@@ -1,9 +1,10 @@
+
 #ifndef STAR_StTpcCalibSector
 #define STAR_StTpcCalibSector
 // Local
 class StTpcCalibSetup;
 // STAR
-class StTpcDb;
+//class StTpcDb;
 class StTPCReader;
 // root
 class TH1F;
@@ -14,7 +15,7 @@ class StTpcCalibSector {
 private :
   int mSectorId; 
   const StTpcCalibSetup* mSetup; //!
-  int* mNumberOfPadAtRow; //!
+  int* mNumberOfPadAtRow; //! To be replaced by db
 
   TH1F* mHCorrupted;//!
   TH2F* mHCorruptedMap;//!
@@ -27,6 +28,8 @@ private :
   TH2F* mHNSequenceMap;//!
   TH2F* mHFoundMap;//!
   TH2F* mHDeadMap;//!
+  TH1S* mHDeadFEE;//!
+  TH1S* mHDeadRDO;//!
 
   TH1F* mHAmp;//!
   TH2F* mHAmpMap;//!
@@ -37,27 +40,30 @@ private :
   TH2F* mHOuterCalibMap;//!
 
 public :
+  // Called at Init
   StTpcCalibSector(const StTpcCalibSetup* aSetup, 
-		const int aSectorId,  int* aNumberOfPadAtRow);
+		   const int aSectorId,  
+		   int* aNumberOfPadAtRow); // To be replaced by db
+  void readBadTable(ifstream* aInFile);
+  void readDeadTable(ifstream* aInFile);
 
-  ~StTpcCalibSector();
-  // Call at make
+  // Called at make
   void updateBad   (StTPCReader *aRMSReader);
   void updateDead  (StTPCReader* aZSupReader);
   void updateGain  (StTPCReader* aZSupReader);
-  // Call at finish
+
+  // Called at finish
   void findBad();
   void findDead();
   void calcGainCoeficient();
 
-
   void writeBadTable(ofstream* aOutFile);
   void findBadElectronics(int** aPadToFeeConvertor,
 			  int** aPadtoRDOConvertor);
-  void readBadTable(ifstream* aInFile);
 
   void writeDeadTable(ofstream* aOutFile);
-  void readDeadTable(ifstream* aInFile);
+  void findDeadElectronics(int** aPadToFeeConvertor,
+			  int** aPadtoRDOConvertor);
 
   void writeCalibCoefTable(ofstream* aOutFile);
 
@@ -65,6 +71,9 @@ public :
   void writeDeadHisto();
   void writeGainHisto();
   void writeAllHisto();
+
+  // Additional
+  ~StTpcCalibSector();
 
   ClassDef(StTpcCalibSector, 1) //
 };

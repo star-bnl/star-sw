@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-//                   BAD CHANNEL FINDER                                 //
+//                   DEAD CHANNEL FINDER                                //
 // For the time being, the finder look for corrupted pads :
 // It makes histograms of the number of coorupted time bin as a function
 // of the pad.
@@ -30,16 +30,16 @@
 #include "StDAQMaker/StDAQReader.h"
 #include "StRoot/StDaqLib/TPC/fee_pin.h"
 // Local
-#include "StTpcBadChanMaker.h"
+#include "StTpcFEEGainCalibMaker.h"
 #include "StTpcCalibSetup.h"
 #include "StTpcCalibSector.h"
 // root again
-ClassImp(StTpcBadChanMaker)
+ClassImp(StTpcFEEGainCalibMaker)
 //  
 //_____________________________________________________________________
 // --- Constructor
 //
-StTpcBadChanMaker::StTpcBadChanMaker(const char *aMakerName,       
+StTpcFEEGainCalibMaker::StTpcFEEGainCalibMaker(const char *aMakerName,       
 			       const StTpcCalibSetup* aSetup)
 :
   StMaker(aMakerName),
@@ -51,15 +51,15 @@ StTpcBadChanMaker::StTpcBadChanMaker(const char *aMakerName,
 //_____________________________________________________________________
 // --- Destructor
 //
-StTpcBadChanMaker::~StTpcBadChanMaker(){
+StTpcFEEGainCalibMaker::~StTpcFEEGainCalibMaker(){
 delete [] mTpcCalibSector;
 }
 //_____________________________________________________________________
 // --- Init
 //
-Int_t StTpcBadChanMaker::Init(){
+Int_t StTpcFEEGainCalibMaker::Init(){
 
-  cout << "StTpcBadChanMaker::Init()" << endl;
+  //  cout << "StTpcFEEGainCalibMaker::Init()" << endl;
   //int tNumberOfSector=gStTpcDb->Dimensions()->numberOfSectors();
   int tNumberOfSector=24;
 
@@ -67,12 +67,21 @@ Int_t StTpcBadChanMaker::Init(){
   88,96,104,112,118,126,134,142,150,158,166,174,182,
   98,100,102,104,106,106,108,110,112,112,114,116,118,120,122,122,
   124,126,128,128,130,132,134,136,138,138,140,142,144,144,144,144};
+  ifstream* tBadFile = new ifstream(mSetup->getBadFileName());
+  ifstream* tDeadFile = new ifstream(mSetup->getDeadFileName());
+
   mTpcCalibSector = new StTpcCalibSector*[tNumberOfSector];
   for(int tiSect=0;
       tiSect<tNumberOfSector;
       tiSect++){
-    mTpcCalibSector[tiSect]= new StTpcCalibSector(mSetup,(tiSect+1),tNPadAtRow);
+    mTpcCalibSector[tiSect]= new StTpcCalibSector(mSetup,(tiSect+1),
+						  tNPadAtRow);
+    mTpcCalibSector[tiSect]->readBadTable(tBadFile);
+    mTpcCalibSector[tiSect]->readDeadTable(tDeadFile);
   }
+  tBadFile->close();
+  tDeadFile->close();
+  delete tBadFile;
 
   return StMaker::Init();
 }
@@ -80,101 +89,77 @@ Int_t StTpcBadChanMaker::Init(){
 //_____________________________________________________________________
 // --- Make calculation
 //
-Int_t StTpcBadChanMaker::Make(){
+Int_t StTpcFEEGainCalibMaker::Make(){
   //int tNumberOfSector=gStTpcDb->Dimensions()->numberOfSectors();
   int tNumberOfSector=24;
-  //cout << "StTpcBadChanMaker::Make()" << endl;
-  St_DataSet * tDataSet=GetDataSet("StDAQReader");
+  //  cout << "StTpcFEEGainCalibMaker::Make()" << endl;
+  static St_DataSet * tDataSet=GetDataSet("StDAQReader");
   //cout << "Got the data set " << tDataSet<< endl;
-  StDAQReader *tDAQReader=(StDAQReader*)(tDataSet->GetObject());
+  static StDAQReader *tDAQReader=(StDAQReader*)(tDataSet->GetObject());
   //cout << "Got the daq reader " << tDAQReader<< endl;
-  StTPCReader *tRMSReader=tDAQReader->getTPCReader(); 
-  //cout << "Got the RMS reader " << tRMSReader<< endl;
-  if(!tRMSReader) {cout << "Coudln't get the reader " << endl;}
+  static StTPCReader *tZSupReader=tDAQReader->getTPCReader(); 
+  //cout << "Got the zero suppressed reader " << tZSupReader<< endl;
+  if(!tZSupReader) {cout << "Coudln't get the reader " << endl;}
   for(int tiSect=0;
       tiSect< tNumberOfSector;
       tiSect++){
-    mTpcCalibSector[tiSect]->updateBad(tRMSReader);
+    mTpcCalibSector[tiSect]->updateGain(tZSupReader);
   }
-  delete tDataSet;
-  delete tDAQReader;
-  delete tRMSReader;
+  //  delete tDataSet;
+  //delete tDAQReader;
+  //delete tZSupReader;
 
-  return !kStOK; // stop after the first event
+  return kStOK;
 }
 //_____________________________________________________________________________
-void StTpcBadChanMaker::PrintInfo(){
+void StTpcFEEGainCalibMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTpcBadChanMaker.cxx,v 1.2 1999/09/14 12:42:13 fretiere Exp $\n");
+  printf("* $Id: StTpcFEEGainCalibMaker.cxx,v 1.1 1999/09/14 12:42:14 fretiere Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
 
-void StTpcBadChanMaker::CalcElectronicConvertor(int** aPadToFeeConvertor, 
+void StTpcFEEGainCalibMaker::CalcElectronicConvertor(int** aPadToFeeConvertor, 
 					     int** aPadToRDOConvertor){
 
-
+  // Eventually this function should be replaced by a database function
   for(int tiFee=0;tiFee<182;tiFee++){
     for(int tiPin=0;tiPin<32;tiPin++){
       if(row_vs_fee[tiFee][tiPin]!=0 && pad_vs_fee[tiFee][tiPin]!=0){
-	//      cout << tiFee << " " << tiPin << " " << row_vs_fee[tiFee][tiPin] << " "
-	//  << pad_vs_fee[tiFee][tiPin] << " " 
-	//    << rdo_vs_fee[tiFee][tiPin] << endl;
 	aPadToFeeConvertor[(row_vs_fee[tiFee][tiPin]-1)]
 	                  [(pad_vs_fee[tiFee][tiPin]-1)]=(tiFee+1);
 	aPadToRDOConvertor[(row_vs_fee[tiFee][tiPin]-1)]
-	                  [(pad_vs_fee[tiFee][tiPin]-1)]=rdo_vs_fee[tiFee][tiPin];
+	                  [(pad_vs_fee[tiFee][tiPin]-1)]=
+	  rdo_vs_fee[tiFee][tiPin];
       }
     }
   }
-  /*
-  int tNPadAtRow[45]={
-  88,96,104,112,118,126,134,142,150,158,166,174,182,
-  98,100,102,104,106,106,108,110,112,112,114,116,118,120,122,122,
-  124,126,128,128,130,132,134,136,138,138,140,142,144,144,144,144};
-  for(int tiRow=1;tiRow<=45;tiRow++){
-    for(int tiPad=1;tiPad<=tNPadAtRow[tiRow-1];tiPad++){
-      cout << tiRow << " " << tiPad << " " 
-	   << aPadToFeeConvertor[tiRow-1][tiPad-1] << " "
-	   << aPadToRDOConvertor[tiRow-1][tiPad-1] << endl;
-    }
-    }*/
 }
 //_____________________________________________________________________________
-Int_t StTpcBadChanMaker::Finish(){
-  cout << "StTpcBadChanMaker::Finish()" << endl;
+Int_t StTpcFEEGainCalibMaker::Finish(){
+  cout << "StTpcFEEGainCalibMaker::Finish()" << endl;
 
   //int tNumberOfSector=gStTpcDb->Dimensions()->numberOfSectors();
   int tNumberOfSector=24;
-  //  mHPercOfBad = new TH1D("HPerBad","Percentage of bad pads",24,0.5,24.5);
+  //  mHPercOfDead = new TH1D("HPerDead","Percentage of bad pads",24,0.5,24.5);
   TFile *tHFile = new TFile(mSetup->getRootOutFileName(),"recreate");
-  ofstream* tBadFile = new ofstream(mSetup->getBadFileName());
-
-  int** tPadToFeeConvertor= new int*[45];
-  int** tPadToRDOConvertor= new int*[45];
-  for(int tiRow=0;tiRow<45;tiRow++){
-    tPadToFeeConvertor[tiRow]= new int[182];
-    tPadToRDOConvertor[tiRow]= new int[182];
-  }
-  CalcElectronicConvertor(tPadToFeeConvertor,tPadToRDOConvertor);
+  ofstream* tCalibFile = new ofstream(mSetup->getGainCalibFileName());
 
   for(int tiSect=0;
       tiSect<tNumberOfSector;
       tiSect++){
-    mTpcCalibSector[tiSect]->findBad();
-    mTpcCalibSector[tiSect]->findBadElectronics(tPadToFeeConvertor,
-					     tPadToRDOConvertor);
-    mTpcCalibSector[tiSect]->writeBadHisto();
-    mTpcCalibSector[tiSect]->writeBadTable(tBadFile);
+    mTpcCalibSector[tiSect]->calcGainCoeficient();
+    mTpcCalibSector[tiSect]->writeGainHisto();
+    mTpcCalibSector[tiSect]->writeCalibCoefTable(tCalibFile);
 
   }
-  //mHPercOfBad->Write();
+  //mHPercOfDead->Write();
   tHFile->Close();
-  tBadFile->close();
+  tCalibFile->close();
   return kStOK;
 }
 //_____________________________________________________________________________
-Int_t StTpcBadChanMaker::Clear(){
+Int_t StTpcFEEGainCalibMaker::Clear(){
    return kStOK;
 }
 

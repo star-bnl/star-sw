@@ -11,13 +11,15 @@ class StTpcCalibSetup {
  private:
   int  mMaxNumberOfCorruptedTB;
   ostrstream* mBadFileName; //!
+  ostrstream* mDeadFileName; //!
+  ostrstream* mGainCalibFileName; //!
   ostrstream* mRootOutFileName; //!
 
   int mFirstTB;
   int mLastTB;
 
   int mMinDistToPulse;
-  int mExpectedPulsePos;
+  int mExpectedPulsePos; 
 
   int mNSidePadsExcluded;
 
@@ -27,9 +29,19 @@ class StTpcCalibSetup {
     {mMaxNumberOfCorruptedTB=aNumber;}
   const int& getMaxNumberOfCorruptedTB() const
     {return mMaxNumberOfCorruptedTB;}
+
   void setBadFileName(char* aCalibOutFileName);
   const char* getBadFileName() const
     {return mBadFileName->str();}
+
+  void setDeadFileName(char* aCalibOutFileName);
+  const char* getDeadFileName() const
+    {return mDeadFileName->str();}
+
+  void setGainCalibFileName(char* aCalibOutFileName);
+  const char* getGainCalibFileName() const
+    {return mGainCalibFileName->str();}
+
   void setRootOutFileName(char* aRootOutFileName);
   const char* getRootOutFileName() const
     {return mRootOutFileName->str();}  

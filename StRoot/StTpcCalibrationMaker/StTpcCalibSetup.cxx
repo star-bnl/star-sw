@@ -7,8 +7,12 @@ StTpcCalibSetup::StTpcCalibSetup(){
   mMaxNumberOfCorruptedTB=300;
   mBadFileName = new ostrstream((new char[30]),30);
   (*mBadFileName) << "Bad.txt" << ends;
+  mDeadFileName = new ostrstream((new char[30]),30);
+  (*mDeadFileName) << "Dead.txt" << ends;
+  mGainCalibFileName = new ostrstream((new char[30]),30);
+  (*mGainCalibFileName) << "GainCalib.txt" << ends;
   mRootOutFileName  = new ostrstream((new char[30]),30);
-  (*mRootOutFileName) << "Bad.root" << ends;
+  (*mRootOutFileName) << "CalibCtrl.root" << ends;
 
   mFirstTB=11;
   mLastTB=361;
@@ -25,6 +29,21 @@ void StTpcCalibSetup::setBadFileName(char* aBadFileName){
 				strlen(aBadFileName));
   (*mBadFileName) << aBadFileName;
 }
+
+void StTpcCalibSetup::setDeadFileName(char* aDeadFileName){
+  delete mDeadFileName;
+  mDeadFileName = new ostrstream((new char[strlen(aDeadFileName)]),
+				strlen(aDeadFileName));
+  (*mDeadFileName) << aDeadFileName;
+}
+
+void StTpcCalibSetup::setGainCalibFileName(char* aGainCalibFileName){
+  delete mGainCalibFileName;
+  mGainCalibFileName = new ostrstream((new char[strlen(aGainCalibFileName)]),
+				strlen(aGainCalibFileName));
+  (*mGainCalibFileName) << aGainCalibFileName;
+}
+
 
 void StTpcCalibSetup::setRootOutFileName(char* aRootOutFileName){
   delete mRootOutFileName;

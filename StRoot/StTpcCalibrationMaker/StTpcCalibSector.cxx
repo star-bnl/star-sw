@@ -113,6 +113,15 @@ int tMaxNumberOfOuterPad=144;
 
   delete tHName;tHName = new  ostrstream(tBuffHName, 20);
   delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
+  (*tHName) << "HNSeqMap" << mSectorId << ends;
+  (*tHTitle) <<"Number sequence per pads, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
+  mHNSequenceMap = new TH2F(tHName->str(),tHTitle->str(),
+		      tMaxNumberOfPad, 0.5, tMaxNumberOfPad+0.5,
+		      tNumberOfRow, 0.5, tNumberOfRow+0.5);
+			    
+  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
+  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
   (*tHName) << "HT0" << mSectorId << ends;
   (*tHTitle) <<"t0 distribution, sector " << mSectorId << ends;
   //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
@@ -156,6 +165,21 @@ int tMaxNumberOfOuterPad=144;
                         tMaxNumberOfPad, 0.5, tMaxNumberOfPad+0.5,
                         tNumberOfRow, 0.5, tNumberOfRow+0.5);
 
+  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
+  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
+  (*tHName) << "HDeadFEE" << mSectorId << ends;
+  (*tHTitle) <<"Number of dead pads per FEE, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
+  mHDeadFEE = new TH1S(tHName->str(),tHTitle->str(),182,0.5,182.5);
+
+  delete tHName;tHName = new  ostrstream(tBuffHName, 20);
+  delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
+  (*tHName) << "HDeadRDO" << mSectorId << ends;
+  (*tHTitle) <<"Number of dead pads per RDO, sector " << mSectorId << ends;
+  //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
+  mHDeadRDO = new TH1S(tHName->str(),tHTitle->str(),6,0.5,6.5);
+
+
   // Calibration histo
   delete tHName;tHName = new  ostrstream(tBuffHName, 20);
   delete tHTitle;tHTitle = new  ostrstream(tBuffHTitle, 100);
@@ -172,7 +196,7 @@ int tMaxNumberOfOuterPad=144;
   (*tHTitle) <<"Calibration coeficient, outer sector " << mSectorId << ends;
   //cout << "Construct " << tHName->str() << " " << tHTitle->str() << endl;  
   mHOuterCalibMap = new TH2F(tHName->str(),tHTitle->str(),
-			     tMaxNumberOfPad, 0.5, tMaxNumberOfPad+0.5,
+			     tMaxNumberOfOuterPad, 0.5, tMaxNumberOfOuterPad+0.5,
 			     tNumberOfOuterRow, tFirstOuterRow-0.5, 
 			     tLastOuterRow+0.5);
 
@@ -256,6 +280,7 @@ void StTpcCalibSector::updateGain(StTPCReader* aZSupReader){
   // --- Get the pad list a the given row
   for(int tRowId=1;tRowId<=tNumberOfRows;tRowId++){
     int tNPad = aZSupReader->getPadList(mSectorId,tRowId, tPadList);
+    //cout << mSectorId << " " << tRowId << " " << tNPad << endl;
     // --- Get the data for a given pad
     int tNSeq; 
     int tOk;
@@ -288,13 +313,13 @@ void StTpcCalibSector::updateGain(StTPCReader* aZSupReader){
 	}
       }
       mHNSequence->Fill(tNSeq);
-      mHNSequenceMap->Fill(tPadList[tPadId],tRowId,tNSeq);
+      mHNSequenceMap->Fill(tThisPad,tRowId,tNSeq);
       if(tFound){
 	mHAmp->Fill(tPeakAmp);
 	mHT0->Fill(tPeakPos);
-	mHAmpMap->Fill(tPadList[tPadId],tRowId,tPeakAmp);
-	mHT0Map->Fill(tPadList[tPadId],tRowId,tPeakPos);
-	mHFoundMap->Fill(tPadList[tPadId],tRowId,1.);
+	mHAmpMap->Fill(tThisPad,tRowId,tPeakAmp);
+	mHT0Map->Fill(tThisPad,tRowId,tPeakPos);
+	mHFoundMap->Fill(tThisPad,tRowId,1.);
       }
     }
   }
@@ -335,13 +360,28 @@ void StTpcCalibSector::findDead(){
     for(int tiPad=1;
 	tiPad<mNumberOfPadAtRow[tiRow-1];//gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(tiRow);
 	tiPad++){
-      if(mHFoundMap->GetCellContent(tiPad,tiRow)==0.){
+      if(mHBadMap->GetCellContent(tiPad,tiRow)!=1 && 
+	 mHFoundMap->GetCellContent(tiPad,tiRow)==0.){
 	mHDeadMap->Fill(tiPad,tiRow,1.);
       }
     }
   }
 }
-
+// __________________________________
+//
+void StTpcCalibSector::findDeadElectronics(int** aPadToFeeConvertor,
+				       int** aPadToRDOConvertor){
+for(int tiRow=1;tiRow<=mHDeadMap->GetNbinsY();tiRow++){
+  for(int tiPad=1; tiPad<=mHDeadMap->GetNbinsX();tiPad++){
+    if(mHDeadMap->GetCellContent(tiPad,tiRow)==1) {
+      mHDeadFEE->Fill(aPadToFeeConvertor[tiRow-1][tiPad-1],1.);
+      mHDeadRDO->Fill(aPadToRDOConvertor[tiRow-1][tiPad-1],1.);
+    }
+  }
+} 
+}
+// __________________________________
+//
 void StTpcCalibSector::calcGainCoeficient(){
   const int tPadExcluded=mSetup->getNSidePadsExcluded();
   //int tFirstOuterPadRow=gStTpcDb->PadPlaneGeometry()->firstOuterSectorPadRow();
@@ -483,18 +523,106 @@ void StTpcCalibSector::writeBadTable(ofstream* aOutFile){
 // __________________________________
 //
 void StTpcCalibSector::readBadTable(ifstream* aInFile){
+  //  int tNSect=24;
+  int tSectId, tNBadRows;
+  char tCharBuff[10];
+  int tRowId, tNBadPads;
+  int tPadId;
+  (*aInFile) >> tCharBuff >> tSectId >> tNBadRows;
+  while(tSectId!=mSectorId && !aInFile->eof()){
+    for(int tiRow=0;tiRow<tNBadRows;tiRow++){
+      (*aInFile) >> tCharBuff >> tRowId >> tNBadPads;
+      for(int tiPad=0; tiPad<tNBadPads; tiPad++){
+	(*aInFile) >> tPadId;
+      }
+    }
+    (*aInFile) >> tCharBuff >> tSectId >> tNBadRows;
+  }
+  if(tSectId==mSectorId){
+    cout << "Found bad data, sector " << mSectorId << endl;
+    for(int tiRow=0;tiRow<tNBadRows;tiRow++){
+      (*aInFile) >> tCharBuff >> tRowId >> tNBadPads;
+      for(int tiPad=0; tiPad<tNBadPads; tiPad++){
+	(*aInFile) >> tPadId;
+	mHBadMap->Fill(tPadId,tRowId,1.);
+      }
+    }
+  }
+  else{
+    cout << "Error, bad data not found, sector " << mSectorId << endl;
+  }
 }
 // __________________________________
 //
 void StTpcCalibSector::writeDeadTable(ofstream* aOutFile){
+  int tNDeadRows=0;
+  for(int tiRow=1;tiRow<=mHDeadMap->GetNbinsY();tiRow++){
+    if(mHDeadMap->Integral(1,mHDeadMap->GetNbinsX(),tiRow,tiRow)!=0) {
+      tNDeadRows++;
+    }
+  }
+  (*aOutFile) << "Sector " << mSectorId << " " << tNDeadRows << endl;
+  if(tNDeadRows!=0){
+    int tNDeadPads;
+    for(int tiRow=1;tiRow<=mHDeadMap->GetNbinsY();tiRow++){
+      tNDeadPads=(int)mHDeadMap->Integral(1,mHDeadMap->GetNbinsX(),tiRow,tiRow);
+      if(tNDeadPads!=0) {
+	(*aOutFile) << "Row " << tiRow << " " 
+		    <<tNDeadPads << endl;
+	for(int tiPad=1; tiPad<=mHDeadMap->GetNbinsX();tiPad++){
+	  if(mHDeadMap->GetCellContent(tiPad,tiRow)==1) {
+	    (*aOutFile) << tiPad << " ";
+	  }
+	}
+	(*aOutFile) << endl;
+      }  
+    }
+  }
 }
 // __________________________________
 //
 void StTpcCalibSector::readDeadTable(ifstream* aInFile){
+  int tSectId, tNDeadRows;
+  char tCharBuff[10];
+  int tRowId, tNDeadPads;
+  int tPadId;
+  (*aInFile) >> tCharBuff >> tSectId >> tNDeadRows;
+  while(tSectId!=mSectorId && !aInFile->eof()){
+    for(int tiRow=0; tiRow<tNDeadRows; tiRow++){
+      (*aInFile) >> tCharBuff >> tRowId >> tNDeadPads;
+      for(int tiPad=0; tiPad<tNDeadPads; tiPad++){
+	(*aInFile) >> tPadId;
+      }
+    }
+    (*aInFile) >> tCharBuff >> tSectId >> tNDeadRows;
+  }
+  if(tSectId==mSectorId){
+    cout << "Found dead data, sector " << mSectorId << endl;
+    for(int tiRow=0;tiRow<tNDeadRows;tiRow++){
+      (*aInFile) >> tCharBuff >> tRowId >> tNDeadPads;
+      for(int tiPad=0; tiPad<tNDeadPads; tiPad++){
+	(*aInFile) >> tPadId;
+	mHDeadMap->Fill(tPadId,tRowId,1.);
+      }
+    }
+  }
+  else{
+    cout << "Error, dead data not found, sector " << mSectorId << endl;
+  }
+
 }
 // __________________________________
 //
 void StTpcCalibSector::writeCalibCoefTable(ofstream* aOutFile){
+  (*aOutFile) << "Sector " << mSectorId << endl;
+  for(int tiRow=1;tiRow<=mHAmpMap->GetNbinsY();tiRow++){
+    (*aOutFile) << "Row " << tiRow << " " 
+		<< mNumberOfPadAtRow[tiRow] <<endl;
+    for(int tiPad=1; tiPad<=mNumberOfPadAtRow[tiRow];tiPad++){
+      (*aOutFile) <<  mHAmpMap->GetCellContent(tiPad,tiRow) << " ";
+    }
+    (*aOutFile) << endl;
+  }
 }
 // __________________________________
 //
@@ -512,6 +640,8 @@ void StTpcCalibSector::writeDeadHisto(){
   mHFoundMap->Write();
   mHNSequence->Write();
   mHDeadMap->Write();
+  mHDeadFEE->Write();
+  mHDeadRDO->Write();
 }
 // __________________________________
 //
