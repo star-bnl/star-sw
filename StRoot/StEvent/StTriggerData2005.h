@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2005.h,v 2.1 2004/11/02 21:18:39 ullrich Exp $
+ * $Id: StTriggerData2005.h,v 2.2 2004/11/30 19:19:12 ullrich Exp $
  *
  * Author: Akio Ogawa, Oct 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2005.h,v $
+ * Revision 2.2  2004/11/30 19:19:12  ullrich
+ * Added new access function for EEMC data (Akio).
+ *
  * Revision 2.1  2004/11/02 21:18:39  ullrich
  * Initial Revision.
  *
@@ -117,6 +120,10 @@ public:
     char* getTriggerStructure();
     TrgDataType2005* getTriggerStructure2005();  
     int getRawSize() const;
+    unsigned      char * getDsm0_EEMC(int prepost=0) const;
+    unsigned short int * getDsm1_EEMC(int prepost=0) const;
+    unsigned short int * getDsm2_EMC()  const;
+    unsigned short int * getDsm3()      const;
     
 protected:
     TrgDataType2005 *mData;
