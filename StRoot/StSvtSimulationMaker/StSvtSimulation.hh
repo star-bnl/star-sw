@@ -37,7 +37,7 @@ public:
   StSvtSimulation();
   ~StSvtSimulation();
 
-  void setOptions(Bool_t backgr,int option);
+  void setOptions(int option);
   void setPointers(StSvtElectronCloud* elCloud ,StSvtAngles* svtAngles);
   void setAnodeTimeBinSizes(double timBinSize, double anodeSize);
   void setDriftVelocity(double driftVelocity);
@@ -63,7 +63,6 @@ public:
   void resetAnodeAttributes(int numOfAnodes);
   void resetSignal(int an, int lTBin, int hTBin);
 
-  double makeGausDev(double sigma);
   PasaSignalAttributes getPasaSigAttributes();
   double getPeak();
 
@@ -86,8 +85,6 @@ private:
   int mSignalOption;
 
   double mPeakSignal;
-
-  Bool_t mBackGrOption;                 //!
 
   StSvtElectronCloud* mElectronCloud;  //!
   StSvtSignal* mSvtSignal;             //!

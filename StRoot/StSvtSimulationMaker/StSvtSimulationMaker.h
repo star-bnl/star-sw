@@ -1,5 +1,8 @@
-// $Id: StSvtSimulationMaker.h,v 1.9 2003/11/30 20:51:48 caines Exp $
+// $Id: StSvtSimulationMaker.h,v 1.10 2004/01/22 16:30:47 caines Exp $
 // $Log: StSvtSimulationMaker.h,v $
+// Revision 1.10  2004/01/22 16:30:47  caines
+// Getting closer to a final simulation
+//
 // Revision 1.9  2003/11/30 20:51:48  caines
 // New version of embedding maker and make OnlSeqAdj a stand alone maker
 //
@@ -74,7 +77,6 @@ class StSvtSimulationMaker : public StMaker
  
   Int_t setOptions(char* option1, int option2, int option3, int option4);
   Int_t setConst(double timBinSize, double anodeSize, int offset );
-  Int_t setBackGround(Bool_t backgr,double backgSigma);
   
   //t+ Int_t setEval(Bool_t key);
   //t+ Int_t setEmbedding(Bool_t key);
@@ -94,7 +96,6 @@ class StSvtSimulationMaker : public StMaker
   void  setGeantData();
 
   void resetPixelData();
-  void createBackGrData();
   void FillGeantHit(int barrel, int ladder, int wafer, int hybrid,
                     StSvtWaferCoordinate& waferCoord,StThreeVector<double>& VecG,
                     StThreeVector<double>& VecL, double peak);
@@ -103,8 +104,6 @@ class StSvtSimulationMaker : public StMaker
   Int_t getSvtGeometry();
   Int_t getSvtDriftSpeeds();
   Int_t getSvtT0();
-  void  getPedRMS();
-  Int_t getBadAnodes();
 
 //+++++++++++++++++++++++
   void MakePixelHistos();
@@ -125,9 +124,6 @@ class StSvtSimulationMaker : public StMaker
   double mTimeBinSize;
   double mAnodeSize;    
   int    mPedOffset;
-
-  double mBackGSigma;  //default value if individiual RMS are not available 
-  Bool_t mBackGrOption;
 
   char* mExpOption;    //!  
   Int_t mWrite;        // for signal width outputs
@@ -154,9 +150,6 @@ class StSvtSimulationMaker : public StMaker
   StSvtGeometry                *mSvtGeom;            //! read for each run in InitRun(owned by SvtDbMaker - don't kill)
   StSvtHybridCollection        *mDriftSpeedColl;     //!
   StSvtT0                      *mT0;                 //!
-  StSvtHybridCollection        *mPedColl;            //!
-  StSvtHybridCollection        *mPedRMSColl;         //!
-  StSvtHybridCollection        *mSvtBadAnodes;       //!
  
   //data for each event
   StSvtData                         *mSvtSimPixelColl;    //! the simulated data - created for each run InitRun{in beginAnalyses} 
@@ -169,7 +162,7 @@ class StSvtSimulationMaker : public StMaker
     
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.9 2003/11/30 20:51:48 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.10 2004/01/22 16:30:47 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
 
   ClassDef(StSvtSimulationMaker,3)
 

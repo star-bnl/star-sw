@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.h,v 1.3 2003/11/30 20:51:48 caines Exp $
+ * $Id: StSvtEmbeddingMaker.h,v 1.4 2004/01/22 16:30:47 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.h,v $
+ * Revision 1.4  2004/01/22 16:30:47  caines
+ * Getting closer to a final simulation
+ *
  * Revision 1.3  2003/11/30 20:51:48  caines
  * New version of embedding maker and make OnlSeqAdj a stand alone maker
  *
@@ -48,8 +51,10 @@ public:
   virtual Int_t Finish();
   virtual Int_t InitRun(int runumber);
     
-  void setBackGround(Bool_t backgr,double backgSigma);
- 
+  void setBackGround(Bool_t backgr=kTRUE,double backgSigma=1.8);      //default is TRUE and 1.8
+  void setDoEmbedding(Bool_t doIt=kTRUE);                       //this allows(when set to FALSE) to force the embedding maker to ignore raw data 
+							  //and create simple background -just a plain simulation; default is TRUE
+  
 private:
   void GetSvtData();
   void GetPedRMS();
@@ -69,6 +74,7 @@ private:
 
   double mBackGSigma;  //default value if individiual RMS are not available 
   Bool_t mBackGrOption;
+  Bool_t mDoEmbedding;   
   Bool_t mMask[128*240];
 
 //global variables for temporary store in the loop
