@@ -1,5 +1,5 @@
 // Author : Dominik Flierl 
-// $Id: StClusterDisplayMaker.cxx,v 1.3 2000/07/17 22:08:44 flierl Exp $
+// $Id: StClusterDisplayMaker.cxx,v 1.4 2000/08/01 01:43:12 flierl Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //                                                                      //
@@ -34,6 +34,8 @@
 #include "TString.h"
 #include "l3/St_l3Clufi_Module.h"
 #include "l3/St_l3totphit_Module.h"
+#include "StDAQMaker/StDAQReader.h"
+#include "StDaqLib/L3/L3_Reader.hh"
 
 ClassImp(StClusterDisplayMaker) ;
 
@@ -130,35 +132,42 @@ Int_t StClusterDisplayMaker::Make(Int_t isec , Int_t irow ,Char_t* c, Int_t ipad
   // l3 points
   /////
   // graph with l3off points
-  if (option.Contains("-l3off"))
+  if (option.Contains("-l3highoff"))
     {
-      Int_t no_l3_off = Get_l3off_points() ;
-      graph_l3_off_points  = new TGraphErrors(no_l3_off,l3offpoints_pad,l3offpoints_time);
-      graph_l3_off_points->SetMarkerStyle(28);
-      graph_l3_off_points->SetMarkerColor(4);
-      graph_l3_off_points->SetMarkerSize(2);
-      graph_l3_off_points->Draw("P");
-      TLine max1(0,0,0,0) ;
-      max1.SetLineColor(4);
-      max1.DrawLine(0,Max_time_bucket_l3off,pad_max ,Max_time_bucket_l3off) ;
-    }
+      Int_t t = PlotL3OffPoints("charge") ;
+      if (option.Contains("-l3highoffDecon"))
+	 {
+	   t = PlotL3OffPoints("timedecon charge") ;
+	   t = PlotL3OffPoints("paddecon charge") ;
+	 }
+    } 
+  // graph with l3off points
+  if (option.Contains("-l3off"))
+    {  
+      Int_t t = PlotL3OffPoints("") ;
+      if (option.Contains("-l3offDecon"))
+	{
+	  t = PlotL3OffPoints("timedecon") ;
+	  t = PlotL3OffPoints("paddecon") ;
+	}
+    } 
   // graph with l3online points
   if (option.Contains("-l3on"))
     {
-      Int_t no_l3_on = Get_l3on_points() ;
-      graph_l3_on_points  = new TGraphErrors(no_l3_on,l3onpoints_pad,l3onpoints_time);
-      graph_l3_on_points->SetMarkerStyle(27);
-      graph_l3_on_points->SetMarkerColor(2);
-      graph_l3_on_points->SetMarkerSize(2);
-      graph_l3_on_points->Draw("P");
+      Int_t numPoints = PlotL3OnPoints("") ;
+      if (option.Contains("-l3onDecon"))
+	{
+	  numPoints = PlotL3OnPoints("timedecon") ;
+	  numPoints = PlotL3OnPoints("paddecon") ;
+	}
     }
 
   
   /////////
   // offline points
   ////////
-  Int_t maxNumberOfPoints = 1000 ;
   // graph with ALL off points
+   const Int_t maxNumberOfPoints = 1000 ;
   if (option.Contains("-off"))
     {
       // NO delete because I want to see this stuff later in my histo!
@@ -652,8 +661,9 @@ Int_t StClusterDisplayMaker::Get_l3off_points()
   Int_t badcluster = 0 ;
 
   // loop over points
-  St_tcl_tphit* sthit = (St_tcl_tphit*) GetDataSet("bfc/.make/l3Chain/.make/l3Clufi/.data/L3hit");
-  tcl_tphit_st* myl3offhit =  sthit->GetTable();
+  //St_tcl_tphit* sthit = (St_tcl_tphit*) GetDataSet("bfc/.make/l3Chain/.make/l3Clufi/.data/L3hit");
+  St_tcl_tphit* sthit = (St_tcl_tphit*) GetDataSet("L3hit");
+  tcl_tphit_st* myl3offhit = (tcl_tphit_st*)  sthit->GetTable();
   if(!myl3offhit)
     {
       cout << "sorry no l3off data found" << endl ;
@@ -733,13 +743,13 @@ Int_t StClusterDisplayMaker::getOffPoints(Float_t* padvec, Float_t* padvecerr, F
   cout << "max tb outer " << transformer.Get_max_timebucket_outter() << endl;
   
   // loop over points
-  St_tcl_tphit* sthit = (St_tcl_tphit*) GetDataSet("bfc/.make/tpcChain/.make/tpc_hits/.data/tphit");
-  tcl_tphit_st* myoffhit =  sthit->GetTable();
-  if (!myoffhit)
+  St_tcl_tphit* sthit = (St_tcl_tphit*) GetDataSet("tphit");
+  if (!sthit)
     {
       cout << "sorry no off points found" << endl ;
       return 0;
     }
+  tcl_tphit_st* myoffhit = (tcl_tphit_st*) sthit->GetTable();
   cout << "off clusters found in this sec and row"<< endl;
 
   // counter
@@ -797,9 +807,168 @@ Int_t StClusterDisplayMaker::getOffPoints(Float_t* padvec, Float_t* padvecerr, F
   return count;
 }
 //______________________
-Int_t StClusterDisplayMaker::Get_l3on_points()
+Int_t StClusterDisplayMaker::PlotL3OnPoints(TString option)
 {
-  return 1;
+    // prepare arrays
+    Int_t maxNumberOfPoints    = 1000 ;
+    Float_t* l3onPointsPad     = new Float_t[maxNumberOfPoints]  ;  
+    Float_t* l3onPointsTime    = new Float_t[maxNumberOfPoints]  ;
+    Float_t* l3onPointsPadErr  = new Float_t[maxNumberOfPoints]  ;
+    Float_t* l3onPointsTimeErr = new Float_t[maxNumberOfPoints]  ;
+
+    TDataSet*    DAQReaderSet = GetDataSet("StDAQReader") ;
+    StDAQReader* daqReader    = (StDAQReader*)(DAQReaderSet->GetObject()) ;
+    StL3Reader*  ml3reader    = daqReader->getL3Reader() ;
+    Int_t clusnumb = 0 ;
+    Int_t sector ;
+    if (sec%2 ==0){sector=sec-1;} else {sector=sec;} ;
+    
+    if (ml3reader->getI960ClusterReader(sector)->getClusterList())
+	{
+	    cout << "Found some i960 clusters in sector:" << sector <<endl ;
+	    l3_cluster* myl3cluster = ml3reader->getI960ClusterReader(sector)->getClusterList();
+	    Int_t numOfClusters = ml3reader->getI960ClusterReader(sector)->getNumberOfClusters() ;
+	    for (Int_t clindex=0;  clindex<numOfClusters ; clindex++)
+		{
+		    // take only the right sector out of a supersector
+		    Int_t RBMZ = (Int_t)(myl3cluster[clindex].RB_MZ) ;
+		    Int_t rb   = RBMZ >> 4 ;
+		    if ( ((sec%2 == 0) && (rb>6)) || ((sec%2 == 1) && (rb<=6)) )
+			{
+			    // take only the right row
+			    Int_t mrow  = (Int_t)(myl3cluster[clindex].padrow) ;
+			    if(mrow == row)
+				{
+				    // take only the right flag
+				    if (option.Contains("timedecon") && ((myl3cluster[clindex].flags & 4) == 0)) { continue ; } 
+				    if (option.Contains("paddecon") && ((myl3cluster[clindex].flags & 2) == 0)) { continue ; }
+				    l3onPointsPad[clusnumb]  = ((Double_t)(myl3cluster[clindex].pad)) / 64 ; 
+				    l3onPointsTime[clusnumb] = ((Double_t)(myl3cluster[clindex].time)) / 64 ;
+				    l3onPointsPadErr[clusnumb] = 0 ;
+				    l3onPointsTimeErr[clusnumb] = 0 ;
+				    clusnumb++;
+				}
+			}
+		}
+	}
+
+
+    // create graph
+    TGraphErrors*  l3OnPointsGraph  = new TGraphErrors( clusnumb,
+							l3onPointsPad,l3onPointsTime,
+							l3onPointsPadErr,l3onPointsTimeErr );
+    Int_t style = 27 ;
+    if (option.Contains("timedecon") ){ style = 25; }
+    if (option.Contains("paddecon") ) { style = 24; }
+    l3OnPointsGraph->SetMarkerStyle(style);
+    l3OnPointsGraph->SetMarkerColor(2);
+    l3OnPointsGraph->SetMarkerSize(2);
+    l3OnPointsGraph->Draw("P");
+    
+    return clusnumb ;
+			    
+}
+//______________________
+Int_t StClusterDisplayMaker::PlotL3OffPoints(TString option)
+{
+  // prepare cood-trans
+  cout << endl << endl;
+  St_l3_Coordinate_Transformer transformer ;
+  //transformer.Use_transformation_provided_by_db();
+  transformer.Print_parameters() ;
+  St_l3_xyz_Coordinate XYZ(0,0,0) ;
+  St_l3_ptrs_Coordinate PTRS(0,0,0,0) ;
+  if (row<=13)
+    {
+      Max_time_bucket_l3off = transformer.Get_max_timebucket_inner() ;
+    }
+  else
+    {
+      Max_time_bucket_l3off = transformer.Get_max_timebucket_outter() ;
+    }
+         
+  // prepare arrays
+  Int_t max_number_of_points = 1000;
+  Float_t* l3offpointsPad     = new Float_t[max_number_of_points] ;
+  Float_t* l3offpointsTime    = new Float_t[max_number_of_points] ;
+  Float_t* l3offpointsPadErr  = new Float_t[max_number_of_points] ;
+  Float_t* l3offpointsTimeErr = new Float_t[max_number_of_points] ;
+
+  // counter
+  Int_t badcluster = 0 ;
+
+  // loop over points
+  St_tcl_tphit* sthit = (St_tcl_tphit*) GetDataSet("L3hit");
+  tcl_tphit_st* myl3offhit = (tcl_tphit_st*)  sthit->GetTable();
+  if(!myl3offhit)
+    {
+      cout << "sorry no l3off data found" << endl ;
+      return 0;
+    }
+  cout << "l3 clusters found in this sec and row. "<< endl;
+  Int_t count = 0;
+  for(Int_t i=0;i<sthit->GetNRows();i++)
+    {
+      if( (myl3offhit[i].row-myl3offhit[i].row%100) / 100 == sec && myl3offhit[i].row%100 == row )
+	{
+	  // exclude unreasonable timebuckets
+	  if (myl3offhit[i].z < 0 && sec<=12 ) { badcluster++ ; continue ; }
+	  if (myl3offhit[i].z > 0 && sec>12 )  { badcluster++ ; continue ; }
+
+	  // check flag
+	  if (option.Contains("timedecon") && ((myl3offhit[i].flag & 4) == 0)) { continue ; } 
+	  if (option.Contains("paddecon") && ((myl3offhit[i].flag & 2) == 0)) { continue ; }
+	  if (option.Contains("charge") && (myl3offhit[i].q<80)) { continue ; }
+	  		    
+	  // back transform
+	  XYZ.Setx(myl3offhit[i].x) ;
+	  XYZ.Sety(myl3offhit[i].y) ;
+	  XYZ.Setz(myl3offhit[i].z) ;
+	  transformer.global_to_raw(XYZ,PTRS) ;
+		    
+	  cout << i << "\t";
+	  cout << "x :" << myl3offhit[i].x <<"\t";
+	  cout << "y :" << myl3offhit[i].y <<"\t";
+	  cout << "z :" << myl3offhit[i].z <<"\t";
+	  cout << "q :" << myl3offhit[i].q <<"\t";
+	  cout << "f :" << myl3offhit[i].flag <<"\t";
+	  cout << "pad :" << PTRS.Getp()  <<"\t";
+	  cout << "time :" << PTRS.Gett() << endl;
+		    
+	  if (count<max_number_of_points)
+	    {
+	      l3offpointsPad [count]    = (Float_t) (PTRS.Getp()) ;
+	      l3offpointsTime[count]   = (Float_t) (PTRS.Gett()) ;
+	      l3offpointsPadErr[count]  = 0 ;
+	      l3offpointsTimeErr [count] = 0 ;
+	    }
+	  // increase counter
+	  count++;
+	}
+    }
+  // some output
+  cout << "Number of l3 clusters found in this row and sector: " << count << endl;
+  cout << "Number of bad clusters found in this row and sector: " << badcluster << endl;
+  cout << "Number of l3 clusters found in this event: " << sthit->GetNRows() << endl;
+   
+  // plot graph
+  TGraphErrors *graphL3Off  = new TGraphErrors(count,
+					       l3offpointsPad,l3offpointsTime,
+					       l3offpointsPadErr,l3offpointsTimeErr);
+  Int_t style = 28 ;
+  if (option.Contains("timedecon") ){ style = 25; }
+  if (option.Contains("paddecon") ) { style = 24; }
+  graphL3Off->SetMarkerStyle(style);
+  graphL3Off->SetMarkerColor(4);
+  graphL3Off->SetMarkerSize(2);
+  graphL3Off->Draw("P");
+
+  // plot max tb
+  TLine* max1 = new TLine(pad_min,Max_time_bucket_l3off,pad_max ,Max_time_bucket_l3off) ;
+  max1->SetLineColor(4);
+  max1->Draw() ;
+
+  return count;
 }
 //______________________
 Int_t StClusterDisplayMaker::Get_matched_points(Int_t& num_not_matched)
