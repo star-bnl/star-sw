@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTTreeReader.cxx,v 1.3 2001/09/19 16:14:58 laue Exp $
+ * $Id: StHbtTTreeReader.cxx,v 1.4 2001/09/25 16:52:01 rcwells Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -147,6 +147,12 @@ StHbtEvent* StHbtTTreeReader::ReturnHbtEvent(){
     
   if (hbtEvent && mDebug>1) cout << *hbtEvent << endl;
   if (!hbtEvent) cout << "StHbtTTreeReader::ReturnHbtEvent() - no hbtEvent" << endl;
+  if (mEventCut && hbtEvent ) {
+    if ( mEventCut->Pass(hbtEvent)==0 ) {
+      delete hbtEvent;
+      hbtEvent=0;
+    }
+  }
   
   return hbtEvent;
 }
@@ -338,6 +344,7 @@ int StHbtTTreeReader::fillChain(TChain* chain, const char* fileList, const int m
     temp = new char[200];
     inputStream->getline(temp,200);
     if (mDebug) cout << temp << endl;
+    cout << "StHbtTTreeReader::fillChain(string file.lis) - Adding " << temp << " to the chain" << endl;
     chain->Add(temp);
     delete temp;
     ++count;
@@ -375,6 +382,9 @@ int StHbtTTreeReader::fillChain(TChain* chain, const char* dir, const char* filt
 /***************************************************************************
  *
  * $Log: StHbtTTreeReader.cxx,v $
+ * Revision 1.4  2001/09/25 16:52:01  rcwells
+ * Added event cut and a print statement for file lists
+ *
  * Revision 1.3  2001/09/19 16:14:58  laue
  * filelist option added
  *
