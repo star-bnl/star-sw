@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.10 2000/01/13 23:22:05 snelling Exp $
+// $Id: StFlowTagMaker.cxx,v 1.11 2000/01/14 01:36:02 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.11  2000/01/14 01:36:02  snelling
+// changed include path ../FlowMaker/ to FlowMaker/
+//
 // Revision 1.10  2000/01/13 23:22:05  snelling
 // modified sum pt (spt) to mean pt (mpt)
 //
@@ -44,9 +47,9 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
-#include "../StFlowMaker/StFlowMaker.hh"
-#include "../StFlowMaker/StFlowEvent.hh"
-#include "../StFlowMaker/StFlowConstants.hh"
+#include "StFlowMaker/StFlowMaker.hh"
+#include "StFlowMaker/StFlowEvent.hh"
+#include "StFlowMaker/StFlowConstants.hh"
 #include "StFlowTagMaker.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -105,7 +108,7 @@ Int_t StFlowTagMaker::Make()
 
 void StFlowTagMaker::PrintInfo() 
 {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.10 2000/01/13 23:22:05 snelling Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.11 2000/01/14 01:36:02 snelling Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 

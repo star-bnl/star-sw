@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.14 2000/01/14 01:13:34 snelling Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.15 2000/01/14 01:35:52 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.15  2000/01/14 01:35:52  snelling
+// changed include path ../FlowMaker/ to FlowMaker/
+//
 // Revision 1.14  2000/01/14 01:13:34  snelling
 // modified spt (sum pt) to mpt (mean pt) because FlowTag changed
 //
@@ -63,10 +66,10 @@
 #include <math.h>
 #include "StMaker.h"
 #include "StFlowAnalysisMaker.hh"
-#include "../StFlowMaker/StFlowMaker.hh"
-#include "../StFlowMaker/StFlowEvent.hh"
-#include "../StFlowTagMaker/StFlowTagMaker.hh"
-#include "../StFlowMaker/StFlowConstants.hh"
+#include "StFlowMaker/StFlowMaker.hh"
+#include "StFlowMaker/StFlowEvent.hh"
+#include "StFlowTagMaker/StFlowTagMaker.hh"
+#include "StFlowMaker/StFlowConstants.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "TVector2.h"
@@ -151,7 +154,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.14 2000/01/14 01:13:34 snelling Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.15 2000/01/14 01:35:52 snelling Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
