@@ -40,7 +40,7 @@
 //       V              v      v                     v      v                       //
 // St_PolyLineShape   TBRIK  TTUBE                 TPCON  TTRD1                     //
 //       ^                                                                          //
-//       |              G  E  A  N  T     S  H  A  P  E  S                          //
+//       |     begin_html       <a href="http://root.cern.ch/root/html/TShape.html#TShape:description">G  E  A  N  T     S  H  A  P  E  S</a>end_html                          //
 //       |              ----------------------------------                          //
 //  TPoints3DABC                                                                    //
 //       |                                                                          //
