@@ -25,14 +25,14 @@ use Cwd;
 # Regression tests keep the code honest by checking for warnings
 # and "use strict" failures.
 
-# $Id: cons,v 1.58 2000/09/16 20:15:40 fisyak Exp $
+# $Id: cons,v 1.59 2000/09/16 20:20:03 fisyak Exp $
 
 use vars qw( $ver_num $ver_rev $version );
 
 $ver_num = "2.1";
 $ver_rev = ".2";
 $version = sprintf "This is Cons %s%s " .
-	    '($Id: cons,v 1.58 2000/09/16 20:15:40 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.59 2000/09/16 20:20:03 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -2450,6 +2450,7 @@ sub scan {
 
     for $name (@$quotes) {
       my $include_standard = "";
+      my $dir;
       my $default_include  = "";
 	for $dir(@longpath) {
 	    my($include) = $dir->lookup_accessible($name);
