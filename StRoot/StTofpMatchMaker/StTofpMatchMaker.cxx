@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpMatchMaker.cxx,v 1.4 2003/09/15 22:38:10 geurts Exp $
+ * $Id: StTofpMatchMaker.cxx,v 1.5 2003/09/17 19:40:12 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofpMatchMaker.cxx,v $
+ * Revision 1.5  2003/09/17 19:40:12  geurts
+ * zeroed event counters and one pointer
+ *
  * Revision 1.4  2003/09/15 22:38:10  geurts
  * dBase updates:
  *  - removed initLocalDb option
@@ -55,11 +58,18 @@ ClassImp(StTofpMatchMaker)
 //---------------------------------------------------------------------------
 /// default constructor, set default values
 StTofpMatchMaker::StTofpMatchMaker(const Char_t *name): StMaker(name){
-  // set default values
+  // zero counters & pointers
   mEventCounter = 0;
+  mAcceptedEventCounter = 0;
+  mTofEventCounter = 0;
+  mTofStrobeEventCounter = 0;
+  mAcceptAndStrobe = 0;
+  mAcceptAndBeam = 0;
+  mTofGeom = 0;
 
-  //setHistoFileName("tofana.root");
+  // set default values
   setHistoFileName("");
+  //setHistoFileName("tofana.root");
   setValidAdcRange(30,1200);
   setValidTdcRange(1,2047);
   setOuterTrackGeometry();
@@ -95,6 +105,14 @@ Int_t StTofpMatchMaker::Init(){
     if (mHistoFileName!="")
         gMessMgr->Info("","OST") << "Histograms will be stored in " << mHistoFileName.c_str() << endm;
   }
+
+  // reset event counters
+  mEventCounter = 0;
+  mAcceptedEventCounter = 0;
+  mTofEventCounter = 0;
+  mTofStrobeEventCounter = 0;
+  mAcceptAndStrobe = 0;
+  mAcceptAndBeam = 0;
 
   return kStOK;
 }
