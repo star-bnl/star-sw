@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.121  2003/04/11 18:56:14  pruneau
+// Pulling the B field from StEventSummary
+//
 // Revision 1.120  2003/04/11 16:51:57  pruneau
 // various fixes
 //
@@ -95,6 +98,7 @@
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiDefaultTrackFilter.h"
 #include "Sti/Star/StiStarDetectorGroup.h"
+#include "Sti/StiKalmanTrackFinderParameters.h"
 #include "StiTpc/StiTpcDetectorGroup.h"
 #include "StiSvt/StiSvtDetectorGroup.h"
 #include "StiEmc/StiEmcDetectorGroup.h"
@@ -162,17 +166,17 @@ Int_t StiMaker::Init()
   _loaderTrackFilter->add(new EditableParameter("PhiUsed",  "Use Phi",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPhi));
   _loaderTrackFilter->add(new EditableParameter("PhiMin",   "Minimum Phi", 0.,   0.,  0., 6.3,2,Parameter::Double, StiTrack::kPhi));
   _loaderTrackFilter->add(new EditableParameter("PhiMax",   "Maximum Phi", 6.3, 6.3, 0., 6.3,2,Parameter::Double, StiTrack::kPhi));
-  _loaderTrackFilter->add(new EditableParameter("PtUsed",   "Use Pt",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPt));
-  _loaderTrackFilter->add(new EditableParameter("PtMin",    "Minimum Pt", 0., 0., 0., 100.,2,Parameter::Double, StiTrack::kPt));
+  _loaderTrackFilter->add(new EditableParameter("PtUsed",   "Use Pt",     true, true, 0,1,1,Parameter::Boolean, StiTrack::kPt));
+  _loaderTrackFilter->add(new EditableParameter("PtMin",    "Minimum Pt", 0.1, 0.1, 0., 100.,2,Parameter::Double, StiTrack::kPt));
   _loaderTrackFilter->add(new EditableParameter("PtMax",    "Maximum Pt", 10., 10., 0., 100.,2,Parameter::Double, StiTrack::kPt));
   _loaderTrackFilter->add(new EditableParameter("PUsed",    "Use P",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kP));
   _loaderTrackFilter->add(new EditableParameter("PMin",     "Minimum P", 0., 0., 0., 100.,2,Parameter::Double, StiTrack::kP));
   _loaderTrackFilter->add(new EditableParameter("PMax",     "Maximum P", 10., 10., 0., 100.,2,Parameter::Double, StiTrack::kP));
-  _loaderTrackFilter->add(new EditableParameter("EtaUsed",  "Use Eta",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPseudoRapidity));
+  _loaderTrackFilter->add(new EditableParameter("EtaUsed",  "Use Eta",   true, true, 0,1,1,Parameter::Boolean, StiTrack::kPseudoRapidity));
   _loaderTrackFilter->add(new EditableParameter("EtaMin",   "Min Eta", -1.5, -1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity));
   _loaderTrackFilter->add(new EditableParameter("EtaMax",   "Max Eta",  1.5,  1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity));
-  _loaderTrackFilter->add(new EditableParameter("nPtsUsed", "Use nPts",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPointCount));
-  _loaderTrackFilter->add(new EditableParameter("nPtsMin",  "Minimum nPts", 0., 0., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount));
+  _loaderTrackFilter->add(new EditableParameter("nPtsUsed", "Use nPts",     true, true, 0,1,1,Parameter::Boolean, StiTrack::kPointCount));
+  _loaderTrackFilter->add(new EditableParameter("nPtsMin",  "Minimum nPts", 10., 10., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount));
   _loaderTrackFilter->add(new EditableParameter("nPtsMax",  "Maximum nPts", 60., 60., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount));
   _loaderTrackFilter->add(new EditableParameter("chargeUsed","Use Charge",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kCharge));
   _loaderTrackFilter->add(new EditableParameter("chargeMin", "Min Charge", -1., -1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge));
@@ -242,12 +246,25 @@ Int_t StiMaker::Make()
 	  if (_pars->doSimulation) _mcPlotter = new StiTrackingPlots("MC","MC");
 	}
       cout <<"StiMaker::Make() -I- Initialization Segment Completed"<<endl;
+
+      
     }
   eventIsFinished = false;
   StMcEvent * mcEvent;
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
+
   if (!event)
     throw runtime_error("StiMaker::Make() - ERROR - event == 0");
+
+  // Retrieve bfield in Tesla
+  double field = event->summary()->magneticField()/10.;
+  if (fabs(field)<2.)
+    static_cast<StiKalmanTrackFinderParameters*>(_tracker->getParameters())->setField(field);
+  else
+    {
+      cout <<"StiMaker::Make() -E- field:"<<field<<endl;
+      return -1;
+    }
   if (_toolkit->isMcEnabled())
     {
       mcEvent= mMcEventMaker->currentMcEvent();
