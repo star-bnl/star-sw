@@ -30,6 +30,18 @@ class StiKalmanTrackFinderParameters
 			setMaxSearchWindow(4.);
 			setSearchWindowScale(3.);
 			setMassHypothesis(0.139);
+			setXtrapolateToMainVertex(true);
+			setUseTrackFilter(true);
+		}
+
+	void setUseTrackFilter(bool option)
+		{
+			useTrackFilter = option;
+		}
+
+	void setXtrapolateToMainVertex(bool option)
+		{
+			xtrapolateToMainVertex = option;
 		}
 
 	void setElossCalculated(bool option)
@@ -87,6 +99,16 @@ class StiKalmanTrackFinderParameters
 			searchWindowScale = val;
 		}
 	
+	bool     getXtrapolateToMainVertex()
+		{
+			return xtrapolateToMainVertex;
+		}
+
+	bool     getUseTrackFilter()
+		{
+			return useTrackFilter;
+		}
+
 	double   getMinSearchWindow()
 		{
 			return minSearchWindow;
@@ -112,6 +134,8 @@ class StiKalmanTrackFinderParameters
 	
  protected:
 	
+	bool   useTrackFilter;
+	bool   xtrapolateToMainVertex;
 	bool   elossCalculated;
 	bool   mcsCalculated;
 	double field;
