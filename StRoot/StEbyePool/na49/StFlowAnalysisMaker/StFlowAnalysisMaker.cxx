@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.5 2001/11/06 17:55:23 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.6 2002/01/16 18:13:32 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.6  2002/01/16 18:13:32  posk
+// Moved fitting q to plot.C.
+//
 // Revision 1.5  2001/11/06 17:55:23  posk
 // Only sin terms at 40 GeV.
 //
@@ -1081,18 +1084,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 
 //-----------------------------------------------------------------------
 
-static Double_t qDist(double* q, double* par) {
-  // Calculates the q distribution given the parameters v, mult, area
-
-  double expo = par[1]*par[0]*par[0]*perCent*perCent + q[0]*q[0];
-  Double_t dNdq = par[2] * (2. * q[0] * exp(-expo) * 
-   TMath::BesselI0(2.*q[0]*par[0]*perCent*sqrt(par[1])));
-
-  return dNdq;
-}
-
-//-----------------------------------------------------------------------
-
 static Double_t resEventPlane(double chi) {
   // Calculates the event plane resolution as a function of chi
 
@@ -1141,7 +1132,7 @@ static Double_t chi(double res) {
 
 Int_t StFlowAnalysisMaker::Finish() {
   // Calculates resolution and flow values
-  // Fits q distribution, and outputs phiWgt and meanSinCos values
+  // Outputs phiWgt and meanSinCos values
   TString* histTitle;
 
   // Flattening histogram collections
@@ -1311,22 +1302,6 @@ Int_t StFlowAnalysisMaker::Finish() {
 	histFull[k].mHist_v->SetBinError(j+1, 0.);
       }
 
-      // Fit q distribution
-      float area = histFull[k].histFullHar[j].mHist_q->
-	Integral() * Flow::qMax / (float)Flow::n_qBins; 
-      float mult = histFull[k].histFullHar[j].mHistMult->GetMean();
-      TF1* func_q = new TF1("qDist", qDist, 0., Flow::qMax, 3); // fit q dist
-      func_q->SetParNames("v", "mult", "area");
-      float qMean = histFull[k].histFullHar[j].mHist_q->GetMean();
-      //float v2N = (qMean > 1.) ? qMean - 1. : 0.;
-      //float vGuess = 100. * sqrt(v2N / mult);
-      float vGuess = (qMean > 2.) ? 8. : 1.;
-      func_q->SetParameters(vGuess, mult, area); // initial values
-      func_q->SetParLimits(1, 1, 1);             // mult is fixed
-      func_q->SetParLimits(2, 1, 1);             // area is fixed
-      histFull[k].histFullHar[j].mHist_q->Fit("qDist", "Q0");
-      delete func_q;
-
       // Calculate PhiWgt
       double mean = histFull[k].histFullHar[j].mHistPhi->Integral() 
 	/ (double)Flow::nPhiBins;
@@ -1348,7 +1323,7 @@ Int_t StFlowAnalysisMaker::Finish() {
   // Write all histograms
   TString* fileName = new TString("flow.hist.root");
   TFile histFile(fileName->Data(), "RECREATE");
-  histFile.SetFormat(1);
+  //histFile.SetFormat(1);
   GetHistList()->Write();
   histFile.Close();
   delete fileName;
