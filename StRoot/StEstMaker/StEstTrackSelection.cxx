@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrackSelection.cxx,v 1.6 2001/02/14 17:51:48 perev Exp $
+ * $Id: StEstTrackSelection.cxx,v 1.7 2001/02/23 08:47:05 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrackSelection.cxx,v $
+ * Revision 1.7  2001/02/23 08:47:05  lmartin
+ * cout replaced by gMessMgr.
+ *
  * Revision 1.6  2001/02/14 17:51:48  perev
  * delete [] added
  *
@@ -69,12 +72,12 @@ void StEstTracker::ChooseBestNBranches(StEstTrack *tr, int slay) {
   double chii, chij;
 
   if(mDebugLevel>0)
-    cout << "StEstMaker::ChooseBestNBranches ****START****" <<endl;
+    gMessMgr->Info()<<"StEstMaker::ChooseBestNBranches ****START****"<<endm;
 
   StEstBranch **br_tmp = new StEstBranch*[tr->GetNBranches()];
 
   if(mDebugLevel>1)
-    cout << "tr->GetNBranches()= "<<tr->GetNBranches()<<endl;
+    gMessMgr->Info()<<"tr->GetNBranches()= "<<tr->GetNBranches()<<endm;
 
   indchi = new int[mParams[0]->maxbranches];
 
@@ -101,13 +104,13 @@ void StEstTracker::ChooseBestNBranches(StEstTrack *tr, int slay) {
   }
 
   if(mDebugLevel>1)
-    cout << "tr->GetNBranches()= "<<tr->GetNBranches()<<endl;
+    gMessMgr->Info()<<"tr->GetNBranches()= "<<tr->GetNBranches()<<endm;
 
   delete[] indchi;
   delete[] br_tmp;
 
   if(mDebugLevel>0)
-    cout << "StEstMaker::ChooseBestNBranches ****STOP****" <<endl;
+    gMessMgr->Info()<<"StEstMaker::ChooseBestNBranches ****STOP****" <<endm;
 }
        
 void StEstTracker::ChooseBestBranch(StEstTrack *tr, int overPass) {
@@ -127,7 +130,7 @@ void StEstTracker::ChooseBestBranch(StEstTrack *tr, int overPass) {
 	chimin = chi;
 	chinr  = i;
       }
-      if (tr->GetNBranches()>1 && tr->GetBranch(i)->GetNHits()==0) cout <<"StEstMaker::ChooseBestBranch  branch with no hit while track with >1 branch  track= "<<tr->mTPCTrack->mId<<endl;    
+      if (tr->GetNBranches()>1 && tr->GetBranch(i)->GetNHits()==0) gMessMgr->Error()<<"StEstMaker::ChooseBestBranch  branch with no hit while track with >1 branch  track= "<<tr->mTPCTrack->mId<<endm;    
   }
 
   br_best=tr->GetBranch(chinr);
@@ -142,17 +145,16 @@ void StEstTracker::RemoveOneHitTracks() {
 
   long i,j;
 
-  if(mDebugLevel>2) cout << "*** Removal of one-hit-tracks ***"<<endl;
+  if(mDebugLevel>2) gMessMgr->Info()<<"*** Removal of one-hit-tracks ***"<<endm;
   for (i=0;i<mNTrack;i++) { // loop over the tracks
     // we assume we have already last only one branch
     if(mDebugLevel>2)
-      cout<<" Track #"<<i<< "  "<<mTrack[i]->GetBranch(0)->GetNHits();
+      gMessMgr->Info()<<" Track #"<<i<< "  "<<mTrack[i]->GetBranch(0)->GetNHits()<<endm;
     if (mTrack[i]->GetBranch(0)->GetNHits()<2 && mTrack[i]->GetBranch(0)->GetNHits()>0) {
-      if(mDebugLevel>2) cout <<" <-- remove"<<endl;
+      if(mDebugLevel>2) gMessMgr->Info()<<"<-- remove"<<endm;
       for (j=0;j<mTrack[i]->GetBranch(0)->GetNHits();j++) 
 	mTrack[i]->GetBranch(0)->GetHit(j)->LeaveBranch(mTrack[i]->GetBranch(0));
     }
-    else if(mDebugLevel>2) cout <<endl;
   }
 }
 
@@ -169,7 +171,7 @@ void StEstTracker::RemoveHitSharing() {
   double minbr;
 
   if(mDebugLevel>2)
-    cout << "StEstMaker::RemoveHitSharing ****START****"<<endl;
+    gMessMgr->Info()<<"StEstMaker::RemoveHitSharing ****START****"<<endm;
 
   HowMany=0;
   for (i=0;i<mNSvtHit;i++) {    
@@ -199,9 +201,9 @@ void StEstTracker::RemoveHitSharing() {
     delete [] track;
     delete [] br_index;
   }
-  cout<<HowMany<<" branches cleared"<<endl;
+  gMessMgr->Info()<<HowMany<<" branches cleared"<<endm;
   if(mDebugLevel>2)
-        cout << "StEstMaker::RemoveHitSharing ****STOP****"<<endl;
+        gMessMgr->Info()<<"StEstMaker::RemoveHitSharing ****STOP****"<<endm;
 }
 
 void StEstTracker::ChooseSegment(int overPass,int layer) {
@@ -300,8 +302,6 @@ void StEstTracker::ReInitializeHelix() {
   StEstBranch *br;
   
   HowMany=0;
-  if (mDebugLevel>0)
-    cout<<"ReInitializing the unselected tracks : ";
   for (il=0;il<mNTrack;il++) {
     if(mTrack[il]->GetDone()==1 && mTrack[il]->GetFlag()==0){
       br = mTrack[il]->GetBranch(0);
@@ -313,11 +313,11 @@ void StEstTracker::ReInitializeHelix() {
 	mTrack[il]->SetDone(0);
 	HowMany++;
       }
-      else cout<<"ReInitializeHelix : Error !! The track_id "
-	       <<mTrack[il]->mTPCTrack->GetId()
-	       <<" is reinitialized but still have hits attached "<<endl;
+      else gMessMgr->Error()<<"ReInitializeHelix : Error !! The track_id "
+			    <<mTrack[il]->mTPCTrack->GetId()
+			    <<" is reinitialized but still have hits attached "<<endm;
     }
   }
   if (mDebugLevel>0)
-    cout<<HowMany<<" tracks initialized"<<endl;
+    gMessMgr->Info()<<"ReInitializing the unselected tracks : "<<HowMany<<" tracks initialized"<<endm;
 }
