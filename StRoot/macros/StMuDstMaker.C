@@ -71,14 +71,14 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   gSystem->Load("StMcEventMaker");
   gSystem->Load("StAssociationMaker");
 
-  if( mode & 0x2){
-    // EMC specific
-    cout << " EMC mode enabled" << endl;
-    gSystem->Load("StEmcUtil");
-    gSystem->Load("StDbLib");
-    gSystem->Load("StDbBroker");
-    gSystem->Load("St_db_Maker");
-  }
+  //if( mode & 0x2){
+  // EMC specific
+  cout << " EMC mode enabled" << endl;
+  gSystem->Load("StEmcUtil");
+  gSystem->Load("StDbLib");
+  gSystem->Load("StDbBroker");
+  gSystem->Load("St_db_Maker");
+  //}
 
   if( mode & 0x4){
     // RICH
