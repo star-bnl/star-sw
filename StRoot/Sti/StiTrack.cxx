@@ -4,11 +4,11 @@
 //StEvent
 #include "StEventTypes.h"
 #include "StiTrack.h"
-
-ClassImp(StiTrack)
+#include "StiConstants.h"
 
 StiTrack::StiTrack()
 {
+  reset();
 }
  
 StiTrack::~StiTrack()
@@ -17,5 +17,11 @@ StiTrack::~StiTrack()
 
 void StiTrack::reset()
 {
-    return;
+  q = 0;
+  nPts = 0;
+  nFitPts = 0;
+  vertex = 0;
+  status = StiConstants::Ok;
+  m      = 0.139;
+  chi2   = 0.;
 }

@@ -2,12 +2,13 @@
 #define StiTrackFinder_H 1
 
 #include "StiFactoryTypedefs.h"
-
-class StiSeedfinder;
-class StiTrackFilter;
-class StiDetectorContainer;
-class StiHitContainer;
-class StiTrackContainer;
+#include "StiConstants.h"
+#include "StiSeedFinder.h"
+#include "StiTrackFilter.h"
+#include "StiDetectorContainer.h"
+#include "StiHitContainer.h"
+#include "StiTrackContainer.h"
+#include "StDbUtilities/StMagUtilities.h"
 
 class StiTrackFinder 
 {
@@ -28,6 +29,7 @@ class StiTrackFinder
   void setHitContainer(StiHitContainer * hitContainer);
   void setTrackContainer(StiTrackContainer * newTrackContainer);
   void setTrackNodeFactory(StiTrackNodeFactory * factory);
+  void setMagneticField(StMagUtilities * magField);
 
   void setTrackFiltering(bool option);
   void setElossCalculated(bool option);
@@ -35,10 +37,12 @@ class StiTrackFinder
 
   StiSeedFinder             * getTrackSeedFinder()    const;
   StiTrackFilter            * getTrackFilter()        const;
-  StiDetectorContainer * getGeometryContainer()  const;
+  StiDetectorContainer      * getGeometryContainer()  const;
   StiHitContainer           * getHitContainer()       const;
   StiTrackContainer         * getTrackContainer()     const;
   StiTrackNodeFactory       * getTrackNodeFactory()   const;
+  StMagUtilities            * getMagneticField()      const;
+
 
   bool isTrackFiltering()   const;
   bool isElossCalculated()  const;
@@ -52,10 +56,11 @@ class StiTrackFinder
 
   StiSeedFinder             * trackSeedFinder;
   StiTrackFilter            * trackFilter;
-  StiDetectorContainer * geometryContainer;
+  StiDetectorContainer      * geometryContainer;
   StiHitContainer           * hitContainer;
   StiTrackContainer         * trackContainer;
   StiTrackNodeFactory       * trackNodeFactory;
+  StMagUtilities            * magField;
 
   int analyzedTrackSeeds;
   int acceptedTracks;
@@ -175,6 +180,14 @@ inline int StiTrackFinder::getStatus() const
   return status;
 }
 
+inline StMagUtilities * StiTrackFinder::getMagneticField() const
+{
+  //----------------------------------------------------------------- 
+  // Returns the descriptor of the magnetic field used by this 
+  // tracker.
+  //----------------------------------------------------------------- 
+  return magField;
+}
 
 
 #endif
