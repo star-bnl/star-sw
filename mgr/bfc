@@ -1,6 +1,9 @@
-#!/usr/local/bin/perl
-# $Id: bfc,v 1.5 1999/10/12 16:01:13 didenko Exp $
+#!/opt/star/bin/perl -w
+# $Id: bfc,v 1.6 1999/11/19 19:37:29 didenko Exp $
 # $Log: bfc,v $
+# Revision 1.6  1999/11/19 19:37:29  didenko
+# fixed perl
+#
 # Revision 1.5  1999/10/12 16:01:13  didenko
 # fixed disk names
 #
