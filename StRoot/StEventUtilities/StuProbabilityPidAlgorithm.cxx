@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.5 2000/05/05 19:25:39 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.6 2000/05/24 14:35:41 ullrich Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
- * Revision 1.5  2000/05/05 19:25:39  aihong
- * modified ctor
+ * Revision 1.6  2000/05/24 14:35:41  ullrich
+ * Added 'const' to compile on Sun CC5.
  *
  * Revision 1.5  2000/05/05 19:25:39  aihong
  * modified ctor
@@ -38,13 +38,6 @@
 #include "StPidAmpMaker/Include/StPidAmpConst.hh"
 
 #include "StPidAmpMaker/StPidAmpChannelInfoOut.h"
-
-
-
-
-
-
-
 
 //-------------------------------
 StuProbabilityPidAlgorithm::StuProbabilityPidAlgorithm(StEvent& ev){
@@ -170,7 +163,7 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
            dca=helix.distance(primaryVtx->position());
 
 
-          StDedxPidTraits* dedxPidTr;
+          const StDedxPidTraits* dedxPidTr;
 
 
        charge=(theTrack.geometry())->charge();
@@ -182,11 +175,11 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
 	     //
 	     // tpc pid trait
 	     //
-             StTrackPidTraits* thisTrait = traits[itrait];
+             const StTrackPidTraits* thisTrait = traits[itrait];
 	     //
 	     // perform cast to make the pid trait a dedx trait
 	     //
-	     dedxPidTr = dynamic_cast<StDedxPidTraits*>(thisTrait);
+	     dedxPidTr = dynamic_cast<const StDedxPidTraits*>(thisTrait);
 	   }
 
            if (dedxPidTr &&  dedxPidTr->method() == mDedxMethod) {
