@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFpdTriggerDetector.cxx,v 2.3 2004/10/05 15:48:05 fisyak Exp $
+ * $Id: StFpdTriggerDetector.cxx,v 2.4 2004/10/05 16:10:33 ullrich Exp $
  *
  * Author: Akio Ogawa, Jul 2004
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFpdTriggerDetector.cxx,v $
+ * Revision 2.4  2004/10/05 16:10:33  ullrich
+ * Corrected uninitialized for-loop variable.
+ *
  * Revision 2.3  2004/10/05 15:48:05  fisyak
  * typo fix
  *
@@ -26,7 +29,7 @@
 #include "tables/St_dst_TrgDet_Table.h"
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StFpdTriggerDetector.cxx,v 2.3 2004/10/05 15:48:05 fisyak Exp $";
+static const char rcsid[] = "$Id: StFpdTriggerDetector.cxx,v 2.4 2004/10/05 16:10:33 ullrich Exp $";
 
 ClassImp(StFpdTriggerDetector)
 
@@ -134,7 +137,7 @@ StFpdTriggerDetector::clear()
     fill_n(mWPN, static_cast<size_t>(mMaxPS), 0);
     fill_n(mWPS, static_cast<size_t>(mMaxPS), 0);
     for (int i=0; i<2; i++)
-	for (int j; j<mMaxModule; j++) {
+	for (int j=0; j<mMaxModule; j++) {
 	    for (int k=0; k<mMaxBoard; k++) mLayer1[i][j][k] = 0;
 	    mLayer2[i][j]=0;
 	}
