@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventReader.hh,v 1.7 2000/01/07 23:21:17 laue Exp $
+ * $Id: StHbtEventReader.hh,v 1.8 2000/02/18 21:25:00 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -18,6 +18,10 @@
  ***************************************************************************
  *
  * $Log: StHbtEventReader.hh,v $
+ * Revision 1.8  2000/02/18 21:25:00  laue
+ * Implementation of a collections of StHbtEventWriters.
+ * We now can write multiple microDsts at a time.
+ *
  * Revision 1.7  2000/01/07 23:21:17  laue
  * 0.) all 'ClassDef(...)' put inside #ifdef __ROOT__  #endif
  * 1.) unnecessary includes of 'StMaker.h' deleted
@@ -46,21 +50,27 @@
 #define StHbtEventReader_hh
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
+#include "StHbtMaker/Base/StHbtEventCut.h"
+#include "StHbtMaker/Base/StHbtTrackCut.h"
+#include "StHbtMaker/Base/StHbtV0Cut.h"
 
 class StHbtEventReader {
 
 protected:
+  StHbtEventCut* mEventCut;     //!
+  StHbtTrackCut* mTrackCut; //!
+  StHbtV0Cut* mV0Cut; //!
   int mReaderStatus;     // 0="good"
 
 public:
   // even tho it's only a base class and never constructed, if you don't have an implementation,
   // you get "StHbtEventReader type_info node" upon dynamical loading
-  StHbtEventReader(){/* no-op*/};
-  virtual ~StHbtEventReader(){/* no-op */};
+  StHbtEventReader(){ mEventCut=0; mTrackCut=0; mV0Cut=0; }
+  virtual ~StHbtEventReader(){/* no-op */}
 
   virtual StHbtEvent* ReturnHbtEvent() =0;
 
-  virtual StHbtString Report() =0;    // user-written method to return string describing reader
+  virtual StHbtString Report();    // user-written method to return string describing reader
                                       // Including whatever "early" cuts are being done
 
   // this next method does NOT need to be implemented, in which case the 
@@ -68,13 +78,51 @@ public:
   virtual int WriteHbtEvent(StHbtEvent*){cout << "No WriteHbtEvent implemented\n"; return (0);}
 
   // these next two are optional but would make sense for, e.g., opening and closing a file
-  virtual int Init(const char* ReadWrite, StHbtString Message=" "){cout << "do-nothing StHbtEventReader::Init()\n"; return(0);}
+  virtual int Init(const char* ReadWrite, StHbtString& Message){cout << "do-nothing StHbtEventReader::Init()\n"; return(0);}
   virtual void Finish(){/*no-op*/};
 
   int Status(){return mReaderStatus;} // StHbtManager looks at this for guidance if it gets null pointer from ReturnHbtEvent
 
+  virtual void SetEventCut(StHbtEventCut* ecut){mEventCut=ecut;}
+  virtual void SetTrackCut(StHbtTrackCut* pcut){mTrackCut=pcut;}
+  virtual void SetV0Cut(StHbtV0Cut* pcut){mV0Cut=pcut;}
+  virtual StHbtEventCut* EventCut(){return mEventCut;}
+  virtual StHbtTrackCut* TrackCut(){return mTrackCut;}
+  virtual StHbtV0Cut*    V0Cut(){return mV0Cut;}
 
+
+#ifdef __ROOOT__
+  ClassDef(StHbtEventReader,0)
+#endif
 };
+
+inline StHbtString StHbtEventReader::Report(){
+  StHbtString temp = "\n This is the base class StHbtEventReader reporting";
+  temp += "\n---> EventCuts in Reader: ";
+  if (mEventCut) {
+    temp += mEventCut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
+  temp += "\n---> TrackCuts in Reader: ";
+  if (mTrackCut) {
+    temp += mTrackCut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
+  temp += "\n---> V0Cuts in Reader: ";
+  if (mV0Cut) {
+    temp += mV0Cut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
+  temp += "\n";
+  return temp;
+}
+
 
 #endif
 

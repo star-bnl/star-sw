@@ -20,11 +20,31 @@ public:
   }
   virtual void EventBegin(const StHbtEvent*) { /* no-op */ }
   virtual void EventEnd(const StHbtEvent*) { /* no-op */ }
-  virtual void Fill(const StHbtEvent*) { cout << " *** no user defined Fill(const StHbtEvent*), take from base class" << endl; }
-  virtual void Fill(const StHbtTrack*) { cout << " *** no user defined Fill(const StHbtTrack*), take from base class" << endl; }
-  virtual void Fill(const StHbtV0*) { cout << " *** no user defined Fill(const StHbtV0Track*), take from base class" << endl; }
-  virtual void Finish() { cout << " *** no user defined Finish(), take from base class" << endl;}
-  virtual void Init() { cout << " *** no user defined Init(), take from base class" << endl;}
+  virtual void Fill(const StHbtEvent*) { 
+#ifdef STHBTDEBUG
+    cout << " *** no user defined Fill(const StHbtEvent*), take from base class" << endl;
+#endif
+  }
+  virtual void Fill(const StHbtTrack*) { 
+#ifdef STHBTDEBUG
+    cout << " *** no user defined Fill(const StHbtTrack*), take from base class" << endl;
+#endif
+  }
+  virtual void Fill(const StHbtV0*) { 
+#ifdef STHBTDEBUG
+    cout << " *** no user defined Fill(const StHbtV0Track*), take from base class" << endl;
+#endif
+  }
+  virtual void Finish() { 
+#ifdef STHBTDEBUG
+    cout << " *** no user defined Finish(), take from base class" << endl;
+#endif
+  }
+  virtual void Init() { 
+#ifdef STHBTDEBUG
+    cout << " *** no user defined Init(), take from base class" << endl;
+#endif
+  }
 };
 
 #endif
