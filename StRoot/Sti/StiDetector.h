@@ -7,6 +7,8 @@
 #ifndef STI_DETECTOR_HH
 #define STI_DETECTOR_HH
 
+#include <string>
+
 class StiMaterial;
 
 class StiDetector {
@@ -80,7 +82,7 @@ public:
 
     void setSector(int val) {sector = val;}
     void setPadrow(int val) {padrow = val;}
-    void setName(const char *val) { strncpy(name, val, 99); }
+    void setName(const char *val){	strncpy(name, val, 99);}
 
     //action
     virtual void build(const char* infile);  //for now, build from SCL parsable ascii file
@@ -144,7 +146,6 @@ protected:
 };
 
 //Non-members--------------------------
-
 ostream& operator<<(ostream&, const StiDetector&);
 
 #endif

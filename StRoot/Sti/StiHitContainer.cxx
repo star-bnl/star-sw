@@ -97,6 +97,13 @@ bool StiHitContainer::hasMore() const
     return (mcurrent!=mcandidatevec.end()) ? true : false;
 }
 
+//Return without incrementing
+StiHit* StiHitContainer::getCurrentHit()
+{
+    return (*mcurrent);
+}
+
+//Return and increment
 StiHit* StiHitContainer::getHit()
 {
     return (*(mcurrent++));

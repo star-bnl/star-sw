@@ -32,11 +32,11 @@ public:
     static StiHitContainer* instance();
     static void kill();
     
-    void setDeltaD(double val) {mdeltad = val;}
-    void setDeltaZ(double val) {mdeltaz = val;}
+    inline void setDeltaD(double val) {mdeltad = val;}
+    inline void setDeltaZ(double val) {mdeltaz = val;}
 
-    double deltaD() const {return mdeltad;}
-    double deltaZ() const {return mdeltaz;}
+    inline double deltaD() const {return mdeltad;}
+    inline double deltaZ() const {return mdeltaz;}
 
     //STL wrappers
     void push_back(StiHit*);
@@ -56,7 +56,8 @@ public:
     //User Query Interface
     void setRefPoint(StiHit* ref);
     bool hasMore() const;
-    StiHit* getHit();
+    StiHit* getCurrentHit(); //get current
+    StiHit* getHit();  //get current hit and increment
 
     //Add vertex information
     void addVertex(StiHit*); //push_back
