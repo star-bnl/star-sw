@@ -8,6 +8,7 @@
 
 struct emcTriggerPed { 
 
+   unsigned long  PedShift;   /*   */
    unsigned long  BitConversionMode[30][10];   /*   */
    unsigned long  Ped[30][160];   /*   */
 
