@@ -1,7 +1,10 @@
 *
-* $Id: ggordq.F,v 1.2 1998/04/16 16:59:33 fisyak Exp $
+* $Id: ggordq.F,v 1.3 1999/09/28 13:51:36 nevski Exp $
 *
 * $Log: ggordq.F,v $
+* Revision 1.3  1999/09/28 13:51:36  nevski
+* fixed for pgf-m transition
+*
 * Revision 1.2  1998/04/16 16:59:33  fisyak
 * 2nd pass with gstar
 *
@@ -71,7 +74,7 @@ C.    ------------------------------------------------------------------
  
 * try all possible axes
  
-      DO 1 IAX=1,7
+      DO 199 IAX=1,7
  
 *   count number of additional words needed and total number of volumes
 *   in all divisions
@@ -82,7 +85,7 @@ C.    ------------------------------------------------------------------
 *
       DO 50 IN = 1,NIN
          CALL GFCLIM (JVO, IN, IAX, CLOW(IN), CHIGH(IN), IERR)
-         IF (IERR.NE.0) GOTO 1
+         IF (IERR.NE.0) GOTO 199
    50 CONTINUE
 *
 * *** Order the coordinate limits, keeping track of the associated
@@ -176,7 +179,7 @@ C.    ------------------------------------------------------------------
  
 * end of loop over IAX
  
-1     CONTINUE
+ 199  CONTINUE
  
  
 * now the best axis is selected - compare with axis requested by CALL
