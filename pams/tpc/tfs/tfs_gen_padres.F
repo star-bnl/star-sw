@@ -1,5 +1,8 @@
-* $Id: tfs_gen_padres.F,v 1.9 1998/12/13 21:36:16 sakrejda Exp $
+* $Id: tfs_gen_padres.F,v 1.10 1998/12/16 02:01:34 fisyak Exp $
 * $Log: tfs_gen_padres.F,v $
+* Revision 1.10  1998/12/16 02:01:34  fisyak
+* CLeanup for NT
+*
 * Revision 1.9  1998/12/13 21:36:16  sakrejda
 * parameters and constants cleaned up, bmpar removed
 *
@@ -125,7 +128,7 @@ C
       real AA, BB, CC
       real xlocal(3),Bfield(3)
       real xlength, dummy
-      integer iret, tgc_drift_volume_length
+      integer tgc_drift_volume_length
       DATA xlocal /3*0/
 
 C=========================== Begin Executable Code =======================
