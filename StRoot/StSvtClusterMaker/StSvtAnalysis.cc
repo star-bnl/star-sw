@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.19 2003/09/02 17:59:06 perev Exp $
+ * $Id: StSvtAnalysis.cc,v 1.20 2004/04/23 15:57:32 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -62,6 +62,9 @@
  *           
  * 
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.20  2004/04/23 15:57:32  caines
+ * Flag as bad hits with 1 anode and peak less than 11
+ *
  * Revision 1.19  2003/09/02 17:59:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -772,7 +775,8 @@ int StSvtAnalysis:: CatagorizeCluster(int iRows, int iCols, int igt3, int clu)
   }
   
   if (mCluNumAnodes[clu] ==1){            // added by JT
-    if (mCluNumPixels[clu] >10 ) iQual = 10;
+    if(mCluPeakAdc[clu] < 11) iQual = 11; // added by HC to remove noise hits
+    if(mCluNumPixels[clu] >10 ) iQual = 10;
     //if (mMeanClusterTimeBin[clu]>30) iQual = 10;
   }
 
