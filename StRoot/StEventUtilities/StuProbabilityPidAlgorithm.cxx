@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.19 2000/12/18 23:51:36 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.20 2000/12/20 16:55:16 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.20  2000/12/20 16:55:16  aihong
+ * let it survive when no support PIDTable is present
+ *
  * Revision 1.19  2000/12/18 23:51:36  aihong
  * mExtrap related bug fixed
  *
@@ -193,6 +196,8 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
      mKaonPlusProb=0.;
      mProtonProb=0.;
 
+     if (mPIDTableRead) {
+
           double rig    =0.0;
           double dedx   =0.0;
 	  double dca    =0.0; //in units of cm.
@@ -238,7 +243,9 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
 	   }
 
 
-       if (dedx!=0.0){//dedx =0.0 means not this track is not in Tpc dector.
+       if (dedx!=0.0 && nhits>=0 //dedx ==0.0 no sense 
+	   && thisPEnd > 0. && thisEtaEnd > 0. // *End ==0, no PIDTable read.
+           && thisNHitsEnd > 0. ){
 
     const StThreeVectorF& p=theTrack.geometry()->momentum();
     rig=double(p.mag()/charge);
@@ -257,9 +264,6 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
 
     setCalibrations(eta, nhits);
 
-
-
-
    if (dedx<thisDedxEnd){
 
    fillPIDByLookUpTable(cent, dca, charge,rig, eta, nhits,dedx);
@@ -273,15 +277,13 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
       myBandBGFcn->SetParameter(4,1.45);
       if (dedx>myBandBGFcn->Eval(rig,0,0)) fillAsUnknown();
 
+     } else fillAsUnknown();
+
        fillPIDHypothis();
 
        return table->findParticleByGeantId(PID[0]);
 
-       }
-
-
-
-
+ }
 
 //-------------------------------
 void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx,int theCharge){
@@ -473,9 +475,7 @@ void StuProbabilityPidAlgorithm::readParametersFromFile(TString fileName){
                 	  =(*mEqualyDividableRangeEndSet)(3);
 
 
-
-
-
+        StuProbabilityPidAlgorithm::mPIDTableRead=true;
 
       } else if (!f.IsOpen()) {
    
@@ -543,6 +543,9 @@ double StuProbabilityPidAlgorithm::thisEtaStart=0;
 double StuProbabilityPidAlgorithm::thisEtaEnd=0;
 double StuProbabilityPidAlgorithm::thisNHitsStart=0;
 double StuProbabilityPidAlgorithm::thisNHitsEnd=0;
+
+
+bool StuProbabilityPidAlgorithm::mPIDTableRead=false;
 
 StDedxMethod  StuProbabilityPidAlgorithm::mDedxMethod=kTruncatedMeanId;
 
