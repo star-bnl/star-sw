@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.4 2001/11/06 20:12:06 caines Exp $
+ * $Id: StSvtSignal.cc,v 1.5 2003/07/31 19:18:10 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.5  2003/07/31 19:18:10  caines
+ * Petrs improved simulation code
+ *
  * Revision 1.4  2001/11/06 20:12:06  caines
  * Add include for new compiler
  *
@@ -25,16 +28,22 @@
  **************************************************************************/
 
 #include <math.h>
+#include <string.h>
+#include <fstream.h>
 
 #include "StSvtElectronCloud.hh"
 #include "StSvtSignal.hh"
 
+//ClassImp(StSvtElectronCloud)
 
-
+fstream pasaOutN,pasaOut;
+double sumAt;
+//_______________________________________________
 StSvtSignal::StSvtSignal()
 {
  mPhi = 0;
-
+ mLowTBin  = 1;
+ mHiTBin = 128;
  mAnRightEdge = 0.0;
  mAnLeftEdge = 0.0;
  mChargeAtAnodes = 0.0;
@@ -48,65 +57,123 @@ StSvtSignal::StSvtSignal()
  mDriftVel = 0.0;                             //[in mm/micro seconds];
  mTimeCenter = 0.0;
  mTimeWidth = 0.0;
- mPeakSignal = 0.0;
- mMinUnderShoot = 0.0;
 
  GAP_TWIDTH = 36*1.e-6;
 
  memset(mSignal,0,sizeof(mSignal[0])*128);
 
- mPasaGain = 0.0;
- mPasaMax = 0.0;
+ mPasaGain = 7.2;      // uV/e
+
  for(int i = 0; i < 4; i++)
     mPasa[i] = 0.0;
 
  mTau_s = 11.0*0.001;   //in micro seconds
  mTau_l = 500.0*0.001;  //in micro seconds
+ 
 }
-
+//_______________________________________________
 StSvtSignal::~StSvtSignal()
 {
 
 }
-
+//_______________________________________________
 void StSvtSignal::setParam(double timeBinSize,double anodeSize,double driftVel)
 {
   mTimeBinSize = timeBinSize;
   mAnodeSize = anodeSize;
   mDriftVel = driftVel;
 }
-
-
-void StSvtSignal::pasaRelatedStuff()
-{
-
- //**** pasa related stuff
- //double PasaMax = 9.5;    // [micro volts/e]
-
- unNormPasaConst();
- //peakingTime();   //  [micro seconds]
- //halfWidthAtHalfMax();
- mPasaMax = 4.4026;          //for Rykov's code
- mPeakTime = 0.0430889;
- //mFwhm = 0.049364;
-
- double pasaMax = pasaRes(mPeakTime);
- cout<<"pasaMAx = "<<pasaMax<<endl;
- mPasaGain = 9.5/pasaMax; // [micro volts]/[micro seconds**4]-e
- //mPasaGain = 3.45934e+09;
-
- cout<<"mPasaGain = "<<mPasaGain<<endl;
- 
- normPasaConst();
- arrays();
-
-}
-
+//_______________________________________________
 void StSvtSignal::setOption(int option)
 {
   mOption = option;
 }
+//_______________________________________________
+void StSvtSignal::pasaRelatedStuff()
+{
 
+ //**** pasa related stuff
+
+ //for Rykov's piece of code
+
+ unNormPasaConst();
+
+ //To speed things up do not calculate these values every time, just use the already calculated values
+
+ mPeakTimeR = 0.04308;
+ mPasaMaxR = 4.4026;
+ mFwhmR = 0.049364;
+
+ /*
+  peakingTimeR();   //  [micro seconds]
+ cout<<"mPeakTimeR = "<<mPeakTimeR<<endl;
+ cout<<"mPasaMaxR = "<<mPasaMaxR<<endl;
+ halfWidthAtHalfMaxR();
+ cout<<"mFwhmR = "<<mFwhmR<<endl;
+ */
+
+ normPasaConst();
+ arrays();
+
+ //for Selemons piece of code
+ //To speed things up do not calculate these values every time, just use the already calculated values
+
+ mPeakTimeS = 0.04308;
+ mPasaMaxS = 2.74619e-09;
+ mFwhmS = 0.0494;
+ mPasaNorm = 2.62181e+09; // [micro volts]/[micro seconds**4]-e
+ /*
+ peakingTimeS();
+ cout<<"\nmPeakTimeS = "<<mPeakTimeS<<endl;
+ cout<<"mPasaMaxS = "<<mPasaMaxS<<endl;
+ halfWidthAtHalfMaxS();
+ cout<<"mFwhmS = "<<mFwhmS<<endl;
+ mPasaNorm = mPasaGain/mPasaMaxS; // [micro volts]/[micro seconds**4]-e
+ cout<<"mPasaNorm = "<<mPasaNorm<<endl;
+ */
+}
+
+//_______________________________________________
+void StSvtSignal::doPasaOnly(int option){
+
+ double t = 0.0;  
+ // double tStep = 0.04;
+ double tStep = mTimeBinSize*0.001;     //microseconds
+ double pasaFunValue;
+
+ pasaOutN.open("pasaNorm.dat",ios::out);
+ pasaOut.open("pasa.dat",ios::out);
+
+ unNormPasaConst();
+
+ for(int j = 0; j <25000; j++){
+
+     t = t + tStep;
+
+     pasaFunValue = pasaRes(t);
+
+     if(option){
+       pasaFunValue = mPasaNorm*pasaFunValue;
+       pasaOutN<<t<<setw(20)<<pasaFunValue<<endl;
+
+     } else {
+
+       pasaOut<<t<<setw(20)<<pasaFunValue<<endl;
+     }
+     /*
+     if(j < 100){
+	cout<<t<<"\t"<<pasaFunValue<<endl;
+     }
+     */
+    } 
+
+ halfWidthAtHalfMaxS();
+
+ pasaOutN.close();
+ pasaOut.close();
+
+}
+//_______________________________________________
 void StSvtSignal::getCloud(StSvtElectronCloud* elCloud)
 {
  double sigmaMajor,sigmaMajor2,sigmaMinor,sigmaMinor2,sigmaSqDiff,sigmaSqDiff2;
@@ -140,8 +207,7 @@ void StSvtSignal::getCloud(StSvtElectronCloud* elCloud)
  mC3 = (sigmaMajor2*sigmaMinor2/mSigmaMajor2) + (cosPhi2*sinPhi2*sigmaSqDiff2/mSigmaMajor2);  // [mm]**2
 }
 
-
-
+//_______________________________________________
 double  StSvtSignal::chargeFraction(int an, double anHit)
 {
 
@@ -157,6 +223,7 @@ double  StSvtSignal::chargeFraction(int an, double anHit)
   //cout<<"mAnLeftEdge = "<<mAnLeftEdge<<endl;
   //cout<<"mAnHit = "<<mAnHit<<endl;
   //cout<<"mSigmaMajor = "<<mSigmaMajor<<endl;
+
  if(mFractionOfCharge < 0.000001)
    {
     mCollectedCharge = 0.0;
@@ -171,6 +238,7 @@ double  StSvtSignal::chargeFraction(int an, double anHit)
 
 }
 
+//_______________________________________________
 //relTimeCenter = Center of gravity relative to the cloud y-center of gravity
 
 int StSvtSignal::timeCenterAndWidth(double anHit,double timeHit)
@@ -228,24 +296,27 @@ int StSvtSignal::timeCenterAndWidth(double anHit,double timeHit)
  
 }
 
-
-void StSvtSignal::setPeakAndUnderShoot()
+//_______________________________________________
+void StSvtSignal::resetPeakAndUnderShoot()
 {
   mPeakSignal = 0.0;
   mMinUnderShoot = 0.0;
 }
-
+//_______________________________________________
 void StSvtSignal::setTimeWidth(double timWidth)
 {
  mTimeWidth = timWidth;
  cout<<"mTimeWidth = "<<mTimeWidth<<endl;
 }
 
-
+//_______________________________________________
 void StSvtSignal::calcConvSignal(double chargeOnAnode)
 {
  int nMin, nMax;
  double tStep = 0;
+
+ resetSignal(mLowTBin,mHiTBin);
+ resetPeakAndUnderShoot();
 
  //4.78/128 = 0.03734375; 
  tStep = mTimeBinSize;     //microseconds
@@ -255,18 +326,22 @@ void StSvtSignal::calcConvSignal(double chargeOnAnode)
   nMin = mTCenter - 10;
   if(nMin <= 0) nMin = 1;
 
+  mLowTBin = nMin;
+
   //nMax = (int)((mTimeCenter + 5*mTimeWidth)/tStep);
   nMax = mTCenter + 20;
   if(nMax > 128) nMax = 128;
 
+  mHiTBin = nMax;
+
  if(mOption == 1)
    {
-     cout<<"using Rykove's method"<<endl;
+     //cout<<"using Rykove's method"<<endl;
     rykovSignal(nMin,nMax, tStep);
    }
  else if(mOption == 2 )
    {
-     cout<<"using  Selemon's version"<<endl; 
+     //cout<<"using  Selemon's version"<<endl; 
      selemonSignal(nMin,nMax,tStep,chargeOnAnode);
    }
  else
@@ -285,11 +360,11 @@ void StSvtSignal::calcConvSignal(double chargeOnAnode)
    }
 
 }
-
+//_______________________________________________
 void  StSvtSignal::rykovSignal(int nMin,int nMax, double tStep)
 {
   double t = 0;
-  //mPeakSignal = 0.0;
+
   for(int n = nMin; n <= nMax ; n++)
     {
       t = n*tStep;
@@ -302,20 +377,20 @@ void  StSvtSignal::rykovSignal(int nMin,int nMax, double tStep)
         mMinUnderShoot = mSignal[n - 1];
     }
 }
-
+//_______________________________________________
 void  StSvtSignal::selemonSignal(int nMin,int nMax, double tStep, double charge)
 {
   double t = 0, sig = 0;
   int numOfIntPoints = 0;
-  //mPeakSignal = 0.0;
+  sumAt = 0.0;
 
   for(int n = nMin; n <= nMax ; n++)
    {
     t = n*tStep;
-    if(mTimeWidth <=  0.02)
+    if(mTimeWidth <=  0.06)
      {
       sig = analConvInt(t,mTimeWidth,mTimeCenter);
-      mSignal[n - 1] = charge*mPasaGain*sig; // [micro volts]
+      mSignal[n - 1] = charge*mPasaNorm*sig; // [micro volts]
       if(n < (int)(mTimeCenter/tStep) && mSignal[n - 1] < 0.0)
 	mSignal[n - 1] = 0;
       if(mSignal[n - 1] > mPeakSignal)
@@ -326,9 +401,9 @@ void  StSvtSignal::selemonSignal(int nMin,int nMax, double tStep, double charge)
     else
       {
        numOfIntPoints = 2;
-       sig = simpsonInt(nMin, n, numOfIntPoints, tStep, t);
+       sig = numConvInt(nMin, n, numOfIntPoints, tStep, t);
        //cout<<"sig = "<<sig<<endl;
-       mSignal[n - 1] = charge*mPasaGain*sig; // [micro volts]
+       mSignal[n - 1] = charge*mPasaNorm*sig; // [micro volts]
        if(n < (int)(mTimeCenter/tStep) && mSignal[n - 1] < 0.0)
 	mSignal[n - 1] = 0;
        if(mSignal[n - 1] > mPeakSignal)
@@ -340,13 +415,10 @@ void  StSvtSignal::selemonSignal(int nMin,int nMax, double tStep, double charge)
     
 }
 
-
-
+//_______________________________________________
 //pasa dependent coefficients
 void StSvtSignal::unNormPasaConst()
 {
- 
- //mPaShortT = 0.02*mTau_s; 
 
  double p = mTau_s/mTau_l;
  double q = 1.0/(1.0 - p);
@@ -359,18 +431,40 @@ void StSvtSignal::unNormPasaConst()
  mPasa[4] = 1.0;
 
 }
-
-void StSvtSignal::peakingTime()
+//_______________________________________________
+void StSvtSignal::peakingTimeS()
 {
 
   double t = 0.0;  
  // double tStep = 0.04;
  double tStep = mTimeBinSize*0.001;     //microseconds
  double pasaFunValue = -1.e20;
- mPasaMax = -2.0e20;
+ mPasaMaxS = -2.0e20;
 
  do {
-     mPasaMax = pasaFunValue;
+     mPasaMaxS = pasaFunValue;
+     t = t + tStep;
+
+     pasaFunValue = pasaRes(t);
+     //cout<<"t = "<<t<<"\tpasaFunValue = "<<pasaFunValue<<endl;
+
+    } while( pasaFunValue > mPasaMaxS);
+   
+   mPeakTimeS = t - tStep;
+
+}
+//_______________________________________________
+void StSvtSignal::peakingTimeR()
+{
+
+  double t = 0.0;  
+ // double tStep = 0.04;
+ double tStep = (mTimeBinSize*0.001)/mTau_s;     //microseconds
+ double pasaFunValue = -1.e20;
+ mPasaMaxR = -2.0e20;
+
+ do {
+     mPasaMaxR = pasaFunValue;
      t = t + tStep;
      pasaFunValue = mPasa[0];
      double c1 = 1.0;
@@ -381,32 +475,55 @@ void StSvtSignal::peakingTime()
        pasaFunValue = pasaFunValue + mPasa[i]*c1;
       }
      
-     //pasaFunValue = pasaRes(t);
      pasaFunValue = pasaFunValue*exp(-t) - mPasa[0]*exp(-(mTau_s/mTau_l)*t);
-
-    } while( pasaFunValue > mPasaMax);
+     cout<<"t = "<<t<<"\tpasaFunValue = "<<pasaFunValue<<endl;
+    
+    } while( pasaFunValue > mPasaMaxR);
    
-   mPeakTime = t - tStep;
-   cout<<"mPeakTime = "<<mPeakTime<<endl;
-   mPeakTime = mTau_s*mPeakTime;
-   cout<<"mPeakTime = "<<mPeakTime<<endl;
-   cout<<"mPasaMax ="<<mPasaMax<<endl; 
+   double peakTime = t - tStep;
+   mPeakTimeR = mTau_s*peakTime;
 
 }
-
-void StSvtSignal::halfWidthAtHalfMax()
+//_______________________________________________
+void StSvtSignal::halfWidthAtHalfMaxS()
 {
  double t;
  //double tStep = 0.04;
  double tStep = mTimeBinSize*0.001;     //microseconds
  double pasaFunValue = 0.0;
- mFwhm = 0.0;
+ mFwhmS = 0.0;
 
  for(int i = 0; i < 2; i++)
    {
-    mFwhm = -1.0*mFwhm;
-    t = mPeakTime/mTau_s;
-    pasaFunValue = mPasaMax;   // from previous function
+    mFwhmS = -1.0*mFwhmS;
+    t = mPeakTimeS;
+    pasaFunValue = mPasaMaxS;   // from previous function
+    
+    do {
+        t = t - tStep;
+	pasaFunValue = pasaRes(t);
+           
+    } while( pasaFunValue > 0.5*mPasaMaxS);
+
+    mFwhmS = mFwhmS + t;
+    tStep = -tStep;
+   }
+
+}
+//_______________________________________________
+void StSvtSignal::halfWidthAtHalfMaxR()
+{
+ double t;
+ //double tStep = 0.04;
+ double tStep = mTimeBinSize*0.001;     //microseconds
+ double pasaFunValue = 0.0;
+ mFwhmR = 0.0;
+
+ for(int i = 0; i < 2; i++)
+   {
+    mFwhmR = -1.0*mFwhmR;
+    t = mPeakTimeR/mTau_s;
+    pasaFunValue = mPasaMaxR;   // from previous function
     
     do {
         t = t - tStep;
@@ -419,25 +536,20 @@ void StSvtSignal::halfWidthAtHalfMax()
            pasaFunValue = pasaFunValue + mPasa[i]*c1;
 	   }
 	
-
-	//pasaFunValue = pasaRes(t);
         pasaFunValue = pasaFunValue*exp(-t) - mPasa[0]*exp(-(mTau_s/mTau_l)*t);
-       
-    
-    } while( pasaFunValue > 0.5*mPasaMax);
 
-    mFwhm = mFwhm + t;
+    } while( pasaFunValue > 0.5*mPasaMaxR);
+
+    mFwhmR = mFwhmR + t;
     tStep = -tStep;
    }
 
-  
-   mFwhm = mTau_s*mFwhm;
-   cout<<"fwhm = "<<mFwhm<<endl;
+ mFwhmR = mTau_s*mFwhmR;
 }
-
+//_______________________________________________
 void StSvtSignal::normPasaConst()
 {
- double s1 = 9.5*1.e-6/mPasaMax;
+ double s1 = mPasaGain*1.e-6/mPasaMaxR;
  
  for(int i = 0; i <= 4; i++)
     mPasa[i] = s1*mPasa[i];
@@ -500,7 +612,7 @@ void StSvtSignal::arrays()
  mArray6[5] = 49267.3942608635921086;  
  
 }
-
+//_______________________________________________
 double StSvtSignal::signal(double t)
 {
  double signal;
@@ -520,7 +632,7 @@ double StSvtSignal::signal(double t)
  return signal;
 
 }
-    
+ //_______________________________________________   
 double StSvtSignal::getShortSignal(double localTime)
  {
   double signal, sig_s, sig_l;
@@ -541,7 +653,7 @@ double StSvtSignal::getShortSignal(double localTime)
   return signal;
  }    
 
-
+//_______________________________________________
 double StSvtSignal::getLongSignal(double localTime)
  {
   double ds0, ds1, ds2, dsc, dsc0, dsc1, dsc2, dsc3;
@@ -593,7 +705,7 @@ double StSvtSignal::getLongSignal(double localTime)
 
   return signal;
 }
-
+//_______________________________________________
 double StSvtSignal::useArrays5And6(double ds1, double dsc)
  {
   double sigUp,sigDn;
@@ -613,7 +725,7 @@ double StSvtSignal::useArrays5And6(double ds1, double dsc)
  
    return dsc0;
 }
-
+//_______________________________________________
 double  StSvtSignal::useArrays3And4Or1And2(double ds1,double dsc)
  {
   double sigUp,sigDn;
@@ -648,17 +760,17 @@ double  StSvtSignal::useArrays3And4Or1And2(double ds1,double dsc)
    return dsc0;
  }
 
-
-double StSvtSignal::simpsonInt(int nMin , int n, int numOfIntPoints, double tStep, double t)
+//_______________________________________________
+double StSvtSignal::numConvInt(int nMin , int n, int numOfIntPoints, double tStep, double t)
 {
  double  At = 0.0,lowlim = 0;
 
  for(int p = nMin; p <= n ; p++)
  {
  //lowlim = -mLowLim*(tStep/100);
- //At = sum(mLowLim,lowlim,tStep/100,t);
-  lowlim = (p - 1)*mTimeBinSize;;
-   At += sum(numOfIntPoints,lowlim,tStep/numOfIntPoints,t);
+ //At = simpsonInt(mLowLim,lowlim,tStep/100,t);
+  lowlim = (p - 1)*mTimeBinSize;
+   At += simpsonInt(numOfIntPoints,lowlim,tStep/numOfIntPoints,t);
 		  
   }
 
@@ -667,7 +779,7 @@ double StSvtSignal::simpsonInt(int nMin , int n, int numOfIntPoints, double tSte
 }
 
 
-
+//_______________________________________________
 double StSvtSignal::analConvInt(double tim, double sigmat, double tc)
 {
  double a, b, c, bc5, bc4, bc3, bc2, ac1;
@@ -723,8 +835,8 @@ double StSvtSignal::analConvInt(double tim, double sigmat, double tc)
 
  return At;
 }
- 
-double StSvtSignal::sum(int numOfIntPoints,double lowlim, double step, double t) 
+//_______________________________________________ 
+double StSvtSignal::simpsonInt(int numOfIntPoints,double lowlim, double step, double t) 
  {
    double firstTerm = 0, evenTerm = 0, oddTerm = 0, lastTerm = 0, mTpr = 0;
   
@@ -743,12 +855,12 @@ double StSvtSignal::sum(int numOfIntPoints,double lowlim, double step, double t)
   
        }
 
-    double signal =  (step*0.33333333333333)*(firstTerm + lastTerm + 4.0*oddTerm + 2.0*evenTerm); //micro seconds**4)
+    double signal =  (step*0.33333333333333)*(firstTerm + lastTerm + 4.0*oddTerm + 2.0*evenTerm); //(micro seconds**4)
   //cout<<"signal = "<<signal<<endl;
-  return signal;         //micro volts/e 
+  return signal;         
 } 
 
-
+//_______________________________________________
 double StSvtSignal::gausInput(double tim)
 {
   double tPr2, PI,Exp1;
@@ -764,7 +876,7 @@ double StSvtSignal::gausInput(double tim)
  return Exp1;        //[micro seconds]**(-1)
 
 }
-
+//_______________________________________________
 double StSvtSignal::pasaRes(double tim)
 {
  double  a, b, c, bc5, bc4, bc3, bc2, ac1, t2, t3,t4;
@@ -791,7 +903,7 @@ double StSvtSignal::pasaRes(double tim)
   return Fpasa;
  
 }
-
+//_______________________________________________
 double StSvtSignal::prob1(double anOrTimeDiff , double  sigma)
 {
    double num = 0;
@@ -803,7 +915,7 @@ double StSvtSignal::prob1(double anOrTimeDiff , double  sigma)
   return fraction; 
 
 }
-
+//_______________________________________________
 double StSvtSignal::freq(double num)
 {
  double frq = 0;
@@ -817,7 +929,7 @@ double StSvtSignal::freq(double num)
 
 }
 
-
+//_______________________________________________
 double StSvtSignal::prob2(double num , double  sigma)
 {
    double mSum = 0, mErrf = 0;
@@ -868,35 +980,45 @@ double StSvtSignal::prob2(double num , double  sigma)
 
   return  0.5*(1.0 + mErrf);
 }
-
+//_______________________________________________
+int StSvtSignal::getLowTBin()
+{
+ return mLowTBin;
+}
+//_______________________________________________
+int StSvtSignal::getHiTBin()
+{
+ return mHiTBin;
+}
+//_______________________________________________
 double StSvtSignal::getTimeWidth()
 {
  return mTimeWidth;
 }
-
+//_______________________________________________
 double StSvtSignal::getTimeCenter()
 {
  return mTimeCenter;
 }
-
+//_______________________________________________
 double StSvtSignal::getPeak()
 {
   return mPeakSignal*0.001;      //[mV]
 }
-
+//_______________________________________________
 double StSvtSignal::getMinUnderShoot()
 {
 
- return mMinUnderShoot;
+ return mMinUnderShoot*0.001;
 }
-
+//_______________________________________________
 double StSvtSignal::getSignal(int n)
 {
   return mSignal[n]*0.001;      //[mV]
 }
-
-void StSvtSignal::setSignal()
+//_______________________________________________
+void StSvtSignal::resetSignal(int lBin, int hBin)
 {
- for(int i = 0; i < 128; i++)
-  mSignal[i] = 0.0;
+ for(int i = lBin; i <= hBin; i++)
+  mSignal[i-1] = 0.0;
 }

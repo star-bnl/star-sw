@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridSimData.hh,v 1.3 2001/08/13 15:34:18 bekele Exp $
+ * $Id: StSvtHybridSimData.hh,v 1.4 2003/07/31 19:18:10 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridSimData.hh,v $
+ * Revision 1.4  2003/07/31 19:18:10  caines
+ * Petrs improved simulation code
+ *
  * Revision 1.3  2001/08/13 15:34:18  bekele
  * Debugging tools added
  *
@@ -27,19 +30,19 @@
 #include "StSvtClassLibrary/StSvtHybridData.hh"
 
 class StSequence;
-class StSvtHybridPixels;
+class StSvtHybridPixelsC;
 
 class StSvtHybridSimData: public StSvtHybridData
 {
 public:
-  StSvtHybridSimData(int barrel, int ladder, int wafer, int hybrid, StSvtHybridPixels* mSimDataPixels = 0);
+  StSvtHybridSimData(int barrel, int ladder, int wafer, int hybrid, StSvtHybridPixelsC* mSimDataPixels = 0);
 
-  int setSimHybridData(StSvtHybridPixels* mSimDataPixels);
-  int getOffSet(){return mOffSet;};
+  int setSimHybridData(StSvtHybridPixelsC* mSimDataPixels);
+  int getOffSet(){return mPedOffset;};
 
 protected:
 
-  int mOffSet;
+  int mPedOffset;
   ClassDef(StSvtHybridSimData,1)
 };
 

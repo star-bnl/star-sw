@@ -6,7 +6,7 @@
 
 ClassImp(StSvtHybridNoise)
 
-StSvtHybridNoise::StSvtHybridNoise(int barrel, int ladder, int wafer, int hybrid):StSvtHybridPixels(barrel,ladder,wafer,hybrid)
+StSvtHybridNoise::StSvtHybridNoise(int barrel, int ladder, int wafer, int hybrid):StSvtHybridPixelsC(barrel,ladder,wafer,hybrid)
 { }
 
 //StSvtHybridNoise::~StSvtHybridNoise()

@@ -16,7 +16,7 @@ void openFiles();
 void closeFiles();
 void setPar(double energy,double theta, double phi,double timeBinSize);
 void setSiliconProp();
-void setInitWidths();
+void setInitWidths(double w1, double w2);
 void calculateWidthAtAnode(double mTc);
 int runge_kutta4(int stepBefore, int numBinDiv, double steplen);
 int adamsBushFort(int stepBefore, int numBinDiv, double steplen);
