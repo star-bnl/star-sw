@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.16 1999/02/22 21:27:20 kathy Exp $
+// $Id: St_glb_Maker.h,v 1.17 1999/03/04 01:19:22 fisyak Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.17  1999/03/04 01:19:22  fisyak
+// Put release tag to run_summary table
+//
 // Revision 1.16  1999/02/22 21:27:20  kathy
 // moved hist from St_glb_Maker to St_QA_Maker and had to rename some etc
 //
@@ -78,12 +81,13 @@ class St_exi_exipar;
 class St_exi_aux;
 class St_mft_control; 
 class St_particle_dst_param;
+class St_dst_summary_param;
 
 class St_glb_Maker : public StMaker {
 
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.16 1999/02/22 21:27:20 kathy Exp $";
+  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.17 1999/03/04 01:19:22 fisyak Exp $";
   // egr
   Int_t         m_scenario;   
   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
@@ -142,7 +146,8 @@ class St_glb_Maker : public StMaker {
   St_egr_egrpar  *m_egr2_egrpar; //!
   St_particle_dst_param *m_particle_dst_param; //!
   St_est_ctrl    *m_est_ctrl; //!
-  
+
+  St_dst_summary_param *m_dst_summary_param; //!
 
  protected:
 
