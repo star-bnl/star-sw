@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.11 1999/07/22 15:31:41 fine Exp $
+// $Id: rootlogon.C,v 1.12 1999/08/06 15:00:41 fisyak Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.12  1999/08/06 15:00:41  fisyak
+// Keep formwer bfc.C as BFC.C
+//
 // Revision 1.11  1999/07/22 15:31:41  fine
 // US letter paper size has been set as default one
 //
@@ -30,8 +33,9 @@
 //=======================================================================
 
 {
-    gInterpreter->ProcessLine(".O0");
-    //    G__loadfile("iostream.h");
+#pragma optimize 0
+  //    gInterpreter->ProcessLine(".O0");
+    G__loadfile("iostream.h");
     TString gPrompt =  gSystem->BaseName(gROOT->GetApplication()->Argv(0));
     gPrompt += " [%d] ";
 
