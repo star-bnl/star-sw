@@ -11,8 +11,8 @@ use Sys::Hostname;
 #my $debugOn=0;
 
 my $hostname     = hostname();
-my $mdir_log      = "/star/rcf/disk00001/star/P00hi/log/";
-my $mdir_sum      = "/star/rcf/disk00001/star/P00hi/sum/"; 
+my $mdir_log      = "/star/rcf/prodlog/MDC4/log/";
+my $mdir_sum      = "/star/rcf/prodlog/MDC4/sum/"; 
 my @dir_ext      = ("trs","daq");  
 my @set ;
 my @list;
@@ -221,10 +221,10 @@ sub parse_log($) {
   my @tag_word;
   my $last_tag_line;
   my $last_tag = "last";
-  my $node_name = "n/\a";
+  my $node_name = "n/a";
   my $first_line;
-  my $star_level = "n/\a";
-  my $root_level = "n/\a"; 
+  my $star_level = "n/a";
+  my $root_level = "n/a"; 
    my $Anflag = 0;
 #---------------------------------------------------------
   
@@ -277,13 +277,13 @@ sub parse_log($) {
      if ($num_line > 100){
      if( $line =~ /EndMaker/){
        @size_line = split(" ",$line); 
-       if($size_line[0] eq "QAInfo:" and $size_line[5] eq "starreco") {
-     
-        $maker_size[$num_maker] += $size_line[9];
+       if($size_line[0] eq "QAInfo:" and $size_line[4] eq "EndMaker") {
+        $size_line[6] =~ s/=//g;      
+        $maker_size[$num_maker] += $size_line[6];
          $mymaker = $size_line[3];
        $maker_name[$num_maker] = $mymaker;
        $num_maker++;
-       if( $mymaker eq "tree:"){
+       if( $mymaker eq "outputStream:"){
          $last_maker = $num_maker;
          $num_maker = 0; 
        }
@@ -307,41 +307,57 @@ sub parse_log($) {
       $Anflag = 1;
     }
 
-     if ($line =~ /QAInfo: StAnalysisMaker/ && $Anflag == 0 ) {
-           my  $string = $logfile[$num_line];
-             @word_tr = split /:/,$string;
+     if ($line =~ /track nodes:/ && $Anflag == 0 ) {
+           my  $string = $line;
+             @word_tr = split /:/,$string;            
               $no_tracks = $word_tr[2];
              $tot_tracks += $no_tracks; 
 #              print $word_tr[2], $no_tracks, "\n";
-              $string = $logfile[$num_line + 1];
+    }
+        elsif($line =~ /primary tracks:/ && $Anflag == 0 ) {
+              $string = $line;
              @word_tr = split /:/,$string;
              $no_prtracks = $word_tr[2]; 
              $tot_prtracks += $no_prtracks;
-             $string = $logfile[$num_line + 2];
+     }
+        elsif($line =~ /V0 vertices:/ && $Anflag == 0 ) {
+            $string = $line;
              @word_tr = split /:/,$string;
              $no_vertices = $word_tr[2]; 
              $tot_vertices += $no_vertices;
-             $string = $logfile[$num_line + 3];
+     }
+        elsif($line =~ /Xi vertices:/ && $Anflag == 0 ) {     
+             $string = $line;
              @word_tr = split /:/,$string;
              $no_xivertices = $word_tr[2]; 
              $tot_xivertices += $no_xivertices;
-             $string = $logfile[$num_line + 4];
+     }
+        elsif($line =~ /Kink vertices:/ && $Anflag == 0 ) {         
+            $string = $line;
              @word_tr = split /:/,$string;
              $no_knvertices = $word_tr[2]; 
              $tot_knvertices += $no_knvertices;
-             $string = $logfile[$num_line + 5];
+     } 
+        elsif($line =~ /TPC hits:/ && $Anflag == 0 ) { 
+             $string = $line;
              @word_tr = split /:/,$string;
              $no_tpc_hits = $word_tr[2];
              $tot_tpc_hits += $no_tpc_hits;
-             $string = $logfile[$num_line + 6];
+   }
+        elsif($line =~ /SVT hits:/ && $Anflag == 0 ) {       
+             $string = $line;
              @word_tr = split /:/,$string;
              $no_svt_hits = $word_tr[2]; 
              $tot_svt_hits += $no_svt_hits;
-             $string = $logfile[$num_line + 7];
+   }
+        elsif($line =~ /SSD hits:/ && $Anflag == 0 ) {    
+            $string = $line;
              @word_tr = split /:/,$string;
              $no_ssd_hits = $word_tr[2];
              $tot_ssd_hits += $no_ssd_hits; 
-             $string = $logfile[$num_line + 8];
+     }
+        elsif($line =~ /FTPC hits:/ && $Anflag == 0 ) {  
+            $string = $line;
              @word_tr = split /:/,$string;
              $no_ftpc_hits = $word_tr[2];
              $tot_ftpc_hits += $no_ftpc_hits; 
