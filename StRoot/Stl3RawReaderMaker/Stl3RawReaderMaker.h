@@ -1,3 +1,13 @@
+//
+//  $Id: Stl3RawReaderMaker.h,v 1.4 2001/08/20 22:32:00 struck Exp $
+//
+//  $Log: Stl3RawReaderMaker.h,v $
+//  Revision 1.4  2001/08/20 22:32:00  struck
+//  first version filling L3 counters and algorithm info into StEvent
+//
+//
+
+
 #ifndef STAR_Stl3RawReaderMaker
 #define STAR_Stl3RawReaderMaker
 
@@ -95,7 +105,7 @@ class Stl3RawReaderMaker : public StMaker {
    TTree* GetGlobalTrackTree() {return mGlobalTrackTree;} ;
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.3 2001/08/20 22:29:20 struck Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.4 2001/08/20 22:32:00 struck Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(Stl3RawReaderMaker, 1)   //StAF chain virtual base class for Makers
 };
