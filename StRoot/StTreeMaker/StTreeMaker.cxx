@@ -227,7 +227,7 @@ void StTreeMaker::UpdateHddr()
   St_DataSetIter nextBr(fTree);
   
   while ((br = (StBranch *)nextBr())) {	//Looop over branches
-    if ((opt = br->GetOption()) && strstr(opt,"const")) continue;
+    if ((opt = br->GetOption()) && strstr(opt,"CONST")) continue;
     if (!failmk && !br->First())			continue;
     St_DataSet *ds = br;
     if (ds->First() && ds->First() == ds->Last()) ds = ds->First();
