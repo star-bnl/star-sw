@@ -115,7 +115,6 @@ void StiGeometryTransform::kill()
 double StiGeometryTransform::phiForWestSector(int iSector, int nSectors){
     
   int offset = nSectors/4;
-  int minSector = -nSectors/2 + 1;
   double deltaPhi = 2.*M_PI/nSectors;
   
   // make phi ~ sector (not -sector) and correct offset
@@ -130,8 +129,7 @@ double StiGeometryTransform::phiForWestSector(int iSector, int nSectors){
 // as above, but numbering _increases_ with increasing phi.
 double StiGeometryTransform::phiForEastSector(int iSector, int nSectors){
     
-    int offset = nSectors/4;
-    int minSector = -nSectors/2 + 1;
+    int offset = 3*nSectors/4;
     double deltaPhi = 2.*M_PI/nSectors;
 
     // correct offset
