@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.19 1998/07/21 23:35:13 kathy Exp $
+* $Id: bfc.kumac,v 1.20 1998/07/22 15:32:51 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.20  1998/07/22 15:32:51  kathy
+* fixed space in input parameters that caused it not to run
+*
 * Revision 1.19  1998/07/21 23:35:13  kathy
 * changed names of some items in chain, separated gstar and g2t parts, made bfc and bfc_mdc consistent
 *
@@ -167,7 +170,7 @@ MACRO bfc _
    chain=' evg2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
    first=1 _
    no_events=1 _
-   input_data_prefix= $AFS_RHIC/star/data/samples/ _
+   input_data_prefix=$AFS_RHIC/star/data/samples/ _
    input_data_file=auau_central_hijing.xdf _
    output_file=bfc_output.xdf 
   
