@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.17 2003/10/07 03:10:27 perev Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.18 2004/07/26 16:02:32 lbarnby Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.18  2004/07/26 16:02:32  lbarnby
+ * Added Xibar, Omega(bar). Introduce max pt tags.
+ *
  * Revision 1.17  2003/10/07 03:10:27  perev
  * Leak of struct on mTagTable fixed
  *
@@ -69,6 +72,7 @@
 #include "StChain.h"
 #include "TMath.h"
 #include "PhysicalConstants.h"
+#include "phys_constants.h"
 
 ClassImp(StStrangeTagsMaker)
 
@@ -91,6 +95,7 @@ Int_t StStrangeTagsMaker::Init()
     mMasspi2 = pion_plus_mass_c2 * pion_plus_mass_c2;
     mMasspr2 = proton_mass_c2 * proton_mass_c2;
     mMassla2 = lambda_mass_c2 * lambda_mass_c2;
+    mMasska2 = M_KAON_MINUS * M_KAON_MINUS; // defined in phys_constants.h
 
     return StMaker::Init();
 }
@@ -133,64 +138,149 @@ void StStrangeTagsMaker::fillTag()
     Int_t nbelowXi = 0;
     Int_t nXi = 0;
     Int_t naboveXi = 0;
+    Int_t nbelowXibar = 0;
+    Int_t nXibar = 0;
+    Int_t naboveXibar = 0;
+    Int_t nbelowOm = 0;
+    Int_t nOm = 0;
+    Int_t naboveOm = 0;
+    Int_t nbelowOmbar = 0;
+    Int_t nOmbar = 0;
+    Int_t naboveOmbar = 0;
     Float_t perc;
 
     size_t i;
 
+    ///max Pt temporary variables
+    Float_t maxPtK0=0;
+    Float_t maxPtLa=0;
+    Float_t maxPtLb=0;
+    Float_t maxPtXi=0;
+    Float_t maxPtXibar=0;
+    Float_t maxPtOm=0;
+    Float_t maxPtOmbar=0;
+    
+    // v0s
+    
     for (i=0; i<v0tot; i++) {
-        StV0Vertex *vertex = v0Vertices[i];
-        const StThreeVectorF& nMom = vertex->momentumOfDaughter(negative);
-        const StThreeVectorF& pMom = vertex->momentumOfDaughter(positive);
-        StThreeVectorF vMom = nMom + pMom;
-        Float_t pN2 = nMom.mag2();
-        Float_t pP2 = pMom.mag2();
-        Float_t pV2 = vMom.mag2();
-        Float_t eNpi = ::sqrt(pN2 + mMasspi2);
-        Float_t eNpr = ::sqrt(pN2 + mMasspr2);
-        Float_t ePpi = ::sqrt(pP2 + mMasspi2);
-        Float_t ePpr = ::sqrt(pP2 + mMasspr2);
-        Float_t eK0 = eNpi + ePpi;
-        Float_t eLa = eNpi + ePpr;
-        Float_t eLb = eNpr + ePpi;
-        Float_t maK0 = ::sqrt(eK0*eK0 - pV2);
-        Float_t maLa = ::sqrt(eLa*eLa - pV2);
-        Float_t maLb = ::sqrt(eLb*eLb - pV2);
-
-        perc = (maK0/kaon_0_short_mass_c2) - 1.;
-        if (TMath::Abs(perc) < mRange) nK0++;
-        else if (TMath::Abs(perc + m2Range) < mRange) nbelowK0++;
-        else if (TMath::Abs(perc - m2Range) < mRange) naboveK0++;
-
-        perc = (maLa/lambda_mass_c2) - 1.;
-        if (TMath::Abs(perc) < mRange) nLa++;
-        else if (TMath::Abs(perc + m2Range) < mRange) nbelowLa++;
-        else if (TMath::Abs(perc - m2Range) < mRange) naboveLa++;
-
-        perc = (maLb/antilambda_mass_c2) - 1.;
-        if (TMath::Abs(perc) < mRange) nLb++;
-        else if (TMath::Abs(perc + m2Range) < mRange) nbelowLb++;
-        else if (TMath::Abs(perc - m2Range) < mRange) naboveLb++;
-
+      StV0Vertex *vertex = v0Vertices[i];
+      const StThreeVectorF& nMom = vertex->momentumOfDaughter(negative);
+      const StThreeVectorF& pMom = vertex->momentumOfDaughter(positive);
+      StThreeVectorF vMom = nMom + pMom;
+      Float_t pN2 = nMom.mag2();
+      Float_t pP2 = pMom.mag2();
+      Float_t pV2 = vMom.mag2();
+      Float_t eNpi = ::sqrt(pN2 + mMasspi2);
+      Float_t eNpr = ::sqrt(pN2 + mMasspr2);
+      Float_t ePpi = ::sqrt(pP2 + mMasspi2);
+      Float_t ePpr = ::sqrt(pP2 + mMasspr2);
+      Float_t eK0 = eNpi + ePpi;
+      Float_t eLa = eNpi + ePpr;
+      Float_t eLb = eNpr + ePpi;
+      Float_t maK0 = ::sqrt(eK0*eK0 - pV2);
+      Float_t maLa = ::sqrt(eLa*eLa - pV2);
+      Float_t maLb = ::sqrt(eLb*eLb - pV2);
+      
+      
+      Float_t ptV0 = TMath::Sqrt((vMom.x()*vMom.x())+(vMom.y()*vMom.y()));
+      
+      
+      perc = (maK0/kaon_0_short_mass_c2) - 1.;
+      if (TMath::Abs(perc) < (2.0*mRange)) // mRange too narrow for highPt K0s
+	{
+	  nK0++;
+	  if(ptV0>maxPtK0) maxPtK0=ptV0;
+	}
+      else if (TMath::Abs(perc + (2.0*m2Range)) < (2.0*mRange)) nbelowK0++;
+      else if (TMath::Abs(perc - (2.0*m2Range)) < (2.0*mRange)) naboveK0++;
+      
+      perc = (maLa/lambda_mass_c2) - 1.;
+      if (TMath::Abs(perc) < (0.5*mRange)) // mRange too wide for La, Lb.
+	{
+	  nLa++;
+	    if(ptV0>maxPtLa) maxPtLa=ptV0;
+	}
+      else if (TMath::Abs(perc + (0.5*m2Range)) < (0.5*mRange)) nbelowLa++;
+      else if (TMath::Abs(perc - (0.5*m2Range)) < (0.5*mRange)) naboveLa++;
+      
+      perc = (maLb/antilambda_mass_c2) - 1.;
+      if (TMath::Abs(perc) < (0.5*mRange))
+	{
+	  nLb++;
+	  if(ptV0>maxPtLb) maxPtLb=ptV0;
+	}
+      else if (TMath::Abs(perc + (0.5*m2Range)) < (0.5*mRange)) nbelowLb++;
+      else if (TMath::Abs(perc - (0.5*m2Range)) < (0.5*mRange)) naboveLb++;
+      
     }
-    for (i=0; i<castot; i++) {
-
+      
+      // Cascades
+      
+      for (i=0; i<castot; i++) {
         StXiVertex *vertex = xiVertices[i];
-        const StThreeVectorF& pMom = vertex->momentumOfBachelor();
+        const StThreeVectorF& bMom = vertex->momentumOfBachelor();
+	double pcharge = vertex->chargeOfBachelor();
         StThreeVectorF lMom = vertex->momentumOfV0();
-        StThreeVectorF xMom = lMom + pMom;
-        Float_t pP2 = pMom.mag2();
+        StThreeVectorF cMom = lMom + bMom;
+        Float_t pB2 = bMom.mag2();
         Float_t pL2 = lMom.mag2();
-        Float_t pX2 = xMom.mag2();
-        Float_t epi = ::sqrt(pP2 + mMasspi2);
-        Float_t ela = ::sqrt(pL2 + mMassla2);
+        Float_t pC2 = cMom.mag2();
+        Float_t epi = ::sqrt(pB2 + mMasspi2);
+	Float_t eka = ::sqrt(pB2 + mMasska2);
+        Float_t ela = ::sqrt(pL2 + mMassla2); 
         Float_t eXi = ela + epi;
-        Float_t maXi = ::sqrt(eXi*eXi - pX2);
-
+        Float_t maXi = ::sqrt(eXi*eXi - pC2);
+	Float_t eOm = ela + eka;
+	Float_t maOm = ::sqrt(eOm*eOm - pC2);
+	
+	Float_t ptCas = TMath::Sqrt((cMom.x()*cMom.x())+(cMom.y()*cMom.y()));
         perc = (maXi/xi_minus_mass_c2) - 1.;
-        if (TMath::Abs(perc) < mRange) nXi++;
-        else if (TMath::Abs(perc + m2Range) < mRange) nbelowXi++;
-        else if (TMath::Abs(perc - m2Range) < mRange) naboveXi++;
-
+	// Xi minus, Xi-bar plus
+	if(pcharge<0)
+	  {
+	    if (TMath::Abs(perc) < mRange)
+	      {
+		nXi++;
+		if(ptCas>maxPtXi) maxPtXi=ptCas;
+	      }
+	    else if (TMath::Abs(perc + m2Range) < mRange) nbelowXi++;
+	    else if (TMath::Abs(perc - m2Range) < mRange) naboveXi++;
+	  }
+	else
+	  {
+	    if (TMath::Abs(perc) < mRange)
+	      {
+		nXibar++;
+		if(ptCas>maxPtXibar) maxPtXibar=ptCas;
+	      }
+	    else if (TMath::Abs(perc + m2Range) < mRange) nbelowXibar++;
+	    else if (TMath::Abs(perc - m2Range) < mRange) naboveXibar++;
+	  }
+	
+	// Omega minus, Omega-bar plus
+	perc = (maOm/M_OMEGA_MINUS) - 1.;
+	if(pcharge<0)
+	  {
+	    if (TMath::Abs(perc) < mRange)
+	      {
+		nOm++;
+		if(ptCas>maxPtOm) maxPtOm=ptCas;
+	      }
+	    else if (TMath::Abs(perc + m2Range) < mRange) nbelowOm++;
+	    else if (TMath::Abs(perc - m2Range) < mRange) naboveOm++;
+	  }
+	else
+	  {
+	    if (TMath::Abs(perc) < mRange)
+	      {
+		nOmbar++;
+		if(ptCas>maxPtOmbar) maxPtOmbar=ptCas;
+	      }
+	    else if (TMath::Abs(perc + m2Range) < mRange) nbelowOmbar++;
+	    else if (TMath::Abs(perc - m2Range) < mRange) naboveOmbar++;
+	  }
+	
+	
     }
 
     mTagTable->NV0 = v0tot;
@@ -206,7 +296,26 @@ void StStrangeTagsMaker::fillTag()
     mTagTable->NbelowXi = nbelowXi;
     mTagTable->NXi = nXi;
     mTagTable->NaboveXi = naboveXi;
+    mTagTable->NbelowXibar = nbelowXibar;
+    mTagTable->NXibar = nXibar;
+    mTagTable->NaboveXibar = naboveXibar;
+    mTagTable->NbelowOm = nbelowOm;
+    mTagTable->NOm = nOm;
+    mTagTable->NaboveOm = naboveOm;
+    mTagTable->NbelowOmbar = nbelowOmbar;
+    mTagTable->NOmbar = nOmbar;
+    mTagTable->NaboveOmbar = naboveOmbar;
+
+    mTagTable->MaxPtK0 = maxPtK0;
+    mTagTable->MaxPtLa = maxPtLa;
+    mTagTable->MaxPtLb = maxPtLb;
+    mTagTable->MaxPtXi = maxPtXi;
+    mTagTable->MaxPtXibar = maxPtXibar;
+    mTagTable->MaxPtOm = maxPtOm;
+    mTagTable->MaxPtOmbar = maxPtOmbar;
+
     mTagTable->range = mRange;
+
 }
 
 void StStrangeTagsMaker::printTag(ostream& os) 
@@ -221,6 +330,9 @@ void StStrangeTagsMaker::printTag(ostream& os)
         os << "No. La's:       " << mTagTable->NLa << endl;
         os << "No. Lb's:       " << mTagTable->NLb << endl;
         os << "No. Xi's:       " << mTagTable->NXi << endl;
+        os << "No. Xibar's:       " << mTagTable->NXi << endl;
+        os << "No. Om's:       " << mTagTable->NOm << endl;
+        os << "No. Ombar's:       " << mTagTable->NOmbar << endl;
         os << "Backgrounds: (same bin size)" << endl;
         os << "No. below K0's: " << mTagTable->NbelowK0 << endl;
         os << "No. above K0's: " << mTagTable->NaboveK0 << endl;
@@ -230,5 +342,19 @@ void StStrangeTagsMaker::printTag(ostream& os)
         os << "No. above Lb's: " << mTagTable->NaboveLb << endl;
         os << "No. below Xi's: " << mTagTable->NbelowXi << endl;
         os << "No. above Xi's: " << mTagTable->NaboveXi << endl;
+        os << "No. below Xibar's: " << mTagTable->NbelowXibar << endl;
+        os << "No. above Xibar's: " << mTagTable->NaboveXibar << endl;
+        os << "No. below Om's: " << mTagTable->NbelowOm << endl;
+        os << "No. above Om's: " << mTagTable->NaboveOm << endl;
+        os << "No. below Ombar's: " << mTagTable->NbelowOmbar << endl;
+        os << "No. above Ombar's: " << mTagTable->NaboveOmbar << endl;
+	os << "Rare probe tags: (same ranges)" << endl;
+	os << "max Pt K0:      " << mTagTable->MaxPtK0  << endl;
+	os << "max Pt La:      " << mTagTable->MaxPtLa  << endl;
+	os << "max Pt Lb:      " << mTagTable->MaxPtLb  << endl;
+	os << "max Pt Xi:      " << mTagTable->MaxPtXi  << endl;
+	os << "max Pt Xibar:      " << mTagTable->MaxPtXibar  << endl;
+	os << "max Pt Om:      " << mTagTable->MaxPtOm  << endl;
+	os << "max Pt Ombar:      " << mTagTable->MaxPtOmbar  << endl;
     }   
 }
