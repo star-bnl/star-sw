@@ -155,8 +155,9 @@ Int_t StKinkMaker::Make(){//called for each event
 
          StThreeVectorD p11 = trk->geometry()->momentum();
          StThreeVectorD p22 = trk->geometry()->helix().momentum(mBfield);
-         if(p22.x() != 0) mBfield *= p11.x()/p22.x();
-         else mBfield *= p11.y()/p22.y();
+         if(p22.x() != 0) mBfield *= p11.x()/(p22.x()+1e-5);
+         else mBfield *= p11.y()/(p22.y()+1.e-5);
+         if (fabs(mBfield) < 1.e-5) return kStWarn;
 	}
 	mGlobalTrks++;
       //### cut: fiducial volume
@@ -361,7 +362,7 @@ Int_t StKinkMaker::Make(){//called for each event
      p2 = mDaughterMoment/daughterPtot;
 
      cos12 = p1.dot(p2);
-     sin2_12 = 1.0 - cos12*cos12;
+     sin2_12 = (1.0 - cos12)*(1.- cos12);
      if( sin2_12){
         temp = dca_12/sin2_12;
         t1 = (-p1.z()+p2.z()*cos12)*temp;
