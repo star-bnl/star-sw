@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <iostream.h>
 //Sti
 #include "StiHit.h"
@@ -524,17 +525,26 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin()
     py = 0;
     pz = 0;
     StiObjectFactoryInterface<StiKalmanTrackNode> * f 
-	= dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode>*>(trackNodeFactory);
+	= static_cast<StiObjectFactoryInterface<StiKalmanTrackNode>*>(trackNodeFactory);
     StiKalmanTrackNode * n = f->getObject();
     n->reset();
     n->setState(lastNode);
-    n->propagate(0,0,0);
-    double p[3];
-    double e[6];
-    n->getMomentum(p,e);
-    StThreeVector<double> p3(p[0],p[1],p[2]);
-    p3.rotateZ(n->fAlpha);
-    return p3;
+		try
+			{
+				n->propagate(0,0,0);
+				
+				double p[3];
+				double e[6];
+				n->getMomentum(p,e);
+				StThreeVector<double> p3(p[0],p[1],p[2]);
+				p3.rotateZ(n->fAlpha);
+				return p3;
+			}
+		catch (runtime_error & rte) 
+			{
+				cout << "SKT::getMomentumAtOrigin() - runtime_error - " << rte.what() << endl;
+				return -1;
+			}
 }
 
 double  StiKalmanTrack::getMass() const   
