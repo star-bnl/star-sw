@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.56 1999/01/31 17:59:47 didenko Exp $
+# $Id: MakeDll.mk,v 1.57 1999/01/31 20:54:56 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.57  1999/01/31 20:54:56  fisyak
+# Fix bugs
+#
 # Revision 1.56  1999/01/31 17:59:47  didenko
 # Clean up
 #
@@ -261,19 +264,20 @@ FILES_MOD  := $(wildcard $(SRC_DIR)/St_*_Module.cxx)
 FILES_DAT  := $(wildcard $(SRC_DIR)/St_DataSet.cxx)
 FILES_XDF  := $(wildcard $(SRC_DIR)/St_XDFFile.cxx)
 FILES_ALL  := $(filter-out %Cint.cxx,$(wildcard $(SRC_DIR)/*.cxx $(SRC_DIR)/*.cc))
-FILES_H    := $(wildcard $(addprefix $(SRC_DIR)/, $(addsuffix  .h, $(basename $(notdir $(FILES_ALL)))) \
+FILES_HH   := $(wildcard $(addprefix $(SRC_DIR)/, $(addsuffix  .h, $(basename $(notdir $(FILES_ALL)))) \
                                                   $(addsuffix .hh, $(basename $(notdir $(FILES_ALL))))))
+ifneq (,$(FILES_HH))
+FILES_H    := $(shell grep -l ClassDef $(FILES_HH))
+endif
 FILES_ST   := $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) 
 NAMES_ST   := $(basename $(notdir $(FILES_ST)))
 FILES_ALL  := $(sort $(filter-out $(FILES_ST),$(FILES_ALL)))
 FILES_ORD  := $(FILES_ALL)
 
 ifdef FILES_SYM
-  NAMES_SYMM     := $(notdir $(basename $(FILES_SYM)))
-  NAMES_SYM      := $(subst St_,,$(NAMES_SYM))
-  FILES_CINT_SYM := $(addprefix $(GEN_DIR)/,$(addsuffix Cint.cxx,$(NAMES_SYMM)))
-  FILES_SYMH     := $(addprefix $(GEN_DIR)/,$(addsuffix .h,$(NAMES_SYMM)))
-  FILES_H        := $(filter-out $(FILES_SYMH),$(FILES_H))
+  NAMES_SYM      := $(subst St_,, $(notdir $(basename $(FILES_SYM))))
+  FILES_CINT_SYM := $(addprefix $(GEN_DIR)/St_,$(addsuffix Cint.cxx,$(NAMES_SYM)))
+  FILES_H        := $(filter-out $(subst .cxx,.h,$(FILES_SYM)), $(FILES_H))
 endif
 ifdef FILES_SYT
   NAMES_SYT      := $(basename $(notdir $(FILES_SYT)))
@@ -295,9 +299,8 @@ ifdef FILES_MOD
   FILES_H        := $(filter-out $(FILES_MOD_H), $(FILES_H))
 endif
 ifdef FILES_ORD
-  NAMES_ST       := $(strip $(NAMES_SYM) $(NAMES_SYT) $(addprefix St_,$(NAMES_MOD)))
   ifneq (,$(strip $(FILES_H)))
-    NAMES_ORD      := $(basename $(notdir $(shell grep -l ClassDef $(FILES_H))))
+    NAMES_ORD      := $(basename $(notdir $(FILES_H)))
   endif
   LinkDef        :=$(wildcard $(SRC_DIR)/$(PKGNAME)LinkDef.h $(SRC_DIR)/$(PKGNAME)LinkDef.hh)
   ifneq (,$(LinkDef))
@@ -372,7 +375,8 @@ all:   RootCint Libraries  DeleteDirs
 #  $(INCLUDES)
 RootCint :  $(FILES_CINT)
 
-$(GEN_DIR)/St_ModuleCint.cxx : $(SRC_DIR)/St_Module.h 
+#$(GEN_DIR)/St_ModuleCint.cxx
+$(FILES_CINT_SYM) : $(SRC_DIR)/St_Module.h 
 	$(COMMON_LINKDEF)
 	@echo "#pragma link C++ class St_Module-;"	>> $(LINKDEF)
 	@echo "#pragma link C++ enum EModuleTypes;"     >> $(LINKDEF)
@@ -647,6 +651,7 @@ test:
 	@echo FILES_TAB := $(FILES_TAB)
 	@echo FILES_MOD := $(FILES_MOD) 
 	@echo FILES_CINT:= $(FILES_CINT)
+	@echo FILES_H   := $(FILES_H)
 
 	@echo NAMES_ORD := $(NAMES_ORD) 
 	@echo NAMES_DEF := $(NAMES_DEF) 

@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.47  1999/01/31 20:54:57  fisyak
+#  Fix bugs
+#
 #  Revision 1.46  1999/01/30 04:08:23  fisyak
 #  Add StRootEvent
 #
@@ -217,7 +220,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/01/30 04:08:23 $ 
+#           Last modification $Date: 1999/01/31 20:54:57 $ 
 #  default setings
 # Current Working Directory
 #
@@ -383,7 +386,8 @@ StRoot += StChain
 endif
 Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St*Maker)) 
 #Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St*)) 
-ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
+#ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56 hp_ux102))
+ifneq (,$(findstring $(STAR_SYS),hp_ux102))
 Makers  :=  $(filter-out StTrsMaker, $(Makers))
 endif
 Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
