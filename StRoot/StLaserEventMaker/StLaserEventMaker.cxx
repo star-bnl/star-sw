@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.25 2003/01/29 20:35:06 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.26 2003/03/01 17:46:08 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.26  2003/03/01 17:46:08  pfachini
+// Fixing the error message (writing numberTracks->GetMean() instead of numberTracks->GetRMS()).
+//
 // Revision 1.25  2003/01/29 20:35:06  pfachini
 // Introducing a sanity check: table written out only if drift velocit > 5.0 cm/us
 //
@@ -741,7 +744,7 @@ Int_t StLaserEventMaker::Finish() {
 	gMessMgr->Error() << "StLaserEventMaker::no laser events. Drift Velocity East = " << velocityEast << " and Drift Velocity West = " << velocityWest << " which is lower than the minimum of " << " 5.0 cm/us" << endm;
       }
     } else {
-      gMessMgr->Error() << "StLaserEventMaker::no laser events. Number Tracks = " << numberTracks->GetRMS() << " which is lower than the minimum of " << minValidTracks << "tracks requested for good laser events. No table will be written" << endm;  
+      gMessMgr->Error() << "StLaserEventMaker::no laser events. Number Tracks = " << numberTracks->GetMean() << " which is lower than the minimum of " << minValidTracks << "tracks requested for good laser events. No table will be written" << endm;  
     }
   } else {
     gMessMgr->Error() << "StLaserEventMaker:: completly empty. Are sure you called this maker on laser events ?? No table will be written ... " << endm;
@@ -757,7 +760,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.25 2003/01/29 20:35:06 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.26 2003/03/01 17:46:08 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
