@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.26 2001/09/16 22:24:22 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.27 2001/09/22 00:35:54 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.27  2001/09/22 00:35:54  caines
+ * Fixes now that AddData() is cleared everyevent
+ *
  * Revision 1.26  2001/09/16 22:24:22  caines
  * Fix for when SVT isnt in every event
  *
@@ -140,7 +143,7 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   m_n_seq_hi  = 0;
   m_inv_prod_lo = 0;
   //m_inv_prod_lo = 0;
-
+ 
 }
 
 //____________________________________________________________________________________________
@@ -249,12 +252,12 @@ Int_t StSvtSeqAdjMaker::GetSvtPedestals()
 Int_t  StSvtSeqAdjMaker::SetSvtData()
 {
   mSvtDataSet = new St_ObjectSet("StSvtData");
-  AddConst(mSvtDataSet);  
+  AddData(mSvtDataSet);  
 
   mSvtAdjData = new StSvtData(*mSvtRawData);
   //cout<<"mSvtAdjData  = "<<mSvtAdjData<<endl;
   mSvtDataSet->SetObject((TObject*)mSvtAdjData); 
-  assert(mSvtAdjData);
+  // assert(mSvtAdjData);
 
   return kStOK;
 }
@@ -435,6 +438,9 @@ Int_t StSvtSeqAdjMaker::Make()
 
 
   if ( GetSvtRawData() ) return kStWarn; // Return if SVT not there
+
+  SetSvtData();
+
   // copy event information to adjusted data collection
   (*mSvtAdjData) = (*mSvtRawData);
 
@@ -474,8 +480,12 @@ Int_t StSvtSeqAdjMaker::Make()
 	  
 	  status= mHybridRawData->getSequences(1,nSequence,Seq);
 	  length = 0;
-	  
-	  for( int i=0; i<nSequence; i++)  length += Seq[i].length;
+	  // if( (int) Seq[0].firstAdc[0] != 0){
+	    
+// 	    cout << Barrel << " " << Ladder << " " << Wafer << " " << Hybrid <<
+// 	      " " << (int) Seq[0].firstAdc[0] << endl;
+// 	  }
+	    for( int i=0; i<nSequence; i++)  length += Seq[i].length;
 	  if( length != 128) doCommon =1;
 	  
 	  status= mHybridRawData->getSequences(2,nSequence,Seq);
