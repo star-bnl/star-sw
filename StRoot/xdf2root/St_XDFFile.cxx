@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.22 1999/01/02 19:08:27 fisyak Exp $ 
+// $Id: St_XDFFile.cxx,v 1.23 1999/01/02 21:28:57 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.23  1999/01/02 21:28:57  fine
+// St_XDFFile::MakeDataSet(DS_DATASET_T *ds): some protection against of the "wrong" tables
+//
 // Revision 1.22  1999/01/02 19:08:27  fisyak
 // Add ctf
 //
@@ -385,7 +388,7 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
       const Char_t *type;
       const Char_t *classprefix="St_";
       const Int_t extralen = strlen(classprefix) + 1;
-
+ 
       if (!dsTableDataAddress(&data,ds)) {/* fErrorCode = 2;*/ return 0; }
       if (!dsTableRowCount(&nrows,ds)) {/* fErrorCode = 3; */ return 0; }
       if (!dsTableRowSize(&rsize,ds)) {/* fErrorCode = 4;*/ return 0; }
@@ -412,7 +415,7 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
         }
         else {
          table->PrintHeader();
-         fprintf(stderr," ** Error ** There were <%d> columns found in the <%s> table definition\n\t mismatched  <%d> columns been read \n"
+         fprintf(stderr," ** Error ** There are <%d> columns found in the <%s> table ALREADY in the current dictionary\n     They do not match <%d> columns in the input file\n"
                 ,cl->GetNdata(),table->GetType(),cCount);
          const Char_t *tableSpec=0;
          if (dsTableTypeSpecifier(&tableSpec, ds)) {
