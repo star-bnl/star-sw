@@ -395,6 +395,7 @@ void StEventQAMaker::MakeHistGlob() {
       cnttrkg++;
       Float_t pT = -999.;
       pT = geom->momentum().perp();
+      if (pT <= 1.e-10) continue;
       Float_t lmevpt = TMath::Log10(pT*1000.0);
       Float_t theta = TMath::ASin(1.) - geom->dipAngle();
       Float_t thetad = theta/degree;
@@ -2160,8 +2161,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.64 2005/01/27 05:28:25 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.65 2005/02/05 01:12:25 perev Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.65  2005/02/05 01:12:25  perev
+// test for zero pt added
+//
 // Revision 2.64  2005/01/27 05:28:25  genevb
 // PMD changes
 //
