@@ -64,7 +64,7 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
   pBankTRGD=(Bank_TRGD*) ((unsigned int)pBankTRGP + 4*pBankTRGP->theData.offset);
   assert(pBankTRGD);
   if(!pBankTRGD->test_CRC()) printf("CRC error: %s %d\n",__FILE__,__LINE__); 
-  char *ptr=(char*)pBankTRGD; ptr+=40; /* Skip the 10-word TRGD bank header. */ 
+  char *ptr=(char*)pBankTRGD; ptr+=40; /* skip header */ 
   switch(YearOfData(ptr)) {
     case 2000:
       gs2000=(MarilynMonroe2000*)ptr;

@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.37 2002/04/09 00:01:37 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.38 2003/01/16 13:32:26 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.38  2003/01/16 13:32:26  ward
+// Accomodation of the new trgStructures.h.
+//
 // Revision 1.37  2002/04/09 00:01:37  ward
 // Bug fix in Vladimir2Herbert().
 //
@@ -216,7 +219,7 @@ void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2) {
   tt->MWC_CTB_moment   = 0;
 }
 
-char St_trg_Maker::IsYear2000Data(St_DataSet *herb) 
+int St_trg_Maker::YearOfData(St_DataSet *herb) 
 {
   unsigned char *data;
   StDAQReader *fromVictor = (StDAQReader*) (herb->GetObject()); assert(fromVictor);
@@ -225,9 +228,10 @@ char St_trg_Maker::IsYear2000Data(St_DataSet *herb)
   data=(unsigned char*)(trgReader->fTRGImpReader->pBankTRGD);
   data+=40; // Skip the 10 word DAQ bank header
   data+=sizeof(unsigned short)+sizeof(char); // Skip the first two data.
-  if(*data==0x12) return 7; // TRUE
-  if(*data==0x13) return 0; // FALSE
-  assert(0);  // Should not be here.  Eto nehoroshoe mesto etogo fajla.
+  if(*data==0x12) return 2000;
+  if(*data==0x13) return 2001;
+  if(*data==0x20) return 2003;
+  assert(0);  // Should not be here.  My ne dolshnie byt6 zdes6.
   return 0;   // to make insure happy
 }
 
@@ -244,14 +248,23 @@ Int_t St_trg_Maker::Make(){
 
   St_DataSet *herb = GetDataSet("StDAQReader");
   if(herb) {
-    if(IsYear2000Data(herb)) {
-      PP"This is St_trg_Maker, analyzing year 2000 trigger data.\n");
-      if(!initializationDone) { InitCtbArrays(); initializationDone=7; }
-      return Daq2000(herb,dst1,dst2,dst3,dst4);
-    } else {
-      PP"This is St_trg_Maker, analyzing year 2001 trigger data.\n");
-      if(!initializationDone) { InitCtbArrays2001(); initializationDone=7; }
-      return     Daq(herb,dst1,dst2,dst3,dst4);
+    switch(YearOfData(herb)) {
+      case 2000:
+        PP"This is St_trg_Maker, analyzing year 2000 trigger data.\n");
+        if(!initializationDone) { InitCtbArrays(); initializationDone=7; }
+        return Daq2000(herb,dst1,dst2,dst3,dst4);
+        break;
+      case 2001:
+        PP"This is St_trg_Maker, analyzing year 2001 trigger data.\n");
+        if(!initializationDone) { InitCtbArrays2001(); initializationDone=7; }
+        return Daq(herb,dst1,dst2,dst3,dst4);
+        break;
+      case 2003:
+        PP"This is St_trg_Maker, analyzing year 2003 trigger data.\n");
+        if(!initializationDone) { InitCtbArrays2001(); /* use 2001 for 2003 */ initializationDone=7; }
+        return Daq2003(herb,dst1,dst2,dst3,dst4);
+        break;
+      default: assert(0);
     }
   } else {
     if(!initializationDone) { InitCtbArrays2001(); initializationDone=7; }
