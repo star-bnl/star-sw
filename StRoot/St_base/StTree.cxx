@@ -559,7 +559,7 @@ Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
     return kStWarn;}
 
   const char* cc = strrchr(tfile,'.');
-  if (!cc || !strstr(".xdf .root",cc)){// No extention
+  if (!cc || !strstr(".xdf .root .daq",cc)){// No extention
     Warning("AddFile","*** IGNORED *** File %s has wrong extention \n",
     (const Char_t *)tfile);
     return kStWarn;}
@@ -660,7 +660,7 @@ void StFile::SetInfo()
   if (strcmp(".daq",ext)==0) {
     tit.Replace(0,0," format=daq ");
     tit.Replace(0,0," branch=NONE");
-    known = 4;
+    known = 3;
   } 
   
   if (known!=3) {
