@@ -1,4 +1,4 @@
-// $Id: bfcread_tagsBranch.C,v 1.7 2000/04/13 18:33:02 kathy Exp $
+// $Id: bfcread_tagsBranch.C,v 1.8 2000/05/03 20:06:51 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -31,15 +31,18 @@ void bfcread_tagsBranch(
   TStopwatch timer;
   timer.Start();
 
-  cout << " Input .tags.root File Name = " << MainFile << endl;
-  cout << " event # for which to  print details  = " << printEvent << endl;
-  cout << " Output file containing QAInfo printouts = " << fname << endl;
+  cout << " event to print  = " << printEvent << endl;
+  cout << " Input File Name = " << MainFile << endl;
+  cout << " Output file containing printouts = " << fname << endl;
+  cout << endl << endl;
 
   ofstream fout(fname);
+
   fout << " Running: bfcread_tagsBranch.C " << endl;
-  fout << " Input .tags.root File Name = " << MainFile << endl;
-  fout << " event # for which to  print details  = " << printEvent << endl;
-  fout << " Output file containing QAInfo printouts = " << fname << endl;
+  fout << " event to print  = " << printEvent << endl;
+  fout << " Input File Name = " << MainFile << endl;
+  fout << " Output file containing printouts = " << fname << endl;
+  fout << endl << endl;
 
 // gather all files from the same Run into one chain for loading to tagDB
 // can .Add more on here and then we will loop over them all 
@@ -47,8 +50,8 @@ void bfcread_tagsBranch(
   TChain chain("Tag");
   chain.Add(MainFile);
 
-  cout << "   Total # events  = " << chain->GetEntries() << endl;
-  fout << "   Total # events  = " << chain->GetEntries() << endl;
+  cout << " QAInfo: Total # events  = " << chain->GetEntries() << endl;
+  fout << " QAInfo: Total # events  = " << chain->GetEntries() << endl;
 
   TObjArray *files = chain.GetListOfFiles();
   TObjArray *branches = chain.GetListOfBranches();
@@ -56,8 +59,10 @@ void bfcread_tagsBranch(
 
   Int_t nleaves = leaves->GetEntriesFast();
   Int_t nbranches = branches->GetEntriesFast();
-  cout << "    tot num tables,tags = " << nbranches << "   " << nleaves << endl;
-  fout << "    tot num tables,tags = " << nbranches << "   " << nleaves << endl;
+  cout << " QAInfo:   tot num tables,tags = " << nbranches << "   " 
+       << nleaves << endl << endl;
+  fout << " QAInfo:   tot num tables,tags = " << nbranches << "   " 
+       << nleaves << endl << endl;
 
   TString file;
 
@@ -102,8 +107,8 @@ void bfcread_tagsBranch(
             fout <<"    now reading file: " << file.Data() << endl;
         }
 
-        cout <<" ----- Event # " << countEvents << endl;
-        fout <<" ----- Event # " << countEvents << endl;
+        cout << endl << " ----- Event # " << countEvents << endl;
+        fout << endl << " ----- Event # " << countEvents << endl;
     
 // must renew leaves for each file
 	leaves = chain.GetListOfLeaves();
