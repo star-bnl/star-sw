@@ -1,4 +1,4 @@
-#!/opt/star/bin/perl
+#!/usr/bin/env perl
 #use File::Basename;
 #print "rootcint @ARGV\n";
 my $DirName = shift;
