@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.38 2003/04/01 00:27:05 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.39 2003/05/02 21:09:41 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -28,51 +28,51 @@
 ClassImp(StFlowEvent)
 
 Float_t  StFlowEvent::mEtaTpcCuts[2][Flow::nHars][Flow::nSels] = {{{0.,0.5},
-                                                                   {0.,0.},
-								   {0.,0.5} },
+                                                                   {0.,0.} },
+// 								   {0.,0.5} },
 // 								   {0.,0.},
 // 								   {0.,0.5},
 // 								   {0.,0.}},
 							          {{1.0,2.},
-								   {1.0,1.},
-							   	   {1.0,2.} }};
+								   {1.0,1.} }};
+// 							   	   {1.0,2.} }};
 // 								   {1.0,1.},
 // 								   {1.0,2.},
 // 								   {1.0,1.}}};
 Float_t  StFlowEvent::mEtaFtpcCuts[2][Flow::nHars][Flow::nSels] = {{{2.7,2.7},
-								    {2.7,2.7},
 								    {2.7,2.7} },
+// 								    {2.7,2.7} },
 // 								    {2.7,2.7},
 // 								    {2.7,2.7},
 // 								    {2.7,2.7}},
 							           {{4.0,4.0},
-								    {4.0,4.0},
 								    {4.0,4.0} }};
+// 								    {4.0,4.0} }};
 // 								    {4.0,4.0},
 // 								    {4.0,4.0},
 // 								    {4.0,4.0}}};
 
 Float_t  StFlowEvent::mPtTpcCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
-								   {0.1,0.1},
 								   {0.1,0.1} },
+// 								   {0.1,0.1} },
 // 								   {0.1,0.1},
 // 								   {0.1,0.1},
 //   								   {0.1,0.1}},
 							          {{2.,2.},
-								   {2.,2.},
 								   {2.,2.} }};
+// 								   {2.,2.} }};
 // 								   {2.,2.},
 // 								   {2.,2.},
 // 								   {2.,2.}}};
 Float_t  StFlowEvent::mPtFtpcCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
-								    {0.1,0.1},
 								    {0.1,0.1} },
+// 								    {0.1,0.1} },
 // 								    {0.1,0.1},
 // 								    {0.1,0.1},
 // 								    {0.1,0.1}},
 							           {{2.,2.},
-								    {2.,2.},
 								    {2.,2.} }};
+// 								    {2.,2.} }};
 // 								    {2.,2.},
 // 								    {2.,2.},
 // 								    {2.,2.}}};
@@ -944,6 +944,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.39  2003/05/02 21:09:41  posk
+// Reduced the number of harmonics from 3 to 2.
+//
 // Revision 1.38  2003/04/01 00:27:05  posk
 // Little q is now unweighted by pt or eta. Big Q is unaffected.
 //

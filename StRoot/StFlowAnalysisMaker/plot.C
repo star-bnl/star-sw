@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.49 2003/03/18 17:58:36 posk Exp $
+// $Id: plot.C,v 1.50 2003/05/02 21:11:13 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -22,7 +22,7 @@
 #include <iostream.h>
 
 //const Int_t nHars     = 6;
-const    Int_t nHars    = 3;
+const    Int_t nHars    = 2;
 const    Int_t nSels    = 2;
 const    Int_t nSubs    = 2;
 Int_t    runNumber      = 0;
@@ -581,7 +581,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	fit_q->SetParLimits(1, 1, 1);             // mult is fixed
 	fit_q->SetParLimits(2, 1, 1);             // area is fixed
 	hist->Fit("qDist", "Q");
-	fit_q->Draw("same");
+	//fit_q->Draw("same");
+	fit_q->Draw();
  	fit_q->FixParameter(3, 0.);               // g is fixed
 	fit_q->SetLineStyle(kDotted);
 	hist->Fit("qDist", "Q+");
@@ -592,6 +593,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	fit_q->SetLineStyle(kDashed);
 	hist->Fit("qDist", "Q+");
 	fit_q->Draw("same");
+ 	fit_q->ReleaseParameter(0);               // v is unfixed
       } else if (strstr(shortName[pageNumber],"CosPhi")!=0) {  // CosPhiLab
 	TLine* lineZeroHar = new TLine(0.5, 0., nHars+0.5, 0.);
 	gStyle->SetOptStat(0);
@@ -877,6 +879,9 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.50  2003/05/02 21:11:13  posk
+// Reduced the number of harmonics from 3 to 2.
+//
 // Revision 1.49  2003/03/18 17:58:36  posk
 // Kirill Fillimonov's improved fit to the angle between subevent planes.
 //

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.15 2003/01/10 16:41:51 oldi Exp $
+// $Id: StFlowConstants.h,v 1.16 2003/05/02 21:09:40 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -21,7 +21,7 @@ class Flow{
  public:
 
   enum {
-    nHars        =   3, 
+    nHars        =   2, 
     nSels        =   2,
     nSubs        =   2,
     nPhiBins     = 120,
@@ -61,6 +61,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.16  2003/05/02 21:09:40  posk
+// Reduced the number of harmonics from 3 to 2.
+//
 // Revision 1.15  2003/01/10 16:41:51  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.
