@@ -1,5 +1,8 @@
-//$Id: MemoryUsage.C,v 1.6 2000/02/01 17:31:00 kathy Exp $
+//$Id: MemoryUsage.C,v 1.7 2000/03/10 16:05:23 kathy Exp $
 //$Log: MemoryUsage.C,v $
+//Revision 1.7  2000/03/10 16:05:23  kathy
+//change Mbyte scale explanation so it's correct
+//
 //Revision 1.6  2000/02/01 17:31:00  kathy
 //fixed documentation
 //
@@ -107,7 +110,7 @@ void MemoryUsage(
    TH2F *h1 = new TH2F("MemUsage","memory usage vs event number",
       nevents,0.,Float_t(nevents),100,Float_t(lowy),Float_t(highy));
    h1->SetXTitle("event number");
-   h1->SetYTitle("memory usage in bytes");
+   h1->SetYTitle("memory usage in Mbytes x 1000");
    h1->GetXaxis()->SetLabelSize(0.02);
    h1->GetYaxis()->SetLabelSize(0.02);
    h1->GetXaxis()->SetTitleOffset(1.3);
