@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichWindowHistogram.cxx,v 1.2 2002/01/12 00:10:24 lasiuk Exp $
+ * $Id: StRichWindowHistogram.cxx,v 1.3 2002/02/01 17:45:56 lasiuk Exp $
  *
  * Author:  bl Nov 2, 2001
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StRichWindowHistogram.cxx,v $
+ * Revision 1.3  2002/02/01 17:45:56  lasiuk
+ * Mods for gcc(7.2)
+ * outer helix usage
+ * histo mods
+ *
  * Revision 1.2  2002/01/12 00:10:24  lasiuk
  * debin addition; quartz cerenkov angle, tuple modification, shift
  * to 183 nm for ray tracing, no temperature effect yet
@@ -97,7 +102,7 @@ void StRichWindowHistogram::process() {
     // The values of the bins are available here
     // First: sort them
     //
-    cout << "StRichWindowHistogram::process() " << endl;
+//     cout << "StRichWindowHistogram::process() " << endl;
     size_t ii;
     
     sort(mWindowHistogram.begin(),mWindowHistogram.end(),weight());
@@ -128,7 +133,7 @@ void StRichWindowHistogram::status() {
     }
 
     if(mMaxBin)
-	cout << "\tAll: " << (this->maxBin()->mAngle/degree) << endl;
+	cout << "\tMaximum Bin: " << (this->maxBin()->mAngle/degree) << endl;
 
     cout.precision(6);
     cout.width(0);
