@@ -75,6 +75,8 @@ franksTrackCut::franksTrackCut(franksTrackCut& c) : StHbtTrackCut(c) {
   mNSigmaAntiProton[1] = c.mNSigmaAntiProton[1];
   mNHits[0] = c.mNHits[0];
   mNHits[1] = c.mNHits[1];
+  mNdEdxHits[0] = c.mNdEdxHits[0];
+  mNdEdxHits[1] = c.mNdEdxHits[1];
   mP[0] = c.mP[0]; mP[1] = c.mP[1];
   mPt[0] = c.mPt[0]; mPt[1] = c.mPt[1];
   mPx[0] = c.mPx[0]; mPx[1] = c.mPx[1];
@@ -116,6 +118,7 @@ bool franksTrackCut::Pass(const StHbtTrack* track){
     track->DCAxy() << " " << 
     track->DCAxyGlobal() << " " << 
     track->NHits() << " " <<  
+    track->NHitsDedx() << " " <<  
     track->P().mag() << " " << 
     track->Pt() << " " <<  
     TRapidity << " " << 
@@ -162,6 +165,8 @@ bool franksTrackCut::Pass(const StHbtTrack* track){
      (track->DCAxyGlobal()  <= mDCAGlobal[1]) &&
      (track->NHits() >= mNHits[0]) &&
      (track->NHits() <= mNHits[1]) &&
+     (track->NHitsDedx() >= mNdEdxHits[0]) &&
+     (track->NHitsDedx() <= mNdEdxHits[1]) &&
       (track->P().mag() >= mP[0]) &&
       (track->P().mag() <= mP[1]) &&
       (track->Pt()    >= mPt[0]) &&
@@ -215,6 +220,8 @@ StHbtString franksTrackCut::Report(){
   Stemp+=Ctemp;
   sprintf(Ctemp,"\nParticle #hits:\t%d - %d",mNHits[0],mNHits[1]);
   Stemp+=Ctemp;
+  sprintf(Ctemp,"\nParticle dEdx #hits:\t%d - %d",mNdEdxHits[0],mNdEdxHits[1]);
+  Stemp+=Ctemp;
   sprintf(Ctemp,"\nParticle p:\t%E - %E",mP[0],mP[1]);
   Stemp+=Ctemp;
   sprintf(Ctemp,"\nParticle pT:\t%E - %E",mPt[0],mPt[1]);
@@ -231,5 +238,28 @@ StHbtString franksTrackCut::Report(){
   Stemp += Ctemp;
   StHbtString returnThis = Stemp;
   return returnThis;
+}
+
+
+ostrstream* franksTrackCut::finalReport() const{
+  ostrstream* tFinalReport = new ostrstream;
+  (*tFinalReport) <<  "_____ Track Cut _____ " << endl
+		  << "Charge = " << mCharge << endl
+		  << mNSigmaPion[0] << " < Sigma pion < " 
+		  << mNSigmaPion[1] << endl
+		  << mNSigmaKaon[0] << " < Sigma Kaon < " 
+		  << mNSigmaKaon[1] << endl
+		  << mNSigmaProton[0] << " < Sigma proton < " 
+		  << mNSigmaProton[1] << endl
+		  << mNHits[0] << " < NHits < " << mNHits[1] << endl
+		  << mNdEdxHits[0] << " < NHits < " << mNdEdxHits[1] << endl
+		  << mPt[0] << " < pT < " << mPt[1] << endl
+		  << mP[0] << " < p < " << mP[1] << endl
+		  << mRapidity[0] << " < Y < " << mRapidity[1] << endl
+		  << mDCA[0] << " < dca < " << mDCA[1] << endl
+		  << " >>> N Tracks passed " << mNTracksPassed << endl
+		  << " >>> N Tracks failed " << mNTracksFailed << endl
+		  << ends;
+  return tFinalReport;
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: fabricesPairCut.h,v 1.1 2001/12/14 23:11:27 fretiere Exp $
+ * $Id: fabricesPairCut.h,v 1.2 2002/12/12 17:03:51 kisiel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: fabricesPairCut.h,v $
+ * Revision 1.2  2002/12/12 17:03:51  kisiel
+ * Add NDedxHits cut, slight modification for Y cuts and Fabrices probability
+ *
  * Revision 1.1  2001/12/14 23:11:27  fretiere
  * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
  *
@@ -78,12 +81,16 @@ public:
   void setPiKPairMinProbability(double aPiKPairMinProb);
   void setPiPPairMinProbability(double aPiPPairMinProb);
   void setElPairMaxProbability(double aElPairMaxProb);
+  void setPiPiPairMaxProbability(double aPiPiPairMaxProb);
+  void setKKPairMaxProbability(double aKKPairMaxProb);
   ostrstream* finalReport() const;
 
 private:
   double mPiKPairMinProb;
   double mPiPPairMinProb;
   double mElPairMaxProb;
+  double mPiPiPairMaxProb;
+  double mKKPairMaxProb;
 #ifdef __ROOT__
   ClassDef(fabricesPairCut, 1)
 #endif
@@ -104,5 +111,11 @@ inline void fabricesPairCut::setPiPPairMinProbability(double aPiPPairMinProb){
 }
 inline void fabricesPairCut::setElPairMaxProbability(double aElPairMaxProb){
   mElPairMaxProb = aElPairMaxProb;
+}
+inline void fabricesPairCut::setPiPiPairMaxProbability(double aPiPiPairMaxProb){
+  mPiPiPairMaxProb = aPiPiPairMaxProb;
+}
+inline void fabricesPairCut::setKKPairMaxProbability(double aKKPairMaxProb){
+  mKKPairMaxProb = aKKPairMaxProb;
 }
 #endif

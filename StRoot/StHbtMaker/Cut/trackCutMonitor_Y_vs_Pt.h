@@ -9,9 +9,14 @@ class trackCutMonitor_Y_vs_Pt : public StHbtCutMonitor{
 
 private:
   StHbt2DHisto*  mHisto; 
+  double mMass;
 
 public:
   trackCutMonitor_Y_vs_Pt();
+  trackCutMonitor_Y_vs_Pt(double aMass, 
+			  const char* TitCutMoni, const char* title, 
+			 int nbins1 ,double min1, double max1,
+			 int nbins2 ,double min2, double max2);
   trackCutMonitor_Y_vs_Pt(const char* TitCutMoni, const char* title, 
 			 int nbins1 ,double min1, double max1,
 			 int nbins2 ,double min2, double max2);

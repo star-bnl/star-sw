@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: fabricesPairCut.cxx,v 1.1 2001/12/14 23:11:27 fretiere Exp $
+ * $Id: fabricesPairCut.cxx,v 1.2 2002/12/12 17:03:51 kisiel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: fabricesPairCut.cxx,v $
+ * Revision 1.2  2002/12/12 17:03:51  kisiel
+ * Add NDedxHits cut, slight modification for Y cuts and Fabrices probability
+ *
  * Revision 1.1  2001/12/14 23:11:27  fretiere
  * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
  *
@@ -49,6 +52,8 @@ fabricesPairCut::fabricesPairCut():HitMergingPairCut(){
   mPiKPairMinProb=0.;
   mPiPPairMinProb=0.;
   mElPairMaxProb=1.;
+  mPiPiPairMaxProb=1.;
+  mKKPairMaxProb=1.;
 }
 //__________________
 //fabricesPairCut::~fabricesPairCut(){
@@ -57,13 +62,17 @@ fabricesPairCut::fabricesPairCut():HitMergingPairCut(){
 //__________________
 bool fabricesPairCut::Pass(const StHbtPair* pair){
   bool temp = ( pair->track1()->TrackId()!=pair->track2()->TrackId() &&
-		pair->ElectronPairProbability() < mElPairMaxProb && 
-		((pair->track1()->Track()->PidProbPion()) * 
-		 (pair->track2()->Track()->PidProbKaon()))>=mPiKPairMinProb &&
-		((pair->track1()->Track()->PidProbPion()) * 
-		 (pair->track2()->Track()->PidProbProton()))>=mPiPPairMinProb &&
-		pair->getFracOfMergedRow()<mMaxFracPair
-		);
+  		pair->ElectronPairProbability() < mElPairMaxProb && 
+  		((pair->track1()->Track()->PidProbPion()) * 
+  		 (pair->track2()->Track()->PidProbPion()))<=mPiPiPairMaxProb &&
+  		((pair->track1()->Track()->PidProbKaon()) * 
+  		 (pair->track2()->Track()->PidProbKaon()))<=mKKPairMaxProb &&
+  		((pair->track1()->Track()->PidProbPion()) * 
+  		 (pair->track2()->Track()->PidProbKaon()))>=mPiKPairMinProb &&
+  		((pair->track1()->Track()->PidProbPion()) * 
+  		 (pair->track2()->Track()->PidProbProton()))>=mPiPPairMinProb &&
+  		pair->getFracOfMergedRow()<mMaxFracPair
+  		);
   temp ? mNPairsPassed++ : mNPairsFailed++;
   return temp;
 }
