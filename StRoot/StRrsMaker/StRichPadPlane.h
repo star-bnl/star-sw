@@ -1,9 +1,13 @@
 /*****************************************************************
- * $Id: StRichPadPlane.h,v 1.8 2000/04/26 18:58:03 lasiuk Exp $   
+ * $Id: StRichPadPlane.h,v 1.9 2000/05/17 22:27:39 lasiuk Exp $   
  *   StRichPadPlane is a special container specialized to store 
  *   RICH Raw Data. 
  *
  * $Log: StRichPadPlane.h,v $
+ * Revision 1.9  2000/05/17 22:27:39  lasiuk
+ * use charge()
+ * use mHitID in comparator for StRichID
+ *
  * Revision 1.8  2000/04/26 18:58:03  lasiuk
  * change list to vector for mc info storage.
  * allow change of allocation methodology
@@ -57,23 +61,23 @@ using std::vector;
 
 struct StRichID {
     StRichID()
-	:  mHitID(0), mG_ID(0), mTrackp(0), mAmount(0), mSignalType(eUnknown) {/* nopt*/ }
+	:  mHitID(0), mG_ID(0), mTrackp(0), mCharge(0), mSignalType(eUnknown) {/* nopt*/ }
 	
     StRichID(int id, int gid, int track, int q =-1, StRichSignalType signalType=eUnknown)
-	:  mHitID(id), mG_ID(gid), mTrackp(track), mAmount(q), mSignalType(signalType) {/* nopt*/ }
+	:  mHitID(id), mG_ID(gid), mTrackp(track), mCharge(q), mSignalType(signalType) {/* nopt*/ }
 
     int operator==(const StRichID& anID) const;
 
-    int mHitID;
-    int mG_ID;
-    int mTrackp;
-    int mAmount;
+    int   mHitID;
+    int   mG_ID;
+    int   mTrackp;
+    float mCharge;
     StRichSignalType mSignalType;
 };
 
 inline int StRichID::operator==(const StRichID& anID) const
 {
-    return ((mG_ID == anID.mG_ID) &&
+    return ((mHitID == anID.mHitID) &&
 	    (mTrackp == anID.mTrackp) &&
 	    (mSignalType == anID.mSignalType));
 }
