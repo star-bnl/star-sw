@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.89 1999/07/15 16:20:34 didenko Exp $
+// $Id: bfc.C,v 1.90 1999/07/15 18:23:35 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -268,17 +268,19 @@ void SetOption(int k){// set all OFF
       SetOption(kEMC);
       SetOption(kRICH);
     }
+  case  kY1a:
+  case  kY1c:
+    if (!ChainFlags[kDEFAULT]) {
+      SetOption(kFTPC);
+      SetOption(kTRG);
+    }
   case kSD97:
   case kSD98:
-  case  kY1a:
-  case kES99:
   case kER99:
-  case  kY1c:
+  case kSR99:
     if (!ChainFlags[kDEFAULT]) {
       SetOption(kDEFAULT);
       SetOption(kTPC);
-      SetOption(kFTPC);
-      SetOption(kTRG);
       SetOption(kGLOBAL);
       SetOption(kDST);
       SetOption(kQA);
@@ -359,23 +361,28 @@ Examples:
 \t root4star  bfc.C                   \t// Create this message
 \t root4star 'bfc.C(1)'               \t// Run one event with default Chain=\"gstar tfs\"
 \t root4star 'bfc.C(1,1)'             \t// the same
-\t root4star 'bfc.C(2,40,\"y1a fzin\")'\t// run for configuration year_1a, 
-\t                                    \t// reading /disk1/star/test/psc0049_08_40evts.fzd
+\t root4star 'bfc.C(2,40,\"y1b fzin\")'\t// run for configuration year_1b, 
+\t                                    \t// reading /disk1/star/test/psc0050_01_40evts.fzd
 \t                                    \t// skipping the 1-st event for the rest 39 events
-\t root4star 'bfc.C(2,40,\"y1a fzin -l3t\")'\t// the as above but remove L3T from chain
-\t root4star 'bfc.C(1,\"off xin tpc FieldOff sd96 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"
-\t root4star 'bfc.C(2,40,\"y1a fzin\",\"/disk1/star/test/psc0049_08_40evts.fzd\")'\t// the same
-\t root4star 'bfc.C(5,10,\"y1a xin xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'
+\n");
+    printf ("
+\t root4star 'bfc.C(40,\"y1b fzin\",\"/disk1/star/test/psc0050_01_40evts.fzd\")'
+\t root4star 'bfc.C(40,\"y1b fzin\")'\t// the same as  above
+\t root4star 'bfc.C(2,40,\"y1b fzin -l3t\")'//the as above but remove L3T from chain
+\t root4star 'bfc.C(40,\"y2a fzin\",\"/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fz\")'
+\t root4star 'bfc.C(40,\"y2a fzin\")'\t// the same as  above
+\t root4star 'bfc.C(5,10,\"y1b xin xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'
 \t                                    \t// skipping the 4 events for the rest 6 events
+\t root4star 'bfc.C(1,\"off xin tpc FieldOff sd96 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"
 \n");
     printf ("
 \t root4star 'bfc.C(1,\"off tdaq tpc FieldOn\",\"/disk1/star/daq/990624.306.daq\")' 
-\t \t//Cosmics (56) events with full magnetic field 
+\t \t//Cosmics (56) events with full magnetic field, TPC only 
 \t root4star 'bfc.C(1,\"tdaq -ftpc -trg FieldOn\",\"/disk1/star/daq/990624.306.daq\")' 
 \t \t//Cosmics (56) events with full magnetic field 
-\t root4star 'bfc.C(1,\"off tdaq tpc HalfField\",\"/disk1/star/daq/990630.602.daq\")' 
+\t root4star 'bfc.C(1,\"tdaq -ftpc -trg  HalfField\",\"/disk1/star/daq/990630.602.daq\")' 
 \t \t//Laser (10) events with half magnetic field 
-\t root4star 'bfc.C(1,\"off tdaq tpc FieldOff\",\"/disk1/star/daq/990701.614.daq\")' 
+\t root4star 'bfc.C(1,\"tdaq -ftpc -trg FieldOff\",\"/disk1/star/daq/990701.614.daq\")' 
 \t \t//Laser (12) events with no magnetic field 
 \n");
     printf ("============= \tPossible Chain Options are: \n"); 
@@ -542,15 +549,19 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
     }
     else {
       if (ChainFlags[kFZIN]) {
-	infile ="/disk1/star/test/psc0049_08_40evts.fzd";                     // zebra file
-	//infile = "/afs/rhic/star/tpc/data/trs_muon_10cmdrift_good.fzd";
+	if (ChainFlags[kY1b]) infile = "/disk0/star/test/venus412/b0_3/year_1b/psc0050_01_40evts.fzd";
+	else {
+	  if (ChainFlags[kY2a]) infile = "/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fzd";
+	  else                  infile ="/disk1/star/test/psc0049_08_40evts.fzd";
+	}
 	printf ("Use default input file %s for %s \n",infile,ChainOptions[kFZIN]);
       }
-      else 
+      else { 
 	if (!ChainFlags[kGSTAR]) {
 	  infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";	       // g2t xdf file
 	  printf ("Use default input file %s for %s \n",infile,ChainOptions[kXIN]);
 	}
+      }
     }
   }
   if (infile) {
@@ -570,6 +581,7 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
     if (outfile) FileOut = new TString(outfile);
     else {
       FileOut = new TString(gSystem->BaseName(InFile->Data()));
+      FileOut->ReplaceAll(".daq",".root");
       FileOut->ReplaceAll(".fzd",".root");
       FileOut->ReplaceAll(".fz",".root");
       FileOut->ReplaceAll(".xdf",".root");
@@ -811,52 +823,54 @@ void bfc(const Int_t First,
   if (ChainFlags[kTREE]) {//		Tree
     treeMk = new StTreeMaker("tree",FileOut->Data());
     if (treeMk) {
-    treeMk->SetIOMode("w");
-    treeMk->SetDebug();
-    if (dstMk) {
-      //  treeMk->SetBranch("dstBranch",FileOut->Data());
-      treeMk->IntoBranch("dstBranch","dst");
+      treeMk->SetIOMode("w");
+      treeMk->SetDebug();
+      if (dstMk) {
+	//  treeMk->SetBranch("dstBranch",FileOut->Data());
+	treeMk->IntoBranch("dstBranch","dst");
+	//      TString hist(FileOut);
+	//      hist.ReplaceAll(".root",".hist.root");
+	//      treeMk->SetBranch("histBranch",hist.Data());
+      }
+      else if (glbMk) {
+	//  treeMk->SetBranch("globalBranch",FileOut->Data());
+	treeMk->IntoBranch("globalBranch","global/.data");
+      }
+      if (evMk){
+	//  treeMk->SetBranch("EventBranch",FileOut->Data());
+	treeMk->IntoBranch("eventBranch","StEvent");
+      }
+      if (ChainFlags[kAllEvent]) {
+	if (geant) {
+	  treeMk->IntoBranch("geantBranch","geant");
+	  //  treeMk->SetBranch("geantBranch",FileOut->Data());
+	  treeMk->IntoBranch("geantBranch","geant/.data/particle");
+	  treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
+	}
+	if (fssMk) {
+	  //  treeMk->SetBranch("ftpc_rawBranch",FileOut->Data());
+	  treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
+	}
+	if (emsMk) {
+	  //  treeMk->SetBranch("emc_rawBranch",FileOut->Data());
+	  treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
+	}
+	if (ChainFlags[kTSS] || ChainFlags[kTRS]) { 
+	  //  treeMk->SetBranch("tpc_rawBranch",FileOut->Data());
+	  treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
+	}
+	if (tclMk) treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
+	if (tptMk) treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
+	if (ChainFlags[kTRG]) {
+	  //  treeMk->SetBranch("trgBranch",FileOut->Data());
+	  treeMk->IntoBranch("trgBranch","ctf mwc trg");
+	}
+	if (l3tMk) {
+	  //  treeMk->SetBranch("l3TBranch",FileOut->Data());
+	  treeMk->IntoBranch("l3tBranch","l3Tracks");
+	}
+      }      
     }
-    else if (glbMk) {
-      //  treeMk->SetBranch("globalBranch",FileOut->Data());
-      treeMk->IntoBranch("globalBranch","global/.data");
-    }
-    if (evMk){
-      //  treeMk->SetBranch("EventBranch",FileOut->Data());
-      treeMk->IntoBranch("eventBranch","StEvent");
-    }
-    if (ChainFlags[kAllEvent]) {
-      if (geant) {
-	treeMk->IntoBranch("geantBranch","geant");
-	//  treeMk->SetBranch("geantBranch",FileOut->Data());
-	//    treeMk->IntoBranch("geantBranch","geant/.data/particle");
-	//    treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
-      }
-      if (fssMk) {
-	//  treeMk->SetBranch("ftpc_rawBranch",FileOut->Data());
-	treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
-      }
-      if (emsMk) {
-	//  treeMk->SetBranch("emc_rawBranch",FileOut->Data());
-	treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
-      }
-      if (ChainFlags[kTSS] || ChainFlags[kTRS]) { 
-	//  treeMk->SetBranch("tpc_rawBranch",FileOut->Data());
-	treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
-      }
-      if (tclMk) treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
-      if (tptMk) treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
-      if (ChainFlags[kTRG]) {
-	//  treeMk->SetBranch("trgBranch",FileOut->Data());
-	treeMk->IntoBranch("trgBranch","ctf mwc trg");
-      }
-      if (l3tMk) {
-	//  treeMk->SetBranch("l3TBranch",FileOut->Data());
-	treeMk->IntoBranch("l3tBranch","l3Tracks");
-      }
-    }      
-    treeMk->SetBranch("histBranch");
-  }
   }
   chain->PrintInfo();
   // START the chain (may the force be with you)
