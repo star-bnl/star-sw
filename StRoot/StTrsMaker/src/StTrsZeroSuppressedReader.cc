@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.cc,v 1.3 2000/01/10 23:14:31 lasiuk Exp $
+ * $Id: StTrsZeroSuppressedReader.cc,v 1.4 2000/03/14 01:00:24 calderon Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.cc,v $
+ * Revision 1.4  2000/03/14 01:00:24  calderon
+ * remove annoying beep
+ *
  * Revision 1.3  2000/01/10 23:14:31  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -87,7 +90,7 @@ StTrsZeroSuppressedReader::instance(StTpcRawDataEvent* ev)
 {
     if (!mInstance) mInstance = new StTrsZeroSuppressedReader(ev);
     else {
-	cerr << "StTrsZeroSuppressedReader::instance()\a\a\a"  << endl;
+	cerr << "StTrsZeroSuppressedReader::instance()"  << endl;
 	cerr << "\tWARNING:" << endl;
 	cerr << "\tSingleton class is already instantiated" << endl;
 	cerr << "\tArgument ignored!!" << endl;
