@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * $Id: StEbye2ptMaker.h,v 1.4 2000/09/20 00:53:50 jgreid Exp $
+ * $Id: StEbye2ptMaker.h,v 1.5 2000/12/16 18:41:42 aya Exp $
  *
  * Author: Jeff Reid, UW
  *         with design advice from Thomas Ullrich, Yale
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StEbye2ptMaker.h,v $
+ * Revision 1.5  2000/12/16 18:41:42  aya
+ * *** empty log message ***
+ *
  * Revision 1.4  2000/09/20 00:53:50  jgreid
  * fixed sorting to work properly with event cuts
  *
@@ -55,7 +58,7 @@ public:
     void SetEbye2ptFileName(const Char_t* name="Ebye2pt.root");    
     void          EbyeDSTRead(Bool_t flag=kFALSE);
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StEbye2ptMaker.h,v 1.4 2000/09/20 00:53:50 jgreid Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StEbye2ptMaker.h,v 1.5 2000/12/16 18:41:42 aya Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
 private:
 
@@ -67,11 +70,13 @@ private:
 
     // histograms for sibling and mixed pairs
     //   (+.+, +.-, -.+, -.-)
-    TH1F *mMt,*mX,*mEta,*mEtaX,*mPt,*mPtX;
+    TH1F *mMt,*mX,*mEta,*mPt,*mPtX;
+    //    TH1F *mEtaX;
     TH2F *mSibPP,*mSibPM,*mSibMP,*mSibMM;
     TH2F *mMixPP,*mMixPM,*mMixMP,*mMixMM;
     TH2F *mSibPPEta,*mSibPMEta,*mSibMPEta,*mSibMMEta;
     TH2F *mMixPPEta,*mMixPMEta,*mMixMPEta,*mMixMMEta;
+    TH2F *mZMult;
 
     Int_t mixEvents();
     Int_t processEvent(StEbyeEvent &event);

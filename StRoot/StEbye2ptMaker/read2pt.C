@@ -1,6 +1,6 @@
   ///////////////////////////////////////////////////////////////////////////////
   //
-  // $Id: read2pt.C,v 1.2 2000/08/14 22:05:20 jseger Exp $
+  // $Id: read2pt.C,v 1.3 2000/12/16 18:41:43 aya Exp $
   //
   // read2pt.C
   //
@@ -15,6 +15,9 @@
   //  Janet Seger, Creighton
   //
   // $Log: read2pt.C,v $
+  // Revision 1.3  2000/12/16 18:41:43  aya
+  // *** empty log message ***
+  //
   // Revision 1.2  2000/08/14 22:05:20  jseger
   // Added eta-spectra.  Now reads Ebye mini-DST as input.  Bins events in
   // multiplicity and z-vertex position.  Name of output file is no longer hard-wired.
@@ -104,8 +107,8 @@ void read2pt(const Char_t *inputfile, const Char_t *outputfile)
   RatioAlleta->SetName("Eta Ratio All");
   RatioAlleta->SetTitle("Eta all");
 
-  Float_t histMin = 0.9;
-  Float_t histMax = 1.1;
+  Float_t histMin = 0.99;
+  Float_t histMax = 1.01;
 
   RatioPP.SetMinimum(histMin);
   RatioPP.SetMaximum(histMax);
@@ -118,8 +121,8 @@ void read2pt(const Char_t *inputfile, const Char_t *outputfile)
   RatioAll.SetMinimum(histMin);
   RatioAll.SetMaximum(histMax);
 
-  Float_t histMinEta = 0.9;
-  Float_t histMaxEta = 1.1;
+  Float_t histMinEta = 0.99;
+  Float_t histMaxEta = 1.01;
 
   RatioPPeta.SetMinimum(histMinEta);
   RatioPPeta.SetMaximum(histMaxEta);
@@ -171,7 +174,7 @@ void read2pt(const Char_t *inputfile, const Char_t *outputfile)
   // open a postscript file and draw the histograms
   TPostScript *psf = new TPostScript(outputfile,112);
 
-  TCanvas *TwoPt = new TCanvas("TwoPt","TwoPt",700,500);
+  TCanvas *TwoPt = new TCanvas("TwoPt","TwoPt",700,700);
   TwoPt->Divide(2,2);
 
   psf->NewPage();

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEbye2ptMaker.cxx,v 1.7 2000/09/20 00:53:50 jgreid Exp $
+ * $Id: StEbye2ptMaker.cxx,v 1.8 2000/12/16 18:41:42 aya Exp $
  *
  * StEbye2ptMaker.cxx
  *
@@ -15,6 +15,12 @@
  ***************************************************************************
  *
  * $Log: StEbye2ptMaker.cxx,v $
+ * Revision 1.8  2000/12/16 18:41:42  aya
+ * *** empty log message ***
+ *
+ * Revision 1.8  2000/12/15 15:50:50  aya
+ * fixed event cuts for eta
+ *
  * Revision 1.7  2000/09/20 00:53:50  jgreid
  * fixed sorting to work properly with event cuts
  *
@@ -52,7 +58,7 @@
 using namespace units;
 #endif
 
-static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.7 2000/09/20 00:53:50 jgreid Exp $";
+static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.8 2000/12/16 18:41:42 aya Exp $";
 
 ClassImp(StEbye2ptMaker)
 
@@ -69,27 +75,30 @@ Int_t StEbye2ptMaker::Init()
 
   Int_t aMax = 5000;
   Int_t HistBinNumber = 25;
+  //  float EtaMax = 1.5;
+  //  float EtaMin = -1.5;
 
   // allocate the necessary histograms
   mMt = new TH1F("Mt","Transverse Mass",HistBinNumber,0,5);
   mX = new TH1F("X","X",HistBinNumber,0,1);
-  mEta = new TH1F("Eta","Pseudorapidity",HistBinNumber,-3,3);
-  mEtaX = new TH1F("EtaX","Transformed Pseudorapidity",HistBinNumber,-1,1);
+  mEta = new TH1F("Eta","Pseudorapidity",HistBinNumber,-2,2);
+  //  mEtaX = new TH1F("EtaX","Transformed Pseudorapidity",HistBinNumber,-1,1);//no transform for now.
+  mZMult = new TH2F("Z-Mult","Zposition Multiplicity",HistBinNumber,500,2000, 20,-100,100);    
   
-  mSibPPEta = new TH2F("SibppEta","Pseudorapidity,Sibling:+.+",HistBinNumber,-1,1,HistBinNumber,-1,1);
-  mSibPMEta = new TH2F("SibpmEta","Pseudorapidity,Sibling:+.-",HistBinNumber,-1,1,HistBinNumber,-1,1);
-  mSibMPEta = new TH2F("SibmpEta","Pseudorapidity,Sibling:-.+",HistBinNumber,-1,1,HistBinNumber,-1,1);
-  mSibMMEta = new TH2F("SibmmEta","Pseudorapidity,Sibling:-.-",HistBinNumber,-1,1,HistBinNumber,-1,1);
+  mSibPPEta = new TH2F("SibppEta","Pseudorapidity,Sibling:+.+",HistBinNumber,-1.5,1.5,HistBinNumber,-1.5,1.5);
+  mSibPMEta = new TH2F("SibpmEta","Pseudorapidity,Sibling:+.-",HistBinNumber,-1.5,1.5,HistBinNumber,-1.5,1.5);
+  mSibMPEta = new TH2F("SibmpEta","Pseudorapidity,Sibling:-.+",HistBinNumber,-1.5,1.5,HistBinNumber,-1.5,1.5);
+  mSibMMEta = new TH2F("SibmmEta","Pseudorapidity,Sibling:-.-",HistBinNumber,-1.5,1.5,HistBinNumber,-1.5,1.5);
 
   mSibPP = new TH2F("SPP","Sibling :+.+",HistBinNumber,0,1,HistBinNumber,0,1);
   mSibPM = new TH2F("SPM","Sibling :+.-",HistBinNumber,0,1,HistBinNumber,0,1);
   mSibMP = new TH2F("SMP","Sibling :-.+",HistBinNumber,0,1,HistBinNumber,0,1);
   mSibMM = new TH2F("SMM","Sibling :-.-",HistBinNumber,0,1,HistBinNumber,0,1);
 
-  mMixPPEta = new TH2F("MixppEta","Pseudorapidity,Mixed:+.+",HistBinNumber,-1,1,HistBinNumber,-1,1);
-  mMixPMEta = new TH2F("MixpmEta","Pseudorapidity,Mixed:+.-",HistBinNumber,-1,1,HistBinNumber,-1,1);
-  mMixMPEta = new TH2F("MixmpEta","Pseudorapidity,Mixed:-.+",HistBinNumber,-1,1,HistBinNumber,-1,1);
-  mMixMMEta = new TH2F("MixmmEta","Pseudorapidity,Mixed:-.-",HistBinNumber,-1,1,HistBinNumber,-1,1);
+  mMixPPEta = new TH2F("MixppEta","Pseudorapidity,Mixed:+.+",HistBinNumber,-1.5,1.5,HistBinNumber,-1.5,1.5);
+  mMixPMEta = new TH2F("MixpmEta","Pseudorapidity,Mixed:+.-",HistBinNumber,-1.5,1.5,HistBinNumber,-1.5,1.5);
+  mMixMPEta = new TH2F("MixmpEta","Pseudorapidity,Mixed:-.+",HistBinNumber,-1.5,1.5,HistBinNumber,-1.5,1.5);
+  mMixMMEta = new TH2F("MixmmEta","Pseudorapidity,Mixed:-.-",HistBinNumber,-1.5,1.5,HistBinNumber,-1.5,1.5);
 
   mMixPP = new TH2F("MPP","Mixed :+.+",HistBinNumber,0,1,HistBinNumber,0,1);
   mMixPM = new TH2F("MPM","Mixed :+.-",HistBinNumber,0,1,HistBinNumber,0,1);
@@ -97,8 +106,8 @@ Int_t StEbye2ptMaker::Init()
   mMixMM = new TH2F("MMM","Mixed :-.-",HistBinNumber,0,1,HistBinNumber,0,1);
 
   // define the binnumbers for mixing
-  Int_t mthisEventBinNumber=0;
-  Int_t mpreviousEventBinNumber=0;
+  mthisEventBinNumber=0;
+  mpreviousEventBinNumber=0;
 
   // allocate the particle arrays for mixing
   mPreviousEventPlus = new Double_t[aMax];
@@ -151,18 +160,16 @@ Int_t
 StEbye2ptMaker::Finish()
 {
   // create the histogram output file
-  //  (file name is currently hardwired, fix this)
-//  TFile histogramFile("ebye2pt.root","recreate");
   Char_t* outfile = mEbye2ptFileName;
-//  histogramFile = new TFile(outfile);
-   TFile histogramFile(outfile,"recreate");
+  TFile histogramFile(outfile,"recreate");
 
   // write out histograms to file
 
   mMt->Write();
   mX->Write();
   mEta->Write();
-  mEtaX->Write();
+  mZMult->Write();
+  //  mEtaX->Write();
 
   mSibPPEta->Write();
   mSibPMEta->Write();
@@ -191,7 +198,8 @@ StEbye2ptMaker::Finish()
   delete mMt;
   delete mX;
   delete mEta;
-  delete mEtaX;
+  //  delete mEtaX;
+  delete mZMult;
 
   delete mSibPPEta;
   delete mSibPMEta;
@@ -241,8 +249,8 @@ StEbye2ptMaker::Make()
     mEventCounter++;
    
     // drop off events which are outside 700<mult<1600, abs(z)>75cm. 
-    if (mthisEventBinNumber == 0) {
-	gMessMgr->Info() << "StEbye2ptMaker::Make() drops it !" << endm;
+    if (!mthisEventBinNumber || mthisEventBinNumber == 0 ) {
+	gMessMgr->Info() << "StEbye2ptMaker::Make() drops event!!" << endm;
 	return kStOK;
     }
   
@@ -300,12 +308,14 @@ StEbye2ptMaker::processEvent(StEbyeEvent& event)
   // hardwire cut values temporarily
   float pt_min = 0;
   float pt_max = 20;
+  float eta_min = -1.5;
+  float eta_max = 1.5;
    
-  float dcaX_min = -0.1/centimeter;
-  float dcaX_max = 0.1/centimeter;
+  //  float dcaX_min = -0.1/centimeter; // no cut on dca for now.
+  //  float dcaX_max = 0.1/centimeter;
 
-  float dcaY_min = dcaX_min;
-  float dcaY_max = dcaX_max;
+  //  float dcaY_min = dcaX_min;
+  //  float dcaY_max = dcaX_max;
 
   // define variables
   float px,py,pt, mtOnly;
@@ -322,8 +332,12 @@ StEbye2ptMaker::processEvent(StEbyeEvent& event)
 
   double VertexX, VertexY, dcaX, dcaY, dcaM;
 
+
   int minusCount = 0;
   int plusCount = 0;
+
+  int minusCountEta = 0;
+  int plusCountEta = 0;
   
   float minusPt = 0;
   float minusPt2 = 0;
@@ -332,9 +346,10 @@ StEbye2ptMaker::processEvent(StEbyeEvent& event)
 	    
   double PionMass = StPionPlus::instance()->mass();
   float Temperature = 0.25;
-  float width = 1.4;
+  // float width = 1.4;
 
   float Minimum = (1+(PionMass/Temperature))*exp(-PionMass/Temperature);
+
 
   // ** track loop **
   for (Int_t nt=0; nt<mEbyeEvent->Ntrack(); nt++) {
@@ -380,7 +395,7 @@ StEbye2ptMaker::processEvent(StEbyeEvent& event)
 
                 // fill eta
 		eta = ntrack->Eta();
-		mEta->Fill(eta);
+		//mEta->Fill(eta);
 
                 // ** cut out extreme pt values [cut #5]
                 if ((pt > pt_min) && (pt < pt_max)) {
@@ -392,8 +407,14 @@ StEbye2ptMaker::processEvent(StEbyeEvent& event)
                     minusCount++;
                     mThisEventMinus[minusCount]=1-(1+(mtOnly/Temperature))*exp(-mtOnly/Temperature)/Minimum;
 		    mX->Fill(mThisEventMinus[minusCount]);
-		    mEtaThisEventMinus[minusCount]=erf(eta/(sqrt(2)*width));
-		    mEtaX->Fill(mEtaThisEventMinus[minusCount]);
+
+		    if(eta >= eta_min && eta <= eta_max ){
+		    // mEtaThisEventMinus[minusCount]=erf(eta/(sqrt(2)*width));
+		    mEtaThisEventMinus[minusCount]=eta;
+		    // mEtaX->Fill(mEtaThisEventMinus[minusCount]);
+		    mEta->Fill(mEtaThisEventMinus[minusCount]);
+                    ++minusCountEta;
+		    }
                     minusPt += pt;
                     minusPt2 += pt*pt;
                   }
@@ -401,12 +422,16 @@ StEbye2ptMaker::processEvent(StEbyeEvent& event)
                     plusCount++;
                     mThisEventPlus[plusCount]=1-(1+(mtOnly/Temperature))*exp(-mtOnly/Temperature)/Minimum;
 		    mX->Fill(mThisEventPlus[plusCount]);
-		    mEtaThisEventPlus[plusCount]=erf(eta/(sqrt(2)*width));
-		    mEtaX->Fill(mEtaThisEventPlus[plusCount]);
+		    if(eta >= eta_min && eta <= eta_max ){
+		    //		    mEtaThisEventPlus[plusCount]=erf(eta/(sqrt(2)*width));
+		    mEtaThisEventPlus[plusCount]=eta;
+		    //		    mEtaX->Fill(mEtaThisEventPlus[plusCount]);
+		    mEta->Fill(mEtaThisEventPlus[plusCount]);
+                    ++plusCountEta;
+		    }
                     PlusPt += pt;
                     PlusPt2 += pt*pt;
                   }
-
                   // calculate number of particles that make the cuts, and the first two pt moments
                   trackCount++;
                   meanPtSquared += pt*pt;
@@ -426,13 +451,14 @@ StEbye2ptMaker::processEvent(StEbyeEvent& event)
 
   mThisEventMinus[0] = minusCount;
   mThisEventPlus[0] = plusCount;
-  mEtaThisEventMinus[0] = minusCount;
-  mEtaThisEventPlus[0] = plusCount;
+  mEtaThisEventMinus[0] = minusCountEta;
+  mEtaThisEventPlus[0] = plusCountEta;
 
  // mPt->Fill(minusPt+PlusPt);
 
   //uncomment this line to see how many tracks pass the cuts
   //cerr << minusCount << "  -|+ " << plusCount << endl;
+  //cerr << minusCountEta <<  "eta  -|+ " << plusCountEta << endl;
 
   minusPt2 /= minusCount;
   minusPt /= minusCount;
@@ -557,22 +583,22 @@ Int_t StEbye2ptMaker::InitEbyeDSTRead() {
   branch->SetAddress(&mEbyeEvent);
   Int_t nEntries = (Int_t)pEbyeTree->GetEntries();
   gMessMgr->Info() << "##### Ebye2ptMaker: events in Ebye DST file = " << nEntries << endm;
-
   mEventCounter = 0;
-
   return kStOK;
   }
 //-----------------------------------------------------------------------
 void StEbye2ptMaker::SortEvents() {
-  Int_t Nentries = pEbyeTree->GetEntries();
+  Int_t Nentries = (Int_t)pEbyeTree->GetEntries();
+  int NZeroBins = 0;
+  int NnonZeroBins = 0;
 
   // set binning constants
-  Int_t mNMultBins = 40;  //  set number of bins for multiplicity
-  Int_t mNZBins = 40;  //set number of bins for z vertex position
+  Int_t mNMultBins = 20;  //  set number of bins for multiplicity
+  Int_t mNZBins = 20;  //set number of bins for z vertex position
   Int_t mMultMax = 1600;  // set the maximum multiplicity for the dataset
   Int_t mMultMin = 700;
   Float_t mZMax = 75.;  // set the maximum value for z vertex position
-
+  Float_t mZMin = -75.;
   // place events into bins
   gMessMgr->Info() << " StEbye2ptMaker::SortEvents() Binning events... " << endm;
   Int_t i=0;
@@ -581,28 +607,40 @@ void StEbye2ptMaker::SortEvents() {
     pEbyeTree->GetEntry(i);
     Int_t mult = mEbyeEvent->OrigMult();
     Float_t zvertex = mEbyeEvent->Vz();
-    if(mult > mMultMax || mult < mMultMin || zvertex > mZMax || zvertex < -75.){
+    if(mult > mMultMax || mult < mMultMin || zvertex > mZMax || zvertex < mZMin){
 	BinNumber = 0;
+	++NZeroBins;
     } else {
+      mZMult->Fill(mult,zvertex,1);
     Int_t multbin = 1+((mult-mMultMin)*mNMultBins/(mMultMax-mMultMin));
     Int_t zbin = 1 + int((zvertex+mZMax)*mNZBins/(2.*mZMax));
     BinNumber = (multbin-1)*mNZBins+zbin;
+    ++NnonZeroBins;
      if(zbin > mNZBins || zbin < 0 || multbin >mNMultBins || multbin <0){
      gMessMgr->Info() << " StEbye2ptMaker::SortEvents() Bin Number Outside Allowed Range " << endm;
-     cout <<zbin<<" mNZBins=40"<<multbin<<" mNMultBins=40 "<<zvertex<<" "<<mult<<endl;
      }
     }
     mSortArray[i] = BinNumber;
   }
-
+ 
   // sort events by bin number so they can be mixed with other events from
   // the same bin
   gMessMgr->Info() << " StEbye2ptMaker::SortEvents() Sorting events... " << endm;
+  cerr << "Nentries" << Nentries <<" Zerobins:" << NZeroBins << " NonZerobins:" << NnonZeroBins << endl;
   TMath::Sort(Nentries,mSortArray,mIndex);
-   for (i=0;i<40;i++) {
-      printf("i=%d, index=%d,param=%d\n",i,mIndex[i],mSortArray[mIndex[i]]);
-   }
+  //   for (i=0;i<40;i++) {
+  //    printf("i=%d, index=%d,param=%d\n",i,mIndex[i],mSortArray[mIndex[i]]);
+  // }
 }
 //-----------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
 
 
