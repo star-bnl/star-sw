@@ -1,6 +1,9 @@
-//$Id: StLaserEvent.h,v 1.3 2000/02/01 16:06:30 love Exp $
+//$Id: StLaserEvent.h,v 1.4 2000/04/24 14:28:03 love Exp $
 // Header file for TPC Laser event - Bill Love
 //$Log: StLaserEvent.h,v $
+//Revision 1.4  2000/04/24 14:28:03  love
+//Added clock, drivel and tZero to event Header
+//
 //Revision 1.3  2000/02/01 16:06:30  love
 //Added track invp and nfit to Hit object
 //
@@ -39,11 +42,17 @@ private:
    Int_t   fEvtNum;
    Int_t   fRun;
    Int_t   fDate;
+   Float_t ftZero;
+   Float_t fDriVel;
+   Float_t fClock;
+
 
 public:
    EventHeader() : fEvtNum(0), fRun(0), fDate(0) { }
    virtual ~EventHeader() { }
    void   Set(Int_t i, Int_t r, Int_t d) { fEvtNum = i; fRun = r; fDate = d; }
+   void   SetE(Float_t tz, Float_t dv, Float_t ck) {
+        ftZero = tz; fDriVel = dv; fClock = ck; }
    Int_t  GetEvtNum() const { return fEvtNum; }
    Int_t  GetRun() const { return fRun; }
    Int_t  GetDate() const { return fDate; }
@@ -82,6 +91,8 @@ public:
    void          SetNvertex(Int_t n) { fNvertex = n; }
    void          SetFlag(UInt_t f) { fFlag = f; }
    void          SetHeader(Int_t i, Int_t run, Int_t date);
+   void          SetHeader(Int_t i, Int_t run, Int_t date,
+                 Float_t tzero, Float_t drivel, Float_t clock);
    void          AddTrack(Int_t flag,Int_t hitid,Int_t tid,Int_t id_globtrk,
          Int_t ndedx, Int_t nfit, Int_t nrec, Int_t npos,
          Int_t q, Float_t Chixy, Float_t Chiyz, Float_t dedx,
