@@ -18,6 +18,7 @@
 #include "TList.h"
 //*KEEP,TNamed.
 #include "TNamed.h"
+#include "TString.h"
 //*KEND.
  
 class St_DataSetIter;
@@ -36,6 +37,7 @@ class St_DataSet : public TNamed
  public:
  
     St_DataSet(const Char_t *name="", St_DataSet *parent=0);
+    St_DataSet(TString &dirname, const Char_t *filename="");
     virtual ~St_DataSet();
             void        Add(St_DataSet *dataset);
     virtual void        Browse(TBrowser *b);
@@ -51,6 +53,7 @@ class St_DataSet : public TNamed
     virtual void        ls(Option_t *option="");    // Option "*" means print all levels
     virtual void        ls(Int_t deep);             // Print the "deep" levels of this datatset
     virtual void        Update();                   // Update dataset
+           TString      Path();                     // return the "full" path of this dataset
     virtual void        Remove(St_DataSet *set);
     ClassDef(St_DataSet,1)
 };
