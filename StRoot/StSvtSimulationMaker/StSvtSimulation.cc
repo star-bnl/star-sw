@@ -1,15 +1,18 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulation.cc,v 1.7 2003/09/02 17:59:09 perev Exp $
+ * $Id: StSvtSimulation.cc,v 1.8 2003/11/13 16:24:59 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
- *
+ * 
  * Description: Fills hybrid pixel objects
  *
  ***************************************************************************
  *
  * $Log: StSvtSimulation.cc,v $
+ * Revision 1.8  2003/11/13 16:24:59  caines
+ * Further improvements to get simulator looking like reality
+ *
  * Revision 1.7  2003/09/02 17:59:09  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -33,7 +36,6 @@
  *
  **************************************************************************/
 
-#include "Stiostream.h"
 
 #include "StSvtClassLibrary/StSvtHybridPixelsC.hh"
 #include "StDbUtilities/StGlobalCoordinate.hh"
@@ -96,16 +98,28 @@ void StSvtSimulation::setPointers(StSvtElectronCloud* elCloud,StSvtAngles* svtAn
 
 }
 
-void StSvtSimulation::setAnodeTime(double timBinSize, double anodeSize,double driftVelocity)
+void StSvtSimulation::setAnodeTimeBinSizes(double timBinSize, double anodeSize)
  {
   mTimeBinSize = timBinSize ;
   mAnodeSize = anodeSize;
-  mDriftVelocity = driftVelocity;
-
-  mSvtSignal->setParam(mTimeBinSize,mAnodeSize,mDriftVelocity);
-  mSvtSignal->pasaRelatedStuff();
-
+  mSvtSignal->setAnodeTimeBinSizes(mTimeBinSize,mAnodeSize);
  }
+  
+  
+void StSvtSimulation::setDriftVelocity(double driftVelocity)
+{
+
+  mDriftVelocity = driftVelocity;
+  mSvtSignal->setDriftVelocity(mDriftVelocity);
+  mSvtSignal->pasaRelatedStuff();
+}
+
+void StSvtSimulation::setTrappingConst(double trapConst)
+{
+
+  mTrapConst = trapConst;                   // [micro seconds]
+
+}
 
 void StSvtSimulation::setPasaSigAttributes(int pasaSigAttributes, int numOfAnodesPerHit)
  {
@@ -136,7 +150,8 @@ void StSvtSimulation::setPasaSigAttributes(int pasaSigAttributes, int numOfAnode
 //____________________________________________________________________________
 void StSvtSimulation::doCloud_FixHitPos(double anode,double time, double Energy)
 {
-  //double wStep = 0.001;    // mm
+
+   double wStep = 0.001;    // mm
 
   //mTimeBinSize = 0.04;  //micro sec ---> 0.27 mm at 6.75 mm/us
   //2.7mm -----> a width of 10 time bins
@@ -151,7 +166,9 @@ void StSvtSimulation::doCloud_FixHitPos(double anode,double time, double Energy)
 
     for(int n = 1; n <= 2700; n++){
 
-      mElectronCloud->setInitWidths(n*0.001,0.001);   //this has to be done for each hit 
+      mElectronCloud->setInitWidths(n*0.001,0.001);   //this has to be done for each hit
+      mElectronCloud->setDriftVelocity(mDriftVelocity);
+      mElectronCloud->setTrappingConst(mTrapConst);   
       mElectronCloud->calculateWidthAtAnode(time);
       mSvtSignal->getCloud(mElectronCloud);
       //calcPeakAndWidth(1,anode,time,mSignalOption);
@@ -166,7 +183,7 @@ void StSvtSimulation::doCloud_FixHitPos(double anode,double time, double Energy)
 //____________________________________________________________________________
 void StSvtSimulation::doCloud_VaryHitPos(double anode,double Energy)
 {
-   double t;
+  double t;
    double wStep = 0.001;    // mm
 
   //mTimeBinSize = 0.04;  //micro sec ---> 0.27 mm at 6.75 mm/us
@@ -180,7 +197,9 @@ void StSvtSimulation::doCloud_VaryHitPos(double anode,double Energy)
     for(int n = 1; n <= 128; n++){
 
       t = (double)n - 0.5;
-      mElectronCloud->setInitWidths(wStep,wStep);   //this has to be done for each hit 
+      mElectronCloud->setInitWidths(wStep,wStep);   //this has to be done for each hit
+      mElectronCloud->setDriftVelocity(mDriftVelocity);
+      mElectronCloud->setTrappingConst(mTrapConst);   
       mElectronCloud->calculateWidthAtAnode(t);
       mSvtSignal->getCloud(mElectronCloud);
       //calcPeakAndWidth(1,anode,t,mSignalOption);
@@ -188,6 +207,7 @@ void StSvtSimulation::doCloud_VaryHitPos(double anode,double Energy)
       calcPeakAndWidth(1,anode,t,j);
     }
   }
+   
 
 }
 
@@ -197,8 +217,11 @@ void StSvtSimulation::doCloud(double time, double Energy,double mTheta,double mP
 {
   mElectronCloud->setPar(Energy,mTheta,mPhi,mTimeBinSize);  //this has to be done for each hit
   mElectronCloud->setInitWidths(0.001,0.001);   //this has to be done for each hit 
+  mElectronCloud->setDriftVelocity(mDriftVelocity);
+  mElectronCloud->setTrappingConst(mTrapConst);  
   mElectronCloud->calculateWidthAtAnode(time);
   mSvtSignal->getCloud(mElectronCloud);
+
 }
 
 //____________________________________________________________________________
@@ -259,14 +282,15 @@ void StSvtSimulation::calcPeakAndWidth(int k,double mAnHit, double mTimeHit, int
  
 
 //____________________________________________________________________________
-//this fillBufer should be used
 void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixelsD *svtSimDataPixels)
  {
-   double chargeOnAnode = 0.0, adc, peak;
+   double chargeOnAnode, adc, peak;
    int counter = 0, anode,status;
 
    float t = 0.0;
 
+   //cout<<"StSvtSimulation::fillBuffer"<<endl;
+   
    anode = (int)(mAnHit) + 1;    //mAnHit in fraction of anode numbers
  
    mPeakSignal = 0.0;
@@ -279,9 +303,8 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixe
       if(anode + an > 0 && anode + an <= 240)
        {
          //cout<<"****** an = "<<anode + an<<" *******"<<endl;
-
+	
          chargeOnAnode = mSvtSignal->chargeFraction(anode + an,mAnHit); //mAnHit in fraction of anodes
-
          //cout<<"chargeOnAnode  "<<anode + an<<" = "<<chargeOnAnode<<endl;
 	 //cout<<"\n";
 
@@ -294,7 +317,7 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixe
 
          if(chargeOnAnode == 0.0)
            continue;
-
+	 
 	 status = mSvtSignal->timeCenterAndWidth(mAnHit,mTimeHit);  //mTimeHit in fraction of time buckets
       
          mSvtSignal->calcConvSignal(chargeOnAnode);
@@ -310,7 +333,7 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixe
 	    adc = mSvtSignal->getSignal(n-1);
 	   if(adc==0.0) continue;
            
-            adc = adc/4;   // in counts with 1 count <-> 4mV
+            adc = adc/3.90625;   // in counts with 1 count <-> 4mV*1000/1024
 
 	    if(adc > peak) peak = adc;
 
@@ -325,7 +348,7 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixe
 
              int pixelIndex = svtSimDataPixels->getPixelIndex(anode + an, n - 1);	     
 
-	     /*Petr -back ground is done from outside
+	     /*Petr -background is done from outside
               int offset = svtSimDataPixels->getPedOffset();
 	     //cout<<"offset = "<<offset <<endl;
 	     
@@ -354,9 +377,7 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixe
 		svtSimDataPixels->addToPixel(pixelIndex,adc);
 		//svtSimDataPixels->AddAt(adc,pixelIndex);
 		}*/
-	     // this could cause problems if the pedestal is low and hits overlap
-	     //it would be better to use double precision all the time and at the end convert 
-	     //to pixels
+	    
 	     double adc1 = svtSimDataPixels->getPixelContent(anode + an,n - 1);
 	     adc+=adc1;
 	     svtSimDataPixels->AddAt(adc,pixelIndex);

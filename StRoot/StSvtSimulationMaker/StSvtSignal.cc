@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.6 2003/09/02 17:59:09 perev Exp $
+ * $Id: StSvtSignal.cc,v 1.7 2003/11/13 16:24:59 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.7  2003/11/13 16:24:59  caines
+ * Further improvements to get simulator looking like reality
+ *
  * Revision 1.6  2003/09/02 17:59:09  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -29,11 +32,7 @@
  * First version of Slow Simulator - S. Bekele
  *
  **************************************************************************/
-
-#include <math.h>
-#include <string.h>
-#include "Stiostream.h"
-
+ 
 #include "StSvtElectronCloud.hh"
 #include "StSvtSignal.hh"
 
@@ -80,11 +79,17 @@ StSvtSignal::~StSvtSignal()
 
 }
 //_______________________________________________
-void StSvtSignal::setParam(double timeBinSize,double anodeSize,double driftVel)
+void StSvtSignal::setAnodeTimeBinSizes(double timeBinSize,double anodeSize)
 {
   mTimeBinSize = timeBinSize;
   mAnodeSize = anodeSize;
-  mDriftVel = driftVel;
+ 
+}
+//_______________________________________________
+void StSvtSignal::setDriftVelocity(double driftVelocity)
+{
+
+ mDriftVel = driftVelocity;
 }
 //_______________________________________________
 void StSvtSignal::setOption(int option)
@@ -144,8 +149,10 @@ void StSvtSignal::doPasaOnly(int option){
  double tStep = mTimeBinSize*0.001;     //microseconds
  double pasaFunValue;
 
- pasaOutN.open("pasaNorm.dat",ios::out);
- pasaOut.open("pasa.dat",ios::out);
+ if(option)
+   pasaOutN.open("pasaNorm.dat",ios::out);
+ else
+   pasaOut.open("pasa.dat",ios::out);
 
  unNormPasaConst();
 
@@ -172,8 +179,10 @@ void StSvtSignal::doPasaOnly(int option){
 
  halfWidthAtHalfMaxS();
 
- pasaOutN.close();
- pasaOut.close();
+ if(option)
+   pasaOutN.close();
+ else
+   pasaOut.close();
 
 }
 //_______________________________________________

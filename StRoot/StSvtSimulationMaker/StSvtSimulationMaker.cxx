@@ -1,6 +1,6 @@
-/***************************************************************************
+ /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.13 2003/09/02 17:59:09 perev Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.14 2003/11/13 16:24:59 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
- * Revision 1.13  2003/09/02 17:59:09  perev
- * gcc 3.2 updates + WarnOff
+ * Revision 1.14  2003/11/13 16:24:59  caines
+ * Further improvements to get simulator looking like reality
  *
  * Revision 1.12  2003/07/31 19:18:10  caines
  * Petrs improved simulation code
@@ -44,9 +44,11 @@
  * First version of Slow Simulator - S. Bekele
  *
  **************************************************************************/
-#include <Stiostream.h>
+
+
 #include <string.h>
 #include <math.h>
+
 
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
@@ -74,36 +76,45 @@
 #include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 #include "StSvtClassLibrary/StSvtT0.hh"
 #include "StSvtClassLibrary/StSvtHybridDriftVelocity.hh"
+#include "StSvtClassLibrary/StSvtHybridPed.hh"
+#include "StSvtDaqMaker/StSvtHybridDaqPed.hh"
+#include "StSvtCalibMaker/StSvtPedMaker.h"
 #include "StSvtHybridSimData.hh"
 #include "StSvtAngles.hh"
 #include "StSvtElectronCloud.hh"
 #include "StSvtSignal.hh"
 #include "StSvtSimulation.hh"
 #include "StSvtGeantHits.hh"
+#include "StSvtOnlineSeqAdjSim.hh"
 #include "StSvtSimulationMaker.h"
 
 
 
 #include "tables/St_g2t_svt_hit_Table.h"
-
 #include "StSvtConversionTable.h"
+
 
 ClassImp(StSvtSimulationMaker)
 
 int* counter = 0;
-
-fstream outGeantSvtGeom, outDbSvtGeom, outSvtTrans;
 
 
 
 //___________________________________________________________________________
 StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
 { 
+   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor"<<endm;
+ 
   mPedOffset = 20;     //value taken from StSeqAdjMakeru- hardwired value, but can change run to run
-
+ 
   //background settings - can be set by setBackGround
   mBackGrOption = kTRUE;
-  mBackGSigma = 1.8;  //Petr - this seems to be so far the best value
+  mBackGSigma = 1.8;  //1.8 seems to be so far the best value
+
+  //electron cloud settings - these can be tuned;
+  mDiffusionConst=0.0035;   // [mm**2/micro seconds]
+  mLifeTime=1000000.0;     // [us]
+  mTrapConst=0;            // [us]
 
   //options - can be set by setOptions
   mExpOption = "both";     // both, coulomb, diffusion
@@ -123,18 +134,33 @@ StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
   mSvtSimPixelColl = NULL;
   mSvt8bitPixelColl = NULL; //final data 
   mDriftSpeedColl=NULL;
+  mPedColl=NULL;
+  mPedRMSColl=NULL;
+  mSvtBadAnodes=NULL;
  
   mCoordTransform = NULL;
 
+  //this should be part of the chain
+  if (!GetMaker("StSvtPedMaker")) new StSvtPedMaker("StSvtPedMaker");
+  else gMessMgr->Info() << "StSvtPedMaker already exists in the chain"<<endm;
+
+
+  if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor...END"<<endm;
+ 
 }
 
 //____________________________________________________________________________
 StSvtSimulationMaker::~StSvtSimulationMaker()
 {
+  if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::destructor"<<endm;
+
   if (mSvtAngles) delete mSvtAngles;
   if (mSvtSimulation) delete mSvtSimulation;
   if (mElectronCloud) delete mElectronCloud;
   if (mCoordTransform) delete mCoordTransform;
+  if (mOnlineAdjuster) delete mOnlineAdjuster;
+
+  if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::destructor...END"<<endm; 
 }
 
 //____________________________________________________________________________
@@ -154,6 +180,25 @@ Int_t StSvtSimulationMaker::setBackGround(Bool_t backgr,double backgSigma){
   return kStOK;
 }
 
+//____________________________________________________________________________
+
+void StSvtSimulationMaker::setElectronLifeTime(double tLife)
+{
+  mLifeTime = tLife;  //  [micro seconds] 
+
+}
+//____________________________________________________________________________
+void StSvtSimulationMaker::setTrappingConst(double trapConst)
+{
+  mTrapConst = trapConst;  //  [micro seconds] 
+
+}
+
+//____________________________________________________________________________
+void StSvtSimulationMaker::setDiffusionConst(double diffConst)
+{
+  mDiffusionConst = diffConst;  
+}
 
 //____________________________________________________________________________
 /*
@@ -189,48 +234,76 @@ Int_t StSvtSimulationMaker::Init()
 {
     
   if(Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Init() ..."<<endm;
-  
+    
   // init objects that do parts of simulation
   mSvtAngles =  new StSvtAngles();
  
   mElectronCloud = new StSvtElectronCloud(mExpOption,mWrite,mFineDiv);
   mElectronCloud->setSiliconProp();
-  
+  mElectronCloud->setElectronLifeTime(mLifeTime);
+  mElectronCloud->setDiffusionConst(mDiffusionConst);
+
   mSvtSimulation = new StSvtSimulation();
   mSvtSimulation->setOptions(mBackGrOption,mSigOption);
   mSvtSimulation->setPointers(mElectronCloud, mSvtAngles);
- 
+  mSvtSimulation->setTrappingConst(mTrapConst); 
+
+
   mCoordTransform=new StSvtCoordinateTransform();  
+  
+  
+  mOnlineAdjuster=new StSvtOnlineSeqAdjSim();
+  //some of these things should be in database(like paramters for sequence adjusting)
+  // then this should be moved to InitRun - it could change run to run
+  //these parameters must be the same as they were set by Tonko in online software!!
+
+  mOnlineAdjuster->SetNumberTBinsToClear(4); //default is 2
+  mOnlineAdjuster->SetSaveAnode2Raw(kFALSE);
+  mOnlineAdjuster->SetSaveAnode239Raw(kFALSE);
+  
+  mOnlineAdjuster->SetExtraPixelsBefore(1);
+  mOnlineAdjuster->SetExtraPixelsAfter(4);
+  
+  
+  mOnlineAdjuster->Set_thresh_hi(7);
+  mOnlineAdjuster->Set_n_seq_hi(2);
+  mOnlineAdjuster->Set_thresh_lo(3);
+  mOnlineAdjuster->Set_n_seq_lo(0);
+  
+
 
   // this has no effect - it will get deleted imediately in Clear(), but some
   // makers down the chain require to have it.
+  
   getConfig();
   setSvtRawData();
+ 
 
   if(Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Init() -End"<<endm;
 
   return  StMaker::Init();
- 
 }
 
 //__________________________________________________________________________
 Int_t StSvtSimulationMaker::InitRun(int runumber)
 { //when the run changes
-  gMessMgr->Info() <<"StSvtSimulationMaker::InitRun()"<<endm;
-
+  if(Debug()) gMessMgr->Info() <<"StSvtSimulationMaker::InitRun()"<<endm;
+ 
+  ((StSvtPedMaker*) GetMaker("StSvtPedMaker"))->ReadFromFile("data/ped/pedestal_4065001.root");
+  ((StSvtPedMaker*) GetMaker("StSvtPedMaker"))->ReadRMSFromFile("data/ped/rms2_pedestal_4065001.root");
+  
   //read from tabase
   getConfig();
   getSvtGeometry();
   getSvtDriftSpeeds();
   getSvtT0();
-  /* should also have
-     readSvtPedestals();*/
+  getPedRMS();
+  getBadAnodes();
+
   setSvtPixelData();
   //Set up coordinate transformation 
   mCoordTransform->setParamPointers(mSvtGeom, mConfig,mDriftSpeedColl,mT0);
- 
   
-     
   //mTimeBinSize = 1.E6/mSvtSrsPar->fsca;  // Micro Secs
   //mAnodeSize = mSvtSrsPar->pitch*10;  // mm
   //mDriftVelocity = 1.E-5*mSvtSrsPar->vd;  // mm/MicroSec (?)
@@ -238,23 +311,28 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   mTimeBinSize = 0.04;  // Micro Secs - Petr: this is quite accurate according to Dave
   mAnodeSize = mSvtGeom->getAnodePitch()*10;  // mm
   mDefaultDriftVelocity = 1.E-5*675000;  // used only if there is no database
- 
+  
   //set default drift speeds - if drift speed data exist it will be overriden later
-  mSvtSimulation->setAnodeTime(mTimeBinSize , mAnodeSize,mDefaultDriftVelocity); 
-
+  mSvtSimulation->setAnodeTimeBinSizes(mTimeBinSize , mAnodeSize);
+  mSvtSimulation->setDriftVelocity(mDefaultDriftVelocity);
+ 
   //set size of hits-otherwise default is false,8
   //mSvtSimulation->setPasaSigAttributes(kFALSE,8)
+
+  mOnlineAdjuster->SetPedOffset(mPedOffset);
+  mOnlineAdjuster->SetBadAnodes(mSvtBadAnodes);
 
   //if(Debug()) CreateHistograms();
 
   cout<<"  Anode size="<<mAnodeSize<<" ,time bin size="<<mTimeBinSize<<endl;
-  cout<<"  pedestal offset="<<mPedOffset<<", backgr. sigma="<<mBackGSigma<<endl;
+  cout<<"  pedestal offset="<<mPedOffset<<", default backgr. sigma="<<mBackGSigma<<endl;
   cout<<"  do backround="<<mBackGrOption<<endl;
   cout<<"  default drift velocity="<<mDefaultDriftVelocity<<endl;
   cout<<"  T0(from database)= "<<mT0->getT0(1)<<endl;
   
-  gMessMgr->Info()<<"StSvtSimulationMaker::InitRun()-END"<<endm;
 
+  gMessMgr->Info()<<"StSvtSimulationMaker::InitRun()-END"<<endm;
+ 
   return StMaker::InitRun(runumber);
 }
 
@@ -264,8 +342,8 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
 //____________________________________________________________________________
 
 void  StSvtSimulationMaker::resetPixelData(){
-  //this reset mSvtSimPixelColl and mSvt8bitPixelColl
-  //int Layer;
+  //this resets mSvtSimPixelColl and mSvt8bitPixelColl
+ 
    StSvtHybridPixelsD* tmpPixels;
    StSvtHybridPixelsC* tmp8bitPixels;
 
@@ -299,11 +377,13 @@ void  StSvtSimulationMaker::resetPixelData(){
 }
 
 //____________________________________________________________________________
-void StSvtSimulationMaker::createBackGrData(double backgsigma)
+void StSvtSimulationMaker::createBackGrData()
 {
+  double rmsScale=16.;
 
+  //TH1D *t=new TH1D("t","t",100,0,10);
   if(Debug()) gMessMgr->Message()<<"StSvtSimulationMaker::createBackGrData()"<<endm;
-
+   
   StSvtHybridPixelsD* tmpPixels;
 
   for(int Barrel = 1;Barrel <= mSvtSimPixelColl->getNumberOfBarrels();Barrel++) {
@@ -318,30 +398,44 @@ void StSvtSimulationMaker::createBackGrData(double backgsigma)
           if( index < 0) continue; 
           
           tmpPixels  = (StSvtHybridPixelsD*)mSvtSimPixelColl->at(index);          
-	  /*
-          if(!tmpPixels){
-	    cout<<"Warning: bad memory allocation-StSvtSimulationMaker::createBackGrData()"<<endl; 
-            tmpPixels  = new StSvtHybridPixelsD(Barrel, Ladder, Wafer, Hybrid);
-            mSvtSimPixelColl->put_at(tmpPixels,index);
-          }
-	  */
-          double *mAdcArray=tmpPixels->GetArray(); // array of [128*240]
+	  double *mAdcArray=tmpPixels->GetArray(); // array of [128*240]
 
-          for(int an = 0; an < 240; an++){
-            for(int tim = 0; tim < 128; tim++){
-	      mAdcArray[an*128 + tim]+=mSvtSimulation->makeGausDev(backgsigma);//mAdcArray already contains PedOffset
-              /*double back;
-              back= mSvtSimulation->makeGausDev(backgsigma)+ mAdcArray[an*128 + tim]; //deviation + offset
-	      mAdcArray[an*128 + tim] = (back>0) ? (signed char)back:0;  //this may not be reliable
-              //cout<<back<<":"<<(int)(char)back<<":"<<(int)(signed char)back<<":"<<(int)mAdcArray[an*128 + tim]<<endl;
-	      */
-            }
+	  //find out what background to use
+	  StSvtHybridPixels* pedRms=NULL;
+	  if (mPedRMSColl) pedRms = (StSvtHybridPixels*)mPedRMSColl->at(index);
+	 	    
+	  if(pedRms)
+	    {// I have rms for each pixel
+	      for(int an = 0; an < 240; an++)  for(int tim = 0; tim < 128; tim++){
+		//cout<<pedRms<<"indiv rms="<<pedRms->At(pedRms->getPixelIndex(an+1,tim))/rmsScale<<endl;
+		mAdcArray[an*128 + tim]+=mSvtSimulation->makeGausDev(pedRms->At(pedRms->getPixelIndex(an+1,tim))/rmsScale);// !! mAdcArray already contains PedOffset
+	      }
+	    }
+	  else {
+	    //one value for hybrid
+	    double backgsigma;
+	    StSvtHybridPed *ped=NULL;
+	    if (mPedColl) ped=(StSvtHybridPed *)mPedColl->at(index);
+	    if (ped) backgsigma=ped->getRMS(); else  backgsigma=mBackGSigma; //the default value
+	    if (backgsigma<=0.){
+	      cout<<"Warnig for index "<<index<<" pedestal RMS is:"<<backgsigma<<" => seting to default"<<endl;
+	      backgsigma=mBackGSigma;
+	    }
+	    if (Debug()) cout<<"for index "<<index<<" pedestal RMS is:"<< backgsigma<<endl;
+	    //t->Fill(backgsigma);
+	    for(int an = 0; an < 240; an++){
+	      for(int tim = 0; tim < 128; tim++){
+		mAdcArray[an*128 + tim]+=mSvtSimulation->makeGausDev(backgsigma);// !! mAdcArray already contains PedOffset             
+	      }
+	    }
           }
-
+	  
         }
       }
     }
   } 
+  //t->Draw();
+ 
   if(Debug()) gMessMgr->Message()<<"StSvtSimulationMaker::createBackGrData() - END"<<endm;
 }
 
@@ -379,7 +473,7 @@ void  StSvtSimulationMaker::setSvtRawData()
     AddData(set);  
   }
 
-  if (mSvtSimDataColl) cout<<"!!!!!!m SvtSimDataColl already exists in SvtSimulationMaker.cxx:setSvtRawData"<<endl;
+  if (mSvtSimDataColl) cout<<"!!!!!!mSvtSimDataColl already exists in SvtSimulationMaker.cxx:setSvtRawData"<<endl;
   else  mSvtSimDataColl = new /*StSvtHybridCollection*/StSvtData(mConfig->getConfiguration());
   
   set->SetObject((TObject*)mSvtSimDataColl);
@@ -429,17 +523,20 @@ void StSvtSimulationMaker::CreateHistograms()
 //__________________________________________________________________________________________________
 Int_t  StSvtSimulationMaker::getSvtGeometry()
 {
+    
   St_DataSet* dataSet;
   dataSet = GetDataSet("StSvtGeometry");
   assert(dataSet);
 
   mSvtGeom = (StSvtGeometry*)dataSet->GetObject();
   assert(mSvtGeom);
+  
+ 
 
   //+++++++++++++ 
   //why it's not local? and why here - gets open for each run again
-  outGeantSvtGeom.open("geantSvtGeom.dat",ios::out);
-  outDbSvtGeom.open("dbSvtGeom.dat",ios::out);
+  //outGeantSvtGeom.open("geantSvtGeom.dat",ios::out);
+  //outDbSvtGeom.open("dbSvtGeom.dat",ios::out);
   //outSvtTrans.open("transSvtGeom.dat",ios::out);
   return kStOk;
 }
@@ -459,6 +556,25 @@ Int_t StSvtSimulationMaker::getSvtDriftSpeeds()
   if (! mDriftSpeedColl) cout<<"Warning: SVT drift velocity data empty - using default drift speed:"<<mDefaultDriftVelocity<<endl;
     
   return kStOk;
+}
+
+//___________________________________________________________________________
+void  StSvtSimulationMaker::getPedRMS()
+{
+  mPedRMSColl=NULL;
+  mPedColl=NULL;
+
+  St_DataSet* dataSet=NULL;
+  dataSet = GetDataSet("StSvtRMSPedestal");
+  if (dataSet)  mPedRMSColl= (StSvtHybridCollection*)dataSet->GetObject();
+      
+  dataSet=NULL;
+  dataSet = GetDataSet("StSvtPedestal");
+  if (dataSet) mPedColl= (StSvtHybridCollection*)dataSet->GetObject();
+
+  if ((!mPedRMSColl)&&(!mPedColl))
+    cout<<"Warning: no SVT RMS information available from StSvtPedestal  - using default backgroung:"<<mBackGSigma<<endl;
+    
 }
 
 
@@ -486,50 +602,74 @@ Int_t StSvtSimulationMaker::getConfig()
   St_DataSet *dataSet = NULL;
   dataSet = GetDataSet("StSvtConfig");
   
-  if (dataSet) mConfig=((StSvtConfig*)(dataSet->GetObject()));
-  else
+  if (!dataSet)
     {
-      gMessMgr->Warning() << " No SvtConfig  data set - seting default full configuration" << endm;
+      gMessMgr->Warning() << " No SvtConfig  data set" << endm;
       dataSet = new St_ObjectSet("StSvtConfig");                                                               
       AddConst(dataSet);
       mConfig=NULL;
     }
+  
+  mConfig=((StSvtConfig*)(dataSet->GetObject()));
+ 
   if (!mConfig) {
     gMessMgr->Warning() << "SvtConfig data set is empty- seting default full configuration" << endm;
     mConfig=new StSvtConfig();
     mConfig->setConfiguration("FULL");
     dataSet->SetObject(mConfig);
   }
-
+  
  
+  return kStOk;
+}
+
+//____________________________________________________________________________
+Int_t StSvtSimulationMaker::getBadAnodes()
+{
+  
+  St_DataSet *dataSet;
+  
+  dataSet = GetDataSet("StSvtBadAnodes");
+  if( !dataSet) {
+    gMessMgr->Warning() << " No Svt Bad Anodes data set" << endm;
+    return kStWarn;
+  }
+
+  mSvtBadAnodes = (StSvtHybridCollection*)(dataSet->GetObject());
+  if( !mSvtBadAnodes) {
+    gMessMgr->Warning() << " No Svt Bad Anodes data " << endm;
+    return kStWarn;
+  }
+
+  if (Debug()) gMessMgr->Info()<<"Svt Bad Anode list found"<<endm;
   return kStOk;
 }
 
 //____________________________________________________________________________
 Int_t StSvtSimulationMaker::Make()
 {
-  gMessMgr->Info() << "In StSvtSimulationMaker::Make()" << endm;
-  
-  //########## initiating data structures ##########################
-  resetPixelData();
-  //pokud se vzdy dela background, pak je to nadbytecne
-  setSvtRawData();
-  setGeantData(); //if this removed geant data need to be dealocated ion Clear( 
-
-  if(mBackGrOption)
-    createBackGrData(mBackGSigma); 
- 
-  // MakePixelHistos();
-
+  if (Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Make()" << endm;
+   
   int volId ,barrel, layer, ladder, wafer, hybrid;
   double px,py,pz;
+  Int_t NumOfHitsPerHyb=0;
   StThreeVector<double> VecG(0,0,0);
   StThreeVector<double> VecL(0,0,0);
 
-  StSvtHybridPixelsD *svtSimDataPixels; 
-  
+  StSvtHybridPixelsD *svtSimDataPixels;
  
+  //########## initiating data structures ##########################
+  resetPixelData();
+   
+  setSvtRawData();
+  setGeantData(); //if this removed geant data need to be dealocated in Clear() 
+
+  if(mBackGrOption) createBackGrData(); 
   
+  StSvtWaferCoordinate waferCoord (0,0,0,0,0,0);
+  StSvtLocalCoordinate localCoord (0,0,0);
+  StGlobalCoordinate globalCor(0,0,0);
+
   //
   //################  get geant hit table ##########################
   // 
@@ -537,32 +677,30 @@ Int_t StSvtSimulationMaker::Make()
   St_DataSet *g2t_svt_hit =  GetDataSet("g2t_svt_hit");
   St_DataSetIter g2t_svt_hit_it(g2t_svt_hit);
   St_g2t_svt_hit *g2t_SvtHit = (St_g2t_svt_hit *) g2t_svt_hit_it.Find("g2t_svt_hit");
+
+  g2t_svt_hit_st *trk_st;
   if( !g2t_SvtHit) {
     gMessMgr->Warning() << "No SVT hits" << endm;
-    return kStOK;
+    NumOfHitsPerHyb = 0;
   }
-  
-  g2t_svt_hit_st *trk_st = g2t_SvtHit->GetTable();
-    
-  
-  StSvtWaferCoordinate waferCoord (0,0,0,0,0,0);
-  StSvtLocalCoordinate localCoord (0,0,0);
-  StGlobalCoordinate globalCor(0,0,0);
-  
- 
+  else{  
+  trk_st = g2t_SvtHit->GetTable();    
+  NumOfHitsPerHyb = g2t_SvtHit->GetNRows();
+  }
+
   //
   //################  Loop over geant hits ##########################
   //
-  Int_t NumOfHitsPerHyb = g2t_SvtHit->GetNRows();
-  
+ 
   cout<<"mNumOfGeantHits = "<<NumOfHitsPerHyb<<endl;
   int tmpBadCount=0;
-  for (int j=0;j<NumOfHitsPerHyb ;j++)
+  if (NumOfHitsPerHyb>0) 
+   for (int j=0;j<NumOfHitsPerHyb ;j++)
     {
       double anode,time;
       volId = trk_st[j].volume_id;
-      //cout << volId << " " << trk_st[j].x[0] << " " << trk_st[j].x[1] << " " << endl;
-      outGeantSvtGeom<< volId <<endl;
+      //cout <<"genat hit #"<<j<<" volumeID="<< volId << " x=" << trk_st[j].x[0] << " y=" << trk_st[j].x[1] << " z=" <<  trk_st[j].x[2]<<endl;
+      //outGeantSvtGeom<< volId <<endl;
       if( volId > 7000) continue; // SSD hit
       /*
         if (int(volId/1000) == 3)
@@ -571,18 +709,16 @@ Int_t StSvtSimulationMaker::Make()
         volId = volId - 4000 + 3000;
       */
 
-       
-      VecG.setX( trk_st[j].x[0]);
-      VecG.setY( trk_st[j].x[1]);
-      VecG.setZ( trk_st[j].x[2]);
-      
+   
+      VecG.setX( trk_st[j].x[0]);VecG.setY( trk_st[j].x[1]);VecG.setZ( trk_st[j].x[2]);
       px = trk_st[j].p[0];  py = trk_st[j].p[1];  pz = trk_st[j].p[2];
-      //double energy = 96000.; MIP?
-      double  energy = trk_st[j].de*1e9; //odkud je ta konstanta
+      //double energy = 96000.; 
+      double  energy = trk_st[j].de*1e9; 
       globalCor.setPosition(VecG);
-      
+
       mCoordTransform->operator()(globalCor,waferCoord);
       
+
       layer = waferCoord.layer(); ladder = waferCoord.ladder();
       wafer = waferCoord.wafer(); hybrid = waferCoord.hybrid();     
       time = waferCoord.timebucket();
@@ -623,7 +759,7 @@ Int_t StSvtSimulationMaker::Make()
       int index = mSvtSimPixelColl->getHybridIndex(barrel,ladder,wafer,hybrid);
       if( index < 0) continue; 
       svtSimDataPixels  = (StSvtHybridPixelsD*)mSvtSimPixelColl->at(index);
-	    
+	     
       mSvtAngles->calcAngles(mSvtGeom,px,py,pz,layer,ladder,wafer);
       double theta = mSvtAngles->getTheta();
       double phi = mSvtAngles->getPhi();
@@ -636,19 +772,20 @@ Int_t StSvtSimulationMaker::Make()
 	else vd=vd*1e-5;
       }
       //cout<<"drift velocity used: = "<<vd<<" (default would be "<<mDefaultDriftVelocity<<")"<<endl;
-      mSvtSimulation->setAnodeTime(mTimeBinSize , mAnodeSize,vd);
-
+     
+      mSvtSimulation->setDriftVelocity(vd);
       mSvtSimulation->doCloud(time,energy,theta,phi);
       mSvtSimulation->fillBuffer(anode,time,svtSimDataPixels);
            
-      FillGeantHit(barrel,ladder,wafer,hybrid,waferCoord,VecG,VecL,mSvtSimulation->getPeak());
+      //FillGeantHit(barrel,ladder,wafer,hybrid,waferCoord,VecG,VecL,mSvtSimulation->getPeak());
       
     }
-         
-   
+  
+  
   RawDataFromPixels();
-  ClearFirst2Tbins();//first two time bins are set in reality to 0 becasue of high noise
     
+
+
   /*
    if (mDoBigOutput){
     cout<<"!!!!!!!!!!!!!Watch out:making big output of histograms"<<endl;
@@ -657,37 +794,11 @@ Int_t StSvtSimulationMaker::Make()
     oldDir->cd();
   }
   */
-  cout<<" Number of SVT hits outside of drift area: "<<tmpBadCount<<endl;
-  gMessMgr->Info() << "In StSvtSimulationMaker::Make()...END" << endm;
+
+  if (Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Make()...END" << endm;
   return kStOK;
 }
 
-//____________________________________________________________________________
-void  StSvtSimulationMaker::ClearFirst2Tbins()
-{
-  for(int Barrel = 1;Barrel <= mSvt8bitPixelColl->getNumberOfBarrels();Barrel++) {
-    for (int Ladder = 1;Ladder <= mSvt8bitPixelColl->getNumberOfLadders(Barrel);Ladder++) {
-      for (int Wafer = 1;Wafer <= mSvt8bitPixelColl->getNumberOfWafers(Barrel);Wafer++) {
-        for( int Hybrid = 1;Hybrid <= mSvt8bitPixelColl->getNumberOfHybrids();Hybrid++){
-          
-          int index = mSvt8bitPixelColl->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
-	  if( index < 0) continue; 
-         
-          StSvtHybridPixelsC* tmpPixels  = (StSvtHybridPixelsC*)mSvt8bitPixelColl->at(index);          
-	  
-	  Char_t *mAdcArray=tmpPixels->GetArray(); // array of [128*240]
-
-	  for(int tim = 0; tim < 1; tim++){
-	    for(int an = 0; an < 240; an++){
-	      mAdcArray[an*128 + tim]=0;
-	    }
-          }
-	  
-        }
-      }
-    }
-  }
-}
 
 //____________________________________________________________________________
 void StSvtSimulationMaker::Conversion10to8bit(StSvtHybridPixelsD *from, StSvtHybridPixelsC *to)
@@ -695,17 +806,30 @@ void StSvtSimulationMaker::Conversion10to8bit(StSvtHybridPixelsD *from, StSvtHyb
   //this rounds up double to unsigned 10 bit number and then converts to 8 bits
   double adc;
 
+  //to->setHybrid(from->getBarrelID(),from->getLadderID(),from->getWaferID(),from->getHybridID());
   *(StSvtHybridObject*)to=*(StSvtHybridObject*)from; //copy ID's
+
   //cout<<"barrel:"<<to->getBarrelID()<<" ladder:"<<to->getLadderID()<<" wafer:"<<to->getWaferID()<<" hybrid:"<<to->getHybridID()<<endl;
+
+  double *fromArray=from->GetArray();
+  Char_t *toArray=to->GetArray();
 
   for (int i=0;i<from->getTotalNumberOfPixels();i++)
     {
-      adc=from->At(i);
+      adc=fromArray[i];
       if (adc<=0) adc=0.;
       if (adc>=1023) adc=1023.;
       unsigned int adc1=(unsigned int)adc; //conversion to 10 bits from double - ?is it "compiler" reliable?
-      to->AddAt(StSvt10to8ConversionTable[adc1],i); //conversion to 8 bits
+      toArray[i]=(Char_t)StSvt10to8ConversionTable[adc1]; //conversion to 8 bits
     }
+}
+
+//____________________________________________________________________________
+void StSvtSimulationMaker::OnlineAdjusting(StSvtHybridPixelsC *from,StSvtHybridSimData *to)
+{
+  mOnlineAdjuster->SetPixelData(from);
+  mOnlineAdjuster->SetRawData(to);
+  mOnlineAdjuster->Make();
 }
 
 //____________________________________________________________________________
@@ -713,15 +837,15 @@ void StSvtSimulationMaker::RawDataFromPixels()
 {
   StSvtHybridPixelsD* tmpPixels; 
   StSvtHybridSimData* hybridData;
-  
+ 
   for(int Barrel = 1;Barrel <= mSvtSimPixelColl->getNumberOfBarrels();Barrel++) {
     for (int Ladder = 1;Ladder <= mSvtSimPixelColl->getNumberOfLadders(Barrel);Ladder++) {      
       for (int Wafer = 1;Wafer <= mSvtSimPixelColl->getNumberOfWafers(Barrel);Wafer++) {	
         for( int Hybrid = 1;Hybrid <= mSvtSimPixelColl->getNumberOfHybrids();Hybrid++){
-               
+
           int index = mSvtSimPixelColl->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
           if( index < 0) continue;
-          
+	  
           tmpPixels = (StSvtHybridPixelsD *)mSvtSimPixelColl->at(index);
           if (!tmpPixels){
             cout<<"Error in StSvtSimulationMaker::RawDataFromPixels() empty pixel data"<<endl;
@@ -729,17 +853,20 @@ void StSvtSimulationMaker::RawDataFromPixels()
           }
 
           hybridData = (StSvtHybridSimData *)mSvtSimDataColl->at(index);
+	 
           if(!hybridData ) {
             hybridData = new StSvtHybridSimData(Barrel, Ladder, Wafer, Hybrid);
             mSvtSimDataColl->put_at(hybridData,index);
           }
-	  
+	 
 	  Conversion10to8bit(tmpPixels,(StSvtHybridPixelsC *)mSvt8bitPixelColl->at(index));
-          hybridData->setSimHybridData((StSvtHybridPixelsC *)mSvt8bitPixelColl->at(index));
-        }
+	  OnlineAdjusting((StSvtHybridPixelsC *)mSvt8bitPixelColl->at(index),hybridData);
+	}
       }
     }
+   
   }
+ 
 }
 
 //____________________________________________________________________________
@@ -907,8 +1034,9 @@ void StSvtSimulationMaker::MakeGeantHitsHistos()
 //_____________________________________________________________________________
 void StSvtSimulationMaker::Clear(const char*)
 {
-  /*if (Debug()) gMessMgr->Debug()*/gMessMgr->Message() << "In StSvtSimulationMaker::Clear" << endm;
-  cout<<"In StSvtSimulationMaker::Clear" << endl; 
+ 
+  if (Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Clear" << endm;
+  
   
   //all will be deleted by StMaker::Clear()
   mSvtGeantHitColl = NULL;
@@ -919,7 +1047,7 @@ void StSvtSimulationMaker::Clear(const char*)
 
   StMaker::Clear();
   
-  cout<<"In StSvtSimulationMaker::Clear...DONE" << endl;
+  if (Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Clear..END" << endm; 
 }
 
 
@@ -927,17 +1055,18 @@ void StSvtSimulationMaker::Clear(const char*)
 
 Int_t StSvtSimulationMaker::Finish()
 {
-  if (Debug()) gMessMgr->Message() << "In StSvtSimulationMaker::Finish() ..."<< endm;
+  if (Debug()) gMessMgr->Info()<< "In StSvtSimulationMaker::Finish()"<< endm;
 
-
+  /*
   if (Debug()&&(mNtFile)) {
-    //mNtFile->Write(); 
-    //mNtFile->Close(); 
+    mNtFile->Write(); 
+    mNtFile->Close(); 
   }
-  
+  */
   //mSvtSimulation->closeFiles(); 
   //mElectronCloud->closeFiles();
-  cout<<"StSvtSimulationMaker::Finish() ... END"<<endl;
+
+  if (Debug()) gMessMgr->Info()<< "In StSvtSimulationMaker::Finish() ...END"<< endm;
   return kStOK;
 }
 

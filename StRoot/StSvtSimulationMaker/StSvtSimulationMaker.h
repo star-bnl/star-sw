@@ -1,7 +1,7 @@
-// $Id: StSvtSimulationMaker.h,v 1.7 2003/07/31 19:18:10 caines Exp $
+// $Id: StSvtSimulationMaker.h,v 1.8 2003/11/13 16:25:00 caines Exp $
 // $Log: StSvtSimulationMaker.h,v $
-// Revision 1.7  2003/07/31 19:18:10  caines
-// Petrs improved simulation code
+// Revision 1.8  2003/11/13 16:25:00  caines
+// Further improvements to get simulator looking like reality
 //
 // Revision 1.6  2001/08/13 15:34:19  bekele
 // Debugging tools added
@@ -59,7 +59,9 @@ class StSvtElectronCloud;
 class StSvtAngles;
 class StSvtWaferCoordinate;
 class StSvtCoordinateTransform;
+class StSvtOnlineSeqAdjSim;
 class StSvtT0;
+
 
 class StSvtSimulationMaker : public StMaker
 {
@@ -83,25 +85,30 @@ class StSvtSimulationMaker : public StMaker
   virtual Int_t Finish();
   virtual Int_t InitRun(int runumber); //caled when run number changes
    
+  void setElectronLifeTime(double tLife);
+  void setTrappingConst(double trapConst);
+  void setDiffusionConst(double diffConst);
 
   void  setSvtPixelData();
   void  setSvtRawData();
   void  setGeantData();
 
   void resetPixelData();
-  void createBackGrData(double backgsigma);
+  void createBackGrData();
   void FillGeantHit(int barrel, int ladder, int wafer, int hybrid,
                     StSvtWaferCoordinate& waferCoord,StThreeVector<double>& VecG,
                     StThreeVector<double>& VecL, double peak);
 
   void RawDataFromPixels();
   void Conversion10to8bit(StSvtHybridPixelsD *from, StSvtHybridPixelsC *to);
-  void ClearFirst2Tbins();
-
+  void OnlineAdjusting(StSvtHybridPixelsC *from,StSvtHybridSimData *to);
+  
   Int_t getConfig();
   Int_t getSvtGeometry();
   Int_t getSvtDriftSpeeds();
   Int_t getSvtT0();
+  void  getPedRMS();
+  Int_t getBadAnodes();
 
 //+++++++++++++++++++++++
   void MakePixelHistos();
@@ -124,11 +131,14 @@ class StSvtSimulationMaker : public StMaker
  private:
 
   // initial options
+  double mLifeTime;
+  double mTrapConst;
+  double mDiffusionConst;
   double mTimeBinSize;
   double mAnodeSize;    
   int    mPedOffset;
 
-  double mBackGSigma;
+  double mBackGSigma;  //default value if individiual RMS are not available 
   Bool_t mBackGrOption;
 
   char* mExpOption;    //!  
@@ -151,18 +161,23 @@ class StSvtSimulationMaker : public StMaker
   StSvtElectronCloud           *mElectronCloud;      //! created in Init (desctructor kills)
   StSvtSimulation              *mSvtSimulation;      //! created in Init (desctructor kills)
   StSvtCoordinateTransform     *mCoordTransform;     //! created in Init (desctructor kills)
+  StSvtOnlineSeqAdjSim         *mOnlineAdjuster;     //! created in Init (desctructor kills)
+ 
   
   //data for each run
   StSvtGeometry                *mSvtGeom;            //! read for each run in InitRun(owned by SvtDbMaker - don't kill)
   StSvtHybridCollection        *mDriftSpeedColl; 
   StSvtT0                      *mT0;
+  StSvtHybridCollection        *mPedColl;
+  StSvtHybridCollection        *mPedRMSColl;
+  StSvtHybridCollection        *mSvtBadAnodes;
  
   
   //data for each event
-  StSvtData/*HybridCollection*/     *mSvtSimPixelColl;    //! the simulated data - created for each run InitRun{in beginAnalyses} 
+  StSvtData                         *mSvtSimPixelColl;    //! the simulated data - created for each run InitRun{in beginAnalyses} 
   StSvtData                         *mSvt8bitPixelColl;   //! simulated final result written to 8 bits
-  StSvtData/*HybridCollection*/     *mSvtSimDataColl;     //! "StSvtRawData" from simulation (output for chain)
-  StSvtData/*HybridCollection*/     *mSvtGeantHitColl;    //!
+  StSvtData                         *mSvtSimDataColl;     //! "StSvtRawData" from simulation (output for chain)
+  StSvtData                         *mSvtGeantHitColl;    //!
   
   //  TFile                        *mDebugFile;         //!
   TFile                        *mNtFile;        //! asi taky zlikvidovat
@@ -170,9 +185,9 @@ class StSvtSimulationMaker : public StMaker
     
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.7 2003/07/31 19:18:10 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.8 2003/11/13 16:25:00 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
 
-  ClassDef(StSvtSimulationMaker,2)
+  ClassDef(StSvtSimulationMaker,3)
 
   
 };
