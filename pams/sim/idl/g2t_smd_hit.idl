@@ -1,6 +1,0 @@
-struct g2t_smd_hit {
-        long id;
-        long track_p;
-        long volume_id;
-        float de;
-};
