@@ -40,21 +40,23 @@ public:
    virtual char * type ();
    virtual char * version ();
    virtual SOC_PTR_T ptr ();
-   virtual char * soRef ();
    virtual void lock (unsigned char lock);
    virtual unsigned char lock ();
+   virtual char * listing ();
 //:----------------------------------------------- PUB FUNCTIONS      --
-   virtual STAFCV_T attach ();
-   virtual STAFCV_T release ();
 
-//:----------------------------------------------- PRIV VARIABLES     --
 protected:
+//:----------------------------------------------- PROT VARIABLES     --
 SOC_PTR_T myPtr;
+
+//:----------------------------------------------- PROT FUNCTIONS     --
+//:**NONE**
+
 private:
+//:----------------------------------------------- PRIV VARIABLES     --
 IDREF_T myIdRef;
 string *myName;
 string *myType;
-string *mySOR;
 unsigned char myLock;
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
@@ -76,13 +78,13 @@ public:
    virtual long maxCount ();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
-   virtual char * list ();
+   virtual char * list ();			// list all objects
 
    virtual STAFCV_T addEntry (IDREF_T idRef);
    virtual STAFCV_T deleteEntry (IDREF_T idRef);
    virtual STAFCV_T unaddEntry (IDREF_T idRef);
 
-   virtual IDREF_T entry(long n);
+   virtual IDREF_T entryID(long n);
 
 protected:
 //:----------------------------------------------- PROT VARIABLES     --
@@ -93,6 +95,7 @@ protected:
 
 //:----------------------------------------------- PROT FUNCTIONS     --
 //:**NONE**
+
 private:
 //:----------------------------------------------- PRIV VARIABLES     --
 //:**NONE**
@@ -115,7 +118,7 @@ public:
    virtual char * version (); // override virtual
 
 //:----------------------------------------------- PUB FUNCTIONS      --
-   virtual char * list (); // override virtual
+   virtual char * list ();			// override virtual
    virtual STAFCV_T deleteID (IDREF_T id);
 
    virtual STAFCV_T deleteObject (const char * name, const char * type);
