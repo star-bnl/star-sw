@@ -28,6 +28,7 @@
 **:           dec 21, 1999  ppy maxChi2Primary =10 in setParameters
 **:           jan 27, 2000  ppy canItMerged beefed up
 **:           feb 10, 2000  ppy add xyError and zError
+**:           feb 14, 2000  ppy track length filled for tracks type 2 and 3
 **:<------------------------------------------------------------------*/
 #include "FtfSl3.h"
 #include <iostream.h>
@@ -287,6 +288,7 @@ int FtfSl3::fillTracks ( int maxBytes, char* buff, unsigned int token ) {
 	     uPTrack->psi   = track[i].psi  ; 
 	     uPTrack->tanl  = track[i].tanl  ; 
 	     uPTrack->z0    = track[i].z0    ; 
+	     uPTrack->trackLength  = track[i].trackLength  ;
 	     uPTrack->Errors= 0 ; // to be filled
 	     uPTrack++ ;
 	  }
@@ -308,6 +310,7 @@ int FtfSl3::fillTracks ( int maxBytes, char* buff, unsigned int token ) {
 	  uSTrack->r0    = track[i].r0    ; 
 	  uSTrack->phi0  = track[i].phi0  ; 
 	  uSTrack->z0    = track[i].z0    ; 
+	  uSTrack->trackLength  = track[i].trackLength  ;
 	  uSTrack->Errors= 0 ; // to be filled
 	  uSTrack++ ;
        }
@@ -562,7 +565,8 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
    }
 
    // run over receiver boards
-   for (iRb=0; iRb<SB_RB_NUM; iRb++) {
+// for (iRb=0; iRb<SB_RB_NUM; iRb++) {
+   for (iRb=0; iRb<6; iRb++) {
 
       if (iRb==6) { 
 	 sector++ ;	// the other Sector
@@ -579,11 +583,12 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
 	 else { 
 	    if ( sectorGeo[sector-1].phiMin < para.phiMin ) para.phiMin = sectorGeo[sector-1].phiMin ;
 	    if ( sectorGeo[sector-1].phiMax > para.phiMax ) para.phiMax = sectorGeo[sector-1].phiMax ;
+            para.phiShift = 0 ;
 	 }
 	 if ( sectorGeo[sector-1].etaMin < para.etaMin ) para.etaMin = sectorGeo[sector-1].etaMin ;
 	 if ( sectorGeo[sector-1].etaMax > para.etaMax ) para.etaMax = sectorGeo[sector-1].etaMax ;
-         para.phiShift = 0 ;
       }
+      printf ( "sector %d rb %d phi min/max %f %f \n", sector, iRb, para.phiMin, para.phiMax ) ;
 
 
       if ( !(unsigned int)seclp->rb[iRb].off) continue ;
