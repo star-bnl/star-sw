@@ -17,16 +17,8 @@ ClassImp(StDAQMaker)
 {
   fDAQReader 	= 0;
   if (inputFile && inputFile[0]) SetFile(inputFile);
-  fEvtHddr = new StEvtHddr(m_ConstSet);
-  SetOutput(fEvtHddr);	//Declare this "EvtHddr" for output
-  fDAQReaderSet = new St_ObjectSet("StDAQReader");
-  AddConst(fDAQReaderSet);
-  SetOutput(fDAQReaderSet);			//Declare for output
-  fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
-    if (!fEvtHddr) {
-    fEvtHddr = new StEvtHddr(m_ConstSet);
-    SetOutput(fEvtHddr); //Declare this "EvtHddr" for output
-  }
+  fEvtHddr = 0;
+  fDAQReaderSet = 0;
 }
 //_____________________________________________________________________________
 StDAQMaker::~StDAQMaker()
@@ -37,7 +29,16 @@ delete fEvtHddr;
 //_____________________________________________________________________________
 Int_t StDAQMaker::Init()
 {
+  fDAQReaderSet = new St_ObjectSet("StDAQReader");
+  AddConst(fDAQReaderSet); SetOutput(fDAQReaderSet);	//Declare for output
+
+  fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
+  if (!fEvtHddr) {
+    fEvtHddr = new StEvtHddr(m_ConstSet);
+    SetOutput(fEvtHddr); //Declare this "EvtHddr" for output
+  }
 // 		Get run parameters from input file
+
   return Open();  
 }
 //_____________________________________________________________________________
