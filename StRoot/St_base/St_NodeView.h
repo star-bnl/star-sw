@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_NodeView.h,v 1.12 1999/04/23 22:47:36 fine Exp $
+// $Id: St_NodeView.h,v 1.13 1999/05/29 20:52:33 fine Exp $
 // $Log: St_NodeView.h,v $
+// Revision 1.13  1999/05/29 20:52:33  fine
+// Several method to estimat range of 3D object were introduced
+//
 // Revision 1.12  1999/04/23 22:47:36  fine
 // Node family has been adjusted for St_PolyLineShape class
 //
@@ -52,6 +55,8 @@ public:
   virtual Int_t    DistancetoPrimitive(Int_t px, Int_t py);
   virtual St_NodePosition *GetPosition() const { return (St_NodePosition *)GetObject();}
   virtual St_Node *GetNode() const ;
+  virtual Int_t    GetGlobalRange(const St_NodeView *rootNode,Float_t *min, Float_t *max);
+  virtual void     GetLocalRange(Float_t *min, Float_t *max);
   virtual Int_t    GetVisibility() const {return GetNode() ? GetNode()->GetVisibility():0;}
   virtual Bool_t   IsMarked();
   virtual Bool_t   Is3D()  {return kTRUE;}

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.24 1999/05/13 19:57:26 fine Exp $
+// $Id: St_Node.cxx,v 1.25 1999/05/29 20:52:32 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.25  1999/05/29 20:52:32  fine
+// Several method to estimat range of 3D object were introduced
+//
 // Revision 1.24  1999/05/13 19:57:26  fine
 // St_Node  the TShape list has been introduced, St_Node file format has been changed
 //
@@ -513,11 +516,7 @@ void St_Node::Draw(Option_t *option)
       (gROOT->GetMakeDefCanvas())();
    }
    if (!opt.Contains("same")) gPad->Clear();
- 
-//*-*- Draw Referenced node
-   gGeometry->SetGeomLevel();
-   gGeometry->UpdateTempMatrix();
- 
+  
    AppendPad(option);
  
 //*-*- Create a 3-D View
@@ -668,6 +667,9 @@ void St_Node::ls(Option_t *option)
 //______________________________________________________________________________
 void St_Node::Paint(Option_t *opt)
 {
+//*-*- Draw Referenced node
+  gGeometry->SetGeomLevel();
+  gGeometry->UpdateTempMatrix();
   PaintNodePosition(opt);
   return; 
 }
@@ -727,8 +729,11 @@ void St_Node::PaintShape(Option_t *option)
 {
   // Paint shape of the node
   // To be called from the TObject::Paint method only
-  TAttLine::Modify();
-  TAttFill::Modify();
+  Bool_t rangeView = option && option[0]=='r';
+  if (!rangeView) {
+    TAttLine::Modify();
+    TAttFill::Modify();
+  }
 
   if (!GetVisibility()) return;
 
@@ -736,14 +741,16 @@ void St_Node::PaintShape(Option_t *option)
   TShape *shape = 0;
   while(shape = (TShape *)nextShape()) {
     if (!shape->GetVisibility())   continue;
-    shape->SetLineColor(GetLineColor());
-    shape->SetLineStyle(GetLineStyle());
-    shape->SetLineWidth(GetLineWidth());
-    shape->SetFillColor(GetFillColor());
-    shape->SetFillStyle(GetFillStyle());
-    TPadView3D *view3D=gPad->GetView3D();
-    if (view3D)
+    if (!rangeView) {
+      shape->SetLineColor(GetLineColor());
+      shape->SetLineStyle(GetLineStyle());
+      shape->SetLineWidth(GetLineWidth());
+      shape->SetFillColor(GetFillColor());
+      shape->SetFillStyle(GetFillStyle());
+      TPadView3D *view3D=gPad->GetView3D();
+      if (view3D)
           view3D->SetLineAttr(GetLineColor(),GetLineWidth(),option);
+    }
     shape->Paint(option);
   }
 }
