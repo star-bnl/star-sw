@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.30  1998/09/22 02:21:31  fisyak
+#  Fix NOROOT version
+#
 #  Revision 1.29  1998/09/21 20:30:55  perev
 #  add sgi_62
 #
@@ -68,7 +71,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/09/21 20:30:55 $ 
+#             Last modification $Date: 1998/09/22 02:21:31 $ 
 #. default setings
 
 RM := rm -f
@@ -295,7 +298,7 @@ endif
     LDFLAGS   := $(DEBUG)  -z -Wl,+s -Wl,-E 
     EXEFLAGS  := $(LDFLAGS) -Wl,-N
     SOFLAGS   := $(DEBUG)  -b -z  
-    CLIBS   :=   -lXm -lXt -lX11 -lm -lPW -ldld
+    CLIBS   :=   -lXm -lXt -lX11 -lm -lPW -ldld /usr/local/lib/libMagick.a
 
   else
     CXX     :=  CC
@@ -340,7 +343,7 @@ endif
 ifneq (,$(findstring $(STAF_ARCH),sgi_62 ))
 #  sgi_62 in sgi_52 compatible mode (VP)
   SGI62 := Yess
-  OSFID :=  irix62 sgi62 SGI62 IRIX62 CERNLIB_QMIRIX53 CERNLIB_SGI CERNLIB_UNIX NEW_ARRAY_ON
+  OSFID :=  irix62 sgi62 SGI62 IRIX62 CERNLIB_QMIRIX53 CERNLIB_SGI CERNLIB_UNIX 
   STRID := sgi
   FFLAGS    :=  $(DEBUG) -32  -static -trapuv 
   FEXTEND   :=  -extend_source

@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.18  1998/09/22 02:21:32  fisyak
+#  Fix NOROOT version
+#
 #  Revision 1.17  1998/09/18 00:32:14  fisyak
 #  Add kuip break off for Linux
 #
@@ -133,7 +136,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/09/18 00:32:14 $ 
+#           Last modification $Date: 1998/09/22 02:21:32 $ 
 #  default setings
 # Current Working Directory
 #
@@ -246,32 +249,34 @@ ifeq ($(NAME),$(PKG))
 	SUBDIRS :=
 endif                          
 ifneq ($(EMPTY),$(findstring $(LEVEL),0 1))
+ifneq ($(EMPTY),$(SUBDIRS))     
+TARGETS += $(addsuffix _all, $(SUBDIRS))
+endif
+ifndef NOROOT
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/base))
 BASE := St_base 
 endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/xdf2root))
 XDF2ROOT := xdf2root
 endif
-ifneq ($(EMPTY),$(SUBDIRS))     
-TARGETS += $(addsuffix _all, $(SUBDIRS))
-endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/.share/tables))
-TARGETS += St_Tables
+StRoot += St_Tables
 endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/StChain))
-TARGETS += StChain
+StRoot += StChain
 endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/St_*_Maker))
-TARGETS += St_Makers
+StRoot += St_Makers
 endif
 Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St_*_Maker))
 Makers  :=  $(filter-out St_calib_Maker, $(Makers))
 #Makers  :=  $(filter-out St_dst_Maker, $(Makers))
 Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
+endif
 #          I have subdrs
-.PHONY               :  all $(BASE) $(XDF2ROOT) $(TARGET) St_Tables StChain test clean clean_lib clean_share clean_obj
+.PHONY               :  all $(BASE) $(XDF2ROOT) $(TARGET) $(StRoot) test clean clean_lib clean_share clean_obj
 #      I_have_subdirs
-all:  $(BASE) $(XDF2ROOT)  $(TARGETS)
+all:  $(BASE) $(XDF2ROOT)  $(TARGETS) $(StRoot)
 ifndef NOROOT
 ROOT:      St_base xdf2root St_Makers StChain St_Tables
 St_base:
@@ -290,7 +295,7 @@ endif
 St_%_Maker: 
 	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St_$(STEM)_Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_$(STEM)_Maker.so
 endif
-%_all:  $(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
+%_all:  $(BASE)
 	$(MAKE) -f $(MakePam) -C $(STEM) $(MAKFLAGS) 
 test:  $(BASE) $(addsuffix _test, $(SUBDIRS))
 %_test: 
