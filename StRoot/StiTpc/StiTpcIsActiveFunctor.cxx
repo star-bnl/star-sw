@@ -14,6 +14,7 @@ StiTpcIsActiveFunctor::StiTpcIsActiveFunctor(int iSector, int iPadrow)
   int iRdo = rdoForPadrow(iPadrow);
   m_bWestActive = s_pRdoMasks->isOn(iSector, iRdo);
   m_bEastActive = s_pRdoMasks->isOn(24 - iSector%12, iRdo);
+  //cout << "TPC Sector :"<< iSector << " Row : "<< iPadrow<< "   "<< m_bWestActive<<"   " << m_bEastActive<< endl;
 
 } // StiTpcIsActiveFunctor
 
