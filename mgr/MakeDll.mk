@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.93 1999/06/28 00:18:39 fisyak Exp $
+# $Id: MakeDll.mk,v 1.94 1999/06/29 00:26:03 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.94  1999/06/29 00:26:03  fisyak
+# Fix h-files in subdirs
+#
 # Revision 1.93  1999/06/28 00:18:39  fisyak
 # Remove CVS from directory list
 #
@@ -206,12 +209,24 @@ endif
 
 #.
 #	Includes
+SRC_DIRS  :=$(SRC_DIR)
+suffixes  :=.c .cc .cxx .f .F .g
+FILES_ALL := $(wildcard $(addprefix $(SRC_DIR)/*,$(suffixes)))
+ALL_DIRS  :=$(strip $(sort $(dir $(wildcard $(addprefix $(SRC_DIR)/*/*,$(suffixes))))))
+ifneq (,$(ALL_DIRS))
+ALL_DIRS  := $(subst / , ,$(ALL_DIRS) )
+ALL_DIRS  := $(strip $(filter-out $(addprefix $(SRC_DIR)/,run examples doc local hold CVS), $(ALL_DIRS)))
+endif
+ifneq (,$(ALL_DIRS))
+FILES_ALL += $(foreach dir, $(ALL_DIRS), $(wildcard $(addprefix $(dir)/*,$(suffixes))))
+SRC_DIRS  += $(ALL_DIRS)
+endif
 
 # 	Define internal and external includes dirs
 INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StEvent) \
               StRoot .share .share/tables .share/$(PKG) pams inc 
 #                            StarClassLibrary/include
-INC_DIRS  := $(wildcard $(GEN_DIR) $(SRC_DIR) $(SRC_DIR)/include)
+INC_DIRS  := $(wildcard $(GEN_DIR) $(SRC_DIRS) $(SRC_DIR)/include)
 INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) $(ROOT_DIR) 
 ifneq ($(ROOT_DIR),$(STAR))
 INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
@@ -234,18 +249,6 @@ endif
 #	If NO source , NOTHING to do
 #	Skip up to the end
 #
-SRC_DIRS  :=$(SRC_DIR)
-suffixes  :=.c .cc .cxx .f .F .g
-FILES_ALL := $(wildcard $(addprefix $(SRC_DIR)/*,$(suffixes)))
-ALL_DIRS  :=$(strip $(sort $(dir $(wildcard $(addprefix $(SRC_DIR)/*/*,$(suffixes))))))
-ifneq (,$(ALL_DIRS))
-ALL_DIRS  := $(subst / , ,$(ALL_DIRS) )
-ALL_DIRS  := $(strip $(filter-out $(addprefix $(SRC_DIR)/,run examples doc local hold CVS), $(ALL_DIRS)))
-endif
-ifneq (,$(ALL_DIRS))
-FILES_ALL += $(foreach dir, $(ALL_DIRS), $(wildcard $(addprefix $(dir)/*,$(suffixes))))
-SRC_DIRS  += $(ALL_DIRS)
-endif
 FILES_ALL := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_ALL)))
 FILES_SRC  = $(filter-out      %Cint.cxx, $(FILES_ALL))
 FILES_SRC := $(filter-out %/.share/%/*.F, $(FILES_SRC))
@@ -281,7 +284,8 @@ FILES_MOD  := $(wildcard $(SRC_DIR)/St_*_Module.cxx)
 FILES_DAT  := $(wildcard $(SRC_DIR)/St_DataSet.cxx)
 FILES_XDF  := $(wildcard $(SRC_DIR)/St_XDFFile.cxx)
 ifneq (tables,$(PKGNAME))
-FILES_HH   := $(wildcard $(SRC_DIR)/*.h $(SRC_DIR)/*.hh)
+#FILES_HH   := $(wildcard $(SRC_DIR)/*.h $(SRC_DIR)/*.hh $(SRC_DIR)/*.h $(SRC_DIR)/*.hh)
+FILES_HH   := $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.h) $(wildcard $(dir)/*.hh))
 FILES_HH := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_HH)))
 ifneq (,$(FILES_HH))
 FILES_H    := $(foreach p, $(FILES_HH), $(shell grep -l ClassDef $(p)))
@@ -361,8 +365,9 @@ ifdef FILES_ORD
     endif
     ifneq (,$(NAMES_DEF))
       FILES_CINT_DEF :=$(GEN_DIR)/$(PKG)_DCint.cxx 
-      FILES_DEF_H    := $(wildcard $(addprefix $(SRC_DIR)/,$(addsuffix .h,$(NAMES_DEF)) \
-                                                           $(addsuffix .hh,$(NAMES_DEF))))
+      FILES_DEF_H    := $(foreach dir, $(SRC_DIRS), \
+                            $(wildcard $(addprefix $(dir)/,$(addsuffix .h,$(NAMES_DEF)) \
+                                                           $(addsuffix .hh,$(NAMES_DEF)))))
      ifneq (,$(wildcard $(SRC_DIR)/Stypes.h))
       FILES_DEF_H    += $(SRC_DIR)/Stypes.h
       NAMES_DEF      += Stypes
@@ -370,12 +375,14 @@ ifdef FILES_ORD
     endif
   endif
   ifneq (,$(NAMES_ORD))
-    FILES_CINT_ORD :=$(GEN_DIR)/$(PKG)_Cint.cxx 
-    FILES_ORD_H    := $(wildcard $(addprefix $(SRC_DIR)/,$(addsuffix .h,$(NAMES_ORD)) \
-                                                         $(addsuffix .hh,$(NAMES_ORD))))
+    FILES_CINT_ORD :=$(GEN_DIR)/$(PKG)_Cint.cxx
+    FILES_ORD_H    :=  $(foreach dir, $(SRC_DIRS), \
+                          $(wildcard $(addprefix $(dir)/,$(addsuffix .h,$(NAMES_ORD)) \
+                                                         $(addsuffix .hh,$(NAMES_ORD)))))
     ifneq (,$(FILES_COL))
       FILES_ORD_H  := $(FILES_COG) $(filter-out $(FILES_COL) \
-                      $(addprefix ($SRC_DIR)/, $(notdir $(FILES_COL))), $(FILES_ORD_H)) 
+                      $(foreach dir, $(SRC_DIRS), \
+                      $(addprefix ($dir)/, $(notdir $(FILES_COL))), $(FILES_ORD_H))
     endif 
     ifneq (,$(NAMES_ORDD))
       NAMES_ORD      += $(addsuffix -, $(NAMES_ORDD))
