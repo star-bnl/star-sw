@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpSlice.cc,v 1.1.1.1 2000/03/09 17:48:35 aihong Exp $
+ * $Id: StPidAmpSlice.cc,v 1.2 2000/04/17 19:32:20 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpSlice.cc,v $
+ * Revision 1.2  2000/04/17 19:32:20  aihong
+ * add height constraint in fit()
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:35  aihong
  * Installation of package
  *
@@ -139,8 +142,10 @@ void StPidAmpSlice::fit(){
         mGaussFcn->SetParLimits(2,reso*mMidBound*(1.0-vary2),reso*mMidBound*(1.0+vary2));
 
         if (mUsePathFitResult) {
+        mGaussFcn->SetParLimits(0, 0.0, mPathFittedSlice->GetMaximum()*2.0);
         mPathFittedSlice->Fit("mGaussFcn","NR");
 	}else {
+        mGaussFcn->SetParLimits(0,0.0,mSlice->GetMaximum()*2.0);
         mSlice->Fit("mGaussFcn","NR");
 	}
         mSliceInfo->setAmp(mGaussFcn->GetParameter(0)); 
