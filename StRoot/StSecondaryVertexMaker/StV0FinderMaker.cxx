@@ -19,6 +19,7 @@
 ///Begin Betty
 ///#include "StEstMaker/StEstTracker.h"
 #include "StEvent/StTrack.h"
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
 ///End Betty
 
 #include "math_constants.h"
@@ -55,9 +56,10 @@ ClassImp(StV0FinderMaker)
   StV0FinderMaker::StV0FinderMaker(const char *name):StMaker(name),
          ev0par2(0),pars(0),pars2(0),event(0),v0Vertex(0),
          prepared(kFALSE),useExistingV0s(kFALSE),dontZapV0s(kFALSE),
-         useTracker(kTrackerUseTPT),useSVT(kNoSVT),useV0Language(kV0LanguageUseCpp),
-         useXiLanguage(kXiLanguageUseCppOnCppV0),useLanguage(kLanguageUseRun),
-         useLikesign(kLikesignUseStandard),useRotating(kRotatingUseStandard)
+         useTracker(kTrackerUseTPT),useSVT(kNoSVT),useEventModel(kUseStEvent),
+	 useV0Language(kV0LanguageUseCpp),useXiLanguage(kXiLanguageUseCppOnCppV0),
+	 useLanguage(kLanguageUseRun),useLikesign(kLikesignUseStandard),
+	 useRotating(kRotatingUseStandard)
 {
   // Initializes everything that wasn't yet :
   ptV0sq = 0.;
@@ -212,8 +214,20 @@ Int_t StV0FinderMaker::Init()
  if (2&useXiLanguage) gMessMgr->Info()<<"StV0FinderMaker :    BE CAREFUL : will NOT store C++ Xi, although asked."<<endm;
  if (4&useXiLanguage) gMessMgr->Info()<<"StV0FinderMaker :    BE CAREFUL : will NOT store C++ Xi, although asked."<<endm;
 
- return StMaker::Init();
+ //Betty 
+ if (!useEventModel) gMessMgr->Info()<<"StV0FinderMaker :  Will use StEvent files"<<endm;
+ if (useEventModel)  gMessMgr->Info()<<"StV0FinderMaker :  Will use MuDst files"<<endm;
+ if (useEventModel)  { //initialize mMuDstMaker
+   
+   mMuDstMaker = (StMuDstMaker*)GetMaker("myMuDstMaker");
+   if(!mMuDstMaker) gMessMgr->Warning("StV0FinderMaker::Init can't find a valid MuDst");
  }
+ 
+ //end Betty 
+ 
+ 
+ return StMaker::Init();
+}
 
 //____________________________________________________________________________
 
@@ -249,12 +263,31 @@ Int_t StV0FinderMaker::Prepare() {
   ITTFflag=kITKalmanFitId;
 
   // Get event 
-  event = (StEvent*) GetInputDS("StEvent");
-  if (!event)
-     {gMessMgr->Warning("StV0FinderMaker : no StEvent ; skipping event.");
-      return kStWarn;
-      }
 
+  //Betty method one:
+  if(GetEventUsage()==kUseStEvent){
+    event = (StEvent*) GetInputDS("StEvent");
+  }
+  //Betty method two:
+  else if(GetEventUsage()==kUseMuDst){ 
+    
+    StMuDst* mu = mMuDstMaker->muDst();
+    if(mu) cout<<"V0Finder :: found a MuDst"<<endl;
+    if(mu->event())cout<<"see a muEvent ... "<<endl;
+    Int_t nV0s = mu->GetNV0();
+    if(mu) event = mu->createStEvent();
+    
+    if(event) AddData(event);
+    if(event)cout<<"see a recreated StEvent!"<<endl;
+    cout<<"the number of existing v0's is "<<nV0s<<endl;
+  }
+  //end of Betty 
+  
+  if (!event)
+    {gMessMgr->Warning("StV0FinderMaker : no StEvent ; skipping event.");
+    return kStWarn;
+    }
+  
   // Get Primary Vertex Position
   StPrimaryVertex* pvert = event->primaryVertex();
   if (!pvert)
@@ -710,8 +743,19 @@ Int_t StV0FinderMaker::Make() {
   
   return kStOk;
 }
+//____________________________________________________________________________
 
-
+void StV0FinderMaker::Clear(Option_t *option=""){
+  prepared = kFALSE;
+  if(useEventModel){
+    if(mMuDstMaker){
+      if(event){
+	delete event;
+	event=0;
+      }
+    }
+  }
+}
 
 
 
@@ -754,8 +798,13 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.14 2003/11/08 18:25:54 faivre Exp $
+// $Id: StV0FinderMaker.cxx,v 1.15 2004/01/27 17:56:05 betya Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.15  2004/01/27 17:56:05  betya
+// added EventModelUsage so that the V0Finder and XiFinder can no run on
+// MuDst as well as on StEvent.  Note that the output is still in the StEvent
+// format.  Added Clear() in StV0FinderMaker.cxx to accomodate this addition.
+//
 // Revision 1.14  2003/11/08 18:25:54  faivre
 // Bfield + consistency int/short
 //

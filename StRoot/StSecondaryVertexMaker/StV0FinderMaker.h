@@ -19,7 +19,9 @@ class StTrack;
 class StPhysicalHelixD;
 
 
-
+//Betty
+class StMuDstMaker;
+//end Betty
 
 enum TrackerUsage
 {kTrackerUseTPT = 0,
@@ -31,12 +33,15 @@ enum TrackerUsage
 
 ///Begin Betty
 enum SVTUsage
-{kNoSVT = 0,
- kUseSVT = 1
- };
+  {kNoSVT = 0,
+   kUseSVT = 1
+  };
+
+enum EventModelUsage
+  {kUseStEvent = 0,
+   kUseMuDst   =1
+  };
 ///End Betty
-
-
 
 
 enum V0LanguageUsage
@@ -133,7 +138,10 @@ class StV0FinderMaker : public StMaker {
   virtual Int_t  Init();
   //virtual Int_t  InitRun(int RunNumber);
   virtual Int_t  Make();
-  virtual void   Clear(Option_t *option="") { prepared = kFALSE; }
+  
+  //Betty
+  virtual void   Clear(Option_t *option="");
+  //end Betty 
   virtual void   UseExistingV0s(Bool_t opt=kTRUE) { useExistingV0s = opt; }
   virtual void   DontZapV0s(Bool_t opt=kTRUE) { dontZapV0s = opt; }
   virtual Bool_t UseV0() { return kFALSE; }
@@ -153,45 +161,56 @@ class StV0FinderMaker : public StMaker {
   virtual Int_t  GetRotatingUsage() {return useRotating;}
   virtual void   Trim();
 
+  //Betty 
+  virtual void SetEventUsage(Int_t opt=0){useEventModel=opt;}
+  virtual Int_t  GetEventUsage(){return useEventModel;}
+  //end Betty
+  
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.5 2003/11/08 18:25:48 faivre Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
+    {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.6 2004/01/27 17:56:06 betya Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  
  protected:
-  virtual Int_t Prepare();
+  virtual Int_t Prepare();         //!
   St_ev0_ev0par2* ev0par2;         //!
   ev0_ev0par2_st* pars;            //!
   ev0_ev0par2_st* pars2;           //!
   StEvent* event;                  //!
   StV0Vertex* v0Vertex;            //!
-  double ptV0sq;
-  double Bfield;
-  unsigned short trks;
-  unsigned short ptrks;
-  unsigned short ntrks;
-  Bool_t prepared;
-  Bool_t useExistingV0s;
-  Bool_t dontZapV0s;
-  Int_t useTracker;
-  Int_t useSVT;///Betty
-  Int_t useV0Language;
-  Int_t useXiLanguage;
-  Int_t useLanguage;
-  Int_t useLikesign;
-  Int_t useRotating;
-  int det_id_v0;
-  int ITTFflag;
   
-  int maxtracks;
+   //Betty
+  StMuDstMaker* mMuDstMaker;       //!
+  //end Betty
+  
+  double ptV0sq;                   //! 
+  double Bfield;		   //!
+  unsigned short trks;		   //!
+  unsigned short ptrks;		   //!
+  unsigned short ntrks;		   //!
+  Bool_t prepared;		   //!
+  Bool_t useExistingV0s;           //!
+  Bool_t dontZapV0s;		   //!
+  Int_t useTracker;		   //!
+  Int_t useSVT;        //Betty	   //!
+  Int_t useEventModel; //Betty     //!
+  Int_t useV0Language;		   //!
+  Int_t useXiLanguage;		   //!
+  Int_t useLanguage;               //!
+  Int_t useLikesign;		   //!
+  Int_t useRotating;		   //!
+  int det_id_v0;		   //!
+  int ITTFflag;		           //!
+  
+  int maxtracks;                   //!
   StTrack** trk;                   //!
   unsigned short* ntrk;            //!
   unsigned short* ptrk;            //!
   short* hits;                     //!
-  int* detId;                    //!
+  int* detId;                      //!
   double* pt;                      //!
   double* ptot;                    //!
   unsigned short *trkID;           //!
   StPhysicalHelixD* heli;          //!
-  StThreeVectorD mainv;
+  StThreeVectorD mainv;            //!
 
   ClassDef(StV0FinderMaker,0)
 
@@ -200,8 +219,13 @@ class StV0FinderMaker : public StMaker {
 #endif
 
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.h,v 1.5 2003/11/08 18:25:48 faivre Exp $
+// $Id: StV0FinderMaker.h,v 1.6 2004/01/27 17:56:06 betya Exp $
 // $Log: StV0FinderMaker.h,v $
+// Revision 1.6  2004/01/27 17:56:06  betya
+// added EventModelUsage so that the V0Finder and XiFinder can no run on
+// MuDst as well as on StEvent.  Note that the output is still in the StEvent
+// format.  Added Clear() in StV0FinderMaker.cxx to accomodate this addition.
+//
 // Revision 1.5  2003/11/08 18:25:48  faivre
 // Bfield + consistency int/short
 //
