@@ -404,6 +404,10 @@ c fill ntuple 500 = pixel information
                      kmcid = tpmcpix(kpix).mcid
                      vec(3)=kadc
                      vec(2) = ktdc*time_bucket
+c I'm tired of answering the same question of why there is a time
+c  offset between the pixels and the hits, so offset the pixels too
+                     vec(2) = vec(2) - 
+     +                    3.0*tsspar(1).tau*tsspar(1).v_drift
                      call hfn(500+ihisto,vec)
                      kpix=kpix+1
                   enddo
