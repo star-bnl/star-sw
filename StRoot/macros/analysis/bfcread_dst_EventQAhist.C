@@ -1,7 +1,7 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.1 1999/11/18 18:19:56 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.2 1999/11/18 19:36:04 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
-// Revision 1.1  1999/11/18 18:19:56  kathy
-// adding macro bfcread_dst_EventQAhist.C which reads .dst.root file, fills StEvent and then runs the StEventQAMaker to make QA histograms from StEvent - uses macro bfcread_dst_EventQAhist.C
+// Revision 1.2  1999/11/18 19:36:04  kathy
+// fix to pick up library in the new area
 //
 //======================================================================
 // owner:  Curtis Lansdell
@@ -24,17 +24,14 @@
 //======================================================================
 
 class StChain;
-class St_DataSet;
-
 StChain *chain;
-St_DataSet *Event;
 
 TBrowser *brow=0;
 
-void bfcread_dst_EventQAhist(Int_t nevents=1, 
+void bfcread_dst_EventQAhist(Int_t nevents=10, 
              const char *MainFile="/star/rcf/test/dev/tfs_Solaris/Tue/year_1b/set0352_01_35evts.dst.root",
              const Char_t *MakerHist="EventQA",
-             const Char_t *psFile="QA_hist.ps",
+             const Char_t *psFile="EventQA_hist.ps",
              const Char_t *PageTitle="")
 {
 //
@@ -55,11 +52,9 @@ void bfcread_dst_EventQAhist(Int_t nevents=1,
   gSystem->Load("StarClassLibrary");
   gSystem->Load("St_QA_Maker");  
 
-
   gSystem->Load("StEvent");
-  gSystem->Load("StMagF");
   gSystem->Load("StEventMaker");
-  gSystem->Load("StEventQAMaker");
+
 
 //  Setup top part of chain
   chain = new StChain("MyChain");
@@ -94,9 +89,7 @@ void bfcread_dst_EventQAhist(Int_t nevents=1,
   NoHist = HU->ListHists(MakerHist);
   cout << " bfcread_dst_QAhist.C, No. of Hist we have == " << NoHist << endl;
 
-
-          brow = new TBrowser("BName","BTitle");    
-
+ 
 // loop over events:
   int iev=0,iret=0;
  EventLoop: if (iev<nevents && !iret) {  // goto loop code
@@ -108,6 +101,8 @@ void bfcread_dst_EventQAhist(Int_t nevents=1,
  }
 
   cout <<  " bfcread_dst_EventQAhist.C, passed chain->Make !!!" << endl ;
+
+  brow = new TBrowser("BName","BTitle");   
 
 // the following methods are already set to default values in St_QA_Maker::Init - now write over them
    EventQA->SetDraw(kTRUE);
