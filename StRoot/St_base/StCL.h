@@ -5,8 +5,11 @@
 // The set of methods to work with the plain matrix / vector
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: StCL.h,v 1.7 1999/11/18 14:35:20 fine Exp $
+// $Id: StCL.h,v 1.8 1999/12/08 18:08:03 fine Exp $
 // $Log: StCL.h,v $
+// Revision 1.8  1999/12/08 18:08:03  fine
+// void * zero operation have been introduced
+//
 // Revision 1.7  1999/11/18 14:35:20  fine
 // Class comment introduced
 //
@@ -64,12 +67,15 @@ class StCL  {
     static double *ucopy(const float  *a, double *b, int n);
     static float  *ucopy(const double *a, float  *b, int n);
     static double *ucopy(const double *a, double *b, int n);
+    static void  **ucopy(const void **a, void  **b, int n);
 
     static float  *uzero(float *a,  int n1, int n2);
     static double *uzero(double *a, int n1, int n2);
+    static void  **uzero(void **a,  int n1, int n2);
 
     static float  *vzero(float *a,  int n2);
     static double *vzero(double *a, int n2);
+    static void  **vzero(void **a,  int n2);
 
     static float  *vadd(const float *b,  const float *c,  float *a, int n);
     static double *vadd(const double *b, const double *c, double *a, int n);
@@ -378,6 +384,11 @@ inline double *StCL::ucopy(const double *b, double *a, int n)
 { if (n <= 0) return 0; memcpy(a,b,n*sizeof(double)); return a;}
 
 //________________________________________________________
+inline void **StCL::ucopy(const void **b, void  **a, int n)
+{ if (n <= 0) return 0; memcpy(a,b,n*sizeof(void *)); return a;}
+
+
+//________________________________________________________
 inline float *StCL::vadd(const float *b, const float *c,  float *a, int n)
 { 
   if (n <= 0)  return 0;
@@ -457,6 +468,14 @@ inline double *StCL::uzero(double *a, int n1, int n2)
 }
 
 //________________________________________________________
+inline void **StCL::uzero(void **a, int n1, int n2)
+{ 
+  // Attention: n1, n2 is "Fortran-like index
+  // namely the first element has index "1" 
+  return vzero(&a[n1-1],n2-n1+1);
+}
+
+//________________________________________________________
 inline float *StCL::vzero(float *a, int n1)
 { 
   if (n1 <= 0) return 0;
@@ -468,6 +487,13 @@ inline double *StCL::vzero(double *a, int n1)
 { 
   if (n1 <= 0) return 0;
   return (double *)memset(a,0,n1*sizeof(double));
+}
+
+//________________________________________________________
+inline void **StCL::vzero(void **a, int n1)
+{ 
+  if (n1 <= 0) return 0;
+  return (void **)memset(a,0,n1*sizeof(void *));
 }
 
 #endif
