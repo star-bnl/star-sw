@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.2 1999/08/06 14:26:38 fisyak Exp $
+// $Id: StBFChain.h,v 1.3 1999/08/10 17:10:52 fisyak Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.3  1999/08/10 17:10:52  fisyak
+// Exprot EChainOptions into rootcint
+//
 // Revision 1.2  1999/08/06 14:26:38  fisyak
 // put back xdf out option
 //
@@ -23,6 +26,26 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include "StChain.h"
+//_____________________________________________________________________
+enum EChainOptions { 
+  kFIRST   ,
+  kSD97    ,kSD98    ,kY1a     ,kY1b     ,kY1c     ,          // time stamps
+  kES99    ,kER99    ,kY1d     ,kY1e     ,kY2a     ,
+  kEval    ,kOFF     ,kXIN     ,kXOUT    ,kGSTAR   ,          // Chains, options
+  kTDAQ    ,kFZIN    ,kGEANT   ,
+  kFieldOn ,kFieldOff,kHalfField,                             // Magnetic Field
+  kTPC     ,kTSS     ,kTRS     ,kMINIDAQ ,kTFS     ,kTCL     ,kTPT     ,// TPC
+  kSVT     ,kSRS     ,kSTK     ,                              // SVT  
+  kFTPC    ,kFSS     ,kFCL     ,kFPT     ,                    // FTPC
+  kEMS     ,kEMC     ,                                        // EMC
+  kTRG     ,kCTF     ,kMWC     ,kL3T     ,
+  kRICH    ,                                                  // RICH
+  kGLOBAL  ,kMATCH   ,kPRIMARY ,kV0      ,kXI      ,kKINK    ,// Global Chain
+  kDST     ,kEVENT   ,kANALYSIS,kQA      ,                    // Dst
+  kTREE    ,kAllEvent,kDISPLAY ,kLAST    ,                    // StEvent
+  kDEFAULT ,
+  kMakeDoc ,kDEBUG   ,kHIGZ
+};
 
 class St_XDFFile;
 
@@ -40,7 +63,7 @@ class StBFChain : public StChain {
    void               SetOption(Int_t k);
    Bool_t             GetOption(Int_t k);
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.2 1999/08/06 14:26:38 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.3 1999/08/10 17:10:52 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif
