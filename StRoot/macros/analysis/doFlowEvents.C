@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.13 2000/05/19 22:17:43 posk Exp $
+// $Id: doFlowEvents.C,v 1.14 2000/06/05 15:22:19 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -19,9 +19,17 @@
 // If 'file' ends in 'event.root' a StEvent file is used.
 // If 'file' ends in 'flowevent.root' a StFlowEvent file is used.
 // If 'file' ends in 'flownanoevent.root' a StFlowNanoEvent file is used.
+// If 'file' ends in 'flowpicoevent.root' a StFlowPicoEvent file is used.
 //
-// If path begins with '-', 'file' will be taken to be a single file
-// to be processed.
+//  inputs:
+//      nevents = # events to process
+//      path = a. directory you want files from
+//             b. "-" to get just the one file you want
+//      file = a. file names in directory (takes all files)
+//             b. the 1 particular full file name (with directory) you want
+//      qaflag = "off"  - doesn't do anything now
+//      wrStEOut = flag to turn on=1, off=0 writing of output test.event.root
+//                 file --- set to off by default 
 //
 // Usage: 
 // doFlowEvents.C(nevents, "-", "some_directory/some_dst_file.xdf")
@@ -37,8 +45,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
-// Revision 1.13  2000/05/19 22:17:43  posk
-// Correct default input file.
+// Revision 1.14  2000/06/05 15:22:19  posk
+// Fixed typo in EOF recognition.
+//
 //
 // Revision 1.12  2000/05/18 18:12:06  posk
 // Updated to doEvents.C
@@ -80,7 +89,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 Int_t    usePath = 0;
-Int_t    usePath = 0;
 Int_t    nFile = 0;
 TString  thePath;
 TString  theFileName;
@@ -93,19 +101,18 @@ TBrowser *b=0;
 
 const char *dstFile = 0;
 const char *xdfFile = 0;
-const char *mdcFile = 0;
-const char *fileList[] = {dstFile, xdfFile, mdcFile, 0};
+const char *fileList[] = {dstFile, xdfFile, 0};
 
 void doFlowEvents(Int_t, const Char_t **, const char *qaflag = "",
-		  const Char_t *wrStEOut = "false");
+		  const Int_t wrStEOut = 0);
 void doFlowEvents(Int_t, const Char_t *, const Char_t *, 
-		  const char *qaflag = "off", const Char_t *wrStEOut = "false");
+		  const char *qaflag = "off", const Int_t wrStEOut = 0);
 void doFlowEvents(Int_t nevents = 2);
 
 
 // ------------------ Here is the actual method -----------------------------------------
 void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
-		  const Char_t *wrStEOut)
+		  const Int_t wrStEOut)
 {
   cout <<  endl << endl <<" doFlowEvents -  input # events = " << nevents << endl;
   Int_t ilist=0;
@@ -136,7 +143,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
 
   gSystem->Load("StFlowMaker");
   gSystem->Load("StFlowTagMaker");
-  //gSystem->Load("StFlowAnalysisMaker");
+  gSystem->Load("StFlowAnalysisMaker");
   
   // Make a chain with a file list
   chain  = new StChain("StChain");
@@ -168,8 +175,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
     //IOMk->SetDebug();
     StEventMaker *readerMaker =  new StEventMaker("events", "title");
     StFlowMaker* flowMaker = new StFlowMaker();
-    // WriteOut StEvent
-    if (wrStEOut != "false") {
+    if (wrStEOut) {
+      // Write out StEvent
       cout << "doFlowEvents - will write out .event.root file" << endl << endl;
       StTreeMaker *outMk = new StTreeMaker("EvOut", "", "bfcTree");
       outMk->SetIOMode("w");
@@ -177,7 +184,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
       outMk->IntoBranch("eventBranch", "StEvent");
     }
     
-  } else if (strstr(fileList[0], "nano")==0) {
+  } else if (strstr(fileList[0], "nano")==0 && strstr(fileList[0], "pico")==0) {
     // Read StEvent (or StFlowEvent) files
     StIOMaker *IOMk = new StIOMaker("IO", "r", setFiles, "bfcTree");
     IOMk->SetIOMode("r");
@@ -187,11 +194,17 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
     //IOMk->SetDebug();
     StFlowMaker* flowMaker = new StFlowMaker();
     
-  } else {
+  } else if (strstr(fileList[0], "nano")!=0) { 
     //Read nano-DST
     StFlowMaker* flowMaker = new StFlowMaker();
     flowMaker->NanoEventRead(kTRUE);
     flowMaker->SetNanoEventFileName(fileList[0]); 
+
+  } else {
+    //Read pico-DST
+    StFlowMaker* flowMaker = new StFlowMaker();
+    flowMaker->PicoEventRead(kTRUE);
+    flowMaker->SetPicoEventFileName(fileList[0]); 
   }
   
   //////////////
@@ -224,11 +237,15 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //sprintf(makerName, "FlowAnalysis%s", flowSelect1->Number());
   //StFlowAnalysisMaker* flowAnalysisMaker1 = new StFlowAnalysisMaker(makerName, flowSelect1);
   
-  // Set read-write flages
+  //
+  // Set write flages and file names
+  //
   //flowMaker->NanoEventWrite(kTRUE);
-  flowMaker->SetNanoEventFileName(); 
-  //flowMaker->SetNanoEventFileName("flownanoevent.root"); 
+  //flowMaker->SetNanoEventFileName("testnanoevent.root"); 
+  //flowMaker->PicoEventWrite(kTRUE);
+  //flowMaker->SetPicoEventFileName("/data06/posk/flow1picoevent.root"); 
   //flowMaker->FlowEventWrite(kTRUE);
+
   //flowMaker->FlowEventRead(kTRUE);
   
   // Set Debug status
@@ -270,7 +287,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   // Event loop
   //
   int istat=0, i=1;
- EventLoop: if (i <= nevents && istat=2) {
+ EventLoop: if (i <= nevents && istat!=2) {
    cout << "============================ Event " << i
 	<< " start ============================" << endl;
    chain->Clear();
@@ -278,6 +295,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
    if (istat==2) {cout << "Last  event processed. Status = " << istat << endl;}
    if (istat==3) {cout << "Error event processed. Status = " << istat << endl;}
    i++;
+
+   //chain->Finish();
+
    goto EventLoop;
  }
   
@@ -295,13 +315,13 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   }
 }
 
-void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, const char *qaflag, const Char_t *wrStEOut)
+void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, const char *qaflag, const Int_t wrStEOut)
 {
-  const char *fileListQQ[]={0,0};
-  if (strncmp(path,"GC",2)==0) {
-    fileListQQ=0;
+  const char *fileListQQ[] = {0,0};
+  if (strncmp(path, "GC", 2)==0) {
+    fileListQQ = 0;
   } else if (path[0]=='-') {
-    fileListQQ[0]=file;
+    fileListQQ[0] = file;
   } else {
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
   }
@@ -333,9 +353,12 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* filePath="./";
   //Char_t* fileExt="flownanoevent.root";
   
+  //Char_t* filePath="/data06/posk/";
+  //Char_t* fileExt="flowpicoevent.root";
+  
   // LBNL
   //Char_t* filePath="/data06/snelling/flow/";
   //Char_t* fileExt="*.dst.root";
-  
+
   doFlowEvents(nevents, filePath, fileExt);
 }
