@@ -3,7 +3,6 @@
 // St_xdfin_Maker class for Makers                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
 #include "St_xdfin_Maker.h"
 #include "St_particle_Table.h"
 #include "StChain.h"
@@ -30,7 +29,28 @@ void St_xdfin_Maker::Finish(){
 }
 //_____________________________________________________________________________
 void St_xdfin_Maker::Init(){
-// Create tables
+// Get run parameters from input file
+     St_DataSet *set = gStChain->XDFFile()->NextEventGet(); 
+     if (set) {
+       if (strcmp(set->GetName(),"run")==0){ 
+          St_DataSet *RunSet = gStChain->GetRun();
+          SafeDelete(RunSet);
+          gStChain->DataSet()->Add(set); 
+       }
+       else {// GEANT type of events
+        if (strcmp(set->GetName(),"Run")==0){
+          St_DataSetIter local( gStChain->DataSet());
+          St_DataSet *RunSet = local.Mkdir("run");
+          St_DataSet *geant = local.Mkdir("run/geant");
+          geant->Add(set);
+	}
+        else {
+          Warning("Init","The first record has no \"run / Run\" dataset");
+          delete set;
+	 }
+       }
+     }
+
 // Create Histograms    
   
 // Registrate the Maker
@@ -39,22 +59,30 @@ void St_xdfin_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_xdfin_Maker::Make(){
   PrintInfo();
-   m_DataSet = gStChain->XDFFile()->NextEventGet();
-   if (m_DataSet){
+   St_DataSet *set = gStChain->XDFFile()->NextEventGet();
+   if (set){
      const Char_t *makertype = GetTitle();
+     const Char_t *type = 0;
+     St_DataSetIter    top(gStChain->DataSet());
+     top.Cd(gStChain->GetName());
+     if (makertype && strlen(makertype)&& strcmp(set->GetName(),"Event")==0) {
+     }
      if (makertype && strlen(makertype)) {
-       St_DataSetIter    top(gStChain->DataSet());
-       top.Cd(gStChain->GetName());
-       St_DataSet       *set = top(makertype);
-       if (!set) {
+       St_DataSet       *topset = top(makertype);
+       if (!topset) {
          top.Mkdir(makertype); 
-         set = top(makertype);
+         topset = top(makertype);
        }
        St_DataSetIter    parent(top(makertype));
-       parent.Add(m_DataSet);
+       parent.Add(set);
+     }
+     else {
+       if (strcmp(set->GetName(),"Event")==0){ 
+         St_DataSetIter    top(gStChain->DataSet());
+       }
      }
    }
-  return m_DataSet ? 0:-1;
+  return set ? 0:-1;
 }
 //_____________________________________________________________________________
 void St_xdfin_Maker::PrintInfo(){

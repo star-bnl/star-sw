@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.2 1998/07/21 01:04:39 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.3 1998/08/07 19:34:55 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.3  1998/08/07 19:34:55  fisyak
+// Add St_run_Maker
+//
 // Revision 1.2  1998/07/21 01:04:39  fisyak
 // Clean up
 //
@@ -11,7 +14,7 @@
 // St_tcl_Maker class for Makers                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
+#include "iostream.h"
 #include <stdlib.h>
 #include "St_tcl_Maker.h"
 #include "StChain.h"
@@ -20,6 +23,7 @@
 #include "tpc/St_tpg_main_Module.h"
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
+#include "tpc/St_xyz_newtab_Module.h"
 ClassImp(St_tcl_Maker)
 
 //_____________________________________________________________________________
@@ -58,7 +62,7 @@ void St_tcl_Maker::Init(){
        m_tpg_detector  = (St_tpg_detector  *) partable("tpg_detector");
        m_tpg_pad       = (St_tpg_pad       *) partable("tpg_pad");
        if (!(m_tpg_pad_plane && m_tpg_detector && m_tpg_pad)) 
-       printf("tpc/tpgpar is not initialized. Please add tss_Maker to your chain\n");
+       printf("tpc/tpgpar is not initialized. Please add run_Maker to your chain\n");
    }
 // tss parameters ?
    St_DataSet *tsspars = local("tpc/tsspars");
@@ -66,7 +70,7 @@ void St_tcl_Maker::Init(){
        St_DataSetIter partable(tsspars);
        m_tsspar = (St_tss_tsspar *) partable("tsspar");
        if (!m_tsspar) 
-       printf("tpc/tsspars is not initialized. Please add tss_Maker to your chain\n");
+       printf("tpc/tsspars is not initialized. Please add run_Maker to your chain\n");
    }
 // clustering parameters
    St_DataSet *tclpars = local("tpc/tclpars");
@@ -75,18 +79,10 @@ void St_tcl_Maker::Init(){
      m_tcl_sector_index = (St_tcl_sector_index *) partable("tcl_sector_index");
      m_tclpar           = (St_tcl_tclpar *) partable("tclpar");
      m_type             = (St_tcl_tpc_index_type *) partable("type");
-     if (!(m_tcl_sector_index && m_tclpar && m_type)) SafeDelete(tclpars);
-   }
-   if (!tclpars){
-//   Char_t *tcl_pars = "${STAR}/params/tpc/tcl_pars.xdf";
-     Char_t *tcl_pars = "/afs/rhic/star/packages/dev/params/tpc/tcl_pars.xdf";
-     St_XDFFile::GetXdFile(tcl_pars,tpc);
-     tclpars = local("tpc/tclpars");
-     St_DataSetIter partable(tclpars);
-     m_tcl_sector_index       = new St_tcl_sector_index("tcl_sector_index",1); 
-     partable.Add(m_tcl_sector_index);
-     m_tclpar           = (St_tcl_tclpar *) partable("tclpar");
-     m_type             = (St_tcl_tpc_index_type *) partable("type");
+     if (!(m_tcl_sector_index && m_tclpar && m_type)) {
+       cout << " St_tcl_Maker:  clustering parameters have not been initialized" << endl;
+       SafeDelete(tclpars);
+     }
    }
 // Create Histograms    
    StMaker::Init();
@@ -154,7 +150,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.2 1998/07/21 01:04:39 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.3 1998/08/07 19:34:55 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
