@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixF.cc,v 1.1 1999/01/30 03:59:03 fisyak Exp $
+ * $Id: StMatrixF.cc,v 1.2 1999/03/07 15:02:20 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StMatrixF.cc,v $
- * Revision 1.1  1999/01/30 03:59:03  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/03/07 15:02:20  wenaus
+ * fix scope problems
+ *
+ * Revision 1.2  1999/03/07 15:02:20  wenaus
+ * fix scope problems
  *
  * Revision 1.1  1999/01/30 03:59:03  fisyak
  * Root Version of StarClassLibrary
@@ -750,7 +753,8 @@ unsigned int StMatrixF::dfinv(size_t *ir) {
     }
     float *mi = mElement;
     float *mii = mElement;
-	for (unsigned int j=1; j<=i; j++) {
+    for (unsigned int i=1; i<n; i++) {
+	unsigned int ni = n - i;
 	float *mij = mi;
     unsigned int j;
 	for (j=1; j<=i; j++) {
