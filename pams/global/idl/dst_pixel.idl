@@ -23,8 +23,8 @@
  */
 
  struct dst_pixel  {
-  short secrow;       /* Packed det ID, sec., row. numbers       */
   long  padtimeadc;   /* Packed pad#, time bucket and ADC        */
+  short secrow;       /* Packed det ID, sec., row. numbers       */
  } ;
-/*  Last mod. for dst_pixel::   $Date: 1999/09/27 16:54:08 $ */
+/*  Last mod. for dst_pixel::   $Date: 1999/12/23 19:29:12 $ */
 

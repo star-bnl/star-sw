@@ -5,24 +5,19 @@
 /*  This table contains Level 3 run information       */
 
 struct dst_mon_soft_l3{
-    long id_algorithm;        /* id of the algorithm used in global l3 */
-    long id_hardware;         /* id of the hardware configuration */
-    
-    /* The following once are per TPC sector */
-    short processorId[24] ;   /* processor where the sector was reconstructed */
-    float vertex[3][24];      /* xyz coordinates of the vertex used for track */
-                              /* finding                                      */
-    short id_param[24];       /* the parameter set used in the tracker */
+    float cpuTime[24] ;       /* cpu Time used by the tracker  */
+    float vertex[3][24];      /* xyz coord of vertex used for track finding*/
+    long  id_algorithm;       /* id of the algorithm used in global l3 */
+    long  id_hardware;        /* id of the hardware configuration */
     long  nHits[24] ;         /* number of clusters in the sector */
     long  nTracks[24];        /* number of tracks found by the tracker */
     long  nPrimaryTracks[24] ;/* number of primary tracks found by the tracker */
-    float cpuTime[24] ;       /* cpu Time used by the tracker  */
-
-    /* For all TPC */
-    long    nTotalHits ;         /* total number of clusters in the event */
-    long    nTotalTracks;        /* total number of tracks found by the tracker */
-    long    nTotalPrimaryTracks; /* number of primary tracks found by the tracker */
-    short   triggermask;         /* the result of the trigger inquiry */
+    long  nTotalHits ;        /* total number of clusters in the event */
+    long  nTotalTracks;       /* total number of tracks found by tracker */
+    long  nTotalPrimaryTracks; /* number of primary tracks found by tracker */
+    short triggermask;        /* the result of the trigger inquiry */
+    short processorId[24] ;   /* processor where the sector was reconstructed */
+    short id_param[24];       /* the parameter set used in the tracker */
 };
-/*  Last mod. for dst_mon_soft_l3:   $Date: 1999/10/05 02:49:25 $ */
+/*  Last mod. for dst_mon_soft_l3:   $Date: 1999/12/23 19:29:12 $ */
 

@@ -5,8 +5,8 @@
  */
 
  struct egr_propagate  {
-  short       iflag;  /* switch whether to propagate to a point or radius or plane with constant z */
   float       r;      /* reference radius */
   float       x[3];   /* coordinates of target points */
   float       z;      /* constant z of target plane */
+  short       iflag;  /* switch:propagate to point/radius/plane */
 };
