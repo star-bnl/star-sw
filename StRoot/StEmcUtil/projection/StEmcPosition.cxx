@@ -19,7 +19,7 @@
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "StEvent.h"
 #include "StEventTypes.h"
-#include "StEmcGeom.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 
 ClassImp(StEmcPosition)
 
