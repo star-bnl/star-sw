@@ -1,10 +1,8 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.21 1998/10/07 15:22:38 fine Exp $ 
+// $Id: St_Table.cxx,v 1.22 1998/10/14 21:43:02 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
-// Revision 1.21  1998/10/07 15:22:38  fine
-// St_Table protected Clear() method has been intriduced to solve a clash with public Delete
-//      apart Delete the Clear method doesn't remove this object from the list of sons of the parent
-//      class. It just frees memeory the STAF table has occupied.
+// Revision 1.22  1998/10/14 21:43:02  fisyak
+// Make ami void
 //
 // Revision 1.20  1998/10/04 02:20:12  fine
 // St_Table.h Some clashes with TNamed and TObject have been fixed (affected Delete() method)
@@ -463,6 +461,8 @@ void St_Table::SetHeadFields(Text_t *name)
    if (name) SetName(name);      // Define "name" if supplied
    else SetName("unknown");      // Define the default name 
    SetType("unknown");           // Define the default type 
+   s_TableHeader->dsl_pointer = (long)this;
+
 }
 
 //______________________________________________________________________________
