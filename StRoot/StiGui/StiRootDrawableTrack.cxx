@@ -5,12 +5,8 @@ StiRootDrawableTrack::StiRootDrawableTrack()
 {
   _line = new StiRootDrawableLine();
   _hits = new StiRootDrawableHits();
-  
   _line->setRemoved(true);
   _hits->setRemoved(true);
-  mSubject = StiGuiIOBroker::instance();
-  mBroker = StiGuiIOBroker::instance();
-  mSubject->attach(this);
 }
 
 StiRootDrawableTrack::~StiRootDrawableTrack()

@@ -1,6 +1,5 @@
 #ifndef StiRootDrawableTrack_HH
 #define StiRootDrawableTrack_HH 1
-#include "StiGui/StiGuiIOBroker.h"
 #include "StiGui/StiRootDrawableLine.h"
 #include "StiGui/StiRootDrawableHits.h"
 #include "StiGui/StiTPolyLine3D.h"
@@ -16,14 +15,12 @@ class StiRootDrawableTrack : public StiDrawableTrack
 public:
     StiRootDrawableTrack();
     virtual ~StiRootDrawableTrack();
-    //virtual void getNewState()=0;
     //virtual void fillHitsForDrawing()=0;
     virtual void update();
     virtual void reset();
 protected:
     StiRootDrawableLine* _line;
     StiRootDrawableHits* _hits;
-    StiGuiIOBroker* mBroker;
 };
 
 inline void StiRootDrawableTrack::update()

@@ -8,14 +8,12 @@
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
 #include "StThreeVector.hh"
-#include "Sti/StiIOBroker.h"
 #include "Sti/StiHit.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiPlacement.h"
 #include "Sti/StiDetectorContainer.h"
-#include "StiGuiIOBroker.h"
 #include "StiRootDisplayManager.h"
 #include "StiRootDrawableHits.h"
 #include "StiRDLocalTrackSeedFinder.h"
@@ -37,7 +35,6 @@ StiRDLocalTrackSeedFinder::StiRDLocalTrackSeedFinder(const string& name,
   mdrawablehits->setRemoved(false);
   //mdrawablehits->setName("Seed Finder Hits");
   StiRootDisplayManager::instance()->addDrawable(mdrawablehits);
-  getNewState();
 }
 
 StiRDLocalTrackSeedFinder::~StiRDLocalTrackSeedFinder()
@@ -68,9 +65,8 @@ StiKalmanTrack* StiRDLocalTrackSeedFinder::makeTrack(StiHit* hit)
     mdrawablehits->push_back( pos.y() );
     mdrawablehits->push_back( pos.z() );
   }
-  _messenger <<"StiRDLocalTrackSeedFinder::getNewState() - INFO - Done."<<endl;
   mdrawablehits->fillHitsForDrawing();
-  if (StiGuiIOBroker::instance()->updateEachTrack()) 
+  if (false)
     {
       StiRootDisplayManager::instance()->draw();
       StiRootDisplayManager::instance()->update();
@@ -79,8 +75,3 @@ StiKalmanTrack* StiRDLocalTrackSeedFinder::makeTrack(StiHit* hit)
   return track;
 }
 
-void StiRDLocalTrackSeedFinder::getNewState()
-{
-  _messenger <<"StiRDLocalTrackSeedFinder::getNewState() - INFO - Started"<<endl;
-  StiLocalTrackSeedFinder::getNewState();
-}

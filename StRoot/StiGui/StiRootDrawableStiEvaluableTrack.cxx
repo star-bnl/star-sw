@@ -32,25 +32,18 @@ using namespace std;
 #include "StiRootDrawableLine.h"
 #include "StiRootDrawableHits.h"
 #include "StiRootDrawableStiEvaluableTrack.h"
-#include "StiGuiIOBroker.h"
-
 using std::sort;
 
 StiRootDrawableStiEvaluableTrack::StiRootDrawableStiEvaluableTrack()
     : StiRootDrawableTrack()
-{
-  getNewState();
+{    
+	_hits->setColor( 2 );
+	_hits->setMarkerSize( 0.3 );
+	_hits->setMarkerStyle( 3 );
 }
 
 StiRootDrawableStiEvaluableTrack::~StiRootDrawableStiEvaluableTrack()
 {}
-
-void StiRootDrawableStiEvaluableTrack::getNewState()
-{
-    _hits->setColor( mBroker->markedHitColor() );
-    _hits->setMarkerSize( mBroker->markedHitSize() );
-    _hits->setMarkerStyle( mBroker->markedHitStyle() );
-}
 
 void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
 {

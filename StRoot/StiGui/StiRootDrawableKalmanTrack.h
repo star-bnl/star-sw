@@ -14,9 +14,6 @@ public:
     virtual ~StiRootDrawableKalmanTrack();
     virtual void fillHitsForDrawing();
     virtual void reset();
-
-protected:
-    void getNewState();
 };
 
 #endif

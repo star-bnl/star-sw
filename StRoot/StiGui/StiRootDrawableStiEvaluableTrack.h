@@ -14,7 +14,6 @@ public:
     virtual void fillHitsForDrawing(); 
     virtual void reset();
 protected:
-    void getNewState();
     void setLineInfo();
 };
 

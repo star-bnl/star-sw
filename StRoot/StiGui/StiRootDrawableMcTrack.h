@@ -16,8 +16,6 @@ public:
     virtual ~StiRootDrawableMcTrack();
     virtual void fillHitsForDrawing();
     virtual void reset();
- protected:
-    void getNewState();
 };
 
 
