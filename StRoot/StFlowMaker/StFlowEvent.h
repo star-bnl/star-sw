@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.19 2000/12/08 17:03:38 oldi Exp $
+// $Id: StFlowEvent.h,v 1.20 2000/12/10 02:01:13 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,13 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.20  2000/12/10 02:01:13  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
 // Revision 1.19  2000/12/08 17:03:38  oldi
 // Phi weights for both FTPCs included.
 //
@@ -165,8 +172,10 @@ public:
   void SetPhiWeightFtpcEast(const Flow::PhiWgtFtpc_t &pPhiWgt);
   void SetPhiWeightFtpcWest(const Flow::PhiWgtFtpc_t &pPhiWgt);
 #endif
-  static void SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
-  static void SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
+  static void SetEtaTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
+  static void SetPtTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
+  static void SetEtaFtpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
+  static void SetPtFtpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   static void SetPiPlusCut(Float_t lo, Float_t hi);
   static void SetPiMinusCut(Float_t lo, Float_t hi);
   static void SetProtonCut(Float_t lo, Float_t hi);
@@ -191,9 +200,9 @@ private:
   Float_t             mCTB;                                      // CTB value sum
   Float_t             mZDCe;                                     // ZDC east
   Float_t             mZDCw;                                     // ZDC west
-  static Float_t      mEtaCuts[2][Flow::nHars][Flow::nSels];     // range absolute values
+  static Float_t      mEtaTpcCuts[2][Flow::nHars][Flow::nSels];  // range absolute values
   static Float_t      mEtaFtpcCuts[2][Flow::nHars][Flow::nSels]; // range absolute values
-  static Float_t      mPtCuts[2][Flow::nHars][Flow::nSels];      // range
+  static Float_t      mPtTpcCuts[2][Flow::nHars][Flow::nSels];   // range
   static Float_t      mPtFtpcCuts[2][Flow::nHars][Flow::nSels];  // range
   Flow::PhiWgt_t      mPhiWgt;                                   //!flattening weights (all)
   Flow::PhiWgtFtpc_t  mPhiWgtFtpcEast;                           //!flattening weights (Ftpc east)
@@ -252,11 +261,17 @@ inline void StFlowEvent::SetPhiWeightFtpcWest(const Flow::PhiWgtFtpc_t& pPhiWgtF
   memcpy (mPhiWgtFtpcWest, pPhiWgtFtpcWest, sizeof(Flow::PhiWgtFtpc_t)); }
 #endif
 
-inline void StFlowEvent::SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
-{ mEtaCuts[0][harN][selN] = lo; mEtaCuts[1][harN][selN] = hi; }
+inline void StFlowEvent::SetEtaTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
+{ mEtaTpcCuts[0][harN][selN] = lo; mEtaTpcCuts[1][harN][selN] = hi; }
 
-inline void StFlowEvent::SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
-{ mPtCuts[0][harN][selN] = lo; mPtCuts[1][harN][selN] = hi; }
+inline void StFlowEvent::SetPtTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
+{ mPtTpcCuts[0][harN][selN] = lo; mPtTpcCuts[1][harN][selN] = hi; }
+
+inline void StFlowEvent::SetEtaFtpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
+{ mEtaFtpcCuts[0][harN][selN] = lo; mEtaFtpcCuts[1][harN][selN] = hi; }
+
+inline void StFlowEvent::SetPtFtpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
+{ mPtFtpcCuts[0][harN][selN] = lo; mPtFtpcCuts[1][harN][selN] = hi; }
 
 inline void StFlowEvent::SetEventID(const Int_t& id) { mEventID = id; }
 

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.20 2000/12/08 17:27:51 oldi Exp $
+// $Id: StFlowCutTrack.cxx,v 1.21 2000/12/10 02:01:13 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,13 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.21  2000/12/10 02:01:13  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
 // Revision 1.20  2000/12/08 17:27:51  oldi
 // New release due to cvs comments in last version.
 //
@@ -143,22 +150,6 @@ StFlowCutTrack::~StFlowCutTrack() {
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowCutTrack::DetId(Float_t eta) {
-    // Returns the detector Id depending on the pseudorapidity eta.
-
-    if (TMath::Abs(eta) < 2.) {
-	return kTpcId;
-    }
-
-    else if (TMath::Abs(eta) < 4.5) {
-	return eta > 0. ? kFtpcWestId : kFtpcEastId;
-    } 
-
-    return -1;
-}
-
-//-----------------------------------------------------------------------
-
 Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
   // Returns kTRUE if the StEvent track survives all the cuts
 
@@ -172,23 +163,84 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
   Int_t nMaxPoints = pTrack->numberOfPossiblePoints();
   float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
 
-  if (DetId(eta) == kTpcId) {
+  if (pTrack->topologyMap().numberOfHits(kTpcId) ||  // Tpc track or no topologyMap available
+      (pTrack->topologyMap().data(0) == 0 && pTrack->topologyMap().data(1) == 0)) {
       mTpcTrackN++;
   }
 
-  else if (DetId(eta) == kFtpcEastId) {
+  else if (pTrack->topologyMap().numberOfHits(kFtpcEastId)) {
       mFtpcTrackN++;
       mFtpcEastTrackN++;
   }
 
-  else if (DetId(eta) == kFtpcWestId) {
+  else if (pTrack->topologyMap().numberOfHits(kFtpcWestId)) {
       mFtpcTrackN++;
       mFtpcWestTrackN++;
   }
 
   mTrackN++;
   
-  if (DetId(eta) == kFtpcEastId || DetId(eta) == kFtpcWestId) { // Ftpc track
+ if (pTrack->topologyMap().numberOfHits(kTpcId) ||  // Tpc track or no topologyMap available
+      (pTrack->topologyMap().data(0) == 0 && pTrack->topologyMap().data(1) == 0)) {
+
+    // dca
+    if (mDcaTpcCuts[1] > mDcaTpcCuts[0] && 
+	(dca < mDcaTpcCuts[0] || dca >= mDcaTpcCuts[1])) {
+      mDcaTpcCutN++;
+      return kFALSE;
+    }
+    
+    // pt
+    if (mPtTpcCuts[1] > mPtTpcCuts[0] && 
+	(pt < mPtTpcCuts[0] || pt >= mPtTpcCuts[1])) {
+      mPtTpcCutN++;
+      return kFALSE;
+    }
+    
+    // ChiSq
+    if (mChiSqTpcCuts[1] > mChiSqTpcCuts[0] && 
+	(chiSq < mChiSqTpcCuts[0] || chiSq >= mChiSqTpcCuts[1])) {
+      mChiSqTpcCutN++;
+      return kFALSE;
+    }
+    
+    // Fit Points
+    if (mFitPtsTpcCuts[1] > mFitPtsTpcCuts[0] && 
+	(nFitPoints < mFitPtsTpcCuts[0] || nFitPoints >= mFitPtsTpcCuts[1])) {
+      mFitPtsTpcCutN++;
+      return kFALSE;
+    }
+    
+    // Fit points / max points
+    if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
+	(fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
+      mFitOverMaxTpcCutN++;
+      mFitOverMaxCutN++;
+      return kFALSE;
+    }
+    
+    // eta
+    if (mEtaTpcCuts[1] > mEtaTpcCuts[0] && 
+	(eta < mEtaTpcCuts[0] || eta >= mEtaTpcCuts[1])) {
+      mEtaTpcCutN++;
+      return kFALSE;
+    }
+    
+    // Increment counters for Eta symmetry cut
+    if (eta > 0.) { 
+      mEtaSymPosTpcN++;
+      mEtaSymPosN++;
+    } 
+    
+    else { 
+      mEtaSymNegTpcN++; 
+      mEtaSymNegN++; 
+    }
+    
+    mGoodTpcTrackN++;
+  }
+
+  else if (pTrack->topologyMap().numberOfHits(kFtpcEastId) || pTrack->topologyMap().numberOfHits(kFtpcWestId)) { // Ftpc track
       
     // dca
     if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
@@ -249,63 +301,8 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
     mGoodFtpcTrackN++;
   }
 
-  else { // (DetId(eta) == kTpcId) Tpc track or otherwise!!!
-
-    // dca
-    if (mDcaTpcCuts[1] > mDcaTpcCuts[0] && 
-	(dca < mDcaTpcCuts[0] || dca >= mDcaTpcCuts[1])) {
-      mDcaTpcCutN++;
-      return kFALSE;
-    }
-    
-    // pt
-    if (mPtTpcCuts[1] > mPtTpcCuts[0] && 
-	(pt < mPtTpcCuts[0] || pt >= mPtTpcCuts[1])) {
-      mPtTpcCutN++;
-      return kFALSE;
-    }
-    
-    // ChiSq
-    if (mChiSqTpcCuts[1] > mChiSqTpcCuts[0] && 
-	(chiSq < mChiSqTpcCuts[0] || chiSq >= mChiSqTpcCuts[1])) {
-      mChiSqTpcCutN++;
-      return kFALSE;
-    }
-    
-    // Fit Points
-    if (mFitPtsTpcCuts[1] > mFitPtsTpcCuts[0] && 
-	(nFitPoints < mFitPtsTpcCuts[0] || nFitPoints >= mFitPtsTpcCuts[1])) {
-      mFitPtsTpcCutN++;
-      return kFALSE;
-    }
-    
-    // Fit points / max points
-    if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
-	(fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
-      mFitOverMaxTpcCutN++;
-      mFitOverMaxCutN++;
-      return kFALSE;
-    }
-    
-    // eta
-    if (mEtaTpcCuts[1] > mEtaTpcCuts[0] && 
-	(eta < mEtaTpcCuts[0] || eta >= mEtaTpcCuts[1])) {
-      mEtaTpcCutN++;
-      return kFALSE;
-    }
-    
-    // Increment counters for Eta symmetry cut
-    if (eta > 0.) { 
-      mEtaSymPosTpcN++;
-      mEtaSymPosN++;
-    } 
-    
-    else { 
-      mEtaSymNegTpcN++; 
-      mEtaSymNegN++; 
-    }
-    
-    mGoodTpcTrackN++;
+  else { // neither Tpc nor FTPC track
+    return kFALSE;
   }
 
   mGoodTrackN++;
@@ -327,23 +324,84 @@ Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
   Int_t nMaxPoints = gTrack->numberOfPossiblePoints();
   float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;    
 
-  if (DetId(eta) == kTpcId) {
+  if (gTrack->topologyMap().numberOfHits(kTpcId) ||  // Tpc track or no topologyMap available
+      (gTrack->topologyMap().data(0) == 0 && gTrack->topologyMap().data(1) == 0)) {
       mTpcTrackN++;
   }
 
-  else if (DetId(eta) == kFtpcEastId) {
+  else if (gTrack->topologyMap().numberOfHits(kFtpcEastId)) {
       mFtpcTrackN++;
       mFtpcEastTrackN++;
   }
 
-  else if (DetId(eta) == kFtpcWestId) {
+  else if (gTrack->topologyMap().numberOfHits(kFtpcWestId)) {
       mFtpcTrackN++;
       mFtpcWestTrackN++;
   }
 
   mTrackN++;
     
-  if (DetId(eta) == kFtpcEastId || DetId(eta) == kFtpcWestId) { // Ftpc track
+  if (gTrack->topologyMap().numberOfHits(kTpcId) ||  // Tpc track or no topologyMap available
+      (gTrack->topologyMap().data(0) == 0 && gTrack->topologyMap().data(1) == 0)) {
+      
+    // dca
+    if (mDcaTpcCuts[1] > mDcaTpcCuts[0] && 
+	(dca < mDcaTpcCuts[0] || dca >= mDcaTpcCuts[1])) {
+      mDcaTpcCutN++;
+      return kFALSE;
+    }
+
+    // pt
+    if (mPtTpcCuts[1] > mPtTpcCuts[0] && 
+	(pt < mPtTpcCuts[0] || pt >= mPtTpcCuts[1])) {
+      mPtTpcCutN++;
+      return kFALSE;
+    }
+
+    // ChiSq
+    if (mChiSqTpcCuts[1] > mChiSqTpcCuts[0] && 
+	(chiSq < mChiSqTpcCuts[0] || chiSq >= mChiSqTpcCuts[1])) {
+      mChiSqTpcCutN++;
+      return kFALSE;
+    }
+
+    // Fit Points
+    if (mFitPtsTpcCuts[1] > mFitPtsTpcCuts[0] && 
+	(nFitPoints < mFitPtsTpcCuts[0] || nFitPoints >= mFitPtsTpcCuts[1])) {
+      mFitPtsTpcCutN++;
+      return kFALSE;
+    }
+      
+    // Fit points / max points
+    if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
+	(fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
+      mFitOverMaxTpcCutN++;
+      mFitOverMaxCutN++;
+      return kFALSE;
+    }
+      
+    // eta
+    if (mEtaTpcCuts[1] > mEtaTpcCuts[0] && 
+	(eta < mEtaTpcCuts[0] || eta >= mEtaTpcCuts[1])) {
+      mEtaTpcCutN++;
+      return kFALSE;
+    }
+      
+    // Increment counters for Eta symmetry cut
+    if (eta > 0.) {
+      mEtaSymPosTpcN++;
+      mEtaSymPosN++;
+    } 
+
+    else {
+      mEtaSymNegFtpcN++; 
+      mEtaSymNegN++; 
+    }
+      
+    mGoodTpcTrackN++;
+  }
+
+  else if (gTrack->topologyMap().numberOfHits(kFtpcEastId) || gTrack->topologyMap().numberOfHits(kFtpcWestId)) { // Ftpc track
 
     // dca
     if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
@@ -404,7 +462,46 @@ Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
     mGoodFtpcTrackN++;
   }  
 
-  else { // (DetId(eta) == kTpcId) Tpc tracks or otherwise!!!
+  else { // neither Tpc nor Ftpc track
+    return kFALSE;
+  }
+
+  mGoodTrackN++;
+  return kTRUE;
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
+  // Returns kTRUE if the picotrack survives all the cuts
+
+  float eta = pPicoTrack->Eta();
+  float dca = pPicoTrack->Dca();
+  float pt = pPicoTrack->Pt();
+  float chiSq = pPicoTrack->Chi2();
+  Int_t nFitPoints = pPicoTrack->FitPts();
+  Int_t nMaxPoints = pPicoTrack->MaxPts();
+  float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
+
+  if (pPicoTrack->TopologyMap().numberOfHits(kTpcId) ||  // Tpc track or no topologyMap available
+      (pPicoTrack->TopologyMap().data(0) == 0 && pPicoTrack->TopologyMap().data(1) == 0)) {
+      mTpcTrackN++;
+  }
+
+  else if (pPicoTrack->TopologyMap().numberOfHits(kFtpcEastId)) {
+      mFtpcTrackN++;
+      mFtpcEastTrackN++;
+  }
+
+  else if (pPicoTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
+      mFtpcTrackN++;
+      mFtpcWestTrackN++;
+  }
+
+  mTrackN++;
+      
+  if (pPicoTrack->TopologyMap().numberOfHits(kTpcId) ||  // Tpc track or no topologyMap available
+      (pPicoTrack->TopologyMap().data(0) == 0 && pPicoTrack->TopologyMap().data(1) == 0)) {
       
     // dca
     if (mDcaTpcCuts[1] > mDcaTpcCuts[0] && 
@@ -450,53 +547,20 @@ Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
     }
       
     // Increment counters for Eta symmetry cut
-    if (eta > 0.) {
+    if (eta > 0.) { 
       mEtaSymPosTpcN++;
       mEtaSymPosN++;
     } 
-
-    else {
-      mEtaSymNegFtpcN++; 
-      mEtaSymNegN++; 
+      
+    else { 
+      mEtaSymNegTpcN++;
+      mEtaSymNegN++;
     }
       
     mGoodTpcTrackN++;
   }
 
-  mGoodTrackN++;
-  return kTRUE;
-}
-
-//-----------------------------------------------------------------------
-
-Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
-  // Returns kTRUE if the picotrack survives all the cuts
-
-  float eta = pPicoTrack->Eta();
-  float dca = pPicoTrack->Dca();
-  float pt = pPicoTrack->Pt();
-  float chiSq = pPicoTrack->Chi2();
-  Int_t nFitPoints = pPicoTrack->FitPts();
-  Int_t nMaxPoints = pPicoTrack->MaxPts();
-  float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
-
-  if (DetId(eta) == kTpcId) {
-      mTpcTrackN++;
-  }
-
-  else if (DetId(eta) == kFtpcEastId) {
-      mFtpcTrackN++;
-      mFtpcEastTrackN++;
-  }
-
-  else if (DetId(eta) == kFtpcWestId) {
-      mFtpcTrackN++;
-      mFtpcWestTrackN++;
-  }
-
-  mTrackN++;
-      
-  if (DetId(eta) == kFtpcEastId || DetId(eta) == kFtpcWestId) { // Ftpc track
+  else if (pPicoTrack->TopologyMap().numberOfHits(kFtpcEastId) || pPicoTrack->TopologyMap().numberOfHits(kFtpcWestId)) { // Ftpc track
       
     // dca
     if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
@@ -557,63 +621,8 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
     mGoodFtpcTrackN++;
   }
   
-  else { // (DetId(eta) == kTpcId)   Tpc track or otherwise!!!
-      
-    // dca
-    if (mDcaTpcCuts[1] > mDcaTpcCuts[0] && 
-	(dca < mDcaTpcCuts[0] || dca >= mDcaTpcCuts[1])) {
-      mDcaTpcCutN++;
-      return kFALSE;
-    }
-
-    // pt
-    if (mPtTpcCuts[1] > mPtTpcCuts[0] && 
-	(pt < mPtTpcCuts[0] || pt >= mPtTpcCuts[1])) {
-      mPtTpcCutN++;
-      return kFALSE;
-    }
-
-    // ChiSq
-    if (mChiSqTpcCuts[1] > mChiSqTpcCuts[0] && 
-	(chiSq < mChiSqTpcCuts[0] || chiSq >= mChiSqTpcCuts[1])) {
-      mChiSqTpcCutN++;
-      return kFALSE;
-    }
-
-    // Fit Points
-    if (mFitPtsTpcCuts[1] > mFitPtsTpcCuts[0] && 
-	(nFitPoints < mFitPtsTpcCuts[0] || nFitPoints >= mFitPtsTpcCuts[1])) {
-      mFitPtsTpcCutN++;
-      return kFALSE;
-    }
-      
-    // Fit points / max points
-    if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
-	(fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
-      mFitOverMaxTpcCutN++;
-      mFitOverMaxCutN++;
-      return kFALSE;
-    }
-      
-    // eta
-    if (mEtaTpcCuts[1] > mEtaTpcCuts[0] && 
-	(eta < mEtaTpcCuts[0] || eta >= mEtaTpcCuts[1])) {
-      mEtaTpcCutN++;
-      return kFALSE;
-    }
-      
-    // Increment counters for Eta symmetry cut
-    if (eta > 0.) { 
-      mEtaSymPosTpcN++;
-      mEtaSymPosN++;
-    } 
-      
-    else { 
-      mEtaSymNegTpcN++;
-      mEtaSymNegN++;
-    }
-      
-    mGoodTpcTrackN++;
+  else { // neither Tpc nor Ftpc track
+    return kFALSE;
   }
 
   mGoodTrackN++;

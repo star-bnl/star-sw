@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.8 2000/12/08 17:27:51 oldi Exp $
+// $Id: StFlowCutTrack.h,v 1.9 2000/12/10 02:01:13 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //
@@ -13,6 +13,13 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.9  2000/12/10 02:01:13  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
 // Revision 1.8  2000/12/08 17:27:51  oldi
 // New release due to cvs comments in last version.
 //
@@ -100,8 +107,6 @@ class StFlowCutTrack {
   static void    SetEtaTpc(Float_t lo, Float_t hi);
   static void    SetEtaFtpc(Float_t lo_neg, Float_t hi_neg, Float_t lo_pos, Float_t hi_pos);
 
-  static Int_t   DetId(Float_t eta);
-  
  private:
 
   static UInt_t  mTrackN;                    // number of tracks

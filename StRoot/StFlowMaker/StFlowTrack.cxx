@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.cxx,v 1.7 2000/12/08 17:27:51 oldi Exp $
+// $Id: StFlowTrack.cxx,v 1.8 2000/12/10 02:01:13 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,13 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.cxx,v $
+// Revision 1.8  2000/12/10 02:01:13  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
 // Revision 1.7  2000/12/08 17:27:51  oldi
 // New release due to cvs comments in last version.
 //
@@ -47,18 +54,4 @@ StFlowTrack::StFlowTrack() : mSelection(0) {
 
 
 StFlowTrack::~StFlowTrack() {
-}
-
-void StFlowTrack::SetDetId(Float_t eta) {
-    // Sets the detector Id depending on pseudorapidity.
-
-    if (TMath::Abs(eta) < 2.) {
-	SetDetId(kTpcId);
-    }
-
-    else if (TMath::Abs(eta) < 4.5) {
-	eta > 0. ? SetDetId(kFtpcWestId) :SetDetId(kFtpcEastId);
-    } 
-
-    return;
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoTrack.h,v 1.3 2000/10/12 22:46:39 snelling Exp $
+// $Id: StFlowPicoTrack.h,v 1.4 2000/12/10 02:01:13 oldi Exp $
 //
 // Author: Raimond Snellings, March 2000
 //
@@ -9,6 +9,13 @@
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoTrack.h,v $
+// Revision 1.4  2000/12/10 02:01:13  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
 // Revision 1.3  2000/10/12 22:46:39  snelling
 // Added support for the new pDST's and the probability pid method
 //
@@ -24,6 +31,7 @@
 #ifndef StFlowPicoTrack__h
 #define StFlowPicoTrack__h
 #include "TObject.h"
+#include "StTrackTopologyMap.h"
 
 //-----------------------------------------------------------
 
@@ -56,6 +64,7 @@ public:
    Int_t    MostLikelihoodPID()  const{ return mMostLikelihoodPID; }
    Float_t  MostLikelihoodProb() const{ return mMostLikelihoodProb; }
    Int_t    ExtrapTag()     const{ return mExtrapTag; } 
+   const StTrackTopologyMap& TopologyMap() const { return mTopology; }
 
    void  SetPt(Float_t pt)           { mPt = pt; }
    void  SetPtGlobal(Float_t gpt)    { mPtGlobal = gpt; }
@@ -77,7 +86,8 @@ public:
    void  SetPidElectron(Float_t pid) { mPidElectron = (Int_t)(pid*1000.); }
    void  SetMostLikelihoodPID(Int_t val){ mMostLikelihoodPID=val; } 
    void  SetMostLikelihoodProb(Float_t val){ mMostLikelihoodProb=val; } 
-   void  SetExtrapTag(Int_t val){ mExtrapTag=val; } 
+   void  SetExtrapTag(Int_t val){ mExtrapTag=val; }
+   void  SetTopologyMap(StTrackTopologyMap map) { mTopology = map; }
 
 private:
 
@@ -102,6 +112,7 @@ private:
    Int_t   mMostLikelihoodPID;  
    Float_t mMostLikelihoodProb;
    Int_t   mExtrapTag; //merging area tag.
+   StTrackTopologyMap mTopology;
 
    ClassDef(StFlowPicoTrack,1)
 };
