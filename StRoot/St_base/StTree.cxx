@@ -831,7 +831,7 @@ Int_t StFile::AddFile(const char *file,const char *opt)
     if (!remove) {
        // compare the full path
        // if (tit == twice->GetTitle() )
-          Warning("AddFile","File \"%s\" added twice. First found as \"%s\", it is \"%s\" now. \n"
+          Warning("AddFile","File \"%s\" is already added from \"%s\",\n\tThe file \"%s\" is accepted anyway. \n"
                 ,(const char *)base, twice->GetTitle(), (const char *)tit );
     } else       { delete twice; return 0;}
   }
