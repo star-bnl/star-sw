@@ -80,9 +80,10 @@
    gstar_settings=' ' 
 
 * SETUP LOCAL VARIABLES 
- alias/create STAFCV_OK  1
- alias/create STAFCV_BAD 0
- vec/input STAF_STATUS(1)  1
+* alias/create STAFCV_OK  1
+* alias/create STAFCV_BAD 0
+* vec/input STAF_STATUS(1)  1
+
 
 * import global macros
    macro/global/import *
