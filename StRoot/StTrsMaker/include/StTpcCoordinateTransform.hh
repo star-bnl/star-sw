@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.3 1999/02/16 23:28:46 lasiuk Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.4 1999/02/18 21:17:42 lasiuk Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,10 +16,8 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
- * Revision 1.3  1999/02/16 23:28:46  lasiuk
- * matrix(3) is a data member to avoid constructor calls
- * protection against pad<1
- * const removed from several functions (because of matrix)
+ * Revision 1.4  1999/02/18 21:17:42  lasiuk
+ * instantiate with electronics db
  *
  * Revision 1.3  1999/02/16 23:28:46  lasiuk
  * matrix(3) is a data member to avoid constructor calls
@@ -70,13 +68,14 @@
 #include "StCoordinates.hh"        // coordinate definitions
 #include "StTpcGeometry.hh"        // Abstract (never changes)
 #include "StTpcSlowControl.hh"     // Abstract (never changes)
+#include "StTpcElectronics.hh"
 
 #define DEBUG_TPC 0
 #define idb if(DEBUG_TPC) cout
 
 class StTpcCoordinateTransform {
 public:
-    StTpcCoordinateTransform(StTpcGeometry*, StTpcSlowControl*);
+    StTpcCoordinateTransform(StTpcGeometry*, StTpcSlowControl*, StTpcElectronics*);
 
     ~StTpcCoordinateTransform();
     //StTpcCoordinateTransform(const StTpcCoordinateTransform&);
@@ -129,8 +128,11 @@ private:
     StMatrix<double>  mRotate;    // (2x1)
     StMatrix<double>  mResult;    // (2x1)
     
-    StTpcGeometry    *mTPCdb;     // singleton class
-    StTpcSlowControl *mSCdb;      // singleton class
+    StTpcGeometry    *mTPCdb;         // singleton class
+    StTpcSlowControl *mSCdb;          // singleton class
+    StTpcElectronics *mElectronicsDb; // singleton class
+
+    double            mTimeBinWidth;
 };
 
 #endif
