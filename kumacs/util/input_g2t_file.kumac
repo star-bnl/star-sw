@@ -1,21 +1,34 @@
 **************************************************************************
 
-MACRO init input_g2t_file
-
+ MACRO init input_g2t_file
+   
+ 
 *** make place to keep the input
-cd /dui
+ cd /dui
 
 *** open input streams
 
-
-message 'Opening input file:' [input_g2t_file]
-newfilestream G2Tfile [input_g2t_file] r
-
+ message 'Opening input file:' [input_g2t_file]
+ newfilestream G2Tfile [input_g2t_file] r
+ 
+  if (STAF_STATUS(1).ne. 1) then
+    message ' INPUT_G2T_FILE#INIT ERROR initializing!!'
+    goto EOF
+    endif
+ 
 *** read first "non-information" event (from G2T)
-stream/getevent G2Tfile /dui/geant
-
+*  this record has /dui/Run  on it
+ stream/getevent G2Tfile /dui/geant
+  
+   if (STAF_STATUS(1).ne. 1) then
+    message ' INPUT_G2T_FILE#INIT ERROR reading Run info!!'
+    goto EOF
+   endif
+  
 cd /dui
-
+ 
+EOF:
+ 
 return 
 
 ****************************************************************
@@ -23,9 +36,16 @@ return
 MACRO read 
 
  cd /dui
-
+ 
+* ** records with /dui/Event
  stream/getevent G2Tfile /dui/geant
-
+ 
+     
+   if (STAF_STATUS(1).ne. 1) then
+    message ' INPUT_G2T_FILE#READ ERROR reading Event info!!'
+    goto EOF
+  endif
+  
  cd /dui
 
 return
