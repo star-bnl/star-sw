@@ -1,5 +1,5 @@
 /**
- * $Id $
+ * $Id: StMiniMcMaker.h,v 1.4 2002/06/07 02:22:00 calderon Exp $
  * \file  StMiniMcMaker.h
  * \brief Filling of StMiniMcEvent classes from StMcEvent, StEvent, StAssociationMaker
  * 
@@ -10,6 +10,11 @@
  * Fills the mDst of the association maker results.
  * basically an amalgamation of the flow maker and
  * manuel calderon de la barca's code.
+ *
+ * $Log: StMiniMcMaker.h,v $
+ * Revision 1.4  2002/06/07 02:22:00  calderon
+ * Protection against empty vector in findFirstLastHit
+ * $Log$ and $Id$ plus header comments for the macros
  *
  */
 

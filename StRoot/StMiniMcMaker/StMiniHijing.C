@@ -1,14 +1,16 @@
 //////////////////////////////////////////////////////////////////////
+// $Id: StMiniHijing.C,v 1.3 2002/06/07 02:21:59 calderon Exp $
 // owner: Manuel Calderon de la Barca Sanchez
 //
-// what it does: reads .geant.root file, 
-//               runs a chain of 4 makers: 
-//                 StEventReaderMaker, StMcEventMaker,StAssociationMaker,
-//                 StMcAnalysisMaker
+// what it does: reads .geant.root file from hijing data, produces minimc.root file 
+//               runs a chain with the makers: 
+//                 StMcEventMaker,StAssociationMaker,
+//                 StMiniMcEventMaker
+// $Log: StMiniHijing.C,v $
+// Revision 1.3  2002/06/07 02:21:59  calderon
+// Protection against empty vector in findFirstLastHit
+// $Log$ and $Id$ plus header comments for the macros
 //
-// note: for more info on StMcEvent and StAssociationMaker, do a 
-//      cvs checkout and say "make" in the doc/tex directory - you'll
-//      get a ps file with user guide and reference manual.
 //////////////////////////////////////////////////////////////////////
 
 class StChain;
