@@ -7,15 +7,24 @@
 //
 
 #include <iostream>
+#include "TROOT.h"
+#include "TSystem.h"
+#include "TStyle.h"
+#include "TTree.h"
+#include "TFile.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TCanvas.h"
+#include "TPostScript.h"
 
 void SetResiduals()
 {
 }
 
 
-void RunStiEvaluation(const char* evalFName="Evaluation.root",
-		      const char* histFName="EvalHists.root",
-		      const char* postFName="EvalHists.ps",
+void RunStiEvaluation(const char* evalFName="~mmiller/Evaluation.root",
+		      const char* histFName="~mmiller/EvalHists.root",
+		      const char* postFName="~mmiller/EvalHists.ps",
 		      Int_t debug = 0)
 {
   //File stuff - input/output files open and setup
@@ -39,19 +48,19 @@ void RunStiEvaluation(const char* evalFName="Evaluation.root",
 
    cout << "Create histograms" << endl;
    //1. Px
-   hstpx= new TH1F("hstpx","StiTrack Px Distribution",100,-2,2);
+   TH1* hstpx= new TH1F("hstpx","StiTrack Px Distribution",100,-2,2);
    //2. Py
-   hstpy= new TH1F("hstpy","StiTrack Py Distribution",100,-2,2);
+   TH1* hstpy= new TH1F("hstpy","StiTrack Py Distribution",100,-2,2);
    //3. Pz
-   hstpz= new TH1F("hstpz","StiTrack Pz Distribution",100,-2,2);
+   TH1* hstpz= new TH1F("hstpz","StiTrack Pz Distribution",100,-2,2);
    //3. Pt
-   hstpt = new TH1F("hstpt","StiTrack Pt Distribution",100,0,2);
+   TH1* hstpt = new TH1F("hstpt","StiTrack Pt Distribution",100,0,2);
    //Momentum Residual Hists
-   h2pz = new TH2F("h2pz","StiTrack vs. Global Pz",256,-1,1,256,-1,1);
-   h2pt = new TH2F("h2pt","StiTrack vs. Global Pt",256,0,2,256,0,2);
-   h2mpt = new TH2F("h2mpt","StiTrack vs. Monte Carlo Pt",256,0,2,256,0,2);
-   hpzGvsSt =new TH1F("hpzGvsSt","Fractional Difference, ITTF and Global Pt",256,-.2,.2);
-   hptMvsSt =new TH1F("hptMvsSt","Fractional Difference, ITTF and Monte Carlo Pt",256,-1,1);
+   TH1* h2pz = new TH2F("h2pz","StiTrack vs. Global Pz",256,-1,1,256,-1,1);
+   TH1* h2pt = new TH2F("h2pt","StiTrack vs. Global Pt",256,0,2,256,0,2);
+   TH1* h2mpt = new TH2F("h2mpt","StiTrack vs. Monte Carlo Pt",256,0,2,256,0,2);
+   TH1* hpzGvsSt =new TH1F("hpzGvsSt","Fractional Difference, ITTF and Global Pt",256,-.2,.2);
+   TH1* hptMvsSt =new TH1F("hptMvsSt","Fractional Difference, ITTF and Monte Carlo Pt",256,-1,1);
    
    
   cout << "Plotting" <<endl;
@@ -59,7 +68,7 @@ void RunStiEvaluation(const char* evalFName="Evaluation.root",
   //////////////// page 1 //////////////////////////////////////////////
 
   ps->NewPage();
-  canvas1=new TCanvas("canvas1","ITTF Momentum", 425,550);
+  TCanvas* canvas1=new TCanvas("canvas1","ITTF Momentum", 425,550);
   canvas1->Divide(2,2);
 
   canvas1->cd(1);
@@ -91,7 +100,7 @@ void RunStiEvaluation(const char* evalFName="Evaluation.root",
   //////////////// page 2 //////////////////////////////////////////////
 
   ps->NewPage();
-  canvas2 = new TCanvas("canvas2","Momentum Comparison", 425, 550);
+  TCanvas* canvas2 = new TCanvas("canvas2","Momentum Comparison", 425, 550);
   canvas2->Divide(2,2);
 
   canvas2->cd(1);
@@ -129,12 +138,12 @@ void RunStiEvaluation(const char* evalFName="Evaluation.root",
   //////////////// page 3 //////////////////////////////////////////////
 
   ps->NewPage();
-  canvas4 = new TCanvas("canvas4","Track Reconstruction Charateristics",425,550);
+  TCanvas* canvas4 = new TCanvas("canvas4","Track Reconstruction Charateristics",425,550);
 
   //3. Pz
-  hstc2= new TH1F("hstc2","StiTrack Chi2 Distribution",100,-1,1);
+  TH1* hstc2= new TH1F("hstc2","StiTrack Chi2 Distribution",100,-1,1);
   //3. Pt
-  hgc2 = new TH1F("hgc2","Global Track Chi2 Distribution",100,0,10);
+  TH1* hgc2 = new TH1F("hgc2","Global Track Chi2 Distribution",100,0,10);
   canvas4->Divide(1,1); // kludge for TPostScript
 
   canvas4->cd(1);
@@ -148,26 +157,26 @@ void RunStiEvaluation(const char* evalFName="Evaluation.root",
   //////////////// page 4 //////////////////////////////////////////////
 
   ps->NewPage();
-  canvas5 = new TCanvas("canvas5", "Track Residuals", 425,550);
+  TCanvas* canvas5 = new TCanvas("canvas5", "Track Residuals", 425,550);
   canvas5->Divide(2,2);
 
   canvas5->cd(1);
-  hresx=new TH1F("hresx","StiTrack Residual in X",256,-.2,.2);
+  TH1* hresx=new TH1F("hresx","StiTrack Residual in X",256,-.2,.2);
   TestTree->Draw("nodeLocalX-hitLocalX >> hresx","abs(nodeLocalX-hitLocalX)<.2 && nodeHasHit==1","goff");
   hresx->Draw();
 
   canvas5->cd(2);
-  hresy=new TH1F("hresy","StiTrack Residual in Y",256,-.2,.2);
+  TH1* hresy=new TH1F("hresy","StiTrack Residual in Y",256,-.2,.2);
   TestTree->Draw("nodeLocalY-hitLocalY >> hresy","abs(nodeLocalY-hitLocalY)<.2 && nodeHasHit==1","goff");
   hresy->Draw();
 
   canvas5->cd(3);
-  hresz=new TH1F("hresz","StiTrack Residual in Z",256,-.2,.2);
+  TH1* hresz=new TH1F("hresz","StiTrack Residual in Z",256,-.2,.2);
   TestTree->Draw("nodeLocalZ-hitLocalZ >> hresz","abs(nodeLocalZ-hitLocalZ)<.2 && nodeHasHit==1","goff");
   hresz->Draw();
 
   canvas5->cd(4);
-  hresr=new TH1F("hresr","StiTrack Residual",256,-.2,.2);
+  TH1* hresr=new TH1F("hresr","StiTrack Residual",256,-.2,.2);
   TestTree->Draw("sqrt((nodeLocalX-hitLocalX)*(nodeLocalX-hitLocalX))>> hresr","nodeHasHit==1","goff");
   hresr->Draw();
 
@@ -176,17 +185,17 @@ void RunStiEvaluation(const char* evalFName="Evaluation.root",
   //////////////// page 5 //////////////////////////////////////////////
 
   ps->NewPage();
-  canvas6 = new TCanvas("canvas6","Hit and Node Characteristics", 425,550);
+  TCanvas* canvas6 = new TCanvas("canvas6","Hit and Node Characteristics", 425,550);
   canvas6->Divide(1,1); // kludge for TPostScript
 
   canvas6->cd(1);
-  missedHitRZ= new TH2F("missedHitRZ","Position of Nodes without Associated Hit", 256, -100,100,256,0,200);
+  TH2* missedHitRZ= new TH2F("missedHitRZ","Position of Nodes without Associated Hit", 256, -100,100,256,0,200);
   TestTree->Draw("sqrt(nodeLocalX*nodeLocalX+nodeLocalY*nodeLocalY):nodeLocalZ >> missedHitRZ","nodeHasHit==0","goff");
   missedHitRZ->SetMarkerColor(4);
   missedHitRZ->SetMarkerStyle(20);
   missedHitRZ->SetMarkerSize(.5);
   missedHitRZ->Draw("p");
-  gotHitRZ = new TH2F("gotHitRZ","Position of Nodes Associated with a Hit", 256, -100,100,256,0,200);
+  TH2* gotHitRZ = new TH2F("gotHitRZ","Position of Nodes Associated with a Hit", 256, -100,100,256,0,200);
   TestTree->Draw("sqrt(nodeLocalX*nodeLocalX+nodeLocalY*nodeLocalY):nodeLocalZ >> gotHitRZ","nodeHasHit==1","goff");
   gotHitRZ->SetMarkerColor(3);
   gotHitRZ->SetMarkerStyle(19);
