@@ -1,5 +1,15 @@
-* $Id: geometry.g,v 1.76 2003/12/03 19:53:04 potekhin Exp $
+* $Id: geometry.g,v 1.77 2003/12/17 22:15:18 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.77  2003/12/17 22:15:18  potekhin
+* a) In accordance with recent modifications, we also
+* introduce the configuration variable for the beam
+* pipe, instead of keeping its actual parameters here
+* b) corrected the COMPLETE geometry with the newest
+* version of the svtt code (with ssd separated out)
+* c) removed obsolete variables and logic, streamlined
+* the code
+* d) better comments and formatting in a few places
+*
 * Revision 1.76  2003/12/03 19:53:04  potekhin
 * a) Corrected a small but annoying bug in
 * propagating the geo tag to reco:
@@ -274,7 +284,7 @@
               zcal,mfld,bbcm,fpdm,phmd,pixl
 
 * Qualifiers:  TPC        TOF         etc
-   Logical    mwc,pse,ems,alpipe,svtw,
+   Logical    mwc,pse,ems,svtw,
               on/.true./,off/.false./
 
 
@@ -291,7 +301,7 @@
    Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,kgeom,nmod(2),nonf(3),
               ecal_config, ecal_fill,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,
-              CorrNum, PhmdVersion, SisdConfig
+              CorrNum, PhmdVersion, SisdConfig, PipeConfig
 
 * CorrNum allows us to control incremental bug fixes in a more
 * organized manner
@@ -328,7 +338,8 @@ replace[;ON#{#;] with [
 
 * No Photon multiplicity detector or Silicin strip by default, hence init the version:
    PhmdVersion = 0
-   SisdConfig = 0
+   SisdConfig  = 0
+   PipeConfig  = 2 ! Default, Be pipe used in most of the runs =<2003
 
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
@@ -342,7 +353,7 @@ replace[;ON#{#;] with [
    {bbcm,fpdm,phmd,pixl,sisd} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
-   {ems,rich,alpipe}=off " TimeOfFlight, EM calorimeter Sector            "
+   {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
    btofconfig = 1        " ctb only                                       "
    Nsi=7; Wfr=0;  Wdm=0; " SVT+SSD, wafer number and width as in code     "
    svtw=on               " water+water manifold in svt, off for Y2000 only"
@@ -396,9 +407,14 @@ If LL>1
                   <W>;('Default: complete STAR with hadr_on,auto-split');
                   <W>;('--------------------------------------------- ');
                 }  
-  on YEAR_1S    { starting in summer: TPC, CONE, AL pipe; alpipe=on;
+  on YEAR_1S    { starting in summer: TPC, CONE, AL pipe;
+                  pipeConfig=3;  "Aluminum pipe, non standard"
                   {ftpc,vpdd,calb,ecal}=off;                           Nsi=0;
                   mwx=1;}
+*   obsoleted pipe config still kept here for reference, improved logic through pipeConfig:
+*   if (alpipe)      {call AgDETP add ('pipg.BeLeng=', 0, 1); call AgDETP add ('pipg.S1Leng=',230,1)}
+
+
   on YEAR_1A    { poor approximation to year1: TPC+CTB+FTPC;      
                   {vpdd,calb,ecal}=off;      Itof=1;                   Nsi=0;
                   mwx=1;}
@@ -472,7 +488,7 @@ If LL>1
                      sisd=on;
                      SisdConfig = 1;
 * careful! Achtung!
-                   pipe=off;   " provisional"
+                   pipeConfig=4;   " provisional"
                    pixl=on;    " put the pixel detector in"
                 }
 
@@ -770,10 +786,12 @@ If LL>1
 
    if (rich) ItCKOV = 1
    if (cave)        Call cavegeo
+
+* Pipe:
    If (LL>1)        call AgDETP new ('PIPE')
-   if (alpipe)      call AgDETP add ('pipg.BeLeng=', 0, 1)
-   if (alpipe)      call AgDETP add ('pipg.S1Leng=',230,1)
+   call AgDETP add ('pipv.pipeConfig=',pipeConfig,2);
    if (pipe)        Call pipegeo
+
    if (upst)        Call upstgeo
 
    Call AGSFLAG('SIMU',2)
@@ -795,15 +813,19 @@ If LL>1
   if(svtt) then
     if    (CorrNum==0) then
        call svttgeo
-    elseif(CorrNum==1) then 
-       call svttgeo1
+
+    elseif(CorrNum==1) then
+       call svttgeo1 ! geometry bug corrected
+
     elseif(CorrNum==2) then
-       call svttgeo2
+       call svttgeo2 ! +extra material added
+
     elseif(CorrNum==3) then
-       call svttgeo3
-    elseif(CorrNum==4) then ! switch to a larger inner shield, AND smaller beampipe support
-       call AgDETP add ('svtg.SupportVer=',2 ,1)
-       call svttgeo2
+       call svttgeo3 ! +silicon strip detector separated into its own geo file
+
+    elseif(CorrNum==4) then
+       call AgDETP add ('svtg.SupportVer=',2 ,1) ! switch to a larger inner shield, AND smaller beampipe support
+       call svttgeo3 ! +silicon strip detector separated into its own geo file
     endif
   endif
 
