@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.6 1999/02/10 20:57:40 kathy Exp $
+// $Id: St_tcl_Maker.h,v 1.7 1999/03/01 18:53:33 sakrejda Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.7  1999/03/01 18:53:33  sakrejda
+// hit eveluation switchable
+//
 // Revision 1.6  1999/02/10 20:57:40  kathy
 // added histograms to Maker
 //
@@ -48,6 +51,7 @@ class St_tcl_Maker : public StMaker {
  private:
                void                  MakeHistograms();// Histograms for tpc clustering
                Bool_t                drawinit;
+               Bool_t                m_tclEvalOn;
                St_tpg_detector       *m_tpg_detector;  //! TPC geometry parameters 
                St_tpg_pad            *m_tpg_pad;       //! characteristics unique to a given pad
 	                                          // (not used)
@@ -82,7 +86,11 @@ protected:
 
  public: 
                   St_tcl_Maker(const char *name="tpc_hits", const char *title="event/data/tpc/hits");
-   virtual       ~St_tcl_Maker();
+   virtual       ~St_tcl_Maker(); 
+   virtual void   tclEval(Bool_t flag=kFALSE){m_tclEvalOn=flag;}
+   virtual void   tclEvalOn() {tclEval(kTRUE);}                       // *MENU*
+   virtual void   tclEvalOff(){tclEval();} 
+
    virtual Int_t  Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();

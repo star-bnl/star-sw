@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.23 1999/02/27 23:10:48 sakrejda Exp $
+// $Id: St_tcl_Maker.cxx,v 1.24 1999/03/01 18:53:32 sakrejda Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.24  1999/03/01 18:53:32  sakrejda
+// hit eveluation switchable
+//
 // Revision 1.23  1999/02/27 23:10:48  sakrejda
 // auxiliary hit table eliminated
 //
@@ -223,7 +226,7 @@ Int_t St_tcl_Maker::Make(){
 			       tpseq,tpcluster,tphit,tphitau);
 	}
       }
-      if (sector_tot) { //slow simulation exist
+      if (sector_tot && m_tclEvalOn) { //slow simulation exist
 	cout << "start run_tte_hit_match" << endl;
 	St_DataSetIter geant(gStChain->DataSet("geant"));
 	St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
@@ -269,7 +272,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.23 1999/02/27 23:10:48 sakrejda Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.24 1999/03/01 18:53:32 sakrejda Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
