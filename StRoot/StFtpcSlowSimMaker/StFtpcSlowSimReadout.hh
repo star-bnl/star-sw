@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.hh,v 1.2 2001/03/06 23:36:19 jcs Exp $
+// $Id: StFtpcSlowSimReadout.hh,v 1.3 2001/04/20 12:50:26 jcs Exp $
 // $Log: StFtpcSlowSimReadout.hh,v $
+// Revision 1.3  2001/04/20 12:50:26  jcs
+// cleanup comments
+//
 // Revision 1.2  2001/03/06 23:36:19  jcs
 // use database instead of params
 //
@@ -44,7 +47,7 @@ public:
                                 // width including pad response in [um]
   void ShaperResponse(const StFtpcSlowSimCluster *cl); 
                                 // width including shaper response in [nsec]
-  void Digitize(const StFtpcSlowSimCluster *cl, const int irow);                                                                        //jcs    
+  void Digitize(const StFtpcSlowSimCluster *cl, const int irow);
                                 // add noise and fill the pixel array
                                 //     mADCArray[pad,time]
   void OutputADC() const;
@@ -53,7 +56,7 @@ public:
   float GetPadLength() const        {return pad_length; }
   
   int WhichSlice(const float time);    // which time slice
-  int WhichPad(const float phi, int &isec); //jcs
+  int WhichPad(const float phi, int &isec);
   // which pad is phi and which sector
   float TimeOfSlice(const int slice);// time for slice in nsec
   float PhiOfPad(const int pad, const int deg_or_rad);
