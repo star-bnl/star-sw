@@ -4,7 +4,7 @@
 #include "StParticleDefinition.hh"
 #include "StParticleTable.hh"
 #include "StEfficiency.h"
-#include "StEvent.h"
+#include "StEventTypes.h"
 //
 // a base class
 // for all derived StSpectraAnalysis classes

@@ -1,6 +1,6 @@
 #ifndef StSpectraCutNhit_hh
 #define StSpectraCutNhit_hh
-#include "StEvent.h"
+#include "StEventTypes.h"
 #include "StSpectraCut.h"
 
 class StSpectraCutNhit : public StSpectraCut {
@@ -17,7 +17,7 @@ class StSpectraCutNhit : public StSpectraCut {
 
   ~StSpectraCutNhit();
  
-  bool satisfiesCut(StGlobalTrack* track, StEvent* event);
+  bool satisfiesCut(StTrack* track, StEvent* event);
 
 };
 

@@ -1,5 +1,8 @@
-// $Id: StSpectraMaker.cxx,v 1.4 1999/11/22 01:54:58 ogilvie Exp $
+// $Id: StSpectraMaker.cxx,v 1.5 1999/11/28 20:22:06 ogilvie Exp $
 // $Log: StSpectraMaker.cxx,v $
+// Revision 1.5  1999/11/28 20:22:06  ogilvie
+// updated to work with new StEvent
+//
 // Revision 1.4  1999/11/22 01:54:58  ogilvie
 // generalised analysis containers to beany object that inherits from StSpectraAnalysis
 //
@@ -20,12 +23,16 @@
 #include "StSpectraMaker.h"
 #include "StChain.h"
 #include "StRun.h"
-#include "StEvent.h"
+#include "StEventTypes.h"
+#include "StTpcDeviantSpectraAnalysis.h"
 #include "StMessMgr.h"
 #include "StEfficiency.h"
-#include <vector>
 
-static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.4 1999/11/22 01:54:58 ogilvie Exp $";
+
+#include <vector>
+#include <fstream.h>
+
+static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.5 1999/11/28 20:22:06 ogilvie Exp $";
 
 StSpectraMaker::StSpectraMaker(const Char_t *name) : StMaker(name) {
 }
@@ -39,6 +46,7 @@ Int_t StSpectraMaker::Init() {
   //
   // create the analyses that are stored in the file analysis.dat, 
   // 
+
   ifstream from("StRoot/StSpectraMaker/analysis.dat");
   while (!from.eof()) {
     string particleName;
@@ -142,6 +150,7 @@ Int_t StSpectraMaker::Finish() {
   mOutput->Close();
   return kStOK;
 }
+
 
 ClassImp(StSpectraMaker)
 

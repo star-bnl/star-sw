@@ -11,10 +11,10 @@ StSpectraCutDCA::StSpectraCutDCA(double lowLimit, double highLimit){
 StSpectraCutDCA::~StSpectraCutDCA() {
 }
 
-bool StSpectraCutDCA::satisfiesCut(StGlobalTrack* track, StEvent* event){
+bool StSpectraCutDCA::satisfiesCut(StTrack* track, StEvent* event){
   StVertex* primvtx = event->primaryVertex();
 
-  float dca = track->helix().distance(primvtx->position());
+  float dca = track->geometry()->helix().distance(primvtx->position());
   if (dca > mLowLimit && dca < mHighLimit) { 
     return true;
   } else {
