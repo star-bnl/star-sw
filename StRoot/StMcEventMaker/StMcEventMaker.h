@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.9 2003/02/19 03:17:04 calderon Exp $
+ * $Id: StMcEventMaker.h,v 1.10 2003/08/20 18:51:01 calderon Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.10  2003/08/20 18:51:01  calderon
+ * Filling of Tof and Pixel classes.
+ *
  * Revision 1.9  2003/02/19 03:17:04  calderon
  * Code to fill the StMcCtbHitCollection from the g2t tables by the Gansinator.
  *
@@ -66,7 +69,7 @@ public:
     StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.9 2003/02/19 03:17:04 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.10 2003/08/20 18:51:01 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -80,6 +83,9 @@ public:
     Bool_t  doUseBemc;             //!
     Bool_t  doUseBsmd;             //!
     Bool_t  doUseCtb;              //!
+    Bool_t  doUseTofp;             //!
+    Bool_t  doUseTof;              //!
+    Bool_t  doUsePixel;            //!
 
     void   printEventInfo();                               // *MENU* 
     void   printEventInfoForEmcDet(unsigned int det=1);    // *MENU* 
