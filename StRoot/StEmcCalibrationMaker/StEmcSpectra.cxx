@@ -237,7 +237,9 @@ Bool_t StEmcSpectra::GetOccupancy(Float_t minimum,Float_t* m,
   }
   if(temp==0) return kFALSE;
   avg=avg/temp;
-  sigma=sqrt(sigma/temp-avg*avg);
+  sigma = sigma/temp-avg*avg;
+  if(sigma<0) sigma=0;
+  sigma=sqrt(sigma);
   number=number/temp;
   *m=avg;
   *r=sigma;

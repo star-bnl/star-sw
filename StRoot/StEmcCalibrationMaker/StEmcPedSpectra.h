@@ -27,7 +27,7 @@ class StEmcPedSpectra : public StEmcSpectra
   protected:   
   public: 
            
-                    StEmcPedSpectra(const char*, Int_t = 100, Float_t = 0, Float_t = 100); ///< Default constructor 
+                    StEmcPedSpectra(const char*, Int_t = 150, Float_t = 1, Float_t = 151); ///< Default constructor 
   virtual           ~StEmcPedSpectra(); ///< Default destructor
 					 Bool_t   Fill(TH1F*,StEvent*);	
            Bool_t   CalculatePedestals();

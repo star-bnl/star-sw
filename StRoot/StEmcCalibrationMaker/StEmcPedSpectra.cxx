@@ -57,42 +57,57 @@ Bool_t StEmcPedSpectra::CalculatePedestals()
   Float_t left = 3;
   Float_t right= 2;
   
-  Int_t ngood=0,nped=0,nrms=0,nchi=0;
+  Int_t ngood=0,nped=0,nrms=0,nchi=0,nbad=0;
   
   TF1 *func = new TF1("ped","([0]/sqrt(6.28*[2]))*exp(-0.5*((x-[1])/[2])*((x-[1])/[2]))");
   for(Int_t id = 1;id<=GetNBin();id++) if(GetStatus(id)==1)
   {
-    //cout <<"----------------------------------------------------------------\n";
     TH1D *h = GetSpectra(id);
     Int_t ibin = h->GetMaximumBin();
     Float_t avg = (Float_t)h->GetBinCenter(ibin);
     Float_t max = (Float_t)h->GetMaximum();
-    Float_t rms = 1.5;
+    Float_t rms = 1.0;
     max/=sqrt(6.28*rms);
     func->SetParameter(0,max);
     func->SetParameter(1,avg);
     func->SetParameter(2,rms);
+    func->SetParLimits(2,0,100000);
+    Float_t seed = avg;    
     func->SetRange(avg-left*rms,avg+right*rms);
-    Int_t ndg = (Int_t)((left+right)*rms-3.0);
-    //cout <<"id = "<<id<<"  ped = "<<avg<<"  rms = "<<rms<<endl; 
-    h->Fit(func,"RQN");
+    
+    Int_t npt = (Int_t)((left+right+1.0)*rms);
+    Int_t ndg = (Int_t)((Float_t)npt-3.0);
+    
+    h->Fit(func,"RQN"); // pre fit
     max = func->GetParameter(0);
     avg = func->GetParameter(1);
     rms = func->GetParameter(2);
+    
+    func->SetRange(avg-left*rms,avg+right*rms); // set new fit limits
+    
+    h->Fit(func,"RQN"); // final fit
+    max = func->GetParameter(0);
+    avg = func->GetParameter(1);
+    rms = func->GetParameter(2);    
     Float_t chi = func->GetChisquare()/(Float_t)ndg;
-    cout <<"id = "<<id<<"  ped = "<<avg<<"  rms = "<<rms<<"  chi = "<<chi<<endl; 
+    Float_t res = avg-seed;
     
     Int_t status = 1; // data present
-    if(avg<0) {status+= 2; nped++;}// negative pedestal
-    if(rms<0) {status+= 4; nrms++;}// negative rms
-    if(chi>8) {status+= 8; nchi++;}// large chi square
-    if(status==1) ngood++;
+    if(avg<0)                       {status+= 2; nped++;}// negative pedestal
+    if(rms<0 || rms >4)             {status+= 4; nrms++;}// bad rms
+    if(fabs(res)>rms)               {status+= 8; nchi++;}// large distance to seed
+    if(status==1) ngood++; else nbad++;
     mPed->Fill((Float_t)id,0.0,avg);
     mPed->Fill((Float_t)id,1.0,rms);
     mPed->Fill((Float_t)id,2.0,chi);
     mPed->Fill((Float_t)id,3.0,(Float_t)status);    
+    cout <<"id = "<<id <<"  max = "<<seed
+         <<"  ped = "<<avg <<"  res = " <<res<<"  rms = "<<rms
+         <<"  chi = "<<chi<<"  status = "<<status; 
+    if(status>1 || avg >50 || avg <15) cout <<" <===================";
+    cout <<endl; 
   }
-  cout <<"nGood = "<<ngood<<"  neg Ped = "<<nped<<"  neg rms = "<<nrms<<"  large chi = "<<nchi<<endl;
+  cout <<"nGood = "<<ngood<<"  nBad = "<<nbad<<"  neg Ped = "<<nped<<"  bad rms = "<<nrms<<"  large res = "<<nchi<<endl;
   delete func;
   return kTRUE;
 }

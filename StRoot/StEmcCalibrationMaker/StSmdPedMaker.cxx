@@ -75,7 +75,7 @@ Int_t StSmdPedMaker::Make()
     else 
     {
       cout <<"last pedestal time for SMD = "<<mPedDate<<"  "<<mPedTime<<endl;
-      cout <<"time left for new pedestal round for SMD = "<<dt<<" hours"<<endl;
+      cout <<"time left for new pedestal round for SMD = "<<mPedInterval-dt<<" hours"<<endl;
     }
   }
   if(mPedStatus>=0)
@@ -107,10 +107,10 @@ Bool_t StSmdPedMaker::GetEvent()
   if(!Event) return kFALSE;
   mEmc=Event->emcCollection();
   if(!mEmc) return kFALSE;    	
-	StL0Trigger* trg = Event->l0Trigger();
+	/*StL0Trigger* trg = Event->l0Trigger();
 	Int_t trigger=0;
 	if(trg) trigger = trg->triggerWord();
-	if(trigger!=8192 && trigger!=4096) return kFALSE;
+	if(trigger!=8192 && trigger!=4096) return kFALSE;*/
 	return kTRUE;
 }
 //_____________________________________________________________________________
@@ -128,7 +128,7 @@ void StSmdPedMaker::FillPedestal()
       {
         Int_t m = rawHit[k]->module();
         Int_t e = rawHit[k]->eta();
-        Int_t s = rawHit[k]->sub();
+        Int_t s = abs(rawHit[k]->sub());
         Float_t adc = (Float_t)rawHit[k]->adc();
         Int_t cap = rawHit[k]->calibrationType();
         Int_t id;

@@ -57,9 +57,9 @@ class StSmdPedMaker : public StMaker
    virtual Int_t   Make(); ///< Make mathod - process each event
    virtual Int_t   Finish(); ///< Finish method - save final numbers
    
-           void    setPedInterval(Float_t a) { mPedInterval =a;}
-           void    setMinEvents(Int_t a)     { mMinEvents =a;}
-           void    setSaveToDB(Bool_t a)     { mSaveToDB =a;}
+           void    SetPedInterval(Float_t a) { mPedInterval =a;}
+           void    SetMinEvents(Int_t a)     { mMinEvents =a;}
+           void    SetSavePedToDB(Bool_t a)     { mSaveToDB =a;}
            
 
    ClassDef(StSmdPedMaker, 1)  
