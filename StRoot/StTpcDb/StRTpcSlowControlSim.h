@@ -1,3 +1,19 @@
+/***************************************************************************
+ *
+ * $Id: StRTpcSlowControlSim.h,v 1.3 1999/12/16 22:00:53 hardtke Exp $
+ *
+ * Author:  David Hardtke
+ ***************************************************************************
+ *
+ * Description: Slow control parameters for TRS  
+ *
+ ***************************************************************************
+ *
+ * $Log: StRTpcSlowControlSim.h,v $
+ * Revision 1.3  1999/12/16 22:00:53  hardtke
+ * add CVS tags
+ *
+ **************************************************************************/
 #ifndef __STRTPCSLOWCONTROLSIM__
 #define __STRTPCSLOWCONTROLSIM__
 //#include <TObject.h>

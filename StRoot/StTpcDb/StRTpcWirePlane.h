@@ -1,3 +1,19 @@
+/***************************************************************************
+ *
+ * $Id: StRTpcWirePlane.h,v 1.7 1999/12/16 22:00:53 hardtke Exp $
+ *
+ * Author:  David Hardtke
+ ***************************************************************************
+ *
+ * Description: TPC Wire Plane Geometry Interface  
+ *
+ ***************************************************************************
+ *
+ * $Log: StRTpcWirePlane.h,v $
+ * Revision 1.7  1999/12/16 22:00:53  hardtke
+ * add CVS tags
+ *
+ **************************************************************************/
 #ifndef __STRTPCWIREPLANE__
 #define __STRTPCWIREPLANE__
 #include "StTpcWirePlaneI.h"

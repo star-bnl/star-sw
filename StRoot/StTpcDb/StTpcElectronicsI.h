@@ -1,3 +1,19 @@
+/***************************************************************************
+ *
+ * $Id: StTpcElectronicsI.h,v 1.2 1999/12/16 22:00:53 hardtke Exp $
+ *
+ * Author:  David Hardtke
+ ***************************************************************************
+ *
+ * Description: Abstract Interface for TPC Electronics  
+ *
+ ***************************************************************************
+ *
+ * $Log: StTpcElectronicsI.h,v $
+ * Revision 1.2  1999/12/16 22:00:53  hardtke
+ * add CVS tags
+ *
+ **************************************************************************/
 #ifndef __STTPCELECTRONICSI__
 #define __STTPCELECTRONICSI__
 #include <TObject.h>

@@ -1,3 +1,19 @@
+/***************************************************************************
+ *
+ * $Id: StTpcPadPlaneI.h,v 1.3 1999/12/16 22:00:54 hardtke Exp $
+ *
+ * Author:  David Hardtke
+ ***************************************************************************
+ *
+ * Description: Abstract Interface for Tpc Pad Plane Geometry  
+ *
+ ***************************************************************************
+ *
+ * $Log: StTpcPadPlaneI.h,v $
+ * Revision 1.3  1999/12/16 22:00:54  hardtke
+ * add CVS tags
+ *
+ **************************************************************************/
 #ifndef __STTPCPADPLANEI__
 #define __STTPCPADPLANEI__
 #include <TObject.h>
