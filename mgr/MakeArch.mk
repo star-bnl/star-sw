@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.65  1999/03/07 14:50:53  wenaus
+#  Clean up Sun CC5 handling
+#
 #  Revision 1.64  1999/03/04 01:42:25  didenko
 #  updates from Yuri
 #
@@ -170,7 +173,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/03/04 01:42:25 $ 
+#             Last modification $Date: 1999/03/07 14:50:53 $ 
 #. default setings
 
 MAKE  := gmake
@@ -564,12 +567,12 @@ endif
 
 ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
-  ifeq (,$(findstring $(STAR_HOST_SYS),sun4x_56_CC5))
+  ifneq ($(STAR_HOST_SYS),sun4x_56_CC5)
     STDHOME := /afs/rhic/star/packages/ObjectSpace/2.0m
     STAF_UTILS_INCS += $(STDHOME) $(STDHOME)/ospace/std  $(STDHOME)/ospace
   endif
   ROOTCINTD = -DSOLARIS
-  ifeq (,$(findstring $(STAR_HOST_SYS),sun4x_56_CC5))
+  ifneq ($(STAR_HOST_SYS),sun4x_56_CC5)
     OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN ST_NO_MEMBER_TEMPLATES ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_TEMPLATE_DEF_ARGS ST_NO_NAMESPACES
   else
     OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN ST_NO_MEMBER_TEMPLATES ST_NO_NUMERIC_LIMITS 
@@ -580,9 +583,6 @@ ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   ifeq ($(STAR_HOST_SYS),sun4x_56_CC5)
     CC :=  /opt/WS5.0/bin/cc
     CXX := /opt/WS5.0/bin/CC
-    ifeq ($(STAR_HOST_SYS),sun4x_56_CC5C)
-      CXX += -compat
-    endif
   endif
   ifdef INSURE
     CC       :=  insure -g -Zoi "compiler_c cc"
@@ -595,19 +595,24 @@ ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   LD  := $(CXX)
   SO  := $(CXX)
   FC  := /opt/SUNWspro/bin/f77
-  ifneq (,$(findstring $(STAR_SYS),CC5))
+  ifeq ($(STAR_HOST_SYS),sun4x_56_CC5)
     FC  := /opt/WS5.0/bin/f77
   endif
   FFLAGS   :=  $(DEBUG)  -KPIC -w 
   FEXTEND  :=  -e
   CFLAGS   :=  $(DEBUG)  -KPIC 
-  CXXFLAGS :=  $(DEBUG)  -KPIC -features=no%castop -features=no%anachronisms +w
+  ifeq ($(STAR_HOST_SYS),sun4x_56_CC5)
+    CXXFLAGS :=  $(DEBUG)  -KPIC +w
+  else
+    CXXFLAGS :=  $(DEBUG)  -KPIC -features=no%castop -features=no%anachronisms +w
+  endif
   LDFLAGS  :=  $(DEBUG)  -Bstatic 
   EXEFLAGS :=  $(DEBUG)  -z muldefs -Bdynamic -t 
   SOFLAGS  :=  $(DEBUG) -G
-  CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
-  ifneq (,$(findstring $(STAR_SYS),CC5))
+  ifeq ($(STAR_HOST_SYS),sun4x_56_CC5)
     CLIBS    := -L/opt/WS5.0/lib -L/opt/WS5.0/SC5.0/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
+  else
+    CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   endif
   FLIBS    := -lM77 -lF77 -lsunmath
 endif
