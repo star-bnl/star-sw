@@ -310,7 +310,7 @@ Block rCSI is Cesium Iodide
     HITS rCSI  x:.005:   y:.01:   z:.005:   cx:10:   cy:10:   cz:10:,
                Slen:.1:(0,500)   ptot:18:(0,100),
                Tof:16:(0,1.e-6)  Step:16:(0,10),
-               USER:30:(-0.1,0.1) 
+               USER:32:(-0.01,0.01) 
 endblock
 *- - - - - - - - - - - - - - - - - - - - - - - - - - -
 * 1330 /2 = 66.5 bigger than inside box 
