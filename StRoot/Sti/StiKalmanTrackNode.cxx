@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.70 2005/03/24 18:05:07 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.71 2005/03/24 19:28:35 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.71  2005/03/24 19:28:35  perev
+ * Switch off DerivTest
+ *
  * Revision 2.70  2005/03/24 18:05:07  perev
  * Derivatives and their test fixed to eta==Psi model
  *
@@ -283,7 +286,7 @@ TString StiKalmanTrackNode::comment("");
 int StiKalmanTrackNode::counter = 0;
 //debug vars
 //#define STI_ERROR_TEST
-#define STI_DERIV_TEST
+//#define STI_DERIV_TEST
 #ifdef STI_DERIV_TEST
 int    StiKalmanTrackNode::fDerivTestOn=0;   
 #endif
