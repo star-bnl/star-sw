@@ -16,6 +16,7 @@
 #include "tte_mctrk.idl"
 #include "est_ctrl.idl"
 #include "est_match.idl"
+#include "g2t_track.idl"
 #include "egr_egrpar.idl"
 
 interface est_am : amiModule {
@@ -32,6 +33,7 @@ interface est_am : amiModule {
 		 in tte_mctrk ttemctrk,
 		 inout est_ctrl est_ctrl,
 		 inout est_match est_match,
+		 in g2t_track g2t_track,
 		 in egr_egrpar egrpar);
 };
 

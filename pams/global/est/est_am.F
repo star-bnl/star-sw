@@ -11,6 +11,7 @@
      >     ttemctrk_h, ttemctrk,
      >     est_ctrl_h, est_ctrl,
      >     est_match_h, est_match,
+     >     g2t_track_h, g2t_track, 
      >     egrpar_h,egrpar)
       implicit none
 
@@ -23,15 +24,26 @@ CCC   Function makes a tracking from TPC to SVT
 
       integer i,ii,j,llay
       integer jj, pl,pll, pl4 ,pas, est_erasor,iret,nkeep,nremove
-      integer waf_min(4),waf_max(4),maxtrack,maxid,key,nhit
-      parameter (maxtrack=40000)
-      parameter (maxid=20)
+      integer waf_min(4),waf_max(4),maxtrack,maxsvttrack,maxid,nhit
+      integer*4 index,key,mcidtorow
+      integer*4 malloc
+
+      parameter (maxid=10)
       
-      dimension key(maxtrack,maxid)
+      dimension key(maxid,1),mcidtorow(1)
       DATA waf_min /1000, 3000, 5000, 7000/
       DATA waf_max /2999, 4999, 6999, 8999/
 
+      pointer(mcidtorow_p,mcidtorow)
+      pointer(key_p,key)
+
 c-----------------------------------------------------------------
+C WARNING : here we assume that there not more than 
+C MAXTRACK g2t_track
+C MAXSVTTRACK g2t_track with hits in the svt
+C MAXID hits per tracks in the svt
+C KEY is a table linking the svt hits and the tracks
+C Its first dimension should be equal to maxid.
 
       write(6,*)'>>>>> Tracking options :'
       write(6,11)est_ctrl(1).maxloop,' loop(s) over the TPC pt'
@@ -42,25 +54,38 @@ c-----------------------------------------------------------------
       est_match_h.nok = tptrack_h.nok
 
 
-c     Initialization
+C allocating and initializing memory for mcidtorow
+      maxtrack=g2t_track_h.nok
+      mcidtorow_p=malloc(maxtrack*4)
+      call vzero(mcidtorow,maxtrack)
 
+
+c     Initialization
+      j=0
       do i=1,scs_spt_h.nok
          scs_spt(i).flag = 0
-      enddo
-      do i=1,maxtrack
-         do j=1,maxid
-            key(i,j)=0
-         enddo
-      enddo
-      do i=1,scs_spt_h.nok
-         j=1
-         do while (key(scs_spt(i).id_mctrack,j).ne.0 .and. j.le.maxid)
+         if (mcidtorow(scs_spt(i).id_mctrack).eq.0) then
             j=j+1
-         enddo
-         if(j.le.maxid) key(scs_spt(i).id_mctrack,j)=scs_spt(i).id
+            mcidtorow(scs_spt(i).id_mctrack)=j
+         endif
       enddo
-         
-     
+      maxsvttrack=j
+      write(6,*)'found ',maxsvttrack,' tracks with svt hits'
+C allocating and initializing memory for key
+      key_p=malloc(maxsvttrack*maxid*4)
+      call vzero(key,maxsvttrack*maxid)
+
+C set a scs_spt(i)<--> row,layer key
+      do i=1,scs_spt_h.nok
+         if (mcidtorow(scs_spt(i).id_mctrack).ne.0) then
+            index=mcidtorow(scs_spt(i).id_mctrack)
+            j=1            
+            do while (key(j,index).ne.0 .and. j.le.maxid)
+               j=j+1
+            enddo
+            if(j.le.maxid) key(j,index)=i
+         endif
+      enddo
       
       do i=1,est_match_h.nok
          est_match(i).id = i
@@ -134,25 +159,24 @@ C We get the track parameters from the tptrack table
       do ii=1,est_match_h.nok
          do j=est_ctrl(1).maxlay,est_ctrl(1).minlay,-1 ! loop over 4 layers
             do jj=1,maxid
-               if (scs_spt(key(est_match(ii).id_mctrtpc,jj)).id_wafer
-     +              .ge.waf_min(j).and.
-     >              scs_spt(key(est_match(ii).id_mctrtpc,jj)).id_wafer
-     +              .le.waf_max(j)) then
+               index=mcidtorow(est_match(ii).id_mctrtpc)
+               if (scs_spt(key(jj,index)).id_wafer.ge.waf_min(j).and.
+     >              scs_spt(key(jj,index)).id_wafer.le.waf_max(j)) then
                   nhit=est_match(ii).perf_svt_hits + 1
                   if (nhit.eq.11) then
                      est_match(ii).perf_svt_hits=nhit
                      goto 111
                   endif
                   est_match(ii).perf_scs_id(nhit) = 
-     +                 key(est_match(ii).id_mctrtpc,jj)
+     +                 key(jj,index)
                   est_match(ii).perf_svt_waf(nhit) =
-     +               scs_spt(key(est_match(ii).id_mctrtpc,jj)).id_wafer
+     +               scs_spt(key(jj,index)).id_wafer
                   est_match(ii).perf_svt_x(nhit) = 
-     +                 scs_spt(key(est_match(ii).id_mctrtpc,jj)).x(1)
+     +                 scs_spt(key(jj,index)).x(1)
                   est_match(ii).perf_svt_y(nhit) =
-     +                 scs_spt(key(est_match(ii).id_mctrtpc,jj)).x(2)
+     +                 scs_spt(key(jj,index)).x(2)
                   est_match(ii).perf_svt_z(nhit) = 
-     +                 scs_spt(key(est_match(ii).id_mctrtpc,jj)).x(3)
+     +                 scs_spt(key(jj,index)).x(3)
                   est_match(ii).perf_svt_hits=nhit
                endif
             enddo
@@ -167,11 +191,12 @@ C We flag bad TPC tracks (pt cut, min and max hit number and pid)
       if (est_ctrl(1).ktrl1.eq.1) then
          write(6,*)'********** START FLAG BAD TRACKS ************' 
       endif
-         do i=1,est_match_h.nok
-         if ((1./est_match(i).invp).lt.est_ctrl(1).ptcut) 
-     +           est_match(i).flag=2
+
+      do i=1,est_match_h.nok
+         if ((1./est_match(i).invp).lt.est_ctrl(1).ptcut)
+     +        est_match(i).flag=2
          if ((tptrack(i).nrec.le.est_ctrl(1).min_nrec)
-     >        .or.(tptrack(i).nrec.ge.est_ctrl(1).max_nrec)) 
+     >        .or.(tptrack(i).nrec.ge.est_ctrl(1).max_nrec))
      +        est_match(i).flag=3
          if(est_match(i).pid.le.est_ctrl(1).pid_cut) est_match(i).flag=5
          if(abs(est_match(i).tanl).ge.est_ctrl(1).tanl_cut)
@@ -183,12 +208,11 @@ C We flag bad TPC tracks (pt cut, min and max hit number and pid)
          write(6,*)'********** END FLAG BAD TRACKS ************' 
          write(6,*)'****** PREREFIT SPECIAL LOOP ******'
       endif
-
 c     TPC tracks are refitted with a max number of hits depending on pt
       do pl=1,est_ctrl(1).maxloop       
          est_ctrl(1).current_loop=pl
          if (est_ctrl(1).prerefit(pl).ne.-1) then
-            CALL est_prerefit2(tphit_h, tphit,
+ 2          CALL est_prerefit2(tphit_h, tphit,
      >           tptrack_h, tptrack, 
      >           est_ctrl_h, est_ctrl,
      >           est_match_h, est_match,
@@ -214,15 +238,13 @@ c                in the SVT layers 2 and 3
          est_ctrl(1).pass = pas
          write(6,*)'Pass number = ',pas
          do pl=1,est_ctrl(1).maxloop ! loop over pt ranges
-            write(6,45)'Loop :',pl,' minimal pt =',
-     +           est_ctrl(1).apmin(pl),' GeV/c'
- 45         format(a6,i2,a13,f7.4,a6)
+            write(6,45)'Pass : ',pas,' Loop : ',pl
+ 45         format(a7,i2,a8,i2)
             est_ctrl(1).current_loop=pl
             
             do llay=est_ctrl(1).maxlay,est_ctrl(1).minlay,-1 ! loop over layers
                if (est_ctrl(1).ktrl1.eq.1) write(6,*)'Layer #',llay
                est_ctrl(1).layer=llay
-
 c     Looking for association in the current layer
                CALL est_track(geom_h, geom, 
      >              shape_h, shape,
@@ -233,7 +255,6 @@ c     Looking for association in the current layer
      >              eval_h, eval,
      >              est_ctrl_h, est_ctrl,
      >              est_match_h, est_match)
-
 c     Refitting of the track with the new associated hit
                CALL est_refit2(tphit_h, tphit,
      >              tptrack_h , tptrack,
@@ -243,7 +264,7 @@ c     Refitting of the track with the new associated hit
             enddo               ! layer
 
             if (est_ctrl(1).ktrl1.eq.1) print *,'pt range finished.'
-
+            
 c     Flag tracks with at least 1 point in the svt
             nremove=0
             nkeep=0
@@ -282,8 +303,6 @@ c     Refit removed tracks in the 3 last pt bins
             if (est_ctrl(1).ktrl1.eq.1)then
                write(6,*)'****** PREREFIT SPECIAL LOOP ******'
             endif
-
-c     
             do pll=pl4,pl       
                est_ctrl(1).current_loop=pll
                if (est_ctrl(1).prerefit(pll).ne.-1) then
@@ -297,9 +316,13 @@ c
             if (est_ctrl(1).ktrl1.eq.1) then
                write(6,*)'*** END OF PREREFIT SPECIAL LOOP ***'
             endif
-222        continue
+ 222        continue
          end do                 ! loop over pt range
       enddo                     ! pass
+      
+C FREE THE MEMORY...
+      call free(key_p)
+      call free(mcidtorow_p)
       return
       end
 
