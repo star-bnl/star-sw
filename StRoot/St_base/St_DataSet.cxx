@@ -6,6 +6,7 @@
 //*KEEP,TBrowser.
 #include "TBrowser.h"
 //*KEND.
+#include "TSystem.h"
  
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -335,6 +336,37 @@ St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(), fList
    SetTitle("St_DataSet");
 }
 //______________________________________________________________________________
+St_DataSet::St_DataSet(TString &dirname,const Char_t *addname) : TNamed(), fList(0), fMother(0)
+{
+  // Convert the "opearting system" file system tree into memory resided St_DataSet
+  St_DataSet *set = 0;
+  Long_t id, size, flags, modtime;
+  const Char_t *name = dirname.Data();
+  if (gSystem->GetPathInfo(name, &id, &size, &flags, &modtime)==0) {
+    TString nextobj = name;
+    if (!addname) SetName(name);
+    else          SetName(addname);
+    SetTitle("file");
+
+    // Check if "dirname" is a directory.
+    void *dir = 0;
+    if (flags & 2 ) 
+       dir = gSystem->OpenDirectory(name);
+    if (dir) {   // this is a directory
+      SetTitle("directory");
+      while (name = gSystem->GetDirEntry(dir)) {
+        // scip some "special" names
+         if (strcmp(name,"..")!=0 && strcmp(name,".")!=0) {
+           Char_t *file = gSystem->ConcatFileName(dirname,name);
+           TString nextdir = file;
+           delete [] file;
+           Add(new St_DataSet(nextdir,name));
+         }
+      }
+    }
+  }
+}
+//______________________________________________________________________________
 St_DataSet::~St_DataSet(){
  // Delete list of the St_DataSet
   if (fMother) {
@@ -441,6 +473,17 @@ void FillTree()
 {
 }
 #endif
+//______________________________________________________________________________
+TString St_DataSet::Path()
+{
+ // return the full path of this data set 
+   TString str;
+   St_DataSet *parent = GetParent();
+   if (parent) str = parent->Path();
+   str += "/";
+   str += GetName();
+   return str;
+}
 //______________________________________________________________________________
 void St_DataSet::Remove(St_DataSet *set)
 {
