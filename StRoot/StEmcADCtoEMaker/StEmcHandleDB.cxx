@@ -1,16 +1,8 @@
 /***************************************************************************
- *
- * $Id: StEmcHandleDB.cxx,v 1.1 2001/07/17 00:14:37 perev Exp $
- *
- * Author:  bl
+ * Author:  Subhasis Chattopadhyay
  ***************************************************************************
  *
- * Description: RICH offline software:
- *              StRchMaker.cxx - ROOT/STAR Maker for offline chain.
- *              Incorporation of cluster finder here
- ***************************************************************************
- *
- * See Log Comments at bottom
+ * Description: EMC DB Handling
  ***************************************************************************/
 
 #include <iostream.h>
@@ -94,13 +86,17 @@ Int_t StEmcHandleDB::Process_TowerDB()
    else{
       m_Towercalibdb=caltemp->GetTable();
       for(Int_t idh=1;idh<4801;idh++){
-     if(m_Towercalibdb[idh-1].Status==1 && m_Towercalibdb[idh-1].CalibStatus==1)
-        {
 	  Int_t m=0,e=0,s=0;
         geo[0]->getBin(idh,m,e,s);
+
+     if(m_Towercalibdb[idh-1].Status==1 && m_Towercalibdb[idh-1].CalibStatus==1)
+        {
+
+// Does it (m,e,s) in (0,0,0) or (1,1,1)
+
 	if(m!=0||e!=0||s!=0){
 	  Float_t ped=(Float_t)m_Towercalibdb[idh-1].AdcPedestal;
-        m_TowerPeds[m-1][e-1][s-1].push_back(ped);
+      m_TowerPeds[m-1][e-1][s-1].push_back(ped);
         m_TowerEquals[m-1][e-1][s-1].push_back(ped);
 
 	for(Int_t ic=0;ic<5;ic++){
@@ -108,7 +104,10 @@ Int_t StEmcHandleDB::Process_TowerDB()
           m_TowerCalibs[m-1][e-1][s-1].push_back(conv);
 	}
 	}
-        }  
+        } 
+    else{
+//cout<<"error in ped table**"<<m-1<<" "<<e-1<<" "<<s-1<<"stat "<<m_Towercalibdb[idh-1].Status<<"calibstat "<<m_Towercalibdb[idh-1].CalibStatus<<endl;
+ } 
     }
    }
 
@@ -121,11 +120,12 @@ Int_t StEmcHandleDB::Process_TowerDB()
       caleq = (St_emcCalibration*)m_calibdbptr->Find(TableName.Data());
       if(!caleq)
       {
-        cout<<"StEmcAdcToEMaker::Make() - Can not get pointer to Calibration table for det." << TableName << endl;
+        cout<<"StEmcHandleDB::Make() - Can not get pointer to Calibration table for det." << TableName << endl;
       }
 
   else{
    m_Towerequaldb=caleq->GetTable();
+/*
    for(Int_t idh=1;idh<4801;idh++){
   if(m_Towerequaldb[idh-1].Status==1 && m_Towerequaldb[idh-1].CalibStatus==1)
         {
@@ -136,9 +136,9 @@ Int_t StEmcHandleDB::Process_TowerDB()
         m_TowerEquals[m-1][e-1][s-1].push_back(ped);
 	}
         }  
-   }
+      }
+*/
  }
-
 
    return kStOK;
 }
@@ -153,10 +153,9 @@ Int_t StEmcHandleDB::Process_SmdEDB()
       caltemp = (St_emcCalibration*)m_calibdbptr->Find(TableName.Data());
       if(!caltemp)
       {
-        cout<<"StEmcAdcToEMaker::Make() - Can not get pointer to Calibration table for det." << TableName << endl;
+        cout<<"StHandleDB::Make() - Can not get pointer to Calibration table for det." << TableName << endl;
       }
- 
-                                                                         
+   else{ 
    m_Smdecalibdb=caltemp->GetTable();
    for(Int_t idh=0;idh<4800;idh++){
   if(m_Smdecalibdb[idh-1].Status==1 && m_Smdecalibdb[idh-1].CalibStatus==1)
@@ -170,7 +169,8 @@ Int_t StEmcHandleDB::Process_SmdEDB()
           m_SmdECalibs[m-1][e-1].push_back(m_Smdecalibdb[idh-1].AdcToE[ic]);
 	}
 	}
-        }  
+        } 
+      } 
    }
    return kStOK;
 }
@@ -187,8 +187,7 @@ Int_t StEmcHandleDB::Process_SmdPDB()
       {
         cout<<"StEmcAdcToEMaker::Make() - Can not get pointer to Calibration table for det." << TableName << endl;
       }
- 
-                                                                         
+   else{ 
    m_Smdpcalibdb=caltemp->GetTable();
    for(Int_t idh=0;idh<4800;idh++){
   if(m_Smdpcalibdb[idh-1].Status==1 && m_Smdpcalibdb[idh-1].CalibStatus==1)
@@ -203,60 +202,74 @@ Int_t StEmcHandleDB::Process_SmdPDB()
 	}
 	}
         }  
+     }
    }
    return kStOK;
 }
 
  Int_t StEmcHandleDB::GetTowerPeds(Int_t m,Int_t e,Int_t s,Float_t& ped)
 {
-  ped=m_TowerPeds[m-1][e-1][s-1][0];
+// Call m,e,s starting from 0,0,0 not 1,1,1
+//
+  if(m_TowerPeds[m][e][s].size()>0){ped=(Float_t)m_TowerPeds[m][e][s][0];}
+  else{ped=0;}
   return kStOK;
 }
 
- Int_t StEmcHandleDB::GetTowerCalibs(Int_t m,Int_t e,Int_t s,Float_t& ped)
+ Int_t StEmcHandleDB::GetTowerCalibs(Int_t m,Int_t e,Int_t s,Float_t* ped)
 {
-  ped=m_TowerCalibs[m-1][e-1][s-1][0];
+  if(m_TowerCalibs[m][e][s].size()>0){
+//     for(UInt_t l=0;l<m_TowerCalibs[m][e][s].size();l++)cout<<m_TowerCalibs[m][e][s][l]<<endl;
+     ped=&m_TowerCalibs[m][e][s][0];}
+  else{for(Int_t i=0;i<5;i++){ped[i]=1.;}}
   return kStOK;
 }
 
  Int_t StEmcHandleDB::GetTowerEquals(Int_t m,Int_t e,Int_t s,Float_t& ped)
 {
-  ped=m_TowerEquals[m-1][e-1][s-1][0];
+  if(m_TowerEquals[m][e][s].size()>0)ped=m_TowerEquals[m][e][s][0];
+  else{ped=1;}
   return kStOK;
 }
 
  Int_t StEmcHandleDB::GetSmdEPeds(Int_t m,Int_t e,Float_t& ped)
 {
-  ped=m_SmdEPeds[m-1][e-1][0];
+  if(m_SmdEPeds[m][e].size()>0)ped=m_SmdEPeds[m][e][0];
+  else{ped=0;}
   return kStOK;
 }
 
  Int_t StEmcHandleDB::GetSmdECalibs(Int_t m,Int_t e,Float_t& ped)
 {
-  ped=m_SmdECalibs[m-1][e-1][0];
+  if(m_SmdECalibs[m][e].size()>0)ped=m_SmdECalibs[m][e][0];
+  else{ped=1;}
   return kStOK;
 }
 
  Int_t StEmcHandleDB::GetSmdEEquals(Int_t m,Int_t e,Float_t& ped)
 {
-  ped=m_SmdEEquals[m-1][e-1][0];
+  if(m_SmdEEquals[m][e].size()>0)ped=m_SmdEEquals[m][e][0];
+  else{ped=1;}
   return kStOK;
 }
 ///////////////////////////////////////////////////////////////
  Int_t StEmcHandleDB::GetSmdPPeds(Int_t m,Int_t e,Int_t s,Float_t& ped)
 {
-  ped=m_SmdPPeds[m-1][e-1][s-1][0];
+  if(m_SmdPPeds[m][e][s].size()>0)ped=m_SmdPPeds[m][e][s][0];
+  else{ped=0;}
   return kStOK;
 }
 
  Int_t StEmcHandleDB::GetSmdPCalibs(Int_t m,Int_t e,Int_t s,Float_t& ped)
 {
-  ped=m_SmdPCalibs[m-1][e-1][s-1][0];
+  if(m_SmdPPeds[m][e][s].size()>0)ped=m_SmdPCalibs[m][e][s][0];
+  else{ped=1;}
   return kStOK;
 }
 
  Int_t StEmcHandleDB::GetSmdPEquals(Int_t m,Int_t e,Int_t s,Float_t& ped)
 {
-  ped=m_SmdPEquals[m-1][e-1][s-1][0];
+  if(m_SmdPPeds[m][e][s].size()>0)ped=m_SmdPEquals[m][e][s][0];
+  else{ped=1;}
   return kStOK;
 }

@@ -1,12 +1,8 @@
 /***************************************************************************
- *
- * $Id: StEmcHandleDB.h,v 1.1 2001/07/17 00:14:37 perev Exp $
- *
- * Author: 
+ * Author: Subhasis Chattopadhyay. 
  ***************************************************************************
  *
- * Description: RICH offline software
- *              StRchMaker.h - ROOT/STAR Maker for offline chain.
+ * Description: EMC DB Handling.
  ***************************************************************************/
 
 #ifdef __ROOT__
@@ -54,20 +50,20 @@ public:
     virtual       ~StEmcHandleDB();
 
     //Towers DB
-    virtual Int_t  GetTowerPeds(Int_t,Int_t,Int_t,Float_t&);
-    //    virtual Int_t  GetTowerPeds(Int_t,Float_t&);
-    virtual Int_t  GetTowerCalibs(Int_t,Int_t,Int_t,Float_t&);
+    virtual Int_t  GetTowerPeds(Int_t,Int_t,Int_t,Float_t&);  //mod,eta,phi
+    //    virtual Int_t  GetTowerPeds(Int_t,Float_t&);        //Towerno
+    virtual Int_t  GetTowerCalibs(Int_t,Int_t,Int_t,Float_t*);
     //   virtual Int_t  GetTowerCalibs(Int_t,Float_t&);
     virtual Int_t  GetTowerEquals(Int_t,Int_t,Int_t,Float_t&);
     //    virtual Int_t  GetTowerEquals(Int_t,Float_t&);
 
     //SMDE DB
-    virtual Int_t  GetSmdEPeds(Int_t,Int_t,Float_t&);
+    virtual Int_t  GetSmdEPeds(Int_t,Int_t,Float_t&);    //mod,eta
     virtual Int_t  GetSmdECalibs(Int_t,Int_t,Float_t&);
     virtual Int_t  GetSmdEEquals(Int_t,Int_t,Float_t&);
 
     //SMDP DB
-    virtual Int_t  GetSmdPPeds(Int_t,Int_t,Int_t,Float_t&);
+    virtual Int_t  GetSmdPPeds(Int_t,Int_t,Int_t,Float_t&); //mod,eta,phi
     virtual Int_t  GetSmdPCalibs(Int_t,Int_t,Int_t,Float_t&);
     virtual Int_t  GetSmdPEquals(Int_t,Int_t,Int_t,Float_t&);
 

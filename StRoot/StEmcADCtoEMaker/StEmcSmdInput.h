@@ -1,12 +1,8 @@
 /***************************************************************************
- *
- * $Id: StEmcSmdInput.h,v 1.1 2001/07/17 00:14:37 perev Exp $
- *
- * Author: 
+ * Author: Subhasis Chattopadhyay 
  ***************************************************************************
  *
- * Description: RICH offline software
- *              StRchMaker.h - ROOT/STAR Maker for offline chain.
+ * Description: EMC SMD Input handling
  ***************************************************************************/
 
 #ifdef __ROOT__

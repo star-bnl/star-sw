@@ -1,16 +1,8 @@
 /***************************************************************************
- *
- * $Id: StEmcTowerInput.cxx,v 1.1 2001/07/17 00:14:37 perev Exp $
- *
- * Author:  bl
+ * Author:  Subhasis Chattopadhyay
  ***************************************************************************
  *
- * Description: RICH offline software:
- *              StRchMaker.cxx - ROOT/STAR Maker for offline chain.
- *              Incorporation of cluster finder here
- ***************************************************************************
- *
- * See Log Comments at bottom
+ * Description: EMC Tower Handling:
  ***************************************************************************/
 
 #include <iostream.h>
@@ -92,9 +84,7 @@ for(Int_t i=0;i<120;i++){
   for(Int_t j=0;j<20;j++){
     for(Int_t k=0;k<2;k++){
       Float_t ped=0;
-      cout<<"peds***get tower peds***"<<endl;
-            int pedstat=db->GetTowerPeds(i,j,k,ped);
-      cout<<"peds***obtained***"<<endl;
+      int pedstat=db->GetTowerPeds(i,j,k,ped);
       if(pedstat==kStOK)m_TowerADC[i][j][k]-=ped;
     }
   }
@@ -106,9 +96,9 @@ Int_t StEmcTowerInput::Apply_equalization(StEmcHandleDB* db)
 {
   // Apply Equalization
   //If equalization table is absent then return kStErr
-for(Int_t i=0;i<120;i++){
-  for(Int_t j=0;j<20;j++){
-    for(Int_t k=0;k<2;k++){
+for(Int_t i=1;i<120;i++){
+  for(Int_t j=1;j<20;j++){
+    for(Int_t k=1;k<2;k++){
       Float_t equal=1.;
       //      int pedstat=db->GetTowerEquals(i,j,k,equal);
       m_TowerADC[i][j][k]*=equal;

@@ -1,16 +1,6 @@
 /***************************************************************************
- *
- * $Id: StEmcApplyCalib.cxx,v 1.1 2001/07/17 00:14:37 perev Exp $
- *
- * Author:  bl
- ***************************************************************************
- *
- * Description: RICH offline software:
- *              StRchMaker.cxx - ROOT/STAR Maker for offline chain.
- *              Incorporation of cluster finder here
- ***************************************************************************
- *
- * See Log Comments at bottom
+ * Author:  Subhasis Chattopadhyay
+ * Description: EMC StEvent Only Input Handling:
  ***************************************************************************/
 
 #include <iostream.h>
@@ -51,6 +41,7 @@ Int_t StEmcApplyCalib::Calibrate() {
 //Get DB
  cout<<"Getting DB"<<endl;
     StEmcHandleDB * db=new StEmcHandleDB(m_calibdb);
+    db->ProcessDB(); 
     cout<<"DB handled"<<endl;
 
 // Get EmcCollection, apply separately for each subdetectors
@@ -75,35 +66,77 @@ Int_t StEmcApplyCalib::Calibrate() {
 //////////////////////////////////////////////////
 Int_t StEmcApplyCalib::Calibrate_Tower(StEmcHandleDB* db,StEmcCollection* emccoll)
 {
-
-/*
     StDetectorId id = static_cast<StDetectorId>(1+kBarrelEmcTowerId);
-    if(StEmcDetector* detector=(StEmcDetector*)emctemp->detector(id))
-
-  {
-    for(UInt_t m=1;m<=120;m++){
-      for(UInt_t e=1;e<=20;e++){
-        for(UInt_t s=1;s<=2;s++)
+    StEmcDetector* detector1=(StEmcDetector*)emccoll->detector(id);
+    if(detector1){
+     for(UInt_t j=1;j<121;j++)
+      {
+        StEmcModule* module1 = detector1->module(j);
+        StSPtrVecEmcRawHit& rawHit1=module1->hits();
+ 
+        for(Int_t k1=0;k1<rawHit1.size();k1++)
         {
-        StEmcRawHit* hit=;
-          if(hit->ADC()>0)
-          {
-            UInt_t ADC=hit->ADC();
-          Float_t calib=0;
-//            int calstat=db->GetTowerCalibs(i,j,k,calib);
-            int calstat=kStOK;
-      ifcalstat==kStOK)ADC*=calib;   
-       }                            
-        }
-      }
-    }     
+             Int_t m1, e1, s1;
+              m1=(Int_t)rawHit1[k1]->module();
+              e1=(Int_t)rawHit1[k1]->eta();
+              s1=abs(rawHit1[k1]->sub());
 
-}
-*/
+          Float_t calib[5];
+          for(Int_t i=0;i<5;i++){calib[i]=0.;}
+          Float_t energy=0;
+            int calstat=db->GetTowerCalibs(m1,e1,s1,calib);
+             if(calstat==kStOK){
+                Float_t ADC=rawHit1[k1]->adc();
+//                energy=ADC*calib[0];
+                Float_t adcpower=1;
+                for(Int_t i=0;i<5;i++)
+                {energy+=calib[i]*adcpower; adcpower*=ADC;} 
+            }
+            else{
+             cout<<" error in calstat, what to do??"<<endl;
+            }
+        rawHit1[k1]->setEnergy(energy);
+       }
+      }
+    }
+       else{cout<<"detector not found**"<<endl;}
  return kStOK;
 }
 /////////////////////////////////////////////////////
 Int_t StEmcApplyCalib::Calibrate_Smd(StEmcHandleDB* db,StEmcCollection* emccoll)
 {
+  for(UInt_t idet=3;idet<=4;idet++){
+    StDetectorId id = static_cast<StDetectorId>(idet+kBarrelEmcTowerId);
+    if(StEmcDetector* detector1=(StEmcDetector*)emccoll->detector(id))
+ 
+    for(UInt_t j=1;j<121;j++)
+      {
+        StEmcModule* module1 = detector1->module(j);
+        StSPtrVecEmcRawHit& rawHit1=module1->hits();
+ 
+        for(Int_t k1=0;k1<rawHit1.size();k1++)
+        {
+             Int_t m1, e1, s1;
+              m1=(Int_t)rawHit1[k1]->module();
+              e1=(Int_t)rawHit1[k1]->eta();
+              s1=abs(rawHit1[k1]->sub());
+ 
+          Float_t calib=0;
+          Float_t energy=0;
+          int calstat=0;
+            if(idet==3){calstat=db->GetSmdECalibs(m1,e1,calib);}
+            if(idet==4){calstat=db->GetSmdPCalibs(m1,e1,s1,calib);}
+             if(calstat){
+                Float_t ADC=rawHit1[k1]->adc();
+                energy=ADC*calib;
+             }
+            else{
+             cout<<" error in calstat, what to do??"<<endl;
+            }
+        rawHit1[k1]->setEnergy(energy);
+       }
+      }    
+   }
+
  return kStOK;
 }

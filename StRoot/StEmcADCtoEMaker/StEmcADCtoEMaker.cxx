@@ -1,17 +1,8 @@
 
-/***************************************************************************
- *
- * $Id: StEmcADCtoEMaker.cxx,v 1.1 2001/07/17 00:14:36 perev Exp $
- *
- * Author:  bl
+/* Author:  Subhasis Chattopadhyay
  ***************************************************************************
  *
- * Description: RICH offline software:
- *              StRchMaker.cxx - ROOT/STAR Maker for offline chain.
- *              Incorporation of cluster finder here
- ***************************************************************************
- *
- * See Log Comments at bottom
+ * Description: EMC Calibration Maker:
  ***************************************************************************/
 
 #include <iostream.h>
@@ -50,9 +41,7 @@ StEmcADCtoEMaker::~StEmcADCtoEMaker() {}
 
 Int_t StEmcADCtoEMaker::Init() {
     cout << "StEmcADCtoEMaker::init()" << endl;
-    //
-    // either DAQ or SIM data.  MACRO switchable!
-    //
+
     return StMaker::Init();
 }
 //-----------------------------------------------------------------
@@ -68,15 +57,6 @@ Int_t StEmcADCtoEMaker::Make() {
     if(!mevent)
      {cout<<" stevent does not exist, must run after StEventMaker**"<<endl;return kStWarn;}
 
-    //Get DB
-
-  m_calibdb= GetInputDB("Calibrations/emc");
-  if(!m_calibdb)
-  {
-
-    cout<<" Didn't get calib db** quiting"<<endl;
-        return kStWarn;
-  }
 
 
 //if StEvent exist , then handle the inputs.
@@ -120,8 +100,17 @@ Int_t StEmcADCtoEMaker::Make() {
    	   }
          }
        }
+      if(!mTheEmcReader){cout<<"No EMC READER***, QUIT"<<endl;return kStWarn;}
+    //Get DB
+  m_calibdb= GetInputDB("Calibrations/emc");
+  if(!m_calibdb)
+  {
 
-// you have StEvent and EmcReader pointers, so handle the input now
+    cout<<" Didn't get calib db** quiting"<<endl;
+        return kStWarn;
+  }
+
+// you have DB, StEvent and EmcReader pointers, so handle the input now
 
  StEmcHandleInput * input = new StEmcHandleInput(mevent,mTheEmcReader,m_calibdb);
      if(input->ProcessInput()!=kStOK){
@@ -153,6 +142,5 @@ Int_t StEmcADCtoEMaker::Make() {
 
 Int_t StEmcADCtoEMaker::Finish() {
 
-    cout<<"StRchMaker::Finish()"<<endl;
     return StMaker::Finish();
 }
