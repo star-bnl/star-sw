@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.62 2002/12/16 17:29:56 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.63 2002/12/20 03:28:37 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.63  2002/12/20 03:28:37  perev
+// Save method improved
+//
 // Revision 1.62  2002/12/16 17:29:56  jeromel
 // Fixed timestamp (final)
 //
@@ -335,6 +338,8 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
 
   // 		if descriptor filled, no need for newdat
   void *dbstruct = fDBBroker->Use(dat->GetUniqueID(),parId);
+//  printf("FLAVOR: %s.%s\n",dat->GetName(),fDBBroker->GetFlavor());
+  
   val[0].Set(fDBBroker->GetBeginDate(),fDBBroker->GetBeginTime());
   val[1].Set(fDBBroker->GetEndDate  (),fDBBroker->GetEndTime  ());
 
@@ -636,7 +641,7 @@ void   St_db_Maker::SetDateTime(const char *alias)
 void   St_db_Maker::SetOn(const char *path)
 { AddAlias("On" ,path,".onoff"); OnOff();}
 //_____________________________________________________________________________
-Int_t  St_db_Maker::Save(const char *path) 
+Int_t  St_db_Maker::Save(const char *path,const TDatime *newtime) 
 {
   ofstream out;
   int nakt=0,i,l;
@@ -660,7 +665,8 @@ Int_t  St_db_Maker::Save(const char *path)
       gSystem->MakeDirectory(dir);
     }
     tb = (TTable*)ds;
-    i = GetValidity(tb,val); assert(!i);
+    if (newtime) { val[0] = *newtime;}
+    else         {i = GetValidity(tb,val); assert(!i);}
     sprintf(cbuf,".%08d.%06d.C",val[0].GetDate(),val[0].GetTime());
     ts += cbuf;
     out.open((const char*)ts);       
@@ -711,7 +717,8 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
        fDBBroker->SetTableFlavor(flaType,tabID, parID);
        fl->SetUniqueID(fl->GetUniqueID()+1);
 
-       if (strcmp("ofl",flaType)!=0) 
+       if (!Debug())				continue;
+       if (strcmp("ofl",flaType)==0) 		continue;
          printf("<St_db_Maker::SetFlavor> Set flavor %s to %s\n",flaType,tabName);
 
      }// End Flavor loop

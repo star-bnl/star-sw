@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.20 2002/11/26 02:24:45 perev Exp $
+// $Id: St_db_Maker.h,v 1.21 2002/12/20 03:28:37 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.21  2002/12/20 03:28:37  perev
+// Save method improved
+//
 // Revision 1.20  2002/11/26 02:24:45  perev
 // new ROOT adoptation
 //
@@ -73,7 +76,7 @@ private:
   TDatime     fDBTime;		//! Own DB time stamp
   Int_t       fUpdateMode;	//! 
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.20 2002/11/26 02:24:45 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.21 2002/12/20 03:28:37 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name
@@ -91,7 +94,7 @@ private:
    virtual Int_t   InitRun(int runumber);
    virtual Int_t   Init();
    virtual Int_t   Make();
-   virtual Int_t   Save(const char *path);
+   virtual Int_t   Save(const char *path,const TDatime *newtime=0);
    virtual void    SetOff(const Char_t *path);
    virtual void    SetOn (const Char_t *path);
    virtual void    SetFlavor(const char *flav,const char *tabname=".all");
@@ -112,7 +115,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.20 2002/11/26 02:24:45 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.21 2002/12/20 03:28:37 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };
