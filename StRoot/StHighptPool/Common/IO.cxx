@@ -12,8 +12,8 @@
 
 ClassImp(IO)
 
-IO::IO(const char* dir, const char* ext) 
-  : mNFile(0), mDir(dir), mExt(ext) {
+IO::IO(const char* dir, const char* match, const char* ext) 
+  : mNFile(0), mDir(dir), mMatch(match), mExt(ext) {
 
 }
 
@@ -30,11 +30,13 @@ void IO::chain(TChain* chain)
   }
   
   cout << "\tUsing directory : " << mDir.Data() << endl;
+  cout << "\tMatch string    : " << mMatch.Data() << endl;
   cout << "\tMatch extension : " << mExt.Data() << endl;
   if(mNFile) cout << "\tMaximum # files : " << mNFile << endl;
 
   //
   // now find the files that end in the specified extension
+  // and match the specified string
   //
   const char* fileName(0);
   Int_t count(0);
@@ -42,7 +44,7 @@ void IO::chain(TChain* chain)
   while((fileName = gSystem->GetDirEntry(pDir))){
     if(strcmp(fileName,".")==0 || strcmp(fileName,"..")==0) continue;
 
-    if(strstr(fileName,mExt.Data())){ // found a match
+    if(strstr(fileName,mExt.Data()) && strstr(fileName,mMatch.Data())){ // found a match
       char* fullFile = gSystem->ConcatFileName(mDir.Data(),fileName);
 
       // add it to the chain
@@ -94,6 +96,7 @@ void IO::createDb(const char *dbName)
   }
   
   cout << "\tUsing directory : " << mDir.Data() << endl;
+  cout << "\tMatch string    : " << mMatch.Data() << endl;
   cout << "\tMatch extension : " << mExt.Data() << endl;
 
   //
@@ -105,7 +108,7 @@ void IO::createDb(const char *dbName)
   while((fileName = gSystem->GetDirEntry(pDir))){
     if(strcmp(fileName,".")==0 || strcmp(fileName,"..")==0) continue;
 
-    if(strstr(fileName,mExt.Data())){ // found a match
+    if(strstr(fileName,mExt.Data()) && strstr(fileName,mMatch.Data())){ // found a match
       char* fullFile = gSystem->ConcatFileName(mDir.Data(),fileName);
 
       count++;

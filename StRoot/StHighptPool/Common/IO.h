@@ -19,7 +19,7 @@ class TChain;
 
 class IO : public TObject{
  public:
-  IO(const char* dir="./", const char* ext=".root");
+  IO(const char* dir="./", const char* match="st_physics", const char* ext=".root");
   ~IO();
 
   void setNFile(int n) { mNFile = n; }
@@ -39,6 +39,7 @@ class IO : public TObject{
   int mNFile;
   TString mDir;
   TString mExt;
+  TString mMatch;
 
 /*
   /// the internal database, a vector containing pairs of file names and number of events
