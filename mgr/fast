@@ -1,6 +1,9 @@
 #!/usr/local/bin/tcsh
-#  $Id: fast,v 1.8 1998/05/15 21:55:02 fisyak Exp $
+#  $Id: fast,v 1.9 1998/05/15 22:02:08 fisyak Exp $
 #  $Log: fast,v $
+#  Revision 1.9  1998/05/15 22:02:08  fisyak
+#  check commitlog once again
+#
 #  Revision 1.8  1998/05/15 21:55:02  fisyak
 #  check commitlog once again
 #
@@ -48,7 +51,7 @@
 #$ -s /usr/local/bin/tcsh # under what shell to execute
 #    
 # Go to the directory from where job was submitted.
-#
+#   
 echo Starting job execution at `date`
 set part      = 0001_0010
 set nevent    = 10
