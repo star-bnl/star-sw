@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.8 1999/07/26 20:54:16 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.9 1999/08/06 15:08:12 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.9  1999/08/06 15:08:12  kathy
+// removed for loop and put in goto checks - due to CINT problems
+//
 // Revision 1.8  1999/07/26 20:54:16  kathy
 // changed output text to QAInfo: so that the QA sripts can tag on it; also cleaned up a bit and set to newer default input file
 //
@@ -46,40 +49,13 @@ St_DataSet *Event;
 
 void QA_bfcread_dst_tables(const char 
 *MainFile="/disk00000/star/test/dev/tfs_Linux/Wed/year_2a/psc0208_01_40evts.dst.root",
-const char *fname="qa_tables.txt")
+const char *fname="qa_tables.txt") {
 
-{
-//
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
   gSystem->Load("StTreeMaker");
   gSystem->Load("StarClassLibrary");
-
-  ofstream fout(fname);
-  fout << "Tester: " << endl;
-  fout << "Date tested: " << endl;
-  fout << "Date DST created: " << endl;
-  fout << "QAInfo: " << MainFile << endl << endl;
-  fout << "QAInfo: table name";
-  fout.width(18);
-  fout << "# rows" << endl;
-  fout << "QA->     __________";
-  fout.width(18);
-  fout << "______"<< endl << endl;
-
-
-      cout << "QA-> Tester: " << endl;
-      cout << "QA-> Date tested: " << endl;
-      cout << "QA-> Date DST created: " << endl;
-      cout << "QAInfo: " << MainFile << endl << endl;
-      cout << "QAInfo: table name";
-      cout.width(18);
-      cout << "# rows" << endl;
-      cout << "QA-> ----------";
-      cout.width(18);
-      cout << "------" << endl << endl;
-
 
 //  Setup top part of chain
   chain = new StChain("bfc");
@@ -94,216 +70,241 @@ const char *fname="qa_tables.txt")
   
 // --- now execute chain member functions
   chain->Init();
- 
+
   St_DataSet *ds=0;
   St_Table *tabl=0;
   St_DataSet *obj=0;
   Int_t tabcntr=0;
   Int_t tabmiss=0;
 
-   Int_t cnt_event_header=0;
-   Int_t cnt_event_summary=0;
-   Int_t cnt_globtrk=0;
-   Int_t cnt_globtrk_aux=0;
-   Int_t cnt_vertex=0;
-   Int_t cnt_point=0;
-   Int_t cnt_globtrk2=0;
-   Int_t cnt_primtrk=0;
-   Int_t cnt_primtrk_aux=0;
-   Int_t cnt_dst_v0_vertex=0;
-   Int_t cnt_dst_xi_vertex=0;
-   Int_t cnt_dst_dedx=0;
-   Int_t cnt_particle=0;
-   Int_t cnt_TrgDet=0;
-   Int_t cnt_monitor_soft=0;
-   Int_t cnt_g2t_rch_hit=0;
-   Int_t cnt_kinkVertex=0;
-   Int_t cnt_ev0_eval=0;
+  Int_t cnt_event_header=0;
+  Int_t cnt_event_summary=0;
+  Int_t cnt_globtrk=0;
+  Int_t cnt_globtrk_aux=0;
+  Int_t cnt_vertex=0;
+  Int_t cnt_point=0;
+  Int_t cnt_globtrk2=0;
+  Int_t cnt_primtrk=0;
+  Int_t cnt_primtrk_aux=0;
+  Int_t cnt_dst_v0_vertex=0;
+  Int_t cnt_dst_xi_vertex=0;
+  Int_t cnt_dst_dedx=0;
+  Int_t cnt_particle=0;
+  Int_t cnt_TrgDet=0;
+  Int_t cnt_monitor_soft=0;
+  Int_t cnt_g2t_rch_hit=0;
+  Int_t cnt_kinkVertex=0;
+  Int_t cnt_ev0_eval=0;
 
 // We will always just check 1 event!
   Int_t nevents=1;
 
+  ofstream fout(fname);
+  fout << "Tester: " << endl;
+  fout << "Date tested: " << endl;
+  fout << "Date DST created: " << endl;
+  fout << "QAInfo: " << MainFile << endl << endl;
+  fout << "QAInfo: table name";
+  fout.width(18);
+  fout << "# rows" << endl;
+  fout << "QA->     __________";
+  fout.width(18);
+  fout << "______"<< endl << endl;
+/*
+  cout << "QA-> Tester: " << endl;
+  cout << "QA-> Date tested: " << endl;
+  cout << "QA-> Date DST created: " << endl;
+  cout << "QAInfo: " << MainFile << endl << endl;
+  cout << "QAInfo: table name";
+  cout.width(18);
+  cout << "# rows" << endl;
+  cout << "QA-> ----------";
+  cout.width(18);
+  cout << "------" << endl << endl;
+*/
 // Loop over events
-  for (int iev=0;iev<nevents; iev++)
-    {
-      chain->Clear();
-      int iret = chain->Make();
-      if (iret) break;
+  int iret=0,iev=0;
+  //for (iev=0;iev<nevents; iev++) {            // for loop code
+ EventLoop: if (iev<nevents && !iret) {         // goto loop code
+    chain->Clear();
+    iret = chain->Make();
+    iev++;                                      // goto loop code
+    cout << "   ...iret = " << iret << endl;
+    //if (iret) break;                          // for loop code
+    if (!iret) {
 
-    ds=chain->GetDataSet("dst");
-    St_DataSetIter tabiter(ds);
+      ds=chain->GetDataSet("dst");
+      St_DataSetIter tabiter(ds);
 
-    tabcntr=0;
-    tabmiss=0;
+      tabcntr=0;
+      tabmiss=0;
 
       if (ds) {
 
 // ls() returns a virtual void, so don't have to set it = to anything
-      ds->ls(2);
+        ds->ls(2);
 
-      while (obj = tabiter.Next()) {
+        while (obj = tabiter.Next()) {
 //.. count all tables that exist:
-        if (obj->InheritsFrom("St_Table")) {
-          tabcntr++;
-          //cout << "object  = " << obj->GetName() << endl;
-          //cout << "tabcntr = " << tabcntr << endl;
+          if (obj->InheritsFrom("St_Table")) {
+            tabcntr++;
+            //cout << "object  = " << obj->GetName() << endl;
+            //cout << "tabcntr = " << tabcntr << endl;
 
-          tabl = (St_Table *)tabiter.Find(obj->GetName());
-          if (tabl) {
-            cout << "QAInfo: " << obj->GetName();
-            cout.width(28-strlen(obj->GetName()));
-            cout << tabl->GetNRows() << endl;
+            tabl = (St_Table *)tabiter.Find(obj->GetName());
+            if (tabl) {
+              cout << "QAInfo: " << obj->GetName();
+              cout.width(28-strlen(obj->GetName()));
+              cout << tabl->GetNRows() << endl;
 
-            fout << "QAInfo: " << obj->GetName();
-            fout.width(28-strlen(obj->GetName()));
-            fout << tabl->GetNRows()<< endl;
+              fout << "QAInfo: " << obj->GetName();
+              fout.width(28-strlen(obj->GetName()));
+              fout << tabl->GetNRows()<< endl;
 
-            if (strcmp(obj->GetName(),"event_header")==0) 
-               cnt_event_header++;
-            if (strcmp(obj->GetName(),"event_summary")==0) 
-               cnt_event_summary++;
-            if (strcmp(obj->GetName(),"globtrk")==0) 
-               cnt_globtrk++;
-            if (strcmp(obj->GetName(),"globtrk_aux")==0) 
-               cnt_globtrk_aux++;
-            if (strcmp(obj->GetName(),"vertex")==0) 
-               cnt_vertex++;
-            if (strcmp(obj->GetName(),"point")==0) 
-               cnt_point++;
-            if (strcmp(obj->GetName(),"globtrk2")==0) 
-               cnt_globtrk2++;
-            if (strcmp(obj->GetName(),"primtrk")==0) 
-               cnt_primtrk++;
-            if (strcmp(obj->GetName(),"primtrk_aux")==0) 
-               cnt_primtrk_aux++;
-            if (strcmp(obj->GetName(),"dst_v0_vertex")==0) 
-               cnt_dst_v0_vertex++;
-            if (strcmp(obj->GetName(),"ev0_eval")==0) 
-               cnt_ev0_eval++;
-            if (strcmp(obj->GetName(),"dst_xi_vertex")==0) 
-               cnt_dst_xi_vertex++;
-            if (strcmp(obj->GetName(),"kinkVertex")==0) 
-               cnt_kinkVertex++;
-            if (strcmp(obj->GetName(),"dst_dedx")==0) 
-               cnt_dst_dedx++;
-            if (strcmp(obj->GetName(),"particle")==0) 
-               cnt_particle++;
-            if (strcmp(obj->GetName(),"TrgDet")==0) 
-               cnt_TrgDet++;
-            if (strcmp(obj->GetName(),"monitor_soft")==0) 
-               cnt_monitor_soft++;
-            if (strcmp(obj->GetName(),"g2t_rch_hit")==0) 
-               cnt_g2t_rch_hit++;
+              if (strcmp(obj->GetName(),"event_header")==0) 
+                cnt_event_header++;
+              if (strcmp(obj->GetName(),"event_summary")==0) 
+                cnt_event_summary++;
+              if (strcmp(obj->GetName(),"globtrk")==0) 
+                cnt_globtrk++;
+              if (strcmp(obj->GetName(),"globtrk_aux")==0) 
+                cnt_globtrk_aux++;
+              if (strcmp(obj->GetName(),"vertex")==0) 
+                cnt_vertex++;
+              if (strcmp(obj->GetName(),"point")==0) 
+                cnt_point++;
+              if (strcmp(obj->GetName(),"globtrk2")==0) 
+                cnt_globtrk2++;
+              if (strcmp(obj->GetName(),"primtrk")==0) 
+                cnt_primtrk++;
+              if (strcmp(obj->GetName(),"primtrk_aux")==0) 
+                cnt_primtrk_aux++;
+              if (strcmp(obj->GetName(),"dst_v0_vertex")==0) 
+                cnt_dst_v0_vertex++;
+              if (strcmp(obj->GetName(),"ev0_eval")==0) 
+                cnt_ev0_eval++;
+              if (strcmp(obj->GetName(),"dst_xi_vertex")==0) 
+                cnt_dst_xi_vertex++;
+              if (strcmp(obj->GetName(),"kinkVertex")==0) 
+                cnt_kinkVertex++;
+              if (strcmp(obj->GetName(),"dst_dedx")==0) 
+                cnt_dst_dedx++;
+              if (strcmp(obj->GetName(),"particle")==0) 
+                cnt_particle++;
+              if (strcmp(obj->GetName(),"TrgDet")==0) 
+                cnt_TrgDet++;
+              if (strcmp(obj->GetName(),"monitor_soft")==0) 
+                cnt_monitor_soft++;
+              if (strcmp(obj->GetName(),"g2t_rch_hit")==0) 
+                cnt_g2t_rch_hit++;
 
+            }
           }
         }
-      }
 
 // ------------------------------------------------------------
 
+        cout << endl << "QAInfo: total # tables = " << tabcntr << endl;
+        fout << endl << "QAInfo: total # tables = " << tabcntr << endl;
 
-      cout << endl << "QAInfo: total # tables = " << tabcntr << endl;
-      fout << endl << "QAInfo: total # tables = " << tabcntr << endl;
+        if (cnt_event_header == 0){
+          cout << endl << "QA-> missing table: " << "event_header" << endl;
+          fout << endl << "QA-> missing table: " << "event_header" << endl;
+          tabmiss++;
+        } 
+        if (cnt_event_summary == 0){
+          cout << endl << "QA-> missing table: " << "event_summary" << endl;
+          fout << endl << "QA-> missing table: " << "event_summary" << endl;
+          tabmiss++;
+        } 
+        if (cnt_globtrk == 0){
+          cout << endl << "QA-> Missing Table: " << "globtrk" << endl;
+          fout << endl << "QA-> Missing Table: " << "globtrk" << endl;
+          tabmiss++;
+        } 
+        if (cnt_globtrk_aux == 0){
+          cout << endl << "QA-> Missing Table: " << "globtrk_aux" << endl;
+          fout << endl << "QA-> Missing Table: " << "globtrk_aux" << endl;
+          tabmiss++;
+        } 
+        if (cnt_vertex == 0){
+          cout << endl << "QA-> Missing Table: " << "vertex" << endl;
+          fout << endl << "QA-> Missing Table: " << "vertex" << endl;
+          tabmiss++;
+        } 
+        if (cnt_point == 0){
+          cout << endl << "QA-> Missing Table: " << "point" << endl;
+          fout << endl << "QA-> Missing Table: " << "point" << endl;
+          tabmiss++;
+        } 
+        if (cnt_globtrk2 == 0){
+          cout << endl << "QA-> Missing Table: " << "globtrk2" << endl;
+          fout << endl << "QA-> Missing Table: " << "globtrk2" << endl;
+          tabmiss++;
+        } 
+        if (cnt_primtrk == 0){
+          cout << endl << "QA-> Missing Table: " << "primtrk" << endl;
+          fout << endl << "QA-> Missing Table: " << "primtrk" << endl;
+          tabmiss++;
+        } 
+        if (cnt_primtrk_aux == 0){
+          cout << endl << "QA-> Missing Table: " << "primtrk_aux" << endl;
+          fout << endl << "QA-> Missing Table: " << "primtrk_aux" << endl;
+          tabmiss++;
+        } 
+        if (cnt_dst_v0_vertex == 0){
+          cout << endl << "QA-> Missing Table: " << "dst_v0_vertex" << endl;
+          fout << endl << "QA-> Missing Table: " << "dst_v0_vertex" << endl;
+          tabmiss++;
+        } 
+        if (cnt_ev0_eval == 0){
+          cout << endl << "QA-> Missing Table: " << "ev0_eval" << endl;
+          fout << endl << "QA-> Missing Table: " << "ev0_eval" << endl;
+          tabmiss++;
+        } 
+        if (cnt_dst_xi_vertex == 0){
+          cout << endl << "QA-> Missing Table: " << "dst_xi_vertex" << endl;
+          fout << endl << "QA-> Missing Table: " << "dst_xi_vertex" << endl;
+          tabmiss++;
+        } 
+        if (cnt_kinkVertex == 0){
+          cout << endl << "QA-> Missing Table: " << "kinkVertex" << endl;
+          fout << endl << "QA-> Missing Table: " << "kinkVertex" << endl;
+          tabmiss++;
+        } 
+        if (cnt_dst_dedx == 0){
+          cout << endl << "QA-> Missing Table: " << "dst_dedx" << endl;
+          fout << endl << "QA-> Missing Table: " << "dst_dedx" << endl;
+          tabmiss++;
+        } 
+        if (cnt_particle == 0){
+          cout << endl << "QA-> Missing Table: " << "particle" << endl;
+          fout << endl << "QA-> Missing Table: " << "particle" << endl;
+          tabmiss++;
+        } 
+        if (cnt_TrgDet == 0){
+          cout << endl << "QA-> Missing Table: " << "TrgDet" << endl;
+          fout << endl << "QA-> Missing Table: " << "TrgDet" << endl;
+          tabmiss++;
+        } 
+        if (cnt_monitor_soft == 0){
+          cout << endl << "QA-> Missing Table: " << "monitor_soft" << endl;
+          fout << endl << "QA-> Missing Table: " << "monitor_soft" << endl;
+          tabmiss++;
+        } 
+        if (cnt_g2t_rch_hit == 0){
+          cout << endl << "QA-> Missing Table: " << "g2t_rch_hit" << endl;
+          fout << endl << "QA-> Missing Table: " << "g2t_rch_hit" << endl;
+          tabmiss++;
+        } 
 
+        cout << endl << "QA-> # tables missing = " << tabmiss << endl;
+        fout << endl << "QA-> # tables missing = " << tabmiss  << endl;
 
-      if (cnt_event_header == 0){
-        cout << endl << "QA-> missing table: " << "event_header" << endl;
-        fout << endl << "QA-> missing table: " << "event_header" << endl;
-        tabmiss++;
-      } 
-      if (cnt_event_summary == 0){
-        cout << endl << "QA-> missing table: " << "event_summary" << endl;
-        fout << endl << "QA-> missing table: " << "event_summary" << endl;
-        tabmiss++;
-      } 
-      if (cnt_globtrk == 0){
-        cout << endl << "QA-> Missing Table: " << "globtrk" << endl;
-        fout << endl << "QA-> Missing Table: " << "globtrk" << endl;
-        tabmiss++;
-      } 
-      if (cnt_globtrk_aux == 0){
-        cout << endl << "QA-> Missing Table: " << "globtrk_aux" << endl;
-        fout << endl << "QA-> Missing Table: " << "globtrk_aux" << endl;
-        tabmiss++;
-      } 
-      if (cnt_vertex == 0){
-        cout << endl << "QA-> Missing Table: " << "vertex" << endl;
-        fout << endl << "QA-> Missing Table: " << "vertex" << endl;
-        tabmiss++;
-      } 
-      if (cnt_point == 0){
-        cout << endl << "QA-> Missing Table: " << "point" << endl;
-        fout << endl << "QA-> Missing Table: " << "point" << endl;
-        tabmiss++;
-      } 
-      if (cnt_globtrk2 == 0){
-        cout << endl << "QA-> Missing Table: " << "globtrk2" << endl;
-        fout << endl << "QA-> Missing Table: " << "globtrk2" << endl;
-        tabmiss++;
-      } 
-      if (cnt_primtrk == 0){
-        cout << endl << "QA-> Missing Table: " << "primtrk" << endl;
-        fout << endl << "QA-> Missing Table: " << "primtrk" << endl;
-        tabmiss++;
-      } 
-      if (cnt_primtrk_aux == 0){
-        cout << endl << "QA-> Missing Table: " << "primtrk_aux" << endl;
-        fout << endl << "QA-> Missing Table: " << "primtrk_aux" << endl;
-        tabmiss++;
-      } 
-      if (cnt_dst_v0_vertex == 0){
-        cout << endl << "QA-> Missing Table: " << "dst_v0_vertex" << endl;
-        fout << endl << "QA-> Missing Table: " << "dst_v0_vertex" << endl;
-        tabmiss++;
-      } 
-      if (cnt_ev0_eval == 0){
-        cout << endl << "QA-> Missing Table: " << "ev0_eval" << endl;
-        fout << endl << "QA-> Missing Table: " << "ev0_eval" << endl;
-        tabmiss++;
-      } 
-      if (cnt_dst_xi_vertex == 0){
-        cout << endl << "QA-> Missing Table: " << "dst_xi_vertex" << endl;
-        fout << endl << "QA-> Missing Table: " << "dst_xi_vertex" << endl;
-        tabmiss++;
-      } 
-      if (cnt_kinkVertex == 0){
-        cout << endl << "QA-> Missing Table: " << "kinkVertex" << endl;
-        fout << endl << "QA-> Missing Table: " << "kinkVertex" << endl;
-        tabmiss++;
-      } 
-      if (cnt_dst_dedx == 0){
-        cout << endl << "QA-> Missing Table: " << "dst_dedx" << endl;
-        fout << endl << "QA-> Missing Table: " << "dst_dedx" << endl;
-        tabmiss++;
-      } 
-      if (cnt_particle == 0){
-        cout << endl << "QA-> Missing Table: " << "particle" << endl;
-        fout << endl << "QA-> Missing Table: " << "particle" << endl;
-        tabmiss++;
-      } 
-      if (cnt_TrgDet == 0){
-        cout << endl << "QA-> Missing Table: " << "TrgDet" << endl;
-        fout << endl << "QA-> Missing Table: " << "TrgDet" << endl;
-        tabmiss++;
-      } 
-      if (cnt_monitor_soft == 0){
-        cout << endl << "QA-> Missing Table: " << "monitor_soft" << endl;
-        fout << endl << "QA-> Missing Table: " << "monitor_soft" << endl;
-        tabmiss++;
-      } 
-      if (cnt_g2t_rch_hit == 0){
-        cout << endl << "QA-> Missing Table: " << "g2t_rch_hit" << endl;
-        fout << endl << "QA-> Missing Table: " << "g2t_rch_hit" << endl;
-        tabmiss++;
-      } 
-
-
-      cout << endl << "QA-> # tables missing = " << tabmiss << endl;
-      fout << endl << "QA-> # tables missing = " << tabmiss  << endl;
-
-
-      fout.close();
-      chain->Finish();    
+        fout.close();
+        chain->Finish();    
       }
     }
+    goto EventLoop;
+ }
 }

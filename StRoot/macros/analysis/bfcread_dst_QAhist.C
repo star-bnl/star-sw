@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.1 1999/07/13 00:42:32 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.2 1999/08/06 15:08:13 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.2  1999/08/06 15:08:13  kathy
+// removed for loop and put in goto checks - due to CINT problems
+//
 // Revision 1.1  1999/07/13 00:42:32  kathy
 // updated all default input files, removed unneccessary macros, renamed other to make more standard
 //
@@ -56,22 +59,20 @@ void bfcread_dst_QAhist(Int_t nevents=1,
              const Char_t *psFile="QA_hist.ps")
 {
 //
-  cout << "DrawDstHistNew.C, input file name       " << MainFile << endl;
-  cout << "DrawDstHistNew.C, output psfile name    " << psFile   << endl;
-  cout << "DrawDstHistNew.C, num events to process " << nevents  << endl;
+  cout << "bfcread_dst_QAhist.C, input file name       " << MainFile << endl;
+  cout << "bfcread_dst_QAhist.C, output psfile name    " << psFile   << endl;
+  cout << "bfcread_dst_QAhist.C, num events to process " << nevents  << endl;
 
-    gSystem->Load("St_base");
-    gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
-    gSystem->Load("StTreeMaker");
-    gSystem->Load("St_QA_Maker");
-    gSystem->Load("StarClassLibrary");
-
-
+  gSystem->Load("St_base");
+  gSystem->Load("StChain");
+  gSystem->Load("St_Tables");
+  gSystem->Load("StTreeMaker");
+  gSystem->Load("St_QA_Maker");
+  gSystem->Load("StarClassLibrary");
 
 //  Setup top part of chain
-    chain = new StChain("bfc");
-    chain->SetDebug();
+  chain = new StChain("bfc");
+  chain->SetDebug();
    
 //  Input Tree
   StTreeMaker *treeMk = new StTreeMaker("treeRead",MainFile);
@@ -81,41 +82,44 @@ void bfcread_dst_QAhist(Int_t nevents=1,
   treeMk->SetBranch("dstBranch",0,"r");	//activate dstBranch
 
 //  add other makers to chain:
-   St_QA_Maker  *QA  = new St_QA_Maker;
+  St_QA_Maker  *QA  = new St_QA_Maker;
   
 // --- now execute chain member functions
   chain->Init();
  
 // method to print out list of histograms - can do this anytime after they're booked
-   Int_t NoHist=0;
-   NoHist = QA->ListHists();
-   cout << " DrawDstHistNew.C, No. of Hist we have == " << NoHist << endl;
+  Int_t NoHist=0;
+  NoHist = QA->ListHists();
+  cout << " bfcread_dst_QAhist.C, No. of Hist we have == " << NoHist << endl;
 
 // loop over events:
-  for (int iev=0;iev<nevents; iev++)
-  {
-    cout <<  " DrawDstHistNew.C, processing event !!! " << iev << endl ;
-    chain->Clear();
-    int iret = chain->Make();
-    if (iret) break;
-  }
+  int iev=0,iret=0;
+  //for (iev=0;iev<nevents; iev++) {     // for loop code
+ EventLoop: if (iev<nevents && !iret) {  // goto loop code
+   cout <<  " bfcread_dst_QAhist.C, processing event !!! " << iev << endl ;
+   chain->Clear();
+   iret = chain->Make();
+   //if (iret) break;                    // for loop code
+   iev++;                                // goto loop code
+   goto EventLoop;                       // goto loop code
+ }
 
-  cout <<  " DrawDstHistNew.C, passed chain->Make !!!" << endl ;
+  cout <<  " bfcread_dst_QAhist.C, passed chain->Make !!!" << endl ;
 
 // the following methods are already set to default values in St_QA_Maker::Init - now write over them
-    QA->SetDraw(kTRUE);
+  QA->SetDraw(kTRUE);
 //    QA->SetHistsNamesDraw(firstHist,lastHist);
-    QA->SetPostScriptFile(psFile);
-    QA->SetZones();
-    QA->SetPaperSize();
+  QA->SetPostScriptFile(psFile);
+  QA->SetZones();
+  QA->SetPaperSize();
 
-    Int_t numLog = 0;
-    numLog = QA->ExamineLogYList();
-    cout <<" DrawDstHistNew.C, Number hist to plot with log scale = " << numLog << endl;
+  Int_t numLog = 0;
+  numLog = QA->ExamineLogYList();
+  cout <<" bfcread_dst_QAhist.C, Number hist to plot with log scale = " << numLog << endl;
 
 // Finish method in St_QA_Maker is where the actual DrawHist is done
   chain->Finish();
-  cout <<  "DrawDstHistNew.C, passed chain->Finish" << endl ; 
+  cout <<  "bfcread_dst_QAhist.C, passed chain->Finish" << endl ; 
 
 }
  
