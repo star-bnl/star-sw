@@ -1,23 +1,13 @@
 **:>--------------------------------------------------------------------
-**    module    G2T is the g2t table formatter only
+**    module    G2T is the g2tmain invoker only
 **    author    Pavel Nevski
 **    created   22 april 98
 **:<--------------------------------------------------------------------
       subroutine   g2t 
-      implicit     none
-
-      Call AGSTRUT(' ',' ')
-
+      entry        g2t_start
       print *,' *********** g2t main called *********** '
-      call g2tmain
+      call  g2tmain
       end
-
-      subroutine g2t_start
-      external   g2t
-      call this_is_amodule ('g2t'//char(0),g2t)
-      call g2t
-      end
-
 
 **:>--------------------------------------------------------------------
 module    G2Tmain  is g2t converter
@@ -42,7 +32,7 @@ created   22 april 98
       Record         /G2T_EVENT_ST/  g2t_event
 *
 *
-If (First) Then
+ If (First) Then
    first = .false.
    fill GTTC(1)           ! g2t control
      version = 1                  ! version number
@@ -132,11 +122,12 @@ If (First) Then
      ctab  = 'pgc'        ! table name
    endfill
 *
-endif
+ endif
 *
       G2T_MAIN = 0
       Use GTTC
-
+      Call AGSTRUT(' ',' ')
+*
       o    = CHAR(0)
       Cdir = gttc_edir(1)//gttc_edir(2)//gttc_edir(3)
       ld   = Lenocc(cdir)
