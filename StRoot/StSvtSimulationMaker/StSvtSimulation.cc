@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulation.cc,v 1.2 2001/02/07 19:13:51 caines Exp $
+ * $Id: StSvtSimulation.cc,v 1.3 2001/03/15 15:12:08 bekele Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulation.cc,v $
+ * Revision 1.3  2001/03/15 15:12:08  bekele
+ * added a method to fill the whole SVT hybrid with background
+ *
  * Revision 1.2  2001/02/07 19:13:51  caines
  * Small fixes to allow to run without setup from command line
  *
@@ -173,37 +176,33 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, double backgrsi
           {
            t = n*mTimeBinSize;
            
-            adc = mSvtSignal->getSignal(n-1);   // [milli volts]
+            adc = mSvtSignal->getSignal(n-1)/4;   // in counts with 1 count <-> 4mV
 
-            if(adc == 0) continue;
+            if(adc == 0.0) continue;
 
              mTempBuffer[counter][n-1] = adc;
              // cout<<"adc = "<<adc;
 
              int pixelIndex = svtSimDataPixels->getPixelIndex(anode + an, n - 1);
 	     double adc1 = svtSimDataPixels->getPixelContent(anode + an,n - 1);
-	
-	     if(!strncmp(mBackGrOption,"doBackGr",strlen("backGr"))){
-	      if(adc1 != 0){
-
-                  adc = adc/4 ;   // (int)adc will be in counts with 1 count <-> 4 mV
-                  svtSimDataPixels->addToPixel(pixelIndex,adc);
-	          }
-               else {
-
+             
+             if(!strncmp(mBackGrOption,"doHitBackGr",strlen("doHitBackGr"))){
+	       if(adc1 == 0.0){               
                    back = makeGausDev(backgrsigma);
-                   adc = back + adc/4 ;   // (int)adc will be in counts with 1 count <-> 4 mV
+                   adc = back + adc;   // (int)adc will be in counts with 1 count <-> 4 mV
                    svtSimDataPixels->addToPixel(pixelIndex,adc);
-              
+
+	          }
+               else{
+                    adc = adc1 + adc;   // (int)adc will be in counts with 1 count <-> 4 mV
+                    svtSimDataPixels->addToPixel(pixelIndex,adc);
 	         }
-                }
-	    
-	    else{
-                 adc = adc/4 ;   // (int)adc will be in counts with 1 count <-> 4 mV
-                 svtSimDataPixels->addToPixel(pixelIndex,adc);
+	        }
+	     else {	      
+                   adc = adc1 + adc;
+                   svtSimDataPixels->addToPixel(pixelIndex,adc);
+	        }
 	      } 
-	  }         
-       
         
          mPeakArray[counter] = mSvtSignal->getPeak();
 
