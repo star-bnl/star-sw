@@ -103,6 +103,8 @@
 *                             read_table_from_file
 *                             and skip out if vector is set 
 *                           - change emc to ems in chain 
+* editted 9/14/98 K. Turner - new chain variable dstin to read in dst
+*                             file and put tables in correct directories
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -171,7 +173,18 @@ macro bfc_init _
            if ($vexist(readprob).ne.0) then 
             message ' BFC_UTIL,init: ERROR - cannot read input file - quit '
             goto EOF
-           endif
+	  endif
+    (dstin) 
+	  exec read_table_from_file#init ind [input_file]
+	   if ($vexist(readprob).ne.0) then 
+            message ' BFC_UTIL,init: ERROR - cannot open dstin file - quit '
+            goto EOF
+	   endif
+	  exec read_table_from_file#read ind [run_dst]
+           if ($vexist(readprob).ne.0) then 
+            message ' BFC_UTIL,init: ERROR - cannot read dstin file - quit '
+            goto EOF
+	   endif  
      (esin)
           dio/newfilestream inev [input_file] r
           cd [run]
@@ -370,6 +383,25 @@ ABEND:
 	        endif
               endif
             endif
+   (dstin) exec read_table_from_file#read ind [dst]
+           if ($vexist(readprob).ne.0) then 
+            message ' BFC_UTIL,process: ERROR - cannot read dstin file - quit '
+            goto EOF
+           endif
+            ls [run_dst]/run_summary
+            if (staf_status(2).eq.STAFCV_OK) then
+*              message ' *** BFC_PROCESS: run summary table exists! '
+              rowcount [run_dst]/run_summary	    
+	      if (staf_result(1).ne.0) then
+*                message ' *** BFC_PROCESS: run summary table has entries! '
+                tdm/table/cell/getvalue 'run/dst/run_summary[0].n_events_tot' 
+                if (staf_result(1).ne.0) then 
+	            vec/create havedstrunsum
+*	            message ' *** BFC_PROCESS: final run_summary table!'
+	            goto FINISH
+	        endif
+              endif
+            endif
      (esin) for dir in [evgen] [geantE] [raw_data] [data] [dst]
               cd [dir]; dio/stream/getevent inev 
               if (staf_status(1).ne.STAFCV_OK) goto EOF
@@ -535,7 +567,8 @@ macro bfc_finish _
     CASE [mod] in 
      (g2tin)  exec input_g2t_file#close
      (evin)  exec read_table_from_file#close inev 
-     (rgst)  ge/rz/cd //PAWC; hi/list;  | show histograms
+     (dstin) exec read_table_from_file#close ind
+     (rgst)  ge/rz/cd //PAWC; hi/list; | show histograms
 *     (drhd)  vec/create randst
      (drsum) exec  finish_dst#dst_run_summary
              exec  run_dst#dst_run_summary
