@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StMuPmdCollection.h,v 1.1 2004/04/02 03:36:21 jeromel Exp $
+ * $Id: StMuPmdCollection.h,v 1.2 2004/04/26 00:11:07 perev Exp $
  *
  * Class : StMuPmdCollection
  * Author: Supriya Das & Subhasis Chattopadhyay
@@ -8,6 +8,9 @@
  * Description: This class holds the PMD clusters for MuDst
  * ****************************************************************
  * $Log: StMuPmdCollection.h,v $
+ * Revision 1.2  2004/04/26 00:11:07  perev
+ * forward declaration of StMuPmdCluster
+ *
  * Revision 1.1  2004/04/02 03:36:21  jeromel
  * New files for PMD
  *
@@ -18,9 +21,9 @@
  
 #include "TObject.h"
 #include "TClonesArray.h"
-#include "StMuPmdCluster.h"
-
 #include "Stiostream.h"
+
+class StMuPmdCluster;
 
 enum {pmd=1, cpv=2};
 class StMuPmdCollection: public TObject
