@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.117 2001/08/02 21:03:27 jeromel Exp $
+# $Id: Construct,v 1.118 2001/09/17 13:37:57 fisyak Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
@@ -54,21 +54,20 @@ $INCLUDE = "#" . $include;
 $EXPORT  = "#.share";
 $LIBPATH = $LIB;
 print "Set LIB = $LIB BIN = $BIN OBJ = $OBJ INCLUDE = $INCLUDE LIBPATH = $LIBPATH\n";
-my $ROOTLIBS = 
-" -lNew  -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lHist -lGraf -lGraf3d -lTree -lGpad -lPhysics";
-print "ROOTLIBS = $ROOTLIBS\n";
-
+my $ROOTLIBS = "";
 my $ROOTGLIBS = "";
 my $RINTLIBS  = "-lRint ";
-
-if ( !defined( $ARG{NoNew} ) ) { $ROOTLIBS = " -lNew"; }
-$ROOTLIBS .=
-" -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui -lGpad -lPhysics -lMatrix";
-print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
 
 if ( defined( $ARG{ROOTLIBS} ) ) {
     $ROOTLIBS = $ARG{ROOTLIBS};
     print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
+}
+else {
+  if ( !defined( $ARG{NoNew} ) ) { $ROOTLIBS = " -lNew"; }
+  $ROOTLIBS .=
+    " -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui -lGpad -lPhysics -lMatrix";
+  print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
+  
 }
 $CPPPATH = $INCLUDE . ":#StRoot:" . $ROOTSRC;
 $CPPPATH .= $main::PATH_SEPARATOR . $CERN_ROOT . "/include" . $EXTRA_CPPPATH;
@@ -175,7 +174,7 @@ my @subdirs = ();
 # make Targets and install includes
 my  @items = split(" ",$SKIP_DIRS);
 
-foreach my $dir( "pams", "StRoot" ) {
+foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
     next if !-d $dir;
     opendir( DIR, $dir ) or die "Can't open $dir\n";
     my @subdirS = readdir DIR;
