@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cc,v 1.4 1999/02/18 15:42:09 ullrich Exp $
+ * $Id: StV0Vertex.cc,v 1.5 1999/02/21 20:32:48 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cc,v $
+ * Revision 1.5  1999/02/21 20:32:48  genevb
+ * Improve StV0Vertex code
+ *
  * Revision 1.4  1999/02/18 15:42:09  ullrich
  * Momemta of daughter tracks added.
  *
@@ -27,9 +30,10 @@
 #include <iostream.h>
 #include "StEvent/StV0Vertex.hh"
 
-static const char rcsid[] = "$Id: StV0Vertex.cc,v 1.4 1999/02/18 15:42:09 ullrich Exp $";
+static const char rcsid[] = "$Id: StV0Vertex.cc,v 1.5 1999/02/21 20:32:48 genevb Exp $";
 
-StV0Vertex::StV0Vertex()
+StV0Vertex::StV0Vertex() : 
+ StVertex()
 {
     mType = V0;			// always
     mDcaDaughtersToPrimaryVertex[negativeTrack] = 0;
@@ -40,7 +44,8 @@ StV0Vertex::StV0Vertex()
     mDcaParentToPrimaryVertex = 0;
 }
 
-StV0Vertex::StV0Vertex(dst_v0_vertex_st* v0vtx)
+StV0Vertex::StV0Vertex(dst_v0_vertex_st* v0vtx, dst_vertex_st* vtx) :
+ StVertex(vtx)
 {
     mType = V0;			// always
     mDcaDaughtersToPrimaryVertex[negativeTrack] = v0vtx->dcan;
