@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.cc,v 2.8 2003/10/08 20:17:55 calderon Exp $
+ * $Id: StMcFtpcHit.cc,v 2.9 2003/10/08 21:21:31 calderon Exp $
  * $Log: StMcFtpcHit.cc,v $
+ * Revision 2.9  2003/10/08 21:21:31  calderon
+ * Added backward compatibility for plane(), in case of volumeId < 1000.
+ * The sector() will return a dummy value of 99999 in this case.
+ *
  * Revision 2.8  2003/10/08 20:17:55  calderon
  * -using <iostream>, std::cout, std::ostream.
  * -changes in FTPC volume Id.
@@ -47,7 +51,7 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_ftp_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.8 2003/10/08 20:17:55 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.9 2003/10/08 21:21:31 calderon Exp $";
 
 StMemoryPool StMcFtpcHit::mPool(sizeof(StMcFtpcHit));
 
@@ -82,6 +86,8 @@ ostream&  operator<<(ostream& os, const StMcFtpcHit& h)
 unsigned long
 StMcFtpcHit::plane() const
 {
+    if (mVolumeId<1000) return (mVolumeId/100 - 1)*10 + (mVolumeId)%100; // for backward compatibility
+
     //new encoding from Maria: 1st (west) or 2nd (east) FTPC * 1000 + plane * 100 + sector
     //volume_id = 101? to 110? are the first FTPC (1-10 in StEvent), last digit is sector (below)
     //volume_id = 201? to 210? are the second FTPC (11-20 in StEvent), last digit is sector (below)
@@ -91,6 +97,7 @@ StMcFtpcHit::plane() const
 unsigned long
 StMcFtpcHit::sector() const
 {
+    if (mVolumeId < 1000) return 99999; // for backward compatibility
     //volume_id = 1??1 to 1??6 are the sectors in the first FTPC (1-6 in StEvent)
     //volume_id = 2??1 to 2??6 are the sectors in the second FTPC (1-6 in StEvent)
     return mVolumeId%10;
