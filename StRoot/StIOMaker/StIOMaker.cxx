@@ -74,7 +74,8 @@ void StIOMaker::Build(StFileI *fileSet,const char *ioFile,const char *treeName)
 //_____________________________________________________________________________
 StIOMaker::~StIOMaker()
 {
-  if (fFileSet) delete fFileSet;
+  // pointer may belong to someone else - do not delete
+  //if (fFileSet) delete fFileSet; 
   fFileSet= 0;
 }
 //_____________________________________________________________________________
