@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridSimData.cc,v 1.1 2000/11/30 20:47:49 caines Exp $
+ * $Id: StSvtHybridSimData.cc,v 1.2 2001/05/10 04:29:52 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridSimData.cc,v $
+ * Revision 1.2  2001/05/10 04:29:52  caines
+ * Change pedestal offset to match real raw data
+ *
  * Revision 1.1  2000/11/30 20:47:49  caines
  * First version of Slow Simulator - S. Bekele
  *
@@ -29,6 +32,7 @@ ClassImp(StSvtHybridSimData)
 
 StSvtHybridSimData::StSvtHybridSimData(int barrel, int ladder, int wafer, int hybrid,StSvtHybridPixels* mSimDataPixels):StSvtHybridData(barrel, ladder, wafer,hybrid)
 {
+  mOffSet=25;
   if (mSimDataPixels)
     setSimHybridData(mSimDataPixels);
 }
@@ -60,8 +64,8 @@ int StSvtHybridSimData::setSimHybridData(StSvtHybridPixels* mSimDataPixels)
 
       for (int i=0;i<128;i++)
 	{
-	  float adc = mSimDataPixels->getPixelContent(ianode+1,i) + 100.0;
-	  if( adc >=0 && adc < 255){
+	  float adc = (float)mSimDataPixels->getPixelContent(ianode+1,i)+mOffSet;
+	  if( adc >=0. && adc < 255.){
 	    seq[ianode][iseq].firstAdc[i] =  (unsigned char) adc;
 	  }
 	  else{

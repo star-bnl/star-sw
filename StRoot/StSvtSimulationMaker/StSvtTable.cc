@@ -35,7 +35,7 @@ void StSvtTable::setFreq(int i)
           else 
            mFreq[j][k] = prob1(num,width);
            if(i == 1 && j == 33 && k == 132)
-             cout<<"mFreq"<<"["<<j<<"]"<<"["<<k<<"] = "<<mFreq[j][k]<<"\t"; 
+             cout<<"mFreq"<<"\["<<j<<"]"<<"\["<<k<<"] = "<<mFreq[j][k]<<"\t"; 
               
 	 }
       }
@@ -50,7 +50,7 @@ double StSvtTable::getFreq(int j, int k)
 
 double StSvtTable::prob1(double num , double  sigma)
 {
-   num = num/(M_SQRT2*sigma);
+   num = num/(sqrt(2)*sigma);
 
    double fraction = 0.5*(1 + erf(num));
 
@@ -75,7 +75,7 @@ double StSvtTable::prob2(double num , double  sigma)
       if(j==0)
        {
         mFactorial = 1.0;
-        mPowerTerm = fabs(num)/(M_SQRT2*sigma);
+        mPowerTerm = fabs(num)/(sqrt(2)*sigma);
         mPowerTermSquared = mPowerTerm*mPowerTerm;
         mCountTerm = mPowerTerm;
        }
@@ -96,7 +96,7 @@ double StSvtTable::prob2(double num , double  sigma)
     
      }
 
-     mErrf = (2.0/sqrt(M_PI))*mSum;
+     mErrf = (2.0/sqrt(acos(-1)))*mSum;
 
      if(num < 0.0)
        mErrf = (-1.0)*mErrf;
