@@ -1,4 +1,21 @@
 @rem = '--*-PERL-*--';
+@rem = '';
+@rem = 'Copyright (C) 1996-2000 Free Software Foundation, Inc.';
+@rem = '';
+@rem = 'This program is free software; you can redistribute it and/or modify';
+@rem = 'it under the terms of the GNU General Public License as published by';
+@rem = 'the Free Software Foundation; either version 2 of the License, or';
+@rem = '(at your option) any later version.';
+@rem = '';
+@rem = 'This program is distributed in the hope that it will be useful,';
+@rem = 'but WITHOUT ANY WARRANTY; without even the implied warranty of';
+@rem = 'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the';
+@rem = 'GNU General Public License for more details.';
+@rem = '';
+@rem = 'You should have received a copy of the GNU General Public License';
+@rem = 'along with this program; see the file COPYING.  If not, write to';
+@rem = 'the Free Software Foundation, Inc., 59 Temple Place - Suite 330,';
+@rem = 'Boston, MA 02111-1307, USA.';
 @rem = '
 @echo off
 rem setlocal
@@ -10,21 +27,25 @@ shift
 goto loop
 :endloop
 rem ***** This assumes PERL is in the PATH *****
-rem $Id: cons.bat,v 1.2 2000/03/14 01:46:57 fisyak Exp $
+rem $Id: cons.bat,v 1.3 2000/06/14 22:52:43 fisyak Exp $
 perl.exe -S cons.bat %ARGS%
 goto endofperl
 @rem ';
 
 #!/usr/bin/env perl
 
-# Cons: A Software Construction Tool.
-# Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons.bat,v 1.2 2000/03/14 01:46:57 fisyak Exp $
+# $Id: cons.bat,v 1.3 2000/06/14 22:52:43 fisyak Exp $
+
+$ver_num = 2.0;
+$ver_rev = ".1";
+$version = sprintf "This is Cons %2.1f%s " .
+	    '($Id: cons.bat,v 1.3 2000/06/14 22:52:43 fisyak Exp $)'. "\n",
+	    $ver_num, $ver_rev;
 
 $ver_num = 1.8;
 $ver_rev = "-dev";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons.bat,v 1.2 2000/03/14 01:46:57 fisyak Exp $)'. "\n";
+	    '($Id: cons.bat,v 1.3 2000/06/14 22:52:43 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -222,6 +243,10 @@ if ($main::_WIN32) {
 	'CC'             => 'cl',
 	'CFLAGS'         => '/nologo',
 	'CCCOM'          => '%CC %CFLAGS %_IFLAGS /c %< /Fo%>',
+	'CXX'            => '%CC',
+	'CXXFLAGS'       => '%CFLAGS',
+	'CXXCOM'         => '%CXX %CXXFLAGS %_IFLAGS -c %< /Fo%>',
+	'INCDIRPREFIX'   => '/I',
 	'LINK'           => 'link',
 	'LINKCOM'        => '%LINK %LDFLAGS /out:%> %< %_LDIRS %LIBS',
 	'LINKMODULECOM'  => '%LD /r /o %> %<',
@@ -684,7 +709,7 @@ sub SplitPath {
     if (ref($dirs) ne ARRAY) {
 	$dirs = [ split(/$main::PATH_SEPARATOR/o, $dirs) ];
     }
-    map { DirPath(@_) } @$dirs;
+    map { DirPath($_) } @$dirs;
 }
 
 # Return true if the supplied path is available as a source file
@@ -1612,9 +1637,9 @@ sub scan {
     my(@includes);
     # File should have been built by now. If not, we'll ignore it.
     return () unless open(SCAN, $file->rpath);
-    local($script::env) = $self->{env};
     while(<SCAN>) {
 	push(@includes, &$code);
+	push(@includes, grep($_ ne '', &$code));
     }
     close(SCAN);
     my($wd) = $file->{dir};
@@ -2679,7 +2704,7 @@ the original.
 
 by Bob Sidebotham F<rns@fore.com>
 
-A guide and reference for version 1.8-dev
+A guide and reference for version 2.0.1
 
 Copyright (c) 1996-1999 FORE Systems, Inc. All rights reserved.
 
@@ -4600,7 +4625,7 @@ installed in the script:
   # path $BIN_DIR.
 
   sub cons::InstallScript {
-	my($env, $dst, $src) = shift;
+	my ($env, $dst, $src) = @_;
 	Command $env $dst, $src, qq(
 		sed s+your-path-here+$BIN_DIR+ %< > %>
 		chmod oug+x %>
