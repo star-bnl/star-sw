@@ -2,19 +2,6 @@
 * run_gstar.kumac
 * 
 * This kumac reads from a file and runs gstar then g2t.
-* The input file can be from an event generator or a txt file 
-* OR: can enter values by hand and use "phase" - use intype=phase
-* 
-* *****************************************************************
-* ***** IMPORTANT NOTE *************
-* - See also notes from Pavel Nevski on his WWW page about this:
-* - The extension of the input file (first letter) tells Geant
-*   what type of file it is and can therefore read it correctly.
-*    .t is text file
-*    .x is xdf file - if you are reading directly from xdf file use this
-*    .s is staf tables  - if you are using commands to write a staf table
-*                   to use for geant OR to read from a staf table file,
-*                   then use this extension.
 * 
 ******************************************************************
 * 
@@ -27,6 +14,27 @@
 *                                extension on your file! (see note below)
 * editted 7/8/98 Kathy Turner - put in default STAR geometry
 *                               and make kumac more standard
+* editted 7/10/98 Kathy Turner - change directories where tables get written
+* *******************************************************************
+* ---------available values of input parameters ---------------
+* 
+* phystype = on, off
+* geomtype = all, tpc_nofield,tpc_field
+* intype = file,phase
+*    The input file can be from an event generator or a txt file 
+*    OR: can enter values by hand and use "phase" - use intype=phase
+* 
+* *****************************************************************
+* ***** IMPORTANT NOTE *************
+* - See also notes from Pavel Nevski on his WWW page about this:
+* - The extension of the input file (first letter) tells Geant
+*   what type of file it is and can therefore read it correctly.
+*    .t is text file
+*    .x is xdf file - if you are reading directly from xdf file use this
+*    .s is staf tables  - if you are using commands to write a staf table
+*                   to use for geant OR to read from a staf table file,
+*                   then use this extension.
+* 
 * ******************************************************************
 * input_data_dir=/star/u2d/kathy/jun98_daq/datafiles/ _
 * input_file=muons_central_2.txt _
@@ -34,16 +42,16 @@
 * input_file=auau_ce_b0-2_1_200.xdf _
 * 
  macro run__
-   TOP=/scr22/kathy/testdev _
+   TOP=$STAR _
    domain='geometry sim/gstar sim/g2t' _
-   phystype=off _
-   geomtype=tpc_nofield _   
+   phystype=on _
+   geomtype=all _   
    num_events=1 _
-   debugger=on _
+   debugger=off _
    intype=file _
    input_data_dir=/star/u2d/kathy/jun98_daq/datafiles/ _
    input_file=muons_central_2.txt _
-   output_file=auau_central_2.xdf
+   output_file=muons_central_2.xdf
  
 * 
 *  this is an example!! you must change to fill your needs
@@ -94,7 +102,7 @@
      endif
        
 * only if doing g2t: tell g2t where to put tables
-    detp g2tmain gttc.rdir=0 edir=event/geant
+    detp g2tmain gttc.rdir=0 
     
 * ----------------------------------------------
        
@@ -126,8 +134,8 @@
 * --------------------------------------------------------------
 * if reading gstar from tape (file) or running gstar
 * don't need if I'm reading from xdf file
-* write geometry tables
- tables ' ' run/geometry 
+* this command writes geant Run tables
+ tables ' ' run/geant/Run
  
  
 ******** turn debugger on just for GSTAR! ******************************
@@ -140,7 +148,7 @@
  
 *********** WRITE RUN INFO TO OUTPUT FILE ***************
 * write Run information to output file - already in staf format 
- exec write_table_to_file#write outunit [run]/geometry 
+ exec write_table_to_file#write outunit [geant_Run] 
  
 ************* FOR DEBUGGING *********************************
 *  just for looking at output of gstar
@@ -177,12 +185,14 @@
      if [debugger].eq.on then 
        next; dcut cave z 225 10 10 .04 .04
      endif
-* run gstar/g2t - automatically reads next event from input file
-*               - runs gstar, then g2t
+* trig 1 - automatically reads next event and runs gstar
+* g2t - go to event/geant directory, then transform geant structures
+*       to staf tables which will be put in event/geant/Event
      trig 1
+     cd event/geant
      for/call g2t
 * write out to output_file
- exec write_table_to_file#write outunit [geant]
+ exec write_table_to_file#write outunit [geant_Event]
  enddo
    
 * -------------------- end stuff -----------------------------*
