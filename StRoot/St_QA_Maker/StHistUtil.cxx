@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.7 1999/12/06 22:25:05 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.8 1999/12/07 18:56:00 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.8  1999/12/07 18:56:00  lansdell
+// added a few more histograms and updated the default list of logy plots
+//
 // Revision 1.7  1999/12/06 22:25:05  kathy
 // split apart the tpc and ftpc (east & west) histograms for the globtrk table; had to add characters to end of each histogram pointer to differentiate the different ones; updated the default list of hist to be plotted with logy scale
 //
@@ -541,6 +544,64 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "StEQaGlobtrkThetaT ",
  "StEQaGlobtrkEtaT",
  "StEQaGlobtrkLengthT",
+ "StEQaGlobtrkNPntFE",
+ "StEQaGlobtrkNPntMaxFE",
+ "StEQaGlobtrkNPntFitFE",
+ "StEQaGlobtrkPtFE",
+ "StEQaGlobtrkPFE",
+ "StEQaGlobtrkXfFE",
+ "StEQaGlobtrkYfFE",
+ "StEQaGlobtrkZfFE",
+ "StEQaGlobtrkRFE",
+ "StEQaGlobtrkRnfFE",
+ "StEQaGlobtrkRnmFE",
+ "StEQaGlobtrkTanlFE",
+ "StEQaGlobtrkThetaFE",
+ "StEQaGlobtrkEtaFE",
+ "StEQaGlobtrkLengthFE",
+ "StEQaGlobtrkNPntFW",
+ "StEQaGlobtrkNPntMaxFW",
+ "StEQaGlobtrkNPntFitFW",
+ "StEQaGlobtrkPtFW",
+ "StEQaGlobtrkPFW",
+ "StEQaGlobtrkXfFW",
+ "StEQaGlobtrkYfFW",
+ "StEQaGlobtrkZfFW",
+ "StEQaGlobtrkRFW",
+ "StEQaGlobtrkRnfFW",
+ "StEQaGlobtrkRnmFW",
+ "StEQaGlobtrkTanlFW",
+ "StEQaGlobtrkThetaFW",
+ "StEQaGlobtrkEtaFW",
+ "StEQaGlobtrkLengthFW",
+ "StEQaPrimtrkDetId",
+ "StEQaPrimtrkFlag",
+ "StEQaPrimtrkNPnt",
+ "StEQaPrimtrkNPntMax",
+ "StEQaPrimtrkNPntFit",
+ "StEQaPrimtrkPt",
+ "StEQaPrimtrkP",
+ "StEQaPrimtrkXf0",
+ "StEQaPrimtrkXf",
+ "StEQaPrimtrkYf0",
+ "StEQaPrimtrkYf",
+ "StEQaPrimtrkZf0",
+ "StEQaPrimtrkZf",
+ "StEQaPrimtrkR",
+ "StEQaPrimtrkRnf",
+ "StEQaPrimtrkTanl ",
+ "StEQaPrimtrkTheta ",
+ "StEQaPrimtrkEta",
+ "StEQaPrimtrkLength",
+ "StEQaPrimtrkImpact",
+ "StEQaPrimtrkNdof",
+ "StEQaDstDedxNdedx",
+ "StEQaDstDedxDedx0", 
+ "StEQaDstDedxDedx1",
+ "StEQaParticlePt",
+ "StEQaParticleVtxX",
+ "StEQaParticleVtxY",
+ "StEQaParticleVtxZ"
    };
   sdefList = sdefList2;
   lengofList = sizeof(sdefList2)/4;  
