@@ -22,13 +22,17 @@ void QA_Hist_Draw(
   Long_t size;
   Long_t flags; 
   Long_t modtime;
-  if (gSystem->GetPathInfo(fileName, &id, &size, &flags, &modtime)) 
+  Char_t *exFileName = gSystem->ExpandPathName(fileName);
+  if (gSystem->GetPathInfo(exFileName, &id, &size, &flags, &modtime)) 
   {
    cerr << " *** Error ***  Can not find file: \"" << fileName << "\"" << endl;
+   delete [] exFileName;
+   exFileName=0;
    return;
   }
+  Char_t *exPsFile =  gSystem->ExpandPathName(psFile);
 //  TString tmodTime = ctime(modtime);
-  TFile file1(fileName);  
+  TFile file1(exFileName);  
   // TFile file1("/diskA/star/kathy/output/psc0049_08_40evts_3EV.root");  
   // file1.ls();
   TList *keys = file1.GetListOfKeys();
@@ -38,7 +42,7 @@ void QA_Hist_Draw(
     Int_t width  = 16;
     Int_t height = 10;
     gStyle->SetPaperSize(width, height);
-    TPostScript p5(psFile);
+    TPostScript p5(exPsFile);
     TH1F dummy("QA","MDC2",1,0,1);
  // Create banner page   
 //    QACanvas->Range(0,0,1,1);
@@ -49,7 +53,7 @@ void QA_Hist_Draw(
     dummy.Draw();
     gStyle->SetOptStat(111111);
     TString banner  =  "Input: \"";
-    banner += fileName;
+    banner += exFileName;
     banner += "\"";
     TPaveLabel *pl = new TPaveLabel(0.06, 0.75, 0.9, 0.9, banner.Data(), "br");
     pl->SetFillColor(18);
@@ -57,7 +61,7 @@ void QA_Hist_Draw(
     pl->Draw();
    
     banner  =  "Output: \"";
-    banner += psFile;
+    banner += exPsFile;
     banner += "\"";
     pl = new TPaveLabel(0.06, 0.55, 0.9, 0.7, banner.Data(), "br");
     pl->SetFillColor(18);
@@ -126,4 +130,6 @@ void QA_Hist_Draw(
   printf(" One may use ROOT browser to investigate some particular histogram now\n");
   if (QABrowser) delete QABrowser;
   QABrowser = new TBrowser;
+  delete [] exFileName;
+  delete [] exPsFile;
 }
