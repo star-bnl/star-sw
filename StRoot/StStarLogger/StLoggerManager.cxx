@@ -148,7 +148,12 @@ StMessMgr* StLoggerManager::Instance() {
     if (!gSystem->AccessPathName(propertyFile.c_str())) {
        PropertyConfigurator::configure(propertyFile);
     } else {       
-     	 BasicConfigurator::configure();
+     	// BasicConfigurator::configure();
+       LoggerPtr root = Logger::getRootLogger();
+      	root->addAppender(new ConsoleAppender(
+		      new PatternLayout("%-3c{2}:%-5p - %m%n")));
+//		      new PatternLayout(PatternLayout::TTCC_CONVERSION_PATTERN)));
+
     }
     Logger::getRootLogger();
     fgQALogger = Logger::getLogger("QA");
@@ -348,7 +353,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.3 2004/05/11 23:21:58 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.4 2004/05/11 23:48:19 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -654,8 +659,11 @@ static StMessMgr* temp=StLoggerManager::Instance();
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.3 2004/05/11 23:21:58 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.4 2004/05/11 23:48:19 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.4  2004/05/11 23:48:19  fine
+// update the default logger pattern
+//
 // Revision 1.3  2004/05/11 23:21:58  fine
 // add the default logger description
 //
