@@ -77,6 +77,7 @@ Int_t StSpectraTagMaker::Make(){
      py = track->geometry()->momentum().y();
      pz = track->geometry()->momentum().z();
      momentum = ::sqrt(px*px+py*py+pz*pz);
+     if (momentum <=1.e-10) continue;
      dedx_deuteron = dEdx_formula(momentum, 1.88);
      chargesign = track->geometry()->charge();
      dedx = 0.0;
