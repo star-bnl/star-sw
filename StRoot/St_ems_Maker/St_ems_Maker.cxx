@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.cxx,v 1.16 2000/03/29 20:25:33 akio Exp $
+// $Id: St_ems_Maker.cxx,v 1.17 2000/03/30 18:36:02 akio Exp $
 // $Log: St_ems_Maker.cxx,v $
+// Revision 1.17  2000/03/30 18:36:02  akio
+// delete stlib stuff
+//
 // Revision 1.16  2000/03/29 20:25:33  akio
 // Add StEvent
 //
@@ -73,19 +76,6 @@
 #include "StEmcCluster.h"
 #include "StEmcPoint.h"
 #include "StEnumerations.h"
-
-#if !defined(ST_NO_NAMESPACES)
-using std::vector;
-using std::max;
-using std::pair;
-#endif
-
-#if defined(ST_NO_TEMPLATE_DEF_ARGS)
-#define StVector(T) vector<T, allocator<T> >
-#else
-#define StVector(T) vector<T>
-#endif
-
 
 ClassImp(St_ems_Maker)
 
