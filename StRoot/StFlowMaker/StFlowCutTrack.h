@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.18 2003/01/10 16:42:05 oldi Exp $
+// $Id: StFlowCutTrack.h,v 1.19 2003/01/14 14:14:16 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -52,6 +52,7 @@ class StFlowCutTrack {
   static void    SetEtaFtpc(Float_t lo_neg, Float_t hi_neg, Float_t lo_pos, Float_t hi_pos);
   static void    SetChgTpc(Int_t lo, Int_t hi);
   static void    SetChgFtpc(Int_t lo, Int_t hi);
+  static void    IncludeTpcTracks(Bool_t tpc_include);
   static void    IncludeFtpcTracks(Bool_t ftpc_include);
 
  private:
@@ -109,8 +110,11 @@ class StFlowCutTrack {
   static UInt_t  mChgTpcCutN;                // number not accepted
   static Int_t   mChgTpcCuts[2];             // range
 
-  static UInt_t  mChgFtpcCutN;                // number not accepted
-  static Int_t   mChgFtpcCuts[2];             // range
+  static UInt_t  mChgFtpcCutN;               // number not accepted
+  static Int_t   mChgFtpcCuts[2];            // range
+
+  static UInt_t  mTpcTrackCutN;              // number not accepted
+  static Bool_t  mTpcTrackCut;               // cut or don't cut (kTRUE, kFALSE)
 
   static UInt_t  mFtpcTrackCutN;             // number not accepted
   static Bool_t  mFtpcTrackCut;              // cut or don't cut (kTRUE, kFALSE)
@@ -170,6 +174,9 @@ inline void StFlowCutTrack::SetChgTpc(Int_t lo, Int_t hi) {
 inline void StFlowCutTrack::SetChgFtpc(Int_t lo, Int_t hi) {
   mChgFtpcCuts[0] = lo; mChgFtpcCuts[1] = hi; }
 
+inline void StFlowCutTrack::IncludeTpcTracks(Bool_t tpc_include) {
+    mTpcTrackCut = !tpc_include; }
+
 inline void StFlowCutTrack::IncludeFtpcTracks(Bool_t ftpc_include) {
     mFtpcTrackCut = !ftpc_include; }
 
@@ -178,6 +185,9 @@ inline void StFlowCutTrack::IncludeFtpcTracks(Bool_t ftpc_include) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.19  2003/01/14 14:14:16  oldi
+// Possibility to exclude TPC tracks completely (= FTPC only).
+//
 // Revision 1.18  2003/01/10 16:42:05  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.
