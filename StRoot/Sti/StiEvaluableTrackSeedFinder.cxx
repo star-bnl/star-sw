@@ -185,8 +185,7 @@ void StiEvaluableTrackSeedFinder::operator() (const StTrack* st, StiKalmanTrack*
     //}
     
     //That's it, seed the track and go home
-    sti->initialize(refAngle, 
-		    eta,
+    sti->initialize(eta,
 		    curvature, 
 		    tanLambda,
 		    hitvec);
