@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridGraph.cc,v 1.1 2004/02/06 02:30:35 munhoz Exp $
+ * $Id: StSvtHybridGraph.cc,v 1.2 2004/05/12 17:47:57 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridGraph.cc,v $
+ * Revision 1.2  2004/05/12 17:47:57  perev
+ * WarnOff
+ *
  * Revision 1.1  2004/02/06 02:30:35  munhoz
  * inserting SVT online monitor
  *
@@ -92,7 +95,7 @@ void StSvtHybridGraph::Fill(int nEvents, TArrayF* n_array, TArrayF* array)
   }
 }
 
-void StSvtHybridGraph::Draw(char* option)
+void StSvtHybridGraph::Draw(const char* option)
 {
   if (graph->GetN()) { 
     graph->SetMarkerStyle(20);
