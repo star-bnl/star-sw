@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.19 2000/03/10 08:14:02 sakrejda Exp $
+* $Id: tpt.F,v 1.20 2000/03/19 04:20:32 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.20  2000/03/19 04:20:32  sakrejda
+* An option to use straigth line to fit lasers even if the field is on.
+*
 * Revision 1.19  2000/03/10 08:14:02  sakrejda
 * Marging for field on and off under the same switch.
 *
@@ -269,7 +272,8 @@ C       merge pieces of tracks together
         call timed(time_now)
         time_all = time_all + time_now
         call gufld(xlocal,bfield)
-        if(abs(bfield(3)).lt.0.1) then
+        if((abs(bfield(3)).lt.0.1.and.tpar(ipass).lfit.eq.0)
+     >  .or.tpar(ipass).lfit.eq.1) then
            iret=tpt_merge_line(track_h,track,trk,hit_h,hit,tpar,tpar_h,ipass)
         else
            iret=tpt_merge_segments(track_h,track,trk,hit_h,hit,tpar,tpar_h,ipass)

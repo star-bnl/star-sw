@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.18 2000/03/10 06:29:57 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.19 2000/03/19 04:20:33 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.19  2000/03/19 04:20:33  sakrejda
+* An option to use straigth line to fit lasers even if the field is on.
+*
 * Revision 1.18  2000/03/10 06:29:57  sakrejda
 * Debug write removed
 *
@@ -55,7 +58,7 @@
 * Revision 1.2  1998/01/27 00:35:49  fisyak
 * Split sources
 *
-      INTEGER FUNCTION TPT_LOAD_TRACK(ipt,track_h,track,trk,hit_h,hit)
+      INTEGER FUNCTION TPT_LOAD_TRACK(ipt,track_h,track,trk,hit_h,hit,tpar_h,tpar,ipass)
 C>--------------------------------------------------------------------
 C
 C TPT_LOAD_TRACK - calculate track parameters required in tptrack table
@@ -74,7 +77,7 @@ C<--------------------------------------------------------------------
       IMPLICIT NONE
 
 #include "PAM.inc"
-
+#include "tpt_pars.inc"
 #include "tpt_track.inc"
 #include "tcl_tphit.inc"
 #include "tpt_track_pointers.inc"
@@ -82,6 +85,9 @@ C<--------------------------------------------------------------------
 #include "math_constants.inc"
 
 C___________________________________________________________________
+
+      RECORD /table_head_st/    tpar_h
+      RECORD /tpt_pars_st/      tpar(*)
       RECORD /table_head_st/    track_h
       RECORD /tpt_track_st/     track(*)
       RECORD /table_head_st/    hit_h
@@ -89,7 +95,7 @@ C___________________________________________________________________
       RECORD /tpt_track_pointers_st/   trk(*)
 
 C___________________________________________________________________
-      INTEGER ipt
+      INTEGER ipt,ipass
       REAL    x0, y0, sgn, sign
       REAL   dx0,dy0
       real   xlocal(3),bfield(3)
@@ -106,9 +112,16 @@ C     REAL     xlocal(3), bfield(3)                  !ALREADY EXISTS
       LOGICAL nposOn
       DATA nposOn /.TRUE./
 
-
+      character*256 m132 
+      integer id1
+      data id1/0/
+      save id1 
 C___________________________________________________________________
-
+      if(ipt.gt.track_h.maxlen) then
+         write(m132,*) "TPTLOAD-E1 too many tracks",track_h.maxlen,ipt
+         call Message( m132, 1, id1 )
+      endif
+C
       track(ipt).flag= trk(ipt).flag   ! good momentum fit
       track(ipt).id_globtrk=0 ! clear the globtrk id
 C
@@ -126,7 +139,8 @@ C
 
 C     inverse of the pt
       call gufld(xlocal,bfield)
-      if(abs(bfield(3)).lt.0.1)then
+      if((abs(bfield(3)).lt.0.1.and.tpar(ipass).lfit.eq.0)
+     >.or.tpar(ipass).lfit.eq.1)then
         track(ipt).invp = 0.001
         track(ipt).cov(1) = 0.0
         track(ipt).cov(3) = 0.0
@@ -202,7 +216,10 @@ c     >   (yold-hit(ient).y)**2)/abs(trk(ipt).p(2)))
       hit( trk(ipt).ipnt(trk(ipt).nhit)).lambda =
      >hit( trk(ipt).ipnt(trk(ipt).nhit-1)).lambda
 C
-      if(abs(bfield(3)).gt.0.1) then
+      if((abs(bfield(3)).lt.0.1.and.tpar(ipass).lfit.eq.0)
+     >.or.tpar(ipass).lfit.eq.1) then
+           track(ipt).length = trk(ipt).p(3)
+      else
            ds=(( hit( trk(ipt).ipnt(trk(ipt).nhit)).x -trk(ipt).p(3))*
      >        ( hit( trk(ipt).ipnt(1)).x-trk(ipt).p(3))+ 
      >        ( hit( trk(ipt).ipnt(trk(ipt).nhit)).y -trk(ipt).p(4))*
@@ -214,8 +231,6 @@ C
            ds=acos(ds)
 C
            track(ipt).length =abs(trk(ipt).p(2))*ds*sqrt(1.0+track(ipt).tanl**2)
-      else
-           track(ipt).length = trk(ipt).p(3)
       endif
 
       if(track(ipt).psi.lt.0) track(ipt).psi=track(ipt).psi+

@@ -1,5 +1,8 @@
-* $Id: tpt_extend_segments.F,v 1.8 2000/03/03 23:32:25 sakrejda Exp $
+* $Id: tpt_extend_segments.F,v 1.9 2000/03/19 04:20:32 sakrejda Exp $
 * $Log: tpt_extend_segments.F,v $
+* Revision 1.9  2000/03/19 04:20:32  sakrejda
+* An option to use straigth line to fit lasers even if the field is on.
+*
 * Revision 1.8  2000/03/03 23:32:25  sakrejda
 * Add refit if no field (straigth line).
 *
@@ -223,9 +226,10 @@ c                    mark that the track needs to be re-fit
                endif
          endif
 
-         if(bfield(3).lt.0.1.and.trk(ipos).flag.gt.0)then
+         if(((abs(bfield(3)).lt.0.1.and.tpar(ipass).lfit.eq.0)
+     >   .or.tpar(ipass).lfit.eq.1).and.trk(ipos).flag.gt.0)then
            iret = tpt_fit_track_line(ipos,trk,hit_h,hit,tpar_h,tpar,ipass)
-           iret = tpt_load_track(ipos,track_h,track,trk,hit_h,hit)
+           iret = tpt_load_track(ipos,track_h,track,trk,hit_h,hit,tpar_h,tpar,ipass)
          endif
       end do
       tpt_extend_segments=STAFCV_OK
