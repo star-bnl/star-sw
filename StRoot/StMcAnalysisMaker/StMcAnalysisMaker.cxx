@@ -1,7 +1,13 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.23 2004/01/17 19:12:28 fisyak Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.24 2004/01/24 04:35:53 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.24  2004/01/24 04:35:53  calderon
+ * The last commits using BFChain broke StAssociator.  The histograms were
+ * not found and nothing was plotted.  Revert back to the usual mode (this
+ * code is not meant to run in bfc anyway, it's meant as a collection of
+ * examples).
+ *
  * Revision 1.23  2004/01/17 19:12:28  fisyak
  * Add protection when StMcAnalysisMaker is not running within StBFChain and/or TFile is not coming from StBFChain parameters
  *
@@ -110,10 +116,6 @@
 
 #include "StMessMgr.h"
 
-#include "StBFChain.h"
-#include "St_DataSet.h"
-#include "St_DataSetIter.h"
-
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "StAssociationMaker/StTrackPairInfo.hh"
 
@@ -199,10 +201,8 @@ Int_t StMcAnalysisMaker::Init()
     
     SetZones();  // This is my method to set the zones for the canvas.
 
-    StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
-    if (chain) mNtupleFile = chain->GetTFile();
-    if (mNtupleFile) {mNtupleFile->cd(); mNtupleFile = 0;}
-    else {mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");}
+	//}
+    cout << "Now booking histograms" << endl;
     // Book Histograms Here so they can be found and deleted by Victor's chain (I hope).
     mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",
 			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
@@ -221,7 +221,18 @@ Int_t StMcAnalysisMaker::Init()
     coordMcPartner->SetYTitle("Y (cm)");
 
     // Define the file for the Ntuple, otherwise it won't be available later.
+    // one must define the file _after_ the histograms are booked, otherwise they are
+    // not owned by the maker, but are stored in the file, breaking the code in StAssociator.
+//     StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
     
+//     if (chain) mNtupleFile = chain->GetTFile();
+//     if (mNtupleFile) {
+// 	mNtupleFile->cd();
+// 	mNtupleFile = 0;
+//     }
+//     else {
+	mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");
+//     }
     
     char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commTpcHits:hitDiffX:hitDiffY:hitDiffZ";
     mTrackNtuple = new TNtuple("TrackNtuple","Track Pair Info",vars);
@@ -595,6 +606,6 @@ Int_t StMcAnalysisMaker::Make()
   
   
   //mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,900,500);
-  
+  cout << "List of histograms size " << Histograms()->GetSize() << endl;
   return kStOK;
 }
