@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.hh,v 1.5 2004/01/30 07:22:07 munhoz Exp $
+ * $Id: St_SvtDb_Reader.hh,v 1.6 2004/07/26 00:06:08 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.hh,v $
+ * Revision 1.6  2004/07/26 00:06:08  munhoz
+ * read drift curve
+ *
  * Revision 1.5  2004/01/30 07:22:07  munhoz
  * adding rms and daq parameters reading
  *
@@ -42,6 +45,7 @@
 
 class StSvtHybridCollection;
 class StSvtHybridDriftVelocity;
+class StSvtHybridDriftCurve;
 class StSvtConfig;
 class StSvtGeometry;
 class StSvtT0;
@@ -52,7 +56,8 @@ class St_SvtDb_Reader
  private:
   St_DataSet* svtDb[3];        //!
   StSvtConfig* mSvtConfig;      //!
-  StSvtHybridCollection *mSvtDriftVeloc;
+  StSvtHybridCollection *mSvtDriftVeloc; //!
+  StSvtHybridCollection *mSvtDriftCurve; //!
   StSvtHybridCollection* mSvtPed; //!
   StSvtHybridCollection* mSvtRms; //!
   StSvtGeometry* mSvtGeom;        //!
@@ -73,6 +78,7 @@ class St_SvtDb_Reader
   StSvtHybridCollection* getDriftVelocity();
   StSvtHybridDriftVelocity* getDriftVelocity(int barrel, int ladder, int wafer, int hybrid);
   void getDriftVelocityAverage(StSvtHybridCollection* svtColl);
+  StSvtHybridCollection* getDriftCurve();
   StSvtHybridCollection* getPedestals();
   StSvtHybridCollection* getRms();
   StSvtGeometry* getGeometry();

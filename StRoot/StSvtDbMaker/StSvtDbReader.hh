@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbReader.hh,v 1.5 2004/03/30 21:16:18 caines Exp $
+ * $Id: StSvtDbReader.hh,v 1.6 2004/07/26 00:06:08 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbReader.hh,v $
+ * Revision 1.6  2004/07/26 00:06:08  munhoz
+ * read drift curve
+ *
  * Revision 1.5  2004/03/30 21:16:18  caines
  * Get daq parameters
  *
@@ -74,6 +77,7 @@ class StSvtDbReader
 
   StSvtConfig* getConfiguration();
   StSvtHybridCollection* getDriftVelocity();
+  StSvtHybridCollection* getDriftCurve();
   StSvtHybridCollection* getPedestals();
   StSvtHybridCollection* getRms();
   StSvtHybridCollection* getBadAnodes();

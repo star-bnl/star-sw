@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.12 2004/03/30 21:16:17 caines Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.13 2004/07/26 00:06:08 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.13  2004/07/26 00:06:08  munhoz
+ * read drift curve
+ *
  * Revision 1.12  2004/03/30 21:16:17  caines
  * Get daq parameters
  *
@@ -67,6 +70,7 @@
 StSvtDbMaker* gStSvtDbMaker=NULL; 
 St_ObjectSet *svtSetConfig;
 St_ObjectSet *svtSetDrift;
+St_ObjectSet *svtSetDriftCurve;
 St_ObjectSet *svtSetPed;
 St_ObjectSet *svtSetRms;
 St_ObjectSet *svtSetGeom;
@@ -163,6 +167,7 @@ Int_t StSvtDbMaker::Init()
   readSvtConfig();
   setSvtGeometry();
   setSvtDriftVelocity();
+  setSvtDriftCurve();
   setSvtBadAnodes();
   setSvtT0();
   setSvtDaqParameters();
@@ -183,6 +188,7 @@ Int_t StSvtDbMaker::InitRun(int runumber)
 
   readSvtGeometry();
   readSvtDriftVelocity();
+  readSvtDriftCurve();
   readSvtBadAnodes();
   readSvtT0();
   readSvtDaqParameters();
@@ -281,6 +287,23 @@ void StSvtDbMaker::readSvtDriftVelocity()
   else if (m_Reader)
     o=(TObject*)m_Reader->getDriftVelocity();  
   if (o!=svtSetDrift->GetObject()) svtSetDrift->SetObject(o);
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::setSvtDriftCurve()
+{
+  svtSetDriftCurve = new St_ObjectSet("StSvtDriftCurve");
+  AddConst(svtSetDriftCurve);
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::readSvtDriftCurve()
+{
+  TObject* o;
+  if (mReader)o= (TObject*)mReader->getDriftCurve();
+  else if (m_Reader)
+    o=(TObject*)m_Reader->getDriftCurve();
+  if (o!=svtSetDriftCurve->GetObject()) svtSetDriftCurve->SetObject(o);
 }
 
 //_____________________________________________________________________________

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.h,v 1.9 2004/03/30 21:16:18 caines Exp $
+ * $Id: StSvtDbMaker.h,v 1.10 2004/07/26 00:06:08 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.h,v $
+ * Revision 1.10  2004/07/26 00:06:08  munhoz
+ * read drift curve
+ *
  * Revision 1.9  2004/03/30 21:16:18  caines
  * Get daq parameters
  *
@@ -98,6 +101,8 @@ class StSvtDbMaker : public StMaker {
   void readSvtConfig();
   void setSvtDriftVelocity();
   void readSvtDriftVelocity();
+  void setSvtDriftCurve();
+  void readSvtDriftCurve();
   void setSvtPedestals();
   void readSvtPedestals();
   void setSvtRms();
@@ -120,7 +125,7 @@ class StSvtDbMaker : public StMaker {
   StSvtDbWriter* getSvtDbWriter(){return mWriter;}  
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.9 2004/03/30 21:16:18 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.10 2004/07/26 00:06:08 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSvtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
