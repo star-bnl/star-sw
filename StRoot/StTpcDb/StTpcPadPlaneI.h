@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcPadPlaneI.h,v 1.3 1999/12/16 22:00:54 hardtke Exp $
+ * $Id: StTpcPadPlaneI.h,v 1.4 2000/01/12 15:14:41 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcPadPlaneI.h,v $
+ * Revision 1.4  2000/01/12 15:14:41  hardtke
+ * Update StTpcWirePlanes to use new variable names in tpcWirePlanes.idl/ Add Z position functions to StTpcPadPlane
+ *
  * Revision 1.3  1999/12/16 22:00:54  hardtke
  * add CVS tags
  *
@@ -46,6 +49,8 @@ public:
   virtual float ioSectorSeparation()     const = 0;
   virtual float innerSectorEdge()        const = 0;
   virtual float outerSectorEdge()        const = 0;
+  virtual float innerSectorPadPlaneZ()   const = 0;
+  virtual float outerSectorPadPlaneZ()   const = 0;
  
   virtual int   numberOfPadsAtRow(int row)    const = 0;
   virtual float radialDistanceAtRow(int row) const = 0;  

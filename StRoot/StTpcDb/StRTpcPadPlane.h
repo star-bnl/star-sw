@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcPadPlane.h,v 1.9 1999/12/16 22:00:53 hardtke Exp $
+ * $Id: StRTpcPadPlane.h,v 1.10 2000/01/12 15:14:40 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRTpcPadPlane.h,v $
+ * Revision 1.10  2000/01/12 15:14:40  hardtke
+ * Update StTpcWirePlanes to use new variable names in tpcWirePlanes.idl/ Add Z position functions to StTpcPadPlane
+ *
  * Revision 1.9  1999/12/16 22:00:53  hardtke
  * add CVS tags
  *
@@ -60,6 +63,8 @@ public:
  float ioSectorSeparation()     const;
  float innerSectorEdge()        const;
  float outerSectorEdge()        const;
+ float innerSectorPadPlaneZ()   const;
+ float outerSectorPadPlaneZ()   const;
  
  int   numberOfPadsAtRow(int row)    const;
  float radialDistanceAtRow(int row) const;  
@@ -160,6 +165,14 @@ return (*mPadPlane)[0].innerSectorEdge;
 
 inline float StRTpcPadPlane::outerSectorEdge() const {
 return (*mPadPlane)[0].outerSectorEdge;
+}
+
+inline float StRTpcPadPlane::innerSectorPadPlaneZ() const {
+return (*mPadPlane)[0].innerSectorPadPlaneZ;
+}
+
+inline float StRTpcPadPlane::outerSectorPadPlaneZ() const {
+return (*mPadPlane)[0].outerSectorPadPlaneZ;
 }
 
 #endif
