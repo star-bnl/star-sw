@@ -96,5 +96,15 @@ void EEstarTrig :: print(int k, FILE *fd) const{
 }
 
 
+//--------------------------------------------------
+//--------------------------------------------------
+int EEstarTrig ::isTrigID(int trigId) { // works only for 2003 data
+  int i;
+  for(i=0;i<32;i++)  {
+    if(trigId==offline_id[i]) return 1;
+    if(offline_id[i]<=0) break; // no more triggers in the list
+  }
+  return 0;
+}
 
 
