@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.hh,v 2.1 2000/05/25 14:44:51 ullrich Exp $
+ * $Id: StRootEventManager.hh,v 2.2 2000/08/17 00:38:09 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.hh,v $
- * Revision 2.1  2000/05/25 14:44:51  ullrich
- * Removed remaining pieces of the RICH pixel table.
+ * Revision 2.2  2000/08/17 00:38:09  ullrich
+ * Added CpyTrk table.
  *
  * Revision 2.1  2000/05/25 14:44:51  ullrich
  * Removed remaining pieces of the RICH pixel table.
@@ -40,7 +40,7 @@ public:
     virtual void shutdown();
     
     virtual particle_st*  	   returnTable_particle(long&)          const;
-    virtual run_header_st*         returnTable_run_header(long&)     const;             
+    virtual run_header_st*         returnTable_run_header(long&)        const;             
     virtual event_header_st*       returnTable_event_header(long&)      const;             
     virtual dst_run_summary_st*    returnTable_dst_run_summary(long&)   const;             
     virtual dst_event_summary_st*  returnTable_dst_event_summary(long&) const;             
@@ -63,6 +63,7 @@ public:
     virtual dst_v0_vertex_st*      returnTable_dst_v0_vertex(long&)     const;               
     virtual dst_vertex_st*         returnTable_dst_vertex(long&)        const;                  
     virtual dst_xi_vertex_st*      returnTable_dst_xi_vertex(long&)     const;               
+    virtual dst_track_st*          returnTable_CpyTrk(long&)            const;               
 
 protected:
     St_DataSetIter mDst;

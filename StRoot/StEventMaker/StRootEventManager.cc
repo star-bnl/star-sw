@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.4 2000/05/25 14:44:47 ullrich Exp $
+ * $Id: StRootEventManager.cc,v 2.5 2000/08/17 00:38:05 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
- * Revision 2.4  2000/05/25 14:44:47  ullrich
- * Removed remaining pieces of the RICH pixel table.
+ * Revision 2.5  2000/08/17 00:38:05  ullrich
+ * Added CpyTrk table.
  *
  * Revision 2.4  2000/05/25 14:44:47  ullrich
  * Removed remaining pieces of the RICH pixel table.
@@ -140,6 +140,28 @@ StRootEventManager::returnTable_dst_primtrk(long& nentries) const
     dst_track_st* table = NULL;
     St_dst_track  *tableWrap;
     const char *nm =  "primtrk";
+    const char *nt =  "St_dst_track";
+    St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
+    tableWrap = (St_dst_track*) (*Dst)[nt];
+    if (!tableWrap && nm[0]!='-') tableWrap = (St_dst_track*) (*Dst)[nm];
+    if (tableWrap) {
+	table = tableWrap->GetTable();
+	nentries = tableWrap->GetNRows();
+    }
+    else {
+	cerr << "StRootEventManager: Table type  " << nt << 
+	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endl;
+	nentries = 0;
+    }
+    return table;
+}
+
+dst_track_st*
+StRootEventManager::returnTable_CpyTrk(long& nentries) const
+{
+    dst_track_st* table = NULL;
+    St_dst_track  *tableWrap;
+    const char *nm =  "CpyTrk";
     const char *nt =  "St_dst_track";
     St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
     tableWrap = (St_dst_track*) (*Dst)[nt];

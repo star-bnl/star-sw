@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventManager.hh,v 2.1 2000/05/25 14:45:36 ullrich Exp $
+ * $Id: StEventManager.hh,v 2.2 2000/08/17 00:38:02 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StEventManager.hh,v $
- * Revision 2.1  2000/05/25 14:45:36  ullrich
- * Removed remaining pieces of the RICH pixel table.
+ * Revision 2.2  2000/08/17 00:38:02  ullrich
+ * Added CpyTrk table.
  *
  * Revision 2.1  2000/05/25 14:45:36  ullrich
  * Removed remaining pieces of the RICH pixel table.
@@ -91,6 +91,7 @@ public:
     virtual dst_v0_vertex_st*      returnTable_dst_v0_vertex(long&)     const =0;               
     virtual dst_vertex_st*         returnTable_dst_vertex(long&)        const =0;                  
     virtual dst_xi_vertex_st*      returnTable_dst_xi_vertex(long&)     const =0;               
+    virtual dst_track_st*          returnTable_CpyTrk(long&)            const =0;               
     
     virtual void setMaker(StMaker* mk) {mCurrentChain=mk;};
     
