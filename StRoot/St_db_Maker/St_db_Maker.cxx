@@ -375,13 +375,14 @@ SWITCH:  switch (kase) {
     
     case 1:   val->fTimeMin = valsSQL[0];  val->fTimeMax = valsSQL[1]; 
               ds->GetParent()->AddFirst(val->fDat);
-    break;
+              kase=4; goto SWITCH;
 
     case 2:   newGuy = mk->LoadTable(left);
               if (!val->fDat) { val->fDat = newGuy;}
               else            { val->fDat->Update(newGuy); delete newGuy;}
               val->fTimeMin = valsCINT[0];  val->fTimeMax = valsCINT[1];
-              ds->GetParent()->AddFirst(val->fDat); break;
+              ds->GetParent()->AddFirst(val->fDat);
+              kase=4; goto SWITCH;
   
     case 3:   if (valsCINT[0].Get()>=valsSQL[0].Get()) {
                 kase = 2; 
@@ -391,6 +392,10 @@ SWITCH:  switch (kase) {
                 if (valsSQL[1].Get()>valsCINT[1].Get()) valsSQL[1] = valsCINT[1];   
               }
               goto SWITCH;
+
+    case 4:   assert((val->fTimeMin.Get()<= uevent) && (val->fTimeMax.Get()>uevent));
+              break;
+
     default:  assert(0);
   }
   val->Modified(1);  
