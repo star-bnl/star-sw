@@ -82,7 +82,7 @@ void ViewMenuGroup::dispatch(int option)
       setDefaultView(); break;
       getDisplay()->draw();
     default: 
-      int viewOption = option-_offset-10;
+      int viewOption = option-10;
       //cout << "setSelectedView:"<<viewOption<<endl;
       if (viewOption<1000 && viewOption>=0) 
 	{
