@@ -50,6 +50,19 @@
     module load globus
     mkdir -p ${registerDirectory}
     mkdir -p ${packageDirectoryBin}
+
+    #--  Prepare the Web catalog
+    # 
+    if ( ! -f ${registerDirectory}/../index.html ) then;
+       echo "<HTML><TITLE>${jobTitle} catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/../index.html
+    endif
+    echo "<li><a href="$REQUESTID">Job: $REQUESTID `date`</a>" >> ${registerDirectory}/../index.html
+    #
+    if ( ! -f ${registerDirectory}/index.html ) then;
+       echo "<HTML><TITLE>${jobTitle} $REQUESTID catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/index.html
+    endif
+    echo "<li><a href="$PROCESSID.html">Process: $PROCESSID `date` </a>" >> ${registerDirectory}/index.html
+
 # ---
 #   Start the local Web page
 # ---
