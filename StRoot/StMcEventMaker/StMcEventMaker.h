@@ -1,7 +1,12 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.11 2003/09/10 19:47:22 perev Exp $
+ * $Id: StMcEventMaker.h,v 1.12 2003/12/04 05:58:15 calderon Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.12  2003/12/04 05:58:15  calderon
+ * Introduction of Endcap EMC collections into StMcEvent.  Read the corresponding
+ * g2t table for the hits, decode the volume Id and add it to the proper
+ * containers in StMcEvent and StMcTrack.
+ *
  * Revision 1.11  2003/09/10 19:47:22  perev
  * ansi corrs
  *
@@ -72,7 +77,7 @@ public:
     StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.11 2003/09/10 19:47:22 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.12 2003/12/04 05:58:15 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -88,6 +93,7 @@ public:
     Bool_t  doUseCtb;              //!
     Bool_t  doUseTofp;             //!
     Bool_t  doUseTof;              //!
+    Bool_t  doUseEemc;             //!
     Bool_t  doUsePixel;            //!
 
     void   printEventInfo();                               // *MENU* 
@@ -95,6 +101,7 @@ public:
 protected:
     void   fillBemc(St_g2t_emc_hit*);
     void   fillBsmd(St_g2t_emc_hit*);
+    void   fillEemc(St_g2t_emc_hit*);
 
     void   printTrackInfo(StMcTrack*);
     void   printEventInfoForEmc(StMcEmcHitCollection*); 
