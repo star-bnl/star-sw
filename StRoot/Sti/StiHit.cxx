@@ -17,7 +17,7 @@
 
 StiHit::StiHit()
 {
-    msthit=0;
+    reset();
 }
 
 StiHit::~StiHit()

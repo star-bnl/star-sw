@@ -10,6 +10,7 @@
 class StHit;
 class StThreeVectorD;
 class StMatrixF;
+class StiDetector;
 
 class StiHit 
 {
@@ -30,6 +31,7 @@ public:
     double syz() const;
     double refangle() const;
     double position() const;
+    const StiDetector* detector() const;
     const StHit* stHit() const;
     bool   isUsed() const;
     StThreeVectorD globalPosition() const;
@@ -44,6 +46,7 @@ public:
     void setRefangle(double);
     void setPosition(double);
     void setError(const StMatrixF&);
+    void setDetector(StiDetector*);
     void setStHit(StHit*);
     void setUsed(bool);
 
@@ -70,6 +73,7 @@ private:
     double msxz;
     double msyz;
     bool   mused;
+    StiDetector* mdetector;
     StHit* msthit;
 };
 
@@ -79,6 +83,7 @@ inline void StiHit::reset()
 {
     mrefangle = mposition = mx = my = mz = msxx = msyy = mszz = msxy = msxz = msyz = 0.;
     mused = false;
+    mdetector = 0;
     msthit = 0;
 }
 
@@ -105,6 +110,8 @@ inline double StiHit::refangle() const {return mrefangle;}
 inline double StiHit::position() const {return mposition;}
 
 inline const StHit* StiHit::stHit() const {return msthit;}
+
+inline const StiDetector* StiHit::detector() const {return mdetector;}
 
 inline bool   StiHit::isUsed() const { return mused;}
 
@@ -134,6 +141,8 @@ inline void StiHit::setZ(double val) {mz=val;}
 inline void StiHit::setRefangle(double val) {mrefangle=val;}
 
 inline void StiHit::setPosition(double val) {mposition=val;}
+
+inline void StiHit::setDetector(StiDetector* det) {mdetector=det;}
 
 inline void StiHit::setStHit(StHit* val) {msthit=val;}
 
