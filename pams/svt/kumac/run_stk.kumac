@@ -1,32 +1,9 @@
-MACRO run_stk i=1 
-macro/global/import *
-i = [1]
+MACRO run_stk 
+   
+   macro/global/import *
 
-if [i] = 1 then
-  exec create_tables_svt#stk
-  exec create_tables_svt#sgr
-  exec init_stk
-  exec init_sgr
 
-  message ' *** Warning vertex not found just filled fron MC ***'
-
-  cd [data]/global/vertices
-   tdm/newtable stk_vtx stk_vtx 1
-   tdm/table/rowcount stk_vtx 1
-   tdm/table/cell/putvalue 'stk_vtx[0].id' 1
-   tdm/table/cell/putvalue 'stk_vtx[0].flag' 1
-   tdm/table/cell/putvalue 'stk_vtx[0].t' 0
-   tdm/table/cell/putvalue 'stk_vtx[0].x' 0.0 0.0 0.0
-   tdm/table/cell/putvalue 'stk_vtx[0].cov' 0.0 0.0 0.0 0.0 0.0 0.0
-  cd /dui 
-  
-endif
- 
- 
- 
-message 'Calling STK_AM'
-
-ami/mod/call stk_am _
+   ami/mod/call stk_am _
         [params]/svt/stk_stkpar _
         [geant]/Event/g2t_track _
         [geant]/Event/g2t_event _
@@ -44,20 +21,19 @@ ami/mod/call stk_am _
         [geometry]/svt/config _
         [geometry]/svt/geom 
 
-        if (staf_status(1).ne.stafcv_ok) then
+   if (staf_status(1).ne.stafcv_ok) then
                 message 'Problem on return from STK_AM'
-        endif
+   endif
 
 RETURN
 
 ***************************************************************
 
 MACRO eval_stk
-macro/global/import *
-	
-	message 'Calling STE_AM...'
-
-	ami/mod/call ste_am _
+  
+  macro/global/import *
+    
+    ami/mod/call ste_am _
 	 [geant]/Run/g2t_gepart _
 	 [geant]/Event/g2t_svt_hit _
 	 [geant]/Event/g2t_track _
@@ -68,18 +44,15 @@ macro/global/import *
 	        [data]/svt/tracks/groups _
 	 [data]/svt/tracks/stk_track _
 	 [data]/svt/tracks/stk_kine _
-	  [data]/svt/tracks/mcgroups _
+	 [data]/svt/tracks/mcgroups _
 	 [data]/svt/tracks/stk_mctrack _
 	 [data]/svt/tracks/stk_mckine _
                 [data]/svt/tracks/ste_teval _
                 [data]/svt/tracks/ste_teff
 
-	if (staf_status(1).ne.stafcv_ok) then
+    if (staf_status(1).ne.stafcv_ok) then
 		message 'Problem on return from STE_AM'
-	endif
-
-* newcwn [i] ste_teval
-* nt/proj 100 [i].(kpt-rpt)/kpt
+    endif
 
 return
 *********************************************************************
