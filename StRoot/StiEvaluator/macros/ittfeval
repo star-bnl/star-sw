@@ -85,8 +85,6 @@ printf "done\n";
 printf "Copying evaluation histogram files...";
 $result = system("cp StiEvalOutputRawHistos/CorHistosEvalItTest.root StiEvalOutputRawHistos/SumHistosEvalItTest.root $dirName")/256;
 $result and die "\nWarning, error copying files $1\n";
-chmod(0664, "$dirName/EvalHists.pdf");
-chmod(0664, "$dirName/EvalHists.root");
 printf "done\n";
 
 exit(0);
