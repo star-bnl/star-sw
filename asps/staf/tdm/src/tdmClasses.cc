@@ -318,8 +318,9 @@ STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
 
   FILE *gg,*ff; long i; DS_TYPE_T *dstype; char *pCellData; char *c=NULL;
   char colListCopy[COLLIST+1],tmp[80],haveSetMask=0,mask[MCIF];
+  char nformat[10],format[10];
   char *col[NCOL],line[LINESIZE+2],linecopy[LINESIZE+2],*cc,*dd;
-  int imask,nmask,ncol,linecnt;
+  int maxlineindex,pass,size[MCIF],imask,nmask,ncol,lineindex;
 
   if(strlen(colList)>COLLIST) EML_ERROR(COL_LIST_TOO_LONG);
   strcpy(colListCopy,colList); 
@@ -369,40 +370,61 @@ STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
      pCellData += rowSize(); fprintf(ff,"\n");
   }
   fclose(ff);
-  ff=fopen(tmp,"r"); if(!ff) EML_ERROR(CANT_READ_FILE);
-  gg=fopen(out,"w"); if(!gg) EML_ERROR(CANT_WRITE_FILE); linecnt=0;
-  while(fgets(line,LINESIZE,ff)) {
-    linecnt++;
-    if(strlen(line)>LINESIZE-5) {
-      fclose(ff); fclose(gg); EML_ERROR(LINE_TOO_BIG); /* too many cols */
+  for(pass=0;pass<2;pass++) { /* first pass compiles info (eg, col widths) */
+    ff=fopen(tmp,"r"); if(!ff) EML_ERROR(CANT_READ_FILE);
+    if(pass==1) { gg=fopen(out,"w"); if(!gg) EML_ERROR(CANT_WRITE_FILE);  }
+    lineindex=0; if(pass==0) maxlineindex=0;
+    if(pass==1) {
+      sprintf(format,"%d",maxlineindex+ifirst);
+      sprintf(nformat,"%%%dd ",strlen(format));
     }
-    if(!haveSetMask) {
-      haveSetMask=7; for(i=MCIF-1;i>=0;i--) mask[i]=0; nmask=0;
-      strcpy(linecopy,line); cc=strtok(linecopy,TOKENS);
-      cc=strtok(NULL,TOKENS); cc=strtok(NULL,TOKENS); /* discard first 2 */
-      while(cc) {
-        if(nmask>=MCIF) { fclose(ff); fclose(gg); EML_ERROR(TOO_MANY_COLS); }
-        dd=strstr(cc,"["); if(dd) dd[0]=0;
-        for(i=0;i<ncol;i++) {
-          if(!strcmp(col[i],cc)) { mask[nmask]=7; break; }
-        }
-        cc=strtok(NULL,TOKENS); nmask++;
+    while(fgets(line,LINESIZE,ff)) {
+      if(strlen(line)>LINESIZE-5) {
+        fclose(ff); if(pass==1) fclose(gg); 
+        EML_ERROR(LINE_TOO_BIG); /* too many cols */
       }
+      if(!haveSetMask) {
+        haveSetMask=7;
+        for(i=MCIF-1;i>=0;i--) { size[i]=0; mask[i]=0; }
+        nmask=0;
+        strcpy(linecopy,line); cc=strtok(linecopy,TOKENS);
+        cc=strtok(NULL,TOKENS); cc=strtok(NULL,TOKENS); /* discard first 2 */
+        while(cc) {
+          if(nmask>=MCIF) {
+            fclose(ff); if(pass==1) fclose(gg); EML_ERROR(TOO_MANY_COLS);
+          }
+          dd=strstr(cc,"["); if(dd) dd[0]=0;
+          for(i=0;i<ncol;i++) {
+            if(!strcmp(col[i],cc)) { mask[nmask]=7; break; }
+          }
+          cc=strtok(NULL,TOKENS); nmask++;
+        }
+      }
+      if(lineindex<=0) {
+        strtok(line,TOKENS); strtok(NULL,TOKENS); 
+        if(pass==1) for(ii=atoi(nformat+1);ii>=0;ii--) fprintf(gg," ");
+      } else {
+        strtok(line,TOKENS); 
+        if(pass==1) fprintf(gg,nformat,lineindex+ifirst-1); /* -1 <-colheads*/
+      }
+      cc=strtok(NULL,TOKENS); imask=0;
+      while(cc) {
+        if(mask[imask]) {
+          if(pass==0) {
+            if(size[imask]<strlen(cc)) size[imask]=strlen(cc);
+          } else {
+            sprintf(format,"%%%ds ",size[imask]); fprintf(gg,format,cc); 
+          }
+        }
+        cc=strtok(NULL,TOKENS); imask++;
+      }
+      if(pass==1) fprintf(gg,"\n");
+      lineindex++; if(pass==0) maxlineindex++;
     }
-    if(linecnt<=1) {
-      strtok(line,TOKENS); strtok(NULL,TOKENS); fprintf(gg,"      ");
-    } else {
-      strtok(line,TOKENS); fprintf(gg,"%5d ",linecnt-2); 
-    }
-    cc=strtok(NULL,TOKENS); imask=0;
-    while(cc) {
-      if(mask[imask++]) fprintf(gg,"%10s ",cc); cc=strtok(NULL,TOKENS);
-    }
-    fprintf(gg,"\n");
+    fclose(ff); 
+    if(pass==1) fclose(gg);
   }
-  fclose(ff); fclose(gg);
   printf("Have written %s,  vi %s\n",out,out);
-  /* bbb remove(tmp); */
   EML_SUCCESS(STAFCV_OK);
 }
 STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {

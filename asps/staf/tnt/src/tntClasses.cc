@@ -532,12 +532,12 @@ tntFactory::findCWNtuple (long hid) {
   obj = soc->findObject(name,"tntCWNtuple");
   if (obj == NULL) {
     CWNtuple = NULL;
-    FREE(name); /*fix memory leak -akio*/
-    EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
+    if(name) { EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name); }
+    if(name) FREE(name); /*fix memory leak -akio*/
     EML_ERROR(OBJECT_NOT_FOUND);
   }
   CWNtuple = TNTCWNTUPLE(obj);
-  FREE(name); /*fix memory leak -akio*/
+  if(name) FREE(name); /*fix memory leak -akio*/
   return CWNtuple;
 }
 
