@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixD.hh,v 1.6 2000/09/25 20:22:59 ullrich Exp $
+ * $Id: StMatrixD.hh,v 1.7 2001/12/05 23:34:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StMatrixD.hh,v $
+ * Revision 1.7  2001/12/05 23:34:44  ullrich
+ * Added Victor modifications to cope with error recovery.
+ *
  * Revision 1.6  2000/09/25 20:22:59  ullrich
  * Removed inheritance from TObject.
  *
@@ -84,7 +87,9 @@ public:
     const double& operator()(size_t row, size_t col) const;
     double& operator()(size_t row, size_t col);
 
-    // classes for implementing m[i][j]
+    StMatrixD transform(const StMatrixD &, int = 0) const;
+
+   // classes for implementing m[i][j]
     class StMatrixRowD {
     public:
 	StMatrixRowD(StMatrixD&, size_t);
@@ -202,5 +207,6 @@ ostream&         operator<<(ostream& s, const StMatrixD& q);
 double           norm_infinity(const StMatrixD& m1);
 double           normInfinity(const StMatrixD& m1);
 double           norm1(const StMatrixD& m1);                                      
+StMatrixD        recoverError(const StMatrixD &toLocal);
 
 #endif

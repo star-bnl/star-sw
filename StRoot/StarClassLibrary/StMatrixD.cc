@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixD.cc,v 1.4 2000/09/25 20:22:56 ullrich Exp $
+ * $Id: StMatrixD.cc,v 1.5 2001/12/05 23:34:43 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StMatrixD.cc,v $
+ * Revision 1.5  2001/12/05 23:34:43  ullrich
+ * Added Victor modifications to cope with error recovery.
+ *
  * Revision 1.4  2000/09/25 20:22:56  ullrich
  * Removed inheritance from TObject.
  *
@@ -37,6 +40,9 @@
 #include "TBuffer.h"
 ClassImp(StMatrixD)
 #endif
+
+static void
+mxmlrt (int flag, const double *a, const double* b, double* c, int ni, int nj); 
 
 // Constructors. 
 
@@ -1110,5 +1116,64 @@ void StMatrixD::Streamer(TBuffer& R__b)
       R__b << mCol;
       R__b << mSize;
    }
+}
+
+StMatrixD
+StMatrixD::transform(const StMatrixD &tform, int bak) const
+{
+    assert (mRow==mCol); 
+    if (bak==0) assert (mRow==tform.mCol); 
+    if (bak!=0) assert (mRow==tform.mRow); 
+    int nc = (bak) ? tform.mCol:tform.mRow;
+    
+    StMatrixD c(nc,nc);
+    double* cc = c.mElement;
+    const double *aa = tform.mElement;
+    const double *bb = mElement;
+    mxmlrt ( bak, aa, bb, cc,  mRow,nc);
+    return c;
+}
+
+static void
+mxmlrt ( int flag, const double *a, const double* b, double* c,  int ni,int nj) 
+{
+    if (ni <= 0 || nj <= 0) return;        
+    double x;                                
+    int ia, ib, ic, ja, kc, ii, jj, kj, ki, ia1, ib1, ic1, ja1; 
+    int ipa = 1;  int jpa = nj;              
+    if (flag) { ipa = ni;  jpa = 1; }    
+    
+    --a;  --b;  --c;                         
+    
+    ic1 = 1;  ia1 = 1;                       
+    for (ii = 1; ii <= ni; ++ii, ic1+=ni, ia1+=jpa) { 
+	ic = ic1;                                       
+	for (kc = 1; kc <= ni; ++kc,ic++) c[ic] = 0.;   
+	ib1 = 1;  ja1 = 1;                              
+	for (jj = 1; jj <= nj; ++jj,++ib1,ja1 += ipa) { 
+	    ib = ib1;  ia = ia1;                          
+	    x = 0.;                                       
+	    for (kj = 1;kj <= nj;++kj,ia+=ipa,ib += nj)   
+		x += a[ia] * b[ib];                     
+	    ja = ja1;  ic = ic1;                          
+	    for (ki = 1; ki <= ni; ++ki,++ic,ja += jpa)   
+		c[ic] += x * a[ja];                     
+	}                                               
+    }  
+}
+
+StMatrixD recoverError(const StMatrixD &toLocal)
+{
+    StMatrixD qq(3,3);
+    for (int irow=0; irow<3; irow++) {
+	for (int icol=0; icol<3; icol++) {
+	    double dmp = toLocal(irow+1,icol+1);
+	    qq(icol+1,irow+1) = dmp*dmp;
+	}
+    }
+    size_t ierr;
+    qq.invert(ierr);
+    assert(!ierr);
+    return qq;
 }
 #endif
