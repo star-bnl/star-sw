@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.44 2003/09/02 17:58:41 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.45 2003/10/08 20:28:23 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.45  2003/10/08 20:28:23  calderon
+ * use <iostream>, std::ostream, std::cout
+ *
  * Revision 1.44  2003/09/02 17:58:41  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -156,7 +159,11 @@
  *
  *
  *************************************************/
-#include <Stiostream.h>
+#include <iostream>
+#ifndef ST_NO_NAMESPACES
+using std::ostream;
+using std::cout;
+#endif
 #include <stdlib.h>
 #include <string>
 #include <algorithm>
@@ -205,7 +212,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.44 2003/09/02 17:58:41 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.45 2003/10/08 20:28:23 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
