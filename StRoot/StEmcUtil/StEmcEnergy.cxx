@@ -1,3 +1,4 @@
+
 //******************************************************************************
 //
 // StEmcEnergy.cxx
@@ -38,6 +39,7 @@ StEmcEnergy::StEmcEnergy():TObject()
   setQ0Factor(0.163);
   mBemcGeom = StEmcGeom::getEmcGeom("bemc");    
   setEval(evalOff);
+  mRealData = kTRUE;
 }
 //------------------------------------------------------------------------------
 StEmcEnergy::~StEmcEnergy()
@@ -113,7 +115,7 @@ void StEmcEnergy::chHadEnergyInBtow()
   StThreeVectorD  finalPosition, finalMomentum;
   Float_t         trackFinalEta, trackFinalPhi;
 
-  UInt_t Nhadminus = uncorrectedNumberOfNegativePrimaries(*mEvent);
+  UInt_t Nhad = uncorrectedNumberOfPrimaries(*mEvent);
 
   StEmcPosition* emcPosition = new StEmcPosition();
   StEmcHadDE* emcHadDE = new StEmcHadDE();
@@ -157,13 +159,16 @@ void StEmcEnergy::chHadEnergyInBtow()
                 if (towerNdx != -1 && mEmcFilter->getEmcStatus(1,towerId)==kGOOD)
                 {
                   Float_t tempDepEnergy = 0;
-                  tempDepEnergy = emcHadDE->getNormDepEnergy(track, mBfield, nTowersdEta,
-                                                         nTowersdPhi);
-                  //tempDepEnergy*=0.88; // Checking if Et_em smaller is due to wrong had dep
+                  if(mRealData)
+                    tempDepEnergy = emcHadDE->getNormDepEnergy(track, mBfield, nTowersdEta, nTowersdPhi);
+                  else
+                    tempDepEnergy = emcHadDE->getDepEnergy(track, mBfield, nTowersdEta, nTowersdPhi);
+                  
                   if (tempDepEnergy >= 0)
                   {  
-                    Float_t eff = trackEff(track, Nhadminus);
-                    if(eff!=0) mChHadEnergyInBtow[towerNdx] += tempDepEnergy/eff;                    
+                    Float_t eff = trackEff(track, Nhad);
+                    if(eff>0.1) mChHadEnergyInBtow[towerNdx] += tempDepEnergy/eff; 
+                    else mChHadEnergyInBtow[towerNdx] += tempDepEnergy;
                   }                    
                 }
               }
@@ -200,6 +205,7 @@ void StEmcEnergy::mcEnergyInBtow()
   }
 
   StPtrVecMcTrack& tracks = mMcEvent->tracks();
+	StMcVertex *primary = mMcEvent->primaryVertex();
   for (UInt_t i = 0; i < tracks.size(); i++)
   { 
     StPtrVecMcCalorimeterHit& bemcHits = tracks[i]->bemcHits(); 
@@ -220,7 +226,23 @@ void StEmcEnergy::mcEnergyInBtow()
         if ( mEmcFilter->getEmcStatus( 1,towerId )==kGOOD )
         {
           mEnergyInBtow[towerNdx] += hitEnergy;
-          if ( geantId < 7 ) mEmEnergyInBtow[towerNdx] += hitEnergy;
+          if ( geantId < 4 ) 
+					{
+						Bool_t ok=kFALSE;
+						StMcVertex *start = tracks[i]->startVertex();
+						if(start==primary) ok=kTRUE;
+						else
+						{
+							StMcTrack *parent = tracks[i]->parent();
+							Int_t pId = parent->geantId();
+							if(pId==7 || pId==17) // pi0 or eta
+							{
+								StMcVertex *start2 = parent->startVertex();
+								if(start2==primary) ok=kTRUE;
+							}
+						}
+						if(ok) mEmEnergyInBtow[towerNdx] += hitEnergy;
+					}
           if ( geantId > 7 && geantId < 33 )
           {
             if ( charge!= 0 ) mChHadEnergyInBtow[towerNdx] += hitEnergy;
@@ -528,21 +550,48 @@ void StEmcEnergy::processEnergy()
   delete emcPosition; 
 }
 //------------------------------------------------------------------------------
-Float_t StEmcEnergy::trackEff( StTrack* track, UInt_t Nhadminus)
+Float_t StEmcEnergy::trackEff( StTrack* track, UInt_t NCharged)
 { 
+  
   Float_t parm0, parm1, parm2;
-  
   if(!mTPCEff) return 1;
-  
-  Float_t trackEff;
-  parm0 = 0.9715 - 67.44e-5 * Nhadminus;
-  parm1 = 0.02805 - 3.731e-5 * Nhadminus;
-  parm2 = 0.05309 + 3.387e-5 * Nhadminus;
-  
   Float_t trackMomentum=track->geometry()->momentum().perp();
-  
-  trackEff = parm0 * ( 1 - exp(-(trackMomentum-parm1)/parm2) );
+  if(trackMomentum<0.1) return 0;
+  Float_t trackEff;
+
+  if(mRealData)
+  {
+    //Eff for real data
+    parm0 = 0.92210 - 1.05e-4 * (Float_t)NCharged;//-0.18E-7*NCharged*NCharged;
+    parm1 = 0.06352;
+    parm2 = 0.07507 + 3.867E-5 * (Float_t)NCharged;
+  }
+  else
+  {
+    //Eff for hijing data
+    parm0 = 0.9706 - 1.66E-4*(NCharged/2.) - 0.575E-7*(NCharged/2.)*(NCharged/2.);
+    parm1 = 0.0635;
+    parm2 = 0.07507 + 3.867E-5*(NCharged/2.);
+  }
+  trackEff = parm0*(1-exp(-(trackMomentum-parm1)/parm2));
   return trackEff;
+  
+  
+  // old 130 GeV efficiency
+  /*Float_t parm0, parm1, parm2;
+
+  if(!mTPCEff) return 1;
+
+  Float_t trackEff;
+  parm0 = 0.9715 - 67.44e-5 * NNegative;
+  parm1 = 0.02805 - 3.731e-5 * NNegative;
+  parm2 = 0.05309 + 3.387e-5 * NNegative;
+
+  Float_t trackMomentum=track->geometry()->momentum().perp();
+
+  trackEff = parm0 * ( 1 - exp(-(trackMomentum-parm1)/parm2) );
+  cout <<"pt = "<<trackMomentum<<" EFF = "<<trackEff<<endl;
+  return trackEff;*/
 
 }
 //------------------------------------------------------------------------------

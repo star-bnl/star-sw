@@ -209,8 +209,8 @@ Float_t StEmcHadDE::getNormDepEnergy(StTrack* track, Double_t magField, Int_t nT
 Float_t StEmcHadDE::normDEfactor(Float_t mom)
 {
   Float_t mNormDEfactor = 1;
-  Float_t a1 = 0.48;
-  Float_t a2 = 0.4;
+  Float_t a1 = 0.50; //0.50
+  Float_t a2 = 0.34; //0.34
 
   if (mom <= 1.3) mNormDEfactor = a1 + a2 * mom;
   return mNormDEfactor;

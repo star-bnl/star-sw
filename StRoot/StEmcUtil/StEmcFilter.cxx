@@ -134,12 +134,12 @@ void StEmcFilter::calcCentrality(StEvent* event)
   if(fabs(mBField)>0.4) //full field
   {
     Int_t cent[]  = {14,33,59,98,150,221,311,428,500,1000};
-    mCentrality = cent;
+    for(Int_t i=0;i<10;i++) mCentrality[i] = cent[i];
   }
   else // half field
   {
     Int_t cent[]  = {14,32,59,98,149,216,302,409,474,1000};
-    mCentrality = cent;
+    for(Int_t i=0;i<10;i++) mCentrality[i] = cent[i];
   }
   
   Int_t primaries=uncorrectedNumberOfPrimaries(*event);
@@ -153,38 +153,27 @@ void StEmcFilter::calcCentrality(StEvent* event)
 //------------------------------------------------------------------------------
 Bool_t StEmcFilter::accept(StEvent* event)
 {
-  if(!event) 
-  {
-    msg("Event","Null pointer");
-    return kFALSE;
-  }
+  if(!event) return kFALSE;
   
   if(mNTriggerMask!=0)
   {
     UInt_t trigger = event->triggerMask();
     Bool_t accept = kFALSE;
     for(UInt_t n = 0;n<mNTriggerMask;n++) if(mTriggerMask[n] == trigger) accept = kTRUE;
-    if(!accept) 
-    {
-      msg("Event","Trigger Mask");
-      return kFALSE;
-    }
+    if(!accept)  return kFALSE;
+   
   }
   
   if(mHaveVertex)
   {
     StPrimaryVertex *vertex = event->primaryVertex();
-    if(!vertex) 
-    {
-      msg("Event","Null vertex");
-      return kFALSE;
-    }
+    if(!vertex) return kFALSE;
+  
   
     StThreeVectorF v = vertex->position();
     Float_t vz=v.z();
     if(fabs(vz)>fabs(mZVertexCut)) 
     {
-      msg("Event","ZVertexCut");
       cout <<"\nVertex = "<<vz<<endl<<endl;
       return kFALSE;
     }
@@ -192,37 +181,23 @@ Bool_t StEmcFilter::accept(StEvent* event)
     if(mHavePrimaries)
     {
       StSPtrVecPrimaryTrack& tracks = vertex->daughters();
-      if(tracks.size()==0) 
-      {
-        msg("Event","HavePrimaries");
-        return kFALSE;
-      }
+      if(tracks.size()==0) return kFALSE;
     }
   }
   
   calcCentrality(event);
   
   Float_t EventMultiplicity = uncorrectedNumberOfNegativePrimaries(*event);
-  if(EventMultiplicity<mMinMult || EventMultiplicity>mMaxMult) 
-  {
-    msg("Event","Min/MaxMult");
-    return kFALSE;
-  }
+  if(EventMultiplicity<mMinMult || EventMultiplicity>mMaxMult) return kFALSE;
   
   if(mEmcPresent)
   {
     StEmcCollection *emc=event->emcCollection();
-    if(!emc) 
-    {
-      msg("Event","EmcPresent");
-      return kFALSE;
-    }
+    if(!emc) return kFALSE;
+    
     Float_t emcETotal = getEmcETotal(event);
-    if(emcETotal<mEmcETotalMin || emcETotal>mEmcETotalMax) 
-    {
-      msg("Event","EmcETotalMin/Max");
-      return kFALSE;
-    }
+    if(emcETotal<mEmcETotalMin || emcETotal>mEmcETotalMax) return kFALSE;
+    
   }
   
   return kTRUE; 
@@ -384,25 +359,14 @@ Bool_t StEmcFilter::accept(StTrack *track)
 //------------------------------------------------------------------------------/
 Bool_t StEmcFilter::accept(StMcEvent *event)
 {
-  if(!event) 
-  {
-    msg("McEvent","Null pointer");
-    return kFALSE;
-  }
+  if(!event) return kFALSE;
+  
   StMcVertex* vertex = event->primaryVertex();
-  if(!vertex) 
-  {
-    msg("McEvent","Null vertex");
-    return kFALSE;
-  }
+  if(!vertex) return kFALSE;
   
   StThreeVectorF position = vertex->position();
   
-  if(fabs(position.z())>mZVertexCut) 
-  {
-    msg("McEvent","ZVertexCut");
-    return kFALSE;
-  }
+  if(fabs(position.z())>mZVertexCut) return kFALSE;
   
   return kTRUE;
 }
