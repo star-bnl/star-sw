@@ -67,7 +67,7 @@ if(track_h->nok ==0) return STAFCV_OK;
 tls_index_sort_i_(&hit_h[0].nok, &hit[0].track,
 		      &hit[1].track,&loc_hit[0],&mylen);
 
-/* Correct for c indexing bu subtracting 1 */
+/* Correct for c indexing by subtracting 1 */
     for(l=0;l<hit_h->nok;l++) {
       loc_hit[l]--;
       if(loc_hit[l]<0||loc_hit[l]>=hit_h->nok) { 
@@ -104,7 +104,7 @@ while (l<hit_h->nok && hit[loc_hit[l]].track>0)
     z1 = track[j].z0;
     
     /* calculate radius */
-    /*    radius = 1.0/(track[j].invp*bfield[2]*C_D_CURVATURE);*/
+
     radius = 1.0/track[j].curvature;
     psic   = track[j].psi*C_RAD_PER_DEG + track[j].q/fabs(track[j].q)*C_PI*0.5;
     tanl   = track[j].tanl;

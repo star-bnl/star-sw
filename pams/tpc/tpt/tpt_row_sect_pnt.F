@@ -1,5 +1,8 @@
-* $Id: tpt_row_sect_pnt.F,v 1.22 2000/03/22 20:35:21 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.23 2000/12/19 16:01:53 love Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.23  2000/12/19 16:01:53  love
+* fixed asymmetry bug in tpt_row_sect_pnt
+*
 * Revision 1.22  2000/03/22 20:35:21  sakrejda
 * Message enable removed from the fortran routines.
 * Message control will be handled in one place in the tpt Maker.
@@ -125,7 +128,6 @@ c     allocate memory following Victor's suggestion
       integer isec2, isec3
       INTEGER tls_Index_Sort_i
 C             sort hits in the TPC table according to row/sec field
-      real    xglobal(3)
 
       INTEGER tpc_global_to_sector
       INTEGER tpc_sec24_to_sec12
@@ -143,17 +145,14 @@ c     allocate memory for a local array
       p_rhit = malloc(hit_h.nok*4)
 
       do i=1,hit_h.nok
-C        clean up sector assignement.
-         xglobal(1)=hit(i).x
-         xglobal(2)=hit(i).y
-         xglobal(3)=hit(i).z
-         if(xglobal(3).gt.0) then
+C        truncate sector assignment.
+         isec3=int(hit(i).row/100)
+         if(isec3.lt.13)then
             rhit(i)=hit(i).row
          else
-            isec3=int(hit(i).row/100)
             iret=tpc_sec24_to_sec12(isec3,isect)
-            longrow = hit(i).row
-            rhit(i) = isect*100+mod(longrow,100)
+            longrow = mod(hit(i).row,100)
+            rhit(i) = isect*100+longrow
          endif
       end do
 
