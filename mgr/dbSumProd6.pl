@@ -115,7 +115,7 @@ $nhpssDstFiles = 0;
 
 for ($ll=0; $ll<scalar(@SetS); $ll++) {
 
-$sql="SELECT dataset, fName, Nevents, size  FROM $FileCatalogT WHERE dataset = '$SetS[$ll]' AND fName LIKE '%dst.root' AND JobID LIKE '%mdc3%' AND hpss ='Y'";
+$sql="SELECT dataset, fName, Nevents, size  FROM $FileCatalogT WHERE dataset = '$SetS[$ll]' AND fName LIKE '%dst.root' AND JobID LIKE '%prod6%' AND hpss ='Y'";
 $cursor =$dbh->prepare($sql)
   || die "Cannot prepare statement: $DBI::errstr\n";
 $cursor->execute;
@@ -159,7 +159,7 @@ $ndiskDstFiles = 0;
 
 for ($kk=0; $kk<scalar(@SetS); $kk++) {
 
-$sql="SELECT dataset, fName, Nevents, size  FROM $FileCatalogT WHERE dataset = '$SetS[$kk]' AND fName LIKE '%dst.root' AND jobID LIKE '%mdc3%' AND site = 'disk_rcf'";
+$sql="SELECT dataset, fName, Nevents, size  FROM $FileCatalogT WHERE dataset = '$SetS[$kk]' AND fName LIKE '%dst.root' AND jobID LIKE '%prod6%' AND site = 'disk_rcf'";
 $cursor =$dbh->prepare($sql)
   || die "Cannot prepare statement: $DBI::errstr\n";
 $cursor->execute;
@@ -231,7 +231,7 @@ my $TdstHEvt  = 0;
 
 # print total amount
   print HTML "<TR ALIGN=CENTER VALIGN=CENTER>\n";
-  print HTML "<td>Total for MDC3 </td>\n"; 
+  print HTML "<td>Total </td>\n"; 
   print HTML "<td>$TInSize </td><td>$TInEvt </td><td>$TdstHpsize </td><td>$TdstHEvt</td><td>$TdstDsize </td><td>$TdstDEvt </td></tr>\n"; 
 
 ##
