@@ -1,5 +1,8 @@
-// $Id: tpctest.C,v 1.7 1999/05/21 15:34:02 kathy Exp $
+// $Id: tpctest.C,v 1.8 2000/01/11 22:08:55 love Exp $
 // $Log: tpctest.C,v $
+// Revision 1.8  2000/01/11 22:08:55  love
+// Macro works again - can no longer skip first record or you lose BEGIN_RUN
+//
 // Revision 1.7  1999/05/21 15:34:02  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
@@ -40,11 +43,14 @@ St_xdfin_Maker *xdfin = 0;
 void Load(){
   gSystem->Load("St_base");
   gSystem->Load("StChain");
+    gSystem->Load("StUtilities");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
   gSystem->Load("StMagF");
   gSystem->Load("libmsg");
-  gSystem->Load("libtls");
+  gSystem->Load("tls");
+  gSystem->Load("StDbLib");
+  gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
   gSystem->Load("St_xdfin_Maker");
 #if 0
@@ -86,11 +92,11 @@ void start(){
   // Char_t *filename="/star/tpctest/SD97/laser/log-p285-t28-f2-las.xdf";
   // Char_t *filename="/star/tpctest/SD97/laser/log-p285-t28-f3-las.xdf";
   // Char_t *filename="/star/tpctest/SD97/laser/log-p285-t28-f4-las.xdf";
-  Char_t *filename="/star/tpctest/SD97/laser/log-p285-t28-f5-las.xdf";
+  // Char_t *filename="/star/tpctest/SD97/laser/log-p285-t28-f5-las.xdf";
   // Char_t *filename="/star/tpctest/SD97/laser/log-p285-t28-f6-las.xdf";
   // this file has 44 events with the membrane only.
   // Char_t *filename="/star/tpctest/SD97/laser/log-p274-t23-f4-las.xdf";
-  // Char_t *filename="/star/tpctest/SD97/laser/log-p274-t23-f5-las.xdf";
+   Char_t *filename="/star/tpctest/SD97/laser/log-p274-t23-f5-las.xdf";
   // Char_t *filename="/star/tpctest/SD97/laser/log-p274-t23-f6-las.xdf";
   // Char_t *filename="/star/tpctest/SD97/laser/log-p246-t13-f2-las.xdf";
   
@@ -219,8 +225,8 @@ void draw_event(){
   Float_t rmax[3]={ 40,  -60, 210};
   Float_t p[6];
   //TPolyMarker3D *hit  = new TPolyMarker3D();
-  Float_t pts[7500],tkpts[75][150]; //allow for 75, 50 hit tracks
-  Int_t ntkpt[75];                  // and 75 track hit counters 
+  Float_t pts[10000],tkpts[100][150]; //allow for 100, 50 hit tracks
+  Int_t ntkpt[100];                  // and 100 track hit counters 
   int value; 
   
   view->SetRange(rmin,rmax);
@@ -245,8 +251,8 @@ void draw_event(){
     //    cin >>  value ;  // this is a pause just before plotting each slice.
     //  Now draw the hits - mark those assigned to tracks.
     tcl_tphit_st *h = hit1;
-    for(int mm=0;mm<75;mm++)ntkpt[mm] = 0;
-    Int_t k=0, savnum[75]; 
+    for(int mm=0;mm<100;mm++)ntkpt[mm] = 0;
+    Int_t k=0, savnum[100]; 
     Int_t oldie=0, itkno =0;
     Int_t j=0;
     for (i = 0;i<nhits;i++){
@@ -269,8 +275,8 @@ void draw_event(){
         }
       }
     } 
-    TPolyMarker3D *thit[75];
-    for ( i=0;i<75;i++){
+    TPolyMarker3D *thit[100];
+    for ( i=0;i<100;i++){
       m_TreeD->RecursiveRemove(thit[i]);
     }
     // plot all the points as a + sign
@@ -281,7 +287,7 @@ void draw_event(){
     hit->SetMarkerColor(1);
     hit->Draw(); 
     //Now plot the tracks hits in color ;
-    for(int m=0;m<75;m++){
+    for(int m=0;m<100;m++){
       if(ntkpt[m] !=0){
 	//    
 	cout <<" Track #" << savnum[m] << " "<< ntkpt[m] <<" hits" << endl;
@@ -301,12 +307,12 @@ void draw_event(){
       }
     }
     // Now plot all the tracks as polylines.  
-    TPolyLine3D *trk[75];
-    for ( i=0;i<75;i++){
+    TPolyLine3D *trk[100];
+    for ( i=0;i<100;i++){
       m_TreeD->RecursiveRemove(trk[i]);
     }
     Int_t tin=0;
-    Int_t tid[75];
+    Int_t tid[100];
     tpt_track_st *t = track1;
     for( i=0;i<ntracks;i++){
       //    cout << "track flag " << i <<", " << t->nfit <<", " << t->flag <<endl;
@@ -394,8 +400,8 @@ void tpctest(){
   // Create a root file to hold the ntuples. 
   f=new TFile("ntup99.root","RECREATE");
   start();
-  skip(4);
+  //skip(4);
   draw_sector();
-  loop(1);
+  // loop(1);
 }
 
