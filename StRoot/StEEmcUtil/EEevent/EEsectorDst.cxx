@@ -1,5 +1,8 @@
-// $Id: EEsectorDst.cxx,v 1.3 2003/02/20 20:13:15 balewski Exp $
+// $Id: EEsectorDst.cxx,v 1.4 2003/07/01 14:13:13 balewski Exp $
 // $Log: EEsectorDst.cxx,v $
+// Revision 1.4  2003/07/01 14:13:13  balewski
+// no clue
+//
 // Revision 1.3  2003/02/20 20:13:15  balewski
 // fixxy
 // xy
@@ -188,7 +191,7 @@ void EEsectorDst::sumRawMC(EEsectorDst *outSec, float minE) {
     
   }// end of loop over 60 towers in subsect
 
-  printf(" sector=%d towerOnlySum=%f\n",ID,grandSum);
+  //  printf(" sector=%d towerOnlySum=%f\n",ID,grandSum);
   // copy smd-U&V  hits above energy threshold
   for(j=0;j<mx2;j++) {
     int strip=j+1;
@@ -205,7 +208,7 @@ void EEsectorDst::sumRawMC(EEsectorDst *outSec, float minE) {
     
   }// end of loop over 288 SMD strip
   
-  printf(" sector=%d grandSum=%f\n",ID,grandSum);
+  //  printf(" sector=%d grandSum=%f\n",ID,grandSum);
   
 }
 
