@@ -38,6 +38,7 @@ my $CPPFLAGS = ""; #"-I-";
 my $CXX      = "g++";
 my $CXXFLAGS = "-fpic -w";
 my $CXXEXTRA = "";
+my $CXXOPT   = "";
 my $CC       = "gcc";
 my $CFLAGS   = "-fpic -w";
 my $FC       = "f77";
@@ -64,8 +65,8 @@ my $ROOTCINTD= "";
 my $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
 my $LINKCOM  = "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
 my $FCCOM    = "%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";
-my $GEANT3COM= "test -f %<.F && rm %<.F;";
-   $GEANT3COM.="%GEANT3 %< -o %<.F && %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %<.F -o %>";
+my $GEANT3COM= "test -f %>.F && rm %>.F;";
+   $GEANT3COM.="%GEANT3 %< -o %>.F && %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %>.F -o %>";
 my $INCLUDE_PATH  = $INCLUDE;
 my $Salt = undef;
 $_ = $STAR_HOST_SYS;
@@ -94,6 +95,25 @@ if (/^i386_/) {
     $FCCOM   .= "else %FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>; fi";
     my $GEANT3COM= $FCCOM;
     $FEXTEND  = "-ffixed-line-length-132"; 
+  }
+  elsif (/kcc$/) {
+    $DEBUG    = "-g";
+    $CXXOPT   = "+K0 -O0 --no_exceptions";
+    $CXX      = "KCC";
+    $CXXFLAGS = $CXXOPT . " --signed_chars -D_EXTERN_INLINE=inline";
+    $CXXFLAGS.= " --display_error_number --diag_suppress 191 -fPIC";
+    $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl -Bdynamic";
+    $FC       = "pgf77";
+    $FLIBS    = "-L/usr/pgi/linux86/lib -lpgftnrtl -lpgc";
+    $FLIBS   .= " -L/opt/star/lib -lpgf77S -lpgf77A";
+    $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
+    $FFLAGS   = "-DPGI";  
+    $FEXTEND  = "-Mextend";
+    $LD       = $CXX;
+    $LDFLAGS  = $CXXOPT;
+    $EXEFLAGS = $CXXOPT;
+    $SO       = $CXX;
+    $SOFLAGS  = $CXXOPT;
   }
   else {
     $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
@@ -135,6 +155,7 @@ elsif (/^sun4x_56_CC5$/) {
   $OSFID     = "__CC5__";
   $OSFID    .= " CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS";
   $OSFID    .= " ST_NO_MEMBER_TEMPLATES";
+# $OSFID    .= " ST_NO_NAMESPACES"; # add
   $OSFID    .= " SUN Solaris sun sun4os5 sun4x_56";
   $CC        = "/opt/WS5.0/bin/cc";
   $CXX       = "/opt/WS5.0/bin/CC";
