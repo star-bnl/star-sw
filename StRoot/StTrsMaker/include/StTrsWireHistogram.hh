@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.hh,v 1.1 1998/11/10 17:12:13 fisyak Exp $
+ * $Id: StTrsWireHistogram.hh,v 1.2 1998/11/16 14:50:22 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.hh,v $
- * Revision 1.1  1998/11/10 17:12:13  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1998/11/16 14:50:22  lasiuk
+ * remove diagnostics (mLastEntry, mLastWire)
  *
  *
  * Revision 1.2  1998/11/16 14:50:22  lasiuk
@@ -77,10 +77,6 @@ public:
     // access functions
     int min() const;
     int max() const;
-
-    // Diagnostic
-    StTrsWireBinEntry*  lastEntry() const;
-    int                 lastWire()  const;
     
     // Book-keeping
     void                addEntry(StTrsWireBinEntry&);
@@ -128,10 +124,6 @@ private:
     double          mOuterSectorGasGain;
 
     // Time Delay
-
-    ////////DIAGNOSTIC
-    int                mLastWire;
-    StTrsWireBinEntry* mLastEntry;
     bool            mDoTimeDelay;
     
     StTpcGeometry*    mGeomDb;
@@ -144,7 +136,6 @@ private:
     static RandGauss       mGaussianDistribution;
     static RandExponential mExponentialDistribution;
 };
-int inline StTrsWireHistogram::lastWire() const {return mLastWire;}
 int inline StTrsWireHistogram::max() const {return mMax;}
 void inline StTrsWireHistogram::setDoGasGain(bool gg) {mDoGasGain = gg;}
 void inline StTrsWireHistogram::setDoTimeDelay(bool t) {mDoTimeDelay = t;}
