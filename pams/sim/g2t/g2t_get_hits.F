@@ -23,7 +23,7 @@ C :>--------------------------------------------------------------------
      >                LenT,LenH,xD2M,pD2M,IH,JTRA,Iprin
       Real            Hits(Nmh),FHmin(Nmh),FHmax(Nmh),FHbin(Nmh)
       integer         IQQ(100),iadr(Nmh),jadr(Nmh),NUMBV(Nmh),phits(Nmh)
-      Character*4     Csys*4/' '/,chit*4(Nmh),col*80,typ*80
+      Character*4     Csys*4/' '/,chit(Nmh)*4,col*80,typ*80
       real            xxx(3),ccc(3),QQ(100)
       Equivalence     (QQ(1),IQQ(1),id)
 
