@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.110 1999/09/09 23:02:16 fisyak Exp $
+# $Id: MakeDll.mk,v 1.111 1999/09/09 23:31:57 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.111  1999/09/09 23:31:57  fisyak
+# Remove clash between MakeDll and cons in RootCint output
+#
 # Revision 1.110  1999/09/09 23:02:16  fisyak
 # Suppress library versioning for users
 #
@@ -416,7 +419,7 @@ ifdef FILES_ORD
     endif
   endif
   ifneq (,$(NAMES_ORD))
-    FILES_CINT_ORD :=$(GEN_DIR)/$(PKG)_Cint.cxx
+    FILES_CINT_ORD :=$(GEN_DIR)/$(PKG)_OCint.cxx
     FILES_ORD_H    :=  $(foreach dir, $(SRC_DIRS), \
                           $(wildcard $(addprefix $(dir)/,$(addsuffix .h,$(NAMES_ORD)) \
                                                          $(addsuffix .hh,$(NAMES_ORD)))))
