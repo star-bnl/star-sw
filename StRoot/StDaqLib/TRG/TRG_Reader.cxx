@@ -92,6 +92,7 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
       break;
 
     case 2003:
+      S_mode = 0;
       SanityCheck2003(ptr,S_mode);
       if(pBankTRGD->HerbSwap2003(ptr)<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
       break;
