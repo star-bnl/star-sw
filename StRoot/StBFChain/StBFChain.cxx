@@ -112,16 +112,29 @@ BfcItem BFC[] = {
   {"daq"         ,""  ,"","",""                         ,"StDaqLib,StDAQMakerLib","Load StDAQMaker",kFALSE},
   {"SCL"         ,""  ,"","","","StarClassLibrary",                         "Load StarClassLibrary",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"MAKERS      ","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"I/O Makers  ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"in"          ,""  ,"","xin"                                               ,"","","Alias to xin",kFALSE},
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"xdf2root"    ,""  ,"",""                                   ,"","xdf2root","Read XDF input file",kFALSE},
   {"geant","geant","","NoFieldSet,geomT,gen_T,sim_T"
                                          ,"St_geant_Maker","geometry,St_g2t,St_geant_Maker","GEANT",kFALSE}, 
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"Db makers   ","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"db"          ,"db","","StDbT,xdf2root"       ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"dbutil"      ,""  ,"","SCL"                            ,"","StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"Valid Db Versions","------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"DbVNone"     ,""  ,"","db,calib,y1h"                     ,"","","19940614/0 Db Version for none",kFALSE},
+  {"DbV0614"     ,""  ,"","db,calib,y1h"                     ,"","","20000614/0 Db Version for p00hd",kFALSE},
+  {"DbV0624"     ,""  ,"","db,calib,y1h"                   ,"","","20000624/0 Db Version for p00hd_1",kFALSE},
+  {"DbV0713"     ,""  ,"","db,calib,y1h"                     ,"","","20000713/0 Db Version for p00he",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"MAKERS      ","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"magF"        ,"","","NoFieldSet,StDbT,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
@@ -402,10 +415,11 @@ Int_t StBFChain::Instantiate()
     fXdfOut = new St_XDFFile(fXdfFile->Data(),"wb"); 
     if (!fXdfOut) status = kStErr;
   }
+  SetDbOptions();
   //  PrintQAInfo();
   PrintInfo();
   // START the chain (may the force be with you)
-  // Create HTML docs of all Maker's inv#ifdef GetOption("trg")
+  // Create HTML docs of all Maker's inv
   if (GetOption("MakeDoc")) MakeDoc();
   if (GetOption("Debug")) SetDEBUG();
   return status;
@@ -586,7 +600,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	  printf ("Use default input file %s for Laser\n",fInFile->Data());
     }    
     if (!fInFile && GetOption("p00h")) {
-	  fInFile = new TString("/star/data08/daq/2000/06/st_physics_1164056_raw_0001.daq");
+	  fInFile = new TString("/star/data08/daq/2000/07/st_physics_1185015_raw_0001.daq");
 	  printf ("Use default input file %s forfirst real data No Field \n",fInFile->Data());
     }    
     if (!fInFile && GetOption("miniDAQ")) {
@@ -718,6 +732,7 @@ void StBFChain::SetDbOptions(){
   else {if (GetOption("Y1h"))  SetDataBases("year_1h");
   else {if (GetOption("Y2a"))  SetDataBases("year_2a");
   else {if (GetOption("gstar"))SetDataBases("year_2a");
+  else                         SetDataBases("year_2a");
   }}}}}}}}}}}}
   gMessMgr->QAInfo() << "db Maker set time = " << dbMk->GetDateTime().GetDate() 
 		   << dbMk->GetDateTime().GetTime() << endm;
@@ -725,8 +740,30 @@ void StBFChain::SetDbOptions(){
 }
 //_____________________________________________________________________
 void StBFChain::SetDataBases(const Char_t* TimeStamp){
-  if (dbMk)           dbMk->SetDateTime(TimeStamp);
-  if (calibMk)     calibMk->SetDateTime(TimeStamp);
+  Int_t i;
+  Int_t Idate=0, Itime=0;
+  for (i = 1; i< NoChainOptions; i++) {// Load Libraries if any
+    if (fBFC[i].Flag && !strncmp(fBFC[i].Key ,"DbV",3)) 
+      sscanf(fBFC[i].Comment,"%d/%d",&Idate,&Itime);
+  }
+  TList *tl = GetMakeList();
+  if (!tl) return;
+  
+  TIter nextMaker(tl);
+  StMaker *maker;
+  while ((maker = (StMaker*)nextMaker())) { 
+    if (!strcmp(maker->ClassName(),"St_db_Maker")) {
+      St_db_Maker *db = (St_db_Maker *) maker;
+      db->SetDateTime(TimeStamp); 
+      cout << "\tSet time stamp = " << TimeStamp 
+	   << " for St_db_Maker(\"" << db->GetName() <<"\")" << endl;
+      if (Idate) {
+	db->SetMaxEntryTime(Idate,Itime);
+	cout << "\tSet DataBase max entry time " << Idate << "/" << Itime 
+	     << " for St_db_Maker(\"" << db->GetName() <<"\")" << endl;
+      }
+    }
+  }
 }
 //_____________________________________________________________________
 void StBFChain::SetTreeOptions()
@@ -760,5 +797,5 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.115 2000/07/13 22:44:12 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.116 2000/07/18 22:54:09 fisyak Exp $
 //_____________________________________________________________________
