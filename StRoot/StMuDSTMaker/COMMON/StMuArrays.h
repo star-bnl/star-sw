@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.8 2004/04/26 00:13:28 perev Exp $
+ * $Id: StMuArrays.h,v 1.9 2004/05/04 00:10:28 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -40,18 +40,18 @@ class StMuArrays {
  public:
  StMuArrays();
 ///< names of the TBranches in the TTree/File 
-    static char*         arrayNames    [__NALLARRAYS__    ];
-    static char** strangeArrayNames; //[__NSTRANGEARRAYS__]
-    static char**      emcArrayNames;//[__NEMCARRAYS__    ]
-    static char**      pmdArrayNames;//[__NPMDARRAYS__    ]
-    static char**      tofArrayNames;//[__NTOFARRAYS__    ]
+    static const char*         arrayNames    [__NALLARRAYS__    ];
+    static const char** strangeArrayNames; //[__NSTRANGEARRAYS__]
+    static const char**      emcArrayNames;//[__NEMCARRAYS__    ]
+    static const char**      pmdArrayNames;//[__NPMDARRAYS__    ]
+    static const char**      tofArrayNames;//[__NTOFARRAYS__    ]
 
 ///< names of the classes, the TClonesArrays are arrays of this type
-    static char*         arrayTypes    [__NALLARRAYS__    ];
-    static char**  strangeArrayTypes;//[__NSTRANGEARRAYS__]
-    static char**      emcArrayTypes;//[__NEMCARRAYS__    ]
-    static char**      pmdArrayTypes;//[__NPMDARRAYS__    ]
-    static char**      tofArrayTypes;//[__NTOFARRAYS__    ]
+    static const char*   arrayTypes          [__NALLARRAYS__    ];
+    static const char**  strangeArrayTypes;//[__NSTRANGEARRAYS__]
+    static const char**  emcArrayTypes;//    [__NEMCARRAYS__    ]
+    static const char**  pmdArrayTypes;//    [__NPMDARRAYS__    ]
+    static const char**  tofArrayTypes;//    [__NTOFARRAYS__    ]
 
 ///< maximum sizes of the TClonesArrays
     static int           arraySizes    [__NALLARRAYS__    ];
@@ -73,6 +73,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.9  2004/05/04 00:10:28  perev
+ * Cleanup
+ *
  * Revision 1.8  2004/04/26 00:13:28  perev
  * Cleanup+simplification
  *

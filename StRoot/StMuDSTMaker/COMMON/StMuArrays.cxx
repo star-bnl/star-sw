@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.10 2004/04/26 00:13:28 perev Exp $
+ * $Id: StMuArrays.cxx,v 1.11 2004/05/04 00:10:28 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -10,7 +10,7 @@
 
 //		ARRAY NAMES
 //============================================================================================
-char* StMuArrays::arrayNames       [__NALLARRAYS__    ] = {"MuEvent",
+const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent",
 					                   "PrimaryTracks","GlobalTracks","OtherTracks","L3Tracks",
 					                   "RichSpectra","DetectorStates","L3AlgoAccept","L3AlgoReject",
 /*strangeArrayNames[__NSTRANGEARRAYS__]*/                  "Event","McEvent",
@@ -22,15 +22,15 @@ char* StMuArrays::arrayNames       [__NALLARRAYS__    ] = {"MuEvent",
 /*pmdArrayNames    [__NPMDARRAYS__    ]*/                  "PmdCollection",
 /*tofArrayNames    [__NTOFARRAYS__    ]*/                  "TofHit","TofData"};
 
-char** StMuArrays::strangeArrayNames = StMuArrays::arrayNames    +__NARRAYS__;
-char** StMuArrays::emcArrayNames = StMuArrays::strangeArrayNames +__NSTRANGEARRAYS__;
-char** StMuArrays::pmdArrayNames = StMuArrays::emcArrayNames     +__NEMCARRAYS__;
-char** StMuArrays::tofArrayNames = StMuArrays::pmdArrayNames     +__NPMDARRAYS__;
+const char** StMuArrays::strangeArrayNames = StMuArrays::arrayNames    +__NARRAYS__;
+const char** StMuArrays::emcArrayNames = StMuArrays::strangeArrayNames +__NSTRANGEARRAYS__;
+const char** StMuArrays::pmdArrayNames = StMuArrays::emcArrayNames     +__NEMCARRAYS__;
+const char** StMuArrays::tofArrayNames = StMuArrays::pmdArrayNames     +__NPMDARRAYS__;
 
 
 //		ARRAY TYPES
 //============================================================================================
-char* StMuArrays::arrayTypes       [__NALLARRAYS__    ] = {"StMuEvent",
+const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent",
 					                   "StMuTrack","StMuTrack","StMuTrack","StMuTrack",
 					                   "StRichSpectra","StDetectorState","StL3AlgorithmInfo","StL3AlgorithmInfo",
 /*strangeArrayTypes[__NSTRANGEARRAYS__]*/                  "StStrangeEvMuDst","StStrangeEvMuDst",
@@ -41,10 +41,10 @@ char* StMuArrays::arrayTypes       [__NALLARRAYS__    ] = {"StMuEvent",
 /*emcArrayTypes   [__NEMCARRAYS__     ]*/                  "StMuEmcCollection",
 /*pmdArrayTypes   [__NPMDARRAYS__     ]*/                  "StMuPmdCollection",
 /*tofArrayTypes   [__NTOFARRAYS__     ]*/                  "StMuTofHit","StTofData"};
-char** StMuArrays::strangeArrayTypes = StMuArrays::arrayTypes    +__NARRAYS__;
-char** StMuArrays::emcArrayTypes = StMuArrays::strangeArrayTypes +__NSTRANGEARRAYS__;
-char** StMuArrays::pmdArrayTypes = StMuArrays::emcArrayTypes     +__NEMCARRAYS__;
-char** StMuArrays::tofArrayTypes = StMuArrays::pmdArrayTypes     +__NPMDARRAYS__;
+const char** StMuArrays::strangeArrayTypes = StMuArrays::arrayTypes    +__NARRAYS__;
+const char** StMuArrays::emcArrayTypes = StMuArrays::strangeArrayTypes +__NSTRANGEARRAYS__;
+const char** StMuArrays::pmdArrayTypes = StMuArrays::emcArrayTypes     +__NEMCARRAYS__;
+const char** StMuArrays::tofArrayTypes = StMuArrays::pmdArrayTypes     +__NPMDARRAYS__;
 
 
 //		ARRAY SIZES
@@ -95,6 +95,9 @@ StMuArrays::StMuArrays()
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
+ * Revision 1.11  2004/05/04 00:10:28  perev
+ * Cleanup
+ *
  * Revision 1.10  2004/04/26 00:13:28  perev
  * Cleanup+simplification
  *
