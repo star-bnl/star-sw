@@ -11,7 +11,7 @@ macro run__
           funit=21 _
           nfile=tpc_hits.ntup _
           nid=111 _
-          table=/dui/data/tpc/hits/tphit
+          table=tpc/hits/tphit
 * 
 *  this is an example!! you must change to fill your needs
 *  
@@ -96,7 +96,7 @@ $STAR/pams/trg/kumac
       if STAF_STATUS(1).eq.0 then
         message ' problem with tfs '
       endif
-    exec write_table_to_ntuple#write_event_disk [nid] [table]
+    exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
   enddo
 
  
