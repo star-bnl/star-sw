@@ -1,5 +1,9 @@
-// $Id: StFtpcTracker.cc,v 1.4 2000/05/15 14:28:13 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.5 2000/06/13 14:28:23 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.5  2000/06/13 14:28:23  oldi
+// Changed cout to gMessMgr->Message().
+// Printed output changed (slightly).
+//
 // Revision 1.4  2000/05/15 14:28:13  oldi
 // problem of preVertex solved: if no main vertex is found (z = NaN) StFtpcTrackMaker stops with kStWarn,
 // refitting procedure completed and included in StFtpcTrackMaker (commented),
@@ -25,6 +29,8 @@
 #include "StFtpcTracker.hh"
 #include "StFtpcPoint.hh"
 #include "StFtpcTrack.hh"
+
+#include "StMessMgr.h"
 
 ///////////////////////////////////////////////////////////////////////////////////
 //                                                                               //
@@ -171,13 +177,21 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper)
     }
    
     trackTableWrapper->SetNRows(num_tracks);
-    cout << "Writing " << num_tracks << " tracks." << endl;
+    gMessMgr->Message("", "I", "OST") << "Writing " << num_tracks << " found track";
+    
+    if (num_tracks == 1) {
+      *gMessMgr << "." << endm;
+    }
+    
+    else {
+      *gMessMgr << "s." << endm;
+    }
 
     return 0;
   }
 
   else {
-    cout << "Tracks not written (No tracks found!)." << endl;
+    gMessMgr->Message("", "W", "OST") << "Tracks not written (No tracks found!)." << endm;
     return -1;
   }
 }
