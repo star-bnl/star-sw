@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.51 2002/11/03 02:16:10 nevski Exp $
+* $Id: geometry.g,v 1.52 2002/11/27 21:53:14 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.52  2002/11/27 21:53:14  potekhin
+* code improvement for readability etc -- moved bbcmgeo call
+*
 * Revision 1.51  2002/11/03 02:16:10  nevski
 * geometry up to 2003 introduced
 *
@@ -287,7 +290,6 @@ If LL>1
    if (alpipe)      call AgDETP add ('pipg.S1Leng=',230,1)
    if (pipe)        Call pipegeo
    if (upst)        Call upstgeo
-   if (bbcm)        Call bbcmgeo
 
    Call AGSFLAG('SIMU',2)
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
@@ -353,6 +355,7 @@ If LL>1
       }
    endif
    if (ecal) Call ecalgeo
+   if (bbcm) Call bbcmgeo
    if (fpdm) Call fpdmgeo
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo
