@@ -63,7 +63,8 @@ macro init_rsum
 macro/global/import *
 
 cd [params]/global/dstpars
-
+ 
+* Kathy (12/14/98) - here we are checking on the rowcount - NOT setting it!
 rowcount dst_summary_param
 if (staf_result(1).eq.0) then 
  message ' init_dst#init_rsum: Load dst_summary_param  table'
@@ -83,7 +84,8 @@ macro init_esum
 macro/global/import *
 
 cd [params]/global/dstpars
-
+ 
+* Kathy (12/14/98) - here we are checking on rowcount - NOT setting it
 rowcount dst_summary_param
 if (staf_result(1).eq.0) then 
  message ' init_dst#init_esum: Load dst_summary_param  table'
