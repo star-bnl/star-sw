@@ -6,6 +6,7 @@
 #include "fill_ftpc_dst.h"
 #include "StDetectorId.h"
 #include "StVertexId.h"
+#include "math_constants.h"
 
 #define TWO4   16                    /* 2**4  */
 #define TWO10  1024                  /* 2**10 */
@@ -162,12 +163,14 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
     dst_track[dst_track_h->nok].map[1]                = 0;
 
 /*  radius at start of track (cm) */
-/*  (currently not set for FTPC)  */
-    dst_track[dst_track_h->nok].r0           = 0.;
+    dst_track[dst_track_h->nok].r0   = 
+           sqrt(fptrack[itrk].v[0]*fptrack[itrk].v[0] 
+                 + fptrack[itrk].v[1]*fptrack[itrk].v[1]);
 
 /*  azimuthal angle at start of track (deg) */
-/*  (currently not set for FTPC)  */
-    dst_track[dst_track_h->nok].phi0           = 0.;
+    dst_track[dst_track_h->nok].phi0 = 
+                 atan2(fptrack[itrk].v[1],fptrack[itrk].v[0])
+                     * C_DEG_PER_RAD;
 
 /*  z-coordinate at start of track  */
     dst_track[dst_track_h->nok].z0           = fptrack[itrk].v[2];
