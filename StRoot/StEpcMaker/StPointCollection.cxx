@@ -3,6 +3,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.8  2001/08/18 22:13:49  subhasis
+// phi-cluster attached to cat#3 points corrected
+//
 // Revision 1.7  2001/04/25 17:27:44  perev
 // HPcorrs
 //
@@ -460,7 +463,7 @@ Int_t
 	 ClusterPointer[2].push_back(cl1);
 	 StEmcCluster *cl2;
 	 cl2 = (StEmcCluster*)pvec[k[i1]-1];
-	 ClusterPointer[3].push_back(cl1);
+	 ClusterPointer[3].push_back(cl2);
 	 PointEta=cl1->eta();
 	 PointSigEta=cl1->sigmaEta();
 	 PointPhi=cl2->phi();
