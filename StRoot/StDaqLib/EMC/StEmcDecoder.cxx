@@ -11,7 +11,7 @@ to get the correct electronics configuration for towers and SMD
 */
 StEmcDecoder::StEmcDecoder(unsigned int date,unsigned int time)
 {
-  cout <<"TIME USED FOR DECODER = "<<date<<" "<<time<<endl;
+  //cout <<"TIME USED FOR DECODER = "<<date<<" "<<time<<endl;
   Init(date,time);
   // reverse order for tower
   for (int i=0;i<30;i++) Crate_TDC[TDC_Crate[i]-1]=i;

@@ -202,9 +202,12 @@ int EMC_BarrelReader::FillBarrelTower(Bank_TOWERADCR* pADCR)
          <<"  Token = "<<mTheTowerAdcR.TDCToken[TDC]
          <<"  Trigger = "<<mTheTowerAdcR.TDCTrigger[TDC]
          <<"  CrateId = "<<mTheTowerAdcR.TDCCrateId[TDC]<<endl;*/
-         
-    
-    if(mTheTowerAdcR.TDCError[TDC]==0) 
+    int CId = 0;
+    decoder->GetTowerCrateFromTDC(TDC,CId);
+             
+    if(mTheTowerAdcR.TDCError[TDC]==0      && 
+       mTheTowerAdcR.TDCCount[TDC]==164    &&
+       mTheTowerAdcR.TDCCrateId[TDC]==CId) 
     {
       mTheTowerAdcR.TDCErrorFlag=0;                     // at least one TDC channel is Ok
       mTheTowerAdcR.NTDCChannels++;                     // Number of valid TDC channels
