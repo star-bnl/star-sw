@@ -1,5 +1,8 @@
-// $Id: QAhlist_logx.h,v 2.2 2001/05/25 16:31:20 lansdell Exp $
+// $Id: QAhlist_logx.h,v 2.3 2002/04/23 01:59:55 genevb Exp $
 // $Log: QAhlist_logx.h,v $
+// Revision 2.3  2002/04/23 01:59:55  genevb
+// Addition of BBC/FPD histos
+//
 // Revision 2.2  2001/05/25 16:31:20  lansdell
 // more updates to qa shift histograms
 //
@@ -18,3 +21,4 @@
  "QaPtrkRT",
  "QaPtrkRTS",
  "QaDedxBBTTS"
+
