@@ -91,7 +91,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.22 1999/10/18 14:53:10 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.23 1999/12/01 20:39:16 ward Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -160,7 +160,7 @@ void DoComment(int codeLineNum,char *xx) {
   if(xx[0]=='/'&&xx[1]=='/') cc=xx+2; else cc=xx;
   if(gNoMoreComments) return;
   if(strlen(cc)+strlen(gComments)>COMMENTS-len) {
-    strcat(gComments,rr); gNoMoreComments=7;
+    strcat(gComments,rr); gNoMoreComments=7; return;
   }
   strcat(gComments,cc);
 }
