@@ -4,8 +4,8 @@ macro/global/import *
 *   
 *    Call cts
 *
-ami/mod/call cts [geant]/Event/g2t_ctb_hit _
-                 [geant]/Event/g2t_track   _
+ami/mod/call cts [geant_Event]/g2t_ctb_hit _
+                 [geant_Event]/g2t_track   _
                  [geometry]/ctf/ctb _ 
                  [calib]/ctf/ctb_slat _
                  [geometry]/ctf/ctb_slat_phi _
@@ -14,3 +14,5 @@ ami/mod/call cts [geant]/Event/g2t_ctb_hit _
                  [data]/ctf/ctb_event                  _
                  [data]/ctf/ctb_mslat                  _
                  [data]/ctf/ctb_raw
+
+return
