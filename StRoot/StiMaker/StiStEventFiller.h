@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 1.3 2002/05/29 19:14:45 calderon Exp $
+ * $Id: StiStEventFiller.h,v 1.4 2002/08/12 15:29:21 andrewar Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 1.4  2002/08/12 15:29:21  andrewar
+ * Added dedx calculators
+ *
  * Revision 1.3  2002/05/29 19:14:45  calderon
  * Filling of primaries, in
  * StiStEventFiller::fillEventPrimaries()
@@ -45,12 +48,16 @@ using std::map;
     \author Manuel Calderon de la Barca Sanchez (Yale Software)
     \note 
  */
+#include "Sti/StiDedxCalculator.h"
+#include "Sti/StiResidualCalc.h"
 
 class StEvent;
 class StTrackNode;
 class StiTrackContainer;
 class StiTrack;
 class StiKalmanTrack;
+class StiDedxCalculator;
+class StiResidualCalc;
 
 class StiStEventFiller
 {
@@ -73,6 +80,10 @@ private:
     StEvent* mEvent;
     StiTrackContainer* mTrackStore;
     map<const StiKalmanTrack*, StTrackNode*> mTrkNodeMap;
+
+    StiDedxCalculator dEdxTpcCalculator;
+    StiDedxCalculator dEdxSvtCalculator;
+    StiResidualCalc   mResMaker;
 };
 
 #endif
