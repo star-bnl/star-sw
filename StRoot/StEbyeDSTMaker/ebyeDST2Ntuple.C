@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: ebyeDST2Ntuple.C,v 1.3 2000/09/15 16:41:38 jgreid Exp $
+ * $Id: ebyeDST2Ntuple.C,v 1.4 2000/09/15 22:19:04 jgreid Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *
@@ -17,6 +17,9 @@
  **********************************************************************
  *
  * $Log: ebyeDST2Ntuple.C,v $
+ * Revision 1.4  2000/09/15 22:19:04  jgreid
+ * made filename array larger in ebyeDST2Ntuple.C
+ *
  * Revision 1.3  2000/09/15 16:41:38  jgreid
  * bug fix in multiple file name handler
  *
@@ -74,7 +77,7 @@ void ebyeDST2Ntuple(char *dirname) {
   Char_t path_file[100];
   TString Tname;
   // must be big enough to handle dir listing!!!
-  Char_t file_list[100][256];
+  Char_t file_list[500][256];
 
   do {
     file_name = gSystem->GetDirEntry(dir);
