@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.4 1999/02/20 05:39:24 wenaus Exp $
+// $Id: doEvents.C,v 1.5 1999/02/24 23:21:19 wenaus Exp $
 // $Log: doEvents.C,v $
-// Revision 1.4  1999/02/20 05:39:24  wenaus
-// turn off TBrowser (gives bus errors) and don't count run header as an event
+// Revision 1.5  1999/02/24 23:21:19  wenaus
+// add ROOT file handling
+//
+// Revision 1.5  1999/02/24 23:21:19  wenaus
+// add ROOT file handling
 //
 // Revision 1.4  1999/02/20 05:39:24  wenaus
 // turn off TBrowser (gives bus errors) and don't count run header as an event
@@ -41,6 +44,7 @@ St_XDFFile* nextFile();
 // File-scope stuff needed by setFiles, nextFile. Someone ambitious
 // can clean this up by putting it all into a nice clean class.
 
+Int_t usePath = 0;
 Int_t nFile = 0;
 class St_FileSet;
 St_FileSet *dstDirs = 0;
@@ -51,61 +55,130 @@ St_DataSetIter* nextXdf;
 class St_XDFFile;
 St_XDFFile *theFile = 0;
 TString  originalPath;
+TFile *rootFile=0;  
 class StChain;
 const char *xdfFile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
 // If you specify a path, all *dst.xdf files below that path will be
 
 // If 'file ends in '.xdf', XDF DSTs are searched for.
 // If 'file ends in '.dst.root', ROOT DSTs are searched for.
-
+//
 // If path begins with '-', 'file' will be taken to be a single file
 // to be processed.
+//
+// example invocation:
+// .x doEvents.C(10,"-","/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/gstardata/psc0033_01_40evts.root")
 
 void doEvents(const Int_t nevents=999,
               const Char_t *path="-/disk00000/star/auau200/hijing135/",
-              const Char_t *file="/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
+              const Char_t *path="/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/set0019_01_49evts_dst.root")
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
-  //               const Char_t *file="/disk00000/star/auau200/hijing135/default/b0_20/year2x/hadronic_on/tfs_dst/pet213_02_190evts_h_dst.xdf")
+  //  const Char_t *file="/disk1/star/test/psc0049_08_40evts.root")
+  //  const Char_t *file="/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
+  //  const Char_t *file="/disk00000/star/auau200/hijing135/default/b0_20/year2x/hadronic_on/tfs_dst/pet213_02_190evts_h_dst.xdf")
 
 
 
+
+  StChain *chain=0;
   gSystem->Load("xdf2root");
   // Dynamically link needed shared libs
-  gSystem->Load("StSclRoot");
+  gSystem->Load("St_io_Maker");
+  St_io_Maker *rootIn=0;
+  gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
   gSystem->Load("StEventReaderMaker");
 //  gSystem->Load("StEventReaderMaker");
 //  gSystem->Load("St_geom_Maker");
-  // Set up the chain
-  StChain chain("StChain");
+//  gSystem->Load("StEventDisplayMaker");
+  theFileName = file;
+  int isRoot=0;
+  if ( (path[0] == '-') && (theFileName.Contains(".root")) ) {
+    cout << "Reading ROOT file" << endl;
+    rootFile = new TFile(file);
+    chain = new StChain("StChain");
+    rootIn = new St_io_Maker("Input","all");
+    isRoot=1;
+  } else {
+    chain = new StChain("StChain");
+    cout << "Reading XDF file" << endl;
+  }
+  //  St_geom_Maker *geom = new St_geom_Maker; // this maker open its own TFile !!!
   // Maker to read events from file or database into StEvent
   StEventReaderMaker readerMaker("events","title");
   // Sample analysis maker
   StAnalysisMaker analysisMaker("analysis","title");
 //  Event Display Maker
-  // Initialize chain
-  Int_t iInit = chain.Init();
-  if (iInit) chain.Fatal(iInit,"on init");
-
-  setFiles(path,file);
-
-  St_XDFFile *xdf_in = 0;
-  while (xdf_in = nextFile()) {
+  if (isRoot) {
+    // ROOT file handling -------------------------------
+    if (rootFile) {
+      tree=(TTree *)rootFile->Get("Output");
+    }
+    if (tree) {
+      cout << "Print tree" << endl;
+      tree->Print();
+      chain->SetTree(tree);
+      TObjArray *list = tree->GetListOfBranches();
+      if (list) {
+        TIter next(list);
+        TBranch *nextb = 0;
+        while (nextb = (TBranch *)next()) 
+          cout << "Branch: <"<< nextb->GetName() << ">;"
+               << "  File: <"<< nextb->GetFileName() << ">;"
+               << " Entries: " << nextb->GetEntries()
+               << "; Last event number: "<< nextb->GetEventNumber() << endl;
+      }
+    }
+    //    while (xdf_in = nextFile()) {
     // Open XDF file and pass to reader
-    xdf_in = new St_XDFFile(file,"r");
-    readerMaker.setXdfFile(xdf_in);
-
+    //      xdf_in = new St_XDFFile(file,"r");
+    //      readerMaker.setXdfFile(xdf_in);
+      
+    // Initialize chain
+    Int_t iInit = chain->Init();
+    if (iInit) chain->Fatal(iInit,"on init");
+    chain->PrintInfo();
     // Event loop
+    int istat;
     for (Int_t i=1; i<=nevents; i++) {
-      if (i == 1) chain.Make(0); // Read the run header
       cout << "============================ Event " << i << " start" << endl;
-      if (chain.Make(i)) break;
+      istat = chain->Make(i);
+      if (!istat) {
+        cout << "Event processed" << endl;
+        //        chain->DataSet("dst")->ls("*");
+      } else {
+        cout << "Last event processed" << endl;
+        St_DataSet *set = chain->DataSet("dst");
+        //        if (set) set->ls("*");
+        break;
+      }
       cout << "============================ Event " << i << " finish" << endl;
       if (i != nevents) chain->Clear();
     }
+  } else {
+    // XDF file handling ------------------------------------
+    // Initialize chain
+    Int_t iInit = chain->Init();
+    if (iInit) chain->Fatal(iInit,"on init");
+    setFiles(path,file);  
+    St_XDFFile *xdf_in = 0;
+    while (xdf_in = nextFile()) {
+      // Open XDF file and pass to reader
+      xdf_in = new St_XDFFile(file,"r");
+      readerMaker.setXdfFile(xdf_in);
+      
+      // Event loop
+      for (Int_t i=1; i<=nevents; i++) {
+        if (i == 1) chain->Make(0); // Read the run header
+        cout << "============================ Event " << i << " start" << endl;
+        if (chain->Make(i)) break;
+        cout << "============================ Event " << i << " finish" << endl;
+        if (i != nevents) chain->Clear();
+      }
+    }
   }
      chain->Clear();
-    chain.Finish();
+    cout << "============================ Event " << i << " finish" << endl;
   if (nevents > 1) {
     // results in bus errors at present // if (!b) b = new TBrowser;
       //       gROOT->LoadMacro("PadControlPanel.C");
