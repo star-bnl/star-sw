@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.hh,v 1.8 2000/02/18 22:47:36 posk Exp $
+// $Id: StFlowTagMaker.hh,v 1.9 2000/02/23 22:14:11 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -16,6 +16,9 @@
 //
 // History:
 // $Log: StFlowTagMaker.hh,v $
+// Revision 1.9  2000/02/23 22:14:11  posk
+// Renamed histograms to contain "Flow".
+//
 // Revision 1.8  2000/02/18 22:47:36  posk
 // Minor updates.
 //
@@ -80,9 +83,9 @@ public:
 
 private:
 
-  void         fillFlowTag();
-  Int_t        fillHistograms();
-  void         printTag(ostream& = cout);  // output Tag info to screen
+  void         FillFlowTag();
+  Int_t        FillHistograms();
+  void         PrintTag(ostream& = cout);  // output Tag info to screen
 
   St_FlowTag*  pSt_FlowTag; //! the StFlowTag table header
   FlowTag_st*  pFlowTag;    //! the StFlowTag table structure to fill

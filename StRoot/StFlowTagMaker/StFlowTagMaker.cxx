@@ -1,16 +1,19 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.15 2000/02/18 22:47:34 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.16 2000/02/23 22:14:08 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
 //////////////////////////////////////////////////////////////////////
 //
-// Description:  Maker to fill the Flow EbyE Tag database
+// Description:  Maker to Fill the Flow EbyE Tag database
 //
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.16  2000/02/23 22:14:08  posk
+// Renamed histograms to contain "Flow".
+//
 // Revision 1.15  2000/02/18 22:47:34  posk
 // Minor updates.
 //
@@ -93,13 +96,13 @@ Int_t StFlowTagMaker::Make() {
   pSt_FlowTag = NULL;
 
   // instantiate new St_FlowTag class
-  pSt_FlowTag = new St_FlowTag("FlowTag",1); // table header
+  pSt_FlowTag = new St_FlowTag("FlowTag",1);      // table header
   // set the size of the table
   pSt_FlowTag->SetNRows(1);
   // add FlowTag table to the root .data directory
   AddData(pSt_FlowTag,".data");
   // get a pointer to the c-struct containing the variables
-  pFlowTag = pSt_FlowTag->GetTable(); // table structure
+  pFlowTag = pSt_FlowTag->GetTable();             // table structure
 
   // print pointer to flowtag 
   if (Debug()) cout << "StTagPointer: " << pSt_FlowTag << endl;
@@ -109,16 +112,16 @@ Int_t StFlowTagMaker::Make() {
   StFlowMaker* pFlowMaker = (StFlowMaker*)GetMaker("Flow");
   if (pFlowMaker) pFlowEvent = pFlowMaker->FlowEventPointer();
   if (pFlowEvent && pFlowTag) {
-    fillFlowTag();    // fill the tag database
+    FillFlowTag();                                // fill the tag database
   } else {
     pFlowTag = NULL;
-    return kStOK;     // no StFlowEvent or no Tag pointer
+    return kStOK;                       // no StFlowEvent or no Tag pointer
   }
 
-  if (Debug()) printTag();
+  if (Debug()) PrintTag();
 
   // fill histograms from the Flow Tags
-  fillHistograms();
+  FillHistograms();
 
   return kStOK;
 }
@@ -126,13 +129,13 @@ Int_t StFlowTagMaker::Make() {
 //-------------------------------------------------------------
 
 void StFlowTagMaker::PrintInfo() {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.15 2000/02/18 22:47:34 posk Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.16 2000/02/23 22:14:08 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
 //-------------------------------------------------------------
 
-void StFlowTagMaker::printTag(ostream& os) {
+void StFlowTagMaker::PrintTag(ostream& os) {
   os << "##### Event-by-Event Flow Tag Table ---" << endl; 
   if (!pFlowTag) 
     os << "(empty FlowTag)" << endl;
@@ -175,58 +178,58 @@ Int_t StFlowTagMaker::Init() {
   const Float_t qMax      =  2.;
 
   for (int i = 0; i < nSels+nSubs; i++) {
-    TString *mHistTitle;
-    char mCountSubEvents[5];
-    sprintf(mCountSubEvents,"%d",i);
+    TString* histTitle;
+    char countSubEvents[5];
+    sprintf(countSubEvents,"%d",i);
 
     for (int j = 0; j < nHars; j++) {
-      char mCountHarmonics[5];
-      sprintf(mCountHarmonics,"%d",j);
+      char countHarmonics[5];
+      sprintf(countHarmonics,"%d",j);
 
-      mHistTitle = new TString("HistPsi");
-      mHistTitle->Append(*mCountSubEvents);
-      mHistTitle->Append("Harmonic");
-      mHistTitle->Append(*mCountHarmonics + 1);
+      histTitle = new TString("FlowPsi");
+      histTitle->Append(*countSubEvents);
+      histTitle->Append("Harmonic");
+      histTitle->Append(*countHarmonics + 1);
       histSubEvents[i].histHarmonics[j].mHistPsi =
-	new TH1F(mHistTitle->Data(), mHistTitle->Data(), nPsiBins,PsiMin,
+	new TH1F(histTitle->Data(), histTitle->Data(), nPsiBins, PsiMin,
 		 (PsiMax / (float)(j + 1)));
-      histSubEvents[i].histHarmonics[j].mHistPsi->SetXTitle("Psi");
+      histSubEvents[i].histHarmonics[j].mHistPsi->SetXTitle("Psi (rad)");
       histSubEvents[i].histHarmonics[j].mHistPsi->SetYTitle("Counts");
-      delete mHistTitle;
+      delete histTitle;
 
-      mHistTitle = new TString("HistMeanPt");
-      mHistTitle->Append(*mCountSubEvents);
-      mHistTitle->Append("Harmonic");
-      mHistTitle->Append(*mCountHarmonics + 1);
+      histTitle = new TString("FlowMeanPt");
+      histTitle->Append(*countSubEvents);
+      histTitle->Append("Harmonic");
+      histTitle->Append(*countHarmonics + 1);
       histSubEvents[i].histHarmonics[j].mHistMeanPt =
-	new TH1F(mHistTitle->Data(), mHistTitle->Data(), nMeanPtBins, MeanPtMin,
+	new TH1F(histTitle->Data(), histTitle->Data(), nMeanPtBins, MeanPtMin,
 		 MeanPtMax);
       histSubEvents[i].histHarmonics[j].mHistMeanPt->
-	SetXTitle("Mean Pt");
+	SetXTitle("Mean Pt (GeV)");
       histSubEvents[i].histHarmonics[j].mHistMeanPt->SetYTitle("Counts");
-      delete mHistTitle;
+      delete histTitle;
 
-      mHistTitle = new TString("HistMult");
-      mHistTitle->Append(*mCountSubEvents);
-      mHistTitle->Append("Harmonic");
-      mHistTitle->Append(*mCountHarmonics + 1);
+      histTitle = new TString("FlowMult");
+      histTitle->Append(*countSubEvents);
+      histTitle->Append("Harmonic");
+      histTitle->Append(*countHarmonics + 1);
       histSubEvents[i].histHarmonics[j].mHistMult =
-	new TH1D(mHistTitle->Data(), mHistTitle->Data(), nMultBins, MultMin,
+	new TH1D(histTitle->Data(), histTitle->Data(), nMultBins, MultMin,
 		 MultMax);
       histSubEvents[i].histHarmonics[j].mHistMult->
 	SetXTitle("Multiplicity");
       histSubEvents[i].histHarmonics[j].mHistMult->SetYTitle("Counts");
-      delete mHistTitle;
+      delete histTitle;
 
-      mHistTitle = new TString("Hist_q");
-      mHistTitle->Append(*mCountSubEvents);
-      mHistTitle->Append("Harmonic");
-      mHistTitle->Append(*mCountHarmonics + 1);
+      histTitle = new TString("Flow_q");
+      histTitle->Append(*countSubEvents);
+      histTitle->Append("Harmonic");
+      histTitle->Append(*countHarmonics + 1);
       histSubEvents[i].histHarmonics[j].mHist_q =
-	new TH1F(mHistTitle->Data(), mHistTitle->Data(), n_qBins,qMin,qMax);
+	new TH1F(histTitle->Data(), histTitle->Data(), n_qBins, qMin, qMax);
       histSubEvents[i].histHarmonics[j].mHist_q->SetXTitle("q (|Q|/sqrt N)");
       histSubEvents[i].histHarmonics[j].mHist_q->SetYTitle("Counts");
-      delete mHistTitle;
+      delete histTitle;
 
     }
   }
@@ -236,7 +239,7 @@ Int_t StFlowTagMaker::Init() {
 
 //-------------------------------------------------------------
 
-void StFlowTagMaker::fillFlowTag() {  
+void StFlowTagMaker::FillFlowTag() {  
   // Fill Tag table
 
   static const int& nHars = Flow::nHars;
@@ -282,7 +285,7 @@ void StFlowTagMaker::fillFlowTag() {
 
 //-------------------------------------------------------------
 
-Int_t StFlowTagMaker::fillHistograms() {
+Int_t StFlowTagMaker::FillHistograms() {
   // Fill histograms from Tag table
 
   static const int& nHars = Flow::nHars;
