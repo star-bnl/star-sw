@@ -9,11 +9,14 @@
 #ifndef WIN32
 #include <unistd.h>
 #endif
-#if !defined(sun) && !defined(WIN32) 
+  /* #if !defined(sun) && !defined(WIN32) 
 #include <strings.h>
 #else
 #include <string.h>
 #endif
+  */
+#include <string.h>
+
 #include <stdlib.h>
 #include "stic.h"
 #define FORTRANCOMMENTSIZE 277
@@ -91,9 +94,10 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.28 2001/07/16 23:58:34 fine Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.29 2003/09/30 17:24:47 starlib Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
+char VERSION[132];
 FILE *gFpH,*gFpInc,*gFile;
 FILE *yyin; /* declaration for yyin made by lex is removed in Makefile */
 /*********************************************************** prototypes */
@@ -219,10 +223,12 @@ void StandardBlurb(int fortranOrC,char *mode,FILE *ff) {
   }
   if(fortranOrC==1) {
     FF"C This file was made by the idl compiler \"stic\". Do not edit.\n");
+    FF"C This was generated for version %s\n",(VERSION[0]=='\0'?"(unspecified)":VERSION));
     FF"C Instead, edit the source idl file and then re-run the compiler.\n");
-    FF"C For help, type contact Craig Tull or Herb Ward.\n");
+    FF"C For help, type contact Craig Tull or Herb Ward.\n"); 
   } else if(fortranOrC==2) {
-    FF"/* This file was made by the idl compiler \"stic\". Do not edit.\n");
+    FF"/* This file was made by the idl compiler \"stic\". Do not edit.\n"); 
+    FF"** This was generated for version %s\n",(VERSION[0]=='\0'?"(unspecified)":VERSION));
     FF"** Instead, edit the source idl file and then re-run the compiler.\n");
     FF"** For help, type contact Craig Tull or Herb Ward. */\n");
   } else ERR;
@@ -1094,7 +1100,8 @@ void CheckForPamIdl(void) {
   }
 }
 void CheckThatAllTablesHaveBeenIncluded(void) {
-  int i,j; char ok,junk[10];
+  int i,j; 
+  char ok;
   for(i=0;i<gNmoduleTable;i++) {
     ok=0;
     for(j=0;j<gNinputTable;j++) {
@@ -1106,7 +1113,6 @@ void CheckThatAllTablesHaveBeenIncluded(void) {
       PP"for table\n");
       PP"type '%s', which is mentioned in %s.\n",
       gModuleTable[i],gOrigInputFile); 
-      /* PP"Press return to continue.   "); fgets(junk, 10, stdin); */
     }
   }
 }
@@ -1220,7 +1226,6 @@ void Init(void) {
   }
 }
 void Help(void) {
- char junk[88];
  P"For help is using STIC with STAF, write CETull@lbl.gov or\n");
  P"ward@physics.utexas.edu\n");
  Usage();
@@ -1251,6 +1256,7 @@ void Usage(void) {
   F"-t Produce only the template files.\n");
   F"-r Produce only the ROOT files.\n");
   F"-v Write version info to stdout, no other output is produced.\n");
+  F"-version XXX adds an arbitrary version XXX to the output file.\n");
   exit(2);
 }
 void OpenAllTblOutput(void) {
@@ -1356,6 +1362,11 @@ void ReadOptions(int nnn,char *aaa[]) {
     if(aaa[ii][0]=='-') {
            if(!strcmp(aaa[ii]+1,"dynamic")) gOptiondynamic=7;
       else if(!strcmp(aaa[ii]+1,"static"))  gOptionstatic=7;
+      else if(!strcmp(aaa[ii]+1,"version")){
+        ii++;
+        (void) strcpy(VERSION,aaa[ii]);
+        (void) printf("Got version %s\n",aaa[ii]);
+      }
       else if(aaa[ii][1]=='I') {
         if(gNincDir>INCDIR) TooManyIncs();
         strcpy(gIncDir[gNincDir++],aaa[ii]+2);
@@ -1478,8 +1489,11 @@ void FixVersionInfo(void) {
   strcpy(gCvsVersion,gCvsVersionRaw);
   for(ii=0;gCvsVersion[ii];ii++) if(gCvsVersion[ii]=='$') gCvsVersion[ii]=' ';
 }
+
 int main(int nnn,char *aaa[]) {
   int i;
+
+  VERSION[0]='\0';
   gNmoduleTable=0; gNinputTable=0; FixVersionInfo();
   gHaveSeen_STAFCV_T=0; gHaveSeen_amiModule=0; gHaveIncludedPamIdl=0;
   strncpy(gExeName,aaa[0],EXE); gNOutFile=0;
