@@ -26,7 +26,7 @@ StEmcMicroDstMaker::StEmcMicroDstMaker(const Char_t *name) : StMaker(name)
     
   mGFilter->setPtCut(0.0);
   mGFilter->setFitPointsCut(0);
-  mGFilter->setMustProjectEmc(kTRUE);
+  mGFilter->setMustProjectEmc(kFALSE);
     
   mPFilter->setPtCut(0.0);
   mPFilter->setFitPointsCut(0);
