@@ -1,5 +1,8 @@
-// $Id: St_geom_Maker.cxx,v 1.5 1998/12/16 20:56:24 fisyak Exp $
+// $Id: St_geom_Maker.cxx,v 1.6 1998/12/17 14:38:00 fisyak Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.6  1998/12/17 14:38:00  fisyak
+// Change default to no Higz window
+//
 // Revision 1.5  1998/12/16 20:56:24  fisyak
 // Add gstar to ROOT
 //
@@ -63,7 +66,7 @@
 #include "TCTUB.h"
 
 extern "C" void geant_     ();
-extern "C" void agmain_    (Int_t*,Int_t*);
+extern "C" void agmain_    (Int_t*,Int_t*,Int_t*);
 extern "C" void agxuser_   ();
 extern "C" void agxinit_   ();
 extern "C" void geometry_  ();
@@ -94,7 +97,8 @@ Int_t St_geom_Maker::Init(){
    printf (" calling agmain \n");
    Int_t nwg = 100000;
    Int_t nwp = 0;
-   agmain_(&nwg,&nwp); 
+   Int_t iwtyp = 0;
+   agmain_(&nwg,&nwp,&iwtyp); 
    Do("detp geometry field_only");
 
    geometry_();
@@ -116,7 +120,7 @@ Int_t St_geom_Maker::Make(){
 //_____________________________________________________________________________
 void St_geom_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geom_Maker.cxx,v 1.5 1998/12/16 20:56:24 fisyak Exp $\n");
+  printf("* $Id: St_geom_Maker.cxx,v 1.6 1998/12/17 14:38:00 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
