@@ -56,10 +56,9 @@ void Subject::detach(Observer* obs)
 
 void Subject::notify()
 {
-    // cout <<"Subject::notify()"<<endl;
-    for (ObserverVec::iterator it=mObservers.begin(); it!=mObservers.end(); ++it) {
-	(*it)->changed(this);
-    }
+  cout <<"Subject::notify()"<<endl;
+  for (ObserverVec::iterator it=mObservers.begin(); it!=mObservers.end(); ++it) 
+    (*it)->changed(this);
 }
 
 Observer::Observer()
@@ -73,3 +72,10 @@ Observer::Observer(Subject * subject)
 Observer::~Observer()
 {}
 
+void Observer::changed(Subject* changedSubject)
+{
+  if (changedSubject!=mSubject) 
+    cout <<"Observer::changed(Subject*) - ERROR - changedSubject!=mSubject"<<endl;
+  else 
+    getNewState();
+}

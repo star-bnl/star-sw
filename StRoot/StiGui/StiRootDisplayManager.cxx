@@ -88,10 +88,16 @@ void StiRootDisplayManager::draw()
 
 void StiRootDisplayManager::reset()
 {
+  cout << "StiRootDisplayManager::reset() - INFO - Starting" << endl;
   for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) 
     {
       if ((*it).second->canBeRemoved()) 
-	mmap.erase(it);
+	{
+	  //cout << "StiRootDisplayManager::reset() - INFO - Element to be removed" << endl;
+	  mmap.erase(it);
+	}
+      //cout << "StiRootDisplayManager::reset() - INFO - Element NOT removed" << endl;
+
     }
 }
 

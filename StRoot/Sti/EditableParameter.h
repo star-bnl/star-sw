@@ -20,7 +20,8 @@ class EditableParameter : public ConstrainedParameter
 		    double min, 
 		    double max,
 		    double increment,
-		    int    type);
+		    int    type,
+		    int    key);
   EditableParameter(const EditableParameter & parameter);
   virtual ~EditableParameter();
   
@@ -35,7 +36,8 @@ class EditableParameter : public ConstrainedParameter
 	      double min, 
 	      double max,
 	      double increment,
-	      int    type);
+	      int    type,
+	      int    key);
   void    reset();
 
  protected:
@@ -48,6 +50,7 @@ inline const EditableParameter & EditableParameter::operator=(const EditablePara
 {
   if (&parameter==this)
     return *this;  
+  _key      = parameter._key;
   _type      = parameter._type;
   _value     = parameter._value; 
   _minimum   = parameter._minimum;

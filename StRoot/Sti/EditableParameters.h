@@ -27,7 +27,8 @@ class EditableParameters : public Parameters, public Subject
 		   double min, 
 		   double max,
 		   double increment,
-		   int    type);
+		   int    type,
+		   int    key);
 };
 
 #endif  // !defined(EDITABLEPARAMETERS_H_INCLUDED_)

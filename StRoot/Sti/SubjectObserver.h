@@ -51,13 +51,14 @@ protected:
     Subject* mSubject;
 };
 
-inline void Observer::changed(Subject* changedSubject)
-{
+/*
+  inline void Observer::changed(Subject* changedSubject)
+  {
   if (changedSubject!=mSubject) 
-    cout <<"Observer::changed(Subject*) - ERROR - changedSubject!=mSubject"<<endl;
+  cout <<"Observer::changed(Subject*) - ERROR - changedSubject!=mSubject"<<endl;
   else 
-    getNewState();
-}
+  getNewState();
+  }*/
 
 inline void Observer::forgetSubject(Subject* obsolete)
 {

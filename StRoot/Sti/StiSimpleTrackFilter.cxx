@@ -21,93 +21,68 @@ StiSimpleTrackFilter::~StiSimpleTrackFilter()
 void StiSimpleTrackFilter::initialize()
 {
   parameterVector.clear();
-  add("Chi2Used", "Use Chi2",     false, Parameter::Boolean);
-  add("Chi2Min",  "Minimum Chi2", 0.,    Parameter::Double);
-  add("Chi2Max",  "Maximum Chi2", 20.,   Parameter::Double);
+  add("Chi2Used", "Use Chi2",     false, Parameter::Boolean, StiTrack::kChi2);
+  add("Chi2Min",  "Minimum Chi2", 0.,    Parameter::Double, StiTrack::kChi2);
+  add("Chi2Max",  "Maximum Chi2", 20.,   Parameter::Double, StiTrack::kChi2);
   
-  add("PtUsed",   "Use Pt",     false,   Parameter::Boolean);
-  add("PtMin",    "Minimum Pt", 0.1,     Parameter::Double);
-  add("PtMax",    "Maximum Pt", 10.,     Parameter::Double);
+  add("PtUsed",   "Use Pt",     false,   Parameter::Boolean, StiTrack::kPt);
+  add("PtMin",    "Minimum Pt", 0.1,     Parameter::Double, StiTrack::kPt);
+  add("PtMax",    "Maximum Pt", 10.,     Parameter::Double, StiTrack::kPt);
   
-  add("PUsed",    "Use P",     false,    Parameter::Boolean);
-  add("PMin",     "Minimum P", 0.,       Parameter::Double);
-  add("PMax",     "Maximum P", 10.,      Parameter::Double);
+  add("PUsed",    "Use P",     false,    Parameter::Boolean, StiTrack::kP);
+  add("PMin",     "Minimum P", 0.,       Parameter::Double, StiTrack::kP);
+  add("PMax",     "Maximum P", 10.,      Parameter::Double, StiTrack::kP);
   
-  add("EtaUsed",  "Use Eta",     false,  Parameter::Boolean);
-  add("EtaMin",   "Minimum Eta", -1.5,   Parameter::Double);
-  add("EtaMax",   "Maximum Eta",  1.5,   Parameter::Double);
+  add("EtaUsed",  "Use Eta",     false,  Parameter::Boolean, StiTrack::kPseudoRapidity);
+  add("EtaMin",   "Minimum Eta", -1.5,   Parameter::Double, StiTrack::kPseudoRapidity);
+  add("EtaMax",   "Maximum Eta",  1.5,   Parameter::Double, StiTrack::kPseudoRapidity);
   
-  add("nPtsUsed", "Use nPts",     false, Parameter::Boolean);
-  add("nPtsMin",  "Minimum nPts", 0.,    Parameter::Integer);
-  add("nPtsMax",  "Maximum nPts", 60.,   Parameter::Integer);
+  add("nPtsUsed", "Use nPts",     false, Parameter::Boolean, StiTrack::kPointCount);
+  add("nPtsMin",  "Minimum nPts", 0.,    Parameter::Integer, StiTrack::kPointCount);
+  add("nPtsMax",  "Maximum nPts", 60.,   Parameter::Integer, StiTrack::kPointCount);
 
-  add("nGapsUsed","Use nGaps",     false, Parameter::Boolean);
-  add("nGapsMin", "Minimum nGaps", 0.,    Parameter::Integer);
-  add("nGapsMax", "Maximum nGaps", 60.,   Parameter::Integer);
+  add("nGapsUsed","Use nGaps",     false, Parameter::Boolean, StiTrack::kGapCount);
+  add("nGapsMin", "Minimum nGaps", 0.,    Parameter::Integer, StiTrack::kGapCount);
+  add("nGapsMax", "Maximum nGaps", 60.,   Parameter::Integer, StiTrack::kGapCount);
 
-  add("NToNmaxPtsUsed", "Use NToNmaxPts",false, Parameter::Boolean);
-  add("NToNmaxPtsMin","Minimum NToNmaxPts",0.25, Parameter::Double);
-  add("NToNmaxPtsMax","Maximum NToNmaxPts",1.0 , Parameter::Double);
+  //add("NToNmaxPtsUsed", "Use NToNmaxPts",false, Parameter::Boolean, StiTrack::);
+  //add("NToNmaxPtsMin","Minimum NToNmaxPts",0.25, Parameter::Double, StiTrack::);
+  //add("NToNmaxPtsMax","Maximum NToNmaxPts",1.0 , Parameter::Double, StiTrack::);
 
-  add("PhiUsed",  "Use Phi",     false,  Parameter::Boolean);
-  add("PhiMin",   "Minimum Phi", 0.,     Parameter::Double);
-  add("PhiMax",   "Maximum Phi", 6.3,   Parameter::Double);
+  add("PhiUsed",  "Use Phi",     false,  Parameter::Boolean, StiTrack::kPhi);
+  add("PhiMin",   "Minimum Phi", 0.,     Parameter::Double, StiTrack::kPhi);
+  add("PhiMax",   "Maximum Phi", 6.3,   Parameter::Double, StiTrack::kPhi);
 }
 
 bool StiSimpleTrackFilter::accept(StiTrack * t) const
 {
-
-  int j=0;	double v;
-  if (parameterVector[j++]->getValue()) 
-    { 
-      v = t->getChi2();
-      if (v<parameterVector[j++]->getValue() || v>parameterVector[j++]->getValue())
-	return false;
-    }
-  if (parameterVector[j]->getValue()) 
+  cout << "StiSimpleTrackFilter::accept(StiTrack * t)  - INFO - Starting" << endl;
+  double v,low,high;
+  ParameterConstIterator iter = begin();
+  Parameter * parUse;
+  Parameter * parLow;
+  Parameter * parHi;
+  while (iter!=end())
     {
-      v = t->getPseudoRapidity();  
-      if (v<parameterVector[j++]->getValue() || v>parameterVector[j++]->getValue())
-	return false;
+      parUse = *iter; iter++;
+      parLow = *iter; iter++;
+      parHi  = *iter; iter++;
+      if (parUse&&parLow&&parHi)
+	{
+	  if (parUse->getValue())
+	    {
+	      v = t->getValue(parUse->getKey());
+	      low = parLow->getValue();
+	      high = parHi->getValue();
+	      if (v<low || v>high)
+		return false;
+	    }
+	}
+      else
+	{
+	  cout << "StiSimpleTrackFilter::accept(StiTrack * t) - INFO - Internal Error" << endl;
+	}
     }
-  if (parameterVector[j]->getValue()) 
-    { 
-      v = t->getPointCount();      
-      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
-	return false;
-    } 
-  if (parameterVector[j]->getValue()) 
-    {
-      v = t->getGapCount();
-      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
-	return false;
-    }
-  if (parameterVector[j]->getValue()) 
-    {
-      v = t->getPhi();     
-      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
-	return false;
-    }
-  if (parameterVector[j]->getValue()) 
-    { 
-      v = t->getPt();     
-      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
-	return false;
-    }
-  if (parameterVector[j]->getValue()) 
-    {
-      v = t->getP(); 
-      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
-	return false;
-    }
-  /*
-  if (parameterVector[j]->getValue()) 
-    { 
-      v = t->getNToNmaxPts();  
-      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue()) 
-	return false;
-    }
-  */
   return true;
 }
 

@@ -13,8 +13,9 @@ EditableParameter::EditableParameter(const string & name,
 				     double min, 
 				     double max,
 				     double increment,
-				     int    type)
-  : ConstrainedParameter(name,description,value,defaultValue,min,max,type),
+				     int    type,
+				     int    key)
+  : ConstrainedParameter(name,description,value,defaultValue,min,max,type,key),
     _increment(increment)
 {}
 
@@ -22,6 +23,7 @@ EditableParameter::EditableParameter(const EditableParameter & parameter)
 {
   _name        = parameter._name;
   _description = parameter._description;
+  _key       = parameter._key;
   _type      = parameter._type;
   _value     = parameter._value; 
   _minimum   = parameter._minimum;
@@ -40,10 +42,12 @@ void EditableParameter::set(const string & name,
 			    double min, 
 			    double max,
 			    double increment,
-			    int    type)
+			    int    type,
+			    int    key)
 {
   _name = name;
   _description = description; 
+  _key         = key;
   _type        = type;
   _value       = value;
   _default     = defaultValue;

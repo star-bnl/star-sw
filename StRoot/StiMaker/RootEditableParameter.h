@@ -16,7 +16,8 @@ class RootEditableParameter : public EditableParameter
 			double min, 
 			double max,
 			double increment,
-			int    type);
+			int    type,
+			int    key);
   RootEditableParameter(const string & name, const string & description);
   ~RootEditableParameter();
   

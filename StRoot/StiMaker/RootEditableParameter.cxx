@@ -13,8 +13,9 @@ RootEditableParameter::RootEditableParameter(const string & name,
 					     double min, 
 					     double max,
 					     double increment,
-					     int    type)
-  : EditableParameter(name,description,value,defaultValue,min,max,increment,type),
+					     int    type,
+					     int    key)
+  : EditableParameter(name,description,value,defaultValue,min,max,increment,type,key),
     _numberEntry(0),
     _checkButton(0)
 {}

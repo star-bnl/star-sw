@@ -27,7 +27,8 @@ class Parameters  : public Named, public Described
   virtual void add(const string & name, 
 		   const string & description,
 		   double value,
-		   int type);
+		   int    type,
+		   int    key);
   virtual void add(Parameter * parameter);
   Parameter * getParameter(const string name);
   ParameterIterator begin();

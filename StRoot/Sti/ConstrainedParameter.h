@@ -18,7 +18,8 @@ public:
                        double defaultValue, 
                        double min, 
                        double max, 
-                       int type=Double);
+                       int type=Double,
+		       int key=0);
   ConstrainedParameter(const ConstrainedParameter & parameter);
   virtual ~ConstrainedParameter();
   
@@ -35,7 +36,8 @@ public:
               double defaultValue, 
               double min, 
               double max, 
-              int type=Double);
+              int type=Double,
+	      int key=0);
 
 protected:
 
@@ -49,6 +51,7 @@ inline const ConstrainedParameter & ConstrainedParameter::operator=(const Constr
 {
   if (&parameter==this)
     return *this;
+  _key     = parameter._key;
   _type    = parameter._type;
   _value   = parameter._value; 
   _minimum = parameter._minimum;
@@ -114,8 +117,10 @@ inline  void ConstrainedParameter::set(double value,
 				       double defaultValue, 
 				       double min, 
 				       double max, 
-				       int type)
+				       int type,
+				       int key)
 {
+  _key = key;
   if (type==Double || type==Integer)
     {
       if (min<max)

@@ -68,3 +68,34 @@ bool StiTrack::find(int direction)
 {
   return trackFinder->find(this,direction);
 }
+
+
+double StiTrack::getValue(int key)
+{
+  double value;
+  switch (key)
+    {
+    case kCharge: value = getCharge(); break;
+    case kMass:   value = getMass(); break;
+    case kChi2: value = getChi2(); break;
+    case kDca2: value = 0.;break;// getDca2(); break;
+    case kDca3: value = 0.;break;// getDca3(); break;
+    case kFlag: value = getFlag(); break;
+    case kPointCount: value = getPointCount(); break;
+    case kFitPointCount: value = getFitPointCount(); break;
+    case kGapCount: value = getGapCount(); break;
+    case kTrackLength: value = getTrackLength(); break;
+    case kMaxPointCount: value = getMaxPointCount(); break;
+    case kTpcDedx: value = 0; break;
+    case kSvtDedx: value = 0; break;
+    case kCurvature: value = getCurvature(); break;
+    case kP: value = getP(); break;
+    case kPt: value = getPt(); break;
+    case kRapidity: value = getRapidity(); break;
+    case kPseudoRapidity: value = getPseudoRapidity(); break;
+    case kPhi: value = getPhi(); break;
+    case kTanL: value = getTanL(); break;
+    default: value = -999999.; break;
+    }
+  return value;  
+}

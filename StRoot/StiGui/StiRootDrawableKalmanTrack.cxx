@@ -52,7 +52,7 @@ void StiRootDrawableKalmanTrack::getNewState()
 
 void StiRootDrawableKalmanTrack::fillHitsForDrawing()
 {
-  cout<<"StiRootDrawableKalmanTrack::fillHitsForDrawing()"<<endl;
+  //cout<<"StiRootDrawableKalmanTrack::fillHitsForDrawing()"<<endl;
     //be sure to reset internal state
     _line->clear();
     _hits->clear();
@@ -114,10 +114,10 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
 
     //These get automatically removed from display each event
     //The display dynamically shrinks temp objects each event (tracks, hits, etc)
-    if (!_line->isAdded())
-	StiRootDisplayManager::instance()->addDrawable( _line );
-    if (!_hits->isAdded()) 
-	StiRootDisplayManager::instance()->addDrawable( _hits );
+    //if (!_line->isAdded())
+    StiRootDisplayManager::instance()->addDrawable( _line );
+    //if (!_hits->isAdded()) 
+    StiRootDisplayManager::instance()->addDrawable( _hits );
     return;
 }
 

@@ -24,13 +24,16 @@
 
 StiOptionFrame::StiOptionFrame(const TGWindow * p, 
 			       const TGWindow * main, 
-			       EditableParameters * parameters)
+			       EditableParameters * params)
   : TGTransientFrame(p, main, 10, 10, kHorizontalFrame)
 {
+  parameters = params;
+  //cout << "StiOptionFrame() - INFO - Starting" << endl;
     // build widgets
     frame1 = new TGVerticalFrame(this, 200, 300);
     layout1 = new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 2, 2, 2);
     AddFrame(frame1, layout1);
+    //cout << "StiOptionFrame() - INFO - frame1 added" << endl;
 
     layout2 = new TGLayoutHints(kLHintsCenterY | kLHintsRight, 2, 2, 2, 2);
     initialize();
@@ -41,19 +44,25 @@ StiOptionFrame::StiOptionFrame(const TGWindow * p,
     applyButton->Associate(this);
     frame2->AddFrame(applyButton, layout3);
     
+    //cout << "StiOptionFrame() - INFO - frame2 added" << endl;
+
     closeButton = new TGTextButton(frame2, " Close ", 1);
     closeButton->Associate(this);
     frame2->AddFrame(closeButton, layout3);
-    
+    //cout << "StiOptionFrame() - INFO - closeButton added" << endl;
+
     // set dialog box title
     SetWindowName(parameters->getName().c_str());
     SetIconName(parameters->getName().c_str());
     SetClassHints("Options", "Options");
+    //cout << "StiOptionFrame() - INFO - Window/Icon/Class hints added" << endl;
+
     // resize & move to center
     MapSubwindows();
     UInt_t width = GetDefaultWidth();
     UInt_t height = GetDefaultHeight();
     Resize(width, height);
+    //cout << "StiOptionFrame() - INFO - Resize done" << endl;
 
     Int_t ax;
     Int_t ay;
@@ -89,7 +98,9 @@ StiOptionFrame::StiOptionFrame(const TGWindow * p,
 
 void StiOptionFrame::initialize()
 {
+  //cout << "StiOptionFrame::initialize() - INFO - Starting" << endl;
   ParameterIterator it;
+  int num=0;
   for (it=parameters->begin();it!=parameters->end();it++)
     {
       RootEditableParameter * par = static_cast<RootEditableParameter *>(*it);
@@ -117,13 +128,20 @@ void StiOptionFrame::initialize()
 	  TGNumberEntry * numberEntry = new TGNumberEntry( frame.back() );
 	  par->setNumberEntry(numberEntry);
 	  numberEntry->SetNumber( par->getValue() );
-	  numberEntry->SetFormat(TGNumberFormat::kNESRealOne, 
-				 TGNumberFormat::kNEAPositive);
-	  numberEntry->SetLimits(TGNumberFormat::kNELLimitMinMax, 
-				 par->getMinimum(),
-				 par->getMaximum() );
+	  if (par->getType()==Parameter::Integer)
+	    {
+	      // Integer
+	      numberEntry->SetFormat(TGNumberFormat::kNESInteger, 
+				     TGNumberFormat::kNEAAnyNumber);
+	    }
+	  else
+	    {
+	      // Double 
+	      numberEntry->SetFormat(TGNumberFormat::kNESRealOne, 
+				     TGNumberFormat::kNEAAnyNumber);
+	    }
+	  numberEntry->SetLimits(TGNumberFormat::kNELLimitMinMax, par->getMinimum(),par->getMaximum() );
 	  numberEntry->Associate(this);
-
 	  frame.back()->AddFrame(numberEntry, layout2);
 	  fLabel.push_back( new TGLabel(frame.back(), par->getDescription().c_str() ));
 	  frame.back()->AddFrame(fLabel.back(), layout2);
@@ -159,6 +177,7 @@ void StiOptionFrame::closeWindow()
 
 void StiOptionFrame::apply()
 {
+  cout << "StiOptionFrame::apply() -  Applied Starting" << endl;
   ParameterIterator it;
   for (it=parameters->begin();it!=parameters->end();it++)
     {
@@ -168,6 +187,9 @@ void StiOptionFrame::apply()
       else
 	par->setValue(par->getNumberEntry()->GetNumber());
     }
+  // tell our observers we have changed!
+  cout << "StiOptionFrame::apply() -  Notify observers" << endl;
+  parameters->notify();
 }
 
 Bool_t StiOptionFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)

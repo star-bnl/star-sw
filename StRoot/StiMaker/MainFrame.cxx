@@ -121,7 +121,7 @@ ClassImp(MainFrame)
 	fFinishTrackButton(0), fFinishEventButton(0),
 	fNextEventButton(0)
 {
-    cout <<"MainFrame::MainFrame()"<<endl;
+  //cout <<"MainFrame::MainFrame()"<<endl;
     s_instance = this;
 
     // Create test main frame. A TGMainFrame is a top level window.
@@ -433,27 +433,17 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	      case M_McTrackFilterOptions: 
 		{
 		  StiRootSimpleTrackFilter * mcFilter;
-		  cout << "case M_McTrackFilterOptions: get Filter" << endl;
-		  StiTrackFinder * finder = StiToolkit::instance()->getTrackFinder();
-		  StiTrackFilter * filter = finder->getGuiMcTrackFilter();
-		  if (filter)
-		    cout << "filter OK" << endl;
-		  else
-		    cout << "filter is NULL" << endl;
+		  StiTrackFilter * filter = StiToolkit::instance()->getTrackFinder()->getGuiMcTrackFilter();
 		  mcFilter = dynamic_cast<StiRootSimpleTrackFilter *>(filter);
 		  if (mcFilter)
-		    {
-		      cout << "case M_McTrackFilterOptions: Start StiOptionFrame" << endl;
 		      new StiOptionFrame(fClient->GetRoot(), this, mcFilter);
-		      cout << "case M_McTrackFilterOptions: Done StiOptionFrame" << endl;
-		    }
 		  else
 		    cout << "case M_McTrackFilterOptions: Null mcFilter." << endl;
 		  break;
 		}
 	      case M_TrackFilterOptions: 
 		StiRootSimpleTrackFilter * filter;
-		filter = static_cast<StiRootSimpleTrackFilter *>(StiToolkit::instance()->getTrackFinder()->getGuiMcTrackFilter());
+		filter = static_cast<StiRootSimpleTrackFilter *>(StiToolkit::instance()->getTrackFinder()->getGuiTrackFilter());
 		new StiOptionFrame(fClient->GetRoot(), this, filter);
 		break;
 	      case M_LocalSeedFinderOptions: new LocalSeedFinderIO(fClient->GetRoot(), this);break;
