@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.7 2001/03/15 19:49:02 hardtke Exp $
+// $Id: StTpcT0Maker.cxx,v 1.8 2001/04/17 23:54:51 hardtke Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.8  2001/04/17 23:54:51  hardtke
+// add z Vertex contraint -- default to +-40cm
+//
 // Revision 1.7  2001/03/15 19:49:02  hardtke
 // Add diagnostic ntuple t0hist file
 //
@@ -60,6 +63,8 @@ StTpcT0Maker::StTpcT0Maker(const char *name):StMaker(name){
   New("StMatchMaker","match");
   New("StPrimaryMaker","primary");
   New("St_dst_Maker","dst");
+  zVertexMax = 40.0;
+  zVertexMin = -40.0;
   saveMk->cd();
 }
 //_____________________________________________________________________________
@@ -158,6 +163,12 @@ Int_t StTpcT0Maker::Make(){
   GetMaker("primary")->Clear();
   GetMaker("dst")->Clear();
   tcl->AllOn();
+  //check to see if event is OK
+  if (zVertexWest<zVertexMin||zVertexWest>zVertexMax){
+    gMessMgr->Info() << "StTpcT0Maker::Vertex out of range, skip event" << endm;
+    return kStOK;
+  }
+
   tcl->WestOff();
   tcl->Make();  
   GetMaker("tpc_tracks")->Make();
@@ -181,7 +192,7 @@ Int_t StTpcT0Maker::Make(){
      }    
     }
 
-    if (zVertexEast>-999&&zVertexWest>-999){
+    if (zVertexEast>-999&&zVertexWest>-999&&zVertexEast>zVertexMin&&zVertexEast<zVertexMax){
       t0current = (zVertexEast-zVertexWest)/(2*dvel_assumed) + t0guess;
       gMessMgr->Info() << "StTpcT0Maker::zVertexWest = " << zVertexWest << endm;
       gMessMgr->Info() << "StTpcT0Maker::zVertexEast = " << zVertexEast << endm;
@@ -244,7 +255,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.7 2001/03/15 19:49:02 hardtke Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.8 2001/04/17 23:54:51 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -296,5 +307,6 @@ void StTpcT0Maker::SetMaxRMS(float rms){maxRMS = rms;}
 int  StTpcT0Maker::GetValidityDate(){return date;}
 int  StTpcT0Maker::GetValidityTime(){return time;}
 void StTpcT0Maker::HistFileByDefault(){mHistOut = kTRUE;} 
-
+void StTpcT0Maker::SetVertexZmax(float zmax){zVertexMax = zmax;}
+void StTpcT0Maker::SetVertexZmin(float zmin){zVertexMin = zmin;}
 

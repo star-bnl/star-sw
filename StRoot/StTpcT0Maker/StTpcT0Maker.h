@@ -1,5 +1,8 @@
-// $Id: StTpcT0Maker.h,v 1.6 2001/03/15 19:49:02 hardtke Exp $
+// $Id: StTpcT0Maker.h,v 1.7 2001/04/17 23:54:51 hardtke Exp $
 // $Log: StTpcT0Maker.h,v $
+// Revision 1.7  2001/04/17 23:54:51  hardtke
+// add z Vertex contraint -- default to +-40cm
+//
 // Revision 1.6  2001/03/15 19:49:02  hardtke
 // Add diagnostic ntuple t0hist file
 //
@@ -55,9 +58,11 @@ class StTpcT0Maker : public StMaker {
    void SetMaxRMS(float RMS);  //maximum allowed RMS for t0 histogram 
    void WriteHistFile();       // Write out t0hist.root file with results
    void HistFileByDefault();   // Write out file on Finish
+   void SetVertexZmax(float zmax);  //Set max z vertex for t0 calculation
+   void SetVertexZmin(float zmin);  //Set min z vertex for t0 calculation
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.6 2001/03/15 19:49:02 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.7 2001/04/17 23:54:51 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
 
@@ -84,6 +89,8 @@ class StTpcT0Maker : public StMaker {
   float eventNumber;
   float T0HIST_MIN;
   float T0HIST_MAX;
+  float zVertexMax; //maximum allowed z vertex for t0 calculation
+  float zVertexMin; //minimum allowed z vertex for t0 calculation
   StTpcDb* theDb; //!
   int    date;
   int    time;
