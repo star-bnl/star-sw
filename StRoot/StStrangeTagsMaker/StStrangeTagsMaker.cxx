@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.13 1999/12/07 23:23:56 genevb Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.14 2000/01/27 19:29:50 fisyak Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.14  2000/01/27 19:29:50  fisyak
+ * Put StrangeTag to .data
+ *
  * Revision 1.13  1999/12/07 23:23:56  genevb
  * Fixed linux warnings
  *
@@ -69,7 +72,7 @@ StStrangeTagsMaker::StStrangeTagsMaker(const char *name, const char *title)
 
 StStrangeTagsMaker::~StStrangeTagsMaker()
 {
-    delete mTagTable;    // clean up
+    mTagTable = 0;    // clean up
 }
 
 Int_t StStrangeTagsMaker::Init()
@@ -85,13 +88,14 @@ Int_t StStrangeTagsMaker::Init()
 
 Int_t StStrangeTagsMaker::Make()
 {
-    delete mTagTable;
     mTagTable = new StrangeTag_st;
     mEvent = (StEvent *) GetInputDS("StEvent");
     if (!mEvent) return kStOK; // If no event, we're done
       
     fillTag();
-            
+    St_StrangeTag *StrangeTag = new St_StrangeTag("StrangeTag",1);
+    AddData(StrangeTag);
+    StrangeTag->AddAt(mTagTable,0);
     return kStOK;
 }
 
