@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.14 2002/05/23 18:54:09 posk Exp $
+// $Id: StFlowConstants.h,v 1.15 2003/01/10 16:41:51 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -25,9 +25,9 @@ class Flow{
     nSels        =   2,
     nSubs        =   2,
     nPhiBins     = 120,
-    nPhiBinsFtpc = 360,
-    //nEtaBins     = 90,
-    nEtaBins     = 30,
+    nPhiBinsFtpc = 120,
+    nEtaBins        = 90,
+    nEtaBinsTpcOnly = 30,
     nPtBins      = 40,
     nPtBinsPart  = 40,
     nCumulIntegOrders =   3, 
@@ -42,6 +42,8 @@ class Flow{
 
   static Float_t etaMin;
   static Float_t etaMax;
+  static Float_t etaMinTpcOnly;
+  static Float_t etaMaxTpcOnly;
   static Float_t ptMin;
   static Float_t ptMax;
   static Float_t ptMaxPart;
@@ -59,6 +61,20 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.15  2003/01/10 16:41:51  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.14  2002/05/23 18:54:09  posk
 // Moved centrality cuts into StFlowConstants
 //

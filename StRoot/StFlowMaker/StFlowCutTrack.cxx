@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.35 2002/06/12 22:36:42 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.36 2003/01/10 16:42:01 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -30,46 +30,51 @@ ClassImp(StFlowCutTrack)
 
 //-----------------------------------------------------------------------
 
-Int_t   StFlowCutTrack::mFitPtsTpcCuts[2]  = {15, 200};
-Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2] = {5, 11};     // greater than ten!
-Float_t StFlowCutTrack::mFitOverMaxCuts[2] = {0.52, 1.1}; // greater than one!
-Float_t StFlowCutTrack::mChiSqTpcCuts[2]   = {0., 0.};
-Float_t StFlowCutTrack::mChiSqFtpcCuts[2]  = {0., 0.};
-Float_t StFlowCutTrack::mDcaFtpcCuts[2]    = {0., 2.};
-Float_t StFlowCutTrack::mPtTpcCuts[2]      = {0.1, 8.};
-Float_t StFlowCutTrack::mPtFtpcCuts[2]     = {0.1, 8.};
-Float_t StFlowCutTrack::mEtaTpcCuts[2]     = {-1.3, 1.3};
-Int_t   StFlowCutTrack::mChgTpcCuts[2]     = {0, 0};
-Float_t StFlowCutTrack::mEtaFtpcCuts[4]    = {-0.2, -0.1, 0.1, 0.2};   // exclude FTPC tracks
-//Float_t StFlowCutTrack::mEtaFtpcCuts[4]    = {-4.0, -2.7, 2.7, 4.0}; // default settings to include FTPC tracks
+Int_t   StFlowCutTrack::mFitPtsTpcCuts[2]     = {15, 200};
+Float_t StFlowCutTrack::mFitOverMaxCuts[2]    = {0.52, 1.1}; // greater than one!
+Float_t StFlowCutTrack::mChiSqTpcCuts[2]      = {0., 0.};
+Float_t StFlowCutTrack::mPtTpcCuts[2]         = {0.1, 8.};
+Float_t StFlowCutTrack::mEtaTpcCuts[2]        = {-1.3, 1.3};
+Int_t   StFlowCutTrack::mChgTpcCuts[2]        = {0, 0};
 
-UInt_t  StFlowCutTrack::mTrackN            = 0;     
-UInt_t  StFlowCutTrack::mTpcTrackN         = 0;     
-UInt_t  StFlowCutTrack::mFtpcTrackN        = 0;     
-UInt_t  StFlowCutTrack::mFtpcWestTrackN    = 0;     
-UInt_t  StFlowCutTrack::mFtpcEastTrackN    = 0;     
-UInt_t  StFlowCutTrack::mGoodTrackN        = 0;
-UInt_t  StFlowCutTrack::mGoodTpcTrackN     = 0;
-UInt_t  StFlowCutTrack::mGoodFtpcTrackN    = 0;
-UInt_t  StFlowCutTrack::mEtaSymPosN        = 0;     
-UInt_t  StFlowCutTrack::mEtaSymNegN        = 0;     
-UInt_t  StFlowCutTrack::mEtaSymPosTpcN     = 0;     
-UInt_t  StFlowCutTrack::mEtaSymNegTpcN     = 0;     
-UInt_t  StFlowCutTrack::mEtaSymPosFtpcN    = 0;     
-UInt_t  StFlowCutTrack::mEtaSymNegFtpcN    = 0;     
-UInt_t  StFlowCutTrack::mFitPtsTpcCutN     = 0;
-UInt_t  StFlowCutTrack::mFitPtsFtpcCutN    = 0;
-UInt_t  StFlowCutTrack::mFitOverMaxCutN    = 0;
-UInt_t  StFlowCutTrack::mFitOverMaxTpcCutN = 0;
-UInt_t  StFlowCutTrack::mFitOverMaxFtpcCutN= 0;
-UInt_t  StFlowCutTrack::mChiSqTpcCutN      = 0;
-UInt_t  StFlowCutTrack::mChiSqFtpcCutN     = 0;
-UInt_t  StFlowCutTrack::mDcaFtpcCutN       = 0;
-UInt_t  StFlowCutTrack::mPtTpcCutN         = 0;
-UInt_t  StFlowCutTrack::mPtFtpcCutN        = 0;
-UInt_t  StFlowCutTrack::mEtaTpcCutN        = 0;
-UInt_t  StFlowCutTrack::mChgTpcCutN        = 0;
-UInt_t  StFlowCutTrack::mEtaFtpcCutN       = 0;
+Bool_t  StFlowCutTrack::mFtpcTrackCut         = kTRUE;
+Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2]    = {5, 11};     // greater than ten!
+Float_t StFlowCutTrack::mChiSqFtpcCuts[2]     = {0., 0.};
+Float_t StFlowCutTrack::mDcaFtpcCuts[2]       = {0., 0.};
+Float_t StFlowCutTrack::mDcaGlobalFtpcCuts[2] = {0., 2.};
+Float_t StFlowCutTrack::mPtFtpcCuts[2]        = {0.1, 8.};
+Float_t StFlowCutTrack::mEtaFtpcCuts[4]       = {-4.0, -2.5, 2.5, 4.0};
+Int_t   StFlowCutTrack::mChgFtpcCuts[2]       = {0, 0};
+
+UInt_t  StFlowCutTrack::mTrackN             = 0;     
+UInt_t  StFlowCutTrack::mTpcTrackN          = 0;     
+UInt_t  StFlowCutTrack::mFtpcTrackN         = 0;     
+UInt_t  StFlowCutTrack::mFtpcWestTrackN     = 0;     
+UInt_t  StFlowCutTrack::mFtpcEastTrackN     = 0;     
+UInt_t  StFlowCutTrack::mGoodTrackN         = 0;
+UInt_t  StFlowCutTrack::mGoodTpcTrackN      = 0;
+UInt_t  StFlowCutTrack::mGoodFtpcTrackN     = 0;
+UInt_t  StFlowCutTrack::mEtaSymPosTpcN      = 0;     
+UInt_t  StFlowCutTrack::mEtaSymNegTpcN      = 0;     
+UInt_t  StFlowCutTrack::mEtaSymPosFtpcN     = 0;     
+UInt_t  StFlowCutTrack::mEtaSymNegFtpcN     = 0;     
+UInt_t  StFlowCutTrack::mFitPtsTpcCutN      = 0;
+UInt_t  StFlowCutTrack::mFitPtsFtpcCutN     = 0;
+UInt_t  StFlowCutTrack::mFitOverMaxCutN     = 0;
+UInt_t  StFlowCutTrack::mFitOverMaxTpcCutN  = 0;
+UInt_t  StFlowCutTrack::mFitOverMaxFtpcCutN = 0;
+UInt_t  StFlowCutTrack::mChiSqTpcCutN       = 0;
+UInt_t  StFlowCutTrack::mChiSqFtpcCutN      = 0;
+UInt_t  StFlowCutTrack::mDcaFtpcCutN        = 0;
+UInt_t  StFlowCutTrack::mDcaGlobalFtpcCutN  = 0;
+UInt_t  StFlowCutTrack::mPtTpcCutN          = 0;
+UInt_t  StFlowCutTrack::mPtFtpcCutN         = 0;
+UInt_t  StFlowCutTrack::mEtaTpcCutN         = 0;
+UInt_t  StFlowCutTrack::mChgTpcCutN         = 0;
+UInt_t  StFlowCutTrack::mEtaFtpcCutN        = 0;
+UInt_t  StFlowCutTrack::mFtpcTrackCutN      = 0;
+UInt_t  StFlowCutTrack::mChgFtpcCutN        = 0;
+
 
 //-----------------------------------------------------------------------
 
@@ -92,27 +97,34 @@ Int_t StFlowCutTrack::CheckTrack(StTrack* pTrack) {
   float charge = pTrack->geometry()->charge();
   float eta = p.pseudoRapidity();
   float dca = pTrack->impactParameter();
+  float dcaGlobal = pTrack->node()->track(global)->impactParameter();  
   float pt = p.perp();
   float chiSq = (float)(pTrack->fitTraits().chi2());
   Int_t nFitPoints = pTrack->fitTraits().numberOfFitPoints();
   Int_t nMaxPoints = pTrack->numberOfPossiblePoints();
   float fitOverMax = (nMaxPoints) ? (float)(nFitPoints-1)/(float)nMaxPoints : 0.0;
+  StTrackTopologyMap map = pTrack->topologyMap();
 
-  if (pTrack->topologyMap().numberOfHits(kTpcId) || // Tpc track, or no topologyMap
-      (pTrack->topologyMap().data(0) == 0 && pTrack->topologyMap().data(1) == 0)) {
+  if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) { 
+    // Tpc track, or no topologyMap
       mTpcTrackN++;
-  } else if (pTrack->topologyMap().numberOfHits(kFtpcEastId)) {
+  } else if (map.trackFtpcEast()) {
       mFtpcTrackN++;
       mFtpcEastTrackN++;
-  } else if (pTrack->topologyMap().numberOfHits(kFtpcWestId)) {
+  } else if (map.trackFtpcWest()) {
       mFtpcTrackN++;
       mFtpcWestTrackN++;
   }
 
   mTrackN++;
   
- if (pTrack->topologyMap().numberOfHits(kTpcId) || // Tpc track, or no topologyMap
-      (pTrack->topologyMap().data(0) == 0 && pTrack->topologyMap().data(1) == 0)) {
+  if ((map.trackFtpcEast() || map.trackFtpcWest()) && mFtpcTrackCut) {
+    mFtpcTrackCutN++;
+    return kFALSE;
+  }
+
+  if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) { 
+    // Tpc track, or no topologyMap
 
     // pt
     if (mPtTpcCuts[1] > mPtTpcCuts[0] && 
@@ -157,24 +169,30 @@ Int_t StFlowCutTrack::CheckTrack(StTrack* pTrack) {
       return kFALSE;
     }
 
-
     // Increment counters for Eta symmetry cut
     if (eta > 0.) { 
       mEtaSymPosTpcN++;
-      mEtaSymPosN++;
     } else { 
       mEtaSymNegTpcN++; 
-      mEtaSymNegN++; 
     }
     
     mGoodTpcTrackN++;
-  } else if (pTrack->topologyMap().numberOfHits(kFtpcEastId) || 
-	     pTrack->topologyMap().numberOfHits(kFtpcWestId)) { // Ftpc track
-      
+  } 
+
+  else if (map.trackFtpcEast() || map.trackFtpcWest()) {
+    // Ftpc track
+     
     // dca
     if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
 	(dca < mDcaFtpcCuts[0] || dca >= mDcaFtpcCuts[1])) {
       mDcaFtpcCutN++;
+      return kFALSE;
+    }
+    
+    // dca global
+    if (mDcaGlobalFtpcCuts[1] > mDcaGlobalFtpcCuts[0] && 
+	(dcaGlobal < mDcaGlobalFtpcCuts[0] || dcaGlobal >= mDcaGlobalFtpcCuts[1])) {
+      mDcaGlobalFtpcCutN++;
       return kFALSE;
     }
     
@@ -215,14 +233,19 @@ Int_t StFlowCutTrack::CheckTrack(StTrack* pTrack) {
       mEtaFtpcCutN++;
       return kFALSE;
     }
+
+    // charge
+    if (mChgFtpcCuts[1] > mChgFtpcCuts[0] && 
+	(charge < mChgFtpcCuts[0] || charge > mChgFtpcCuts[1])) {
+      mChgFtpcCutN++;
+      return kFALSE;
+    }
     
     // Increment counters for Eta symmetry cut
     if (eta > 0.) {
       mEtaSymPosFtpcN++;
-      mEtaSymPosN++;
     } else {
       mEtaSymNegFtpcN++; 
-      mEtaSymNegN++; 
     }
     
     mGoodFtpcTrackN++;
@@ -242,29 +265,35 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
   float charge =  (float) (pPicoTrack->Charge());
   float eta = pPicoTrack->Eta();
   float dca = pPicoTrack->Dca();
+  float dcaGlobal = pPicoTrack->DcaGlobal();
   float pt = pPicoTrack->Pt();
   float chiSq = pPicoTrack->Chi2();
   Int_t nFitPoints = pPicoTrack->FitPts();
   Int_t nMaxPoints = pPicoTrack->MaxPts();
   float fitOverMax = (nMaxPoints) ? (float)(nFitPoints-1)/(float)nMaxPoints : 0.0;
-  StTrackTopologyMap map(pPicoTrack->TopologyMap0(),pPicoTrack->TopologyMap1());
+  StTrackTopologyMap map(pPicoTrack->TopologyMap0(), pPicoTrack->TopologyMap1());
 
-  if (map.numberOfHits(kTpcId) || // Tpc track, or no topologyMap
-      (map.data(0) == 0 && map.data(1) == 0)) {
+  if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) {
+    // Tpc track, or no topologyMap
       mTpcTrackN++;
-  } else if (map.numberOfHits(kFtpcEastId)) {
+  } else if (map.trackFtpcEast()) {
       mFtpcTrackN++;
       mFtpcEastTrackN++;
-  } else if (map.numberOfHits(kFtpcWestId)) {
+  } else if (map.trackFtpcWest()) {
       mFtpcTrackN++;
       mFtpcWestTrackN++;
   }
 
   mTrackN++;
       
-  if (map.numberOfHits(kTpcId) || // Tpc track, or no topologyMap
-      (map.data(0) == 0 && map.data(1) == 0)) {
-      
+  if ((map.trackFtpcEast() || map.trackFtpcWest()) && mFtpcTrackCut) {
+    mFtpcTrackCutN++;
+    return kFALSE;
+  }
+
+  if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) {
+    // Tpc track, or no topologyMap      
+    
     // pt
     if (mPtTpcCuts[1] > mPtTpcCuts[0] && 
 	(pt < mPtTpcCuts[0] || pt >= mPtTpcCuts[1])) {
@@ -301,31 +330,37 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
       return kFALSE;
     }
 
-   // charge
+    // charge
     if (mChgTpcCuts[1] > mChgTpcCuts[0] && 
 	(charge < mChgTpcCuts[0] || charge > mChgTpcCuts[1])) {
       mChgTpcCutN++;
       return kFALSE;
     }
-
       
     // Increment counters for Eta symmetry cut
     if (eta > 0.) { 
       mEtaSymPosTpcN++;
-      mEtaSymPosN++;
     } else { 
       mEtaSymNegTpcN++;
-      mEtaSymNegN++;
     }
       
     mGoodTpcTrackN++;
-  } else if (map.numberOfHits(kFtpcEastId) || 
-	     map.numberOfHits(kFtpcWestId)) { // Ftpc track
+  } 
+
+  else if (map.trackFtpcEast() || map.trackFtpcWest()) { 
+    // Ftpc track
       
     // dca
     if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
 	(dca < mDcaFtpcCuts[0] || dca >= mDcaFtpcCuts[1])) {
       mDcaFtpcCutN++;
+      return kFALSE;
+    }
+
+    // dca global
+    if (mDcaGlobalFtpcCuts[1] > mDcaGlobalFtpcCuts[0] && 
+	(dcaGlobal < mDcaGlobalFtpcCuts[0] || dcaGlobal >= mDcaGlobalFtpcCuts[1])) {
+      mDcaGlobalFtpcCutN++;
       return kFALSE;
     }
 
@@ -366,14 +401,19 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
       mEtaFtpcCutN++;
       return kFALSE;
     }
-      
+    
+    // charge
+    if (mChgFtpcCuts[1] > mChgFtpcCuts[0] && 
+	(charge < mChgFtpcCuts[0] || charge > mChgFtpcCuts[1])) {
+      mChgFtpcCutN++;
+      return kFALSE;
+    }
+    
     // Increment counters for Eta symmetry cut
     if (eta > 0.) { 
       mEtaSymPosFtpcN++;
-      mEtaSymPosN++;
     } else { 
       mEtaSymNegFtpcN++;
-      mEtaSymNegN++;
     }
       
     mGoodFtpcTrackN++;
@@ -393,6 +433,7 @@ Int_t StFlowCutTrack::CheckTrack(StMuTrack* pMuTrack) {
   float charge =  (float) (pMuTrack->charge());
   float eta = pMuTrack->eta();
   float dca = pMuTrack->dca().mag();
+  float dcaGlobal = pMuTrack->dcaGlobal().mag();
   float pt = pMuTrack->pt();
   float chiSq = pMuTrack->chi2xy(); 
   Int_t nFitPoints = pMuTrack->nHitsFit();
@@ -400,21 +441,26 @@ Int_t StFlowCutTrack::CheckTrack(StMuTrack* pMuTrack) {
   float fitOverMax = (nMaxPoints) ? (float)(nFitPoints-1)/(float)nMaxPoints : 0.0;
   StTrackTopologyMap map(pMuTrack->topologyMap());
 
-  if (map.numberOfHits(kTpcId) || // Tpc track, or no topologyMap
-      (map.data(0) == 0 && map.data(1) == 0)) {
+  if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) { 
+    // Tpc track, or no topologyMap
       mTpcTrackN++;
-  } else if (map.numberOfHits(kFtpcEastId)) {
+  } else if (map.trackFtpcEast()) {
       mFtpcTrackN++;
       mFtpcEastTrackN++;
-  } else if (map.numberOfHits(kFtpcWestId)) {
+  } else if (map.trackFtpcWest()) {
       mFtpcTrackN++;
       mFtpcWestTrackN++;
   }
 
   mTrackN++;
       
-  if (map.numberOfHits(kTpcId) || // Tpc track, or no topologyMap
-      (map.data(0) == 0 && map.data(1) == 0)) {
+  if ((map.trackFtpcEast() || map.trackFtpcWest()) && mFtpcTrackCut) {
+    mFtpcTrackCutN++;
+    return kFALSE;
+  }
+
+  if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) { 
+    // Tpc track, or no topologyMap
       
     // pt
     if (mPtTpcCuts[1] > mPtTpcCuts[0] && 
@@ -452,7 +498,7 @@ Int_t StFlowCutTrack::CheckTrack(StMuTrack* pMuTrack) {
       return kFALSE;
     }
 
-   // charge
+    // charge
     if (mChgTpcCuts[1] > mChgTpcCuts[0] && 
         (charge < mChgTpcCuts[0] || charge > mChgTpcCuts[1])) {
       mChgTpcCutN++;
@@ -462,20 +508,27 @@ Int_t StFlowCutTrack::CheckTrack(StMuTrack* pMuTrack) {
     // Increment counters for Eta symmetry cut
     if (eta > 0.) { 
       mEtaSymPosTpcN++;
-      mEtaSymPosN++;
     } else { 
       mEtaSymNegTpcN++;
-      mEtaSymNegN++;
     }
       
     mGoodTpcTrackN++;
-  } else if (map.numberOfHits(kFtpcEastId) || 
-             map.numberOfHits(kFtpcWestId)) { // Ftpc track
+  } 
+
+  else if (map.trackFtpcEast() || map.trackFtpcWest()) {
+    // Ftpc track
       
     // dca
     if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
         (dca < mDcaFtpcCuts[0] || dca >= mDcaFtpcCuts[1])) {
       mDcaFtpcCutN++;
+      return kFALSE;
+    }
+
+    // dca global
+    if (mDcaGlobalFtpcCuts[1] > mDcaGlobalFtpcCuts[0] && 
+        (dcaGlobal < mDcaGlobalFtpcCuts[0] || dcaGlobal >= mDcaGlobalFtpcCuts[1])) {
+      mDcaGlobalFtpcCutN++;
       return kFALSE;
     }
 
@@ -517,13 +570,18 @@ Int_t StFlowCutTrack::CheckTrack(StMuTrack* pMuTrack) {
       return kFALSE;
     }
       
+    // charge
+    if (mChgFtpcCuts[1] > mChgFtpcCuts[0] && 
+	(charge < mChgFtpcCuts[0] || charge > mChgFtpcCuts[1])) {
+      mChgFtpcCutN++;
+      return kFALSE;
+    }
+
     // Increment counters for Eta symmetry cut
     if (eta > 0.) { 
       mEtaSymPosFtpcN++;
-      mEtaSymPosN++;
     } else { 
       mEtaSymNegFtpcN++;
-      mEtaSymNegN++;
     }
       
     mGoodFtpcTrackN++;
@@ -546,10 +604,6 @@ void StFlowCutTrack::PrintCutList() {
   cout << "#   FitPts (Tpc) cuts= " << mFitPtsTpcCuts[0] << ", " << mFitPtsTpcCuts[1] 
        << " :\t " << setprecision(3) << (float)mFitPtsTpcCutN/(float)mTrackN/perCent 
        << "%\t (" << setprecision(3) << (float)mFitPtsTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
-  cout << "#   FitPts (Ftpc) cuts= " << mFitPtsFtpcCuts[0] << ", " << mFitPtsFtpcCuts[1] 
-       << " :\t\t " << setprecision(3) << (float)mFitPtsFtpcCutN/(float)mTrackN/perCent 
-       << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mFitPtsFtpcCutN/(float)mFtpcTrackN/perCent) 
-       << "% Ftpc) cut" << endl;
   cout << "#   FitOverMax cuts= " << mFitOverMaxCuts[0] << ", " << mFitOverMaxCuts[1]
        << " :\t " << setprecision(3) << (float)mFitOverMaxCutN/(float)mTrackN/perCent
        << "%\t (" << setprecision(3) << (float)mFitOverMaxTpcCutN/(float)mTpcTrackN/perCent << "% Tpc, "
@@ -558,6 +612,28 @@ void StFlowCutTrack::PrintCutList() {
   cout << "#   ChiSq (Tpc) cuts= " << mChiSqTpcCuts[0] << ", " << mChiSqTpcCuts[1]
        << " :\t\t " << setprecision(3) << (float)mChiSqTpcCutN/(float)mTrackN/perCent
        << "%\t (" << setprecision(3) << (float)mChiSqTpcCutN/(float)mTpcTrackN/perCent  <<"% Tpc) cut" << endl;
+  cout << "#   Pt (Tpc) cuts= " << mPtTpcCuts[0] << ", " << mPtTpcCuts[1]
+       << " :\t\t " << setprecision(3) << (float)mPtTpcCutN/(float)mTrackN/perCent
+       << "%\t (" << setprecision(3) << (float)mPtTpcCutN/(float)mTpcTrackN/perCent  <<"% Tpc) cut" << endl;
+  cout << "#   Eta (Tpc) cuts= " << mEtaTpcCuts[0] << ", " << mEtaTpcCuts[1]
+       << " :\t\t " << setprecision(3) << (float)mEtaTpcCutN/(float)mTrackN/perCent
+       << "%\t (" << setprecision(3) << (float)mEtaTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
+  cout << "#   Chg (Tpc) cuts= " << mChgTpcCuts[0] << ", " << mChgTpcCuts[1]
+       << " :\t\t " << setprecision(3) << (float)mChgTpcCutN/(float)mTrackN/perCent
+       << "%\t (" << setprecision(3) << (float)mChgTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
+
+  if (mFtpcTrackCut) {
+    cout << "# Include Ftpc tracks= FALSE :\t\t ";
+  } 
+  else {
+    cout << "# Include Ftpc tracks= TRUE :\t\t ";
+  }
+  cout << setprecision(3) << (float)mFtpcTrackCutN/(float)mTrackN/perCent << "%\t (" 
+       << setprecision(3) << (float)mFtpcTrackCutN/(float)mFtpcTrackN/perCent << "% Ftpc) cut" << endl;
+  cout << "#   FitPts (Ftpc) cuts= " << mFitPtsFtpcCuts[0] << ", " << mFitPtsFtpcCuts[1] 
+       << " :\t\t " << setprecision(3) << (float)mFitPtsFtpcCutN/(float)mTrackN/perCent 
+       << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mFitPtsFtpcCutN/(float)mFtpcTrackN/perCent) 
+       << "% Ftpc) cut" << endl;
   cout << "#   ChiSq (Ftpc) cuts= " << mChiSqFtpcCuts[0] << ", " << mChiSqFtpcCuts[1]
        << " :\t\t " << setprecision(3) << (float)mChiSqFtpcCutN/(float)mTrackN/perCent
        << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mChiSqFtpcCutN/(float)mFtpcTrackN/perCent)  
@@ -566,25 +642,22 @@ void StFlowCutTrack::PrintCutList() {
        << " :\t\t " << setprecision(3) << (float)mDcaFtpcCutN/(float)mTrackN/perCent
        << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mDcaFtpcCutN/(float)mFtpcTrackN/perCent)  
        <<"% Ftpc) cut" << endl;
-  cout << "#   Pt (Tpc) cuts= " << mPtTpcCuts[0] << ", " << mPtTpcCuts[1]
-       << " :\t\t " << setprecision(3) << (float)mPtTpcCutN/(float)mTrackN/perCent
-       << "%\t (" << setprecision(3) << (float)mPtTpcCutN/(float)mTpcTrackN/perCent  <<"% Tpc) cut" << endl;
+  cout << "#   Dca global (Ftpc) cuts= " << mDcaGlobalFtpcCuts[0] << ", " << mDcaGlobalFtpcCuts[1]
+       << " :\t " << setprecision(3) << (float)mDcaGlobalFtpcCutN/(float)mTrackN/perCent
+       << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mDcaGlobalFtpcCutN/(float)mFtpcTrackN/perCent)  
+       <<"% Ftpc) cut" << endl;
   cout << "#   Pt (Ftpc) cuts= " << mPtFtpcCuts[0] << ", " << mPtFtpcCuts[1]
        << " :\t\t " << setprecision(3) << (float)mPtFtpcCutN/(float)mTrackN/perCent
        << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mPtFtpcCutN/(float)mFtpcTrackN/perCent)  
        << "% Ftpc) cut" << endl;
-  cout << "#   Eta (Tpc) cuts= " << mEtaTpcCuts[0] << ", " << mEtaTpcCuts[1]
-       << " :\t\t " << setprecision(3) << (float)mEtaTpcCutN/(float)mTrackN/perCent
-       << "%\t (" << setprecision(3) << (float)mEtaTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
- cout << "#   Chg (Tpc) cuts= " << mChgTpcCuts[0] << ", " << mChgTpcCuts[1]
-       << " :\t\t " << setprecision(3) << (float)mChgTpcCutN/(float)mTrackN/perCent
-       << "%\t (" << setprecision(3) << (float)mChgTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
-
   cout << "#   Eta (Ftpc) cuts= " << mEtaFtpcCuts[0] << ", " << mEtaFtpcCuts[1]
        << "; " << mEtaFtpcCuts[2] << ", " << mEtaFtpcCuts[3] 
        << " :\t " << setprecision(3) << (float)mEtaFtpcCutN/(float)mTrackN/perCent
        << "%\t (" << setprecision(3) << ((mFtpcTrackN == 0)?0.:(float)mEtaFtpcCutN/(float)mFtpcTrackN/perCent) 
        << "% Ftpc) cut" << endl;
+  cout << "#   Chg (Ftpc) cuts= " << mChgFtpcCuts[0] << ", " << mChgFtpcCuts[1]
+       << " :\t\t " << setprecision(3) << (float)mChgFtpcCutN/(float)mTrackN/perCent
+       << "%\t (" << setprecision(3) << (float)mChgFtpcCutN/(float)mFtpcTrackN/perCent << "% Ftpc) cut" << endl;
   cout << "# Good Tpc Tracks =\t " << (float)mGoodTpcTrackN/(float)mTpcTrackN/perCent
        << "%" << endl;
   cout << "# Good Ftpc Tracks =\t " << ((mFtpcTrackN == 0)?0.:(float)mGoodFtpcTrackN/(float)mFtpcTrackN/perCent)
@@ -598,6 +671,20 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.36  2003/01/10 16:42:01  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.35  2002/06/12 22:36:42  posk
 // FitOverMax points cut/selection is now done on (FitPts - 1)/MaxPts.
 //

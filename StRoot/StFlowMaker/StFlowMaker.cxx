@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.77 2003/01/08 19:26:49 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.78 2003/01/10 16:42:17 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -221,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.77 2003/01/08 19:26:49 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.78 2003/01/10 16:42:17 oldi Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -323,6 +323,11 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
       histTitleFarWest->Append(*countSels);
       histTitleFarWest->Append("_Har");
       histTitleFarWest->Append(*countHars);
+      // Ftpc (FarEast)
+      TString* histTitleFtpcFarEast = new TString("Flow_Phi_Weight_FtpcFarEast_Sel");
+      histTitleFtpcFarEast->Append(*countSels);
+      histTitleFtpcFarEast->Append("_Har");
+      histTitleFtpcFarEast->Append(*countHars);
       // Ftpc (East)
       TString* histTitleFtpcEast = new TString("Flow_Phi_Weight_FtpcEast_Sel");
       histTitleFtpcEast->Append(*countSels);
@@ -333,6 +338,11 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
       histTitleFtpcWest->Append(*countSels);
       histTitleFtpcWest->Append("_Har");
       histTitleFtpcWest->Append(*countHars);
+      // Ftpc (FarWest)
+      TString* histTitleFtpcFarWest = new TString("Flow_Phi_Weight_FtpcFarWest_Sel");
+      histTitleFtpcFarWest->Append(*countSels);
+      histTitleFtpcFarWest->Append("_Har");
+      histTitleFtpcFarWest->Append(*countHars);
       if (pPhiWgtFile->IsOpen()) {
 	TH1* phiWgtHist = dynamic_cast<TH1*>(pPhiWgtFile->Get(histTitle->Data()));
 	if (k==0 && j==0 && phiWgtHist) {
@@ -364,15 +374,23 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	      phiWgtHistFarWest->GetBinContent(n+1) : 1.;
 	  }
 	}
+	TH1* phiWgtHistFtpcFarEast = dynamic_cast<TH1*>(pPhiWgtFile->
+							Get(histTitleFtpcFarEast->Data()));
 	TH1* phiWgtHistFtpcEast = dynamic_cast<TH1*>(pPhiWgtFile->
 						     Get(histTitleFtpcEast->Data()));
 	TH1* phiWgtHistFtpcWest = dynamic_cast<TH1*>(pPhiWgtFile->
 						     Get(histTitleFtpcWest->Data()));
+	TH1* phiWgtHistFtpcFarWest = dynamic_cast<TH1*>(pPhiWgtFile->
+							Get(histTitleFtpcFarWest->Data()));
 	for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
+	  mPhiWgtFtpcFarEast[k][j][n] = (phiWgtHistFtpcFarEast) ? 
+	    phiWgtHistFtpcFarEast->GetBinContent(n+1) : 1.;
 	  mPhiWgtFtpcEast[k][j][n] = (phiWgtHistFtpcEast) ? 
 	    phiWgtHistFtpcEast->GetBinContent(n+1) : 1.;
 	  mPhiWgtFtpcWest[k][j][n] = (phiWgtHistFtpcWest) ? 
 	    phiWgtHistFtpcWest->GetBinContent(n+1) : 1.;
+	  mPhiWgtFtpcFarWest[k][j][n] = (phiWgtHistFtpcFarWest) ? 
+	    phiWgtHistFtpcFarWest->GetBinContent(n+1) : 1.;
 	}
       } else {
 	for (int n = 0; n < Flow::nPhiBins; n++) {
@@ -383,8 +401,10 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	  mPhiWgtFarWest[k][j][n] = 1.;
 	}
 	for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
-	  mPhiWgtFtpcEast[k][j][n] = 1.;
+	  mPhiWgtFtpcFarEast[k][j][n] = 1.;
 	  mPhiWgtFtpcWest[k][j][n] = 1.;
+	  mPhiWgtFtpcEast[k][j][n] = 1.;
+	  mPhiWgtFtpcFarWest[k][j][n] = 1.;
 	}
       }
       delete histTitle;
@@ -392,8 +412,10 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
       delete histTitleEast;
       delete histTitleWest;
       delete histTitleFarWest;
+      delete histTitleFtpcFarEast;
       delete histTitleFtpcEast;
       delete histTitleFtpcWest;
+      delete histTitleFtpcFarWest;
     }
   }
 
@@ -421,8 +443,10 @@ void StFlowMaker::FillFlowEvent() {
     pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
     pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
   }
+  pFlowEvent->SetPhiWeightFtpcFarEast(mPhiWgtFtpcFarEast);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
+  pFlowEvent->SetPhiWeightFtpcFarWest(mPhiWgtFtpcFarWest);
   pFlowEvent->SetFirstLastPoints();
 
   // Get Trigger information
@@ -654,8 +678,10 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
     pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
     pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
   }
+  pFlowEvent->SetPhiWeightFtpcFarEast(mPhiWgtFtpcFarEast);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
+  pFlowEvent->SetPhiWeightFtpcFarWest(mPhiWgtFtpcFarWest);
 
   // Event ID and Run ID
   // ????????
@@ -875,8 +901,10 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
     pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
     pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
   }
+  pFlowEvent->SetPhiWeightFtpcFarEast(mPhiWgtFtpcFarEast);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
+  pFlowEvent->SetPhiWeightFtpcFarWest(mPhiWgtFtpcFarWest);
 
   // Recalculate MultEta for year=2 old pico tapes
   if (pPicoEvent->CenterOfMassEnergy()) {
@@ -1496,8 +1524,10 @@ Bool_t StFlowMaker::FillFromMuDST() {
     pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
     pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
   }
+  pFlowEvent->SetPhiWeightFtpcFarEast(mPhiWgtFtpcFarEast);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
+  pFlowEvent->SetPhiWeightFtpcFarWest(mPhiWgtFtpcFarWest);
   pFlowEvent->SetFirstLastPoints();  
   
   // Check event cuts
@@ -1851,6 +1881,20 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.78  2003/01/10 16:42:17  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.77  2003/01/08 19:26:49  posk
 // PhiWgt hists sorted on sign of z of first and last points.
 // Version 6 of pico file.

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.9 2002/06/10 22:50:57 posk Exp $
+// $Id: StFlowCutEvent.h,v 1.10 2003/01/10 16:41:56 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -42,7 +42,8 @@ class StFlowCutEvent {
   static void   SetVertexX(const Float_t lo, const Float_t hi);
   static void   SetVertexY(const Float_t lo, const Float_t hi);
   static void   SetVertexZ(const Float_t lo, const Float_t hi);
-  static void   SetEtaSym(Float_t lo, Float_t hi);
+  static void   SetEtaSymTpc(Float_t lo, Float_t hi);
+  static void   SetEtaSymFtpc(Float_t lo, Float_t hi);
   static void   SetTrigger(const Float_t value);   
 
  private:
@@ -65,8 +66,11 @@ class StFlowCutEvent {
   static UInt_t  mVertexZCut;            // number of not accepted events
   static Float_t mVertexZCuts[2];        // range of Z vertex position
 
-  static UInt_t  mEtaSymCutN;            // number not accepted
-  static Float_t mEtaSymCuts[2];         // range
+  static UInt_t  mEtaSymTpcCutN;         // number not accepted
+  static Float_t mEtaSymTpcCuts[2];      // range
+
+  static UInt_t  mEtaSymFtpcCutN;        // number not accepted
+  static Float_t mEtaSymFtpcCuts[2];     // range
 
   static UInt_t  mTriggerCutN;           // number not accepted
   static Float_t mTriggerCut;            // allowed trigger value
@@ -89,8 +93,11 @@ inline void StFlowCutEvent::SetVertexY(const Float_t lo, const Float_t hi) {
 inline void StFlowCutEvent::SetVertexZ(const Float_t lo, const Float_t hi) {
   mVertexZCuts[0] = lo; mVertexZCuts[1] = hi; }
 
-inline void StFlowCutEvent::SetEtaSym(Float_t lo, Float_t hi) {
-  mEtaSymCuts[0] = lo; mEtaSymCuts[1] = hi; }
+inline void StFlowCutEvent::SetEtaSymTpc(Float_t lo, Float_t hi) {
+  mEtaSymTpcCuts[0] = lo; mEtaSymTpcCuts[1] = hi; }
+
+inline void StFlowCutEvent::SetEtaSymFtpc(Float_t lo, Float_t hi) {
+  mEtaSymFtpcCuts[0] = lo; mEtaSymFtpcCuts[1] = hi; }
 
 inline void StFlowCutEvent::SetTrigger(const Float_t value) {
   mTriggerCut = value; }
@@ -100,6 +107,20 @@ inline void StFlowCutEvent::SetTrigger(const Float_t value) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
+// Revision 1.10  2003/01/10 16:41:56  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.9  2002/06/10 22:50:57  posk
 // pt and eta weighting now default.
 // DcaGlobalPart default now 0 to 1 cm.

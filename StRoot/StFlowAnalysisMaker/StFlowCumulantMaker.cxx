@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.12 2002/05/19 18:58:00 aihong Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.13 2003/01/10 16:40:36 oldi Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -50,6 +50,7 @@ StFlowCumulantMaker::StFlowCumulantMaker(const Char_t* name): StMaker(name),
   MakerName(name) {
   pFlowSelect = new StFlowSelection();
   mOldMethod  = kFALSE;
+  SetHistoRanges();
 }
 
 StFlowCumulantMaker::StFlowCumulantMaker(const Char_t* name,
@@ -57,6 +58,7 @@ StFlowCumulantMaker::StFlowCumulantMaker(const Char_t* name,
   StMaker(name), MakerName(name) {
   pFlowSelect = new StFlowSelection(flowSelect); // copy constructor
   mOldMethod  = kFALSE;
+  SetHistoRanges();
 }
 
 //-----------------------------------------------------------------------
@@ -203,8 +205,8 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle->Append("_Har");
 	histTitle->Append(*countHars);
 	histFull[k].histFullHar[j].mHistCumul2D[ord] =	
-	  new TProfile2D(histTitle->Data(),histTitle->Data(), Flow::nEtaBins,
-			 Flow::etaMin, Flow::etaMax, Flow::nPtBins, Flow::ptMin,
+	  new TProfile2D(histTitle->Data(),histTitle->Data(), mNEtaBins,
+			 mEtaMin, mEtaMax, Flow::nPtBins, Flow::ptMin,
 			 ptMaxPart, -1.*FLT_MAX, FLT_MAX, "");
 	histFull[k].histFullHar[j].mHistCumul2D[ord]->SetXTitle((char*)xLabel.Data());
 	histFull[k].histFullHar[j].mHistCumul2D[ord]->SetYTitle("Pt (GeV)");
@@ -217,8 +219,8 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle->Append("_Har");
 	histTitle->Append(*countHars);
 	histFull[k].histFullHar[j].mHistCumulEta[ord] =  
-	  new TProfile(histTitle->Data(),histTitle->Data(), Flow::nEtaBins,
-		       Flow::etaMin, Flow::etaMax, -1.*FLT_MAX, FLT_MAX, "");
+	  new TProfile(histTitle->Data(),histTitle->Data(), mNEtaBins,
+		       mEtaMin, mEtaMax, -1.*FLT_MAX, FLT_MAX, "");
 	histFull[k].histFullHar[j].mHistCumulEta[ord]->SetXTitle((char*)xLabel.Data());
 	delete histTitle;
 	
@@ -269,8 +271,8 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle->Append("_Har");
 	histTitle->Append(*countHars);
 	histFull[k].histFullHar[j].mCumulG0Denom2D[pq] =
-	  new TProfile2D(histTitle->Data(),histTitle->Data(), Flow::nEtaBins,
-			 Flow::etaMin, Flow::etaMax, Flow::nPtBins, Flow::ptMin,
+	  new TProfile2D(histTitle->Data(),histTitle->Data(), mNEtaBins,
+			 mEtaMin, mEtaMax, Flow::nPtBins, Flow::ptMin,
 			 Flow::ptMax,-1.*FLT_MAX, FLT_MAX, "");
 	histFull[k].histFullHar[j].mCumulG0Denom2D[pq]->
 	  SetXTitle((char*)xLabel.Data());
@@ -286,8 +288,8 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle->Append("_Har");
 	histTitle->Append(*countHars);
 	histFull[k].histFullHar[j].mCumulG0DenomEta[pq] =
-	  new TProfile(histTitle->Data(),histTitle->Data(), Flow::nEtaBins,
-		       Flow::etaMin, Flow::etaMax, -1.*FLT_MAX, FLT_MAX, "");
+	  new TProfile(histTitle->Data(),histTitle->Data(), mNEtaBins,
+		       mEtaMin, mEtaMax, -1.*FLT_MAX, FLT_MAX, "");
 	histFull[k].histFullHar[j].mCumulG0DenomEta[pq]->
 	  SetXTitle((char*)xLabel.Data());
 	delete histTitle;
@@ -405,7 +407,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.12 2002/05/19 18:58:00 aihong Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.13 2003/01/10 16:40:36 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -536,14 +538,14 @@ void StFlowCumulantMaker::FillParticleHistograms() {
  	if (pFlowSelect->Select(pFlowTrack)) {
 // 	  // Get detID
 // 	  StDetectorId detId;
-// 	  if (pFlowTrack->TopologyMap().numberOfHits(kTpcId) || 
+// 	  if (pFlowTrack->TopologyMap().hasHitInDetector(kTpcId) || 
 // 	      (pFlowTrack->TopologyMap().data(0) == 0 && 
 // 	       pFlowTrack->TopologyMap().data(1) == 0)) {
 // 	    // Tpc track, or TopologyMap not available
 // 	    detId = kTpcId;
-// 	  } else if (pFlowTrack->TopologyMap().numberOfHits(kFtpcEastId)) {
+// 	  } else if (pFlowTrack->TopologyMap().trackFtpcEast()) {
 // 	    detId = kFtpcEastId;
-// 	  } else if (pFlowTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
+// 	  } else if (pFlowTrack->TopologyMap().trackFtpcWest()) {
 // 	    detId = kFtpcWestId;
 // 	  } else {
 // 	    detId = kUnknownId;
@@ -982,7 +984,7 @@ Int_t StFlowCumulantMaker::Finish() {
   (*cumulConstants)(2)=double(Flow::nSubs);
   (*cumulConstants)(3)=double(Flow::nPhiBins);
   (*cumulConstants)(4)=double(Flow::nPhiBinsFtpc);
-  (*cumulConstants)(5)=double(Flow::nEtaBins);
+  (*cumulConstants)(5)=double(mNEtaBins);
   (*cumulConstants)(6)=double(Flow::nPtBins);
   (*cumulConstants)(7)=double(Flow::nCumulIntegOrders);
   (*cumulConstants)(8)=double(Flow::nCumulInteg_qMax);
@@ -1013,10 +1015,41 @@ Int_t StFlowCumulantMaker::Finish() {
   return StMaker::Finish();
 }
 
+//-----------------------------------------------------------------------
+
+void StFlowCumulantMaker::SetHistoRanges(Bool_t ftpc_included) {
+
+    if (ftpc_included) {
+	  mEtaMin = Flow::etaMin;
+	  mEtaMax = Flow::etaMax;
+	mNEtaBins = Flow::nEtaBins;
+    }
+    else {
+	  mEtaMin = Flow::etaMinTpcOnly;
+ 	  mEtaMax = Flow::etaMaxTpcOnly;
+	mNEtaBins = Flow::nEtaBinsTpcOnly;
+    }
+
+    return;
+}
 
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.13  2003/01/10 16:40:36  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.12  2002/05/19 18:58:00  aihong
 // speed up cumulant
 //

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.36 2002/11/26 22:11:53 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.37 2003/01/10 16:40:33 oldi Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -54,8 +54,9 @@ public:
   Int_t    Finish();
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
+  void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.36 2002/11/26 22:11:53 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.37 2003/01/10 16:40:33 oldi Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -82,10 +83,11 @@ private:
 
   // for single histograms
   TH1F*     mHistTrigger;              //!
-  TH1F*     mHistCharge;               //!
-  TH1F*     mHistDcaFtpc;              //!
+  TH1F*     mHistChargeTpc;            //!
+  TH1F*     mHistChargeFtpc;           //!
   TH1F*     mHistDcaGlobalTpc;         //!
   TH1F*     mHistDcaGlobalFtpc;        //!
+  TH1F*     mHistDcaFtpc;              //!
   TH1F*     mHistChi2Tpc;              //!
   TH1F*     mHistChi2Ftpc;             //!
   TH1F*     mHistFitPtsTpc;            //!
@@ -101,7 +103,8 @@ private:
   TH1F*     mHistMultPart;             //!
   TH1F*     mHistVertexZ;              //!
   TH2F*     mHistVertexXY2D;           //!
-  TH1F*     mHistEtaSym;               //!
+  TH1F*     mHistEtaSymTpc;            //!
+  TH1F*     mHistEtaSymFtpc;           //!
   TH3F*     mHistEtaPtPhi3D;           //!
   TH2D*     mHistYieldAll2D;           //!
   TH2D*     mHistYieldPart2D;          //!
@@ -130,8 +133,8 @@ private:
   TH1F*     mHistPidPositronPart;      //!
   TProfile* mHistPidMult;              //!
   TH1F*     mHistCent;                 //!
-  TH2F*     mHistEtaSymVerZ2D;         //!
-  TH1F*     mHistEtaSymVerZ;           //!
+  TH2F*     mHistEtaSymVerZ2DTpc;      //!
+  TH2F*     mHistEtaSymVerZ2DFtpc;     //!
   TH2F*     mHistCTBvsZDC2D;           //!
   TH2F*     mHistMeanDedxPos2D;        //!
   TH2F*     mHistMeanDedxNeg2D;        //!
@@ -164,24 +167,31 @@ private:
     TH1D*       mHistPhiEast;
     TH1D*       mHistPhiWest;
     TH1D*       mHistPhiFarWest;
+    TH1D*       mHistPhiFtpcFarEast;
     TH1D*       mHistPhiFtpcEast;
     TH1D*       mHistPhiFtpcWest;
+    TH1D*       mHistPhiFtpcFarWest;
     TH1D*       mHistPhiWgtFarEast;
     TH1D*       mHistPhiWgtEast;
     TH1D*       mHistPhiWgtWest;
     TH1D*       mHistPhiWgtFarWest;
+    TH1D*       mHistPhiWgtFtpcFarEast;
     TH1D*       mHistPhiWgtFtpcEast;
     TH1D*       mHistPhiWgtFtpcWest;
+    TH1D*       mHistPhiWgtFtpcFarWest;
     TH1D*       mHistPhiFlatFarEast;
     TH1D*       mHistPhiFlatEast;
     TH1D*       mHistPhiFlatWest;
     TH1D*       mHistPhiFlatFarWest;
+    TH1D*       mHistPhiFlatFtpcFarEast;
     TH1D*       mHistPhiFlatFtpcEast;
     TH1D*       mHistPhiFlatFtpcWest;
+    TH1D*       mHistPhiFlatFtpcFarWest;
     TH1F*       mHistPhiCorr;
     TH1F*       mHistPsiSubCorr;
     TH1F*       mHistPsiSubCorrDiff;
     TH1F*       mHistPsi;
+    TH1F*       mHistPsi_Diff;
     TH1F*       mHistMult;
     TH1F*       mHist_q;
     TH2D*       mHistYield2D;
@@ -208,6 +218,10 @@ private:
 
   TString      MakerName;
 
+  Float_t mEtaMin;
+  Float_t mEtaMax;
+    Int_t mNEtaBins;
+
   ClassDef(StFlowAnalysisMaker, 1)              // macro for rootcint
 };
 
@@ -222,6 +236,20 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.37  2003/01/10 16:40:33  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.36  2002/11/26 22:11:53  posk
 // First use of doxygen.
 //

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.42 2002/11/26 22:11:54 posk Exp $
+// $Id: plot.C,v 1.43 2003/01/10 16:40:53 oldi Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -50,8 +50,10 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_Trigger",
     "Flow_VertexZ",
     "Flow_VertexXY2D",
-    "Flow_EtaSymVerZ2D",
-    "Flow_EtaSym",
+    "Flow_EtaSymVerZ2D_Tpc",
+    "Flow_EtaSym_Tpc",
+    "Flow_EtaSymVerZ2D_Ftpc",
+    "Flow_EtaSym_Ftpc",
     "Flow_CTBvsZDC2D",
     "Flow_Cent",
     "Flow_Mult",
@@ -59,17 +61,18 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_MultOverOrig",
     "Flow_MultEta",
     "Flow_MultPart",
-    "Flow_Charge",
-    "Flow_Dca_Ftpc",
+    "Flow_Charge_Tpc",
+    "Flow_Charge_Ftpc",
     "Flow_DcaGlobal_Tpc",
     "Flow_DcaGlobal_Ftpc",
+    "Flow_Dca_Ftpc",
     "Flow_Chi2_Tpc",
     "Flow_Chi2_Ftpc",
     "Flow_FitPts_Tpc",
-    "Flow_FitPts_Ftpc",
     "Flow_MaxPts_Tpc",
-    "Flow_MaxPts_Ftpc",
     "Flow_FitOverMax_Tpc",
+    "Flow_FitPts_Ftpc",
+    "Flow_MaxPts_Ftpc",
     "Flow_FitOverMax_Ftpc",
     //"Flow_EtaPtPhi3D",
     "Flow_EtaPtPhi2D.PhiEta",
@@ -108,12 +111,18 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_Phi_FarWest_Sel",
     "Flow_Phi_Flat_FarWest_Sel",
     "Flow_Phi_Weight_FarWest_Sel",
+    "Flow_Phi_FtpcFarEast_Sel",
+    "Flow_Phi_Flat_FtpcFarEast_Sel",
+    "Flow_Phi_Weight_FtpcFarEast_Sel",
     "Flow_Phi_FtpcEast_Sel",
     "Flow_Phi_Flat_FtpcEast_Sel",
     "Flow_Phi_Weight_FtpcEast_Sel",
     "Flow_Phi_FtpcWest_Sel",
     "Flow_Phi_Flat_FtpcWest_Sel",
     "Flow_Phi_Weight_FtpcWest_Sel",
+    "Flow_Phi_FtpcFarWest_Sel",
+    "Flow_Phi_Flat_FtpcFarWest_Sel",
+    "Flow_Phi_Weight_FtpcFarWest_Sel",
     "Flow_Mul_Sel",
     "Flow_Yield2D_Sel",
     "Flow_Yield.Eta_Sel",
@@ -123,6 +132,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_EtaPhi.Phi_Sel",
     "Flow_Psi_Subs",
     "Flow_Psi_Sel",
+    "Flow_Psi_Diff_Sel",
     "Flow_Psi_Sub_Corr_Sel",
     "Flow_Psi_Sub_Corr_Diff_Sel",
     "Flow_Phi_Corr_Sel",
@@ -146,7 +156,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   // construct array of short names
   char* shortName[] = new char*[nNames];
   for (int n = 0; n < nNames; n++) {
-    shortName[n] = new char[30];
+    shortName[n] = new char[35];
     strcpy(shortName[n], baseName[n]);
     char* cp = strstr(shortName[n],"_Sel");
     if (cp) *cp = '\0';                                  // truncate
@@ -256,7 +266,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       int padN = j*columns + k + 1;                    // pad number
 
       // construct histName and histProjName
-      char* temp = new char[30];
+      char* temp = new char[35];
       strcpy(temp,shortName[pageNumber]);
       char* cproj = strstr(temp,".");
       if (cproj) {                                     // a projection
@@ -666,6 +676,20 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.43  2003/01/10 16:40:53  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.42  2002/11/26 22:11:54  posk
 // First use of doxygen.
 //

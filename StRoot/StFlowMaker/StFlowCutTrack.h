@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.17 2002/06/10 22:50:59 posk Exp $
+// $Id: StFlowCutTrack.h,v 1.18 2003/01/10 16:42:05 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -34,12 +34,10 @@ class StFlowCutTrack {
   static Int_t   CheckTrack(StFlowPicoTrack* pPicoTrack);
   static Int_t   CheckTrack(StMuTrack* pMuTrack);
   static void    PrintCutList();
-  static UInt_t  EtaSymPos();
-  static UInt_t  EtaSymNeg();
-  static UInt_t  EtaSymTpcPos();
-  static UInt_t  EtaSymTpcNeg();
-  static UInt_t  EtaSymFtpcPos();
-  static UInt_t  EtaSymFtpcNeg();
+  static UInt_t  EtaSymPosTpc();
+  static UInt_t  EtaSymNegTpc();
+  static UInt_t  EtaSymPosFtpc();
+  static UInt_t  EtaSymNegFtpc();
   static void    EtaSymClear();
   static void    SetFitPtsTpc(Int_t lo, Int_t hi);
   static void    SetFitPtsFtpc(Int_t lo, Int_t hi);
@@ -47,11 +45,14 @@ class StFlowCutTrack {
   static void    SetChiSqTpc(Float_t lo, Float_t hi);
   static void    SetChiSqFtpc(Float_t lo, Float_t hi);
   static void    SetDcaFtpc(Float_t lo, Float_t hi);
+  static void    SetDcaGlobalFtpc(Float_t lo, Float_t hi);
   static void    SetPtTpc(Float_t lo, Float_t hi);
   static void    SetPtFtpc(Float_t lo, Float_t hi);
   static void    SetEtaTpc(Float_t lo, Float_t hi);
-  static void    SetChgTpc(Int_t lo, Int_t hi);
   static void    SetEtaFtpc(Float_t lo_neg, Float_t hi_neg, Float_t lo_pos, Float_t hi_pos);
+  static void    SetChgTpc(Int_t lo, Int_t hi);
+  static void    SetChgFtpc(Int_t lo, Int_t hi);
+  static void    IncludeFtpcTracks(Bool_t ftpc_include);
 
  private:
 
@@ -65,8 +66,6 @@ class StFlowCutTrack {
   static UInt_t  mGoodTpcTrackN;             // number of accepted Tpc tracks   
   static UInt_t  mGoodFtpcTrackN;            // number of accepted Ftpc tracks
    
-  static UInt_t  mEtaSymPosN;                // number of positive Eta tracks
-  static UInt_t  mEtaSymNegN;                // number of negative Eta tracks
   static UInt_t  mEtaSymPosTpcN;             // number of positive Eta Tpc tracks
   static UInt_t  mEtaSymNegTpcN;             // number of negative Eta Tpc tracks
   static UInt_t  mEtaSymPosFtpcN;            // number of positive Eta Ftpc tracks
@@ -92,6 +91,9 @@ class StFlowCutTrack {
   static UInt_t  mDcaFtpcCutN;               // number not accepted
   static Float_t mDcaFtpcCuts[2];            // range
 
+  static UInt_t  mDcaGlobalFtpcCutN;         // number not accepted
+  static Float_t mDcaGlobalFtpcCuts[2];      // range
+
   static UInt_t  mPtTpcCutN;                 // number not accepted
   static Float_t mPtTpcCuts[2];              // range
 
@@ -101,20 +103,31 @@ class StFlowCutTrack {
   static UInt_t  mEtaTpcCutN;                // number not accepted
   static Float_t mEtaTpcCuts[2];             // range
 
+  static UInt_t  mEtaFtpcCutN;               // number not accepted
+  static Float_t mEtaFtpcCuts[4];            // range
+
   static UInt_t  mChgTpcCutN;                // number not accepted
   static Int_t   mChgTpcCuts[2];             // range
 
-  static UInt_t  mEtaFtpcCutN;               // number not accepted
-  static Float_t mEtaFtpcCuts[4];            // range
+  static UInt_t  mChgFtpcCutN;                // number not accepted
+  static Int_t   mChgFtpcCuts[2];             // range
+
+  static UInt_t  mFtpcTrackCutN;             // number not accepted
+  static Bool_t  mFtpcTrackCut;              // cut or don't cut (kTRUE, kFALSE)
 
   ClassDef(StFlowCutTrack,1)                 // macro for rootcint
 }; 
 
-inline UInt_t StFlowCutTrack::EtaSymPos() { return mEtaSymPosN; }
+inline UInt_t StFlowCutTrack::EtaSymPosTpc() { return mEtaSymPosTpcN; }
 
-inline UInt_t StFlowCutTrack::EtaSymNeg() { return mEtaSymNegN; }
+inline UInt_t StFlowCutTrack::EtaSymNegTpc() { return mEtaSymNegTpcN; }
 
-inline void StFlowCutTrack::EtaSymClear() { mEtaSymPosN = 0; mEtaSymNegN = 0; }
+inline UInt_t StFlowCutTrack::EtaSymPosFtpc() { return mEtaSymPosFtpcN; }
+
+inline UInt_t StFlowCutTrack::EtaSymNegFtpc() { return mEtaSymNegFtpcN; }
+
+inline void StFlowCutTrack::EtaSymClear() { mEtaSymPosTpcN = 0; mEtaSymNegTpcN = 0; 
+					    mEtaSymPosFtpcN = 0; mEtaSymNegFtpcN = 0; }
 
 inline void StFlowCutTrack::SetFitPtsTpc(Int_t lo, Int_t hi) {
   mFitPtsTpcCuts[0] = lo; mFitPtsTpcCuts[1] = hi; }
@@ -134,6 +147,9 @@ inline void StFlowCutTrack::SetChiSqFtpc(Float_t lo, Float_t hi) {
 inline void StFlowCutTrack::SetDcaFtpc(Float_t lo, Float_t hi) {
   mDcaFtpcCuts[0] = lo; mDcaFtpcCuts[1] = hi; }
 
+inline void StFlowCutTrack::SetDcaGlobalFtpc(Float_t lo, Float_t hi) {
+  mDcaGlobalFtpcCuts[0] = lo; mDcaGlobalFtpcCuts[1] = hi; }
+
 inline void StFlowCutTrack::SetPtTpc(Float_t lo, Float_t hi) {
   mPtTpcCuts[0] = lo; mPtTpcCuts[1] = hi; }
 
@@ -143,19 +159,39 @@ inline void StFlowCutTrack::SetPtFtpc(Float_t lo, Float_t hi) {
 inline void StFlowCutTrack::SetEtaTpc(Float_t lo, Float_t hi) {
   mEtaTpcCuts[0] = lo; mEtaTpcCuts[1] = hi; }
 
-inline void StFlowCutTrack::SetChgTpc(Int_t lo, Int_t hi) {
-  mChgTpcCuts[0] = lo; mChgTpcCuts[1] = hi; }
-
 inline void StFlowCutTrack::SetEtaFtpc(Float_t lo_neg, Float_t hi_neg,
 				       Float_t lo_pos, Float_t hi_pos) {
   mEtaFtpcCuts[0] = lo_neg; mEtaFtpcCuts[1] = hi_neg; 
-  mEtaFtpcCuts[2] = lo_pos; mEtaFtpcCuts[3] = hi_pos;}
+  mEtaFtpcCuts[2] = lo_pos; mEtaFtpcCuts[3] = hi_pos; }
+
+inline void StFlowCutTrack::SetChgTpc(Int_t lo, Int_t hi) {
+  mChgTpcCuts[0] = lo; mChgTpcCuts[1] = hi; }
+
+inline void StFlowCutTrack::SetChgFtpc(Int_t lo, Int_t hi) {
+  mChgFtpcCuts[0] = lo; mChgFtpcCuts[1] = hi; }
+
+inline void StFlowCutTrack::IncludeFtpcTracks(Bool_t ftpc_include) {
+    mFtpcTrackCut = !ftpc_include; }
 
 #endif
 
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.18  2003/01/10 16:42:05  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.17  2002/06/10 22:50:59  posk
 // pt and eta weighting now default.
 // DcaGlobalPart default now 0 to 1 cm.
