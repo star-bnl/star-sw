@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.90 1999/03/30 15:51:53 fisyak Exp $
+# $Id: MakePam.mk,v 1.91 1999/04/18 23:35:29 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.91  1999/04/18 23:35:29  fisyak
+# Add SL_EXTRA_LIB
+#
 # Revision 1.90  1999/03/30 15:51:53  fisyak
 # Make silent test for geant3.def
 #
@@ -380,7 +383,7 @@ endif #/* NT */
 endif                          
 ifneq ($(strip $(FILES_SL) $(FILES_OG) $(FILES_init)),)   
 $(SL_PKG): $(FILES_SL) $(FILES_OG) $(FILES_init) $(LIB_PKG)
-	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG) $(FILES_init)  -o $(SL_NEW)    $(LIBRARIES)
+	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG) $(FILES_init)  -o $(SL_NEW)  $(LIBRARIES) $(SL_EXTRA_LIB)
 	$(RM) $(SL_PKG)
 	$(LN) $(SL_NEW) $(SL_PKG)
 	@echo "           Shared library " $(SL_PKG) " has been created"   
