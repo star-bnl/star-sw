@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.6 2000/07/12 11:58:40 jcs Exp $
+// $Id: StFtpcTrack.cc,v 1.7 2000/07/17 14:54:22 jcs Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.7  2000/07/17 14:54:22  jcs
+// save results of constrained fit
+//
 // Revision 1.6  2000/07/12 11:58:40  jcs
 // calculate and save FTPC track parameters for unconstrained fit
 //
@@ -379,6 +382,12 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
 
      else {
        mP = Fit->momentum();
+       StThreeVector<double> firstPoint(vertexPos.x(),vertexPos.y(),vertexPos.z());
+       pl = Fit->pathLength(firstPoint,nv);
+       mV.setX(Fit->x(pl));
+       mV.setY(Fit->y(pl));
+       mV.setZ(Fit->z(pl));
+       mtrackLength = Fit->pathLength(Hit[numHits-1],nv);
        mFromMainVertex = (Bool_t)true;
        mChiSq[0] = Fit->chi2Rad();
        mChiSq[1] = Fit->chi2Lin();
