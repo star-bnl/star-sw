@@ -7,9 +7,9 @@
 #include "St_DataSetIter.h"
 #include "St_DataSet.h"
 //*KEEP,TBrowser.
-#include "TBrowser.h"
+#include <TBrowser.h>
 //*KEND.
-#include "TSystem.h"
+#include <TSystem.h>
  
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -144,6 +144,13 @@ void St_DataSet::ls(Int_t depth)
     }
   }
 }
+#if 0
+//______________________________________________________________________________
+Bool_t    St_DataSet::IsEmpty() const 
+{ 
+ return (HasData() == 0 && GetListSize() == 0);
+}
+#endif
 //______________________________________________________________________________
 Bool_t St_DataSet::IsThisDir(const Char_t *dirname) const 
 {
@@ -173,7 +180,7 @@ void FillTree()
 }
 #endif
 //______________________________________________________________________________
-TString St_DataSet::Path()
+TString St_DataSet::Path() const
 {
  // return the full path of this data set 
    TString str;
@@ -247,6 +254,7 @@ Int_t St_DataSet::Purge(Option_t *opt)
      if (this == son->GetParent()) {
      // mark the object is deleted from the St_DataSet dtor
         son->Purge();
+//        if (son->IsEmpty()) //  Bool_t IsEmpty() const { return (HasData() == 0 && GetListSize() == 0) 
         if (son->HasData() == 0 && son->GetListSize() == 0) 
                            garbage.Add(son);
      }

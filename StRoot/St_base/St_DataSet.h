@@ -15,9 +15,9 @@
 //////////////////////////////////////////////////////////////////////////
  
 //*KEEP,TList.
-#include "TList.h"
+#include <TList.h>
 //*KEEP,TNamed.
-#include "TNamed.h"
+#include <TNamed.h>
 //*KEND.
  
 class St_DataSetIter;
@@ -48,21 +48,22 @@ class St_DataSet : public TNamed
     virtual ~St_DataSet();
             void         Add(St_DataSet *dataset);
     virtual void         Browse(TBrowser *b);
-    virtual St_DataSet  *Data() { return HasData() ? this : 0; }  // returns this pointer the derived classes if any
+    virtual St_DataSet  *Data() const { return HasData() ? this : 0; }  // returns this pointer the derived classes if any
     virtual void         Delete(Option_t *opt="");   
             TObject     *GetMother() const { return fMother; }
     virtual St_DataSet  *GetParent() const { return (St_DataSet *)fMother;}
-            TList       *GetList() const {return fList;}
+            TList       *GetList()   const { return fList; }
             TList       *GetListOfDataset() const {return GetList();}
             Int_t        GetListSize() const;
     virtual Long_t       HasData() const {return 0;}         // Check whether this dataset has extra "data-members"
-    virtual Bool_t       IsFolder(){return kTRUE;}
+//  virtual Bool_t       IsEmpty() const;
+    virtual Bool_t       IsFolder() {return kTRUE;}
     virtual Bool_t       IsThisDir(const Char_t *dirname) const ;
     virtual void         ls(Option_t *option="");             // Option "*" means print all levels
     virtual void         ls(Int_t depth);                     // Print the "depth" levels of this datatset
     virtual void         Update();                            // Update dataset
     virtual void         Update(St_DataSet *set,UInt_t opt=0);// Update this dataset with the new one
-           TString       Path();                              // return the "full" path of this dataset
+           TString       Path() const;                        // return the "full" path of this dataset
     virtual EDataSetPass Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t depth=0);
     virtual Int_t        Purge(Option_t *opt="");   
     virtual void         Remove(St_DataSet *set);

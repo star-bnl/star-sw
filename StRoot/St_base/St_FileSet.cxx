@@ -75,6 +75,25 @@ St_FileSet::St_FileSet(const TString &dirname,const Char_t *setname,Bool_t expan
 }
 //______________________________________________________________________________
 St_FileSet::~St_FileSet(){}
+
+//______________________________________________________________________________
+Bool_t St_FileSet::IsEmpty() const 
+{ 
+ return  strcmp(GetTitle(),"file")!=0 ? kTRUE : kFALSE ;
+}
+//______________________________________________________________________________
+Long_t St_FileSet::HasData() const
+{
+  // This implementation is done in the St_DataSet::Purge() method in mind
+  // Since this method returns non-zero for files the last are NOT "purged"
+  // by St_DataSet::Purge()
+  //
+   return strcmp(GetTitle(),"file")==0 ? 1 : 0; 
+
+   //  this must be like this:
+   //  return !IsFolder() ;
+   //  Alas TObject::IsFolder() isn't defined as "const" 
+} 
 //______________________________________________________________________________
 Bool_t St_FileSet::IsFolder()
 {
