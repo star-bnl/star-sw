@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.20 2004/02/24 01:59:46 jeromel Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.21 2004/03/18 17:09:11 calderon Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,10 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.21  2004/03/18 17:09:11  calderon
+ * Change the StiXXXVertexFinder from StiDummy to StiStar for Y2004 chain,
+ * as per Lee's example.
+ *
  * Revision 2.20  2004/02/24 01:59:46  jeromel
  * Commented out include of disappeared .h
  *
@@ -89,6 +93,7 @@
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiTrackMerger.h"
 #include "Sti/StiDummyVertexFinder.h"
+#include "Sti/StiStarVertexFinder.h"
 //#include "Sti/StiCompositeSeedFinder.h"
 #include "Sti/StiLocalTrackMerger.h"
 #include "Sti/StiDefaultTrackFilter.h"
@@ -393,7 +398,8 @@ StiVertexFinder * StiDefaultToolkit::getVertexFinder()
   cout << "StiDefaultToolkit::getVertexFinder() -I- Started"<<endl;
   if (_vertexFinder)
     return _vertexFinder;
-  _vertexFinder = new StiDummyVertexFinder("StEventVertex");
+  //_vertexFinder = new StiDummyVertexFinder("StEventVertex");
+  _vertexFinder = new StiStarVertexFinder("GenericVertex"); // MCBS, for Y2004 chain
   return _vertexFinder;
 }
 
