@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MiniDst.hh,v 1.2 1999/07/26 19:17:25 jones Exp $
+ * $Id: StV0MiniDst.hh,v 1.3 1999/07/30 15:01:13 genevb Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 04-Jun-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StV0MiniDst.hh,v $
+ * Revision 1.3  1999/07/30 15:01:13  genevb
+ * Switched from TObject to StHFillObject inheritance
+ *
  * Revision 1.2  1999/07/26 19:17:25  jones
  * Added primary vertex position and v0 daughter DCA to the primary vertex
  *
@@ -21,12 +24,12 @@
  ***********************************************************************/
 #ifndef StV0MiniDst_hh
 #define StV0MiniDst_hh
-#include <TObject.h>
+#include "StHFillObject.h"
 
 class StVertex;
 class StV0Vertex;
 
-class StV0MiniDst : public TObject {
+class StV0MiniDst : public StHFillObject {
 public:
   StV0MiniDst();
   ~StV0MiniDst();
@@ -67,6 +70,8 @@ public:
   float ptotPosDaughter();      // Total momentum of pos. daughter
   float ptNegDaughter();        // Transverse momentum of neg. daughter
   float ptotNegDaughter();      // Total momentum of neg. daughter  
+
+  virtual void LearnMembers();
 
 protected:
   int   mRun;                   // These are written out
