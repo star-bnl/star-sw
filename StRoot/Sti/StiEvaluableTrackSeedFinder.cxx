@@ -132,7 +132,7 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     if (!mcToStTrackMap) {
 	cout <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack*).  ERROR:\t";
 	cout <<"McTrackMap==0"<<endl;
-	return track;
+	return 0;
     }
 
     pair<mcTrackMapType::iterator, mcTrackMapType::iterator> range = mcToStTrackMap->equal_range(mcTrack);
@@ -164,7 +164,9 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     //Set StiDetectorContainer to layer corresponding to the innermost point on the track seed
     StiKalmanTrackNode* node = track->getLastNode(); //Should return innermost
     if (!node) {
-	cout <<"StiEvaluableTrackSeedFinder::makeTrack(). ERROR!\tnode==0.  return;"<<endl;
+	cout <<"StiEvaluableTrackSeedFinder::makeTrack(). ERROR:\t";
+	cout <<"node==0.  return;"<<endl;
+	return 0;
     }
     else {
 	StiDetector* layer = node->getHit()->detector();
@@ -174,7 +176,7 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     return track;
 }
 
-BestCommonHits::BestCommonHits() : mMostCommon(0), mPair(0)
+BestCommonHits::BestCommonHits() : mMostCommon(10), mPair(0)
 {
 }
 
