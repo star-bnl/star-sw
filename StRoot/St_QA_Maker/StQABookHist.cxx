@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.9 1999/12/10 17:38:24 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.10 1999/12/10 18:11:18 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.10  1999/12/10 18:11:18  kathy
+// changed limits of some histograms so we can at least see all the data; changed booking order for globtrk histograms
+//
 // Revision 1.9  1999/12/10 17:38:24  kathy
 // now reprint canvas on each page of postscript output file; also changed some histogram limits
 //
@@ -496,48 +499,6 @@ void StQABookHist::BookHistGlob(){
   m_glb_impactT = QAH1F("QaGtrkImpactT", "globtrk: impact param from prim vtx, tpc  ", 50,0.,500.);
 
 
-// 1D ftpc
-
-
-  m_pointFE      = QAH1F("QaGtrkNPntFE",    "globtrk: N points on trk,ftpc east", 15, 0.,15.);
-  m_pointFW      = QAH1F("QaGtrkNPntFW",    "globtrk: N points on trk,ftpc west", 15, 0.,15.);
-  m_max_pointFE  = QAH1F("QaGtrkNPntMaxFE", "globtrk: N max pnts on trk, ftpc east", 15, 0.,15.);
-  m_max_pointFW  = QAH1F("QaGtrkNPntMaxFW", "globtrk: N max pnts on trk, ftpc west", 15, 0.,15.);
-  m_fit_pointFE  = QAH1F("QaGtrkNPntFitFE", "globtrk: N fit pnts on trk, ftpc east", 15, 0.,15.);
-  m_fit_pointFW  = QAH1F("QaGtrkNPntFitFW", "globtrk: N fit pnts on trk, ftpc west", 15, 0.,15.);
-  m_glb_ratioFE  = QAH1F("QaGtrkRnfFE",     "globtrk: ratio Nfit/tot pnt, ftpc east", 55, 0., 1.1);
-  m_glb_ratioFW  = QAH1F("QaGtrkRnfFW",     "globtrk: ratio Nfit/tot pnt, ftpc west", 55, 0., 1.1);
-  m_glb_ratiomFE = QAH1F("QaGtrkRnmFE",     "globtrk: ratio Nfit/max pnt, ftpc east", 55, 0., 1.1);
-  m_glb_ratiomFW = QAH1F("QaGtrkRnmFW",     "globtrk: ratio Nfit/max pnt, ftpc west", 55, 0., 1.1);
-  m_glb_chargeFE = QAH1F("QaGtrkChrgFE",    "globtrk: charge, ftpc east ", 20,-2.,2.);
-  m_glb_chargeFW = QAH1F("QaGtrkChrgFW",    "globtrk: charge, ftpc west ", 20,-2.,2.);
-  m_glb_xfFE     = QAH1F("QaGtrkXfFE",      "globtrk: x of first hit on trk, ftpc east", 50,-200.,200.);
-  m_glb_xfFW     = QAH1F("QaGtrkXfFW",      "globtrk: x of first hit on trk, ftpc west", 50,-200.,200.);
-  m_glb_yfFE     = QAH1F("QaGtrkYfFE",      "globtrk: y of first hit on trk, ftpc east", 50,-200.,200.);
-  m_glb_yfFW     = QAH1F("QaGtrkYfFW",      "globtrk: y of first hit on trk, ftpc west", 50,-200.,200.);
-  m_glb_zfFE     = QAH1F("QaGtrkZfFE",      "globtrk: z of first hit on trk, ftpc east", 50,-300.,300.);
-  m_glb_zfFW     = QAH1F("QaGtrkZfFW",      "globtrk: z of first hit on trk, ftpc west", 50,-300.,300.);
-  m_glb_radfFE   = QAH1F("QaGtrkRFE",       "globtrk: radial position of first hit, ftpc east", 50,0.,200.);
-  m_glb_radfFW   = QAH1F("QaGtrkRFW",       "globtrk: radial position of first hit, ftpc west", 50,0.,200.);
-  m_lengthFE     = QAH1F("QaGtrkLengthFE",  "globtrk: track length, ftpc east", 30,0.,120.);
-  m_lengthFW     = QAH1F("QaGtrkLengthFW",  "globtrk: track length, ftpc west", 30,0.,120.);
-  m_psiFE        = QAH1F("QaGtrkPsiFE",     "globtrk: psi, ftpc east", 36, 0.,360.);
-  m_psiFW        = QAH1F("QaGtrkPsiFW",     "globtrk: psi, ftpc west", 36, 0.,360.);
-  m_tanlFE       = QAH1F("QaGtrkTanlFE",    "globtrk: tanl, ftpc east",30,-30.,30.);
-  m_tanlFW       = QAH1F("QaGtrkTanlFW",    "globtrk: tanl, ftpc west",30,-30.,30.);
-  m_glb_thetaFE  = QAH1F("QaGtrkThetaFE",   "globtrk: theta, ftpc east",20,0.,4.);
-  m_glb_thetaFW  = QAH1F("QaGtrkThetaFW",   "globtrk: theta, ftpc west",20,0.,4.);
-  m_etaFE        = QAH1F("QaGtrkEtaFE",     "globtrk: eta, ftpc east",60,-6.,6.);
-  m_etaFW        = QAH1F("QaGtrkEtaFW",     "globtrk: eta, ftpc west",60,-6.,6.);
-  m_pTFE         = QAH1F("QaGtrkPtFE",      "globtrk: pT, ftpc east",50,0.,5.);
-  m_pTFW         = QAH1F("QaGtrkPtFW",      "globtrk: pT, ftpc west",50,0.,5.);
-  m_momFE        = QAH1F("QaGtrkPFE",       "globtrk: momentum, ftpc east ",50,0.,5.);
-  m_momFW        = QAH1F("QaGtrkPFW",       "globtrk: momentum, ftpc west ",50,0.,5.);
-  m_chisq0FE     = QAH1F("QaGtrkChisq0FE",  "globtrk: chisq0 - xy, ftpc east", 50, 0.,50.);
-  m_chisq0FW     = QAH1F("QaGtrkChisq0FW",  "globtrk: chisq0 - xy, ftpc west", 50, 0.,50.);
-  m_chisq1FE     = QAH1F("QaGtrkChisq1FE",  "globtrk: chisq1 - z, ftpc east", 50, 0.,50.);
-  m_chisq1FW     = QAH1F("QaGtrkChisq1FW",  "globtrk: chisq1 - z, ftpc west", 50, 0.,50.);
-
 
 // 2D - tpc
 
@@ -614,8 +575,49 @@ void StQABookHist::BookHistGlob(){
      m_nfptonpt_etaT->SetXTitle("eta");
      m_nfptonpt_etaT->SetYTitle("Ratio Nfitpnt/Npnt");
 
-// 2D - ftpc
 
+// 1D ftpc
+
+  m_pointFE      = QAH1F("QaGtrkNPntFE",    "globtrk: N points on trk,ftpc east", 15, 0.,15.);
+  m_pointFW      = QAH1F("QaGtrkNPntFW",    "globtrk: N points on trk,ftpc west", 15, 0.,15.);
+  m_max_pointFE  = QAH1F("QaGtrkNPntMaxFE", "globtrk: N max pnts on trk, ftpc east", 15, 0.,15.);
+  m_max_pointFW  = QAH1F("QaGtrkNPntMaxFW", "globtrk: N max pnts on trk, ftpc west", 15, 0.,15.);
+  m_fit_pointFE  = QAH1F("QaGtrkNPntFitFE", "globtrk: N fit pnts on trk, ftpc east", 15, 0.,15.);
+  m_fit_pointFW  = QAH1F("QaGtrkNPntFitFW", "globtrk: N fit pnts on trk, ftpc west", 15, 0.,15.);
+  m_glb_ratioFE  = QAH1F("QaGtrkRnfFE",     "globtrk: ratio Nfit/tot pnt, ftpc east", 55, 0., 1.1);
+  m_glb_ratioFW  = QAH1F("QaGtrkRnfFW",     "globtrk: ratio Nfit/tot pnt, ftpc west", 55, 0., 1.1);
+  m_glb_ratiomFE = QAH1F("QaGtrkRnmFE",     "globtrk: ratio Nfit/max pnt, ftpc east", 55, 0., 1.1);
+  m_glb_ratiomFW = QAH1F("QaGtrkRnmFW",     "globtrk: ratio Nfit/max pnt, ftpc west", 55, 0., 1.1);
+  m_glb_chargeFE = QAH1F("QaGtrkChrgFE",    "globtrk: charge, ftpc east ", 20,-2.,2.);
+  m_glb_chargeFW = QAH1F("QaGtrkChrgFW",    "globtrk: charge, ftpc west ", 20,-2.,2.);
+  m_glb_xfFE     = QAH1F("QaGtrkXfFE",      "globtrk: x of first hit on trk, ftpc east", 50,-200.,200.);
+  m_glb_xfFW     = QAH1F("QaGtrkXfFW",      "globtrk: x of first hit on trk, ftpc west", 50,-200.,200.);
+  m_glb_yfFE     = QAH1F("QaGtrkYfFE",      "globtrk: y of first hit on trk, ftpc east", 50,-200.,200.);
+  m_glb_yfFW     = QAH1F("QaGtrkYfFW",      "globtrk: y of first hit on trk, ftpc west", 50,-200.,200.);
+  m_glb_zfFE     = QAH1F("QaGtrkZfFE",      "globtrk: z of first hit on trk, ftpc east", 50,-300.,300.);
+  m_glb_zfFW     = QAH1F("QaGtrkZfFW",      "globtrk: z of first hit on trk, ftpc west", 50,-300.,300.);
+  m_glb_radfFE   = QAH1F("QaGtrkRFE",       "globtrk: radial position of first hit, ftpc east", 40,0.,40.);
+  m_glb_radfFW   = QAH1F("QaGtrkRFW",       "globtrk: radial position of first hit, ftpc west", 40,0.,40.);
+  m_lengthFE     = QAH1F("QaGtrkLengthFE",  "globtrk: track length, ftpc east", 30,0.,30.);
+  m_lengthFW     = QAH1F("QaGtrkLengthFW",  "globtrk: track length, ftpc west", 30,0.,30.);
+  m_psiFE        = QAH1F("QaGtrkPsiFE",     "globtrk: psi, ftpc east", 36, -360.,0.);
+  m_psiFW        = QAH1F("QaGtrkPsiFW",     "globtrk: psi, ftpc west", 36, 0.,360.);
+  m_tanlFE       = QAH1F("QaGtrkTanlFE",    "globtrk: tanl, ftpc east",30,-60.,60.);
+  m_tanlFW       = QAH1F("QaGtrkTanlFW",    "globtrk: tanl, ftpc west",30,-60.,60.);
+  m_glb_thetaFE  = QAH1F("QaGtrkThetaFE",   "globtrk: theta, ftpc east",20,0.,4.);
+  m_glb_thetaFW  = QAH1F("QaGtrkThetaFW",   "globtrk: theta, ftpc west",20,0.,4.);
+  m_etaFE        = QAH1F("QaGtrkEtaFE",     "globtrk: eta, ftpc east",80,-8.,8.);
+  m_etaFW        = QAH1F("QaGtrkEtaFW",     "globtrk: eta, ftpc west",80,-8.,8.);
+  m_pTFE         = QAH1F("QaGtrkPtFE",      "globtrk: pT, ftpc east",50,0.,5.);
+  m_pTFW         = QAH1F("QaGtrkPtFW",      "globtrk: pT, ftpc west",50,0.,5.);
+  m_momFE        = QAH1F("QaGtrkPFE",       "globtrk: momentum, ftpc east ",50,0.,5.);
+  m_momFW        = QAH1F("QaGtrkPFW",       "globtrk: momentum, ftpc west ",50,0.,5.);
+  m_chisq0FE     = QAH1F("QaGtrkChisq0FE",  "globtrk: chisq0 - xy, ftpc east", 50, 0.,500.);
+  m_chisq0FW     = QAH1F("QaGtrkChisq0FW",  "globtrk: chisq0 - xy, ftpc west", 50, 0.,500.);
+  m_chisq1FE     = QAH1F("QaGtrkChisq1FE",  "globtrk: chisq1 - z, ftpc east", 50, 0.,500.);
+  m_chisq1FW     = QAH1F("QaGtrkChisq1FW",  "globtrk: chisq1 - z, ftpc west", 50, 0.,500.);
+
+// 2D - ftpc
 
   m_globtrk_xf_yfFE = QAH2F("QaGtrkXfYfFE","globtrk: Y vs X of first hit on trk, ftpcE", 40,-40.,40.,40,-40.,40.);
     m_globtrk_xf_yfFE->SetXTitle("x first");
@@ -663,7 +665,7 @@ void StQABookHist::BookHistPrim(){
 
   m_primtrk_good  = QAH1F("QaPtrkGood",  "primtrk: tot # good tracks",40,0.,10000.);  
   m_pdet_id     = QAH1F("QaPtrkDetId",   "primtrk: Detector ID for tracks",25,0.,25.);
-  m_ppoint      = QAH1F("QaPtrkNPnt",    "primtrk: N points on track", 50, 0.,50.);
+  m_ppoint      = QAH1F("QaPtrkNPnt",    "primtrk: N points on track", 100, 0.,2000.);
   m_pmax_point  = QAH1F("QaPtrkNPntMax", "primtrk: N max points on track", 50, 0.,50.);
   m_pfit_point  = QAH1F("QaPtrkNPntFit", "primtrk: N fit points on track", 50, 0.,50.);
   m_prim_charge = QAH1F("QaPtrkChrg",    "primtrk: charge ", 20,-2.,2.);
@@ -684,7 +686,7 @@ void StQABookHist::BookHistPrim(){
   m_pchisq0     = QAH1F("QaPtrkChisq0",  "primtrk: chisq0 - xy", 50, 0.,5.);
   m_pchisq1     = QAH1F("QaPtrkChisq1",  "primtrk: chisq1 - z", 50, 0.,5.);
   m_plength     = QAH1F("QaPtrkLength",  "primtrk: track length", 50,0.,300.);
-  m_prim_impact = QAH1F("QaPtrkImpact",  "primtrk: impact param from prim vtx ", 50,0.,0.05);
+  m_prim_impact = QAH1F("QaPtrkImpact",  "primtrk: impact param from prim vtx ", 50,0.,0.005);
 
 
 // 2D
