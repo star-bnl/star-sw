@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.346 2003/07/30 01:04:13 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.347 2003/07/30 01:50:17 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -31,7 +31,7 @@
 #include "StiMaker/StiMaker.h"
 #include "StSecondaryVertexMaker/StV0FinderMaker.h"
 #include "StSecondaryVertexMaker/StXiFinderMaker.h"
-
+#include "StHitFilterMaker/StHitFilterMaker.h"
 
 //_____________________________________________________________________
 Bfc_st BFC1[] = {
@@ -1451,10 +1451,16 @@ Int_t StBFChain::Instantiate()
 	    //mk->UseOnlyCathodeDriftVelocity();  // uses offl database
 	  }
 	  
-	  if (maker == "StHitFiltermaker"){
+	  if (maker == "StHitFilterMaker"){
 	    if ( GetOption("svtfilt") ){
 	      // Placeholder for option
 	      printf("QAInfo: SVT hit filter is ON\n");
+	      StHitFilterMaker *Filtmk=(StHitFilterMaker*)mk;
+	      //Filtmk->setPtLowerCut(-99.); 
+	      //Filtmk->setPtUpperCut(-99.);
+	      //Filtmk->setAbsEtaCut(-99);
+	      //Filtmk->setAbsZVertCut(30);
+
 	    } else {
 	      printf("QAInfo: Default hit filtering is ON\n");
 	    }
