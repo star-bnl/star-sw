@@ -55,7 +55,6 @@ macro svm
   if (staf_result(1).eq.0) then
       cd [dst]
       tdm/newtable ev0out ev0_aux 100000
-      maxrow [dst]/ev0out 100000
   endif
     
   rowcount [dst]/vertex
