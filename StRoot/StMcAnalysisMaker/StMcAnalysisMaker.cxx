@@ -1,7 +1,15 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.4 1999/07/30 16:19:19 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.5 1999/09/09 23:59:37 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.5  1999/09/09 23:59:37  calderon
+ * Made the following changes:
+ *
+ * -book histograms and ntuple in Init()
+ * -do not delete the histograms, they are supposed to be
+ *  deleted automatically by the chain
+ * -don't create the canvas here, now done in the macro
+ *
  * Revision 1.4  1999/07/30 16:19:19  calderon
  * Use value_type typedef for inserting pairs in multimaps, Victor corrected iterators on HP in SL99h, Improved use of const for HP compilation
  *
@@ -101,6 +109,7 @@ StMcAnalysisMaker::~StMcAnalysisMaker()
 {
     //  StMcAnalysisMaker Destructor
     //  delete the histograms
+    cout << "Inside StMcAnalysisMaker Destructor" << endl;
     SafeDelete(mAssociationCanvas);
     SafeDelete(mMomResolution);
     SafeDelete(mHitResolution);
@@ -109,9 +118,20 @@ StMcAnalysisMaker::~StMcAnalysisMaker()
     SafeDelete(mTrackNtuple);
 }
 
+//_____________________________________________________________________________
+
+void StMcAnalysisMaker::Clear(const char*)
+{
+    // StMcAnalysisMaker - Clear,
+    // Don't delete the canvas, so that it stays if needed
+    
+    StMaker::Clear();
+}
+
 //_________________________________________________
 Int_t StMcAnalysisMaker::Finish()
 {
+    cout << "in StMcAnalysisMaker::Finish....." << endl;
     return StMaker::Finish();
 }
 
@@ -122,6 +142,28 @@ Int_t StMcAnalysisMaker::Init()
     // StMcAnalysisMaker - Init
     
     SetZones();  // This is my method to set the zones for the canvas.
+
+    // Book Histograms Here so they can be found and deleted by Victor's chain (I hope).
+    mHitResolution = new TH2F("Hit Resolution using Map","Delta X Vs Delta Z for Hits",
+			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
+    mHitResolution->SetXTitle("Delta X (cm)");
+    mHitResolution->SetYTitle("Delta Z (cm)");
+
+    mMomResolution = new TH1F("Mom. Resolution","(|p| - |pmc|)/|p|",100,-1.,1.);
+    mMomResolution->SetXTitle("Resolution (%)");
+
+    char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commHits:hitDiffX:hitDiffY:hitDiffZ";
+    mTrackNtuple = new TNtuple("Track Ntuple","Track Pair Info",vars);
+    
+    //cout << "Defined Momentum Res. Histogram & Ntuple" << endl;
+
+    coordRec = new TH2F("coords. Rec","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
+    coordRec->SetXTitle("X (cm)");
+    coordRec->SetYTitle("Y (cm)");
+    
+    coordMcPartner = new TH2F("coords. MC","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
+    coordMcPartner->SetXTitle("X (cm)");
+    coordMcPartner->SetYTitle("Y (cm)");
 
     return StMaker::Init();
 }
@@ -177,14 +219,14 @@ Int_t StMcAnalysisMaker::Make()
     
     
     // Delete previous histogram if any, then book histogram
-    if (mHitResolution!=0) {
-	delete mHitResolution;
-	mHitResolution =0;
-    }
-    mHitResolution = new TH2F("Hit Resolution","Delta X Vs Delta Z for Hits",
-			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
-    mHitResolution->SetXTitle("Delta X (cm)");
-    mHitResolution->SetYTitle("Delta Z (cm)");
+//     if (mHitResolution!=0) {
+// 	delete mHitResolution;
+// 	mHitResolution =0;
+//     }
+//     mHitResolution = new TH2F("Hit Resolution","Delta X Vs Delta Z for Hits",
+// 			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
+//     mHitResolution->SetXTitle("Delta X (cm)");
+//     mHitResolution->SetYTitle("Delta Z (cm)");
 
     // Fill histogram from map
 
@@ -239,27 +281,27 @@ Int_t StMcAnalysisMaker::Make()
     StThreeVectorF p;
     StThreeVectorF pmc;
     float diff =0;
-    if (mMomResolution!=0) {
-	delete mMomResolution;
-	mMomResolution=0;
-    }
-    mMomResolution = new TH1F("Mom. Resolution","(|p| - |pmc|)/|p|",100,-1.,1.);
-    mMomResolution->SetXTitle("Resolution (%)");
+//     if (mMomResolution!=0) {
+// 	delete mMomResolution;
+// 	mMomResolution=0;
+//     }
+//     mMomResolution = new TH1F("Mom. Resolution","(|p| - |pmc|)/|p|",100,-1.,1.);
+//     mMomResolution->SetXTitle("Resolution (%)");
 
     
     
-    if (mTrackNtuple!=0) {
-	delete mTrackNtuple;
-	mTrackNtuple=0;
-    }
-    char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commHits:hitDiffX:hitDiffY:hitDiffZ";
+//     if (mTrackNtuple!=0) {
+// 	delete mTrackNtuple;
+// 	mTrackNtuple=0;
+//     }
+//     char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commHits:hitDiffX:hitDiffY:hitDiffZ";
     float* values = new float[12];
-    mTrackNtuple = new TNtuple("Track Ntuple","Track Pair Info",vars);
+//     mTrackNtuple = new TNtuple("Track Ntuple","Track Pair Info",vars);
     
-    cout << "Defined Momentum Res. Histogram & Ntuple" << endl;
+//     cout << "Defined Momentum Res. Histogram & Ntuple" << endl;
     for (trackMapIter tIter=theTrackMap->begin();
 	 tIter!=theTrackMap->end(); ++tIter){
-	
+
 	recTrack = (*tIter).first;
 	if ((*tIter).second->commonHits()<10) continue;
 	mcTrack = (*tIter).second->partnerMcTrack();
@@ -275,7 +317,6 @@ Int_t StMcAnalysisMaker::Make()
 	// Fill 1d Mom. resolution Histogram
 	diff = (p.mag() - pmc.mag())/p.mag();
 	mMomResolution->Fill(diff,1.);
-
 	// Loop to get Mean hit position diff.
 	StThreeVectorF rHitPos(0,0,0);
 	StThreeVectorF mHitPos(0,0,0);
@@ -293,12 +334,11 @@ Int_t StMcAnalysisMaker::Make()
 	    }// Associated Hits Loop.
 	
 	} // Hits of rec. Track Loop
-	
+       
 	rHitPos /=(float) (*tIter).second->commonHits();
 	mHitPos /=(float) (*tIter).second->commonHits();
 	for (int jj=0; jj<3; jj++) values[9+jj] = rHitPos[jj] - mHitPos[jj];
 	mTrackNtuple->Fill(values);
-
     } // Tracks in Map Loop
     cout << "Finished Track Loop, Made Ntuple" << endl;
     //delete vars;
@@ -310,20 +350,20 @@ Int_t StMcAnalysisMaker::Make()
     // - x and y positions of the hits from the  Monte Carlo  track.
     
     StMcTrack* partner = (*trackBounds.first).second->partnerMcTrack();
-    if (coordRec!=0) {
-	delete coordRec;
-	coordRec =0;
-    }
-    coordRec = new TH2F("coords. Rec","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
-    coordRec->SetXTitle("X (cm)");
-    coordRec->SetYTitle("Y (cm)");
-    if (coordMcPartner!=0) {
-	delete coordMcPartner;
-	coordMcPartner =0;
-    }
-    coordMcPartner = new TH2F("coords. MC","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
-    coordMcPartner->SetXTitle("X (cm)");
-    coordMcPartner->SetYTitle("Y (cm)");
+//     if (coordRec!=0) {
+// 	delete coordRec;
+// 	coordRec =0;
+//     }
+//     coordRec = new TH2F("coords. Rec","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
+//     coordRec->SetXTitle("X (cm)");
+//     coordRec->SetYTitle("Y (cm)");
+//     if (coordMcPartner!=0) {
+// 	delete coordMcPartner;
+// 	coordMcPartner =0;
+//     }
+//     coordMcPartner = new TH2F("coords. MC","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
+//     coordMcPartner->SetXTitle("X (cm)");
+//     coordMcPartner->SetYTitle("Y (cm)");
 
     StTpcHitIterator rcHitIt;
     StMcTpcHitIterator mcHitIt;
@@ -338,7 +378,7 @@ Int_t StMcAnalysisMaker::Make()
 
     
     
-    mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,900,500);
+    //mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,900,500);
 
     return kStOK;
 }

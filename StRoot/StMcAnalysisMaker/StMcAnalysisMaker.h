@@ -1,7 +1,15 @@
 /**********************************************
  *
- * $Id: StMcAnalysisMaker.h,v 1.3 1999/07/29 15:08:33 calderon Exp $
+ * $Id: StMcAnalysisMaker.h,v 1.4 1999/09/09 23:59:38 calderon Exp $
  * $Log: StMcAnalysisMaker.h,v $
+ * Revision 1.4  1999/09/09 23:59:38  calderon
+ * Made the following changes:
+ *
+ * -book histograms and ntuple in Init()
+ * -do not delete the histograms, they are supposed to be
+ *  deleted automatically by the chain
+ * -don't create the canvas here, now done in the macro
+ *
  * Revision 1.3  1999/07/29 15:08:33  calderon
  * Include Mom. Resolution example (Histograms & Ntuple)
  *
@@ -38,6 +46,7 @@ class StMcAnalysisMaker : public StMaker {
     StMcAnalysisMaker(const char* name = "McAnalysis",
 		       const char* title = "event/McAnalysis");
     virtual ~StMcAnalysisMaker();
+    virtual void  Clear(const char* opt="");
     virtual Int_t Init();
     virtual Int_t Make();
     virtual Int_t Finish();
@@ -68,7 +77,7 @@ private:
     static const Float_t mMaxDeltaZ;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcAnalysisMaker.h,v 1.3 1999/07/29 15:08:33 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcAnalysisMaker.h,v 1.4 1999/09/09 23:59:38 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StMcAnalysisMaker, 1)
