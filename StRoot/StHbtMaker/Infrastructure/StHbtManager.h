@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.h,v 1.3 1999/09/04 04:41:02 lisa Exp $
+ * $Id: StHbtManager.h,v 1.4 1999/09/05 02:58:12 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.h,v $
+ * Revision 1.4  1999/09/05 02:58:12  lisa
+ * add ASCII microDST reader/writer AND franksParticle cuts
+ *
  * Revision 1.3  1999/09/04 04:41:02  lisa
  * StHbtEvent IO   --and--  StHbtEventWriter (microDST) method added to framework
  *
@@ -54,7 +57,7 @@ public:
 
   void AddAnalysis(StHbtAnalysis*);
 
-  void Init();
+  int Init();
   void ProcessEvent();
   void Finish();
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.7 1999/09/04 04:41:01 lisa Exp $
+ * $Id: StHbtManager.cxx,v 1.8 1999/09/05 02:58:11 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.8  1999/09/05 02:58:11  lisa
+ * add ASCII microDST reader/writer AND franksParticle cuts
+ *
  * Revision 1.7  1999/09/04 04:41:01  lisa
  * StHbtEvent IO   --and--  StHbtEventWriter (microDST) method added to framework
  *
@@ -60,14 +63,22 @@ StHbtManager::~StHbtManager(){
   delete mAnalysisCollection;
 }
 //____________________________
-void StHbtManager::Init(){
+int StHbtManager::Init(){
+  StHbtString temp = " ";
   if (mEventReader) {
-    mEventReader->Init('r');
-    if (mEventWriter) mEventWriter->Init('w',mEventReader->Report());
+    if (mEventReader->Init("r")){
+      cout << " StHbtManager::Init() - Reader initialization failed " << endl;
+      return (1);
+    }
+    temp = mEventReader->Report();
   }
-  else{
-    if (mEventWriter) mEventWriter->Init('w');
+  if (mEventWriter) {
+    if (mEventWriter->Init("w",temp)){
+      cout << " StHbtManager::Init() - Writer initialization failed " << endl;
+      return (1);
+    }
   }
+  return (0);
 }
 //____________________________
 void StHbtManager::Finish(){

@@ -66,6 +66,16 @@ void StHbtExample(Int_t nevents=1,
 
     cout << "READER SET UP.... " << endl;
 
+    // Hey kids! Let's make a microDST!
+    // in StHbt we do this by instantiating and plugging in a StHbtEventReader as a writer!
+    // the particular StHbtEventReader that we will use will write (and read) ASCII files
+
+    //    StHbtAsciiReader* Writer = new StHbtAsciiReader;
+    //    Writer->SetFileName("FirstMicroDst.asc");
+    //    TheManager->SetEventWriter(Writer);
+
+    cout << "WRITER SET UP.... " << endl;
+
     // 0) now define an analysis...
     StHbtAnalysis* anal = new StHbtAnalysis;
     // 1) set the Event cuts for the analysis
@@ -162,7 +172,10 @@ void StHbtExample(Int_t nevents=1,
 
   // now execute the chain member functions
   
-  chain->Init(); // This should call the Init() method in ALL makers
+  if (chain->Init()){ // This should call the Init() method in ALL makers
+    cout << "Initialization failed \n";
+    goto TheEnd;
+  }
   chain->PrintInfo();
 
 
@@ -192,4 +205,5 @@ void StHbtExample(Int_t nevents=1,
   cout << "StHbtExample -- Done with event loop" << endl;
 
   chain->Finish(); // This should call the Finish() method in ALL makers
+ TheEnd:
 }

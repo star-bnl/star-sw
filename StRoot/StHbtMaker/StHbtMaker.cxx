@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtMaker.cxx,v 1.4 1999/07/26 16:21:25 lisa Exp $
+ * $Id: StHbtMaker.cxx,v 1.5 1999/09/05 02:58:10 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.cxx,v $
+ * Revision 1.5  1999/09/05 02:58:10  lisa
+ * add ASCII microDST reader/writer AND franksParticle cuts
+ *
  * Revision 1.4  1999/07/26 16:21:25  lisa
  * always convert string to char when output - needed on solaris
  *
@@ -62,7 +65,10 @@ void StHbtMaker::Clear(const char*)
 //_____________________________________________________________________________
 Int_t StHbtMaker::Init()
 {
-
+  if (mHbtManager->Init()){
+    cout << "StHbtMaker::Init() - Manager init failed " << endl;
+    return (2);
+  }
   cout << "StHbtMaker::Init() - requesting a Report " << endl;
   StHbtString tempString = mHbtManager->Report();
   cout << "Got the report, now let me try to put it to screen" << endl;
