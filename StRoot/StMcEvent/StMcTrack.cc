@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.9 2000/04/18 00:55:14 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.10 2000/05/04 22:46:01 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.10  2000/05/04 22:46:01  calderon
+ * read the pdg Id ALSO from the g2t_track table.  This caused problems
+ * for embedded tracks.
+ *
  * Revision 2.9  2000/04/18 00:55:14  calderon
  * added printout of local momentum to operator<<
  *
@@ -65,7 +69,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.9 2000/04/18 00:55:14 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.10 2000/05/04 22:46:01 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -82,6 +86,7 @@ StMcTrack::StMcTrack(g2t_track_st* trk) {
     mFourMomentum.setE(trk->e);
     mIsShower = trk->is_shower;
     mGeantId = trk->ge_pid;
+    mPdgId   = trk->eg_pid;
     mKey     = trk->id;
     mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(trk->ge_pid);
     mEventGenLabel = trk->eg_label;
