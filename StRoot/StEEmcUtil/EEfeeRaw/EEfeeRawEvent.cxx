@@ -5,6 +5,7 @@
 
 ClassImp(EEfeeRawEvent)
 
+
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
@@ -46,6 +47,7 @@ void EEfeeRawEvent :: print(int flag) const{
   
   int i;
   for(i=0;i<block->GetEntries();i++) {
+    printf("%d-",i+1);
     ((EEfeeDataBlock *)(block->At(i)))->print(flag);
   }
 
@@ -70,6 +72,42 @@ void EEfeeRawEvent ::addFeeDataBlock(EEfeeDataBlock* b){
   //  bl1->print();
 }
 
+//--------------------------------------------------
+//--------------------------------------------------
+//--------------------------------------------------
+
+void EEfeeRawEvent::maskWrongCrates( long timeStamp) {
+
+  if(timeStamp< 1068744930) {// Thu Nov 13 12:35:30 2003
+    printf(" maskWrongCrates() not implemented for time stamp   : %ld / %s",timeStamp,ctime((const time_t *)& timeStamp));
+    assert(1==2);
+  }
+
+  // add more patterns below
+  int listA[]={1,2,3,4,5,6};
+  int listB[]={1,2,3,4,5,6,84,85,86};
+
+  int *list, dim;
+  if (timeStamp< 1068761131)  //Thu Nov 13 17:05:31 2003
+    { list=listA; dim=sizeof(listA)/sizeof(int); }
+  else 
+    { list=listB; dim=sizeof(listB)/sizeof(int); }
+
+
+  int i;
+  for(i=0;i<block->GetEntries();i++) {
+    EEfeeDataBlock *b=(EEfeeDataBlock *)block->At(i);
+    int crateID=b->getCrateID();
+    if(i>=dim ||  crateID!=list[i]) b->maskCrate();
+    //printf("vvv %d %d \n",i,crateID);
+  }
   
+  
+}
 
-
+/*
+ * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.4  2003/11/20 16:01:46  balewski
+ * towars run 4
+ *
+ */

@@ -2,8 +2,11 @@
 #define EEname2Index_h
 
 /*********************************************************************
- * $Id: EEname2Index.h,v 1.1 2003/01/28 23:17:14 balewski Exp $
+ * $Id: EEname2Index.h,v 1.2 2003/11/20 16:01:47 balewski Exp $
  * $Log: EEname2Index.h,v $
+ * Revision 1.2  2003/11/20 16:01:47  balewski
+ * towars run 4
+ *
  * Revision 1.1  2003/01/28 23:17:14  balewski
  * start
  *
@@ -46,9 +49,9 @@
 #define EEindexMax 120000 // use it to decalare any local array
 #define EEindexVersion 100 // use assert(EEindexVersion==100) if you depend on particular indexing, but try not to.
 
-int EEname2Index(char *name);
-
+int EEname2Index(const char *name);
 void EEindex2Name(int index, char * name);
+void  EEindexRange(int secID,int &ix1, int &ix2);
 
 #endif
 

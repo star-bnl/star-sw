@@ -1,5 +1,7 @@
 #include <cassert>
 
+#include "EEdims.h"
+
 #include "EEfeeDataBlock.h"
 
 ClassImp(EEfeeDataBlock)
@@ -40,7 +42,8 @@ EEfeeDataBlock ::  ~EEfeeDataBlock() {
   if(head) delete [] head;
   if(data) delete [] data;
 }
- 
+
+
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
@@ -51,8 +54,10 @@ void EEfeeDataBlock :: print(int flag){
   
   if(flag<=0) return;
 
-  printf("Data:");
-  for(int i=0;i<MaxData;i++) {
+  int nd=getValidDataLen();
+  if(flag>1) nd=getDataLen();
+  printf("Data[%3d]:",nd);
+  for(int i=0;i<nd;i++) {
     if( i%8 == 0 ) printf("\n");
     printf("0x%04hx ",data[i]);
 
@@ -80,6 +85,15 @@ void EEfeeDataBlock ::setHead(UShort_t *h) {
   memcpy(head,h,sizeof(head[0])*MaxHead);
 }
 
+//--------------------------------------------------
+//--------------------------------------------------
+//--------------------------------------------------
+
+int EEfeeDataBlock ::getValidDataLen() const {
+  if(getCrateID()>=MinTwCrateID && getCrateID()<= MaxTwCrateID ) return MxTwCrateCh;
+  if(getCrateID()>=MinMapmtCrateID && getCrateID()<= MaxMapmtCrateID ) return MxMapmtCrateCh;
+  return 0;
+}
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -87,7 +101,8 @@ void EEfeeDataBlock ::setHead(UShort_t *h) {
 int EEfeeDataBlock ::getNData(int thres) const {
   int n=0;
   int i;
-  for(i=0;i<MaxData;i++) if(data[i]>thres) n++;
+  const int nd=getValidDataLen();
+  for(i=0;i<nd;i++) if(data[i]>thres) n++;
   return n;
 }
 
@@ -141,4 +156,11 @@ void EEfeeDataBlock :: clear(){
 //--------------------------------------------------
 //--------------------------------------------------
 
+
+/*
+ * $Log: EEfeeDataBlock.cxx,v $
+ * Revision 1.4  2003/11/20 16:01:46  balewski
+ * towars run 4
+ *
+ */
 

@@ -2,32 +2,12 @@
 #ifndef EEfeeDataBlock_h
 #define EEfeeDataBlock_h
 /*********************************************************************
- * $Id: EEfeeDataBlock.h,v 1.1 2003/01/28 23:17:14 balewski Exp $
+ * $Id: EEfeeDataBlock.h,v 1.2 2003/11/20 16:01:46 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Data Block
  *********************************************************************
- * $Log: EEfeeDataBlock.h,v $
- * Revision 1.1  2003/01/28 23:17:14  balewski
- * start
- *
- * Revision 1.5  2002/12/19 22:22:56  zolnie
- * fixed trig type bug
- *
- * Revision 1.4  2002/12/19 21:54:32  zolnie
- * updates for real fee data
- *
- * Revision 1.3  2002/12/04 19:13:16  zolnie
- * fixed bug in setData
- *
- * Revision 1.2  2002/12/03 23:48:52  zolnie
- * changed back to var length
- *
- * Revision 1.1  2002/11/30 20:04:37  balewski
- * start
- *
- *
- *********************************************************************/
+ */
 #include "TObject.h"
 
 class EEfeeDataBlock :public TObject {
@@ -61,14 +41,41 @@ public:
   UShort_t* getHead() const { return head; };
   
   int       getDataLen() const { return MaxData; }
+  int       getValidDataLen() const;
   int       getHeadLen() const { return MaxHead; }
 
   UShort_t  getToken()    const { return  head[TOKEN];           }
   UChar_t   getTrigType() const { return  head[CRATE] / 0x0100 ; }
   UChar_t   getCrateID()  const { return  head[CRATE] & 0x00FF ; }
   int       getNData(int thres) const;
+  void      maskCrate() {head[CRATE]=0xFFFF;}
+
   ClassDef(EEfeeDataBlock,1) // Endcap Emc event
 };
 #endif
 
-
+/*
+ * $Log: EEfeeDataBlock.h,v $
+ * Revision 1.2  2003/11/20 16:01:46  balewski
+ * towars run 4
+ *
+ * Revision 1.1  2003/01/28 23:17:14  balewski
+ * start
+ *
+ * Revision 1.5  2002/12/19 22:22:56  zolnie
+ * fixed trig type bug
+ *
+ * Revision 1.4  2002/12/19 21:54:32  zolnie
+ * updates for real fee data
+ *
+ * Revision 1.3  2002/12/04 19:13:16  zolnie
+ * fixed bug in setData
+ *
+ * Revision 1.2  2002/12/03 23:48:52  zolnie
+ * changed back to var length
+ *
+ * Revision 1.1  2002/11/30 20:04:37  balewski
+ * start
+ *
+ *
+ *********************************************************************/
