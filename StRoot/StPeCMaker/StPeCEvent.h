@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.1 2000/03/24 22:36:56 nystrand Exp $
+// $Id: StPeCEvent.h,v 1.2 2000/04/21 19:10:27 nystrand Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.2  2000/04/21 19:10:27  nystrand
+// Include StPeCPair class
+//
 // Revision 1.1  2000/03/24 22:36:56  nystrand
 // First version of StPeCEvent
 //
@@ -23,6 +26,7 @@
 #ifndef __CINT__
 #include "PhysicalConstants.h"
 #include "StEventTypes.h"
+#include "StPeCPair.h"
 #endif /* __CINT__ */
 #include "SystemOfUnits.h"
 
@@ -44,8 +48,10 @@ public:
 #ifndef __CINT__
   void                            addPeCPrimaryTrack(StTrack* trk) const;
   void                            addPeCNonPrimaryTrack(StTrack* trk) const;
+  void                            addPeCPair(StPeCPair* pair) const;
   StPeCPrimaryTrackCollection*    getPeCPrimaryTrackCollection() const;
   StPeCNonPrimaryTrackCollection* getPeCNonPrimaryTrackCollection() const;
+  StPeCPairCollection*            getPeCPairCollection() const;
   StLorentzVectorF                getEvent4Momentum(StPeCParticle pid) const;
 #endif /*__CINT__*/
   Float_t                         mInv(StPeCParticle pid) const;
@@ -73,6 +79,7 @@ private:
 #ifndef __CINT__
   StPeCPrimaryTrackCollection     *pPrim; //!
   StPeCNonPrimaryTrackCollection  *pNonPrim; //!
+  StPeCPairCollection             *pPair; //!
 #endif /*__CINT__*/
 
   ClassDef(StPeCEvent,1)
