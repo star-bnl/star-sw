@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.122 1999/09/26 19:16:02 fisyak Exp $
+# $Id: MakePam.mk,v 1.123 1999/09/30 20:07:37 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.123  1999/09/30 20:07:37  fisyak
+# Synchronize cons and makel Path
+#
 # Revision 1.122  1999/09/26 19:16:02  fisyak
 # Merge directory structures with cons
 #
@@ -268,22 +271,13 @@ ifeq (,$(sources))
 	@echo Nothing to do for package $(PKG), no source files
 else
 SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
-SUBDIR1 := $(subst $(OUT_DIR)/pams/,, $(wildcard $(OUT_DIR)/pams/*/idl))
-SUBDIR2 := $(filter-out $(SUBDIR1), $(subst $(STAR)/pams/,, $(wildcard $(STAR)/pams/*/idl)))
-IDL_DIRS:= $(addprefix $(OUT_DIR)/pams/, $(SUBDIR1)) $(addprefix $(STAR)/pams/, $(SUBDIR2)) 
-SUBDIR1 := $(subst $(OUT_DIR)/pams/,, $(wildcard $(OUT_DIR)/pams/*/inc))
-SUBDIR2 := $(filter-out $(SUBDIR1), $(subst $(STAR)/pams/,, $(wildcard $(STAR)/pams/*/inc)))
-INC_DIRS:= $(addprefix $(OUT_DIR)/pams/, $(SUBDIR1)) $(addprefix $(STAR)/pams/, $(SUBDIR2)) 
-INC_DIRS+= $(STAF_UTILS_INCS)
-INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StEvent) \
-              StRoot .share include include/tables .share/$(PKG) pams inc StDb/include
-#                            StarClassLibrary/include
+INC_NAMES  := include
 INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES))))
 ifneq ($(ROOT_DIR),$(STAR))
-  INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
+  INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES))))
 endif
-INC_DIRS  += $(STAF)/inc $(ROOT_DIR)
-#INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
+INC_DIRS  += $(STAF)/inc
+INC_DIRS+= $(STAF_UTILS_INCS)
 DINCINT  :=  -DROOT_CINT $(filter-out -DST_NO_TEMPLATE_DEF_ARGS, $(CPPFLAGS)) $(ROOTCINTD) $(INCINT)
 ifeq ($(STAR_HOST_SYS),sun4x_56)
   CXXFLAGS +=-ptr$(OBJ_DIR)
@@ -334,15 +328,13 @@ echo "                                                              ">>$(GEN_TAB
 echo "#endif                                                        ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h
 endef
 #-------------------------------includes----------------------------
-STICFLAGS =  $(addprefix -I,  $(STAF_SYS_INCS) $(SRC_DIR) $(IDL_DIRS))
+STICFLAGS =  $(addprefix -I,  $(INC_DIRS))
 CXXFLAGS   += -DASU_MALLOC_OFF
 
-INCLUDES += -I. -I../ -I/usr/include \
-             $(addprefix -I,$(STAF_SYS_INCS) $(SRC_DIR) $(GEN_TAB_INC) $(GEN_DIR) $(INC_DIRS)) \
-            -I$(CERN_ROOT)/include
+INCLUDES += $(addprefix -I,$(INC_DIRS)) -I$(CERN_ROOT)/include
 
 ifneq ($(OUT_DIR),$(STAR))        
-  INCLUDES += -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
+#  INCLUDES += -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
 endif                          
 CPPFLAGS += $(INCLUDES)
 FFLAGS   += -DCERNLIB_TYPE  -I$(CERN_ROOT)/include -I$(CERN_ROOT)/include/geant321 

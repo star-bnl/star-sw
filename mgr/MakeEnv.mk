@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.21 1999/09/24 22:18:27 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.22 1999/09/30 20:07:37 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.22  1999/09/30 20:07:37  fisyak
+# Synchronize cons and makel Path
+#
 # Revision 1.21  1999/09/24 22:18:27  fisyak
 # Add new Table method (VF), fix bug in VPATH
 #
@@ -181,7 +184,8 @@ STAF_ANA := $(strip $(wildcard $(STAF_ANA)))
 
 
 ifdef STAF_SYS
-  STAF_SYS_INCS := $(STAF)/inc $(STAF_SYS)/inc
+  STAF_SYS_INCS := $(STAF)/inc
+#                               $(STAF_SYS)/inc
 #
 #	default staf libs
   STAF_SYS_LIB := $(STAF_SYS)/.$(STAF_ARCH)/lib

@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.116 1999/09/26 19:16:02 fisyak Exp $
+# $Id: MakeDll.mk,v 1.117 1999/09/30 20:07:34 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.117  1999/09/30 20:07:34  fisyak
+# Synchronize cons and makel Path
+#
 # Revision 1.116  1999/09/26 19:16:02  fisyak
 # Merge directory structures with cons
 #
@@ -355,7 +358,8 @@ ifeq (tables,$(PKGNAME))
 FILES_TAB  := $(wildcard $(GEN_TAB)/St_*_Table.cxx)
 #FILES_H    := $(wildcard $(GEN_TAB_INC)/St_*_Table.h)
 else
-FILES_HH   := $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.h) $(wildcard $(dir)/*.hh))
+#FILES_HH   := $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.h) $(wildcard $(dir)/*.hh))
+FILES_HH   := $(foreach dir, $(SRC_DIR), $(wildcard $(dir)/*.h) $(wildcard $(dir)/*.hh))
 FILES_HH := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_HH)))
 ifneq (,$(FILES_HH))
 FILES_H    := $(foreach p, $(FILES_HH), $(shell grep -l ClassDef $(p)))
