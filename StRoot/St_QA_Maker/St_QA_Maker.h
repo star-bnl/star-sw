@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.13 1999/04/20 01:16:59 fisyak Exp $
+//! $Id: St_QA_Maker.h,v 1.14 1999/04/21 20:19:19 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.14  1999/04/21 20:19:19  kathy
+//! put in comments and cleaned up - works for mdc2 dst in dev now
+//!
 //! Revision 1.13  1999/04/20 01:16:59  fisyak
 //! Add check on. no of tracks in dE/dX
 //!
@@ -89,7 +92,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.13 1999/04/20 01:16:59 fisyak Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.14 1999/04/21 20:19:19 kathy Exp $";
   //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -186,7 +189,7 @@ class St_QA_Maker : public StMaker {
   
   // for method MakeGlob - from table globtrk
   TH1F     *m_pT;            //! pT  reconstructed
-  TH1F     *m_pT_fr;            //! pT  reconstructed - full range
+  TH1F     *m_pT_fr;         //! pT  reconstructed - full range
   TH1F     *m_eta;           //! eta reconstructed
   TH2F     *m_pT_eta_rec;    //! pT versus eta Spectra for reconstructed
   TH2F     *m_mom_trklength; //! mom vs. trk length
@@ -237,8 +240,8 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_H_ncpart;   //! number of charged e,mu,proton,kaon,pion
   
   // for MakeHistV0 - from table dst_v0_vertex
-  TH1F     *m_ev0_lama_hist;//! Lambda mass
-  TH1F     *m_ev0_k0ma_hist;//! K0 mass
+  TH1F     *m_ev0_lama_hist; //! Lambda mass
+  TH1F     *m_ev0_k0ma_hist; //! K0 mass
   
   // for MakeHistPID - from tables primtrk & dst_dedx 
   TH2F     *m_p_dedx_rec;   //! dedx vs p
@@ -347,7 +350,8 @@ class St_QA_Maker : public StMaker {
     
 inline void St_QA_Maker::SetDraw(Bool_t drawFlag) { drawinit = drawFlag;}
 inline void St_QA_Maker::SetHistsNames(const Char_t *firstName, const Char_t *lastName)
-{ m_FirstHistName = firstName;  m_LastHistName  = lastName; }
+            { m_FirstHistName = firstName;  m_LastHistName  = lastName; }
 inline void St_QA_Maker::SetZones(Int_t columns, Int_t rows){ m_PadColumns =columns; m_PadRows = rows;}
-inline void St_QA_Maker::SetPaperSize(Int_t width, Int_t height){ m_PaperWidth = width; m_PaperHeight = height;}
+inline void St_QA_Maker::SetPaperSize(Int_t width, Int_t height)
+            { m_PaperWidth = width; m_PaperHeight = height;}
 inline void St_QA_Maker::SetPostScriptFile(const Char_t *psFileName){ m_PsFileName = psFileName;}
