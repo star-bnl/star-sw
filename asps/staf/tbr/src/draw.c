@@ -42,6 +42,7 @@ void SetColor(XtPointer cld) { /*makeproto*/
   XSetForeground(dpy,gGraphicsContext,col.pixel);
 }
 void Clear(void) {
+  /* Don't call this (or XtWindow) before realization of gDrawingArea) */
   XClearWindow(XtDisplay(gDrawingArea),XtWindow(gDrawingArea));
   SetColor("white");
   XFillRectangle(XtDisplay(gDrawingArea),gPM,gGraphicsContext,0,0,
