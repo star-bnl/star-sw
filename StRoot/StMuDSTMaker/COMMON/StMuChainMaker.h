@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.h,v 1.9 2003/01/23 21:59:50 laue Exp $
+ * $Id: StMuChainMaker.h,v 1.10 2003/04/15 16:17:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** @class StMuChainMaker
@@ -45,7 +45,7 @@ class StMuChainMaker  {
   bool pass(string file, string*  filters);
   void add(string file);
 
-ClassDef(StMuChainMaker,0)
+    ClassDef(StMuChainMaker,0)
 };
 
 #endif
@@ -53,6 +53,11 @@ ClassDef(StMuChainMaker,0)
 /***************************************************************************
  *
  * $Log: StMuChainMaker.h,v $
+ * Revision 1.10  2003/04/15 16:17:11  laue
+ * Minor changes to be able to filter MuDst.root files. The StMuDstFilterMaker
+ * is just an example of how to do it. It has be be customized (spoilers,
+ * chrome weels, etc)  by the user.
+ *
  * Revision 1.9  2003/01/23 21:59:50  laue
  * Modification to compile on Solaris.
  *
