@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.16 2000/05/31 19:30:38 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.17 2000/06/06 18:17:49 calderon Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.17  2000/06/06 18:17:49  calderon
+ * change exit to assert
+ *
  * Revision 1.16  2000/05/31 19:30:38  hardtke
  * lannys modification to t0 definitions
  *
@@ -207,7 +210,9 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
     }
     else {
 	cerr << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endl;
-	exit(1);
+	assert(gTpcDbPtr->PadPlaneGeometry());
+	assert(gTpcDbPtr->Electronics());
+	assert(gTpcDbPtr->SlowControlSim());
     }
 }
 StTpcCoordinateTransform::~StTpcCoordinateTransform() { /* nopt */ }
