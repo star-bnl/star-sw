@@ -1,4 +1,4 @@
-// $Id: bfcz.C,v 1.9 1999/03/15 19:52:18 fisyak Exp $
+// $Id: bfcz.C,v 1.10 1999/03/17 03:00:06 fisyak Exp $
 //#define TRS
 //#define TSS
 #define FTPC
@@ -87,11 +87,16 @@ void bfcz (const Int_t Nevents=1000000,
   //set I/O for crs
   TString InFile = "$input_file";
   gSystem->ExpandPathName(InFile);
-  if (!strcmp("$input_file",InFile.Data())) {InFile = fzfile;}
-  Int_t NoEvents = atoi(strrchr(InFile.Data(),'_')+1);
-  if (NoEvents <=0) {NoEvents = Nevents;}  
-  if (NoEvents > Nevents) {NoEvents = Nevents;}  
-  printf("Input file name = %s with No.Events to process = %i \n",InFile.Data(),NoEvents);
+  Int_t NoEvents = Nevents;
+  if (!strcmp("$input_file",InFile.Data())) {
+    InFile = fzfile; 
+  }
+  else {
+    Int_t NoEvents = atoi(strrchr(InFile.Data(),'_')+1);
+    if (NoEvents <=0) {NoEvents = Nevents;}  
+    if (NoEvents > Nevents) {NoEvents = Nevents;}  
+    printf("Input file name = %s with No.Events to process = %i \n",InFile.Data(),NoEvents);
+  }
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
   if (!FileOut){
