@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.45 1999/10/29 16:45:06 fine Exp $
+// $Id: makedoc.C,v 1.46 1999/11/18 13:21:45 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.46  1999/11/18 13:21:45  fine
+// Adjusted to the new source tree
+//
 // Revision 1.45  1999/10/29 16:45:06  fine
 // new macro videoStyle and bolStyle have been introduced
 //
@@ -51,15 +54,14 @@
 //=======================================================================
   {
  //*-- Author :    Valery Fine   25/12/98
-  gROOT.Reset();
-  Char_t *libs[] = { "St_base","xdf2root","St_Tables"
-                    ,"libmsg", 
+ gROOT.Reset();
+  Char_t *libs[] = { "St_base","xdf2root","St_Tables"                    
                     , "StChain"};
-  
+
  TString AFS; // STAR root directory
 
- Char_t *suffix=0;
-  Int_t nlist = 8;
+  Char_t *suffix=0;
+  Int_t nlist = sizeof(libs)/sizeof(Char_t *);;
   Bool_t NT=kFALSE;
   if (strcmp(gSystem.GetName(),"WinNT") == 0 )
   {
@@ -91,10 +93,9 @@
      gSystem->Load("St_TLA_Maker.so");
      gSystem->Load("St_io_Maker.so");
      gSystem->Load("St_xdfin_Maker");
-     gSystem->Load("St_evg_Maker");
      gSystem->Load("StarClassLibrary");
      gSystem->Load("StEvent");
-     gSystem->Load("StPadDisplayMaker");
+     //-- gSystem->Load("StPadDisplayMaker");
      gSystem->Load("St_geom_Maker");
      gSystem->Load("StEventDisplayMaker");
 
@@ -110,18 +111,18 @@
   //Create the object of the THtml class
   THtml *html = new THtml();
 
-  TString STAR = "$STAR";  
+  TString STAR = "$STAR/.$STAR_SYS/obj";  
   TString sourcedir;
-  sourcedir = STAR;
+  sourcedir =  "$STAR";
   if (!NT) { 
     sourcedir += ":";
     sourcedir = STAR;
     sourcedir += "/StRoot/St_base:";
     sourcedir = STAR;
     sourcedir += "/StRoot/St_baseTest:";
-    sourcedir += STAR;
+    sourcedir += "$STAR";
     sourcedir += "/.share/tables:";
-    sourcedir += STAR;
+    sourcedir += "$STAR";
     sourcedir += "/include:";
     sourcedir += STAR;
     sourcedir += "/StRoot/StEvent:";
@@ -144,13 +145,13 @@
     lookup += ".share/St_base";
   }
   else {
-    lookup = STAR;
+    lookup = "$STAR";
     lookup += ":";
-    lookup += STAR;
+    lookup += "$STAR";
     lookup += "/StRoot/StChain:";
-    lookup += STAR;
+    lookup += "$STAR";
     lookup += "/include:";
-    lookup += STAR;
+    lookup += "$STAR";
     lookup += "/include/tables:";
     lookup += STAR;
     lookup += "/StRoot/xdf2root:";
@@ -238,39 +239,45 @@
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
   cout << " Making HTML's for macros" << endl;
-  html.Convert("../test/micky.C","\"Micky\" to test the <matrix> and <triangilar matrix> methods");
-  html.Convert("../graphics/boldStyle.C","Style file for making presentation histograms.");
-  html.Convert("../graphics/videoStyle.C","Style file for video presentation histograms.");
-  html.Convert("../graphics/PadBrowser.C","How to use St_geom_Maker and StPadDisplayMaker");
-  html.Convert("../graphics/basic3dPrimitives.C","An example of the basic 3D STAR object");
-  html.Convert("../graphics/EventPanel.C","An example of the ToolBar to control an applications");
-  html.Convert("../graphics/DrawTpcHits.C","How to draw 3D view for hits and");
-  html.Convert("../graphics/DrawTrackTpcHits.C","How to draw 3D view for hits and tracks");
-  html.Convert("../graphics/PadControlPanel.C","How to manipulate with 3D pad images");
-  html.Convert("../graphics/HitsDraw.C","3D drawing of the STAR Geometry and the hits from the STAF table");
-  html.Convert("../graphics/SubDetectorView.C","How to create sub-detector view");
-  html.Convert("../graphics/StarFromWeb.C","Access to ROOT/GEANT geometry database");
-  html.Convert("./GetEvent.C","An example of the reading MDC2 dst events");
-  html.Convert("./QA_Hist_Draw.C","An example of the plotting postscript file of the MDC2 histograms");
-  html.Convert("../graphics/StarGeom.C","An example of the ROOT/STAR/GEANT interface");
-  html.Convert("../examples/TestSorter.C","An example of the STAF table sort utility");
-  html.Convert("../examples/XDFBrowser.C","XDF file interactive ROOT browser");
-  html.Convert("../../Chain/xdf.C","STAR chain example");
-  html.Convert("../../test/XDFcopy.C","How to read/write XDF file");
-  html.Convert("../../test/XDFtest.C","How to read/write XDF and ROOT files");
-  html.Convert("./par_anal.cxx","How to create several histrograms from XDF file");
-  html.Convert("../../test/test10.C","How to use the dataset iterator class");
-  html.Convert("../../test/test9.C","How to read the event from XDF file and build some histograms with ROOT");
-  html.Convert("./makedoc.C","How to create the HTML documentation");
-  html.Convert("../tss.C","\"TPC slow simulator\" chain");
-  html.Convert("../bfc.C","An example of the \"Big Full Chain\" production chain");
-  html.Convert("./bfcx.C","An example of the \"Big Full Chain\" production chain");
-  html.Convert("./ebye.C","An example of\"Event by Event\" production chain");
-  html.Convert("./../STAR_Demos.C","The source of the STAR_demos macro");
-  html.Convert("../graphics/STAR_shapes.C","Test for the basic STAR GEOMETRY classes");
-  html.Convert("../graphics//StarView.C","How to Draw the local STAR 3D geometry");
-  html.Convert("../graphics/StarWebView.C","How to Draw the remote STAR 3D geometry");
-  if (NT) {
+  const Char_t *macros[] = {
+       "/test/micky.C" ,               "\"Micky\" to test the <matrix> and <triangilar matrix> methods"
+     , "/test/test10.C",               "How to use the dataset iterator class"
+     , "/test/test9.C",                "How to read the event from XDF file and build some histograms with ROOT"
+     , "/test/XDFcopy.C",              "How to read/write XDF file"
+     , "/test/XDFtest.C",              "How to read/write XDF and ROOT files"
+
+     , "/graphics/boldStyle.C",        "Style file for making presentation histograms."
+     , "/graphics/videoStyle.C",       "Style file for video presentation histograms."
+     , "/graphics/PadBrowser.C",       "How to use St_geom_Maker and StPadDisplayMaker"
+     , "/graphics/basic3dPrimitives.C","An example of the basic 3D STAR object"
+     , "/graphics/EventPanel.C",       "An example of the ToolBar to control an applications"
+     , "/graphics/DrawTpcHits.C",      "How to draw 3D view for hits and"
+     , "/graphics/DrawTrackTpcHits.C", "How to draw 3D view for hits and tracks"
+     , "/graphics/PadControlPanel.C",  "How to manipulate with 3D pad images"
+     , "/graphics/HitsDraw.C",         "3D drawing of the STAR Geometry and the hits from the STAF table"
+     , "/graphics/SubDetectorView.C",  "How to create sub-detector view"
+     , "/graphics/StarFromWeb.C",      "Access to ROOT/GEANT geometry database"
+     , "/graphics/STAR_shapes.C",      "Test for the basic STAR GEOMETRY classes"
+     , "/graphics/StarView.C",         "How to Draw the local STAR 3D geometry"
+     , "/graphics/StarWebView.C",      "How to Draw the remote STAR 3D geometry"
+     , "/graphics/StarGeom.C",         "An example of the ROOT/STAR/GEANT interface"
+
+     , "/html/GetEvent.C",             "An example of the reading MDC2 dst events"
+     , "/html/makedoc.C",              "How to create the HTML documentation"
+
+     , "/QA_Hist_Draw.C",              "An example of the plotting postscript file of the MDC2 histograms"
+
+     , "/examples/TestSorter.C",       "An example of the STAF table sort utility"
+     , "/examples/XDFBrowser.C",       "XDF file interactive ROOT browser"
+
+     , "/tss.C" ,                      "\"TPC slow simulator\" chain"
+     , "/bfc.C",                       "An example of the \"Big Full Chain\" production chain"
+     , "/bfcx.C",                      "An example of the \"Big Full Chain\" production chain"
+     , "/ebye.C",                      "An example of\"Event by Event\" production chain"
+     , "/STAR_Demos.C",                "The source of the STAR_demos macro"
+};
+
+ if (NT) {
     html.Convert("//hepburn/common/p32/root/star/macros/CallMevSaveXDF.cxx","How to call STAF module");
     html.Convert("//hepburn/common/p32/root/star/macros/par_anal.cxx","How to pick the XDF file up with ROOT");
     html.Convert("//hepburn/common/p32/root/star/macros/MakeHists.cxx","How to read the event from XDF file and build some histograms with ROOT");
@@ -281,9 +288,19 @@
     html.Convert("./MakeHists.cxx","How to read the event from XDF file and build some histograms with ROOT");
   }
 
-  html.Convert("./laser.C","An example of the analysis of laser events equivalent to Iwona's old tst.kumac");
-  html.Convert("./tst.kumac","An example of  Iwona's old tst.kumac of the analysis of laser events");
-  html.Convert("./tpctest.C","ROOT based TPC test analysis");
+//  html.Convert("./par_anal.cxx","How to create several histrograms from XDF file");
+
+//  html.Convert("./laser.C","An example of the analysis of laser events equivalent to Iwona's old tst.kumac");
+//  html.Convert("./tst.kumac","An example of  Iwona's old tst.kumac of the analysis of laser events");
+//  html.Convert("./tpctest.C","ROOT based TPC test analysis");
+
+ Int_t lmacros = sizeof(macros)/sizeof(Char_t *);
+ for (int i = 0; i < lmacros; i+=2) {
+      TString starRoot = "$STAR/StRoot/macros";
+      starRoot += macros[i];
+      html.Convert(starRoot.Data(),macros[i+1]); 
+      //  cout << starRoot.Data() << macros[i+1] << ";" << endl;
+ }
 
  html.MakeClass("EModuleTypes");
  html.MakeIndex();
