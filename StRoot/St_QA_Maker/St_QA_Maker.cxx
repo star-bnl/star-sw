@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.70 1999/12/15 18:31:05 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.71 1999/12/15 20:32:18 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.71  1999/12/15 20:32:18  kathy
+// separated the tpc and tpc+svt histograms for globtrk table; had to book and fill new histograms, add histograms to default logy list AND had to change what values of iflag I cut on for filling each different type of track in makehistglob method
+//
 // Revision 1.70  1999/12/15 18:31:05  kathy
 // added 4 new histogram to globtrk for tpc - r0,phi0,z0,curvature; also put 3 of these in default logY list; also changed scale on iflag hist. for globtrk & primtrk
 //
@@ -379,7 +382,7 @@ void St_QA_Maker::MakeHistGlob(){
  	m_det_id->Fill(t->det_id);
 
 //  now fill all TPC histograms ------------------------------------------------
-        if (t->iflag<700) {
+        if (t->iflag>100 && t->iflag<200 ) {
 
 // these are tpc only
         m_glb_xf0->Fill(xdif);
@@ -432,6 +435,60 @@ void St_QA_Maker::MakeHistGlob(){
 	m_chisq1_zfT->Fill(t->x_first[2],chisq1);
         m_nfptonpt_momT->Fill(lmevmom,nfitntot);
         m_nfptonpt_etaT->Fill(eta,nfitntot);
+        }
+
+
+//  now fill all TPC+SVT histograms ------------------------------------------------
+        if (t->iflag>500 && t->iflag<600 ) {
+
+        m_glb_xf0TS->Fill(xdif);
+        m_glb_yf0TS->Fill(ydif);
+        m_glb_zf0TS->Fill(zdif);
+        m_glb_impactTS->Fill(t->impact);
+	
+	m_pointTS->Fill(t->n_point);
+	m_max_pointTS->Fill(t->n_max_point);
+	m_fit_pointTS->Fill(t->n_fit_point);
+        m_glb_chargeTS->Fill(t->icharge);
+        m_glb_r0TS->Fill(t->r0);
+        m_glb_phi0TS->Fill(t->phi0);
+        m_glb_z0TS->Fill(t->z0);
+        m_glb_curvTS->Fill(t->curvature);
+        m_glb_xfTS->Fill(t->x_first[0]);
+        m_glb_yfTS->Fill(t->x_first[1]);
+        m_glb_zfTS->Fill(t->x_first[2]);
+        m_glb_radfTS->Fill(radf);
+        m_glb_ratioTS->Fill(nfitntot);
+        m_glb_ratiomTS->Fill(nfitnmax);
+	m_psiTS->Fill(t->psi);
+        m_tanlTS->Fill(t->tanl);
+        m_glb_thetaTS->Fill(theta);
+	m_etaTS->Fill(eta);
+	m_pTTS->Fill(pT);
+        m_momTS->Fill(gmom);
+	m_lengthTS->Fill(t->length);
+	m_chisq0TS->Fill(chisq0);
+	m_chisq1TS->Fill(chisq1);
+	
+        m_globtrk_xf_yfTS->Fill(t->x_first[0],t->x_first[1]);
+        m_eta_trklengthTS->Fill(eta,t->length);
+	m_npoint_lengthTS->Fill(t->length,Float_t(t->n_point));
+	m_fpoint_lengthTS->Fill(t->length,Float_t(t->n_fit_point));
+	
+	m_pT_eta_recTS->Fill(eta,lmevpt);
+        m_tanl_zfTS->Fill(t->x_first[2],t->tanl);
+	m_mom_trklengthTS->Fill(t->length,lmevmom);
+	m_chisq0_momTS->Fill(lmevmom,chisq0);
+	m_chisq1_momTS->Fill(lmevmom,chisq1);
+	m_chisq0_etaTS->Fill(eta,chisq0);
+	m_chisq1_etaTS->Fill(eta,chisq1);
+	m_chisq0_dipTS->Fill(t->tanl,chisq0);
+	m_chisq1_dipTS->Fill(t->tanl,chisq1);
+	m_chisq0_zfTS->Fill(t->x_first[2],chisq0);
+	m_chisq1_zfTS->Fill(t->x_first[2],chisq1);
+        m_nfptonpt_momTS->Fill(lmevmom,nfitntot);
+        m_nfptonpt_etaTS->Fill(eta,nfitntot);
+
         }
 
 //  now fill all FTPC East histograms ------------------------------------------------
