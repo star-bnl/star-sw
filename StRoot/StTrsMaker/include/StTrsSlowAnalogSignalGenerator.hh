@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.hh,v 1.3 1999/01/18 10:20:57 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.hh,v 1.4 1999/01/18 21:01:42 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.hh,v $
- * Revision 1.3  1999/01/18 10:20:57  lasiuk
- * use integral to deposit total charge in time bin
+ * Revision 1.4  1999/01/18 21:01:42  lasiuk
+ * use fractionSampled(); enumerated types for function selection
  *
  * Revision 1.4  1999/01/18 21:01:42  lasiuk
  * use fractionSampled(); enumerated types for function selection
@@ -40,6 +40,19 @@
 
 #include <iostream.h>
 #include "StTrsAnalogSignalGenerator.hh"
+
+class StTrsSlowAnalogSignalGenerator : public  StTrsAnalogSignalGenerator {
+public:
+    enum StDistribution {endo,
+			 gatti,
+			 dipole,
+			 unknown};
+
+    enum StSignal {delta,
+		   symmetricGaussianApproximation,
+		   symmetricGaussianExact,
+		   asymmetricGaussianApproximation,
+		   realShaper,
 		   undefined};
 
 public:
@@ -48,10 +61,12 @@ public:
     //StTrsSlowAnalogSignalGenerator& operator=(const StTrsSlowAnalogSignalGenerator&);
 
     static StTrsAnalogSignalGenerator* instance();
+    static StTrsAnalogSignalGenerator* instance(StTpcGeometry*, StTpcSlowControl*, StTpcElectronics*, StTrsSector*);
 
     // charge generation
     void   setChargeDistribution(StDistribution);
     void   inducedChargeOnPad(StTrsWireHistogram*);
+    double signalOnPad(double, double, double, double, double, double);
 
     // sampling
     void   setElectronicSampler(StSignal);
@@ -67,9 +82,9 @@ private:
     // sampling
     double deltaResponse(double, StTrsAnalogSignal&);
     double symmetricGaussianApproximateResponse(double, StTrsAnalogSignal&);
-    double shaperResponse(double, StTrsAnalogSignal&);
+    double symmetricGaussianExactResponse(double, StTrsAnalogSignal&);
     double asymmetricGaussianApproximateResponse(double, StTrsAnalogSignal&);
-    
+    //    double asymmetricGaussianResponseWithUnrestoredBaseline(double, StTrsAnalogSignal&);
     double realShaperResponse(double, StTrsAnalogSignal&);
     double oneOverT(double, double);
 
@@ -77,6 +92,8 @@ protected:
     //StTrsSlowAnalogSignalGenerator();
     StTrsSlowAnalogSignalGenerator(StTpcGeometry*, StTpcSlowControl*, StTpcElectronics*, StTrsSector*);
 
+private:
+    static StTrsAnalogSignalGenerator* mInstance;
 
     StDistribution mChargeDistribution;
     StSignal       mSampler;
