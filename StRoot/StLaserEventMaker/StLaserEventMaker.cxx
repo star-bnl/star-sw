@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.14 2001/12/14 17:30:16 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.15 2001/12/18 15:22:00 jeromel Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.15  2001/12/18 15:22:00  jeromel
+// Removed laserhist#_#.root file from StarDb/Calibration/tpc
+//
 // Revision 1.14  2001/12/14 17:30:16  pfachini
 // Adding two histograms to the laserhist.*.*.root file
 //
@@ -679,7 +682,7 @@ Int_t StLaserEventMaker::Finish() {
 //_____________________________________________________________________________
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.14 2001/12/14 17:30:16 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.15 2001/12/18 15:22:00 jeromel Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -717,7 +720,8 @@ void StLaserEventMaker::WriteTableToFile(){
 //_____________________________________________________________________________
 void StLaserEventMaker::WriteHistFile(){
   char filename[80]; 
-  sprintf(filename,"./StarDb/Calibrations/tpc/laserhist.%08d.%06d.root",date,time);
+  //sprintf(filename,"./StarDb/Calibrations/tpc/laserhist.%08d.%06d.root",date,time);
+  sprintf(filename,"laserhist.%08d.%06d.root",date,time);
   TFile out(filename,"RECREATE");
   GetHistList()->Write();
   out.Close();
