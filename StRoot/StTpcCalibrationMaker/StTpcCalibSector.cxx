@@ -21,8 +21,8 @@ ClassImp(StTpcCalibSector)
 // _____________________________________________________________________
 //
 StTpcCalibSector::StTpcCalibSector(const StTpcCalibSetup* aSetup, 
-			     const  int aSectorId,
-			     int* aNumberOfPadAtRow)
+				   const  int aSectorId,
+				   const int* aNumberOfPadAtRow)
 : 
 mSectorId(aSectorId),
 mSetup(aSetup),

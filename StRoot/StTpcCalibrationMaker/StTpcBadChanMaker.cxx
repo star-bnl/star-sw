@@ -100,12 +100,12 @@ Int_t StTpcBadChanMaker::Make(){
   delete tDAQReader;
   delete tRMSReader;
 
-  return !kStOK; // stop after the first event
+  return kStEOF; // stop after the first event
 }
 //_____________________________________________________________________________
 void StTpcBadChanMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTpcBadChanMaker.cxx,v 1.2 1999/09/14 12:42:13 fretiere Exp $\n");
+  printf("* $Id: StTpcBadChanMaker.cxx,v 1.3 1999/09/14 15:23:35 fretiere Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
