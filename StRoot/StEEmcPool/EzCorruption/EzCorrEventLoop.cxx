@@ -1,4 +1,4 @@
-// $Id: EzCorrEventLoop.cxx,v 1.1 2004/07/24 22:51:08 balewski Exp $
+// $Id: EzCorrEventLoop.cxx,v 1.2 2004/07/26 22:54:26 rfatemi Exp $
 // modified by rfatemi 6-22-04 added barrel loop
  
 #include <assert.h>
@@ -29,6 +29,7 @@ EzCorrEventLoop::EzCorrEventLoop(){
   eHead=0;
   eEve=0;
   eTrig=0;
+  mode=0;
 
 }
 
@@ -38,7 +39,7 @@ void EzCorrEventLoop::init (){
   printf("EzCorrEventLoop() init\n");
   evt=0;
   CorrAna::init();
-  mode=0;
+
 }
 
 //--------------------------------------------------
@@ -51,7 +52,7 @@ EzCorrEventLoop::~EzCorrEventLoop() {/* noop */}
 //--------------------------------------------------
 void EzCorrEventLoop::setMode(int hold){
   mode=hold;
-  // printf("Hold=%d,Mode=%d\n",hold,mode);
+  //  printf("Hold=%d,Mode=%d\n",hold,mode);
 }
 
 //--------------------------------------------------
@@ -296,11 +297,14 @@ void EzCorrEventLoop::unpackEzTreeHisto(){
 //--------------------------------------------------
 //--------------------------------------------------
 void EzCorrEventLoop::printCorrupt(){
- //header corruption testing when only BEMC in .daq file
-  UChar_t test;
-  long timeStamp=eHead->getTimeStamp();
-  eEve->maskWrongCrates(timeStamp,eHead->getToken()); 
   int nb=eEve->block->GetEntries();
+  printf("#datablocks=%d %p\n",nb, eHead);
+  long timeStamp=eHead->getTimeStamp();
+ printf("run   timeStamp=%d=%s\n" ,(int)timeStamp,ctime((const time_t *)&timeStamp));
+  eEve->maskWrongCrates(timeStamp,eHead->getToken()); 
+  printf("After maskWrongCrates\n");
+  UChar_t test;
+
   if (nb==0)  printf("NO DATA BLOCKS -- ABORT!\n");
 
   if (nb==15){//header corruption testing when only BEMC in .daq file
@@ -342,7 +346,7 @@ void EzCorrEventLoop::printCorrupt(){
 	  Blist[Bic][7]=-1;
 	  continue;
 	}
-      }    
+      }
       
       UShort_t* Bdata=b->getData();
       int nd=b->getValidDataLen(); 
@@ -372,11 +376,11 @@ void EzCorrEventLoop::printCorrupt(){
     }  
   }
   else {
-
+    printf("Did you make it to the else?\n");
     for(int Bic=EDataBkMin;Bic<EDataBkMax;Bic++) {// ETOW data blocks 0 - 5
       EEfeeDataBlock *b=(EEfeeDataBlock *)eEve->block->At(Bic);
       //int crateID=b->getCrateID(); 
-      //b->print(0);
+      b->print(0);
       
       if( !b->isValid() ) {//check for corrupted header
 	Esanity=b->getSanity();
@@ -626,6 +630,9 @@ void EzCorrEventLoop::printCorrupt(){
 
 /*****************************************************************
  * $Log: EzCorrEventLoop.cxx,v $
+ * Revision 1.2  2004/07/26 22:54:26  rfatemi
+ * Corruption Update
+ *
  * Revision 1.1  2004/07/24 22:51:08  balewski
  * first
  *

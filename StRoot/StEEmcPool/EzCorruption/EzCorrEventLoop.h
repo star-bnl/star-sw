@@ -4,7 +4,7 @@
 #ifndef EzCorrEventLoop_h
 #define EzCorrEventLoop_h
 /*********************************************************************
- * $Id: EzCorrEventLoop.h,v 1.1 2004/07/24 22:51:08 balewski Exp $
+ * $Id: EzCorrEventLoop.h,v 1.2 2004/07/26 22:54:26 rfatemi Exp $
  *********************************************************************
  * \class  EzCorrEventLoop
  * some description
@@ -30,7 +30,6 @@ class EzCorrEventLoop :public TObject, public  CorrAna{
   int EsmdState;
   int BState;
   int evt;
-  int mode;
 
  public:  
   EzCorrEventLoop();
@@ -48,6 +47,9 @@ class EzCorrEventLoop :public TObject, public  CorrAna{
 
 /*****************************************************************
  * $Log: EzCorrEventLoop.h,v $
+ * Revision 1.2  2004/07/26 22:54:26  rfatemi
+ * Corruption Update
+ *
  * Revision 1.1  2004/07/24 22:51:08  balewski
  * first
  *

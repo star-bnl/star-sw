@@ -3,7 +3,7 @@
 #ifndef CorrAna_h
 #define CorrAna_h
 /*********************************************************************
- * $Id: CorrAna.h,v 1.1 2004/07/24 22:51:08 balewski Exp $
+ * $Id: CorrAna.h,v 1.2 2004/07/26 22:54:26 rfatemi Exp $
  * modified by rfatemi 2004/06/22
  *********************************************************************/
 
@@ -71,6 +71,7 @@ class CorrAna {
   void taskBall();
 
   int allBad;
+  int mode;
 
   //  EEDB *eeDb; /// DB access point
   TObjArray  *HList; /// output histo access point
@@ -93,6 +94,9 @@ class CorrAna {
 
 /*****************************************************************
  * $Log: CorrAna.h,v $
+ * Revision 1.2  2004/07/26 22:54:26  rfatemi
+ * Corruption Update
+ *
  * Revision 1.1  2004/07/24 22:51:08  balewski
  * first
  *

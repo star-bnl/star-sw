@@ -1,4 +1,4 @@
-// $Id: CorrAna.cxx,v 1.1 2004/07/24 22:51:08 balewski Exp $
+// $Id: CorrAna.cxx,v 1.2 2004/07/26 22:54:25 rfatemi Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -35,66 +35,69 @@ void CorrAna::init( ){
  
   printf("CorrAna() init\n");
 
-  char title[10];
-  char code[100];
-  
-   
-  for (int i=0;i<MaxBTwCrate;i++){
-    sprintf(title,"BEMC ADC for Crate %d",i+16);
-    sprintf(code,"BadcCr%d",i+16);
-    hBadc[i]=new TH2F(code,title,4096,0.0,4096.0,160,0.0,160);
-    sprintf(title,"Corrupt BEMC ADC for Crate %d",i+16);
-    sprintf(code,"CBadcCr%d",i+16);
-    cBadc[i]=new TH2F(code,title,4096,0.0,4096.0,160,0.0,160);
-  }
-  
-  for (int i=0;i<MaxTwCrates;i++){
-    sprintf(title,"EEMC ADC for Crate %d",i);
-    sprintf(code,"EadcCr%d",i);
-    hEadc[i]=new TH2F(code,title,4096,0.0,4096.0,128,0.0,128);
-    sprintf(title,"Corrupt EEMC ADC for Crate %d",i);
-    sprintf(code,"CEadcCr%d",i);
-    cEadc[i]=new TH2F(code,title,4096,0.0,4096.0,128,0.0,128);
-  }
-
-  for (int i=0;i<16;i++){
-    sprintf(title,"EEMC SMD ADC for Crate %d",i+84);
-    sprintf(code,"ESadcCr%d",i+84);
-    hESadc[i]=new TH2F(code,title,4096,0.0,4096.0,192,0.0,192);
-    sprintf(title,"Corrupt EEMC SMD ADC for Crate %d",i+84);
-    sprintf(code,"CESadcCr%d",i+84);
-    cESadc[i]=new TH2F(code,title,4096,0.0,4096.0,192,0.0,192);
-  }
-  
-
-  hBdiag[0]= new TH1F("BbadCr","Bad BEMC Crate #'s in Corrupt Events",50,0,50);
-  hBdiag[1]= new TH1F("Bfail","Corrupt Header Words in BEMC tower",5,-0.5,4.5);
-  hEdiag[0]= new TH1F("EbadCr","Bad EEMC Crate #'s in Corrupt Events",7,0,7);
-  hEdiag[1]= new TH1F("Efail","Corrupt Header Words in EEMC tower",5,-0.5,4.5);
-  hESdiag[0]= new TH1F("ESbadCr","Bad EEMC Mapmt Crate #'s in Corrupt Events",100,50,150);
-  hESdiag[1]= new TH1F("ESfail","Corrupt Header Words in EEMC Mapmt",5,-0.5,4.5);
-
-  hDiag= new TH1F("Corr","Correlation of Corruption between ESMD,ETOW,BTOW",3,-0.5,2.5);
-  HList->Add(hDiag);
-  
-  if(HList) {
+  if (mode==1) {
+    printf("CorrAna() init:loading Histograms\n");
+    char title[10];
+    char code[100];
+    
+    
     for (int i=0;i<MaxBTwCrate;i++){
-      HList->Add(hBadc[i]);
-      HList->Add(cBadc[i]);
+      sprintf(title,"BEMC ADC for Crate %d",i+16);
+      sprintf(code,"BadcCr%d",i+16);
+      hBadc[i]=new TH2F(code,title,4096,0.0,4096.0,160,0.0,160);
+      sprintf(title,"Corrupt BEMC ADC for Crate %d",i+16);
+      sprintf(code,"CBadcCr%d",i+16);
+      cBadc[i]=new TH2F(code,title,4096,0.0,4096.0,160,0.0,160);
     }
+    
     for (int i=0;i<MaxTwCrates;i++){
-      HList->Add(hEadc[i]);
-      HList->Add(cEadc[i]);
+      sprintf(title,"EEMC ADC for Crate %d",i);
+      sprintf(code,"EadcCr%d",i);
+      hEadc[i]=new TH2F(code,title,4096,0.0,4096.0,128,0.0,128);
+      sprintf(title,"Corrupt EEMC ADC for Crate %d",i);
+      sprintf(code,"CEadcCr%d",i);
+      cEadc[i]=new TH2F(code,title,4096,0.0,4096.0,128,0.0,128);
     }
+    
     for (int i=0;i<16;i++){
-      HList->Add(hESadc[i]);
-      HList->Add(cESadc[i]);
+      sprintf(title,"EEMC SMD ADC for Crate %d",i+84);
+      sprintf(code,"ESadcCr%d",i+84);
+      hESadc[i]=new TH2F(code,title,4096,0.0,4096.0,192,0.0,192);
+      sprintf(title,"Corrupt EEMC SMD ADC for Crate %d",i+84);
+      sprintf(code,"CESadcCr%d",i+84);
+      cESadc[i]=new TH2F(code,title,4096,0.0,4096.0,192,0.0,192);
     }
-    for (int i=0;i<2;i++){
-      HList->Add(hBdiag[i]);
-      HList->Add(hEdiag[i]);
-      HList->Add(hESdiag[i]);
-    }
+    
+    
+    hBdiag[0]= new TH1F("BbadCr","Bad BEMC Crate #'s in Corrupt Events",50,0,50);
+    hBdiag[1]= new TH1F("Bfail","Corrupt Header Words in BEMC tower",5,-0.5,4.5);
+    hEdiag[0]= new TH1F("EbadCr","Bad EEMC Crate #'s in Corrupt Events",7,0,7);
+    hEdiag[1]= new TH1F("Efail","Corrupt Header Words in EEMC tower",5,-0.5,4.5);
+    hESdiag[0]= new TH1F("ESbadCr","Bad EEMC Mapmt Crate #'s in Corrupt Events",100,50,150);
+    hESdiag[1]= new TH1F("ESfail","Corrupt Header Words in EEMC Mapmt",5,-0.5,4.5);
+    
+    hDiag= new TH1F("Corr","Correlation of Corruption between ESMD,ETOW,BTOW",3,-0.5,2.5);
+    HList->Add(hDiag);
+    
+    if(HList) {
+      for (int i=0;i<MaxBTwCrate;i++){
+	HList->Add(hBadc[i]);
+	HList->Add(cBadc[i]);
+      }
+      for (int i=0;i<MaxTwCrates;i++){
+	HList->Add(hEadc[i]);
+	HList->Add(cEadc[i]);
+      }
+      for (int i=0;i<16;i++){
+	HList->Add(hESadc[i]);
+	HList->Add(cESadc[i]);
+      }
+      for (int i=0;i<2;i++){
+	HList->Add(hBdiag[i]);
+	HList->Add(hEdiag[i]);
+	HList->Add(hESdiag[i]);
+      }
+    }   
   }
 }
 
@@ -289,6 +292,9 @@ void CorrAna:: saveHisto(TString fname){
 
 /*****************************************************************
  * $Log: CorrAna.cxx,v $
+ * Revision 1.2  2004/07/26 22:54:25  rfatemi
+ * Corruption Update
+ *
  * Revision 1.1  2004/07/24 22:51:08  balewski
  * first
  *
