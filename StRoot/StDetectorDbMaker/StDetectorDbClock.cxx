@@ -1,5 +1,6 @@
 #include "StDetectorDbClock.h"
 #include "tables/St_starClockOnl_Table.h"
+#include "TUnixTime.h"
 
 /// Initialize Instance
 StDetectorDbClock* StDetectorDbClock::sInstance = 0;
@@ -21,6 +22,8 @@ StDetectorDbClock* StDetectorDbClock::instance()
 
 /// Updates data in instance from database
 void StDetectorDbClock::update(StMaker* maker){
+
+    mMaker = maker;
     
     if(maker){
 	// RDO in RunLog_onl
@@ -80,16 +83,15 @@ unsigned int StDetectorDbClock::getTimeEntry(unsigned int entry){
 
 /// gets the nth frequency entry in the database
 double StDetectorDbClock::getFrequency(unsigned int time){
-    double tempFrequency = 0;
+    double tempFrequency = -9999 ;
     
     if(mNumRows == 1 || time == 0){
 	tempFrequency = this->getFrequencyEntry(0);
     }
     else{
 	for(unsigned int i = 0; i < this->getNumRows() - 1 ; i++){
-	    if( time >= getTimeEntry(i) && time <= getTimeEntry(i+1) ){
-		if( fabs(this->getFrequencyEntry(i) - this->getFrequencyEntry(i+1)) < 100000 )
-		    tempFrequency = this->getFrequencyEntry(i);
+	    if( time >= getTimeEntry(i) && time <= getTimeEntry(i+1) - 10 ){
+		tempFrequency = this->getFrequencyEntry(i);
 	    }
 	}
     }
@@ -97,6 +99,22 @@ double StDetectorDbClock::getFrequency(unsigned int time){
     return tempFrequency;
     
 };
+
+/// Gets the current frequency (figures out correct event time automatically)
+double StDetectorDbClock::getCurrentFrequency(){
+
+    double value = -9999;
+    
+    if(mMaker){
+	TDatime rootTime = mMaker->GetDateTime(); // Gets time from maker 
+	TUnixTime unixTime;                       // Handles conversion to UnixTime
+	unixTime.SetGTime(rootTime.GetDate(),rootTime.GetTime());
+	unsigned int gmtTime = unixTime.GetUTime();
+	value = this->getFrequency(gmtTime);
+    }
+    return value;
+};
+
 
 /// returns 1 if current frequency is the same +/- 25,000 Hz as the first frequency
 /// 0 if not
