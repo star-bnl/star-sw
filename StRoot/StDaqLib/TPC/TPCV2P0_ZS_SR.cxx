@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.11 1999/12/07 23:10:46 levine Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.12 1999/12/09 02:50:41 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -28,6 +28,10 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.12  1999/12/09 02:50:41  levine
+ * #define changed to get rid of unused fee array defs for TPCv?P0_ZS_SR.cxx
+ * only
+ *
  * Revision 1.11  1999/12/07 23:10:46  levine
  * changes to silence the gcc compiler warnings
  *
@@ -59,6 +63,7 @@
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "TPCV2P0.hh"
+#define MAKE_THE_DAMNED_COMPILER_SILENT
 #include "fee_pin.h"
 // 
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: fee_pin.h,v 1.3 1999/12/07 23:10:47 levine Exp $
+ * $Id: fee_pin.h,v 1.4 1999/12/09 02:50:41 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC sector readout hardware configuration
@@ -10,6 +10,10 @@
  *
  ***************************************************************************
  * $Log: fee_pin.h,v $
+ * Revision 1.4  1999/12/09 02:50:41  levine
+ * #define changed to get rid of unused fee array defs for TPCv?P0_ZS_SR.cxx
+ * only
+ *
  * Revision 1.3  1999/12/07 23:10:47  levine
  * changes to silence the gcc compiler warnings
  *
@@ -2212,7 +2216,7 @@ static unsigned short pad_vs_fee[182][32] = {
 },
 };
 
-#ifdef MAKE_THE_DAMNED_COMPILER_SILENT
+#ifndef MAKE_THE_DAMNED_COMPILER_SILENT
 static unsigned short rdo_vs_fee[182][32] = {
 /* fee 0 */ 
 {6, 6, 6, 6, 6, 6, 6, 6, 
