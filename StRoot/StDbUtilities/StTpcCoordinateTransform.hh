@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.3 2000/02/10 01:19:37 calderon Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.4 2000/04/13 22:57:53 calderon Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,10 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.4  2000/04/13 22:57:53  calderon
+ * use lookup table of sines and cosines instead of calculating them
+ * each time
+ *
  * Revision 1.3  2000/02/10 01:19:37  calderon
  * Tpc Local Sector Coordinate definitions where
  * y is up,
@@ -80,6 +84,10 @@
 #define ST_COORDINATE_TRANSFORM_HH
 
 #include <stdlib.h>
+#include <vector>
+#ifndef ST_NO_NAMESPACES
+using std::vector;
+#endif
 //#include <unistd.h>
 #ifndef ST_NO_EXCEPTIONS
 //#include <stdexcept>
@@ -163,6 +171,8 @@ private:
     int         nearestInteger(double) const;
 
 private:
+    vector<double>    mCosForSector;
+    vector<double>    mSinForSector;
     StMatrix<double>  mRotation;  // (2x2)
     StMatrix<double>  mRotate;    // (2x1)
     StMatrix<double>  mResult;    // (2x1)

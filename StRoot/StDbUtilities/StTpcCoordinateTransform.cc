@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.12 2000/04/05 23:00:55 calderon Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.13 2000/04/13 22:57:53 calderon Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,10 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.13  2000/04/13 22:57:53  calderon
+ * use lookup table of sines and cosines instead of calculating them
+ * each time
+ *
  * Revision 1.12  2000/04/05 23:00:55  calderon
  * Use the outer sector edge as the boundary between charge going to
  * padrow 13 or 14.
@@ -171,6 +175,25 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
         mDriftDistance = gTpcDbPtr->Dimensions()->gatingGridZ();
         mInnerSectorzOffset = gTpcDbPtr->Dimensions()->zInnerOffset();
         mOuterSectorzOffset = gTpcDbPtr->Dimensions()->zOuterOffset();
+	double beta = 0;
+	int numSectors = gTpcDbPtr->Dimensions()->numberOfSectors();
+	mCosForSector.resize(numSectors);
+	mSinForSector.resize(numSectors);
+	for (int sector = 1; sector <= numSectors;
+	     sector++) {
+	    beta = (sector>12) ? (numSectors-sector)*2.*M_PI/(static_cast<double>(numSectors)/2.)
+		: sector*2.*M_PI/(static_cast<double>(numSectors)/2.);
+// 	    if (sector==12) sector=0;
+// 	    if (sector<12) {
+// 		sector=15-sector;
+// 	    }
+	    mCosForSector[sector-1] = cos(beta); // careful, sector is the sector number, not index
+	    mSinForSector[sector-1] = sin(beta); // careful, sector is the sector number, not index
+// 	    PR(beta);
+// 	    PR(cos(beta));
+// 	    PR(sin(beta));
+	}
+	
     }
     else {
 	cerr << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endl;
@@ -530,57 +553,20 @@ StThreeVector<double>
 StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
 				     const int sector)
 {   //  to local means " from sector 12 local to tpc local"
-    // Should be replaced with Rotation class:
-    //
-    // define 2x2 rotation matrix
-    //
-    // ( cos Þ  -sin Þ )
-    // ( sin Þ   cos Þ )
 
-  //   double beta = sector*M_PI/6.;   //(30 degrees)
+    // Speed up the code, don't use matrices.
+    // Use array of cosines and sines created during construction.
+    // careful, sector is the sector number, not index
+    // rotation is in opposite sense than the "fromLocal" rotation, only change
+    // sign of sin(b) because sin is odd and cos is even.
     
-    //
-    // In order to speed up the code, the Matrix constructors
-    // have been moved to data Members and are initialized in
-    // the constructor.  This has also meant the removal of
-    // a lot of "const" because many functions now modify the
-    // data members.  This is the old code:
-    //
-//     const int m = 2;  
-//     const int n = 2;
-//     StMatrix<double> m1(m,n,0);
+    // ( cos Þ  sin Þ )
+    // ( -sin Þ   cos Þ )
+    double x = (sector>12)?a.x():-a.x(); // Undo the sign flip before rotation
+    StThreeVector<double> result(x*mCosForSector[sector-1] + a.y()*mSinForSector[sector-1],
+				 -x*mSinForSector[sector-1] + a.y()*mCosForSector[sector-1],
+				 0.); // z is done in the next line
 
-//     // vector to be rotated
-//     StMatrix<double> v1(2,1,0);
-//     v1(1,1) = a.x();
-//     v1(2,1) = a.y();  // z co-ordinate is immaterial
-
-//     m1(1,1) = cos(beta);
-//     m1(1,2) = -sin(beta);
-
-//     m1(2,1) = -1*m1(1,2); // saves calculation sin(beta);
-//     m1(2,2) = m1(1,1);    // saves calculation cos(beta);
-
-//     PR(m1);
-//     StMatrix<double> newMatrix = m1*v1;
-//     PR(newMatrix);
-    //
-    // Now modify the data members instead:
-
-    double     beta=   (sector>12)? 	
-                      (sector-24)*M_PI/6. :
-		     -sector*M_PI/6. ;   //(30 degrees)
-    mRotation(1,1) =  cos(beta);
-    mRotation(1,2) =  -sin(beta);
-    mRotation(2,1) = -1.*mRotation(1,2);   // saves calculation sin(beta);
-    mRotation(2,2) =    mRotation(1,1);   // saves calculation cos(beta);
-
-    mRotate(1,1) = (sector>12)?a.x():-a.x(); //DH for sectors less than 12,
-                                             //x -> -x
-    mRotate(2,1) = a.y();  // z co-ordinate is immaterial
-
-    mResult = mRotation*mRotate;
-//     PR(mResult);
     return (sector>12)? (StThreeVector<double>(mResult(1,1),mResult(2,1),a.z()-mDriftDistance))
                         : (StThreeVector<double>(mResult(1,1),mResult(2,1),-a.z()+mDriftDistance));
 }
@@ -595,51 +581,15 @@ StTpcCoordinateTransform::rotateFromLocal(const StThreeVector<double>& a,
     // ( cos Þ  -sin Þ )
     // ( sin Þ   cos Þ )
 
-  // double beta = (sector>12) ? (sector-12)*M_PI/6 : -sector*M_PI/6;   //(30 degrees)  NEGATIVE ANGLE!!!!!!!!
-    //double beta = -sector*M_PI/6;   //(30 degrees)  NEGATIVE ANGLE!!!!!!!!
-
-    //
-    // See above for explanation.  All old code is as below
-    //
-//     const int m = 2;  
-//     const int n = 2;
-//     StMatrix<double> m1(m,n,0);
-
-//     // vector to be rotated
-//     StMatrix<double> v1(2,1,0);
-
-//     v1(1,1) = a.x();
-//     v1(2,1) = a.y();  // z co-ordinate is immaterial
-
-//     idb << "Rotation angle is " << beta << endl;
-//     m1(1,1) = cos(beta);
-//     m1(1,2) = -sin(beta);
-
-//     m1(2,1) = -1*m1(1,2); // saves calculation sin(beta);
-//     m1(2,2) = m1(1,1);   // saves calculation cos(beta);
-
-//     StMatrix<double> newMatrix = m1*v1;
-//     PR(newMatrix);
-
-    //
-    // New code:
-    // 
-    double beta = (sector>12) ?
-		(24-sector)*M_PI/6. :
-		sector*M_PI/6. ;   //(30 degrees)
-//     PR(beta);
-    mRotation(1,1) =  cos(beta);
-    mRotation(1,2) =  -sin(beta);
-    mRotation(2,1) = -1.*mRotation(1,2);   // saves calculation sin(beta);
-    mRotation(2,2) =     mRotation(1,1);   // saves calculation cos(beta);
-
-    mRotate(1,1) = a.x();
-    mRotate(2,1) = a.y();  // z co-ordinate is immaterial
-
-    mResult = mRotation*mRotate;
-//     PR(mResult);
-    return (sector>12) ? (StThreeVector<double>(mResult(1,1),mResult(2,1),a.z()+mDriftDistance))
-	               : (StThreeVector<double>(-mResult(1,1),mResult(2,1),-a.z()+mDriftDistance));
+    // Speed up the code, don't use matrices.
+    // Use array of cosines and sines created during construction.
+    // careful, sector is the sector number, not index
+    StThreeVector<double> result(a.x()*mCosForSector[sector-1] - a.y()*mSinForSector[sector-1],
+				 a.x()*mSinForSector[sector-1] + a.y()*mCosForSector[sector-1],
+				 0.); // z is done in the next line
+    //     PR(result);
+    return (sector>12) ? (StThreeVector<double>(result.x(),result.y(),a.z()+mDriftDistance))
+	               : (StThreeVector<double>(-result.x(),result.y(),-a.z()+mDriftDistance));
 }
 
 /****************************************************************/
