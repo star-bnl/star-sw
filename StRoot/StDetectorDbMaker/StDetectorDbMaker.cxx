@@ -1,6 +1,7 @@
 #include <iostream.h>
 #include "StDetectorDbMaker.h"
 #include "StDetectorDbFTPCGas.h"
+#include "StDetectorDbFTPCVoltage.h"
 #include "StDetectorDbRichScalers.h"
 #include "StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMagnet.h"
@@ -9,6 +10,7 @@
 #include "StDetectorDbTpcVoltages.h"
 #include "StDetectorDbBeamInfo.h"
 #include "StDetectorDbTriggerID.h"
+#include "StDetectorDbIntegratedTriggerID.h"
 
 ClassImp(StDetectorDbMaker)
 
@@ -49,6 +51,17 @@ Int_t StDetectorDbMaker::InitRun(int runNumber){
     // Update triggerID 
     StDetectorDbTriggerID* trigger = StDetectorDbTriggerID::instance();
     trigger->update(this);
+//    cout << *trigger;
+
+    // Update integratedTriggerID 
+    StDetectorDbIntegratedTriggerID* inTrigger = StDetectorDbIntegratedTriggerID::instance();
+    inTrigger->update(this);
+//    cout << *inTrigger;
+
+    // Update the ftpc voltage
+    StDetectorDbFTPCVoltage* ftpcVolt = StDetectorDbFTPCVoltage::instance();
+    ftpcVolt->update(this);
+//    cout << *ftpcVolt;
 
     return StMaker::InitRun(runNumber);
 }
@@ -59,6 +72,11 @@ Int_t StDetectorDbMaker::Make(){
     // Update FTPC Gas
     StDetectorDbFTPCGas* gas = StDetectorDbFTPCGas::instance();
     gas->update(this);
+    
+    // Update the ftpc voltage
+    StDetectorDbFTPCVoltage* ftpcVolt = StDetectorDbFTPCVoltage::instance();
+    ftpcVolt->update(this);
+//    cout << *ftpcVolt;
 
     // Update Rich Scalers/Voltages
     StDetectorDbRichScalers* scalers = StDetectorDbRichScalers::instance();
@@ -71,12 +89,13 @@ Int_t StDetectorDbMaker::Make(){
     // Also need to update instances for classes done in InitRun.
     // This is needed because of a feature in TTable
     // Please ingore unused variables..the call to instane() is needed!
-//VPunused    StDetectorDbTpcRDOMasks* masks = StDetectorDbTpcRDOMasks::instance();
-//VPunused    StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
+    StDetectorDbTpcRDOMasks* masks = StDetectorDbTpcRDOMasks::instance();
+    StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
     StDetectorDbSpaceCharge* spaceCharge = StDetectorDbSpaceCharge::instance();
-//VPunused    StDetectorDbClock* clock = StDetectorDbClock::instance();
-//VPunused    StDetectorDbBeamInfo* beam = StDetectorDbBeamInfo::instance();
-//VPunused    StDetectorDbTriggerID* trigger = StDetectorDbTriggerID::instance();
+    StDetectorDbClock* clock = StDetectorDbClock::instance();
+    StDetectorDbBeamInfo* beam = StDetectorDbBeamInfo::instance();
+    StDetectorDbTriggerID* trigger = StDetectorDbTriggerID::instance();
+    StDetectorDbIntegratedTriggerID* inTrigger = StDetectorDbIntegratedTriggerID::instance();
 
     // Jamie Asked for SpaceCharge to be couted every event
     cout << "Space Charge Correction = " << spaceCharge->getSpaceChargeCoulombs()
@@ -84,13 +103,3 @@ Int_t StDetectorDbMaker::Make(){
 
     return kStOK;
 }
-
-
-
-
-
-
-
-
-
-
