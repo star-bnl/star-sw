@@ -107,7 +107,6 @@ macro/global/import *
         [params]/tpc/tclpars/tcl_sector_index_
         [params]/tpc/tclpars/tclpar_ 
         [params]/tpc/tsspars/tsspar_
-        [geometry]/tpc/tpgpar/tpg_detector_
         [geometry]/tpc/tpgpar/tpg_pad_plane_
         [raw_data]/tpc/Sector_[j]/pixel_data_in_
         [raw_data]/tpc/Sector_[j]/pixel_data_out_
