@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNet.cc,v 1.4 2000/04/11 15:34:23 aihong Exp $
+ * $Id: StPidAmpNet.cc,v 1.5 2000/04/14 14:30:53 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNet.cc,v $
+ * Revision 1.5  2000/04/14 14:30:53  aihong
+ * bug fixed in pushATrk()
+ *
  * Revision 1.4  2000/04/11 15:34:23  aihong
  * change to adapt dividing trks by channel for faster filling
  *
@@ -633,7 +636,9 @@ void StPidAmpNet::pushATrk(StPidAmpTrk* theTrack,StPidAmpChannelCollection* set)
     double dedx;
                    
 
- if ( (fabs(theTrack->rig())>fabs(mParticleType.start())) && (fabs(theTrack->rig())<fabs(mParticleType.end())) ){
+ if ( (fabs(theTrack->rig())>fabs(mParticleType.start())) && 
+      (fabs(theTrack->rig())<fabs(mParticleType.end()))   &&
+      (((theTrack->charge())*(mParticleType.charge()))>0) ){
    //channel bound checking and band bound checking
 
     if (!set){
