@@ -1,0 +1,41 @@
+/*---------------------------------------------------------------------------
+ *  dst_tof.idl           
+ *
+ *  original: lanny ray
+ *   revised: bill llope, for mdc2, feb-11-99
+ *
+ *  Comments:   Each row in this table corresponds to a reconstructed 
+ *              track-TOF slat crossing.  More than one track may hit 
+ *              a single scintillator and one track may hit one or more 
+ *              scintillators.
+ *---------------------------------------------------------------------------
+ */
+ struct dst_tof  {
+  long      iflag;     /* =1 for extrap. of primary-like track to struck slat, =0 otherwise */
+  long      det_id;    /* detector element id                        */ 
+  long      itptrk;    /* row number in tpt_track table              */
+  long      ictftrk;   /* row number in g2t_ctf_hit table            */
+  long      ig2ttrk;   /* row number in g2t_track table              */
+  long      imslat;    /* row number in cts_mslat table              */
+  float     ptot;      /* total momentum of reconstructed track      */
+  float     x_trk;     /* extrapolated position of trk at tof in x   */
+  float     y_trk;     /* extrapolated position of trk at tof in y   */
+  float     z_trk;     /* extrapolated position of trk at tof in z   */
+  float     pm_len;    /* extrapolated hit posn to PMT distance      */
+  float     s_trk;     /* tracklength from target to hit             */
+  float     charge;    /* normalized charge of hit                   */
+  float     tof;       /* actual time of flight                      */
+  float     atime;     /* pure tof plus propagation delay            */
+  float     mtime;     /* =tof   + slat assembly resolution          */
+  float     mtimel;    /* =mtime + prop delay + start resolution     */
+  float     n_hits;    /* number of geant crossings for this slat    */
+  float     adc;       /* ADC value for this slat                    */
+/*  float     sig_tof;       /* sigma of tof                               */
+/*  float     beta;          /* pathl/tof (/c)                             */
+/*  float     sig_beta;      /* sigma of beta                              */
+/*  float     mass2;         /* squared mass                               */
+/*  float     sig_mass2;     /* sigma of mass**2                           */ 
+/*  long      id_track;      /* F.key to dst_track associated with         */
+                             /* this tof entry                             */
+ } ;
+/*  Last mod. for dst_tof:   $Date: 1999/02/11 22:15:22 $ */

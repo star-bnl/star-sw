@@ -15,6 +15,7 @@ ami/mod/call cts [geant_Event]/g2t_ctb_hit     _
                  [data]/ctf/ctb_event          _
                  [data]/ctf/ctb_mslat          _
                  [data]/ctf/ctb_raw
+*
 *---- call cts for TOF data...
 ami/mod/call cts [geant_Event]/g2t_tof_hit     _
                  [geant_Event]/g2t_track       _
@@ -26,5 +27,21 @@ ami/mod/call cts [geant_Event]/g2t_tof_hit     _
                  [data]/ctf/tof_event          _
                  [data]/ctf/tof_mslat          _
                  [data]/ctf/tof_raw
+*
+*---- fill dst table with TOF information
+ami/mod/call fill_dst_tof  _
+                 [geant_Event]/g2t_tof_hit     _
+                 [geant_Event]/g2t_track       _
+                 [data]/tpc/tracks/tptrack     _
+                 [data]/tpc/tracks/mctrk       _
+                 [data]/global/dst/vertex      _
+                 [params]/ctf/ctg/tof          _
+                 [params]/ctf/ctg/tof_slat     _
+                 [params]/ctf/ctg/tof_slat_phi _
+                 [params]/ctf/ctg/tof_slat_eta _
+                 [params]/ctf/cts/cts_tof      _
+                 [data]/ctf/tof_mslat          _
+                 [data]/ctf/dst_tof
+
 theend:
 return
