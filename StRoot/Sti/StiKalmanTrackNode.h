@@ -157,7 +157,7 @@ public:
   void rotate(double alpha); 
   void add(StiKalmanTrackNode * newChild);
   double getField()  const;
-  double getHelicity()  const;
+  int    getHelicity()  const;
   double getPhase()   const;
   double getWindowY() const;
   double getWindowZ() const;
@@ -299,6 +299,12 @@ inline double StiKalmanTrackNode::getTanL() const
 {
   return _p4;
 }
+
+inline int StiKalmanTrackNode::getHelicity()  const
+{
+  return (_p3 < 0) ? 1 : -1;
+}
+
 
 inline double StiKalmanTrackNode::pitchAngle() const
 {

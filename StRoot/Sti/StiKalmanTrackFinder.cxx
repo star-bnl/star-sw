@@ -175,8 +175,11 @@ void StiKalmanTrackFinder::findTracks()
 	      track->find();
 	      StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
 	      if (t) t->update();
-	      if (_trackFilter && _trackFilter->filter(track)) 
-		_trackContainer->push_back(track);
+	      if (_trackFilter)
+		{
+		  if (_trackFilter->filter(track)) 
+		    _trackContainer->push_back(track);
+		}
 	      else
 		_trackContainer->push_back(track);
 	    }
@@ -225,8 +228,11 @@ void StiKalmanTrackFinder::fitTracks()
 	  track->fit(kOutsideIn); track->setFlag(0);
 	  // apply filter if one is defined 
 	  // always add track if not
-	  if (_trackFilter && _trackFilter->filter(track)) 
-	    _trackContainer->push_back(track);
+	  if (_trackFilter)
+	    {
+	      if (_trackFilter->filter(track))
+		_trackContainer->push_back(track);
+	    }
 	  else
 	    _trackContainer->push_back(track);
 	  StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
@@ -501,10 +507,13 @@ void StiKalmanTrackFinder::findNextTrack()
 					track->find();
 					StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
 					if (t) t->update();
-					if (_trackFilter && _trackFilter->filter(track)) 
-						_trackContainer->push_back(track);
+					if (_trackFilter)
+					  {
+					    if (_trackFilter->filter(track)) 
+					      _trackContainer->push_back(track);
+					  }
 					else 
-						_trackContainer->push_back(track);
+					  _trackContainer->push_back(track);
 				} 
       else 
 				_messenger <<"StiKalmanTrackFinder::findNextTrack() - I - trackSeedFinder->hasMore()==false"<<endl;
@@ -528,10 +537,13 @@ void StiKalmanTrackFinder::fitNextTrack()
 					if (!track) 
 						throw runtime_error("\nStiKalmanTrackFinder::fitNextTrack() - trackSeedFinder->next() returned 0");
 					track->fit(kOutsideIn);
-					if (_trackFilter && _trackFilter->filter(track)) 
-						_trackContainer->push_back(track);
+					if (_trackFilter)
+					  {
+					    if(_trackFilter->filter(track)) 
+					      _trackContainer->push_back(track);
+					  }
 					else
-						_trackContainer->push_back(track);
+					  _trackContainer->push_back(track);
 					StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
 					t->update();
 					_messenger << "track parameters:" << _messenger << *track<<endl;
@@ -586,13 +598,13 @@ void StiKalmanTrackFinder::update()
   for (iter=_trackContainer->begin();iter!=_trackContainer->end();++iter) 
     {
       if (_guiTrackFilter && _guiTrackFilter->filter((*iter).second))
-				{
-					t = dynamic_cast<StiDrawableTrack *>((*iter).second);
-					if (t)
-						t->update();
-					else
-						_messenger << "StiKalmanTrackFinder::update() - WARNING - Kalman dynamic_cast failed." << endl;
-				}
+	{
+	  t = dynamic_cast<StiDrawableTrack *>((*iter).second);
+	  if (t)
+	    t->update();
+	  else
+	    _messenger << "StiKalmanTrackFinder::update() - WARNING - Kalman dynamic_cast failed." << endl;
+	}
     }
   StiToolkit::instance()->getDisplayManager()->draw();
   StiToolkit::instance()->getDisplayManager()->update();

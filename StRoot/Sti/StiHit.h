@@ -112,7 +112,7 @@ public:
 
     ///Return a const reference to a StThreeVectorF that denotes the position
     ///of the hit in global STAR coordinates.
-    const StThreeVectorF& globalPosition() const;
+    const StThreeVectorF globalPosition() const;
 
     void set(float position,  float angle, float y, float z);
 
@@ -157,6 +157,8 @@ private:
     float msxy;
     float msxz;
     float msyz;
+    // global position
+    float _xg,_yg,_zg;
     unsigned int mTimesUsed;
     const StiDetector* mdetector;
     const StMeasuredPoint * msthit;
@@ -173,11 +175,10 @@ private:
 inline void StiHit::reset()
 {
   mrefangle = mposition = 0;
-  mx = my = mz = msxx = msyy = mszz = msxy = msxz = msyz = 0.;
+  mx = my = mz = msxx = msyy = mszz = msxy = msxz = msyz = _xg = _yg = _zg = _energy= 0.;
   mTimesUsed=0;
   mdetector = 0;
   msthit = 0;
-  _energy = 0;
 }
 
 inline void StiHit::scaleError(float scale)
@@ -192,9 +193,12 @@ inline void StiHit::scaleError(float scale)
 inline float StiHit::x() const {return mx;}
 inline float StiHit::y() const {return my;}
 inline float StiHit::z() const {return mz;}
-inline float StiHit::x_g() const {return msthit->position().x();}
-inline float StiHit::y_g() const {return msthit->position().y();}
-inline float StiHit::z_g() const {return msthit->position().z();}
+//inline float StiHit::x_g() const {return msthit->position().x();}
+//inline float StiHit::y_g() const {return msthit->position().y();}
+//inline float StiHit::z_g() const {return msthit->position().z();}
+inline float StiHit::x_g() const {return _xg;}
+inline float StiHit::y_g() const {return _yg;}
+inline float StiHit::z_g() const {return _zg;}
 inline float StiHit::sxx() const {return msxx;}
 inline float StiHit::syy() const {return msyy;}
 inline float StiHit::szz() const {return mszz;}
@@ -226,19 +230,21 @@ inline void StiHit::setGlobal(const StiDetector * detector,
 			      float gx, float gy, float gz,
 			      float energy)
 {
-	if (detector)
-		{
-			StiPlacement * placement = detector->getPlacement();
-			mrefangle = placement->getNormalRefAngle();
-			mposition = placement->getLayerRadius();
-			mx =  detector->_cos*gx + detector->_sin*gy;
-			my = -detector->_sin*gx + detector->_cos*gy;
-		}
-	else
-		{
-			mrefangle = 0.;
-			mposition = 0.;
-		}
+  if (detector)
+    {
+      StiPlacement * placement = detector->getPlacement();
+      mrefangle = placement->getNormalRefAngle();
+      mposition = placement->getLayerRadius();
+      mx =  detector->_cos*gx + detector->_sin*gy;
+      my = -detector->_sin*gx + detector->_cos*gy;
+    }
+  else
+    {
+      mrefangle = 0.;
+      mposition = 0.; 
+      mx =  gx;
+      my =  gy;
+    }
   mz = gz;
   msxx = 1.;//sxx;
   msyy = 1.;//syy;
@@ -246,6 +252,9 @@ inline void StiHit::setGlobal(const StiDetector * detector,
   msxy = 0.;//sxy;
   msxz = 0.;//sxz;
   msyz = 0.;//syz;  
+  _xg = gx;
+  _yg = gy;
+  _zg = gz;
   mTimesUsed = 0;
   mdetector = detector;  msthit = stHit;
   _energy = energy;
@@ -253,22 +262,26 @@ inline void StiHit::setGlobal(const StiDetector * detector,
 
 
 inline void StiHit::set(const StiDetector * detector,
-		 const StMeasuredPoint * stHit,
-		 float energy,
-		 float x, float y, float z, 
-		 float sxx, float sxy, float sxz, float syy, float syz, float szz)
+			const StMeasuredPoint * stHit,
+			float energy,
+			float x, float y, float z, 
+			float sxx, float sxy, float sxz, float syy, float syz, float szz)
 {
-	if (detector)
-		{
-			StiPlacement * placement = detector->getPlacement();
-			mrefangle = placement->getNormalRefAngle();
-			mposition = placement->getLayerRadius();
-		}
-	else
-		{
-			mrefangle = 0.;
-			mposition = 0.;
-		}
+  if (detector)
+    {
+      StiPlacement * placement = detector->getPlacement();
+      mrefangle = placement->getNormalRefAngle();
+      mposition = placement->getLayerRadius();
+      _xg = detector->_cos*x - detector->_sin*y;
+      _yg = detector->_sin*x + detector->_cos*y;
+    }
+  else
+    {
+      mrefangle = 0.;
+      mposition = 0.;
+      _xg = x;
+      _yg = y;
+    }
   mx = x;
   my = y;
   mz = z;
@@ -281,7 +294,8 @@ inline void StiHit::set(const StiDetector * detector,
   mTimesUsed = 0;
   mdetector = detector;
   msthit = stHit;
-  _energy = energy;
+  _energy = energy;  
+  _zg = z;
 }
 
 inline void StiHit::setTimesUsed(unsigned int val)
@@ -294,9 +308,9 @@ inline float StiHit::getEloss()
   return _energy;
 }
 
-inline const StThreeVectorF& StiHit::globalPosition() const
+inline const StThreeVectorF StiHit::globalPosition() const
 {
-  return msthit->position();
+  return StThreeVectorF(_xg,_yg,_zg); ////msthit->position();
 }
 
 
