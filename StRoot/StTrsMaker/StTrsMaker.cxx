@@ -1,6 +1,13 @@
-// $Id: StTrsMaker.cxx,v 1.53 2000/02/10 01:21:27 calderon Exp $
+// $Id: StTrsMaker.cxx,v 1.54 2000/02/24 16:30:41 long Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.54  2000/02/24 16:30:41  long
+// 1) modified  for field on case
+// //2) modified for pileup pp events  ---Balewski
+//
+// Revision 1.54  2000/02/23 01:34:06  long
+//1) modified  for field on case
+//2) modified for pileup pp events  ---Balewski
 // Revision 1.53  2000/02/10 01:21:27  calderon
 // Switch to use StTpcDb.
 // Coordinates checked for consistency.
@@ -303,11 +310,13 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 // g2t tables
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h" 
+#define PILEUP_ON  (m_Mode )
 
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.53 2000/02/10 01:21:27 calderon Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.54 2000/02/24 16:30:41 long Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -676,6 +685,14 @@ Int_t StTrsMaker::Make(){
     St_g2t_track *g2t_track =
 	static_cast<St_g2t_track *>(geant("g2t_track"));
     g2t_track_st *tpc_track = g2t_track->GetTable();
+    
+     St_g2t_vertex  *g2t_ver=static_cast<St_g2t_vertex *>(geant("g2t_vertex"));
+     g2t_vertex_st *gver=g2t_ver->GetTable();
+     assert(gver); 
+     if(PILEUP_ON)
+       printf("\n  TRS(): Pileup is ON (m_Mode=%d)\n\n",m_Mode); 
+     else
+       printf("\n  TRS(): Pileup is OFF (m_Mode=%d)\n\n",m_Mode); 
 
     //int geantPID = tpc_track->ge_pid;
     //PR(geantPID);
@@ -687,7 +704,18 @@ Int_t StTrsMaker::Make(){
     // Limit the  processing to a fixed number of segments
     //  no_tpc_hits = 4;
     for (int i=1; i<=no_tpc_hits; i++,tpc_hit++){
-        
+       int id2=tpc_hit->track_p;
+         int id3=tpc_track[id2-1].start_vertex_p; //  "-1" is (Fortran-->C++)
+        float BunchZoffset=gver[id3-1].ge_tof* mSlowControlDb->driftVelocity();
+          float absHitZ=fabs(tpc_hit->x[2]);
+	
+	      if(PILEUP_ON)
+            {
+	    if(absHitZ - tpc_hit->ds + BunchZoffset<0) continue;//crossed central membrane
+	    if(absHitZ + tpc_hit->ds + BunchZoffset> mGeometryDb->frischGrid()) 
+	   continue;//out of TPC
+	     }    //  for piled up events
+
 // 		cout << "--> tpc_hit:  " << i << endl;
 // 		raw << tpc_hit->volume_id   << ' '
 // 		    << tpc_hit->de          << ' '
@@ -767,7 +795,7 @@ Int_t StTrsMaker::Make(){
 	    // the code below follows exactly what is in StTpcCoordinateTransform
 	    // It is also in StTrsChargeSegment::rotate()
 	    double beta = (bsectorOfHit>12) ?
-		(24-bsectorOfHit)*M_PI/6. :
+		-bsectorOfHit*M_PI/6. :
 		bsectorOfHit*M_PI/6. ;   //(30 degrees)
 	    double cb   = cos(beta);
 	    double sb   = sin(beta);
@@ -789,12 +817,12 @@ Int_t StTrsMaker::Make(){
 					      tpc_hit->p[2]*GeV);
 
 	    //added by Hui Long ,8/24/99
-	    //Modified by M. Calderon 2/5/99
+	    //Modified by M. Calderon 2/5/00
 	    
              if(bsectorOfHit>12) 
                    {
                     sector12Coordinate.setZ((tpc_hit->x[2])+mGeometryDb->driftDistance());
-	            //hitMomentum.setZ(-(tpc_hit->p[2]*GeV));
+	            hitMomentum.setZ(-(tpc_hit->p[2]*GeV));// HL,02/23/00
 		 
                    } 
              else
@@ -858,7 +886,7 @@ Int_t StTrsMaker::Make(){
 // 	    copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
 #endif
 
-	   
+	    double SigmaL,SigmaT;//HL,added for field on case,02/08/00
 	    
 	    // Loop over the miniSegments
 	    for(iter = comp.begin();
@@ -868,7 +896,16 @@ Int_t StTrsMaker::Make(){
 		//
 	        // TRANSPORT HERE
 	        //
-		mChargeTransporter->transportToWire(*iter);
+	      //	mChargeTransporter->transportToWire(*iter); 
+               mChargeTransporter->transportToWire(*iter,SigmaL,SigmaT);//HL,08/02/00   for field on 
+              
+	            if(PILEUP_ON)
+	      { 
+	      StTrsMiniChargeSegment *seg1=&(*iter);
+	      float Znew=seg1->position().z()-BunchZoffset;
+	      seg1->position().setZ(Znew);
+	        }
+
               
 //   		PR(*iter);
 		
@@ -882,11 +919,13 @@ Int_t StTrsMaker::Make(){
 // 		PR(anEntry);
 		//#else
               
-		StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge());
+		//  	StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge());
                
 		//#endif
-		mWireHistogram->addEntry(anEntry);
-		
+	       //	mWireHistogram->addEntry(anEntry); 
+             
+               StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge(),SigmaL,SigmaT);//HL,for field on ,08/02/00
+	        mWireHistogram->addEntry(anEntry);	
 	    } // Loop over the list of iterators
 
 	    //  tpc_hit++;  // increase the pointer to the next hit
@@ -915,7 +954,7 @@ Int_t StTrsMaker::Make(){
 	mWireNtuple->Write();
 #endif
 	PR(currentSectorProcessed);
-	cout << endl;
+     
 	//
 	// Generate the ANALOG Signals on pads
 	//
