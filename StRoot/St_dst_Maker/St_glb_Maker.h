@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.6 1998/12/12 02:37:53 fisyak Exp $
+// $Id: St_glb_Maker.h,v 1.7 1998/12/16 22:22:41 fisyak Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.7  1998/12/16 22:22:41  fisyak
+// New global from Spiros
+//
 // Revision 1.6  1998/12/12 02:37:53  fisyak
 // fix evr
 //
@@ -45,18 +48,19 @@
 class St_svm_ctrl;
 class St_evr_privert;
 class St_evr_evrpar;
+class St_egr_propagate;
 class St_egr_egrpar;
 class St_ev0_ev0par;
-class St_mft_control;
-class St_ev0_ev0par;
+class St_ev0_ev0par2;
 class St_mft_control; 
 class St_particle_dst_param;
 class St_dst_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.6 1998/12/12 02:37:53 fisyak Exp $";
+  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.7 1998/12/16 22:22:41 fisyak Exp $";
   // egr
-  Int_t         m_scenario;   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
+  Int_t         m_scenario;   
+  //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
   //    EGR will refit the TPC tracks, reproducing the parameters in tptrack.
   //#2: Perfect TPC Stand-Alone Tracking: Use this when running the TPC only.  
   //    EGR will perform a direct copy of tptrack into globtrk.
@@ -86,7 +90,8 @@ class St_dst_Maker : public StMaker {
   //    the 1/pt value taken from tptrack.
   //#11:Description Perfect SVT/TPC matching (M.C.). Only tracks w/ TPC into 
   Int_t         m_svtchicut;  // = 0 all unmatched svt tracks copied
-  Int_t         m_useglobal;  // = 1 - Perfect matching between tpc and svt (checks mc_ids)
+  Int_t         m_useglobal;  
+  // = 1 - Perfect matching between tpc and svt (checks mc_ids)
   // = 2 - Refit tracks
   // = 3 - Copies info from svt tracks + 1/invpt from tptrack
   Int_t         m_usesvt;     // = 0 Dont' copy unmatched svt tracks
@@ -96,14 +101,18 @@ class St_dst_Maker : public StMaker {
   // = 1 Copy unmatched tracks, no refit
   // = 2 Copy unmatched tracks, refit
   
-  Int_t         m_usevert;    // 
+  Int_t            m_usevert;    // 
+  Int_t            m_flag;       //
   St_svm_ctrl    *m_svm_ctrl;    // ! 
   St_evr_privert *m_evr_privert; //!
-  St_evr_evrpar  *m_evr_evrpar;  //!
   
+  St_evr_evrpar  *m_evr_evrpar;  //!
+  St_egr_propagate *m_tp_param;  //!
   St_ev0_ev0par  *m_ev0par;      //!
+  St_ev0_ev0par2 *m_ev0par2;     //!
   St_mft_control *m_magf;        //!
   St_egr_egrpar  *m_egr_egrpar;  //!
+  St_egr_egrpar  *m_egr2_egrpar; //!
   St_particle_dst_param *m_particle_dst_param; //!
   // Histograms
   static const Int_t nxpT;
@@ -134,6 +143,7 @@ class St_dst_Maker : public StMaker {
   virtual void   Set_usesvt   (Int_t m = 1){m_usesvt    = m;} // *MENU*
   virtual void   Set_usetpc   (Int_t m = 1){m_usetpc    = m;} // *MENU*
   virtual void   Set_usevert  (Int_t m = 0){m_usevert   = m;} // *MENU*
+  virtual void   Set_flag     (Int_t m = 0){m_flag = m;}      // *MENU*
   ClassDef(St_dst_Maker, 1)   //StAF chain virtual base class for Makers
     };
 

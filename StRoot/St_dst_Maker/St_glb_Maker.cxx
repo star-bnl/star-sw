@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.12 1998/12/12 02:37:53 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.13 1998/12/16 22:22:40 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.13  1998/12/16 22:22:40  fisyak
+// New global from Spiros
+//
 // Revision 1.12  1998/12/12 02:37:53  fisyak
 // fix evr
 //
@@ -50,6 +53,7 @@
 
 #include <iostream.h>
 #include <stdlib.h>
+#include <string.h>
 #include <TMath.h>
 #include "St_dst_Maker.h"
 #include "St_particle_Table.h"
@@ -65,7 +69,9 @@
 
 #include "global/St_evr_am_Module.h"
 #include "global/St_egr_fitter_Module.h"
-#include "global/St_ev0_am_Module.h"
+#include "global/St_track_propagator_Module.h"
+//#include "global/St_ev0_am_Module.h"
+#include "global/St_ev0_am2_Module.h"
 #include "global/St_ev0_eval2_Module.h"
 #include "global/St_dst_dedx_filler_Module.h"
 #include "global/St_dst_monitor_soft_filler_Module.h"
@@ -86,7 +92,6 @@ ClassImp(St_dst_Maker)
 //_____________________________________________________________________________
 St_dst_Maker::St_dst_Maker(const char *name, const char *title):StMaker(name,title),
 m_svm_ctrl(0),
-m_evr_privert(0),
 m_evr_evrpar(0),
 m_ev0par(0),
 m_magf(0),
@@ -100,6 +105,7 @@ m_particle_dst_param(0)
   m_usesvt    = 1;
   m_usetpc    = 1;
   m_usevert   = 0;
+  m_flag      = 2;
 }
 //_____________________________________________________________________________
 St_dst_Maker::~St_dst_Maker(){
@@ -110,21 +116,86 @@ Int_t St_dst_Maker::Init(){
   St_DataSetIter params(gStChain->DataSet("params"));
   //svm
   m_svm_ctrl   = (St_svm_ctrl *)   params("global/svmpars/svm_ctrl");
-  //evr
-  m_evr_privert = (St_evr_privert *) params("global/evrpars/evr_privert");
-  m_evr_evrpar  = (St_evr_evrpar *) params("global/evrpars/evr_evrpar");
   //egr 
   m_egr_egrpar = (St_egr_egrpar *) params("global/egrpars/egr_egrpar");
   egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
-  egr_egrpar->scenario  = m_scenario;
-  egr_egrpar->svtchicut = m_svtchicut;
-  egr_egrpar->useglobal = m_useglobal;
-  egr_egrpar->usetpc    = m_usetpc;
-  egr_egrpar->usesvt    = m_usesvt; 
-  egr_egrpar->usevert   = m_usevert;
+  egr_egrpar->scenario =   8;
+  egr_egrpar->mxtry =     10;
+  egr_egrpar->minfit =     2;
+  egr_egrpar->prob[0] =    2;
+  egr_egrpar->prob[1] =    2;
+  //  memset((Int_t *) egr_egrpar->debug[0], 0, 10*sizeof(Int_t));  
+  Int_t i;
+  egr_egrpar->debug[0] =   1; 
+  for (i=1;i<10;i++){egr_egrpar->debug[i]=0;}
+  egr_egrpar->svtchicut =  0;
+  egr_egrpar->usetpc =     1;
+  egr_egrpar->usesvt =     1;
+  egr_egrpar->usevert =    0;
+  egr_egrpar->useglobal =  2;
+  //  egr_egrpar->scenario  = m_scenario;
+  //  egr_egrpar->svtchicut = m_svtchicut;
+  //  egr_egrpar->useglobal = m_useglobal;
+  //  egr_egrpar->usetpc    = m_usetpc;
+  //  egr_egrpar->usesvt    = m_usesvt; 
+  //  egr_egrpar->usevert   = m_usevert;
+  //evr
+  m_evr_evrpar  = (St_evr_evrpar *) params("global/evrpars/evr_evrpar");
+  // prop
+  m_tp_param = new St_egr_propagate("tp_param",1); 
+  params("global/evrpars/evr_evrpar")->Add(m_tp_param);
+  egr_propagate_st *tp_param = m_tp_param->GetTable();
+  tp_param->iflag =   m_flag;
+  if (m_flag == 1 || m_flag == 2) {
+    memset(tp_param->x,0,3*sizeof(Float_t));  
+  }
+  if (m_flag == 3) {
+   tp_param->r     =  4.;
+  }
+  if (m_flag == 4) {
+    tp_param->z =  0.; 
+  }
+  // egr2
+  m_egr2_egrpar = (St_egr_egrpar *) params("global/egrpars/egr2_egrpar");
+  if (!m_egr2_egrpar) {
+    m_egr2_egrpar = new St_egr_egrpar("egr2_egrpar",1);
+    params("global/egrpars")->Add(m_egr2_egrpar);
+  }
+  egr_egrpar_st *egr2_egrpar = m_egr2_egrpar->GetTable();
+  egr2_egrpar->scenario =  5;
+  egr2_egrpar->mxtry =    10;
+  egr2_egrpar->minfit =    5;
+  egr2_egrpar->prob[0] =   2;
+  egr2_egrpar->prob[1] =   2;
+  //  memset ((Int_t *)egr2_egrpar->debug[0],0,10*sizeof(Int_t));
+  egr2_egrpar->debug[0] =  1;
+  for (i=1;i<10;i++){egr2_egrpar->debug[i]=0;}
+  egr2_egrpar->svtchicut = 0;
+  egr2_egrpar->usetpc    = 1;
+  egr2_egrpar->usesvt    = 0;
+  egr2_egrpar->usevert   = 1;
+  egr2_egrpar->useglobal = 0;
+
   //ev0   
   m_ev0par = (St_ev0_ev0par *)  params("global/ev0pars/ev0par");
-  m_magf   = (St_mft_control *) params("global/magnetic_field/magf");  
+  //  m_magf   = (St_mft_control *) params("global/magnetic_field/magf");  
+  m_ev0par2 = (St_ev0_ev0par2 *)  params("global/ev0pars/ev0par2");
+  if (!m_ev0par2) {
+    m_ev0par2 = new St_ev0_ev0par2("ev0par2",3);
+    params("global/ev0pars")->Add(m_ev0par2);
+  }
+  ev0_ev0par2_st *ev0par2 = m_ev0par2->GetTable();
+  Int_t l;
+  for (l=0;l<3;l++){
+    ev0par2->dca =   0.8;
+    ev0par2->dcav0 = 0.3;
+    ev0par2->dlen =  100;
+    ev0par2->alpha_max = 1.2;
+    ev0par2->ptarm_max = 0.3;
+    ev0par2++;
+  }
+  ev0par2 = m_ev0par2->GetTable();
+  ev0par2->dlen =  2;
   // Create Histograms    
   m_pT_eta_rec = new TH2F("pT_eta_rec","pT versus eta (reconstructed)",
 			  nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
@@ -159,14 +230,18 @@ Int_t St_dst_Maker::Make(){
     St_tpt_track  *tptrack   = (St_tpt_track *) tpc_tracks("tptrack");
     St_tcl_tphit  *tphit = (St_tcl_tphit *) tpc_hits("tphit");
     St_stk_track  *stk_track = (St_stk_track *) svt_tracks("stk_track");
-    
+    if (! stk_track) {
+      stk_track = new St_stk_track("stk_track",1);
+      svt_tracks.Add(stk_track);
+    }
     St_tte_eval     *evaltrk      = (St_tte_eval   *) tpc_tracks("evaltrk");
     St_scs_spt      *scs_spt      = (St_scs_spt    *) svt_hits("scs_spt");
     St_sgr_groups   *groups       = (St_sgr_groups *) svt_tracks("groups");
     //svm
     St_DataSet  *global_track = global.Mkdir("tracks");
     St_DataSetIter track(global_track);
-    St_svm_evt_match *evt_match  = new St_svm_evt_match("evt_match",3000); track.Add(evt_match);
+    St_svm_evt_match *evt_match  = new St_svm_evt_match("evt_match",3000);
+    track.Add(evt_match);
     
     if (tptrack && stk_track) {
       
@@ -196,14 +271,15 @@ Int_t St_dst_Maker::Make(){
       Int_t Res_svm_svt_eval  = svm_svt_eval(scs_spt,groups,stk_track,tptrack,evaltrk,
 					     evt_match, svm_eval_par,svm_eval_strk);
     }
-    St_dst_track     *globtrk     = new St_dst_track("globtrk",100000);         dst.Add(globtrk);
-    St_dst_track_aux *globtrk_aux = new St_dst_track_aux("globtrk_aux",100000); dst.Add(globtrk_aux);
-    St_ev0_track     *ev0track    = new St_ev0_track("ev0track",100000);        dst.Add(ev0track);
+    St_dst_track     *globtrk     = new St_dst_track("globtrk",100000); 
+    dst.Add(globtrk);
+    St_dst_track_aux *globtrk_aux = new St_dst_track_aux("globtrk_aux",100000);
+    dst.Add(globtrk_aux);
     St_DataSet *vertices    = global("vertices");
     if (!vertices) vertices = global.Mkdir("vertices");
-    // ev0
-    St_ev0_aux *ev0out = new St_ev0_aux("ev0out",100000); vertices->Add(ev0out);
-    St_dst_vertex *vertex = new St_dst_vertex("vertex",100000); dst.Add(vertex);
+    St_dst_vertex *vertex = new St_dst_vertex("vertex",100000); 
+    dst.Add(vertex);
+
     // evr
     cout << "run_evr: calling evr_am" << endl;
     
@@ -219,17 +295,53 @@ Int_t St_dst_Maker::Make(){
       cout << "Problem on return from EGR_FITTER" << endl;
     }
     cout << " finished calling egr_fitter" << endl;
-    //ev0
+    // track_propogator
+    St_dst_track *globtrk2     = new St_dst_track("globtrk2",100000);
+    dst.Add(globtrk2);
+    *globtrk2  = *globtrk;
+    cout << " Calling track_propagator " << endl;
+
+    Int_t Res_tp = track_propagator(globtrk,m_tp_param,globtrk2);
+
+    if (Res_tp !=  kSTAFCV_OK) {
+      cout << "Problem on return from Track_Propagator" << endl;
+    }
+    cout << " finished calling track-propagator" << endl;
+
+
+    // egr2
+    cout << "Calling EGR_fitter - Second time" << endl;
+    St_dst_track *primtrk = new St_dst_track("primtrk",30000);
+    dst.Add(primtrk);
+    St_dst_track_aux *primtrk_aux = new St_dst_track_aux("primtrk_aux",30000);
+    dst.Add(primtrk_aux);
+    Int_t Res_egr2 = egr_fitter (tphit,vertex,tptrack,evaltrk,
+				 scs_spt,m_egr2_egrpar,stk_track,groups,
+				 evt_match,primtrk,primtrk_aux);
+    if (Res_egr2 != kSTAFCV_OK){
+      cout << "Problem on return from EGR_FITTER" << endl;
+    }
+    cout <<" finished calling egr_fitter - second time" << endl;
+    // ev0
     cout << "Calling ev0..." << endl;
-    
+    St_ev0_aux *ev0out    = new St_ev0_aux("ev0out",100000); 
+    vertices->Add(ev0out);
+    //    St_ev0_track     *ev0track    = new St_ev0_track("ev0track",100000);
+    //    dst.Add(ev0track);
+#if 0    
     Int_t Res_ev0 = ev0_am(m_ev0par,globtrk,vertex,
 			   ev0out,ev0track,m_magf);
-    
+#endif 
+    St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",100000);
+    dst.Add(ev0track2);
+    Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk,vertex,ev0out,ev0track2);
+   
     if (Res_ev0 != kSTAFCV_OK){
       cout << "Problem on return from ev0_am" << endl;
     }
     //  ev0_eval2
-    St_ev0_eval *ev0_eval = new St_ev0_eval("ev0_eval",100000); vertices->Add(ev0_eval); 
+    St_ev0_eval *ev0_eval = new St_ev0_eval("ev0_eval",100000);
+    vertices->Add(ev0_eval); 
     St_DataSetIter geant(gStChain->DataSet("geant"));
     St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("Event/g2t_track");
     St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *)geant("Event/g2t_vertex");
@@ -392,7 +504,7 @@ Int_t St_dst_Maker::Make(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.12 1998/12/12 02:37:53 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.13 1998/12/16 22:22:40 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
