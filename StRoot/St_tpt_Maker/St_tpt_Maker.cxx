@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.38 1999/08/12 17:04:12 ogilvie Exp $
+// $Id: St_tpt_Maker.cxx,v 1.39 1999/08/19 21:09:51 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.39  1999/08/19 21:09:51  sakrejda
+// limit on annoying messages set to 10
+//
 // Revision 1.38  1999/08/12 17:04:12  ogilvie
 // changed to tde, added tpc_dedx table
 //
@@ -119,6 +122,7 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_XDFFile.h"
+#include "StUtilities/StMessMgr.h"
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
 #include "tpc/St_tpt_Module.h"
@@ -154,6 +158,10 @@ ClassImp(St_tpt_Maker)
 St_tpt_Maker::~St_tpt_Maker(){}
 //_____________________________________________________________________________
 Int_t St_tpt_Maker::Init(){
+  //Suppress annoying messages
+gMessMgr->SetLimit("TPTROOT1-E1",10);
+gMessMgr->SetLimit("TPTOUT2-E1",10);
+
   // Create tables
   
   St_DataSet *tpcpars = GetInputDB("params/tpc");
