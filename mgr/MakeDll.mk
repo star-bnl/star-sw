@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.80 1999/04/30 13:23:25 fisyak Exp $
+# $Id: MakeDll.mk,v 1.81 1999/05/03 15:06:42 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.81  1999/05/03 15:06:42  fisyak
+# patch for Collections
+#
 # Revision 1.80  1999/04/30 13:23:25  fisyak
 # add precint for Collection, use in compilation generated with precint h-files
 #
@@ -180,7 +183,7 @@ endif
 INC_NAMES := $(addprefix StRoot/,St_base StChain xdf2root StarClassLibrary StRootEvent) \
               StRoot .share .share/tables .share/$(PKG) pams inc 
 #                            StarClassLibrary/include
-INC_DIRS  := $(wildcard $(SRC_DIR) $(SRC_DIR)/include)
+INC_DIRS  := $(wildcard $(GEN_DIR) $(SRC_DIR) $(SRC_DIR)/include)
 INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) $(ROOT_DIR) 
 ifneq ($(ROOT_DIR),$(STAR))
 INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
@@ -317,7 +320,9 @@ ifdef FILES_ORD
                                      $(addprefix  VecPtr,    $(NAMES_DD)))
       NAMES_ORD := $(filter-out $(NAMES_ORDD), $(NAMES_ORD))
       FILES_COL := $(shell grep -l StCollectionDef  $(FILES_H))
-      FILES_COG := $(addprefix $(GEN_DIR)/, $(notdir $(FILES_COL)))
+      NAMES_COL := $(notdir $(FILES_COL))
+      NAMES_COL := $(filter %Hit.h, $(NAMES_COL)) $(filter-out %Hit.h, $(NAMES_COL)) 
+      FILES_COG := $(addprefix $(GEN_DIR)/, $(notdir $(NAMES_COL)))
     endif
   endif
   LinkDef        :=$(wildcard $(SRC_DIR)/$(PKG)LinkDef.h $(SRC_DIR)/$(PKG)LinkDef.hh)
@@ -346,8 +351,8 @@ ifdef FILES_ORD
     FILES_ORD_H    := $(wildcard $(addprefix $(SRC_DIR)/,$(addsuffix .h,$(NAMES_ORD)) \
                                                          $(addsuffix .hh,$(NAMES_ORD))))
     ifneq (,$(FILES_COL))
-      FILES_ORD_H  := $(filter-out $(FILES_COL) \
-                      $(addprefix ($SRC_DIR)/, $(notdir $(FILES_COL))), $(FILES_ORD_H)) $(FILES_COG)
+      FILES_ORD_H  := $(FILES_COG) $(filter-out $(FILES_COL) \
+                      $(addprefix ($SRC_DIR)/, $(notdir $(FILES_COL))), $(FILES_ORD_H)) 
     endif 
     ifneq (,$(NAMES_ORDD))
       NAMES_ORD      += $(addsuffix -, $(NAMES_ORDD))
@@ -436,7 +441,7 @@ else
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
 endif
 
-$(FILES_COG): $(GEN_DIR)/%.h:$(SRC_DIR)/%.h
+$(FILES_COG): $(GEN_DIR)/%.h:$(SRC_DIR)/%.h $(STAR)/StRoot/St_base/StArray.h
 	$(RM) $(ALL_TAGS)
 	precint.pl $(1ST_DEPS) > $(ALL_TAGS);
 $(FILES_CINT_ORD) : $(FILES_ORD_H)   
@@ -667,7 +672,7 @@ test:
 	@echo NAMES_SYM := $(NAMES_SYM) 
 	@echo NAMES_TAB := $(NAMES_TAB)
 	@echo NAMES_MOD := $(NAMES_MOD)
-
+	@echo NAMES_COL := $(NAMES_COL)
 
 	@echo FILES_CINT_ORD := $(FILES_CINT_ORD) 
 	@echo FILES_CINT_DEF := $(FILES_CINT_DEF) 
