@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.15 2001/09/18 00:14:55 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.16 2001/10/01 19:40:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.16  2001/10/01 19:40:31  ullrich
+ * Added StTofData.
+ *
  * Revision 2.15  2001/09/18 00:14:55  ullrich
  * Added StRunInfo.
  *
@@ -126,6 +129,7 @@
 #include "StTofMCSlat.h"
 #include "StTofPidTraits.h"
 #include "StTofSlat.h"
+#include "StTofData.h"
 #include "StTofSoftwareMonitor.h"
 #include "StTpcHit.h"
 #include "StTpcHitCollection.h"

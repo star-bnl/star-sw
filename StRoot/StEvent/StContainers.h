@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.11 2001/08/02 01:27:09 ullrich Exp $
+ * $Id: StContainers.h,v 2.12 2001/10/01 19:40:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.12  2001/10/01 19:40:31  ullrich
+ * Added StTofData.
+ *
  * Revision 2.11  2001/08/02 01:27:09  ullrich
  * Added containers for StL3AlgorithmInfo.
  *
@@ -68,6 +71,7 @@ class StEmcCluster;
 class StEmcPoint;
 class StTofHit;
 class StTofSlat;
+class StTofData;
 class StTrack;
 class StTrackNode;
 class StTrackPidTraits;
@@ -97,6 +101,7 @@ StCollectionDef(EmcCluster)
 StCollectionDef(EmcPoint)
 StCollectionDef(TofHit)
 StCollectionDef(TofSlat)
+StCollectionDef(TofData)
 StCollectionDef(Track)
 StCollectionDef(TrackNode)
 StCollectionDef(TrackPidTraits)
