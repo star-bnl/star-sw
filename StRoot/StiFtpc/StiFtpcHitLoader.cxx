@@ -63,7 +63,9 @@ void StiFtpcHitLoader::loadHits(StEvent* source,
 	      //stihit->setDetector( layer );
 	      //_hitContainer->push_back( stiHit );
 	      if (fmod(++nhit, nprint)==0.) 
-		_messenger <<"Filling FtpcHit:\t"<<nhit<<endl;
+		//_messenger <<"Filling FtpcHit:\t"<<nhit<<endl;
+		cout << "Filling FtpcHit:\t"<<nhit<<endl;
+	      
 	    }
 	}
     }
