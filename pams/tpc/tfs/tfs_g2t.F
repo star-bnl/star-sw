@@ -1,5 +1,23 @@
-* $Id: tfs_g2t.F,v 1.3 1998/04/02 20:53:39 sakrejda Exp $
+* $Id: tfs_g2t.F,v 1.4 1998/04/07 20:56:30 hardtke Exp $
 * $Log: tfs_g2t.F,v $
+* Revision 1.4  1998/04/07 20:56:30  hardtke
+* AZZZZ
+* A
+* B
+* C
+* B
+* B
+* B
+*
+* A
+* A
+* B
+* B
+*
+*
+* C
+* add error message if tphit table too small
+*
 * Revision 1.3  1998/04/02 20:53:39  sakrejda
 * message calls initialised
 *
@@ -105,6 +123,10 @@ C Local variables
       integer   ind, ierr, iev, nevpx(5), nevent,i
       REAL      TIME_NOW, TIME_RD, TIME_POINT, TIME_DISPL
       REAL      TIME_MERGE, TIME_ALL, TIME_SORT
+      character*132 m132       ! for messages
+      integer idI1
+      data idI1 / 0 /
+      save idI1
       real      seed
       integer   iseed
       equivalence (iseed,seed)
@@ -119,6 +141,8 @@ C     Protect against no Geant hits in the chamber.  DSW  12/18/96
       endif
       call Msg_Enable( 'TFS-MERGE-I1' )
       call Msg_Enable( 'TFS-MERGE-I2' )
+      call Msg_Enable( 'TFS-MERGE-I3' )
+      call Msg_Enable( 'TFS-G2T-I1' )
 C     Initialize tpc_index_h.nok to zero. This is valid  for the fast
 C     simulator chain only. It is assumed that TFS is the first PAM
 C     to be called in the fast simulator chain discounting geant and g2t.
@@ -224,7 +248,13 @@ C     read-in the Monte-Carlo hit data
      >        ctrl_h, ctrl,par_h, par, tphit_h, tphit,
      >        ix, nxtrig,
      >        tpc_index_h, tpc_index, tpc_index_type_h,
-     >        tpc_index_type)
+     >        tpc_index_type,ierr)
+         If (ierr.eq.1) then
+*          write(m132,*) 'TFS-G2T-I1: tphit table too small'
+*          call Message (m132, 1, idI1 )
+          write(6,*) 'TFS-G2T-I1 tphit table too small'
+*          tfs_g2t = STAFCV_BAD
+         endif
          CALL TIMED(TIME_NOW)
          TIME_ALL = TIME_ALL + TIME_NOW
          TIME_RD = TIME_RD + TIME_NOW
