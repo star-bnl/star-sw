@@ -430,7 +430,7 @@ Int_t StRFEmcTrigMaker::Make(){
     StDetectorId emcId=StDetectorId(kEndcapEmcTowerId);
     EmcDet = EmcCol->detector(emcId); //EEMC tower detector number
     assert(EmcDet);
-    for (uint mod=1;mod<EmcDet->numberOfModules();mod++){
+    for (uint mod=1;mod<=EmcDet->numberOfModules();mod++){
       StEmcModule* module=EmcDet->module(mod); 
       StSPtrVecEmcRawHit& hit=module->hits();
       for(uint ih=0;ih<hit.size();ih++){
