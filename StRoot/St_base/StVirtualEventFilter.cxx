@@ -2,10 +2,23 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StVirtualEventFilter virtual base class                              //
+// StVirtualEventFilter virtual base class to create the variuous       //
+// user-defined fikters for StEventDiplayMaker's objects                //
+// This class defines the intreface to define a graphics attribute:     //
+// like: color, size and style                                          //
+// At the same time colr = 0 means the event supplied did not pass      //
+// filter and should not be drawn at all                                //
 //                                                                      //
+// 1. StGlobalTrack  *globTrack                                         //
+// 2. StObjArray     *hitCollection                                     //
+// 3. St_TableSorter *tableObject,Int_t index                           //
+// 4. StVertex       *vertexObject                                      //
+// 5. St_Table       *tableObject, Int_t rowNumber                      //
 //                                                                      //
-//  Submit any problem with this code via begin_html <A HREF="http://www.star.bnl.gov/STARAFS/comp/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
+// User should derive his own class and overload the "filter" methods   //
+// with the signature those fit his/her current needs                   //
+//                                                                      //
+// Submit any problem with this code via begin_html <A HREF="http://www.star.bnl.gov/STARAFS/comp/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
