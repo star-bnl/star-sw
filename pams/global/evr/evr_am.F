@@ -327,7 +327,7 @@ CC                          ! DCA position uncertainty with SVT and/or SSD hits.
       DATA beampipecut /4.0/  ! Beam pipe radius (cm), used for track DCA
 CC                            ! transverse position cut on initial pass.
       DATA ntrkcut  /50/    ! Min. track number for event abort decision
-      DATA ntrkratiocut /0.1/ ! Min. acceptable ratio of selected tracks for
+      DATA ntrkratiocut /0./! Min. acceptable ratio of selected tracks for
 CC                            ! vertex fitting to total # global tracks.
       DATA ptdefault /0.4/  ! Default pT value in GeV/c for use in B_field = 0
 CC                          ! cases for estimating MCS error contribution to
