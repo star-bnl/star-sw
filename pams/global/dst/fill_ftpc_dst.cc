@@ -1,8 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: fill_ftpc_dst.cc,v 1.8 2000/07/12 12:03:48 jcs Exp $
+// $Id: fill_ftpc_dst.cc,v 1.9 2000/07/17 14:51:31 jcs Exp $
 //
 // $Log: fill_ftpc_dst.cc,v $
+// Revision 1.9  2000/07/17 14:51:31  jcs
+// save key to globtrk in fptrack
+//
 // Revision 1.8  2000/07/12 12:03:48  jcs
 // FTPC globtrks now contain fit values at reference point on helix
 //
@@ -117,6 +120,7 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
 
 //  Primary key
     dst_track[dst_track_h->nok].id      = dst_track_h->nok + 1;
+    fptrack[itrk].id_globtrk = dst_track[dst_track_h->nok].id; 
 
 //  initialize map and det_id 
 //  =0 if unconstrained, =1 if vertex constraint used in track fit
