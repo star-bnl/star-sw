@@ -7,6 +7,7 @@
 ///////#include "Exception.h"
 #include "StiTrackNode.h"
 #include "StThreeVector.hh"
+#include "StThreeVectorF.hh"
 #include "StiKalmanTrackFinderParameters.h"
 
 class StiHit;
@@ -55,6 +56,13 @@ public:
     /// Get the charge (sign) of the track at this node
     double getCharge() const;
     
+    /// Convenience Method that returns the track momentum at this node
+    StThreeVectorF getMomentumF() const;
+    
+    /// Convenience Method that returns the track momentum at this node
+    /// in global coordinates.
+    StThreeVectorF getGlobalMomentumF() const;
+
     StThreeVector<double> getMomentum() const;
     StThreeVector<double> getGlobalMomentum() const;
 
@@ -122,22 +130,6 @@ public:
     static void   setParameters(StiKalmanTrackFinderParameters *parameters);
 
     friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
-
-    /*
-    // we have many friends...
-    friend class StiKalmanTrack;
-    friend class StiKalmanTrackLessThan;
-    friend class StiKalmanTrackFinder;
-    friend class StiKalmanTrackFitter;
-    friend class StiKTNXLessThan;
-    friend class StreamX;
-    friend class StiGeometryTransform;
-    friend class StiLocalTrackMerger;
-    friend class StiMaterialInteraction;
-    friend class StiTrackContainer;
-    friend class StiEvaluator;
-    friend class StiEventAssociator;
-    */
 
     /// rotation angle of local coordinates wrt global coordinates
     double fAlpha;
@@ -219,11 +211,31 @@ inline StThreeVector<double> StiKalmanTrackNode::getMomentum() const
   return StThreeVector<double>(pt*sqrt(1-ss),pt*sinPhi,pt*fP4);
 }
 
+inline StThreeVectorF StiKalmanTrackNode::getMomentumF() const
+{
+  double pt, sinPhi;
+  pt = getPt();
+  sinPhi = fP3*fX-fP2;
+  double ss = sinPhi*sinPhi;
+  if (ss>1.)
+    {
+      throw runtime_error("StiKalmanTrackNode::getMomentumF() - ERROR - sinPhi*sinPhi>1.");
+    }  
+  return StThreeVectorF(pt*sqrt(1-ss),pt*sinPhi,pt*fP4);
+}
+
 inline StThreeVector<double> StiKalmanTrackNode::getGlobalMomentum() const
 {
   StThreeVector<double> p = getMomentum();
   p.rotateZ(fAlpha);
   return StThreeVector<double>(p);
+}
+
+inline StThreeVectorF StiKalmanTrackNode::getGlobalMomentumF() const
+{
+  StThreeVectorF p = getMomentumF();
+  p.rotateZ(fAlpha);
+  return StThreeVectorF(p);
 }
 
 
