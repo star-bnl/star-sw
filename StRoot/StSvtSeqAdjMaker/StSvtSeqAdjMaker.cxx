@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.28 2001/09/26 18:42:48 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.29 2001/09/28 15:36:41 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -8,7 +8,14 @@
  * Description: Sequence
  **************************************************************************
  *
+ * 
+ * Revision 1.29  2001/09/26 18:42:48  Takahashi
+ * Added new bad anode list and switched ON the bad anode elimination
+ *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.29  2001/09/28 15:36:41  caines
+ * Add in bad anode elimination
+ *
  * Revision 1.28  2001/09/26 18:42:48  caines
  * Fix 2 anode subtraction routines
  *
@@ -194,7 +201,7 @@ Int_t StSvtSeqAdjMaker::Init()
     }
   }
 
-  //GetBadAnodes();
+  GetBadAnodes();
   
   return  StMaker::Init();  
 }
@@ -318,64 +325,138 @@ Int_t StSvtSeqAdjMaker::GetBadAnodes()
   assert(mSvtBadAnodes);
 
 
-  if(  !strncmp(mSvtRawData->getConfiguration(), "Y1L", strlen("Y1L"))){
+  if(  !strncmp(mSvtRawData->getConfiguration(), "FULL", strlen("FULL"))){
 
     //Put in bad Anodes by hand
     
-    // Wafer 2 Hybrid 2
-    
-    index = 3;
+    // L01B1-D3H1 anode 159 to 160    
+    index = mSvtRawData->getHybridIndex(1,1,3,1);
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    {for( int i=80; i<159; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
-    
-    // Wafer 3 Hybrid 2
-    
-    index = 5;
+    {for( int i=159; i<161; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L03B1-D2H2 anode 33 to 208    
+    index = mSvtRawData->getHybridIndex(1,3,2,2);
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    {for( int i=80; i<159; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
-    
-    // Wafer 4 Hybrid 1
-    
-    index = 6;
+    {for( int i=33; i<209; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L06B1-D3H1 anode 81 to 160    
+    index = mSvtRawData->getHybridIndex(1,6,3,1);
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    {for( int i=165; i<167; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
-    {for( int i=171; i<174; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
-    
-    
-    // Wafer 4 Hybrid 2
-    
-    index = 7;
+    {for( int i=81; i<161; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L05B2-D1H2 anode 1 to 80    
+    index = mSvtRawData->getHybridIndex(2,5,1,2);
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    {for( int i=38; i<80; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
-    {for( int i=94; i<95; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
-    {for( int i=102; i<160; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
-    
-    // Wafer 5 Hybrid 2
-    
-    index = 9;
+    {for( int i=1; i<81; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L07B2-D4H2
+    index = mSvtRawData->getHybridIndex(2,7,4,2);
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    {for( int i=208; i<240; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    {for( int i=113; i<130; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    {for( int i=193; i<210; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
     
-    // Wafer 6 Hybrid 1
-    
-    index = 10;
+    // L07B2-D6H2
+    index = mSvtRawData->getHybridIndex(2,7,6,2);
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    {for( int i=69;  i<73;  i++)  mHybridBadAnodeData->SetBadAnode(i,1);}
-    {for( int i=189; i<192; i++)  mHybridBadAnodeData->SetBadAnode(i,1);}
-    {for( int i=224; i<240; i++)  mHybridBadAnodeData->SetBadAnode(i,1);}
+    {for( int i=1; i<81; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
     
-    // Wafer 6 Hybrid 2
-    
-    index = 11;
+    // L08B2-D2H2
+    index = mSvtRawData->getHybridIndex(2,8,2,2);
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
-    {for( int i=0; i<240; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    {for( int i=177; i<193; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L09B2-D1H2
+    index = mSvtRawData->getHybridIndex(2,9,1,2);
+    mHybridBadAnodeData = new StSvtBadAnode();
+    mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+    {for( int i=17; i<33; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L09B2-D3H2
+    index = mSvtRawData->getHybridIndex(2,9,3,2);
+    mHybridBadAnodeData = new StSvtBadAnode();
+    mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+    {for( int i=129; i<145; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L10B2-D3H2
+    index = mSvtRawData->getHybridIndex(2,10,3,2);
+    mHybridBadAnodeData = new StSvtBadAnode();
+    mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+    {for( int i=81; i<161; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L3B3-D1H2 anode 199
+    index = mSvtRawData->getHybridIndex(3,3,1,2);
+    mHybridBadAnodeData = new StSvtBadAnode();
+    mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+    {mHybridBadAnodeData->SetBadAnode(199, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L3B3-D3H2 Entire hybrid
+    index = mSvtRawData->getHybridIndex(3,3,3,2);
+    mHybridBadAnodeData = new StSvtBadAnode();
+    mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+    {for( int i=1; i<241; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L4B3-D4H2 anode 215 to 216
+    index = mSvtRawData->getHybridIndex(3,4,4,2);
+    mHybridBadAnodeData = new StSvtBadAnode();
+    mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+    {for( int i=215; i<217; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L5B3-D3H2 anode 129 to 144
+    index = mSvtRawData->getHybridIndex(3,5,3,2);
+    mHybridBadAnodeData = new StSvtBadAnode();
+    mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+    {for( int i=129; i<145; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L6B3-D1H2 anode 113 and anode 128
+    index = mSvtRawData->getHybridIndex(3,6,1,2);
+    mHybridBadAnodeData = new StSvtBadAnode();
+    mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+    {mHybridBadAnodeData->SetBadAnode(113, 1);
+     mHybridBadAnodeData->SetBadAnode(128, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L10B3-D7H2 anode 88
+    index = mSvtRawData->getHybridIndex(3,10,7,2);
+    mHybridBadAnodeData = new StSvtBadAnode();
+    mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+    {mHybridBadAnodeData->SetBadAnode(88, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L11B3-D1H1 anode 177
+    index = mSvtRawData->getHybridIndex(3,11,1,1);
+    mHybridBadAnodeData = new StSvtBadAnode();
+    mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+    {mHybridBadAnodeData->SetBadAnode(177, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
+    // L14B3-D4H2
+    index = mSvtRawData->getHybridIndex(3,14,4,2);
+    mHybridBadAnodeData = new StSvtBadAnode();
+    mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+    {for( int i=1; i<81; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
+
   }
   return kStOK; 
 }
@@ -476,7 +557,6 @@ Int_t StSvtSeqAdjMaker::Make()
           mHybridAdjData = (StSvtHybridData *)mSvtAdjData->at(index);
 	  if (mHybridAdjData)
 	    delete mHybridAdjData;
-
 	  mHybridAdjData = new StSvtHybridData(Barrel,Ladder,Wafer,Hybrid); 
 
 	  // Decide whether to do common mode noise from average timebucket value or via first two black anodes
@@ -539,21 +619,10 @@ Int_t StSvtSeqAdjMaker::Make()
             {
 	      Anode = anolist[iAnode];
 
+
 	      //if (Barrel == 1 && Ladder==1 && Wafer ==1 && Hybrid==1)
 	      //	cout << "raw data, iAnode = " << iAnode << ", Anode = " << Anode << endl;
-	      /*  
-	      if( BadAnode){
-		if( BadAnode->IsBadAnode(Anode-1)){
 
-		  // If anode is bad set sequences to zero
-		  int nSequence = 0;
-		  StSequence* seq = NULL;
-		  //setLi  stSeq uses index into anolist array
-		  mHybridAdjData->setListSequences(iAnode, Anode, nSequence, seq);
-		  continue;
-		}
-	      }
-	      */
 	      // here anode is real anode number (1-240)
 	      if (Debug())MakeHistogramsAdc(mHybridRawData,index,Anode,1);
 	      if( doCommon)  CommonModeNoiseCalc(iAnode);
@@ -596,6 +665,14 @@ Int_t StSvtSeqAdjMaker::Make()
 	  for( int iAnode= 2; iAnode<mHybridRawData->getAnodeList(anolist); iAnode++)
             {
 	      Anode = anolist[iAnode];
+
+	      // Skip Bad anodes
+	      //
+	      if( BadAnode){
+		if( BadAnode->IsBadAnode(Anode)){
+		  continue;
+		}
+	      }
 
 	      if( doCommon) CommonModeNoiseSub(iAnode);
 	      else SubtractFirstAnode(iAnode);
