@@ -63,15 +63,16 @@ my $CERNLIBS = "";
 my $OSFID    = "";
 my $ROOTCINTD= "";
 my $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
+my $FCCOM    = "%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %< %Fout%>";
+my $GEANT3COM= "%GEANT3 %< -o %<:.F; %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<.F -o %>";
 my $INCLUDE_PATH  = $INCLUDE;
-$_ = $STAR_SYS;
+$_ = $STAR_HOST_SYS;
 print "System: ", $_,"\n";
 #if (/^i386_linux2/ || /^i386_redhat50/ || /^i386_redhat51/ ||  /^i386_redhat52/ || /^i386_redhat60/) {
 if (/^i386_/) {
 #    case linux but gcc is EGCS
 #  ====================
   $OSFID    = "lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
-  $FC       = "pgf77";
   $CXXFLAGS = "-fPIC -Wall";
 #                                             -fpipe
   $CFLAGS   = "-fPIC -Wall";
@@ -80,11 +81,23 @@ if (/^i386_/) {
   $EXEFLAGS = $CXXFLAGS . " -Wl,-Bdynamic";
   $SOFLAGS  = "-shared";  
   $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
-  $FLIBS    = "-L/usr/pgi/linux86/lib -lpgftnrtl -lpgc -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
+  if (/^i386_redhat51egcs$/) {
+    $FC       = "g77";
+    $FFLAGS   = "-w -O -fno-second-underscore";
+    $FCCOM    = "%FC -E -P %CPPFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %< %Fout%>.g &&"; 
+    $FCCOM   .= "%GEANT3 -v 1 -i %>.g %Fout%>.f &&"; 
+    $FCCOM   .= "%FC %FFLAGS -c %>.f %Fout%>";
+  }
+  else {
+    $FC       = "pgf77";
+    $FLIBS    = "-L/usr/pgi/linux86/lib -lpgftnrtl -lpgc";
+    $FLIBS   .= " -L/opt/star/lib -lpgf77S -lpgf77A";
+    $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
+    $FFLAGS   = "-DPGI";  
+    $FEXTEND  = "-Mextend";
+    #  $FLIBS   .= "-lcrypt";
+  }
   if (/^i386_linux2/) {$FLIBS   .= " -lI77 -lF77";}
-#  $FLIBS   .= "-lcrypt";
-  $FFLAGS   = "-DPGI";  
-  $FEXTEND  = "-Mextend";
 }
 elsif (/^hp_ux102/) {
 #    case "hp":
@@ -227,11 +240,11 @@ my @Reps = ($DirPath);
 foreach my $rep (@Repo) {
   push @Reps, $rep;
 } print "Repositories: @Reps\n";
-if ($STAR_SYS !~ /^intel_wnt/) {
+if ($STAR_HOST_SYS !~ /^intel_wnt/) {
   $CERNLIBS .= " " . `cernlib geant321 pawlib graflib/X11 packlib mathlib kernlib`;
   chop ($CERNLIBS);
   $Libraries =  $CERNLIBS . " " . $ROOTLIBS . " " . $ROOTGLIBS . " -lXpm  ";
-  if ($STAR_SYS !~ /^hp_ux/) {$Libraries .=  " ". $FLIBS . " " . $CLIBS . " ";}
+  if ($STAR_HOST_SYS !~ /^hp_ux/) {$Libraries .=  " ". $FLIBS . " " . $CLIBS . " ";}
   chop ($Libraries);
   print "Libraries     = \t$Libraries\n";
 }
@@ -264,9 +277,9 @@ $env = new cons(
 		'Cout'         => $Cout,
 		'Lout'         => $Lout,
 		'SoOUT'        => $SoOUT,
-		'FCCOM'        => '%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %< %Fout%>',
+		'FCCOM'        => $FCCOM,
 		'GEANT3'       => $GEANT3,
-		'GEANT3COM'    => '%GEANT3 %< -o %<:.F; %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<.F -o %>',
+		'GEANT3COM'    => $GEANT3COM,
 		'CC'	       => $CC,
 		'CFLAGS'       => $CFLAGS,
 		'KUIP'         => $KUIP,
@@ -332,7 +345,7 @@ $env = new cons(
 				     'STAR_BIN' => $STAR_BIN,
 				     'TEMP' => $TEMP,
 				     'TMP'  => $TMP,
-				     'STAR_SYS' => $STAR_SYS
+				     'STAR_SYS' => $STAR_HOST_SYS
 				   },
 	       );
 my @subdirs = ();
@@ -353,10 +366,10 @@ foreach my $dir ("StRoot","pams") {
 	  $sub_dir =~ /^StTpcDb$/    ||
 	  $sub_dir =~ /^StDbMaker$/    ||
           $sub_dir =~ /^test$/)  {next;}
-      if ($STAR_SYS =~ /^hp_ux102/ && 
+      if ($STAR_HOST_SYS =~ /^hp_ux102/ && 
 	  ($sub_dir =~ /^StDbLib$/ ||
 	   $sub_dir =~ /StHbt/)	  ) {next;}
-      if ($STAR_SYS =~ /sun4x/ && $sub_dir =~ /^StAssociationMaker$/) {next;}
+      if ($STAR_HOST_SYS =~ /sun4x/ && $sub_dir =~ /^StAssociationMaker$/) {next;}
       my $sub_DIR = $dir . "/" . $sub_dir; #print "sub_DIR = $sub_DIR\n";
       if (-d $sub_DIR) {
 	if ($sub_dir =~  /\./ || $sub_dir =~ /\.\./ || $sub_dir =~ /CVS/ || 
@@ -426,6 +439,7 @@ foreach my $dir ("StRoot","pams") {
 	 }
 	if ($sub_dir =~ /^St_base$/ ||
 	    $sub_dir =~ /^StChain$/ ||
+	    $sub_dir =~ /^StBFChain$/ ||
 	    $sub_dir =~ /^StUtilities$/ ||
 	    $sub_dir =~ /^StAnalysisUtilities$/ ||
 	    $sub_dir =~ /^xdf2root$/ ||
