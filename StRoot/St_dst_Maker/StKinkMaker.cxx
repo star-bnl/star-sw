@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.16 1999/08/24 22:37:23 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.17 1999/08/26 17:30:39 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.17  1999/08/26 17:30:39  wdeng
+// Fix typo. Reorganize Make() function. Use shorter names for identifiers
+//
 // Revision 1.16  1999/08/24 22:37:23  wdeng
 // Add check of used rows against table size. Reallocate if necessary.
 //
@@ -134,60 +137,59 @@ Int_t StKinkMaker::Make(){
 
   St_DataSet *match = GetDataSet("match"); 
   if (!match) {
-    gMessMgr->Warning() << " StKinkMaker: match is missing. Exit!" << endm;
+    gMessMgr->Warning() << " match is missing. Exit from StKinkMaker." << endm;
     return kStWarn;
   }  
   St_DataSetIter matchI(match);         
   St_dst_track  *globtrk = (St_dst_track *) matchI("globtrk");
   if (!globtrk) {
-    gMessMgr->Warning() << " StKinkMaker: globtrk is missing. Exit!" << endm;
+    gMessMgr->Warning() << " globtrk is missing. Exit from StKinkMaker." << endm;
     return kStWarn;
   }
 
   St_DataSet     *primary = GetDataSet("primary"); 
   if (!primary) {
-    gMessMgr->Warning() << " StKinkMaker: primary is missing. Exit!" << endm;
+    gMessMgr->Warning() << " primary is missing. Exit from StKinkMaker." << endm;
     return kStWarn;
   }
   St_DataSetIter primaryI(primary);         
   St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
   if (!vertex) {
-    gMessMgr->Warning() << " StKinkMaker: vertex is missing. Exit!" << endm;
+    gMessMgr->Warning() << " vertex is missing. Exit from StKinkMaker." << endm;
     return kStWarn;
   }
   
+  StThreeVectorD eventVertex;
+  Int_t whichRow = 0;  
   dst_vertex_st *vrtx = vertex->GetTable();
-  Int_t whichRow = 0;
   for( whichRow=0; whichRow<vertex->GetNRows(); whichRow++,vrtx++) {
-    if( vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1 ) break;
+    if( vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1 ) {
+      eventVertex.setX(vrtx->x);
+      eventVertex.setY(vrtx->y);
+      eventVertex.setZ(vrtx->z);
+      break;
+    }
   }
   if( whichRow == vertex->GetNRows() ) {
-    gMessMgr->Warning() << " StKinkMaker: no primary vertex. Exit!" << endm;
+    gMessMgr->Warning() << " No primary vertex. Exit from StKinkMaker." << endm;
     return kStWarn;
   }
 
-  St_dst_tkf_vertex *kinkVertex  = (St_dst_tkf_vertex *) matchI("kinkVertex");
-  
   Int_t numOfGlbtrk = globtrk->GetNRows();
   Int_t tkf_limit = numOfGlbtrk/10 + 100;
   
+  St_dst_tkf_vertex *kinkVertex  = (St_dst_tkf_vertex *) matchI("kinkVertex");
   if(!kinkVertex) {
     kinkVertex = new St_dst_tkf_vertex("kinkVertex", tkf_limit);
     AddData(kinkVertex);
   }
+
   Int_t NoVertex = vertex->GetNRows()+ tkf_limit;
   vertex->ReAllocate(NoVertex); 
   
   tkf_tkfpar_st *tkfpar = m_tkfpar->GetTable();
-  dst_vertex_st *dstVertexStart = vertex->GetTable(); 
   dst_track_st  *dstTrackStart  = globtrk->GetTable();
-  
-  dst_tkf_vertex_st kinkVtxRow;
-  dst_vertex_st     dstVtxRow;
-  
-  Int_t  dstVtxIndex  = vertex->GetNRows();
-  Int_t  kinkVtxIndex = 0;
-  
+
   StKinkLocalTrack* tempTrack;
   TObjArray* trackArray = new TObjArray(MAXNUMOFTRACKS);
   
@@ -209,7 +211,6 @@ Int_t StKinkMaker::Make(){
 	Float_t phase = dstTrackPtr->psi*degree-h*pi/2;
 	Float_t pt    = (1./dstTrackPtr->invpt)*GeV;
 	Float_t curvature = fabs(c_light*nanosecond/meter*dstTrackPtr->icharge*B/tesla)/(pt/GeV);
-	
 	StThreeVectorD origin(dstTrackPtr->x0, dstTrackPtr->y0, dstTrackPtr->z0);  
 	
 	tempTrack = new StKinkLocalTrack(dstTrackPtr,
@@ -219,12 +220,12 @@ Int_t StKinkMaker::Make(){
 					 origin*centimeter,
 					 h);
 	
-	if(((*tempTrack).getStartRadius2D()<tkfpar->vertexRMin2D ) &&
-	   ((*tempTrack).getEndRadius2D()>tkfpar->vertexRMax2D )) 
+	if(((*tempTrack).startRadius2D()<tkfpar->vertexRMin2D ) &&
+	   ((*tempTrack).endRadius2D()>tkfpar->vertexRMax2D )) 
 	  continue; 
 	
-	if(((*tempTrack).getStartRadius2D()<tkfpar->vertexRMax2D ) ||
-	   ((*tempTrack).getEndRadius2D()>tkfpar->vertexRMin2D ))	
+	if(((*tempTrack).startRadius2D()<tkfpar->vertexRMax2D ) ||
+	   ((*tempTrack).endRadius2D()>tkfpar->vertexRMin2D ))	
 	  {
 	    trackArray->Add(tempTrack);
 	  }
@@ -233,366 +234,142 @@ Int_t StKinkMaker::Make(){
   
   trackArray->Sort();
   
-  StThreeVectorD parentMom, daughterMom; 
-  StThreeVectorD mKinkVertex; 
-  
+  dstVtxIndex  = vertex->GetNRows();
+  kinkVtxIndex = 0;  
+
   Int_t   kinkCandidate=0;
-  Float_t dca;
-  Float_t parentImpact, daughterImpact;
-  Float_t decayAngle;
-  Float_t xCoordinates[2], yCoordinates[2];
-  Float_t xtarget, ytarget;
   
   for( i = 0; i < trackArray->GetLast(); i++)
     {
-      StKinkLocalTrack* myTrack1 = (StKinkLocalTrack*)trackArray->At(i);
+      myTrack1 = (StKinkLocalTrack*)trackArray->At(i);
+
       if(fabs( myTrack1->helix().dipAngle()) > tkfpar->parentDipAngleMax ) continue;  
-      if( myTrack1->getPt() < tkfpar->parentPtMin ) continue;     
-      
-      dst_vertex_st* dstVertexPtr = dstVertexStart;         
-      while(1) {                                    
-        if( (dstVertexPtr->iflag==1) && (dstVertexPtr->vtx_id==kEventVtxId) )
-          {
-            StThreeVectorD eventVertex(dstVertexPtr->x, dstVertexPtr->y, dstVertexPtr->z);
-            parentImpact = myTrack1->helix().distance(eventVertex);
-            break;
-          }
-        dstVertexPtr++;
-      }
+      if( myTrack1->pt() < tkfpar->parentPtMin ) continue;     
+
+      parentImpact = myTrack1->helix().distance(eventVertex);
       if( parentImpact > tkfpar->impactCut ) continue;
       
       for( j = i+1; j <= trackArray->GetLast(); j++)
 	{
-	  StKinkLocalTrack* myTrack2 = (StKinkLocalTrack*)trackArray->At(j);
-	  if( myTrack1->getCharge() != myTrack2->getCharge() ) continue;
-	  if( myTrack2->getStartRadius2D() < tkfpar->vertexRMin2D ) continue;
-	  
-	  dst_vertex_st* dstVertexPtr1 = dstVertexStart;         
-	  while(1) {                                       
-	    if( (dstVertexPtr1->iflag==1) && (dstVertexPtr1->vtx_id==kEventVtxId) )
-	      {
-		StThreeVectorD eventVertex(dstVertexPtr1->x, dstVertexPtr1->y, dstVertexPtr1->z);
-		daughterImpact = myTrack2->helix().distance(eventVertex);
-		break;
-	      }
-	    dstVertexPtr1++;
-	  }
+	  myTrack2 = (StKinkLocalTrack*)trackArray->At(j);
+
+	  if( myTrack1->charge() != myTrack2->charge() ) continue;
+	  if( myTrack2->startRadius2D() < tkfpar->vertexRMin2D ) continue;
+
+	  daughterImpact = myTrack2->helix().distance(eventVertex);
 	  if( daughterImpact < tkfpar->impactCut ) continue;
 	  
-	  if( fabs(myTrack2->getStartRadius2D()-myTrack1->getEndRadius2D()) > tkfpar->parentLastDaughterStart2D ) continue; 
+	  if( fabs(myTrack2->startRadius2D()-myTrack1->endRadius2D()) > tkfpar->parentLastDaughterStart2D ) continue; 
+	  if( fabs(myTrack2->startPoint(2)-myTrack1->lastPoint(2)) > tkfpar->parentLastDaughterStartZ ) continue;	  
 	  
-	  if( fabs(myTrack2->getStartPoint(2)-myTrack1->getLastPoint(2)) > tkfpar->parentLastDaughterStartZ ) continue;	  
-	  
-	  Int_t numOfSolution = meetTwoHelices2D(tkfpar->dcaParentDaughterMax, myTrack1->helix(), 
-		           		         myTrack2->helix(), xCoordinates, yCoordinates); 
+	  Float_t xCords[2], yCords[2];
+	  Float_t xtarget, ytarget;
+	  Int_t numOfSolution = MeetTwoHelices2D(tkfpar->dcaParentDaughterMax, myTrack1->helix(), 
+		           		         myTrack2->helix(), xCords, yCords); 
 	  
  	  if( numOfSolution == 0 ) continue;
 	  if( numOfSolution == 1 ) 
 	    {
-	      Float_t radiusIntersect2D = sqrt(xCoordinates[0]*xCoordinates[0] +
- 				 	       yCoordinates[0]*yCoordinates[0]);
-	      if( (radiusIntersect2D < tkfpar->vertexRMin2D) || 	  
-		  (radiusIntersect2D > tkfpar->vertexRMax2D) )  continue;
-	      xtarget = xCoordinates[0];	    
-	      ytarget = yCoordinates[0];	    
+	      Float_t radius2D = sqrt(xCords[0]*xCords[0] +
+				      yCords[0]*yCords[0]);
+	      if( (radius2D < tkfpar->vertexRMin2D) || 	  
+		  (radius2D > tkfpar->vertexRMax2D) )  continue;
+	      xtarget = xCords[0];	    
+	      ytarget = yCords[0];	    
 	    }
 	  if ( numOfSolution == 2 )
 	    {
-	      Float_t radiusOneIntersect2D = sqrt(xCoordinates[0]*xCoordinates[0] +
-						  yCoordinates[0]*yCoordinates[0]);
-	      Float_t radiusTwoIntersect2D = sqrt(xCoordinates[1]*xCoordinates[1] +
-						  yCoordinates[1]*yCoordinates[1]);
-	      if( (radiusOneIntersect2D > tkfpar->vertexRMin2D) && 	  
-		  (radiusOneIntersect2D < tkfpar->vertexRMax2D) &&
-		  (radiusTwoIntersect2D > tkfpar->vertexRMin2D) && 	  
-		  (radiusTwoIntersect2D < tkfpar->vertexRMax2D) ) 
+	      Float_t radiusOne2D = sqrt(xCords[0]*xCords[0] +
+					 yCords[0]*yCords[0]);
+	      Float_t radiusTwo2D = sqrt(xCords[1]*xCords[1] +
+					 yCords[1]*yCords[1]);
+	      if( (radiusOne2D > tkfpar->vertexRMin2D) && 	  
+		  (radiusOne2D < tkfpar->vertexRMax2D) &&
+		  (radiusTwo2D > tkfpar->vertexRMin2D) && 	  
+		  (radiusTwo2D < tkfpar->vertexRMax2D) ) 
 		{
-		  Float_t distanceInterOneStart = sqrt(TMath::Power((xCoordinates[0]-myTrack2->getStartPoint(0)), 2) + 
-						       TMath::Power((yCoordinates[0]-myTrack2->getStartPoint(1)), 2));
-		  Float_t distanceInterTwoStart = sqrt(TMath::Power((xCoordinates[1]-myTrack2->getStartPoint(0)), 2) + 
-						       TMath::Power((yCoordinates[1]-myTrack2->getStartPoint(1)), 2));	
-		  if ( distanceInterOneStart < distanceInterTwoStart ) 
+		  Float_t distanceOne = sqrt(TMath::Power((xCords[0]-myTrack2->startPoint(0)), 2) + 
+					     TMath::Power((yCords[0]-myTrack2->startPoint(1)), 2));
+		  Float_t distanceTwo = sqrt(TMath::Power((xCords[1]-myTrack2->startPoint(0)), 2) + 
+					     TMath::Power((yCords[1]-myTrack2->startPoint(1)), 2));	
+		  if ( distanceOne < distanceTwo ) 
 		    {
-		      xtarget = xCoordinates[0];	    
-		      ytarget = yCoordinates[0];	    
+		      xtarget = xCords[0];	    
+		      ytarget = yCords[0];	    
 		    } 
 		  else
 		    {
-		      xtarget = xCoordinates[1];	    
-		      ytarget = yCoordinates[1];
+		      xtarget = xCords[1];	    
+		      ytarget = yCords[1];
 		    }
 		}
-	      else if( (radiusOneIntersect2D > tkfpar->vertexRMin2D) && 	  
-		       (radiusOneIntersect2D < tkfpar->vertexRMax2D) )
+	      else if( (radiusOne2D > tkfpar->vertexRMin2D) && 	  
+		       (radiusOne2D < tkfpar->vertexRMax2D) )
 		{
-		  xtarget = xCoordinates[0];	    
-		  ytarget = yCoordinates[0];	    
+		  xtarget = xCords[0];	    
+		  ytarget = yCords[0];	    
 		} 
-	      else if( (radiusTwoIntersect2D > tkfpar->vertexRMin2D) && 	  
-		       (radiusTwoIntersect2D < tkfpar->vertexRMax2D) )
+	      else if( (radiusTwo2D > tkfpar->vertexRMin2D) && 	  
+		       (radiusTwo2D < tkfpar->vertexRMax2D) )
 		{
-		  xtarget = xCoordinates[1];	    
-		  ytarget = yCoordinates[1];
+		  xtarget = xCords[1];	    
+		  ytarget = yCords[1];
 		} 
 	      else continue;
 	    }
 	  
-	  Float_t p1PathLength = myTrack1->helix().pathLength(xtarget, ytarget);
-	  Float_t p2PathLength = myTrack2->helix().pathLength(xtarget, ytarget);
-	  StThreeVectorD p1Project = myTrack1->helix().at(p1PathLength);
-	  StThreeVectorD p2Project = myTrack2->helix().at(p2PathLength);
+	  Float_t t1PathLength = myTrack1->helix().pathLength(xtarget, ytarget);
+	  Float_t t2PathLength = myTrack2->helix().pathLength(xtarget, ytarget);
+	  StThreeVectorD t1Project = myTrack1->helix().at(t1PathLength);
+	  StThreeVectorD t2Project = myTrack2->helix().at(t2PathLength);
 	  
-	  if( fabs(p2Project.z()-p1Project.z()) > tkfpar->projectPointZDiff ) continue;
+	  if( fabs(t2Project.z()-t1Project.z()) > tkfpar->projectPointZDiff ) continue;
 
-	  parentMom   = myTrack1->helix().momentumAt(p1PathLength, B);
-	  daughterMom = myTrack2->helix().momentumAt(p2PathLength, B);
+	  parentMoment   = myTrack1->helix().momentumAt(t1PathLength, B);
+	  daughterMoment = myTrack2->helix().momentumAt(t2PathLength, B);
 	  
-	  decayAngle = radToDeg*parentMom.angle(daughterMom);
+	  decayAngle = radToDeg*parentMoment.angle(daughterMoment);
 	  if(decayAngle<tkfpar->thetaMin) continue;
 	  
-	  if( (parentMom.z()==0.) || (daughterMom.z()==0.) ) continue;
+	  if( (parentMoment.z()==0.) || (daughterMoment.z()==0.) ) continue;
 
 	  Float_t point1AtDca[3], point2AtDca[3];
-	  dca =  dcaTwoLines(p1Project, p2Project, parentMom, daughterMom, point1AtDca, point2AtDca);
+	  dca =  DcaTwoLines(t1Project, t2Project, parentMoment, daughterMoment, point1AtDca, point2AtDca);
 	  if ( dca>tkfpar->dcaParentDaughterMax ) continue;
 	  
 	  mKinkVertex.setX((point1AtDca[0]+point2AtDca[0])/2.);
 	  mKinkVertex.setY((point1AtDca[1]+point2AtDca[1])/2.);
 	  mKinkVertex.setZ((point1AtDca[2]+point2AtDca[2])/2.);
 	  
-	  Float_t distanceKinkParent2D   = sqrt( TMath::Power(mKinkVertex.x()-myTrack1->getLastPoint(0), 2) +
-					         TMath::Power(mKinkVertex.y()-myTrack1->getLastPoint(1), 2) );
+	  Float_t distanceKinkParent2D   = sqrt( TMath::Power(mKinkVertex.x()-myTrack1->lastPoint(0), 2) +
+					         TMath::Power(mKinkVertex.y()-myTrack1->lastPoint(1), 2) );
 	  
-	  Float_t distanceKinkDaughter2D = sqrt( TMath::Power(mKinkVertex.x()-myTrack2->getStartPoint(0), 2) +
-						 TMath::Power(mKinkVertex.y()-myTrack2->getStartPoint(1), 2) );
+	  Float_t distanceKinkDaughter2D = sqrt( TMath::Power(mKinkVertex.x()-myTrack2->startPoint(0), 2) +
+						 TMath::Power(mKinkVertex.y()-myTrack2->startPoint(1), 2) );
 	  
-	  Float_t distanceKinkParentZ    = sqrt( TMath::Power(mKinkVertex.z()-myTrack1->getLastPoint(2), 2) );
-	  Float_t distanceKinkDaughterZ  = sqrt( TMath::Power(mKinkVertex.z()-myTrack2->getStartPoint(2), 2) );
+	  Float_t distanceKinkParentZ    = sqrt( TMath::Power(mKinkVertex.z()-myTrack1->lastPoint(2), 2) );
+	  Float_t distanceKinkDaughterZ  = sqrt( TMath::Power(mKinkVertex.z()-myTrack2->startPoint(2), 2) );
 	  
 	  if( distanceKinkParent2D > tkfpar->distanceKinkParent2D ) continue; 
 	  if( distanceKinkDaughter2D > tkfpar->distanceKinkDaughter2D ) continue; 
 	  
 	  if( distanceKinkParentZ > tkfpar->distanceKinkParentZ ) continue; 
 	  if( distanceKinkDaughterZ > tkfpar->distanceKinkDaughterZ ) continue; 
-	  
-	  StThreeVectorD pMomMinusDMom = parentMom - daughterMom;
-	  
-	  Float_t  deltaKaonMuon = fabs(sqrt(parentMom.mag2() + kaonMass*kaonMass)   -
-					sqrt(daughterMom.mag2() + muonMass*muonMass) - 
-					pMomMinusDMom.mag());
-	  Float_t  deltaKaonPion = fabs(sqrt(parentMom.mag2() + kaonMass*kaonMass)   -
-					sqrt(daughterMom.mag2() + pionMass*pionMass) - 
-					sqrt(pMomMinusDMom.mag2() + pi0Mass*pi0Mass));
-          Float_t  deltaPionMuon = fabs(sqrt(parentMom.mag2() + pionMass*pionMass)   -
-					sqrt(daughterMom.mag2() + muonMass*muonMass) - 
-					pMomMinusDMom.mag());  
-	  
-	  if( (deltaKaonPion < deltaKaonMuon) && (deltaKaonPion < deltaPionMuon) )
-	    {
-	      kinkVtxRow.theta_cm = radToDeg*asin((daughterMom.mag()/kaonToPionQ)*sin(decayAngle*degToRad));
-	      if( myTrack1->getCharge() > 0 )	  
-		{
-		  kinkVtxRow.pidd = 8;
-		  kinkVtxRow.pidp = 11;
-		} else {
-		  kinkVtxRow.pidd = 9;
-		  kinkVtxRow.pidp = 12;
-		}
-	    } else if( (deltaKaonMuon < deltaKaonPion) && (deltaKaonMuon < deltaPionMuon) )
-	      {
-		kinkVtxRow.theta_cm = radToDeg*asin((daughterMom.mag()/kaonToMuonQ)*sin(decayAngle*degToRad));
-		if( myTrack1->getCharge() > 0 )	  
-		  {
-		    kinkVtxRow.pidd = 5;
-		    kinkVtxRow.pidp = 11;
-		  } else {
-		    kinkVtxRow.pidd = 6;
-		    kinkVtxRow.pidp = 12;
-		  }   
-	      } else {
-		kinkVtxRow.theta_cm = radToDeg*asin((daughterMom.mag()/pionToMuonQ)*sin(decayAngle*degToRad));
-		if( myTrack1->getCharge() > 0 )	  
-		  {
-		    kinkVtxRow.pidd = 5;
-		    kinkVtxRow.pidp = 8;
-		  } else {
-		    kinkVtxRow.pidd = 6;
-		    kinkVtxRow.pidp = 9;
-		  }   
-	      }
-	  
-	  kinkVtxRow.id = kinkVtxIndex + 1;  
-	  kinkVtxRow.id_vertex = dstVtxIndex + 1;
-	  kinkVtxRow.idd  = myTrack2->getId();
-	  kinkVtxRow.idp  = myTrack1->getId();
-	  kinkVtxRow.dca  = dca;
-	  kinkVtxRow.dcad = daughterImpact;
-	  kinkVtxRow.dcap = parentImpact;
-	  kinkVtxRow.dlf  = sqrt( TMath::Power(myTrack2->getStartPoint(0)-myTrack1->getLastPoint(0), 2) +
-				  TMath::Power(myTrack2->getStartPoint(1)-myTrack1->getLastPoint(1), 2) + 
-				  TMath::Power(myTrack2->getStartPoint(2)-myTrack1->getLastPoint(2), 2) ); 
-	  
-          kinkVtxRow.dlv  = sqrt( TMath::Power(mKinkVertex.x()-myTrack1->getLastPoint(0), 2) +
-				  TMath::Power(mKinkVertex.y()-myTrack1->getLastPoint(1), 2) +
-				  TMath::Power(mKinkVertex.z()-myTrack1->getLastPoint(1), 2) );
-	  
-	  kinkVtxRow.dE[0] = deltaKaonMuon;
-	  kinkVtxRow.dE[1] = deltaKaonPion;
-	  kinkVtxRow.dE[2] = deltaPionMuon;
-	  
-	  kinkVtxRow.p[0] = parentMom.x();
-	  kinkVtxRow.p[1] = parentMom.y();
-	  kinkVtxRow.p[2] = parentMom.z();
-	  
-	  kinkVtxRow.pd[0] = daughterMom.x();
-	  kinkVtxRow.pd[1] = daughterMom.y();
-	  kinkVtxRow.pd[2] = daughterMom.z();
-	  
-	  kinkVtxRow.theta = decayAngle;
-	  
-	  
-	  dstVtxRow.id       = dstVtxIndex + 1;
-	  dstVtxRow.det_id   = 100*myTrack1->getDetId() + myTrack2->getDetId();
-	  dstVtxRow.x        = mKinkVertex.x();
-	  dstVtxRow.y        = mKinkVertex.y();
-	  dstVtxRow.z        = mKinkVertex.z();
-	  dstVtxRow.sigma[0] = 0.;
-	  dstVtxRow.sigma[1] = 0.;
-	  dstVtxRow.sigma[2] = 0.;
-	  dstVtxRow.pchi2    = 0.;
-	  dstVtxRow.id_aux_ent = kinkVtxIndex + 1;
-	  
+
 	  kinkCandidate++;		  
-	  //==========================================================================
-	  if(m_kinkEvalOn) {
-	    St_DataSet *tpcTracks = GetDataSet("tpc_tracks"); 
-	    if (tpcTracks) {
-	      St_DataSetIter tpcI(tpcTracks);  
-	      
-	      St_tpt_track  *tptTrack = (St_tpt_track *) tpcI["tptrack"];
-	      St_tte_eval   *tteEval  = (St_tte_eval *)  tpcI["evaltrk"];
-	      if (tptTrack && tteEval) {
-		tpt_track_st* tptPtr  = tptTrack->GetTable();
-		tte_eval_st*  tteEPtr = tteEval->GetTable(); 
-		
-		Int_t daughterMcId;
-		
-		for(Int_t m=0; m<tptTrack->GetNRows(); m++)
-		  {
-		    if(tptPtr->id_globtrk == myTrack2->getId())
-		      {
-			for(Int_t n=0; n<tteEval->GetNRows(); n++)
-			  {
-			    if(tteEPtr->rtrk == tptPtr->id)
-			      {
-				daughterMcId = tteEPtr->mtrk;
-				break;		
-			      }
-			    tteEPtr++;
-			  }
-		      }
-		    tptPtr++;
-		  }
-		
-		//==============================================================
-		tpt_track_st* tptPtr1  = tptTrack->GetTable();
-		tte_eval_st*  tteEPtr1 = tteEval->GetTable();
-		
-		Int_t parentMcId;
-		Int_t parentPid;
-		
-		for(Int_t xl=0; xl<tptTrack->GetNRows(); xl++)
-		  {
-		    if(tptPtr1->id_globtrk == myTrack1->getId())
-		      {
-			for(Int_t yl=0; yl<tteEval->GetNRows(); yl++)
-			  {
-			    if(tteEPtr1->rtrk == tptPtr1->id)
-			      {
-				parentMcId = tteEPtr1->mtrk;
-				parentPid = tteEPtr1->pid;		  
-				break;		
-			      }
-			    tteEPtr1++;
-			  }
-		      }
-		    tptPtr1++;
-		  }
-		
-		//=====================================================================
-		Int_t stopIdParent;
-		Int_t startIdDaughter;	
-		Int_t vertexGeProc; 
-		Int_t numDaughter;
-		
-		St_DataSet *geant = GetDataSet("geant"); 
-		St_DataSetIter geantI(geant);         
-		
-		St_g2t_track  *g2tTrack  = (St_g2t_track *)  geantI["g2t_track"];
-		St_g2t_vertex *g2tVertex = (St_g2t_vertex *) geantI["g2t_vertex"];
-		
-		g2t_track_st*   g2tTrackStart  = g2tTrack->GetTable();
-		g2t_vertex_st*  g2tVertexStart = g2tVertex->GetTable();
-		
-		g2t_track_st*  g2tTrackPtr;
-		g2t_vertex_st* g2tVertexPtr;
-		
-		if( daughterMcId>g2tTrack->GetNRows() || daughterMcId<1  ) {
-		  goto WRONGFILL; 	    
-		}
-		if( parentMcId>g2tTrack->GetNRows() || parentMcId<1 ) {
-		  goto WRONGFILL; 	    
-		}
-		
-		g2tTrackPtr = g2tTrackStart + (parentMcId -1);
-		
-		stopIdParent = g2tTrackPtr->stop_vertex_p;
-		//=====================================================================
-		g2tTrackPtr = g2tTrackStart + (daughterMcId -1);
-		
-		startIdDaughter = g2tTrackPtr->start_vertex_p;
-		
-		if( stopIdParent>g2tVertex->GetNRows() || stopIdParent<0 )  {
-		  goto WRONGFILL; 	    
-		}
-		if( startIdDaughter>g2tVertex->GetNRows() || startIdDaughter<1 ) {
-		  goto WRONGFILL; 
-		}
-		
-		g2tVertexPtr = g2tVertexStart + (startIdDaughter -1);
-		
-		vertexGeProc = g2tVertexPtr->ge_proc;
-		numDaughter = g2tVertexPtr->n_daughter;
-		
-		if( stopIdParent==startIdDaughter  && ( parentPid==11 || parentPid==12 )
-		    && vertexGeProc==5  && numDaughter==2 )
-		  {
-		    dstVtxRow.iflag       = 1;
-		  } else {
-		    dstVtxRow.iflag       = 0;
-		  }
-		goto PROPERFILL;
-	      }
-	    }
-	  }
-	  //================================================================================ 
-	WRONGFILL:
-	  dstVtxRow.iflag       = 2;
-	PROPERFILL:	  
-	  dstVtxRow.vtx_id      = kKinkVtxId;
-	  dstVtxRow.n_daughters = 1;
- 
+
+	  FillTableRow();
+  
 	  Int_t kvTableSize = kinkVertex->GetTableSize();
 	  Int_t dstvTableSize = vertex->GetTableSize();
-
+	  
 	  if( kinkVertex->GetNRows() == kvTableSize )
 	    kinkVertex->ReAllocate( kvTableSize + 100 );
 	  if( vertex->GetNRows() == dstvTableSize )
 	    vertex->ReAllocate( dstvTableSize + 100 );
-
-	  kinkVertex->AddAt(&kinkVtxRow, kinkVtxIndex);
-	  vertex->AddAt(&dstVtxRow, dstVtxIndex);
 	  
+	  kinkVertex->AddAt(&kinkVtxRow, kinkVtxIndex);
+	  vertex->AddAt(&dstVtxRow, dstVtxIndex);	  
 	  kinkVtxIndex++;	
 	  dstVtxIndex++;
 	}
@@ -604,14 +381,233 @@ Int_t StKinkMaker::Make(){
 }
 
 //_____________________________________________________________________________
-Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& helix1, 
-				    const StPhysicalHelixD& helix2, Float_t xCoordinates[2], 
-				    Float_t yCoordinates[2])
+void StKinkMaker::FillTableRow()
+{	  
+  StThreeVectorD pMomMinusDMom = parentMoment - daughterMoment;
+  
+  Float_t  deltaKaonMuon = fabs(sqrt(parentMoment.mag2() + kaonMass*kaonMass)   -
+				sqrt(daughterMoment.mag2() + muonMass*muonMass) - 
+				pMomMinusDMom.mag());
+  Float_t  deltaKaonPion = fabs(sqrt(parentMoment.mag2() + kaonMass*kaonMass)   -
+				sqrt(daughterMoment.mag2() + pionMass*pionMass) - 
+				sqrt(pMomMinusDMom.mag2() + pi0Mass*pi0Mass));
+  Float_t  deltaPionMuon = fabs(sqrt(parentMoment.mag2() + pionMass*pionMass)   -
+				sqrt(daughterMoment.mag2() + muonMass*muonMass) - 
+				pMomMinusDMom.mag());  
+  
+  if( (deltaKaonPion < deltaKaonMuon) && (deltaKaonPion < deltaPionMuon) )
+    {
+      kinkVtxRow.theta_cm = radToDeg*asin((daughterMoment.mag()/kaonToPionQ)*sin(decayAngle*degToRad));
+      if( myTrack1->charge() > 0 )	  
+	{
+	  kinkVtxRow.pidd = 8;
+	  kinkVtxRow.pidp = 11;
+	} else {
+	  kinkVtxRow.pidd = 9;
+	  kinkVtxRow.pidp = 12;
+	}
+    } else if( (deltaKaonMuon < deltaKaonPion) && (deltaKaonMuon < deltaPionMuon) )
+      {
+	kinkVtxRow.theta_cm = radToDeg*asin((daughterMoment.mag()/kaonToMuonQ)*sin(decayAngle*degToRad));
+	if( myTrack1->charge() > 0 )	  
+	  {
+	    kinkVtxRow.pidd = 5;
+	    kinkVtxRow.pidp = 11;
+	  } else {
+	    kinkVtxRow.pidd = 6;
+	    kinkVtxRow.pidp = 12;
+	  }   
+      } else {
+	kinkVtxRow.theta_cm = radToDeg*asin((daughterMoment.mag()/pionToMuonQ)*sin(decayAngle*degToRad));
+	if( myTrack1->charge() > 0 )	  
+	  {
+	    kinkVtxRow.pidd = 5;
+	    kinkVtxRow.pidp = 8;
+	  } else {
+	    kinkVtxRow.pidd = 6;
+	    kinkVtxRow.pidp = 9;
+	  }   
+      }
+  
+  kinkVtxRow.id = kinkVtxIndex + 1;  
+  kinkVtxRow.id_vertex = dstVtxIndex + 1;
+  kinkVtxRow.idd  = myTrack2->Id();
+  kinkVtxRow.idp  = myTrack1->Id();
+  kinkVtxRow.dca  = dca;
+  kinkVtxRow.dcad = daughterImpact;
+  kinkVtxRow.dcap = parentImpact;
+  kinkVtxRow.dlf  = sqrt( TMath::Power(myTrack2->startPoint(0)-myTrack1->lastPoint(0), 2) +
+			  TMath::Power(myTrack2->startPoint(1)-myTrack1->lastPoint(1), 2) + 
+			  TMath::Power(myTrack2->startPoint(2)-myTrack1->lastPoint(2), 2) ); 
+  
+  kinkVtxRow.dlv  = sqrt( TMath::Power(mKinkVertex.x()-myTrack1->lastPoint(0), 2) +
+			  TMath::Power(mKinkVertex.y()-myTrack1->lastPoint(1), 2) +
+			  TMath::Power(mKinkVertex.z()-myTrack1->lastPoint(2), 2) );
+  
+  kinkVtxRow.dE[0] = deltaKaonMuon;
+  kinkVtxRow.dE[1] = deltaKaonPion;
+  kinkVtxRow.dE[2] = deltaPionMuon;
+  
+  kinkVtxRow.p[0] = parentMoment.x();
+  kinkVtxRow.p[1] = parentMoment.y();
+  kinkVtxRow.p[2] = parentMoment.z();
+	  
+  kinkVtxRow.pd[0] = daughterMoment.x();
+  kinkVtxRow.pd[1] = daughterMoment.y();
+  kinkVtxRow.pd[2] = daughterMoment.z();
+	  
+  kinkVtxRow.theta = decayAngle;
+  
+  
+  dstVtxRow.id       = dstVtxIndex + 1;
+  dstVtxRow.det_id   = 100*myTrack1->DetId() + myTrack2->DetId();
+  dstVtxRow.x        = mKinkVertex.x();
+  dstVtxRow.y        = mKinkVertex.y();
+  dstVtxRow.z        = mKinkVertex.z();
+  dstVtxRow.sigma[0] = 0.;
+  dstVtxRow.sigma[1] = 0.;
+  dstVtxRow.sigma[2] = 0.;
+  dstVtxRow.pchi2    = 0.;
+  dstVtxRow.id_aux_ent = kinkVtxIndex + 1;
+  
+  FillIflag();
+
+  dstVtxRow.vtx_id      = kKinkVtxId;
+  dstVtxRow.n_daughters = 1;
+
+}
+
+//_____________________________________________________________________________
+void StKinkMaker::FillIflag()
+{
+  if(m_kinkEvalOn) {
+    St_DataSet *tpcTracks = GetDataSet("tpc_tracks"); 
+    if (tpcTracks) {
+      St_DataSetIter tpcI(tpcTracks);  
+      
+      St_tpt_track  *tptTrack = (St_tpt_track *) tpcI["tptrack"];
+      St_tte_eval   *tteEval  = (St_tte_eval *)  tpcI["evaltrk"];
+      if (tptTrack && tteEval) {
+	tpt_track_st* tptPtr  = tptTrack->GetTable();
+	tte_eval_st*  tteEPtr = tteEval->GetTable(); 
+	
+	Int_t daughterMcId;
+	
+	for(Int_t m=0; m<tptTrack->GetNRows(); m++)
+	  {
+	    if(tptPtr->id_globtrk == myTrack2->Id())
+	      {
+		for(Int_t n=0; n<tteEval->GetNRows(); n++)
+		  {
+		    if(tteEPtr->rtrk == tptPtr->id)
+		      {
+			daughterMcId = tteEPtr->mtrk;
+			break;		
+		      }
+		    tteEPtr++;
+		  }
+	      }
+	    tptPtr++;
+	  }
+	
+	//==============================================================
+	tpt_track_st* tptPtr1  = tptTrack->GetTable();
+	tte_eval_st*  tteEPtr1 = tteEval->GetTable();
+	
+	Int_t parentMcId;
+	Int_t parentPid;
+	
+	for(Int_t xl=0; xl<tptTrack->GetNRows(); xl++)
+	  {
+	    if(tptPtr1->id_globtrk == myTrack1->Id())
+	      {
+		for(Int_t yl=0; yl<tteEval->GetNRows(); yl++)
+		  {
+		    if(tteEPtr1->rtrk == tptPtr1->id)
+		      {
+			parentMcId = tteEPtr1->mtrk;
+			parentPid = tteEPtr1->pid;		  
+			break;		
+		      }
+		    tteEPtr1++;
+		  }
+	      }
+	    tptPtr1++;
+	  }
+	
+	//=====================================================================
+	Int_t stopIdParent;
+	Int_t startIdDaughter;	
+	Int_t vertexGeProc; 
+	Int_t numDaughter;
+	
+	St_DataSet *geant = GetDataSet("geant"); 
+	St_DataSetIter geantI(geant);         
+	
+	St_g2t_track  *g2tTrack  = (St_g2t_track *)  geantI["g2t_track"];
+	St_g2t_vertex *g2tVertex = (St_g2t_vertex *) geantI["g2t_vertex"];
+	
+	g2t_track_st*   g2tTrackStart  = g2tTrack->GetTable();
+	g2t_vertex_st*  g2tVertexStart = g2tVertex->GetTable();
+	
+	g2t_track_st*  g2tTrackPtr;
+	g2t_vertex_st* g2tVertexPtr;
+	
+	if( daughterMcId>g2tTrack->GetNRows() || daughterMcId<1  ) {
+	  goto WRONGFILL; 	    
+	}
+	if( parentMcId>g2tTrack->GetNRows() || parentMcId<1 ) {
+	  goto WRONGFILL; 	    
+	}
+	
+	g2tTrackPtr = g2tTrackStart + (parentMcId -1);
+	
+	stopIdParent = g2tTrackPtr->stop_vertex_p;
+	//=====================================================================
+	g2tTrackPtr = g2tTrackStart + (daughterMcId -1);
+	
+	startIdDaughter = g2tTrackPtr->start_vertex_p;
+	
+	if( stopIdParent>g2tVertex->GetNRows() || stopIdParent<0 )  {
+	  goto WRONGFILL; 	    
+	}
+	if( startIdDaughter>g2tVertex->GetNRows() || startIdDaughter<1 ) {
+	  goto WRONGFILL; 
+	}
+	
+	g2tVertexPtr = g2tVertexStart + (startIdDaughter -1);
+	
+	vertexGeProc = g2tVertexPtr->ge_proc;
+	numDaughter = g2tVertexPtr->n_daughter;
+	
+	if( stopIdParent==startIdDaughter  && ( parentPid==11 || parentPid==12 )
+	    && vertexGeProc==5  && numDaughter==2 )
+	  {
+	    dstVtxRow.iflag = 1;
+	  } else {
+	    dstVtxRow.iflag = 0;
+	  }
+	goto PROPERFILL;
+      }
+    }
+  }
+  //================================================================================ 
+ WRONGFILL:
+  dstVtxRow.iflag = 2;
+ PROPERFILL:	  
+  assert(1);
+
+}
+
+//_____________________________________________________________________________
+Int_t StKinkMaker::MeetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& helix1, 
+				    const StPhysicalHelixD& helix2, Float_t xCords[2], 
+				    Float_t yCords[2])
 {       
   
-  Float_t om1, om2, ph1, ph2;
-  Float_t a, b, c, d, dia, dtouch;
-  Float_t xc1[2], xc2[2], r1, r2;  
+  Float_t  om1, om2, ph1, ph2;
+  Float_t  a, b, c, d, dia, dtouch;
+  Float_t  xc1[2], xc2[2], r1, r2;  
   Int_t    flag;
   
   xc1[0] = helix1.xcenter();
@@ -625,10 +621,10 @@ Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
   
   /*    Clear variables */
   
-  xCoordinates[0] = 0.;
-  xCoordinates[1] = 0.;
-  yCoordinates[0] = 0.;
-  yCoordinates[1] = 0.;
+  xCords[0] = 0.;
+  xCords[1] = 0.;
+  yCords[0] = 0.;
+  yCords[1] = 0.;
   flag = 2;
   
   /*    Find the two intersections      */
@@ -647,10 +643,10 @@ Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
       if (dtouch <= cut)
         {
           flag = 1;
-          xCoordinates[0] = xc1[0] + r1*(xc2[0]-xc1[0])/dia;
-          yCoordinates[0] = xc1[1] + r1*(xc2[1]-xc1[1])/dia;
-          xCoordinates[1] = xCoordinates[0];
-          yCoordinates[1] = yCoordinates[0];
+          xCords[0] = xc1[0] + r1*(xc2[0]-xc1[0])/dia;
+          yCords[0] = xc1[1] + r1*(xc2[1]-xc1[1])/dia;
+          xCords[1] = xCords[0];
+          yCords[1] = yCords[0];
         }
       else
         {
@@ -675,13 +671,13 @@ Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
 	  if ( fabs(TMath::Power((ph1+a), 2)+TMath::Power((om1+b), 2)-r2*r2) 
 	       <= fabs(TMath::Power((ph2+a), 2) + TMath::Power((om1+b), 2) - r2*r2) )
             {
-	      xCoordinates[0] = ph1+xc1[0];
+	      xCords[0] = ph1+xc1[0];
             }
           else
             {
-              xCoordinates[0] = ph2+xc1[0];
+              xCords[0] = ph2+xc1[0];
             }   
-	  yCoordinates[0] = om1+xc1[1];
+	  yCords[0] = om1+xc1[1];
         }
       
       /*        Second pair     */
@@ -693,21 +689,21 @@ Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
           if ( fabs(TMath::Power((ph1+a), 2) + TMath::Power((om2+b), 2) - r2*r2)
 	       <= fabs(TMath::Power((ph2+a), 2) + TMath::Power((om2+b), 2) - r2*r2) )
             {
-              xCoordinates[1] = ph1 + xc1[0];
+              xCords[1] = ph1 + xc1[0];
             }
           else
             {
-              xCoordinates[1] = ph2 + xc1[0];
+              xCords[1] = ph2 + xc1[0];
             }   
-	  yCoordinates[1] = om2 + xc1[1];
+	  yCords[1] = om2 + xc1[1];
         }
     }
   return flag;
 }
 
 //_____________________________________________________________________________
-Float_t  StKinkMaker::dcaTwoLines(const StThreeVectorD& p1Project, const StThreeVectorD& p2Project, 
-				  const StThreeVectorD& parentMoment, const StThreeVectorD& daughterMoment, 
+Float_t  StKinkMaker::DcaTwoLines(const StThreeVectorD& t1Project, const StThreeVectorD& t2Project, 
+				  const StThreeVectorD& parentMom, const StThreeVectorD& daughterMom, 
 				  Float_t point1AtDca[3], Float_t point2AtDca[3])
 {
   Float_t        x1, x2, y1, y2, z1, z2;
@@ -716,16 +712,16 @@ Float_t  StKinkMaker::dcaTwoLines(const StThreeVectorD& p1Project, const StThree
   Float_t        a1, a2, a3, c, k, l, m, b, v, A, Bb, Cc, D, E, F;
   Float_t        mdca;
 	  
-  x1 = p1Project.x();
-  y1 = p1Project.y();
-  z1 = p1Project.z();
-  x2 = p2Project.x();
-  y2 = p2Project.y();
-  z2 = p2Project.z();
-  sxz1 = parentMoment.x()/parentMoment.z();
-  syz1 = parentMoment.y()/parentMoment.z();
-  sxz2 = daughterMoment.x()/daughterMoment.z();
-  syz2 = daughterMoment.y()/daughterMoment.z();
+  x1 = t1Project.x();
+  y1 = t1Project.y();
+  z1 = t1Project.z();
+  x2 = t2Project.x();
+  y2 = t2Project.y();
+  z2 = t2Project.z();
+  sxz1 = parentMom.x()/parentMom.z();
+  syz1 = parentMom.y()/parentMom.z();
+  sxz2 = daughterMom.x()/daughterMom.z();
+  syz2 = daughterMom.y()/daughterMom.z();
 
   dx = x1-x2;
   dy = y1-y2;
