@@ -1,4 +1,4 @@
-// $Id: bfcread_tagsBranch.C,v 1.4 2000/03/21 21:28:55 kathy Exp $
+// $Id: bfcread_tagsBranch.C,v 1.5 2000/03/23 16:56:15 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -17,7 +17,7 @@
 //=======================================================================
 
 void bfcread_tagsBranch(const char *MainFile=
- "/afs/rhic/star/data/samples/gstar.tags.root")
+ "/afs/rhic/star/data/samples/gstar.tags.root",Int_t printEvent=1)
 {
   // fill tags table
 
@@ -47,29 +47,30 @@ void bfcread_tagsBranch(const char *MainFile=
   TString file;
 
 //Loop over entries (events written to the tags.root file)
-//test that all events can be read in & print out values for first event
+//test that all events can be read in & print out values for printEvent
 
   Int_t countEvents=0;
   Int_t countTables=0;
   Int_t countTagsTot[4]={0,0,0,0};
-  Float_t sumScaCPM=0;
-  Float_t sumScaCPS=0;
-  Float_t sumScaAM=0;
-  Float_t sumStrange=0;
-  Float_t sumFlowqx=0;
-  Float_t sumFlowqy=0;
-  Float_t sumFlown=0;
-  Float_t sumFlowm=0;
-  Float_t sumEvtHddr=0;
-  Float_t cntScaCPM=0;
-  Float_t cntScaCPS=0;
-  Float_t cntScaAM=0;
-  Float_t cntStrange=0;
-  Float_t cntFlowqx=0;
-  Float_t cntFlowqy=0;
-  Float_t cntFlown=0;
-  Float_t cntFlowm=0;
-  Float_t cntEvtHddr=0;
+
+  Float_t AsumScaCPM=0;
+  Float_t AsumScaCPS=0;
+  Float_t AsumScaAM=0;
+  Float_t AsumStrange=0;
+  Float_t AsumFlowqx=0;
+  Float_t AsumFlowqy=0;
+  Float_t AsumFlown=0;
+  Float_t AsumFlowm=0;
+  Float_t AsumEvtHddr=0;
+  Float_t AcntScaCPM=0;
+  Float_t AcntScaCPS=0;
+  Float_t AcntScaAM=0;
+  Float_t AcntStrange=0;
+  Float_t AcntFlowqx=0;
+  Float_t AcntFlowqy=0;
+  Float_t AcntFlown=0;
+  Float_t AcntFlowm=0;
+  Float_t AcntEvtHddr=0;
 
   for (Int_t k=0;k<chain->GetEntries();k++) {
 
@@ -99,8 +100,8 @@ void bfcread_tagsBranch(const char *MainFile=
           countTagsTot[branches->IndexOf(branch)]++;
          
  
-//print out branch,tag name and value - first event only
-	  if (!k) 
+//sum & print out branch,tag name and value - for printEvent only
+	  if (countEvents == printEvent) 
           { 
             cout << 
 	      " QAInfo: table#,name: " << branches->IndexOf(branch) <<
@@ -108,65 +109,65 @@ void bfcread_tagsBranch(const char *MainFile=
               " -- has  tag: " << leaf->GetName() <<
               " = " << leaf->GetValue() << endl; 
            
+	  }
 
-	    // now sum up values in groups of tags so we can do a 
-            // rough check - this can be removed later when/if we
-            // have histograms
+// Sums for ALL events:
+// now sum up values in groups of tags so we can do a 
+// rough check - this can be removed later when/if we
+// have histograms
 	     if ( (strcmp(branch->GetName(),"ScaTag")==0) &&
                   (strncmp(leaf->GetName(),"chargedParticles_Means",20)==0) )
 	      {
-		cntScaCPM++;
-	        sumScaCPM += leaf->GetValue();
+		AcntScaCPM++;
+	        AsumScaCPM += leaf->GetValue();
               }
 	     if ( (strcmp(branch->GetName(),"ScaTag")==0) &&
                   (strncmp(leaf->GetName(),"chargedParticles_Sigmas",20)==0) )
      	      {
-		cntScaCPS++;
-	        sumScaCPS += leaf->GetValue();
+		AcntScaCPS++;
+	        AsumScaCPS += leaf->GetValue();
               }
 	     if ( (strcmp(branch->GetName(),"ScaTag")==0) &&
                   (strncmp(leaf->GetName(),"scaAnalysisMatrix",15)==0) )
 	      {
-		cntScaAM++;
-	        sumScaAM += leaf->GetValue();
+		AcntScaAM++;
+	        AsumScaAM += leaf->GetValue();
               }
 	     if ( (strcmp(branch->GetName(),"StrangeTag")==0) )
 	      {
-		cntStrange++;
-	        sumStrange += leaf->GetValue();
+		AcntStrange++;
+	        AsumStrange += leaf->GetValue();
               }
 	     if ( (strcmp(branch->GetName(),"FlowTag")==0) &&
                   (strncmp(leaf->GetName(),"qx",2)==0) )
 	      {
-		cntFlowqx++;
-	        sumFlowqx += leaf->GetValue();
+		AcntFlowqx++;
+	        AsumFlowqx += leaf->GetValue();
               }
 	     if ( (strcmp(branch->GetName(),"FlowTag")==0) &&
                   (strncmp(leaf->GetName(),"qy",2)==0) )
 	      {
-		cntFlowqy++;
-	        sumFlowqy += leaf->GetValue();
+		AcntFlowqy++;
+	        AsumFlowqy += leaf->GetValue();
               }
 	     if ( (strcmp(branch->GetName(),"FlowTag")==0) &&
                   (strncmp(leaf->GetName(),"n",1)==0) )
 	      {
-		cntFlown++;
-	        sumFlown += leaf->GetValue();
+		AcntFlown++;
+	        AsumFlown += leaf->GetValue();
               }
 	     if ( (strcmp(branch->GetName(),"FlowTag")==0) &&
                   (strncmp(leaf->GetName(),"m",1)==0) )
 	      {
-		cntFlowm++;
-	        sumFlowm += leaf->GetValue();
+		AcntFlowm++;
+	        AsumFlowm += leaf->GetValue();
               }
 	     if ( (strcmp(branch->GetName(),"EvtHddr")==0) )
 	      {
-		cntEvtHddr++;
-	        sumEvtHddr += leaf->GetValue();
+		AcntEvtHddr++;
+	        AsumEvtHddr += leaf->GetValue();
               }
 
-
-	  }
 
 	}
 
@@ -183,10 +184,11 @@ void bfcread_tagsBranch(const char *MainFile=
 
 // print out at end of processing all events:
 
-  cout << " QAInfo:  Read total # events = " << countEvents << endl;
+  cout << endl << endl << 
+    " QAInfo:  Read total # events = " << countEvents << endl;
   //  cout << " QAInfo:  Read total # tables = " << countTables << endl;
   countTables /= countEvents;
-  cout << " QAInfo:  #tables/event = " << countTables << endl;
+  cout << " QAInfo:  #tables/event = " << countTables << endl << endl;
 
   for (Int_t j=0; j<4; j++){
     countTagsTot[j] /= countEvents;
@@ -195,25 +197,35 @@ void bfcread_tagsBranch(const char *MainFile=
   }
   
 
-        sumEvtHddr /= cntEvtHddr;
-        sumFlowqx  /= cntFlowqx;
-        sumFlowqy  /= cntFlowqy;
-        sumFlown   /= cntFlown;
-        sumFlowm   /= cntFlowm;
-        sumStrange /= cntStrange;
-        sumScaCPM  /= cntScaCPM;
-        sumScaCPS  /= cntScaCPS;
-        sumScaAM   /= cntScaAM;
 
-	cout << " QAInfo: evt 1, avg Flow qx      = " << sumFlowqx << endl;
-        cout << " QAInfo: evt 1, avg Flow qy      = " << sumFlowqy << endl;
-        cout << " QAInfo: evt 1, avg Flow n       = " << sumFlown  << endl; 
-        cout << " QAInfo: evt 1, avg Flow m       = " << sumFlowm  << endl; 
-        cout << " QAInfo: evt 1, avg Strange      = " << sumStrange << endl; 
-        cout << " QAInfo: evt 1, avg Sca CP mean  = " << sumScaCPM  << endl; 
-        cout << " QAInfo: evt 1, avg Sca CP sig   = " << sumScaCPS  << endl; 
-        cout << " QAInfo: evt 1, avg Sca An. Mtrx = " << sumScaAM   << endl; 
-        cout << " QAInfo: evt 1, avg Evt Hddr     = " << sumEvtHddr << endl;
+        AsumEvtHddr /= AcntEvtHddr;
+        AsumFlowqx  /= AcntFlowqx;
+        AsumFlowqy  /= AcntFlowqy;
+        AsumFlown   /= AcntFlown;
+        AsumFlowm   /= AcntFlowm;
+        AsumStrange /= AcntStrange;
+        AsumScaCPM  /= AcntScaCPM;
+        AsumScaCPS  /= AcntScaCPS;
+        AsumScaAM   /= AcntScaAM;
+
+	cout << endl <<  " QAInfo: ALL evt,  avg Flow qx      = " 
+            << AsumFlowqx << endl;
+        cout << " QAInfo: ALL evt,  avg Flow qy      = " 
+            << AsumFlowqy << endl;
+        cout << " QAInfo: ALL evt,  avg Flow n       = " 
+            << AsumFlown  << endl; 
+        cout << " QAInfo: ALL evt,  avg Flow m       = " 
+            << AsumFlowm  << endl; 
+        cout << " QAInfo: ALL evt,  avg Strange      = "
+            << AsumStrange << endl; 
+        cout << " QAInfo: ALL evt,  avg Sca CP mean  = " 
+            << AsumScaCPM  << endl; 
+        cout << " QAInfo: ALL evt,  avg Sca CP sig   = " 
+            << AsumScaCPS  << endl; 
+        cout << " QAInfo: ALL evt,  avg Sca An. Mtrx = " 
+            << AsumScaAM   << endl; 
+        cout << " QAInfo: ALL evt,  avg Evt Hddr     = " 
+            << AsumEvtHddr << endl;
        
 
   // stop timer and print results
@@ -221,6 +233,14 @@ void bfcread_tagsBranch(const char *MainFile=
   cout<< endl << endl <<"RealTime="<<timer.RealTime()<<
        " seconds, CpuTime="<<timer.CpuTime()<<" seconds"<<endl;
 }
+
+
+
+
+
+
+
+
 
 
 
