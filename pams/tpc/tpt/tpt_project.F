@@ -1,5 +1,8 @@
-* $Id: tpt_project.F,v 1.17 2000/03/19 04:20:33 sakrejda Exp $
+* $Id: tpt_project.F,v 1.18 2000/03/29 03:58:19 sakrejda Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.18  2000/03/29 03:58:19  sakrejda
+* Loading a track moved to the extend segment routine
+*
 * Revision 1.17  2000/03/19 04:20:33  sakrejda
 * An option to use straigth line to fit lasers even if the field is on.
 *
@@ -112,7 +115,6 @@ C     Local variables
       INTEGER iret, tpt_helix_pred ,l,ip_in,ip_out,row_in,row_out,llc
       INTEGER row_start(2),row_end(2),st(2),mdir,ip(2)
       INTEGER nf,lk,imem,ib,tpt_fit_track,tpt_cross_fact
-      INTEGER tpt_load_track
       INTEGER islic,is_pnt,ipass,tte_skip
       INTEGER tpt_find_slic, irets,save_flag
       INTEGER tpc_sec24_to_sec12
@@ -247,8 +249,6 @@ C              a hit found
                iret=tpt_fit_track(itrk,trk,hit_h,hit,tpar_h,tpar,tte_skip,ipass)
                if((iret.eq.STAFCV_OK).and.(irow.ne.irow_last)) then
                   trk(itrk).flag=save_flag
-                  iret = tpt_load_track(itrk,track_h,track,trk,hit_h,hit,tpar_h,tpar,ipass)
-                  tpt_project = STAFCV_OK
                   irow_last=irow
                   irow=irow-st(mdir)
                   repeat=.true.
@@ -265,7 +265,6 @@ C              a hit found
       iret=tpt_fit_track(itrk,trk,hit_h,hit,tpar_h,tpar,tte_skip,ipass)
       if(iret.eq.STAFCV_OK) then
          trk(itrk).flag=save_flag
-         iret = tpt_load_track(itrk,track_h,track,trk,hit_h,hit,tpar_h,tpar,ipass)
          tpt_project = STAFCV_OK
       else
          tpt_project = STAFCV_BAD
