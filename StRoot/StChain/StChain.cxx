@@ -120,7 +120,7 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
      iMake = Make(jCur);
 
      if (outMk && iMake == kStErr) {outMk->IMake(jCur); mNFailed++;}
-     if (iMake%10 >= kStEOF) break;
+     if (iMake%10 == kStEOF || iMake%10==kStFatal)	break;
      mNTotal++;
      evnt.Stop("QAInfo:");
      //  evnt.Show("QAInfo:");
@@ -140,8 +140,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.48 2002/11/26 02:16:39 perev Exp $
+// $Id: StChain.cxx,v 1.49 2004/08/03 17:18:46 perev Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.49  2004/08/03 17:18:46  perev
+// EventLoop corrected according to current policy
+//
 // Revision 1.48  2002/11/26 02:16:39  perev
 // EventLoop added
 //
