@@ -1,6 +1,6 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.10  1998/07/09 16:39:31  perev
-#  BAKup for .so
+#  Revision 1.11  1998/07/10 12:23:15  nevski
+#  Add backup for PAMs shared libraries
 #
 #  Revision 1.10  1998/05/19 16:36:38  perev
 #  Makefiles
@@ -23,7 +23,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/07/09 16:39:31 $ 
+#             Last modification $Date: 1998/07/10 12:23:15 $ 
 #. default setings
 
 RM := rm -f
@@ -308,7 +308,7 @@ ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
   CFLAGS   :=  $(DEBUG)  -KPIC 
   CXXFLAGS :=  $(DEBUG)  -KPIC 
   LDFLAGS  :=  $(DEBUG)  -Bstatic
-  EXEFLAGS :=  $(DEBUG)  -Bdynamic
+  EXEFLAGS :=  $(DEBUG)  -Bdynamic -t
   SOFLAGS  :=  $(DEBUG) -G
   CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   FLIBS    := -lM77 -lF77 -lsunmath
@@ -329,7 +329,7 @@ ifneq (,$(findstring $(STAF_ARCH),sunx86_55))
   CFLAGS   :=  $(DEBUG) -KPIC +w2 -I/usr/dt/share/include -I/usr/openwin/share/include
   CXXFLAGS :=  $(CFLAGS)
   LDFLAGS  :=  $(DEBUG)  -z muldefs -Bstatic
-  EXEFLAGS :=  $(DEBUG)  -z muldefs -Bdynamic
+  EXEFLAGS :=  $(DEBUG)  -z muldefs -Bdynamic -t
   SOFLAGS  :=  $(DEBUG)  -G
   CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   FLIBS    := -lM77 -lF77 -lsunmath

@@ -136,11 +136,9 @@ FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(notdir $(basename $(FIL
 NAMES_O   = $(notdir $(FILES_O))
 # *.cc moved to sl $(NAMES_CC)
 ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF))) 
-#ifndef NODEBUG
-#        SL_PKG  := $(LIB_DIR)/$(PKG)-nodebug.sl
-#else
         SL_PKG  := $(LIB_DIR)/$(PKG).sl
-#endif
+        SL_NEW  := $(LIB_DIR)/$(PKG).sl.NEW
+        SL_OLD  := $(wildcard $(SL_PKG))
 endif                          
 ifneq (,$(strip $(FILES_O)))
 ifdef NODEBUG
@@ -206,8 +204,12 @@ $(LIB_PKG):$(OBJS)
 endif                          
 ifneq ($(strip $(FILES_SL) $(FILES_OG) $(FILES_init)),)   
 $(SL_PKG): $(FILES_SL) $(FILES_OG) $(FILES_init) $(LIB_PKG)
-	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG)  $(FILES_init)  -o $(SL_PKG) \
+	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG)  $(FILES_init)  -o $(SL_NEW) \
         $(LIBRARIES)  
+ifneq (,$(strip $(SL_OLD)))
+	mv $(SL_OLD) $(SL_OLD).BAK
+endif
+	mv $(SL_NEW) $(SL_PKG)
 	@echo "           Shared library " $(SL_PKG) " has been created"   
 #--------- module --------- 
 ifneq ($(NAMES_IDM),)           
