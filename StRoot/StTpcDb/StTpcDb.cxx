@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.37 2004/10/27 21:44:28 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.38 2004/11/19 10:21:54 jecc Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.38  2004/11/19 10:21:54  jecc
+ * Initialize pointers
+ *
  * Revision 1.37  2004/10/27 21:44:28  fisyak
  * Add debug print for tables Validities, add access to ExB correction
  *
@@ -250,8 +253,8 @@ StTpcWirePlaneI* StTpcDb::WirePlaneGeometry(){
 StTpcDimensionsI* StTpcDb::Dimensions(){
   if (!dimensions){            // get wire plane from data base
    int dbIndex = kGeometry;
-   St_DataSet *tpd;
-   St_DataSet *geo;
+   St_DataSet *tpd=0;
+   St_DataSet *geo=0;
    if (tpctrg[dbIndex]){
      //    tpd = tpctrg[dbIndex]->Find("tpcDimensions");
      tpd = FindTable("tpcDimensions",dbIndex);
@@ -264,17 +267,17 @@ StTpcDimensionsI* StTpcDb::Dimensions(){
    if (tpctrg[dbIndex]){
      //    geo = tpctrg[dbIndex]->Find("tpcEffectiveGeom");
      geo = FindTable("tpcEffectiveGeom",dbIndex);
-    if (!(geo && geo->HasData()) ){
-     gMessMgr->Message("StTpcDb::Error Finding Tpc Effective Geometry","E");
-     return 0;
-    }
+     if (!(geo && geo->HasData()) ){
+       gMessMgr->Message("StTpcDb::Error Finding Tpc Effective Geometry","E");
+       return 0;
+     }
    }
-    StRTpcDimensions* rdimensions =  new StRTpcDimensions((St_tpcDimensions*)tpd,(St_tpcEffectiveGeom*)geo);
-    rdimensions->SetPadPlanePointer(PadPlaneGeometry());
-    rdimensions->SetWirePlanePointer(WirePlaneGeometry());
-    dimensions = (StTpcDimensionsI*)rdimensions;
+   StRTpcDimensions* rdimensions =  new StRTpcDimensions((St_tpcDimensions*)tpd,(St_tpcEffectiveGeom*)geo);
+   rdimensions->SetPadPlanePointer(PadPlaneGeometry());
+   rdimensions->SetWirePlanePointer(WirePlaneGeometry());
+   dimensions = (StTpcDimensionsI*)rdimensions;
   }
- return dimensions;
+  return dimensions;
 }
 
 //_____________________________________________________________________________
