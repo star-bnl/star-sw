@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/env perl -w
 
 # Written by J.Lauret on Tue Mar 27 2001
 # This script takes care of Insure++ compilation and output 
@@ -7,7 +7,7 @@
 # Note : This script is also menat to be usable by users so NO default
 #        file names with location in specific area should be hardcoded.
 #        use options to overwrite default instead.
-
+#
 use lib "/afs/rhic/star/packages/DEV/mgr";
 use InsUtils;
 
@@ -213,7 +213,7 @@ foreach $line (keys %DELETE){
 # Swell. We can start now. We will do that by using system and
 # exception test.
 if($COMPIL){
-    IUresource($dir/$FILOUT," - .psrc file created");
+    IUresource("$dir/$FILOUT"," - .psrc file created");
 
     $file= join(" ",@SKIP);
     $tmp = "/tmp/InsureComp".time().".com";

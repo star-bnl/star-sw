@@ -1,6 +1,5 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env perl -w
 
-#
 # Written J.lauret Mar 27 2001
 # This scripts take an input file as sole argument
 # and output result in HTML format to STDOUT
