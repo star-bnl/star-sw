@@ -219,6 +219,19 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   	connector3[i]=connector3_tmp[i];
   }
   ///////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////
+  // these tables are for PSD decoding //////////////////////////////////
+
+  // which PMT Box is connected to each RDO and crate board
+  if(date >= 20040101) // year 2002/2003 pp and dAu runs
+  {
+    int PsdModules_tmp[4][15]={
+                              {46,47,48,49,50,51,52,53,54,55,56,57,58,59,60},                //RDO 0
+                              {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15},                         //RDO 1
+                              {31,32,33,34,35,36,37,38,39,40,41,42,43,44,45},                //RDO 2
+                              {16,17,18,19,20,21,22,23,24,25,26,27,28,29,30}};               //RDO 3
+    for(int i=0;i<4;i++) for(int j=0;j<15;j++) PsdModules[i][j]=PsdModules_tmp[i][j];
+  }
   return;
 }
 //--------------------------------------------------------
@@ -481,10 +494,15 @@ int StEmcDecoder::GetSmdRDO(int detector,int module, int eta, int sub, int& RDO,
 \param eta is the eta division for towers
 \param sub is the sub division for towers
 */
-int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int& eta,int& sub)
+int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int& eta,int& sub,bool print)
 {
+    
   if(RDO<0 || RDO>7) return 0;
   if(index <0 || index >4799) return 0; 
+  
+  char line[300];
+    
+  if(print) sprintf(line,"%2d    %4d    ",RDO,index);
   
   int daq_smd=index;
   
@@ -494,6 +512,9 @@ int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int&
   int S_step=daq_smd%20;
   int A_value=0;
   int S_value=0;
+  int SCA = S_step/5+1;
+  
+  if(print) sprintf(line,"%s%3d    %3d    %4d    %3d    Sca%1d    ",line,category,wire,A_step,S_step,SCA);
   
   if(category==0)
   {
@@ -512,6 +533,8 @@ int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int&
     A_value=FEE3[A_step];
     S_value=connector3[S_step];
   }
+  
+  if(print) sprintf(line,"%sA%1d    S%02d    ",line,A_value,S_value);
   
   //detector no
   int det=0;
@@ -537,6 +560,7 @@ int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int&
     det=3;
     half=1;
   }
+  if(print) sprintf(line,"%s%2d    %2d    ",line,det,half);
   
   int mod=0;
   int mod_stat=getSmdModule(RDO, S_value, mod);
@@ -545,10 +569,10 @@ int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int&
   {
     //Get strip no
     int dummy=checkDummy(wire);
+    if(print) sprintf(line,"%s%3d    %1d    ",line,mod,dummy); 
+    int stat=getSmdPin(det,half,wire,pin); if(stat){/*nothing*/}
     if(dummy==0)
     {
-      int stat=getSmdPin(det,half,wire,pin); if(stat){/*nothing*/}
-
       /*cout <<"RDO = "<<RDO
            <<"  idx = "<<index
            <<"  AS = "<<A_step
@@ -568,16 +592,19 @@ int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int&
         eta = 151-pin;
         sub = 1;
         //cout <<" m = "<<module<<"  e = "<<eta <<"  s = "<<sub;
-        return 1;
       }
       if(detector == 4) // bsmdp
       {
         int stat=getSmdpStrip(pin,eta,sub);
         if(stat!=1) return 0;
         //cout <<" m = "<<module<<"  e = "<<eta <<"  s = "<<sub;
-        return 1;
       }
+      if(print) sprintf(line,"%s%3d    %3d    %2d",line,pin,eta,sub);
+      if(print) cout<<line<<endl;
+      return 1;
     }
+    if(print) sprintf(line,"%s%3d    %3d    %2d",line,pin,0,0);
+    if(print) cout <<line<<endl;
   }
   return 0;
 }
@@ -638,6 +665,32 @@ int StEmcDecoder::getSmdpStrip(int pin,int& eta,int& sub)
   sub=15-(pin-1)/10;
   return 1; // 0 is bad
 }       
+//--------------------------------------------------------
+/*!
+\param RDO is the SMD fiber number
+\param index is the position in the fiber
+\param id is the software Id
+*/
+int StEmcDecoder::GetPsdId(int RDO,int index, int& id,bool print)
+{
+  id=0;  
+  if(RDO<0 || RDO>3) return 0;
+  if(index <0 || index >4799) return 0; 
+  return 0;
+}
+//--------------------------------------------------------
+/*!
+\param id is the software Id
+\param RDO is the SMD fiber number
+\param index is the position in the fiber
+*/
+int StEmcDecoder::GetPsdRDO(int id, int& RDO,int& index)
+{
+  RDO=0;
+  index=0;
+  if(id<1 || id>4800) return 0;
+  return 0;
+}
 //--------------------------------------------------
 void StEmcDecoder::PrintTowerMap(ofstream *out)
 {
