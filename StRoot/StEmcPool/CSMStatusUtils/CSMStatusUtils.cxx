@@ -1,3 +1,16 @@
+/*
+Indexing is an issue in this code, so I'm going to be explicit.
+When I read from the data, the data are indexed from 1 to N.
+When I write the data to the histograms, it's from 1 to N.
+When I write text data to the status files, it's from 1 to N.
+EVERYTHING is from 1 to N.
+
+except the db ROOT files.
+db ROOT files are from 0 to N-1.
+I explicitly write them this way.
+*/
+
+
 #include "CSMStatusUtils.h"
 
 #include "TMath.h"
@@ -256,7 +269,7 @@ CSMStatusUtils::saveAbbreviatedStatusTablesToASCII(TString directory) {
          (oldstatus != status && (statuscounter[i]/mRunStatusMapPtr->size() <= 0.1 || mRunStatusMapPtr->size() <= 3))) {
         ofs << i << "\t" << status << endl;
       }
-      emcstatus->Status[i]=status;
+      emcstatus->Status[i-1]=status; //indexed from 0
     }
     ofs.close();
     datetimestring = getDateTimeString(runnumber);
@@ -275,96 +288,13 @@ CSMStatusUtils::saveAbbreviatedStatusTablesToASCII(TString directory) {
   return 0;
 }
 
-//this finds out which towers' pedestals changed between runs
-//and writes only the changes to the abbreviated pedestal files
-
-/*Int_t
-CSMStatusUtils::saveAbbreviatedPedestalTables(const Char_t* directory, const Char_t* filter) {) {
-
-  std::map<Int_t,std::vector<Float_t>*> pedMeanMap;
-  std::map<Int_t,std::vector<Float_t>*> pedErrorMap;
-  std::map<Int_t,std::vector<Int_t>*> pedStatusMap;
-  if (!directory || !filter) return 0;
-  void* dir = NULL;
-  Char_t buffert[2048];
-  strcpy(buffert,directory);
-  strcat(buffert,"/pedestals/");
-  if ((dir = gSystem->OpenDirectory(buffert)) != NULL) {
-    const Char_t *dirEntry;
-    while ((dirEntry = gSystem->GetDirEntry(dir)) != NULL) {
-      Char_t buffer[2048];
-      strcpy(buffer,buffert);
-      strcat(buffer,dirEntry);
-      if (!strstr(buffer,filter)) continue;
-      if (!strstr(buffer,mDetectorFlavor.Data())) continue;
-      Char_t* needle = strstr(buffer,"run_");
-      Int_t runNumber = 0;
-      if (needle) {
-	      needle+=3;
-	      Char_t runString[10];
-	      strncpy(runString,needle,7);
-	      runNumber = atoi(runString);
-      }
-      if (runNumber != 0) {
-	      ifstream in(buffer);
-        if(in.good()) {
-          in.getline(buffert);  //reposition past first line
-	        Float_t pedmean, pederr;
-          Int_t itemp, istatus;
-	        vector<Float_t>* means = new vector<Float_t>(mDetectorSize+1);
-	        vector<Float_t>* errs = new vector<Float_t>(mDetectorSize+1);
-	        vector<Int_t>* statuses = new vector<Int_t>(mDetectorSize+1);
-	        for(int id=1; id<mDetectorSize+1; id++) {
-//        cout << buffer << "mrz" << endl;
-            in >> itemp >> pedmean >> pederr >> istatus;
-//        cout << status << "mrz" << itemp << endl;
- 	          (*means)[id] = pedmean;
- 	          (*errs)[id] = pederr;
- 	          (*statuses)[id] = istatus;
-	        }
-	        pedMeanMap[runNumber] = means;
-	        pedErrorMap[runNumber] = errors;
-	        pedStatusMap[runNumber] = statuses;
-        }
-        in.close();
-      } 
-    }
-  }  
-  TString tmpstr;
-  int tmpint;
-  IntToPtrVecShortConstIter first = pedStatusMap.begin();
-  IntToPtrVecShortConstIter last = pedStatusMap.end();
-  IntToPtrVecShortConstIter iter = first;
-  IntToPtrVecShortConstIter preiter = first;
-  iter++;
-
-  for(;iter!=last;iter++) {
-    tmpint = iter->first;
-    tmpstr = directory;
-    tmpstr += "/status/short_status_run";
-    tmpstr += tmpint; //runnumber
-    tmpstr += ".status";
-    ofstream ofs(tmpstr.Data());
-    vector<Short_t>* statusVector = iter->second;
-    vector<Short_t>* oldStatusVector = preiter->second;
-    Short_t oldstatus, status;
-    for (UInt_t i = 1; i < statusVector->size(); i++) {
-      oldstatus = (*oldStatusVector)[i];
-      status = (*statusVector)[i];
-      if (oldstatus != status) ofs << i << "\t" << status << endl;
-    }
-    ofs.close();
-    preiter = iter;
-  }
-}*/
-
 //this takes HistFileMap, opens each file in it, creates the
 //hot tower histogram, calls analyseStatusHistogram, and if there
 //are enough statistics in the run, it will draw the
 //histograms, and output to an html file the abbreviated results,
 //such as the number of good towers in a run.
 
-//the logic is outlined here for cases of low statistics:
+//the logic is outlined here:
 //"RI" refers to a run's (or set of runs') Run Information:
     //2d histogram, earliest run number, and earliest time and datestamps
 //there are three separate RIs: 
@@ -836,25 +766,28 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
   
 //identical channel test
 
-//daqId is from 0 to N-1
-//towerId is from 1 to N
+//30 crates, indexed from 1
+//160 channels per crate, indexed from 0
+//towerId indexed from 1
 //histogram projection is from 2 to N+1 (stupid... but true)
 
-  for(int daqId=0; daqId<mDetectorSize-1; daqId++) {
-    histogramsAreSame = kTRUE;
-    barry.GetTowerIdFromDaqId(daqId,towerId);
-    barry.GetTowerIdFromDaqId(daqId+1,nextTowerId);
-    
-    TH1D* projnow = hist->ProjectionY("projTemp2",towerId+1,towerId+1);
-    TH1D* projnext = hist->ProjectionY("projTemp3",nextTowerId+1,nextTowerId+1);
-    
-    for (Int_t i=1; i<projnow->GetXaxis()->GetNbins() && histogramsAreSame; i++) {
-      if( projnow->GetBinContent(i) != projnext->GetBinContent(i))
-        histogramsAreSame = kFALSE;
-    }
-    if(histogramsAreSame) {
-      statusVector[towerId] |= 256;
-      statusVector[nextTowerId] |= 256;
+  for(int crate=1; crate<30; crate++) {
+    for(int channel=0; channel<160-1; channel++) {  //comparing adjacent channels
+      histogramsAreSame = kTRUE;
+      barry.GetTowerIdFromCrate(crate, channel, towerId);
+      barry.GetTowerIdFromCrate(crate, channel+1, nextTowerId);
+
+      TH1D* projnow = hist->ProjectionY("projTemp2",towerId+1,towerId+1);
+      TH1D* projnext = hist->ProjectionY("projTemp3",nextTowerId+1,nextTowerId+1);
+
+      for (Int_t i=1; i<projnow->GetXaxis()->GetNbins() && histogramsAreSame; i++) {
+        if( projnow->GetBinContent(i) != projnext->GetBinContent(i))
+          histogramsAreSame = kFALSE;
+      }
+      if(histogramsAreSame) {
+        statusVector[towerId] |= 256;
+        statusVector[nextTowerId] |= 256;
+      }
     }
   }
 
@@ -869,7 +802,7 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
   }
   if(nbinhits!=0) {
     averageNumberOfHitsPerChannel = sumofhits/nbinhits;
-    for(int i=1; i<mDetectorSize; i++) {
+    for(int i=1; i<mDetectorSize+1; i++) {
       if(hHotTower->GetBinContent(i) > 10*averageNumberOfHitsPerChannel) statusVector[i] |= 2;
       if(hHotTower->GetBinContent(i) < averageNumberOfHitsPerChannel/40) statusVector[i] |= 2+16;
       if(statusVector[i] == 0) {
@@ -880,7 +813,7 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
       }
     }
   } else {
-    for(int i=1; i<mDetectorSize; i++) {
+    for(int i=1; i<mDetectorSize+1; i++) {
       statusVector[i]=0;
     }
   }
@@ -993,6 +926,8 @@ CSMStatusUtils::getNumberOfChangedTowers(Int_t runnumber) {
   return changedTowers;
 }
 
+//write pedestals to ROOT db files and to text files
+
 void
 CSMStatusUtils::writePedestals(Int_t runNumber, TString directory,
                                 std::vector<Short_t>& statusVector,
@@ -1031,10 +966,10 @@ CSMStatusUtils::writePedestals(Int_t runNumber, TString directory,
   for (UInt_t i = 1; i < statusVector.size(); i++) {
     shortpedmean = TMath::Nint(100*pedestalmean[i]);
     shortpedwidth = TMath::Nint(100*pedestalwidth[i]);
-    t_ped.Status[i] = statusVector[i];
-    t_ped.AdcPedestal[i] = shortpedmean;
-    t_ped.AdcPedestalRMS[i] = shortpedwidth;
-    t_ped.ChiSquare[i]=pedestalchi[i];
+    t_ped.Status[i-1] = statusVector[i];  //indexed from 0
+    t_ped.AdcPedestal[i-1] = shortpedmean;  //indexed from 0
+    t_ped.AdcPedestalRMS[i-1] = shortpedwidth;  //indexed from 0
+    t_ped.ChiSquare[i-1]=pedestalchi[i];  //indexed from 0
     pedestalfile << setw(8) << i << 
                     setw(8) << setprecision(4) << shortpedmean << 
                     setw(8) << setprecision(3) << shortpedwidth <<

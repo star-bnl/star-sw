@@ -1,6 +1,6 @@
-void makeStatusPlots(TString dir="/star/u/relyea/star/bemc/abemc/ALLRUNS", 
+void makeStatusPlots(TString dir="/star/u/relyea/star/bemc/abemc/", 
                      TString filter=".cal.total.hist.root", 
-		     const TString plotDir="/star/u/relyea/star/bemc/abemc/ALLRUNS") {
+		     const TString plotDir="/star/u/relyea/star/bemc/abemc/") {
   //
   // load shared libs
     gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
