@@ -89,7 +89,9 @@
     lookup += STAR;
     lookup += "/.share/tables:";
     lookup += STAR;
-    lookup += "/StRoot/base";
+    lookup += "/StRoot/base:";
+    lookup += STAR;
+    lookup += "/StRoot/St_tpctest_Maker";
   }
 
   
@@ -138,7 +140,7 @@
   Int_t i=0;
 
   for (i=0;i<nclass;i++) 
-                   html.MakeClass(classes[i]);
+                  html.MakeClass(classes[i]);
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
 
@@ -147,6 +149,7 @@
   html.Convert("./../test/XDFtest.C","How to read/write XDF and ROOT files");
   html.Convert("./par_anal.cxx","How to create several histrograms from XDF file");
   html.Convert("./ana.C","Multiple DST files analysis");
+  html.Convert("./dedx.C","Multiple DST files analysis: de/dx vs P ");
   html.Convert("./../test/test10.C","How to use the dataset iterator class");
   html.Convert("./../test/test9.C","How to read the event from XDF file and build some histograms with ROOT");
   html.Convert("./makedoc.C","How to create the HTML documentation");
