@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.cxx,v 2.3 2002/02/20 03:12:15 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.cxx,v 2.4 2003/01/23 23:49:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.cxx,v $
+ * Revision 2.4  2003/01/23 23:49:32  ullrich
+ * Feeding now tables to BBC instance as well.
+ *
  * Revision 2.3  2002/02/20 03:12:15  ullrich
  * Added EMC trigger.
  *
@@ -26,14 +29,14 @@
 #include "StTriggerDetectorCollection.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.3 2002/02/20 03:12:15 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.4 2003/01/23 23:49:32 ullrich Exp $";
 
 ClassImp(StTriggerDetectorCollection)
 
 StTriggerDetectorCollection::StTriggerDetectorCollection() {/* noop */}
 
 StTriggerDetectorCollection::StTriggerDetectorCollection(const dst_TrgDet_st& t) :
-    mCtb(t), mMwc(t), mVpd(t), mZdc(t), mEmc(t) {/* noop */}
+    mCtb(t), mMwc(t), mVpd(t), mZdc(t), mEmc(t), mBbc(t) {/* noop */}
 
 StTriggerDetectorCollection::~StTriggerDetectorCollection() {/* noop */}
 
