@@ -2,6 +2,7 @@
 #include "StDetectorDbTriggerID.h"
 #include "tables/St_triggerID_Table.h"
 #include "tables/St_trigPrescales_Table.h"
+#include "tables/St_L0TriggerInfo_Table.h"
 #include "tables/St_defaultTrgLvl_Table.h"
 #include "TUnixTime.h"
 
@@ -26,6 +27,8 @@ StDetectorDbTriggerID* StDetectorDbTriggerID::instance()
 	sInstance->mTriggerID = (triggerID_st*)(sInstance->mIDTable->GetArray());
     if(sInstance->mSTable)
 	sInstance->mTrigPrescales = (trigPrescales_st*)(sInstance->mSTable->GetArray());
+    if(sInstance->mL0Table)
+	sInstance->mL0TriggerInfo = (L0TriggerInfo_st*)(sInstance->mL0Table->GetArray());
     if(sInstance->mDefTrgLvlTable)
 	sInstance->mDefaultTriggerLevel = (defaultTrgLvl_st*)(sInstance->mDefTrgLvlTable->GetArray());
     
@@ -57,6 +60,14 @@ void StDetectorDbTriggerID::update(StMaker* maker){
 		mTrigPrescales = (trigPrescales_st*)(mSTable->GetArray());
             }
 
+	    // TTable of L0TriggerInfo	
+	    mL0Table = dynamic_cast<TTable*>(dataSet->Find("L0TriggerInfo"));
+	    
+	    if(mL0Table){
+		mL0NumRows = mL0Table->GetNRows();
+		mL0TriggerInfo = (L0TriggerInfo_st*)(mL0Table->GetArray());
+            }
+
 	}
 
 	dataSet = 0;
@@ -84,6 +95,10 @@ StDetectorDbTriggerID::StDetectorDbTriggerID(){
     mTrigPrescales = 0;
     mSNumRows = 0;
     mSTable = 0;
+
+    mL0TriggerInfo = 0;
+    mL0NumRows = 0;
+    mL0Table = 0;
 
     mDefaultTriggerLevel = 0;
     mDefTrgLvlTable = 0;
@@ -214,9 +229,78 @@ float StDetectorDbTriggerID::getPs(unsigned int entry){
     return value;
 };
 
-/// Will return kDbTriggerBadID if it fails finding it in the database
+/// L0TriggerInfo members
+/// Returns Number of Entries in database
+unsigned int StDetectorDbTriggerID::getL0NumRows(){
+    return mL0NumRows;
+};
+
+/// Returns L0 Run Number
+int StDetectorDbTriggerID::getL0RunNumber(){
+    int value = 0;
+    if(mL0TriggerInfo)
+	value = mL0TriggerInfo[0].runNumber;
+    return value;
+};
+
+/// Returns daqTriggerId 
+int StDetectorDbTriggerID::getL0DaqTrgId(unsigned int entry){
+    int value = 0;
+    if(mL0TriggerInfo && entry < this->getL0NumRows() )
+	value = mL0TriggerInfo[entry].daqTriggerId;
+    return value;
+};
+
+/// Returns offlineTriggerId 
+int StDetectorDbTriggerID::getL0OfflineTrgId(unsigned int entry){
+    int value = 0;
+    if(mL0TriggerInfo && entry < this->getL0NumRows() )
+	value = mL0TriggerInfo[entry].offlineTriggerId;
+    return value;
+};
+
+/// Returns psL0 
+int StDetectorDbTriggerID::getPsL0(unsigned int entry){
+    int value = 0;
+    if(mL0TriggerInfo && entry < this->getL0NumRows() )
+	value = mL0TriggerInfo[entry].psL0;
+    return value;
+};
+
+/// Returns name 
+char* StDetectorDbTriggerID::getName(unsigned int entry){
+    char* value = 0;
+    if(mL0TriggerInfo && entry < this->getL0NumRows() )
+	value = mL0TriggerInfo[entry].name;
+    return value;
+};
+
+/// Returns detectorLiveOnBits 
+unsigned int StDetectorDbTriggerID::getDetectorLiveOnBits(unsigned int entry){
+    unsigned int value = 0;
+    if(mL0TriggerInfo && entry < this->getL0NumRows() )
+	value = mL0TriggerInfo[entry].detectorLiveOnBits;
+    return value;
+};
+
+/// Returns detectorLiveOffBits 
+unsigned int StDetectorDbTriggerID::getDetectorLiveOffBits(unsigned int entry){
+    unsigned int value = 0;
+    if(mL0TriggerInfo && entry < this->getL0NumRows() )
+	value = mL0TriggerInfo[entry].detectorLiveOffBits;
+    return value;
+};
+
+/// Returns detectorRequest 
+unsigned int StDetectorDbTriggerID::getDetectorRequest(unsigned int entry){
+    unsigned int value = 0;
+    if(mL0TriggerInfo && entry < this->getL0NumRows() )
+	value = mL0TriggerInfo[entry].detectorRequest;
+    return value;
+};
+
 unsigned int StDetectorDbTriggerID::getDefaultTriggerLevel(){
-    unsigned int value = kDbTriggerBadID;
+    unsigned int value = 999;
     if(mDefaultTriggerLevel)
 	value = mDefaultTriggerLevel->level;
     return value;
@@ -224,7 +308,7 @@ unsigned int StDetectorDbTriggerID::getDefaultTriggerLevel(){
 
 /// outputs to ostream the entire class
 ostream& operator<<(ostream& os, StDetectorDbTriggerID& v){
-    os << "Run shown in triggerID: " << v.getIDRunNumber() << endl;
+    os << endl << "Run shown in triggerID: " << v.getIDRunNumber() << endl;
     
     for(unsigned int i = 0; i < v.getIDNumRows(); i++){
 	os << "idx_trg: " << v.getIdxTrg(i) 
@@ -235,13 +319,25 @@ ostream& operator<<(ostream& os, StDetectorDbTriggerID& v){
 	   << "  threashVersion: " << v.getThreashVersion(i)  
 	   << "  psVersion: " << v.getPsVersion(i) << endl;
     }
-    os << "Run shown in trigPreScales: " << v.getSRunNumber() << endl;
+    os << endl << "Run shown in trigPreScales: " << v.getSRunNumber() << endl;
     
     for(unsigned int i = 0; i < v.getSNumRows(); i++){
 	os << "idxTrigger: " << v.getIdxTrigger(i) 
 	   << "  idxLevel: " << v.getIdxLevel(i)  
 	   << "  id (algorithm) : " << v.getId(i)  
 	   << "  prescale : " << v.getPs(i) << endl; 
+    }
+    
+    os << endl<<  "Run shown in L0TriggerInfo: " << v.getL0RunNumber() << endl;
+
+    for(unsigned int i = 0; i < v.getL0NumRows(); i++){
+	os << "daqTriggerId: " << v.getL0DaqTrgId(i) 
+	   << " OfflineTriggerId: " << v.getL0OfflineTrgId(i)   
+	   << " psL0: " << v.getPsL0(i)  
+	   << " name : " << v.getName(i) << endl 
+	   << "detectorLiveOnBits: " << v.getDetectorLiveOnBits(i)  
+	   << " detectorLiveOffBits: " << v.getDetectorLiveOffBits(i) 
+	   << " detectorRequest: " << v.getDetectorRequest(i)  << endl; 
     }
 
     os << "Default Trigger Level: " << v.getDefaultTriggerLevel() << endl;

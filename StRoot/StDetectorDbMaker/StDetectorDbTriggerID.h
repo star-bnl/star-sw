@@ -5,6 +5,7 @@
 
 struct triggerID_st;
 struct trigPrescales_st;
+struct L0TriggerInfo_st;
 struct defaultTrgLvl_st;
 
 #ifdef sun
@@ -14,9 +15,6 @@ struct defaultTrgLvl_st;
 #ifndef sun
 class ostream;
 #endif
-
-enum { kDbTriggerBadID = 999 };
-
 
 class StDetectorDbTriggerID{
 public:
@@ -32,11 +30,22 @@ public:
     unsigned int               getPsVersion(unsigned int entry = 0);
 
     int                        getSRunNumber();
-    unsigned int              getSNumRows();
+    unsigned int               getSNumRows();
     int                        getIdxTrigger(unsigned int entry = 0);
     int                        getIdxLevel(unsigned int entry = 0);
     int                        getId(unsigned int entry = 0);
     float                      getPs(unsigned int entry = 0);
+
+
+    int                        getL0RunNumber();
+    unsigned int               getL0NumRows();
+    int                        getL0DaqTrgId(unsigned int entry = 0);
+    int                        getL0OfflineTrgId(unsigned int entry = 0);
+    int                        getPsL0(unsigned int entry = 0);
+    char*                      getName(unsigned int entry = 0);
+    unsigned int               getDetectorLiveOnBits(unsigned int entry = 0);
+    unsigned int               getDetectorLiveOffBits(unsigned int entry = 0);
+    unsigned int               getDetectorRequest(unsigned int entry = 0);
 
     unsigned int              getDefaultTriggerLevel();
     
@@ -60,7 +69,12 @@ protected:
     TTable* mSTable; // points to table, need to re-intilize mTrigPrescales every event
     unsigned int mSNumRows;
 
-// members of trigPrescales
+// members of L0TriggerInfo
+    L0TriggerInfo_st* mL0TriggerInfo; // points to L0TriggerInfo struct
+    TTable* mL0Table; // points to table, need to re-intilize mL0TriggerInfo every event
+    unsigned int mL0NumRows;
+
+// members of defaultTrgLvl 
     defaultTrgLvl_st* mDefaultTriggerLevel; // points to prescales struct
     TTable* mDefTrgLvlTable; // points to table, need to re-intilize mDefaultTriggerLevel every event
     
