@@ -75,7 +75,7 @@ If LL>1
                                               {vpdd,calb,ecal}=off;    Nsi=0; }
   on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch, no svt; 
                                               {vpdd,ecal}=off; ems=on; Nsi=0; }
-  on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;      {vpdd,ecal};   Nsi=0; }
+  on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;  {vpdd,ecal}=off;   Nsi=0; }
   on YEAR_2A    { asymptotic STAR;                                   tof=off; }
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
