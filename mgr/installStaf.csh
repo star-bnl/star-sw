@@ -3,9 +3,6 @@
 
 # define input area where directories asu,sdd,... are
 set INP = $cwd/asps/staf
-if ( ! -d $INP) then
-  set INP = /afs/rhic/common/$STAR_LEVEL/asps/staf
-endif
 echo INP_DIR = $INP
 if ( ! -d $INP) then
   echo *** $INP does not exist ***
@@ -56,9 +53,9 @@ set OffPlace = `echo $OUT | grep /afs/rhic/common/`
 if ( ${#OffPlace} ) then
   echo '*** CLEAN UP ***'
   
-rm -rf ${OUT}/.@sys/dep
-rm -rf ${OUT}/.@sys/obj
-rm -rf ${OUT}/tmp
+#rm -rf ${OUT}/.@sys/dep
+#rm -rf ${OUT}/.@sys/obj
+#rm -rf ${OUT}/tmp
   echo '*** DONE ***'
 
 endif

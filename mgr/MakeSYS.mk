@@ -1,4 +1,7 @@
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.17  1998/06/21 19:36:19  fisyak
+#  Clean up for SL98c_1
+#
 #  Revision 1.16  1998/06/12 15:45:02  fisyak
 #  LDFLAGS for Linux
 #
@@ -29,7 +32,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/06/12 15:45:02 $ 
+#             Last modification $Date: 1998/06/21 19:36:19 $ 
 #. default setings
 
 RM := rm -f
@@ -193,7 +196,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
 
 #    case "hp":
 #  ====================
-  OSFID :=hpx hp HP-UX HPUX CERNLIB_HPUX CERNLIB_UNIX
+  OSFID :=hpx hp HPUX CERNLIB_HPUX CERNLIB_UNIX
   ifdef GCC
     CXXFLAGS  := -fPIC   -I/usr/include/X11R5 
     CFLAGS   := -fPIC   -I/usr/include/X11R5 
@@ -246,7 +249,7 @@ ifneq (,$(findstring $(STAF_ARCH),sgi_52 sgi_53))
   CXXFLAGS  :=   -signed  -fullwarn
   ARFLAGS   :=   slrvu
   LD        :=   $(CXX)
-  LDFLAGS   :=
+  LDFLAGS   :=  -32 -shared
   SO        :=   $(CXX)
   SOFLAGS   :=  -shared
   CLIBS     := -lsun  -lm -lc -lPW -lXext

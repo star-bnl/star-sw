@@ -109,7 +109,7 @@ ifdef PKG
 endif
 #
 ##	Temporary remove of some ASPs
-ifeq ($(STAF_ARCH),i386_linux2)
+ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50 hp_ux102))
   ASPS := $(filter-out tbr,$(ASPS))
 endif
 

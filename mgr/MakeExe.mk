@@ -30,13 +30,11 @@ endif
 CPPFLAGS += -DSTAF -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON 
 GEA := $(FOR72) $(FFLAGS)   $(CPPFLAGS)  
 FOR := $(FOR72) $(FFLAGS)   $(CPPFLAGS)  
-GST := $(FOR72) $(FFLAGS)   $(LDFLAGS)
-GSC := $(CXX)   $(CXXFLAGS) $(LDFLAGS)
+GST := $(FOR72) $(FFLAGS)   $(EXEFLAGS)
+GSC := $(CXX)   $(CXXFLAGS) $(EXEFLAGS)
 CPP := $(CXX)   $(CXXFLAGS) $(CPPFLAGS)  
 CC  := $(CC)    $(CFLAGS)   $(CPPFLAGS)   
 FSL := $(FOR72) $(FFLAGS)   $(CPPFLAGS)   $(SOFLAGS)
-LIBSL :=
-LIB := $(FLIBS) $(CLIBS)
 
 CMDS  := atlsim starsim gstar staf staf+ staf++ Staf
 
@@ -78,29 +76,29 @@ ifdef STAF
 DOEXE  += -DSTAF $(INCL)
 endif
 
-EXE_LIBS :=
+ALL_EXE_LIBS :=
 ifdef GCALOR
-EXE_LIBS +=     -L/afs/cern.ch/atlas/offline/@sys/pro/lib -lgcalor 
+ALL_EXE_LIBS +=     -L/afs/cern.ch/atlas/offline/@sys/pro/lib -lgcalor 
 endif
 
 ifdef STAF
- EXE_LIBS +=    -L$(STAF_SYS_LIB) -ltdm -lspx -lsoc -lasu -ltop -ltnt -lami -ldio -ldui -ldsl -ldsu 
+ ALL_EXE_LIBS +=    -L$(STAF_SYS_LIB) -lmsg -ltdm -lspx -lsoc -lasu -ltop -ltnt -lami -ldio -ldui -ldsl -ldsu -ltls 
 endif
 
-EXE_LIBS +=	`cernlib geant321 pawlib
+ALL_EXE_LIBS +=	`cernlib geant321 pawlib
 
 ifdef  MOTIF
-  EXE_LIBS += graflib/Motif
+  ALL_EXE_LIBS += graflib/Motif
 else
-  EXE_LIBS += graflib/X11
+  ALL_EXE_LIBS += graflib/X11
 endif
-EXE_LIBS += packlib mathlib kernlib`
+ALL_EXE_LIBS += packlib mathlib kernlib`
 
-EXE_LIBS += $(FLIBS) $(CLIBS)	
+ALL_EXE_LIBS += $(FLIBS) $(CLIBS)	
 
 #.SILENT:
 .SUFFIXES:
-.SUFFIXES:  .o .g .f .c .cc .cdf .rz
+.SUFFIXES:  .o .g .f .c .cc .cdf  .F
 #
 #
 $(OBJ_DIR)/%.o :%.cdf
@@ -108,15 +106,14 @@ $(OBJ_DIR)/%.o :%.cdf
 	$(FOR) -c $(SRG_DIR)/$(STEM).f -o  $(OBJ_DIR)/$(STEM).o
 	$(RM)    $(SRG_DIR)/$(STEM).f
 
+.PRECIOUS : $(SRG_DIR)/%.f
 $(SRG_DIR)/%.f : %.g 
 	cd $(GST_DIR); \
 	geant3    $(1ST_DEPS) -o $(SRG_DIR)/$(STEM).f
-#	$(FOR) -c $(SRG_DIR)/$(STEM).f -o  $(OBJ_DIR)/$(STEM).o
-#	$(RM)    $(SRG_DIR)/$(STEM).f
-#
-$(OBJ_DIR)/%.o : %.f
-	$(FOR) -c $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o
+
 $(OBJ_DIR)/%.o : $(SRG_DIR)/%.f
+	$(FOR) -c $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o
+$(OBJ_DIR)/%.o : %.f
 	$(FOR) -c $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o : %.F
 	$(FOR) -c $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o
@@ -129,7 +126,7 @@ $(OBJ_DIR)/%.o : %.cc
 geant3: geant3.f; $(GEA) -o geant3 geant3.f `cernlib kernlib`
 #
 $(CMDS): $(FILES_O)
-	$(DOEXE)  $(EXE_LIBS)   
+	$(DOEXE)  $(ALL_EXE_LIBS)   
 #
 ifneq (,$(findstring $(STAF_ARCH),rs_aix31 rs_aix32 rs_aix41))
 	echo '#!'$(PWD)'/$@'  > import.map

@@ -1,6 +1,6 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.1  1998/06/11 12:39:22  fisyak
-#  New STAR/STAF makefiles
+#  Revision 1.2  1998/06/21 19:36:16  fisyak
+#  Clean up for SL98c_1
 #
 #  Revision 1.10  1998/05/19 16:36:38  perev
 #  Makefiles
@@ -23,7 +23,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/06/11 12:39:22 $ 
+#             Last modification $Date: 1998/06/21 19:36:16 $ 
 #. default setings
 
 RM := rm -f
@@ -36,6 +36,10 @@ MKDIR := mkdir -p
 COUT := -o 
 LOUT := -o 
 
+  O     :=o
+  A     :=a
+  Cxx   :=cxx
+  So    :=so
 
 CERN_LEVEL :=pro
 MOTIF :=YES
@@ -50,13 +54,16 @@ ARFLAGS  := rvu
 LD 	 := $(CXX)
 SO	 := $(CC)
 SOFLAGS	 := 
+LDFLAGS	 := 
+EXEFLAGS := NONE
 So       :=so
 O        :=o
 A        :=a
 Cxx   :=cc
 CLIBS    :=
 FLIBS    :=
-CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH)
+
+CPPFLAGS := $(UNAMES) $(STAF_ARCH) 
 OSFID    :=
 YACC     := yacc
 YACCLIB  := -ly
@@ -126,7 +133,7 @@ ifneq (,$(findstring $(STAF_ARCH),rs_aix31 rs_aix32 rs_aix41))
   FEXTEND := -e
 endif 
 
-ifneq (,$(findstring $(STAF_ARCH),i386_linux2))
+ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
 #    case linux
 #  ====================
   MOTIF :=
@@ -138,12 +145,13 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2))
   CXXFLAGS := -g -fPIC
   CFLAGS   := -g -fPIC
   CPPFLAGS += f2cFortran
-  LDFLAGS  := 
-  SOFLAGS  := -shared 
+  LDFLAGS  := -Wl,-Bstatic
+  EXEFLAGS := -Wl,-Bdynamic  
+  SOFLAGS  := -shared  
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
-  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lcrypt -lg++ -lpgc -lm -ldl -rdynamic
+  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
   FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
-  FFLAGS   := -DPGI -w 
+  FFLAGS   := -DPGI  -g
   FEXTEND  := -Mextend
   YACC     := bison -y
   YACCLIB  := 
@@ -184,7 +192,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
 
 #    case "hp":
 #  ====================
-  OSFID :=hpx hp HP-UX HPUX CERNLIB_HPUX CERNLIB_UNIX
+  OSFID := HPUX CERNLIB_HPUX CERNLIB_UNIX
   ifdef GCC
     CXXFLAGS  := -fPIC   -I/usr/include/X11R5 
     CFLAGS   := -fPIC   -I/usr/include/X11R5 
@@ -217,7 +225,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
     SOFLAGS   := -b +a1 -z 
     CLIBS   :=   -L/usr/lib/X11R5 -lXm -lXt -lX11 -lm -lPW -ldld
   endif
-  SOEXT := sl
+  So := sl
   FC        :=fort77
   FLIBS     := /opt/fortran/lib/libU77.a 
   FFLAGS    := +DA1.0 +ppu +Z  +U77
@@ -267,7 +275,7 @@ endif
 ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
 
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
-  OSFID := sun SUN SOLARIS solaris Solaris CERNLIB_UNIX CERNLIB_SUN
+  OSFID :=  SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SUN
   CC :=  /opt/SUNWspro/bin/cc
   CXX := /opt/SUNWspro/bin/CC
   LD  := $(CXX)
@@ -279,6 +287,7 @@ ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
   CFLAGS   :=  -g  -KPIC 
   CXXFLAGS :=  -g  -KPIC 
   LDFLAGS  :=  -g  -Bstatic
+  EXEFLAGS :=  -g  -Bdynamic
   SOFLAGS  :=   -G
   CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   FLIBS    := -lM77 -lF77 -lsunmath
@@ -287,7 +296,7 @@ endif
 
 ifneq (,$(findstring $(STAF_ARCH),sunx86_55))
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
-  OSFID := sun SUN SOLARIS SOLARISPC CERNLIB_UNIX CERNLIB_SUN CERNLIB_FQNEEDCV 
+  OSFID :=  SUN SOLARIS SOLARISPC CERNLIB_UNIX CERNLIB_SUN CERNLIB_FQNEEDCV 
   CC       :=  /opt/SUNWspro/bin/cc
   CXX      := /opt/SUNWspro/bin/CC
   SO       := $(CXX)
@@ -297,21 +306,21 @@ ifneq (,$(findstring $(STAF_ARCH),sunx86_55))
   FEXTEND  := -e
   CFLAGS   :=  -g -KPIC +w2 -I/usr/dt/share/include -I/usr/openwin/share/include
   CXXFLAGS :=  $(CFLAGS)
-  LDFLAGS  :=  -g  -z muldefs
+  LDFLAGS  :=  -g  -z muldefs -Bstatic
+  EXEFLAGS :=  -g  -z muldefs -Bdynamic
   SOFLAGS  :=  -g  -G
   CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   FLIBS    := -lM77 -lF77 -lsunmath
 
 endif
 
-CPPFLAGS := $(CPPFLAGS) $(OSFID)
+CPPFLAGS := $(filter-out HP-UX,$(CPPFLAGS) $(OSFID))
 CPPFLAGS := $(sort $(addprefix -D,$(CPPFLAGS)))
 
 FOR72 := $(FC)
 FC  := $(FC) $(FEXTEND)
 
-LD_LIBS := $(CLIBS) $(FLIBS)
-
-
-
+ifeq ($(EXEFLAGS),NONE)
+  EXEFLAGS := $(LDFLAGS)
+endif
 
