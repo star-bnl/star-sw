@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.30 2001/06/26 18:07:38 jcs Exp $
+ * $Id: EventReader.cxx,v 1.31 2001/07/10 18:12:47 jeromel Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,11 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.31  2001/07/10 18:12:47  jeromel
+ * Changes commited for Frank Geurts (TOF) after approval from Herb Ward
+ * on Tue, 10 Jul 2001 11:19:48 and review by Victor.
+ * Changes implements TOF DAQ Reader.
+ *
  * Revision 1.30  2001/06/26 18:07:38  jcs
  * remove temporary code to skip corruption check for FTPC banks
  *
@@ -775,6 +780,7 @@ void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
   if(!strcmp(xx,    "FTPP")) { *beg=1; *end=48; }
   if(!strcmp(xx, "FTPSECP")) { *beg=1; *end= 24; }
   if(!strcmp(xx,  "FTPRBP")) { *beg=1; *end=6; }
+  if(!strcmp(xx,    "TOFP")) { *beg=1; *end=8; }
   (*beg)--; (*end)--;
   if((*beg)<0||(*end)<0) {
     printf("Please add code to WhereAreThePointers for '%s'.\n",xx);

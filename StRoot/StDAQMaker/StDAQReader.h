@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.16 2001/06/29 17:08:24 perev Exp $
+ * $Id: StDAQReader.h,v 1.17 2001/07/10 18:13:04 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.17  2001/07/10 18:13:04  jeromel
+ * Changes commited for Frank Geurts (TOF) after approval from Herb Ward
+ * on Tue, 10 Jul 2001 11:19:48 and review by Victor.
+ * Changes implements TOF DAQ Reader.
+ *
  * Revision 1.16  2001/06/29 17:08:24  perev
  * Hide DaqLib includes from CINT
  *
@@ -71,8 +76,10 @@ class StSVTReader ;
 
 #include "StDaqLib/RICH/RICH_Reader.hh"
 #include "StDaqLib/L3/L3_Reader.hh"
+#include "StDaqLib/TOF/TOF_Reader.hh"
 typedef RICH_Reader StRICHReader;
 typedef L3_Reader   StL3Reader;
+typedef TOF_Reader  StTOFReader;
 
 #endif /*__CINT__*/
 
@@ -80,6 +87,7 @@ typedef L3_Reader   StL3Reader;
 
 class StRICHReader;
 class StL3Reader;
+class StTOFReader;
 
 #endif /*__CINT__*/
 
@@ -125,25 +133,27 @@ public:
   StTRGReader  *getTRGReader ();
   StSVTReader  *getSVTReader ();
   StL3Reader   *getL3Reader  ();
+  StTOFReader  *getTOFReader ();
   virtual void printEventInfo();
   virtual int  getEventSize() const;
   virtual EventReader *getEventReader() const {return fEventReader;}  
 
 protected:
-int fFd;	//File descriptor
-int fVerbose;
-EventReader  *fEventReader;  
-StTPCReader  *fTPCReader;  
-StFTPCReader *fFTPCReader;  
-StRICHReader *fRICHReader;
-StTRGReader  *fTRGReader;
-StSVTReader  *fSVTReader;
-StL3Reader   *fL3Reader;
-long fOffset;
-DAQEventInfo *fEventInfo;
-char *fFile;
-char fTPCVersion[12];
-char fFTPCVersion[12];
+  int fFd;	//File descriptor
+  int fVerbose;
+  EventReader  *fEventReader;  
+  StTPCReader  *fTPCReader;  
+  StFTPCReader *fFTPCReader;  
+  StRICHReader *fRICHReader;
+  StTRGReader  *fTRGReader;
+  StSVTReader  *fSVTReader;
+  StL3Reader   *fL3Reader;
+  StTOFReader  *fTOFReader;
+  long fOffset;
+  DAQEventInfo *fEventInfo;
+  char *fFile;
+  char fTPCVersion[12];
+  char fFTPCVersion[12];
 
 };
 #ifndef __CINT__
