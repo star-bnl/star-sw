@@ -1,5 +1,8 @@
-// $Id: bfcz.C,v 1.12 1999/04/18 23:45:05 fisyak Exp $
+// $Id: bfcz.C,v 1.13 1999/04/19 13:43:20 fisyak Exp $
 // $Log: bfcz.C,v $
+// Revision 1.13  1999/04/19 13:43:20  fisyak
+// Take out L3
+//
 // Revision 1.12  1999/04/18 23:45:05  fisyak
 // New schema
 //
@@ -41,7 +44,7 @@
 #define SVT
 #define EMC
 #define CTF
-#define L3
+//#define L3
 #define GLOBAL
 #endif  /* new data only FZIN or GTRACK */
 //#define XDFOUT
@@ -127,7 +130,7 @@ void Load(){
 #endif /* GLOBAL */
 }
 
-void bfc_tfs (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
+void bfcz (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
 {
   Int_t NoEvents = Nevents;
   // define input file

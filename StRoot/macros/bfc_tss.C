@@ -1,5 +1,8 @@
-// $Id: bfc_tss.C,v 1.17 1999/04/18 23:45:06 fisyak Exp $
+// $Id: bfc_tss.C,v 1.18 1999/04/19 13:43:20 fisyak Exp $
 // $Log: bfc_tss.C,v $
+// Revision 1.18  1999/04/19 13:43:20  fisyak
+// Take out L3
+//
 // Revision 1.17  1999/04/18 23:45:06  fisyak
 // New schema
 //
@@ -41,7 +44,7 @@
 #define SVT
 #define EMC
 #define CTF
-#define L3
+//#define L3
 #define GLOBAL
 #endif  /* new data only FZIN or GTRACK */
 //#define XDFOUT
