@@ -5,7 +5,7 @@
 *	description: *	//:	Table which contains BeamCenter information for zdcsmd ADCs
 */
 
-struct zdcsmdBeamCenter {
+struct zdcsmdBeamCntr {
 
 	long RunID;	/*  runID */
 	float ZdcsmdBeamCenter[4];	/* BeamCenter of zdcsmd */
