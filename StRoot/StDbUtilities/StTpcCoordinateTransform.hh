@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.2 2000/02/02 23:01:38 calderon Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.3 2000/02/10 01:19:37 calderon Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,14 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.3  2000/02/10 01:19:37  calderon
+ * Tpc Local Sector Coordinate definitions where
+ * y is up,
+ * z points toward central membrane,
+ * x is such that everything is righthanded
+ * There are still some parameters that need to be taken from
+ * database.
+ *
  * Revision 1.2  2000/02/02 23:01:38  calderon
  * Changes for CC5
  * Tests withs StTpcDb still going.
@@ -166,6 +174,7 @@ private:
     double            mTimeBinWidth;
     double            mInnerSectorzOffset; //These are in temporarily,
     double            mOuterSectorzOffset; //until StTpcDb has them.
+    double            mDriftDistance; //ditto
 };
 
 #endif
