@@ -13,5 +13,5 @@ DEBUG := TRUE
 #MOTIF := TRUE
 #
 # Specify which CERN libraries against which to link, or take default.
-#CERNLIBS := pawlib packlib mathlib kernlib
+#CERNLIBS := pawlib graflib grafX11 packlib mathlib kernlib
 #

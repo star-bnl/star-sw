@@ -16,5 +16,5 @@ DEBUG := TRUE
 # Specify which CERN libraries against which to link, or take default.
 #CERNLIBS := pawlib packlib mathlib kernlib
 #
-INSTALL_BIN_FILES := stafGen
+INSTALL_BIN_FILES := stafGen pamiGen
 #

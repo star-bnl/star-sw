@@ -18,11 +18,11 @@ foreach p ($pams)
 	echo '#include "'$p'.h"'
 end
 echo 'extern "C" int'" ${pkg}_init(void), ${pkg}_start(void), ${pkg}_stop(void);"
-echo "int ${pkg}_init() { return TRUE; }"
+echo "int ${pkg}_init() { return 1; }"
 echo "int ${pkg}_start() {"
 foreach p ($pams)
 	echo "	${p}_load_ami(ami);"
 end
-echo 'return TRUE; }'
-echo "int ${pkg}_stop() { return TRUE; }"
+echo 'return 1; }'
+echo "int ${pkg}_stop() { return 1; }"
 #
