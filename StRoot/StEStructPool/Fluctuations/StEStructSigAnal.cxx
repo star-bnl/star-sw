@@ -45,16 +45,26 @@ void StEStructSigAnal::closeFile() {
     mInFile = 0;
 }
 //--------------------------------------------------------------------------
-void StEStructSigAnal::normalizeCounters() {
+void StEStructSigAnal::getLimits() {
+    // get number of eta and phi bins from histogram called "nBins".
     TH2F *hnBins   = (TH2F *) gDirectory->Get("nBins");
     mNPhiBins = hnBins->GetNbinsX();
     mNEtaBins = hnBins->GetNbinsY();
-    float nFiles = hnBins->GetBinContent(mNPhiBins,mNEtaBins);
-    hnBins->Scale( 1.0/nFiles );
+    // get number of files. This assumes one bin for largest scale.
+    mNFiles = hnBins->GetBinContent(mNPhiBins,mNEtaBins);
+    // get minimum and maximum eta values from histogram called "EtaLimits".
+    TH1F *hEtaLimits   = (TH1F *) gDirectory->Get("EtaLimits");
+    mEtaMin = hEtaLimits->GetBinContent(1) / mNFiles;
+    mEtaMax = hEtaLimits->GetBinContent(2) / mNFiles;
+}
+void StEStructSigAnal::normalizeCounters() {
+    getLimits();
+    TH2F *hnBins   = (TH2F *) gDirectory->Get("nBins");
+    hnBins->Scale( 1.0/mNFiles );
     TH2F *hoffset = (TH2F *) gDirectory->Get("offset");
-    hoffset->Scale( 1.0/nFiles );
+    hoffset->Scale( 1.0/mNFiles );
     TH2F *hfUnique = (TH2F *) gDirectory->Get("fUnique");
-    hfUnique->Scale( 1.0/nFiles );
+    hfUnique->Scale( 1.0/mNFiles );
 }
 //--------------------------------------------------------------------------
 void StEStructSigAnal::fillHistograms() {
@@ -116,13 +126,14 @@ cout << "Found " << mnPtCents << " Pt centrality bins. " << endl;
     char key[1024];
     for (int i=0;i<mnCents;i++) {
         sprintf(key,"%i",i);
-        mSigma[i] = new StEStructSigmas(key,mNPhiBins,mNEtaBins);
+        mSigma[i] = new StEStructSigmas(key,mNPhiBins,mNEtaBins,mEtaMin,mEtaMax);
     }
     int index = mnCents;
     for (int i=0;i<mnPtCents;i++) {
         for (int j=0;j<mnPts;j++) {
             sprintf(key,"%i_%i",i,j);
-            mSigma[index] = new StEStructSigmas(key,mNPhiBins,mNEtaBins,mpreFix);
+            mSigma[index] = new StEStructSigmas(key,mNPhiBins,mNEtaBins,
+                                                    mEtaMin,mEtaMax,mpreFix);
             index++;
         }
     }

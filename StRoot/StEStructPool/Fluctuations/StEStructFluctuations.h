@@ -18,9 +18,6 @@ class StEStructEvent;
 class StEStructTrack;
 class StTimer;
 
-const float ETAMIN = -1.0;
-const float ETAMAX = +1.0;
-
 class StEStructFluct {
 
  protected:
@@ -32,38 +29,28 @@ class StEStructFluct {
   // accumulate into arrays. Copy to histograms for
   // writing at the end.
     double *TotEvents[5];
-    double *NSum[2];
+    double *NSum[16];
     double *NDiff[2];
-    double *NPlus[2];
-    double *NMinus[2];
-    double *NPlusMinus;
-    double *PSum[5];
-    double *PDiff[8];
-    double *PPlus[5];
-    double *PMinus[5];
-    double *PPlusMinus[8];
-    double *PNSum[4];
-    double *PNDiff[4];
-    double *PNPlus[4];
-    double *PNMinus[4];
-    double *PNPlusMinus[8];
+    double *NPlus[5];
+    double *NMinus[5];
+    double *NPlusMinus[8];
+    double *PSum[16];
+    double *PDiff[16];
+    double *PPlus[11];
+    double *PMinus[11];
+    double *PPlusMinus[17];
 
     TH1D *hTotEvents[5];
-    TH1D *hNSum[2];
+    TH1D *hNSum[16];
     TH1D *hNDiff[2];
-    TH1D *hNPlus[2];
-    TH1D *hNMinus[2];
-    TH1D *hNPlusMinus;
-    TH1D *hPSum[5];
-    TH1D *hPDiff[8];
-    TH1D *hPPlus[5];
-    TH1D *hPMinus[5];
-    TH1D *hPPlusMinus[8];
-    TH1D *hPNSum[4];
-    TH1D *hPNDiff[4];
-    TH1D *hPNPlus[4];
-    TH1D *hPNMinus[4];
-    TH1D *hPNPlusMinus[8];
+    TH1D *hNPlus[5];
+    TH1D *hNMinus[5];
+    TH1D *hNPlusMinus[8];
+    TH1D *hPSum[16];
+    TH1D *hPDiff[16];
+    TH1D *hPPlus[11];
+    TH1D *hPMinus[11];
+    TH1D *hPPlusMinus[17];
 
 
     TH2F *occNSum;
@@ -78,6 +65,13 @@ class StEStructFluct {
     TH2F *occPNPlus;
     TH2F *occPNMinus;
     TH2F *occPNDiff;
+
+    TH2F *EtaZNTracks;
+    TH2F *EtaZNFitPoints;
+    TH2F *EtaZNMaxPoints;
+    TH2F *EtaZNFoundPoints;
+    TH2F *InnerRow;
+    TH2F *OuterRow;
 
     TH1F *multNSum;
     TH1F *multNPlus;
@@ -95,14 +89,15 @@ class StEStructFluct {
   // belong to this object. Important when reading histograms produced
   // by this object.
     char *mKey;
-    int mTotBins;
+    int   mTotBins;
+    float mEtaMin, mEtaMax;
 
     void  initArrays();
     void  deleteArrays();
     void  initHistograms();
     void  deleteHistograms();
 
-    StEStructFluct( char *key, int totBins );
+    StEStructFluct( char *key, int totBins, float EtaMin, float EtaMax );
     virtual ~StEStructFluct();
 
 
@@ -123,6 +118,9 @@ class StEStructFluct {
                           double pPlus, double pMinus );
     void fillMults( double nPlus, double nMinus,
                     double pPlus, double pMinus );
+    void fillEtaZ( float z, float eta,
+                   int maxFitPoints, int foundPoints, int nFitPoints,
+                   int iF, int iL );
 
     ClassDef(StEStructFluct,1)
 };

@@ -14,16 +14,14 @@ class TH1D;
 class TH2F;
 class TH2D;
 
-const float SETAMIN = -1.0;
-const float SETAMAX = +1.0;
-
 class StEStructSigmas {
 
  protected:
  public:
 
-    int mNPhiBins;
-    int mNEtaBins;
+    int   mNPhiBins;
+    int   mNEtaBins;
+    float mEtaMin, mEtaMax;
     char *mKey;
     char *mpreFix;
 
@@ -32,17 +30,22 @@ class StEStructSigmas {
     TH2D *NPlus;
     TH2D *NMinus;
     TH2D *NPlusMinus;
-    TH2D *PSig;
-    TH2D *PDel;
-    TH2D *PPlus;
-    TH2D *PMinus;
-    TH2D *PPlusMinus;
-    TH2D *PNSig;
-    TH2D *PNDel;
-    TH2D *PNPlus;
-    TH2D *PNMinus;
-    TH2D *PNPlusMinus;
-    TH2D *PNMinusPlus;
+
+    // Have different measures of pt fluctuations.
+    // First is based on \Delta\sigma^2.
+    // Second is based on \Phi_{p_\perp}.
+    // Third is based on \sigma^2_{dynamic}.
+    TH2D *PSig[3];
+    TH2D *PDel[3];
+    TH2D *PPlus[3];
+    TH2D *PMinus[3];
+    TH2D *PPlusMinus[3];
+    TH2D *PNSig[3];
+    TH2D *PNDel[3];
+    TH2D *PNPlus[3];
+    TH2D *PNMinus[3];
+    TH2D *PNPlusMinus[3];
+    TH2D *PNMinusPlus[3];
 
     TH2D *SPtHat;
     TH2D *PPtHat;
@@ -75,7 +78,10 @@ class StEStructSigmas {
     void  initHistograms();
     void  deleteHistograms();
 
-    StEStructSigmas( char *key, int nPhi, int nEta, const char *preFix = "" );
+    StEStructSigmas( char *key,
+                     int   nPhi,   int   nEta,
+                     float EtaMin, float EtaMax,
+                     const char *preFix = "" );
     virtual ~StEStructSigmas();
 
     void  fillHistograms();
