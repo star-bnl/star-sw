@@ -1,16 +1,12 @@
-rdEz2SmdCal(
-	    char *runL=" R5107005 R5107005_1  R5107008 R5109025 R5109026 R5109027 R5109028a R5109028c R5109029a R5109030 R5109031  R5109034  R5112004",
-	    char *outname="allAE"
+rdEz2SmdCal(  char *runL=" R5107005",
+	    char *outname="tmp"
 	    ) {
 
-  // char *runL=" R5109034 R5109035 R5112004 R5132005 R5132007 R5132008 R5132009 R5132010 R5132011 R5132012 R5132013 R5132020 R5132021 ";
-  // char *runL=" R5107005 ";
-  
   TString iPath="/star/data04/sim/balewski/daq/ezTree/pp200/pp2/";
-  int mxEve=5000000;
+  int mxEve=1000000;
   int nDot=8;
   int firstSec=5;
-  int lastSec=5;
+  int lastSec=8;
   int oflTrigId=0;;
   char *libL[]={
     "StRoot/StDbLib/StDbLib.so",  
@@ -23,6 +19,7 @@ rdEz2SmdCal(
     "EEmcDb/libEEmcDb.so",
     "libPhysics"
   };
+ 
   
   gStyle->SetPalette(1,0);
   int i;
@@ -75,22 +72,31 @@ rdEz2SmdCal(
 
   // set all DB flags before DB request
   db->requestDataBase(timeStamp,firstSec,lastSec); // range of sectors
+  // db->changeGains("setG1.dat");
+  db->changeMask("setM1.dat");
   
   TObjArray  HList;
   //........... sorters ..........
   float thrMipSmdE=0.1;
   int emptyStripCount=nDot;
-  float twMipEdev=0.5;
+  float twMipRelEneLow=0.4, twMipRelEneHigh=2.5;
   float presMipElow=0.3, presMipEhigh=3.;
- 
-  EzEEsmdCal *sorter=new  EzEEsmdCal(5); // sectID
-  sorter->set(&HList,db,eFee,eHead,eTrig);
-  sorter->setMipCuts(thrMipSmdE,emptyStripCount, twMipEdev,presMipElow,presMipEhigh);
-  sorter->init();
-  sorter->initRun(eHead->getRunNumber());
 
+  const int mSect=4;
+  EzEEsmdCal *sorterA[mSect];
+
+  int j;
+  for(j=0;j<mSect;j++) {
+    sorterA[j]=new  EzEEsmdCal(5+j); // sectID
+    sorterA[j]->set(&HList,db,eFee,eHead,eTrig);
+    sorterA[j]->setTwCuts( presMipElow,presMipEhigh );
+    sorterA[j]->setSmdCuts(thrMipSmdE,emptyStripCount);
+    sorterA[j]->setPQRCuts(presMipElow,presMipEhigh);
+    sorterA[j]->init();
+    sorterA[j]->initRun(eHead->getRunNumber());
+  }
   // dump current DB content
-  // db->exportAscii("dbDump2.dat"); return;
+  //db->exportAscii("dbDump2.dat"); return;
   
    
   printf("Sort %d  of total Events %d, use trigId=%d\n",mxEve, nEntries,oflTrigId);
@@ -112,7 +118,9 @@ rdEz2SmdCal(
     if(nCr!=22) continue;
     // use only 100% healthy events
     nOK++;
-    sorter->make();
+    for(int j=0;j<mSect;j++) {
+      sorterA[j]->make();
+    }
   }
   int t2=time(0);
   if(t2==t1) t2=t1+1;
@@ -120,44 +128,34 @@ rdEz2SmdCal(
   float rate=1.*nEve/(t2-t1);
   printf("sorting done, nEve=%d, acc=%d CPU event rate=%.1f Hz, total time %.1f minute(s) \n",nEve,nAcc,rate,tMnt);
 
-  sorter->finish();
+
+  for(int j=0;j<mSect;j++) {
+    sorterA[j]->finish();
+  }
 
   // save output histograms
 
-  TString out="out/";
-  out+=outname;
   //out+="_";
   //out+=nDot;
-  sorter->saveHisto(out);
+
+  
+  TString out="outX/";
+  out+=outname;
+  out+=".hist.root";
+  TFile f( out,"recreate");
+  assert(f.IsOpen());
+  printf("%d histos are written  to '%s' ...\n",HList.GetEntries(),out.Data());
+  HList.Write();
+  f.Close();
+  
   // HList.ls(); 
 
-  h=(TH1F *) HList.FindObject("myStat");   assert(h);
+  h=(TH1F *) HList.FindObject("myStat05");   assert(h);
   float *my=h->GetArray();
   printf("%d -->UxV multi=%.1f  one=%.1f any=%.1f tw=%.1f\n",nEve,my[2],my[3],my[4],my[5]);
 
   printf(" -->MIP cntr=%.1f w/tag=%.1f \n",my[6],my[7]);
 
    return;
-  gStyle->SetPalette(1,0);
-  printf("drawing ...\n");  TString out=outname;
-  out+="_";
-  out+=nDot;
-  sorter->saveHisto(out);
-  // HList.ls(); 
-
-  h=(TH1F *) HList.FindObject("myStat");   assert(h);
-  float *my=h->GetArray();
-  printf("%d -->UxV multi=%.1f  one=%.1f any=%.1f tw=%.1f\n",nEve,my[2],my[3],my[4],my[5]);
-
-  printf(" -->MIP cntr=%.1f w/tag=%.1f \n",my[6],my[7]);
-
-   return;
-  gStyle->SetPalette(1,0);
-  printf("drawing ...\n");
-  c=new TCanvas();  c->Divide(1,2);
-  c->cd(1);h=(TH1F*)HList.FindObject("case"); h->Draw("");
-  c->cd(2);h2=(TH2F*)HList.FindObject("xy05c"); h2->Draw("colz");
-
- //gPad->SetLogy();
  } 
 
