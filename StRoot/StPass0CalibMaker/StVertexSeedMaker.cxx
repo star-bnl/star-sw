@@ -24,6 +24,7 @@
 #include "TFile.h"
 #include "TVirtualFitter.h"
 #include "TNtuple.h"
+#include "TArrayF.h"
 #include "StTree.h"
 
 const char* defDir = "./StarDb/Calibrations/rhic";
@@ -31,7 +32,7 @@ const char* defDir = "./StarDb/Calibrations/rhic";
 //_____________________________________________________________________________
 // C variables and functions for fit/minimization
 //_____________________________________________________________________________
-static float *xVert, *yVert, *zVert, *mult;
+static TArrayF xVert, yVert, zVert, mult;
 int nverts,nsize;
 Double_t funcX(float z,Double_t *par) {
   Double_t x = par[0] + par[1]*z;
@@ -63,30 +64,14 @@ void fnch(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
   f = chisq;
 }
 void setArraySize(int n) {
-  if (n <= nsize) return;
-  float* temp1 = new float[n];
-  float* temp2 = new float[n];
-  float* temp3 = new float[n];
-  float* temp4 = new float[n];
-  if (nsize) {
-    int csize = nsize * sizeof(float);
-    memcpy(temp1,xVert,csize);
-    memcpy(temp2,yVert,csize);
-    memcpy(temp3,zVert,csize);
-    memcpy(temp4,mult ,csize);
-    delete [] xVert;
-    delete [] yVert;
-    delete [] zVert;
-    delete [] mult ;
-  }
-  xVert = temp1;
-  yVert = temp2;
-  zVert = temp3;
-  mult  = temp4;
+  xVert.Set(n);
+  yVert.Set(n);
+  zVert.Set(n);
+  mult.Set(n);
   nsize = n;
 }
 void addVert(float x, float y, float z, float m) {
-  if (nverts > nsize) setArraySize(nsize*2);
+  if (nverts >= nsize) setArraySize(nsize*2);
   xVert[nverts] = x;
   yVert[nverts] = y;
   zVert[nverts] = z;
@@ -268,7 +253,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.7 2002/03/22 20:29:09 jeromel Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.8 2002/03/23 00:23:54 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -536,6 +521,8 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
       addVert(vals[1],vals[2],vals[3],vals[4]);
       weight += vals[4];
     }
+    gMessMgr->Info() << "StVertexSeedMaker: Current statistics: "
+      << nverts << endm;
   }
   if (currentFile) {
     currentFile->Close();
@@ -546,8 +533,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.7 2002/03/22 20:29:09 jeromel Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.8 2002/03/23 00:23:54 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.8  2002/03/23 00:23:54  genevb
+// switch from float arrays to TArrayF
+//
 // Revision 1.7  2002/03/22 20:29:09  jeromel
 // Not .C but .root
 //
