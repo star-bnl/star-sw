@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.8 2004/07/27 21:59:46 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.9 2004/09/11 04:57:33 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -19,7 +19,7 @@
 #include "StEEmcDbMaker/EEmcDbItem.h"
 
 #ifdef StRootFREE
-    #include "EEmcDb/EEmcDb.h"
+  #include "EEmcDb/EEmcDb.h"
 #else
   #include "StEEmcDbMaker/StEEmcDbMaker.h"
 #endif
@@ -29,7 +29,6 @@ ClassImp(EEsmdCal)
 //--------------------------------------------------
 //--------------------------------------------------
 EEsmdCal::EEsmdCal(){
-
   nInpEve=0; 
   HList=0; 
   eeDb=0;
@@ -37,10 +36,11 @@ EEsmdCal::EEsmdCal(){
   // clear all histo pointers just in case
   memset(hT,0,sizeof(hT));
   memset(hSs,0,sizeof(hSs));
-  memset(hSp,0,sizeof(hSp));
+  // memset(hSp,0,sizeof(hSp));
 
   dbMapped=-1;
   memset(dbT,0,sizeof(dbT));
+  memset(dbS,0,sizeof(dbS));
 
   // initialization
   smdHitPl=new EEsmdPlain [MaxSmdPlains];
@@ -50,7 +50,6 @@ EEsmdCal::EEsmdCal(){
 
   thrMipSmdE=-1; emptyStripCount=-2; 
   twMipRelEneLow=-3; twMipRelEneHigh=-4;
-
   offCenter=0.7;
 
   printf("EEsmdCal() constructed\n");
@@ -59,6 +58,52 @@ EEsmdCal::EEsmdCal(){
 //--------------------------------------------------
 //--------------------------------------------------
 EEsmdCal::~EEsmdCal() {/* noop */}
+
+
+//-------------------------------------------------
+//-------------------------------------------------
+void EEsmdCal::init( ){
+  printf("EEsmdCal() init , calibrate sector=%d\n",sectID);
+
+  initAuxHisto();
+
+  initTileHistoAdc('a',"inclusive ADC ",kBlack);
+  initTileHistoAdc('d',"ADC, tag: UxV 2*thr",kBlack);
+  initTileHistoAdc('e',"ADC, tag: mipT UxV 2*thr",kBlue);
+
+  initTileHistoEne('f',"energy, tag: UxV 2*thr",kBlack);
+  initTileHistoEne('g',"energy, tag: mipT UxV 2*thr",kBlue);
+ 
+  initSmdHist('a',"inclusive ADC");
+  initSmdHist('b',"ADC, tag: best MIP",kBlue);
+  initSmdEneHist('d',"Energy (K): best MIP",kMagenta);
+  initSmdEneHist('e',"Energy (K)+(K+1)*tgh(eta): best MIP",kBlack);
+  //  initSmdAttenHist();  // take it out soon, JB
+
+  //.................... initialize MIP finding algo for SMD
+  int i;
+  for(i=0;i<MaxSmdPlains;i++) {
+    smdHitPl[i].set(thrMipSmdE,emptyStripCount,i+'U');
+  }
+
+  printf("use thrMipSmdE/MeV=%.2f emptyStripCount=%d  twMipRelEne/high=%.2f/%.2f offCenter=%.2f\n", thrMipSmdE*1000.,emptyStripCount,twMipRelEneLow, twMipRelEneHigh,offCenter);
+  assert(sectID>0 && sectID<=MaxSectors);
+
+  //....................... initilize MIP energy in towers
+  assert(twMipRelEneLow< twMipRelEneHigh);
+
+  for(int i=0;i<MaxEtaBins;i++){
+    float etaValue=(geoTw->getEtaMean(i));
+    float tghEta=TMath::TanH(etaValue);
+    twTghEta[i]=tghEta;
+    towerMipE[i]= 1./(2.89*tghEta); // GeV EM
+    presMipE[i]=0.0009/tghEta; //GeV MIP, 5mm*1.8mm
+  }
+  
+  smdAvrMipE=0.0013; //GeV MIP;  7mm*1.8 MeV/cm
+  
+}
+
 
 //-------------------------------------------------
 //-------------------------------------------------
@@ -71,48 +116,44 @@ void EEsmdCal::initRun(int runID){
 
   // now init all what relays on DB inofrmation
   addTwMipEbarsToHisto(kGreen,'g');
+
   addPresMipEbarsToHisto(kGreen,'P');
   addPresMipEbarsToHisto(kGreen,'Q');
   addPresMipEbarsToHisto(kGreen,'R');
 
+  addSmdMipEbarsToHisto(kGreen,'U');
+  addSmdMipEbarsToHisto(kGreen,'V');
+  histoGains();
 }
 
-//-------------------------------------------------
-//-------------------------------------------------
-void EEsmdCal::init( ){
-  printf("EEsmdCal() init , calibrate sector=%d\n",sectID);
+//--------------------------------------------------
+//--------------------------------------------------
+void EEsmdCal:: mapTileDb(){
+  printf("EEsmdCal:: mapTileDb()\n");
 
-  initAuxHisto();
-
-  initTileHistoAdc('a',"inclusive ADC ",kBlack);
-  initTileHistoAdc('b',"ADC, tag: thrR",kRed);
-  initTileHistoAdc('c',"ADC, tag: thrR UxV",kBlue);
-  initTileHistoAdc('d',"ADC, tag: UxV 2*thr",kBlack);
-  initTileHistoAdc('e',"ADC, tag: mipT UxV 2*thr",kBlue);
-
-  initTileHistoEne('f',"energy, tag: UxV 2*thr",kBlack);
-  initTileHistoEne('g',"energy, tag: mipT UxV 2*thr",kBlue);
-
-  initSmdHist('a',"inclusive ADC");
-  initSmdHist('b',"ADC, tag: best MIP",kBlue);
-  initSmdAttenHist(); 
-
-  //.................... initialize MIP finding algo for SMD
-  int i;
-  for(i=0;i<MaxSmdPlains;i++) {
-    smdHitPl[i].set(thrMipSmdE,emptyStripCount,i+'U');
+  //....................  Tower like ....................
+  char cT[mxTile]={'T','P','Q','R'};
+  int iT=0;
+  for(iT=0;iT<mxTile;iT++) {
+    for(char iSub=0; iSub<MaxSubSec; iSub++){
+      for(int iEta=0; iEta<MaxEtaBins; iEta++){
+	int iPhi=iSect*MaxSubSec+iSub;
+	dbT[iT][iEta][iPhi]=eeDb->getTile(sectID,iSub+'A',iEta+1,cT[iT]);
+	//printf("%d %d %d '%s' \n",iT,iEta,iPhi,dbT[iT][iEta][iPhi]->name);
+      }
+    }
   }
 
-  printf("use thrMipSmdE=%.2f emptyStripCount=%d  twMipRelEne/high=%.2f/%.2f\npresMipElow/high=%.2f/%.2f\n", thrMipSmdE,emptyStripCount,twMipRelEneLow, twMipRelEneHigh,presMipElow,presMipEhigh);
-  assert(sectID>0 && sectID<=MaxSectors);
-
-  //....................... initilize energy cuts for MIPs in towers
-  assert(twMipRelEneLow< twMipRelEneHigh);
-  for(int i=0;i<MaxEtaBins;i++){
-    float etaValue=(geoTw->getEtaMean(i));
-    float mean=1./(2.89*TMath::TanH(etaValue));
-    towerMipE[i]= mean;
+  //................ SMD strips
+  int iu;
+  for(iu=0;iu<MaxSmdPlains;iu++) {
+    int istr;
+    for(istr=0;istr<MaxSmdStrips;istr++) {
+      if(istr>=288) break; // ugly, but I gave up, JB
+      dbS[iu][istr]=eeDb->getByStrip(sectID,iu+'U',istr+1);
+    }
   }
+
 }
 
 
@@ -146,8 +187,6 @@ void EEsmdCal::findSectorMip( ){
     for(int iEta=0; iEta<MaxEtaBins; iEta++){      
       int iPhi=iSect*MaxSubSec+iSub;
       fillOneTailHisto('a', iEta,iPhi);   // inclusive histos 
-      if(tileThr[kR][iEta][iPhi]<=0) continue;
-      fillOneTailHisto('b', iEta,iPhi);   // tagged histos 
     }
   }
   
@@ -225,12 +264,9 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
   float eneT=tileEne[kT][iEtaX][iPhiX];  // GeV
   float eneP=tileEne[kP][iEtaX][iPhiX]*1000; // MeV
   float eneQ=tileEne[kQ][iEtaX][iPhiX]*1000; // MeV
-  float eneR=tileEne[kR][iEtaX][iPhiX]*1000; // MeV
+float eneR=tileEne[kR][iEtaX][iPhiX]*1000; // MeV
 
-  if(thrR){
-    hA[9]->Fill(7);
-    fillOneTailHisto('c', iEtaX,iPhiX);
-  }
+  if(thrR) hA[9]->Fill(7);
 
   if(mipT )hA[9]->Fill(8);
 
@@ -260,30 +296,42 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
   if( mipT && thrP         && thrR ) hT[iCut][kQ][iEtaX][iPhiX]->Fill(eneQ);
   if( mipT && thrP && thrQ         ) hT[iCut][kR][iEtaX][iPhiX]->Fill(eneR);
   
-  
-  ((TH2F*) hA[22])->Fill( r.x(),r.y());
 
-  // calibration of SMD strips
+  //..................... calibration of SMD strips
   if( mipT && thrP && thrQ && thrR ) {
+    ((TH2F*) hA[22])->Fill( r.x(),r.y());
     int iuv,i2;
     const int mx=2; // # of strips from given plain
     int iStr[MaxSmdPlains];
-    iStr[0]=iStrU;
+    iStr[0]=iStrU; // working pointers
     iStr[1]=iStrV;
-    iCut='b'-'a';
     float eUV=0;// sum from both plains
     for(iuv=0;iuv<MaxSmdPlains;iuv++) {
       float e12=0;
       for(i2=0;i2<mx;i2++) {
 	int istrip=iStr[iuv]+i2;
 	float adc=smdAdc[iuv][istrip];
-	float ene=smdEne[iuv][istrip]; // GeV
-	if(adc<3) continue;// drop pedestal, tmp
-	e12+=ene*1000; // MeV
+	float ene=smdEne[iuv][istrip]*twTghEta[iEtaX]*1000; // MeV, at normal angle 	
+	if(adc<2) continue;// drop pedestal, tmp
+	e12+=ene; // sum pairs
 	// re-calibratiop  of strips
-	hSs[iCut][iuv][istrip]->Fill(adc);
-	hA[14+iuv]->Fill(istrip+1); // only above ped
-	
+	hSs['b'-'a'][iuv][istrip]->Fill(adc);
+	hSs['d'-'a'][iuv][istrip]->Fill(ene);
+      }// end of loop over one plain
+      eUV+=e12;
+      // SMD energy for pairs
+      int istrip1=iStr[iuv];
+      ((TH2F*) hA[20])->Fill(istrip1+1,e12);
+      hSs['e'-'a'][iuv][istrip1]->Fill(e12);      
+	hA[14+iuv]->Fill(istrip1+1); 
+
+    }// end of loop over UV plains
+    ((TH2F*) hA[23])->Fill(iEtaX+1,eUV); 
+  }
+  
+}
+
+#if 0	
 	// SMD light attenuation for pair of strips
 	StructEEmcStrip* bar=geoSmd->getStripPtr(istrip,iuv,iSect);
 	TVector3 r1=bar->end1;
@@ -302,18 +350,7 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
 	hSc[iuv][iSubX][iG]->Fill(ene); 
 	hSeta[iuv][iSubX][iG]->Fill(r.Eta());
 	hSdist[iuv][iSubX][iG]->Fill(dist);
-      }// end of loop over one plain
-      eUV+=e12;
-      // SMD energy for pairs
-      int istrip1=iStr[iuv];
-      ((TH2F*) hA[20])->Fill(istrip1+1,e12);
-      hSp[iCut][iuv][istrip1]->Fill(e12);      
-    }// end of loop over UV plains
-    ((TH2F*) hA[23])->Fill(iEtaX+1,eUV); 
-  }
-  
-}
-
+#endif
 
 //-------------------------------------------------
 //-------------------------------------------------

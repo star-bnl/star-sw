@@ -1,6 +1,6 @@
 LIBNAME  = EzSmdCal
-HDRS     = $(wildcard EE*.h) EzEEsmdCal.h
-SRCS     = $(wildcard EE*.cxx)  EzEEsmdCal.cxx
+HDRS     = $(wildcard EE*.h) EzEEsmdCal.h SmdGains.h
+SRCS     = $(wildcard EE*.cxx)  EzEEsmdCal.cxx  SmdGains.cxx
 
 
 CXX    = g++
