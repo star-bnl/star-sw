@@ -1,7 +1,10 @@
 *
-* $Id: gskine.F,v 1.4 2000/01/06 22:09:17 nevski Exp $
+* $Id: gskine.F,v 1.5 2000/01/07 00:48:48 nevski Exp $
 *
 * $Log: gskine.F,v $
+* Revision 1.5  2000/01/07 00:48:48  nevski
+* strong typing in quest required
+*
 * Revision 1.4  2000/01/06 22:09:17  nevski
 * unlimited track/vertex version
 *
@@ -38,7 +41,7 @@ C.
 #include "geant321/gcflag.inc"
 #include "geant321/gcpush.inc"
 #include "geant321/gcunit.inc"
-#include "zebra/quest.inc"
+#include "atcdes/quest.inc"
 
       REAL      PLAB(3),BUF(1),P2,AMASS,E
       INTEGER   LGKINE,LGVERT,IPART,NV,NWBUF,NT,NTI,IER,JV,JPA,JK,

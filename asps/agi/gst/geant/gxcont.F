@@ -1,7 +1,10 @@
 *
-* $Id: gxcont.F,v 1.4 2000/01/06 22:09:18 nevski Exp $
+* $Id: gxcont.F,v 1.5 2000/01/07 00:48:49 nevski Exp $
 *
 * $Log: gxcont.F,v $
+* Revision 1.5  2000/01/07 00:48:49  nevski
+* strong typing in quest required
+*
 * Revision 1.4  2000/01/06 22:09:18  nevski
 * unlimited track/vertex version
 *
@@ -37,9 +40,9 @@
 **    *  - Time control introduced - upon the limit IQUEST(1) is set   *
 **    ******************************************************************
 **
-#include "zebra/quest.inc"
 #include "geant321/pawc.inc"
 #include "atcdes/sclink.inc"
+#include "atcdes/quest.inc"
 #include "zebra/zstate.inc"
 #include "geant321/gcbank.inc"
 #include "geant321/gctmed.inc"
