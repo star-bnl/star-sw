@@ -1,8 +1,10 @@
 #include <cmath>
+#include <TArrayD.h>
 #include "StEmcMath.h"
 #include "StEvent/StMeasuredPoint.h"
 #include "StarClassLibrary/StThreeVectorF.hh"
 #include "StEmcUtil/emcInternalDef.h"
+#include "StEmcUtil/StEmcGeom.h"
 
 ClassImp(StEmcMath)
 
@@ -67,9 +69,35 @@ StEmcMath::detectorId(const UInt_t id)
 Double_t 
 StEmcMath::getPhiPlusMinusPi(const Double_t phi)
 {
-  // convert phi to the range from -pi to +pi 
+  // convert phi to the range from -pi<= phi< pi (as in StEmcGeom) 
   Double_t phiw = phi;
-  while(phiw >  M_PI) phiw -= 2.*M_PI;
-  while(phiw < -M_PI) phiw += 2.*M_PI;
+  while(phiw >=  M_PI) phiw -= 2.*M_PI;
+  while(phiw <  -M_PI) phiw += 2.*M_PI;
   return phiw;
 }  
+
+TArrayD  *StEmcMath::binForSmde(Bool_t kprint)
+{
+  // Calculate correct eta binnig for smd eta
+  StEmcGeom* geom = new StEmcGeom(3);   // For SMDE
+  Int_t neta = geom->NEta(), iw1, iw2;
+  Float_t *eb = geom->Eta();
+  TArrayD *xb = new TArrayD(2*neta+1); 
+  (*xb)[neta]   = 0.0;
+  for(Int_t ik=0; ik<neta; ik++){
+    iw1 = neta + 1 + ik;
+    iw2 = neta-ik-1;
+    Float_t x1 = eb[ik], x2, xw;
+    if(ik<neta-1) {
+      x2 = eb[ik+1];
+      xw = (x1+x2)*0.5;
+    }
+    else xw = 0.99;
+    (*xb)[iw1] = +xw;
+    (*xb)[iw2] = -xw;
+    if(kprint)
+    printf(" iw1 %i %f => iw2 %i %f => eta %f\n", iw1,(*xb)[iw1], iw2,(*xb)[iw2], eb[ik]);
+  }
+  delete geom; 
+  return xb;
+}
