@@ -1,7 +1,15 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.15 2000/04/04 23:15:43 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.16 2000/04/06 08:38:08 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.16  2000/04/06 08:38:08  calderon
+ * First version using the particle table.
+ * The parent daughter relationship(if it exists) between tracks in the g2t_track table
+ * and tracks that come from the
+ * event generator is successfully established.  Next step is to load
+ * the rest of the particle table entries that don't have any descendants
+ * in the g2t table (which is the majority of the entries).
+ *
  * Revision 1.15  2000/04/04 23:15:43  calderon
  * Report number of hits successfully stored and additional
  * reporting of hits with bad volume id.
@@ -89,6 +97,7 @@ using std::sort;
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
+#include "tables/St_particle_Table.h"
 
 #include "StMcEventTypes.hh"
 
@@ -98,7 +107,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.15 2000/04/04 23:15:43 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.16 2000/04/06 08:38:08 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -179,6 +188,7 @@ Int_t StMcEventMaker::Make()
 
     
     St_DataSet* dsGeant = GetDataSet("geant");
+    St_DataSet* dsDst   = GetDataSet("dst");
     if(!dsGeant || !dsGeant->GetList()) return kStWarn;
     // This is done only for one file, though.  I haven't put functionality for
     // multiple file handling.  If needed, it should start in the StMcEventReadMacro
@@ -189,6 +199,7 @@ Int_t StMcEventMaker::Make()
     // Now we have the DataSet, but for some reason, we need the Iterator to navigate
     
     St_DataSetIter geantDstI(dsGeant);
+    St_DataSetIter dstDstI(dsDst);
   
     // Now the Iterator is set up, and this allows us to access the tables
     // This is done like so:
@@ -200,7 +211,9 @@ Int_t StMcEventMaker::Make()
     St_g2t_tpc_hit *g2t_tpc_hitTablePointer =  (St_g2t_tpc_hit *) geantDstI("g2t_tpc_hit");
     St_g2t_svt_hit *g2t_svt_hitTablePointer =  (St_g2t_svt_hit *) geantDstI("g2t_svt_hit");
     St_g2t_ftp_hit *g2t_ftp_hitTablePointer =  (St_g2t_ftp_hit *) geantDstI("g2t_ftp_hit");
-    St_g2t_rch_hit *g2t_rch_hitTablePointer =  (St_g2t_rch_hit *) geantDstI("g2t_rch_hit");
+
+    St_g2t_rch_hit *g2t_rch_hitTablePointer =  (St_g2t_rch_hit *) dstDstI("g2t_rch_hit");
+    St_particle    *particleTablePointer    =  (St_particle    *) dstDstI("particle");
 
     // Now we check if we have the pointer, if we do, then we can access the tables!
   
@@ -256,8 +269,16 @@ Int_t StMcEventMaker::Make()
 	if (g2t_rch_hitTablePointer)
 	    rchHitTable = g2t_rch_hitTablePointer->GetTable();
 	else
-	    cerr << "Table g2t_rch_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+	    cerr << "Table g2t_rch_hit Not found in Dataset " << dstDstI.Pwd()->GetName() << endl;
 	
+	//
+	// particle Table
+	//
+	particle_st *particleTable;
+	if (particleTablePointer)
+	    particleTable = particleTablePointer->GetTable();
+	else
+	    cerr << "Table particle Not found in Dataset " << dstDstI.Pwd()->GetName() << endl;
        
        // Before filling StMcEvent, we can check whether we can actually
        // access the tables.
@@ -372,10 +393,15 @@ Int_t StMcEventMaker::Make()
 	// Step 3 - Fill Tracks - we do not fill associated hits until Step 4
 
 	long NTracks = g2t_trackTablePointer->GetNRows();
+	size_t usedTracksG2t = 0;
+	long NGeneratorTracks = particleTablePointer->GetNRows();
+	size_t usedTracksEvGen = 0;
 #ifndef ST_NO_TEMPLATE_DEF_ARGS	  
 	vector<StMcTrack*> ttemp(NTracks); // Temporary array for Step 4
+	vector<StMcTrack*> ttempParticle(NGeneratorTracks);
 #else
 	vector<StMcTrack*, allocator<StMcTrack*> > ttemp(NTracks);
+	vector<StMcTrack*, allocator<StMcTrack*> > ttempParticle(NGeneratorTracks);
 #endif
 
 	cout << "Preparing to process and fill TRACK information ....." << endl;
@@ -397,6 +423,7 @@ Int_t StMcEventMaker::Make()
 		}
 	    }    
 	    t = new StMcTrack(&(trackTable[itrk]));
+	    usedTracksG2t++;
 	    ttemp[ trackTable[itrk].id - 1 ] = t; // This we do for all accepted tracks
 	    
 	    
@@ -441,14 +468,49 @@ Int_t StMcEventMaker::Make()
 		
 		
 	    } // Intermediate vertices
+
+	    // Look in the particle table
+	    // for parents from event generator
+	    long iEventGeneratorLabel = (trackTable[itrk].eg_label) - 1;
+	    StMcTrack* egTrk = 0;
+	    if (iEventGeneratorLabel >=0) {
+		// follow the "linked list" of indices from e.g. particle table
+ 
+		while (particleTable[iEventGeneratorLabel].jmohep[0] > 0) {
+		    // we have a mother
+		    iEventGeneratorLabel = (particleTable[iEventGeneratorLabel].jmohep[0]) - 1;
+		    if ( iEventGeneratorLabel+1 > NGeneratorTracks) break; // Sometimes the id goes out of range for some reason, need to cover for this case. 
+		    if ( ((StMcTrack*) ttempParticle[iEventGeneratorLabel]) == 0) {
+			egTrk = new StMcTrack(&(particleTable[iEventGeneratorLabel]));
+			egTrk->setEventGenLabel(iEventGeneratorLabel+1);
+			ttempParticle[iEventGeneratorLabel] = egTrk;
+			mCurrentMcEvent->tracks().push_back(egTrk); // adds track egTrk to master collection
+			usedTracksEvGen++;
+		    }
+		    else {
+			t->setGeneratorParent(ttempParticle[iEventGeneratorLabel]);
+			break; // If we're here, the parent has already been created, and
+			       // from then on, we would repeat the same parent pattern, so break here.
+		    }
+		    t->setGeneratorParent(egTrk);
+		    t = egTrk; // When there are several tracks in the linked list, need to
+		               // change t, otherwise we would always be setting the parent to the
+		               // same track. 
+		}
+		    
+	    }
 	    
 	} // Track loop
 
 	if (nThrownTracks)
 	    gMessMgr->Warning() << "StMcEventMaker::Make(): Throwing " << nThrownTracks
 				<< " whose stop vertex is the same as primary vertex." << endm;
+	cout << "Used   tracks from g2t_track table: " << usedTracksG2t << endl;
+	cout << "Avail. tracks from g2t_track table: " << NTracks       << endl;
+	cout << "Used   tracks from particle  table: " << usedTracksEvGen  << endl;
+	cout << "Avail. tracks from particle  table: " << NGeneratorTracks << endl;
 	vtemp.clear();
-	
+	ttempParticle.clear();
 	
 	//______________________________________________________________________
 	// Step 4 - Fill Hits
@@ -614,7 +676,7 @@ Int_t StMcEventMaker::Make()
 		ttemp[iTrkId]->addRichHit(rh);
 		
 	    }
-	    cout << "Filled RICH Hits" << endl;
+	    cout << "Filled " << mCurrentMcEvent->richHitCollection()->numberOfHits() << " RICH Hits" << endl;
 	    if (nBadVolId)
 		gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
 				    << " RICH hits, wrong Volume Id." << endm;
