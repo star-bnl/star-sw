@@ -26,14 +26,6 @@
 
 #include "St_DataSet.h"
 
-//----- dataset flags
-enum ESetBits {
-     kMark        = BIT(22)   // if object is marked
-};
-enum EBitOpt { 
-               kSet   = kTRUE,
-               kReset = kFALSE
-             };
 class St_DataSetIter : public TObject{
 protected:
    TIter           *fNext;            // "standard" ROOT iterator for containers

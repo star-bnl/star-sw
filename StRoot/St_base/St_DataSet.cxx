@@ -252,6 +252,13 @@ Bool_t St_DataSet::IsThisDir(const Char_t *dirname,int len,int ignorecase) const
   }
 }
 //______________________________________________________________________________
+void St_DataSet::Mark()
+{ Mark(kMark,kSet); }
+//______________________________________________________________________________
+void St_DataSet::Mark(UInt_t flag,EBitOpt reset)
+{  SetBit(flag,reset); }
+
+//______________________________________________________________________________
 TString St_DataSet::Path() const
 {
  // return the full path of this data set 
