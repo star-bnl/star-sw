@@ -28,6 +28,9 @@
 ClassImp(StHbtGstarTxtReader)
 #endif
 
+#if !(ST_NO_NAMESPACES)
+  using namespace units;
+#endif
 
 /* =========== some useful functions in parsing the strings ============== */
 int get_next_int(string strline,int start_at,int& wordends){
