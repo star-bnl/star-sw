@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.18 2002/03/20 00:33:32 munhoz Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.19 2002/04/04 16:00:16 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.19  2002/04/04 16:00:16  caines
+ * Finally got phase correction correct
+ *
  * Revision 1.18  2002/03/20 00:33:32  munhoz
  * temporary fix for memory leaks and new vertex finder params for pp
  *
@@ -325,15 +328,15 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 	  if( !mHybridAdjData) continue;
 	  // Adjust recorded phase for each hybrid into frcation of a 
 	  // time bucket
-	  T0Jitter = (long)(mHybridAdjData->getTimeZero());
-	  if( T0Jitter == 3){
+	  T0Jitter = (float)(mHybridAdjData->getTimeZero());
+	  if( T0Jitter >  2. && T0Jitter < 4.){
 	    T0Jitter = 0.;
 	  }
-	  if( T0Jitter == 4){
+	  if( T0Jitter > 3. && T0Jitter < 5.){
 	    T0Jitter = 3. - (8./3.);
 	  }
-	  if( T0Jitter == 5){
-	    T0Jitter =  6. - ( 2.*8./3.);;
+	  if( T0Jitter > 4 && T0Jitter < 6.){
+	    T0Jitter =  6. - ( 2.*8./3.);
 	  }
 
           mHybridCluster = (StSvtHybridCluster*)mSvtClusterColl->at(index); 
@@ -377,7 +380,7 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 		m_PeakADCvsTime->Fill((float)mSvtAnalysis->GetMeanClusterTimeBin(clu),(float)mSvtAnalysis->GetCluPeakAdc(clu));
 		m_n_seq->Fill(mSvtAnalysis->GetCluNumPixels(clu));
 	      }
-	    
+	     
 	    }
 	  }
         }
