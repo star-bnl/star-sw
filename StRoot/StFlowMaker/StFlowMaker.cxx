@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.53 2001/05/22 20:17:34 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.54 2001/05/23 18:11:14 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -174,7 +174,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.53 2001/05/22 20:17:34 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.54 2001/05/23 18:11:14 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -434,7 +434,8 @@ void StFlowMaker::FillFlowEvent() {
   pFlowEvent->SetSelections();
   (pFlowEvent->EtaSubs()) ? pFlowEvent->MakeEtaSubEvents() :
     pFlowEvent->MakeSubEvents();
-  pFlowEvent->SetPids();
+  (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
+    pFlowEvent->SetPidsDeviant();
 
 }
 
@@ -923,6 +924,9 @@ Int_t StFlowMaker::InitPicoEventRead() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.54  2001/05/23 18:11:14  posk
+// Removed SetPids().
+//
 // Revision 1.53  2001/05/22 20:17:34  posk
 // Now can do pseudorapidity subevents.
 //
