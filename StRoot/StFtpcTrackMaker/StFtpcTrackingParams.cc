@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackingParams.cc,v 1.8 2002/10/31 13:42:26 oldi Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.9 2002/11/06 13:47:34 oldi Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.9  2002/11/06 13:47:34  oldi
+// All current database values hardcoded (for stand alone usage).
+// Code clean ups.
+//
 // Revision 1.8  2002/10/31 13:42:26  oldi
 // Everything read from database now.
 //
@@ -86,6 +90,29 @@ StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, St_ftpcCoordT
 }
 
 
+StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, Double_t magFieldFactor) {
+  // Initialization with hardcoded values (to be able to run stand alone).
+  
+  if (mInstance) {
+    
+    if (magFieldFactor != mInstance->MagFieldFactor()) {
+      delete mInstance;
+      mInstance = new StFtpcTrackingParams(magFieldFactor);
+    }
+  }
+
+  else { // instance isn't there
+    mInstance = new StFtpcTrackingParams(magFieldFactor);
+  }
+
+  if (debug) {
+    mInstance->PrintParams();
+  }
+
+  return mInstance;
+}
+
+
 inline StFtpcTrackingParams* StFtpcTrackingParams::Instance() {
   // return instance only
   
@@ -108,6 +135,220 @@ StFtpcTrackingParams::StFtpcTrackingParams(St_ftpcTrackingPars *trackPars,
   InitPadRows(zrow->GetTable());
   InitCoordTransformation();
   ResetMagField();
+}
+
+
+StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
+  : mTpcToGlobalRotation(3, 3, 1), mGlobalToTpcRotation(3, 3, 1), 
+    mFtpcRotation(3, 3, 1), mFtpcRotationInverse(3, 3, 1)
+{
+  // Initialization with hardcoded values.
+
+  // FTPC geometry
+  mInnerRadius =  7.73;
+  mOuterRadius = 30.05;
+
+  mNumberOfPadRows        = 20;
+  mNumberOfPadRowsPerSide = 10;
+  
+  mPadRowPosZ = new Double_t[mNumberOfPadRows];
+  
+  mPadRowPosZ[0]  =  162.75;
+  mPadRowPosZ[1]  =  171.25;
+  mPadRowPosZ[2]  =  184.05;
+  mPadRowPosZ[3]  =  192.55;
+  mPadRowPosZ[4]  =  205.35;
+  mPadRowPosZ[5]  =  213.85;
+  mPadRowPosZ[6]  =  226.65;
+  mPadRowPosZ[7]  =  235.15;
+  mPadRowPosZ[8]  =  247.95;
+  mPadRowPosZ[9]  =  256.45;
+  mPadRowPosZ[10] = -162.75;
+  mPadRowPosZ[11] = -171.25;
+  mPadRowPosZ[12] = -184.05;
+  mPadRowPosZ[13] = -192.55;
+  mPadRowPosZ[14] = -205.35;
+  mPadRowPosZ[15] = -213.85;
+  mPadRowPosZ[16] = -226.65;
+  mPadRowPosZ[17] = -235.15;
+  mPadRowPosZ[18] = -247.95;
+  mPadRowPosZ[19] = -256.45;
+
+  // Vertex position
+  mMaxVertexPosZWarning =  50;
+  mMaxVertexPosZError   = 100;
+
+  // Vertex reconstruction
+  mHistoBins = 300;
+  mHistoMin  = -75;
+  mHistoMax  =  75;
+
+  // Tracker
+  mRowSegments =  20;
+  mPhiSegments = 100; 
+  mEtaSegments = 200;
+  
+  // Tracking
+  mLaser[0] = 0;
+  mLaser[1] = 0;
+  mLaser[2] = 1;
+  mLaser[3] = 1;
+
+  mVertexConstraint[0] = 1;
+  mVertexConstraint[1] = 0;
+  mVertexConstraint[2] = 1;
+  mVertexConstraint[3] = 0;
+
+  mMaxTrackletLength[0] =  3;
+  mMaxTrackletLength[1] =  3;
+  mMaxTrackletLength[2] = 10;
+  mMaxTrackletLength[3] = 10;
+
+  mMinTrackLength[0] = 5;
+  mMinTrackLength[1] = 5;
+  mMinTrackLength[2] = 5;
+  mMinTrackLength[3] = 5;
+
+  mRowScopeTracklet[0] = 2;
+  mRowScopeTracklet[1] = 2;
+  mRowScopeTracklet[2] = 2;
+  mRowScopeTracklet[3] = 3;
+
+  mRowScopeTrack[0] = 3;
+  mRowScopeTrack[1] = 3;
+  mRowScopeTrack[2] = 3;
+  mRowScopeTrack[3] = 3;
+
+  mPhiScope[0] = 1;
+  mPhiScope[1] = 1;
+  mPhiScope[2] = 1;
+  mPhiScope[3] = 2;
+
+  mEtaScope[0] =  1;
+  mEtaScope[1] =  3;
+  mEtaScope[2] =  3;
+  mEtaScope[3] = 15;
+
+  mMaxDca[0] = 100.;
+  mMaxDca[1] = 100.;
+  mMaxDca[2] = 100.;
+  mMaxDca[3] = 100.;
+
+  // Tracklets
+  mMaxAngleTracklet[0] = 0.015;
+  mMaxAngleTracklet[1] = 0.03;
+  mMaxAngleTracklet[2] = 0.03;
+  mMaxAngleTracklet[3] = 0.05;
+
+  // Tracks
+  mMaxAngleTrack[0] = 0.03;
+  mMaxAngleTrack[1] = 0.08;
+  mMaxAngleTrack[2] = 0.007;
+  mMaxAngleTrack[3] = 0.007;
+
+  mMaxCircleDist[0] = 0.05;
+  mMaxCircleDist[1] = 0.05;
+  mMaxCircleDist[2] = 0.03;
+  mMaxCircleDist[3] = 0.03;
+
+  mMaxLengthDist[0] = 30.;
+  mMaxLengthDist[1] = 70.;
+  mMaxLengthDist[2] = 30.;
+  mMaxLengthDist[3] = 30.;
+  
+  // Split tracks
+  mMaxDist       = 0.11;
+  mMinPointRatio = 0.5;
+  mMaxPointRatio = 0.5;
+
+  // dE/dx
+  mDebugLevel =     10;
+  mIdMethod   =      0;
+  mNoAngle    =      0;
+  mMaxHit     =     10; 
+  mMinHit     =      4;
+  mMaxTrack   = 100000;
+
+  mPadLength    = 0.02;
+  mFracTrunc    = 0.8;
+  mAip          = 2.6e-08;
+  mALargeNumber = 1.0e+10;
+
+  // magnetic field
+  mMagFieldFactor = magFieldFactor;
+  mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);
+
+  // transformation due to rotated and displaced TPC
+  mTpcPositionInGlobal.setX(-0.256);
+  mTpcPositionInGlobal.setY(-0.082);
+  mTpcPositionInGlobal.setZ(-0.192);
+
+  Double_t phi   =  0.0;  //large uncertainty, so set to 0
+  Double_t theta = -0.000381;
+  Double_t psi   = -0.000156;
+  
+  mGlobalToTpcRotation(1, 1) =   TMath::Cos(theta) * TMath::Cos(phi);
+  mGlobalToTpcRotation(1, 2) =   TMath::Cos(theta) * TMath::Sin(phi);
+  mGlobalToTpcRotation(1, 3) = - TMath::Sin(theta);
+  mGlobalToTpcRotation(2, 1) =   TMath::Sin(psi)   * TMath::Sin(theta) * TMath::Cos(phi) - TMath::Cos(psi) * TMath::Sin(phi);
+  mGlobalToTpcRotation(2, 2) =   TMath::Sin(psi)   * TMath::Sin(theta) * TMath::Sin(phi) + TMath::Cos(psi) * TMath::Cos(phi);
+  mGlobalToTpcRotation(2, 3) =   TMath::Cos(theta) * TMath::Sin(psi);
+  mGlobalToTpcRotation(3, 1) =   TMath::Cos(psi)   * TMath::Sin(theta) * TMath::Cos(phi) + TMath::Sin(psi) * TMath::Sin(phi);
+  mGlobalToTpcRotation(3, 2) =   TMath::Cos(psi)   * TMath::Sin(theta) * TMath::Sin(phi) - TMath::Sin(psi) * TMath::Cos(phi);
+  mGlobalToTpcRotation(3, 3) =   TMath::Cos(theta) * TMath::Cos(psi);
+  
+  UInt_t ierr;
+  mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
+  
+  if (ierr!=0) { 
+    gMessMgr->Message("", "E", "OST") << "Cant invert rotation matrix!" << endm;
+    gMessMgr->Message("", "E", "OST") << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endm;
+    gMessMgr->Message("", "E", "OST") << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endm;
+  }
+    
+  // internal FTPC rotation (East only) [has do be done before local -> global]
+
+  mInstallationPointZ[0] = -235.8855;
+  mInstallationPointZ[1] =  235.8855;
+  
+  mObservedVertexOffsetY[0] = 0.3427;
+  mObservedVertexOffsetY[1] = 0.;
+  
+  // define rotation angle alpha=atan(y_vertex_offset cm/z_installation cm)
+  Double_t alpha = TMath::ATan(mObservedVertexOffsetY[0] / TMath::Abs(mInstallationPointZ[0])); // radians and > 0
+  
+  // define rotation axis
+  // simplify to rotation about x-axis because of very small y-z-offset
+  Double_t rx = 1.0;
+  Double_t ry = 0.0;
+  Double_t rz = 0.0;
+  
+  // take the normal vector as rotation vector
+  Double_t norm_r = TMath::Sqrt(rx*rx + ry*ry + rz*rz);
+  rx = rx/norm_r;
+  ry = ry/norm_r;
+  rz = rz/norm_r;
+  
+  // rotation maxtrix : rotation about r(rx, ry, rz) with angle alpha [please check!]
+  // before that the coordinate system has to be transformed to x_installation, 
+  // y_installation, z_installation as new coordinate system origin
+  mFtpcRotation(1, 1) = rx * rx * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
+  mFtpcRotation(1, 2) = ry * rx * (1 - TMath::Cos(alpha)) - rz * TMath::Sin(alpha);
+  mFtpcRotation(1, 3) = rz * rx * (1 - TMath::Cos(alpha)) + ry * TMath::Sin(alpha);
+  mFtpcRotation(2, 1) = rx * ry * (1 - TMath::Cos(alpha)) + rz * TMath::Sin(alpha);
+  mFtpcRotation(2, 2) = ry * ry * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
+  mFtpcRotation(2, 3) = rz * ry * (1 - TMath::Cos(alpha)) - rx * TMath::Sin(alpha);
+  mFtpcRotation(3, 1) = rx * ry * (1 - TMath::Cos(alpha)) - ry * TMath::Sin(alpha);
+  mFtpcRotation(3, 2) = ry * rz * (1 - TMath::Cos(alpha)) + rx * TMath::Sin(alpha);
+  mFtpcRotation(3, 3) = rz * rz * (1 - TMath::Cos(alpha)) + TMath::Cos(alpha);
+  
+  mFtpcRotationInverse = mFtpcRotation.inverse(ierr);
+  
+  if (ierr!=0) { 
+    gMessMgr->Message("", "E", "OST") << "Can't invert FTPC rotation matrix!" << endm;
+    gMessMgr->Message("", "I", "OST") << "FTPC rotation matrix:" << mFtpcRotation << endm;
+    gMessMgr->Message("", "I", "OST") << "Inverse FTPC rotation matrix:" << mFtpcRotationInverse << endm;
+  }
 }
 
 
@@ -225,6 +466,10 @@ Int_t StFtpcTrackingParams::InitDimensions(ftpcDimensions_st* dimensionsTable) {
     mInstallationPointZ[0] = dimensionsTable->installationPointZ[0] * centimeter;
     mInstallationPointZ[1] = dimensionsTable->installationPointZ[1] * centimeter;
 
+    // temporary fix due to database problem
+    if (mInstallationPointZ[0] != -235.8855) mInstallationPointZ[0] = -235.8855 * centimeter;
+    if (mInstallationPointZ[1] !=  235.8855) mInstallationPointZ[1] =  235.8855 * centimeter;
+
     return 1;
   }
   
@@ -241,7 +486,7 @@ Int_t StFtpcTrackingParams::InitPadRows(ftpcPadrowZ_st* padrowzTable) {
   // Set z-positione of pad rows.
   
   if (padrowzTable) {
-    mPadRowPosZ = new Float_t[mNumberOfPadRows];
+    mPadRowPosZ = new Double_t[mNumberOfPadRows];
     
     for (Int_t i = 0; i < mNumberOfPadRows; i++) {
       mPadRowPosZ[i] = ((Float_t *)padrowzTable->z)[i];
@@ -274,7 +519,7 @@ Int_t StFtpcTrackingParams::InitCoordTransformation(ftpcCoordTrans_st* ftpcCoord
 
   if (ftpcCoordTrans) {
     
-    Float_t old[2] = {mObservedVertexOffsetY[0], mObservedVertexOffsetY[1]};
+    Double_t old[2] = {mObservedVertexOffsetY[0], mObservedVertexOffsetY[1]};
     
     mObservedVertexOffsetY[0] = ftpcCoordTrans->observedVertexOffsetY[0];
     mObservedVertexOffsetY[1] = ftpcCoordTrans->observedVertexOffsetY[1];  // not used
@@ -388,13 +633,14 @@ Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog) {
   if (RunLog) {
     St_MagFactor *fMagFactor = (St_MagFactor *)RunLog->Find("MagFactor"); 
     
-    Float_t newFactor = (*fMagFactor)[0].ScaleFactor;
+    Double_t newFactor = (*fMagFactor)[0].ScaleFactor;
     
     if (newFactor != mMagFieldFactor) { // field has changed
       
-      if (mMagFieldFactor == -9999) { // field will be set the first time
+      if (mMagFieldFactor == -9999.) { // field will be set the first time
 	mMagFieldFactor = newFactor;
-	mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);
+	mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);  
+	// I hope this is ok. Should be the same as the table in the database.
       }
       
       else { // field has been set before
@@ -523,8 +769,10 @@ void StFtpcTrackingParams::PrintParams() {
 
   gMessMgr->Message("", "I", "OST") << endm;
   gMessMgr->Message("", "I", "OST") << "FTPC to global transformation" << endm;
+  Int_t precision = gMessMgr->precision(7); // switch precision to show all digits
   gMessMgr->Message("", "I", "OST") << "Rotation point (east)..............: " << InstallationPointZ(0) << endm;
   gMessMgr->Message("", "I", "OST") << "Rotation point (west)..............: " << InstallationPointZ(1) << " (not used)" << endm;
+  gMessMgr->precision(precision); // switch back precision
   gMessMgr->Message("", "I", "OST") << "Observed vertex offset y (east, cm): " << ObservedVertexOffsetY(0) << endm;
   gMessMgr->Message("", "I", "OST") << "Observed vertex offset y (west, cm): " << ObservedVertexOffsetY(1) << " (not used)" << endm;
   gMessMgr->Message("", "I", "OST") << "FTPC to global rotation: " << FtpcRotation() << endm;
@@ -539,20 +787,20 @@ void StFtpcTrackingParams::PrintParams() {
 }
 
 // FTPC geometry
-inline Float_t StFtpcTrackingParams::InnerRadius()            { return mInnerRadius;            }
-inline Float_t StFtpcTrackingParams::OuterRadius()            { return mOuterRadius;            }
-inline   Int_t StFtpcTrackingParams::NumberOfPadRows()        { return mNumberOfPadRows;        }
-inline   Int_t StFtpcTrackingParams::NumberOfPadRowsPerSide() { return mNumberOfPadRowsPerSide; }
-inline Float_t StFtpcTrackingParams::PadRowPosZ(Int_t row)    { return mPadRowPosZ[row];        }
+inline Double_t StFtpcTrackingParams::InnerRadius()            { return mInnerRadius;            }
+inline Double_t StFtpcTrackingParams::OuterRadius()            { return mOuterRadius;            }
+inline    Int_t StFtpcTrackingParams::NumberOfPadRows()        { return mNumberOfPadRows;        }
+inline    Int_t StFtpcTrackingParams::NumberOfPadRowsPerSide() { return mNumberOfPadRowsPerSide; }
+inline Double_t StFtpcTrackingParams::PadRowPosZ(Int_t row)    { return mPadRowPosZ[row];        }
 
 // Vertex position
-inline Float_t StFtpcTrackingParams::MaxVertexPosZWarning() { return mMaxVertexPosZWarning; }
-inline Float_t StFtpcTrackingParams::MaxVertexPosZError()   { return mMaxVertexPosZError;   }
+inline Double_t StFtpcTrackingParams::MaxVertexPosZWarning() { return mMaxVertexPosZWarning; }
+inline Double_t StFtpcTrackingParams::MaxVertexPosZError()   { return mMaxVertexPosZError;   }
 
 // Vertex reconstruction
-inline   Int_t StFtpcTrackingParams::HistoBins() { return mHistoBins; }
-inline Float_t StFtpcTrackingParams::HistoMin()  { return mHistoMin;  }
-inline Float_t StFtpcTrackingParams::HistoMax()  { return mHistoMax;  }
+inline    Int_t StFtpcTrackingParams::HistoBins() { return mHistoBins; }
+inline Double_t StFtpcTrackingParams::HistoMin()  { return mHistoMin;  }
+inline Double_t StFtpcTrackingParams::HistoMax()  { return mHistoMax;  }
 
 // Tracker
 inline Int_t StFtpcTrackingParams::RowSegments() { return mRowSegments; }
@@ -560,28 +808,28 @@ inline Int_t StFtpcTrackingParams::PhiSegments() { return mPhiSegments; }
 inline Int_t StFtpcTrackingParams::EtaSegments() { return mEtaSegments; }
 
 // Tracking
-inline  Bool_t StFtpcTrackingParams::Laser(Int_t tracking_method)             { return mLaser[tracking_method];             }
-inline  Bool_t StFtpcTrackingParams::VertexConstraint(Int_t tracking_method)  { return mVertexConstraint[tracking_method];  }
-inline   Int_t StFtpcTrackingParams::MaxTrackletLength(Int_t tracking_method) { return mMaxTrackletLength[tracking_method]; }
-inline   Int_t StFtpcTrackingParams::MinTrackLength(Int_t tracking_method)    { return mMinTrackLength[tracking_method];    }
-inline   Int_t StFtpcTrackingParams::RowScopeTracklet(Int_t tracking_method)  { return mRowScopeTracklet[tracking_method];  }
-inline   Int_t StFtpcTrackingParams::RowScopeTrack(Int_t tracking_method)     { return mRowScopeTrack[tracking_method];     }
-inline   Int_t StFtpcTrackingParams::PhiScope(Int_t tracking_method)          { return mPhiScope[tracking_method];          }
-inline   Int_t StFtpcTrackingParams::EtaScope(Int_t tracking_method)          { return mEtaScope[tracking_method];          }
-inline Float_t StFtpcTrackingParams::MaxDca(Int_t tracking_method)            { return mMaxDca[tracking_method];            }
+inline   Bool_t StFtpcTrackingParams::Laser(Int_t tracking_method)             { return mLaser[tracking_method];             }
+inline   Bool_t StFtpcTrackingParams::VertexConstraint(Int_t tracking_method)  { return mVertexConstraint[tracking_method];  }
+inline    Int_t StFtpcTrackingParams::MaxTrackletLength(Int_t tracking_method) { return mMaxTrackletLength[tracking_method]; }
+inline    Int_t StFtpcTrackingParams::MinTrackLength(Int_t tracking_method)    { return mMinTrackLength[tracking_method];    }
+inline    Int_t StFtpcTrackingParams::RowScopeTracklet(Int_t tracking_method)  { return mRowScopeTracklet[tracking_method];  }
+inline    Int_t StFtpcTrackingParams::RowScopeTrack(Int_t tracking_method)     { return mRowScopeTrack[tracking_method];     }
+inline    Int_t StFtpcTrackingParams::PhiScope(Int_t tracking_method)          { return mPhiScope[tracking_method];          }
+inline    Int_t StFtpcTrackingParams::EtaScope(Int_t tracking_method)          { return mEtaScope[tracking_method];          }
+inline Double_t StFtpcTrackingParams::MaxDca(Int_t tracking_method)            { return mMaxDca[tracking_method];            }
 
 // Tracklets
-inline Float_t StFtpcTrackingParams::MaxAngleTracklet(Int_t tracking_method) { return mMaxAngleTracklet[tracking_method]; }
+inline Double_t StFtpcTrackingParams::MaxAngleTracklet(Int_t tracking_method) { return mMaxAngleTracklet[tracking_method]; }
 
 // Tracks
-inline Float_t StFtpcTrackingParams::MaxAngleTrack(Int_t tracking_method) { return mMaxAngleTrack[tracking_method]; }
-inline Float_t StFtpcTrackingParams::MaxCircleDist(Int_t tracking_method) { return mMaxCircleDist[tracking_method]; }
-inline Float_t StFtpcTrackingParams::MaxLengthDist(Int_t tracking_method) { return mMaxLengthDist[tracking_method]; }
+inline Double_t StFtpcTrackingParams::MaxAngleTrack(Int_t tracking_method) { return mMaxAngleTrack[tracking_method]; }
+inline Double_t StFtpcTrackingParams::MaxCircleDist(Int_t tracking_method) { return mMaxCircleDist[tracking_method]; }
+inline Double_t StFtpcTrackingParams::MaxLengthDist(Int_t tracking_method) { return mMaxLengthDist[tracking_method]; }
 
 // Split tracks
-inline Float_t StFtpcTrackingParams::MaxDist()       { return mMaxDist;       }
-inline Float_t StFtpcTrackingParams::MinPointRatio() { return mMinPointRatio; }
-inline Float_t StFtpcTrackingParams::MaxPointRatio() { return mMaxPointRatio; }
+inline Double_t StFtpcTrackingParams::MaxDist()       { return mMaxDist;       }
+inline Double_t StFtpcTrackingParams::MinPointRatio() { return mMinPointRatio; }
+inline Double_t StFtpcTrackingParams::MaxPointRatio() { return mMaxPointRatio; }
 
 // dE/dx
 inline Int_t StFtpcTrackingParams::DebugLevel() { return mDebugLevel;    }
@@ -607,5 +855,5 @@ inline  Double_t StFtpcTrackingParams::InstallationPointZ(Int_t i)    { return (
 inline  Double_t StFtpcTrackingParams::ObservedVertexOffsetY(Int_t i) { return (i>=0 && i<=1) ? mObservedVertexOffsetY[i] : 0.; }
 
 // magnetic field table
-inline Float_t StFtpcTrackingParams::MagFieldFactor()   { return mMagFieldFactor; }
+inline Double_t StFtpcTrackingParams::MagFieldFactor()  { return mMagFieldFactor; }
 inline StMagUtilities *StFtpcTrackingParams::MagField() { return mMagField;       }
