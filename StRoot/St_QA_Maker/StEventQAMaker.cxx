@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.9 2001/05/01 15:17:36 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.10 2001/05/02 16:10:46 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.10  2001/05/02 16:10:46  lansdell
+// changed some histogram limits
+//
 // Revision 2.9  2001/05/01 15:17:36  genevb
 // Execute EMC code only if EMC libs loaded
 //
@@ -220,18 +223,6 @@ void StEventQAMaker::MakeHistGlob() {
       // DCA in the xy-plane to a given point
       double S = geom->helix().pathLength(0,0);
       StThreeVectorD dcaToBeam = geom->helix().at(S);
-      // these histogram additions are for Lanny's evr QA histograms
-      hists->m_dcaToBeamXY->Fill(dcaToBeam.x(),dcaToBeam.y());
-      hists->m_dcaToBeamZ1->Fill(dcaToBeam.z());
-      hists->m_dcaToBeamZ2->Fill(dcaToBeam.z());
-      hists->m_dcaToBeamZ3->Fill(dcaToBeam.z());
-      hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(geom->dipAngle()));
-      hists->m_zDcaZf->Fill(dcaToBeam.z(),firstPoint.z());
-      hists->m_zDcaPsi->Fill(dcaToBeam.z(),geom->psi()/degree);
-      if (origin.phi() < 0)
-        hists->m_zDcaPhi0->Fill(dcaToBeam.z(),360+origin.phi()/degree);
-      else
-        hists->m_zDcaPhi0->Fill(dcaToBeam.z(),origin.phi()/degree);
 
 // from Lanny on 2 Jul 1999 9:56:03
 //1. x0,y0,z0 are coordinates on the helix at the starting point, which
@@ -267,6 +258,19 @@ void StEventQAMaker::MakeHistGlob() {
       if (map.hasHitInDetector(kTpcSvtId)) hists->m_det_id->Fill(kTpcSvtId);
       if (map.hasHitInDetector(kTpcSsdSvtId)) hists->m_det_id->Fill(kTpcSsdSvtId);
       if (map.hasHitInDetector(kSsdSvtId)) hists->m_det_id->Fill(kSsdSvtId);
+
+      // these histogram additions are for Lanny's evr QA histograms
+      hists->m_dcaToBeamXY->Fill(dcaToBeam.x(),dcaToBeam.y());
+      hists->m_dcaToBeamZ1->Fill(dcaToBeam.z());
+      hists->m_dcaToBeamZ2->Fill(dcaToBeam.z());
+      hists->m_dcaToBeamZ3->Fill(dcaToBeam.z());
+      hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(geom->dipAngle()));
+      if (map.trackTpcOnly()) hists->m_zDcaZf->Fill(dcaToBeam.z(),firstPoint.z());
+      hists->m_zDcaPsi->Fill(dcaToBeam.z(),geom->psi()/degree);
+      if (origin.phi() < 0)
+        hists->m_zDcaPhi0->Fill(dcaToBeam.z(),360+origin.phi()/degree);
+      else
+        hists->m_zDcaPhi0->Fill(dcaToBeam.z(),origin.phi()/degree);
 
       // calculate the probability of a fit being correct
       // number of degrees of freedom = fitpoints-5 (5 params constrain track)
