@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.24  1998/10/29 23:34:26  fisyak
+#  set ASU_MALLOC_OFF for PAMS
+#
 #  Revision 1.23  1998/10/08 15:57:37  fisyak
 #  Remove trailing blanks
 #
@@ -148,7 +151,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/10/08 15:57:37 $ 
+#           Last modification $Date: 1998/10/29 23:34:26 $ 
 #  default setings
 # Current Working Directory
 #
@@ -165,31 +168,36 @@ TWO        :=2
 THREE      :=3
 FOUR       :=4
 FIVE       :=5
-
+ifndef MakePam
 MakePam :=$(strip $(wildcard $(CWD)/MakePam.mk))
+endif
 ifndef MakePam
   MakePam :=$(strip $(wildcard $(CWD)/mgr/MakePam.mk))
 endif
 ifndef MakePam
   MakePam :=$(strip $(wildcard $(STAR)/mgr/MakePam.mk))
 endif
-
+ifndef MakeDll
 MakeDll :=$(strip $(wildcard $(CWD)/MakeDll.mk))
+endif
 ifndef MakeDll
   MakeDll :=$(strip $(wildcard $(CWD)/mgr/MakeDll.mk))
 endif
 ifndef MakeDll
   MakeDll :=$(strip $(wildcard $(STAR)/mgr/MakeDll.mk))
 endif
-
+ifndef Makeloop
 Makeloop :=$(strip $(wildcard $(CWD)/Makeloop.mk))
+endif
 ifndef Makeloop
   Makeloop :=$(strip $(wildcard $(CWD)/mgr/Makeloop.mk))
 endif
 ifndef Makeloop
   Makeloop :=$(strip $(wildcard $(STAR)/mgr/Makeloop.mk))
 endif
-
+export MakePam
+export MakeDll
+export Makeloop
 ifndef INP_DIR 
   INP_DIR := $(CWD)
 endif           
@@ -301,11 +309,11 @@ ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/St_*_Maker))
 StRoot += St_Makers
 endif
 Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St_*_Maker))
-Makers  :=  $(filter-out St_calib_Maker, $(Makers))
+#Makers  :=  $(filter-out St_calib_Maker, $(Makers))
 #Makers  :=  $(filter-out St_dst_Maker, $(Makers))
 Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
-Makers  :=  $(filter-out St_TLA_Maker, $(Makers))
-Makers  :=  $(filter-out St_fss_Maker, $(Makers))
+#Makers  :=  $(filter-out St_TLA_Maker, $(Makers))
+Makers  :=  $(filter-out St_laser_Maker, $(Makers))
 Makers  :=  $(filter-out St_mev_Maker, $(Makers))
 Makers  :=  $(filter-out St_tpctest_Maker, $(Makers))
 endif
