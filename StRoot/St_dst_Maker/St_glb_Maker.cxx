@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.42 1999/02/28 15:48:48 caines Exp $
+// $Id: St_glb_Maker.cxx,v 1.43 1999/03/03 04:52:55 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.43  1999/03/03 04:52:55  fisyak
+// Add protection for no vertex fit was made
+//
 // Revision 1.42  1999/02/28 15:48:48  caines
 // CHanged no of xi_vertex booked
 //
@@ -527,76 +530,80 @@ Int_t St_glb_Maker::Make(){
     // evr
     cout << "run_evr: calling evr_am" << endl;
     Int_t Res_evr = evr_am(m_evr_evrpar,m_egr_egrpar,globtrk,vertex);
-     // track_propagator
-    St_dst_track *globtrk2     = new St_dst_track("globtrk2");
-    dst.Add(globtrk2);
-    *globtrk2  = *globtrk;
-    cout << " Calling track_propagator " << endl;
-    if (m_tp_param && vertex) {
-      egr_propagate_st *tp_param = m_tp_param->GetTable();
-      tp_param->iflag =   m_flag;
-      if (m_flag == 1 || m_flag == 2) {
-	dst_vertex_st *vrtx = vertex->GetTable();
-	memcpy(&tp_param->x,&vrtx->x,3*sizeof(Float_t));  
-      }
+    if (Res_evr != kSTAFCV_OK || vertex->GetNRows() < 1) {
+      cout << "Problem with evr, skip till the dst filling " << endl; 
     }
-    Int_t Res_tp = track_propagator(globtrk,m_tp_param,globtrk2);
-
-     if (Res_tp !=  kSTAFCV_OK) 
+    else {
+      // track_propagator
+      St_dst_track *globtrk2     = new St_dst_track("globtrk2");
+      dst.Add(globtrk2);
+      *globtrk2  = *globtrk;
+      cout << " Calling track_propagator " << endl;
+      if (m_tp_param && vertex) {
+	egr_propagate_st *tp_param = m_tp_param->GetTable();
+	tp_param->iflag =   m_flag;
+	if (m_flag == 1 || m_flag == 2) {
+	  dst_vertex_st *vrtx = vertex->GetTable();
+	  memcpy(&tp_param->x,&vrtx->x,3*sizeof(Float_t));  
+	}
+      }
+      Int_t Res_tp = track_propagator(globtrk,m_tp_param,globtrk2);
+      
+      if (Res_tp !=  kSTAFCV_OK) 
         cout << "Problem on return from Track_Propagator" << endl;
-     
-     dst_track_st *glob  = globtrk->GetTable();
-     dst_track_st *glob2 = globtrk2->GetTable();
-     dst_vertex_st *vrtx = vertex->GetTable();
-     if( vrtx->vtx_id != 1){
-       for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
-	 if( vrtx->vtx_id == 1) break;
-       }
-     }
-     Float_t vx0 = vrtx->x;
-     Float_t vy0 = vrtx->y;
-     Float_t vz0 = vrtx->z; 
-		 
-     for( Int_t no_rows=0; no_rows<globtrk2->GetNRows(); 
-	  no_rows++, glob++,glob2++){
-       Float_t x0 = (glob2->x0 - vx0)*(glob2->x0 - vx0);
-       Float_t y0 = (glob2->y0 - vy0)*(glob2->y0 - vy0);
-       Float_t z0 = (glob2->z0 - vz0)*(glob2->z0 - vz0);
-       glob->impact = 	 TMath::Sqrt(x0+y0+z0);
-     }
-       
-    cout << " finished calling track-propagator" << endl;
-    // egr2
-    if (tphit && stk_track) {
-      if (!primtrk) {
-	primtrk = new St_dst_track("primtrk",globtrk->GetNRows());
-	dst.Add(primtrk);
+      
+      dst_track_st *glob  = globtrk->GetTable();
+      dst_track_st *glob2 = globtrk2->GetTable();
+      dst_vertex_st *vrtx = vertex->GetTable();
+      if( vrtx->vtx_id != 1){
+	for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
+	  if( vrtx->vtx_id == 1) break;
+	}
       }
-      if (!primtrk_aux) {
-	primtrk_aux = new St_dst_track_aux("primtrk_aux",globtrk_aux->GetNRows());
-	dst.Add(primtrk_aux);
+      Float_t vx0 = vrtx->x;
+      Float_t vy0 = vrtx->y;
+      Float_t vz0 = vrtx->z; 
+      
+      for( Int_t no_rows=0; no_rows<globtrk2->GetNRows(); 
+	   no_rows++, glob++,glob2++){
+	Float_t x0 = (glob2->x0 - vx0)*(glob2->x0 - vx0);
+	Float_t y0 = (glob2->y0 - vy0)*(glob2->y0 - vy0);
+	Float_t z0 = (glob2->z0 - vz0)*(glob2->z0 - vz0);
+	glob->impact = 	 TMath::Sqrt(x0+y0+z0);
       }
-      cout << "Calling EGR_fitter - Second time" << endl;
-       Int_t Res_egr2 = egr_fitter (tphit,vertex,tptrack,evaltrk,
-      			   scs_spt,m_egr2_egrpar,stk_track,groups,
-      				   evt_match,primtrk,primtrk_aux);
-     if (Res_egr2 != kSTAFCV_OK){
-    	cout << "Problem on return from EGR_FITTER" << endl;
+      
+      cout << " finished calling track-propagator" << endl;
+      // egr2
+      if (tphit && stk_track) {
+	if (!primtrk) {
+	  primtrk = new St_dst_track("primtrk",globtrk->GetNRows());
+	  dst.Add(primtrk);
+	}
+	if (!primtrk_aux) {
+	  primtrk_aux = new St_dst_track_aux("primtrk_aux",globtrk_aux->GetNRows());
+	  dst.Add(primtrk_aux);
+	}
+	cout << "Calling EGR_fitter - Second time" << endl;
+	Int_t Res_egr2 = egr_fitter (tphit,vertex,tptrack,evaltrk,
+				     scs_spt,m_egr2_egrpar,stk_track,groups,
+				     evt_match,primtrk,primtrk_aux);
+	if (Res_egr2 != kSTAFCV_OK){
+	  cout << "Problem on return from EGR_FITTER" << endl;
+	}
+	cout <<" finished calling egr_fitter - second time" << endl;
       }
-      cout <<" finished calling egr_fitter - second time" << endl;
-    }
 #endif
-    // ev0
-    cout << "Calling ev0..." << endl;
-    if (! dst_v0_vertex) {dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",20000); dst.Add(dst_v0_vertex);}
-    St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",globtrk->GetNRows());
-    temp->Add(ev0track2);
-    if (vertex->GetNRows() != 1) vertex->SetNRows(1); 
-    Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
-    if (Res_ev0 != kSTAFCV_OK) cout << " Problem on return from EV0 " << endl;
-
-    //  ev0_eval2
-    // if (stk_track && tptrack && evaltrk) {
+      // ev0
+      cout << "Calling ev0..." << endl;
+      if (! dst_v0_vertex) {dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",20000); dst.Add(dst_v0_vertex);}
+      St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",globtrk->GetNRows());
+      temp->Add(ev0track2);
+      if (vertex->GetNRows() != 1) vertex->SetNRows(1); 
+      Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
+      if (Res_ev0 != kSTAFCV_OK) cout << " Problem on return from EV0 " << endl;
+      
+      //  ev0_eval2
+      // if (stk_track && tptrack && evaltrk) {
       // St_ev0_eval *ev0_eval = new St_ev0_eval("ev0_eval",20000);
       //  dst.Add(ev0_eval);
       // St_DataSetIter geant(gStChain->DataSet("geant"));
@@ -605,22 +612,23 @@ Int_t St_glb_Maker::Make(){
       // if (g2t_track && g2t_vertex){
       //	cout << " Calling ev0_eval2.." << endl;
       // Int_t Res_ev0_eval = kSTAFCV_BAD;
-//    Res_ev0_eval = ev0_eval2(stk_track,tptrack,evaltrk,
-//				       vertex,ev0out,ev0_eval,
-//				       g2t_track,g2t_vertex);
-    
+      //    Res_ev0_eval = ev0_eval2(stk_track,tptrack,evaltrk,
+      //				       vertex,ev0out,ev0_eval,
+      //				       g2t_track,g2t_vertex);
+      
       //	if (Res_ev0_eval != kSTAFCV_OK) {cout << "Problem on return from ev0eval2" << endl;}
-    //   }
-    // }
-
-    // exi
-    cout << "Calling exi..."<< endl;
-    if (! dst_xi_vertex) {
-      dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",30*dst_v0_vertex->GetNRows());
-      dst.Add(dst_xi_vertex);
-     }
-    Int_t Res_exi = exiam(m_exipar,globtrk,vertex,dst_v0_vertex,dst_xi_vertex,m_exiaux);
-    if (Res_exi != kSTAFCV_OK) {cout << " Problem on return from EXI " << endl;}
+      //   }
+      // }
+      
+      // exi
+      cout << "Calling exi..."<< endl;
+      if (! dst_xi_vertex) {
+	dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",30*dst_v0_vertex->GetNRows());
+	dst.Add(dst_xi_vertex);
+      }
+      Int_t Res_exi = exiam(m_exipar,globtrk,vertex,dst_v0_vertex,dst_xi_vertex,m_exiaux);
+      if (Res_exi != kSTAFCV_OK) {cout << " Problem on return from EXI " << endl;}
+    }
     // dst 
     // dst_dedx_filler
     if (tptrack && stk_track) {
@@ -629,7 +637,7 @@ Int_t St_glb_Maker::Make(){
 	dst_dedx = new St_dst_dedx("dst_dedx",20000); dst.Add(dst_dedx);
       
       Int_t Res_dedx_filler =  dst_dedx_filler(tptrack,stk_track,dst_dedx);
-    
+      
       if (Res_dedx_filler != kSTAFCV_OK) 
 	cout << "Problem on return from DST_DEDX_FILLER" << endl; 
       
@@ -641,11 +649,11 @@ Int_t St_glb_Maker::Make(){
       // dst_point_filler
       if (! point) {point = new St_dst_point("point",200000); dst.Add(point);}
       Int_t Res_dst_point_filler = dst_point_filler(tphit, scs_spt, point);
-    
+      
       if ( Res_dst_point_filler != kSTAFCV_OK) 
 	cout << "Problem on return from DST_POINT_FILLER" << endl;
       
-    
+      
       cout << " run_dst: finished calling dst_point_filler" << endl;
     }
     St_DataSet *ftpc_hits   = gStChain->DataSet("ftpc_hits");
@@ -731,7 +739,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.42 1999/02/28 15:48:48 caines Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.43 1999/03/03 04:52:55 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
