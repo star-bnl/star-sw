@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.21  2004/02/13 10:43:11  subhasis
+// track->geometry() != 0 check added
+//
 // Revision 1.20  2003/10/21 15:35:25  suaide
 // fix a break segmentation introduced when a memory leak was fixed
 //
@@ -741,8 +744,8 @@ Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
   {
     for(unsigned int jj=0; jj < TrackToFit.size(); jj++)
     {
-      StPhysicalHelixD  Helix = TrackToFit[jj]->geometry()->helix();
-      helices.push_back(Helix);
+      if(TrackToFit[jj]->geometry()!=0)
+      helices.push_back(TrackToFit[jj]->geometry()->helix());
     }
   }
   //  if(mPrint) cout<<" HELIX FILLED ***Size **"<<helices.size()<<endl;
