@@ -1,5 +1,11 @@
-// $Id: StFtpcTracker.cc,v 1.3 2000/05/12 12:59:17 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.4 2000/05/15 14:28:13 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.4  2000/05/15 14:28:13  oldi
+// problem of preVertex solved: if no main vertex is found (z = NaN) StFtpcTrackMaker stops with kStWarn,
+// refitting procedure completed and included in StFtpcTrackMaker (commented),
+// new constructor of StFtpcVertex due to refitting procedure,
+// minor cosmetic changes
+//
 // Revision 1.3  2000/05/12 12:59:17  oldi
 // removed delete operator for mSegment in StFtpcConfMapper (mSegment was deleted twice),
 // add two new constructors for StFtpcTracker to be able to refit already existing tracks,
@@ -42,6 +48,7 @@ StFtpcTracker::StFtpcTracker()
   mTrack = 0;
 
   mHitsCreated = (Bool_t)false;
+  mVertexCreated = (Bool_t)false;
 
   mMaxDca = 100.;
 }
@@ -66,6 +73,8 @@ StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3],
   else {
     mVertex = new StFtpcVertex(vertexPos);
   }
+
+  mVertexCreated = (Bool_t)true;
 }
 
 
@@ -76,6 +85,7 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TClonesArray *hit, TClonesArr
   mVertex = vertex;
   mHit = hit;
   mHitsCreated = (Bool_t) false;
+  mVertexCreated = (Bool_t) false;
   mTrack = track;
   mMaxDca = dca;
 }
@@ -83,9 +93,10 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TClonesArray *hit, TClonesArr
 
 StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, St_fpt_fptrack *fpt_fptrack, Double_t dca)
 {
-  // Constructor to do refitting.
+  // Constructor to handle the case where everything is there already but only in StAF tables.
 
   mVertex = vertex;
+  mVertexCreated = (Bool_t)false;
 
   // Copy clusters into ClonesArray.
   Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
@@ -102,11 +113,10 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, 
   }
 
   // Copy tracks into ClonesArray.
-  Int_t n_tracks = fpt_fptrack->GetNRows();            // number of tracks
+  Int_t n_tracks = fpt_fptrack->GetNRows();  // number of tracks
   fpt_fptrack_st *track_st = fpt_fptrack->GetTable();  // pointer to first track structure
 
   mTrack = new TClonesArray("StFtpcTrack", n_tracks);    // create TClonesArray
-
   TClonesArray &track = *mTrack;
   
   for (Int_t i = 0; i < n_tracks; i++) {
@@ -131,7 +141,7 @@ StFtpcTracker::~StFtpcTracker()
     delete mHit;
   }
 
-  if (mVertex) {
+  if (mVertex && mVertexCreated) {
     delete mVertex;
   }
   
@@ -152,9 +162,12 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper)
       num_tracks = trackTableWrapper->GetTableSize();
     }
 
+    StFtpcTrack *track;
+    
     for (Int_t i=0; i<num_tracks; i++) {
-      ((StFtpcTrack *)(mTrack->At(i)))->Fit(mVertex, mMaxDca);    
-      ((StFtpcTrack *)(mTrack->At(i)))->Write(&(trackTable[i]));    
+      track = (StFtpcTrack *)mTrack->At(i);
+      track->Fit(mVertex, mMaxDca);  
+      track->Write(&(trackTable[i]));    
     }
    
     trackTableWrapper->SetNRows(num_tracks);

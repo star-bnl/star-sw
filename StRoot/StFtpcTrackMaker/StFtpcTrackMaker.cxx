@@ -1,5 +1,11 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.3 2000/05/12 12:59:16 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.4 2000/05/15 14:28:12 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.4  2000/05/15 14:28:12  oldi
+// problem of preVertex solved: if no main vertex is found (z = NaN) StFtpcTrackMaker stops with kStWarn,
+// refitting procedure completed and included in StFtpcTrackMaker (commented),
+// new constructor of StFtpcVertex due to refitting procedure,
+// minor cosmetic changes
+//
 // Revision 1.3  2000/05/12 12:59:16  oldi
 // removed delete operator for mSegment in StFtpcConfMapper (mSegment was deleted twice),
 // add two new constructors for StFtpcTracker to be able to refit already existing tracks,
@@ -13,7 +19,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 11.05.2000
+//----------Last Modified: 15.05.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include <iostream.h>
@@ -140,41 +146,51 @@ Int_t StFtpcTrackMaker::Make()
   if ( iflag != 101 ) {
     //    preVertex not found  - compute and store Holm's preVertex
     cout<<"(Holm's vertex): ";
-    
-    if (!preVtx) {
-      // no preVertex table exists
-      // create preVertex table with 1 row
-      preVtx = new St_dst_vertex("preVertex",1);
-      preVtx->SetNRows(1);
-      AddData(preVtx);
-    }
-    
-    else {
-      // correct preVertex not found
-      // add a row to preVertex
-      Int_t numRowPreVtx = preVtx->GetNRows(); 
-      preVtx->ReAllocate(numRowPreVtx+1);
-      preVtx->SetNRows(numRowPreVtx+1);
-    }
-    
-    dst_vertex_st *preVtxPtr = preVtx->GetTable();
-    preVtxPtr = preVtxPtr + preVtx->GetNRows() - 1;
-    
+
     StFtpcVertex *vertex = new StFtpcVertex(fcl_fppoint->GetTable(), fcl_fppoint->GetNRows());
-    
-    fpt_fptpar->primary_vertex[0] = 0.0;
-    fpt_fptpar->primary_vertex[1] = 0.0;
-    fpt_fptpar->primary_vertex[2] = vertex->GetZ();
-    
-    // save results in preVertex    
-    preVtxPtr->x = 0.0;
-    preVtxPtr->y = 0.0;
-    preVtxPtr->z = vertex->GetZ();
-    preVtxPtr->iflag = 301;
-    preVtxPtr->det_id = 4;
-    preVtxPtr->id = preVtx->GetNRows();
-    preVtxPtr->vtx_id = kEventVtxId;  
-    
+
+    if (isnan(vertex->GetZ())) {
+      // handels problem if there are not enough tracks and therefore a vertex cannot be found
+      cout << "No vertex found! Ftpc tracking stopped!" << endl;
+      delete vertex;
+      return kStWarn;
+    }
+
+    else {
+
+      if (!preVtx) {
+	// no preVertex table exists
+	// create preVertex table with 1 row
+	preVtx = new St_dst_vertex("preVertex",1);
+	preVtx->SetNRows(1);
+	AddData(preVtx);
+      }
+      
+      else {
+	// correct preVertex not found
+	// add a row to preVertex
+	Int_t numRowPreVtx = preVtx->GetNRows(); 
+	preVtx->ReAllocate(numRowPreVtx+1);
+	preVtx->SetNRows(numRowPreVtx+1);
+      }
+      
+      dst_vertex_st *preVtxPtr = preVtx->GetTable();
+      preVtxPtr = preVtxPtr + preVtx->GetNRows() - 1;
+      
+      fpt_fptpar->primary_vertex[0] = 0.0;
+      fpt_fptpar->primary_vertex[1] = 0.0;
+      fpt_fptpar->primary_vertex[2] = vertex->GetZ();
+      
+      // save results in preVertex    
+      preVtxPtr->x = 0.0;
+      preVtxPtr->y = 0.0;
+      preVtxPtr->z = vertex->GetZ();
+      preVtxPtr->iflag = 301;
+      preVtxPtr->det_id = 4;
+      preVtxPtr->id = preVtx->GetNRows();
+      preVtxPtr->vtx_id = kEventVtxId;  
+    }
+
     delete vertex;
   }
   
@@ -262,6 +278,23 @@ Int_t StFtpcTrackMaker::Make()
 
   delete tracker;
 
+  /*
+    // Refitting
+    // To do refitting of the tracks after some other module has found a 'better' 
+    // main vertex position include the following lines and insert the new vertex position. 
+    
+    St_DataSet *hit_data = GetDataSet("ftpc_hits");   
+    St_fcl_fppoint *points = (St_fcl_fppoint *)hit_data->Find("fcl_fppoint");
+    St_DataSet *track_data = GetDataSet("ftpc_tracks"); 
+    St_fpt_fptrack *tracks = (St_fpt_fptrack *)track_data->Find("fpt_fptrack");
+    
+    StFtpcVertex *refit_vertex = new StFtpcVertex(0., 0., 0.);   // insert vertex position (x, y, z) here!
+    StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, 1.);
+    refitter->FitAndWrite(tracks);
+    delete refitter;
+    delete refit_vertex;
+  */
+
   MakeHistograms();
   cout << "Tracking (FTPC) completed." << endl << endl;
 
@@ -300,7 +333,7 @@ void StFtpcTrackMaker::PrintInfo()
   // prints some information
 
   cout << "******************************************************************" << endl;
-  cout << "* $Id: StFtpcTrackMaker.cxx,v 1.3 2000/05/12 12:59:16 oldi Exp $ *" << endl;
+  cout << "* $Id: StFtpcTrackMaker.cxx,v 1.4 2000/05/15 14:28:12 oldi Exp $ *" << endl;
   cout << "******************************************************************" << endl;
   
   if (Debug()) {
