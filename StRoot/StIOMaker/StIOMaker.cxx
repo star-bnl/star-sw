@@ -260,7 +260,7 @@ StIOInterFace *StIOMaker::Load()
   (void) printf("<StIOMaker::Load() trying to GetClass(%s) case %d\n",className,fCase);
   klass = gROOT->GetClass(className);
   
-  if (! klass ) {        // lib not loaded
+  if (! klass || klass->Size()==0) {        // lib not loaded
     Int_t Loaded=0;      // library load stack may be self-sufficient, set to 1
     if (fCase==kStXDF)   gSystem->Load("xdf2root");
     if (fCase==kStDAQ)   gSystem->Load("StDaqLib");
