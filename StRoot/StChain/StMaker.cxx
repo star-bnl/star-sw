@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.33 1999/05/06 00:47:43 fine Exp $
+// $Id: StMaker.cxx,v 1.34 1999/05/06 21:27:10 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.34  1999/05/06 21:27:10  perev
+// StMaker remove his from hdirectory
+//
 // Revision 1.33  1999/05/06 00:47:43  fine
 // maker's histogram is removed from the ROOT system gDirectory
 //
@@ -86,7 +89,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.33 1999/05/06 00:47:43 fine Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.34 1999/05/06 21:27:10 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -257,20 +260,19 @@ St_DataSetIter nextMk(0);
 TString actInput,findString,tmp;
 St_DataSet *dataset,*dir;
 StMaker    *parent,*mk;
-int icol;
+int icol,islas;
+  
   actInput = GetInput(logInput);
   if (actInput.IsNull()) actInput = logInput;
   
-//	if I was called from THIS maker no sence to search here
-//VP  if (!uppMk && !dowMk) 	goto DOWN;
 
 //		Direct try
   dataset = 0;
   if (actInput.Contains("."))  dataset = Find(actInput);
-  if (dataset) return dataset;
+  if (dataset) goto FOUND;
   
   if (actInput==GetName()) dataset = m_DataSet;
-  if (dataset) return dataset;
+  if (dataset) goto FOUND;
 
 //		Not so evident, do some editing
   
@@ -281,23 +283,35 @@ int icol;
     tmp.Replace(0,0,".make/"); icol +=6;
     tmp.Replace(icol,1,"/.data/");
     dataset = Find((const char*)tmp);  		// .make/MAKER/.data/...
-    if (dataset) return dataset;
+    if (dataset) goto FOUND;
     dataset = Find((const char*)tmp+6);		//       MAKER/.data/...
-    if (dataset) return dataset;
+    if (dataset) goto FOUND;
     tmp.Replace(icol,7,"/.const/");
     dataset = Find((const char*)tmp);		// .make/MAKER/.const/...
-    if (dataset) return dataset;
+    if (dataset) goto FOUND;
     dataset = Find((const char*)tmp+6);		//       MAKER/.const/...
-    if (dataset) return dataset;
+    if (dataset) goto FOUND;
+    goto DOWN;
   }
 
-  if (actInput.Contains("/.")) 	goto DOWN;
-
   assert(m_DataSet);
+  islas = actInput.Index("/");
+  if (islas>0) {
+    tmp.Replace(0,999,actInput,islas);
+    if (tmp == GetName()) { // 
+      tmp = actInput;
+      tmp.Replace(0,islas+1,"");
+      dataset = m_DataSet->Find(tmp);
+      if (dataset) goto FOUND;
+      dataset = m_ConstSet->Find(tmp);
+      if (dataset) goto FOUND;
+    }
+  }
+
   dataset = m_DataSet->Find(actInput);
-  if (dataset) return dataset;
+  if (dataset) goto FOUND;
   dataset = m_ConstSet->Find(actInput);
-  if (dataset) return dataset;
+  if (dataset) goto FOUND;
 
 
 //	Try to search DOWN
@@ -308,19 +322,29 @@ DOWN: if (!(dir = Find(".make"))) goto UP;
   {
     if (mk==dowMk) continue;
     dataset = mk->GetDataSet(actInput,this,0);
-    if (dataset) return dataset;
+    if (dataset) goto FOUND;
   }
 
 //     Try to search UP
 UP: if (uppMk) return 0;
 
-  parent = GetMaker(this);         if (!parent) return 0;
+  parent = GetMaker(this); if (!parent) goto NOTFOUND;
   dataset = parent->GetDataSet(actInput,0,this);
-  if (dataset) return dataset;
+  if (dataset) goto FOUND;
 
+//		Not FOUND
+NOTFOUND:
   if (!dowMk && GetDebug()) //Print Warning message
     Warning("GetDataSet"," \"%s\" Not Found ***\n",(const char*)actInput);
   return 0;
+
+//		DataSet FOUND
+FOUND: if (uppMk || dowMk) 	return dataset;
+       if (GetDebug()<2) 	return dataset;
+  printf("Remark: <%s::%s> DataSet %s FOUND in %s\n"
+  ,ClassName(),"GetDataSet",logInput,(const char*)dataset->Path());
+
+  return dataset;
 
 }
 //______________________________________________________________________________
@@ -344,7 +368,7 @@ if (m_DataSet) m_DataSet->Delete();
 //_____________________________________________________________________________
 Int_t StMaker::Init()
 {   
-   TObject *objfirst, *objlast;
+   TObject  *objLast,*objHist;
    TList *tl = GetMakeList();
    if (!tl) return kStOK;
    
@@ -353,29 +377,30 @@ Int_t StMaker::Init()
 
    while ((maker = (StMaker*)nextMaker())) {
      // save last created histogram in current Root directory
-      objlast = gDirectory->GetList()->Last();
+      gROOT->cd();
+      objLast = gDirectory->GetList()->Last();
 
-     // Initialise maker
+// 		Initialise maker
       gBenchmark->Start((const char *)maker->GetName());
       if (GetDebug()) printf("\n*** Call %s::Init() ***\n\n",maker->ClassName());
       if ( maker->Init()) return kStErr;
       gBenchmark->Stop((const char *) maker->GetName());
-     // Add the Maker histograms in the Maker histograms list
-     // and remove it from the ROOT system directory
-      TList *rootListofHistogram = gDirectory->GetList();
-      if (rootListofHistogram) {
-         if (objlast) objfirst = rootListofHistogram->After(objlast);
-         else         objfirst = rootListofHistogram->First();
-         while (objfirst) {
-            if (objfirst->InheritsFrom("TH1")) {
-               // Move the histogram from the ROOT list into the "maker's" list
-                maker->AddHist((TH1*)objfirst);
-                ((TH1*)objfirst)->SetDirectory(0);
-            }
-            objfirst = rootListofHistogram->After(objfirst);
-         }
+
+// 		Add the Maker histograms in the Maker histograms list
+// 		and remove it from the ROOT system directory
+      gROOT->cd();
+      TIter nextHist(gDirectory->GetList());
+      int ready = !objLast;
+      while((objHist=nextHist())) {// loop over gDirectory
+        if (!ready && objHist!=objLast)		continue;
+        ready = 1999;
+        if (!objHist->InheritsFrom("TH1")) 	continue;
+
+// 		Move the histogram from the ROOT list into the "maker's" list
+        ((TH1*)objHist)->SetDirectory(0);
+        maker->AddHist((TH1*)objHist);
       }
-   }
+    }
   return kStOK; 
 }
 void StMaker::StartMaker()
