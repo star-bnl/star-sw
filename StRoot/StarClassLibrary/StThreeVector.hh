@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.7 2000/01/04 19:56:05 ullrich Exp $
+ * $Id: StThreeVector.hh,v 1.8 2002/06/21 17:47:37 genevb Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.8  2002/06/21 17:47:37  genevb
+ * Added pseudoProduct
+ *
  * Revision 1.7  2000/01/04 19:56:05  ullrich
  * Added cpp macro for CINT.
  *
@@ -129,11 +132,13 @@ public:
     StThreeVector<T>  operator+ ();
     StThreeVector<T>& operator*= (double);
     StThreeVector<T>& operator/= (double);
+    StThreeVector<T>  pseudoProduct(double,double,double) const;
  
 #ifndef ST_NO_MEMBER_TEMPLATES
     template<class X> T                angle(const StThreeVector<X>&) const;
     template<class X> StThreeVector<T> cross(const StThreeVector<X>&) const;
     template<class X> T                dot  (const StThreeVector<X>&) const;
+    template<class X> StThreeVector<T> pseudoProduct(const StThreeVector<X>&) const;
     
     template<class X> bool operator == (const StThreeVector<X>& v) const;
     template<class X> bool operator != (const StThreeVector<X>& v) const;
@@ -144,11 +149,13 @@ public:
     T                angle(const StThreeVector<float>&) const;
     StThreeVector<T> cross(const StThreeVector<float>&) const;
     T                dot  (const StThreeVector<float>&) const;
+    StThreeVector<T> pseudoProduct(const StThreeVector<float>&) const;
     
     T                angle(const StThreeVector<double>&) const;
     T                dot  (const StThreeVector<double>&) const;
     StThreeVector<T> cross(const StThreeVector<double>&) const;
-       
+    StThreeVector<T> pseudoProduct(const StThreeVector<double>&) const;
+
     bool operator == (const StThreeVector<float>& v) const;
     bool operator != (const StThreeVector<float>& v) const;
     StThreeVector<T>& operator+= (const StThreeVector<float>&);
@@ -440,6 +447,13 @@ inline StThreeVector<T>& StThreeVector<T>::operator/= (double c)
 }
 
 template<class T>
+inline StThreeVector<T>
+StThreeVector<T>::pseudoProduct(double x,double y,double z) const
+{
+    return StThreeVector<T>(mX1*x,mX2*y,mX3*z);
+}
+
+template<class T>
 StThreeVector<T> StThreeVector<T>::operator- ()
 {
     return StThreeVector<T>(-mX1, -mX2, -mX3);
@@ -532,6 +546,14 @@ inline T StThreeVector<T>::angle(const StThreeVector<X>& vec) const
     double norm = this->mag2()*vec.mag2();
     
     return norm > 0 ? acos(this->dot(vec)/(sqrt(norm))) : 0;
+}
+
+template<class T>
+template<class X>
+inline StThreeVector<T>
+StThreeVector<T>::pseudoProduct(const StThreeVector<X>& v) const
+{
+    return this->pseudoProduct(v.x(),v.y(),v.z());
 }
 
 #else
@@ -676,6 +698,20 @@ template<class T>
 inline T StThreeVector<T>::angle(const StThreeVector<double>& v) const
 {
     return acos(this->dot(v)/this->mag()/v.mag());
+}
+
+template<class T>
+inline StThreeVector<T>
+StThreeVector<T>::pseudoProduct(const StThreeVector<float>& v) const
+{
+    return this->pseudoProduct(v.x(),v.y(),v.z());
+}
+
+template<class T>
+inline StThreeVector<T>
+StThreeVector<T>::pseudoProduct(const StThreeVector<double>& v) const
+{
+    return this->pseudoProduct(v.x(),v.y(),v.z());
 }
 #endif  // ST_NO_MEMBER_TEMPLATES
 

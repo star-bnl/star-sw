@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.cc,v 1.10 2001/05/04 20:01:33 perev Exp $
+ * $Id: StThreeVectorD.cc,v 1.11 2002/06/21 17:47:36 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.cc,v $
+ * Revision 1.11  2002/06/21 17:47:36  genevb
+ * Added pseudoProduct
+ *
  * Revision 1.10  2001/05/04 20:01:33  perev
  * Bug, Redaversion added
  *
@@ -109,6 +112,12 @@ StThreeVectorD StThreeVectorD::cross(const StThreeVectorF& v) const
 double StThreeVectorD::angle(const StThreeVectorF& v) const
 {
     return acos(this->dot(v)/this->mag()/v.mag());
+}
+
+inline StThreeVectorD
+StThreeVectorD::pseudoProduct(const StThreeVectorF& v) const
+{
+    return this->pseudoProduct(v.x(),v.y(),v.z());
 }
 
 ostream&  operator<<(ostream& os, const StThreeVectorD& v)
