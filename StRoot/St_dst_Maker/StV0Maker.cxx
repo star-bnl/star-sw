@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.28 2000/10/12 14:52:14 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.29 2000/10/12 18:26:38 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.29  2000/10/12 18:26:38  genevb
+// Edit some warning messages
+//
 // Revision 1.28  2000/10/12 14:52:14  genevb
 // Remove vertex table entries when trimming V0s
 //
@@ -327,8 +330,6 @@ void StV0Maker::Trim(){
   ev0_ev0par2_st* pars = m_ev0parT->GetTable(0);
   rsize = dst_v0_vertex->GetRowSize();
   rvsize = vertex->GetRowSize();
-  gMessMgr->Info() << "StV0Maker::Trim(): start with " << vertex->GetNRows()
-                   << " vertex candidates" << endm;
 
   for (Int_t iv0 = 0; iv0 < dst_v0_vertex->GetNRows(); iv0++) {
     dst_v0_vertex_st* v0row = dst_v0_vertex->GetTable(iv0);
@@ -407,6 +408,8 @@ void StV0Maker::ChopVertex(Long_t idVert){
             break;
           }
         }
+        if (!i)
+          gMessMgr->Warning("StV0Maker::ChopVertex(): v0 vertex not found");
         break; }
       case kXiDecayIdentifier : {
         for (i = dst_xi_vertex->GetNRows(); i>0 ; i--) {
@@ -416,11 +419,13 @@ void StV0Maker::ChopVertex(Long_t idVert){
             break;
           }
         }
+        if (!i)
+          gMessMgr->Warning("StV0Maker::ChopVertex(): xi vertex not found");
         break; }
       case kKinkDecayIdentifier : {
 	if (!dst_tkf_vertex) {
-	  gMessMgr->Warning() << "StV0Maker::Trim(): "
-	    << " Deleting kink vertex, but no kinks done" << endm;
+	  gMessMgr->Warning() << "StV0Maker::ChopVertex(): "
+	    << " Deleting kink vertex, but kinks not done" << endm;
           break;
 	}
         for (i = dst_tkf_vertex->GetNRows(); i>0 ; i--) {
@@ -430,9 +435,11 @@ void StV0Maker::ChopVertex(Long_t idVert){
             break;
           }
         }
+        if (!i)
+          gMessMgr->Warning("StV0Maker::ChopVertex(): kink vertex not found");
         break; }
-      default : gMessMgr->Warning() << "StV0Maker::Trim(): "
-	    << " Deleting vertex of unkown type=" << vertrowL->vtx_id << endm;
+      default : gMessMgr->Warning() << "StV0Maker::ChopVertex(): "
+	    << " Moving vertex of unkown type=" << vertrowL->vtx_id << endm;
     }
   }
   vertex->SetNRows(lastVert);
