@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.70  2004/06/18 12:06:18  jcs
+// replace #ifdef...#elif...#endif conditional compiler directives with #ifdef...#endif #ifdef...#endif
+//
 // Revision 1.69  2004/06/18 09:04:40  jcs
 // replace obsolete DEBUGFILE code with code to write out a root file for cluster/laser analysis
 //
@@ -633,7 +636,8 @@ Int_t StFtpcClusterMaker::Make()
                                                        m_csteps,
                                                        m_chargestep_West,
                                                        m_chargestep_East);
-#elif DEBUGFILE
+#endif
+#ifdef DEBUGFILE
     StFtpcClusterDebug *cldebug=new StFtpcClusterDebug((int) GetRunNumber(),(int) GetEventNumber());
 
     StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 

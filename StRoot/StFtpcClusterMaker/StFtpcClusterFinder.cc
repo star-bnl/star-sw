@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.60 2004/06/18 09:04:39 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.61 2004/06/18 12:04:57 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.61  2004/06/18 12:04:57  jcs
+// replace #ifdef...#elif...#endif conditional compiler directives with #ifdef...#endif #ifdef...#endif
+//
 // Revision 1.60  2004/06/18 09:04:39  jcs
 // replace obsolete DEBUGFILE code with code to write out a root file for cluster/laser analysis
 //
@@ -215,7 +218,8 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
                                          TH2F *histo,
                                          TH1F *histoW,
                                          TH1F *histoE)
-#elif DEBUGFILE
+#endif
+#ifdef DEBUGFILE
 
 int iHardSec, iHardRow;
 
@@ -308,7 +312,8 @@ int StFtpcClusterFinder::search()
   Double_t  *pdeflection = 0;
 #ifndef DEBUGFILE  
   int iRow, iSec, iPad, iPadBuf, iHardSec, iHardRow;
-#elif DEBUGFILE
+#endif  
+#ifdef DEBUGFILE
   int iRow, iSec, iPad, iPadBuf;
 #endif
   int iRowBuf, iSecBuf;
@@ -881,7 +886,8 @@ bool StFtpcClusterFinder::geometryCut(TClusterUC *Cluster)
     return true;
   else
     return false;
-#elif DEBUGFILE
+#endif  
+#ifdef DEBUGFILE
    if (abs(Cluster->EndPad-Cluster->StartPad)<mMaxPadlengthOut && seqlength<mMaxTimelengthOut)
       return true;
    else
