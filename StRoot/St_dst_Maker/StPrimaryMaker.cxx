@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.47 2000/06/20 20:22:08 wdeng Exp $
+// $Id: StPrimaryMaker.cxx,v 1.48 2000/06/22 16:57:41 wdeng Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.48  2000/06/22 16:57:41  wdeng
+// Move globtrk length calculation from StPrimaryMaker to StMatchMaker.
+//
 // Revision 1.47  2000/06/20 20:22:08  wdeng
 // Copy cluster vertex to dst_vertex table.
 //
@@ -446,8 +449,9 @@ Int_t StPrimaryMaker::Make(){
     }
   }
   if (vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1) {
-    
     Float_t *pv = &vrtx->x;
+    StThreeVectorD primVertex(pv[0],pv[1],pv[2]);
+    
     for( Int_t no_rows=0; no_rows<globtrk->GetNRows(); no_rows++, glob++)
       {
 	Float_t dip   = atan(glob->tanl);
@@ -460,12 +464,7 @@ Int_t StPrimaryMaker::Make(){
 	StThreeVectorD origin(x0, y0, z0);  
 	StHelixD globHelix(curvature, dip, phase, origin, h);
 	
-	StThreeVectorD primVertex(pv[0],pv[1],pv[2]);
 	glob->impact = globHelix.distance(primVertex);
-
-	StThreeVectorD lastPoint(glob->x_last[0], glob->x_last[1],glob->x_last[2]);
-	Float_t globLength = globHelix.pathLength(lastPoint); 
-	glob->length = (globLength>0) ? globLength : (-globLength);  
       }
     
     if(Debug()) gMessMgr->Debug() << " finished calling track-propagator" << endm;
