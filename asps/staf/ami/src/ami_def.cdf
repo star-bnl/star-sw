@@ -15,11 +15,11 @@
 >GUIDANCE
 Analysis_Module_Invoker commands.
 .
- #(@)$Id: ami_def.cdf,v 1.4 1998/01/24 19:02:51 ward Exp $
+ #(@)$Id: ami_def.cdf,v 1.5 1998/02/20 22:26:13 love Exp $
 .
 AMI is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
-into the software bus archictecture of StAF in a CORBA compliant
+into the software bus architecture of StAF in a CORBA compliant
 interface layer.
 .
 Each ASP is comprised of an object factory interface (eg. amiFactory)
@@ -44,7 +44,7 @@ DESCRIPTION:
 COUNT is a readonly long attribute which reflects the number of AMI
 worker objects currently registered with the AMI object factory.
 Constructing a new AMI worker object increments COUNT by 1,
-destructing an existing AMI worker object decrements COUNT by 1.
+destroying an existing AMI worker object decrements COUNT by 1.
 .
 AMI worker objects include:
    amiInvoker - See AMI/MODULE
@@ -181,8 +181,8 @@ user-written PAMs. Each amiModule object corresponds to a different PAM
 function.
 .
 A Physics Analysis Module (PAM) is a user-written function in C, C++,
-or FORTRAN which adhears to one of the StAF PAM APIs.  Currently there
-is only one API for PAMs in StAF. A PAM which adhears to this API is
+or FORTRAN which adheres to one of the StAF PAM APIs.  Currently there
+is only one API for PAMs in StAF. A PAM which adheres to this API is
 called a type 1 PAM
 .
 **
@@ -204,7 +204,8 @@ NB. Readonly attributes are not necessarily static attributes.
 .
 The rank of an analysis module function is determined by the IDL
 (Interface Definition Language) definition of the analysis module
-function interface.
+function interface.  In short, the RANK is the number of tables in
+the PAM's call list. 
 .
 The IDL file:
 .
@@ -264,22 +265,22 @@ SOREF 'amiModule object SORef' C
 +
 TABLES  'List of PAM argument tables.' C D='-'
 >GUIDANCE
-More guidance needed here.
+The way to get work done.  CALL executes the PAM (SOREF) and specifies
+what tables it will operate on.
 .
 DESCRIPTION: 
 .
 CALL is a member function of objects which implement the amiModule
 interface.
 .
-Invoke a Physics Analysis Module on pre-existing and/or non-existant
-data tables. IN and INOUT tables must exist before being passed to the
-Physics Analysis Module. OUT tables can, but need not, exist before
-being passed to the Physics Analysis Module. Non-existant OUT tables
-will be created at invokation of the Physics Analysis Module.
+Invoke a Physics Analysis Module on data tables. IN and INOUT tables
+must exist before being passed to the PAM.  OUT tables can, but need
+not, exist.   Non-existent OUT tables will be created at invokation
+of the PAM by CALL.
 .
-Non-existant OUT tables can be created with a user-specified memory
+Non-existent OUT tables can be created with a user-specified memory
 allocation by specifying the number of rows to be allocated in
-parenthisis after the table name (The default is to allocate only one
+parenthesis after the table name (The default is to allocate only one
 row's worth of memory.).
 .
 ARGUMENTS: 
@@ -327,7 +328,8 @@ SEE ALSO:
 >PARAMETERS
 SOREF 'amiModule object SORef' C
 >GUIDANCE
-Show definition of Analysis Module invoker.
+Show definition of Analysis Module invoker.  I.e. show the tables
+expected in calling the PAM.
 .
 DESCRIPTION: 
 .
@@ -391,3 +393,5 @@ SEE ALSO:
 .
 >ACTION KAM_AMIMODULE_SHOW
 **
+
+
