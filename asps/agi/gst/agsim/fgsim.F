@@ -1,4 +1,4 @@
-*CMZ :          27/05/98  23.06.11  by  Pavel Nevski
+*CMZ :          05/08/98  23.16.12  by  Pavel Nevski
 *CMZ :  1.30/00 29/04/97  23.40.13  by  Pavel Nevski
 *-- Author :    Pavel Nevski   29/03/97
 c***********************************************************************
@@ -198,8 +198,7 @@ c***  Get command and number of parameters passed
                 endif
 *               Comis pass whole words only (both start and length !)
                 L1    = 4*((Length1+3)/4)
-                call CSJCAL(Iadr,2,string1(1:L1)
-     *,0,0,0,0,0, 0,0,0                )
+                call CSJCAL1S(Iadr,string1(1:L1))
                 IKINE = -4
             endif
 *
@@ -375,4 +374,5 @@ c----------------------------------------------------------------------
  5000  continue
        return
        end
+ 
  
