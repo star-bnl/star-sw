@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.21 1999/01/25 06:00:59 sakrejda Exp $
+* $Id: tte.F,v 1.22 1999/02/23 19:07:34 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.22  1999/02/23 19:07:34  sakrejda
+* changes in a qsort requested by Victor, put in
+*
 * Revision 1.21  1999/01/25 06:00:59  sakrejda
 * tte_res.idl removed from the tte call - obsolete
 *
@@ -311,7 +314,7 @@ c     write(6,*) 'number of mc hits used to create tfs hits = ',ng2t
 c
 c     sort on the mc hit id (key1)
       iret = tls_qsort_herb_i(ng2t,tindex(istart).key1,
-     >       tindex(istart+1).key1,tindex)
+     >       tindex(istart+1).key1,tindex(istart))
 c
 c
 c     set up a list so the monte carlo hit can be found in the
@@ -597,7 +600,7 @@ c     done with the mc tracks now go to the real tracks
 c
 c     sort on the index table on reconstructed hit id (key2)
       iret = tls_qsort_herb_i(ng2t,tindex(istart).key2,
-     >       tindex(istart+1).key2,tindex)
+     >       tindex(istart+1).key2,tindex(istart))
 c
 c
 c     set up a list so the reconstructed hit can be found in the
