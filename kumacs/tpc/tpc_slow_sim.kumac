@@ -36,8 +36,7 @@ message ' *** Ntuple ID # -->            ' [nid]
 message ' *** Table to write to ntup --> ' [table]
  
 * global macros
-*  exec $STAR/kumacs/util/setup_global_macros
-  exec /scr22/kathy/test98b_tfs/kumacs/util/setup_global_macros
+  exec $STAR/kumacs/util/setup_global_macros
   macro/global/import _
          KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
 
