@@ -1,7 +1,7 @@
-// $Id: St_smdst_Maker.h,v 1.1 1999/01/18 22:59:48 fisyak Exp $
+// $Id: St_smdst_Maker.h,v 1.2 1999/01/19 22:42:32 genevb Exp $
 // $Log: St_smdst_Maker.h,v $
-// Revision 1.1  1999/01/18 22:59:48  fisyak
-// Add Gene Van Buren smdst
+// Revision 1.2  1999/01/19 22:42:32  genevb
+// update comments
 //
 //
 // Revision 1.1  1999/01/18 12:46:19 genevb
