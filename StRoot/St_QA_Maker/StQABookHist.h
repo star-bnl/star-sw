@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.7 2001/05/24 01:48:14 lansdell Exp $ 
+// $Id: StQABookHist.h,v 2.8 2001/07/31 23:21:42 lansdell Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.8  2001/07/31 23:21:42  lansdell
+// added last point, hit-helix histos
+//
 // Revision 2.7  2001/05/24 01:48:14  lansdell
 // qa_shift histograms updated
 //
@@ -52,7 +55,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.7 2001/05/24 01:48:14 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.8 2001/07/31 23:21:42 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -196,7 +199,9 @@ class StQABookHist : public TObject {
   TH1F     *m_glb_zf0;       //! z-coord. of first hit - at start of helix
   TH1F     *m_glb_zf0TS;     //! z-coord. of first hit - at start of helix+svt
   TH2F     *m_glb_rzf0;      //! transverse & longitudinal helix center of first hit - helix hit
+  TH2F     *m_glb_rzl0;      //! transverse & longitudinal helix center of last hit - helix hit
   TH2F     *m_glb_rzf0TS;    //! transverse & longitudinal helix center of first hit - helix hit+svt
+  TH2F     *m_glb_rzl0TS;    //! transverse & longitudinal helix center of last hit - helix hit+svt
   TH1F     *m_glb_radfT;     //! radial (xy) coordinate of first hit, tpc
   TH1F     *m_glb_radfTS;    //! radial (xy) coordinate of first hit, tpc+svt
   TH2F     *m_glb_phifT;     //! phi dist. of first point on trk, tpc
@@ -394,7 +399,9 @@ class StQABookHist : public TObject {
   TH1F     *m_prim_zf0;       //! z-coord. of first hit - at start of helix
   TH1F     *m_prim_zf0TS;     //! z-coord. of first hit - at start of helix+svt
   TH2F     *m_prim_rzf0;      //! transverse & longitudinal helix center of first hit - helix hit
+  TH2F     *m_prim_rzl0;      //! transverse & longitudinal helix center of last hit - helix hit
   TH2F     *m_prim_rzf0TS;    //! transverse & longitudinal helix center of first hit - helix hit+svt
+  TH2F     *m_prim_rzl0TS;    //! transverse & longitudinal helix center of last hit - helix hit+svt
   TH1F     *m_prim_radfT;     //! radial (xy) coordinate of first hit, tpc
   TH1F     *m_prim_radfTS;    //! radial (xy) coordinate of first hit, tpc+svt
   TH2F     *m_prim_radfF;     //! radial (xy) coordinate of first hit, ftpc

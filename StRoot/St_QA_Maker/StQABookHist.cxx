@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.16 2001/06/06 18:44:59 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.17 2001/07/31 23:21:42 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.17  2001/07/31 23:21:42  lansdell
+// added last point, hit-helix histos
+//
 // Revision 2.16  2001/06/06 18:44:59  lansdell
 // changed domain on some qa_shift histograms
 //
@@ -193,6 +196,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_glb_planefF=0;
   m_glb_f0=0;
   m_glb_rzf0=0;
+  m_glb_rzl0=0;
   m_glb_radfT=0;
   m_glb_radfF=0;
   m_glb_radfFE=0;
@@ -257,6 +261,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_glb_zf0TS=0;      
   m_glb_f0TS=0;      
   m_glb_rzf0TS=0;
+  m_glb_rzl0TS=0;
   m_glb_radfTS=0;     
   m_psiTS=0;          
   m_tanlTS=0;         
@@ -388,6 +393,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_prim_zfFW=0;
   m_prim_f0=0;
   m_prim_rzf0=0;
+  m_prim_rzl0=0;
   m_prim_radfT=0;
   m_prim_radfF=0;
   m_prim_radfFE=0;
@@ -449,6 +455,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_prim_zf0TS=0;
   m_prim_f0TS=0;
   m_prim_rzf0TS=0;
+  m_prim_rzl0TS=0;
   m_prim_radfTS=0;
   m_ppsiTS=0;          
   m_ptanlTS=0;         
@@ -700,6 +707,10 @@ void StQABookHist::BookHistGlob(){
   m_glb_rzf0->Rebin(0,"#pm #sqrt{ x_{dif}^{2}+y_{dif}^{2}}");
   m_glb_rzf0->Rebin(1,"z_{dif}");
   m_glb_rzf0->SetStats(kFALSE);
+  m_glb_rzl0    = QAH::MH1F("QaGtrkRZl0",   "globtrk: last point: hit - helix, tpc",60,-3.,3.,2);
+  m_glb_rzl0->Rebin(0,"#pm #sqrt{ x_{dif}^{2}+y_{dif}^{2}}");
+  m_glb_rzl0->Rebin(1,"z_{dif}");
+  m_glb_rzl0->SetStats(kFALSE);
   m_glb_phifT   = QAH::MH1F("QaGtrkPhifT",  "globtrk: phi of first point on trk, tpc",64,0,360,2);
   m_glb_phifT->Rebin(0,"East");
   m_glb_phifT->Rebin(1,"West");
@@ -834,6 +845,10 @@ void StQABookHist::BookHistGlob(){
   m_glb_rzf0TS->Rebin(0,"#pm #sqrt{ x_{dif}^{2}+y_{dif}^{2}}");
   m_glb_rzf0TS->Rebin(1,"z_{dif}");
   m_glb_rzf0TS->SetStats(kFALSE);
+  m_glb_rzl0TS   = QAH::MH1F("QaGtrkRZl0TS",  "globtrk: last point: hit - helix, tpc+svt",60,-3.,3.,2);
+  m_glb_rzl0TS->Rebin(0,"#pm #sqrt{ x_{dif}^{2}+y_{dif}^{2}}");
+  m_glb_rzl0TS->Rebin(1,"z_{dif}");
+  m_glb_rzl0TS->SetStats(kFALSE);
   m_glb_phifTS   = QAH::H1F("QaGtrkPhifTS",   "globtrk: phi of first point on track, svt",64,0,360);
   m_lengthTS     = QAH::H1F("QaGtrkLengthTS", "globtrk: track length, tpc+svt", 50,0.,300.);
   m_psiTS        = QAH::H1F("QaGtrkPsiTS",    "globtrk: psi, tpc+svt (deg) ", 64, 0.,360.);
@@ -1145,6 +1160,10 @@ void StQABookHist::BookHistPrim(){
   m_prim_rzf0->Rebin(0,"#pm #sqrt{ x_{dif}^{2}+y_{dif}^{2}}");
   m_prim_rzf0->Rebin(1,"z_{dif}");
   m_prim_rzf0->SetStats(kFALSE);
+  m_prim_rzl0    = QAH::MH1F("QaPtrkRZl0",   "primtrk: last point: hit - helix (r,z), tpc",60,-3.,3.,2);
+  m_prim_rzl0->Rebin(0,"#pm #sqrt{ x_{dif}^{2}+y_{dif}^{2}}");
+  m_prim_rzl0->Rebin(1,"z_{dif}");
+  m_prim_rzl0->SetStats(kFALSE);
   m_plengthT     = QAH::H1F("QaPtrkLengthT", "primtrk: track length, tpc", 50,0.,300.);
   m_ppsiT        = QAH::H1F("QaPtrkPsiT",    "primtrk: psi, tpc (deg)", 36, 0.,360.);
   m_ptanlT       = QAH::H1F("QaPtrkTanlT",   "primtrk: tanl, tpc",32,-4.,4.);
@@ -1240,6 +1259,10 @@ void StQABookHist::BookHistPrim(){
   m_prim_rzf0TS->Rebin(0,"#pm #sqrt{ x_{dif}^{2}+y_{dif}^{2}}");
   m_prim_rzf0TS->Rebin(1,"z_{dif}");
   m_prim_rzf0TS->SetStats(kFALSE);
+  m_prim_rzl0TS   = QAH::MH1F("QaPtrkRZl0TS",  "primtrk: last point: hit - helix (r,z), tpc+svt",60,-3.,3.,2);
+  m_prim_rzl0TS->Rebin(0,"#pm #sqrt{ x_{dif}^{2}+y_{dif}^{2}}");
+  m_prim_rzl0TS->Rebin(1,"z_{dif}");
+  m_prim_rzl0TS->SetStats(kFALSE);
   m_plengthTS     = QAH::H1F("QaPtrkLengthTS", "primtrk: track length, tpc+svt", 50,0.,300.);
   m_ppsiTS        = QAH::H1F("QaPtrkPsiTS",    "primtrk: psi, tpc+svt (deg) ", 36, 0.,360.);
   m_ptanlTS       = QAH::H1F("QaPtrkTanlTS",   "primtrk: tanl, tpc+svt",32,-4.,4.);

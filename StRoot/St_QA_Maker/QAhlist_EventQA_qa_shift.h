@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.8 2001/06/27 23:57:50 lansdell Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.9 2001/07/31 23:21:42 lansdell Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.9  2001/07/31 23:21:42  lansdell
+// added last point, hit-helix histos
+//
 // Revision 2.8  2001/06/27 23:57:50  lansdell
 // added geant-reco primvtx position histos to qa_shift list
 //
@@ -119,9 +122,13 @@
   "StEQaXiVtxTot",
   "StEQaKinkTot",
   "StEQaGtrkRZf0",
+  "StEQaGtrkRZl0",
   "StEQaGtrkRZf0TS",
+  "StEQaGtrkRZl0TS",
   "StEQaPtrkRZf0",
+  "StEQaPtrkRZl0",
   "StEQaPtrkRZf0TS",
+  "StEQaPtrkRZl0TS",
   "StEbemcClNum",
   "StEbemcClEnergy",
   "StEbemcEta",
