@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.60 1999/05/29 20:42:41 fine Exp $
+// $Id: bfc.C,v 1.61 1999/06/09 01:15:06 snelling Exp $
 // $Log: bfc.C,v $
+// Revision 1.61  1999/06/09 01:15:06  snelling
+// added switches for year1a,b,c and 2a geometry (y1a,..,y2a)
+//
 // Revision 1.60  1999/05/29 20:42:41  fine
 // type fixed
 //
@@ -120,14 +123,14 @@ Int_t NoEvents = 0;
 Bool_t DefaultSet = kFALSE;
 //_____________________________________________________________________
 enum EChainOptions { 
-  kNULL =0 ,kEval    ,
+  kNULL =0 ,kEval    ,kY1a     ,kY1b     ,kY1c     ,kY2a     ,
   kXINDF   ,kXOUTDF  ,kGSTAR   ,kMINIDAQ ,kFZIN    ,kGEANT   ,kCTEST   ,
   kField_On,kNo_Field,kTPC     ,kTSS     ,kTRS     ,kTFS     ,kFPC     ,
   kFSS     ,kEMC     ,kCTF     ,kL3      ,kRICH    ,kSVT     ,kGLOBAL  ,
   kDST     ,kSQA     ,kEVENT   ,kANALYS  ,kTREE    ,kAllEvent,kLAST    
 };
 Char_t *ChainOptions[] = {
-  "NULL    ","Eval    ",
+  "NULL    ","Eval    ","Y1a     ","Y1b     ","Y1c     ","Y2a     ",
   "XINDF   ","XOUTDF  ","GSTAR   ","MINIDAQ ","FZIN    ","GEANT   ","CTEST   ",
   "FieldOn ","NoField ","TPC     ","TSS     ","TRS     ","TFS     ","FPC     ",
   "FSS     ","EMC     ","CTF     ","L3      ","RICH    ","SVT     ","GLOBAL  ",
@@ -136,6 +139,10 @@ Char_t *ChainOptions[] = {
 Char_t *ChainComments[] = {
   "Nothing to comment",
   "Turn on evaluation switch for different makers",
+  "Turn on Year 1a geometry (and corresponding Makers)",
+  "Turn on Year 1b geometry (and corresponding Makers)",
+  "Turn on Year 1c geometry (and corresponding Makers)",
+  "Turn on Year 2a geometry (and corresponding Makers)",
   "Read XDF input file with g2t",
   "Write dst to XDF file",
   "Run gstar for 10 muon track with pT = 10 GeV in |eta|<1",
@@ -166,7 +173,7 @@ Char_t *ChainComments[] = {
   "Nothing to comment",
 };
 UChar_t  ChainFlags[] = {
-  kFALSE   ,kFALSE   ,
+  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,
   kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,
   kTRUE    ,kFALSE   ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kFALSE  ,
   kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,
@@ -228,43 +235,83 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
       printf(" Switch on  %s\n",ChainOptions[kNo_Field]);
       printf(" Switch on  %s\n",ChainOptions[kEval]);
       break;
-    case kGSTAR:
+    case  kY1a:
+      ChainFlags[kY1a] = kTRUE;
+      ChainFlags[kTPC] = kTRUE;
+      ChainFlags[kFPC] = kTRUE;
+      ChainFlags[kCTF] = kTRUE;
+      printf(" Switch on  %s\n",ChainOptions[kY1a]);
+      break;
+    case  kY1b:
+      ChainFlags[kY1b] = kTRUE;
+      ChainFlags[kTPC] = kTRUE;
+      ChainFlags[kFPC] = kTRUE;
+      ChainFlags[kCTF] = kTRUE;
+      ChainFlags[kEMC] = kTRUE;
+      ChainFlags[kRICH] = kTRUE;
+      printf(" Switch on  %s\n",ChainOptions[kY1b]);
+      break;
+    case  kY1c:
+      ChainFlags[kY1c] = kTRUE;
+      ChainFlags[kTPC] = kTRUE;
+      ChainFlags[kFPC] = kTRUE;
+      ChainFlags[kCTF] = kTRUE;
+      printf(" Switch on  %s\n",ChainOptions[kY1c]);
+      break;
+    case  kY2a:
+      ChainFlags[kY2a] = kTRUE;
       SetDefaultChain();
+      printf(" Switch on  %s\n",ChainOptions[kY2a]);
+      break;
+    case kGSTAR:
+      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
+      SetDefaultChain();
+      }
       ChainFlags[kGEANT]   = kTRUE;
       ChainFlags[kGSTAR]   = kTRUE;
       printf(" Switch on  %s\n",ChainOptions[kGEANT]);
       printf(" Switch on  %s\n",ChainOptions[kGSTAR]);
       break;
     case kTSS:
-      SetDefaultChain(); 
+      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
+      SetDefaultChain();
+      }
       ChainFlags[k]    = kTRUE;
       ChainFlags[kTRS] = kFALSE;
       printf(" Switch on  %s\n",ChainOptions[kTSS]);
       printf(" Switch off %s\n",ChainOptions[kTRS]);
       break;
     case -kTSS:
+      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
       SetDefaultChain();
+      }
       ChainFlags[kTSS] = kFALSE;
       ChainFlags[kTRS] = kTRUE;
       printf(" Switch off %s\n",ChainOptions[kTSS]);
       printf(" Switch on  %s\n",ChainOptions[kTRS]);
       break;
     case kTRS:
+      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
       SetDefaultChain();
+      }
       ChainFlags[kTSS] = kFALSE;
       ChainFlags[kTRS] = kTRUE;
       printf(" Switch off %s\n",ChainOptions[kTSS]);
       printf(" Switch on  %s\n",ChainOptions[kTRS]);
       break;
     case -kTRS:
+      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
       SetDefaultChain();
+      }
       ChainFlags[kTSS] = kTRUE;
       ChainFlags[kTRS] = kFALSE;
       printf(" Switch on  %s\n",ChainOptions[kTSS]);
       printf(" Switch off %s\n",ChainOptions[kTRS]);
       break;
     case  kTFS:
+      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
       SetDefaultChain();
+      }
       ChainFlags[kTFS] = kTRUE;
       ChainFlags[kTSS] = kFALSE;
       ChainFlags[kTRS] = kFALSE;
@@ -276,7 +323,9 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
       break;
     default:
       if (k <= 0 || k > kLAST ) {printf ("Option %s unrecognized\n",ChainOptions[k]);}
+      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
       SetDefaultChain();
+      }
       if (kgo<0) {ChainFlags[k] = kFALSE; printf(" Switch off %s\n",ChainOptions[k]);}
       else       {ChainFlags[k] = kTRUE;  printf(" Switch on  %s\n",ChainOptions[k]);}
     }
@@ -351,8 +400,12 @@ void Load(const Char_t *Chain="tfs"){
     gSystem->Load("St_l3");
     gSystem->Load("St_l3t_Maker");
   }
-  if (ChainFlags[kRICH]) gSystem->Load("StRchMaker");
-  if (ChainFlags[kSVT] || ChainFlags[kGLOBAL]) gSystem->Load("St_svt");
+  if (ChainFlags[kRICH]) {
+    gSystem->Load("StRchMaker");
+  }
+  if (ChainFlags[kSVT] || ChainFlags[kGLOBAL]) {
+    gSystem->Load("St_svt");
+  }
   if (ChainFlags[kSVT]) {
     gSystem->Load("St_srs_Maker");
     gSystem->Load("St_stk_Maker");
@@ -468,7 +521,13 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, C
     //  geant->SetIwtype(1);
     //  geant->SetDebug();
     if (ChainFlags[kGSTAR]) {
-      geant->LoadGeometry("detp geometry YEAR_1B");
+      if (ChainFlags[kY1a]) { geant->LoadGeometry("detp geometry YEAR_1A");}
+      if (ChainFlags[kY1b]) { geant->LoadGeometry("detp geometry YEAR_1B");}
+      if (ChainFlags[kY1c]) { geant->LoadGeometry("detp geometry YEAR_1C");}
+      if (ChainFlags[kY2a]) { geant->LoadGeometry("detp geometry YEAR_2A");}
+      if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
+	geant->LoadGeometry("detp geometry YEAR_2A");
+      }
       geant->Do("subevent 0;");
       // gkine #particles partid ptrange yrange phirange vertexrange 
       geant->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  0. 0.;");
