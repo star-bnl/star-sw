@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.hh,v 2.4 2000/01/18 20:52:31 calderon Exp $
+ * $Id: StMcSvtHit.hh,v 2.5 2000/04/18 22:55:28 calderon Exp $
  * $Log: StMcSvtHit.hh,v $
+ * Revision 2.5  2000/04/18 22:55:28  calderon
+ * Functions to access the volume Id
+ * Added volume Id to output of operator<<
+ *
  * Revision 2.4  2000/01/18 20:52:31  calderon
  * Works with CC5
  *
@@ -56,6 +60,7 @@ public:
     unsigned long wafer() const;      // wafer=[1-7]
     unsigned long barrel() const;     // barrel=[1-3]
     unsigned long hybrid() const;
+    long          volumeId() const;
 
 protected:
     static StMemoryPool mPool;  //!
@@ -91,6 +96,7 @@ StMcSvtHit::barrel() const { return layer()/2; }
 inline unsigned long
 StMcSvtHit::hybrid() const { return 0; } // to be implemented
 
-
+inline long
+StMcSvtHit::volumeId() const { return mVolumeId; }
 
 #endif

@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.cc,v 2.4 2000/04/18 00:55:14 calderon Exp $
+ * $Id: StMcSvtHit.cc,v 2.5 2000/04/18 22:55:28 calderon Exp $
  * $Log: StMcSvtHit.cc,v $
+ * Revision 2.5  2000/04/18 22:55:28  calderon
+ * Functions to access the volume Id
+ * Added volume Id to output of operator<<
+ *
  * Revision 2.4  2000/04/18 00:55:14  calderon
  * added printout of local momentum to operator<<
  *
@@ -28,7 +32,7 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_svt_hit_Table.h"
 
-static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.4 2000/04/18 00:55:14 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.5 2000/04/18 22:55:28 calderon Exp $";
 
 StMemoryPool StMcSvtHit::mPool(sizeof(StMcSvtHit));
 
@@ -59,7 +63,8 @@ StMcSvtHit::~StMcSvtHit() {/* noop */}
 ostream&  operator<<(ostream& os, const StMcSvtHit& h)
 {
     os << "Position      : " << h.position() << endl; 
-    os << "Local Momentum: " << h.localMomentum() << endl; 
+    os << "Local Momentum: " << h.localMomentum() << endl;
+    os << "Volume Id     : " << h.volumeId() << endl;
     os << "Layer         : " << h.layer()    << endl;
     os << "Ladder        : " << h.ladder()   << endl;
     os << "Wafer         : " << h.wafer()    << endl;
