@@ -22,7 +22,7 @@ use Class::Struct;
 use File::Basename;
 
 
-require "/afs/rhic/star/packages/DEV/mgr/dbProdSetup.pl";
+require "/afs/rhic/star/packages/DEV00/mgr/dbProdSetup.pl";
 
 struct FileAttr => {
 
