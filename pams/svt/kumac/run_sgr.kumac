@@ -46,6 +46,7 @@ if ( [i] .eq. 1) then
   cd [data]/svt/tracks
   tdm/newtable ste_teval ste_teval 10000 
   tdm/newtable ste_teff ste_teff 1
+  rowcount ste_teff
 endif
 
         message 'Calling STE_AM...'
