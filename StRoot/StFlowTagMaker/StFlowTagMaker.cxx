@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.21 2000/03/28 23:23:25 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.22 2000/05/12 22:39:28 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.22  2000/05/12 22:39:28  snelling
+// Fixed warning
+//
 // Revision 1.21  2000/03/28 23:23:25  posk
 // Allow multiple instances of the AnalysisMaker.
 //
@@ -121,7 +124,6 @@ Int_t StFlowTagMaker::Make() {
   AddData(pSt_FlowTag,".data");
   // get a pointer to the c-struct containing the variables
   pFlowTag = pSt_FlowTag->GetTable();             // table structure
-  (pFlowTag);
   // print pointer to flowtag 
   if (Debug()) cout << "StTagPointer: " << pSt_FlowTag << endl;
   if (Debug()) cout << "TagPointer: " << pFlowTag << endl;
@@ -147,7 +149,7 @@ Int_t StFlowTagMaker::Make() {
 //-------------------------------------------------------------
 
 void StFlowTagMaker::PrintInfo() {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.21 2000/03/28 23:23:25 posk Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.22 2000/05/12 22:39:28 snelling Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
