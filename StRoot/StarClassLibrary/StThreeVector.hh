@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.11 2004/12/02 20:07:32 fine Exp $
+ * $Id: StThreeVector.hh,v 1.12 2005/03/28 06:03:41 perev Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.12  2005/03/28 06:03:41  perev
+ * Defence FPE added
+ *
  * Revision 1.11  2004/12/02 20:07:32  fine
  * define the valid method for both flavor of StThreeVector
  *
@@ -251,7 +254,7 @@ inline T StThreeVector<T>::z() const {return mX3;}
 template<class T>
 inline T StThreeVector<T>::theta() const
 {
-    return acos(mX3/this->mag());
+    return acos(mX3/(mag()+1e-20));
 }
 
 template<class T>
@@ -273,7 +276,7 @@ inline T StThreeVector<T>::pseudoRapidity() const
     // change code to more optimal:
     // double m = mag();
     // return 0.5*::log( (m+z())/(m-z()) );
-    return -::log(tan(theta()/2.));
+    return -::log(tan(theta()/2.+1e-20));
 }
 
 template<class T>

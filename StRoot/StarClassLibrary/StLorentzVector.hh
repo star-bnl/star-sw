@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVector.hh,v 1.8 2003/09/02 17:59:35 perev Exp $
+ * $Id: StLorentzVector.hh,v 1.9 2005/03/28 06:02:45 perev Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StLorentzVector.hh,v $
+ * Revision 1.9  2005/03/28 06:02:45  perev
+ * Defence FPE added
+ *
  * Revision 1.8  2003/09/02 17:59:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -361,7 +364,7 @@ inline T& StLorentzVector<T>::operator[] (size_t i)
 template<class T>
 inline T StLorentzVector<T>::rapidity() const
 {
-    return 0.5*::log((mX4+mThreeVector.z())/(mX4-mThreeVector.z()));
+    return 0.5*::log((mX4+mThreeVector.z())/(mX4-mThreeVector.z())+1e-20);
 }
 
 template<class T>
