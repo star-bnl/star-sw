@@ -40,6 +40,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "TROOT.h"
+#include "TFile.h"
+#include "TKey.h"
 #include "TTree.h"
 #include "TChain.h"
 #include "TBranch.h"
@@ -204,7 +206,8 @@ TTreeHelper::TTreeHelper(TTree *tree):fCast(&fNErr)
 
 TTreeHelper::TTreeHelper(const char *treeName):fCast(&fNErr)
 {
-  fTree  = new TChain(treeName);
+  fTree = 0;
+  if (treeName && treeName[0] && treeName[0]!=' ') fTree  = new TChain(treeName);
   Init();
 }
 //______________________________________________________________________________
@@ -216,8 +219,9 @@ void TTreeHelper::Init()
   fEntry = 0;
   fUnits = 0;
   fChain = 0;
-  if (fTree->IsA()==TChain::Class()) fChain=(TChain*)fTree;
   fTreeNumb = 0;
+  if (fTree==0) return;
+  if (fTree->IsA()==TChain::Class()) fChain=(TChain*)fTree;
   fTree->SetMakeClass(1);
   fTree->SetBranchStatus("*",0);
   if (fTree->IsA()==TChain::Class()) 
@@ -504,7 +508,6 @@ Int_t TTreeHelper::AddFile(const Char_t *file)
   TString tfile,tdir,tname,tbase,fullname;
   const char *name; char *cc;
 
-  Assert(fChain);
 
   tfile = file;
   tdir  = gSystem->DirName(tfile);
@@ -537,8 +540,41 @@ Int_t TTreeHelper::AddFile(const Char_t *file)
     if (len!=tname.Length())            continue;
     num++;
     printf("%02d -  TTreeHelper::AddFile %s\n",num,fullname.Data());
+    if (fChain == 0) WhichTree(fullname);
     fChain->Add(fullname);
   }
   gSystem->FreeDirectory(dir);
   return num;
 }
+//______________________________________________________________________________
+void TTreeHelper::WhichTree(const char *fileName)
+{
+   TString fileNameS = fileName;
+   gSystem->ExpandPathName(fileNameS);
+//   printf(" fileName = %s\n",fileNameS.Data());
+   
+   
+
+   TFile *tfile = new TFile(fileNameS.Data());
+   if (tfile->IsZombie()) {
+     printf("*** Can NOT open %s ***\n",fileNameS.Data());
+     return;}
+   
+   TList *keyList = tfile->GetListOfKeys();
+   TListIter NextKey(keyList);
+   TKey *key; const char *ttName=0;
+   while ( (key = (TKey*)NextKey()) ) 
+   { 
+     if (strcmp("TTree",key->GetClassName())) continue;
+     ttName = key->GetName(); break;
+   }  
+   printf(" Got TTree = %s\n",ttName);
+   if (ttName==0) return;
+
+   fTree = new TChain(ttName);
+   delete tfile;
+   Init();
+}
+
+
+
