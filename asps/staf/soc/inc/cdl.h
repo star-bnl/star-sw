@@ -2,7 +2,7 @@
 #define __CDL_H__
 
 #include <stdlib.h>
-#if defined(HPUX)
+#if defined(__hpux)
 #include <dl.h>
 void perror();
 #elif defined(AIX)
@@ -31,7 +31,7 @@ typedef enum {
 } ArgType;
 
 typedef 
-#if defined(HPUX)
+#if defined(__hpux)
    shl_t 
 #elif defined(SUN) || defined(SGI) || defined(SGI64)
    int *
