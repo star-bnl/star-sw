@@ -1,5 +1,8 @@
-// $Id: doEvents.C,v 1.19 1999/06/10 15:39:03 fisyak Exp $
+// $Id: doEvents.C,v 1.20 1999/06/24 20:06:36 genevb Exp $
 // $Log: doEvents.C,v $
+// Revision 1.20  1999/06/24 20:06:36  genevb
+// Include StUtilities library
+//
 // Revision 1.19  1999/06/10 15:39:03  fisyak
 // Add mag.field
 //
@@ -146,6 +149,7 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
 
 
 
+  gSystem->Load("StUtilities");
 
   // Dynamically link needed shared libs
   gSystem->Load("StMagF");
