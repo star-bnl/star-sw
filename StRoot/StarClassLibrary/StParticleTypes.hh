@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTypes.hh,v 1.1 1999/05/14 18:50:01 ullrich Exp $
+ * $Id: StParticleTypes.hh,v 1.2 2000/04/06 22:25:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StParticleTypes.hh,v $
- * Revision 1.1  1999/05/14 18:50:01  ullrich
- * Initial Revision
+ * Revision 1.2  2000/04/06 22:25:42  ullrich
+ * Added phi and omega. More STAR specific Geant IDs.
  *
  * Revision 1.1  1999/05/14 18:50:01  ullrich
  * Initial Revision
@@ -64,6 +64,8 @@
 #include "StKaonZero.hh"
 #include "StKaonZeroLong.hh"
 #include "StKaonZeroShort.hh"
+#include "StOmegaMeson.hh"
+#include "StPhi.hh"
 #include "StPionMinus.hh"
 #include "StPionPlus.hh"
 #include "StPionZero.hh"
