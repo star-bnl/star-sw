@@ -1,4 +1,5 @@
    subroutine geometry
+   entry      geometry_start
 *
    Call cavegeo
    Call pipegeo
@@ -16,8 +17,3 @@
 *
    end
 
-   subroutine geometry_init
-   external   geometry
-   call this_is_amodule('geometry'//char(0),geometry)
-   call geometry
-   end

@@ -1,4 +1,5 @@
    subroutine    GSTAR 
+   entry   gstar_start
    print *,' **********************************************************'
    print *,' *                                                        *'
    print *,' *             GSTAR specific parts are:                  *'
@@ -14,8 +15,3 @@
    print *,' **********************************************************'
    end
 
-   subroutine gstar_start
-   external   gstar
-   call this_is_amodule('gstar'//char(0),gstar)
-   call gstar
-   end
