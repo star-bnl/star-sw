@@ -1,9 +1,12 @@
 //
-// $Id: FlowTag.idl,v 1.2 1999/11/16 20:59:40 snelling Exp $
+// $Id: FlowTag.idl,v 1.3 2000/01/13 23:18:06 snelling Exp $
 //
 // Event by event flow tag
 //
 // $Log: FlowTag.idl,v $
+// Revision 1.3  2000/01/13 23:18:06  snelling
+// Changed sum pt to mean pt
+//
 // Revision 1.2  1999/11/16 20:59:40  snelling
 // Removed unused tags and added 6th harmonic
 //
@@ -16,5 +19,5 @@ struct FlowTag {
   float qxa[6], qxb[6], qxc[6], qxd[6];     /* x component Q vector */
   float qya[6], qyb[6], qyc[6], qyd[6];     /* y component Q vector */
   long  na[6], nb[6], nc[6], nd[6];         /* multiplicity */
-  float spta[6], sptb[6], sptc[6], sptd[6]; /* sum pt */
+  float mpta[6], mptb[6], mptc[6], mptd[6]; /* mean pt */
 };
