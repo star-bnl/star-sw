@@ -198,8 +198,6 @@ C :>--------------------------------------------------------------------
          id     = nh
          trac   = abs(jtra)
          volume = g2t_volume_id (Csys,NUMBV)
-         if (csys(1:3).eq.'tpc' .and. numbv(1).le.1 .and. hits(3).le.0)
-     >      print *,' tpc hit ',(numbv(i),i=1,3),(hits(i),i=1,3)
          do k=1,Nmh
             if (iadr(k).gt.0) QQ(iadr(k))=(hits(k))
          enddo
