@@ -1,7 +1,11 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.4 2000/04/20 16:53:39 calderon Exp $
+ * $Id: StMcEventMaker.h,v 1.5 2000/05/11 14:40:29 calderon Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.5  2000/05/11 14:40:29  calderon
+ * Added switches to do/do not load hit information from different detectors.
+ * By default, all the detectors' hit information is loaded.
+ *
  * Revision 1.4  2000/04/20 16:53:39  calderon
  * change maker name from "MCEvent" to "StMcEvent".
  *
@@ -42,14 +46,17 @@ public:
     StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.4 2000/04/20 16:53:39 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.5 2000/05/11 14:40:29 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
     Bool_t  doPrintEventInfo;      //! lots of screen output
     Bool_t  doPrintMemoryInfo;     //! 
     Bool_t  doPrintCpuInfo;        //! 
-
+    Bool_t  doUseTpc;              //!
+    Bool_t  doUseSvt;              //!
+    Bool_t  doUseFtpc;             //!
+    Bool_t  doUseRich;             //!
 protected:
     void   printEventInfo();
     void   printTrackInfo(StMcTrack*);
