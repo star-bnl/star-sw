@@ -1,5 +1,17 @@
-// $Id: StBFChain.cxx,v 1.71 2000/02/18 23:02:46 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.76 2000/02/29 01:58:47 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.76  2000/02/29 01:58:47  fisyak
+// Fix MDC3 chain
+//
+// Revision 1.74  2000/02/27 22:29:52  fisyak
+// Remove clash with I/O Maker in file names
+//
+// Revision 1.73  2000/02/25 21:53:39  fisyak
+// Add rrs to default
+//
+// Revision 1.72  2000/02/25 21:43:49  fisyak
+// Change default
+//
 // Revision 1.71  2000/02/18 23:02:46  fisyak
 // Fix bug for tables, add sim_T to PreVtx
 //
@@ -290,19 +302,21 @@ BfcItem BFC[] = {
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
   {"doEvents"    ,""  ,"","xin,event,analysis,FieldOn"                                    ,"","","",kFALSE},
-  {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
-  {"Cy1a"        ,""  ,"","y1a,tpc,ftpc,l0,Cdst,tree"                    ,"","","Turn on chain y1a",kFALSE},
-  {"Cy1b"        ,""  ,"","y1b,tpc,ftpc,l0,emc,Cdst,tree"                ,"","","Turn on chain y1b",kFALSE},
-  {"Cy1c"        ,""  ,"","y1c,tpc,ftpc,l0,Cdst,tree"                    ,"","","Turn on chain y1c",kFALSE},
-  {"Cy1d"        ,""  ,"","y1d,tpc,global,Cdst,qa,event,analysis,tree"   ,"","","Turn on chain y1d",kFALSE},
-  {"cy1e"        ,""  ,"","y1e,tpc,Cdst,tree"                            ,"","","Turn on chain y1h",kFALSE},
-  {"cy1h"        ,""  ,"","y1h,tpc,ftpc,l0,emc,Cdst,tree"                ,"","","Turn on chain y1e",kFALSE},
-  {"Cy2a"        ,""  ,"","y2a,tpc,svt,ftpc,l0,emc,Cdst,tree"            ,"","","Turn on chain y2a",kFALSE},
+  {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l0,l3,Cdst,qa,tags,tree"        ,"","","Default chain",kFALSE}, 
+  {"Cy1a"        ,""  ,"","y1a,Cdefault"                                 ,"","","Turn on chain y1a",kFALSE},
+  {"Cy1b"        ,""  ,"","y1b,Cdefault"                                 ,"","","Turn on chain y1b",kFALSE},
+  {"Cy1c"        ,""  ,"","y1c,Cdefault"                                 ,"","","Turn on chain y1c",kFALSE},
+  {"Cy1d"        ,""  ,"","y1d,Cdefault"                                 ,"","","Turn on chain y1d",kFALSE},
+  {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
+  {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
+  {"Cy2a"        ,""  ,"","y2a,Cdefault,svt"                             ,"","","Turn on chain y2a",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"gstar"       ,""  ,"","geant","",""      ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE}, 
@@ -310,10 +324,24 @@ BfcItem BFC[] = {
   {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
   {"fzin"        ,""  ,"","geant","" ,""                                      ,"read gstar fz-file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
+  {"NoFieldSet"  ,""  ,"","-FieldOn,-FieldOff,-HalfField,-ReverseField,-magF" ,"","","No Field Set",kFALSE},
+  {"FieldOn"     ,""  ,"","NoFieldSet"                ,"StMagFC","StMagF" ,"Constant nominal field",kFALSE},
+  {"FieldOff"    ,""  ,"","NoFieldSet"                       ,"StMagFC","StMagF" ,"No Field option",kFALSE},
+  {"HalfField"   ,""  ,"","NoFieldSet"                      ,"StMagFC","StMagF","Half Field option",kFALSE},
+  {"ReverseField",""  ,"","NoFieldSet"                   ,"StMagFC","StMagF","Reverse Field option",kFALSE},
+  {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
+  {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
+  {"Debug"       ,""  ,"",""                                                ,"","","Set debug flag",kFALSE},
+  {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},  
+  {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
+  {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
+  {"EvOut"       ,""  ,"",""                                       ,"","","Write StEvent to StTree",kFALSE},
+  {"GeantOut"    ,""  ,"",""                                    ,"","","Write g2t tables to StTree",kFALSE},
+  {"AllEvent"    ,""  ,"",""                                   ,"","","Write whole event to StTree",kFALSE},
+  {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
   {"tables"      ,""  ,"",
 "StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,mwc_T,sim_T,svt_T,tpc_T,trg_T,vpd_T","","","",kFALSE},
   {"StDbT"       ,""  ,"","",""                                ,"libStDb_Tables","Load StDb_Tables",kFALSE},
@@ -336,19 +364,6 @@ BfcItem BFC[] = {
   {"tls"         ,""  ,"","",""                                                           ,"tls","",kFALSE},
   {"daq"         ,""  ,"","",""                         ,"StDaqLib,StDAQMakerLib","Load StDAQMaker",kFALSE},
   {"SCL"         ,""  ,"","","","StarClassLibrary",                         "Load StarClassLibrary",kFALSE},
-  {"NoFieldSet"  ,""  ,"","-FieldOn,-FieldOff,-HalfField,-ReverseField,-magF" ,"","","No Field Set",kFALSE},
-  {"FieldOn"     ,""  ,"","NoFieldSet"                ,"StMagFC","StMagF" ,"Constant nominal field",kFALSE},
-  {"FieldOff"    ,""  ,"","NoFieldSet"                       ,"StMagFC","StMagF" ,"No Field option",kFALSE},
-  {"HalfField"   ,""  ,"","NoFieldSet"                      ,"StMagFC","StMagF","Half Field option",kFALSE},
-  {"ReverseField",""  ,"","NoFieldSet"                   ,"StMagFC","StMagF","Reverse Field option",kFALSE},
-  {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
-  {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
-  {"Debug"       ,""  ,"",""                                                ,"","","Set debug flag",kFALSE},
-  {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},  
-  {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
-  {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
-  {"EvOut"       ,""  ,"",""                                       ,"","","Write StEvent to StTree",kFALSE},
-  {"AllEvent"    ,""  ,"",""                                   ,"","","Write whole event to StTree",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -410,9 +425,8 @@ BfcItem BFC[] = {
   {"FlowTag"     ,"","TagsChain","Event,Flow"                 ,"StFlowTagMaker","StFlowTagMaker","",kFALSE},
   {"FlowAnalysis","","TagsChain","Event,Flow"       ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
   {"StrangeTags" ,"","TagsChain","Event"              ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
-  {"StEbyeScaTagsMaker " ,"","TagsChain","Event"
-                                      ,"StStEbyeScaTagsMaker Maker","StStEbyeScaTagsMaker Maker","",kFALSE},
-  {"tags"        ,"","TagsChain","Event,FlowTag,StrangeTags"    
+  {"EbyeScaTags" ,"","TagsChain","Event"              ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
+  {"tags"        ,"","TagsChain","globT,Event,FlowTag,StrangeTags,EbyeScaTags"    
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
   {"QA"          ,"QA","","globT,SCL,global"                        ,"St_QA_Maker","St_QA_Maker","",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
@@ -745,40 +759,38 @@ void StBFChain::SetFlags(const Char_t *Chain, Bool_t Force)
 //_____________________________________________________________________
 void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   // define input file
-  Char_t *Infile  = (Char_t *) infile;
-  if (!Infile) {
+  if (infile) InFile = new TString(infile);
+  if (!InFile) {
     if (GetOption("miniDAQ")) {
-      Infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"; // laser data
-      //Infile ="/scratch/sakrejda/tpc_s01w_981021_21h_cos_t7_f3.xdf"; // laser data
-      printf ("Use default input file %s for %s \n",Infile,"miniDAQ");
+      InFile = new TString("/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"); // laser data
+      printf ("Use default input file %s for %s \n",InFile->Data(),"miniDAQ");
     }
     else {
       if (GetOption("fzin")) {
-	TString StandrdFile("/star/rcf/disk0/star/test/auau200/hadronic_cocktail/standard/");
-             if (GetOption("y1b")) StandrdFile.Append("year_1b/hadronic_on/Gstardata/gstar.fzd");
-	else if (GetOption("y2a")) StandrdFile.Append("year_1b/hadronic_on/Gstardata/gstar.fzd");
-	     else {printf ("for fzin Option In file has not been defined. Exit!\n"); gSystem->Exit(1);}
-	     printf ("Use default input file %s for %s \n",Infile,"fzin");
+	InFile = new TString("/star/rcf/simu/cocktail/hadronic/default/lowdensity/");
+	if (GetOption("y1h")) InFile->Append("year_1h/hadronic_on/Gstardata/rcf0078/hc_lowdensity.400_evts.fz");
+	else 
+	if (GetOption("y2a")) InFile->Append("year_2a/hadronic_on/Gstardata/rcf0079/hc_lowdensity.400_evts.fz");
+	else {printf ("for fzin Option In file has not been defined. Exit!\n"); gSystem->Exit(1);}
+	printf ("Use default input file %s for %s \n",InFile->Data(),"fzin");
       }
       else {
 	if (GetOption("doEvents")){
-	  Infile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
-	  printf ("Use default input file %s for %s \n",Infile,"doEvent");
+	  InFile = new TString("/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf");
+	  printf ("Use default input file %s for %s \n",InFile->Data(),"doEvent");
 	}
 	else { 
 	  if (!GetOption("gstar")) {
-	    Infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";	       // g2t xdf file
-	    printf ("Use default input file %s for %s \n",Infile,"xin");
+	    InFile = new TString("/afs/rhic/star/data/samples/hijet-g2t.xdf");	       // g2t xdf file
+	    printf ("Use default input file %s for %s \n",InFile->Data(),"xin");
 	  }
 	}
       }
     }
   }
-  if (Infile) {
-    InFile = new TString(Infile);
-    if (Infile && !GetOption("fzin")) {
+  if (InFile) {
+    if (!GetOption("fzin")) {
       setFiles= new StFile();
-      InFile = new TString(Infile);
       TString *Files[80];
       Int_t NParsed = ParseString((const TString )*InFile,Files);
       Int_t i;
@@ -806,13 +818,14 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	FileOut->ReplaceAll(".fz","");
 	FileOut->ReplaceAll(".xdf","");
 	FileOut->Strip();
+	FileOut->Append(".root");
       }
     }
   }
   if (FileOut)  gMessMgr->QAInfo() << "Output root file name " <<  FileOut->Data() << endm;
   if (GetOption("tags") && FileOut && !m_TFile) {
     TString *TagsName = new  TString(FileOut->Data());
-    TagsName->Append(".tags.root");
+    TagsName->ReplaceAll(".root",".tags.root");
     m_TFile = new TFile(TagsName->Data(),"RECREATE");
   }
   if (GetOption("xout") && FileOut) {
@@ -850,7 +863,7 @@ void StBFChain::SetGeantOptions(){
       }
     }
     else {
-      if (geantMk->SetInputFile(InFile->Data()) > kStOK) {
+      if (!InFile || geantMk->SetInputFile(InFile->Data()) > kStOK) {
 	printf ("File %s cannot be opened. Exit! \n",InFile->Data());
 	gSystem->Exit(1);
       }
@@ -911,4 +924,5 @@ void StBFChain::SetTreeOptions()
     if (GetOption("l3t"))    treeMk->IntoBranch("l3tBranch","l3Tracks");
     if (GetOption("global")) treeMk->IntoBranch("globalBranch","global/.data");
   }
+  else if (GetOption("GeantOut") && geantMk) treeMk->IntoBranch("geantBranch","geant");
 }

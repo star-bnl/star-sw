@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbGeometry.cc,v 1.5 2000/02/25 17:25:36 long Exp $
+ * $Id: StTpcDbGeometry.cc,v 1.4 2000/02/10 01:21:49 calderon Exp $
  *
  * Authors: Brain Lasiuk & Manuel Calderon de la Barca Sanchez September 8, 1999
  *
@@ -11,9 +11,6 @@
  *****************************************************************
  *
  * $Log: StTpcDbGeometry.cc,v $
- * Revision 1.5  2000/02/25 17:25:36  long
- * move hardwired parameters into database
- *
  * Revision 1.4  2000/02/10 01:21:49  calderon
  * Switch to use StTpcDb.
  * Coordinates checked for consistency.
@@ -132,11 +129,10 @@ StTpcDbGeometry::StTpcDbGeometry(StTpcDb* globalDbPointer)
 
     mTimeBuckets = gTpcDbPtr->Electronics()->numberOfTimeBins();
     mEndCapZ     = 200.; 
-    mFrischGrid  = gTpcDbPtr->PadPlaneGeometry()->outerSectorPadPlaneZ() - 
-     gTpcDbPtr->WirePlaneGeometry()->outerSectorFrischGridPadPlaneSeparation();
-    mInnerSectorzOffSet = gTpcDbPtr->Dimensions()->zInnerOffset();
-    mOuterSectorzOffSet = gTpcDbPtr->Dimensions()->zOuterOffset();
-    mDriftDistance = gTpcDbPtr->Dimensions()->gatingGridZ();
+    mFrischGrid  = 209.9;
+    mInnerSectorzOffSet = .35;
+    mOuterSectorzOffSet = 0.;
+    mDriftDistance = 210.1;
 
     
     //mIoSectorSpacing = gTpcDbPtr->()->();

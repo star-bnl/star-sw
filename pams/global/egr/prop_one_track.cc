@@ -95,7 +95,7 @@ float prop_one_track( float gtrack[8] , float target[2] , float ptrack[3] )
       xv[1] = target[1];
       xv[2] = 0.;
       psi  = gtrack[3]*C_RAD_PER_DEG;
-      tanl = gtrack[4]*C_RAD_PER_DEG;
+      tanl = gtrack[4];
       pStraight[0] = cos(psi);
       pStraight[1] = sin(psi);
       pStraight[2] = tanl;

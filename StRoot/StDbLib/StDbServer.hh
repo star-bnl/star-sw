@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.hh,v 1.9 2000/02/15 20:27:44 porter Exp $
+ * $Id: StDbServer.hh,v 1.10 2000/03/01 20:56:16 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbServer.hh,v $
+ * Revision 1.10  2000/03/01 20:56:16  porter
+ * 3 items:
+ *    1. activated reConnect for server timeouts
+ *    2. activated connection sharing; better resource utilization but poorer
+ *       logging
+ *    3. made rollback method in mysqlAccessor more robust (affects writes only)
+ *
  * Revision 1.9  2000/02/15 20:27:44  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -144,9 +151,11 @@ public:
   virtual bool rollBack(StDbNode* node);
   virtual bool rollBack(StDbTable* table);
   virtual bool QueryDescriptor(StDbTable* table);
+  virtual void selectDb();
 
   // provide direct SQL access
   virtual tableQuery* getQueryObject();
+  virtual void setQueryObject(tableQuery* queryObject);
 
   virtual void connectError();
  
@@ -172,9 +181,28 @@ StDbServer::closeConnection(){
 }
 
 
+////////////////////////////////////////////////////////////////
+
+inline
+void StDbServer::selectDb(){
+  if(!mdatabase->IsConnected()) initServer();
+  mdatabase->selectDb(mdbName,mdbType,mdbDomain);
+}
+
+////////////////////////////////////////////////////////////////
+
 inline
 tableQuery* 
 StDbServer::getQueryObject(){ return mdatabase;}
+
+////////////////////////////////////////////////////////////////
+
+inline
+void 
+StDbServer::setQueryObject(tableQuery* queryObject){ 
+mdatabase=queryObject;
+mconnectState=mdatabase->IsConnected();
+}
 
 inline
 void StDbServer::connectError() {

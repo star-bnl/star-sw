@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: mysqlAccessor.hh,v 1.9 2000/02/15 20:27:45 porter Exp $
+ * $Id: mysqlAccessor.hh,v 1.10 2000/03/01 20:56:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.hh,v $
+ * Revision 1.10  2000/03/01 20:56:17  porter
+ * 3 items:
+ *    1. activated reConnect for server timeouts
+ *    2. activated connection sharing; better resource utilization but poorer
+ *       logging
+ *    3. made rollback method in mysqlAccessor more robust (affects writes only)
+ *
  * Revision 1.9  2000/02/15 20:27:45  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -69,6 +76,8 @@ class mysqlAccessor : public tableQuery {
 
 unsigned int theEndTime;
 
+char* mserverName;
+int mportNumber;
 char* mdbName;
 StDbType mdbType;
 StDbDomain mdbDomain;
@@ -78,7 +87,8 @@ public:
 MysqlDb Db;
 StDbBuffer buff;
 
-  mysqlAccessor(StDbType type, StDbDomain domain):theEndTime(2145934799), mdbName(0), mdbType(type), mdbDomain(domain) { };
+  mysqlAccessor(const char* serverName, int portNumber); 
+  mysqlAccessor(StDbType type, StDbDomain domain):theEndTime(2145934799), mserverName(0), mportNumber(0), mdbName(0), mdbType(type), mdbDomain(domain) { };
    ~mysqlAccessor();
     
   virtual int initDbQuery(const char* dbname, 
@@ -99,6 +109,8 @@ StDbBuffer buff;
   virtual bool rollBack(StDbTable* table);
   
   virtual int QueryDescriptor(StDbTable* table);
+  virtual void selectDb(const char* dbName, StDbType type, StDbDomain domain);
+
 
   virtual StDbBuffer* getBuffer(){return (StDbBuffer*) &buff;}; 
   virtual bool  IsConnected();

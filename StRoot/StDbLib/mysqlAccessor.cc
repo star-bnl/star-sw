@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.19 2000/02/24 20:30:49 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.21 2000/03/06 17:11:49 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,18 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.21  2000/03/06 17:11:49  porter
+ * - WriteDb(table) returns true if no data is in table
+ * - fixed memory leak introduced in 2/18/00 update.
+ * - modified descriptor algorythm for OnlRunDescriptor.
+ *
+ * Revision 1.20  2000/03/01 20:56:16  porter
+ * 3 items:
+ *    1. activated reConnect for server timeouts
+ *    2. activated connection sharing; better resource utilization but poorer
+ *       logging
+ *    3. made rollback method in mysqlAccessor more robust (affects writes only)
+ *
  * Revision 1.19  2000/02/24 20:30:49  porter
  * fixed padding for uchar; beginTime in mysqlAccessor;
  * added rollback safety checkes in StDbManger
@@ -76,10 +88,20 @@
 #include <strings.h>
 
 ////////////////////////////////////////////////////////////////
+mysqlAccessor::mysqlAccessor(const char* serverName, int portNumber): theEndTime(2145934799), mdbName(0), mdbType(dbStDb), mdbDomain(dbDomainUnknown) {
+
+mserverName=new char[strlen(serverName)+1];
+strcpy(mserverName,serverName);
+mportNumber = portNumber;
+
+}
+
+////////////////////////////////////////////////////////////////
 
 mysqlAccessor::~mysqlAccessor(){
 
 if(mdbName) delete [] mdbName;
+if(mserverName) delete [] mserverName;
 
 }
 
@@ -315,9 +337,14 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
     table->setEndTime(getUnixTime(eTime));
   } else {
     table->setEndTime(getEndTime()); // simply use dec-31st 2037, 11:59:59
-    table->setEndTime(getEndDateTime()); // simply use dec-31st 2037, 11:59:59
+    eTime=getEndDateTime();
+    table->setEndTime(eTime); // simply use dec-31st 2037, 11:59:59
   }
 
+  if(eTime) {
+     delete [] eTime;
+     eTime=0;
+  }
   unsigned int t1,t2;
   t1=t2=0;
   int countRows = 0;
@@ -466,6 +493,7 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
                break;
             }
           }
+     buff.Raz();
      }
 
      Db.Release(); buff.Raz();
@@ -536,6 +564,7 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
   if(eTime)delete [] eTime;
   if(rTime)delete [] rTime;
   if(elementID) delete [] elementID;
+  buff.Raz();
   Db.Release();
 
   return 1; 
@@ -624,7 +653,9 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
 
     if(!table->hasData() && !table->IsStoreMode()){
       table->commitData(); // prevents rollback on this table
-      return 0;
+      if(!StDbManager::Instance()->IsQuiet()) 
+         cout<<"WriteDb::Info no data in table="<<table->getMyName()<<". No write done"<<endl;
+      return 1;
     }
   
   StDbNodeInfo currentNode;
@@ -651,7 +682,8 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
   }
 
 
-  table->setNodeID(currentNode.nodeID);
+    table->setNodeID(currentNode.nodeID);
+
 
   // check if it baseline &, if so, if an instance is already stored 
   if(currentNode.IsBaseLine && hasInstance(&currentNode)){
@@ -959,6 +991,7 @@ mysqlAccessor::readNodeInfo(StDbNodeInfo* node){
     cout << " version = " << node->versionKey;
     cout << " nodeType = " << node->nodeType;
     cout << " cstructName = " << node->structName << endl;
+    cout << " node ID = " << node->nodeID << endl;
     */
 return true;
 };
@@ -1180,32 +1213,51 @@ int* dataIDs=table->getWrittenRows(&numrows);
 
  if(dataIDs){
      
-   char* dataString = new char[4*numrows+1];
-   ostrstream os(dataString,4*numrows+1);
-   for(int i=0;i<numrows-1;i++)os<<"dataID="<<dataIDs[i]<<" OR ";
-   os<<"dataID="<<dataIDs[numrows-1]<<ends;
-   if(table->IsBinary()){
-     Db<<"Delete from bytes where "<<dataString<<endsql;
-   } else {
-     Db<<"Delete from "<<table->getCstrName()<<" where "<<dataString<<endsql;
+   for(int i=0;i<numrows-1;i++){
+     char dataString[1024];
+     ostrstream os(dataString,1024);
+     os<<" dataID="<<dataIDs[i]<<ends;
+     if(table->IsBinary()){
+        Db<<"Delete from bytes where "<<dataString<<endsql;
+      } else {
+        Db<<"Delete from "<<table->getCstrName()<<" where "<<dataString<<endsql;
+      }
+
+     Db.Release();
+     if(table->IsIndexed()){
+        char nodeID[10];
+        ostrstream nos(nodeID,10); nos<<table->getNodeID()<<ends;
+        Db<<"delete from dataIndex where nodeID="<<nodeID<<" AND ";
+        Db<<dataString<<endsql;
+     }
    }
+    Db.Release();
+ }
 
-   Db.Release();
-   if(table->IsIndexed()){
-      char * nodeID = new char[10];
-      ostrstream nos(nodeID,10); os<<table->getNodeID()<<ends;
-      Db<<"delete from dataIndex where nodeID="<<nodeID<<" AND (";
-      Db<<dataString<<")"<<endsql;
-   }
-
-   delete [] dataString;
-   Db.Release();
-   table->commitData();
-
- } 
-
+table->commitData();
+ 
 return true;
 }
+
+/////////////////////////////////////////////////////////////////
+
+void
+mysqlAccessor::selectDb(const char* dbName, StDbType type, StDbDomain domain){
+
+  //  if(mdbName) cout << " Switching from db="<<mdbName;
+  //  cout << " Selecting Database="<<dbName << endl;
+ 
+mdbType = type;
+mdbDomain = domain;
+if(mdbName) delete [] mdbName;
+mdbName=new char[strlen(dbName)+1];
+strcpy(mdbName,dbName);
+Db.setDefaultDb(mdbName);
+}
+
+
+
+
 
 /////////////////////////////////////////////////////////////////
 

@@ -1,15 +1,6 @@
-* $Id: gstar_input.g,v 1.33 2000/02/25 16:23:19 nevski Exp $
+* $Id: gstar_input.g,v 1.30 2000/02/17 17:01:21 nevski Exp $
 *
 * $Log: gstar_input.g,v $
-* Revision 1.33  2000/02/25 16:23:19  nevski
-* no header printed on skipped events
-*
-* Revision 1.32  2000/02/25 16:20:12  nevski
-* no header printed on skipped events
-*
-* Revision 1.31  2000/02/25 02:26:35  nevski
-* debugging print commented out
-*
 * Revision 1.30  2000/02/17 17:01:21  nevski
 * agcuser common changed
 *
@@ -124,7 +115,7 @@
 *       return: error flag                                              *
 *************************************************************************
    Implicit   None
-+CDE,GCBANK,GCFLAG,GCNUM,SCLINK,RBBANK,AgCKINE.
++CDE,GCBANK,GCNUM,SCLINK,RBBANK,AgCKINE.
    Integer          LENOCC,CSADDR,AMI_CALL,Igate,Ier,J,I
    Character        C*1, o*1, Table*120
    Integer          Irec,InEvent,NnEvent
@@ -145,8 +136,8 @@
      elseif C=='M' { J=CsADDR ('MICKINE'); IF (J!=0) Call CsJCAL(J,1,Igate)}
      elseif C=='S' { J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)-1;     }
      If Igate<=0   { Ier=1; return }
-     If (NtoSkip<=0 | Idebug>0) print *,' AgUsREAD mode ',C,' Event ',Ievent,
-        ': # particles in GEANT=',Ntrack,'  # vertices=',Nvertx   
+     print *,' AgUsREAD mode ',C,': # particles in GEANT=',Ntrack,
+                                 '  # vertices=',Nvertx
      if (J==0) print *,' AgUsREAD ERROR : input processor did not work '
    enddo
 
@@ -180,7 +171,7 @@
    Call RZCDIR(CWD, 'R')
    Call RZCDIR(CDIR,' ')
    Call  HCDIR(CDIR,' ')
-*  Call RZCDIR(' ', 'P')
+   Call RZCDIR(' ', 'P')
    Call HRin  (Id,  99999,Igate*1000) 
    Call HRin  (Id-1,99999,Igate*1000) 
    if (Irec(Igate)=<0) then

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.16 2000/02/25 20:04:59 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.17 2000/02/29 23:04:01 jgreid Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.17  2000/02/29 23:04:01  jgreid
+ * bug fix
+ *
  * Revision 1.16  2000/02/25 20:04:59  jgreid
  * changed to primary tracks, added abs(y) calculation
  *
@@ -337,13 +340,13 @@ Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
 
     //uncomment the next line to send the analysis results to cout
     //    for charge > 0 ...
-    cout << trackCountPlus << " " << meanPtPlus/GeV << " " << meanPtSquaredPlus/(GeV*GeV) << endl;
+    //cout << trackCountPlus << " " << meanPtPlus/GeV << " " << meanPtSquaredPlus/(GeV*GeV);
     //    for charge < 0 ...
-    cout << trackCountMinus << " " << meanPtMinus/GeV << " " << meanPtSquaredMinus/(GeV*GeV) << endl;
+    //cout << trackCountMinus << " " << meanPtMinus/GeV << " " << meanPtSquaredMinus/(GeV*GeV);
     //    for charge > 0 ...
-    cout << meanEtaPlus << " " << meanEtaSquaredPlus << " " << totalAbsEtaPlus << endl;
+    //cout << meanEtaPlus << " " << meanEtaSquaredPlus << " " << totalAbsEtaPlus;
     //    for charge < 0 ...
-    cout << meanEtaMinus << " " << meanEtaSquaredMinus << " " << totalAbsEtaMinus << endl;
+    //cout << meanEtaMinus << " " << meanEtaSquaredMinus << " " << totalAbsEtaMinus << endl;
 
 
     //uncomment the next line (and declaration of outFile above) to append results to a file
