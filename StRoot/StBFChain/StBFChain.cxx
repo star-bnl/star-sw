@@ -45,12 +45,13 @@ BfcItem BFC[] = {
   {"Cy1d"        ,""  ,"","y1d,Cdefault"                                 ,"","","Turn on chain y1d",kFALSE},
   {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
   {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
-  {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,l0,l3,Cdst,qa,tags,Tree,svt"     ,"","","Turn on chain y2a",kFALSE},
+  {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,emc,l0,l3,Cdst,qa,tags,Tree,svt" ,"","","Turn on chain y2a",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
+  {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"gstar"       ,""  ,"","geant","",""      ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE}, 
   {"tdaq"        ,""  ,"","xin,tpc_daq"                                                   ,"","","",kFALSE},  
@@ -63,6 +64,9 @@ BfcItem BFC[] = {
   {"FieldOff"    ,""  ,"","NoFieldSet"                       ,"StMagFC","StMagF" ,"No Field option",kFALSE},
   {"HalfField"   ,""  ,"","NoFieldSet"                      ,"StMagFC","StMagF","Half Field option",kFALSE},
   {"ReverseField",""  ,"","NoFieldSet"                   ,"StMagFC","StMagF","Reverse Field option",kFALSE},
+  {"NoCintDb"    ,""  ,"",""                                            ,"","","Switch off Cint Db",kFALSE},
+  {"NoCintCalDb" ,""  ,"",""                                      ,"","","Switch off Cint Calib Db",kFALSE},
+  {"NoMySQLDb"   ,""  ,"",""                                           ,"","","Switch off MySQL Db",kFALSE},
   {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
   {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
   {"Debug"       ,""  ,"",""                                                ,"","","Set debug flag",kFALSE},
@@ -71,6 +75,8 @@ BfcItem BFC[] = {
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
   {"EvOut"       ,""  ,"","Tree"                                   ,"","","Write StEvent to StTree",kFALSE},
   {"GeantOut"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
+  {"TrsOut"      ,""  ,"","Tree"                                ,"","","Write Trs output to StTree",kFALSE},
+  {"Simu"        ,""  ,"",""                                                ,"","","Simulated Data",kFALSE},
   {"TrsOut"      ,""  ,"","Tree"                                ,"","","Write Trs output to StTree",kFALSE},
   {"AllEvent"    ,""  ,"","Tree"                               ,"","","Write whole event to StTree",kFALSE},
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
@@ -132,9 +138,10 @@ BfcItem BFC[] = {
   {"Fcl"         ,"ftpc_hits","ftpc","SCL"
                           ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,St_ftpc,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpc","SCL"              ,"StFtpcTrackMaker","St_ftpc,StFtpcTrackMaker","",kFALSE},
-  {"emc"         ,"emc","","geant,emc_T,tpc_T,db,calib,ems,emh"        ,"StChainMaker","StChain","",kFALSE},
-  {"ems"         ,"emc_raw","emc","geant,emc_T"            ,"St_ems_Maker","St_emc,St_ems_Maker","",kFALSE},
+  {"emc"         ,"emc","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl" ,"StChainMaker","StChain","",kFALSE},
+  {"ems"         ,"emc_raw","emc","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
   {"emh"         ,"emc_hits","emc","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
+  {"PreEcl"      ,"ecl","emc","emh"                            ,"StPreEclMaker","StPreEclMaker","",kFALSE},
   {"l0"          ,"l0","","trg_T,globT,ctf,mwc,trg"                    ,"StChainMaker","StChain","",kFALSE}, 
   {"ctf"         ,"ctf","l0","ctf_T,db"                    ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
   {"mwc"         ,"mwc","l0","mwc_T,db"                    ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
@@ -148,6 +155,7 @@ BfcItem BFC[] = {
                                                          ,"StChainMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","global","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Epc"         ,"epc","global","PreEcl,Match"                       ,"StEpcMaker","StEpcMaker","",kFALSE},
   {"Primary"     ,"primary","global","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"V0"          ,"v0","global","SCL,globT,tls"     ,"StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -207,6 +215,7 @@ StBFChain::~StBFChain(){
 //_____________________________________________________________________________
 Int_t StBFChain::Load() 
 {
+  Int_t status = kStOk;
   Int_t i, j, k, l, iok;
   for (i = 1; i< NoChainOptions; i++) {// Load Libraries if any
     if (fBFC[i].Flag) {
@@ -232,6 +241,7 @@ Int_t StBFChain::Load()
 	    printf("QAInfo: problem with loading\t%s\nQAInfo: %s is switched off \t!!!!\n"
 		   ,Libs[j]->Data(),fBFC[i].Key);
 	    fBFC[i].Flag = kFALSE;
+	    status = kStErr;
 	    break;
 	  }
 	  else printf("QAInfo: Library %-20s\t(%s)\tis loaded\n",Libs[j]->Data(),
@@ -242,11 +252,12 @@ Int_t StBFChain::Load()
       }
     }
   }
-  return kStOk;
+  return status;
 }
 //_____________________________________________________________________________
 Int_t StBFChain::Instantiate() 
 {
+  Int_t status = kStOk;
   Int_t i;
   for (i = 1; i< NoChainOptions; i++) {// Instantiate Makers if any
     if (fBFC[i].Flag) {
@@ -269,33 +280,37 @@ Int_t StBFChain::Instantiate()
 	  continue;
 	}
 	if (maker == "St_db_Maker"){
-// 	  if (GetChain()->GetMaker(fBFC[i].Chain)) {
-// 	    cout << "St_db_Maker(" << fBFC[i].Chain << ") has already existed" << endl;
-// 	    continue;
-// 	  }
 	  if (Key == "calib") {
-	    const char *calibDB = "$STAR_ROOT/calib";
-	    if (!calibMk) calibMk = new St_db_Maker("calib",calibDB);
+	    if (!GetOption("NoCintCalDb")) {
+	      const char *calibDB = "$STAR_ROOT/calib";
+	      if (!calibMk) calibMk = new St_db_Maker("calib",calibDB);
+	      if (!calibMk) status = kStErr;
+	    } 
 	  }
 	  else {
-	    const char *mainDB = "$STAR/StDb/params";
-	          char *userDB = 0;
-		  TString STAR("$STAR");
-		  gSystem->ExpandPathName(STAR);
-	          TString PWD(gSystem->pwd());
-                  if (STAR != PWD && gSystem->AccessPathName("./StDb/params") == 0)  userDB = "./StDb/params";
-	    //DbInit from StDbBroker.so checks that mysql db1 server is accessible
-	    //  if (StDbBroker::DbInit("params")==0) mainDB = "MySQL:params";
-	    gMessMgr->QAInfo() << " Main DataBase == " << mainDB << endm;  
-	    if (userDB) gMessMgr->QAInfo() << " User DataBase == " << PWD.Data() << "/" << userDB << endm;  
-	    if (!dbMk) dbMk = new St_db_Maker("db",mainDB,userDB);
-	    if (GetOption("tpcDB")){// 
-	      if (!StarDbMk)     StarDbMk     = new St_db_Maker("StarDb","MySQL:StarDb");
+	    if (!GetOption("NoCintDb")) {
+	      const char *mainDB = "$STAR/StDb/params";
+	      char *userDB = 0;
+	      TString STAR("$STAR");
+	      gSystem->ExpandPathName(STAR);
+	      TString PWD(gSystem->pwd());
+	      if (STAR != PWD && gSystem->AccessPathName("./StDb/params") == 0)  userDB = "./StDb/params";
+	      gMessMgr->QAInfo() << " Main DataBase == " << mainDB << endm;  
+	      if (userDB) gMessMgr->QAInfo() << " User DataBase == " << PWD.Data() << "/" << userDB << endm;  
+	      if (!dbMk) dbMk = new St_db_Maker("db",mainDB,userDB);
+	      if (!dbMk) status = kStErr;
 	    }
-	    if (!RunLogMk) RunLogMk = new St_db_Maker("RunConditions","MySQL:RunLog");
-	    if (dbMk) {
-	      fBFC[i].Name = (Char_t *) dbMk->GetName();
-	      SetDbOptions();
+	    if (!GetOption("NoMySQLDb")) {
+	      if (GetOption("tpcDB")){// 
+		if (!StarDbMk) StarDbMk     = new St_db_Maker("StarDb","MySQL:StarDb");
+		if (!StarDbMk) status = kStErr;
+	      }
+	      if (!RunLogMk) RunLogMk = new St_db_Maker("RunConditions","MySQL:RunLog");
+	      if (!RunLogMk) status = kStErr;
+	      if (dbMk) {
+		fBFC[i].Name = (Char_t *) dbMk->GetName();
+		SetDbOptions();
+	      }
 	    }
 	  }
 	  continue;
@@ -307,6 +322,7 @@ Int_t StBFChain::Instantiate()
 	    SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
 	    SetInput("geant",".make/inputStream/.make/inputStream_XDF/.data/event/geant/Event");
 	  }
+	  else status = kStErr;
 	  continue;
 	}
 	if (maker == "StTreeMaker" && fFileOut) {
@@ -340,6 +356,7 @@ Int_t StBFChain::Instantiate()
 	      SetGeantOptions();
 	    }
 	  }
+	  if (!geantMk) status = kStErr;
 	  continue;
 	}
 	StMaker *mk = 0;
@@ -351,29 +368,36 @@ Int_t StBFChain::Instantiate()
 	    if (mk) fBFC[i].Name = (Char_t *) mk->GetName();
 	  }
 	}
-	if (maker == "StTpcDbMaker") tpcDBMk = mk;
-	if (mk && maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
-	if (mk && maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
-	if (mk && maker == "St_tpcdaq_Maker") {
-	  if (GetOption("Trs")) mk->SetMode(1); // trs
-	  else                  mk->SetMode(0); // daq
+	if (mk) {
+	  if (maker == "StTpcDbMaker") tpcDBMk = mk;
+	  if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
+	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
+	  if (maker == "St_tpcdaq_Maker") {
+	    if (GetOption("Trs")) mk->SetMode(1); // trs
+	    else                  mk->SetMode(0); // daq
+	  }
+	  if (maker == "StRchMaker") {
+	    if (GetOption("Rrs")) mk->SetMode(1); // rrs
+	    else                  mk->SetMode(0); // daq
+	  }
+	  if (maker == "StV0Maker" && GetOption("Ev03")) mk->SetMode(1); // Turn on alternative V0 method
 	}
-	if (mk && maker == "StRchMaker") {
-	  if (GetOption("Rrs")) mk->SetMode(1); // rrs
-	  else                  mk->SetMode(0); // daq
-	}
+        else status = kStErr;
 	if (saveMk) saveMk->cd();
       }
     }
   }
-  if (fXdfFile) fXdfOut = new St_XDFFile(fXdfFile->Data(),"wb"); 
+  if (fXdfFile) {
+    fXdfOut = new St_XDFFile(fXdfFile->Data(),"wb"); 
+    if (!fXdfOut) status = kStErr;
+  }
   //  PrintQAInfo();
   PrintInfo();
   // START the chain (may the force be with you)
   // Create HTML docs of all Maker's inv#ifdef GetOption("trg")
   if (GetOption("MakeDoc")) MakeDoc();
   if (GetOption("Debug")) SetDEBUG();
-  return kStOk;
+  return status;
 }
 Int_t StBFChain::Finish()
 {
@@ -685,8 +709,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.88 2000/05/10 21:12:02 didenko Exp $
+// $Id: StBFChain.cxx,v 1.89 2000/05/17 16:22:59 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.89  2000/05/17 16:22:59  fisyak
+// Add Ev03, PreEcl and Epc flags, checks for loading shared libraries and instatiaton of makers
+//
 // Revision 1.88  2000/05/10 21:12:02  didenko
 // change to switch to StFtpcTrackMaker
 //
