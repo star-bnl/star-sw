@@ -1,6 +1,10 @@
-// $Id: StFtpcParamReader.hh,v 1.15 2001/04/02 12:10:28 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.16 2001/04/24 07:11:45 oldi Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.16  2001/04/24 07:11:45  oldi
+// Float_t mSlowSimPressure introduced to replace mNormalizedNowPressure in
+// StFtpcSlowSimMaker.
+//
 // Revision 1.15  2001/04/02 12:10:28  jcs
 // get FTPC calibrations,geometry from MySQL database and code parameters
 // from StarDb/ftpc
@@ -134,6 +138,7 @@ protected:
   Float_t mChamberCathodeVoltage;
   Float_t mSigmaPadResponseFuntion;
   Float_t mReadoutShaperTime;
+  Float_t mSlowSimPressure;
   
 public:
   // constructor used by StFtpcClusterMaker:
@@ -209,6 +214,7 @@ public:
   Float_t chamberCathodeVoltage() {return mChamberCathodeVoltage;}
   Float_t sigmaPadResponseFuntion() {return mSigmaPadResponseFuntion;}
   Float_t readoutShaperTime() {return mReadoutShaperTime;}
+  Float_t slowSimPressure() {return mSlowSimPressure;}
 
 };
 
