@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesParticleCut.cxx,v 1.4 1999/07/27 20:21:08 lisa Exp $
+ *  
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -10,35 +10,23 @@
  *
  ***************************************************************************
  *
- * $Log: mikesParticleCut.cxx,v $
- * Revision 1.4  1999/07/27 20:21:08  lisa
- * Franks fixes of StTrack and subsequent changes to particleCut and EventReader
- *
- * Revision 1.3  1999/07/19 14:24:04  hardtke
- * modifications to implement uDST
- *
- * Revision 1.2  1999/07/06 22:33:21  lisa
- * Adjusted all to work in pro and new - dev itself is broken
- *
- * Revision 1.1.1.1  1999/06/29 16:02:56  lisa
- * Installation of StHbtMaker
- *
+ * 
  **************************************************************************/
 
-#include "StHbtMaker/Cut/mikesParticleCut.h"
+#include "StHbtMaker/Cut/mikesTrackCut.h"
 #include <cstdio>
 
-ClassImp(mikesParticleCut)
+ClassImp(mikesTrackCut)
 
-mikesParticleCut::mikesParticleCut(){
+mikesTrackCut::mikesTrackCut(){
   mNTracksPassed = mNTracksFailed = 0;
 }
 //------------------------------
-//mikesParticleCut::~mikesParticleCut(){
+//mikesTrackCut::~mikesTrackCut(){
 //  /* noop */
 //}
 //------------------------------
-bool mikesParticleCut::Pass(const StHbtTrack* track){
+bool mikesTrackCut::Pass(const StHbtTrack* track){
   static int trackCount=0;
 
 
@@ -99,7 +87,7 @@ bool mikesParticleCut::Pass(const StHbtTrack* track){
   }
 }
 //------------------------------
-StHbtString mikesParticleCut::Report(){
+StHbtString mikesTrackCut::Report(){
   string Stemp;
   char Ctemp[100];
   sprintf(Ctemp,"Particle mass:\t%E\n",this->Mass());

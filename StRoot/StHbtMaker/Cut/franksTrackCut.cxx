@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: franksParticleCut.cxx,v 1.1 1999/09/05 02:58:11 lisa Exp $
+ *  
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,35 +10,26 @@
  *
  ***************************************************************************
  *
- * $Log: franksParticleCut.cxx,v $
- * Revision 1.1  1999/09/05 02:58:11  lisa
- * add ASCII microDST reader/writer AND franksParticle cuts
- *
- * Revision 1.2  1999/07/06 22:33:21  lisa
- * Adjusted all to work in pro and new - dev itself is broken
- *
- * Revision 1.1.1.1  1999/06/29 16:02:56  lisa
- * Installation of StHbtMaker
- *
+ * 
  **************************************************************************/
 
-#include "StHbtMaker/Cut/franksParticleCut.h"
+#include "StHbtMaker/Cut/franksTrackCut.h"
 #include <cstdio>
 
 
-ClassImp(franksParticleCut)
+ClassImp(franksTrackCut)
 
-franksParticleCut::franksParticleCut(){
+franksTrackCut::franksTrackCut(){
   mNTracksPassed = mNTracksFailed = 0;
 }
 
 //------------------------------
-franksParticleCut::~franksParticleCut(){
+franksTrackCut::~franksTrackCut(){
 }
 
 //------------------------------
-bool franksParticleCut::Pass(const StHbtTrack* track){
-  // cout << " *** franksParticleCut::Pass(const StHbtTrack* track) " << endl;
+bool franksTrackCut::Pass(const StHbtTrack* track){
+  // cout << " *** franksTrackCut::Pass(const StHbtTrack* track) " << endl;
   bool goodPID = ((track->NSigmaPion()   >= mNSigmaPion[0]) &&
                   (track->NSigmaPion()   <= mNSigmaPion[1]) &&
                   (track->NSigmaKaon()   >= mNSigmaKaon[0]) &&
@@ -68,7 +59,7 @@ bool franksParticleCut::Pass(const StHbtTrack* track){
     //goodTrack = goodTrack && ( fabs(track->NSigmaPion()) > 1/ abs(track->P()) );
 
     goodTrack ? mNTracksPassed++ : mNTracksFailed++;
-    // cout << " *** franksParticleCut: now fill *** " << endl;
+    // cout << " *** franksTrackCut: now fill *** " << endl;
     //    Fill(track,goodTrack); // fill monitor histograms 
     return (goodTrack);
   }
@@ -79,7 +70,7 @@ bool franksParticleCut::Pass(const StHbtTrack* track){
   }
 }
 //------------------------------
-StHbtString franksParticleCut::Report(){
+StHbtString franksTrackCut::Report(){
   string Stemp;
   char Ctemp[100];
   sprintf(Ctemp,"Particle mass:\t%E\n",this->Mass());
