@@ -1,12 +1,17 @@
 /**
- * $Id $
+ * $Id: StMiniMcMaker.cxx,v 1.4 2002/06/06 23:22:34 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
  *
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
- * $Log $  
+ * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.4  2002/06/06 23:22:34  calderon
+ * Changes from Jenn:
+ * -Add needed libs in StMiniHijing.C
+ * -Properly do an InitRun(int runnumber) method
+ *  
  */
 #include "StMiniMcMaker.h"
 #include "TFile.h"
@@ -120,36 +125,53 @@ StMiniMcMaker::Finish()
  */
 
 Int_t
-StMiniMcMaker::Init()
-{
-  cout << "###StMiniMcMaker::Init()" << endl;
+StMiniMcMaker::InitRun(int runID) {
+  cout << "###StMiniMcMaker::InitRun()" << endl;
 
   cout << "\tpt cut : " << mMinPt << " , " << mMaxPt << endl;
-//        << "\tBField : " << mBField << endl;
 
-  //
-  // get the pointer to the IO Maker, the file name is not known until Make()  !!
-  //
   mIOMaker = (StIOMaker*)GetMaker("IO");
-  
+  if(mIOMaker) mInFileName = strrchr(mIOMaker->GetFile(),'/')+1;
+
   //
   // instantiate the event object here (embedding or simulation?)
   //
   if(mDebug) cout << "\tCreating StMiniMcEvent..." << endl;
   mMiniMcEvent =  new StMiniMcEvent();
+  if(mGhost) {
+    cout << "\tGhost loop on" << endl;
+    // double check that we really want the ghost flag
+    if(mInFileName.Contains("st_physics")){ // probably not
+      mGhost = kFALSE;
+      cout << "\tApparently we're looking at real data. " <<endl
+	   << "\tTurning off the ghost flag" << endl;
+    }
+  }
 
   //
   // init the tpc dedx algo once
   //
   mTpcDedxAlgo = new StTpcDedxPidAlgorithm;
-
+    
   //
   // create file, trees, etc.
-  // 
+  //
   Int_t stat = openFile();
 
   return stat + StMaker::Init();
-}
+
+}   
+    
+Int_t
+StMiniMcMaker::Init()
+{
+  //Moved everything important to InitRun(int)
+  cout << "###StMiniMcMaker::Init()" << endl;
+
+  cout << "\tpt cut : " << mMinPt << " , " << mMaxPt << endl;
+
+  return StMaker::Init();
+}   
 
 /*
   Make called every event
@@ -160,18 +182,6 @@ StMiniMcMaker::Make()
 {
   if(mDebug) cout << "###StMiniMcMaker::Make()" << endl;
   
-  cout << mIOMaker->GetFile() << endl;
-  if(mIOMaker) mInFileName = strrchr(mIOMaker->GetFile(),'/')+1;
-
-  if(mGhost) {
-    cout << "\tGhost loop on" << endl;
-    // double check that we really want the ghost flag
-    if(mInFileName.Contains("st_physics")){ // probably not
-      mGhost = kFALSE;
-      cout << "\tApparently we're looking at real data. " <<endl
-	   << "\tTurning off the ghost flag" << endl;
-    }
-  }
   Int_t stat=0;
   //
   // if it's a new file, then close the old one and open a new one
@@ -717,6 +727,7 @@ StMiniMcMaker::openFile()
   //
   // for the output root file, replace geant.root with minimc.root
   //
+  cout << "Infilename = " << mInFileName << endl;
   TString outFileName(mInFileName);
   outFileName.ReplaceAll("geant.root","minimc.root");
   outFileName.Prepend(mOutDir + "/");
