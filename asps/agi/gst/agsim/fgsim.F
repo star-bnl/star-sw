@@ -89,37 +89,39 @@ c
       parameter (udecay_nstep_max=5000)
  
       structure /udecay_t/
-         integer parent
-         integer new_parent
-         real    r_in
-         real    r_out
-         integer daughter_1
-         integer daughter_2
-         integer daughter_3
-         real    mass_p
-         real    mass_1
-         real    mass_2
-         real    mass_3
-         integer nbody
+         integer*4 parent
+         integer*4 new_parent
+         real*4    r_in
+         real*4    r_out
+         integer*4 daughter_1
+         integer*4 daughter_2
+         integer*4 daughter_3
+         real*4    mass_p
+         real*4    mass_1
+         real*4    mass_2
+         real*4    mass_3
+         integer*4 nbody
       end structure
       record /udecay_t/ udecay(udecay_count_max)
  
       structure /udecay_step_t/
-         real x
-         real y
-         real z
-         real px
-         real py
-         real pz
-         real pathlength
+         real*4 x
+         real*4 y
+         real*4 z
+         real*4 px
+         real*4 py
+         real*4 pz
+         real*4 pathlength
       end structure
       record /udecay_step_t/ udecay_step(udecay_nstep_max)
- 
+
+*     temporary fix:
+      integer udecay_dum,udecay_step_dum
       common/c_udecay/
      >         udecay_count
-     >        ,udecay
+     >        ,udecay_dum
      >        ,udecay_nstep
-     >        ,udecay_step
+     >        ,udecay_step_dum
      >        ,i_udecay
      >        ,udecay_track
      >        ,udecay_in_region_last_step
