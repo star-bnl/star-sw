@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.18 1998/10/12 00:53:02 fisyak Exp $
+// $Id: bfc.C,v 1.19 1998/10/18 21:20:49 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.19  1998/10/18 21:20:49  fisyak
+// typo
+//
 // Revision 1.18  1998/10/12 00:53:02  fisyak
 // Add parameters for bfc
 //
@@ -52,7 +55,7 @@ void bfc(const Char_t *fileinp =
 "/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/g2t/psc262_02_142evts.xdf", 
          const Char_t *fileout=
 "/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc262_02_142evts_dst.xdf",
-         const Char_t *fileout=
+         const Char_t *FileOut=
 "/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc262_02_142evts_dst.root",
          const Int_t  Nevents=1000)
 {
