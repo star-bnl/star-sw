@@ -89,7 +89,8 @@ long  type_of_call fill_dst_run_summary_ (
   
   int     i, glb_trk_good, itrk;
   double  pi, piov2;
-  float   pt, mt, eta ,phi, theta;
+  float   pt, eta ,phi, theta;
+  /* float   mt; */
   float   n_events_good, mean, stddev;
   static  int     first_event=1;
   static  double  pt_sum=0, pt2_sum=0, eta_sum=0, eta2_sum=0;
@@ -170,7 +171,7 @@ long  type_of_call fill_dst_run_summary_ (
     theta = piov2 - atan(dstTrack[itrk].tanl);
     eta   = -log(tan(theta/2.));
     pt    = 1./dstTrack[itrk].invpt;
-    mt    = sqrt(pt*pt + PI_MASS*PI_MASS)-PI_MASS;
+    /* mt    = sqrt(pt*pt + PI_MASS*PI_MASS)-PI_MASS; */
     phi   = dstTrack[itrk].psi;
     if (phi<0) phi += 360.;
     /* Sum pt, pt^2, eta, eta^2  for all good global charged tracks*/ 
