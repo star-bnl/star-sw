@@ -4,7 +4,7 @@
 #include "Sti/Base/Named.h"
 
 // allowed values for shapeCode
-enum StiShapeCode {kPlanar = 1, kCylindrical, kConical}; 
+enum StiShapeCode {kPlanar = 1, kCylindrical, kConical, kDisk}; 
 
 /*! Class encapsulating the notion of detector/volume shape.
 \author Ben Norman, Kent State, 25 July 01
@@ -14,10 +14,10 @@ class StiShape : public Named
 {
 public:
 
-    // constructor (for subclass use)
-    StiShape(): Named("undefined"),_halfDepth(0.), _thickness(0.){}
-    StiShape(const string &name,float halfDepth, float thickness);
-
+  // constructor (for subclass use)
+  StiShape(const string &name="undefined",float halfDepth=0, float thickness=0, float edge=0) :
+  Named(name),_halfDepth(halfDepth),_thickness(thickness),_edgeWidth(edge) {}
+  
     // accessors
     float getHalfDepth() const { return _halfDepth; } 
     virtual float getHalfWidth() const=0;
@@ -26,10 +26,10 @@ public:
     float getEdgeWidth() const { return _edgeWidth; }
 
     // mutators
-    void setHalfDepth(float val);
-    void setThickness(float val);
+    void setHalfDepth(float val) {if(val >= 0.) _halfDepth = val; }
+    void setThickness(float val) {if(val >= 0.) _thickness = val; }
 
-protected:
+ protected:
     
     double nice(double val);
 
