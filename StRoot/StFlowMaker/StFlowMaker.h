@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.1 2000/03/02 23:02:54 posk Exp $
+//  $Id: StFlowMaker.h,v 1.2 2000/03/07 17:50:59 snelling Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.2  2000/03/07 17:50:59  snelling
+//  Added Nano DST
+//
 //  Revision 1.1  2000/03/02 23:02:54  posk
 //  Changed extensions from .hh and .cc to .h and .cxx .
 //
@@ -56,11 +59,13 @@
 #include <stdlib.h>
 #include "StMaker.h"
 #include "TString.h"
+#include "TTree.h"
 #include "StFlowConstants.h"
 class StEvent;
 class StPrimaryTrack;
 class StParticleDefinition;
 class StFlowEvent;
+class StFlowNanoEvent;
 
 class StFlowMaker : public StMaker {
 
@@ -74,19 +79,27 @@ public:
   Int_t           Make();
   Int_t           Finish();
   StFlowEvent*    FlowEventPointer() const;  // returns pointer to the StFlowEvent
+  virtual void    NanoFlowEventOn() {NanoFlowEvent(kTRUE);}
+  virtual void    NanoFlowEventOff(){NanoFlowEvent();} 
 
 protected:
 
   Flow::PhiWgt_t  mPhiWgt;                   // To make event plane isotropic
 
 private:
-
-  Int_t           ReadPhiWgtFile();
-  void            FillFlowEvent();
-  StEvent*        pEvent;                    //! pointer to DST data
-  StFlowEvent*    pFlowEvent;                //! pointer to micro-DST data
-
-  ClassDef(StFlowMaker, 1)                   // macro for rootcint
+  Bool_t           mNanoFlowEventOn;          // switch for the nano DST
+  void             NanoFlowEvent(Bool_t flag=kFALSE){mNanoFlowEventOn=flag;}
+  Int_t            ReadPhiWgtFile();          // get the weight file
+  void             InitFlowNanoEvent();       // fill a persistent nano dst
+  void             FillFlowEvent();           // fill the transient flow event
+  void             FillFlowNanoEvent();       // fill a persistent nano dst
+  void             CloseFlowNanoEvent();      // Close the output file
+  StEvent*         pEvent;                    //! pointer to DST data
+  StFlowEvent*     pFlowEvent;                //! pointer to micro-DST data
+  StFlowNanoEvent* pFlowNanoEvent;            // pointer to the nano DST Event
+  TTree*           pFlowTree;                 // pointer to the nano DST Tree
+  TFile*           pFlowNanoDST;              //! pointer to the nano DST File
+  ClassDef(StFlowMaker, 1)                    // macro for rootcint
 
 };
 
