@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.76  2004/11/16 11:35:34  jcs
+// label the x-axis for the charge step plots
+//
 // Revision 1.75  2004/09/27 12:54:28  jcs
 // pad vs. time histograms moved to St_QA_Maker
 // set radial step histogram line color; red = FTPC East, blue=FTPC West
@@ -393,7 +396,9 @@ Int_t StFtpcClusterMaker::Init(){
 
   // 		Create Histograms
   m_chargestep_West = new TH1F("fcl_chargestepW","FTPC West chargestep",260, -0.5, 259.5);
+  m_chargestep_West->SetXTitle("timebin");
   m_chargestep_East = new TH1F("fcl_chargestepE","FTPC East chargestep",260, -0.5, 259.5);
+  m_chargestep_East->SetXTitle("timebin");
   m_cluster_radial_West = new TH1F("fcl_radialW","FTPCW cluster radial position",700,0.,35.);
   m_cluster_radial_West->SetLineColor(kBlue);
   m_cluster_radial_East = new TH1F("fcl_radialE","FTPCE cluster radial position",700,0.,35.);
