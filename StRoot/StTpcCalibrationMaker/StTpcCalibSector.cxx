@@ -1,3 +1,22 @@
+// $Id: StTpcCalibSector.cxx,v 1.6 1999/10/11 08:04:09 fretiere Exp $
+// $Log: StTpcCalibSector.cxx,v $
+// Revision 1.6  1999/10/11 08:04:09  fretiere
+// Fix bugg + add README, LOG and ID
+//
+///////////////////////////////////////////////////////////////////////////////
+//
+// StTpcCalibSector
+//
+// Description:
+//   Main calibration class : find the dead and bad pads, calculate the
+//     gain correction coeficient and store everything in root histo. The
+//     output can also be ascii files.
+//
+// History:
+//  Oct 11, 1999 : correct a bug in StTpcCalibSector::findDead
+//
+///////////////////////////////////////////////////////////////////////////////
+
 // STAR
 #include "StChain.h" // Needed before StTpcDb.h ; should be added there
 //#include "St_DataSetIter.h"
@@ -356,10 +375,10 @@ void StTpcCalibSector::findDead(){
   int tNumberOfRows=45;
 
   for(int tiRow=1;
-      tiRow<tNumberOfRows;
+      tiRow<=tNumberOfRows;
       tiRow++){
     for(int tiPad=1;
-	tiPad<mNumberOfPadAtRow[tiRow-1];//gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(tiRow);
+	tiPad<=mNumberOfPadAtRow[tiRow-1];//gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(tiRow);
 	tiPad++){
       if(mHBadMap->GetCellContent(tiPad,tiRow)!=1 && 
 	 (mHFoundMap->GetCellContent(tiPad,tiRow)/mNEvt)<0.95){
@@ -441,7 +460,8 @@ void StTpcCalibSector::calcGainCoeficient(){
       mHInnerCalibMap->Fill(tiPad,tiRow,tCalibCoef);
     }
   }  
-  // Outer sector
+// _____________________________
+// --- Outer sector
   // >>> Mean amplitude calculation
   tMeanSectorAmp=0.;
   tNCount=0;

@@ -1,4 +1,9 @@
-//////////////////////////////////////////////////////////////////////////
+// $Id: StTpcBadChanMaker.cxx,v 1.5 1999/10/11 08:04:08 fretiere Exp $
+// $Log: StTpcBadChanMaker.cxx,v $
+// Revision 1.5  1999/10/11 08:04:08  fretiere
+// Fix bugg + add README, LOG and ID
+//
+///////////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //                   BAD CHANNEL FINDER                                 //
 // For the time being, the finder look for corrupted pads :
@@ -105,7 +110,7 @@ Int_t StTpcBadChanMaker::Make(){
 //_____________________________________________________________________________
 void StTpcBadChanMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTpcBadChanMaker.cxx,v 1.4 1999/09/24 01:23:27 fisyak Exp $\n");
+  printf("* $Id: StTpcBadChanMaker.cxx,v 1.5 1999/10/11 08:04:08 fretiere Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

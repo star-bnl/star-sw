@@ -1,4 +1,9 @@
-//////////////////////////////////////////////////////////////////////////
+// $Id: StTpcDeadChanMaker.cxx,v 1.4 1999/10/11 08:04:15 fretiere Exp $
+// $Log: StTpcDeadChanMaker.cxx,v $
+// Revision 1.4  1999/10/11 08:04:15  fretiere
+// Fix bugg + add README, LOG and ID
+//
+///////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //                   DEAD CHANNEL FINDER                                //
 // For the time being, the finder look for corrupted pads :
@@ -116,7 +121,7 @@ Int_t StTpcDeadChanMaker::Make(){
 //_____________________________________________________________________________
 void StTpcDeadChanMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTpcDeadChanMaker.cxx,v 1.3 1999/09/24 01:23:27 fisyak Exp $\n");
+  printf("* $Id: StTpcDeadChanMaker.cxx,v 1.4 1999/10/11 08:04:15 fretiere Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

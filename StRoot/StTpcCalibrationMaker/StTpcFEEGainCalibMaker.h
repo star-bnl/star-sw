@@ -1,11 +1,12 @@
+// $Id: StTpcFEEGainCalibMaker.h,v 1.2 1999/10/11 08:04:18 fretiere Exp $
+// $Log: StTpcFEEGainCalibMaker.h,v $
+// Revision 1.2  1999/10/11 08:04:18  fretiere
+// Fix bugg + add README, LOG and ID
+//
+///////////////////////////////////////////////////////////////////////////
 #ifndef STAR_StTpcFEEGainCalibMaker
 #define STAR_StTpcFEEGainCalibMaker
 
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_tpt_Maker virtual base class for Maker                            //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif

@@ -1,4 +1,9 @@
-
+// $Id: StTpcCalibSector.h,v 1.6 1999/10/11 08:04:12 fretiere Exp $
+// $Log: StTpcCalibSector.h,v $
+// Revision 1.6  1999/10/11 08:04:12  fretiere
+// Fix bugg + add README, LOG and ID
+//
+///////////////////////////////////////////////////////////////////////////////
 #ifndef STAR_StTpcCalibSector
 #define STAR_StTpcCalibSector
 // Local
