@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.38 2002/03/22 08:52:52 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.39 2002/07/15 13:31:09 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.39  2002/07/15 13:31:09  jcs
+// incorporate charge step histos into cluster finder and remove StFtpcChargeStep
+//
 // Revision 1.38  2002/03/22 08:52:52  jcs
 // correct memory leaks found by Insure
 //
@@ -137,7 +140,6 @@
 #include "StFtpcParamReader.hh"
 #include "StFtpcDbReader.hh"
 #include "StFtpcGeantReader.hh"
-#include "StFtpcChargeStep.hh"
 #include "StFtpcClusterFinder.hh"
 #include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "StFtpcGeantPoint.hh"
@@ -437,16 +439,6 @@ Int_t StFtpcClusterMaker::Make()
 
   if(ftpcReader) {
 
-    StFtpcChargeStep *step = new StFtpcChargeStep(m_csteps,
-                                                  m_chargestep_West,
-                                                  m_chargestep_East,
-						  ftpcReader, 
-						  paramReader, 
-                                                  dbReader);
-    // uncomment to recalculate normalized pressure from charge step:
-    //step->histogram(1); // This can give wrong values if the decline of the charge step is too steep!
-    // uncomment to fill charge step histogram only:
-    step->histogram(0);
 
     if(Debug()) gMessMgr->Message("", "I", "OST") << "start running StFtpcClusterFinder" << endm;
     
@@ -455,7 +447,10 @@ Int_t StFtpcClusterMaker::Make()
                                                        dbReader,
 						       hitarray,
 						       m_hitsvspad,
-						       m_hitsvstime);
+						       m_hitsvstime,
+                                                       m_csteps,
+                                                       m_chargestep_West,
+                                                       m_chargestep_East);
     
     int searchresult=fcl->search();
     
@@ -465,7 +460,6 @@ Int_t StFtpcClusterMaker::Make()
       }
 	
     delete fcl;
-    delete step;
     if (using_FTPC_slow_simulator) delete ftpcReader;
   }
   else {     
