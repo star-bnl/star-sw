@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.22 2001/08/22 14:24:49 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.23 2001/08/24 20:57:45 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.23  2001/08/24 20:57:45  caines
+ * Do common mode noise suppression from first two anodes
+ *
  * Revision 1.22  2001/08/22 14:24:49  caines
  * Raise m_thresh_hi to 10
  *
@@ -409,7 +412,9 @@ Int_t StSvtSeqAdjMaker::Make()
 {
   if (Debug()) gMessMgr->Debug() << " In StSvtSeqAdjMaker::Make()" << GetName() << endm; 
 
-  int Anode;
+  int Anode, doCommon, status, length;
+  int nSequence = 0;
+  StSequence* Seq = NULL;
 
   StSvtBadAnode* BadAnode=NULL;
 
@@ -422,7 +427,7 @@ Int_t StSvtSeqAdjMaker::Make()
     for (int Ladder = 1;Ladder <= mSvtRawData->getNumberOfLadders(Barrel);Ladder++) {      
       for (int Wafer = 1;Wafer <= mSvtRawData->getNumberOfWafers(Barrel);Wafer++) {
 	for( int Hybrid = 1;Hybrid <=mSvtRawData->getNumberOfHybrids();Hybrid++){
-	  
+
           int index = mSvtRawData->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
 
 	  if( index < 0) continue;
@@ -433,9 +438,9 @@ Int_t StSvtSeqAdjMaker::Make()
 	  if( !mHybridRawData) continue;
 
 	  // subtract pedestal from raw data and save pedestal subtracted data
-	  if( mSvtPedSub){
-	    mSvtPedSub->SubtractPed(mHybridRawData, index, mPedOffSet);
-	  }
+	  //if( mSvtPedSub){
+	  //  mSvtPedSub->SubtractPed(mHybridRawData, index, mPedOffSet);
+	  //}
 
 	  // retrieve bad anodes
 	  if (mSvtBadAnodes)
@@ -445,75 +450,97 @@ Int_t StSvtSeqAdjMaker::Make()
 	  if (mHybridAdjData)
 	    delete mHybridAdjData;
 
-	  mHybridAdjData = new StSvtHybridData(Barrel,Ladder,Wafer,Hybrid);
+	  mHybridAdjData = new StSvtHybridData(Barrel,Ladder,Wafer,Hybrid); 
 
-	  // Zero Common Mode Noise arrays
-	  for(int Timebin=0; Timebin<128; Timebin++){
-	    mCommonModeNoise[Timebin]=0;
-	    mCommonModeNoiseAn[Timebin]=0;	
-	  }  
+	  // Decide whether to do common mode noise from average timebucket value or via first two black anodes
+	  doCommon = 0;
+	  
+	  status= mHybridRawData->getSequences(1,nSequence,Seq);
+	  length = 0;
+	  
+	  for( int i=0; i<nSequence; i++)  length += Seq[i].length;
+	  if( length != 128) doCommon =1;
+	  
+	  status= mHybridRawData->getSequences(2,nSequence,Seq);
+	  length = 0;
+	    
+	  for( int i=0; i<nSequence; i++)  length += Seq[i].length;
+	  if( length != 128) doCommon =1;
 
-	  // Loop through anodes from Raw data
-	  for( int iAnode= 0; iAnode<mHybridRawData->getAnodeList(anolist); iAnode++)
+	  
+	  if( doCommon){
+	    cout << "Doing Common mode average" << endl;
+	    // Zero Common Mode Noise arrays
+	    for(int Timebin=0; Timebin<128; Timebin++){
+	      mCommonModeNoise[Timebin]=0;
+	      mCommonModeNoiseAn[Timebin]=0;	
+	    } 
+	  }
+
+	  for( int iAnode= 0; iAnode< mHybridRawData->getAnodeList(anolist); iAnode++)
             {
 	      Anode = anolist[iAnode];
 
 	      //if (Barrel == 1 && Ladder==1 && Wafer ==1 && Hybrid==1)
 	      //	cout << "raw data, iAnode = " << iAnode << ", Anode = " << Anode << endl;
-	    
+	      /*  
 	      if( BadAnode){
 		if( BadAnode->IsBadAnode(Anode-1)){
 
 		  // If anode is bad set sequences to zero
 		  int nSequence = 0;
 		  StSequence* seq = NULL;
-		  //setListSeq uses index into anolist array
+		  //setLi  stSeq uses index into anolist array
 		  mHybridAdjData->setListSequences(iAnode, Anode, nSequence, seq);
 		  continue;
 		}
 	      }
-	      
+	      */
 	      // here anode is real anode number (1-240)
 	      if (Debug())MakeHistogramsAdc(mHybridRawData,index,Anode,1);
-	      CommonModeNoiseCalc(iAnode);
+	      if( doCommon)  CommonModeNoiseCalc(iAnode);
 		}
 	 
-	  int TimeLast, TimeAv, TimeSum, TimeAvSav;
-	  TimeLast = 0;
-	  TimeSum = 0;
-	  TimeAv=0;
-	  TimeAvSav = 0;
-	  for( int TimeBin=0; TimeBin<128; TimeBin++){
-	    if(mCommonModeNoiseAn[TimeBin] > 50)
-	      mCommonModeNoise[TimeBin] /= mCommonModeNoiseAn[TimeBin];
-	    else  mCommonModeNoise[TimeBin] =0;
-	    
-	    if( Debug()){
-	      mCommonModeCount->Fill(mCommonModeNoiseAn[TimeBin]);
-	      if( index < 4 && mCommonModeNoiseAn[TimeBin] > 50){
-		if( TimeLast < TimeBin-3 && TimeSum > 0){
-		  
-		  TimeAv /= TimeSum;
-		  TimeLast = TimeBin;
-		  mCommonModePitch->Fill(TimeAv-TimeAvSav);
-		  TimeAvSav = TimeAv;
-		  TimeAv = 0;
-		  TimeSum=0;
-		}
-		else{
-		  TimeAv +=TimeBin;
-		  TimeSum++;
-		  TimeLast = TimeBin;
+	  if( doCommon){
+	    int TimeLast, TimeAv, TimeSum, TimeAvSav;
+	    TimeLast = 0;
+	    TimeSum = 0;
+	    TimeAv=0;
+	    TimeAvSav = 0;
+	    for( int TimeBin=0; TimeBin<128; TimeBin++){
+	      if(mCommonModeNoiseAn[TimeBin] > 50)
+		mCommonModeNoise[TimeBin] /= mCommonModeNoiseAn[TimeBin];
+	      else  mCommonModeNoise[TimeBin] =0;
+	      
+	      if( Debug()){
+		mCommonModeCount->Fill(mCommonModeNoiseAn[TimeBin]);
+		if( index < 4 && mCommonModeNoiseAn[TimeBin] > 50){
+		  if( TimeLast < TimeBin-3 && TimeSum > 0){
+		    
+		    TimeAv /= TimeSum;
+		    TimeLast = TimeBin;
+		    mCommonModePitch->Fill(TimeAv-TimeAvSav);
+		    TimeAvSav = TimeAv;
+		    TimeAv = 0;
+		    TimeSum=0;
+		  }
+		  else{
+		    TimeAv +=TimeBin;
+		    TimeSum++;
+		    TimeLast = TimeBin;
+		  }
 		}
 	      }
 	    }
 	  }
 	
-	  for( int iAnode= 0; iAnode<mHybridRawData->getAnodeList(anolist); iAnode++)
+	  //for( int iAnode= 0; iAnode<mHybridRawData->getAnodeList(anolist); iAnode++)
+	  for( int iAnode= 2; iAnode<mHybridRawData->getAnodeList(anolist); iAnode++)
             {
 	      Anode = anolist[iAnode];
 
-	      CommonModeNoiseSub(iAnode);
+	      if( doCommon) CommonModeNoiseSub(iAnode);
+	      else SubtractFirstAnode(iAnode);
 
 	      //Perform Asic like zero suppression
 	      AdjustSequences1(iAnode, Anode);
@@ -773,7 +800,6 @@ void StSvtSeqAdjMaker::CommonModeNoiseCalc(int iAnode){
   }
   return;
 }
-
 //_____________________________________________________________________________
 
 void StSvtSeqAdjMaker::CommonModeNoiseSub(int iAnode){
@@ -787,7 +813,7 @@ void StSvtSeqAdjMaker::CommonModeNoiseSub(int iAnode){
 
   //Anode is the index into the anolist array
   
-  status= mHybridRawData->getListSequences(iAnode,nSeqOrig,Sequence);
+  status= mHybridAdjData->getListSequences(iAnode,nSeqOrig,Sequence);
 
   for( int nSeq=0; nSeq< nSeqOrig ; nSeq++){
   
@@ -800,6 +826,51 @@ void StSvtSeqAdjMaker::CommonModeNoiseSub(int iAnode){
       if( (int) adc[j]-mCommonModeNoise[j+startTimeBin] < 0) adc[j]=0;
       else{
 	adc[j] -=mCommonModeNoise[j+startTimeBin];
+      }
+      j++;
+    }
+  }
+  return;
+}
+
+//_____________________________________________________________________________
+
+void StSvtSeqAdjMaker::SubtractFirstAnode(int iAnode){
+
+  // Calc common mode noise
+
+  int  nSeqOrig, nSeqFirst, nSeqSecond, length;
+  int startTimeBin,  status;
+  float adcMean;
+  StSequence *Sequence, *SeqFirst, *SeqSecond;
+  unsigned char *adc, *adcFirst, *adcSecond;
+
+  //Anode is the index into the anolist array
+
+  // get first and second anode adc values  
+  status= mHybridRawData->getSequences(1,nSeqFirst,SeqFirst);
+  status= mHybridRawData->getSequences(2,nSeqSecond,SeqSecond);
+
+  status= mHybridRawData->getListSequences(iAnode,nSeqOrig,Sequence);
+
+  for( int nSeq=0; nSeq< nSeqOrig ; nSeq++){
+  
+    adc=Sequence[nSeq].firstAdc;
+    length = Sequence[nSeq].length;
+    startTimeBin=Sequence[nSeq].startTimeBin;
+    adcFirst = SeqFirst[0].firstAdc + startTimeBin;
+    adcSecond = SeqSecond[0].firstAdc + startTimeBin;
+    int j =0;
+    while( j<length){
+
+      adcMean = ((float)adcFirst[j] + (float)adcSecond[j])/2.;
+      //adcMean = (float)adcSecond[j];
+
+      //cout << "iAnode = " << iAnode << ", time = " << startTimeBin + j << ", adcFirst = " << (int)adcFirst[j] << ", adcSecond = " << (int)adcSecond[j] << ", adcMean = " << adcMean << endl;
+
+      if( (float)adc[j]-(float)adcMean < 0) adc[j]=0;
+      else{
+	adc[j] -=adcMean;
       }
       j++;
     }
