@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.20 2000/08/31 18:50:30 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.21 2000/09/12 01:31:00 snelling Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.21  2000/09/12 01:31:00  snelling
+// Added pid histograms for e- e+ and dbar
+//
 // Revision 1.20  2000/08/31 18:50:30  posk
 // Added plotCen.C to plot from a series of files with different centralities.
 //
@@ -113,7 +116,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.20 2000/08/31 18:50:30 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.21 2000/09/12 01:31:00 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -166,6 +169,19 @@ private:
   TH1F*     mHistPidKplus;      //!
   TH1F*     mHistPidKminus;     //!
   TH1F*     mHistPidDeuteron;   //!
+  TH1F*     mHistPidAntiDeuteron;   //!
+  TH1F*     mHistPidElectron;   //!
+  TH1F*     mHistPidPositron;   //!
+  TH1F*     mHistPidPiPlusSel;     //!
+  TH1F*     mHistPidPiMinusSel;    //!
+  TH1F*     mHistPidProtonSel;     //!
+  TH1F*     mHistPidAntiProtonSel; //!
+  TH1F*     mHistPidKplusSel;      //!
+  TH1F*     mHistPidKminusSel;     //!
+  TH1F*     mHistPidDeuteronSel;   //!
+  TH1F*     mHistPidAntiDeuteronSel;   //!
+  TH1F*     mHistPidElectronSel;   //!
+  TH1F*     mHistPidPositronSel;   //!
   TProfile* mHistPidMult;       //!
   TH1F*     mHistCent;          //!
   TH2F*     mHistEtaSymVerZ2D;  //!
@@ -178,6 +194,10 @@ private:
   TH2F*     mHistMeandEdxPbar;    //!
   TH2F*     mHistMeandEdxKplus;   //!
   TH2F*     mHistMeandEdxKminus;  //!
+  TH2F*     mHistMeandEdxDeuteron;   //!
+  TH2F*     mHistMeandEdxAntiDeuteron;  //!
+  TH2F*     mHistMeandEdxPositron;   //!
+  TH2F*     mHistMeandEdxElectron;  //!
 
   
   // for each harmonic, each selection, and each sub-event
