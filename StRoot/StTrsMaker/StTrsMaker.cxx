@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.29 1999/03/28 02:59:11 perev Exp $
+// $Id: StTrsMaker.cxx,v 1.30 1999/04/07 01:02:41 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.30  1999/04/07 01:02:41  lasiuk
+// use gas gain from db
+//
 // Revision 1.29  1999/03/28 02:59:11  perev
 // Put interfaces to .const area
 //
@@ -167,7 +170,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.29 1999/03/28 02:59:11 perev Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.30 1999/04/07 01:02:41 lasiuk Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -204,18 +207,18 @@ Int_t StTrsMaker::Init()
 #ifdef ROOT_DATABASE_PARAMETERS
   mGeometryDb =
      StTpcROOTGeometry::instance(Geometry);
-  mGeometryDb->print();
+  //mGeometryDb->print();
 
   mSlowControlDb =
        StTpcROOTSlowControl::instance(SlowControl);
-  mSlowControlDb->print();
+  //mSlowControlDb->print();
    
    mMagneticFieldDb =
        StROOTMagneticField::instance();  // default is .5T field in z direction
 
    mElectronicsDb =
        StTpcROOTElectronics::instance(Electronics);
-   mElectronicsDb->print();
+   //mElectronicsDb->print();
 #endif
 #ifdef ASCII_DATABASE_PARAMETERS
     //
@@ -259,7 +262,7 @@ Int_t StTrsMaker::Init()
    mSlowControlDb =
        StTpcSimpleSlowControl::instance(scFile.c_str());
    //mSlowControlDb->print();
-   
+
    mMagneticFieldDb =
        StSimpleMagneticField::instance(magFile.c_str());
 
@@ -281,8 +284,10 @@ Int_t StTrsMaker::Init()
        StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb);
    mWireHistogram->setDoGasGain(true);             // True by default
    mWireHistogram->setDoGasGainFluctuations(true);
-   mWireHistogram->setGasGainInnerSector(2000);
-   mWireHistogram->setGasGainOuterSector(1000);
+   //cout << ">innerSectorGasGain= " << mSlowControlDb->innerSectorGasGain() << endl;
+   //cout << ">outerSectorGasGain= " << mSlowControlDb->outerSectorGasGain() << endl;
+   mWireHistogram->setGasGainInnerSector(mSlowControlDb->innerSectorGasGain());
+   mWireHistogram->setGasGainOuterSector(mSlowControlDb->outerSectorGasGain());
    mWireHistogram->setDoTimeDelay(false);
 
    //
@@ -635,14 +640,6 @@ Int_t StTrsMaker::Make(){
 		
 	    } // Loop over the list of iterators
 
-	    //
-	    // Evaluate the situation:
-	    // are you at the end of a data file?
-	    // should you continue processing this sector?
-	    // if eof, break;
-// 	    PR(i);
-// 	    PR(no_tpc_hits);
-	    
 	    tpc_hit++;  // increase the pointer to the next hit
 	    numberOfProcessedPointsInCurrentSector++;
 	    continue;   // don't digitize, you still have data in the same sector to process
@@ -679,8 +676,6 @@ Int_t StTrsMaker::Make(){
 	//
 	// Fill it into the event structure...
 	// and you better check the sector number!
-// 	PR(currentSectorProcessed);
-// 	PR(mAllTheData->mSectors.size());
 	
 	mAllTheData->mSectors[(currentSectorProcessed-1)] = aDigitalSector;
 	// Clear and reset for next sector:
@@ -813,7 +808,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.29 1999/03/28 02:59:11 perev Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.30 1999/04/07 01:02:41 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
