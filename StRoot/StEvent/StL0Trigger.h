@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.h,v 2.3 2001/07/21 00:46:54 ullrich Exp $
+ * $Id: StL0Trigger.h,v 2.4 2002/01/09 15:37:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.h,v $
+ * Revision 2.4  2002/01/09 15:37:12  ullrich
+ * Bunch crossing id and spin bit extraction functions added.
+ *
  * Revision 2.3  2001/07/21 00:46:54  ullrich
  * Changed nMaxBcData from 8 to 16 since table changed.
  *
@@ -55,6 +58,14 @@ public:
     unsigned int    bcDataArraySize() const;
     unsigned short  bcDataArray(unsigned int);
 
+    unsigned int bunchCrossingId7bit();
+    unsigned int bunchCrossingId();
+    int spinBits();
+    int spinBitYellowUp();
+    int spinBitYellowDown();
+    int spinBitBlueUp();
+    int spinBitBlueDown();
+
     void setMwcCtbMultiplicity(int);
     void setMwcCtbDipole(int);
     void setMwcCtbTopology(int);
@@ -82,7 +93,7 @@ protected:
     UChar_t       mAddBits;   
     UShort_t      mLastDsmArray[mMaxLastDsm];
     UShort_t      mBcDataArray[mMaxBcData];
-    
+
     ClassDef(StL0Trigger,2)
 };
 #endif

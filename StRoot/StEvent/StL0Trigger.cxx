@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.cxx,v 2.4 2001/07/19 00:04:06 ullrich Exp $
+ * $Id: StL0Trigger.cxx,v 2.5 2002/01/09 15:37:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.cxx,v $
+ * Revision 2.5  2002/01/09 15:37:12  ullrich
+ * Bunch crossing id and spin bit extraction functions added.
+ *
  * Revision 2.4  2001/07/19 00:04:06  ullrich
  * Updated to handle new trigger info.
  *
@@ -35,7 +38,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.4 2001/07/19 00:04:06 ullrich Exp $";
+static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.5 2002/01/09 15:37:12 ullrich Exp $";
 
 ClassImp(StL0Trigger)
 
@@ -206,3 +209,66 @@ StL0Trigger::setBcDataArray(unsigned int i, unsigned short val)
     if (i < mMaxBcData)
         mBcDataArray[i] = val;
 }
+
+unsigned int
+StL0Trigger::bunchCrossingId7bit()
+{
+    int b7=0, b7dat;
+    b7dat = mBcDataArray[2];
+    for (int i=0; i<7; i++) {
+	b7 += (!((b7dat>>(7-i)) & 0x1) << (i)) & 0x7f;
+    }
+    return b7;
+}
+
+unsigned int
+StL0Trigger::bunchCrossingId()
+{
+    unsigned long long bxinghi,bxing1,bxinglo,bxing,bx0,bx1,bx2;
+    int b120;
+    bxinghi = mBcDataArray[3];
+    bxing1 =  mBcDataArray[10];
+    bxinglo = (bxing1 << 16) + mBcDataArray[11];
+    bxing = (bxinghi << 32) + bxinglo;
+    bx0 = bxing;
+    bx1 = bx0/120;
+    bx2 = bx1 * 120;
+    b120 = bx0 - bx2;
+    return static_cast<unsigned int>(b120);
+} 
+
+int
+StL0Trigger::spinBits()
+{
+    int ldsm0,spin1,spin2,spin3,spin4;
+    ldsm0 = mLastDsmArray[0];
+    spin1 = (ldsm0>>8) & 0x1;
+    spin2 = (ldsm0>>9) & 0x1;
+    spin3 = (ldsm0>>10) & 0x1;
+    spin4 = (ldsm0>>11) & 0x1;
+    return spin1+spin2*2+spin3*4+spin4*8;
+} 
+
+int
+StL0Trigger::spinBitYellowUp()
+{
+    return (mLastDsmArray[0]>>8) & 0x1;
+} 
+
+int
+StL0Trigger::spinBitYellowDown()
+{
+    return (mLastDsmArray[0]>>9) & 0x1;
+} 
+
+int
+StL0Trigger::spinBitBlueUp()
+{
+    return (mLastDsmArray[0]>>10) & 0x1;
+} 
+
+int
+StL0Trigger::spinBitBlueDown()
+{
+    return (mLastDsmArray[0]>>11) & 0x1;
+} 
