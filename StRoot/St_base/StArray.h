@@ -52,8 +52,8 @@ public:
    	StObjLink &operator=(StObject *obj)  {fLink=obj; return *this;}
    	StObject  &operator*() 				{return *fLink;}
    	StObject  *operator->() 			{return  fLink;}
-   	          operator StObject *&() 		{return  fLink;}
-                  operator const StObject *() const 	{return  fLink;}
+//   	          operator StObject *&() 		{return  fLink;}
+//                operator const StObject *() const 	{return  fLink;}
    	StObject*  get() 				{return  fLink;}
 virtual Bool_t     IsFolder() const {return 1;}
 virtual void Browse(TBrowser* b); 			
@@ -74,7 +74,7 @@ public:
    T         *operator->() 		{return   (T*)fLink; }
    const T   *operator->() const	{return   (const T*)fLink; }
               operator const T *() const{return   (const T*)fLink; }
-   	      operator T *&() 		{return   (T*&)fLink; }
+   	      operator T *&() 		{return   (     T*&)fLink; }
 };
 
 
