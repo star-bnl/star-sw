@@ -1,5 +1,8 @@
-* $Id: tpt_project.F,v 1.3 1998/03/23 18:26:03 sakrejda Exp $
+* $Id: tpt_project.F,v 1.4 1998/08/26 17:03:06 sakrejda Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.4  1998/08/26 17:03:06  sakrejda
+* calculation of the dip angle for hits on tracks added
+*
 * Revision 1.3  1998/03/23 18:26:03  sakrejda
 * tpg_pad-plane removed from the tpt module, it was not used there anyway
 *
@@ -182,9 +185,12 @@ C              a hit found
      >          hit(ient).y,xold,yold,cf,hit(ient).alpha)
             xold = hit(ient).x
             yold = hit(ient).y
+            hit(ient).lambda=atand(trk(itrk).p(7))
          end do
          hit( trk(itrk).ipnt(trk(itrk).nhit)).alpha =
      >   hit( trk(itrk).ipnt(trk(itrk).nhit-1)).alpha
+         hit( trk(itrk).ipnt(trk(itrk).nhit)).lambda =
+     >   hit( trk(itrk).ipnt(trk(itrk).nhit-1)).lambda
          trk(itrk).flag=save_flag
          iret = tpt_load_track(itrk,track_h,track,trk)
          tpt_project = STAFCV_OK
