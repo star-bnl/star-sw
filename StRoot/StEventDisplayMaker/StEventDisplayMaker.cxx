@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.75 2001/07/30 19:29:33 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.76 2001/09/01 19:51:23 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -59,11 +59,13 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "TROOT.h"
+#include "TError.h"
 #include "TCanvas.h"
 #include "TColor.h"
 #include "TStyle.h"
 #include "TTUBS.h"
 #include "TPaveLabel.h"
+#include "TRootHelpDialog.h"
 
 #include "StEventDisplayMaker.h"
 #include "StChain.h"
@@ -88,8 +90,7 @@
 // #include "StThreeVector.hh"
 // #include "StHelixD.hh"
 #include "StTrackChair.h"
-
-// #include "StEvent.h"
+#include "StEvent.h"
 #include <TCanvas.h>
 #include <TGeometry.h>
 #include <TWebFile.h>
@@ -97,13 +98,21 @@
 #include <TH2.h>
 #include <TMath.h>
 #include <TObjString.h>
+#include <TSystem.h>
 
 #include "StDefaultFilter.h"
+#include "StEventHelper.h"
 
 // StVirtualEventFilter hitsOffFilter(0);
 // StVirtualEventFilter hitsOnFilter(1);
 // StVirtualEventFilter StEventDisplayMaker::m_DefaultFilters[StEventDisplayMaker::kEndOfEventList];
 StDefaultFilter StEventDisplayMaker::m_DefaultFilters[StEventDisplayMaker::kEndOfEventList];
+
+Int_t               StEventDisplayMaker::fgEventLoop = 0;
+StEventDisplayInfo *StEventDisplayMaker::fgInfo      = 0;
+
+ClassImp(StEventDisplayInfo)
+
 
 //_____________________________________________________________________________
 //
@@ -115,6 +124,7 @@ ClassImp(StEventDisplayMaker)
 //_____________________________________________________________________________
 StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 {
+  mEventHelper    =  0;
   m_Hall          =  0;  
   m_FullView      =  0;  
   m_ShortView     =  0; 
@@ -132,6 +142,7 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 
   m_ListDataSetNames = 0;
   m_VolumeList       = 0;
+  mFilterList        = 0;
   m_FilterArray   = new TObjArray(kEndOfEventList);
   Int_t i; 
   for (i =0;i<kEndOfEventList;i++) {
@@ -146,11 +157,17 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
  
   // Create the default geometry model
 
-  const Char_t *volumeNames[] = {"TPSS","STSI"}; // STLI"};  // tpc + svt
-// emc   const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB"}; // STSI"};
-//       const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB","BTOF"};
-  const Int_t lvolumeNames = sizeof(volumeNames)/sizeof(Char_t *);
+  const char *volumeNames[] = {"TPSS","STSI"}; // STLI"};  // tpc + svt
+// emc   const char *volueNames[] = {"TPSS","STLI","ECAL","CALB"}; // STSI"};
+//       const char *volueNames[] = {"TPSS","STLI","ECAL","CALB","BTOF"};
+  const Int_t lvolumeNames = sizeof(volumeNames)/sizeof(char *);
   for (i=0;i<lvolumeNames;i++) AddVolume(volumeNames[i]);
+
+  gROOT->LoadMacro("EventControlPanel.C");
+  gSystem->DispatchOneEvent(1);
+  gROOT->LoadMacro("PadControlPanel.C"  );
+  gSystem->DispatchOneEvent(1);
+
 
 }
 //_____________________________________________________________________________
@@ -182,12 +199,7 @@ Int_t StEventDisplayMaker::Init(){
      // Create a special node to keep "tracks" and "hits"
    CreateTrackNodes();
      // define the custom palette (may affect other pictures)
-#ifdef PALETTE
-   palette(); 
-#else
    gStyle->SetPalette(1);   
-   gROOT->LoadMacro("PadControlPanel.C");
-#endif
    // Call the "standard" Init()
    
    return StMaker::Init();
@@ -231,7 +243,7 @@ Int_t StEventDisplayMaker::BuildGeometry()
 }
 
 //______________________________________________________________________________
-void StEventDisplayMaker::AddName(const Char_t *name)
+void StEventDisplayMaker::AddName(const char *name)
 {
   //  "name" - StEvent
   //  "g2t_tpc_hit(track_id,x[0]:x[1]:x[2])"
@@ -240,6 +252,17 @@ void StEventDisplayMaker::AddName(const Char_t *name)
   if (!m_ListDataSetNames) m_ListDataSetNames = new TList;
   if (!m_ListDataSetNames->FindObject(name)) 
         m_ListDataSetNames->Add(new TObjString(name));
+  if (strncmp(name,"StEvent",7)==0) {
+    gROOT->ProcessLine("__StEventControlPanel__.Refresh();");
+    gSystem->DispatchOneEvent(1);
+  }
+}
+//______________________________________________________________________________
+void StEventDisplayMaker::AddFilter(StFilterABC* filt)
+{
+    if (!mFilterList) mFilterList = new TList;
+    if (mFilterList->FindObject(filt->GetName())) return;
+    mFilterList->Add(filt);
 }
 //______________________________________________________________________________
 void StEventDisplayMaker::RemoveName(const char *name)
@@ -264,7 +287,7 @@ void StEventDisplayMaker::PrintNames()
 }
 
 //______________________________________________________________________________
-void StEventDisplayMaker::AddVolume(const Char_t *name)
+void StEventDisplayMaker::AddVolume(const char *name)
 {
   // Add "GEANT" volume name to the detector model
   if (!m_VolumeList) m_VolumeList = new TList;
@@ -422,6 +445,10 @@ TVirtualPad *StEventDisplayMaker::CreateCanvas()
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::Make()
 {
+
+AGAIN: fgEventLoop = -1;
+
+
 //  const Int_t maxTrackCounter = 9;
   if (!m_EventsNode) return kStErr;
   if (m_Mode == 1)   return  kStOK;
@@ -444,6 +471,8 @@ Int_t StEventDisplayMaker::Make()
  //_______________________________________
   Int_t totalCounter = 0;
   if (m_ShortView){
+
+#if 0  //VP
     if (!m_ListDataSetNames || m_ListDataSetNames->GetSize() == 0) 
     {
     // Add default names
@@ -509,18 +538,19 @@ Int_t StEventDisplayMaker::Make()
 #endif
       }
     }
+#endif  //VP
     TIter nextNames(m_ListDataSetNames);
     TObjString *eventName = 0;
      while ( (eventName = (TObjString *)nextNames()) ) 
     {
       m_Table = 0;
   
-      Char_t *nextObjectName = StrDup(eventName->String().Data());
-      Char_t *positions[] = {0,0,0,0,0,0};
+      char *nextObjectName = StrDup(eventName->String().Data());
+      char *positions[] = {0,0,0,0,0,0};
       Int_t type = ParseName(nextObjectName, positions);
       if (Debug()) { printf(" The type of the current parameter is %d \n", type); }
       if (!type) { delete [] nextObjectName; continue; }
-      const Char_t *foundName = positions[0];
+      const char *foundName = positions[0];
       TDataSet *event = GetDataSet(foundName);
       if (!event) {
          if (Debug()) Warning("Make","No object \"%s\" found",foundName);
@@ -530,9 +560,12 @@ Int_t StEventDisplayMaker::Make()
           (( type == 5) || (type == 1) || (type == 2)) ) 
       {
         //  ----- Draw "table" events -------------------------- //
-          m_Table = (TTable *)event;                           //
-          totalCounter += MakeTable((const Char_t **)positions); //
+          m_Table = (TTable *)event;                             //
+          totalCounter += MakeTable((const char **)positions); //
         //  ---------------------------------------------------- //
+      }
+      else if (event->InheritsFrom("StEvent")) {
+          totalCounter += MakeEvent(event,positions); 
       }
       else if (Debug()) Warning("Make","Can not draw the object \"%s\"",nextObjectName); 
       delete [] nextObjectName;
@@ -545,11 +578,21 @@ Int_t StEventDisplayMaker::Make()
      m_PadBrowserCanvas->Modified();
      m_PadBrowserCanvas->Update();
    }
+
+   printf("StEventDisplayMaker::EventLoop Started\n");
+   int resLoop = MakeLoop(0);
+   printf("StEventDisplayMaker::EventLoop FINISHED\n");
+   switch (resLoop) {
+     case 1: ClearCanvas(); goto AGAIN;     
+     case 2: break;
+     case 3: fgEventLoop = 0; return kStEOF;
+   } 
+   fgEventLoop = 0;
    return kStOK;
 }
 
 //_____________________________________________________________________________
-Int_t StEventDisplayMaker::ParseName(Char_t *inName, Char_t *positions[])
+Int_t StEventDisplayMaker::ParseName(char *inName, char *positions[])
 { 
   // returns  the number of the tokens found:
   //
@@ -564,19 +607,19 @@ Int_t StEventDisplayMaker::ParseName(Char_t *inName, Char_t *positions[])
 
   Int_t nParsed = 0;
   if (inName && inName[0]) {
-    Char_t *pos = 0;
-    const Char_t *errorMessages[] = {  "the open bracket missed"
+    char *pos = 0;
+    const char *errorMessages[] = {  "the open bracket missed"
                                      , "first comma missed"
                                      , "first collon missed"
                                      , "second collon missed"
                                      , "the closed bracket missed"
                                     };
-    const Int_t lenExpr = sizeof(errorMessages)/sizeof(Char_t *);
-    const Char_t *openBracket  = "(";
-    const Char_t *closeBracket = ")";
-    const Char_t *comma        = ",)";
-    const Char_t *collon       = ":";
-    const Char_t *delimiters[] = {openBracket,comma,collon,collon,closeBracket };
+    const Int_t lenExpr = sizeof(errorMessages)/sizeof(char *);
+    const char *openBracket  = "(";
+    const char *closeBracket = ")";
+    const char *comma        = ",)";
+    const char *collon       = ":";
+    const char *delimiters[] = {openBracket,comma,collon,collon,closeBracket };
     pos = positions[nParsed] = inName;
     UInt_t idx = 0;
     nParsed = 1;
@@ -609,7 +652,7 @@ Color_t StEventDisplayMaker::GetColorAttribute(Int_t adc)
 }
 
 //_____________________________________________________________________________
-Int_t StEventDisplayMaker::MakeTable(const Char_t **positions)
+Int_t StEventDisplayMaker::MakeTable(const char **positions)
 {
   StVirtualEventFilter *filter = 0;
   Int_t tableCounter = 0;
@@ -631,6 +674,137 @@ Int_t StEventDisplayMaker::MakeTable(const Char_t **positions)
     }
   }
   return tableCounter;
+}
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
+{
+const Style_t UHitSty = 4; const Size_t UHitSiz = 0.35; const Color_t UHitCol= 0;
+const Style_t NHitSty = 1; const Size_t NHitSiz = 1.00; const Color_t NHitCol=18;
+const Style_t TrakSty = 1; const Size_t TrakSiz = 1.00; const Color_t TrakCol= 0;
+const Style_t VertSty = 5; const Size_t VertSiz = 0.90; const Color_t VertCol= 0;
+
+
+static const char *listEvents[] = {
+      "All Used Hits"  ,"All Unused Hits",  
+      "TPC Used Hits"  ,"TPC Unused Hits",  
+      "RICH Used Hits" ,"RICH Unused Hits",  
+      "All Tracks"     ,"All Track Hits",
+      "Primary Tracks" ,"Primary Track Hits",  
+      "Kink Tracks"    ,"Kink Track Hits"  ,
+      "V0 Tracks"      ,"V0 Track Hits",  
+      "Xi Tracks"      ,"Xi Track Hits", 
+      0}; 
+
+  if (!pos[1] || !pos[1][0]) return 1;
+  int kase;
+  for (kase=0;listEvents[kase];kase++) 
+      {if (strcmp(pos[1],listEvents[kase])==0) break;}
+  if (!listEvents[kase]) return 1;
+
+  int IfHits = (strstr(listEvents[kase],"Hit")!=0);
+
+  if (!mEventHelper) mEventHelper = new StEventHelper;
+  mEventHelper->Reset(event);
+  mEventHelper->ls();
+
+  Style_t defSty=0; Size_t defSiz = 0; Color_t defCol= 0;
+  
+  TObjArray *shaps =0;
+  switch (kase) {
+     case  0: shaps = mEventHelper->SelHits  ("AU AllUsed"    	); 
+              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
+
+     case  1: shaps = mEventHelper->SelHits  ("AN NonUnused"	); 
+              defSty = NHitSty; defSiz = NHitSiz; defCol = NHitCol; break;       
+
+     case  2: shaps = mEventHelper->SelHits  ("TU TPCUsed"    	); 
+              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
+
+     case  3: shaps = mEventHelper->SelHits  ("TN TPCNonUsed"	); 
+              defSty = NHitSty; defSiz = NHitSiz; defCol = NHitCol; break;       
+
+     case  4: shaps = mEventHelper->SelHits  ("RU RICHUsed"    	); 
+              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
+
+     case  5: shaps = mEventHelper->SelHits  ("RN TPCNonUsed"	); 
+              defSty = NHitSty; defSiz = NHitSiz; defCol = NHitCol; break;       
+
+     case  6: shaps = mEventHelper->SelTracks("Tracks" 		); 
+              defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; break;       
+
+     case  7: shaps = mEventHelper->SelTracks("Hits"   		); 
+              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
+
+
+     case  8: shaps = mEventHelper->SelVertex("PT PrimaryTracks"); 
+              defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; break;       
+
+     case  9: shaps = mEventHelper->SelVertex("PH PrimaryHits"  ); 
+              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
+
+     case 10: shaps = mEventHelper->SelVertex("KT KinkTracks"  	); 
+              defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; break;       
+
+     case 11: shaps = mEventHelper->SelVertex("KH KinkHits"  	); 
+              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
+
+     case 12: shaps = mEventHelper->SelVertex("VT V0Tracks"  	); 
+              defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; break;       
+
+     case 13: shaps = mEventHelper->SelVertex("VH V0Hits"  	); 
+              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
+
+     case 14: shaps = mEventHelper->SelVertex("XT XiTracks"  	); 
+              defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; break;       
+
+     case 15: shaps = mEventHelper->SelVertex("XH XiHits"  	); 
+              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
+
+     default: Assert(0);
+  }
+  if (!shaps) return 0;
+
+  m_TrackCollector->Add(shaps);	//collect for garbage
+  int ntrk = shaps->GetLast()+1;
+  if (!ntrk ) return 0;
+
+  Int_t trackCounter = 0;
+  Color_t rndCol = kRed;
+
+  TListIter nextFilter(mFilterList);
+  for (int i = 0; i < ntrk; i++ ){
+    rndCol = (((rndCol-kRed)+1)%7)+kRed;
+    StPoints3DABC *pnt = (StPoints3DABC*)shaps->At(i);
+//		Filtration
+    StFilterABC *filt=0;
+    nextFilter.Reset();
+    while ((filt=(StFilterABC*)nextFilter())) {if (!filt->Accept(pnt)) break;}
+    if (filt) continue;
+//
+    int P = pnt->Size()==1;
+    const char *L = (P) ? "P":"L";
+
+    Style_t sty = defSty; Size_t siz = defSiz;
+    if (P && !IfHits) { sty = VertSty ; siz = VertSiz; }
+
+    TPolyLineShape *tracksShape = new TPolyLineShape(pnt,L);
+    m_TrackCollector->Add(pnt);		//collect garbage
+    Color_t col = pnt->GetUniqueID();
+    if (!col) col = defCol;
+    if (!col) col = rndCol;
+
+    tracksShape->SetVisibility(1);
+    tracksShape->SetColorAttribute(col);
+    tracksShape->SetLineStyle(sty);
+    tracksShape->SetSizeAttribute(siz);
+
+// 		Create a node to hold it
+    TVolume *thisTrack = new TVolume(pnt->GetName(),pnt->GetTitle(),tracksShape);
+    thisTrack->Mark();   thisTrack->SetVisibility();
+    trackCounter++;
+    m_EventsNode->Add(thisTrack); 
+  }
+  return trackCounter;
 }
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeTableTracks(const StTrackChair *points,StVirtualEventFilter *filter)
@@ -679,14 +853,14 @@ Int_t StEventDisplayMaker::MakeTableTracks(const StTrackChair *points,StVirtualE
 }
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeTableHits(const TTable *points,StVirtualEventFilter *filter
-                                        ,const Char_t *keyColumn,const Char_t *keyPositions[]
+                                        ,const char *keyColumn,const char *keyPositions[]
 )
 {
   Int_t totalHits = 0;
   TTable &ttt = *((TTable *)points);
   TString tr = keyColumn; 
-  const Char_t *packedList[] = {"dst_point_st"};
-  const Int_t lPackedList = sizeof(packedList)/sizeof(Char_t *);
+  const char *packedList[] = {"dst_point_st"};
+  const Int_t lPackedList = sizeof(packedList)/sizeof(char *);
   Bool_t packed = kFALSE;
   Int_t i = 0;
   for (i = 0; i< lPackedList && !packed ;i++) {
@@ -777,7 +951,7 @@ StVirtualEventFilter *StEventDisplayMaker::SetFilter(StVirtualEventFilter *filte
 //_____________________________________________________________________________
 void StEventDisplayMaker::PrintFilterStatus()
 {
-  const Char_t *filterNames[] = {
+  const char *filterNames[] = {
                                    "Primary Vertex"
                                  , "Tpc Hit"
                                  , "Svt Hit"
@@ -807,6 +981,59 @@ void StEventDisplayMaker::PrintFilterStatus()
       else printf(" doesn't exist\n");
   }
 }
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::MakeLoop(Int_t flag)
+{
+//   	fgEventLoop == 0  : out of 		StEventDisplayMaker::Make
+//   	fgEventLoop == -1 : processing of 	StEventDisplayMaker::Make
+//   	fgEventLoop == -2 : waiting in loop 	StEventDisplayMaker::Make
+//      flag == 0           start loop
+//      flag == 1           redraw
+//      flag == 2           next event
+//      flag == 3           exit of chain 
+//
+   const char* infos[] = {"Start loop","Redrawing...","Next event","Chain Exit",0};
+
+
+   if (fgEventLoop == -2) { //We are in loop
+     if (flag >0 || flag <=3) fgEventLoop = flag;
+     return 0;
+   }
+
+   if (fgEventLoop == -1 && flag == 0) {
+     fgEventLoop=-2;
+     Info("Waiting...");
+     while (fgEventLoop==-2) {gSystem->DispatchOneEvent(1);}
+     Info("Waiting finished");
+     int ans = fgEventLoop; fgEventLoop=-1;
+     Info(infos[ans]);
+     return ans;
+   }
+
+   if (fgEventLoop == 0) {
+     if(fgStChain==0) return 0;
+     StEventDisplayMaker *edMk = (StEventDisplayMaker*)fgStChain->GetMaker("EventDisplay");
+     if (edMk==0) return 0;
+     switch(flag) {
+       case 1: Info("Redrawing...");
+               edMk->ReDraw(); 
+               Info("Redrawing finished");
+               return 0;
+       case 2: Info("NextEvent"); 
+               fgStChain->Clear(); fgStChain->Make(); return 0;
+     }
+     return 0;
+   }
+  return 2001;
+}   
+//_____________________________________________________________________________
+void StEventDisplayMaker::Info(const char *info)
+{
+  if (!fgInfo) new StEventDisplayInfo(&fgInfo," Info ");
+  fgInfo->SetText(info);
+  fgInfo->Popup();
+}
+
 
 #define DISPLAY_FILTER_DEFINITION(filterName)                                \
 Int_t  StEventDisplayMaker::_NAME3_(Set,filterName,Flag)(Int_t flag)         \
@@ -827,6 +1054,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.76  2001/09/01 19:51:23  perev
+// StEvent added
+//
 // Revision 1.75  2001/07/30 19:29:33  fine
 // Add vertex point into the default view
 //
