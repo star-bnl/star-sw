@@ -1,7 +1,10 @@
 *
-* $Id: gxdraw.F,v 1.3 2000/01/06 22:09:18 nevski Exp $
+* $Id: gxdraw.F,v 1.4 2000/01/07 00:31:43 nevski Exp $
 *
 * $Log: gxdraw.F,v $
+* Revision 1.4  2000/01/07 00:31:43  nevski
+* cvs header record corrected
+*
 * Revision 1.3  2000/01/06 22:09:18  nevski
 * unlimited track/vertex version
 *
@@ -894,22 +897,5 @@ C.
       ENDIF
 *
   999 END
-
-      SUBROUTINE AKUGET(NAME)
-      CHARACTER*(*) NAME
-      CHARACTER*4   cnam
-      INTEGER IVOLUM
-#include "geant321/gcbank.inc"
-#include "geant321/gcunit.inc"
-#include "geant321/gcflag.inc"
-      Cnam=NAME
-      IF (JVOLUM.LE.0) RETURN
-      Call GLOOK(NAME,IQ(JVOLUM + 1),IQ(JVOLUM - 1),IVOLUM)
-      IF (IVOLUM.GT.0) RETURN
-      CALL CLTOU(NAME)
-      IF (IDEBUG.LE.0) RETURN
-      IF (CNAM.NE.' ') WRITE(LOUT,1111) Cnam,NAME
-1111  FORMAT (' GXDRAW: ',a,'  not found, converted to ',a)
-      END
 
 
