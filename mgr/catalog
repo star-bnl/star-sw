@@ -1,0 +1,21 @@
+#! /usr/local/bin/tcsh -f
+set SETS = "b0_20/year2a/hadronic_on\
+            b0_20/year2x/hadronic_on\
+            b0_20/year_1b/hadronic_off\
+            b0_2/year1a/hadronic_off\
+            b0_2/year1a/hadronic_on\
+            b0_2/year2a/hadronic_off\
+            b0_2/year2a/hadronic_on\
+            b0_2/year2y/hadronic_on\
+            b0_3/year1a/hadronic_off\
+            b0_3/year1a/hadronic_on\
+            b0_3/year2a/hadronic_on\
+            b0_3/year2x/hadronic_on\
+            b0_3/year_1b/hadronic_off"
+foreach set ($SETS)
+# raw data
+  set gen_set = `echo $set | sed -e 's/ear//g' -e 's/hadronic//g' -e 's/\///g'`
+  catalog.pl $set | tee temp.catalog
+  mv temp.catalog ${gen_set}.catalog
+end 
+ grep GEANT *.catalog | grep Objy | awk 'BEGIN {g=0; nt=0; d=0; nd=0;} {g+= $4; nt+=$7; d+=$17;nd+=$20;} END {printf("GEANT=%8.2f GB with %d events  DST=%8.2f with %d events\n",g,nt,d,nd)}'
