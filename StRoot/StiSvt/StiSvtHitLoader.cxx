@@ -157,7 +157,7 @@ void StiSvtHitLoader::loadHits(StEvent* source,
 		  
 		  //detector = _detector->getDetector(hit->layer(),hit->ladder());
 		  detector = _detector->getDetector(layer,ladder);
-		  if (hit && detector && hit->flag()>0 && hit->flag()<4) 
+		  if (hit && detector && hit->flag()<4) 
 		    {
 					//cout << "hit->layer():"<<hit->layer()
 					//		 << "hit->ladder():"<<hit->ladder()
