@@ -3,9 +3,9 @@
 #include "StEventTypes.h"
 #include "StEmcMicroEvent.h"
 #include "SystemOfUnits.h"
-#include "StEmcUtil/StEmcGeom.h"
-#include "StEmcUtil/emcDetectorName.h"
-#include "StEmcUtil/StEmcFilter.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/others/emcDetectorName.h"
+#include "StEmcUtil/filters/StEmcFilter.h"
 
 ClassImp(StEmcMicroUtil)
 

@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.40 2001/10/15 20:38:56 pavlinov Exp $
+ * $Id: StMcEventMaker.cxx,v 1.41 2003/01/23 04:03:20 jeromel Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.41  2003/01/23 04:03:20  jeromel
+ * Include fixed
+ *
  * Revision 1.40  2001/10/15 20:38:56  pavlinov
  * Added bfcTree/geantBranch for searching g2t tablesStMcEventMaker.cxx
  *
@@ -183,7 +186,7 @@ using std::find;
 
 #include "StMcEventTypes.hh"
 
-#include "StEmcUtil/StEmcGeom.h" // For Barrel Emc
+#include "StEmcUtil/geometry/StEmcGeom.h" // For Barrel Emc
 
 
 static double vertexCut = .0000025; // 25 nm (lifetime of the pi0)
@@ -191,7 +194,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.40 2001/10/15 20:38:56 pavlinov Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.41 2003/01/23 04:03:20 jeromel Exp $";
 ClassImp(StMcEventMaker)
 
 

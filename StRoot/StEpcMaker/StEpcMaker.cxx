@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.19 2002/02/19 17:42:13 alexst Exp $
+// $Id: StEpcMaker.cxx,v 1.20 2003/01/23 04:03:21 jeromel Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.20  2003/01/23 04:03:21  jeromel
+// Include fixed
+//
 // Revision 1.19  2002/02/19 17:42:13  alexst
 // Removed a bunch of redundant branching statements and some (but not all) useless output
 //
@@ -71,7 +74,7 @@
 #include "StThreeVector.hh"
 #include "StHelix.hh"
 #include "SystemOfUnits.h"
-#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 #include <stdlib.h>
 #include <string.h>
 #include "StThreeVectorD.hh"

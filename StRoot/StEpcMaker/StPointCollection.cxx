@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.15  2003/01/23 04:03:21  jeromel
+// Include fixed
+//
 // Revision 1.14  2001/12/03 22:24:28  pavlinov
 // tuned for case of no tracks
 //
@@ -62,7 +65,7 @@
 #include "StThreeVector.hh"
 #include "StHelix.hh"
 #include "SystemOfUnits.h"
-#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 //#include "St_emc_Maker/StEmcHitCollection.h"
 #include <stdlib.h>
 #include <string.h>
