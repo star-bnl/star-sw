@@ -33,7 +33,7 @@ long type_of_call mwg_(
 //
 //    Set Calibration constants and pedestals
 //
-   long n_sectors = 4 * geom->nphi * geom->neta ;
+   long n_sectors = 2 * geom->nphi * geom->neta ;
 //
    if ( n_sectors <= cal_h->maxlen ) {
       for ( long i_sec = 1 ; i_sec < n_sectors ; i_sec++ ) 
