@@ -112,6 +112,10 @@ double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
   StThreeVectorD nodeToIntersection = momentumCoefficient*momentum;
   StThreeVectorD intersection = node + nodeToIntersection;
 
+	//cout << "g:nodeToIntersection:"<<nodeToIntersection<<endl;
+	//cout << "g:node              :"<<node<<endl;
+	//cout << "g:intersection:"<<intersection<<endl;
+
   //--------------------------------
   // determine thickness and density
   // of the region travsersed
@@ -145,6 +149,7 @@ double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
   // if & where it hit the detector
 
   intersection.rotateZ(-pPlacement->getNormalRefAngle());
+	//cout << "L:intersection:"<<intersection<<endl;
   dXlocal = intersection.x();
 
   // get offsets of intersection from center

@@ -5,7 +5,7 @@
  */
 
 #ifndef STI_DETECTOR_HH
-#define STI_DETECTOR_HH
+#define STI_DETECTOR_HH 1
 
 #include <string>
 using std::string;
@@ -76,7 +76,6 @@ protected:
 
 };
 
-//Non-members--------------------------
-ostream& operator<<(ostream& os, const StiDetector& d);
+//ostream& operator<<(ostream& os, const StiDetector& d);
 
 #endif

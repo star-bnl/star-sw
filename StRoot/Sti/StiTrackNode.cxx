@@ -3,12 +3,35 @@
 #include "StiDetector.h"
 #include "StiTrackNode.h"
 
+ostream& operator<<(ostream& os, const StiDetector& d);
 
-const StiDetector * StiTrackNode::getDetector() const{
-  return( hit==NULL ? detector : hit->detector() );
+const StiDetector * StiTrackNode::getDetector() const
+{
+	if (hit==0)
+		{
+			if (detector==0)
+				cout << "StiTrackNode::getDetector() - Fatal Error - Detector improperly set to '0'" << endl;
+			else
+				cout << "StiTrackNode::getDetector() - Detector  :" << *detector << endl;
+		}
+	else
+		{
+			StiDetector * d =  hit->detector();
+			if (d==0)
+				cout << "StiTrackNode::getDetector() - Fatal Error - Node has hit that has no associated detector" << endl;
+			else
+				cout << "StiTrackNode::getDetector() - Detector associated with hit :" << *d << endl;
+		}
+  return( hit==0 ? detector : hit->detector() );
 }
+
 void StiTrackNode::setDetector(const StiDetector *pDetector){
-  if(hit==NULL){ detector = pDetector; }
+  //if(hit==0){ 
+	detector = pDetector; 
+	if (detector!=0)
+		cout << "StiTrackNode::setDetector() - Detector set to :" << *detector << endl;
+	else
+		cout << "StiTrackNode::setDetector() - Fatal Error - Detector improperly set to '0'" << endl;
 }
 
 
@@ -17,6 +40,7 @@ void StiTrackNode::reset()
 { 
   StiDefaultMutableTreeNode::reset();
   hit      = 0;
+	detector = 0;
 }
 
 
