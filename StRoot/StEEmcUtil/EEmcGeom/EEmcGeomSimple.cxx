@@ -1,9 +1,6 @@
-// $Id: EEmcGeomSimple.cxx,v 1.6 2003/02/20 21:26:58 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.7 2003/02/20 21:47:25 zolnie Exp $
 // $Log: EEmcGeomSimple.cxx,v $
-// Revision 1.6  2003/02/20 21:26:58  zolnie
-// added simple geometry class
-//
-// Revision 1.5  2003/02/20 21:15:17  zolnie
+// Revision 1.7  2003/02/20 21:47:25  zolnie
 // *** empty log message ***
 //
 // Revision 1.4  2003/01/19 03:47:10  zolnie
@@ -28,12 +25,9 @@
 #include "EEmcGeomDefs.h"
 #include "EEmcGeomSimple.h"
 
-
 // ######################################################################
 //         *** WARNING NOT TESTED FOR mClock==1 (clock-wise) ***
 // ######################################################################
-
-
 ClassImp(EEmcGeomSimple)
 
 
@@ -46,7 +40,6 @@ EEmcGeomSimple::~EEmcGeomSimple()
 {
   if(mEtaBin) delete [] mEtaBin;
 }
-
 
 // counter-clockwise (mClock==-1)
 //    12:  105deg ->   75deg
@@ -70,63 +63,79 @@ EEmcGeomSimple::useDefaultGeometry()
 
   if(mEtaBin) delete mEtaBin;
   mEtaBin = new Float_t[mNumEta+1];
-  for(int i=0;i<=mNumEta;i++) mEtaBin[i] = defaultEtaBin[i];
+  for(UInt_t i=0;i<=mNumEta;i++) mEtaBin[i] = defaultEtaBin[i];
 
   mZ1     =  270.190*centimeter; // preshower
   mZ2     =  306.158*centimeter; // postshower
   mPhi0   =  75.0*degree;       
   mClock  =  CounterClockwise;  
-
 }
 
 // =========================================================================
 // gets a hit vector r checks if inside the EEmc
-// and returns sector (0..mNumSec-1), subsector (0..mNumSSec-1) and eta(0..mNumEta)
-// 
+// and returns sector (0..mNumSec-1), subsector (0..mNumSSec-1) 
+// and eta(0..mNumEta)
 // =========================================================================
 int 
-EEmcGeomSimple::getHit(const StThreeVectorD& r,  StEmcRawHit &hit)
+EEmcGeomSimple::getHit(const StThreeVectorD& point,  StEmcRawHit &hit) const
 {
-  const double dPhiSec  = 2.0*M_PI/mNumSec;
+  double dPhiSec  = 2.0*M_PI/mNumSec;
   
   // some shorcuts
-  double  rZ    = r.z();
-  double  rEta  = r.pseudoRapidity();
-  double  rPhi  = r.phi() - mPhi0;
+  double  rZ    = point.z();
+  double  rEta  = point.pseudoRapidity();
+  double  rPhi  = point.phi() - mPhi0;
 
   // check if inside 
   if(rZ  <mZ1              || mZ2<rZ          ) return 0; 
   if(rEta<mEtaBin[mNumEta] || mEtaBin[0]<rEta ) return 0; 
-
   
-  int eta = 0;
+  UInt_t eta = 0;
   for(eta=0;eta<=mNumEta;eta++) if(mEtaBin[eta]<rEta) break;
   --eta; // step back
 
   // ------------------------------------------------------------------------
   // this code is a wonder code  - I do not know how it works ;) /paz/
   // get the sector number - 1
-  int  k  = isClockwise() ? (int) floor(rPhi/dPhiSec) : (int) ceil(rPhi/dPhiSec); 
+  int k = isClockwise() ? (int)floor(rPhi/dPhiSec) : (int)ceil(rPhi/dPhiSec);
   // adjust to 0..(mNumSec-1)
-  int sec    = (mNumSec + mClock*k) % mNumSec; 
+  UInt_t sec    = (mNumSec + mClock*k) % mNumSec; 
   // get the subsector
-  int subsec = (int) ( ((k*dPhiSec - rPhi)/dPhiSec*mNumSSec) ) % mNumSSec ;
+  UInt_t subsec = (int) ( ((k*dPhiSec - rPhi)/dPhiSec*mNumSSec) ) % mNumSSec;
   // ------------------------------------------------------------------------
 
   hit.setId(kEndcapEmcTowerId,sec,eta,subsec);
-
   return 1;
-
 }
 
-// 
-// a wrapper for the above when a StTrack and z is given 
-// (implicitely assumed that the center of the world is at z==0
-//
-int   
-EEmcGeomSimple::getHit(const StTrack& track , double z, StEmcRawHit &hit)
+// compute the distance of a point from the center of a tower pointed by hit
+Float_t 
+EEmcGeomSimple::getR2Dist(const StThreeVectorD& point,const StEmcRawHit& hit)
+  const 
+{
+  StThreeVectorD r = getTowerCenter(hit) - point;
+  return r.mag2();
+}
+
+StThreeVectorD
+EEmcGeomSimple::getTowerCenter(const StEmcRawHit& hit) const 
+{
+  
+  Double_t  phi   = getPhiMean(hit.module(),hit.sub());
+  Double_t  eta   = getEtaMean(hit.eta());
+  if(eta<0.0) return StThreeVectorD();
+  Double_t  z     = 0.5*(mZ1+mZ2);
+  Double_t  rho   = z*tan(2.0*atan(exp(-1.0*eta)));  
+
+  // create vector pointing toward the center of the tower
+  return StThreeVectorD(rho*cos(phi),rho*sin(phi),z);
+}
+
+StThreeVectorD 
+EEmcGeomSimple::getTrackPoint(const StTrack& track, Double_t z) const 
 {
   StPhysicalHelixD   helix = track.geometry()->helix();
+  if(helix.dipAngle()<1e-13) return StThreeVectorD();
   double s  = ( z - helix.origin().z() ) / sin( helix.dipAngle())  ;
-  return getHit(helix.at(s),hit);
-}
+  return StThreeVectorD(helix.at(s));
+} 
