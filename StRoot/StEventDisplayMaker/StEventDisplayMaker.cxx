@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.37 1999/11/22 16:14:31 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.38 1999/11/22 18:41:45 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -462,11 +462,13 @@ Int_t StEventDisplayMaker::ParseName(Char_t *inName, Char_t *positions[])
     const Char_t collon       = ':';
     const Char_t delimiters[] = {openBracket,comma,collon,collon,closeBracket };
     pos = positions[nParsed] = inName;
-    for (nParsed=1;nParsed <= lenExpr;nParsed++)  {
-       if( (pos = strchr(pos+1,delimiters[nParsed-1])) ) {
-           positions[nParsed] = pos+1;
-          *pos = 0;
-       } else break;
+    for (nParsed=1; (nParsed <= lenExpr) && 
+                    ((pos = strchr(pos+1,delimiters[nParsed-1])) ||
+                     (pos = strchr(pos+1,delimiters[lenExpr-1])) );
+         nParsed++)  
+    {
+      positions[nParsed] = pos+1;
+      *pos = 0;
     }
     if (nParsed > 1) {
       nParsed--;
@@ -935,6 +937,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 // --  end of filter list --
 
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.38  1999/11/22 18:41:45  fine
+// Parser for single parameter fixed
+//
 // Revision 1.37  1999/11/22 16:14:31  fine
 // palette() has been removed
 //
