@@ -67,7 +67,8 @@ If LL>1
                   <W>;('---------------:----------------------------- ');
                   <W>;('Configurations : complete,tpc_only,field_only ');
                   <W>;('               : year_1a,s,b,h,c;  year_2a    ');
-                  <W>;('Geant Physics  : Hadr_on, Hadr_off, Decay_Only');
+                  <W>;('Geant Physics  : Hadr_on, Hadr_off            ');
+                  <W>;('Geant Physics  : Phys_off, Decay_Only         ');
                   <W>;('Geometry Detail: mwc_off, pse_off, 4th_off    ');
                   <W>;('Magnetic Field : Field_on/off, field=value    ');
                   <W>;('Auxillary keys : Debug_on/off, Split_on/off   ');
@@ -89,6 +90,8 @@ If LL>1
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
                                                                        IHADR=0}
+  on PHYS_OFF   { No Physics: only energy loss;
+      {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY,IMULS}=0; Iloss=2}
   on DECAY_ONLY { Some Physics: decays, mult.scat and energy loss;
                   {IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY}=0; Iloss=2}
   on TPC_ONLY   { Minimal geometry - only TPC;
