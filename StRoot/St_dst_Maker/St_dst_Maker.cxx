@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.46 2000/04/13 21:48:08 lbarnby Exp $
+// $Id: St_dst_Maker.cxx,v 1.47 2000/05/08 15:38:28 lbarnby Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.47  2000/05/08 15:38:28  lbarnby
+// Added l3Dedx table to dst
+//
 // Revision 1.46  2000/04/13 21:48:08  lbarnby
 // No longer write particle and g2t_rch_hit tables to dst branch
 //
@@ -141,7 +144,7 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.46 2000/04/13 21:48:08 lbarnby Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.47 2000/05/08 15:38:28 lbarnby Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -165,7 +168,7 @@ Int_t St_dst_Maker::Init(){
     "kink:",   "kinkVertex",
     "rch:",    "dst_rch_pixel",
     "trg:",    "TrgDet", "L0_Trigger","L1_Trigger","L2_Trigger",
-    "l3Tracks:","l3Track",
+    "l3Tracks:","l3Track","l3Dedx",
     "l3Clufi:","l3Hit",
     0};
   
