@@ -9,7 +9,11 @@ St_geant_Maker *geant= 0;
 // reads .fzd file and prints on the screen
 
 // ______________________________________________
-void fzd2EEevent(const Int_t Nevents=5, TString fzFile ="../sim2003/mc_eve2.fzd") {
+void fzd2EEevent(const Int_t Nevents=10000, TString fzFile ="../sim2003/mc_eve2.fzd") {
+  fzFile ="pid6.fzd";
+  fzFile ="dAu83.fzd";
+  //fzFile ="../sim2003/mc_pi0-1.5.fzd";
+  //fzFile ="../sim2003/mc_eve3.fzd";
   Int_t  i=0;
   gSystem->Load("St_base");
   gSystem->Load("StChain");
