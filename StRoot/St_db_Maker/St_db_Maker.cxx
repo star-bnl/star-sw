@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.38 2000/09/16 02:45:09 didenko Exp $
+// $Id: St_db_Maker.cxx,v 1.39 2000/11/02 16:02:20 fisyak Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.39  2000/11/02 16:02:20  fisyak
+// Jeff request to allow a top level directory (e.g. database) have ID=0 which is ok
+//
 // Revision 1.38  2000/09/16 02:45:09  didenko
 // commit Victor's changes
 //
@@ -413,8 +416,8 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   par->Remove(val->fDat);
 
   int kase = 0;
-  if (mk->fDBBroker && val->fDat && par->GetUniqueID()) {	// Try to load from MySQL
-     
+  //  if (mk->fDBBroker && val->fDat && par->GetUniqueID()) {	// Try to load from MySQL
+  if (mk->fDBBroker && val->fDat) { // Try to load from MySQL
     int ierr = mk->UpdateTable(par->GetUniqueID(),(TTable*)val->fDat, valsSQL );
     if (!ierr) kase = 1;
   }
