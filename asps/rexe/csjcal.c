@@ -52,8 +52,8 @@ int  *narg,             /* number   of arguments      			*/
   va_end(ap);
 
 
-  switch (*narg) {
-
+  switch (*narg) 
+    {
     case  0: return ((fun0) *fun)(); 
     case  1: return ((fun1) *fun)(a[0]); 
     case  2: return ((fun2) *fun)(a[0],a[1]); 
@@ -67,8 +67,12 @@ int  *narg,             /* number   of arguments      			*/
     case 10: return ((fun10)*fun)(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9]); 
     case 11: return ((fun11)*fun)(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10]); 
     case 12: return ((fun12)*fun)(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11]); 
-   default: printf("*** CsJCall: Wrong narg=%d ***\n",*narg);exit(13);};
-
+    default: 
+      printf("*** CsJCall: Wrong narg=%d ***\n",*narg);
+      exit(13);
+    };
+  
+  return -1;
 }
 
 void type_of_call *csaddr_(char *name, int l77name)
