@@ -12,6 +12,7 @@
 //   all sequences start with number '1', e.g. sector 1-24,
 //   row 1-45
 
+#include "l3GeneralHeaders.h"
 #ifndef SL3COORDINATETRANSFORM
 #define SL3COORDINATETRANSFORM
 
@@ -20,7 +21,6 @@
 #define outerSectorPadPitch     0.67     // cm
 #define driftLength             208.     // cm
 #define lengthPerTb             0.5977   // = 208/348
-#define NSECTORS                24 
 
 
 // number of pads in padrow

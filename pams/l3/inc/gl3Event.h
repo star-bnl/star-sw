@@ -6,12 +6,12 @@
 #include <stdio.h>
 #include <math.h>
 #include "daqFormats.h"
+#include "l3GeneralHeaders.h"
 #include "gl3Tracks.h"
 
 #ifndef GL3EVENT 
 #define GL3EVENT 
 
-#define NSECTORS 24
 
 class gl3Sector {
 public:
@@ -39,7 +39,7 @@ public:
    gl3Event(int mxTracks=50000 ):track(0){
       setup ( mxTracks ) ;
    } ;
-   ~gl3Event( ){ } ;
+   ~gl3Event( ){ if ( track != 0 ) delete []track ;  } ;
 
    gl3Track* getTrack ( unsigned int n ) {
       if ( n < 0 || n > nTracks ) {
