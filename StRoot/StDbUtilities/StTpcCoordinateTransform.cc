@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.4 2000/02/10 01:19:37 calderon Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.5 2000/02/23 14:52:59 hardtke Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.5  2000/02/23 14:52:59  hardtke
+ * fix StTpcLocalSectorCoordinate to StTpcLocalCoordinate conversion
+ *
  * Revision 1.4  2000/02/10 01:19:37  calderon
  * Tpc Local Sector Coordinate definitions where
  * y is up,
@@ -525,13 +528,14 @@ StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
     mRotation(2,1) = -1.*mRotation(1,2);   // saves calculation sin(beta);
     mRotation(2,2) =    mRotation(1,1);   // saves calculation cos(beta);
 
-    mRotate(1,1) = a.x();
+    mRotate(1,1) = (sector>12)?a.x():-a.x(); //DH for sectors less than 12,
+                                             //x -> -x
     mRotate(2,1) = a.y();  // z co-ordinate is immaterial
 
     mResult = mRotation*mRotate;
 //     PR(mResult);
     return (sector>12)? (StThreeVector<double>(mResult(1,1),mResult(2,1),a.z()-mDriftDistance))
-                        : (StThreeVector<double>(-mResult(1,1),mResult(2,1),-a.z()+mDriftDistance));
+                        : (StThreeVector<double>(mResult(1,1),mResult(2,1),-a.z()+mDriftDistance));
 }
  
 StThreeVector<double> 
