@@ -126,6 +126,7 @@ StiKalmanTrackNode * StiKalmanTrack::addHit(StiHit *h)
     {
       StiKalmanTrackNodeFactory * f = dynamic_cast<StiKalmanTrackNodeFactory*>(trackNodeFactory);
       StiKalmanTrackNode * n = f->getObject();
+			n->reset();
       n->setHit(h);
       n->fX = h->x();
       lastNode->add(n);
@@ -135,7 +136,8 @@ StiKalmanTrackNode * StiKalmanTrack::addHit(StiHit *h)
   else 
     {
       StiKalmanTrackNodeFactory * f = dynamic_cast<StiKalmanTrackNodeFactory*>(trackNodeFactory);
-      firstNode  = f->getObject();
+      firstNode  = f->getObject(); 
+			firstNode->reset();
       firstNode->setHit(h);
       firstNode->fX = h->x();
       lastNode = firstNode;  // that's the only node on this track
@@ -156,6 +158,7 @@ StiKalmanTrackNode * StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targe
 
   StiKalmanTrackNodeFactory * f = dynamic_cast<StiKalmanTrackNodeFactory*>(trackNodeFactory);
   StiKalmanTrackNode * n = f->getObject();
+	n->reset();
   n->setHit(hInserted);
   if (targetParent==0)
     {
@@ -356,41 +359,45 @@ void StiKalmanTrack::initialize(double curvature,
   //cout <<"\tAdd Hits"<<endl;
   for (it=v.begin(); it!=v.end(); ++it)
     {
-      //cout <<"Adding Hit: "<<(*(*it))<<endl;
+			cout <<"===========Adding Hit: "<<(*(*it))<<endl;
       StiDetector* layer = (*it)->detector();
       if (!layer) {
-	  cout <<"StiKalmanTrack::initialize() ERROR:\tHit has null detector.  Seg-fault"<<endl;
+				cout <<"StiKalmanTrack::initialize() ERROR:\tHit has null detector.  Seg-fault"<<endl;
       }
       alpha = layer->getPlacement()->getNormalRefAngle();
       node = fac->getObject();
       node->reset();
       if (node==0)
-	{
-	  cout << "StiKalmanTrack::initilize() - Severe Error - "
-	       << "trackNodeFactor returned null object" << endl;
-	  return;
-	}
+				{
+					cout << "StiKalmanTrack::initialize() - Severe Error - "
+							 << "trackNodeFactor returned null object" << endl;
+					return;
+				}
       if (pNode==0)
-	alphaP = -99999.; // no parent, set crazy value
+				alphaP = -99999.; // no parent, set crazy value
       else
-	alphaP = pNode->fAlpha; // value of the parent
+				alphaP = pNode->fAlpha; // value of the parent
       if (alphaP!=alpha)
-	{
-	  stiOrigin = t->operator()(origin, alpha);
-	  eta = curvature*stiOrigin.x();
-	}
+				{
+					stiOrigin = t->operator()(origin, alpha);
+					eta = curvature*stiOrigin.x();
+				}
       state[0] = (*it)->y(); 
       state[1] = (*it)->z(); 
       state[2] = eta;
       node->set(i, (*it), alpha, (*it)->x(), state,error, 0., 0.);
       if (pNode==0) 
-	  firstNode = node;
+				firstNode = node;
       else
-	  pNode->add(node);
+				{
+					pNode->add(node);
+					cout << " just added a node" << endl;
+				}
       pNode = node;
       i++;
     }
   lastNode = node;
+	cout << *firstNode;
 }
 
 StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
@@ -399,20 +406,20 @@ StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
       return 0;
   StiDefaultMutableTreeNodeVector* nodes  = firstNode->breadthFirstEnumeration();
   double minDist  = 1.E10;
-  double diff;
+  double xx, diff;
   StiKalmanTrackNode * bestNode = firstNode;
   StiDefaultMutableTreeNodeIterator it;
   for (it=nodes->begin(); it!=nodes->end(); it++)
     {
       StiKalmanTrackNode * node = dynamic_cast<StiKalmanTrackNode *>(*it);
-      diff = node->fX - x; if (diff<0) diff = -diff;
-      //cout << "======> x:" << node->fX << endl;
-      //cout << "======> diff :" << diff << endl;
+			xx = node->fX;
+      diff = xx-x; if (diff<0) diff = -diff;
+      cout << "===> x/diff:" << xx << "\t" << diff << endl;
       if (diff<minDist) 
-	{
-	  minDist = diff;
-	  bestNode = firstNode;
-	}
+				{
+					minDist = diff;
+					bestNode = node;
+				}
     }
   delete nodes;
   return bestNode;

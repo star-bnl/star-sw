@@ -83,20 +83,20 @@ bool StiKalmanTrackFinder::isValid(bool debug) const
 void StiKalmanTrackFinder::doNextAction()
 {
     //Test composite seed finder
-    StiCompositeSeedFinder* sf = dynamic_cast<StiCompositeSeedFinder*>(trackSeedFinder);
-    if (!sf) {
-	cout <<"StiKalmanTrackFinder::doNextAction()\tcast to CompositeSF failed"<<endl;
-	return;
-    }
-
-    StiKalmanTrack* track = 0;
-    if (sf->hasMore()) {
-	track = sf->next();
-	cout <<"StiKalmanTrackFinder::doNextAction()\tGot Track: "<<track<<endl;
-    }
-    else {
-	cout <<"\tsf->hasMore()==false"<<endl;
-    }
+	StiCompositeSeedFinder* sf = dynamic_cast<StiCompositeSeedFinder*>(trackSeedFinder);
+	if (!sf) {
+		cout <<"StiKalmanTrackFinder::doNextAction()\tcast to CompositeSF failed"<<endl;
+		return;
+	}
+	
+	StiKalmanTrack* track = 0;
+	if (sf->hasMore()) {
+		track = sf->next();
+		cout <<"StiKalmanTrackFinder::doNextAction()\tGot Track: "<<track<<endl;
+	}
+	else {
+		cout <<"\tsf->hasMore()==false"<<endl;
+	}
     return;
 }
 
