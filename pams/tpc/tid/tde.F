@@ -1,5 +1,8 @@
-* $Id: tde.F,v 1.12 2000/06/15 18:54:55 aihong Exp $
+* $Id: tde.F,v 1.13 2000/06/20 00:23:16 fisyak Exp $
 * $Log: tde.F,v $
+* Revision 1.13  2000/06/20 00:23:16  fisyak
+* Patch for stright tracks
+*
 * Revision 1.12  2000/06/15 18:54:55  aihong
 * add warning for zero magnetic field
 *
@@ -217,12 +220,12 @@ C Abort if there are too many TPC tracks to work with
 
       call gufld(xlocal,bfield)
 
-      if(abs(bfield(3)).lt.0.00002) then 
-        call message('TDE_DEDX-W: zero field.'// 
-     >                 'TDE aborted.',1,imsg3)
-         tde=STAFCV_BAD
-         return
-      endif      
+*yf      if(abs(bfield(3)).lt.0.00002) then 
+*        call message('TDE_DEDX-W: zero field.'// 
+*     >                 'TDE aborted.',1,imsg3)
+*         tde=STAFCV_BAD
+*         return
+*yf      endif      
 
 c
 c  this only once on initialisation-
@@ -317,7 +320,9 @@ c        psic is the azimuthal angle of the start of the track
 c        wrt to the center of the transverse circle
 c        xc, yc are the coordinates of center of the circle
 c
-         radius=1.0 / (track(j).invp*bfield(3)*C_D_CURVATURE)
+         radius = 1.e9
+         if (abs(track(j).invp*bfield(3)*C_D_CURVATURE) .gt. 1.e-9) 
+     >   radius=1.0 / (track(j).invp*bfield(3)*C_D_CURVATURE)
          psic=track(j).psi*C_RAD_PER_DEG+
      >      sign(1.,track(j).q*bfield(3))*C_PI*0.5
          xc = x1 - radius*cos(psic)
