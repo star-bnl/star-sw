@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHWJetMaker.cxx,v 1.3 2003/05/09 20:48:19 thenry Exp $
+ * $Id: StHWJetMaker.cxx,v 1.4 2003/07/24 22:06:47 thenry Exp $
  * 
  * Author: Thomas Henry April 2003
  ***************************************************************************
@@ -74,7 +74,7 @@ StHWJetMaker::StHWJetMaker(const Char_t *name)
   mcanalyzer->setEmcAccepted(false);
   mcanalyzer->setTpcAccepted(false);
   mcanalyzer->setFpdAccepted(false);
-  mcanalyzer->setJetPtMin(5.0); // GeV/c2
+  mcanalyzer->setJetPtMin(2.0); // GeV/c2
   mcanalyzer->setJetEtaMax(100.0);
   mcanalyzer->setJetEtaMin(0);
   mcanalyzer->setJetNmin(0);
