@@ -441,7 +441,7 @@ Int_t St_TableSorter::GetIndex(UInt_t index) const
        if (!m_simpleArray) 
          indx = m_firstRow + (res - (((const Char_t *)m_ParentTable.At(m_firstRow)) + m_colOffset))/m_ParentTable.GetRowSize();
        else
-         indx = ULong_t(res) - ULong_t(m_simpleArray)/m_colSize;
+         indx = (ULong_t(res) - ULong_t(m_simpleArray))/m_colSize;
      }
   }
   return indx;
