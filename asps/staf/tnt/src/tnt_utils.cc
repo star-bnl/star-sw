@@ -20,7 +20,7 @@ tntColumnChform(tdmTable *table, long iColumn) {
   char temp[20];
   char chShape[20];
   char chtype[10];
-  int i, j;
+  int i;
 
   colName = table->columnName(iColumn);
 
@@ -54,13 +54,13 @@ tntColumnChform(tdmTable *table, long iColumn) {
     EML_ERROR(INVALID TYPE);
   }
   
-  sprintf(chShape,"");
+  chShape[0] = 0; // Reset string to null.
   if (table->columnTypeCode(iColumn) != DS_TYPE_CHAR) {
     for (i = 0; i < table->columnRank(iColumn); i++) {
       if (i == 0) {
-	sprintf(chShape,"(%d",table->columnShape(iColumn,i));
+	sprintf(chShape,"(%ld",table->columnShape(iColumn,i));
       } else { 
-	sprintf(temp,",%d",table->columnShape(iColumn,i));
+	sprintf(temp,",%ld",table->columnShape(iColumn,i));
 	strcat(chShape,temp);
       }
     }
@@ -84,7 +84,7 @@ size_t
 tntLongwordifyRowSize(tdmTable *table) 
 {
   long i;
-  size_t size, longwordifiedSize;
+  long size, longwordifiedSize;
   
   /*- Calculate longwordified size of row */
   if(table->columnCount() <= 0) {
@@ -95,9 +95,6 @@ tntLongwordifyRowSize(tdmTable *table)
   longwordifiedSize = 0;
   for (i = 0; i < table->columnCount(); i++) {
     size = tntLongwordifyColumnSize(table, i);
-    if (size < 0) {
-      EML_ERROR(INVALID_TABLE_CELL);
-    }
     longwordifiedSize += size;
   }
 
@@ -110,11 +107,7 @@ tntLongwordifyColumnSize(tdmTable *table, long iColumn)
   size_t size, longwordifiedSize;
   
   size = table->columnSize(iColumn);
-  if (size <= 0) {
-    longwordifiedSize = -1;
-  } else {
-    longwordifiedSize = LONGWORDIFY(size);
-  }
+  longwordifiedSize = LONGWORDIFY(size);
 
   return longwordifiedSize;
 }

@@ -31,7 +31,7 @@ extern "C"
 //:----------------------------------------------- CTORS & DTOR       --
 tntNtuple::tntNtuple()
   : socObject("NULL","tntNtuple") {
-  myPtr = NULL;
+  myPtr = 0;
 }
 
 //:---------------------------------
@@ -153,7 +153,7 @@ tntCWNtuple::tntCWNtuple(long id, tdmTable *table)
       iBlock++;
       _blockPtr[iBlock] = rowBuffer + offset;
       _blockType[iBlock] = currentBlockType;
-      sprintf(_blockName[iBlock],"BLOCK%3d",iBlock);
+      sprintf(_blockName[iBlock],"BLOCK%3ld",iBlock);
       oldBlockType = currentBlockType;
       chforms[iBlock] = tntColumnChform(table, i);
     } else {
@@ -356,6 +356,9 @@ tntCWNtuple::append (tdmTable* table) {
 	  bufferPtr += sizeof(double)/sizeof(long);
 	}
 	break;
+      case DS_TYPE_STRUCT:
+	EML_MESSAGE("Tables containing structs not supported by `tnt'.\n");
+	break;
       }
     }
 
@@ -379,6 +382,8 @@ tntCWNtuple::clear () {
 //:---------------------------------
 STAFCV_T 
 tntCWNtuple::export (tdmTable* table) {
+  // Just to hush pedantic compilers
+  static void *p = table;
   EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
@@ -391,6 +396,9 @@ tntCWNtuple::show () {
 //:---------------------------------
 STAFCV_T 
 tntCWNtuple::print (long ifirst, long nrows) {
+  // Just to hush pedantic compilers
+  static void *pi = &ifirst;
+  static void *pn = &nrows;
   EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
@@ -421,12 +429,16 @@ tntCWNtuple::isCharBlock (long iBlock) {
 //:------------------------------
 STAFCV_T 
 tntCWNtuple::getDataFromTable(tdmTable* table) {
+  // Just to hush pedantic compilers
+  static void *pt = table;
   EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
 //:------------------------------
 STAFCV_T
 tntCWNtuple::putDataToTable(tdmTable* table) {
+  // Just to hush pedantic compilers
+  static void *pt = table;
   EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 

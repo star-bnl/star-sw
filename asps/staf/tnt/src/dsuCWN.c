@@ -1,3 +1,4 @@
+#include <string.h>
 #include "asuAlloc.h"
 #include "dstype.h"
 #include "dsuCWN.h"
@@ -67,6 +68,8 @@ dsuLongwordifyBuffer(DS_DATASET_T *pTable, size_t irow, char **pData) {
   }
   *pData = (char *) MALLOC(expandedSize);
   memset(pData,0,expandedSize);
+
+  return STAFCV_OK;
 }
 
 /*----------------------------------------------------------------------
@@ -77,7 +80,7 @@ dsuLongwordifyRow(DS_DATASET_T *pTable, size_t irow, char **ppData)
 {
    long ic,i;
    size_t colCount;
-   size_t size;
+
    size_t elCount;
    size_t colSize;
    DS_TYPE_CODE_T code;
@@ -141,6 +144,8 @@ dsuLongwordifyRow(DS_DATASET_T *pTable, size_t irow, char **ppData)
 	 }
       }
    }
+
+   return STAFCV_OK;
 }
 
 /*----------------------------------------------------------------------
@@ -243,14 +248,14 @@ dsuColumnChform(DS_DATASET_T *pTable, size_t icolumn)
    strncpy(chname,name,8); 
    chname[8]=0; /* hjw 19Feb98 */
    if( 1 < count ){
-      sprintf(chdim,"(%s)",count);
+      sprintf(chdim,"(%d)",count);
    }
    else {
       chdim[0]=0;
    }
    switch(code) {
       case DS_TYPE_CHAR:
-	 sprintf(chtype,"C*%s",MIN(32,LONGWORDIFY(size)));
+	 sprintf(chtype,"C*%d",MIN(32,LONGWORDIFY(size)));
          break;
       case DS_TYPE_OCTET:
 	 strcpy(chtype,"U*4:8");	/* :[0,255]");		*/

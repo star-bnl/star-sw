@@ -25,12 +25,16 @@
 STAFCV_T
 hbkCWNbook(long hid, char *title) {
   HBNT((int)hid, title, "");
+  
+  return STAFCV_OK;
 }
 
 /*--------------------------------------------------------------------*/
 STAFCV_T 
 hbkCWNscalarBlock(long id, char *blockName, int *dataPtr, char *chform) {
   HBNAME(id, blockName, dataPtr, chform);
+
+  return STAFCV_OK;
 }    
 
 /*--------------------------------------------------------------------*/
@@ -42,7 +46,8 @@ hbkCWNscalarBlock(long id, char *blockName, int *dataPtr, char *chform) {
 STAFCV_T 
 hbkCWNcharBlock(long id, char *blockName, char *dataPtr, char *chform) {
   /* This is a hardwired C/Fortran linkage. */
-#ifndef WIN32
+  /* #ifndef WIN32 */
+#if 0
   hbnamc_(&id, blockName, dataPtr, chform, strlen(blockName), 4,
 	  strlen(chform));
 #else
@@ -56,6 +61,8 @@ hbkCWNcharBlock(long id, char *blockName, char *dataPtr, char *chform) {
      comments above.  
      
       */
+
+  return STAFCV_OK;
 }    
 
 /*--------------------------------------------------------------------*/
@@ -282,7 +289,6 @@ hbkCWNblockOffset(long hid, size_t iblock) {
 unsigned char
 hbkCWNblockIsChar(long hid, size_t iblock) {
   size_t numColumns, numBlocks;
-  size_t blockOffset = 0;
   char block[9];
   char chtag[33];
   int nsub, itype, isize, ielem;
