@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.63 2002/05/21 18:42:15 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.64 2002/05/23 18:57:08 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -291,7 +291,7 @@ Int_t StFlowAnalysisMaker::Init() {
   // MultEta
   mHistMultEta = new TH1F("Flow_MultEta", "Flow_MultEta",
       nMultEtaBins, MultEtaMin, MultEtaMax);
-  mHistMultEta->SetXTitle("Mult |eta| < 0.75");
+  mHistMultEta->SetXTitle("Mult for Centrality");
   mHistMultEta->SetYTitle("Counts");
     
   // Mult
@@ -1057,7 +1057,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.63 2002/05/21 18:42:15 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.64 2002/05/23 18:57:08 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1789,6 +1789,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.64  2002/05/23 18:57:08  posk
+// changed label on MultHist histogram
+//
 // Revision 1.63  2002/05/21 18:42:15  posk
 // Kirill's correction to minBias.C for bins with one count.
 //
