@@ -1,9 +1,13 @@
 /**************************************************************************
- * $Id: StRichPhysicsDbInterface.h,v 1.2 2000/02/08 16:29:37 lasiuk Exp $
+ * $Id: StRichPhysicsDbInterface.h,v 1.3 2000/02/11 21:10:54 lasiuk Exp $
  *
  * Description:
  *
  * $Log: StRichPhysicsDbInterface.h,v $
+ * Revision 1.3  2000/02/11 21:10:54  lasiuk
+ * maximum energy probability in access function
+ * change electrons/cm and gas gain to 10 pwer 5
+ *
  * Revision 1.2  2000/02/08 16:29:37  lasiuk
  * include gasGainAmplification factor here instead of geometry
  *
@@ -35,7 +39,7 @@ public:
     virtual double polia() const = 0;
     virtual double averageNumberOfInteractions() const = 0;
     virtual double electronDistribution(int)     const = 0;    
-    virtual double maximumElectronEnergy()       const = 0;
+    virtual double maximumElectronEnergyProbability()       const = 0;
     virtual double gasGainAmplification()        const = 0;
     
     // Electronics

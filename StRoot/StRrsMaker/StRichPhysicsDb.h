@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPhysicsDb.h,v 1.3 2000/02/08 16:29:35 lasiuk Exp $
+ * $Id: StRichPhysicsDb.h,v 1.4 2000/02/11 21:10:54 lasiuk Exp $
  *
  * Description:
  *  The two classes defined below, geometryDB and physicsDB,
@@ -21,9 +21,13 @@
  *
  **************************************************************
  * $Log: StRichPhysicsDb.h,v $
- * Revision 1.3  2000/02/08 16:29:35  lasiuk
- * include gasGainAmplification factor here instead of geometry
+ * Revision 1.4  2000/02/11 21:10:54  lasiuk
+ * maximum energy probability in access function
+ * change electrons/cm and gas gain to 10 pwer 5
  *
+ * Revision 1.4  2000/02/11 21:10:54  lasiuk
+ * maximum energy probability in access function
+ * change electrons/cm and gas gain to 10 pwer 5
  *
  * Revision 1.3  2000/02/08 16:29:35  lasiuk
  * include gasGainAmplification factor here instead of geometry
@@ -69,7 +73,7 @@ public:
     double feedBackPhotonProbability() const;
 
     
-    double maximumElectronEnergy()       const;
+    // Ionization
     double polia() const;
     double averageNumberOfInteractions() const;
     double electronDistribution(int)     const;    
@@ -130,7 +134,7 @@ inline double StRichPhysicsDb::photonToPadEfficiency() const { return phot2pad;}
 inline double StRichPhysicsDb::photoConversionEfficiency() const { return phot2elec;}
 inline double StRichPhysicsDb::feedBackPhotonProbability() const { return avl2phot;}
 inline double StRichPhysicsDb::electronicNoiseLevel() const { return electric_noise;}    
-inline double StRichPhysicsDb::maximumElectronEnergy() const { return e_max;}
+//inline double StRichPhysicsDb::electronCharge() const { return e_charge;}    
 inline double StRichPhysicsDb::electronDistribution(int i) const { return e_distribut[i];}    
 inline double StRichPhysicsDb::gasGainAmplification() const { return mGasGainAmplification;}
 
