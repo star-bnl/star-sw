@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.27 1999/07/12 02:27:10 perev Exp $
+// $Id: StMaker.h,v 1.28 1999/07/12 17:36:34 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.28  1999/07/12 17:36:34  perev
+// Spiros request to add error flags
+//
 // Revision 1.27  1999/07/12 02:27:10  perev
 // GetCVS only
 //
@@ -87,7 +90,7 @@ class TTree;
 class StMaker : public St_DataSet{
 public:
    typedef  enum {kNormal, kDebug} EDebugLevel;
-   enum {kSTAFCV_BAD, kSTAFCV_OK} EModule_return_Status;
+   enum {kSTAFCV_BAD, kSTAFCV_OK, kSTAFCV_ERR=2, kSTAFCV_FATAL=3} EModule_return_Status;
 
 protected:
 
@@ -209,7 +212,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS()
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.27 1999/07/12 02:27:10 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.28 1999/07/12 17:36:34 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };
