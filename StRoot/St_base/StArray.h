@@ -101,7 +101,7 @@ class StTObjArray : public TSeqCollection {
       virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const {return fArr->MakeIterator(dir);}
 //VP supressed       virtual TObject*& operator[](Int_t i)
         virtual TObject* Remove(TObject* obj){return fArr->Remove(obj);}
-            virtual void RemoveAt(Int_t idx){fArr->RemoveAt(idx);}
+        virtual TObject* RemoveAt(Int_t idx){return fArr->RemoveAt(idx);}
             virtual void SetLast(Int_t last){fArr->SetLast (last);}
             virtual void Sort(Int_t upto = kMaxInt){fArr->Sort(upto);}
                 TObject* UncheckedAt(Int_t i) const {return fArr->UncheckedAt(i);}
