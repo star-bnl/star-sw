@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSingleHitCollection.h,v 1.1 2000/04/05 16:39:51 lasiuk Exp $
+ * $Id: StRichSingleHitCollection.h,v 1.2 2000/05/18 11:42:42 lasiuk Exp $
  *
  * Description:
  *  Container for output of cluster finder
@@ -9,8 +9,8 @@
  ****************************************************************
  *
  * $Log: StRichSingleHitCollection.h,v $
- * Revision 1.1  2000/04/05 16:39:51  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/05/18 11:42:42  lasiuk
+ * mods for pre StEvent writing
  *
  * Revision 1.2  2000/05/18 11:42:42  lasiuk
  * mods for pre StEvent writing
@@ -28,7 +28,7 @@
 
 #include <vector>
 #ifndef ST_NO_NAMESPACES
-#include "StRichHit.h"
+using std::vector;
 #endif
 
 #include "StRichSimpleHit.h"

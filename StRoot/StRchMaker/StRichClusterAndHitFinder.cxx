@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 1.2 2000/04/07 12:50:21 dunlop Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 1.3 2000/05/18 11:42:25 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
- * Revision 1.2  2000/04/07 12:50:21  dunlop
- * Fixed clearAndDestroy of StRichSinglePixelCollection mThePixels
+ * Revision 1.3  2000/05/18 11:42:25  lasiuk
+ * mods for pre StEvent writing
  *
  * MC info restored in classifyHit() member
  * cut parameters (for decon) added in initializeCutParameters()
@@ -32,6 +32,8 @@
 
  * Filled the id associated to hit
  *
+ * add clone() where necessary
+ * Revision 1.3  2000/05/18 11:42:25  lasiuk
  * mods for pre StEvent writing
  *
  * Revision 1.2  2000/04/07 12:50:21  dunlop
@@ -202,10 +204,10 @@ bool StRichClusterAndHitFinder::makeTheClustersAndFilter()
 //    if (!makeClusters(1)) return false;
     
 //    if (!splitClusters()) return false;
-	if( mThePixels[ii]->amplitude() > minimumAmplitude  &&
+//    if (!removeSmallClusters()) return false;
     return true;
 } 
-	    mTheClusters.push_back(new StRichCluster);
+
 bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
 {
     //cout << "StRichClusterAndHitFinder::makeClusters()" << endl;
@@ -222,7 +224,7 @@ bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
     // first pass cluster finder
     // Loop over single list;
     //
-		double amplitude = newPads.back()->amplitude();
+//     PR(mThePixels.size());
 
     // Is it necessary to mark all UNUSED? unSetBit(eUsed)
     // IF there is more than 1 pass...YES
@@ -235,15 +237,15 @@ bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
 	    
 	    mTheClusters.push_back(new StRichSimpleCluster);
 	    mTheClusters.back()->setFirstPad(newPads.size());
-		    if( mThePixels(iPad,iRow)->amplitude() > amplitude     ||
+	    mTheClusters.back()->setMinimumAmplitudeOfLocalMax(startAmplitude);
 
-			 mThePixels(iPad,iRow+1)->amplitude() > amplitude) ||
+	    theCandidatePads.push(mThePixels[ii]);
 	    mThePixels[ii]->setBit(eUsed);
-			 mThePixels(iPad,iRow-1)->amplitude() > amplitude) ) {
+	    while (!theCandidatePads.empty()) {
 
 		// Move it to the new List and remove!
 		newPads.push_back(theCandidatePads.top());
-		    if( mThePixels(iPad,iRow)->amplitude() > minimumAmplitude &&
+		theCandidatePads.pop();		
 
 		newPads.back()->setBit(eLocalMaximum);
 		newPads.back()->setClusterNumber(mTheClusters.size()-1);
@@ -254,15 +256,15 @@ bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
 		ivb << "x/y-amplitude ";
 		ivb << ix << '/' << iy << '-' << amplitude << endl;
 
-		    if( mThePixels(iPad,iRow)->amplitude() > amplitude     ||
+		// No pixel on the border is used,
 		// so no n eed to check for boundaries here 
-			 mThePixels(iPad+1,iRow)->amplitude() > amplitude) ||
+		int iPad;
 		int iRow = iy;
-			 mThePixels(iPad-1,iRow)->amplitude() > amplitude) ) {
+		for(iPad = ix-1; iPad<ix+2; iPad+=2) {
 		    if(mThePixels(iPad,iRow) == 0) continue;
 
 		    //
-		    if( mThePixels(iPad,iRow)->amplitude() > minimumAmplitude &&
+		    // Nearest neighbor search
 		    //
 		    if( mThePixels(iPad,iRow)->charge() > amplitude     ||
 			(mThePixels(iPad,iRow+1) != 0 &&
@@ -271,15 +273,15 @@ bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
 			 mThePixels(iPad,iRow-1)->charge() > amplitude) ) {
 			newPads.back()->unSetBit(eLocalMaximum);
 		    }
-		mTheClusters.back()->updateAmplitude(newPads.back()->amplitude());
+		    
 		    if( mThePixels(iPad,iRow)->charge() > minimumAmplitude &&
 			(!mThePixels(iPad,iRow)->isSet(eUsed)) ) {
 			theCandidatePads.push(mThePixels(iPad,iRow));
 			mThePixels(iPad,iRow)->setBit(eUsed);
 		    }
 		} // loop over neighbors in x
-		    newPads.back()->amplitude() > mTheClusters.back()->minimumAmplitudeOfLocalMax() ) {
-		    mTheClusters.back()->setMinimumAmplitudeOfLocalMax(newPads.back()->amplitude());
+
+		iPad = ix;
 		for(iRow = iy-1; iRow<iy+2; iRow+=2) {
 		    if(mThePixels(iPad,iRow) == 0) continue;
 
@@ -287,7 +289,7 @@ bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
 			(mThePixels(iPad+1,iRow) != 0 &&
 			 mThePixels(iPad+1,iRow)->charge() > amplitude) ||
 			(mThePixels(iPad-1,iRow) != 0 &&
-	else if( mThePixels[ii]->amplitude() <= minimumAmplitude) {
+			 mThePixels(iPad-1,iRow)->charge() > amplitude) ) {
 			newPads.back()->unSetBit(eLocalMaximum);
 		    }
 		    
@@ -299,7 +301,7 @@ bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
 		} // loop over neighbors in y
 
 		// Update cluster Properties based on the above:
-	if(mThePixels[m]->amplitude()>minimumAmplitude &&
+		mTheClusters.back()->increaseNumberOfPads();
 		mTheClusters.back()->updateAmplitude(newPads.back()->charge());
 
 		if( newPads.back()->isSet(eLocalMaximum) ) {
@@ -322,7 +324,7 @@ bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
     } // loop over all  pixels :=> mThePixels.size()
 
 //     PR(mThePixels.size());
-  	if(mThePixels[im]->amplitude()>minimumAmplitude &&
+//     PR(newPads.size());
     //
     // Take into account the border pixels that have not been
     // assigned to a cluster
@@ -336,7 +338,7 @@ bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
     // Diagnostic for total number of pads
     //
     //PR(newPads.size());
-// 	    if(mThePixels[ii]->amplitude()<=2) {
+    //PR(lowAmplitudePixels.size());
     while(!lowAmplitudePixels.empty()) {
 	newPads.push_back(lowAmplitudePixels.top());
 	lowAmplitudePixels.pop();
@@ -357,7 +359,7 @@ bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
     }
 
     if(mThePixels.size() != newPads.size()) {
-// 	    if((*iter)->amplitude() <=2) {
+	cout << "StRichClusterAndHitFinder::makeClusters()\n";
 	cout << "\tERROR\n";
 	cout << "\tPointer lengths mixed up\n";
 // 	ofstream highpix("highpix.txt");
@@ -424,7 +426,7 @@ void StRichClusterAndHitFinder::dumpClusterInformation(ostream& os) const
 	os << mTheClusters.size() << " Clusters found." << endl;
 	os << "cluster #pads firstPad #LocMax AmpLocMax charge rms" << endl;
 	for(size_t ii=0; ii<mTheClusters.size(); ii++) {
-	       << mTheHits[ii]->position() << endl;
+	    os << ii << '\t'
 	       << mTheClusters[ii]->numberOfPads()     << '\t'
 	       << mTheClusters[ii]->firstPad()         << '\t'
 	       << mTheClusters[ii]->numberOfLocalMax() << '\t'
@@ -490,7 +492,7 @@ void StRichClusterAndHitFinder::dumpHitInformation(ostream& os) const
 	double maxAmp = 0;
 	int jj;
 	if(makeHitFromCluster) {
-		amp = mThePixels[jj]->amplitude();
+	    
 	    for(jj=firstPadOfCluster; jj<lastPadOfCluster; jj++) {
 		ivb << '\t' << *mThePixels[jj] << endl;
 		amp = mThePixels[jj]->charge();
@@ -502,7 +504,7 @@ void StRichClusterAndHitFinder::dumpHitInformation(ostream& os) const
 	    // Loop over the isolated max
 	    if(RICH_CF_DEBUG) {
 		PR(x);
-	    mTheHits.push_back(new StRichHit);
+		PR(y);
 		PR(sum);
 	    }
 	    mTheHits.push_back(new StRichSimpleHit);
@@ -530,16 +532,16 @@ bool StRichClusterAndHitFinder::constructTheMatrix(int ipad, int irow,
     ampsum = 0;
     maxadc = 0;
     
-	       mThePixels(iPad,iRow)->amplitude()<=0) continue;
+    for(int iPad=ipad-1; iPad<=ipad+1; iPad++) {
 	for(int iRow=irow-1; iRow<=irow+1; iRow++) {
-		amp = mThePixels(iPad,iRow)->amplitude();
+	    if(mThePixels(iPad,iRow) == 0 ||
 	       mThePixels(iPad,iRow)->charge()<=0) continue;
 	    else {
 		amp = mThePixels(iPad,iRow)->charge();
 		ampsum += amp;
 		fx     += amp*iPad;
 		fy     += amp*iRow;
-		if(amp>maxadc->amplitude())
+		fx2    += amp*iPad*iPad;
 		fy2    += amp*iRow*iRow;
 		
 		if(amp>maxadc->charge())
@@ -574,7 +576,7 @@ bool StRichClusterAndHitFinder::useTheMovingMatrix(StRichSinglePixel* pix)
     StRichSinglePixel* maxAdc = 0;
     
     bool   anotherIteration = false;
-    //double amp  = pix->amplitude();
+//     cout << "construct square matrix" << endl;
 bool StRichClusterAndHitFinder::useTheMovingMatrix(StRichSinglePixel* pix, StRichHitInformation* info)
 
     //double amp  = pix->charge();
@@ -610,11 +612,11 @@ bool StRichClusterAndHitFinder::useTheMovingMatrix(StRichSinglePixel* pix, StRic
     double iPad = pix->pad();
 	//cout << "Iteration " << ii << " x= " << info->position() << endl;
     for(size_t ii=0;
-    mTheHits.push_back(new StRichHit);
+    //
     // then make the hit
     //
     mTheHits.push_back(new StRichSimpleHit);
-    mTheHits.back()->setMaxAmplitude(maxAdc->amplitude());
+    mTheHits.back()->internal() = StThreeVector<double>(fractionalPad,fractionalRow,0);
     mTheHits.back()->setCharge(totalCharge);
     mTheHits.back()->setClusterNumber(mThePixels(iPad,iRow)->clusterNumber());
     mTheHits.back()->setMaxAmplitude(maxAdc->charge());
@@ -630,7 +632,7 @@ bool StRichClusterAndHitFinder::makeHitsFromPixelMatrix()
 //     cout << "StRichClusterAndHitFinder::makeHitsFromPixelMatrix()" << endl;
 
     const int minimumNumberOfPixelsForMovingMatrix = 10;
-    //    StRichHit* theCurrentHit;
+    double x,x2;
     double y,y2;
     double sum;
     //    StRichSimpleHit* theCurrentHit;
@@ -664,7 +666,7 @@ bool StRichClusterAndHitFinder::makeHitsFromPixelMatrix()
 	    // do it "quick"
 	    //
 	    x = x2 = y = y2 = sum = 0;
-		amp  = mThePixels[jj]->amplitude();
+	    double amp = 0;
 	    int jj;
 	    for(jj=firstPadOfCluster; jj<lastPadOfCluster; jj++) {
 		amp  = mThePixels[jj]->charge();
@@ -676,7 +678,7 @@ bool StRichClusterAndHitFinder::makeHitsFromPixelMatrix()
 	    }
 
 	    PR(x);
-	    mTheHits.push_back(new StRichHit);
+ 	    PR(y);
  	    PR(sum);
 	    
 	    mTheHits.push_back(new StRichSimpleHit);
@@ -714,7 +716,7 @@ bool StRichClusterAndHitFinder::makeHitsFromPixelMatrix()
     //
 	if( abs(info->position() - mTheHits[ii]->internal()) < 1 ) {
 	    status = false;
-	mTheHits[ii]->position() = local.position();
+// 	    double distance = abs(info->position() - mTheHits[ii]->internal());
 // 	    PR(distance);
 	    break;
 	}
@@ -733,11 +735,11 @@ bool StRichClusterAndHitFinder::makeHitsFromPixelMatrix()
 	if(RICH_CF_DEBUG)
 	    cout << "\t" << ii << " " << *mTheHits[ii] << " " << local << endl;
 	
-	//os << mThePixels(ii)->amplitude() << '\t';
+    }
 }
 
     StRichCoordinateTransform* myTransform =
-	   << mThePixels(ii)->amplitude() << endl;
+	StRichCoordinateTransform::getTransform(mGeometryDb);
 void StRichClusterAndHitFinder::calculateHitsInGlobalCoordinates()
 {
 //     cout << "StRichClusterAndHitFinder::calculateHitsInLocalCoordinates()" << endl;
@@ -749,7 +751,7 @@ void StRichClusterAndHitFinder::calculateHitsInGlobalCoordinates()
 	StRichRawCoordinate raw(mTheHits[ii]->internal().x(),
 				mTheHits[ii]->internal().y());
 	(*mTransform)(raw,global);
-	    os << mThePixels(iPad,iRow)->amplitude() << " ";
+	mTheHits[ii]->global() = global.position();
     }
 }
 

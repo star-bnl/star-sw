@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSimpleHit.cxx,v 1.1 2000/05/18 11:34:14 lasiuk Exp $
+ * $Id: StRichSimpleHit.cxx,v 1.2 2000/05/18 11:42:39 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StRichSimpleHit.cxx,v $
- * Revision 1.1  2000/05/18 11:34:14  lasiuk
- * iRename revision
+ * Revision 1.2  2000/05/18 11:42:39  lasiuk
+ * mods for pre StEvent writing
  *
  * Revision 2.0  2000/08/09 16:22:12  gans
  * Cosmetic Changes. Naming convention for TDrawable objects
@@ -28,12 +28,12 @@
  * iRename revision
  *
  **************************************************************************/
-#ifdef __ROOT__
-StRichSimpleHit::StRichSimpleHit(const StRichHit*)
-{
-    cout << "StRichSimpleHit::StRichSimpleHit(const StRichHit*)" << endl;
-}
-#endif
+
+    : mLocal(xl), mSigma(dx)
+
+// #ifdef __ROOT__
+// StRichSimpleHit::StRichSimpleHit(const StRichHit*)
+// {
 //     cout << "StRichSimpleHit::StRichSimpleHit(const StRichHit*)" << endl;
 // }
 // #endif

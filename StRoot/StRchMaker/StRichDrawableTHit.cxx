@@ -1,12 +1,12 @@
 /***************************************************************
- * $Id: StRichDrawableTHit.cxx,v 1.1 2000/04/05 16:39:34 lasiuk Exp $
+ * $Id: StRichDrawableTHit.cxx,v 1.2 2000/05/18 11:42:32 lasiuk Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTHit.cxx,v $
- * Revision 1.1  2000/04/05 16:39:34  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/05/18 11:42:32  lasiuk
+ * mods for pre StEvent writing
  *
  * Revision 1.2  2000/05/18 11:42:32  lasiuk
  * mods for pre StEvent writing
@@ -23,8 +23,8 @@ ClassImp(StRichDrawableTHit)
 StRichDrawableTHit::StRichDrawableTHit() {/*nopt*/}
 
 StRichDrawableTHit::StRichDrawableTHit(double xl, double yl, int type)
-StRichDrawableTHit::StRichDrawableTHit(StRichHit& hit, int type)
-    : TMarker(hit.position().x(),hit.position().y(),type)
+    : TMarker(xl,yl,type)
+{/* nopt */}
 
 StRichDrawableTHit::StRichDrawableTHit(StRichSimpleHit& hit, int type)
     : TMarker(hit.local().x(),hit.local().y(),type)
