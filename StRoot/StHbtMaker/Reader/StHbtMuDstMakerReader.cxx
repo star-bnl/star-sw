@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMuDstMakerReader.cxx,v 1.3 2003/02/13 19:02:20 magestro Exp $
+ * $Id: StHbtMuDstMakerReader.cxx,v 1.4 2004/02/24 19:50:00 magestro Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -35,7 +35,8 @@
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 
 #include "StHbtMuDstMakerReader.h"
-#include "Infrastructure/StHbtEvent.hh"
+#include "StHbtMaker/Infrastructure/StHbtEvent.hh"
+#include "StHbtMaker/Base/StHbtEventCut.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -107,6 +108,15 @@ StHbtEvent* StHbtMuDstMakerReader::ReturnHbtEvent(){
     DEBUGVALUE3(mMuDst);
     mMuDst->fixTrackIndices();
     mHbtEvent = new StHbtEvent(mMuDst, mTrackType);
+
+    // Apply event cut, if available
+    if (mEventCut) {
+      if (!(mEventCut->Pass(mHbtEvent))){
+        delete mHbtEvent;
+        mHbtEvent = 0;
+        return 0;
+      }
+    }
   }
 
   if (mFlowMaker && mHbtEvent ) {
@@ -140,6 +150,9 @@ void StHbtMuDstMakerReader::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StHbtMuDstMakerReader.cxx,v $
+ * Revision 1.4  2004/02/24 19:50:00  magestro
+ * Added optional event cut
+ *
  * Revision 1.3  2003/02/13 19:02:20  magestro
  * Removed offending cout statement
  *
