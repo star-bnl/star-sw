@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.24 1999/07/15 13:58:39 perev Exp $
+// $Id: doEvents.C,v 1.25 1999/07/16 15:13:05 fisyak Exp $
 // $Log: doEvents.C,v $
-// Revision 1.24  1999/07/15 13:58:39  perev
-// cleanup
+// Revision 1.25  1999/07/16 15:13:05  fisyak
+// clean up
+//
+// Revision 1.25  1999/07/16 15:13:05  fisyak
+// clean up
 //
 // Revision 1.24  1999/07/15 13:58:39  perev
 // cleanup
@@ -125,7 +128,7 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 // .x doEvents.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.root")
 
               const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-void doEventsQQ(const Int_t nevents=999,
+void doEvents(const Int_t nevents,
               const Char_t **fileList)
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
     cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
@@ -211,7 +214,7 @@ void doEvents(const Int_t nevents=999,
   const char *fileListQQ[]={0,0};
   if (path[0]=='-') {
     fileListQQ[0]=file;
-  doEventsQQ(nevents,fileListQQ);
+  doEvents(nevents,fileListQQ);
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
 }
 
