@@ -759,7 +759,7 @@ StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
 	    *s_pMessenger << "c1sq:" << c1sq << endl;
 	    throw runtime_error("SKTN::propagate() - c1sq>=1");
 	}
-    c2=fP3*x2 - fP2; 
+    c2=fP3*x2 - fP2;
     double c2sq = c2*c2; 
     if (c2sq>=1.) 
 	{
