@@ -1,12 +1,6 @@
 //CompositeSeedFinderBuild.txt
 
-//theStringVecSize:		1
-//The ordering defines the order of seed finder execution
-//theStringVec:	StRoot/StiMaker/RunTimeParameters/OuterSeedFinder.txt
-
-theStringVecSize:		2
+theStringVecSize:		1
 //The ordering defines the order of seed finder execution
 
-theStringVec:	StRoot/StiMaker/RunTimeParameters/OuterSeedFinder.txt  StRoot/StiMaker/RunTimeParameters/InnerSeedFinder.txt
-
-//theStringVec:	StRoot/StiMaker/RunTimeParameters/OuterSeedFinder.txt  StRoot/StiMaker/RunTimeParameters/CollinearSeedFinder.txt
+theStringVec:	StRoot/StiMaker/RunTimeParameters/OuterSeedFinder.txt
