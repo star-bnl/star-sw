@@ -71,9 +71,9 @@
      C=CCOMMAND(i:i); Igate=i
      if     C=='E' { Call AGZREAD('P',ier);  call gstar_ReadEGZ(Igate)     }
      elseif C=='X' { IrbDIV=IxDIV;           LKARP2=LkEvnt
-                     J=CsADDR('XDF_READ'); If (J!=0) call CsJCAL(J,1,Igate)}
+                     J=CsADDR('XDF_READ'); If (J!=0) call CsJCAL(J,1,Igate,0)}
      elseif C=='T' {                         call gstar_ReadTXT(Igate)     }
-     elseif C=='M' { J=CsADDR ('MICKINE'); IF (J!=0) Call CsJCAL(J,1,Igate)}
+     elseif C=='M' { J=CsADDR ('MICKINE'); IF (J!=0) Call CsJCAL(J,1,Igate,0)}
      elseif C=='S' { J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)        }
 
      If Igate<=0   { Ier=1; return }
