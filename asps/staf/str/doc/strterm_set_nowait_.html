@@ -1,0 +1,20 @@
+<pre><h3>void strterm_set_nowait_</h3></pre>
+<pre>
+(void) /* Turn terminal I/O waiting off */
+{
+/*
+  FORTRAN callable:
+
+	CALL STRTERM_SET_NOWAIT
+
+  No arguments
+
+  Return value:  none ("void")
+
+  Description:
+	Set the terminal into "nowait", or asynchronous I/O mode.  ie, if
+	no characters are available at a read, a null byte is returned
+	and program flow continues, rather than waiting for something to be
+	transmitted.
+*/
+</pre>
