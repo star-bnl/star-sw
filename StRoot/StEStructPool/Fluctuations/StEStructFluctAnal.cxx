@@ -172,8 +172,8 @@ void StEStructFluctAnal::setEtaLimits( const char* cutFileName ) {
     if (ival != 2) {
         cout << " Did not find a line containing Eta and two numbers in file " << cutFileName <<endl; 
     } else {
-        mEtaMin = strtof(val[1],0);
-        mEtaMax = strtof(val[2],0);
+        mEtaMin = strtod(val[1],0);
+        mEtaMax = strtod(val[2],0);
     }
     from.close();
     delete [] val;
@@ -226,8 +226,8 @@ void StEStructFluctAnal::setPtLimits( const char* cutFileName ) {
     if (ival != 2) {
         cout << " Did not find a line containing Pt and two numbers in file " << cutFileName <<endl; 
     } else {
-        mPtMin = strtof(val[1],0);
-        mPtMax = strtof(val[2],0);
+        mPtMin = strtod(val[1],0);
+        mPtMax = strtod(val[2],0);
     }
     from.close();
     delete [] val;
