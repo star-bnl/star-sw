@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.3 1999/07/23 14:35:43 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.4 1999/07/23 19:57:26 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.4  1999/07/23 19:57:26  calderon
+// Load StarClassLibrary before loading StMcEvent
+//
 // Revision 1.3  1999/07/23 14:35:43  calderon
 // Updated names of default files and of packages
 //
@@ -45,13 +48,9 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
     //gSystem->Load("StTreeMaker");
     gSystem->Load("StIOMaker");
 
-    
+    gSystem->Load("StarClassLibrary");
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker"); // This is where I load my own maker
-
-
-    gSystem->Load("StarClassLibrary");
-    gSystem->Load("StRootEvent");
     
 //	TOP maker
     chain = new StChain("StMcEventMainChain"); 
