@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiMicroMaker.cxx,v 1.1 2002/04/02 20:00:41 jklay Exp $                                      
+ * $Id: StHiMicroMaker.cxx,v 1.2 2002/04/02 23:35:14 jklay Exp $                                      
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiMicroMaker.cxx,v $
+ * Revision 1.2  2002/04/02 23:35:14  jklay
+ * Added L3RichTrigger information
+ *
  * Revision 1.1  2002/04/02 20:00:41  jklay
  * Bums highpt uDST Maker
  *
@@ -270,6 +273,13 @@ StHiMicroMaker::fillEvent(StEvent* stEvent,Int_t nGoodEta)
   StL3Trigger* pL3Trigger = stEvent->l3Trigger();
   if(pL3Trigger){
     mHiMicroEvent->SetL3UnbiasedTrigger(pL3Trigger->l3EventSummary()->unbiasedTrigger());
+    mHiMicroEvent->SetL3RichTrigger(false);
+
+    //Now check for L3 Rich Trigger
+    const StPtrVecL3AlgorithmInfo& algoInfo = pL3Trigger->l3EventSummary()->algorithmsAcceptingEvent();
+    for (Int_t i = 0; i < algoInfo.size(); i++) {
+       if(algoInfo[i]->id() == 4) mHiMicroEvent->SetL3RichTrigger(true);
+    }
   }
   
   // for simplicity, just loop over all the tracks again to get manuel's number.
