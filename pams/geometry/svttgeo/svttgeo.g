@@ -46,7 +46,8 @@ Module  SVTTGEO  is the SVT geometry for STAR
 *             otherwise they can not be converted into tables                 *
 * 06/13/98 PN simplify a bit carbon structure code                            *
 *             error fixed in the SFCP cooling pipe                            *
-* 09/26/99, E.Cains: if Nlayer is negaitive, generate one svt ladder there    *
+* 08/26/99, E.Cains: if Nlayer is negaitive, generate one svt ladder there    *
+* 09/14/99, H.Huemmler: include beampipe support and svt shields              *
 *******************************************************************************
 
 +cde,AGECOM,GCONST,GCUNIT.
@@ -59,7 +60,9 @@ Module  SVTTGEO  is the SVT geometry for STAR
                        SCMY,SCAL,SWMM,SWMB,SWMT,SWMS,SWMW,SOTB,SITB,
                        SBRG,SBRM,SBRI,SOES,SIES,SOSM,SISM,SCRW,
                        SGLA,SFMO,SFLM,SFDM,SFSW,SFSD,SFSM,
-                       SFSS,SFCP,SFCF,SFCT,SFCX,SFCW
+                       SFSS,SFCP,SFCF,SFCT,SFCX,SFCW,
+                       SBSP,SAKM,SCKM,SBSR,SBCR,SBSC,SBRX,SBRL,
+                       SBMM,SBMO,SBMI,SMRD,SALM,SISH,SSSH,SOSH
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
 		       ZsizeMax,  Angoff}
@@ -78,6 +81,14 @@ Module  SVTTGEO  is the SVT geometry for STAR
                        ERJLen,    ERJzdis,   ERJ1x,     ERJ2x,
                        ERJ2y,     ERJrad,    ERJdia}
 *
+      structure SSUB { Version,   KMountId,  KMountOd,  KMntThk,
+                       KMCutOd,   KMCutId,   KMCutOA,   KMCutOff,
+                       SRingId,   SRingOd,   SRingThk,
+                       SRCutPhi,  SRCutWid,  SRCutOut,  SRCutIn,
+                       SRollId,   SRollOd,   SRollLen,  SWireLen,
+                       MBlkHgh,   MBlkOWid,  MBlkOLen,  MBlkIWid,   
+                       MBlkILen,  MBlkORad,  MBlkIRad,  MRodDia}
+*
       structure SWAM { Version,   Zmin,      Len,       Rmin, 
                        Rmax,      TbrdThk,   WallThk} 
 *
@@ -95,19 +106,25 @@ Module  SVTTGEO  is the SVT geometry for STAR
 		       dmLen,    smWid,    smThk,    smLen,
                        ssLen,    wpLen,    sdlen,    tilt,     
                        cprad,    cpral,    cfrad,    gpThk}
+*
+      structure SSLD { Version,  SInRInn,  SInROut,  SInLen,
+                       SSepRInn, SSepROut, SSepLen,
+                       SOutRInn, SOutROut, SOutLen,
+                       AlMeshId, AlMeshOd, AlMshThk, AlMshPos} 
 *     
-      Integer        iLayer,s,side,ilad,iwaf
+      Integer        iLayer,s,side,ilad,iwaf,i,j
       Real           ladthk,cone_thk1,cone_thk2,roffset,RsizeMax,deg,rad
       Real	     cone_len,cone_sin,cone_cos,rmin,rmax,zmin,zmax,angle
       Real           xpos,ypos,zpos,clearence,rin,rou,elethk,tabLen
       Real           endrng_z,brack_z,screw_z,ir_rmin,ang,wafpckLen,dthk,radtilt
+      Real           xbuf, ybuf, zbuf, phi, xbuf1, xbuf2
 *
 *******************************************************************************
 *
    Fill SVTG ! Basic SVT dimensions 
       Version   = 1          ! geometry version
       Nlayer    = 7          ! number of svt layers (was 7)
-      RsizeMin  = 5          ! STV innermost radius
+      RsizeMin  = 4.006      ! STV innermost radius
       RsizeMax  = 46.107     ! STV outermost radius
       ZsizeMax  = 270        ! SVT+FTPC length
       Angoff    = 0          ! angular offset x1 for slayer 2 x2 for slayer 3
@@ -155,6 +172,35 @@ Module  SVTTGEO  is the SVT geometry for STAR
       ERJ2y     = 0.72       ! ERJ screw 2 y position
       ERJrad    = 10.80      ! distance of ERJ center from beam axis
       ERJdia    = 0.17       ! ERJ screw diameter
+*
+   Fill SSUB ! beampipe support
+      Version   = 1          ! geometry version
+      KMountId  = 31.34      ! id of beampipe support kinematic mount 
+      KMountOd  = 38.96      ! od of beampipe support kinematic mount 
+      KMntThk   = 0.64       ! thickness of support kinematic mount
+      KMCutOd   = 18.31      ! od of cutout in kinematic mount
+      KMCutId   = 14         ! id of cutout in kinematic mount
+      KMCutOA   = 38         ! opening angle of cutout
+      KMCutOff  = 26.58      ! offset of cutout center from axis
+      SRingId   = 8.47       ! id of beampipe support ring 
+      SRingOd   = 12.78      ! od of beampipe support ring
+      SRingThk  = 0.64       ! thichkness of beampipe support ring
+      SRCutPhi  = 38         ! support ring cutout angle to z-axis
+      SRCutWid  = 3.63       ! support ring cutout width
+      SRCutOut  = 5.08       ! support ring cutout depth
+      SRCutIn   = 3.5        ! support ring cutout start
+      SRollId   = 0.2        ! support roller Id
+      SRollOd   = 0.62       ! support roller Od
+      SRollLen  = 2.54       ! support roller length
+      SWireLen  = 5.08       ! support roller axis length
+      MBlkHgh   = 0.97       ! mounting block height
+      MBlkOWid  = 2.54       ! outer mounting block width
+      MBlkOLen  = 1.27       ! outer mounting block length
+      MBlkIWid  = 3.175      ! inner mounting block width
+      MBlkILen  = 1.27       ! inner mounting block length
+      MBlkORad  = 17.4       ! outer mounting block at radius
+      MBlkIRad  = 5.42       ! inner mounting block at radius
+      MRodDia   = 0.32       ! mounting support rod diameter
 *
    Fill SERG ! end rings
       Version   = 1          ! geometry version
@@ -239,17 +285,52 @@ Module  SVTTGEO  is the SVT geometry for STAR
       cpral    = 0.09       ! cooling pipe inner radius
       cfrad    = 0.1        ! carbon fiber tube radius (support structure)
       gpThk    = 0.5        ! gap between structure mother and detector
+*
+   Fill SSLD ! shielding parameters
+      version  = 1          ! geometry version
+      SInRInn  = 5          ! inner shield cylinder, inner radius
+      SInROut  = 5.008      ! inner shield cylinder, outer radius
+      SInLen   = 53.5       ! inner shield cylinder, half length
+      SSepRInn = 22         ! separation shield cylinder, inner radius
+      SSepROut = 22.018     ! separation shield cylinder, outer radius
+      SSepLen  = 55.4       ! separation shield cylinder, half length
+      SOutRInn = 28         ! outer shield cylinder, inner radius
+      SOutROut = 28.02      ! outer shield cylinder, outer radius
+      SOutLen  = 65.4       ! outer shield cylinder, half length
+      AlMeshId  = 9.7       ! Aluminum shield mesh inner diameter
+      AlMeshOd  = 44        ! Aluminum shield mesh outer diameter
+      AlMshThk  = 0.03      ! Aluminum shield mesh effective thickness
+      AlMshPos  = 53.5      ! Aluminum shield mesh z position
    EndFill
 *
       USE SVTG  version=1
       USE SWCA  version=1
       USE SELC  version=1
       USE SSUP  version=1
+      USE SSUB  version=1
       USE SERG  version=1
       USE SWAM  version=1
       USE SELC  version=1
       USE SFPA  version=1
+      USE SSLD  version=1
 
+* introduce common materials here
+*
+*     G10 is about 60% SiO2 and 40% epoxy (stolen from ftpcgeo.g)
+        Component Si  A=28.08  Z=14   W=0.6*1*28./60.
+        Component O   A=16     Z=8    W=0.6*2*16./60.
+        Component C   A=12     Z=6    W=0.4*8*12./174.
+        Component H   A=1      Z=1    W=0.4*14*1./174.
+        Component O   A=16     Z=8    W=0.4*4*16./174.
+      Mixture   G10   Dens=1.7
+
+* use aluminized mylar mixture instead of kapton
+        Component C5  A=12    Z=6  W=5
+        Component H4  A=1     Z=1  W=4
+        Component O2  A=16    Z=8  W=2
+        Component Al  A=27    Z=13 W=3
+      Mixture  ALKAP  Dens=1.65
+*
       Create and Position SVTT in Cave
 *
 *******************************************************************************
@@ -322,6 +403,15 @@ Block SVTT is the mother of all SVT volumes
       Create    SCON  " support cone mother"
       Position  SCON
       Position  SCON              ThetaZ=180 
+*
+* The beampipe support
+*
+      Create    SBSP  " Beampipe support mother "
+      Position  SBSP z=(ssup_RodLen/2-
+                        ssub_KMntThk/2)
+      Position  SBSP z=-(ssup_RodLen/2-
+                         ssub_KMntThk/2),
+                     ThetaZ=180
 * 
 * SVT support rods
 *
@@ -350,6 +440,18 @@ Block SVTT is the mother of all SVT volumes
       if (svtg_Nlayer>6) then
          Create and position SFMO " mother of 4th layer (strip detectors)"
       endif
+*
+* The shield cylinders
+*
+      Create and position SISH " SVT inner shield "
+      Create and position SOSH " SVT outer shield "
+      if (svtg_Nlayer>6) then
+         Create and position SSSH " SVT/SSD separation shield "
+      endif
+      Create SALM  " aluminum shield mesh "
+      Position SALM z=ssld_AlMshPos-ssld_AlMshThk/2
+      Position SALM z=-(ssld_AlMshPos-ssld_AlMshThk/2)
+
 *
 EndBlock
 *
@@ -408,6 +510,7 @@ EndBlock
 * -----------------------------------------------------------------------------
 *
 Block SLDI is a ladder volume
+
 * This contains the active wafer, Roha cell support, and the Be waffer carrier
 * The center of the active wafer is at the center of this cell, the cell is
 * centered on svtl_radius. 
@@ -415,7 +518,7 @@ Block SLDI is a ladder volume
       Material  Air
       Attribute SLDI   seen=0    colo=1     serial=svtl_Nwafer
       Shape     BOX    dx=swca_WaferWid/2 dy=swca_Length/2  dz=ladthk
-      Create and Position STLI          z=0
+      Create and Position STLI
 *         
 *     SBER are the Berillium wafer carrier rails                     
       Create   SBER " wafer carrier rails"
@@ -426,22 +529,18 @@ Block SLDI is a ladder volume
 *
 *     STAB are the Berrillium tabs and the ends of the wafer carriers
       Create   STAB " wafter carrier end tabs"
-      Position STAB x=0,
-                    y=swca_Length/2-tabLen/2,
+      Position STAB y=swca_Length/2-tabLen/2,
                     z=-ladthk+swca_WafCarTh/2 
-      Position STAB x=0,
-                    y=-swca_Length/2+tabLen/2,
+      Position STAB y=-swca_Length/2+tabLen/2,
                     z=-ladthk+swca_WafCarTh/2 
 *
 *     STRU are the Berrillium struts between the wafer carriers rails
 *     note: the positioning of these struts is approximate
       Create   STRU " struts between wafer carrier rails"
-      Position STRU x=0,
-                    y=(svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)+ _
+      Position STRU y=(svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)+ _
                        swca_WaferGap+swca_strutlen/2),
                     z=-ladthk+swca_WafCarTh/2 
-      Position STRU x=0,
-                    y=-(svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)+ _
+      Position STRU y=-(svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)+ _
                        swca_WaferGap+swca_strutlen/2),
                     z=-ladthk+swca_WafCarTh/2 
 *
@@ -488,13 +587,8 @@ Block SVTD is an active wafer volume
 *     The following is the corrected hits definition: 25-dec-98 (PN)
       HITS    SVTD   Z:.001:S  Y:.001:   X:.001:     Ptot:18:(0,100),
                      cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
-                     ToF:16:(0,1.e-6)    Step:.01:   Eloss:22:(0,0.1) 
+                     ToF:16:(0,1.e-6)    Step:.01:   Eloss:22:(0,0.01) 
 
-*      The following is the corrected hits definition: 2-12-97 (wkw)
-*     HITS    SVTD   xx:16:SH(-20,20)   yy:16:(-20,20)     zz:16:(-30,30),
-*	             px:16:(-100,100)   py:16:(-100,100)   pz:16:(-100,100),
-*                    Slen:16:(0,1.e4)   Tof:16:(0,1.e-6)   Step:16:(0,10),
-*                    SHTN:16:           Elos:32:(0,1)
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block SBER are the Berillium wafer carrier rails
@@ -829,22 +923,19 @@ Block SGRA is the graphite/epoxy support cone
       Material   Carbon
       Attribute SGRA   Seen=1   Colo=6
       SHAPE     PCON   Phi1=0   Dphi=360   Nz=7,
-      zi ={ssup_Cone1zmn,
-           ssup_Rodlen/2, 
+      zi ={ssup_Rodlen/2, 
            ssup_Rodlen/2, 
            ssup_Rodlen/2+ssup_GrphThk, 
            ssup_Rodlen/2+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
-      Rmx={ssup_Con1IdMn+ssup_GrphThk,
-           ssup_Con1IdMn+ssup_GrphThk, 
+      Rmx={ssup_Con1IdMn+ssup_GrphThk, 
            ssup_Con3IdMn+ssup_GrphThk,
            ssup_Con3IdMn+ssup_GrphThk,
            ssup_Con3IdMn+ssup_GrphThk,
 	   ssup_Con4IdMn+ssup_GrphThk,
 	   ssup_Con4IdMx+ssup_GrphThk},
-      Rmn={ssup_Con1IdMn,
-           ssup_Con1IdMn, 
+      Rmn={ssup_Con1IdMn, 
            ssup_Con1IdMn,
            ssup_Con1IdMn,
            ssup_Con3IdMn, 
@@ -1064,11 +1155,8 @@ Endblock
 *------------------------------------------------------------------------------
 *
 Block SWMB is the water manifold bottom piece (small r)
-      Material   Aluminium
-      Attribute  SWMB   Seen=1   Colo=2
-*      Shape      TUBE   Rmin=swam_Rmin,
-*                        Rmax=swam_Rmin+swam_WallThk,
-*                        dz=swam_Len/2-swam_WallThk
+      Material  Aluminium
+      Attribute SWMB   Seen=1   Colo=2
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
                       zi ={-swam_Len/2+swam_WallThk,
@@ -1080,11 +1168,8 @@ Endblock
 *------------------------------------------------------------------------------
 *
 Block SWMT is the water manifold top piece (big r)
-      Material   Aluminium
-      Attribute  SWMT   Seen=1   Colo=2
-*      Shape      TUBE   Rmin=swam_Rmax-swam_WallThk,
-*                        Rmax=swam_Rmax,
-*                        dz=swam_Len/2-swam_WallThk
+      Material  Aluminium
+      Attribute SWMT   Seen=1   Colo=2
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
                       zi ={-swam_Len/2+swam_WallThk,
@@ -1096,11 +1181,8 @@ Endblock
 *------------------------------------------------------------------------------
 *
 Block SWMS is the water manifold side pieces
-      Material   Aluminium
-      Attribute  SWMS   Seen=1   Colo=2
-*      Shape      TUBE   Rmin=swam_Rmin,
-*                        Rmax=swam_Rmax,
-*                        dz=swam_WallThk/2
+      Material  Aluminium
+      Attribute SWMS   Seen=1   Colo=2
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
                       zi ={-swam_WallThk/2,swam_WallThk/2},
@@ -1115,9 +1197,6 @@ Block SWMW is the water in the water manifold
       Component O      A=16  Z=8   W=1
       Mixture   Water  Dens=1.0
       Attribute SWMW   seen=1  colo=6
-*      Shape     TUBE   Rmin=swam_Rmin+swam_WallThk,
-*                       Rmax=swam_Rmax-swam_WallThk,
-*                       dz=swam_Len/2-swam_WallThk
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
                       zi ={-swam_Len/2+swam_WallThk,
@@ -1129,17 +1208,8 @@ Endblock
 *------------------------------------------------------------------------------
 *
 Block SOTB is the outer transition board (large r)
-*     G10 is about 60% SiO2 and 40% epoxy (stolen from ftpcgeo.g)
-         Component Si  A=28.08  Z=14   W=0.6*1*28./60.
-         Component O   A=16     Z=8    W=0.6*2*16./60.
-         Component C   A=12     Z=6    W=0.4*8*12./174.
-         Component H   A=1      Z=1    W=0.4*14*1./174.
-         Component O   A=16     Z=8    W=0.4*4*16./174.
-      Mixture   G10    Dens=1.7
+      material  G10
       Attribute SOTB   Seen=1   Colo=3
-*      Shape     TUBE   Rmin=swam_Rmax,
-*                       Rmax=swam_Rmax+swam_TbrdThk,
-*                       dz=swam_Len/2
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
                       zi ={-swam_Len/2,+swam_Len/2},
@@ -1150,14 +1220,11 @@ Endblock
 *------------------------------------------------------------------------------
 *
 Block SITB is the inner transition board (small r)
-*     The material is G-10
-      Component C      A=12  Z=6  W=1
-      Component H2     A=1   Z=1  W=2
+*     The material is CH2
+       Component C      A=12  Z=6  W=1
+       Component H2     A=1   Z=1  W=2
       Mixture   CH2    Dens=0.935
       Attribute SITB   Seen=1   Colo=3
-*      Shape     TUBE   Rmin=swam_Rmin-swam_TbrdThk,
-*                       Rmax=swam_Rmin,
-*                       dz=swam_Len/2
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
                       zi ={-swam_Len/2,+swam_Len/2},
@@ -1310,12 +1377,7 @@ Block SFSD is the strip detector
 *     The following is the corrected hits definition: 25-apr-99 (PN)
       HITS    SFSD   X:.001:S   Y:.001:   Z:.001:   cx:10:   cy:10:   cz:10:,
                      Step:.01:   Sleng:16:(0,500)   ToF:16:(0,1.e-6),  
-                     Ptot:16:(0,100)      Eloss:16:(0,0.01) 
-* wkw fixed 4th layer hit definition Feb 27
-*     HITS    SFSD   xx:16:SH(-30,30)   yy:16:(-30,30)     zz:16:(-35,35),
-*                    px:16:(-100,100)   py:16:(-100,100)   pz:16:(-100,100),
-*                    Slen:16:(0,1.e4)   Tof:16:(0,1.e-6)   Step:16:(0,10),
-*                    SHTN:16:           Elos:32:(0,1)
+                     Ptot:16:(0,100)      Eloss:16:(0,0.001) 
 
 Endblock
 *
@@ -1354,7 +1416,6 @@ Endblock
 Block SFCP is the cooling pipe 
       Material Carbon
       Attribute SFCP Seen=1 Colo=6
-* PN,13.06.98:  error fixed - Rmin should be zero .
       Shape TUBE  rmin=0 rmax=sfpa_cprad dz=sfpa_ssLen/2
 		 
       Create and Position SFCW " water cylinder"
@@ -1417,6 +1478,210 @@ Block SFCX is the carbon fiber tube
       Attribute SFCX Seen=1 Colo=7
       Shape TUBE rmin=0  rmax=sfpa_cfrad,
 		 dz=sfpa_smThk*tan(pi/6.)-sfpa_cfrad
+Endblock
+*
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* 
+Block SBSP is the beampipe support mother volume
+      Material Air
+      Attribute SBSP Seen=0 Colo=1
+      Shape TUBE rmin=svtg_RSizeMin rmax=ssub_KMountOd/2,
+		 dz=ssub_KMntThk/2+ssub_MBlkHgh
+      Create SAKM  " aluminum kinematic mount "
+      Position SAKM 
+      Create SBMM " beampipe support mounting mother volume "
+
+
+      Create SBMM " beampipe support mounting mother volume "
+      Create SBRL " beampipe support ceramic roller "
+      Create SBRX " beampipe support roller axis "
+
+      do i=-1,1,2
+      do j=0,1
+      phi=i*ssub_SRCutPhi+180*j
+
+      xbuf1=(ssub_KMountOD/4.0+(svtg_RSizeMin+ssub_SRollOd)/2.0)
+      Position SBMM AlphaZ=Phi,
+                    x= xbuf1*sin(degrad*Phi),
+                    y=-xbuf1*cos(degrad*Phi),
+                    z=-ssub_KMntThk/2-ssub_MBlkHgh/2
+
+      xbuf2=svtg_RSizeMin+ssub_SRollOd/2
+      Position SBRL alphaZ=phi-90  ort=ZXY _
+                    x= xbuf2*sin(degrad*Phi),
+                    y=-xbuf2*cos(degrad*Phi),
+                    z=ssub_SRingThk/2+ssub_SRollId/2                   
+
+      Position SBRX alphaZ=phi-90  ort=ZXY _
+                    x= xbuf2*sin(degrad*Phi),
+                    y=-xbuf2*cos(degrad*Phi),
+                    z=ssub_SRingThk/2+ssub_SRollId/2
+      enddo
+      enddo
+
+      Create SBSR  " g10 beampipe support ring "
+      Position SBSR 
+Endblock
+*
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* 
+Block SAKM is the beampipe support aluminum kinematic mount
+      Material Aluminium
+      Attribute SAKM Seen=1 Colo=2
+      Shape     TUBE rmin=ssub_KMountId/2 rmax=ssub_KMountOd/2,
+		     dz=ssub_KMntThk/2
+      Create    SCKM  " cutout in kinematic mount "
+      Position  SCKM y=ssub_KMCutOff               Konly='MANY'
+      Position  SCKM y=-ssub_KMCutOff  AlphaZ=180  Konly='MANY'
+Endblock
+*
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* 
+Block SCKM is the cutout in the aluminum kinematic mount
+      Material Air
+      Attribute SCKM Seen=1 Colo=1
+      Shape TUBS rmin=ssub_KMCutId/2 rmax=ssub_KMCutOd/2,
+		 dz=ssub_KMntThk/2,
+                 phi1=270-ssub_KMCutOA,
+                 phi2=270+ssub_KMCutOA
+Endblock
+*
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* 
+Block SBSR is the beampipe support G10 ring
+
+      Material G10 
+      Attribute SBSR Seen=1 Colo=3
+      Shape TUBE rmin=ssub_SRingId/2  rmax=ssub_SRingOd/2,
+		 dz=ssub_SRingThk/2
+      Create SBCR " cutout in beampipe support ring "
+
+      xbuf=ssub_SRCutIn+(ssub_SRCutOut-ssub_SRCutIn)/2
+      do i=-1,1,2
+      do j=0,1
+         phi=i*ssub_SRCutPhi+180*j
+         Position SBCR x=xbuf*sin(degrad*phi)  y=-xbuf*cos(degrad*phi),
+                       AlphaZ=phi              Konly='MANY'
+      enddo
+      enddo
+
+Endblock
+*
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* 
+Block SBCR is the cutout in the beampipe support G10 ring
+      Material Air
+      Attribute SBCR Seen=1 Colo=1
+      Shape BOX dx=ssub_SRCutWid/2,
+		dy=(ssub_SRCutOut-ssub_SRCutIn)/2,
+		dz=ssub_SRingThk/2
+Endblock
+*
+*------------------------------------------------------------------------------
+*
+Block SBRL is the ceramic roller supporting the beampipe
+* approximate MACOR with PYREX, the ceramic used in the ftpc
+      Material  PYREX A=20.719  Z=10.307  Dens=2.23  RadL=12.6  AbsL=50.7
+      Attribute SBRL  Seen=1 Colo=6
+      Shape     TUBE  rmin=ssub_SRollId/2  rmax=ssub_SRollOd/2,
+		       dy=ssub_SRollLen/2
+Endblock
+*
+*------------------------------------------------------------------------------
+*
+Block SBRX is the stainless steel roller axis
+      Material  Iron
+      Attribute SBRX Seen=1 Colo=2
+      Shape TUBE rmin=0.0 rmax=ssub_SRollId/2,
+                  dz=ssub_SWireLen/2
+Endblock
+*
+*------------------------------------------------------------------------------
+*
+Block SBMM is the beampipe support mounting mother volume
+      Material  Air
+      Attribute SBMM Seen=0 Colo=1
+      Shape BOX dx=ssub_MBlkIWid/2,
+                dy=(ssub_KMountOD/2-svtg_RSizeMin-ssub_SRollOd)/2,
+                dz=ssub_MBlkHgh/2
+      Create SMRD " beampipe support mounting rod "
+      xbuf=-(ssub_MBlkORad+ssub_MBlkIRad)/2+svtg_RSizeMin+ssub_SRollOd
+      Position SMRD AlphaX=90,
+                    y=xbuf+(ssub_KMountOD/2-svtg_RSizeMin-ssub_SRollOd)/2
+      Create SBMO " outer beampipe support mounting block "
+      xbuf=-ssub_MBlkORad+svtg_RSizeMin+ssub_SRollOd
+      Position SBMO y=xbuf+(ssub_KMountOD/2-svtg_RSizeMin-ssub_SRollOd)/2
+      Create SBMI " inner beampipe support mounting block "
+      xbuf=-ssub_MBlkIRad+svtg_RSizeMin+ssub_SRollOd
+      Position SBMI y=xbuf+(ssub_KMountOD/2-svtg_RSizeMin-ssub_SRollOd)/2
+Endblock
+*
+*------------------------------------------------------------------------------
+*
+Block SMRD is the aluminum rod carrying the beampipe support
+      Material  Aluminium
+      Attribute SMRD Seen=1 Colo=2
+      Shape TUBE rmin=0.0 rmax=ssub_MRodDia/2,
+                  dz=(ssub_MBlkORad-ssub_MBlkIRad+ssub_MBlkOLen)/2
+Endblock
+*
+*------------------------------------------------------------------------------
+*
+Block SBMO is the outer beampipe support mounting block
+      Material G10 
+      Attribute SBMO Seen=1 Colo=3
+      Shape BOX dx=ssub_MBlkOWid/2,
+                dy=ssub_MBlkOLen/2,
+                dz=ssub_MBlkHgh/2
+Endblock
+*
+*------------------------------------------------------------------------------
+*
+Block SBMI is the inner beampipe support mounting block
+      Material G10 
+      Attribute SBMO Seen=1 Colo=3
+      Shape BOX dx=ssub_MBlkIWid/2,
+                dy=ssub_MBlkILen/2,
+                dz=ssub_MBlkHgh/2
+Endblock
+*
+*------------------------------------------------------------------------------
+*
+Block SALM is the aluminum shield mesh
+      Material  Aluminium
+      Attribute SALM Seen=1 Colo=2
+      Shape TUBE rmin=ssld_AlMeshId/2 rmax=ssld_AlMeshOd/2,
+                  dz=ssld_AlMshThk/2
+Endblock
+*
+*------------------------------------------------------------------------------
+*
+Block SISH is the inner shield cylinder
+* use aluminised mylar mixture instead of kapton
+      material  ALKAP
+      Attribute SISH Seen=1 Colo=3
+      Shape TUBE rmin=ssld_SInRInn rmax=ssld_SInROut,
+                  dz=ssld_SInLen
+Endblock
+*
+*------------------------------------------------------------------------------
+*
+Block SSSH is the separation shield cylinder
+* use aluminised mylar mixture instead of kapton
+      material  ALKAP
+      Attribute SSSH Seen=1 Colo=3
+      Shape TUBE rmin=ssld_SSepRInn rmax=ssld_SSepROut,
+                  dz=ssld_SSepLen
+Endblock
+*
+*------------------------------------------------------------------------------
+*
+Block SOSH is the separation shield cylinder
+* use aluminised mylar mixture instead of kapton
+      material  ALKAP
+      Attribute SOSH Seen=1 Colo=3
+      Shape TUBE rmin=ssld_SOutRInn rmax=ssld_SOutROut,
+                  dz=ssld_SOutLen
 Endblock
 *
 *------------------------------------------------------------------------------
