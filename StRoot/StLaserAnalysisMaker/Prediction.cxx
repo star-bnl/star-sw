@@ -1,5 +1,8 @@
-// $Id: Prediction.cxx,v 1.3 2000/06/10 23:15:12 fisyak Exp $
+// $Id: Prediction.cxx,v 1.4 2004/01/14 22:46:01 fisyak Exp $
 // $Log: Prediction.cxx,v $
+// Revision 1.4  2004/01/14 22:46:01  fisyak
+// clean up
+//
 // Revision 1.3  2000/06/10 23:15:12  fisyak
 // Add new W.Loeve table with Laser tracks
 //
@@ -9,7 +12,7 @@
 // Revision 1.1.1.1  2000/01/29 16:23:07  fisyak
 // First release of StLaserAnalysisMaker
 //
-#include <iostream.h>
+#include "Stiostream.h"
 #include "Prediction.h"
 ClassImp(Prediction)
 Prediction::Prediction(Int_t LT, Int_t Id, Int_t Sector, Int_t Padrow, 
@@ -27,7 +30,7 @@ Prediction::Prediction(Int_t LT, Int_t Id, Int_t Sector, Int_t Padrow,
   fZ =      Z;      
 }
 //________________________________________________________________________________
-void Prediction::Print(){
+void Prediction::Print(const Option_t* opt) const {
   cout << "Prediction for Laser Track #" << fLT << " Id:\t"  << fId;
   cout << "\tSector:\t"       << fSector;   
   cout << "\tPadrow:\t"       << fPadrow;   
@@ -70,9 +73,9 @@ void LEvent::Clear(Option_t *Option) {
     fAdc->Clear(Option);
 }
 //________________________________________________________________________________
-void LEvent::Print(){
-  fPred.Print();
-  fAverage.Print();
+void LEvent::Print(const Option_t* opt) const {
+  fPred.Print(opt);
+  fAverage.Print(opt);
   cout << "Y Prof " << endl;
   Int_t i; 
   for (i=0;i<fNoY;i++) {
@@ -92,7 +95,7 @@ void LEvent::Print(){
 }
 //________________________________________________________________________________
 ClassImp(Average)
-void Average::Print() {
+void Average::Print(const Option_t* opt) const {
   cout << "Average: ADC   \t"  << fADC;
   cout << "\tADC3x3       \t"  << fADC3x3;     
   cout << "\tratio  	  \t"  << fratio << endl;      

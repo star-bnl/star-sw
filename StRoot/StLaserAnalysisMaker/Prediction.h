@@ -1,5 +1,8 @@
 // 
 // $Log: Prediction.h,v $
+// Revision 1.5  2004/01/14 22:46:01  fisyak
+// clean up
+//
 // Revision 1.4  2000/06/10 23:15:12  fisyak
 // Add new W.Loeve table with Laser tracks
 //
@@ -46,7 +49,7 @@ class Prediction : public TObject {
   virtual Int_t   GetTimeBin() const { return fTimeBin; }
   virtual void    DisActivate() {fId = fId > 0 ? -fId : fId;}
   virtual void    Activate()    {fId = fId > 0 ? fId : -fId;}
-  virtual void  Print();   
+  virtual void    Print(const Option_t* opt="") const;   
   ClassDef(Prediction,1)  //A track segment
 };
 class Average : public TObject {
@@ -83,7 +86,7 @@ class Average : public TObject {
     fnY1   ( nY1),   fnY2   ( nY2),   fnZ1   ( nZ1),   fnZ2   ( nZ2),   
     fADC   ( ADC),   fADC3x3(ADC3x3), fratio ( ratio), fYav   ( Yav),   
     fZav   ( Zav),   fDYY   ( DYY),   fCYZ   ( CYZ),   fDZZ   ( DZZ) {}
-  virtual void    Print();   
+  virtual void    Print(const Option_t* opt="") const;   
 
   virtual ~Average() { }
   ClassDef(Average,1)  //A track segment
@@ -189,7 +192,7 @@ class LEvent : public TObject {
   virtual TClonesArray     *GetYProf() {return fYProf;}
   virtual TClonesArray     *GetZProf() {return fZProf;}
   virtual TClonesArray     *GetAdc()      {return fAdc;}
-  virtual void              Print();
+  virtual void              Print(const Option_t* opt="") const;
   virtual void              AddAdc(Float_t y, Float_t z, Float_t adc);
   virtual void              AddYProf(Float_t y, Float_t adc);
   virtual void              AddZProf(Float_t z, Float_t adc);
