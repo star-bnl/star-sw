@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.27 2002/03/15 10:04:41 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.28 2002/03/25 09:52:55 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.28  2002/03/25 09:52:55  jcs
+// exit with warning if primary vertex calculation returns nan
+//
 // Revision 1.27  2002/03/15 10:04:41  oldi
 // Adjust eta segments not only to z-position of vertex but to x,y as well.
 // Avoid tracking if vertex position is outside of the inner radius of the Ftpc.
@@ -294,6 +297,13 @@ Int_t StFtpcTrackMaker::Make()
   }
 
   // check for the position of the main vertex
+
+  if (isnan(primary_vertex_x) || isnan(primary_vertex_y) || isnan(primary_vertex_z)) {
+      // No tracking!
+      gMessMgr->Warning() << "StFtpcTrackMaker::Make() - error in vertex calculation - no tracking" << endm;
+      return kStWarn;
+  } 
+
   Double_t z = TMath::Abs(primary_vertex_z);
   Double_t radius = TMath::Sqrt(primary_vertex_x*primary_vertex_x + primary_vertex_y*primary_vertex_y);
   
@@ -468,7 +478,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.27 2002/03/15 10:04:41 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.28 2002/03/25 09:52:55 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
