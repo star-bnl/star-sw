@@ -1,7 +1,7 @@
-// $Id: St_geant_Maker.cxx,v 1.89 2004/02/25 17:55:05 fine Exp $
+// $Id: St_geant_Maker.cxx,v 1.90 2004/02/26 16:24:07 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
-// Revision 1.89  2004/02/25 17:55:05  fine
-// An extra protection against of crash with gGeometry == 0
+// Revision 1.90  2004/02/26 16:24:07  fisyak
+// Undo yesterday corrections. They should wait till Monday
 //
 // Revision 1.88  2004/02/24 17:16:44  fisyak
 // remove creation of empty fVolume
@@ -477,16 +477,15 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
   if (!fVolume) ((St_geant_Maker *)this)->Work();
   
   if (fVolume) { 
-     if (gGeometry) {
-        TList *listOfVolume = gGeometry->GetListOfNodes();
-
-        // Remove hall from the list of ROOT nodes to make it free of ROOT control
-        listOfVolume->Remove(fVolume);
-        listOfVolume->Remove(fVolume);
-     }
-     // Add "hall" into ".const" area of this maker
-     ((St_geant_Maker *)this)->AddConst(fVolume);
-     if (Debug()) fVolume->ls(3);
+    TList *listOfVolume = gGeometry->GetListOfNodes();
+    
+    // Remove hall from the list of ROOT nodes to make it free of ROOT control
+    listOfVolume->Remove(fVolume);
+    listOfVolume->Remove(fVolume);
+    
+    // Add "hall" into ".const" area of this maker
+    ((St_geant_Maker *)this)->AddConst(fVolume);
+    if (Debug()) fVolume->ls(3);
   }
   return fVolume;
 }
@@ -1580,8 +1579,8 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
 	     RotAngles[0],RotAngles[1],RotAngles[2],RotAngles[3],
 	     RotAngles[4],RotAngles[5],RotAngles[6]);
       TGeoRotation Matrix("Test",
-			  RotAngles[0],RotAngles[1],RotAngles[2],
-			  RotAngles[3],RotAngles[4],RotAngles[5]); 
+			  RotAngles[0],RotAngles[1],RotAngles[2],RotAngles[3],
+			  RotAngles[4],RotAngles[5]); 
       matrix = (TGeoRotation *) MatrixH.GetPointer((void *)Matrix.GetRotationMatrix(),18);
       if (!matrix) {
 	jn++; 
