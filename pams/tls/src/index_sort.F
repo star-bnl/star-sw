@@ -1,5 +1,8 @@
-* $Id: index_sort.F,v 1.2 1998/08/13 02:08:57 perev Exp $
+* $Id: index_sort.F,v 1.3 1998/08/16 16:59:00 perev Exp $
 * $Log: index_sort.F,v $
+* Revision 1.3  1998/08/16 16:59:00  perev
+* Increase stack 20->40
+*
 * Revision 1.2  1998/08/13 02:08:57  perev
 * cleanup+speedup+leaks
 *
@@ -75,7 +78,7 @@ C
 ************************************************************************
 
       INTEGER A(*),X
-      INTEGER        W, R, LT(20), RT(20), IND(N)
+      INTEGER        W, R, LT(40), RT(40), IND(N)
 *--------------------------------------------------------------------------
 
       LEVEL = 1

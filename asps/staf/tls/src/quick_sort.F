@@ -1,5 +1,8 @@
-* $Id: quick_sort.F,v 1.2 1998/08/13 02:08:59 perev Exp $
+* $Id: quick_sort.F,v 1.3 1998/08/16 16:59:01 perev Exp $
 * $Log: quick_sort.F,v $
+* Revision 1.3  1998/08/16 16:59:01  perev
+* Increase stack 20->40
+*
 * Revision 1.2  1998/08/13 02:08:59  perev
 * cleanup+speedup+leaks
 *
@@ -50,7 +53,7 @@ C
 C-    PROGRAM  M103  TAKEN FROM CERN PROGRAM LIBRARY,  29-APR-78
 C
       INTEGER        A(NROW,NCOL),WORD(NROW,NCOL),X,W
-      INTEGER        LT(20),RT(20)
+      INTEGER        LT(40),RT(40)
       INTEGER        R,RT
 C
       N = NCOL
