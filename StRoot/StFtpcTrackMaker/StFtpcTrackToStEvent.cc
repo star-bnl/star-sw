@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.1 2004/04/06 20:23:49 oldi Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.2 2004/05/07 14:39:39 oldi Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -31,11 +31,7 @@ using namespace std;
 #include "StDetectorId.h"
 #include "StHelix.hh"
 
-
-#include "StEventUtilities/StuFixTopoMap.cxx"
-//Sti
-//#include "Sti/StiDedxCalculator.h"
-
+//StFtpcTrackMaker
 #include "StFtpcPoint.hh"
 #include "StFtpcTrack.hh"
 #include "StFtpcTrackingParams.hh"
@@ -45,13 +41,6 @@ using namespace std;
 
 StFtpcTrackToStEvent::StFtpcTrackToStEvent() : mEvent(0), mTrackStore(0), mTrkNodeMap() {
   
-  /* does not work for FTPC tracks
-  dEdxFtpcWestCalculator.setFractionUsed(1.);
-  dEdxFtpcEastCalculator.setFractionUsed(1.);
-  dEdxFtpcWestCalculator.setDetectorFilter(kFtpcWestId);
-  dEdxFtpcEastCalculator.setDetectorFilter(kFtpcEastId);
-  */
-
   originD = new StThreeVectorD(0,0,0);
   physicalHelix = new StPhysicalHelixD(0.,0.,0.,*originD,-1);
 
@@ -69,7 +58,7 @@ StFtpcTrackToStEvent::~StFtpcTrackToStEvent()
 
 /*! 
   Algorithm:
-  Loop over all tracks in the TobjArray of StFtpcTracks, doing for each track:
+  Loop over all tracks in the TObjArray of StFtpcTracks, doing for each track:
   - Create a new global track and associated information (see below)
     and set its data members according to the StFtpcTrack,
     can be done in a StGlobalTrack constructor
@@ -100,7 +89,7 @@ StEvent* StFtpcTrackToStEvent::FillEvent(StEvent* e, TObjArray* t) {
   
   if (e==0 || t==0) {
     cout <<"StFtpcTrackToStEvent::FillEvent(). ERROR:\t"
-	 <<"Null StEvent ("<<e<<") || TObjArray ("<<t<<").  Exit"<<endl;
+	 <<"Null StEvent ("<<e<<") || TObjArray of tracks ("<<t<<").  Exit"<<endl;
     return 0;
   }
 
@@ -130,13 +119,10 @@ StEvent* StFtpcTrackToStEvent::FillEvent(StEvent* e, TObjArray* t) {
       // filling successful, set up relationships between objects
       detInfoVec.push_back(detInfo);
       gTrack->setDetectorInfo(detInfo);	
+      gTrack->setKey((unsigned short)(trNodeVec.size()));
       trackNode->addTrack(gTrack);
       trNodeVec.push_back(trackNode);
-      // reuse the utility to fill the topology map
-      // this has to be done at the end as it relies on
-      // having the proper track->detectorInfo() relationship
-      // and a valid StDetectorInfo object.
-      StuFixTopoMap(gTrack);
+      FillTopologyMap(gTrack, kTrack);
       mTrkNodeMap.insert(map<StFtpcTrack*,StTrackNode*>::value_type (kTrack, trNodeVec.back()));
       if (trackNode->entries(global)<1) {
 	cout << "StFtpcTrackToStEvent::FillEvent() - ERROR - Track Node has no entries!" << endl;
@@ -178,7 +164,7 @@ StEvent* StFtpcTrackToStEvent::FillEventPrimaries(StEvent* e, TObjArray* t) {
   
   if (e==0 || t==0) {
     cout <<"StFtpcTrackToStEvent::FillEventPrimaries(). ERROR:\t"
-	 <<"Null StEvent ("<<e<<") || StiTrackContainer ("<<t<<").  Exit"<<endl;
+	 <<"Null StEvent ("<<e<<") || TObjArray of tracks ("<<t<<").  Exit"<<endl;
     return 0;
   }
 
@@ -188,7 +174,7 @@ StEvent* StFtpcTrackToStEvent::FillEventPrimaries(StEvent* e, TObjArray* t) {
   StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo();
 
   if(!vertex) {
-    cout <<"Failed to find a primary vertex."<<endl;
+    cout <<"Failed to find a primary vertex. No primary FTPC tracks written to StEvent."<<endl;
     return (StEvent*)NULL;
   }
   
@@ -215,7 +201,8 @@ StEvent* StFtpcTrackToStEvent::FillEventPrimaries(StEvent* e, TObjArray* t) {
     }
     
     StTrackNode* currentTrackNode = (*itKtrack).second;
-
+    StGlobalTrack* currentGlobalTrack = static_cast<StGlobalTrack*>(currentTrackNode->track(global));
+    
     if (kTrack->ComesFromMainVertex()) {
       
       fillTrackCount1++;
@@ -238,9 +225,10 @@ StEvent* StFtpcTrackToStEvent::FillEventPrimaries(StEvent* e, TObjArray* t) {
 	// set up relationships between objects
 	detInfoVec.push_back(detInfo);
 	pTrack->setDetectorInfo(detInfo);
+	pTrack->setKey(currentGlobalTrack->key());
 	currentTrackNode->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
 	vertex->addDaughter(pTrack);
-	StuFixTopoMap(pTrack);
+	FillTopologyMap(pTrack, kTrack);
 	fillTrackCount2++;
       }
 	
@@ -268,12 +256,14 @@ StEvent* StFtpcTrackToStEvent::FillEventPrimaries(StEvent* e, TObjArray* t) {
 void StFtpcTrackToStEvent::FillDetectorInfo(StTrackDetectorInfo* detInfo, StFtpcTrack* track) {
 
   TObjArray *hitVec = track->GetHits();
+  
   detInfo->setFirstPoint(((StFtpcPoint*)hitVec->Last())->GetStFtpcHit()->position());
   detInfo->setLastPoint(((StFtpcPoint*)hitVec->First())->GetStFtpcHit()->position());
   detInfo->setNumberOfPoints(EncodedStEventFitPoints(track));
-  
-  for (Int_t iHit = 0; iHit < hitVec->GetEntriesFast(); iHit++) {
-    StHit *hh = dynamic_cast<StHit*>(((StFtpcPoint*)track->GetHits()->At(iHit))->GetStFtpcHit());
+
+  for (Int_t iHit = hitVec->GetEntriesFast()-1; iHit >= 0; iHit--) {  // revert order
+    StFtpcPoint *pt = (StFtpcPoint*)hitVec->At(iHit);
+    StHit *hh = dynamic_cast<StHit*>(pt->GetStFtpcHit());
     if (hh) detInfo->addHit(hh);
   }
 }
@@ -362,9 +352,6 @@ void StFtpcTrackToStEvent::FillFitTraits(StTrack* gTrack, StFtpcTrack* track){
   if (gTrack->type()==primary) nFitPoints += 1; // the vertex is added as a fit point
   // chi square and covariance matrix, plus other stuff from the
   // innermost track node
-  //StFtpcPoint *hit = (StFtpcPoint *)track->GetHits()->Last();
-  //double alpha, xRef, x[5], covM[15], chi2node;
-  //node->get(alpha,xRef,x,covM,chi2node);
   float chi2[2];
   chi2[0] = track->GetChiSq()[0]/(nFitPoints-3.);
   chi2[1] = track->GetChiSq()[1]/(nFitPoints-2.);
@@ -383,7 +370,7 @@ void StFtpcTrackToStEvent::FillFitTraits(StTrack* gTrack, StFtpcTrack* track){
 }
 
 
-void StFtpcTrackToStEvent::FilldEdxInfo(/*StiDedxCalculator& dEdxCalculator,*/ StTrack* gTrack, StFtpcTrack* track) {
+void StFtpcTrackToStEvent::FilldEdxInfo(StTrack* gTrack, StFtpcTrack* track) {
   
   double dEdx = track->GetdEdx();
   double errordEdx = 0.;
@@ -403,13 +390,6 @@ void StFtpcTrackToStEvent::FilldEdxInfo(/*StiDedxCalculator& dEdxCalculator,*/ S
     method = kUndefinedMethodId;
   }
   
-  // this part doesn't work for FTPC tracks
-  /*
-  if (track) {
-    dEdxCalculator.getDedx(track, dEdx, errordEdx, nPoints);
-  }
-  */
-
   if(!finite(dEdx) || dEdx>9999) {
     dEdx = 9999;
     errordEdx = dEdx;
@@ -424,11 +404,10 @@ void StFtpcTrackToStEvent::FilldEdxInfo(/*StiDedxCalculator& dEdxCalculator,*/ S
     cout <<"StFtpcTrackToStEvent::Error: errordEdx non-finite."<<endl;
   }
   
-  StTrackPidTraits* pidTrait = new StDedxPidTraits(/*dEdxCalculator.whichDetId(),*/
-						   detId,
+  StTrackPidTraits* pidTrait = new StDedxPidTraits(detId,
 						   static_cast<short>(method),
 						   static_cast<unsigned short>(nPoints),
-						   static_cast<float>(dEdx), // This was set to 1.5*dEdx. Why?
+						   static_cast<float>(dEdx),
 						   static_cast<float>(errordEdx));
   gTrack->addPidTraits(pidTrait);
   return;
@@ -437,12 +416,7 @@ void StFtpcTrackToStEvent::FilldEdxInfo(/*StiDedxCalculator& dEdxCalculator,*/ S
 
 void StFtpcTrackToStEvent::FillPidTraits(StTrack* gTrack, StFtpcTrack* track) {
 
-  if (track->GetHemisphere() == 1) { // Ftpc west
-    FilldEdxInfo(/*dEdxFtpcWestCalculator,*/ gTrack, track);
-  }
-  else { // Ftpc east
-    FilldEdxInfo(/*dEdxFtpcEastCalculator,*/ gTrack, track);
-  }
+  FilldEdxInfo(gTrack, track);
   
   return;
 }
@@ -504,4 +478,20 @@ float StFtpcTrackToStEvent::ImpactParameter(StFtpcTrack* track) {
   else {
     return track->GetDca();
   }
+}
+
+
+void StFtpcTrackToStEvent::FillTopologyMap(StTrack *gTrack, StFtpcTrack* ftpcTrack) {
+  unsigned long word0 = (gTrack->type()==primary) ? 1 : 0;
+  unsigned long word1 = (1<<31); // FTPC track flag
+
+  for (Int_t i = 0; i < ftpcTrack->GetHits()->GetEntriesFast(); i++){
+    StFtpcPoint *pt = (StFtpcPoint*)ftpcTrack->GetHits()->At(i);
+    word0 |= (1<<pt->GetPadRow());
+  }
+  
+  StTrackTopologyMap newmap(word0, word1);
+  gTrack->setTopologyMap(newmap);
+  
+  return;
 }
