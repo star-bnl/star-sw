@@ -78,7 +78,7 @@ foreach my $logFile (@list) {
          $msize = ($$logFile)->lsize;
        
         my $ltime = `mod_time $mfile`;
-           if( $ltime > 7200){
+           if( $ltime > 3600){
 		    if ($msize < 2000 )  {
 #     print "Crashed job :", $mfile, "\n";
    }else { 
