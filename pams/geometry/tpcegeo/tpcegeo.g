@@ -299,27 +299,23 @@ block TPAD is a real padrow with dimensions defined at positioning time
 * We want to use PAI model in padrows to simulate energy loss more precisely.
 * (see GEANT PHYS334, Allisson and Cobb, Ann.Rev.Nucl.Part.Sci.30(1980),253).
 * (    best formalism in Grishin,Ermilova,Kotelnikov, NIM A307(1991),273).
-* To switch it ON only in this volume we introduce P10 as a different MATERIAL, 
-* since ISTRA flag is kept in medium, but all tables are stored in the material.
+* To switch it ON only in this volume we introduce P10 as a different MATERIAL,
+* since ISTRA flag is kept in medium, but all tables are stored in the material
 * According to AGI rules for this we need A parameter. Lets use ISVOL=1 (!)
-* - this eliminates a need for a separate medium definition.
+* (- this eliminates a need for a separate medium definition ?)
 *
       attribute TPAD seen=0 colo=2
       material p10
-      material sensitive_gas  ISVOL=1    stemax=5
+      material sensitive_gas  ISVOL=1  stemax=2.5*tprs_width
       SHAPE    BOX   dx=0   dy=0   dz=0    
       Call     GSTPAR(ag_imed,'STRA',1.)
 *
 *     The following is the corrected hits definition: 25-dec-98 (PN)
-      HITS    TPAD   Z:.0005:S  Y:.0005:  X:.0005:   cx:10:   cy:10:   cz:10:,
-                     LPtot:18:(-3,2)      Sleng:.1:(0,500),
+      HITS    TPAD   Z:.0005:S  Y:.0005:  X:.0005:   cx:10: cy:10: cz:10:,
+                     LPtot:18:(-3,2)      Sleng:.1:(0,800),
                      ToF:16:(0,1.e-6)     LGAM:16:(-2,2),    
-                     Step:11:(0,5)        USER:21:(-.01,.01) 
-*
-*     HITS     TPAD  xx:16:SHX(-250,250)  yy:16:(-250,250)   zz:32:(-250,250),
-*                    px:20:(-100,100)     py:20:(-100,100)   pz:20:(-100,100),
-*                    Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,10),
-*                    LGAM:16:(-2,2)       USER:32:(-0.1,0.1) 
+                     Step:11:(0,10)       USER:21:(-.01,.01) 
+
 endblock
 *
 ********************************************************************************
@@ -523,7 +519,7 @@ endblock
 Block TMSE  is a single sensitive volume
 
       SHAPE   division  Iaxis=3 Ndiv=tecw_MwcNwir
-      HITS    TMSE   Z:.01:S  Y:.01:   X:.01:    Sleng:0.1:(0,500),  
+      HITS    TMSE   Z:.01:S  Y:.01:   X:.01:    Sleng:0.1:(0,800),  
                      cx:10:   cy:10:   cz:10:    Step:.01:,  
                      ToF:16:(0,1.e-6)  Ptot:16:(0,100), 
                      LGAM:16:(-2,2)    Elos:16:(0,0.01) 
@@ -603,35 +599,43 @@ end
       end
 
 
-
 *******************************************************************************
                 Subroutine   T P A D S T E P (j,Hit)
 * Description:  Step routine for TPCs, called at the end of the HITS operator *
-*     It uses COMIS CALL to get GSTAR specific functions, if they are loaded, *
-*     otherwise nothing is done and hits will contain GEANT standard values.  *
+*    A correction for the track curvature is introduced here. It assumes that
+*    hits are (z,y,x)- packed and negative Z are in left-handed coordinates.
+*     
 *******************************************************************************
 *
-+CDE,Typing,GCBANK,GCVOLU,GCKINE,GCTRAK,AgCSTEP.
++CDE,Typing,GCBANK,GCVOLU,GCKINE,GCTRAK,AgCSTEP,GCFLAG.
 */AGCSTEP/: r*7 vect0,vloc0,vloc,xloc, r: Astep,Adestep
 *
       Integer   J,MyPad,JMyPad,Ishape,JMyPar,i_flag,Jcenter
-      Real      Hit,Dr,Vect_middle(6)
+      Real      center(3)/0,0,0/,Field(3)/0,0,0/,Hit,Dr,Dt,Vect_middle(6),
+                xi,yi,xo,yo,dx,dy,dphi,dtr,Vr,Pt,SIGN,smax/6.0/
       data      i_flag/0/,Jcenter/-1/,Vect_middle/6*0./
-      Logical   Valid_hit
+      Logical   Valid_hit,First/.true./
       Character Cname*4
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                 Entry     TPAISTEP (J,Hit)
                 Entry     TPAOSTEP (J,Hit)
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      If (First) then
+          First = .false.
+          Call GUFLD (center,field)
+          if (IDEBUG>1) print *,' In TPADSTEP field=',field
+      endif
 * 
 * Extract parameters of the current padraw from GEANT
 *
 *    This we need to get the actual padraw width from GEANT:
-      JMYPAR  = LQ(JGPAR-NLEVEL)         ! pointer to the volume parameters
-      dr      = Q(JMYPAR+1)              ! Radial half-size
+    JMYPAR  = LQ(JGPAR-NLEVEL)         ! pointer to the volume parameters
+    dr      = Q(JMYPAR+1)              ! Radial half-size
+    dt      = Q(JMYPAR+2)              ! transverse half-size
 *
+    If (Idebug>0) then
 *    this is for control purpouse only - not really needed:
-      MyPad   = LVOLUM(NLEVEL)           ! Padrow Volume Number
+      MyPad   = LVOLUM(NLEVEL)           ! Padrow Volume Pointer (Number)
       JMYPad  = LQ(JVOLUM-MYPad)         ! pointer to the volume bank
       Ishape  = Q(JMyPad+2)              ! GEANT shape code of the PadRaw
       If (Ishape != 1) then
@@ -640,113 +644,55 @@ end
         print *,' volume ',cname,' at level ',NLEVEL,' shape=',Ishape,' dr=',dr
         print *,' we are in point ',vect0
       endif 
+    endif
 *
 *    A hit is called Valid when trajectory cross a padrow (almost) completely:
       Valid_hit = abs(vloc0(1)-vloc(1)) .gt. 2*dr-0.1
 *
-* For Valid hit Calculate Coordinate and Direction at midpoint of PadRow 
-*
-      If (Valid_hit) then
-         Call gstar_pr_center ( Vloc0, Vloc, Vect_middle,i_flag)
-         Valid_hit = i_flag.eq.0
-      endif
-* 
-*    Valid hits are marked with positive dE, unvalid - negative:
-      If (valid_hit) then
-*        Call GDtoM ( Vect_middle(1), hits(1), 1 )
-*        Call GDtoM ( Vect_middle(4), hits(4), 2 )
-*        Call Vscale(hits(4), (Vect(7)+Vect0(7))/2, hits(4), 3)
-*
-         Call Ucopy ( Vect_middle, hits, 6 )
-         hits(1)=vect_middle(3)
-         hits(3)=vect_middle(1)
-         Hit = +AdEStep
-      else
-         Hit = -AdEStep
-      endif
-*
+      xi = vloc0(1);      yi = vloc0(2)
+      xo = vloc(1);       yo = vloc(2)
+
+      Pt = vloc0(7) * sqrt(vloc0(4)**2+vloc0(5)**2)
+      Vr = 1.e9;  if (Pt>0) Vr = 0.0003*Field(3)/Pt
+
+*     more precisely 2*asin(S/2R), but we use a limited linear approximation:
+      dphi = min (aStep*Vr,1.0)
+      dtr  = dphi/8*charge*SIGN(1.,VECT(3))
+
+*     correction to   HITS TPAD  Z  Y  X  cx cy cz 
+*     again precise coefficient is S/R*(1-cos(phi/2), take linear term only:
+      dy = dtr*(xi-xo);  hits(2) = min(max(-dt,hits(2)+dy),dt)
+      dx = dtr*(yo-yi);  hits(3) = min(max(-dr,hits(3)+dx),dr)
+
+      hit = AdEStep
       end
 
-
-******************************************************************
-      subroutine gstar_pr_center( v_in, v_out, v_0, i_flag )
-******************************************************************
-
-*** does quadratic interpolation in local coordiantes in 
-*** x-y (bend plane) and x-z between local padrow
-*** coordinates v_in and v_out to get (x,p) at z=0
-
-* Author: P. Jacobs
-* Creation Date: 14/10/94 (gna49)
-* modified for GSTAR 10/1/96  pmj
-
-*------------------------------------------------------------------
-      implicit none
-*------------------------------------------------------------------
-      real v_in(6), v_out(6), v_0(6)
-
-      integer i_flag, i
-
-      real*8 a_y, b_y, c_y, a_z, b_z, c_z
-
-      real*8 temp1, temp2, temp3
-*==================================================================
-*** use nonzero i_flag to signal unstable calculation => use weighted
-*** average position
-         
-      i_flag = 0
-*----------------------------------------------------------------
-      temp1 = v_in(1) - v_out(1)
-
-      if( abs(temp1).lt..5 .or. v_in(4).eq.0 .or. v_out(4).eq.0 ) then
-         i_flag = 1
-         goto 999
-      endif
-*----------------------------------------------------------------
-*** calculate a,b,c for y = a*x**2 + b*x + c
-
-      temp2 = v_in(5) / v_in(4) - v_out(5) / v_out(4)
-      a_y = .5 * temp2 / temp1
-      
-      temp2 = v_in(2) - a_y * v_in(1)**2
-      temp3 = v_out(2) - a_y * v_out(1)**2
-
-      b_y = ( temp2 - temp3 ) / temp1
-      c_y = v_in(2) - a_y * v_in(1)**2 - b_y * v_in(1)
-
-*** calculate a,b,c for z = a*x**2 + b*x + c
-
-      temp2 = v_in(6) / v_in(4) - v_out(6) / v_out(4)
-      a_z = .5 * temp2 / temp1
-      
-      temp2 = v_in(3) - a_z * v_in(1)**2
-      temp3 = v_out(3) - a_z * v_out(1)**2
-
-      b_z = ( temp2 - temp3 ) / temp1
-      c_z = v_in(3) - a_z * v_in(1)**2 - b_z * v_in(1)
-
-*-------------------------------------------------------------------------
-*** output vector: position
-      
-      v_0(1) = 0.
-      v_0(2) = c_y
-      v_0(3) = c_z
-
-*** output vector: direction
-
-      v_0(4) = 1 / sqrt( 1. + b_y**2 + b_z**2 )
-      if( v_in(4) .lt. 0. ) v_0(4) = - v_0(4)
-      
-      v_0(5) = b_y * v_0(4)
-      v_0(6) = b_z * v_0(4)
-*-------------------------------------------------------------------------
-*** check that the middle point is in between, otherwise flag as bad
-
-      do i = 1,4
-         if ((v_in(i)-v_0(i))*(v_0(i)-v_out(i)).lt.0) I_flag = 1 
-      enddo        
-*-------------------------------------------------------------------------
- 999  continue
-      return
-      end
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*
+* Suppose we have a piece of trajectory from i to o (in xy plane only):
+*       _
+*      |\       o
+*         n   ( / \
+*            ( /    \
+*            (/       \
+*            i---------c
+*
+* - where c in center of the helix, ('s represent the helix arc. 
+* To find its middle point (in direction of n) we introduce vectors:
+*         i={xi,yi}
+*         o={xo,yo)
+*         s={xo-xi,yo-yi}
+*         n={yo-yi,xi-xo}/L
+* where
+*         L=dist(i-o)=|S|
+* Then
+*         R=p/0.0003B    - R[cm], B[KGs], p[GeV/c]
+*         phi=L/R        - linear approximation should be good enouph, 
+*                          geant will keep this value < 20 degrees)
+*         d=R*(1-cos phi)= ~R*phi^2/8  - displacement 
+*         from to middle of the straight line to the middle of the arc
+*             
+*         m={(xi+xo)/2,(yi+yo)/2} + L/8R*{yo-yi,xi-xo}
+*         ============================================
+*
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
