@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.1 2003/10/15 18:20:46 porter Exp $
+ * $Id: StEStructPairCuts.h,v 1.2 2004/03/19 19:07:43 chunhuih Exp $
  *
  * Author: Jeff Porter 
  *
@@ -235,14 +235,14 @@ inline float StEStructPairCuts::qInv() const {
 inline int StEStructPairCuts::cutDeltaPhi(){
   if ( mdeltaPhiCut &&
        ( (mdeltaPhi=DeltaPhi()) <mdphi[0] || mdeltaPhi>mdphi[1])  
-      ) return mdphiCounter[mType]++;
+      ) return ++(mdphiCounter[mType]);
   return 0;
 }
 
 inline int StEStructPairCuts::cutDeltaEta(){
   if(mdeltaEtaCut &&
      ( (mdeltaEta=DeltaEta()) <mdeta[0] || mdeltaEta>mdeta[1]) 
-     ) return mdetaCounter[mType]++; 
+     ) return ++(mdetaCounter[mType]);
   return 0;
 }
 
@@ -250,36 +250,36 @@ inline int StEStructPairCuts::cutDeltaEta(){
 inline int StEStructPairCuts::cutDeltaMt(){
   if(mdeltaMtCut &&
      ( (mdeltaMt=DeltaMt()) <mdmt[0] || mdeltaMt>mdmt[1]) 
-     )return mdmtCounter[mType]++; 
+     ) return ++(mdmtCounter[mType]);
   return 0;
 }
 
 inline int StEStructPairCuts::cutqInvORNominalEntranceSep(){
-    if( mqInvCut && mEntSepCut &&
-               (  (mqInvarient=qInv()) <mqInv[0] 
-                  || mqInvarient>mqInv[1] ||
-                  ((mEntranceSeparation=NominalTpcEntranceSeparation())<mEntSep[0])|| mEntranceSeparation>mEntSep[1]
-		)
-      ) return mqInvCounter[mType]++; 
-    return 0;
+  if( mqInvCut && mEntSepCut &&
+      (  (mqInvarient=qInv()) <mqInv[0] 
+	 || mqInvarient>mqInv[1] ||
+	 ((mEntranceSeparation=NominalTpcEntranceSeparation())<mEntSep[0])|| mEntranceSeparation>mEntSep[1]
+	 )
+      ) return ++(mqInvCounter[mType]);
+  return 0;
 }
 
 inline int StEStructPairCuts::cutqInv(){
-    if( mqInvCut && 
-               (  (mqInvarient=qInv())<mqInv[0] 
-                  || mqInvarient>mqInv[1] 
-		  )                  
-      ) return mqInvCounter[mType]++; 
-    return 0;
+  if( mqInvCut && 
+      (  (mqInvarient=qInv())<mqInv[0] 
+	 || mqInvarient>mqInv[1] 
+	 )                  
+      ) return ++(mqInvCounter[mType]);
+  return 0;
 }
 
 inline int StEStructPairCuts::cutEntranceSep(){
-    if( mEntSepCut && 
-            ( (mEntranceSeparation=NominalTpcEntranceSeparation())<mEntSep[0] 
-                  || mEntranceSeparation>mEntSep[1]  
-		  )                  
-      ) return mEntSepCounter[mType]++; 
-    return 0;
+  if( mEntSepCut && 
+      ( (mEntranceSeparation=NominalTpcEntranceSeparation())<mEntSep[0] 
+	|| mEntranceSeparation>mEntSep[1]  
+	)                  
+      ) return ++(mEntSepCounter[mType]);
+  return 0;
 }
 
 
@@ -288,7 +288,7 @@ inline int StEStructPairCuts::cutMidTpcSepUS(){
     double x1=mMidTpcSeparationUS=MidTpcSeparation();
     double x2=NominalTpcEntranceSeparation();
     double x3=NominalTpcExitSeparation();
-    if( x1<x2 && x1<x3 && x1<mMidTpcSepUS[0]) return msplitUSCounter[mType]++;
+    if( x1<x2 && x1<x3 && x1<mMidTpcSepUS[0]) return ++(msplitUSCounter[mType]);
   }
   return 0;
 }
@@ -308,7 +308,7 @@ inline int StEStructPairCuts::cutExitSep(){
    if( mExitSepCut && 
        ( (mExitSeparation=NominalTpcExitSeparation()) <mExitSep[0]
         || mExitSeparation>mExitSep[1] )
-       ) return mExitSepCounter[mType]++; 
+       ) return ++(mExitSepCounter[mType]);
    return 0;
 }
 
@@ -316,7 +316,7 @@ inline int StEStructPairCuts::cutQuality(){
   if( mQualityCut && 
       ( (mQualityVal=quality()) <mQuality[0]
        || mQualityVal>mQuality[1] )
-      ) return mQualityCounter[mType]++; 
+      ) return ++(mQualityCounter[mType]);
   return 0;
 }
 
@@ -394,6 +394,11 @@ inline int StEStructPairCuts::cutQualityH(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.2  2004/03/19 19:07:43  chunhuih
+ * Use pre-increment instead of post-increment operators for the return values
+ * of a set of cut methods. This returns the correct cut value for the first
+ * time the counting array is incremented.
+ *
  * Revision 1.1  2003/10/15 18:20:46  porter
  * initial check in of Estruct Analysis maker codes.
  *
