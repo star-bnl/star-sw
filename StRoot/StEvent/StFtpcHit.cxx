@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.cxx,v 2.9 2004/04/08 19:02:33 ullrich Exp $
+ * $Id: StFtpcHit.cxx,v 2.10 2004/05/07 15:05:28 calderon Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.cxx,v $
+ * Revision 2.10  2004/05/07 15:05:28  calderon
+ * Adding constructor based on StFtpcPoint from Markus.
+ *
  * Revision 2.9  2004/04/08 19:02:33  ullrich
  * Added additional data member and access methods to hold the position in
  * pad and time units including their std deviation. Constructors updated.
@@ -44,9 +47,10 @@
  **************************************************************************/
 #include "StFtpcHit.h"
 #include "tables/St_dst_point_Table.h"
+#include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.9 2004/04/08 19:02:33 ullrich Exp $";
+static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.10 2004/05/07 15:05:28 calderon Exp $";
 
 StMemoryPool StFtpcHit::mPool(sizeof(StFtpcHit));
 
@@ -108,7 +112,7 @@ StFtpcHit::StFtpcHit(const dst_point_st& pt)
     mPositionError.setZ(float(ftpcz)/(1L<<17));
 
     //
-    // The hardware position stays at it is
+    // The hardware position stays as it is
     //
     mHardwarePosition = pt.hw_position;
 
@@ -116,6 +120,46 @@ StFtpcHit::StFtpcHit(const dst_point_st& pt)
     mTimePos = 0;     
     mPadPosSigma = 0; 
     mTimePosSigma = 0;
+}
+
+StFtpcHit::StFtpcHit(const StFtpcPoint& pt)
+{
+  update(pt);
+}
+
+void StFtpcHit::update(const StFtpcPoint& pt)
+{
+    //
+    // charge and status flag
+    //
+    const unsigned int iflag = pt.GetFlags();
+    const unsigned int ftpcq  = pt.GetCharge();
+    mCharge = float(ftpcq)/(1<<16);
+    mFlag = static_cast<unsigned char>(iflag);
+
+    //
+    // position in xyz
+    //
+    mPosition.setX(pt.GetX());
+    mPosition.setY(pt.GetY());
+    mPosition.setZ(pt.GetZ());
+       
+    //
+    // error on position in xyz
+    //
+    mPositionError.setX(pt.GetXerr());
+    mPositionError.setY(pt.GetYerr());
+    mPositionError.setZ(pt.GetZerr());
+
+    //
+    // The hardware position stays as it is
+    //
+    mHardwarePosition = pt.GetHardwarePosition();
+
+    mPadPos = pt.GetPadPos();      
+    mTimePos = pt.GetTimePos();     
+    mPadPosSigma = pt.GetPadPosSigma(); 
+    mTimePosSigma = pt.GetTimePosSigma();
 }
 
 StFtpcHit::~StFtpcHit() {/* noop */}
