@@ -42,7 +42,7 @@ C<----------------------------------------------------------------------
 #include "math_constants.inc"
 #include "StDetectorId.inc"
 
-      INTEGER nok,detect_id_i
+      INTEGER nok,detect_id_i,points(3)
       INTEGER i
 
       CHARACTER*132 m132
@@ -88,15 +88,19 @@ C     Only write tracks that have more than a certain number of hits in a detect
 
            if( globtrk(i).det_id .eq. kTpcId )then
               detect_id_i = 1
+              points(1) = globtrk(i).n_point - (1000 * int(globtrk(i).n_point/1000))
            elseif( globtrk(i).det_id .eq. kSvtId .or.
      +             trak(i).det_id .eq.  kSsdSvtId .or.
      )             trak(i).det_id .eq. kSsdId )then
               detect_id_i = 2
+              points(2) = ((((globtrk(i).n_point - (10000 * int(globtrk(i).n_point/10000)) - points(1))/1000)) 
+     +        + (int(globtrk(i).n_point/10000)))
            else
               detect_id_i = 3
+              points(3) = (points(1) + points(2))
            endif
 
-           IF(globtrk(i).n_point .ge. ev0par(detect_id_i).n_point) then
+           IF(points(detect_id_i) .ge. ev0par(detect_id_i).n_point) then
 
               if (globtrk(i).iflag .gt. 0 .and. 
      +             globtrk(i).det_id .eq. kTpcId .or.
