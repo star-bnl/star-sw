@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.63 1998/11/13 15:48:44 fisyak Exp $
+# $Id: MakePam.mk,v 1.64 1998/11/14 01:16:58 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.64  1998/11/14 01:16:58  fisyak
+# Post NT updates
+#
 # Revision 1.63  1998/11/13 15:48:44  fisyak
 # Merged version with NT
 #
@@ -244,11 +247,11 @@ endif
 endif                          
 ifneq (,$(strip $(FILES_O)))
 LIB_PKG := $(LIB_DIR)/lib$(DOMAIN).$(A)
-endif
 ifndef NT
 qwe     := $(shell test ! -f $(LIB_PKG) ||  $(AR) $(ARFLAGS) $(LIB_PKG))
 OBJS    := $(LIB_PKG)($(NAMES_O))
 endif #/* NT */
+endif
 ifneq (,$(FILES_IDM))   
 IDLSD    := $(wildcard $(STAR)/pams/$(DOMAIN)/*/*.idl $(STAR)/pams/$(DOMAIN)/*/*/*.idl $(STAR)/pams/$(DOMAIN)/*/*/*/*.idl)
 ifndef NT

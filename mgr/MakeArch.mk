@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.43  1998/11/14 01:16:58  fisyak
+#  Post NT updates
+#
 #  Revision 1.42  1998/11/13 15:48:43  fisyak
 #  Merged version with NT
 #
@@ -107,7 +110,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/11/13 15:48:43 $ 
+#             Last modification $Date: 1998/11/14 01:16:58 $ 
 #. default setings
 
 MOTIF := Yess
@@ -398,7 +401,12 @@ endif
     SO      := $(CXX)
     CXXFLAGS  := $(DEBUG) -z +Z  -Dextname  
     CFLAGS   := $(DEBUG) -Ae -z +Z -Dextname  
-    LDFLAGS   := $(DEBUG)  -z -Wl,+s -Wl,-E 
+	ifdef SCL_OPTIMISE # from Brian
+		CXXFLAGS += +Olibcalls +Onolimit
+	else
+		CXXFLAGS += +d
+	endif              # from Brian
+    LDFLAGS   := $(DEBUG)  -z -Wl,+s -Wl,-E,+vnocompatwarnings
     EXEFLAGS  := $(LDFLAGS) -Wl,-N 
     SOFLAGS   := $(DEBUG)  -b -z  
 #    CLIBS   :=   -lXm -lXt -lX11 -lm -lPW -ldld /usr/local/lib/libMagick.a

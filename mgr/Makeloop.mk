@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.28  1998/11/14 01:16:59  fisyak
+#  Post NT updates
+#
 #  Revision 1.27  1998/11/13 15:48:44  fisyak
 #  Merged version with NT
 #
@@ -160,7 +163,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/11/13 15:48:44 $ 
+#           Last modification $Date: 1998/11/14 01:16:59 $ 
 #  default setings
 # Current Working Directory
 #
@@ -312,6 +315,9 @@ Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
 Makers  :=  $(filter-out St_laser_Maker, $(Makers))
 Makers  :=  $(filter-out St_mev_Maker, $(Makers))
 Makers  :=  $(filter-out St_tpctest_Maker, $(Makers))
+ifneq ($(EMPTY),$(findstring i386_linux2, $(STAR_SYS)) )
+Makers  :=  $(filter-out St_trs_Maker, $(Makers))
+endif
 ifneq ($(EMPTY),$(Makers))
 StRoot += St_Makers
 endif
