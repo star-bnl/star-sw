@@ -26,6 +26,14 @@
 
 #include "St_DataSet.h"
 
+//----- dataset flags
+enum ESetBits {
+     kMark        = BIT(22),   // if object is marked
+};
+enum EBitOpt { 
+               kSet   = kTRUE,
+               kReset = kFALSE
+             };
 class St_DataSetIter : public TObject{
 private:
    TIter           *fNext;            // "standard" ROOT iterator for containers
@@ -54,6 +62,11 @@ public:
   virtual St_DataSet    *Dir(Char_t *dirname);
   virtual Int_t          Du() const {return 0;} // summarize dataset usage
   virtual Int_t          Df() const {return 0;} // report number of free "table" blocks. 
+
+  virtual Int_t          Flag(UInt_t flag=kMark,EBitOpt reset=kSet){return Flag((St_DataSet *)0,flag,reset);}
+  virtual Int_t          Flag(const Char_t *path,UInt_t flag=kMark,EBitOpt reset=kSet);
+  virtual Int_t          Flag(St_DataSet *dataset,UInt_t flag=kMark,EBitOpt reset=kSet);
+
   virtual St_DataSet    *Ls(const Char_t *dirname="",Option_t *opt="");
   virtual St_DataSet    *Ls(const Char_t *dirname,Int_t depth);
   virtual St_DataSet    *ls(const Char_t *dirname="",Option_t *opt=""){return Ls(dirname,opt);}

@@ -48,7 +48,7 @@ class St_DataSet : public TNamed
     virtual ~St_DataSet();
             void         Add(St_DataSet *dataset);
     virtual void         Browse(TBrowser *b);
-    virtual St_DataSet  *Data() const { return HasData() ? this : 0; }  // returns this pointer the derived classes if any
+    virtual St_DataSet  *Data() const { return HasData() ? (St_DataSet *)this : 0; }  // returns this pointer the derived classes if any
     virtual void         Delete(Option_t *opt="");   
             TObject     *GetMother() const { return fMother; }
     virtual St_DataSet  *GetParent() const { return (St_DataSet *)fMother;}
