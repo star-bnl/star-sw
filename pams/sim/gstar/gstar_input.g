@@ -69,6 +69,7 @@
 *  print *,' AGUSREAD: doing input command :',Ccommand
    Do i=1,LENOCC(Ccommand)
      C=CCOMMAND(i:i);  Igate=i;  J=0;
+
      if     C=='E' { Call AGZREAD('P',ier);  
                      if (ier==0) { J=1;      call gstar_ReadEGZ(Igate)  }  }
      elseif C=='X' { IrbDIV=IxDIV;           LKARP2=LkEvnt
