@@ -3,7 +3,7 @@
 */
    struct tcl_tphit {
        long      cluster;    /* id of a cluster used to reconstruct pnt. */
-       long      flag;       /* hit quality*1000+position hit in a cluster */
+       long      flag;       /* hit quality (see TFS documentation) */
        long      id;         /* a unique point id */
        long      id_globtrk; /* id of reconstructed/sim global track */
        long      track;      /* track_id*1000+position on on a track (starts from 1) */
@@ -31,6 +31,6 @@
        short     mintmbk;    /* lowest time bucket in hit */
        short     maxtmbk;    /* highest time bucket in hit */
    };
-/*  Last mod. for tphit: $Date: 1999/11/20 20:52:15 $ */
+/*  Last mod. for tphit: $Date: 2000/03/03 23:23:58 $ */
 
 
