@@ -8,7 +8,11 @@
 /*--------------------------------------------------------------------*/
 const char *id2name(const char *base, long id)
 {
-   static char name[100]; int lbase,from,to;
+   static int ibuf = 0;
+   static char buf[4][100]; int lbase,from,to;
+   char *name;
+   name = buf[(ibuf++)&3];
+
    lbase = strlen(base);
    strcpy(name,base); 
    if(id > 0) sprintf(name+lbase,"%ld",id);
@@ -21,8 +25,11 @@ const char *id2name(const char *base, long id)
 const char *shortname(const char *longname, size_t length)
 {
   char *nn; size_t l1,l2,ll;
-  static char n[100];
-  
+  static int ibuf = 0;
+  static char buf[4][100];
+  char *n;
+  n = buf[(ibuf++)&3];
+    
   l1=(length-1)/2; l2=(length-l1-1); ll=strlen(longname);
   strncpy(n,longname,length+1); 
   if( length < ll){
