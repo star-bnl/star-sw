@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.67  2002/02/20 20:45:02  ward
+// Implementation of RDO mask.  Mostly from Fabrice.
+//
 // Revision 1.66  2002/02/13 21:16:30  ward
 // Move calibration access from Init() to InitRun().
 //
@@ -478,6 +481,8 @@ int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequenc
 #endif
   return rv; // < 0 means serious error.
 }
+#include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
+#include "StDaqLib/TPC/fee_pin.h"
 //________________________________________________________________________________
 #ifdef GAIN_CORRECTION
 void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) { // www
@@ -493,10 +498,27 @@ void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) { // www
 
   assert(sector>=1&&sector<=24);
 
+  static StDetectorDbTpcRDOMasks* mask=0;
+  static int tRDOFromRowAndPad[45][182];
+  if(!mask) {
+    mask = StDetectorDbTpcRDOMasks::instance();
+    assert(mask);
+    for(int tiFee=0;tiFee<182;tiFee++) {
+      for(int tiPin=0;tiPin<32;tiPin++) {
+        if(row_vs_fee[tiFee][tiPin]!=0 && pad_vs_fee[tiFee][tiPin]!=0) {
+          tRDOFromRowAndPad[(row_vs_fee[tiFee][tiPin]-1)]
+              [(pad_vs_fee[tiFee][tiPin]-1)]=
+              rdo_vs_fee[tiFee][tiPin];
+        }
+      }
+    }
+  }
 
   for(row=0;row<45;row++) {
     for(pad=0;pad<182;pad++) {
-      fGain[row][pad]=gains[sector-1].Gain[row][pad];
+      fGain[row][pad]=
+          (mask->isOn(sector,tRDOFromRowAndPad[row][pad]))?
+          gains[sector-1].Gain[row][pad] : -1.;
     }
   }
 }
