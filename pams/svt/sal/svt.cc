@@ -1303,7 +1303,7 @@ float work::TakeDerivatives(float st)
 
  int level = 20, n_track = 2000, nsh;
  int nl3, nw3, i, num3;
- float  x3, y3, shift = 0.02, angle = 0.001, dx, dy;
+ float  x3, y3, angle = 0.001, dx, dy;
  float d, fi, rs;
  Point P1, P2, P3, PP1, PP2;
 

@@ -21,7 +21,6 @@ long type_of_call ssf_mv_to_adc_(
   TABLE_HEAD_ST *adc10_h, SSF_ADC_ST  *adc10)
 {  
   int ipixel, iADC10;
-  float current_mv;
   float ADC_SENSITIVITY = 2.0; /* counts per millivolt */
   float ADC_PEDESTAL = 10.;    /* arbitrary pedestal   */
 

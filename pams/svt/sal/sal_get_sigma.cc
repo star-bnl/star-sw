@@ -22,7 +22,7 @@ FILE *f;
 FILE *fx;
 FILE *fy;
 float r1, r2, r3, r4, r5, r6;
-Point P1, P2, P3, P4, Pv, P, Pr;
+Point P1, P2, P3, P4, Pv, Pr;
 
 r1 = config[0].layer_radius[0]*10; r2 = config[0].layer_radius[1]*10;
 r3 = config[0].layer_radius[2]*10; r4 = config[0].layer_radius[3]*10;
