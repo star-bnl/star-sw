@@ -20,18 +20,16 @@ StEStructFluctAnal::StEStructFluctAnal(int mode, int invokePairCuts,
     doingPairCuts  = invokePairCuts;
     etaSummingMode = etaSumMode;
     phiSummingMode = phiSumMode;
-    mnCents = 0;
-    mnPts = 0;
-    mnPtCents = 0;
-    init();
-}
+    mEtaMin = -1.1;
+    mEtaMax =  1.1;
+    mFluct   = 0;
+    mPtFluct = 0;
+    mnCentEvents = 0;
+    mptnplus     = 0;
+    mptnminus    = 0;
+    mptpplus     = 0;
+    mptpminus    = 0;
 
-//--------------------------------------------------------------------------
-StEStructFluctAnal::StEStructFluctAnal(const char* cutFileName, int mode, int invokePairCuts,
-                                       int etaSumMode, int phiSumMode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false), mPair(cutFileName) {
-    doingPairCuts  = invokePairCuts;
-    etaSummingMode = etaSumMode;
-    phiSummingMode = phiSumMode;
     mnCents = 0;
     mnPts = 0;
     mnPtCents = 0;
@@ -52,22 +50,32 @@ void StEStructFluctAnal::init() {
     } else if (manalysisMode & 2) {
         mdoPairCutHistograms = true;
     }
+    if (manalysisMode & 4) {
+        mUseAllEtaTracks = true;
+    } else {
+        mUseAllEtaTracks = false;
+    }
+
 
     ms  = new multStruct();
     initHistograms();
 }
 void StEStructFluctAnal::initCentralityObjects() {
-    for (int i=0;i<mnCents;i++) {
-        delete mFluct[i];  mFluct[i] = 0;
-    }
-    delete [] mFluct;
-    for (int i=0;i<mnPts;i++) {
-        for (int j=0;j<mnPtCents*mnPts;j++) {
-            delete mPtFluct[i];  mPtFluct[i] = 0;
+    if (mFluct) {
+        for (int i=0;i<mnCents;i++) {
+            delete mFluct[i];  mFluct[i] = 0;
         }
-        delete [] mPtFluct[i];  mPtFluct[i] = 0;
+        delete [] mFluct;
     }
+    if (mPtFluct) {
+        for (int i=0;i<mnPts;i++) {
+            for (int j=0;j<mnPtCents*mnPts;j++) {
+                delete mPtFluct[i];  mPtFluct[i] = 0;
+            }
+            delete [] mPtFluct[i];  mPtFluct[i] = 0;
+        }
     delete [] mPtFluct;  mPtFluct = 0;
+    }
     if (mnCentEvents) {
         delete [] mnCentEvents;  mnCentEvents = 0;
     }
@@ -95,7 +103,7 @@ void StEStructFluctAnal::initCentralityObjects() {
     char key[1024];
     for (int i=0;i<mnCents;i++) {
         sprintf(key,"%i",i);
-        mFluct[i] = new StEStructFluct(key,mTotBins);
+        mFluct[i] = new StEStructFluct(key,mTotBins,mEtaMin,mEtaMax);
     }
     mnPts     = mCentralities->numPts() - 1;
     mnPtCents = mCentralities->numPtCentralities() - 1;
@@ -104,7 +112,7 @@ void StEStructFluctAnal::initCentralityObjects() {
         for (int j=0;j<mnPts;j++) {
             sprintf(key,"%i_%i",i,j);
             int index = j + i*mnPtCents;
-            mPtFluct[index] = new StEStructFluct(key,mTotBins);
+            mPtFluct[index] = new StEStructFluct(key,mTotBins,mEtaMin,mEtaMax);
         }
     }
 
@@ -117,6 +125,131 @@ void StEStructFluctAnal::initCentralityObjects() {
 void StEStructFluctAnal::cleanUp() {
     delete ms;
     deleteHistograms();
+}
+// Parse cuts file for limits on eta.
+void StEStructFluctAnal::setEtaLimits( const char* cutFileName ) {
+    ifstream from(cutFileName);
+
+    if(!from){ 
+        cout<<" Cut file Not Found while looking for eta limits in StEStructFluctAnal::setEtaLimits"<<endl; 
+    }
+
+    char line[256], lineRead[256];
+    char* puteol;
+    char** val = new char*[100];
+    int ival;
+
+    bool done = false;
+    while(!done) {
+        if(from.eof()){
+            cout<<" Did not find eta limits in StEStructFluctAnal::setEtaLimits, file "<< cutFileName <<endl; 
+            done=true;
+        } else {
+            from.getline(lineRead,256);
+            strcpy(line,lineRead);
+            if ( (line[0]=='#') ) {
+                continue;
+            }
+            if ( !strstr(line,"Eta") ) {
+                continue;
+            }
+            if ((puteol=strstr(line,"#"))) {
+                *puteol='\0';
+            }
+            ival=0;
+            val[ival]=line;
+            char* fcomma;
+            while ((fcomma=strstr(val[ival],","))) {
+                *fcomma='\0';
+                fcomma++;
+                ival++;
+                val[ival]=fcomma;
+            }
+            if (ival==2) {
+                done=true;
+                break;
+            }
+        }
+    }
+    if (ival != 2) {
+        cout << " Did not find a line containing Eta and two numbers in file " << cutFileName <<endl; 
+    } else {
+        mEtaMin = strtof(val[1],0);
+        mEtaMax = strtof(val[2],0);
+    }
+    from.close();
+    delete [] val;
+}
+// Parse cuts file for limits on Pt.
+// Adjust minimum Pt of first Pt bin and maximum Pt of last Pt bin.
+// Not really obvious I want to do this. Also why not adjust multiplicity
+// limits in the same way?
+void StEStructFluctAnal::adjustPtLimits( const char* cutFileName ) {
+    ifstream from(cutFileName);
+
+    if(!from){ 
+        cout<<" Cut file Not Found while looking for eta limits in StEStructFluctAnal::adjustPtLimits"<<endl; 
+    }
+
+    char line[256], lineRead[256];
+    char* puteol;
+    char** val = new char*[100];
+    int ival;
+
+    bool done = false;
+    while(!done) {
+        if(from.eof()){
+            cout<<" Did not find Pt limits in StEStructFluctAnal::adjustPtLimits, file "<< cutFileName <<endl; 
+            done=true;
+        } else {
+            from.getline(lineRead,256);
+            strcpy(line,lineRead);
+            if ( (line[0]=='#') ) {
+                continue;
+            }
+            if ( !strstr(line,"Pt") ) {
+                continue;
+            }
+            if ((puteol=strstr(line,"#"))) {
+                *puteol='\0';
+            }
+            ival=0;
+            val[ival]=line;
+            char* fcomma;
+            while ((fcomma=strstr(val[ival],","))) {
+                *fcomma='\0';
+                fcomma++;
+                ival++;
+                val[ival]=fcomma;
+            }
+            if (ival==2) {
+                done=true;
+                break;
+            }
+        }
+    }
+    if (ival != 2) {
+        cout << " Did not find a line containing Pt and two numbers in file " << cutFileName <<endl; 
+    } else {
+        double PtMin = strtof(val[1],0);
+        double PtMax = strtof(val[2],0);
+        if (PtMax <= PtMin) {
+            cout << " Pt cuts must be wrong. PtMin = " << PtMin << ", PtMax = " << PtMax << endl;
+        }
+        double ptMax0 = mCentralities->ptLimit(1);
+        if (PtMin > ptMax0) {
+            cout << " New lower Pt cut, " << PtMin << " larger than max Pt cut of first Pt bin, " << ptMax0 << endl;
+        }
+        mCentralities->setPtLimit(0,PtMin);
+        int nPts = mCentralities->numPts();
+        double ptMinN = mCentralities->ptLimit(nPts-2);
+        if (PtMax < ptMinN) {
+            cout << " New upper Pt cut, " << PtMax << " smaller than min Pt cut of last Pt bin, " << ptMinN << endl;
+        }
+        mCentralities->setPtLimit(nPts,PtMax);
+    }
+    from.close();
+    delete [] val;
 }
 
 //
@@ -231,65 +364,114 @@ void StEStructFluctAnal::pairCuts(StEStructEvent* e1, StEStructEvent* e2, int j)
   };// iter 1 loop
 
 }
+// Modified 8/18/2004 djp
+// Assume Chi2, Eta cuts done in Track cuts.
 void StEStructFluctAnal::makeMultStruct() {
     StEStructTrackCollection* tc;
     StEStructTrackIterator Iter;
     StEStructTrack* t;
 
-    int iEta, iPhi, iPt;
+    int jEta, jPhi, jPt, jCent, jPtCent, totMult = 0;
 
     ms->NewEvent(mCurrentEvent->Vx(), mCurrentEvent->Vy(), mCurrentEvent->Vz() );
+    if (mUseAllEtaTracks) {
+        mCurrentEvent->SetCentrality( (double) mCurrentEvent->Ntrack() );
+    }
+    jCent   = mCurrentEvent->Centrality();
+    jPtCent = mCurrentEvent->PtCentrality();
 
     tc = mCurrentEvent->TrackCollectionP();
     for(Iter=tc->begin(); Iter!=tc->end(); ++Iter){
         t = *Iter;
-        if (t->Chi2() < 0) {
+        jEta = int(NETABINS*(t->Eta()-mEtaMin)/(mEtaMax-mEtaMin));
+        if ((jEta < 0) || (NETABINS <= jEta)) {
             continue;
         }
-        if ((t->Eta() < ETAMIN) || (ETAMAX < t->Eta())) {
+        jPhi = int(NPHIBINS*(1.0 + t->Phi()/3.141592654)/2.0);
+        if ((jPhi < 0) || (NPHIBINS <= jPhi)) {
             continue;
         }
-        iEta = int(NETABINS*(t->Eta()-ETAMIN)/(ETAMAX-ETAMIN));
-        if ((iEta < 0) || (NETABINS <= iEta)) {
-            continue;
-        }
-        iPhi = int(NPHIBINS*(1.0 + t->Phi()/3.141592654)/2.0);
-        if ((iPhi < 0) || (NPHIBINS <= iPhi)) {
-            continue;
-        }
-        iPt = mCentralities->ptIndex( t->Pt() );
-        if (iPt < 0) {
+        jPt = mCentralities->ptIndex( t->Pt() );
+        if (jPt < 0) {
             continue;
         }
 
-        ms->AddTrack( iPhi, iEta, iPt, +1, t->Pt() );
+        ms->AddTrack( jPhi, jEta, jPt, +1, t->Pt() );
+        totMult++;
+
+        StTrackTopologyMap *map = new StTrackTopologyMap(t->TopologyMapData(0),t->TopologyMapData(1));
+        int iF=1, iL=45;
+        for (int ifirst=0;ifirst<46;ifirst++) {
+            if (map->hasHitInRow(kTpcId,ifirst)) {
+                iF = ifirst;
+                break;
+            }
+        }
+        for (int ilast=45;ilast>0;ilast--) {
+            if (map->hasHitInRow(kTpcId,ilast)) {
+                iL = ilast;
+                break;
+            }
+        }
+        if ((-1 < jCent) && (jCent < mnCents)) {
+            mFluct[jCent]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
+                                     t->NFoundPoints(), t->NFitPoints(), iF, iL );
+        }
+        int index = jPt + jPtCent*mnPtCents;
+        if ((-1 < index) && (index < mnPtCents*mnPts)) {
+            mPtFluct[index]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
+                                       t->NFoundPoints(), t->NFitPoints(), iF, iL );
+        }
+        delete map;
     }
     tc = mCurrentEvent->TrackCollectionM();
     for(Iter=tc->begin(); Iter!=tc->end(); ++Iter){
         t = *Iter;
-        if (t->Chi2() < 0) {
+        jEta = int(NETABINS*(t->Eta()-mEtaMin)/(mEtaMax-mEtaMin));
+        if ((jEta < 0) || (NETABINS <= jEta)) {
             continue;
         }
-        if ((t->Eta() < ETAMIN) || (ETAMAX < t->Eta())) {
+        jPhi = int(NPHIBINS*(1.0 + t->Phi()/3.141592654)/2.0);
+        if ((jPhi < 0) || (NPHIBINS <= jPhi)) {
             continue;
         }
-        iEta = int(NETABINS*(t->Eta()-ETAMIN)/(ETAMAX-ETAMIN));
-        if ((iEta < 0) || (NETABINS <= iEta)) {
-            continue;
-        }
-        iPhi = int(NPHIBINS*(1.0 + t->Phi()/3.141592654)/2.0);
-        if ((iPhi < 0) || (NPHIBINS <= iPhi)) {
-            continue;
-        }
-        iPt = mCentralities->ptIndex( t->Pt() );
-        if (iPt < 0) {
+        jPt = mCentralities->ptIndex( t->Pt() );
+        if (jPt < 0) {
             continue;
         }
 
-        ms->AddTrack( iPhi, iEta, iPt, -1, t->Pt() );
+        ms->AddTrack( jPhi, jEta, jPt, -1, t->Pt() );
+        totMult++;
+
+        StTrackTopologyMap *map = new StTrackTopologyMap(t->TopologyMapData(0),t->TopologyMapData(1));
+        int iF=1, iL=45;
+        for (int ifirst=0;ifirst<46;ifirst++) {
+            if (map->hasHitInRow(kTpcId,ifirst)) {
+                iF = ifirst;
+                break;
+            }
+        }
+        for (int ilast=45;ilast>0;ilast--) {
+            if (map->hasHitInRow(kTpcId,ilast)) {
+                iL = ilast;
+                break;
+            }
+        }
+        if ((-1 < jCent) && (jCent < mnCents)) {
+            mFluct[jCent]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
+                                     t->NFoundPoints(), t->NFitPoints(), iF, iL );
+        }
+        int index = jPt + jPtCent*mnPtCents;
+        if ((-1 < index) && (index < mnPtCents*mnPts)) {
+            mPtFluct[index]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
+                                       t->NFoundPoints(), t->NFitPoints(), iF, iL );
+        }
+        delete map;
     }
 
     AddEvent(ms);
+    hRefMultiplicity->Fill(mCurrentEvent->CentMult());
+    hMultiplicity->Fill(totMult);
 }
 void StEStructFluctAnal::AddEvent(multStruct *ms) {
     double delEta, delPhi;
@@ -346,10 +528,12 @@ void StEStructFluctAnal::AddEvent(multStruct *ms) {
                             }
                         }
                         int index = jPt + jPtCent*mnPtCents;
-                        mPtFluct[index]->AddToBin( iBin,
-                                                   ptNPlus,   ptNMinus,
-                                                   ptPtPlus,  ptPtMinus,
-                                                   ptPt2Plus, ptPt2Minus );
+                        if ((-1 < index) && (index < mnPtCents*mnPts)) {
+                            mPtFluct[index]->AddToBin( iBin,
+                                                       ptNPlus,   ptNMinus,
+                                                       ptPtPlus,  ptPtMinus,
+                                                       ptPt2Plus, ptPt2Minus );
+                        }
                         NPlus    += ptNPlus;
                         NMinus   += ptNMinus;
                         PtPlus   += ptPtPlus;
@@ -370,7 +554,7 @@ void StEStructFluctAnal::AddEvent(multStruct *ms) {
     }
 
     // Increment occupancy histograms.
-    delEta = (ETAMAX-ETAMIN) / NETABINS;
+    delEta = (mEtaMax-mEtaMin) / NETABINS;
     delPhi = 2.0*3.1415926 / NPHIBINS;
     double nplus = 0, nminus = 0, pplus = 0, pminus = 0;
 
@@ -383,7 +567,7 @@ void StEStructFluctAnal::AddEvent(multStruct *ms) {
     for (int jPhi=0;jPhi<NPHIBINS;jPhi++) {
         double dp = -3.1415926 + delPhi*(jPhi+0.5);
         for (int jEta=0;jEta<NETABINS;jEta++) {
-            double de = ETAMIN + delEta*(jEta+0.5);
+            double de = mEtaMin + delEta*(jEta+0.5);
             double nPlus = 0, nMinus = 0, pPlus = 0, pMinus = 0;
             for (int jPt=0;jPt<mnPts;jPt++) {
                 double np, nm, pp, pm;
@@ -563,6 +747,13 @@ void StEStructFluctAnal::writeHistograms(TFile* tf){
 
     tf->cd();
 
+    TH1F *hEtaLimits = new TH1F("EtaLimits","EtaLimits",2,1,2);
+    hEtaLimits->SetBinContent(1,mEtaMin);
+    hEtaLimits->SetBinContent(2,mEtaMax);
+    hEtaLimits->Write();
+    hRefMultiplicity->Write();
+    hMultiplicity->Write();
+
     for (int i=0;i<mnCents;i++) {
         mFluct[i]->writeHistograms();
     }
@@ -621,6 +812,9 @@ void StEStructFluctAnal::writeQAHists(TFile* qatf) {
 void StEStructFluctAnal::setOutputFileName(const char* outFileName) {
 }
 void StEStructFluctAnal::initHistograms(){
+
+    hRefMultiplicity = new TH1F("RefMultiplicity","RefMultiplicity",1500,1,1500);
+    hMultiplicity = new TH1F("Multiplicity","Multiplicity",1500,1,1500);
 
     // Now we allocate arrays to store information.
     // Need to keep track of all bins at each scale.

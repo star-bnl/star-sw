@@ -2,6 +2,7 @@
 #define __STESTRUCTFLUCTANAL__H
 
 
+#include "StTrackTopologyMap.h"
 #include "multStruct.h"
 #include "StEStructFluctuations.h"
 #include "StEStructPool/AnalysisMaker/StEStructAnalysis.h"
@@ -27,6 +28,7 @@ class StEStructFluctAnal: public StEStructAnalysis {
     int  manalysisMode;                 //! simple enumeration of analyses ...
     bool mskipPairCuts;                 //!
     bool mdoPairCutHistograms;          //!
+    bool  mUseAllEtaTracks;             //!
 
     StEStructEvent      *mCurrentEvent;  //!  pointer to EStruct2pt data 
     StEStructPairCuts    mPair;          //! for pairs (1 at a time) and all pair cuts
@@ -34,12 +36,15 @@ class StEStructFluctAnal: public StEStructAnalysis {
 
     int   doingPairCuts;
     int   etaSummingMode, phiSummingMode;
+    float mEtaMin, mEtaMax;
+    TH1F *hRefMultiplicity;
+    TH1F *hMultiplicity;
     int   histosFilled;
 
-     double *mptnplus;
-     double *mptnminus;
-     double *mptpplus;
-     double *mptpminus;
+    double *mptnplus;
+    double *mptnminus;
+    double *mptpplus;
+    double *mptpminus;
 
     int   mTotBins;
     int   mnTotEvents, *mnCentEvents;
@@ -64,17 +69,16 @@ class StEStructFluctAnal: public StEStructAnalysis {
     void  deleteHistograms();
     void  moveEvents();
 
-    StEStructFluctAnal(int mode=0, int invokePairCuts = 0,
-                          int etaSumMode=1, int phiSumMode=1);
-    StEStructFluctAnal(const char* cutFileName, int mode=0,
-                          int invokePairCuts = 0,
-                          int etaSumMode=1, int phiSumMode=1);
+    StEStructFluctAnal( int mode=4, int invokePairCuts = 0,
+                        int etaSumMode=1, int phiSumMode=1 );
     virtual ~StEStructFluctAnal();
 
     StEStructPairCuts& getPairCuts();
-    void  setAnalysisMode(int mode);
-    void  setCutFile(const char* cutFileName);  
-    void  setCentralityObject(StEStructCentrality *cent);
+    void  setAnalysisMode( int mode );
+    void  setCutFile( const char* cutFileName );
+    void  setEtaLimits( const char* cutFileName );
+    void  adjustPtLimits( const char* cutFileName );
+    void  setCentralityObject( StEStructCentrality *cent );
 
   //---> support of interface  
     bool loadUserCuts(const char* name, const char** vals, int nvals);
@@ -113,6 +117,8 @@ inline void StEStructFluctAnal::setAnalysisMode(int mode){
 inline void StEStructFluctAnal::setCutFile(const char* cutFileName){
     mPair.setCutFile(cutFileName);
     mPair.loadCuts();
+    setEtaLimits(cutFileName);
+    adjustPtLimits(cutFileName);
 };
 inline void StEStructFluctAnal::setCentralityObject(StEStructCentrality *cent) {
     mCentralities = cent;

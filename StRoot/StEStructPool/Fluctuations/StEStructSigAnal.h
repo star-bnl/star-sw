@@ -15,9 +15,11 @@ class StEStructSigAnal {
 
  protected:
  public:
-    int mNPhiBins;
-    int mNEtaBins;
-    int mnSigmas, mnCents, mnPts, mnPtCents;
+    int   mNPhiBins;
+    int   mNEtaBins;
+    float mNFiles;
+    float mEtaMin, mEtaMax;
+    int   mnSigmas, mnCents, mnPts, mnPtCents;
     StEStructSigmas **mSigma;
     char *mInputFile;
     TFile *mInFile;
@@ -31,6 +33,7 @@ class StEStructSigAnal {
 
     void newFile( char *inputFile );
     void closeFile();
+    void getLimits();
     void normalizeCounters();
     void fillHistograms();
     void writeHistograms( TFile* sig );
