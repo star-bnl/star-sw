@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.11 1999/01/02 19:08:23 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.12 1999/01/08 23:19:42 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.12  1999/01/08 23:19:42  sakrejda
+// histogramming added
+//
 // Revision 1.11  1999/01/02 19:08:23  fisyak
 // Add ctf
 //
@@ -45,6 +48,7 @@
 #include "tpc/St_tte_track_Module.h"
 #include "tpc/St_tde_new_Module.h"
 #include "tpc/St_tte_Module.h"
+#include "TH1.h"
 ClassImp(St_tpt_Maker)
   
   //_____________________________________________________________________________
@@ -116,7 +120,9 @@ Int_t St_tpt_Maker::Init(){
       SafeDelete(tidpars);
     }
   }
-  // Create Histograms    
+  // Create Histograms
+m_hits_on_track = new TH1F("hits_on_track","Number of hits on reconstructed tracks",50,.5,50.5);
+   
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -176,12 +182,27 @@ Int_t St_tpt_Maker::Make(){
       }
     }
   }
+   MakeHistograms(); // tracking histograms
   return kStOK;
+}
+void St_tpt_Maker::MakeHistograms() {
+  // Create an iterator
+St_DataSetIter tpc_tracks(gStChain->DataSet("tpc_tracks"));
+//Get the table:
+St_tte_mctrk *mct = 0;
+mct =  (St_tte_mctrk *) tpc_tracks.Find("mctrk");
+ if (mct) {
+tte_mctrk_st *t = mct->GetTable();
+ for(Int_t i=0; i<mct->GetNRows();i++,t++) {
+Float_t nr = t->nrec1;
+m_hits_on_track->Fill(nr);
+ }
+ }
 }
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.11 1999/01/02 19:08:23 fisyak Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.12 1999/01/08 23:19:42 sakrejda Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
