@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.56 2001/06/06 13:02:58 rcwells Exp $
+// $Id: StFlowMaker.cxx,v 1.57 2001/07/02 20:19:12 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -176,7 +176,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.56 2001/06/06 13:02:58 rcwells Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.57 2001/07/02 20:19:12 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -430,14 +430,14 @@ void StFlowMaker::FillFlowEvent() {
 
   pFlowEvent->SetMultEta(goodTracksEta);
   pFlowEvent->SetCentrality(goodTracksEta);
+  (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
+    pFlowEvent->SetPidsDeviant();
   
   pFlowEvent->TrackCollection()->random_shuffle();
 
   pFlowEvent->SetSelections();
   (pFlowEvent->EtaSubs()) ? pFlowEvent->MakeEtaSubEvents() :
     pFlowEvent->MakeSubEvents();
-  (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
-    pFlowEvent->SetPidsDeviant();
 
 }
 
@@ -572,10 +572,11 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
   */
   pFlowEvent->SetMultEta(goodTracksEta);
   pFlowEvent->SetCentrality(goodTracksEta);
+//   (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
+//     pFlowEvent->SetPidsDeviant();
   pFlowEvent->TrackCollection()->random_shuffle();
   pFlowEvent->SetSelections();
   pFlowEvent->MakeSubEvents();
-  //pFlowEvent->SetPidsProb();
 }
 
 //----------------------------------------------------------------------
@@ -697,15 +698,15 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
     return kTRUE;
   }
   
+  (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
+    pFlowEvent->SetPidsDeviant();
+
   pFlowEvent->TrackCollection()->random_shuffle();
 
   pFlowEvent->SetSelections();
   (pFlowEvent->EtaSubs()) ? pFlowEvent->MakeEtaSubEvents() :
     pFlowEvent->MakeSubEvents();
-  
-  (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
-    pFlowEvent->SetPidsDeviant();
-  
+    
   return kTRUE;
 }
 
@@ -1063,6 +1064,9 @@ Int_t StFlowMaker::InitPicoEventRead() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.57  2001/07/02 20:19:12  posk
+// Moved call to SetPids() above call to SetSelections().
+//
 // Revision 1.56  2001/06/06 13:02:58  rcwells
 // Added SetPtWgt(Bool_t) function to StFlowEvent
 //
