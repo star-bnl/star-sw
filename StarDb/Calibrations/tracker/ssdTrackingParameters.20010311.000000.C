@@ -10,8 +10,8 @@ St_TrackingParameters *tableSet = new St_TrackingParameters("ssdTrackingParamete
 //
 memset(&row,0,tableSet->GetRowSize());
 //                                        hit errors are squared !
-    row.minSearch =  5.; // Minimum Search Window ;
-    row.maxSearch =  1.; // Maximum Search Window ;
+    row.minSearch =  1.; // Minimum Search Window ;
+    row.maxSearch =  5.; // Maximum Search Window ;
     row.scaling	  =  4.; // Search Window Scaling ;
     row.maxChi2	  = 10.; // Max Chi2 ;
 tableSet->AddAt(&row);
