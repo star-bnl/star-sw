@@ -51,6 +51,7 @@ temp = (StDbDataSet*)mk->GetData("StarDb");
 PadPlane=0;
 WirePlane=0;
 slowControlSim=0;
+electronics=0;
 dimensions=0;
  for (int i=0;i<24;i++){
    gain[i]=0;
@@ -74,6 +75,10 @@ gStTpcDb = 0;
 StTpcPadPlaneI* StTpcDb::PadPlaneGeometry(){
   if (PadPlane==0){            // get pad plane from data base
    StDbDataSet* pp = (StDbDataSet*)tpc_geometry->Find("tpcPadPlanes");
+   if (pp==0){
+    gMessMgr->Message("StTpcDb::Error Finding Tpc Pad Planes","E");
+    return 0;
+   }
    StDbTableI* table=pp->GetDbObject();
    tpcPadPlanes* tpd;
    tpd=(tpcPadPlanes*)table->GetTable(); 
@@ -87,6 +92,10 @@ StTpcPadPlaneI* StTpcDb::PadPlaneGeometry(){
 StTpcWirePlaneI* StTpcDb::WirePlaneGeometry(){
   if (WirePlane==0){            // get wire plane from data base
    StDbDataSet* wp = (StDbDataSet*)tpc_geometry->Find("tpcWirePlanes");
+   if (wp==0){
+    gMessMgr->Message("StTpcDb::Error Finding Tpc Wire Planes","E");
+    return 0;
+   }
    StDbTableI* table=wp->GetDbObject();
    tpcWirePlanes* tpd;
    tpd=(tpcWirePlanes*)table->GetTable(); 
@@ -100,6 +109,10 @@ StTpcWirePlaneI* StTpcDb::WirePlaneGeometry(){
 StTpcDimensionsI* StTpcDb::Dimensions(){
   if (dimensions==0){            // get wire plane from data base
    StDbDataSet* wp = (StDbDataSet*)tpc_geometry->Find("tpcDimensions");
+   if (wp==0){
+    gMessMgr->Message("StTpcDb::Error Finding Tpc Dimensions","E");
+    return 0;
+   }
    StDbTableI* table=wp->GetDbObject();
    tpcDimensions* tpd;
    tpd=(tpcDimensions*)table->GetTable(); 
@@ -113,6 +126,10 @@ StTpcDimensionsI* StTpcDb::Dimensions(){
 StTpcSlowControlSimI* StTpcDb::SlowControlSim(){
   if (slowControlSim==0){            // get wire plane from data base
    StDbDataSet* wp = (StDbDataSet*)tpc_calibrations->Find("tpcSlowControlSim");
+   if (wp==0){
+    gMessMgr->Message("StTpcDb::Error Finding Slow Control Simulations Parameters","E");
+    return 0;
+   }
    StDbTableI* table=wp->GetDbObject();
    tpcSlowControlSim* tpd;
    tpd=(tpcSlowControlSim*)table->GetTable(); 
@@ -121,6 +138,23 @@ StTpcSlowControlSimI* StTpcDb::SlowControlSim(){
    slowControlSim = (StTpcSlowControlSimI*)wptemp; 
   }
  return slowControlSim;
+}
+
+StTpcElectronicsI* StTpcDb::Electronics(){
+  if (electronics==0){            // get electronics from data base
+   StDbDataSet* wp = (StDbDataSet*)tpc_geometry->Find("tpcElectronics");
+   if (wp==0){
+    gMessMgr->Message("StTpcDb::Error Finding Tpc Electronics","E");
+    return 0;
+   }
+   StDbTableI* table=wp->GetDbObject();
+   tpcElectronics* tpd;
+   tpd=(tpcElectronics*)table->GetTable(); 
+   StRTpcElectronics* wptemp = new StRTpcElectronics();
+   wptemp->AddData(tpd);
+   electronics = (StTpcElectronicsI*)wptemp; 
+  }
+ return electronics;
 }
 
 StTpcGainI* StTpcDb::Gain(int sector){
@@ -133,6 +167,10 @@ StTpcGainI* StTpcDb::Gain(int sector){
    sprintf(dbname,"Sector_%.2d/tpcGainFactors",sector);
    printf("Getting %s \n",dbname);
    StDbDataSet* wp = (StDbDataSet*)tpc_calibrations->Find(dbname);
+   if (wp==0){
+    gMessMgr->Message("StTpcDb::Error Finding Tpc Gain Factors","E");
+    return 0;
+   }
    StDbTableI* table=wp->GetDbObject();
    tpcGainFactors* tpd;
    tpd=(tpcGainFactors*)table->GetTable(); 
@@ -154,6 +192,10 @@ StTpcT0I* StTpcDb::T0(int sector){
    sprintf(dbname,"Sector_%.2d/tpcTimeOffsets",sector);
    printf("Getting %s \n",dbname);
    StDbDataSet* wp = (StDbDataSet*)tpc_calibrations->Find(dbname);
+   if (wp==0){
+    gMessMgr->Message("StTpcDb::Error Finding Tpc Time Offsets","E");
+    return 0;
+   }
    StDbTableI* table=wp->GetDbObject();
    tpcTimeOffsets* tpd;
    tpd=(tpcTimeOffsets*)table->GetTable(); 
