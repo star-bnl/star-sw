@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPairCut.h,v 1.4 2000/03/16 01:54:37 laue Exp $
+ * $Id: StHbtPairCut.h,v 1.5 2000/03/23 22:43:27 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPairCut.h,v $
+ * Revision 1.5  2000/03/23 22:43:27  laue
+ * Clone() function implemented in cuts.
+ *
  * Revision 1.4  2000/03/16 01:54:37  laue
  * Copy constructor added to all the cut base classes and to the
  * corrfctn base class
@@ -67,10 +70,10 @@ public:
 
   virtual bool Pass(const StHbtPair* pair) =0;  // true if passes, false if not
 
-  //  virtual string Report() =0;    // user-written method to return string describing cuts
   virtual StHbtString Report() =0;    // user-written method to return string describing cuts
   virtual void EventBegin(const StHbtEvent*) { /* no-op */ }
   virtual void EventEnd(const StHbtEvent*) { /* no-op */ }
+  virtual StHbtPairCut* Clone() { return 0;}
 
 #ifdef __ROOT__
   ClassDef(StHbtPairCut, 0)

@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtParticleCut.h,v 1.6 2000/03/17 17:18:25 laue Exp $
+ * $Id: StHbtParticleCut.h,v 1.7 2000/03/23 22:43:27 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticleCut.h,v $
+ * Revision 1.7  2000/03/23 22:43:27  laue
+ * Clone() function implemented in cuts.
+ *
  * Revision 1.6  2000/03/17 17:18:25  laue
  * Roberts new three particle correlations implemented.
  *
@@ -82,6 +85,7 @@ public:
 
   virtual void EventBegin(const StHbtEvent*) { /* no-op */ }
   virtual void EventEnd(const StHbtEvent*) { /* no-op */ }
+  virtual StHbtParticleCut* Clone() { return 0;}
 
   virtual StHbtParticleType Type()=0;
 

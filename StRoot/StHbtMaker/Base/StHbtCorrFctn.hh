@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCorrFctn.hh,v 1.5 2000/03/16 01:54:36 laue Exp $
+ * $Id: StHbtCorrFctn.hh,v 1.6 2000/03/23 22:43:27 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtCorrFctn.hh,v $
+ * Revision 1.6  2000/03/23 22:43:27  laue
+ * Clone() function implemented in cuts.
+ *
  * Revision 1.5  2000/03/16 01:54:36  laue
  * Copy constructor added to all the cut base classes and to the
  * corrfctn base class
@@ -53,6 +56,8 @@ public:
   virtual void EventBegin(const StHbtEvent*) { /* no-op */ }
   virtual void EventEnd(const StHbtEvent*) { /* no-op */ }
   virtual void Finish() = 0;
+
+  virtual StHbtCorrFctn* Clone() { return 0;}
 
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
   friend class StHbtAnalysis;
