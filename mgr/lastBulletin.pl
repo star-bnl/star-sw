@@ -1,8 +1,11 @@
 #!/usr/local/bin/perl
 #
-# $Id: lastBulletin.pl,v 1.4 1999/08/17 22:01:44 wenaus Exp $
+# $Id: lastBulletin.pl,v 1.5 1999/09/16 02:08:02 wenaus Exp $
 #
 # $Log: lastBulletin.pl,v $
+# Revision 1.5  1999/09/16 02:08:02  wenaus
+# Use RCF NFS based data area
+#
 # Revision 1.4  1999/08/17 22:01:44  wenaus
 # Add folklore forum
 #
@@ -87,7 +90,7 @@ sub getLast {
         $who = '';
     }
 
-    $floc = "/star/datapool/web";
+    $floc = "/star/starlib/doc/www/html/comp-nfs";
     open(OFILE,">$floc/$ofile.txt") or die "File open failure $!";
     $oline = sprintf("Last posting %d $hours\n",$delHrs);
     print OFILE $oline;
