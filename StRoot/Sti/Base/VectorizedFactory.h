@@ -191,6 +191,7 @@ void VectorizedFactory<Concrete,Abstract>::destroy()
     for (typename t_vector::iterator it=_container.begin(); it!=_container.end(); ++it) 
       delete *it;
     _container.clear();
+    reset(); 
 }
 
 /*! Instantiate "n" objects of class Concrete and add them to the internal
