@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.1 2003/10/15 18:20:32 porter Exp $
+ * $Id: StEStructEventCuts.h,v 1.2 2004/09/24 01:41:42 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -14,6 +14,8 @@
 #define __STEBYEEVENTCUTS__H
 
 
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuL3EventSummary.h"
 #include "StEStructCuts.h"
 #include "Stiostream.h"
 
@@ -27,6 +29,7 @@ protected:
    CutName mnumTracksName;  
 
 
+  char         mRunPeriod[1024];
   unsigned int mtWord[2];  
   float        mpVertexZ[2]; 
   unsigned int mcentrality[2];
@@ -48,8 +51,8 @@ public:
   virtual void printCuts(const char* fname) { StEStructCuts::printCuts(fname); };
 
 
-  bool goodTrigger(unsigned int t);
-  bool goodPrimaryVertexZ(float z);
+  bool goodTrigger(StMuEvent* muEvent);
+  bool goodPrimaryVertexZ( float z );
   bool goodCentrality(unsigned int c);
   bool goodNumberOfTracks(unsigned int n);
 
@@ -65,16 +68,40 @@ public:
 
 inline void StEStructEventCuts::loadUserCuts(const char* name, const char** vals, int nvals){}
 
-inline bool StEStructEventCuts::goodTrigger(unsigned int t){
-  mvalues[mtWordName.idx] = (float)t;
-  return ( (mtWord[0]==mtWord[1] && mtWord[0]==0) ||
-           (t>=mtWord[0] && t<=mtWord[1])  ) ;
+inline bool StEStructEventCuts::goodTrigger(StMuEvent* muEvent){
+    if (!strcmp("AuAu62GeVMinBias2004",mRunPeriod)) {
+        if (((muEvent->triggerIdCollection().nominal().isTrigger(35004) ||
+              muEvent->triggerIdCollection().nominal().isTrigger(35007))
+            ||
+            ((muEvent->triggerIdCollection().nominal().isTrigger(35001) ||
+              muEvent->triggerIdCollection().nominal().isTrigger(35009) )
+              && muEvent->ctbMultiplicity()>15))) {
+            return true;
+        }
+    } else if (!strcmp("AuAu200GeVMinBias2001",mRunPeriod)) {
+        StMuL3EventSummary l3 = muEvent->l3EventSummary();
+        if (!(l3.unbiasedTrigger())) {
+            return false;
+        }
+        unsigned int t = muEvent->l0Trigger().triggerWord();
+        if ( 0x1000 == t ) {
+            return true;
+        }
+    } else {
+        unsigned int t = muEvent->l0Trigger().triggerWord();
+        mvalues[mtWordName.idx] = (float)t;
+        return ( (mtWord[0]==mtWord[1] && mtWord[0]==0) ||
+                 (t>=mtWord[0] && t<=mtWord[1])  ) ;
+    }
+    return false;
 }
 
-inline bool StEStructEventCuts::goodPrimaryVertexZ(float z){
-  mvalues[mpVertexZName.idx] = z;
-  return ( (mpVertexZ[0]==mpVertexZ[1] && mpVertexZ[0]==0) ||
-           (z>=mpVertexZ[0] && z<=mpVertexZ[1])  ) ;
+inline bool StEStructEventCuts::goodPrimaryVertexZ(float z) {
+    mvalues[mpVertexZName.idx] = z;
+    if (mpVertexZ[0]==mpVertexZ[1] && mpVertexZ[0]==0) {
+        return true;
+    }
+    return (z>=mpVertexZ[0] && z<=mpVertexZ[1]);
 }
 
 inline bool StEStructEventCuts::goodCentrality(unsigned int c){
@@ -94,6 +121,10 @@ inline bool StEStructEventCuts::goodNumberOfTracks(unsigned int n){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.2  2004/09/24 01:41:42  prindle
+ * Allow for cuts to be defined by character strings. I use this to select trigger
+ * cuts appropriate for run periods
+ *
  * Revision 1.1  2003/10/15 18:20:32  porter
  * initial check in of Estruct Analysis maker codes.
  *
