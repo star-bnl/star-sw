@@ -1,0 +1,44 @@
+# $Id: Makefile.HP-UX,v 1.1 2004/09/02 23:50:49 potekhin Exp $
+
+# HP (with aCC) platform dependent definitions
+
+# The compilers
+CXX       = aCC
+F77	      = f77
+
+# Global optimisation
+OPT	      = -O
+
+# Shared library suffix
+SL	      = sl
+
+# AWK
+AWK	      = awk
+
+# The options
+CXXOPTS       = $(OPT) +Z -z +W70,495,740,749,823,829 -Dextname
+COPT          = $(OPT)
+FOPT          = $(OPT) +ppu +Z
+
+# CERNLIB defines
+
+CLIBDEFS      = -DCERNLIB_HPUX -DCERNLIB_BLDLIB -DCERNLIB_CZ
+CLIBCXXOPTS   =
+CLIBCOPT      = +z -Ae 
+CLIBFOPT      = -WF,-P
+
+LD            = aCC
+LDFLAGS       = $(OPT) -z -Wl,+s -Wl,-E
+
+SHLD	      = $(LD)
+SOFLAGS       = -b /usr/lib/libm.sl 
+
+# Graphics
+#  
+X11FLAGS  += -I/usr/contrib/X11R6/include/X11
+XMFLAGS   := -I/usr/include/Motif1.2
+ifndef OGLFLAGS
+  ifneq ($(OGLHOME),/usr) 
+    OGLFLAGS  := -I$(OGLHOME)/include
+  endif 
+endif

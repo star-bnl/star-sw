@@ -1,0 +1,49 @@
+# $Id: Makefile.Linux,v 1.1 2004/09/02 23:50:49 potekhin Exp $
+
+# Linux platform dependent definitions 
+
+# The compilers
+CXX   = g++ 
+
+# Global optimisation
+  ifndef G4NO_OPTIMISE
+    OPT  = -O
+  else
+    ifdef G4DEBUG
+      OPT  = -g
+    endif
+  endif
+  ifdef G4PROFILE
+    OPT  += -pg
+  endif
+
+# Shared library suffix
+SL	  = so
+
+# The options
+#
+# starting from root.2.22 on Linux the flags -fno-rtti -fno-exceptions are
+# not necessary any more
+#
+CXXOPTS       = $(OPT) -Wall -fPIC -pipe -fno-for-scope -DWITHROOT
+
+# G4 defines
+
+G4MCDEFS      = -DGNU_GCC -DG4USE_STD_NAMESPACE
+
+LD            = g++
+LDFLAGS       = $(OPT)
+
+SHLD	      = $(LD)
+SOFLAGS       = -Wl,-soname,$(notdir $@) -shared 
+
+# Graphics
+#  
+X11FLAGS  := -I/usr/include/X11/extensions -I/usr/include/X11
+XMFLAGS   := -I/usr/X11R6/include
+ifndef OGLFLAGS
+  ifneq ($(OGLHOME),/usr) 
+    OGLFLAGS  := -I$(OGLHOME)/include
+  endif 
+endif
+

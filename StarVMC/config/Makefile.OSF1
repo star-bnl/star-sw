@@ -1,0 +1,46 @@
+# $Id: Makefile.OSF1,v 1.1 2004/09/02 23:50:49 potekhin Exp $
+ 
+# Alpha OSF platform dependent definitions
+
+# The compilers
+CXX       = cxx
+F77	      = f77
+
+# Global optimisation
+OPT	      = -g
+
+# Shared library suffix
+SL	      = so
+
+# AWK
+AWK	      = awk
+
+# The options
+CXXOPTS       = $(OPT) -nostdnew -rtti -taso
+COPT          = $(OPT)
+FOPT          = $(OPT) -nofor_main -warn noinformational -taso
+
+# CERNLIB defines
+
+CLIBDEFS      = -DCERNLIB_DECS -DCERNLIB_BLDLIB -DCERNLIB_CZ
+CLIBCXXOPTS   =
+CLIBCOPT      = 
+CLIBFOPT      = -I. -warn noinformational
+
+LD            = cxx
+LDFLAGS       = -taso
+
+SHLD          = ld
+SOFLAGS       = -L/usr/lib/cmplrs/cxx -rpath /usr/lib/cmplrs/cxx \
+	        -expect_unresolved "*" -msym -shared \
+	        /usr/lib/cmplrs/cc/crt0.o /usr/lib/cmplrs/cxx/_main.o 
+SHLIB         = -lUfor -lfor -lFutil
+
+# Graphics
+#  
+X11FLAGS  := -I/usr/include/X11/extensions -I/usr/include/X11
+ifndef OGLFLAGS
+  ifneq ($(OGLHOME),/usr) 
+    OGLFLAGS  := -I$(OGLHOME)/include
+  endif 
+endif

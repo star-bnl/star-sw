@@ -1,0 +1,51 @@
+# $Id: Makefile.icc,v 1.1 2004/09/02 23:50:50 potekhin Exp $
+
+# Linux (with icc) platform dependent definitions
+
+# The compilers
+CXX       = icc 
+F77	      = ifc
+CC	      = icc
+
+# Global optimisation
+OPT       = -O
+
+# Shared library suffix
+SL	      = so
+
+# AWK
+AWK	      = awk
+
+# The options
+#
+# starting from root.2.22 on Linux the flags -fno-rtti -fno-exceptions are
+# not necessary any more
+#
+CXXOPTS       = $(OPT)
+COPT	      = $(OPT)
+FOPT	      = $(OPT)
+
+# CERNLIB defines
+
+CLIBDEFS      = -DCERNLIB_LINUX -DCERNLIB_BLDLIB -DCERNLIB_CZ
+CLIBCXXOPTS   =
+CLIBCOPT      =
+CLIBFOPT      =
+
+LD            = icc
+LDFLAGS       = $(OPT)
+
+SHLD	      = $(LD)
+SOFLAGS       = -Wl,-soname,$(notdir $@) -shared 
+SHLIB         = 
+
+# Graphics
+#  
+X11FLAGS  := -I/usr/include/X11/extensions -I/usr/include/X11
+XMFLAGS   := -I/usr/X11R6/include
+ifndef OGLFLAGS
+  ifneq ($(OGLHOME),/usr) 
+    OGLFLAGS  := -I$(OGLHOME)/include
+  endif 
+endif
+

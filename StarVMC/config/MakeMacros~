@@ -1,0 +1,74 @@
+# $Id: MakeMacros~,v 1.1 2004/09/02 23:50:48 potekhin Exp $
+
+############################   MACROS   #######################################
+
+$(DICT):
+		@echo "Generating $@"
+		@[ -d $(dir $@) ] || mkdir -p $(dir $@)
+ifeq ($(CXXVERBOSE),)
+		@rootcint -f $@ -c $(CXXFLAGS) $^
+#		@rootcint -f $@ -c $(filter -I%,$(CXXFLAGS)) $(filter -D%,$(CXXFLAGS)) $^
+else
+		rootcint -f $@ -c $(CXXFLAGS) $^
+endif
+
+$(SLIBRARY):
+		@echo "Generating+ $@"
+		@echo $(MODBINDIR)
+		@[ -d $(dir $@) ] || mkdir -p $(dir $@)
+		@rm -f $@
+		@-rm -rf tmp
+		@mkdir tmp
+		@cd tmp ; find $(BINDIR) -name '*.o' -exec ln -s {} . \;
+		@pwd
+		@cd tmp ; find $(MODBINDIR) -name '*.o' -exec ln -s {} . \;
+                ifeq ($(PLATFORM),aix)
+		   @cd tmp; $(SHLD) -o $@ $(LIBS) -p 0 $(notdir $^)
+                else
+		   @cd tmp; $(SHLD) $(SOFLAGS) $(LDFLAGS) $(notdir $^) $(SHLIB) -o $@ ;\:
+                endif
+		@chmod 555 $@
+		@-rm -rf tmp
+
+$(ALIBRARY):	
+		@echo "Generating $@"
+		@[ -d $(dir $@) ] || mkdir -p $(dir $@)
+		@rm -f $@
+		@-rm -rf tmp
+		@mkdir tmp
+		@cd tmp ; find $(BINDIR) -name '*.o' -exec ln -s {} . \;
+                ifeq ($(PLATFORM),aix)
+		  @ar rv $@ $^
+                else
+		  @cd tmp; ar rv $@ $(notdir $^) ;\:
+                endif
+		@chmod 555 $@
+		@-rm -rf tmp
+		
+make_includes:
+	@echo "Making includes ..."
+	@[ -d $(TOPDIR)/include ] || mkdir -p $(TOPDIR)/include
+	@cp -p $(HEADERS) $(TOPDIR)/include
+
+clean:
+	@rm -rf $(TOCLEAN)
+
+cleanall:
+	@rm -rf $(TOCLEANALL)
+	
+clean_includes:
+	@rm -rf $(TOPDIR)/include
+
+depend:
+		-@$(ROOTSYS)/bin/rmkdepend -f$(BINDIR)/Make-depend -p$(BINDIR)/ -- $(CXXFLAGS) $(DEPINC) -- $^ 2>/dev/null
+
+$(BINDIR)/Make-depend:
+		@[ -d $(dir $@) ] || mkdir -p $(dir $@)
+		@cp $(TOPDIR)/config/Makedepend $@
+		
+dist:
+	@$(MAKEDIST)
+
+distsrc:
+	@$(MAKEDISTSRC)
+
