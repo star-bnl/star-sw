@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.12 2002/04/30 22:49:19 caines Exp $
+ * $Id: StEstInit.cxx,v 1.13 2002/11/21 23:02:48 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.13  2002/11/21 23:02:48  caines
+ * Fix helicity initialization for TPC tracks and no longer use assumed vertex if one isnt there
+ *
  * Revision 1.12  2002/04/30 22:49:19  caines
  * Make est work with shifted SVT geom, change search radii to 1cm
  *
@@ -56,6 +59,7 @@
 #include "phys_constants.h"
 #include "StEstTracker.h"
 #include "StHelix.hh"
+#include "StEvent/StHelixModel.h"
 #include "StThreeVector.hh"
 #include "StEstParams.hh"
 #include "Infrastructure/StEstWafer.hh"
@@ -101,15 +105,19 @@ int StEstTracker::VertexSetup(St_dst_vertex *preVertex){
 	xg->setZ(preVtxPtr->z);
       }
     }
+    mVertex = new StEstHit(9999,xg,xl,eg,el,1,1,mIndexWaf[0]);
   }
-  else gMessMgr->Warning()<<"StEstTracker::VertexSetup : Prevertex not found. Main vertex set to (0,0,0)"<<endm;
-  mVertex = new StEstHit(9999,xg,xl,eg,el,1,1,mIndexWaf[0]);
-  
+  else{
+    gMessMgr->Warning()<<"StEstTracker::VertexSetup : Prevertex not found. Main vertex set to (0,0,0)"<<endm;
+    
+    mVertex = new StEstHit(9999,xg,xl,eg,el,1,1,mIndexWaf[0]);
+    mVertex->SetFlag(-999);
+  }
   return kStOK;
 }
 
 int StEstTracker::BranchInit(){
-
+  
   int i;
   StEstBranch *branch;
 
@@ -150,7 +158,7 @@ int StEstTracker::BranchInit(){
 	  int fitstatus;
 	  fitstatus=0;
 // 	  cout << "primary vertex at : " << a << " dca of track : " << mTPCTrack[i]->GetHelix()->distance(a) << endl;
- 	  if (mTPCTrack[i]->GetHelix()->distance(a)<3.){ 
+ 	  if (mTPCTrack[i]->GetHelix()->distance(a)<3. && mVertex->GetFlag()>=0){ 
 	    RefitBranch(branch,1,&fitstatus);
 // 	    cout << "refit track with primary vertex " << endl;
 	  }
@@ -515,9 +523,12 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
   StThreeVector<double> orig;
   StThreeVectorD *xhit, *xdhit;
   RowToFill=0;
+  // int signOfField = (b[2] > 0 ? 1 : -1); 
   for (il=0;il<Sttptrack->GetNRows();il++) {
     if (tptrack[il].flag>0) {
-      c = tptrack[il].invp*C_D_CURVATURE*b[2];
+      
+      //c = tptrack[il].invp*C_D_CURVATURE*b[2];
+       c = tptrack[il].curvature; // curvature should not be signed for StHelix
       orig.setX(tptrack[il].r0*cos((double)tptrack[il].phi0/C_DEG_PER_RAD));
       orig.setY(tptrack[il].r0*sin((double)tptrack[il].phi0/C_DEG_PER_RAD));
       orig.setZ(tptrack[il].z0);
@@ -527,6 +538,7 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
       phase = (tptrack[il].psi)/C_DEG_PER_RAD-h*M_PI_2;
 
       hel = new StHelix(c,dip,phase,orig,h);
+
       if(!hel) {
 	gMessMgr->Error()<<"ERROR!!! not enough memory"<<endm;
 	gMessMgr->Error()<<"StEstMaker::TPCInit hel = new StHelix(c,dip,phase,orig,h);"<<endm;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstRefitBranch.cxx,v 1.4 2001/07/15 20:31:31 caines Exp $
+ * $Id: StEstRefitBranch.cxx,v 1.5 2002/11/21 23:02:48 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstRefitBranch.cxx,v $
+ * Revision 1.5  2002/11/21 23:02:48  caines
+ * Fix helicity initialization for TPC tracks and no longer use assumed vertex if one isnt there
+ *
  * Revision 1.4  2001/07/15 20:31:31  caines
  * Fixes from Insure++ debugging
  *
@@ -227,16 +230,16 @@ int StEstTracker::RefitBranch(StEstBranch *br, int usevertex, int *fitstatus) {
 	  zcir[ncir]=tpctr->mR[ient]->z();
 	  wcir[ncir]=1./(tpctr->mdR[ient]->x()*tpctr->mdR[ient]->x()+
 			 tpctr->mdR[ient]->y()*tpctr->mdR[ient]->y());
- 	  iret= egr_cross_fact(tpctr->row[ient],xcir[ncir],ycir[ncir],
- 			       xold,yold,cf,theta);
-	  if (ient1==-1) ient1=0;
-	  else if (ient1==0) {
-	    ient1=1;
-	    wcir[ncir-1]=wcir[ncir-1]/cf;
-	  }
-	  xold=xcir[ncir];
-	  yold=ycir[ncir];
-	  wcir[ncir]=wcir[ncir]/cf;
+	  //  iret= egr_cross_fact(tpctr->row[ient],xcir[ncir],ycir[ncir],
+	  // 			       xold,yold,cf,theta);
+	  //if (ient1==-1) ient1=0;
+	  //  else if (ient1==0) {
+	   //    ient1=1;
+	  //   wcir[ncir-1]=wcir[ncir-1]/cf;
+	  // }
+	  //  xold=xcir[ncir];
+	  //  yold=ycir[ncir];
+	  //  wcir[ncir]=wcir[ncir]/cf;
 	  wlin[ncir]=1.0/(tpctr->mdR[ient]->z()*tpctr->mdR[ient]->z());
 	  if (tpctr->mHitFlag[ient]!=0) {
 	    wcir[ncir]=0.01*wcir[ncir];
