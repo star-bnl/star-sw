@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.7 2003/11/13 16:24:59 caines Exp $
+ * $Id: StSvtSignal.cc,v 1.8 2005/02/09 14:33:35 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.8  2005/02/09 14:33:35  caines
+ * New electron expansion routine
+ *
  * Revision 1.7  2003/11/13 16:24:59  caines
  * Further improvements to get simulator looking like reality
  *
@@ -43,19 +46,14 @@ double sumAt;
 //_______________________________________________
 StSvtSignal::StSvtSignal()
 {
- mPhi = 0;
  mLowTBin  = 1;
  mHiTBin = 128;
- mAnRightEdge = 0.0;
- mAnLeftEdge = 0.0;
- mChargeAtAnodes = 0.0;
+ mTotalHitCharge = 0.0;
  mFractionOfCharge = 0.0;
  mCollectedCharge = 0.0;
 
  mSigmaMajor = 0.0;
- mSigmaMajor2 = 0.0;
  mSigmaMinor = 0.0;
- mSigmaMinor2 = 0.0;
  mDriftVel = 0.0;                             //[in mm/micro seconds];
  mTimeCenter = 0.0;
  mTimeWidth = 0.0;
@@ -85,17 +83,19 @@ void StSvtSignal::setAnodeTimeBinSizes(double timeBinSize,double anodeSize)
   mAnodeSize = anodeSize;
  
 }
+
 //_______________________________________________
 void StSvtSignal::setDriftVelocity(double driftVelocity)
 {
-
- mDriftVel = driftVelocity;
+mDriftVel = driftVelocity;
 }
+
 //_______________________________________________
 void StSvtSignal::setOption(int option)
 {
   mOption = option;
 }
+
 //_______________________________________________
 void StSvtSignal::pasaRelatedStuff()
 {
@@ -186,12 +186,12 @@ void StSvtSignal::doPasaOnly(int option){
 
 }
 //_______________________________________________
-void StSvtSignal::getCloud(StSvtElectronCloud* elCloud)
+void StSvtSignal::setCloud(StSvtElectronCloud* elCloud)
 {
- double sigmaMajor,sigmaMajor2,sigmaMinor,sigmaMinor2,sigmaSqDiff,sigmaSqDiff2;
+ double sigmaSqDiff,sigmaSqDiff2;
  double cosPhi,cosPhi2,sinPhi,sinPhi2;
 
- mPhi = elCloud->getPhi();
+ /* old stuff
  sigmaMajor2 = elCloud->getSigma1Sq();
  sigmaMinor2 = elCloud->getSigma2Sq();
  
@@ -204,36 +204,43 @@ void StSvtSignal::getCloud(StSvtElectronCloud* elCloud)
  mSigmaMinor = elCloud->getSigma2();              // [mm]
  //mSigmaMinor = (mSigmaMinor/0.24)*(4.78/128);      // [micro seconds]
  //mSigmaMinor = mSigmaMinor*0.0001555989583;         // [micro seconds]
- mChargeAtAnodes =  elCloud->getChargeAtAnode();
+ */
 
- cosPhi = cos(mPhi);
- sinPhi = sin(mPhi);
+ mSigmaMajor = elCloud->getSigmaDrift();
+ double sigmaMajor2 = mSigmaMajor*mSigmaMajor;
+ mSigmaMinor = elCloud->getSigmaAnode(); 
+ double sigmaMinor2 = mSigmaMinor*mSigmaMinor;
+ sigmaSqDiff = sigmaMajor2 - sigmaMinor2;
+ sigmaSqDiff2 = sigmaSqDiff*sigmaSqDiff;
+
+ mTotalHitCharge =  elCloud->getChargeAtAnode();
+
+ cosPhi = cos(elCloud->getPhi());
+ sinPhi = sin(elCloud->getPhi());
  cosPhi2 = cosPhi*cosPhi;
  sinPhi2 = sinPhi*sinPhi;
 
- mSigmaMajor2 = mSigmaMajor*mSigmaMajor;
- //mSigmaMinor2 = mSigmaMinor*mSigmaMinor;
-
  mC1 = (-0.39894228*cosPhi*sinPhi*sigmaSqDiff)/mSigmaMajor;        // [mm]
- mC2 = (0.39894228*cosPhi2*sinPhi2*sigmaSqDiff2)/mSigmaMajor2;     // [mm]**2
- mC3 = (sigmaMajor2*sigmaMinor2/mSigmaMajor2) + (cosPhi2*sinPhi2*sigmaSqDiff2/mSigmaMajor2);  // [mm]**2
+ mC2 = (0.39894228*cosPhi2*sinPhi2*sigmaSqDiff2)/sigmaMajor2;     // [mm]**2
+ mC3 = (sigmaMajor2*sigmaMinor2/sigmaMajor2) + (cosPhi2*sinPhi2*sigmaSqDiff2/sigmaMajor2);  // [mm]**2
 }
 
 //_______________________________________________
 double  StSvtSignal::chargeFraction(int an, double anHit)
 {
-
-  double mAnHit = anHit*mAnodeSize;
+  //anodes are numbered from 1
+  double anodeHitCent = anHit*mAnodeSize;
+  
   mAnRightEdge = an*mAnodeSize;
   mAnLeftEdge = (an - 1)*mAnodeSize;
 
  //Fraction of total charge collected
 
-  mFractionOfCharge = prob1(mAnRightEdge - mAnHit,mSigmaMajor) - prob1(mAnLeftEdge - mAnHit,mSigmaMajor);
+  mFractionOfCharge = prob1(mAnRightEdge - anodeHitCent,mSigmaMajor) - prob1(mAnLeftEdge - anodeHitCent,mSigmaMajor);
   
   //cout<<"mAnRightEdge = "<<mAnRightEdge<<endl;
   //cout<<"mAnLeftEdge = "<<mAnLeftEdge<<endl;
-  //cout<<"mAnHit = "<<mAnHit<<endl;
+  //cout<<"anodeHitCent = "<<anodeHitCent<<endl;
   //cout<<"mSigmaMajor = "<<mSigmaMajor<<endl;
 
  if(mFractionOfCharge < 0.000001)
@@ -243,7 +250,7 @@ double  StSvtSignal::chargeFraction(int an, double anHit)
  else 
    {
      //cout<<"mFractionOfCharge = "<<mFractionOfCharge<<endl;
-    mCollectedCharge = mChargeAtAnodes*mFractionOfCharge;
+    mCollectedCharge = mTotalHitCharge*mFractionOfCharge;
    }
 
  return mCollectedCharge;
@@ -258,12 +265,12 @@ int StSvtSignal::timeCenterAndWidth(double anHit,double timeHit)
  double leftArgument,leftArgument2,rightArgument,rightArgument2;
  double exp1,exp2,relTimeCenter,relTimeCenter2,timeWidth2,driftVel2;
 
- double mAnHit = anHit*mAnodeSize;
+ double anodeHitCent = anHit*mAnodeSize;
  double mTimeHit = timeHit*mTimeBinSize;
 
- leftArgument = (mAnLeftEdge - mAnHit)/mSigmaMajor;
+ leftArgument = (mAnLeftEdge - anodeHitCent)/mSigmaMajor;
  leftArgument2 = leftArgument*leftArgument;
- rightArgument = (mAnRightEdge - mAnHit)/mSigmaMajor;
+ rightArgument = (mAnRightEdge - anodeHitCent)/mSigmaMajor;
  rightArgument2 = rightArgument*rightArgument;
 
  //cout<<"leftArgument = "<<leftArgument<<endl;
@@ -318,7 +325,7 @@ void StSvtSignal::resetPeakAndUnderShoot()
 void StSvtSignal::setTimeWidth(double timWidth)
 {
  mTimeWidth = timWidth;
- cout<<"mTimeWidth = "<<mTimeWidth<<endl;
+ //cout<<"mTimeWidth = "<<mTimeWidth<<endl;
 }
 
 //_______________________________________________
@@ -488,7 +495,7 @@ void StSvtSignal::peakingTimeR()
       }
      
      pasaFunValue = pasaFunValue*exp(-t) - mPasa[0]*exp(-(mTau_s/mTau_l)*t);
-     cout<<"t = "<<t<<"\tpasaFunValue = "<<pasaFunValue<<endl;
+     //cout<<"t = "<<t<<"\tpasaFunValue = "<<pasaFunValue<<endl;
     
     } while( pasaFunValue > mPasaMaxR);
    
