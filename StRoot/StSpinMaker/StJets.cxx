@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.3 2003/05/15 17:48:26 thenry Exp $
+// $Id: StJets.cxx,v 1.4 2003/05/20 19:17:42 thenry Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.4  2003/05/20 19:17:42  thenry
+// Fixed problem with jet value accessor functions (always returned -999. fixed),
+// now return useful values.
+//
 // Revision 1.3  2003/05/15 17:48:26  thenry
 // Previous versions of StJets expected only primary TPC tracks to be used by
 // the jet maker.  That changed with the introduction of EMC points.
@@ -160,48 +164,48 @@ StJet* StJets::jet(int i)
 
 double StJets::e(int i) 
 {
-    StJet* j = jet(i);
+    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
     return (j) ? j->E() : -999.;
 }
 
 double StJets::et(int i) 
 {
-    StJet* j = jet(i);
+    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
     return (j) ? j->et() : -999.;
 }
 
 double StJets::p(int i) 
 {
-    StJet* j = jet(i);
+    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
     return (j) ? j->P() : -999.;
 }
 
 double StJets::pt(int i) 
 {
-    StJet* j = jet(i);
+    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
     return (j) ? j->Pt() : -999.;
 }
 
 double StJets::phi(int i)
 {
-    StJet* j = jet(i);
+    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
     return (j) ? j->Phi() : -999.;
 }
 
 double StJets::eta(int i) 
 {
-    StJet* j = jet(i);
+    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
     return (j) ? j->Eta() : -999.;
 }
 
 int StJets::nCell(int i) 
 {
-    StJet* j = jet(i);
+    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
     return (j) ? j->nCell : -999;
 }
 
 int StJets::charge(int i) 
 {
-    StJet* j = jet(i);
+    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
     return (j) ? j->charge : -999;
 }
