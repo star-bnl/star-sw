@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.cxx,v 2.6 2001/05/30 17:45:54 perev Exp $
+ * $Id: StRichPidTraits.cxx,v 2.7 2002/02/19 23:21:30 ullrich Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.cxx,v $
+ * Revision 2.7  2002/02/19 23:21:30  ullrich
+ * Added copy constructor and assignment operator. New destructor.
+ *
  * Revision 2.6  2001/05/30 17:45:54  perev
  * StEvent branching
  *
@@ -33,7 +36,7 @@
 #include "TClass.h"
 #include "StRichPidTraits.h"
 
-static const char rcsid[] = "$Id: StRichPidTraits.cxx,v 2.6 2001/05/30 17:45:54 perev Exp $";
+static const char rcsid[] = "$Id: StRichPidTraits.cxx,v 2.7 2002/02/19 23:21:30 ullrich Exp $";
 
 ClassImp(StRichPidTraits)
 
@@ -41,11 +44,42 @@ StRichPidTraits::StRichPidTraits()
     : StTrackPidTraits(kRichId), mId(0), mProbability(0) {
     mThePids.clear();
     mThePids.resize(0);
+    mRichSpectra = 0;
 }
 
-StRichPidTraits::~StRichPidTraits() { /* noop */ }
+StRichPidTraits::~StRichPidTraits() {delete mRichSpectra;}
 
-StRichPid* StRichPidTraits::getPid(StParticleDefinition* part) {
+StRichPidTraits::StRichPidTraits(const StRichPidTraits& t)
+{
+    mRichSpectra = 0;
+    *this = t;
+}
+
+StRichPidTraits&
+StRichPidTraits::operator=(const StRichPidTraits& t)
+{
+    if (this != &t) {
+	mThePids           = t.mThePids;
+	mProductionVersion = t.mProductionVersion;
+	mId                = t.mId;
+	mProbability       = t.mProbability;
+	mAssociatedMip     = t.mAssociatedMip;     
+	mMipResidual       = t.mMipResidual;
+	mRefitResidual     = t.mRefitResidual;
+	mSigned3dDca       = t.mSigned3dDca;
+	mSigned2dDca       = t.mSigned2dDca;
+	if (mRichSpectra) delete mRichSpectra;
+	if (t.mRichSpectra)
+	    mRichSpectra   = new  StRichSpectra(*t.mRichSpectra);
+	else
+	    mRichSpectra = 0;	
+    }
+    return *this;
+}
+
+
+StRichPid*
+StRichPidTraits::getPid(StParticleDefinition* part) {
 
     for (size_t index=0;index<mThePids.size();index++) {
 
@@ -59,7 +93,8 @@ StRichPid* StRichPidTraits::getPid(StParticleDefinition* part) {
 }
 
 
-const StRichPid* StRichPidTraits::getPid(StParticleDefinition* part) const {
+const StRichPid*
+StRichPidTraits::getPid(StParticleDefinition* part) const {
 
     for (size_t index=0;index<mThePids.size();index++) {
 
@@ -84,7 +119,8 @@ operator<<(ostream& os, const StRichPidTraits& t)
             << "\n\tprobability         " << t.probability());
 }
 
-void StRichPidTraits::Streamer(TBuffer &R__b)
+void
+StRichPidTraits::Streamer(TBuffer &R__b)
 {
     // Stream an object of class .
 
