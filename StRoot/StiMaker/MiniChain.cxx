@@ -16,6 +16,7 @@ using namespace std;
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "St_geant_Maker/St_geant_Maker.h"
+#include "StGenericVertexMaker/StGenericVertexMaker.h"
 #include "StIOMaker/StIOMaker.h"
 #include "StTreeMaker/StTreeMaker.h"
 #include "StiGui/EventDisplay.h"
@@ -73,6 +74,12 @@ void MiniChain::run(int first,
 	  mcEventMaker = new StMcEventMaker();
 	  //assocMaker   = new StAssociationMaker("EgrStAssociationMaker");
 	}
+
+      
+      StGenericVertexMaker *genVert =0;
+      genVert = new StGenericVertexMaker("GenericVertex");
+      
+
       _stiMaker = new StiMaker("StiMaker");
       _stiMaker->setParameters(_pars);
       if (_pars->doSimulation) 
