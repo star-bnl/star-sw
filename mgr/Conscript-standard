@@ -11,6 +11,8 @@ my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 @Repo = Repository_List unless $param::noRepository; #print "Repositories = |@Repo|\n";
 my $pkg  = File::Basename::basename($Dir);# print "Run cons in $Dir for $PKG\n";
 my $PKG = $pkg;
+my $SO_PKG = "";
+my $SO_PKGT = "";
 my @idlL     = script::find_idl($Dir);  print "In Dir = $Dir idlL = @idlL\n"  if $param::debug;
 foreach my $Rep (@Repo) {
   my $RepDir = $Rep . "/" . $Dir; print "RepDir = $RepDir\n" if $param::debug;
@@ -45,8 +47,7 @@ my @h_files = script::sortu (@h_filesL);
 my @idlM    = script::sortu (@idlML);# print "idlM = @idlM\n";
 if ($#idlM > -1 and $PKG !~ "^St") {$PKG = "St_" . $PKG;}
 my $obj  = $ObjDir;  print "obj = $obj\n" if $param::debug;
-my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; print "SO_PKG = $SO_PKG\n" if $param::debug;
-my $SO_PKGT = "";
+$SO_PKG = $PKG . "." . $env->{SUFSOLIB}; print "SO_PKG = $SO_PKG\n" if $param::debug;
 my $LIBS  = $env->{LIBS};
 my $LIBPATH = $env->{LIBPATH};
 my $CPPPATH = $env->{CPPPATH};
@@ -123,7 +124,6 @@ $env2 = $env->clone('CPPPATH'      => $CPPPATH,
 print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |",$env2->{LIBS},"|\n"  if $param::debug;
 print "LINKMODULECOM |",$env2->{LINKMODULECOM},"|\n"  if $param::debug;
 my $cscanner= find scan::cpp($env2->{_cwd}, $env2->{CPPPATH});
-my $CPPPATH = $cscanner->iflags($env2);  print "CPPPATH = $CPPPATH\n" if $param::debug;
 my @cpps = split /$main::PATH_SEPARATOR/,$env2->{CPPPATH}; print "@cpps\n" if $param::debug;
 my $ROOTCINT_CPP ="";
 my $STIC_CPP = "";
@@ -223,7 +223,6 @@ if ($#idlL > -1) {
   (my $objT_dir = $objT) =~ s/^\#//g; print "objT_dir = $objT_dir\n" if $param::debug;
   my $shareT  = "#.share/tables"; print "shareT = $shareT\n" if $param::debug;
   my $includeT = $INCLUDE . "/tables"; print "includeT = $includeT\n" if $param::debug;
-  my $SHARET  = $DIR . "/.share/tables";
   foreach my $idl (@idlL) {  print "$idl\n" if $param::debug;
     my $IDL = "#" . $Dir . "/" . $idl;# print "i=",$i++," idl = $idl IDL=$IDL\n";
     my $stem = File::Basename::basename ($IDL, ".idl"); print "stem = $stem\n" if $param::debug;
@@ -297,11 +296,6 @@ if ($#idlL > -1) {
 	push @Deps, $LinkDef;
 	push @Deps, $idlh;
 	push @Deps, $idli;
-#	push @Deps, $INCLUDE . "/Stypes.h";
-#	push @Deps, $INCLUDE . "/St_Table.h";
-#	push @Deps, $INCLUDE . "/St_DataSet.h";
-#	push @Deps, $INCLUDE . "/tableDescriptor.h";
-#	Depends $env3 [$idlCintH,$idlCintC], $LinkDef;
 	if ($STAR_SYS !~ /^intel_wnt$/) {
 	  Command $env3 [$idlCintC, $idlCintH], @Deps,  
 	  qq (rootcint.pl %>:d -f %>:f -c  "$ROOTCINT_CPPPATH -D__ROOT__" %1:f %2:f);

@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.104 2000/12/19 20:25:18 fisyak Exp $
+# $Id: Construct,v 1.105 2001/02/01 16:39:59 fisyak Exp $
 use Env;
 #use lib qw($STAR . "/mgr"); # Modify perl include path
 use lib $STAR . "/mgr"; # Modify perl include path
@@ -184,9 +184,9 @@ foreach my $dir ("pams","StRoot","StPiD"){#,"asps/rexe"){#,"StDb") {
 	    if ($#incT > -1 && ! $param::rflag) {Install $env $INCLUDE, @incT;}
 	    next;
 	  }
-	  if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/)){
+	  if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/ || $sub_dir =~ /Pool$/)){
 	    # &&  $subsub_dir !~ /^g2t$/) {
-	    # one more level for gen & sim
+	    # one more level for gen & sim & Pool
 	    if ($SKIP_DIRS && $SKIP_DIRS =~ $subsub_dir) {
 	      print "skip dir: $subsub_dir \t=> $SKIP_DIRS\n";
 	      next;
@@ -196,6 +196,7 @@ foreach my $dir ("pams","StRoot","StPiD"){#,"asps/rexe"){#,"StDb") {
 	}
       }
       #      if ($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) {next;} 
+      if ($sub_dir =~ /Pool$/) {next;} 
       if ($SKIP_DIRS && $SKIP_DIRS =~ $sub_dir) {
 	print "skip dir: $sub_dir \t=> $SKIP_DIRS\n";
 	next;
