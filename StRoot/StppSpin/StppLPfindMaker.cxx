@@ -2,8 +2,11 @@
 //  
 // JB 3/30/01 - divorce with MC. Only StEvent is used. No evaluation
 //
-// $Id: StppLPfindMaker.cxx,v 1.6 2001/05/03 23:38:10 balewski Exp $
+// $Id: StppLPfindMaker.cxx,v 1.7 2001/06/07 17:02:52 balewski Exp $
 // $Log: StppLPfindMaker.cxx,v $
+// Revision 1.7  2001/06/07 17:02:52  balewski
+// *** empty log message ***
+//
 // Revision 1.6  2001/05/03 23:38:10  balewski
 // *** empty log message ***
 //
@@ -62,6 +65,9 @@
 #include "tables/St_dst_track_Table.h"
 #include "tables/St_tpt_track_Table.h" 
 #include "tables/St_tcl_tphit_Table.h" //tmp for CL vs. nPrim
+
+#include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
+
 
 // for Helix model
 #include "StarCallf77.h"
@@ -147,8 +153,26 @@ Int_t StppLPfindMaker::Make()
   if(dstPrimTr==NULL) printf(" NULL pointer to primtrk St_Table \n");
   //if(dstPrimTr)dstPrimTr->Print(0,10);
 
-  cout <<" Mmmmmmmmmmmmmmmmmmmmmm   all tables OK ::"<<GetName() <<endl;
-
+ //   G E T   TCL HITS 
+ St_DataSet *ds=GetDataSet("tpc_hits"); assert(ds);
+ St_tcl_tphit  *tpcl=(St_tcl_tphit  *) ds->Find( "tphit");
+ if(tpcl==0) printf("NULL pointer to St_tcl_tphit table\n");
+ int nCL=tpcl->GetNRows();
+ 
+ // tmp for test only
+ {
+   int i1;
+   tcl_tphit_st *TCL=tpcl->GetTable();
+   for(i1=0; i1<nCL; i1++, TCL++) {
+     float phi=atan2(TCL->y, TCL->x) /3.1416*180.;
+     if (phi<0) phi=phi+360.;
+     hv[10]->Fill(phi);
+     ((TH2F *)hv[11])->Fill(phi,TCL->z);
+   }
+ }
+ // test end
+ cout <<" Mmmmmmmmmmmmmmmmmmmmmm   all tables OK ::"<<GetName() <<endl;
+ 
   //------------------------------------------------
   //   A C T I O N :    find reconstructed Leading Particle
   //------------------------------------------------
@@ -168,6 +192,8 @@ Int_t StppLPfindMaker::Make()
     float reta=asinh(DSTT->tanl);// rec eta
     //printf("rID=%d rPt=%f, reta=%f \n",DSTT->id,1./DSTT->invpt,reta);
     if(fabs(reta)>EtaCut) continue; // those tracks were also not considered for M-C
+    hv[8]->Fill(DSTT->psi);
+    hv[9]->Fill(DSTT->psi,reta);
     if(rLP==NULL) { rLP=DSTT; continue;}
     if(rLP->invpt<DSTT->invpt) continue;
     rLP=DSTT;
@@ -228,6 +254,25 @@ Int_t StppLPfindMaker::Make()
   row.DRxy=delRxy;// LP - vert
   row.Rxy=lpRxy;// LP - vert
 
+  //tmp2 -search for phi-error
+  {
+    float reta=asinh(rLP->tanl);// rec eta
+    hv[12]->Fill(rLP->psi);
+    hv[13]->Fill(rLP->psi,reta);
+  }
+
+  // tmp
+  {
+    //    G E A N T
+    St_DataSet *gds=GetDataSet("geant"); assert(gds);
+    St_g2t_vertex  *gver=(St_g2t_vertex  *) gds->Find("g2t_vertex");
+    g2t_vertex_st *GVER=gver->GetTable(); 
+    row.Dz=GVER->ge_x[2]-primV->position().z();
+    printf("WARN, ppDST.DZ=%f is temporary changed !!!\n",row.Dz);
+  }
+
+
+
   ppDst *my=new ppDst("rec_lp",1); // name of the table in ppDst
   my->AddAt(&row);
 
@@ -251,14 +296,16 @@ Int_t StppLPfindMaker::Make()
   hv[5]->Fill(nTPTtr);
   
   
- //   G E T   D A T A
- St_DataSet *ds=GetDataSet("tpc_hits"); assert(ds);
- St_tcl_tphit  *tpcl=(St_tcl_tphit  *) ds->Find( "tphit");
- if(tpcl==0) printf("NULL pointer to St_tcl_tphit table\n");
- int nCL=tpcl->GetNRows();
-
  ((TH2F *)hv[7])->Fill(row.nPrim,nCL/1000.);
-
+ 
+ int i1;
+ tcl_tphit_st *TCL=tpcl->GetTable();
+ for(i1=0; i1<nCL; i1++, TCL++) {
+   float phi=atan2(TCL->y, TCL->x) /3.1416*180.;
+   if (phi<0) phi=phi+360.;
+   hv[10]->Fill(phi);
+   ((TH2F *)hv[11])->Fill(phi,TCL->z);
+ }
 return kStOK;
 }
 
