@@ -22,6 +22,7 @@ using std::vector;
 class StDAQReader;
 class StEMCReader;
 class StEvent;
+class StEmcCollection; 
 
 class StEmcADCtoEMaker : public StMaker {
     
@@ -36,20 +37,23 @@ public:
     virtual Int_t  Make();
     //    virtual void   PrintInfo();
     virtual Int_t  Finish();
-
+    //    StEvent *getEvent() {return mevent;}
+    StEmcCollection *getEmcCollection();
+    virtual void  Browse(TBrowser* b);
 protected:
     
 private:
     StDAQReader*           mTheDataReader;//!
     StEMCReader* mTheEmcReader;//!
     St_DataSet*            mTheEmcData;//!
-    StEvent* mevent;
+    StEvent* mevent;    //!
+    StEmcCollection *mEmcCollection; //!
     TDataSet* m_calibdb;
     int mDaq;  // looking for DAQ data or not?
 
     // the following is a ROOT macro  that is needed in all ROOT code
     ClassDef(StEmcADCtoEMaker, 1)   
-	};
+};
 
 #endif 
 #endif 

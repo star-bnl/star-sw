@@ -12,7 +12,7 @@
 #include "StEmcHandleInput.h"
 #include "StEmcApplyCalib.h"
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TDataSetIter.h"
 
 #include "StGlobals.hh"
 #include "StEventTypes.h"
@@ -24,6 +24,7 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/EMC/EMC_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
+#include <TBrowser.h>
 
 ClassImp(StEmcADCtoEMaker) // macro
    
@@ -50,7 +51,8 @@ Int_t StEmcADCtoEMaker::Make() {
     cout << "EreaderMaker::Make()" << endl;
 
    //
-    mevent=new StEvent();
+    mevent = new StEvent();
+    //    AddData(mevent->emcCollection());
 //for the time being StEvent check is disabled,
 // when it will be run in full chain, it will be enabled.
     // Get StEvent pointer
@@ -129,6 +131,9 @@ Int_t StEmcADCtoEMaker::Make() {
    {cout <<" Calibration done **"<<endl;}
    }
 
+    // for what ?? after that program crash in StDAQReader::readEvent() 
+    // when call fEMCReader ->Update() !!!
+     /* 
     if(!mDaq) {
 
 	if(mTheEmcReader) {
@@ -136,6 +141,8 @@ Int_t StEmcADCtoEMaker::Make() {
 	}
 	mTheEmcReader = 0;
     }
+     */
+    mEmcCollection = mevent->emcCollection();
 
     return kStOK;
 }
@@ -143,4 +150,18 @@ Int_t StEmcADCtoEMaker::Make() {
 Int_t StEmcADCtoEMaker::Finish() {
 
     return StMaker::Finish();
+}
+
+StEmcCollection* 
+StEmcADCtoEMaker::getEmcCollection()
+{
+  mevent->setEmcCollection(0); // may be clean up StEvent ??
+  return mEmcCollection;
+}
+
+void
+StEmcADCtoEMaker::Browse(TBrowser* b)
+{
+  if(mEmcCollection) b->Add((TObject*)mEmcCollection);
+  TDataSet::Browse(b);
 }

@@ -7,10 +7,6 @@
 #ifndef STAR_StEmcTowerInput
 #define STAR_StEmcTowerInput
 
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
-
 #ifndef __CINT__
 #include <vector>
 #ifndef ST_NO_NAMESPACES
