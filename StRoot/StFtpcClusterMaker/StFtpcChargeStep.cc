@@ -1,6 +1,10 @@
-// $Id: StFtpcChargeStep.cc,v 1.1 2000/11/14 13:07:49 hummler Exp $
+// $Id: StFtpcChargeStep.cc,v 1.2 2000/11/14 14:01:39 hummler Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.2  2000/11/14 14:01:39  hummler
+// cleanup: comment out alternative charge step calculations, can be uncommented
+// again if they turn out to be better
+//
 // Revision 1.1  2000/11/14 13:07:49  hummler
 // add charge step calculation, minor cleanup
 //
@@ -118,11 +122,11 @@ int StFtpcChargeStep::histogram(int setPressure)
   TH1D *proHisto= mHisto->ProjectionY();
   int i,j;
   int imax=proHisto->GetNbinsX();
-  for(i=0; i<imax; i++)
-    {  
-      float temp=proHisto->GetBinContent(i);
+//   for(i=0; i<imax; i++)
+//     {  
+//       float temp=proHisto->GetBinContent(i);
 //       cout << "bin " << i << " content " << temp << endl;
-    }
+//     }
 
   // find charge step roughly
   float average=0;
@@ -150,14 +154,16 @@ int StFtpcChargeStep::histogram(int setPressure)
     }
 
   // gauss fit beginning of charge step dropoff
-  float peakplus1=proHisto->GetBinContent(peak+1);
-  float peakplus2=proHisto->GetBinContent(peak+2);
-  float lnAmps=log(peakplus1*peakplus1/(peakheight*peakplus2));
-  if(lnAmps<=0)
-    lnAmps=1000000;
-  float sigmaSqrDropoff=1/lnAmps;
-  float chargestep = peak+0.5-sigmaSqrDropoff*log(peakheight/peakplus1);
+  // uncomment this if this is deemed more appropriate than maximum change
+//   float peakplus1=proHisto->GetBinContent(peak+1);
+//   float peakplus2=proHisto->GetBinContent(peak+2);
+//   float lnAmps=log(peakplus1*peakplus1/(peakheight*peakplus2));
+//   if(lnAmps<=0)
+//     lnAmps=1000000;
+//   float sigmaSqrDropoff=1/lnAmps;
+//   float chargestep = peak+0.5-sigmaSqrDropoff*log(peakheight/peakplus1);
 
+  // gauss fit derivative of charge step dropoff
   float *dCharge = new float[imax];
   int maxdrop=0;
   dCharge[maxdrop]=0.0;
