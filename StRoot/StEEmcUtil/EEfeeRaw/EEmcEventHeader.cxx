@@ -1,5 +1,9 @@
-// $Id: EEmcEventHeader.cxx,v 1.1 2003/05/20 19:22:58 zolnie Exp $ 
+// $Id: EEmcEventHeader.cxx,v 1.2 2003/05/26 14:44:34 zolnie Exp $ 
 // $Log: EEmcEventHeader.cxx,v $
+// Revision 1.2  2003/05/26 14:44:34  zolnie
+// rewritten implementation of EEmcL3Tracks using TClonesArray
+// introduced a common Makefile and mklinkdef.pl
+//
 // Revision 1.1  2003/05/20 19:22:58  zolnie
 // new additions for ..... :)
 //
@@ -54,9 +58,9 @@ void EEmcEventHeader :: clear() {
 //--------------------------------------------------
 void EEmcEventHeader :: print(FILE *fd) const{
   fprintf(fd,"EEmcEventHeader:\n");
-  fprintf(fd,"\tevent number : %d (0x%04x)\n",mEventNumber,mEventNumber);
-  fprintf(fd,"\ttoken        : %d (0x%04x)\n",mToken      ,mToken);
-  fprintf(fd,"\ttime stamp   : %ld / %s",mTimeStamp     ,
+  fprintf(fd,"\tevent number : %-6d (0x%06x)\n",mEventNumber,mEventNumber);
+  fprintf(fd,"\ttoken        : %-6d (0x%03x)\n",mToken      ,mToken);
+  fprintf(fd,"\ttime stamp   : %ld / %s",mTimeStamp,
 		  	ctime((const time_t *)&mTimeStamp));
   fprintf(fd,"\tproc. time   : %ld / %s",mProcessingTime,
 		  	ctime((const time_t *)&mProcessingTime));
