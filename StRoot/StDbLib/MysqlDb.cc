@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.9 2000/06/02 13:37:36 porter Exp $
+ * $Id: MysqlDb.cc,v 1.10 2000/07/27 01:59:18 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.10  2000/07/27 01:59:18  porter
+ * fixed bug in delete vs delete []
+ * fixed up LDFLAGS for linux/g++
+ *
  * Revision 1.9  2000/06/02 13:37:36  porter
  * built up list of minor changes:
  *  - made buffer more robust for certain null inputs
@@ -382,8 +386,8 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
 	       int len;
 	       tStrPtr=DecodeStrArray((char*)tRow[i],len);
 	       aBuff->WriteArray(tStrPtr,len,mRes->mRes->fields[i].name);
-           for(int k=0;k<len;k++)delete tStrPtr[k];
-           delete tStrPtr;
+           for(int k=0;k<len;k++)delete [] tStrPtr[k];
+           delete [] tStrPtr;
 
            // something of a cludge: "," are used in "Decode.."  
            // as array delimeters. But we also want to have
