@@ -165,8 +165,12 @@ Int_t StTreeMaker::Make(){
   }
 }
 //_____________________________________________________________________________
-Int_t StTreeMaker::MakeRead(){
-  int iret = fTree->NextEvent();
+Int_t StTreeMaker::MakeRead(UInt_t *RunEvent){
+
+  int iret;
+  if (RunEvent && *RunEvent)	iret = fTree->ReadEvent(*RunEvent);
+  else                       	iret = fTree->NextEvent();
+
   if (iret) return iret;
   St_DataSetIter nextBr(fTree);
   StBranch *br ;

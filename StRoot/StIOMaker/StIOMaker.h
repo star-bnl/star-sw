@@ -20,7 +20,7 @@
 class StIOMaker : public StIOInterFace {
 public:
    StIOMaker(const char *name="StIO",const char *iomode="r", const char *ioFile="",const char *treeName="bfcTree");
-   StIOMaker(const char *name,       const char *iomode,     StFile      *fileSet ,const char *treeName="bfcTree");
+   StIOMaker(const char *name,       const char *iomode,     StFileI  *fileSet ,const char *treeName="bfcTree");
    virtual       ~StIOMaker();
    virtual Int_t  Init();
    virtual Int_t  Make();
@@ -32,18 +32,18 @@ public:
    virtual void Clear(Option_t *opt);
    virtual void   SetFile(const char *file);   
            void   SetMaxEvent(Int_t mx=10000000){fMaxEvent=mx;fNumEvent=0;};
-   void   SetFileSet(StFile *fileSet){fFileSet = fileSet;};
+   void   SetFileSet(StFileI *fileSet){fFileSet = fileSet;};
    virtual Int_t Skip(int nskip);
 protected:
 
-void Build(StFile *fileSet,const char *treeName);
+void Build(StFileI *fileSet,const char *treeName);
 StIOInterFace *Load();
 
 
 //	Data members
 
 
-   StFile         *fFileSet;    //!Chain of files
+   StFileI      *fFileSet;    //!Chain of files
    const char     *fNextFile;	//!next file from file set
    StIOInterFace  *fCurrMk;	//!Pointer to Current Maker
    StIOInterFace  *fFmtMk[9];	//!Pointers to TreeMaker,xdfin_Maker,St_io_Maker,StDAQMaker
@@ -52,7 +52,7 @@ StIOInterFace *Load();
    Int_t  fCase    ;		//! case 1=root,2=xdf,3=mdc2,4=daq
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.6 1999/07/28 23:31:01 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.7 2000/04/03 23:54:41 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StIOMaker, 1)   //StAR chain virtual base class for Makers
 };
