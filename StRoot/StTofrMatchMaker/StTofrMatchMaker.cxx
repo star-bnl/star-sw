@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.2 2004/03/09 17:44:56 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.3 2004/03/11 22:30:34 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,10 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.3  2004/03/11 22:30:34  dongx
+ * -move m_Mode control to Init()
+ * -clear up
+ *
  * Revision 1.2  2004/03/09 17:44:56  dongx
  * first release
  *
@@ -67,14 +71,7 @@ StTofrMatchMaker::StTofrMatchMaker(const Char_t *name): StMaker(name){
   setMinFitPointsPerTrack(0);
   setMaxDCA(9999.);
 
-  // m_Mode can be set by SetMode() method
-  if(m_Mode) {
-    setHistoFileName("tofana.root");
-    setCreateHistoFlag(kTRUE);
-  } else {
-    setHistoFileName("");
-    setCreateHistoFlag(kFALSE);
-  }
+  setCreateHistoFlag(kFALSE);
   doPrintMemoryInfo = kFALSE;
   doPrintCpuInfo    = kFALSE;
 }
@@ -94,6 +91,13 @@ Int_t StTofrMatchMaker::Init(){
   if (!mOuterTrackGeometry)
     gMessMgr->Warning("Warning: using standard trackgeometry()","OS");
   
+  // m_Mode can be set by SetMode() method
+  if(m_Mode) {
+    setHistoFileName("tofana.root");
+  } else {
+    setHistoFileName("");
+  }
+
   if (mHisto){
     bookHistograms();
     gMessMgr->Info("","OS") << "Histograms are booked" << endm;

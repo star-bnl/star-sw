@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.2 2004/03/09 17:44:56 dongx Exp $
+ * $Id: StTofrMatchMaker.h,v 1.3 2004/03/11 22:30:34 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,10 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.3  2004/03/11 22:30:34  dongx
+ * -move m_Mode control to Init()
+ * -clear up
+ *
  * Revision 1.2  2004/03/09 17:44:56  dongx
  * first release
  *
@@ -68,8 +72,6 @@ public:
     
 private:
     StTrackGeometry* trackGeometry(StTrack*);//!
-    Float_t slatPropagationTime(StThreeVectorD*); // calculate hit position correction
-    Float_t startTime(const Float_t); // calculated pvpd startTime
     Int_t getTofData(StTofCollection*); // check, remap and fill local arrays with tof and pvpd data
     Int_t storeMatchData(StTofCellCollection*, StTofCollection*); 
 
@@ -133,10 +135,6 @@ private:
     unsigned int mMinFitPointsPerTrack; //! lower cut on #fitpoints per track
     Float_t mMaxDCA; //! upper cut (centimeters) on final (global) DCA
     
-    // misc.
-    Float_t mValidNeighbours; //!
-    Float_t mSumValidNeighbours; //!
-    
     // TOFr histograms
     TH2D* mADCTDCCorelation;
     
@@ -199,7 +197,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.2 2004/03/09 17:44:56 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.3 2004/03/11 22:30:34 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
