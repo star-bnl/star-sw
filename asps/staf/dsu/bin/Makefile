@@ -3,7 +3,7 @@
 #
 TAS := $(EMPTY)
 MID_FILE := $(EMPTY)
-PROGS := translate_xdf2rzd
+PROGS := translate_xdf2rzd tbr
 #
 # OPTIONAL PARAMETERS --------------------------------------------------
 #
@@ -49,7 +49,7 @@ $(PROGS): $(BIN_ARCH)
 	$(CC) -o $@ \
 	$(LDFLAGS) \
 	$^ \
-	$(LD_PATH) -ldsl $(CERN_LIBS) $(OS_LIBS) $(FOR_LIBS)
+	$(LD_PATH) -ldsl $(CERN_LIBS) $(OS_LIBS) $(FOR_LIBS) $(X_LIBS)
 	chmod +x $@
 #
 test: slm_test
