@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.179 2001/03/20 13:09:13 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.180 2001/03/21 16:14:00 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -31,6 +31,8 @@ Bfc_st BFC[] = {
   {"Y1a"         ,""  ,"","db,calib"         ,"","","YEAR_1A  approximation to year1: TPC+CTB+FTPC",kFALSE},
   {"Y1b"         ,""  ,"","db,calib"         ,"","","YEAR_1B: TPC+CTB+FTPC+calo patch+RICH, no svt",kFALSE},
   {"Y1s"         ,""  ,"","db,calib"        ,"","","YEAR_1S  started in summer: TPC, CONE, AL pipe",kFALSE},
+  {"Y1d"         ,"","","db,calib","","","YEAR_1D  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
+  {"Y1e"         ,"","","db,calib","","","YEAR_1E  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
   {"Y1e"         ,"","","db,calib","","","YEAR_1E  even better y1:TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
   {"ES99"        ,""  ,"","db"          ,"","","Turn on 1999 engineering run simulation parameters",kFALSE},
   {"ER99"        ,""  ,"","db"           ,"","","Turn on 1999 engineering run real data parameters",kFALSE},
@@ -69,6 +71,7 @@ Bfc_st BFC[] = {
   {"cy1h"        ,""  ,"","y1h,C1default"                                ,"","","Turn on chain y1e",kFALSE},
   {"Cy2a"        ,""  ,"","y2a,CAdefault"                                ,"","","Turn on chain y2a",kFALSE},
   {"Cy2b"        ,""  ,"","y2b,C2default"                                ,"","","Turn on chain y2b",kFALSE},
+  {"C2000"       ,""  ,"","y2000,C1default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"C2001"       ,""  ,"","y2001,C2default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
@@ -183,7 +186,7 @@ Bfc_st BFC[] = {
   {"trg"         ,"trg","l0Chain","trg_T,globT,db"         ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
   {"tpc"         ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StMaker","StChain","",kFALSE},
   {"Trs"         ,"","tpcChain","scl,tpcDB,tpc_daq,Simu"              ,"StTrsMaker","StTrsMaker","",kFALSE},
-  {"Mixer"         ,"tpc_raw","","","StMixerMaker","StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
+  {"Mixer"       ,"tpc_raw","","","StMixerMaker"  ,"StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpcChain","tpc_T"              ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,""  ,"tpcChain","Simu"                           ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
@@ -196,10 +199,13 @@ Bfc_st BFC[] = {
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
   {"PreVtx"     ,"","tpcChain","tpt,SCL,sim_T,tpc_T,svt_T,ftpcT,globT,ctf_T",
                                        "StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"svt"         ,"svtChain","","svt_T,srs,Est"                             ,"StMaker","StChain","",kFALSE},
-  {"SvtSlowSim"  ,"SvtSlowSim","svtChain","SvtCL", "StSvtSimulationMaker","StSvtSimulationMaker","",kFALSE},
+  {"svt"         ,"svtChain","","svt_T,SvtCL,Est"                           ,"StMaker","StChain","",kFALSE},
+  {"sss"         ,"","","SvtSlowSim"                              ,"","","Short cut for SvtSlowSim",kFALSE},
+  {"SvtSlowSim"  ,"SvtSlowSim","svtChain","SvtCL,Simu"
+                                                  ,"StSvtSimulationMaker","StSvtSimulationMaker","",kFALSE},
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                                             ,"","","",kFALSE},
-  {"srs"     ,"svt_hits","svtChain","tls,Simu,SvtCL","St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
+  {"srs"         ,"svt_hits","svtChain","tls,Simu,SvtCL,-SvtCL,-sss,-SvtSlowSim,Simu"
+                                                    ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
   {"sls"     ,"","svtChain","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
   {"spa"     ,"","svtChain","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
   {"svt_daq"     ,"svt_raw","svtChain","SvtCL"                  ,"StSvtDaqMaker","StSvtDaqMaker","",kFALSE},
@@ -858,22 +864,23 @@ void StBFChain::SetGeantOptions(){
       else {if (GetOption("Y2b"))     geantMk->LoadGeometry("detp geometry YEAR_2b");
       else {if (GetOption("Y2001"))   geantMk->LoadGeometry("detp geometry year2001");
       else {if (GetOption("Complete"))geantMk->LoadGeometry("detp geometry complete");
-      else                            geantMk->LoadGeometry("detp geometry year2001");}}}}}}}}}}}
-    if (GetOption("gstar")) {
-      geantMk->Do("subevent 0;");
-      // gkine #particles partid ptrange yrange phirange vertexrange 
-      geantMk->Do("gkine 80 6 1. 1. -4. 4. 0 6.28  0. 0.;");
-      geantMk->Do("mode g2tm prin 1;");
-      //  geantMk->Do("next;");
-      //  geantMk->Do("dcut cave z 1 10 10 0.03 0.03;");
-      if (GetOption("Debug") ||GetOption("Debug2")) geantMk->Do("debug on;");
-      geantMk->Do("swit 2 3;");
+      else                            geantMk->LoadGeometry("detp geometry year2001");}}}}}}}}}}
+	    if (GetOption("gstar")) {
+	      geantMk->Do("subevent 0;");
+	      // gkine #particles partid ptrange yrange phirange vertexrange 
+	      geantMk->Do("gkine 80 6 1. 1. -4. 4. 0 6.28  0. 0.;");
+	      geantMk->Do("mode g2tm prin 1;");
+	      //  geantMk->Do("next;");
+	      //  geantMk->Do("dcut cave z 1 10 10 0.03 0.03;");
+	      if (GetOption("Debug") ||GetOption("Debug2")) geantMk->Do("debug on;");
+	      geantMk->Do("swit 2 3;");
+	    }
     }
-  }
-  else {
-    if (fInFile && geantMk->SetInputFile(fInFile->Data()) > kStOK) {
-      printf ("File %s cannot be opened. Exit! \n",fInFile->Data());
-      gSystem->Exit(1);
+    else {
+      if (fInFile && geantMk->SetInputFile(fInFile->Data()) > kStOK) {
+	printf ("File %s cannot be opened. Exit! \n",fInFile->Data());
+	gSystem->Exit(1);
+      }
     }
   }
 }
