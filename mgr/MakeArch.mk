@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.39  1998/11/05 23:18:42  perev
+#  MOTIF
+#
 #  Revision 1.38  1998/11/05 21:47:40  fisyak
 #  Move OBJY definition to bottom
 #
@@ -95,9 +98,10 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/11/05 21:47:40 $ 
+#             Last modification $Date: 1998/11/05 23:18:42 $ 
 #. default setings
 
+MOTIF := Yess
 RM := rm -f
 MV := mv -f
 RMDIR := rm -rf
@@ -166,6 +170,8 @@ ifneq (,$(findstring $(STAF_ARCH),intel_wnt))
 #  case WIN32
 #  ====================
 
+  MOTIF :=
+  DEBUG :=  
 
   COUT := -Fo 
   LOUT := -out: 
@@ -231,6 +237,7 @@ endif
 ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
 #    case linux
 #  ====================
+  MOTIF :=
   LINUX :=YESS
   MOTIF :=
   CERN_LEVEL :=pgf98
