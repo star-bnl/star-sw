@@ -1,5 +1,8 @@
-* $Id: tde.F,v 1.11 2000/06/14 15:17:22 aihong Exp $
+* $Id: tde.F,v 1.12 2000/06/15 18:54:55 aihong Exp $
 * $Log: tde.F,v $
+* Revision 1.12  2000/06/15 18:54:55  aihong
+* add warning for zero magnetic field
+*
 * Revision 1.11  2000/06/14 15:17:22  aihong
 * split tde.F & and new module for ensemble truncation
 *
@@ -213,8 +216,14 @@ C Abort if there are too many TPC tracks to work with
       endif
 
       call gufld(xlocal,bfield)
-      if(abs(bfield(3)).lt.0.00002) return 
-      
+
+      if(abs(bfield(3)).lt.0.00002) then 
+        call message('TDE_DEDX-W: zero field.'// 
+     >                 'TDE aborted.',1,imsg3)
+         tde=STAFCV_BAD
+         return
+      endif      
+
 c
 c  this only once on initialisation-
 c field is uniform enough in the TPC)
