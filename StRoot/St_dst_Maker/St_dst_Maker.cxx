@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.69 2002/02/22 01:43:08 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.70 2002/04/06 03:09:23 jeromel Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.70  2002/04/06 03:09:23  jeromel
+// Valeri found one biggy buggy causing crashes (pointer <-> array range)
+//
 // Revision 1.69  2002/02/22 01:43:08  caines
 // Correct track-hit correlations for SVT
 //
@@ -214,7 +217,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.69 2002/02/22 01:43:08 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.70 2002/04/06 03:09:23 jeromel Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -489,13 +492,11 @@ Int_t  St_dst_Maker::Filler(){
 
 
  
-    dst_point_st *mypoint  = point->GetTable();
-    int HitIndex = point->GetNRows();
-    point->ReAllocate(HitIndex + NSvtPoints);
+    //dst_point_st *mypoint  = point->GetTable();
+    dst_point_st mypoint;                               // will use local dst_point
+    Int_t        nsize=point->GetNRows() + NSvtPoints;  // new expected size
+    point->ReAllocate(nsize);                           // realloc to save time
    
-    // Get table again because pointer may have moved after realloc
-    mypoint  = point->GetTable();
-
     const float maxRange   = 22;
     const float mapFactor  = 23800;
     unsigned int svty11,svtz,svtx,svty10,svty;
@@ -526,29 +527,29 @@ Int_t  St_dst_Maker::Filler(){
 		//		if( mSvtBigHit->svtHit()[clu].flag() > 3 ||
 		//   mSvtBigHit->svtHitData()[clu].peakAdc < 15 ) continue;
 
-		mypoint[HitIndex].hw_position = 2;
-  		mypoint[HitIndex].hw_position += (1L<<4)*(index2);
+		mypoint.hw_position = 2;
+  		mypoint.hw_position += (1L<<4)*(index2);
 		svtx = int(mSvtBigHit-> WaferPosition()[clu].x()*4);
 		
-		mypoint[HitIndex].hw_position += (1L<<13)*(svtx);
+		mypoint.hw_position += (1L<<13)*(svtx);
 
 		svty = int(mSvtBigHit->WaferPosition()[clu].y()*4);
-	      	mypoint[HitIndex].hw_position += (1L<<22)*svty;
+	      	mypoint.hw_position += (1L<<22)*svty;
 
 		if( mSvtBigHit->svtHit()[clu].charge() < (1L<<10)){
-		  mypoint[HitIndex].charge = (int)mSvtBigHit->svtHit()[clu].charge();
+		  mypoint.charge = (int)mSvtBigHit->svtHit()[clu].charge();
 		}
 		else 
-		  mypoint[HitIndex].charge = (1L<<10)-1;
+		  mypoint.charge = (1L<<10)-1;
 
 		if( mSvtBigHit->svtHitData()[clu].peakAdc < (1L<<7)){
-		  mypoint[HitIndex].charge +=  
+		  mypoint.charge +=  
 		    mSvtBigHit->svtHitData()[clu].peakAdc*(1L<<10);
 		}		  
 		else  
-		  mypoint[HitIndex].charge += (1L<<10)*((1L<<7)-1);
+		  mypoint.charge += (1L<<10)*((1L<<7)-1);
 		
-		mypoint[HitIndex].charge += (1L<<17)*mSvtBigHit->svtHit()[clu].flag();
+		mypoint.charge += (1L<<17)*mSvtBigHit->svtHit()[clu].flag();
 		
 		if( mSvtBigHit->svtHit()[clu].position().x() > (-1*maxRange) &&
 		    mSvtBigHit->svtHit()[clu].position().x() < maxRange)
@@ -570,8 +571,8 @@ Int_t  St_dst_Maker::Filler(){
 		svty10 = int(svty/(1L<<10));
 		svty11 = svty - (1L<<10)*svty10;
 		
-		mypoint[HitIndex].position[0] = svtx + (1L<<20)*svty11;
-		mypoint[HitIndex].position[1] = svty10 + (1L<<10)*svtz; 
+		mypoint.position[0] = svtx + (1L<<20)*svty11;
+		mypoint.position[1] = svty10 + (1L<<10)*svtz; 
 		
 		
 		//cov =  mSvtBigHit->svtHit()[clu].positionError().x()
@@ -604,14 +605,17 @@ Int_t  St_dst_Maker::Filler(){
 		svty10 = int(svty/(1L<<10));
 		svty11 = svty - (1L<<10)*svty10;
 		
-		mypoint[HitIndex].pos_err[0] = svtx + (1L<<20)*svty11;
-		mypoint[HitIndex].pos_err[1] = svty10 + (1L<<10)*svtz;
-		mypoint[HitIndex].id_track = 0;
+		mypoint.pos_err[0] = svtx + (1L<<20)*svty11;
+		mypoint.pos_err[1] = svty10 + (1L<<10)*svtz;
+		mypoint.id_track = 0;
 		if( mSvtBigHit->svtHitData()[clu].id < 10000)
-		mypoint[HitIndex].id_track = 
+		mypoint.id_track = 
 		  svtindex[mSvtBigHit->svtHitData()[clu].id];
 
-		HitIndex++;
+		// Add the new point ; if allready allocated, will just add
+		// if realloc required, this method will increase the table
+		// size accordingly.
+		point->AddAt(&mypoint);
 	      }
 	    }
 	  }
@@ -619,38 +623,30 @@ Int_t  St_dst_Maker::Filler(){
       }
     } // End of if mSvtCluColl
   
-    point->SetNRows(HitIndex-1);
-    sgr_groups_st *tgroup = tpc_groups->GetTable();
-    mypoint  = point->GetTable();
-      
-      int spt_id = 0;
-      int i;
-      bool isset;
-      
-      for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
-	if( tgroup->id1 != 0 && tgroup->ident >= 0){
-	  spt_id = tgroup->id2-1;
-	  if( spt_id <0) {
-	    cout << spt_id << endl;
-            assert(0);
-	  }
-          else{
-	 
-	      mypoint[no_ftpc_points+spt_id].charge |= 1UL<<24;
-	      //	    row = spc[spt_id].row/100;
-	      // row = spc[spt_id].row - row*100;
-	      // if( spc[spt_id].id_globtrk-1 < 0){
-	      // cout << tgroup->ident << " " << tgroup->id1 << " " << tgroup->id2 << " " << spc[spt_id].id << " " << endl;
-              // assert(0);
-	      // }
-	      // if( row < 25){
-	      // isset = track[spc[spt_id].id_globtrk-1].map[0] & 1UL<<(row+7);
-	      // track[spc[spt_id].id_globtrk-1].map[0] |= 1UL<<(row+7);
-	      // }
-	      // if (isset) track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<30; 
-	  }
+    //  Sanity check
+    if(point->GetNRows() > nsize){
+      gMessMgr->Warning() << "St_dst_Maker::Filler : New size " << point->GetNRows()
+			  << " exceeds expected size " << nsize << " for table "
+	                  << point->GetName() << endm;
+    }
+
+
+    int  spt_id = 0;
+
+    sgr_groups_st *tgroup     =  tpc_groups->begin();
+    sgr_groups_st *tgroup_end =  tpc_groups->end();
+    
+    for( ; tgroup != tgroup_end; tgroup++){
+      if( (*tgroup).id1 != 0 && (*tgroup).ident >= 0){
+	spt_id = (*tgroup).id2-1;
+	if( spt_id <0) {
+	  cout << spt_id << endl;
+	  assert(0);
+	} else{
+	  point->GetTable(no_ftpc_points+spt_id)->charge |= 1UL<<24;
 	}
       }
+    }
   
       
       
@@ -665,7 +661,7 @@ Int_t  St_dst_Maker::Filler(){
     St_DataSetIter tpc_tracks(tpctracks); 
     tptrack   = (St_tpt_track  *) tpc_tracks("tptrack");
     tpc_dedx   = (St_dst_dedx  *) tpc_tracks("tpc_dedx");
-  }
+  } 
   // Case tpc not there
   if (!tptrack) {tptrack = new St_tpt_track("tptrack",1); AddGarb(tptrack);}
   if (!tpc_dedx) {tpc_dedx = new St_dst_dedx("tpc_dedx",1); AddGarb(tpc_dedx);}
