@@ -48,7 +48,7 @@ ttm
 
   // finally after so many lines we arrive at the good stuff
   EETowTrackMatchMaker *mm = new  EETowTrackMatchMaker ("TTM",muDstMaker,eemcDbMaker);
-  mm->PrintCutSummary(cout);    // 
+  mm->Summary(cout);    // 
 
   StMuDebug::setLevel(0);
 
@@ -57,11 +57,10 @@ ttm
 
   int stat=0;
   //---------------------------------------------------
-  for(int counter=0; nEvents<0 || counter<nEvents ; counter++) {
+  for(int counter=0; nEvents<0 || counter<nEvents ; ++counter) {
     if( (stat = chain->Make()) != 0 ) break;
+    if(counter%100==0) cerr << "analyzed " << counter << " events" << endl;
   }
 
-  cout << "tracks matched: " << mm->GetNMatched() << endl;
-  cout << " # of events:" << counter << endl;
-
+  mm->Summary(cout);    // 
 }
