@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.10 2004/07/27 02:35:23 mvl Exp $
+ * $Id: StMuArrays.h,v 1.11 2004/10/19 01:43:05 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -14,7 +14,8 @@
 #define StMuArrays_hh
 
 /// @enum emcTypes enumeration to to index the emcArrays
-enum emcTypes {muEmc=0};
+//enum emcTypes {muEmc=0};
+enum emcTypes {muEmcTow=0, muEmcPrs, muEmcSmde, muEmcSmdp, muEEmcPrs, muEEmcSmdu, muEEmcSmdv};
 
 /// @enum strangeTypes enumeration to to index the strangeArrays
 enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0Mc, smuV0Assoc, smuXi, smuXiMc, smuXiAssoc, smuKink, smuKinkMc, smuKinkAssoc, smuCut};
@@ -23,7 +24,7 @@ enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0Mc, smuV0Assoc, smuXi, smuXiMc,
 enum muDstTypes {muEvent=0, muPrimary, muGlobal, muOther, muL3, muRich, muState, muAccept, muReject}; 
 
 /// @enum pmdTypes enumeration to to index the pmdArrays
-enum pmdTypes {muPmd=0}; 
+enum pmdTypes {muPmdHit=0, muCpvHit, muPmdCluster, muCpvCluster}; 
 
 /// @enum Tofr enumeration
 enum tofTypes {muTofHit=0, muTofData};
@@ -31,8 +32,8 @@ enum tofTypes {muTofHit=0, muTofData};
 enum NARRAYS {
 __NARRAYS__        =9,	///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  
 __NSTRANGEARRAYS__ =12,	///< size of the strangeness arrays, i.e. number of TClonesArrays  
-__NEMCARRAYS__     =1 ,	///< size of the emc arrays, i.e. number of TClonesArrays  
-__NPMDARRAYS__     =1 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
+__NEMCARRAYS__     =7 ,	///< size of the emc arrays, i.e. number of TClonesArrays  
+__NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
 __NTOFARRAYS__     =2 ,  ///< size of the tof arrays >
 __NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__
 };
@@ -73,6 +74,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.11  2004/10/19 01:43:05  mvl
+ * Changes for splitting Emc and Pmd collections
+ *
  * Revision 1.10  2004/07/27 02:35:23  mvl
  * Added access methods for Strangeness Monte-Carlo arrays
  *
