@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.71 2004/05/12 19:30:29 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.72 2004/06/08 20:33:33 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -121,6 +121,8 @@
     if ( !$ROOT_LEVEL ) { print "ROOT_LEVEL has to be defined\n"; exit 1;}
     if ( !$ROOTSYS )    { print "ROOT_SYS   has to be defined\n"; exit 1;}
     $ROOTCINT      = $ROOTSYS . "/bin/rootcint";
+    my $RLIBMAP    = $ROOTSYS . "/bin/rlibmap";
+ if (! -e $RLIBMAP ) {$RLIBMAP = "";}
     $CINTSYSDIR    = $ROOTSYS . "/cint";
     $LIBS          = "";
     $Libraries     = "";
@@ -204,7 +206,7 @@
     #  ============================================================
     # Platform support should be concentrated here
     #  ============================================================
- if ($STAR_HOST_SYS =~ /^rh80_icc/) {
+ if ($STAR_HOST_SYS =~ /^rh/ and $STAR_HOST_SYS =~ /_icc/) {
 	$PLATFORM      = "linux";
 	$ARCH          = "linuxicc";
 	$PGI           = "";
@@ -593,6 +595,13 @@
           'OPTSTAR'         => $OPTSTAR
       },
 	  'Packages' => {		  
+			 'ROOT' => {
+				     'BINDIR'=> $ROOTSYS . "/bin",
+				     'LIBDIR'=> $ROOTSYS . "/lib",
+				     'INCDIR'=> $ROOTSYS . "/include",
+				     'RLIBMAP'  => $RLIBMAP,
+				     'ROOTCINT' => $ROOTCINT
+				    },
 			 'MYSQL' => {
 				     'LIBDIR'=> $MYSQLLIBDIR,
 				     'INCDIR'=> $MYSQLINCDIR,
