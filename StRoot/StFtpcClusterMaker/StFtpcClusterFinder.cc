@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.18 2001/06/24 21:08:22 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.19 2001/06/25 00:45:35 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.19  2001/06/25 00:45:35  jcs
+// change DEBUG print statement to print out both soft and hard row/sector info
+//
 // Revision 1.18  2001/06/24 21:08:22  jcs
 // Change Hit rejected message since this also occurs for FTPC daq data
 //
@@ -183,7 +186,7 @@ int StFtpcClusterFinder::search()
 	  iPadBuf=-2;
 	  bNewSec=TRUE;
 #ifdef DEBUG
-	  printf("Now on Sector %d, Row %d\n", iSec, iRow);
+	  printf("Now on Sector %d, Row %d (iHardSec %d, iHardRow %d)\n",iSec,iRow,iHardSec,iHardRow);
 #endif
 
 	  // calculate hardware (daq) sectors from software position
