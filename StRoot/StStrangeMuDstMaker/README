@@ -40,5 +40,6 @@ StStrangeMuDst.*          : Base classes for components of muDST
 St*MuDst.*                : Classes for real data components of muDST
 St*Mc.*                   : Classes for Monte Carlo components of muDST
 StDecayMode.*             : Singleton for determining decay mode of MC vertices
+StDecayAngle.hh           : Formulae for angles of decay
 StStrangeCuts.*           : Handling of cuts collection stored with muDST
 StStrangeMuDstPlayer.*    : New Maker front-end to StStrangeMuDstMaker
