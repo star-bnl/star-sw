@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.24 2001/06/16 12:59:47 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.25 2001/07/12 10:35:14 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.25  2001/07/12 10:35:14  jcs
+// create and fill FTPC cluster radial position histogram
+//
 // Revision 1.24  2001/06/16 12:59:47  jcs
 // delete ftpcReader only if it is the FTPC slow simulator reader
 //
@@ -185,6 +188,7 @@ m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59
 //m_timebins   = new TH1F("fcl_timebins","FTPC timebins"		,100,1.,257.);
 //m_row_sector = new TH2F("fcl_row_sector","FTPC(fcl) row vs. sector"	,20,1.,21.,6,1.,7.);
 //m_npad_nbin  = new TH2F("fcl_pad_bin"	,"FTPC(fcl) pad vs. timebin"	,80,1.,161.,100,1.,257.);
+m_cluster_radial = new TH1F("fcl_radius","FTPC cluster radial position",700,0.,35.);
 
   return StMaker::Init();
 }
@@ -265,7 +269,7 @@ Int_t StFtpcClusterMaker::Make()
 						  paramReader, 
                                                   dbReader);
     // uncomment to recalculate normalized pressure from charge step:
-    // step->histogram(1); // This can give wrong values if the decline of the charge step is too steep!
+    //step->histogram(1); // This can give wrong values if the decline of the charge step is too steep!
     // uncomment to fill charge step histogram only:
     step->histogram(0);
     
@@ -357,7 +361,7 @@ Int_t StFtpcClusterMaker::Make()
   delete paramReader;
   delete dbReader;
 // Deactivate histograms for MDC3
-//MakeHistograms(); // FTPC cluster finder histograms
+MakeHistograms(); // FTPC cluster finder histograms
   return iMake;
 }
 //_____________________________________________________________________________
@@ -375,27 +379,29 @@ void StFtpcClusterMaker::MakeHistograms()
   if (! ppointh) 	return;
   fcl_fppoint_st *r = ppointh->GetTable();
   for (Int_t i=0; i<ppointh->GetNRows();i++,r++) {
-    Int_t flag = r->flags;
-    if (flag > 0) {
-      Int_t bin = 6;
-      for (Int_t twofac=32; twofac>0; twofac=twofac/2,bin--) {
-        Int_t nbit = flag/twofac;
-        if (nbit != 1) 	continue;
-        m_flags->Fill((float)bin);
-        flag = flag - nbit*twofac;        
-      }//end loop twofac
-    }//endif flag
+//    Int_t flag = r->flags;
+//    if (flag > 0) {
+//      Int_t bin = 6;
+//      for (Int_t twofac=32; twofac>0; twofac=twofac/2,bin--) {
+//        Int_t nbit = flag/twofac;
+//        if (nbit != 1) 	continue;
+//        m_flags->Fill((float)bin);
+//        flag = flag - nbit*twofac;        
+//      }//end loop twofac
+//    }//endif flag
 
-    Float_t nrow = r->row;
-    m_row->Fill(nrow);
-    Float_t nsec = r->sector;
-    m_sector->Fill(nsec);
-    m_row_sector->Fill(nrow,nsec);
-    Float_t npad = r->n_pads;
-    m_pads->Fill(npad);
-    Float_t nbin = r->n_bins;
-    m_timebins->Fill(nbin);
-    m_npad_nbin->Fill(npad,nbin);
+//    Float_t nrow = r->row;
+//    m_row->Fill(nrow);
+//    Float_t nsec = r->sector;
+//    m_sector->Fill(nsec);
+//    m_row_sector->Fill(nrow,nsec);
+//    Float_t npad = r->n_pads;
+//    m_pads->Fill(npad);
+//  Float_t nbin = r->n_bins;
+//  m_timebins->Fill(nbin);
+//    m_npad_nbin->Fill(npad,nbin);
+    Float_t rpos = sqrt(r->x*r->x + r->y*r->y);
+    m_cluster_radial->Fill(rpos);
   }//end rows loop 
 }
                                    
