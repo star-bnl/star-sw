@@ -1,12 +1,20 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.7 2004/03/23 23:12:36 calderon Exp $
+ * $Id: StiStEventFiller.h,v 2.8 2004/03/31 00:27:29 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.8  2004/03/31 00:27:29  calderon
+ * Modifications for setting the fit points based on the chi2<chi2Max algorithm.
+ * -Distinguish between points and fit points, so I added a function for each.
+ * -Points is done as it was before, just counting the stHits for a given
+ *  detector id.
+ * -Fit points is done the same with the additional condition that each
+ *  StiKalmanTrackNode has to satisfy the chi2 criterion.
+ *
  * Revision 2.7  2004/03/23 23:12:36  calderon
  * Added an "accept" function to filter unwanted tracks from Sti into StEvent.
  * The current method just looks for tracks with a negative length, since
@@ -126,6 +134,7 @@ public:
     void fillPidTraits(StTrack* track, StiKalmanTrack* kTrack);
     void filldEdxInfo(StiDedxCalculator&, StTrack* track, StiKalmanTrack* kTrack);
     void fillTrack(StTrack* track, StiKalmanTrack* kTrack);
+    unsigned short encodedStEventPoints(StiKalmanTrack* kTrack); 
     unsigned short encodedStEventFitPoints(StiKalmanTrack* kTrack); 
     float impactParameter(StiKalmanTrack* kTrack);
     float impactParameter(StTrack* track);
