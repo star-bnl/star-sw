@@ -48,12 +48,12 @@ print USERCOMMITS $content;
 $iCommit = 0;
 while (<COMMITLOG>) {
   if ( m/^--------------------------/ ) {
-      $iCommit++;
       if ( $iCommit > 0) {
         @modA[$iCommit] = $module;
         @userA[$iCommit] = $uname;
         @timeA[$iCommit] = $commitTime;
       }
+      $iCommit++;
       close USERFILE;
       $uname = <COMMITLOG>;
       chomp $uname;
@@ -129,10 +129,14 @@ foreach $cuser (sort keys %commitUsers) {
 END_BLOCK
     print USERCOMMITS $content;
 }
+$firstTime = $timeA[1];
 $content =<<END_BLOCK;
 </table>
 </blockquote>
-<font size=-1><a href="mailto:wenaus\@bnl.gov">Torre Wenaus</a></font>
+<font size=-1>
+Commits since $firstTime <br>
+<a href="mailto:wenaus\@bnl.gov">Torre Wenaus</a>
+</font>
 </body></html>
 END_BLOCK
 print USERCOMMITS $content;
@@ -170,8 +174,11 @@ name to browse that module's CVS area.
 END_BLOCK
 print COMMITHISTORY $content;
 
+@modA[$iCommit] = $module;
+@userA[$iCommit] = $uname;
+@timeA[$iCommit] = $commitTime;
 $iFirstIndex = $iCommit - 500;
-if ($iFirstIndex < 0) { $iFirstIndex = 0; }
+if ($iFirstIndex < 1) { $iFirstIndex = 1; }
 for ( $i=$iCommit; $i>=$iFirstIndex; $i--) {
     $content = <<END_BLOCK;
     <tr bgcolor=whitesmoke>
