@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.cc,v 1.9 2001/11/06 18:29:34 caines Exp $
+ * $Id: StSvtHybridCollection.cc,v 1.10 2001/11/12 22:55:22 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCollection.cc,v $
+ * Revision 1.10  2001/11/12 22:55:22  caines
+ * Delete mConfig when delete called to fix memory leak
+ *
  * Revision 1.9  2001/11/06 18:29:34  caines
  * Add back in delete of mSvtConfig
  *
@@ -98,9 +101,9 @@ void StSvtHybridCollection::setConfiguration(StSvtConfig* config)
 {
   // set the Collection configuration
 
-  mSvtConfig = config;
-  mConfig = TString(mSvtConfig->getConfiguration());
-
+   mConfig = TString(config->getConfiguration());
+   mSvtConfig = new StSvtConfig();
+   mSvtConfig->setConfiguration(mConfig);
   resize(mSvtConfig->getTotalNumberOfHybrids());
   clear();
 }
