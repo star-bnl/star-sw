@@ -22,6 +22,7 @@
 #include "soc_macros.h"
 #include "soc_types.h"
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 class socObject {
 
@@ -31,6 +32,7 @@ public:
    socObject(long id);
    socObject(const char* name);
    socObject(const char* name, const char* type);
+   socObject(long n, const char* type); //automatic name=type"n"
    virtual ~socObject();
 //:----------------------------------------------- ATTRIBUTES         --
    virtual IDREF_T idRef ();
