@@ -1,5 +1,5 @@
 // Author : Dominik Flierl 
-// $Id: StClusterDisplayMaker.cxx,v 1.6 2001/05/14 19:36:11 flierl Exp $
+// $Id: StClusterDisplayMaker.cxx,v 1.7 2001/08/21 23:53:13 struck Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //                                                                      //
@@ -826,7 +826,7 @@ Int_t StClusterDisplayMaker::PlotL3OnPoints(TString option)
     if (ml3reader->getI960ClusterReader(sector)->getClusterList())
 	{
 	    cout << "Found some i960 clusters in sector:" << sector <<endl ;
-	    l3_cluster* myl3cluster = ml3reader->getI960ClusterReader(sector)->getClusterList();
+	    L3_Cluster* myl3cluster = ml3reader->getI960ClusterReader(sector)->getClusterList();
 	    Int_t numOfClusters = ml3reader->getI960ClusterReader(sector)->getNumberOfClusters() ;
 	    for (Int_t clindex=0;  clindex<numOfClusters ; clindex++)
 		{
