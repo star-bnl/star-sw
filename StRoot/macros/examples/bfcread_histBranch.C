@@ -1,4 +1,4 @@
-// $Id: bfcread_histBranch.C,v 1.5 2000/05/03 19:38:52 kathy Exp $
+// $Id: bfcread_histBranch.C,v 1.6 2000/06/13 01:41:50 lansdell Exp $
 // $Log $
 
 //======================================================================
@@ -45,6 +45,7 @@ void bfcread_histBranch(
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("StIOMaker");
+    gSystem->Load("libglobal_Tables");
 
 //  Setup top part of chain
     chain = new StChain("bfc");
