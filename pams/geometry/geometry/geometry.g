@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.83 2004/03/10 20:11:34 potekhin Exp $
+* $Id: geometry.g,v 1.84 2004/03/24 23:33:48 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.84  2004/03/24 23:33:48  potekhin
+* Added proper VPD versioning as discussed with the team.
+* No numerical data here, just config flag.
+*
 * Revision 1.83  2004/03/10 20:11:34  potekhin
 * In Y2004, set the TOF config to 7 as requested by B.Llope,
 * to reflect the current configuration.
@@ -332,11 +336,11 @@
    Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,kgeom,nmod(2),nonf(3),
               ecal_config, ecal_fill,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,
-              btofconfig,
+              BtofConfig, VpddConfig,
               CorrNum, PhmdVersion, SisdConfig, PipeConfig, CalbConfig
 
 * configuration variables for tuning the geometry:
-*            btofconfig  -- tof trays
+*            BtofConfig  -- tof trays
 *            PhmdVersion -- photon multiplicity detector
 *            SisdConfig  -- silicon strip
 *            PipeConfig  -- beam pipe
@@ -379,7 +383,8 @@ replace[;ON#{#;] with [
    PhmdVersion = 0
    SisdConfig  = 0
    PipeConfig  = 2 ! Default, Be pipe used in most of the runs =<2003
-   btofconfig  = 1 ! ctb only
+   BtofConfig  = 1 ! ctb only
+   VpddConfig  = 1 ! vpd...
    CalbConfig  = 0 ! really make use of it starting in y2004
 
 * Set only flags for the main configuration (everthing on, except for tof),
@@ -459,7 +464,7 @@ If LL>1
                   {vpdd,calb,ecal}=off;      Itof=1;                   Nsi=0;
                   mwx=1;}
   on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch+RICH, no svt;
-                  btofconfig = 4;
+                  BtofConfig = 4;
                   {vpdd,ecal}=off;  {rich,ems}=on; 
                   nmod={12,0}; shift={87,0}; Itof=1; {Rv,Rp}=1;        Nsi=0;
                   mwx=1;}
@@ -468,20 +473,20 @@ If LL>1
                   mwx=1;}
 
   on YEAR_1H    { even better y1:  TPC+CTB+FTPC+RICH+caloPatch+svtLadder;  
-                  btofconfig=4;
+                  BtofConfig=4;
                   {vpdd,ecal}=off;  {rich,ems}=on;  Itof=1; 
                   nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wdm=6;        Nsi=-3;
                   mwx=1;}
 
 * HELEN:       one ladder at R=10.16cm with 7 wafers at the 12 O'Clock...
   on YEAR_1E    { even better y1:  TPC+CTB+RICH+caloPatch+svtLadder;  
-                  btofconfig=4;
+                  BtofConfig=4;
                   {vpdd,ecal,ftpc}=off;  {rich,ems}=on;  Itof=1;
                   nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wfr=7; Wdm=6; Nsi=-3;
                   mwx=1;}
 
   on YEAR_2B    { old 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
-                  btofconfig=4;
+                  BtofConfig=4;
                   {rich,ems}=on;  nmod={24,0}; shift={21,0};  
                   nonf={0,2,2};  Itof=2;  Rv=2;                        Nsi=6; }
 
@@ -506,7 +511,7 @@ If LL>1
                      pse=on " inner sector has pseudo padrows ";
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
-                     btofconfig=5;
+                     BtofConfig=5;
                   "calb" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
@@ -550,7 +555,7 @@ If LL>1
                   "geometry correction "
                      CorrNum = 1;
 
-                  btofconfig=4;
+                  BtofConfig=4;
                   {rich,ems}=on;
 
 * a newer way to steer ecal:
@@ -575,7 +580,7 @@ If LL>1
                      Rv=2;        " save additional (fake) hits "; 
                   "ctb: central trigger barrer ";
                      Itof=2       " vyzyvat' btofgeo2                 ";
-                     btofconfig=4;
+                     BtofConfig=4;
                   "calb: barrel calorimeter "
                      ems=on       " sector version "
                      nmod={24,0}  " 24 sectors ";
@@ -586,6 +591,9 @@ If LL>1
                      bbcm=on
                   "forward pion detector "
                      fpdm=on
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=2;
                   "field version "
                      Mf=4;      " tabulated field, with correction ";
                 }
@@ -600,7 +608,7 @@ If LL>1
                      pse=on " inner sector has pseudo padrows ";
                   "ctb: central trigger barrer             ";
                      Itof=2 "  btofgeo2  ";
-                     btofconfig=5;
+                     BtofConfig=5;
                   "calb" 
                      ems=on   "endcap "
                      nmod={60,0}; shift={0,0}; " 60 sectors "
@@ -611,6 +619,9 @@ If LL>1
                      bbcm=on
                   "forward pion detector "
                      fpdm=on
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
                 }
@@ -633,7 +644,7 @@ If LL>1
                      pse=on " inner sector has pseudo padrows ";
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
-                     btofconfig=5;
+                     BtofConfig=5;
                   "calb" 
                      ems=on
                      nmod={60,0}; shift={75,0}; " 60 sectors " 
@@ -644,6 +655,9 @@ If LL>1
                      bbcm=on
                   "forward pion detector "
                      fpdm=on
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
                   "geometry correction "
@@ -667,7 +681,7 @@ If LL>1
                      pse=on " inner sector has pseudo padrows ";
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
-                     btofconfig=5;
+                     BtofConfig=5;
                   "calb" 
                      ems=on
                      nmod={60,0}; shift={75,0}; " 60 sectors " 
@@ -678,6 +692,9 @@ If LL>1
                      bbcm=on
                   "forward pion detector "
                      fpdm=on
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
                   "geometry correction "
@@ -695,7 +712,7 @@ If LL>1
                      pse=on " inner sector has pseudo padrows ";
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
-                     btofconfig=5;
+                     BtofConfig=5;
                   "calb" 
                      ems=on ;
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
@@ -706,6 +723,9 @@ If LL>1
                      bbcm=on
                   "forward pion detector "
                      fpdm=on
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
                   "geometry correction "
@@ -738,7 +758,7 @@ If LL>1
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
 * note the upgrade with respect to previous years:
-                     btofconfig=7;
+                     BtofConfig=7;
 
                   "calb" 
                      ems=on
@@ -759,6 +779,10 @@ If LL>1
 
                   "forward pion detector "
                      fpdm=on
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
 
                   "field version "
                      Mf=4;      "tabulated field, with correction "
@@ -938,19 +962,27 @@ If LL>1
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
    If (LL>1 & btof) then
      call AgDETP new ('BTOF')
-     call AgDETP add ('btog.choice=',btofconfig,1)
+     call AgDETP add ('btog.choice=',BtofConfig,1)
    endif
 
    if(btof) then
              if(Itof.eq.1) then
-                write(*,*) '*************  ATTENTION : OLD VERSION OF BTOF IS NO LONGER IMPLEMENTED ***********'
+                write(*,*) '***********  ATTENTION : OLD VERSION OF BTOF IS NO LONGER IMPLEMENTED **********'
+                write(*,*) '***********  NO BTOF WILL BE INSTANTIATED **************************************'
              else
                 call btofgeo2
              endif
    endif
      
    Call AGSFLAG('SIMU',1)
-   if (vpdd) Call vpddgeo
+
+
+********************* Vertex Position Detector *******************
+   If (LL>1 & vpdd) then
+     call AgDETP new ('VPDD')
+     call AgDETP add ('vpdv.vpdConfig=',VpddConfig,1);
+     call vpddgeo
+   endif
 
 ********************** BARREL CALORIMETER ************************
 *  - Set up the parameters for the barrel calorimeter
