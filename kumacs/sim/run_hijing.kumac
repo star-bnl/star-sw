@@ -17,7 +17,7 @@ debug on
 
 * keep track of memory/cpu consumption
 ghist star.his  STAR
-gstat time size
+gstat time size mult stak
 
 user/input  U /star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_801_1000.xdf
 user/output O auau_gstar.fzd
