@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.96 2003/10/28 06:07:30 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.97 2003/10/28 20:21:13 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -72,6 +72,7 @@
 #include "TObjString.h"
 #include "TSystem.h"
 #include "TPolyLine3D.h"
+#include "TPolyMarker3D.h"
 
 #include "StEventDisplayMaker.h"
 #include "TDataSetIter.h"
@@ -799,7 +800,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
     while ((filt=(StFilterABC*)nextFilter())) {if (!filt->AcceptCB(pnt)) break;}
     if (filt) {ncut++; continue;}
 //
-    P = pnt->Size()==1;
+    P = ( pnt->Size()==1 ) || ( kase & kHIT ) ;
     L = (P) ? "P":"L";
 
     sty = defSty; siz = defSiz;
@@ -823,9 +824,9 @@ void  StEventDisplayMaker::DrawIt(StPoints3DABC *pnt,const char *opt
     StPoints3DABC  *bigPnt;
 
     m_TrackCollector->Add(pnt);		//collect garbage
-    if (opt[0] == 'P' && col < kCOLORS) {
+    if (0 && opt[0] == 'P' && col < kCOLORS) {
       thisTrack = fColCash[col];
-      if (!thisTrack) {
+      if (!thisTrack){
          bigPnt = new StPoints3DABC(pnt->GetName(),pnt->GetTitle(),0);
          tracksShape = new TPolyLineShape(bigPnt,opt);  
          tracksShape->SetVisibility(1);
@@ -855,11 +856,19 @@ void  StEventDisplayMaker::DrawIt(StPoints3DABC *pnt,const char *opt
       m_PadBrowserCanvas->cd();
       int i= 0;
       Int_t n = pnt->Size();
-      TPolyLine3D  *line = new TPolyLine3D ( n, (Float_t *)pnt->GetXYZ(0),"");
-      line->SetLineColor(col);
-      line->SetLineWidth(1);
-      line->Draw();
-      m_TrackCollector->Add(line);
+      if ( opt[0] == 'L' ) {
+         TPolyLine3D  *line = new TPolyLine3D ( n, (Float_t *)pnt->GetXYZ(0),"");
+         line->SetLineColor(col);
+         line->SetLineWidth(siz);
+         line->Draw();
+         m_TrackCollector->Add(line);
+     } else {
+         TPolyMarker3D *dots = new TPolyMarker3D ( n, (Float_t *)pnt->GetXYZ(0),sty);
+         dots->SetMarkerColor(col);
+         dots->SetMarkerSize(siz/6);
+         dots->Draw();
+         m_TrackCollector->Add(dots);      
+     }
 #endif            
 
     // 		Create a node to hold it
@@ -1120,6 +1129,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.97  2003/10/28 20:21:13  fine
+// Adjust the maker size
+//
 // Revision 1.96  2003/10/28 06:07:30  fine
 // workaround to make the new viewer happy
 //
