@@ -105,17 +105,48 @@ void EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken) {
     { list=listC; dim=sizeof(listC)/sizeof(int); }
 
   int ic;
+  int nOK=0;
   for(ic=0;ic<block->GetEntries();ic++) {
     EEfeeDataBlock *b=(EEfeeDataBlock *)block->At(ic);
-    int crateID=b->getCrateID();
-    // printf("XXX b=%d crID=%d=%d  tok=%d=%d\n",ic, b->getCrateID() ,list[ic],b->getToken(), headToken);
-    if(ic>=dim ||  crateID!=list[ic] || headToken!=b->getToken())
+    assert(ic<dim); // fix it, use DB for crIdSwitch
+    if(ic>=22 ) { 
+      /*  mark BTOW crate as not valid,, one would need
+	  to come up with consistency test for BTOW and  
+	  b->setCrateID(16+BTOWcrateID); to avoid collision with ETOW & ESMD
+	  Jan Balewski, April 2004
+      */
       b->maskCrate();
-    else if(ic>=22 )
-      b->setCrateID(16+crateID); // bump up btow ID
-    //pr-intf("vvv %d %d \n",i,crateID);
+      continue;
+    }
+
+    // tmp, should be taken from DB as in StEEmcDataMaker.cxx
+    int lenCount=0;
+    int errFlag=0;
+    if(ic<6) {// ETOW
+      //lenCount=4+5*32; // real .daq content
+      lenCount=5*32; //  old ezTree header
+      errFlag=0;
+    } else { // ESMD
+      //lenCount=4+192;// real .daq content
+      lenCount=192;//  old ezTree header
+      errFlag=0x28;
+    };
+    int trigCommand=4; // physics, 9=laser/LED, 8=??
+
+    // this is messy, contact Jan before you change between  ezTree header & .daq header
+    
+    // real .daq content
+    //  int ok=b->isHeadValid(headToken,list[ic],lenCount,trigCommand,errFlag);
+
+    // old ezTree header 
+    int ok=b->isHeadValid(headToken,list[ic],errFlag,trigCommand,lenCount);
+    // printf("XXX b=%d crID=%d=%d  tok=%d=%d ok=%d\n",ic, b->getCrateID() ,list[ic],b->getToken(), headToken,ok);
+ 
+    if(ok) nOK++;
+   
+    if(!ok)  b->maskCrate();
   }
-  
+  // printf("nOK=%d\n",nOK);
 }
 
 //--------------------------------------------------
@@ -139,6 +170,9 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.14  2004/04/16 17:26:46  balewski
+ * more header checking, some mess introduced
+ *
  * Revision 1.13  2004/01/27 15:13:57  balewski
  * it is tricky with BTOW
  *

@@ -164,8 +164,16 @@ int  EEfeeDataBlock :: isValid(){
 //--------------------------------------------------
 int  EEfeeDataBlock 
 ::isHeadValid(int token, int crId, int len, int trigComm, int errFlag){
-  // printf("ask/0x: %x %x %x %x %x\n", token,crId,len,trigComm,errFlag);
-  // print(0);
+#if 0
+  printf("ask/0x: %x %x %x %x %x\n", token,crId,len,trigComm,errFlag);
+  print(0);
+  printf("getCrateID()/0x = %x %x\n",getCrateID(),crId);
+  printf("getToken()/0x = %x %x\n",getToken(),token);
+  printf("getLenCount()/0x = %x %x\n",getLenCount(),len);
+  printf("getTrigComm()/0x = %x %x\n",getTrigComm(),trigComm);
+  printf("getErrFlag()/0x = %x %x\n",getErrFlag(),errFlag);
+#endif
+
   if(getCrateID()!=crId) return 0; // discard
   if(getToken()!=token) return 0; // discard
   if(getLenCount()!=len) return 0;
@@ -178,6 +186,9 @@ int  EEfeeDataBlock
 
 /*
  * $Log: EEfeeDataBlock.cxx,v $
+ * Revision 1.13  2004/04/16 17:26:46  balewski
+ * more header checking, some mess introduced
+ *
  * Revision 1.12  2004/04/02 06:38:52  balewski
  * *** empty log message ***
  *
