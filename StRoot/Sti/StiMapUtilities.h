@@ -9,6 +9,7 @@ using std::string;
 
 class StHit;
 class StiHit;
+class StTpcHit;
 
 //Structure for hit map key
 struct HitMapKey {
@@ -74,6 +75,28 @@ struct SameStHit
 {
     bool operator() (const StiHit*) const;
     StHit* stHit;
+};
+
+//unary predicate
+class StTpcHitFilter
+{
+public:
+    virtual ~StTpcHitFilter() {};
+    virtual bool operator()(const StTpcHit&) const = 0;
+    virtual void build(const string&) =0;
+};
+
+class StTpcPadrowHitFilter : public StTpcHitFilter
+{
+public:
+    StTpcPadrowHitFilter() : mMinPadrow(999), mMaxPadrow(999), mBuilt(false) {};
+    virtual ~StTpcPadrowHitFilter() {};
+    virtual bool operator()(const StTpcHit&) const;
+    virtual void build(const string&);
+private:
+    unsigned int mMinPadrow;
+    unsigned int mMaxPadrow;
+    bool mBuilt;
 };
 
 #endif

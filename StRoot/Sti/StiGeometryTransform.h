@@ -24,6 +24,7 @@ class svg_shape_st;
 class StPrimaryVertex;
 class StSvtConfig;
 class StHelix;
+class StTpcHitFilter;
 
 class StiGeometryTransform{
     
@@ -77,15 +78,7 @@ public:
 
     void operator() (const StiKalmanTrackNode*, StHelix*);  // from StiTrackNode helix params -> StHelix
 
-    void operator() (const StGlobalTrack*, StiKalmanTrack*);
-    
-    //Point Transform Functors
-    
-    //refAngle is always defined [0,2pi] by each sector of the detector.
-    
-    //Go from global->Sti, expect refAngle positive
-    //StThreeVector<double> operator() (const StThreeVector<double>& position, double refAngle);
-    //StThreeVectorD operator() (const StThreeVectorD& position, double refAngle);
+    void operator() (const StGlobalTrack*, StiKalmanTrack*, const StTpcHitFilter* filter=0) const;
 
     pair<double, double> angleAndPosition(const StTpcHit*) const;
 
@@ -106,5 +99,6 @@ protected:
     padrow_radius_map mpadrowradiusmap;
 
 };
+
 
 #endif

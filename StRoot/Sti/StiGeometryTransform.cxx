@@ -533,7 +533,7 @@ pair<double, double> StiGeometryTransform::angleAndPosition(const StTpcHit *pHit
 } // angleAndPosition
 
 
-void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* sti)
+void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* sti, const StTpcHitFilter* filter) const
 {
     //cout <<"StiEvaluableTrackSeedFinder::operator()(StTrack*, StiKalmanTrack*, StiDetector*)"<<endl;
     //now get hits
@@ -551,27 +551,32 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 	}
 	else {
 	    //Find StiHit for this StHit
-	    pair<double, double> myPair = StiGeometryTransform::instance()->angleAndPosition(hit);
-	    double refAngle=myPair.first;
-	    double position=myPair.second;
+	    bool passedFilter=true;
+	    if (filter!=0) {passedFilter = filter->operator()(*hit);}
+
+	    if (passedFilter) {
+		pair<double, double> myPair = StiGeometryTransform::instance()->angleAndPosition(hit);
+		double refAngle=myPair.first;
+		double position=myPair.second;
+		
+		const hitvector& stiHits = StiHitContainer::instance()->hits(refAngle, position);
+		if (stiHits.size()==0) {
+		    cout <<"Error, no StiHits for this sector, padrow"<<endl;
+		    sti=0;
+		    return;
+		}
 	    
-	    const hitvector& stiHits = StiHitContainer::instance()->hits(refAngle, position);
-	    if (stiHits.size()==0) {
-		cout <<"Error, no StiHits for this sector, padrow"<<endl;
-		sti=0;
-		return;
-	    }
-	    
-	    SameStHit mySameStHit;
-	    mySameStHit.stHit = hit;
-	    hitvector::const_iterator where = find_if(stiHits.begin(), stiHits.end(), mySameStHit);
-	    if (where==stiHits.end()) {
-		cout <<"Error, no StiHit with this StHit was found"<<endl;
-		sti=0;
-		return;
-	    }
-	    else {
-		hitvec.push_back(*where);
+		SameStHit mySameStHit;
+		mySameStHit.stHit = hit;
+		hitvector::const_iterator where = find_if(stiHits.begin(), stiHits.end(), mySameStHit);
+		if (where==stiHits.end()) {
+		    cout <<"Error, no StiHit with this StHit was found"<<endl;
+		    sti=0;
+		    return;
+		}
+		else {
+		    hitvec.push_back(*where);
+		}
 	    }
 	}
     }

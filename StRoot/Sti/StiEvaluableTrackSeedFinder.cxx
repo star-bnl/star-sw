@@ -11,8 +11,8 @@ using std::for_each;
 #include <map>
 #include <utility>
 
-//StEvent
-//#include "StEventTypes.h"
+//SCL
+#include "StGetConfigValue.hh"
 
 //StMcEvent
 #include "StMcEventTypes.hh"
@@ -30,12 +30,14 @@ using std::for_each;
 #include "StiGeometryTransform.h"
 #include "StiKalmanTrack.h"
 #include "StiKalmanTrackNode.h"
+#include "StiMapUtilities.h"
 #include "StiEvaluableTrackSeedFinder.h"
 
 ostream& operator<<(ostream&, const StiHit&);
 
 StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* assoc)
-    : mAssociationMaker(assoc), mMcEvent(0)
+    : mAssociationMaker(assoc), mMcEvent(0), mFactory(0), mTpcHitFilter(0),
+      mBuildPath("empty"), mBuilt(false)
 {
     cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder()"<<endl;
     if (!assoc) {
@@ -46,6 +48,10 @@ StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* ass
 StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()
 {
     cout <<"StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()"<<endl;
+    if (mTpcHitFilter) {
+	delete mTpcHitFilter;
+	mTpcHitFilter=0;
+    }
 }
 
 void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt) 
@@ -69,6 +75,34 @@ void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt)
 void StiEvaluableTrackSeedFinder::build()
 {
     cout <<"StiEvalaubleTrackSeedFinder::build()"<<endl;
+    if (mBuildPath=="empty") {
+	cout <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\tmBuildPath==empty.  ABORT"<<endl;
+	return;
+    }
+
+    if (mBuilt) {
+	cout <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\talready built!.  ABORT"<<endl;
+	return;
+    }
+
+    cout <<"StiEvalaubleTrackSeedFinder::build().  Build from:\t"<<mBuildPath<<endl;
+
+    string hitFilterType="empty";
+    StGetConfigValue(mBuildPath.c_str(), "hitFilterType", hitFilterType);
+    if (hitFilterType=="empty") {
+	cout <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\tmhitFilterType==empty.  ABORT"<<endl;
+	return;
+    }
+    else if (hitFilterType=="StTpcPadrowHitFilter") {
+	mTpcHitFilter = new StTpcPadrowHitFilter();
+    }
+    else {
+	cout <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\tunkown hitfilter type: "<<hitFilterType<<".  ABORT"<<endl;
+	return;
+    }
+    mTpcHitFilter->build(mBuildPath);
+    
+    mBuilt=true;
 }
 
 bool StiEvaluableTrackSeedFinder::hasMore()
@@ -83,7 +117,7 @@ StiKalmanTrack* StiEvaluableTrackSeedFinder::next()
 
 StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
 {
-    StiEvaluableTrack* track = mfactory->getObject();
+    StiEvaluableTrack* track = mFactory->getObject();
     track->reset();
   
     mcTrackMapType* mcToStTrackMap = mAssociationMaker->mcTrackMap();
@@ -117,7 +151,9 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     }
     track->setStTrackPairInfo(bestPair);
     //ATTENTION CLAUDE: Uncomment the following to seed KalmanTrack and investigate problems!
-    StiGeometryTransform::instance()->operator()(bestPair->partnerTrack(), track);
+    //StiGeometryTransform::instance()->operator()(bestPair->partnerTrack(), track); //unfiltered
+    StiGeometryTransform::instance()->operator()(bestPair->partnerTrack(), track, mTpcHitFilter); //fitlered
+
     //Set StiDetectorContainer to layer corresponding to the innermost point on the track seed
     StiKalmanTrackNode* node = track->getLastNode(); //Should return innermost
     if (!node) {

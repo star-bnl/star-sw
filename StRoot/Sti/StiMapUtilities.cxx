@@ -2,12 +2,16 @@
 //M.L. Miller (Yale Software)
 //3/01
 
+//STD
 #include <iostream.h>
 #include <math.h>
 
+//SCL
 #include "StThreeVectorD.hh"
 #include "StEventTypes.h"
+#include "StGetConfigValue.hh"
 
+//Sti
 #include "StiHit.h"
 #include "StiMapUtilities.h"
 
@@ -134,6 +138,34 @@ bool NameMapKey::operator==(const NameMapKey& key2) const{
 bool NameMapKey::operator<(const NameMapKey& key2) const{
     //return( strcmp(name, key2.name) < 0 );
   return( name < key2.name );
+}
+
+bool StTpcPadrowHitFilter::operator()(const StTpcHit& hit) const
+{
+    return ( (hit.padrow()>=mMinPadrow) && (hit.padrow()<=mMaxPadrow) );
+}
+
+void StTpcPadrowHitFilter::build(const string& buildPath)
+{
+    cout <<"StTpcPadrowHitFilter::build()"<<endl;
+    if (mBuilt==true) {
+	cout <<"StTpcPadrowHitFilter::build(). ERROR:\tAlread built!  Abort."<<endl;
+	return;
+    }
+    
+    if (buildPath=="empty") {
+	cout <<"StTpcPadrowHitFilter::build(). ERROR:\tbuildPath==empty.  Abort."<<endl;
+	return;
+    }
+    StGetConfigValue(buildPath.c_str(), "mMinPadrow", mMinPadrow);
+    StGetConfigValue(buildPath.c_str(), "mMaxPadrow", mMaxPadrow);
+    
+    if (mMinPadrow==999 || mMaxPadrow==999) {
+	cout <<"StTpcPadrowHitFilter::build(). ERROR:\tmembers not initialized.  ABORT"<<endl;
+	return;
+    }
+    cout <<"\tMinPadrow:\t"<<mMinPadrow<<"\tMaxPadrow:\t"<<mMaxPadrow<<endl;
+    mBuilt=true;
 }
 
 //----------------------- Streamers -------------------------------------------------

@@ -311,9 +311,8 @@ void StiCompositeSeedFinder::build()
     mCurrentRep = mRepVec.begin();
     reset();
     cout <<"\n\tStiSeedFinderRep Entries\n"<<endl;
-    copy(mRepVec.begin(), mRepVec.end(),
-	 ostream_iterator<StiCompositeSeedFinder::StiSeedFinderRep>(cout, "\n\n"));
-    cout <<endl;
+    //copy(mRepVec.begin(), mRepVec.end(), ostream_iterator<StiCompositeSeedFinder::StiSeedFinderRep>(cout, "\n\n"));
+    //cout <<endl;
 }
 
 ostream& operator<<(ostream& os, const StiCompositeSeedFinder::StiSeedFinderRep& rep)
