@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.66  2002/02/13 21:16:30  ward
+// Move calibration access from Init() to InitRun().
+//
 // Revision 1.65  2001/05/17 20:16:02  ward
 // Minor modification to allow running without gain corrections.
 //
@@ -219,15 +222,34 @@ StTPCReader *victor;
 int gSector;
 // obsolete since we are moving to StIOMaker ZeroSuppressedReader *gZsr;  
 // obsolete since we are moving to StIOMaker DetectorReader *gDetectorReader;
-
+//________________________________________________________________________________
 St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),gConfig(daqOrTrs)
 {
   printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
   alreadySet=0; // FALSE
 }
+//________________________________________________________________________________
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 }
+//________________________________________________________________________________
 Int_t St_tpcdaq_Maker::Init() {
+  
+  m_seq_startTimeBin  = new TH1F("tpcdaq_startBin" , 
+                            "seq vs start bin" , 512 , 1.0 , 512.0 );
+  m_seq_sequnceLength = new TH1F("tpcdaq_seqLen" , 
+                            "seq vs seq len" , 100 , 1.0 , 100.0 );
+  m_seq_padNumber     = new TH1F("tpcdaq_padNum" , 
+                            "seq vs pad num" , 188 , 1.0 , 188.0 );
+  m_seq_padRowNumber  = new TH1F("tpcdaq_padrowNum" , 
+                            "seq vs padrow num" , 45 , 1.0 , 45.0 );
+  m_pad_numSeq        = new TH1F("tpcdaq_numSeq" , 
+                            "pad vs num seq" , 40 , 1.0 , 40.0 );
+  m_pix_AdcValue      = new TH1F("tpcdaq_adcVal" , 
+                            "pix vs ADC value" , 255 , 1.0 , 255.0 );
+  return StMaker::Init();
+}
+//________________________________________________________________________________
+Int_t St_tpcdaq_Maker::InitRun(Int_t RunNumber) {
   St_DataSet *herb; int junk;
 #ifdef NOISE_ELIM
   // This is for noise elimination, added July 99 for Iwona.
@@ -246,19 +268,6 @@ Int_t St_tpcdaq_Maker::Init() {
   mNseqHi=kasic[0].n_seq_hi;
 #endif
   junk=log10to8_table[0]; /* to eliminate the warnings from the compiler. */
-  
-  m_seq_startTimeBin  = new TH1F("tpcdaq_startBin" , 
-                            "seq vs start bin" , 512 , 1.0 , 512.0 );
-  m_seq_sequnceLength = new TH1F("tpcdaq_seqLen" , 
-                            "seq vs seq len" , 100 , 1.0 , 100.0 );
-  m_seq_padNumber     = new TH1F("tpcdaq_padNum" , 
-                            "seq vs pad num" , 188 , 1.0 , 188.0 );
-  m_seq_padRowNumber  = new TH1F("tpcdaq_padrowNum" , 
-                            "seq vs padrow num" , 45 , 1.0 , 45.0 );
-  m_pad_numSeq        = new TH1F("tpcdaq_numSeq" , 
-                            "pad vs num seq" , 40 , 1.0 , 40.0 );
-  m_pix_AdcValue      = new TH1F("tpcdaq_adcVal" , 
-                            "pix vs ADC value" , 255 , 1.0 , 255.0 );
   if(m_Mode == 0 || m_Mode == 2) { // Update this for embedding.
     herb=GetDataSet("StDAQReader");
     assert(herb);
@@ -272,16 +281,19 @@ Int_t St_tpcdaq_Maker::Init() {
      assert(0); // Ctor called incorrectly. 
   }
   PP"end of St_tpcdaq_Maker::Init\n");
-  return StMaker::Init();
+  return StMaker::InitRun(RunNumber);
 }
+//________________________________________________________________________________
 void St_tpcdaq_Maker::PrintErr(int number,char letter) {
   printf("Severe error %d(%c) in St_tpcdaq_Maker.\n",number,letter);
 }
+//________________________________________________________________________________
 char *St_tpcdaq_Maker::NameOfSector(int isect) {
   static char rv[16];
   sprintf(rv,"Sector_%i",isect);
   return rv;
 }
+//________________________________________________________________________________
 void St_tpcdaq_Maker::MkTables(int isect,St_DataSet *sector,
       St_raw_row **raw_row_in,St_raw_row **raw_row_out,
       St_raw_pad **raw_pad_in,St_raw_pad **raw_pad_out, 
@@ -332,6 +344,7 @@ void St_tpcdaq_Maker::MkTables(int isect,St_DataSet *sector,
     sect.Add(*pixel_data_out);
   }
 }
+//________________________________________________________________________________
 void St_tpcdaq_Maker::PadWrite(St_raw_pad *raw_pad_gen,int padR,int padOffset,
       int seqOffset,int nseq,int timeWhere,int pad) {
   int nAlloc,nUsed;
@@ -345,6 +358,7 @@ void St_tpcdaq_Maker::PadWrite(St_raw_pad *raw_pad_gen,int padR,int padOffset,
   if(nUsed>nAlloc-10) { raw_pad_gen->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
   raw_pad_gen->AddAt(&singlerow,padR);
 }
+//________________________________________________________________________________
 inline void St_tpcdaq_Maker::PixelWrite(St_type_shortdata *pixel_data_gen,
       int rownum,unsigned short datum) {
   int nAlloc,nUsed;
@@ -354,6 +368,7 @@ inline void St_tpcdaq_Maker::PixelWrite(St_type_shortdata *pixel_data_gen,
   if(nUsed>nAlloc-10) { pixel_data_gen->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
   pixel_data_gen->AddAt(&singlerow,rownum);
 }
+//________________________________________________________________________________
 void St_tpcdaq_Maker::SeqWrite(St_raw_seq *raw_seq_gen,int rownumber,
     int startTimeBin,int numberOfBinsInSequence) {
   int nAlloc,nUsed;
@@ -365,6 +380,7 @@ void St_tpcdaq_Maker::SeqWrite(St_raw_seq *raw_seq_gen,int rownumber,
   if(nUsed>nAlloc-10) { raw_seq_gen->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
   raw_seq_gen->AddAt(&singlerow,rownumber);
 }
+//________________________________________________________________________________
 void St_tpcdaq_Maker::RowWrite(St_raw_row *raw_row_gen,int rownumber,
           int pixSave, int iseqSave,int nPixelPreviousPadRow,
           int nSeqThisPadRow,int offsetIntoPadTable,
@@ -382,6 +398,7 @@ void St_tpcdaq_Maker::RowWrite(St_raw_row *raw_row_gen,int rownumber,
   singlerow.RowId=ipadrow+1;
   raw_row_gen->AddAt(&singlerow,rownumber);
 }
+//________________________________________________________________________________
 int St_tpcdaq_Maker::getSector(Int_t isect) {
   int rv=0;
   if(m_Mode != 1) {         // Use DAQ.
@@ -392,6 +409,7 @@ int St_tpcdaq_Maker::getSector(Int_t isect) {
   }
   return rv; // 0 means there are hits and there is no error.
 }
+//________________________________________________________________________________
 int St_tpcdaq_Maker::getPadList(int whichPadRow,unsigned char **padlist) {
   int rv; unsigned char *padlistPrelim;
   if(m_Mode != 1) { // Use DAQ.
@@ -404,6 +422,7 @@ int St_tpcdaq_Maker::getPadList(int whichPadRow,unsigned char **padlist) {
   }
   return rv;
 }
+//________________________________________________________________________________
 #ifdef ASIC_THRESHOLDS
 #define MSSPS 600 /* MSSPS = max sub sequences per sequence */
 void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst) {
@@ -443,6 +462,7 @@ void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst) {
   *nseqOld=npp; *lst=pp;
 }
 #endif
+//________________________________________________________________________________
 int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequence **lst) {
   int rv,nseqPrelim; TPCSequence *lstPrelim;
   if(m_Mode != 1) { // Use DAQ.
@@ -458,6 +478,7 @@ int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequenc
 #endif
   return rv; // < 0 means serious error.
 }
+//________________________________________________________________________________
 #ifdef GAIN_CORRECTION
 void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) { // www
   register int row,pad;
@@ -480,6 +501,7 @@ void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) { // www
   }
 }
 #endif
+//________________________________________________________________________________
 #ifdef NOISE_ELIM
 void St_tpcdaq_Maker::SetNoiseEliminationStuff() {
   int i,sector;
@@ -514,6 +536,7 @@ void St_tpcdaq_Maker::SetNoiseEliminationStuff() {
 
   }
 }
+//________________________________________________________________________________
 void St_tpcdaq_Maker::ExcludeTheseTimeBins(int lo1,int hi1,int lo2,int hi2,int lo3,int hi3) {
   int sector,nbin;
   assert(lo1<=hi1);
@@ -534,6 +557,7 @@ void St_tpcdaq_Maker::ExcludeTheseTimeBins(int lo1,int hi1,int lo2,int hi2,int l
     noiseElim[sector].up [2]=hi3;
   }
 }
+//________________________________________________________________________________
 void St_tpcdaq_Maker::WriteStructToScreenAndExit() {
   int jj,ii;
   for(ii=0;ii<24;ii++) {
@@ -558,6 +582,7 @@ void St_tpcdaq_Maker::WriteStructToScreenAndExit() {
 // St_tpcdaq_Maker::Output returns 1
 // St_tpcdaq_Maker::Maker returns kStErr
 ///////////////////////////////////////
+//________________________________________________________________________________
 int St_tpcdaq_Maker::Output() {
 #ifdef NOISE_ELIM
   char skip; int hj,lgg;
@@ -719,6 +744,7 @@ int St_tpcdaq_Maker::Output() {
   printf("Pixel count = %d\n",pixCnt);
   return 0;
 }
+//________________________________________________________________________________
 /*------------------------------------------------------------------------
 name        init        set      used     columnName     comment
 ----        ----        ---      ----     ----------     -------
@@ -735,6 +761,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
  mTdr = new StTrsDetectorReader(mEvent); assert(mTdr);
  return 0;
 }
+//________________________________________________________________________________
 Int_t St_tpcdaq_Maker::Make() {
   int errorCode;
   printf("I am Ronald McDonald. (Mar 7 2000).  St_tpcdaq_Maker::Make().\n"); 
