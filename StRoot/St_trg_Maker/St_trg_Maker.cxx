@@ -145,7 +145,9 @@ Int_t St_trg_Maker::Make(){
   //     printf("ssd  pedestal data\n");
   //   }
   //   event++;
-  //   printf("ssd event %2d, %02d%c, chan %05d, data %03d\n",event,ladder,eastWest,channel,data);
+  //   printf("ssd event %2d, %02d%c, chan %05d, data  %03d\n",event,ladder,eastWest,channel,data);
+  //   printf("ssd event %2d, %02d%c, chan %05d, ped   %03d\n",event,ladder,eastWest,channel,pedestal);
+  //   printf("ssd event %2d, %02d%c, chan %05d, noise %03d\n",event,ladder,eastWest,channel,noise);
   // }
   //////////////////////  END OF SSD EXAMPLE  //////////////////////////////////////////
 
@@ -1050,8 +1052,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.48 2004/02/18 20:17:49 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.49 2004/03/09 18:19:06 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.49  2004/03/09 18:19:06  ward
+// Added pedestal and noise capability to the SSD reader.
+//
 // Revision 1.48  2004/02/18 20:17:49  ward
 // Access SSD data in makers.
 //

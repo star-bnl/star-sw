@@ -43,7 +43,8 @@ int SSD_Reader::ssdData(int ladder,char eastWest,int channel,
     int& data,int& ped,int& noise) {
 
   int cnt=0,strip,pad,i,det,pos,mtime,time,daqLadder;
-  static unsigned int dataCache[12288]; 
+  static unsigned int cache1[12288];
+  static unsigned int cache2[12288];
   static int daqLadderInit=-1;
 
   data = -1; ped  = -1; noise= -1; daqLadder=-1;
@@ -85,24 +86,44 @@ int SSD_Reader::ssdData(int ladder,char eastWest,int channel,
   // For speed, we cache the data for one ladder.  Adapted from Boucham's special.C.
   if(daqLadderInit!=daqLadder) {
     daqLadderInit=daqLadder;
-    for(i=0;i<12288;i++) dataCache[i]=0; // This is necessary -- not all members will be reset below.
-    pos=0;
-    for(time=0;time<192;time++) { // Though "time" is not used explicitly, it's involved in incrementeing "pos".
-      for(pad=0;pad<64;pad++) {
-        for(mtime=0;mtime<ssd.counts[daqLadder][pad];mtime++) {
-          if(time==ssd.strip[daqLadder][pad][mtime]) {
-            det=pos/768; strip=pos%768;
-            assert(pos>=0&&pos<12288);
-            dataCache[pos]=log8to10_table[ssd.adc[daqLadder][pad][mtime]];
-            cnt++;
-          } // if(time
-        }   // for(mtime
-        pos++;
-      }     // for(pad
-    }       // for(time
+    for(i=0;i<12288;i++) { cache1[i]=0; cache2[i]=0; } // This is necessary -- not all members are reset if ssd.mode==0.
+    if(ssd.mode==0) { // real data
+      pos=0;
+      for(time=0;time<192;time++) { // Though "time" is not used explicitly, it's involved in incrementeing "pos".
+        for(pad=0;pad<64;pad++) {
+          for(mtime=0;mtime<ssd.counts[daqLadder][pad];mtime++) {
+            if(time==ssd.strip[daqLadder][pad][mtime]) {
+              det=pos/768; strip=pos%768;
+              assert(pos>=0&&pos<12288);
+              cache1[pos]=log8to10_table[ssd.adc[daqLadder][pad][mtime]];
+              cnt++;
+            } // if(time
+          }   // for(mtime
+          pos++;
+        }     // for(pad
+      }       // for(time
+    } else if(ssd.mode==1) { // pedestal data
+      pos=0;
+      for(time=0;time<192;time++) {
+        for(pad=0;pad<64;pad++) {
+          cache1[pos]=ssd.adc[daqLadder][pad][time];
+          cache2[pos]=ssd.strip[daqLadder][pad][time]; // "strip"s role in ped data is completely different than in real data.
+          pos++;
+        }
+      }
+    } else {
+      assert(0); // unknown value of ssd.mode
+    }
   }         // if(daqLadderInit ...
 
-  data=dataCache[channel];
+  if(ssd.mode==0) {
+    data=cache1[channel];
+  } else if(ssd.mode==1) {
+    ped=cache1[channel];
+    noise=cache2[channel];
+  } else {
+    assert(0); // unknown value of ssd.mode
+  }
 
   return ssd.mode ;
 } 
