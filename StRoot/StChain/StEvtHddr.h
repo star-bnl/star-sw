@@ -33,7 +33,7 @@ public:
   TDatime       GetProdDateTime() const {return mProdTime;};
   Int_t     	GetEventNumber()  const {return mEventNumber;};
   Int_t     	GetGenerType()    const {return mGenerType;};
-  Int_t     	IsNewRun()    const {return (mRunNumber==mOldRunNumber);};
+  Int_t     	IsNewRun()    const {return (mRunNumber!=mOldRunNumber);};
   void          FillTag(EvtHddr_st *tag);  
 //		Set methods
 
