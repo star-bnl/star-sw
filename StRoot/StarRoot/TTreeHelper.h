@@ -70,7 +70,7 @@ TTreeHelperCast   fCast;		//!
 public:
 
     TTreeHelper(TTree *tree);
-    TTreeHelper(const char *treeName);
+    TTreeHelper(const char *treeName="");
     virtual ~TTreeHelper();
 
 TTreeHelperCast &operator() (const TString varname);
@@ -95,6 +95,7 @@ static void GetInfo(const TBranch *tb, const char *&tyName,Int_t &units,void  *&
 
 private:
 void Init();
+void WhichTree(const char *fileName);
 static TBranch *GetBranch(const char* brName,TTree *tree);     
 static TBranch *GetBranch(const char* brName,TSeqCollection *brList,Int_t flag); 
 
