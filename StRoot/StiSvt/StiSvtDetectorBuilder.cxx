@@ -65,16 +65,35 @@
     6     13       5     6
     6     15       5     7
  */
-StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active)
+StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, char* baseName)
   : StiDetectorBuilder("Svt",active)
 {
+  cout <<"Creating Hit Error Calculator:"<<endl;
   _calc = new StiDefaultHitErrorCalculator();
-  _calc->set(0.25,0.,0.,0.25,0.,0.); 
+  cout <<"Setting Hit Error Calculator parameters:"<<endl;
+  _calc->set(.1,0.,0.,.1,0.,0.); 
+
+
   StiTrackingParameters * trackingPars = getTrackingParameters();
-  trackingPars->setMaxChi2ForSelection(10.);
-  trackingPars->setMinSearchWindow(1.6);
-  trackingPars->setMaxSearchWindow(7.);
-  trackingPars->setSearchWindowScaling(10.);
+
+  string fName= _name + baseName;
+
+  ifstream inF(fName.c_str());
+  if (inF)
+    {
+      trackingPars->setPar(inF);
+      cout <<"New tracking parameters set from file:"<<fName<<endl;
+    }
+  else
+    {
+      trackingPars->setMaxChi2ForSelection(50.);
+      trackingPars->setMinSearchWindow(1.6);
+      trackingPars->setMaxSearchWindow(40.);
+      trackingPars->setSearchWindowScaling(60.);
+      cout <<"Tracking Parameters set from default. "<<endl;
+    }
+  cout <<*trackingPars<<endl;
+
 }
 
 StiSvtDetectorBuilder::~StiSvtDetectorBuilder()
