@@ -5,12 +5,11 @@
 * Author     : Aleksei Pavlinov, WSU 
 *********************************************************
 */
-  struct  controlADCtoE{
-    short bemcDeductPedestal;  /* switch for deducting pedestal */
-    short bsmdDeductPedestal;  /* switch for deducting pedestal */
-
-    short bemcCalibration;       /* switch for calibration */
-    short bsmdCalibration;       /* switch for calibration */
-
-    short messLimit;           /* limit for warning message */
-  };
+struct  controlADCtoE
+{
+    short DeductPedestal[8];    /* switch for deducting pedestal */
+    short Calibration[8];       /* switch for calibration */    
+    short AdcCutOff[8];         /* cutoff value for hits close to pedestal. -1 = none */
+    short OnlyCalibrated[8];    /* save only calibrated hits */
+    short messLimit;            /* limit for warning message */
+};
