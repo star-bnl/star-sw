@@ -25,7 +25,7 @@ c
       INTEGER   itptrk,imctrk,igetrk,ittetrk,ig2ttrk,ictfhit,imslat
       INTEGER   i,j,k,l,m,n,icall,itrk,itr,ieb,ll,idet
       INTEGER   iout,iout1,iout2,iout3,iout4,iout5
-      INTEGER   eta_bin,tray_bin,slat_bin,int_yn
+      INTEGER   eta_bin,tray_bin,slat_bin,int_yn,ivtx
       INTEGER   n_exttrk,n_toftrk,trk_npts_min,i_eta,kk,kk_eta
       REAL      b_field,deg_to_rad,pi,rad_to_deg
       REAL      p_input(6),p_gen,p_trk,p_tof,dx,dy,dr,phi1,phi2
@@ -97,11 +97,17 @@ c
       privert_r_cut =  4.0  ! OPEN CUT because data volume so small, and cut vars are in output
 
 c---- privert setup
-c      x_privert = dst_vertex(1).x
-c      y_privert = dst_vertex(1).y
       x_privert = 0.
       y_privert = 0.
-      z_privert = dst_vertex(1).z
+      z_privert = 0.
+      DO ivtx=1,dst_vertex_h.nok
+         IF( (dst_vertex(ivtx).vtx_id=1).AND.
+     +       (dst_vertex(ivtx).iflag=1)) THEN
+            x_privert = dst_vertex(ivtx).x
+            y_privert = dst_vertex(ivtx).y
+            z_privert = dst_vertex(ivtx).z
+         ENDIF
+      ENDDO
       write(*,'(1x,a36,3f9.3)')' FILL_DST_TOF: primary vertex posn =',
      1         x_privert,y_privert,z_privert
 
