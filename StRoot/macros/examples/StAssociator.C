@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.12 2000/01/12 20:23:01 calderon Exp $
+// $Id: StAssociator.C,v 1.13 2000/01/19 19:38:12 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.13  2000/01/19 19:38:12  calderon
+// activate runco branch
+//
 // Revision 1.12  2000/01/12 20:23:01  calderon
 // Changed default file to the one produced weekly by Lidia in
 // /star/rcf/test/dev/tfs_Linux/Tue/year_2a/hc_standard/
@@ -96,6 +99,7 @@ const char *MainFile="/star/rcf/test/dev/tfs_Linux/Tue/year_2a/hc_standard/*.gea
     ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
     ioMaker->SetBranch("geantBranch",0,"r"); //activate geant Branch
     ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
+    ioMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
 
     // Note, the title "events" is used in the Association Maker, so don't change it.
     StEventMaker*       eventReader   = new StEventMaker("events","title");
