@@ -68,7 +68,7 @@ void StBemcData::validateData()
 	if(TDCErrorFlag==1) ok = kFALSE;
   Int_t nbad = 0;
 	for(Int_t i=0;i<30;i++) if(!checkTDC(i)) nbad++;
-  if(nbad>0) ok = kFALSE;
+  if(nbad>7) ok = kFALSE;
 	ValidTowerEvent = ok;
 	
 	//SMD
