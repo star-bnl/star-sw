@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 1.5 1999/04/30 13:16:31 fisyak Exp $
+ * $Id: StVertex.h,v 1.6 1999/06/24 17:33:01 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -15,8 +15,11 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 1.5  1999/04/30 13:16:31  fisyak
- * add StArray for StRootEvent
+ * Revision 1.6  1999/06/24 17:33:01  fisyak
+ * Replace Collection by value to Collection by pointer for TBrowser
+ *
+ * Revision 1.7  1999/09/10 09:16:12  ullrich
+ * Made position() and positionError() const methods.
  *
  * Revision 1.6  1999/06/24 17:33:01  fisyak
  * Replace Collection by value to Collection by pointer for TBrowser
@@ -49,6 +52,15 @@
  * Fixed typo introduced at last check-in.
  *
  * Revision 2.2  2000/01/11 19:22:14  ullrich
+#include "tables/dst_vertex.h"
+#include "StThreeVectorF.hh"
+#include "StGlobalTrack.h"
+#include "dst_vertex.h"
+ * Added non-const parent() method.
+class StVertex : public StObject {
+protected:
+    ULong_t                mIndex;
+    StVertexType           mType;
     StVecPtrGlobalTrack   *mDaughters;
     StGlobalTrack         *mParent;
     StThreeVectorF         mPosition;
@@ -59,16 +71,16 @@
  *
     StVertex(dst_vertex_st*);
     // StVertex(const StVertex&);       use default
-    virtual StVertexType                type();
-    virtual StVecPtrGlobalTrack&        daughters();
-    virtual UInt_t                numberOfDaughters();
+    // const StVertex & operator=(const StVertex&);
+#include "StMeasuredPoint.h"
+#include "StEnumerations.h"
 #include "StMatrixF.hh"
-    virtual const StGlobalTrack*        parent();
-    virtual const StThreeVectorF& position();
-    virtual const StThreeVectorF& positionError();
+#include "StContainers.h"
+
+    virtual StVertexType                type() {return mType;};
     virtual StVecPtrGlobalTrack&        daughters() {return *mDaughters;};
-    virtual ULong_t               qualityBitmask();
-    virtual Float_t                       chiSquared();         
+    virtual const StThreeVectorF& position(){ return mPosition; } ;
+    virtual const StThreeVectorF& positionError(){ return mPositionError; };
     virtual const StGlobalTrack*        parent(){ return mParent; };
     virtual const StThreeVectorF& position() const{ return mPosition; } ;
     virtual const StThreeVectorF& positionError() const { return mPositionError; };
@@ -79,39 +91,13 @@
     ULong_t                flag() const;
     virtual void setType(StVertexType);           
     virtual void setParent(StGlobalTrack* );         
-protected:
-    ULong_t          mIndex;
-    StVertexType           mType;
-    StVecPtrGlobalTrack    mDaughters;
-    StGlobalTrack*         mParent;
-    StThreeVectorF   mPosition;
-    StThreeVectorF   mPositionError;
-    ULong_t          mQualityBitmask;
-    Float_t                  mChiSquared;                
     virtual void setPosition(const StThreeVectorF&);       
     virtual void setPositionError(const StThreeVectorF&);  
     virtual void setQualityBitmask(ULong_t); 
-
-inline StVertexType StVertex::type() { return mType; }
-
-inline StVecPtrGlobalTrack& StVertex::daughters(){ return mDaughters; }       
-
-inline UInt_t StVertex::numberOfDaughters() { return mDaughters.size(); }
-
     virtual void setChiSquared(Float_t);     
     virtual void setIndex(Long_t ii) {mIndex = ii;};
-    return (i < mDaughters.size() ? mDaughters[i] : 0);
+    StMatrixF              covariantMatrix() const;  // overwrite inherited
   ClassDef(StVertex,1)  //StVertex structure
-
-inline const StGlobalTrack* StVertex::parent(){ return mParent; }          
-
-inline const StThreeVectorF& StVertex::position(){ return mPosition; }        
-
-inline const StThreeVectorF& StVertex::positionError(){ return mPositionError; }   
-
-inline ULong_t StVertex::qualityBitmask(){ return mQualityBitmask; }  
-
-inline Float_t StVertex::chiSquared(){ return mChiSquared; }      
     virtual void setFlag(Long_t);
 StCollectionDef(Vertex)
 inline StGlobalTrack* StVertex::daughter(UInt_t i)

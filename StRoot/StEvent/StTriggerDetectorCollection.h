@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.h,v 1.5 1999/04/30 13:16:30 fisyak Exp $
+ * $Id: StTriggerDetectorCollection.h,v 1.6 1999/06/24 17:33:01 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.h,v $
- * Revision 1.5  1999/04/30 13:16:30  fisyak
- * add StArray for StRootEvent
+ * Revision 1.6  1999/06/24 17:33:01  fisyak
+ * Replace Collection by value to Collection by pointer for TBrowser
+ *
+ * Revision 1.6  1999/06/24 17:33:01  fisyak
+ * Replace Collection by value to Collection by pointer for TBrowser
  *
  * Revision 1.5  1999/04/30 13:16:30  fisyak
  * add StArray for StRootEvent
@@ -49,26 +52,26 @@ public:
     StVecPtrVpdCounter& vpdCounters();
     StVecPtrZdcSegment& zdcSegments();
     StZdcSummary&    zdcSummary();
-    StVecPtrCtbCounter mCtbCounters;
-    StVecPtrMwcSector  mMwcSectors;
-    StVecPtrVpdCounter mVpdCounters;
-    StVecPtrZdcSegment mZdcSegments;
-    StVpdSummary    mVpdSummary;
-    StZdcSummary    mZdcSummary;
+    StVpdSummary&    vpdSummary();
+
+protected:
+    StVecPtrCtbCounter *mCtbCounters;
+    StVecPtrMwcSector  *mMwcSectors;
+    StVecPtrVpdCounter *mVpdCounters;
     StVecPtrZdcSegment *mZdcSegments;
     StVpdSummary       *mVpdSummary;
     StZdcSummary       *mZdcSummary;
-inline StVecPtrCtbCounter& StTriggerDetectorCollection::ctbCounters() { return mCtbCounters; }
+  ClassDef(StTriggerDetectorCollection,1)  //StTriggerDetectorCollection structure
 };
-inline StVecPtrMwcSector&  StTriggerDetectorCollection::mwcSectors() { return mMwcSectors; }
+
 inline StVecPtrCtbCounter& StTriggerDetectorCollection::ctbCounters() { return *mCtbCounters; }
-inline StVecPtrVpdCounter& StTriggerDetectorCollection::vpdCounters() { return mVpdCounters; }
+
 inline StVecPtrMwcSector&  StTriggerDetectorCollection::mwcSectors() { return *mMwcSectors; }
-inline StVecPtrZdcSegment& StTriggerDetectorCollection::zdcSegments() { return mZdcSegments; }
+
 inline StVecPtrVpdCounter& StTriggerDetectorCollection::vpdCounters() { return *mVpdCounters; }
-inline StZdcSummary& StTriggerDetectorCollection::zdcSummary() { return mZdcSummary; }
+
 inline StVecPtrZdcSegment& StTriggerDetectorCollection::zdcSegments() { return *mZdcSegments; }
-inline StVpdSummary& StTriggerDetectorCollection::vpdSummary() { return mVpdSummary; }
+
 inline StZdcSummary& StTriggerDetectorCollection::zdcSummary() { return *mZdcSummary; }
 
 inline StVpdSummary& StTriggerDetectorCollection::vpdSummary() { return *mVpdSummary; }
