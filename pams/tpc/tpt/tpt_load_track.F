@@ -1,5 +1,9 @@
-* $Id: tpt_load_track.F,v 1.19 2000/03/19 04:20:33 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.20 2000/03/29 03:52:07 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.20  2000/03/29 03:52:07  sakrejda
+* Marking hits belonging to a track added here and the track length
+* calcualtion changed to allow for spirals.
+*
 * Revision 1.19  2000/03/19 04:20:33  sakrejda
 * An option to use straigth line to fit lasers even if the field is on.
 *
@@ -113,9 +117,9 @@ C     REAL     xlocal(3), bfield(3)                  !ALREADY EXISTS
       DATA nposOn /.TRUE./
 
       character*256 m132 
-      integer id1
-      data id1/0/
-      save id1 
+      integer id1,id2
+      data id1,id2/2*0/
+      save id1 ,id2
 C___________________________________________________________________
       if(ipt.gt.track_h.maxlen) then
          write(m132,*) "TPTLOAD-E1 too many tracks",track_h.maxlen,ipt
@@ -198,17 +202,32 @@ C     z coordinate of the point where track parameters are given
 c
       xold = hit(ld).x
       yold = hit(ld).y
+      do ld=1,trk(ipt).nhit
+         ient=trk(ipt).ipnt(ld)
+         if(ient.gt.hit_h.nok.or.ient.lt.1) then
+           write(m132,*) 'TPTLOAD-E2 WRONG POINTER*',ient
+           call Message( m132, 1, idI2 )
+         endif
+         hit(ient).track=ipt*1000+ld
+      end do
       ds=0.0
       do ld=trk(ipt).nhit-1,1,-1
          ient = trk(ipt).ipnt(ld)
          iret = tpt_cross_fact(hit(ient).row,hit(ient).x,
      >          hit(ient).y,xold,yold,cf,hit(ient).alpha)
-c         if(abs(bfield(3)).gt.0.1)
-c     >   ds=ds+2.0*abs(trk(ipt).p(2))*asin(0.5*sqrt((xold-hit(ient).x)**2+
-c     >   (yold-hit(ient).y)**2)/abs(trk(ipt).p(2)))
+         hit(ient).lambda=atand(trk(ipt).p(7))
+         if(abs(bfield(3)).gt.0.1.or.tpar(ipass).lfit.ne.0) then
+         ds=ds+abs(asin((( xold -trk(ipt).p(3))*
+     >       ( hit( ient).y-trk(ipt).p(4))-
+     >       ( yold -trk(ipt).p(4))*
+     >       ( hit( ient).x-trk(ipt).p(3)))/
+     > sqrt((( hit( ient).x -trk(ipt).p(3))**2+
+     >       ( hit( ient).y -trk(ipt).p(4))**2)*
+     >      (( xold-trk(ipt).p(3))**2+
+     >       ( yold-trk(ipt).p(4))**2))))
+         endif
          xold = hit(ient).x
          yold = hit(ient).y
-         hit(ient).lambda=atand(trk(ipt).p(7))
       end do
 
       hit( trk(ipt).ipnt(trk(ipt).nhit)).alpha =
@@ -220,16 +239,6 @@ C
      >.or.tpar(ipass).lfit.eq.1) then
            track(ipt).length = trk(ipt).p(3)
       else
-           ds=(( hit( trk(ipt).ipnt(trk(ipt).nhit)).x -trk(ipt).p(3))*
-     >        ( hit( trk(ipt).ipnt(1)).x-trk(ipt).p(3))+ 
-     >        ( hit( trk(ipt).ipnt(trk(ipt).nhit)).y -trk(ipt).p(4))*
-     >        ( hit( trk(ipt).ipnt(1)).y-trk(ipt).p(4)))/
-     >     sqrt((( hit( trk(ipt).ipnt(trk(ipt).nhit)).x -trk(ipt).p(3))**2+
-     >           ( hit( trk(ipt).ipnt(trk(ipt).nhit)).y -trk(ipt).p(4))**2)*
-     >          (( hit( trk(ipt).ipnt(1)).x-trk(ipt).p(3))**2+
-     >           ( hit( trk(ipt).ipnt(1)).y-trk(ipt).p(4))**2))
-           ds=acos(ds)
-C
            track(ipt).length =abs(trk(ipt).p(2))*ds*sqrt(1.0+track(ipt).tanl**2)
       endif
 
