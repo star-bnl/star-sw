@@ -11,6 +11,7 @@ message 'start tfs_run'
   ami/module/call tfs_g2t _
 	 [geant_Event]/g2t_tpc_hit _
 	 [geant_Event]/g2t_track _
+	 [geant_Event]/g2t_vertex _
 		[params]/tpc/tfspars/tfs_fspar _ 
   		[params]/tpc/tfspars/tfs_bmpar _
 		[params]/tpc/tfspars/tfs_fsctrl _

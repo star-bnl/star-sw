@@ -1,5 +1,8 @@
-* $Id: tfs_g2t.F,v 1.6 1998/04/23 19:12:00 sakrejda Exp $
+* $Id: tfs_g2t.F,v 1.7 1998/12/03 23:03:56 sakrejda Exp $
 * $Log: tfs_g2t.F,v $
+* Revision 1.7  1998/12/03 23:03:56  sakrejda
+* Akio's changes to create pileup events added
+*
 * Revision 1.6  1998/04/23 19:12:00  sakrejda
 * modified to print out an estimate of needed tphit size if the structure is not big enough
 *
@@ -17,6 +20,7 @@
 *
       INTEGER FUNCTION TFS_G2T(  g2t_hit_h,       g2t_hit,
      >                           g2t_track_h,     g2t_track,
+     >                           g2t_vertex_h,    g2t_vertex,
      >                           par_h,            par,
      >                           bmpar_h,          bmpar,
      >                           ctrl_h,           ctrl,
@@ -92,6 +96,7 @@ C                                                  hits in TPC.
 C     Dhammika W.                  04/16/1997      fix a bug in tpc_index
 C                                                  table updating in 
 C                                                  tfs_tpchit_merge.
+C     Akio O.                      10/29/1998      modify for high L pp.
 
 C-----------------------------------------------------------------------
 
@@ -284,7 +289,15 @@ C     generate pad response and spatial resolutions
          TIME_ALL = TIME_ALL + TIME_NOW
          TIME_POINT = TIME_POINT + TIME_NOW
          
-C     displace overlapping events
+C     displace overlapping events  ---1998.10.29-akio
+         CALL TFS_DISPL_EVENT2(par_h,par,tphit_h,tphit,
+     +        tpc_index_h,tpc_index,g2t_hit_h,g2t_hit,
+     +        g2t_track_h,g2t_track,g2t_vertex_h,g2t_vertex)
+         CALL TIMED(TIME_NOW)
+         TIME_ALL = TIME_ALL + TIME_NOW
+         TIME_DISPL = TIME_DISPL + TIME_NOW
+
+C     displace
          IF( CTRL(1).PPFLAG .NE. 0 )
      >        CALL TFS_DISPL_EVENT( par_h, par, tphit_h, tphit )
          CALL TIMED(TIME_NOW)
