@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.23 2001/09/10 18:00:12 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.24 2001/10/15 16:15:02 pavlinov Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.24  2001/10/15 16:15:02  pavlinov
+// Clenup EMC stuff for production
+//
 // Revision 2.23  2001/09/10 18:00:12  genevb
 // Another trigger word
 //
@@ -134,7 +137,7 @@ Int_t StEventQAMaker::Init() {
 
   mHitHist = new HitHistograms("QaDedxAllSectors","dE/dx for all TPC sectors",100,0.,1.e-5,2);
   if ((gROOT->GetClass("StEmcMath")) && (gROOT->GetClass("StEmcGeom"))) {
-    for(Int_t i=0; i<4; i++) {emcGeom[i] = new StEmcGeom(i+1);}
+    for(Int_t i=0; i<4; i++) {emcGeom[i] = StEmcGeom::getEmcGeom(i+1);} // 3-oct-2001 by PAI
   }
   return StQAMakerBase::Init();
 }
@@ -1681,6 +1684,7 @@ void StEventQAMaker::MakeHistEMC() {
 
     Float_t energy=0.0; // Energy for whole detector
     UInt_t  nh=0;         // Hits for whole detectors
+    if(detector==0) continue; // 2-oct-2001 
     for(UInt_t j=1;j<121;j++){
       StEmcModule* module = detector->module(j);
       StSPtrVecEmcRawHit& rawHit=module->hits();
@@ -1712,6 +1716,7 @@ void StEventQAMaker::MakeHistEMC() {
     Int_t det = i+1, nh;
     StDetectorId id = StEmcMath::detectorId(det);
     StEmcDetector* detector = emccol->detector(id);
+    if(detector==0) continue; // 2-oct-2001 
     StSPtrVecEmcCluster& cluster = detector->cluster()->clusters();
 
     hists->m_emc_ncl->Fill(log10(Double_t(cluster.size())),(Float_t)det);
