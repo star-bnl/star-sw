@@ -2,47 +2,9 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.11 1999/07/13 00:34:16 fine Exp $
-// $Log: PadControlPanel.C,v $
-// Revision 1.11  1999/07/13 00:34:16  fine
-// new button has been added to draw 3D axes
+// $Id: PadControlPanel.C,v 1.12 1999/11/13 23:31:34 fine Exp $
 //
-// Revision 1.10  1999/06/11 19:14:01  fine
-// Some extra protections agaist of view == 0
-//
-// Revision 1.9  1999/06/11 18:17:55  fine
-// View have been standardtized
-//
-// Revision 1.8  1999/06/11 01:27:37  fine
-// TIter fixed
-//
-// Revision 1.7  1999/06/10 19:44:16  fine
-// AdjustScale button jas been introduced
-//
-// Revision 1.6  1999/06/10 03:40:53  fine
-// New button to draw 3D axice added
-//
-// Revision 1.5  1999/06/03 00:35:34  fine
-// Comments clean up
-//
-// Revision 1.4  1999/06/03 00:27:53  fine
-//  4 view control has been activated
-//
-// Revision 1.3  1999/06/02 22:25:12  fine
-// 4 view command has been introduced
-//
-// Revision 1.2  1999/06/02 16:30:12  fine
-// Clean up
-//
-// Revision 1.1  1999/05/29 20:55:11  fine
-// macro to control any 3D view
-//
-//
-//  PadControl panel is the set of the static methods to control 
-//  TView of any "current" TPad with some "primitive"
-//  operation:
-//
-//
+
 ////////////////////////////////////////////////////////////////////////
 //
 // This macro generates a Controlbar panel: 
@@ -102,7 +64,7 @@ static TControlBar *PadControlPanel(TControlBar *bar=0){
    if (bar) delete bar;
    bar = new TControlBar("vertical", "Pad Control Panel");
    bar->AddButton("Black background", "StPadControlPanel::SetBackround(kBlack);", "Change the backgroung color to black");
-   bar->AddButton("White background", "StPadControlPanel::SetBackround(kWhite);", "Change the backgroung color to white");
+   bar->AddButton("White background", "StPadControlPanel::SetBackround(19);", "Change the backgroung color to white");
 //   bar->AddButton("Set background", "StPadControlPanel::SetBackroundStyle();", "Change the backgroung color to white");
    bar->AddButton("Adjust scales","StPadControlPanel::AdjustScales();","Adjust the scales of all three axice");
    bar->AddButton("Centered","StPadControlPanel::Centered3DImages();","Place (0,0,0) into the center of the view port");
@@ -316,3 +278,46 @@ void AddAxes(TVirtualPad *pad=0)
 
 StPadControlPanel __aa__;
 void PadControlPanel(){}
+
+// $Log: PadControlPanel.C,v $
+// Revision 1.12  1999/11/13 23:31:34  fine
+// Constant kWhite has been replaced with number 19 due some bug wity 2.23
+//
+// Revision 1.11  1999/07/13 00:34:16  fine
+//  new button has been added to draw 3D axes
+//
+// Revision 1.10  1999/06/11 19:14:01  fine
+// Some extra protections agaist of view == 0
+//
+// Revision 1.9  1999/06/11 18:17:55  fine
+// View have been standardtized
+//
+// Revision 1.8  1999/06/11 01:27:37  fine
+// TIter fixed
+//
+// Revision 1.7  1999/06/10 19:44:16  fine
+// AdjustScale button jas been introduced
+//
+// Revision 1.6  1999/06/10 03:40:53  fine
+// New button to draw 3D axice added
+//
+// Revision 1.5  1999/06/03 00:35:34  fine
+// Comments clean up
+//
+// Revision 1.4  1999/06/03 00:27:53  fine
+//  4 view control has been activated
+//
+// Revision 1.3  1999/06/02 22:25:12  fine
+// 4 view command has been introduced
+//
+// Revision 1.2  1999/06/02 16:30:12  fine
+// Clean up
+//
+// Revision 1.1  1999/05/29 20:55:11  fine
+// macro to control any 3D view
+//
+//
+//  PadControl panel is the set of the static methods to control 
+//  TView of any "current" TPad with some "primitive"
+//  operation:
+//
