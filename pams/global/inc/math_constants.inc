@@ -1,5 +1,8 @@
-* $Id: math_constants.inc,v 1.2 1999/04/13 21:08:33 sakrejda Exp $
+* $Id: math_constants.inc,v 1.3 1999/05/10 21:04:54 fisyak Exp $
 * $Log: math_constants.inc,v $
+* Revision 1.3  1999/05/10 21:04:54  fisyak
+* remove double defintion of C_DEG_PER_RAD
+*
 * Revision 1.2  1999/04/13 21:08:33  sakrejda
 * #define replaced by the PARAMETER statements
 *
@@ -14,7 +17,7 @@
 
       DOUBLE PRECISION C_DEG_PER_RAD,C_RAD_PER_DEG,C_2PI,C_EULER,C_1_PI,C_2_PI,
      > C_2_SQRTPI, C_E, C_LN10, C_LN2, C_LOG10E, C_LOG2E, C_PI, C_PI_2,
-     > C_PI_4, C_SQRT1_2, C_SQRT2, C_DEG_PER_RAD
+     > C_PI_4, C_SQRT1_2, C_SQRT2
 
 
       PARAMETER(  C_RAD_PER_DEG=  0.017453292519943295769237)
