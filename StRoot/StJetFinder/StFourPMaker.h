@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.h,v 1.2 2003/04/24 14:15:16 thenry Exp $
+ * $Id: StFourPMaker.h,v 1.3 2003/05/09 21:01:34 thenry Exp $
  * $Log: StFourPMaker.h,v $
+ * Revision 1.3  2003/05/09 21:01:34  thenry
+ * removed "../" from #include statement
+ *
  * Revision 1.2  2003/04/24 14:15:16  thenry
  * These changes are really the first working version of the StFourPMakers
  * and teh StJetMakers.  This is all c++ stl implementation, and by virtue of
@@ -25,7 +28,7 @@
 #include <map>
 #include "StMaker.h"
 #include "StProtoJet.h"
-#include "../StSpinMaker/StMuTrackFourVec.h"
+#include "StSpinMaker/StMuTrackFourVec.h"
 
 class StEvent;
 class StEmcClusterCollection;    
