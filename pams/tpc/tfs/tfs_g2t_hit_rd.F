@@ -1,5 +1,8 @@
-* $Id: tfs_g2t_hit_rd.F,v 1.4 1998/04/23 19:12:03 sakrejda Exp $
+* $Id: tfs_g2t_hit_rd.F,v 1.5 1998/09/25 23:24:05 sakrejda Exp $
 * $Log: tfs_g2t_hit_rd.F,v $
+* Revision 1.5  1998/09/25 23:24:05  sakrejda
+* check added to make sure that id of geant hits is sequential
+*
 * Revision 1.4  1998/04/23 19:12:03  sakrejda
 * modified to print out an estimate of needed tphit size if the structure is not big enough
 *
@@ -116,6 +119,11 @@ C     central membrane width = 76 microns -- TPC geometry proposal by Iwona S.
       real central_membrane
       parameter (central_membrane=0.0076)
 
+      integer idI1
+      character*132 m132  ! And some message-generating space.
+      data idI1 /0/
+      save idI1
+
 C=========================== Begin Executable Code =======================
 
 C     set row counter for tphit
@@ -143,7 +151,14 @@ C     ---  Dhammika W.  April 18, 1996 ---
 
 C     increment row counter
             nok = nok + 1
-            
+
+c     check whether Victor's assumption is valid            
+            if(g2t_hit(ih).id.ne.nok) then
+              write(m132,*) 'TFS-READ-I1 gstar hits not in order ',
+     >        g2t_hit(ih).id,nok
+              call Message( m132, 1, idI1 )
+              return
+            endif
             
 C     Initialize tphit id/flags for this hit to their default value.
 C     DSW 03/13/97
@@ -184,6 +199,7 @@ C     Store  GEANT hit id in tpc_index table
      >           g2t_hit(ih).id
             tpc_index(tpc_index_h.nok).key2 = 
      >           tphit(nok).id
+            
             
 
             tphit(nok).row = g2t_hit(ih).volume_id
