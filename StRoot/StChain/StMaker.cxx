@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.97 2000/06/21 23:59:24 perev Exp $
+// $Id: StMaker.cxx,v 1.98 2000/07/01 00:17:37 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -925,9 +925,9 @@ static void doPs(const char *who, const char *where)
 	ps = "ps -lP -p $$";
 #endif
       }
-      TString *ts = new TString(ps);
-      ts->ReplaceAll("$$",buf);
-      ps = ts->Data();
+      TString ts = TString(ps);
+      ts.ReplaceAll("$$",buf);
+      ps = ts.Data();
     } else { ps ="";}
   }
   if (ps[0]) { //Execute shell
@@ -1052,6 +1052,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.98  2000/07/01 00:17:37  fisyak
+// Remove memory leak
+//
 // Revision 1.97  2000/06/21 23:59:24  perev
 // getDataBase loop over makers added
 //
