@@ -3,6 +3,7 @@
 * 3Jul98 K. Turner - changed tpc kumacs so that pam kumacs are called directly
 * 7Jul98 K. Turner - changed to use gstar stuff
 * 9Jul98 K. Turner - changed to use new tpc cluster and track eval for slow sim
+* 9Jul98 K. Turner - changed to use tfc_run#run_newtab - can set adcxyzon=1
 * 
 *************************************************************
 *                     BFC_UTIL.KUMAC
@@ -182,7 +183,7 @@ EOF:
       (tss)    
                exec tss_run#run [tpc_sector_first] [tpc_sector_last]
                if [adcxyzon].eq.1 then
-                 exec tfc_run#run 
+                 exec tfc_run#run_newtab [tpc_sector_first] [tpc_sector_last]
                endif
                if (staf_status(1) .ne. stafcv_ok) then 
                  message ' problem with tpc_slow_sim_process_event'
@@ -193,10 +194,7 @@ EOF:
                if (staf_status(1) .ne. stafcv_ok) then 
                  message ' problem with tpc_clustering_process_event'
                endif
-    (tte_e)    | must be done only for tss and before tracking!
-	       if $index([test],tss)>0 then
-                   exec tte_run#run_tte_hit_match
-	       endif
+    (tcl_e)    exec tte_run#run_tte_hit_match
       (emc)    exec run_ems_interface          
       (stk)    exec svt_tracker#process_event_stk [ievent];
                if (staf_status(1) .ne. stafcv_ok) then
