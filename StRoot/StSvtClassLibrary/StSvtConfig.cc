@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtConfig.cc,v 1.8 2001/10/04 02:56:26 caines Exp $
+ * $Id: StSvtConfig.cc,v 1.9 2002/02/22 20:12:10 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtConfig.cc,v $
+ * Revision 1.9  2002/02/22 20:12:10  caines
+ * Add getLayer() call
+ *
  * Revision 1.8  2001/10/04 02:56:26  caines
  * Fix some of the hybrid swapping indexing
  *
@@ -387,6 +390,42 @@ int StSvtConfig::getBarrel(int index){
   
   return -1;
 }
+
+int StSvtConfig::getLayer(int index)
+{
+  int Layer;
+  int Barrel = getBarrel(index);
+  int Ladder = getLadder(index);
+  switch (Barrel) {
+
+  case 1:
+    if (Ladder%2)
+      Layer = 2;
+    else
+      Layer = 1;
+
+    break;
+
+  case 2:    
+    if (Ladder%2)
+      Layer = 4; //
+    else          // switched due to different geometry (07/12/2001) 
+      Layer = 3; //
+
+    break;
+
+  case 3:
+    if (Ladder%2)
+      Layer = 6;
+    else
+      Layer = 5;
+
+    break;
+  }
+
+  return Layer;
+}
+
 
 int StSvtConfig::getLadder(int index){
 
