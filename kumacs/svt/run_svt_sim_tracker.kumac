@@ -1,168 +1,140 @@
-**************************************************
+* SYNOPSIS: STAF analysis driver for the SVTanalysis
+*
+* DESCRIPTION:
+*    A kumac STAF driver for SVT data
+*    analysis. The kumac includes user setable switches to let
+*    the user decide what packages are to be used for specific
+*    tasks.
+* Authors: H. Caines
+*
+* History:
+*          MARCH 18, 98 - created
+* June 3, 1998 - editted by Kathy Turner
+* 7/11/98 - K. Turner - change default data file to new version
+* 7/11/98 - K. Turner - change to use standard setup kumacs
+* *************************************************
+ 
  MACRO run _
-        no_events=1 _
-	INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
-	file=event_0000050.xdf _
+        TOP=$STAR _
+        domain=' svt ' _
+        num_events=1 _   
+        INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
+	input_g2t_file=event_0000050.xdf _
 	svt_simul=srs _
-	svt_tracker=sgr  
- **************************************************
- * MACRO RUN_ALL
- *
- * SYNOPSIS: STAF analysis driver for the SVTanalysis
- *
- * DESCRIPTION:
- *    A kumac STAF driver for SVT data
- *    analysis. The kumac includes user setable switches to let
- *    the user decide what packages are to be used for specific
- *    tasks.
- *
-
- * Authors: H. Caines
- *
- * History:
- *          MARCH 18, 98 - created
-*           June 3, 1998 - editted by Kathy Turner
- *************************************************
-
-macro/global/import *
-
-***********************************************************
-* PRINT OUT INPUT VALUES
-***********************************************************
+	svt_tracker=sgr _  
+        funit=21 _
+        nfile=svt_tracks.ntup _
+        nid=111 _
+        table=svt/hits/scs_spt
+   
+* ******************************************************
+* *****************************************************
+   
+  message ' *** TOP directory to search for kumacs --> ' [TOP]
+  message ' *** domains to load  -->                   ' [domain]
+  message ' *** Data Sample directory -->              ' [INPUT_DATA_DIR]
+  message ' *** Input G2T file -->                     ' [input_g2t_file]
+  message ' *** Num Events to process -->              ' [num_events]
+  message ' *** svt simulator -->                      ' [svt_simul]
+  message ' *** svt tracker  --->                      ' [svt_tracker]
+  message ' *** ntup file unit -->                     ' [funit]
+  message ' *** output Ntuple filename  -->            ' [nfile]
+  message ' *** Ntuple ID # -->                        ' [nid]
+  message ' *** Table to write to ntup -->             ' [table]
  
-message ' *** Data sample directory -->  ' [INPUT_DATA_DIR]
-message ' *** Input file -->             ' [file]
-message ' *** Num Events to process -->  ' [no_events]
-message ' *** SVT simulator         -->  ' [svt_simul]
-message ' *** SVT tracker           -->  ' [svt_tracker]
- 
-***********************************
-* SETUP DIRECTORIES TO FIND KUMACS:
-***********************************
- 
- DEFAULT = _
-./kumacs/util,_
-./kumacs/chain,_
-./kumacs/svt,_
-./pams/emc/kumac,_
-./pams/global/kumac,_
-./pams/svt/kumac,_
-./pams/tpc/kumac,_
-$STAR/kumacs/util,_
-$STAR/kumacs/chain,_
-$STAR/kumacs/svt,_
-$STAR/kumacs/tpc,_
-$STAR/pams/ctf/kumac,_
-$STAR/pams/emc/kumac,_
-$STAR/pams/ftpc/kumac,_
-$STAR/pams/gen/kumac,_
-$STAR/pams/global/kumac,_
-$STAR/pams/mwc/kumac,_
-$STAR/pams/svt/kumac,_
-$STAR/pams/tpc/kumac,_
-$STAR/pams/trg/kumac
- 
- def [DEFAULT]
- message 'Define default kumac search path as' def
- 
- make svt
 
- *****************************************
- * variables
- *****************************************
- alias/create STAFCV_OK  1
- alias/create STAFCV_BAD 0
+* ----------- General setup stuff ------------------------*
+  macro/global/create TOP              [TOP]
+    
+* setup default directories to search for kumacs in
+* setup default table directory structure in STAF
+* load libraries [domain]
+    
+ exec $STAR/kumacs/chain/bfc_util#bfc_start [domain]
+     
+ macro/global/import *
+      
 
- *****************************************
- * create table directories
- *****************************************
- *****************************************
+* --------- Setup and run svt fast simulator & tracker pams -------------*
+   
+* open input g2t data file
+  exec input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
+
+  if STAF_STATUS(1).eq.0 goto ENDOFDATA
   
- exec setup_dir
-
-
-Message 'Doing' [no_events] 'events'
-
- ***************************************** 
- * open input file and read header
- *****************************************
- exec input_g2t_file#init [INPUT_DATA_DIR][file]
-
- *****************************************
- * one time package initialization phase for geometry
- *****************************************
+* open output ntuple
+  exec write_table_to_ntuple#init_disk [funit] [nfile]  
+   
+* --------------- SVT initialization ----------------------------
 
  exec  init_svg
- 
- *****************************************
- * initialize for slow simulator
- *****************************************
- 
+  
  if [svt_simul] = sss then
-   exec svt_slow_sim#initialize
+    exec init_sss
+    exec init_ssf
  elseif [svt_simul] = srs then
-    exec svt_fast_sim#initialize
+   exec create_tables_svt#srs
+   exec init_srs
  endif
  
- *****************************************
- * initialize for tracking
- *****************************************
  
  if [svt_tracker].eq.stk .or. [svt_tracker].eq.sgr then
-   exec svt_tracker#initialize
+   exec create_tables_svt#sgr
+   exec create_tables_svt#stk
+   exec init_stk
+   exec init_sgr
  endif
-
-
- *****************************************
- * event loop
- *****************************************
-
- do ievent=1,[no_events]
-    
-    if (staf_status(1).ne.STAFCV_OK) goto EOF
-    message 'run_all-I3 : doing loop' [ievent]
-
-   
- exec input_g2t_file#read
  
-    if (staf_status(1).ne.STAFCV_OK) goto EOF
-    
-  message 'cput time is ' $cptime
- 
- *  SVT detector response simulation 
 
+* ---------------- SVT - event processing -----------------------
+
+ do ievent=1,[num_events]
+    message ' run_svt_sim_tracker: processing event ' [ievent]
+* clear all event tables
+  tabclear [event]
+* read input file
+    exec input_g2t_file#read
+    if STAF_STATUS(1).eq.0 goto ENDOFDATA
+   message 'cpu time is ' $cptime
+* SVT detector response simulation
     if [svt_simul]= sss then
-         exec svt_slow_sim#process_event [ievent]
-         if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+      exec svt_slow_sim#process_event
+      if (staf_status(1) .ne. 1) goto NEXT_EVENT
     elseif [svt_simul]= srs then
-         exec svt_fast_sim#process_event  [ievent]
-         if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+      exec svt_fast_sim#process_event
+      if (staf_status(1) .ne. 1) goto NEXT_EVENT
     else
       message ' SVT simulator not valid!!'
     endif
-
-
 * SVT track finding and momentum reconstruction -----------------------
-
     if [svt_tracker]= stk then
-      exec svt_tracker#process_event_stk [ievent]
-         if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+      exec svt_tracker#process_event_stk 
+        if (staf_status(1) .ne. 1) goto NEXT_EVENT
     elseif [svt_tracker]=sgr then
-      exec svt_tracker#process_event_sgr [ievent]
-         if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+      exec svt_tracker#process_event_sgr
+        if (staf_status(1) .ne. 1) goto NEXT_EVENT
     else
       message ' svt_tracker not valid! '
     endif
-        
-
+* write table to ntuple
+    exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]    
+    
   NEXT_EVENT:
+   
+ enddo
  
+* -------------------- end stuff -----------------------------*
   
-enddo
+ ENDOFDATA:
 
-*  task is completed
-EOF:
- 
+* close ntuple
+  message ' close ntuple'
+  exec write_table_to_ntuple#close_disk [funit]
+
+* close input file
+  message ' close input file'
+  exec input_g2t_file#close
 
 RETURN
-
+ 
+* **************************************************************
