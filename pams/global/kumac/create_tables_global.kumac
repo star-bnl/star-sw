@@ -147,10 +147,10 @@ macro svm
  macro/global/import *
 
  cd [dst]
-  
-  tdm/newtable event_summary dst_event_summary 1
-  
-  tdm/newtable event_header dst_event_header   1 
+
+  tdm/newtable event_summary   dst_event_summary   1
+  tdm/newtable event_header    dst_event_header    1
+
  cd /dui
 
  return
@@ -159,6 +159,8 @@ macro svm
  macro fill_dst_run_summary
 
  macro/global/import *
+
+
 
  cd [run_dst]
 
@@ -175,8 +177,11 @@ macro svm
  macro/global/import *
 
  cd [dst]
-
-   tdm/newtable tof           dst_tof        2000
+   *** There is no module in the library that will use dst_tof table. 
+   *** Hence STAF dosen't recognize dst_tof data type. Temporary solution
+   *** is to  load dst_tof.idl file.  DSW  Aug 30, 1998
+   tdm/types/load    pams/global/idl/dst_tof.idl
+   tdm/newtable      tof    dst_tof        2000
 
 
  cd /dui
