@@ -19,38 +19,47 @@ C              xn2(2) : the new coordinates of the points
 C                       at the DCA of the two tracks         
 C              rd     : 3D dca of v0
           real rd,p1(3),p2(3),trk1(6),trk2(6),xn1(2),xn2(2),rc1,rc2
-          real t1,t2,phi1,phi2
+          real t1,t2
 
-          real a,b,c,d
-          
+          real a,d,ptr1,ptr2,asq
+          real temp, xn11, xn12, xn21, xn22, zdiff
 
 
-         a=-(p1(1)*p2(1)+p1(2)*p2(2)+p1(3)*p2(3))
-         b=-(trk1(3)-trk2(3))*p1(3)
-         c=(trk1(3)-trk2(3))*p2(3)
-         if(a*a.eq.1)then
-         t1=0.0
-         t2=0.0
+         zdiff = trk1(3)-trk2(3)
+         a=(p1(1)*p2(1)+p1(2)*p2(2)+p1(3)*p2(3))
+         asq=a*a
+         if(asq.eq.1)then
+           t1=0.0
+           t2=0.0
          else
-         t1=(b-c*a)/(1-a*a)
-         t2=(c-a*b)/(1-a*a)
+           temp = zdiff/(1-asq)
+           t1=(-p1(3)+p2(3)*a)*temp
+           t2=(p2(3)-a*p1(3))*temp
          endif
          
+         xn11 = trk1(1)*cos(trk1(2))
+         xn12 = trk1(1)*sin(trk1(2))
+         xn21 = trk2(1)*cos(trk2(2))
+         xn22 = trk2(1)*sin(trk2(2))
+
          pt1=sqrt(p1(1)*p1(1)+p1(2)*p1(2))
          pt2=sqrt(p2(1)*p2(1)+p2(2)*p2(2))
-         phi1=t1*pt1/rc1
-         phi2=t2*pt2/rc2
-         xn1(1)=trk1(1)*cos(trk1(2))+rc1*p1(1)/pt1*sin(phi1)
-         xn1(2)=trk1(1)*sin(trk1(2))+rc1*p1(2)/pt1*sin(phi1) 
-         xn2(1)=trk2(1)*cos(trk2(2))+rc2*p2(1)/pt2*sin(phi2)
-         xn2(2)=trk2(1)*sin(trk2(2))+rc2*p2(2)/pt2*sin(phi2)
-          
-         d=(trk1(3)-trk2(3)+p1(3)*t1-p2(3)*t2)**2+(xn1(1)-xn2(1))**2+(xn1(2)-xn2(2))**2
+         ptr1 = rc1/pt1
+         ptr2 = rc2/pt2
+         temp = ptr1*sin(t1/ptr1)
+         xn1(1)=xn11+p1(1)*temp
+         xn1(2)=xn12+p1(2)*temp
+         temp = ptr2*sin(t2/ptr2)
+         xn2(1)=xn21+p2(1)*temp
+         xn2(2)=xn22+p2(2)*temp
+
+         d=(zdiff+p1(3)*t1-p2(3)*t2)**2+(xn1(1)-xn2(1))**2+(xn1(2)-xn2(2))**2
+
          if(d.gt.rd)then
-         xn1(1)=trk1(1)*cos(trk1(2))
-         xn1(2)=trk1(1)*sin(trk1(2)) 
-         xn2(1)=trk2(1)*cos(trk2(2))
-         xn2(2)=trk2(1)*sin(trk2(2))
+         xn1(1)=xn11
+         xn1(2)=xn12
+         xn2(1)=xn21
+         xn2(2)=xn22
         
          else
          rd=d
