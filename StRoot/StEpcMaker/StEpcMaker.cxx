@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.18 2001/12/03 22:24:28 pavlinov Exp $
+// $Id: StEpcMaker.cxx,v 1.19 2002/02/19 17:42:13 alexst Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.19  2002/02/19 17:42:13  alexst
+// Removed a bunch of redundant branching statements and some (but not all) useless output
+//
 // Revision 1.18  2001/12/03 22:24:28  pavlinov
 // tuned for case of no tracks
 //
@@ -173,174 +176,156 @@ Int_t StEpcMaker::Init()
 //_________________________________________________________________________
 Int_t StEpcMaker::Make()
 {
-  cout <<"\n\n***************************************************************\n";
-  cout<<" StEpcMaker Make() **"<<endl;
-  // ptr initialization
   mTheEmcCollection=0;                                                            
-
   if (!m_DataSet->GetList()) //if DataSet is empty, create object and fill it
-  {   
-    //Getting tracks from StEvent
-    cout << "about to Obtain Stevent" << endl;
-    mEvent = (StEvent *) GetInputDS("StEvent");
+    {   
+      mEvent = (StEvent *) GetInputDS("StEvent");
  
-    if (!mEvent) 
-    {
-      cout << "No StEvent! Can not continue. " << endl;
-      return kStOK; // If no event, we're done
-    }
-    cout<<"StEpcMaker** , StEvent found**"<<endl; 
-    //First Find if EmcCollection exists
-
-    if(mEvent)
-    {
-      cout<<"Epc::StEvent found **"<<endl;
+      if (!mEvent) 
+	{
+	  cout << "No StEvent! Can not continue. " << endl;
+	  return kStOK; // If no event, we're done
+	}
       mTheEmcCollection = mEvent->emcCollection();
-    }
-    if(!mTheEmcCollection)
-    {
-      cout<<" EPC:: No EmcCollection, Cannot continue**"<<endl;
-      return kStOK;
-    }
+      if(!mTheEmcCollection)
+	{
+	  cout<<" EPC:: No EmcCollection, Cannot continue**"<<endl;
+	  return kStOK;
+	}
 
-    StDetectorId EmcId;
-    StEmcDetector* EmcDet;
-    StEmcClusterCollection* cluscoll=NULL;
-    StEmcClusterCollection* Bemccluster=NULL;
-    StEmcClusterCollection* Bprscluster=NULL;
-    StEmcClusterCollection* Bsmdecluster=NULL;
-    StEmcClusterCollection* Bsmdpcluster=NULL;
-
-    if(mTheEmcCollection)
-    {
-      cout<<" StEvent EmcCollection exists**"<<endl;
+      StDetectorId EmcId;
+      StEmcDetector* EmcDet;
+      StEmcClusterCollection* cluscoll=NULL;
+      StEmcClusterCollection* Bemccluster=NULL;
+      StEmcClusterCollection* Bprscluster=NULL;
+      StEmcClusterCollection* Bsmdecluster=NULL;
+      StEmcClusterCollection* Bsmdpcluster=NULL;
 
       for(Int_t idet=0;idet<4;idet++)
-      {
-        EmcId = static_cast<StDetectorId>(idet+kBarrelEmcTowerId); 
-        EmcDet =mTheEmcCollection->detector(EmcId);
-        cluscoll=NULL;
-        if(EmcDet)
-        {
-          cluscoll = EmcDet->cluster();
-          UInt_t ncl=0;
-          if(cluscoll) ncl = cluscoll->numberOfClusters();
+	{
+	  EmcId = static_cast<StDetectorId>(idet+kBarrelEmcTowerId);
+	  EmcDet =mTheEmcCollection->detector(EmcId);
+	  cluscoll=NULL;
+	  if(EmcDet)
+	    {
+	      cluscoll = EmcDet->cluster();
+	      UInt_t ncl=0;
+	      if(cluscoll) ncl = cluscoll->numberOfClusters();
+
+	      // Attn: this maker tuned-up for High Pt Pi0 and requires
+	      // clusters in all EMC sub-detectors (except preshower)
           
-          // added to check if clusters exist for all detectors (not PRS now).
-          if(idet !=1 && ncl==0)
-          {
-            cout<<" NO Clusters for detector " << idet <<endl;
-            return kStWarn;
-          }
+	      // added to check if clusters exist for all detectors (not PRS now).
+	      if(idet !=1 && ncl==0)
+		{
+		  cout<<" NO Clusters for detector " << idet <<endl;
+		  return kStWarn;
+		}
 
-          if(cluscoll)
-          {
-            if(idet==0) Bemccluster=(StEmcClusterCollection*)cluscoll;
-            if(idet==1) Bprscluster=(StEmcClusterCollection*)cluscoll;
-            if(idet==2) Bsmdecluster=(StEmcClusterCollection*)cluscoll;
-            if(idet==3) Bsmdpcluster=(StEmcClusterCollection*)cluscoll;
-          }
-        }
-      }
-    }
+	      if(cluscoll)
+		switch(idet)
+		  {
+		  case 0 : Bemccluster  = (StEmcClusterCollection*)cluscoll; break;
+		  case 1 : Bprscluster  = (StEmcClusterCollection*)cluscoll; break;
+		  case 2 : Bsmdecluster = (StEmcClusterCollection*)cluscoll; break;
+		  case 3 : Bsmdpcluster = (StEmcClusterCollection*)cluscoll; break;
+		  }
+	    }
+	}
     
-    mBField=0.5;   // default magnetic field in Tesla  
+      mBField=0.5;   // default magnetic field in Tesla  
     
-    StEventSummary*  summary=mEvent->summary();
-    if(summary) {
-      mBField = summary->magneticField()/10.; // mBField in Tesla
-      cout <<"StEpcMaker::Make() -> mBField(summary->magneticField()) = "
-           <<mBField<<"(tesla)"<<endl;
-    }
-    if(fabs(mBField) < 0.01) {
-    // Sometimes StEventSummary get wrong value of field - 3 Dec 2001
-      // Get mBField from gufld(,)
-      cout <<"Trying to Get the mBField ..."<<endl;
-      float x[3] = {0,0,0};
-      float b[3];
-      gufld(x,b);
-      mBField = 0.1*b[2]; // This is mBField in Tesla.        
-      cout <<"StEpcMaker::Make() -> mBField(gufld) = "
-           <<mBField<<"(tesla)"<<endl;
-    }
-    if(fabs(mBField) < 0.01) {
-      cout<<"StEpcMaker::Make() finished => wrong mBField !!!"<<endl; 
-      return kStWarn;
-    }
+      StEventSummary* summary = mEvent->summary();
+      if(summary) 
+	{
+	  mBField = summary->magneticField()/10.; // mBField in Tesla
+	  cout << "StEpcMaker::Make() -> mBField(summary->magneticField()) = "
+	       << mBField << "(tesla)" << endl;
+	}
+      if(fabs(mBField) < 0.01)
+	{
+	  // Sometimes StEventSummary get wrong value of field - 3 Dec 2001
+	  // Get mBField from gufld(,)
+	  cout <<"Trying to Get the mBField ..."<<endl;
+	  float x[3] = {0,0,0};
+	  float b[3];
+	  gufld(x,b);
+	  mBField = 0.1*b[2]; // This is mBField in Tesla.        
+	  cout << "StEpcMaker::Make() -> mBField(gufld) = "
+	       << mBField << "(tesla)" << endl;
+	}
+      if(fabs(mBField) < 0.01) 
+	{
+	  cout << "StEpcMaker::Make() finished => wrong mBField !!!" << endl; 
+	  return kStWarn;
+	}
   
-    //////////////////////////////////////
+      //////////////////////////////////////
 
-    //-------------------
-    //Tracks from StEvent
-    //------------------- 
+      //-------------------
+      //Tracks from StEvent
+      //------------------- 
 
-    StSPtrVecTrackNode& theTrackNodes = mEvent->trackNodes();
-    cout<<" StEpcMaker:: Node size **"<<theTrackNodes.size()<<endl;
+      StSPtrVecTrackNode& theTrackNodes = mEvent->trackNodes();
+      cout << "StEpcMaker:: Node size **" << theTrackNodes.size() << endl;
 
-    int allGlobals = 0;
-    int goodGlobals = 0;                                                       
+      int allGlobals = 0;
+      int goodGlobals = 0;                                                       
 
-    StTrack *track;
-    //Initialize container for track
+      StTrack *track;
+      TrackVecForEmc.clear();
 
-    TrackVecForEmc.clear();
+      for (size_t nodeIndex = 0; nodeIndex < theTrackNodes.size(); nodeIndex++) 
+	{
+	  size_t numberOfTracksInNode =  theTrackNodes[nodeIndex]->entries(global);
+	  for (size_t trackIndex = 0; trackIndex < numberOfTracksInNode; trackIndex++) 
+	    {
+	      track = theTrackNodes[nodeIndex]->track(global,trackIndex);
+	      if (track) allGlobals++;
+	      if (accept(track))
+		{
+		  TrackVecForEmc.push_back(track);
+		  goodGlobals++;
+		}                                     
+	    }
+	}
 
-    for (size_t nodeIndex=0; nodeIndex<theTrackNodes.size(); nodeIndex++) 
-    {
-      size_t numberOfTracksInNode =  theTrackNodes[nodeIndex]->entries(global);
-      for (size_t trackIndex=0; trackIndex<numberOfTracksInNode; trackIndex++) 
-      {
-        track =theTrackNodes[nodeIndex]->track(global,trackIndex);
-        if (track) allGlobals++;
-        if (accept(track))
-        {
-          TrackVecForEmc.push_back(track);
-          goodGlobals++;
-        }                                      
-      }
+      StTrackVec& TrackToFit = TrackVecForEmc;
+      //******Creating StPointCollection and calling findPoints
+      mPoint = new StPointCollection("point");
+      mPoint->SetBField(mBField);  // set correct magnetic field
+      m_DataSet->Add(mPoint);      // for convinience only
+
+      if(mPoint->findEmcPoints(Bemccluster,Bprscluster,Bsmdecluster,Bsmdpcluster,TrackToFit) != kStOK)
+	{
+	  return kStWarn;
+	} 
+      else cout << "findEmcPoint == kStOK" << endl;
+
+      MakeHistograms(); // Fill QA histgrams
+      //------------------------------------------
+      // WRITING IN EMCCOLLECTION IN STEVENT
+      //------------------------------------------
+
+      //Search for StEvent pointer , where EmcCollection is to be added
+      //  mEvent=(StEvent *) GetInputDS("StEvent");
+      //  if(mEvent){
+      //      cout<<"Epc::StEvent found **"<<endl;
+      //   if(!mTheEmcCollection){
+      //        mTheEmcCollection = mEvent->emcCollection();
+      //   }
+      //  }
+      //else{
+      //    cout<<" *** Epc:: StEvent Structure does not exist***"<<endl;
+      //    cout<<" *** Epc:: Try make one yourself***"<<endl;
+      //    mEvent= new StEvent();
+      //  }
+      //   if(mTheEmcCollection){
+      //   cout<<" StEvent EmcCollection exists**"<<endl;
+      //   }
+      cout << "Epc: ***  Filling StEvent ***" << endl;
+      if(fillStEvent() != kStOK){cout<< "StEvent filling is not OK"<<endl;}
     }
-
-    StTrackVec& TrackToFit=TrackVecForEmc;
-    //******Creating StPointCollection and calling findPoints
-    mPoint = new StPointCollection("point");
-    
-    mPoint->SetBField(mBField);  // set correct magnetic field
-    
-    m_DataSet->Add(mPoint);     // for convinience only
-
-    if(mPoint->findEmcPoints(Bemccluster,Bprscluster,Bsmdecluster,Bsmdpcluster,TrackToFit)!=kStOK)
-    {
-      return kStWarn;
-    } 
-    else cout<<" findEmcPoint called is ok "<<endl;
-
-    MakeHistograms(); // Fill QA histgrams
-    //------------------------------------------
-    // WRITING IN EMCCOLLECTION IN STEVENT
-    //------------------------------------------
-
-    //Search for StEvent pointer , where EmcCollection is to be added
-    //  mEvent=(StEvent *) GetInputDS("StEvent");
-    //  if(mEvent){
-    //      cout<<"Epc::StEvent found **"<<endl;
-    //   if(!mTheEmcCollection){
-    //        mTheEmcCollection = mEvent->emcCollection();
-    //   }
-    //  }
-    //else{
-    //    cout<<" *** Epc:: StEvent Structure does not exist***"<<endl;
-    //    cout<<" *** Epc:: Try make one yourself***"<<endl;
-    //    mEvent= new StEvent();
-    //  }
-    //   if(mTheEmcCollection){
-    //   cout<<" StEvent EmcCollection exists**"<<endl;
-    //   }
-    cout<<" Epc***  Filling StEvent **"<<endl;
-    Int_t fill = fillStEvent();
-    if(fill != kStOK){cout<< "StEvent filling is not O.k"<<endl;}
-  }
-  cout <<"***************************************************************\n\n";
-  
   return kStOK;
 }
 //_________________________________________________________________________
@@ -414,20 +399,19 @@ StEpcMaker::fillStEvent()
     Int_t nR = mPoint->NPointsReal();
 
     if(nR>0) {
-      cout<<"Number of Emc points "<< nR <<endl;
+      cout << "Number of Emc points " << nR << endl;
       TIter next(mPoint->PointsReal());
       StEmcPoint *cl;
 
       for(Int_t i=0; i<nR; i++){
 	cl = (StEmcPoint*)next();
 	mTheEmcCollection->addBarrelPoint(cl);
-      } //for i=0
+      }
 
-    }// for nR
+    }
 
-  } else { //mPoint check
-    cout<<"mPoint iz zero !!! "<<endl;
-  }
+  } 
+  else cout << "mPoint iz zero !!!" <<endl;
   return kStOK;
 }
 //-------------------------------------------------------
