@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.cc,v 1.4 2000/09/28 02:06:10 perev Exp $
+ * $Id: StThreeVectorF.cc,v 1.5 2000/09/30 17:14:28 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.cc,v $
- * Revision 1.4  2000/09/28 02:06:10  perev
- * non automatic streamer added
+ * Revision 1.5  2000/09/30 17:14:28  perev
+ * Streame added to ThreeVector
+ *
+ * Revision 1.5  2000/09/30 17:14:28  perev
+ * Streame added to ThreeVector
  *
  * Revision 1.4  2000/09/28 02:06:10  perev
  * non automatic streamer added
@@ -28,6 +31,7 @@
  * Root Version of StarClassLibrary
  *
  * Revision 1.1  1999/01/23 00:29:24  ullrich
+ * Initial Revision
  *
  **************************************************************************/
 #include <assert.h>
@@ -117,9 +121,23 @@ istream&  operator>>(istream& is, StThreeVectorF& v)
 }
 //______________________________________________________________________________
 void StThreeVectorF::Streamer(TBuffer &R__b)
+{
+//	Stream an object of class StThreeVectorF.
+
+   int offset = 0;
+   if (R__b.IsReading() && R__b.GetVersion() == 2) {//Special case
+      offset = R__b.Length();
+      int buffset;
+      R__b >> buffset;
+      R__b.SetBufferOffset(buffset - 1 + 4);
+      Version_t R__v = R__b.ReadVersion();
+      assert(R__v==1);
+      R__b.SetBufferOffset(R__b.Length()+10);
+      R__b >> mX1;
+      R__b >> mX2;
+      R__b >> mX3;
       R__b.SetBufferOffset(offset+4);
-      Version_t R__v = R__b.ReadVersion(); 
-      if (R__v == 1) R__b.SetBufferOffset(R__b.Length()+10); //skip TObject
+      return;
    }
    if (R__b.IsReading()) {
       Version_t R__v = R__b.ReadVersion();if (R__v){/*touch*/}; 
