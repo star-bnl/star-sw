@@ -2,15 +2,16 @@
 %
 % STAR Class Library - User Guide and Reference Manual -- LaTeX Source 
 %
-% $Id: StarClassLibrary.tex,v 1.3 1999/03/11 13:07:13 ullrich Exp $
+% $Id: StarClassLibrary.tex,v 1.4 1999/03/30 19:06:25 ullrich Exp $
 %
 % Author: LaTeX template by Thomas Ullrich, March 19 1998
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StarClassLibrary.tex,v $
-% Revision 1.3  1999/03/11 13:07:13  ullrich
-% Change of package names to cope with newer versions of LaTeX.
+% Revision 1.4  1999/03/30 19:06:25  ullrich
+% Added description of dca between two helices to
+% appendix. Corrected some typos.
 %
 % Revision 1.19  2000/04/06 23:01:45  ullrich
 % Added reference section for StMath. Particle section updated.
@@ -159,8 +160,8 @@
   \mbox{\includegraphics[width=\textwidth]{StarClassLibraryTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.3 $ $}  \\[5mm] % replaced by cvs with current revision  
-  {\LARGE $ $Date: 1999/03/11 13:07:13 $ $}  % replaced by cvs with current revision  
+  {\LARGE $ $Revision: 1.4 $ $}  \\[5mm] % replaced by cvs with current revision  
+  {\LARGE $ $Date: 1999/03/30 19:06:25 $ $}  % replaced by cvs with current revision  
   \vfill
 \end{center}
 \cleardoublepage
@@ -1446,7 +1447,7 @@ hbookFile status: (1) is good 1
 \item[Public Member\\ Functions]
     It is possible to set and access the data members within the class
     via the names associated with a space-time vector:
-    Given a position \args{s} in space, returns the path length of the helix
+  
     \verb+double dipAngle() const;+\\
     Returns the dip angle of the helix.
     
@@ -1469,15 +1470,15 @@ hbookFile status: (1) is good 1
     the helix rotates clockwise or counter-clockwise.
     
     \verb+StThreeVector<double>& origin() const;+\\
-    \verb+pair<double, double> pathLengths(const StHelix& h) const;+\\
-    Returns the path lengths at the distance-of-closest-approach
-    \index{dca} \index{distance of closest approach}
-    between self and \args{h}. The first element of the pair is the referring
-    path length of self and the second element the path length of \args{h}.
-    The method is fast and robust but execution time will increase
-    slightly for two helices with very different dip angles and/or for large
-    distances.
-    The following pseudo-code explains how to get the actual dca:
+    Returns the origin or starting point of the helix.
+    
+    \verb+void setParameters(double c, double dip, double phase,+\\
+    \verb+                   StThreeVector<double> o, int h);+ \\
+    Sets parameters in a unique an order dependent way.
+
+    \verb+double x(double s) const;+\\
+    Returns the x-coordinate of the helix at a pathlength \args{s}.
+
     \verb+double y(double s) const;+\\
     Returns the y-coordinate of the helix at a pathlength \args{s}.
     
@@ -4734,6 +4735,63 @@ momentum in [GeV/c].
 The minimal squared distance $M_i$ between a helix and a
 point $i$ with position $(x_i, y_i, z_i)$ is given by
 \begin{eqnarray}
+     M_i & = & M_i^{(xy)} + M_i^{(z)} \\
+     M_i & = & (x_i - x(s^\prime))^2 + (y_i - y(s^\prime))^2 + (z_i - z(s^\prime))^2 \\
+\end{eqnarray}
+In literature one finds the following approach to solve this problem analytically
+by neglecting $M_i^{(z)}$ in the derivatives.
+\begin{eqnarray}
+\frac{\mathrm{d}M_i^{xy}}{\mathrm{d}s}  = 0
+\end{eqnarray}
+This formula can only serve to derive an approximation for the real distance.
+For large dip angles the errors become large depending also on the actual helix
+parameters. The advantage is that $s^\prime$ can be calculated analytically:
+\begin{eqnarray}
+  s^\prime = \frac{1}{h \kappa \cos\lambda} \arctan \left(
+    \frac{(y_i-y_0)\cos\Phi_0 - (x_i-x_0) \sin\Phi_0}
+    {1/\kappa + (x_i-x_0) \cos\Phi_0 + (y_i-y_0)\sin\Phi_0} \right) \label{eq:dist}
+\end{eqnarray}
+Note, that this formula can {\bf not} be used to derive the distance of closest
+approach to a point.
+In order to derive the distance of closest approach the following equation
+has to be solved:
+\begin{eqnarray}
+\frac{\mathrm{d}M_i}{\mathrm{d}s}  = 0
+\end{eqnarray}
+which can be written as
+\begin{eqnarray}
+&&2\,\left (x_i-x_0-{\frac {\cos(\Phi_0+h s
+  \kappa\cos\lambda)-\cos\Phi_0}{\kappa}}\right) 
+  \sin(\Phi_0+h s \kappa\cos\lambda)\ h\cos\lambda -  \nonumber \\
+&&2\,\left (y_i-y_0-{\frac {\sin(\Phi_0+h s \kappa\cos\lambda)-\sin
+  \Phi_0}{\kappa}}\right) 
+  \cos(\Phi_0+ h s \kappa\cos\lambda)\ h\cos\lambda- \nonumber \\
+&&2\,\left(z_i-z_0-s\sin\lambda\right )\sin\lambda = 0   \label{eq:dsolve}
+\end{eqnarray}
+The root of eq.~\ref{eq:dsolve} can easily be found with the Newton or
+{\it regula falsi} method
+with $s^\prime$ from eq.~\ref{eq:dist} as starting value.
+For the Newton method the second derivative is needed as well.
+\begin{eqnarray}
+\frac{\mathrm{d}^2M_i}{\mathrm{d}s^2}  = 0
+\end{eqnarray}
+which is
+\begin{eqnarray}
+    &2&\left (\sin(\Phi_0+hs\kappa\cos\lambda)\right )^{2}{h}^{2}\cos^{2}\lambda + \nonumber \\
+    &2&\left (x_i-{x_0}-{\frac {\cos(\Phi_0+hs\kappa\cos\lambda)-\cos\Phi_0}{\kappa}}\right ) \nonumber \\
+    & &\cos(\Phi_0+hs\kappa\cos\lambda){h}^{2}\kappa \cos^{2}\lambda + \nonumber \\
+    &2&\left (\cos(\Phi_0+hs\kappa\cos\lambda)\right )^{2}{h}^{2}\cos^{2}\lambda +  \nonumber \\
+    &2&\left (y_i-{y_0}-{\frac {\sin(
+                \Phi_0+hs\kappa\cos\lambda)-\sin\Phi_0}{\kappa}}\right ) \nonumber \\
+    & &\sin(\Phi_0+hs\kappa\cos\lambda){h}^{2}\kappa
+    \cos^{2}\lambda + \nonumber \\
+    &2&\sin^2\lambda = 0 
+\end{eqnarray}
+
+\subsection{Distance of closest approach between two helices}
+\index{dca between helices} The closest distance between two helices
+$H_1$ and $H_2$ is a problem which again can be solved analytically
+only in 2 dimensions, i.e., in the xy-plane.  The solution in 3
 dimensions cannot even be solved by standard numerical methods (as the
 Newton method) but requires more sophisticated method since we have to
 find 2 unknown parameters $s_1$ and $s_2$ in
