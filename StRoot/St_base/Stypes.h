@@ -24,8 +24,8 @@
 enum EReturnCodes { 
   kStOK=0, 	// OK
   kStOk=0, 	// OK
-  kStEOF, 	// End Of File 
   kStWarn, 	// Warning, something wrong but work can be continued
+  kStEOF, 	// End Of File 
   kStErr, 	// Error, drop this and go to the next event
   kStFatal      // Fatal error, processing impossible
 };  
