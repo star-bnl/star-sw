@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cc,v 1.10 1999/02/23 21:20:22 ullrich Exp $
+ * $Id: StEvent.cc,v 1.11 1999/03/04 18:11:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.cc,v $
- * Revision 1.10  1999/02/23 21:20:22  ullrich
- * Modified EMC hit collections.
+ * Revision 1.11  1999/03/04 18:11:41  ullrich
+ * Mods to cope with CC5
  *
  * Revision 1.11  1999/03/04 18:11:41  ullrich
  * Mods to cope with CC5
@@ -48,10 +48,10 @@
  * version with constructors for table-based loading
  *
 #if !defined(ST_NO_NAMESPACES)
-static const char rcsid[] = "$Id: StEvent.cc,v 1.10 1999/02/23 21:20:22 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.11 1999/03/04 18:11:41 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEvent.cc,v 1.10 1999/02/23 21:20:22 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.11 1999/03/04 18:11:41 ullrich Exp $";
 
 StEvent::StEvent()
 {
@@ -158,7 +158,11 @@ int StEvent::operator!=(const StEvent& e) const
     return !(e == *this);   // invoke operator==()
 }
 
+ostream&  operator<<(ostream& os, const StEvent& e)
+{
+    os << "Id: " << e.id().first << ", " << e.id().second << endl;
 #if defined(__SUNPRO_CC)    
+    os << "Type: " << e.type().c_str() << endl;
 #else
     os << "Type: " << e.type() << endl;
 #endif
