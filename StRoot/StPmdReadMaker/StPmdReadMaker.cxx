@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.12 2004/07/12 14:45:08 subhasis Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.13 2004/09/22 19:24:56 perev Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.13  2004/09/22 19:24:56  perev
+ *Leak fixed + mess with i,j indexes
+ *
  *Revision 1.12  2004/07/12 14:45:08  subhasis
  *QA hist added
  *
@@ -186,7 +189,7 @@ Int_t StPmdReadMaker::Make() {
   
   
   int ret=mThePmdReader->getAllPmdCpvData(&adc[0]);
-  
+  if(ret){/*nothing*/}
   Int_t result=ApplyMapping(&adc[0]);
   if(result!=kStOK){gMessMgr->Info("Problem in getting PMD data:ApplyMap");
   return kStWarn;

@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdDetector.cxx,v 1.4 2004/06/29 17:31:41 perev Exp $
+ * $Id: StPmdDetector.cxx,v 1.5 2004/09/22 19:24:56 perev Exp $
  *
  * Author:  Subhasis Chattopadhyay, July 2002
  *******************************************************
@@ -9,6 +9,9 @@
  *
  *********************************************************
  * $Log: StPmdDetector.cxx,v $
+ * Revision 1.5  2004/09/22 19:24:56  perev
+ * Leak fixed + mess with i,j indexes
+ *
  * Revision 1.4  2004/06/29 17:31:41  perev
  * Zeroing in ctr added and tests for null pointers
  *
@@ -32,8 +35,8 @@ StPmdDetector::StPmdDetector()
   mDetectorId=0;
   mNumberOfModules=0;
     
-  memset(mModules_NHit,0,12*sizeof(*mModules_NHit));
-  memset(mModules     ,0,12*sizeof(*mModules     ));
+  memset(mModules_NHit,0,sizeof(mModules_NHit));
+  memset(mModules     ,0,sizeof(mModules     ));
   mClusters=0;    
 }
 
@@ -42,18 +45,20 @@ StPmdDetector::StPmdDetector(Int_t id, unsigned int n)
     mClusters = 0;
     mDetectorId = id;
     mNumberOfModules = n;
-    memset(mModules_NHit,0,12*sizeof(*mModules_NHit));
+    memset(mModules_NHit,0,sizeof(mModules_NHit));
+    memset(mModules     ,0,sizeof(mModules     ));
     for(int i=0; i<12;i++)
     {
       StPmdModule * module = new StPmdModule();
-      this->setModule(module,i);
+      setModule(module,i);
     }
 
 }
 
 StPmdDetector::~StPmdDetector()
 {
-    for(int i=0; i<12;i++) if(mModules[i]) delete mModules[i];
+    for(int i=0; i<12;i++) delete mModules[i];
+    delete mClusters; mClusters=0;
 }
 
 bool
@@ -102,9 +107,8 @@ StPmdDetector::setModule(StPmdModule* val,int IdMod)
     {
       if (IdMod >= 0 && IdMod < static_cast<int>(mNumberOfModules))
       {
-	if (mModules[IdMod]) mModules[IdMod]=0;
 	mModules_NHit[IdMod]=0;
-        if (mModules[IdMod]) delete mModules[IdMod];
+        delete mModules[IdMod];
         mModules[IdMod] = val;
       }
    }

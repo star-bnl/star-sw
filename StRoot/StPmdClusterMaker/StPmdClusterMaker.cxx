@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.12 2004/09/21 14:57:24 subhasis Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.13 2004/09/22 19:24:55 perev Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,8 +9,8 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
- * Revision 1.12  2004/09/21 14:57:24  subhasis
- * delete for StPmdHit*
+ * Revision 1.13  2004/09/22 19:24:55  perev
+ * Leak fixed + mess with i,j indexes
  *
  * Revision 1.11  2004/09/03 14:31:53  subhasis
  * OptHist introduced
@@ -76,7 +76,6 @@ StPmdCollection *cluster_hit;
 StPmdClusterMaker::StPmdClusterMaker(const char *name):StMaker(name)
 {
 	mOptHist=kFALSE;
-	mOptClearHits=kTRUE;
 
 }
 //-------------------
@@ -169,8 +168,6 @@ Int_t StPmdClusterMaker::Make()
       cout<<"stevent filled , to go hist "<<endl;
       if(mOptHist)FillHistograms(pmd_det,cpv_det);
       cout<<"hist filled  "<<endl;
-      if(mOptClearHits)ClearHits(pmd_det);
-      if(mOptClearHits)ClearHits(cpv_det);
       
     }
    clock.Stop();
@@ -393,29 +390,6 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 }
 
 
-void StPmdClusterMaker::ClearHits(StPmdDetector* mdet)
-{
-      for(Int_t id=1;id<=12;id++)
-	{   //! loop for supermodule
-	  StPmdModule * pmd_mod=mdet->module(id);  //! getting module(id)
-	  if(mdet->module_hit(id)>0) 
-	    {
-	      Int_t nmh=mdet->module_hit(id);  //! total no.of hits in the supermodule in PMD plane
 
-	      TIter next(pmd_mod->Hits());
-	      StPmdHit *spmcl;   //! pointer for hits
-	      for(Int_t im=0; im<nmh; im++)
-		{
-		  
-		  spmcl = (StPmdHit*)next();
-		  if(spmcl)
-		    {
-			    delete spmcl;
-			    spmcl=0;
-		    }
-		}
-    	}
-    	}
 
-}
 
