@@ -7,6 +7,11 @@ ClassImp(StBemcData)
 StBemcData::StBemcData(char* name):TDataSet(name)
 {
   mDecoder = NULL;
+  zeroAll();
+}
+void StBemcData::zeroAll()
+{
+  mDecoder = NULL;
 	for(int i=0;i<30;i++)
 	{
 		TDCError[i] = 0;
@@ -15,6 +20,22 @@ StBemcData::StBemcData(char* name):TDataSet(name)
 		TDCCrateId[i] = 0;
 		TDCCount[i] = 164;
 	}
+	for(int i=0;i<4800;i++)
+	{
+    TowerADC[i] = 0;
+    //TowerEnergy[i] = 0;
+    SmdeADC[i] = 0;
+    SmdpADC[i] = 0;
+    //SmdeEnergy[i] = 0;
+    //SmdpEnergy[i] = 0;
+  }
+	for(int i=4800;i<18000;i++)
+	{
+    SmdeADC[i] = 0;
+    SmdpADC[i] = 0;
+    //SmdeEnergy[i] = 0;
+    //SmdpEnergy[i] = 0;
+  }
 }
 StBemcData::~StBemcData()
 {
