@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.9 2001/04/05 04:00:57 ullrich Exp $
+ * $Id: StTpcHit.cxx,v 2.10 2004/01/13 21:01:08 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
+ * Revision 2.10  2004/01/13 21:01:08  fisyak
+ * Add Truth and Quality information from simulation
+ *
  * Revision 2.9  2001/04/05 04:00:57  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -46,7 +49,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.9 2001/04/05 04:00:57 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.10 2004/01/13 21:01:08 fisyak Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
@@ -100,8 +103,8 @@ StTpcHit::StTpcHit(const dst_point_st& pt)
     // The hardware position stays at it is
     //
     mHardwarePosition = pt.hw_position;
-
-    
+    mIdTruth          = pt.id_simtrk;
+    mQuality          = pt.id_quality;
 }
 
 StTpcHit::~StTpcHit() {/* noop */}

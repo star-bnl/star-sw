@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.10 2001/04/05 04:00:51 ullrich Exp $
+ * $Id: StHit.cxx,v 2.11 2004/01/13 21:01:32 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.11  2004/01/13 21:01:32  fisyak
+ * Add Truth and Quality information from simulation
+ *
  * Revision 2.10  2001/04/05 04:00:51  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -51,7 +54,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.10 2001/04/05 04:00:51 ullrich Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.11 2004/01/13 21:01:32 fisyak Exp $";
 
 ClassImp(StHit)
 
@@ -61,13 +64,15 @@ StHit::StHit()
     mCharge = 0;
     mTrackRefCount = 0;
     mFlag = mFitFlag = 0;
+    mIdTruth = mQuality = 0;
 }
 
 StHit::StHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
-             unsigned int hp, float q, unsigned char c)
+             unsigned int hp, float q, unsigned char c, UShort_t id, UShort_t quality)
     : StMeasuredPoint(p), mHardwarePosition(hp),
-      mCharge(q), mTrackRefCount(c), mPositionError(e)
+      mCharge(q), mTrackRefCount(c), mPositionError(e),
+      mIdTruth(id), mQuality(quality)
 {
     mFlag = mFitFlag = 0;
 }
