@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.152 2000/11/22 22:01:53 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.153 2000/11/24 17:28:10 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -181,7 +181,7 @@ Bfc_st BFC[] = {
   {"scm"      ,"","svtChain",""                ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
   {"sce"      ,"","svtChain",""                   ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker","",kFALSE},
   {"Ftpc"        ,"ftpcChain"  ,"","ftpcT,fcl,fpt,Fglobal,Fprimary"         ,"StMaker","StChain","",kFALSE},
-  {"fss"         ,"ftpc_raw","ftpcChain","SCL,Simu"       ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
+  {"fss"    ,"ftpc_raw","ftpcChain","SCL,Simu","StFtpcSlowSimMaker","St_ftpc,StFtpcSlowSimMaker","",kFALSE},
   {"Fcl"         ,"ftpc_hits","ftpcChain","SCL"
                           ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,St_ftpc,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpcChain","SCL" ,"StFtpcTrackMaker","St_ftpc,StFtpcTrackMaker","",kFALSE},
