@@ -217,13 +217,13 @@ ifdef PKG_SDD
 endif 
 FILES_EXE := $(addprefix $(BIN_DIR)/,$(NAMES_EXE))
 
-FILES_D := $(FILES_SRC) $(FILES_SRM) $(FILES_IDL)
+FILES_D := $(filter-out %.f,$(FILES_SRC) $(FILES_SRM) $(FILES_IDL))
 FILES_D := $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_D)))))
 
 FILES_C_CDF := $(addsuffix .c, $(addprefix $(SRC_GEN_DIR)/,$(basename $(notdir $(FILES_CDF)))))
 
 FILES_O := $(FILES_SRC) $(FILES_SRG) $(FILES_CDF)
-FILES_O := $(addprefix $(OBJ_DIR)/,$(addsuffix .o, $(notdir $(basename $(FILES_O)))))
+FILES_O := $(addsuffix .o, $(notdir $(basename $(FILES_O))))
 
 FILES_DIDLM :=$(addsuffix .didlm, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_IDLM)))))
 
@@ -240,7 +240,7 @@ endif
 #
 ##	Include .d and .didlm files
 ifndef PKG_SDD
--include $(FILES_D) 
+ include $(FILES_D) 
 endif
 
 .PHONY : all  CDFtoC  IdlToH lib exe DeleteDirs
@@ -309,11 +309,11 @@ IdlToH: $(FILES_IDH)
 lib : CDFtoC IdlToH $(MY_LIB) $(MY_SO)
 
 $(MY_LIB) : $(FILES_O)
-	$(AR) $(ARFLAGS) $(MY_LIB) $(FILES_O)
+	$(AR) $(ARFLAGS) $(MY_LIB) $(addprefix $(OBJ_DIR)/,$(FILES_O))
 	touch $(MY_LIB)
 
 $(MY_SO) : $(FILES_O)
-	$(SO) $(SOFLAGS) -o $(LIB_DIR)/lib$(PKGNAME).$(So) $(FILES_O)
+	$(SO) $(SOFLAGS) -o $(LIB_DIR)/lib$(PKGNAME).$(So) $(addprefix $(OBJ_DIR)/,$(FILES_O))
 
 $(SRC_GEN_DIR)/%.c : %.cdf
 	kuipc -c $(ALL_DEPS) $(SRC_GEN_DIR)/$(STEM).c
@@ -326,17 +326,17 @@ $(SRC_GEN_DIR)%.c : %.y
 	cd $(TMP_DIR);\
 	$(YACC) $(ALL_DEPS) ; mv y.tab.c $(SRC_GEN_DIR)/$(STEM).c
 
-$(OBJ_DIR)/%.o : %.c 
-	$(CC)  -c $(CPPFLAGS) $(CFLAGS)    $(INCLUDES) $(1ST_DEPS) -o $(ALL_TAGS)
+%.o : %.c 
+	$(CC)  -c $(CPPFLAGS) $(CFLAGS)    $(INCLUDES) $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 
-$(OBJ_DIR)/%.o : %.cc 
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES) $(1ST_DEPS) -o $(ALL_TAGS)
+%.o : %.cc 
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES) $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 
-$(OBJ_DIR)/%.o : %.F 
-	$(FC)  -c $(CPPFLAGS) $(FFLAGS) $(INCLUDES)  $(1ST_DEPS) -o $(ALL_TAGS)
+%.o : %.F 
+	$(FC)  -c $(CPPFLAGS) $(FFLAGS) $(INCLUDES)  $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 
-$(OBJ_DIR)/%.o : %.f 
-	$(FC)  -c $(CPPFLAGS) $(FFLAGS) $(INCLUDES)  $(1ST_DEPS) -o $(ALL_TAGS)
+/%.o : %.f 
+	$(FC)  -c $(CPPFLAGS) $(FFLAGS) $(INCLUDES)  $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 
 $(SRC_GEN_DIR)/%-lex.c : $(SRC_DIR)/%.l 
 	lex $(ALL_DEPS)
