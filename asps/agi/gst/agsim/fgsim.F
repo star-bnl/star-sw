@@ -378,7 +378,7 @@ c----------------------------------------------------------------------
        end
  
  
-*CMZ :          26/08/98  19.49.23  by  Pavel Nevski
+*CMZ :  1.40/05 26/08/98  20.16.56  by  Pavel Nevski
 *CMZ :  1.40/05 26/08/98  19.34.12  by  Pavel Nevski
 *CMZ :  2.06/13 01/02/95  09.38.53  by  O.Couet
 *-- Author :    Fons Rademakers   20/11/93
@@ -393,17 +393,16 @@ c----------------------------------------------------------------------
 *KEEP,VIDQQ.
       CHARACTER*68 VIDQQ
       DATA VIDQQ/
-     +'@(#)* STARSIM  1.40/05  26/08/98  19.37.  C: 26/08/98  19.49.51
+     +'@(#)* Advanced Geant Inteface   1.40/05   C: 28/08/98  10.55.07
      +'/
 *KEEP,DATEQQ.
-      IDATQQ =   980826
+      IDATQQ =   980828
 *KEEP,TIMEQQ.
-      ITIMQQ =   1949
+      ITIMQQ =   1055
 *KEEP,VERSQQ.
       VERSQQ = ' 1.40/05'
       IVERSQ =  14005
 *KEND.
- 
       CHPAW  = 'S T A F'
       IDAY   = mod(IDATQQ,100)
       IMONTH = mod(IDATQQ/100,100)
