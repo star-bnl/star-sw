@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.13 2000/02/11 20:53:10 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.14 2000/02/18 22:49:56 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.14  2000/02/18 22:49:56  posk
+// Added PID and centrality.
+//
 // Revision 1.13  2000/02/11 20:53:10  posk
 // Commented out random_shuffle and cout formatting so as to work under CC5.
 //
@@ -68,6 +71,9 @@
 #include "StThreeVector.hh"
 #include "TFile.h"
 #include "StFlowConstants.hh"
+#include "StParticleDefinition.hh"
+#include "StParticleTable.hh"
+#include "StTpcDedxPidAlgorithm.h"
 #define PR(x) cout << "##### FlowMaker: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowMaker)
@@ -102,7 +108,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.13 2000/02/11 20:53:10 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.14 2000/02/18 22:49:56 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
@@ -202,6 +208,7 @@ void StFlowMaker::fillFlowEvent() {
   // Get initial multiplicity before TrackCuts 
   UInt_t origMult = pEvent->primaryVertex(0)->numberOfDaughters(); 
   pFlowEvent->SetOrigMult(origMult);
+  pFlowEvent->SetCentrality(origMult);
   PR(origMult);
 
   // Get primary vertex position
@@ -212,6 +219,7 @@ void StFlowMaker::fillFlowEvent() {
   int goodTracks = 0;
   const StSPtrVecPrimaryTrack& tracks = pEvent->primaryVertex(0)->daughters();
   StSPtrVecPrimaryTrackIterator itr = 0;
+  StParticleDefinition* particle;
 
   for (itr = tracks.begin(); itr != tracks.end(); itr++) {
     StPrimaryTrack* pTrack = *itr;
@@ -227,6 +235,12 @@ void StFlowMaker::fillFlowEvent() {
       pFlowTrack->SetChi2(pTrack->fitTraits().chi2());
       pFlowTrack->SetFitPts(pTrack->fitTraits().numberOfFitPoints());
       pFlowTrack->SetMaxPts(pTrack->numberOfPossiblePoints());
+      particle =  StParticleTable::instance()->findParticle("pi+");
+      pFlowTrack->SetPidPiPlus(PidSigmas(pTrack, particle));
+      particle =  StParticleTable::instance()->findParticle("pi-");
+      pFlowTrack->SetPidPiMinus(PidSigmas(pTrack, particle));
+      particle =  StParticleTable::instance()->findParticle("proton");
+      pFlowTrack->SetPidProton(PidSigmas(pTrack, particle));
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
       goodTracks++;
     }
@@ -243,6 +257,7 @@ void StFlowMaker::fillFlowEvent() {
 
   pFlowEvent->SetSelections();
   pFlowEvent->MakeSubEvents();
+  pFlowEvent->SetPids();
 
   // Print multiplicities
 //   static const int& nHars    = Flow::nHars;
@@ -266,3 +281,33 @@ void StFlowMaker::fillFlowEvent() {
 //   }
 
 }
+
+//-----------------------------------------------------------------------
+
+Float_t StFlowMaker::PidSigmas(const StPrimaryTrack* pTrack, 
+			 const StParticleDefinition* particle) {
+     
+  Float_t nSigma = 0.;
+
+  // get collection of pid traits of TPC track
+  StPtrVecTrackPidTraits traits = pTrack->pidTraits(kTpcId);
+  
+  StTpcDedxPidAlgorithm tpcDedx;
+  StDedxPidTraits* pid;
+  for (int i = 0; i < traits.size(); i++) {
+    StTrackPidTraits* thisTrait = traits[i];
+    // perform cast to make the pid trait a dedx trait
+    pid = dynamic_cast<StDedxPidTraits*>(thisTrait);
+    //pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
+
+    // container of traits contains several possible dE/dx methods
+    if (pid && pid->method() == kTruncatedMeanId) {
+      // next line is necessary to allow tpcDedx functions
+      const StParticleDefinition* guess = pTrack->pidTraits(tpcDedx);
+      nSigma = (float)tpcDedx.numberOfSigma(particle);
+      break;
+    }
+  }
+  return nSigma;
+}
+

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.13 2000/02/11 20:53:09 posk Exp $
+// $Id: StFlowEvent.cc,v 1.14 2000/02/18 22:49:54 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cc,v $
+// Revision 1.14  2000/02/18 22:49:54  posk
+// Added PID and centrality.
+//
 // Revision 1.13  2000/02/11 20:53:09  posk
 // Commented out random_shuffle and cout formatting so as to work under CC5.
 //
@@ -98,6 +101,10 @@ Float_t  StFlowEvent::mPtCuts[2][Flow::nHars][Flow::nSels] =  {{{0.05,0.05},
 								{2.,2.},
 								{2.,2.},
 								{2.,2.}}};
+
+Float_t StFlowEvent::mPiPlusCuts[2]  = { -2, 1 };
+Float_t StFlowEvent::mPiMinusCuts[2] = { -2, 2 };
+Float_t StFlowEvent::mProtonCuts[2]  = { -1, 2 };
 
 //-----------------------------------------------------------
 
@@ -299,7 +306,9 @@ void StFlowEvent::MakeSubEvents() {
   int eventMult[Flow::nHars][Flow::nSels] = {{0}};
   int harN, selN, subN = 0;
 
-  //random_shuffle(TrackCollection()->begin(), TrackCollection()->end());
+#if !defined(__CC5__)
+  random_shuffle(TrackCollection()->begin(), TrackCollection()->end());
+#endif
 
   // loop to count the total number of tracks for each selection
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
@@ -337,6 +346,36 @@ void StFlowEvent::MakeSubEvents() {
 
 //-----------------------------------------------------------------------
 
+void StFlowEvent::SetPids() {
+  
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    Char_t pid[10] = "none";
+    Short_t charge  = pFlowTrack->Charge();
+
+    if (charge == 1) {
+      Float_t piPlus  = pFlowTrack->PidPiPlus();
+      Float_t proton  = pFlowTrack->PidProton();
+      if (piPlus > mPiPlusCuts[0] && piPlus < mPiPlusCuts[1]) {
+	strcpy(pid, "pi+");
+      } else if ( proton > mProtonCuts[0] && proton < mProtonCuts[1]) {
+	strcpy(pid, "proton");
+      }
+    } else if (charge == -1) {
+      Float_t piMinus = pFlowTrack->PidPiMinus();
+      if (piMinus > mPiMinusCuts[0] && piMinus < mPiMinusCuts[1]) {
+	strcpy(pid, "pi-");
+      }
+    }
+
+    pFlowTrack->SetPid(pid);
+
+  }
+}
+
+//-----------------------------------------------------------------------
+
 void StFlowEvent::PrintSelectionList() {
   // Prints the list of selection cuts
   // Call in Finish
@@ -344,6 +383,14 @@ void StFlowEvent::PrintSelectionList() {
   static const int& nHars    = Flow::nHars;
   static const int& nSels    = Flow::nSels;
 
+  cout << "#######################################################" << endl;
+  cout << "# Pid Cuts:" << endl; 
+  cout << "#    PiPlus cuts=  " << mPiPlusCuts[0] << ", " 
+       << mPiPlusCuts[1] << endl;
+  cout << "#    PiMinus cuts= " << mPiMinusCuts[0] << ", " 
+       << mPiMinusCuts[1] << endl;
+  cout << "#    Proton cuts=  " << mProtonCuts[0] << ", " 
+       << mProtonCuts[1] << endl;
   cout << "#######################################################" << endl;
   cout << "# Track Selections List:" << endl; 
   for (int k = 0; k < nSels; k++) {

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.hh,v 1.8 2000/02/11 20:53:09 posk Exp $
+// $Id: StFlowEvent.hh,v 1.9 2000/02/18 22:49:55 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.hh,v $
+// Revision 1.9  2000/02/18 22:49:55  posk
+// Added PID and centrality.
+//
 // Revision 1.8  2000/02/11 20:53:09  posk
 // Commented out random_shuffle and cout formatting so as to work under CC5.
 //
@@ -62,6 +65,7 @@ public:
   Double_t       PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const;
   UInt_t         EventNumber() const;
   UInt_t         OrigMult() const;
+  UInt_t         Centrality() const;
   StThreeVectorF VertexPos() const;
   UInt_t         Mult(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
   TVector2       Q(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
@@ -73,12 +77,17 @@ public:
   void     SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   void     SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   void     SetSelections();
+  void     SetPids();
   void     PrintSelectionList();
   void     MakeSubEvents();
   void     SetEventNumber(const UInt_t&);
   void     SetOrigMult(const UInt_t&);
+  void     SetCentrality(const UInt_t&);
   void     SetVertexPos(const StThreeVectorF&);
   void     SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt);
+  void     SetPiPlusCut(Float_t lo, Float_t hi);
+  void     SetPiMinusCut(Float_t lo, Float_t hi);
+  void     SetProtonCut(Float_t lo, Float_t hi);
 
   // For I/O of this object -- functions defined in StHbtIO.cc
   friend ostream& operator<<(ostream& out, StFlowEvent& ev);
@@ -90,10 +99,14 @@ private:
 
   UInt_t          mEventNumber;                      // number of the event
   UInt_t          mOrigMult;                         // number of tracks
+  UInt_t          mCentrality;                       // centrality bin
   StThreeVectorF  mVertexPos;                        // primary vertex position
   static Float_t  mEtaCuts[2][Flow::nHars][Flow::nSels];  // range absolute values
   static Float_t  mPtCuts[2][Flow::nHars][Flow::nSels];   // range
   Flow::PhiWgt_t  mPhiWgt;
+  static Float_t  mPiPlusCuts[2];                    // PID cuts
+  static Float_t  mPiMinusCuts[2];
+  static Float_t  mProtonCuts[2];
 
   StFlowEvent*           pFlowEvent;         //!
   StFlowTrackCollection* pTrackCollection;   //!
@@ -106,6 +119,8 @@ inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {
 inline  UInt_t StFlowEvent::EventNumber() const { return mEventNumber; }
 
 inline  UInt_t StFlowEvent::OrigMult() const { return mOrigMult; }
+
+inline  UInt_t StFlowEvent::Centrality() const { return mCentrality; }
 
 inline  StThreeVectorF StFlowEvent::VertexPos() const { return mVertexPos; }
 
@@ -121,8 +136,20 @@ inline void StFlowEvent::SetEventNumber(const UInt_t& event) {
 inline void StFlowEvent::SetOrigMult(const UInt_t& tracks) {
   mOrigMult = tracks; }
 
+inline void StFlowEvent::SetCentrality(const UInt_t& tracks) {
+  UInt_t maxTracks = 4000; mCentrality = (6*tracks)/maxTracks + 1; }
+
 inline void StFlowEvent::SetVertexPos(const StThreeVectorF& vertexPos) {
   mVertexPos = vertexPos; }
+
+inline void StFlowEvent::SetPiPlusCut(Float_t lo, Float_t hi) { 
+  mPiPlusCuts[0] = lo; mPiPlusCuts[1] = hi; }
+
+inline void StFlowEvent::SetPiMinusCut(Float_t lo, Float_t hi) { 
+  mPiMinusCuts[0] = lo; mPiMinusCuts[1] = hi; }
+
+inline void StFlowEvent::SetProtonCut(Float_t lo, Float_t hi) { 
+  mProtonCuts[0] = lo; mProtonCuts[1] = hi; }
 
 #endif
 
