@@ -6,7 +6,8 @@
 
 //SCL
 #include "StThreeVector.hh"
-#include "StHelix.hh" 
+#include "StHelix.hh"
+#include "StMatrixF.hh"
 
 //StEvent
 #include "StEventTypes.h"
@@ -51,6 +52,37 @@ T g2dEulerRotation(const T& x, double beta)
 	      );
 }
 
+//Given a rotation R and error matrix E about the z-axis, we take E'=R*E*R_transpose
+template <class T>
+T gCovarianceRotation(const T& Error, double theta)
+{
+    enum Labels {x=1, y=2, z=3};
+    
+    if ( (Error.numRow()!=3) || (Error.numCol()!=3) ) {
+	cout <<"gCovarianceRotation()\t Error!: not 3 by 3 matrix.  Undefined Errors"<<endl;
+    }
+
+    //Make the rotation matrix
+    //StMatrix::operator() (row, column)
+
+    T R(3,3);
+    //Diagonal
+    R(x,x) = cos(theta); 
+    R(y,y) = cos(theta);
+    R(z,z) = 1.;
+
+    //Off Diagonal
+    R(x,y) = sin(theta);
+    R(y,x) = -1.*sin(theta);
+
+    R(x,z) = 0.; 
+    R(y,z) = 0.;
+    R(z,x) = 0.; 
+    R(z,y) = 0.; 
+
+    //Now Transform
+    return ( R*Error*R.transpose() );
+}
 
 StiGeometryTransform::StiGeometryTransform()
 {
@@ -316,24 +348,19 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
 	stihit->setY( -1.*lsHit.position().x() );
     }
 
-    /*
-      cout <<"TpcHit: "<<tpchit->sector()<<" "<<tpchit->padrow()<<" "<<tpchit->position();
-      cout <<" GlobHit: "<<gHit.position();
-      cout <<" LSHit: "<<lsHit.position()<<" From Sector: "<<lsHit.fromSector()<<" ";
-      cout <<" StiHit: "<<stihit->x()<<" "<<stihit->y()<<" "<<stihit->z()<<endl;
-    */
     double phi=tpchit->position().phi();
     while (phi<0.) {
 	if (phi<0.) phi+=(2.*M_PI);
     }
 
-    /*
-      cout <<"TpcHit:\t"<<tpchit->sector()<<" "<<tpchit->padrow()<<"\t"<<tpchit->position().perp()<<" "<<phi<<endl;
-      double r=sqrt(stihit->x()*stihit->x() + stihit->y()*stihit->y());
-      cout <<"StiHit:\t \t "<<r<<" "<<stihit->refangle()<<endl;
-    */
+    //Now Transform Errors
+    StMatrixF covMatrix = tpchit->covariantMatrix();
+    stihit->setError( gCovarianceRotation( covMatrix, stihit->refangle() ) );
+
     return;
 }
+
+
 void StiGeometryTransform::operator() (const StiHit* stihit, StTpcHit* tpchit)
 {
 }
