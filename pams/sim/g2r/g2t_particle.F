@@ -10,7 +10,7 @@
       G2T_PARTICLE=1
       call agfpartic(link,len)
       call ucopy(IQ(link+1),particle,15*len)
-
+      particle_h.nok = len
 *
 *      print * ,' in partiocl ',particle_h.maxlen
 *      do i=1,particle_h.maxlen
