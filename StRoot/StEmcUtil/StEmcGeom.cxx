@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.4 2001/04/25 01:03:03 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.5 2001/04/25 02:41:45 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.5  2001/04/25 02:41:45  pavlinov
+ * Fixed erorr for transition from ivid to EMC numeration
+ *
  * Revision 1.4  2001/04/25 01:03:03  pavlinov
  * Clean up
  *
@@ -434,13 +437,17 @@ Int_t &sub, Int_t &detector)
       printf("<W> StEmcGeom::getVolIdBemc => wrong value of dep %i \n",dep);
     }
     if     (rl==1) {
-      phi += Int_t((mCalg_st->shift[0]-75.)/6.);
+      //      cout<<" Phi 1 "<<phi<<endl;
+      //      phi += Int_t((mCalg_st->shift[0]-75.)/6.);
+      phi += Int_t((75.-mCalg_st->shift[0])/6.);
       while (phi<=0)  phi+=60;
       while (phi>=61) phi-=60;
       module=phi;
+      //      cout<<" Phi 2 "<<phi<<endl;
     }
     else if(rl==2) {
-      phi += Int_t((mCalg_st->shift[1]-105.)/6.);
+      //      phi += Int_t((mCalg_st->shift[1]-105.)/6.);
+      phi += Int_t((105.-mCalg_st->shift[0])/6.);
       while (phi<=0)  phi+=60;
       while (phi>=61) phi-=60;
       module=phi+60;
@@ -483,13 +490,15 @@ Int_t &sub, Int_t &detector)
     t      = smdChid[3];  // SMD type 1->3
     strip  = smdChid[4];  // strip number 1-75(type 1,2) 1-15(type 3)
     if     (rl==1) {
-      phi += Int_t((mCalg_st->shift[0]-75.)/6.);
+      //      phi += Int_t((mCalg_st->shift[0]-75.)/6.);
+      phi += Int_t((75.-mCalg_st->shift[0])/6.);
       while (phi<=0)  phi+=60;
       while (phi>=61) phi-=60;
       module=phi;
     }
     else if(rl==2) {
-      phi += Int_t((mCalg_st->shift[1]-105.)/6.);
+      //      phi += Int_t((mCalg_st->shift[1]-105.)/6.);
+      phi += Int_t((105.-mCalg_st->shift[0])/6.);
       while (phi<=0)  phi+=60;
       while (phi>=61) phi-=60;
       module=phi+60;
