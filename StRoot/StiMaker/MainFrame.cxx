@@ -19,6 +19,7 @@ using std::find_if;
 #include "StMemoryInfo.hh"
 
 //Sti
+#include "Sti/StiIOBroker.h"
 #include "Sti/Messenger.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiPlacement.h"
@@ -202,6 +203,7 @@ ClassImp(MainFrame)
     mOptionsMenu = new TGPopupMenu(fClient->GetRoot());
     mOptionsMenu->AddEntry("Messenger Options", M_Messenger);
     mOptionsMenu->AddEntry("Display Options", M_DisplayOptions);
+    mOptionsMenu->AddEntry("Seed Finder Options", M_SeedFinderOptions);
 
     fMenuHelp = new TGPopupMenu(fClient->GetRoot());
     fMenuHelp->AddEntry("&Contents", M_HELP_CONTENTS);
@@ -475,6 +477,10 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 
 	    case M_DisplayOptions:
 		new EntryTestDlg(fClient->GetRoot(), this);		
+		break;
+
+	    case M_SeedFinderOptions:
+		new SeedFinderIO(fClient->GetRoot(), this);
 		break;
 		
 	    case M_Draw_TestObject:
@@ -1795,6 +1801,218 @@ void EntryTestDlg::SetLimits()
 }
 
 Bool_t EntryTestDlg::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
+{
+    switch (GET_MSG(msg)) {
+    case kC_COMMAND:
+	{
+	    switch (GET_SUBMSG(msg)) {
+	    case kCM_BUTTON:
+		{
+		    switch (parm1) {
+			// exit button
+		    case 1:
+			{
+			    CloseWindow();
+			    break;
+			}
+			// set button
+		    case 2:
+			{
+			    SetLimits();
+			    break;
+			}
+		    }
+		    break;
+		}
+	    }
+	    break;
+	}
+    }
+    return kTRUE;
+}
+
+
+SeedFinderIO::SeedFinderIO(const TGWindow * p, const TGWindow * main)
+    : TGTransientFrame(p, main, 10, 10, kHorizontalFrame)
+{
+    // build widgets
+    fF1 = new TGVerticalFrame(this, 200, 300);
+    fL1 = new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 2, 2, 2);
+    AddFrame(fF1, fL1);
+
+    fL2 = new TGLayoutHints(kLHintsCenterY | kLHintsRight, 2, 2, 2, 2);
+
+    makeNumberEntries();
+    
+    fF2 = new TGVerticalFrame(this, 200, 500);
+    fL3 = new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 2, 2, 2);
+    AddFrame(fF2, fL3);
+    
+    fSetButton = new TGTextButton(fF2, " Apply ", 2);
+    fSetButton->Associate(this);
+    fF2->AddFrame(fSetButton, fL3);
+    
+    fExitButton = new TGTextButton(fF2, " Close ", 1);
+    fExitButton->Associate(this);
+    fF2->AddFrame(fExitButton, fL3);
+    
+    // set dialog box title
+    SetWindowName("Display Options");
+    SetIconName("Display Options");
+    SetClassHints("DisplayOptions", "DisplayOptions");
+    // resize & move to center
+    MapSubwindows();
+    UInt_t width = GetDefaultWidth();
+    UInt_t height = GetDefaultHeight();
+    Resize(width, height);
+
+    Int_t ax;
+    Int_t ay;
+    if (main) {
+	Window_t wdum;
+	gVirtualX->TranslateCoordinates(main->GetId(), GetParent()->GetId(),
+					(((TGFrame *) main)->GetWidth() -
+					 fWidth) >> 1,
+					(((TGFrame *) main)->GetHeight() -
+					 fHeight) >> 1, ax, ay, wdum);
+;    } else {
+	UInt_t root_w, root_h;
+	gVirtualX->GetWindowSize(fClient->GetRoot()->GetId(), ax, ay,
+				 root_w, root_h);
+	ax = (root_w - fWidth) >> 1;
+	ay = (root_h - fHeight) >> 1;
+    }
+    Move(ax, ay);
+    SetWMPosition(ax, ay);
+    // make the message box non-resizable
+    SetWMSize(width, height);
+    SetWMSizeHints(width, height, width, height, 0, 0);
+    SetMWMHints(kMWMDecorAll | kMWMDecorResizeH | kMWMDecorMaximize |
+		kMWMDecorMinimize | kMWMDecorMenu,
+		kMWMFuncAll | kMWMFuncResize | kMWMFuncMaximize |
+		kMWMFuncMinimize, kMWMInputModeless);
+    
+    MapWindow();
+    
+    //fClient->WaitFor(this);
+}
+
+void SeedFinderIO::makeNumberEntries()
+{
+    StiIOBroker* broker = StiIOBroker::instance();
+    
+    //Minimum Padrow
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("MinimumPadrow",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->tphfMinPadrow() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 1, 45);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Minimum Padrow") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Maximum Padrow
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("MaximumPadrow",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->tphfMaxPadrow() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 1, 45);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Maximum Padrow") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Lower Bound
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("LowerBound",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->etsfLowerBound() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMin, 0);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Lower Bound for Good Association") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Max Hits
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("MaxHits",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->etsfMaxHits() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 1, 45);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Number of Hits in Seed") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+}
+
+SeedFinderIO::~SeedFinderIO()
+{
+    if (fNumericEntries.size()!=fLabel.size() || fLabel.size()!=fF.size()) {
+	cout <<"SeedFinderIO::~SeedFinderIO. ERROR:\t"
+	     <<"Mismatch in cleanup vector size"<<endl;
+    }
+    for (unsigned int i=0; i<fF.size(); ++i) {
+	delete fNumericEntries[i].second;
+	delete fLabel[i];
+	delete fF[i];
+	fNumericEntries[i].second=0;
+	fLabel[i]=0;
+	fF[i]=0;
+    }
+    delete fSetButton;
+    delete fExitButton;
+    delete fF1;
+    delete fF2;
+    delete fL1;
+    delete fL2;
+    delete fL3;
+}
+
+void SeedFinderIO::CloseWindow()
+{
+    delete this;
+}
+
+void SeedFinderIO::SetLimits()
+{
+    StiIOBroker* broker = StiIOBroker::instance();
+
+    for (NumberEntryVec::const_iterator it=fNumericEntries.begin();
+	 it!=fNumericEntries.end(); ++it) {
+	//cout <<"Number Entry\t"<<(*it).first<<" has value:\t"<<(*it).second->GetNumber()<<endl;
+	const string& name = (*it).first;
+	
+	if (name=="MinimumPadrow") {
+	    broker->setTPHFMinPadrow( (*it).second->GetNumber() );
+	}
+	else if (name=="MaximumPadrow") {	
+	    broker->setTPHFMaxPadrow( (*it).second->GetNumber() );
+	}
+	else if (name=="LowerBound") {	
+	    broker->setETSFLowerBound( (*it).second->GetNumber() );
+	}
+	else if (name=="MaxHits") {
+	    broker->setETSFMaxHits( (*it).second->GetNumber() );
+	}
+	else {
+	    cout <<"SeedFinderIO::SetLimits(). ERROR:\t"
+		 <<"Unknown name for NumberEntry:\t"<<name
+		 <<"\tYou had a compile time error"<<endl;
+	}
+    }
+}
+
+Bool_t SeedFinderIO::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 {
     switch (GET_MSG(msg)) {
     case kC_COMMAND:
