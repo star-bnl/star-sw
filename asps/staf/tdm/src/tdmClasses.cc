@@ -48,6 +48,7 @@
 //extern CC_P int dsTypeSpecifier(char **ptr, size_t *pLen, size_t tid);
 extern CC_P void dsuPrintData(FILE *stream , DS_TYPE_CODE_T type
 		, unsigned int count , void *data);
+extern "C" int finite(double);
 
 //:#####################################################################
 //:=============================================== CLASS              ==
@@ -755,6 +756,36 @@ void * tdmTable:: cellAddress(long nrow, long ncol) {
    }
    return (void*)pData;
 }
+//:----------------------------------------------- CHECK FUNCTIONS    --
+
+int tdmTable::NaN()
+{
+DS_TYPE_CODE_T code;
+double word;
+long icol,irow,colsize,wordsize,nwords,iword,nerr;
+long ncols = columnCount ();
+char *cell,*colname;
+int nrows = rowCount ();
+  nerr =0; 
+  for (icol=0; icol < ncols; icol++) {// loop over cols
+    code = columnTypeCode (icol);
+    if (code!=DS_TYPE_FLOAT && code!=DS_TYPE_DOUBLE) continue;
+    colsize  = columnSize(icol); 
+    wordsize = (code==DS_TYPE_DOUBLE) ? sizeof(double) : sizeof(float);
+    nwords = colsize/wordsize;
+    for (irow=0; irow < nrows; irow++) { //loop over rows
+      cell = (char*)cellAddress(irow, icol);
+      for (iword=0;iword<nwords; iword++,cell+=wordsize) { //words in col        
+        word = (code==DS_TYPE_DOUBLE) ? *(double*)cell : *(float*)cell;   
+        if (finite(word)) continue;
+//		ERROR FOUND
+        nerr++; colname = columnName(icol);
+        printf("tdmTable::NaN ***ERROR***: Table %s.%s.%d\n",Name,colname,irow);
+        FREE(colname);
+  }  }  } 
+return nerr;
+}          
+
 //:----------------------------------------------- PROT FUNCTIONS     --
 
 //:#####################################################################
