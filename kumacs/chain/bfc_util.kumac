@@ -178,6 +178,8 @@
 * 11/18/98 K. Turner - add "rhij" chain to run hijing
 * 11/24/98 K. Turner - change to smdst chain (macro names) and rename sdst 
 *                    - add sdst2 chain
+* 11/25/98 K. Turner - change ev0d chain to use ev0_dst code & kumacs
+*                      instead of just kumacs
 * 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -423,7 +425,9 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
             exec create_tables_global#ev02
 	    exec init_ev0#init_ev02
    (ev0_e)  exec create_tables_global#ev0_eval2
-   (ev0d)   exec init_ev0#ev0_dst
+   (ev0d)   exec create_tables_global#ev0d
+            exec init_ev0#init_ev0d
+* exec init_ev0#ev0_dst
     (ctf)   exec create_tables_ctf#init
             exec ctg_init#init
             exec ctg_init#ctg
@@ -740,8 +744,9 @@ return
       (ev0)    exec run_ev0#ev0_am 
      (ev02)    exec run_ev0#ev0_am2
     (ev0_e)    exec run_ev0#ev0_eval2
-     (ev0d)    exec run_ev0#ev0_dst
-               rm [dst]/ev0out
+    (ev0d)     exec run_ev0#ev0d  
+* exec run_ev0#ev0_dst
+* rm [dst]/ev0out
       (ctf)    exec cts_run
                exec ctu_run 
       (mwc)    exec mws_run
