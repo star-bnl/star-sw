@@ -1,11 +1,23 @@
 #!/usr/bin/env perl
 
-# $Id: cons,v 1.1.1.11 2000/08/02 15:19:08 fisyak Exp $
+# NOTE:  Cons intentionally does not use the "perl -w" option or
+# "use strict."  Beecause Cons "configuration files" are actually
+# Perl scripts, enabling those restrictions here would force them
+# on every user, wanted or not.  Would users write "better"
+# Construct and Conscript files if we forced "use strict" on them?
+# Probably.  But we want people to use Cons to get work done, not
+# force everyone to become a Perl guru to use it, so we don't insist.
+#
+# That said, Cons' code is both "perl -w" and "use strict" clean.
+# Regression tests keep the code honest by checking for warnings
+# and "use strict" failures.
+
+# $Id: cons,v 1.1.1.12 2000/08/04 12:34:24 fisyak Exp $
 
 $ver_num = __VERSION__;
 $ver_rev = "__REVISION__";
 $version = sprintf "This is Cons %s%s " .
-	    '($Id: cons,v 1.1.1.11 2000/08/02 15:19:08 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.1.1.12 2000/08/04 12:34:24 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -27,6 +39,7 @@ $version = sprintf "This is Cons %s%s " .
 # Boston, MA 02111-1307, USA.
 
 require 5.002;
+# See the NOTE above about why Cons doesn't "use strict".
 use integer;
 use Cwd;
 use File::Copy;
@@ -146,6 +159,7 @@ $param::depfile = '';		# Write all deps out to this file
 $param::salt = '';		# Salt derived file signatures with this.
 $param::rep_sig_times_ok = 1;	# Repository .consign times are in sync
 				#   w/files.
+$param::conscript_chdir = 0;	# Change dir to Conscript directory
 $param::quiet = 0;		# should we show the command being executed.
 
 #
@@ -522,11 +536,11 @@ sub buildtarget {
 }
 
 # Support for "building" scripts, importing and exporting variables.
-# With the expection of the top-level routine here (invoked from the
+# With the exception of the top-level routine here (invoked from the
 # main package by cons), these are all invoked by user scripts.
 package script;
 
-use vars qw( $ARG );
+use vars qw( $ARG $caller_dir_path );
 
 # This is called from main to interpret/run the top-level Construct
 # file, passed in as the single argument.
@@ -536,12 +550,29 @@ sub main::doscripts {
     # Now set up the includes/excludes (after the Construct file is read).
     $param::include = join('|', @param::include);
 
+    $caller_dir_path = undef;
+    my $cwd = Cwd::cwd();
     my(@scripts) = pop(@priv::scripts);
     while ($priv::self = shift(@scripts)) {
 	my($path) = $priv::self->{script}->rsrcpath;
-	$dir::cwd = $priv::self->{script}->{dir};
 	if (-f $path) {
-	    do $path;
+	    $dir::cwd = $priv::self->{script}->{dir};
+	    my ($vol, $dir, $file);
+	    if ($param::conscript_chdir) {
+		($vol, $dir, $file) = File::Spec->splitpath($path);
+		if ($vol ne '' || $dir ne '') {
+		    $caller_dir_path = File::Spec->catpath($vol, $dir, undef);
+		    chdir($caller_dir_path) ||
+			die "Could not chdir to $caller_dir_path: $!\n";
+		}
+	    } else {
+		$file = $path;
+	    }
+	    do $file;
+	    if ($caller_dir_path) {
+		chdir($cwd);
+		$caller_dir_path = undef;
+	    }
 	    if ($@) {
 		chomp($@);
 		my $err = ($@ =~ /\n/ms) ? ":\n$@" : " ($@)";
@@ -553,8 +584,13 @@ sub main::doscripts {
 	    }
 	    undef @priv::scripts;
 	} else {
-	    my($_foo, $script, $line, $sub) = @{$priv::self->{script}->creator};
-	    warn qq(Ignoring missing script "$path" ($sub in $script, line $line).\n);
+	    my $where = '';
+	    my $cref = $priv::self->{script}->creator;
+	    if (defined $cref) {
+		my($_foo, $script, $line, $sub) = @$cref;
+		$where = " ($sub in $script, line $line)";
+	    }
+	    warn qq(Ignoring missing script "$path"$where);
 	}
 
 # reset "a-zA-Z";# Reset here, to give Construct chance at globals (i.e. %ARG).
@@ -582,7 +618,11 @@ sub caller_info {
     do {
 	@frame = caller ++$lev;
 	if (defined($frame[3]) && $frame[3] eq '(eval)') {
-	    return caller --$lev;
+	    @frame = caller --$lev;
+	    if ($caller_dir_path) {
+		$frame[1] = File::Spec->catfile($caller_dir_path, $frame[1]);
+	    }
+	    return @frame;
 	}
     } while ($frame[3]);
     return;
@@ -621,6 +661,12 @@ sub Repository_List {
 # in fact, consistent with the times on the files themselves.
 sub Repository_Sig_Times_OK {
     $param::rep_sig_times_ok = shift;
+}
+
+# Specify whether we should chdir to the containing directories
+# of Conscript files.
+sub Conscript_chdir {
+    $param::conscript_chdir = shift;
 }
 
 # Specify files/targets that must be present and built locally,
@@ -849,21 +895,22 @@ sub _resolve {
 # Internal function/method.
 sub _subst {
     my($env, $str) = @_;
-    if (ref($str) eq ARRAY) {
+    if (! defined $str) {
+	return undef;
+    } elsif (ref($str) eq ARRAY) {
 	return [ map($env->_subst($_), @$str) ];
     } else {
 	# % expansion.  %% gets converted to % later, so expand any
-	# %keyword construction that doesn't have a % in front of it
-	# (modulo multiple %% pairs in between).
-	# We could actually do this in one expression as follows
-	# using a conditional expression:
+	# %keyword construction that doesn't have a % in front of it,
+	# modulo multiple %% pairs in between.
+	# In Perl 5.005 and later, we could actually do this in one regex
+	# using a conditional expression as follows,
 	#	while ($str =~ s/($pre)\%(\{)?([_a-zA-Z]\w*)(?(2)\})/"$1".$env->{$3}/ge) {}
-	# but conditional expressions weren't introduced until Perl5.005.
 	# The following two-step approach is backwards-compatible
-	# to at least Perl5.003.
+	# to (at least) Perl5.003.
 	my $pre = '^|[^\%](?:\%\%)*';
-	while ($str =~ s/($pre)\%([_a-zA-Z]\w*)/$1.$env->{$2}/ge) {}
-	while ($str =~ s/($pre)\%\{([_a-zA-Z]\w*)\}/$1.$env->{$2}/ge) {}
+	while (($str =~ s/($pre)\%([_a-zA-Z]\w*)/$1.($env->{$2}||'')/ge) ||
+	       ($str =~ s/($pre)\%\{([_a-zA-Z]\w*)\}/$1.($env->{$2}||'')/ge)) {}
 	return $str;
     }
 }
@@ -1261,8 +1308,9 @@ sub action {
 	    my($pid) = fork();
 	    die("$0: unable to fork child process ($!)\n") if !defined $pid;
 	    if (!$pid) {
-	      # This is the child.
-	      exec($com);
+	      # This is the child.  We eval the command to suppress -w
+	      # warnings about not reaching the statements afterwards.
+	      eval 'exec($com)';
 	      $com =~ s/\s.*//;
 	      die qq($0: failed to execute "$com" ($!). )
 		. qq(Is this an executable on path "$ENV{PATH}"?\n);
@@ -1509,6 +1557,7 @@ sub comsig {
     return $_[0]->{_comsig} if exists $_[0]->{_comsig};
     my($self, $tgt) = @_;
     my($env) = $self->{env};
+    $self->{_comsig} = '';
   com:
     for $com (split(/[\n;]/, $self->script)) {
 	# Isolate command word.
@@ -1686,6 +1735,7 @@ BEGIN { @ISA = qw(scan) }
 
 sub find {
     my($class, $code, $env, $path) = @_;
+    $path = '' if ! defined $path;
     $scanner{$code,$env,$path} || do {
 	my(@path) = map { $dir::cwd->lookupdir($_) } split(/:/, $path);
 	my($self) = { code => $code, env => $env, path => \@path };
@@ -1805,7 +1855,7 @@ sub scan {
 # Return the include flags that would be used for a C Compile.
 sub iflags {
     my($self, $env) = @_;
-    my($iflags);
+    my($iflags) = '';
     my($dpath);
     for $dpath (map($_->path, @{$self->{path}})) {
 	$iflags .= " ".$env->{INCDIRPREFIX}.$dpath;
@@ -2054,7 +2104,7 @@ sub _parse_path {
 	    # an entry within the root.  Remove @dirs and $entry
 	    # so the caller gets just the root node itself.
 	    @dirs = ();
-	    $entry = undef;
+	    $entry = '';
 	}
 	$dir = $root{$vol};
     } elsif ($toprel) {
@@ -2289,7 +2339,7 @@ sub linked_targets {
 	$dir = $tgt->{dir};
     }
     while ($dir) {
-	if (@{$dir->{links}}) {
+	if (defined $dir->{links} && @{$dir->{links}}) {
 	    push(@targets, map(File::Spec->catdir($_, @tail), @{$dir->{links}}));
 	    #print STDERR "Found Link: ${\$dir->path} -> @{\$dir->{links}}\n";
 	}
@@ -2680,6 +2730,7 @@ sub bind {
     if ($param::wflag) {
 	my($script, $line, $sub);
 	(undef, $script, $line, $sub) = script::caller_info;
+	$self->{script} = '' if ! defined $self->{script};
 	$self->{script} .= "; " if $self->{script};
 	$self->{script} .= qq($sub in "$script", line $line);
     }
@@ -3342,6 +3393,25 @@ top-level. Hybrid schemes are also possible. A separately maintained
 component that needs to be incorporated into a build tree, for example,
 might hook into the build tree in one place, but define its own construction
 hierarchy.
+
+By default, Cons does not change its working directory to the directory
+containing a subsidiary F<Conscript> file it is including.  This behavior
+can be enabled for a build by specifying, in the top-level F<Construct>
+file:
+
+	Conscript_chdir 1;
+
+When enabled, Cons whill change to the subsidiary F<Conscript> file's
+containing directory while reading in that file, and then change back
+to the top-level directory once the file has been processed.
+
+It is expected that this behavior will become the default in some future
+version of Cons.  To prepare for this transition, builds that expect
+Cons to remain at the top of the build while it reads in a subsidiary
+F<Conscript> file are encouraged to explicitly disable this feature
+as follows:
+
+	Conscript_chdir 0;
 
 
 =head2 Relative, top-relative, and absolute file names
