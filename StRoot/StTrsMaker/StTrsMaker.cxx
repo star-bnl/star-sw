@@ -1,6 +1,12 @@
-// $Id: StTrsMaker.cxx,v 1.51 2000/01/10 23:11:07 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.52 2000/01/27 22:56:58 calderon Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.52  2000/01/27 22:56:58  calderon
+// add Magnetic field Db instantiation when using StTpcDb.  The
+// Magnetic Field is still obtained through gufld, so the call
+// is the same as for the StSimpleMagneticField case.  StTpcDb
+// is still not used until further tests.
+//
 // Revision 1.51  2000/01/10 23:11:07  lasiuk
 // Include MACROS for compatibility with SUN CC5.0
 //
@@ -184,7 +190,7 @@
 // You must select a data base initializer method
 //#define tPC_DATABASE_PARAMETERS
 #define ROOT_DATABASE_PARAMETERS
-//#define ASCII_DATABASE_PARAMETERS
+//#define aSCII_DATABASE_PARAMETERS
 //////////////////////////////////////////////////////////////////////////
 
 #include "StTrsMaker.h"
@@ -296,7 +302,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.51 2000/01/10 23:11:07 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.52 2000/01/27 22:56:58 calderon Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -365,6 +371,14 @@ Int_t StTrsMaker::Init()
 //       StTpcDbMagneticField::instance();  // default is .5T field in z direction
   
   
+   float x[3] = {0,0,0};
+   float B[3];
+   gufld(x,B);
+   StThreeVector<double> Bfield(B[0],B[1],B[2]);
+   Bfield*=kilogauss;
+   PR(Bfield/tesla);
+   mMagneticFieldDb =
+      StSimpleMagneticField::instance(Bfield);  // default is .5T field in z direction
 
 #endif
 #ifdef ROOT_DATABASE_PARAMETERS
