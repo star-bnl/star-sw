@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.6 2002/01/16 18:13:32 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.7 2002/03/23 22:28:56 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -9,31 +9,6 @@
 // Description:  Maker to analyze Flow using StFlowEvent
 //
 ////////////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowAnalysisMaker.cxx,v $
-// Revision 1.6  2002/01/16 18:13:32  posk
-// Moved fitting q to plot.C.
-//
-// Revision 1.5  2001/11/06 17:55:23  posk
-// Only sin terms at 40 GeV.
-//
-// Revision 1.4  2001/08/17 22:03:23  posk
-// Now can also do 40 GeV data.
-//
-// Revision 1.3  2001/05/14 22:53:37  posk
-// Can select PID for event plane particles. Protons not used for 1st harmonic
-// event plane.
-//
-// Revision 1.2  2001/03/16 22:42:00  posk
-// Removed pt weighting for odd harmonics.
-//
-// Revision 1.1  2001/02/22 23:34:11  posk
-// NA49 version of STAR flow software.
-//
-// Revision 1.45  2000/10/12 21:01:30  posk
-//
-////////////////////////////////////////////////////////////////////////////
-
 #include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
@@ -768,10 +743,14 @@ void StFlowAnalysisMaker::FillEventHistograms() {
     for (int j = 0; j < Flow::nHars; j++) {
       float order  = (float)(j+1);
       histFull[k].histFullHar[j].mHistPsi->Fill(mPsi[k][j]);
-      if (mPsiSub[Flow::nSels*k][j] != 0. && mPsiSub[Flow::nSels*k+1][j] != 0.) {
-	float psiSubCorr = mPsiSub[Flow::nSels*k][j] - 
-	  mPsiSub[Flow::nSels*k+1][j];
-	histFull[k].mHistCos->Fill(order, (float)cos(order * psiSubCorr));    
+      if (mPsiSub[Flow::nSels*k][j] != 0. && mPsiSub[Flow::nSels*k+1][j] != 0.){
+        float psiSubCorr = mPsiSub[Flow::nSels*k][j] - 
+          mPsiSub[Flow::nSels*k+1][j];
+      if((order == 2) && pFlowEvent->SinOnly()) {
+        histFull[k].mHistCos->Fill(order,(float)(sin(order * mPsiSub[Flow::nSels*k][j])*sin(order * 			  			   mPsiSub[Flow::nSels*k+1][j])));
+         } else {
+         histFull[k].mHistCos->Fill(order, (float)cos(order * psiSubCorr));
+       }
 	if (psiSubCorr < 0.) psiSubCorr += twopi / order;
 	histFull[k].histFullHar[j].mHistPsiSubCorr->Fill(psiSubCorr);
       }
@@ -1164,6 +1143,8 @@ Int_t StFlowAnalysisMaker::Finish() {
       sprintf(countHars,"%d",j+1);
       cosPair[k][j]    = histFull[k].mHistCos->GetBinContent(j+1);
       cosPairErr[k][j] = histFull[k].mHistCos->GetBinError(j+1);
+      if((j == 1) && pFlowEvent->SinOnly()) cosPair[k][j] *= 2.;
+      if((j == 1) && pFlowEvent->SinOnly()) cosPairErr[k][j] *= 2.;
       if (!pFlowEvent->Stripes()) {
 	if (cosPair[k][j] > 0.92) {      // resolution saturates
 	  mRes[k][j]    = 0.99;
@@ -1277,9 +1258,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 	histFull[k].histFullHar[j].mHist_vPt->Scale(1. / mRes[k][j]);
 	// correction for using sin correlation terms only
 	if (j == 1 && pFlowEvent->SinOnly()) {
-	  histFull[k].histFullHar[j].mHist_v2D->Scale(1.41);
-	  histFull[k].histFullHar[j].mHist_vY->Scale(1.41);
-	  histFull[k].histFullHar[j].mHist_vPt->Scale(1.41);
+	  histFull[k].histFullHar[j].mHist_v2D->Scale(2.);
+	  histFull[k].histFullHar[j].mHist_vY->Scale(2.);
+	  histFull[k].histFullHar[j].mHist_vPt->Scale(2.);
 	}	  
 	content = histFull[k].mHist_v->GetBinContent(j+1);
 	content /=  mRes[k][j];
@@ -1355,3 +1336,32 @@ Int_t StFlowAnalysisMaker::Finish() {
 
   return StMaker::Finish();
 }
+
+////////////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.7  2002/03/23 22:28:56  posk
+// More 40 GeV compatability.
+//
+// Revision 1.6  2002/01/16 18:13:32  posk
+// Moved fitting q to plot.C.
+//
+// Revision 1.5  2001/11/06 17:55:23  posk
+// Only sin terms at 40 GeV.
+//
+// Revision 1.4  2001/08/17 22:03:23  posk
+// Now can also do 40 GeV data.
+//
+// Revision 1.3  2001/05/14 22:53:37  posk
+// Can select PID for event plane particles. Protons not used for 1st harmonic
+// event plane.
+//
+// Revision 1.2  2001/03/16 22:42:00  posk
+// Removed pt weighting for odd harmonics.
+//
+// Revision 1.1  2001/02/22 23:34:11  posk
+// NA49 version of STAR flow software.
+//
+// Revision 1.45  2000/10/12 21:01:30  posk
+//
+////////////////////////////////////////////////////////////////////////////
