@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.cxx,v 1.3 2003/09/11 05:49:23 perev Exp $
+ * $Id: StTofrGeometry.cxx,v 1.4 2004/03/09 16:45:16 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StTofrGeometry.cxx,v $
+ * Revision 1.4  2004/03/09 16:45:16  dongx
+ * Remove InitDaqMap() since a StTofrDaqMap is introduced
+ *
  * Revision 1.3  2003/09/11 05:49:23  perev
  * ansi corrs
  *
@@ -39,7 +42,7 @@
 //
 // group of classes for Tofr Geometry:
 //
-//    StTofrGeometry(v1), StTofNode(v2), StTofrGeomNode(v2)(off)
+//    StTofrGeometry(v1), StTofrNode(v2), StTofrGeomNode(v2)(off)
 //    StTofrGeomTray(v1), StTofrGeomSensor(v2), StTofrGeomCell(off)
 //
 // Usage:
@@ -50,23 +53,23 @@
 //
 // ---------------------------------------------------------------------------
 //
-// StTofNode
+// StTofrNode
 // ==============
 //
 //////////////////////////////////////////////////////////////////////////////
 
 #ifdef __ROOT__      
-ClassImp(StTofNode)
+ClassImp(StTofrNode)
 #endif
 
-Bool_t StTofNode::mDebug = kFALSE;
+Bool_t StTofrNode::mDebug = kFALSE;
 Double_t const StTofrGeomSensor::mSensorDy = 10.35;   // Actual module length;
 char* const StTofrGeometry::sectorPref = "BSEC";
 char* const StTofrGeometry::trayPref   = "BTRA";
 char* const StTofrGeometry::senPref    = "BRMD";
 
 //_____________________________________________________________________________
-StTofNode::StTofNode(TVolumeView *element, TVolumeView *top)
+StTofrNode::StTofrNode(TVolumeView *element, TVolumeView *top)
   : fView(element), pView(element->GetPosition()), mMasterNode(top), mTransFlag(kFALSE)
 {
    UpdateMatrix();
@@ -74,7 +77,7 @@ StTofNode::StTofNode(TVolumeView *element, TVolumeView *top)
 }
 
 //_____________________________________________________________________________
-StTofNode::~StTofNode()
+StTofrNode::~StTofrNode()
 { 
   fView = 0;
   pView = 0;
@@ -83,7 +86,7 @@ StTofNode::~StTofNode()
 }
 
 //_____________________________________________________________________________
-void  StTofNode::UpdateMatrix()
+void  StTofrNode::UpdateMatrix()
 {
    //
    //Update the Translation and RotateMatrix between local and master
@@ -99,8 +102,8 @@ void  StTofNode::UpdateMatrix()
 }
 
 //_____________________________________________________________________________
-void StTofNode::CalcMatrix(StTofNode* son,
-              Double_t* trans, Double_t* rot, StTofNode* mother)
+void StTofrNode::CalcMatrix(StTofrNode* son,
+              Double_t* trans, Double_t* rot, StTofrNode* mother)
 {
    //
    //Translation vector and Rotation matrix from TNode "mother" to "son"
@@ -137,7 +140,7 @@ void StTofNode::CalcMatrix(StTofNode* son,
 
    //  son->TNode::UpdateMatrix();
    //   son->GetpView()->UpdateMatrix();
-   //   cout << "StTofNode::CalcMatrix" << endl;
+   //   cout << "StTofrNode::CalcMatrix" << endl;
 
    xl[0] = 0;  xl[1] = 0;  xl[2] = 0;
    ConvertPos(son,xl, mother,xm);
@@ -167,9 +170,9 @@ void StTofNode::CalcMatrix(StTofNode* son,
 }
 
 //_____________________________________________________________________________
-void StTofNode::ConvertPos(
-                     StTofNode* from, const Double_t* pos_from,
-            StTofNode* to,         Double_t* pos_to)
+void StTofrNode::ConvertPos(
+                     StTofrNode* from, const Double_t* pos_from,
+            StTofrNode* to,         Double_t* pos_to)
 {
    if (to==0) from->Local2Master(pos_from,pos_to);
    else {
@@ -182,7 +185,7 @@ void StTofNode::ConvertPos(
 }
 
 //_____________________________________________________________________________
-void  StTofNode::BuildMembers()
+void  StTofrNode::BuildMembers()
 {
    //
    //Build date members: mCenter{Rxy,Eta,Phi}, m{Eta,Phi}{Min,Max}
@@ -245,7 +248,7 @@ void  StTofNode::BuildMembers()
 }
 
 //_____________________________________________________________________________
-void StTofNode::Local2Master(const Double_t* local, Double_t* master)
+void StTofrNode::Local2Master(const Double_t* local, Double_t* master)
 {
    //
    //Transform local coordinate into global coordinate
@@ -276,7 +279,7 @@ void StTofNode::Local2Master(const Double_t* local, Double_t* master)
 }
 
 //_____________________________________________________________________________
-void StTofNode::Master2Local(const Double_t* master, Double_t* local)
+void StTofrNode::Master2Local(const Double_t* master, Double_t* local)
 {
    //
    //Transform global coordinate into local coordinate
@@ -300,7 +303,7 @@ void StTofNode::Master2Local(const Double_t* master, Double_t* local)
 }
 
 //_____________________________________________________________________________
-StThreeVectorD StTofNode::YZPlaneNormal()
+StThreeVectorD StTofrNode::YZPlaneNormal()
 {
    //
    //Calculate the vector unit of normal to YZ-plane
@@ -320,7 +323,7 @@ StThreeVectorD StTofNode::YZPlaneNormal()
 }
 
 //_____________________________________________________________________________
-StThreeVectorD  StTofNode::GetCenterPosition()
+StThreeVectorD  StTofrNode::GetCenterPosition()
 const
 {
    //
@@ -336,7 +339,7 @@ const
 }
 
 //_____________________________________________________________________________
-Bool_t StTofNode::IsLocalPointIn(const Double_t x, const Double_t y, 
+Bool_t StTofrNode::IsLocalPointIn(const Double_t x, const Double_t y, 
                                       const Double_t z)
 {
    TBRIK *brik = dynamic_cast<TBRIK*> (GetShape());
@@ -349,7 +352,7 @@ Bool_t StTofNode::IsLocalPointIn(const Double_t x, const Double_t y,
 }
 
 //_____________________________________________________________________________
-Bool_t  StTofNode::IsGlobalPointIn(const StThreeVectorD &global)
+Bool_t  StTofrNode::IsGlobalPointIn(const StThreeVectorD &global)
 {
    Double_t xl[3], xg[3];
    xg[0] = global.x();
@@ -362,7 +365,7 @@ Bool_t  StTofNode::IsGlobalPointIn(const StThreeVectorD &global)
 }
 
 //_____________________________________________________________________________
-Bool_t StTofNode::HelixCross(const StHelixD &helix, Double_t &pathLen,
+Bool_t StTofrNode::HelixCross(const StHelixD &helix, Double_t &pathLen,
                                   StThreeVectorD &cross)
 {
    //
@@ -400,7 +403,7 @@ Bool_t StTofNode::HelixCross(const StHelixD &helix, Double_t &pathLen,
 }
 
 //_____________________________________________________________________________
-void StTofNode::Print(Option_t *opt) const
+void StTofrNode::Print(Option_t *opt) const
 {
    TBRIK *brik = dynamic_cast<TBRIK*> (GetShape());
    cout << "Name=" << GetName() << "\t TBRIK-dimension=" << brik->GetDx()
@@ -811,7 +814,7 @@ Bool_t StTofrGeomTray::mDebug = kFALSE;
 
 //_____________________________________________________________________________
 StTofrGeomTray::StTofrGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top) 
-  : StTofNode((TVolumeView *)sector->First(), top)
+  : StTofrNode((TVolumeView *)sector->First(), top)
 {
   mSectorsInBTOH = top->GetListSize()/2;
   mBTOHIndex = ibtoh + 1;
@@ -979,7 +982,7 @@ StTofrGeomSensor* StTofrGeomTray::GetSensor(const Int_t imodule) const
 void StTofrGeomTray::Print(const Option_t *opt) const
 {
    cout << "StTofrGeomTray, tray#=" << mTrayIndex << endl;
-   StTofNode::Print(opt);
+   StTofrNode::Print(opt);
 }
 
 
@@ -998,7 +1001,7 @@ Bool_t StTofrGeomSensor::mDebug = kFALSE;
 
 //_____________________________________________________________________________
 StTofrGeomSensor::StTofrGeomSensor(TVolumeView *element, TVolumeView *top) 
-  : StTofNode(element, top)
+  : StTofrNode(element, top)
 {
    mModuleIndex = element->GetPosition()->GetId();
    CreateGeomCells();
@@ -1131,7 +1134,7 @@ Int_t StTofrGeomSensor::FindCellIndex(const Double_t* local)
 void StTofrGeomSensor::Print(const Option_t *opt) const
 {
    cout << "StTofrGeomSensor, module#=" << mModuleIndex << endl;
-   StTofNode::Print(opt);
+   StTofrNode::Print(opt);
 
    cout << " Cells=" << mCells << "\t Y range for cells=\n";
    for (Int_t i=0; i<=mCells; i++) cout << " : " << mCellY[i];
@@ -1451,7 +1454,7 @@ Bool_t  StTofrGeometry::InitFromRoot(const char* geofile)
    return kTRUE;
 }
 */
-
+/*
 //_____________________________________________________________________________
 void StTofrGeometry::InitDaqMap()
 {
@@ -1460,27 +1463,27 @@ void StTofrGeometry::InitDaqMap()
   for ( int i=0;i<120;i++ ) {
     for ( int j=0;j<33;j++ ) {
       for ( int k=0;k<6;k++ ) {
-	mTofDaqADCMap[i][j][k] = 255;
-	mTofDaqTDCMap[i][j][k] = 255;
+	mTofDaqADCChanMap[i][j][k] = 255;
+	mTofDaqTDCChanMap[i][j][k] = 255;
 	if ( i+1 == 83 && ( 3<=j+1 && j+1<=5 ) ) {
-	  mTofDaqADCMap[i][j][k] = ( (j+1)-3 ) * 6 + ( 6-(k+1) ) + 60;
-	  mTofDaqTDCMap[i][j][k] = ( (j+1)-3 ) * 6 + ( 6-(k+1) ) + 48;
+	  mTofDaqADCChanMap[i][j][k] = ( (j+1)-3 ) * 6 + ( 6-(k+1) ) + 60;
+	  mTofDaqTDCChanMap[i][j][k] = ( (j+1)-3 ) * 6 + ( 6-(k+1) ) + 48;
 	}
 	if ( i+1 == 83 && j+1 == 7 ) {
-	  mTofDaqADCMap[i][j][k] = ( (j+1)-4 ) * 6 + ( 6-(k+1) ) + 60;
-	  mTofDaqTDCMap[i][j][k] = ( (j+1)-4 ) * 6 + ( 6-(k+1) ) + 48;
+	  mTofDaqADCChanMap[i][j][k] = ( (j+1)-4 ) * 6 + ( 6-(k+1) ) + 60;
+	  mTofDaqTDCChanMap[i][j][k] = ( (j+1)-4 ) * 6 + ( 6-(k+1) ) + 48;
 	}
 	if ( i+1 == 83 && ( 9<=j+1 && j+1<=14 ) ) {
-	  mTofDaqADCMap[i][j][k] = ( (j+1)-5 ) * 6 + ( 6-(k+1) ) + 60;
-	  mTofDaqTDCMap[i][j][k] = ( (j+1)-5 ) * 6 + ( 6-(k+1) ) + 48;
+	  mTofDaqADCChanMap[i][j][k] = ( (j+1)-5 ) * 6 + ( 6-(k+1) ) + 60;
+	  mTofDaqTDCChanMap[i][j][k] = ( (j+1)-5 ) * 6 + ( 6-(k+1) ) + 48;
 	}
 	if ( i+1 == 83 && j+1 == 26 ) {
-	  mTofDaqADCMap[i][j][k] = ( (j+1)-16 ) * 6 + ( 6-(k+1) ) + 60;
-	  mTofDaqTDCMap[i][j][k] = ( (j+1)-16 ) * 6 + ( 6-(k+1) ) + 48;
+	  mTofDaqADCChanMap[i][j][k] = ( (j+1)-16 ) * 6 + ( 6-(k+1) ) + 60;
+	  mTofDaqTDCChanMap[i][j][k] = ( (j+1)-16 ) * 6 + ( 6-(k+1) ) + 48;
 	}
 	if ( i+1 == 83 && j+1 == 32 ) {
-	  mTofDaqADCMap[i][j][k] = ( (j+1)-21 ) * 6 + ( 6-(k+1) ) + 60;
-	  mTofDaqTDCMap[i][j][k] = ( (j+1)-21 ) * 6 + ( 6-(k+1) ) + 48;
+	  mTofDaqADCChanMap[i][j][k] = ( (j+1)-21 ) * 6 + ( 6-(k+1) ) + 60;
+	  mTofDaqTDCChanMap[i][j][k] = ( (j+1)-21 ) * 6 + ( 6-(k+1) ) + 48;
 	}
 
       }
@@ -1488,70 +1491,70 @@ void StTofrGeometry::InitDaqMap()
   }
 
   for ( int i=0; i<132; i++ ) {
-    mTofADC2TrayMap[i]   = 0;
-    mTofADC2ModuleMap[i] = 0;
-    mTofADC2CellMap[i]   = 0;
-    mTofTDC2TrayMap[i]   = 0;
-    mTofTDC2ModuleMap[i] = 0;
-    mTofTDC2CellMap[i]   = 0;
+    mTofADCChan2TrayMap[i]   = 0;
+    mTofADCChan2ModuleMap[i] = 0;
+    mTofADCChan2CellMap[i]   = 0;
+    mTofTDCChan2TrayMap[i]   = 0;
+    mTofTDCChan2ModuleMap[i] = 0;
+    mTofTDCChan2CellMap[i]   = 0;
 
     int iadc = i-60;
     int itdc = i-48;
     if ( 0<=iadc && iadc<18 ) {
-      mTofADC2TrayMap[i]   = 83;
-      mTofADC2ModuleMap[i] = iadc/6+3;
-      mTofADC2CellMap[i]   = 6-iadc%6;
+      mTofADCChan2TrayMap[i]   = 83;
+      mTofADCChan2ModuleMap[i] = iadc/6+3;
+      mTofADCChan2CellMap[i]   = 6-iadc%6;
     }
     if ( 18<=iadc && iadc<24 ) {
-      mTofADC2TrayMap[i]   = 83;
-      mTofADC2ModuleMap[i] = iadc/6+4;
-      mTofADC2CellMap[i]   = 6-iadc%6;
+      mTofADCChan2TrayMap[i]   = 83;
+      mTofADCChan2ModuleMap[i] = iadc/6+4;
+      mTofADCChan2CellMap[i]   = 6-iadc%6;
     }
     if ( 24<=iadc && iadc<60 ) {
-      mTofADC2TrayMap[i]   = 83;
-      mTofADC2ModuleMap[i] = iadc/6+5;
-      mTofADC2CellMap[i]   = 6-iadc%6;
+      mTofADCChan2TrayMap[i]   = 83;
+      mTofADCChan2ModuleMap[i] = iadc/6+5;
+      mTofADCChan2CellMap[i]   = 6-iadc%6;
     }
     if ( 60<=iadc && iadc<66 ) {
-      mTofADC2TrayMap[i]   = 83;
-      mTofADC2ModuleMap[i] = iadc/6+16;
-      mTofADC2CellMap[i]   = 6-iadc%6;
+      mTofADCChan2TrayMap[i]   = 83;
+      mTofADCChan2ModuleMap[i] = iadc/6+16;
+      mTofADCChan2CellMap[i]   = 6-iadc%6;
     }
     if ( 66<=iadc && iadc<72 ) {
-      mTofADC2TrayMap[i]   = 83;
-      mTofADC2ModuleMap[i] = iadc/6+21;
-      mTofADC2CellMap[i]   = 6-iadc%6;
+      mTofADCChan2TrayMap[i]   = 83;
+      mTofADCChan2ModuleMap[i] = iadc/6+21;
+      mTofADCChan2CellMap[i]   = 6-iadc%6;
     }
 
     if ( 0<=itdc && itdc<18 ) {
-      mTofTDC2TrayMap[i]   = 83;
-      mTofTDC2ModuleMap[i] = itdc/6+3;
-      mTofTDC2CellMap[i]   = 6-itdc%6;
+      mTofTDCChan2TrayMap[i]   = 83;
+      mTofTDCChan2ModuleMap[i] = itdc/6+3;
+      mTofTDCChan2CellMap[i]   = 6-itdc%6;
     }
     if ( 18<=itdc && itdc<24 ) {
-      mTofTDC2TrayMap[i]   = 83;
-      mTofTDC2ModuleMap[i] = itdc/6+4;
-      mTofTDC2CellMap[i]   = 6-itdc%6;
+      mTofTDCChan2TrayMap[i]   = 83;
+      mTofTDCChan2ModuleMap[i] = itdc/6+4;
+      mTofTDCChan2CellMap[i]   = 6-itdc%6;
     }
     if ( 24<=itdc && itdc<60 ) {
-      mTofTDC2TrayMap[i]   = 83;
-      mTofTDC2ModuleMap[i] = itdc/6+5;
-      mTofTDC2CellMap[i]   = 6-itdc%6;
+      mTofTDCChan2TrayMap[i]   = 83;
+      mTofTDCChan2ModuleMap[i] = itdc/6+5;
+      mTofTDCChan2CellMap[i]   = 6-itdc%6;
     }
     if ( 60<=itdc && itdc<66 ) {
-      mTofTDC2TrayMap[i]   = 83;
-      mTofTDC2ModuleMap[i] = itdc/6+16;
-      mTofTDC2CellMap[i]   = 6-itdc%6;
+      mTofTDCChan2TrayMap[i]   = 83;
+      mTofTDCChan2ModuleMap[i] = itdc/6+16;
+      mTofTDCChan2CellMap[i]   = 6-itdc%6;
     }
     if ( 66<=itdc && itdc<72 ) {
-      mTofTDC2TrayMap[i]   = 83;
-      mTofTDC2ModuleMap[i] = itdc/6+21;
-      mTofTDC2CellMap[i]   = 6-itdc%6;
+      mTofTDCChan2TrayMap[i]   = 83;
+      mTofTDCChan2ModuleMap[i] = itdc/6+21;
+      mTofTDCChan2CellMap[i]   = 6-itdc%6;
     }
 
   }
 }
-
+*/
 /*
 //_____________________________________________________________________________
 Bool_t  StTofrGeometry::CopyTopNode(TNode* top)
@@ -1754,7 +1757,7 @@ const
 }
 
 //_____________________________________________________________________________
-Int_t StTofrGeometry::PriorCellId(const Int_t cellId)
+Int_t StTofrGeometry::PrevCellId(const Int_t cellId)
 const
 {
    //
@@ -1766,7 +1769,7 @@ const
    Int_t icell, imodule, itray;
    DecodeCellId(cellId,icell,imodule,itray);
    StTofrGeomSensor* sensor = GetGeomSensor(imodule,itray);
-   Int_t icell_p = sensor->PriorCellIndex(icell);
+   Int_t icell_p = sensor->PrevCellIndex(icell);
 
    found = CalcCellId(icell_p,imodule,itray);
 
@@ -2220,7 +2223,7 @@ const
      if ( !mTofrConf ) {
        int trayindex = ibtoh * mSectorsInBTOH + sectorVolume->GetPosition()->GetId();
        if ( trayindex!=mY03TrayIndex ) {
-	 //	 cout << " skip tray " << trayindex << endl;
+	 //       	 cout << " skip tray " << trayindex << endl;
 	 continue;
        }
      }
@@ -2243,6 +2246,7 @@ const
 	 StTofrGeomSensor *sensor = new StTofrGeomSensor(sensorVolume, mTopNode);
 	 if ( sensor->HelixCross(helix,pathLen,cross) ) {
 	   
+	   //	   cout << "   hit the sensor volume " << endl;
 	   Double_t global[3], local[3];
 	   global[0] = cross.x();
 	   global[1] = cross.y();
@@ -2266,7 +2270,7 @@ const
 
    /*
    TObject *obj;
-   StTofNode *node;
+   StTofrNode *node;
 
    // find out the tray crossed by the helix, and one tray can be crossed
    // but there is totally only one tray of TOFr at this moment
@@ -2275,7 +2279,7 @@ const
    TList *list = mTopNode->Nodes();
    TIter next(list);
    while ( (obj=next()) != 0) {
-      node = dynamic_cast<StTofNode*> (obj);
+      node = dynamic_cast<StTofrNode*> (obj);
       if ( node->HelixCross(helix,pathLen,cross) ) {
          tray = dynamic_cast<StTofrGeomTray*> (obj);
          break;
@@ -2292,7 +2296,7 @@ const
    list = tray->GetfView()->Nodes();
    TIter next2(list);
    while ( (obj=next2()) != 0 ) {
-      node = dynamic_cast<StTofNode*> (obj);
+      node = dynamic_cast<StTofrNode*> (obj);
       if ( node->HelixCross(helix,pathLen,cross) ) { //module crossed
          sensor = dynamic_cast<StTofrGeomSensor*> (obj);
 

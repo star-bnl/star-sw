@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.h,v 1.2 2003/09/11 05:49:23 perev Exp $
+ * $Id: StTofrGeometry.h,v 1.3 2004/03/09 16:45:16 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StTofrGeometry.h,v $
+ * Revision 1.3  2004/03/09 16:45:16  dongx
+ * Remove InitDaqMap() since a StTofrDaqMap is introduced
+ *
  * Revision 1.2  2003/09/11 05:49:23  perev
  * ansi corrs
  *
@@ -59,7 +62,7 @@ typedef vector<Double_t, allocator<Double_t>>  DoubleVec;
 typedef vector<StThreeVectorD, allocator<StThreeVectorD>> PointVec;
 #endif
 
-class StTofNode;
+class StTofrNode;
 class StTofrGeomNode;
 class StTofrGeomTray;
 class StTofrGeomSensor;
@@ -139,12 +142,12 @@ class TVolumeView;
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// StTofNode
+// StTofrNode
 // =========
 //
 //////////////////////////////////////////////////////////////////////////////
 
-class StTofNode : public TObject {
+class StTofrNode : public TObject {
  protected:
   TVolumeView *fView;
   TVolumePosition  *pView;
@@ -165,17 +168,17 @@ class StTofNode : public TObject {
    static Bool_t   mDebug;   //!Control message printing of this class
 
  protected:
-   //   StTofNode(const StTofNode& tofnode);
-    StTofNode(TVolumeView *element, TVolumeView *top);
+   //   StTofrNode(const StTofrNode& tofnode);
+    StTofrNode(TVolumeView *element, TVolumeView *top);
 
-    StTofNode& operator=(const StTofNode&);
+    StTofrNode& operator=(const StTofrNode&);
 
     void      UpdateMatrix();
     void      BuildMembers();
 
  public:
-    StTofNode() {}
-   ~StTofNode();
+    StTofrNode() {}
+   ~StTofrNode();
 
    TVolumeView*    GetfView() const { return fView; }
    TVolumePosition* GetpView() const { return pView; }
@@ -184,10 +187,10 @@ class StTofNode : public TObject {
    static void     DebugOff()  { mDebug = kFALSE; }
    static Bool_t   IsDebugOn() { return mDebug; }
 
-   static void     CalcMatrix(StTofNode* son, Double_t* trans, Double_t* rot,
-                              StTofNode* mother=0);
-   static void     ConvertPos(StTofNode* from, const Double_t* pos_from,
-                              StTofNode* to,         Double_t* pos_to);
+   static void     CalcMatrix(StTofrNode* son, Double_t* trans, Double_t* rot,
+                              StTofrNode* mother=0);
+   static void     ConvertPos(StTofrNode* from, const Double_t* pos_from,
+                              StTofrNode* to,         Double_t* pos_to);
    void            Local2Master(const Double_t* local, Double_t* master);
    void            Master2Local(const Double_t* master, Double_t* local);
    TShape         *GetShape() const { return fView->GetPosition()->GetNode()->GetShape();}
@@ -209,7 +212,7 @@ class StTofNode : public TObject {
    virtual void    Print(const Option_t *opt="") const;
 
 #ifdef __ROOT__
- ClassDef(StTofNode,2)  //Virutal TNode for TOFr geometry
+ ClassDef(StTofrNode,2)  //Virutal TNode for TOFr geometry
 #endif
 };
 
@@ -221,7 +224,7 @@ class StTofNode : public TObject {
 //
 //////////////////////////////////////////////////////////////////////////////
 
-class StTofrGeomTray : public StTofNode {
+class StTofrGeomTray : public StTofrNode {
    friend class StTofrGeometry;
 
  private:
@@ -274,7 +277,7 @@ class StTofrGeomTray : public StTofNode {
 //
 //////////////////////////////////////////////////////////////////////////////
 
-class StTofrGeomSensor : public StTofNode {
+class StTofrGeomSensor : public StTofrNode {
    friend class StTofrGeomTray;
 
  private:
@@ -313,7 +316,7 @@ class StTofrGeomSensor : public StTofNode {
    Double_t          GetCellYMin(const Int_t icell) const;
    Double_t          GetCellYMax(const Int_t icell) const;
    Int_t             FindCellIndex(const Double_t* local);
-   Int_t             PriorCellIndex(const Int_t icell) const;
+   Int_t             PrevCellIndex(const Int_t icell) const;
    Int_t             NextCellIndex(const Int_t icell) const;
    StThreeVectorD    GetCellPosition(const Int_t icell);
    virtual void      Print(Option_t *opt="") const ;
@@ -324,7 +327,7 @@ class StTofrGeomSensor : public StTofNode {
 };
 
 //_____________________________________________________________________________
-inline Int_t StTofrGeomSensor::PriorCellIndex(const Int_t icell)
+inline Int_t StTofrGeomSensor::PrevCellIndex(const Int_t icell)
 const
 {
    Int_t ret = -1;
@@ -375,14 +378,14 @@ class StTofrGeometry : public TNamed {
    static char* const trayPref   ;//= "BTRA";
    static char* const senPref    ;//= "BRMD";
 
-   unsigned short mTofDaqADCMap[120][33][6];   //
-   unsigned short mTofDaqTDCMap[120][33][6];   //
-   unsigned short mTofADC2TrayMap[132];        //
-   unsigned short mTofADC2ModuleMap[132];      //
-   unsigned short mTofADC2CellMap[132];        //
-   unsigned short mTofTDC2TrayMap[132];        //
-   unsigned short mTofTDC2ModuleMap[132];      //
-   unsigned short mTofTDC2CellMap[132];        //
+/*    unsigned short mTofDaqADCChanMap[120][33][6];   // */
+/*    unsigned short mTofDaqTDCChanMap[120][33][6];   // */
+/*    unsigned short mTofADCChan2TrayMap[132];        // */
+/*    unsigned short mTofADCChan2ModuleMap[132];      // */
+/*    unsigned short mTofADCChan2CellMap[132];        // */
+/*    unsigned short mTofTDCChan2TrayMap[132];        // */
+/*    unsigned short mTofTDCChan2ModuleMap[132];      // */
+/*    unsigned short mTofTDCChan2CellMap[132];        // */
 
  protected:
    //void        InitFromXdf(const char* xdffile);
@@ -418,7 +421,7 @@ class StTofrGeometry : public TNamed {
    //   void          InitFromStar(TVolume *starHall, const Int_t TofrConf=0);
    void          Init(TVolume *starHall);
    void          InitFromStar(TVolume *starHall);
-   void          InitDaqMap();
+   //   void          InitDaqMap();
 
    Bool_t  IsInitDone() const { return mInitFlag; }
    Bool_t  IsCellValid(const Int_t icell)     const;
@@ -428,7 +431,7 @@ class StTofrGeometry : public TNamed {
    Int_t   CalcCellId(const Int_t volumeId, const Double_t* local) const;
    Int_t   CalcCellId(const Int_t volumeId, const Float_t* local)  const;
    Int_t   CalcSensorId(const Int_t imodule, const Int_t itray=0)  const;
-   Int_t   PriorCellId(const Int_t cellId) const;
+   Int_t   PrevCellId(const Int_t cellId) const;
    Int_t   NextCellId(const Int_t cellId)  const;
    // Int_t   CalcCellId(const Int_t icell,
    //                   const StTofrGeomSensor* sensor)              const;
@@ -464,14 +467,14 @@ class StTofrGeometry : public TNamed {
                                DoubleVec &pathVec, PointVec &crossVec) const;
    Bool_t            HelixCross(const StHelixD &helix) const;
 
-   int Cell2ADC(const int, const int, const int) const;
-   int Cell2TDC(const int, const int, const int) const;
-   int ADC2Tray(const int) const;
-   int ADC2Module(const int) const;
-   int ADC2Cell(const int) const;
-   int TDC2Tray(const int) const;
-   int TDC2Module(const int) const;
-   int TDC2Cell(const int) const;
+/*    int Cell2ADCChan(const int, const int, const int) const; */
+/*    int Cell2TDCChan(const int, const int, const int) const; */
+/*    int ADCChan2Tray(const int) const; */
+/*    int ADCChan2Module(const int) const; */
+/*    int ADCChan2Cell(const int) const; */
+/*    int TDCChan2Tray(const int) const; */
+/*    int TDCChan2Module(const int) const; */
+/*    int TDCChan2Cell(const int) const; */
 
 #ifdef __ROOT__      
  ClassDef(StTofrGeometry,1)  //Simplified TOFr Geometry
@@ -480,28 +483,29 @@ class StTofrGeometry : public TNamed {
 
 R__EXTERN  StTofrGeometry* gTofrGeometry;
 
-inline int StTofrGeometry::Cell2ADC(const int trayId, const int moduleId, const int cellId)
-     const { return mTofDaqADCMap[trayId][moduleId][cellId];}
+/*
+inline int StTofrGeometry::Cell2ADCChan(const int trayId, const int moduleId, const int cellId)
+     const { return mTofDaqADCChanMap[trayId][moduleId][cellId];}
 
-inline int StTofrGeometry::Cell2TDC(const int trayId, const int moduleId, const int cellId)
-     const { return mTofDaqTDCMap[trayId][moduleId][cellId];}
+inline int StTofrGeometry::Cell2TDCChan(const int trayId, const int moduleId, const int cellId)
+     const { return mTofDaqTDCChanMap[trayId][moduleId][cellId];}
 
-inline int StTofrGeometry::ADC2Tray(const int daqId)
-     const { return mTofADC2TrayMap[daqId];}
+inline int StTofrGeometry::ADCChan2Tray(const int daqId)
+     const { return mTofADCChan2TrayMap[daqId];}
 
-inline int StTofrGeometry::ADC2Module(const int daqId)
-     const { return mTofADC2ModuleMap[daqId];}
+inline int StTofrGeometry::ADCChan2Module(const int daqId)
+     const { return mTofADCChan2ModuleMap[daqId];}
 
-inline int StTofrGeometry::ADC2Cell(const int daqId)
-     const { return mTofADC2CellMap[daqId];}
+inline int StTofrGeometry::ADCChan2Cell(const int daqId)
+     const { return mTofADCChan2CellMap[daqId];}
 
-inline int StTofrGeometry::TDC2Tray(const int daqId)
-     const { return mTofTDC2TrayMap[daqId];}
+inline int StTofrGeometry::TDCChan2Tray(const int daqId)
+     const { return mTofTDCChan2TrayMap[daqId];}
 
-inline int StTofrGeometry::TDC2Module(const int daqId)
-     const { return mTofTDC2ModuleMap[daqId];}
+inline int StTofrGeometry::TDCChan2Module(const int daqId)
+     const { return mTofTDCChan2ModuleMap[daqId];}
 
-inline int StTofrGeometry::TDC2Cell(const int daqId)
-     const { return mTofTDC2CellMap[daqId];}
-
+inline int StTofrGeometry::TDCChan2Cell(const int daqId)
+     const { return mTofTDCChan2CellMap[daqId];}
+*/
 #endif  //end of STTOFRGEOMETRY_H
