@@ -3,8 +3,12 @@
 
 #include "StEEmcDbIndexItem1.h"
 
+ StEEmcDbIndexItem1:: StEEmcDbIndexItem1() {
+   clear();
+}
 
-void StEEmcDbIndexItem1::print() {
+
+void StEEmcDbIndexItem1::print() const{
   printf("DbIndexItem: %s crate=%d chan=%d gain=%.3f hv=%.1f ped=%.2f sig=%.2f\n",name,crate,chan,gain,hv,ped,sig);
 }
 

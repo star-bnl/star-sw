@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: St2eemcFeeRawMaker.cxx,v 1.2 2003/02/17 18:45:40 balewski Exp $
+// $Id: St2eemcFeeRawMaker.cxx,v 1.3 2003/02/18 19:56:07 balewski Exp $
 // $Log: St2eemcFeeRawMaker.cxx,v $
+// Revision 1.3  2003/02/18 19:56:07  balewski
+// add pedestals
+//
 // Revision 1.2  2003/02/17 18:45:40  balewski
 // change names
 //
@@ -100,7 +103,7 @@ Int_t St2eemcFeeRawMaker::InitRun  (int runumber){
   mrunTT->setComment(text);
   //  runTT->print();  
   
-  return StMaker::Init();
+    return kStOK;
 }
 
 
@@ -165,6 +168,7 @@ Int_t St2eemcFeeRawMaker::Make(){
 
       const StEEmcDbIndexItem1 *dbItem=meeDb->getT(sec,sub,eta);
       assert(dbItem); //  fatal error in EEmcDb-maker
+      dbItem->print();
       int chan=dbItem->chan;
       int slot=dbItem->crate;        ;
 
