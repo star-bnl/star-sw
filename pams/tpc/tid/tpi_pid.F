@@ -1,3 +1,8 @@
+* $Id: tpi_pid.F,v 1.2 1998/01/27 01:54:48 fisyak Exp $
+* $Log: tpi_pid.F,v $
+* Revision 1.2  1998/01/27 01:54:48  fisyak
+* Split sources
+*
        INTEGER FUNCTION  tpi_pid(parm_h,parm,trk_h,trk,gl_h,gl,
      >                   hypo_h,hypo)
        IMPLICIT  NONE
@@ -361,5 +366,3 @@ c
 
       return
       end
-
-

@@ -1,3 +1,8 @@
+* $Id: tgc_global_to_local_p.F,v 1.2 1998/01/27 01:56:40 fisyak Exp $
+* $Log: tgc_global_to_local_p.F,v $
+* Revision 1.2  1998/01/27 01:56:40  fisyak
+* Split sources
+*
       integer function tgc_global_to_local_p(isect,pglobal,plocal)
       implicit none
 #include "PAM.inc"

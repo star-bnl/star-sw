@@ -1,3 +1,8 @@
+* $Id: tgc_pad_to_x.F,v 1.2 1998/01/27 01:56:42 fisyak Exp $
+* $Log: tgc_pad_to_x.F,v $
+* Revision 1.2  1998/01/27 01:56:42  fisyak
+* Split sources
+*
       integer function tgc_pad_to_x(pad,row,x,pad_plane_h,pad_plane)
 
       implicit none

@@ -1,3 +1,8 @@
+* $Id: tgc_sector_row_pad_time_to_local.F,v 1.2 1998/01/27 01:56:43 fisyak Exp $
+* $Log: tgc_sector_row_pad_time_to_local.F,v $
+* Revision 1.2  1998/01/27 01:56:43  fisyak
+* Split sources
+*
       integer function tgc_sector_row_pad_time_to_local(isector,
      >pad,row,time,xlocal)
       implicit none

@@ -1,3 +1,8 @@
+* $Id: tgc_drift_volume_length.F,v 1.2 1998/01/27 01:56:39 fisyak Exp $
+* $Log: tgc_drift_volume_length.F,v $
+* Revision 1.2  1998/01/27 01:56:39  fisyak
+* Split sources
+*
       integer function tgc_drift_volume_length(xlength,
      >                   tpg_detector_h, tpg_detector)
       implicit none

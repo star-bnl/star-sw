@@ -1,3 +1,8 @@
+* $Id: tgc_y_to_row.F,v 1.2 1998/01/27 01:56:44 fisyak Exp $
+* $Log: tgc_y_to_row.F,v $
+* Revision 1.2  1998/01/27 01:56:44  fisyak
+* Split sources
+*
       integer function tgc_y_to_row(y,row,pad_plane_h,pad_plane)
 
       implicit none

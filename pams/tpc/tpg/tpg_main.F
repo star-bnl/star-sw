@@ -1,3 +1,8 @@
+* $Id: tpg_main.F,v 1.14 1998/01/27 01:56:45 fisyak Exp $
+* $Log: tpg_main.F,v $
+* Revision 1.14  1998/01/27 01:56:45  fisyak
+* Split sources
+*
       integer function tpg_main(pad_plane_h,pad_plane,
      +     tpg_detector_h, tpg_detector,
      +     tpg_pad_h, tpg_pad)
