@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////
-// $Id: StFtpcMomentumFit.cc,v 1.8 2001/04/04 16:47:39 oldi Exp $
+// $Id: StFtpcMomentumFit.cc,v 1.9 2001/04/09 14:38:44 oldi Exp $
 //
 // $Log: StFtpcMomentumFit.cc,v $
+// Revision 1.9  2001/04/09 14:38:44  oldi
+// There's still a difference between 'delete' and 'delete[]'...
+//
 // Revision 1.8  2001/04/04 16:47:39  oldi
 // I forgot something. This happens if you want to be fast... :)
 //
@@ -77,9 +80,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, StThreeVecto
 
   fitPoints(Point, xWeight, yWeight);
 
-  delete Point;
-  delete xWeight;
-  delete yWeight;
+  delete[] Point;
+  delete[] xWeight;
+  delete[] yWeight;
 }
 
 StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, double xVertexWeight, double yVertexWeight, StThreeVector<double> *Hit, double *xWeightVector, double *yWeightVector, int nHits)
@@ -107,9 +110,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, double xVert
 
   fitPoints(Point, xWeight, yWeight);
 
-  delete Point;
-  delete xWeight;
-  delete yWeight;
+  delete[] Point;
+  delete[] xWeight;
+  delete[] yWeight;
 }
 
 StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Hit, int nHits)
@@ -132,9 +135,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Hit, int nHits)
 
   fitPoints(Point, xWeight, yWeight);
 
-  delete Point;
-  delete xWeight;
-  delete yWeight;
+  delete[] Point;
+  delete[] xWeight;
+  delete[] yWeight;
 }
 
 StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Hit, double *xWeightVector, double *yWeightVector, int nHits)
@@ -157,9 +160,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Hit, double *xWeight
 
   fitPoints(Point, xWeight, yWeight);
 
-  delete Point;
-  delete xWeight;
-  delete yWeight;
+  delete[] Point;
+  delete[] xWeight;
+  delete[] yWeight;
 }
 
 StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double *posx, double *posy, double *posz, int nHits)
@@ -191,9 +194,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double *po
 
   fitPoints(Point, xWeight, yWeight);
 
-  delete Point;
-  delete xWeight;
-  delete yWeight;
+  delete[] Point;
+  delete[] xWeight;
+  delete[] yWeight;
 }
 
 StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double xVertexWeight, double yVertexWeight, double *posx, double *posy, double *posz, double *xWeightVector, double *yWeightVector, int nHits)
@@ -222,9 +225,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double xVe
 
   fitPoints(Point, xWeight, yWeight);
 
-  delete Point;
-  delete xWeight;
-  delete yWeight;
+  delete[] Point;
+  delete[] xWeight;
+  delete[] yWeight;
 }
 
 StFtpcMomentumFit::StFtpcMomentumFit(double *posx, double *posy, double *posz, int nHits)
@@ -250,9 +253,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(double *posx, double *posy, double *posz, i
 
   fitPoints(Point, xWeight, yWeight);
 
-  delete Point;
-  delete xWeight;
-  delete yWeight;
+  delete[] Point;
+  delete[] xWeight;
+  delete[] yWeight;
 }
 
 StFtpcMomentumFit::StFtpcMomentumFit(double *posx, double *posy, double *posz, double *xWeightVector, double *yWeightVector, int nHits)
@@ -276,9 +279,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(double *posx, double *posy, double *posz, d
 
   fitPoints(Point, xWeight, yWeight);
 
-  delete Point;
-  delete xWeight;
-  delete yWeight;
+  delete[] Point;
+  delete[] xWeight;
+  delete[] yWeight;
 }
 
 StFtpcMomentumFit::~StFtpcMomentumFit()
