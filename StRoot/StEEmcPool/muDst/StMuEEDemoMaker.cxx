@@ -1,6 +1,6 @@
 // *-- Author : Victor Perevoztchikov
 // 
-// $Id: StMuEEDemoMaker.cxx,v 1.4 2003/10/15 15:29:53 wzhang Exp $
+// $Id: StMuEEDemoMaker.cxx,v 1.5 2003/11/08 00:35:44 balewski Exp $
 
 #include "StMuEEDemoMaker.h"
 
@@ -133,10 +133,10 @@ Int_t StMuEEDemoMaker::Make(){
       printf("\nSMD-%c  %2.2d%c%3.3d : energy=%f  adc=%d\n",uv,isec+1,uv,istrip+1,hit->getEnergy(),hit->getAdc());
       
       // ... geometry
-//      StructEEmcStrip st=geomSmd->EEmcStrip(1, isec+1, istrip+1);
-       StThreeVectorD end1 = geomSmd->getStripPtr(1, isec, istrip)->end1;
-       StThreeVectorD end2 = geomSmd->getStripPtr(1, isec, istrip)->end2;
-
+      int iuv=uv-'U';
+      StructEEmcStrip *st=geomSmd->getStripPtr(istrip,iuv,isec);
+      StThreeVectorD end1 = st->end1;
+      StThreeVectorD end2 = st->end2;
       
       printf("   x1=%6.2f y1=%6.2f z1=%6.2f x2=%6.2f y2=%6.2f z2=%6.2f\n",
              end1.x(),end1.y(),end1.z(),end2.x(),end2.y(),end2.z());
@@ -183,6 +183,9 @@ Int_t StMuEEDemoMaker::Make(){
 
 
 // $Log: StMuEEDemoMaker.cxx,v $
+// Revision 1.5  2003/11/08 00:35:44  balewski
+// change order of arguments
+//
 // Revision 1.4  2003/10/15 15:29:53  wzhang
 // updated for the new StEEmcSmdGeom
 //
