@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.1 1999/01/02 19:09:22 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.2 1999/01/20 23:58:03 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.2  1999/01/20 23:58:03  fisyak
+// Tree 2 GetTree
+//
 // Revision 1.1  1999/01/02 19:09:22  fisyak
 // Add Clones
 //
@@ -27,6 +30,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+#include "TClass.h"
 #include "St_dst_Maker.h"
 #include "StChain.h"
 #include "St_ObjectSet.h"
@@ -65,7 +69,7 @@ Int_t St_dst_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Make(){
 //  PrintInfo();
-         //  Create and Fill the Track objects
+  //  Create and Fill the Track objects
   TClonesArray &vertices = *m_Vertex;
   TClonesArray &tracks   = *m_Track;
   Char_t VertexName[80];
@@ -81,7 +85,8 @@ Int_t St_dst_Maker::Make(){
       for (Int_t fN=0; fN< dst_vertex->GetNRows(); fN++, fNvertex++, vert++){
 	Nchar = sprintf(VertexName,"Vertex_%i",vert->id);
 	//	vertex = new (vertices[m_Vertex->IndexOf(0)]) StVertex(VertexName);
-	vertex = new (vertices[vert->id]) StVertex(VertexName);
+	vertex = new (vertices[vert->id-1]) StVertex(VertexName);
+        printf ("*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-  %s \n", vertex->IsA()->GetName());
 	*vertex = *vert;
         m_DataSet->Add(new St_ObjectSet(vertex));
       }
@@ -114,10 +119,10 @@ Int_t St_dst_Maker::Make(){
 void St_dst_Maker::MakeBranch()
 {
 //   Adds the list of physics objects to the ATLFast tree as a new branch
-
+#if 0
    if (m_Save == 0) return;
 
-   TTree *tree = Tree();
+   TTree *tree = GetTree();
    if (!tree) return;
 
    Int_t buffersize = 4000;
@@ -127,13 +132,13 @@ void St_dst_Maker::MakeBranch()
     
    if (m_Track && m_Track->InheritsFrom("TClonesArray")) 
        tree->Branch("track", &m_Track, buffersize);
-
+#endif
    StMaker::MakeBranch();
 }
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_dst_Maker.cxx,v 1.1 1999/01/02 19:09:22 fisyak Exp $\n");
+  printf("* $Id: St_dst_Maker.cxx,v 1.2 1999/01/20 23:58:03 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
@@ -149,7 +154,8 @@ void St_dst_Maker::Clear(Option_t *option)
 //_____________________________________________________________________________
 void St_dst_Maker::SetBranch()
 {
-    TTree *tree = Tree();
+#if 0
+    TTree *tree = GetTree();
     if (!tree) return;
 
     TBranch *cloneBranch = tree->GetBranch("vertex");
@@ -157,6 +163,6 @@ void St_dst_Maker::SetBranch()
 
     cloneBranch = tree->GetBranch("track");
     if (cloneBranch) cloneBranch->SetAddress(&m_Track);
-
+#endif
     StMaker::SetBranch();
 }
