@@ -513,9 +513,11 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 #endif
 					last_a = adc ;
 
-
+#ifdef FCF_NEW_ADC_ROUNDOFF
+					av += start*a + (start+1)/2 ;
+#else
 					av += start * a ;
-
+#endif
 					charge += a ;
 
 					//LOG(WARN,"Pad %d, start %d, adc %d, charge %d",pad,start,adc,charge,0) ;
