@@ -1,5 +1,8 @@
-* $Id: tls_search_near_index_r.F,v 1.1 1998/03/24 00:42:13 fisyak Exp $
+* $Id: tls_search_near_index_r.F,v 1.2 1998/04/09 15:18:35 fisyak Exp $
 * $Log: tls_search_near_index_r.F,v $
+* Revision 1.2  1998/04/09 15:18:35  fisyak
+* tls bug fixes from Duncan J. Prindle
+*
 * Revision 1.1  1998/03/24 00:42:13  fisyak
 * Clean
 *
@@ -56,6 +59,7 @@ C     Duncan Prindle,  12/ 4/91
 C                       Taken from Numerical Recipes.
 C         Modified     11/ 5/93 More convenient for Tables.
 C                       9/ 8/95 Add code to handle 0,1 row tables   djp
+C                       4/ 8/98 Ascend was using el1(1). Could be incorrect.
 C
       INTEGER tls_loc, tls_Search_Index_r
       INTEGER JLow, JHigh, JM
@@ -91,7 +95,7 @@ C Check that j_table_off(1) is a valid guess. (Otherwise just call Search_Index)
           END IF
 C
       len    = (tls_loc(el2) - tls_loc(el1(1)))/4
-      Ascend = el1(1+len*(index(nrows)-1)).GT.el1(1)
+      Ascend = el1(1+len*(index(nrows)-1)).GT.el1(1+len*(index(1)-1))
 C
 C Now find JLow and JHigh that bracket rkey.
       inc = 1

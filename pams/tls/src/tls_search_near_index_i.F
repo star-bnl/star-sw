@@ -1,5 +1,8 @@
-* $Id: tls_search_near_index_i.F,v 1.1 1998/03/24 00:42:12 fisyak Exp $
+* $Id: tls_search_near_index_i.F,v 1.2 1998/04/09 15:18:34 fisyak Exp $
 * $Log: tls_search_near_index_i.F,v $
+* Revision 1.2  1998/04/09 15:18:34  fisyak
+* tls bug fixes from Duncan J. Prindle
+*
 * Revision 1.1  1998/03/24 00:42:12  fisyak
 * Clean
 *
@@ -37,6 +40,7 @@ C           tls_sort_sni_nomatch_cv (I):   key not found in specified column.
 C           tls_sort_sni_listshort_cv (W): j_table_off too short for all rows with rkey.
 C           
 C 9/8/95 Add code to handle 0,1 row tables   djp
+C 4/ 8/98 Ascend was using el1(1). Could be (rarely) incorrect.
       INTEGER tls_loc, tls_Search_Index_i
       INTEGER JLow, JHigh, JM
       INTEGER len, inc, i_row
@@ -71,7 +75,7 @@ C Check that j_table_off(1) is a valid guess. (Otherwise just call Search)
           END IF
 C
       len    = (tls_loc(el2) - tls_loc(el1(1)))/4
-      Ascend = el1(1+len*(index(nrows)-1)).GT.el1(1)
+      Ascend = el1(1+len*(index(nrows)-1)).GT.el1(1+len*(index(1)-1))
 C
 C Now find JLow and JHigh that bracket rkey.
       inc = 1

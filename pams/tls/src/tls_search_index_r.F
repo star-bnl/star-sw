@@ -1,5 +1,8 @@
-* $Id: tls_search_index_r.F,v 1.1 1998/03/24 00:42:11 fisyak Exp $
+* $Id: tls_search_index_r.F,v 1.2 1998/04/09 15:18:34 fisyak Exp $
 * $Log: tls_search_index_r.F,v $
+* Revision 1.2  1998/04/09 15:18:34  fisyak
+* tls bug fixes from Duncan J. Prindle
+*
 * Revision 1.1  1998/03/24 00:42:11  fisyak
 * Clean
 *
@@ -58,6 +61,7 @@ C     Duncan Prindle,  12/ 4/91
 C                       Taken from Numerical Recipes.
 C         Modified     11/ 5/93 More convenient for Tables.
 C                       9/ 8/95 Add code to handle 0,1 row tables   djp
+C                       4/ 8/98 Ascend was using el1(index(1)). Wrong!!
 C
       INTEGER tls_loc
       INTEGER JLow, JHigh, JM
@@ -85,7 +89,7 @@ C
       JLow   = 0
       JHigh  = nrows + 1
       len    = (tls_loc(el2) - tls_loc(el1(1)))/4
-      Ascend = el1(1+len*(index(nrows)-1)).GT.el1(index(1))
+      Ascend = el1(1+len*(index(nrows)-1)).GT.el1(1+len*(index(1)-1))
    10 CONTINUE
       IF (JHigh.GT.JLow+1) THEN
           JM = (JHigh+JLow)/2
