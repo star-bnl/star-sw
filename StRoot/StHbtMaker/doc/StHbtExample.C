@@ -90,7 +90,7 @@ void StHbtExample(Int_t nevents=1,
     mikesPairCut* paircut = new mikesPairCut;  // use "mike's" pair cut object
     anal->SetPairCut(paircut);         // this is the pair cut for this analysis
     // 4) set the number of events to mix (per event)
-    anal->SetNumEventsToMix(1);        
+    anal->SetNumEventsToMix(5);        
     // 5) now set up the correlation functions that this analysis will make
     // this particular analysis will have two: the first is a Q-invariant correlation function
     QinvCF = new QinvCorrFctn("mikesQinvCF",50,0.0,0.2);  // defines a Qinv correlation function
@@ -144,7 +144,7 @@ void StHbtExample(Int_t nevents=1,
     mikesPairCut* phiPaircut = new mikesPairCut;  // use "mike's" pair cut object
     phiAnal->SetPairCut(phiPaircut);         // this is the pair cut for this analysis
     // 4) set the number of events to mix (per event)
-    phiAnal->SetNumEventsToMix(1);        
+    phiAnal->SetNumEventsToMix(5);        
     // 5) now set up the correlation functions that this analysis will make
     MinvCF = new MinvCorrFctn("franksMinvCF",100,0.98,1.18); // defines a Minv correlation function
     phiAnal->AddCorrFctn(MinvCF);   // adds the just-defined correlation function to the analysis
