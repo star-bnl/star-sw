@@ -300,7 +300,13 @@ C--   calculate Armenteros variables---
                        pv0  = sqrt(pv0sq) 
                        ppar= pdotp/pv0
                        npar= ndotp/pv0
+CCC>>>>  The following if-block is a quick fix to prevent sqrt(<0)->NaN errors.
+                    if((trak(i).p*trak(i).p-ppar*ppar).lt.0.0) then
+                       pper = 0.0
+                    else
                        pper= sqrt(trak(i).p*trak(i).p-ppar*ppar)
+                    end if
+CCC>>>>  L. Ray, 9/24/98
                        ev0out(ok).pt = pper
                        ev0out(ok).alpha = (ppar-npar)/(ppar+npar)
                        ev0out(ok).sagitta_pos = trak(i).sagitta
