@@ -31,7 +31,7 @@ count = 0;
 keep  = -1;
 shift = -1;
 for (i=0; i <= tphit_h[0].nok; i++)
-    {  if (tphit[i].flag != 0 || i == tphit_h[0].nok)
+    {  if (tphit[i].flag < 0 || tphit[i].flag > 1 || i == tphit_h[0].nok)
          { if (count >0 && shift>-1 )
            {
            keep = keep - shift;
