@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.cc,v 1.14 2001/03/19 15:52:47 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.15 2001/04/02 12:10:11 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.15  2001/04/02 12:10:11  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters
+// from StarDb/ftpc
+//
 // Revision 1.14  2001/03/19 15:52:47  jcs
 // use ftpcDimensions from database
 //
@@ -1686,7 +1690,7 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
   /* preparatory calculations */
   TimeCoordinate = Peak->TimePosition + 0.5; /*time start at beginning of bin 0*/
   // include tZero = time from collision to beginning of bin 0
-  TimeCoordinate += mParam->tZero()/mDb->microsecondsPerTimebin();
+  TimeCoordinate += mDb->tZero()/mDb->microsecondsPerTimebin();
   PadtransPerTimebin = (int) mParam->numberOfDriftSteps() 
     / mDb->numberOfTimebins();
   PadtransLower= (int) (TimeCoordinate*PadtransPerTimebin);
@@ -1776,10 +1780,10 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
       r_last=mDb->sensitiveVolumeOuterRadius();
       pradius[padrow]=mDb->sensitiveVolumeOuterRadius();
       pdeflection[padrow]=0;
-      e_now = mParam->radiusTimesField() / (0.5*r_last);
+      e_now = mDb->radiusTimesField() / (0.5*r_last);
       for(j=v_buf; mDb->magboltzEField(j) < e_now
-	    && j<mParam->numberOfMagboltzBins(); j++);
-      if(j<1 || j>=mParam->numberOfMagboltzBins())
+	    && j<mDb->numberOfMagboltzBins(); j++);
+      if(j<1 || j>=mDb->numberOfMagboltzBins())
 	{
 	  printf("Error 1: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", 
 		 j, v_buf, mDb->magboltzEField(j), e_now);
@@ -1803,18 +1807,18 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	       *(e_now-mDb->magboltzEField(v_buf)))
 	/(mDb->magboltzEField(j)-mDb->magboltzEField(v_buf));
       for (i=0; i<mParam->numberOfDriftSteps() 
-	     && e_now < mDb->magboltzEField(mParam->numberOfMagboltzBins()-2)
+	     && e_now < mDb->magboltzEField(mDb->numberOfMagboltzBins()-2)
 	     ; i++) 
 	{
 	  t_next = t_last + step_size;
 	  /* first guess for r_next: */
 	  r_next = r_last - v_now * step_size * mDb->microsecondsPerTimebin();
-	  e_now = mParam->radiusTimesField() / (0.5*(r_last+r_next));
+	  e_now = mDb->radiusTimesField() / (0.5*(r_last+r_next));
 	  
 	  for(j=v_buf; mDb->magboltzEField(j) < e_now 
-		       && j<mParam->numberOfMagboltzBins(); j++);
+		       && j<mDb->numberOfMagboltzBins(); j++);
 	  
-	  if(j<1 || j>=mParam->numberOfMagboltzBins())
+	  if(j<1 || j>=mDb->numberOfMagboltzBins())
 	    {
 	      printf("Error 2: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", 
 		     j, v_buf, mDb->magboltzEField(j), e_now);

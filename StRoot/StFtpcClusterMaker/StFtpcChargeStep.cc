@@ -1,6 +1,10 @@
-// $Id: StFtpcChargeStep.cc,v 1.6 2001/03/19 15:52:47 jcs Exp $
+// $Id: StFtpcChargeStep.cc,v 1.7 2001/04/02 12:10:08 jcs Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.7  2001/04/02 12:10:08  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters
+// from StarDb/ftpc
+//
 // Revision 1.6  2001/03/19 15:52:47  jcs
 // use ftpcDimensions from database
 //
@@ -68,7 +72,7 @@ int StFtpcChargeStep::histogram(int setPressure)
 {
   printf("in histogram!\n");
   /* is magboltz database loaded, if not exit */
-  if(mParam->numberOfMagboltzBins()<1)
+  if(mDb->numberOfMagboltzBins()<1)
     {
       printf("Couldn't find magboltz data table, exiting!\n");
       return 0;
@@ -204,7 +208,7 @@ int StFtpcChargeStep::histogram(int setPressure)
 
   float TimeCoordinate=chargestep2+0.5;// 0 is at beginning of 1st timebin
   // include tZero = time from collision to beginning of bin 0
-  TimeCoordinate += mParam->tZero()/mDb->microsecondsPerTimebin();
+  TimeCoordinate += mDb->tZero()/mDb->microsecondsPerTimebin();
   int PadtransPerTimebin = (int) mParam->numberOfDriftSteps() 
     / mDb->numberOfTimebins();
   
@@ -217,8 +221,8 @@ int StFtpcChargeStep::histogram(int setPressure)
   float newPressure=
     mParam->normalizedNowPressure()
     +((aimTime/TimeCoordinate-1)/
-     (mDb->magboltzdVDriftdP(mParam->numberOfMagboltzBins()/2, 0)
-      /mDb->magboltzVDrift(mParam->numberOfMagboltzBins()/2, 0)));
+     (mDb->magboltzdVDriftdP(mDb->numberOfMagboltzBins()/2, 0)
+      /mDb->magboltzVDrift(mDb->numberOfMagboltzBins()/2, 0)));
   
   if(setPressure)
     {
@@ -235,8 +239,8 @@ int StFtpcChargeStep::histogram(int setPressure)
       newPressure=
 	mParam->normalizedNowPressure()
 	+((aimTime/TimeCoordinate-1)/
-	  (mDb->magboltzdVDriftdP(mParam->numberOfMagboltzBins()/2, 0)
-	   /mDb->magboltzVDrift(mParam->numberOfMagboltzBins()/2, 0)));
+	  (mDb->magboltzdVDriftdP(mDb->numberOfMagboltzBins()/2, 0)
+	   /mDb->magboltzVDrift(mDb->numberOfMagboltzBins()/2, 0)));
       mParam->setNormalizedNowPressure(newPressure);
 
       // reiterate again to get even better precision (error<10E^-4)
@@ -250,8 +254,8 @@ int StFtpcChargeStep::histogram(int setPressure)
       newPressure=
 	mParam->normalizedNowPressure()
 	+((aimTime/TimeCoordinate-1)/
-	  (mDb->magboltzdVDriftdP(mParam->numberOfMagboltzBins()/2, 0)
-	   /mDb->magboltzVDrift(mParam->numberOfMagboltzBins()/2, 0)));
+	  (mDb->magboltzdVDriftdP(mDb->numberOfMagboltzBins()/2, 0)
+	   /mDb->magboltzVDrift(mDb->numberOfMagboltzBins()/2, 0)));
       mParam->setNormalizedNowPressure(newPressure);
       cout << "StFtpcChargeStep set normalized pressure to " << newPressure << endl;
     }      
@@ -283,10 +287,10 @@ int StFtpcChargeStep::calcpadtrans(double *pRadius)
       v_buf=0;
       r_last=mDb->sensitiveVolumeOuterRadius();
       pRadius[padrow]=mDb->sensitiveVolumeOuterRadius();
-      e_now = mParam->radiusTimesField() / (0.5*r_last);
-      for(j=v_buf; j<mParam->numberOfMagboltzBins() 
+      e_now = mDb->radiusTimesField() / (0.5*r_last);
+      for(j=v_buf; j<mDb->numberOfMagboltzBins() 
 	    && mDb->magboltzEField(j) < e_now; j++);
-      if(j<1 || j>=mParam->numberOfMagboltzBins())
+      if(j<1 || j>=mDb->numberOfMagboltzBins())
 	{
 	  printf("Error 1: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", 
 		 j, v_buf, mDb->magboltzEField(j), e_now);
@@ -308,18 +312,18 @@ int StFtpcChargeStep::calcpadtrans(double *pRadius)
 	       *(e_now-mDb->magboltzEField(v_buf)))
 	/(mDb->magboltzEField(j)-mDb->magboltzEField(v_buf));
       for (i=0; i<mParam->numberOfDriftSteps() 
-	     && e_now < mDb->magboltzEField(mParam->numberOfMagboltzBins()-2)
+	     && e_now < mDb->magboltzEField(mDb->numberOfMagboltzBins()-2)
 	     ; i++) 
 	{
 	  t_next = t_last + step_size;
 	  /* first guess for r_next: */
 	  r_next = r_last - v_now * step_size * mDb->microsecondsPerTimebin();
-	  e_now = mParam->radiusTimesField() / (0.5*(r_last+r_next));
+	  e_now = mDb->radiusTimesField() / (0.5*(r_last+r_next));
 	  
 	  for(j=v_buf; mDb->magboltzEField(j) < e_now 
-		       && j<mParam->numberOfMagboltzBins(); j++);
+		       && j<mDb->numberOfMagboltzBins(); j++);
 	  
-	  if(j<1 || j>=mParam->numberOfMagboltzBins())
+	  if(j<1 || j>=mDb->numberOfMagboltzBins())
 	    {
 	      printf("Error 2: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", 
 		     j, v_buf, mDb->magboltzEField(j), e_now);

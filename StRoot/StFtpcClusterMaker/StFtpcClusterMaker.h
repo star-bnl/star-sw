@@ -1,5 +1,9 @@
-// $Id: StFtpcClusterMaker.h,v 1.9 2001/03/19 15:52:47 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.10 2001/04/02 12:10:20 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.10  2001/04/02 12:10:20  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters
+// from StarDb/ftpc
+//
 // Revision 1.9  2001/03/19 15:52:47  jcs
 // use ftpcDimensions from database
 //
@@ -45,9 +49,10 @@
 class TH1F;
 class TH2F;
 
-class St_fcl_det;
-class St_ffs_gaspar;
 class DetectorReader;
+class St_ftpcClusterPars;
+class St_ftpcFastSimGas;
+class St_ftpcFastSimPars;
 class St_ftpcDimensions;
 class St_ftpcPadrowZ;
 class St_ftpcEField;
@@ -58,23 +63,26 @@ class St_ftpcdDeflectiondP;
 class St_ftpcAmpSlope;
 class St_ftpcAmpOffset;
 class St_ftpcTimeOffset;
+class St_ftpcDriftField;
 
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.9 2001/03/19 15:52:47 jcs Exp $";
-   St_fcl_det      *m_det;       //!
-   St_ffs_gaspar   *m_gaspar;   //!
-   St_ftpcDimensions    *m_dimensions;    //!
-   St_ftpcPadrowZ       *m_padrow_z;      //!
-   St_ftpcEField        *m_efield;        //!
-   St_ftpcVDrift        *m_vdrift;        //!
-   St_ftpcDeflection    *m_deflection;    //!
-   St_ftpcdVDriftdP     *m_dvdriftdp;     //!
-   St_ftpcdDeflectiondP *m_ddeflectiondp; //!
-   St_ftpcAmpSlope      *m_ampslope;      //!
-   St_ftpcAmpOffset     *m_ampoffset;     //!
-   St_ftpcTimeOffset     *m_timeoffset;   //!
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.10 2001/04/02 12:10:20 jcs Exp $";
+   St_ftpcClusterPars   *m_clusterpars;           //!
+   St_ftpcFastSimGas    *m_fastsimgas;            //!
+   St_ftpcFastSimPars   *m_fastsimpars;           //!
+   St_ftpcDimensions    *m_dimensions;            //!
+   St_ftpcPadrowZ       *m_padrow_z;              //!
+   St_ftpcEField        *m_efield;                //!
+   St_ftpcVDrift        *m_vdrift;                //!
+   St_ftpcDeflection    *m_deflection;            //!
+   St_ftpcdVDriftdP     *m_dvdriftdp;             //!
+   St_ftpcdDeflectiondP *m_ddeflectiondp;         //!
+   St_ftpcAmpSlope      *m_ampslope;              //!
+   St_ftpcAmpOffset     *m_ampoffset;             //!
+   St_ftpcTimeOffset    *m_timeoffset;            //!
+   St_ftpcDriftField    *m_driftfield;            //!
    void             MakeHistograms();// Histograms for FTPC cluster finder
  
  protected:
@@ -93,7 +101,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.9 2001/03/19 15:52:47 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.10 2001/04/02 12:10:20 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };
