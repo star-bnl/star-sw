@@ -3,6 +3,7 @@
  *  Table: mwc_pars
  *        description: New parameter table for mws 
  *        author: Vladimir Morozov, Dec 11 2000
+ *        this table is used for SLOW simulation
  */
 
    /*******************  Row struct *******************/

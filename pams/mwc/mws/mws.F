@@ -58,8 +58,6 @@ CC:>------------------------------------------------------------------
       REAL    outsect_ir, insect_ir, wire_step
       REAL    phicent, phicos, sector_ir
       REAL    local_hit, local_step, cell_de(7680)
-      REAL    thresh,elect_noise
-      REAL    g2
       LOGICAL First
       SAVE    Tolerance
       SAVE    First      
@@ -76,9 +74,9 @@ CC:>------------------------------------------------------------------
       INTEGER igain, ogain, tr,delay
       COMMON /deposition/ drift1,drift2,igain,ogain,
      * vgain,tr
-      INTEGER rhic_delay
-      REAL r1min,r1max,r2min,r2max
-      COMMON /mwc_ss/ insect_ir, r1max,r2min
+      INTEGER rhic_delay,sign
+      REAL r1min,r1max,r2min,r2max,noise_width
+      COMMON /mwc_ss/ insect_ir, r1max,r2min,wire_step
 
 *--
 *--    Default this works
@@ -104,8 +102,6 @@ CC:>------------------------------------------------------------------
             write (6,*) 'MWS:WARNING Gains not set.Setting gain to 1.0!'
             mpar(1).gain = 1.0
          endif
-         gain = mpar(1).gain
-         Scale = 2.5e5*gain
 *--
 *--      Let's set some constants !!!
 *--      outsect_ir     :  outer sector radius
@@ -126,6 +122,7 @@ CC:      but in the absence thereof, we should provide these values in the code
          drift1 =  pars(1).drift1
          drift2 =  pars(1).drift2
          tr =  pars(1).tr
+         noise_width = mpar(1).el_noise_width
          mip_deds =  pars(1).mip_deds
          threshold =  pars(1).threshold
          delay =  pars(1).delay
@@ -184,7 +181,7 @@ CC:      end database constants
       num_below_thresh = 0
 
       do j = 1,num_counts_out*num_wires_count
-CC: VM add all 11 timebuckets in here
+
          do jj = 0,10            
           cell_hit(jj,j) = 0 ! 1 cell ~ 1 wire
           wire_hit(jj,j) = 0
@@ -208,7 +205,6 @@ CC: VM add all 11 timebuckets in here
              trg(jj) = 0
             enddo
 *--
-
             Rhit   = sqrt(Mhit(Ihit).x(1)**2+Mhit(Ihit).x(2)**2)
             if (   (Rhit .gt. r1min) 
      +.and.        (Rhit .lt. r2max+10.0))then
@@ -256,7 +252,6 @@ C     VM: now let's do voltage simulation for this hit (hit is one occurence of
 C  energy deposition in one cell), there may be more than one hit in one cell, due to 
 C  a passage of several particles thru one cell, and there may be more than one 
 C  hit from one particle - i.e. a particale goes thru more than 1 cell
-C  We should be OK with this
 
 *-- VM: now we want to know how much more energy was deposited in this hit, compared to a MIP
                
@@ -267,11 +262,15 @@ C  We should be OK with this
                if (iosect.eq.2) then
                y_pos = 10*(208.6 - abs(mhit(ihit).x(3))) + 7
                endif
+
+               sign = 1
+               if (mhit(ihit).x(3).gt.0) sign = -1
+               
                call xploc(xlocal,mhit(ihit).x(1),mhit(ihit).x(2),
-     * plocal,mhit(ihit).p(1),mhit(ihit).p(2))         
+     * plocal,mhit(ihit).p(1),mhit(ihit).p(2))       
                call deposit (10*xlocal,y_pos,
-     * plocal,-1*mhit(ihit).p(3),trg,threshold,
-     * fraction,delay)
+     * plocal,sign*mhit(ihit).p(3),trg,threshold,
+     * fraction,delay,noise_width)
                if (iosect.eq.1) then
                   sector_ir = insect_ir/phicos
                else
@@ -290,16 +289,6 @@ C  We should be OK with this
                   cell_num = cell_num +(num_wires_sect*24)
                endif
             
-*--
-*--    Determine electronic noise
-*--    if width=0 then do not include noise (noise=0)
-*--
-          
-               if (mpar(1).el_noise_width .gt. 0.0) then
-                  elect_noise = g2(0.0,mpar(1).el_noise_width)
-               else
-                  elect_noise = 0.0
-               endif
 
 *--            
 *--     Get the number of hits in a cell and the total energy
@@ -308,10 +297,9 @@ C  We should be OK with this
 C   VM: this is the main change I'm intruducing - a cell is hit if voltage generated in this cell exceeds threshold voltage.
 C   cell_hit(cell_num) is incremented at most by 1 in one particle hit but in principle, we may have cell_hit > 1
                do jj =0,10                  
-               cell_hit(jj,cell_num)=cell_hit(jj,cell_num)+trg(jj) ! + el.noise
+               cell_hit(jj,cell_num)=cell_hit(jj,cell_num)+trg(jj)
                enddo
-               cell_de(cell_num)  = cell_de(cell_num) + mhit(ihit).de +
-     *         elect_noise
+               cell_de(cell_num)  = cell_de(cell_num) + mhit(ihit).de
 
             else
                write (6,*) 'MWS : Wrong geometry '
@@ -379,7 +367,7 @@ C   cell_hit(cell_num) is incremented at most by 1 in one particle hit but in pr
            if (iphi .gt. 12) iphi = iphi - 12
 
 CC: we will write mwc_raw table with 96x11 pairs of values, even if some of hit counts will be zeroz
-CC: to this end, I delet the following condition:
+CC: to this end, I delete the following condition:
 
 CC:           if (se_de(Isec) .gt. 0.) then
                nsignal = nsignal + 1
@@ -398,12 +386,13 @@ CC:           if (se_de(Isec) .gt. 0.) then
                enddo
 CC:           endif
          enddo
+
 *         write (6,*) 'Number below threshold: ',num_below_thresh
 *         write (6,*) '========================================='
 *--
 *--    Define the number of slats with raw data
 *--
-         Raw_h.nok    = Nsignal
+         Raw_h.nok    = Nsignal*11
          Sector_h.nok = Nsignal
 *--
 *--    end if any data
@@ -416,35 +405,12 @@ CC:           endif
   990 continue
       end
 
-      real function g2(mean,sigma)
 
-*--   
-*--  Return a value selected from a gaussian distribution
-*--  Distribution clipped at mean +/- 3 sigma
-*--
-
-       integer seed/11787/
-       real mean,sigma,rval1,rval2,prob,ret_val,pi,t
-       logical next
-
-       pi=3.141592654
-       next=.true.
-       do while (next)
-          rval1=3.0*(2.0*ran(seed)-1.0)   ! random number -3 -> +3
-          rval2=ran(seed)                 ! probablity
-          ret_val=mean+rval1*sigma
-          t=(ret_val-mean)/sigma
-          prob=( 1./(sigma*sqrt(2.0*pi)) )*exp(-0.5*t*t) ! normalized gaussian
-          if (rval2.lt.prob) next=.false.
-       enddo
-       g2=ret_val
-       return
-       end
 *---------------------------------------------------------------
 
 
        subroutine deposit(x0,y0,v_x,v_y,trg,
-     * threshold,fraction,delay)
+     * threshold,fraction,delay,noise)
        real q_x(-70:70), q_y(-70:70), delt, factor, 
      * v_x,v_y, x0, y0,x_wall1, x_wall2,
      * y_wall1, y_wall2, x,y,
@@ -455,7 +421,7 @@ CC:           endif
      * trg(0:10),jj, delay,igain,ogain,tr
 C  This program calculates the voltage output from the MWPC wires,
 C  we want to get 24mV per 6750 electrons - V. Morozov      
-      real maximum, m_time, sum1(1000),total
+      real maximum, m_time, sum1(1000),total,noise,elnoise
       DIMENSION VOUT(1,1000)
       real vshift(0:595) ! voltage output shifted by signal delay
       real v_peak(0:10)
@@ -465,21 +431,16 @@ C  we want to get 24mV per 6750 electrons - V. Morozov
       data maximum = 0
       data m_time = 0
 
-
-C      put all the q_x & q_y equal to zero
-       data q_x/141*0.0/
-       data q_y/141*0.0/
-       data t/141*2000/
-       data q1/801*0/
        factor = 0
-       do 564 j = 0,10
+       do j = 0,10
         v_peak(j)=0
- 564   continue
- 
-     
-       do jj = 0,10
-        trg(jj) = 0
+        trg(j)=0
        enddo
+
+       do jj = 1,594
+        vshift(jj) = 0
+       enddo
+ 
        helper = iosect     
        
        if (helper.eq.1) then 
@@ -510,27 +471,25 @@ C      put all the q_x & q_y equal to zero
        goto 300
 
  300   continue
+CC     put everything equal to zero
 
-       x = x0
-       y = y0
-       delt = .22/(sqrt(v_x*v_x +v_y*v_y))
-C      now we propagate the particle thru the cell
-       
        do 298 nk = -70,70
        q_x(nk) = 0
        q_y(nk) = 0
        t(nk) = 2000
  298   continue
-       
-       N = 0
-       
-       do 182 nk = -70,70
-       summa = summa+q_x(nk)+q_y(nk)
-       if (summa.ne.0) then
-       print*,'!!!!!!!!! MWC ERROR !!!!!!!'
-       endif
- 182   continue
 
+       do 299 nk = 0, 800
+       vout(1,nk)=0
+       q1(nk)=0
+ 299   continue
+
+       n = 0
+       x = x0
+       y = y0
+       delt = .22/(sqrt(v_x*v_x +v_y*v_y))
+C      now we propagate the particle thru the cell
+       
        if(v_y.ge.0) then
        v_y = -1*v_y
        v_x = -1*v_x
@@ -629,16 +588,10 @@ C      for electron with x > 1mm use "factor" to account for curving track
              
           endif
  500   continue
-       
+
+
 C      now we want to add all these arrival times t(n) into q1(j)
 C      q1(j)- how much charge arrives on anode within .5ns at time j
-
-       
-       do 174 nk=0,800
-       if (q1(nk).ne.0) then
-       print*,'!!!!!!!! MWC ERROR !!!!!!'
-       endif
- 174   continue
 
        do 600 n = -70,70
        if (q_x(n).ne.0.or.q_y(n).ne.0) then
@@ -646,55 +599,35 @@ C      q1(j)- how much charge arrives on anode within .5ns at time j
        q1(num) = q1(num) + 1
        endif
  600   continue
-       
-       do 700 j = 0,800
-       q1(j) = gain*q1(j)*fraction
-
-    
- 700   continue
-
-      NTIME=800
-        
-      data sum1/1000*0/ 
-      
-     
-      DO 20 J=2,NTIME
-         SUM1(j)=SUM1(j-1)+Q1(J)
 
 C this increases the electron count by one every time there is 
 C anything at all reaching the wire in that time bucket
 C if more than one e's reach the wire, we miss them.
 C it doesn't happen often, though
-         
- 20   CONTINUE
+       
+       do j = 0,800
+       q1(j) = gain*q1(j)*fraction
+       enddo
 
-      hlpr = 0
+      NTIME=800
    
-      DO 30 J=1,NTIME
+      DO J=1,NTIME
 
          VOUT(1,J)=0.
       
- 30   CONTINUE
+      ENDDO
     
       DO 40 J=2,NTIME
          DO 50 K=1,J
             DT=FLOAT(J-K)
             VOUT(1,J)=VOUT(1,J)+DELTAT(DT,vgain,tr)*Q1(K)
  50      CONTINUE
-      if (maximum.le.vout(1,j)) then
-      maximum = vout(1,j)
-      m_time = j/2
-      endif 
  40   CONTINUE
 
    
-
 C      VM: now let's digitize this V(t) curve, one timebucket = 109 ns
 C      but first we have to shift time by the amount of signal delay
 
-       do jj = 1,594
-        vshift(jj) = 0
-       enddo
 
        do 565 jj = 1,594  ! jj - time in 2ns, spans 11 time buckets
         if (jj*2.lt.delay) then
@@ -715,6 +648,12 @@ C      but first we have to shift time by the amount of signal delay
                 v_peak(jj) = vshift(j+1)
              endif
           enddo
+
+CC add electronic noise, if needed
+          if (noise.gt.0) then
+           v_peak(jj)= elnoise(v_peak(jj),noise)
+          endif
+
           if (jj.gt.0) then
            if(v_peak(jj).ge.threshold.and.v_peak(jj-1).lt.threshold)then
                 trg(jj) = 1
@@ -727,34 +666,15 @@ C      but first we have to shift time by the amount of signal delay
        enddo
     
 
-
-
 C      VM: flip-flop mechanism is on - if the voltage EVER goes above threshold, 
 C      trigger will be in that time bin and that time bin only
 
 
-
        maximum = 0
        m_time = 0
-       do jj = 0,10
-       v_peak(jj)= 0
-       enddo
-
        factor = 0
-       do 288 nk = -70,70
-       q_x(nk) = 0
-       q_y(nk) = 0
-       t(nk) = 2000
- 288   continue
-       
-       do 299 nk = 0, 800
-       vout(1,nk)=0
-       q1(nk)=0
- 299   continue
-      
-
+               
        return
-
        stop
        end
 
@@ -769,16 +689,42 @@ C VM:have put the factor 2.75e-13 to make V_out(1electron) = 24mv/6750
          RETURN
          END
 
+
+      real function elnoise(mean,sigma)
+
+*--   
+*--  Return a value selected from a gaussian distribution
+*--  Distribution clipped at mean +/- 3 sigma
+*--
+
+       integer seed/11787/
+       real mean,sigma,rval1,rval2,prob,ret_val,pi,t,signal
+       logical next
+
+       pi=3.141592654
+       next=.true.
+       do while (next)
+          rval1=3.0*(2.0*ran(seed)-1.0)   ! random number -3 -> +3
+          rval2=ran(seed)                 ! probablity
+          ret_val=mean+rval1*sigma
+          t=(ret_val-mean)/sigma
+          prob=( 1./(sigma*sqrt(2.0*pi)) )*exp(-0.5*t*t) ! normalized gaussian
+          if (rval2.lt.prob) next=.false.
+       enddo
+       write(29,*)rval1
+       elnoise=ret_val
+       return
+       end
+
 CC------------------------------------------------------------
 CC here we write a subroutine to calculate the position of the hit with respect to the cell,
 CC if we know the lab frame coordinates of the hit.
       SUBROUTINE XPLOC (xlocal, x,y,plocal,px,py)
       REAL xlocal,x,y,plocal, px,py
       INTEGER i,imax
-      REAL max,angle,step	
-      COMMON /mwc_ss/ r1min, r1max,r2min
+      REAL max,angle	
+      COMMON /mwc_ss/ r1min, r1max,r2min,step
       PARAMETER (angle =.523598775598)! pi/6 = 30 degrees
-      PARAMETER ( step =.400)! width of a cell in radial direction
  
       imax = 1
       max = -200
@@ -801,7 +747,7 @@ CC now we need to convert max into the coordinate with respect to a cell
 CC    this part will check if xlocal is within (-2,+2)mm
 
  20   continue
-      if ((xlocal.gt.(-.2)).and.(xlocal.lt.(.2))) then
+      if (xlocal.lt.(step)) then
       goto 30
       else
       i = i+1
@@ -810,6 +756,7 @@ CC    this part will check if xlocal is within (-2,+2)mm
       endif
 
  30   continue
+      xlocal = xlocal - step/2
       plocal =  px*sin(angle*imax)+py*cos(angle*imax)
       return
 
