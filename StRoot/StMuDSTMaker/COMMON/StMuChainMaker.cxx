@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.23 2004/04/08 23:58:39 jeromel Exp $
+ * $Id: StMuChainMaker.cxx,v 1.24 2004/04/09 21:09:27 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -197,10 +197,11 @@ void StMuChainMaker::add( StMuStringIntPair filenameEvents) {
     //cout << file.c_str() << endl;
     if ( file.find(rootdTag)==0 ) {
 	// get local machine name 
-	string machine(gSystem->Getenv("HOST"));
-	if (machine.find("rcas")!=string::npos) machine += ".rcf.bnl.gov";
-	if (machine.find("rcrs")!=string::npos) machine += ".rcf.bnl.gov";
-	if (machine.find("pdsf")!=string::npos) machine += ".nersc.gov";
+	string machine(gSystem->Getenv("HOSTNAME"));
+	//string machine(gSystem->Getenv("HOST"));
+	//if (machine.find("rcas")!=string::npos) machine += ".rcf.bnl.gov";
+	//if (machine.find("rcrs")!=string::npos) machine += ".rcf.bnl.gov";
+	//if (machine.find("pdsf")!=string::npos) machine += ".nersc.gov";
 	//cout << machine.c_str() << endl;
 	// get name of machine holding the file
 	int pos = file.find("//",rootdTag.length());
@@ -216,19 +217,21 @@ void StMuChainMaker::add( StMuStringIntPair filenameEvents) {
     if (entries==0) { // try to read the number of event from the db reader 
 	entries = mDbReader->entries(file.c_str());
     }
-    TFile *f1 = TFile::Open(file.c_str());
-    if (entries==0 && f1) { // open the file and get the number of events
-	TTree* tree = (TTree*)dynamic_cast<TTree*>(f1->Get("MuDst"));
-	if (tree) entries = (int)tree->GetEntries();
+    //TFile *f1 = TFile::Open(file.c_str());
+    if (entries==0) { // open the file and get the number of events
+      TFile f1(file.c_str());
+      TTree* tree = (TTree*)dynamic_cast<TTree*>(f1.Get("MuDst"));
+      if (tree) entries = (int)tree->GetEntries();
+      f1.Close();
     } 
-    if ( f1 ){
-      f1->Close();
-      delete f1;
+    //if ( f1 ){
+    //  f1->Close();
+    //  delete f1;
       mChain->Add( file.c_str(), entries );
       mFileCounter++;
-    } else {
-      gMessMgr->Error() << "StMuChainMaker::add: Could not add " << file << endm;
-    }
+      //} else {
+      //  gMessMgr->Error() << "StMuChainMaker::add: Could not add " << file << endm;
+      //}
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -266,8 +269,8 @@ void StMuChainMaker::fromFileCatalog(string list) {
   if ( !server ) DEBUGMESSAGE("could not connect to server");
 
   /// get machine name 
-  string machine(gSystem->Getenv("HOST"));
-  if (machine.find(".rcf.bnl.gov")==string::npos) machine += ".rcf.bnl.gov";
+  string machine(gSystem->Getenv("HOSTNAME"));
+  //if (machine.find(".rcf.bnl.gov")==string::npos) machine += ".rcf.bnl.gov";
 
   /// read list of files
   string files("(filename='dummy')");
@@ -376,6 +379,9 @@ void StMuChainMaker::fromFile(string file) {
  /***************************************************************************
   *
   * $Log: StMuChainMaker.cxx,v $
+  * Revision 1.24  2004/04/09 21:09:27  jeromel
+  * Did not think of wildcards ...
+  *
   * Revision 1.23  2004/04/08 23:58:39  jeromel
   * Used to crash on opening file if zero size. Corrected
   *
