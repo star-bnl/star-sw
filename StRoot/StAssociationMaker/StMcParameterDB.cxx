@@ -1,11 +1,14 @@
 /*****************************************
  *
- * $Id: StMcParameterDB.cxx,v 1.7 2003/09/02 17:55:28 perev Exp $
+ * $Id: StMcParameterDB.cxx,v 1.8 2004/03/30 03:02:02 calderon Exp $
  *
  * Changed extension to .cxx so that it
  * would be accessible from Root macro
  *
  * $Log: StMcParameterDB.cxx,v $
+ * Revision 1.8  2004/03/30 03:02:02  calderon
+ * -Changed default value of the z cut to 5 mm.
+ *
  * Revision 1.7  2003/09/02 17:55:28  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -58,7 +61,7 @@ StMcParameterDB* StMcParameterDB::instance()
 }
 
 StMcParameterDB::StMcParameterDB()
-    :mXCutTpc(5.*millimeter),mYCutTpc(5.*millimeter),mZCutTpc(3.*millimeter),mReqCommonHitsTpc(3),
+    :mXCutTpc(5.*millimeter),mYCutTpc(5.*millimeter),mZCutTpc(5.*millimeter),mReqCommonHitsTpc(3),
      mXCutSvt(1.*millimeter),mYCutSvt(1.*millimeter),mZCutSvt(1.*millimeter),mReqCommonHitsSvt(1),
      mRCutFtpc(3.*millimeter),mPhiCutFtpc(5.*degree),mReqCommonHitsFtpc(2)
 { /*noop*/ }
