@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichTofMuDstMaker.cxx,v 1.8 2002/03/18 22:06:33 dunlop Exp $
+ * $Id: StRichTofMuDstMaker.cxx,v 1.9 2003/01/22 22:42:22 dunlop Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichTofMuDstMaker.cxx,v $
+ * Revision 1.9  2003/01/22 22:42:22  dunlop
+ * Fixed compilation on solaris
+ *
  * Revision 1.8  2002/03/18 22:06:33  dunlop
  * Modified lambda cuts to match ones made by StRichPIDMaker and StRichSpectraMaker
  *
@@ -45,8 +48,8 @@
  **************************************************************************/
 #include <typeinfo>
 #include "StRichTofMuDstMaker.h"
-#include "StChain.h"
 #include "StEventTypes.h"
+#include "StChain.h"
 #include "StMessMgr.h"
 #include "SystemOfUnits.h"
 #include "StGlobals.hh"
@@ -69,6 +72,14 @@
 #include "StRrsMaker/StRichLocalCoordinate.h"
 #include "StRrsMaker/StRichMomentumTransform.h"
 #include "StRrsMaker/StRichGeometryDb.h"
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+using std::vector;
+using std::unique;
+using std::sort;
+using std::binary_search;
+
+#endif
 
 static size_t acceptedEvents = 0;
 static size_t acceptedTracks = 0;
@@ -638,7 +649,10 @@ vector<StV0Vertex*> StRichTofMuDstMaker::getLambdas(StEvent* event)
 	    StTrack* theTrack = keyToTrack[v0m->keyPos()];
 		
 	    if (this->acceptLambdaDaughter(theTrack)) {
-	      lamDaughters.push_back(make_pair(v0m->keyPos(),v0m->keyNeg()));
+		pair<unsigned int, unsigned int> thePair(v0m->keyPos(),v0m->keyNeg());
+		
+		lamDaughters.push_back(thePair);
+		
 	    }
 		
 	  }
@@ -652,7 +666,10 @@ vector<StV0Vertex*> StRichTofMuDstMaker::getLambdas(StEvent* event)
 	    StTrack* theTrack = keyToTrack[v0m->keyNeg()];
 		
 	    if (this->acceptLambdaDaughter(theTrack)) {
-	      lamDaughters.push_back(make_pair(v0m->keyPos(),v0m->keyNeg()));
+		pair<unsigned int, unsigned int> thePair(v0m->keyPos(),v0m->keyNeg());
+		
+		lamDaughters.push_back(thePair);
+		
 	    }
 		
 	  }
@@ -699,8 +716,11 @@ vector<unsigned int> StRichTofMuDstMaker::removeV0sButLambdas(StEvent* event,vec
     }
   }
   sort(goodDaughters.begin(),goodDaughters.end());
-  vector<unsigned int> uniqueGoodDaughters;
-  unique_copy(goodDaughters.begin(),goodDaughters.end(),back_inserter(uniqueGoodDaughters));
+  vector<unsigned int> uniqueGoodDaughters = goodDaughters;
+  vector<unsigned int>::iterator endOfUnique = 
+      unique(uniqueGoodDaughters.begin(),uniqueGoodDaughters.end());
+  uniqueGoodDaughters.erase(endOfUnique,uniqueGoodDaughters.end());
+  
 
   // Now remove bad V0s
   unsigned int keptV0s = 0;

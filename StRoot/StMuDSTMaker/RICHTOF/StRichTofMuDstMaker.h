@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichTofMuDstMaker.h,v 1.4 2002/03/18 23:53:51 dunlop Exp $
+ * $Id: StRichTofMuDstMaker.h,v 1.5 2003/01/22 22:42:22 dunlop Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichTofMuDstMaker.h,v $
+ * Revision 1.5  2003/01/22 22:42:22  dunlop
+ * Fixed compilation on solaris
+ *
  * Revision 1.4  2002/03/18 23:53:51  dunlop
  * GetCVS()
  *
@@ -35,6 +38,9 @@
 #include "StMaker.h"
 #include "StThreeVectorD.hh"
 #include <vector>
+#ifndef ST_NO_NAMESPACES
+using std::vector;
+#endif
 class StEvent;
 class StTrack;
 class StSPtrVecTofData;
@@ -123,7 +129,7 @@ private:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichTofMuDstMaker.h,v 1.4 2002/03/18 23:53:51 dunlop Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichTofMuDstMaker.h,v 1.5 2003/01/22 22:42:22 dunlop Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 
