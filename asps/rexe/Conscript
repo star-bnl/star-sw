@@ -119,8 +119,8 @@ if ($#Defs > -1) {
   my @defs = ();
   my @d    = ();
   foreach my $def (@Defs) {
-    push @defs, $share . "/" . File::Basename::basename($def); 
-    push @d   , "#include/" .  File::Basename::basename($def); 
+    push @defs, $share   . "/" . File::Basename::basename($def); 
+    push @d   , $INCLUDE . "/" . File::Basename::basename($def); 
   }
   Install $env2 $share, @d;
   Command $env2 [@CintFiles], @defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
