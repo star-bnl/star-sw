@@ -1,13 +1,12 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.7 2000/11/14 22:31:51 lasiuk Exp $
+ * $Id: StRichTrack.cxx,v 2.8 2000/11/21 19:46:09 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
- *  Revision 2.7  2000/11/14 22:31:51  lasiuk
- *  associated MIP (commented)
- *  return copy instead of reference
+ *  Revision 2.8  2000/11/21 19:46:09  lasiuk
+ *  px/pz correction uncommented
  *
  *  Revision 2.10  2000/11/28 19:18:54  lasiuk
  *  Include protection/error warning if no MIP
@@ -193,8 +192,8 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     
     StRichLocalCoordinate richTransformedImpactPoint(-999,-999,-999);
     (*coordinateTransformation)(globalImpactPoint,richTransformedImpactPoint);
-//     double xCorrection = 0.4*(mMomentumAtPadPlane.x()/mMomentumAtPadPlane.z());
-    double xCorrection = 0.;
+
+    //
     // correction to the x position of the impact point
     // If this correction is really due to the effect of
     // the offline software cluster finder artificially
@@ -377,8 +376,8 @@ StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)
     this->setMaxChain(maxSeq(emptyRows)); // max number of continuous used rows
     this->setFirstRow(rows.front());
     this->setLastRow(rows.back());
-//     double xCorrection = 0.4*(mMomentumAtPadPlane.x()/mMomentumAtPadPlane.z());
-    double xCorrection = 0.;
+
+    this->setMomentum(richLocalMomentum);
     this->setUnCorrectedMomentum(richLocalMomentum);
 
     //
@@ -599,10 +598,6 @@ bool StRichTrack::correct() {
       StThreeVectorF tempRichLocalMomentum(tempRichLocalMom.x(),tempRichLocalMom.y(),tempRichLocalMom.z());  
       StThreeVectorF normalVector(0,0,-1);
       
-
-
-
-
       setProjectedMIP(correctedProjectedMIP);
       setImpactPoint(impact);
       setMomentum(tempRichLocalMomentum);
@@ -613,7 +608,6 @@ bool StRichTrack::correct() {
 }
 
     typedef pair<StRichHit*, double> candidate;
-    //double adcCut=200;
 
     //
     // proximity matching between TPC track's predicted MIP and 
@@ -628,7 +622,9 @@ bool StRichTrack::correct() {
 	cout << "StRichTrack::assignMIP()\n";
 	cout << "\tHits were not passed properly\n";
 	cout << "\tReturning" << endl;
-	if(testThisResidual < 3.*centimeter)
+	return;
+    }
+
     vector<candidate> candidateHits;
     
     StSPtrVecRichHitConstIterator hitIndex;
@@ -637,30 +633,34 @@ bool StRichTrack::correct() {
 
 	if(testThisResidual>5.*centimeter) continue;
 	
-
+	if(testThisResidual < 2.*centimeter)
 	    candidateHits.push_back( candidate((*hitIndex), testThisResidual) );
 
 	if (testThisResidual<smallestResidual) {
 	    smallestResidual = testThisResidual;   
 	    mAssociatedMIP   = *hitIndex;
-//     if(candidateHits.size()>1) {
-// 	cout << "StRichTrack::associateHit()\n";
-// 	cout << "\tMore than 1 hit is associated\n";
-// 	cout << "\tTake highest amplitude with smallest residual\n" << endl;
+	}
+	
+    }
+    
+    //
+    // if there is more than 1 candidate
+    // take the one with the highest charge
+ 	cout << "StRichTrack::associateHit()\n";
+    
+	//
+	// sort from smallest residual to highest
+	    cout << "\t" << ii << " " << candidateHits[ii].second
+		 << " " << candidateHits[ii].first->charge() << endl;
+	    if(highestAmplitude < candidateHits[ii].first->charge()) {
+	sort(candidateHits.begin(), candidateHits.end());
 
-//     double highestAmplitude = 0;
-// 	for(size_t ii=0; ii<candidateHits.size(); ii++) {
-//     if(highestAmplitude<candidateHits[ii].second) {
-// 	mAssociatedMIP = candidateHits[ii].first;
-// 	break;
-
-// 	}
-//     }
-
+	for(size_t ii=0; ii<candidateHits.size(); ii++) {
 
 	cout << highestAmplitude << endl;
 	    //cout << "StRichTrack::assignMIP()\n";
 	    //cout << "\tTake smallest Residual" << endl;
+	    mAssociatedMIP = candidateHits[0].first;
 	    highestAmplitude = candidateHits[0].first->charge();
 	}
 	    
