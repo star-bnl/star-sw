@@ -70,47 +70,34 @@ istream& operator>>(istream& in,  StHbtTrack& trk){
 ostream& operator<<(ostream& out, StHbtV0& v0){
 
   return (out
-	  << v0.mdecayLengthV0   << " " << v0.mdecayVertexV0      << " "
-	  << v0.mdcaV0Daughters  << " " << v0.mdcaV0ToPrimVertex  << " "
-	  << v0.mdcaPosToPrimVertex << " " << v0.mdcaNegToPrimVertex << " "
-	  << v0.mmomPos          << " " << v0.mmomNeg             << " "
-	  << v0.mtpcHitsPos      << " " << v0.mtpcHitsNeg         << " "
-	  << v0.mmomV0           << " " << v0.malphaV0            << " "
-	  << v0.meLambda         << " " << v0.meK0Short           << " "
-	  << v0.mePosProton      << " " << v0.mePosPion           << " "
-	  << v0.meNegProton      << " " <<  v0.meNegPion          << " "
-	  << v0.mmassLambda      << " " << v0.mmassK0Short        << " " 
-	  << v0.mmassAntiLambda  << " " << v0.mmassAntiLambda     << " "
-	  << v0.mrapLambda       << " " << v0.mrapK0Short         << " "
-          << v0.mrapAntiLambda   << " " << v0.mcTauLambda         << " "
-          << v0.mcTauK0Short     << " " << v0.mptV0               << " "
-          << v0.mptotV0          << " " << v0.mptPos              << " "
-          << v0.mptotPos         << " " << v0.mptNeg              << " "
-          << v0.mptotNeg );
+	  << v0.mdecayLengthV0    << " " << v0.mdecayVertexV0.x()  << " "
+	  << v0.mdecayVertexV0.y()<< " " << v0.mdecayVertexV0.z()  << " "
+	  << v0.mdcaV0Daughters   << " " << v0.mdcaV0ToPrimVertex  << " "
+	  << v0.mdcaPosToPrimVertex <<" "<< v0.mdcaNegToPrimVertex << " "
+	  << v0.mmomPos.x()       << " " << v0.mmomPos.y()         << " "
+          << v0.mmomPos.z()       << " " << v0.mmomNeg.x()         << " "
+	  << v0.mmomNeg.y()       << " " << v0.mmomNeg.z()         << " " 
+	  << v0.mtpcHitsPos       << " " << v0.mtpcHitsNeg         << " "    
+	  << v0.mrapLambda        << " " << v0.mrapK0Short         << " "
+          << v0.mcTauLambda       << " " << v0.mcTauK0Short        << " "
+          << v0.midNeg            << " " << v0.midPos     );
 }
 
 //------------------------- StHbtV0 -----------------------------------
   istream& operator>>(istream& in, StHbtV0& v0){
-  
-  
-    return (in 
+ 
+
+   in 
 	  >> v0.mdecayLengthV0      >>  v0.mdecayVertexV0   
 	  >> v0.mdcaV0Daughters     >>  v0.mdcaV0ToPrimVertex 
 	  >> v0.mdcaPosToPrimVertex >>  v0.mdcaNegToPrimVertex
 	  >> v0.mmomPos             >>  v0.mmomNeg      
-	  >> v0.mtpcHitsPos         >>  v0.mtpcHitsNeg      
-	  >> v0.mmomV0              >>  v0.malphaV0       
-	  >> v0.meLambda            >>  v0.meK0Short 
-	  >> v0.mePosProton         >>  v0.mePosPion 
-	  >> v0.meNegProton         >>  v0.meNegPion 
-	  >> v0.mmassLambda         >>  v0.mmassK0Short  
-	  >> v0.mmassAntiLambda     >>  v0.mmassAntiLambda 
+	  >> v0.mtpcHitsPos         >>  v0.mtpcHitsNeg                
 	  >> v0.mrapLambda          >>  v0.mrapK0Short 
-          >> v0.mrapAntiLambda      >>  v0.mcTauLambda 
-          >> v0.mcTauK0Short        >>  v0.mptV0 
-          >> v0.mptotV0             >>  v0.mptPos 
-          >> v0.mptotPos            >>  v0.mptNeg 
-          >> v0.mptotNeg) ;
+          >> v0.mcTauLambda         >>  v0.mcTauK0Short 
+          >> v0.midNeg              >>  v0.midPos;
+   v0.UpdateV0();
+   return (in) ;
 }
 
 //------------------------- StHbtEvent -----------------------------------
