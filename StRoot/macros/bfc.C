@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.153 2002/01/26 23:48:08 jeromel Exp $
+// $Id: bfc.C,v 1.154 2002/03/19 21:16:58 jeromel Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -69,7 +69,15 @@ void bfc(const Int_t First,
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
   if (chain) delete chain;
-  chain = new StBFChain;   // Create the main chain object
+
+  // This was added on March 19th 2002 for ITTF //-chain setup
+  // Weak case-implementation (no mix case).
+  if( strstr(Chain,"ITTF") || strstr(Chain,"ittf") ){  
+    chain = new StBFChain(2);   // Create the main chain object
+  } else {
+    chain = new StBFChain(1);   // Create the main chain object
+  }
+
   if (!chain) gSystem->Exit(1);
   chain->SetFlags(Chain);
   if (TreeFile) chain->SetTFile(new TFile(TreeFile,"RECREATE"));
