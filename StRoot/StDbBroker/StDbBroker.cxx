@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.30 2001/10/26 15:44:02 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.31 2001/10/26 21:40:03 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.31  2001/10/26 21:40:03  porter
+ * added protection for query by runNumber until Victor can implement his side
+ *
  * Revision 1.30  2001/10/26 15:44:02  porter
  * add query by runNumber
  *
@@ -415,7 +418,9 @@ void * StDbBroker::Use(int tabID, int parID)
   if(!node->hasDescriptor())node->setDescriptor(GetTableDescriptor());
 
   bool fetchStatus;
-  if(node->getDbType()==dbRunLog && node->getDbDomain() != dbStar){
+  if(node->getDbType()==dbRunLog && 
+     node->getDbDomain() != dbStar && 
+     m_runNumber !=0 ){
     ostrstream rq;
     rq<<" where runNumber="<<m_runNumber<<ends;
     fetchStatus=mgr->fetchDbTable(node,rq.str());
