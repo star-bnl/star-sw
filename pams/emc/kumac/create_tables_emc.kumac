@@ -1,0 +1,61 @@
+* ************************************************************
+ macro ems 
+   
+  macro/global/import *
+             
+
+* create tables for output
+    
+    cd [data]/emc/hits
+    tdm/newtable ems_hits_bemc ems_hits_bemc  9600
+    tdm/newtable ems_hits_bsmd ems_hits_bsmd 50000
+    tdm/newtable ems_hits_eemc ems_hits_eemc 50000
+    tdm/newtable ems_hits_esmd ems_hits_esmd 50000
+    tdm/newtable ems_emecor    ems_emecor     4800
+    tdm/newtable adc_bemc      emc_adc	      4800 
+    cd /dui
+    
+ return
+
+* ************************************************************
+ macro cal
+   
+  macro/global/import *
+             
+* create tables for output
+    
+    cd [data]/emc/hits
+    tdm/newtable adc_bemc      emc_adc	      4800 
+    tdm/newtable adc_bprs      emc_adc	      4800 
+    tdm/newtable adc_bsmd      emc_adc	     50000 
+    tdm/newtable adc_eemc      emc_adc	       720 
+    tdm/newtable adc_eprs      emc_adc	       720 
+    tdm/newtable adc_esmd      emc_adc	     50000 
+    cd /dui
+    
+ return
+
+
+* *************************************************************
+
+ macro jet 
+   
+  macro/global/import *
+             
+
+* create tables for output
+    
+    cd [data]/emc/tracks
+    
+    tdm/newtable emc_energy  emc_energy  40000 
+    tdm/newtable ems_jetlist ems_jetlist 50
+ 
+    cd /dui
+
+  return
+ 
+* *************************************************
+
+
+
+

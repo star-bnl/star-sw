@@ -1,0 +1,16 @@
+/* svm_evt_match.idl */
+
+struct svm_evt_match{
+	long id; /* id of matched pair of svt - tpc tracks */
+	long idsvt; /* id no. of svt track from svt_track table */
+	long idsvt_2; /* F.key to 2nd best SVT track match */
+	long idtpc; /* id no. of tpc track from tptrack table */
+	long loop1; /* matching in bi-direc., number of tries */
+	long loop2; /* matching done in second pass */
+	long mc_check; /* mc evaluation:(0)not used,(1)cor,-1wrong */
+	long pid; /* Geant PID # of tpc seg. of matched trks. */
+	long quality; /* equals int(1000.0*chi-square) */
+	long quality_2; /* int(1000.0*chi-square of 2nd best SVTtrk */
+	float eta; /* pseudorapidity of tpc seg. at 1st sp.pt. */
+	float invpt; /* 1/pt of tpc segment of matched tracks */
+};

@@ -1,0 +1,27 @@
+/*
+*
+*  Table type:dst_run_summary.idl 
+*  Module    : fill_dst_run_summary
+*
+*  Fill DST run summary table.
+*
+*/
+#include "PAM.idl"
+#include "dst_run_header.idl"
+#include "dst_run_summary.idl"
+#include "dst_event_header.idl"
+#include "dst_event_summary.idl"
+#include "dst_track.idl"
+#include "dst_vertex.idl"
+
+interface fill_dst_run_summary  : amiModule {
+	STAFCV_T call ( 
+                  in    dst_run_header        dstRunHeader
+                , in    dst_event_header      dstEventHeader
+                , in    dst_event_summary     dstEventSummary
+                , in    dst_track             dstTrack
+                , in    dst_vertex            dstVertex
+                , inout dst_run_summary       dstRunSummary
+		);
+};
+/*  Last mod. for fill_dst_run_summary.idl :  $Fri Aug 28 14:55:30 EDT 1998$ */

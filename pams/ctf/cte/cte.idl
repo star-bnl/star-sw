@@ -1,0 +1,26 @@
+//
+//        description: Track extrapolation to CTF
+//
+#include "PAM.idl"
+#include "ctg_geo.idl"
+#include "ctg_slat.idl"
+#include "ctg_slat_eta.idl"
+#include "ctg_slat_phi.idl"
+#include "ctu_cor.idl"
+#include "egr_globtrk.idl"
+#include "cte_para.idl"
+#include "cte_extra.idl"
+
+interface cte: amiModule {
+        STAFCV_T call
+                ( inout ctg_geo      geo 
+                , inout ctg_slat     slat   
+                , inout ctg_slat_eta slat_eta
+                , inout ctg_slat_phi slat_phi
+                , inout ctu_cor      cor
+                , inout egr_globtrk  track
+                , inout cte_para     para     
+                , inout cte_extra    extra  
+                );
+};
+

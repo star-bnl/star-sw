@@ -1,0 +1,24 @@
+<pre><h3>LOGICAL FUNCTION STROPEN(LUN,FILENAME,COMMANDS)</h3>
+
+
+*  Inputs:
+	INTEGER LUN !Logical unit on which to open file.
+	CHARACTER*(*) FILENAME !Name of file.
+	CHARACTER*(*) COMMANDS !Command line, through which
+                               !OPEN options are selected.
+
+*  Return values:
+*	.TRUE. for a successful open on FILENAME.
+*	.FALSE. for a failed open.
+
+
+*  Description:
+*	Attempts to open the specified file in a machine-independent fashion
+*	using the OPEN parameters specified in COMMANDS.  COMMANDS is a
+*	character string containing all the "usual" OPEN parameters, except
+*	for the UNIT=lun (FORTRAN Logical Unit) and FILE=filename, which are passed
+*	separately, and without the usual single-quotes (apostrophes) normally
+*	around literal arguments.
+
+
+</pre>

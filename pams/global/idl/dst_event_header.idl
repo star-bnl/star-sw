@@ -1,0 +1,12 @@
+/*  dst_event_header.idl        */
+/*  Table: dst_event_header     */
+
+ struct dst_event_header  {
+  char   event_type[20];    /* Event type: Au+Au, p+p, laser...            */
+  long   n_event[2];        /* Unique 64 bit event ID number               */
+  long   n_run;             /* Experiment run number                       */
+  long   time;              /* Unique time stamp for event                 */
+  long   trig_mask;         /* Trigger mask                                */
+  long   bunch_cross;       /* Beam-Beam bunch crossing number             */
+ } ;
+/*  Last mod. for dst_event:   $Date: 1998/08/31 15:11:12 $ */

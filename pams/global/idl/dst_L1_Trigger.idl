@@ -1,0 +1,7 @@
+/* dst_L1_Trigger.idl      */
+/* Table: dst_L1_Trigger   */
+
+ struct dst_L1_Trigger {
+  long            L1_result[10];        /* L1 analysis result */
+ };
+/*  Last mod. for dst_L1_Trigger:   $Date: 1998/06/05 22:07:43 $ */

@@ -1,0 +1,57 @@
+<h1> Table browser, sys package tbr</h1>
+
+<p>Author: <a href=
+"http://rsgi01.rhic.bnl.gov/star/starlib/doc/www/spb/ward.html">Herb Ward</a>.
+
+<h2> Introduction </h2>
+The table browser lets you look at tables conveniently.  It has a cuts
+mechanism so that you can make complicated row selections, eg,
+<pre>
+  ((id.gt.1000.and.id.lt.2000).and.inpt.gt.5).or.(npt.lt.30)
+</pre>
+It is a GUI program that uses the mouse for everything except
+typing cuts strings and hard row ranges (eg, rows 2001 to 3000).
+It is the simplest way currently available to look at dynamic tables.
+It make simple histograms.  Its design is modularized, so that, eg,
+you can apply cuts while making histograms.
+It runs both<ul>
+<li>inside of STAF
+<li>at the UNIX prompt (.xdf files)
+</ul>
+
+<h2>To run inside of STAF</h2>
+The table browser is available in STAF.
+To add it to your STAF executable,
+uncomment the MOTIF:= line in your bin/Makefile,
+and add tbr at the beginning of LHS of the the ASPS line in
+your Makefile.control.
+After you have the STAF prompt, to bring up the browser type
+<pre>                  tbr/motif/viewdataset
+</pre>
+
+<h2>To run at the UNIX prompt</h2>
+From the UNIX prompt type (if tbr is not in your PATH, contact
+starlib@bnl.gov)
+<pre>        tbr myfile.xdf</pre>
+You can generate <code>.xdf</code> files from STAF tables by
+typing, for example,
+<pre>        data_io/write myfile.xdf xdf table1 table2</pre>
+
+<h2>Using the GUI interface</h2>
+
+<strong>The primary window</strong> comes up immediately.
+<ol>
+<li>Click on the two-letter abbreviations until you see the table
+    that you are interested in.  ("TB" and "tb" stand for "table".)
+<li>Click on the <strong>name</strong> (not the abbreviation) for that table.
+<li>Wait for the secondary window.
+</ol><p>
+
+<strong>The secondary window</strong>
+comes up as a result of your actions in the primary window.
+<ol>
+<li>Click on the columns that you are interested in.
+<li>Select which rows you want in the top right corner.
+<li>Select a command from the "Action" menu.
+</ol><p>
+

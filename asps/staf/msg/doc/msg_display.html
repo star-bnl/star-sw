@@ -1,0 +1,26 @@
+<pre><h3>SUBROUTINE			MSG_Display( MSG, LINES, ID )</h3>
+
+	
+*   Inputs:
+	CHARACTER*(*) MSG(*) !1 or more line character-string message
+	                     !submitted for display.
+	INTEGER LINES  !Number of lines in MSG.
+
+*   Input/Output:
+	INTEGER ID     !STAR-standard message ID.  Set to zero by caller 
+                       !before first call, set by MESSAGE on first call by
+                       !looking up or entering the prefix contained in MSG
+                       !(prefix is everything before the first space) in
+	               !the index of STAR-standard message prefixes.
+	               !If ID is negative, ID remains unchanged, and lookup
+	               !is then always by prefix.
+
+*   Outputs: none
+
+*   Brief description:  Display a message on the terminal (only).
+
+*   Description:
+*	Conditionally display & count a message MSG, containing LINES lines
+*	of up to 132 characters each, on the terminal.
+
+</pre>

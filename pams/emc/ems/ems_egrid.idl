@@ -1,0 +1,17 @@
+/* ems_egrid.idl		W.J. Llope */
+
+#include "PAM.idl"
+#include "ems_hits_bemc.idl"
+#include "egr_globtrk.idl"
+#include "ems_control.idl"
+#include "ems_emecor.idl"
+
+interface ems_egrid : amiModule {
+	STAFCV_T call
+        ( in ems_hits_bemc ems_hits_bemc
+        , in egr_globtrk egr_globtrk
+        , in ems_control ems_control
+        , out ems_emecor ems_emecor
+	);
+};
+

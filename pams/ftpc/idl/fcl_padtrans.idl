@@ -1,0 +1,22 @@
+/*****************************************************************************/
+
+/*   fcl_padtrans.idl
+*
+*   Table: fcl_padtrans
+*        description: drift parameter table 
+*
+*/
+
+   /*******************  Row struct *******************/
+   struct fcl_padtrans { 
+       float e;       /* electric field for this bin */   
+       float v[10];   /* vdrift for this padrow, e-field */
+       float psi[10]; /* deflection angle for this padrow, e-field */
+                      /* both at 20 degC, 1013.25hPa */
+       float dv_dp[10];   /* dvdrift/dpressure(normalized) */
+       float dpsi_dp[10]; /* dphi/dpressure(normalized) */
+                          /* pressures normalized to 20 degC etc. */
+   };
+
+/*  Last mod. for fcl_padtrans: $Date: 1998/06/24 13:30:42 $ */
+

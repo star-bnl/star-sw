@@ -1,0 +1,32 @@
+/* 	tkf.idl
+*  	Module: tkf
+*	description:	Tpc charged Kaon Finder
+*/
+#include "PAM.idl"
+#include "tkf_tkfpar.idl"
+#include "tkf_tkfout.idl"
+#include "g2t_vertex.idl"
+#include "g2t_track.idl"
+#include "g2t_tpc_hit.idl"
+#include "tpt_track.idl"
+#include "tte_mctrk.idl"
+#include "dst_track.idl"
+#include "epi_glob_pid_eval.idl"
+
+interface tkf:        amiModule {
+        STAFCV_T call
+                ( inout	tkf_tkfpar	tkfpar
+                , inout	tkf_tkfout	tkfout
+                , in	g2t_track	g2t_track
+                , in	g2t_vertex	g2t_vertex
+                , in	g2t_tpc_hit	tpch
+                , in	tpt_track	tptrack
+                , in	tte_mctrk	tpeval
+                , in	dst_track	globtrk
+                , in	epi_glob_pid_eval	gpideval
+        );
+};
+/* Last mod. for tkf: $Date: 1998/08/31 21:26:41 $ */
+   
+
+

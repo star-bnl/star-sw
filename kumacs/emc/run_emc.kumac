@@ -1,0 +1,119 @@
+* *************************************************************************
+* run_emc.kumac
+* 
+* 8/3/98 K. Turner - editted to make it standard
+* 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
+* 
+************************************************************************
+************************************************************************
+
+ macro run__
+          TOP=/star/u2d/akio/staf _
+          domain='emc' _
+          INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
+          input_g2t_file=muons_central_2.xdf _
+          num_events=1 _
+          funit=21 _
+          nfile=emc.ntup _
+          nid=111 _
+          table=emc/hits/ems_hits_bemc _
+          jetfind=no
+* 
+*  this is an example!! you must change to fill your needs
+*  
+* --> to run
+*    - change the inputs above as desired
+*    - run staf
+*    -   exec run_emc
+* 
+	  
+  message ' *** TOP directory to search for kumacs --> ' [TOP]
+  message ' *** domains to load  -->                   ' [domain]
+  message ' *** Data Sample directory -->              ' [INPUT_DATA_DIR]
+  message ' *** Input G2T file -->                     ' [input_g2t_file]
+  message ' *** Num Events to process -->              ' [num_events]
+  message ' *** ntup file unit -->                     ' [funit]
+  message ' *** output Ntuple filename  -->            ' [nfile]
+  message ' *** Ntuple ID # -->                        ' [nid]
+  message ' *** Table to write to ntup -->             ' [table]
+  message ' *** want to do jetfinding?  -->            ' [jetfind]
+  message ' ****** jetfinding requires global tracks!!! '
+  
+***********************************************************
+* General Setup
+***********************************************************
+  
+ macro/global/create TOP              [TOP]
+
+   exec $STAR/kumacs/util/setup_defaults#run
+   
+   exec setup#setup
+   
+   alias/create STAFCV_OK  1
+   alias/create STAFCV_BAD 0   
+   macro/global/import *
+     
+   exec load_libraries#run [domain]
+
+* **************************************************************
+* --------- Setup and run emc/ems&jet pams -------------*
+   
+* open input g2t data file
+  exec input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
+
+  if STAF_STATUS(1).eq.0 goto ENDOFDATA
+  
+* open output ntuple
+  exec write_table_to_ntuple#init_disk [funit] [nfile]  
+   
+* --------------------- initialization ----------------------------*
+  
+  exec create_tables_emc#ems
+  exec create_tables_emc#jet
+  
+  exec init_ems#init
+  exec init_jet#init
+  
+  
+* ------------------- process events ------------------------------*
+
+* read event and then process thru simulator
+  do i=1,[num_events]
+    message ' run_emc: processing event ' [i]
+* clear all event tables
+    tabclear [event]
+* read input file
+    exec input_g2t_file#read
+    if STAF_STATUS(1).eq.0 goto ENDOFDATA
+* do simulation
+    exec run_ems#ems_interface2
+* do jet finding
+    if [jetfind].eq.yes then
+      exec run_jet#egrid
+      exec run_jet#erj
+    endif
+* write table to ntuple
+    exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
+  enddo
+
+  
+* -------------------- end stuff -----------------------------*
+  
+  ENDOFDATA:
+  if [i].lt.[num_events] then
+    message ' End of input file'
+  endif  
+
+* close ntuple
+  message ' close ntuple'
+  exec write_table_to_ntuple#close_disk [funit] [nid]
+
+* close input file
+  message ' close input file'
+  exec input_g2t_file#close
+
+return
+ 
+************************************************************************
+
+

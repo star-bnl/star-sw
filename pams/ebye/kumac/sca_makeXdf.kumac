@@ -1,0 +1,115 @@
+* sca_makeXdf.kumac
+* written by L.D. Carr -- lcarr@u.washington.edu
+* and D. Weerasundara -- dhammika@gibbs.npl.washington.edu
+* ----------------------------------------------------------------
+* This kumac makes .xdf files for the constant tables used in the
+* sca package: sca_const.idl, sca_filter_const.idl, sca_switch.idl
+* ----------------------------------------------------------------
+* 8/7/98 LDC
+*	1.  modified to accomodate new switches
+*	2.  added a macro to initialize calibration xdf file
+* 8/10/98 LDC
+*	1.  changed to write out 2 calibration xdf files
+*	    so that prior and ensemble_ave can be worked on
+*	    independently
+*------------------------------------------------------
+macro params TOP=./.
+
+  macro/global/create TOP              [TOP]
+  macro/global/import *
+
+  exec $STAR/kumacs/util/setup_defaults 
+  exec setup#setup
+  macro/global/import *
+
+* load idl tables
+  tdm/types/load ./pams/ebye/idl/sca_const.idl
+  tdm/types/load ./pams/ebye/idl/sca_filter_const.idl
+  tdm/types/load ./pams/ebye/idl/sca_switch.idl
+
+* make directory structure
+  cd [params]/ebye
+  mkdir sca
+  cd sca
+
+* make tables
+  tdm/newtable	sca_const		sca_const		1
+  tdm/newtable	sca_switch		sca_switch		1
+  tdm/newtable	sca_filter_const	sca_filter_const	1
+
+* set nok = 1 for the SCA pamameter tables.
+  tdm/table/rowcount	sca_const           1
+  tdm/table/rowcount	sca_filter_const    1
+  tdm/table/rowcount	sca_switch          1
+
+* load sca_filter_const & sca_const
+  exec sca_filter_const
+  exec sca_const
+  exec sca_switch
+
+* write from staf tables to xdf
+  cd /dui
+  exec write_table_to_file#init  SCACONST  ./params/ebye/sca_params.xdf 
+  exec write_table_to_file#write SCACONST   [params]/ebye/sca
+  exec write_table_to_file#close SCACONST
+
+return
+*------------------------------------------------------
+
+*------------------------------------------------------
+macro prior TOP=./.
+
+  macro/global/create TOP              [TOP]
+  macro/global/import *
+
+  exec $STAR/kumacs/util/setup_defaults 
+  exec setup#setup
+
+* load idl tables
+  tdm/types/load ./pams/ebye/idl/sca_prior.idl
+
+* make tables
+  cd [calib]/ebye/sca_prior_dir
+  tdm/newtable	sca_prior		sca_prior		300000
+
+* set nok for the SCA calibration tables.
+  tdm/table/rowcount	sca_prior           300000
+
+* write from staf tables to xdf
+  cd /dui
+  exec write_table_to_file#init  SCAPRIOR  ./calib/ebye/sca_prior.xdf 
+  exec write_table_to_file#write SCAPRIOR   [calib]/ebye/sca_prior_dir
+  exec write_table_to_file#close SCAPRIOR
+
+return
+*------------------------------------------------------
+
+macro ensemble TOP=./.
+
+  macro/global/create TOP              [TOP]
+  macro/global/import *
+
+  exec $STAR/kumacs/util/setup_defaults 
+  exec setup#setup
+
+* load idl tables
+  tdm/types/load ./pams/ebye/idl/sca_out.idl
+
+* make tables
+  cd [calib]/ebye/sca_ensemble_dir
+  tdm/newtable	sca_ensemble_ave	sca_out			1
+
+* set nok for the SCA calibration tables.
+  tdm/table/rowcount	sca_ensemble_ave    1
+
+* zero out sca_ensemble_ave table
+  exec sca_ensemble_ave
+
+* write from staf tables to xdf
+  cd /dui
+  exec write_table_to_file#init  SCAENSEMBLE  ./calib/ebye/sca_ensemble.xdf 
+  exec write_table_to_file#write SCAENSEMBLE   [calib]/ebye/sca_ensemble_dir
+  exec write_table_to_file#close SCAENSEMBLE 
+
+return
+*------------------------------------------------------

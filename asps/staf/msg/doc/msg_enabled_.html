@@ -1,0 +1,28 @@
+<pre><h3>	int	msg_enabled_</h3></pre>
+<pre>
+( const char *Prefix, int *ID, int length )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	LOGICAL FUNCTION		MSG_Enabled( Prefix, ID )
+
+*  Input:
+	CHARACTER*(*) Prefix !A message prefix.
+
+*  Input/Output:
+	INTEGER ID     !Message ID.  Set to zero by caller 
+                       !before first call, set on first call by
+                       !looking up or entering the prefix contained in MSG
+                       !(prefix is everything before the first space) in
+	               !the index of message prefixes.
+	               !If ID is negative, ID remains unchanged, and lookup
+	               !is then always by prefix.
+
+*  Description:  Return enabled-status for a prefix;  define new prefix "enabled".
+	Returns the message-display-enabled-status for the message
+	with stored prefix Prefix, message-index ID.  If the message is not
+	defined, it is defined and enabled, with counting turned on.
+
+*  Return conditions:
+	.TRUE. if the message is enabled (active),
+	.FALSE. if the message is disabled (inactive).
+*/
+</pre>

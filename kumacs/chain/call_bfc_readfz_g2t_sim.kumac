@@ -1,0 +1,21 @@
+* 9/14/98 K. Turner (for 98h)
+* Run BFC in following manner:
+* - read in fz file
+* - run g2t
+* - run tpc (tss) & svt (srs) simulation
+* - write out xdf file
+*  
+* 
+ exec $STAR/kumacs/chain/bfc _
+   TOP=$STAR _
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   gstar_settings=' field_only' _
+   domain=' geometry g2t tpc svt ' _
+   chain=' fzin rg2t tpg svg tss srs evout' _
+   first=1 _
+   no_events=1 _
+ input_data_file=/net/rmds03/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/Gstardata/set100/set100_01_45evts.fz _
+   output_file=set100_01_g2t_sim.xdf
+   log=bfc_g2t_sim.log
+

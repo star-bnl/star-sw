@@ -1,0 +1,25 @@
+<pre><h3>	void	msg_to_lun_</h3></pre>
+<pre>
+( const char *msg, int *Lines, int *LUN, int *ID, int msglen )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	SUBROUTINE			MSG_to_LUN( msg, Lines, LUN, ID )
+
+*  Inputs:
+	CHARACTER*(*) msg(*) !1 or more line character-string message
+	                     !submitted for display.
+	INTEGER Lines  !Number of lines in msg.
+	INTEGER LUN    !Fortran logical unit number for msg to be sent to.
+
+*  Input/Output:
+	INTEGER ID     !A message ID.  Set to zero by caller 
+                       !before first call, set by Message on first call by
+                       !looking up or entering the prefix contained in msg
+                       !(prefix is everything before the first space) in
+	               !the index of message prefixes.
+	               !If ID is negative, ID remains unchanged, and lookup
+	               !is then always by prefix.
+
+*  Description:  Write a message to a Fortran LUN, if enabled.
+	Conditionally display & count a message MSG, containing LINES lines on LUN.
+*/
+</pre>

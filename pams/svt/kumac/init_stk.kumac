@@ -1,0 +1,105 @@
+* editted June 4, 1998 by Kathy Turner
+* 8/10/98 K. Turner
+* *************************************************************************
+**************************************************************************
+* This kumac initializes the STK (Svt Tracker) modules
+**************************************************************************
+**************************************************************************
+* This section sets up the svt tracker control table stkpar
+* the best values for primaries are: 
+*     look for primaries ------------> stkpar.mode=1
+*     include vertex in fit ---------> stkpar.method=1
+*     initial tracking cone size ----> stkpar.th_init=.5
+*     final cone size         -------> stkpar.th_max=10.0
+*     number of iterations ----------> stkpar.nitermax=7
+*     cut on chisq ------------------> stkpar.chicut=60.
+*     filter out large chisqs -------> stkpar.chi_filter=1
+*     mark used space points --------> stkpar.spt_mark=1
+*     remove redundent short tracks -> stkpar.long_tracks=1 
+*****************************************************************
+
+ macro read
+   
+ macro/global/import *
+  
+  message 'init_stk'
+  
+ cd [params]/svt
+ 
+   
+  dio/newfilestream    stk_par $STAR/params/svt/stk_pars.xdf r
+  dio/stream/getevent  stk_par
+  dio/stream/close     stk_par
+  
+  soc/object/oid stk_par 
+  oid = staf_result(1) 
+  soc/deleteoid [oid]
+
+  cd /dui
+  
+ return
+ 
+* ********************************************************
+ 
+ macro init
+   macro/global/import *
+ return
+ 
+
+* ******************************************************
+
+* for stk_stkpar ---------
+ 
+* mode 1 = primaries
+* mode 2 = secondaries
+* mode 3 = primaries to secondaries
+* method = 1 use main vertex in fits
+* method = 2 do not use main vertex in fits
+* fill = 0 do not do standard tracking
+* fill = 1 do standard tracking
+* direct = 0 do not do perfect tracking
+* direct = 1 do perfect tracking with fit
+* direct = 2 do perfect trackinf without fit, mtm from mc info
+* nlayers = 3 three layer svt
+* nlayers = 4 four layer svt
+* normalization factor for chi: chi --> chi/[norm(1)+norm(2)*exp(norm(3)*pt)]
+* The idea here is to take the transverse
+* momentum dependence out of the chisqr.
+* (if resolution is changed from 20 mic then
+* norm(1) will need to be adjusted)
+* c1norm is for the x-y fit, c2 norm is for the phi z fit
+* vertex = 0 do not smear main vertex
+* vertex = 1 smear main vertex
+* chibreak is not used anymore
+* chicut(1) is the maximum chi for the xy fit
+* chicut(2) is the maximum chi for the z-phi fit
+* chi_filter = 0 do not apply chi**2 cuts
+* chi_filter = 1 do apply chi**2 cuts
+* spt_mark=0 use space points more than once
+* spt_mark=1 use space points only  once
+* long_tracks=0 do not remove short tracks which are subsets of longer tracks
+* long_tracks=1 do remove short tracks which are subsets of longer tracks
+* th_init = initial cone angle
+* th_max = maximum cone angle
+* nitermax = maximum number of iterations
+* niternull = maximum number of iterations allowed to find no tracks
+* sec_factor = factor for cone angle for secondaries
+
+ 
+* for stk_filler -------
+* wth = Cone angles for wafer search
+* (not to be changed by casual user!)
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+

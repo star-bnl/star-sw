@@ -1,0 +1,13 @@
+/* vectors.idl */
+
+struct vectors {
+        short bShorts[3];
+        unsigned short bUshorts[3];
+        long bLongs[3];
+        unsigned long bUlongs[3];
+        char bChars[3];
+        octet bOctets[3];
+        float bFloats[3];
+        double bDoubles[3];
+};
+

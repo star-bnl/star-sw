@@ -1,0 +1,18 @@
+<pre><h3>	int	msg_set_from_file_</h3></pre>
+<pre>
+( int *LUN )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	LOGICAL FUNCTION		MSG_Set_From_File( LUN )
+
+*  Input:
+	INTEGER LUN !Fortran Logical Unit Number, on which a command (ASCII)
+	            !file should be (already) open.
+
+*  Description:  ASCII-file command interface to control msg.
+	Reads lines from LUN and interprets them as Msg_Set_By_Command commands
+	until either an <EOF> or a line containing MSG_EXIT is encountered.
+
+  Returns:
+	TRUE for successful completion of command,
+	FALSE for failure.                                                    */
+</pre>

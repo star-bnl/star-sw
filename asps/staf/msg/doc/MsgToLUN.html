@@ -1,0 +1,30 @@
+<pre><h3>	void	MsgToLUN</h3></pre>
+<pre>
+(
+	
+/*  Inputs:                                                                                    */
+	  const char *msg /* 1 or more line character-string message
+	                     submitted for display;  lines separated by "newline" characters.  */
+	, int       LUN   /* FORTRAN logical unit number for time-stamp to be written on.      */
+
+/*  Input/Output:                                                                        */
+	, int *ID ) /* STAR-standard message ID.  Set to zero by caller 
+                       before first call, set by MESSAGE on first call by
+                       looking up or entering the prefix contained in MSG
+                       (prefix is everything before the first space) in
+	               the index of STAR-standard message prefixes.
+	               If ID is negative, ID remains unchanged, and lookup
+	               is then always by prefix.                                         */
+{
+/* Description:  Compatibility routine -- don't use in new code.
+	             ---->  Use MsgToFile instead.  <----
+	Conditionally display & count a message MSG, containing LINES lines
+	of up to 132 characters each, on LUN.
+
+	Note that unlike the FORTRAN message call, there is no "Lines" argument;
+	lines are defined with "\n" (newline) characters.
+	However, unlike standard C practice, the caller should NOT include a "\n" at
+	the very end, since this interfaces to FORTRAN, which effectively puts a
+	"\n" at the very end.  msg may have as many newlines as desired.
+*/
+</pre>

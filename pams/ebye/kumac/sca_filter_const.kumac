@@ -1,0 +1,19 @@
+* sca_filter_const.kumac
+* written by L.D. Carr -- lcarr@u.washington.edu
+* and D. Weerasundara -- dhammika@gibbs.npl.washington.edu
+*
+* last run under sl98f 8/7/98
+*
+* this file is used to initialize the values in the sca_filter_const
+* table -- it runs with sca_makeXdf.kumac
+* -------------------------------------------------------------
+
+
+  tdm/table/cell/putvalue 'sca_filter_const[0].pointsPerTrack'  10
+  tdm/table/cell/putvalue 'sca_filter_const[0].minPT'	          0.0	
+  tdm/table/cell/putvalue 'sca_filter_const[0].maxPT'            2.0
+  tdm/table/cell/putvalue 'sca_filter_const[0].minY'            -1.0	
+  tdm/table/cell/putvalue 'sca_filter_const[0].maxY'             1.0
+  tdm/table/cell/putvalue 'sca_filter_const[0].InversSlope'      0.5  
+  tdm/table/cell/putvalue 'sca_filter_const[0].nGoodTraks'      50
+ 

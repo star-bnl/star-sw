@@ -1,0 +1,29 @@
+<pre><h3>LOGICAL FUNCTION		MSG_Enabled( PREFIX, ID )</h3>
+
+
+*  Input:
+	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
+
+*  Input/Output:
+	INTEGER ID     !STAR-standard message ID.  Set to zero by caller 
+                       !before first call, set on first call by
+                       !looking up or entering the prefix contained in MSG
+                       !(prefix is everything before the first space) in
+	               !the index of STAR-standard message prefixes.
+	               !If ID is negative, ID remains unchanged, and lookup
+	               !is then always by prefix.
+
+*  Outputs: none
+
+*  Brief description:  Return enabled-status for a prefix;  define new prefix "enabled".
+
+*  Description:
+*	Returns the message-display-enabled-status for the STAR-standard message
+*	with stored prefix PREFIX, message-index ID.  If the message is not
+*	defined, it is defined and enabled, with counting turned on.
+
+*  Return conditions:
+*	.TRUE. if the message is enabled (active),
+*	.FALSE. if the message is disabled (inactive).
+
+</pre>

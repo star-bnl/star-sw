@@ -1,0 +1,20 @@
+* 9/14/98 K. Turner (for 98h)
+* Run BFC in following manner:
+* - read in g2t file
+* - run tpc slow sim & clustering
+* - run tpc tracking
+* - write xdf file containing full directories
+
+ exec $STAR/kumacs/chain/bfc _
+   TOP=$STAR _
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   gstar_settings=' field_only' _
+   domain=' geometry tpc ' _
+   chain='  g2tin tpg tss tcl tcl_e tpt tid tte_e evout' _
+   skip=0 _
+   first=1 _
+   no_events=1 _
+   input_data_file=$AFS_RHIC/star/data/samples/auau_central_hijing.xdf _
+   output_file=bfc_tpc_slow_sim_out _
+   log =bfc_tpc_slow_sim.log

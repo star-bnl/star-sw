@@ -1,0 +1,31 @@
+/*        rl0.idl
+ *
+ *        description: Trigger Level 0 simulator analysis module
+ */
+
+#include "PAM.idl"
+#include "ctg_geo.idl"
+#include "mwc_geo.idl"
+#include "ctu_raw.idl"
+#include "mwc_sector.idl"
+#include "mwc_raw.idl"
+#include "rl0_ctrl.idl"
+#include "rl0_data.idl"
+#include "rl0_ctbcal.idl"
+#include "rl0_mwccal.idl"
+
+interface rl0: amiModule {
+        STAFCV_T call
+                ( inout ctg_geo      ctb_geo
+                , inout mwc_geo      mwc_geo
+                , inout ctu_raw      ctb_raw
+                , inout mwc_sector   mwc_sector
+                , inout mwc_raw      mwc_raw
+                , inout rl0_ctrl     ctr
+                , inout rl0_data     L0
+                , inout rl0_ctbcal   ctbcal
+                , inout rl0_mwccal   mwccal
+                );
+};
+/* Last mod. for mws.idl: $Date: 1998/02/17 17:09:32 $ */
+

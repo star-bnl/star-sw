@@ -1,0 +1,18 @@
+/* energy_to_adc		OGAWA, Akio */
+
+#include "PAM.idl"
+#include "ems_control.idl"
+#include "ems_cal_control.idl"
+#include "emc_pedestal.idl"
+#include "emc_adcslope.idl"
+#include "emc_adc.idl"
+
+interface energy_to_adc : amiModule {
+	STAFCV_T call
+         (in ems_control      ems_control
+         ,in ems_cal_control  ems_cal_control
+      	 ,in emc_pedestal     emc_pedestal
+	 ,in emc_adcslope     emc_adcslope
+	 ,out emc_adc         emc_adc
+	);
+};

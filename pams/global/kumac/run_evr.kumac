@@ -1,0 +1,23 @@
+macro run
+
+ macro/global/import *
+
+ message 'run_evr: calling evr_am'
+
+ ami/mod/call evr_am _
+        [params]/global/evrpars/evr_evrpar _
+        [data]/tpc/tracks/tptrack  _
+        [data]/svt/tracks/stk_track _
+        [dst]/globtrk _ 
+        [data]/global/tracks/evt_match _
+        [dst]/vertex
+
+if ( staf_status(1) .ne. STAFCV_OK) then
+     message 'Problem on return from EVR_AM'
+endif
+
+message ' finished calling evr_am'
+
+
+return
+********************************************************

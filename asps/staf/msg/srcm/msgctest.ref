@@ -1,0 +1,27 @@
+28-Jan-98 19:56:03 EST  [mpsgi01]  Elapsed:    0 00:00:00  CPU:    0 00:00:00.00 
+msgTest-O6  Once    #6
+msgTest-O6 Disabled -- count limit reached
+msgTest-I1  Message #1
+msgTest-O4  Once    #4
+msgTest-I7  Message #7
+msgTest-O4 Disabled -- count limit reached
+msgTest-I1  Message #1
+msgTest-T2  Trace   #2
+msgTest-I7  Message #7
+msgTest-I1  Message #1
+msgTest-I7  Message #7
+
+             --- Message Accounting Summary --- (28-Jan-98 19:56:03 EST )
+Message-Prefix & Truncated Sample of last occurance                  Counts   Counts/evt      Limit    Lookups  AbortLimit    State
+
+msgTest-C3  Count   #3 . . . . . . . . . . . . . . . . . . . .  |  . . .  3  . .  1.0000 . . . .  0  . . . . 0 . . . . . 0 Counting 
+msgTest-I1  Message #1 . . . . . . . . . . . . . . . . . . . .  |  . . .  3  . .  1.0000 . . . .  0  . . . . 0 . . . . . 0  Active  
+msgTest-I7  Message #7 . . . . . . . . . . . . . . . . . . . .  |  . . .  3  . .  1.0000 . . . .  0  . . . . 2 . . . . . 0  Active  
+msgTest-O4  Once    #4 . . . . . . . . . . . . . . . . . . . .  |  . . .  3  . .  1.0000 . . . .  1  . . . . 0 . . . . . 0 Counting 
+msgTest-O6  Once    #6 . . . . . . . . . . . . . . . . . . . .  |  . . 1027  .  342.3333 . . . .  1  . . . . 0 . . . . . 0 Counting 
+msgTest-T2 . . . . . . . . . . . . . . . . . . . . . . . . . .  |  . . .  2  . .  0.6667 . . . .  0  . . . . 2 . . . . . 0 Counting 
+
+             --- CPU Usage Summary --- (28-Jan-98 19:56:03 EST )
+Message-Prefix & Truncated Sample of last occurance              Total CPU Usage     Avg CPU Usage       Counts   Lookups
+
+msgTest-O4  Once    #4 . . . . . . . . . . . . . . . . . . . .  |  . .  0.010000  |  . .  0.003333 . . . . . 3 . . . .  0           

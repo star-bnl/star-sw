@@ -1,0 +1,13 @@
+* editted 6/5/98 Kathy Turner
+* 
+* ***************************************************************
+* Sets up STAR STAF directroy tree .
+
+MESSAGE ********************************
+MESSAGE *** Setting up directory tree **
+MESSAGE ********************************
+exec setup#dir 
+**************************************************
+
+
+

@@ -1,0 +1,128 @@
+<HTML>
+<PRE>
+<H2>file: ami/src/ami_init.cc</H2>
+
+
+//:Copyright 1995, Lawrence Berkeley National Laboratory
+//:&gt;--------------------------------------------------------------------
+//:FILE:	ami_init.C
+//:DESCRIPTION:	Functions  to initialize <A HREF="ami_macros.h.html#AMI">AMI</A> 
+//:AUTHOR:	cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:	-- STILL IN DEVELOPMENT --
+//:HISTORY:	08dec95-v000a-cet- creation
+//:&lt;--------------------------------------------------------------------
+
+#include "<A HREF="ami_macros.h.html">ami_macros.h</A>"
+#include "<A HREF="ami_types.h.html">ami_types.h</A>"
+#include "<A HREF="amiClasses.hh.html">amiClasses.hh</A>"
+#include "<A HREF="ami_globals.h.html">ami_globals.h</A>"
+
+amiBroker *ami;
+extern CC_P int <A HREF="ami_load.cc.html#ami_load">ami_load(</A>amiBroker* broker); //automatically generated
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#ami_init">ami_init(</A>)
+//:DESCRIPTION:	Initialize <A HREF="ami_macros.h.html#AMI">AMI</A>
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="ami_init">ami_init(</A>)</B>
+{
+   EML_MESSAGE("Initializing <A HREF="ami_macros.h.html#AMI">AMI</A>.");
+
+/*- Define the <A HREF="ami_macros.h.html#AMI">AMI</A> KUIP commands. -*/
+   ami_def_();
+
+   return TRUE;
+}
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#ami_start">ami_start(</A>)
+//:DESCRIPTION:	Start <A HREF="ami_macros.h.html#AMI">AMI</A>
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="ami_start">ami_start(</A>)</B>
+{
+   EML_MESSAGE("Starting <A HREF="ami_macros.h.html#AMI">AMI</A>.");
+
+/*- Create the <A HREF="ami_macros.h.html#AMI">AMI</A> Broker. -*/
+   ami = new <U>amiBroker(</U>"ami");        //OVERLOAD CALL: amiBroker: <A HREF="amiClasses.cc.html#amiBroker">amiClasses.cc(?)</A>, <A HREF="amiClasses.cc.html#amiBroker">amiClasses.cc(?)</A>
+
+/*- Load all the amiInvokers for this Broker. -*/
+   return <A HREF="ami_load.cc.html#ami_load">ami_load(</A>ami);
+}
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#ami_stop">ami_stop(</A>)
+//:DESCRIPTION:	Stop <A HREF="ami_macros.h.html#AMI">AMI</A>
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="ami_stop">ami_stop(</A>)</B>
+{
+   EML_MESSAGE("Stopping <A HREF="ami_macros.h.html#AMI">AMI</A>.");
+
+/*- Delete the <A HREF="ami_macros.h.html#AMI">AMI</A> Broker.
+   delete ami;
+unecessary -- soc will do it. -*/
+
+   return TRUE;
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

@@ -1,0 +1,40 @@
+/*  dst_track.idl              */
+/*  Table: dst_track           */
+
+/*   Comment: Parameters are given in the global STAR reference system. 
+ *            The track parameters are given at various positions depending
+ *            on the instantiation of this table. 
+ */
+
+ struct dst_track  {
+  long       id;               /* Primary key                            */
+  short      iflag;            /* bitmask quality information            */
+  short      det_id;           /* detector id                            */
+  short      n_point;          /* number of points                       */
+                               /* SVT, TPC, FTPC component #s are packed */
+  short      n_max_point;      /* maximum number of points possible      */
+                               /* SVT, TPC, FTPC component #s are packed */
+  short      n_fit_point;      /* number of points used in fit           */
+                               /* SVT, TPC, FTPC component #s are packed */
+  short      icharge;          /* Particle charge in units of |e|        */
+  float      x0;               /* x-coord. at start                      */
+  float      y0;               /* y-coord. at start                      */
+  float      z0;               /* z-coord. at start                      */
+  float      psi;              /* momentum angle at start                */
+  float      tanl;             /* tan(dip) =pz/pt at start               */
+  float      invpt;            /* 1/pt at start                          */
+  float      covar_diag[5];    /* covariance matrix, diagonal elements   */
+  float      chisq[2];         /* Chi-square for fit in x-y & path-z     */
+  float      x_first[3];       /* coord. of first measured point         */
+  float      x_last[3];        /* coord. of last measured point          */
+  float      length;           /* track length from first to last point  */
+  float      impact;           /* impact parameter from primary vertex   */
+  long       ndegf;            /* no. deg. of freedom for track fit.     */ 
+  long       id_global_pid;    /* F.key to global PID table              */
+  long       id_hypo_pid;      /* F.key to PID hypothesis table          */
+  long       id_start_vertex;  /* F.key to dst_vertex for starting vrtx. */
+  long       id_stop_vertex;   /* F.key to dst_vertex for stopping vrtx. */
+  long       id_emc;           /* F.key to EMC tower energy table        */
+  long       id_smd;           /* F.key to SMD energy table              */
+ } ;
+/*  Last mod. for dst_track:   $Date: 1998/06/03 22:26:50 $ */

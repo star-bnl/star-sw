@@ -1,0 +1,31 @@
+ macro init 
+   macro/global/import *
+   cd [params]/emc/cal
+   
+   tdm/newtable ems_cal_control ems_cal_control 1
+   tdm/table/rowcount ems_cal_control 1
+   tdm/table/cell/putvalue 'ems_cal_control[0].det'                1
+   tdm/table/cell/putvalue 'ems_cal_control[0].iseed'              0
+   tdm/table/cell/putvalue 'ems_cal_control[0].ped_channel'        30
+   tdm/table/cell/putvalue 'ems_cal_control[0].ped_var'            20
+   tdm/table/cell/putvalue 'ems_cal_control[0].slope_fun'          1
+   tdm/table/cell/putvalue 'ems_cal_control[0].slope_ave'          1.0
+   tdm/table/cell/putvalue 'ems_cal_control[0].slope_var'          0.1
+   tdm/table/cell/putvalue 'ems_cal_control[0].ped_width'          2.0
+   tdm/table/cell/putvalue 'ems_cal_control[0].toy_sim_mode'       0.0
+   tdm/table/cell/putvalue 'ems_cal_control[0].noise_level'        0.05
+   tdm/table/cell/putvalue 'ems_cal_control[0].noise_width'        1.0
+   tdm/table/cell/putvalue 'ems_cal_control[0].gaus_peak'          1.5
+   tdm/table/cell/putvalue 'ems_cal_control[0].gaus_width'         0.1
+   tdm/table/cell/putvalue 'ems_cal_control[0].occupancy'          0.5
+   
+   tdm/newtable emc_adc_hist_control emc_adc_hist_control 1
+   tdm/table/rowcount emc_adc_hist_control 1
+   tdm/table/cell/putvalue 'emc_adc_hist_control[0].det'           1
+   tdm/table/cell/putvalue 'emc_adc_hist_control[0].init'          0
+   tdm/table/cell/putvalue 'emc_adc_hist_control[0].min'           0
+   tdm/table/cell/putvalue 'emc_adc_hist_control[0].max'           256
+   tdm/table/cell/putvalue 'emc_adc_hist_control[0].nbin'          256
+   tdm/table/cell/putvalue 'emc_adc_hist_control[0].id_base'       0
+ return
+ 

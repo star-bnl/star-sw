@@ -1,0 +1,18 @@
+/* emc_egrid.idl		OGAWA, Akio */
+
+#include "PAM.idl"
+#include "ems_hits_bemc.idl"
+#include "ems_hits_eemc.idl"
+#include "dst_track.idl"
+#include "ems_control.idl"
+#include "emc_energy.idl"
+
+interface emc_egrid : amiModule {
+	STAFCV_T call
+        ( in ems_hits_bemc ems_hits_bemc
+        , in ems_hits_eemc ems_hits_eemc
+        , in dst_track dst_track
+        , in ems_control ems_control
+        , out emc_energy emc_energy
+	);
+};

@@ -1,0 +1,47 @@
+<pre><h3>	void	MsgClassDefine</h3></pre>
+<pre>
+(
+
+/*   Inputs:                                                                                */
+	  const char *Class  /* The message class -- generally, one character               */
+	, const char *State  /* Default state for messages in this class:                   */
+	                     /* "Active", "Count" or "Inactive".                            */
+	, int   CountLimit   /* Default count-limit for this class.                         */
+	, int   AbortLimit ) /* Default count-limit for this class.                         */
+
+{
+/* Description:  Define a new msg class (of prefixes).
+	Each msg prefix is assigned to a class according to this scheme:
+
+	     * If the prefix contains a "-", its class is the first character
+	       after the "-", if non-blank.
+
+	     * If the prefix ends with a "-" or has no "-", it is assigned
+	       to the null class.
+
+	The MSG class to which a prefix is assigned is used (soley) for the
+	purpose of setting the prefix's state and limits (count and abort).
+	Classes permit the assignment of a variety of default MSG states
+	and counts for diffent groups of messages.  The predefined MSG
+	classes are these:
+
+	Class Description            State    Count Limit    Abort Limit
+
+	 ""   No-class message       Active       50            None
+	  A   Abort message          Active      None        Abort on 1st (msg abort)
+	  B   Bug message            Active      None           None
+	  C   Count-only message   Counting      None           None
+	  D   Debug message          Active      None           None (Often the 1st incarnation of a T class)
+	  E   Error message          Active       20            None
+	  F   Fatal message          Active      None           None (Application abort)
+	  I   Informative message    Active      None           None
+	  O   Once-only message      Active        1            None
+	  T   Trace message        Inactive      None           None
+	  W   Warning message        Active       10            None
+
+	These can be changed or new classes added with a call to this routine.
+
+	Conditionally display a message msg on standard out and the journal,
+	if enabled by a call to MsgJournalOn.  The message is displayed
+	unless disabled.  The message is counted unless counting is disabled.  */
+</pre>

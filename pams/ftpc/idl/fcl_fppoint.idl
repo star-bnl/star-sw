@@ -1,0 +1,39 @@
+/*****************************************************************************/
+
+/*   fcl_fppoint.idl
+*
+*   Table: fcl_fppoint
+*        description: Output of fcl FTPC cluster finder
+*
+*/
+
+   /*******************  Row struct *******************/
+   struct fcl_fppoint {    
+       long      row;      /* FTPC row number */
+       long      sector;   /* FTPC readout sector number */
+       long      n_pads;   /* number of pads in cluster */
+       long      n_bins;   /* number of consecutive timebins in cluster*/
+       long      max_adc;  /* cluster peak height (adc channels) */
+       long      charge;   /* cluster charge (adc channels) */
+       long      flags;    /* bit0:unfolded, bit1:unfold failed, */
+                           /* bit2: saturated, bit3:bad shape, */
+                           /* bit4:cut off, bit5:tracked */
+       float     x;        /* x-position of hit */
+       float     y;        /* y-position of hit */
+       float     z;        /* z-position of hit */
+       float     s_phi;    /* cluster sigma in pad direction */
+       float     s_r;      /* cluster sigma in drift direction */
+    };
+
+/*  Last mod. for fcl_fppoint: $Date: 1998/02/23 14:32:57 $ */
+
+
+
+
+
+
+
+
+
+
+

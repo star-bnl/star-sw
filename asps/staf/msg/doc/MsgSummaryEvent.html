@@ -1,0 +1,16 @@
+<pre><h3>	void	MsgSummaryEvent</h3></pre>
+<pre>
+(
+
+/*  Inputs:   */
+	  int LUN       /* Device on which the summary is output.  */
+	, int Nevents ) /* Number of events by which to normalize. */
+{
+/* Description:  Compatibility routine -- don't use in new code.
+	             ---->  Use MsgSummaryEventFile instead.  <----
+	Generate an MSG summary table with a frequency column.
+	Include a column of normalized occurances of each message,
+	which consists of a column of the number of occurances of each
+	message, divided by Nevents.  If Nevents is not positive, then the
+	column is omitted.  */
+</pre>

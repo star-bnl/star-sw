@@ -1,0 +1,17 @@
+<pre><h3>	void	msg_summary_cpu_</h3></pre>
+<pre>
+( int *LUN )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	SUBROUTINE			MSG_Summary_CPU( LUN )
+
+*  Input:
+	INTEGER LUN !Device on which the summary is output.
+
+*  Description:  Generate a CPU-usage msg-summary table.
+	Output a CPU-usage summary of the MSG-handled & marked messages
+	on the specified LUN.  "Marked" messages are messages whose occurances
+	were preceded, one-for-one, by calls to MSG_Mark, with the same
+	msg prefix.
+	LUN = 0 refers to the journal file, LUN = 6 is standard out.
+*/
+</pre>

@@ -1,0 +1,49 @@
+//   l3t_tpc_para 
+// Controls l3t_tpc
+//
+struct l3t_tpc_para {
+   short      infoLevel    ;     // level of print info about progress
+   short      FirstSector  ;     // First Sector to be processed
+   short      LastSector   ;     // Last  Sector to be processed (0=all)
+   float      ErrorScaleSz ;     // Error Scale for sz plane
+   float      ErrorScaleXy ;     // Error Scale for xy plane
+   float      Phimin       ;     // Minimum phi angle in degrees
+   float      Phimax       ;     // Maximum phi angle in degrees
+   long       PhiSlices    ;     // Number of phi slices
+   float      Etamin       ;     // Minimum Rapidity
+   float      Etamax       ;     // Maximum Rapidity
+   long       EtaSlices    ;     // Number of rapidity slices
+   float      BField       ;     // Magnetic field in Teslas
+   short      SFitSz       ;     // Flag to turn on(1)/off sz fit
+   short      SPhiClosed   ;     // Flat to inform program whether phi is close(1) or open
+   float      SDPhiLimit   ;     // Range of hit search in phi
+   float      SDEtaLimit   ;     // Range of hit search in rapidity
+   float      SChi2Cut     ;     // Cut for new hit chi2
+   float      SGoodChi2    ;     // Shortcut for really good new hit chi2s
+   float      SGoodDistance;     // Shortcut for good distance of new hit
+   float      SChi2TrackCut;     // Cut on track chi2
+   long       NPrimaryLoops ;    // Number of iterations reconstructing primaries
+   long       NSecondaryLoops;   // Number of iterations reconstructing secondaries
+   long       InnerMostRow ;     // Inner most row to process
+   long       OuterMostRow ;     // Outer most row to process
+   long       SMinimumHitsPerSegment;  // Minimum number of hits required for a track segment
+   long       SMinimumHitsPerTrack;    // Minimum number of hits required for a track
+   long       SMaxSearchPadrowsTrack;  // Maximum number of padrows without hits for a track
+   long       SMaxSearchPadrowsSegment;// Maximum number of padrows without hits for a segment
+   short      MergePrimaries ;   // Flag to turn on(1)/off merging of primary tracks
+   long       NumberOfPsiSlices ;// Number of psi slices for merger
+   long       NumberOfTanLSlices;// Number of TanL slices for merger
+   float      MinSlicePsi  ;     // Minimum psi value for merger
+   float      MaxSlicePsi  ;     // Maximum psi value for merger
+   float      MinSliceTanL ;     // Minimum Tanl value for merger
+   float      MaxSliceTanL ;     // Maximum Tanl value for merger
+   float      SDPsiMaxMerge ;    // Maximum psi  distance to merge primaries
+   float      SDTanlMaxMerge ;   // Maximum tanl distance to merge primaries
+
+   float      sectorPhiMin[24];   //  Phi Min for each sector
+   float      sectorPhiMax[24];   //  Phi Max for each sector
+   float      sectorEtaMin[24];   //  Eta Min for each sector
+   float      sectorEtaMax[24];   //  Eta Max for each sector
+   float      sectorPhiShift[24]; //  Phi shift when calculating phi for space points
+};
+

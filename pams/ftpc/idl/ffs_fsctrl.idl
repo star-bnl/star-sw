@@ -1,0 +1,17 @@
+/*   ffs_fsctrl.idl
+*    Table type: ffs_fsctrl
+*        description: FFS control switches                    
+*/
+
+   struct ffs_fsctrl {  
+       long      bipass;     /* bipasses event processing (0 = off) */
+       long      evmerg;     /* number of events to merge */
+       long      fold;       /* event folding factor (2, 4, or 8) */
+       long      init;       /* flag to initialize XFS (0 = initialize) */
+       long      nevent;     /* number of output events required */
+       long      ppflag;     /* pp event merging mode */
+       long      print;      /* controls diagnostic prints (0 = off) */
+   };
+
+/*  Last mod. for ffs_fsctrl:   $Date: 1998/01/19 02:25:12 $ */
+

@@ -1,0 +1,26 @@
+ struct g2t_run {          /* G2t_run */ 
+       char      author[80]; /* username of author */
+       char      eg_name[32];/* Event generator name */
+       char      machine[80];/* contains uname -a */
+       long      date;       /* Creation date */
+       long      east_a;     /* east beam mass number */
+       long      east_z;     /* east beam proton number */
+       long      eg_rndm[2]; /* Event generator initial random seeds */
+       long      eg_run;     /* Event generator run number */
+       long      event_mixing[5];/* info on event mixing - to be specified */
+       long      events_ordered;/* requested number of events (>= actual) */
+       long      ge_rndm[2]; /* GEANT inital random seeds */
+       long      ge_run;     /* GEANT run number */
+       long      generator;  /* Event generator id */
+       long      is_minbias; /* flag if minimum bias run */
+       long      reserved[5];/* Reserved for future applications */
+       long      time;       /* Creation time */
+       long      west_a;     /* west beam mass number */
+       long      west_z;     /* west beam proton number */
+       float     b_max;      /* Max. impact parameter */
+       float     b_min;      /* Min. impact parameter */
+       float     eg_version; /* Event generator version */
+       float     geant_version;/* GEANT version number */
+       float     polarization[10];/* polarization state  - to be specified */
+       float     sqrts;      /* nucleon-nucleon center of mass energy */
+};

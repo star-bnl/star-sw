@@ -1,0 +1,33 @@
+<pre><h3>int strbyte_openr_</h3></pre>
+<pre>
+(
+
+/*
+
+  FORTRAN callable:
+
+	LOGICAL STRBYTE_OPENR, Success
+
+	Success = STRBYTE_OPENR( Filename )
+
+*  Input:
+	CHARACTER*(*) Filename !ASCII name of file to be openned as an old file, to be read from.	
+	                       !It is not necessary for the FORTRAN caller to worry about null-
+	                       !terminators;  a null is appended to a local copy of "Filename"
+	                       !before being passed to any "ANSI C Routines", or any other "C"
+	                       !routines.  This is supposed to be a friendly interface to FORTRAN.
+
+
+  Inputs:
+*/
+
+
+	 char *filename        /*  ASCII filename:  Fortran CHARACTER*(n).  */
+	 /* (Fortran-hidden:) */
+	,size_t filename_length  /*  Filename-length -- Fortran caller doesn't see this.  */
+
+	        )
+
+/*  Description:  Open a file for reading, named in <filename>, in byte-stream mode.    */
+
+</pre>

@@ -1,0 +1,151 @@
+#!/bin/csh
+#
+# make_pkg_lib "makes" an object library for a software package pkg
+#
+# pkg is taken from the directory name one level above the current
+# directory
+#
+#  Created: 8-Jan-1993   D. Olson
+#
+#  Modified 22-Mar-1993  R. Hackenburg, for any package with its own Makefile.
+#                        Invokes the package's Makefile with "make -e all" from here.
+#                        Added *_DBG definitions, flags, etc.  Libraries are
+#                        produced here in two flavors, debug and nodebug.
+#
+#
+echo "Start rebuilding library at `date` for architecture $STAR_ARCH"
+echo "This is the package's-own-Makefile version of make_pkg_lib."
+#
+#
+#
+if ("`alias rm `" == "rm -i") then
+   unalias rm
+endif
+if ("`alias mv `" == "mv -i") then
+   unalias mv
+endif
+#
+echo $STAR_ARCH
+if ( "$STAR_ARCH" == "sun4" ) then
+   setenv ARCH_TAG    "_sun"
+   setenv ARFLAGS     " lqv "
+   setenv FFLAGS      " -xl -e -c "
+   setenv FFLAGS_DBG  " -xl -e -c -g "
+   setenv CC          "acc"
+   setenv CCFLAGS     " -c -DSUN "
+   setenv CCFLAGS_DBG " -c -g -DSUN "
+else if ( "$STAR_ARCH" == "sun4os5" ) then
+   setenv ARCH_TAG    "_sun"
+   setenv ARFLAGS     " lqv "
+   setenv FFLAGS      " -xl -e -c "
+   setenv FFLAGS_DBG  " -xl -e -c -g "
+   setenv CC          "cc"
+   setenv CCFLAGS     " -Xc -c -DSUN "
+   setenv CCFLAGS_DBG " -Xc -c -g -DSUN "
+else if ( "$STAR_ARCH" == "hpux" ) then
+   setenv ARCH_TAG    "_hpu"
+   setenv ARFLAGS     " lqv "
+   setenv FFLAGS      " -w +e +es -c +ppu "
+   setenv FFLAGS_DBG  " -w +e +es -c -g +ppu "
+   setenv CC          "cc"
+   setenv CCFLAGS     " -c -Aa -DHPUX "
+   setenv CCFLAGS_DBG " -c -Aa -g -DHPUX "
+   setenv _HPUX_SOURCE "/usr/include"
+else if ( "$STAR_ARCH" == "irix" ) then
+   setenv ARCH_TAG    "_sgi"
+   setenv ARFLAGS     " slqv "
+   setenv FFLAGS      " -extend_source -c -O -w "
+   setenv FFLAGS_DBG  " -extend_source -c -g -w "
+   setenv CC          "cc"
+   setenv CCFLAGS     " -c -O -ansi -fullwarn -v -prototypes -DIRIX "
+   setenv CCFLAGS_DBG " -c -g -ansi -fullwarn -v -prototypes -DIRIX "
+#
+#  INCLUDES under irix require this step...
+#
+   cd ../src
+else if ( "$STAR_ARCH" == "osf1" ) then
+   setenv ARCH_TAG    "_osf"
+   setenv ARFLAGS     " slqv "
+   setenv FFLAGS      " -extend_source -c -O -w "
+   setenv FFLAGS_DBG  " -extend_source -c -g -w "
+   setenv CC          "cc"
+   setenv CCFLAGS     " -c -O -ansi -fullwarn -v -DOSF1 "
+   setenv CCFLAGS_DBG " -c -g -ansi -fullwarn -v -DOSF1 "
+else if ( "$STAR_ARCH" == "aix" ) then
+   setenv ARCH_TAG    "_aix"
+   setenv ARFLAGS     " slqv "
+   setenv FFLAGS      " -c -w -qextname -qsave -qfixed=132 -qctyplss -qintlog -qxlfag=oldtab "
+   setenv FFLAGS_DBG  " -c -g -w -qextname -qsave -qfixed=132 -qctyplss -qintlog -qxlfag=oldtab "
+   setenv CC          "cc"
+   setenv CCFLAGS     " -c -O -qlanglvl=ansi -v -DAIX "
+   setenv CCFLAGS_DBG " -c -g -qlanglvl=ansi -v -DAIX "
+   alias f77 xlf23
+endif
+#if( -e make_flags.csh ) then
+#	source ../lib/make_flags.csh
+#endif
+#
+if( $1 == "" ) then
+        set PKG = ( `(pwd | awk -F/ '{i=NF-1;print $i}')` )
+else
+        set PKG = ( $1 )
+endif
+#
+echo "Will make library for package $PKG"
+set OBJLIB     = ( ../lib/$STAR_ARCH/lib$PKG.a )
+echo "Will make library for package ${PKG}_dbg"
+set OBJLIB_DBG = ( ../lib/$STAR_ARCH/lib${PKG}_dbg.a )
+#
+if ( -e $OBJLIB ) then
+	echo "Removing $OBJLIB"
+	rm -f $OBJLIB
+endif
+#
+if ( -e $OBJLIB_DBG ) then
+	echo "Removing $OBJLIB_DBG"
+	rm -f $OBJLIB_DBG
+endif
+#
+set OBJFILES = ( `(ls ../lib/$STAR_ARCH/*.o |& grep -v "No match")` )
+if( $OBJFILES[$#OBJFILES] == "" ) then
+	echo "No objects to remove"
+else
+	echo "Removing all object files"
+	rm -f ../lib/$STAR_ARCH/*.o
+endif
+#
+echo "Setting up include file links."
+#D.O. 8-Mar-93rmlink *
+#set INCFILES = ( ../inc/*.inc )
+#if ( $INCFILES == "" ) then
+# echo "No .inc files in ../inc
+#else
+	gen_include_dir_names ../inc
+#endif
+gen_include_dir_names ../src
+if( $PKG != "tas" ) then
+	gen_include_dir_names $STAR_ROOT/$STAR_LEVEL/sys/tas/inc
+endif
+#
+echo "architecture tag is $ARCH_TAG"
+echo "f77 flags are $FFLAGS and f77 debug flags are $FFLAGS_DBG"
+echo "cc  flags are $CCFLAGS and cc debug flags are $CCFLAGS_DBG"
+cd ../src
+echo "Executing '"make -e -f Makefile all"' on ../src"
+make -e -f ../src/Makefile all
+echo "Moving all .a files to ../lib/$STAR_ARCH"
+mv *.a ../lib/$STAR_ARCH
+#
+set OBJFILES = ( `(ls *.o |& grep -v "No match")` )
+if( $OBJFILES[$#OBJFILES] == "" ) then
+	echo "No objects to remove"
+else
+	echo "Removing all object files"
+	rm -f *.o
+endif
+#
+#
+echo "cleaning up include file links.."
+rm -f ../lib/*_inc
+#
+echo "Done at `date`"

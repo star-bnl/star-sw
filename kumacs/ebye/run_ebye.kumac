@@ -1,0 +1,184 @@
+* *************************************************************************
+* run_ebye.kumac
+* 
+* written by D. Weerasundara -- dhammika@npl.washington.edu
+* 08/01/1998 - L.D. Carr  -- lcarr@u.washington.edu  -- modified
+* 08/04/1998 - K. Turner  -- edited to make it standard
+* 08/07/1998 - L.D. Carr  -- lcarr@u.washington.edu
+*	1.  changed switches
+*       2.  moved sca_ensemble_ave and sca_prior to /dui/calib/ebye/sca
+* 08/10/1998 - K. Turner  -- changed exec create_tables_global#sca to 
+*                            exec create_tables_global#egr to make it standard
+* 08/10/1998 - LDC        -- added calib_dir  
+* 08/10/1998 - K. Turner  -- added nid to call to 
+*                            write_table_to_ntuple#close_disk
+* 08/11/1998 - K. Turner  -- made default TOP=$STAR
+* 08/13/1998 - Dhammika W.-- Commented out extra lines need to deal with
+*                            Lanny Ray's fast multiplicity generator 
+*                            DSTs on /star/mds/users/ray/ebye. We don't need
+*                            these lines to use standard STAR DST tables.
+* 09/01/1998 - DSW        -- Brought into STAR kumac framework.
+* 09/11/1998 - DSW        -- Updated to normalize prior and  ensemble average.
+* 09/14/1998 - LDC  Added output xdf file in event loop and as argument
+*
+************************************************************************
+************************************************************************
+
+ macro run__
+          TOP=$STAR_
+          domain='geometry tpc svt global ebye' _
+          input_data_prefix=/scr20/dhammika/data/ _
+          input_data_file=standardDST1.xdf _
+          output_file=sca_out.xdf _
+          num_events=1 _
+          calib_dir=$STAR_CALIB/ebye_
+          prior_switch=0 _
+          ensemble_switch=0 _
+          analysis_switch=1 _
+          funit=21 _
+          nfile=ebye.ntup _
+          nid=111 _
+          table=ebye/sca/sca_out
+
+* 
+*  this is an example!! you must change to fill your needs
+*  
+* --> to run
+*    - change the inputs above as desired
+*    - run staf
+*    -   exec run_ebye
+* 
+* ***********************************************************
+* CALCULATE STUFF FROM MACRO INPUTS 
+***********************************************************
+    
+ input_file = [input_data_prefix][input_data_file]
+
+***********************************************************
+* PRINT OUT INPUT VALUES
+***********************************************************
+	  
+  message ' *** TOP directory to search for kumacs --> ' [TOP]
+  message ' *** domains to load  -->                   ' [domain]
+  message ' *** Data Sample directory -->              ' [input_data_dir]
+  message ' *** Input data file -->                    ' [input_data_file]
+  message ' *** Output data file -->	        ' [output_file]
+  message ' *** Num Events to process -->              ' [num_events]
+  message ' *** Calibration Directory -->              ' [calib_dir]
+  message ' *** Prior Switch -->                       ' [prior_switch]
+  message ' *** Ensemble Switch -->                    ' [ensemble_switch]
+  message ' *** Analysis Switch -->                    ' [analysis_switch]
+  message ' *** ntup file unit -->                     ' [funit]
+  message ' *** output Ntuple filename  -->            ' [nfile]
+  message ' *** Ntuple ID # -->                        ' [nid]
+  message ' *** Table to write to ntup -->             ' [table]
+  
+  
+***********************************************************
+* General Setup
+***********************************************************
+  
+ macro/global/create TOP              [TOP]
+
+   exec $STAR/kumacs/util/setup_defaults#run
+   
+   exec setup#setup
+   
+   macro/global/import *
+     
+   exec load_libraries#run [domain]
+
+**************************************************************
+* OPEN FILES
+****************************************************************
+
+* open input data file
+  exec read_table_from_file#init ebye  [input_file]
+  if STAF_STATUS(1).eq.stafcv_bad goto ENDOFDATA
+
+* open output ntuple
+  exec write_table_to_ntuple#init_disk [funit] [nfile]  
+
+* **************************************************************
+* Setup for EbyE
+* ****************************************************************  
+
+* sca    
+  exec create_tables_ebye#sca_io
+  exec create_tables_ebye#sca_prior
+  exec create_tables_ebye#sca_ensemble_ave
+
+  exec init_sca#init [calib_dir] [output_file] [prior_switch] [ensemble_switch]  [analysis_switch]
+  
+
+***************************************************************
+*  Run EbyE
+* ****************************************************************
+
+* initialize event counter.
+    nevebyetot=0
+* read event and then process thru analysis
+  do i=1,[num_events]
+    message ' run_ebye: processing event ' [i]
+* clear all event tables
+    tabclear [event]
+* read input file
+    exec read_table_from_file#read ebye  /dui/event/data/global
+    if STAF_STATUS(1).eq.0 goto ENDOFDATA  
+* do analysis
+*wait
+    exec run_sca#filter 
+      if ( staf_status(1) .ne. STAFCV_OK) then
+          message <<< WARNING >>>  Problem with sca_filter in event [i]
+	endif
+    exec run_sca#runsca
+      if ( staf_status(1) .ne. STAFCV_OK) then
+          message <<< WARNING >>>  Problem with sca_runsca in event [i]
+        endif
+* count successfully processed events.
+   nevebyetot=[nevebyetot]+1
+* write table to ntuple
+    *exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
+* write event to file
+    if [analysis_switch]=1 then
+        exec write_table_to_file#write SCAANALYSIS [data]/ebye/
+    endif
+  enddo
+* -------------------- end stuff -----------------------------*
+  
+  ENDOFDATA:
+  if [i].lt.[num_events] then
+    message ' End of input file'
+  endif  
+
+* load  sca_switch[0].nEvents,which is needed to normalize ensemble average.
+  cd [params]/ebye/sca
+  tdm/table/cell/putvalue 'sca_switch[0].nEvents'  [nevebyetot]
+  cd /dui    
+* write out sca reference information if switches set accordingly
+  exec run_sca#close [calib_dir] [prior_switch] [ensemble_switch] [analysis_switch]
+
+* close ntuple
+  message ' close ntuple'
+  exec write_table_to_ntuple#close_disk [funit] [nid]
+
+* close input file
+  message ' close input file'
+  exec read_table_from_file#close ebye
+  
+return
+ 
+************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,27 @@
+<h2>msg Template files</h2>
+
+msg has severl template files, ready to be included into application sources
+and editted as needed.  They are:
+
+<dl>
+<dt><a href=simple_message.template>Simple Message Template</a>
+<dd>How to make and use messages
+in the simplest possible way.  This is not the optimal usage as regards CPU usage.
+
+<dt><a href=fast_message.template>Fast (CPU) Message Template</a>
+<dd>How to make and use messages
+in the most CPU-efficient way.  This is slightly more complicated that the Simple Message Template,
+and differs from it only in specifying a fast reference ID (instead of a "-1").  This is more involved
+than the Simple form only because of the nature of Fortran, which does not offer a convenient way
+of declaring local, static, initialized variables without 3 lines of declarations (ie, INTEGER,
+SAVE and DATA).
+
+<dt><a href=full_message.template>Full Message Template</a>
+<dd>How to make and use messages in the most general way.
+This shows how to generate a message with a Fortran WRITE statement and how to
+test a message's enabled-status before devoting resources to that WRITE.
+
+<dt><a href=initialization.template>msg initialization template</a>
+<dd>How to initialize msg, and set msg items.  This is generally of use at the
+control (ie, TAS or KUIP) level;  most applications do not need to use this.
+</dl>

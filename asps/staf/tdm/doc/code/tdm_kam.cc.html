@@ -1,0 +1,912 @@
+<HTML>
+<PRE>
+<H2>file: tdm/src/tdm_kam.cc</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley National Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         tdm_kam.C
+*:DESCRIPTION:  C++ KUIP Action Modules for TDM
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      29nov95-v010a-cet- recreation
+*:HISTORY:      19jul95-v000a-cet- creation
+*:&lt;---------------------------------------------------------------------
+*/
+#undef CORBA
+
+/*-------------------------------------------- INCLUDES             --*/
+
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+
+#include "dstype.h"
+
+#include "kuip.h"
+
+#include "asuAlloc.h"
+#include "emlLib.h"
+#include "<A HREF="tdmLib.h.html">tdmLib.h</A>"
+#include "sutLib.h"
+#include "ahsLib.h"
+
+/*-------------------------------------------- TYPEDEFS             --*/
+/*-------------------------------------------- GLOBALS              --*/
+/*-------------------------------------------- PROTOTYPES           --*/
+extern "C" void <A HREF="dsuPrint.c.html#dsuPrintData">dsuPrintData(</A>FILE *stream , DS_TYPE_CODE_T type
+		, unsigned int count , void *data);
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdm_allocstats_
+*:DESCRIPTION:  KUIP Action Module to <A HREF="tdmClasses.cc.html#show">show</A> DSL allocation stats
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/ALLOCSTATS
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdm_allocstats_">kam_tdm_allocstats_(</A>){<A HREF="#kam_tdm_allocstats">kam_tdm_allocstats(</A>);}</B>
+<B>int <A NAME="kam_tdm_allocstats">kam_tdm_allocstats(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+
+   dsDatasetAllocStats();
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdm_count_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/FACTORY/COUNT
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdm_count_">kam_tdm_count_(</A>){<A HREF="#kam_tdm_count">kam_tdm_count(</A>);}</B>
+<B>int <A NAME="kam_tdm_count">kam_tdm_count(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+
+   printf("TDM:\tObject count = %d \n",tdm-&gt;count());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdm_list_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/FACTORY/LIST
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdm_list_">kam_tdm_list_(</A>){<A HREF="#kam_tdm_list">kam_tdm_list(</A>);}</B>
+<B>int <A NAME="kam_tdm_list">kam_tdm_list(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#list">list</A>() ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdm_newdataset_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/FACTORY/NEWDATASET NAME SETDIM
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdm_newdataset_">kam_tdm_newdataset_(</A>){<A HREF="#kam_tdm_newdataset">kam_tdm_newdataset(</A>);}</B>
+<B>int <A NAME="kam_tdm_newdataset">kam_tdm_newdataset(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* dataset name */
+   long dim = ku_geti();	/* dataset dimension */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#newDataset">newDataset</A>(name,dim) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdm_newtable_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/FACTORY/NEWTABLE NAME SPEC ROWCOUNT
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdm_newtable_">kam_tdm_newtable_(</A>){<A HREF="#kam_tdm_newtable">kam_tdm_newtable(</A>);}</B>
+<B>int <A NAME="kam_tdm_newtable">kam_tdm_newtable(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* table name */
+   char* spec = ku_gets();	/* table row specifier */
+   long rowcount = ku_geti();	/* rows to allocate */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#newTable">newTable</A>(name,spec,rowcount) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdm_type_list_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/TYPESPECIFIERS/LIST [ TID ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdm_type_list_">kam_tdm_type_list_(</A>){<A HREF="#kam_tdm_type_list">kam_tdm_type_list(</A>);}</B>
+<B>int <A NAME="kam_tdm_type_list">kam_tdm_type_list(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   long tid = ku_geti();	/* table type id */
+
+   char *name=NULL;
+
+   if( tid &lt; 0 ){
+      for(int i=1;;i++){
+	 if( !tdm-&gt;<A HREF="tdmClasses.cc.html#getTypeName">getTypeName</A>(i,name) ){
+	    break;
+	 }
+	 printf("TDM:\tType name = (%s) \n",name);
+      }
+   }
+   else {
+      if( !tdm-&gt;<A HREF="tdmClasses.cc.html#getTypeName">getTypeName</A>(tid,name) ){
+	 EML_ERROR(KAM_METHOD_FAILURE);
+      }
+      printf("TDM:\tType name = (%s) \n",name);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdm_type_show_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/SPECIFICATION [ NAME ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdm_type_show_">kam_tdm_type_show_(</A>){<A HREF="#kam_tdm_type_show">kam_tdm_type_show(</A>);}</B>
+<B>int <A NAME="kam_tdm_type_show">kam_tdm_type_show(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char *name = ku_gets();	/* table name */
+
+   char *tspec=NULL;
+   char *tname=NULL;
+
+   for(int i=1;;i++){
+      if( !tdm-&gt;<A HREF="tdmClasses.cc.html#getTypeSpecification">getTypeSpecification</A>(i,tspec)
+      ||  !tdm-&gt;<A HREF="tdmClasses.cc.html#getTypeName">getTypeName</A>(i,tname)
+      ){
+	 break;
+      }
+      if( sutMatchWild(name,tname) ){
+	 printf("TDM:\tType spec = \n***\n%s\n***\n",tspec);
+      }
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmdataset_adddataset_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/DATASET/ADDDATASET TDMDATASET NAME [ DIM ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmdataset_adddataset_">kam_tdmdataset_adddataset_(</A>){<A HREF="#kam_tdmdataset_adddataset">kam_tdmdataset_adddataset(</A>);}</B>
+<B>int <A NAME="kam_tdmdataset_adddataset">kam_tdmdataset_adddataset(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* dsname = ku_gets();	/* dataset name */
+   char* name = ku_gets();	/* new dataset name */
+   long dim = ku_geti();	/* new dataset dimension */
+
+   tdmDataset* dataset;
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findDataset">findDataset</A>(dsname, dataset)
+   ||  !dataset-&gt;<A HREF="tdmClasses.cc.html#addDataset">addDataset</A>(name,dim)
+   ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmdataset_addtable_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/DATASET/ADDTABLE TDMDATASET NAME SPEC ROWCOUNT
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmdataset_addtable_">kam_tdmdataset_addtable_(</A>){<A HREF="#kam_tdmdataset_addtable">kam_tdmdataset_addtable(</A>);}</B>
+<B>int <A NAME="kam_tdmdataset_addtable">kam_tdmdataset_addtable(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* dsname = ku_gets();	/* dataset name */
+   char* name = ku_gets();	/* table name */
+   char* spec = ku_gets();	/* table row specifier */
+   long rowcount = ku_geti();	/* rows to allocate */
+
+   tdmDataset* dataset;
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findDataset">findDataset</A>(dsname, dataset)
+   ||  !dataset-&gt;<A HREF="tdmClasses.cc.html#addTable">addTable</A>(name,spec,rowcount)
+   ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmdataset_entrycount_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/DATASET/ENTRYCOUNT NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmdataset_entrycount_">kam_tdmdataset_entrycount_(</A>){<A HREF="#kam_tdmdataset_entrycount">kam_tdmdataset_entrycount(</A>);}</B>
+<B>int <A NAME="kam_tdmdataset_entrycount">kam_tdmdataset_entrycount(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* dataset name */
+
+   tdmDataset* dataset;		/* tdmDataset object */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findDataset">findDataset</A>(name, dataset) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   printf("TDMDATASET:\tEntry Count = %d \n",dataset-&gt;<A HREF="tdmClasses.cc.html#entryCount">entryCount</A>());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;#####################################################################
+*:&lt;#####################################################################
+*/
+<B>void <A NAME="kam_tdmdataset_entryname_">kam_tdmdataset_entryname_(</A>){<A HREF="#kam_tdmdataset_entryname">kam_tdmdataset_entryname(</A>);}</B>
+<B>int <A NAME="kam_tdmdataset_entryname">kam_tdmdataset_entryname(</A>)</B>
+{
+EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+/*
+*:&gt;#####################################################################
+*:&lt;#####################################################################
+*/
+<B>void <A NAME="kam_tdmdataset_findentry_">kam_tdmdataset_findentry_(</A>){<A HREF="#kam_tdmdataset_findentry">kam_tdmdataset_findentry(</A>);}</B>
+<B>int <A NAME="kam_tdmdataset_findentry">kam_tdmdataset_findentry(</A>)</B>
+{
+EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmdataset_maxentrycount_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/DATASET/MAXENTRYCOUNT NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmdataset_maxentrycount_">kam_tdmdataset_maxentrycount_(</A>){<A HREF="#kam_tdmdataset_maxentrycount">kam_tdmdataset_maxentrycount(</A>);}</B>
+<B>int <A NAME="kam_tdmdataset_maxentrycount">kam_tdmdataset_maxentrycount(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* dataset name */
+
+   tdmDataset* dataset;		/* tdmDataset object */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findDataset">findDataset</A>(name, dataset) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("TDMDATASET:\tMax Entry Count = %d \n"
+		,dataset-&gt;<A HREF="tdmClasses.cc.html#maxEntryCount">maxEntryCount</A>());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmdataset_name_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/DATASET/NAME NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmdataset_name_">kam_tdmdataset_name_(</A>){<A HREF="#kam_tdmdataset_name">kam_tdmdataset_name(</A>);}</B>
+<B>int <A NAME="kam_tdmdataset_name">kam_tdmdataset_name(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* name = ku_gets();	/* dataset name */
+
+   tdmDataset* dataset;
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findDataset">findDataset</A>(name, dataset) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("TDMDATASET:\tDSL name = (%s) \n",dataset-&gt;<U>dslName</U>());        //OVERLOAD CALL: dslName: <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;#####################################################################
+*:&lt;#####################################################################
+*/
+<B>void <A NAME="kam_tdmdataset_show_">kam_tdmdataset_show_(</A>){<A HREF="#kam_tdmdataset_show">kam_tdmdataset_show(</A>);}</B>
+<B>int <A NAME="kam_tdmdataset_show">kam_tdmdataset_show(</A>)</B>
+{
+EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+/*
+*:&gt;#####################################################################
+*:&lt;#####################################################################
+*/
+<B>void <A NAME="kam_tdmtable_cell_getvalue_">kam_tdmtable_cell_getvalue_(</A>){<A HREF="#kam_tdmtable_cell_getvalue">kam_tdmtable_cell_getvalue(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_cell_getvalue">kam_tdmtable_cell_getvalue(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* cellSpec = ku_gets();	/* table.cell specification */
+
+   tdmTable* table;		/* tdmTable object */
+
+   /*- HACK - preliminary AHS calls do not work!!! -*/
+   char *cs = (char*)ASUALLOC(strlen(cellSpec) +1);
+   strcpy(cs,cellSpec);
+   char *tname = strtok(cs,"[].");
+   char *c = strtok(NULL,"[].");
+   int nrow = atoi(c);
+   char *cname = strtok(NULL,"[].");
+
+/**# DEBUG - does not work!!!
+   AHS_STRUCT_T a;
+   if( !<A HREF="ahsLib.cc.html#isValidAhsSpec">isValidAhsSpec(</A>cellSpec)
+   ||  !<A HREF="ahsLib.cc.html#ahs_zeroAHS">ahs_zeroAHS(</A>a)
+   ||  !<A HREF="ahsLib.cc.html#ahs_parseSpec">ahs_parseSpec(</A>cellSpec,&a)		// HACK - MEM LEAK **
+   ){
+      EML_MESSAGE("\t Invalid cell specification. \n");
+   }
+   AHSNODE_T *t=&(a.nodes[a.pathDepth-1]);
+   int nrow = t-&gt;shape.indexes[0];
+   char *tname=t-&gt;name;
+   char *cname=a.entryName;
+#**/
+   
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findTable">findTable</A>((tname), table) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+
+   <A HREF="tdm_types.h.html#TDM_COLUMN_T">TDM_COLUMN_T</A> col;
+   if( !table-&gt;<A HREF="tdmClasses.cc.html#findColumn">findColumn</A>(col,cname) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+
+   int ncol = col.nCol;
+	
+   <A HREF="tdm_types.h.html#TDM_CELLDATA_T">TDM_CELLDATA_T</A> cellData;
+   if( !table-&gt;<A HREF="tdmClasses.cc.html#getCell">getCell</A>(cellData,nrow,ncol) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+
+   printf("TDMTABLE:\tCell data = ");
+   <A HREF="dsuPrint.c.html#dsuPrintData">dsuPrintData(</A>stdout,cellData._d,col.elcount,cellData.data.v);
+   printf("\n");
+
+   float result;
+   switch( cellData._d ){
+      case DS_TYPE_CHAR:
+         result = *(cellData.data.c);
+	 break;
+      case DS_TYPE_OCTET:
+         result = *(cellData.data.o);
+	 break;
+      case DS_TYPE_SHORT:
+         result = *(cellData.data.s);
+	 break;
+      case DS_TYPE_U_SHORT:
+         result = *(cellData.data.us);
+	 break;
+      case DS_TYPE_LONG:
+         result = *(cellData.data.l);
+	 break;
+      case DS_TYPE_U_LONG:
+         result = *(cellData.data.ul);
+	 break;
+      case DS_TYPE_FLOAT:
+         result = *(cellData.data.f);
+	 break;
+      case DS_TYPE_DOUBLE:
+         result = *(cellData.data.d);
+	 break;
+      case DS_TYPE_STRUCT:
+	 result = 11301957;
+	 set_staf_result(result);
+	 EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+	 break;
+      default:
+	 result = -11301957;
+	 set_staf_result(result);
+	 printf(" code = %d \n",cellData._d);
+	 printf(" codes = %d %d %d %d %d %d %d %d %d\n"
+	 ,DS_TYPE_CHAR,DS_TYPE_OCTET,DS_TYPE_SHORT,DS_TYPE_U_SHORT
+	 ,DS_TYPE_LONG,DS_TYPE_U_LONG,DS_TYPE_FLOAT,DS_TYPE_DOUBLE
+	 ,DS_TYPE_STRUCT);
+	 EML_ERROR(KAM_INVALID_TYPE);
+	 break;
+   }
+   set_staf_result(result);
+
+   ASUFREE(cs);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;#####################################################################
+*:&lt;#####################################################################
+*/
+<B>void <A NAME="kam_tdmtable_cell_putvalue_">kam_tdmtable_cell_putvalue_(</A>){<A HREF="#kam_tdmtable_cell_putvalue">kam_tdmtable_cell_putvalue(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_cell_putvalue">kam_tdmtable_cell_putvalue(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* cellSpec = ku_gets();	/* table.cell name specification */
+   char* value = ku_gets();	/* value string */
+
+   tdmTable* table;		/* tdmTable object */
+
+   /*- HACK - preliminary AHS calls do not work!!! -*/
+   char *cs = (char*)ASUALLOC(strlen(cellSpec) +1);
+   strcpy(cs,cellSpec);
+   char *tname = strtok(cs,"[].");
+   char *c = strtok(NULL,"[].");
+   int nrow = atoi(c);
+   char *cname = strtok(NULL,"[].");
+   
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findTable">findTable</A>((tname), table) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+
+   <A HREF="tdm_types.h.html#TDM_COLUMN_T">TDM_COLUMN_T</A> col;
+   if( !table-&gt;<A HREF="tdmClasses.cc.html#findColumn">findColumn</A>(col,cname) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+
+   int ncol = col.nCol;
+   DS_TYPE_CODE_T tcode = col.code;
+	
+   <A HREF="tdm_types.h.html#TDM_CELLDATA_T">TDM_CELLDATA_T</A> cellData;
+   cellData._d = tcode;
+   cellData.data.v = ASUALLOC(sizeof(double));
+   char *v;
+   switch( tcode ){
+      case DS_TYPE_CHAR:
+	 v = (char*)ASUALLOC(strlen(value) +1);
+	 strcpy(v,value);
+         cellData.data.c = (char*)v;
+	 break;
+      case DS_TYPE_OCTET:
+         *(cellData.data.o) = atol(value);
+	 break;
+      case DS_TYPE_SHORT:
+         *(cellData.data.s) = atol(value);
+	 break;
+      case DS_TYPE_U_SHORT:
+         *(cellData.data.us) = atol(value);
+	 break;
+      case DS_TYPE_LONG:
+         *(cellData.data.l) = atol(value);
+	 break;
+      case DS_TYPE_U_LONG:
+         *(cellData.data.ul) = atol(value);
+	 break;
+      case DS_TYPE_FLOAT:
+         *(cellData.data.f) = atof(value);
+	 break;
+      case DS_TYPE_DOUBLE:
+         *(cellData.data.d) = atof(value);
+	 break;
+      case DS_TYPE_STRUCT:
+	 EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+	 break;
+      default:
+	 EML_ERROR(KAM_INVALID_TYPE);
+	 break;
+   }
+
+   if( !table-&gt;<A HREF="tdmClasses.cc.html#putCell">putCell</A>(cellData,nrow,ncol) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   ASUFREE(cellData.data.v);
+
+   ASUFREE(cs);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmtable_colcount_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/TABLE/COLCOUNT NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmtable_colcount_">kam_tdmtable_colcount_(</A>){<A HREF="#kam_tdmtable_colcount">kam_tdmtable_colcount(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_colcount">kam_tdmtable_colcount(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* table name */
+
+   tdmTable* table;		/* tdmTable object */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findTable">findTable</A>(name, table) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("TDMTABLE:\tColumn Count = %d \n",table-&gt;<A HREF="tdmClasses.cc.html#columnCount">columnCount</A>());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;#####################################################################
+*:&lt;#####################################################################
+*/
+<B>void <A NAME="kam_tdmtable_column_code_">kam_tdmtable_column_code_(</A>){<A HREF="#kam_tdmtable_column_code">kam_tdmtable_column_code(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_column_code">kam_tdmtable_column_code(</A>)</B>
+{
+EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+/*
+*:&gt;#####################################################################
+*:&lt;#####################################################################
+*/
+<B>void <A NAME="kam_tdmtable_column_elcount_">kam_tdmtable_column_elcount_(</A>){<A HREF="#kam_tdmtable_column_elcount">kam_tdmtable_column_elcount(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_column_elcount">kam_tdmtable_column_elcount(</A>)</B>
+{
+EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+/*
+*:&gt;#####################################################################
+*:&lt;#####################################################################
+*/
+<B>void <A NAME="kam_tdmtable_column_find_">kam_tdmtable_column_find_(</A>){<A HREF="#kam_tdmtable_column_find">kam_tdmtable_column_find(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_column_find">kam_tdmtable_column_find(</A>)</B>
+{
+EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+/*
+*:&gt;#####################################################################
+*:&lt;#####################################################################
+*/
+<B>void <A NAME="kam_tdmtable_column_name_">kam_tdmtable_column_name_(</A>){<A HREF="#kam_tdmtable_column_name">kam_tdmtable_column_name(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_column_name">kam_tdmtable_column_name(</A>)</B>
+{
+EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+/*
+*:&gt;#####################################################################
+*:&lt;#####################################################################
+*/
+<B>void <A NAME="kam_tdmtable_column_rank_">kam_tdmtable_column_rank_(</A>){<A HREF="#kam_tdmtable_column_rank">kam_tdmtable_column_rank(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_column_rank">kam_tdmtable_column_rank(</A>)</B>
+{
+EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+/*
+*:&gt;#####################################################################
+*:&lt;#####################################################################
+*/
+<B>void <A NAME="kam_tdmtable_column_shape_">kam_tdmtable_column_shape_(</A>){<A HREF="#kam_tdmtable_column_shape">kam_tdmtable_column_shape(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_column_shape">kam_tdmtable_column_shape(</A>)</B>
+{
+EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+/*
+*:&gt;#####################################################################
+*:&lt;#####################################################################
+*/
+<B>void <A NAME="kam_tdmtable_column_size_">kam_tdmtable_column_size_(</A>){<A HREF="#kam_tdmtable_column_size">kam_tdmtable_column_size(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_column_size">kam_tdmtable_column_size(</A>)</B>
+{
+EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+/*
+*:&gt;#####################################################################
+*:&lt;#####################################################################
+*/
+<B>void <A NAME="kam_tdmtable_column_type_">kam_tdmtable_column_type_(</A>){<A HREF="#kam_tdmtable_column_type">kam_tdmtable_column_type(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_column_type">kam_tdmtable_column_type(</A>)</B>
+{
+EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmtable_maxrowcount_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/TABLE/MAXROWCOUNT NAME [ MAXROWCOUNT ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmtable_maxrowcount_">kam_tdmtable_maxrowcount_(</A>){<A HREF="#kam_tdmtable_maxrowcount">kam_tdmtable_maxrowcount(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_maxrowcount">kam_tdmtable_maxrowcount(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* table name */
+   long maxrowcount = ku_geti();/* number of rows allocated */
+
+   tdmTable* table;		/* tdmTable object */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findTable">findTable</A>(name, table) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   if( maxrowcount &gt; 0 ){
+      table-&gt;<U>maxRowCount</U>(maxrowcount);        //OVERLOAD CALL: maxRowCount: <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>
+   }
+   printf("TDMTABLE:\tMax Row Count = %d \n",table-&gt;<U>maxRowCount</U>());        //OVERLOAD CALL: maxRowCount: <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmtable_name_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/TABLE/NAME NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmtable_name_">kam_tdmtable_name_(</A>){<A HREF="#kam_tdmtable_name">kam_tdmtable_name(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_name">kam_tdmtable_name(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* table name */
+
+   tdmTable* table;		/* tdmTable object */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findTable">findTable</A>(name, table) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("TDMTABLE:\tDSL Name = (%s) \n",table-&gt;<U>dslName</U>());        //OVERLOAD CALL: dslName: <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmtable_print_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/TABLE/PRINT TNAME [ NROWS IFIRST ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmtable_print_">kam_tdmtable_print_(</A>){<A HREF="#kam_tdmtable_print">kam_tdmtable_print(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_print">kam_tdmtable_print(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* table name */
+   long nrows = ku_geti();	/* number of rows to print */
+   long ifirst = ku_geti();	/* first row number to print */
+
+   tdmTable* table;		/* tdmTable object */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findTable">findTable</A>(name,table) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   table-&gt;<A HREF="tdmClasses.cc.html#printRows">printRows</A>(ifirst,nrows);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmtable_rowcount_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/TABLE/ROWCOUNT NAME [ ROWCOUNT ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmtable_rowcount_">kam_tdmtable_rowcount_(</A>){<A HREF="#kam_tdmtable_rowcount">kam_tdmtable_rowcount(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_rowcount">kam_tdmtable_rowcount(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* table name */
+   long rowcount = ku_geti();	/* number of rows filled */
+
+   tdmTable* table;		/* tdmTable object */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findTable">findTable</A>(name, table) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   if( rowcount &gt; 0 ){
+      table-&gt;<U>rowCount</U>(rowcount);        //OVERLOAD CALL: rowCount: <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>
+   }
+   printf("TDMTABLE:\tRow Count = %d \n",table-&gt;<U>rowCount</U>());        //OVERLOAD CALL: rowCount: <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmtable_rowsize_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/TABLE/ROWSIZE NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmtable_rowsize_">kam_tdmtable_rowsize_(</A>){<A HREF="#kam_tdmtable_rowsize">kam_tdmtable_rowsize(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_rowsize">kam_tdmtable_rowsize(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* table name */
+
+   tdmTable* table;		/* tdmTable object */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findTable">findTable</A>(name, table) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("TDMTABLE:\tRow Size = %d bytes \n",table-&gt;<A HREF="tdmClasses.cc.html#rowSize">rowSize</A>());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmtable_show_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/TABLE/SHOW TNAME [ OPTION ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmtable_show_">kam_tdmtable_show_(</A>){<A HREF="#kam_tdmtable_show">kam_tdmtable_show(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_show">kam_tdmtable_show(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* table name */
+   char* option = ku_gets();	/* options */
+
+   tdmTable* table;		/* tdmTable object */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findTable">findTable</A>(name,table) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("TDMTABLE:\tTable = \n***\n");
+   table-&gt;<A HREF="tdmClasses.cc.html#show">show</A>();
+   printf("\n***\n");
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmtable_specifier_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/TABLE/SPECIFIER NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmtable_specifier_">kam_tdmtable_specifier_(</A>){<A HREF="#kam_tdmtable_specifier">kam_tdmtable_specifier(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_specifier">kam_tdmtable_specifier(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* table name */
+
+   tdmTable* table;		/* tdmTable object */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findTable">findTable</A>(name, table) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("TDMTABLE:\tType Specifier = \n***\n%s\n***\n"
+		,table-&gt;<A HREF="tdmClasses.cc.html#typeSpecifier">typeSpecifier</A>());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmtable_typename_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/TABLE/TYPE NAME
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_tdmtable_typename_">kam_tdmtable_typename_(</A>){<A HREF="#kam_tdmtable_typename">kam_tdmtable_typename(</A>);}</B>
+<B>int <A NAME="kam_tdmtable_typename">kam_tdmtable_typename(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* table name */
+
+   tdmTable* table=NULL;		/* tdmTable object */
+
+   if( !tdm-&gt;<A HREF="tdmClasses.cc.html#findTable">findTable</A>(name, table) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("TDMTABLE:\tType Name = (%s) \n",table-&gt;<A HREF="tdmClasses.cc.html#typeName">typeName</A>());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

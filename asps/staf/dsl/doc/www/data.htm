@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+
+<html>
+
+<head>
+<title>data operations</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 1.1">
+</head>
+
+<body>
+<h2>Functions that perform operations on table data</h2>
+<p><a href="#dsEquijoin">dsEquijoin</a> - perform an equijoin of two tables </p>
+<p><a href="#dsProjectTable">dsProjectTable</a> - project columns from one table into a second table </p>
+<p><a href="#dsTargetTable">dsTargetTable</a> - create a target table for a join or project operation </p>
+<hr>
+<h2><a name="dsEquijoin">dsEquijoin</a></h2>
+<p>The <b>dsEquijoin</b> function constructs the equijoin of two tables. </p>
+<p><b>int dsEquijoin(DS_DATASET_T *</b><i>pJoinTable</i><b>, DS_DATASET_T *</b><i>pTableOne</i><b>, DS_DATASET_T *</b><i>pTableTwo</i><b>, 
+char *</b><i> aliases</i><b>, char *</b><i>joinList</i><b>, char *</b><i>projectList</i>);. </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>pJoinTable</i> </dt>
+<dd>Handle for join </dd>
+<dt><i>pTableOne</i> </dt>
+<dd>Handle for first table to be joined </dd>
+<dt><i>pTableTwo</i> </dt>
+<dd>Handle for second table to be joined </dd>
+<dt><i>aliases</i> </dt>
+<dd>List of aliases names for tables to be joined </dd>
+<dt><i>joinList</i> </dt>
+<dd>List that specifies the columns to be joined </dd>
+<dt><i>projectList</i> </dt>
+<dd>List of columns to be projected into join table </dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print error 
+information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<h3>Remarks</h3>
+<p>dsEquijoin() constructs the equijoin of <i>pTableOne</i> and <i>pTableTwo</i> and returns it in <i>pJoinTable</i>. The columns to be returned 
+in <i>pJoinTable</i> are specified by <i>projectList</i> which has the format '{' select_column_specifier ',' .... '}'. A 
+select_column_specifier is either a single column_name or table_name '.' column_name column_name. A 
+select_column_specifier specifies a column in <i>pJoinTable</i> and a column in either <i>pTableOne</i> or <i>pTableTwo</i>. Columns of 
+<i>pJoinTable</i> that are not specified by a select_column_specifier are matched to a column of <i>pTableOne</i> or <i>pTableTwo</i>. This 
+default selection is done when the column occurs in only one table or occurs in both and the pair are joined. <i>projectList</i> may 
+be NULL if all columns are to be selected by the default rule, such as in a natural join. Table names can be given aliases to 
+distinguish the role they play in a self-join or when two tables have the same name. Aliases are specified by <i>aliases</i> which has 
+the format alias_name1 alias_name2. aliases may be NULL if no aliases are required. Pairs of columns to be joined are 
+specified by <i>joinList</i> which has the format '{' join_pair_specifier ',' ... '}'. A join_pair_specifier is either a single column_name 
+or table_name '.' column_name table_name '.' column_name. column_specifier has the format table_name '.' column_name. A 
+join_pair_specifier specifies a column from <i>pTableOne</i> and a column from <i>pTableTwo</i> that are to be joined. If <i>joinList</i> is 
+NULL, a natural join is performed. </p>
+<h3>See Also</h3>
+<p><a href="#dsTargetTable">dsTargetTable</a> </p>
+<h3>TODO</h3>
+<p>update the above Remarks </p>
+<hr>
+<h2><a name="dsProjectTable">dsProjectTable</a></h2>
+<p>The <b>dsProjectTable</b> function projects columns from a source table into a destination table. </p>
+<p><b>int dsProjectTable(DS_DATASET_T *</b><i>pDst</i><b>, DS_DATASET_T *</b><i>pSrc</i><b>, char *</b><i>projectList</i><b>);</b> </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>pDst</i> </dt>
+<dd>Handle for destination table </dd>
+<dt><i>pSrc</i> </dt>
+<dd>Handle for source table </dd>
+<dt><i>projectList</i> </dt>
+<dd>List of columns to be projected into join table </dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print error 
+information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<h3>Remarks</h3>
+<p>The columns to be returned in <i>pDst</i> are specified by <i>projectList</i> which has the format '{' select_column_specifier ',' .... '}'. A 
+select_column_specifier is either a single column_name or table_name '.' column_name column_name. A 
+select_column_specifier specifies a column in <i>pDste</i> and a column in <i>pSrc</i>. Columns of <i>pDst </i>that are not specified by a 
+select_column_specifier are matched to a column of <i>pSrc</i>. </p>
+<h3>See Also</h3>
+<p><a href="#dsTargetTable">dsTargetTable</a> </p>
+<hr>
+<h2><a name="dsTargetTable">dsTargetTable</a></h2>
+<p>The <b>dsTargetTable</b> function constructs a target table for a join or project operation. </p>
+<p><b>int dsTargetTable(DS_DATASET_T **</b><i>ppTable</i><b>, char *</b><i>tableName</i><b>, char *</b><i>typeName</i><b>, DS_DATASET_T 
+*</b><i>parentOne</i><b>, DS_DATASET_T *</b><i>parentTwo</i><b>, char *</b><i>aliases</i><b>, char *</b><i>projectList</i><b>); </b></p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>ppTable</i> </dt>
+<dd>Location of table handle </dd>
+<dt><i>tableName</i> </dt>
+<dd>Name of target table </dd>
+<dt><i>typeName</i> </dt>
+<dd>Name of row type for target table </dd>
+<dt><i>pParentOne</i> </dt>
+<dd>Handle for first parent table </dd>
+<dt><i>pParentTwo</i> </dt>
+<dd>Handle for second parent table </dd>
+<dt><i>aliases</i> </dt>
+<dd>List of aliases names for parent tables </dd>
+<dt><i>projectList</i> </dt>
+<dd>List of columns for target table </dd>
+</dl>
+<h3>Return Value</h3>
+<h3>If the function succeeds, the return value is TRUE.</h3>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print error 
+information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<h3>Remarks</h3>
+<p>The columns of th target table are specified by <i>projectList</i> which has the format '{' select_column_specifier ',' .... '}'. A 
+select_column_specifier is either a single column_name or table_name '.' column_name column_name. A 
+select_column_specifier specifies a column in <i>ppTable</i> and a column in either <i>pParentOne</i> or <i>pParentTwo</i>. </p>
+<h3>See Also</h3>
+<p><a href="#dsEquijoin">dsEquijoin</a>, <a href="#dsProjectTable">dsProjectTable</a> </p>
+</body>
+
+</html>

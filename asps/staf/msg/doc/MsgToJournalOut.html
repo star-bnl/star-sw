@@ -1,0 +1,16 @@
+<pre><h3>	void	MsgToJournalOut</h3></pre>
+<pre>
+(
+	
+/*  Inputs:                                                                                */
+	  const char *msg ) /* 1 or more line character-string message
+	                       submitted for display;  lines separated by "newline" characters.  */
+{
+/*  Description:  Write a message to the journal (only);  bypass accounting.
+	Unconditionally display a message msg on the journal file, if open & enabled.
+
+	Note that unlike the FORTRAN message call, there is no "Lines" argument;
+	lines are defined with "\n" (newline) characters.
+	However, the caller should NOT include a "\n" at the very end, since msg puts
+	a "\n" at the very end.  msg may have as many newlines as desired.  */
+</pre>

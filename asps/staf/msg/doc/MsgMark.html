@@ -1,0 +1,16 @@
+<pre><h3>	void	MsgMark</h3></pre>
+<pre>
+(
+
+/*  Inputs:                             */
+	  const char *Prefix /* MSG prefix    */
+
+/*  Input/Output:                       */
+	, int *ID  )   /* Fast-reference MSG ID.  Uniquely assigned on first call */
+{
+/*   Description: Set the given Prefix's "Marked CPU time" to current.
+	When this prefix occurs in a call to an MSG routine which does Msg accounting
+	(eg, Message), and when that Prefix has had its "Marked CPU time" set (ie,
+	to non-zero), that prefix's "total CPU time" is incremented by Current CPU
+	time, less the "Marked CPU time".  The Marked CPU time is then zeroed.  */
+</pre>

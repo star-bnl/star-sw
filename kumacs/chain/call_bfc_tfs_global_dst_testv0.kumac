@@ -1,0 +1,47 @@
+* 9/14/98 K. Turner (for 98h)
+* Run BFC in following manner:
+* - read in g2t file with 1000 test events with Lambda's (from Al Saulys)
+* - run tpc fast sim 
+* - run tpc tracking
+* - run global packages
+* - write xdf file containing full directories
+* PLUS ==> (see email from Al Saulys on 9/14/98 to Kathy)
+*  - writes out v0 table to ntuple
+*  - makes plot from ntuple
+*
+
+ exec $STAR/kumacs/chain/bfc _
+   TOP=$STAR _
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   gstar_settings=' field_only' _
+   domain=' geometry tpc ctf svt global' _
+   chain='  g2tin tpg tfs tpt tid tte_e drhd dehd evr egr ev0 ddedx dpnt desum dmsft drsum evout' _
+   skip=0 _
+   first=1 _
+   no_events=5 _
+   input_data_file=/star/mds/users/saulys/test/v0test-g2t.xdf _
+   output_file=v0test-g2t_tfs_global_dst _
+   log=bfc_tpc_sim_global_dst_testv0.log
+*
+*
+*Now read back in file and make an ntuple
+*
+  exec read_table_from_file#init inev v0test-g2t_tfs_global_dst.xdf 
+  exec write_table_to_ntuple#init_disk 21 testv0.ntup
+  exec read_table_from_file#read inev
+  do i=1,5
+    exec read_table_from_file#read inev
+    exec write_table_to_ntuple#write_event_disk 121 [dst]/ev0out    
+  enddo
+  exec read_table_from_file#close inev
+  exec write_table_to_ntuple#close_disk 21 121
+*
+* Now read in ntuple and make plot
+  hi/file 31 testv0.ntup 0
+  nt/li
+  nt/plot 121.inv_mass_la (inv_mass_la>1.1).and.(inv_mass_la<1.14)
+* 
+
+
+

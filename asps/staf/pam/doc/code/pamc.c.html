@@ -1,0 +1,123 @@
+<HTML>
+<PRE>
+<H2>file: pam/src/pamc.c</H2>
+
+
+/* This is a C template that you can use to begin
+** the coding of your module.  It was made by STAR's idl com-
+** piler, which also made a FORTRAN template. */
+/*------------------------------------------------------------------
+FILE:         pamc.c
+DESCRIPTION:  Physics Analysis Module template.
+AUTHOR:       hpl - H.P. Lovecraft, hplovecraft@cthulhu.void
+BUGS:         -- STILL IN DEVELOPMENT --
+HISTORY:      00jan96-v000a-hpl- Creation.
+------------------------------------------------------------------*/
+
+<B>#define <A NAME="MAX">MAX(</A>A,B) (A&gt;B ? A : B)</B>
+<B>#define <A NAME="MIN">MIN(</A>A,B) (A&lt;B ? A : B)</B>
+
+/*------------------------------------------------------------------
+ROUTINE:      long PAM
+DESCRIPTION:  Physics Analysis Module template.
+ARGUMENTS:    TB1     - table 1
+ARGUMENTS:    TB2     - table 2
+RETURN VALUE: STAF Condition Value
+------------------------------------------------------------------*/
+#include "<A HREF="pamc.h.html">pamc.h</A>"
+
+<B>long <A NAME="pamc_">pamc_(</A></B>
+  TABLE_HEAD_ST             *t1_h,        <A HREF="scalars.h.html#SCALARS_ST">SCALARS_ST</A>               *t1 ,
+  TABLE_HEAD_ST             *t2_h,        <A HREF="vectors.h.html#VECTORS_ST">VECTORS_ST</A>               *t2 ) {
+int i,j;
+
+printf("########################################\n");
+printf("###  pamc - fill tables \n");
+printf("########################################\n");
+
+printf(" name = (%20s) nok = (%d) maxlen = (%d)\n"      /*IGNORE*/
+        ,t1_h-&gt;name,t1_h-&gt;nok,t1_h-&gt;maxlen);            /*IGNORE*/
+printf(" name = (%20s) nok = (%d) maxlen = (%d)\n"      /*IGNORE*/
+        ,t2_h-&gt;name,t2_h-&gt;nok,t2_h-&gt;maxlen);            /*IGNORE*/
+
+  for(i=0;i&lt;(t1_h-&gt;nok);i++){
+     t1[i].aShort = i;
+     t1[i].aUshort = i;
+     t1[i].aLong = i;
+     t1[i].aUlong = i;
+     t1[i].aChar = '-';
+     t1[i].aOctet = i;
+     t1[i].aFloat = i;
+     t1[i].aDouble = i;
+  }
+  for(i=0;i&lt;(t2_h-&gt;nok);i++){
+     for(j=0;j&lt;3;j++){
+	t2[i].bShorts[j] = i+j;
+	t2[i].bUshorts[j] = i+j;
+	t2[i].bLongs[j] = i+j;
+	t2[i].bUlongs[j] = i+j;
+	t2[i].bChars[j] = '-';
+	t2[i].bOctets[j] = i+j;
+	t2[i].bFloats[j] = i+j;
+	t2[i].bDoubles[j] = i+j;
+     }
+  }
+
+  return STAFCV_OK;
+}
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

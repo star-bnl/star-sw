@@ -1,0 +1,9 @@
+macro init
+ macro/global/import *
+
+* cd [params]/global/evrpars
+* cd /dui
+
+return
+
+*********************************************

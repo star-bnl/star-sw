@@ -1,0 +1,18 @@
+/*  dst_dedx.idl                   */
+/*  Table:  dst_dedx               */
+
+/*   Comments: Contains dE/dx and number of used hits information for 
+ *             SVT, TPC and FTPC where appropriate for the charged tracks 
+ *             in dst_track. For tracks with both SVT and TPC dE/dx  
+ *             information this table fills two rows [with the same F.key 
+ *             to the corresponding dst_track.
+ */
+
+ struct dst_dedx   {
+  long   id_track;      /* F.key to dst_track                             */
+  long   det_id;        /* Detector ID - SVT, TPC, FTPC                   */
+  long   iflag;         /* Quality/status of extacted dE/dx               */
+  long   ndedx;         /* number of points used in dE/dx calcu.          */
+  float  dedx[2];       /* Mean, most prob., or other dE/dx; and variance */
+ } ;
+/*  Last mod. for dst_dedx:   $Date: 1998/06/03 22:26:50 $ */

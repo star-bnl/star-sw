@@ -1,0 +1,18 @@
+<pre><h3>	void	MsgTimeStampOut</h3></pre>
+<pre>
+(
+
+/*  Inputs:   */
+	int LUN ) /* FORTRAN logical unit number for time-stamp to be written on.  */
+{
+/* Description:  Compatibility routine -- don't use in new code.
+	             ---->  Use MsgTimeStampFileOut instead.  <----
+	"Stamp" the date and time on a line on FORTRAN logical unit LUN.
+	"Stamp" the node-name on the same line, if node-name has been specified
+	with a "call msg_name_node(<node_name>)".
+	Also stamps an elapsed real-time counter and an elapsed CPU-time counter,
+	as 17-character ASCII strings.
+
+	Always produces output.
+*/
+</pre>

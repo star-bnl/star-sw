@@ -1,0 +1,92 @@
+<HTML>
+<PRE>
+<H2>file: asu/inc/stafCorba.h</H2>
+
+
+/*Copyright 1996, Lawrence Berkeley National Laboratory */
+/*
+** FAKE CORBA.h for use with purely co-located executables that cannot
+** link to a real CORBA implementation.
+*/
+#ifdef							  CORBA
+
+<B>#define <A NAME="NEW">NEW(</A>A) new A_i</B>
+<B>#define <A NAME="BIND">BIND(</A>A) A_i::_bind</B>
+<B>#define <A NAME="RELEASE">RELEASE(</A>A) A_i-&gt;_release()</B>
+<B>#define <A NAME="DELETE">DELETE(</A>A) A_i-&gt;_release()</B>
+<B>#define <A NAME="CORBA_TIE">CORBA_TIE(</A>A) "DEF_TIE_" #A "_i(" #A ")"</B>
+
+#else							/*CORBA*/
+
+<B>#define <A NAME="NEW">NEW(</A>A) new A</B>
+<B>#define <A NAME="BIND">BIND(</A>A) new A</B>
+<B>#define <A NAME="RELEASE">RELEASE(</A>A) delete A</B>
+<B>#define <A NAME="DELETE">DELETE(</A>A) delete A</B>
+<B>#define <A NAME="CORBA_TIE">CORBA_TIE(</A>A)</B>
+
+#endif							/*CORBA*/
+
+                                        /* define CORBA sequences */
+<B>#define <A NAME="TYPEDEF_SEQUENCE">TYPEDEF_SEQUENCE(</A>AAA,BBB) \</B>
+typedef struct _ ## BBB { \
+   unsigned long _maximum; \
+   unsigned long _length; \
+   AAA *_buffer; \
+} BBB ;
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

@@ -1,0 +1,36 @@
+/*  dst_monitor_soft_filler.idl  
+ *  
+ *  Module: dst_monitor_soft_filler
+ *
+ *  Description:  DST level software reconstruction monitor 
+ */
+
+#include "PAM.idl"
+#include "tcl_tpcluster.idl"
+#include "scs_cluster.idl"
+#include "tcl_tphit.idl"
+#include "scs_spt.idl"
+#include "tpt_track.idl"
+#include "stk_track.idl"
+#include "svm_evt_match.idl"
+#include "ctu_cor.idl"
+#include "dst_vertex.idl"
+#include "dst_event_summary.idl"
+#include "dst_monitor_soft.idl"
+
+interface dst_monitor_soft_filler : amiModule {
+             STAFCV_T call
+                     ( in     tcl_tpcluster     tcl_tpcluster,
+                       in     scs_cluster       scs_cluster,
+                       in     tcl_tphit         tcl_tphit,
+                       in     scs_spt           scs_spt,
+                       in     tpt_track         tpt_track,
+                       in     stk_track         stk_track,
+                       in     svm_evt_match     svm_evt_match,
+                       in     ctu_cor           ctu_cor,
+                       in     dst_vertex        dst_vertex,
+                       in     dst_event_summary dst_event_summary,
+                      out     dst_monitor_soft  dst_monitor_soft
+             );
+     };
+     /*  Last mod. for dst_monitor_soft_filler $Date: 1998/08/12 16:34:57 $ */

@@ -1,0 +1,20 @@
+* 9/14/98 K. Turner (for 98h)
+* Run BFC in following manner:
+* - read in simulated data file (thru tss & srs)
+* - run tpc & svt clustering
+* - run tpc & svt tracking
+* - write xdf file containing full directories
+
+ exec $STAR/kumacs/chain/bfc _
+   TOP=$STAR _
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   gstar_settings=' field_only' _
+   domain=' geometry tpc svt global ' _
+   chain=' evin tpg svg tcl tcl_e tpt tid tte_e sgr evout' _
+   skip=0 _
+   first=1 _
+   no_events=1 _
+   input_data_file=/star/data/kathy/set100_01_1ev.xdf _
+   output_file=set100_01_1ev_trks _                  _
+   log=bfc_reco_trk.log

@@ -1,0 +1,16 @@
+/* tpi_pid.idl*/
+#include "PAM.idl"
+#include "tpipar.idl"
+#include "tpt_track.idl"
+#include "egr_globtrk.idl"
+#include "epi_hypo_pid.idl"
+
+interface tpi_pid : amiModule {
+             STAFCV_T call
+                     ( inout tpipar parm,  
+                       in tpt_track trk,
+                       inout egr_globtrk gl,
+                       inout epi_hypo_pid hypo	
+             );
+     };
+     /*  Last mod. for tde_new.idl $Date: 1998/01/27 01:54:49 $ */

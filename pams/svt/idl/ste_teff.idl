@@ -1,0 +1,18 @@
+/*   ste_teff.idl
+*   Table: ste_teff
+*        description: SVT tracking efficiency                 
+*/
+	 struct ste_teff {
+       long      nctrk[10];  /* number of candidate trks with nspt=i */
+       long      nctrktot;   /* total number of trk candidates */
+       long      ndiff[10];  /* number of tracks with nrspt-ngspt+1 */
+       long      ngtrk[10];  /* number of trks with i+1 good spts */
+       long      ngtrktot;   /* total number of perfect reconstruction */
+       long      nrtrk[10];  /* number mc trks with i spts */
+       long      nrtrktot;   /* total number of mc tracks */
+       long      nspt[10];   /* number of spts on layer i */
+       long      nsptnot[10];/* number of spts not assigned on layer i */
+       long      nspttot;    /* total number of spts */
+   };
+/*  Last mod. for ste_teff: $Date: 1997/12/31 14:33:40 $ */
+

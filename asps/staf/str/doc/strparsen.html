@@ -1,0 +1,31 @@
+<pre><h3>LOGICAL FUNCTION STRPARSEN(S,SPT,D)</h3>
+
+
+*  Input:
+	CHARACTER*(*) S !Character string containing one or more "arguments"
+*                        separated from one another by "separators".
+
+*  Input/Output:
+	INTEGER SPT     !Index to a starting point in S, advanced to the next
+*                        starting point after each call to STRPARSEN.
+
+*  Output:
+	CHARACTER*(*) D !Returned with the single argument from S, indexed by
+*                        SPT upon the call to STRPARSEN.
+
+*  Return values:
+*	Return .TRUE. if a next (now, this) argument exists, .FALSE. otherwise.
+
+*  Description:
+*	Parse the next argument out of S and into D.
+*	Leave SPT pointing at the space after the argument parsed,
+*	or at SMAX.  Call STRPARSEN in a loop until it returns false,
+*	giving it a different D each time (D is usually a dimensioned
+*	array);  this parses out the arguments in S.  Separators are:
+*	space, tab, comma, and equal-sign.  The equal-sign is a special
+*	separator in that it is also returned as an argument.  This permits
+*	checking externally to STRPARSEN that equal signs occur where they
+*	are supposed to.  To keep spaces or "=" in a single argument, embed
+*	the whole argument in double quotes "".
+
+</pre>

@@ -1,0 +1,107 @@
+*	msg_initialization.template -- the msg package-initialization-calls template.
+
+*	This is an msg template -- replace items enclosed in <brackets> with application-
+*	specific values and names.  Some numbers, such as message-lengths of 132, may be
+*	changed or kept, as needed;  the values shown are the most general or the most
+*	common and almost always can be used as-is.  Inline comments indicate which of
+*	these may be safely changed.  3 or more blank lines indicate application-specific
+*	code may reside there.
+
+*	Application-specified values:
+*	<Journal LUN>          INTEGER*4
+*	<Journal Filename>     CHARACTER*(*)
+*	<Subroutine Name>      CHARACTER*(*)
+*	<Prefix>               CHARACTER*(*)
+*	<Count Limit>          INTEGER*4
+*	<Abort Limit>          INTEGER*4
+*	<LUN>                  INTEGER*4
+*	<Event Count>          INTEGER*4
+*	<Summary Page Length>  INTEGER*4
+
+
+
+*******************************************************************************************
+*	Omit this if no journal is wanted:
+
+*	The msg journal file LUN:
+	INTEGER Journal_LUN_P
+	PARAMETER ( Journal_LUN_P = '<Journal LUN>' )
+
+*	The msg journal filename:
+	CHARACTER*(*) Journal_Filename_P
+	PARAMETER ( Journal_Filename_P = '<Journal Filename>' )
+
+*	msg fast-reference ID for a possible journal file open-failure message:
+	INTEGER ID_msg_Journal_open_error
+	SAVE ID_msg_Journal_open_error       !Keep it static, or it does no good.
+	LOGICAL MSG_Journal_Open             !Function declaration.
+
+
+
+	DATA ID_msg_Journal_open_error /0/   !Initialize all fast-reference IDs to 0.
+*******************************************************************************************
+
+
+
+*	If no journal is wanted, Journal_LUN_P may be zero:
+	CALL MSG_Ini( Journal_LUN_P )        !Initialize msg and specify the journal-LUN.
+
+*	Omit this if no journal is wanted -- "-E1" may be changed:
+	IF ( .NOT. MSG_Journal_Open( Journal_Filename_P ) ) THEN
+	  CALL MESSAGE('<Subroutine Name>-E1 Failed to open journal [' // Journal_Filename_P // '].'
+     1	              , 1, ID_msg_Journal_open_error )
+	END IF
+
+
+*	Some typical set-items.  Wildcard useage is limited;  wildcard must be a suffix or the only
+*	character.  A single-character wildcard has the unique attribute of affecting all messages,
+*	present and future, whereas other wildards affect only present messages.
+
+*	(Optional)  Set the number of lines on a summary page (66 is default):
+	CALL MSG_Set_Summary_Page_Length( <Summary Page Length> )
+*	Or:
+	CALL MSG_Set_by_Command( 'LINES <Summary Page Length>' )
+
+*	Limit the number of messages from any one source to <Count Limit>:
+	CALL MSG_Set_Limit( '*', <Count Limit> )  !Wildcard ==> affects all messages, present & future.
+*	Or:
+	CALL MSG_Set_by_Command( 'LIMIT *=<Count Limit>' )
+
+*	Limit a specific message-prefix to have no count-limit:
+	CALL MSG_Set_Limit( '<Prefix>', 0 )
+*	Or:
+	CALL MSG_Set_by_Command( 'LIMIT <Prefix>=0' )
+
+*	Set an abort-limit on a message:
+	CALL MSG_Set_Abort_Limit( '<Prefix>', <Abort Limit> )
+*	Or:
+	CALL MSG_Set_by_Command( 'ABORT <Prefix>=<Abort Limit>' )
+
+*	Enable a trace message (see msg_trace.template):
+	CALL MSG_Enable( '<Prefix>' )
+*	Or:
+	CALL MSG_Set_by_Command( 'ENABLE <Prefix>' )
+
+*	Disable a message:
+	CALL MSG_Disable( '<Prefix>' )
+*	Or:
+	CALL MSG_Set_by_Command( 'DISABLE <Prefix>' )
+
+
+
+
+*	Get a msg summary:
+	CALL MSG_Summary( <LUN> ) !Normally, <LUN> is Journal_LUN_P.
+
+*	Get a msg summary with occurance-frequencies, wrt caller-specified <Event Count>:
+	CALL MSG_Summary_Event( <LUN>,  <Event Count> )
+
+
+
+
+*	Close journal file:
+*	Note that a fast reference ID isn't used (it's always optional -- it only
+*	affects the CPU usage). "-E2" may be changed.
+	IF (.NOT.MSG_Journal_Close()) THEN !Failure:
+	  CALL MESSAGE('<Subroutine name>-E2 Failed to close journal file', 1, -1 )
+	END IF

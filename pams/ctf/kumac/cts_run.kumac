@@ -1,0 +1,19 @@
+macro cts_run 
+   
+   macro/global/import *
+*
+*   
+*    Call cts
+*
+ami/mod/call cts [geant_Event]/g2t_ctb_hit _
+                 [geant_Event]/g2t_track   _
+                 [params]/ctf/ctg/ctb _ 
+                 [params]/ctf/ctg/ctb_slat _
+                 [params]/ctf/ctg/ctb_slat_phi _
+                 [params]/ctf/ctg/ctb_slat_eta _
+                 [params]/ctf/cts/cts          _
+                 [data]/ctf/ctb_event      _
+                 [data]/ctf/ctb_mslat      _
+                 [data]/ctf/ctb_raw
+
+return

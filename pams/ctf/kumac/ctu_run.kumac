@@ -1,0 +1,12 @@
+macro ctu_run 
+  macro/global/import *
+*
+*   
+*    Call cts
+*
+ami/mod/call ctu [params]/ctf/ctg/ctb _ 
+                 [params]/ctf/ctg/ctb_slat _
+                 [data]/ctf/ctb_raw _
+                 [data]/ctf/ctb_cor
+
+ return

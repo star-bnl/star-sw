@@ -1,0 +1,63 @@
+//:Copyright 1996, Lawrence Berkeley National Laboratory
+//:>--------------------------------------------------------------------
+//:FILE:        tntI.idl
+//:DESCRIPTION: Interface Definition Language file for TNT
+//:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:        -- STILL IN DEVELOPMENT --
+//:HISTORY:     16jan97-v020a-cet,pj- only CWN class
+//:HISTORY:     17dec96-v010a-cet- seperate tnt_types.idl
+//:HISTORY:     30may96-v000a-cet- creation
+//:<--------------------------------------------------------------------
+
+//:----------------------------------------------- INCLUDES           --
+#include "tdmI.idl"
+#include "tntItypes.idl"
+
+//:####################################################################
+//:=============================================== INTERFACE         ==
+interface tntNtupleI : socObjectI {
+//:----------------------------------------------- ATTRIBUTES        --
+readonly attribute long hid;
+readonly attribute string title;
+readonly attribute long entryCount;
+readonly attribute long columnCount;
+
+//:----------------------------------------------- FUNCTIONS         --
+string tag(in long iColumn);
+STAFCV_T import(in tdmTableI table);
+STAFCV_T append(in tdmTableI table);
+STAFCV_T clear();
+STAFCV_T export(in tdmTableI table);
+STAFCV_T show();
+STAFCV_T print(in long ifirst, in long nrows);
+}; /* tntNtupleI */
+
+//:####################################################################
+//:=============================================== INTERFACE         ==
+interface tntCWNtupleI : tntNtupleI {
+//:----------------------------------------------- ATTRIBUTES        --
+readonly attribute long blockCount;
+
+//:----------------------------------------------- FUNCTIONS         --
+string chform(in long iBlock);
+string blockName(in long iBlock);
+
+}; /* tntCWNtupleI */
+
+//:####################################################################
+//:=============================================== INTERFACE         ==
+interface tntFactoryI : socCatalogI {
+//:----------------------------------------------- ATTRIBUTES        --
+// **NONE**
+
+//:----------------------------------------------- FUNCTIONS         --
+STAFCV_T deleteCWNtuple(in long hid);
+tntCWNtupleI findCWNtuple(in long hid);
+tntCWNtupleI getCWNtuple(in IDREF_T id);
+tntCWNtupleI newCWNtuple(in long hid, in string title
+		, in tdmTableI table);
+
+}; /* tntFactoryI */
+
+//:####################################################################
+

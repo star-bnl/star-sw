@@ -1,0 +1,18 @@
+<pre><h3>SUBROUTINE STRIP(S,EPT)</h3>
+
+
+*  Input/output:
+	CHARACTER*(*) S  !Character string containing possible trailing
+*                         blanks and comments (comments indicated by "!").
+*                         S is returned with trailing comments blanked out.
+*  Output:
+	INTEGER EPT      !Index to the last non-blank character in S, after
+*                         comments have been removed.
+
+*  Description:
+*	Routine to strip off comments (and trailing blanks) at the end
+*	of "command" lines, where comments are denoted by the usual
+*	exclamation mark (!).  Leave EPT pointing at last non-blank.
+*	No null is appended.
+
+</pre>

@@ -1,0 +1,15 @@
+<pre><h3>	void	MsgGetLUN</h3></pre>
+<pre>
+(
+
+/*  Outputs:                                                                          */
+	int *Terminal_LUN  /* Fortran logical unit number of terminal, always 6.      */
+      ,	int *Journal_LUN ) /* (Substitute for) Fortran LUN of journal file, always 0. */
+
+{
+/* Description:  Compatibility routine -- don't use in new code.
+	             ---->  Use MsgGetFile instead.  <----
+	Get the message handler terminal and journal LUNs and pass them
+	to the caller.
+*/
+</pre>

@@ -1,0 +1,25 @@
+<pre><h3>void strcf</h3></pre>
+<pre>
+(
+/*  Inputs:   */
+
+	 char *ctext        /*  Text-string, from a C routine.                  */
+	,int ctext_length   /*  Text-string-length -- from a C routine.         */
+	,int ftext_length   /*  Text-string-length -- to a FORTRAN routine. */
+    
+/*  Outputs:  */
+
+	,char *ftext        /*  Text-string, to a FORTRAN routine.          */
+	,int *ftext_lnb     /*  Last non-blank in ftext, c-index.           */
+
+	        )
+
+/*  Description:     Convert a C-defined text-string into a FORTRAN-suitable string.
+
+	Take a text-string, defined in a C routine and to be passed into
+a FORTRAN routine, and copy it into a text-string defined in that C routine.
+All characters in the text for the FORTRAN routine from the null to the
+end of ftext are replaced with blanks.
+
+*/
+</pre>

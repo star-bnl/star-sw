@@ -1,0 +1,144 @@
+//:Copyright 1995, Lawrence Berkeley Laboratory
+//:>--------------------------------------------------------------------
+//:FILE:        socI.idl
+//:DESCRIPTION: Service & Objcect Catalog interface definition
+//:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:        -- NONE KNOWN : STILL IN DEVELOPMENT --
+//:HISTORY:     31jan97-v002a-cet- update to I convention
+//:HISTORY:     13nov95-v001a-cet- update to _i convention for
+//:HISTORY:		interface, not implementation
+//:HISTORY:     21jul95-v000a-cet- creation
+//:<--------------------------------------------------------------------
+
+//:----------------------------------------------- INCLUDES           --
+#include "asuItypes.idl"
+
+//:----------------------------------------------- TYPEDEFS           --
+#include "socItypes.idl"
+
+//:#####################################################################
+//:=============================================== INTERFACE          ==
+interface socObjectI {
+
+//:----------------------------------------------- ATTRIBUTES         --
+readonly attribute IDREF_T idRef;
+		/* An unique identifier of an socObject which can be
+		used to locate the object from within any programming
+		language. It is analogous to the object pointer in C++.
+		N.B. This should NOT be considered an index number. */
+readonly attribute string name;
+		/* An identifying string unique within a type (class)
+		of object. A name/type combination uniquely identifies
+		an individual object. */
+readonly attribute string type;
+		/* A string defining the C++ class of the object. A
+		name/type combination uniquely identifies an individual
+		object. */
+readonly attribute string version;
+		/* The version of the software release from which the
+		object was created. */
+readonly attribute SOC_PTR_T ptr;
+		/* A swizzled (integerized) object pointer which can be
+		used for internal consistency checks and/or some fancy
+		C++ manipulations.
+		Q. - Should this be a protected (non-idl) attribute? */
+attribute boolean locked;
+		/* Objects can be locked and unlocked. A locked object
+		cannot be deleted (using normal methods) until it has
+		been unlocked. This is primarily a safety feature. */
+readonly attribute string listing;
+		/* A one-line (char[79]) listing of the object
+		useful for summary listings of many objects. */
+//readonly attribute string soRef;
+		/* The Orbix-like Stringafied Object Reference (SOR) is
+                a globally unique identifier of an object.
+                N.B. - NOT YET IMPLEMENTED.  */
+
+//readonly attribute long referenceCount;
+		/*
+                N.B. - NOT YET IMPLEMENTED.  */
+
+//:----------------------------------------------- FUNCTIONS          --
+//STAFCV_T reference();
+		/*
+                N.B. - NOT YET IMPLEMENTED.  */
+//STAFCV_T unreference();
+		/*
+                N.B. - NOT YET IMPLEMENTED.  */
+
+//STAFCV_T release();
+		/* Release an object managed by an object factory. This
+		is analogous to an object destructor in C++.
+                N.B. - NOT YET IMPLEMENTED.  */
+boolean implementsInterface(in string iface);
+		/* Defines whether the object implements a particular
+		interface (by type string). */
+
+};
+
+//:#####################################################################
+//:=============================================== INTERFACE          ==
+interface socFactoryI : socObjectI {
+
+//:----------------------------------------------- ATTRIBUTES         --
+readonly attribute long count;			// count of man'd objs
+		/* The current number of objects managed by the object
+		factory. */
+readonly attribute long maxCount;		// max # objs managable
+		/* The maximum number of objects managable by the 
+		object factory.
+		N.B. This should be eventually removed.  */
+
+//:----------------------------------------------- FUNCTIONS          --
+string list();
+		/* List all managed objects in table format (one line
+		per object). */
+STAFCV_T addEntry(in IDREF_T idRef);
+		/* Add an entry for object #idRef to the object
+		factory's list of managed objects. */
+STAFCV_T deleteEntry(in IDREF_T idRef);
+		/* Delete an entry for object #idRef from the object
+		factory's list of managed objects. */
+IDREF_T entryID(in long n);
+		/* Get the idRef# of a managed object. */
+};
+
+//:#####################################################################
+//:=============================================== INTERFACE          ==
+interface socCatalogI : socFactoryI {
+
+//:----------------------------------------------- ATTRIBUTES         --
+// ** NONE **
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T bind(in string pkgName);
+STAFCV_T release(in string pkgName);
+STAFCV_T deleteID(in IDREF_T id);
+		/* Delete object with idRef# == id. */
+STAFCV_T deleteObject(in string name, in string type);
+		/* Delete a named and typed object. */
+socObjectI findInterface(in string type);
+		/* Find the "first" object which implements interface
+		"type" */
+socObjectI findObject(in string name, in string type);
+		/* Locate an object by name and type. */
+socObjectI findClass(in string type);
+		/* Find the "first" object of class "type" */
+socObjectI getObject(in IDREF_T id);
+		/* Locate an object by idRef#. */
+IDREF_T idObject(in string name, in string type);
+		/* Identify an object (return idRef#) by name and type.
+		*/
+socObjectI newObject(in string name);
+		/* Instantiate a new socObject. Analogous to a C++
+		constructor function. */
+IDREF_T nextIdRef();
+		/* Return the next valid idRef#. */
+IDREF_T signIn(in socObjectI obj);
+		/* Sign an object into the SOCatalog. 
+		N.B. This function may eventually be removed. */
+IDREF_T signOut(in IDREF_T idRef);
+		/* Sign out an object from the SOCatalog. 
+		N.B. This function may eventually be removed. */
+};
+

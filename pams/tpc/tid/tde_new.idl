@@ -1,0 +1,16 @@
+/* tde_new.idl*/
+#include "PAM.idl"
+#include "tdeparm.idl"
+#include "tpg_pad_plane.idl"
+#include "tcl_tphit.idl"
+#include "tpt_track.idl"
+
+interface tde_new : amiModule {
+             STAFCV_T call
+                     ( in tdeparm tdpar,
+                       inout tcl_tphit hit,
+		       inout tpt_track track,
+                       inout tpg_pad_plane pad	
+             );
+     };
+     /*  Last mod. for tde_new.idl $Date: 1998/01/27 01:54:48 $ */

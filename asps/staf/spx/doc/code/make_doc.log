@@ -1,0 +1,51 @@
+code:897% ln -s ../../../spx .
+code:898% ctoohtml `ls spx/src/*.c spx/src/*.cc spx/inc/*.h spx/inc/*.hh | egrep -v _def.c`
+ctoohtml version 1.2
+Parsing source files ...
+Parsing tag file ...
+Warning: unknown tag type found: "nCalls". File: spxClasses.cc, line 39 (may be ok)
+Warning: unknown tag type found: "hello". File: spxClasses.cc, line 45 (may be ok)
+Warning: unknown tag type found: "null". File: spxClasses.cc, line 52 (may be ok)
+Warning: unknown tag type found: "getTime". File: spxClasses.cc, line 58 (may be ok)
+Warning: unknown tag type found: "height". File: spxClasses.cc, line 95 (may be ok)
+Warning: unknown tag type found: "width". File: spxClasses.cc, line 100 (may be ok)
+Warning: unknown tag type found: "get". File: spxClasses.cc, line 105 (may be ok)
+Warning: unknown tag type found: "set". File: spxClasses.cc, line 112 (may be ok)
+Warning: unknown tag type found: "deleteDummy". File: spxClasses.cc, line 140 (may be ok)
+Warning: unknown tag type found: "deleteGrid". File: spxClasses.cc, line 153 (may be ok)
+Warning: unknown tag type found: "findDummy". File: spxClasses.cc, line 166 (may be ok)
+Warning: unknown tag type found: "findGrid". File: spxClasses.cc, line 178 (may be ok)
+Warning: unknown tag type found: "getDummy". File: spxClasses.cc, line 190 (may be ok)
+Warning: unknown tag type found: "getGrid". File: spxClasses.cc, line 205 (may be ok)
+Warning: unknown tag type found: "list". File: spxClasses.cc, line 220 (may be ok)
+Warning: unknown tag type found: "newDummy". File: spxClasses.cc, line 260 (may be ok)
+Warning: unknown tag type found: "newGrid". File: spxClasses.cc, line 275 (may be ok)
+57 tags found.
+Postprocessing tag information...
+Warning: overloaded tag (spxDummy) found.
+spxClasses.cc() and spxClasses.cc().
+Warning: overloaded tag (spxGrid) found.
+spxClasses.cc() and spxClasses.cc().
+Warning: overloaded tag (spxManager) found.
+spxClasses.cc() and spxClasses.cc().
+Generating HTML files...
+***********************************
+spxClasses.hh
+***********************************
+spx_macros.h
+***********************************
+spx_init.cc
+***********************************
+spxLib.h
+***********************************
+spx_types.h
+***********************************
+spx_kam.cc
+***********************************
+spx_codes.h
+***********************************
+spxClasses.cc
+Generating Index...
+Generating Tag Index...
+Generating File-sorted Tag Index...
+DONE.

@@ -1,0 +1,14 @@
+/*   ffs_gaspar.idl
+*   Table type: ffs_gaspar
+*        description: FFS gas-parameter description                     
+*/
+
+   struct ffs_gaspar {    
+	float	vdrift[4];  /* parameters of a P3-fit of drift-vel. */
+	float	tdrift[4];  /* parameters of a P3-fit of drift-time */
+	float	sig_rad[4]; /* parameters of a P3-fit of sigma(rad) */
+	float	sig_azi[4]; /* parameters of a P3-fit of sigma(azi) */
+   };
+
+/*  Last mod. for ffs_gaspar:   $Date: 1998/01/19 02:25:13 $  */
+

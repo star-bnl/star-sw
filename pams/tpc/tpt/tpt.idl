@@ -1,0 +1,18 @@
+/*	tpt.idl
+*
+*	Module: tpt
+*	description: TPC tracking
+*/
+#include "PAM.idl"
+#include "tpt_pars.idl"
+#include "tcl_tphit.idl"
+#include "tpt_track.idl"
+
+interface tpt : amiModule{
+	STAFCV_T call
+		( in    tpt_pars  tpar
+		, inout tcl_tphit hit
+		, out   tpt_track track
+		);
+};
+/* Last mod. for tpt: $Data$ */

@@ -1,0 +1,33 @@
+*  str/doc/strparse.template:
+
+*	This is a quick-substitute template for use in calling STRPARSE from
+*	application programs.
+
+*	To use STRPARSE, include this file and call STRPARSE as shown in the
+*	example.
+
+*	User modifies these:
+	INTEGER     Nargs_max !Maximum number of arguments available to be filled.
+	PARAMETER ( Nargs_max = 10 )
+
+	INTEGER     arg_length !Argument length.
+	PARAMETER ( arg_length = 80 )
+
+*	STRPARSE returns with these:
+	INTEGER               Nargs             !Number of arguments filled;  .le. Nargs_max.
+	CHARACTER*(arg_length) arg( Nargs_max ) !Filled with Nargs char. arguments from S.
+	DOUBLE PRECISION      Darg( Nargs_max ) !args translated as D.P. numbers, if possible.
+	INTEGER               Iarg( Nargs_max ) !args translated as integer numbers, if possible.
+	LOGICAL              VDarg( Nargs_max ) !Set true for each ARG with valid D.P. number.
+	LOGICAL              VIarg( Nargs_max ) !Set true for each ARG with valid integer number.
+
+*  STRParse call example -- "S" is a caller-supplied command-line character string:
+*	SUBROUTINE STRParse( S, Nargs_max, Nargs, arg, Darg, Iarg, VDarg, VIarg )
+
+*  STRParse Description:
+*	Parse out up to Nargs_max argument from S and into arg, Darg and Iarg.
+*	Argument separators are:
+*	space, tab, comma, and equal-sign.  The equal-sign is a special
+*	separator in that it is also returned as an argument.  This permits
+*	checking externally to STRParse that equal signs occur where they
+*	are supposed to.

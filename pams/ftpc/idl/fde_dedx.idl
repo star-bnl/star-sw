@@ -1,0 +1,22 @@
+/*   fde_dedx.idl
+*        Table type: fde_dedx
+*        Description: FDE output table                     
+*/
+
+   struct fde_dedx {    
+       long      id;         /* primary key */
+       long      track_type; /* track type */
+       long      ge_pid;     /* GEANT particle id */
+/*       float     charge; */    /* Charge */
+/*       float     p[3];   */    /* Momentum */
+       float     eta;        /* Pseudorapidity */
+       float     pt;         /* Transverse momentum */
+       float     ptot;       /* Total momentum */
+/*       float     e;      */    /* Energy */
+/*       float     rapidity;*/   /* Rapidity */
+       double    dedx;       /* mean ionization */
+/*       double    beta;   */    /* beta */
+/*       double    gamma;  */    /* gamma */
+       double    bega;      /* beta*gamma */
+   };
+/*  Last mod. for fde_dedx:   $Date: 1998/01/19 02:25:11 $  */

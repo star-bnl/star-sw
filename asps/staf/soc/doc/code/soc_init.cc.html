@@ -1,0 +1,127 @@
+<HTML>
+<PRE>
+<H2>file: soc/src/soc_init.cc</H2>
+
+
+//:Copyright 1995, Lawrence Berkeley National Laboratory
+//:&gt;--------------------------------------------------------------------
+//:FILE:	soc_init.C
+//:DESCRIPTION:	Functions  to initialize <A HREF="soc_macros.h.html#SOC">SOC</A> 
+//:AUTHOR:	cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:	-- STILL IN DEVELOPMENT --
+//:HISTORY:	14nov95-v000a-cet- creation
+//:&lt;--------------------------------------------------------------------
+
+#include &lt;stdio.h&gt;
+#include "asuLib.h"
+#include "emlLib.h"
+#include "<A HREF="soc_macros.h.html">soc_macros.h</A>"
+#include "<A HREF="soc_types.h.html">soc_types.h</A>"
+#include "soc_globals.h"
+
+socCatalog *soc;
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#soc_init">soc_init(</A>)
+//:DESCRIPTION:	Initialize <A HREF="soc_macros.h.html#SOC">SOC</A>
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="soc_init">soc_init(</A>)</B>
+{
+   EML_MESSAGE("Initializing <A HREF="soc_macros.h.html#SOC">SOC</A>.");
+
+/*- Define the <A HREF="soc_macros.h.html#SOC">SOC</A> KUIP commands. -*/
+   soc_def_();
+
+   return TRUE;
+}
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#soc_start">soc_start(</A>)
+//:DESCRIPTION:	Start <A HREF="soc_macros.h.html#SOC">SOC</A>
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="soc_start">soc_start(</A>)</B>
+{
+   EML_MESSAGE("Starting <A HREF="soc_macros.h.html#SOC">SOC</A>.");
+
+/*- Create the <A HREF="soc_macros.h.html#SOC">SOC</A> Catalog. -*/
+   soc = new <U>socCatalog(</U>);        //OVERLOAD CALL: socCatalog: <A HREF="socClasses.cc.html#socCatalog">socClasses.cc(?)</A>, <A HREF="socClasses.cc.html#socCatalog">socClasses.cc(?)</A>
+
+   return TRUE;
+}
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#soc_stop">soc_stop(</A>)
+//:DESCRIPTION:	Stop <A HREF="soc_macros.h.html#SOC">SOC</A>
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="soc_stop">soc_stop(</A>)</B>
+{
+   EML_MESSAGE("Stopping <A HREF="soc_macros.h.html#SOC">SOC</A>.");
+
+/*- Delete the <A HREF="soc_macros.h.html#SOC">SOC</A> Catalog. -*/
+   delete soc;
+
+   return TRUE;
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

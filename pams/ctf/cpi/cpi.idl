@@ -1,0 +1,18 @@
+//
+//        description: CTF particle id
+//
+#include "PAM.idl"
+#include "cpi_para.idl"
+#include "egr_globtrk.idl"
+#include "cte_extra.idl"
+#include "epi_hypo_pid.idl"
+
+interface cpi: amiModule {
+        STAFCV_T call
+                ( inout cpi_para     para     
+                , inout egr_globtrk  track
+                , inout cte_extra    extra  
+                , inout epi_hypo_pid hypo_pid
+                );
+};
+

@@ -1,0 +1,137 @@
+<HTML>
+<PRE>
+<H2>file: soc/inc/soc_types.h</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         soc_types.h
+*:DESCRIPTION:  Variable types for <A HREF="soc_macros.h.html#SOC">SOC</A>
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      14nov95-v000b-cet- rename from <A HREF="soc_macros.h.html#SOC">SOC</A>.h
+*:HISTORY:      26jul95-v000a-cet- creation
+*:&lt;---------------------------------------------------------------------
+*/
+#ifndef <A HREF="#SOC_TYPES_H">SOC_TYPES_H</A>
+<B>#define <A NAME="SOC_TYPES_H">SOC_TYPES_H</A></B>
+
+/*-------------------------------------------- INCLUDES             --*/
+#include "<A HREF="soc_macros.h.html">soc_macros.h</A>"
+
+/*-------------------------------------------- CORBA                --*/
+#ifdef CORBA
+#include "soc_i.hh"
+#endif
+
+/*-------------------------------------------- TYPEDEFS             --*/
+#ifndef CORBA
+
+#include "stafCorba.h"
+
+<B>typedef long <A NAME="IDREF_T">IDREF_T</A>;			/* reference ID */</B>
+
+<B>typedef long <A NAME="SOC_PTR_T">SOC_PTR_T</A>;			/* pointer <A HREF="socClasses.cc.html#type">type</A> */</B>
+
+#ifndef CHAR_SEQ_T
+TYPEDEF_SEQUENCE(char,CHAR_SEQ_T);
+TYPEDEF_SEQUENCE(unsigned char,OCTET_SEQ_T);
+TYPEDEF_SEQUENCE(short,SHORT_SEQ_T);
+TYPEDEF_SEQUENCE(unsigned short,USHORT_SEQ_T);
+TYPEDEF_SEQUENCE(long,LONG_SEQ_T);
+TYPEDEF_SEQUENCE(unsigned long,ULONG_SEQ_T);
+TYPEDEF_SEQUENCE(float,FLOAT_SEQ_T);
+TYPEDEF_SEQUENCE(double,DOUBLE_SEQ_T);
+TYPEDEF_SEQUENCE(char*,STRING_SEQ_T);
+#endif /*CHAR_SEQ_T*/
+
+#endif
+
+/*-------------------------------------------- GLOBALS              --*/
+/*-------------------------------------------- PROTOTYPES           --*/
+extern CC_P int <A HREF="soc_init.cc.html#soc_init">soc_init(</A>);
+extern CC_P int <A HREF="soc_init.cc.html#soc_start">soc_start(</A>);
+extern CC_P int <A HREF="soc_init.cc.html#soc_stop">soc_stop(</A>);
+extern CC_P void soc_def_();
+
+extern CC_P void <A HREF="soc_kam.cc.html#kam_soc_bind_">kam_soc_bind_(</A>);
+extern CC_P void <A HREF="soc_kam.cc.html#kam_soc_release_">kam_soc_release_(</A>);
+extern CC_P void <A HREF="soc_kam.cc.html#kam_soc_count_">kam_soc_count_(</A>);
+extern CC_P void <A HREF="soc_kam.cc.html#kam_soc_deleteid_">kam_soc_deleteid_(</A>);
+extern CC_P void <A HREF="soc_kam.cc.html#kam_soc_deleteobject_">kam_soc_deleteobject_(</A>);
+extern CC_P void kam_soc_findobject_();
+extern CC_P void <A HREF="soc_kam.cc.html#kam_soc_idobject_">kam_soc_idobject_(</A>);
+extern CC_P void <A HREF="soc_kam.cc.html#kam_soc_list_">kam_soc_list_(</A>);
+extern CC_P void <A HREF="soc_kam.cc.html#kam_soc_newobject_">kam_soc_newobject_(</A>);
+extern CC_P void <A HREF="soc_kam.cc.html#kam_socobject_name_">kam_socobject_name_(</A>);
+extern CC_P void <A HREF="soc_kam.cc.html#kam_socobject_type_">kam_socobject_type_(</A>);
+extern CC_P int <A HREF="soc_kam.cc.html#kam_soc_bind">kam_soc_bind(</A>);
+extern CC_P int <A HREF="soc_kam.cc.html#kam_soc_release">kam_soc_release(</A>);
+extern CC_P int <A HREF="soc_kam.cc.html#kam_soc_count">kam_soc_count(</A>);
+extern CC_P int <A HREF="soc_kam.cc.html#kam_soc_deleteid">kam_soc_deleteid(</A>);
+extern CC_P int <A HREF="soc_kam.cc.html#kam_soc_deleteobject">kam_soc_deleteobject(</A>);
+extern CC_P int kam_soc_findobject();
+extern CC_P int <A HREF="soc_kam.cc.html#kam_soc_idobject">kam_soc_idobject(</A>);
+extern CC_P int <A HREF="soc_kam.cc.html#kam_soc_list">kam_soc_list(</A>);
+extern CC_P int <A HREF="soc_kam.cc.html#kam_soc_newobject">kam_soc_newobject(</A>);
+extern CC_P int <A HREF="soc_kam.cc.html#kam_socobject_name">kam_socobject_name(</A>);
+extern CC_P int <A HREF="soc_kam.cc.html#kam_socobject_type">kam_socobject_type(</A>);
+
+#endif /* <A HREF="#SOC_TYPES_H">SOC_TYPES_H</A> */
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

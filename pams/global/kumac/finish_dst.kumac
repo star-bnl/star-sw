@@ -1,0 +1,30 @@
+**********************************************************
+ 
+ macro dst_run_summary
+   
+     macro/global/import *
+
+       message ' finish_dst: macro dst_run_summary '
+       message '     #events total,good = ', [nevdsttot], [nevdstgood] 
+
+*** This must all be filled at END of job!!!
+
+  cd  [run_dst]
+
+  tdm/table/cell/putvalue  'run_summary[0].version'        'V1.0'
+  tdm/table/cell/putvalue  'run_summary[0].cpu_total'      $cptime
+  tdm/table/cell/putvalue  'run_summary[0].n_events_tot'   [nevdsttot]
+  tdm/table/cell/putvalue  'run_summary[0].n_events_good'  [nevdstgood]
+ 
+  tdm/table/cell/getvalue  'run_summary[0].cpu_total'
+  tdm/table/cell/getvalue  'run_summary[0].version'
+  tdm/table/cell/getvalue  'run_summary[0].n_events_tot'
+  tdm/table/cell/getvalue  'run_summary[0].n_events_good'
+
+  cd /dui
+
+ return
+
+****************************************************************
+
+

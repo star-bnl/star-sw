@@ -1,0 +1,16 @@
+/*****************************************************************************
+*   Table: emc_pedestal
+*        description: Table which contains pedestal ADC channels
+*        auther:      OGAWA, Akio
+*/
+   struct emc_pedestal { 
+       long        run;           /* run number */
+       long        date;          /* date */
+       long        time;          /* time */
+       long        flag;          /* flag */
+       long        det;           /* see emc_def.h */
+       long        neta;          /* number of eta bin */
+       long        nphi;          /* number of phi bin */
+       short       ped[120][40]; /* pedestal for low energy ADC channel */
+   };
+

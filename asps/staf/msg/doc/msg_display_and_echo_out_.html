@@ -1,0 +1,18 @@
+<pre><h3>	void	msg_display_and_echo_out_</h3></pre>
+<pre>
+( const char *msg, int *Lines, int *LUN, int msglen )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	SUBROUTINE			MSG_Display_and_Echo_Out( msg, Lines, LUN )
+
+*   Inputs:
+	CHARACTER*(*) msg(*) !1 or more line character-string message
+	                     !submitted for display.
+	INTEGER Lines   !Number of lines in msg.
+	INTEGER LUN     !Fortran logical unit number for msg to be echoed to.
+
+*   Description:  Display a message, echo on a Fortran LUN, and bypass accounting.
+	Display a message msg, containing Lines lines
+	on the terminal, and echo the display on
+	Fortran logical unit LUN.
+*/
+</pre>

@@ -1,0 +1,21 @@
+<pre><h3>	void	msg_set_abort_limit_</h3></pre>
+<pre>
+( const char *Prefix, int *Limit, int length )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	SUBROUTINE			MSG_Set_Abort_Limit( Prefix, Limit )
+
+*  Inputs:
+	CHARACTER*(*) Prefix !A message prefix.
+	INTEGER Limit !Maximum no. of times to display a message before aborting.
+
+*  Description:  Set abort limit for a prefix.
+	Set the abort limit for the message recognized by Prefix;
+	Program termination results when the prefix's
+	count has exceeded Limit.  Wildcards are permitted.
+	The existing count-limit (after which message-display is disabled
+	for Prefix), is set to the same value -- aborting msg calls
+	should not be quiet without deliberate intervention (ie, re-specify
+	the count-limit after this call to obtain silent aborts -- don't
+	do it!).
+*/
+</pre>

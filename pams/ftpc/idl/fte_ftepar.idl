@@ -1,0 +1,20 @@
+/*   fte_ftepar.idl
+*
+*   Table: ftepar
+*        description: Parameters for the momentum rec. in FTPC
+*
+*/
+
+   /*******************  Row struct *******************/
+   struct fte_ftepar {    
+       long      debug[10];  /* Flags for debug print */
+       long      sizer;      /* # of padplanes */
+       long      void1;      /* not used yet */
+       long      void2;      /* not used yet */
+       long      void3;      /* not used yet */
+       float     void4;      /* not used yet */
+       float     void5;      /* not used yet */
+       float     void6;      /* not used yet */
+   };
+
+/*  Last mod. for fte_ftepar: $Date: 1998/03/30 09:37:28 $ */

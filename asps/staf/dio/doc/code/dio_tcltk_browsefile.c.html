@@ -1,0 +1,79 @@
+<HTML>
+<PRE>
+<H2>file: dio/src/dio_tcltk_browsefile.c</H2>
+
+
+
+#include &lt;strings.h&gt;
+#include "<A HREF="dio_types.h.html">dio_types.h</A>"
+
+<B>#define <A NAME="NAME_D">NAME_D</A> "i_changed"</B>
+<B>#define <A NAME="FILE_D">FILE_D</A> "./output_test.xdf"</B>
+<B>#define <A NAME="MODE_D">MODE_D</A> DIO_WRITE_MODE</B>
+
+<B>int <A NAME="dio_tcltk_browsefile">dio_tcltk_browsefile(</A>char** name, char** file, <A HREF="dio_types.h.html#DIO_MODE_T">DIO_MODE_T</A> *iomode)</B>
+{
+	*name = (char*)malloc(strlen(<A HREF="#NAME_D">NAME_D</A>)+1);
+	strcpy(*name,<A HREF="#NAME_D">NAME_D</A>);
+	*file = (char*)malloc(strlen(<A HREF="#FILE_D">FILE_D</A>)+1);
+	strcpy(*file,<A HREF="#FILE_D">FILE_D</A>);
+	*iomode = <A HREF="#MODE_D">MODE_D</A>;
+	return 1;
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

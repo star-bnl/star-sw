@@ -1,0 +1,79 @@
+* run_sca.kumac
+*
+* written by D. Weerasundara -- dhammika@npl.washington.edu
+* modified by L.D. Carr      -- lcarr@u.washington.edu
+* 08/04/1998  K.Turner       -- edited to make it standard
+* 08/10/1998  K. Turner      -- changed name of table dstrack to globtrk
+* 08/10/1998  L.D. Carr      -- added close MACRO to support reference
+*                               switch options.
+* 09/01/1998  DSW            -- fixed DSL directory aliases.
+* 09/11/1998  DSW            -- added call to sca_makeprior & sca_makeref
+*                               in run_sca#close macro.
+* 09/15/98 - LDC added analysis_switch options for xdf file output
+*
+*********************************************************
+ MACRO filter
+   macro/global/import *
+     
+     ami/module/call sca_filter _
+        [dst]/globtrk  _
+        [params]/ebye/sca/sca_filter_const _
+	[params]/ebye/sca/sca_switch _
+	[params]/ebye/sca/sca_const _
+	[data]/ebye/sca/sca_in
+
+ RETURN
+ 
+*********************************************************
+ 
+
+MACRO runsca 
+  macro/global/import *
+    
+    ami/module/call sca_runsca _
+        [params]/ebye/sca/sca_switch _
+        [params]/ebye/sca/sca_const _
+	[data]/ebye/sca/sca_in _
+	[calib]/ebye/sca_ensemble_dir/sca_ensemble_ave _
+	[calib]/ebye/sca_prior_dir/sca_prior _
+	[data]/ebye/sca/sca_out
+
+RETURN
+*********************************************************
+
+MACRO close calib_dir=$STAR_CALIB _
+	    prior_switch=0 _
+	    ensemble_switch=0 _
+	    analysis_switch=1
+
+  macro/global/import *
+
+  if [prior_switch]=1 then
+    ami/module/call sca_makeprior  _
+	[calib]/ebye/sca_prior_dir/sca_prior
+    message ' writing out sca_prior to ' [calib_dir] ' directory '
+    cd /dui
+    exec write_table_to_file#init  SCAPRIOR2  sca_prior_dir.xdf
+    exec write_table_to_file#write SCAPRIOR2  [calib]/ebye/sca_prior_dir
+    exec write_table_to_file#close SCAPRIOR2 
+  endif
+
+  if [ensemble_switch]=1 then
+    ami/module/call sca_makeref _
+	[params]/ebye/sca/sca_switch _
+  	[calib]/ebye/sca_ensemble_dir/sca_ensemble_ave
+    message ' writing out sca_ensemble to ' [calib_dir] ' directory '
+    cd /dui
+    exec write_table_to_file#init  SCAENSEMBLE2  sca_ensemble_dir.xdf
+    exec write_table_to_file#write SCAENSEMBLE2  [calib]/ebye/sca_ensemble_dir
+    exec write_table_to_file#close SCAENSEMBLE2 
+  endif
+
+  if [analysis_switch]=1 then
+    exec write_table_to_file#close SCAANALYSIS  
+  endif
+
+RETURN
+*********************************************************
+
+

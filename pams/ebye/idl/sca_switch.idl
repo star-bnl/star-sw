@@ -1,0 +1,15 @@
+/*   Table type: sca_switch.idl
+*   written by L. D. Carr -- lcarr@u.washington.edu
+*/
+
+   /*******************  Row struct *******************/
+   struct sca_switch {
+	/* these are on-off switches for various kumac options   */
+	long	makePrior;
+	long	makeEnsembleAve;
+	long	doAnalysis;
+	/* dirty way of carrying the total events for making the */
+	/* ensemble average                                      */
+	long	nEvents;
+   };
+/*  Last mod. for sca_switch.idl :  $DATE$ */

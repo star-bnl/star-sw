@@ -1,0 +1,11 @@
+/*   tcl_tpc_index
+ * Table of many-to-many index correlations for tpc evaluations
+*/
+   struct tcl_tpc_index {
+       long      key1;       /* key into table#1 being correlated */
+       long      key2;       /* key into table #2 being correlated */
+       long      type;       /* indx pair type- see TPC_INDEX_TYPE table */
+   };
+/*  Last mod. for tpc_index:  $Date: 1998/01/06 23:57:33 $ */
+
+

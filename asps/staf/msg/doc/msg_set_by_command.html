@@ -1,0 +1,51 @@
+<pre><h3>SUBROUTINE			MSG_Set_By_Command( COM )</h3>
+
+
+*  Input:
+	CHARACTER*(*) COM !Command-string describing features to be set.
+
+*  Brief description:  ASCII-string command interface to control MSG.
+
+*  Description:
+*	Set the MSG package parameters on individual messages, referenced
+*	by prefix, according to arguments contained in a single character-
+*	string command contained in COM.  Commands take these forms:
+
+*	To disable specific messages, but to continue counting their occurances:
+*	DISABLE prefix-1 prefix-2 ... prefix-n
+
+*	To enable specific messages:
+*	ENABLE prefix-1 prefix-2 ... prefix-n
+
+*	To resume counting of message occurances, whether or not disabled:
+*	COUNT prefix-1 prefix-2 ... prefix-n
+
+*	To stop counting of message occurances, whether or not disabled:
+*	NOCOUNT prefix-1 prefix-2 ... prefix-n
+
+*	To set message-limits on specific messages:
+*	LIMIT prefix-1=limit-1 prefix-2=limit-2 ... prefix-n=limit-n
+
+*	To set message-abort-limits on specific messages:
+*	ABORT prefix-1=limit-1 prefix-2=limit-2 ... prefix-n=limit-n
+
+*	To set the number of lines per page in the summary-output:
+*	LINES line-count
+
+*	To have time-stamps occur on a changed CPU time (in addition to
+*	getting them on changed real-time or node-name):
+*	TIMESTAMP CPU
+
+*	To have time-stamps not occur on a changed CPU time (ie, only
+*	getting them on changed real-time or node-name):
+*	TIMESTAMP NOCPU
+
+*	Spacing is not critical in the command line, provided at least one
+*	or more spaces, tabs or commas separate the arguments.
+*	The "=" symbols in the LIMIT command are essential, but spaces around
+*	it are optional and not at all critical.
+
+*	Wildcards are permitted in the prefix specifications.
+
+
+</pre>

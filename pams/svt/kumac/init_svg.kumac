@@ -1,0 +1,60 @@
+*  editted June 4, 1998 Kathy Turner
+* 8/10/98 K. Turner
+* ***********************************************
+* init_svg.kumac
+*
+* Authors: W.K.Wilson, C.A.Pruneau, WSU 
+*
+* Description:
+*
+* Initialization of the SVG package i.e. SVT
+* geometry.
+* 
+* ***********************************************
+ 
+ macro read
+   
+  macro/global/import *
+  message ' Init_svg: read in tables '
+ 
+  cd [params]/svt
+  
+  dio/newfilestream    svg_par $STAR/params/svt/svg_pars.xdf r
+  dio/stream/getevent  svg_par
+  dio/stream/close     svg_par
+  
+  soc/object/oid svg_par 
+  oid = staf_result(1) 
+  soc/deleteoid [oid]
+
+  cd /dui
+  
+ return
+ 
+* ******************************************************
+ macro svg_am
+   
+    macro/global/import *
+
+  message 'init_svg: call svg_am'
+  
+  ami/module/call svg_am [params]/svt/svgpars/config _
+                         [params]/svt/svgpars/shape _
+                         [params]/svt/svgpars/geom
+
+  return
+* *******************************************************
+
+ * ********************************************************
+ 
+ macro init
+   macro/global/import *
+ return
+ 
+* ***************************************************
+
+
+
+
+
+

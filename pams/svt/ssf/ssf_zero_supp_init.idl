@@ -1,0 +1,13 @@
+/* ssf_zero_supp_init.idl
+ * 
+ * Zero Suppression Initialization
+ * 
+ */
+#include "PAM.idl"
+#include "ssf_zero_par.idl"
+
+interface ssf_zero_supp_init : amiModule {
+   STAFCV_T call(out ssf_zero_par zero_par);
+};
+
+

@@ -1,0 +1,102 @@
+MACRO tnt
+
+MESS
+MESS ************************************************************
+MESS ************************************************************
+MESS ****  TNT.kumac - Test the TNT commands.               ****
+MESS ************************************************************
+MESS ************************************************************
+MESS
+
+
+MESS
+MESS ************************************************************
+MESS ****  Show there are no ntuples created yet             ****
+MESS ************************************************************
+TNT/COUNT
+
+
+MESS
+MESS ************************************************************
+MESS ****  Open data file to get some tables                 ****
+MESS ************************************************************
+
+mkdir tnt_test
+cd tnt_test
+dio/newfile idat12 $STAR_DATA/samples/test_data.xdf R
+dio/stream/getevent idat12
+dio/stream/getevent idat12
+cd Event
+ls
+
+MESS
+MESS ************************************************************
+MESS ****  Make ntuple of g2t_svt_hit                      ****
+MESS **********************************************************
+
+
+tnt/newcwn 1 g2t_svt_hit
+
+tnt/count
+tnt/list
+
+WAIT 'Hit <cr> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Count columns and entries of ntuple               ****
+MESS ****    compare with what ntuple think is there
+MESS ************************************************************
+
+tnt/cwn/columncount 1
+tnt/cwn/entrycount 1
+nt/print 1
+
+WAIT 'Hit <cr> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS ****  Plot some ntuple entries.  first 3 plots are of   ****
+MESS ****    vector x(3) should look different               ****
+MESS ************************************************************
+
+
+zone 2 3
+nt/pl 1.x(1)
+nt/pl 1.x(2)
+nt/pl 1.x(3)
+
+WAIT 'Hit <cr> to continue:' 0
+
+MESS
+MESS ************************************************************
+MESS **** Append g2t_svt_hit again contents should double ***
+MESS ************************************************************
+
+tnt/cwn/entrycount 1
+tnt/cwn/append 1 g2t_svt_hit
+tnt/cwn/entrycount 1
+
+MESS ************************************************************
+MESS ****  Replot vector x(3)                                ****
+MESS ************************************************************
+
+
+nt/pl 1.x(1)
+nt/pl 1.x(2)
+nt/pl 1.x(3)
+
+tnt/cwn/hid 1
+tnt/cwn/title 1
+WAIT 'Hit <cr> to continue:' 0
+
+
+MESS ************************************************************
+MESS ****  This does not test tnt/cwn/import                 ****
+MESS ************************************************************
+
+MESS ************************************************************
+MESS ****  End of tnt testing                                ****
+MESS ************************************************************
+
+RETURN

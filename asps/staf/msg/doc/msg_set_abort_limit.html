@@ -1,0 +1,21 @@
+<pre><h3>SUBROUTINE			MSG_Set_Abort_Limit( Prefix, Limit )</h3>
+
+
+*  Inputs:
+	CHARACTER*(*) Prefix !A STAR-standard message prefix.
+	INTEGER Limit !Maximum no. of times to display a message before aborting.
+
+*  Brief description:  Set abort limit for a prefix.
+
+*  Description:
+*	Set the abort limit for the message recognized by Prefix;
+*	Program termination results when the prefix's
+*	count has exceeded Limit.  Wildcards are permitted.
+*	The existing count-limit (after which message-display is disabled
+*	for Prefix), is set to the same value -- aborting msg calls
+*	should not be quiet without deliberate intervention (ie, re-specify
+*	the count-limit after this call to obtain silent aborts -- don't
+*	do it!).
+
+
+</pre>

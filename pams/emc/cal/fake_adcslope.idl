@@ -1,0 +1,14 @@
+/* fake_adcslope		OGAWA, Akio */
+
+#include "PAM.idl"
+#include "ems_control.idl"
+#include "ems_cal_control.idl"
+#include "emc_adcslope.idl"
+
+interface fake_adcslope : amiModule {
+	STAFCV_T call
+        ( in    ems_control  ems_control
+        , in    ems_cal_control  ems_cal_control
+	, inout emc_adcslope fake_adcslope
+	);
+};

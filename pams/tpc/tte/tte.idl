@@ -1,0 +1,30 @@
+/*          tte.idl
+*           Module: tte
+*           Description: tracking eveluation
+*/
+#include "PAM.idl"
+#include "tpt_track.idl"
+#include "tcl_tphit.idl"
+#include "g2t_tpc_hit.idl"
+#include "g2t_track.idl"
+#include "tcl_tpc_index.idl"
+#include "tcl_tpc_index_type.idl"
+#include "tte_eval.idl"
+#include "tte_mctrk.idl"
+#include "tte_res.idl"
+#include "tte_control.idl"
+
+interface tte : amiModule{
+          STAFCV_T call
+                   (      in     tpt_track track
+			, in     tcl_tphit hit 
+			, in     g2t_tpc_hit g2t_hit 
+			, in     g2t_track g2t_track 
+			, inout  tcl_tpc_index tindex 
+			, in     tcl_tpc_index_type tindex_type 
+			, out    tte_eval eval 
+			, out    tte_mctrk evmc 
+			, out    tte_res everes 
+			, out    tte_control cntrl);
+};
+/* Last mod. for tte: $Date: 1998/01/27 02:18:52 $ */

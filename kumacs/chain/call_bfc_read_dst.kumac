@@ -1,0 +1,18 @@
+* 9/14/98 K. Turner (for 98h)
+* Run BFC in following manner:
+* - read in simulated data file that has ONLY dst tables on it (made with dout)
+* - rest is blank for now.
+
+ exec $STAR/kumacs/chain/bfc _
+   TOP=$STAR _
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   gstar_settings=' field_only' _
+   domain='  ' _
+   chain=' dstin ' _
+   skip=0 _
+   first=1 _
+   no_events=2 _
+   input_data_file=/star/data/kathy/set100_01_2ev_dst_dst.xdf _
+   output_file=set100_01_2ev_dst _
+   log=bfc_read_dst.log

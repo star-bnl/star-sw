@@ -1,0 +1,25 @@
+<pre><h3>SUBROUTINE			MSG_Time_Stamp( LUN )</h3>
+
+	INTEGER LUN
+
+*  Inputs:
+*	LUN -- FORTRAN logical unit number for time-stamp to be written on.
+
+*  Outputs: none
+
+*  Brief description:  Write a node and time (real and CPU) stamp to a FORTRAN LUN, if new.
+
+*  Description:
+*	"Stamp" the date and time on a line on FORTRAN logical unit LUN.
+*	"Stamp" the node-name on the same line, if node-name has been specified
+*	with a "call msg_name_node(<node_name>)".
+*	Also stamps an elapsed real-time counter and an elapsed CPU-time counter,
+*	as 17-character ASCII strings.
+
+*	Produces output only if different than the previous output from
+*	this subroutine.  eg, a call to this routine in a tight loop will
+*	only produce an actual time-stamp once each second.
+
+
+
+</pre>

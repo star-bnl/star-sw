@@ -1,0 +1,14 @@
+/*   tfs_bmpar.idl
+*
+*    Table: tfs_bmpar
+*   
+*    description: TFS beam parameter table                
+*/
+   struct tfs_bmpar { 
+       float     lumin;      /* beam luminosity (cm^-2 per second) */
+       float     txing;      /* time between bunch crossings (ns) */
+       float     xsec;       /* inelastic cross-section (mbarns) */
+   };
+
+/*  Last mod. for tfs_bmpar: $Date: 1997/12/31 14:34:12 $ */
+

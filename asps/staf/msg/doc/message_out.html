@@ -1,0 +1,20 @@
+<pre><h3>SUBROUTINE			Message_Out( MSG, Lines )</h3>
+
+	
+*   Inputs:
+	CHARACTER*(*) MSG(*) !1 or more line character-string message
+	                     !submitted for display.
+	INTEGER        Lines !Number of lines in MSG.
+
+*   Brief description:  Display and log a message, bypassing MSG accounting.
+
+*   Description:
+*	Always display a message MSG, containing Lines lines of up to
+*	132 characters each on the terminal and the journal, if
+*	enabled by a call to MSG_JOURNAL_ON.  Displaying is unnaffected
+*	by calls to the MSG_DISABLE command, and the message is not
+*	"counted".  This is the "pure" I/O part of MESSAGE.
+
+*   Error conditions:  none
+
+</pre>

@@ -1,0 +1,21 @@
+<pre><h3>	void 	MsgInit</h3></pre>
+<pre>
+( const char *switches /*  One-letter switch string:                    */
+	                                      /*  "s"  shared msg -- default: not shared       */
+	                                      /*  "h"  hard initialize -- default: hard        */
+	                                      /*       initialize on first call, soft          */
+	                                      /*       initialize afterwards                   */
+	               , ... )
+{
+/* Description:  MSG package initializion.
+
+	Shared msg:
+	  Permits other processes to read and modify msg's prefix accounting.
+
+	Hard Initialize:
+	  Wipes out all msg prefix accounting;  starts with no prefixes defined.
+
+	Soft Initialize:
+	  Zeroes all msg prefix accounting, but retains all prefix definitions
+	  and states.                                                                          */
+</pre>

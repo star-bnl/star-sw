@@ -1,0 +1,6 @@
+wish <<EOF
+tk appname msg
+wm title . "msg Control"
+source msgui.ui.tcl
+source msgui.tcl
+EOF

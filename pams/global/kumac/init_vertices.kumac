@@ -1,0 +1,10 @@
+  macro init
+   
+ macro/global/import *
+         
+ message ' !!! init_vertices: vtx not found for stk,sgr - filled from MC ***'
+ 
+* cd [params]/global/vertices 
+*  cd /dui
+  
+ return

@@ -1,0 +1,15 @@
+/*   Table type: sca_in.idl
+*   written by L. D. Carr -- lcarr@u.washington.edu
+*/
+
+   /*******************  Row struct *******************/
+   struct sca_in {
+     long 	index;
+     long 	iflag;
+     double 	x;
+     double 	y;
+     double 	z;
+     long   	evn;              
+     long   	run;
+   };
+/*  Last mod. for sca_in.idl :  $DATE$ */

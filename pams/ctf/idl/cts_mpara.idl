@@ -1,0 +1,36 @@
+
+   struct cts_mpara { 
+       long      init;            // Controls module initialization 
+       long      geo_from_geant ; // =1 gets counter from geant, otherwise according 
+                                  // to hit position 
+       long      adc_overflow;    // # adc counts 
+       long      tdc_overflow;    // # tdc counts 
+       long      slat_para    ;   // (0=exponential attenuation), (1=table)
+       float     amax_noise;      // Maximum noise amplitude 
+       float     amin_noise;      // Minimum noise amplitude 
+       float     attlen;          // Attenuation length 
+       float     cath_eff;        // Cathode efficiency 
+       float     cath_surf;       // Ratio scintillator/pm surfaces 
+       float     delay;           // Light delay 
+       float     elec_noise;      // Fraction slats producing electronic nois 
+       float     gain;            // Variation in conv from nphe_to_adc 
+       float     gate_t0   ;      // Time to start integration gate
+       float     gate_width;      // Time width integration gate of ADC 
+       float     position_tolerance ; // Error allowed for GEANT position tolerance
+       float     GeV_2_n_photons; // Conversion factor from GeV to photons 
+       float     nphe_to_adc;     // Nphe to ADC conversion 
+       float     nphe_yield;      // # Cerenkov phe yield 
+       float     phys_noise;      // Fraction slats producing physics noise 
+       float     surf_loss;       // Surface losses 
+       float     time_res;        // Time resolution 
+       float     tmax_noise;      // Maximum noise time 
+       float     tmin_noise;      // Minimum noise time 
+       long      n_z ;                //  Segmentation in z ( along the beam )
+       long      n_d ;                //  Segmentation in d ( perpendicular to the beam )
+       long      n_time ;             //  Time segmentation for time_response
+       float     z_grid[20] ;         //  z points in slat response grid
+       float     d_grid[20] ;         //  d points in slat response grid
+       float     slat_response[100] ; //  Slat response vs z and d
+       float     time_response[100] ; //  Integrated amplitude as a function of time
+       long      zero_suppression   ; //  
+   } ;

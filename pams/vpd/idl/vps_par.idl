@@ -1,0 +1,44 @@
+/**
+ * <hr>
+ * VPS control parameter table. <br>
+ *
+ * @parm id - primary key
+ * @parm n_pmt - total number of photo-tubes
+ * @parm c_light - speed of light in vacuum
+ * @parm refractive_index -  refractive index        
+ * @parm thick_rad - thickness of radiator
+ * @parm time_res - time resolution of detector
+ * @parm adc_range - adc range of detector
+ * @parm tdc_range - tdc range of detector
+ * @parm konst - 2*pi*alpha*(1/lambda1 - 1/lambda2), alpha=1/137, lambdas are spectral response region of PMT's, here
+ * @parm phot_thresh - minimum # photons to produce signal
+ * @parm max_photons - conversion factor
+ * @parm max_time - timing gate
+ * @parm dist - distance between VPD's
+ * @author         Zoran Milosevich
+ */
+
+/*   vps_par.idl
+*   Table: vps_par
+*        description: VPD parameters     
+*             more..:                                         
+*/
+   struct vps_par {          
+       long      id;                /* primary key */
+       long      n_pmt;             /* total number of photo-tubes */
+       float     c_light;           /* speed of light in vacuum */
+       float     refractive_index;  /* refractive index */
+       float     thick_rad;         /* thickness of radiator */
+       float     time_res;          /* time resolution of detector*/
+       float     adc_range;         /* adc range of detector*/
+       float     tdc_range;         /* tdc range of detector*/
+       float     konst;             /* 2*pi*alpha*(1/lambda1 - 1/lambda2), 
+                                       alpha=1/137, lambdas are spectral 
+                                       response region of PMT's, here */
+       float     phot_thresh;       /* minimum # photons to produce signal*/
+       float     max_photons;       /* conversion factor*/ 
+       float     max_time;          /* timing gate */
+       float     dist;              /* distance between VPD's */ 
+   };
+
+/*  Last mod. for vps_par:  Tue Oct 15 19:41:37 1996 */

@@ -1,0 +1,38 @@
+/*   tpg_tptarget.idl
+*
+*   Table: tpg_tptarget
+*        
+*        description: TPC survey targets, positions in local  
+*             more..: and global coordinates and their errors 
+*/
+
+   /*******************  Row struct *******************/
+   struct tpg_tptarget { 
+       char      dnum[80];   /* Drawing numbers for the survey targets */
+       float     dxi[3];     /* error on xi */
+       float     dxo[3];     /* error on xo */
+       float     dxpi[3];    /* error on xpi */
+       float     dxpo[3];    /* error on xpo */
+       float     dyi[3];     /* error on yi */
+       float     dyo[3];     /* error on yo */
+       float     dypi[3];    /* error on ypi */
+       float     dypo[3];    /* error on ypo */
+       float     dzi[3];     /* error on zi */
+       float     dzo[3];     /* error on zo */
+       float     dzpi[3];    /* error on zpi */
+       float     dzpo[3];    /* error on zpo */
+       float     xi[3];      /* x of the targets (inner sector) */
+       float     xo[3];      /* x of the targets (outer sector) */
+       float     xpi[3];     /* xi in the sector coordinate system */
+       float     xpo[3];     /* xo in the sector coordinate system */
+       float     yi[3];      /* y of the targets (inner sector) */
+       float     yo[3];      /* y of the targets (outer sector) */
+       float     ypi[3];     /* yi in the sector coordinate system */
+       float     ypo[3];     /* yo in the sector coordinate system */
+       float     zi[3];      /* z of the targets (inner sector) */
+       float     zo[3];      /* z of the targets (outer sector) */
+       float     zpi[3];     /* zi in the sector coordinate system */
+       float     zpo[3];     /* zo in the sector coordinate system */
+   };
+/*  Last mod. for tpg_tptarget:   $Date: 1998/01/06 23:57:38 $ */
+

@@ -1,0 +1,9 @@
+#define BEMC 1
+#define BPRS 2
+#define BSMD 3
+#define EEMCR 4
+#define EEMCL 5
+#define EPRSR 6
+#define EPRSL 7
+#define ESMDR 8
+#define ESMDL 9

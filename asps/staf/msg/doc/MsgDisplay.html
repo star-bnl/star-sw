@@ -1,0 +1,26 @@
+<pre><h3>	void	MsgDisplay</h3></pre>
+<pre>
+(
+
+/*   Inputs:                                                                               */
+	  const char *msg /* Character-string message, with prefix, submitted for display. */
+
+/*   Input/Output:                                                                         */
+	, int       *ID ) /* Fast-reference message ID.  Set to zero by caller 
+	                     before first call, set by Message on first call by
+	                     looking up or entering the prefix contained in MSG
+	                     (prefix is everything before the first space) in
+	                     the index of MSG message prefixes.
+	                     If ID is negative, ID remains unchanged, and lookup
+	                     is then always by prefix.                                     */
+{
+/* Description:  Display and log a message.
+	Conditionally display a message msg on standard out and the journal,
+	if enabled by a call to MsgJournalOn.  The message is displayed
+	unless disabled.  The message is counted unless counting is disabled.
+
+	Note that unlike the FORTRAN message call, there is no "Lines" argument;
+	lines are defined with "\n" (newline) characters.
+	However, the caller should NOT include a "\n" at the very end, since msg puts
+	a "\n" at the very end.  msg may have as many newlines as desired.  */
+</pre>

@@ -1,0 +1,17 @@
+<pre><h3>SUBROUTINE STRTime_Get_Current_Zone( Zone, Zone_Name )</h3>
+
+
+	INCLUDE 'str_time_inc'
+
+*  Outputs:
+	INTEGER       Zone      !Time zone offset, in {-12, 12}.
+	CHARACTER*(*) Zone_Name !Zone name (eg, "EST", "PDT", etc.)
+
+*  Brief Description: Get the time zone.
+
+*  Description:
+*	Return the current time zone, as set in str.  If not set,
+*	set str's current zone to the host's local time zone.
+
+
+</pre>

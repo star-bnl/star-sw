@@ -1,0 +1,37 @@
+//:Copyright 1995, Lawrence Berkeley National Laboratory
+//:>--------------------------------------------------------------------
+//:FILE:	duiI.idl
+//:DESCRIPTION:	Dataset Unix-like Interface Orbix-objects
+//:AUTHOR:	cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:	-- STILL IN DEVELOPMENT --
+//:HISTORY:	16jul97-v005a-cet- out args => return values
+//:HISTORY:	02feb97-v004b-cet- rename file
+//:HISTORY:	08dec95-v004a-cet- move cwd & root from tdm to dui,
+//					change base class to socObject
+//:HISTORY:	29nov95-v003a-cet- extract from tdm_i.idl
+//:<--------------------------------------------------------------------
+
+//:----------------------------------------------- INCLUDES           --
+#include "tdmI.idl"
+
+//:----------------------------------------------- TYPEDEFS           --
+
+//:=============================================== INTERFACE          ==
+interface duiFactoryI : tdmFactoryI {
+
+//:----------------------------------------------- ATTRIBUTES         --
+attribute string cwd;
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T cd(in string dirPath);
+STAFCV_T cp(in string fromPath, in string toPath);
+string ls(in string path);
+STAFCV_T ln(in string origPath, in string lnkdPath);
+STAFCV_T mkdir(in string dirPath);
+STAFCV_T mv(in string fromPath, in string toPath);
+string pwd();
+STAFCV_T rm(in string filePath);
+STAFCV_T rmdir(in string dirPath);
+
+};
+

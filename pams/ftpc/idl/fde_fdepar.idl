@@ -1,0 +1,32 @@
+/*   fde_fdepar.idl
+*        Table type: fde_fdepar
+*        Description: FDE parameter table                     
+*/
+
+   struct fde_fdepar {    
+       long      debug_level;/* level of debug printing  */
+                             /* level <  2: print DE of each hits */
+                             /* level <  5: print unacc. no. hits */
+                             /* level <  8: print input parameters */
+                             /* level < 11: print output results */
+       long      id_method;  /* which algorithm to use for evaluation */
+                             /* default=0, truncated mean */
+       long      no_angle;   /* 0 to consider dip/cross angles */
+       long      max_track;  /* max. tracks to process */
+       long      nok_track;  /* no. tracks accepted */
+       long      max_hit;    /* max. dedx array dimension */
+                             /* default=20 */ 
+       long      min_hit;    /* min. no. hits per track for dE/dx ana */
+                             /* default=10 */
+       float     a_large_number;  /* a large number */
+       float     pad_length; /* pad length in cm */
+       float     frac_trun;  /* fraction of hits for calculating mean dE/dx */
+                             /* default=0.8, 80% truncated mean */
+       float     a_i_p;      /* average ionization potential of a gas */
+                             /* default=30. eV */
+       float     min_dedx;   /* Ionization min. got by fit */
+                             /* default=1. */
+       float     total_charge;   /* total charge (energy loss/a_i_p) */
+      
+   };
+/*  Last mod. for fde_fdepar:   $Date: 1998/01/19 02:25:11 $  */

@@ -1,0 +1,37 @@
+/*  dst_event_summary.idl       */
+/*  Table: dst_event_summary    */
+
+ struct dst_event_summary  {
+  long   n_event[2];        /* Unique 64 bit event ID number, F.key to     */
+                            /* dst_event_header                            */
+  long   prod_run;          /* Prod. run number, F.key to dst_run_header   */
+  long   glb_trk_tot;       /* Total number of global tracks               */
+  long   glb_trk_good;      /* Total number of good global tracks          */
+  long   glb_trk_prim;      /* Total number of good, primary glb trks      */
+  long   glb_trk_plus;      /* Total number of good global (+) tracks      */
+  long   glb_trk_minus;     /* Total number of good global (-) tracks      */
+  long   n_vert_total;      /* Total number of vertices, loose cuts        */
+  long   n_vert_V0;         /* Total number of V0 vertices, loose cuts     */
+  long   n_vert_K0;         /* Total number of K0 vertex candidates, loose */
+  long   n_vert_Lambda;     /* Total number of Lambda vtx cand., loose cuts*/
+  long   n_vert_ALambda;    /* Total number of AntiLambda vrtx., loose cuts*/
+  long   n_vert_pileup;     /* Number of pileup vertices in event          */
+  long   vrtx_qual[10];     /* Vertex quality parameters used              */
+  long   mult_eta[5];       /* # good glb chrg trk, all pt for eta bins    */
+  long   mult_pt[5];        /* # good glb chrg trk, all eta for pt bins    */
+  long   mult_phi[8];       /* # good glb chrg trk, all pt,eta for phi bins*/
+  float  mean_pt;           /* Mean pt for all good glb chrg tracks        */
+  float  mean_pt2;          /* Mean pt^2 for all good glb chrg tracks      */
+  float  mean_eta;          /* Mean pseudorap. for all good glb chrg trks  */
+  float  rms_eta;           /* RMS pseudorap. for all good glb chrg trks   */
+  float  T_average;         /* T as in dN/(dy*mt*dmt) = exp(-mt/T) for     */
+                            /* all good global charged tracks              */
+  float  T_mt_bins[5];      /* T as above for various mt bins              */
+  float  T_eta_bins[3];     /* T as above for various eta bins             */
+  float  energy_emc_eta[5]; /* EMC energy (or raw ADC sum) for eta bins    */
+  float  energy_emc_phi[8]; /* EMC energy (or raw ADC sum) for phi bins    */
+  float  prim_vrtx[3];      /* Primary vrtx x,y,z-position -SCS(cm)        */
+  float  prim_vrtx_cov[6];  /* Primary vrtx covariance matrix              */
+  float  prim_vrtx_chisq;   /* Primary vertex chi-square of fit            */
+ } ;
+/*  Last mod. for dst_event_summary:   $Date: 1998/08/28 16:06:42 $ */

@@ -1,0 +1,17 @@
+<pre><h3>INTEGER FUNCTION STR_NEXTARG_REQEQ(ARG,NARGS,JARG)</h3>
+
+
+*  Inputs:
+	CHARACTER*(*) ARG(*)
+	INTEGER NARGS
+*  Input/output:
+	INTEGER JARG
+
+*  Returns:
+*	STR_NEXTARG_SUCCESS_RC if JARG points at the next argument, skipping
+*	a required equals sign "=".
+*	STR_NEXTARG_NOARGS_RC if no arguments remain;  JARG is invalid.
+*	STR_NEXTARG_NOEQ_RC if no equals sign was found.  JARG points at
+*	where the equals sign was expected.
+
+</pre>

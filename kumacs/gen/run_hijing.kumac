@@ -1,0 +1,98 @@
+* RUN_HIJING.KUMAC
+* 
+* generates hijing events and writes out to xdf file
+* 
+* to run in staf:
+* stardev (or whichever version)
+* staf
+* exec $STAR/kumacs/gen/run_hijing
+* 
+* 6/22/98 Kathy Turner
+* 7/30/98 K. Turner - change to use utility kumacs 
+* ************************************************************************
+
+ MACRO run__
+   TOP=$STAR _
+   domain='gen/hij' _
+   Nevents=5 _
+   file=hijing_output.xdf
+   
+ ***********************************************************
+* PRINT OUT INPUT VALUES
+***********************************************************       
+ message ' *** TOP level directory      -->  ' [TOP]
+ message ' *** domains to load          -->  ' [domain]
+ message ' *** output file              -->  ' [file]        
+ message ' *** Num Events to process    -->  ' [Nevents]
+ 
+***********************************************************
+* GLOBAL VARIABLES 
+***********************************************************
+    
+ macro/global/create TOP              [TOP]
+   
+***********************************************************
+* BEGINNING STUFF 
+***********************************************************
+   
+ exec $STAR/kumacs/util/setup_defaults 
+   
+ exec setup#setup 
+ 
+ macro/global/import *
+   
+ exec load_libraries#run  [domain]  
+ 
+**************************************************************
+* OPEN FILES
+* ***************************************************************
+ 
+ exec write_table_to_file#init ofile [file]
+ 
+* **************************************************************
+*  Setup for running hijing
+* ****************************************************************
+ 
+ message ' !!! HIJING expects input file hijev.inp in top directory !!! '
+ 
+* initialize
+   
+RNDM   114399  54720141
+  
+exec init_hij#init
+ 
+* **************************************************************
+*  Run hijing
+* ****************************************************************
+ 
+DO i=1,[Nevents]
+  message ' run_hijing: processing event ' [i]
+* zero all tables
+  tabclear [event]
+* process event
+  exec run_hij#run
+* print out table
+  if [i].eq.1 then
+    table/print  /dui/event/evgen/particle
+  endif
+* write table to file  
+  exec write_table_to_file#write ofile [event]/evgen
+ENDDO
+ 
+* **************************************************************
+*  End of Job
+* ****************************************************************
+ 
+ exec write_table_to_file#close ofile
+ 
+ 
+ return
+ 
+* ***********************************************************
+
+
+
+
+
+
+

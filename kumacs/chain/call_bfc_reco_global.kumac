@@ -1,0 +1,20 @@
+* 9/14/98 K. Turner (for 98h)
+* Run BFC in following manner:
+* - read in data file that has simulation and tracking on it (thru tpt & sgr)
+* - run global packages
+* - run dst packages
+* - write output file containing full directories
+
+ exec $STAR/kumacs/chain/bfc _
+   TOP=$STAR _
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   gstar_settings=' field_only' _
+   domain=' geometry tpc ctf svt global ' _
+   chain=' evin drhd dehd svm evr egr ev0 ddedx dpnt desum dmsft drsum evout' _
+   skip=0 _
+   first=1 _
+   no_events=1 _   
+   input_data_file=/star/data/kathy/set100_01_1ev_tpc_svt_tracks.xdf _
+   output_file=set100_01_1ev_global _
+   log=bfc_global.log

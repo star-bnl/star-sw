@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+
+<html>
+
+<head>
+<title>prototypes</title>
+<meta name="AUTHOR" content="bill">
+<meta name="GENERATOR" content="Microsoft FrontPage 1.1">
+</head>
+
+<body>
+<h2>DSL prototypes</h2>
+<p>int dsAddTable(DS_DATASET_T *pDataset, char *name, char *typeSpecifier, size_t nRow, char 
+**ppData); </p>
+<p>int dsAllocTables(DS_DATASET_T *pDataset); </p>
+<p>int dsCellAddress(char **pAddress, DS_DATASET_T *pTable, size_t rowNumber , size_t colNumber); </p>
+<p>int dsColumnDimCount(size_t *pCount, DS_DATASET_T *pTable, size_t colNumber); </p>
+<p>int dsColumnDimensions(size_t *dims, DS_DATASET_T *pTable, size_t colNumber); </p>
+<p>int dsColumnElcount(size_t *pCount, DS_DATASET_T *pTable, size_t colNumber); </p>
+<p>int dsColumnName(char **pName, DS_DATASET_T *pTable, size_t colNumber); </p>
+<p>int dsColumnSize(size_t *pSize, DS_DATASET_T *pTable, size_t colNumber); </p>
+<p>int dsColumnTypeCode(DS_TYPE_CODE_T *pCode, DS_DATASET_T *pTable, size_t colNumber); </p>
+<p>int dsColumnTypeName(char **pName, DS_DATASET_T *pTable, size_t colNumber); </p>
+<p>void dsDatasetAllocStats(void); </p>
+<p>int dsDatasetEntry(DS_DATASET_T **ppEntry, DS_DATASET_T *pDataset, size_t entryNumber); </p>
+<p>int dsDatasetEntryCount(size_t *pCount, DS_DATASET_T *pDataset); </p>
+<p>int dsDatasetMaxEntryCount(size_t *pCount, DS_DATASET_T *pDataset); </p>
+<p>int dsDatasetName(char **pName, DS_DATASET_T *pDataset); </p>
+<p>int dsDeleteEntry(DS_DATASET_T *pEntry, DS_DATASET_T *pDataset); </p>
+<p>int dsEquijoin(DS_DATASET_T *pJoinTable,DS_DATASET_T *pTableOne, DS_DATASET_T 
+*pTableTwo, char *aliases, char *joinLst, char *projectList); </p>
+<p>int dsErrorCode(void); </p>
+<p>int dsFindColumn(size_t *pColNumber, DS_DATASET_T *pTable, char *name); </p>
+<p>int dsFindEntry(DS_DATASET_T **ppEntry, DS_DATASET_T *pDataset, char *path); </p>
+<p>int dsFreeDataset(DS_DATASET_T *pDataset); </p>
+<p>int dsGetCell(char *address, DS_DATASET_T *pTable, size_t rowNumber , size_t colNumber); </p>
+<p>int dsIsAcyclic(DS_DATASET_T *handle); </p>
+<p>int dsIsDataset(bool_t *pResult, DS_DATASET_T *handle); </p>
+<p>int dsIsTable(bool_t *pResult, DS_DATASET_T *handle); </p>
+<p>int dsLink(DS_DATASET_T *parent, DS_DATASET_T *child); </p>
+<p>int dsLinkAcyclic(DS_DATASET_T *parent, DS_DATASET_T *child); </p>
+<p>void dsLogError(DS_ERROR_CODE_T code, char *msg, char *file, size_t line); </p>
+<p>int dsMapTable(DS_DATASET_T *pDataset, char *name, char *typeSpecifier, size_t *pCount, char 
+**ppData); </p>
+<p>int dsNewDataset(DS_DATASET_T **ppDataset, char *name); </p>
+<p>int dsNewTable(DS_DATASET_T **ppTable, char *tableName, char *typeSpecifier, unsigned rowCount, 
+void *pData); </p>
+<p>void dsPerror(char *msg); </p>
+<p>int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc, char *projectList); </p>
+<p>int dsPutCell(char *address, DS_DATASET_T *pTable, size_t rowNumber , size_t colNumber); </p>
+<p>int dsReallocTable(DS_DATASET_T *pTable, size_t nRow); </p>
+<p>int dsRefcount(size_t *pCount, DS_DATASET_T *dataset);</p>
+<p>int dsSetTableRowCount(DS_DATASET_T *pTable, size_t rowCount); </p>
+<p>int dsTableColumnCount(size_t *pCount, DS_DATASET_T *pTable); </p>
+<p>int dsTableDataAddress(char **pAddress, DS_DATASET_T *pTable); </p>
+<p>int dsTableIsType(bool_t *pResult, DS_DATASET_T *pTable, char *specifier); </p>
+<p>int dsTableMaxRowCount(size_t *pCount, DS_DATASET_T *pTable); </p>
+<p>int dsTableName(char **pName, DS_DATASET_T *pTable); </p>
+<p>int dsTableRowCount(size_t *pRowCount, DS_DATASET_T *pTable); </p>
+<p>int dsTableRowSize(size_t *pSize, DS_DATASET_T *pTable); </p>
+<p>int dsTableTypeName(char **pName, DS_DATASET_T *pTable); </p>
+<p>int dsTableTypeSpecifier(char **pSpecifier, DS_DATASET_T *pTable); </p>
+<p>int dsTargetTable(DS_DATASET_T **ppTable, char *tableName, char *typeName, DS_DATASET_T 
+*parentOne, DS_DATASET_T *parentTwo, char *aliases, char *projectList); </p>
+<p>int dsTasProject(DS_DATASET_T *pDataset, char *name, char *typeSpecifier, size_t *pCount, void 
+*ppData); </p>
+<p>int dsUnlink(DS_DATASET_T *parent, DS_DATASET_T *child); </p>
+<p>bool_t xdr_dataset(XDR *xdrs, DS_DATASET_T **ppDataset);</p>
+<p>bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset);</p>
+<p>bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset);</p>
+</body>
+
+</html>

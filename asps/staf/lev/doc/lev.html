@@ -1,0 +1,67 @@
+<h2> Package lev (Logging of Environment and Version information) </h2>
+
+<p>Author: <a href=
+"http://rsgi01.rhic.bnl.gov/star/starlib/doc/www/spb/ward.html">Herb Ward</a>.
+<p>
+
+All the functions discussed here are for use only by SOFI personnel.
+<p>
+This package is for putting
+version information (on modules, tables, etc) and environment information
+(date, user, machine, etc) into the hierarchical data structure so that
+this info can be archived with the output.  Thus, should an incompatibility
+be discovered later, the affected
+portions of our processed-data archives (expensive in terms of
+CPU power consumption) can be isolated and deleted.
+<p>
+Below is the API (functions intended for calling from outside the lev
+package).  The functions are listed in the approximate order that they
+should be called.
+All these functions return FALSE in case of error, and TRUE otherwise.
+These prototypes should be accessed in your code by <code>#include</code>ing
+the file <code>lev/inc/levHeader.h</code>, and not by copying this WWW
+page, to optimize your chances of having up-to-date prototypes.
+<pre>
+boolean levAddEnvironmentTable(DS_DATASET_T **ppEnv);
+  /* Information on ppEnv:
+  **      Read and write.
+  **      INPUT(NON-NULL) dsAddTable to dataset 
+  **      INPUT(NULL)     dsNewTable
+  **      OUTPUT          pointer to new table
+  */
+boolean levAddVersionTable(DS_DATASET_T **ppVer);
+  /* Information on ppVer:
+  **      Read and write.
+  **      INPUT(NON-NULL) dsAddTable to dataset 
+  **      INPUT(NULL)     dsNewTable
+  **      OUTPUT          pointer to new table
+  */
+boolean levFindEnvironmentTable(DS_DATASET_T **ppEnv);
+  /* Information on ppEnv: 
+  **      Write only.
+  **      OUTPUT   point to newest environ table
+  */
+boolean levFindVersionTable(DS_DATASET_T **ppVer);
+  /* Information on ppVer: 
+  **      Write only.
+  **      OUTPUT   point to newest version table
+  */
+boolean levRegisterEnvironment(DS_DATASET_T *pEnv,
+          const char *comment);
+  /* pEnv must point to a table, and you can get pEnv
+  ** either from output of levAddEnvironmentTable() or 
+  ** levFindEnvironmentTable().
+  */
+boolean levRegisterVersion(DS_DATASET_T *pVer,char *name,
+          enum type,char *ver);
+  /* pVer must point to a table, and you can get pVer
+  ** either from output of levAddVersionTable() or 
+  ** levFindVersionTable().
+  */
+boolean levStopTime(DS_DATASET_T *pEnv,const char *comment);
+  /* pEnv must point to a table, and you can get pEnv
+  ** either from output of levAddEnvironmentTable() or 
+  ** levFindEnvironmentTable().  The start time is set
+  ** when levRegisterEnvironment is called.
+  */
+</pre>

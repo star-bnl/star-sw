@@ -1,0 +1,25 @@
+/*
+*
+*  Table type:dst_event_summary.idl 
+*  Module    : fill_dst_event_summary
+*
+*  Fill DST event summary table.
+*
+*/
+#include "PAM.idl"
+#include "dst_run_header.idl"
+#include "dst_event_header.idl"
+#include "dst_event_summary.idl"
+#include "dst_track.idl"
+#include "dst_vertex.idl"
+
+interface fill_dst_event_summary  : amiModule {
+	STAFCV_T call ( 
+                  in  dst_run_header        dstRunHeader
+                , in  dst_event_header      dstEventHeader
+                , in  dst_track             dstTrack
+                , in  dst_vertex            dstVertex
+                , out dst_event_summary     dstEventSummary
+		);
+};
+/*  Last mod. for fill_dst_event_summary.idl :  $DATE$ */

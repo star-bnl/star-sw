@@ -1,0 +1,15 @@
+<pre><h3>SUBROUTINE STRDEC_ENDIAN_BYTES(Nwords,Block)</h3>
+
+
+*  Input:
+	INTEGER Nwords   !Number of 32-bit words in Block to reorder.
+
+*  Input/Output:
+	INTEGER Block(*) !Block of 32-bit words in to be reordered.
+
+*  Description:
+*	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
+*	if needed, to make the big/little endian business come out
+*	DEC-style.  On SGI (here), the swapping is done.
+
+</pre>

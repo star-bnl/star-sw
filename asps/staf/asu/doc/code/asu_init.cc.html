@@ -1,0 +1,123 @@
+<HTML>
+<PRE>
+<H2>file: asu/src/asu_init.cc</H2>
+
+
+//:Copyright 1995, Lawrence Berkeley National Laboratory
+//:&gt;--------------------------------------------------------------------
+//:FILE:	asu_init.C
+//:DESCRIPTION:	Functions  to initialize <A HREF="asu_macros.h.html#ASU">ASU</A> 
+//:AUTHOR:	cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:	-- STILL IN DEVELOPMENT --
+//:HISTORY:	20nov95-v000a-cet- creation
+//:&lt;--------------------------------------------------------------------
+
+#include &lt;string.h&gt;
+#include &lt;stdio.h&gt;
+#include "asuAlloc.h"
+#include "<A HREF="asuLib.h.html">asuLib.h</A>"
+#include "emlLib.h"	/* Error Messaging & Logging */
+
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#asu_init">asu_init(</A>)
+//:DESCRIPTION:	Initialize <A HREF="asu_macros.h.html#ASU">ASU</A>
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="asu_init">asu_init(</A>)</B>
+{
+   EML_MESSAGE("Initializing <A HREF="asu_macros.h.html#ASU">ASU</A>.");
+
+/*- Setup basic KUIP commands. -*/
+   asu_kuip_init_();
+
+/*- Define the <A HREF="asu_macros.h.html#ASU">ASU</A> KUIP commands. -*/
+   asu_def_();
+
+   return <U>TRUE</U>;        //OVERLOAD CALL: TRUE: <A HREF="stafGeneric.h.html#TRUE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#TRUE">sutLib.cc(?)</A>
+}
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#asu_start">asu_start(</A>)
+//:DESCRIPTION:	Start <A HREF="asu_macros.h.html#ASU">ASU</A>
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="asu_start">asu_start(</A>)</B>
+{
+   EML_MESSAGE("Starting <A HREF="asu_macros.h.html#ASU">ASU</A>.");
+
+   return <U>TRUE</U>;        //OVERLOAD CALL: TRUE: <A HREF="stafGeneric.h.html#TRUE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#TRUE">sutLib.cc(?)</A>
+}
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#asu_stop">asu_stop(</A>)
+//:DESCRIPTION:	Stop <A HREF="asu_macros.h.html#ASU">ASU</A>
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="asu_stop">asu_stop(</A>)</B>
+{
+   EML_MESSAGE("Stopping <A HREF="asu_macros.h.html#ASU">ASU</A>.");
+
+   <A HREF="asuAlloc.c.html#asuAllocStats">asuAllocStats(</A>);			/* show allocation stats */
+   return <U>TRUE</U>;        //OVERLOAD CALL: TRUE: <A HREF="stafGeneric.h.html#TRUE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#TRUE">sutLib.cc(?)</A>
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

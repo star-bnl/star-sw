@@ -1,0 +1,82 @@
+**************** tfc_run.kumac **************************************
+**************************************************************************
+**************************************************************************
+*********************************************************************
+**********************************************************************
+************************************************************************
+
+macro run 
+macro/global/import *
+
+  message 'start tfc_run'
+
+  alias/create STAFCV_OK 1
+  alias/create STAFCV_BAD 0
+
+  ami/module/call xyz_
+       [geometry]/tpc/tpgpar/tpg_pad_plane_
+       [geometry]/tpc/tpgpar/tpg_detector_
+       [raw_data]/tpc/pixels/tppixel_
+       [raw_data]/tpc/pixels/tppad_
+       [raw_data]/tpc/pixels/adcxyz
+
+  if ( staf_status(1) .ne. STAFCV_OK) then
+	message 'Problem running tfc...'
+	goto RTRN
+  endif
+
+  RTRN:
+
+  message 'finish tfc_run'
+
+return
+
+
+***********************************************************************
+ 
+macro run_newtab tpc_sector_first=1 tpc_sector_last=24 
+  
+  macro/global/import *
+  message 'start tfc_run_newtab'
+
+  alias/create STAFCV_OK 1
+  alias/create STAFCV_BAD 0
+  
+  do j = [tpc_sector_first],[tpc_sector_last] 
+     cd  [params]/tpc/tfcpars
+     rowcount tfc_sector_index 1
+     tdm/table/cell/putvalue 'tfc_sector_index[0].CurrentSector' [j]
+     cd /dui 
+   ami/module/call xyz_newtab_
+       [geometry]/tpc/tpgpar/tpg_pad_plane_
+       [geometry]/tpc/tpgpar/tpg_detector_
+       [params]/tpc/tfcpars/tfc_sector_index_
+       [raw_data]/tpc/raw_sec_m_
+       [raw_data]/tpc/Sector_[j]/raw_row_in_
+       [raw_data]/tpc/Sector_[j]/raw_pad_in_
+       [raw_data]/tpc/Sector_[j]/raw_seq_in_
+       [raw_data]/tpc/Sector_[j]/pixel_data_in_
+       [raw_data]/tpc/Sector_[j]/raw_row_out_
+       [raw_data]/tpc/Sector_[j]/raw_pad_out_
+       [raw_data]/tpc/Sector_[j]/raw_seq_out_
+       [raw_data]/tpc/Sector_[j]/pixel_data_out_
+       [raw_data]/tpc/pixels/adcxyz
+
+  if ( staf_status(1) .ne. STAFCV_OK) then
+        message 'Problem running tfc...'
+        goto RTRN
+  endif
+      
+enddo      
+ 
+   RTRN:
+
+  message 'finish tfc_run_newtab'
+
+return
+
+
+***********************************************************************
+
+
+

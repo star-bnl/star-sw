@@ -1,0 +1,25 @@
+<h2>Messages</h2>
+
+Messages consist of one or more lines of ASCII characters with no more 
+that 132 characters per line.  The messages may be completely described in 
+FORTRAN DATA or PARAMETER statements, or the C equivalent, or they may be 
+generated in real time using FORTRAN "internal files" (ie, character 
+strings instead of logical unit numbers), or the C equivalent.  Messages 
+may not be generated in any way which directly produces output, such as 
+with a FORTRAN WRITE to a logical unit, but only as character strings 
+which are then passed as arguments to actual I/O routines (ie, the 
+routines in the msg package).  FORTRAN WRITE statements, to "internal 
+files" (ie, character strings instead of LUNs), are generally used for 
+the purpose of generating the messages to be displayed.  Multiple lines 
+are implemented as multiple-dimensioning of the character string used 
+to contain the message, eg: 
+
+<pre>
+	CHARACTER*132 M132    !Defines a one-line message space.
+
+	CHARACTER*132 M132(6) !Defines a six-line message space.
+</pre>
+
+FORTRAN formatted WRITE statements start writing to the next "line" in 
+such a character string whenever the new record character "/" is 
+encountered.

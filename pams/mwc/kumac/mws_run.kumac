@@ -1,0 +1,13 @@
+macro mws_run 
+macro/global/import *
+*   
+*    Call mws
+*
+  ami/mod/call mws [geant_Event]/g2t_mwc_hit _
+                 [params]/mwc/geom _ 
+                 [params]/mwc/mpar _
+                 [data]/mwc/mevent _
+                 [data]/mwc/sector _
+                 [data]/mwc/raw
+
+return

@@ -1,0 +1,25 @@
+/*   egr_globtrk_eval.idl
+ *   Table: egr_globtrk_eval
+*    description: Global track evaluation table           
+*/
+   struct egr_globtrk_eval{
+       long      id;         /* primary key = globtrk.id */
+       long      mc_pid;     /* Geant PID code # for good MC track */
+       long      svt_seg;    /* =0 no SVT seg, =1 MC ok, = -1 MC not ok */
+       long      tpc_seg;    /* =0 no tpc seg, =1 MC ok, = -1 MC not ok */
+       float     deta_svt[2];/* pseudorap diff. at SVT. (1)-mag, (2)-% */
+       float     deta_tpc[2];/* pseudorap diff. at TPC. (1)-mag, (2)-% */
+       float     deta_vrt[2];/* pseudorap diff at vertex. (1)-mag, (2)-% */
+       float     dmin_vrt[2];/* min dist frm prim(+),sec(-)vrt;1-2D,2-3D */
+       float     dpt_svt[2]; /* p trans diff. at SVT. (1)-mag, (2)-% */
+       float     dpt_tpc[2]; /* p trans diff. at TPC. (1)-mag, (2)-% */
+       float     dpt_vrt[2]; /* p trans. diff. at vertex. (1)-mag, (2)-% */
+       float     dpto_svt[2];/* p total diff. at SVT. (1)-mag, (2)-% */
+       float     dpto_tpc[2];/* p total diff. at TPC. (1)-mag, (2)-% */
+       float     dpto_vrt[2];/* p total diff. at vertex. (1)-mag, (2)-% */
+       float     dpz_svt[2]; /* pz diff. at SVT. (1)-mag, (2)-% */
+       float     dpz_tpc[2]; /* pz diff. at TPC. (1)-mag, (2)-% */
+       float     dpz_vrt[2]; /* pz diff. at vertex. (1)-mag, (2)-% */
+   };
+/*  Last mod. for egr_globtrk_eval: $Date: 1997/12/31 14:33:28 $ */
+

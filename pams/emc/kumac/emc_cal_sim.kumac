@@ -1,0 +1,63 @@
+macro emc_cal_sim.kumac
+ make pams/emc
+
+ ems=/dui/emc/ems
+ cal=/dui/emc/cal
+ fake=/dui/emc/cal/fake
+ ped =/dui/emc/cal/ped
+ led =/dui/emc/cal/led
+ led2=/dui/emc/cal/led2
+
+ def /star/u2d/akio/ofl/sim/staf++/new/pams/emc/kumac
+ cd /dui; dui/mkdir emc
+ exec init_ems [ems] ;cd /dui
+ exec init_cal [cal] ;cd /dui
+ dui/mkdir [fake]
+ dui/mkdir [ped]
+ dui/mkdir [led]
+ dui/mkdir [led2]
+
+ cd [cal]
+ exec fake_pedestal [fake] [ems]
+ exec fake_adcslope [fake] [ems]
+
+***Barrel EMC tower
+ tdm/table/cell/putvalue 'ems_cal_control[0].det'               1
+
+ tdm/table/cell/putvalue 'ems_cal_control[0].toy_sim_mode'      0
+ tdm/table/cell/putvalue 'ems_cal_control[0].ped_width'         10.0
+ tdm/table/cell/putvalue 'ems_cal_control[0].noise_level'       0.05
+ tdm/table/cell/putvalue 'ems_cal_control[0].noise_width'       1.0
+ tdm/table/cell/putvalue 'emc_adc_hist_control[0].min'          0
+ tdm/table/cell/putvalue 'emc_adc_hist_control[0].max'          256
+ tdm/table/cell/putvalue 'emc_adc_hist_control[0].nbin'         256
+ exec toysim_etoadc_fit bemc A 100 11 [fake] [ped] [ems]
+
+ tdm/table/cell/putvalue 'ems_cal_control[0].toy_sim_mode'      0
+ tdm/table/cell/putvalue 'ems_cal_control[0].force_B'           1
+ tdm/table/cell/putvalue 'ems_cal_control[0].ped_width'         10.0
+ tdm/table/cell/putvalue 'ems_cal_control[0].noise_level'       0.05
+ tdm/table/cell/putvalue 'ems_cal_control[0].noise_width'       10.0
+ tdm/table/cell/putvalue 'emc_adc_hist_control[0].min'          1024
+ tdm/table/cell/putvalue 'emc_adc_hist_control[0].max'          1280
+ tdm/table/cell/putvalue 'emc_adc_hist_control[0].nbin'         256
+ exec toysim_etoadc_fit bemc B 100 11 [fake] [ped] [ems]
+ tdm/table/cell/putvalue 'ems_cal_control[0].force_B'           0
+
+ tdm/table/cell/putvalue 'ems_cal_control[0].toy_sim_mode'        1
+ tdm/table/cell/putvalue 'ems_cal_control[0].gaus_peak'         1.5
+ tdm/table/cell/putvalue 'ems_cal_control[0].gaus_width'        0.3
+ tdm/table/cell/putvalue 'emc_adc_hist_control[0].min'          0
+ tdm/table/cell/putvalue 'emc_adc_hist_control[0].max'          1024
+ tdm/table/cell/putvalue 'emc_adc_hist_control[0].nbin'         256
+ exec toysim_etoadc_fit bemc LED 100 12 [fake] [led] [ems]
+
+ tdm/table/cell/putvalue 'ems_cal_control[0].toy_sim_mode'        1
+ tdm/table/cell/putvalue 'ems_cal_control[0].gaus_peak'         20.0
+ tdm/table/cell/putvalue 'ems_cal_control[0].gaus_width'        1.0
+ tdm/table/cell/putvalue 'emc_adc_hist_control[0].min'          1024
+ tdm/table/cell/putvalue 'emc_adc_hist_control[0].max'          2048
+ tdm/table/cell/putvalue 'emc_adc_hist_control[0].nbin'         256
+ exec toysim_etoadc_fit bemc LED2 100 12 [fake] [led2] [ems]
+
+return

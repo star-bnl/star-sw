@@ -1,0 +1,17 @@
+<pre><h3>SUBROUTINE STRTIMCNV(TIME,ASC)</h3>
+
+
+*  Input:
+	INTEGER TIME(2) !TIME(1) is seconds since midnight, 1-jan-1970.
+	                !TIME(2) is (additional) days since 1-jan-1970.
+*  Output:
+	CHARACTER*23 ASC !Standard time & date: dd-mmm-yy hh:mm:ss zone
+	                 !(Last four characters are time-zone.)
+
+*  Brief Description:  Convert seconds since 1970 to 23-char ASCII date-time.
+
+*  Description:
+*	Convert TIME to 23 character ASCII years, months, days,
+*	hours, minutes and seconds.
+
+</pre>

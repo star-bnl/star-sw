@@ -1,0 +1,120 @@
+* init_sca.kumac
+* written by L.D. Carr -- lcarr@u.washington.edu
+* ----------------------------------------------------------------
+* this is the initialization kumac for the sca event by event package
+* ----------------------------------------------------------------
+* History:
+*
+* 08/04/1998 - K. Turner   -- edited to make standard
+* 08/07/1998 - L.D. Carr   -- 1.  added switches
+*	                      2.  added calib/ebye/sca_calib.xdf filestream 
+*                                 readin
+* 08/10/1998 - L.D. Carr   -- changed filestreams to read in 2 calib tables
+* 08/13/1998 - Dhammika W. -- Put reading in prior and ensemble average xdf
+*                             files on switches.
+*
+* 09/15/98 - LDC added analysis_switch options for xdf file output
+* ***************************************************************
+macro init _
+	calib_dir=$STAR_CALIB/ebye _ 	    
+	output_file=sca_out.xdf _
+	prior_switch=0 _
+	ensemble_switch=0 _
+	analysis_switch=0
+  
+  macro/global/import *
+  message 'initialize sca tables and switches '  
+
+message  'prior switch: ' [prior_switch]
+message  'ensemble switch: ' [ensemble_switch]
+message  'analysis switch: ' [analysis_switch]
+
+  exec read_table_from_file#init  SCAPARAM    [TOP]/params/ebye/sca_params.xdf
+  exec read_table_from_file#read  SCAPARAM    [params]/ebye
+  exec read_table_from_file#close SCAPARAM 
+  if [prior_switch].eq.1 then
+   exec  init_sca#init_prior
+   exec  init_sca#init_ensemble_ave
+   goto SETSWITCH
+  endif
+
+  exec read_table_from_file#init  SCAPRIOR   [calib_dir]/sca_prior_dir.xdf
+* exec read_table_from_file#init  SCAPRIOR   $STAR_CALIB/ebye/sca_prior_dir.xdf
+  exec read_table_from_file#read  SCAPRIOR    [calib]/ebye
+  exec read_table_from_file#close SCAPRIOR 
+
+  if [ensemble_switch].eq.1 then
+   exec  init_sca#init_ensemble_ave
+   goto SETSWITCH
+  endif
+  
+  exec read_table_from_file#init  SCAENSEMBLE [calib_dir]/sca_ensemble_dir.xdf
+* exec read_table_from_file#init  SCAENSEMBLE $STAR_CALIB/ebye/sca_ensemble_dir.xdf
+  exec read_table_from_file#read  SCAENSEMBLE [calib]/ebye
+  exec read_table_from_file#close SCAENSEMBLE 
+
+  if [analysis_switch].eq.1 then
+    exec write_table_to_file#init SCAANALYSIS [output_file]
+   goto SETSWITCH
+  endif
+
+SETSWITCH:
+  setswitch=0
+* set switches
+  cd [params]/ebye/sca
+  if [prior_switch]=1 then 
+    tdm/table/cell/putvalue 'sca_switch[0].makePrior' 1
+    setswitch=1
+  endif
+  if [ensemble_switch]=1 then 
+    tdm/table/cell/putvalue 'sca_switch[0].makeEnsembleAve' 1
+    setswitch=1
+  endif
+  if [analysis_switch]=1 then 
+    tdm/table/cell/putvalue 'sca_switch[0].doAnalysis' 1
+    setswitch=1
+  endif
+
+*** Added by Dhammika W.  Aug 12, 1998
+  if [setswitch]=0 then
+   message " <<<<<  ERROR  >>>>> in init_sca.kumac "
+   message "      Invalid switch value: Switch option not set"
+  endif
+  cd /dui
+  
+return
+
+* ******************************************************
+
+macro init_prior
+  macro/global/import *
+  cd [calib]/ebye/sca_prior_dir
+
+  tdm/table/rowcount   sca_prior         1
+  tdm/table/cell/putvalue 'sca_prior[0].w'              0
+  tdm/table/cell/putvalue 'sca_prior[0].marker'         0
+ 
+  cd /dui
+return
+
+
+macro init_ensemble_ave
+  macro/global/import *
+
+  cd [calib]/ebye/sca_ensemble_dir
+  tdm/table/rowcount   sca_ensemble_ave  1
+
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].index'           0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].scale_x'         0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].scale_y'         0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].rank'            0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].volume'          0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].entropy'         0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].dim'             0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].info'            0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].dim_lower'       0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].evn'             0
+  tdm/table/cell/putvalue 'sca_ensemble_ave[0].run'             0
+
+  cd /dui
+return

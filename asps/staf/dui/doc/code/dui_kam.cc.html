@@ -1,0 +1,288 @@
+<HTML>
+<PRE>
+<H2>file: dui/src/dui_kam.cc</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley National Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         dui_kam.c
+*:DESCRIPTION:  C KUIP Action Modules for Error & Message Logger
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      08dec95-v000a-cet- creation
+*:&lt;---------------------------------------------------------------------
+*/
+#undef CORBA
+
+/*-------------------------------------------- INCLUDES             --*/
+
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+
+#include "kuip.h"
+
+#include "asuAlloc.h"
+#include "emlLib.h"
+#include "<A HREF="dui_macros.h.html">dui_macros.h</A>"
+#include "<A HREF="dui_types.h.html">dui_types.h</A>"
+#include "<A HREF="dui_globals.h.html">dui_globals.h</A>"
+
+/*-------------------------------------------- TYPEDEFS             --*/
+/*-------------------------------------------- GLOBALS              --*/
+/*-------------------------------------------- PROTOTYPES           --*/
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_dui_cd_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dui_macros.h.html#DUI">DUI</A>/CD [ PATH ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_dui_cd_">kam_dui_cd_(</A>){<A HREF="#kam_dui_cd">kam_dui_cd(</A>);}</B>
+<B>int <A NAME="kam_dui_cd">kam_dui_cd(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char*  path = ku_gets();	/* path */
+
+   if( !dui-&gt;<A HREF="duiClasses.cc.html#cd">cd</A>(path) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_dui_cp_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dui_macros.h.html#DUI">DUI</A>/CP FROM TO
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_dui_cp_">kam_dui_cp_(</A>){<A HREF="#kam_dui_cp">kam_dui_cp(</A>);}</B>
+<B>int <A NAME="kam_dui_cp">kam_dui_cp(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char*  fromPath = ku_gets();	/* path */
+   char*  toPath = ku_gets();	/* path */
+
+   if( !dui-&gt;<A HREF="duiClasses.cc.html#cp">cp</A>(fromPath,toPath) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_dui_ls_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dui_macros.h.html#DUI">DUI</A>/LS [ PATH ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_dui_ls_">kam_dui_ls_(</A>){<A HREF="#kam_dui_ls">kam_dui_ls(</A>);}</B>
+<B>int <A NAME="kam_dui_ls">kam_dui_ls(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char*  path = ku_gets();	/* path */
+
+
+   char * result = (char*)ASUALLOC(2048);
+   strncpy(result,"",1);
+   if( !dui-&gt;<A HREF="duiClasses.cc.html#ls">ls</A>(path, result) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   printf("<A HREF="dui_macros.h.html#DUI">DUI</A>:\tListing = \n***\n%s\n***\n",result);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_dui_mkdir_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dui_macros.h.html#DUI">DUI</A>/MKDIR PATH
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_dui_mkdir_">kam_dui_mkdir_(</A>){<A HREF="#kam_dui_mkdir">kam_dui_mkdir(</A>);}</B>
+<B>int <A NAME="kam_dui_mkdir">kam_dui_mkdir(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char*  path = ku_gets();	/* path */
+
+   if( !dui-&gt;<A HREF="duiClasses.cc.html#mkdir">mkdir</A>(path) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_dui_mv_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dui_macros.h.html#DUI">DUI</A>/MV FROM TO
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_dui_mv_">kam_dui_mv_(</A>){<A HREF="#kam_dui_mv">kam_dui_mv(</A>);}</B>
+<B>int <A NAME="kam_dui_mv">kam_dui_mv(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char*  fromPath = ku_gets();	/* fromPath */
+   char*  toPath = ku_gets();	/* toPath */
+
+   if( !dui-&gt;<A HREF="duiClasses.cc.html#mv">mv</A>(fromPath,toPath) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_dui_pwd_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dui_macros.h.html#DUI">DUI</A>/PWD
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_dui_pwd_">kam_dui_pwd_(</A>){<A HREF="#kam_dui_pwd">kam_dui_pwd(</A>);}</B>
+<B>int <A NAME="kam_dui_pwd">kam_dui_pwd(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+
+   char* result=NULL;
+
+   if( !dui-&gt;<A HREF="duiClasses.cc.html#pwd">pwd</A>(result) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   printf("<A HREF="dui_macros.h.html#DUI">DUI</A>:\tCurrent Working Directory = (%s) \n",result);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_dui_rm_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dui_macros.h.html#DUI">DUI</A>/RM PATH
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_dui_rm_">kam_dui_rm_(</A>){<A HREF="#kam_dui_rm">kam_dui_rm(</A>);}</B>
+<B>int <A NAME="kam_dui_rm">kam_dui_rm(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char*  path = ku_gets();	/* path */
+
+   if( !dui-&gt;<A HREF="duiClasses.cc.html#rm">rm</A>(path) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_dui_rmdir_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dui_macros.h.html#DUI">DUI</A>/RMDIR PATH
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_dui_rmdir_">kam_dui_rmdir_(</A>){<A HREF="#kam_dui_rmdir">kam_dui_rmdir(</A>);}</B>
+<B>int <A NAME="kam_dui_rmdir">kam_dui_rmdir(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char*  path = ku_gets();	/* path */
+
+   if( !dui-&gt;<A HREF="duiClasses.cc.html#rmdir">rmdir</A>(path) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_dui_table_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="dui_macros.h.html#DUI">DUI</A>/MKTABLE NAME SPEC ROWCOUNT
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_dui_mktable_">kam_dui_mktable_(</A>){<A HREF="#kam_dui_mktable">kam_dui_mktable(</A>);}</B>
+<B>int <A NAME="kam_dui_mktable">kam_dui_mktable(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();      /* table name */
+   char* spec = ku_gets();      /* table row specifier */
+   long rowcount = ku_geti();   /* rows to allocate */
+
+   if( !dui-&gt;<A HREF="duiClasses.cc.html#mkTable">mkTable</A>(name,spec,rowcount) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

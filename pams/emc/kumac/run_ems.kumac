@@ -1,0 +1,55 @@
+************************************************************
+ 
+ macro ems_interface2
+   
+   macro/global/import *
+     
+   cd [geant_Run]
+   tdm/table/cell/getvalue 'calb_calg[0].shift' OFF
+   if (staf_status(1).ne.STAFCV_OK) then
+	dui/rm [geant_Run]/calb_calg	
+	tables calb/* [geant_Run]
+   endif
+   cd /dui
+
+   ami/module/call ems_interface2 _
+			[geant_Event]/g2t_event _
+                        [geant_Event]/g2t_vertex _
+                        [geant_Event]/g2t_track _
+                        [geant_Event]/g2t_emc_hit _
+                       	[geant_Event]/g2t_smd_hit _
+                       	[geant_Event]/g2t_eem_hit _
+                        [geant_Event]/g2t_esm_hit _
+                        [geant_Run]/calb_calg _
+                        [params]/emc/ems/ems_control _
+                        [data]/emc/hits/ems_hits_bemc _
+                        [data]/emc/hits/ems_hits_bsmd _
+                        [data]/emc/hits/ems_hits_eemc _
+                        [data]/emc/hits/ems_hits_esmd
+   
+   if ( staf_status(1) .ne. STAFCV_OK) then
+	message '***** Problem with ems_interface *****'
+   endif
+     
+ return
+ 
+************************************************************
+ 
+ macro dep_e_toadc
+   
+   macro/global/import *
+     
+   ami/module/call dep_e_toadc _
+                        [params]/emc/ems/ems_control _
+                        [params]/emc/ems/control_toadc  _
+                        [data]/emc/hits/ems_hits_bemc _
+                        [data]/emc/hits/adc_bemc
+   
+   if ( staf_status(1) .ne. STAFCV_OK) then
+	message '***** Problem with dep_e_toadc (for BEMC and BSMD) *****'
+   endif
+     
+ return
+ 
+************************************************************
+

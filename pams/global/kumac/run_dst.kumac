@@ -1,0 +1,161 @@
+**********************************************************
+macro dst_dedx_filler
+  
+  macro/global/import *
+
+  message ' run_dst: Calling dst_dedx_filler'
+
+  ami/mod/call dst_dedx_filler_
+        [data]/tpc/tracks/tptrack_
+        [data]/svt/tracks/stk_track_
+        [dst]/dst_dedx
+
+
+  if ( staf_status(1) .ne. stafcv_ok) then
+     message 'Problem on return from DST_DEDX_FILLER' 
+  endif
+
+
+  message ' run_dst: finished calling dst_dedx_filler'
+
+return
+********************************************************
+
+macro dst_mon_soft
+ 
+  macro/global/import *
+
+  message ' run_dst: Calling dst_monitor_soft_filler'
+
+ami/mod/call dst_monitor_soft_filler_
+        [data]/tpc/hits/tpcluster _
+        [data]/svt/hits/scs_cluster _
+        [data]/tpc/hits/tphit _
+        [data]/svt/hits/scs_spt _
+        [data]/tpc/tracks/tptrack _
+        [data]/svt/tracks/stk_track _
+        [data]/global/tracks/evt_match _
+        [data]/ctf/ctb_cor _
+        [dst]/vertex _
+        [dst]/event_summary _
+        [dst]/monitor_soft
+
+
+if ( staf_status(1) .ne. stafcv_ok) then
+     message 'Problem on return from DST_MONITOR_SOFT_FILLER'
+endif
+
+
+message ' run_dst: finished calling dst_monitor_soft_filler'
+
+return
+ 
+**********************************************************
+ 
+ macro dst_run_summary
+   
+     macro/global/import *
+
+       message ' run_dst: Calling fill_dst_run_summary'
+       
+ami/mod/call fill_dst_run_summary_
+        [run_dst]/run_header _
+        [dst]/event_header _
+        [dst]/event_summary _
+        [dst]/globtrk _
+        [dst]/vertex _
+        [run_dst]/run_summary
+
+if ( staf_status(1) .ne. stafcv_ok) then
+     message 'Problem on return from FILL_DST_RUN_SUMMARY'
+endif
+
+
+message ' run_dst: finished calling fill_dst_run_summary'
+ return
+* *****************************************************
+ 
+ macro dst_event_summary
+     macro/global/import *
+
+       message ' run_dst: Calling fill_dst_event_summary'
+       
+ami/mod/call fill_dst_event_summary_
+        [run_dst]/run_header _
+        [dst]/event_header _
+        [dst]/globtrk _
+        [dst]/vertex _
+        [dst]/event_summary
+
+if ( staf_status(1) .ne. stafcv_ok) then
+     message 'Problem on return from FILL_DST_EVENT_SUMMARY'
+endif
+
+
+message ' run_dst: finished calling fill_dst_event_summary'
+
+ return
+* **************************************************
+
+ macro point_filler
+
+   macro/global/import *
+
+   message ' run_dst: Calling dst_point_filler'
+
+ami/mod/call dst_point_filler_
+        [data]/tpc/hits/tphit _
+        [data]/svt/hits/scs_spt _
+        [dst]/point
+
+if ( staf_status(1) .ne. stafcv_ok) then
+     message 'Problem on return from DST_POINT_FILLER'
+endif
+
+message ' run_dst: finished calling dst_point_filler'
+
+ return
+* **************************************************
+
+ macro point_unpack
+
+   macro/global/import *
+
+       message ' run_dst: Calling dst_point_unpack'
+
+ami/mod/call dst_point_unpack_    
+        [data]/tpc/hits/tphit _
+        [data]/svt/hits/scs_spt _
+        [dst]/point
+
+if ( staf_status(1) .ne. stafcv_ok) then
+     message 'Problem on return from DST_POINT_UNPACK'
+endif
+
+message ' run_dst: finished calling dst_point_unpack'
+ return
+
+***************************************************
+
+macro particle_dst_filler
+
+  macro/global/import *
+
+   message 'Calling particle_dst_filler'
+
+  ami/mod/call particle_dst_filler _
+               [params]/global/particle_dst_param _
+               [evgen]/particle _ 
+               [dst]/dst_track
+
+  if (staf_status(1) .ne. stafcv_ok) then
+        message 'Problem on return from particle_dst_filler'
+  endif
+
+  message 'Finished calling particle_dst_filler'
+
+RETURN
+ 
+****************************************************************
+
+

@@ -1,0 +1,13 @@
+/***************************************************************************************
+*   Table: emc_adc
+*	emc ADC/energy information
+*	OGAWA. Akio
+*/
+
+   struct emc_adc {
+       short   det;	 /* Detector number. See emc_def.h*/
+       short   eta_bin;  /* Pseudorapidity bin number */
+       short   phi_bin;  /* Phi module number */
+       short   adc;      /* ADC channel */
+       float   energy;   /* converted energy */
+   };

@@ -1,0 +1,10 @@
+
+ macro init
+
+ macro/global/import *
+
+*cd [params]/global/magnetic_field
+
+*cd /dui
+
+return

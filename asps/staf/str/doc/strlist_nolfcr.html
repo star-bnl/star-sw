@@ -1,0 +1,24 @@
+<pre><h3>SUBROUTINE STRLIST_NOLFCR(MSG,LUN)</h3>
+
+
+*  Inputs:
+	CHARACTER*(*) MSG !Character string to be output.
+	INTEGER LUN !Logical unit on which to output (terminal).
+
+*  Description:
+*	Output a one-line message without a preceding line feed
+*	or a following carriage-return on a terminal-emulating
+*	listing-file.
+*	Actual outputing is deferred until a STRLIST_NOLF
+*	call is made, at which time the message specified in that
+*	latter call is appended to previously-specified output
+*	and then output.  A call to STRLIST will wipe out any
+*	characters from a STRLIST_NOCR or STRLIST_NOLFCR call.
+*	MSG is appended to any existing characters in
+*	previously-specified output in a STRLIST_NOCR or STRLIST_NOLFCR
+*	call.
+
+*	It is illegal to call this routine before a call to any one of
+*	STRLIST, STRLIST_NOCR or STRLIST_NOLF.
+
+</pre>

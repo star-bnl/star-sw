@@ -1,0 +1,16 @@
+<pre><h3>	void	msg_to_journal_out_</h3></pre>
+<pre>
+( const char *msg, int *Lines, int msglen )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	SUBROUTINE			MSG_to_Journal_Out( msg, Lines )
+
+*  Inputs:
+	CHARACTER*(*) msg(*) !1 or more line character-string message
+	                     !submitted for display.
+	INTEGER Lines  !Number of lines in msg.
+
+*  Description:  Write a message to the journal (only);  bypass accounting.
+	Unconditionally display a message msg, containing Lines lines
+	on the journal file, if open & enabled.
+*/
+</pre>

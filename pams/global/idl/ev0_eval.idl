@@ -1,0 +1,34 @@
+/*   ev0_eval.h
+*   Table: ev0_eval
+*/
+   struct ev0_eval {
+	long id; /* Primary key */
+	long itrue; /* Evaluation flag for vertex */
+	long pid; /* pid (geant) of parent track */
+	long pid_pos; /* pid (geant) of pos track */
+	long pid_neg; /* pid (geant) of neg track */
+	long pid_true; /* true pid (geant) of parent track */
+	long pid_pos_true; /* true pid (geant) of pos track */
+	long pid_neg_true; /* true pid (geant) of neg track */
+	float x;
+	float y; /* V0 coords */
+	float z;
+	float x_true; 
+	float y_true; /* Real decay vertex */
+	float z_true; 
+	float px;
+	float py; /* Calculated momentum of parent */
+	float pz; 
+	float px_true;
+	float py_true; /* Real parent momentum */
+	float pz_true;
+	float rapidity_la; /* Calculated rapidity of parent */
+	float rapidity_lb; /* Calculated rapidity of parent */
+	float rapidity_k0; /* Calculated rapidity of parent */
+	float rapidity_true; /* Real rapidity of parent */
+	float inv_mass_la; /*  invariant mass if lambda */
+	float inv_mass_lb; /*  invariant mass if anti-lambda */
+	float inv_mass_k0; /*  invariant mass if k0 */
+   } ;
+/*  Last mod. for ev0_eval:   $Date: 1998/05/28 21:05:52 $ */
+

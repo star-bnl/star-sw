@@ -1,0 +1,15 @@
+<pre><h3>SUBROUTINE STRCPUCNV(CPU_TIME,CPU_ASC)</h3>
+
+
+*  Input:
+	INTEGER CPU_TIME(2) !CPU clock ticks of some caller-timed-interval.
+*  Output:
+	CHARACTER*(*) CPU_ASC !ddddd_hh:mm:ss.tt (ASCII cpu time; "_" = blank)
+
+*  Description:
+*	Convert specified CPU time to 17 character ASCII days, hours, minutes,
+*	seconds and ticks.
+*	If the passed string isn't long enough, a truncation is performed, and
+*	the last character in the passed string is set to "*".
+
+</pre>

@@ -1,0 +1,80 @@
+* ******************************************************************
+ MACRO run
+   
+   macro/global/import *
+
+
+   ami/mod/call stk_am _
+        [params]/svt/stkpars/stk_stkpar _
+        [geant_Event]/g2t_track _
+        [geant_Event]/g2t_event _
+        [geant_Event]/g2t_vertex _
+        [data]/svt/hits/scs_spt _
+        [params]/global/vertices/stk_vtx _
+        [params]/global/vertices/stk_vtx_direct _
+        [data]/svt/tracks/groups _
+        [data]/svt/tracks/stk_track _
+        [data]/svt/tracks/stk_kine _
+        [data]/svt/tracks/mcgroups _
+        [data]/svt/tracks/stk_mctrack _
+        [data]/svt/tracks/stk_mckine _
+        [params]/svt/stkpars/stk_filler _
+        [params]/svt/svgpars/config _
+        [params]/svt/svgpars/geom 
+
+   if (staf_status(1).ne.stafcv_ok) then
+                message 'Problem on return from STK_AM'
+   endif
+
+RETURN
+
+***************************************************************
+
+MACRO eval_stk
+  
+  macro/global/import *
+    
+    ami/mod/call ste_am _
+	 [geant_Run]/g2t_gepart _
+	 [geant_Event]/g2t_svt_hit _
+	 [geant_Event]/g2t_track _
+	 [geant_Event]/g2t_event _
+	 [geant_Event]/g2t_vertex _
+	 [data]/svt/hits/scs_spt _
+	 [params]/global/vertices/stk_vtx _
+	 [data]/svt/tracks/groups _
+	 [data]/svt/tracks/stk_track _
+	 [data]/svt/tracks/stk_kine _
+	 [data]/svt/tracks/mcgroups _
+	 [data]/svt/tracks/stk_mctrack _
+	 [data]/svt/tracks/stk_mckine _
+         [data]/svt/tracks/ste_teval _
+         [data]/svt/tracks/ste_teff
+
+    if (staf_status(1).ne.stafcv_ok) then
+		message 'Problem on return from STE_AM'
+    endif
+
+return
+*********************************************************************
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,24 @@
+//:Copyright 1996, Lawrence Berkeley National Laboratory
+//:>--------------------------------------------------------------------
+//:FILE:        tntItypes.idl
+//:DESCRIPTION: Type Definitions for TNT
+//:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:        -- STILL IN DEVELOPMENT --
+//:HISTORY:     17dec96-v000a-cet- creation
+//:<--------------------------------------------------------------------
+
+//:----------------------------------------------- INCLUDES           --
+
+//:----------------------------------------------- TYPEDEFS           --
+enum NT_TYPE_CODE_T {
+   NT_TYPE_CHAR4,
+   NT_TYPE_LOGICAL,
+   NT_TYPE_LONG,
+   NT_TYPE_U_LONG,
+   NT_TYPE_LONGLONG,
+   NT_TYPE_U_LONGLONG,
+   NT_TYPE_FLOAT,
+   NT_TYPE_DOUBLE,
+   NT_TYPE_UNKNOWN
+};
+

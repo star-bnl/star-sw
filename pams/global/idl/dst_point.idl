@@ -1,0 +1,11 @@
+/*  dst_point.idl                 */
+/*  Table: dst_point              */
+
+ struct dst_point  {
+  long      hw_position;   /* detector, sec, row, pad, time sizes  */
+  long      position[2];   /* compressed x,y,z of space-point      */
+  long      pos_err[2];    /* compressed x,y,z space-point error   */
+  long      charge;        /* total charge and max_adc             */
+  long      id_track;      /* F.key into dst_tracks table          */
+ } ;
+/*  Last mod. for dst_point:   $Date: 1998/06/03 13:52:01 $ */

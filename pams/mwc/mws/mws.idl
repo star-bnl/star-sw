@@ -1,0 +1,24 @@
+/*        mws.idl
+ *
+ *        description: MWC simulator analysis module
+ */
+#include "PAM.idl"
+#include "g2t_mwc_hit.idl"
+#include "mwc_geo.idl"
+#include "mwc_mpar.idl"
+#include "mwc_mevent.idl"
+#include "mwc_sector.idl"
+#include "mwc_raw.idl"
+
+interface mws: amiModule {
+        STAFCV_T call
+                ( inout g2t_mwc_hit  mhit
+                , inout mwc_geo      geom
+                , inout mwc_mpar     mpar
+                , inout mwc_mevent   mevent
+                , inout mwc_sector   sector
+                , inout mwc_raw      raw   
+                );
+};
+/* Last mod. for mws.idl: $Date: 1998/02/17 16:45:52 $ */
+

@@ -1,0 +1,13 @@
+//:Copyright 1995, Lawrence Berkeley Laboratory
+//:>--------------------------------------------------------------------
+//:FILE:        asuItypes.idl
+//:DESCRIPTION: Analysis Service Utilities idl file
+//:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:        -- STILL IN DEVELOPMENT --
+//:HISTORY:     31jan97-v000b-cet- rename file
+//:HISTORY:     20nov95-v000a-cet- creation
+//:<--------------------------------------------------------------------
+
+// STAR Analysis Framework Condition Value
+typedef long STAFCV_T;
+

@@ -1,0 +1,14 @@
+/* emc_ideal_egrid.idl		OGAWA, Akio */
+
+#include "PAM.idl"
+#include "g2t_track.idl"
+#include "ems_control.idl"
+#include "emc_energy.idl"
+
+interface emc_ideal_egrid : amiModule {
+	STAFCV_T call
+        ( in g2t_track   g2t_track
+        , in ems_control ems_control
+        , out emc_energy emc_energy
+	);
+};

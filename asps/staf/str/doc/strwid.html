@@ -1,0 +1,18 @@
+<pre><h3>LOGICAL FUNCTION STRWID(BEG,WIDTH,END,S)</h3>
+
+
+*  Inputs:
+	INTEGER BEG   !Index to S -- make a gap in S starting here.
+	INTEGER WIDTH !Width of gap to make in S.
+	INTEGER END   !Effective end-of-string in S (can't use LEN(S)).
+
+*  Input/Output:
+	CHARACTER*(*) S !String to be "widenned".
+
+*  Description:
+*	Move everything in S, from and including BEG to END, up by WIDTH.
+*	Effectively widen or create a gap in S. WIDTH is not negative.
+*	BEG is left to point at the first position of the new gap.
+*	Returns .true. for success, .false. for failure.
+
+</pre>

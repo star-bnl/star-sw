@@ -1,0 +1,20 @@
+<pre><h3>	void	MsgDisplayOut</h3></pre>
+<pre>
+(
+
+/*   Inputs:                                                                                       */
+	  const char *msg ) /* Character-string message, prefix irrelevant, submitted for display. */
+{
+/* Description:  Display and log a message, bypassing msg accounting.
+	Display (always) a message msg on standard out and the journal, if enabled by a
+	call to MsgJournalOn.
+	The message may not be disabled.
+	The message is not counted.
+	This is the "pure" I/O part of MsgDisplay.
+
+	Note that unlike the FORTRAN message call, there is no "Lines" argument;
+	lines are defined with "\n" (newline) characters.
+	However, unlike standard C practice, the caller should NOT include a "\n" at
+	the very end, since this interfaces to FORTRAN, which effectively puts a
+	"\n" at the very end.  msg may have as many newlines as desired.                           */
+</pre>

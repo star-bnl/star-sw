@@ -1,0 +1,39 @@
+#! /bin/csh -f
+#
+# runs gstar mickey mouse generator
+#
+####################################################
+
+# set number of events
+set nevent=1
+
+# this file sets parameters of generator (pids, pT inv slopes, dy, etc.)
+set mickey_mouse_setup=$GSTAR_UTIL_DIR/../user/setup_mickey_mouse.kumac
+
+# set output file directory and name
+set output_dir=.
+set output_filename=mickey_mouse.fzd
+
+# setup gstar
+setenv GSTAR_UTIL_DIR $STAR/kumacs/sim/utilities
+source $GSTAR_UTIL_DIR/../user/setup_gstar.hadronic_off.year2a.csh
+
+#-----------------------------------------------------------
+
+# run gstar
+# (the first two "y"s are because dynamic loader has rm command
+# which requires keyboard input - do not remove them)
+
+gstar <<END
+0
+y
+y
+user/output o $output_dir/$output_filename
+exec $mickey_mouse_setup
+trig $nevent
+user/output close
+exit
+END
+
+
+

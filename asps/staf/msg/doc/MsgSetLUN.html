@@ -1,0 +1,16 @@
+<pre><h3>	void	MsgSetLUN</h3></pre>
+<pre>
+(
+
+/*  Inputs: */
+	  int TERMINAL_LUN  /* FORTRAN logical unit number of terminal
+	                       for output, typically 6.  */
+	, int JOURNAL_LUN ) /* FORTRAN logical unit number of journal file.  */
+{
+/* Description:  Compatibility routine -- don't use in new code.
+	             ---->  Use nothing instead.  <----
+	Formerly, it set the terminal and journal LUNs for msg.
+	(ie, the message handler LUNs.)  The caller specifies
+	the Fortran logical unit number of the terminal in
+	TERMINAL_LUN and the journal file in JOURNAL_LUN.  */
+</pre>

@@ -1,0 +1,22 @@
+/*  dst_run_summary.idl         */  
+/*  Table: dst_run_summary      */  
+
+ struct dst_run_summary  {
+  char   version[20];     /* DST production software version               */
+  long   prod_run;        /* Prod. run number, F.key to dst_run_header     */
+  long   n_events_tot;    /* Total number of events in the run             */
+  long   n_events_good;   /* Total number events successfully processed    */
+  long   date[2];         /* Start/stop date for processing                */
+  long   time[2];         /* Start/stop time of day (sec)                  */
+  float  cpu_total;       /* Total cpu sec for production run              */
+  float  eta_bins[6];     /* Pseudorapidity bins, lower->upper ranges      */
+  float  pt_bins[6];      /* Trans. momen. bins, lower->upper ranges       */
+  float  mt_bins[6];      /* Trans. mass bins, lower->upper ranges         */
+  long   n_phi_bins;      /* # of phi bins, start at phi=0, max # is 8     */
+  float  mean_eta[2];     /* Mean and std.dev. of <eta> for all events     */
+  float  mean_pt[2];      /* Mean and std.dev. of <pt> for all events      */
+  long   multiplicity[2]; /* Mean and std.dev. of total chrg. mult.        */
+  long   num_vert[2];     /* Mean and std.dev. of total # vertices         */
+  long   energy_emc[2];   /* Mean and std.dev. of total energy in EMC      */
+ } ;
+/*  Last mod. for dst_event:   $Date: 1998/08/31 15:11:14 $ */

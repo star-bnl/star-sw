@@ -1,0 +1,32 @@
+<pre><h3>void strterm_get_char_from_line_</h3></pre>
+<pre>
+(long int *i1)
+{
+/*
+  FORTRAN callable.
+
+  Output:
+	integer i1 -- passed by reference (pointer or address).
+
+  Return value:  none ("void")
+
+  Description:
+	Get a character from the terminal, w/o waiting.
+	Wait for a complete line before transmitting.
+	Return with the null byte as the character if no
+	character is ready at the terminal (ie, don't wait).
+
+  Warning:
+	A Unix ambiguity fails to distinguish between EOF, sometimes
+	indicated with a ^D from an input stream, but otherwise being
+	a specific signal from the input device indicating that there
+	is no (more) data available, and a "no character avaiable"
+	condition.
+
+	This will result in an unpleasant surprise if a program is exitted
+	while in nowait mode:       The Unix shell begins receiving
+	null bytes from the terminal, instead of waiting for real characters.
+	This being indistiguishable under Unix from an EOF, or ^D, the session
+	will be immediately ended, and the user logged off!!!
+*/
+</pre>

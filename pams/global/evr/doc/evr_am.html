@@ -1,0 +1,54 @@
+<pre><h3>INTEGER*4 FUNCTION EVR_AM(
+            evrpar_h,            evrpar ,
+           tptrack_h,           tptrack ,
+         svt_track_h,         svt_track ,
+           globtrk_h,           globtrk ,
+         evt_match_h,         evt_match ,
+           privert_h,           privert ) </h3>
+#include "evr_am.inc"
+CC:>----------------------------------------------------------------------
+CC: ROUTINE:    EVR
+CC: DESCRIPTION: Vertex fit, least square method with outlier removal
+CC: AUTHOR:     S. Margetis  Created  MARCH-1992
+CC: ARGUMENTS:
+CC:          IN:
+CC:	       	evrpar   = Parameters controlling vertex finding
+CC:     	tptrack    = Track information from tpt package
+CC:       	svt_track    = Track information from stk package
+CC:       	globtrk  = Track information from egr package
+CC:       	evt_match    = Matching information from svm package
+CC:         OUT:
+CC:	       	privert  = Primary Vertex Information
+CC: RETURNS:    STAF Condition Value
+CC: ERROR CONDITIONS	: None-Yet
+CC: STATUS		: Tested
+CC: MODIFIED TO WORK IN TAS : E. G. Judd, November 1993
+CC:   Added switches so the vertex finder can use TPC, SVT or global tracks.
+CC:         Also added cuts on pt, and whether or not the track has been
+CC:         matched, to improve track selection : E. G. Judd, April 1994
+CC: MODIFIED TO WORK IN STAF : S. Margetis, November 1996
+CC:
+CC:  METHOD:
+CC:  Minimization of the perpendicular distances from the vectors to a point.
+CC:
+CC:  Consider an arbitrary vector Vi, with a unit vector in the direction
+CC:  The distance from a point P to the vector Vi is the crossproduct of the 
+CC:  unit vector e(Vi)^ with any line connecting P to any point Q on the line.
+CC:  Line PQ = (x0-xi)x^+(y0-yi)y^+(z0-zi)z^
+CC:	P=(x0,y0,z0)    Q=(xi,yi,zi)
+CC:  The distance is: |d|=|PQ X e(Vi)^|
+CC:
+CC:  A least square minimization employs a merit function (chi square) to 
+CC:  assess quality of fit.  The optimum values of the variables are 
+CC:  determined by where the partial derivatives of the merit function are
+CC:  equal to zero.  For this case, the merit function is the summation of
+CC:  the squares of the perpendicular distances from the vectors (Vi) to a 
+CC:  point (Xo, Yo, Zo) [divided by the squares of the uncertanty
+CC:  errors?] (sumation over vector number).  The partial derivatives are taken
+CC:  with respect to x0, y0, and Z0.  We are left with three equations 
+CC:  for three unknowns (Xo,Yo,Zo).  The evaluation is done through matrix 
+CC:  manipulation.
+CC:
+CC:>----------------------------------------------------------------------
+
+</pre>

@@ -1,0 +1,22 @@
+<pre><h3>SUBROUTINE			MSG_to_LUN_Out( msg, Nlines, LUN )</h3>
+
+
+*  Inputs:
+	CHARACTER*(*) msg(*) !1 or more line character-string message submitted for display.
+	INTEGER       Nlines !Number of lines in MSG.
+	INTEGER       LUN    !FORTRAN logical unit number for MSG to be written to.
+
+*  Brief description:  Write a message to a FORTRAN LUN;  bypass accounting.
+
+*  Description:
+*	Display a message, containing one or more lines of no particular
+*	length (or length-limit), on FORTRAN logical unit LUN.
+
+*	This routine ends with a call to STRFlush( LUN ), flushing the output
+*	output buffer.  This seems to be necessary to get some machines to
+*	keep the LUN file (or terminal) up-to-date;  without this, a crash
+*	leaves the last several lines of the output to LUN not in the listing
+*	file -- a terrible thing indeed for debugging:
+
+
+</pre>
