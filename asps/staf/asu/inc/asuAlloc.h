@@ -10,10 +10,10 @@
 void * operator new(size_t sz,const char *file,int line);
 void * operator new(size_t sz);
 
-#if defined(__GNUC__) || defined(__ACC)
+#ifdef NEW_ARRAY_ON
 void * operator new[](size_t sz,const char *file,int line);
 void * operator new[](size_t sz);
-#endif /**__GNUC__ or __ACC**/
+#endif /**NEW_ARRAY_ON**/
 
 #define new new(__FILE__,__LINE__)
 #endif /**__cplusplus**/

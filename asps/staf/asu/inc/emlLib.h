@@ -110,19 +110,19 @@ extern CC_P void dsPerror(const char *msg);
 
 /*-------------------------------------------- INTERFACE MACROS     --*/
 
-#define EML_INITSTACK() {memset(eml_stack,0,EML_STACKSIZE);eml_stack[EML_STACKSIZE]=-1;}
+#define EML_INITSTACK() {memset(eml_stack,0,EML_STACKSIZE);eml_stack[EML_STACKSIZE]=(char)(-1);}
 #define EML_INITCONTEXT() {memset(eml_context,0,EML_CONTEXTSIZE);}
 #define EML_INITBUFFER() {memset(eml_buffer,0,EML_BUFFERSIZE);}
 #define EML_INIT() {EML_INITSTACK(); EML_INITBUFFER(); \
 	EML_INITCONTEXT();}
 
-#define EML_CLEARSTACK() {eml_stack[0] = '\0';eml_stack[EML_STACKSIZE]=-1;}
+#define EML_CLEARSTACK() {eml_stack[0] = '\0';eml_stack[EML_STACKSIZE]=(char)(-1);}
 #define EML_CLEARCONTEXT() {eml_context[0] = '\0';}
 #define EML_CLEARBUFFER() {eml_buffer[0] = '\0';}
 #define EML_CLEAR() {EML_CLEARSTACK(); EML_CLEARBUFFER(); \
 	EML_CLEARCONTEXT();}
 #define EML_OVERFULL() {\
-        if (eml_stack[EML_STACKSIZE]!=-1) {\
+        if (eml_stack[EML_STACKSIZE]!=(char)(-1)) {\
           printf("***EML_STACK Overfull***\n%s\n",eml_stack);\
           EML_CLEAR();}}
 #define EML_PRINTCONTEXT(STREAM) \
