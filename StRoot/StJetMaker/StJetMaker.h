@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.2 2004/09/14 17:27:15 mmiller Exp $
+ * $Id: StJetMaker.h,v 1.3 2004/09/22 15:46:20 mmiller Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.3  2004/09/22 15:46:20  mmiller
+ * Added a double check to verify that jet 4p is equal to the vector sum of
+ * the particles 4-p.  Removed troublesome access methods to StJets.  See
+ * StJetReader::exampleEventAna() for access to jet-particles.
+ *
  * Revision 1.2  2004/09/14 17:27:15  mmiller
  * Fixed bug (lack of StFourPMaker::Clear()).
  *
@@ -64,6 +69,7 @@
 #include "StppJetAnalyzer.h"
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <algorithm>
 using namespace std;
@@ -127,6 +133,10 @@ private:
     TTree           *jetTree;      //!
     Int_t            infoLevel;
     int mEventCounter;
+
+    //temp, MLM
+    ofstream* mOfstream; //!
+    
     ClassDef(StJetMaker,0)
 	};
 

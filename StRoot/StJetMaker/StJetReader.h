@@ -57,6 +57,10 @@ private:
     StMuDstMaker* mDstMaker;
     int mCounter;
     
+    //temp, MLM
+    ofstream* mOfstream; //!
+
+    
     ClassDef(StJetReader,1)
 };
 
