@@ -30,7 +30,7 @@ float pawc[PAWC_SIZE];
 
 
 #if defined(__vms) || defined(vms)
-/*        On VMS rand has a range of 2**31
+/*        On VMS rand has a range of 2**31    */
 # define RAND_RANGE 2146483648.
 #else
 # define RAND_RANGE 32768.
@@ -52,3 +52,18 @@ main()
 	}
 	HPRINT(hid);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
