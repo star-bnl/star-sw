@@ -148,7 +148,7 @@ int eut_circles_x_ ( float *lx0, float *ly0, float *la0, float *lr0,
 ------------------------------------------------------------------------ */
       if ( nsol > 2 ) 
       {
-          printf ( "\n nsol: &d is too many solutions \n", nsol );
+          printf ( "\n nsol: %d is too many solutions \n", nsol );
           nsol = 0 ;
           return nsol ;
       } 
