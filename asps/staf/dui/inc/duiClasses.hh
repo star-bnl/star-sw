@@ -39,10 +39,6 @@ public:
 // Unix-Like commands
    virtual STAFCV_T cd (const char * dirPath);
    virtual STAFCV_T cp (const char * fromPath, const char * toPath);
-   virtual STAFCV_T findDatasetPath (const char * dirPath
-		, tdmDataset*& dataset);
-   virtual STAFCV_T findTablePath (const char * filePath
-		, tdmTable*& table);
    virtual STAFCV_T ls (const char * path, char *& result);
    virtual STAFCV_T mkdir (const char * dirPath);
    virtual STAFCV_T mkTable (const char * filePath
@@ -52,15 +48,19 @@ public:
    virtual STAFCV_T rm (const char * filePath);
    virtual STAFCV_T rmdir (const char * dirPath);
 
-   virtual STAFCV_T findDataset (const char * name
-		, tdmDataset*& dataset);
-   virtual STAFCV_T findTable (const char * name
-		, tdmTable*& table);
 //----------------------------------
 // Unix-Related commands
    virtual char * cvtRelAbs (const char * relPath);
 
 //----------------------------------
+// Over-ride tdmFactory methods
+   virtual STAFCV_T findDataset (const char * dirPath
+		, tdmDataset*& dataset);
+   virtual STAFCV_T findTable (const char * filePath
+		, tdmTable*& table);
+   virtual STAFCV_T newDataset (const char * name, long setDim);
+   virtual STAFCV_T newTable (const char * name, const char * spec
+   		, long rows);
 
 protected:
 //:----------------------------------------------- PRIV VARIABLES     --

@@ -29,7 +29,7 @@
 //:<--------------------------------------------------------------------
 int dui_init()
 {
-   EML_MESSAGE("Initializing DUI.");
+   EML_MESSAGE(Initializing DUI.);
 
 /*- Define the DUI KUIP commands. -*/
    dui_def_();
@@ -45,14 +45,14 @@ int dui_init()
 //:<--------------------------------------------------------------------
 int dui_start()
 {
-   EML_MESSAGE("Starting DUI.");
+   EML_MESSAGE(Starting DUI.);
 
 /*- Create the DUI Dispatcher. -*/
    dui = new duiDispatcher("dui");
 
 /*- Superceed the TDM Factory. -*/
    if( tdm != NULL ){
-      EML_MESSAGE("DUI superceeds TDM.");
+      EML_MESSAGE(DUI superceeds TDM.);
       tdm->lock(FALSE);
       soc->deleteObject("tdm","tdmFactory");
       tdm = dui;
@@ -69,7 +69,7 @@ int dui_start()
 //:<--------------------------------------------------------------------
 int dui_stop()
 {
-   EML_MESSAGE("Stopping DUI.");
+   EML_MESSAGE(Stopping DUI.);
 
 /*- Delete the DUI Dispatcher.
    delete dui;
