@@ -1,6 +1,12 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.81 2003/05/01 20:48:56 jeromel Exp $
+// $Id: St_geant_Maker.cxx,v 1.82 2003/05/14 22:54:23 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.82  2003/05/14 22:54:23  potekhin
+// Fixing the incompatibilities gradually accumulated, in the
+// part that reads and propagates the event header info.
+// In particular, the pseudoparticle codes were incorrect.
+// FIll the header based on the parsed event record.
+//
 // Revision 1.81  2003/05/01 20:48:56  jeromel
 // This one is ugly ... But needed for root transition again.
 //
@@ -497,16 +503,26 @@ Int_t St_geant_Maker::Make()
 //    =======================
 
       particle_st *p = particle->GetTable();
-      if (p->isthep == 10 && p->idhep  == 9999999 && fEvtHddr) 
+
+      // 20030508 --max-- found a bug: 9999999
+      // "istat==10" on the following line, changing to >=11
+      // This "if should now work with both "old" and "new"
+      // ntuple conventions
+
+      if ( (p->isthep == 10 && p->idhep  == 9999999 && fEvtHddr) ||
+           (p->isthep >= 11 && p->idhep  == 999998  && fEvtHddr))
       {
 	fEvtHddr->SetBImpact  (p->phep[0]);
 	fEvtHddr->SetPhImpact (p->phep[1]);
-	fEvtHddr->SetGenerType((int)p->phep[2]);
-	fEvtHddr->SetCenterOfMassEnergy(p->phep[3]);
-	Int_t west = (int)p->phep[4];
-	Int_t east = (int)(1000.*p->phep[4]-1000.*((float)west));
-	fEvtHddr->SetAWest(west);
-	fEvtHddr->SetAEast(east);
+	fEvtHddr->SetCenterOfMassEnergy(p->phep[2]);
+
+	// Obsoleted: --max--
+	// 	fEvtHddr->SetGenerType((int)p->phep[2]);
+	// 	Int_t west = (int)p->phep[4];
+	// 	Int_t east = (int)(1000.*p->phep[4]-1000.*((float)west));
+	// 	fEvtHddr->SetAWest(west);
+	// 	fEvtHddr->SetAEast(east);
+
 	if (fEvtHddr->GetRunNumber() != p->vhep[0])
 	  fEvtHddr->SetRunNumber((int)p->vhep[0]);
 	fEvtHddr->SetEventNumber((int)p->vhep[1]);
@@ -530,6 +546,11 @@ Int_t St_geant_Maker::Make()
     iRes = g2t_get_kine(g2t_vertex,g2t_track);
     iRes = g2t_get_event(g2t_event);
 
+    // --max-- addition due to the new coding:
+    if(fEvtHddr) {
+      fEvtHddr->SetAEast((*g2t_event)[0].n_wounded_east);
+      fEvtHddr->SetAWest((*g2t_event)[0].n_wounded_west);
+    }
     //---------------------- inner part -------------------------//
 
     geant3->Gfnhit("SVTH","SVTD", nhit1);
