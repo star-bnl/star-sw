@@ -27,7 +27,7 @@ StiRootDrawableLine::StiRootDrawableLine() :
     mline->SetLineColor(mcolor);
     mline->ResetBit(kCanDelete);
 
-    mname = "Unnamed RootDrawableLine";
+    setName("Unnamed RootDrawableLine");
 }
 
 StiRootDrawableLine::~StiRootDrawableLine()
@@ -82,7 +82,3 @@ void StiRootDrawableLine::setVisibility(bool val)
     return;
 }
 
-const char* StiRootDrawableLine::name() const
-{
-    return mname;
-}

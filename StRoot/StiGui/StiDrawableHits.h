@@ -31,8 +31,6 @@ public:
 
     virtual void setMarkerStyle(unsigned int) = 0;
     virtual void setMarkerSize(double) = 0;
- 
-    virtual const char* name() const = 0;
 
 protected:
     

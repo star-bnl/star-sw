@@ -25,8 +25,6 @@ public:
     virtual void setColor(int val);
     virtual void setVisibility(bool val);
     
-    virtual const char* name() const = 0;
-
     TRotMatrix* rotation() const {return mrotation;}
     TShape* shape() const {return mshape;}
     TVolume* volume() const {return mnode;}

@@ -25,14 +25,11 @@ public:
     virtual void setMarkerStyle(unsigned int);
     virtual void setMarkerSize(double);
 
-    virtual const char* name() const;
-
 protected:
     StiTPolyMarker3D* mpoly;
     double* marray;
     int mcolor;
     bool mvisible;
-    char* mname;
     unsigned int mmarker;
     double* mPointsForRoot;
     unsigned int mArraySize; 
