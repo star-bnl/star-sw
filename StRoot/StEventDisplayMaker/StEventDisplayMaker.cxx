@@ -34,6 +34,8 @@
 #include "TCanvas.h"
 #include "TColor.h"
 #include "TStyle.h"
+#include "TTUBS.h"
+
 #include "StEventDisplayMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -159,7 +161,15 @@ Int_t StEventDisplayMaker::BuildGeometry()
   if (!m_Hall) return kStErr;
   //
   // Create an iterator to navigate STAR geometry
-  St_DataSetIter volume(m_Hall);
+  St_DataSetIter volume(m_Hall,0);
+
+  St_Node *sector = 0;
+  while ( (sector = ( St_Node *)volume()) ){
+      if (strcmp(sector->GetName(),"TPSS") ) continue;
+      sector->SetVisibility(1);
+      TTUBE *tubs = (TTUBE *)sector->GetShape();
+      tubs->SetNumberOfDivisions(1);
+  }
 
   // Select sensors
   m_FullView = new St_NodeView(*m_Hall); 
@@ -181,7 +191,7 @@ Int_t StEventDisplayMaker::BuildGeometry()
   St_DataSetIter nextSector(m_Sensible,0);
   St_DataSet *tpssNode = 0;
   while (( tpssNode = nextSector() ) ) {
-    if (strcmp(tpssNode->GetName(),"TPGV")) continue;
+    if (strcmp(tpssNode->GetName(),"TPGV") && strcmp(tpssNode->GetName(),"TPSS")) continue;
     tpssNode->Mark();
   }
 
@@ -361,12 +371,16 @@ Int_t StEventDisplayMaker::Make()
           continue;
         }
         if (event->InheritsFrom("St_Table")) {
-               m_Table = (St_Table *)event;
-               totalCounter += MakeTable();
+             //  ---- Draw "table" events ----  //
+               m_Table = (St_Table *)event;     //
+               totalCounter += MakeTable();     //
+             //  -----------------------------  //
         }
         else if (event->InheritsFrom("StEvent")) {
-               m_Event = (StEvent *)event;
-               totalCounter += MakeEvent();
+             //  ---- Draw "StEvent" events ---- //
+               m_Event = (StEvent *)event;       //
+               totalCounter += MakeEvent();      //
+             //  ------------------------------- //
         }
         else if (Debug()) Warning("Make","Can not draw object \"%s\"",foundName); 
      }
@@ -403,7 +417,7 @@ const Char_t StEventDisplayMaker::ParseName(const Char_t *inName)
     const Char_t openBracket  = '(';
     const Char_t closeBracket = ')';
     const Char_t comma        = ',';
-    const Char_t delimiters[5] = {openBracket,comma,comma,comma,closeBracket };
+    const Char_t delimiters[] = {openBracket,comma,comma,comma,closeBracket };
     Int_t i = 0;
     pos = positions[0] = parsedName;
     for (i=1;i<lenExpr;i++)  {
