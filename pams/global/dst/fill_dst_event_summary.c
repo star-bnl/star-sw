@@ -239,17 +239,6 @@ long  type_of_call fill_dst_event_summary_ (
 	 eta_histo[ibin];        /* Fill eta bin  multiplicities  */
     }/* end of looping over bins */
 
-  binrange = NPHIBINS/NPHIRANGE; /* NBINS have to be a multiple of NRANGE */
-
-  /* Fill  phi  bin multiplicities  */
-  for (irange=0; irange<NPHIRANGE; irange++) { /* begin looping over ranges  */
-    minbin = binrange*irange;
-    maxbin = minbin + binrange;
-    for (ibin=minbin; ibin < maxbin; ibin++) {/* begin  looping over bins  */
-      dst_eventsummary->mult_phi[irange]+=
-	 phi_histo[ibin];        /* Fill phi bin  multiplicities  */
-    }/* end of looping over bins */
-
 
     /* Fill inverse slope for mt bins   */
     dst_eventsummary->T_mt_bins[irange] = 
@@ -270,6 +259,21 @@ long  type_of_call fill_dst_event_summary_ (
 	mt_inverse_slope(eta3_mt_histo,  0, NBINS ); /* mt inverse slope */
       break;
     }
+  }  /* end of looping over ranges */
+
+
+
+
+  binrange = NPHIBINS/NPHIRANGE; /* NBINS have to be a multiple of NRANGE */
+
+  /* Fill  phi  bin multiplicities  */
+  for (irange=0; irange<NPHIRANGE; irange++) { /* begin looping over ranges  */
+    minbin = binrange*irange;
+    maxbin = minbin + binrange;
+    for (ibin=minbin; ibin < maxbin; ibin++) {/* begin  looping over bins  */
+      dst_eventsummary->mult_phi[irange]+=
+	 phi_histo[ibin];        /* Fill phi bin  multiplicities  */
+    }/* end of looping over bins */
   }  /* end of looping over ranges */
 
   
