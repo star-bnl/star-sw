@@ -181,7 +181,7 @@ Int_t St_DataSetIter::Du() const {
   St_DataSetIter next(fWorkingDataSet,0); 
   St_DataSet *nextset = 0;
   Int_t count = 0;
-  while(nextset = count ? next():fWorkingDataSet) {
+  while((nextset = (count) ? next():fWorkingDataSet)) {
       count++;
       if (nextset->IsFolder()) cout << endl;
       TString path = nextset->Path();
@@ -206,57 +206,16 @@ St_DataSet *St_DataSetIter::FindObject(const Char_t *name,const Char_t *path,Opt
   //       the first found is returned.
   //
 
-  if (!name || strlen(name) == 0) return 0;
-  if (strchr(name,'/')) {
-    Error("FindObject","The name of the object <%s> can not contain any \"/\"",name);
-    return 0;
-  }
-  
-  Bool_t opti = opt ? strcasecmp(opt,"-i") == 0 : kFALSE;
+int namelen;
+char empty[]="";
 
-  St_DataSet *startset = 0;
-  if (path && strlen(path)) startset = Find(path);
-  else                      startset = fWorkingDataSet;
-  if (!startset) return 0;
-
-  St_DataSetIter next(startset,100);
-  St_DataSet *set = 0;
-  while (set = next()){
-     if (opti) {
-         if (strcasecmp(set->GetName(),name) == 0 )break;
-     }
-     else 
-      if (set->IsThisDir(name)) break;
-  }
-  return set;
+  if (!name || !(namelen=strlen(name))) return 0;
+  if (!path) path = empty;
+  char cbuf[512]; assert (namelen+strlen(path)+10 < 512);
+  if (name[0]=='/') name++;
+  sprintf(cbuf,"%s/.*/%s",path,name);
+  return Find(cbuf);
 }
-#if 0
-//______________________________________________________________________________
-St_DataSet *St_DataSetIter::FindObject(St_DataSet *set,const Char_t *path,Option_t *opt)
-{
-  //
-  // Check whether the object does belong the St_DataSet defined with "path"
-  // opt = "-l"  - check the "reference" links only
-  //       "-s"  - check the "structural" links only
-  //             = "by default" - checks all links
-  //
-  if (!set) return 0;
-  Bool_t optl = opt ? stricmp(opt,"-l") == 0 : kFALSE;
-  Bool_t opts = opt ? stricmp(opt,"-s") == 0 : kFALSE;
-
-  St_DataSet *startset = 0;
-  if (path) startset = Find(path);
-  else      startset = fWorkingDataSet;
-  if (!startset) return 0;
-
-  St_DataSetIter next(fWorkingDataSet);
-  while (set = next()) 
-        if (set == this) break;
- }
-
-  return set;
-}
-#endif
 //______________________________________________________________________________
 Int_t St_DataSetIter::Flag(const Char_t *path,UInt_t flag,EBitOpt reset)
 {
@@ -283,9 +242,8 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Option_t *opt) {
 //   dirname[0] != '/' - prints DataSet with respect of the current class
 //
  
-  St_DataSet *set= 0;
-  if (dirname && strlen(dirname)) set = Find(dirname);
-  if (!set && dirname==0) set=Cwd();
+  St_DataSet *set= fWorkingDataSet;
+  if (dirname && strlen(dirname)) set= Find(dirname);
   if (set) set->ls(opt);
   return set;
 }
@@ -296,7 +254,6 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Int_t depth) {
 //   Ls(const Char_t *dirname,Int_t depth)
 //
 //   Prints the list of the St_DataSet defined with dirname
-//   Returns the dataset defined by "path" or Cwd();
 //
 //   dirname     = 0   - prints the current dataset
 //   dirname[0]  = '/' - print St_DataSet defined with dirname
@@ -305,9 +262,8 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Int_t depth) {
 //   depth       = 0   - print all level of the St_DataSet defined with dirname
 //               > 0   - print depth levels at most of the dirname St_DataSet
 //
-  St_DataSet *set= 0;
-  if (dirname && strlen(dirname)) set = Find(dirname);
-  if (!set && dirname==0) set=Cwd();
+  St_DataSet *set= fWorkingDataSet;
+  if (dirname && strlen(dirname)) set= Find(dirname);
   if (set) set->ls(depth);
   return set;
 }
@@ -351,8 +307,7 @@ St_DataSet *St_DataSetIter::Next()
     if (fDataSet && (fDepth < fMaxDepth || fMaxDepth ==0) ) 
     {
       // create the next level iterator, go deeper
-
-      TList  *list  = fDataSet->GetListOfDataset();
+      TList *list  = fDataSet->GetList();
       // Look for the next level
       if (list && list->GetSize() ) {
          fDepth++;
@@ -388,136 +343,87 @@ St_DataSet *St_DataSetIter::Next()
 St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
                                  Bool_t mkdirflag)
 {
- ////////////////////////////////////////////////////////////////////////////////
- //                                                                            //
- //           "path" ::= <relative path> | <absolute path> | <empty>           //
- //                                                                            //
- //  "relative path" ::= <dataset name> | <dataset name>/<dataset name>        //
- //                                                                            //
- //  "absolute path" ::= /<relative path>                                      //
- //  "empty"         ::= zero pointer | pointer to zero length string          //
- //                                                                            //
- // "relative path": the search is done against of fWorkingDataSet data mem    //
- // "absolute path": the search is done against of fRootDataSet    data mem    //
- // "empty path"   : no search is done just next St_DataSet is returned if any //
- //                                                                            //
- //  Remark: This version can not treat any "special name" like "..", ".", etc //
- //  ------                                                                    //
- ////////////////////////////////////////////////////////////////////////////////
- 
-   if (!path || !strlen(path)) return rootset;
- 
-   St_DataSet *dataset = rootset;
-   const Char_t pathseparator='/';
-   const Char_t *startpos = path;
-   const Char_t *seppos = startpos ? strchr(startpos,pathseparator) : 0;
-   Bool_t isAbs = kFALSE;
- 
- // delete all "blanks"
- 
- //*-*
- //*-* define the path type
- //
-   if ( startpos && seppos==startpos )
-   {
-      //*-* "absolute path":
- 
-      startpos = seppos+1;
-      seppos = strchr(startpos,pathseparator);
-      if (!dataset) dataset = fRootDataSet;
-      isAbs = kTRUE;
-   }
-   else
-      if (!dataset)
-           dataset = fWorkingDataSet;  //*-* "relative path"
- 
-  if (!(dataset || mkdirflag)) {
-    Warning("Next()","Empty iterator. Nothing to do!");
-    return 0;
-  }
- 
-   ULong_t ldirname = 0;
- 
-   if (seppos)
-      ldirname=ULong_t(seppos-startpos);
-   else
-      ldirname = strlen(startpos);
- 
-   if (ldirname) {
-      Char_t *dirname = new Char_t[ldirname+1];
-      strncpy(dirname,startpos,ldirname);
-      dirname[ldirname]=0;
- 
-      St_DataSet *thisset = dataset;
-      Bool_t found = kFALSE;
-      if (mkdirflag && !fRootDataSet) {
- 
-      // There is no "root" St_DataSet object
-      //     Let's create it
-        St_DataSet *set = new St_DataSet(dirname,dataset);
-        if (dataset)
-              dataset->Add(set);
-        else
-              dataset = set;
- 
-        thisset   = dataset;
-        if (!fRootDataSet) {
-          fRootDataSet       = dataset;
-          fWorkingDataSet    = dataset;
-        }
-        found = kTRUE;
-      }
-      else {
-        TList *list = dataset->GetListOfDataset();
-        if (list) {
-          TIter next(list);
-          St_DataSet *obj = 0;
-           while ( obj = (St_DataSet *)next() ) {
-             if (found = obj->IsThisDir(dirname)) {
-               dataset = obj;
-               break;
-             }
-          }
-        } 
-#if 0
-else
-          found = dataset->IsThisDir(dirname);
-#endif
-      }
-#if 1
-      if (!(found || mkdirflag))
-          found = dataset->IsThisDir(dirname);
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//           "path" ::= <relative path> | <absolute path> | <empty>           //
+//                                                                            //
+//  "relative path" ::= <dataset name> | <dataset name>/<dataset name>        //
+//                                                                            //
+//  "absolute path" ::= /<relative path>                                      //
+//  "empty"         ::= zero pointer | pointer to zero length string          //
+//                                                                            //
+// "relative path": the search is done against of fWorkingDataSet data mem    //
+// "absolute path": the search is done against of fRootDataSet    data mem    //
+// "empty path"   : no search is done just next St_DataSet is returned if any //
+//                                                                            //
+//  Remark: This version can not treat any "special name" like "..", ".", etc //
+//  ------                                                                    //
+////////////////////////////////////////////////////////////////////////////////
+   St_DataSet *dataset=0,*dsnext=0,*ds=0;
+   int len=0,nextlen=0,yes=0,anywhere=0,rootdir=0;
+   const char *name=0,*nextname=0;
+   TList *tl=0;
+   
+   name = path;
+   if (!name) return rootset;
+   dataset = rootset;
+   if (!dataset) {// Starting point
+     rootdir = 1999;
+     dataset = (path[0]=='/') ? fRootDataSet:fWorkingDataSet;}
 
-      if ( !found && mkdirflag            
-            && (!isAbs || !(found = dataset->IsThisDir(dirname)))
-         )
-      {
-         found = kTRUE;
-         dataset = new St_DataSet(dirname,thisset);
-         if (thisset)
-            thisset->Add(dataset);
-      }
+   if (name[0] == '/') name++;
+   
+   if (!strncmp(name,".*/",3)) {anywhere=1998; name +=3;} 
 
-      if (!found) dataset = 0;
-#else
-      if (!found) dataset = 0;
-      if (!found && mkdirflag) {
-          found = kTRUE;
-          dataset = new St_DataSet(dirname,thisset);
-          if (thisset)
-             thisset->Add(dataset);
-      }
-#endif
-      // Go to the next recursive level
-      if (found) {
-        if (seppos) seppos++;
-        dataset = Find(seppos,dataset,mkdirflag);
-      }
- 
-      delete [] dirname;
-   }
-   return dataset;
-}
+   len = strcspn(name," /");   
+   if (!len) return dataset;
+
+   if (!dataset) goto NOTFOUND;
+
+//	Check name of root directory
+   if (rootdir) {
+   nextname = dataset->GetName();
+   nextlen  = strlen(nextname);
+   if (nextlen==len && !strncmp(name,nextname,len)) 
+     return Find(name+len,dataset,mkdirflag);}
+
+
+
+   tl = dataset->GetList();
+   if (!tl) goto NOTFOUND;
+
+   {TIter next(tl);
+   while ((dsnext = (St_DataSet*)next())) { //horisontal loop 
+     nextname = dsnext->GetName();
+     if (!nextname)	continue;
+     yes = name[0]=='*';	// wildcard test
+     if (!yes) {		// real     test
+       nextlen  = strlen(nextname);
+       yes = (len == nextlen);
+       if (yes) yes = !strncmp(name,nextname,len);}
+      
+     if (yes) {//go down
+       ds = Find(name+len,dsnext,mkdirflag);
+       if (ds) return ds;}
+       
+     if (!anywhere) continue; 	// next horizontal
+       ds = Find(name,dsnext,mkdirflag);
+       if (ds) return ds;
+   }}; 					// end of while
+
+NOTFOUND:
+   if (mkdirflag) {// create dir 
+     char buf[512];buf[0]=0; strncat(buf,name,len);
+     ds = new St_DataSet(buf);
+     if (!fRootDataSet) 	fRootDataSet    = ds;
+     if (!fWorkingDataSet) 	fWorkingDataSet = ds;
+     if (dataset) { // 
+       dataset->Add(ds);} else { dataset = ds; name +=len;}
+     
+     return Find(name,dataset,mkdirflag);}
+  
+   return 0;
+}     
  
 //______________________________________________________________________________
 void St_DataSetIter::Reset(St_DataSet *l, int depth)
@@ -569,7 +475,7 @@ St_DataSet *St_DataSetIter::Shunt(St_DataSet *set, St_DataSet *dataset)
  //  returns  the pointer to set is success or ZERO poiner                    //
  //  =======                                                                  //
  //                                                                           //
- //  Note: If this St_DataSetIter is empty (i.e. Cwd() returns 0), the "set"  //
+ //  Note: If this St_DataSetIter is empty (i.e. Pwd() returns 0), the "set"  //
  //        becomes the "root" dataset of this iterator                        //                                                                         //
  ///////////////////////////////////////////////////////////////////////////////
  

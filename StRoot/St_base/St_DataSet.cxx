@@ -1,8 +1,8 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
-//  
-//  
-// Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
+
+// Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
+ 
 //*KEEP,TDataset,T=C++.
 #include <iostream.h>
 #include "St_DataSetIter.h"
@@ -26,7 +26,7 @@
 ClassImp(St_DataSet)
  
 //______________________________________________________________________________
-St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(), fList(0), fMother(0)
+St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(), fList(0), fParent(0)
 {
   //  cout << "ctor for " << GetName() << " - " << GetTitle() << endl;
    if (strchr(name,'/')) {
@@ -34,10 +34,10 @@ St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(), fList
       return;
    }
  
+   if (parent) parent->Add(this);
+ 
    SetName(name);
    SetTitle("St_DataSet");
-   if (parent) SetParent(parent);
-//   if (parent) parent->Add(this);
 }
 //______________________________________________________________________________
 St_DataSet::St_DataSet(const St_DataSet &pattern,EDataSetPass iopt)
@@ -68,7 +68,7 @@ St_DataSet::St_DataSet(const St_DataSet &pattern,EDataSetPass iopt)
     // define the parent of the next set
      St_DataSet *parent = set->GetParent(); 
      if ( optall || (optsel && parent == this) )
-                                  Add((St_DataSet *)(set->Clone()));
+       Add((St_DataSet *)(set->Clone()));
   }
 }
 
@@ -105,18 +105,16 @@ St_DataSet::~St_DataSet()
    Delete();
 } 
 //______________________________________________________________________________
-void St_DataSet::Add(St_DataSet *dataset)
+void St_DataSet::Add(St_DataSet *dataset,int ifirst)
 {
   if (!dataset) return;
  
-  if (!fList) {
-       fList = new TList;
-   //    if (fMother) fList->SetParent(fMother);
-  }
- 
+  if (!fList) fList = new TList;
+
   // Check whether this new child has got any partent yet
   if (!dataset->GetParent()) dataset->SetParent(this);
-  fList->Add(dataset);
+  if (ifirst) fList->AddFirst(dataset);
+  else        fList->AddLast (dataset);
 }
  
 //______________________________________________________________________________
@@ -135,17 +133,8 @@ TObject *St_DataSet::Clone() {
 }
 //______________________________________________________________________________
 void St_DataSet::Delete(Option_t *opt){
-  //
-  //  Delete(Option_t *opt)
-  //
-  //  Deletes all "structural" links
-  //  removes all "references"
-  // then
-  //  delets the internal container (TList)
-  //
-
   // First we should break our relationship with the parent if any
-  if (fMother && !TestBit(kCanDelete) ) 
+  if (fParent && !TestBit(kCanDelete) ) 
   {
     St_DataSet *parent = GetParent();
     if (parent) parent->Remove(this);
@@ -168,35 +157,6 @@ void St_DataSet::Delete(Option_t *opt){
     delete fList;
     fList = 0;
   }
-}
-//______________________________________________________________________________
-St_DataSet *St_DataSet::Find(const Char_t *path)
-{
-  //
-  // Full description see: St_DataSetIter::Find
-  //
-  // Note. This is method is quite expansive. 
-  // ----- It is done to simplify the user's code when one wants to find ONLY object.
-  //       If you need to find more then 1 object in this dataset,
-  //       regard using St_DataSetIter class yourself.
-  //
-  St_DataSetIter next(this);
-  return next.Find(path);
-}
-//______________________________________________________________________________
-St_DataSet *St_DataSet::FindObject(const Char_t *name,const Char_t *path,Option_t *opt)
-{
-  //
-  // Full description see: St_DataSetIter::FindObject
-  //
-  // Note. This is method is quite expansive. 
-  // ----- It is done to simplify the user's code when one wants to find ONLY object.
-  //       If you need to find more then 1 object in this dataset,
-  //       regard using St_DataSetIter class yourself.
-  //
-
-  St_DataSetIter next(this);
-  return next.FindObject(path,path,opt);
 }
  
 //______________________________________________________________________________
@@ -265,11 +225,7 @@ Bool_t    St_DataSet::IsEmpty() const
 //______________________________________________________________________________
 Bool_t St_DataSet::IsThisDir(const Char_t *dirname) const 
 {
-  
-  Bool_t res = kFALSE;
-  if (strcmp(GetName(),dirname)==0 ) res = kTRUE;
-//   Warning("IsThisDir(const Char_t *dirname) const"," %s %s %d ",GetName(),dirname,res);
-  return res; 
+  return !strcmp(GetName(),dirname); 
 }
 #if 0
 //______________________________________________________________________________
@@ -314,11 +270,11 @@ void St_DataSet::Remove(St_DataSet *set)
 }
  
 //______________________________________________________________________________
-EDataSetPass St_DataSet::Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t depth)
+EDataSetPass St_DataSet::Pass(EDataSetPass ( *callback)(St_DataSet *,void*),void *user,Int_t depth)
 {
  /////////////////////////////////////////////////////////////////////
  //                                                                 //
- // Pass (callback,depth)                                           //
+ // Pass (callback,user,depth)                                      //
  //                                                                 //
  // Calls callback(this) for all datasets those recursively         //
  //                                                                 //
@@ -327,31 +283,32 @@ EDataSetPass St_DataSet::Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t dept
  //    Int_t depth >0 the number of levels to be passed             //
  //                =0 all levels will be passed                     //
  //                                                                 //
- //  Return (this value mast be returned by the user's callback):   //
+ //  Return:                                                        //
  //  ======                                                         //
  //  kContinue - continue passing                                   //
  //  kPrune    - stop passing the current branch, go to the next one//
- //  kUp       - stop passing, leave the current branch,            //
- //              return to previous level and continue              //
+ //  kUpp      - stop passing the current horizont, go to the upper //
  //  kStop     - stop passing, leave all braches                    //
  //                                                                 //
  /////////////////////////////////////////////////////////////////////
  
   if (!callback) return kStop;
 
-  EDataSetPass condition = callback(this);
+  EDataSetPass condition = callback(this,user);
 
   if (condition == kContinue){
     if (fList && depth != 1 ) {
       TIter next(fList);
       St_DataSet *d=0;
       while (d = (St_DataSet *)next()) {
-         condition = d->Pass(callback, depth == 0 ? 0 : --depth);
-         if (condition == kStop || condition == kUp) break;
+         condition = d->Pass(callback, user, depth == 0 ? 0 : --depth);
+         if (condition == kStop) break;
+         if (condition == kUpp ) break;
       }
     }
   }
-  return condition==kUp ? kContinue:condition;
+  if (condition == kUpp)  condition = kContinue; 
+  return condition;
 }
 //______________________________________________________________________________
 Int_t St_DataSet::Purge(Option_t *opt)
@@ -373,7 +330,7 @@ Int_t St_DataSet::Purge(Option_t *opt)
         son->Purge();
 //        if (son->IsEmpty()) //  Bool_t IsEmpty() const { return (HasData() == 0 && GetListSize() == 0) 
         if (son->HasData() == 0 && son->GetListSize() == 0) 
-                           garbage.Add(son);
+                           garbage.AddFirst(son);
      }
    }
    garbage.Delete();
@@ -386,44 +343,29 @@ void  St_DataSet::SetParent(St_DataSet *parent){
 //  Break the "parent" relationship with the current object parent if present
 //  Set the new parent if any
 //
-   St_DataSet *oldparent = GetParent();
-    // Each St_DataSet object must have only parent, therefore ...
-   if (oldparent)
-       oldparent->Remove(this);       // Break relations with the current parents
-//   if (fList) 
-//      fList->SetParent(parent);       // Establish a new relationships
-   SetMother(parent);                 // Adjust St_DataSet::fMother pointer as well
+   fParent = parent;                 
 }
 //______________________________________________________________________________
 void St_DataSet::SetWrite()
 {
  //
  // To Write object first we should temporary break the 
- // the backward fMother pointer (otherwise ROOT follows this links
- // and will pull fMother out too.
+ // the backward fParent pointer (otherwise ROOT follows this links
+ // and will pull fParent out too.
  //
-  TObject *mothersav = fMother; // GetParent();
-  fMother = 0;
-//  SetParent();
+  St_DataSet *saveParent = fParent; // GetParent();
+  fParent = 0;
   Write();
-  // Restore the fMother pointer
-  // SetParent(mothersav);
-  fMother = mothersav;
+  fParent = saveParent;
 }
 //______________________________________________________________________________
 void St_DataSet::Shunt(St_DataSet *dataset)
 {
-  // Remove object from the original dataset and insert into this one
-  if (!dataset) return;
+  // Remove object from the original and add it to dataset 
 
-  if (!fList) {
-       fList = new TList;
-//       if (fMother) fList->SetParent(fMother);
-  }
- 
-  // Check whether this new child has got any parent yet
-  dataset->SetParent(this);
-  fList->Add(dataset);
+  St_DataSet *par = GetParent();
+  if (par) par->Remove(this);
+  if (dataset) dataset->Add(this);
 }
 //______________________________________________________________________________
 void St_DataSet::Update(St_DataSet* set,UInt_t opt)
@@ -458,7 +400,7 @@ void St_DataSet::Update(St_DataSet* set,UInt_t opt)
     }
     // If the new "set" contains some new dataset with brand-new name
     // move it into the our dataset and remove it from its old location
-    if (!found) Shunt(newset);
+    if (!found) newset->Shunt(this);
   }
 }
 //______________________________________________________________________________
@@ -473,7 +415,24 @@ void St_DataSet::Update()
  
   St_DataSetIter next(this);
   St_DataSet *set = 0;
-  while( set = next())
-            set->Update();
+  while( set = next()) set->Update();
 }
+//______________________________________________________________________________
+void St_DataSet::Sort()
+{
+ Pass(SortIt);
+}
+//______________________________________________________________________________
+EDataSetPass St_DataSet::SortIt(St_DataSet *ds,void *user)
+{
+  TList *list = ds->GetList();
 
+  if (!list) return kContinue;
+  list->Sort();
+  return kContinue;
+}
+St_DataSet  *St_DataSet::Find(const Char_t *path)
+{ 
+  St_DataSetIter iter(this);  
+  return iter.Find(path);
+}

@@ -29,8 +29,8 @@ class TBrowser;
 typedef enum {
       kContinue,  // continue passing 
       kPrune,     // stop passing of the current branch but continue with the next one if any
+      kUpp,       // break passing current level
       kStop,      // break passing
-      kUp,        // break passing, return to the previous level, then continue
       kStruct,    // work with structural links only
       kAll,       // work with all links 
       kRefs,      // work with refs links only
@@ -42,33 +42,28 @@ class St_DataSet : public TNamed
  friend class St_DataSetIter;
  friend class St_DataSetTree;
  protected: 
-    TObject     *fMother; // pointer to mother of the directory
+    St_DataSet  *fParent; // pointer to mother of the directory
     TList       *fList;   // List of the the the objects included into this dataset
     virtual void SetParent(St_DataSet *parent=0);
-    virtual void SetMother(TObject *mother) {fMother = mother;}
     St_DataSet(const Char_t *name,const Char_t *title):
-    TNamed(name,title),fMother(0),fList(0){} // to support TDictionary
- 
+    TNamed(name,title),fParent(0),fList(0){} // to support TDictionary
+    static EDataSetPass SortIt(St_DataSet *ds,void *user);
+     
  public:
  
     St_DataSet(const Char_t *name="", St_DataSet *parent=0);
     St_DataSet(const St_DataSet &src,EDataSetPass iopt=kAll);
     St_DataSet(TNode &src); 
     virtual ~St_DataSet();
-            void         Add(St_DataSet *dataset);
+            void         Add(St_DataSet *dataset,int ifirst=0);
     virtual void         Browse(TBrowser *b);
     virtual TObject     *Clone();
     virtual St_DataSet  *Data() const { return HasData() ? (St_DataSet *)this : 0; }  // returns this pointer the derived classes if any
     virtual void         Delete(Option_t *opt="");   
-    virtual St_DataSet  *Find(const Char_t *path);
-    virtual St_DataSet  *FindObject(const Char_t *name,const Char_t *path="",Option_t *opt="");
-            TObject     *GetMother() const { return fMother; }
-    virtual St_DataSet  *GetParent() const { return (St_DataSet *)fMother;}
+    virtual St_DataSet  *GetParent() const { return fParent;}
             TList       *GetList()   const { return fList; }
-            TList       *GetListOfDataset() const {return GetList();}
             Int_t        GetListSize() const;
     virtual Long_t       HasData() const {return 0;}         // Check whether this dataset has extra "data-members"
-//  virtual Bool_t       IsEmpty() const;
     virtual Bool_t       IsFolder() {return kTRUE;}
     virtual Bool_t       IsThisDir(const Char_t *dirname) const ;
     virtual void         ls(Option_t *option="");             // Option "*" means print all levels
@@ -76,11 +71,15 @@ class St_DataSet : public TNamed
     virtual void         Update();                            // Update dataset
     virtual void         Update(St_DataSet *set,UInt_t opt=0);// Update this dataset with the new one
            TString       Path() const;                        // return the "full" path of this dataset
-    virtual EDataSetPass Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t depth=0);
+    virtual EDataSetPass Pass(EDataSetPass ( *callback)(St_DataSet*,void*),void *user=0,Int_t depth=0);
     virtual Int_t        Purge(Option_t *opt="");   
     virtual void         Remove(St_DataSet *set);
     virtual void         SetWrite();
     virtual void         Shunt(St_DataSet *dataset);
+    virtual void         PutObject(TObject *obj){printf("***DUMMY PutObject***%p\n",obj);}
+    virtual TObject     *GetObject(){printf("***DUMMY GetObject***\n");return 0;}
+    virtual void         Sort();	//Sort objects in lexical order
+    virtual St_DataSet  *Find(const Char_t *path);
     ClassDef(St_DataSet,1)
 };
  
