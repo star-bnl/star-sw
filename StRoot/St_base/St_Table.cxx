@@ -1,6 +1,11 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.11 1998/09/07 19:23:39 fine Exp $ 
+// $Id: St_Table.cxx,v 1.12 1998/09/14 00:31:30 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.12  1998/09/14 00:31:30  fine
+// The new method St_DataSet::Update(... ) has been introduced to merge two datasets
+// The version of the method above was done for  the St_Table base class as well
+// The classes St_DataSet and St_DataSetIter have been separated
+//
 // Revision 1.11  1998/09/07 19:23:39  fine
 // St_Table::Print() - malloc/fre have been replaced with new [] / delete []  due a problem under Linux
 // St_DataSet::~St_DataSet has been changed to take in account the "strutural" links. Some opt have been done too
@@ -145,10 +150,11 @@ St_Table::~St_Table()
 {
    // Delete St_Table object.
    Delete();
+   SafeDelete(s_TableHeader);
 }
  
 //______________________________________________________________________________
-void St_Table::Adopt(Int_t n, Char_t *arr)
+void St_Table::Adopt(Int_t n, void *arr)
 {
    // Adopt array arr into St_Table, i.e. don't copy arr but use it directly
    // in St_Table. User may not delete arr, St_Table dtor will do it.
@@ -156,7 +162,7 @@ void St_Table::Adopt(Int_t n, Char_t *arr)
    Delete();
  
    SetfN(n);
-   s_Table = arr;
+   s_Table = (char *)arr;
 }
  
 //______________________________________________________________________________
@@ -806,7 +812,7 @@ void St_Table::StafStreamer(Char_t *structname, FILE *fl)
    // Clean things
 
    if (thisclassname) delete [] thisclassname;
-   if (tablename) delete [] tablename;
+   if (tablename)     delete [] tablename;
 }
 
 //______________________________________________________________________________
@@ -900,7 +906,30 @@ Int_t St_Table::SetfN(Long_t len)
 //     s_TableHeader->nok = fN;
      s_TableHeader->maxlen = fN;
    }
-    return fN;
+   return fN;
 }
+//_______________________________________________________________________
+void St_Table::Update(){;}
+//_______________________________________________________________________
+void St_Table::Update(St_DataSet *set, UInt_t opt)
+{
+ // Kill the table current data
+ // and adopt those from set
 
+  if (set->HasData()) 
+  {
+   // Check whether the new table has the same type 
+   if (strcmp(GetTitle(),set->GetTitle()) == 0 ) 
+   {
+     St_Table *table = (St_Table *)set;
+     Adopt(table->GetSize(),table->GetArray());
+     SetHeader(table->GetHeader());
+     LinkHeader();
+   }
+   else
+      Error("Update",
+            "This table is <%s> but the updating one has a wrong type %s",GetTitle(),set->GetTitle());
+  }
+  St_DataSet::Update(set,opt);
+}
 
