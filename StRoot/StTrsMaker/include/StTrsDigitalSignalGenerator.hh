@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSignalGenerator.hh,v 1.1 1998/11/10 17:12:10 fisyak Exp $
+ * $Id: StTrsDigitalSignalGenerator.hh,v 1.2 1999/01/18 10:23:00 lasiuk Exp $
  *
  * Author: brian, October 1998 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSignalGenerator.hh,v $
- * Revision 1.1  1998/11/10 17:12:10  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 10:23:00  lasiuk
+ * add StTrsDigitalSector
  *
  *
  * Revision 1.2  1999/01/18 10:23:00  lasiuk
@@ -32,6 +32,7 @@
 #ifndef ST_TRS_DIGITAL_SIGNAL_GENERATOR_HH
 #define ST_TRS_DIGITAL_SIGNAL_GENERATOR_HH
 #include <vector>
+
 #include "StTrsAnalogSignal.hh"
 #include "StTpcElectronics.hh"
 #include "StTrsSector.hh"
@@ -43,11 +44,12 @@ public:
 
     virtual void addCorrelatedNoise() = 0;
 
-    StTrsDigitalSignalGenerator(StTpcElectronics*, StTrsSector*);
+    StTrsDigitalSignalGenerator(StTpcElectronics*, StTrsSector*, StTrsDigitalSector*);
     
 protected:
-    StTpcElectronics*  mElectronicsDb;
-    StTrsSector*       mSector;
+    //StTrsDigitalSignalGenerator();
+    StTrsDigitalSignalGenerator(StTpcElectronics*, StTrsSector*);
+	
 protected:
     StTpcElectronics*   mElectronicsDb;
     StTrsSector*        mSector;
