@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.cc,v 1.4 2000/08/23 12:48:44 munhoz Exp $
+ * $Id: StSvtHybridCollection.cc,v 1.5 2000/11/30 20:39:12 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,17 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCollection.cc,v $
- * Revision 1.4  2000/08/23 12:48:44  munhoz
- * add reset method
- *
- * Revision 1.3  2000/07/30 21:18:32  munhoz
- * correction for getObject method and allow year 1 east side reading
- *
- * Revision 1.2  2000/07/03 02:07:53  perev
- * StEvent: vector<TObject*>
- *
- * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
- * SVT Class Library
+ * Revision 1.5  2000/11/30 20:39:12  caines
+ * Changed to allow us of database
  *
  **************************************************************************/
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,12 +28,14 @@
 #include <iostream.h>
 #include "StObject.h"
 #include "StSvtHybridCollection.hh"
+#include "StSvtConfig.hh"
 #include "StMessMgr.h"
+
+#include "TString.h"
 
 ClassImp(StSvtHybridCollection)
 
-StSvtHybridCollection::StSvtHybridCollection(char* config) : 
-  StObjArray()
+StSvtHybridCollection::StSvtHybridCollection() 
 {
   // As the SVT can present various configurations, 
   // the constructor of this class has one parameter that corresponds to the configuration name.
@@ -56,75 +49,91 @@ StSvtHybridCollection::StSvtHybridCollection(char* config) :
   //           There is no meaningful barrel, ladder, wafer or hybrid number information. 
   //           The hybrid index depends on the order of the read out in the RB.
 
-  if (config)  
-    setConfiguration(config);
-  else {
-    mNumberOfBarrels = 0;
-    for (int barrel = 0;barrel<MAX_NUMBER_OF_BARRELS;barrel++) {
-      mNumberOfLadders[barrel] = 0;
-      mNumberOfWafers[barrel] = 0;
-    }
-    mNumberOfHybrids = 0;
+  mConfig = TString();
+  mSvtConfig = NULL;
+}
 
-    mTotalNumberOfHybrids = 0;
-  }
+StSvtHybridCollection::StSvtHybridCollection(const char* config) 
+{
+  setConfiguration(config);
+}
+
+StSvtHybridCollection::StSvtHybridCollection(StSvtConfig* config) 
+{
+  setConfiguration(config);
 }
 
 StSvtHybridCollection::~StSvtHybridCollection()
-{}
+{
+  delete mSvtConfig;
+}
 
-
-void StSvtHybridCollection::setConfiguration(char* config)
+void StSvtHybridCollection::setConfiguration(const char* config)
 {
   // set the Collection configuration
 
-  fConfig = config;
- 
-  if ( !strncmp(config, "ASCII", strlen("ASCII")) ) {
-    mNumberOfBarrels = 1;
-    mNumberOfLadders[0] = 1;
-    mNumberOfWafers[0] = 1;
-    mNumberOfHybrids = 2;
-    mTotalNumberOfHybrids =2;    
-   }
+  mConfig = TString(config);
+  mSvtConfig = new StSvtConfig();
 
+  if ( !strncmp(config, "ASCII", strlen("ASCII")) ) {
+    mSvtConfig->setNumberOfBarrels(1);
+    mSvtConfig->setNumberOfLadders(1,1);
+    mSvtConfig->setNumberOfWafers(1,1);
+    mSvtConfig->setNumberOfHybrids(2);
+    mSvtConfig->setTotalNumberOfHybrids(2);    
+  }
+  
   else if ( !strncmp(config, "SYST", strlen("SYST")) ) {
-    mNumberOfBarrels = 3;
-    mNumberOfLadders[0] = 8;
-    mNumberOfLadders[1] = 12;
-    mNumberOfLadders[2] = 16;
-    mNumberOfWafers[0] = 4;
-    mNumberOfWafers[1] = 6;
-    mNumberOfWafers[2] = 7;
-    mNumberOfHybrids = 2;
-    mTotalNumberOfHybrids = 18;
+    mSvtConfig->setNumberOfBarrels(3);
+    mSvtConfig->setNumberOfLadders(1,8);
+    mSvtConfig->setNumberOfLadders(2,12);
+    mSvtConfig->setNumberOfLadders(3,16);
+    mSvtConfig->setNumberOfWafers(1,4);
+    mSvtConfig->setNumberOfWafers(2,6);
+    mSvtConfig->setNumberOfWafers(3,7);
+    mSvtConfig->setNumberOfHybrids(2);
+    mSvtConfig->setTotalNumberOfHybrids(18);
   }
+
   else if ( !strncmp(config, "Y1L", strlen("Y1L")) ) {
-    mNumberOfBarrels = 3;
-    mNumberOfLadders[0] = 0;
-    mNumberOfLadders[1] = 0;
-    mNumberOfLadders[2] = 2;
-    mNumberOfWafers[0] = 0;
-    mNumberOfWafers[1] = 0;
-    mNumberOfWafers[2] = 7;
-    mNumberOfHybrids = 2;
-    mTotalNumberOfHybrids = 14;
+    mSvtConfig->setNumberOfBarrels(3);
+    mSvtConfig->setNumberOfLadders(1,0);
+    mSvtConfig->setNumberOfLadders(2,0);
+    mSvtConfig->setNumberOfLadders(3,2);
+    mSvtConfig->setNumberOfWafers(1,0);
+    mSvtConfig->setNumberOfWafers(2,0);
+    mSvtConfig->setNumberOfWafers(3,7);
+    mSvtConfig->setNumberOfHybrids(2);
+    mSvtConfig->setTotalNumberOfHybrids(14);
   }
+
   else if ( !strncmp(config, "FULL", strlen("FULL")) ) {
-    mNumberOfBarrels = 3;
-    mNumberOfLadders[0] = 8;
-    mNumberOfLadders[1] = 12;
-    mNumberOfLadders[2] = 16;
-    mNumberOfWafers[0] = 4;
-    mNumberOfWafers[1] = 6;
-    mNumberOfWafers[2] = 7;
-    mNumberOfHybrids = 2;
-    mTotalNumberOfHybrids = 432;
+    mSvtConfig->setNumberOfBarrels(3);
+    mSvtConfig->setNumberOfLadders(1,8);
+    mSvtConfig->setNumberOfLadders(2,12);
+    mSvtConfig->setNumberOfLadders(3,16);
+    mSvtConfig->setNumberOfWafers(1,4);
+    mSvtConfig->setNumberOfWafers(2,6);
+    mSvtConfig->setNumberOfWafers(3,7);
+    mSvtConfig->setNumberOfHybrids(2);
+    mSvtConfig->setTotalNumberOfHybrids(432);
   }
   else
     gMessMgr->Message("Configuration of SVT not defined! It must be SYST, Y1L or FULL","E");
 
-  resize(mTotalNumberOfHybrids);
+  resize(mSvtConfig->getTotalNumberOfHybrids());
+  clear();
+}
+
+void StSvtHybridCollection::setConfiguration(StSvtConfig* config)
+{
+  // set the Collection configuration
+
+  mSvtConfig = config;
+  mConfig = TString(mSvtConfig->getConfiguration());
+
+  resize(mSvtConfig->getTotalNumberOfHybrids());
+  clear();
 }
 
 int StSvtHybridCollection::getHybridIndex(int barrelID, int ladderID, int waferID, int hybridID)
@@ -133,7 +142,22 @@ int StSvtHybridCollection::getHybridIndex(int barrelID, int ladderID, int waferI
   // This index should be used to store/retrieve a specific hybrid in/from the collection.
   // Or one can use the getObject method which parameters are the barrel, ladder, wafer and hybrid numbers.
 
+  //if (mSvtConfig)
+  //  return mSvtConfig->getHybridIndex(barrelID, ladderID, waferID, hybridID);
+
   int index;
+  int mNumberOfBarrels;                        // Number of Barrels
+  int mNumberOfLadders[MAX_NUMBER_OF_BARRELS]; // Number of Ladders of each Barrel
+  int mNumberOfWafers[MAX_NUMBER_OF_BARRELS];  // Number of Wafers of each Ladder (Barrel dependent)
+  int mNumberOfHybrids;                        // Number of Hybrids of each Wafer ( = 2)
+
+  mNumberOfBarrels = mSvtConfig->getNumberOfBarrels();
+
+  for (int i = 0;i < mNumberOfBarrels;i++) {
+    mNumberOfLadders[i] = mSvtConfig->getNumberOfLadders(i);
+    mNumberOfWafers[i] = mSvtConfig->getNumberOfWafers(i);
+  }
+  mNumberOfHybrids = mSvtConfig->getNumberOfHybrids();
 
 
   switch  (barrelID) {
@@ -160,7 +184,7 @@ int StSvtHybridCollection::getHybridIndex(int barrelID, int ladderID, int waferI
     break;
   }
 
-  if ( !strncmp(fConfig, "SYST", strlen("SYST")) ) {
+  if ( !strncmp(mConfig, "SYST", strlen("SYST")) ) {
     if      ((barrelID == 3) && (ladderID == 1) && (waferID == 7) && (hybridID == 1)) index = 0;
     else if ((barrelID == 3) && (ladderID == 1) && (waferID == 7) && (hybridID == 2)) index = 1;
     else if ((barrelID == 3) && (ladderID == 1) && (waferID == 6) && (hybridID == 1)) index = 2;
@@ -182,7 +206,7 @@ int StSvtHybridCollection::getHybridIndex(int barrelID, int ladderID, int waferI
     
     else index = -1;
   }
-  else if ( !strncmp(fConfig, "Y1L", strlen("Y1L")) ) {
+  else if ( !strncmp(mConfig, "Y1L", strlen("Y1L")) ) {
     if      ((barrelID == 3) && (ladderID == 2) && (waferID == 1) && (hybridID == 1)) index = 0;
     else if ((barrelID == 3) && (ladderID == 2) && (waferID == 1) && (hybridID == 2)) index = 1;
     else if ((barrelID == 3) && (ladderID == 2) && (waferID == 2) && (hybridID == 1)) index = 2;
@@ -203,12 +227,33 @@ int StSvtHybridCollection::getHybridIndex(int barrelID, int ladderID, int waferI
 
   return index;
 }
+/*
+StSvtHybridObject* StSvtHybridCollection::At(int index)
+{
+  return (StSvtHybridObject*)at(index);
+}
 
+void StSvtHybridCollection::AddAt(StSvtHybridObject* object, int index)
+{
+  put_at((TObject*)object,index);
+}
+*/
 StSvtHybridObject* StSvtHybridCollection::getObject(int barrelID, int ladderID, int waferID, int hybridID)
 {
   // Method to retrieve an object (StSvtHybridObject) of the collection using the barrel, ladder, wafer and hybrid numbers.
 
   int index = getHybridIndex(barrelID, ladderID, waferID, hybridID);
 
-  return (StSvtHybridObject*)(*this)[index];
+  if (index<0) return 0;
+
+  //return (StSvtHybridObject*)At(index);
+  return (StSvtHybridObject*)at(index);
 }
+
+int StSvtHybridCollection::getNumberOfBarrels() {return mSvtConfig->getNumberOfBarrels();}
+int StSvtHybridCollection::getNumberOfLadders(int barrel) {return mSvtConfig->getNumberOfLadders(barrel);}
+int StSvtHybridCollection::getNumberOfWafers(int barrel)  {return mSvtConfig->getNumberOfWafers(barrel);}
+int StSvtHybridCollection::getNumberOfHybrids() {return mSvtConfig->getNumberOfHybrids();}
+int StSvtHybridCollection::getTotalNumberOfHybrids() {return mSvtConfig->getTotalNumberOfHybrids();}
+const char* StSvtHybridCollection::getConfiguration(){return mConfig.Data();}
+

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtData.hh,v 1.3 2000/08/23 12:48:44 munhoz Exp $
+ * $Id: StSvtData.hh,v 1.4 2000/11/30 20:39:12 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtData.hh,v $
+ * Revision 1.4  2000/11/30 20:39:12  caines
+ * Changed to allow us of database
+ *
  * Revision 1.3  2000/08/23 12:48:44  munhoz
  * add reset method
  *
@@ -35,7 +38,9 @@ class StSvtAsciiUnpacker;
 class StSvtData: public StSvtHybridCollection
 {
 public:
-  StSvtData(char* config=0, int run=0, int event=0, int trigger=0, int time=0);
+  StSvtData();
+  StSvtData(const char* config, int run=0, int event=0, int trigger=0, int time=0);
+  StSvtData(StSvtConfig* config, int run=0, int event=0, int trigger=0, int time=0);
   virtual ~StSvtData();
 
   StSvtData(const StSvtData&);

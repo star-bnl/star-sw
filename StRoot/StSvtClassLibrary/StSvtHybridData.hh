@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridData.hh,v 1.1.1.1 2000/03/10 14:26:21 munhoz Exp $
+ * $Id: StSvtHybridData.hh,v 1.2 2000/11/30 20:39:12 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridData.hh,v $
+ * Revision 1.2  2000/11/30 20:39:12  caines
+ * Changed to allow us of database
+ *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
  *
@@ -36,8 +39,8 @@ public:
   int getSequences(int anodeID, int& nSequences, StSequence*& sequence); // Pass through reference the sequences of a particular anode
   int getListSequences(int listID, int& nSequence,StSequence*& sequence); // Pass through reference the sequences of a particular list item of the anode list (used mainly in the cluster finder) 
 
-  int StSvtHybridData::SetListSequences(int listID, int& nSequence, StSequence* tempSeq); // resets the sequence list
-  int StSvtHybridData::SetAnodeList(); // Allows to reset the anodelist
+  int setListSequences(int listID, int& nSequence, StSequence* tempSeq); // resets the sequence list
+  int setAnodeList(); // Allows to reset the anodelist
 
 protected:
 
