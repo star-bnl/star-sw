@@ -20,3 +20,33 @@ macro dst_dedx_filler
 return
 ********************************************************
 
+macro dst_mon_soft
+ 
+  macro/global/import *
+
+  message ' run_dst: Calling dst_monitor_soft_filler'
+
+ami/mod/call dst_monitor_soft_filler_
+        [data]/tpc/hits/tpcluster _
+        [data]/svt/hits/scs_cluster _
+        [data]/tpc/hits/tphit _
+        [data]/svt/hits/scs_spt _
+        [data]/tpc/tracks/tptrack _
+        [data]/svt/tracks/stk_track _
+        [data]/global/tracks/evt_match _
+        [data]/ctf/ctb_cor _
+        [dst]/vertex _
+        [dst]/event_summary _
+        [dst]/monitor_soft
+
+
+if ( staf_status(1) .ne. STAFCV_OK) then
+     message 'Problem on return from DST_MONITOR_SOFT_FILLER'
+endif
+
+
+message ' run_dst: finished calling dst_monitor_soft_filler'
+
+return
+ 
+**********************************************************
