@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.7 2001/04/25 15:57:22 jeromel Exp $
+ * $Id: StHit.h,v 2.8 2001/04/25 17:46:56 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.8  2001/04/25 17:46:56  jeromel
+ * Remove last change. There is another way to fix the problems seen (the right way
+ * actually) which Thomas will take care off.
+ *
  * Revision 2.7  2001/04/25 15:57:22  jeromel
  * Fixed cint problem with StContainers.h
  *
@@ -41,9 +45,7 @@
 
 #include "StMeasuredPoint.h"
 #include "StEnumerations.h"
-#ifndef __CINT__
 #include "StContainers.h"
-#endif
 
 class StTrackNode;
 class StTrack;
