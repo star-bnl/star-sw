@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrigger.hh,v 1.2 1999/01/15 22:54:12 wenaus Exp $
+ * $Id: StTrigger.hh,v 1.3 1999/03/23 21:54:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrigger.hh,v $
- * Revision 1.2  1999/01/15 22:54:12  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/03/23 21:54:12  ullrich
+ * Member function made virtual
  *
  * Revision 1.2  1999/01/15 22:54:12  wenaus
  * version with constructors for table-based loading
@@ -30,11 +30,11 @@ public:
     int operator==(const StTrigger&) const;
     int operator!=(const StTrigger&) const;
 
-    unsigned short triggerActionWord() const;
-    unsigned short triggerWord() const;
+    virtual unsigned short triggerActionWord() const;
+    virtual unsigned short triggerWord() const;
 
-    void setTriggerActionWord(unsigned short);
-    void setTriggerWord(unsigned short);
+    virtual void setTriggerActionWord(unsigned short);
+    virtual void setTriggerWord(unsigned short);
     
 protected:
     unsigned short mTriggerActionWord;
