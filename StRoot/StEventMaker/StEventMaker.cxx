@@ -44,7 +44,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.63 2003/12/29 00:00:34 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.64 2004/01/22 23:35:55 ullrich Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -1180,6 +1180,10 @@ StEventMaker::makeEvent()
 	mCurrentRunInfo->setBackgroundRate(richScalers->getMult());
 	mCurrentRunInfo->setL0RateToRich(richScalers->getL0());
 	mCurrentRunInfo->setBbcCoincidenceRate(richScalers->getBBCX());
+	mCurrentRunInfo->setBbcEastRate(richScalers->getBBCEast());		
+	mCurrentRunInfo->setBbcWestRate(richScalers->getBBCWest());		
+	mCurrentRunInfo->setBbcBlueBackgroundRate(richScalers->getBBCBlueBkg());	
+	mCurrentRunInfo->setBbcYellowBackgroundRate(richScalers->getBBCYellowBkg());
     }
     if (mCurrentRunInfo)
 	mCurrentEvent->setRunInfo(mCurrentRunInfo);
@@ -1609,8 +1613,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.63 2003/12/29 00:00:34 perev Exp $
+ * $Id: StEventMaker.cxx,v 2.64 2004/01/22 23:35:55 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.64  2004/01/22 23:35:55  ullrich
+ * Fill new member of StRunInfo (RICH scaler).
+ *
  * Revision 2.63  2003/12/29 00:00:34  perev
  * More debug prints
  *
