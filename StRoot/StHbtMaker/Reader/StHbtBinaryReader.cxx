@@ -31,7 +31,11 @@ void wait(int n, const char* c) {
 
 
 //_______________________________
-StHbtBinaryReader::StHbtBinaryReader() : mInputStream(0), mOutputStream(0), mReaderStatus(ioOK), mDirName(0), mFileName(0), mFileList(0), mRetrieve(0) {
+StHbtBinaryReader::StHbtBinaryReader(const char* dir, const char* file, const char* appendix) : mInputStream(0), mOutputStream(0), mReaderStatus(ioOK), mRetrieve(0) {
+  //cout << dir << " " << file << " " << appendix << endl;
+  mDirName=dir;
+  mFileName=file;
+  mAppendix=appendix;
   mStHbtEventVersion = mStHbtTrackVersion = mStHbtV0Version = 1;
 #ifdef __ROOT__
   mIOMaker =0;
@@ -39,13 +43,16 @@ StHbtBinaryReader::StHbtBinaryReader() : mInputStream(0), mOutputStream(0), mRea
 }
 //_______________________________
 #ifdef __ROOT__
-StHbtBinaryReader::StHbtBinaryReader(StIOMaker* ioMaker) {
-  StHbtBinaryReader();
+StHbtBinaryReader::StHbtBinaryReader(StIOMaker* ioMaker, const char* dir, const char* file, const char* appendix) : mInputStream(0), mOutputStream(0), mReaderStatus(ioOK), mRetrieve(0) {
+  //cout << dir << " " << file << " " << appendix << endl;
+  mDirName=dir;
+  mFileName=file;
+  mAppendix=appendix;
   mRetrieve = 1;
   mIOMaker = ioMaker;
-#ifdef STHBTDEBUG
-  cout << " StHbtBinaryReader::StHbtBinaryReader(StIOMaker* ioMaker) -  mIOMaker : " << mIOMaker << endl;
-#endif
+  //#ifdef STHBTDEBUG
+  cout << " StHbtBinaryReader::StHbtBinaryReader() -  mIOMaker : " << mIOMaker << endl;
+  //#endif
 }
 #endif
 //_______________________________
@@ -174,7 +181,6 @@ int StHbtBinaryReader::NextFile() {
 void StHbtBinaryReader::SetFileName(const char* file){mFileName=(char*)file;}
 void StHbtBinaryReader::SetDirName(const char* dir){mDirName=(char*)dir;}
 void StHbtBinaryReader::SetAppendix(const char* appendix){mAppendix=(char*)appendix;}
-void StHbtBinaryReader::SetRetrieveFileName(const int r){ mRetrieve = r;}
 //_______________________________
 void StHbtBinaryReader::AddFileList(const char* fileList) {
   cout << " StHbtBinaryReader::AddFileList(char* fileList)"<< endl;

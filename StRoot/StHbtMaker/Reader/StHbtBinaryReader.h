@@ -72,10 +72,9 @@ private:
 #endif
 
 public:
-  StHbtBinaryReader();
-  StHbtBinaryReader(char*);
+  StHbtBinaryReader(const char* dir=0, const char* file="test", const char* appendix=0);
 #ifdef __ROOT__
-  StHbtBinaryReader(StIOMaker*);
+  StHbtBinaryReader(StIOMaker* ioMaker, const char* dir="./", const char* file="test", const char* appendix=".microDst");
 #endif
   ~StHbtBinaryReader();
 
@@ -91,7 +90,6 @@ public:
   void SetDirName(const char*);
   void SetAppendix(const char*);
   void AddFileList(const char*);
-  void SetRetrieveFileName(const int=1);
 #ifdef __ROOT__
   ClassDef(StHbtBinaryReader, 0)
 #endif

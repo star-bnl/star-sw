@@ -334,8 +334,8 @@ cout << "READER SET UP.... " << endl;
 #if ASCIIREADER
  //   set up a microDstWriter 
  StHbtAsciiReader* Reader = new StHbtAsciiReader;
- // Reader->SetFileName(*fileList);
- Reader->SetFileName("test1.asc");
+ Reader->SetFileName(*fileList);
+ //Reader->SetFileName("test1.asc");
  TheManager->SetEventReader(Reader);
  cout << "READER SET UP.... " << endl;
 #endif
@@ -366,10 +366,9 @@ cout << "READER SET UP.... " << endl;
 #endif
 #if BINARYREADER
  //   set up a microDstWriter 
- StHbtBinaryReader* Reader = new StHbtBinaryReader;
+ StHbtBinaryReader* Reader = new StHbtBinaryReader(0,*fileList,0);
  //Reader->SetFileName("/star/u2d/laue/MDC3/MicroDst/rcf0110.kaon.microDst");
- Reader->SetFileName(*fileList);
- //Reader->AddFileList(*fileList);
+ //Reader->AddFileList("test.lis");
   TheManager->SetEventReader(Reader);
  cout << "READER SET UP.... " << endl;
 #endif
@@ -467,7 +466,7 @@ cout << "READER SET UP.... " << endl;
  //franksPairCut* phiPairCut = new franksPairCut;  // use "frank's" pair cut object
  phiAnal->SetPairCut(phiPairCut);         // this is the pair cut for this analysis
  // 4) set the number of events to mix (per event)
- phiAnal->SetNumEventsToMix(10); 
+ phiAnal->SetNumEventsToMix(3); 
  // ********************************************************************
  // 5) now set up the correlation functions that this analysis will make
  // ********************************************************************
