@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.38 2001/04/25 18:10:00 perev Exp $
+// $Id: St_l3t_Maker.cxx,v 1.39 2001/06/12 12:09:03 flierl Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -400,6 +400,7 @@ Int_t St_l3t_Maker::MakeOnLine(){
          hit[ihit].dz = tracker.getZError();
          hit[ihit].q = gHit->getCharge ();
          hit[ihit].track = gHit->getTrackId ();
+	 hit[ihit].flag = (long) gHit->getFlags ();
       }
 
       nHits = eventP->getNHits ();
@@ -688,14 +689,16 @@ Int_t St_l3t_Maker::fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl
 	 StThreeVectorF poserror(tcl_points[pointindex].dx,
 				 tcl_points[pointindex].dy,
 				 tcl_points[pointindex].dz) ;
-	 // pack sec and row 
+	 // pack sec and row  and tpcid
 	 ULong_t hw = 0 ;
 	 ULong_t row = ULong_t (tcl_points[pointindex].row%100) ;
-	 if ( row >=1 && row <=45 )  { row <<= 9 ; } else { row=0 ; } 
+	 if ( row >=1 && row <=45 )  { row <<= 9 ; } else { row=0 ; } ;
    	 ULong_t sec = ULong_t ((tcl_points[pointindex].row-tcl_points[pointindex].row%100)/100) ;
-	 if ( sec >=1 && sec <=24 )  { sec <<= 4 ; } else { sec=0 ; } 
+	 if ( sec >=1 && sec <=24 )  { sec <<= 4 ; } else { sec=0 ; } ;
+	 ULong_t tpcid = 1;
 	 hw = hw | row ;
 	 hw = hw | sec ;
+	 hw = hw | tpcid ;
 	 // charge
 	 Float_t charge = tcl_points[pointindex].q ;
 	 // track reference counter set always to 0
@@ -703,6 +706,9 @@ Int_t St_l3t_Maker::fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl
 
 	 // create hit
 	 StTpcHit* tpcHit = new StTpcHit(pos,poserror,hw,charge,c) ;
+	 // set flag
+	 tpcHit->setFlag(UChar_t(tcl_points[pointindex].flag));
+
 	 // add to hit collection
 	 if (tpcHit) { myStTpcHitCollection->addHit(tpcHit) ;} else { delete tpcHit; return 0;}
 
