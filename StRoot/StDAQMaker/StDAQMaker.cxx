@@ -8,6 +8,7 @@
 #include "TObjectSet.h"
 #include "StDAQMaker.h"
 #include "StDAQReader.h"
+#include "StTPCReader.h"
 
 ClassImp(StDAQMaker)
 
