@@ -26,9 +26,9 @@
 class StIOHeader : public TObject 
 {
  private:
-    TString    m_BranchName;
-    TObject   *m_DataSet;
-    TBranch   *m_Branch; 
+    TString     m_BranchName;
+    TObject    *m_DataSet;
+    TBranch    *m_Branch; 
 
  public:
   StIOHeader(const Char_t *name, TBranch *branch, TObject *obj=0) : m_BranchName(name),
@@ -77,12 +77,12 @@ St_io_Maker::St_io_Maker(const char *name, const char *title,Bool_t split,TTree 
 {
    m_ListOfBranches = 0;
    SetTree(tree);
-   drawinit=kFALSE;
    m_FileIterator = 0;
    m_ListOfFiles  = 0;
    m_TreeRootFile = 0;
    m_OffSet       = 0;       // Event offset for multi-volumes tree's
    m_Entries      = 0;       // Number of the events of the current tree.
+   m_Tree         = 0;
    SetMaxEvent();
 }
 //_____________________________________________________________________________
@@ -101,9 +101,11 @@ St_io_Maker::~St_io_Maker()
   }
 
   DestroyBranchList();
-
   if (m_TreeRootFile) {
-    if (m_Tree) { m_Tree = 0; g_Chain->SetTree(m_Tree);}
+    if (m_Tree) { 
+       m_Tree = 0; 
+//??????       fgStChain->SetTree(m_Tree);
+    }
     delete m_TreeRootFile;
     m_TreeRootFile = 0;
   }
@@ -265,6 +267,7 @@ Bool_t St_io_Maker::IsNewTree(Int_t nevent)
          && ( nevent-m_OffSet == TMath::Min(GetMaxEvent(),m_Entries) ) ;
 }
 
+#if 0
 //_____________________________________________________________________________
 St_DataSet *St_io_Maker::DataSet(const Char_t *set) 
 {
@@ -276,7 +279,8 @@ St_DataSet *St_io_Maker::DataSet(const Char_t *set)
   //
 
    if (!m_ListOfBranches) return 0;
-   Int_t nevent = g_Chain->Event()-1;
+//   Int_t nevent = fgStChain->GetNumber()-1;
+   Int_t nevent = GetNumber()-1;
 //    cout << "DataSet:  " << nevent << " : " << m_OffSet << " : " << m_Entries << endl;
    if (  IsNewTree( nevent ) ) {
        DestroyBranchList();
@@ -295,13 +299,12 @@ St_DataSet *St_io_Maker::DataSet(const Char_t *set)
 
    if (obj){
     if (m_Entries = -1) m_Entries = GetEntries(obj);
-    if (obj->GetEvent(nevent-m_OffSet)) {
+    if (obj->GetEvent(nevent-m_OffSet)) 
          return (St_DataSet *)(obj->ShuntData());
-    }
-   }
-   
+   }   
    return  0;
 }
+#endif /* 0*/
 //_____________________________________________________________________________
 void St_io_Maker::DestroyBranchList()
 {
@@ -331,9 +334,6 @@ Int_t St_io_Maker::Init(){
    TTree *tree = GetTree();
    if (!tree) MakeTree(GetName(),GetTitle());
 
-// Create tables
-   St_DataSetIter       local(gStChain->DataSet("params"));
-// Create Histograms    
    return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -351,6 +351,12 @@ Int_t St_io_Maker::Finish()
  return 0;
 }
 //_____________________________________________________________________________
+TTree *St_io_Maker::GetTree(){
+//  return m_Tree ? m_Tree : fgStChain->Tree();
+  return m_Tree;
+}
+
+//_____________________________________________________________________________
 Int_t St_io_Maker::Make()
 {
   // Write out all datasets for all StMaker's
@@ -359,7 +365,7 @@ Int_t St_io_Maker::Make()
      return kStOK;
   }
   else 
-       return  NextEventGet(g_Chain->Event()) ? kStOK : kStErr;
+       return  NextEventGet(GetNumber()) ? kStOK : kStErr;
 
 }
 //_____________________________________________________________________________
@@ -374,12 +380,9 @@ Int_t St_io_Maker::NextEventGet(Int_t nEvent)
  //
  // - Reads next event.
  //
-#ifdef tree
-  TTree *tree = GetTree();
-  if (!tree)   return 0;
-#endif
+
   Int_t nevent = nEvent-1;
-//  cout << "NextEventGet:  " << nevent << " : " << m_OffSet << " : " << m_Entries << endl;
+  if (Debug()) cout << "NextEventGet:  " << nevent << " : " << m_OffSet << " : " << m_Entries << endl;
 
   if (  IsNewTree( nevent ) ) DestroyBranchList();
 
@@ -390,33 +393,35 @@ Int_t St_io_Maker::NextEventGet(Int_t nEvent)
     if (!tree) return 0;
   }
   Int_t counter = 0;
-#ifdef tree
-  if (SetActive()) 
-  {
-    counter = tree->GetEvent(nevent-m_OffSet);
-#else
-  {
-#endif
-    if (m_ListOfBranches) 
-    {
-      counter = -1;
-      TIter next(m_ListOfBranches);
-      StIOHeader *obj = 0;
-      while(obj = (StIOHeader *)next())  {
-       // determinate the recepient
-        TString name = obj->GetName();
-        name.ReplaceAll("_Branch","");
-        StMaker *maker = gStChain->Maker(name.Data());
-        if (maker) {
-#ifndef tree
+  if (m_ListOfBranches)  {
+     counter = -1;
+     TIter next(m_ListOfBranches);
+     StIOHeader *obj = 0;
+     while(obj = (StIOHeader *)next())  {
+//VP       // determinate the recepient
+//VP        TString name = obj->GetName();
+//VP        name.ReplaceAll("_Branch","");
+//VP        StMaker *maker = gStChain->Maker(name.Data());
+//VP        if (maker) {
            if (counter == -1) counter = 0;
-           if (m_Entries = -1) m_Entries = GetEntries(obj);
+           if (m_Entries == -1) m_Entries = GetEntries(obj);
            counter += obj->GetEvent(nevent-m_OffSet);
-#endif
-           maker->SetDataSet((St_DataSet *)obj->ShuntData());
-        }
-      }
-    }
+//VP           maker->SetDataSet((St_DataSet *)obj->ShuntData());
+//VP        }
+
+     St_DataSet *getDs,*psPar,*par,*son;
+     getDs = (St_DataSet *)obj->ShuntData();
+//		Fix of very weird BUG in written structure
+     son = getDs->First();
+     if (son){
+       psPar = son->GetParent();
+       if (psPar!=getDs) {
+       TObject ** to=  (TObject **)((int*)getDs+8);
+       if (*to && strcmp((*to)->GetName(),"TList")==0){ *to=0; delete getDs;}
+       getDs=psPar;}}
+      
+         AddData(getDs);
+   }
   }
   return counter;
 }
@@ -426,16 +431,9 @@ Int_t St_io_Maker::NextEventPut()
 {
   // Write next event out 
   // returns the number of the bytes written
-#ifdef tree
-  TTree *tree = GetTree();
-  if (!tree) return 0;
-#endif
 
   Int_t counter = 0;
   if (!m_ListOfBranches) return -1;
-#ifdef tree
-  if (SetActive()) 
-#endif
   {
     TIter next(m_ListOfBranches);
     StIOHeader *obj = 0;
@@ -443,17 +441,10 @@ Int_t St_io_Maker::NextEventPut()
       // Collect data
       TString name = obj->GetName();
       name.ReplaceAll("_Branch","");
-      St_DataSet *dataSet = gStChain->DataSet(name);
+      St_DataSet *dataSet = GetDataSet(name);
       // Fill branch buffer
-#ifndef tree
       counter += obj->Fill(dataSet);
-#else
-      obj->Fill(dataSet);
-#endif
     }
-#ifdef tree
-    counter = tree->Fill();
-#endif
   }
   printf(" =========== >>>>>>> %d bytes have been written\n",counter);
 
@@ -468,14 +459,15 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
    if (m_Tree) return m_Tree;
 
    m_Tree = new TTree(name,title);
+   return m_Tree;
 }
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.16 1999/03/10 15:03:03 fine Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.17 1999/03/19 23:54:12 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 
 //_____________________________________________________________________________
@@ -499,7 +491,7 @@ Int_t St_io_Maker::SetActive()
   {
     TString name = obj->GetName();
     name.ReplaceAll("_Branch","");
-    StMaker *maker = g_Chain->Maker(name);
+    StMaker *maker = fgStChain->Maker(name);
     if (maker) {
        tree->SetBranchStatus(name,kTRUE);
        numberActive++;
@@ -526,7 +518,7 @@ TTree *St_io_Maker::SetNextTree()
         m_TreeRootFile = 0;
       }
       m_Tree = 0; // This object is deleted by deleting the ROOT file above
-      while( (s = (TObjString *)m_FileIterator->Next()) && !m_TreeRootFile)
+      while( !m_TreeRootFile && (s = (TObjString *)m_FileIterator->Next()) )
       {
          const Char_t *fileName = s->String();
          cout << "Opening next root file :" << fileName << endl;
@@ -551,34 +543,7 @@ TTree *St_io_Maker::SetNextTree()
          }
        }
      }
-     g_Chain->SetTree(m_Tree);
+//====     fgStChain->SetTree(m_Tree);
   }  
   return GetTree();
 }
-#if 0
-//_____________________________________________________________________________
-Bool_t St_io_Maker::SetFile(const Char_t *rootFileName)
-{
-
-  // SetFile opens a new ROOT file and look it up to fund OUTPUT Tree
-  // IT closes the previous ROOT fiel and deletes the previous old TTree if any
-
-  if (rootFileName && strlen(rootFileName) {
-    if (m_Tree) delete m_Tree; m_Tree = 0;  
-    // delete the previous TFile if any
-    SafeDelete(m_TreeRootFile)
-    // Open new TFile 
-    m_TreeRootFile  =  new TFile(rootFileName);
-    if (m_TreeRootFile) 
-         m_Tree=(TTree *)root_file->Get("Output");
-    else 
-        return kFALSE;
-   
-    if (m_Tree) {
-       m_Tree->Print();
-       chain->SetTree(tree);
-    }
-  }
-  return kTRUE;
-}
-#endif
