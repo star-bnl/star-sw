@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.9 1999/02/24 19:31:25 lasiuk Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.10 1999/03/02 17:52:10 lasiuk Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,10 +16,13 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
- * Revision 1.9  1999/02/24 19:31:25  lasiuk
- * allow for tZero offset
- * positive pushes time bins into the chamber
+ * Revision 1.10  1999/03/02 17:52:10  lasiuk
+ * rotation for sectors>12
  *
+ * sure it is defined as the STAR Coordinate system!
+ *
+ * Revision 1.10  1999/03/02 17:52:10  lasiuk
+ * rotation for sectors>12
  *
  * Revision 1.9  1999/02/24 19:31:25  lasiuk
  * allow for tZero offset
@@ -465,8 +468,8 @@ StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
 StThreeVector<double> StTpcCoordinateTransform::rotateFromLocal(const StThreeVector<double>& a,
 						     const int sector)
 {
-
-    double beta = -sector*M_PI/6;   //(30 degrees)  NEGATIVE ANGLE!!!!!!!!
+    //
+    // define 2x2 rotation matrix
     //
     // ( cos Þ   sin Þ )
     // (-sin Þ   cos Þ )
