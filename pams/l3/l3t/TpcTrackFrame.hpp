@@ -22,7 +22,7 @@
 #include "Common.h"				// include common definitions
 #include "types.h"				// include common types
 #include "PAM.h"
-#include "l3t_tpc_para.h"
+#include "sl3TpcPara.h"
 #include "tcl_tphit.h"
 #include "tpt_track.h"
 
@@ -36,7 +36,7 @@ public:
 // Initialize the frame
   void Init();
 // initalize from struct
-  void Initialize(L3T_TPC_PARA_ST* para);
+  void Initialize(SL3TPCPARA_ST* para);
 // Set the tracking algorithm
   void SetTracker(VTracker* theTracker);
 // (re)process current event
