@@ -1,4 +1,5 @@
-#!/usr/bin/env perl
+#!/opt/star/bin/perl
+
 # Program is written by Alex Lenderman
 # RHIC Computing Facility
 # Version 1.0

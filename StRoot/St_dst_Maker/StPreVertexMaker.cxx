@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.cxx,v 1.7 2000/05/09 19:54:31 wdeng Exp $
+// $Id: StPreVertexMaker.cxx,v 1.8 2000/05/17 21:25:36 wdeng Exp $
 // $Log: StPreVertexMaker.cxx,v $
+// Revision 1.8  2000/05/17 21:25:36  wdeng
+// Copy nfit. evr needs it now.
+//
 // Revision 1.7  2000/05/09 19:54:31  wdeng
 // Copy more entries from tpt_track to local globtpc table. It is needed by lmv according to Akio.
 //
@@ -100,18 +103,19 @@ Int_t StPreVertexMaker::Make(){
     Int_t counter = 0;
     for( Int_t i=0; i<numRowTptrack; i++) {
       if( tptrackT[i].flag < 0 ) continue;
-      globtpcRow.r0      = tptrackT[i].r0;
-      globtpcRow.phi0    = tptrackT[i].phi0;
-      globtpcRow.z0      = tptrackT[i].z0;
-      globtpcRow.psi     = tptrackT[i].psi;
-      globtpcRow.tanl    = tptrackT[i].tanl;
-      globtpcRow.invpt   = tptrackT[i].invp;
-      globtpcRow.length  = tptrackT[i].length;
-      globtpcRow.id      = counter+1;
-      globtpcRow.iflag   = tptrackT[i].flag;
-      globtpcRow.det_id  = kTpcId;
-      globtpcRow.n_point = tptrackT[i].nrec;
-      globtpcRow.icharge = tptrackT[i].q;
+      globtpcRow.r0          = tptrackT[i].r0;
+      globtpcRow.phi0        = tptrackT[i].phi0;
+      globtpcRow.z0          = tptrackT[i].z0;
+      globtpcRow.psi         = tptrackT[i].psi;
+      globtpcRow.tanl        = tptrackT[i].tanl;
+      globtpcRow.invpt       = tptrackT[i].invp;
+      globtpcRow.length      = tptrackT[i].length;
+      globtpcRow.id          = counter+1;
+      globtpcRow.iflag       = tptrackT[i].flag;
+      globtpcRow.det_id      = kTpcId;
+      globtpcRow.n_point     = tptrackT[i].nrec; 
+      globtpcRow.n_fit_point = tptrackT[i].nfit; 
+      globtpcRow.icharge     = tptrackT[i].q;
 
       globtpc.AddAt(&globtpcRow, counter);
       counter++;

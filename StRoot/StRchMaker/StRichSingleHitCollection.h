@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSingleHitCollection.h,v 1.1 2000/04/05 16:39:51 lasiuk Exp $
+ * $Id: StRichSingleHitCollection.h,v 1.4 2000/05/18 22:08:54 didenko Exp $
  *
  * Description:
  *  Container for output of cluster finder
@@ -9,6 +9,9 @@
  ****************************************************************
  *
  * $Log: StRichSingleHitCollection.h,v $
+ * Revision 1.4  2000/05/18 22:08:54  didenko
+ * Brian fixes
+ *
  * Revision 1.1  2000/04/05 16:39:51  lasiuk
  * Initial Revision
  *
@@ -28,10 +31,10 @@
 
 #include <vector>
 #ifndef ST_NO_NAMESPACES
-#include "StRichHit.h"
+//#include "StRichHit.h"
 #endif
 
-#include "StRichSimpleHit.h"
+#include "StRichHit.h"
 
 class StRichSingleHitCollection
 #ifdef __ROOT__
