@@ -132,7 +132,7 @@ virtual void    SetLast(Int_t last);
 virtual const TIterator *Begin() const;
 virtual const TIterator *End() const;
 virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const;
-virtual TObject** GetCell(Int_t idx){return &fObjArr->TObjArray::operator[](idx);};
+virtual TObject** GetCell(Int_t idx) const{return &fObjArr->TObjArray::operator[](idx);};
 
 // Data Members
 TObjArray *fObjArr;
@@ -163,8 +163,8 @@ virtual StObjArrayIter &operator--();
 virtual StObjArrayIter &operator++(int);
 virtual StObjArrayIter &operator--(int);
 virtual void operator=(const StObjArrayIter &iter);
-virtual Bool_t operator==(const StObjArrayIter &iter);
-virtual Bool_t operator!=(const StObjArrayIter &iter);
+virtual Bool_t operator==(const StObjArrayIter &iter) const;
+virtual Bool_t operator!=(const StObjArrayIter &iter) const;
 
 protected:
 const StObjArray* fColl;
@@ -237,7 +237,7 @@ virtual QWERTY* front() const {return (QWERTY*)Front();};
 virtual const QWERTYIter begin() const ;
 virtual const QWERTYIter end()   const ;
 virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const;
-virtual QWERTY *&operator[](int idx){return *((QWERTY**)GetCell(idx));};
+virtual QWERTY *&operator[](int idx) const {return *((QWERTY**)GetCell(idx));};
 ClassDef(QWERTYRef,1)
 };
 
@@ -251,7 +251,7 @@ virtual QWERTY* front() const {return (QWERTY*)Front();};
 virtual const QWERTYIter begin() const ;
 virtual const QWERTYIter end()   const ;
 virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const;
-virtual QWERTY *&operator[](int idx){return *((QWERTY**)GetCell(idx));};
+virtual QWERTY *&operator[](int idx) const {return *((QWERTY**)GetCell(idx));};
 ClassDef(QWERTYStr,1)
 };
 
@@ -295,7 +295,7 @@ virtual St ## QWERTY ## * front() const \
 virtual const St ## QWERTY ## Iterator begin() const ; \
 virtual const St ## QWERTY ## Iterator end()   const ; \
 virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const; \
-virtual St ## QWERTY *&operator[](int idx)\
+virtual St ## QWERTY *&operator[](int idx) const\
 {return *((St ## QWERTY ## **)GetCell(idx));}; \
 ClassDef(StVecPtr ## QWERTY ##,1) \
 }; \
@@ -314,7 +314,7 @@ virtual St ## QWERTY ## * front() const \
 virtual const St ## QWERTY ## Iterator begin() const ; \
 virtual const St ## QWERTY ## Iterator end()   const ; \
 virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const; \
-virtual St ## QWERTY *&operator[](int idx)\
+virtual St ## QWERTY *&operator[](int idx) const\
 {return *((St ## QWERTY ## **)GetCell(idx));}; \
 ClassDef(St ## QWERTY ## Collection,1) \
 }; \
