@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.60 2000/06/23 19:40:01 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.61 2000/06/26 22:34:38 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.61  2000/06/26 22:34:38  snelling
+// Removed generating adcxyz table with eval switch (used to much memory)
+//
 // Revision 1.60  2000/06/23 19:40:01  fisyak
 // remove access to params
 //
@@ -73,9 +76,9 @@ Int_t St_tcl_Maker::Init() {
 
   // set bools
   if (m_tclEvalOn) {
-    m_tclPixTransOn = kTRUE;
+    //    m_tclPixTransOn = kTRUE;
     m_tclMorphOn = kTRUE;
-    bWriteTNtupleOn = kTRUE; 
+    //    bWriteTNtupleOn = kTRUE; 
   }
 
   // 		Create tables
@@ -381,7 +384,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.60 2000/06/23 19:40:01 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.61 2000/06/26 22:34:38 snelling Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
