@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cxx,v 2.7 2001/06/10 21:03:32 perev Exp $
+ * $Id: StXiVertex.cxx,v 2.8 2003/01/24 22:30:05 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cxx,v $
+ * Revision 2.8  2003/01/24 22:30:05  genevb
+ * Allow for signed DCA of Xi to PrimVertex
+ *
  * Revision 2.7  2001/06/10 21:03:32  perev
  * Solaris: consting
  *
@@ -44,7 +47,7 @@
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_xi_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.7 2001/06/10 21:03:32 perev Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.8 2003/01/24 22:30:05 genevb Exp $";
 
 ClassImp(StXiVertex)
 
@@ -144,7 +147,10 @@ float
 StXiVertex::dcaDaughters() const { return mDcaDaughters; }
 
 float
-StXiVertex::dcaParentToPrimaryVertex() const { return mDcaParentToPrimaryVertex; }
+StXiVertex::dcaParentToPrimaryVertex() const { return TMath::Abs(mDcaParentToPrimaryVertex); }
+
+float
+StXiVertex::signedDcaParentToPrimaryVertex() const { return mDcaParentToPrimaryVertex; }
 
 StV0Vertex*
 StXiVertex::v0Vertex() { return mV0Vertex; }

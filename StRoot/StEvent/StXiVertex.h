@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StXiVertex.h,v 2.7 2002/02/22 22:56:53 jeromel Exp $
+ * $Id: StXiVertex.h,v 2.8 2003/01/24 22:30:05 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.h,v $
+ * Revision 2.8  2003/01/24 22:30:05  genevb
+ * Allow for signed DCA of Xi to PrimVertex
+ *
  * Revision 2.7  2002/02/22 22:56:53  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -67,6 +70,7 @@ public:
     float                 dcaV0ToPrimaryVertex() const;
     float                 dcaDaughters() const;
     float                 dcaParentToPrimaryVertex() const;
+    float                 signedDcaParentToPrimaryVertex() const;
     const StThreeVectorF& momentumOfBachelor() const;
     StThreeVectorF        momentumOfV0() const;
     StThreeVectorF        momentum() const;
