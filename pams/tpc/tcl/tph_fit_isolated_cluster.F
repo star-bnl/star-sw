@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.26 2004/01/14 13:22:07 fisyak Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.27 2004/01/25 19:42:00 fisyak Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.27  2004/01/25 19:42:00  fisyak
+* fix bug with vzeros
+*
 * Revision 1.26  2004/01/14 13:22:07  fisyak
 * add IdTruth information
 *
@@ -201,9 +204,9 @@ c-----------------------------------------------------------------------
 c-----------------------------------------------------------------------
       ierr = 0
 c     clean up the workspace 
-      call vzero(imc_track,nmc_tracks)
-      call vzero(nocc_track,nmc_tracks)
-      call vzero(q_track,nmc_tracks)
+      call vzero(imc_track,nmc_tracks_max)
+      call vzero(nocc_track,nmc_tracks_max)
+      call vzero(q_track,nmc_tracks_max)
       
 c     set up the identity vector for x (pad) calculation
       if (first) then
