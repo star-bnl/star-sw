@@ -186,8 +186,9 @@ TPC, the field cage are artificially segmented into 12 sectors each.
 	  bool west = s_pRdoMasks->isOn(sector+1, iRdo);
 	  bool east = s_pRdoMasks->isOn( 24-(sector+1)%12, iRdo);
 	  // temp overide...
-	  if (row==12 || 
-	      (sector==3 && (row==13 || row==14 || row==15 || row==16 || row==17 || row==18 || row==19 || row==20)))
+	  //if (row==12 || 
+	  //(sector==3 && (row==13 || row==14 || row==15 || row==16 || row==17 || row==18 || row==19 || row==20)))
+	  if (row==12)
 	    {
 	      east = false;
 	      west = false;
