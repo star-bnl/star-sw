@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.cxx,v 2.2 2000/11/01 16:46:59 lasiuk Exp $
+ * $Id: StRichPidTraits.cxx,v 2.3 2000/11/25 11:53:36 lasiuk Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,9 +10,8 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.cxx,v $
- * Revision 2.2  2000/11/01 16:46:59  lasiuk
- * Keep the StRichPid as the owner (use a StSPtrVec)
- * also check the pdg encoded number now
+ * Revision 2.3  2000/11/25 11:53:36  lasiuk
+ * initialize data members in c'tor
  *
  * Revision 2.2  2000/11/01 16:46:59  lasiuk
  * Keep the StRichPid as the owner (use a StSPtrVec)
@@ -26,11 +25,12 @@
 
 #include "StRichPid.h"
 
-static const char rcsid[] = "$Id: StRichPidTraits.cxx,v 2.2 2000/11/01 16:46:59 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPidTraits.cxx,v 2.3 2000/11/25 11:53:36 lasiuk Exp $";
 
 ClassImp(StRichPidTraits)
 
-StRichPidTraits::StRichPidTraits() : StTrackPidTraits(kRichId) {
+StRichPidTraits::StRichPidTraits()
+    : StTrackPidTraits(kRichId), mId(0), mProbability(0) {
     mThePids.clear();
     mThePids.resize(0);
 }
