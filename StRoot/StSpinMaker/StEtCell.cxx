@@ -1,7 +1,22 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEtCell.cxx,v 1.2 2002/06/24 13:22:58 akio Exp $
+// $Id: StEtCell.cxx,v 1.3 2002/12/04 20:28:07 thenry Exp $
 // $Log: StEtCell.cxx,v $
+// Revision 1.3  2002/12/04 20:28:07  thenry
+// StppuDstMaker was modified to allow multiple jet analysis modules to be
+// run simultaneosly with various parameters while the Maker loads the events
+// and analyses them.  Four different jet analyzers exist:
+//
+// Konstanin's Analyzers:
+//     Kt type: StppKonstKtJetAnalyzer
+//     Cone type: StppKonstConeJetAnalyzer
+//
+// Mike's Analyzers:
+//     Kt type: StppMikeKtJetAnalyzer
+//     Cone type: StppMikeConeJetAnalyzer
+//
+// These modules all require the StJetFinder modules.
+//
 // Revision 1.2  2002/06/24 13:22:58  akio
 // numerous bug fix & updates
 //
@@ -17,7 +32,7 @@
 #include "StEvent.h"
 #include "StEtCell.h"
 
-ClassImp(StEtCell);
+ClassImp(StEtCell)
 
 void  StEtCell::print() const{
   printf("Key=%6d  Et=%6.3f Eta=%6.3f(%6.3f : %6.3f) Phi=%6.3f(%6.3f : %6.3f) Entry=%6d JetId=%3d\n",
