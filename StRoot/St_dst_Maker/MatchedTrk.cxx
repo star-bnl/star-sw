@@ -34,7 +34,7 @@ MatchedTrk:: MatchedTrk(StPrimaryMaker* head, int *ipar, float *fpar, CtbRespons
 
   dst_track_st *glb_track_pointer = track->GetTable();
   int n1=0,n2=0,n3=0, n4=0,n5=0,n6=0;
-  for (long l=0; l<Ntrk; l++,glb_track_pointer++) {
+  for (int l=0; l<Ntrk; l++,glb_track_pointer++) {
     if(glb_track_pointer->iflag<=0) continue;
     n1++;
     head->hmtr[0]->Fill(1);
