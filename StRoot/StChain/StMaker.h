@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.8 1998/11/18 22:46:10 fine Exp $
+// $Id: StMaker.h,v 1.9 1998/11/19 01:23:57 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.9  1998/11/19 01:23:57  fine
+// StChain::MakeDoc has been introduced, StChain::MakeDoc has been fixed (see macros/bfc_doc.C macro
+//
 // Revision 1.8  1998/11/18 22:46:10  fine
 // The lost MakeDoc method has been re-introduced
 //
@@ -66,7 +69,7 @@ public:
    TObject       *Clones() {return m_Clones;}
    virtual void   FillClone();
    virtual Int_t  Make() = 0;
-   virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html");
+   virtual void   MakeDoc(const TString &stardir="$(afs)/rhic/star/packages/dev",const TString &outdir="$(star)/StRoot/html");
    virtual void   PrintInfo();
    virtual void MakeBranch();
    virtual void   Save(Int_t save=1) {m_Save = save;}

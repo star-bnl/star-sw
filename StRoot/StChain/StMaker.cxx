@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.12 1998/11/18 22:46:09 fine Exp $
+// $Id: StMaker.cxx,v 1.13 1998/11/19 01:23:57 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.13  1998/11/19 01:23:57  fine
+// StChain::MakeDoc has been introduced, StChain::MakeDoc has been fixed (see macros/bfc_doc.C macro
+//
 // Revision 1.12  1998/11/18 22:46:09  fine
 // The lost MakeDoc method has been re-introduced
 //
@@ -179,6 +182,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir)
  //            $(stardir) + "StRoot/xdf2root"
  //            $(stardir) + ".share/tables"
  //            $(stardir) + "inc",
+ //            $(stardir) + "StRoot/<this class name>",
  //
  //   where $(stardir) is the input parameter (by default = "$(afs)/rhic/star/packages/dev/")
  //
@@ -216,8 +220,16 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir)
   for (i=0;i<lsource;i++) {
     lookup += delim;
     lookup += STAR;
+    lookup += "/";
     lookup += source[i];
   }
+  
+  const Char_t *c = ClassName();  // This tric has to be done since a bug within ROOT
+
+    lookup += delim;
+    lookup += STAR;
+    lookup += "/StRoot/";
+    lookup += c;
 
   html.SetSourceDir(lookup);
 
@@ -236,7 +248,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir)
   Int_t nclass = 9;
   // Create the definitions of the classes not derived from TObjects
   TString header = STAR;
-  header += "inc/table_header.h";
+  header += "/inc/table_header.h";
 
   gROOT->LoadMacro(header);
 
@@ -247,7 +259,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir)
                    html.MakeClass(classes[i]);
 
   // Create the doc for this class
-  const Char_t *c = ClassName();  // This tric has to be done since a bug within ROOT
+  printf(" Making html for <%s>\n",c);
   html.MakeClass((Char_t *)c);
 }
 
