@@ -1,9 +1,12 @@
 
+#ifndef USING_PERSISTENT
+#include "StThreeVector.hh"
+#else
+#include "StThreeVectorF.hh"
 
-
+#endif
 
 #include "StSubDetector.hh"
-#include "StThreeVector.hh"
 #include "StDevice.hh"
 #include "StEvent/StTpcHit.hh"
 #include "StMcEvent/StMcTpcHit.hh"
@@ -16,6 +19,7 @@
 
 
 int TpcLocalTransform(StThreeVector<float>& xgl, int& iSector, int& iPadrow, float& xlocal){
+    
     // this STINKS - Hopefully this is a placeholder for when we have a "real" database!
     // This tries to follow the code found in
     // $STAR/pams/tpc/tpg/tpc_global_to_local.F
@@ -108,7 +112,10 @@ StSubDetector::~StSubDetector(){
 
 //__________________________________
 void StSubDetector::addHit(const StTpcHit* hit){
+    
+  
   StThreeVector<float> xglbvec = hit->position();
+  
   int iSector;
   int iPadrow;
   float xLocal;
@@ -118,6 +125,7 @@ void StSubDetector::addHit(const StTpcHit* hit){
   
   float zGlobal = xglbvec.z();
   mDevices[iSector]->row(iPadrow)->addHit(hit, xLocal, zGlobal);
+  
 }
 
 //__________________________________

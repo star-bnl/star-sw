@@ -12,6 +12,9 @@
 #define  StSubDetector_HH
 
 #include <vector>
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
+#endif
 
 class StDevice;
 class StTpcHit;
@@ -33,7 +36,11 @@ public:
   StDevice*          device(const int iDev){return mDevices[iDev];};
 
 private:
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
   vector<StDevice*>  mDevices;
+#else
+ vector<StDevice*, allocator<StDevice*> > mDevices;
+#endif    
   unsigned int mNDevices;
 
 };

@@ -35,17 +35,30 @@ struct compTrack {
     bool operator()(const StGlobalTrack*, const StGlobalTrack*);
 };
 
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
+#endif
+
 
 #ifndef __CINT__
 #include <map>
 #include <utility>
+// Need to define the maps & Iterators, typedef them so we don't write the whole thing out every time
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
 typedef  multimap<StTpcHit*, StMcTpcHit*, compHit> tpcHitMapType;//!
 typedef  tpcHitMapType::iterator tpcHitMapIter;//!
-
 
 typedef  multimap<StGlobalTrack*, StTrackPairInfo*, compTrack> trackMapType;//!
 typedef  trackMapType::iterator trackMapIter;//!
 typedef  trackMapType::const_iterator trackMapConstIter;//!
+#else
+typedef  multimap<StTpcHit*, StMcTpcHit*, compHit, allocator< pair<const StTpcHit*, StMcTpcHit*> > > tpcHitMapType;//!
+typedef  tpcHitMapType::iterator tpcHitMapIter;//!
+
+typedef  multimap<StGlobalTrack*, StTrackPairInfo*, compTrack, allocator< pair<const StGlobalTrack*, StTrackPairInfo*> > > trackMapType;//!
+typedef  trackMapType::iterator trackMapIter;//!
+typedef  trackMapType::const_iterator trackMapConstIter;//!
+#endif
 
 #else
 class tpcHitMapType; //!
@@ -57,8 +70,6 @@ class trackMapConstIter; //!
 
 #endif
 
-
-// Need to define the maps & Iterators, typedef them so we don't write the whole thing out every time
 
 
 
@@ -77,7 +88,6 @@ class StAssociationMaker : public StMaker {
 
     TH1F*     mNumberOfPings;    //! Number of Hits Associated.
     
-private:
 
     // Have to tell Root not to parse the Multimap stuff, or else it pukes.
     tpcHitMapType* tpcHitMap() { return mTpcHitMap; } //!
@@ -85,6 +95,8 @@ private:
 
 //     multimap<StTpcHit*, StMcTpcHit*, compHit>*  tpcHitMap() { return mTpcHitMap; } //!
 //     multimap<StGlobalTrack*, StTrackPairInfo*, compTrack>* trackMap() { return mTrackMap;} //!
+
+private:
 
     // Define the maps.  Note they are pointers to the maps.
     

@@ -7,6 +7,9 @@
 #define StDevRow_HH
 
 #include <vector>
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
+#endif
 
 class StMcTpcHit;
 class StTpcHit;
@@ -24,7 +27,11 @@ public:
 
     unsigned int nHits() { return localHits.size(); };
 private:
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<StLocalHit*> localHits;
+#else
+    vector<StLocalHit*, allocator<StLocalHit*> > localHits;
+#endif
 
 
 };

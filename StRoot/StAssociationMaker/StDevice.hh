@@ -9,6 +9,9 @@
 #define StDevice_HH
 
 #include <vector>
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
+#endif
 
 //class StDevRow;
 #include "StDevRow.hh"
@@ -16,7 +19,11 @@
 class StDevice{
 
 private:
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<StDevRow*> mRows;
+#else
+     vector<StDevRow*, allocator<StDevRow*> > mRows;
+#endif
     unsigned int mNRows;
     
 public:
