@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.7 2000/01/04 20:54:47 levine Exp $
+ * $Id: EventReader.hh,v 1.8 2000/01/11 22:04:40 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -19,6 +19,11 @@
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.8  2000/01/11 22:04:40  levine
+ * EventReader.hh  // change the header file to include std::string
+ * EventReader.cxx // convert string to char* via c_str() member
+ * (changes from Brian Lasiuk)
+ *
  * Revision 1.7  2000/01/04 20:54:47  levine
  * Implemented memory-mapped file access in EventReader.cxx. Old method
  * (via seeks) is still possible by setting mmapp=0 in
@@ -63,12 +68,14 @@
 #ifndef EVENTREADER_HH
 #define EVENTREADER_HH
 
-
-
+#include <iostream.h>
 
 #include <sys/types.h>
 
 #include <string>
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::string;
+#endif
 
 #include "RecHeaderFormats.hh"
 #include "Error.hh"

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.17 2000/01/04 20:54:46 levine Exp $
+ * $Id: EventReader.cxx,v 1.18 2000/01/11 22:04:40 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -21,6 +21,11 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.18  2000/01/11 22:04:40  levine
+ * EventReader.hh  // change the header file to include std::string
+ * EventReader.cxx // convert string to char* via c_str() member
+ * (changes from Brian Lasiuk)
+ *
  * Revision 1.17  2000/01/04 20:54:46  levine
  * Implemented memory-mapped file access in EventReader.cxx. Old method
  * (via seeks) is still possible by setting mmapp=0 in
@@ -102,8 +107,8 @@ EventReader *getEventReader(int fd, long offset, int MMap)
     er->InitEventReader(fd, offset, MMap); // invoke the mapped version
     if(er->errorNo()) 
       {
-	cout << er->errstr() << endl;
-	cout << er->err_string[er->errorNo()-1] << endl;
+	cout << er->errstr().c_str() << endl;
+	cout << (er->err_string[er->errorNo()-1]) << endl;
 	delete er;
 	return NULL;
       }
@@ -112,8 +117,8 @@ EventReader *getEventReader(int fd, long offset, int MMap)
     er->InitEventReader(fd, offset); // invoke the unmapped version
     if(er->errorNo()) 
       {
-	cout << er->errstr() << endl;
-	cout << er->err_string[er->errorNo()-1] << endl;
+	cout << er->errstr().c_str() << endl;
+	cout << (er->err_string[er->errorNo()-1]) << endl;
 	delete er;
 	return NULL;
       }
@@ -134,8 +139,8 @@ EventReader *getEventReader(int fd, long offset, const char *logfile, int MMap)
   }
   if(er->errorNo()) 
   {
-    cout << er->errstr() << endl;
-    cout << er->err_string[er->errorNo()-1] << endl;
+    cout << er->errstr().c_str() << endl;
+    cout << (er->err_string[er->errorNo()-1]) << endl;
     delete er;
     return NULL;
   }
@@ -149,8 +154,8 @@ EventReader *getEventReader(char *event)
   er->InitEventReader(event);
   if(er->errorNo())
   {
-    cout << er->errstr() << endl;
-    cout << er->err_string[er->errorNo()-1] << endl;
+    cout << er->errstr().c_str() << endl;
+    cout << (er->err_string[er->errorNo()-1]) << endl;
     delete er;
     return NULL;
   }
