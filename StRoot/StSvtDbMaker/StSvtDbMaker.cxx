@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.14 2004/07/29 01:36:00 caines Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.15 2004/07/31 00:50:22 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.15  2004/07/31 00:50:22  munhoz
+ * adding anode drift veloc correction factor
+ *
  * Revision 1.14  2004/07/29 01:36:00  caines
  * Changes for the drift curve usage
  *
@@ -74,6 +77,7 @@ StSvtDbMaker* gStSvtDbMaker=NULL;
 St_ObjectSet *svtSetConfig;
 St_ObjectSet *svtSetDrift;
 St_ObjectSet *svtSetDriftCurve;
+St_ObjectSet *svtSetAnodeDriftCorr;
 St_ObjectSet *svtSetPed;
 St_ObjectSet *svtSetRms;
 St_ObjectSet *svtSetGeom;
@@ -171,6 +175,7 @@ Int_t StSvtDbMaker::Init()
   setSvtGeometry();
   setSvtDriftVelocity();
   setSvtDriftCurve();
+  setSvtAnodeDriftCorr();
   setSvtBadAnodes();
   setSvtT0();
   setSvtDaqParameters();
@@ -192,6 +197,7 @@ Int_t StSvtDbMaker::InitRun(int runumber)
   readSvtGeometry();
   readSvtDriftVelocity();
   readSvtDriftCurve();
+  readSvtAnodeDriftCorr();
   readSvtBadAnodes();
   readSvtT0();
   readSvtDaqParameters();
@@ -307,6 +313,23 @@ void StSvtDbMaker::readSvtDriftCurve()
   else if (m_Reader)
     o=(TObject*)m_Reader->getDriftCurve();
   if (o!=svtSetDriftCurve->GetObject()) svtSetDriftCurve->SetObject(o);
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::setSvtAnodeDriftCorr()
+{
+  svtSetAnodeDriftCorr = new St_ObjectSet("StSvtAnodeDriftCorr");
+  AddConst(svtSetAnodeDriftCorr);
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::readSvtAnodeDriftCorr()
+{
+  TObject* o;
+  if (mReader)o= (TObject*)mReader->getAnodeDriftCorr();
+  else if (m_Reader)
+    o=(TObject*)m_Reader->getAnodeDriftCorr();
+  if (o!=svtSetAnodeDriftCorr->GetObject()) svtSetAnodeDriftCorr->SetObject(o);
 }
 
 //_____________________________________________________________________________

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.hh,v 1.6 2004/07/26 00:06:08 munhoz Exp $
+ * $Id: St_SvtDb_Reader.hh,v 1.7 2004/07/31 00:50:30 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.hh,v $
+ * Revision 1.7  2004/07/31 00:50:30  munhoz
+ * adding anode drift veloc correction factor
+ *
  * Revision 1.6  2004/07/26 00:06:08  munhoz
  * read drift curve
  *
@@ -58,6 +61,7 @@ class St_SvtDb_Reader
   StSvtConfig* mSvtConfig;      //!
   StSvtHybridCollection *mSvtDriftVeloc; //!
   StSvtHybridCollection *mSvtDriftCurve; //!
+  StSvtHybridCollection *mSvtAnodeDriftCorr; //!
   StSvtHybridCollection* mSvtPed; //!
   StSvtHybridCollection* mSvtRms; //!
   StSvtGeometry* mSvtGeom;        //!
@@ -79,6 +83,7 @@ class St_SvtDb_Reader
   StSvtHybridDriftVelocity* getDriftVelocity(int barrel, int ladder, int wafer, int hybrid);
   void getDriftVelocityAverage(StSvtHybridCollection* svtColl);
   StSvtHybridCollection* getDriftCurve();
+  StSvtHybridCollection* getAnodeDriftCorr();
   StSvtHybridCollection* getPedestals();
   StSvtHybridCollection* getRms();
   StSvtGeometry* getGeometry();

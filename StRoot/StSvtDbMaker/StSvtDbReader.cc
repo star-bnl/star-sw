@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbReader.cc,v 1.5 2004/07/26 00:06:08 munhoz Exp $
+ * $Id: StSvtDbReader.cc,v 1.6 2004/07/31 00:50:26 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbReader.cc,v $
+ * Revision 1.6  2004/07/31 00:50:26  munhoz
+ * adding anode drift veloc correction factor
+ *
  * Revision 1.5  2004/07/26 00:06:08  munhoz
  * read drift curve
  *
@@ -440,3 +443,8 @@ StSvtHybridCollection* StSvtDbReader::getDriftCurve()
   return NULL;
 }
 
+//_____________________________________________________________________________
+StSvtHybridCollection* StSvtDbReader::getAnodeDriftCorr()
+{
+  return NULL;
+}  
