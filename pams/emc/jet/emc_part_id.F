@@ -6,17 +6,17 @@ C:BUGS:         None known.
 C:HISTORY:      11/23/99 - Creation.
 c:>------------------------------------------------------------------
       INTEGER*4 FUNCTION emc_part_id(
-     1       emc_cluster_h,       emc_cluster ,
-     2 emc_cluster_index_h, emc_cluster_index ,
-     3    emc_hits_bsmde_h,    emc_hits_bsmde ,
-     4    emc_hits_bsmdp_h,    emc_hits_bsmdp ,
-     5       ems_control_h,       ems_control ,
-     6   emc_part_id_par_h,   emc_part_id_par ,
-     7         calb_calg_h,         calb_calg ,
-     8         calb_calr_h,         calb_calr ,
-     9         dst_track_h,         dst_track ,  
-     A           emc_gam_h,           emc_gam ,
-     1         emc_elect_h,         emc_elect )
+     >       emc_cluster_h,       emc_cluster ,
+     > emc_cluster_index_h, emc_cluster_index ,
+     >    emc_hits_bsmde_h,    emc_hits_bsmde ,
+     >    emc_hits_bsmdp_h,    emc_hits_bsmdp ,
+     >       ems_control_h,       ems_control ,
+     >   emc_part_id_par_h,   emc_part_id_par ,
+     >         calb_calg_h,         calb_calg ,
+     >         calb_calr_h,         calb_calr ,
+     >         dst_track_h,         dst_track ,  
+     >           emc_gam_h,           emc_gam ,
+     >         emc_elect_h,         emc_elect )
 c:>------------------------------------------------------------------
 C:ROUTINE:      INTEGER*4 EMS_ELECT
 C:DESCRIPTION:  looks for cluster in barrel EMC
