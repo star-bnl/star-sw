@@ -82,6 +82,7 @@ Int_t StIOMaker::Skip(int nskip)
 Int_t StIOMaker::Open()
 {
   
+  if (fCurrMk) return 0;
   fNumEvent = 0;
   if (!fFileSet) 			return kStEOF;
 
@@ -128,8 +129,9 @@ AGAIN:
 Int_t StIOMaker::MakeRead(){
   UInt_t uRunEvent[8];
 
+  if (!fCurrMk) Open();
   if (!fCurrMk) return kStEOF;
-  int res = fFileSet->GetNextEvent(uRunEvent);
+ int res = fFileSet->GetNextEvent(uRunEvent);
   if (res)	return kStEOF;
 
   return fCurrMk->MakeRead(uRunEvent);
