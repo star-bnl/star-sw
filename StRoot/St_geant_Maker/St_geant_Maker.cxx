@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.41 1999/07/03 22:40:11 fine Exp $
+// $Id: St_geant_Maker.cxx,v 1.42 1999/07/09 01:15:48 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.42  1999/07/09 01:15:48  fisyak
+// Remove non printing character from generator type
+//
 // Revision 1.41  1999/07/03 22:40:11  fine
 // St_geant_Maker::Work - workaround of LINUX compiler problem
 //
@@ -146,6 +149,7 @@
 #include <iostream.h>
 #include <stdio.h>
 #include <string.h>
+extern "C" int isprint (int);
 #include "GtHash.h"
 #include "TGeometry.h"
 #include "TMaterial.h"
@@ -307,7 +311,10 @@ Int_t St_geant_Maker::Make()
 
     fEvtHddr->SetRunNumber(irun);
     fEvtHddr->SetEventNumber(ievt);
-    fEvtHddr->SetEventType(cgnam);
+    for (int i=0; i<20 && isprint(cgnam[i]); i++);
+    cgnam[i] = 0;
+    
+    if (i) fEvtHddr->SetEventType(cgnam);
 
     if (npart>0) 
     {  
@@ -474,7 +481,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.41 1999/07/03 22:40:11 fine Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.42 1999/07/09 01:15:48 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
