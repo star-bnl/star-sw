@@ -37,6 +37,7 @@ StrangeMuDstPlayer::StrangeMuDstPlayer() {
   v0DcaToPrimVertex = 0.8;
   v0DcaDaughters = 0.75;
   v0NumTpcHits = 15;
+  xiDecayLength = 0.;
   xiDcaDaughters = 0.7;
   xiDcaV0Daughters = 0.7;
   xiDcaToPrimVertex = 0.7;
@@ -232,15 +233,17 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
   v0MuDstMaker->Cuts().Add("v0DcaDaughters",buff);
   sprintf(buff,"> %f",v0NumTpcHits);
   v0MuDstMaker->Cuts().Add("v0NumTpcHits",buff);
+  sprintf(buff,"> %f",xiDecayLength);
+  xiMuDstMaker->Cuts().Add("xiDecayLength",buff);
   sprintf(buff,"< %f",xiDcaDaughters);
   xiMuDstMaker->Cuts().Add("xiDcaDaughters",buff);
   sprintf(buff,"< %f",xiDcaV0Daughters);
   xiMuDstMaker->Cuts().Add("xiDcaV0Daughters",buff);
   sprintf(buff,"< %f",xiDcaToPrimVertex);
   xiMuDstMaker->Cuts().Add("xiDcaToPrimVertex",buff);
-  sprintf(buff,"< %f",xiDcaV0ToPrimVertex);
+  sprintf(buff,"> %f",xiDcaV0ToPrimVertex);
   xiMuDstMaker->Cuts().Add("xiDcaV0ToPrimVertex",buff);
-  sprintf(buff,"< %f",xiDcaBachelorToPrimVertex);
+  sprintf(buff,"> %f",xiDcaBachelorToPrimVertex);
   xiMuDstMaker->Cuts().Add("xiDcaBachelorToPrimVertex",buff);
   
   gMessMgr->Info() << "evPrimVertexZ < " << evPrimVertexZ << endm;
@@ -251,6 +254,7 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
     v0DcaDaughtersToPrimVertex << endm;
   gMessMgr->Info() << "v0DcaDaughters < " << v0DcaDaughters << endm;
   gMessMgr->Info() << "v0NumTpcHits > " << v0NumTpcHits << endm;
+  gMessMgr->Info() << "xiDecayLength > " << xiDecayLength << endm;
   gMessMgr->Info() << "xiDcaDaughters < " << xiDcaDaughters << endm;
   gMessMgr->Info() << "xiDcaV0Daughters < " << xiDcaV0Daughters << endm;
   gMessMgr->Info() << "xiDcaToPrimVertex < " << xiDcaToPrimVertex << endm;
@@ -294,7 +298,8 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
       // Apply selection criteria to the Xis
       {for( Int_t j=0; j<oldMuDstMaker->GetNXi(); j++ ) {
 	StXiMuDst *xij = oldMuDstMaker->GetXi(j);
-	if( xij->dcaXiDaughters() < xiDcaDaughters &&
+	if( xij->decayLengthXi() > xiDecayLength &&
+	    xij->dcaXiDaughters() < xiDcaDaughters &&
 	    xij->dcaV0Daughters() < xiDcaV0Daughters &&
 	    xij->dcaXiToPrimVertex() < xiDcaToPrimVertex &&
 	    xij->dcaV0ToPrimVertex() > xiDcaV0ToPrimVertex &&
@@ -339,10 +344,13 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
   // Create Makers
   IOMaker = new StIOMaker("IO","r",input,"bfcTree");
   // Indicate input branches
-  IOMaker->SetBranch("*",0,"0");           //deactivate all branches
-  IOMaker->SetBranch("dstBranch",0,"r");   //activate Event Branch
-  IOMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
-  eventMaker = new StEventMaker("events","title");
+  IOMaker->SetBranch("*",0,"0");             //deactivate all branches
+  IOMaker->SetBranch("runcoBranch",0,"r");   //activate runco Branch
+  if( doReadDST ) {
+    IOMaker->SetBranch("dstBranch",0,"r");   //activate dst Branch
+    eventMaker = new StEventMaker("events","title");
+  } else
+    IOMaker->SetBranch("eventBranch",0,"r"); //activate event Branch
   // The following are needed for using Monte Carlo info
   if( doMC ) {
     IOMaker->SetBranch("geantBranch",0,"r"); //activate geant Branch
@@ -429,15 +437,17 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
   v0MuDstMaker->Cuts().Add("v0DcaDaughters",buff);
   sprintf(buff,"> %f",v0NumTpcHits);
   v0MuDstMaker->Cuts().Add("v0NumTpcHits",buff);
+  sprintf(buff,"> %f",xiDecayLength);
+  xiMuDstMaker->Cuts().Add("xiDecayLength",buff);
   sprintf(buff,"< %f",xiDcaDaughters);
   xiMuDstMaker->Cuts().Add("xiDcaDaughters",buff);
   sprintf(buff,"< %f",xiDcaV0Daughters);
   xiMuDstMaker->Cuts().Add("xiDcaV0Daughters",buff);
   sprintf(buff,"< %f",xiDcaToPrimVertex);
   xiMuDstMaker->Cuts().Add("xiDcaToPrimVertex",buff);
-  sprintf(buff,"< %f",xiDcaV0ToPrimVertex);
+  sprintf(buff,"> %f",xiDcaV0ToPrimVertex);
   xiMuDstMaker->Cuts().Add("xiDcaV0ToPrimVertex",buff);
-  sprintf(buff,"< %f",xiDcaBachelorToPrimVertex);
+  sprintf(buff,"> %f",xiDcaBachelorToPrimVertex);
   xiMuDstMaker->Cuts().Add("xiDcaBachelorToPrimVertex",buff);
   
   gMessMgr->Info() << "evPrimVertexZ < " << evPrimVertexZ << endm;
@@ -448,6 +458,7 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
     v0DcaDaughtersToPrimVertex << endm;
   gMessMgr->Info() << "v0DcaDaughters < " << v0DcaDaughters << endm;
   gMessMgr->Info() << "v0NumTpcHits > " << v0NumTpcHits << endm;
+  gMessMgr->Info() << "xiDecayLength > " << xiDecayLength << endm;
   gMessMgr->Info() << "xiDcaDaughters < " << xiDcaDaughters << endm;
   gMessMgr->Info() << "xiDcaV0Daughters < " << xiDcaV0Daughters << endm;
   gMessMgr->Info() << "xiDcaToPrimVertex < " << xiDcaToPrimVertex << endm;
@@ -491,7 +502,8 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
       // Apply selection criteria to the Xis
       {for( Int_t j=0; j<oldMuDstMaker->GetNXi(); j++ ) {
 	StXiMuDst *xij = oldMuDstMaker->GetXi(j);
-	if( xij->dcaXiDaughters() < xiDcaDaughters &&
+	if( xij->decayLengthXi() > xiDecayLength &&
+	    xij->dcaXiDaughters() < xiDcaDaughters &&
 	    xij->dcaV0Daughters() < xiDcaV0Daughters &&
 	    xij->dcaXiToPrimVertex() < xiDcaToPrimVertex &&
 	    xij->dcaV0ToPrimVertex() > xiDcaV0ToPrimVertex &&
