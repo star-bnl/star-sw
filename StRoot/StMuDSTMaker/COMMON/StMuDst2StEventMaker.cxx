@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.cxx,v 1.5 2003/08/28 13:01:45 laue Exp $
+ * $Id: StMuDst2StEventMaker.cxx,v 1.6 2003/08/29 14:54:00 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDst2StEventMaker.h"
@@ -48,11 +48,13 @@ int StMuDst2StEventMaker::Make(){  ///< create a StEvent from the muDst and put 
     }
 
     // print all the trigger ids
-    if (mStEvent) {
-	printTriggerIds(mStEvent);
-	loopOverTracks(mStEvent);
-	
-    }
+    // so now you have a StEvent and you can loop
+    // uncomment the following if to have to print out and tests
+//     if (mStEvent) {
+// 	printTriggerIds(mStEvent);
+// 	loopOverTracks(mStEvent);
+//     }
+
   }
   return 0;
 }
@@ -130,6 +132,9 @@ ClassImp(StMuDst2StEventMaker)
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.cxx,v $
+ * Revision 1.6  2003/08/29 14:54:00  laue
+ * Commented out printing of the trigger ids and the (test)-loop over the tracks.
+ *
  * Revision 1.5  2003/08/28 13:01:45  laue
  * now passing proper maker name to the call of the StMaker(name) constructor
  *
