@@ -248,11 +248,9 @@ TObjArray *StEventHelper::SelConts(const char *sel)
   return tarr;   
 }   
 //______________________________________________________________________________
-TObjArray *StEventHelper::SelTracks(const char *sel)
+TObjArray *StEventHelper::SelTracks(Int_t th)
 {
-
-  int needTrk = (strstr(sel,"Track")!=0);
-  int needHit = (strstr(sel,"Hit")  !=0);
+// 		th == needTrack + 2*needHit
 
   TObjArray *conts = SelConts("^StSPtrVecTrack$");
   TObjArray *traks = new TObjArray();
@@ -264,12 +262,12 @@ TObjArray *StEventHelper::SelTracks(const char *sel)
     StTrack *trk = (StTrack*)arr->front();
     Assert(trk->InheritsFrom(StTrack::Class()));
     if (!trk)	continue;
-    if (needTrk) {
+    if (th&1) {
       StTrackPoints *trp = new StTrackPoints(trk);
       traks->Add(trp);
     }
 
-    if (!needHit) 	continue;
+    if (!(th&2)) 	continue;
     StTrackDetectorInfo *tdi = trk->detectorInfo();
     if (!tdi)		continue;
     StPtrVecHit *hits = &tdi->hits();
@@ -282,19 +280,9 @@ TObjArray *StEventHelper::SelTracks(const char *sel)
   return traks;
 }
 //______________________________________________________________________________
-TObjArray *StEventHelper::SelHits(const char *sel)
+TObjArray *StEventHelper::SelHits(const char *RegEx, Int_t un)
 {
-  const char *RegEx = 0;
-  if (!sel) sel ="";
-
-  switch (sel[0]) {
-    case 'A': RegEx = "^StSPtrVec.*Hit$"  ;	break;
-    case 'T': RegEx = "^StSPtrVecTpcHit$" ;	break;
-    case 'R': RegEx = "^StSPtrVecRichHit$";	break;
-    default: Warning("SelHits","Unknown selection %s",sel);
-             return 0;
-  }
-  int used = (sel[1]=='U');
+//		un == used +2*nonused
 
   TObjArray *conts = SelConts(RegEx);
   TObjArray *hits = new TObjArray();
@@ -309,8 +297,9 @@ TObjArray *StEventHelper::SelHits(const char *sel)
       StHit *hit = (StHit*)arr->at(ih);
       if (!hit) 	continue;
       Assert(hit->InheritsFrom(StHit::Class()));
-
-      if ((hit->trackReferenceCount()!=0) !=used) continue ;
+      int used = (hit->trackReferenceCount()!=0);
+      if (used==1 && (un&1)==0) continue;
+      if (used==0 && (un&2)==0) continue;
       StHitPoints *hip = new StHitPoints(hit);
       hits->Add(hip);
     }
@@ -319,22 +308,15 @@ TObjArray *StEventHelper::SelHits(const char *sel)
   return hits;
 }
 //______________________________________________________________________________
-TObjArray *StEventHelper::SelVertex(const char *sel)
+TObjArray *StEventHelper::SelVertex(const char *sel,Int_t thFlag)
 {
   char title[100],name[100];
-  const char *cont = 0;
-  if (sel[0]=='K') cont= "^StSPtrVecKinkVertex$";
-  if (sel[0]=='X') cont= "^StSPtrVecXiVertex$";
-  if (sel[0]=='P') cont= "^StSPtrVecPrimaryVertex$";
-  if (sel[0]=='V') cont= "^StSPtrVecV0Vertex$";
-  int thFlag = 0;
-  if (sel[1]=='T' || sel[2]=='T' ) thFlag |=1;
-  if (sel[1]=='H' || sel[2]=='H' ) thFlag |=2;
+
   if (thFlag==0)		   thFlag  =1;
   
   StTrack *trk; StTrackPoints *trp;StVertexPoints *vxp;
 
-  TObjArray *conts = SelConts(cont);
+  TObjArray *conts = SelConts(sel);
   TObjArray *traks = new TObjArray();
   Int_t ilast = conts->GetLast();
   int nvtx =0;
@@ -541,11 +523,11 @@ const float  *StFilterDef::GetDefs() const
   static const float defs[] = {
    /*  RandomSelect=*/    1.00,
    /*  RxyMin      =*/    0.00,
-   /*  RxyMax      =*/  200.00,
-   /*  ZMin        =*/ -200.00,
-   /*  ZMax        =*/ +200.00,
-   /*  PhiMin      =*/ -180.00,
-   /*  PhiMax      =*/ +180.00,
+   /*  RxyMax      =*/  900.00,
+   /*  ZMin        =*/ -900.00,
+   /*  ZMax        =*/ +900.00,
+   /*  PhiMin      =*/ -180.01,
+   /*  PhiMax      =*/ +181.01,
    /*  LenMin      =*/   +0.00,
    /*  LenMax      =*/ +999.00,
    /*  PtMin       =*/    0.00,

@@ -34,9 +34,9 @@ public:
     StEventHelper(const TObject *evt=0);
     virtual ~StEventHelper();
     TObjArray *SelConts (const char *sel=".*");
-    TObjArray *SelTracks(const char *sel="");
-    TObjArray *SelHits  (const char *sel="");
-    TObjArray *SelVertex(const char *sel="");
+    TObjArray *SelTracks(Int_t th);
+    TObjArray *SelHits  (const char *RegEx, Int_t un);
+    TObjArray *SelVertex(const char *sel,Int_t thFlag);
     virtual void ls(Option_t* option="") const;
     virtual void Clear(Option_t *opt="");
     void Reset(const TObject *evt=0);

@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: EventControlPanel.C,v 1.5 2001/09/05 18:34:20 fine Exp $
+// $Id: EventControlPanel.C,v 1.6 2001/09/17 00:05:24 perev Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -59,13 +59,16 @@ class StEventDisplayInfo;
 class StEventControlPanel {
 public:
 
-   TGButtonGroup *fBar;  
-   TGLayoutHints *fL1;
+   	TGMainFrame *fBar;  
+   	TGLayoutHints *fL1;
 
 static StMaker       *fgChain;
 static StEventDisplayMaker *fgDispMk;
-static TGButtonGroup *fgBar;  
+static TGMainFrame *fgBar;  
 static StEventDisplayInfo *fgHlp;  
+private:
+        Int_t fNum;
+	TList *fGarb;
 
 protected:
 
@@ -74,8 +77,17 @@ protected:
    TGTextButton *AddButt(const Char_t *buttonName, const Char_t *command)
    {   
        TGTextButton *tb = new TGTextButton(fBar,buttonName,command);
-       fBar->AddFrame(tb,fL1);   
-       fBar->Show();
+       fGarb->Add(tb);
+       int col = (fNum&1)*2;
+       int row = (fNum/2)*2;
+       fNum++;
+       UInt_t uHintsNam = kLHintsCenterY | kLHintsFillX;
+       TGTableLayoutHints *hi = new TGTableLayoutHints(col,col+1,row,row+1
+                                ,uHintsNam,10,10,10);
+       fGarb->Add(hi);
+
+       fBar->AddFrame(tb,hi);   
+       Show();
        return tb;
    }
 
@@ -83,13 +95,15 @@ protected:
 public:
    StEventControlPanel()
    { 
-     fgChain = 0;  fgDispMk=0; fgHlp = 0;
+     fgChain = 0;  fgDispMk=0; fgHlp = 0; fNum=0;
+     fGarb = new TList;
      TClass *kl = gROOT->GetClass("StChain");
      if (kl && kl->GetClassInfo())
      {
        fgChain  = StMaker::GetChain();
        fgDispMk = (StEventDisplayMaker*)fgChain->GetMaker("EventDisplay");
      }
+
      Build();
    }
 
@@ -103,10 +117,20 @@ public:
       "dst/vertex"		,"dst/vertex(vtx_id,x:y:z)"	,
       "All Used Hits"  		,"StEvent(All Used Hits)"	,
       "All Unused Hits"		,"StEvent(All Unused Hits)"	, 
-      "TPC Used Hits"  		,"StEvent(TPC Used Hits)"	,
-      "TPC Unused Hits"		,"StEvent(TPC Unused Hits)"	, 
-      "RICH Used Hits" 		,"StEvent(RICH Used Hits)"	,
-      "RICH Unused Hits"	,"StEvent(RICH Unused Hits)"	, 
+      "TPC Used Hits"  		,"StEvent(Tpc Used Hits)"	,
+      "TPC Unused Hits"		,"StEvent(Tpc Unused Hits)"	, 
+      "FTPC Used Hits"  	,"StEvent(Ftpc Used Hits)"	,
+      "FTPC Unused Hits"	,"StEvent(Ftpc Unused Hits)"	, 
+      "SVT Used Hits"		,"StEvent(Svt Used Hits)"	, 
+      "SVT Unused Hits"		,"StEvent(Svt Unused Hits)"	, 
+      "SSD Used Hits"		,"StEvent(Ssd Used Hits)"	, 
+      "SSD Unused Hits"		,"StEvent(Ssd Unused Hits)"	, 
+      "RICH Used Hits" 		,"StEvent(Rich Used Hits)"	,
+      "RICH Unused Hits"	,"StEvent(Rich Unused Hits)"	, 
+      "EMC Used Hits"		,"StEvent(Emc Used Hits)"	, 
+      "EMC Unused Hits"		,"StEvent(Emc Unused Hits)"	, 
+      "TOF Used Hits"		,"StEvent(Tof Used Hits)"	, 
+      "TOF Unused Hits"		,"StEvent(Tof Unused Hits)"	, 
       "All Tracks",    		,"StEvent(All Tracks)"		,
       "All Track Hits"		,"StEvent(All Track Hits)"	,
       "Primary Tracks" 		,"StEvent(Primary Tracks)"	,
@@ -119,30 +143,34 @@ public:
       "Xi Track Hits"		,"StEvent(Xi Track Hits)"	, 
       0}; 
       
-   fBar = new TGButtonGroup(gClient->GetRoot(), "Event Control Panel");
+   fBar = new TGMainFrame(gClient->GetRoot(), 250,550);
+   fBar->SetWindowName("EventControl");
+   TGTableLayout  *lay = new TGTableLayout(fBar,40,4,0,0);
+   fBar->SetLayoutManager(lay);
    fgBar = fBar;
-   gVirtualX->SetWindowName(fBar->GetId(),"Event");
-   fL1  = new TGLayoutHints(kLHintsCenterY | kLHintsExpandX, 1, 1, 1, 1);
-      
+
+
+
    int i;
    char cbuf[200];
    for (i=0;listEvents[i];i+=2) {
-     TGTextButton *button = new TGTextButton(fBar,listEvents[i],"");
+     TGTextButton *button = AddButt(listEvents[i],"");
      sprintf(cbuf,"StEventControlPanel::ToggleDisplayName(\"%s\",(TGTextButton*)%p)"
      ,listEvents[i+1],button);
-
-//   printf("%s == %s\n",listEvents[i],cbuf);
      button->SetCommand(cbuf);
-     fBar->AddFrame(button, fL1);
-//     fBar->Insert(button);
    }
 
    AddButt("Show selections", "StEventControlPanel::PrintNames();");
    Refresh();
-   fBar->Show();
+   Show();
 }
 //_______________________________________________________________________________________
-~StEventControlPanel(){ delete fBar; delete fL1;}
+~StEventControlPanel()
+{  
+  fGarb->Delete();
+  delete fGarb;
+  delete fBar;
+}
 
 //_______________________________________________________________________________________
 static void PrintNames()
@@ -161,13 +189,17 @@ static void PrintNames()
   fgHlp->Popup();
 }
 //_______________________________________________________________________________________
-static void Refresh()
+void Refresh()
 {
   if (!fgDispMk) return;
   TList *tl = fgDispMk->GetNameList();
   if (!tl) return;
-  int id; TGButton *but=0;TObject *n=0;
-  for (id=1;but=fgBar->GetButton(id);id++) {
+  TGButton *but=0;TObject *n=0;
+  TList *frameList = fBar->GetList();
+  TListIter nextFrame(frameList);
+  TGFrameElement *fe=0;
+  while ((fe=(TGFrameElement*)nextFrame())) {
+    but = (TGButton*)fe->fFrame;
     TListIter nextOne(tl);
     while ((n=nextOne())) {
       if (strchr(n->GetName(),'(')==0) continue;
@@ -175,12 +207,11 @@ static void Refresh()
     int state = (n) ? kButtonDown:kButtonUp;
     but->SetState(state);
  }
- fgBar->Show();
+ Show();
 }
 //_______________________________________________________________________________________
 static void ToggleDisplayName(const char *name,TGTextButton *button)
 {
-  fgBar->Show();
   if (!fgDispMk) return;
   TList *lis = fgDispMk->GetNameList(); 
   if (!lis || !(lis->FindObject(name))) {
@@ -202,6 +233,17 @@ static void ToggleDisplayName(const char *name,TGTextButton *button)
 
 
 //_______________________________________________________________________________________
+ void Show()
+{
+   // Show group of buttons.
+
+   fBar->MapSubwindows();
+   fBar->Layout();
+//   Resize(GetLayoutManager()->GetDefaultSize());
+   fBar->MapWindow();
+   fBar->MapRaised();
+//   fClient->NeedRedraw(this);
+}
 };
 
 StEventControlPanel __StEventControlPanel__;

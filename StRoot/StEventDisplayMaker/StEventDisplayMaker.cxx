@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.76 2001/09/01 19:51:23 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.77 2001/09/17 00:06:11 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -683,85 +683,63 @@ const Style_t NHitSty = 1; const Size_t NHitSiz = 1.00; const Color_t NHitCol=18
 const Style_t TrakSty = 1; const Size_t TrakSiz = 1.00; const Color_t TrakCol= 0;
 const Style_t VertSty = 5; const Size_t VertSiz = 0.90; const Color_t VertCol= 0;
 
+enum {kTRK=1,kHIT=2,kUSE=4,kUNU=8};
 
-static const char *listEvents[] = {
-      "All Used Hits"  ,"All Unused Hits",  
-      "TPC Used Hits"  ,"TPC Unused Hits",  
-      "RICH Used Hits" ,"RICH Unused Hits",  
-      "All Tracks"     ,"All Track Hits",
-      "Primary Tracks" ,"Primary Track Hits",  
-      "Kink Tracks"    ,"Kink Track Hits"  ,
-      "V0 Tracks"      ,"V0 Track Hits",  
-      "Xi Tracks"      ,"Xi Track Hits", 
-      0}; 
 
   if (!pos[1] || !pos[1][0]) return 1;
-  int kase;
-  for (kase=0;listEvents[kase];kase++) 
-      {if (strcmp(pos[1],listEvents[kase])==0) break;}
-  if (!listEvents[kase]) return 1;
-
-  int IfHits = (strstr(listEvents[kase],"Hit")!=0);
 
   if (!mEventHelper) mEventHelper = new StEventHelper;
   mEventHelper->Reset(event);
   mEventHelper->ls();
 
+
+  int keyLen = strchr(pos[1],' ') - pos[1];
+  int kase=0;
+  if (strstr(pos[1],"Track" )) kase |= kTRK;
+  if (strstr(pos[1],"Hit"   )) kase |= kHIT;
+  if (strstr(pos[1],"Used"  )) kase |= kUSE;
+  if (strstr(pos[1],"Unused")) kase |= kUNU;
+  int all = (strncmp(pos[1],"All",3)==0);
+  TString sel("^StSPtrVec");
+
   Style_t defSty=0; Size_t defSiz = 0; Color_t defCol= 0;
-  
   TObjArray *shaps =0;
-  switch (kase) {
-     case  0: shaps = mEventHelper->SelHits  ("AU AllUsed"    	); 
-              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
 
-     case  1: shaps = mEventHelper->SelHits  ("AN NonUnused"	); 
-              defSty = NHitSty; defSiz = NHitSiz; defCol = NHitCol; break;       
+SWIT:  switch (kase) {
 
-     case  2: shaps = mEventHelper->SelHits  ("TU TPCUsed"    	); 
-              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
+    case kHIT|kUNU:;
+    case kHIT|kUSE:;
+      if (all) {sel +=".*";}
+      else     {sel.Append(pos[1],keyLen);} 
+      sel += ".*Hit$";
+      shaps = mEventHelper->SelHits  (sel.Data(),(kase>>2)&3);
+      kase  = kase&kUSE | kase&kUNU;
+      goto SWIT;
 
-     case  3: shaps = mEventHelper->SelHits  ("TN TPCNonUsed"	); 
-              defSty = NHitSty; defSiz = NHitSiz; defCol = NHitCol; break;       
+    case kUSE:;
+      defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;
 
-     case  4: shaps = mEventHelper->SelHits  ("RU RICHUsed"    	); 
-              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
+    case kUNU:;
+      defSty = NHitSty; defSiz = NHitSiz; defCol = NHitCol; break;
 
-     case  5: shaps = mEventHelper->SelHits  ("RN TPCNonUsed"	); 
-              defSty = NHitSty; defSiz = NHitSiz; defCol = NHitCol; break;       
+    case kTRK:;
+      defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol;       
 
-     case  6: shaps = mEventHelper->SelTracks("Tracks" 		); 
-              defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; break;       
-
-     case  7: shaps = mEventHelper->SelTracks("Hits"   		); 
-              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
-
-
-     case  8: shaps = mEventHelper->SelVertex("PT PrimaryTracks"); 
-              defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; break;       
-
-     case  9: shaps = mEventHelper->SelVertex("PH PrimaryHits"  ); 
-              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
-
-     case 10: shaps = mEventHelper->SelVertex("KT KinkTracks"  	); 
-              defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; break;       
-
-     case 11: shaps = mEventHelper->SelVertex("KH KinkHits"  	); 
-              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
-
-     case 12: shaps = mEventHelper->SelVertex("VT V0Tracks"  	); 
-              defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; break;       
-
-     case 13: shaps = mEventHelper->SelVertex("VH V0Hits"  	); 
-              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
-
-     case 14: shaps = mEventHelper->SelVertex("XT XiTracks"  	); 
-              defSty = TrakSty; defSiz = TrakSiz; defCol = TrakCol; break;       
-
-     case 15: shaps = mEventHelper->SelVertex("XH XiHits"  	); 
-              defSty = UHitSty; defSiz = UHitSiz; defCol = UHitCol; break;       
+    case kTRK|kHIT:;
+      if (all) { 
+        shaps = mEventHelper->SelTracks(kase&3);
+      } else {
+        sel.Append(pos[1],keyLen);
+        sel +="Vertex$";
+        shaps = mEventHelper->SelVertex(sel.Data(),kase&3);
+      } 
+      if (!(kase&kHIT)) break;
+      kase = kUSE; goto SWIT;
 
      default: Assert(0);
   }
+      
+  
   if (!shaps) return 0;
 
   m_TrackCollector->Add(shaps);	//collect for garbage
@@ -785,7 +763,7 @@ static const char *listEvents[] = {
     const char *L = (P) ? "P":"L";
 
     Style_t sty = defSty; Size_t siz = defSiz;
-    if (P && !IfHits) { sty = VertSty ; siz = VertSiz; }
+    if (P && !(kase&kHIT)) { sty = VertSty ; siz = VertSiz; }
 
     TPolyLineShape *tracksShape = new TPolyLineShape(pnt,L);
     m_TrackCollector->Add(pnt);		//collect garbage
@@ -1054,6 +1032,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.77  2001/09/17 00:06:11  perev
+// Two column
+//
 // Revision 1.76  2001/09/01 19:51:23  perev
 // StEvent added
 //
