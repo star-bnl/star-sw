@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.17 2004/06/14 21:27:46 caines Exp $
+// $Id: StSvtHitMaker.h,v 1.18 2004/07/07 18:09:24 caines Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.18  2004/07/07 18:09:24  caines
+// Save out fraction drfi5 velocity scaler to StEvent
+//
 // Revision 1.17  2004/06/14 21:27:46  caines
 // Fine tuning of drift velocity using laser spots from Jana Bielcikova
 //
@@ -62,7 +65,7 @@
 #endif
 
 #include "tables/St_scs_spt_Table.h"
-
+#include "tables/St_dst_mon_soft_svt_Table.h"
 #include "TH2.h"
 
 //class ofstream;
@@ -104,7 +107,7 @@ class StSvtHitMaker : public StMaker
   double LaserTemperatureCorrection();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.17 2004/06/14 21:27:46 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.18 2004/07/07 18:09:24 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
@@ -122,6 +125,8 @@ class StSvtHitMaker : public StMaker
   
   StSvtData *mSvtData; //!
   StSvtGeantHits *mSvtGeantHit;  //!
+
+  St_dst_mon_soft_svt *svt_drift_mon; //!
   
   TH2F     *m_x_vs_y;  //! x vs y of Si points
   int        mNwaf_no;  //! size of following array
