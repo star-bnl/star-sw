@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.21 2003/04/14 18:30:00 munhoz Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.22 2003/04/16 02:04:24 munhoz Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -70,9 +70,6 @@ void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
   mconfig = config;
   mDriftVelocity = driftVeloc;
   mT0 = T0;
-
-  cout << "StSvtCoordinateTransform::t0 = " << mT0->getT0() << ", fsca = " << mT0->getFsca() << endl;
-endl;
 }
 
 //_____________________________________________________________________________
@@ -111,9 +108,11 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a, StSvtWafe
 void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLocalCoordinate& b)
 
 {
-
-  double t0=mT0->getT0();
-  cout << "operator::t0 = " << t0 << endl;
+  double t0;
+  if (mT0)
+    t0=mT0->getT0();
+  else
+    t0 = 0;
 
   b.setLayer(a.layer());
   b.setLadder(a.ladder());
@@ -158,10 +157,11 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
 
 void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWaferCoordinate& b)
 {
-
-  double t0=mT0->getT0();
-
-  cout << "operator::t0 = " << t0 << endl;
+  double t0;
+  if (mT0)
+    t0=mT0->getT0();
+  else
+    t0 = 0;
 
   StThreeVector<double> pos(0,0,0);
 
@@ -620,7 +620,11 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
   //float vd = 675000;
   //float fsca = 25000000;
 
-  float fsca = mT0->getFsca();
+  float fsca;
+  if (mT0)
+    fsca = mT0->getFsca();
+  else
+    fsca = 25000000;
 
   int barrel;
   if ((a.layer()==1) || (a.layer()==2)) barrel = 1;
@@ -690,7 +694,11 @@ double StSvtCoordinateTransform::UnCalcDriftLength(const StSvtLocalCoordinate& a
   //float vd = 675000;
   //float fsca = 25000000;
 
-  float fsca = mT0->getFsca();
+  float fsca;
+  if (mT0)
+    fsca = mT0->getFsca();
+  else
+    fsca = 25000000;
 
   int barrel;
   if ((a.layer()==1) || (a.layer()==2)) barrel = 1;
