@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.3 2001/02/01 13:00:26 lmartin Exp $ 
+ * $Id: StEstTracker.cxx,v 1.4 2001/02/22 16:33:30 lmartin Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,10 +10,14 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.4  2001/02/22 16:33:30  lmartin
+ * most of the cout replaced by gMessMgr
+ *
  * Revision 1.3  2001/02/01 13:00:26  lmartin
  * Correction of the cvs keywords to get the log in the file header.
  *
  **************************************************************************/
+#include "StMessMgr.h"
 #include "StEstTracker.h"
 #include "StEstParams.hh"
 #include "Infrastructure/StEstWafer.hh"
@@ -32,7 +36,6 @@ StEstTracker::StEstTracker(int npass,
 			   StEstSegments** segments,
 			   St_egr_egrpar* egr_egrpar,
 			   table_head_st* egrpar_h) {
-  cout<<"-------------------------------------------------------------> StEstTracker Constructor "<<endl;
   mNPass=npass;
   mPass=0;
   mNSuperPass=nsuperpass;
@@ -47,20 +50,13 @@ StEstTracker::StEstTracker(int npass,
   mNPhiBins=36;
   mZBin=4;
   mNZBins=18;
-  
-  cout<<"mNPass="<<mNPass<<endl;
-  cout<<"mNSuperPass="<<mNSuperPass<<endl;
-  cout<<"mIdealTracking="<<mIdealTracking<<endl;
-  cout<<"mDebugLevel="<<mDebugLevel<<endl;
-
 }
 
 StEstTracker::~StEstTracker() {
-  cout<<"-------------------------------------------------------------> StEstTracker Destructor "<<endl;
-}
-Int_t StEstTracker::DoTracking() {
 
-  cout<<"-------------------------------------------------------------> StEstTracker DoTracking "<<endl;
+}
+
+Int_t StEstTracker::DoTracking() {
   long TrackDeadBeforeSelection,TrackDeadAfterSelection;
   long TrackDeadBeforeSegment,TrackDeadAfterSegment;
   long TrackDeadBeforeBest,TrackDeadAfterBest;
@@ -74,7 +70,7 @@ Int_t StEstTracker::DoTracking() {
 
 
   if(mDebugLevel>0)
-    cout<<"StEstTracker::DoTracking() ****START****"<<endl;
+    gMessMgr->Info()<<"StEstTracker::DoTracking() ****START****"<<endm;
   if(mIdealTracking==1){
     BuildIdealBranches();
     BuildFindableBranches();
@@ -87,8 +83,8 @@ Int_t StEstTracker::DoTracking() {
   for (i=0;i<mNSvtHit;i++) {
     if (mSvtHit[i]->GetFlag()==0) ihita[mSvtHit[i]->GetWafer()->GetLayer()]++;
   }
-  cout<<"Hit density (0123) :";
-  cout<<"\t"<<ihita[0]<<"\t\t"<<ihita[1]<<"\t\t"<<ihita[2]<<"\t\t"<<ihita[3]<<endl;
+
+  gMessMgr->Info()<<"Hit density (0123) :\t"<<ihita[0]<<"\t\t"<<ihita[1]<<"\t\t"<<ihita[2]<<"\t\t"<<ihita[3]<<endm;
   for(mSuperPass=0; mSuperPass<mNSuperPass; mSuperPass++) {
     FlagTPCTracksSP(mSuperPass);
     onoffmatrix=0;
@@ -97,7 +93,7 @@ Int_t StEstTracker::DoTracking() {
 	onoffmatrix |= int(pow(2,j));
     nminhit=mSegments[mSuperPass]->minhits;
     for (mPass=0;mPass<mNPass;mPass++) {
-      cout<<"Super = "<<mSuperPass<<" Pass = "<<mPass<<endl;
+      gMessMgr->Info()<<"Super = "<<mSuperPass<<" Pass = "<<mPass<<endm;
       // locally mark the tracks which should be considered
       NTrackPresented=0;
       NTrackPresentedGood=0;
@@ -149,7 +145,7 @@ Int_t StEstTracker::DoTracking() {
 		TrackDeadAfterSegment++;
 	      }
 	    }
-	  cout<<"slay "<<slay<<" TrackDead (b/a) ChooseSegment = "<<TrackDeadBeforeSegment<<"  "<<TrackDeadAfterSegment<<endl;
+	  gMessMgr->Info()<<"slay "<<slay<<" TrackDead (b/a) ChooseSegment = "<<TrackDeadBeforeSegment<<"  "<<TrackDeadAfterSegment<<endm;
 	}
 	TrackDeadBeforeSelection=0;
 	TrackDeadAfterSelection=0;
@@ -177,7 +173,7 @@ Int_t StEstTracker::DoTracking() {
 	    }
 	  }
 	if (mIdealTracking==1 && mDebugLevel>0)
-	cout<<"slay "<<slay<<" TrackDead (b/a) ChooseBestNBranches = "<<TrackDeadBeforeSelection<<"  "<<TrackDeadAfterSelection<<endl;
+	gMessMgr->Info()<<"slay "<<slay<<" TrackDead (b/a) ChooseBestNBranches = "<<TrackDeadBeforeSelection<<"  "<<TrackDeadAfterSelection<<endm;
 	
       }// for (slay=3..... 
 
@@ -212,14 +208,14 @@ Int_t StEstTracker::DoTracking() {
 		mTrack[i]->GetIdealPattern()>=nminhit)
 	      TrackDeadAfterBest++;
 	  }
-	cout<<"--> TrackDead (b/a) ChooseBest = "<<TrackDeadBeforeBest<<"  "<<TrackDeadAfterBest<<endl;
+	gMessMgr->Info()<<"--> TrackDead (b/a) ChooseBest = "<<TrackDeadBeforeBest<<"  "<<TrackDeadAfterBest<<endm;
       }
       
       NTrackFormed=0;
 	for (i=0;i<mNTrack;i++) 
 	  if (mTrack[i]->GetDoIt()==1 && mTrack[i]->GetFlag()==1) NTrackFormed++;
-      cout<<"Number of tracks presented/should be formed/formed during the pass : "
-	  <<NTrackPresented<<"/"<<NTrackPresentedGood<<"/"<<NTrackFormed<<endl;
+      gMessMgr->Info()<<"Number of tracks presented/should be formed/formed during the pass : "
+	  <<NTrackPresented<<"/"<<NTrackPresentedGood<<"/"<<NTrackFormed<<endm;
 
       for (i=0;i<4;i++) {
 	ihitaold[i]=ihita[i];
@@ -228,11 +224,11 @@ Int_t StEstTracker::DoTracking() {
       for (i=0;i<mNSvtHit;i++) {
 	if (mSvtHit[i]->GetFlag()==0) ihita[mSvtHit[i]->GetWafer()->GetLayer()]++;
       }
-      cout<<"Hit density (0123) :";
-      cout<<"\t"<<ihita[0]<<"\t"<<ihitaold[0]-ihita[0];
-      cout<<"\t"<<ihita[1]<<"\t"<<ihitaold[1]-ihita[1];
-      cout<<"\t"<<ihita[2]<<"\t"<<ihitaold[2]-ihita[2];
-      cout<<"\t"<<ihita[3]<<"\t"<<ihitaold[3]-ihita[3]<<endl;
+      gMessMgr->Info()<<"Hit density (0123) :"
+		      <<"\t"<<ihita[0]<<"\t"<<ihitaold[0]-ihita[0]
+		      <<"\t"<<ihita[1]<<"\t"<<ihitaold[1]-ihita[1]
+		      <<"\t"<<ihita[2]<<"\t"<<ihitaold[2]-ihita[2]
+		      <<"\t"<<ihita[3]<<"\t"<<ihitaold[3]-ihita[3]<<endm;
       // We need to flag the track process in the current pass 
       // in order to be considered by the method applied (FinishFlag...)
       // at the end of the superpasses.
@@ -241,7 +237,7 @@ Int_t StEstTracker::DoTracking() {
     } // for (mPass=0.......
     mPass--;
     // studing the hit sharing.
-    cout<<"Studying the hit sharing"<<endl;
+    gMessMgr->Info()<<"Studying the hit sharing"<<endm;
     for (i=0;i<4;i++) {
       ihitb[i]=0;
       ihitbshared[i]=0;
@@ -253,16 +249,16 @@ Int_t StEstTracker::DoTracking() {
 	  ihitbshared[mSvtHit[i]->GetWafer()->GetLayer()]++;
       }
     
-    cout<<"Hits used (0123) :";
-    cout<<"\t"<<ihitb[0];
-    cout<<"\t"<<ihitb[1];
-    cout<<"\t"<<ihitb[2];
-    cout<<"\t"<<ihitb[3]<<endl;
-    cout<<"Hits shared (0123) :";
-    cout<<"\t"<<ihitbshared[0];
-    cout<<"\t"<<ihitbshared[1];
-    cout<<"\t"<<ihitbshared[2];
-    cout<<"\t"<<ihitbshared[3]<<endl;
+    gMessMgr->Info()<<"Hits used (0123) :"
+		    <<"\t"<<ihitb[0]
+		    <<"\t"<<ihitb[1]
+		    <<"\t"<<ihitb[2]
+		    <<"\t"<<ihitb[3]<<endm;
+    gMessMgr->Info()<<"Hits shared (0123) :"
+		    <<"\t"<<ihitbshared[0]
+		    <<"\t"<<ihitbshared[1]
+		    <<"\t"<<ihitbshared[2]
+		    <<"\t"<<ihitbshared[3]<<endm;
     
     // choosing best branches for each hit
     TrackDeadBeforeRemoveSharing=0;
@@ -289,7 +285,7 @@ Int_t StEstTracker::DoTracking() {
 	    mTrack[i]->GetIdealPattern()>=nminhit)
 	  TrackDeadAfterRemoveSharing++;
       }
-    cout<<"--> TrackDead (b/a) RemoveSharing = "<<TrackDeadBeforeRemoveSharing<<"  "<<TrackDeadAfterRemoveSharing<<endl;
+    gMessMgr->Info()<<"--> TrackDead (b/a) RemoveSharing = "<<TrackDeadBeforeRemoveSharing<<"  "<<TrackDeadAfterRemoveSharing<<endm;
     
 
     // flagging the tracks which we assume as found
@@ -303,7 +299,7 @@ Int_t StEstTracker::DoTracking() {
   }// for(mSuperPass...
 
   if(mDebugLevel>0)
-    cout<<"StEstTracker::DoTracking() ****STOP****"<<endl;
+    gMessMgr->Info()<<"StEstTracker::DoTracking() ****STOP****"<<endm;
   
   return kStOK;
 } 
@@ -324,7 +320,7 @@ void StEstTracker::BuildIdealBranches() {
   StThreeVector<double> NWaf;
 
 
-  if (mDebugLevel>0) cout<<"StEstTracker::BuildIdealBranches Starting"<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstTracker::BuildIdealBranches Starting"<<endm;
   IsolatedTPCTracks=0;
   AssociatedTPCTracks=0;
   for (i=0;i<8;i++) flaglog[i]=0;
@@ -362,7 +358,7 @@ void StEstTracker::BuildIdealBranches() {
 
 	branch = new StEstBranch(NULL, long(mParams[0]->maxsvthits));
 	if (branch==NULL)
-	  cerr << "ERROR StEstTracker::BuildIdealBranches branch==NULL" << endl;
+	  gMessMgr->Error()<<"ERROR StEstTracker::BuildIdealBranches branch==NULL"<<endm;
 	else { // the perfect branch has been created
 	  branch->JoinTrack(mTrack[i],1);
 	  StThreeVector<double> temp(mVertex->GetGlobX()->x(),
@@ -434,12 +430,9 @@ void StEstTracker::BuildIdealBranches() {
       }
     }
   }
-  cout<<"Number of TPC Tracks without SVT/SSD hits :"<<IsolatedTPCTracks<<endl;
-  cout<<"Number of TPC Tracks with    SVT/SSD hits :"<<AssociatedTPCTracks<<endl;
-  cout<<"Fit status : ";
-  for (i=0;i<8;i++) cout<<flaglog[i]<<" ";
-  cout<<endl;
-  if (mDebugLevel>0) cout<<"StEstTracker::BuildIdealBranches Finished"<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"Number of TPC Tracks without SVT/SSD hits :"<<IsolatedTPCTracks<<endm;
+  if (mDebugLevel>0) gMessMgr->Info()<<"Number of TPC Tracks with    SVT/SSD hits :"<<AssociatedTPCTracks<<endm;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstTracker::BuildIdealBranches Finished"<<endm;
 }
 
 
@@ -457,7 +450,7 @@ void StEstTracker::BuildFindableBranches() {
   StThreeVector<double> XWaf;
   StThreeVector<double> NWaf;
 
-  if (mDebugLevel>0) cout<<"StEstTracker::BuildFindableBranches Starting"<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstTracker::BuildFindableBranches Starting"<<endm;
   for (i=0;i<8;i++) flaglog[i]=0;
   for (i=0;i<mNTrack;i++) {
     if (mTrack[i]->mTPCTrack->GetFlag()>0) {
@@ -470,7 +463,7 @@ void StEstTracker::BuildFindableBranches() {
 	mcid = Eval_id_mctrk2est_Track[mTrack[i]->mTPCTrack->GetMcId()];
 	branch = new StEstBranch(NULL, long(mParams[0]->maxsvthits));
 	if (branch==NULL)
-	  cerr << "ERROR StEstTracker::BuildFindableBranches branch==NULL" << endl;
+	  gMessMgr->Error()<<"ERROR StEstTracker::BuildFindableBranches branch==NULL"<<endm;
 	else { // the perfect branch has been created
 	  branch->JoinTrack(mTrack[i],2);
 	  StThreeVector<double> temp(mVertex->GetGlobX()->x(),
@@ -552,11 +545,7 @@ void StEstTracker::BuildFindableBranches() {
       }
     }
   }
-  cout<<"End of Build Findable Branches"<<endl;
-  cout<<"Fit status : ";
-  for (i=0;i<8;i++) cout<<flaglog[i]<<" ";
-  cout<<endl;
-  if (mDebugLevel>0) cout<<"StEstTracker::BuildFindableBranches Finished"<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstTracker::BuildFindableBranches Finished"<<endm;
 }
 
 
@@ -644,8 +633,8 @@ void StEstTracker::CleanUp(){
   // release the hits from the branch and delete the branches.
   // the IndexGeom is reset and followed by the wafer deletions.
   long i,j,NHitStillAttached,NBranchPossessing;
-  cout<<" CleanUp : Starting"<<endl;
-  cout<<" Before mNSvtHit="<<mNSvtHit<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstTracker::CleanUp : Starting"<<endm;
+  if (mDebugLevel>0) gMessMgr->Info()<<" Before mNSvtHit="<<mNSvtHit<<endm;
   NHitStillAttached=0;
   NBranchPossessing=0;
   for (i=0;i<mNSvtHit;i++) {
@@ -653,23 +642,20 @@ void StEstTracker::CleanUp(){
       NHitStillAttached=NHitStillAttached+1;
       NBranchPossessing=NBranchPossessing+mSvtHit[i]->mNBranch;
       for (j=0;j<mSvtHit[i]->mNBranch;j++)
-	if(!mSvtHit[i]->mBranch[j]) cout<<"Error fake branch"<<endl;
+	if(!mSvtHit[i]->mBranch[j]) gMessMgr->Error()<<"Error fake branch"<<endm;
     }
   }
-  cout<<" Number of hits attached : "<<NHitStillAttached<<endl;
-  cout<<" Number of branchess possessing the hits : "<<NBranchPossessing<<endl;
-  cout<<"CleanUp : deleting the "<<mNTrack<<" Tracks"<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<" Number of hits attached : "<<NHitStillAttached<<endm;
+  if (mDebugLevel>0) gMessMgr->Info()<<" Number of branchess possessing the hits : "<<NBranchPossessing<<endm;
+  if (mDebugLevel>0) gMessMgr->Info()<<"CleanUp : deleting the "<<mNTrack<<" Tracks"<<endm;
   for (i=0;i<mNTrack;i++) {
-    if (mTrack[i]->mNBranch<1) cout<<"Warning, this track does not have any branch"<<endl;
+    if (mTrack[i]->mNBranch<1) gMessMgr->Error()<<"Warning, this track does not have any branch"<<endm;
     delete mTrack[i];
   }
   delete [] mTrack;
-  cout<<"mTrack deleted"<<endl;
   delete [] mTPCTrack;
-  cout<<"mTPCTrack deleted"<<endl;
   mIndexGeom->ResetWafTab();
   delete mIndexGeom;
-  cout<<"mIndexGeom deleted"<<endl;
   // Delete the Eval_mchits array.
   if (mIdealTracking==1) {
     for (i=0;i<mNTPCTrack;i++)
@@ -677,25 +663,20 @@ void StEstTracker::CleanUp(){
     for (i=0;i<mNTPCTrack;i++)
       delete [] Eval_mchits[i];
     delete [] Eval_mchits;
-    cout<<"Eval_mchits deleted"<<endl;
   }
+
   for (i=0;i<mNSvtHit;i++) mSvtHit[i]->DetachFromWafer();
-  cout<<"Hits detached from the wafers"<<endl;
-  for (i=0;i<mNSvtHit;i++) {
+  for (i=0;i<mNSvtHit;i++) 
     delete mSvtHit[i];
-  }
-  cout<<"Hits deleted"<<endl;
   delete [] mSvtHit;
-  cout<<"mSvtHit deleted"<<endl;
   delete mVertex;
-  cout<<"mVertex deleted"<<endl;
+
   for (i=0;i<mNWafers;i++) delete mIndexWaf[i];
   delete [] mIndexWaf;
-  cout<<"mIndexWaf deleted"<<endl;
+
   delete [] mTptIndex;
-  cout<<"mTptIndex deleted"<<endl;
   delete [] Eval_id_mctrk2est_Track;
-  cout<<"Eval_id_mctrk2est deleted"<<endl;
-  cout<<" CleanUp : Done"<<endl;
+
+  if (mDebugLevel>0) gMessMgr->Info()<<" CleanUp : Done"<<endm;
 
 }
