@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.26 2002/03/01 14:21:21 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.27 2002/03/15 10:04:41 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.27  2002/03/15 10:04:41  oldi
+// Adjust eta segments not only to z-position of vertex but to x,y as well.
+// Avoid tracking if vertex position is outside of the inner radius of the Ftpc.
+//
 // Revision 1.26  2002/03/01 14:21:21  jcs
 // add additional histograms to monitor cluster finding
 //
@@ -291,6 +295,7 @@ Int_t StFtpcTrackMaker::Make()
 
   // check for the position of the main vertex
   Double_t z = TMath::Abs(primary_vertex_z);
+  Double_t radius = TMath::Sqrt(primary_vertex_x*primary_vertex_x + primary_vertex_y*primary_vertex_y);
   
   if (z > 50.) {
     
@@ -313,6 +318,14 @@ Int_t StFtpcTrackMaker::Make()
       // Do tracking.
     }
   }
+
+  if (radius >= 7.73) {
+    gMessMgr->Message("Found vertex x-z-position is greater than 7.73 cm (inner Ftpc radius). No Ftpc tracking possible.", "E", "OTS");
+    
+    // No tracking!
+    return kStWarn; 
+  }
+
 
   Double_t vertexPos[3] = {primary_vertex_x, primary_vertex_y, primary_vertex_z};
   StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertexPos, Debug());
@@ -455,7 +468,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.26 2002/03/01 14:21:21 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.27 2002/03/15 10:04:41 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
