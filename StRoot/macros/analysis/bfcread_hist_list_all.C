@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list_all.C,v 1.13 2000/06/12 19:58:54 lansdell Exp $ 
+// $Id: bfcread_hist_list_all.C,v 1.14 2000/07/26 19:53:45 lansdell Exp $ 
 // $Log: bfcread_hist_list_all.C,v $
+// Revision 1.14  2000/07/26 19:53:45  lansdell
+// made changes for creating new QA histograms
+//
 // Revision 1.13  2000/06/12 19:58:54  lansdell
 // loaded global shared library
 //
@@ -72,6 +75,7 @@ void bfcread_hist_list_all(
 //
     gSystem->Load("St_base");
     gSystem->Load("StChain");
+    gSystem->Load("StUtilities");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("libglobal_Tables");

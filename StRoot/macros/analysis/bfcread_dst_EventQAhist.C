@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.25 2000/06/02 20:24:22 lansdell Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.26 2000/07/26 19:53:44 lansdell Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.26  2000/07/26 19:53:44  lansdell
+// made changes for creating new QA histograms
+//
 // Revision 1.25  2000/06/02 20:24:22  lansdell
 // ignore previous message; added check on Make() return codes
 //
@@ -140,20 +143,20 @@ void bfcread_dst_EventQAhist(
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
-
-  gSystem->Load("libgen_Tables");
-  gSystem->Load("libsim_Tables");
-  gSystem->Load("libglobal_Tables");
-
+  gSystem->Load("St_Tables");
 
   gSystem->Load("StUtilities");
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
-  gSystem->Load("St_QA_Maker");  
+  gSystem->Load("StDbUtilities");
+  gSystem->Load("StDbLib");
+  gSystem->Load("StDbBroker");
+  gSystem->Load("St_db_Maker");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker");
-
+  gSystem->Load("St_QA_Maker");  
 
 //  Setup top part of chain
   chain = new StChain("MyChain");
@@ -166,6 +169,13 @@ void bfcread_dst_EventQAhist(
   IOMk->SetBranch("dstBranch",0,"r");
   IOMk->SetBranch("runcoBranch",0,"r");
 
+// database stuff
+  const char* calibDB = "MySQL:StarDb";
+  St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB);
+  calibMk->SetDateTime("year_1h");
+  calibMk->SetDebug();  
+  StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
+
 // constructor for other maker (not used in chain)
   StHistUtil   *HU  = new StHistUtil;
 
@@ -174,11 +184,9 @@ void bfcread_dst_EventQAhist(
 // -- input any maker pointer but must cast as type StMaker
   HU->SetPntrToMaker((StMaker *)IOMk);
 
-
 //  add other makers to chain:
   StEventMaker *eventMaker = new StEventMaker("events","title");
   StEventQAMaker *EventQA = new StEventQAMaker("EventQA","StEvent/QA");
-
 
 // --- now execute chain member functions --> Init
   Int_t iInit = chain->Init();
@@ -191,8 +199,7 @@ void bfcread_dst_EventQAhist(
   NoHist = HU->ListHists(MakerHistDir);
   cout << " !!! bfcread_dst_EventQAhist.C, No. of Hist we have == " << NoHist << endl;
 
- 
-// loop over events:
+ // loop over events:
   int iev=0,iret=0, evnum=0;
  EventLoop: if (iev<nevents && iret!=2) {  // goto loop code
    evnum=iev+1;

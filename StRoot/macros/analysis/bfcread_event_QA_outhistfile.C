@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.4 2000/06/13 00:58:59 lansdell Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.5 2000/07/26 19:53:45 lansdell Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.5  2000/07/26 19:53:45  lansdell
+// made changes for creating new QA histograms
+//
 // Revision 1.4  2000/06/13 00:58:59  lansdell
 // added libglobal_Tables to resolve crashes
 //
@@ -72,14 +75,20 @@ void bfcread_event_QA_outhistfile(
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
+  gSystem->Load("St_Tables");
+
   gSystem->Load("StUtilities");
-  gSystem->Load("libglobal_Tables");
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
+  gSystem->Load("StDbUtilities");
+  gSystem->Load("StDbLib");
+  gSystem->Load("StDbBroker");
+  gSystem->Load("St_db_Maker");
+  gSystem->Load("StTpcDb");
+  gSystem->Load("StEvent");
   gSystem->Load("St_QA_Maker"); 
   gSystem->Load("StTreeMaker");
-  gSystem->Load("StEvent");
 
 //  Setup top part of chain
   chain = new StChain("MyChain");
@@ -90,27 +99,33 @@ void bfcread_event_QA_outhistfile(
   IOMk->SetIOMode("r");
   IOMk->SetBranch("event",0,"r");
 
+// database stuff
+  const char* calibDB = "MySQL:StarDb";
+  St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB);
+  calibMk->SetDateTime("year_1h");
+  calibMk->SetDebug();  
+  StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
+
 // constructor for other maker (not used in chain)
-   StHistUtil   *HU  = new StHistUtil;
+  StHistUtil   *HU  = new StHistUtil;
 
 // now must set pointer to StMaker so HistUtil can find histograms
 //  with StHistUtil methods
 // -- input any maker pointer but must cast as type StMaker
-   HU->SetPntrToMaker((StMaker *)IOMk);
+  HU->SetPntrToMaker((StMaker *)IOMk);
 
 //  add other makers to chain:
   StEventQAMaker *EventQA = new StEventQAMaker(MakerHistDir,"StEvent/QA-notused");
 
 // output hist.root file:
-   StTreeMaker* treeMk = new StTreeMaker("tree",outHistFile,TopDirTree);
-      treeMk->SetIOMode("w");
-      treeMk->SetBranch("histBranch");
-
+  StTreeMaker* treeMk = new StTreeMaker("tree",outHistFile,TopDirTree);
+  treeMk->SetIOMode("w");
+  treeMk->SetBranch("histBranch");
 
 // --- now execute chain member functions --> Init
-    Int_t iInit = chain->Init();
-    if (iInit) chain->Fatal(iInit,"on init");
-    chain->PrintInfo();
+  Int_t iInit = chain->Init();
+  if (iInit) chain->Fatal(iInit,"on init");
+  chain->PrintInfo();
  
 // method to print out list of histograms - 
 //can do this anytime after they're booked
@@ -118,7 +133,6 @@ void bfcread_event_QA_outhistfile(
   NoHist = HU->ListHists(MakerHistDir);
   cout << " !!! bfcread_dst_QAhist.C, No. of Hist we have == " << NoHist << endl;
 
- 
 // loop over events:
   int iev=0,iret=0, evnum=0;
  EventLoop: if (iev<nevents && iret!=2) {  // goto loop code

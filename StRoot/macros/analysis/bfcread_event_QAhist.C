@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QAhist.C,v 1.4 2000/06/13 00:58:59 lansdell Exp $
+// $Id: bfcread_event_QAhist.C,v 1.5 2000/07/26 19:53:45 lansdell Exp $
 // $Log: bfcread_event_QAhist.C,v $
+// Revision 1.5  2000/07/26 19:53:45  lansdell
+// made changes for creating new QA histograms
+//
 // Revision 1.4  2000/06/13 00:58:59  lansdell
 // added libglobal_Tables to resolve crashes
 //
@@ -78,13 +81,19 @@ void bfcread_event_QAhist(
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
+  gSystem->Load("St_Tables");
+
   gSystem->Load("StUtilities");
-  gSystem->Load("libglobal_Tables");
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
-  gSystem->Load("St_QA_Maker");  
+  gSystem->Load("StDbUtilities");
+  gSystem->Load("StDbLib");
+  gSystem->Load("StDbBroker");
+  gSystem->Load("St_db_Maker");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
+  gSystem->Load("St_QA_Maker");  
 
 //  Setup top part of chain
   chain = new StChain("MyChain");
@@ -94,6 +103,13 @@ void bfcread_event_QAhist(
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
   IOMk->SetBranch("event",0,"r");
   IOMk->SetDebug();
+
+// database stuff
+  const char* calibDB = "MySQL:StarDb";
+  St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB);
+  calibMk->SetDateTime("year_1h");
+  calibMk->SetDebug();  
+  StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
 
 // constructor for other maker (not used in chain)
   StHistUtil   *HU  = new StHistUtil;
