@@ -1,7 +1,10 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.7 2003/04/02 20:42:23 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.8 2003/04/16 20:33:51 balewski Exp $
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.8  2003/04/16 20:33:51  balewski
+// small fixes in eemc daq reader
+//
 // Revision 1.7  2003/04/02 20:42:23  balewski
 // tower-->tube mapping
 //
@@ -144,7 +147,7 @@ void  StEEmcDbMaker::setTimeStampDay( int tD) {
 //------------------
 void StEEmcDbMaker::setThreshold(float x){
  KsigOverPed=x;
- printf("set KsigOverPed=%f, threshold=ped+sig*KsigOverPed\n",KsigOverPed);
+ printf("%s::setThres KsigOverPed=%f, threshold=ped+sig*KsigOverPed\n",GetName(),KsigOverPed);
 }
 
 
@@ -153,7 +156,7 @@ void StEEmcDbMaker::setThreshold(float x){
 //________________________________________________________
 Int_t StEEmcDbMaker::Init(){
   if( mNSector==0) setSectors(5,8);//default
-  setThreshold(2.0);  // defines threshold for ADCs
+  setThreshold(1.0);  // defines threshold for ADCs
   // should be +2 or +3 sigma in the future
   return StMaker::Init();
 }
@@ -175,7 +178,7 @@ void StEEmcDbMaker::setSectors(int sec1,int sec2){
   mDbPMTped= (eemcDbPMTped_st  **) new void *[mNSector];
   mDbsectorID=  new int [mNSector];
   
-  printf("\n\n%s Use sectors from %d to %d\n",GetName(),mfirstSecID,mlastSecID);
+  printf("\n\n%s::Use sectors from %d to %d\n",GetName(),mfirstSecID,mlastSecID);
 
 }
 
@@ -260,7 +263,7 @@ void  StEEmcDbMaker::mReloadDb  (){
   
   TDataSet *eedb=GetDataBase("Calibrations/eemc");
   if(eedb==0) {
-    printf(" \n\n Did you setup 'setenv Calibrations_eemc VerD' or other VerX and/or ~dbServers.xml ?, JB\n\n");
+    printf(" \n\n Did you setup 'setenv Calibrations_eemc VerE' or other VerX and/or ~dbServers.xml ?, JB\n\n");
     assert(eedb);
   }
   eedb->ls(2);
@@ -373,7 +376,7 @@ void  StEEmcDbMaker::print(int k){
 void  StEEmcDbMaker::mOptimizeDb(){
 
   int i, j;
-  printf("\n\noptimizeDb :::::: %s\n\n\n",GetName());
+  printf("\noptimizeDb :::::: %s\n\n",GetName());
 
 
   // primary information: crate,chan <--> element name

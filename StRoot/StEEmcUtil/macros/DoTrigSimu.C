@@ -3,8 +3,9 @@
 class StChain;
 StChain *chain=0;
 
-void DoTrigSimu(Int_t nevents=1,char *fname="minb200-10k.event.root")
+void DoTrigSimu(Int_t nevents=5,char *fname="minb200-10k.event.root")
 {
+  char *fname="st_physics_4095050_raw_0010002.event.root";
   //
   // First load some shared libraries we need
   //    
@@ -31,10 +32,10 @@ void DoTrigSimu(Int_t nevents=1,char *fname="minb200-10k.event.root")
   gSystem->Load("StEmcUtil");    
      
   // Load my makers
-  gSystem->Load("EEmc");
-  gSystem->Load("EEfeeRaw");
-  gSystem->Load("SteemcDb");
-  
+  gSystem->Load("StEEmcDbMaker");
+  gSystem->Load("StEEmcUtil");
+    gSystem->Load("StEEmcSimulatorMaker");
+
   // create chain    
   chain = new StChain("bfc"); 
   //chain->SetDebug();
@@ -57,7 +58,7 @@ void DoTrigSimu(Int_t nevents=1,char *fname="minb200-10k.event.root")
 
   // My Makers 
   //  SteemcDbMaker  *myMk1=new SteemcDbMaker("eemcDBio");
-  StEmcTrigSimuMaker *myMk2=new StEmcTrigSimuMaker("eemcTrigMaker");
+  StEEmcTrigSimuMaker *myMk2=new StEEmcTrigSimuMaker("eemcTrigMaker");
 
   // Now execute the chain Init functions
   chain->PrintInfo();
@@ -83,7 +84,6 @@ void DoTrigSimu(Int_t nevents=1,char *fname="minb200-10k.event.root")
     } // Event Loop
     chain->Finish();
 
-    delete myMk3;
     delete myMk2;
     delete myMk1;
 

@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: St2eemcFeeRawMaker.cxx,v 1.9 2003/03/26 21:16:42 balewski Exp $
+// $Id: St2eemcFeeRawMaker.cxx,v 1.10 2003/04/16 20:33:56 balewski Exp $
 // $Log: St2eemcFeeRawMaker.cxx,v $
+// Revision 1.10  2003/04/16 20:33:56  balewski
+// small fixes in eemc daq reader
+//
 // Revision 1.9  2003/03/26 21:16:42  balewski
 // *** empty log message ***
 //
@@ -122,7 +125,7 @@ Int_t St2eemcFeeRawMaker::InitRun  (int runNumber){
   mrunTT->print();  
  
  printf("\n%s::InitRun(%d) list  DB content \n",GetName(),runNumber);
- meeDb->print();
+ //meeDb->print();
   return kStOK;
 }
 
