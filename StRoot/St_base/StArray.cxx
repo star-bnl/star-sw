@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.10 1999/06/23 20:31:04 perev Exp $
+// $Id: StArray.cxx,v 1.11 1999/07/17 19:00:12 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.11  1999/07/17 19:00:12  perev
+// fix destructor of StStrArray
+//
 // Revision 1.10  1999/06/23 20:31:04  perev
 // StArray I/O + browser
 //
@@ -387,7 +390,10 @@ StStrArray::StStrArray(const Char_t *name, Int_t s):StObjArray(s)
 }
 //______________________________________________________________________________
 StStrArray::~StStrArray()
-{StRegistry::RemColl(this);}
+{
+  Delete(); 
+  StRegistry::RemColl(this);
+}
 
 //______________________________________________________________________________
 const Char_t *StStrArray::GetIDName() const 

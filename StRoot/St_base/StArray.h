@@ -103,7 +103,7 @@ virtual        ~StObjArray(){delete fObjArr;};
             virtual void Browse(TBrowser *b);
            virtual void Clear(Option_t* option=""){fObjArr->Clear(option);};
             virtual void Compress(){fObjArr->Compress();};
-            virtual void Delete(Option_t* option){fObjArr->Delete(option);};
+            virtual void Delete(Option_t* option=""){if(fObjArr)fObjArr->Delete(option);};
             virtual void Expand(Int_t newSize){fObjArr->Expand(newSize);};
         virtual TObject* First() const {return fObjArr->First();};
                    Int_t GetEntries() const {return fObjArr->GetEntries();};
