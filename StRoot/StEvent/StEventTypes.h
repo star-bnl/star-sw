@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.20 2002/01/03 20:59:33 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.21 2002/02/19 04:24:03 lasiuk Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.21  2002/02/19 04:24:03  lasiuk
+ * addition of StRichSpectra information for uDST purposes
+ *
  * Revision 2.20  2002/01/03 20:59:33  ullrich
  * Added BBC and FPD.
  *
@@ -126,6 +129,7 @@
 #include "StRichPhotonInfo.h"
 #include "StRichPid.h"
 #include "StRichPidTraits.h"
+#include "StRichSpectra.h"
 #include "StRichSoftwareMonitor.h"
 #include "StRichPixel.h"
 #include "StRunInfo.h"
