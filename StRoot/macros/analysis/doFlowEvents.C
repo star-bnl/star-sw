@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.11 2000/05/17 16:20:59 kathy Exp $
+// $Id: doFlowEvents.C,v 1.12 2000/05/18 18:12:06 posk Exp $
 //
 // Description: 
-// Chain to read events from files or database into StEvent and analyze.
-// what it does: reads .dst.root or .xdf files and then runs StEventMaker
-//          to fill StEvent and StAnalysisMaker to show example of analysis
+// Chain to read events from files into StFlowEvent and analyze.
+// what it does: reads .dst.root, .xdf, flowevent.root, flownanoevent.root files 
+//          to fill StFlowEvent
 //
 // Environment:
 // Software developed for the STAR Detector at Brookhaven National Laboratory
@@ -14,8 +14,11 @@
 // If you specify a path, all DST files below that path will be
 // found, and 'nevents' events will be analyzed.
 // The type of DST files searched for is taken from the 'file' parameter.
-// If 'file ends in '.xdf', XDF DSTs are searched for.
-// If 'file ends in '.dst.root', ROOT DSTs are searched for.
+// If 'file' ends in '.xdf', XDF DSTs are searched for.
+// If 'file' ends in '.dst.root', ROOT DSTs are searched for.
+// If 'file' ends in 'event.root' a StEvent file is used.
+// If 'file' ends in 'flowevent.root' a StFlowEvent file is used.
+// If 'file' ends in 'flownanoevent.root' a StFlowNanoEvent file is used.
 //
 // If path begins with '-', 'file' will be taken to be a single file
 // to be processed.
@@ -34,6 +37,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.12  2000/05/18 18:12:06  posk
+// Updated to doEvents.C
+//
 // Revision 1.11  2000/05/17 16:20:59  kathy
 // add some print stmts and also run some IOMaker methods in order to get default input files that are softlinks to other files working correctly
 //
@@ -71,12 +77,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 Int_t    usePath = 0;
+Int_t    usePath = 0;
 Int_t    nFile = 0;
 TString  thePath;
 TString  theFileName;
 TString  originalPath;
 class    StChain;
 StChain  *chain=0;
+class StEventDisplayMaker;
+StEventDisplayMaker *dsMaker = 0;
 TBrowser *b=0;
 
 const char *dstFile = 0;
@@ -84,25 +93,26 @@ const char *xdfFile = 0;
 const char *mdcFile = 0;
 const char *fileList[] = {dstFile, xdfFile, mdcFile, 0};
 
-void doFlowEvents(Int_t, const Char_t **, const char *qaflag = "");
+void doFlowEvents(Int_t, const Char_t **, const char *qaflag = "",
+		  const Char_t *wrStEOut = "false");
 void doFlowEvents(Int_t, const Char_t *, const Char_t *, 
-		  const char *qaflag = "off");
+		  const char *qaflag = "off", const Char_t *wrStEOut = "false");
 void doFlowEvents(Int_t nevents = 2);
 
 
 // ------------------ Here is the actual method -----------------------------------------
-void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
+void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
+		  const Char_t *wrStEOut)
 {
-
   cout <<  endl << endl <<" doFlowEvents -  input # events = " << nevents << endl;
   Int_t ilist=0;
   while(fileList[ilist]){ 
       cout << " doFlowEvents -  input fileList = " << fileList[ilist] << endl;
       ilist++; 
     }
-  cout << " doFlowEvents -  input qaflag   = " << qaflag << endl << endl << endl;
+  cout << " doFlowEvents -  input qaflag   = " << qaflag << endl;
+  cout << " doFlowEvents -  input wrStEOut = " << wrStEOut << endl << endl << endl;
  
-
   //
   // First load some shared libraries we need
   // Do it in this order
@@ -116,6 +126,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 
   gSystem->Load("StUtilities");
   gSystem->Load("StIOMaker");
+  gSystem->Load("StTreeMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
   gSystem->Load("StMagF");
@@ -127,46 +138,60 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   // Make a chain with a file list
   chain  = new StChain("StChain");
   //chain->SetDebug();
-
-  StFile *setFiles= new StFile();
-  for (int ifil=0; fileList[ifil]; ifil++)
-    { setFiles->AddFile(fileList[ifil]); }
   
-  cout << "#### First File = " << fileList[0] << endl;
-
+  StFileI *setFiles =0;
+  if (fileList) {	//Normal case
+    setFiles= new StFile(fileList);
+  } else        {	//Grand Challenge
+    gSystem->Load("StChallenger");
+    setFiles = StChallenger::Challenge();
+    setFiles->SetDebug();
+    Int_t Argc=4;
+    const char *Argv[4]= {
+      "-s","dst;hist;runco",
+      "-q","-5<=qxa_3<0.3 && 22>qxc_1>18"
+    };
+    setFiles->Init(Argc,Argv);
+  }
+  
   if (strstr(fileList[0], "event.root")==0) {
     // Read raw events and make StEvent
     gSystem->Load("StEventMaker");
     StIOMaker *IOMk = new StIOMaker("IO", "r", setFiles, "bfcTree");
-     IOMk->SetIOMode("r");
-     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-     IOMk->SetBranch("dstBranch",0,"r");
-     IOMk->SetBranch("runcoBranch", 0, "r");
-     //IOMk->SetDebug();
+    IOMk->SetIOMode("r");
+    IOMk->SetBranch("*", 0, "0");                 //deactivate all branches
+    IOMk->SetBranch("dstBranch", 0, "r");
+    IOMk->SetBranch("runcoBranch", 0, "r");
+    //IOMk->SetDebug();
     StEventMaker *readerMaker =  new StEventMaker("events", "title");
     StFlowMaker* flowMaker = new StFlowMaker();
-
+    // WriteOut StEvent
+    if (wrStEOut != "false") {
+      cout << "doFlowEvents - will write out .event.root file" << endl << endl;
+      StTreeMaker *outMk = new StTreeMaker("EvOut", "", "bfcTree");
+      outMk->SetIOMode("w");
+      outMk->SetBranch("eventBranch", "test.event.root", "w");
+      outMk->IntoBranch("eventBranch", "StEvent");
+    }
+    
   } else if (strstr(fileList[0], "nano")==0) {
     // Read StEvent (or StFlowEvent) files
     StIOMaker *IOMk = new StIOMaker("IO", "r", setFiles, "bfcTree");
     IOMk->SetIOMode("r");
-    IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+    IOMk->SetBranch("*", 0, "0");                 //deactivate all branches
     IOMk->SetBranch("eventBranch", 0, "r");
     IOMk->SetBranch("runcoBranch", 0, "r");
     //IOMk->SetDebug();
     StFlowMaker* flowMaker = new StFlowMaker();
-
+    
   } else {
     //Read nano-DST
     StFlowMaker* flowMaker = new StFlowMaker();
     flowMaker->NanoEventRead(kTRUE);
-    flowMaker->SetNanoEventFileName(); 
-    //flowMaker->SetNanoEventFileName(fileList[0]); 
-    //flowMaker->SetNanoEventFileName("flownanoevent.root"); 
-    //flowMaker->SetNanoEventFileName("FlowNanoDSTa.root"); 
+    flowMaker->SetNanoEventFileName(fileList[0]); 
   }
   
-  //
+  //////////////
   // Flow Makers
   //   Use of the TagMaker is optional.
   //   The AnalysisMaker may be used with a selection object.
@@ -180,37 +205,39 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
   
   // Make Selection objects and instantiate Makers
-//     StFlowSelection flowSelect;
-//     StFlowSelection flowSelect1;
-//     flowSelect1->SetNumber(1);
-//     flowSelect->SetCentrality(0);
-//     flowSelect1->SetPid("pi"); // pi+, pi-, pi, or proton
-//     flowSelect1->SetPidPart("pi"); // pi+, pi-, pi, or proton
-//     char makerName[30];
-//     sprintf(makerName, "Flow%s", flowSelect->Number());
-//     StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
-//     sprintf(makerName, "FlowAnalysis%s", flowSelect->Number());
-//     StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker(makerName, flowSelect);
-//     sprintf(makerName, "Flow%s", flowSelect1->Number());
-//     StFlowMaker* flowMaker1 = new StFlowMaker(makerName, flowSelect1);
-//     sprintf(makerName, "FlowAnalysis%s", flowSelect1->Number());
-//     StFlowAnalysisMaker* flowAnalysisMaker1 = new StFlowAnalysisMaker(makerName, flowSelect1);
-
+  //StFlowSelection flowSelect;
+  //StFlowSelection flowSelect1;
+  //flowSelect1->SetNumber(1);
+  //flowSelect->SetCentrality(0);
+  //flowSelect1->SetPid("pi"); // pi+, pi-, pi, or proton
+  //flowSelect1->SetPidPart("pi"); // pi+, pi-, pi, or proton
+  //char makerName[30];
+  //sprintf(makerName, "Flow%s", flowSelect->Number());
+  //StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
+  //sprintf(makerName, "FlowAnalysis%s", flowSelect->Number());
+  //StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker(makerName, flowSelect);
+  //sprintf(makerName, "Flow%s", flowSelect1->Number());
+  //StFlowMaker* flowMaker1 = new StFlowMaker(makerName, flowSelect1);
+  //sprintf(makerName, "FlowAnalysis%s", flowSelect1->Number());
+  //StFlowAnalysisMaker* flowAnalysisMaker1 = new StFlowAnalysisMaker(makerName, flowSelect1);
+  
   // Set read-write flages
   //flowMaker->NanoEventWrite(kTRUE);
-  //flowMaker->FlowEventWrite(kTRUE);
-//     flowMaker->FlowEventRead(kTRUE);
-
+  flowMaker->SetNanoEventFileName(); 
+  //flowMaker->SetNanoEventFileName("flownanoevent.root"); 
+  flowMaker->FlowEventWrite(kTRUE);
+  //flowMaker->FlowEventRead(kTRUE);
+  
   // Set Debug status
   //flowMaker->SetDebug();
-//     flowTagMaker->SetDebug();
-//     flowAnalysisMaker->SetDebug();
+  //flowTagMaker->SetDebug();
+  //flowAnalysisMaker->SetDebug();
 
   //
   // Initialize chain
   //
   Int_t iInit = chain->Init();
-  if (iInit) chain->Fatal(iInit,"on init");
+  if (iInit) chain->Fatal(iInit, "on init");
   chain->PrintInfo();
   
   //
@@ -240,12 +267,13 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   // Event loop
   //
   int istat=0, i=1;
- EventLoop: if (i <= nevents && !istat) {
+ EventLoop: if (i <= nevents && istat=2) {
    cout << "============================ Event " << i
 	<< " start ============================" << endl;
    chain->Clear();
    istat = chain->Make(i);
-   if (istat) {cout << "Last event processed. Status = " << istat << endl;}
+   if (istat==2) {cout << "Last  event processed. Status = " << istat << endl;}
+   if (istat==3) {cout << "Error event processed. Status = " << istat << endl;}
    i++;
    goto EventLoop;
  }
@@ -264,31 +292,34 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   }
 }
 
-void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, const char *qaflag)
+void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, const char *qaflag, const Char_t *wrStEOut)
 {
   const char *fileListQQ[]={0,0};
-  if (path[0]=='-') {
+  if (strncmp(path,"GC",2)==0) {
+    fileListQQ=0;
+  } else if (path[0]=='-') {
     fileListQQ[0]=file;
   } else {
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
   }
-  doFlowEvents(nevents, fileListQQ, qaflag);
+
+  doFlowEvents(nevents, fileListQQ, qaflag, wrStEOut);
 }
 
 void doFlowEvents(const Int_t nevents)
 {
   // Commit to cvs with these defaults:
-  const Char_t *filePath="-";
-  const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
-
+  //const Char_t *filePath="-";
+  //const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
+  
   // BNL
   //Char_t* filePath="/star/rcf/data03/reco/auau200/mevsim/vanilla/flow/year_1h/hadronic_on/tfs_6/";
   //Char_t* fileExt="*.dst.root";
-
+  
   // Both
   //Char_t* filePath="/afs/rhic/star/ebye/flow/";
   //Char_t* fileExt="test.event.root";
-
+  
   //Char_t* filePath="/afs/rhic/star/ebye/flow/fixed10/";
   //Char_t* filePath="/afs/rhic/star/ebye/flow/random10/";
   //Char_t* fileExt="*.xdf";
@@ -296,14 +327,12 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* filePath="./";
   //Char_t* fileExt="*.event.root";
   
-  //Char_t* filePath="./";
-  //Char_t* fileExt="flownanoevent.root";
-
+  Char_t* filePath="./";
+  Char_t* fileExt="flownanoevent.root";
+  
   // LBNL
   //Char_t* filePath="/data06/snelling/flow/";
   //Char_t* fileExt="*.dst.root";
   
   doFlowEvents(nevents, filePath, fileExt);
 }
-
-
