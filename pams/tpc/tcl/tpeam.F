@@ -415,8 +415,8 @@ c
 c only consider those hits that are actually on padrows (not on
 c  "ghost" padrows that precede and follow inner sector padrows)
                if (numbv.lt.100000) then
-                  isect = numbv/1000
-                  irow = (numbv-1000*isect)
+                  isect = numbv/100
+                  irow = (numbv-100*isect)
 
                   idummy=(isect-1)*mxrow+irow
                   n_incidence(isect,irow)=n_incidence(isect,irow)+1
