@@ -1,5 +1,9 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.36 2002/03/14 10:53:42 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.37 2002/03/20 11:44:35 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.37  2002/03/20 11:44:35  jcs
+// forgot to uncomment delete step when reactivating StFtpcChargeStep - caused
+// memory leak
+//
 // Revision 1.36  2002/03/14 10:53:42  jcs
 // turn ftpc timebin charge step histograms back on
 //
@@ -454,7 +458,7 @@ Int_t StFtpcClusterMaker::Make()
       }
 	
     delete fcl;
-    //delete step;
+    delete step;
     if (using_FTPC_slow_simulator) delete ftpcReader;
   }
   else {     
