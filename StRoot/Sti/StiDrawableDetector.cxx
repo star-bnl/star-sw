@@ -54,16 +54,19 @@ void StiDrawableDetector::makeShape()
     char* shapename = new char[200];
     sprintf(shapename,"Shape_%s",getName());
     //cout <<"\tshapename: "<<shapename<<endl;
-    mshape = new TBRIK(shapename,"BRIK","void", thickness/2., halfWidth, halfDepth);
+    Double_t dWidth = yMax - yMin;
+    Double_t dYshift = (yMax + yMin)/2.; // how much yCenter differs from 0.
+    mshape = new TBRIK(shapename,"BRIK","void", thickness/2., dWidth/2., 
+                       halfDepth);
     mshape->SetLineColor(1);
     
     //Hang shape on a drawable node
     //cout <<"Make node"<<endl;
     char* nodename = new char[200];
     sprintf(nodename, "node_%f_%f",position, refAngle);
-    double xcenter = position*cos(refAngle);
-    double ycenter = position*sin(refAngle);
-    mnode = new TNode("nodename","", mshape, xcenter, ycenter, zcenter);
+    double xcenter = position*cos(refAngle) - dYshift*sin(refAngle); 
+    double ycenter = position*sin(refAngle) + dYshift*cos(refAngle);
+    mnode = new TNode("nodename","", mshape, xcenter, ycenter, zCenter);
     
     //Account for rotation of object w.r.t. origin
     //cout <<"\tRotate node"<<endl;
