@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.13 2000/01/14 05:44:34 snelling Exp $
+// $Id: StFlowTagMaker.cxx,v 1.14 2000/01/20 02:00:05 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.14  2000/01/20 02:00:05  snelling
+// Fixed StFlowTag table size SetNRows=1 (Thanks Iwona)
+//
 // Revision 1.13  2000/01/14 05:44:34  snelling
 // Added St_FlowTag Table to .data
 //
@@ -70,33 +73,34 @@ ClassImp(StFlowTagMaker)
 
 //-------------------------------------------------------------
 
-StFlowTagMaker::StFlowTagMaker(const Char_t* name) : StMaker(name)
-{
+StFlowTagMaker::StFlowTagMaker(const Char_t* name) : StMaker(name) {
 }
 
 //-------------------------------------------------------------
 
-StFlowTagMaker::~StFlowTagMaker() 
-{
+StFlowTagMaker::~StFlowTagMaker() {
 }
 
 //-------------------------------------------------------------
 
-Int_t StFlowTagMaker::Make() 
-{
+Int_t StFlowTagMaker::Make() {
   // Create a new tag
-  pFlowEvent  = 0;
-  pFlowTag    = 0;
-  pSt_FlowTag = 0;
+  pFlowEvent  = NULL;
+  pFlowTag    = NULL;
+  pSt_FlowTag = NULL;
 
-  pSt_FlowTag = new St_FlowTag; // table header
-  pFlowTag    = new FlowTag_st; // tabe structure
-
+  // instantiate new St_FlowTag class
+  pSt_FlowTag = new St_FlowTag("FlowTag",1); // table header
+  // set the size of the table
+  pSt_FlowTag->SetNRows(1);
   // add FlowTag table to the root .data directory
-  AddData(pSt_FlowTag);
+  AddData(pSt_FlowTag,".data");
+  // get a pointer to the c-struct containing the variables
+  pFlowTag = pSt_FlowTag->GetTable(); // table structure
 
   // print pointer to flowtag 
-  //cout << "TagPointer: " << pFlowTag << endl;
+  if (Debug()) cout << "StTagPointer: " << pSt_FlowTag << endl;
+  if (Debug()) cout << "TagPointer: " << pFlowTag << endl;
 
   // fill the Flow Tags 
   StFlowMaker* pFlowMaker = (StFlowMaker*)GetMaker("Flow");
@@ -104,7 +108,7 @@ Int_t StFlowTagMaker::Make()
   if (pFlowEvent && pFlowTag) {
     fillFlowTag();    // fill the tag database
   } else {
-    pFlowTag = 0;
+    pFlowTag = NULL;
     return kStOK;     // no StFlowEvent or no Tag pointer
   }
 
@@ -118,16 +122,14 @@ Int_t StFlowTagMaker::Make()
 
 //-------------------------------------------------------------
 
-void StFlowTagMaker::PrintInfo() 
-{
-  cout << "$Id: StFlowTagMaker.cxx,v 1.13 2000/01/14 05:44:34 snelling Exp $" << endl;
+void StFlowTagMaker::PrintInfo() {
+  cout << "$Id: StFlowTagMaker.cxx,v 1.14 2000/01/20 02:00:05 snelling Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
 //-------------------------------------------------------------
 
-void StFlowTagMaker::printTag(ostream& os) 
-{
+void StFlowTagMaker::printTag(ostream& os) {
   os << "##### Event-by-Event Flow Tag Table ---" << endl; 
   if (!pFlowTag) 
     os << "(empty FlowTag)" << endl;
@@ -148,8 +150,7 @@ Int_t StFlowTagMaker::Finish() {
 
 //-------------------------------------------------------------
 
-Int_t StFlowTagMaker::Init()
-{
+Int_t StFlowTagMaker::Init() {
   // Book histograms
 
   static const int& nHars = Flow::nHars;
@@ -278,8 +279,7 @@ void StFlowTagMaker::fillFlowTag() {
 
 //-------------------------------------------------------------
 
-Int_t StFlowTagMaker::fillHistograms()
-{
+Int_t StFlowTagMaker::fillHistograms() {
   // Fill histograms from Tag table
 
   static const int& nHars = Flow::nHars;
