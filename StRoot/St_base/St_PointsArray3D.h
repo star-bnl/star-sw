@@ -1,6 +1,3 @@
-
-//+SEQ,CopyRight,T=NOINCLUDE.
-
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_PointsArray3D                                                     //
@@ -10,6 +7,8 @@
 //////////////////////////////////////////////////////////////////////////
 #ifndef ROOT_St_PointsArray3D
 #define ROOT_St_PointsArray3D
+
+// $Id: St_PointsArray3D.h,v 1.3 1999/12/21 18:57:14 fine Exp $
 
 #include "TPoints3DABC.h"
 
@@ -51,7 +50,7 @@ public:
         virtual Option_t *GetOption() const ;
         virtual Bool_t    Is3D();
         virtual void      ls(Option_t *option="");
-        virtual void      PaintPoints(Int_t n, Float_t *p,Option_t *option=""){;}
+        virtual void      PaintPoints(Int_t , Float_t *,Option_t *){;}
         virtual void      Print(Option_t *option="");
         virtual Int_t     SetLastPosition(Int_t idx);
         virtual void      SetOption(Option_t *option="");
@@ -78,4 +77,8 @@ inline void      St_PointsArray3D::SetOption(Option_t *option)                {f
 
 inline Int_t     St_PointsArray3D::Size() const                               {return fLastPoint+1;}
 
+// $Log: St_PointsArray3D.h,v $
+// Revision 1.3  1999/12/21 18:57:14  fine
+// compilation warning plus new type for SizeAttribute
+//
 #endif

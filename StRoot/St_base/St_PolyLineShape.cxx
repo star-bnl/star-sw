@@ -1,4 +1,4 @@
-// $Id: St_PolyLineShape.cxx,v 1.20 1999/12/17 23:28:41 fine Exp $ 
+// $Id: St_PolyLineShape.cxx,v 1.21 1999/12/21 18:57:14 fine Exp $ 
 // ***********************************************************************
 // *  C++ class library to define an abstract 3D shape os STAR "event" geometry
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -373,7 +373,7 @@ END:
 }
 
 //______________________________________________________________________________
-void St_PolyLineShape::Draw(Option_t *opt)
+void St_PolyLineShape::Draw(Option_t *)
 {
   Create();
   AppendPad();
@@ -390,8 +390,8 @@ Color_t St_PolyLineShape::GetColorAttribute() const {
   return ((St_PolyLineShape *)this)->GetLineColor();
 }
 //______________________________________________________________________________
-Width_t St_PolyLineShape::GetSizeAttribute() const {
-  return ((St_PolyLineShape *)this)->GetLineWidth();
+Size_t St_PolyLineShape::GetSizeAttribute() const {
+  return ((St_PolyLineShape *)this)->GetMarkerSize();
 }
 //______________________________________________________________________________
 Style_t St_PolyLineShape::GetStyleAttribute() const 
@@ -610,7 +610,7 @@ void St_PolyLineShape::Paint3d(Option_t *opt)
 }
 
 //______________________________________________________________________________
-void St_PolyLineShape::PaintX3DLine(Option_t *opt)
+void St_PolyLineShape::PaintX3DLine(Option_t *)
 {
 #ifndef WIN32
    X3DBuffer *buff = new X3DBuffer;
@@ -657,7 +657,7 @@ void St_PolyLineShape::PaintX3DLine(Option_t *opt)
 #endif
 }
 //______________________________________________________________________________
-void St_PolyLineShape::PaintX3DMarker(Option_t *opt)
+void St_PolyLineShape::PaintX3DMarker(Option_t *)
 {
 #ifndef WIN32
    Int_t size = 0;
@@ -809,12 +809,12 @@ Color_t St_PolyLineShape::SetColorAttribute(Color_t color)
   return currentColor;
 }
 //______________________________________________________________________________
-Width_t St_PolyLineShape::SetSizeAttribute(Width_t size)
+Size_t St_PolyLineShape::SetSizeAttribute(Size_t size)
 {
-  Width_t currentSize = GetSizeAttribute();
+  Size_t currentSize = GetSizeAttribute();
   if (size != currentSize) 
   {
-    SetLineWidth(size);
+    SetLineWidth(Width_t(size));
     SetMarkerSize(size);
   }
   return currentSize;
@@ -862,6 +862,9 @@ void St_PolyLineShape::Sizeof3D() const
 
 //______________________________________________________________________________
 // $Log: St_PolyLineShape.cxx,v $
+// Revision 1.21  1999/12/21 18:57:14  fine
+// compilation warning plus new type for SizeAttribute
+//
 // Revision 1.20  1999/12/17 23:28:41  fine
 // clean up for the sake of docs + new class St_Table3DPackedPoints introduced
 //
