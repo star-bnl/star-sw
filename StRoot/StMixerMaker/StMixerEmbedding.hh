@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerEmbedding.hh,v 1.1 2000/02/16 21:02:09 pfachini Exp $
+ * $Id: StMixerEmbedding.hh,v 1.2 2000/02/22 20:25:05 pfachini Exp $
  *
  * Author: Patricia Fachini
  *
@@ -33,11 +33,12 @@ public:
     void doEmbedding();
 protected:
     StMixerEmbedding(StTpcElectronics*, StMixerSector*, StMixerSector*, StMixerSector*);
-	
+
+#define mTimeBins 512
     unsigned int        mNumberOfTimeBins;
-    float               conversion1,conversion2,conversionmixer;
-    int                 bin1,bin2,size1,size2;
-    
+    float               conversion1,conversion2,accum[mTimeBins];
+    int                 bin1,bin2;  
+
     StTpcElectronics*     mElectronicsDb;
     StMixerSector*        mSector;
     StMixerSector*        mSector1;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.cxx,v 1.1 2000/02/16 21:02:09 pfachini Exp $
+ * $Id: StMixerMaker.cxx,v 1.2 2000/02/22 20:25:23 pfachini Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.cxx,v $
+ * Revision 1.2  2000/02/22 20:25:23  pfachini
+ * *** empty log message ***
+ *
  * Revision 1.1  2000/02/16 21:02:09  pfachini
  * First version StMixer
  *
@@ -91,8 +94,15 @@
 
 #include "StDaqLib/TPC/trans_table.hh"
 
-StDAQReader *daqr;
-StTPCReader *tpcr;
+StDAQReader *daqr1;
+StTPCReader *tpcr1;
+StDAQReader *daqr2;
+StTPCReader *tpcr2;
+StTrsDetectorReader* tdr1;
+StTrsDetectorReader* tdr2;
+ZeroSuppressedReader* trsZsr;
+ZeroSuppressedReader* trsZsr1;
+ZeroSuppressedReader* trsZsr2;
 
 ClassImp(StMixerMaker)
 
@@ -106,10 +116,18 @@ mLastSector(24)
 
 StMixerMaker::~StMixerMaker() { /* nopt */ }
 
-int StMixerMaker::getSequences(int sector,int row,int pad,int *nseq,StSequence **listOfSequences) {
+int StMixerMaker::getSequences1(int sector,int row,int pad,int *nseq,StSequence **listOfSequences) {
     int nseqPrelim; 
     TPCSequence *listOfSequencesPrelim;
-    tpcr->getSequences(sector,row,pad,nseqPrelim,listOfSequencesPrelim);
+    tpcr1->getSequences(sector,row,pad,nseqPrelim,listOfSequencesPrelim);
+    *nseq=nseqPrelim;
+    *listOfSequences=(StSequence*)listOfSequencesPrelim;
+    return kStOK;
+}
+int StMixerMaker::getSequences2(int sector,int row,int pad,int *nseq,StSequence **listOfSequences) {
+    int nseqPrelim; 
+    TPCSequence *listOfSequencesPrelim;
+    tpcr2->getSequences(sector,row,pad,nseqPrelim,listOfSequencesPrelim);
     *nseq=nseqPrelim;
     *listOfSequences=(StSequence*)listOfSequencesPrelim;
     return kStOK;
@@ -172,10 +190,10 @@ Int_t StMixerMaker::Init() {
 
 Int_t StMixerMaker::Make() {
   
-  ofstream out_file1("file1.dat");
-  ofstream out_file2("file2.dat");
-  ofstream out_file1mixer("file1mixer.dat");
-  ofstream out_file2mixer("file2mixer.dat");
+  //ofstream out_file1("file1.dat");
+  //ofstream out_file2("file2.dat");
+  //ofstream out_file1mixer("file1mixer.dat");
+  //ofstream out_file2mixer("file2mixer.dat");
   
   // Make a digital Pad!
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
@@ -184,49 +202,75 @@ Int_t StMixerMaker::Make() {
   vector<unsigned char, allocator<unsigned char> > digitalPadData;
 #endif
   
-  if((!strcmp(GetConfig1(),"daq") && !strcmp(GetConfig2(),"trs")) || (!strcmp(GetConfig2(),"daq") && !strcmp(GetConfig1(),"trs"))) {
-    
+  if(!strcmp(GetConfig1(),"daq")) {
     // DAQ
-    St_DataSet *dataset;
-    dataset=GetDataSet("StDAQReader");
-    assert(dataset);
-    daqr=(StDAQReader*)(dataset->GetObject());
-    assert(daqr);
-    tpcr=daqr->getTPCReader(); 
-    assert(tpcr);
-    
+    St_DataSet *dataset1;
+    dataset1=GetDataSet("mixer/.make/DaqFirst/.const/StDAQReader");
+    assert(dataset1);
+    daqr1=(StDAQReader*)(dataset1->GetObject());
+    assert(daqr1);
+    tpcr1=daqr1->getTPCReader(); 
+    assert(tpcr1);
+  } else {
     // TRS
     // Get the TRS Event Data Set 
-    St_ObjectSet* trsEventDataSet; 
-    if(!strcmp(GetConfig1(),"trs")) {
-      trsEventDataSet = (St_ObjectSet*) GetDataSet("mixer/.make/TrsFirst/.const/Event"); 
-    }
-    if(!strcmp(GetConfig2(),"trs")) {
-      trsEventDataSet = (St_ObjectSet*) GetDataSet("mixer/.make/TrsSecond/.const/Event"); 
-    }
-    
+    St_ObjectSet* trsEventDataSet1 = (St_ObjectSet*) GetDataSet("mixer/.make/TrsFirst/.const/Event"); 
     // Get the pointer to the raw data. 
-    StTpcRawDataEvent* trsEvent = (StTpcRawDataEvent*) trsEventDataSet->GetObject(); 
+    StTpcRawDataEvent* trsEvent1 = (StTpcRawDataEvent*) trsEventDataSet1->GetObject(); 
     // Instantiate the DetectorReader. Version will be default if not given 
     string version = "TrsDatav1.0"; 
-    StTrsDetectorReader* tdr = new StTrsDetectorReader(trsEvent, version); 
-    
-    for(int isector=mFirstSector; isector<=mLastSector; isector++) {
-      //PR(isector);
-      ZeroSuppressedReader* trsZsr = tdr->getZeroSuppressedReader(isector); 
+    tdr1 = new StTrsDetectorReader(trsEvent1, version); 
+   }
+   
+  if(!strcmp(GetConfig2(),"daq")) {
+    // DAQ
+    St_DataSet *dataset2;
+    dataset2=GetDataSet("mixer/.make/DaqSecond/.const/StDAQReader");
+    assert(dataset2);
+    daqr2=(StDAQReader*)(dataset2->GetObject());
+    assert(daqr2);
+    tpcr2=daqr2->getTPCReader(); 
+    assert(tpcr2);
+  } else {
+    // TRS
+    // Get the TRS Event Data Set 
+    St_ObjectSet* trsEventDataSet2 = (St_ObjectSet*) GetDataSet("mixer/.make/TrsSecond/.const/Event"); 
+    // Get the pointer to the raw data. 
+    StTpcRawDataEvent* trsEvent2 = (StTpcRawDataEvent*) trsEventDataSet2->GetObject(); 
+    // Instantiate the DetectorReader. Version will be default if not given 
+    string version = "TrsDatav1.0"; 
+    tdr2 = new StTrsDetectorReader(trsEvent2, version); 
+  }
+  
+  for(int isector=mFirstSector; isector<=mLastSector; isector++) {
+
+    if((!strcmp(GetConfig1(),"daq") && !strcmp(GetConfig2(),"trs")) || (!strcmp(GetConfig1(),"trs") && !strcmp(GetConfig2(),"daq"))){
+
+     if(!strcmp(GetConfig1(),"trs")) {
+       trsZsr = tdr1->getZeroSuppressedReader(isector);
+     } 
+     if(!strcmp(GetConfig2(),"trs")) {
+       trsZsr = tdr2->getZeroSuppressedReader(isector);
+     }
       unsigned char* padListRaw; 
       unsigned char* padListTrs; 
       // Remember mSector is the "normal" analog sector! 
       for(int irow=0; irow<mSector->numberOfRows(); irow++) { 
-	int numberOfPadsRaw = tpcr->getPadList(isector,irow+1,padListRaw);
+	int numberOfPadsRaw;
+	if(!strcmp(GetConfig1(),"daq")) {
+	  numberOfPadsRaw = tpcr1->getPadList(isector,irow+1,padListRaw);
+	}
+	if(!strcmp(GetConfig2(),"daq")) {
+	  numberOfPadsRaw = tpcr2->getPadList(isector,irow+1,padListRaw);
+	}
 	if (!trsZsr) {
-	  if (numberOfPadsRaw>0) {
+	  if (numberOfPadsRaw) {
 	    int padraw;
 	    for(int ipadraw=0; ipadraw<numberOfPadsRaw; ipadraw++) {
 	      padraw=padListRaw[ipadraw];
 	      int nseqraw;
 	      StSequence* listOfSequencesRaw; 
-	      getSequences(isector,irow+1,padraw,&nseqraw,&listOfSequencesRaw); 
+	      getSequences1(isector,irow+1,padraw,&nseqraw,&listOfSequencesRaw); 
 	      // Note that ipad is an index, NOT the pad number. 
 	      // The pad number comes from padList[ipad] 
 	      for(int iseqraw=0;iseqraw<nseqraw;iseqraw++) {
@@ -237,132 +281,84 @@ Int_t StMixerMaker::Make() {
 		unsigned char *pointerToAdcRaw=listOfSequencesRaw[iseqraw].firstAdc;
 		for(int ibinraw=startTimeBinRaw;ibinraw<(startTimeBinRaw+seqLenRaw);ibinraw++) {
 		  float conversionraw=log8to10_table[*(pointerToAdcRaw++)];
-		  //out_file1 << "file1" << ' ' << irow+1 << ' ' << padraw << ' ' << ibinraw << ' ' << conversionraw  << '\n';
+		  //if (isector==21) out_file1 << "file1" << ' ' << irow+1 << ' ' << padraw << ' ' << ibinraw << ' ' << conversionraw  << '\n';
 		  StMixerAnalogSignal padSignal(ibinraw,conversionraw);
 		  mSector->addEntry(irow+1,padraw,padSignal);
 		}
 	      }// seq loop    
 	    }// pad loop, don't confuse padR (table row #) with ipad (loop index)
 	  }
-	  break;
-	} 
-	int numberOfPadsTrs = trsZsr->getPadList(irow+1, &padListTrs);
-	if (numberOfPadsRaw>0) {
-	  int padraw;
-	  for(int ipadraw=0; ipadraw<numberOfPadsRaw; ipadraw++) {
-	    padraw=padListRaw[ipadraw];
-	    int nseqraw;
-	    StSequence* listOfSequencesRaw; 
-	    getSequences(isector,irow+1,padraw,&nseqraw,&listOfSequencesRaw); 
-	    // Note that ipad is an index, NOT the pad number. 
-	    // The pad number comes from padList[ipad] 
-	    for(int iseqraw=0;iseqraw<nseqraw;iseqraw++) {
-	      int startTimeBinRaw=listOfSequencesRaw[iseqraw].startTimeBin;
-	      if(startTimeBinRaw<0) startTimeBinRaw=0;
-	      if(startTimeBinRaw>511) startTimeBinRaw=511;
-	      int seqLenRaw=listOfSequencesRaw[iseqraw].length;
-	      unsigned char *pointerToAdcRaw=listOfSequencesRaw[iseqraw].firstAdc;
-	      for(int ibinraw=startTimeBinRaw;ibinraw<(startTimeBinRaw+seqLenRaw);ibinraw++) {
-		float conversionraw=log8to10_table[*(pointerToAdcRaw++)];
-		//out_file1 << "file1" << ' ' << irow+1 << ' ' << padraw << ' ' << ibinraw << ' ' << conversionraw  << '\n';
-		if(numberOfPadsTrs>0) {
-		  StMixerAnalogSignal padSignal(ibinraw,conversionraw);
-		  mSector1->addEntry(irow+1,padraw,padSignal);
-		  out_file1mixer << "file1mixer" << ' ' << irow+1 << ' ' << padraw << ' ' << ibinraw << ' ' << conversionraw  << '\n';
-		} else {
-		  StMixerAnalogSignal padSignal(ibinraw,conversionraw);
-		  mSector->addEntry(irow+1,padraw,padSignal);
+	} else {
+	  int numberOfPadsTrs = trsZsr->getPadList(irow+1, &padListTrs);
+	  if (numberOfPadsRaw) {
+	    int padraw;
+	    for(int ipadraw=0; ipadraw<numberOfPadsRaw; ipadraw++) {
+	      padraw=padListRaw[ipadraw];
+	      int nseqraw;
+	      StSequence* listOfSequencesRaw; 
+	      getSequences1(isector,irow+1,padraw,&nseqraw,&listOfSequencesRaw); 
+	      // Note that ipad is an index, NOT the pad number. 
+	      // The pad number comes from padList[ipad] 
+	      for(int iseqraw=0;iseqraw<nseqraw;iseqraw++) {
+		int startTimeBinRaw=listOfSequencesRaw[iseqraw].startTimeBin;
+		if(startTimeBinRaw<0) startTimeBinRaw=0;
+		if(startTimeBinRaw>511) startTimeBinRaw=511;
+		int seqLenRaw=listOfSequencesRaw[iseqraw].length;
+		unsigned char *pointerToAdcRaw=listOfSequencesRaw[iseqraw].firstAdc;
+		for(int ibinraw=startTimeBinRaw;ibinraw<(startTimeBinRaw+seqLenRaw);ibinraw++) {
+		  float conversionraw=log8to10_table[*(pointerToAdcRaw++)];
+		  //if (isector==21) out_file1 << "file1" << ' ' << irow+1 << ' ' << padraw << ' ' << ibinraw << ' ' << conversionraw  << '\n';
+		  if(numberOfPadsTrs) {
+		    StMixerAnalogSignal padSignal(ibinraw,conversionraw);
+		    mSector1->addEntry(irow+1,padraw,padSignal);
+		    //out_file1mixer << "file1mixer" << ' ' << irow+1 << ' ' << padraw << ' ' << ibinraw << ' ' << conversionraw  << '\n';
+		  } else {
+		    StMixerAnalogSignal padSignal(ibinraw,conversionraw);
+		    mSector->addEntry(irow+1,padraw,padSignal);
+		  }
 		}
-	      }
-	    }// seq loop    
-	  }// pad loop, don't confuse padR (table row #) with ipad (loop index)
-	} 
-	if (numberOfPadsTrs>0) {
-	  int padtrs;
-	  for(int ipadtrs = 0; ipadtrs<numberOfPadsTrs; ipadtrs++) { 
-	    padtrs=padListTrs[ipadtrs];
-	    int nseqtrs; 
-	    //cout << irow+1 << ' ' << padtrs << endl;
-	    Sequence* listOfSequencesTrs; 
-	    trsZsr->getSequences(irow+1,static_cast<int>(padtrs),&nseqtrs,&listOfSequencesTrs); 	  // Note that ipad is an index, NOT the pad number. 
-	    // The pad number comes from padList[ipad] 
-	    for(int iseqtrs=0; iseqtrs<nseqtrs; iseqtrs++) { 
-	      int seqLenTrs=listOfSequencesTrs[iseqtrs].Length;
-	      int startTimeBinTrs=listOfSequencesTrs[iseqtrs].startTimeBin;
-	      if(startTimeBinTrs<0) startTimeBinTrs=0;
-	      if(startTimeBinTrs>511) startTimeBinTrs=511;
-	      unsigned char *pointerToAdcTrs=listOfSequencesTrs[iseqtrs].FirstAdc;
-	      for(int ibintrs=startTimeBinTrs; ibintrs<(startTimeBinTrs+seqLenTrs); ibintrs++) {
-		//static_cast<int>(*(listOfSequencesTrs[iseqtrs].FirstAdc)) << endl; 
-		//listOfSequencesTrs[iseqtrs].FirstAdc++;
-		float conversiontrs=log8to10_table[*(pointerToAdcTrs++)]; 
-		//out_file2 << "file2" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
-		if(numberOfPadsRaw>0) {
-		  StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
-		  mSector2->addEntry(irow+1,padtrs,padSignal);
-		  out_file2mixer << "file2mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
-		} else {
-		  StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
-		  mSector->addEntry(irow+1,padtrs,padSignal);
+	      }// seq loop    
+	    }// pad loop, don't confuse padR (table row #) with ipad (loop index)
+	  } 
+	  if (numberOfPadsTrs) {
+	    int padtrs;
+	    for(int ipadtrs = 0; ipadtrs<numberOfPadsTrs; ipadtrs++) { 
+	      padtrs=static_cast<int>(padListTrs[ipadtrs]);
+	      int nseqtrs; 
+	      //cout << irow+1 << ' ' << padtrs << endl;
+	      Sequence* listOfSequencesTrs; 
+	      trsZsr->getSequences(irow+1,padtrs,&nseqtrs,&listOfSequencesTrs); 	  // Note that ipad is an index, NOT the pad number. 
+	      // The pad number comes from padList[ipad] 
+	      for(int iseqtrs=0; iseqtrs<nseqtrs; iseqtrs++) { 
+		int seqLenTrs=listOfSequencesTrs[iseqtrs].Length;
+		int startTimeBinTrs=listOfSequencesTrs[iseqtrs].startTimeBin;
+		if(startTimeBinTrs<0) startTimeBinTrs=0;
+		if(startTimeBinTrs>511) startTimeBinTrs=511;
+		for(int ibintrs=startTimeBinTrs; ibintrs<(startTimeBinTrs+seqLenTrs); ibintrs++) {
+		  float conversiontrs=static_cast<float>(*(listOfSequencesTrs[iseqtrs].FirstAdc)); 
+		  listOfSequencesTrs[iseqtrs].FirstAdc++; 
+		  //out_file2 << "file2" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
+		  if(numberOfPadsRaw) {
+		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
+		    mSector2->addEntry(irow+1,padtrs,padSignal);
+		    //out_file2mixer << "file2mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
+		  } else {
+		    //if (isector==21 && (irow+1)==3 && padtrs==54) cout << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs <<endl;  
+		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
+		    mSector->addEntry(irow+1,padtrs,padSignal);
+		  }
 		}
-	      }
-	    }// seq loop
-	  }// pad loop, don't confuse padR (table row #) with ipad (loop index)
-	}
-      }// ipadrow loop
+	      }// seq loop
+	    }// pad loop, don't confuse padR (table row #) with ipad (loop index)
+	  }
+	}// ipadrow loop
+      }
+    }// if loop
+
+    if((!strcmp(GetConfig1(),"trs") && !strcmp(GetConfig2(),"trs"))) {
       
-      mEmbedding->doEmbedding();
-      
-      // Digitize the Signals
-      //
-      // First make a sector where the data can go...
-      StMixerDigitalSector* aDigitalSector = new StMixerDigitalSector(mGeometryDb);
-      
-      // Point to the object you want to fill
-      //
-      mDigitalSignalGenerator->fillSector(aDigitalSector);
-      
-      //cout << "sector" << ' ' << isector+1 << endl;
-      // ...and digitize it
-      cout << "--->digitizeSignal()..." << endl;
-      mDigitalSignalGenerator->digitizeSignal();
-      cout<<"--->digitizeSignal() Finished..." << endl;
-      
-      // Fill it into the event structure...
-      // and you better check the sector number!
-      
-      mAllTheDataMixer->mSectors[(isector-1)] = aDigitalSector;
-      // Clear and reset for next sector:
-      mSector->clear();
-      mSector1->clear();
-      mSector2->clear();
-      
-    }// sector loop
-    mOutputStreamMixer->writeMixerEvent((mAllTheDataMixer));
-    return kStOK;
-  }
-  
-  if((!strcmp(GetConfig1(),"trs") && !strcmp(GetConfig2(),"trs"))) {
-    
-    // TRS
-    // Get the TRS Event Data Set 
-    St_ObjectSet* trsEventDataSet1; 
-    St_ObjectSet* trsEventDataSet2; 
-    trsEventDataSet1 = (St_ObjectSet*) GetDataSet("mixer/.make/TrsFirst/.const/Event");
-    trsEventDataSet2 = (St_ObjectSet*) GetDataSet("mixer/.make/TrsSecond/.const/Event");
-    
-    // Get the pointer to the raw data. 
-    StTpcRawDataEvent* trsEvent1 = (StTpcRawDataEvent*) trsEventDataSet1->GetObject(); 
-    StTpcRawDataEvent* trsEvent2 = (StTpcRawDataEvent*) trsEventDataSet2->GetObject(); 
-    // Instantiate the DetectorReader. Version will be default if not given 
-    string version = "TrsDatav1.0"; 
-    StTrsDetectorReader* tdr1 = new StTrsDetectorReader(trsEvent1, version); 
-    StTrsDetectorReader* tdr2 = new StTrsDetectorReader(trsEvent2, version); 
-    
-    for(int isector=mFirstSector; isector<=mLastSector; isector++) {
-      //PR(isector);
-      ZeroSuppressedReader* trsZsr1 = tdr1->getZeroSuppressedReader(isector); 
-      ZeroSuppressedReader* trsZsr2 = tdr2->getZeroSuppressedReader(isector); 
+      trsZsr1 = tdr1->getZeroSuppressedReader(isector); 
+      trsZsr2 = tdr2->getZeroSuppressedReader(isector); 
       //cout << trsZsr1 << ' ' << trsZsr2 << ' ' << isector <<endl;
       if (!trsZsr1 && !trsZsr2) continue;
       unsigned char* padListTrs1; 
@@ -372,14 +368,13 @@ Int_t StMixerMaker::Make() {
 	if (!trsZsr1 || !trsZsr2) {
 	  if (!trsZsr1) {
 	    int numberOfPadsTrs2 = trsZsr2->getPadList(irow+1, &padListTrs2);
-	    PR(numberOfPadsTrs2);
-	    if (numberOfPadsTrs2>0) {
+	    if (numberOfPadsTrs2) {
 	      int padtrs;
 	      for(int ipadtrs = 0; ipadtrs<numberOfPadsTrs2; ipadtrs++) { 
-		padtrs=padListTrs2[ipadtrs];
+		padtrs=static_cast<int>(padListTrs2[ipadtrs]);
 		int nseqtrs; 
 		Sequence* listOfSequencesTrs; 
-		trsZsr2->getSequences(irow+1,static_cast<int>(padtrs),&nseqtrs,&listOfSequencesTrs);
+		trsZsr2->getSequences(irow+1,padtrs,&nseqtrs,&listOfSequencesTrs);
 		// Note that ipad is an index, NOT the pad number. 
 		// The pad number comes from padList[ipad] 
 		for(int iseqtrs=0; iseqtrs<nseqtrs; iseqtrs++) { 
@@ -387,13 +382,10 @@ Int_t StMixerMaker::Make() {
 		  int startTimeBinTrs=listOfSequencesTrs[iseqtrs].startTimeBin;
 		  if(startTimeBinTrs<0) startTimeBinTrs=0;
 		  if(startTimeBinTrs>511) startTimeBinTrs=511;
-		  unsigned char *pointerToAdcTrs=listOfSequencesTrs[iseqtrs].FirstAdc;
-		  //cout << "seqLenTrs" << ' ' << seqLenTrs << ' ' << padtrs << ' ' << startTimeBinTrs << endl;
 		  for(int ibintrs=startTimeBinTrs; ibintrs<(startTimeBinTrs+seqLenTrs); ibintrs++) {
-		    //static_cast<int>(*(listOfSequencesTrs[iseqtrs].FirstAdc)) << endl; 
-		    //listOfSequencesTrs[iseqtrs].FirstAdc++;
-		    float conversiontrs=log8to10_table[*(pointerToAdcTrs++)]; 
-		    out_file1mixer << "file1mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
+		    float conversiontrs=static_cast<float>(*(listOfSequencesTrs[iseqtrs].FirstAdc)); 
+		    listOfSequencesTrs[iseqtrs].FirstAdc++; 
+		    //out_file1mixer << "file1mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
 		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector->addEntry(irow+1,padtrs,padSignal);
 		  }
@@ -403,13 +395,13 @@ Int_t StMixerMaker::Make() {
 	  } 
 	  if (!trsZsr2) {
 	    int numberOfPadsTrs1 = trsZsr1->getPadList(irow+1, &padListTrs1);
-	    if (numberOfPadsTrs1>0) {
+	    if (numberOfPadsTrs1) {
 	      int padtrs;
 	      for(int ipadtrs = 0; ipadtrs<numberOfPadsTrs1; ipadtrs++) { 
-		padtrs=padListTrs1[ipadtrs];
+		padtrs=static_cast<int>(padListTrs1[ipadtrs]);
 		int nseqtrs; 
 		Sequence* listOfSequencesTrs; 
-		trsZsr1->getSequences(irow+1,static_cast<int>(padtrs),&nseqtrs,&listOfSequencesTrs);
+		trsZsr1->getSequences(irow+1,padtrs,&nseqtrs,&listOfSequencesTrs);
 		// Note that ipad is an index, NOT the pad number. 
 		// The pad number comes from padList[ipad] 
 		for(int iseqtrs=0; iseqtrs<nseqtrs; iseqtrs++) { 
@@ -417,13 +409,10 @@ Int_t StMixerMaker::Make() {
 		  int startTimeBinTrs=listOfSequencesTrs[iseqtrs].startTimeBin;
 		  if(startTimeBinTrs<0) startTimeBinTrs=0;
 		  if(startTimeBinTrs>511) startTimeBinTrs=511;
-		  unsigned char *pointerToAdcTrs=listOfSequencesTrs[iseqtrs].FirstAdc;
-		  //cout << "seqLenTrs" << ' ' << seqLenTrs << endl;
 		  for(int ibintrs=startTimeBinTrs; ibintrs<(startTimeBinTrs+seqLenTrs); ibintrs++) {
-		    //static_cast<int>(*(listOfSequencesTrs[iseqtrs].FirstAdc)) << endl; 
-		    //listOfSequencesTrs[iseqtrs].FirstAdc++;
-		    float conversiontrs=log8to10_table[*(pointerToAdcTrs++)]; 
-		    out_file2mixer << "file2mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
+		    float conversiontrs=static_cast<float>(*(listOfSequencesTrs[iseqtrs].FirstAdc)); 
+		    listOfSequencesTrs[iseqtrs].FirstAdc++; 
+		    //out_file2mixer << "file2mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
 		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector->addEntry(irow+1,padtrs,padSignal);
 		  }
@@ -436,14 +425,14 @@ Int_t StMixerMaker::Make() {
 	  int numberOfPadsTrs1 = trsZsr1->getPadList(irow+1, &padListTrs1);
 	  int numberOfPadsTrs2 = trsZsr2->getPadList(irow+1, &padListTrs2);
 	  //cout << numberOfPadsTrs1 << ' ' << numberOfPadsTrs2 << endl;
-	  if (numberOfPadsTrs1>0) {
+	  if (numberOfPadsTrs1) {
 	    int padtrs;
 	    for(int ipadtrs = 0; ipadtrs<numberOfPadsTrs1; ipadtrs++) { 
-	      padtrs=padListTrs1[ipadtrs];
+	      padtrs=static_cast<int>(padListTrs1[ipadtrs]);
 	      int nseqtrs; 
 	      Sequence* listOfSequencesTrs;
 	      //cout << irow+1 << ' ' << padtrs << endl;
-	      trsZsr1->getSequences(irow+1,static_cast<int>(padtrs),&nseqtrs,&listOfSequencesTrs); 
+	      trsZsr1->getSequences(irow+1,padtrs,&nseqtrs,&listOfSequencesTrs); 
 	      // Note that ipad is an index, NOT the pad number. 
 	      // The pad number comes from padList[ipad] 
 	      for(int iseqtrs=0; iseqtrs<nseqtrs; iseqtrs++) { 
@@ -451,16 +440,14 @@ Int_t StMixerMaker::Make() {
 		int startTimeBinTrs=listOfSequencesTrs[iseqtrs].startTimeBin;
 		if(startTimeBinTrs<0) startTimeBinTrs=0;
 		if(startTimeBinTrs>511) startTimeBinTrs=511;
-		unsigned char *pointerToAdcTrs=listOfSequencesTrs[iseqtrs].FirstAdc;
-		//cout << "seqLenTrs" << ' ' << seqLenTrs << endl;
 		for(int ibintrs=startTimeBinTrs; ibintrs<(startTimeBinTrs+seqLenTrs); ibintrs++) {
-		  //static_cast<int>(*(listOfSequencesTrs[iseqtrs].FirstAdc)) << endl; 
-		  //listOfSequencesTrs[iseqtrs].FirstAdc++;
-		  float conversiontrs=log8to10_table[*(pointerToAdcTrs++)]; 
-		  if(numberOfPadsTrs2>0) {
+		  float conversiontrs=static_cast<float>(*(listOfSequencesTrs[iseqtrs].FirstAdc)); 
+		  listOfSequencesTrs[iseqtrs].FirstAdc++; 
+		  if(numberOfPadsTrs2) {
+		    //if (isector==21 && (irow+1)==3 && padtrs==54) cout << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs <<endl;  
 		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector1->addEntry(irow+1,padtrs,padSignal);
-		    out_file1mixer << "file1mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
+		    //if (isector==21) out_file1mixer << "file1mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
 		  } else {
 		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector->addEntry(irow+1,padtrs,padSignal);
@@ -469,29 +456,26 @@ Int_t StMixerMaker::Make() {
 	      }// seq loop
 	    }// pad loop, don't confuse padR (table row #) with ipad (loop index)
 	  }
-	  if (numberOfPadsTrs2>0) {
+	  if (numberOfPadsTrs2) {
 	    int padtrs;
 	    for(int ipadtrs = 0; ipadtrs<numberOfPadsTrs2; ipadtrs++) { 
-	      padtrs=padListTrs2[ipadtrs];
+	      padtrs=static_cast<int>(padListTrs2[ipadtrs]);
 	      int nseqtrs; 
 	      Sequence* listOfSequencesTrs; 
-	      trsZsr2->getSequences(irow+1,static_cast<int>(padtrs),&nseqtrs,&listOfSequencesTrs); 	  // Note that ipad is an index, NOT the pad number. 
+	      trsZsr2->getSequences(irow+1,padtrs,&nseqtrs,&listOfSequencesTrs); 	  // Note that ipad is an index, NOT the pad number. 
 	      // The pad number comes from padList[ipad] 
 	      for(int iseqtrs=0; iseqtrs<nseqtrs; iseqtrs++) { 
 		int seqLenTrs=listOfSequencesTrs[iseqtrs].Length;
 		int startTimeBinTrs=listOfSequencesTrs[iseqtrs].startTimeBin;
 		if(startTimeBinTrs<0) startTimeBinTrs=0;
 		if(startTimeBinTrs>511) startTimeBinTrs=511;
-		unsigned char *pointerToAdcTrs=listOfSequencesTrs[iseqtrs].FirstAdc;
-		//cout << "seqLenTrs" << ' ' << seqLenTrs << endl;
 		for(int ibintrs=startTimeBinTrs; ibintrs<(startTimeBinTrs+seqLenTrs); ibintrs++) {
-		  //static_cast<int>(*(listOfSequencesTrs[iseqtrs].FirstAdc)) << endl; 
-		  //listOfSequencesTrs[iseqtrs].FirstAdc++;
-		  float conversiontrs=log8to10_table[*(pointerToAdcTrs++)]; 
-		  if(numberOfPadsTrs1>0) {
+		  float conversiontrs=static_cast<float>(*(listOfSequencesTrs[iseqtrs].FirstAdc)); 
+		  listOfSequencesTrs[iseqtrs].FirstAdc++; 
+		  if(numberOfPadsTrs1) {
 		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector2->addEntry(irow+1,padtrs,padSignal);
-		    out_file2mixer << "file2mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
+		    //if (isector==21) out_file1mixer << "file1mixer" << ' ' << irow+1 << ' ' << padtrs << ' ' << ibintrs << ' ' << conversiontrs  << endl;
 		  } else {
 		    StMixerAnalogSignal padSignal(ibintrs,conversiontrs);
 		    mSector->addEntry(irow+1,padtrs,padSignal);
@@ -500,38 +484,108 @@ Int_t StMixerMaker::Make() {
 	      }// seq loop
 	    }// pad loop, don't confuse padR (table row #) with ipad (loop index)
 	  }
-	}// ipadrow loop
-      }
+	}
+      }// ipadrow loop
+    }// if loop
+    
+    if(!strcmp(GetConfig1(),"daq") && !strcmp(GetConfig2(),"daq")) {
       
-      mEmbedding->doEmbedding();
-      
-      // Digitize the Signals
-      //
-      // First make a sector where the data can go...
-      StMixerDigitalSector* aDigitalSector = new StMixerDigitalSector(mGeometryDb);
-      
-      // Point to the object you want to fill
-      //
-      mDigitalSignalGenerator->fillSector(aDigitalSector);
-      
-      // ...and digitize it
-      cout << "--->digitizeSignal()..." << endl;
-      mDigitalSignalGenerator->digitizeSignal();
-      cout<<"--->digitizeSignal() Finished..." << endl;
-      
-      // Fill it into the event structure...
-      // and you better check the sector number!
-      
-      mAllTheDataMixer->mSectors[(isector-1)] = aDigitalSector;
-      // Clear and reset for next sector:
-      mSector->clear();
-      mSector1->clear();
-      mSector2->clear();
-      
-    }// sector loop
-    mOutputStreamMixer->writeMixerEvent((mAllTheDataMixer));
-    return kStOK;
-  }
+      unsigned char* padListRaw1; 
+      unsigned char* padListRaw2; 
+      // Remember mSector is the "normal" analog sector! 
+      for(int irow=0; irow<mSector->numberOfRows(); irow++) { 
+	int numberOfPadsRaw1 = tpcr1->getPadList(isector,irow+1,padListRaw1);
+	int numberOfPadsRaw2 = tpcr2->getPadList(isector,irow+1,padListRaw2);
+	if (!numberOfPadsRaw1 && !numberOfPadsRaw2) continue;
+	if (numberOfPadsRaw1) {
+	  int padraw;
+	  for(int ipadraw=0; ipadraw<numberOfPadsRaw1; ipadraw++) {
+	    padraw=padListRaw1[ipadraw];
+	    int nseqraw;
+	    StSequence* listOfSequencesRaw; 
+	    getSequences1(isector,irow+1,padraw,&nseqraw,&listOfSequencesRaw); 
+	    // Note that ipad is an index, NOT the pad number. 
+	    // The pad number comes from padList[ipad] 
+	    for(int iseqraw=0;iseqraw<nseqraw;iseqraw++) {
+	      int startTimeBinRaw=listOfSequencesRaw[iseqraw].startTimeBin;
+	      if(startTimeBinRaw<0) startTimeBinRaw=0;
+	      if(startTimeBinRaw>511) startTimeBinRaw=511;
+	      int seqLenRaw=listOfSequencesRaw[iseqraw].length;
+	      unsigned char *pointerToAdcRaw=listOfSequencesRaw[iseqraw].firstAdc;
+	      for(int ibinraw=startTimeBinRaw;ibinraw<(startTimeBinRaw+seqLenRaw);ibinraw++) {
+		float conversionraw=log8to10_table[*(pointerToAdcRaw++)];
+		if (numberOfPadsRaw2) {
+		  //if (isector==21) out_file1 << "file1" << ' ' << irow+1 << ' ' << padraw << ' ' << ibinraw << ' ' << conversionraw  << '\n';
+		  StMixerAnalogSignal padSignal(ibinraw,conversionraw);
+		  mSector1->addEntry(irow+1,padraw,padSignal);
+		} else {
+		  StMixerAnalogSignal padSignal(ibinraw,conversionraw);
+		  mSector->addEntry(irow+1,padraw,padSignal);
+		}
+	      }
+	    }// seq loop    
+	  }// pad loop, don't confuse padR (table row #) with ipad (loop index)
+	}
+	if (numberOfPadsRaw2) {
+	  int padraw;
+	  for(int ipadraw=0; ipadraw<numberOfPadsRaw2; ipadraw++) {
+	    padraw=padListRaw2[ipadraw];
+	    int nseqraw;
+	    StSequence* listOfSequencesRaw; 
+	    getSequences2(isector,irow+1,padraw,&nseqraw,&listOfSequencesRaw); 
+	    // Note that ipad is an index, NOT the pad number. 
+	    // The pad number comes from padList[ipad] 
+	    for(int iseqraw=0;iseqraw<nseqraw;iseqraw++) {
+	      int startTimeBinRaw=listOfSequencesRaw[iseqraw].startTimeBin;
+	      if(startTimeBinRaw<0) startTimeBinRaw=0;
+	      if(startTimeBinRaw>511) startTimeBinRaw=511;
+	      int seqLenRaw=listOfSequencesRaw[iseqraw].length;
+	      unsigned char *pointerToAdcRaw=listOfSequencesRaw[iseqraw].firstAdc;
+	      for(int ibinraw=startTimeBinRaw;ibinraw<(startTimeBinRaw+seqLenRaw);ibinraw++) {
+		float conversionraw=log8to10_table[*(pointerToAdcRaw++)];
+		//cout << isector << ' ' << irow+1 << ' ' << padraw << ' ' << ibinraw << ' ' << conversionraw  << '\n';
+		if (numberOfPadsRaw1) {
+		  StMixerAnalogSignal padSignal(ibinraw,conversionraw);
+		  mSector2->addEntry(irow+1,padraw,padSignal);
+		} else {
+		  StMixerAnalogSignal padSignal(ibinraw,conversionraw);
+		  mSector->addEntry(irow+1,padraw,padSignal);
+		}
+	      }
+	    }// seq loop    
+	  }// pad loop, don't confuse padR (table row #) with ipad (loop index)
+	}
+      }// ipadrow loop
+    }// if loop
+    
+    mEmbedding->doEmbedding();
+    
+    // Digitize the Signals
+    //
+    // First make a sector where the data can go...
+    StMixerDigitalSector* aDigitalSector = new StMixerDigitalSector(mGeometryDb);
+    
+    // Point to the object you want to fill
+    //
+    mDigitalSignalGenerator->fillSector(aDigitalSector);
+    
+    //cout << "sector" << ' ' << isector+1 << endl;
+    // ...and digitize it
+    cout << "--->digitizeSignal()..." << endl;
+    mDigitalSignalGenerator->digitizeSignal();
+    cout<<"--->digitizeSignal() Finished..." << endl;
+    
+    // Fill it into the event structure...
+    // and you better check the sector number!
+    
+    mAllTheDataMixer->mSectors[(isector-1)] = aDigitalSector;
+    // Clear and reset for next sector:
+    mSector->clear();
+    mSector1->clear();
+    mSector2->clear();
+    
+  }// sector loop
+  mOutputStreamMixer->writeMixerEvent((mAllTheDataMixer));
   return kStOK;
 } // Make() 
 

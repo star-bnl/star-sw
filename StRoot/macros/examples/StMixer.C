@@ -1,5 +1,5 @@
 //
-// $Id: StMixer.C,v 1.1 2000/02/16 22:13:46 pfachini Exp $
+// $Id: StMixer.C,v 1.2 2000/02/22 20:27:07 pfachini Exp $
 //
 // Description:
 // Read in a .trs and a data file for the Mixer
@@ -7,8 +7,8 @@
 ///////////////////////////////////////////////////////
 //
 // $Log: StMixer.C,v $
-// Revision 1.1  2000/02/16 22:13:46  pfachini
-// maro to run StMixerMaker
+// Revision 1.2  2000/02/22 20:27:07  pfachini
+// *** empty log message ***
 //
 //
 ////////////////////////////////////////////////////////
@@ -40,14 +40,14 @@ void Load(){
 }
 void StMixer(const Int_t Nevents=1, 
 	     const Char_t *kind1="daq",
-	     const Char_t *file1 ="/disk1/star/daq/st_physics_0003373_raw_0001.daq",
-             //const Char_t *file1 ="trs_muon_10cmdrift_good.trs",
-	     //const Char_t *file1 ="hij_1evt1.trs",
-	     const Char_t *kind2="trs",
-	     const Char_t *file2 ="/star/u2c/pfachini/workdir/Mixer/Pion1Evt.trs")
-	     //const Char_t *file2 ="hij_1evt1.trs")
-             //const Char_t *file2 ="/disk1/star/daq/st_physics_0003373_raw_0001.daq")
-             //const Char_t *file2 ="trs_muon_10cmdrift_good.trs")
+	     const Char_t *file1 ="/disk1/star/daq/st_physics_0003459_raw_0001.daq",
+             //const Char_t *file1 ="/afs/rhic/star/data1/pfachini/Mixer/Files/trs_muon_10cmdrift_good.trs",
+	     //const Char_t *file1 ="/afs/rhic/star/data1/pfachini/Mixer/Files/hij_1evt.trs",
+	     const Char_t *kind2="daq",
+	     //const Char_t *file2 ="/afs/rhic/star/data1/pfachini/Mixer/Files/Pion1Evt.trs")
+	     //const Char_t *file2 ="/afs/rhic/star/data1/pfachini/Mixer/Files/hij_1evt.trs")
+             const Char_t *file2 ="/disk1/star/daq/st_physics_0003707_raw_0001.daq")
+             //const Char_t *file2 ="/afs/rhic/star/data1/pfachini/Mixer/Files/trs_muon_10cmdrift_good.trs")
 {
   if (gClassTable->GetID("StChain") < 0) Load();
   chain = new StChain("mixer");
@@ -105,11 +105,13 @@ void StMixer(const Int_t Nevents=1,
     TString InFile(file1);
     gSystem->ExpandPathName(InFile);
     StDAQMaker    *tpc_first = new StDAQMaker("DaqFirst",InFile);
+    //tpc_first->SetOutput{"DAQReader1","StDAQReader"};
   }
   if (!strcmp(kind2,"daq")) {
     TString InFile(file2);
     gSystem->ExpandPathName(InFile);
     StDAQMaker    *tpc_second = new StDAQMaker("DaqSecond",InFile);
+    //tpc_second->SetOutput{"DAQReader2","StDAQReader"};
   }
 
   // Mixer

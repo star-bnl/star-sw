@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.h,v 1.1 2000/02/16 21:02:10 pfachini Exp $
+ * $Id: StMixerMaker.h,v 1.2 2000/02/22 20:25:34 pfachini Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.h,v $
+ * Revision 1.2  2000/02/22 20:25:34  pfachini
+ * *** empty log message ***
+ *
  * Revision 1.1  2000/02/16 21:02:10  pfachini
  * First version StMixer
  *
@@ -97,12 +100,13 @@ class StMixerMaker : public StMaker {
     
     Char_t   *GetConfig1() {return gConfig1;}
     Char_t   *GetConfig2() {return gConfig2;}
-    int   getSequences(int sector,int row,int pad,int *nseq,StSequence **listOfSequences);//!
+    int   getSequences1(int sector,int row,int pad,int *nseq,StSequence **listOfSequences);//!
+    int   getSequences2(int sector,int row,int pad,int *nseq,StSequence **listOfSequences);//!
     int   writeFile(char*, int);//!
 
     virtual const char *GetCVS() const
       {
-	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.1 2000/02/16 21:02:10 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.2 2000/02/22 20:25:34 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StMixerMaker, 1)   //StAF chain virtual base class for Makers
 };
