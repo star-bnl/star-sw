@@ -1,4 +1,4 @@
-// $Id: EzEEsmdCal.cxx,v 1.8 2004/09/14 19:38:43 balewski Exp $
+// $Id: EzEEsmdCal.cxx,v 1.9 2004/09/22 00:45:51 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -35,7 +35,7 @@ EzEEsmdCal::EzEEsmdCal(int sect){
   printf("EzEEsmdCal() constructed\n");
   eHead=0;
   eEve=0;
-   setSector(sect);
+  setSector(sect);
  }
  
 //--------------------------------------------------
@@ -96,7 +96,7 @@ void EzEEsmdCal:: unpackEzTail(){
       // (assuming pre/post/tw is not mixed with SMD pixels) 
      
       if(x->fail ) continue; // drop broken channels
-      
+      if(x->stat & killStat) continue; // drop masked chan      
       // accept this hit
       int iphi=(x->sec-1)*MaxSubSec+(x->sub-'A');
       int ieta=x->eta-1;
@@ -151,11 +151,13 @@ void EzEEsmdCal:: unpackEzSmd(){
       // (assuming pre/post is not mixed in hrdware with SMD pixels) 
 
       if(x->fail ) continue; // drop broken channels
+      if(x->stat & killStat) continue; // drop masked chan 
       if(x->sec!=sectID ) continue; // drop data from other sectors
 
       float rawAdc=data[chan];
       float adc=rawAdc-x->ped;
 
+      if(adc>maxStripAdc) continue; //drop 'jumpy ped'
       smdAdc[x->plane-'U'][x->strip-1]=adc;
       
       if(x->gain<=0)continue; // drop channels w/o gains

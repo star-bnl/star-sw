@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.10 2004/09/14 19:38:43 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.11 2004/09/22 00:45:40 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -15,6 +15,7 @@
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 #include "StEEmcUtil/StEEmcSmd/EEmcSmdGeom.h"
 #include "StEEmcUtil/EEmcSmdMap/EEmcSmdMap.h"
+#include "StEEmcDbMaker/cstructs/eemcConstDB.hh"
 #include "StEEmcDbMaker/EEmcDbItem.h"
 
 #ifdef StRootFREE
@@ -50,6 +51,11 @@ EEsmdCal::EEsmdCal(){
   thrMipSmdE=-1; emptyStripCount=-2; 
   twMipRelEneLow=-3; twMipRelEneHigh=-4;
   offCenter=0.7;
+  
+  maxStripAdc=150; // suppress large jump in ped or sticky bits
+
+  // chose which stat bits are fatal
+  killStat=EEMCSTAT_ONLPED  | EEMCSTAT_HOTSTR ;
 
   printf("EEsmdCal() constructed\n");
 }
@@ -84,7 +90,7 @@ void EEsmdCal::init( ){
     smdHitPl[i].set(thrMipSmdE,emptyStripCount,i+'U');
   }
 
-  printf("use thrMipSmdE/MeV=%.2f emptyStripCount=%d  twMipRelEne/high=%.2f/%.2f offCenter=%.2f\n", thrMipSmdE*1000.,emptyStripCount,twMipRelEneLow, twMipRelEneHigh,offCenter);
+  printf("use thrMipSmdE/MeV=%.2f emptyStripCount=%d  twMipRelEne/high=%.2f/%.2f offCenter=%.2f maxStripAdc=%.1f \n", thrMipSmdE*1000.,emptyStripCount,twMipRelEneLow, twMipRelEneHigh,offCenter,maxStripAdc);
   assert(sectID>0 && sectID<=MaxSectors);
 
   //....................... initilize MIP energy in towers
@@ -321,7 +327,7 @@ float eneR=tileEne[kR][iEtaX][iPhiX]*1000; // MeV
       int istrip1=iStr[iuv];
       ((TH2F*) hA[20])->Fill(istrip1+1,e12);
       hSs['e'-'a'][iuv][istrip1]->Fill(e12);      
-	hA[14+iuv]->Fill(istrip1+1); 
+      hA[14+iuv]->Fill(istrip1+1); 
 
     }// end of loop over UV plains
     ((TH2F*) hA[23])->Fill(iEtaX+1,eUV); 

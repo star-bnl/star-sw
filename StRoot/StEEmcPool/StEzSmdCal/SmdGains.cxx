@@ -1,4 +1,4 @@
-// $Id: SmdGains.cxx,v 1.2 2004/09/14 19:38:43 balewski Exp $
+// $Id: SmdGains.cxx,v 1.3 2004/09/22 00:45:52 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -34,10 +34,9 @@ SmdGains::SmdGains(){
 
   idealMipEne=1.3; // (MeV) in 7mm of plastic
   // limits for expo fit
-  adcMin=40;
-  adcMax=100;
-  minSum=50;
-  maxRelEr=0.2; // maximal relative error at any stage of calculations
+  adcMin=40;  adcMax=100; // SMD
+   minSum=50;
+  maxRelEr=0.4; // maximal relative error at any stage of calculations
   minMipEne=0.3;// (MeV) lower/upper thres for Landau Ene fit
   maxMipEne=4;
 }
@@ -81,13 +80,13 @@ void SmdGains::init(){
   gr->SetTitle(plCore+ " MPV of Landau fit to single strips; strip ID; MIP energy (MeV)");
   grA[2]=gr;
 
-  
   for(i=0;i<mxH;i++) 
     if(grA[i]) HList->Add(grA[i]);
   
   //............... other initializations ...........
   printf("cuts for %s : adcMin=%d ,adcMax=%d minSum=%d maxRelEr=%f\n",plCore.Data(),adcMin,adcMax,minSum, maxRelEr);
-  c1=new TCanvas("aa","aa",300,400);
+  //c1=new TCanvas("aa","aa",300,400);// small
+    c1=new TCanvas("aa","aa",800,700);// big
 
   for(i=0;i<mxS;i++) str[i].id=i+1;
 
@@ -426,18 +425,22 @@ void SmdGains:: plFGC(){
 //-----------------------------------------
 //-----------------------------------------
 
-void SmdGains::fitSlopes(int str1, int str2) {
+void SmdGains::fitSlopesSmd(int str1, int str2, int pl) {
   char tit[100];
   int ns=str2-str1+1;
   assert(str1>0 && ns>0);
   sprintf(tit,"%02d%c%03d+%d",sectID,planeUV,str1,ns);
   printf("fitSlopes() %s\n",tit);
+  TString ttC=tit;
+
   
-  if(c1) {
-    c1->Divide(3,3);
-    c1->SetName(tit);
-    c1->SetTitle(tit);
-  }
+  c1->Clear();
+  if(pl)
+    c1->Divide(5,6);
+  else
+    c1->Divide(2,2);
+  c1->SetName(ttC);
+  c1->SetTitle(ttC);
   
   int k=0;
   int i;
@@ -447,20 +450,20 @@ void SmdGains::fitSlopes(int str1, int str2) {
     StripG *s=&str[i-1];
     sprintf(tit,"a%s%03d",plCore.Data(),i);
     TH1F* h= (TH1F*)fdIn->Get(tit); assert(h);
-    // h->Rebin(4);
+    h->Rebin(4);
     HList->Add(h);
     c1->cd(k+1);
     h->SetAxisRange(adcMin,adcMax);
     float sum=h->Integral();
-    h->SetAxisRange(-25,1.5*adcMax);
+    h->SetAxisRange(-50,1.5*adcMax);
     //printf(" %s sum=%f\n",h->GetName(),sum);
     
     hA[0]->Fill(i,sum);
     s->sum1=(int)sum;
     h->Draw(); h->SetLineColor(kBlue);gPad->SetLogy();
-    h->SetMinimum(.9);    h->SetMaximum(10000);
-    //if(sum<4*minSum)  h->Rebin();
-
+    gPad->SetGridx(0);      gPad->SetGridy(0);
+    h->SetMinimum(.9);    h->SetMaximum(3000);
+    
     Lx=h->GetListOfFunctions();    assert(Lx);
     ln=new TLine(adcMin,0,adcMin,30000); ln->SetLineColor(kMagenta); Lx->Add(ln);
     ln=new TLine(adcMax,0,adcMax,30000);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
@@ -476,9 +479,73 @@ void SmdGains::fitSlopes(int str1, int str2) {
     s->esl=epar[1];
     if(epar[1]>maxRelEr *fabs(par[1])) {
       s->flag+=2;
-    }
-    
+    } 
   }
+
+  if(pl&1) c1->Print(ttC+".ps");
+  if(pl&2) c1->Print(ttC+".gif");
+ 
+}
+
+
+//-----------------------------------------
+//-----------------------------------------
+
+void SmdGains::fitSlopesTile(int eta1, int nEta, char cT, int pl) {
+  char tit[100];
+  assert(eta1>0 && nEta>0);
+  sprintf(tit,"%02d%cA-E%02d+%d",sectID,cT,eta1,nEta);
+  printf("fitSlopes() %s\n",tit);
+  TString ttC=tit;
+  float xLow=-50;
+
+  if(cT=='T') { adcMin=20;  adcMax=60; } // towers
+
+  c1->Clear();
+  if(pl)
+    c1->Divide(5,6);
+  else
+    c1->Divide(2,2);
+  c1->SetName(ttC);
+  c1->SetTitle(ttC);
+  
+  int k=0;
+  int i;
+  TList *Lx;  TLine *ln;
+  for(i=eta1;i<eta1+nEta;i++) {
+    char sub='A';
+    for(sub='A';sub<='E';sub++) {
+      k++;
+      sprintf(tit,"a%02d%c%c%02d",sectID,cT,sub,i); 
+      TH1F* h= (TH1F*)fdIn->Get(tit); assert(h);
+      // h->Rebin(4);
+      HList->Add(h);
+      c1->cd(k);
+      h->SetAxisRange(adcMin,adcMax);
+      float sum=h->Integral();
+      h->SetAxisRange(xLow,1.5*adcMax);
+      printf(" %s sum=%f\n",h->GetName(),sum);
+      
+      h->Draw(); h->SetLineColor(kBlue);
+      gPad->SetLogy();
+      gPad->SetGridx(0);      gPad->SetGridy(0);
+      h->SetMinimum(.9);    h->SetMaximum(9000);
+      //if(sum<4*minSum)  h->Rebin();
+      
+      Lx=h->GetListOfFunctions();    assert(Lx);
+      ln=new TLine(adcMin,0,adcMin,30000); ln->SetLineColor(kMagenta); Lx->Add(ln);
+      ln=new TLine(adcMax,0,adcMax,30000);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+      if(sum<minSum) {  continue;}
+      h->Fit("expo","RQ","",adcMin,adcMax);
+      TF1* f=h->GetFunction("expo");
+      f->SetLineColor(kRed);
+      f->SetLineWidth(2);
+    }
+  }
+
+  if(pl&1) c1->Print(ttC+".ps");
+  if(pl&2) c1->Print(ttC+".gif");
+ 
 }
 
 
@@ -589,6 +656,9 @@ void StripG::print(){
 
 /*****************************************************************
  * $Log: SmdGains.cxx,v $
+ * Revision 1.3  2004/09/22 00:45:52  balewski
+ * ready for calib of smd
+ *
  * Revision 1.2  2004/09/14 19:38:43  balewski
  * new version, SMD calib is now too complicated
  *

@@ -4,7 +4,7 @@
 #ifndef SmdGains_h
 #define SmdGains_h
 /*******************************************************
- * $Id: SmdGains.h,v 1.2 2004/09/14 19:38:44 balewski Exp $
+ * $Id: SmdGains.h,v 1.3 2004/09/22 00:45:52 balewski Exp $
  *******************************************************
  This code should run only on histogram files, not on events, JB
  *
@@ -81,8 +81,8 @@ class SmdGains :public TObject{
   void saveHisto(char *fname=0);
   void saveGains(FILE *fd=0);
 
-  // old ...........
-  void fitSlopes(int str1, int str2);
+  void fitSlopesSmd(int str1, int str2, int pl=0);
+  void fitSlopesTile(int eta1, int nEta, char cT, int pl=0) ;
 
   ClassDef(SmdGains,1) 
 };
@@ -91,6 +91,9 @@ class SmdGains :public TObject{
 
 /*****************************************************************
  * $Log: SmdGains.h,v $
+ * Revision 1.3  2004/09/22 00:45:52  balewski
+ * ready for calib of smd
+ *
  * Revision 1.2  2004/09/14 19:38:44  balewski
  * new version, SMD calib is now too complicated
  *
