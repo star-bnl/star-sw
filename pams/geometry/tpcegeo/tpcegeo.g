@@ -574,20 +574,24 @@ end
 *   note that the ionization density decreases along the beam according to    *
 *   I(l) = I(0)*exp(-l/300.),  l in cm I(0) = 200e-/cm., dE of 1 e- is 26 eV  *
 *   PN  21.08.97: anything denser than TPC gas absorbs laserino               *
-*                                                                             *
+*   PN  30.03.99: introducing dE dependence on beam intensity (Q measured)    *
+*       Normalisation is done on a measured Q peak value for cosmic muons     *
+*       Although the beam intensity is sqrt of Q, the ionization is I**2.     *
 *******************************************************************************
       implicit none
 +CDE,GCMATE,GCTMED,GCKINE,GCTRAK,AGCSTEP.
       character*8  cpart,laserino/'LASERINO'/
       equivalence (cpart,NaPart)
       Real Average
+      REAL ANORM/4.2/       " MUON <Q> IN 87 MEASURMENTS "
+      REAL PNORM/200./      " Npairs/sm for cosmic muons " 
       Integer Npair,ier
 *                                    this happens only with primary laserino   
       Check cpart==laserino
       if (Dens>0.005) Istop=1  
       Check Isvol > 0 & Istak==0
 *                                    number of produced pairs follows Poisson
-      Average = 200*aStep*exp(Sleng/300.)
+      Average = Pnorm*aStep * GETOT/Anorm * exp(Sleng/300.)
       Call POISSN(Average,Npair,ier)
       AdEstep  = 26.e-9*Npair
 *
