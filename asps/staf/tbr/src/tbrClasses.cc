@@ -15,6 +15,7 @@
 
 //:----------------------------------------------- MACROS             --
 //:----------------------------------------------- PROTOTYPES         --
+extern CC_P void writeTheVisualization(DS_DATASET_T *pDataset);
 extern CC_P void tbrNewDSView(DS_DATASET_T **ppDS, long np);
 extern CC_P void tbrNewTbView(DS_DATASET_T **ppDS);
 extern CC_P int dsPrintDatasetSpecifier(FILE *stream
@@ -37,6 +38,17 @@ tbrMotifViewer:: ~tbrMotifViewer() { }
 //:----------------------------------------------- ATTRIBUTES         --
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+STAFCV_T tbrMotifViewer:: writeVisualization ( tdmDataset * dataset ) {
+
+   DS_DATASET_T *pDataset=NULL;
+   long ptr;
+
+   dataset->cvtDslPointer(ptr);
+   pDataset = (DS_DATASET_T*)ptr;
+
+   writeTheVisualization(pDataset);
+   EML_SUCCESS(STAFCV_OK);
+}
 STAFCV_T tbrMotifViewer:: viewDataset ( tdmDataset * dataset) {
 
    DS_DATASET_T *pDataset=NULL;
