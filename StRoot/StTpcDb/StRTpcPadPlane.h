@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcPadPlane.h,v 1.10 2000/01/12 15:14:40 hardtke Exp $
+ * $Id: StRTpcPadPlane.h,v 1.11 2000/11/14 22:00:06 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRTpcPadPlane.h,v $
+ * Revision 1.11  2000/11/14 22:00:06  genevb
+ * Switched several functions from float to double
+ *
  * Revision 1.10  2000/01/12 15:14:40  hardtke
  * Update StTpcWirePlanes to use new variable names in tpcWirePlanes.idl/ Add Z position functions to StTpcPadPlane
  *
@@ -40,38 +43,38 @@ public:
 
   //Implements Abstract Interface 
  
- int   numberOfRows()           const; 
- int   numberOfInnerRows()      const;
- int   numberOfInnerRows48()    const;
- int   numberOfInnerRows52()    const;
- int   numberOfOuterRows()      const;
- float innerSectorPadWidth()    const;
- float innerSectorPadLength()   const;
- float innerSectorPadPitch()    const;
- float innerSectorRowPitch1()   const;
- float innerSectorRowPitch2()   const;
- float firstPadRow()            const;
- float firstOuterSectorPadRow() const;
- float lastOuterSectorPadRow()  const;
- float firstRowWidth()          const; 
- float lastRowWidth()           const;
- float outerSectorPadWidth()    const;
- float outerSectorPadLength()   const;
- float outerSectorPadPitch()    const;
- float outerSectorRowPitch()    const;
- float outerSectorLength()      const;
- float ioSectorSeparation()     const;
- float innerSectorEdge()        const;
- float outerSectorEdge()        const;
- float innerSectorPadPlaneZ()   const;
- float outerSectorPadPlaneZ()   const;
+ int   numberOfRows()            const; 
+ int   numberOfInnerRows()       const;
+ int   numberOfInnerRows48()     const;
+ int   numberOfInnerRows52()     const;
+ int   numberOfOuterRows()       const;
+ double innerSectorPadWidth()    const;
+ double innerSectorPadLength()   const;
+ double innerSectorPadPitch()    const;
+ double innerSectorRowPitch1()   const;
+ double innerSectorRowPitch2()   const;
+ double firstPadRow()            const;
+ double firstOuterSectorPadRow() const;
+ double lastOuterSectorPadRow()  const;
+ double firstRowWidth()          const; 
+ double lastRowWidth()           const;
+ double outerSectorPadWidth()    const;
+ double outerSectorPadLength()   const;
+ double outerSectorPadPitch()    const;
+ double outerSectorRowPitch()    const;
+ double outerSectorLength()      const;
+ double ioSectorSeparation()     const;
+ double innerSectorEdge()        const;
+ double outerSectorEdge()        const;
+ double innerSectorPadPlaneZ()   const;
+ double outerSectorPadPlaneZ()   const;
  
  int   numberOfPadsAtRow(int row)    const;
- float radialDistanceAtRow(int row) const;  
- float PadWidthAtRow(int row)       const;
- float PadLengthAtRow(int row)      const;
- float PadPitchAtRow(int row)       const;
- float RowPitchAtRow(int row)       const;
+ double radialDistanceAtRow(int row) const;  
+ double PadWidthAtRow(int row)       const;
+ double PadLengthAtRow(int row)      const;
+ double PadPitchAtRow(int row)       const;
+ double RowPitchAtRow(int row)       const;
 
  int indexForRowPad(int row, int pad)   const;
 
@@ -96,82 +99,82 @@ inline int   StRTpcPadPlane::numberOfOuterRows() const {
 return (*mPadPlane)[0].outerPadRows;
 }
 
-inline float StRTpcPadPlane::innerSectorPadWidth() const {
+inline double StRTpcPadPlane::innerSectorPadWidth() const {
 return (*mPadPlane)[0].innerSectorPadWidth;
 }
 
-inline float StRTpcPadPlane::innerSectorPadLength() const {
+inline double StRTpcPadPlane::innerSectorPadLength() const {
 return (*mPadPlane)[0].innerSectorPadLength;
 }
 
-inline float StRTpcPadPlane::innerSectorPadPitch() const {
+inline double StRTpcPadPlane::innerSectorPadPitch() const {
 return (*mPadPlane)[0].innerSectorPadPitch;
 }
 
-inline float StRTpcPadPlane::innerSectorRowPitch1() const {
+inline double StRTpcPadPlane::innerSectorRowPitch1() const {
 return (*mPadPlane)[0].innerSectorRowPitch1;
 }
-inline float StRTpcPadPlane::innerSectorRowPitch2() const {
+inline double StRTpcPadPlane::innerSectorRowPitch2() const {
 return (*mPadPlane)[0].innerSectorRowPitch2;
 }
 
-inline float StRTpcPadPlane::firstPadRow() const {
+inline double StRTpcPadPlane::firstPadRow() const {
 return (*mPadPlane)[0].firstPadRow;
 }
 
-inline float StRTpcPadPlane::firstOuterSectorPadRow() const {
+inline double StRTpcPadPlane::firstOuterSectorPadRow() const {
 return (*mPadPlane)[0].firstOuterSectorPadRow;
 }
 
-inline float StRTpcPadPlane::lastOuterSectorPadRow() const {
+inline double StRTpcPadPlane::lastOuterSectorPadRow() const {
 return (*mPadPlane)[0].lastOuterSectorPadRow;
 }
 
-inline float StRTpcPadPlane::firstRowWidth() const {
+inline double StRTpcPadPlane::firstRowWidth() const {
 return (*mPadPlane)[0].firstRowWidth;
 }
  
-inline float StRTpcPadPlane::lastRowWidth() const {
+inline double StRTpcPadPlane::lastRowWidth() const {
 return (*mPadPlane)[0].lastRowWidth;
 }
 
-inline float StRTpcPadPlane::outerSectorPadWidth() const {
+inline double StRTpcPadPlane::outerSectorPadWidth() const {
 return (*mPadPlane)[0].outerSectorPadWidth;
 }
 
-inline float StRTpcPadPlane::outerSectorPadLength() const {
+inline double StRTpcPadPlane::outerSectorPadLength() const {
 return (*mPadPlane)[0].outerSectorPadLength;
 }
 
-inline float StRTpcPadPlane::outerSectorPadPitch() const {
+inline double StRTpcPadPlane::outerSectorPadPitch() const {
 return (*mPadPlane)[0].outerSectorPadPitch;
 }
 
-inline float StRTpcPadPlane::outerSectorRowPitch() const {
+inline double StRTpcPadPlane::outerSectorRowPitch() const {
 return (*mPadPlane)[0].outerSectorRowPitch;
 }
 
-inline float StRTpcPadPlane::outerSectorLength() const {
+inline double StRTpcPadPlane::outerSectorLength() const {
 return (*mPadPlane)[0].outerSectorLength;
 }
 
-inline float StRTpcPadPlane::ioSectorSeparation() const {
+inline double StRTpcPadPlane::ioSectorSeparation() const {
 return (*mPadPlane)[0].ioSectorSeparation;
 }
 
-inline float StRTpcPadPlane::innerSectorEdge() const {
+inline double StRTpcPadPlane::innerSectorEdge() const {
 return (*mPadPlane)[0].innerSectorEdge;
 }
 
-inline float StRTpcPadPlane::outerSectorEdge() const {
+inline double StRTpcPadPlane::outerSectorEdge() const {
 return (*mPadPlane)[0].outerSectorEdge;
 }
 
-inline float StRTpcPadPlane::innerSectorPadPlaneZ() const {
+inline double StRTpcPadPlane::innerSectorPadPlaneZ() const {
 return (*mPadPlane)[0].innerSectorPadPlaneZ;
 }
 
-inline float StRTpcPadPlane::outerSectorPadPlaneZ() const {
+inline double StRTpcPadPlane::outerSectorPadPlaneZ() const {
 return (*mPadPlane)[0].outerSectorPadPlaneZ;
 }
 

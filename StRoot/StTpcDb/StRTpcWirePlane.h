@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcWirePlane.h,v 1.8 2000/01/12 15:14:41 hardtke Exp $
+ * $Id: StRTpcWirePlane.h,v 1.9 2000/11/14 22:00:06 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRTpcWirePlane.h,v $
+ * Revision 1.9  2000/11/14 22:00:06  genevb
+ * Switched several functions from float to double
+ *
  * Revision 1.8  2000/01/12 15:14:41  hardtke
  * Update StTpcWirePlanes to use new variable names in tpcWirePlanes.idl/ Add Z position functions to StTpcPadPlane
  *
@@ -37,88 +40,88 @@ public:
   }
 
   //Implements Abstract Interface
-  float  anodeWireRadius()                           const;
-  float  frischGridWireRadius()                      const;
-  float  gateWireRadius()                            const;
+  double  anodeWireRadius()                          const;
+  double  frischGridWireRadius()                     const;
+  double  gateWireRadius()                           const;
   
-  float  anodeWirePitch()                            const;
-  float  frischGridPitch()                           const;
-  float  gatePitch()                                 const;
+  double  anodeWirePitch()                           const;
+  double  frischGridPitch()                          const;
+  double  gatePitch()                                const;
   
-  float  innerSectorAnodeWirePadPlaneSeparation()    const;
-  float  innerSectorFrischGridPadPlaneSeparation()   const;
-  float  innerSectorGatingGridPadPlaneSeparation()   const;
+  double  innerSectorAnodeWirePadPlaneSeparation()   const;
+  double  innerSectorFrischGridPadPlaneSeparation()  const;
+  double  innerSectorGatingGridPadPlaneSeparation()  const;
 
-  float  outerSectorAnodeWirePadPlaneSeparation()    const;
-  float  outerSectorFrischGridPadPlaneSeparation()   const;
-  float  outerSectorGatingGridPadPlaneSeparation()   const;
+  double  outerSectorAnodeWirePadPlaneSeparation()   const;
+  double  outerSectorFrischGridPadPlaneSeparation()  const;
+  double  outerSectorGatingGridPadPlaneSeparation()  const;
 
   int    numberOfInnerSectorAnodeWires()             const;
   int    numberOfInnerSectorFrischGridWires()        const;
   int    numberOfInnerSectorGatingGridWires()        const;
-  float  firstInnerSectorAnodeWire()                 const;
-  float  firstInnerSectorFrischGridWire()            const;
-  float  firstInnerSectorGatingGridWire()            const;
-  float  lastInnerSectorAnodeWire()                  const;
+  double  firstInnerSectorAnodeWire()                const;
+  double  firstInnerSectorFrischGridWire()           const;
+  double  firstInnerSectorGatingGridWire()           const;
+  double  lastInnerSectorAnodeWire()                 const;
 
   int    numberOfOuterSectorAnodeWires()             const;
   int    numberOfOuterSectorFrischGridWires()        const;
   int    numberOfOuterSectorGatingGridWires()        const;
-  float  firstOuterSectorAnodeWire()                 const;
-  float  firstOuterSectorFrischGridWire()            const;
-  float  firstOuterSectorGatingGridWire()            const;
-  float  lastOuterSectorAnodeWire()                  const;
+  double  firstOuterSectorAnodeWire()                const;
+  double  firstOuterSectorFrischGridWire()           const;
+  double  firstOuterSectorGatingGridWire()           const;
+  double  lastOuterSectorAnodeWire()                 const;
 
 
 ClassDef(StRTpcWirePlane,0)
 
 };
 
-inline float  StRTpcWirePlane::anodeWireRadius() const {
+inline double  StRTpcWirePlane::anodeWireRadius() const {
    return (*mWirePlane)[0].anodeWireRadius;
 }
 
-inline float  StRTpcWirePlane::frischGridWireRadius() const {
+inline double  StRTpcWirePlane::frischGridWireRadius() const {
    return (*mWirePlane)[0].frischGridWireRadius;
 }
    
-inline float  StRTpcWirePlane::gateWireRadius() const {
+inline double  StRTpcWirePlane::gateWireRadius() const {
    return (*mWirePlane)[0].gatingGridWireRadius;
 }
   
-inline float  StRTpcWirePlane::anodeWirePitch() const {
+inline double  StRTpcWirePlane::anodeWirePitch() const {
    return (*mWirePlane)[0].anodeWirePitch;
 }
 
-inline float  StRTpcWirePlane::frischGridPitch() const {
+inline double  StRTpcWirePlane::frischGridPitch() const {
    return (*mWirePlane)[0].frischGridWirePitch;
 }
 
-inline float  StRTpcWirePlane::gatePitch() const {
+inline double  StRTpcWirePlane::gatePitch() const {
    return (*mWirePlane)[0].gatingGridWirePitch;
 }
   
-inline float  StRTpcWirePlane::innerSectorAnodeWirePadPlaneSeparation() const {
+inline double  StRTpcWirePlane::innerSectorAnodeWirePadPlaneSeparation() const {
    return (*mWirePlane)[0].innerSectorAnodeWirePadSep;
 }
 
-inline float  StRTpcWirePlane::innerSectorFrischGridPadPlaneSeparation() const {
+inline double  StRTpcWirePlane::innerSectorFrischGridPadPlaneSeparation() const {
    return (*mWirePlane)[0].innerSectorFrischGridPadSep;
 }
 
-inline float  StRTpcWirePlane::innerSectorGatingGridPadPlaneSeparation() const {
+inline double  StRTpcWirePlane::innerSectorGatingGridPadPlaneSeparation() const {
    return (*mWirePlane)[0].innerSectorGatingGridPadSep;
 }
 
-inline float  StRTpcWirePlane::outerSectorAnodeWirePadPlaneSeparation() const {
+inline double  StRTpcWirePlane::outerSectorAnodeWirePadPlaneSeparation() const {
    return (*mWirePlane)[0].outerSectorAnodeWirePadSep;
 }
 
-inline float  StRTpcWirePlane::outerSectorFrischGridPadPlaneSeparation() const {
+inline double  StRTpcWirePlane::outerSectorFrischGridPadPlaneSeparation() const {
    return (*mWirePlane)[0].outerSectorFrischGridPadSep;
 }
 
-inline float  StRTpcWirePlane::outerSectorGatingGridPadPlaneSeparation() const {
+inline double  StRTpcWirePlane::outerSectorGatingGridPadPlaneSeparation() const {
    return (*mWirePlane)[0].outerSectorGatingGridPadSep;
 }
 
@@ -134,19 +137,19 @@ inline int StRTpcWirePlane::numberOfInnerSectorGatingGridWires() const {
    return (*mWirePlane)[0].numInnerSectorGatingGridWires;
 }
 
-inline float  StRTpcWirePlane::firstInnerSectorAnodeWire() const {
+inline double  StRTpcWirePlane::firstInnerSectorAnodeWire() const {
    return (*mWirePlane)[0].firstInnerSectorAnodeWire;
 }
 
-inline float  StRTpcWirePlane::firstInnerSectorFrischGridWire() const {
+inline double  StRTpcWirePlane::firstInnerSectorFrischGridWire() const {
    return (*mWirePlane)[0].firstInnerSectorFrischGridWire;
 }
 
-inline float  StRTpcWirePlane::firstInnerSectorGatingGridWire() const {
+inline double  StRTpcWirePlane::firstInnerSectorGatingGridWire() const {
    return (*mWirePlane)[0].firstInnerSectorGatingGridWire;
 }
 
-inline float  StRTpcWirePlane::lastInnerSectorAnodeWire() const {
+inline double  StRTpcWirePlane::lastInnerSectorAnodeWire() const {
    return (*mWirePlane)[0].lastInnerSectorAnodeWire;
 }
 
@@ -162,19 +165,19 @@ inline int StRTpcWirePlane::numberOfOuterSectorGatingGridWires() const {
    return (*mWirePlane)[0].numOuterSectorGatingGridWires;
 }
 
-inline float  StRTpcWirePlane::firstOuterSectorAnodeWire() const {
+inline double  StRTpcWirePlane::firstOuterSectorAnodeWire() const {
    return (*mWirePlane)[0].firstOuterSectorAnodeWire;
 }
 
-inline float  StRTpcWirePlane::firstOuterSectorFrischGridWire() const {
+inline double  StRTpcWirePlane::firstOuterSectorFrischGridWire() const {
    return (*mWirePlane)[0].firstOuterSectorFrischGridWire;
 }
 
-inline float  StRTpcWirePlane::firstOuterSectorGatingGridWire() const {
+inline double  StRTpcWirePlane::firstOuterSectorGatingGridWire() const {
    return (*mWirePlane)[0].firstOuterSectorGatingGridWire;
 }
 
-inline float  StRTpcWirePlane::lastOuterSectorAnodeWire() const {
+inline double  StRTpcWirePlane::lastOuterSectorAnodeWire() const {
    return (*mWirePlane)[0].lastOuterSectorAnodeWire;
 }
 
