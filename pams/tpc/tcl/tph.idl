@@ -5,7 +5,6 @@
 #include "tcl_sector_index.idl"
 #include "tcl_tclpar.idl"
 #include "tss_tsspar.idl"
-#include "tpg_detector.idl"
 #include "tpg_pad_plane.idl"
 #include "type_shortdata.idl"
 #include "tcl_tp_seq.idl"
@@ -18,7 +17,6 @@ interface tph : amiModule{
                   in tcl_sector_index tcl_sector_index
 		, in tcl_tclpar tclpar
 		, in tss_tsspar tsspar
-		, in tpg_detector detector
 		, in tpg_pad_plane pad_plane
 		, in type_shortdata pixel_data_in
 		, in type_shortdata pixel_data_out
@@ -28,7 +26,7 @@ interface tph : amiModule{
 		, inout tcl_tphit_aux tphit_aux
 		);
 };
-/* last modified $Date: 1998/05/22 00:18:20 $ */
+/* last modified $Date: 1998/12/17 19:33:05 $ */
 
 		
 		
