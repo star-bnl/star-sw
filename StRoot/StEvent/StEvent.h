@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 1.6 1999/05/03 01:36:18 fisyak Exp $
+ * $Id: StEvent.h,v 1.7 1999/05/04 20:59:24 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 1.6  1999/05/03 01:36:18  fisyak
- * Add Print
+ * Revision 1.7  1999/05/04 20:59:24  fisyak
+ * move CVS Tag to StRun
+ *
+ * Revision 1.7  1999/05/04 20:59:24  fisyak
+ * move CVS Tag to StRun
  *
  * Revision 1.6  1999/05/03 01:36:18  fisyak
  * Add Print
@@ -147,7 +150,7 @@ struct pairL : public TObject
     Int_t     	             GetDate()     const {return ((TDatime *)&mTime)->GetDate();};
     Int_t     	             GetTime()     const {return ((TDatime *)&mTime)->GetTime();};
     TDatime                  GetDateTime() const {return mTime;};
-    TString                  CvsTag()      const {return mCvsTag;};
+    virtual ULong_t          GetUTime()    const {return GetDateTime().Get();};
    
     virtual ULong_t                runNumber() const;              
     virtual ULong_t                triggerMask() const;
@@ -171,7 +174,6 @@ struct pairL : public TObject
     virtual Float_t                      beamPolarization(StBeamDirection, 
 							  StBeamPolarizationAxis);
 
-    virtual void SetCvsTag(const Char_t* tag){mCvsTag = tag;}; 
     virtual void setType(const Char_t*);
     virtual void setId(const pairL&);
     virtual void setTime(Int_t dt)                 {SetDateTime(dt,0);};
@@ -202,7 +204,6 @@ struct pairL : public TObject
     const StFtpcHitCollection*          ftpcHitCollection() const;
     
     
-    TString                      mCvsTag;
     pairL                        mId;        //!
     ULong_t                      mRunNumber;
     TDatime                      mTime;

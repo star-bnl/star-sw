@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.h,v 1.5 1999/04/30 13:16:28 fisyak Exp $
+ * $Id: StRun.h,v 1.6 1999/05/04 20:59:26 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StRun.h,v $
- * Revision 1.5  1999/04/30 13:16:28  fisyak
- * add StArray for StRootEvent
+ * Revision 1.6  1999/05/04 20:59:26  fisyak
+ * move CVS Tag to StRun
+ *
+ * Revision 1.6  1999/05/04 20:59:26  fisyak
+ * move CVS Tag to StRun
  *
  * Revision 1.5  1999/04/30 13:16:28  fisyak
  * add StArray for StRootEvent
@@ -61,6 +64,7 @@ public:
     StRun(dst_run_header_st&, dst_run_summary_st&);
     StRun(dst_run_header_st&);
     
+    Int_t operator==(const StRun&) const;
     Int_t operator!=(const StRun&) const;
     
     const char   *CVSTag(){return (const char *) mCVSTag;};
@@ -78,8 +82,9 @@ public:
     virtual void setCenterOfMassEnergy(Double_t);
     virtual void setBeamMassNumber(StBeamDirection, Short_t);
     virtual void setBeamCharge(StBeamDirection, Short_t);
+    virtual void setSummary(StRunSummary*);
     
-    TString        mType;
+protected:
     TString         mCVSTag;  
     Long_t          mId;
     TString         mType;
