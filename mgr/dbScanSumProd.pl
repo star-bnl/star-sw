@@ -42,10 +42,22 @@ my @SetS = (
              "auau200/starlight/2gamma/halffield/year_1h/hadronic_on",
              "auau200/starlight/2gamma/none/year_1h/hadronic_on",
              "auau200/starlight/vmeson/halffield/year_1h/hadronic_on",
-             "auau200/starlight/vmeson/none/year_1h/hadronic_on",
+             "auau200/starlight/vmeson/none/year_1h/hadronic_on",              
              "auau200/dtunuc/two_photon/halffield/year_1h/hadronic_on",
              "auau200/dtunuc/two_photon/none/year_1h/hadronic_on",
-             
+             "auau200/hemicosm/default/none/year_1h/hadronic_on",
+             "pau200/hijing/b0_7/gam15/year_1h/hadronic_on",
+             "pau200/hijing/b0_7/jet15/year_1h/hadronic_on", 
+             "auau200/mevsim/vcascade/central/year_1h/hadronic_on",       
+             "auau200/mevsim/vcascade/flow/year_1h/hadronic_on", 
+             "auau200/mevsim/vcascade/fluct/year_1h/hadronic_on",
+             "auau200/mevsim/vcascade/resonance/year_1h/hadronic_on", 
+             "auau200/mevsim/vcascade/trigger/year_1h/hadronic_on",
+             "auau200/hijing_quark/b0_3_jetq_off/jet05/year_1h/hadronic_on",
+             "auau200/hijing_quark/b0_3_jetq_on/jet05/year_1h/hadronic_on",
+             "auau200/hijing_antinuc/b0_3_jetq_off/jet05/year_1h/hadronic_on",
+             "auau200/hijing_antinuc/b0_3_jetq_on/jet05/year_1h/hadronic_on",
+                        
  );
 
 my $SetD = "daq/2000/02/";
@@ -224,6 +236,10 @@ my $TdstHEvt  = 0;
 # get giga number for dst and raw files and accumulate total amount
 
   foreach my $setE (@SetS) {
+      if (! defined $InSize{$setE}) {$InSize{$setE} = 0 };
+      if (! defined $InEvts{$setE}) {$InEvts{$setE} = 0 };
+      if (! defined $dstDsize{$setE}) {$dstDsize{$setE} = 0 };
+      if (! defined $dstHpsize{$setE}) {$dstHpsize{$setE} = 0 };
       $InSize{$setE}   = int($InSize{$setE}/1000000000);
       $dstDsize{$setE}  = int($dstDsize{$setE}/1000000000);   
       $dstHpsize{$setE} = int($dstHpsize{$setE}/1000000000);
