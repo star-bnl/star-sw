@@ -1,7 +1,11 @@
 #ifndef STARGENERATOR_H
 #define STARGENERATOR_H
 
-/* $Id: StarGenerator.h,v 1.2 2004/07/16 22:52:53 potekhin Exp $ */
+// $Id: StarGenerator.h,v 1.3 2004/09/02 23:29:27 potekhin Exp $
+// $Log: StarGenerator.h,v $
+// Revision 1.3  2004/09/02 23:29:27  potekhin
+// Proper comments and ID
+//
 
 ///////////////////////////////////////////////////////////
 //                                                       //
