@@ -13,6 +13,7 @@ if ( open(SCRIPT,"> dstdelete.csh") ) {
     print "Unable to create deletion script; cannot write locally\n";
 }
 $theTime = localtime(time());
+print SCRIPT "# XDF DST deletion script generated at $theTime\n";
 print "XDF DST files under $topPrefix$topLevel loaded to DB as of $theTime\n";
 open(FILES, "cd $topPrefix; find $topLevel/ | grep 'dst\.xdf' |")
  or die "Failed on xdf seek\n";
@@ -39,7 +40,8 @@ while (<FILES>) {
       $yr =~ s/ear//;
       $hadronic = $tokens[5];
       $hadronic =~ s/hadronic//;
-      $sumfile = "/star/u2e/starreco/MDC1/summary/".$bimpact.$yr.$hadronic.".catalog";
+      $sumfilename = $bimpact.$yr.$hadronic.".catalog";
+      $sumfile = "/star/u2e/starreco/MDC1/summary/".$sumfilename;
       $hpssStatus = "??HPSS";
       if ( -e $sumfile ) {
           $setname = $fname;
@@ -47,7 +49,7 @@ while (<FILES>) {
           open (SUMMARY, "grep $setname $sumfile |");
           $len = read SUMMARY, $str, 999;
           if ( $len == 0 ) {
-              print "!!!!! No record of set $setname\n";
+              print "!!!!! No record of $setname in catalog $sumfilename\n";
           } else {
               if ( $str =~ /[0-9]+[ \t]+Done/i ) {
                   $hpssStatus = "onHPSS";
