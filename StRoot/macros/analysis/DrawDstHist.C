@@ -49,8 +49,9 @@ void DrawDstHist(
     chain = new StChain("bfc");
     St_io_Maker *in    = new St_io_Maker("Input","all");
     in->AddFile(exFileName);
-//    in->SetMaxEvent(4);
+    in->SetMaxEvent(4);
     St_QA_Maker *QA   = new St_QA_Maker("QA","event/geant/Event");
+    QA->SetHistsNames(firstHistName,lastHistName);
     QA->SetDraw();
 //    in->MakeDoc(); 
   }
