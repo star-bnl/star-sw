@@ -1,24 +1,16 @@
+*
+* $Id: gcbank.inc,v 1.2 2004/03/01 17:26:25 fisyak Exp $
+*
+* $Log: gcbank.inc,v $
+* Revision 1.2  2004/03/01 17:26:25  fisyak
+* Get rid of staf
+*
+* Revision 1.1.1.1  1995/10/24 10:20:31  cernlib
+* Geant
+*
+*
 #ifndef CERNLIB_GEANT321_GCBANK_INC
 #define CERNLIB_GEANT321_GCBANK_INC
-# if defined (__cplusplus) || defined (__STDC__)  /* C++ or ANSI C */
-#define KWBANK 69000
-
-#define gcbank gcbank_
-extern struct
-{
-  int nzebra;
-  float gversn;
-  float zversn;
-  int ixstor;
-  int ixdiv;
-  int ixcons;
-  int fendq[16];
-  int lmain;
-  int lr1;
-  int ws[KWBANK];
-} gcbank;
-
-#else
 *
 *
 * gcbank.inc
@@ -45,5 +37,4 @@ extern struct
 #include "geant321/incend.inc"
 #endif
 
-#endif
 #endif

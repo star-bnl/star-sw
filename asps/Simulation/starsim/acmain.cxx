@@ -1,7 +1,11 @@
 /********************************************************
-* $Id: acmain.cxx,v 1.1.1.1 2004/01/12 23:49:36 potekhin Exp $
+* $Id: acmain.cxx,v 1.2 2004/03/01 17:26:25 fisyak Exp $
 * $Log: acmain.cxx,v $
+* Revision 1.2  2004/03/01 17:26:25  fisyak
+* Get rid of staf
+*
 * Revision 1.1.1.1  2004/01/12 23:49:36  potekhin
+*
 *
 * Revision 1.3  2002/04/29 00:58:33  nevski
 * production support utilities
@@ -53,14 +57,22 @@ void  G77_date_y2kbuggy_0    (){printf(" G77_date_y2kbuggy_0 called \n"); }
 void  G77_vxtidate_y2kbuggy_0(){printf(" G77_vxtidate_y2kbuggy_0 called \n");}
 #endif
 
-#if !defined(CERNLIB_LINUX)
+extern "C"  int   iargcf_  ();
+extern "C"  int   getargf_ (int*, char*, int);
+#if defined(CERNLIB_LINUX)
+extern "C"  int   iargc_  ();
+extern "C"  int   getarg_ (int*, char*, int);
+int iargcf_()  {return  iargcf_();}
+int   getargf_ (int*k, char*args, int n) {return getarg_ (k, args, n);}
+#else
 /* define a uniform GETARG function for all compilers */
 extern "C"  int   iargc_  ();
 extern "C"  int   getarg_ (int*, char*, int);
-int iargc_  ()        { return Margc; }
-int getarg_ (int *k, char *args, int n)
+int iargcf_  ()        { return Margc; }
+int getargf_ (int *k, char *args, int n)
 { int i=0;   if (*k<Margc) i=strlen(Margv[*k]);  if (i>n) i=n;
   strncpy(args,Margv[*k],i); memset (args+i,' ',n-i); return 0;
 }
+
 #endif
 

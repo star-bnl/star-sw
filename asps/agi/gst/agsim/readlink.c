@@ -1,5 +1,6 @@
 /*CMZ :  2.00/00 01/09/99  22.08.19  by  Pavel Nevski*/
 /*-- Author :    Pavel Nevski   22/04/99*/
+#include <string.h>
 int readlink (char*, char*, int);
 int readlink_(char* a, char *b, int La, int Lb)
 {

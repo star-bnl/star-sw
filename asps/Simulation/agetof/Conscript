@@ -36,6 +36,7 @@ if ($PGI) {
   $CERNLIBS .= " -Wl,-Bdynamic";
 }
 my $Libraries = $CERNLIBS .  " " . $FLIBS . " " . $CLIBS;
+if ($LD eq 'g77' or $LD eq 'ifort') { $Libraries .= " ". $env->{LIBG2C}; }
 $env2 = $env->clone('FC'           => $FC,
 		    'LD'           => $LD,
 		    'LDFLAGS'      => $LDFLAGS,

@@ -1,11 +1,12 @@
 *
-* $Id: eropts.inc,v 1.1.1.1 2004/01/15 00:12:23 potekhin Exp $
+* $Id: eropts.inc,v 1.2 2004/03/01 17:26:25 fisyak Exp $
 *
 * $Log: eropts.inc,v $
-* Revision 1.1.1.1  2004/01/15 00:12:23  potekhin
+* Revision 1.2  2004/03/01 17:26:25  fisyak
+* Get rid of staf
 *
-* Revision 1.1.1.1  1997/11/03 15:29:46  atlascvs
-* Importing CERNLIB version 08.21.
+* Revision 1.1  1999/12/07 15:44:29  fisyak
+* Add geane, new TGeant3 from Alice
 *
 * Revision 1.2  1996/07/25 15:01:02  ravndal
 * CMZ to CVS conversion artefact removed
@@ -22,12 +23,12 @@
 * eropts.inc
 *
       CHARACTER*8     CHOPTI
-      LOGICAL         LEEXAC, LELENG, LEONLY, LEPLAN, LEPOIN, LEVOLU
+      LOGICAL         LEEXAC, LELENG, LEONLY, LEPLAN, LEPOIN, LEVOLU, LEVMIX
       REAL            ERPLI, ERPLO, ERLENG
       INTEGER         NAMEER, NUMVER, IOVLER
       COMMON /EROPTS/ ERPLI(3,2), ERPLO(3,4,MXPRED), ERLENG(MXPRED),
      +                NAMEER(MXPRED), NUMVER(MXPRED), IOVLER(MXPRED),
-     +                LEEXAC, LELENG, LEONLY, LEPLAN, LEPOIN, LEVOLU
+     +                LEEXAC, LELENG, LEONLY, LEPLAN, LEPOIN, LEVOLU, LEVMIX
       COMMON /EROPTC/CHOPTI
 *
 * eropts.inc

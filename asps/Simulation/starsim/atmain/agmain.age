@@ -1,6 +1,10 @@
-* $Id: agmain.age,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Id: agmain.age,v 1.2 2004/03/01 17:26:33 fisyak Exp $
 * $Log: agmain.age,v $
+* Revision 1.2  2004/03/01 17:26:33  fisyak
+* Get rid of staf
+*
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
 *
 * Revision 1.14  2003/11/16 20:15:00  nevski
 * new control feature
@@ -69,7 +73,7 @@
       Call SetEnv('No_Copyright'//char(0),'yes'//char(0),1)
 *
       CALL TIMEST  (3.E7)  ! set time limit for interactive mode
-      CALL GETARG(0,ARG)
+      CALL GETARGF(0,ARG)
       I = 1
       N = LENOCC (ARG)
 *     DO J=1,N   { IF (ARG(J:J).EQ.'/') { I=J+1; }
@@ -89,7 +93,7 @@
       FATCAT  = ' '
       VERSION = ' '
       do J=1,999
-      {  comd=' ';  CALL GETARG(J,comd);  Call CUTOL(comd)
+      {  comd=' ';  CALL GETARGF(J,comd);  Call CUTOL(comd)
          L=LENOCC(comd);       if (L<=0) Break
          if comd(1:2)=='-h'
          { print *, ' usage: '//prog(1:LP)    _
@@ -104,11 +108,11 @@
                  // ' [ -G GCBANK_size(Mw)]'  _
                  // ' [ -f fatmen_catalog  ]' _
                  // ' [ -n(o login_kumac)]'   _
-           ; return
+           ; stop 'Done with help'
          }
          if comd(1:1)='-'
          { Na+=1;  Nr=1;
-           Arg=comd(3:);       If (Arg==' ') CALL GETARG(J+1,Arg);
+           Arg=comd(3:);       If (Arg==' ') CALL GETARGF(J+1,Arg);
            K  =Lenocc(arg);    If (K>0) Nr=ICDECI(arg,1,K);
            If (comd(1:2)='-v') { Version=PROG; if (LenOCC(arg)>0) VERSION=arg }
            If (comd(1:2)='-d') { JDEB=Nr; CDEBUG=Arg; ICSDEBUG=Index(Arg,'c') }
@@ -124,7 +128,7 @@
 *
       write (*,1001) PROG(1:LP),NWGEAN,NWPAW,GETPID()
 1001  format(1x,54('*')/' * Starting ',a8,
-     >       ' NwGEANT=',i9,' NwPAW=',i8,' *'/,
+     >       ' NwGEANT=',i10,' NwPAW=',i8,' *'/,
      >       1x,22('*'),'pid=',i6,22('*') )
 *
       IPRIN = -3

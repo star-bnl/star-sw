@@ -1,8 +1,12 @@
 /*
-** $Id: dblib.cxx,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+** $Id: dblib.cxx,v 1.2 2004/03/01 17:26:33 fisyak Exp $
 **
 ** $Log: dblib.cxx,v $
+** Revision 1.2  2004/03/01 17:26:33  fisyak
+** Get rid of staf
+**
 ** Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+**
 **
 ** Revision 1.18  2003/11/13 16:23:36  nevski
 **
@@ -45,7 +49,6 @@
 **  MySQL interface enabled
 **
 */
-#define CERNLIB_MYSQL 1
 #if defined(CERNLIB_MYSQL)
 /*******************************************************************************/
 /*                             MYSQL INTERFACE                                 */
