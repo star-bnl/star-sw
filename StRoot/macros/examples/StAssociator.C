@@ -1,5 +1,10 @@
-// $Id: StAssociator.C,v 1.18 2000/04/20 17:02:42 calderon Exp $
+// $Id: StAssociator.C,v 1.19 2000/05/11 16:20:33 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.19  2000/05/11 16:20:33  calderon
+// histograms have to be obtained directly from maker again.
+// Examples of using the loading of hits in StMcEventMaker (commented out by
+// default).
+//
 // Revision 1.18  2000/04/20 17:02:42  calderon
 // Modified macros to continue looping when status = 3
 // Pick up maker with name "StMcAnalysisMaker" instead of "McAnalysis"
@@ -92,13 +97,18 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     // Dynamically link needed shared libs
     gSystem->Load("St_base");
     gSystem->Load("StChain");
+//     gSystem->Load("St_Tables");
     gSystem->Load("libglobal_Tables");
     gSystem->Load("libsim_Tables");
     gSystem->Load("libgen_Tables");
     gSystem->Load("StUtilities");
-
+//     gSystem->Load("StDbLib");
+//     gSystem->Load("StDbBroker");
+//     gSystem->Load("St_db_Maker");
+//     gSystem->Load("StTpcDb");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
+//     gSystem->Load("StDbUtilities");
     
     gSystem->Load("StEvent");
     gSystem->Load("StEventMaker"); 
@@ -120,10 +130,27 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
     ioMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
 
+//     const char *mainDB = "MySQL:Geometry_tpc";
+//     St_db_Maker *dbMk = new St_db_Maker("Geometry",mainDB);
+//     dbMk->SetDebug();
+    
+//     const char *calibDB = "MySQL:Calibrations_tpc";
+//     St_db_Maker *calibMk = new St_db_Maker("Calibrations",calibDB);
+//     calibMk->SetDebug();
+    
+//     StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
+    
     // Note, the title "events" is used in the Association Maker, so don't change it.
     StEventMaker*       eventReader   = new StEventMaker("events","title");
+    eventReader->doPrintMemoryInfo = kFALSE;
     StMcEventMaker*     mcEventReader = new StMcEventMaker; // Make an instance...
+//     mcEventReader->doPrintMemoryInfo = kFALSE;
+//     mcEventReader->doUseTpc = kTRUE;
+//     mcEventReader->doUseSvt = kTRUE;
+//     mcEventReader->doUseFtpc = kTRUE;
+//     mcEventReader->doUseRich = kTRUE;
     StAssociationMaker* associator    = new StAssociationMaker;
+    //associator->doPrintMemoryInfo = kTRUE;
     StMcAnalysisMaker*  examples      = new StMcAnalysisMaker;
 
     // Define the cuts for the Associations
@@ -132,16 +159,16 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     // TPC
     parameterDB->setXCutTpc(.5); // 5 mm
     parameterDB->setYCutTpc(.5); // 5 mm
-    parameterDB->setZCutTpc(.2); // 2 mm
+    parameterDB->setZCutTpc(.5); // 5 mm
     parameterDB->setReqCommonHitsTpc(3); // Require 3 hits in common for tracks to be associated
     // FTPC
     parameterDB->setRCutFtpc(.3); // 3 mm
     parameterDB->setPhiCutFtpc(5*(3.1415927/180.0)); // 5 degrees
     parameterDB->setReqCommonHitsFtpc(3); // Require 3 hits in common for tracks to be associated
     // SVT
-    parameterDB->setXCutSvt(.1); // 1 mm
-    parameterDB->setYCutSvt(.1); // 1 mm
-    parameterDB->setZCutSvt(.1); // 1 mm
+    parameterDB->setXCutSvt(.08); // 800 um
+    parameterDB->setYCutSvt(.08); // 800 um
+    parameterDB->setZCutSvt(.08); // 800 um
     parameterDB->setReqCommonHitsSvt(1); // Require 1 hits in common for tracks to be associated
     
     
@@ -166,32 +193,38 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
 
     myCanvas->cd(1);
     gPad->SetLogy(0);
-    examples->mTrackNtuple->Draw("(p-prec)/p:commTpcHits");
+    examples->mTrackNtuple->Draw("(p-prec)/p:commTpcHits","prec!=0");
 
     TList* dList = chain->GetMaker("StMcAnalysisMaker")->Histograms();
-    TH2F* hitRes = dList->At(0);
-    TH2F* momRes = dList->At(1);
-    TH2F* coordRc = dList->At(2);
-    TH2F* coordMc = dList->At(3);
+//     TH2F* hitRes = dList->At(0);
+//     TH1F* momRes = dList->At(1);
+//     TH2F* coordRc = dList->At(2);
+//     TH2F* coordMc = dList->At(3);
+    TH2F* hitRes  = examples->mHitResolution;
+    TH1F* momRes  = examples->mMomResolution;
+    TH2F* coordRc = examples->coordRec;
+    TH2F* coordMc = examples->coordMcPartner;
     
     myCanvas->cd(2);
     gPad->SetLogy(0);
-    hitRes->Draw();
+    hitRes->Draw("box");
 
     myCanvas->cd(3);
     gPad->SetLogy(0);
     momRes->Draw();
-
+    
     myCanvas->cd(4);
     gPad->SetLogy(0);
+    coordRc->SetMarkerStyle(20);
     coordRc->Draw();
-
+    
     myCanvas->cd(4);
     gPad->SetLogy(0);
     coordMc->SetMarkerColor(2);
+    coordMc->SetMarkerStyle(20);
     coordMc->Draw("same");
     
-    //chain->Finish(); // This should call the Finish() method in ALL makers,
+    if(iev>200) chain->Finish(); // This should call the Finish() method in ALL makers,
                      // comment it out if you want to keep the objects
                      // available at the command line after running
                      // the macro.
