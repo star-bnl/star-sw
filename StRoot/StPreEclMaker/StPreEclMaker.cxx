@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.27 2003/10/14 21:20:44 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.28 2004/09/03 03:09:26 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.28  2004/09/03 03:09:26  suaide
+// changes in the histograms
+//
 // Revision 1.27  2003/10/14 21:20:44  suaide
 // changed return kStErr to kStWarn
 //
@@ -153,6 +156,21 @@ StEmcCollection* ecmpreecl;
 StPreEclMaker::StPreEclMaker(const char *name, const char *title):StMaker(name,title){
 //  drawinit=kFALSE;
   mPrint = kTRUE;
+  mFillHisto = kFALSE;
+  m_ncl = 0;
+  m_etot = 0;
+  m_sig_e = 0;
+  m_sig_p = 0;
+  
+  for (Int_t i=0; i<MAXDET; i++)
+  {
+    m_cl[i] = 0;
+    m_energy[i] = 0;
+    m_HitsInCl[i] = 0;
+    m_EnergyCl[i] = 0;
+    m_EtaInCl[i] = 0;
+    m_PhiInCl[i] = 0;
+  }
 }
 //_____________________________________________________________________________
 StPreEclMaker::~StPreEclMaker()
@@ -187,22 +205,11 @@ Int_t StPreEclMaker::Init()
   Int_t   rmsN=52;
   m_sig_e= new TH2F("RMS(eta)" ,"Sigma(eta) .vs. Detector #",rmsN,0.0,rmsMax,4,0.5,4.5);
   m_sig_p= new TH2F("RMS(phi)" ,"Sigma(phi) .vs. Detector #",rmsN,0.0,rmsMax,4,0.5,4.5);
-  for (Int_t i=0; i<4; i++)
+  
+  Histograms()->SetName("PreClustHist");  
+  
+  for (Int_t i=0; i<MAXDET; i++)
   {
-    TString name_h = detname[i] + "_cluster";
-    TString name_e = detname[i] + "_cluster_energy";
-    TString tit_h  = detname[i] + " cluster";
-    TString tit_e  = detname[i] + " energy of cluster";
-    if(i==2) {
-      m_cl[i]     = new TH2F(name_h,tit_h,greta[i],-1.0,1.0,grphi[i],-M_PI*1.015, M_PI*0.985);
-      m_energy[i] = new TH2F(name_e,tit_e,greta[i],-1.0,1.0,grphi[i],-M_PI*1.015, M_PI*0.985);
-    }
-    else{
-      m_cl[i]     = new TH2F(name_h,tit_h,greta[i],-1.0,1.0,grphi[i],-myPI, myPI);
-      m_energy[i] = new TH2F(name_e,tit_e,greta[i],-1.0,1.0,grphi[i],-myPI, myPI);
-    }
-    
-
     TString name_m  = detname[i] + "ClNum";
     TString tit_m   = "Number hits in cluster for " + detname[i];
     m_HitsInCl[i]   = new TH1F(name_m, tit_m, 21, -0.5, 20.5);
@@ -210,25 +217,46 @@ Int_t StPreEclMaker::Init()
     TString name_en  = detname[i] + "ClEnergy";
     TString tit_en   = "Energy of cluster for " + detname[i];
     m_EnergyCl[i]    = new TH1F(name_en, tit_en, 2000, 0.0, 20.0);
+  }  
+  
+  if(!mFillHisto) return StMaker::Init();
+  
+  for (Int_t i=0; i<MAXDET; i++)
+  {
+    TString name_h = detname[i] + "_cluster";
+    TString name_e = detname[i] + "_cluster_energy";
+    TString tit_h  = detname[i] + " cluster";
+    TString tit_e  = detname[i] + " energy of cluster";
+    if(i==2) 
+    {
+      m_cl[i]     = new TH2F(name_h,tit_h,greta[i],-1.0,1.0,grphi[i],-M_PI*1.015, M_PI*0.985);
+      m_energy[i] = new TH2F(name_e,tit_e,greta[i],-1.0,1.0,grphi[i],-M_PI*1.015, M_PI*0.985);
+    }
+    else{
+      m_cl[i]     = new TH2F(name_h,tit_h,greta[i],-1.0,1.0,grphi[i],-myPI, myPI);
+      m_energy[i] = new TH2F(name_e,tit_e,greta[i],-1.0,1.0,grphi[i],-myPI, myPI);
+    }
 
     TString name_eta  = detname[i] + "Eta";
     TString tit_eta   = "Eta of clusters for " + detname[i];
     TString name_phi  = detname[i] + "Phi";
     TString tit_phi   = "Phi of clusters for " + detname[i];
-    if(i==2) {
+    if(i==2) 
+    {
       TArrayD *xb  = StEmcMath::binForSmde();
-      if(xb){
+      if(xb)
+      {
         m_EtaInCl[i] = new TH1F(name_eta, tit_eta, xb->GetSize()-1, xb->GetArray());
         delete xb;
       }
       m_PhiInCl[i]   = new TH1F(name_phi, tit_phi, grphi[i], -M_PI*1.015, M_PI*0.985);
     }
-    else{ 
+    else
+    { 
       m_EtaInCl[i]   = new TH1F(name_eta, tit_eta, greta[i], -1., 1.);
       m_PhiInCl[i]   = new TH1F(name_phi, tit_phi, grphi[i], -myPI, myPI);
     }
   }
-  Histograms()->SetName("PreClustHist");  
   return StMaker::Init();
 }  
 //_____________________________________________________________________________
@@ -392,7 +420,7 @@ void StPreEclMaker::MakeHistograms(Int_t idet,StEmcPreClusterCollection* cluster
       if(n>0)
       {
 	      det = cluster->Detector();
-        m_ncl->Fill(log10((Float_t)n),(Float_t)det);
+        if(m_ncl) m_ncl->Fill(log10((Float_t)n),(Float_t)det);
 
         TIter next(cluster->Clusters());
         StEmcPreCluster *cl;
@@ -406,19 +434,19 @@ void StPreEclMaker::MakeHistograms(Int_t idet,StEmcPreClusterCollection* cluster
           Float_t sigmaphi=cl->SigmaPhi();
           Int_t   nhits=cl->Nhits();
 
-          if(sigmaeta > 0) m_sig_e->Fill(sigmaeta, Axis_t(det));          
-          if(sigmaphi > 0.0) m_sig_p->Fill(sigmaphi, Axis_t(det));
+          if(sigmaeta > 0) if(m_sig_e) m_sig_e->Fill(sigmaeta, Axis_t(det));          
+          if(sigmaphi > 0.0) if(m_sig_p) m_sig_p->Fill(sigmaphi, Axis_t(det));
           
-          m_cl[det-1]->Fill(Axis_t(eta), Axis_t(phi));
-          m_energy[det-1]->Fill(Axis_t(eta), Axis_t(phi), energy);
-          m_HitsInCl[det-1]->Fill(Axis_t(nhits));
-          m_EnergyCl[det-1]->Fill(Axis_t(energy));
-          m_EtaInCl[det-1]->Fill(Axis_t(eta));
-          m_PhiInCl[det-1]->Fill(Axis_t(phi));
+          if(m_cl[det-1]) m_cl[det-1]->Fill(Axis_t(eta), Axis_t(phi));
+          if(m_energy[det-1]) m_energy[det-1]->Fill(Axis_t(eta), Axis_t(phi), energy);
+          if(m_HitsInCl[det-1]) m_HitsInCl[det-1]->Fill(Axis_t(nhits));
+          if(m_EnergyCl[det-1]) m_EnergyCl[det-1]->Fill(Axis_t(energy));
+          if(m_EtaInCl[det-1]) m_EtaInCl[det-1]->Fill(Axis_t(eta));
+          if(m_PhiInCl[det-1]) m_PhiInCl[det-1]->Fill(Axis_t(phi));
 
           Etot+=energy;         
         }
-        m_etot->Fill(log10(Etot), Axis_t(det));
+        if(m_etot) m_etot->Fill(log10(Etot), Axis_t(det));
       }
     }
   
@@ -528,7 +556,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.27 2003/10/14 21:20:44 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.28 2004/09/03 03:09:26 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

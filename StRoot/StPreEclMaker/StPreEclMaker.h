@@ -1,8 +1,11 @@
 //
-// $Id: StPreEclMaker.h,v 1.16 2003/09/10 19:47:27 perev Exp $
+// $Id: StPreEclMaker.h,v 1.17 2004/09/03 03:09:26 suaide Exp $
 //
 //
 // $Log: StPreEclMaker.h,v $
+// Revision 1.17  2004/09/03 03:09:26  suaide
+// changes in the histograms
+//
 // Revision 1.16  2003/09/10 19:47:27  perev
 // ansi corrs
 //
@@ -99,14 +102,18 @@ protected:
   TH2F          *m_etot;            //!
   TH2F          *m_sig_e;           //!
   TH2F          *m_sig_p;           //!
-  TH2F          *m_cl[MAXDET];      //!
-  TH2F          *m_energy[MAXDET];  //!
   TH1F          *m_HitsInCl[MAXDET];//!
   TH1F          *m_EnergyCl[MAXDET];//!
+  
+  // the following histograms will be created and filled only if the
+  // mFilHisto is set to kTRUE
+  TH2F          *m_cl[MAXDET];      //!
+  TH2F          *m_energy[MAXDET];  //!
   TH1F          *m_EtaInCl[MAXDET]; //!
   TH1F          *m_PhiInCl[MAXDET]; //!
 
   Bool_t        mPrint;
+  Bool_t        mFillHisto;
 
   St_emcClusterParam* mParam;       //!
 public: 
@@ -122,11 +129,12 @@ public:
           void  SetClusterConditions(char*,Int_t,Float_t,Float_t,Float_t,Bool_t);
   St_emcClusterParam* getParam() {return mParam;} 
           void  setPrint(Bool_t a) { mPrint = a;}
+  void          setFillHisto(Bool_t a) {mFillHisto = a;} ///< Turns on/off histogram filling
   
   Bool_t doClearEmc;
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPreEclMaker.h,v 1.16 2003/09/10 19:47:27 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPreEclMaker.h,v 1.17 2004/09/03 03:09:26 suaide Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   

@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.44 2004/04/13 15:22:12 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.45 2004/09/03 03:09:07 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.45  2004/09/03 03:09:07  suaide
+// changes in the histograms
+//
 // Revision 1.44  2004/04/13 15:22:12  suaide
 // svaeHistograms method added and small bug fixed
 //
@@ -166,16 +169,15 @@ class StEmcADCtoEMaker : public StMaker
  private: 
   TH2F              *mNhit;           //! 
   TH2F              *mEtot;           //!
+  TH2F              *mAverageTDC;    //!
+  TH2F              *mValidEvents;    //!
+  TH2F              *mSmdTimeBinHist; //!
+  
+  // the following histograms will be created and filled only if the
+  // mFilHisto is set to kTRUE
   TH2F              *mHits[MAXDETBARREL];   //!
   TH2F              *mAdc[MAXDETBARREL];    //!
   TH2F              *mEnergyHist[MAXDETBARREL]; //!
-  TH2F              *mEnergySpec[MAXDETBARREL][3]; //!
-  TH1F              *mAdc1d[MAXDETBARREL];  //!           
-  TH1F              *mEn1d[MAXDETBARREL];  //!           
-  TH2F              *mADCSpec[MAXDETBARREL];          //!           
-  TH2F              *mSmdTimeBinHist; //!
-  TH2F              *mValidEvents;    //!
-  TH2F              *mAverageTDC;    //!
            
   controlADCtoE_st  *mControlADCtoE; 
   
@@ -251,7 +253,7 @@ class StEmcADCtoEMaker : public StMaker
 
   void                      saveHistograms(char*); ///<saves the histograms in a ROOT file
   
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.44 2004/04/13 15:22:12 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.45 2004/09/03 03:09:07 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcADCtoEMaker, 2)  
 };

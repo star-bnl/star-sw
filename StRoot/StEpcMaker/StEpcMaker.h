@@ -1,7 +1,10 @@
 //
-// $Id: StEpcMaker.h,v 1.8 2003/09/10 19:47:13 perev Exp $
+// $Id: StEpcMaker.h,v 1.9 2004/09/03 03:09:45 suaide Exp $
 //
 // $Log: StEpcMaker.h,v $
+// Revision 1.9  2004/09/03 03:09:45  suaide
+// changes in the histograms
+//
 // Revision 1.8  2003/09/10 19:47:13  perev
 // ansi corrs
 //
@@ -75,19 +78,23 @@ class StEpcMaker : public StMaker
     StPointCollection*   mPoint;              //! 29-nov-2001 by PAI
     bool                 accept(StTrack*);    // This is used to select tracks
     void                 MakeHistograms();    // Filling QA Histograms
+    void                 setFillHisto(Bool_t a) {mFillHisto = a;} ///< Turns on/off histogram filling
 
   protected:
+    TH1F *m_point_flag;        //! //Point Flag spectra
     TH1F *m_point_energy[4];   //! //Point Energy spectra
     TH1F *m_point_eta[4];      //! //Point Eta spectra
     TH1F *m_point_phi[4];      //! //Point Phi spectra
+  // the following histograms will be created and filled only if the
+  // mFilHisto is set to kTRUE
     TH1F *m_point_sigeta[4];   //! //Point SigmaEta spectra
     TH1F *m_point_sigphi[4];   //! //Point SigmaPhi spectra
     TH1F *m_point_deleta[4];   //! //Point DeltaEta spectra
     TH1F *m_point_delphi[4];   //! //Point DeltaPhi spectra
     TH1F *m_point_trmom[4];    //! //Point TrMom spectra
     TH1F *m_emc_points[4];     //! //Emc Point multiplicity
-    TH1F *m_point_flag;        //! //Point Flag spectra
 
+    Bool_t        mFillHisto;
     double mBField;
     Bool_t mPrint;
   
@@ -102,7 +109,7 @@ class StEpcMaker : public StMaker
     virtual void  Browse(TBrowser* b); // StEvent staf will be visible in browser
   
     virtual const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StEpcMaker.h,v 1.8 2003/09/10 19:47:13 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
+    "Tag $Name:  $ $Id: StEpcMaker.h,v 1.9 2004/09/03 03:09:45 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
 
   ClassDef(StEpcMaker,0)// EMC-Track match maker
 };
