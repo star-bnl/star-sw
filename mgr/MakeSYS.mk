@@ -1,5 +1,8 @@
-#  $Id: MakeSYS.mk,v 1.3 1998/03/23 02:31:43 fisyak Exp $
+#  $Id: MakeSYS.mk,v 1.4 1998/03/25 16:13:53 nevski Exp $
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.4  1998/03/25 16:13:53  nevski
+#  old fashion gstar setup
+#
 #  Revision 1.3  1998/03/23 02:31:43  fisyak
 #  move staff in group_dir
 #
@@ -32,7 +35,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/03/23 02:31:43 $ 
+#             Last modification $Date: 1998/03/25 16:13:53 $ 
 ALL_DEPS    = $^
 FIRST_DEP   = $<
 FIRSTF      = $(<D)/$(<F)
@@ -83,7 +86,7 @@ CC         := cc
 #CFLAGS     += +DAportable +Z  -Wl,+s,+b${STAR_LIB} -Ae    # from DSPACK
 CFLAGS     +=  +z -Aa +DAportable -D_HPUX_SOURCE            # P.Nevski 
 FC         := /opt/fortran/bin/fort77
-FFLAGS     += +DAportable +U77 +ppu +Z                    # from DSPACK
+FFLAGS     += +DAportable +U77 +ppu +B +Z                    # from DSPACK
 F_EXTENDED := +es
 LDFLAGS    += -b                                     # from DSPACK 
 LD         := ld                                     # from DSPACK
@@ -114,7 +117,7 @@ F_EXTENDED :=-extend_source
 CC         := cc
 CFLAGS     +=   -32 -ansi -KPIC -kpicopt -w
 CXX        :=  CC
-CXXFLAGS   +=  -32 ${CFLAGS} -xansi -use_cfront -w
+CXXFLAGS   +=  ${CFLAGS} -xansi -use_cfront -w
 LD         := CC
 LDFLAGS    += -32 -shared
 LD_LIBS    := -lXext -lm

@@ -64,7 +64,6 @@ macro ld_standard
   sl = $fexist([slib])
   if [sl]=1 then
      message  '================ Load standard shared library:' [slib] '================'
-     plib = $STAR_LIB/[p]
      for/call  csrmsl($quote([p]))
      gexec [slib]| for/call [p]_init;
   endif
@@ -74,14 +73,12 @@ macro ld_private
   pam = [1]
   n = $words([pam],'/') 
   p = $word([pam],[n],[n],'/')
-  plib = $STAR_LIB/[p]
   for/call  csrmsl($quote([p]))
   shell gmake SILENT=YES -f $STAR/mgr/MakePam.mk -C [pam]
   slib = lib/$STAR_SYS/[p].sl
   sl = $fexist([slib])
   if [sl]=1 then
     message  '================ Load private shared library:' [slib] '================'
-    plib = $STAR_LIB/[p]
     call  csrmsl($quote([p]))
     gexec [slib]| for/call [p]_init;
   endif

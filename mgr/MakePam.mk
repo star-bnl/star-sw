@@ -1,4 +1,7 @@
 #  $Log: MakePam.mk,v $
+#  Revision 1.4  1998/03/25 16:13:52  nevski
+#  old fashion gstar setup
+#
 #  Revision 1.3  1998/03/23 02:31:42  fisyak
 #  move staff in group_dir
 #
@@ -43,7 +46,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/03/23 02:31:42 $ 
+#           Last modification $Date: 1998/03/25 16:13:52 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
 PWD       = /bin/pwd
@@ -68,6 +71,7 @@ ifeq ($(EMPTY),$(pams))         #1# ROOT level
 	ROOT:=$(INP_DIR)
 	SUBDIRS :=$(PAMS)
 else                    #1 
+        DIRS_LEV:= $(foreach dir, $(DIRS), $(shell test -d $(dir) && echo $(dir))) 
 	LIST    := $(DIR_LIST)
 	N       := $(words $(LIST))
 	SN      := $(word  $(N), $(DIR_LIST))
@@ -148,6 +152,7 @@ else                            #1
 ifndef RANLIB                   #2
 override RANLIB := /bin/true
 endif                           #2
+ROOTD   := $(shell cd $(ROOT)/..; $(PWD) )
 LIB_DIR := $(OUT_DIR)/$(STAR_HOST_SYS)
 DOMAIN  := $(notdir $(DOM_DIR))
 OBJ_DIR := $(LIB_DIR)/$(DOMAIN).obj
@@ -235,7 +240,7 @@ STICFLAGS =  $(addprefix -I,  $(STAR)/asps/../.$(STAR_HOST_SYS)/inc $(SRC_DIR) $
 ifneq ($(STAR_SYS),hp_ux102)    #2
 CPPFLAGS += -D$(STAR_SYS) $(strip -D$(shell uname)) 
 endif                           #2
-CPPFLAGS +=              -I. -I../ -I/usr/include -I$(STAR)/asps/../.$(STAR_HOST_SYS)/inc  \
+CPPFLAGS += -I. -I../ -I/usr/include -I$(STAR)/asps/../.$(STAR_HOST_SYS)/inc \
              $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) 
 ifneq ($(ROOT),$(STAR))         #2
 CPPFLAGG :=  $(addprefix -I, $(INC_DIRG))
@@ -248,10 +253,10 @@ CXXFLAGS += -g
 CPPFLAGS += -DDEBUG
 endif                           #2
 ifndef CERN_LIBS                #2
-#    CERN_LIBS := $(shell cernlib mathlib kernlib)
+    CERN_LIBS := $(shell cernlib mathlib kernlib)
 endif                           #2
 ifndef LIBRARIES                #2
-ifeq ($(STAR_LIB),$(LIB_DIR))   #3
+ifeq ($(STAR_PATH),$(ROOTD))   #3
 		LIBRARIES :=  $(STAR_LIB)/$(PKG_LIB) \
                -L$(STAR)/asps/../.$(STAR_HOST_SYS)/lib -L$(STAR_LIB)
 else                            #3
@@ -316,7 +321,7 @@ clean_share:
 clean_obj:
 	rm -rf $(OBJ_DIR) 
 clean_lib:
-	rm -rf $(SL_PKG) $(LIB_DIR)/$(DOMAIN).a
+	rm -rf $(SL_PKG) $(LIB_PKG)
 #-----dependencies--------------------------
 ifneq ($(EMPTY), $(strip $(FILES_D)))  #4
 include $(FILES_D)
@@ -455,7 +460,7 @@ test_mk:
 	@echo "TWO       =" $(TWO)
 test_dir:
 	@echo "CWD       =" $(CWD)  
-	@echo "ROOT      =" $(ROOT)
+	@echo "ROOT      =" $(ROOT) "; ROOTD = " $(ROOTD)
 	@echo "DOMAIN    =" $(DOMAIN)
 	@echo "NAME      =" $(NAME) 
 	@echo "PGK       =" $(PKG) 
@@ -484,6 +489,10 @@ test_dir:
 	@echo "IDLS      =" $(IDLS)
 	@echo "IDLSD     =" $(IDLSD)
 	@echo "FILES_DD  =" $(FILES_DD)
+	@echo "SN        =" $(SN)
+	@echo "SN_1      =" $(SN_1)
+	@echo "SN_2      =" $(SN_2)
+	@echo "SN_3      =" $(SN_3)
 
 
 
