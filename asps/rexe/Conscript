@@ -37,14 +37,20 @@ if ($FC =~ /pgf77/) {
 #    }
 #  }
 #  else {
-    $LIBS .= " -L$PGI/linux86/lib " . $env->{LDALL};
-    if ( -e "$PGI/linux86/lib/libpgftnrtl.a"){
-      $LIBS .= " $PGI/linux86/lib/libpgftnrtl.a";
+  my $PGILIB = $PGI . "/linux86/lib";
+  if (! -d $PGILIB) {
+    $PGILIB = $PGI . "/linux86/5.1/lib";
+  }
+  if (-d $PGILIB) {
+    $LIBS .= " -L" . $PGILIB . " " . $env->{LDALL};
+    if ( -e "$PGILIB/libpgftnrtl.a"){
+      $LIBS .= " $PGILIB/libpgftnrtl.a";
     } 
-    if ( -e "$PGI/linux86/lib/libpgc.a"){
-      $LIBS .= " $PGI/linux86/lib/libpgc.a";
+    if ( -e "$PGILIB/libpgc.a"){
+      $LIBS .= " $PGILIB/libpgc.a";
     }
-#    if ( -e "$PGI/linux86/lib/libpgnod_prof.a"){
+  }
+#    if ( -e "$PGILIB/libpgnod_prof.a"){
 #      $LIBS .= " -lpgnod_prof";
 #    }
     $LIBS .= $env->{LDNONE};
@@ -61,7 +67,7 @@ $FPPFLAGS = "-D__ROOT__ -DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB
   "-DCERNLIB_NONEWL -DCERNLIB_HIGZ -DCERNLIB_CG  -DCERNLIB_HADRON";
   $CPPFLAGS  = "-D__ROOT__ -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " .
   "-DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
-if ($STAR_SYS =~ /g77/) {$CPPFLAGS .= " -DPrivateMalloc";}
+if ($FC =~ /g77/) {$CPPFLAGS .= " -DPrivateMalloc";}
 print "build $pkg with cons\n";
 my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{LIBPATH};
 $LIBS .= $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};
@@ -101,7 +107,7 @@ my $LIBSN = $LIBS; $LIBSN =~ s/-lRint/-lRint -lNew/;
 $envN = $env2->clone('LIBS'         => $LIBSN);
 my @src = qw(MAIN_rmain.cxx);#  dummy.g);
 my @dirs = split /$main::PATH_SEPARATOR/,$env->{CPPPATH};
-if ($STAR_HOST_SYS =~ /g77/) {push @src, "df.F";}
+if ($FC =~ /g77/) {push @src, "df.F";}
 for my $cpp (@dirs,$Dir) {
   next if $cpp =~ ' ';
   if ($cpp =~ /cern/ ||
