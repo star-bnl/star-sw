@@ -1,7 +1,7 @@
 
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.cxx,v 1.3 2003/06/11 18:58:19 wzhang Exp $
+ * $Id: StEEmcSmdGeom.cxx,v 1.4 2003/08/22 15:14:26 wzhang Exp $
  *
  * Author: Wei-Ming Zhang 
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StEEmcSmdGeom.cxx,v $
+ * Revision 1.4  2003/08/22 15:14:26  wzhang
+ * Added ClassImp and method stripEnd
+ *
  * Revision 1.3  2003/06/11 18:58:19  wzhang
  * added geometry methods for StiEEmc
  *
@@ -36,6 +39,8 @@
 #include "StMaker.h"
 
 /// defaulty constructor
+ClassImp(StEEmcSmdGeom)
+
 StEEmcSmdGeom::StEEmcSmdGeom(){ 
   for(int iMod = 1; iMod <= kEEmcNumSectors; iMod++) mIsSectorIn[iMod-1] = true;
 };
@@ -396,6 +401,21 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
      return moduleId; 
 }
 // return  DCA strip from a global point  
+  StructEEmcStrip StEEmcSmdGeom::EEmcStrip(const Int_t layerId, 
+		         const Int_t moduleId, const Int_t etaId) {
+    EEmcStripPtrVec stripPtrVec;
+    if(layerId == 1)
+       stripPtrVec = EEmcUModule(moduleId).stripPtrVec;
+    else if(layerId == 2)
+       stripPtrVec = EEmcVModule(moduleId).stripPtrVec;
+    else 
+       cout << "EEmcStrip: Wrong moduleId!" << endl;
+    
+    StructEEmcStrip strip = *stripPtrVec[etaId-1];
+    return strip;
+}
+
+// return  DCA strip from a global point  
   StructEEmcStrip StEEmcSmdGeom::EEmcStrip(const Int_t planeId, const StThreeVectorD& point, Float_t* dca) {
     StructEEmcStrip strip = EEmcInitStrip();
     EEmcStripPtrVec stripPtrVec;
@@ -430,6 +450,17 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
       }
     }
     return strip;
+}
+
+  StThreeVectorD  StEEmcSmdGeom::stripEnd(const StructEEmcStrip strip, 
+		                                    const Int_t endId) {
+      StThreeVectorD end;
+      if(endId == 1) 
+	      end = strip.end1;
+      else
+              end = strip.end2;
+
+      return end;
 }
 
 // match two strips  
