@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.cxx,v 2.8 2003/04/30 20:59:23 ullrich Exp $
+ * $Id: StL0Trigger.cxx,v 2.9 2003/07/29 19:50:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.cxx,v $
+ * Revision 2.9  2003/07/29 19:50:53  ullrich
+ * Fix for spin bits added.
+ *
  * Revision 2.8  2003/04/30 20:59:23  ullrich
  * Modified bunchCrossingId7bit() to deal with run
  * numbers > 4000000. Code from Eleanor.
@@ -48,7 +51,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.8 2003/04/30 20:59:23 ullrich Exp $";
+static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.9 2003/07/29 19:50:53 ullrich Exp $";
 
 ClassImp(StL0Trigger)
 
@@ -258,37 +261,86 @@ StL0Trigger::bunchCrossingId() const
 } 
 
 int
-StL0Trigger::spinBits() const
+StL0Trigger::spinBits(int runNumber) const
 {
     int ldsm0,spin1,spin2,spin3,spin4;
-    ldsm0 = mLastDsmArray[0];
-    spin1 = (ldsm0>>8) & 0x1;
-    spin2 = (ldsm0>>9) & 0x1;
-    spin3 = (ldsm0>>10) & 0x1;
-    spin4 = (ldsm0>>11) & 0x1;
-    return spin1+spin2*2+spin3*4+spin4*8;
+    if (runNumber<4000000){
+	ldsm0 = mLastDsmArray[0];
+	spin1 = (ldsm0>>8) & 0x1;
+	spin2 = (ldsm0>>9) & 0x1;
+	spin3 = (ldsm0>>10) & 0x1;
+	spin4 = (ldsm0>>11) & 0x1;
+	return spin1+spin2*2+spin3*4+spin4*8;
+    }
+    else if (runNumber<5000000){
+	ldsm0 = (mLastDsmArray[7]/16)%256;
+	spin1 = (ldsm0/ 2)%2;
+	spin2 = (ldsm0/ 4)%2;
+	spin3 = (ldsm0/32)%2;
+	spin4 = (ldsm0/64)%2;
+	return spin1+spin2*2+spin3*4+spin4*8;
+    }
+    else {
+	return 0;
+    }
 } 
 
 int
-StL0Trigger::spinBitYellowUp() const
+StL0Trigger::spinBitYellowUp(int runNumber) const
 {
-    return (mLastDsmArray[0]>>8) & 0x1;
+    if (runNumber<4000000){
+	return (mLastDsmArray[0]>>8) & 0x1;
+    }
+    else if (runNumber<5000000){
+	int ldsm0 = (mLastDsmArray[7]/16)%256;
+	return (ldsm0/2)%2;
+    }
+    else {
+	return 0;
+    }
 } 
 
 int
-StL0Trigger::spinBitYellowDown() const
+StL0Trigger::spinBitYellowDown(int runNumber) const
 {
-    return (mLastDsmArray[0]>>9) & 0x1;
+    if (runNumber<4000000){
+	return (mLastDsmArray[0]>>9) & 0x1;
+    }
+    else if (runNumber<5000000){
+	int ldsm0 = (mLastDsmArray[7]/16)%256;
+	return (ldsm0/ 4)%2;
+    }
+    else {
+	return 0;
+    }
 } 
 
 int
-StL0Trigger::spinBitBlueUp() const
+StL0Trigger::spinBitBlueUp(int runNumber) const
 {
-    return (mLastDsmArray[0]>>10) & 0x1;
+    if (runNumber<4000000){
+	return (mLastDsmArray[0]>>9) & 0x1;
+    }
+    else if (runNumber<5000000){
+	int ldsm0 = (mLastDsmArray[7]/16)%256;
+	return (ldsm0/32)%2;
+    }
+    else {
+	return 0;
+    }
 } 
 
 int
-StL0Trigger::spinBitBlueDown() const
+StL0Trigger::spinBitBlueDown(int runNumber) const
 {
-    return (mLastDsmArray[0]>>11) & 0x1;
+    if (runNumber<4000000){
+	return (mLastDsmArray[0]>>10) & 0x1;
+    }
+    else if (runNumber<5000000){
+	int ldsm0 = (mLastDsmArray[7]/16)%256;
+	return (ldsm0/64)%2;
+    }
+    else {
+	return 0;
+    }
 } 
