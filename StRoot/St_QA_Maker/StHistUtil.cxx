@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.12 1999/12/10 17:38:24 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.13 1999/12/13 20:08:37 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.13  1999/12/13 20:08:37  lansdell
+// added pt vs eta in ftpc histogram to match table QA changes; updated logy scale histograms
+//
 // Revision 1.12  1999/12/10 17:38:24  kathy
 // now reprint canvas on each page of postscript output file; also changed some histogram limits
 //
@@ -570,8 +573,8 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "StEQaGtrkRT",
  "StEQaGtrkRnfT",
  "StEQaGtrkRnmT",
- "StEQaGtrkTanlT ",
- "StEQaGtrkThetaT ",
+ "StEQaGtrkTanlT",
+ "StEQaGtrkThetaT",
  "StEQaGtrkEtaT",
  "StEQaGtrkLengthT",
  "StEQaGtrkNPntFE",
