@@ -1,5 +1,8 @@
-// $Id: St_geom_Maker.cxx,v 1.3 1998/12/12 00:18:00 fisyak Exp $
+// $Id: St_geom_Maker.cxx,v 1.4 1998/12/12 00:21:15 fisyak Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.4  1998/12/12 00:21:15  fisyak
+// Remove gstar for the moment
+//
 // Revision 1.3  1998/12/12 00:18:00  fisyak
 // Remove gstar for the moment
 //
@@ -103,16 +106,16 @@ Int_t St_geom_Maker::Make(){
 }
  return kStOK;
 }
-#if 0
 //_____________________________________________________________________________
 void St_geom_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geom_Maker.cxx,v 1.3 1998/12/12 00:18:00 fisyak Exp $\n");
+  printf("* $Id: St_geom_Maker.cxx,v 1.4 1998/12/12 00:21:15 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
 
+#if 0
 //Geometry *pGeometry = new Geometry();
 
 
