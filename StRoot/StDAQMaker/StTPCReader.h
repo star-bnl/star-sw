@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTPCReader.h,v 1.1 2000/06/12 15:12:27 perev Exp $
+ * $Id: StTPCReader.h,v 1.2 2000/07/13 22:29:52 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTPCReader.h,v $
+ * Revision 1.2  2000/07/13 22:29:52  perev
+ * Return kStErr when TPC data is not in event.
+ *
  * Revision 1.1  2000/06/12 15:12:27  perev
  * SVT + cleanup
  *
@@ -140,10 +143,10 @@ class  StTPCReader
 	// returns true if the pad is bad.  
 	// returns false if the pad is not bad.
 
-  virtual void Update();
+  virtual int Update();
 
 protected:
-  virtual void setSector(int sector);
+  virtual int setSector(int sector);
 
   StDAQReader 		*fDAQReader;
   DetectorReader 	*fTPCImpReader;

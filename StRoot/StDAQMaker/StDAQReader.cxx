@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.20 2000/07/08 22:53:39 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.21 2000/07/13 22:29:52 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.21  2000/07/13 22:29:52  perev
+ * Return kStErr when TPC data is not in event.
+ *
  * Revision 1.20  2000/07/08 22:53:39  perev
  * next offset before error return
  *
@@ -161,7 +164,7 @@ int StDAQReader::readEvent()
   *fEventInfo = fEventReader->getEventInfo();
   if(fEventInfo->Token==0) return kStErr;  // Herb, July 5 2000
 
-  if (fTPCReader) 	fTPCReader ->Update();
+  if (fTPCReader) { if(fTPCReader ->Update()) return kStErr; }
   if (fFTPCReader)	fFTPCReader->Update();
   if (fTRGReader) 	fTRGReader ->Update();
   if (fSVTReader) 	fSVTReader ->Update();

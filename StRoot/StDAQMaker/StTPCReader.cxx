@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTPCReader.cxx,v 1.1 2000/06/12 15:12:27 perev Exp $
+ * $Id: StTPCReader.cxx,v 1.2 2000/07/13 22:29:52 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTPCReader.cxx,v $
+ * Revision 1.2  2000/07/13 22:29:52  perev
+ * Return kStErr when TPC data is not in event.
+ *
  * Revision 1.1  2000/06/12 15:12:27  perev
  * SVT + cleanup
  *
@@ -48,9 +51,9 @@ StTPCReader::StTPCReader(StDAQReader *daqr)
   Update();
 }
 //_____________________________________________________________________________
-void StTPCReader::Update()
+int StTPCReader::Update()
 {
-  setSector(-1);
+  return setSector(-1);
 }
 //_____________________________________________________________________________
 StTPCReader::~StTPCReader()
@@ -71,9 +74,9 @@ int StTPCReader::close()
   return 0;
  }
 //_____________________________________________________________________________
-void StTPCReader::setSector(int sector)
+int StTPCReader::setSector(int sector)
 {
-  if (sector == fSector) return;
+  if (sector == fSector) return 0;
 
   delete fZeroSuppressedReader;	fZeroSuppressedReader 	= 0;
   delete fADCRawReader ;	fADCRawReader 		= 0;
@@ -87,7 +90,8 @@ void StTPCReader::setSector(int sector)
    delete fTPCImpReader;
    fTPCImpReader = ::getDetectorReader(fDAQReader->getEventReader(),fDAQReader->getTPCVersion());
    fSector = -1999;
-   return;
+   if(!fTPCImpReader) return 1;
+   return 0;
   }
 
   fSector = sector;
@@ -99,6 +103,8 @@ void StTPCReader::setSector(int sector)
   fGainReader 		= fTPCImpReader->getGainReader(fSector);
   fCPPReader 		= fTPCImpReader->getCPPReader(fSector);
   fBadChannelReader 	= fTPCImpReader->getBadChannelReader(fSector);
+
+  return 0;
 }
 //_____________________________________________________________________________
 
