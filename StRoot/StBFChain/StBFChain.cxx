@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.398 2004/03/24 20:28:17 calderon Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.399 2004/03/24 23:16:54 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1582,6 +1582,12 @@ Int_t StBFChain::Instantiate()
 
 	  // Turn on alternative V0 method
 	  if (maker == "StV0Maker" && GetOption("Ev03")) mk->SetMode(1);
+	  //if (maker == "StKinkMaker"){
+	  // // Placeholder for KinkMaker control. 
+	  // // - SetMode(1)   TPT, 
+	  // // - SetMode(2)   ITTF
+	  // // Default = Both
+	  //}
 
 	  if (maker == "StEventQAMaker") {
 	    if ( GetOption("alltrigger") ){
