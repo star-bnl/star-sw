@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.6 2001/04/26 14:23:40 akio Exp $
+ * $Id: StEmcGeom.cxx,v 1.7 2001/04/28 19:46:29 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.7  2001/04/28 19:46:29  pavlinov
+ * Reject output
+ *
  * Revision 1.6  2001/04/26 14:23:40  akio
  * Quick and dirty fix for crashing non-bfc chain
  *
@@ -105,7 +108,7 @@ void StEmcGeom::initGeom(const Int_t det)
   defineModuleGridOnPhi();
 
   mMaxAdc = 1024; if(det==1) mMaxAdc = 4096;
-  getGeantGeometryTable();
+  //  getGeantGeometryTable();
 
   switch (det){
   case 1:
@@ -418,7 +421,8 @@ Int_t &sub, Int_t &detector)
 
   static Int_t emcIvid[5]={10000000,100000,100,10,1};
   Int_t emcChid[5], i, ividw, rl, phi, dep;
-  assert(mCalg_st); // 24-apr
+  //  assert(mCalg_st); // 24-apr
+  if(mCalg_st == 0) getGeantGeometryTable();
 
   ividw = ivid;
   for(i=0; i<5; i++){
@@ -814,11 +818,9 @@ StEmcGeom::getGeantGeometryTable()
   mCalr_st = 0;
   StMaker maker;
   mChain = maker.GetChain();
-  //  TList *tl = (TList*)gROOT->GetListOfBrowsables();
-  //  if(tl) {
-  //  mChain=(StBFChain*)tl->FindObject("bfc"); 
+
   if(mChain) mGeantGeom = mChain->GetDataSet("geom");
-  //}
+
   if(mGeantGeom != 0) {
     mCalg    = (St_calb_calg   *) mGeantGeom->Find("calb_calg");
     if(mCalg) {
@@ -831,8 +833,8 @@ StEmcGeom::getGeantGeometryTable()
   }
   if(!mCalg_st || !mCalr_st) {
     mMode.Append(" : No table");
-    printf("StEmcGeom::getGeantGeometryTable() could not find geom\n");
-    printf("StEmcGeom::getGeantGeometryTable() create own calb_calg/r\n");
+    //    printf("StEmcGeom::getGeantGeometryTable() could not find geom\n");
+    //printf("StEmcGeom::getGeantGeometryTable() create own calb_calg/r\n");
     mCalg = new St_calb_calg("calg", 1);
     mCalr = new St_calb_calr("calr", 1);
     mCalg_st = mCalg->GetTable();
@@ -841,7 +843,3 @@ StEmcGeom::getGeantGeometryTable()
     mCalg_st[0].shift[1]=105.0;
   }
 }
-
-
-
-
