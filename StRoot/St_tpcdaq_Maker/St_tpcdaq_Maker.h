@@ -1,5 +1,152 @@
-// $Id: St_tpcdaq_Maker.h,v 1.39 2004/01/02 17:53:18 ward Exp $
+/*!
+ * \class St_tpcdaq_Maker 
+ * \author Herbert Ward
+ * \date started Feb 1 1999.
+ *
+ */
+
+#ifndef STAR_St_tpcdaq_Maker
+#define STAR_St_tpcdaq_Maker
+
+//////////////////////////////////////////////////////////////////////////
+//                                                                      //
+// St_tpcdaq_Maker virtual base class for Maker                         //
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////
+#ifndef StMaker_H
+#include "StMaker.h"
+#endif
+#include "St_DataSet.h"
+
+class St_raw_row;
+class St_raw_pad;
+class St_raw_seq;
+class St_type_shortdata;
+class StTpcRawDataEvent;
+class StTpcUnpacker;
+class StSequence;
+class TH1F;
+#define MAXROWPADPERSECTOR 400            /*! \def MAXROWPADPERSECTOR SomeExplaination */
+#define BINRANGE 3                        /*! \def BINRANGE SomeExplaination           */
+
+class ZeroSuppressedReader;
+class StTrsDetectorReader;
+class StTrsZeroSuppressedReader;
+
+typedef struct {
+  int npad,row[MAXROWPADPERSECTOR],pad[MAXROWPADPERSECTOR];
+  int nbin,low[BINRANGE],up[BINRANGE];
+} tpcdaq_noiseElim; /* one of these for each of the 24 sectors */
+class St_tpcdaq_Maker : public StMaker {
+ private:
+   int                mCorrectionMask; //!
+   char               mMergeSequences; //!
+
+   Char_t            *gConfig;         //!
+   char               alreadySet;      //!
+   char               mErr;            //!
+   StTpcRawDataEvent *mEvent;          //!
+   void MakeHistograms();
+   void SetGainCorrectionStuff(int);
+   float fGain[45][182];
+   tpcdaq_noiseElim noiseElim[24];     //!
+
+   StTrsDetectorReader* mTdr;          //!
+   StTrsZeroSuppressedReader* mZsr;    //!
+   Int_t daq_flag;                     //! 
+
+   Int_t GetEventAndDecoder();
+ protected:
+   TH1F *m_seq_startTimeBin;   // These names are more or less self-
+   TH1F *m_seq_sequnceLength;  // explanatory.  For example, the first one
+   TH1F *m_seq_padNumber;      // means "vertical axis is number of sequences,
+   TH1F *m_seq_padRowNumber;   // and the horizontal axis is startTimeBin".
+   TH1F *m_pad_numSeq;         // Happy sailing.
+   TH1F *m_pix_AdcValue;       //
+ private:
+   void PrepareSimulatedData(unsigned int sector,unsigned int *out);
+   void DAQ100clOutput(const unsigned int *pTPCP); //!
+   void DAQ100clTableOut(unsigned int,unsigned int,unsigned int, char,const unsigned int *); //!
+ public: 
+   void SetCorrection(int);
+   int  GetCorrection(void);
+   char SetSequenceMerging(char);
+   char WhetherToSwap(unsigned int x);
+   unsigned int Swap4(char,unsigned int x); //!
+   unsigned short int Swap2(char,unsigned short int x); //!
+   void ExcludeTheseTimeBins(int lo1,int hi1,int lo2,int hi2,int lo3,int hi3);
+   St_tpcdaq_Maker(const char *name="tpc_raw",char *daqInputFile="undefined"); // If
+       // the 2nd arg (daqInputFile) is NULL, then we use TRS.
+   
+   void OrderTheSequences(int nseq,StSequence *los);
+   // void FatalError(int);
+   void SeqWrite(St_raw_seq *raw_seq_gen,int rownum,
+                  int startTimeBin,int numberOfBinsInSequence);
+   void PixelWrite(St_type_shortdata *pixel_data_gen,St_type_shortdata *pixel_indx_gen,
+                    int rownum,unsigned short datum,unsigned short id);
+   void PadWrite(St_raw_pad *raw_pad_gen,int padR,int padOffset,
+      int seqOffset,int nseq,int nSeqB4Offset,int pad);
+   void RowWrite(St_raw_row *raw_row_gen,int rownumber,
+          int pixSave, int iseqSave,int nPixelThisPadRow,
+          int nSeqThisPadRow,int offsetIntoPadTable,
+          int nPadsWithSignal,int pixTblWhere,int ipadrow);
+   void MkTables(
+      int isect,
+      St_DataSet *sector,
+      St_raw_row **raw_row_in,
+      St_raw_row **raw_row_out,
+      St_raw_pad **raw_pad_in,
+      St_raw_pad **raw_pad_out,
+      St_raw_seq **raw_seq_in,
+      St_raw_seq **raw_seq_out,
+      St_type_shortdata **pixel_data_in,
+      St_type_shortdata **pixel_data_out,
+      St_type_shortdata **pixel_indx_in,
+      St_type_shortdata **pixel_indx_out);
+   char *NameOfSector(int isect);
+   void PrintErr(int,char);
+   int Output();
+   int getSector(Int_t isect);
+   int getPadList(int whichPadRow,unsigned char **padlist);
+   int mNseqLo,mNseqHi,mThreshLo,mThreshHi; // ASICS parameters
+   void AsicThresholds(float gain,int *nseq,StSequence **lst);
+   int getSequences(float gain,int whichPadRow,int pad,int *nseq,StSequence **seqList, int ***listOfIds=0);
+   void SetDAQFlag(Int_t);
+   void SetNoiseEliminationStuff();
+   void WriteStructToScreenAndExit();
+   void SetConfig(Char_t *conf) {gConfig = conf;  
+     printf("St_tpcdaq_Maker::SetConfig, getting data from %s.\n",gConfig);
+   }
+   Char_t   *GetConfig() {return gConfig;}
+   virtual void SetMode(Int_t mode=0) {
+     m_Mode=mode; 
+     if (m_Mode == 1) SetConfig("trs");
+     else {if (m_Mode == 2)  SetConfig("l3"); else  SetConfig("daq");}
+   }  
+   virtual       ~St_tpcdaq_Maker();
+   virtual Int_t  Init();
+   virtual Int_t  InitRun(Int_t );
+   virtual Int_t  Make();
+   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
+   virtual const char *GetCVS() const {
+     static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.40 2004/03/10 05:49:52 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+     return cvs;
+   }
+
+   ClassDef(St_tpcdaq_Maker,0)   //StAF chain virtual base class for Makers
+};
+
+#endif
+
+
+
+// $Id: St_tpcdaq_Maker.h,v 1.40 2004/03/10 05:49:52 jeromel Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.40  2004/03/10 05:49:52  jeromel
+// This unfortunatly appears all diferent but main changes are
+// - doxygenized
+// - implement SetSequenceMerging()
+//
 // Revision 1.39  2004/01/02 17:53:18  ward
 // Add receiver board and mezzanine to daq100cl output table.
 //
@@ -117,129 +264,3 @@
 // Revision 1.1  1999/02/18 16:56:35  ward
 // There may be bugs. = Moshno oshibki.
 //
-#ifndef STAR_St_tpcdaq_Maker
-#define STAR_St_tpcdaq_Maker
-
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_tpcdaq_Maker virtual base class for Maker                         //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
-#include "St_DataSet.h"
-
-class St_raw_row;
-class St_raw_pad;
-class St_raw_seq;
-class St_type_shortdata;
-class StTpcRawDataEvent;
-class StTpcUnpacker;
-class StSequence;
-class TH1F;
-#define MAXROWPADPERSECTOR 400
-#define BINRANGE 3
-
-class ZeroSuppressedReader;
-class StTrsDetectorReader;
-class StTrsZeroSuppressedReader;
-typedef struct {
-  int npad,row[MAXROWPADPERSECTOR],pad[MAXROWPADPERSECTOR];
-  int nbin,low[BINRANGE],up[BINRANGE];
-} tpcdaq_noiseElim; /* one of these for each of the 24 sectors */
-class St_tpcdaq_Maker : public StMaker {
- private:
-   int               m_CorrectionMask; //!
-   Char_t            *gConfig; //!
-   char               alreadySet; //!
-   char               mErr; //!
-   StTpcRawDataEvent *mEvent; //!
-   void MakeHistograms();
-   void SetGainCorrectionStuff(int);
-   float fGain[45][182];
-  tpcdaq_noiseElim noiseElim[24]; //!
-
-   StTrsDetectorReader* mTdr;  //!
-   StTrsZeroSuppressedReader* mZsr; //!
-   Int_t daq_flag;             //! 
-
-   Int_t GetEventAndDecoder();
- protected:
-   TH1F *m_seq_startTimeBin;   // These names are more or less self-
-   TH1F *m_seq_sequnceLength;  // explanatory.  For example, the first one
-   TH1F *m_seq_padNumber;      // means "vertical axis is number of sequences,
-   TH1F *m_seq_padRowNumber;   // and the horizontal axis is startTimeBin".
-   TH1F *m_pad_numSeq;         // Happy sailing.
-   TH1F *m_pix_AdcValue;       //
- private:
-   void PrepareSimulatedData(unsigned int sector,unsigned int *out);
-   void DAQ100clOutput(const unsigned int *pTPCP); //!
-   void DAQ100clTableOut(unsigned int,unsigned int,unsigned int, char,const unsigned int *); //!
- public: 
-   void SetCorrection(int);
-   int GetCorrection(void);
-   char WhetherToSwap(unsigned int x);
-   unsigned int Swap4(char,unsigned int x); //!
-   unsigned short int Swap2(char,unsigned short int x); //!
-   void ExcludeTheseTimeBins(int lo1,int hi1,int lo2,int hi2,int lo3,int hi3);
-   St_tpcdaq_Maker(const char *name="tpc_raw",char *daqInputFile="undefined"); // If
-       // the 2nd arg (daqInputFile) is NULL, then we use TRS.
-   
-   void OrderTheSequences(int nseq,StSequence *los);
-   // void FatalError(int);
-   void SeqWrite(St_raw_seq *raw_seq_gen,int rownum,
-                  int startTimeBin,int numberOfBinsInSequence);
-   void PixelWrite(St_type_shortdata *pixel_data_gen,St_type_shortdata *pixel_indx_gen,
-                    int rownum,unsigned short datum,unsigned short id);
-   void PadWrite(St_raw_pad *raw_pad_gen,int padR,int padOffset,
-      int seqOffset,int nseq,int nSeqB4Offset,int pad);
-   void RowWrite(St_raw_row *raw_row_gen,int rownumber,
-          int pixSave, int iseqSave,int nPixelThisPadRow,
-          int nSeqThisPadRow,int offsetIntoPadTable,
-          int nPadsWithSignal,int pixTblWhere,int ipadrow);
-   void MkTables(
-      int isect,
-      St_DataSet *sector,
-      St_raw_row **raw_row_in,
-      St_raw_row **raw_row_out,
-      St_raw_pad **raw_pad_in,
-      St_raw_pad **raw_pad_out,
-      St_raw_seq **raw_seq_in,
-      St_raw_seq **raw_seq_out,
-      St_type_shortdata **pixel_data_in,
-      St_type_shortdata **pixel_data_out,
-      St_type_shortdata **pixel_indx_in,
-      St_type_shortdata **pixel_indx_out);
-   char *NameOfSector(int isect);
-   void PrintErr(int,char);
-   int Output();
-   int getSector(Int_t isect);
-   int getPadList(int whichPadRow,unsigned char **padlist);
-   int mNseqLo,mNseqHi,mThreshLo,mThreshHi; // ASICS parameters
-   void AsicThresholds(float gain,int *nseq,StSequence **lst);
-   int getSequences(float gain,int whichPadRow,int pad,int *nseq,StSequence **seqList, int ***listOfIds=0);
-   void SetDAQFlag(Int_t);
-   void SetNoiseEliminationStuff();
-   void WriteStructToScreenAndExit();
-   void SetConfig(Char_t *conf) {gConfig = conf;  
-     printf("St_tpcdaq_Maker::SetConfig, getting data from %s.\n",gConfig);
-   }
-   Char_t   *GetConfig() {return gConfig;}
-   virtual void SetMode(Int_t mode=0) {
-     m_Mode=mode; 
-     if (m_Mode == 1) SetConfig("trs");
-     else {if (m_Mode == 2)  SetConfig("l3"); else  SetConfig("daq");}
-   }  
-   virtual       ~St_tpcdaq_Maker();
-   virtual Int_t  Init();
-   virtual Int_t  InitRun(Int_t );
-   virtual Int_t  Make();
-// virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.39 2004/01/02 17:53:18 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
-   ClassDef(St_tpcdaq_Maker,0)   //StAF chain virtual base class for Makers
-};
-
-#endif
