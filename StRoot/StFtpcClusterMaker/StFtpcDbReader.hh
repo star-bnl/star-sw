@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.6 2001/08/16 18:27:54 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.7 2001/10/19 09:40:11 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.7  2001/10/19 09:40:11  jcs
+// tZero now in data base in ftpcElectronics
+//
 // Revision 1.6  2001/08/16 18:27:54  jcs
 // add inline get function for driftCathodeVoltage
 //
@@ -39,6 +42,7 @@
 #include "tables/St_ftpcTimeOffset_Table.h"
 #include "tables/St_ftpcGas_Table.h"
 #include "tables/St_ftpcDriftField_Table.h"
+#include "tables/St_ftpcElectronics_Table.h"
 
 
 class StFtpcDbReader : public TObject 
@@ -113,7 +117,8 @@ public:
                  St_ftpcAmpSlope      *ampslope,
                  St_ftpcAmpOffset     *ampoffset,
                  St_ftpcTimeOffset    *timeoffset,
-                 St_ftpcDriftField    *driftfield);
+                 St_ftpcDriftField    *driftfield,
+                 St_ftpcElectronics   *electronics);
   // constructor used by StFtpcSlowSimMaker and StFtpcDriftMapMaker:
   StFtpcDbReader(St_ftpcDimensions    *dimensions,
                  St_ftpcPadrowZ       *zrow,
@@ -123,7 +128,8 @@ public:
                  St_ftpcdVDriftdP     *dvdriftdp,
                  St_ftpcdDeflectiondP *ddeflectiondp,
                  St_ftpcGas           *gas,
-                 St_ftpcDriftField    *driftfield);
+                 St_ftpcDriftField    *driftfield,
+                 St_ftpcElectronics   *electronics);
   ~StFtpcDbReader();
   Float_t padrowZPosition(Int_t i); 
   Float_t magboltzEField(Int_t i);

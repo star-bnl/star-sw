@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.27 2001/10/12 14:33:08 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.28 2001/10/19 09:41:22 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.28  2001/10/19 09:41:22  jcs
+// tZero now in data base in ftpcElectronics
+//
 // Revision 1.27  2001/10/12 14:33:08  jcs
 // create and fill charge step histograms for FTPC East and West
 //
@@ -140,7 +143,8 @@ StMaker(name),
     m_ampslope(0),
     m_ampoffset(0),
     m_timeoffset(0),
-    m_driftfield(0)
+    m_driftfield(0),
+    m_electronics(0)
 {
   drawinit=kFALSE;
 }
@@ -184,6 +188,7 @@ Int_t StFtpcClusterMaker::Init(){
   m_ampoffset = (St_ftpcAmpOffset *)dblocal_calibrations("ftpcAmpOffset");
   m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
   m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
+  m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
 
 // 		Create Histograms
 m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
@@ -244,7 +249,8 @@ Int_t StFtpcClusterMaker::Make()
                                                 m_ampslope,
                                                 m_ampoffset,
                                                 m_timeoffset,
-                                                m_driftfield);
+                                                m_driftfield,
+                                                m_electronics);
 
   TObjArray *hitarray = new TObjArray(10000);  
 
