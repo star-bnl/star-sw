@@ -189,9 +189,9 @@ void StTreeMaker::UpdateTree(Int_t flag)
   StBranch *br;
   const char* logs;int nlog,isSetBr,isHist; 
   St_DataSet *upd,*updList,*dat,*ds;
-  const char *updName,*updTitl,*cc;
+  const char *cc;
 
-  TString updFile,updMode,updOpt,tlog;
+  TString updName,updTitl,updFile,updMode,updOpt,tlog;
   
   updList= Find(".branches");
   if (!updList) return;
@@ -201,7 +201,7 @@ void StTreeMaker::UpdateTree(Int_t flag)
     updTitl = upd->GetTitle();
     updName = upd->GetName();
     updFile = ""; updMode = ""; updOpt = "";
-    isSetBr = (strncmp("SetBranch:",updTitl,10)==0);
+    isSetBr = (updTitl.Index("SetBranch:",10)==0);
     if (isSetBr && flag!=0)	continue;
 
     if (isSetBr) {//SetBranch block
@@ -228,7 +228,7 @@ void StTreeMaker::UpdateTree(Int_t flag)
     
     if (flag==0) 	continue;
     
-    isHist = (strncmp("hist",updName,4)==0); 
+    isHist = (updName=="hist"); 
     if ( (flag==1) != (!isHist)) 	continue;
 
 
