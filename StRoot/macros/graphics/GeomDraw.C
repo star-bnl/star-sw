@@ -3,12 +3,15 @@ St_geant_Maker *geant=0;
 //_________________________________________________________________________________________________________________
 void GeomDrawUsage() {
           printf("\n");
-          printf("Usage: root4star \'GeomDraw.C(const char *geomDescriptor)\' \n");
+          printf("Usage: root4star \'GeomDraw.C(const char *geomDescriptor,Float_t bombFactor=2.0, const char *outRootFile="")\' \n");
           printf("-----  where \"geomDescriptor\" can be either \n");
           printf("        1. STAR geometry version like \"year2003\" (see: http://www.star.bnl.gov/STAR/comp/prod/MCGeometry.html) \n");
           printf("            example: root4star \'GeomDraw.C(\"year2003\")\'\n");                
           printf("        2. the proper ZEBRA fz file, for example \n");
           printf("            example: root4star \'GeomDraw.C(\"/star/u/potekhin/gstardata/y2003x_complete.fz \")\'\n\n"); 
+          printf("         \"Float_t bombFactor\" - the so-called \"bombFactor\" to get the exploiding view of the detector.\n");
+          printf("                                    To get the normal view the bombFactor has to be set to 1.0\n");
+          printf("                                    It is usually useless to apply bombFactor < 1.0 \n");
           printf("---------------\n"); 
           printf(" One can adjust the view via ROOT Browser or ROOT TCanvas \n"); 
           printf(" 1. Select the volume you are interesting in with left mouse button\n"); 
@@ -27,10 +30,20 @@ void GeomDrawUsage() {
           printf(" To get the OpenGL view one has to\n");
           printf("    1. Turn Qt ROOT Layer on (see: http://www.rhic.bnl.gov/~fine/EventDisplay \n");
           printf("    2. Select \"OpenGL view\" from the \"View\" menu of ROOT TCanvas \n");                
-          printf("\n$Id: GeomDraw.C,v 1.7 2004/08/07 00:46:33 fine Exp $\n");
+          printf("---------------\n"); 
+          printf(" To adjust the so-called bombFactor you can invoke \n");
+          printf(" the C++ statement from the ROOT command prompt:\n\n");
+          printf("  gGeometry->SetBomb(1.6);\n\n");
+          printf(" To change the background color  call:\\nn");
+          printf("        gPad->SetFillColor(kWhite);\n\n");
+          printf("   \"kWhite\" background is advised \n");
+          printf("   if you want to print the image to the paper\n");
+          printf("---------------\n"); 
+          
+          printf("\n$Id: GeomDraw.C,v 1.8 2004/08/09 17:43:43 fine Exp $\n");
 }                 
 //_____________________________________________________________________________________________________________
-void GeomDraw(const char *fzFile="complete",const char *out = "")
+void GeomDraw(const char *fzFile="complete",Float_t bombFactor=1.4, const char *out = "")
 {
    // Read the ZEBRA file with GEANT geometry
    // Convert it to TVolume format 
@@ -50,7 +63,14 @@ void GeomDraw(const char *fzFile="complete",const char *out = "")
           return;              
      }
    }
-
+   
+  // Workaroung of STAR bug with ROOT 4.00.04
+  TString unixLDPath = "$ROOT/$ROOT_LEVEL.qt/.$STAR_HOST_SYS/rootdeb/lib:";
+  unixLDPath += gEnv->GetValue("Root.DynamicPath","");
+  gEnv->SetValue("Root.DynamicPath",unixLDPath.Data());
+  gSystem->Load("$ROOT/$ROOT_LEVEL.qt/.$STAR_HOST_SYS/rootdeb/lib/libRQTGL.so");
+  // end of workaroung
+  
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
@@ -84,7 +104,10 @@ void GeomDraw(const char *fzFile="complete",const char *out = "")
      if (hall) {
         hall->SetVisibility(2);
         new TBrowser("STAR Geometry", hall);
-        hall->Draw("5");
+        if (bombFactor < 1)  bombFactor = 1.;
+        gGeometry->SetBomb(bombFactor);        
+        hall->Draw("6");        
+        gPad->SetFillColor(kBlack);
     }
     gPad->Modified();
     gPad->Update();
@@ -97,5 +120,5 @@ void GeomDraw(const char *fzFile="complete",const char *out = "")
   } else {
      fprintf(stderr,"\n\n, ** Error **, No suitable STAR geonmetry has been found. Abort !!! \n");   
   }
-  deleet chain; chain = 0;
+//  delete chain; chain = 0;
 }
