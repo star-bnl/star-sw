@@ -1,5 +1,8 @@
-// $Id: St_tptsts_Maker.cxx,v 1.3 1999/09/24 01:23:48 fisyak Exp $
+// $Id: St_tptsts_Maker.cxx,v 1.4 2000/06/23 19:40:43 fisyak Exp $
 // $Log: St_tptsts_Maker.cxx,v $
+// Revision 1.4  2000/06/23 19:40:43  fisyak
+// remove access to params
+//
 // Revision 1.3  1999/09/24 01:23:48  fisyak
 // Reduced Include Path
 //
@@ -47,7 +50,7 @@ St_tptsts_Maker::~St_tptsts_Maker(){}
 Int_t St_tptsts_Maker::Init(){
   // Create tables
   
-  St_DataSet *tpcpars = GetInputDB("params/tpc");
+  St_DataSet *tpcpars = GetInputDB("tpc");
   assert(tpcpars);
   
   St_DataSetIter       gime(tpcpars);

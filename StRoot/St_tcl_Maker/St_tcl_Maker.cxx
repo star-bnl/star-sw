@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.59 2000/02/26 01:51:11 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.60 2000/06/23 19:40:01 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.60  2000/06/23 19:40:01  fisyak
+// remove access to params
+//
 // Revision 1.59  2000/02/26 01:51:11  snelling
 // clean up
 //
@@ -76,7 +79,7 @@ Int_t St_tcl_Maker::Init() {
   }
 
   // 		Create tables
-  St_DataSet *tpc = GetDataBase("params/tpc");
+  St_DataSet *tpc = GetDataBase("tpc");
   assert(tpc);
 
   // 		geometry parameters
@@ -378,7 +381,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.59 2000/02/26 01:51:11 snelling Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.60 2000/06/23 19:40:01 fisyak Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.51 2000/06/22 21:07:10 wdeng Exp $
+// $Id: St_tpt_Maker.cxx,v 1.52 2000/06/23 19:40:27 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.52  2000/06/23 19:40:27  fisyak
+// remove access to params
+//
 // Revision 1.51  2000/06/22 21:07:10  wdeng
 // New iflag for cluster vertex.
 //
@@ -223,7 +226,7 @@ gMessMgr->SetLimit("TPTRSP-E1",10);
 
   // Create tables
   
-  St_DataSet *tpcpars = GetInputDB("params/tpc");
+  St_DataSet *tpcpars = GetInputDB("tpc");
   assert(tpcpars);
   
   St_DataSetIter       gime(tpcpars);
