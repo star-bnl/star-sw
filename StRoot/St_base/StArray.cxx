@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.13 1999/10/21 00:13:58 perev Exp $
+// $Id: StArray.cxx,v 1.14 1999/10/22 22:24:00 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.14  1999/10/22 22:24:00  perev
+// Minor fixes
+//
 // Revision 1.13  1999/10/21 00:13:58  perev
 // Version of StArray for new StEvent
 //
@@ -227,7 +230,7 @@ TIterator* StObjArray::MakeIterator(Bool_t dir) const
   return (TIterator*)(new StObjArrayIter(this,dir));
 }
 //______________________________________________________________________________
-void StObjArray::Clean(StObject *obj=0)
+void StObjArray::Clean(StObject *obj)
 {
   if (!obj) Clear(); else Remove(obj);
 }  
