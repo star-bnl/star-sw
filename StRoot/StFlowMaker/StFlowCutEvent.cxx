@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.23 2002/01/30 13:04:10 oldi Exp $
+// $Id: StFlowCutEvent.cxx,v 1.24 2002/03/15 16:43:21 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -135,7 +135,7 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
   if (!pPicoEvent) return kFALSE;
 
   // Centrality
-  Int_t cent = pPicoEvent->Centrality();
+  Int_t cent = pPicoEvent->CalcCentrality();
   if (mCentCuts[0] && mCentCuts[1] >= mCentCuts[0] && 
       (cent < mCentCuts[0] || cent > mCentCuts[1])) {
     mCentCut++;
@@ -290,6 +290,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.24  2002/03/15 16:43:21  snelling
+// Added a method to recalculate the centrality in StFlowPicoEvent
+//
 // Revision 1.23  2002/01/30 13:04:10  oldi
 // Trigger cut implemented.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.cxx,v 1.9 2001/07/24 22:29:31 snelling Exp $
+// $Id: StFlowPicoEvent.cxx,v 1.10 2002/03/15 16:43:22 snelling Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -22,6 +22,7 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
+#include <iostream.h>
 #include "StFlowPicoEvent.h"
 #include "TClonesArray.h"
 
@@ -56,10 +57,80 @@ void StFlowPicoEvent::AddTrack(StFlowPicoTrack* inputTrack) {
   TClonesArray &tracks = *fTracks;
   new(tracks[mNtrack++]) StFlowPicoTrack(inputTrack);
 }
+//-----------------------------------------------------------------------
+
+UInt_t StFlowPicoEvent::CalcCentrality() {
+
+  if (this->CenterOfMassEnergy() >= 199.) {
+    if (fabs(this->MagneticField()) >= 4.) {
+      int nhmin = this->UncorrNegMult();
+      int nhplus = this->UncorrPosMult();
+      int tracks = nhmin + nhplus;
+      cout << "pFlowPicoEvent->SetCentralityYear2AuAuFull: " << tracks << endl;
+      
+      // Centrality for year=2, Au+Au and Full Field 
+
+      int cent[] = {14,33,59,98,150,221,311,428,500};
+      if (tracks < cent[0])       { mCentrality = 0; }
+      else if (tracks < cent[1])  { mCentrality = 1; }
+      else if (tracks < cent[2])  { mCentrality = 2; }
+      else if (tracks < cent[3])  { mCentrality = 3; }
+      else if (tracks < cent[4])  { mCentrality = 4; }
+      else if (tracks < cent[5])  { mCentrality = 5; }
+      else if (tracks < cent[6])  { mCentrality = 6; }
+      else if (tracks < cent[7])  { mCentrality = 7; }
+      else if (tracks < cent[8])  { mCentrality = 8; }
+      else                        { mCentrality = 9; }
+    }
+    else {
+      int nhmin = this->UncorrNegMult();
+      int nhplus = this->UncorrPosMult();
+      int tracks = nhmin + nhplus;
+      cout << "pFlowPicoEvent->SetCentralityYear2AuAuHalf: " << tracks << endl;  
+
+      // Centrality for year=2, Au+Au and Half Field
+
+      int cent[] = {14,32,59,98,149,216,302,409,474};
+      if (tracks < cent[0])       { mCentrality = 0; }
+      else if (tracks < cent[1])  { mCentrality = 1; }
+      else if (tracks < cent[2])  { mCentrality = 2; }
+      else if (tracks < cent[3])  { mCentrality = 3; }
+      else if (tracks < cent[4])  { mCentrality = 4; }
+      else if (tracks < cent[5])  { mCentrality = 5; }
+      else if (tracks < cent[6])  { mCentrality = 6; }
+      else if (tracks < cent[7])  { mCentrality = 7; }
+      else if (tracks < cent[8])  { mCentrality = 8; }
+      else                        { mCentrality = 9; }
+    }
+  }
+  else {
+    int tracks = this->MultEta();
+    cout << "pFlowPicoEvent->SetCentrality: " << tracks << endl;
+
+    // Centrality for year=1
+
+    int cent[] = {20,100,180,270,360,460,560,660,870};
+    if (tracks < cent[0])       { mCentrality = 0; }
+    else if (tracks < cent[1])  { mCentrality = 1; }
+    else if (tracks < cent[2])  { mCentrality = 2; }
+    else if (tracks < cent[3])  { mCentrality = 3; }
+    else if (tracks < cent[4])  { mCentrality = 4; }
+    else if (tracks < cent[5])  { mCentrality = 5; }
+    else if (tracks < cent[6])  { mCentrality = 6; }
+    else if (tracks < cent[7])  { mCentrality = 7; }
+    else if (tracks < cent[8])  { mCentrality = 8; }
+    else                        { mCentrality = 9; }
+  }
+
+  return mCentrality;
+}
  
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.cxx,v $
+// Revision 1.10  2002/03/15 16:43:22  snelling
+// Added a method to recalculate the centrality in StFlowPicoEvent
+//
 // Revision 1.9  2001/07/24 22:29:31  snelling
 // First attempt to get a standard root pico file again, added variables
 //

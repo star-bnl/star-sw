@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.38 2002/03/14 18:51:50 snelling Exp $
+// $Id: StFlowEvent.h,v 1.39 2002/03/15 16:43:22 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -84,9 +84,7 @@ public:
   void SetUncorrPosMult(const UInt_t&);
   void SetUncorrNegMult(const UInt_t&);
   void SetMultEta(const UInt_t&);
-  void SetCentrality(const UInt_t&);
-  void SetCentralityYear2AuAuFull(const UInt_t&);
-  void SetCentralityYear2AuAuHalf(const UInt_t&);
+  void SetCentrality();
   void SetVertexPos(const StThreeVectorF&);
   void SetCTB(const Float_t ctb);
   void SetZDCe(const Float_t zdce);
@@ -345,6 +343,9 @@ inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.39  2002/03/15 16:43:22  snelling
+// Added a method to recalculate the centrality in StFlowPicoEvent
+//
 // Revision 1.38  2002/03/14 18:51:50  snelling
 // Added new centralities
 //
