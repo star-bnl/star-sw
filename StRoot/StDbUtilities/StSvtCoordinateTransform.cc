@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.30 2004/08/26 17:11:51 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.31 2004/09/16 02:16:07 perev Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -39,6 +39,7 @@ using namespace units;
 //_____________________________________________________________________________
 StSvtCoordinateTransform::StSvtCoordinateTransform() {
 
+  mFlag=0;
   mDeltaDriftVelocity = 1;
   mPoly9 = new TF1("mPoly9","pol9(0)",0.0,6.0);
 }
@@ -46,13 +47,15 @@ StSvtCoordinateTransform::StSvtCoordinateTransform() {
 //_____________________________________________________________________________
 
 StSvtCoordinateTransform::StSvtCoordinateTransform(StTpcDb* gStTpcDb) {
-mPoly9=0;
+  mFlag=0;
+  mPoly9=0;
 }
 //_____________________________________________________________________________
 
 StSvtCoordinateTransform::~StSvtCoordinateTransform()
 {
  delete mPoly9; mPoly9=0;
+ if (mFlag&1) delete mgeom; mgeom=0;
 }
 
 //_____________________________________________________________________________
@@ -62,7 +65,9 @@ void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
 						 StSvtConfig* config,
 						 StSvtHybridCollection* driftVeloc,
 						 StSvtT0* T0){
+  mFlag=0;
   mgeom = new StSvtGeometry(param, geom, shape);
+  mFlag |=1;
   mconfig = config;
   mDriftVelocity = driftVeloc;
   mDriftCurve = NULL;
@@ -78,7 +83,9 @@ void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
 						 StSvtT0* T0){
 
   
+  mFlag=0;
   mgeom = new StSvtGeometry(param, geom, shape);
+  mFlag |=1;
   mconfig = config;
   mDriftVelocity = driftVeloc;
   mDriftCurve = driftCurve;
