@@ -21,7 +21,7 @@ St_l3_Coordinate_Transformer::St_l3_Coordinate_Transformer()
 
     // initialize transformations
     this->Use_transformation_provided_by_db() ;
-    this->Print_parameters() ;    
+    //this->Print_parameters() ;    
 }
 //______________________________
 St_l3_Coordinate_Transformer::~St_l3_Coordinate_Transformer()
@@ -234,7 +234,7 @@ void St_l3_Coordinate_Transformer::Use_transformation_provided_by_db()
   delete glo ;
   delete padco ;
    
-  cout << "Constants set by using official transformation." << endl;
+  //  cout << "Constants set by using official transformation." << endl;
 }
 //______________________________
 void St_l3_Coordinate_Transformer::Get_parameters_from_db()
