@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.27 1998/12/06 00:38:16 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.28 1998/12/07 03:57:42 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.28  1998/12/07 03:57:42  fine
+// St_Table::SavePrimitive () method has been introduced
+//
 // Revision 1.27  1998/12/06 00:38:16  fisyak
 // Add SavePrimitive
 //
@@ -60,6 +63,7 @@
 //////////////////////////////////////////////////////////////////////////
  
 #include <iostream.h>
+#include <iomanip.h>
 // #include <sstream>
 #include <string.h> 
 
@@ -102,6 +106,31 @@ static void ArrayIndex(Int_t *index,Int_t *size, Int_t dim)
         ArrayIndex(index,size, dim);
     }
   }
+}
+
+//______________________________________________________________________________
+static void AsString(void *buf, const char *name, Int_t width=0)
+{
+   if (!strcmp("unsigned int", name))
+      cout << setw(width) << *(unsigned int *)buf;
+   else if (!strcmp("int", name))
+      cout <<  setw(width) <<  *(int *)buf;
+   else if (!strcmp("unsigned long", name))
+      cout <<  setw(width) <<  *(unsigned long *)buf;
+   else if (!strcmp("long", name))
+      cout <<  setw(width) <<  *(long *)buf;
+   else if (!strcmp("unsigned short", name))
+      cout <<  setw(width) <<   *(unsigned short *)buf;
+   else if (!strcmp("short", name))
+      cout <<  setw(width) <<  *(short *)buf;
+   else if (!strcmp("unsigned char", name))
+      cout <<  setw(width) <<  *(unsigned char *)buf;
+   else if (!strcmp("char", name))
+      cout <<   setw(width) << *(char *)buf;
+   else if (!strcmp("float", name))
+      cout <<   setw(width) << setprecision(width-3) << *(float *)buf;
+   else if (!strcmp("double", name))
+      cout <<   setw(width) << setprecision(width-3) << *(double *)buf;
 }
 
 
@@ -499,6 +528,7 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
   //
   //--------------------------------------------------------------
    // Check bounds and adjust it
+   Int_t const width = 8;
    Int_t rowStep = 10; // The maximun values to print per line
    Int_t rowNumber = rownumber;
    if (row  > GetSize())  return 0;
@@ -588,7 +618,6 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
                 for (Int_t i=0;i<dim;i++) cout << "["<<arrayIndex[i]<<"]";
                 cout << "\t\t";
            }
-
            for (thisStepRows = 0;thisStepRows < thisLoopLenth; thisStepRows++,nextRow += GetRowSize())
            {
              const char *pointer = nextRow + offset  + indexOffset*membertype->Size();
@@ -615,14 +644,16 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
                           breakLoop = kTRUE;
                         }
                         else 
-                           cout << membertype->AsString(p3pointer) << " : ";
+//                           cout << membertype->AsString(p3pointer) << " : ";
+                          ::AsString(p3pointer,membertype->GetTypeName(),width);
+                           cout << " : ";
                    }
                 } else if (!strcmp(member->GetFullTypeName(), "char*") ||
                          !strcmp(member->GetFullTypeName(), "const char*")) {
-                   cout << *ppointer;
+                   cout << setw(width) << *ppointer;
                 } else {
 //                   if (pass == 1) tlink = new TLink(xvalue+0.1, ytext, p3pointer);
-                   cout << " N/A ";
+                   cout << setw(width) << " N/A ";
                 }
              } else if (membertype)
                 if (isdate) {
@@ -638,8 +669,11 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
                     cout << "\"";
                     breakLoop = kTRUE;
                  }
-                 else
-                    cout << membertype->AsString((void *)pointer) <<" : ";
+                 else{
+                    ::AsString((void *)pointer,membertype->GetTypeName(),width);
+                    cout << " : ";
+//                    cout << membertype->AsString((void *)pointer) <<" : ";
+                 }
              else
                 cout << "->" << (Long_t)pointer;
            }
@@ -648,7 +682,7 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
              Int_t ltit = 0;
              if (isdate == kFALSE && strcmp(member->GetFullTypeName(), "char*") &&
                  strcmp(member->GetFullTypeName(), "const char*")) {
-                    cout << "\t // " << member->GetTitle() << ";";
+                    cout << " // " << member->GetTitle() << ";";
              }   
            }
            cout << endl;
@@ -666,8 +700,171 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
 {
    // Save a primitive as a C++ statement(s) on output stream "out".
  
-   out << "//Primitive: " << GetName() << "/" << GetTitle()
-       <<". You must implement " << ClassName() << "::SavePrimitive" << endl;
+   Int_t rowStep =  1; // The maximun values to print per line
+   Int_t rowNumber = GetSize();
+//   Int_t rowNumber = 3; // Just to debug code only
+   if (!rowNumber) return;
+
+   Int_t cdate = 0;
+   Int_t ctime = 0;
+   UInt_t *cdatime = 0;
+   Bool_t isdate = kFALSE;
+//   char *pname; 
+
+   if  (GetNRows() == 0) return;
+
+   TClass *classPtr = GetRowClass();
+
+
+   if (classPtr == 0) return;
+   if (!classPtr->GetListOfRealData()) classPtr->BuildRealData();
+   if (!classPtr->GetNdata()) return;
+
+   TIter      next( classPtr->GetListOfDataMembers());
+
+   //  3. Loop by "rowStep x lines"
+
+   const Char_t  *startRow = (const Char_t *)GetArray();
+   Int_t rowCount = rowNumber;
+   Int_t thisLoopLenth = 0;
+   const Char_t  *nextRow;
+   const Char_t *rowId = "row";
+   const Char_t *tableId = "tableSet";
+   // Generate the header
+   if (!rowCount) return;
+
+    out << "St_DataSet *CreateTable() { " << endl
+        << "// -----------------------------------------------------------------" << endl
+        << "// "   << Path() 
+                        << " Allocated rows: "<<fN
+                        <<"  Used rows: "<<*s_MaxIndex
+                        <<"  Row size: " << *s_Size << " bytes"
+                        <<endl 
+        << "// "  << " Table: " << classPtr->GetName()<<"[0]--> "
+                         << classPtr->GetName()<<"["<<rowNumber-1 <<"]" 
+      << endl
+      << "// ====================================================================" << endl
+      <<    classPtr->GetName() << " " << rowId << ";" << endl
+      <<  "St_" <<  GetTitle() << " *" << tableId << " = new " 
+                               << "St_" << GetTitle()
+                               << "(\""<<GetName()<<"\"," << GetNRows() << ");" << endl 
+      << "//" <<endl ;
+ 
+   while (rowCount) {
+      next.Reset();
+      TDataMember *member = 0;
+      while (member = (TDataMember*) next()) {
+         TDataType *membertype = member->GetDataType();
+         isdate = kFALSE;
+         if (strcmp(member->GetName(),"fDatime") == 0 && strcmp(member->GetTypeName(),"UInt_t") == 0) {
+            isdate = kTRUE;
+         }
+
+
+//  out << member->GetTypeName() << "\t" << member->GetName();
+
+         // Add the dimensions to "array" members 
+         Int_t dim = member->GetArrayDim();
+         Int_t indx = 0;
+         Int_t *arrayIndex = 0;
+         Int_t *arraySize = 0;
+         if (dim) {
+           arrayIndex = new Int_t[dim];
+           arraySize  = new Int_t[dim];          
+           memset(arrayIndex,0,dim*sizeof(Int_t));
+         }
+         Int_t arrayLength  = 1;
+         while (indx < dim ){
+            arraySize[indx] = member->GetMaxIndex(indx);
+            arrayLength *= arraySize[indx];
+           // Take in account the room this index will occupy
+           indx++;
+         }
+
+         // Encode data value or pointer value
+         Int_t offset = member->GetOffset();
+         Int_t thisStepRows;
+         thisLoopLenth = TMath::Min(rowCount,rowStep);
+         Int_t indexOffset;
+         Bool_t breakLoop = kFALSE;
+
+         for (indexOffset=0; indexOffset < arrayLength && !breakLoop; indexOffset++) 
+         {
+           nextRow = startRow;
+           out << rowId << "." << member->GetName();
+           if (dim) {
+                for (Int_t i=0;i<dim;i++) out << "["<<arrayIndex[i]<<"]";
+                ArrayIndex(arrayIndex,arraySize,dim);
+           }
+
+         // Generate "="
+ 
+           out << " = ";
+
+           for (thisStepRows = 0;thisStepRows < thisLoopLenth; thisStepRows++,nextRow += GetRowSize())
+           {
+             const char *pointer = nextRow + offset  + indexOffset*membertype->Size();
+             const char **ppointer = (const char**)(pointer);
+ 
+             if (member->IsaPointer()) {
+                const char **p3pointer = (const char**)(*ppointer);
+                if (!p3pointer) {
+                   printf("->0");
+                } else if (!member->IsBasic()) {
+//                   if (pass == 1) tlink = new TLink(xvalue+0.1, ytext, p3pointer);
+                   out << "N/A :" ;
+                } else if (membertype) {
+                   if (!strcmp(membertype->GetTypeName(), "char"))
+                      out << *ppointer;
+                   else {
+                        if (dim == 1) {
+                          out << "\"" << (char *)*p3pointer << "\"";
+                          breakLoop = kTRUE;
+                        }
+                        else 
+                           out << "char(" << membertype->AsString(p3pointer) << ")";
+                   }
+                } else if (!strcmp(member->GetFullTypeName(), "char*") ||
+                         !strcmp(member->GetFullTypeName(), "const char*")) {
+                   out << *ppointer;
+                } else {
+//                   if (pass == 1) tlink = new TLink(xvalue+0.1, ytext, p3pointer);
+                   out << " N/A ";
+                }
+             } else if (membertype)
+                if (isdate) {
+                   cdatime = (UInt_t*)pointer;
+                   TDatime::GetDateTime(cdatime[0],cdate,ctime);
+                   out << cdate << "/" << ctime;
+                } else if (strcmp(membertype->GetFullTypeName(),"char")==0 && dim == 1) {
+                     out << "\"" << (char *)pointer << "\"";
+                     breakLoop = kTRUE;
+                }
+                 else
+                   out << membertype->AsString((void *)pointer) ;
+             else
+                  out << (Long_t)pointer;
+           }
+        // Encode data member title
+           if (indexOffset==0) {
+             Int_t ltit = 0;
+             if (isdate == kFALSE && strcmp(member->GetFullTypeName(), "char*") &&
+                 strcmp(member->GetFullTypeName(), "const char*")) {
+                    out << "; // " << member->GetTitle();
+             }   
+           }
+           out << ";" << endl;
+         }
+      }
+      out << tableId << "->AddRow(" << rowId << ");" << endl 
+      << "// ------------------ next row -----------------" << endl;
+      rowCount -= thisLoopLenth;
+      startRow  = nextRow;
+   }
+  out << "// ----------------- end of code ---------------" << endl
+      << " return tableSet;" << endl
+      << "}"  << endl;
+  return;
 }
  
 //______________________________________________________________________________
