@@ -1,3 +1,8 @@
+// $Id: St_xdfin_Maker.cxx,v 1.33 2000/01/12 16:38:54 fisyak Exp $
+// $Log: St_xdfin_Maker.cxx,v $
+// Revision 1.33  2000/01/12 16:38:54  fisyak
+// Add Id and Log
+//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_xdfin_Maker class for Makers                                      //
