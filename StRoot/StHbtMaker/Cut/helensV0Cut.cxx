@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.cxx,v 1.3 2000/01/25 17:35:02 laue Exp $
+ * $Id: helensV0Cut.cxx,v 1.4 2000/02/01 00:31:27 laue Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: helensV0Cut.cxx,v $
+ * Revision 1.4  2000/02/01 00:31:27  laue
+ * *** empty log message ***
+ *
  * Revision 1.3  2000/01/25 17:35:02  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -50,11 +53,9 @@ helensV0Cut::helensV0Cut(){
 bool helensV0Cut::Pass(const StHbtV0* V0){
   int inMassRange;
 
-
-  /*
     cout << endl;
-    cout << "#V0 " << V0Count++;
-    cout << " * dcaV0daughters " << V0->dcaV0daughters();
+    //    cout << "#V0 " << V0Count++;
+    cout << " * dcaV0Daughters " << V0->dcaV0Daughters();
     cout << " * dcaV0ToPrimVertex " << V0->dcaV0ToPrimVertex();
     cout << " * decayLengthV0 " << V0->decayLengthV0();
     cout << " * tpcHitsPos " << V0->tpcHitsPos();
@@ -63,7 +64,7 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
     cout << " * dcaNegToPrimVertex " << V0->dcaNegToPrimVertex();
     cout << " * ptArmV0 " << V0->ptArmV0();
     cout << " * alphaV0 " << V0->alphaV0();
-  */
+
 
 
   inMassRange=0;
