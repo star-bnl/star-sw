@@ -1,24 +1,22 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 1.4 1999/07/15 13:57:23 perev Exp $
+ * $Id: StRchMaker.h,v 1.5 1999/07/21 13:33:56 gans Exp $
  *
- * Author: Dan Lyons
+ * Author: 
  ***************************************************************************
  *
  * Description: RICH offline software
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
- *              Start at
- *  http://rsgi01.rhic.bnl.gov/STAR/html/comp_l/root/index2.html
- *              for more info, or at
- *  http://rsgi01.rhic.bnl.gov/star/starlib/doc/www/star.html
- *              if the other one disappears for some reason
- *
  ***************************************************************************
  *
  * $Log: StRchMaker.h,v $
+ * Revision 1.5  1999/07/21 13:33:56  gans
+ * *** empty log message ***
+ *
+ * Revision 1.5  1999/07/20 00:00:00 gans
+ * added test histogram
  * Revision 1.4  1999/07/15 13:57:23  perev
  * cleanup
- *
  * Revision 1.3  1999/03/20 22:00:19  perev
  * new maker schema
  *
@@ -29,30 +27,52 @@
  * Trail version... untested
  *
  *
-#ifndef ST_RCH_MAKER_HH
-#define ST_RCH_MAKER_HH
+ * Fills new dst_rch_pixel;
+ * debug macros;
  * used in first DAQ data
 #endif
 #define rCH_WITH_PAD_MONITOR 1
 
 #ifndef StMaker_H
+#ifndef ROOT_TH1
+
+#endif
+
+#ifndef ROOT_TH2
+#include "TH2.h"
+#endif
+
+#ifndef ROOT_TH3
+#include "TH3.h"
+#endif
 #endif
 class StRichReaderInterface;
- private:
+
+class StRichSimpleHitCollection;
    Bool_t drawinit;
+   TH3S * hist;        //!
+
+
 
     
-    StRchMaker(const char *name="rch");
-    virtual       ~StRchMaker();
-    virtual Int_t  Init();
-    virtual Int_t  Make();
+  StRchMaker(const char *name="rch");
+  virtual       ~StRchMaker();
+  virtual Int_t  Init();
+  virtual Int_t  Make();
+  virtual void   PrintInfo();
+  virtual Int_t  Finish();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.4 1999/07/15 13:57:23 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.5 1999/07/21 13:33:56 gans Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    StRchMaker(const char *name="rch", int daq=0, int matrix=0, int cf=0);
 
+// the following is a ROOT macro  that is needed in all ROOT code
 	m_Mode = mode;
 };
 
-#endif // ST_RCH_MAKER_HH
+    // the following is a ROOT macro  that is needed in all ROOT code
+
+
+
 	};
 
 inline void StRchMaker::setUseMatrix(int v) {mUseMatrix = v;}
