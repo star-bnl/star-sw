@@ -23,22 +23,34 @@ franksPairCut::franksPairCut(const franksPairCut& c) : StHbtPairCut(c) {
 //__________________
 bool franksPairCut::Pass(const StHbtPair* pair){
   
-  double p1 = pair->track1()->Helix().pathLengths(pair->track2()->Helix()).first;
-  double p2 = pair->track1()->Helix().pathLengths(pair->track2()->Helix()).second;
-
-  StHbtThreeVector mid  = (pair->track1()->Helix().at(p1) + pair->track2()->Helix().at(p2) )/2.;
-  StHbtThreeVector vertexVec  = mid - mPrimaryVertex;
-
-  double dcaHelicees = abs(pair->track1()->Helix().at(p1) - pair->track2()->Helix().at(p2));
-  double angle = vertexVec.angle(pair->fourMomentumSum().vect());
-  double dcaPhi = sin(angle)*abs(vertexVec);
-
 #ifdef STHBTDEBUG
+  static double p1 = pair->track1()->Helix().pathLengths(pair->track2()->Helix()).first;
+  static double p2 = pair->track1()->Helix().pathLengths(pair->track2()->Helix()).second;
+
+  static StHbtThreeVector mid  = (pair->track1()->Helix().at(p1) + pair->track2()->Helix().at(p2) )/2.;
+  static StHbtThreeVector vertexVec  = mid - mPrimaryVertex;
+
+  static double dcaHelicees = abs(pair->track1()->Helix().at(p1) - pair->track2()->Helix().at(p2));
+  static double angle = vertexVec.angle(pair->fourMomentumSum().vect());
+  static double dcaPhi = sin(angle)*abs(vertexVec);
+
   cout << " angle: " << angle*180./3.1415927 << " dcaHelicees : " << dcaHelicees;
   cout << " dcaPhi: " << dcaPhi << " mid: " << mid << endl;
-#endif  
+#else
+
+#define p1  (pair->track1()->Helix().pathLengths(pair->track2()->Helix()).first)
+#define p2  (pair->track1()->Helix().pathLengths(pair->track2()->Helix()).second)
+
+#define mid  ((pair->track1()->Helix().at(p1) + pair->track2()->Helix().at(p2) )/2.)
+#define vertexVec  (mid - mPrimaryVertex)
+
+  //  double dcaHelicees = abs(pair->track1()->Helix().at(p1) - pair->track2()->Helix().at(p2));
+#define angle  vertexVec.angle(pair->fourMomentumSum().vect())
+#define dcaPhi  sin(angle)*abs(vertexVec)
   
-  bool temp;
+#endif
+
+  static bool temp;
   (dcaPhi<5.) ? temp=true : temp=false;
 
   temp ? mNPairsPassed++ : mNPairsFailed++;

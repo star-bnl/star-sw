@@ -49,6 +49,7 @@ class franksTrackCut : public StHbtTrackCut
   void SetDCA(const float& lo, const float& hi);
   void SetCharge(const int&);
 
+  franksTrackCut* Clone();
 
 private:   // here are the quantities I want to cut on...
 
@@ -81,5 +82,6 @@ inline void franksTrackCut::SetPt(const float& lo, const float& hi){mPt[0]=lo; m
 inline void franksTrackCut::SetRapidity(const float& lo,const float& hi){mRapidity[0]=lo; mRapidity[1]=hi;}
 inline void franksTrackCut::SetDCA(const float& lo,const float& hi){mDCA[0]=lo; mDCA[1]=hi;}
 inline void franksTrackCut::SetCharge(const int& ch){mCharge = ch;}
+inline franksTrackCut* franksTrackCut::Clone() { franksTrackCut* c = new franksTrackCut(*this); return c;}
 
 #endif
