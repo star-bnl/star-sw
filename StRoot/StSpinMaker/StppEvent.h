@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.h,v 1.9 2003/09/07 03:49:05 perev Exp $ 
+// $Id: StppEvent.h,v 1.10 2003/10/16 19:48:37 akio Exp $ 
 // $Log: StppEvent.h,v $
+// Revision 1.10  2003/10/16 19:48:37  akio
+// updates for 2003
+//
 // Revision 1.9  2003/09/07 03:49:05  perev
 // gcc 3.2 + WarnOff
 //
@@ -74,6 +77,7 @@ class StEvent;
 class StMuDst;
 class StJet;
 class StProtoJet;
+class TrgDataType2003;
 
 //VP #define MAXANALYZERS 4 //enum instead
 
@@ -177,6 +181,12 @@ public:
     Int_t        svtNHit;   
     Float_t      emcHighTower;   
   
+    int FPDL012(TrgDataType2003*, int mode, int nbuf);
+    void checkFPDL012(TrgDataType2003*, int pp, int print,
+		      int l2[2][4], int l1sum[2][4], int l02sum[2][4],
+		      int d02[2][4], int d12[2][4],
+		      int l1[2][4][4], int l01sum[2][4][4], int d01[2][4][4]);
+ 
 #ifdef _Jet_
     Int_t nJets;
     TClonesArray *jets;

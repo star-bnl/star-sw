@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.22 2003/09/23 20:43:09 akio Exp $
+// $Id: StppEvent.cxx,v 1.23 2003/10/16 19:48:37 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.23  2003/10/16 19:48:37  akio
+// updates for 2003
+//
 // Revision 1.22  2003/09/23 20:43:09  akio
 // *** empty log message ***
 //
@@ -92,6 +95,7 @@
 // Revision 1.0  2001/06/14 Akio Ogawa
 //
 //////////////////////////////////////////////////////////////////////
+#include <stdio.h>
 #include <Stiostream.h>
 
 #include "StEventTypes.h"
@@ -125,8 +129,10 @@ ClassImp(StppEvent)
 
 StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm;
 extern "C" void fpdpi0mass_(int*,int*,float*,float*, int*, int*);
-extern "C" void fillntp2003_(int*, float*,
-			    int*, float*);
+extern "C" void fillntp2003_(int*, float*, int*, float*);
+extern "C" void fillh1d_(int*, float*, float*);
+extern "C" void fillh2d_(int*, float*, float*, float*);
+
 #include "ntp2003.h"
 
 StppEvent::StppEvent(){
@@ -147,10 +153,13 @@ StppEvent::StppEvent(){
 #endif 
     infoLevel = 0;
     BunchIdDifference=-999;
+
+    TrgDataType2003* trgd=0; FPDL012(trgd,0,0);
     clear();
 }
 
 StppEvent::~StppEvent() {
+    TrgDataType2003* trgd=0; FPDL012(trgd,2,0);
     clear() ;
     tracks->Delete();
     delete tracks ;
@@ -687,6 +696,18 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	  int iin[100], iout[100];
 	  float rin[100], rout[100];
 	  iin[0]=runN;
+	  
+	  int nbuf=1;
+	  int npre=t2003->numberOfPreXing();
+	  int npost=t2003->numberOfPostXing();
+	  if (npre < npost) {
+	    nbuf = (2*npost) + 1;
+	  } else {
+	    nbuf = (2*npre) + 1;
+	  }
+	  int GB = FPDL012(trgd,1,nbuf);
+	  if(GB!=0) {printf("Taking %d bunch for layer0 FPD East DSM\n",GB);}
+	    
 	  ntp2003_.event       = eventN;
 	  ntp2003_.BChi        = trgdata->bunchCounterHigh();
 	  ntp2003_.BClo        = trgdata->bunchCounterLow();
@@ -715,9 +736,9 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	  for(int i=0; i<256; i++) {ntp2003_.CTB[i]=trgd->rawTriggerDet[0].CTB[i];
 	                            ntp2003_.FPDADC[i]=(fpd->adc())[i];}
 	  for(int i=0; i<80;  i++) {ntp2003_.BBC[i]=trgd->rawTriggerDet[0].BBC[i];}
-	  for(int i=0; i<112; i++) {ntp2003_.FPDENS[i]=trgd->rawTriggerDet[0].FPDEastNSLayer0[i];
+	  for(int i=0; i<112; i++) {ntp2003_.FPDENS[i]=trgd->rawTriggerDet[GB].FPDEastNSLayer0[i];
 	                            ntp2003_.FPDWNS[i]=trgd->rawTriggerDet[0].FPDWestNSLayer0[i];}
-	  for(int i=0; i<64; i++)  {ntp2003_.FPDETB[i]=trgd->rawTriggerDet[0].FPDEastTBLayer0[i];
+	  for(int i=0; i<64; i++)  {ntp2003_.FPDETB[i]=trgd->rawTriggerDet[GB].FPDEastTBLayer0[i];
 	                            ntp2003_.FPDWTB[i]=trgd->rawTriggerDet[0].FPDWestTBLayer0[i];}
 	  for(int i=0; i<32;  i++) {ntp2003_.FPDWEST[i]   =bbc->adc(i); 
 	                            ntp2003_.FPDWEST[i+32]=bbc->tdc(i);}
@@ -801,3 +822,254 @@ void StppEvent::setConeIndex(StProtoJet& pj, int ijet)
     }
 }
 */
+
+int StppEvent::FPDL012(TrgDataType2003* trgd, int mode, int nbuf){
+  int i,j,k,l,p,goodbunch;
+  int l2[2][4], l1sum[2][4], l02sum[2][4], d02[2][4], d12[2][4];
+  int l1[2][4][4],l01sum[2][4][4], d01[2][4][4];
+  const int SUMTHR=40;
+  const int DIFFTHR=3;
+  const int maxch[4]={4,4,2,2};
+
+  static int ntot;
+  static int n[2][4][10];
+  static int nn[2][4][4][10];
+  static int match[11];
+  
+  goodbunch=0;
+  if(mode==0) {
+    ntot=0;
+    for(i=0; i<11; i++){match[i]=0;}
+    for(i=0; i<2; i++){
+      for(j=0; j<4; j++){
+	for(k=0; k<10; k++){
+	  n[i][j][k]=0;
+	  for(l=0; l<4; l++){
+	    nn[i][j][l][k]=0;
+	  }
+	}
+      }
+    }
+  }else if(mode==1){
+    ntot++;    
+    printf("# of buffer recorded=%d\n",nbuf);
+    checkFPDL012(trgd,0,0,l2,l1sum,l02sum,d02,d12,l1,l01sum,d01);
+    for(i=0; i<2; i++){
+      for(j=0; j<4; j++){
+	if(i==1 && (j==0 || j==2)) continue;
+	n[i][j][0]++; // Totla # of events
+	if(l2[i][j]>SUMTHR){ 
+	  n[i][j][1]++; //Total # of events with SUM>SUMTHR
+	  if(abs(d12[i][j])>DIFFTHR){ 
+	    printf("!!! L1-L2 inconsistent!!!! %d %d\n",i,j);
+	  }else{
+	    n[i][j][2]++; //L1-L2 consistent
+	    if(abs(d02[i][j])<DIFFTHR){ 
+	      n[i][j][3]++; //L0-L2 consistent = good events
+	    }else{  
+	      n[i][j][4]++;  //L0-L2 inconsistent at pre/post=0, bad event	      
+	      printf("L0-L2 inconsistency found in %d %d\n",i,j);
+	      for(p=1; p<nbuf; p++){
+		checkFPDL012(trgd,p,0,l2,l1sum,l02sum,d02,d12,l1,l01sum,d01);
+		if(abs(d02[i][j])<DIFFTHR){ 
+		  n[i][j][5]++; //L0-L2 consistent at pre/post		  		  
+		  printf("Found L0-L2 matching in prepost=%d\n",p);
+		  int isBad=0;
+		  for(int k=0; k<maxch[j]; k++){
+		    if(abs(d01[i][j][k])>DIFFTHR){
+		      isBad=1; break;
+		    }
+		  }
+		  if(isBad==0){
+		    n[i][j][6]++; //L0-L1 consistent at pre/post		  		  
+		    printf("Found L0-L1 matching in prepost=%d\n",p);
+		    if(goodbunch!=0 && goodbunch!=p){
+		      n[i][j][7]++; //Multiple match and different!!!
+		      printf("Found different bunch in a event!!!!\n");		      
+		    }else{
+		      match[p]++;
+		      goodbunch=p;
+		    }
+		    break;
+		  }else{
+		    printf("Found L0-L1 does not match in prepost=%d\n",p);
+		  }
+		}
+	      }
+	      if(goodbunch==0){
+		n[i][j][8]++; //found no match
+		printf("Found no matching\n");
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }else{
+    const char* tit[10]={"Total       ",
+			 "L2>40ch     ",
+			 "L1-L2 OK    ",
+			 "L0-L2 OK    ",
+			 "L0-L2 BAD   ",
+			 "Found Match ",
+			 "L1 match too",
+			 "Mult Match  ",
+			 "NoMatch/BAD ",
+			 "------------"};
+    printf("FPDL012  Total Analyzed Event = %d\n",ntot);
+    printf("FPDL012             :       EN        ES        ET        EB |       WS        WB \n");
+    for(i=0; i<9; i++){
+      printf("FPDL012 %s: %8d  %8d  %8d  %8d | %8d  %8d\n",tit[i]
+	     ,n[0][0][i],n[0][1][i],n[0][2][i],n[0][3][i]
+	     ,n[1][1][i],n[1][3][i]);
+    }
+    printf("FPDL012-SUMMARY %d ",ntot);
+    for(i=1; i<9; i++){
+      printf("%d %d %d %d %d %d : "
+	     ,n[0][0][i],n[0][1][i],n[0][2][i],n[0][3][i]
+	     ,n[1][1][i],n[1][3][i]);
+    }
+    printf(" / ");
+    for(i=0; i<11; i++){printf("%d ",match[i]);}
+    printf("\n");
+  }
+  return goodbunch;
+}
+
+void StppEvent::checkFPDL012(TrgDataType2003* trgd, int pp, int print,
+			     int l2[2][4], int l1sum[2][4], int l02sum[2][4], 
+			     int d02[2][4], int d12[2][4],
+			     int l1[2][4][4], int l01sum[2][4][4], int d01[2][4][4]){
+  int i,j,k;
+  static const int adr[8] ={3,2,1,0,7,6,5,4};
+
+  for(i=0; i<2; i++){
+    for(j=0; j<4; j++) {
+      l2[i][j]=0; l1sum[i][j]=0; l02sum[i][j]=0; d02[i][j]=0; d12[i][j]=0;
+      for(k=0; k<4; k++) {
+	l1[i][j][k]=0; l01sum[i][j][k]=0; d01[i][j][k]=0;
+      }
+    }
+  }    
+
+  //Layer0 info
+  static const int sl[11]={6,7,8,9,10,11,12,14,15,16,17};
+  static const int ch[16]={7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8};
+  for(i=0; i<11; i++){
+    int slot=sl[i];
+    for(j=0; j<16; j++){
+      int chan=ch[j];
+      int add = i*16+j;
+      if(slot>13) { add = (slot-14)*16+j; }
+      if(chan != 15) {
+	//printf("slot=%d chan=%d add=%d\n",slot,chan,add);
+	//east
+	if(slot==6)  {l01sum[0][0][0]+=trgd->rawTriggerDet[pp].FPDEastNSLayer0[add];}
+	if(slot==7)  {l01sum[0][0][1]+=trgd->rawTriggerDet[pp].FPDEastNSLayer0[add];}
+	if(slot==8)  {l01sum[0][0][2]+=trgd->rawTriggerDet[pp].FPDEastNSLayer0[add];}
+	if(slot==9)  {
+	  if(chan<7) {l01sum[0][0][3]+=trgd->rawTriggerDet[pp].FPDEastNSLayer0[add];}
+	  else if(chan<14)       
+	             {l01sum[0][1][0]+=trgd->rawTriggerDet[pp].FPDEastNSLayer0[add];}
+	}
+	if(slot==10) {l01sum[0][1][1]+=trgd->rawTriggerDet[pp].FPDEastNSLayer0[add];}
+	if(slot==11) {l01sum[0][1][2]+=trgd->rawTriggerDet[pp].FPDEastNSLayer0[add];}
+	if(slot==12) {l01sum[0][1][3]+=trgd->rawTriggerDet[pp].FPDEastNSLayer0[add];}
+	if(slot==14) {l01sum[0][2][0]+=trgd->rawTriggerDet[pp].FPDEastTBLayer0[add];}
+	if(slot==15) {
+	  if(chan<10){l01sum[0][2][1]+=trgd->rawTriggerDet[pp].FPDEastTBLayer0[add];}
+	}
+	if(slot==16) {l01sum[0][3][0]+=trgd->rawTriggerDet[pp].FPDEastTBLayer0[add];}
+	if(slot==17) {
+	  if(chan<10){l01sum[0][3][1]+=trgd->rawTriggerDet[pp].FPDEastTBLayer0[add];}	
+	}
+	//west
+	if(slot==6)  {l01sum[1][1][0]+=trgd->rawTriggerDet[pp].FPDWestNSLayer0[add];}
+	if(slot==7)  {l01sum[1][1][1]+=trgd->rawTriggerDet[pp].FPDWestNSLayer0[add];}
+	if(slot==8)  {l01sum[1][1][2]+=trgd->rawTriggerDet[pp].FPDWestNSLayer0[add];}
+	if(slot==9)  {
+          if(chan<10){l01sum[1][1][3]+=trgd->rawTriggerDet[pp].FPDWestNSLayer0[add];}
+	}
+	if(slot==10) {l01sum[1][3][0]+=trgd->rawTriggerDet[pp].FPDWestNSLayer0[add];}
+	if(slot==11) {l01sum[1][3][1]+=trgd->rawTriggerDet[pp].FPDWestNSLayer0[add];}
+      }
+    }
+  }
+
+  //Layer1 info
+  static const int ns[8] ={0,0,0,0,1,1,1,1};
+  static const int ans[8]={0,1,2,3,0,1,2,3};
+  static const int tb[4] ={2,2,3,3};
+  static const int atb[4]={0,1,0,1};
+  for(i=0; i<8; i++){
+    //printf("nstb=%d ch=%d add=%d\n",ns[i],ans[i],adr[i]);
+    l1[0][ns[i]][ans[i]] = trgd->rawTriggerDet[0].FPDEastNSLayer1[adr[i]];
+    d01[0][ns[i]][ans[i]] = l01sum[0][ns[i]][ans[i]]-l1[0][ns[i]][ans[i]];
+    l1sum[0][ns[i]]  += l1[0][ns[i]][ans[i]];
+    l02sum[0][ns[i]] += l01sum[0][ns[i]][ans[i]];
+  }
+  for(i=0; i<4; i++){
+    //printf("nstb=%d ch=%d add=%d\n",tb[i],atb[i],adr[i]);
+    l1[0][tb[i]][atb[i]] = trgd->rawTriggerDet[0].FPDEastTBLayer1[adr[i]];
+    d01[0][tb[i]][atb[i]] = l01sum[0][tb[i]][atb[i]]-l1[0][tb[i]][atb[i]];
+    l1sum[0][tb[i]] += l1[0][tb[i]][atb[i]];
+    l02sum[0][tb[i]] += l01sum[0][tb[i]][atb[i]];
+  }
+  static const int adr2[6] ={3,2,1,0,6,5};
+  static const int sb[6] ={1,1,1,1,3,3};
+  static const int asb[6]={0,1,2,3,0,1};
+  //  for(i=0; i<8;  i++){
+  //  printf("%d\n",trgd->rawTriggerDet[0].FPDWestNSLayer1[i]);
+  // }
+  for(i=0; i<6; i++){
+    l1[1][sb[i]][asb[i]] = trgd->rawTriggerDet[0].FPDWestNSLayer1[adr2[i]];
+    d01[1][sb[i]][asb[i]] = l01sum[1][sb[i]][asb[i]]-l1[1][sb[i]][asb[i]];
+    l1sum[1][sb[i]]  += l1[1][sb[i]][asb[i]];
+    l02sum[1][sb[i]] += l01sum[1][sb[i]][asb[i]];
+  }
+  
+  //Layer2 info
+  static const int ew[8]  ={0,0,0,0,1,1,1,1};
+  static const int nstb[8]={0,1,2,3,1,3,0,2};
+  static const int nbit[8]={16384,16384,8192,8192,16384,16384,8192,8192};
+  for(i=0; i<8; i++){
+    l2[ew[i]][nstb[i]]=trgd->TrgSum.DSMdata.FPD[adr[i]] % nbit[i];    
+    d02[ew[i]][nstb[i]]=l02sum[ew[i]][nstb[i]]-l2[ew[i]][nstb[i]];
+    d12[ew[i]][nstb[i]]= l1sum[ew[i]][nstb[i]]-l2[ew[i]][nstb[i]];
+  }
+  
+  if(print==1){
+    printf("*** CHECK FPD FOR PRE/POST=%d***\n",pp);
+    printf("EW  Mod Ch  L0   L1   0-1\n");
+    int ih;
+    float d;
+    float p=(float)pp;
+    static float one=1.0;
+    for(i=0; i<2; i++){
+      for(j=0; j<4; j++){
+	ih = 1000*(i+1) + 100*(j+1); d=(float)d02[i][j];
+	fillh2d_(&ih, &d, &p, &one);
+	ih = 1000*(i+1) + 100*(j+1) + 1; d=(float)d12[i][j];
+	if(pp==0) { fillh1d_(&ih, &d, &one); }
+	for(k=0; k<4; k++){
+	  if(i==1 && (j==0 || j==2)) break;
+	  if(j>1 && k>1) break;
+	  printf("%3d %2d %2d %4d %4d %4d\n",i,j,k,l01sum[i][j][k],l1[i][j][k],d01[i][j][k]);
+	  ih=1000*(i+1) + 100*(j+1) + 10*(1+k); d=(float)d01[i][j][k];
+	  fillh2d_(&ih,&d,&p,&one);
+	}
+      }
+    }
+    printf("  : EN     ES     ET    EB |  WS    WB \n");
+    printf("L0: %4d  %4d  %4d  %4d | %4d  %4d\n",l02sum[0][0],l02sum[0][1],l02sum[0][2],l02sum[0][3]
+	                                        ,l02sum[1][1],l02sum[1][3]);
+    printf("L1: %4d  %4d  %4d  %4d | %4d  %4d\n",l1sum[0][0],l1sum[0][1],l1sum[0][2],l1sum[0][3]
+	                                        ,l1sum[1][1],l1sum[1][3]);
+    printf("L2: %4d  %4d  %4d  %4d | %4d  %4d\n",l2[0][0],l2[0][1],l2[0][2],l2[0][3]
+	                                        ,l2[1][1],l2[1][3]);
+    printf("02: %4d  %4d  %4d  %4d | %4d  %4d\n",d02[0][0],d02[0][1],d02[0][2],d02[0][3]
+	                                        ,d02[1][1],d02[1][3]);
+    printf("12: %4d  %4d  %4d  %4d | %4d  %4d\n",d12[0][0],d12[0][1],d12[0][2],d12[0][3]
+	                                        ,d12[1][1],d12[1][3]);  
+  }
+}
