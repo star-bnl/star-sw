@@ -1,5 +1,8 @@
-* $Id: index_sort.F,v 1.3 1998/08/16 16:59:00 perev Exp $
+* $Id: index_sort.F,v 1.4 1998/08/17 14:39:22 fisyak Exp $
 * $Log: index_sort.F,v $
+* Revision 1.4  1998/08/17 14:39:22  fisyak
+* clean up
+*
 * Revision 1.3  1998/08/16 16:59:00  perev
 * Increase stack 20->40
 *
@@ -15,8 +18,8 @@ C
 C
 #include "tls_ecvalues.inc"
       INTEGER nrows             ! Length of el1 array.
-      REAL    el1(*)            ! Element to sort on (in first row of table)
-      REAL    el2               ! Element from second row of table.
+      INTEGER el1(*)            ! Element to sort on (in first row of table)
+      INTEGER el2(1)            ! Element from second row of table.
       INTEGER ind_size          ! Allocated size of index.
 C
 C OUTPUT VARIABLES:
