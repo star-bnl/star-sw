@@ -6,145 +6,39 @@ set TOP_TEST     =  /star/scr2f/starreco/MDC1/tests/auau200/hijing135/default
 set REQUEST      =  /star/u2e/starreco/MDC1/requests
 set JOB_SUMMARY  =  /star/u2e/starreco/MDC1/summary
 set JOB_LOG      =  /star/scr2h/starreco/MDC1/auau200/hijing135/default
-set set          =   b0_3/year2a/hadronic_on
+#set SET          =   b0_3/year2a/hadronic_on
+set SET          =   b0_20/year2a/hadronic_on
 set input_file = `basename $1 .xdf`
-set input_dir  = /disk1/star/auau200/hijing135/default/${set}/g2t
-set output_dir = /disk1/star/auau200/hijing135/default/${set}/root
-set log_dir    = ${JOB_LOG}/${set}/root
+set input_dir  = /disk1/star/auau200/hijing135/default/${SET}/g2t
+set output_dir = /disk1/star/auau200/hijing135/default/${SET}/root
+set log_dir    = ${JOB_LOG}/${SET}/root
 if (! -d ${log_dir}) mkdir -p ${log_dir}
-set batch = `basename ${input_file}`
+set batch = ${REQUEST}/${PROCESS}/`basename ${input_file}`
 set log_file   = ${log_dir}/${batch}
 cd ${REQUEST}
-if (! -d root) mkdir root
-cd root
+if (! -d ${PROCESS}) mkdir ${PROCESS}
+cd ${PROCESS}
 if (-f ${batch}) rm -f ${batch}
-if (-f ${batch}.C) rm -f ${batch}.C
-cat > ${batch}.C <<EOD
+#if (-f ${batch}.C) rm -f ${batch}.C
+cat > ${batch} <<EOF
+#! /usr/local/bin/tcsh -f
+#BSUB -R cas
+source ${GROUP_DIR}/.stardev
+cd  ${REQUEST}/${PROCESS}
+Root.exe -b -q <<EOD
 {
-#pragma includepath "/afs/rhic/star/packages/dev/StRoot"
-#pragma includepath "/afs/rhic/star/packages/dev/lib"
-   gSystem->Load("St_base.so");
-   gSystem->Load("StChain.so");
-   gSystem->Load("xdf2root.so");
-   gSystem->Load("St_Tables.so");
-   gSystem->Load("libmsg.so");
-   gSystem->Load("libtls.so");
-   gSystem->Load("tpc.sl");
-   gSystem->Load("St_tpc.so");
-   gSystem->Load("St_tss_Maker.so");
-   gSystem->Load("St_tcl_Maker.so");
-   gSystem->Load("St_tpt_Maker.so");
-   gSystem->Load("svt.sl");
-   gSystem->Load("St_svt.so");
-   gSystem->Load("St_srs_Maker.so");
-   gSystem->Load("St_stk_Maker.so");
-// gSystem->Load("ftpc.sl");
-// gSystem->Load("St_ftpc.so");
-// gSystem->Load("St_fss_Maker.so");
-// gSystem->Load("St_fcl_Maker.so");
-// gSystem->Load("St_fpt_Maker.so");
-   gSystem->Load("global.sl");
-   gSystem->Load("St_global.so");
-   gSystem->Load("St_dst_Maker.so");
-   gSystem->Load("St_run_Maker.so");
-   gSystem->Load("St_xdfin_Maker.so");
-   gSystem->IgnoreInterrupt(kTRUE);
-  St_XDFFile *xdf_in   = 0;
-  xdf_in   = new St_XDFFile("${input_dir}/${input_file}.xdf","r");
-  St_XDFFile *xdf_out  = 0;
-  xdf_out  = new St_XDFFile("${output_dir}/${input_file}.xdf","w");
-  TFile      *root_out= 0; 
-  root_out = new TFile("${output_dir}/${input_file}.root","RECREATE");
-  StChain chain("StChain");
-//  Create the makers to be called by the current chain
-  St_run_Maker run_Maker("run_Maker","run/params");
-  if (xdf_in) {
-    St_xdfin_Maker xdfin("xdfin_Maker","event/geant");
-    chain.SetInputXDFile(xdf_in);
-  }
-//St_calib_Maker calib("calib_Maker","run/calib"); 
-//St_evg_Maker evg_Maker("evg_Maker","event");
-  St_srs_Maker srs_Maker("srs_Maker","event/data/svt/hits");
-//St_fss_Maker fss_Maker("fss_Maker","event/raw_data/ftpc/pixels");
-//St_tss_Maker tss_Maker("tss_Maker","event/raw_data/tpc");
-//Set parameters
-//tss_Maker.adcxyzon();
-  St_tcl_Maker tcl_Maker("tcl_Maker","event/data/tpc/hits");
-  St_stk_Maker stk_Maker("stk_Maker","event/data/svt/tracks");
-  St_tpt_Maker tpt_Maker("tpt_Maker","event/data/tpc/tracks");
-  St_dst_Maker dst_Maker("dst_Maker","event/data/global");
-  chain.PrintInfo();
-// Init the mai chain and all its makers
-  chain.Init();
-//  chain.MakeTree("StChainTree","Title");
-// Prepare TCanvas to show some histograms created by makers
-  if (xdf_out){
-    gBenchmark->Start("xdf out");
-    xdf_out->NextEventPut(chain.GetRun()); // xdf output
-    gBenchmark->Stop("xdf out");
-  }
-  if (root_out) {
-    gBenchmark->Start("root i/o");
-    root_out->cd();
-    St_DataSet *run = chain.GetRun();// root output
-    run->SetWrite();
-    gBenchmark->Stop("root i/o");
-  }
-  gBenchmark->Start("bfc");
-  Int_t i=0;
-  const Int_t Nevents=999;
-  for (Int_t i =1; i <= Nevents; i++){
-    if (chain.Make(i)) break;
-    St_DataSetIter local(chain.DataSet());
-    local.Cd(chain.GetName());
-    St_DataSet *evnt = local("event/data/global/dst");
-    if (xdf_out){
-      gBenchmark->Start("xdf out");
-      xdf_out->NextEventPut(evnt); // xdf output
-      gBenchmark->Stop("xdf out");
-    }
-    if (root_out){
-      printf ("Root write for event %d\n",i);
-      evnt->ls();
-      gBenchmark->Start("root i/o");
-      root_out->cd();
-      evnt->SetWrite();// root output
-      gBenchmark->Stop("root i/o");
-    }
-    //    root_tree->cd();
-    //    printf ("Fill Tree\n");
-    //    chain.FillTree();
-    //  histCanvas->Modified();
-    //  histCanvas->Update();
-    if (i != Nevents) chain.Clear();
-    printf ("Process event no. %d",i);
-  }
-  if (Nevents > 1) {
-    chain.Finish();
-    delete xdf_in;
-    if (xdf_out){
-      delete xdf_out;;
-      gBenchmark->Print("xdf out");
-    }
-    if (root_out){
-      root_out->Close();   
-      delete root_out;
-      gBenchmark->Print("root i/o");
-    }
-    gBenchmark->Stop("bfc");
-    gBenchmark->Print("bfc");
-  }
-  else {TBrowser *b = new TBrowser};
+gROOT->LoadMacro("bfc.C");
+const Char_t *file_in  ="${input_dir}/${input_file}.xdf";
+const Char_t *file_out ="${output_dir}/${input_file}.xdf";
+const Char_t *root_out ="${output_dir}/${input_file}.root";
+const Int_t No = 1000;
+bfc(file_in,file_out,root_out,No);
 }
 EOD
-cat > ${batch} <<EOF
-#! /usr/local/bin/tcsh
-#BSUB -R rcas
-cd  ${REQUEST}/root
-Root.exe -q -b ${batch}.C
 EOF
 chmod +x ${batch}
 #more ${batch}
-set jobname = `echo $batch | cut -c1-9`
-echo qsub ${batch}
-bsub -o ${log_file} -e ${log_file}  -J ${jobname} ${batch}
+set jobname = `basename ${batch}`
+set jobname = `echo ${jobname} | cut -c1-9`
+echo qsub -R cas -o ${log_file} -e ${log_file}  -J ${jobname} ${batch} 
+bsub -R cas -o ${log_file} -e ${log_file}  -J ${jobname} ${batch}

@@ -76,14 +76,15 @@ INC_DIRS += $(addprefix $(ROOT_DIR)/StRoot/,$(INC_NAMES))
 INC_DIRS += $(addprefix     $(STAR)/.share/,$(INC_NAMES))
 INC_DIRS += $(addprefix     $(STAR)/StRoot/,$(INC_NAMES))
 INCINT := $(INC_DIRS)
-INC_DIRS += $(SRC_DIR) $(GEN_DIR) $(ROOT_DIR)/inc $(STAR)/inc 
+INC_DIRS += $(SRC_DIR) $(GEN_DIR) $(ROOT_DIR)/inc  $(STAR)/inc 
+#
 INCINT := $(INC_DIRS)
 INC_DIRS += $(OUT_DIR)/.share $(ROOT_DIR)/StRoot $(STAR)/.share $(STAR)/StRoot $(ROOTSYS)/include
 
 INCLUDES := $(addprefix -I,$(INC_DIRS))
 INCINT   := $(addprefix -I,$(INCINT))
 
-PPFLAGS += -D__ROOT__
+CPPFLAGS += -D__ROOT__
 
 #
 #	If NO source , NOTHING to do
