@@ -2,7 +2,7 @@
 #define STAR_MuEzSoloPi0Maker
 
 /************************************************************
- * $Id: MuEzSoloPi0Maker.h,v 1.1 2005/02/05 04:56:31 balewski Exp $
+ * $Id: MuEzSoloPi0Maker.h,v 1.2 2005/03/01 20:02:15 balewski Exp $
  ************************************************************
  Goal: wrap EEMC-Panitkin code to be used in the BFC
  *
@@ -24,13 +24,14 @@ class MuEzSoloPi0Maker : public StMaker, public  EEsoloPi0 {
 
  private: 
   StMuDstMaker* mMuDstMaker;  
-  int nInpEve, nTrigEve; /// no. of input events
+  int nInpEve, nTrigEve, nAcceptEve; /// no. of input events
   EztEventHeader *eHead;
   EztEmcRawData  *eETow;
   EztEmcRawData  *eESmd;
   EztTrigBlob    *eTrig;
   StTriggerDataMother *trgAkio;//  $STAR/StRoot/StEvent/StTriggerData2004.h
   int trigID; // filter only one trigger if non-zero
+  int maxCtbSum; // filter on CTB sum if non-zero
   bool unpackMuEzTowers(int token); // EEMC data
 
  public: 
@@ -44,10 +45,11 @@ class MuEzSoloPi0Maker : public StMaker, public  EEsoloPi0 {
   void SetHList(TObjArray * x){HList=x;} 
   void saveHisto(TString fname="fixMe3");
   void SetTrigIdFilter(int id) {trigID=id;}
+  void SetMaxCtbSum(int x) {maxCtbSum=x;}
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: MuEzSoloPi0Maker.h,v 1.1 2005/02/05 04:56:31 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: MuEzSoloPi0Maker.h,v 1.2 2005/03/01 20:02:15 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -58,6 +60,9 @@ class MuEzSoloPi0Maker : public StMaker, public  EEsoloPi0 {
 
 
 // $Log: MuEzSoloPi0Maker.h,v $
+// Revision 1.2  2005/03/01 20:02:15  balewski
+// hack to access 2005 trigger data
+//
 // Revision 1.1  2005/02/05 04:56:31  balewski
 // reads ezTree from muDst
 //

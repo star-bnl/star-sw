@@ -1,4 +1,4 @@
-// $Id: EEsoloPi0.cxx,v 1.8 2004/09/29 18:04:44 balewski Exp $
+// $Id: EEsoloPi0.cxx,v 1.9 2005/03/01 20:02:15 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -79,17 +79,15 @@ void EEsoloPi0::init(){
   TString C="";
 
   hA[0]=new TH1F ("tE","Eneregy (GeV) from any tower",100,0.,Emax); 
-  hA[1]=new TH1F ("sE","Total  Eneregy in event (GeV) (sum from all tower)",200,0.,Emax*12); 
+  hA[1]=new TH1F ("sE","Total  Eneregy in event (GeV) (sum from all tower)",100,0.,Emax*24); 
 
-  hA[2]=new TH1F ("cE","cluster Eneregy (GeV) ",400,0.,Emax);
+  hA[2]=new TH1F ("cE","cluster Eneregy (GeV) ",200,0.,1.5*Emax);
  
   hA[3]=new TH1F ("cSh","Shape: energy ratio highT/cluster",55,0.,1.1); 
   hA[4]=new TH1F ("cN","No. of clusters per event",30,-0.5,29.5);
   hA[5]=new TH1F ("tT","Transverse Eneregy (GeV) from any tower",100,0.,Emax); 
   hA[6]=0;
-  hA[7]=new TH1F ("ctbSum","CTB ADC sum", 2000,-.5,9999.5);
-
-
+  hA[7]=new TH1F ("ctbSum","CTB ADC sum", 240,0,12000);
 
   if(HList) {
     for(i=0;i<=14;i++) {
@@ -99,7 +97,7 @@ void EEsoloPi0::init(){
   }
 
   // Mix/noMix histos
-  hR[0]=(TH1F*)new TH2F ("iE2","Eneregy (GeV) for any pair of clusters",40,0.,Emax,40,0.,Emax);
+  hR[0]=0;
   
   hR[1]=new TH1F ("invm","Invariant mass of 2 gammas (GeV)",80,0.,1.2);
   
@@ -108,15 +106,15 @@ void EEsoloPi0::init(){
   
   hR[4]=(TH1F*)new TH2F ("xyL","Y vs. X  (cm) of LOW energy cluster",200,-250.,250,200,-250,250);
   hR[5]=(TH1F*)new TH2F ("xyH","Y vs. X  (cm) of HIGH energy cluster",200,-250.,250,200,-250,250);
-  hR[6]=new TH1F ("oAng","Opening angle/rad of any pair",50,0.,.7);
+  hR[6]=new TH1F ("oAng","Opening angle/rad of any pair",30,0.,.3);
   
   
   char ttt[100];
   sprintf(ttt,"cut invM=[%.2f,%.2f]",mLo,mHi);
-  hR[7]=new TH1F ("0ener","Energy (GeV), "+C+ttt,50,0.,Emax);
+  hR[7]=new TH1F ("0ener","Energy (GeV), "+C+ttt,50,0.,Emax/2.);
   hR[8]=new TH1F ("0eta","Pseudorapidity, "+C+ttt,25,0.,2.5); 
-  hR[9]=new TH1F ("0phi","phi/rad, "+C+ttt,50,-3.14,3.14); 
-  hR[10]=new TH1F ("0pt","pT (GeV/c), "+C+ttt,100,0.,Emax/2.);
+  hR[9]=new TH1F ("0phi","phi/rad, "+C+ttt,30,-3.14,3.14); 
+  hR[10]=new TH1F ("0pt","pT (GeV/c), "+C+ttt,50,0.,Emax/4.);
   hR[11]=(TH1F*)new TH2F ("0xyL","Y vs. X  (cm) of LOW energy, "+C+ttt,200,-250.,250,200,-250,250);
   hR[12]=(TH1F*)new TH2F ("0xyH","Y vs. X  (cm) of HIGH energy, "+C+ttt,200,-250.,250,200,-250,250);
   
@@ -444,7 +442,7 @@ int EEsoloPi0::findInvM(Cluster *c1, Cluster *c2, TH1F **h){
   int isPi0=0;
   float e1=c1->eC;
   float e2=c2->eC;
-  ((TH2F*) h[0])->Fill(e1,e2);
+  //  ((TH2F*) h[0])->Fill(e1,e2);
 
   TVector3 r1=geom-> getDirection( c1->feta, c1->fphi);
   TVector3 r2=geom-> getDirection( c2->feta, c2->fphi);
@@ -540,6 +538,9 @@ int EEsoloPi0::findInvM(Cluster *c1, Cluster *c2, TH1F **h){
 
 /*****************************************************************
  * $Log: EEsoloPi0.cxx,v $
+ * Revision 1.9  2005/03/01 20:02:15  balewski
+ * hack to access 2005 trigger data
+ *
  * Revision 1.8  2004/09/29 18:04:44  balewski
  * now it runs on M-C as well
  *

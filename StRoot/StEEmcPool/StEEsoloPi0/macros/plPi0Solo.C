@@ -6,10 +6,10 @@ TPad *pad=0;
 //==========================
 //==========================
 
-void plPi0Solo( int page=1) {
+void plPi0Solo( int page=1,TString fName="soloPi0" ) {
   int pr=0;
 
-  TString fName="soloPi0" ;
+  
   //  fName="mc12";
   
   TString outDir="./"; 
@@ -35,7 +35,10 @@ void plPi0Solo( int page=1) {
 
   
   TString ctit="pi0-"; ctit+=page;
-  c=new TCanvas(ctit,ctit,600,350);
+  if(page==3 || page==6) 
+    c=new TCanvas(ctit,ctit,600,650);
+  else
+    c=new TCanvas(ctit,ctit,600,350);
   
   c->Range(0,0,1,1);
   TPad *pad0 = new TPad("pad0", "apd0",0.0,0.95,1.,1.);
@@ -69,41 +72,32 @@ void plPi0Solo( int page=1) {
   //..........................................
   //..........................................
   case 2: {
-    char *name[]={"ctbSum","tE","cE","cSh","sE"};
-    int log[]={  1,1,1,0,1};
+    char *name[]={"ctbSum","tE","cE","cSh","sE","cN"};
+    int log[]={  1,1,1,0,1,0};
     int i;
-    pad->Divide(2,3);
-    for(i=0;i<5;i++){
+    pad->Divide(4,2);
+    for(i=0;i<6;i++){
       pad->cd(i+1);
       TH1* h= (TH1*)fd->Get(name[i]); assert(h);
       h->Draw();
       if(log[i]) gPad->SetLogy();
     }
     
-    pad->cd(6);
+    pad->cd(7);
     plotMix("invm", xLo,xHi, fd);
   }  break;
   //..........................................
   //..........................................
   case 3: {
-    char *name[]={"iE2","xyL","xyH","eta12","0xyL","0xyH"};
+    char *name[]={"xyL","xyH","0eta","eta12","0xyH","invm","0ener","0phi","0Z"};
     int i;
     pad->Divide(3,3);
-    for(i=0;i<6;i++){
+    for(i=0;i<9;i++){
       pad->cd(i+1);
       TH1* h= (TH1*)fd->Get(name[i]); assert(h);
-      h->Draw("colz");
+      if(i<6 && i%3<2 ) { h->Draw("colz"); continue; }
+      plotMix(name[i], xLo,xHi, fd);	
     }    
-
-    pad->cd(7);
-    TH1* h= (TH1*)fd->Get("cN"); assert(h);
-    h->Draw(); gPad->SetLogy();
-
-    char *namex[]={"invm","0Ang"};
-    for(i=0;i<2;i++){
-      pad->cd(i+8);
-      plotMix(namex[i], xLo,xHi, fd);
-    }
   }  break;
 
   //..........................................
