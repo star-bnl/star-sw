@@ -20,8 +20,8 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   
 
   // which crate is connected to each TDC channel
-  int TDC_Crate_tmp[]= {18,17,16,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
-                        19,20,21,22,23,24,25,26,27,28,29,30};
+  int TDC_Crate_tmp[]= {18,17,16,30,29,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+                        19,20,21,22,23,24,25,26,27};
   TDC_Crate=TDC_Crate_tmp;
 
   ///////////////////////////////////////////////////////////////////////
