@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.63 2001/09/21 21:06:39 jcs Exp $
+// $Id: St_dst_Maker.cxx,v 1.64 2001/09/22 18:54:19 genevb Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.64  2001/09/22 18:54:19  genevb
+// Special handling of FTPC points
+//
 // Revision 1.63  2001/09/21 21:06:39  jcs
 // Set HitIndex correctly
 //
@@ -196,7 +199,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.63 2001/09/21 21:06:39 jcs Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.64 2001/09/22 18:54:19 genevb Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -419,15 +422,16 @@ Int_t  St_dst_Maker::Filler(){
   if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_point_filler" << endm;
   // dst_point_filler
   Int_t no_of_points    = tphit->GetNRows() + scs_spt->GetNRows();
+  Int_t no_ftpc_points  = 0;
   // If FTPC in chain, a point table already exists
   St_dst_point   *point = 0;
   if (no_of_points > 0) { 
     point     = (St_dst_point *)     dstI("point");
     if (!point) {
        point = new St_dst_point("point",no_of_points);  dstI.Add(point);
-    }
-    else {
-       point->ReAllocate(point->GetNRows() + no_of_points);
+    } else {
+       no_ftpc_points = point->GetNRows();
+       point->ReAllocate(no_ftpc_points + no_of_points);
     }
     if (GetMaker("tpc_raw")) point->SetBit(kIsCalibrated); // mark that tpc_raw made calibration
     iRes = dst_point_filler(tphit, scs_spt, point);
@@ -440,7 +444,7 @@ Int_t  St_dst_Maker::Filler(){
           // Fill 'used in the fit' info
 
     dst_point_st *mypoint  = point->GetTable();
-    int HitIndex = point->GetNRows();
+    int HitIndex = no_ftpc_points + point->GetNRows();
 
 
     const float maxRange   = 22;
