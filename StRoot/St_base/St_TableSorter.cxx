@@ -5,10 +5,10 @@
 #include <stdlib.h> 
 #include "St_TableSorter.h"
 #include "St_Table.h"
-#include <TClass.h>
-#include <TDataMember.h>
-#include <TDataType.h>
-
+#include "TClass.h"
+#include "TDataMember.h"
+#include "TDataType.h"
+#include "TMemberInspector.h"
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 //  St_TableSorter  - Is an "observer" class to sort the St_Table objects
@@ -638,7 +638,29 @@ void St_TableSorter::LearnTable()
     break;
   }
 }
+#if 0
+//______________________________________________________________________________
+void St_TableSorter::ShowMembers(TMemberInspector &R__insp, char *R__parent)
+{
+   // Inspect the data members of an object of class St_TableSorter.
 
+   TClass *R__cl  = St_TableSorter::IsA();
+   Int_t   R__ncp = strlen(R__parent);
+   if (R__ncp || R__cl || R__insp.IsA()) { }
+   R__insp.Inspect(R__cl, R__parent, "*m_SortIndex", &m_SortIndex);
+   R__insp.Inspect(R__cl, R__parent, "m_firstRow", &m_firstRow);
+   R__insp.Inspect(R__cl, R__parent, "m_numberOfRows", &m_numberOfRows);
+   m_colName.ShowMembers(R__insp, strcat(R__parent,"m_colName.")); R__parent[R__ncp] = 0;
+   R__insp.Inspect(R__cl, R__parent, "m_colOffset", &m_colOffset);
+   R__insp.Inspect(R__cl, R__parent, "m_colSize", &m_colSize);
+   R__insp.Inspect(R__cl, R__parent, "*m_IndexArray", &m_IndexArray);
+   R__insp.Inspect(R__cl, R__parent, "m_colDimensions", &m_colDimensions);
+   R__insp.Inspect(R__cl, R__parent, "*m_simpleArray", &m_simpleArray);
+   R__insp.Inspect(R__cl, R__parent, "*m_searchMethod", &m_searchMethod);
+   R__insp.Inspect(R__cl, R__parent, "m_colType", &m_colType);
+   TNamed::ShowMembers(R__insp, R__parent);
+}
+#endif
 #undef COMPAREVALUES
 #undef COMPAREORDER
 #undef COMPAREFLOATVALUES

@@ -61,7 +61,7 @@ class St_TableSorter : public TNamed {
 #ifndef __CINT__
     const St_Table &m_ParentTable;  // the back pointer to the sorted table
 #else
-    const St_Table *m_ParentTable;  // the back pointer to the sorted table
+    //    const St_Table *m_ParentTable;  //!- the back pointer to the sorted table
 #endif
     SEARCHMETHOD  m_searchMethod;   // Function selected to serach values
     EColumnType   m_colType;        // data type of the selected column
