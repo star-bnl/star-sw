@@ -1,8 +1,6 @@
-//Z,+PATCH,//ROOT/HISTPAINTER.
-//Z,+DECK,Axis3D,T=C++..
-//*CMZ :          28/11/99  01.06.19  by  Valery Fine(fine@mail.cern.ch)
-//*-- Author :    Valery Fine(fine@mail.cern.ch)   27/11/99
-// $Id: Axis3D.cxx,v 1.2 1999/11/29 19:57:59 fine Exp $ 
+//*CMZ :          28/11/99  01.06.19  by  Valery Fine(fine@bnl.gov)
+//*-- Author :    Valery Fine(fine@bnl.gov)   27/11/99
+// $Id: Axis3D.cxx,v 1.3 1999/11/30 01:44:23 fine Exp $ 
 #include <iostream.h>
 #include <ctype.h>
 
@@ -12,8 +10,17 @@
 #include "TGaxis.h"
 #include "TView.h" 
 //______________________________________________________________________________
-//   The histogram painter class
-//   ===========================
+//   The 3D axis painter class
+//   ==========================
+//
+//  To add the 3D rulers to any 3D view one has to create
+//  an intance of this class and Draw it.
+//
+//   TAxis3D rulers;
+//   rulers.Draw();
+//
+// The attributes of the created axice are affected by the current style
+// (see TStyle class )
 //
  
 ClassImp(TAxis3D)
@@ -99,9 +106,9 @@ void TAxis3D::PaintLegoAxis(TGaxis *axis, Float_t ang)
     Double_t cosa, sina;
     Float_t bmin, bmax;
     Float_t r[24]       /* was [3][8] */;
-    Int_t ndiv, i; // ndivx, ndivy, ndivz, i;
+    Int_t ndiv, i;
     Float_t x1[3], x2[3], y1[3], y2[3], z1[3], z2[3], av[24]  /*  was [3][8] */;
-    static char chopax[8]; // , chopay[8], chopaz[8];
+    char chopax[8];
     Int_t ix1, ix2, iy1, iy2, iz1, iz2;
     Double_t rad;
  
@@ -125,7 +132,6 @@ void TAxis3D::PaintLegoAxis(TGaxis *axis, Float_t ang)
         r[i*3 - 2] = av[i*3 - 2]*sina;
         r[i*3 - 1] = av[i*3 - 1];
     }
- 
  
     view->WCtoNDC(&r[ix1*3 - 3], x1);
     view->WCtoNDC(&r[ix2*3 - 3], x2);
@@ -163,11 +169,12 @@ void TAxis3D::PaintLegoAxis(TGaxis *axis, Float_t ang)
                   strcpy(chopax, "SDH+=");
                   logAx = gPad->GetLogz();
                   break;
-        default:
+        default:  assert(0);
                   continue;
       };
- 
-       if ( !( TMath::Abs(ax[0] - ax[1]) >= epsil && TMath::Abs(ay[0] - ay[1]) > epsil)) continue;
+
+      // If the axis is too short - skip it
+      if ( ( TMath::Abs(ax[0] - ax[1]) + TMath::Abs(ay[0] - ay[1]))  < epsil  ) continue;
 
        if (i < 2) {
          if (ax[0] > ax[1]) strcpy(chopax, "SDHV=+");
@@ -196,14 +203,14 @@ void TAxis3D::PaintLegoAxis(TGaxis *axis, Float_t ang)
        axis->SetTitle(fAxis[i].GetTitle());
        axis->SetTitleOffset(fAxis[i].GetTitleOffset());
        axis->SetTitleSize(fAxis[i].GetTitleSize());
-       enum { kCenterTitle = BIT(12) }; // to be remove with the last version of ROOT
+       enum { kCenterTitle = BIT(12) }; // to be removed with the last version of ROOT
        axis->SetBit(kCenterTitle, fAxis[i].TestBit(kCenterTitle));
 
        //*-*-    Initialize the number of divisions. If the
        //*-*-    number of divisions is negative, option 'N' is required.
        ndiv = fAxis[i].GetNdivisions();
        if (ndiv < 0) {
-         ndiv = TMath::Abs(ndiv);
+         ndiv = -ndiv;
          chopax[6] = 'N';
        }          
       
@@ -383,6 +390,9 @@ void TAxis3D::SetTitleOffset(Float_t offset, Option_t *axis)
 }
 
 // $Log: Axis3D.cxx,v $
+// Revision 1.3  1999/11/30 01:44:23  fine
+// Z axis fixed
+//
 // Revision 1.2  1999/11/29 19:57:59  fine
 // Missing ROOT constant kCenterTitle hard coded. Should be removed later
 //
