@@ -384,22 +384,22 @@ void StEStructSigmas::PHistograms() {
                 }
                 if (NSsig > 0) {
                     Ssig = Ssig / NSsig;
-                    PSig[jCent]->SetBinContent(iPhi,iEta,Ssig/(StHat*StHat));
+                    PSig[jCent]->SetBinContent(iPhi,iEta,Ssig);
                 }
 
                 if (NPsig > 0) {
                     Psig = Psig / NPsig;
-                    PPlus[jCent]->SetBinContent(iPhi,iEta,Psig/(StHat*StHat));
+                    PPlus[jCent]->SetBinContent(iPhi,iEta,Psig);
                 }
 
                 if (NMsig > 0) {
                     Msig = Msig / NMsig;
-                    PMinus[jCent]->SetBinContent(iPhi,iEta,Msig/(StHat*StHat));
+                    PMinus[jCent]->SetBinContent(iPhi,iEta,Msig);
                 }
 
                 if (NPMsig > 0) {
                     PMsig = PMsig / NPMsig;
-                    PPlusMinus[jCent]->SetBinContent(iPhi,iEta,PMsig/(StHat*StHat));
+                    PPlusMinus[jCent]->SetBinContent(iPhi,iEta,PMsig);
                 }
             }
         }
@@ -613,23 +613,23 @@ void StEStructSigmas::PNHistograms() {
                 }
                 if (NSsig > 0) {
                     Ssig = Ssig / NSsig;
-                    PNSig[jCent]->SetBinContent(iPhi,iEta,Ssig/StHat);
+                    PNSig[jCent]->SetBinContent(iPhi,iEta,Ssig);
                 }
                 if (NPsig > 0) {
                     Psig = Psig / NPsig;
-                    PNPlus[jCent]->SetBinContent(iPhi,iEta,Psig/StHat);
+                    PNPlus[jCent]->SetBinContent(iPhi,iEta,Psig);
                 }
                 if (NMsig > 0) {
                     Msig = Msig / NMsig;
-                    PNMinus[jCent]->SetBinContent(iPhi,iEta,Msig/StHat);
+                    PNMinus[jCent]->SetBinContent(iPhi,iEta,Msig);
                 }
                 if (NPMsig) {
                     PMsig = PMsig / NPMsig;
-                    PNPlusMinus[jCent]->SetBinContent(iPhi,iEta,PMsig/StHat);
+                    PNPlusMinus[jCent]->SetBinContent(iPhi,iEta,PMsig);
                 }
                 if (NMPsig) {
                     MPsig = MPsig / NMPsig;
-                    PNMinusPlus[jCent]->SetBinContent(iPhi,iEta,MPsig/StHat);
+                    PNMinusPlus[jCent]->SetBinContent(iPhi,iEta,MPsig);
                 }
             }
         }
