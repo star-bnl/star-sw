@@ -42,6 +42,8 @@ bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset);
 * Definitions for ANSI C
 *
 */
+#define XDR_NO_PROTO
+
 #ifndef XDR_NO_PROTO
 #undef XDR_GETBYTES
 #define XDR_GETBYTES(xdrs, ptr, len)\

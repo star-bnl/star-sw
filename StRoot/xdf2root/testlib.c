@@ -15,6 +15,7 @@ DESCRIPTION
 collection of routine to test ds lib
 */
 #include <stddef.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -27,7 +28,7 @@ collection of routine to test ds lib
 #define SEEK_SET 0
 #define SEEK_END 2
 #endif /* ifndef SEEK_SET */
-
+     
 #define NLOOP 300
 #define XDR_MEM_SIZE(nloop) ((nloop)*(316 + 40*(nloop)))
 #define DS_TEST_FAILED(msg) {dsErrorPrint("TEST FAILED: %s - %s.%d\n",\
@@ -169,7 +170,7 @@ int dsTestCorba()
 	char *str2 = str1;
 	printf("strlen %d\n\n%s\n", strlen(str1), str1);
 	
-	if (!dsParseType(&type, &n, str1, NULL)) {
+	if (!dsParseType(&type, str1, NULL)) {
 		dsPerror("dsParseType failed");
 		return FALSE;
 	}
@@ -182,11 +183,10 @@ int dsTestCorba()
 		dsPerror("dsTypeId failed");
 		return FALSE;
 	}
-	if (!dsTypeSpecifier(&ptr, &i, tid)) {
+	if (!dsTypeSpecifier(&ptr, tid)) {
 		dsPerror("dsTypeSpecifier failed");
 		return FALSE;
 	}
-	printf("len: %d\n%s\n", i, ptr);
 	printf("first tid %d\n", tid);
 	if (!dsTypeId(&tid, str1, &ptr)) {
 		dsPerror("dsTypeId failed");
@@ -242,7 +242,6 @@ int dsTestErr()
 int dsTestGraph(void)
 {
 	char buf[200];
-	DS_BUF_T bp;
 	DS_DATASET_T *a, *b, *c, *d, *e;
 	DS_LIST_T list;
 
@@ -258,7 +257,7 @@ int dsTestGraph(void)
 	T(dsLink(b, c));
 	T(dsLink(b, d));
 	T(dsLink(c, d));
-	T(dsListInit(&list));
+	dsListInit(&list);
 	T(dsVisitList(&list, a));
 	T(dsListFree(&list));
 	T(a->visit == 1);
@@ -270,8 +269,7 @@ int dsTestGraph(void)
 	T(dsLink(d, a));
 	F(dsIsAcyclic(a));
 	T(dsPrintDatasetSpecifier(stdout, a));
-	DS_PUT_INIT(&bp, buf, sizeof(buf));
-	T(dsDatasetSpecifier(&bp, a));
+	T(dsDatasetSpecifier(a, buf, sizeof(buf)));
 	T(dsCreateDataset(&e, NULL, &buf[4], NULL));
 	T(dsPrintDatasetSpecifier(stdout, e));
 	T(dsFreeDataset(e));
@@ -420,11 +418,10 @@ int dsTestType()
 		dsPerror("dsTypeId failed");
 		return FALSE;
 	}
-	if (!dsTypeSpecifier(&ptr, &i, tid1)) {
+	if (!dsTypeSpecifier(&ptr, tid1)) {
 		dsPerror("dsTypeSpecifier failed");
 		return FALSE;
 	}
-	printf("len: %d\n%s\n", i, ptr);
 	printf("first tid %d\n", tid1);
 	if (!dsTypeId(&tid2, str, &ptr) || tid1 != tid2) {
 		dsPerror("dsTypeId failed");
@@ -777,5 +774,4 @@ void testStats(void)
 	printf("\n");
 	dsAllocStats();
 	dsTidHashStats();
-	dsSemStats();
 }

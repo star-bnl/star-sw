@@ -8,8 +8,8 @@ modification history
 24apr93,whg  written.
 28feb95,whg  change to CORBA IDL
 11jun96,whg  added indirection to dataset structure
+18jun98,whg  modify to allow C++ wrappers
 */
-
 /*
 DESCRIPTION
 routines to manage type ID structures and hash tables
@@ -19,66 +19,201 @@ routines to manage type ID structures and hash tables
 #include <string.h>
 #define DS_PRIVATE
 #include "dstype.h"
-
-static int dsTidInit(void);
-
 /******************************************************************************
 *
-* Tid list and hash table for declaration cache
+* hash table for declaration cache
 *
 */
+/* replace by real semaphore for multi thread */
+#define DS_TID_GIVE (++semGive == semTake)
+#define DS_TID_TAKE (semTake++ == semGive)
+static int semGive = 0, semTake = 0;
+
 typedef struct tid_hash {
-	struct tid_hash *next;	/* next node - MUST BE FIRST MEMBER OF STRUCT */
-	size_t tid;		/* type ID for this entry */
-	size_t len;		/* length of str */
-	char str[1];	/* declaration string for this entry */
+	struct tid_hash *next;	/* next node */
+	size_t tid;				/* type ID for this entry */
+	size_t len;				/* length of str */
+	char *spec;				/* type specifier */
 }TID_HASH_T;
 
-typedef struct tid_info {
-	DS_TYPE_T *type;	/* pointer to type structure */
-	char *specifier;		/* string for tid type specifier */
-	int len;		/* length of specifier string */
-}TID_INFO_T;
-
-static size_t dsTidCount = 0;	/* index of next dsTidInfo element */
-static int dsTidHit = 0;
-static int dsTidMiss = 0;
-static int dsTidSlots = 0;
+static size_t dsTidHit = 0, dsTidMax = 0, dsTidMiss = 0;
 static TID_HASH_T **dsTidHash = NULL;
-static TID_INFO_T *dsTidInfo = NULL;
 /******************************************************************************
 *
-* dsTidInit - intilize dsTidHash and dsTidInfo structs
-* 
+* dsFormatStruct - recursive part of format type declaration string
+*
 * RETURNS: TRUE if success else FALSE
 */
-static int dsTidInit()
+static int dsFormatStruct(DS_TYPE_T *type, DS_TYPE_T **scope, size_t nScope,
+						  size_t level, char **in, char *limit)
 {
-	size_t hashSize = DS_TID_HASH_LEN*sizeof(TID_HASH_T *);
-	size_t infoSize = (DS_MAX_TID + 1)*sizeof(TID_INFO_T);
+	int j, simple;
+	size_t firstDecl, i;
+	DS_TYPE_T *ft;
+	DS_FIELD_T *field = type->field;
 
-	/********* start critical section *********/
-	if (!dsTypeSemTake()) {
-		return FALSE;
+	if (!dsPutStr("struct ", in, limit) ||
+		!dsPutStr(type->name, in, limit) ||
+		!dsPutStr(" {\n", in, limit)) {
+		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 	}
-	if (dsTidCount != 0) {
-		/* exit if initialized */
-		return dsTypeSemGive();
-	}
-	if ((dsTidHash = dsTypeCalloc(hashSize)) != NULL) {
-		if ((dsTidInfo = dsTypeCalloc(infoSize)) == NULL) {
-			dsTypeFree(dsTidHash, hashSize);
-			dsTidHash = NULL;
+	for (i = 0; i < type->nField;) {
+		ft = field[i].type;
+		if (!dsPutTabs(level + 1, in, limit)) {
+			DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+		}
+		if (ft->code != DS_TYPE_STRUCT) {
+			simple = TRUE;
+		}
+		else {
+			for (j = nScope; j-- > 0 && ft != scope[j];);
+			simple = j >= 0;
+		}
+		if (simple) {
+			if (!dsPutStr(ft->name, in, limit)) {
+				DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+			}
+		}
+		else {
+			if (!dsFormatStruct(ft, scope,
+				nScope, level + 1, in, limit)) {
+				return FALSE;
+			}
+			if (nScope >= DS_SCOPE_DIM) {
+				DS_LOG_ERROR(DS_E_SCOPE_TOO_LARGE);
+			}
+			scope[nScope++] = ft;
+		}
+		for (firstDecl = i; i < type->nField && ft == field[i].type; i++) {
+			if (!dsPutStr(i == firstDecl ? " " : ", ", in, limit) ||
+				!dsPutStr(field[i].name, in, limit)) {
+				DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+			}
+			for (j = 0; j < DS_MAX_DIMS && field[i].dim[j]; j++) {
+				if (!dsPutStr("[", in, limit) ||
+					!dsPutNumber(field[i].dim[j], in, limit) ||
+					!dsPutStr("]", in, limit)) {
+					DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+				}
+			}
+		}
+		if (!dsPutStr(";\n", in, limit)) {
+			DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 		}
 	}
-	if (dsTidHash == NULL) {
-		dsTypeSemGive();
+	if (!dsPutTabs(level, in, limit) ||
+		!dsPutStr("}", in, limit)) {
+		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
+	}
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsFormatTypeSpecifier - format a declaration string for a structure
+*
+* RETURNS: TRUE if success else FALSE
+*/
+int dsFormatTypeSpecifier(char *str, size_t maxSize, DS_TYPE_T *type)
+{
+	char *in = str, *limit = str + maxSize;
+	size_t tid;
+	DS_TYPE_T *scope[DS_SCOPE_DIM];
+
+	if (type->code != DS_TYPE_STRUCT) {
+		DS_ERROR(DS_E_INVALID_TYPE);
+	}
+	if (!dsFormatStruct(type, scope, 0, 0, &in, limit)) {
 		return FALSE;
 	}
-	/* set dsTidCount to indicate initilized */
-	dsTidCount = 1;
-	return dsTypeSemGive();
-	/********** end critical section **********/
+	if (!dsTypeId(&tid, str, NULL)) {
+		DS_ERROR(DS_E_INVALID_TYPE);
+	}
+	if (type->tid != 0 && tid != type->tid) {
+		DS_ERROR(DS_E_SYSTEM_ERROR);
+	}
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsHashSpec - hash function for type specifier
+*
+* RETURNS: TRUE if success else FALSE
+*/
+static int dsHashSpec(size_t *pHash, char *spec)
+{
+	char name[DS_NAME_DIM], *str;
+	size_t size;
+
+	if (dsTidHash == NULL) {
+		if (!DS_TID_TAKE) {
+			DS_ERROR(DS_E_SEM_TAKE_ERROR);
+		}
+		size = DS_TID_HASH_DIM*sizeof(TID_HASH_T *);
+		dsTidHash = dsTypeCalloc(size);
+		if (!DS_TID_GIVE) {
+			DS_ERROR(DS_E_SEM_GIVE_ERROR);
+		}
+		if (dsTidHash == NULL) {
+			return FALSE;
+		}
+	}
+	if (!dsParseName(name, spec, &str) ||
+		strcmp(name, "struct") != 0 ||
+		!dsParseName(name, str, &str)) {
+		DS_ERROR(DS_E_INVALID_TYPE_SPECIFIER);
+	}
+	*pHash = dsHash(name)%DS_TID_HASH_DIM;
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsHashTid - add (tid, spec) to hash
+*
+* RETURNS: TRUE if success else FALSE
+*/
+static int dsHashTid(TID_HASH_T **ppNode, size_t tid, char *spec, size_t len)
+{
+	size_t h;
+	TID_HASH_T **next, *node;
+
+	if(!dsHashSpec(&h, spec)) {
+		return FALSE;
+	}
+	if (!DS_TID_TAKE) {
+		DS_ERROR(DS_E_SEM_TAKE_ERROR);
+	}
+	next = &dsTidHash[h];
+	for (next = &dsTidHash[h]; (node = *next) != NULL; next = &node->next ) {
+		if (tid == node->tid && strncmp(spec, node->spec, node->len) == 0) {
+			goto done;
+		}
+	}
+	if (spec[len-1] != '}') {
+		DS_LOG_ERROR(DS_E_SYSTEM_ERROR);
+		goto fail;
+	}
+	if ((node = dsTypeCalloc(sizeof(TID_HASH_T) + len +1)) == NULL) {
+		goto fail;
+	}
+	if (tid > dsTidMax)dsTidMax = tid;
+	node->spec = (char *)&node[1];
+	strncpy(node->spec, spec, len);
+	node->spec[len] = '\0';
+	node->tid = tid;
+	node->len = len;
+	*next = node;/* must be after node is setup to be thread safe */
+
+done:
+	if (!DS_TID_GIVE) {
+		DS_ERROR(DS_E_SEM_GIVE_ERROR);
+	}
+	*ppNode = node;
+	return TRUE;
+fail:
+	if (!DS_TID_GIVE) {
+		DS_ERROR(DS_E_SEM_GIVE_ERROR);
+	}
+	return FALSE;
 }
 /******************************************************************************
 *
@@ -86,71 +221,25 @@ static int dsTidInit()
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTypeSpecifier(char **ptr, size_t *pLen, size_t tid)
+int dsTypeSpecifier(char **ptr, size_t tid)
 {
-	char buf[DS_MAX_SPEC_LEN+1], *str;
-	size_t len;
+	char buf[DS_MAX_SPEC_LEN+1];
+	TID_HASH_T *node;
+	DS_TYPE_T *type;
 
-	if (tid < 1 || tid >= dsTidCount) {
-		DS_ERROR(DS_E_INVALID_TYPE_ID);
+	if (!dsTypePtr(&type, tid)) {
+		return FALSE;
 	}
-	/* check if string is already formated */
-	if (dsTidInfo[tid].specifier == NULL) {
-		if (!dsFormatTypeSpecifier(buf, sizeof(buf), dsTidInfo[tid].type)) {
+	if (type->stdspec == NULL) {
+		if (!dsFormatTypeSpecifier(buf, sizeof(buf), type) ||
+			!dsHashTid(&node, tid, buf, strlen(buf))) {
 			return FALSE;
 		}
-		len = strlen(buf);
-		if ((str = dsTypeCalloc(len + 1)) == NULL) {
-			return FALSE;
-		}
-		strcpy(str, buf);
-
-		/******** start critical section *********/
-		if (!dsTypeSemTake()) {
-			goto fail;
-		}
-		/* check for string formatted by another thread */
-		if (dsTidInfo[tid].specifier == NULL) {
-			dsTidInfo[tid].specifier = str;
-			dsTidInfo[tid].len = len;
-			str = NULL;
-		}
-		if (!dsTypeSemGive()) {
-			goto fail;
-		}
-		/********* end critical section **********/
-		if (str != NULL) {
-			/* free memory - specifier was created by another thread */
-			dsTypeFree(str, len + 1);
-		}
+		type->stdspec = node->spec;
 	}
 	if (ptr != NULL) {
-		*ptr = dsTidInfo[tid].specifier;
+		*ptr = type->stdspec;
 	}
-	if (pLen != NULL) {
-		*pLen = dsTidInfo[tid].len;
-	}
-	return TRUE;
-
-fail:
-	if (str != NULL) {
-		dsTypeFree(str, len + 1);
-	}
-	return FALSE;
-}
-/******************************************************************************
-*
-* dsTypePtr - get pointer to a type structure for a tid
-*
-* RETURNS: TRUE if success else FALSE
-*/
-int dsTypePtr(DS_TYPE_T **pType, size_t tid)
-{
-	if (tid < 1 || tid >= dsTidCount) {
-		DS_ERROR(DS_E_INVALID_TYPE_ID);
-	}
-
-	*pType = dsTidInfo[tid].type;
 	return TRUE;
 }
 /******************************************************************************
@@ -161,8 +250,8 @@ int dsTypePtr(DS_TYPE_T **pType, size_t tid)
 */
 int dsTidHashStats()
 {
-	printf("tidHashStats: tidSlots %d, tidHit %d, tidMiss %d\n",
-		dsTidSlots, dsTidHit, dsTidMiss);
+	printf("tidHashStats: tidMax %d, tidMiss %d, tidHit %d\n",
+		dsTidMax, dsTidMiss, dsTidHit);
 	return TRUE;
 }
 /******************************************************************************
@@ -173,135 +262,35 @@ int dsTidHashStats()
 */
 int dsTypeId(size_t *pTid, char *str, char **ptr)
 {
-	char *next;
-	size_t c, i, h, n, newSize, typeSize;
-	TID_HASH_T *entry, *sptr, *new, *tptr;
+	char *tmp;
+	size_t h;
+	TID_HASH_T **next, *node;
 	DS_TYPE_T *type;
 
-	if (ptr != NULL) {
-		*ptr = str;
+	for (;isspace(*str); str++);
+	if (!dsHashSpec(&h, str)) {
+		return FALSE;
 	}
-	/* skip to type name */
-	for (; isspace(*str); str++);
-	for (i = 0; isalnum(c = str[i]) || c == '_'; i++);
-	for (; isspace(str[i]); i++);
-
-	/* hash type name */
-	for (h = 0, n = i; isalnum(c = str[i]) ||c == '_'; i++) {
-		h = ((h << 8) + c)%DS_TID_HASH_LEN;
+	for (next = &dsTidHash[h]; (node = *next) != NULL; next = &node->next ) {
+		if (strncmp(str, node->spec, node->len) == 0) {
+			dsTidHit++;
+			break;
+		}
 	}
-	if (i == n) {
-		DS_ERROR(DS_E_INVALID_TYPE_NAME);
-	}
-	if (dsTidCount == 0) {
-		if (!dsTidInit()) {
+	if (node == NULL) {
+		if (!dsParseType(&type, str, &tmp) ||
+			!dsHashTid(&node, type->tid, str, tmp - str)) {
 			return FALSE;
 		}
-	}
-	/* search for string in hash table */
-	for (sptr = (TID_HASH_T *)&dsTidHash[h]; sptr->next != NULL; ) {
-		sptr = sptr->next;
-		if (strncmp(str, sptr->str, sptr->len) == 0) {
-			if (pTid != NULL) {
-				*pTid = sptr->tid;
-			}
-			if (ptr != NULL) {
-				*ptr = str + sptr->len;
-			}
-dsTidHit++;
-			return TRUE;
-		}
-	}
-dsTidMiss++;
-if(dsTidHash[h] == NULL)dsTidSlots++;
-	type = NULL;
-	if (!dsParseType(&type, &typeSize, str, &next)) {
-		return FALSE;
-	}
-	n = next - str;
-
-	/* create entry for open hash */
-	newSize = sizeof(TID_HASH_T) + n;
-	if ((new = dsTypeCalloc(newSize)) == NULL) {
-		dsTypeFree(type, typeSize);
-		return FALSE;
-	}
-	strncpy(new->str, str, n);
-	new->str[n] = '\0';
-	new->len = n;
-	tptr = (TID_HASH_T *)&dsTidHash[h];
-
-	for(entry = NULL;;) {
-		/* look for type match in hash table */
-		while (new->tid == 0 && tptr->next != NULL) {
-			tptr = tptr->next;
-			if (dsTypeCmp(type, dsTidInfo[tptr->tid].type) == 0) {
-				new->tid = tptr->tid;
-				dsTypeFree(type, typeSize);
-				type = NULL;
-			}
-		}
-		/********* start critical section *********/
-		if( !dsTypeSemTake()) {
-			goto fail;
-		}
-		/* check if entries were created by other threads */
-		if (sptr->next == NULL) {
-			/* create a new tid if type not found in hash table */
-			if (new->tid == 0) {
-				if (dsTidCount >= DS_MAX_TID) {
-					/* exit with error - dsTidInfo full */
-					if (!dsTypeSemGive()) {
-						goto fail;
-					}
-					DS_LOG_ERROR(DS_E_TOO_MANY_TYPES);
-					goto fail;
-				}
-				new->tid = dsTidCount;
-				dsTidInfo[dsTidCount].type = type;
-				/* allow other threads to use new tid */
-				dsTidCount++;
-			}
-			/* add entry to open hash */
-			sptr->next = new;
-			if (!dsTypeSemGive())  {
-				goto fail;
-			}
-			entry = new;
-			break;
-		}
-		if (!dsTypeSemGive()) {
-			goto fail;
-		} 
-		/********** end critical section **********/
-
-		/* check entry created by other thread */
-		sptr = sptr->next;
-		if (strncmp(str, sptr->str, sptr->len) == 0) {
-			dsTypeFree(new, newSize);
-			if (type) {
-				dsTypeFree(type, typeSize);
-			}
-			entry = sptr;
-			break;
-		}
-	}
-	if (ptr != NULL) {
-		*ptr = next;
+		dsTidMiss++;
 	}
 	if (pTid != NULL) {
-		*pTid = entry->tid;
+		*pTid = node->tid;
+	}
+	if (ptr != NULL) {
+		*ptr = str + node->len;
 	}
 	return TRUE;
-
-fail:
-	if (type != NULL) {
-		dsTypeFree(type, typeSize);
-	}
-	if (new != NULL) {
-		dsTypeFree(new, newSize);
-	}
-	return FALSE;
 }
 /******************************************************************************
 *
@@ -343,14 +332,16 @@ int dsTypeListCreate(size_t **pList, size_t listDim)
 */
 int dsTypeListEnter(size_t *list, char *str, char **ptr)
 {
-	char *name;
 	size_t h, tid;
+	DS_TYPE_T *type;
 
 	if (!dsTypeId(&tid, str, ptr)) {
 		return FALSE;
 	}
-	name = dsTidInfo[tid].type->name;
-	if (!dsTypeListFind(&h, list, name)) {
+	if (!dsTypePtr(&type, tid)) {
+		return FALSE;
+	}
+	if (!dsTypeListFind(&h, list, type->name)) {
 		return FALSE;
 	}
 	if (list[h] == 0) {
@@ -371,16 +362,17 @@ int dsTypeListFind(size_t *pH, size_t *list, char *str)
 {
 	int c;
 	size_t h, len, tid, n = list[0];
+	DS_TYPE_T *type;
 
 	for (; isspace(*str); str++);
 	for (h = len = 0; isalnum(c = str[len]) || c == '_'; len++) {
 		h = ((h << 8) + c)%n;
 	}
 	for (h++; (tid = list[h]) != 0; h = h > 1 ? h - 1 : list[0]) {
-		if (tid >= dsTidCount) {
-			DS_ERROR(DS_E_INVALID_TYPE_ID);
+		if (!dsTypePtr(&type, tid)) {
+			return FALSE;
 		}
-		if ((c = dsCmpName(str, dsTidInfo[tid].type->name)) <= 0) {
+		if ((c = dsCmpName(str, type->name)) <= 0) {
 			if (c < 0) {
 				DS_ERROR(DS_E_NAMES_COLLIDE);
 			}

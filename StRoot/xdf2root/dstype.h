@@ -114,22 +114,19 @@ typedef union ds_ptr_union_t {	/* union of pointers to basic types */
 */
 #define DS_ALLOC_FACTOR	1.5		/* realloc factor for dynamic tables */
 #define DS_ALLOC_INC	100		/* alloc increment for dynamic datasets */
-#define DS_BUF_ALLOC	500		/* allocation increment for string buffers */
 #define DS_LIST_INC		100		/* number of items for list realloc */
 #define DS_MAX_DIMS		4		/* max number of dimensions for a field */
 #define DS_MAX_ERR		20		/* max number of thread error structures */
 #define DS_MAX_JOIN 	100 	/* max number of fields in a join */
 #define DS_MAX_NAME_LEN	31		/* max length of a name */
-#define DS_MAX_NEST		10		/* max levels of nested structs */
-#ifndef VXWORKS
 #define DS_MAX_SPEC_LEN	10000	/* max length of specifier string */
-#else
-#define DS_MAX_SPEC_LEN	1000	/* max length of specifier string */
-#endif
 #define DS_MAX_STRUCT	100		/* max number of struct defs in a type */
 #define DS_MAX_TID		1000	/* max number of tids */
-#define DS_NAME_DIM	(DS_MAX_NAME_LEN+1)/* size of name plus zero byte */ 
-#define DS_TID_HASH_LEN	255		/* size of tid closed hash (2^N -1) */
+#define DS_NAME_DIM	(DS_MAX_NAME_LEN+1)/* size of name plus zero byte */
+#define DS_SCOPE_DIM	100		/* max number of scoped names in struct */
+#define DS_TID_HASH_DIM	255		/* size of tid closed hash (2^N -1) */
+#define DS_TYPE_HASH_DIM 255	/* size of type closed hash (2^N - 1) */
+#define DS_TYPE_NODE_DIM 1000	/* number of type hash nodes */
 /******************************************************************************
 *
 * node in hiearchical data structure
@@ -143,6 +140,7 @@ typedef struct ds_dataset_t {
 	size_t maxcount;		/* max value for elcount */
 	size_t refcount;		/* refrence count of pointers to this node */
 	size_t visit;			/* used in graph theory algorithms */
+	void *cppWrap;			/* pointer to C++ wrapper */
 	union {						
 		struct ds_dataset_t **link;	/* dataset if tid == zero */
 		void *data;					/* table if tid != zero */
@@ -259,14 +257,18 @@ typedef struct ds_list_t {
 *
 */
 typedef struct ds_type_t {
-	char name[DS_NAME_DIM];	/* type name */
-	DS_TYPE_CODE_T code;	/* type code */
-	unsigned int flags;		/* type flags */
-	size_t size;			/* in memory sizeof(type) */
-	size_t modulus;			/* alignment modulus */
-	size_t stdsize;			/* size in standard encoding */
-	size_t stdmodulus;		/* modulus in standard encoding */
-	size_t nField;			/* number of fields that follow */
+	char name[DS_NAME_DIM];		/* type name */
+	DS_TYPE_CODE_T code;		/* type code */
+	size_t size;				/* in memory sizeof(type) */
+	size_t modulus;				/* alignment modulus */
+	size_t stdsize;				/* size in standard encoding */
+	size_t stdmodulus;			/* modulus in standard encoding */
+	size_t tid;					/* tid for this type */
+	unsigned int flags;			/* type flags */
+	size_t nField;				/* number of fields that follow */
+	struct ds_field_t *field;	/* fields */
+	char *stdspec;				/* standard type specifier */
+	void *typeWrap;				/* pointer to C++ wrapper */
 }DS_TYPE_T;
 /* 
  * macros to classify types
@@ -291,11 +293,12 @@ typedef  struct	ds_field_t {
 	size_t count;				/* number of elements in field */
 	size_t offset;				/* field offset from start of struct */
 	size_t stdoffset;			/* field offset in standard encoding */
+	void * fieldWrap;			/* pointer to C++ wrapper */
 	size_t dim[DS_MAX_DIMS];	/* array dimension or zero */
 }DS_FIELD_T;
 
 /* fields follow type struct */
-#define DS_FIELD_PTR(type) ((DS_FIELD_T *)&(type)[1])
+#define DS_FIELD_PTR(type) ((type)->field)
 /*
  * function for test and internal use - not in defined API
  */       
@@ -308,16 +311,18 @@ int dsColumnField(DS_FIELD_T **ppField, DS_DATASET_T *pTable, size_t colNumber);
 int dsCreateDataset(DS_DATASET_T **ppDataset,
 					 size_t *tList, char *str, char **ptr);
 int dsErrorPrint(char *fmt, ...);
+int dsFreeListed(DS_LIST_T *list);
 int dsFindField(DS_FIELD_T **pFound, DS_TYPE_T *pType, char *name);
 int dsFindTable(DS_DATASET_T **ppTable, DS_DATASET_T *pDataset, char *name,
 	char *typeSpecifier);
 int dsFormatTypeSpecifier(char *str, size_t maxSize, DS_TYPE_T *type);
 int dsListAppend(DS_LIST_T *list, DS_DATASET_T *item);
 int dsListFree(DS_LIST_T *list);
-int dsListInit(DS_LIST_T *list);
+void dsListInit(DS_LIST_T *list);
 int dsListRealloc(DS_LIST_T *list, size_t maxcount);
+int dsMakeFreeList(DS_LIST_T *list, DS_DATASET_T *dataset);
 int dsMark(DS_LIST_T *list, DS_DATASET_T *item);
-int dsParseType(DS_TYPE_T **pType, size_t *pSize, char *str, char **ptr);
+int dsParseType(DS_TYPE_T **pType, char *str, char **ptr);
 void dsPrintData(FILE *stream, DS_TYPE_T *type, unsigned count, void *data);
 int dsPrintDatasetSpecifier(FILE *stream, DS_DATASET_T *pDataset);
 int dsPrintSpecifiers(FILE *stream, DS_DATASET_T *pDataset);
@@ -332,7 +337,7 @@ int dsTableType(DS_TYPE_T **ppType, DS_DATASET_T *pTable);
 int dsTargetTypeSpecifier(char *str, size_t maxSize, char *typeName, 
 	size_t *tidList, char **names, char *projectList);
 int dsTypeCmp(DS_TYPE_T *t1, DS_TYPE_T *t2);
-int dsTypeSpecifier(char **ptr, size_t *pLen, size_t tid);
+int dsTypeSpecifier(char **ptr, size_t tid);
 int dsTypeId(size_t *pTid, char *str, char **ptr);
 int dsTypePtr(DS_TYPE_T **pType, size_t tid);
 int dsVisited(DS_LIST_T *list, DS_DATASET_T *item);
@@ -400,30 +405,6 @@ extern int dsIsIeee;
 #define DS_PAD(offset, modulus) (offset%modulus ? modulus - offset%modulus : 0)
 /******************************************************************************
 *
-* descriptor for buffer
-*
-*/
-typedef struct ds_buf_t {
-	char *first;	/* address of first location of buffer */
-	char *in;		/* address to put next byte in buffer */
-	char *out;		/* address of get next byte from buffer */
-	char *limit;	/* address of byte just after buffer */ 
-}DS_BUF_T;
-/*
- * macros get and put characters
- */
-#define DS_GET_INIT(bp, str) {(bp)->first = (bp)->out = str;\
-		(bp)->in = (bp)->limit = NULL;}
-#define DS_GETC(bp) (((bp)->in == NULL && *(bp)->out) || ((bp)->in &&\
-		(bp)->in > (bp)->out) ? 0XFF & (char)*(bp)->out++ : EOF)
-#define DS_PEEK(bp) (((bp)->in == NULL && *(bp)->out) || ((bp)->in &&\
-		(bp)->in > (bp)->out) ? 0XFF & (char)*(bp)->out : EOF)
-#define DS_PUT_INIT(bp, buf, size) {(bp)->limit = (buf) + ((buf) ? (size) : 0);\
-		(bp)->first = (bp)->in = (bp)->out = (buf);}		
-#define DS_PUTC(c, bp) ((bp)->in < (bp)->limit ?\
-		0XFF & (*(bp)->in++ = (char)(c)) : dsPutc(c, bp))
-/******************************************************************************
-*
 * descriptor for table key
 *
 */
@@ -437,28 +418,25 @@ typedef struct ds_key_t {
 * private functions
 *
 */
-int dsBufFree(DS_BUF_T *bp);
-int dsBufRealloc(DS_BUF_T *bp, size_t size);
 int dsCmpKeys(char *baseOne, char *baseTwo, DS_KEY_T *key);
 int dsCmpName(char *s1, char *s2);
-int dsCopyName(char *dst, char *str, char **ptr);
-int dsDatasetSpecifier(DS_BUF_T *bp, DS_DATASET_T *pDataset);
+int dsDatasetSpecifier(DS_DATASET_T *pDataset, char *buf, size_t bufSize);
 int dsDumpTypes(void);
 int dsErrSemGive(void);
 int dsErrSemTake(void);
-int dsGetc(DS_BUF_T *mp);
-int dsGetColumnSpecifier(char *tableName, char *columnName, DS_BUF_T *bp);
-int dsGetName(char *name, DS_BUF_T *bp);
-int dsGetNonSpace(DS_BUF_T *mp);
-int dsGetNumber(size_t *pNumber, DS_BUF_T *bp);
-int dsPutc(int c, DS_BUF_T *bp);
-int dsPutNumber(int n, DS_BUF_T *bp);
-int dsPuts(char *s, DS_BUF_T *bp);
-int dsPutTabs(int n, DS_BUF_T *bp);
+int dsGetColumnSpecifier(char *tableName, char *columnName, char *str, char **ptr);
+size_t dsHash(char *str);
+int dsIsNextName(char *name, char *str, char **ptr);
+int dsNonSpace(char *str, char **ptr);
+int dsParseName(char *name, char *str, char **ptr);
+int dsParseNumber(size_t *pNum, char *str, char **ptr);
+int dsPutc(int c, char **in, char *limit);
+int dsPutNumber(int n, char **in, char *limit);
+int dsPutStr(char *s, char **in, char *limit);
+int dsPutTabs(size_t n, char **in, char *limit);
 int dsSemInit(void);
-int dsSemStats(void);
 int dsTargetField(char *dstColumnName, DS_FIELD_T **ppSrcField,
-	size_t *pSrcIndex, DS_TYPE_T **types, char **names, DS_BUF_T *bp);
+	size_t *pSrcIndex, DS_TYPE_T **types, char **names, char *str, char **ptr);
 void dsToDo(void);
 void *dsTypeCalloc(size_t size);
 void dsTypeFree(void *ptr, size_t size);
@@ -468,9 +446,6 @@ int dsTypeListCreate(size_t **pList, size_t listDim);
 int dsTypeListEnter(size_t *list, char *str, char **ptr);
 int dsTypeListFind(size_t *pH, size_t *list, char *str);
 int dsTypeListFree(size_t *list);
-int dsTypeSemGive(void);
-int dsTypeSemTake(void);
-int dsUngetc(int c, DS_BUF_T *bp);
 #endif  /* DS_PRIVATE */
 #ifdef __cplusplus
 }

@@ -333,6 +333,27 @@ int dsFindEntry(DS_DATASET_T **ppEntry, DS_DATASET_T *pDataset, char *path)
 	}
 	DS_ERROR(DS_E_ENTRY_NOT_FOUND);
 }
+/******************************************************************************
+*
+* dsFindField - return a pointer to a named field
+*
+* RETURN: -1 if name collision, 0 if found or 1 if not found
+*/
+int dsFindField(DS_FIELD_T **ppField, DS_TYPE_T *pType, char *name)
+{
+	int c;
+	size_t i;
+	DS_FIELD_T *field;
+
+	field = DS_FIELD_PTR(pType);
+	for (i = 0; i < pType->nField; i++) {
+		if (( c = dsCmpName(field[i].name, name)) <= 0) {
+			*ppField = &field[i];
+			return c;
+		}
+	}
+	return 1;
+}
 /*****************************************************************************
 *
 * dsFindTable - find table in dataset and return pointer to descriptor
@@ -594,5 +615,5 @@ int dsTableTypeName(char **pName, DS_DATASET_T *pTable)
 */
 int dsTableTypeSpecifier(char **pSpecifier, DS_DATASET_T *pTable)
 {
-	return dsTypeSpecifier(pSpecifier, NULL, pTable->tid);
+	return dsTypeSpecifier(pSpecifier, pTable->tid);
 }

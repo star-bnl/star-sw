@@ -107,10 +107,8 @@ void dsPrintData(FILE *stream, DS_TYPE_T *type, unsigned count, void *data)
 int dsPrintDatasetSpecifier(FILE *stream, DS_DATASET_T *pDataset)
 {
 	char buf[DS_MAX_SPEC_LEN+1];
-	DS_BUF_T bp;
 
-	DS_PUT_INIT(&bp, buf, sizeof(buf));
-	if (!dsDatasetSpecifier(&bp, pDataset)) {
+	if (!dsDatasetSpecifier(pDataset, buf, sizeof(buf))) {
 		return FALSE;
 	}
 	fprintf(stream, "%s\n", buf);
@@ -126,7 +124,7 @@ int dsPrintSpecifiers(FILE *stream, DS_DATASET_T *pDataset)
 {
 	size_t *tList = NULL;
 
-	if (!dsTypeListCreate(&tList, DS_TID_HASH_LEN + 1)) {
+	if (!dsTypeListCreate(&tList, DS_TID_HASH_DIM + 1)) {
 		return FALSE;
 	}
 	if (!dsPrintTypes(stream, pDataset, tList) ||
@@ -144,14 +142,12 @@ fail:
 int dsPrintTypes(FILE *stream, DS_DATASET_T *dataset, size_t *tList)
 {
 	char *str;
-	size_t h, i, len;
+	size_t h, i;
 	DS_DATASET_T *item;
 	DS_LIST_T list;
 	DS_TYPE_T *pType;
 
-	if (!dsListInit(&list)) {
-		return FALSE;
-	}
+	dsListInit(&list);
 	if (!dsVisitList(&list, dataset)) {
 		goto fail;
 	}
@@ -172,7 +168,7 @@ int dsPrintTypes(FILE *stream, DS_DATASET_T *dataset, size_t *tList)
 			goto fail;
 		}
 		tList[h] = item->tid;
-		if (!dsTypeSpecifier(&str, &len, item->tid)) {
+		if (!dsTypeSpecifier(&str, item->tid)) {
 			goto fail;
 		}
 		fprintf(stream, "type %s\n", str);
@@ -210,9 +206,8 @@ void dsPrintTableData(FILE *stream, DS_DATASET_T *table)
 void dsPrintTableType(FILE *stream, DS_DATASET_T *pTable)
 {
 	char *str;
-	size_t i;
 	
-	if (!dsTypeSpecifier(&str, &i, pTable->tid)) {
+	if (!dsTypeSpecifier(&str, pTable->tid)) {
 		fprintf(stream, "\nINVALID TABLE\n\n");
 		return;
 	}

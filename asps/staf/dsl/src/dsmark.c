@@ -1,6 +1,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #define DS_PRIVATE
 #include "dsxdr.h"
@@ -120,9 +121,7 @@ int dsMarkSize(DS_DATASET_T *pDataset, size_t *pSize)
 	DS_LIST_T list;
 	DS_TYPE_T *type;
 
-	if (!dsListInit(&list)) {
-		return FALSE;
-	}
+	dsListInit(&list);
 	if (!dsVisitList(&list, pDataset)) {
 		goto fail;
 	}
