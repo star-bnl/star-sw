@@ -34,7 +34,7 @@ protected:
   
   Int_t mDecayMode;
 
-  ClassDef(StKinkMc,4)
+  ClassDef(StKinkMc,5)
 };
 
 inline Int_t StKinkMc::decayMode() const
@@ -52,8 +52,11 @@ inline Int_t StKinkMc::daughterCharge() const
 
 
 /***********************************************************************
- * $Id: StKinkMc.hh,v 3.2 2003/05/30 21:20:19 genevb Exp $
+ * $Id: StKinkMc.hh,v 3.3 2003/06/01 04:25:19 genevb Exp $
  * $Log: StKinkMc.hh,v $
+ * Revision 3.3  2003/06/01 04:25:19  genevb
+ * Update ClassDef version for altered inheritance
+ *
  * Revision 3.2  2003/05/30 21:20:19  genevb
  * doxygen savvy, encoding of FTPC mults, change virtual funcs
  *

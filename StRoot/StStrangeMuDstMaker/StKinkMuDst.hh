@@ -93,7 +93,7 @@ private:
   void     findTransverseMassPion();
   void     findRapidityKaon();
   void     findRapidityPion();
-  ClassDef(StKinkMuDst,6)
+  ClassDef(StKinkMuDst,7)
 };
 
 inline Float_t StKinkMuDst::dcaParentDaughter() const
@@ -149,8 +149,11 @@ inline Float_t StKinkMuDst::lenDedxDaughter() const
 
 
 /***********************************************************************
- * $Id: StKinkMuDst.hh,v 3.6 2003/05/30 21:20:19 genevb Exp $
+ * $Id: StKinkMuDst.hh,v 3.7 2003/06/01 04:25:19 genevb Exp $
  * $Log: StKinkMuDst.hh,v $
+ * Revision 3.7  2003/06/01 04:25:19  genevb
+ * Update ClassDef version for altered inheritance
+ *
  * Revision 3.6  2003/05/30 21:20:19  genevb
  * doxygen savvy, encoding of FTPC mults, change virtual funcs
  *
