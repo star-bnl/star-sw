@@ -1,5 +1,8 @@
-* $Id: tdi_rdi_distort.F,v 1.1 1998/01/27 00:59:19 fisyak Exp $
+* $Id: tdi_rdi_distort.F,v 1.2 2000/02/23 23:25:35 hardtke Exp $
 * $Log: tdi_rdi_distort.F,v $
+* Revision 1.2  2000/02/23 23:25:35  hardtke
+* replace tpg functions with tpc functions
+*
 * Revision 1.1  1998/01/27 00:59:19  fisyak
 * Split sources
 *
@@ -36,16 +39,16 @@ c-----------------------------------------------------------------------
 
       real x_l(3), p_l(3), theta, tan_theta, tan_alpha, dy
 c-----------------------------------------------------------------------
-      call tgc_global_to_local(i_sector,x_g,x_l)
+      call tpc_global_to_local(i_sector,x_g,x_l)
       tan_theta = x_l(1)/x_l(2)
       theta = atan(tan_theta)
       dy = drho*cos(theta)
     
-      call tgc_global_to_local_p(i_sector,p_g,p_l)
+      call tpc_global_to_local_p(i_sector,p_g,p_l)
       tan_alpha = p_l(1)/p_l(2)
 
       x_l(1) = x_l(1) - dy*(tan_alpha-tan_theta)
-      call tgc_local_to_global(i_sector,x_l,x_g)
+      call tpc_local_to_global(i_sector,x_l,x_g)
 
       return
       end
