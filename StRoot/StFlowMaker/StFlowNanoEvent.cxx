@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowNanoEvent.cxx,v 1.5 2000/05/20 00:55:17 posk Exp $
+// $Id: StFlowNanoEvent.cxx,v 1.6 2000/05/26 21:29:30 posk Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -16,12 +16,15 @@
 //        StThreeVectorF  mVertexPos;               // primary vertex position
 //
 //   The StFlowNanoEvent data member fTracks is a pointer to a TClonesArray.
-//   It is an array of a variable number of tracks per Event.
+//   It is an array of a variable number of tracks per event.
 //   Each element of the array is an object of class StFlowTrack 
 //
 ////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowNanoEvent.cxx,v $
+// Revision 1.6  2000/05/26 21:29:30  posk
+// Protected Track data members from overflow.
+//
 // Revision 1.5  2000/05/20 00:55:17  posk
 // Condensed flownanoevent.root somewhat.
 //
@@ -29,14 +32,6 @@
 // Voloshin's flownanoevent.root added.
 //
 // Revision 1.2  2000/03/08 15:10:48  posk
-// Added $Id: StFlowNanoEvent.cxx,v 1.5 2000/05/20 00:55:17 posk Exp $ and $Log: StFlowNanoEvent.cxx,v $
-// Added $Id: StFlowNanoEvent.cxx,v 1.4 2000/05/16 20:59:33 posk Exp $ and Revision 1.5  2000/05/20 00:55:17  posk
-// Added $Id: StFlowNanoEvent.cxx,v 1.4 2000/05/16 20:59:33 posk Exp $ and Condensed flownanoevent.root somewhat.
-// Added $Id: StFlowNanoEvent.cxx,v 1.4 2000/05/16 20:59:33 posk Exp $ and
-// Added $Id: StFlowNanoEvent.cxx,v 1.5 2000/05/20 00:55:17 posk Exp $ and Revision 1.4  2000/05/16 20:59:33  posk
-// Added $Id: StFlowNanoEvent.cxx,v 1.5 2000/05/20 00:55:17 posk Exp $ and Voloshin's flownanoevent.root added.
-// Added $Id: StFlowNanoEvent.cxx,v 1.5 2000/05/20 00:55:17 posk Exp $ and.
-//
 //
 // 
 //////////////////////////////////////////////////////////////////////////

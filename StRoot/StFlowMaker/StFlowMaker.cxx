@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.27 2000/05/23 20:09:44 voloshin Exp $
+// $Id: StFlowMaker.cxx,v 1.28 2000/05/26 21:29:28 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.28  2000/05/26 21:29:28  posk
+// Protected Track data members from overflow.
+//
 // Revision 1.27  2000/05/23 20:09:44  voloshin
 // added StFlowPicoEvent, persistent FlowEvent as plain root TTree
 //
@@ -22,9 +25,6 @@
 //
 // Revision 1.24  2000/05/12 22:42:04  snelling
 // Additions for persistency and minor fix
-//
-// Revision 1.23  2000/05/11 20:00:35  posk
-// Preparation for micro and nano DSTs.
 //
 // Revision 1.22  2000/03/28 23:21:02  posk
 // Allow multiple instances of the AnalysisMaker.
@@ -106,6 +106,7 @@
 #include "StPionMinus.hh"
 #include "StProton.hh"
 #include "StTpcDedxPidAlgorithm.h"
+//#include <algorithm>
 #define PR(x) cout << "##### FlowMaker: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowMaker)
@@ -117,6 +118,8 @@ StFlowMaker::StFlowMaker(const Char_t* name):
   mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE),
   mFlowEventWrite(kFALSE), mFlowEventRead(kFALSE), pEvent(NULL) {
   pFlowSelect = new StFlowSelection();
+  SetNanoEventFileName("flownanoevent.root"); 
+  SetPicoEventFileName("flowpicoevent.root");
 }
 
 StFlowMaker::StFlowMaker(const Char_t* name,
@@ -126,6 +129,8 @@ StFlowMaker::StFlowMaker(const Char_t* name,
   mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), 
   mFlowEventWrite(kFALSE), mFlowEventRead(kFALSE), pEvent(NULL) {
   pFlowSelect = new StFlowSelection(flowSelect); //copy constructor
+  SetNanoEventFileName("flownanoevent.root"); 
+  SetPicoEventFileName("flowpicoevent.root");
 }
 
 //-----------------------------------------------------------------------
@@ -138,7 +143,7 @@ StFlowMaker::~StFlowMaker() {
 Int_t StFlowMaker::Make() {
 
   // Delete previous StFlowEvent
-  if (pFlowEvent) delete pFlowEvent;    // it deletes pTrackCollection
+  if (pFlowEvent) delete pFlowEvent;
   pFlowEvent = NULL;
     
   // Get a pointer to StEvent
@@ -160,22 +165,25 @@ Int_t StFlowMaker::Make() {
       Long_t eventID = pEvent->id();
       cout << "##### FlowMaker: event " << eventID << " cut" << endl;
     }
+
   } else if (mFlowEventRead) {
     // Get a pointer to StFlowEvent
     if (!pFlowEvent) return kStOK; // If no event, we're done
     if (mNanoEventWrite) FillNanoEvent();
     if (mPicoEventWrite) FillPicoEvent();
+
   } else if (mNanoEventRead) {
     // Instantiate a new StFlowEvent
     pFlowEvent = new StFlowEvent;
     if (!pFlowEvent) return kStOK;
-    if (!FillFromNanoDST(pFlowNanoEvent)) return kStEOF; // false if EOF
+    if (!FillFromNanoDST(pNanoEvent)) return kStEOF; // false if EOF
     if (mFlowEventWrite) pFlowMicroTree->Fill();  // fill the tree
+
   } else if (mPicoEventRead) {
     // Instantiate a new StFlowEvent
     pFlowEvent = new StFlowEvent;
     if (!pFlowEvent) return kStOK;
-    if (!FillFromPicoDST(pFlowPicoEvent)) return kStEOF; // false if EOF
+    if (!FillFromPicoDST(pPicoEvent)) return kStEOF; // false if EOF
     if (mFlowEventWrite) pFlowMicroTree->Fill();  // fill the tree
   }
 
@@ -192,7 +200,7 @@ Int_t StFlowMaker::Make() {
 
 void StFlowMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowMaker.cxx,v 1.27 2000/05/23 20:09:44 voloshin Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.28 2000/05/26 21:29:28 posk Exp $" << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
 
@@ -226,12 +234,27 @@ Int_t StFlowMaker::Finish() {
   }
   pFlowEvent->PrintSelectionList();
 
-  if (mNanoEventWrite) CloseNanoEventWrite();
-  if (mNanoEventRead)  CloseNanoEventRead();
-  if (mPicoEventWrite) ClosePicoEventWrite();
-  if (mPicoEventRead)  ClosePicoEventRead();
-  if (mFlowEventWrite) CloseFlowEventWrite();
-  if (mFlowEventRead)  CloseFlowEventRead();
+  if (mNanoEventWrite && pNanoDST->IsOpen()) {
+    pNanoDST->Write();
+    pNanoDST->Close();
+  }
+
+  if (mNanoEventRead && pNanoDST->IsOpen()) { pNanoDST->Close(); }
+
+  if (mPicoEventWrite && pPicoDST->IsOpen()) {
+    pPicoDST->Write();
+    pPicoDST->Close();
+  }
+
+  if (mPicoEventRead && pPicoDST->IsOpen()) { pPicoDST->Close(); }
+
+  if (mFlowEventWrite && pFlowDST->IsOpen()) {
+    pFlowDST->Write();
+    pFlowDST->Close();
+  }
+
+  if (mFlowEventRead && pFlowDST->IsOpen()) { // pFlowDST->Close(); 
+  }
 
   return StMaker::Finish();
 }
@@ -343,34 +366,17 @@ void StFlowMaker::FillFlowEvent() {
     return;
   }
 
+  // For use with STL vector
+//   random_shuffle(pFlowEvent->TrackCollection()->begin(),
+// 		 pFlowEvent->TrackCollection()->end());
+
   pFlowEvent->TrackCollection()->random_shuffle();
   pFlowEvent->SetSelections();
   pFlowEvent->MakeSubEvents();
   pFlowEvent->SetPids();
 
-  // Print multiplicities
-//   int j, k, n;
-
-//   pFlowSelect->SetSubevent(-1);
-//   for (j = 0; j < Flow::nHars; j++) {
-//     pFlowSelect->SetHarmonic(j);
-//     for (k = 0; k < Flow::nSels; k++) {
-//       pFlowSelect->SetSelection(k);
-//       cout << "j,k= " << j << k << " : " << pFlowEvent->Mult(pFlowSelect) << endl;
-//     }
-//   }
-
-//   for (j = 0; j < Flow::nHars; j++) {
-//     pFlowSelect->SetHarmonic(j);
-//     for (k = 0; k <Flow:: nSels; k++) {
-//       pFlowSelect->SetSelection(k);
-//       for (n = 0; n < Flow::nSubs+1; n++) {
-// 	pFlowSelect->SetSubevent(n);
-// 	cout << "j,k,n= " << j << k << n << " : " << 
-// 	  pFlowEvent->Mult(pFlowSelect) << endl;
-//       }
-//     }
-//   }
+  //PR("Flow Subs");
+  //PrintSubeventMults();
 
 }
 
@@ -378,24 +384,25 @@ void StFlowMaker::FillFlowEvent() {
 
 void StFlowMaker::FillNanoEvent() {
 
-  if (!pFlowNanoEvent) {
+  if (!pNanoEvent) {
     cout << "##### FlowMaker: Warning: No FlowNanoEvent" << endl;
+    return;
   }
 
-  pFlowNanoEvent->SetEventID(pFlowEvent->EventID());
-  pFlowNanoEvent->SetOrigMult(pFlowEvent->OrigMult());
-  pFlowNanoEvent->SetCentrality(pFlowEvent->Centrality());
-  pFlowNanoEvent->SetVertexPos(pFlowEvent->VertexPos());
+  pNanoEvent->SetEventID(pFlowEvent->EventID());
+  pNanoEvent->SetOrigMult(pFlowEvent->OrigMult());
+  pNanoEvent->SetCentrality(pFlowEvent->Centrality());
+  pNanoEvent->SetVertexPos(pFlowEvent->VertexPos());
   
   StFlowTrackIterator itr;
   StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
   
   for (itr = pFlowTracks->begin(); itr != pFlowTracks->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
-    pFlowNanoEvent->AddTrack(pFlowTrack);
+    pNanoEvent->AddTrack(pFlowTrack);
   }
-  pFlowTree->Fill();  //fill the tree
-  pFlowNanoEvent->Clear();  
+  pFlowTree->Fill();           //fill the tree
+  pNanoEvent->Clear();  
   
 }
 
@@ -403,69 +410,65 @@ void StFlowMaker::FillNanoEvent() {
 
 void StFlowMaker::FillPicoEvent() {
 
-  if (!pFlowPicoEvent) {
+  if (!pPicoEvent) {
     cout << "##### FlowMaker: Warning: No FlowPicoEvent" << endl;
+    return;
   }
-
-  if (pFlowPicoEvent) {
-    pFlowPicoEvent->SetEventID(pFlowEvent->EventID());
-    pFlowPicoEvent->SetOrigMult(pFlowEvent->OrigMult());
-    pFlowPicoEvent->SetCentrality(pFlowEvent->Centrality());
-    pFlowPicoEvent->SetVertexPos(pFlowEvent->VertexPos().x(),
-                                 pFlowEvent->VertexPos().y(),
-                                 pFlowEvent->VertexPos().z());
-
-    StFlowTrackIterator itr;
-    StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
-
-    TClonesArray &tracks = *pFlowPicoEvent->Tracks();
-    Int_t nnt=0;
-    for (itr = pFlowTracks->begin(); itr != pFlowTracks->end(); itr++) {
-      StFlowTrack* pFlowTrack = *itr;
-      new(tracks[nnt++])
-               StFlowPicoTrack(pFlowTrack->Pt(), 
-                               pFlowTrack->Eta(),
-                               pFlowTrack->Phi(),
-                               pFlowTrack->Charge(),
-                               pFlowTrack->Dca(),
-                               pFlowTrack->Chi2(),
-                               pFlowTrack->FitPts(),
-                               pFlowTrack->MaxPts(),
-                               pFlowTrack->PidPiPlus(),
-                               pFlowTrack->PidPiMinus(),
-                               pFlowTrack->PidProton()    );
-    }  
-    pFlowPicoEvent->SetNtrack(nnt);
-    
-    pFlowTree->Fill();  //fill the tree
-    pFlowPicoEvent->Clear();
-  } else {
-    cout << "##### FlowMaker: Warning: No FlowPicoEvent" << endl;
-  }
+  
+  pPicoEvent->SetEventID(pFlowEvent->EventID());
+  pPicoEvent->SetOrigMult(pFlowEvent->OrigMult());
+  pPicoEvent->SetCentrality(pFlowEvent->Centrality());
+  pPicoEvent->SetVertexPos(pFlowEvent->VertexPos().x(),
+			       pFlowEvent->VertexPos().y(),
+			       pFlowEvent->VertexPos().z());
+  
+  StFlowTrackIterator itr;
+  StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
+  
+  TClonesArray &tracks = *pPicoEvent->Tracks();
+  Int_t nt=0;
+  for (itr = pFlowTracks->begin(); itr != pFlowTracks->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    new(tracks[nt++]) StFlowPicoTrack(pFlowTrack->Pt(), 
+				      pFlowTrack->Eta(),
+				      pFlowTrack->Phi(),
+				      pFlowTrack->Charge(),
+				      pFlowTrack->Dca(),
+				      pFlowTrack->Chi2(),
+				      pFlowTrack->FitPts(),
+				      pFlowTrack->MaxPts(),
+				      pFlowTrack->PidPiPlus(),
+				      pFlowTrack->PidPiMinus(),
+				      pFlowTrack->PidProton()  );
+  }  
+  pPicoEvent->SetNtrack(nt);
+  
+  pFlowTree->Fill();             //fill the tree
+  pPicoEvent->Clear();
   
 }
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowMaker::FillFromNanoDST(const StFlowNanoEvent* pFlowNanoEvent) {
+Bool_t StFlowMaker::FillFromNanoDST(const StFlowNanoEvent* pNanoEvent) {
   // Make StFlowEvent from StFlowNanoEvent
 
-  if (!pFlowTree->GetEntry(mNanoEventCounter++)) {
+  if (!pNanoEvent || !pFlowTree->GetEntry(mNanoEventCounter++)) {
     cout << "##### FlowMaker: no more events" << endl; 
     return kFALSE; 
   }
 
   // Fill FlowEvent
   pFlowEvent->SetPhiWeight(mPhiWgt);
-  pFlowEvent->SetEventID(pFlowNanoEvent->EventID());
-  UInt_t origMult = pFlowNanoEvent->OrigMult();
+  pFlowEvent->SetEventID(pNanoEvent->EventID());
+  UInt_t origMult = pNanoEvent->OrigMult();
   pFlowEvent->SetOrigMult(origMult);
   pFlowEvent->SetCentrality(origMult);
-  pFlowEvent->SetVertexPos(pFlowNanoEvent->VertexPos());
+  pFlowEvent->SetVertexPos(pNanoEvent->VertexPos());
 
   // Fill FlowTracks
-  Int_t nTracks = (Int_t)pFlowNanoEvent->GetNtrack();
-  TClonesArray &tracks = *pFlowNanoEvent->GetTracks();
+  Int_t nTracks = (Int_t)pNanoEvent->GetNtrack();
+  TClonesArray &tracks = *pNanoEvent->GetTracks();
   for (Int_t nt=0; nt<nTracks; nt++) {
       pFlowEvent->TrackCollection()->push_back((StFlowTrack*)tracks[nt]);
   }
@@ -474,55 +477,35 @@ Int_t StFlowMaker::FillFromNanoDST(const StFlowNanoEvent* pFlowNanoEvent) {
   pFlowEvent->MakeSubEvents();
   pFlowEvent->SetPids();
 
-  // Print multiplicities
-//   int j, k, n;
-
-//   pFlowSelect->SetSubevent(-1);
-//   for (j = 0; j < Flow::nHars; j++) {
-//     pFlowSelect->SetHarmonic(j);
-//     for (k = 0; k < Flow::nSels; k++) {
-//       pFlowSelect->SetSelection(k);
-//       cout << "j,k= " << j << k << " : " << pFlowEvent->Mult(pFlowSelect) << endl;
-//     }
-//   }
-
-//   for (j = 0; j < Flow::nHars; j++) {
-//     pFlowSelect->SetHarmonic(j);
-//     for (k = 0; k <Flow:: nSels; k++) {
-//       pFlowSelect->SetSelection(k);
-//       for (n = 0; n < Flow::nSubs+1; n++) {
-// 	pFlowSelect->SetSubevent(n);
-// 	cout << "j,k,n= " << j << k << n << " : " << 
-// 	  pFlowEvent->Mult(pFlowSelect) << endl;
-//       }
-//     }
-//   }
+  //PR("Nano Subs");
+  //PrintSubeventMults();
 
   return kTRUE;
 }
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowMaker::FillFromPicoDST(const StFlowPicoEvent* pFlowPicoEvent) {
+Bool_t StFlowMaker::FillFromPicoDST(const StFlowPicoEvent* pPicoEvent) {
   // Make StFlowEvent from StFlowPicoEvent
 
-  if (!pFlowTree->GetEntry(mPicoEventCounter++)) {
+  if (!pPicoEvent || !pFlowTree->GetEntry(mPicoEventCounter++)) {
     cout << "##### FlowMaker: no more events" << endl; 
     return kFALSE; 
   }
 
   // Fill FlowEvent
   pFlowEvent->SetPhiWeight(mPhiWgt);
-  pFlowEvent->SetEventID(pFlowPicoEvent->EventID());
-  UInt_t origMult = pFlowPicoEvent->OrigMult();
+  pFlowEvent->SetEventID(pPicoEvent->EventID());
+  UInt_t origMult = pPicoEvent->OrigMult();
   pFlowEvent->SetOrigMult(origMult);
   pFlowEvent->SetCentrality(origMult);
-  pFlowEvent->SetVertexPos(StThreeVectorF( pFlowPicoEvent->VertexX(),
-pFlowPicoEvent->VertexY(), pFlowPicoEvent->VertexZ()) );
+  pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
+					  pPicoEvent->VertexY(),
+					  pPicoEvent->VertexZ()) );
 
   // Fill FlowTracks
-  for (Int_t nt=0; nt<pFlowPicoEvent->GetNtrack(); nt++) {
-    StFlowPicoTrack *ntrack = (StFlowPicoTrack*)pFlowPicoEvent->Tracks()
+  for (Int_t nt=0; nt<pPicoEvent->GetNtrack(); nt++) {
+    StFlowPicoTrack* ntrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
       ->UncheckedAt(nt);
       // Instantiate new StFlowTrack
       StFlowTrack* pFlowTrack = new StFlowTrack;
@@ -541,7 +524,43 @@ pFlowPicoEvent->VertexY(), pFlowPicoEvent->VertexZ()) );
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
   }
 
+  pFlowEvent->SetSelections();
+  pFlowEvent->MakeSubEvents();
+  pFlowEvent->SetPids();
+
+  //PR("Pico Subs");
+  //PrintSubeventMults();
+
   return kTRUE;
+}
+
+//-----------------------------------------------------------------------
+
+void StFlowMaker::PrintSubeventMults() {
+
+  int j, k, n;
+
+  pFlowSelect->SetSubevent(-1);
+  for (j = 0; j < Flow::nHars; j++) {
+    pFlowSelect->SetHarmonic(j);
+    for (k = 0; k < Flow::nSels; k++) {
+      pFlowSelect->SetSelection(k);
+      cout << "j,k= " << j << k << " : " << pFlowEvent->Mult(pFlowSelect) << endl;
+    }
+  }
+
+  for (j = 0; j < Flow::nHars; j++) {
+    pFlowSelect->SetHarmonic(j);
+    for (k = 0; k <Flow:: nSels; k++) {
+      pFlowSelect->SetSelection(k);
+      for (n = 0; n < Flow::nSubs+1; n++) {
+	pFlowSelect->SetSubevent(n);
+	cout << "j,k,n= " << j << k << n << " : " << 
+	  pFlowEvent->Mult(pFlowSelect) << endl;
+      }
+    }
+  }
+
 }
 
 //-----------------------------------------------------------------------
@@ -553,28 +572,29 @@ void StFlowMaker::InitNanoEventWrite() {
   Int_t bufsize = 256000;
   if (split) bufsize /= 4;
 
-  pFlowNanoEvent = new StFlowNanoEvent();   
+  pNanoEvent = new StFlowNanoEvent();   
 
   // Open an output file
   Char_t* file = mNanoEventFileName;  
-  pFlowNanoDST = new TFile(mNanoEventFileName,"RECREATE","Flow Nano DST file");
-  if (pFlowNanoDST) {
-    pFlowNanoDST->SetCompressionLevel(comp);
-    cout << "##### FlowMaker: NanoEvents file = " << file << endl;
-  } else {
+  pNanoDST = new TFile(mNanoEventFileName,"RECREATE","Flow Nano DST file");
+  if (!pNanoDST) {
     cout << "##### FlowMaker: Warning: no NanoEvents file = " << file << endl;
     return;
   }
 
+  pNanoDST->SetCompressionLevel(comp);
+  cout << "##### FlowMaker: NanoEvents file = " << file << endl;
+
   // Create a ROOT Tree and one superbranch
   pFlowTree = new TTree("FlowTree", "Flow Nano Tree");
-  if (pFlowTree) {
-    pFlowTree->SetAutoSave(100000000);  // autosave when 100 Mbyte written
-    pFlowTree->Branch("pFlowNanoEvent", "StFlowNanoEvent", &pFlowNanoEvent,
-		      bufsize, split);
-  } else {
+  if (!pFlowTree) {
     cout << "##### FlowMaker: Warning: No FlowNanoTree" << endl;
+    return;
   }
+
+  pFlowTree->SetAutoSave(10000000);  // autosave when 10 Mbyte written
+  pFlowTree->Branch("pNanoEvent", "StFlowNanoEvent", &pNanoEvent,
+		    bufsize, split);
   
 }
 
@@ -588,19 +608,27 @@ void StFlowMaker::InitPicoEventWrite() {
   if (split) bufsize /= 4;
 
   // creat a Picoevent and an output file
-  pFlowPicoEvent = new StFlowPicoEvent();   
-  pFlowPicoDST = new TFile("flowPicoevent.root","RECREATE","Flow Pico DST file");
-  if (pFlowPicoDST) pFlowPicoDST->SetCompressionLevel(comp);
+  pPicoEvent = new StFlowPicoEvent();   
+  Char_t* file = mPicoEventFileName;  
+  pPicoDST = new TFile(mPicoEventFileName,"RECREATE","Flow Pico DST file");
+  if (!pPicoDST) {
+    cout << "##### FlowMaker: Warning: no PicoEvents file = " << file << endl;
+    return;
+  }
+  
+  pPicoDST->SetCompressionLevel(comp);
+  cout << "##### FlowMaker: PicoEvents file = " << file << endl;
 
   // Create a ROOT Tree and one superbranch
   pFlowTree = new TTree("FlowTree", "Flow Pico Tree");
-  if (pFlowTree) {
-    pFlowTree->SetAutoSave(100000000);  // autosave when 100 Mbyte written
-    pFlowTree->Branch("pFlowPicoEvent", "StFlowPicoEvent", &pFlowPicoEvent,
-		      bufsize, split);
-  } else {
+  if (!pFlowTree) {
     cout << "##### FlowMaker: Warning: No FlowPicoTree" << endl;
+    return;
   }
+
+  pFlowTree->SetAutoSave(10000000);  // autosave when 10 Mbyte written
+  pFlowTree->Branch("pPicoEvent", "StFlowPicoEvent", &pPicoEvent,
+		    bufsize, split);
   
 }
 
@@ -608,49 +636,59 @@ void StFlowMaker::InitPicoEventWrite() {
 
 void StFlowMaker::InitNanoEventRead() {
   
-  pFlowNanoEvent = new StFlowNanoEvent(); 
+  pNanoEvent = new StFlowNanoEvent(); 
   
   // Open the input file
   Char_t* file = mNanoEventFileName;  
-  pFlowNanoDST = new TFile(file);
-  if (pFlowNanoDST) {
-    cout << "##### FlowMaker: NanoEvents file = " << file << endl;
-  } else {
+  pNanoDST = new TFile(file);
+  if (!pNanoDST) {
     cout << "##### FlowMaker: Warning: no NanoEvents file = " << file << endl;
     return;
   }
 
+  cout << "##### FlowMaker: NanoEvents file = " << file << endl;
+
   // Get the tree, the branch, and the entries
-  pFlowTree = (TTree*)pFlowNanoDST->Get("FlowTree");
-  if (pFlowTree) {
-    TBranch* branch = pFlowTree->GetBranch("pFlowNanoEvent");
-    branch->SetAddress(&pFlowNanoEvent);
-    Int_t nEntries = (Int_t)pFlowTree->GetEntries(); 
-    cout << "##### FlowMaker: events in nano-DST file = " << nEntries << endl;
-  } else {
-    cout << "##### FlowMaker: Warning: No FlowNanoTree" << endl;
+  pFlowTree = (TTree*)pNanoDST->Get("FlowTree");
+  if (!pFlowTree) {
+    cout << "##### FlowMaker: Warning: No FlowTree" << endl;
+    return;
   }
 
+  TBranch* branch = pFlowTree->GetBranch("pNanoEvent");
+  branch->SetAddress(&pNanoEvent);
+  Int_t nEntries = (Int_t)pFlowTree->GetEntries(); 
+  cout << "##### FlowMaker: events in nano-DST file = " << nEntries << endl;
+  
   mNanoEventCounter = 0;
-
+  
   }
 
 //-----------------------------------------------------------------------
 
 void StFlowMaker::InitPicoEventRead() {
   
-  pFlowPicoEvent = new StFlowPicoEvent(); 
+  pPicoEvent = new StFlowPicoEvent(); 
   
   // Open the file
   Char_t* file = mPicoEventFileName;  
-  //Char_t* file = "flowPicoevent.root";  
+  pPicoDST = new TFile(file);
+  if (!pPicoDST) {
+    cout << "##### FlowMaker: Warning: no PicoEvents file = " << file << endl;
+    return;
+  }
+
   cout << "##### FlowMaker: " << "PicoEvents file = " << file << endl;
-  pFlowPicoDST = new TFile(file);
 
   // Get the tree, the branch, and the entries
-  pFlowTree = (TTree*)pFlowPicoDST->Get("FlowTree");
-  TBranch* branch = pFlowTree->GetBranch("pFlowPicoEvent");
-  branch->SetAddress(&pFlowPicoEvent);
+  pFlowTree = (TTree*)pPicoDST->Get("FlowTree");
+  if (!pFlowTree) {
+    cout << "##### FlowMaker: Warning: No FlowTree" << endl;
+    return;
+  }
+
+  TBranch* branch = pFlowTree->GetBranch("pPicoEvent");
+  branch->SetAddress(&pPicoEvent);
   Int_t nEntries = (Int_t)pFlowTree->GetEntries(); 
   cout << "##### FlowMaker: " << "events in Pico-DST file = " << nEntries << endl;
 
@@ -672,87 +710,29 @@ void StFlowMaker::InitFlowEventWrite() {
   // pictures, graphics objects, detector geometries, tracks, events, etc..
   // This file is now becoming the current directory.
   pFlowDST = new TFile("flowevent.root", "RECREATE", "Flow micro DST file");
-  if (pFlowDST) {
-    pFlowDST->SetCompressionLevel(comp);
-  } else {
+  if (!pFlowDST) {
     cout << "##### FlowMaker: Warning: no FlowEvents file" << endl;
-  }
-  // Create a ROOT Tree and one superbranch
-  pFlowMicroTree = new TTree("FlowMicroTree","Flow Micro Tree");
-  if (pFlowMicroTree) {
-    pFlowMicroTree->SetAutoSave(100000000);  // autosave when 100 Mbyte written
-    pFlowMicroTree->Branch("pFlowEvent", "StFlowEvent", &pFlowEvent, bufsize, split);
-  } else {
-    cout << "##### FlowMaker: Warning: No FlowMicroTree" << endl;
+    return;
   }
 
+  pFlowDST->SetCompressionLevel(comp);
+
+  // Create a ROOT Tree and one superbranch
+  pFlowMicroTree = new TTree("FlowMicroTree", "Flow Micro Tree");
+  if (!pFlowMicroTree) {
+    cout << "##### FlowMaker: Warning: No FlowMicroTree" << endl;
+    return;
+  }
+
+  pFlowMicroTree->SetAutoSave(100000000);  // autosave when 100 Mbyte written
+  pFlowMicroTree->Branch("pFlowEvent", "StFlowEvent", &pFlowEvent, bufsize, split);
+  
 }
 
 //-----------------------------------------------------------------------
 
 void StFlowMaker::InitFlowEventRead() {
   pFlowDST = new TFile("flowevent.root", "READ");
-
-}
-
-//-----------------------------------------------------------------------
-
-void StFlowMaker::CloseNanoEventWrite() {
-
-  if (pFlowNanoDST->IsOpen()) {
-    pFlowNanoDST->Write();
-    pFlowNanoDST->Close();
-  }
-
-}
-
-//-----------------------------------------------------------------------
-
-void StFlowMaker::ClosePicoEventWrite() {
-
-  if (pFlowPicoDST->IsOpen()) {
-    pFlowPicoDST->Write();
-    pFlowPicoDST->Close();
-  }
-
-}
-
-//-----------------------------------------------------------------------
-
-void StFlowMaker::CloseNanoEventRead() {
-
-  if (pFlowNanoDST->IsOpen()) {
-    pFlowNanoDST->Close();
-  }
-
-}
-
-//-----------------------------------------------------------------------
-
-void StFlowMaker::ClosePicoEventRead() {
-
-  if (pFlowPicoDST->IsOpen()) {
-    pFlowPicoDST->Close();
-  }
-
-}
-
-//-----------------------------------------------------------------------
-
-void StFlowMaker::CloseFlowEventWrite() {
-
-  if (pFlowDST->IsOpen()) {
-    pFlowDST->Write();
-    pFlowDST->Close();
-  }
-
-}
-
-//-----------------------------------------------------------------------
-
-void StFlowMaker::CloseFlowEventRead() {
-
-  //if (pFlowDST->IsOpen()) pFlowDST->Close();
 
 }
 

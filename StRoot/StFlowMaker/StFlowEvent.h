@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.6 2000/05/20 00:55:15 posk Exp $
+// $Id: StFlowEvent.h,v 1.7 2000/05/26 21:29:27 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.7  2000/05/26 21:29:27  posk
+// Protected Track data members from overflow.
+//
 // Revision 1.6  2000/05/20 00:55:15  posk
 // Condensed flownanoevent.root somewhat.
 //
@@ -125,7 +128,7 @@ private:
   static Float_t  mProtonCuts[2];
 
   StFlowEvent*           pFlowEvent;         //!
-  StFlowTrackCollection* pTrackCollection;   
+  StFlowTrackCollection* pTrackCollection;   //
 
   ClassDef(StFlowEvent,1)                    // macro for rootcint
 };
