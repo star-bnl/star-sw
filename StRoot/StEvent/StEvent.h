@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.11 2000/05/24 15:46:10 ullrich Exp $
+ * $Id: StEvent.h,v 2.12 2000/06/19 01:32:15 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.11  2000/05/24 15:46:10  ullrich
- * Added setSummary() method.
+ * Revision 2.12  2000/06/19 01:32:15  perev
+ * Thomas StEvent branches added
+ *
+ * Revision 2.13  2000/09/06 22:34:17  ullrich
+ * Changed mBunchCrossingNumber from scalar to array to hold all 64 bits.
  *
  * Revision 2.12  2000/06/19 01:32:15  perev
  *  Thomas StEvent branches added
@@ -56,11 +59,11 @@
  * Completely Revised for New Version
  *
  **************************************************************************/
-#include "StTrackDetectorInfo.h"
 #ifndef StEvent_hh
 #define StEvent_hh
 
 #include "St_DataSet.h"
+#include "TString.h"
 #include "StContainers.h"
 
 class event_header_st;
@@ -88,13 +91,17 @@ public:
     StEvent();
     StEvent(const event_header_st&,
             const dst_event_summary_st&,
-    const TString&                      type() const;
+            const dst_summary_param_st&);
+    StEvent(const event_header_st&);
     virtual ~StEvent();
 
     void                                Browse(TBrowser*);
     static const TString&               cvsTag();
     
     TString                             type() const;
+    Long_t                              id() const;
+    ULong_t                             bunchCrossingNumber() const;
+    Long_t                              time() const;
     ULong_t                             triggerMask() const;
     ULong_t                             bunchCrossingNumber(UInt_t) const;
     
@@ -137,13 +144,16 @@ public:
     StPrimaryVertex*                    primaryVertex(UInt_t = 0);
     const StPrimaryVertex*              primaryVertex(UInt_t = 0) const;
 
- 
+    StSPtrVecV0Vertex&                  v0Vertices();
+    const StSPtrVecV0Vertex&            v0Vertices() const;
+    StSPtrVecXiVertex&                  xiVertices();
     const StSPtrVecXiVertex&            xiVertices() const;
     StSPtrVecKinkVertex&                kinkVertices();
     const StSPtrVecKinkVertex&          kinkVertices() const;
 
     StSPtrVecObject&                    content();  // for IO purposes only
 
+    void setType(const Char_t*);
     void setRunId(Long_t);
     void setBunchCrossingNumber(ULong_t);
     void setTime(Long_t);
@@ -158,36 +168,28 @@ public:
     void setSsdHitCollection(StSsdHitCollection*);
     void setEmcCollection(StEmcCollection*);
     void setRichCollection(StRichCollection*);
-    TString                              mType;
-    Long_t                               mRunId;
-    Long_t                               mId;
-    Long_t                               mTime;
-    ULong_t                              mTriggerMask;
-    ULong_t                              mBunchCrossingNumber;
-                                             
-    StEventSummary*                      mSummary;
-    StSoftwareMonitor*                   mSoftwareMonitor;
-                                         
-    StTpcHitCollection*                  mTpcHits;
-    StFtpcHitCollection*                 mFtpcHits;
-    StSvtHitCollection*                  mSvtHits;
-    StSsdHitCollection*                  mSsdHits;
-    StRichCollection*                    mRichCollection;
-    StEmcCollection*                     mEmcCollection;
+    void setTriggerDetectorCollection(StTriggerDetectorCollection*);
+    void setL0Trigger(StL0Trigger*);
+    void setL3Trigger(StL3Trigger*);
+    void addPrimaryVertex(StPrimaryVertex*);
     
-    StTriggerDetectorCollection*         mTriggerDetectors;
-    StL0Trigger*                         mL0Trigger;
-    StL3Trigger*                         mL3Trigger;
-
-    mutable StSPtrVecTrackDetectorInfo*  mTrackDetectorInfo;
-    mutable StSPtrVecTrackNode*          mTrackNodes;
-
-    mutable StSPtrVecPrimaryVertex*      mPrimaryVertices;
-    mutable StSPtrVecV0Vertex*           mV0Vertices;
-    mutable StSPtrVecXiVertex*           mXiVertices;
-    mutable StSPtrVecKinkVertex*         mKinkVertices;
+protected:
+    enum { mInfo,
+	   mSummary,
+	   mSoftwareMonitor,
+	   mTpcHits,
+	   mFtpcHits,
+	   mSvtHits,
+	   mSsdHits,
+	   mRichCollection,
+	   mEmcCollection,
+	   mTriggerDetectors,
+	   mL0Trigger,
+	   mL3Trigger,	
+	   mTrackDetectorInfo,
 	   mTrackNodes,	
-    static TString                       mCvsTag;
+	   mPrimaryVertices,
+	   mV0Vertices,
 	   mXiVertices,
 	   mKinkVertices,
            mContentLength };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.8 2000/05/22 21:43:06 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.9 2000/06/19 01:32:16 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
- * Revision 2.8  2000/05/22 21:43:06  ullrich
- * Add RICH related containers.
+ * Revision 2.9  2000/06/19 01:32:16  perev
+ * Thomas StEvent branches added
+ *
+ * Revision 2.9  2000/06/19 01:32:16  perev
+ *  Thomas StEvent branches added
  *
  * Revision 2.8  2000/05/22 21:43:06  ullrich
  * Add RICH related containers.
@@ -52,6 +55,7 @@
 #include "StEmcModule.h"
 #include "StEmcPoint.h"
 #include "StEmcRawHit.h"
+#include "StEmcSoftwareMonitor.h"
 #include "StEnumerations.h"
 #include "StEvent.h"
 #include "StEventInfo.h"

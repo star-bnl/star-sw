@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.5 2000/05/22 21:42:41 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.6 2000/06/19 01:32:15 perev Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
- * Revision 2.5  2000/05/22 21:42:41  ullrich
- * Add RICH related classes.
+ * Revision 2.6  2000/06/19 01:32:15  perev
+ * Thomas StEvent branches added
+ *
+ * Revision 2.7  2000/09/28 10:56:33  ullrich
+ * Added Rich PID classes.
  *
  * Revision 2.6  2000/06/19 01:32:15  perev
  *  Thomas StEvent branches added
@@ -47,6 +50,7 @@
 #include "StPrimaryTrack.h"
 #include "StPrimaryVertex.h"
 #include "StTrackNode.h"
+#include "StTrackPidTraits.h"
 #include "StTrackDetectorInfo.h"
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
