@@ -1,7 +1,7 @@
-//! $Id: StRawTpcQaMaker.cxx,v 1.4 2000/06/20 19:46:04 kathy Exp $
+//! $Id: StRawTpcQaMaker.cxx,v 1.5 2000/06/20 20:02:20 kathy Exp $
 //! $Log: StRawTpcQaMaker.cxx,v $
-//! Revision 1.4  2000/06/20 19:46:04  kathy
-//! added GetCVS
+//! Revision 1.5  2000/06/20 20:02:20  kathy
+//! commented out the SetDirectory for histograms that Sergei put in - otherwise histograms go to never-never land
 //!
 //! Revision 1.3  2000/06/19 19:01:21  kathy
 //! put in Sergei's new versions of the code
@@ -69,23 +69,24 @@ Int_t StRawTpcQaMaker::Init(){
 
   victorPrelim=(StDAQReader*)(herb->GetObject());
   assert(victorPrelim);
+ 
+//  cout << " herb = " << herb << endl;
+//  cout << " victorPrelim = " << victorPrelim <<  endl;
 
-  
-  //  cout << " herb = " << herb << endl;
-  //  cout << " victorPrelim = " << victorPrelim <<  endl;
-
-  cout << " Initializing histograms" <<  endl;
+//  cout << " Initializing histograms 1" <<  endl;
 
    mhist_1 = new TH1F("hist_1","sectors", 25, 0., 25.);   
 
-  // create histograms for each sector
+// create histograms for each sector
    for (int i=0; i< N__SECTORS; i++) { // loop over sectors
     mSector[i]=0;
+
+//    cout << " Initializing histograms set 2  #" << i <<  endl;
 
       char name[128];
       sprintf(name," Sector# %d ",i);
       mSector[i]= new TH2D(name, name, 182, -.5, 181.5, 45, -0.5, 44.5);
-      mSector[i]->SetDirectory(0);
+//      mSector[i]->SetDirectory(0);
       mSector[i]->SetOption("LineWidth=2");
       mSector[i]->Sumw2();
     
@@ -162,7 +163,7 @@ Int_t StRawTpcQaMaker::Make(){
 //_____________________________________________________________________________
 void StRawTpcQaMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StRawTpcQaMaker.cxx,v 1.4 2000/06/20 19:46:04 kathy Exp $\n");
+  printf("* $Id: StRawTpcQaMaker.cxx,v 1.5 2000/06/20 20:02:20 kathy Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
