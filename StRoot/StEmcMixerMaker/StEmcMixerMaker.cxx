@@ -25,6 +25,7 @@ StEmcMixerMaker::StEmcMixerMaker(const char *name):StMaker(name)
   mAddHits = kTRUE;
   mClear = kTRUE;
   mUseDB = kTRUE;
+  mEmbedAll = kFALSE;
   mFakeTrackEmbed = kFALSE;
   mDoPrint = kTRUE;
   for(Int_t i=0;i<NDETECTORS;i++) mGeom[i]=StEmcGeom::instance(i+1);
@@ -102,7 +103,7 @@ Int_t StEmcMixerMaker::addHits()
       for(UInt_t k1=0;k1<rawHit1.size();k1++) {edep1_tot+=rawHit1[k1]->energy();}
       for(UInt_t k1=0;k1<rawHit2.size();k1++) {edep2_tot+=rawHit2[k1]->energy();}
 
-      for(UInt_t is=0;is<rawHit2.size();is++) {stat_h2_all[is]=0;}
+      for(UInt_t is=0;is<rawHit2.size();is++) {stat_h2_all[is]=0;stat_h2[is]=0;}
  
       for(UInt_t k1=0;k1<rawHit1.size();k1++)  
       {
@@ -144,7 +145,7 @@ Int_t StEmcMixerMaker::addHits()
       }
       
       //Add remainig hits
-      for(UInt_t k2=0;k2<rawHit2.size();k2++) if(checkHit(i,rawHit2[k2]))
+      if(mEmbedAll) for(UInt_t k2=0;k2<rawHit2.size();k2++) if(checkHit(i,rawHit2[k2]))
       {
         if(stat_h2_all[k2]==0)
         { 

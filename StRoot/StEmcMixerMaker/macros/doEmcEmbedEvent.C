@@ -4,7 +4,7 @@
 */
 class StChain;
 StChain *chain=0;
-void doEmcEmbedEvent(int nevents = 10,char* file="./pi0/*.event.root",Bool_t print = kFALSE)
+void doEmcEmbedEvent(int nevents = 10,char* file="*.event.root",Bool_t print = kFALSE)
 {
   gSystem->Load("St_base");
   gSystem->Load("St_base");
@@ -52,7 +52,12 @@ void doEmcEmbedEvent(int nevents = 10,char* file="./pi0/*.event.root",Bool_t pri
   
   St_db_Maker *db1 = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
    
-  StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();      
+  StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
+  // this line is important to propagate all the hits into StEvent
+  // so, even the pedestals are propagated. In this case
+  // the second AdcToEMaker will be responsible for making the
+  // cuts (after the simulated hits are embedded)
+  adc->saveAllStEvent(kTRUE);
   if(!print) adc->setPrint(kFALSE);
   
   StEmcPreMixerMaker *preMixer = new StEmcPreMixerMaker("preEmbed");
@@ -63,9 +68,13 @@ void doEmcEmbedEvent(int nevents = 10,char* file="./pi0/*.event.root",Bool_t pri
   if(!print) emcSim->setPrint(kFALSE);
   
   StEmcMixerMaker *emb = new StEmcMixerMaker();
+  // include the next line if you want to embedd all simuated hits
+  // even the ones that do not have a hit in the real data
+  //emb->setEmbedAll(kTRUE);
   if(!print) emb->setPrint(kFALSE);
   
   StEmcADCtoEMaker *adc1 = new StEmcADCtoEMaker("EReadEmbed");      
+  adc1->setEmbeddingMode(kTRUE);
   if(!print) adc1->setPrint(kFALSE);
   
   StPreEclMaker *pre = new StPreEclMaker();
@@ -76,6 +85,12 @@ void doEmcEmbedEvent(int nevents = 10,char* file="./pi0/*.event.root",Bool_t pri
     
   StAssociationMaker    *association = new StAssociationMaker();       // TPC association maker
   StEmcAssociationMaker *emcAssociation = new StEmcAssociationMaker(); // EMC association maker
+  
+  ///////////////////////////////////////////////////////////////
+  //
+  // put your analysis maker here
+  //
+  ///////////////////////////////////////////////////////////////
   
   chain->Init();
   int iev = 0;
