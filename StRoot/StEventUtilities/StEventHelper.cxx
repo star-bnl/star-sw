@@ -157,7 +157,7 @@ void StEventInspector::CheckIn(TObject *obj,const char *bwname)
      if (inmap) return;
      inmap = 2; fCount++;
      int vecobj = ( obj->IsA() == StSPtrVecObject::Class());  
-//     printf("%8d %p %s::%s\n",fLevel,obj,obj->GetName(),bwname);
+//     printf("%8d %p %s::%s\n",fLevel,(void*)obj,obj->GetName(),bwname);
      StStrArray *arr = (StStrArray*)obj; 
      int sz = arr->size();
      for (int idx=0;idx<sz; idx++) {
@@ -222,7 +222,7 @@ void StEventHelper::ls(Option_t* option) const
      if (val != 2) continue;
      StStrArray *a = (StStrArray *)key;
      Long_t &cnt = map((Long_t)a->IsA());
-//     printf("%s %p\n",a->ClassName(),a);
+//     printf("%s %p\n",a->ClassName(),(void*)a);
      if (!cnt) {
        qwe = new QWE;
        cnt = (Long_t)qwe; 
@@ -237,7 +237,7 @@ void StEventHelper::ls(Option_t* option) const
  
    }
    TExMapIter  itt(&map);
-   printf("\n      StEvent(%p)\n",fObject);
+   printf("\n      StEvent(%p)\n",(void*)fObject);
 
    while( itt.Next(key,val) ) {
      TObject *kl = (TObject *)key;
@@ -418,7 +418,7 @@ void StTrackPoints::Init()
   if (fXYZ) return;
   float len = fTrack->length();   
   if (len <= 0.0001) {
-    Warning("Init","Zero length %s(%p), IGNORED",fObj->ClassName(),fObj);
+    Warning("Init","Zero length %s(%p), IGNORED",fObj->ClassName(),(void*)fObj);
     MakeZombie();
     return;
   }
@@ -574,7 +574,7 @@ StFilterABC::StFilterABC(const char *name,bool active):TNamed(name,""),fActive(a
 {
 #ifdef OLDDISPLAY
    char cbuf[200];
-   sprintf(cbuf,"__StEventControlPanel__.AddFilter((TObject*)%p);",this);
+   sprintf(cbuf,"__StEventControlPanel__.AddFilter((TObject*)%p);",(void*)this);
    gROOT->ProcessLine(cbuf);
 #endif
 }
@@ -595,12 +595,12 @@ void   StFilterABC::Update()
    if (!fgDial++) gROOT->LoadMacro("FilterDialog.C");
    sprintf(cbuf
   ,"new FilterDialog((char*)%p,(char**)%p,(float*)%p,(float*)%p,(int*)%p);"
-                    ,GetName(),    namval,      defs,      pars,  &flagg);
+                    ,(void*)GetName(),(void*)namval,(void*)defs,(void*)pars,(void*)&flagg);
    printf("%s\n",cbuf);
    void *dial = (void*)gROOT->ProcessLineFast(cbuf);
    printf("StFilterABC::Update() Waiting for update\n");
    while(flagg) {gSystem->DispatchOneEvent(1);}
-   sprintf(cbuf,"delete ((FilterDialog*)%p);",dial);
+   sprintf(cbuf,"delete ((FilterDialog*)%p);",(void*)dial);
    printf("StFilterABC::Update: %s\n",cbuf);
    gROOT->ProcessLine(cbuf);
    printf("StFilterABC::Update() update finished\n");

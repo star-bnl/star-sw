@@ -7,7 +7,7 @@ class ViewMenuGroup : public MenuGroup
  public:	
   enum _cmds
     {
-      _cmdSetDefaultView=1,
+      _cmdSetDefaultView=1
     };
   
   ViewMenuGroup(const string& name, 

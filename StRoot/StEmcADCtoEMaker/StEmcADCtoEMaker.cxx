@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.48 2003/09/08 20:56:41 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.49 2003/09/11 05:49:18 perev Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.49  2003/09/11 05:49:18  perev
+// ansi corrs
+//
 // Revision 1.48  2003/09/08 20:56:41  suaide
 // Patch to fix problem with SMD-phi pedestals saved on database
 //
@@ -112,7 +115,7 @@
 #include "StBemcData.h"
 
 #define STATUS_OK 1
-#define MAXDET 4
+//VP #define MAXDET 4  // defined already in emcInternalDef.h
 #define CAP1 124
 #define CAP2 125
 
@@ -203,8 +206,8 @@ Int_t StEmcADCtoEMaker::Init()
         Float_t center;
         mGeo[i]->getPhiModule(m,center);
         PhiBins1[j]=center-PhiB[s-1];
-        Float_t ee,pp;
-        Int_t id;
+        //Float_t ee,pp;
+        //Int_t id;
         //if(i==3 && s<=nSub) mGeo[i]->getId(m,1,s,id);
         //if(i==3 && s<=nSub) mGeo[i]->getEtaPhi(id,ee,pp);
         //if(i==3 && s<=nSub) cout <<"j = "<<j<<"  center = "<<center<<"  DPhi = "<<PhiB[s-1]<<"  m = "<<m<<"  s = "<<s<<"  PhiBins1 = "<<PhiBins1[j]<<"  phi = "<<pp<<endl;

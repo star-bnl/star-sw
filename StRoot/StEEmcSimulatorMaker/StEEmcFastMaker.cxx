@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.5 2003/02/21 15:31:18 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.6 2003/09/11 05:49:17 perev Exp $
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.6  2003/09/11 05:49:17  perev
+// ansi corrs
+//
 // Revision 1.5  2003/02/21 15:31:18  balewski
 // do not kill the chain (it is against my will, JB)
 //
@@ -151,7 +154,7 @@ void  StEEmcFastMaker::SetLocalStEvent(){
 void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
   int mxSector = kEEmcNumSectors;
   assert(stevt); // fix dumm input
-  if(mdbg)printf("EE2ST() start %p\n",stevt);
+  if(mdbg)printf("EE2ST() start %p\n",(void*)stevt);
 
   StEmcCollection* emcC =(StEmcCollection*)stevt->emcCollection();
    if(mdbg)printf("EE2ST got emcCollection\n");
@@ -168,7 +171,7 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
       int secID=isec+1;
       EEsectorDst* EEsec = (EEsectorDst*)eevt->getSec(secID);
       if(EEsec==0) continue;
-      if(mdbg) printf("EE2ST() isec=%d sec_add=%p  secID=%d det=%d\n",isec,EEsec,secID,det);
+      if(mdbg) printf("EE2ST() isec=%d sec_add=%p  secID=%d det=%d\n",isec,(void*)EEsec,secID,det);
 
       switch (det){
       case kEndcapEmcTowerId: //..............................     
@@ -279,7 +282,7 @@ void  StEEmcFastMaker::mST2EE(EEeventDst* evt, StEvent* stevt){
       printf("ST2EE() Found no detector collection, skipping id=%d\n",id);
       continue;
     }
-    printf("ST2EE() det=%d add_d=%p\n",det,d);
+    printf("ST2EE() det=%d add_d=%p\n",det,(void*)d);
 
     if(d->numberOfModules() < 1) {
       printf("ST2EE() Found no modules in the detector collection, skipping id=%d\n",id);

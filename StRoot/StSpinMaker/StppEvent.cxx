@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.16 2003/09/02 17:59:01 perev Exp $
+// $Id: StppEvent.cxx,v 1.17 2003/09/11 05:49:22 perev Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.17  2003/09/11 05:49:22  perev
+// ansi corrs
+//
 // Revision 1.16  2003/09/02 17:59:01  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -116,8 +119,8 @@ StppEvent::StppEvent(){
     trackChoice = 0; //primary track is default
 #ifdef _Jet_
     jets = new TClonesArray ("StJet", 20);
-
-    mAnalyzers = new (StppJetAnalyzer*)[MAXANALYZERS];
+    typedef StppJetAnalyzer* StppJetAnalyzerP;
+    mAnalyzers = new StppJetAnalyzerP[MAXANALYZERS];
     numAnalyzers = 0;
     mStJetsMap = 0;
     

@@ -41,7 +41,7 @@ class St_trg_Maker : public StMaker {
    void dumpDataToScreenAndExit2003();
    void InitMwcArrays();
    void InitCtbArrays();
-   int St_trg_Maker::YearOfData(St_DataSet *herb);
+   int  YearOfData(St_DataSet *herb);
    void InitCtbArrays2001();             // For data taken 2001 and (?) after. 
    Int_t SanityCheck    ();
    Int_t SanityCheck2000();
@@ -93,7 +93,7 @@ class St_trg_Maker : public StMaker {
    virtual Int_t Make();
 
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.21 2003/09/10 19:47:52 perev Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.22 2003/09/11 05:49:25 perev Exp $ built "__DATE__" "__TIME__ ; 
      return cvs;
    }
 
@@ -103,8 +103,11 @@ class St_trg_Maker : public StMaker {
 #endif
 
 
-// $Id: St_trg_Maker.h,v 1.21 2003/09/10 19:47:52 perev Exp $
+// $Id: St_trg_Maker.h,v 1.22 2003/09/11 05:49:25 perev Exp $
 // $Log: St_trg_Maker.h,v $
+// Revision 1.22  2003/09/11 05:49:25  perev
+// ansi corrs
+//
 // Revision 1.21  2003/09/10 19:47:52  perev
 // ansi corrs
 //

@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.17 2003/09/02 19:02:49 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.18 2003/09/11 05:49:17 perev Exp $
  
 #include <TDatime.h>
 #include <time.h>
@@ -237,7 +237,7 @@ Int_t  StEEmcDbMaker::InitRun  (int runumber){
 void  StEEmcDbMaker::mReloadDb  (){
 
   int i;
-  printf("%s::reloadDb using TimeStamp from 'StarDb'=%p or 'db'=%p \n",GetName(),GetMaker("StarDb"),GetMaker("db"));
+  printf("%s::reloadDb using TimeStamp from 'StarDb'=%p or 'db'=%p \n",GetName(),(void*)GetMaker("StarDb"),(void*)GetMaker("db"));
   
   // clear old DB tables  ...................
   nFound=0;
@@ -588,6 +588,9 @@ template <class St_T, class T_st>  void StEEmcDbMaker
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.18  2003/09/11 05:49:17  perev
+// ansi corrs
+//
 // Revision 1.17  2003/09/02 19:02:49  balewski
 // fix for TMemeStat
 //

@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 2.11 2003/09/02 17:58:52 perev Exp $
+ * $Id: StRichPadMonitor.cxx,v 2.12 2003/09/11 05:49:21 perev Exp $
  * Description:
  *  A Pad Monitor for the STAR-RICH.
  *  Runs only in ROOT
@@ -7,6 +7,9 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
+ * Revision 2.12  2003/09/11 05:49:21  perev
+ * ansi corrs
+ *
  * Revision 2.11  2003/09/02 17:58:52  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -840,13 +843,14 @@ void StRichPadMonitor::drawQuickRing(vector<StThreeVectorF>& ipi, vector<StThree
     //
     // pions
     //
-#ifndef Solaris
-    const unsigned int ssipi = ipi.size();
-    const unsigned int ssopi = opi.size();
-#else
-    const unsigned int ssipi = 1000;
-    const unsigned int ssopi = 1000;
-#endif
+//#ifndef Solaris
+//    const unsigned int ssipi = ipi.size();
+//    const unsigned int ssopi = opi.size();
+//#else
+//    const unsigned int ssipi = 1000;
+//    const unsigned int ssopi = 1000;
+//#endif
+    enum {ssipi = 1000,ssopi = 1000};
     Float_t ixpi[ssipi];
     Float_t iypi[ssipi];
     for(ii=0; ii<ipi.size(); ii++) {
@@ -874,13 +878,13 @@ void StRichPadMonitor::drawQuickRing(vector<StThreeVectorF>& ipi, vector<StThree
     //
     // kaons
     //
-#ifndef Solaris
-    const unsigned int ssik = ik.size();
-    const unsigned int ssok = ok.size();
-#else
+//#ifndef Solaris
+//    const unsigned int ssik = ik.size();
+//    const unsigned int ssok = ok.size();
+//#else
     const unsigned int ssik = 1000;
     const unsigned int ssok = 1000;
-#endif
+//#endif
 
     Float_t ixk[ssik];
     Float_t iyk[ssik];
@@ -909,13 +913,13 @@ void StRichPadMonitor::drawQuickRing(vector<StThreeVectorF>& ipi, vector<StThree
     //
     // protons
     //
-#ifndef Solaris
-    const unsigned int ssip = ip.size();
-    const unsigned int ssop = op.size();
-#else
-    const unsigned int ssip = 1000;
-    const unsigned int ssop = 1000;
-#endif
+//#ifndef Solaris
+//    const unsigned int ssip = ip.size();
+//    const unsigned int ssop = op.size();
+//#else
+    static const unsigned int ssip = 1000;
+    static const unsigned int ssop = 1000;
+//#endif
 
     Float_t ixp[ssip];
     Float_t iyp[ssip];

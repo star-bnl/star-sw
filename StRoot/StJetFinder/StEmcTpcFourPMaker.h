@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.13 2003/09/10 19:47:20 perev Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.14 2003/09/11 05:49:20 perev Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.14  2003/09/11 05:49:20  perev
+ * ansi corrs
+ *
  * Revision 1.13  2003/09/10 19:47:20  perev
  * ansi corrs
  *
@@ -95,9 +98,12 @@ class BadPathLengthException : public string
 class StCorrectedEmcPoint
 {
  public:
-    static const double SMDR = 2.2625;
-    static const double HSMDR = 1.13125;
-    static const double twoPi = M_PI*2.0;
+//VP    static const double SMDR = 2.2625;
+//VP    static const double HSMDR = 1.13125;
+//VP    static const double twoPi = M_PI*2.0;
+    static const double SMDR;
+    static const double HSMDR;
+    static const double twoPi;
 
     StCorrectedEmcPoint() : correctedE(0), mPoint(0), thetaShift(0), index(0) {};
     StCorrectedEmcPoint(StMuEmcPoint* p, int _index) : correctedE(0), 
@@ -178,13 +184,13 @@ class StCorrectedEmcPoint
 class StProjectedTrack
 {
  public:
-    static const double SMDR = 231.23;
-    static const double HSMDR = 115.615;
-    static const double twoPi = M_PI*2.0;
-    static const double me = .000511;	
-    static const double mpr = .9383;
-    static const double mpi = .1396;
-    static const double mk = .4937;
+    static const double SMDR ;// = 231.23;
+    static const double HSMDR;// = 115.615;
+    static const double twoPi;// = M_PI*2.0;
+    static const double me   ;// =.000511;	
+    static const double mpr  ;// =.9383;
+    static const double mpi  ;// =.1396;
+    static const double mk   ;// =.4937;
 
     StProjectedTrack() : mTrack(0), index(0) { };
     StProjectedTrack(StMuTrack* t, int _index) : mTrack(t), index(_index) 

@@ -31,8 +31,8 @@ struct MapKeyLessThan{
 
 // Structure for material, shape, or detector name map key
 struct NameMapKey {
-    NameMapKey::NameMapKey(const string& str){ name = str; }
-    NameMapKey::NameMapKey(){}
+    NameMapKey(const string& str){ name = str; }
+    NameMapKey(){}
     bool operator==(const NameMapKey&) const;
     bool operator<(const NameMapKey&) const;
     string name;

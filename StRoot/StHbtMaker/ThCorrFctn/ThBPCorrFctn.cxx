@@ -111,7 +111,8 @@ ThBPCorrFctn::ThBPCorrFctn(char* aTitle, int aNBins,
     Float_t qdepMin = 0.0, qdepMax=0.1;
     Float_t qdiffMin = -0.025, qdiffMax = 0.025;
     numAdd2DHistos = 3;
-    add2DHistos = new (StHbt2DHisto *)[3];
+    typedef StHbt2DHisto* StHbt2DHistoP;
+    add2DHistos = new StHbt2DHistoP[3];
     char Tit1add[100] = "Qout";
     strcat(Tit1add,aTitle);
     add2DHistos[0] = new StHbt2DHisto(Tit1add,aTitle,qdepNBins, qdepMin, qdepMax, qdiffNBins, qdiffMin, qdiffMax);

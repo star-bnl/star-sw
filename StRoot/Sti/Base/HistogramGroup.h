@@ -23,12 +23,12 @@ class HistogramGroup : public Named, public Described, public vector<TH1*>
   virtual void write();
   virtual void reset();
   TH1 * add(TH1*histo);
-  TH1D * HistogramGroup::book(const string &title, 
+  TH1D * book(const string &title, 
 			      const string & description, 
 			      int n, 
 			      double xMin,
 			      double xMax);
-  TH2D * HistogramGroup::book(const string &title, 
+  TH2D * book(const string &title, 
 			      const string & description, 
 			      int nx, 
 			      double xMin,
@@ -37,7 +37,7 @@ class HistogramGroup : public Named, public Described, public vector<TH1*>
 			      double yMin,
 			      double yMax);
 
-  TH3D * HistogramGroup::book(const string &title, 
+  TH3D * book(const string &title, 
 			      const string & description, 
 			      int nx, 
 			      double xMin,
@@ -49,12 +49,12 @@ class HistogramGroup : public Named, public Described, public vector<TH1*>
 			      double zMin,
 			      double zMax);
 
-  TProfile * HistogramGroup::bookProfile(const string &title, 
+  TProfile * bookProfile(const string &title, 
 			      const string & description, 
 			      int n, 
 			      double xMin,
 			      double xMax);
-  TProfile2D * HistogramGroup::bookProfile(const string &title, 
+  TProfile2D * bookProfile(const string &title, 
 					   const string & description, 
 					   int nx, 
 					   double xMin,

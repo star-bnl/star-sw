@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridSimData.cc,v 1.5 2003/09/02 17:59:09 perev Exp $
+ * $Id: StSvtHybridSimData.cc,v 1.6 2003/09/11 05:49:22 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridSimData.cc,v $
+ * Revision 1.6  2003/09/11 05:49:22  perev
+ * ansi corrs
+ *
  * Revision 1.5  2003/09/02 17:59:09  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -56,7 +59,8 @@ int StSvtHybridSimData::setSimHybridData(StSvtHybridPixelsC* mSimDataPixels)
   nAnodes = 240;
   if (!anodeList)  anodeList = new int[nAnodes];
   if (!nSeq)  nSeq = new int[nAnodes];
-  if (!seq)  seq = new (StSequence*)[nAnodes];
+  typedef StSequence* StSequenceP;
+  if (!seq)  seq = new StSequenceP[nAnodes];
  
   
   for (int ianode=0;ianode<nAnodes;ianode++) {

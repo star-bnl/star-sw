@@ -54,7 +54,7 @@ public:
    { fSize=0; fXYZ=0;
      char buf[200];
      if (obj && (!name || !name[0])) {
-       sprintf(buf,"%s(%p)",obj->GetName(),obj);name = buf;}
+       sprintf(buf,"%s(%p)",obj->GetName(),(void*)obj);name = buf;}
      fName=name;fTitle=title;fObj = obj;}
 
   ~StPoints3DABC(){delete [] fXYZ;};

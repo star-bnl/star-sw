@@ -26,7 +26,7 @@ class StiElossCalculator
  public:
   StiElossCalculator();
   virtual ~StiElossCalculator();
-  double StiElossCalculator::calculate(double z2, double zOverA, double m, double beta2, double ionization2 ) const;
+  double calculate(double z2, double zOverA, double m, double beta2, double ionization2 ) const;
  protected:  
   static const double _k;
   static const double _mec;
