@@ -473,7 +473,7 @@ Int_t StEmcSimulatorMaker::makeBemcAndBprsMcHits()
         StMcEmcHitCollection::EAddHit bprsNew = mEmcMcHits[BPRS-1]->addHit(emchBprs);
         if(bprsNew != StMcEmcHitCollection::kNew) delete emchBprs;
       }
-      if ( emchBemc) delete emchBemc; 
+      //if ( emchBemc) delete emchBemc; 
 
     }
   }
@@ -975,8 +975,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.22 2003/09/28 03:06:01 jeromel Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.23 2003/09/30 01:28:49 jeromel Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.23  2003/09/30 01:28:49  jeromel
+// Undo correction until logic reshape
+//
 // Revision 1.22  2003/09/28 03:06:01  jeromel
 // restored leak_assign (logic needs to be modified to get rid of it)
 //
