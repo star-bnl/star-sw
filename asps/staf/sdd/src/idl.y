@@ -89,7 +89,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.14 1998/08/28 21:22:28 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.15 1998/10/11 17:41:14 fisyak Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -1222,7 +1222,7 @@ void CheckThatAllTablesHaveBeenIncluded(void) {
     for(j=0;j<gNinputTable;j++) {
       if(!strcmp(gModuleTable[i],gInputTable[j])) { ok=7; break; }
     }
-    if(!ok) {
+    if(!ok && !gOptionq) {
       Ose();
       PP"%cWARNING FROM STIC:  you did not include an IDL file ",7);
       PP"for table\n");
