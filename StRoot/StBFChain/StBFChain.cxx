@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.263 2002/01/30 22:34:49 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.264 2002/01/31 23:20:27 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -40,10 +40,11 @@ Bfc_st BFC[] = {
   {"DC99"        ,""  ,"","db"       ,"","","Turn on December 1999 engineering run real parameters",kFALSE},
   {"Y1h"      ,"","","db,calib","","","YEAR_1H  fantastic y1:TPC+CTB+FTPC+RICH+caloPatch+svtLadder",kFALSE},
   {"Y2000"    ,"","","db,calib"             ,"","","actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
-  {"RY1h"        ,""  ,"","db,calib,VtxOffSet"              ,"","","Real data with Year1h geometry",kFALSE},
-  {"RY2000"   ,"","","db,calib,VtxOffSet"   ,"","","actual 2000: Real data with Year2000 geometry ",kFALSE},
-  {"RY2000a"  ,"","","db,calib"          ,"","","alternate 2000: Real data with Year2000 geometry ",kFALSE},
-  {"RY2001"   ,"","","db,calib"             ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
+  {"RY1h"        ,""  ,"","db,calib,detDb,VtxOffSet"        ,"","","Real data with Year1h geometry",kFALSE},
+  {"RY2000"   ,"","","db,calib,detDb,VtxOffSet","","",
+                                                   "actual 2000: Real data with Year2000 geometry ",kFALSE},
+  {"RY2000a"  ,"","","db,calib,detDb"    ,"","","alternate 2000: Real data with Year2000 geometry ",kFALSE},
+  {"RY2001"   ,"","","db,calib,detDb"       ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
   {"Y2a"         ,""  ,"","db,calib"                          ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"         ,"" ,"","db,calib","","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"Y2001"       ,"","","db,calib","","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
@@ -177,6 +178,8 @@ Bfc_st BFC[] = {
   {"OPr13"       ,""  ,"","",""                                          ,"","PadRow 13 distortion",kFALSE},
   {"OCentm"      ,""  ,"","",""                                   ,"","Central membrane correction",kFALSE},
   {"OECap"       ,""  ,"","",""                                    ,"","EndCap (curved) correction",kFALSE},
+  {"OIFC"        ,""  ,"","",""                                         ,"","Field Cage correction",kFALSE},
+  {"OSpaceZ"     ,""  ,"","",""                                      ,"","Space Charge corrections",kFALSE},
   {"AlignSectors",""  ,"","",""          ,"","Activate Sector Alignment correction in St_tpt_Maker",kFALSE},
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
@@ -230,6 +233,7 @@ Bfc_st BFC[] = {
   {"db"          ,"db","","StDbT,xdf2root"       ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"dbutil"      ,""  ,"","SCL"                            ,"","StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
+  {"detDb"       ,"","",""        ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -249,7 +253,6 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"magF"        ,"","","geant,StDbT,db","StMagFMaker","geometry,StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
-  {"detDb"       ,""  ,"",""      ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
@@ -296,7 +299,7 @@ Bfc_st BFC[] = {
   {"scm"      ,"","svtChain",""                ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
   {"sce"      ,"","svtChain",""                   ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker","",kFALSE},
   {"Est"      ,"","svtChain","globT"                 ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
-  {"Ftpc"        ,"ftpcChain"  ,"","ftpcT,detDb,fcl,fpt,Fglobal,Fprimary"   ,"StMaker","StChain","",kFALSE},
+  {"Ftpc"        ,"ftpcChain"  ,"","ftpcT,fcl,fpt,Fglobal,Fprimary"         ,"StMaker","StChain","",kFALSE},
   {"fss"    ,"ftpc_raw","ftpcChain","SCL,Simu",        "StFtpcSlowSimMaker","StFtpcSlowSimMaker","",kFALSE},
   {"Fcl"    ,"ftpc_hits","ftpcChain","SCL"
                                   ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcClusterMaker","",kFALSE},
@@ -623,12 +626,14 @@ Int_t StBFChain::Instantiate()
 	    }
 	    // Other options introduced in October 2001 for distortion corrections
 	    // studies and year1 re-production. Those are OR additive to the mask.
-	    if( GetOption("OBmap") ){	      mask |= 16;  }
-	    if( GetOption("OPr13") ){	      mask |= 32;  }
-	    if( GetOption("OTwist") ){	      mask |= 64;  }
-	    if( GetOption("OClock") ){	      mask |= 128; }
-	    if( GetOption("OCentm") ){	      mask |= 256; }
-	    if( GetOption("OECap") ){	      mask |= 512; }
+	    if( GetOption("OBmap") ){	      mask |=   16; }
+	    if( GetOption("OPr13") ){	      mask |=   32; }
+	    if( GetOption("OTwist") ){	      mask |=   64; }
+	    if( GetOption("OClock") ){	      mask |=  128; }
+	    if( GetOption("OCentm") ){	      mask |=  256; }
+	    if( GetOption("OECap") ){	      mask |=  512; }
+	    if( GetOption("OIFC") ){	      mask |= 1024; }
+	    if( GetOption("OSpaceZ") ){	      mask |= 2048; }
 
 	    (void) printf("StBFChain: ExB The option passed will be %d 0x%X\n",mask,mask);
 	    mk->SetMode(mask);
