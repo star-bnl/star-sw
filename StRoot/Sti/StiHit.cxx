@@ -24,13 +24,6 @@ StiHit::~StiHit()
 {
 }
 
-StiHit::StiHit(const StiHit& rhs)
-{
-    if (*this==rhs) return;
-    copyToThis(rhs);
-    return;
-}
-
 const StThreeVectorF& StiHit::globalPosition() const
 {
     return msthit->position();
@@ -53,6 +46,7 @@ void StiHit::setError(const StMatrixF& matrix)
     return;
 }
 
+/*! Streamer for StiHit objects. */
 ostream& operator<<(ostream& os, const StiHit& hit)
 {
     return os <<hit.refangle()<<" "<<hit.position()<<"\t\t" //Key

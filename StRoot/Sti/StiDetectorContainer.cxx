@@ -59,36 +59,48 @@ void StiDetectorContainer::setToDetector(double radius)
 {
     mradial_it = gFindClosestOrderKey(mregion->begin(), mregion->end(), radius);
     if (mphi_it == mregion->end()) {
-	cout <<"StiDetectorContainer::setToDetector(double)\tError:\tFind radius failed"<<endl;
+	cout <<"StiDetectorContainer::setToDetector(double)\tError:\t";
+	cout <<"Find radius failed"<<endl;
 	mradial_it = mregion->begin();
     }
     mphi_it = (*mradial_it)->begin();
     return;
 }
 
+/*!If no detector exists at this position, the iterator is set to the
+  innermost layer closest to phi=0, s.t. phi>0.
+*/
 void StiDetectorContainer::setToDetector(double radius, double angle)
 {
     //First, set the radius
     setToDetector(radius);
     
     //Now set the phi
-    mphi_it = gFindClosestOrderKey((*mradial_it)->begin(), (*mradial_it)->end(), angle);
+    mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
+				   (*mradial_it)->end(), angle);
     if (mphi_it == (*mradial_it)->end()) {
-	cout <<"StiDetectorContainer::setToDetector(double, double)\tError:\tFind Phi failed"<<endl;
+	cout <<"StiDetectorContainer::setToDetector(double, double)\tError:\t";
+	cout <<"Find Phi failed"<<endl;
 	mphi_it = (*mradial_it)->begin();
     }
 }
 
+/*! This is used, e.g., to set the iterators to a certain point in
+  preparation  for propogation of a new track.  If no StiDetector pointer is
+  found that is equal to <b>layer</b>, then an error message is streamed to
+  the screen and reset() is called.
+*/
 void StiDetectorContainer::setToDetector(StiDetector* layer)
 {
-    //StiCompositeLeafIterator<data_t> leafit(mroot); //Find the leaves
-    
     SameData<data_t> mySameData;
     mySameData.thedata = layer;
 
-    data_node_vec::const_iterator where = find_if(mLeafIt->const_begin(), mLeafIt->const_end(), mySameData);
+    data_node_vec::const_iterator where = find_if(mLeafIt->const_begin(),
+						  mLeafIt->const_end(),
+						  mySameData);
     if (where==mLeafIt->const_end()) {
-	cout <<"StiDetectorContainer::setToDetector(StiDetector*)\tError:\tlayer not found in leaves.  Reset and Abort"<<endl;
+	cout <<"StiDetectorContainer::setToDetector(StiDetector*)\tError:\t";
+	cout <<"layer not found in leaves.  Reset and Abort"<<endl;
 	reset();
 	return;
     }
@@ -97,6 +109,9 @@ void StiDetectorContainer::setToDetector(StiDetector* layer)
     }
 }
 
+/*! A call to reset simply sets the pointer to the default StiDetector object.
+  It does not alter the state of the detector model.
+ */
 void StiDetectorContainer::reset()
 {
     mradial_it = mregion->begin();
@@ -109,6 +124,19 @@ StiDetector* StiDetectorContainer::operator*() const
     return (*mphi_it)->getData();
 }
 
+/*! A call to moveIn() may not always alter the StiDetector to which the
+  container points.  Notably, if there is nowhere else to 'move in to', then
+  moveIn() will have no action.  So, to see if the action succeeded, one must
+  store a pointer to the StiDetector represented by the current state of the
+  container, call moveIn(), and then check that the pointer to the
+  StiDetector represented by the new state of the container is different than
+  that of the previous state. <p>
+  Additionally, when a call to moveIn() is made, the container 'selects' the
+  StiDetector object that is closest in phi to the StiDetector object that is
+  being 'movedIn' from.  Therefore, a call to moveIn() usually need not be
+  followed by a call to movePlusPhi() or moveMinusPhi(), except in cases of
+  extreme assymetry, such as navigation through the Silicon Vertex Tracker.
+ */
 void StiDetectorContainer::moveIn()
 {
     if (mradial_it == mregion->begin() ) {
@@ -118,34 +146,56 @@ void StiDetectorContainer::moveIn()
     else {
 	double oldOrder = (*mphi_it)->getOrderKey();
 	--mradial_it;
-	mphi_it = gFindClosestOrderKey((*mradial_it)->begin(), (*mradial_it)->end(), oldOrder);
+	mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
+				       (*mradial_it)->end(), oldOrder);
 	if (mphi_it == (*mradial_it)->end()) {
-	    cout <<"StiDetectorContainer::moveIn()\tError:\tFind Phi failed"<<endl;
+	    cout <<"StiDetectorContainer::moveIn()\tError:\t";
+	    cout <<"Find Phi failed"<<endl;
 	    mphi_it = (*mradial_it)->begin();
 	}
 	return;
     }
 }
 
+/*! A call to moveOut() may not always alter the StiDetector to which the
+  container points.  Notably, if there is nowhere else to 'move out to', then
+  moveOut() will have no action.  So, to see if the action succeeded, one must
+  store a pointer to the StiDetector represented by the current state of the
+  container, call moveOut(), and then check that the pointer to the
+  StiDetector represented by the new state of the container is different than
+  that of the previous state. <p>
+  Additionally, when a call to moveOut() is made, the container 'selects' the
+  StiDetector object that is closest in phi to the StiDetector object that is
+  being 'movedOut' from.  Therefore, a call to moveIn() usually need not be
+  followed by a call to movePlusPhi() or moveMinusPhi(), except in cases of
+  extreme assymetry, such as navigation through the Silicon Vertex Tracker.
+ */
 void StiDetectorContainer::moveOut()
 {
     ++mradial_it;
     if (mradial_it == mregion->end()) {
-	cout <<"StiDetectorContainer::moveOut()\tNowhere to go"<<endl;
+	cout <<"StiDetectorContainer::moveOut(). ERROR:\t";
+	cout <<"Nowhere to go"<<endl;
 	--mradial_it;
 	return;
     }
     else {
 	double oldOrder = (*mphi_it)->getOrderKey();
-	mphi_it = gFindClosestOrderKey((*mradial_it)->begin(), (*mradial_it)->end(), oldOrder);
+	mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
+				       (*mradial_it)->end(), oldOrder);
 	if (mphi_it == (*mradial_it)->end()) {
-	    cout <<"StiDetectorContainer::moveOut()\tError:\tFind Phi failed"<<endl;
+	    cout <<"StiDetectorContainer::moveOut()\tError:\t";
+	    cout <<"Find Phi failed"<<endl;
 	    mphi_it = (*mradial_it)->begin();
 	}
 	return;
     }
 }
 
+/*! Plus phi is defined as clockwise if viewing sectors 1-12 from the membrane,
+  increasing phi in STAR TPC global coordinates.  A call to movePlusPhi() will
+  always have a valid action.  That is, the call will wrap around past 2pi.
+*/
 void StiDetectorContainer::movePlusPhi()
 {
     ++mphi_it;
@@ -154,6 +204,11 @@ void StiDetectorContainer::movePlusPhi()
     }
 }
 
+/*! Minus phi is defined as counter-clockwise if viewing sectors 1-12 from
+  the membrane,
+  decreasing phi in STAR TPC global coordinates.  A call to moveMinusPhi() will
+  always have a valid action.  That is, the call will wrap around past 2pi.
+*/
 void StiDetectorContainer::moveMinusPhi()
 {
     if (mphi_it == (*mradial_it)->begin()) { //Wrap around 2pi
@@ -162,9 +217,15 @@ void StiDetectorContainer::moveMinusPhi()
     --mphi_it;
 }
 
-// Recursively load all detector definition files from the given directory.
-void StiDetectorContainer::buildDetectors(StiObjectFactoryInterface<StiDetectorNode>* nodefactory,
-					  StiObjectFactoryInterface<StiDetector>* detfactory)
+/*! Recursively load all detector definition files from the given directory.
+  There is internal protection to avoid building the detector representation
+  more than once.
+ */
+void
+StiDetectorContainer::buildDetectors(StiObjectFactoryInterface<StiDetectorNode>*
+				     nodefactory,
+				     StiObjectFactoryInterface<StiDetector>*
+				     detfactory)
 {
     StiDetectorTreeBuilder mybuilder;
     mroot = mybuilder.build(nodefactory, detfactory);
