@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.20 2003/09/02 17:58:12 perev Exp $
+// $Id: StFlowSelection.cxx,v 1.21 2004/02/03 22:36:37 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -26,14 +26,15 @@ StFlowSelection::StFlowSelection() : mSubevent(-1) {
   mPidPart[0] = '\0';
   mPtPart[0]            = 0.;
   mPtPart[1]            = 0.;
+  mPtBinsPart           = 0;
   mPPart[0]             = 0.;
   mPPart[1]             = 0.;
   mEtaPart[0]           = 0.;
   mEtaPart[1]           = 0.;
   mFitPtsPart[0]        = 0;
   mFitPtsPart[1]        = 0;
-  mDedxPtsPart[0]        = 0;
-  mDedxPtsPart[1]        = 0;
+  mDedxPtsPart[0]       = 0;
+  mDedxPtsPart[1]       = 0;
   mFitOverMaxPtsPart[0] = 0.;
   mFitOverMaxPtsPart[1] = 0.;
   mChiSqPart[0]         = 0.;
@@ -173,6 +174,9 @@ void StFlowSelection::PrintList() const {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.21  2004/02/03 22:36:37  posk
+// Initialzed mPtBinsPart.
+//
 // Revision 1.20  2003/09/02 17:58:12  perev
 // gcc 3.2 updates + WarnOff
 //
