@@ -1,9 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.38 2005/02/11 23:22:10 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.39 2005/03/03 17:22:01 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
+//          year4 triggers by Paul Sorenson, LBNL, Feb 2005
 //
 // Description:  Class for applying event cuts
 //
@@ -669,6 +670,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.39  2005/03/03 17:22:01  posk
+// Initialized pFlowEvent in the constructors.
+//
 // Revision 1.38  2005/02/11 23:22:10  posk
 // Made TriggersFound() work for pico files.
 //

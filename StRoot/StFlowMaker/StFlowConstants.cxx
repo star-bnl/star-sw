@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.cxx,v 1.14 2005/02/08 20:57:35 psoren Exp $
+// $Id: StFlowConstants.cxx,v 1.15 2005/03/03 17:21:58 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -26,7 +26,7 @@ ClassImp(Flow)
   Int_t Flow::cent200Half[nCents] = {14,32,59,98,149,216,302,409,474};
   Int_t Flow::cent200Year4Full[nCents] = {14,30,56,94,146,217,312,431,510};//preliminary
   Int_t Flow::cent200Year4Full15003[nCents] = {14,30,56,94,146,217,312,431,510};//preliminary
-  Int_t Flow::cent200Year4Half[nCents] = {14,32,59,98,149,216,302,409,474};//preliminary
+  Int_t Flow::cent200Year4Half[nCents] = {14,30,56,94,146,217,312,431,510};//preliminary
   Int_t Flow::cent130[nCents]     = {20,100,180,270,360,460,560,660,870};
   Int_t Flow::cent62[nCents]	  = {9,20,38,65,102,154,222,313,373};
   Int_t Flow::cent22[nCents]      = {8,16,30,51,80,120,173,240,284}; // Cebra
@@ -55,6 +55,9 @@ ClassImp(Flow)
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.cxx,v $
+// Revision 1.15  2005/03/03 17:21:58  posk
+// Initialized pFlowEvent in the constructors.
+//
 // Revision 1.14  2005/02/08 20:57:35  psoren
 // trigger and centrality selections were updated for all runs after run 4 to be compatible with trigger collections. Added TriggersFound() and GetFlowTriggerBitMap() functions.
 //
