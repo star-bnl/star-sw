@@ -9,8 +9,9 @@
 
 interface track_propagator   :        amiModule {
         STAFCV_T call
-               (  inout   dst_track  gtrack
+               (  in      dst_track  gtrack
                ,  in      egr_propagate target
+               ,  out     dst_track  ptrack
                );
 };
-/* Last mod. for track_propagator: $Date: 1998/09/23 16:56:21 $ */
+/* Last mod. for track_propagator: $Date: 1998/09/25 21:52:07 $ */

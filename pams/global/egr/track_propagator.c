@@ -8,7 +8,8 @@
 
 long track_propagator_(
   TABLE_HEAD_ST         *gtrack_h,      DST_TRACK_ST           *gtrack ,
-  TABLE_HEAD_ST         *target_h,  EGR_PROPAGATE_ST           *target )
+  TABLE_HEAD_ST         *target_h,  EGR_PROPAGATE_ST           *target ,
+  TABLE_HEAD_ST         *ptrack_h,      DST_TRACK_ST           *ptrack )
 {
 /*:>--------------------------------------------------------------------
 **: ROUTINE:    track_propagator_
@@ -21,18 +22,19 @@ long track_propagator_(
 **:       IN:
 **:             target    - PLEASE FILL IN DESCRIPTION HERE
 **:            target_h   - header Structure for target
-**:    INOUT:
 **:             gtrack    - PLEASE FILL IN DESCRIPTION HERE
 **:            gtrack_h   - header Structure for gtrack
 **:      OUT:
+**:             ptrack    - PLEASE FILL IN DESCRIPTION HERE
+**:            ptrack_h   - header Structure for gtrack
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
   
   
-  long  i, iflag, iiflag=1;
+  long  i, iflag;
   float bfld=5., GRADDEG=57.2958;
   float psi, pt, tanl, x0, y0, z0, xp[2], xout[4], p[3], xv[3], xx0[3];
-  float trk[6], r1, r2, xc1[2], xc2[2], x[2], y[2], cut, x1[3];
+  float trk[7], r1, r2, xc1[2], xc2[2], x[2], y[2], cut, x1[3];
   long  q;
 
   for(i=0; i<gtrack_h->nok; i++) 
@@ -57,8 +59,10 @@ long track_propagator_(
       trk[2] = gtrack[i].z0;
       trk[3] = gtrack[i].psi;
       trk[4] = gtrack[i].tanl;
-      trk[5] = gtrack[i].icharge;
+      trk[5] = (float) gtrack[i].icharge;
+      trk[6] = pt;
       r1     = ((float) gtrack[i].icharge)*(1/gtrack[i].invpt)/(0.0003*bfld);
+
      
       
       if(target->iflag == 1 || target->iflag == 2)
@@ -68,10 +72,10 @@ long track_propagator_(
 	  
 	  prop_project_track_(&psi, &q, &pt, &tanl, &x0, &y0, &bfld, &z0, xp, xout); 
 	  
-	  gtrack[i].x0 = xout[0];
-	  gtrack[i].y0 = xout[1];
-	  gtrack[i].z0 = xout[2];
-	  gtrack[i].psi= xout[3];
+	  ptrack[i].x0 = xout[0];
+	  ptrack[i].y0 = xout[1];
+	  ptrack[i].z0 = xout[2];
+	  ptrack[i].psi= xout[3];
 
 	  if (target->iflag == 2)
 	    {
@@ -81,22 +85,22 @@ long track_propagator_(
 	      x1[0] = xout[0];
 	      x1[1] = xout[1];
 	      x1[2] = xout[2];
-	      trk[0] = gtrack[i].x0;
-	      trk[1] = gtrack[i].y0;
-	      trk[2] = gtrack[i].z0;
-	      trk[3] = gtrack[i].psi;
-	      prop_track_mom_(trk, &r1, &iiflag, p, &bfld);  
+	      trk[0] = xout[0];
+	      trk[1] = xout[1];
+	      trk[2] = xout[2];
+	      trk[3] = xout[3];
+	      prop_track_mom_(trk, p);  
 	      prop_fine_approach_(xv, x1, p, &xx0); 
-	      gtrack[i].x0 = xx0[0];
-	      gtrack[i].y0 = xx0[1];
-	      gtrack[i].z0 = xx0[2];
+	      ptrack[i].x0 = xx0[0];
+	      ptrack[i].y0 = xx0[1];
+	      ptrack[i].z0 = xx0[2];
 	    }
 	  return STAFCV_OK;
 	}
       
       if(target->iflag == 3)
 	{
-	  prop_circle_param_(trk, xc1, &r1, &bfld); 
+	  prop_circle_param_(trk, xc1, &r1); 
 	  xc2[0] = xc2[1] = 0.;
 	  r2 = target->r;
 	  cut = 0.4;
@@ -128,10 +132,10 @@ long track_propagator_(
 	  
 	  prop_project_track_(&psi, &q, &pt, &tanl, &x0, &y0, &bfld, &z0, xp, xout); 
 	  
-	  gtrack[i].x0 = xout[0];
-	  gtrack[i].y0 = xout[1];
-	  gtrack[i].z0 = xout[2];
-	  gtrack[i].psi= xout[3];
+	  ptrack[i].x0 = xout[0];
+	  ptrack[i].y0 = xout[1];
+	  ptrack[i].z0 = xout[2];
+	  ptrack[i].psi= xout[3];
 	}
     }
 }
