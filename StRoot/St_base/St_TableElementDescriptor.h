@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableElementDescriptor.h,v 1.2 1999/05/18 20:08:47 fine Exp $
+// $Id: St_TableElementDescriptor.h,v 1.3 1999/08/11 00:44:12 fine Exp $
 // $Log: St_TableElementDescriptor.h,v $
+// Revision 1.3  1999/08/11 00:44:12  fine
+// clean up
+//
 // Revision 1.2  1999/05/18 20:08:47  fine
 // St_TAbleElementDescriptor class have been introduced
 //
@@ -36,7 +39,7 @@ class St_TableElementDescriptor : public TNamed {
     void   SetOffset(UInt_t offset)  {m_Offset     = offset;}
     void   SetSize(UInt_t size)      {m_Size       = size;  }
     void   SetDimensions(UInt_t dim) {m_Dimensions = dim;   }
-    void   SetType(EColumnType type) {m_Type       = type;  }
+   // void   SetType(St_TableElementDescriptor::EColumnType type) {m_Type       = type;  }
     ClassDef(St_TableElementDescriptor,0)
 };
 
