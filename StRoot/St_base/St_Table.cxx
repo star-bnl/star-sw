@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.60 1999/07/07 16:44:40 fine Exp $ 
+// $Id: St_Table.cxx,v 1.61 1999/08/02 00:53:14 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.61  1999/08/02 00:53:14  fine
+// St_Table::New - protection against of zero pointers was removed by VP demand
+//
 // Revision 1.60  1999/07/07 16:44:40  fine
 // Some print statements clean ups
 //
@@ -601,7 +604,7 @@ St_Table *St_Table::New(const Char_t *name, const Char_t *type, void *array, UIn
   // This static method creates a new St_Table object if provided 
 
   St_Table *table = 0;
-  if (array && size && type && name) 
+  if (type && name) 
   {
     TString TableType(type); 
     TString t = TableType.Strip();
