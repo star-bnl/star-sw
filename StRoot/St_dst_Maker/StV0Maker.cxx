@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.33 2002/01/31 18:07:49 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.34 2002/02/20 06:15:05 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.34  2002/02/20 06:15:05  genevb
+// Do not trim on dcapnmin above ptV0 = 3.5 GeV/c
+//
 // Revision 1.33  2002/01/31 18:07:49  genevb
 // Switch to using database for cut parameters
 //
@@ -120,6 +123,8 @@
 St_dst_xi_vertex* dst_xi_vertex = 0;
 St_dst_tkf_vertex* dst_tkf_vertex = 0;
 Int_t rsize,rvsize,lastV0;
+float ptV0_cut_sq = pow(3.5,2); // Don't trim on dcapnmin above ptV0 = 3.5
+
 
 ClassImp(StV0Maker)
   
@@ -324,8 +329,13 @@ void StV0Maker::Trim(){
 	}
         dst_v0_vertex_st* v0rowL = dst_v0_vertex->GetTable(lastV0);
         isXiV0 = (v0rowL->dcav0 < 0);
+        float ptV0_sq = pow((v0rowL->neg_px + v0rowL->pos_px),2) +
+                        pow((v0rowL->neg_py + v0rowL->pos_py),2);
+        // Current cuts are different for dcaV0 and 
+        // dcapnmin (pt below 3.5 GeV/c)
         passV0 = (TMath::Abs(v0rowL->dcav0) < pars->dcav0) &&
-            (v0rowL->dcap > pars->dcapnmin) && (v0rowL->dcan > pars->dcapnmin);
+                 ((ptV0_sq >= ptV0_cut_sq) ||
+                 ((v0rowL->dcap > pars->dcapnmin) && (v0rowL->dcan > pars->dcapnmin)));
 	if (isXiV0 || passV0) {
 	  notGood = kFALSE;
 
