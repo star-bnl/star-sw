@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.18 2000/08/01 21:51:20 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.19 2000/08/09 21:38:59 snelling Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.19  2000/08/09 21:38:59  snelling
+// Added monitor histograms
+//
 // Revision 1.18  2000/08/01 21:51:20  posk
 // Added doubly integrated v.
 //
@@ -107,7 +110,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.18 2000/08/01 21:51:20 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.19 2000/08/09 21:38:59 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -141,6 +144,8 @@ private:
   TH1F*     mHistMaxPts;        //!
   TH1F*     mHistFitOverMax;    //!
   TH1F*     mHistOrigMult;      //!
+  TH1F*     mHistMultEta1;      //!
+  TH1F*     mHistMultEta2;      //!
   TH1F*     mHistMult;          //!
   TH1F*     mHistMultOverOrig;  //!
   TH1F*     mHistCorrMult;      //!
@@ -155,10 +160,23 @@ private:
   TH1F*     mHistPidPiPlus;     //!
   TH1F*     mHistPidPiMinus;    //!
   TH1F*     mHistPidProton;     //!
+  TH1F*     mHistPidAntiProton; //!
+  TH1F*     mHistPidKplus;      //!
+  TH1F*     mHistPidKminus;     //!
+  TH1F*     mHistPidDeuteron;   //!
   TProfile* mHistPidMult;       //!
   TH1F*     mHistCent;          //!
   TH2F*     mHistEtaSymVerZ2D;  //!
   TH1F*     mHistEtaSymVerZ;    //!
+  TH2F*     mHistCTBversusZDC;  //!
+  TH2F*     mHistMeandEdx;      //!
+  TH2F*     mHistMeandEdxPiPlus;  //!
+  TH2F*     mHistMeandEdxPiMinus; //!
+  TH2F*     mHistMeandEdxProton;  //!
+  TH2F*     mHistMeandEdxPbar;    //!
+  TH2F*     mHistMeandEdxKplus;   //!
+  TH2F*     mHistMeandEdxKminus;  //!
+
   
   // for each harmonic, each selection, and each sub-event
   struct histSubHars {
