@@ -131,20 +131,20 @@ MESS ****  fail). Unlock and delete the same object (this    ****
 MESS ****  will succeed). List objects at each step          ****
 MESS ****  (N.B. This is dangerous if object 6 is not apple) ****
 MESS ************************************************************
-TRACE ON
+*TRACE ON
 SOC/OBJ/LOCK [oidapp] T
 SOC/DELETEOID [oidapp]
 SOC/LIST
 SOC/OBJ/LOCK [oidapp] F
 SOC/DELETEOID [oidapp]
 SOC/LIST
-TRACE OFF
+*TRACE OFF
 WAIT 'Hit <CR> to continue:' 0
 MESS
 MESS ************************************************************
 MESS ****  Delete the fish by name and list again.                   ****
 MESS ************************************************************
-SOC/DELETEOBJECT fish 
+SOC/OBJECT/DELETE fish socObject
 SOC/LIST
 WAIT 'Hit <CR> to continue:' 0
 MESS
