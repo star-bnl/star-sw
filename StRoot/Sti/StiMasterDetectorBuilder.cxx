@@ -1,5 +1,4 @@
 #include "StiMasterDetectorBuilder.h"
-#include "Sti/Base/Messenger.h"
 
 StiMasterDetectorBuilder::StiMasterDetectorBuilder(bool active)
   : StiDetectorBuilder("MasterDetectorBuilder",active)
@@ -19,30 +18,30 @@ void StiMasterDetectorBuilder::reset()
 
 /*! Build all the detector groups and their elementary detector components registered with this builder.
  */
-void StiMasterDetectorBuilder::build()
+void StiMasterDetectorBuilder::build(StMaker&source)
 {
-  _messenger << "StiMasterDetectorBuilder::build() -I- Started"<<endl;
+  cout << "StiMasterDetectorBuilder::build() -I- Started"<<endl;
   vector<StiDetectorBuilder*>::iterator iter;
   unsigned int nRows=0;
   for (iter=begin();
        iter!=end();
        iter++)
     {
-      _messenger << "StiMasterDetectorBuilder::build() -I- Calling Group Builder named:" << (*iter)->getName()<<endl;
-      (*iter)->build();
+      cout << "StiMasterDetectorBuilder::build() -I- Calling Group Builder named:" << (*iter)->getName()<<endl;
+      (*iter)->build(source);
       nRows+=(*iter)->getNRows();
     }
-  _messenger << "StiMasterDetectorBuilder::build() -I- Will build local array"<<endl;
+  cout << "StiMasterDetectorBuilder::build() -I- Will build local array"<<endl;
   setNRows(nRows);
   unsigned int row=0;
   for (iter=begin();
        iter!=end();
        iter++)
     {
-      _messenger << "StiMasterDetectorBuilder::build() -I- Builder:"<<(*iter)->getName()<<endl;
+      cout << "StiMasterDetectorBuilder::build() -I- Builder:"<<(*iter)->getName()<<endl;
       for (unsigned int i=0;i<(*iter)->getNRows();i++)
 	{
-	  _messenger << "StiMasterDetectorBuilder::build() -I- row:"<<row<<endl;
+	  cout << "StiMasterDetectorBuilder::build() -I- row:"<<row<<endl;
 	  unsigned int nSectors = (*iter)->getNSectors(i);
 	  setNSectors(row,nSectors);
 	  for (unsigned int sector=0;sector<nSectors;sector++)
@@ -52,20 +51,20 @@ void StiMasterDetectorBuilder::build()
 	  row++;
 	}
     }
-  _messenger << "StiMasterDetectorBuilder::build() -I- Done"<<endl;
+  cout << "StiMasterDetectorBuilder::build() -I- Done"<<endl;
 }
 
 /*! Return true if this builder has not served all detector objects currently registered with it.
  */
 bool StiMasterDetectorBuilder::hasMore() const
 { 
-  //_messenger << "StiMasterDetectorBuilder::build() -I- Started"<<endl;
+  //cout << "StiMasterDetectorBuilder::build() -I- Started"<<endl;
   vector<StiDetectorBuilder*>::const_iterator iter;
   for (iter=begin();
        iter!=end();
        iter++)
     {
-      //_messenger << "StiMasterDetectorBuilder::hasMore() -I- Calling Group Builder named:" << (*iter)->getName()<<endl;
+      //cout << "StiMasterDetectorBuilder::hasMore() -I- Calling Group Builder named:" << (*iter)->getName()<<endl;
       if((*iter)->hasMore()) return true;
     }
   return false;
@@ -76,13 +75,12 @@ no detector object left to server.
  */
 StiDetector * StiMasterDetectorBuilder::next()
 {
-  //_messenger << "StiMasterDetectorBuilder::next() -I- Started"<<endl;
+  //cout << "StiMasterDetectorBuilder::next() -I- Started"<<endl;
   vector<StiDetectorBuilder*>::const_iterator iter;
   for (iter=begin();
        iter!=end();
        iter++)
     {
-      //_messenger << "StiMasterDetectorBuilder::next() -I- Calling Group Builder named:" << (*iter)->getName()<<endl;
       if((*iter)->hasMore()) return (*iter)->next();
     }
   return 0;
@@ -92,3 +90,19 @@ void StiMasterDetectorBuilder::add(StiDetectorBuilder *builder)
 {
   push_back(builder);
 }
+
+StiDetectorBuilder * StiMasterDetectorBuilder::get(const string & name)
+{
+	// iterate through the list to find the requested object.
+	  vector<StiDetectorBuilder*>::const_iterator iter;
+  for (iter=begin();
+       iter!=end();
+       iter++)
+    {
+      //cout << "StiMasterDetectorBuilder::next() -I- Calling Group Builder named:" << (*iter)->getName()<<endl;
+      if((*iter)->isName(name)) return *iter;
+    }
+	throw runtime_error("StiMasterDetectorBuilder::get(const string & name) -E- Requested object not found");
+}
+
+
