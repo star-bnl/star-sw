@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.18 2000/06/24 00:20:35 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.19 2000/12/05 17:54:23 hardtke Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.19  2000/12/05 17:54:23  hardtke
+ * Fix bug in sectorFromCoordinate
+ *
  * Revision 1.18  2000/06/24 00:20:35  hardtke
  * remove shaping time from time-to-z conversion
  *
@@ -395,7 +398,7 @@ int StTpcCoordinateTransform::sectorFromCoordinate(const StTpcLocalCoordinate& a
     else
               {
                sectorNumber+=9;
-               if(sectorNumber<12)sectorNumber+=12;
+               if(sectorNumber<=12)sectorNumber+=12;
                }
 
      return(sectorNumber);
@@ -416,7 +419,7 @@ int StTpcCoordinateTransform::sectorFromCoordinate(const StThreeVector<double>& 
     else
               {
                sectorNumber+=9;
-               if(sectorNumber<12)sectorNumber+=12;
+               if(sectorNumber<=12)sectorNumber+=12;
                }
 
      return(sectorNumber);
