@@ -52,7 +52,7 @@ ifeq (,$(strip $(filter /%,$(OUT_DIR))))
 endif
 
 #	Check if OUT directory on AFS ?
-ifOUT_AFS := $(strip $(filter $(AFS)/%,$(AFS_RHIC)/%,$(OUT_DIR)))
+ifOUT_AFS := $(strip $(filter $(AFS)/% $(AFS_RHIC)/%,$(OUT_DIR)))
 
 
 ifndef SYSTEM_DOMAIN
