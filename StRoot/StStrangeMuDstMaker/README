@@ -9,6 +9,8 @@ readStrangeMuDst.C respectively.
 Authors:
 Gene Van Buren, UCLA
 Peter G. Jones, University of Birmingham
+Wensheng Deng, Kent State University
 
 History:
 280300 GVB Rewritten from StV0MiniDstMaker and committed to STAR library
+290300 GVB Added Wensheng's StKinkMuDst, replaced arrays
