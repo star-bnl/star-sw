@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.95 2000/02/22 23:05:00 fine Exp $ 
+// $Id: St_Table.cxx,v 1.96 2000/02/26 01:38:12 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -1240,10 +1240,6 @@ void St_Table::Fit(const Text_t *formula ,const Text_t *varexp, const Text_t *se
    else      printf("ERROR hfit=0\n");
 }
 
-//______________________________________________________________________________
-void  *St_Table::GetArray() const {
-//  return the void pointer to the C-structure
- return s_Table; }
 //______________________________________________________________________________
 const Char_t *St_Table::GetType() const { 
 //Returns the type of the wrapped C-structure kept as the TNamed title
@@ -2695,6 +2691,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.96  2000/02/26 01:38:12  fine
+// public s_Table is replaced with inline GetArray()
+//
 // Revision 1.95  2000/02/22 23:05:00  fine
 // Several loops for Streamer methods had been cleaned to avoid some problem in future
 //
