@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtSectoredAnalysis.h,v 1.2 2000/05/11 21:18:56 willson Exp $
+ * $Id: StHbtSectoredAnalysis.h,v 1.3 2000/06/15 18:54:08 willson Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -15,6 +15,10 @@
  ***************************************************************************
  *
  * $Log: StHbtSectoredAnalysis.h,v $
+ * Revision 1.3  2000/06/15 18:54:08  willson
+ * Methods to access cuts and correlation functions moved to derived analysis
+ * classes.
+ *
  * Revision 1.2  2000/05/11 21:18:56  willson
  * Removed StHbtThreeParticleCorrFctn's...put methods in StHbtCorrFctn
  * Some methods in derived analysis classes moved to base analysis class
@@ -27,13 +31,13 @@
 
 #ifndef StHbtSectoredAnalysis_hh
 #define StHbtSectoredAnalysis_hh
-//#ifndef StMaker_H
-//#include "StMaker.h"
-//#endif
-
 
 #include "StHbtMaker/Base/StHbtBaseAnalysis.h"        // base analysis class
-//#include <string>
+#include "StHbtMaker/Base/StHbtPairCut.h"   
+#include "StHbtMaker/Base/StHbtEventCut.h"
+#include "StHbtMaker/Base/StHbtParticleCut.h"
+#include "StHbtMaker/Base/StHbtCorrFctn.hh" 
+#include "StHbtMaker/Infrastructure/StHbtCorrFctnCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtSectoredPicoEventCollection.hh"
 
 class StHbtSectoredAnalysis : public StHbtBaseAnalysis {
@@ -51,8 +55,22 @@ public:
   int  Index(int, int, int);
  
   // Gets and Sets
-  StHbtCorrFctn* CorrFctn(int n);     // Access to CFs within the collection
- 
+  virtual StHbtPairCut*       PairCut();
+  virtual StHbtEventCut*      EventCut();
+  virtual StHbtParticleCut*   FirstParticleCut();
+  virtual StHbtParticleCut*   SecondParticleCut();
+
+  StHbtCorrFctnCollection* CorrFctnCollection();
+  virtual StHbtCorrFctn* CorrFctn(int n);     // Access to CFs within the collection
+  void AddCorrFctn(StHbtCorrFctn*);
+
+  void SetPairCut(StHbtPairCut*);
+  void SetEventCut(StHbtEventCut*);
+  void SetFirstParticleCut(StHbtParticleCut*);
+  void SetSecondParticleCut(StHbtParticleCut*);
+
+
+
   int                    NumBinsX();
   int                    NumBinsY();
   int                    NumBinsZ();
@@ -72,8 +90,10 @@ public:
   void SetPZmin(float);
   void SetDeltaP(float);
 
-  bool SectoredMixingBufferFull();
+  unsigned int NumEventsToMix();
+  void SetNumEventsToMix(const unsigned int&);
   StHbtSectoredPicoEventCollection* SectoredMixingBuffer();
+  bool SectoredMixingBufferFull();
 
   bool AnalyzeIdenticalParticles();
   virtual StHbtString Report();       //! returns reports of all cuts applied and correlation functions being done
@@ -86,17 +106,23 @@ public:
 
 
 private:
-  float                  mPXmax;
-  float                  mPXmin;
-  float                  mPYmax;
-  float                  mPYmin;
-  float                  mPZmax;
-  float                  mPZmin;
-  float                  mDeltaP;
-  int                    mNumBinsX;
-  int                    mNumBinsY;
-  int                    mNumBinsZ;
+  StHbtPairCut*                      mPairCut;
+  StHbtCorrFctnCollection*           mCorrFctnCollection;
+  StHbtEventCut*                     mEventCut;
+  StHbtParticleCut*                  mFirstParticleCut;
+  StHbtParticleCut*                  mSecondParticleCut;
+  float                              mPXmax;
+  float                              mPXmin;
+  float                              mPYmax;
+  float                              mPYmin;
+  float                              mPZmax;
+  float                              mPZmin;
+  float                              mDeltaP;
+  int                                mNumBinsX;
+  int                                mNumBinsY;
+  int                                mNumBinsZ;
   StHbtSectoredPicoEventCollection*  mSectoredMixingBuffer;
+  unsigned int                       mNumEventsToMix;
 
 #ifdef __ROOT__
   ClassDef(StHbtSectoredAnalysis, 0)
@@ -104,22 +130,38 @@ private:
 
 };
 
-inline bool StHbtSectoredAnalysis::SectoredMixingBufferFull(){return (mSectoredMixingBuffer->size() >= NumEventsToMix());}
+// Get's
+inline StHbtPairCut*                      StHbtSectoredAnalysis::PairCut() {return mPairCut;}
+inline StHbtEventCut*                     StHbtSectoredAnalysis::EventCut() {return mEventCut;}
+inline StHbtParticleCut*                  StHbtSectoredAnalysis::FirstParticleCut() {return mFirstParticleCut;}
+inline StHbtParticleCut*                  StHbtSectoredAnalysis::SecondParticleCut() {return mSecondParticleCut;}
+inline StHbtCorrFctnCollection*           StHbtSectoredAnalysis::CorrFctnCollection() {return mCorrFctnCollection;}
+inline unsigned int                       StHbtSectoredAnalysis::NumEventsToMix(){return mNumEventsToMix;}
 inline StHbtSectoredPicoEventCollection*  StHbtSectoredAnalysis::SectoredMixingBuffer() {return mSectoredMixingBuffer;}
 
-// Get's
-inline float                  StHbtSectoredAnalysis::PXmax() {return mPXmax;}
-inline float                  StHbtSectoredAnalysis::PXmin() {return mPXmin;}
-inline float                  StHbtSectoredAnalysis::PYmax() {return mPYmax;}
-inline float                  StHbtSectoredAnalysis::PYmin() {return mPYmin;}
-inline float                  StHbtSectoredAnalysis::PZmax() {return mPZmax;}
-inline float                  StHbtSectoredAnalysis::PZmin() {return mPZmin;}
-inline float                  StHbtSectoredAnalysis::DeltaP() {return mDeltaP;}
-inline int                    StHbtSectoredAnalysis::NumBinsX() {return mNumBinsX;}
-inline int                    StHbtSectoredAnalysis::NumBinsY() {return mNumBinsY;}
-inline int                    StHbtSectoredAnalysis::NumBinsZ() {return mNumBinsZ;}
+inline float                     StHbtSectoredAnalysis::PXmax() {return mPXmax;}
+inline float                     StHbtSectoredAnalysis::PXmin() {return mPXmin;}
+inline float                     StHbtSectoredAnalysis::PYmax() {return mPYmax;}
+inline float                     StHbtSectoredAnalysis::PYmin() {return mPYmin;}
+inline float                     StHbtSectoredAnalysis::PZmax() {return mPZmax;}
+inline float                     StHbtSectoredAnalysis::PZmin() {return mPZmin;}
+inline float                     StHbtSectoredAnalysis::DeltaP() {return mDeltaP;}
+inline int                       StHbtSectoredAnalysis::NumBinsX() {return mNumBinsX;}
+inline int                       StHbtSectoredAnalysis::NumBinsY() {return mNumBinsY;}
+inline int                       StHbtSectoredAnalysis::NumBinsZ() {return mNumBinsZ;}
 
 // Set's
+
+inline bool StHbtSectoredAnalysis::AnalyzeIdenticalParticles() {return (mFirstParticleCut==mSecondParticleCut);}
+inline void StHbtSectoredAnalysis::SetPairCut(StHbtPairCut* x) { mPairCut = x; x->SetAnalysis((StHbtBaseAnalysis*)this);}
+inline void StHbtSectoredAnalysis::AddCorrFctn(StHbtCorrFctn* cf) {mCorrFctnCollection->push_back(cf); cf->SetAnalysis((StHbtBaseAnalysis*)this);}
+inline void StHbtSectoredAnalysis::SetEventCut(StHbtEventCut* x) {mEventCut = x; x->SetAnalysis((StHbtBaseAnalysis*)this);}
+inline void StHbtSectoredAnalysis::SetFirstParticleCut(StHbtParticleCut* x) {mFirstParticleCut = x; x->SetAnalysis((StHbtBaseAnalysis*)this);}
+inline void StHbtSectoredAnalysis::SetSecondParticleCut(StHbtParticleCut* x) {mSecondParticleCut = x; x->SetAnalysis((StHbtBaseAnalysis*)this);}
+
+inline void StHbtSectoredAnalysis::SetNumEventsToMix(const unsigned int& nmix){ mNumEventsToMix = nmix;}
+inline bool StHbtSectoredAnalysis::SectoredMixingBufferFull(){return (mSectoredMixingBuffer->size() >= NumEventsToMix());}
+
 inline void StHbtSectoredAnalysis::SetPXmax(float x) {
   mPXmax = x;
   if (mPXmax<mPXmin) mNumBinsX=1;
@@ -171,7 +213,5 @@ inline void StHbtSectoredAnalysis::SetDeltaP(float x) {
     if (mNumBinsZ==0) mNumBinsZ=1;
   }
 }
-
-inline bool StHbtSectoredAnalysis::AnalyzeIdenticalParticles() {return (mFirstParticleCut==mSecondParticleCut);}
 
 #endif
