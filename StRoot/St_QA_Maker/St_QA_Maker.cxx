@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.98 2000/05/25 15:27:05 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 1.99 2000/06/02 20:07:11 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.99  2000/06/02 20:07:11  lansdell
+// removed RICH code (now written directly to StEvent)
+//
 // Revision 1.98  2000/05/25 15:27:05  lansdell
 // changed primtrk iflag check: 300<=iflag<400 (TPC), 600<=iflag<700 (TPC+SVT)
 //
@@ -1439,18 +1442,7 @@ void St_QA_Maker::MakeHistPoint(){
 //_____________________________________________________________________________
 void St_QA_Maker::MakeHistRich(){
   if (Debug()) cout << " *** in St_QA_Maker - filling Rich histograms " << endl;
-
-  St_DataSetIter dstI(dst);           
-
-  St_g2t_rch_hit *pt = (St_g2t_rch_hit*) dstI["g2t_rch_hit"];
-  if (pt) {
-
-    Int_t cntrows=0;
-    cntrows = pt->GetNRows();
-    m_rich_tot->Fill(cntrows);
-
-  }
-
+  // RICH information is written directly to StEvent now.
 }
 
 
