@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcHit.h,v 1.5 1999/04/30 13:16:27 fisyak Exp $
+ * $Id: StEmcHit.h,v 1.6 1999/05/03 01:36:18 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEmcHit.h,v $
- * Revision 1.5  1999/04/30 13:16:27  fisyak
- * add StArray for StRootEvent
+ * Revision 1.6  1999/05/03 01:36:18  fisyak
+ * Add Print
+ *
+ * Revision 1.6  1999/05/03 01:36:18  fisyak
+ * Add Print
  *
  * Revision 1.5  1999/04/30 13:16:27  fisyak
  * add StArray for StRootEvent
@@ -49,6 +52,7 @@ public:
     Float_t eta()    const;
 
     void setEnergy(Float_t);
+    void setPhi(Float_t);
     void setEta(Float_t);
     void setId(Int_t);
     virtual void                   Print(Option_t *opt=""); // *MENU*

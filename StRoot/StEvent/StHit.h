@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 1.5 1999/04/30 13:16:28 fisyak Exp $
+ * $Id: StHit.h,v 1.6 1999/05/03 01:36:18 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
- * Revision 1.5  1999/04/30 13:16:28  fisyak
- * add StArray for StRootEvent
+ * Revision 1.6  1999/05/03 01:36:18  fisyak
+ * Add Print
+ *
+ * Revision 1.6  1999/05/03 01:36:18  fisyak
+ * Add Print
  *
  * Revision 1.5  1999/04/30 13:16:28  fisyak
  * add StArray for StRootEvent
@@ -41,32 +44,33 @@
 #include "StObject.h"
 #include <iostream.h>
 #include "StThreeVectorF.hh"
-    StHit();
-    StHit(const StThreeVectorF&,
-	  const StThreeVectorF&,
-	  Float_t, UChar_t = 0);
-    // StHit(const StSvtHit&);                  use default
-    // const StHit & operator=(const StHit&);   use default
-    virtual ~StHit();
+ * Completely Revised for New Version
+class StHit : public StObject {
+
+  StHit();
+  StHit(const StThreeVectorF&,
+	const StThreeVectorF&,
+	Float_t, UChar_t = 0);
   // StHit(const StSvtHit&);                  use default
-    Int_t operator==(const StHit&) const;
-    Int_t operator!=(const StHit&) const;
+  // const StHit & operator=(const StHit&);   use default
+  virtual ~StHit();
     
-    virtual const StThreeVectorF& position() const;
-    virtual const StThreeVectorF& positionError() const;
-    virtual Float_t                       charge() const;
-    virtual UChar_t               trackReferenceCount() const;	
+  Int_t operator==(const StHit&) const;
+  Int_t operator!=(const StHit&) const;
+    
+  virtual const StThreeVectorF& position() const;
+  virtual const StThreeVectorF& positionError() const;
   virtual Float_t                       charge() const;
-    virtual void setPosition(const StThreeVectorF&);
-    virtual void setPositionError(const StThreeVectorF&);
-    virtual void setCharge(Float_t);
-    virtual void setTrackReferenceCount(UChar_t);
+  virtual UChar_t               trackReferenceCount() const;	
+  virtual void                   Print(Option_t *opt=""); // *MENU*
+class StHit : public StMeasuredPoint {
+  virtual void setPosition(const StThreeVectorF&);
   virtual void setPositionError(const StThreeVectorF&);
   virtual void setCharge(Float_t);
-    StThreeVectorF mPosition;
-    StThreeVectorF mPositionError;
-    Float_t                mCharge;
-    UChar_t        mTrackRefCount;    
+  virtual void setTrackReferenceCount(UChar_t);
+    StThreeVectorF  positionError() const;     // overwrite inherited
+    
+  StThreeVectorF mPosition;
   StThreeVectorF mPositionError;
   Float_t                mCharge;
   UChar_t        mTrackRefCount;    

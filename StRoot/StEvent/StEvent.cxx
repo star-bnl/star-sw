@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 1.5 1999/04/30 13:16:27 fisyak Exp $
+ * $Id: StEvent.cxx,v 1.6 1999/05/03 01:36:18 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 1.5  1999/04/30 13:16:27  fisyak
- * add StArray for StRootEvent
+ * Revision 1.6  1999/05/03 01:36:18  fisyak
+ * Add Print
+ *
+ * Revision 1.6  1999/05/03 01:36:18  fisyak
+ * Add Print
  *
  * Revision 1.5  1999/04/30 13:16:27  fisyak
  * add StArray for StRootEvent
@@ -57,6 +60,7 @@
  * Fix for Sun compiler peculiarity
  *
  * Revision 1.2  1999/01/15 22:53:39  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 2.11  2000/05/15 18:35:38  ullrich
 #include <iostream.h>
@@ -66,16 +70,16 @@
 #include "TString.h"
 #include "TBrowser.h"
 using namespace std;
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.5 1999/04/30 13:16:27 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.6 1999/05/03 01:36:18 fisyak Exp $";
  extern "C" {int isprint(int);}
 StEvent::StEvent():St_DataSet("Event")
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.5 1999/04/30 13:16:27 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.6 1999/05/03 01:36:18 fisyak Exp $";
  * Changes due to the addition of the EMC to StEvent
 StEvent::StEvent():St_DataSet("StEvent")
  * add rich pixel info/containers
     init();
 St_DataSet("Event")
-static const char rcsid[] = "$Id: StEvent.cxx,v 1.5 1999/04/30 13:16:27 fisyak Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 1.6 1999/05/03 01:36:18 fisyak Exp $";
 StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum):
 St_DataSet("StEvent")
 #include "StEmcCollection.h"
@@ -118,11 +122,13 @@ StEvent::operator=(const StEvent&) { return *this;} // private
     SafeDelete(mVertices);
     SafeDelete(mL0Trigger);
 }
+
     mRun = run;
 {
     mType = "Unknown";
     //    mRun = run;
-    setTime(0);
+    mRunNumber = 0;           
+    mCvsTag = "Unknown";
     mTriggerMask = 0;         
     mBunchCrossingNumber = 0; 
     mTime.Set();
@@ -182,6 +188,12 @@ void StEvent::Browse(TBrowser *b)
      if (mEmcTowerHits)     b->Add(mEmcTowerHits);
      if (mEmcPreShowerHits) b->Add(mEmcPreShowerHits);
      if (mSmdPhiHits)       b->Add(mSmdPhiHits);
+     if (mSmdEtaHits)       b->Add(mSmdEtaHits);
+   }
+  St_DataSet::Browse(b);
+}
+//______________________________________________________________________________
+void StEvent::Print(Option_t *opt)
 {
   cout << endl;
   cout << *this << endl;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 1.4 1999/05/02 00:00:17 fisyak Exp $
+ * $Id: StSvtHit.h,v 1.5 1999/05/03 01:36:18 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
- * Revision 1.4  1999/05/02 00:00:17  fisyak
- * Add default ctors
+ * Revision 1.5  1999/05/03 01:36:18  fisyak
+ * Add Print
+ *
+ * Revision 1.5  1999/05/03 01:36:18  fisyak
+ * Add Print
  *
  * Revision 1.4  1999/05/02 00:00:17  fisyak
  * Add default ctors
@@ -47,13 +50,14 @@ class StGlobalTrackCollection;
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
-  StSvtHit() : StHit () {/* noop */};
+
  * Added missing default constructor
  *
   StSvtHit(){/* noop */};
   StSvtHit(const StThreeVectorF&,
-    
+	   const StThreeVectorF&,
 	   Float_t, UChar_t = 0);
+  StSvtHit(dst_point_st*);
 #ifndef __CINT__    
   StVecPtrGlobalTrack relatedTracks(const StGlobalTrackCollection&);
 #endif
