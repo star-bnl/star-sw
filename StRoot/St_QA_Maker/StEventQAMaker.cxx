@@ -270,7 +270,7 @@ void StEventQAMaker::MakeHistEvSum() {
       else
 	tpcChgEast += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
     }
-    m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,(float) eventClass);
+    m_glb_trk_chg->Fill(tpcChgEast/(tpcChgWest+1.e-10),(float) eventClass);
     m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[1]/(ftpcMon->chrg_ftpc_tot[0]+1.e-10),
       (float) eventClass);
   }
@@ -320,9 +320,9 @@ void StEventQAMaker::MakeHistGlob() {
       Float_t chisq0 = fTraits.chi2(0);
       Float_t chisq1 = fTraits.chi2(1);
       Float_t nfitntot = (Float_t(fTraits.numberOfFitPoints())) /
-	                 (Float_t(detInfo->numberOfPoints()));
+	                 (Float_t(detInfo->numberOfPoints())+1.e-10);
       Float_t nfitnmax = (Float_t(fTraits.numberOfFitPoints())) /
-                         (Float_t(globtrk->numberOfPossiblePoints()));
+                         (Float_t(globtrk->numberOfPossiblePoints())+1.e-10);
       const StThreeVectorF& firstPoint = detInfo->firstPoint();
       const StThreeVectorF& lastPoint = detInfo->lastPoint();
       const StThreeVectorF& origin = geom->origin();
@@ -512,11 +512,12 @@ void StEventQAMaker::MakeHistGlob() {
 					Float_t(fTraits.numberOfFitPoints()));
 
         hists->m_pT_eta_recT->Fill(eta,lmevpt);
-	if (event->primaryVertex()) {
-	  Float_t denom = 2*rcircle*
-	    asin(::sqrt((::pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
-		      (::pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
-		 (2*rcircle));
+	if (event->primaryVertex() && fabs(rcircle)>0.) {
+          double qwe = ::pow(firstPoint.x()-event->primaryVertex()->position().x(),2)
+		     + ::pow(firstPoint.y()-event->primaryVertex()->position().y(),2);
+          qwe = sqrt(qwe)/2*rcircle;
+	  if (qwe>0.9999) qwe = 0.999;
+	  Float_t denom = 2*rcircle*asin(qwe);
 	  hists->m_tanl_zfT->Fill((firstPoint.z() -
 				   event->primaryVertex()->position().z())/denom,
 				  Float_t(TMath::Tan(geom->dipAngle())));
@@ -633,10 +634,11 @@ void StEventQAMaker::MakeHistGlob() {
 
         hists->m_pT_eta_recTS->Fill(eta,lmevpt);
 	if (event->primaryVertex()) {
-	  Float_t denom = 2*rcircle*
-	    asin(::sqrt((::pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
-		      (::pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
-		 (2*rcircle));
+          double qwe = ::pow(firstPoint.x()-event->primaryVertex()->position().x(),2)
+		     + ::pow(firstPoint.y()-event->primaryVertex()->position().y(),2);
+          qwe = sqrt(qwe)/2*rcircle;
+	  if (qwe>0.9999) qwe = 0.999;
+	  Float_t denom = 2*rcircle*asin(qwe);
 	  if (radf>40) {
 	    hists->m_tanl_zfT->Fill((firstPoint.z() -
 				     event->primaryVertex()->position().z())/denom,
@@ -826,8 +828,8 @@ void StEventQAMaker::MakeHistGlob() {
   hists->m_globtrk_tot->Fill(cnttrk); 
   hists->m_globtrk_good->Fill(cnttrkg);
   hists->m_globtrk_good_sm->Fill(cnttrkg);
-  hists->m_globtrk_good_tot->Fill((Float_t)cnttrkgT/(Float_t)cnttrkT,1.);
-  hists->m_globtrk_good_tot->Fill((Float_t)cnttrkgTS/(Float_t)cnttrkTS,0.);
+  hists->m_globtrk_good_tot->Fill((Float_t)cnttrkgT /((Float_t)cnttrkT +1.e-10),1.);
+  hists->m_globtrk_good_tot->Fill((Float_t)cnttrkgTS/((Float_t)cnttrkTS+1.e-10),0.);
   hists->m_globtrk_goodTTS->Fill(cnttrkgTTS);
   hists->m_globtrk_goodF->Fill(cnttrkgFE,cnttrkgFW);
 }
@@ -897,7 +899,7 @@ void StEventQAMaker::MakeHistPrim() {
 	StTrackFitTraits& gfTraits = gtrack->fitTraits();
 	Int_t nhit_prim_fit = fTraits.numberOfFitPoints();
 	Int_t nhit_glob_fit = gfTraits.numberOfFitPoints();
-	hists->m_primglob_fit->Fill((Float_t)nhit_prim_fit/(Float_t)nhit_glob_fit);
+	hists->m_primglob_fit->Fill((Float_t)nhit_prim_fit/((Float_t)nhit_glob_fit+1.e-10));
 
 	n_prim_good++;
         cnttrkg++;
@@ -1077,10 +1079,11 @@ void StEventQAMaker::MakeHistPrim() {
 
 // these are TPC only
 	  hists->m_ppT_eta_recT->Fill(eta,lmevpt);
-	  Float_t denom = 2*rcircle*
-	    asin(::sqrt((::pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
-		      (::pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
-		 (2*rcircle));
+          double qwe = ::pow(firstPoint.x()-event->primaryVertex()->position().x(),2)
+		     + ::pow(firstPoint.y()-event->primaryVertex()->position().y(),2);
+          qwe = sqrt(qwe)/2*rcircle;
+	  if (qwe>0.9999) qwe = 0.999;
+	  Float_t denom = 2*rcircle*asin(qwe);
 	  hists->m_ptanl_zfT->Fill((firstPoint.z() -
 				    event->primaryVertex()->position().z())/denom,
 				   Float_t(TMath::Tan(geom->dipAngle())));
@@ -1175,10 +1178,11 @@ void StEventQAMaker::MakeHistPrim() {
 					   Float_t(fTraits.numberOfFitPoints()));
 
 	  hists->m_ppT_eta_recTS->Fill(eta,lmevpt);
-	  Float_t denom = 2*rcircle*
-	    asin(::sqrt((::pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
-		      (::pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
-		 (2*rcircle));
+          double qwe = ::pow(firstPoint.x()-event->primaryVertex()->position().x(),2)
+		     + ::pow(firstPoint.y()-event->primaryVertex()->position().y(),2);
+          qwe = sqrt(qwe)/2*rcircle;
+	  if (qwe>0.9999) qwe = 0.999;
+	  Float_t denom = 2*rcircle*asin(qwe);
 	  if (radf>40) hists->m_ptanl_zfT->
 			 Fill((firstPoint.z() - event->primaryVertex()->position().z())/denom,
 			      Float_t(TMath::Tan(geom->dipAngle())));
@@ -1321,14 +1325,14 @@ void StEventQAMaker::MakeHistPrim() {
     hists->m_primtrk_goodTTS->Fill(cnttrkgT+cnttrkgTS);
     hists->m_primtrk_goodF->Fill(cnttrkgFE,cnttrkgFW);
   }
-  mean_ptT /= cnttrkgT;
-  mean_ptTS /= cnttrkgTS;
-  mean_ptFE /= pTcnttrkgFE;
-  mean_ptFW /= pTcnttrkgFW;
-  mean_etaT /= cnttrkgT;
-  mean_etaTS /= cnttrkgTS;
-  mean_etaFE /= cnttrkgFE;
-  mean_etaFW /= cnttrkgFW;
+  mean_ptT   /= (cnttrkgT   +1.e-10);
+  mean_ptTS  /= (cnttrkgTS  +1.e-10);
+  mean_ptFE  /= (pTcnttrkgFE+1.e-10);
+  mean_ptFW  /= (pTcnttrkgFW+1.e-10);
+  mean_etaT  /= (cnttrkgT   +1.e-10);
+  mean_etaTS /= (cnttrkgTS  +1.e-10);
+  mean_etaFE /= (cnttrkgFE  +1.e-10);
+  mean_etaFW /= (cnttrkgFW  +1.e-10);
   hists->m_primtrk_meanptTTS->Fill(mean_ptTS,0.);
   hists->m_primtrk_meanptTTS->Fill(mean_ptT,1.);
   hists->m_primtrk_meanptF->Fill(mean_ptFE,0.);
@@ -1339,7 +1343,7 @@ void StEventQAMaker::MakeHistPrim() {
   hists->m_primtrk_meanetaF->Fill(fabs(mean_etaFW),1.);
 
   // MakeHistPrim() must be called after MakeHistGlob for the following to work
-  hists->m_primglob_good->Fill((Float_t)n_prim_good/(Float_t)n_glob_good);
+  hists->m_primglob_good->Fill((Float_t)n_prim_good/((Float_t)n_glob_good+1.e-10));
 }
 
 
@@ -1374,7 +1378,7 @@ void StEventQAMaker::MakeHistPID() {
 	  Float_t pionExpectedBB = BetheBloch::Sirrf(theTrack->geometry()->momentum().mag()/
 						     pion_minus_mass_c2,trackLength);
 	  pionExpectedBB *= 1.e-6;
-	  hists->m_dedxTTS->Fill(dedx/pionExpectedBB);
+	  hists->m_dedxTTS->Fill(dedx/(pionExpectedBB+1.e-10));
 	  hists->m_ndedxT->Fill(ndedx);
 	  hists->m_dedx0T->Fill(dedx);
 	  hists->m_dedx1T->Fill(error);
@@ -1387,7 +1391,7 @@ void StEventQAMaker::MakeHistPID() {
 	  Float_t pionExpectedBB = BetheBloch::Sirrf(theTrack->geometry()->momentum().mag()/
 						     pion_minus_mass_c2,trackLength);
 	  pionExpectedBB *= 1.e-6;
-	  hists->m_dedxTTS->Fill(dedx/pionExpectedBB);
+	  hists->m_dedxTTS->Fill(dedx/(pionExpectedBB+1.e-10));
 	}
 	if (dedxPidTr->detector() == kFtpcWestId) {
 	  // east and west in same histogram
@@ -2009,8 +2013,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.50 2003/10/25 00:48:49 perev Exp $
+// $Id: StEventQAMaker.cxx,v 2.51 2003/11/20 03:13:55 perev Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.51  2003/11/20 03:13:55  perev
+// Fix FPE
+//
 // Revision 2.50  2003/10/25 00:48:49  perev
 // Protect chrg_ftpc_tot[0]=0 (1/0)
 //
