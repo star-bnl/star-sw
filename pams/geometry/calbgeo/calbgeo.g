@@ -54,7 +54,7 @@ external etsphit
               CSHI,CBTW
       Structure CALG { version,  Rmin,     Etacut,   CrackWd,
                        FrontThk, CompThk,  AirThk,   BackThk,  SpaceThk, 
-                       ScintThk, AbsorThk, AbPapThk, g10SbThk,
+                       ScintThk, AbsorThk, AbPapThk, Sntchthk, g10SbThk,
                        SmAlfWdh, SmAlfThk, SmGasThk, SmGasWdh, SmGasRad,
                        SmAffWdh, SmAfbWdh, SmetaWdh, Seta1Wdh, Netfirst, 
                        Seta2Wdh, Netsecon, Set12Wdh, SphiWdh,  SphidWdh, 
@@ -83,6 +83,7 @@ external etsphit
       ScintThk = 0.250       ! active scintillator plate half thickness
       AbsorThk = 0.250       ! absorber plate thickness halfpThickness
       AbPapThk = 0.005       ! absorber paper plate thickness half thickness
+      SntchThk = 0.000       ! not used - Smd front notch width
       g10SbThk = 0.115       ! G10 SMD front and back plate half thickness
       SmAlfWdh =11.2014      ! SMD Al front back plate with Ar half width
       SmAlfThk = 0.3893      ! SMD Al front back plate with Ar half thickness
