@@ -1,14 +1,5 @@
-// $Id: StLaserEventMaker.h,v 1.21 2003/07/09 21:49:51 pfachini Exp $
+// $Id: StLaserEventMaker.h,v 1.19 2003/03/01 17:44:57 pfachini Exp $
 // $Log: StLaserEventMaker.h,v $
-// Revision 1.21  2003/07/09 21:49:51  pfachini
-// The minimum number of valid tracks (minValidTracks) for a good drift velocity
-// calculation is 500 if both east and west lasers are up and 250 if one of them
-// is down. If one of the lasers is down, the drift velocity for east and west will
-// be the same.
-//
-// Revision 1.20  2003/07/08 14:54:10  pfachini
-// *** empty log message ***
-//
 // Revision 1.19  2003/03/01 17:44:57  pfachini
 // Changing the value of minValidTracks from 20 to 500.
 //
@@ -158,10 +149,6 @@ public:
   double fzlAverageEastLow();
   double fzlAverageWestHigh();
   double fzlAverageWestLow();
-  double fzlIntegralEastHigh();
-  double fzlIntegralEastLow();
-  double fzlIntegralWestHigh();
-  double fzlIntegralWestLow();
   double driftVelocityReco;
   double clock;
   double clockNominal;
@@ -169,7 +156,7 @@ public:
   double velocityWest;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.21 2003/07/09 21:49:51 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.19 2003/03/01 17:44:57 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.84 2003/07/08 18:27:09 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.83 2003/05/06 20:38:03 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -221,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.84 2003/07/08 18:27:09 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.83 2003/05/06 20:38:03 posk Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -1338,8 +1338,7 @@ Bool_t StFlowMaker::FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent) {
   for (Int_t nt=0; nt < pPicoEvent->GetNtrack(); nt++) {
     StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
       ->UncheckedAt(nt);
-    if (pPicoTrack &&  (pPicoTrack->Dca())!=(pPicoTrack->DcaGlobal())
-	&& StFlowCutTrack::CheckTrack(pPicoTrack)) {
+    if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
       // Instantiate new StFlowTrack
       StFlowTrack* pFlowTrack = new StFlowTrack;
       if (!pFlowTrack) return kFALSE;
@@ -1403,7 +1402,7 @@ Bool_t StFlowMaker::FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent) {
 Bool_t StFlowMaker::FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent) {
   // Make StFlowEvent from StFlowPicoEvent
   
-  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion6DST()" << endm;
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion5DST()" << endm;
 
   pFlowEvent->SetFirstLastPoints();  
   pFlowEvent->SetEventID(pPicoEvent->EventID());
@@ -1435,8 +1434,7 @@ Bool_t StFlowMaker::FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent) {
   for (Int_t nt=0; nt < pPicoEvent->GetNtrack(); nt++) {
     StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
       ->UncheckedAt(nt);
-    if (pPicoTrack &&  (pPicoTrack->Dca())!=(pPicoTrack->DcaGlobal())
-	&& StFlowCutTrack::CheckTrack(pPicoTrack)) {
+    if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
       // Instantiate new StFlowTrack
       StFlowTrack* pFlowTrack = new StFlowTrack;
       if (!pFlowTrack) return kFALSE;
@@ -1895,9 +1893,6 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
-// Revision 1.84  2003/07/08 18:27:09  posk
-// Skips pico tracks with dca = dcaGlobal.
-//
 // Revision 1.83  2003/05/06 20:38:03  posk
 // Removed all but last two versions of pico file read.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.cxx,v 1.10 2003/07/07 21:58:20 posk Exp $
+// $Id: StFlowScalarProdMaker.cxx,v 1.9 2003/02/24 19:35:27 posk Exp $
 //
 // Authors: Method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -133,7 +133,7 @@ Int_t StFlowScalarProdMaker::Init() {
         histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax, nPtBinsPart, 
 		 Flow::ptMin, ptMaxPart, -10000., 10000., "");
       histFull[k].histFullHar[j].mHist_vObs2D->SetXTitle((char*)xLabel.Data());
-      histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV/c)");
+      histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV)");
       delete histTitle;
 
       // Flow observed profiles
@@ -154,7 +154,7 @@ Int_t StFlowScalarProdMaker::Init() {
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsPt = new TProfile(histTitle->Data(),
         histTitle->Data(), nPtBinsPart, Flow::ptMin, ptMaxPart, -10000., 10000., "");
-      histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV/c)");
+      histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV)");
       histFull[k].histFullHar[j].mHist_vObsPt->SetYTitle("v (%)");
       delete histTitle;
 
@@ -162,7 +162,7 @@ Int_t StFlowScalarProdMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowScalarProd", 2);
-  gMessMgr->Info("##### FlowScalarProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.10 2003/07/07 21:58:20 posk Exp $");
+  gMessMgr->Info("##### FlowScalarProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.9 2003/02/24 19:35:27 posk Exp $");
 
   return StMaker::Init();
 }
@@ -316,7 +316,7 @@ Int_t StFlowScalarProdMaker::Finish() {
 	histFull[k].histFullHar[j].mHist_vObs2D->ProjectionXY(histTitle->Data());
       histFull[k].histFullHar[j].mHist_v2D->SetTitle(histTitle->Data());
       histFull[k].histFullHar[j].mHist_v2D->SetXTitle((char*)xLabel.Data());
-      histFull[k].histFullHar[j].mHist_v2D->SetYTitle("Pt (GeV/c)");
+      histFull[k].histFullHar[j].mHist_v2D->SetYTitle("Pt (GeV)");
       histFull[k].histFullHar[j].mHist_v2D->SetZTitle("v (%)");
       delete histTitle;
       AddHist(histFull[k].histFullHar[j].mHist_v2D);
@@ -341,7 +341,7 @@ Int_t StFlowScalarProdMaker::Finish() {
       histFull[k].histFullHar[j].mHist_vPt = 
 	histFull[k].histFullHar[j].mHist_vObsPt->ProjectionX(histTitle->Data());
       histFull[k].histFullHar[j].mHist_vPt->SetTitle(histTitle->Data());
-      histFull[k].histFullHar[j].mHist_vPt->SetXTitle("Pt (GeV/c)");
+      histFull[k].histFullHar[j].mHist_vPt->SetXTitle("Pt (GeV)");
       histFull[k].histFullHar[j].mHist_vPt->SetYTitle("v (%)");
       delete histTitle;
       AddHist(histFull[k].histFullHar[j].mHist_vPt);
@@ -408,9 +408,6 @@ void StFlowScalarProdMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.cxx,v $
-// Revision 1.10  2003/07/07 21:58:20  posk
-// Made units of momentum GeV/c instead of GeV.
-//
 // Revision 1.9  2003/02/24 19:35:27  posk
 // Corrected mistake in the error of the resolution.
 // This only affected doubly integrated v values.
