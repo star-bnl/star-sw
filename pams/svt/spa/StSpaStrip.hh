@@ -1,6 +1,6 @@
 #ifndef STSPASTRIP_HH
 #define STSPASTRIP_HH
-# include <stdiostream.h>
+# include <iostream.h>
 # include <stdlib.h>
 # include <math.h>
 
