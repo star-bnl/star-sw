@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.cc,v 1.7 2000/11/27 17:33:51 ullrich Exp $
+ * $Id: StThreeVectorD.cc,v 1.8 2001/04/09 21:19:33 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.cc,v $
+ * Revision 1.8  2001/04/09 21:19:33  perev
+ * Streamer for ROOT3
+ *
  * Revision 1.7  2000/11/27 17:33:51  ullrich
  * Enclosed streamer in macro __ROOT__.
  *
@@ -122,24 +125,9 @@ void StThreeVectorD::Streamer(TBuffer &R__b)
 {
 //	Stream an object of class StThreeVectorD.
    int offset = 0;
-   if (R__b.IsReading() && R__b.GetVersion() == 2) {//Special case
-      offset = R__b.Length();
-      int buffset;
-      R__b >> buffset;
-      R__b.SetBufferOffset(buffset - 1 + 4);
-      Version_t R__v = R__b.ReadVersion();
-      assert(R__v==1);
-      R__b.SetBufferOffset(R__b.Length()+10);
-      R__b >> mX1;
-      R__b >> mX2;
-      R__b >> mX3;
-      R__b.SetBufferOffset(offset+4);
-      return;
-   }
 
    if (R__b.IsReading()) {
       Version_t R__v = R__b.ReadVersion(); 
-      if (R__v == 1) R__b.SetBufferOffset(R__b.Length()+10); //skip TObject
       R__b >> mX1;
       R__b >> mX2;
       R__b >> mX3;
