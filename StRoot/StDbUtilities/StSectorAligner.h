@@ -8,13 +8,14 @@
 #define StSectorAligner_HH
 
 #include "TObject.h"
+#include "StTpcDb/StTpcDb.h"
 
 class StThreeVectorF;
 class StTpcDb;
 
 class StSectorAligner {
  public: 
-  StSectorAligner();
+  StSectorAligner(StTpcDb* dbin);
   virtual ~StSectorAligner();
 
   //------ sets
@@ -36,6 +37,7 @@ class StSectorAligner {
   void      moveHit(const float x[], float xprime[3],int sector, int row);
   
  private:
+  StTpcDb* thedb;
   static const int   lastInnerSectorRow=13; //!
   static const float innerSectorRotatePoint=123; //! cm
   static const float outerSectorRotatePoint=123; //! cm

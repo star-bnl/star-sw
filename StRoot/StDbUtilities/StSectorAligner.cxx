@@ -1,6 +1,5 @@
 #include "StSectorAligner.h"
 #include "StThreeVectorF.hh"
-#include "StTpcDb/StTpcDb.h"
 
 #include <iostream>
 #include <math.h>
@@ -46,12 +45,12 @@ static const float deg_2_rad= 180./M_PI;
 
 //__________ CONSTRUCTORS AND DESTRUCTORS_________
 
-StSectorAligner::StSectorAligner() :
+StSectorAligner::StSectorAligner(StTpcDb* dbin) :
   mTranslateOuterSector(true), mVecHit(0)
 {
   mVecHit = new StThreeVectorF;   assert(mVecHit);
 
-  assert(gStTpcDb);
+  thedb = dbin;
 
 }
 
@@ -89,16 +88,16 @@ StSectorAligner::moveHit(const float x[],float xprime[],int sector, int row)
   // always rotate the hits
   if(row<=lastInnerSectorRow){ //inner
     angle  = 
-      gStTpcDb->SectorPosition(sector)->innerRotation()*deg_2_rad;
+      thedb->SectorPosition(sector)->innerRotation()*deg_2_rad;
     offset = 
-      gStTpcDb->SectorPosition(sector)->innerPositionOffsetX();
+      thedb->SectorPosition(sector)->innerPositionOffsetX();
     rotateHit(angle,sector,innerSectorRotatePoint);
   }
   else{ // outer
     angle  = 
-      gStTpcDb->SectorPosition(sector)->outerRotation()*deg_2_rad;
+      thedb->SectorPosition(sector)->outerRotation()*deg_2_rad;
     offset = 
-      gStTpcDb->SectorPosition(sector)->outerPositionOffsetX();
+      thedb->SectorPosition(sector)->outerPositionOffsetX();
     rotateHit(angle,sector,outerSectorRotatePoint);
   }
   
