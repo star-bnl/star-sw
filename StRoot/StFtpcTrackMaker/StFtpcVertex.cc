@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.2 2000/05/15 14:28:15 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.3 2000/06/13 14:35:00 oldi Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.3  2000/06/13 14:35:00  oldi
+// Changed cout to gMessMgr->Message().
+//
 // Revision 1.2  2000/05/15 14:28:15  oldi
 // problem of preVertex solved: if no main vertex is found (z = NaN) StFtpcTrackMaker stops with kStWarn,
 // refitting procedure completed and included in StFtpcTrackMaker (commented),
@@ -11,7 +14,7 @@
 //
 
 //----------Author:        Holm G. H&uuml;ummler, Markus D. Oldenburg
-//----------Last Modified: 08.05.2000
+//----------Last Modified: 09.06.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcVertex.hh"
@@ -19,6 +22,8 @@
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "tables/St_g2t_vertex_Table.h"
+
+#include "StMessMgr.h"
 
 ////////////////////////////////////////////////////////////////////////////
 //                                                                        //
@@ -147,27 +152,24 @@ StFtpcVertex::StFtpcVertex(St_DataSet *const geant)
 {
   // Obsolete constructor taking vertex from geant.
 
-  cout <<"Using primary vertex coordinates ";
-
   if (geant) {
     St_DataSetIter geantI(geant);
     St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) geantI.Find("g2t_vertex");
     
     if (g2t_vertex) {
       g2t_vertex_st   *vertex = g2t_vertex->GetTable();
-      cout << vertex->ge_x[0]<< endl;
       SetX((Double_t) vertex->ge_x[0]);
       SetY((Double_t) vertex->ge_x[1]);
       SetZ((Double_t) vertex->ge_x[2]);
-      cout<<"(Geant): ";
+      gMessMgr->Message("Using primary vertex coordinates (Geant): ", "I", "OST");
     }
     
     else {
-      cout<<"(Default): ";
-      Double_t dummy=0.0;
+      Double_t dummy = 0.0;
       SetX(dummy);
       SetY(dummy);
       SetZ(dummy);
+      gMessMgr->Message("Using primary vertex coordinates (Default): ", "I", "OST");
     }
   }
 }
