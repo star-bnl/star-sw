@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   18/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHits3DPoints.cxx,v 1.1 1999/05/19 22:46:38 fine Exp $
+// $Id: StHits3DPoints.cxx,v 1.2 1999/05/22 18:59:32 fine Exp $
 // $Log: StHits3DPoints.cxx,v $
-// Revision 1.1  1999/05/19 22:46:38  fine
-// New class to 3D drawing operation for StHit commections have been introduced
+// Revision 1.2  1999/05/22 18:59:32  fine
+// New class to draw StHelix3D and StTrack has been introduced
+//
+// Revision 1.2  1999/05/22 18:59:32  fine
+// New class to draw StHelix3D and StTrack has been introduced
 //
 // Revision 1.1  1999/05/19 22:46:38  fine
 //  New class to 3D drawing operation for StHit commections have been introduced
@@ -10,8 +13,6 @@
 
 #include "StHits3DPoints.h"
 #include "StArray.h"
-
-StHits3DPoints hh;
 #include "StHit.h"
 #include "StThreeVectorF.hh"
 #include <TMath.h>
