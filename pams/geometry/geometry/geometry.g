@@ -14,10 +14,10 @@
               zcal,mfld,mwc,pse,tof,t25,t1,four,ems,alpipe,
               on/.true./,off/.false./
    real       Par(1000),field,dcay(5),shift(2)
-   Integer    LENOCC,LL,IDEB,Nsi,i,j,l,nmod(2)
+   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),Nleft,Mleft
    character  Commands*4000
 * - - - - - - - - - - - - - - - - -
-+CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE.
++CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
 *  temporarely until GCTLIT is not part of GCTMED:
    Integer        Thrind   ,Jmin,ItCkov,ImCkov,NpCkov
    common/GCTLIT/ Thrind(4),Jmin,ItCkov,ImCkov,NpCkov
@@ -30,7 +30,8 @@ replace[;ON#{#;] with [
 *
    call ASLGETBA ('GEOM','DETP',1000,LL,Par)
    If (JVOLUM>0) call AGDROP ('*')
-   IDEB = IDEBUG
+   IPRIN    = IDEBUG
+   NtrSubEv = 1000     " automatic !"
 *
 * -------------------- set GSTAR absolute default ------------------------
 * Set only flags for the main configuration (everthing on, except for tof),
@@ -59,7 +60,6 @@ If LL>1
   {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,ILOSS,IDRAY,IMULS} = 1;
   {IRAYL,ISTRA} = 0;
   TOFMAX        = 1.e-4 
-  NtrSubEv      = 1000
 *
   for(j=1;j>0;) { j=0;
   on HELP       { you may select the following keywords: ;
@@ -92,7 +92,7 @@ If LL>1
                   {IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY}=0; Iloss=2}
   on TPC_ONLY   { Minimal geometry - only TPC;
                      {pipe,svtt,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal}=off; }
-  on FIELD_ONLY { No geometry - only magnetic field;           NtrSubEv=0;
+  on FIELD_ONLY { No geometry - only magnetic field;              NtrSubEv=0;
       {cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,rich,upst,zcal}=off; }
   on FIELD_OFF  { no magnetic field;                field=0;                  }
   on FIELD_ON   { Standard (5 KGs) field on;        field=5;                  }
@@ -110,7 +110,7 @@ If LL>1
 * sanity check - if something left in commands (unknown keyword), we stop!
   l=LENOCC(commands); if l>0
   {  print *,' Unknown command left => ', commands(1:l), ' <= ',l
-     if (Ideb<3) stop 'You better stop here to avoid problems'     
+     if (IPRIN==0) stop 'You better stop here to avoid problems'     
   }
 }
 * -------------------- setup selected configuration ------------------------
@@ -175,9 +175,17 @@ If LL>1
    { Call ggclos
      If IDEBUG>0 { CALL ICLRWK(0,1); Call GDRAWC('CAVE',1,.2,10.,10.,.03,.03)}
    }
-   IDEBUG = IDEB
-   ITEST  = min(IDEB,1)
+   IDEBUG = IPRIN
+   ITEST  = min(IPRIN,1)
    call agphysi
+*                      automatic subevent size selection
+   If NtrSubev > 0
+   { Call MZNEED(IXDIV,1000,'G')
+     NLEFT    = max(10,IQUEST(11)/1200)
+     MLEFT    = 10**Int(Alog10(Float(Nleft))-1)
+     NtrSubEv = MLEFT*(NLEFT/MLEFT)
+     Prin1 NtrSubEv; (' Ntrack per subevent = ',i6)
+   } 
 *
    end
 
