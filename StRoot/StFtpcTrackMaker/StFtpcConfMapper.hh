@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.hh,v 1.9 2001/07/12 08:29:09 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.10 2001/11/21 12:31:15 jcs Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.10  2001/11/21 12:31:15  jcs
+// adjust mEtaMax for extended drift maps
+//
 // Revision 1.9  2001/07/12 08:29:09  oldi
 // New constructor introduced to be able to use only cluster which were
 // found to be good in a previous run.
@@ -325,7 +328,7 @@ inline void StFtpcConfMapper::CalcEtaMinMax()
   // event. To be save, 0.01 is substracted/added.
   
   mEtaMin = -TMath::Log(TMath::Tan( TMath::ASin(30./ (162.75 - TMath::Abs(mVertex->GetZ()) ) ) /2.) ) - 0.01;
-  mEtaMax = -TMath::Log(TMath::Tan( TMath::ASin( 8./ (256.45 + TMath::Abs(mVertex->GetZ()) ) ) /2.) ) + 0.01;
+  mEtaMax = -TMath::Log(TMath::Tan( TMath::ASin( 5./ (256.45 + TMath::Abs(mVertex->GetZ()) ) ) /2.) ) + 0.01;
 
   return;
 }
