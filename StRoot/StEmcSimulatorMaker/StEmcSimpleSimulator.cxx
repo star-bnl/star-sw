@@ -105,7 +105,7 @@ void StEmcSimpleSimulator::init()
 void StEmcSimpleSimulator::setParameters(const Float_t calibCoeff, const UInt_t type, const Float_t pedMean, const Float_t pedRMS)
 {
   if(calibCoeff <= 1.e-10) {
-    printf("StEmcSimpleSimulator::setParameters -> det %i calibCoef %f \n", mDetector, calibCoeff);
+    if(mPrint) printf("StEmcSimpleSimulator::setParameters -> det %i calibCoef %f \n", mDetector, calibCoeff);
     mKeySet    = -1;    // bad case 
     return;
   }
@@ -265,8 +265,11 @@ Double_t StEmcSimpleSimulator::getSinTheta(Double_t eta)
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcSimpleSimulator.cxx,v 1.7 2003/01/23 03:09:02 jeromel Exp $
+//  $Id: StEmcSimpleSimulator.cxx,v 1.8 2003/09/23 15:19:48 suaide Exp $
 //  $Log: StEmcSimpleSimulator.cxx,v $
+//  Revision 1.8  2003/09/23 15:19:48  suaide
+//  fixed bugs and modifications for embedding
+//
 //  Revision 1.7  2003/01/23 03:09:02  jeromel
 //  Include modif
 //

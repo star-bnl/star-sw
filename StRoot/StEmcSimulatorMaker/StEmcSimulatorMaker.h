@@ -21,6 +21,8 @@ class StMcEmcHitCollection;
 class StEmcCollection;
 class StEmcVirtualSimulator;
 class St_db_Maker;
+class St_controlEmcSimulatorMaker; 
+class St_controlEmcPmtSimulator; 
 
 class StEmcSimulatorMaker : public StMaker {
 private:
@@ -34,6 +36,7 @@ private:
   StEmcGeom *mGeom[MAXDET]; //! Geometry 
   
   Bool_t  mCompare;
+  Bool_t  mPrint;
   TCanvas *mC1;             //!
 
 protected:
@@ -83,6 +86,8 @@ public:
   StEmcCollection*      getEmcCollection() {return  mEmcCollection;}
   void                  clearStEventStaf() {mEmcCollection = 0;}
   void                  Browse(TBrowser* b); // StEvent staf will be visible in browser
+            St_controlEmcSimulatorMaker *getControlSimulator(); 
+            St_controlEmcPmtSimulator   *getControlPmtSimulator(); 
 
   void   pictureAllDetectors(Int_t print=0);                          // *MENU* 
   void   pictureForDetector(Int_t det, Int_t logy=1, Int_t print=0);  // *MENU* 
@@ -96,9 +101,10 @@ public:
 
   void   printmBEMC();
   void   setBEMC(UInt_t  key){mBEMC = key; if (Debug()) printmBEMC();}
+  void   setPrint(Bool_t a) {mPrint = a;}
   void   setHistControl(UInt_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.10 2003/09/10 19:47:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.11 2003/09/23 15:19:55 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcSimulatorMaker,0)  // Simulation maker for BEMC and EEMC
 };
@@ -106,8 +112,11 @@ public:
 #endif
 //////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEmcSimulatorMaker.h,v 1.10 2003/09/10 19:47:12 perev Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.11 2003/09/23 15:19:55 suaide Exp $
 // $Log: StEmcSimulatorMaker.h,v $
+// Revision 1.11  2003/09/23 15:19:55  suaide
+// fixed bugs and modifications for embedding
+//
 // Revision 1.10  2003/09/10 19:47:12  perev
 // ansi corrs
 //
