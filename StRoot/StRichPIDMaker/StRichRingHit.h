@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRichRingHit.h,v 2.1 2000/09/29 01:35:37 horsley Exp $
+ * $Id: StRichRingHit.h,v 2.2 2000/10/19 01:13:23 horsley Exp $
  *
  * Description:
  *   
@@ -15,18 +15,19 @@
 class StRichRingHit {
 
 public:
-  StRichRingHit(StRichHit* , double,double,double,double);  
+  StRichRingHit(StRichHit* , double,double,double,double,double);  
   ~StRichRingHit();
   
   StRichHit* getHit();
   double getAngle();
   double getDist();
+  double getNSigma();
   double getMeanPathInRadiator();
   double getMeanPathInQuartz();
 
 private:
   StRichHit* mHit;
-  double mAngle,mDist;
+  double mAngle,mDist,mNSigma;
   double mPathInRadiator,mPathInQuartz;
 };
 

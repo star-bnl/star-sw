@@ -1,12 +1,18 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.3 2000/10/03 19:26:01 horsley Exp $
+ * $Id: StRichTrack.cxx,v 2.4 2000/10/19 01:13:23 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
- *  Revision 2.3  2000/10/03 19:26:01  horsley
- *  fixed error in StRichTrack correct member function, now returns bool.
+ *  Revision 2.4  2000/10/19 01:13:23  horsley
+ *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
+ *  added normal distance sigma cut on hits, quartz and radiator pathlengths
+ *  for individual photons, modified minimization routine to correct boundary
+ *  problems
+ *
+ *  Revision 2.10  2000/11/28 19:18:54  lasiuk
+ *  Include protection/error warning if no MIP
  *
  *  Revision 2.9  2000/11/25 12:27:42  lasiuk
  *  implement algorithm for finding MIP
@@ -415,19 +421,20 @@ StRichTrack::getRingHits( StParticleDefinition* part) {
   for (size_t l=0;l<mProtonList.size();l++) {
     delete mProtonList[l];
     mProtonList[l] = 0;
-void  StRichTrack::addHit(StRichHit* hit, double dist, double angle, double radPath, 
+  }
+  mProtonList.clear();
   mProtonList.resize(0); 
     for (size_t l=0;l<mPionList.size();l++) {
 	delete mPionList[l];
-    mPionList.push_back(new StRichRingHit(hit,angle,dist,radPath,quaPath)); 
+	mPionList[l] = 0;
     }
     mPionList.clear();
     mPionList.resize(0);
-    mKaonList.push_back(new StRichRingHit(hit,angle,dist,radPath,quaPath)); 
+  
     for (size_t l=0;l<mKaonList.size();l++) {
 	delete mKaonList[l];
 	mKaonList[l] =0;
-    mProtonList.push_back(new StRichRingHit(hit,angle,dist,radPath,quaPath));  
+    }
     mKaonList.clear();
     mKaonList.resize(0);
   
