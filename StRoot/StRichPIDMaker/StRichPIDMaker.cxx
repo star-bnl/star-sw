@@ -1,15 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.16 2000/11/21 19:49:13 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.17 2000/11/22 16:58:05 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.16  2000/11/21 19:49:13  lasiuk
- * fill the photon d in the StRichPid
- * remove parameterized dip angle dependence
- * of the mean/sigma d.  Setting of hitflags
- * in fillPidTraits
+ * Revision 2.17  2000/11/22 16:58:05  lasiuk
+ * Uniform setting of flags in two places
+ * remove dependence of dip angle on mean and sigma
  *
  * Revision 2.22  2000/11/28 19:21:01  lasiuk
  * correct memory leak in writing to StEvent
@@ -205,7 +203,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.16 2000/11/21 19:49:13 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.17 2000/11/22 16:58:05 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -1310,8 +1308,8 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	
 	// constant area
 	//
-	    if( fabs(sigma)<1 ) (*hitIter)->setBit(e1SigmaPi);
-	    if( fabs(sigma)<2 ) {pi2++;(*hitIter)->setBit(e2SigmaPi);}
+	    pi++;
+	meanOfD  = 0.70;
 // 	    if( (*hitIter)->isSet(eAssignedToRingPi) )
 // 		(*hitIter)->setBit(eMultiplyAssignedToRing);
 
@@ -1323,13 +1321,13 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 		(*hitIter)->setBit(eInAreaPi);
 		
 		}
-	    if( (*hitIter)->isSet(eAssignedToRingK) )
-		(*hitIter)->setBit(eMultiplyAssignedToRing);
+		else {
+		    (*hitIter)->setBit(eInAreaPi);
 		addHit((*hitIter),normalizedD,sigma,meanAngle,radPath,quartzPath,particle);
 	    }
 	    
-	    if( fabs(sigma)<1 ) (*hitIter)->setBit(e1SigmaK);
-	    if( fabs(sigma)<2 ) {ka2++;(*hitIter)->setBit(e2SigmaK);}
+	    ringCalculator->
+	    ka++;
 // 	    if( (*hitIter)->isSet(eAssignedToRingK) )
 // 		(*hitIter)->setBit(eMultiplyAssignedToRing);
 
@@ -1341,13 +1339,13 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 		(*hitIter)->setBit(eInAreaK);
 	    
 		}
-	    if( (*hitIter)->isSet(eAssignedToRingp) )
-		(*hitIter)->setBit(eMultiplyAssignedToRing);
+		else {
+		    (*hitIter)->setBit(eInAreaK);
 		addHit((*hitIter),normalizedD,sigma,meanAngle,radPath,quartzPath,particle);
 	    }
 	
-	    if( fabs(sigma)<1 ) (*hitIter)->setBit(e1Sigmap);
-	    if( fabs(sigma)<2 ) (*hitIter)->setBit(e2Sigmap);
+	double sigma = (normalizedD - meanOfD)/sigmaOfD;
+	    pr++;
 // 	    if( (*hitIter)->isSet(eAssignedToRingp) )
 // 		(*hitIter)->setBit(eMultiplyAssignedToRing);
 	//
@@ -1743,6 +1741,9 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
 	pid->setTotalAzimuth(ringCalc->getTotalConstantAngle());
 
 	//
+	// set the constant area on the active portion of pad plane
+	// takes into account the edge and gap
+	pid->setTruncatedArea(ringCalc->getTotalConstantAreaOnActivePadPlane());
 	pid->setTruncatedAzimuth(ringCalc->getTotalConstantAngleOnActivePadPlane());	
 	    pid->addNormalizedD(normalizedD);
 	//
@@ -1890,24 +1891,24 @@ void StRichPIDMaker::drawPadPlane(StEvent* rEvent, bool kCreatePsFile) {
 
 void StRichPIDMaker::printCutParameters(ostream& os) const
 {
-    os << "<d>  "     << "\t" << "sigma_d"    << endl;
-    os << "Negatives" << endl;
-    os << meanD[0][0] << "\t" << sigmaD[0][0] << endl;
-    os << meanD[1][0] << "\t" << sigmaD[1][0] << endl;
-    os << meanD[2][0] << "\t" << sigmaD[2][0] << endl;
-    os << meanD[3][0] << "\t" << sigmaD[3][0] << endl;
-    os << meanD[4][0] << "\t" << sigmaD[4][0] << endl;
-    os << meanD[5][0] << "\t" << sigmaD[5][0] << endl;
-
-    os << "Positives" << endl;
-    os << meanD[0][1] << "\t" << sigmaD[0][1] << endl;
-    os << meanD[1][1] << "\t" << sigmaD[1][1] << endl;
-    os << meanD[2][1] << "\t" << sigmaD[2][1] << endl;
-    os << meanD[3][1] << "\t" << sigmaD[3][1] << endl;
-    os << meanD[4][1] << "\t" << sigmaD[4][1] << endl;
-    os << meanD[5][1] << "\t" << sigmaD[5][1] << endl;
+    os << "==============================================" << endl;
+    os << "StRichPIDMaker::printCutParameters()" << endl;
     os << "----------------------------------------------" << endl;
-    os << "----------------------------------------------\n" << endl;
+    os << "Event Level:" << endl;
+    os << "\tVertexWindow =  " << (mVertexWindow/centimeter)  << " cm"    << endl;
+    os << "Hit Level:" << endl;
+    os << "\tAdcCut =        " << (mAdcCut)                               << endl; 
+    os << "Track Level:" << endl;
+    os << "\tPtCut =         " << (mPtCut/GeV)                << " GeV/c" << endl;
+    os << "\tEtaCut =        " << mEtaCut                                 << endl;
+    os << "\tLastHitCut =    " << (mLastHitCut/centimeter)    << " cm"    << endl;
+    os << "\tDcaCut =        " << (mDcaCut/centimeter)        << " cm"    << endl;
+    os << "\tFitPointsCut =  " << mFitPointsCut                           << endl;
+    os << "\tPathCut =       " << (mPathCut/centimeter)       << " cm"    << endl;
+    os << "\tPadPlaneCut =   " << (mPadPlaneCut/centimeter)   << " cm"    << endl;
+    os << "\tRadiatorCut =   " << (mRadiatorCut/centimeter)   << " cm"    << endl;
+    os << "\tThreshMom =     " << (mThresholdMomentum/GeV)    << " GeV/c" << endl;
+    os << "----------------------------------------------" << endl;
     os << "++++++++++++++++++++++++++++++++++++++++++++++" << endl;
     os << "Convergence Precision:" << endl;
     os << "\tPrecision =     " << (mPrecision/micrometer)     << " um"    << endl;
