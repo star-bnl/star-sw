@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.25 2003/10/08 15:42:15 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.26 2003/10/09 19:22:34 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.26  2003/10/09 19:22:34  suaide
+// small change in StEvent filling
+//
 // Revision 1.25  2003/10/08 15:42:15  suaide
 // Changes to allow for clustering using hits with calibrationType<128
 //
@@ -334,7 +337,11 @@ Int_t StPreEclMaker::Make()
         fillStEvent(i,cc);
       }      
       if(Debug()<2) delete cc;
-    } else if(mPrint) cout<<" ..  NO !!! \n";
+    } else 
+    {
+      fillStEvent(i,NULL);
+      if(mPrint) cout<<" ..  NO !!! \n";
+    }
   }
   
   //AddData(new St_ObjectSet("PreEclEmcCollection",ecmpreecl));  // comments 14-oct-2001
@@ -418,12 +425,16 @@ void StPreEclMaker::MakeHistograms(Int_t idet,StEmcPreClusterCollection* cluster
 Int_t StPreEclMaker::fillStEvent(Int_t idet,StEmcPreClusterCollection* cluster)
 {
        
+    if(mPrint) cout <<"Filling StEvent clusters for detector "<<idet<<endl;
+    StDetectorId id = static_cast<StDetectorId>(idet+kBarrelEmcTowerId); 
+    StEmcDetector* detector = ecmpreecl->detector(id);
+    if(!detector) 
+    {
+      if(mPrint) cout <<"No StEmcDetector for detector "<<idet<<endl;
+      return kStWarn;           
+    }
     if(cluster)
     {
-      if(mPrint) cout <<"Filling StEvent clusters for detector "<<idet<<endl;
-      StDetectorId id = static_cast<StDetectorId>(idet+kBarrelEmcTowerId); 
-      StEmcDetector* detector = ecmpreecl->detector(id);           
-
       Int_t n = cluster->Nclusters();
       if(n>0)
       {
@@ -463,8 +474,10 @@ Int_t StPreEclMaker::fillStEvent(Int_t idet,StEmcPreClusterCollection* cluster)
           
           cluscoll->addCluster(clus);
         } 
-      } 
+      } else  detector->setCluster(NULL);
     } 
+    else detector->setCluster(NULL);
+     
   return kStOK;
 }                                                                               
 
@@ -512,7 +525,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.25 2003/10/08 15:42:15 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.26 2003/10/09 19:22:34 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
