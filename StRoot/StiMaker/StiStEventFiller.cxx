@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.10 2003/03/13 21:20:10 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.11 2003/03/14 19:02:55 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.11  2003/03/14 19:02:55  pruneau
+ * various updates - DCA is a bitch
+ *
  * Revision 2.10  2003/03/13 21:20:10  pruneau
  * bug fix in filler fixed.
  *
@@ -200,7 +203,7 @@ StiStEventFiller::~StiStEventFiller()
   delete helix;
 }
 
-//Helper functor, gotta live some place else, just a temp. test of StiTrack::stHits() method
+//Helper functor, gotta live some place else, just a temp. test of StiKalmanTrack::stHits() method
 struct StreamStHit
 {
   void operator()(const StHit* h) 
@@ -226,7 +229,7 @@ struct StreamStHit
   Algorithm:
   Loop over all tracks in the StiTrackContainer, doing for each track:
   - Create a new global track and associated information (see below)
-    and set its data members according to the StiTrack,
+    and set its data members according to the StiKalmanTrack,
     can be done in a StGlobalTrack constructor
   - Hang the new track to the StTrackNode container in StEvent, this creates a new entry
     in the container, the global track is now owned by it.
@@ -295,7 +298,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
       fillDetectorInfo(detInfo,kTrack);
       // track node where the new StTrack will reside
       StTrackNode* trackNode = new StTrackNode;
-      // actual filling of StTrack from StiTrack
+      // actual filling of StTrack from StiKalmanTrack
       StGlobalTrack* gTrack = new StGlobalTrack;
       try 
 	{
@@ -341,7 +344,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
   if (!mTrkNodeMap.size()) 
     {
       cout <<"StiStEventFiller::fillEventPrimaries(). ERROR:\t"
-	   << "Mapping between the StTrackNodes and the StiTracks is empty.  Exit." << endl;
+	   << "Mapping between the StTrackNodes and the StiKalmanTracks is empty.  Exit." << endl;
       return 0;
     }
   if (e==0 || t==0) 
@@ -374,60 +377,55 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
       map<StiKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
       if (itKtrack == mTrkNodeMap.end()) 
 	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- itKtrack == mTrkNodeMap.end()");
-      //	{ 
-      //  if (++skippedCount<5)
-      //    cout << "skipping track which was not entered in an StTrackNode" << endl;
-      //  continue;
-      //}
-    StTrackNode* currentTrackNode = (*itKtrack).second;
-    //double globalDca = currentTrackNode->track(global)->impactParameter();
-    if (kTrack->isPrimary())
-      {
-	if (currentTrackNode->entries()>10)
-	  throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries()>10");
-	if (currentTrackNode->entries(global)<1) 
-	  throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries(global)<1");
-	// detector info
-	StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
-	fillDetectorInfo(detInfo,kTrack);
-	StPrimaryTrack* pTrack = new StPrimaryTrack;
-	try
-	  {
-	    fillTrackCount++;
-	    fillTrack(pTrack,kTrack);
-	    // set up relationships between objects
-	    detInfoVec.push_back(detInfo);
-	    pTrack->setDetectorInfo(detInfo);
-	    currentTrackNode->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
-	    vertex->addDaughter(pTrack);
-	    StuFixTopoMap(pTrack);
-	  }
-	catch (runtime_error & rte )
-	  {
-	    cout << "StiStEventFiller::fillEventPrimaries() - runtime exception, filling track: "
-		 << rte.what() << endl;
-	    delete detInfo;
-	    delete pTrack;
-	  }
-	catch (...)
-	  {
-	    cout << "StiStEventFiller::fillEventPrimaries() - Unknown exception, filling track."<<endl;
-	    delete detInfo;
-	    delete pTrack;
-	  }
-      }//end if primary
+      StTrackNode* currentTrackNode = (*itKtrack).second;
+      //double globalDca = currentTrackNode->track(global)->impactParameter();
+      if (kTrack->isPrimary())
+	{
+	  if (currentTrackNode->entries()>10)
+	    throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries()>10");
+	  if (currentTrackNode->entries(global)<1) 
+	    throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries(global)<1");
+	  // detector info
+	  StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
+	  fillDetectorInfo(detInfo,kTrack);
+	  StPrimaryTrack* pTrack = new StPrimaryTrack;
+	  try
+	    {
+	      fillTrackCount++;
+	      fillTrack(pTrack,kTrack);
+	      // set up relationships between objects
+	      detInfoVec.push_back(detInfo);
+	      pTrack->setDetectorInfo(detInfo);
+	      currentTrackNode->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
+	      vertex->addDaughter(pTrack);
+	      StuFixTopoMap(pTrack);
+	    }
+	  catch (runtime_error & rte )
+	    {
+	      cout << "StiStEventFiller::fillEventPrimaries() - runtime exception, filling track: "
+		   << rte.what() << endl;
+	      delete detInfo;
+	      delete pTrack;
+	    }
+	  catch (...)
+	    {
+	      cout << "StiStEventFiller::fillEventPrimaries() - Unknown exception, filling track."<<endl;
+	      delete detInfo;
+	      delete pTrack;
+	    }
+	}//end if primary
     } // kalman track loop
-  if (skippedCount>0) cout << "StiStEventFiller::fillEventPrimaries() -I- A total of "<<skippedCount<<" StiTracks were skipped"<<endl;
+  if (skippedCount>0) cout << "StiStEventFiller::fillEventPrimaries() -I- A total of "<<skippedCount<<" StiKalmanTracks were skipped"<<endl;
   mTrkNodeMap.clear();  // need to reset for the next event
   //cout <<"StiStEventFiller::fillEventPrimaries() -I- Done"<<endl;
   return mEvent;
 }
 
 /// use the vector of StHits to fill the detector info
-/// change: currently point and fit points are the same for StiTracks,
+/// change: currently point and fit points are the same for StiKalmanTracks,
 /// if this gets modified later in ITTF, this must be changed here
 /// but maybe use track->getPointCount() later?
-void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiTrack* track) 
+void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanTrack* track) 
 {
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Started"<<endl;
   vector<StMeasuredPoint*> hitVec = track->stHits();
@@ -442,21 +440,18 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiTrack* 
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Done"<<endl;
 }
 
-void StiStEventFiller::fillGeometry(StTrack* gTrack, StiTrack* track, bool outer)
+void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool outer)
 {
   //cout << "StiStEventFiller::fillGeometry() -I- Started"<<endl;
   if (!gTrack)
     throw runtime_error("StiStEventFiller::fillGeometry() -F- gTrack==0");
   if (!track) 
     throw runtime_error("StiStEventFiller::fillGeometry() -F- track==0");
-  StiKalmanTrack* kTrack = dynamic_cast<StiKalmanTrack*>(track);
-  if (!kTrack)
-    throw runtime_error("StiStEventFiller::fillGeometry() -F- kTrack==0 cast failed");
   StiKalmanTrackNode* node;
   if (outer)
-    node = kTrack->getOuterMostHitNode();
+    node = track->getOuterMostHitNode();
   else
-    node = kTrack->getInnerMostHitNode();
+    node = track->getInnerMostHitNode();
   StThreeVectorF origin(node->getRefPosition(),node->getY(),node->getZ());
   origin.rotateZ(node->getRefAngle());
   StTrackGeometry* geometry =new StHelixModel(short(node->getCharge()),
@@ -473,7 +468,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiTrack* track, bool outer
   return;
 }
 
-// void StiStEventFiller::fillTopologyMap(StTrack* gTrack, StiTrack* track){
+// void StiStEventFiller::fillTopologyMap(StTrack* gTrack, StiKalmanTrack* track){
 // 	cout << "StiStEventFiller::fillTopologyMap()" << endl;
 //     int map1,map2;
 //     map1 = map2 = 0;
@@ -484,21 +479,16 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiTrack* track, bool outer
 //     return;
 // }
 
-void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiTrack* track){
+void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   // mass
-  double massHyp = track->getMass();  // change: perhaps this mass is not set right?
+  // this makes no sense right now... double massHyp = track->getMass();  // change: perhaps this mass is not set right?
   unsigned short geantIdPidHyp = 9999;
-  if (.13< massHyp<.14) geantIdPidHyp = 9;
+  //if (.13< massHyp<.14) 
+  geantIdPidHyp = 9;
   unsigned short nFitPoints = encodedStEventFitPoints(track);
   // chi square and covariance matrix, plus other stuff from the
   // innermost track node
-  StiKalmanTrack* kTrack = dynamic_cast<StiKalmanTrack*>(track);
-  if (!kTrack) {
-    cout << "StiStEventFiller::fillFitTraits(). ERROR:\t"
-	 << "StiTrack can't be dynamic_cast'd to StiKalmanTrack.  Exit" <<endl;
-    return;	
-  }
-  StiKalmanTrackNode* node = kTrack->getInnerMostHitNode();
+  StiKalmanTrackNode* node = track->getInnerMostHitNode();
   double alpha, xRef, x[5], covM[15], chi2node;
   node->get(alpha,xRef,x,covM,chi2node);
   float chi2[2];
@@ -520,23 +510,22 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiTrack* track){
   return;
 }
 
-void StiStEventFiller::filldEdxInfo(StiDedxCalculator& dEdxCalculator, StTrack* gTrack, StiTrack* track){
+void StiStEventFiller::filldEdxInfo(StiDedxCalculator& dEdxCalculator, StTrack* gTrack, StiKalmanTrack* track){
   double dEdx, errordEdx, nPoints;
   dEdx = errordEdx = nPoints = 9999;
-  StiKalmanTrack* kTrack = dynamic_cast<StiKalmanTrack*>(track);
-  if (kTrack) {
-    dEdxCalculator.getDedx(kTrack, dEdx, errordEdx, nPoints);
+  if (track) {
+    dEdxCalculator.getDedx(track, dEdx, errordEdx, nPoints);
   }
     
   StTrackPidTraits* pidTrait = new StDedxPidTraits(dEdxCalculator.whichDetId(),
 						   static_cast<short>(kTruncatedMeanId),
 						   static_cast<unsigned short>(nPoints),
-						   static_cast<float>(dEdx),
+						   static_cast<float>(1.5*dEdx),
 						   static_cast<float>(errordEdx));
   gTrack->addPidTraits(pidTrait);
   return;
 }
-void StiStEventFiller::fillPidTraits(StTrack* gTrack, StiTrack* track){
+void StiStEventFiller::fillPidTraits(StTrack* gTrack, StiKalmanTrack* track){
 
   // TPC
   filldEdxInfo(dEdxTpcCalculator,gTrack,track);
@@ -557,7 +546,7 @@ void StiStEventFiller::fillPidTraits(StTrack* gTrack, StiTrack* track){
 /// 	x=6 -> SVT+TPC+primary vertex 
 /// 	x=7 -> FTPC only 
 /// 	x=8 -> FTPC+primary 
-void StiStEventFiller::fillTrack(StTrack* gTrack, StiTrack* track)
+void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
 {
   //cout << "StiStEventFiller::fillTrack()" << endl;
   if (gTrack->type()==global) {
@@ -582,21 +571,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiTrack* track)
   gTrack->setEncodedMethod(mStiEncoded);
   double impactParam = impactParameter(track);
 
-  /*
-  StiKalmanTrack * kktrack = static_cast<StiKalmanTrack *>(track);
-  if (kktrack->isPrimary())
-    {
-      double dy,dz,d;
-      StiKalmanTrackNode * node = kktrack->getInnerMostHitNode();
-      cout << " ______________________\n\nvertex:" << *node->getHit()<<endl;
-      dy = node->_p0 - node->getHit()->y();
-      dz = node->_p1 - node->getHit()->z();
-      d = sqrt(dy*dy+dz*dz);
-      //cout << " impact par:"<< impactParam <<" dy:"<<dy<<" dz:"<<dz <<" sqrt(dy^2+dz^2):"<<d<<endl;
-    }
-  */
-
-  gTrack->setImpactParameter(impactParam );//gTrack->setImpactParamter(track->getDca(vertex)); // change: need to calculate impact parameter or use 	gTrack->setLength(track->getTrackLength());
+  gTrack->setImpactParameter(impactParam );
   int maxPoints = track->getMaxPointCount();
   gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(maxPoints));
   fillGeometry(gTrack, track, false); // inner geometry
@@ -606,7 +581,8 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiTrack* track)
   return;
 }
 
-unsigned short StiStEventFiller::encodedStEventFitPoints(StiTrack* track) {
+unsigned short StiStEventFiller::encodedStEventFitPoints(StiKalmanTrack* track) 
+{
   // need to write the fit points in StEvent following the convention
   // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
   //vector<StHit*> hitVec = track->stHits();
@@ -642,23 +618,26 @@ unsigned short StiStEventFiller::encodedStEventFitPoints(StiTrack* track) {
   return (nFitTpc + 1000*nFitSvt + 10000*nFitSsd);
     
 }
-float StiStEventFiller::impactParameter(StiTrack* track) 
+float StiStEventFiller::impactParameter(StiKalmanTrack* track) 
 {
-  if (!mEvent->primaryVertex()) {
-    return DBL_MAX;
-  }
-    
-  // get the innermost hit node
-  StiKalmanTrack* kTrack = static_cast<StiKalmanTrack*>(track);
-  StiKalmanTrackNode*	lastNode = kTrack->getInnerMostHitNode();
-  //cout << " ///////////////////// LAST NODE :" << *lastNode<<endl;
-  StiKalmanTrackNode*	node = static_cast<StiKalmanTrackNode*>(lastNode->getParent());
+  if (!mEvent->primaryVertex()) 
+    {
+      return DBL_MAX;
+    }
+  StiKalmanTrackNode*	lastNode;
+  StiKalmanTrackNode*	node;
+
+  if (track->isPrimary())
+    {
+      lastNode = track->getInnerMostNode();
+      //cout << " ///////////////////// LAST NODE :" << *lastNode<<endl;
+      node = static_cast<StiKalmanTrackNode*>(lastNode->getParent());
+    }
+  else
+    node = track->getInnerMostNode();
   //cout << "  Previous node:"<<*node<<endl;
   //const StThreeVector<double> momentum = node->getGlobalMomentum();
-  //cout << "StiTrack  ------->  px:"<< momentum.x() << " py:"<<  momentum.y() << " pz:"<< momentum.z()<<endl;
-  cout << " MYDCA:"<< kTrack->getDca();
-  //cout << "    PHASE: "<<node->getPhase()<<endl;
-
+  //cout << "StiKalmanTrack  ------->  px:"<< momentum.x() << " py:"<<  momentum.y() << " pz:"<< momentum.z()<<endl;
   StThreeVector<double> origin(node->getRefPosition(), node->getY(),node->getZ());
   origin.rotateZ(node->getRefAngle());
 
@@ -683,8 +662,17 @@ float StiStEventFiller::impactParameter(StiTrack* track)
 
   //cout << "helix " << *helix << endl;
   float dca = static_cast<float>(helix->distance(vxD));
-  cout << "  dcaHelix : " << dca << endl;  
+  //if (track->isPrimary())
+  //  {
+  //    cout << " PRIMARY ---- MYDCA:"<< track->getDca() << " StHelix:"<< dca<<endl;
+  //  }
+  //else
+  //  {
+  //    cout << " GLOBAL  ---- StHelix:"<< dca<<endl;
+  //  }
+
+  //cout << "  dcaHelix : " << dca << endl;  
   //cout << "dcaPhysical : " << static_cast<float>(physical.distance(vxD) ) << endl;  
-  kTrack->setDca(dca);
+  track->setDca(dca);
   return dca;
 }

@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.2 2003/03/13 18:59:45 pruneau Exp $
+ * $Id: StiStEventFiller.h,v 2.3 2003/03/14 19:02:56 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.3  2003/03/14 19:02:56  pruneau
+ * various updates - DCA is a bitch
+ *
  * Revision 2.2  2003/03/13 18:59:45  pruneau
  * various updates
  *
@@ -75,7 +78,7 @@ class StiKalmanTrack;
 class StHelix;
 
 /*! \class StiStEventFiller
-    StiStEventFiller is a utilitity class meant to properly convert StiTrack
+    StiStEventFiller is a utilitity class meant to properly convert StiKalmanTrack
     objects into StTrack (Global/Primary) objects and hang these on the StEvent
     Track-node.
 
@@ -88,15 +91,15 @@ public:
     virtual ~StiStEventFiller();
     StEvent* fillEvent(StEvent*, StiTrackContainer*);
     StEvent* fillEventPrimaries(StEvent*, StiTrackContainer*);
-    void fillDetectorInfo(StTrackDetectorInfo* detInfo, StiTrack* kTrack);
-    void fillGeometry(StTrack* track, StiTrack* kTrack, bool outer);
-    //void fillTopologyMap(StTrack* track, StiTrack* kTrack);
-    void fillFitTraits(StTrack* track, StiTrack* kTrack);
-    void fillPidTraits(StTrack* track, StiTrack* kTrack);
-    void filldEdxInfo(StiDedxCalculator&, StTrack* track, StiTrack* kTrack);
-    void fillTrack(StTrack* track, StiTrack* kTrack);
-    unsigned short encodedStEventFitPoints(StiTrack* kTrack); 
-    float impactParameter(StiTrack* kTrack);
+    void fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanTrack* kTrack);
+    void fillGeometry(StTrack* track, StiKalmanTrack* kTrack, bool outer);
+    //void fillTopologyMap(StTrack* track, StiKalmanTrack* kTrack);
+    void fillFitTraits(StTrack* track, StiKalmanTrack* kTrack);
+    void fillPidTraits(StTrack* track, StiKalmanTrack* kTrack);
+    void filldEdxInfo(StiDedxCalculator&, StTrack* track, StiKalmanTrack* kTrack);
+    void fillTrack(StTrack* track, StiKalmanTrack* kTrack);
+    unsigned short encodedStEventFitPoints(StiKalmanTrack* kTrack); 
+    float impactParameter(StiKalmanTrack* kTrack);
 private:
     StEvent* mEvent;
     StiTrackContainer* mTrackStore;
