@@ -1,5 +1,8 @@
-* $Id: tpt_fit_sz.F,v 1.3 2000/11/14 22:29:07 genevb Exp $
+* $Id: tpt_fit_sz.F,v 1.4 2000/12/07 16:52:55 genevb Exp $
 * $Log: tpt_fit_sz.F,v $
+* Revision 1.4  2000/12/07 16:52:55  genevb
+* Need save declaration for optimized code
+*
 * Revision 1.3  2000/11/14 22:29:07  genevb
 * Switched from float to double in many places
 *
@@ -15,6 +18,8 @@
       integer iflag
       real*8  sr, sz, srr, s1, srz, rc, sdenom
       real*8  da, ds
+      save    sr, sz, srr, s1, srz
+
       if(iflag.eq.0) then
         sr =0.0
         sz =0.0
