@@ -74,20 +74,44 @@ Int_t St_xdfin_Maker::Make(){
         ret = kStOK;
         break;
       } 
-      if (strcmp(set->GetName(),"ROSIE_RESET")==0){
-        SafeDelete(set);
-	cout << " St_xdfin_Maker::Init dropping ROSIE_RESET dataset" <<endl;
-	cout << "Looking for BEGIN_RUN" << endl;
-        continue;
-      }
       if (strcmp(set->GetName(),"BEGIN_RUN")==0){
 	cout << "St_xdfin_Maker::Init found BEGIN_RUN dataset" << endl;
-	local.Mkdir("run/paramers");
+        StMaker *params = gStChain->Maker("params");
+        if (! params) {
+	  cout << "St_params_Maker has not been created. No Place to put BEGIN_RUN data" << endl;
+	  continue;
+        }
+	const Char_t *maker_title = gStChain->Maker("params")->GetTitle();
+        if (maker_title) {
+	  local.Mkdir(maker_title);
+	  local.Cd(maker_title);
+	}
 	St_DataSet *tpc = local("tpc");
 	if (!tpc) tpc = local.Mkdir("tpc");
-	tpc->Add(set);
+        local.Cd("tpc");
+        St_DataSet *BEGIN_RUN = local("BEGIN_RUN");
+        if (! BEGIN_RUN) BEGIN_RUN = local.Mkdir("BEGIN_RUN");
+        BEGIN_RUN->Update(set);
         SafeDelete(set);
         m_Init_Done = kTRUE;
+        ret = kStOK;
+        break;
+      }   
+      if (strcmp(set->GetName(),"TPC_DATA")==0){
+        StMaker *tpc_raw = gStChain->Maker("tpc_raw");
+        if (! tpc_raw) {
+	  cout << "tpc_raw Maker has not been created. No Place to put TPC_DATA data" << endl;
+	  continue;
+        }
+	const Char_t *maker_title = gStChain->Maker("tpc_raw")->GetTitle();
+        if (maker_title) {
+	  local.Mkdir(maker_title);
+	  local.Cd(maker_title);
+	}
+        St_DataSet *TPC_DATA = local("TPC_DATA");
+        if (! TPC_DATA) TPC_DATA = local.Mkdir("TPC_DATA");
+        TPC_DATA->Update(set);
+        SafeDelete(set);
         ret = kStOK;
         break;
       }   

@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.24 1998/11/07 02:45:05 fisyak Exp $
+// $Id: bfc.C,v 1.25 1998/11/25 21:58:36 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.25  1998/11/25 21:58:36  fisyak
+// Cleanup
+//
 // Revision 1.24  1998/11/07 02:45:05  fisyak
 // cleanup analysis
 //
@@ -75,37 +78,37 @@ void bfc(
 "/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc091_03_34evts_dst.root",
          const Int_t  Nevents=1000)
 {
-  gSystem->Load("St_base.so");
-  gSystem->Load("StChain.so");
-  gSystem->Load("xdf2root.so");
-  gSystem->Load("St_Tables.so");
-  gSystem->Load("libmsg.so");
-  gSystem->Load("libtls.so");
-  gSystem->Load("St_params_Maker.so");
-  gSystem->Load("St_xdfin_Maker.so");
-  gSystem->Load("St_calib_Maker.so");
-  gSystem->Load("St_evg_Maker.so");
-  gSystem->Load("St_geant_Maker.so");
-  gSystem->Load("St_geom_Maker.so");
-  gSystem->Load("St_TLA_Maker.so");
-  gSystem->Load("tpc.sl");
-  gSystem->Load("St_tpc.so");
-  gSystem->Load("St_tss_Maker.so");
-  gSystem->Load("St_tcl_Maker.so");
-  gSystem->Load("St_tpt_Maker.so");
-  gSystem->Load("global.sl");
-  gSystem->Load("St_global.so");
-  gSystem->Load("St_dst_Maker.so");
-  gSystem->Load("St_run_summary_Maker.so");
-  gSystem->Load("svt.sl");
-  gSystem->Load("St_svt.so");
-  gSystem->Load("St_srs_Maker.so");
-  gSystem->Load("St_stk_Maker.so");
-  //  gSystem->Load("ftpc.sl");
-  //  gSystem->Load("St_ftpc.so");
-  //  gSystem->Load("St_fss_Maker.so");
-  //  gSystem->Load("St_fcl_Maker.so");
-  //  gSystem->Load("St_fpt_Maker.so");
+  gSystem->Load("St_base");
+  gSystem->Load("StChain");
+  gSystem->Load("xdf2root");
+  gSystem->Load("St_Tables");
+  gSystem->Load("libmsg");
+  gSystem->Load("libtls");
+  gSystem->Load("St_params_Maker");
+  gSystem->Load("St_xdfin_Maker");
+  gSystem->Load("St_calib_Maker");
+  gSystem->Load("St_evg_Maker");
+  gSystem->Load("St_geant_Maker");
+  gSystem->Load("St_geom_Maker");
+  gSystem->Load("St_TLA_Maker");
+  gSystem->Load("tpc");
+  gSystem->Load("St_tpc");
+  gSystem->Load("St_tss_Maker");
+  gSystem->Load("St_tcl_Maker");
+  gSystem->Load("St_tpt_Maker");
+  gSystem->Load("global");
+  gSystem->Load("St_global");
+  gSystem->Load("St_dst_Maker");
+  gSystem->Load("St_run_summary_Maker");
+  gSystem->Load("svt");
+  gSystem->Load("St_svt");
+  gSystem->Load("St_srs_Maker");
+  gSystem->Load("St_stk_Maker");
+  //  gSystem->Load("ftpc");
+  //  gSystem->Load("St_ftpc");
+  //  gSystem->Load("St_fss_Maker");
+  //  gSystem->Load("St_fcl_Maker");
+  //  gSystem->Load("St_fpt_Maker");
   St_XDFFile   *xdf_in   = 0;
   if (fileinp)  xdf_in   = new St_XDFFile(fileinp,"r");
   St_XDFFile  *xdf_out   = 0;

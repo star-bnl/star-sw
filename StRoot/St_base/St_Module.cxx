@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.4 1998/08/25 23:07:24 didenko Exp $
+// $Id: St_Module.cxx,v 1.5 1998/11/25 21:58:33 fisyak Exp $
 // $Log: St_Module.cxx,v $
+// Revision 1.5  1998/11/25 21:58:33  fisyak
+// Cleanup
+//
 // Revision 1.4  1998/08/25 23:07:24  didenko
 // New base with Tree
 //
@@ -374,12 +377,12 @@ Int_t St_Module::ExecuteModule()
      printf("\n");
      for (Int_t i=0;i<fN;i++)
      {
-        if (st_Params[i]) printf(" %i ",*((ULong_t *)st_Params[i]));
+        if (st_Params[i]) printf(" %u ",*((ULong_t *)st_Params[i]));
         else { 
             errcode++; 
-            Char_t *suffix[4]={"st","nd","d","th"};
+	    //yf            Char_t *suffix[4]={"st","nd","d","th"};
             Char_t *title[2] = {"header","table"};
-            Bool_t istable = i & 1;
+	    //yf            Bool_t istable = i & 1;
             printf("%i %s has not been defined yet\n"
                    ,(i>>1)+1, title[i&1]);
         }

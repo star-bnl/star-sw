@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.18 1998/10/31 00:21:57 fisyak Exp $ 
+// $Id: St_XDFFile.cxx,v 1.19 1998/11/25 21:58:38 fisyak Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.19  1998/11/25 21:58:38  fisyak
+// Cleanup
+//
 // Revision 1.18  1998/10/31 00:21:57  fisyak
 // Add record counter
 //
@@ -124,7 +127,7 @@ void St_XDFFile::Delete(DS_DATASET_T *ds)
      ds->elcount = 0;
   }
   else
-    for (Int_t j=0; j< ds->elcount; j++)
+    for (UInt_t j=0; j< ds->elcount; j++)
       if (dt=ds->p.link[j]) { 
             Delete(dt);
             ds->p.link[j] = dt;
@@ -369,7 +372,7 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
   }
   else {
     dataset = new St_DataSet(ds->name);
-    for (Int_t j=0; j< ds->elcount; j++)
+    for (UInt_t j=0; j< ds->elcount; j++)
       if (dt=ds->p.link[j]) 
           dataset->Add(MakeDataSet(dt));
   }

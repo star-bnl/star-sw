@@ -149,6 +149,8 @@ void St_DataSet::Delete(Option_t *opt){
           delete son;        
        }
     }
+    // Cleare list
+    fList->Clear("nodelete");
     delete fList;
     fList = 0;
   }

@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.16 1998/11/22 18:28:06 fisyak Exp $
+// $Id: StChain.h,v 1.17 1998/11/25 21:58:21 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.17  1998/11/25 21:58:21  fisyak
+// Cleanup
+//
 // Revision 1.16  1998/11/22 18:28:06  fisyak
 // Add name of tag
 //
@@ -94,7 +97,6 @@ private:
    Int_t               m_Mode;              //Run mode
    EDebugLevel         m_DebugLevel;        //Debug level
    St_DataSet         *m_RunSet;            //Run
-   St_DataSet         *m_EventSet;          //Event
    TTree              *m_Tree;              //Pointer to the Root tree
    TList              *m_Makers;            //List of Makers
    St_XDFFile         *m_File;              //!Pointer to input file 
@@ -115,7 +117,6 @@ public:
    virtual void       FillXDF(St_XDFFile &file);
    virtual Int_t      Finish();
    virtual Int_t      GetEvent(Int_t event=1);  // *MENU*
-   St_DataSet        *GetEventSet(){return m_EventSet;}
    St_XDFFile        *GetXDF_in(){return m_File;} 
    St_XDFFile        *GetXDF_out(){ return m_FileOut;} 
    virtual Int_t Init();
