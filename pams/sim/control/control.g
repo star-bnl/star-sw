@@ -20,7 +20,6 @@
 * do not allow run without geometry
       if (JVOLUM<=0) STOP ' NO GEOMETRY LOADED '
 * 
-      IEV=IEV+1
       call xntup ('Ieotri',Ieotri)
       call xntup ('Ntrack',Ntrack)
       call xntup ('Nvertx',Nvertx)
@@ -30,6 +29,11 @@
 * fill PID histogramm
       do Itrac=1,Ntrack
          call GFKINE(Itrac,vert,Pvert, Ipart,Ivert,Ubuf,Nu)
+         if (0>=Ivert | Ivert > Nvertx | Ipart<=0 ) then
+             print *,'CONTROL: error in Itrac,Ivert,Ipart=',
+                                        Itrac,Ivert,Ipart
+             go to :e:
+         endif
          call GFVERT(Ivert,vert,Nttarg,Ntbeam,Tofg,Ubuf,Nu)
 * all particles:
          call hfill (11,float(Ipart),1.,1.)
@@ -66,9 +70,14 @@
                      
       enddo
 
+      IEV=IEV+1
       call xntup ('Ntr10',N10)
       call xntup ('*** end_of_event ***',1)
       if (idebug>0) print *,' EVENT ',IEV,' DONE '
       iquest(100)=Iev
+      return
+:e:
+      IEOTRI = 1
+      iquest(100)=Iev 
       end
 
