@@ -11,7 +11,7 @@ macro dst_dedx_filler
         [dst]/dst_dedx
 
 
-  if ( staf_status(1) .ne. STAFCV_OK) then
+  if ( staf_status(1) .ne. stafcv_ok) then
      message 'Problem on return from DST_DEDX_FILLER' 
   endif
 
@@ -41,7 +41,7 @@ ami/mod/call dst_monitor_soft_filler_
         [dst]/monitor_soft
 
 
-if ( staf_status(1) .ne. STAFCV_OK) then
+if ( staf_status(1) .ne. stafcv_ok) then
      message 'Problem on return from DST_MONITOR_SOFT_FILLER'
 endif
 
@@ -66,7 +66,7 @@ ami/mod/call fill_dst_run_summary_
         [dst]/vertex _
         [run_dst]/run_summary
 
-if ( staf_status(1) .ne. STAFCV_OK) then
+if ( staf_status(1) .ne. stafcv_ok) then
      message 'Problem on return from FILL_DST_RUN_SUMMARY'
 endif
 
@@ -87,7 +87,7 @@ ami/mod/call fill_dst_event_summary_
         [dst]/vertex _
         [dst]/event_summary
 
-if ( staf_status(1) .ne. STAFCV_OK) then
+if ( staf_status(1) .ne. stafcv_ok) then
      message 'Problem on return from FILL_DST_EVENT_SUMMARY'
 endif
 
@@ -108,7 +108,7 @@ ami/mod/call dst_point_filler_
         [data]/svt/hits/scs_spt _
         [dst]/point
 
-if ( staf_status(1) .ne. STAFCV_OK) then
+if ( staf_status(1) .ne. stafcv_ok) then
      message 'Problem on return from DST_POINT_FILLER'
 endif
 
@@ -128,7 +128,7 @@ ami/mod/call dst_point_unpack_
         [data]/svt/hits/scs_spt _
         [dst]/point
 
-if ( staf_status(1) .ne. STAFCV_OK) then
+if ( staf_status(1) .ne. stafcv_ok) then
      message 'Problem on return from DST_POINT_UNPACK'
 endif
 

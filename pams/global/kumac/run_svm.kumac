@@ -4,14 +4,12 @@
   
   macro/global/import *
     
-
   ami/mod/call svm_am _
    [data]/svt/tracks/stk_track _
    [data]/tpc/tracks/tptrack _
    [params]/global/svmpars/svm_ctrl _
    [data]/global/tracks/evt_match
 
-  
   if (staf_status(1) .ne. stafcv_ok) then
 	message 'Problem on return from SVM'
   endif
