@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.84 2002/12/19 01:21:45 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.85 2003/01/08 03:16:32 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -89,6 +89,7 @@
 #include "tables/St_tpt_track_Table.h"
 #include "tables/St_dst_event_summary_Table.h"
 
+#include "StEventControlPanel.h"
 #include "PadControlPanel.h"
 
 #include "StTrackChair.h"
@@ -97,11 +98,12 @@
 #include "StEvent.h"
 #include "StDefaultFilter.h"
 #include "StEventHelper.h"
+#include "StEventDisplayInfo.h"
 
 #ifdef R__QT
-// Qt header files
-#include <qtextview.h>
-#endif
+    StPadControlPanel   *fPadControlPanelnew=0; //!
+    StEventControlPanel *fEventControlPanel=0;  //!
+#endif 
 
 // StVirtualEventFilter hitsOffFilter(0);
 // StVirtualEventFilter hitsOnFilter(1);
@@ -110,23 +112,6 @@ StDefaultFilter StEventDisplayMaker::m_DefaultFilters[StEventDisplayMaker::kEndO
 
 Int_t               StEventDisplayMaker::fgEventLoop = 0;
 StEventDisplayInfo *StEventDisplayMaker::fgInfo      = 0;
-
-
-
-class StEventDisplayInfo
-#ifdef R__QT
- : public QTextView 
-#endif
-{
-public:
-  StEventDisplayInfo(StEventDisplayInfo **kaddr, const char* title, UInt_t w=100, UInt_t h=50);
-  virtual ~StEventDisplayInfo(){*fKAddr=0;}
-private:
- StEventDisplayInfo **fKAddr;	//!
-public:
- void SetText(const char *info);
- void Popup();
-};
 
 //_____________________________________________________________________________
 StEventDisplayInfo::StEventDisplayInfo(StEventDisplayInfo **kaddr, const char* title, UInt_t w, UInt_t h)
@@ -140,7 +125,13 @@ StEventDisplayInfo::StEventDisplayInfo(StEventDisplayInfo **kaddr, const char* t
     fKAddr=kaddr;*fKAddr=this;
   }
 //_____________________________________________________________________________
-inline void StEventDisplayInfo::SetText(const char *info){ 
+void StEventDisplayInfo::AddText(const char *info){ 
+#ifdef R__QT
+  setText(info);
+#endif
+}
+//_____________________________________________________________________________
+void StEventDisplayInfo::SetText(const char *info){ 
 #ifdef R__QT
   setText(info);
 #endif
@@ -203,7 +194,8 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   for (i=0;i<lvolumeNames;i++) AddVolume(volumeNames[i]);
 
 #ifdef R__QT
-  new StPadControlPanel();
+  fPadControlPanelnew = new StPadControlPanel();
+  fEventControlPanel  = new StEventControlPanel();
   gSystem->DispatchOneEvent(1);
 #else
   gROOT->LoadMacro("EventControlPanel.C");
@@ -297,7 +289,9 @@ void StEventDisplayMaker::AddName(const char *name)
   if (!m_ListDataSetNames->FindObject(name)) 
         m_ListDataSetNames->Add(new TObjString(name));
   if (strncmp(name,"StEvent",7)==0) {
-    gROOT->ProcessLine("__StEventControlPanel__.Refresh();");
+#ifdef R__QT
+    fEventControlPanel->Refresh();
+#endif 
     gSystem->DispatchOneEvent(1);
   }
 }
@@ -1121,6 +1115,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.85  2003/01/08 03:16:32  fine
+// first working version of Qt-based Event Display. It is still very ugly
+//
 // Revision 1.84  2002/12/19 01:21:45  fine
 // CPP condition to use Qt staff has been introduced
 //
