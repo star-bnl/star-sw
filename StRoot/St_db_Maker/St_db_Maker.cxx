@@ -95,7 +95,7 @@ Int_t St_db_Maker::Init()
    AddData(Fileset);
 
    SetOutput(Fileset); //  
-   SetOutputAll(Fileset); //  
+// SetOutputAll(Fileset); //  
 
    if (Debug()) Fileset->ls("*");
 // Create Histograms    
@@ -261,7 +261,7 @@ void    St_db_Maker::SetUserDir(const Char_t *db)
 //_____________________________________________________________________________
 void St_db_Maker::PrintInfo(){
   printf("***************************************************************\n");
-  printf("* $Id: St_db_Maker.cxx,v 1.5 1999/04/30 15:07:20 perev Exp $\n");
+  printf("* $Id: St_db_Maker.cxx,v 1.6 1999/05/01 00:51:37 perev Exp $\n");
   printf("***************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
