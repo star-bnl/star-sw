@@ -1,11 +1,19 @@
 /****************************************************************  
  *
- * StTofDataCollection.h
+ * $Id: StTofDataCollection.h,v 1.2 2002/01/22 06:53:01 geurts Exp $
+ *
+ * Author: Bill Llope
  *
  *****************************************************************
+ *
  * Description:
+ * Local TOF raw data collection
  *
  *****************************************************************
+ *
+ * $Log: StTofDataCollection.h,v $
+ * Revision 1.2  2002/01/22 06:53:01  geurts
+ * cvs tags added
  *
  *
  ****************************************************************/
