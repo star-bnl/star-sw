@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.60 2003/10/08 19:32:04 starlib Exp $
+# $Id: ConsDefs.pm,v 1.61 2003/10/28 20:40:40 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -42,7 +42,7 @@
     # Dirty patch to circunvent a cons side effect which is to 
     # eliminate from the -I search list non-existing directories.
     $EXTRA_CPPFLAGS = "";
-    $EXTRA_CPPFLAGS = "-Iinclude" if( ! -d "include");                     
+    #$EXTRA_CPPFLAGS = "-Iinclude" if( ! -d "include");                     
           #-I-";
 
     $AFSFLAGS = "";
@@ -119,12 +119,12 @@
 
     # $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< ";
     $LINKCOM =
-      "%LD %DEBUG %LDFLAGS %EXTA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
+      "%LD %DEBUG %LDFLAGS %EXTRA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
     $FCCOM =
-      "%FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";
+      "%FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %< %Fout%>";
     $GEANT3COM = "test -f %>:b.F && rm %>:b.F;";
     $GEANT3COM .=
-"%GEANT3 %< -o %>:b.F && %FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %_IFLAGS  %FCPPPATH -c %>:b.F -o %>";
+"%GEANT3 %< -o %>:b.F && %FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %_IFLAGS %FCPPPATH -c %>:b.F -o %>";
     $INCLUDE_PATH = $INCLUDE;
     $Salt = undef;
     if ( !$OPTSTAR ) { $OPTSTAR = "/opt/star"; }
@@ -207,11 +207,11 @@
             $FCCOM  = "test -f %>.g && rm %>.g ; test -f %>.f && rm %>.f;";
 	    $FDEBUG = $DEBUG;
             $FCCOM .=
-            "%FC -E -P %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %_IFLAGS  %FCPPPATH -c %< %Fout%>.g &&";
+            "%FC -E -P %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %_IFLAGS %FCPPPATH -c %< %Fout%>.g &&";
             $FCCOM .= "%GEANT3 -V 1 -V f -i %>.g %Fout%>:b.f;";
             $FCCOM .= "if [ -f %>:b.f ]; then %FC %FFLAGS -c %>:b.f %Fout%> ;";
             $FCCOM .=
-"else %FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>; fi";
+"else %FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %< %Fout%>; fi";
             my $GEANT3COM = $FCCOM;
             $FEXTEND = "-ffixed-line-length-132";
         }
@@ -474,7 +474,7 @@
       'KUIP'          => $KUIP,
       'KUIPCOM'       => '%KUIP %< %<.f && %FC %FFLAGS -c %<.f -o %>',
       'CCCOM'         =>
-      '%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS  -c %Cinp%< %Cout%>',
+      '%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS -c %Cinp%< %Cout%>',
       'CXX'            => $CXX,
       'CXXFLAGS'       => $CXXFLAGS,
       'CINTCXXFLAGS'   => $CINTCXXFLAGS,
