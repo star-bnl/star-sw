@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.18 2002/12/12 17:01:50 kisiel Exp $
+ * $Id: StHbtParticle.hh,v 1.19 2003/01/14 09:41:16 renault Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.19  2003/01/14 09:41:16  renault
+ * changes on average separation calculation, hit shared finder and memory optimisation
+ * for Z,U and Sectors variables.
+ *
  * Revision 1.18  2002/12/12 17:01:50  kisiel
  * Hidden Information handling and purity calculation
  *
@@ -131,12 +135,12 @@ public:
 
   // the following method is for explicit internal calculation to fill datamembers.
   // It is invoked automatically if StHbtParticle constructed from StHbtTrack
-  void CalculateNominalTpcExitAndEntrancePoints(); // NOTE - this requires the mHelix, so be sure this is filled
+  //void CalculateNominalTpcExitAndEntrancePoints(); // NOTE - this requires the mHelix, so be sure this is filled
 
 
   StHbtThreeVector mNominalPosSample[11];  // I make this public for convenience and speed of StHbtPair()
-  double mZ[45];
-  double mU[45];
+  float mZ[45];
+  float mU[45];
   int mSect[45];
 
   void ResetFourMomentum(const StHbtLorentzVector& fourMomentum);
@@ -149,29 +153,20 @@ public:
   double GetPionPurity();
   double GetKaonPurity();
   double GetProtonPurity();
-  void CalculateTpcExitAndEntrancePoints( const StPhysicalHelixD* tHelix,
+  void CalculateTpcExitAndEntrancePoints( StPhysicalHelixD* tHelix,
 					  StHbtThreeVector* PrimVert,
+					  StHbtThreeVector* SecVert,
 					  StHbtThreeVector* tmpTpcEntrancePoint,
 					  StHbtThreeVector* tmpTpcExitPoint,
 					  StHbtThreeVector* tmpPosSample,
-					  double* tmpZ,double* tmpU,int* tmpSect);
+					  float* tmpZ,float* tmpU,int* tmpSect);
 
-  // For V0 Daugthers TpcEntrance/ExitPoints
-  StHbtThreeVector mTpcV0PosPosSample[11];
-  double mV0PosZ[45];
-  double mV0PosU[45];
-  int mV0PosSect[45];
-  StHbtThreeVector mTpcV0NegPosSample[11];
-  double mV0NegZ[45];
-  double mV0NegU[45];
-  int mV0NegSect[45];
-  // test
-  StHbtThreeVector mTpcTrackTestPosSample[11];
-  double mTrackTestZ[45];
-  double mTrackTestU[45];
-  int mTrackTestSect[45];
-  // end test
-
+  // For V0 Neg Daugthers TpcEntrance/ExitPoints
+  StHbtThreeVector* mTpcV0NegPosSample;
+  float* mV0NegZ;
+  float* mV0NegU;
+  int* mV0NegSect;
+ 
 private:
   StHbtTrack* mTrack;  // copy of the track the particle was formed of, else Null
   StHbtV0* mV0;        // copy of the v0 the particle was formed of, else Null
@@ -203,6 +198,7 @@ private:
 
    // For V0 Daugthers TpcEntrance/ExitPoints
   StHbtThreeVector mPrimaryVertex;
+  StHbtThreeVector mSecondaryVertex;
 
   StPhysicalHelixD mHelixV0Pos;
   StHbtThreeVector mTpcV0PosEntrancePoint;
@@ -211,11 +207,6 @@ private:
   StPhysicalHelixD mHelixV0Neg;
   StHbtThreeVector mTpcV0NegEntrancePoint;
   StHbtThreeVector mTpcV0NegExitPoint;
-  // test
-  //StHbtThreeVector mPrimaryVertexTrackTest;
-  StPhysicalHelixD mHelixTrackTest;
-  StHbtThreeVector mTpcTrackTestEntrancePoint;
-  StHbtThreeVector mTpcTrackTestExitPoint;
 };
 
 inline StHbtTrack* StHbtParticle::Track() const { return mTrack; }
