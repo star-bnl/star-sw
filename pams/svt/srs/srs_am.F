@@ -79,7 +79,7 @@ c      IMPLICIT NONE
 #include "srs_am.inc"
 c------------------------------------------------------------------------------c
 c      integer j,k,ii,jj,kk
-      integer i
+      integer i,iret
       integer svt_resolution_sim,spt_direct,spt_direct_gs
       integer ihit,iwafer,wafer,layer,id_active,active,active_area
       integer filtered,deadssd,deadsvt
@@ -90,6 +90,7 @@ c      integer j,k,ii,jj,kk
       data    idI1 /0/
       save    idI1
       real    acosd,cosd,sind
+      integer  svtgtol
 
 c------------------------------------------------------------------------------c
 c------------------------------------------------------------------------------c
@@ -118,11 +119,7 @@ c------------------------------------------------------------------------------c
            wafer  = svt_hit(ihit).volume_id
            iwafer = get_geom_row(geom_h,geom,wafer)
            if (iwafer.gt.0) then
-              call svtgtol(gcoord,lcoord,
-     &             geom(iwafer).x,
-     &             geom(iwafer).d,
-     &             geom(iwafer).t,
-     &             geom(iwafer).n)
+           iret= svtgtol(gcoord,lcoord,geom(1),iwafer-1)
               layer=geom(iwafer).layer
               id_shape=config(1).layer_shape(layer)
               drift_length=shape(id_shape).shape(1)
@@ -412,13 +409,14 @@ c       real mag2,v3(3),mag3,v4(3),mag4,v5(3),mag5
 	real seperation,resolution
 	integer  ihit,nanode,id_active
 c       integer  chip,iix,iiz
-        integer  seed,iwafer
+        integer  seed,iwafer,iret
 	real     drift_length,trans_length,thickness,gasdev
 	integer  id_shape,jhit,old_ok,new_ok
 	integer  layer,ladder,wafer,npoints(9,26,9),points(9,26,9,1000),wi,wj
 	real     posit(2,15000),uncer(2,15000)
         real     acosd,cosd,sind
         external ran2
+        integer  svtgtol
 c------------------------------------------------------------------------------c
 c       samples(1,n),samples(2,n) = x and z coordinate of sample               c
 c       samplesx(1,n),samplesz(1,n) anode,t bucket hit in x or z projection    c
@@ -499,11 +497,7 @@ c------------------------------------------------------------------------------c
            wafer  = svt_hit(ihit).volume_id
            iwafer = get_geom_row(geom_h,geom,wafer)
            if (iwafer.gt.0) then
-              call svtgtol(gcoord,lcoord,
-     &             geom(iwafer).x,
-     &             geom(iwafer).d,
-     &             geom(iwafer).t,
-     &             geom(iwafer).n)
+              iret=svtgtol(gcoord,lcoord,geom(1),iwafer-1)
               layer=geom(iwafer).layer
               id_shape=config(1).layer_shape(layer)
               drift_length=shape(id_shape).shape(1)
@@ -2468,11 +2462,12 @@ c     Argument/Global Declarations:
 
 c     Local Declarations
 c     ==================
-      integer    ihit, iwafer, wafer, ispt
+      integer    ihit, iwafer, wafer, ispt,iret
       integer   get_geom_row
       real      xp(3)       ! local coordinate
       real      rg32, dummy
       real      dx(3), dxp(3), zero(3)
+      integer svtltog, svtgtol
 
 c     Format
 c     ======
@@ -2541,11 +2536,7 @@ c     map to wafer local frame coordinate, smear and map back to global frame
             spt(ispt).x(1)   = svt_hit(ihit).x(1) ! position of space point
             spt(ispt).x(2)   = svt_hit(ihit).x(2)
             spt(ispt).x(3)   = svt_hit(ihit).x(3)
-            call svtgtol(spt(ispt).x,xp,
-     &           geom(iwafer).x,
-     &           geom(iwafer).d,
-     &           geom(iwafer).t,
-     &           geom(iwafer).n)
+            iret=svtgtol(spt(ispt).x,xp,geom(1),iwafer-1)
             if (wafer.lt.7000.or.direct_h.nok.eq.1) then
                xp(1) = xp(1)+ direct(1).sd *rg32(dummy)
                xp(2) = xp(2)+ direct(1).st *rg32(dummy)
@@ -2556,11 +2547,7 @@ c     map to wafer local frame coordinate, smear and map back to global frame
             spt(ispt).xl(1) = xp(1)
             spt(ispt).xl(2) = xp(2)
             spt(ispt).xl(3) = 0
-            call svtltog(xp,spt(ispt).x,
-     &           geom(iwafer).x,
-     &           geom(iwafer).d,
-     &           geom(iwafer).t,
-     &           geom(iwafer).n)
+            iret= svtltog(xp,spt(ispt).x,geom(1),iwafer-1)
             
             if (wafer.lt.7000.or.direct_h.nok.eq.1) then
                dxp(1) = direct(1).sd
@@ -2573,11 +2560,7 @@ c     map to wafer local frame coordinate, smear and map back to global frame
             zero(1) = 0.
             zero(2) = 0.
             zero(3) = 0.
-            call svtltog(dxp,dx,
-     &           zero,
-     &           geom(iwafer).d,
-     &           geom(iwafer).t,
-     &           geom(iwafer).n)
+            iret= svtltog(dxp,dx,geom(1),iwafer-1)
             spt(ispt).de(1)      = svt_hit(ihit).de ! energy loss
             spt(ispt).de(2)      = 0. ! error on energy loss)
             spt(ispt).cov(1)     = abs(dx(1))
@@ -2613,102 +2596,8 @@ c     set the number of OK lines in spt
       
       end
 
-c     ============================================================
-      subroutine svtgtol(x,xp,wx,wd,wt,wn)
-c      implicit none
 
-c     DESCRIPTION:   global to local mapping for svt points
-c
-c     Input Arguments:
-c       x     : global coordinate
-c       wx    : wafer origin
-c       wd    : wafer drift direction
-c       wt    : wafer transverse direction
-c       wn    : wafer normal
-c
-c     Output Arguments:
-c       xp    : local coordinate
-c
-c     Functional Description: 
-c      Make a global to local mapping by using the origin of the wafer coordinate and the
-c     3 vectors defining the normal to the plane, the drift direction, and the transverse direction.
-c     xp(1)  : component in the drift direction
-c     xp(2)  : component in the transverse direction
-c     xp(3)  : component in the direction normal to the wafer; should be small ...
-c
-c     Created 1-Nov-93  C. Pruneau, WSU
-c
-c     Error Conditions: none
-c
-c     Argument declarations:
-c     ======================
-      real  x(3), xp(3), wx(3), wd(3), wt(3), wn(3)
-
-c     Local Declarations
-c     ==================
-      real  xl(3)
-
-c     Executable Code
-c     ===============
-      xl(1) = x(1) - wx(1)
-      xl(2) = x(2) - wx(2)
-      xl(3) = x(3) - wx(3)
-
-      xp(1) = xl(1)*wd(1) + xl(2)*wd(2) + xl(3)*wd(3) 
-      xp(2) = xl(1)*wt(1) + xl(2)*wt(2) + xl(3)*wt(3) 
-      xp(3) = xl(1)*wn(1) + xl(2)*wn(2) + xl(3)*wn(3) 
-
-      return
-      end
-
-c     ============================================================
-      subroutine svtltog(xp,x,wx,wd,wt,wn)
-c      implicit none
-
-c     DESCRIPTION:  local to global mapping for svt points
-c
-c     Input Arguments:
-c       xp    : local coordinate
-c       wx    : wafer origin
-c       wd    : wafer drift direction
-c       wt    : wafer transverse direction
-c       wn    : wafer normal
-c
-c     Output Arguments:
-c       x     : global coordinate
-c
-c     Functional Description: 
-c      Make a local to global mapping by using the origin of the wafer coordinate and the
-c     3 vectors defining the normal to the plane, the drift direction, and the transverse direction.
-c     xp(1)  : component in the drift direction
-c     xp(2)  : component in the transverse direction
-c     xp(3)  : component in the direction normal to the wafer; should be small ...
-c
-c     Created 1-Nov-93  C. Pruneau, WSU
-c
-c     Error Conditions: none
-c
-c     Argument declarations:
-c     ======================
-      real  x(3), xp(3), wx(3), wd(3), wt(3), wn(3)
-
-c     Local Declarations
-c     ==================
-      real  xl(3)
-
-c     Executable Code
-c     ===============
-      xl(1) = xp(1)
-      xl(2) = xp(2)
-      xl(3) = xp(3)
-
-      x(1) = wx(1) + xl(1)*wd(1) + xl(2)*wt(1) + xl(3)*wn(1) 
-      x(2) = wx(2) + xl(1)*wd(2) + xl(2)*wt(2) + xl(3)*wn(2) 
-      x(3) = wx(3) + xl(1)*wd(3) + xl(2)*wt(3) + xl(3)*wn(3) 
-
-      return
-      end
-c====================================================================================
+C_____________________________________________________________________________
       integer function get_geom_row(geom_h,geom,wafer)
 c      implicit none
 c
