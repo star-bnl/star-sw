@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.16 1999/04/27 15:05:04 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.17 1999/04/27 18:33:08 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
- * Revision 1.16  1999/04/27 15:05:04  lasiuk
- * time shift in ns
+ * Revision 1.17  1999/04/27 18:33:08  lasiuk
+ * change position of time shift in sampleAnalogSignal()
+ *
+ * Revision 1.17  1999/04/27 18:33:08  lasiuk
+ * change position of time shift in sampleAnalogSignal()
  *
  * Revision 1.16  1999/04/27 15:05:04  lasiuk
  * time shift in ns
@@ -744,6 +747,17 @@ void StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()
 
 	    mDiscreteAnalogTimeSequence.clear();
 
+	    // Make sure it is not empty
+	    if(!continuousAnalogTimeSequence.size()) continue;
+	    for(mTimeSequenceIterator  = continuousAnalogTimeSequence.begin();
+		mTimeSequenceIterator != continuousAnalogTimeSequence.end();
+		mTimeSequenceIterator ++) {
+//  		    PR(mTimeSequenceIterator->time());
+//  		    PR(mTimeShiftOfSignalCentroid);
+		    double tmpTime =
+			mTimeSequenceIterator->time() +
+			mTimeShiftOfSignalCentroid;
+		    mTimeSequenceIterator->setTime(tmpTime);
 //  		PR(mTimeSequenceIterator->time());
 //  		PR(mTimeSequenceIterator->time()/nanosecond);
 	    }
@@ -776,14 +790,6 @@ void StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()
 		    // 10 time bins.  This should be a settable
 		    // parameter.
 		    //
-// 		    PR(mTimeSequenceIterator->time());
-// 		    PR(mTimeShiftOfSignalCentroid);
-		    double tmpTime =
-			mTimeSequenceIterator->time() +
-			mTimeShiftOfSignalCentroid;
-		    mTimeSequenceIterator->setTime(tmpTime);
-// 		PR(mTimeSequenceIterator->time());
-// 		PR(mTimeSequenceIterator->time()/nanosecond);
 		    if( fabs(timeBinT-mTimeSequenceIterator->time()) > 10.*mTimeBinWidth)
 			continue;
 //   		    cout << " tb " << itbin << " " << (*mTimeSequenceIterator) << endl;
