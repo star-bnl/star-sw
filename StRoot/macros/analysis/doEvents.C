@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.12 1999/04/01 23:39:47 fisyak Exp $
+// $Id: doEvents.C,v 1.13 1999/04/15 18:03:14 wenaus Exp $
 // $Log: doEvents.C,v $
-// Revision 1.12  1999/04/01 23:39:47  fisyak
-// Cleanup old macros
+// Revision 1.13  1999/04/15 18:03:14  wenaus
+// clean out duplicate/conflicting declarations
+//
+// Revision 1.13  1999/04/15 18:03:14  wenaus
+// clean out duplicate/conflicting declarations
 //
 // Revision 1.12  1999/04/01 23:39:47  fisyak
 // Cleanup old macros
@@ -60,7 +63,6 @@
 void setFiles(const Char_t *path, const Char_t *file);
 class St_XDFFile;
 St_XDFFile* nextFile();
-Bool_t nextRootFile();
 
 // Functions included below which retrieve a single file or all files
 // under a path
@@ -76,7 +78,6 @@ class St_DataSet;
 St_DataSet *set = 0; 
 class St_DataSetIter;
 St_DataSetIter* nextDataSet;
-class St_XDFFile;
 St_XDFFile *theFile = 0;
 TString  thePath;
 TString  theFileName;
@@ -87,7 +88,6 @@ Bool_t isRoot=kFALSE;
 Bool_t isXdf=kFALSE;
 TTree* tree=0;
 const char *xdfFile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
-void setFiles(const Char_t *path, const Char_t *file);
 St_XDFFile* nextFile();
 TFile *nextRootFile();
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
@@ -113,6 +113,7 @@ void doEvents(const Int_t nevents=999,
               const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
               const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf")
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
+  // const Char_t *file="/afs/rhic/star/data/samples/psc0016_05_35evts.root")
   // const Char_t *file="/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/./set0022_01_56evts_dst.xdf")
   // const Char_t *file="/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
   // const Char_t *file="/disk00000/star/auau200/hijing135/default/b0_20/year2x/hadronic_on/tfs_dst/pet213_02_190evts_h_dst.xdf")
