@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.15 1999/05/05 19:35:53 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.16 1999/05/07 17:18:30 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.16  1999/05/07 17:18:30  kathy
+//! new method AddToLogYList implemented and tested on solaris
+//!
 //! Revision 1.15  1999/05/05 19:35:53  kathy
 //! add new method ListHists and clean up
 //!
@@ -90,12 +93,18 @@
 #include "TH2.h"
 #endif
 
+#include "TList.h"
+#include "TString.h"
+
+//  - if not using the methods of the class, then can just put class TCanvas;
+//   -  however, if we are using the methods of TCanvas, then put include "TCanvas.h"
 class TCanvas;
+
 
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.15 1999/05/05 19:35:53 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.16 1999/05/07 17:18:30 kathy Exp $";
   //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -167,11 +176,11 @@ class St_QA_Maker : public StMaker {
   TString        m_FirstHistName;
   TString        m_LastHistName;
   
-  TString        m_LogHistName;    // Name of histogram that we want plotted in LogY scale
-
   TString        m_PsFileName;     // Name of the PostScipt file to plot hist's out
   
-  
+  TList         *m_ListOfLog;      // list of histogram names that will be drawn with logy scale
+
+
  protected:
   
   // for method MakeEvSum - from table event_summary
@@ -315,6 +324,7 @@ class St_QA_Maker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Finish();
   virtual Int_t  Make();
+  virtual Int_t  AddToLogYList(const Char_t *HistName="");
   virtual void   MakeHistEvSum(St_DataSet *dst);
   virtual void   MakeHistGlob(St_DataSet *dst);
   virtual void   MakeHistDE(St_DataSet *dst);
@@ -343,7 +353,7 @@ class St_QA_Maker : public StMaker {
   virtual void   MakeHistXi(St_DataSet *dst);
   virtual void   PrintInfo();
   virtual void   SetDraw(Bool_t drawFlag=kTRUE);
-  virtual void   SetHistsNames(const Char_t *firstName="*", const Char_t *lastName="*");
+  virtual void   SetHistsNamesDraw(const Char_t *firstName="*", const Char_t *lastName="*");
 // SetZones --> divide canvas into 2 x 3 zones
   virtual void   SetZones(Int_t columns=2, Int_t rows=3);
 // SetPaperSize -->  A4 is 20,26  US letter is 20,24
@@ -359,7 +369,7 @@ class St_QA_Maker : public StMaker {
     
 inline void St_QA_Maker::SetDraw(Bool_t drawFlag) 
                          { drawinit = drawFlag;}
-inline void St_QA_Maker::SetHistsNames(const Char_t *firstName, const Char_t *lastName)
+inline void St_QA_Maker::SetHistsNamesDraw(const Char_t *firstName, const Char_t *lastName)
                          { m_FirstHistName = firstName;  m_LastHistName  = lastName; }
 inline void St_QA_Maker::SetZones(Int_t columns, Int_t rows)
                          { m_PadColumns =columns; m_PadRows = rows;}
