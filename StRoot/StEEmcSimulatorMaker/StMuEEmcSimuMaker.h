@@ -3,6 +3,7 @@
 
 // Class to be removed
 class StMuEEmcSimuMaker {
+public:
   StMuEEmcSimuMaker() { /* nada */ };
   ~StMuEEmcSimuMaker() { /* nada */ };
 };

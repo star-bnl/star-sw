@@ -79,7 +79,7 @@ Int_t StMuEEmcSimuReMaker::Make()
 
   //-- Obtain a pointer to the muDst, and the emc collection
   StMuDstMaker *muDstMaker = (StMuDstMaker *)GetMaker("MuDst");
-  StMuEmcCollection *emcCollection = muDstMaker -> muDst() -> emcCollection();
+  StMuEmcCollection *emcCollection = muDstMaker -> muDst() -> muEmcCollection();
 
   MakeTowers( emcCollection );
   //$$$MakePreshower( emcCollection );
@@ -201,6 +201,9 @@ void StMuEEmcSimuReMaker::MakeSmd( StMuEmcCollection *emc )
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StMuEEmcSimuReMaker.cxx,v $
+// Revision 1.2  2004/10/21 16:18:09  balewski
+// muEmcColl fix
+//
 // Revision 1.1  2004/05/26 21:28:37  jwebb
 // o Changes to StEEmcFastMaker to provide methods to get sampling fraction,
 //   gains, etc...
