@@ -21,7 +21,7 @@ class Filter
   Filter();
   virtual ~Filter();
   
-  virtual void initialize()=0;
+  //virtual void initialize()=0;
   virtual bool accept(const Filtered *filtered) const=0;
   virtual void reset();
   
