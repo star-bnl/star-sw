@@ -125,7 +125,6 @@ void WriteOutPIDTableMacro( char* myOutputName){
    //////////filling............
    TFile outFile(mOutputFileName,"RECREATE");
 
-   //   outFile.SetFormat(1);
    outFile.cd();
 
 
@@ -141,7 +140,7 @@ void WriteOutPIDTableMacro( char* myOutputName){
 ////////////////////////
 
    double thisDedxStart=0.;
-   double thisDedxEnd=0.55e-5;
+   double thisDedxEnd=0.53e-5;
    double thisPStart=1e-12;
    double thisPEnd=2.0;
    double thisEtaStart=mEtaStart;
@@ -333,58 +332,52 @@ void WriteOutPIDTableMacro( char* myOutputName){
 
      if (OutPutName.Contains("PiPIDTable")){//3 fcn for Pi
 
+         theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
+                  (theAmpHist->GetBinContent(pIdx+1)) : 0.;
+
        TF1* PiFcnCenter = theAmpHist->GetFunction("PiFcnCenter");
        TF1* PiFcnLeft   = theAmpHist->GetFunction("PiFcnLeft");
        TF1* PiFcnRight  = theAmpHist->GetFunction("PiFcnRight");
 
-
+       if (PiFcnRight){ 
+          PiFcnRight->SetRange(PiFcnRight->GetXmin(),mPEnd);
        if (     pPosition<=PiFcnRight->GetXmax() 
 	  && pPosition >PiFcnRight->GetXmin()&& PiFcnRight->GetParameter(1)<0 )
 	 theAmp = PiFcnRight->Eval(pPosition,0.,0.);
+       }
 
-  else if (     pPosition<=PiFcnCenter->GetXmax() 
+       if (PiFcnCenter){
+       if (     pPosition<=PiFcnCenter->GetXmax() 
              && pPosition >PiFcnCenter->GetXmin() ) 
 	 theAmp = PiFcnCenter->Eval(pPosition,0.,0.);
+       }
 
-  else if (     pPosition < PiFcnCenter->GetXmin())
+       if (PiFcnLeft){
+       if (     pPosition <= PiFcnLeft->GetXmax()
+             && pPosition  > PiFcnLeft->GetXmin() )
 	 theAmp = PiFcnLeft->Eval(pPosition,0.,0.);
-
-  else   theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
-                  (theAmpHist->GetBinContent(pIdx+1)) : 0.;
-
-       if (nhitsPosition<=15) { //ndedx<15, only right fcn fitting is good.
-
-	 PiFcnRight->SetRange(PiFcnRight->GetXmin(),mPEnd);
-
-	 if ( pPosition >  PiFcnRight->GetXmin() 
-               && pPosition<=PiFcnRight->GetXmax())
-	 theAmp = PiFcnRight->Eval(pPosition,0.,0.);
-         else
-         theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
-                  (theAmpHist->GetBinContent(pIdx+1)) : 0.;
        }
 
 
      } else if (OutPutName.Contains("EPIDTable")) { //1 fcn for E
 
+         theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
+                  (theAmpHist->GetBinContent(pIdx+1)) : 0.;       
+
        TF1* EFcnLeft = theAmpHist->GetFunction("EFcnLeft");
-       EFcnLeft->SetRange(0.15, mPEnd);
-       // can not get a good fit with a single expo. has to split to "left" and "right"
-       // left
+       if (EFcnLeft){
        if (     pPosition<=EFcnLeft->GetXmax()
 	     && pPosition >EFcnLeft->GetXmin() && EFcnLeft->GetParameter(1)<0 )
              theAmp = EFcnLeft->Eval(pPosition,0.,0.);
-       else  theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
-                  (theAmpHist->GetBinContent(pIdx+1)) : 0.;
+       }
 
-      // right fit for e-k e-p amp.
        TF1* EFcnRight = theAmpHist->GetFunction("EFcnRight");
+       if (EFcnRight){
        EFcnRight->SetRange(EFcnRight->GetXmin(), mPEnd);
        if (     pPosition<=EFcnRight->GetXmax()
 	     && pPosition >EFcnRight->GetXmin() && EFcnRight->GetParameter(1)<0 )
              theAmp = EFcnRight->Eval(pPosition,0.,0.);
-       //       else  theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
-       //                  (theAmpHist->GetBinContent(pIdx+1)) : 0.;       
+       }
 
       if (nhitsPosition<=5)  //ndedx<5, E fcn fitting not good. use hist.
          theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
@@ -392,23 +385,31 @@ void WriteOutPIDTableMacro( char* myOutputName){
 
      } else if (OutPutName.Contains("KPIDTable")) {//3 fcn for K
 
+         theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
+                  (theAmpHist->GetBinContent(pIdx+1)) : 0.;
+
+
        TF1* KFcnCenter = theAmpHist->GetFunction("KFcnCenter");
        TF1* KFcnLeft   = theAmpHist->GetFunction("KFcnLeft");
        TF1* KFcnRight  = theAmpHist->GetFunction("KFcnRight");
 
-       KFcnCenter->SetRange(0.,mPEnd);
-
+       if (KFcnRight){
        if (     pPosition<=KFcnRight->GetXmax() 
-	     && pPosition >KFcnCenter->GetXmax() )
+	     && pPosition >KFcnRight->GetXmin() )
 	 theAmp = KFcnRight->Eval(pPosition,0.,0.);
-  else if (     pPosition<=KFcnCenter->GetXmax() 
+       }
+
+       if (KFcnCenter){
+       if (     pPosition<=KFcnCenter->GetXmax() 
              && pPosition >KFcnCenter->GetXmin() ) 
 	 theAmp = KFcnCenter->Eval(pPosition,0.,0.);
-  else if (     pPosition<=KFcnCenter->GetXmin()
+       }
+
+       if (KFcnLeft){
+       if (     pPosition<=KFcnLeft->GetXmax()
              && pPosition >KFcnLeft->GetXmin() ) 
 	 theAmp = KFcnLeft->Eval(pPosition,0.,0.);
-  else   theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
-                  (theAmpHist->GetBinContent(pIdx+1)) : 0.;
+       }
 
        if (nhitsPosition<=5)  //ndedx<5, K fcn fitting not good. use hist.
          theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
@@ -416,13 +417,23 @@ void WriteOutPIDTableMacro( char* myOutputName){
 
      } else if (OutPutName.Contains("PPIDTable")) { // 1 fcn for P
 
-       TF1* PFcn = theAmpHist->GetFunction("PFcn");
-       
-       if (     pPosition<=PFcn->GetXmax() 
-	     && pPosition >PFcn->GetXmin() )
-	 theAmp = PFcn->Eval(pPosition,0.,0.);
-       else  theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
+         theAmp = (theAmpHist->GetBinContent(pIdx+1)>0) ? 
                   (theAmpHist->GetBinContent(pIdx+1)) : 0.;
+
+       TF1* PFcnRight = theAmpHist->GetFunction("PFcnRight");
+       TF1* PFcnLeft  = theAmpHist->GetFunction("PFcnLeft");
+     
+       if (PFcnRight){              
+       if (     pPosition<=PFcnRight->GetXmax() 
+	     && pPosition >PFcnRight->GetXmin() )
+	 theAmp = PFcnRight->Eval(pPosition,0.,0.);
+       }
+
+       if (PFcnLeft){
+	 if (     pPosition<=PFcnLeft->GetXmax()
+		  && pPosition >PFcnLeft->GetXmin() )
+	   theAmp = PFcnLeft->Eval(pPosition,0.,0.);
+       }
 
      }
 
@@ -434,12 +445,6 @@ void WriteOutPIDTableMacro( char* myOutputName){
      theSigma=
     mSigmaOfSingleTrail[etaIdx]*theCenter/TMath::Sqrt(nhitsPosition);
 
-
-
-     //    theSigma *=1.12; //temp fix. the calculated resolution is a little bigger 
-     //than multi-gaus fitted resolution, and the resolution of pion has big
-     //effect on electrion Identification. Here instead let all reso goes down 
-     //a little, I let electron reso goes up, a temporary fix.
 
 
      theAmp= (theAmp<FLT_MAX && theAmp>0.) ? theAmp : 0.;
