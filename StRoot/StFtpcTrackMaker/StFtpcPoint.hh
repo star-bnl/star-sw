@@ -1,5 +1,8 @@
-// $Id: StFtpcPoint.hh,v 1.3 2000/07/18 21:22:16 oldi Exp $
+// $Id: StFtpcPoint.hh,v 1.4 2000/08/01 12:24:04 hummler Exp $
 // $Log: StFtpcPoint.hh,v $
+// Revision 1.4  2000/08/01 12:24:04  hummler
+// add writing to table functionality (ToTable() function)
+//
 // Revision 1.3  2000/07/18 21:22:16  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -71,6 +74,7 @@ public:
                  StFtpcPoint(Double_t *x, Int_t row);           // constructor which take an arbitrary point as input
   virtual       ~StFtpcPoint();                                 // destructor
   virtual Int_t  Write();                                       // writes cluster to disc
+  virtual Int_t  ToTable(fcl_fppoint_st *point_st);                                       // writes cluster to STAF table
   
   // getter
   StThreeVector<double> GetCoord()  { return mCoord;    }
