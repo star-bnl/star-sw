@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.20 2003/09/02 17:59:26 perev Exp $
+// $Id: StXiMaker.cxx,v 1.21 2003/09/23 01:18:18 jeromel Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.21  2003/09/23 01:18:18  jeromel
+// READ_UNINIT_MEM(read) problem fixed (of course used in a if() statement)
+//
 // Revision 1.20  2003/09/02 17:59:26  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -84,6 +87,8 @@ ClassImp(StXiMaker)
   //_____________________________________________________________________________
   StXiMaker::StXiMaker(const char *name):StMaker(name)
 {
+  m_exiaux = 0;
+  m_exipar = 0;
   drawinit=kFALSE;
 }
 //_____________________________________________________________________________
