@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.cc,v 1.1 1999/01/30 03:59:05 fisyak Exp $
+ * $Id: StThreeVectorF.cc,v 1.2 1999/06/04 18:00:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,10 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.cc,v $
- * Revision 1.1  1999/01/30 03:59:05  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/06/04 18:00:12  ullrich
+ * Added new constructor which takes C-style array as argument.
+ * New operators operator() and operator[] which can be used
+ * as lvalues.
  *
  * Revision 1.3  1999/10/15 15:46:51  ullrich
  * Changed output format in operator<<
@@ -30,6 +32,20 @@
 #include <assert.h>
 #include "StThreeVectorF.hh"
 
+#ifdef __ROOT__
+#include "TBuffer.h"
+ClassImp(StThreeVectorF)
+#endif
+
+StThreeVectorF::StThreeVectorF(const StThreeVectorD& v)
+    : mX1(v.x()), mX2(v.y()), mX3(v.z()) {/* nop */}
+
+StThreeVectorF::StThreeVectorF(const float *a)
+{
+    mX1 = a[0];
+    mX2 = a[1];
+    mX3 = a[2];
+}
 
 StThreeVectorF::StThreeVectorF(const double *a)
 {
