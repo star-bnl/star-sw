@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibration.cxx,v 1.2 2002/01/22 07:11:32 geurts Exp $
+ * $Id: StTofCalibration.cxx,v 1.3 2002/01/22 16:12:42 geurts Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibration.cxx,v $
+ * Revision 1.3  2002/01/22 16:12:42  geurts
+ * minor bugfix for Solaris
+ *
  * Revision 1.2  2002/01/22 07:11:32  geurts
  * doxygenized
  *
@@ -85,7 +88,7 @@ void StTofCalibration::init(){
 }
 
 /// dump contents of calibration vector to stdout
-void StTofCalibration::print(ostream& os = cout){
+void StTofCalibration::print(ostream& os){
   os << "------StTofCalibration:print()----" << endl;
   os << " CalibrationVector Size = " << mSlatCalibVec.size() << endl;
   for (unsigned int i=0;i<mSlatCalibVec.size();i++){
