@@ -1,12 +1,11 @@
 #!/opt/star/bin/perl
-#use Env;
 Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
 (my $build = $OBJ) =~ s/\#//g;
-$build =~ s/\\/\//g;# print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
-(my $ObjDir = DirPath '.') =~ s/\\/\//g;# print "ObjDir = $ObjDir\n";
-(my $Dir = $ObjDir) =~ s/$build\///g;# print "Dir = $Dir\n";
-$ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
-(my $obj_dir = $ObjDir) =~ s/^\#//g;# print "obj_dir = $obj_dir\n";
+$build =~ s/\\/\//g;
+(my $ObjDir = DirPath '.') =~ s/\\/\//g;
+(my $Dir = $ObjDir) =~ s/$build\///g;
+$ObjDir = "#" . $ObjDir; 
+(my $obj_dir = $ObjDir) =~ s/^\#//g;
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my $pkg  = root4star;
 my @GDIRS = qw(.
@@ -17,28 +16,19 @@ my @GDIRS = qw(.
 	      );
 
 my $PKG  = $pkg . $env->{SUFEXE};
-my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};# print "SO_PKG = $SO_PKG\n"; 
+my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};
 my $LIBPKG = $PKG . "." . $env->{SUFLIB};
-my @h_files = find_hfiles($Dir);#   $i = 0; for my $s (@h_files) {print "i=",$i++," h_files = ",$s,"\n";}
-$CPPPATH = "#asps/agi:#asps/agi/gst:" . $env->{CPPPATH};# . ":" . $env->{ENV}->{STAF} . "/inc"; 
-#  $env->{ENV}->{CERN_ROOT} .  "/src/graflib/higz";
+my @h_files = find_hfiles($Dir);
+$CPPPATH = "#asps/agi:#asps/agi/gst:" . $env->{CPPPATH};
 $CPPFLAGS = $env->{CPPFLAGS} . " -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
 if ($STAR_SYS =~ /egcs$/) {$CPPFLAGS .= " -DPrivateMalloc";}
 print "build $pkg with cons\n";
-(my $share = $EXPORT .  "/" . $Dir) =~ s/\/asps//g; #print "new share $share\n" if $param::debug;
+(my $share = $EXPORT .  "/" . $Dir) =~ s/\/asps//g; 
 my $CXXFLAGS = $env->{CXXFLAGS};
 my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib:" . $env->{LIBPATH};
 my $LIBS  = $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS} . " " . $env->{LIBS};
-   $LIBS .= " -lSTAR -lStar2Root";# -lSt_base -lStUtilities";  
-my $Libraries = "";
-if ($STAR_SYS =~ /^sun4x_56_CC5$/) {
-  my $glob = $env->{ENV}->{ROOTSYS} . "/." . $STAR_SYS . "/root/cint/stl/*.dl*";# print "glob = $glob\n";
-  my @dll = glob $glob;# print "dll = @dll\n";
-  my $libs = "";
-  foreach my $l (@dll) {$libs .= " " . $l;}
-  $Libraries = $libs . " " . $env->{Libraries};# print "Libraries $Libraries\n";
-}
-else {$Libraries = $env->{Libraries};}
+   $LIBS .= " -lSTAR -lStar2Root";
+my $Libraries =  $env->{Libraries};
 if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
 $env2 = $env->clone('CPPPATH'      => $CPPPATH,
 		    'CPPFLAGS'     => $CPPFLAGS,
@@ -49,10 +39,10 @@ $env2 = $env->clone('CPPPATH'      => $CPPPATH,
 		   );
 my @src = ();
 foreach my $d (@GDIRS){
-  my $dir = $Dir . "/" . $d;#      print "dir = $dir\n";
-  my @sources  = find_sources($dir);#  my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
+  my $dir = $Dir . "/" . $d;
+  my @sources  = find_sources($dir);
   foreach my $s (@sources) {
-    my $ss = $d . "/" . $s;# print "ss = $ss\n";
+    my $ss = $d . "/" . $s;
     next if $ss =~ /\/gst\/agsim\/agdummy\.g/ or $ss =~ /traceqc/ or $ss =~ /ighcxy/;
     push @src, $ss; 
   }
@@ -64,9 +54,9 @@ foreach my $cpp (@cpps,$Dir) {
   if ($ROOTCINT_CPP) {$ROOTCINT_CPP .= ":" . $cpp;}
   else               {$ROOTCINT_CPP .= $cpp;}
 }
-$cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n" if $param::debug;
-my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
-my $DIR = cwd(); #print "DIR = $DIR\n" if $param::debug;
+$cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP);
+my $ROOTCINT_CPPPATH = $cscanner->iflags;
+my $DIR = cwd(); 
 my $line;
 my @Defs = ();
 if ($Dir !~ /pams\//) {
@@ -80,7 +70,7 @@ if ($Dir !~ /pams\//) {
     }
     else {      
       foreach my $Rep (@Repo) {
-	my $RepDir = $Rep . "/" . $Dir;# print "RepDir = $RepDir\n" if $param::debug;
+	my $RepDir = $Rep . "/" . $Dir;
 	if (-d $RepDir) {
 	  my $hh = $RepDir . "/" . $h;
 	  if (-r $hh) {
@@ -97,19 +87,18 @@ if ($Dir !~ /pams\//) {
 if ($#Defs > -1) {
   Install $env2 $INCLUDE, @Defs;
   my @CintFiles = 
-  ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h");#, $share . "/"  . "LinkDef.h"); 
-#  print "CintFiles = @CintFiles\n";
+  ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h");
   my @defs = ();
   my @d    = ();
   foreach my $def (@Defs) {
     push @defs, $share . "/" . basename($def); 
     push @d   , "#include/" .  basename($def); 
   }
-  Install $env2 $share, @d;# print "Install $env2 $share, @d\n";
+  Install $env2 $share, @d;
   Command $env2 [@CintFiles], @defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
   Install $env2 $ObjDir, @CintFiles;
   (my $cint =  $CintFiles[0]) =~ s/$share/$ObjDir/g;
-  push @src, $cint; #print "+==========add $cint\n";# if $param::debug; 
+  push @src, $cint; 
 }
 
 if ($#src > -1) {
