@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.174 2001/02/16 17:27:05 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.175 2001/03/03 03:04:19 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -177,6 +177,7 @@ Bfc_st BFC[] = {
   {"tpc_daq"     ,"tpc_raw","tpcChain","tpc_T"              ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,""  ,"tpcChain","Simu"                           ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
+  {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
   {"tpt"         ,"tpc_tracks","tpcChain","tpc_T,tls,"     ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"TpcT0"      ,"TpcT0","","tpc_T,svt_T,ctf_T,ftpcT,globT,tls,db,tpcDB,tpc_daq,kalman,ry1h","StTpcT0Maker",
                    "St_tpc,St_tcl_Maker,St_tpt_Maker,St_svt,St_global,St_dst_Maker,StTpcT0Maker","",kFALSE},
