@@ -90,16 +90,18 @@ Int_t StSpectraTagMaker::Make(){
   	     dedxPidTr = dynamic_cast<StDedxPidTraits*>(thisTrait);
 	     if (dedxPidTr && dedxPidTr->method() == kTruncatedMeanId) {
               dedx = dedxPidTr->mean();
+              if (!dedx) continue;
               ndedx = dedxPidTr->numberOfPoints();
              }
         }
       }
       //look for Abar candidate:  require 20 hits, 10 dE/dx samples, negative charge, Z_deuteron>0.5, apparent momentum < 5, apparent momentum <0.2
+     if (!dedx)          continue;
      z_deuteron = ::log(dedx/dedx_deuteron);
      if (z_deuteron<0.5) continue;
-     if (npntfit<20) continue;
-     if (ndedx<10) continue;
-     if (chargesign>0) continue;
+     if (npntfit<20)     continue;
+     if (ndedx<10)       continue;
+     if (chargesign>0)   continue;
      if (momentum>5||momentum<0.2) continue;
      ANucs++;
     }  // loop over tracks
