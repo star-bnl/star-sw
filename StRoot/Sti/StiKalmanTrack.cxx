@@ -689,7 +689,7 @@ vector<StMeasuredPoint*> StiKalmanTrack::stHits() const
     if (hit) {
       StMeasuredPoint * stHit = const_cast<StMeasuredPoint*>( hit->stHit() );
       if (stHit)
-	hits.push_back(stHit);
+				hits.push_back(stHit);
     }
     ++it;
   }
@@ -766,6 +766,7 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   chi2 = tNode->evaluateChi2(vertex); 
   if (chi2<pars->maxChi2ForSelection)
     {
+      tNode->setHit(vertex);
       tNode->setChi2(chi2);
       add(tNode);
       trackExtended = true;

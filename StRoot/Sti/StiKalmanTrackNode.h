@@ -229,6 +229,7 @@ public:
 inline void StiKalmanTrackNode::reset()
 { 
   StiTrackNode::reset();
+	_detector = 0;
   _cosAlpha = 1.;
   _alpha=_sinAlpha=_x=_refX=_p0=_p1=_p2=_p3=_p4=0.;
   // diagonal error set to 1

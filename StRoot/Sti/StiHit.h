@@ -224,11 +224,19 @@ inline void StiHit::setGlobal(const StiDetector * detector,
 			      float gx, float gy, float gz,
 			      float energy)
 {
-  StiPlacement * placement = detector->getPlacement();
-  mrefangle = placement->getNormalRefAngle();
-  mposition = placement->getLayerRadius();
-  mx =  detector->_cos*gx + detector->_sin*gy;
-  my = -detector->_sin*gx + detector->_cos*gy;
+	if (detector)
+		{
+			StiPlacement * placement = detector->getPlacement();
+			mrefangle = placement->getNormalRefAngle();
+			mposition = placement->getLayerRadius();
+			mx =  detector->_cos*gx + detector->_sin*gy;
+			my = -detector->_sin*gx + detector->_cos*gy;
+		}
+	else
+		{
+			mrefangle = 0.;
+			mposition = 0.;
+		}
   mz = gz;
   msxx = 1.;//sxx;
   msyy = 1.;//syy;
@@ -248,9 +256,17 @@ inline void StiHit::set(const StiDetector * detector,
 		 float x, float y, float z, 
 		 float sxx, float sxy, float sxz, float syy, float syz, float szz)
 {
-  StiPlacement * placement = detector->getPlacement();
-  mrefangle = placement->getNormalRefAngle();
-  mposition = placement->getLayerRadius();
+	if (detector)
+		{
+			StiPlacement * placement = detector->getPlacement();
+			mrefangle = placement->getNormalRefAngle();
+			mposition = placement->getLayerRadius();
+		}
+	else
+		{
+			mrefangle = 0.;
+			mposition = 0.;
+		}
   mx = x;
   my = y;
   mz = z;
