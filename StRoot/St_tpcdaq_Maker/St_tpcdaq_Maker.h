@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.31 2002/02/13 22:03:00 jeromel Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.32 2002/10/11 18:10:54 jeromel Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.32  2002/10/11 18:10:54  jeromel
+// Changes to accomodate for DAQ100 Cluster reading or raw hit reading
+//
 // Revision 1.31  2002/02/13 22:03:00  jeromel
 // Swell, made incomplete prototype .. Now ** really ** fixed.
 //
@@ -143,8 +146,9 @@ class St_tpcdaq_Maker : public StMaker {
   tpcdaq_noiseElim noiseElim[24]; //!
 #endif
 
-   StTrsDetectorReader* mTdr; //!
+   StTrsDetectorReader* mTdr;  //!
    ZeroSuppressedReader* mZsr; //!
+   Int_t daq_flag;             //! 
 
    Int_t GetEventAndDecoder();
  protected:
@@ -192,6 +196,7 @@ class St_tpcdaq_Maker : public StMaker {
    void AsicThresholds(float gain,int *nseq,StSequence **lst);
 #endif
    int getSequences(float gain,int whichPadRow,int pad,int *nseq,StSequence **seqList);
+   void SetDAQFlag(Int_t);
    void SetNoiseEliminationStuff();
    void WriteStructToScreenAndExit();
    void SetConfig(Char_t *conf) {gConfig = conf;  
@@ -209,7 +214,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.31 2002/02/13 22:03:00 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.32 2002/10/11 18:10:54 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };
