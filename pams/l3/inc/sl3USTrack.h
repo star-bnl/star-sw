@@ -13,7 +13,7 @@ public:
     float     z0;        /* z   coordinate of the first point */
     float     r0;        /* r   coordinate of the first point */
     float     phi0;      /* phi coordinate of the first point */
-    float     Errors ;   /* dpt, dpsi, dtanl errors (10bits*3)  */
+    float     errors ;   /* dpt, dpsi, dtanl errors (10bits*3)  */
 
     void print ( ) {
         printf ( " id %d nHits %d pt %e tanl %e psi %e \n",

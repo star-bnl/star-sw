@@ -6,19 +6,23 @@
 **:                         bank instead of FILE) using
 **:                         daqFormats.h
 **:           oct 25, 1999  ppy: use sl3CoordianteTransform header
-**:   
-**:  
+**:           11/24/99      cle: include <L3Formats.h> intead daqFormats.h
+**:                         commented out fillUSTracks
+**:                         added public sectorNr variable
+**:           12/03/99      ppy: sectorGeometry class added
+**:                              variable sectorGeo added
+**:                              clean extra includes    
+**:           12/06/99      ppy: method added to check whether track can be merged
 **:<------------------------------------------------------------------*/
 #ifndef FTFSL3
 #define FTFSL3
 
 #include "FtfFinder.h"
-#include "sl3MPTrack.h"
-#include "sl3USTrack.h"
+//#include <SECTOR/daqFormats.h>
 #include "daqFormats.h"
 #include "sl3CoordinateTransform.h"
 
-#define checkByteOrder(byte_order)    ( (byte_order) == (DAQ_RAW_FORMAT_ORDER) ? (1) : (-1) )
+#define checkByteOrder(byte_order)    ( (byte_order) == (DAQ_RAW_FORMAT_ORDER) ? (1) : (0) )
 
 #ifdef SL3ROOT
 #include "Rtypes.h"
@@ -26,16 +30,32 @@
 #define ClassDef(a,b)
 #endif
 
+#define NSECTORS 24
+
 int rawToGlobal ( int sector, int row, double pad, double tb,
 		  double &x, double &y, double &z);
+
+class sectorGeometry {
+public:
+   double phiMin ;
+   double phiMax ;
+   double phiShift ;
+   double etaMin ;
+   double etaMax ;
+};
 
 class FtfSl3: public FtfFinder 
 {
 
 public:
-   sl3MPTrack *sl3Track ;
    
+   int sectorNr; 
    short     debugLevel  ;
+   //
+   //  Sector phase space
+   //
+   sectorGeometry sectorGeo[NSECTORS] ;
+
    FtfSl3 (  ) { 
       debugLevel = 0 ;
    };
@@ -43,8 +63,8 @@ public:
         if ( track != 0 ) delete []track ;
         if ( hit   != 0 ) delete []hit   ;
    };
-   int   fillTracks      ( int maxBytes, int* buff ) ;
-   int   fillUSTracks    ( int maxBytes, int* buff ) ;
+   int   fillTracks      ( int maxBytes, char* buff, unsigned int token ) ;
+   int   canItBeMerged   ( FtfTrack* thisTrack ) ;
    int   processSector   ( ) ;
    int   readMezzanine   ( int sector, struct TPCMZCLD_local *mzcld );
    int   readSector      ( struct TPCSECLP *seclp ) ; 
@@ -56,3 +76,7 @@ public:
 
 };
 #endif
+
+
+
+

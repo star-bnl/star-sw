@@ -8,6 +8,7 @@
 //:              3jun1999 ppy add fillTracks flag
 //:             11aug1999 ppy add vertexConstrainedFit variable
 //:             23aug1999 ppy add ROOT option
+//:             19nov1999 ppy add maxChi2Primary to decide whether track is primary
 //:
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
@@ -19,7 +20,6 @@
 #else
 #define ClassDef(a,b)
 #endif
-
 //
 //           fft control parameters                          
 //
@@ -50,6 +50,7 @@
        short     nPrimaryPasses;  // # iterations looking for primaries
        short     nSecondaryPasses;// # iterations looking for secondaries
        short     vertexConstrainedFit; // 
+       float     maxChi2Primary ; // maximum chi2 to be considered primary 
        short     rowInnerMost;    // Row where end track search 
        short     rowOuterMost;    // Outer most row to consider tin tracking
        short     rowStart;        // Row where start track search

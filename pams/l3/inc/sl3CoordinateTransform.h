@@ -20,6 +20,7 @@
 #define outerSectorPadPitch     0.67     // cm
 #define driftLength             208.     // cm
 #define lengthPerTb             0.5977   // = 208/348
+#define NSECTORS                24 
 
 
 // number of pads in padrow
@@ -44,7 +45,7 @@ static double radialDistanceAtRow[45] = {
 };
 
 // sector-rotation factors: 30 degree steps
-static double SectorSin[24] = {
+static double SectorSin[NSECTORS] = {
      0.5,  0.866025404,
      1.0,  0.866025404,
      0.5,  0.,
@@ -59,7 +60,7 @@ static double SectorSin[24] = {
      0.5,  0.,
 };
 
-static double SectorCos[24] = {
+static double SectorCos[NSECTORS] = {
      0.866025404,  0.5,
      0.,          -0.5,
     -0.866025404, -1.0,
@@ -73,7 +74,6 @@ static double SectorCos[24] = {
      0.,          -0.5,
     -0.866025404, -1.0,
 };
-
 
 inline int rawToLocal ( int row, double pad, double tb,
 			double *xLocal, double *yLocal, double *zLocal) {

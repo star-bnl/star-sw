@@ -27,7 +27,7 @@ class FtfFinder {
 
 public:
    FtfFinder( ) ;
-   friend FtfTrack ;
+   friend class FtfTrack ;
 	
    void    dEdx                    ( ) ;
    int     getTracks               ( ) ;
@@ -41,6 +41,7 @@ public:
 //
 //
    int           nHits      ;  
+   int           nHitsOutOfRange ;
    int           maxHits    ;  
    FtfHit        *hit       ;  
    int           nTracks    ; 

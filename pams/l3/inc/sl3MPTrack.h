@@ -1,20 +1,6 @@
 #ifndef SL3MPTRACK
 #define SL3MPTRACK
  
-
-class TrackHeader {
-public:
-   long nBytes ;  
-   short sourceId ;
-   short targetId ;
-   float cpuTime ; 
-   float realTime;
-   int   nHits   ;
-   int   nTracks ;
-   int   bTrack  ;
-};
-
-
 class sl3MPTrack {
 public:
    short    id     ;// id

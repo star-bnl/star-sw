@@ -28,11 +28,8 @@ public:
    float     vertex[3] ;  // track origin 
 
    long      nMcHits ;  // # space points in hit array
-   FtfMcSpacePoint* hit ;
 
-   FtfMcTrack  ( ) ;
-   ~FtfMcTrack  ( ) ;
-   inline virtual   void nextHit (){ currentHit = currentHit->nextMcTrackHit ; } ;
+   inline virtual void nextHit (){ currentHit = currentHit->nextMcTrackHit ; } ;
 
 } ;
 #endif
