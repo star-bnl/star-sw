@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.7 1999/11/24 18:55:19 ullrich Exp $
+% $Id: StEvent.tex,v 2.8 1999/12/01 21:08:19 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -143,8 +143,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.7 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/24 18:55:19 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.8 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/01 21:08:19 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -168,8 +168,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.7 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/24 18:55:19 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.8 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/01 21:08:19 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -177,56 +177,61 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.7 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/24 18:55:19 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.8 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/01 21:08:19 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-where-ever possible forward declarations were used.  This is
-  {\LARGE $ $Date: 1999/11/24 18:55:19 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.8 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/01 21:08:19 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.7 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/24 18:55:19 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.8 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/01 21:08:19 $ $}  % replaced by cvs with current revision
 %
 %    Title page
-\emph{all} header files needed to use every little bit of \StEvent\ 
-put together in one single file: \texttt{StEventTypes.h}.  The
-disadvantage of this approach is that every time one \StEvent\ class
-changes you have to recompile all your code, even if the changed class
-is not used. This, however, should not happen too often and it by far
-more convenient to deal with on header file only.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{titlepage}
+\pagestyle{empty}
+\vspace*{-25mm}
+\begin{center}
+  \mbox{\includegraphics[width=2cm]{StarIcon.eps}}
   {\Large\bf STAR Offline Library Long Writeup}
   \hfill\mbox{}\\[3cm]
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.7 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/24 18:55:19 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.8 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/01 21:08:19 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
-\StEvent\ uses a lot of enumeration for all types of purposes. This is
-much more type-safe then using simple integer numbers and makes the
-code much more readable. All enumerations used in \StEvent\ are
-defined in \texttt{StEnumerations.h}.  For users convenience also the
-``standard'' header files \texttt{StDetectorId.h},
-\texttt{StVertexId.h} and \texttt{StTrackMethod.h} are included
-therein.
+\cleardoublepage
+\end{titlepage}
+\pagenumbering{roman}
+\texttt{StEnumerations.h}.  For users convenience some non-\StEvent\ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 %    Table of content
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \tableofcontents
 \cleardoublepage
 
-To remind you of the names and save you the time to look them up every
-time they are all listed below:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 %    Introduction
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagenumbering{arabic}
 
+\section{Introduction} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+This document contains the User Guide and Reference Manual for
 \StEvent\ version 2. Like the new version of \StEvent\ this
+documentation is a complete rewrite and supersedes all documentation
 with revision number 1.xx. All code and documentation for the new
+version has a cvs version number of greater or equal 2.00.
 
 In this document more emphasis is put on the User Guide while the
 Reference Manual part is kept shorter in terms of description of
@@ -252,59 +257,61 @@ is given in Appendix~\ref{sec:introUML}.\index{UML}
 \begin{figure}[hb]
     \begin{center}
         \includegraphics[width=0.9\textwidth]{cartoon1.eps}
+        \caption{The task of the software development team is to
             engineer the illusion of simplicity.}
     \end{center}
 \end{figure}
 
 \clearpage
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 enum StDedxMethod           {kUndefinedMethodId,       
                              kTruncatedMeanId,         
                              kEnsembleTruncatedMeanId, 
                              kLikelihoodFitId,         
                              kWeightedTruncatedMeanId, 
 \clearpage
-enum StTrackFindingMethod   {kUndefinedFinderId,         
-                             kSvtGrouperId,
-                             kSvtStkId,
-                             kTpcStandardId,
-                             kSvtTpcSvmId,
-                             kSvtTpcEstId};                          
-enum StTrackQualityScheme   {kUndefinedQualityId,        
-                             kGrouperPassId,
-                             kStkPassId,
-                             kSvmPassId,
-                             kEstPassId};                                                      
+
 enum StTrackFittingMethod   {kUndefinedFitterId,         
 \label{sec:Basics}
 
 \subsection{Header Files}
 \label{sec:HeaderFiles}
 \index{header files} \index{StEventTypes.h file}
+
+The amount of header files included in the \StEvent\ classes was
+minimized to decrease dependencies between the various classes and
+                             svtOther, 
+especially true for the \texttt{StEvent} class itself and it is
+therefore \emph{not} sufficient to include \texttt{StEvent.h} only.
+Many more header files would have to be included. This is very good
+for the developers since turnaround times are minimized but obviously
+bad for the users for it would be very cumbersome to each time figure
+out which header files one might need and which not. Therefore are
 \emph{all} header files which are needed to use every little bit of
 \StEvent\ contained in one single header file named
 \texttt{StEventTypes.h}.  The disadvantage of this approach is that
-are used as an argument types. The strong C++ type checking rules
-ensures the proper use of the enumeration constants already during
+every time one \StEvent\ class changes you have to recompile all your
+code, even if the changed class is not used. This, however, should not
 happen too often and it by far more convenient to deal with on header
 file only.
 
-namely the physical constants as defined in
-\texttt{PhysicalConstants.h}.  There are too many to be listed here
-but you should make yourself familiar with what is available. You will
-find it in the \name{StarClassLibrary} (see
-Sec.~\ref{sec:furtherDoc}). \index{StarClassLibrary} In order to
-define the units of the various physical constants another set of
-constants defined in \texttt{SystemOfUnits.h} is used (also from
-\name{StarClassLibrary}). The latter is described in section
-\ref{sec:units}.
+To summarize: All you need when using \StEvent\ is to include
+\texttt{StEventTypes.h} and you are all set.
+
+\subsection{Enumerations and Constants}
+\label{sec:Enumerations}
+\index{enumerations} \index{constants} \index{StDetectorId.h file}
+\index{StVertexId.h file} \index{StEnumerations.h file}
+
 \StEvent\ uses a lot of enumerations for all types of purposes. This
 is much more type-safe then using simple integer numbers and makes the
 code more readable. All enumerations used in \StEvent\ are defined in
 \texttt{StEnumerations.h}.  For users convenience some non-\StEvent\
 header files as \texttt{StDetectorId.h}, \texttt{StVertexId.h} and
-\subsubsection{Numbering Scheme}
+\subsubsection{Numbering Scheme} 
 enum StTrackType            {global, primary, secondary};
+    \begin{center}
 All numbering follows \emph{strictly} the C/C++ convention. This
 includes not only indices as usual but also for example sector
 numbers, row numbers and wafer numbers. If you follow this rule things
@@ -326,27 +333,28 @@ If you find a deviation from this rule it is a bug.
                              kTpcSsdId,
                              kTpcSvtId,
                              kTpcSsdSvtId,
-\emph{not} guaranteed to exist. You might get a NULL pointer back.  It
-is always a good idea to check if you really get what you asked for.
-Dereferencing a NULL pointer can be painful.
+                             kSsdSvtId};
+
+enum StVertexId             {kUndefinedVtxId,
                              kEventVtxId,
-As you will see in the reference sections many methods are provided in
+                             kV0VtxId,
                              kXiVtxId,
                              kKinkVtxId,
                              kOtherVtxId};
 
 enum StDedxMethod           {kUndefinedMethodId,
-\index{units} \index{system of units} All physics quantities in
-\StEvent\ are stored using the official STAR units: cm, GeV and Tesla.
-Angles are given in radians\footnote{Note, that here \StEvent\ 
-    deviates from STAR guidelines where degrees are declared the
-    official units.}  In order to maintain a coherent system of units
-it is recommended to use the definitions in \texttt{SystemOfUnits.h}
-from the StarClassLibrary. They allow to 'assign' a unit to a given
-variable by multiplying it with a constant named accordingly
-(centimeter, millimeter, kilometer, Tesla, MeV, ...).  The value of
-the constants is thus that the result after the multiplication follows
-always the STAR system of units.
+                             kTruncatedMeanId,
+                             kEnsembleTruncatedMeanId,
+                             kLikelihoodFitId,
+                             kWeightedTruncatedMeanId,
+                             kOtherMethodId};
+           
+enum StTrackFittingMethod   {kUndefinedFitterId,
+                             kHelix2StepId,
+                             kHelix3DId,
+                             kKalmanFitId,
+                             kLine2StepId,
+                             kLine3DId};
 
                              tpcOther,
                              ftpcConformal,
@@ -392,10 +400,11 @@ addressing elements in a container.
 TPC, SVT and FTPC hits return their hardware address in STAR units.
 In order to select the hit container in which a hit \texttt{h} is
 stored you must write:
-Further documentation can be found in the StarClassLibrary manual (see
-Sec.~\ref{sec:furtherDoc}).\vfill
+\begin{verbatim}
+evt->tpcHitCollection()->sector(h.sector()-1)->padrow(h.padrow()-1).hits();
 \end{verbatim}
 
+\ 
 programming language and C/C++ played only a minor role. Again, the only
 place where you have to deal with these conventions is when you use one of the
 following methods:
@@ -419,7 +428,7 @@ See the corresponding reference sections for more.
 Many methods (or member functions) or \StEvent\ classes return objects
 by \emph{reference} or by \emph{pointer}. This is sometimes confusing
 but there is a idea behind this. Whenever an object is returned by
-\StEvent\ classes we make heavily use of STL features.
+reference it is guaranteed to exist. No questions asked. If the object
 is a container it might be empty, i.e. it has zero size, but you ask
 for it you get it. Objects returned by pointer, however, are
 \emph{not} guaranteed to exist. You might get a \texttt{NULL} pointer
@@ -484,12 +493,12 @@ E2 = 0.1234 GeV
 
 My units:
 a = 100 mm
-and non-structural collection. Their interface is the same and they
-act they same. The secret lies in their implementation. If you create
-a container by your own you should always use the non-structural
-containers. Those you van create and delete without doing \StEvent\ 
+b = 4000 um
+c = 0.0254 m
+E1 = 0.00013 TeV
+containers. Those you can create and delete without doing \StEvent\ 
 \end{verbatim}
-your back to wall with a sharp knife on your throat.
+Further documentation can be found in the \name{StarClassLibrary}
 manual (see Sec.~\ref{sec:furtherDoc}).\vfill
 
 \subsection{Persistence and ROOT}
@@ -516,9 +525,9 @@ Library as:
 \end{itemize}
 This however applies for the header files only. Source files are not
 processed via \texttt{rootcint} and therefore all the stuff mentioned
-compatible interface.  This means that \emph{both} containers classes
+above can be used.  And indeed in the implementation of various
 \StEvent\ classes we make heavily use of the STL.
-with whatever \StEvent\ class.
+\begin{figure}[ht]
     \begin{center}
         \includegraphics[width=0.5\textheight]{cartoon4.eps}
         \caption{Persistence saves the state and class of an object
@@ -530,29 +539,33 @@ with whatever \StEvent\ class.
 ROOT uses typedefs for the built-in standard C++ types. This is pretty
 confusing but has a good reason when it comes to persistence. This way
 one can guarantee the same size (number of bytes) for the types
-
 independent of the platform.  The ANSI/ISO standard only requires
 that: \texttt{char} $\le$ \texttt{short} $\le$ \texttt{int} $\le$
-    Copy constructor. Structural containers copies also the objects it
-    contains.
+\texttt{long} $\le$ \texttt{long long} and \texttt{float} $\le$
+\texttt{double} $\le$ \texttt{long double}.
 
 The types used in \StEvent\ are defined as follows:
 \begin{verbatim}
 typedef char           Char_t;      //Signed Character 1 byte
 typedef unsigned char  UChar_t;     //Unsigned Character 1 byte
     
+    
 typedef short          Short_t;     //Signed Short integer 2 bytes
 typedef unsigned short UShort_t;    //Unsigned Short integer 2 bytes
 typedef int            Int_t;       //Signed integer 4 bytes
 typedef unsigned int   UInt_t;      //Unsigned integer 4 bytes
 typedef long           Long_t;      //Signed long integer 4 bytes
+    
 
 typedef unsigned long  ULong_t;     //Unsigned long integer 4 bytes
 typedef float          Float_t;     //Float 4 bytes
     
+    
 typedef double         Double_t;    //Float 8 bytes
 typedef unsigned char  Bool_t;      //Boolean
-    Deletes all elements.
+\end{verbatim}
+
+This is fine and good but there is absolutely no reason to use them in
     
 
 code other than in the definition of class data member. Even worse
@@ -569,7 +582,7 @@ therefore allow random-access as in
 \begin{verbatim}
     pointer_to_object = container[i];
 \end{verbatim}
-    to structural containers the objects gets deleted.
+that is they are ordered collections. There are two different types of
 containers, so called structural and non-structural containers.  What
 that means is rather simple. Structural containers \emph{own} the
 objects they contain the others not. If you delete a structural
@@ -577,24 +590,23 @@ container all objects stored in it get deleted as well.
 \begin{itemize}
 \item All \textbf{s}tructural \textbf{vec}tors which store
     \textbf{p}oin\textbf{t}e\textbf{r}s carry the prefix \textbf{\texttt{StSPtrVec}}.\\
-more you better have a look at the \texttt{StArray.h} source code
-directly.
+\item All other \textbf{vec}tors which store
     \textbf{p}oin\textbf{t}e\textbf{r}s carry the prefix
-Needless to say that every container comes with two iterators a
-constant and a non-constant version.  The name of each iterators is
-composed of the name of container and the
+    \textbf{\texttt{StPtrVec}}.
+\end{itemize}
+That's simple. To complete the name we append the type of objects they
 contain and we are done. Hence a structural container which holds
 objects (or better pointer to objects) of type \texttt{StTrackNode} is
 named \texttt{StSPtrVecTrackNode}. The \texttt{St} prefix of the class
-StSPtrVecTrackNodeConstIterator are defined.  Iterators care if the
-iterate over about structural or non-structural containers so there
-are two sets of iterators for \texttt{StSPtrVecTrackNode} and
+is always omitted.\\
+In practice it makes little difference if you are using a structural
+or non-structural collection. Their interface is the same and they act
 they same. The secret lies in their implementation. If you create a
 container by your own you should always use the non-structural
 containers. Those you can create and delete without doing \StEvent\
 any harm. Never delete a structural container unless you stand with
 your back to a wall and a sharp knife on your throat.
-version has some advantages and is safer.
+
 All containers used in \StEvent\ are defined in the
 \texttt{StContainers.h} header file and are based on \texttt{StArray}
 which was written by Victor Perevoztchikov.  \index{StContainers.h}
@@ -642,44 +654,44 @@ with any \StEvent\ class one might find in a container.
     \verb+void push_back(const StClassName *pobj);+\\
     Adds object pointed to by \texttt{pobj}. If the container is not
     large enough it will automatically resize.
+    
+    
 
 
     \verb+UInt_t size() const;+\\
     Returns the current size of the container, i.e. the number of
     stored elements.
-    Print or do not print dump of current instances of \texttt{StRun}
-    and \texttt{StRunSummary} (default=kFALSE).
+    
+    \verb+void resize(UInt_t nelem);+\\
     Resizes the collection to size \texttt{nelem}.
 
-
-    Print or do not print info on the current StEvent
+    \verb+void clear();+\\
     Deletes all elements. If the container is a structural container
     all objects it holds get deleted.
-    element in every container (default=kFALSE). Don't use it for
-    production.
+    
     \verb+Bool_t empty() const;+\\
-
     Checks for zero size.
-    Switch on/off checks on memory usage of StEvent (default=kFALSE).
-    In order to get a memory snapshot we uses \texttt{StMemoryInfo}
-    from the \name{StarClassLibrary}.  A snapshot is taken before and
-    after the setup of StEvent and StRun.  The numbers in brackets
-    refer to the difference. Not available on SUN Solaris.
+    Switch on/off checks on memory usage of \StEvent\ 
+    \verb+const StPtrVecClassNameIterator begin() const;+\\
+    \verb+const StSPtrVecClassNameIterator begin() const;+\\
+    Returns iterator to the the first element in the collection.
+    
+    \verb+const StPtrVecClassNameIterator end() const;+\\
     \verb+const StSPtrVecClassNameIterator end() const;+\\
     Returns iterator to the the last+1 element in the collection.
     
-    took to setup StEvent. Timing is performed using \texttt{StTimer}
+    \verb+void erase(StPtrVecClassNameIterator iter) const;+\\
     \verb+void erase(StSPtrVecClassNameIterator iter) const;+\\
     Deletes element referred to by iterator \texttt{iter}.  If applied
     to structural containers the object gets also deleted.
     
-    Returns a pointer to the current StEvent object. The object
-    returned is actually of type \texttt{StBrowsableEvent}.
+\item[Public Member\\ Operators]
+    \verb+StClassName*& operator[](UInt_t i);+\\
     Returns the pointer to the \texttt{i}'th element where \texttt{i}
     runs from 0 to \texttt{size()-1}.
-    Returns a pointer to the current StRun object.  This object is
-    only updates for a new run, else you will get always the same
-    instance.
+\end{Entry}
+There are many more than one can describe here.  If you want to learn
+more you better have a look at the \texttt{StArray.h} source code.
 
 Needless to say that every container comes with two iterators, a
 constant and a non-constant version.  The name of each iterator is
@@ -692,11 +704,12 @@ if they iterate over structural or non-structural containers so there
 are different iterators for \texttt{StSPtrVecTrackNode} and
 \texttt{StPtrVecTrackNode} containers.
 and does all the things to make \StEvent\ nice and useful. How the DST
-\index{root4star} \index{ROOT files} \index{XDF files} In order to get
-started it is always a good idea to study a simple example which shows
-the essential steps on how to analyse data using \StEvent.  The
-procedure starting from scratch to run the provided StEvent usage
-example is
+gets into memory is another story and is explained in the next section
+the two methods to iterator/loop over a collection work both as well.
+(if any) and does all the things to make \StEvent\ nice and useful.
+How the DST gets into memory is another story and is explained in the next section
+
+\begin{verbatim}
 StPtrVecTrack container;
 float x;
 
@@ -717,17 +730,19 @@ check this from case to case. Don't say you haven't been warned.
 
 For your own analysis (or reconstruction) code you might use the
 standard STL containers together with \StEvent\ provided that you
-\item[\texttt{StAnalysisMaker}:] Pick up the \texttt{StEvent} event
-    and analyze it (incorporates a few simple examples).
+    Returns a pointer to the current \texttt{StEvent} object. The
+    object returned is actually of type \texttt{StBrowsableEvent}.
 are transient they are more efficient if speed and use less memory if
 this is your concern.
-specified root directory (see doEvents.C for details), eg. example
+
 \subsection{Getting StEvent: The StEventMaker}
 \label{sec:StEventMaker}
+
 
 \index{StEventMaker}
 
 \StEvent\ is set up and filled in a ``maker'' with the name
+
 
 \texttt{StEventMaker}.  This maker reads DST tables stored in memory
 and does all the things to make \StEvent\ nice and useful. How the DST
@@ -737,18 +752,22 @@ gets into memory is another story and is explained in the next section
     
 \item[Public Data\\ Member]
     \verb+Bool_t  doLoadTpcHits;+\\
-it yourself you can pick up StAnalysisMaker and modify it piece by
-piece or use it as a template for a Maker of your own that works with
-StEvent:
+    Controls if TPC hits should be loaded (default=kTRUE).
+    
+    \verb+Bool_t  doLoadFtpcHits;+\\
     Controls if FTPC hits should be loaded (default=kTRUE).
     
     \verb+Bool_t  doLoadSvtHits; +\\
     Controls if SVT hits should be loaded (default=kTRUE).
-    [and edit and modify]
+                              
     \verb+Bool_t  doLoadTptTracks;+\\
     Controls if TPT tracks should be loaded (default=kFALSE).
-    [and edit to use your maker]
-    root4star doEvents.C
+
+\verb+Bool_t  doPrintRunInfo;+\\
+\vfill
+Needless to say that the pointer will only be valid if
+\texttt{StEventMaker} was called beforehand.  Else you get a
+\texttt{NULL} pointer.  \vfill
     Print or do not print info on the current \StEvent\ event.
     (default=kFALSE).  This produces a lot of output. Every major
     class is dumped, the sizes of all collections, and the first
@@ -756,59 +775,65 @@ StEvent:
     
     \verb+Bool_t  doPrintMemoryInfo;+\\
     Switch on/off checks on memory usage of \StEvent\
-\index{documentation} All documentation specific to the various
-packages is under cvs control and stored in the same repository as the
-source code of the package. You will find it usually in a directory
-called \texttt{doc}.  In addition to that every package should contain
-a \texttt{README} and a \texttt{index.html} file with further
-information. (Note the ``should''.)
-
-\StEvent\ makes use of various classes from the StarClassLibrary
-(SCL).  Examples are \texttt{StThreeVector}, \texttt{StHelix} and
-\texttt{StParticleDefinition}. You should have a version of the
-corresponding LaTeX manual at hand.\index{SCL}
-\index{StarClassLibrary}
+    (default=kFALSE).  In order to get a memory snapshot we use
+    \texttt{StMemoryInfo} from the \name{StarClassLibrary}.  A
+    snapshot is taken before and after the setup of \StEvent.  The
+    numbers in brackets refer to the difference. Not available on SUN
+    Solaris yet.
+    
+    \verb+Bool_t  doPrintCpuInfo;+\\
+    Switch on/off CPU usage (default=kFALSE). Tells you how long it
+    took to setup \StEvent. Timing is performed using \texttt{StTimer}
+    from the \name{StarClassLibrary}.
+    
+\item[Public Member\\ Functions]
+    \verb+StEvent*  event();+\\
+    Returns a pointer to the current \texttt{StEvent} object.
+    
     \verb+StRun*    run();+\\
     Returns a pointer to the current \texttt{StRun} object.  This
     object gets only updated for a new run, else you will get always
     the same instance.
 \end{Entry}
 
-variables or methods.  In this manual we cannot go too much into every
-detail.
+And don't forget to check if you got a \texttt{NULL} pointer. If
+something went wrong this might be the case. Something else should be
 mentioned here: Do \emph{not} delete the \texttt{StEvent} or
-And finally you really should have the C++ bible from B.~Stroustrup
+\texttt{StRun} object you get through these methods.  They will be
 automatically deleted by the system once you read-in a new event.
 \vfill
 
-the internal structure you will find things like virtual constructors,
-overloaded new/delete operators and much more.  Then it is nice to
-have Bjarnes book around to look things up.  \index{Stroustrup,
-    Bjarne} \clearpage
+\subsection{A Standard Example: doEvents.C and StAnalysisMaker}
+\label{sec:doEvents}
+\index{doEvents.C} \index{StEventMaker} \index{StAnalysisMaker}
+\index{root4star} \index{ROOT files} \index{XDF files}
 
 In order to get started it is always a good idea to study a simple
+example which shows the essential steps on how to analyse data using
 \StEvent.  The procedure starting from scratch to run the provided
-not to describe every class and every method but to explain the idea
-behind it and illustrate a few things in examples.  If you need more
-details have a look at the reference section and if you want to know
-\emph{everything} about \StEvent\ you have to visit the source code
-directly.
+\StEvent\ usage example is
+\begin{verbatim}
+    stardev
+    mkdir workdir
+    cd workdir
     root4star
 \end{verbatim}
 At the root4star prompt type:
-    summary} The class \texttt{StRun} contains all information you
-would expect from a run header: run number, trigger settings, beam
-setup, and much more. Every living \texttt{StRun} object also contains
-a pointer to an instance of \texttt{StRunSummary} which contains - you
-guessed it - the run summary.  The fact that the summary is contained
-by pointer already tells you that the pointer might be \texttt{NULL}
-if something went wrong.
-So better make sure it is non-zero before you de-reference it.\\
+\begin{verbatim}
+    .x doEvents.C(1,"-","<DST File>")
+\end{verbatim}
+where \texttt{<DST File>} must be replaced by an actual DST file. Ask
+one of your colleges where to find the latest DST files in either XDF
+(extension .xdf) or ROOT (extension .root) format.
+
+This will run the \texttt{\$STAR/StRoot/macros/analysis/doEvents.C}
+macro which runs a chain consisting of two makers:
+\begin{description}
 \item[\texttt{StEventMaker}:] Read events from DST input files (XDF
-reconstruction like average pt, average pseudo-rapidity, CPU time, and
-similar stuff.  It does \emph{not} contain all data on the
+    files or ROOT files; the file is handled appropriately based on
+    file type) and load \StEvent.
 \item[\texttt{StAnalysisMaker}:] Picks up the \StEvent\ event and
-in a single batch job. This are usually around 50 events,an
+    analyze it (incorporates a few simple examples).
 \end{description}
 It runs the chain on either a single file or all files under a
 specified root directory (see doEvents.C for details). Example
@@ -822,13 +847,14 @@ Processes 42 events from the specified ROOT file.\\
 
 Processes all events from all files found recursively under the
 specified directory.\\
-i.e.~ many instances of \texttt{StEvent}.  \texttt{StEventMaker} (see
+\verb+.x doEvents.C(9999,"/some_directory/"," ");+\\
 
 The multiple-files feature works for XDF and ROOT files.  To play with
 it yourself you can pick up \name{StAnalysisMaker} and modify it piece
 by piece or use it as a template for a Maker of your own that works
-a small example of a function \texttt{printRunInfo} which takes a
-pointer to an instance of \texttt{StRun} and prints out some stuff.
+with \StEvent:
+
+\begin{verbatim}
     mkdir StRoot/StMyAnalysisMaker
     cp $STAR/StRoot/StAnalysisMaker/* StRoot/StMyAnalysisMaker/
     [edit and modify]
@@ -854,12 +880,12 @@ and stored in the same repository as the source code of the package.
 You will find it usually in a directory called \texttt{doc}.  In
 addition to that every package should contain a \texttt{README} and a
 \texttt{index.html} file with further information. (Note the
-properly. This code actually could have been written differently using
-the \texttt{PR(x)} macro defined in \texttt{StGlobals.h} from the
-StarClassLibrary.
+``should''.)
+
+\StEvent\ makes use of various classes from the
 \name{StarClassLibrary} (SCL).  Examples are \texttt{StThreeVector},
 \texttt{StHelix} and \texttt{StParticleDefinition}. You should have a
-one then could write\\
+version of the SCL manual at hand. It also contains a description of
 the helix track model used in STAR and contains many
 examples.\index{SCL} \index{StarClassLibrary}
 
@@ -869,18 +895,20 @@ description of the DST tables content.  Since StEvent pretty much
 reflects this content (although in a different way and approach) this
 is the place to check if you don't understand the meaning of certain
 variables or methods.  In this manual we cannot go too much into
-\index{StBrowsableEvent} \index{StEventSummary} The event header
-carries the same name as the whole package: \texttt{StEvent}.  Don't
-worry, when we talk about the package we write \StEvent, when
-we talk about the class we write \texttt{StEvent}.\\
+detail. It's already thick enough.
+
+And finally, you really should have the C++ bible from B.~Stroustrup
+within 100 feet distance from your desk. The more you get into C++ and
+OO the more you will appreciate this book. We already mentioned that
+\StEvent\ is a bit complex and especially when you look deeper into
 its internal structure you will find weird things like virtual
-point and upper most object of the whole \StEvent\ tree. From here you
-can reach
-every single bit and byte there is on the DST.\\
-One already sees that that \texttt{StEvent} is a bit more complex than
-\texttt{StRun}. However, one thing is very similar: the summary.  This
-is depicted in Fig.~\ref{fig:umlEvent} which shows only a very small
-fraction of the class design around \texttt{StEvent}.
+constructors, overloaded new/delete operators and much more.  Then it
+is nice to have Bjarnes book.  \index{Stroustrup, Bjarne} \clearpage
+
+
+\section{The StEvent Model} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In the following we describe the basic concepts of \StEvent.  This is
 not to describe every class and every method in detail but to explain
 the idea behind it and illustrate a few things in simple examples.  If
 you need more details have a look at the reference section and if you
@@ -890,16 +918,16 @@ source code directly.
 \subsection{Run Header}
 \index{StRun} \index{StRunSummary} \index{run header} \index{run
     summary}
-gathered during the reconstruction of the event like: the number of
-tracks, the number of positive or negative tracks, the number of
-vertices of certain types, and several \emph{quasi}-histograms to hold
-for example distributions of for transverse momenta and other
-essential physics quantities. The same warning as for \texttt{StRun}
-applies here.  Check the pointer to the event summary before you use
-it. It could be \texttt{NULL}.
+
+The class \texttt{StRun} contains all information you would expect
+from a run header: run number, trigger settings, beam setup, and much
+more. Every living \texttt{StRun} object also contains a pointer to an
+instance of \texttt{StRunSummary} which contains - you guessed it -
+the run summary.  The fact that the summary is contained by pointer
+already tells you that the pointer might be \texttt{NULL} if something
 went wrong. So better make sure it is non-zero before you dereference
 it.\\
-therefore acts the same way but it has some additional features which
+The run summary contains information gathered during the DST
 reconstruction run like mean p$_\perp$, mean pseudo-rapidity, CPU
 time, and similar stuff.  It does \emph{not} contain all data on the
 experimental run but only on the events of the run which were handled
@@ -908,21 +936,21 @@ experimental run can contain thousands of events.
 \begin{figure}[htb]
     \begin{center}
         \includegraphics{run.eps}
-can be accessed directly from the \texttt{StEvent} objects.  Here's a
+        \caption{Class diagrams for \texttt{StRun} and \texttt{StRunSummary}.}
         \label{fig:umlRun}
     \end{center}
 \end{figure}
-\item collection of software monitors
+\index{StBrowsableEvent} \index{StEventSummary}
 classes. Pretty simple.  What is not shown is the relation to the
 \texttt{StEvent} class, simply because there is none.  \texttt{StRun}
 and \texttt{StEvent} are completely separate entities. They don't know
-\item list of all track nodes
-\item list of the detector info for each track
-\item primary vertices (mostly only one)
-\item list of all V0 vertex candidates
-\item list of all Xi vertex candidates
-\item list of all kink vertex candidates
-\item level-0 trigger
+from each other.  The \texttt{StRun} object is valid over many events,
+i.e.~ many generatins of \StEvent\ events.  \texttt{StEventMaker} (see
+Sec.~\ref{sec:StEventMaker} will give you the same one over and over
+again, unless there's a new run header on the DST.
+
+\index{example using StRun} \index{example using StRunSummary} Here is
+an example of a simple function \texttt{printRunInfo} which takes a
 pointer to an instance of \texttt{StRun} as argument and prints out
 some stuff.
 \begin{verbatim}
@@ -933,49 +961,53 @@ void printRunInfo(StRun* run)
     cout << "run id:                " << run->id() << endl;
     cout << "run type:              " << run->type() << endl;
     cout << "center of mass energy: " << run->centerOfMassEnergy() << endl;
+    cout << "magnetic field:        " << run->magneticField() << endl;
+
     if (run->summary()) {
         cout << "# of events:            "
              << run->summary()->numberOfEvents() << endl;
         cout << "# of processed events:  "
-the physics of the event but tells you a lot about how the
-reconstruction programs performs. These are mostly quantities which
-cannot be derived from other objects in \StEvent\ and would be lost
-otherwise.  In a sense they \emph{monitor} the reconstruction details.
-That's where
-the name software monitor comes from.\\
-\begin{figure}[htb]
+             << run->summary()->numberOfProcessedEvents() << endl;
+        cout << "CPU time used:          "
+             << run->summary()->cpuSeconds() << endl;
+        cout << "average luminosity:     "
+The class \texttt{StBrowsableEvent} inherits from \texttt{StEvent} and
+therefore acts the same way but has some additional features which
 allow a better integration of \StEvent\ into the ROOT framework. Since
 this is of no big importance for the understanding of the data model
 as a whole we refer to section \ref{sec:StEventMaker} and
 \ref{sec:StBrowsableEvent} for more details.
 
              << run->summary()->averageLuminosity() << endl;
+        cout << "<pt>:                   "
              << run->summary()->meanPt() << endl;
-reconstruction has one. This is not really a detector but still a
-large fraction of our software deals with combining all the detectors
-in order to create global tracks and find the primary vertices.
+    }
+}
+\end{verbatim}
 This example also illustrates how useful it is to name the methods
 properly. This code actually could have been written simpler using the
-This is depicted in Fig.~\ref{fig:umlMonitors} where all classes and
-their relations are shown.  You get the actual instance of
-\texttt{StSoftwareMonitor} from StEvent and then you can select which
-component, i.e.~which monitor object you want by invoking the proper
-method. The methods are named after the component they return:
-\texttt{tpc()} returns a pointer to the \texttt{StTpcSoftwareMonitor},
-\texttt{svt()} to the \texttt{StSvtSoftwareMonitor} -- well, you get
-the idea. As usual you should check for \texttt{NULL} pointers. If a
-detector was not reconstructed in the reconstruction chain it's likely
-that you will not find the corresponding monitor.
+\texttt{PR(x)} macro defined in \texttt{StGlobals.hh} from the
+\name{StarClassLibrary}.
+Instead of\\
+\verb+    cout << "magnetic field:        " << run->magneticField() << endl;+\\
+one then would write\\
+\verb+    PR(run->magneticField());+\\
+which prints:\\
+\verb+    run->magneticField() = 0.5+\\
+or whatever setting STAR was running at this time. As long as the
+names are descriptive this makes life much easier and provides the
+reader the same amount of information.
 
 \subsection{Event Header}
-They have no relation with any other class. ALl the do is to hold
-data. Because of this the have no member access functions but all data
-member are public. In order to make things easier for people moving
-from table-based analysis to \StEvent-based analysis we kept the table
-names.  With other words the software monitor classes match their
-table counterparts 1:1.  The names are not always descriptive but the
-author got tired of inventing new names.  You'll find more details on
-what is what in the reference section of this manual.
+\index{event header} \index{event summary} \index{StEvent}
+\index{StEventSummary}
+
+The event header carries the same name as the whole package:
+\texttt{StEvent}. Confused?  Don't worry, when we talk about the
+package we write \StEvent, when we talk about the class we write
+\texttt{StEvent}.\\
+The class \texttt{StEvent} plays a special role since it is the entry
+point and the upper most object of the whole \StEvent\ tree. From here
 you
 can reach every single bit and byte there is on the DST.\\
 Obviously, this makes the \texttt{StEvent} class is a bit more complex
@@ -1003,14 +1035,15 @@ As already mentioned \texttt{StEvent} opens the door to all the info
 there is on the DST.  In order to get there you have to navigate
 through the tree. Only few objects, mostly container and collections,
 can be reached directly from the \texttt{StEvent} objects.  Here's a
-Here we are actually talking about two different things. The trigger
-and the trigger detectors. The trigger is put together from data
-recorded by a bunch of trigger detectors combined in some logic. So
-far STAR deals with 3 levels of trigger numbered 0 -- 3.  Currently
-the only one implemented is level-0 (L0). Others will follow.  All
-trigger classes inherit from a common base class \texttt{StTrigger}.
-As mentioned above, at the moment there is only one derived class
-\texttt{StL0Trigger} as depicted in Fig.~\ref{fig:umlTrigger}.
+list of some important objects which are directly stored in
+\texttt{StEvent} and let you climb further down the tree:
+\begin{enumerate}
+\item Collection of software monitors
+\item TPC hit collection
+\item FTPC hit collection
+\item SVT hit collection
+\item List of all track nodes
+\item List of the detector info for each track
 \item Primary vertices (mostly only one)
 \item List of all V0 vertex candidates
 \item List of all Xi vertex candidates
@@ -1027,13 +1060,13 @@ and more. For a complete reference see section \ref{sec:StEvent}.
 
 \subsection{Software Monitors}
 \index{software monitors}
-The trigger detectors are those detectors which data is used in the
-trigger (which doesn't mean that the data isn't useful for other
-things as well). There's a couple of them: the Central Trigger Barrel
-(CTB), the Zero Degree Calorimeter (ADC), the Vertex Position Detector
-(VPD), and the Multiwire Proportional Chamber (MWC). This means we
-need a collection to hold them together and indeed this is what
-\texttt{StTriggerDetectorCollection} is all about. The trigger
+
+The STAR DST contains a bunch of tables called software monitors.
+Before we go into details let's clarify what this is. During the
+reconstruction of the various detectors lots of statistics and summary
+information is generated which is not necessarily of importance for
+the physics of the event but tells you a lot on how the reconstruction
+programs performed. These are mostly quantities which cannot be
 derived from other objects in \StEvent\ and would be lost otherwise.
 In a sense they \emph{monitor} the reconstruction details.
 That's where the name 'software monitor' comes from.\\
@@ -1044,14 +1077,13 @@ That's where the name 'software monitor' comes from.\\
         \label{fig:umlMonitors}
     \end{center}
 \end{figure}
-named after the component they return by \texttt{reference}:
-\texttt{ctb()} returns a reference to the
-\texttt{StCtbTriggerDetector}, \texttt{mwc()} to the
-\texttt{StMwcTriggerDetector}, and so on.  Since they are returned by
-reference you can be sure the objects exist. No checks necessary. Note
-that ``exist'' is not a synonym for ``makes sense''. The reason for
-this is that the DST contains the data for all trigger detectors in
-one big table. If it available the collection
+
+There are many of these monitors and even the ``global''
+reconstruction has one. This is not really a detector but a large
+fraction of our software deals with combining all the detectors in
+order to create global tracks and find the primary vertices.
+
+Since there are many they have to be organised in a transparent way.
 This is depicted in Fig.~\ref{fig:umlMonitors} where all monitor
 classes and their relations are shown.  You get the actual instance of
 \texttt{StSoftwareMonitor} from \texttt{StEvent} and then you can
@@ -1088,60 +1120,63 @@ void printTpcClusterInfo(ostream& os = cout, StEvent* event)
     if (!tpcMon) return;       // no monitor
 
     os << "Total # of TPC cluster:" << tpcMon->n_clus_tpc_tot;
-to save some typing. The names of the method say all there is to say.
+    for (int i=0; i<24; i++) {
         os << "Inner sector " << i << " has "
            << tpcMon->n_clus_tpc_in[i] << " cluster" << endl;
-\index{tracks} This is probably the most complex part of the design.
-Before we go into the details we give a brief introduction to what a
-track is and explain the differences between \emph{global} and
-\emph{primary} tracks. We then introduce the track \emph{node}, which
-plays a very central role in the \StEvent\ track model.  The different
-blocks of information which make a track such as the track geometry
-and the various traits are explained later together with a short
-introduction to filters which, as you will learn, allow to apply
-predefined algorithm to select and filter information out of the data.
+        os << "Outer sector " << i << " has "
+           << tpcMon->n_clus_tpc_out[i] << " cluster" << endl;
+    }
+}
+\end{verbatim}
+Note that, as everywhere in \StEvent\ indices run from \texttt{0} to
+\texttt{size-1}.  If you are new to C/C++ and wonder why this is so,
+you really should read section \ref{sec:conventionsNumbering}.\vfill
+
+\subsection{Trigger and Trigger Detectors}
+\index{trigger} \index{detectors}
 
 The \textbf{trigger} is put together from data recorded by a bunch of
-\index{primary tracks} \index{global tracks} The STAR tracker, known
-as \texttt{tpt}, performs the tracking in the main STAR tracking
-detector the TPC. It finds a set of hits, which tpt assume to belong
-to one track and applies fits in order to determine the track
-parameters. Once this is done the track is passed along the chain.
-Points from other detectors might be added. At the end this track is
-then usually fitted with a more sophisticated fitting method and from
-there on is called a \textbf{global} track (class
+trigger detectors combined in some logic. So far STAR deals with 4
+trigger levels numbered 0 -- 3.  Currently only level-0 (L0) is
+implemented. Others will follow.  All trigger classes inherit from a
+common base class \texttt{StTrigger}.  As mentioned above, at the
+moment there is only one derived class \texttt{StL0Trigger} as
+depicted in Fig.~\ref{fig:umlTrigger}.
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics{trigger.eps}
         \caption{Class diagrams for the trigger detector collection and
             the \texttt{StTrigger} hierarchy.}
     cout << "  counter  |     mips    |     time   \n";
     cout << "--------------------------------------\n";
 simulations have no trigger data. You were warned.
-this, since by using all global tracks we can deduce the primary
-vertex (or vertices) with pretty good accuracy. A track which comes
-from the primary vertex (and most do) can be re-fitted using the new
-primary vertex. This increase dramatically the accuracy in which STAR
-can measure particles, both in terms of direction and momentum. If a
-global track points back close enough to the primary vertex and the
-re-fitting works out well (whatever that means) then this track, or
-better the re-fitted track, becomes a \textbf{primary} track (class
-\texttt{StPrimaryTrack}). A primary track only makes sense if it
-refers to a primary vertex.  If a primary track is found the global
-track which was used to create it makes almost no sense any more and
-could be dropped, \texttt{if} you trust the procedure. However, things
-aren't as perfect and a primary track very well could have been
-misidentified.  For that reason STAR keeps currently all global
+    for (int i=0; i<ctb.numberOfCtbCounters(); i++) {
+        cout << setw(9) << i <<   "  | "
+             << setw(10) << ctb.mips(i) << "  | "
+             << ctb.time(i) << endl;
+    }
+
+The \textbf{trigger detectors} are those detectors which data is used
+in the trigger (which doesn't mean that the data isn't useful for
+other things as well). There's a couple of them: the Central Trigger
+Barrel (CTB), the Zero Degree Calorimeter (ADC), the Vertex Position
+Detector (VPD), and the Multiwire Proportional Chamber (MWC). This
+means we need a collection to hold them together and indeed this is
+what \texttt{StTriggerDetectorCollection} is all about. The trigger
+detector design is shown in Fig.~\ref{fig:umlTrigger}.  The collection
 holds all classes which describe the different trigger detectors:
 \texttt{StMwcTriggerDetector}, \texttt{StCtbTriggerDetector},
 \texttt{StZdcTriggerDetector}, and \texttt{StVpdTriggerDetector} (not
 shown).  These trigger detectors store the actual ADC and TDC values
-a fraction of the global tracks if th primary track is superior. \\
-If a primary track fit succeeds the new track parameters and related
+including some calculated quantities. Check in the reference section
+for more details.  The collection is a member of \texttt{StEvent}. To
 get a pointer to the collection use:
-the number of hits might change, since the newly re-fitted track might
-exclude old hits and/or add new hits.  \StEvent\ is able to cope with
+\texttt{StEvent::triggerDetectorCollection()}. From there you get the
+specific trigger detectors through a set of methods.  The methods are
 named after the component they return by reference: \texttt{ctb()}
 returns a reference to the \texttt{StCtbTriggerDetector},
 \texttt{mwc()} to the \texttt{StMwcTriggerDetector}, and so on.  Since
-So far so good. But what is with the tracks which fail the fit.
+they are returned by reference you can be sure the objects exist. No
 checks necessary. Note that ``exist'' is not a synonym for ``makes
 sense''. The reason for this is that the DST contains the data for all
 trigger detectors in one big table. If it available the collection
@@ -1159,25 +1194,28 @@ void dumpCtb(StEvent* event)
     if (!(event && event->triggerDetectorCollection())) return;
 
     StCtbTriggerDetector &ctb = event->triggerDetectorCollection()->ctb();
-possibly also the set of hits used.  In a sense these are tracks
-created from the same \texttt{seed}. How we keep track of all these
-different flavours is explained in the next section.
+
+    cout << " tray | slot |    mips    |      time   \n";
+    cout << "----------------------------------------\n";
 
     for (int i=0; i<ctb.numberOfTrays(); i++) 
         for (int j=0; j<ctb.numberOfSlats(); j++) 
             cout << setw(5) << i <<   " | "
-used to re-fit the primary tracks.
+                 << setw(4) << j <<   " | "
                  << setw(10) << ctb.mips(i, j, 0) << " | "
                  << ctb.time(i, j, 0) << endl;
 
-\index{track node} As we have seen in the previous section there are
-two kinds of tracks from which each of them might be possibly fitted
-in different models such creating a whole bunch of tracks which all
-come originally from the same \texttt{seed} formed early in the
-reconstruction chain. Only one of them can be right (at least for a
-specific analysis) and if we count tracks we can only count all of
-them as one. May students spent by far too much time hunting
-the problem of double-counting.\\
+
+    cout << "\nL0 trigger:\n";
+    if (event->l0Trigger()) {
+        PR(event->l0Trigger()->mwcCtbMultiplicity());
+        PR(event->l0Trigger()->mwcCtbDipole());
+        PR(event->l0Trigger()->mwcCtbTopology());
+        PR(event->l0Trigger()->mwcCtbMoment());
+    }
+    else
+        cout << "not available" << endl;
+}
 \end{verbatim}
 Again, we are using the \texttt{PR()} macro from \texttt{StGlobals.hh}
 to save some typing. The names of the methods speak for themself.
@@ -1187,18 +1225,17 @@ to save some typing. The names of the methods speak for themself.
 
 This is probably the most complex part of the design.  Before we get
 into too much detail we give a brief introduction on what a track is
-We have to have a way to tell that all these flavours belong together
-even if the have different fit parameters or event a slightly
-different set of hits. This is were the track \textbf{node} comes into
-the game (class \texttt{StTrackNode}).
+and explain the differences between \emph{global} and \emph{primary}
+tracks. We then introduce the track \emph{node} which plays a very
+central role in the \StEvent\ track model.  The different pieces of
+information which make a track such as the track geometry and the
 various traits are explained later together with a short introduction
 to filters, which, as you will learn, allow to apply predefined
-Every track knows about the node it belongs and thus one can navigate
-from one track in the node to the other.  Each node contains at 1--n
-tracks. This is depicted in Fig.~\ref{fig:nodes}.
+algorithm to select and filter information out of the data.
 
-The array shown in the middle of the picture shows the list of nodes
-as held by the StEvent class itself. Every element (depicted as a box)
+\subsubsection{Introduction to Tracks}
+\index{primary tracks} \index{global tracks}
+
 The STAR tracker, known as \texttt{tpt}, performs the tracking in the
 main STAR tracking detector the TPC. It finds a set of hits, which
 \texttt{tpt} assume to belong to one track and applies fits in order
@@ -1206,38 +1243,37 @@ to determine the track parameters. Once this is done the track is
 passed along the chain.  Points from other detectors might be added.
 At the end this track is then fitted with a more sophisticated fitting
 method and from there on is called a \textbf{global} track (class
-From the previous section you must get the impression that the primary
-and the global track share lots of information. Actually, there is
-much less to share then one might think.  Almost everything changes or
-might change when a track is re-fitted. One of the few things which
-often do not change are the hits used in the tracks.  If the global
-track fit points back to the vertex the additional constraint,
-i.e.~the position of the primary
-vertex, changes the parameters only slightly. \\
-If the hits, or better the whole detector information, are the same
-then they belong in a separate class so one can use them for all
-tracks in the same node.  This is why there is a class
-\texttt{StTrackDetectorInfo}.
+\texttt{StGlobalTrack}).  The name "global" stems from the fact that
+this is a fit which is possibly composed of his from several tracking
+detectors.
+
+But wait, this is not the end of the story. STAR can do better than
+this. By using all global tracks we can reconstruct the primary vertex
+(or vertices) with pretty good accuracy. A track which originates from
+the primary vertex (and most do) can be refitted using the primary
+vertex as additional point.  This increase dramatically the accuracy
+in which STAR can measure particles, both in terms of direction and
+momentum.  If a global track points back close enough to the primary
 vertex and the refitting works out well (whatever that means) then
 this track, or better the refitted track, becomes a \textbf{primary}
 track (class \texttt{StPrimaryTrack}). A primary track only makes
-the reconstruction is done.  And indeed one STAR cannot afford to
-write all hits to DST. In this case each track might or might not have
-a pointer to an existing instance of \texttt{StTrackDetectorInfo}.
-Since several tracks can share the instance it is obvious that no
-track can on them. This is why all objects of type
-\texttt{StTrackDetectorInfo} are stored in a separate, flat and simple
-list which is directly accessible from \texttt{StEvent}. Each track
-only points to its detector info. This is depicted in
-Fig.~\ref{fig:nodes}.  The upper array represents a possible list of
-detector info objects.  As you can see tracks in a node mostly share
-the same detector info but this doesn't need to be the case. If a
-primary vertex fitter decides to reject one or more hits and/or adds
-new hits than the detector infos might be different although the
-tracks are in the same node (see right most node in the figure as an
-example). It makes obviously no sense to keep both tracks in the same
-node if the hits are \emph{very} different but if only one or two hits
-are different they still are related - somewhat.
+sense if it refers to a primary vertex.  If a primary track is found
+the global track which was used to create it makes almost no sense any
+more and could be dropped, \texttt{if} you trust the procedure.
+However, things aren't as perfect and the primary track might have
+been misidentified.  For that reason STAR keeps currently all global
+tracks. That means that for every primary track there is one
+corresponding global track but every global track does not necessarily
+have a corresponding primary track. The fit might have failed badly.
+In future this might change and we might be able to drop
+a fraction of the global tracks if the primary track is superior. \\
+If a primary track fit succeeds the new track parameters and its
+errors are stored.  To really confuse you, we should mention that even
+the number of hits might change, since the newly refitted track might
+exclude some hits and/or add new hits.  \StEvent\ is able to cope with
+all these scenarios and that is one of the reasons why version 2 is
+somewhat more complex than good old version 1.
+
 So far so good. But what's with the tracks which fail the fit.
 Obviously these aren't primary tracks and -- you guessed it -- come
 from a secondary vertex.  Here, things become a bit difficult. While a
@@ -1245,9 +1281,9 @@ primary vertex can be found easily secondary vertices are more tricky
 to detect (at least in a Heavy-Ion collision) and can hardly be
 identified unambiguously. If one could do so, one could repeat the
 same trick as with the primary tracks and refit the global track using
-closer look at the design of the specific classes. It is really
-helpful to look at the class diagrams in Fig.~\ref{fig:umlTracks}. It
-looks complicated but once you get the idea things become easy.
+the secondary vertex such making it a secondary track. But we can't --
+at least for now. As as consequence STAR doesn't use the concept of
+secondary tracks yet.
 
 All global and primary tracks are fitted according to a certain
 tracking model. Some models include the effect of energy loss and
@@ -1255,15 +1291,17 @@ multiple scattering in the fit and the fit parameters therefore
 depends on the mass of the particle which created the track. This is
 not know a priori or at least cannot be determined unambiguously. In
 this case the same track might be fitted with different mass
-implementation but not in the interface. For this very reason when a
-track is returned by a method or is used as an argument a pointer or a
-references to \texttt{StTrack*} is used. This is were polymorphism
-comes in handy.
+hypothesis.  This not only alters the fit parameters and errors but
+possibly also the hits assigned to the track.  In a sense these are
+tracks created from the same \texttt{seed}. How we keep track of all
+these different flavours is explained in the next section.
 
 To summarize: STAR has two kinds of tracks global tracks which can
 come from wherever they want and primary tracks which always point
 back to the primary vertex. The position of the primary vertex was
-        \caption{}
+used to refit the primary tracks.
+
+\subsubsection{The Concept of the Track Node}
 \label{sec:node}
 \index{track node}
 
@@ -1274,7 +1312,7 @@ But we have to keep in mind that all come originally from the same
 \texttt{seed} formed early in the reconstruction chain. Only one of
 them can be the true track, or better only one comes closest to the
 truth. If we count tracks we can only count all of them as one.  Many
-    implementation. You get a pointer to the instance use the
+students spent by far too much time hunting the problem of
 double-counting.\\
 \begin{figure}[htb]
     \begin{center}
@@ -1283,18 +1321,18 @@ double-counting.\\
             its relation to the detector info collection and the list
             of daughter tracks of the primary vertex.}
         \label{fig:nodes}
-    provide. If the track model does not directly contain them they
-    have to be derived. This insures that every tracking model which
-    gets plugged in doesn't break anything. The class guarantees that
-    you always get:
+    \end{center}
+\end{figure}
+We have to have a way to tell that all these ``flavours'' belong
+together, even if they have different fit parameters or even a
 slightly different set of hits. This is were the track \textbf{node}
-    \item curvature (in cm${-1}$)
-    \item charge (un units of +e)
+comes into the game (class \texttt{StTrackNode}).
+
 A track node holds all tracks which originate from the same seed.
 Every track knows about the node it belongs to and thus allows to
 navigate from one track in the node to the other.  Each node contains
-            the StarClassLibrary appendix. There the parameters are
-            explained in detail.}
+1--n tracks. This is depicted in Fig.~\ref{fig:nodes}.  The array
+shown in the middle of the picture shows the collection of nodes as
 held by the StEvent class itself. Every element (depicted as a box)
 represents one node which contains a primary (solid triangle) and/or a
 global track (solid circle). The length of the track node list lies
@@ -1302,14 +1340,14 @@ between: max(N$_{primary}$, N$_{global}$) and N$_{primary}$ +
 N$_{global}$.
 
 \subsubsection{Detector Information}
-    approximation in 90\% of all cases -- and a helix can be handled
-    analytically. This makes it very useful to find the
+\label{sec:detInfo}
+From the previous section you probably got the impression that a given
 primary track and its referring global track share lots of
 information.  Actually, there is much less to share then one might
 think.  Almost everything changes or can change when a track is
 refitted. One of the few things which often do not change are the hits
-    At the moment there is actually one one concrete class implemented
-    and that is -- you guessed it -- the helix model
+used in the tracks.  If the global track fit points back to the vertex
+the additional constraint, i.e.~the position of the primary
 vertex, changes the parameters in fact only slightly. \\
 If the set of hits, or the detector information, is the same then it
 belongs in a separate class so one can use it for all tracks in the
@@ -1367,8 +1405,334 @@ polymorphism comes in handy.
 \end{figure}
 With other words it is sufficient to explain \texttt{StTrack} and the
 other two come for free. As you can see in Fig.~\ref{fig:umlTracks}
+\texttt{StTrack} is composed of several classes. It either contains
+them by value or by pointer. There are:
+\begin{description}
+\item[StTrackGeometry] \index{StTrackGeometry} This is an abstract
+    class which only serves as an interface the the actual, concrete
+    implementation. You get a pointer to the instance via the
+    \texttt{StTrack::geometry()} method. The track geometry contains
+    exactly what the name implies.  It describes the parameters of the
+    track which let us describe the path of the particle in the
+    detector. Which set of parameters are actually obtained from a fit
+    depends strongly on the track model.  However, we don't want any
+    new track model to make you change your code and this exactly is
+    the \textit{reason d'etre} for \texttt{StTrackGeometry}. It
+    defines the interface and with it the parameters it has to
+    provide. If the track model does not directly use or produce them
+    they have to be derived. This insures that every tracking model
+    which gets plugged in doesn't break anything. The class guarantees
+    that you always get:
+    \begin{itemize}
+    \item curvature (in cm$^{-1}$)
+    \item charge (in units of +e)
+    \item dip angle (in radians)
+    \item psi (in radians) , i.e.~$\psi$ not $\phi_0$ -- watch
+        out\footnote{if you don't know the difference have a look in
+            the appendix of the \name{StarClassLibrary} manual.  There
+            the parameters are explained in detail.}
+    \item origin (as a \texttt{StThreeVectorF})
+    \item momentum at the origin (as a \texttt{StThreeVectorF})
+    \item a helix (as a \texttt{StPhysicalHelixD})
+    \end{itemize}
+    The helix now is somewhat special since it obviously implies that
+    the track can be described as such. Although this is not always
+    true (FTPC, low momentum tracks in TPC) it is a very good
+    approximation for almost all TPC tracks -- and a helix can be
+    handled analytically. This makes it very useful to find the
+    distance-of-closest approach to a given point, to extrapolate the
+    path of the track and to easily get the 3-momentum at every point
+The class \texttt{StDedxPidTraits} gives you the mean and sigma dE/dx,
+the number of points used, and the method which was applied to
+    At the moment there is actually only one concrete class
+    implemented and that is -- you guessed it -- the helix model
+    (\texttt{StHelixModel}). This is where all the calculations (if
+    any) are done to make sure you get what you ask for.
+    
+    If you want to know which model is actually used you may call the
+    \texttt{StTrackGeometry::model()} method which returns an element
+    of the enumeration type \texttt{StTrackModel}. See in section
+    \ref{sec:Enumerations} what types are available or check directly
+    in \texttt{StEnumerations.h}.
+    
+\item[StTrackFitTraits] \index{StTrackFitTraits} Every track gets
+    fitted and every fit algorithm provides errors, a covariant matrix
+    and a $\chi^2$ value -- if the algorithm is worth a penny.  This
+    and a bit more is stored in the \texttt{StTrackFitTraits} which
+    you get through \texttt{StTrack::fitTraits()} by reference! By
+    reference since \texttt{StTrack} contains the instance by value.
+    It is always present. No need to check for \texttt{NULL} pointer
+    and such crap. There's no need for an abstract
+// we first get the list. 
+    There might be different ways to fit and different ways to
+    calculate the errors but they better be available, always. After
+    all, this is what determines the quality of the track and thus
+    decides if tracks get included in the analysis or get rejected.
+// What we want here is the dE/dx from the TPC from 
+\item[StTrackNode] \index{StTrackNode} See section \ref{sec:node}.
+    \texttt{StTrack::node()} will return a pointer to the node the
+    track belongs to.
+    
+\item[StDetectorInfo] \index{StDetectorInfo} See section
+    \ref{sec:detInfo}.  \texttt{StTrack::detectorInfo()} will return a
+    pointer to its respective detector info. Note, that there is no
+    way to navigate back from the detector info to the tracks which
+    are using it.
+    
+\item[StPidTraits] \index{StPidTraits} Each track has a list
+    (container) of so called PID traits. Each of them contains
+    information on the ID of the particle. What they actual provide is
+    not specified. All we know is that we get an object which tells us
+    something about the identity of the track.  \texttt{StPidTraits}
+    is an abstract class. The concrete classes are
+\end{description}
+
+\subsubsection{TPT Tracks}
+\label{sec:tptTracks} \index{TPT tracks}
 You probably never will need them but they are mentioned here for completeness.
-\vfill
+The main reason they are in StEvent is for debugging purposes and studies by reconstruction
+experts. For physics always use global or primary tracks. 
+
+The current STAR tracker for the TPC is called TPT. It not only finds the tracks
+but also performs some simple fits. In a sense 'TPT tracks' are real tracks, but,
+and this is important, TPC only tracks. In addition the track parameters are determined
+in a very simplistic fitting method. \\
+TPT tracks are described by \texttt{StTptTrack} which is identical in look and feel to
+\texttt{StGlobalTrack}. Tracks of this type are owned by the referring track node.
+And this is almost everything there is to say about them.
+
+\subsubsection{PID Traits}
+\label{sec:pidTraits}
+PID traits contain information about the identity of the track. Every
+detector will supply some sort of information useful for PID and there
+will be several methods for each detector to derive the same kind of
+information. The most basic ways to find out about the PID of a track
+are:
+\begin{description}
+\item[dE/dx] in TPC, FTPC and SVT.
+\item[Ring area densities] in the RICH detector.
+\item[TOF] information from the TOF patch.
+\item[Topology info] where the ID of a track can be derived, or at
+    least be constraint, from its measured decay products (e.g.
+    kinks).
+\end{description}
+It seems natural that, as the experiment progresses, STARs PID methods
+will be refined and new algorithms will get developed. If every PID
+method for every detector would require an concrete interface (via
+concrete classes) the class \texttt{StTrack} would be subject to
+permanent modifications. Schema evolution would become daily business.
+Very bad.  The only way out of this dilemma is to shield
+\texttt{StTrack} from this kind of PID inflation by adding
+an abstract layer. And this is all what \texttt{StTrackPidTraits} is for.\\
+\texttt{StTrack} now holds only a list of pointers to
+\texttt{StTrackPidTraits} and doesn't need to know about any specific
+details. Since the various ways of doing PID differ quite
+significantly there is hardly any data member or method they have in
+common.  That's why the abstract class \texttt{StTrackPidTraits} has
+only one member which returns the ID of the detector the PID info
+originates from.  The PID traits collection in \texttt{StTrack}
+obviously contains concrete objects which will provide the data you
+are looking for but \texttt{StTrack} is screened from any further details. \\
+There is currently only one concrete class implemented which is meant
+to contain the dE/dx derived from various methods in the TPC, FTPC and
+SVT: \texttt{StDedxPidTraits}. If a specific PID method or detector
+needs more than this class provides a new one has to be created. For
+sure, a new class is needed for the RICH, for the TOF and for
+topology-PID.  But that's something
+for the future.\\
+The class \texttt{StDedxPidTraits} gives you the mean dE/dx, the error
+on the mean, the number of points used, and the method which was applied to
+calculate it.  This method is returned as an enumeration
+(\texttt{StDedxMethod}) and can take the following values:
+\texttt{kTruncatedMeanId}, \texttt{kEnsembleTruncatedMeanId},
+\texttt{kLikelihoodFitId}, \texttt{kWeightedTruncatedMeanId}, and
+\texttt{kOtherMethodId}. The latter is a place-holder which can be
+used for tests and code development (see also
+sec.~\ref{sec:Enumerations}).
+
+So now I have a list of \texttt{StTrackPidTraits} with which I hardly
+can do anything -- how do I get the object I need? Good questions with
+an easy answer. You have to scan the list and pick out the object you
+are looking for and \textbf{cast} it up to the concrete class for only
+the concrete class will reveal its content.  This is where you
+obviously need RTTI (Real Time Type Information) as provided by
+ANSI/C++. Alternatively you can use ROOT-RTTI which we will not
+discuss here.  And here an example to show how it works:
+\begin{verbatim}
+//
+// Given a pointer 'track' to a valid track object
+// we first get the list.
+//
+StSPtrVecTrackPidTraits& traits = track->pidTraits()
+
+//
+// What we want here is the dE/dx from the TPC from
+// a simple truncated mean. This means:
+// 1. detector = kTpcId
+// 2. class    = StDedxPidTraits
+// 3. method   = kTruncatedMeanId
+//
+StDedxPidTraits* pid;        // this is what we want
+
+for (int i=0; i<traits.size(); i++) {
+     if (traits[i]->detector() == kTpcId) {
+         // Here we know it is some PID object derived from TPC data
+
+         // Now the dynamic cast
+         pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
+
+         // If traits[i] is NOT of type StDedxPidTraits the dynamic cast
+         // returns a NULL pointer. No other cast can do this !!!
+         // If we succeed we found the right object.
+         if (pid && pid->method() == kTruncatedMeanId) break;
+     }
+}
+
+if (pid) {
+   // We found what we wanted  ....
+   cout << pid->mean() << endl;
+}
+\end{verbatim}
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{cartoon5.eps}
+        \caption{Abstraction focuses upon the essential characteristic
+            of some object, relative to the perspective of the
+            viewer.}
+    \end{center}
+\end{figure}
+Instead of a \texttt{dynamic\_cast} one also could use
+\texttt{typeid()} as in
+\begin{verbatim}
+        if (typeid(*pid) == typeid(StDedxPidTraits))
+           pid = static_cast<StDedxPidTraits*>(traits[i]);
+struct MyPID : public StPidAlgorithm 
+which is probably even faster.
+
+In the example we used \texttt{StTrack::pidTraits()} to get the whole
+list. In fact we can do better.  Since we already know we want PID
+from the TPC we can use the overloaded version
+\texttt{StTrack::pidTraits(StDetectorId)} to get all PID traits for
+one specific detector.  What happens internally is that the method
+scans the whole list, creates a new container and puts in all the
+objects (or better the pointer to the objects) with PID data from a
+the requested detector. This is what the method returns.
+
+Now we save a line and the example above looks like:
+\begin{verbatim}
+StPtrVecTrackPidTraits traits = track->pidTraits(kTpcId);
+StDedxPidTraits* pid;
+
+for (int i=0; i<traits.size(); i++) {
+    pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
+    if (pid && pid->method() == kTruncatedMeanId) break;
+}
+
+if (pid) {
+   // We found what we wanted  ....
+   cout << pid->mean() << endl;
+}
+\end{verbatim}
+
+But that's not the end of it. We can do even better, but this is
+described in the next section (\ref{sec:pidAlgorithm}) since it needs
+a bit more explanation. With what was shown here you already get very
+far. Remember that every cast but a \texttt{dynamic\_cast} will cause
+you nothing but trouble. Have a look at your favourite introductory
+C++ textbook on \texttt{dynamic\_cast} and RTTI.  (If your favourite
+           return StPionMinus.instance();           
+carefully tear out all pages and recycle them.  Dispose of the book's
+cover in an environmentally sound manner, then borrow or buy a better
+      return 0;  
+
+\subsubsection{PID Algorithm, Filters and Functors}
+\label{sec:pidAlgorithm}
+\index{PID algorithm} \index{filter} \index{functor}
+\index{StPidAlgorithm and examples} In OO one often talks about
+\emph{functors} which are essentially nothing but functions wrapped in
+a class. The reason why one wants to do this are manifold. One is that
+one can build up a hierarchy of functions by inheritance and, this is
+even more important, lifetime control. A function is gone when it
+finishes while an object still lives happily in memory. Thus a functor
+can do some work and then rest until someone comes and picks up the
+information it has stored.  Also it is \emph{much} easier to pass
+objects than pointer to functions. (Ever tried to pass an array of
+function pointers in C ?).
+
+If a functor is used to scan a list and returns only a subset of the
+elements it is called a filter. In the context of PID traits we use a
+PID algorithm which serves as a filter but is supposed to do a bit
+more than this.
+
+The essential method all tracks provide is:
+\begin{verbatim}
+const StParticleDefinition*
+class MyTpcAlgo : public StPidAlgorithm 
+\end{verbatim}
+
+As usual \texttt{StPidAlgorithm} is an abstract class (functor) which
+does nothing but defining the interface to the ``real'' function,
+i.e.~ it defines the arguments it takes and what it has to return.
+\texttt{pidTraits()} then calls this function, passing to it the
+proper arguments. The important thing is that we require
+\texttt{pidTraits()} to return 'something', namely the definition of
+the most probable particle (for \texttt{StParticleDefinition} see the
+\name{StarClassLibrary}). How it does that is up to the guy who
+implements the concrete
+functor, that is you.\\
+The decleration of \texttt{StPidAlgorithm} from
+\texttt{StFunctional.h} looks as follows:
+\begin{verbatim}
+struct StPidAlgorithm
+{
+    virtual StParticleDefinition*
+    operator() (const StTrack&, const StSPtrVecTrackPidTraits&) = 0;
+}
+\end{verbatim}
+\index{StParticleDefinition} The function which does the work is
+invoked when the operator() is invoked.  All the data needed to do the
+job are passed as arguments.  This is the track itself and the list of
+all PID traits. The PID algorithm now can pick up the detector (or
+detectors) and methods of its choice and derive the final answer. With
+other words the algorithm is doing the PID.  Over time you will
+collect a set of PID algorithms which you can plug in whenever needed.
+They may use different detectors and methods or possibly combine them.
+
+To make it completely clear, here's an example of a PID algorithm
+which uses the dE/dx of the TPC and the SVT and returns the most
+probable particle:
+\begin{verbatim}
+// MyPID.h
+#include "StEventTypes.h"
+struct MyPID : public StPidAlgorithm
+{
+    StParticleDefinition*
+    operator() (const StTrack&, const StSPtrVecTrackPidTraits&);
+};
+
+// MyPID.cxx
+#include "MyPID.h"
+StParticleDefinition*
+MyPID::operator() (const StTrack& track,
+                   const StSPtrVecTrackPidTraits& traits)
+{
+   StDedxPidTraits* tpcPid = 0;
+cout << tpcDedx.traits()->sigma() << endl;
+
+   for (int i=0; i<traits.size(); i++) {
+        StDedxPidTraits *pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
+        if (pid && pid->method() == kTruncatedMeanId) {
+           if (pid->detector == kTpcId)
+               tpcPid = pid;
+           else if (pid->detector == kSvtId)
+               svtPid = pid;
+        }
+   }
+
+   if (svtPid && tpcPid) {
+       // do something with the numbers and figure
+       // out what particle is most likely
+       // ....
 
        // Assume it's a pion
 cout << tpcDedx.traits()->mean() << endl;
@@ -1525,6 +1889,12 @@ definition in the header file.
     \end{center}
     \verb+Float_t sigma() const;+\\
     Returns the sigma of the dE/dx value.
+
+
+    \verb+StDedxMethod method() const;+\\
+    
+\begin{Entry}
+
 \item[Summary] Definitions of all container types used in \StEvent.
     \verb+#include "StContainers.h"+\\
     \verb+UInt_t numberOfCtbCounters() const;+\\
@@ -1612,6 +1982,7 @@ definition in the header file.
     \verb+StEmcRawHit(StDetectorId, UInt_t, UInt_t, UInt_t, UInt_t);+\\
     \verb+ULong_t bunchCrossingNumber() const;+\\
     
+    
     \verb+StDetectorId detector() const;+\\
     \verb+UInt_t module() const;+\\
     \verb+UInt_t eta() const;+\\
@@ -1635,15 +2006,18 @@ definition in the header file.
     \verb+#include "StEmcSoftwareMonitor.h"+\\
     \verb+class StEmcSoftwareMonitor;+\\
     
+    
 \item[Description]
 \item[Related Classes]
 \item[Public\\ Constructors]
     \verb+StEmcSoftwareMonitor();+\\
     DST this pointer is \texttt{NULL}. You better check for this.
     
+    
 \clearpage
 \begin{Entry}
 \item[Summary] Header file which contains all enumeration types used
+    
     
     in \StEvent.
 \item[Synopsis]
@@ -1677,6 +2051,7 @@ definition in the header file.
     \texttt{St\_DataSet}.
 \item[Public\\ Constructors]
     \verb+StEvent();+\\
+    
 
     
     \verb+StEvent(const event_header_st&,+\\
@@ -1796,9 +2171,11 @@ definition in the header file.
 \index{StEventSummary|textbf}
     Returns sector number running from 0--5.
 \begin{Entry}
+    
 
 \item[Summary]
     Returns plane number running from 0--19.
+    
     
     \verb+#include "StEventSummary.h"+\\
     \verb+ULong_t padsInCluster() const;+\\
@@ -1960,13 +2337,16 @@ definition in the header file.
     \verb+StFtpcSectorHitCollection* sector(UInt_t i);+\\
     \verb+const StFtpcSectorHitCollection* sector(UInt_t i) const;+\\
     
+    
     Returns the \texttt{i}'th sector, where \texttt{i =
         0--(numberOfSectors()-1).}
 \end{Entry}
     
+    
 \clearpage
 
 
+    
     
 \subsection{StFtpcSectorHitCollection}
 \index{StFtpcSectorHitCollection|textbf}
@@ -2504,9 +2884,11 @@ definition in the header file.
     \verb+ULong_t centralStripNSide() const;+\\
     Runs from 0--767.
     \verb+Float_t averageLuminosity() const;+\\
+    \verb+Float_t meanPt() const;+\\
 
     \verb+Float_t meanNumberOfVertices() const;+\\
     Runs from 0--767.
+    
     
 
     \verb+Float_t rmsNumberOfVertices() const;+\\
@@ -2535,6 +2917,7 @@ definition in the header file.
 \end{Entry}
 \clearpage
     Layer in which hit is located. Layer number runs from 0--5.
+    
     
 \subsection{StSsdHitCollection}
 \index{StSsdHitCollection|textbf}
@@ -2654,6 +3037,7 @@ definition in the header file.
     Total number of space points in each SVT layer.
     Ladder number runs from 1--16. Ladders
     are counted per barrel.
+    
     \verb+ULong_t wafer() const;+\\
     Wafer number runs from 1--7.
     Total charge deposition in each SVT layer.
@@ -2721,8 +3105,8 @@ definition in the header file.
     Fraction of hits used in each SVT/SSD barrel/layer. 
     \verb+ULong_t sector() const; // 0-23+\\
     \verb+ULong_t padrow() const; // 0-44+\\
-    \verb+ULong_t padsInCluster() const;+\\
-    \verb+ULong_t pixelsInCluster() const;+\\
+    Average residual, pad direction, SVT \\
+
     \verb+Float_t res_drf_svt;+\\
     Average residuals, drift direction, SVT \\
     or average chisq(2) of fit.
@@ -2746,6 +3130,7 @@ definition in the header file.
     \verb+StSPtrVecSvtHit& hits();+\\
     \verb+const StSPtrVecSvtHit& hits() const;+\\
 \end{Entry}
+    
     
 \clearpage
 
@@ -2906,8 +3291,7 @@ definition in the header file.
     
     Returns padrow hit collection. Note that \texttt{i}=0--44.
 \subsection{StTpcSoftwareMonitor}
-    \verb+StTrackFindingMethod findingMethod() const;+\\
-    \verb+StTrackQualityScheme qualityScheme() const;+\\
+\label{sec:StTpcSoftwareMonitor}
     Quality control flag (sort of). Most important: \texttt{flag()} $> 0$ good,
     the status of the refit and much more. For a detailed (and actual) description
     \verb+class StTpcSoftwareMonitor;+\\
@@ -2920,7 +3304,8 @@ definition in the header file.
     where 
   
     \begin{description}
-    \verb+const StPtrVecTrackPidTraits pidTraits(StDetectorId) const;+\\
+    \item[-x01] Bad fit, outlier removal eliminated too many points 
+    \item[-x02] Bad fit, not enough points to fit 
     \item[-x03] Bad fit, too many fit iterations 
     \item[-x04] Bad Fit, too many outlier removal iterations 
     \item[-x06] Bad fit, outlier could not be identified 
@@ -3056,11 +3441,9 @@ numberOfPoints(kTpcId) == numberOfPoints(kFtpcWestId)
 \index{StTrackFitTraits|textbf}
 \label{sec:StTrackFitTraits}
 \begin{Entry}
-    \verb+StTrackPidTraits(StDetectorId, Short_t);+\\
+\item[Summary]
 \item[Synopsis]
     \verb+#include "StTrackFitTraits.h"+\\
-    \verb+StDedxMethod method() const;+\\
-    \verb+Short_t encodedMethod() const;+\\
     \verb+class StTrackFitTraits;+\\
 \item[Description]
 \item[Related Classes]
@@ -3084,13 +3467,16 @@ numberOfPoints(kTpcId) == numberOfPoints(kFtpcWestId)
     one or two values.
     If a real 3D fit is performed (e.g.~Kalman) the first value (\texttt{i = 0}) is the
     $\chi^2$ per degree of freedom and the second value (\texttt{i = 1}) is the
+    
 
     upper tail probability of $\chi^2$ distribution for this value.
     Row numbering starts at 0.
     
+    the $\chi^2$ per degree of freedom for each fit is stored.
 
     \index{$\chi^2$} \index{degree of freedom}
     Layer numbering starts at 0.
+    
     
 \end{Entry}
 \clearpage
@@ -3326,6 +3712,7 @@ numberOfPoints(kTpcId) == numberOfPoints(kFtpcWestId)
 
 
 \subsection{StVpdTriggerDetector}
+\index{StVpdTriggerDetector|textbf}
 \label{sec:StVpdTriggerDetector}
 \begin{Entry}
 \item[Summary]
