@@ -113,8 +113,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   }
   if(date >= 20011226)
   {
-    int TDC_Crate_tmp[]= {18,17,16,30,29,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
-                          19,20,21,22,23,24,25,26,27};
+    int TDC_Crate_tmp[]= {18,17,16,30,29,28,27,26,25,24,23,22,21,20,19,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
     for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];      
     goto SMD;
   }
