@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.17 2002/01/30 15:40:48 porter Exp $
+ * $Id: StDbSql.cc,v 1.18 2003/01/10 04:19:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.18  2003/01/10 04:19:20  porter
+ * added feature of getting timestamp list (but no data) for a table.
+ * fixed 2 features sometimes used in online in query-by-whereclause.
+ * removed a stray 'cout' in a routine that is rarely accessed
+ *
  * Revision 1.17  2002/01/30 15:40:48  porter
  * changed limits on flavor tag & made defaults retrieving more readable
  *
@@ -448,12 +453,12 @@ StDbSql::QueryDb(StDbTable* table, const char* whereClause){
 
 ///////////////////////////////////////////////////////////////////
 unsigned int*
-StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
+StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause, int opt){
 
 #define __METHOD__ "QueryDb(StDbTable*, const char* where)"
 
   /*
-     rules for # of rows returned (by user request via SetNRows(int nrows);)
+     rules for # of rows returned (by user request via setRowLimit(int nrows);)
      1. table->GetNRows()= 0 or N means no limit or limit N
      2. returned table->GetNRows()=M where M is how many returned
 
@@ -486,14 +491,17 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
    int i;
    for(i=0;i<numTables;i++){
 
-    char* columnList=getColumnList(table,dataTables[i]);
-    if(!columnList){
+    char* columnList=0;
+    if(!opt)columnList=getColumnList(table,dataTables[i]);
+    if(!opt && !columnList){
       sendMess(tName," has no elements?",dbMErr,__LINE__,__CLASS__,__METHOD__);
       return retVal;
     }
 
      Db<<" select unix_timestamp("<<dataTables[i]<<".beginTime) as bTime,";
-     Db<<" elementID, "<<columnList<<" from "<<dataTables[i]<<" "<<whereClause;
+     Db<<" elementID ";
+     if(!opt)Db<<","<<columnList;
+     Db<<" from "<<dataTables[i]<<" "<<whereClause;
      if(numRows)Db<<" limit "<<numRows;
      Db<<endsql;
      sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
@@ -508,7 +516,11 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
      int* elements = new int[retRows];
      int* dataIDList = new int[retRows];
      unsigned int* timeList = new unsigned int[retRows];
-     table->addNRows(retRows);
+     if(!opt){
+       table->addNRows(retRows);
+     } else {
+       table->resizeElementID(retRows+table->GetNRows());
+     }
      // table->setRowNumber();
 
      int j=0;
@@ -516,7 +528,7 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
        buff.ReadScalar(timeList[j],"bTime");
        buff.ReadScalar(elements[j],"elementID");
        buff.ReadScalar(dataIDList[j],"dataID");
-       table->dbStreamer(&buff,true);
+       if(!opt)table->dbStreamer(&buff,true);
        if(timeList[j]>t1)t1=timeList[j];
        j++;
        buff.Raz();
@@ -536,7 +548,7 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
      numRowsReturned+=retRows;
      Db.Release();
 
-     if(table->IsIndexed() && t1>0){
+     if(table->IsIndexed() && t1>0 && !opt){
        Db<<" select unix_timestamp(beginTime) as eTime from "<<dataTables[i];
        Db<<" where beginTime>from_unixtime("<<t1<<")";
        Db<<" and elementID In("<<getElementList(elements,retRows)<<")";
@@ -563,6 +575,7 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
        table->setBeginTime(dateTime); if(dateTime) delete [] dateTime;
        dateTime=getDateTime(table->getEndTime());
        table->setEndTime(dateTime); if(dateTime) delete [] dateTime;
+       table->setRowNumber();
    }     
    return retVal;
 #undef __METHOD__
@@ -1333,6 +1346,15 @@ StDbSql::getColumnList(StDbTable* table,char* tableName,char* funcName){
  return (char*) 0;
 }
   
+//////////////////////////////////////////////////
+char*
+StDbSql::getEmptyString(){
+
+  ostrstream es; es<<" "<<ends;
+  return mRetString(es);
+
+};
+
 ////////////////////////////////////////////////
 char*
 StDbSql::checkTablePrepForQuery(StDbTable* table, bool checkIndexed){

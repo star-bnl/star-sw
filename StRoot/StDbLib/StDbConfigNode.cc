@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.21 2001/10/26 16:35:28 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.22 2003/01/10 04:19:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.22  2003/01/10 04:19:20  porter
+ * added feature of getting timestamp list (but no data) for a table.
+ * fixed 2 features sometimes used in online in query-by-whereclause.
+ * removed a stray 'cout' in a routine that is rarely accessed
+ *
  * Revision 1.21  2001/10/26 16:35:28  porter
  * improved directory search
  *
@@ -255,7 +260,6 @@ if(node){
  bool found = false;
  while(!found){
    if(!node->checkName(nextNodeName)){
-     cout<<" this node "<<node->printName()<<endl;
        node=node->getNextNode();
        if(!node) found=true;
    } else {
