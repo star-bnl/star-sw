@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCorrFctn.hh,v 1.2 1999/07/06 22:33:18 lisa Exp $
+ * $Id: StHbtCorrFctn.hh,v 1.3 1999/12/03 22:24:33 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtCorrFctn.hh,v $
+ * Revision 1.3  1999/12/03 22:24:33  lisa
+ * (1) make Cuts and CorrFctns point back to parent Analysis (as well as other way). (2) Accommodate new PidTraits mechanism
+ *
  * Revision 1.2  1999/07/06 22:33:18  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -43,6 +46,12 @@ public:
 
   virtual void Finish() = 0;
 
+  // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
+  friend class StHbtAnalysis;
+  StHbtAnalysis* HbtAnalysis(){return myAnalysis;};
+
+protected:
+  StHbtAnalysis* myAnalysis;
 
 private:
 

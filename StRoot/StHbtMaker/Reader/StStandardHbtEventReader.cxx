@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.13 1999/11/24 21:56:05 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.14 1999/12/03 22:24:37 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.14  1999/12/03 22:24:37  lisa
+ * (1) make Cuts and CorrFctns point back to parent Analysis (as well as other way). (2) Accommodate new PidTraits mechanism
+ *
  * Revision 1.13  1999/11/24 21:56:05  laue
  * a typo fixed ; ClassDef() was splitted by an accidental carriage-return
  * ----------------------------------------------------------------------
@@ -120,10 +123,6 @@ StStandardHbtEventReader::StStandardHbtEventReader(){
   mReaderStatus = 0;  // "good"
   mV0=0;
 
-  mPion = StPionPlus::instance(); 
-  mKaon = StKaonPlus::instance(); 
-  mProton = StProton::instance(); 
-  mPidAlgorithm = new StTpcDedxPidAlgorithm();
 
 }
 //__________________
@@ -132,10 +131,6 @@ StStandardHbtEventReader::~StStandardHbtEventReader(){
   if (mTrackCut) delete mTrackCut;
   if (mV0Cut) delete mV0Cut;
 
-  delete mPion;
-  delete mKaon;
-  delete mProton;
-  delete mPidAlgorithm;
 
 }
 //__________________
@@ -209,15 +204,28 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   StTrack* rTrack;
   cout << "StStandardHbtReader::ReturnHbtEvent - We have " << mult << " tracks to store - we skip tracks with nhits==0" << endl;
 
+  StTpcDedxPidAlgorithm* PidAlgorithm = new StTpcDedxPidAlgorithm();
+
+  if (!PidAlgorithm) cout << "Whoa!! No PidAlgorithm!! " << endl;
+
+  // the following just point to particle definitions in StEvent
+  StPionPlus* Pion = StPionPlus::instance();
+  StKaonPlus* Kaon = StKaonPlus::instance();
+  StProton* Proton = StProton::instance();
 
   int iNoGlobal = 0;
   int iNoHits = 0;
   int iNoPidTraits = 0;
   int iFailedCut =0;
+  int iNoBestGuess =0;
   // loop over all the tracks, accept only global
-  for (int icount=0; icount<mult; icount++){
+  for (unsigned long int icount=0; icount<mult; icount++){
+
+
     //cout << " track# " << icount << endl;
     rTrack = rEvent->trackNodes()[icount]->track(global);
+
+
     // don't make a hbtTrack if not a global track
     if (!rTrack) {
       iNoGlobal++;
@@ -235,7 +243,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     // get dedxPidTraits
     //cout << " number of pidTraits " << rTrack->pidTraits().size();
     //cout << " number of pidTraits for tpc: " << rTrack->pidTraits(kTpcId).size() << endl;
-    StTrackPidTraits* trackPidTraits; 
+    StTrackPidTraits* trackPidTraits=0; 
     int iPidTraitsCounter=0;
     do {
       trackPidTraits = rTrack->pidTraits(kTpcId)[iPidTraitsCounter];
@@ -246,7 +254,29 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
       //cout << " No dEdx information from Tpc- skipping track with " << nhits << " hits"<< endl;
       continue;
     }
-    const StDedxPidTraits* dedxPidTraits = (const StDedxPidTraits*)trackPidTraits;
+    // SIMPLE WAY  const StDedxPidTraits* dedxPidTraits = (const StDedxPidTraits*)trackPidTraits;
+    // ULLRICH WAY...
+#if defined(__SUNPRO_CC)
+    const StDedxPidTraits *dedxPidTraits = dynamic_cast<const StDedxPidTraits*>((const StDedxPidTraits*)trackPidTraits);
+#else
+    const StDedxPidTraits *dedxPidTraits = dynamic_cast<const StDedxPidTraits*>(trackPidTraits);
+#endif    
+
+
+
+    // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
+    // pointers to track and pidTraits are set 
+    //cout << "look for best guess " << endl;
+    StParticleDefinition* BestGuess = rTrack->pidTraits(*PidAlgorithm);
+    //    if (BestGuess) cout << "best guess for particle is " << BestGuess->name() << endl; //2dec9
+    
+    if (!BestGuess){
+      iNoBestGuess++;
+      continue;
+    }
+
+
+
     //cout << " dE/dx = " << dedxPidTraits->mean() << endl;
 
     // get fitTraits
@@ -255,29 +285,29 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
     //cout << "Getting readty to instantiate new StHbtTrack " << endl;
 
+
     // o.k., we got the track with all we need, let's create the StHbtTrack
     StHbtTrack* hbtTrack = new StHbtTrack;
     //cout << "StHbtTrack instantiated " << endl;
 
+
+
     hbtTrack->SetNHits(nhits);
 
-    // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
-    // pointers to track and pidTraits are set 
-    //cout << "look for best guess " << endl;
-    mBestGuess = rTrack->pidTraits(*mPidAlgorithm);
-    //if (mBestGuess) cout << "best guess for particle is " << mBestGuess->name() << endl;
+    float nsigpi = PidAlgorithm->numberOfSigma(Pion);
 
-    float nsigpi = mPidAlgorithm->numberOfSigma(mPion);
     //cout << "nsigpi\t\t" << nsigpi << endl;
     hbtTrack->SetNSigmaPion(nsigpi);
 
-    float nsigk = mPidAlgorithm->numberOfSigma(mKaon);
+    float nsigk = PidAlgorithm->numberOfSigma(Kaon);
     //cout << "nsigk\t\t\t" << nsigk << endl;
     hbtTrack->SetNSigmaKaon(nsigk);
 
-    float nsigprot = mPidAlgorithm->numberOfSigma(mProton);
+    float nsigprot = PidAlgorithm->numberOfSigma(Proton);
     //cout << "nsigprot\t\t\t\t" << nsigprot << endl;
     hbtTrack->SetNSigmaProton(nsigprot);
+
+
 
     //cout << "Nsig pion,kaon,proton : " << nsigpi << " " << nsigk << " " << nsigprot << endl;
     
@@ -290,6 +320,8 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     StHbtThreeVector p = rTrack->geometry()->helix().momentumAt(pathlength,HBT_B_FIELD);
     //cout << "p: " << p << endl;
     hbtTrack->SetP(p);
+
+
 
     StHbtThreeVector  DCAxyz = rTrack->geometry()->helix().at(pathlength)-vp;
     //cout << "DCA\t\t" << DCAxyz << " " << DCAxyz.perp() << endl;
@@ -313,6 +345,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     hbtTrack->SetCharge(charge);
     
     //cout << "pushing..." <<endl;
+
     
     // By now, all track-wise information has been extracted and stored in hbtTrack
     // see if it passes any front-loaded event cut
@@ -323,8 +356,10 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 	continue;
       }
     }
+
     hbtEvent->TrackCollection()->push_back(hbtTrack);
   }
+  delete PidAlgorithm;
 
   printf("%8i non-global tracks skipped \n",iNoGlobal);
   printf("%8i tracks skipped because of nHits=0 \n",iNoHits);

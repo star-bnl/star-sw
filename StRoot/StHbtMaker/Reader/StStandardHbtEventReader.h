@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.10 1999/11/24 22:01:41 laue Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.11 1999/12/03 22:24:37 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.11  1999/12/03 22:24:37  lisa
+ * (1) make Cuts and CorrFctns point back to parent Analysis (as well as other way). (2) Accommodate new PidTraits mechanism
+ *
  * Revision 1.10  1999/11/24 22:01:41  laue
  * reader adopted to the new StEvent 2.x
  *
@@ -92,12 +95,6 @@ class TOrdCollection;
 class StStandardHbtEventReader : public StHbtEventReader{
 
 private:
-  // needed for the new StEvent 2.x  pid functions
-  StPionPlus* mPion;  //!
-  StKaonPlus* mKaon;  //!
-  StProton* mProton;  //!
-  StTpcDedxPidAlgorithm* mPidAlgorithm; //!
-  StParticleDefinition* mBestGuess; //!
 
   StMaker* mTheEventMaker;      //! this is the chain where the StEventReaderMaker is
   StV0MiniDstMaker* mTheV0Maker; //! this is the chain where the StV0MiniDstMaker is
