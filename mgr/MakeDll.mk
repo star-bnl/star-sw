@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.51 1999/01/28 16:49:58 fisyak Exp $
+# $Id: MakeDll.mk,v 1.52 1999/01/28 17:17:40 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.52  1999/01/28 17:17:40  fisyak
+# Fix typo
+#
 # Revision 1.51  1999/01/28 16:49:58  fisyak
 # remove copying of h-files for rootcint
 #
@@ -395,7 +398,6 @@ $(FILES_CINT_SYT) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 	@echo "#endif"					>> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
 ifndef NT
-#$(CP) $(1ST_DEPS) .; \
 	cd $(GEN_DIR); \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
 else
