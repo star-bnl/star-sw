@@ -7,7 +7,7 @@ int rdMuDstEEmcDemo(
 	  char* file    = "rcf1202_2178_1000evts.MuDst.root",
 	  Int_t nFiles  = 1, 
 	  char* inDir   = "/star/data29/reco/pp200/pythia6_203/default/pt5/year2003/gheisha_on/trs_if/",
-	  int nEve=500)
+	  int nEve=10)
 { 
   if (gClassTable->GetID("TTable") < 0)
   gSystem->Load("libStar");
@@ -55,24 +55,22 @@ int rdMuDstEEmcDemo(
 
   
   // instantiate your maker here 
-  //#2
-  StEEmcDbMaker  *myMk=new StEEmcDbMaker("eemcDb");  
-  //#1
-  St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
-
+  /* #1 */ St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
+  /* #2 */ StEEmcDbMaker  *myMk=new StEEmcDbMaker("eemcDb");  
+  
   // request DB for sectors you need (dafault:1-12)
-  myMk->setSectors(5,8);
+  // myMk->setSectors(5,8);
 
   // overwritte the time stamp (if needed)
   // reverse order of makers: first #2, then #1
   // activate the line below
-  myMk->setTimeStampDay(20030514);  // format: yyyymmdd
+  //myMk->setTimeStampDay(20030514);  // format: yyyymmdd
 
   // change DB-server name (if needed)
-  myMk->setDBname("TestScheme/emc");
+  // myMk->setDBname("TestScheme/emc");
  
   // request alternative flavor of DB table (if needed)
-  myMk->setPreferedFlavor("set430","eemcPMTcal");
+  // myMk->setPreferedFlavor("set430","eemcPMTcal");
 
   StMuEEDemoMaker *m = new StMuEEDemoMaker("jasEE","MuDst");
   
