@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StAnalysisMaker.cxx,v 2.0 1999/11/04 16:10:03 ullrich Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.1 1999/12/30 01:54:57 ogilvie Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.1  1999/12/30 01:54:57  ogilvie
+ * added countPrimaryPions as example how to use PID
+ *
  * Revision 2.0  1999/11/04 16:10:03  ullrich
  * Revision for new StEvent
  *
@@ -23,7 +26,7 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 2.0 1999/11/04 16:10:03 ullrich Exp $";
+static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 2.1 1999/12/30 01:54:57 ogilvie Exp $";
 
 //
 //  Proptotypes of little functions which perform
@@ -32,6 +35,7 @@ static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 2.0 1999/11/04 16:10:03 
 void summarizeEvent(StEvent& event, Int_t &nevents);
 long countPrimaryTracks(StEvent& event);
 void tagFiller(StEvent& event, HighPtTag_st& hptTag);
+long countPrimaryPions(StEvent& event);
 
 ClassImp(StAnalysisMaker)
 
@@ -80,7 +84,9 @@ StAnalysisMaker::Make()
     summarizeEvent(ev,nevents); 
     long ntk = countPrimaryTracks(ev);
     gMessMgr->Info() << " StAnalysisMaker.cxx -- Primary tracks: " << ntk << endl;
-    
+    long npions = countPrimaryPions(ev);
+    cout << npions << endl;
+
     // Create and fill a tag
     if (theTag) delete theTag;
     theTag = new HighPtTag_st;
