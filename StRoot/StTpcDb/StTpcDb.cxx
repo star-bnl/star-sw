@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.15 2000/01/24 15:31:31 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.16 2000/02/10 00:29:08 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.16  2000/02/10 00:29:08  hardtke
+ * Add tpg functions to StTpcDbMaker, fix a few bugs
+ *
  * Revision 1.15  2000/01/24 15:31:31  hardtke
  * change to use new gain and t0 tables
  *
@@ -33,16 +36,10 @@
 #include "StMaker.h"
 #include "St_Table.h"
 #include "StTpcDb.h"
+#include "tables/St_tpcDriftVelocity_Table.h"
 
 StTpcDb* gStTpcDb = 0;
 
-//
-// C and Fortran routines:
-//________________________________________
-int type_of_call numberOfPadsAtRow_(int *row) {
-    return gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(*row);
-}
-//
 // C++ routines:
 //_____________________________________________________________________________
 
@@ -251,7 +248,21 @@ St_Table *StTpcDb::getTpcTable(int i){
   return (St_Table *)tpc[i];
 }
 
-
-
+//-----------------------------------------------------------------------------
+float StTpcDb::DriftVelocity(){
+  if(!dvel){              // get drift velocity table
+   const int dbIndex = kCalibration;
+   if (tpc[dbIndex]){
+    St_DataSet* tpd = tpc[dbIndex]->Find("tpcDriftVelocity");
+    if (!(tpd && tpd->HasData()) ){
+     gMessMgr->Message("StTpcDb::Error Finding Tpc DriftVelocity","E");
+     return 0;
+    }
+    dvel = (St_tpcDriftVelocity*)tpd;
+   }
+  }
+  float driftvel = 1e6*(*dvel)[0].cathodeDriftVelocityEast;
+  return driftvel;
+}
 
 

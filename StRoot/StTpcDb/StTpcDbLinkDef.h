@@ -4,5 +4,4 @@
 #pragma link off all functions;
 #pragma link C++ class StTpcDb;
 #pragma link C++ global gStTpcDb;
-#pragma link C++ function numberOfPadsAtRow_;
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.13 2000/01/25 16:01:10 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.14 2000/02/10 00:29:09 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.14  2000/02/10 00:29:09  hardtke
+ * Add tpg functions to StTpcDbMaker, fix a few bugs
+ *
  * Revision 1.13  2000/01/25 16:01:10  fisyak
  * Devorce with StAF
  *
@@ -36,13 +39,27 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#ifndef __CINT__
-#include "StarCallf77.h"
-#define numberOfPadsAtRow_ F77_NAME(numberofpadsatrow,NUMBEROFPADSATROW)
-extern "C" {
-int type_of_call numberOfPadsAtRow_(int *row);
-}
-#endif
+/* #ifndef __CINT__ */
+/* #include "StarCallf77.h" */
+/* #define numberOfPadsAtRow_ F77_NAME(numberofpadsatrow,NUMBEROFPADSATROW) */
+/* #define tpc_row_to_y_ F77_NAME(tpc_row_to_y,TPC_ROW_TO_Y) */
+/* #define tpc_pad_to_x_ F77_NAME(tpc_pad_to_x,TPC_PAD_TO_X) */
+/* #define tpc_local_to_global_ F77_NAME(tpc_local_to_global,TPC_LOCAL_TO_GLOBAL) */
+/* #define tpc_drift_velocity_ F77_NAME(tpc_drift_velocity,TPC_DRIFT_VELOCITY) */
+/* #define tpc_time_to_z_ F77_NAME(tpc_time_to_z,TPC_TIME_TO_Z) */
+/* extern "C" { */
+/* R__EXTERN int type_of_call numberOfPadsAtRow_(int *); */
+/* } */
+/* extern "C" { */
+/* R__EXTERN int type_of_call tpc_row_to_y_(float *,float *); */
+/* } */
+/* extern "C" { */
+/* R__EXTERN int type_of_call tpc_pad_to_x_(float *,float *,float *); */
+/* } */
+/* extern "C" { */
+/* R__EXTERN int type_of_call tpc_global_to_local_(int *,float *,float *); */
+/* } */
+/* #endif */
 #include "StMessMgr.h"
 #include "StRTpcPadPlane.h"
 #include "StRTpcWirePlane.h"
@@ -53,6 +70,8 @@ int type_of_call numberOfPadsAtRow_(int *row);
 #include "StRTpcSlowControlSim.h"
 class StMaker;
 class St_Table;
+class St_tpcDriftVelocity;
+//class StTpcCoordinateTransform;
 
 class StTpcDb {
  private:
@@ -66,6 +85,8 @@ class StTpcDb {
  StTpcGainI*           gain[24];      //!
  StTpcT0I*             t0[24];        //! 
  St_DataSet*           tpc[3];        //!
+ St_tpcDriftVelocity*  dvel;          //!
+ // StTpcCoordinateTransform* transform; //!
 
  protected:
    StTpcDb() {}
@@ -82,6 +103,9 @@ class StTpcDb {
    StTpcGainI* Gain(int sector);
    StTpcT0I* T0(int sector);
    St_Table *getTpcTable(int i);
+   //small pieces of data:
+   float DriftVelocity();
+
 
 #ifdef __ROOT__
    ClassDef(StTpcDb,0)
