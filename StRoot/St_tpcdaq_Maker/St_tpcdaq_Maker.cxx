@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.65  2001/05/17 20:16:02  ward
+// Minor modification to allow running without gain corrections.
+//
 // Revision 1.64  2001/02/15 22:25:29  fisyak
 // Add l3 option
 //
@@ -627,7 +630,11 @@ int St_tpcdaq_Maker::Output() {
         if(skip) continue;
 #endif
         nPixelThisPad=0;
+#ifdef GAIN_CORRECTION
         seqStatus=getSequences(fGain[ipadrow][pad-1],ipadrow+1,pad,&nseq,&listOfSequences);
+#else
+        seqStatus=getSequences(                  1.0,ipadrow+1,pad,&nseq,&listOfSequences);
+#endif
         if(seqStatus<0) { PrintErr(seqStatus,'a'); mErr=2; return 1; }
         if(nseq) {
           numPadsWithSignal++; 
