@@ -1,8 +1,12 @@
 /* 
-* $Id: mykuip.c,v 1.1.1.1 2004/01/12 23:49:39 potekhin Exp $
+* $Id: mykuip.c,v 1.2 2004/09/18 01:05:50 jeromel Exp $
 * $Name:  $
 * $Log: mykuip.c,v $
+* Revision 1.2  2004/09/18 01:05:50  jeromel
+* Implicit dec fix
+*
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
+*
 *
 * Revision 1.4  2002/04/29 00:58:47  nevski
 * production support utilities
@@ -18,6 +22,8 @@
 */
 /*CMZ :  2.00/00 01/09/99  22.08.18  by  Pavel Nevski*/
 /*-- Author :    Pavel Nevski   24/09/98*/
+
+#include <stdio.h>
 
 typedef struct _KmCommand {     /*                                         */ \
   struct _KmCommand *next;      /* link to next command                    */ \
@@ -72,7 +78,10 @@ void dump_arg_list_ ( )
 {
   static KmCommand *cmd;
   cmd = cmdcurrent_;
-  if (cmd == 0 ) { printf (" *** Kuip tracing not available ***\n"); return; }
+  if (cmd == 0 ) { 
+    printf (" *** Kuip tracing not available ***\n"); 
+    return; 
+  }
 
   if( cmd->argc > 0 )
   { int i;
