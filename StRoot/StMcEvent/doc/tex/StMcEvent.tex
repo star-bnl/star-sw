@@ -2,7 +2,7 @@
 %
 % StMcEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StMcEvent.tex,v 2.1 2000/02/03 03:36:59 calderon Exp $
+% $Id: StMcEvent.tex,v 2.2 2000/02/03 23:04:30 calderon Exp $
 %
 % Authors:Michael A. Lisa
 %         Thomas S. Ullrich
@@ -23,6 +23,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StMcEvent.tex,v $
+% Revision 2.2  2000/02/03 23:04:30  calderon
+% Fixed typo that caused index to be generated in \texttt
+%
 % Revision 2.1  2000/02/03 03:36:59  calderon
 % Documentation for version 2.0
 %
@@ -336,7 +339,8 @@ nothing about sectors.
 Part of the goal of \StMcEvent\ is the use of pointers and references
 as opposed to id's and foreign keys.  However, the handling of
 pointers must be done with care.
-To reiterate wise words of caution: If a function returns an object by {\it reference},
+To reiterate wise words of caution: If a function returns an object by
+\textit{reference},
 the object is guaranteed to exist.  If a function returns an object by {\it pointer},
 then it is a good idea to always check if the pointer is \verb+NULL+. Not doing
 this can be the cause of many a headache and sleepless nights.  This is one of
@@ -429,7 +433,7 @@ The containers and iterators are all declared in the file
 {\tt StMcContainers.hh}, for convenience.  In addition,
 all the classes in \StMcEvent\ are {\tt \#include}d in
 the header {\tt StMcEventTypes.hh}.
-\index{\tt{\#include} files}
+\index{{\tt \#include} files}
 \index{include files}
 \index{StMcEventTypes}
 The names given to the containers are meant to reflect
