@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.9 1999/10/01 13:59:18 calderon Exp $
+// $Id: StAssociator.C,v 1.10 1999/11/03 22:39:35 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.10  1999/11/03 22:39:35  calderon
+// Changed default file.  Previous one was removed.
+//
 // Revision 1.9  1999/10/01 13:59:18  calderon
 // Opened up default Local X cut to 5 mm as a result of
 // studies on merged tracks.
@@ -56,10 +59,10 @@ class StChain;
 StChain *chain=0;
 
 void StAssociator(Int_t nevents=1,
-const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root")
+const char *MainFile="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0373_12_35evts.geant.root")
 
 // ~/TestFiles/merged.geant.root
-// /disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfsr/psc0029_02_40evts.geant.root
+// /disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0373_12_35evts.geant.root
 // /disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root
 {
 
