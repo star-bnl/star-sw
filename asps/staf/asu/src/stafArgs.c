@@ -83,7 +83,6 @@ int stafArgs(int argc, char **argv)
 
    if( paw ){
       printf("PAW option\n");
-      pawopt_on_();
    }
 
    if( exec ){
