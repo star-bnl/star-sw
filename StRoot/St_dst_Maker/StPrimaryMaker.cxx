@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.6 1999/07/15 13:57:53 perev Exp $
+// $Id: StPrimaryMaker.cxx,v 1.7 1999/07/17 00:31:24 genevb Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.7  1999/07/17 00:31:24  genevb
+// Use StMessMgr
+//
 // Revision 1.6  1999/07/15 13:57:53  perev
 // cleanup
 //
@@ -27,6 +30,8 @@
 #include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
+
+#include "StMessMgr.h"
 
 #include "global/St_evr_am_Module.h"
 #include "global/St_egr_fitter_Module.h"
@@ -166,7 +171,7 @@ Int_t StPrimaryMaker::Make(){
   } 
   
   // evr
-  if(Debug()) cout << "run_evr: calling evr_am" << endl;
+  if(Debug()) gMessMgr->Debug() << "run_evr: calling evr_am" << endm;
   
   iRes = evr_am(m_evr_evrpar,m_egr_egrpar,globtrk,vertex);
   //	 ================================================
@@ -180,7 +185,7 @@ Int_t StPrimaryMaker::Make(){
   
   *globtrk2  = *globtrk;		//Copy table
   
-  if(Debug()) cout << " Calling track_propagator " << endl;
+  if(Debug()) gMessMgr->Debug() << " Calling track_propagator " << endm;
   
   if (m_tp_param && vertex) {
     egr_propagate_st *tp_param = m_tp_param->GetTable();
@@ -194,7 +199,8 @@ Int_t StPrimaryMaker::Make(){
   //	 ==============================================
   
   if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-  if (iRes !=  kSTAFCV_OK) cout << "Problem on return from Track_Propagator" << endl;
+  if (iRes !=  kSTAFCV_OK) 
+    gMessMgr->Warning() << "Problem on return from Track_Propagator" << endm;
   
   dst_track_st *glob  = globtrk->GetTable();
   dst_track_st *glob2 = globtrk2->GetTable();
@@ -214,7 +220,7 @@ Int_t StPrimaryMaker::Make(){
 	glob->impact = TMath::Sqrt(qwe);
       }
     
-    if(Debug()) cout << " finished calling track-propagator" << endl;
+    if(Debug()) gMessMgr->Debug() << " finished calling track-propagator" << endm;
     
     // egr2
     if (tphit && stk_track) {
@@ -224,7 +230,8 @@ Int_t StPrimaryMaker::Make(){
       primtrk_aux = new St_dst_track_aux("primtrk_aux",nglob);
       AddData(primtrk_aux);
       
-      if(Debug()) cout << "Calling EGR_fitter - Second time" << endl;
+      if(Debug())
+        gMessMgr->Debug() << "Calling EGR_fitter - Second time" << endm;
       
       iRes = egr_fitter (tphit,    vertex,       tptrack,  evaltrk,
 			 scs_spt,m_egr2_egrpar,stk_track,groups,
@@ -232,9 +239,11 @@ Int_t StPrimaryMaker::Make(){
       //	   ======================================================
       
       if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-      if (iRes !=kSTAFCV_OK){cout << "Problem on return from EGR_FITTER" << endl;}
+      if (iRes !=kSTAFCV_OK){
+        gMessMgr->Warning() << "Problem on return from EGR_FITTER" << endm;}
       
-      if(Debug()) cout <<" finished calling egr_fitter - second time" << endl;
+      if(Debug())
+        gMessMgr->Debug() <<" finished calling egr_fitter - second time" << endm;
     }
   }
   return iMake;

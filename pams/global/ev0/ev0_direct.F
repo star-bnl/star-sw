@@ -141,7 +141,7 @@ C  set return code to normal success
                do while (j .ne. 0)
                   
                   if( j .ne. tpc_hit(j).id) then
-                     write(6,*) 'PANIC now'
+                     call StWarning('PANIC now')
                   endif
                   if(  sqrt((tpc_hit(j).x(1))**2.+
      >                 (tpc_hit(j).x(2))**2) .lt. rr) then

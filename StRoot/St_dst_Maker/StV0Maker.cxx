@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.9 1999/07/15 13:57:54 perev Exp $
+// $Id: StV0Maker.cxx,v 1.10 1999/07/17 00:31:25 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.10  1999/07/17 00:31:25  genevb
+// Use StMessMgr
+//
 // Revision 1.9  1999/07/15 13:57:54  perev
 // cleanup
 //
@@ -33,6 +36,8 @@
 
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
+
+#include "StMessMgr.h"
 
 #include "global/St_ev0_am2_Module.h"
 #include "global/St_ev0_eval2_Module.h"
@@ -94,7 +99,7 @@ Int_t StV0Maker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StV0Maker::Make(){
-  //if(Debug()) cout << "Calling ev0..."<< endl; 
+  //if(Debug()) gMessMgr->Debug() << "Calling ev0..."<< endm; 
   PrintInfo();   
   
   int iMake = kStOK;
@@ -102,26 +107,26 @@ Int_t StV0Maker::Make(){
   
   St_DataSet     *match = GetDataSet("match"); 
   if (!match) {
-    cout << " StV0Maker: match is missing" << endl;
+    gMessMgr->Warning() << " StV0Maker: match is missing" << endm;
     return kStWarn;
   }
   St_DataSetIter matchI(match);         
   St_dst_track   *globtrk  = (St_dst_track *) matchI("globtrk");
   if (!globtrk) {
-    cout << " StV0Maker: globtrk is missing" << endl;
+    gMessMgr->Warning() << " StV0Maker: globtrk is missing" << endm;
     return kStWarn;
   }
   
   St_DataSet     *primary = GetDataSet("primary"); 
   
   if (!primary) {
-    cout << " StV0Maker: primary is missing" << endl;
+    gMessMgr->Warning() << " StV0Maker: primary is missing" << endm;
     return kStWarn;
   }
   St_DataSetIter primaryI(primary);
   St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
   if (!vertex) {
-    cout << " StV0Maker: vertex is missing" << endl;
+    gMessMgr->Warning() << " StV0Maker: vertex is missing" << endm;
     return kStWarn;
   }
   
@@ -155,7 +160,7 @@ Int_t StV0Maker::Make(){
   }
   if (vrtx->vtx_id == 1 && vrtx->iflag == 1) {
     // ev0
-    if(Debug()) cout << "Calling ev0..." << endl;
+    if(Debug()) gMessMgr->Info() << "Calling ev0..." << endm;
     Int_t v0_limit = globtrk->GetNRows();
     v0_limit = (v0_limit*v0_limit)/6000;
     if (v0_limit < 1000) v0_limit=1000;
@@ -173,7 +178,8 @@ Int_t StV0Maker::Make(){
     //       =========================================================
     
     if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-    if (iRes !=kSTAFCV_OK) cout << " Problem on return from EV0 " << endl;
+    if (iRes !=kSTAFCV_OK)
+      gMessMgr->Warning() << " Problem on return from EV0 " << endm;
     if(m_ev0EvalOn){   
       //ev0_eval2
       if (tptrack && evaltrk) {
@@ -183,13 +189,14 @@ Int_t StV0Maker::Make(){
 	St_DataSetIter geant(GetInputDS("geant"));
 	St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("g2t_track");
 	St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *) geant("g2t_vertex");
-	if(Debug()) cout << " Calling ev0_eval2.." << endl;
+	if(Debug()) gMessMgr->Info() << " Calling ev0_eval2.." << endm;
 	Int_t Res_ev0_eval = kSTAFCV_BAD;
 	Res_ev0_eval = ev0_eval2(stk_track,tptrack,evaltrk,
 				 vertex,dst_v0_vertex,ev0_eval,
 				 g2t_track,g2t_vertex);
 	
-	if (Res_ev0_eval != kSTAFCV_OK) {cout << "Problem on return from ev0eval2" << endl;}
+	if (Res_ev0_eval != kSTAFCV_OK) {
+	  gMessMgr->Warning() << "Problem on return from ev0eval2" << endm;}
       }
     }     // If ev0 evaluation switched on 
   }  

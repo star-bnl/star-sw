@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.6 1999/07/15 13:57:54 perev Exp $
+// $Id: StXiMaker.cxx,v 1.7 1999/07/17 00:31:25 genevb Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.7  1999/07/17 00:31:25  genevb
+// Use StMessMgr
+//
 // Revision 1.6  1999/07/15 13:57:54  perev
 // cleanup
 //
@@ -28,6 +31,8 @@
 #include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
+
+#include "StMessMgr.h"
 
 #include "global/St_exiam_Module.h"
 
@@ -98,7 +103,7 @@ Int_t StXiMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StXiMaker::Make(){
-  //  if(Debug()) cout << "Calling exi..."<< endl;  
+  //  if(Debug()) gMessMgr->Debug() << "Calling exi..."<< endm;
   PrintInfo();
   
   int iMake = kStOK;
@@ -134,7 +139,8 @@ Int_t StXiMaker::Make(){
   //	 ===================================================================
   
     if (iRes != kSTAFCV_OK) iMake = kStWarn;
-    if (iRes != kSTAFCV_OK) {cout << " Problem on return from EXI " << endl;}
+    if (iRes != kSTAFCV_OK) {
+      gMessMgr->Warning() << " Problem on return from EXI " << endm;}
   }
   return iMake;
 }

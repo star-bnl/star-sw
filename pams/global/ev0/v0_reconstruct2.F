@@ -327,7 +327,7 @@ C---- find square of impact param of reconstructed particle------
                        vertex_h.nok = vertex_h.nok +1
                        if (ok.ge.ev0out_h.maxlen .or.
      +                      vertex_h.nok .gt.  vertex_h.maxlen) then
-                          write(6,*) 'Too many v0s'
+                          call StWarning('Too many v0s')
                           return ! wkw
                        endif
                        vertex(vertex_h.nok).x=xpp(1)

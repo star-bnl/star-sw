@@ -45,6 +45,7 @@ C<----------------------------------------------------------------------
       INTEGER nok
       INTEGER i
 
+      CHARACTER*132 m132
 
       REAL    xc(2),xlocal(3),bfield(3)
 
@@ -70,7 +71,8 @@ c B-field obtained via gufld call
       xlocal(3) = 0.
  
       call gufld(xlocal,bfield)
-      write(6,*) 'Using a field of',bfield(3),' KGauss'
+      write(m132,*) 'Using a field of',bfield(3),' KGauss'
+      call StInfo(m132)
 
 C convert to Tesla
       bfield(1) = bfield(1)/10.
@@ -90,7 +92,7 @@ C convert to Tesla
      +          globtrk(i).det_id .eq. kTpcSsdSvtId .or.
      +          globtrk(i).det_id .eq. kSsdSvtId) then
              IF(nok .ge. trak_h.maxlen)   then
-                write(6,*) 'Internal track table too small quiting'
+                call StError('Internal track table too small quiting')
                 EV0_AM2= STAFCV_BAD
                 return
              endif
@@ -117,7 +119,8 @@ C convert to Tesla
  35     CONTINUE
                 
         trak_h.nok = nok
-        write(6,*) ' No. of trak rows is:',trak_h.nok
+        write(m132,*) ' No. of trak rows is:',trak_h.nok
+        call StInfo(m132)
 c     
 c     call reconstruction program
 c     
@@ -150,7 +153,8 @@ C       ENDIF
         trak_h.nok = 0
 C     return a normal success code
         
-        write(6,*) 'Found ',ev0out_h.nok,' v0 candidates'
+        write(m132,*) 'Found ',ev0out_h.nok,' v0 candidates'
+        call StInfo(m132)
         EV0_AM2=STAFCV_OK
  999    CONTINUE
         RETURN

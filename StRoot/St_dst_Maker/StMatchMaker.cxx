@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.5 1999/07/15 13:57:52 perev Exp $
+// $Id: StMatchMaker.cxx,v 1.6 1999/07/17 00:31:24 genevb Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.6  1999/07/17 00:31:24  genevb
+// Use StMessMgr
+//
 // Revision 1.5  1999/07/15 13:57:52  perev
 // cleanup
 //
@@ -22,6 +25,9 @@
 #include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
+
+#include "StMessMgr.h"
+
 #include "tables/St_tcl_tpcluster_Table.h"
 #include "tables/St_scs_cluster_Table.h"
 #include "tables/St_ctu_cor_Table.h"
@@ -182,7 +188,7 @@ Int_t StMatchMaker::Make(){
   St_DataSet *ctf = GetInputDS("ctf");
   St_ctu_cor *ctb_cor = 0;
   if (!ctf) {
-    if(Debug()) cout << "St_ctf_Maker has not been called " << endl;
+    if(Debug()) gMessMgr->Debug() << "St_ctf_Maker has not been called " << endm;
   } else {
     ctb_cor = (St_ctu_cor *)ctf->Find("ctb_cor"); 
     if (! ctb_cor) {ctb_cor = new St_ctu_cor("ctb_cor",1); AddGarb(ctb_cor);}
@@ -217,15 +223,15 @@ Int_t StMatchMaker::Make(){
 		  est_match,g2t_track,m_egr_egrpar);
     //          ==============================================
     if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-    if(Debug()) cout << "Calling EST_TOGLOB2" << endl;
+    if(Debug()) gMessMgr->Debug() << "Calling EST_TOGLOB2" << endm;
     iRes = est_toglob2(est_match, tphit,     tptrack, scs_spt,
 		       groups,stk_track,evt_match);
     //         ==================================================
     
     if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-    if(Debug()) cout << "finished est_toglob2 " << endl;   
+    if(Debug()) gMessMgr->Debug() << "finished est_toglob2 " << endm;
 #if 0     
-    if(Debug()) cout << "Calling EST_EVAL" << endl;    
+    if(Debug()) gMessMgr->Debug() << "Calling EST_EVAL" << endm;
     iRes_est_eval = est_eval(g2t_track, tptrack, mctrk, 
 			     m_est_ctrl,est_match,est_ev,scs_spt); 
     if (iRes !=kSTAFCV_OK) iMake = kStWarn;
@@ -241,8 +247,9 @@ Int_t StMatchMaker::Make(){
   //	 ======================================================
   
   if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-  if (iRes !=kSTAFCV_OK) {cout << "Problem on return from EGR_FITTER" << endl;}
-  if(Debug()) cout << " finished calling egr_fitter" << endl;
+  if (iRes !=kSTAFCV_OK) {
+    gMessMgr->Warning() << "Problem on return from EGR_FITTER" << endm;}
+  if(Debug()) gMessMgr->Debug() << " finished calling egr_fitter" << endm;
   
   return iMake;
 }

@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.9 1999/02/26 22:54:45 sakrejda Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.10 1999/07/17 00:32:06 genevb Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.10  1999/07/17 00:32:06  genevb
+* Use StMessMgr
+*
 * Revision 1.9  1999/02/26 22:54:45  sakrejda
 * protection against empty clusters added
 *
@@ -162,7 +165,6 @@ c
         parameter(nmc_tracks_max=2000)
         parameter(npads_max=182)
 c
-        integer id                    ! Message ID
         integer imax                  ! Index for local maxima found
         integer imc_track(nmc_tracks_max)   ! List of MC track ID's
         integer indx                  ! General index
@@ -222,6 +224,8 @@ C-----------------------------------------------------------------------
         save bucket_length_in
         save bucket_length_out
 C-----------------------------------------------------------------------
+        character*132 m132
+C-----------------------------------------------------------------------
         ierr = 0
 
 c set up the identity vector for x (pad) calculation
@@ -277,9 +281,11 @@ C time direction no longer a projection - WAL 13 Feb 98
            endif
         enddo
 	if (adc_sum.eq.0.) then
-         write(6,*) 'Hey -- ADCSUM=0!!!!'
-         write(6,*) 'number of pixels in cluster = ',nclspix
-         write(6,*) 'ADC vaulues = ',(iadc(ir),ir=1,nclspix)
+	 call StError('Hey -- ADCSUM=0!!!!')
+         write(m132,*) 'number of pixels in cluster = ',nclspix
+         call StError(m132)
+         write(m132,*) 'ADC vaulues = ',(iadc(ir),ir=1,nclspix)
+         call StError(m132)
          ierr = 1
          return
         endif
@@ -423,9 +429,7 @@ c          call vzero(nocc_track,nmc_tracks_max)
                     imc_track(nmc_tracks) = ktrk
                     nocc_track(nmc_tracks) = 1
                  else           ! too many contributing tracks... forget it
-                    id=0
-*                    call message('TPHAM-I-2MANY, ntrk.gt.max',1,id)
-                     write(6,*) 'TPHAM-I-2MANY, ntrk.gt.max'
+                    call StMessage('TPHAM-I-2MANY, ntrk.gt.max')
                  endif
               else
                  nocc_track(mtrk) = nocc_track(mtrk)+1

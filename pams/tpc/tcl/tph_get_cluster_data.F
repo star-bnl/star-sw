@@ -1,5 +1,8 @@
-* $Id: tph_get_cluster_data.F,v 1.3 1999/06/09 14:45:43 hardtke Exp $
+* $Id: tph_get_cluster_data.F,v 1.4 1999/07/17 00:32:07 genevb Exp $
 * $Log: tph_get_cluster_data.F,v $
+* Revision 1.4  1999/07/17 00:32:07  genevb
+* Use StMessMgr
+*
 * Revision 1.3  1999/06/09 14:45:43  hardtke
 * add 1 to kseqpix
 *
@@ -125,7 +128,6 @@ c
 	parameter (tdc_factor='400'X)
 C
         integer iclspix               ! Pixel index within cluster
-        integer id                    ! Message ID
         integer indx                  ! General index
 	integer iseq_num              ! Sequence index
         integer jpix                  ! Pixel index
@@ -138,8 +140,6 @@ C
         integer local_tdc_high
 c
 c 24mar95 -now data is packed in a new way in tppixel
-C-----------------------------------------------------------------------
-        data id/0/
 C-----------------------------------------------------------------------
 
         iclspix = 0
@@ -157,9 +157,7 @@ C-----------------------------------------------------------------------
            iclspix = iclspix + 1
 
 	   if (iclspix.gt.nclpix_max) then
-	     id = 0
-*	     call message('TPHAM-!-TMP too many pixels!',1,id)
-             write(6,*) 'TPHAM-!-TMP too many pixels!'
+	     call StError('TPHAM-!-TMP too many pixels!')
 	     return
 	   endif
 
@@ -191,9 +189,7 @@ C Step through one sequence on one pad:
            do indx = jpix+1, jpix+kseqpix-1
               iclspix = iclspix + 1
 	      if (iclspix.gt.nclpix_max) then
-	        id = 0
-*	        call message('TPHAM-!-TMP too many pixels!',1,id)
-	        write(6,*) 'TPHAM-!-TMP too many pixels!'
+	        call StError('TPHAM-!-TMP too many pixels!')
 	        return
 	      endif
               ldatum = pixel_data(indx).data

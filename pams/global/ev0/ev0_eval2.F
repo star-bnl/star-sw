@@ -28,7 +28,7 @@ C---------------
       ev0_eval_h.nok = ev0out_h.nok
       IF( svt_track_h.nok .eq. 0 .and. tte_eval_h.nok .eq. 0) then
          ev0_eval2 = stafcv_bad
-         write(6,*) 'No evaluation tables qutiing'
+         call StError('No evaluation tables qutiing')
          return
       endif
 *
