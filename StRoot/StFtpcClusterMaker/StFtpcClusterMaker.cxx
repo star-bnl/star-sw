@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.57 2003/09/02 17:58:14 perev Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.58 2003/10/11 04:07:48 perev Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.58  2003/10/11 04:07:48  perev
+// assert for number of east temperatures added
+//
 // Revision 1.57  2003/09/02 17:58:14  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -557,7 +560,7 @@ Int_t StFtpcClusterMaker::Make()
 		 numberBodyTemperaturesEast++;
 		 cout<<"gas->getBody4East() = "<<gas->getBody4East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
          }		 
-		 
+	 assert(numberBodyTemperaturesEast);	 
 	 averageBodyTemperatureEast = averageBodyTemperatureEast/numberBodyTemperaturesEast;
 	 if (averageBodyTemperatureEast >= dbReader->minGasTemperature() && averageBodyTemperatureEast <= dbReader->maxGasTemperature()) {
              paramReader->setGasTemperatureEast(averageBodyTemperatureEast);
