@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.47 2001/05/22 17:40:47 nevski Exp $
+* $Id: geometry.g,v 1.48 2001/09/10 17:39:34 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.48  2001/09/10 17:39:34  nevski
+* do not set MFLD datacards without a DETP GEOM
+*
 * Revision 1.47  2001/05/22 17:40:47  nevski
 * field find tuning
 *
@@ -272,9 +275,11 @@ If LL>1
    if (magp) Call magpgeo
 *
 * - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5
-   If (LL>1) call AgDETP new ('MFLD')
-   if (mfld & field!=5) call AgDETP add ('MFLG(1).Bfield=',field,1)
-   if (mfld & mf!=0)    call AgDETP add ('MFLG(1).version=',mf,1)
+   If (LL>1) then
+      call AgDETP new ('MFLD')
+      if (mfld & field!=5) call AgDETP add ('MFLG(1).Bfield=',field,1)
+      if (mfld & mf!=0)    call AgDETP add ('MFLG(1).version=',mf,1)
+   endif
    if (mfld) Call mfldgeo
 *
    if JVOLUM>0 
