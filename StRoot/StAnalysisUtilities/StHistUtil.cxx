@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.17 2000/06/23 14:31:52 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.18 2000/06/23 14:36:08 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.18  2000/06/23 14:36:08  kathy
+// comment out print statements and add some documentation
+//
 // Revision 1.17  2000/06/23 14:31:52  kathy
 // put 2 new methods in: CopyHists (must be used first), AddHists
 //
@@ -597,15 +600,18 @@ Int_t StHistUtil::CopyHists(TList *dirList)
 
 //_____________________________________________________________________________
 
+// **** IMPORTANT! ***** 
+//  THIS METHOD ASSUMES YOU HAVE ALREADY USED CopyHists TO PUT
+//  HISTOGRAMS FROM 1 FILE INTO newHist array
+//   -- this method is used in subsequent files!
 
 Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
 {  
   cout << " **** Now in StHistUtil::AddHists **** " << endl;
-  cout << " num hists to copy = " << numHistCopy << endl;
+  //  cout << " num hists to copy = " << numHistCopy << endl;
 
   if (!dirList) cout << 
         " StHistUtil::AddHists - histogram Pointer not set! " << endl;
-
 
   Int_t histAddCount = 0;
 
@@ -624,13 +630,8 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
 	 //	cout << "  ---- hist num to add --- " << imk << endl;
          newHist[imk]->Add((TH1 *)obj);
          histAddCount++;
-         cout << " !!! Added histograms with Name: "
-	      << newHist[imk]->GetName() <<  endl;
+	 // cout << " !!! Added histograms with Name: " << newHist[imk]->GetName() <<  endl;
 
-         if (strcmp(newHist[imk]->GetName(),"TabQaEvsumTrkTot")==0) {       
-	   newHist[imk]->Draw();
-           gPad->Update();
-         } // if strcmp -- to draw
 
        } // strcmp
       }  // loop over imk
@@ -638,7 +639,6 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
     }    //while
 
   } //dirlist
-
 
   cout << " StHistUtil::AddHists: Total No. Histograms Added  = " << 
         histAddCount <<endl;
