@@ -26,7 +26,7 @@ class St_DataSet : public TNamed
     St_Table    *s_StafTable;       // The pointer to the STAF STAR tables for this data set
     TList       *s_ListOfDataSet;   // List of the STAF DataSet objects
  protected:
-   virtual void SetParent(St_DataSet *parent){if (s_ListOfDataSet) s_ListOfDataSet->SetParent(parent);}
+    virtual void SetParent(St_DataSet *parent){if (s_ListOfDataSet) /*s_ListOfDataSet->SetParent(parent)*/;}
  public:
     St_DataSet(const Char_t *name="", St_DataSet *parent=0);
     virtual ~St_DataSet();
