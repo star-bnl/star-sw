@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.4 1999/07/12 01:49:39 fine Exp $
+// $Id: StXiMaker.cxx,v 1.5 1999/07/12 23:04:17 fisyak Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.5  1999/07/12 23:04:17  fisyak
+// Remove glob2
+//
 // Revision 1.4  1999/07/12 01:49:39  fine
 // Clean up
 //
@@ -105,7 +108,6 @@ Int_t StXiMaker::Make(){
   St_DataSet     *primary = GetDataSet("primary"); 
   St_DataSetIter primaryI(primary);         
   St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
-  St_dst_track   *globtrk2 = (St_dst_track *) primaryI("globtrk2");
 
   St_DataSet *v0 = GetDataSet("v0"); 
   St_DataSetIter v0I(v0);         
@@ -113,7 +115,6 @@ Int_t StXiMaker::Make(){
   St_dst_xi_vertex  *dst_xi_vertex = 0;
   
   dst_track_st *glob  = globtrk->GetTable();
-  dst_track_st *glob2 = globtrk2->GetTable();
   dst_vertex_st *vrtx = vertex->GetTable();
   if( vrtx->vtx_id != 1 || vrtx->iflag != 1){
     for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
@@ -138,7 +139,7 @@ Int_t StXiMaker::Make(){
 //_____________________________________________________________________________
 void StXiMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StXiMaker.cxx,v 1.4 1999/07/12 01:49:39 fine Exp $\n");
+  printf("* $Id: StXiMaker.cxx,v 1.5 1999/07/12 23:04:17 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
