@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.14 2003/02/19 06:38:29 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.15 2003/02/20 20:09:54 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.15  2003/02/20 20:09:54  genevb
+// Several changes for new trigger scheme, dAu data
+//
 // Revision 2.14  2003/02/19 06:38:29  genevb
 // Rework trigger and mult/event class sections
 //
@@ -71,9 +74,11 @@ class StQABookHist : public TObject {
   virtual       ~StQABookHist() {}
   virtual void   BookHist(Int_t histsSet);
 
+  const char*    HistType() {return QAHistType.Data();}
+
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.14 2003/02/19 06:38:29 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.15 2003/02/20 20:09:54 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -157,11 +162,6 @@ class StQABookHist : public TObject {
   TH2F     *m_zDcaZf;           //! z-dca vs z-first
   TH2F     *m_zDcaPsi;          //! z-dca vs psi
   TH2F     *m_zDcaPhi0;         //! z-dca vs phi0
-
-  TH1F     *m_ftpc_chargestepW; //! Chargestep from ftpc west
-  TH1F     *m_ftpc_chargestepE; //! Chargestep from ftpc east
-  TH1F     *m_ftpc_fcl_radialW;  //! ftpc west cluster radial position
-  TH1F     *m_ftpc_fcl_radialE;  //! ftpc east cluster radial position
 
   TH1F     *m_pointT;        //! number of points on the track - tpc
   TH1F     *m_pointTS;       //! number of points on the track - tpc+svt

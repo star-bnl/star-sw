@@ -41,6 +41,20 @@ static float ftpcPadrowZPos[20] = {162.75,171.25,184.05,192.55,205.35,
 
 ClassImp(StEventQAMaker)
 
+Bool_t isTriggerInRange(const StTriggerId* tr, UInt_t lo, UInt_t hi) {
+  for (UInt_t i=lo; i<=hi; i++)
+    if (tr->isTrigger(i)) return kTRUE;
+  return kFALSE;
+}
+Bool_t isTriggerAmong(const StTriggerId* tr, UInt_t n, ... ) {
+  va_list ap;
+  va_start(ap,n);
+  Bool_t is=kFALSE;
+  for (UInt_t i=0; (!is) && (i<n); i++)
+    if (tr->isTrigger(va_arg(ap, unsigned int))) is=kTRUE;
+  va_end(ap);
+  return is;
+}
 
 //_____________________________________________________________________________
 StEventQAMaker::StEventQAMaker(const char *name, const char *title) :
@@ -84,7 +98,7 @@ Int_t StEventQAMaker::Make() {
   n_prim_good = 0;
   n_glob_good = 0;
 
-  event = (StEvent *)GetInputDS("StEvent");
+  event = (StEvent*) GetInputDS("StEvent");
   if (event) {
     Bool_t realData = (event->info()->type() == "NONE");
     if (firstEvent) {
@@ -100,34 +114,19 @@ Int_t StEventQAMaker::Make() {
     }
     UInt_t tword = 0;
     Bool_t doEvent = kTRUE;
+    Int_t evClasses[32];
+    Int_t nEvClasses = 1;
     Int_t run_num = event->runId();
     Int_t run_year = run_num/1000000;         // Determine run year from run #
-    allTrigs = (allTrigs || (run_year == 1)); // Don't use year 1 trigger word
     if (allTrigs) {
+
       histsSet = StQA_pp;
-    } else {
-     StTriggerIdCollection* trigIdColl = event->triggerIdCollection();
-     const StTriggerId* trigId = ((trigIdColl) ? trigIdColl->nominal() : 0);
-     if (trigId) {
-       histsSet = StQA_dAu;
-       if (realData) doEvent = kFALSE;
-       tword = trigId->mask();
-       if ((trigId->isTrigger(2001)) ||
-           (trigId->isTrigger(2002)) ||
-           (trigId->isTrigger(2003)) ||
-           (trigId->isTrigger(2004))) {
-         mTrigWord->Fill(1.); // "MinBias"
-         doEvent = kTRUE;
-       } else if ((trigId->isTrigger(2201)) ||
-                  (trigId->isTrigger(2202))) {
-         mTrigWord->Fill(3.); // "Other Physics"
-         doEvent = kTRUE;
-       } else {
-         mTrigWord->Fill(8.); // "Other"
-       }
-     } else {  // trigId
+
+    } else if (run_year <= 3) {
+
+      // Old way of determining the trigger (from L0 trigger word)
       StTrigger* l0Trig = event->l0Trigger();
-      if (l0Trig) {
+      if ((l0Trig) && (run_year != 1)) {      // Don't use year 1 trigger word
        if (realData) doEvent = kFALSE;
        tword = l0Trig->triggerWord();
        if (tword) {
@@ -153,22 +152,53 @@ Int_t StEventQAMaker::Make() {
         if (realData)
           gMessMgr->Warning("StEventQAMaker::Make(): trigger word=0 !!!!!");
        }  // tword
-      } else {  // No trigger info or year 1 data!
+      } else { // No trigger info or year 1 data!
        gMessMgr->Warning("StEventQAMaker::Make(): No trigger info...processing anyhow");
-      }  // l0Trig
-     }  // trigId
+      }
+
+    } else {  // run_year >= 4
+
+      StTriggerIdCollection* trigIdColl = event->triggerIdCollection();
+      const StTriggerId* trigId = ((trigIdColl) ? trigIdColl->nominal() : 0);
+      if (trigId) {
+       histsSet = StQA_dAu;
+       if (realData) doEvent = kFALSE;
+       nEvClasses=0;
+       tword = trigId->mask();
+       if (isTriggerAmong(trigId,4,2001,2002,2003,2004)) {
+         mTrigWord->Fill(1.); // "MinBias"
+         doEvent = kTRUE;
+	 evClasses[nEvClasses] = 1;
+	 nEvClasses++;
+       }
+       if (isTriggerAmong(trigId,2,2201,2202)) {
+         mTrigWord->Fill(3.); // "High pt"
+         doEvent = kTRUE;
+	 evClasses[nEvClasses] = 2;
+	 nEvClasses++;
+       }
+       if ((nEvClasses==0) && (isTriggerInRange(trigId,2000,2999))) {
+         mTrigWord->Fill(8.); // "Other"
+	 evClasses[nEvClasses] = 3;
+	 nEvClasses++;
+       }
+      } else {  // No trigger info!
+       gMessMgr->Warning("StEventQAMaker::Make(): No trigger info");
+      }
     }  // allTrigs
+
     for (int bitn=0; bitn<32; bitn++) {
       if (tword>>(bitn) & 1U)
         mTrigBits->Fill((Float_t) bitn);
     }
+
     if (!doEvent) {
       gMessMgr->Message() << "StEventQAMaker::Make(): "
         << "skipping because trigger word=" << tword << endm;
       return kStOk;
     }
+
     if (firstEvent) BookHist();
-    // only process if a primary vertex exists !!!
     multiplicity = event->trackNodes().size();
     switch (histsSet) {
       case (StQA_AuAu) : {
@@ -177,20 +207,33 @@ Int_t StEventQAMaker::Make() {
         else if (multiplicity < 2500) eventClass = 2;
         else eventClass = 3;
         break; }
+      case (StQA_dAu) : {
+        eventClass = evClasses[0];
+	break; }
       default : {
         eventClass = 1;
       }
     }
+
     int makeStat = kStOk;
     float vertExists = 1.;
+ 
+    // only process if a primary vertex exists !!!
     if (!(event->primaryVertex())) {
       vertExists = -1.;
       gMessMgr->Warning("StEventQAMaker::Make(): no primary vertex found!");
     }
     mNullPrimVtx->Fill(vertExists);
-    if ((eventClass) && (histsSet != StQA_MC))
-      hists->mNullPrimVtxClass->Fill(vertExists);
-    if (event->primaryVertex()) makeStat = StQAMakerBase::Make();
+
+    if (nEvClasses == 1) evClasses[0] = eventClass;
+    
+    for (int i=0; i<nEvClasses; i++) {
+      eventClass = evClasses[i];
+      if (event->primaryVertex()) makeStat = StQAMakerBase::Make();
+      if ((eventClass) && (histsSet != StQA_MC))
+        hists->mNullPrimVtxClass->Fill(vertExists);
+      if (makeStat != kStOk) break;
+    }
     return makeStat;
   }
   gMessMgr->Error("StEventQAMaker::Make(): no event found!");
@@ -217,8 +260,9 @@ void StEventQAMaker::MakeHistEvSum() {
       else
 	tpcChgEast += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
     }
-    m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,eventClass);
-    m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[1]/ftpcMon->chrg_ftpc_tot[0],eventClass);
+    m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,(float) eventClass);
+    m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[1]/ftpcMon->chrg_ftpc_tot[0],
+      (float) eventClass);
   }
 }
 
@@ -1955,8 +1999,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.43 2003/02/19 06:38:28 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.44 2003/02/20 20:09:53 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.44  2003/02/20 20:09:53  genevb
+// Several changes for new trigger scheme, dAu data
+//
 // Revision 2.43  2003/02/19 06:38:28  genevb
 // Rework trigger and mult/event class sections
 //
