@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.61  2001/02/11 17:42:00  fisyak
+// Make gain correction switchable
+//
 // Revision 1.60  2000/11/30 02:06:10  fisyak
 // Remove scale factor 1.135, move it to calibration file
 //
@@ -174,7 +177,6 @@
 #include "StTrsMaker/include/StTrsDetectorReader.hh"
 #include "StTrsMaker/include/StTrsZeroSuppressedReader.hh"
 #include "St_tpcdaq_Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
 #include "TH1.h"
@@ -209,7 +211,8 @@ int gSector;
 // obsolete since we are moving to StIOMaker ZeroSuppressedReader *gZsr;  
 // obsolete since we are moving to StIOMaker DetectorReader *gDetectorReader;
 
-St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),gConfig(daqOrTrs)
+St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),gConfig(daqOrTrs),
+mGAIN_CORRECTION(kTRUE)
 {
   printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
   alreadySet=0; // FALSE
@@ -449,7 +452,6 @@ int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequenc
 #endif
   return rv; // < 0 means serious error.
 }
-#ifdef GAIN_CORRECTION
 #define GAIN_LINE_SIZE 1700
 void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) { // www
   register int row,pad;
@@ -471,7 +473,6 @@ void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) { // www
     }
   }
 }
-#endif
 #ifdef NOISE_ELIM
 void St_tpcdaq_Maker::SetNoiseEliminationStuff() {
   int i,sector;
@@ -584,9 +585,9 @@ int St_tpcdaq_Maker::Output() {
   // See "DAQ to Offline", section "Better example - access by padrow,pad",
   // modifications thereto in Brian's email, SN325, and Iwona's SN325 expl.
   for(isect=1;isect<=NSECT;isect++) {
-#ifdef GAIN_CORRECTION
-    SetGainCorrectionStuff(isect);
-#endif
+    if (mGAIN_CORRECTION) {
+      SetGainCorrectionStuff(isect);
+    }
     dataOuter[isect-1]=0; dataInner[isect-1]=0;
     sector=raw_data_tpc(NameOfSector(isect));
     if(!sector) {
@@ -659,21 +660,17 @@ int St_tpcdaq_Maker::Output() {
           m_seq_padNumber->Fill((Float_t)pad);
           m_seq_padRowNumber->Fill((Float_t)(ipadrow+1));
 #endif
-#ifdef GAIN_CORRECTION
-          assert(pad>0&&pad<=182);
-          if(fGain[ipadrow][pad-1]<=0.125 || fGain[ipadrow][pad-1]>8.0) continue;
-#endif
+          double gainCorrection = 1.0;
+          if (mGAIN_CORRECTION) {
+            assert(pad>0&&pad<=182);
+//          if(fGain[ipadrow][pad-1]<=0.125 || fGain[ipadrow][pad-1]>8.0) continue;
+            if (fGain[ipadrow][pad-1] > 0.125 &&  
+	        fGain[ipadrow][pad-1] <= 8.0) gainCorrection = fGain[ipadrow][pad-1];
+          }
           numberOfUnskippedSeq++;
           for(ibin=0;ibin<seqLen;ibin++) {
             pixCnt++; conversion=log8to10_table[*(pointerToAdc++)]; 
-#ifdef GAIN_CORRECTION
-            if(fGain[ipadrow][pad-1]>22.0) {
-              printf("Fatal error in %s, line %d.\n",__FILE__,__LINE__);
-              printf("ipadrow=%d, pad-1=%d, fgain=%g\n",ipadrow,pad-1,fGain[ipadrow][pad-1]);
-              assert(0);
-            }
-            conversion=(short unsigned int)(0.5+fGain[ipadrow][pad-1]*conversion);
-#endif
+            conversion=(short unsigned int)(0.5+gainCorrection*conversion);
 #ifdef HISTOGRAMS
             m_pix_AdcValue->Fill((Float_t)(conversion));
 #endif
