@@ -1,11 +1,16 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.14 2002/08/12 15:29:21 andrewar Exp $
+ * $Id: StiStEventFiller.cxx,v 1.15 2002/08/12 21:39:56 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.15  2002/08/12 21:39:56  calderon
+ * Introduced fillPidTraits, which uses the values obtained from
+ * Andrews brand new dEdxCalculator to create two instances of an
+ * StTrackPidTraits object and pass it to the track being filled.
+ *
  * Revision 1.14  2002/08/12 15:29:21  andrewar
  * Added dedx calculators
  *
@@ -80,6 +85,8 @@ using namespace std;
 #include "StThreeVectorF.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
+
+#include "StDedxMethod.h"
 
 //StEvent
 #include "StPrimaryVertex.h"
@@ -508,15 +515,13 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, const StiTrack* track){
 	return;	
     }
     StiKalmanTrackNode* node = kTrack->getInnerMostHitNode();
-    double alpha, xRef, x[5], covM[15], dEdx, chi2node;
-    node->get(alpha,xRef,x,covM,dEdx,chi2node);
+    double alpha, xRef, x[5], covM[15], dEdxNode, chi2node;
+    node->get(alpha,xRef,x,covM,dEdxNode,chi2node);
     cout <<"GetAlpha: "<<alpha<<" Alpha: "<<node->fAlpha<<endl;
     float chi2[2];
     chi2[0] = chi2node; // change: perhaps use chi2node instead of track->getChi2()?
     chi2[1] = -9999; // change: here goes an actual probability, need to calculate?
     
-    dEdx=dEdxTpcCalculator.getDedx(kTrack);
-    cout <<"TPC dEdx: "<< dEdx << endl;
 
     // @#$%^&
     // need to transform the covariant matrix from double's (Sti) to floats (StEvent)!
@@ -532,6 +537,32 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, const StiTrack* track){
     return;
 }
 
+void StiStEventFiller::filldEdxInfo(StiDedxCalculator& dEdxCalculator, StTrack* gTrack, const StiTrack* track){
+    double dEdx, errordEdx, nPoints;
+    dEdx = errordEdx = nPoints = 9999;
+    const StiKalmanTrack* kTrack = dynamic_cast<const StiKalmanTrack*>(track);
+    if (kTrack) {
+	dEdxCalculator.getDedx(kTrack, dEdx, errordEdx, nPoints);
+    }
+    
+    StTrackPidTraits* pidTrait = new StDedxPidTraits(dEdxCalculator.whichDetId(),
+						     static_cast<short>(kTruncatedMeanId),
+						     static_cast<unsigned short>(nPoints),
+						     static_cast<float>(dEdx),
+						     static_cast<float>(errordEdx));
+    gTrack->addPidTraits(pidTrait);
+    return;
+}
+void StiStEventFiller::fillPidTraits(StTrack* gTrack, const StiTrack* track){
+
+    // TPC
+    filldEdxInfo(dEdxTpcCalculator,gTrack,track);
+
+    // SVT
+    filldEdxInfo(dEdxSvtCalculator,gTrack,track);
+
+    return;
+}
 void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track){
   
     //cout << "StiStEventFiller::fillTrack()" << endl;
@@ -579,6 +610,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track){
     fillGeometry(gTrack, track, false); // inner geometry
     fillGeometry(gTrack, track, true);  // outer geometry
     fillFitTraits(gTrack, track);
+    fillPidTraits(gTrack, track);
     return;
 }
 unsigned short StiStEventFiller::encodedStEventFitPoints(const StiTrack* track) {

@@ -1,12 +1,17 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 1.4 2002/08/12 15:29:21 andrewar Exp $
+ * $Id: StiStEventFiller.h,v 1.5 2002/08/12 21:39:57 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 1.5  2002/08/12 21:39:57  calderon
+ * Introduced fillPidTraits, which uses the values obtained from
+ * Andrews brand new dEdxCalculator to create two instances of an
+ * StTrackPidTraits object and pass it to the track being filled.
+ *
  * Revision 1.4  2002/08/12 15:29:21  andrewar
  * Added dedx calculators
  *
@@ -49,7 +54,6 @@ using std::map;
     \note 
  */
 #include "Sti/StiDedxCalculator.h"
-#include "Sti/StiResidualCalc.h"
 
 class StEvent;
 class StTrackNode;
@@ -57,7 +61,6 @@ class StiTrackContainer;
 class StiTrack;
 class StiKalmanTrack;
 class StiDedxCalculator;
-class StiResidualCalc;
 
 class StiStEventFiller
 {
@@ -73,6 +76,8 @@ public:
     void fillGeometry(StTrack* track, const StiTrack* kTrack, bool outer);
     //void fillTopologyMap(StTrack* track, const StiTrack* kTrack);
     void fillFitTraits(StTrack* track, const StiTrack* kTrack);
+    void fillPidTraits(StTrack* track, const StiTrack* kTrack);
+    void filldEdxInfo(StiDedxCalculator&, StTrack* track, const StiTrack* kTrack);
     void fillTrack(StTrack* track, const StiTrack* kTrack);
     unsigned short encodedStEventFitPoints(const StiTrack* kTrack); 
     float impactParameter(const StiTrack* kTrack);
@@ -83,7 +88,6 @@ private:
 
     StiDedxCalculator dEdxTpcCalculator;
     StiDedxCalculator dEdxSvtCalculator;
-    StiResidualCalc   mResMaker;
 };
 
 #endif
