@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.109 2001/03/02 16:54:44 perev Exp $
+// $Id: StMaker.cxx,v 1.110 2001/04/12 22:23:22 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -331,7 +331,7 @@ TDataSet *StMaker::GetDataBase(const char* logInput)
   StMakerIter mkiter(this);
   while ((mk = mkiter.NextMaker())) {//loop over makers
     if (!mk->InheritsFrom("St_db_Maker")) 	continue;
-    ds = GetInputDS(logInput);
+    ds = mk->GetInputDS(logInput);
     if (!ds) 					continue;
     return mk->UpdateDB(ds);
   }
@@ -1049,6 +1049,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.110  2001/04/12 22:23:22  perev
+// Small bug fixed (fine found)
+//
 // Revision 1.109  2001/03/02 16:54:44  perev
 // doPs fix
 //
