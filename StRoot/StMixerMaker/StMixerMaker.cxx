@@ -78,12 +78,12 @@ StTrsZeroSuppressedReader* trsZsr2;
 
 ClassImp(StMixerMaker)
 
-StMixerMaker::StMixerMaker(const char *name,char *kind1,char *kind2):
-StMaker(name), 
-gConfig1(kind1),
-gConfig2(kind2),
-mFirstSector(1),
-mLastSector(24)  
+StMixerMaker::StMixerMaker(const char *name,char *kind1,char *kind2):StMaker(name), 
+								     gConfig1(kind1),
+								     gConfig2(kind2),
+								     mMergeSequences(1),
+								     mFirstSector(1),
+								     mLastSector(24)  
 { /* nopt */ }
 
 
@@ -105,14 +105,14 @@ int StMixerMaker::getSequences2(int sector,int row,int pad,int *nseq,StSequence 
     *listOfSequences=(StSequence*)listOfSequencesPrelim;
     return kStOK;
 }
-#if 0
+
 int StMixerMaker::writeFile(char* file, int numEvents)
 {
     mOutputFileName = file;
     mNumberOfEvents = numEvents;
     return kStOK;
 }
-#endif
+
 Int_t StMixerMaker::InitRun(int RunId) {
 
   // The global pointer to the Db is gStTpcDb and it should be created in the macro.  
@@ -167,6 +167,8 @@ Int_t StMixerMaker::Make() {
     assert(daqr1);
     tpcr1=daqr1->getTPCReader(); 
     if(!tpcr1) return kStWarn;
+    tpcr1->SetSequenceMerging(mMergeSequences);
+
   } else {
     // TRS
     // Get the TRS Event Data Set 
@@ -190,6 +192,7 @@ Int_t StMixerMaker::Make() {
     assert(daqr2);
     tpcr2=daqr2->getTPCReader(); 
     if(!tpcr2) return kStWarn;
+    tpcr2->SetSequenceMerging(mMergeSequences);
   } else {
     // TRS
     // Get the TRS Event Data Set 
@@ -590,5 +593,12 @@ Int_t StMixerMaker::Finish()
   if (mDigitalSignalGenerator) delete mDigitalSignalGenerator;
   mDigitalSignalGenerator = 0;    
   return kStOK;
+}
+
+/// See method in St_tpcdaq_Maker and TPCReader. See comments there (FCF related).
+char  StMixerMaker::SetSequenceMerging(char mergeSequences)
+{
+  mMergeSequences=mergeSequences;
+  return mMergeSequences;
 }
 
