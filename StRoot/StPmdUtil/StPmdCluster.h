@@ -4,7 +4,7 @@
  */
 /**************************************************************
  *
- * $Id: StPmdCluster.h,v 1.4 2003/10/14 07:28:48 subhasis Exp $
+ * $Id: StPmdCluster.h,v 1.5 2004/06/24 13:53:41 subhasis Exp $
  *
  * Author:
  **************************************************************
@@ -14,6 +14,12 @@
  **************************************************************
 *
 * $Log: StPmdCluster.h,v $
+* Revision 1.5  2004/06/24 13:53:41  subhasis
+* sigmaL, sigmaS introduced
+*
+* 2004/06/24 : Cluster SigmaL and SigmaS included 
+* according to new clustering algorithm. Number of
+* cells changed to Float_t type  : Dipak
 * Revision 1.4  2003/10/14 07:28:48  subhasis
 * CluX, CluY added
 *
@@ -41,11 +47,13 @@ class StPmdCluster : public StObject {
 private:
   //! cluster objects
   Int_t             mModule;       // supermodule no
-  Int_t             mNumofMems;    // no. of cells in the cluster
+  //  Int_t             mNumofMems;    // no. of cells in the cluster
+  Float_t             mNumofMems;    // no. of cells in the cluster
   Float_t             mCluEta;     // cluster eta
   Float_t             mCluPhi;     // cluster phi
   Float_t           mCluEdep;      // cluster edep
-  Float_t           mCluSigma;     // sigma of the cluster
+  Float_t           mCluSigmaL;     // sigma of the cluster along large axis
+  Float_t           mCluSigmaS;     // sigma of the cluster along small axis
   Int_t             mCluPID;       // cluster PID based on matching
   Int_t             mCluEdepPID;   // clusterPID based on edep
   Int_t             mMcCluPID ;     // Mantecarlo cluster ID
@@ -60,11 +68,13 @@ public:
   /*! member functions*/
 
   Int_t           Module() const; //!for Supermodule number
-  Int_t           NumofMems() const; //! number of cells in the cluster
+  //  Int_t           NumofMems() const; //! number of cells in the cluster
+  Float_t        NumofMems() const; //! number of cells in the cluster as float
   Float_t           CluEta() const; //! cluster eta
   Float_t           CluPhi() const;  //! cluster phi
   Float_t         CluEdep() const;  //! cluster edep
-  Float_t         CluSigma() const;  //! cluster sigma
+  Float_t        CluSigmaL() const;  //! cluster sigma Large
+  Float_t        CluSigmaS() const;  //! cluster sigma Small
   Int_t         CluEdepPID() const;  //! cluster PID based on Edep
   Int_t         CluPID() const;   //! cluster PID based on CPV/PMD matching
   Int_t         McCluPID() const;  //! cluster PID based on Mantecarlo
@@ -75,11 +85,13 @@ public:
   TObjArray*    HitCollection();   //! hit collection
 
   void            setModule(Int_t);
-  void            setNumofMems(Int_t);
+  //  void            setNumofMems(Int_t);
+ void            setNumofMems(Float_t); // Cell number as float
   void            setCluEta(Float_t);
   void            setCluPhi(Float_t);
   void            setCluEdep(Float_t);
-  void            setCluSigma(Float_t);
+  void            setCluSigmaL(Float_t); //Large
+  void            setCluSigmaS(Float_t);//Small
   void            setCluEdepPID(Int_t);
   void            setCluPID(Int_t);
   void            setMcCluPID(Int_t);
@@ -100,11 +112,13 @@ ostream &operator<<(ostream&, StPmdCluster&); // Printing operator
 inline              StPmdCluster::~StPmdCluster(){ /* Nobody */ }
 
 inline   Int_t    StPmdCluster::Module() const {return mModule;}
-inline   Int_t    StPmdCluster::NumofMems() const {return mNumofMems;}
+//inline   Int_t    StPmdCluster::NumofMems() const {return mNumofMems;}
+inline   Float_t    StPmdCluster::NumofMems() const {return mNumofMems;}
 inline   Float_t    StPmdCluster::CluEta() const     {return mCluEta;} 
 inline   Float_t    StPmdCluster::CluPhi() const    {return mCluPhi;}
 inline   Float_t  StPmdCluster::CluEdep() const  {return mCluEdep;}
-inline   Float_t  StPmdCluster::CluSigma() const  {return mCluSigma;}
+inline   Float_t  StPmdCluster::CluSigmaL() const  {return mCluSigmaL;}//Large
+inline   Float_t  StPmdCluster::CluSigmaS() const  {return mCluSigmaS;} //Small
 inline   Int_t  StPmdCluster::CluEdepPID() const  {return mCluEdepPID;}
 inline   Int_t  StPmdCluster::CluPID() const  {return mCluPID;}
 inline   Int_t  StPmdCluster::McCluPID() const  {return mMcCluPID;}
@@ -112,11 +126,13 @@ inline  Float_t  StPmdCluster::CluX() const {return mCluX;}
 inline  Float_t  StPmdCluster::CluY() const {return mCluY;}
 
 inline   void    StPmdCluster::setModule(Int_t var) {mModule=var;}
-inline   void    StPmdCluster::setNumofMems(Int_t var) {mNumofMems=var;}
+//inline   void    StPmdCluster::setNumofMems(Int_t var) {mNumofMems=var;}
+inline   void    StPmdCluster::setNumofMems(Float_t var) {mNumofMems=var;}
 inline   void    StPmdCluster::setCluEta(Float_t var) {mCluEta=var;}
 inline   void    StPmdCluster::setCluPhi(Float_t var) {mCluPhi=var;}
 inline   void    StPmdCluster::setCluEdep(Float_t var) {mCluEdep=var;}
-inline   void    StPmdCluster::setCluSigma(Float_t var) {mCluSigma=var;}
+inline   void    StPmdCluster::setCluSigmaL(Float_t var) {mCluSigmaL=var;}//Large
+inline   void    StPmdCluster::setCluSigmaS(Float_t var) {mCluSigmaS=var;}//Small
 inline   void    StPmdCluster::setCluEdepPID(Int_t var) {mCluEdepPID=var;}
 inline   void    StPmdCluster::setCluPID(Int_t var) {mCluPID=var;}
 inline   void    StPmdCluster::setMcCluPID(Int_t var) {mMcCluPID=var;}
