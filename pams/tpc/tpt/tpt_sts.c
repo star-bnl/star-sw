@@ -72,8 +72,6 @@ ARGUMENTS:
 **:       IN:
 **:                par    - Tracking parameters
 **:               par_    - 
-**:           detector    - TPC geometry info.
-**:          detector_    - 
 **:    INOUT:
 **:              tphit    - table of TPC coordinate measurements
 **:             tphit_    - header Structure for tphit
@@ -110,8 +108,7 @@ long type_of_call tpt_sts_(
   TABLE_HEAD_ST          *tphit_h,      TCL_TPHIT_ST            *tphit ,
   TABLE_HEAD_ST            *res_h,        TPT_RES_ST              *res ,
   TABLE_HEAD_ST       *diff_res_h,        TPT_RES_ST         *diff_res ,
-  TABLE_HEAD_ST         *strack_h,     TPT_STRACK_ST            *strack,
-  TABLE_HEAD_ST       *detector_h,   TPG_DETECTOR_ST          *detector)
+  TABLE_HEAD_ST         *strack_h,     TPT_STRACK_ST            *strack)
 {
 /*
  * Here are examples of how you should access table members:
