@@ -1,5 +1,24 @@
-* $Id: geometry.g,v 1.103 2005/03/08 01:05:35 potekhin Exp $
+* $Id: geometry.g,v 1.104 2005/03/25 02:13:59 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.104  2005/03/25 02:13:59  potekhin
+* A very significant set of code changes, related to
+* versioning: The CorrNum variable turned out to be
+* unwieldy, dur to combinatorially large number of various
+* individual detector correctionds. Accordingly, it has
+* been retired.
+*
+* I have extended the set of "Config" variables
+* to describe the parameters previously wrapped into
+* CorrNum. This appears to work nicely.
+*
+* The tag y2005b will contain the latest improvements,
+* done in this new scheme of versioning:
+* a) SVT elelctronics mother volume length bug fix
+* b) Ar+C02 mix in the FTPC
+* c) SSD ladder radius corection (to be double-checked with Lilian)
+*
+* Better diagnostic printout and code simplification.
+*
 * Revision 1.103  2005/03/08 01:05:35  potekhin
 * Created a new tag, y2005b, which is necessary to optionally
 * activate the updated version of the TPC geometry. Introduced
@@ -442,37 +461,46 @@
    Integer    LENOCC,LL,IPRIN,Nsi,NsiMin,i,j,l,kgeom,nmod(2),nonf(3),
               ecal_config, ecal_fill,
               sisd_level,
-              Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,
-              CorrNum, PhmdConfig,
-              BtofConfig, VpddConfig, FpdmConfig,
-              SisdConfig, PipeConfig, CalbConfig,
-              PixlConfig, IstbConfig, FstdConfig,
-              FtroConfig, ConeConfig, FgtdConfig,
-              TpceConfig
+              Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf
+
+* CorrNum allows us to control incremental bug fixes in a more
+* organized manner -- obsoleted 20050324 maxim --
+
+
+* The following are the versioning flags:
+
+   Integer    DensConfig, SvttConfig, BtofConfig, VpddConfig, FpdmConfig,
+              SisdConfig, PipeConfig, CalbConfig, PixlConfig, IstbConfig,
+              FstdConfig, FtroConfig, ConeConfig, FgtdConfig, TpceConfig,
+              PhmdConfig, ShldConfig, SupoConfig, FtpcConfig
+
+*             DensConfig, ! gas density correction
+*             SvttConfig, ! SVTT version
+*             BtofConfig, ! BTOF trays
+*             VpddConfig, ! VPDD
+*             FpdmConfig, ! Forfward Pion Mult detectoe
+*             SisdConfig, ! SSD
+*             PipeConfig, ! Beam Pipr
+*             CalbConfig, ! Barrel EMC
+*             PixlConfig, ! Inner Pixel detector
+*             IstbConfig, ! Integrated Silicon Tracker
+*             FstdConfig, ! Forward Silicon tracker Disks
+*             FtroConfig, ! FTPC Readout Electronics
+*             ConeConfig, ! SVTT support cones and cables
+*             FgtdConfig, ! Forward GEM tracker
+*             TpceConfig, ! TPC
+*             PhmdConfig  ! Photon Multiplicity Detector
+*             ShldConfig  ! SVT Shield
+*             SupoConfig  ! FTPC support
+*             FtpcConfig  ! FTPC
+
 
 * Note that SisdConfig can take values in the tens, for example 20
 * We do this to not proliferate additional version flags -- there has
 * been a correction which resulted in new code.. We check the value
 * and divide by 10 if necessary.
 
-* configuration variables for tuning the geometry:
-*            BtofConfig  -- tof trays
-*            PhmdConfig  -- photon multiplicity detector
-*            SisdConfig  -- silicon strip
-*            PipeConfig  -- beam pipe
-*            CalbConfig  -- barrel calorimeter
-*            FpdmConfig  -- fpd
-*            PixlConfig  -- pixel
-*            IstbConfig  -- outer pixel
-*            FstdConfig  -- forward pixel
-*            FtroConfig  -- FTPC readout barrel
-*            ConeConfig  -- SVT support cone
-*            FgtdConfig  -- forward GEM detector config
-*            TpceConfig  -- TPC version (new material added to the backplane in Feb 2005)
 
-
-* CorrNum allows us to control incremental bug fixes in a more
-* organized manner
 
    character  Commands*4000,Geom*8
 
@@ -501,10 +529,13 @@ replace[;ON#{#;] with [
    IPRIN    = IDEBUG
    NtrSubEv = 1000     " automatic !"
 
-* No correction by default
-   CorrNum = 0
+* No correction by default   CorrNum = 0  -- obsoleted 20050324 maxim --
 
 * No Photon multiplicity detector or Silicon strip by default, hence init the version:
+   DensConfig  = 0 ! gas density correction
+   SvttConfig  = 0 ! SVTT version
+   ShldConfig  = 0 ! SVTT shield version
+
    PhmdConfig  = 0
    SisdConfig  = 0
    PipeConfig  = 2 ! Default, Be pipe used in most of the runs =<2003
@@ -519,6 +550,8 @@ replace[;ON#{#;] with [
    FtroConfig  = 0 ! 0=no, >1=version
    ConeConfig  = 1 ! 1 (def) old version, 2=more copper
    TpceConfig  = 1 ! 1 (def) old version, 2=more structures in the backplane
+   SupoConfig  = 0 ! 0 (def) old buggy version, 1=correction
+   FtpcConfig  = 0 ! 0  version, 1=gas correction
 
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
@@ -659,8 +692,13 @@ If LL>1
                      fpdm=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
-                  "geometry correction "
-                     CorrNum = 4;
+
+* -- obsoleted 20050324 maxim -- CorrNum = 4;
+                     ShldConfig = 1; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 4;
+
                   "Photon Multiplicity Detector Version "
                      phmd=on;
                      PhmdConfig = 1;
@@ -696,8 +734,12 @@ If LL>1
                      fpdm=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
-                  "geometry correction "
-                     CorrNum = 4;
+* CorrNum = 4;
+                     ShldConfig = 1; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 4;
+
                   "Photon Multiplicity Detector Version "
                      phmd=on;
                      PhmdConfig = 1;
@@ -745,8 +787,12 @@ If LL>1
                      fpdm=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
-                  "geometry correction "
-                     CorrNum = 4;
+* CorrNum = 4;
+                     ShldConfig = 1; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 4;
+
                   "Photon Multiplicity Detector Version "
                      phmd=on;
                      PhmdConfig = 1;
@@ -774,11 +820,11 @@ If LL>1
 
 * 02/09/2004  Jerome signed off on changing, retroactively, the
 * position of the wafers in year2001, which was incorrectly offset
-* by 250 um insterad of 150 um. The change is done via the
-* flag "CorrNum", which helps us keep track of corections of this kind.
+* by 250 um insterad of 150 um.
 
-                  "geometry correction "
-                     CorrNum = 1;
+* CorrNum = 1;
+                     SvttConfig = 1; "SVTT version"
+                     SupoConfig = 1; "FTPC Support"
 
                   BtofConfig=4;
                   {rich,ems}=on;
@@ -885,8 +931,9 @@ If LL>1
                      VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
-                  "geometry correction "
-                     CorrNum = 1;
+* CorrNum = 1;
+                     SvttConfig = 1; "SVTT version"
+                     SupoConfig = 1; "FTPC Support"
                 }
 ***********************************************************************
 * y2003b is y2003a, but with the extra material in the SVT
@@ -922,8 +969,9 @@ If LL>1
                      VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
-                  "geometry correction "
-                     CorrNum = 2;
+* CorrNum = 2;
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 2; "SVTT version"
                 }
 
 ****************************************************************************************
@@ -953,8 +1001,10 @@ If LL>1
                      VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
-                  "geometry correction "
-                     CorrNum = 2;
+* CorrNum = 2;
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 2; "SVTT version"
+
                   "Photon Multiplicity Detector Version "
                      phmd=on;
                      PhmdConfig = 1;
@@ -1004,8 +1054,10 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-                  "geometry correction "
-                     CorrNum = 3;
+* CorrNum = 3;
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 3; "SVTT version"
+                     DensConfig = 1; "gas density correction"
 
                   "Photon Multiplicity Detector Version "
                      phmd=on;
@@ -1059,8 +1111,10 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-                  "geometry correction "
-                     CorrNum = 3;
+* CorrNum = 3;
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 3; "SVTT version"
+                     DensConfig = 1; "gas density correction"
 
                   "Photon Multiplicity Detector Version "
                      phmd=on;
@@ -1110,8 +1164,10 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-                  "geometry correction "
-                     CorrNum = 3;
+* CorrNum = 3;
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 3; "SVTT version"
+                     DensConfig = 1; "gas density correction"
 
                   "Photon Multiplicity Detector Version "
                      phmd=on;
@@ -1176,8 +1232,10 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-                  "geometry correction "
-                     CorrNum = 3;
+* CorrNum = 3;
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 3; "SVTT version"
+                     DensConfig = 1; "gas density correction"
 
                   "Photon Multiplicity Detector Version "
                      phmd=on;
@@ -1229,8 +1287,10 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-                  "geometry correction "
-                     CorrNum = 3;
+* CorrNum = 3;
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 3; "SVTT version"
+                     DensConfig = 1; "gas density correction"
 
                   "Photon Multiplicity Detector Version "
                      phmd=on;
@@ -1248,7 +1308,7 @@ If LL>1
                 }
 
 ****************************************************************************************
-  on Y2005B    { TPC correction of 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
+  on Y2005B    { TPC,FTPC,SVT and SSD correction of 2005 geometry
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -1292,8 +1352,14 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-                  "geometry correction "
-                     CorrNum = 3;
+* important -- notice:
+* new svt version
+* FTPC gas correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 4; "SVTT version"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
 
                   "Photon Multiplicity Detector Version "
                      phmd=on;
@@ -1358,8 +1424,10 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-                  "geometry correction "
-                     CorrNum = 3;
+* CorrNum = 3;
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 3; "SVTT version"
+                     DensConfig = 1; "gas density correction"
 
                   "Photon Multiplicity Detector Version "
                      phmd=on;
@@ -1441,9 +1509,29 @@ If LL>1
    dcay={210,210,0.1,0.01}
    If LL>1 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 
+   write(*,*) '****** ATTENTION ACTUNG ATTENZIONE VNIMANIE UVAGA ******'
+   write(*,*) 'BtofConfig:',BtofConfig
+   write(*,*) 'CalbConfig:',CalbConfig
+   write(*,*) 'ConeConfig:',ConeConfig
+   write(*,*) 'DensConfig:',DensConfig
+   write(*,*) 'FgtdConfig:',FgtdConfig
+   write(*,*) 'FpdmConfig:',FpdmConfig
+   write(*,*) 'FstdConfig:',FstdConfig
+   write(*,*) 'FtpcConfig:',FtpcConfig
+   write(*,*) 'FtroConfig:',FtroConfig
+   write(*,*) 'IstbConfig:',IstbConfig
+   write(*,*) 'PhmdConfig:',PhmdConfig
+   write(*,*) 'PipeConfig:',PipeConfig
+   write(*,*) 'PixlConfig:',PixlConfig
+   write(*,*) 'ShldConfig:',ShldConfig
+   write(*,*) 'SisdConfig:',SisdConfig
+   write(*,*) 'SupoConfig:',SupoConfig
+   write(*,*) 'SvttConfig:',SvttConfig
+   write(*,*) 'TpceConfig:',TpceConfig
+   write(*,*) 'VpddConfig:',VpddConfig
+   write(*,*) '********** THESE ARE CONFIGURAION FLAGS USED  **********'
+   write(*,*) '******** EXPERTS CAN LOOK IN GEOMETRY.G FOR DETAIL *****'
 
-*  Advertise the geometry correction level used to implement intra-year corrections:
-   write(*,*) '************** ATTENTION: Geometry Correction Level:', CorrNum
 
    if (rich) ItCKOV = 1
    if (cave)        Call cavegeo
@@ -1481,23 +1569,19 @@ If LL>1
 
     call AgDETP add ('svtg.ConeVer=',ConeConfig ,1) ! could have more copper on the cone
 
+* Optionally, switch to a larger inner shield, AND smaller beampipe support 
+    if(ShldConfig==1) call AgDETP add ('svtg.SupportVer=',2 ,1)
 
-    if    (CorrNum==0) then
-       call svttgeo
+    if(SvttConfig==0) call svttgeo
+    if(SvttConfig==1) call svttgeo1
+    if(SvttConfig==2) call svttgeo2
+    if(SvttConfig==3) call svttgeo3
+    if(SvttConfig==4) call svttgeo4
 
-    elseif(CorrNum==1) then
-       call svttgeo1 ! geometry bug corrected
-
-    elseif(CorrNum==2) then
-       call svttgeo2 ! +extra material added
-
-    elseif(CorrNum==3) then
-       call svttgeo3 ! +silicon strip detector separated into its own geo file
-
-    elseif(CorrNum==4) then
-       call AgDETP add ('svtg.SupportVer=',2 ,1) ! switch to a larger inner shield, AND smaller beampipe support
-       call svttgeo3 ! +silicon strip detector separated into its own geo file
-    endif
+*    elseif(CorrNum==4) then
+*
+*       call svttgeo3 ! +silicon strip detector separated into its own geo file
+*    endif
 
   endif
 
@@ -1510,7 +1594,6 @@ If LL>1
        call AgDETP new ('SISD')
 
 * if SVT is present, position the SSD in it, otherwise need to position in CAVE (default)
-
        if(svtt) { call AgDETP add ('ssdp.Placement=',1 ,1) };
 
 * In the following, level means the version of the ssd geo code to be loaded
@@ -1518,29 +1601,25 @@ If LL>1
 * for it here:
 
        if (SisdConfig>10) then
-
          sisd_level=SisdConfig/10
          SisdConfig=SisdConfig-sisd_level*10
 
          call AgDETP add ('ssdp.Config=',SisdConfig ,1)
-
          if     (sisd_level.eq.1) then
             call sisdgeo1
          elseif (sisd_level.eq.2) then
             call sisdgeo2
          else ! Unimplemented level
-
-            write(*,*) '************************* ERROR IN PARSING THE SSD GEOMETRY LEVEL! ************************'
+            write(*,*) '******************* ERROR IN PARSING THE SSD GEOMETRY LEVEL! ******************'
             if (IPRIN==0) stop 'You better stop here to avoid problems'     
-
          endif
 
-       else ! The original verion
+       else ! ------ The original version (pretty much obsolete) --------
          call AgDETP add ('ssdp.Config=',SisdConfig ,1)
          call sisdgeo
        endif
 
-       write(*,*) 'Silicon Strip Detector Config and Level: ',SisdConfig, ' ',sisd_level
+       write(*,*) '*** Silicon Strip Detector Config and Code Level: ',SisdConfig, ' ',sisd_level
 
   endif
 
@@ -1561,26 +1640,23 @@ If LL>1
    endif 
 
 * Back in July 2003 Yuri has discovered the discrepancy
-* in the gas density. The patch for this is activated here:
-   if(CorrNum>=3) then
-     call AgDETP add ('tpcg.gasCorr=',2 ,1)
-   endif
+* in the gas density. The patch for this is activated here: (was: if(CorrNum>=3) )
+
+   if(DensConfig>0) call AgDETP add ('tpcg.gasCorr=',2 ,1)
 
    if (tpce.and.TpceConfig==1) Call tpcegeo
    if (tpce.and.TpceConfig==2) Call tpcegeo1
 
    if (ftpc) then
-	Call ftpcgeo     ! and look at the support pieces:
-	if(CorrNum==0) then
-           Call supogeo  ! Default, buggy version
-	else            
-           Call supogeo1 ! New, corrected version
-	endif
+	if(FtpcConfig==0) Call ftpcgeo
+	if(FtpcConfig==1) Call ftpcgeo1
+* and look at the support pieces, was: if(CorrNum==0)
+	if(SupoConfig==0)  Call supogeo
+	if(SupoConfig==1)  Call supogeo1
    endif
 
-   if (ftro) then
-	Call ftrogeo     ! FTPC readout electronics barrel
-   endif
+* FTPC readout electronics barrel
+   if (ftro) Call ftrogeo
 
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
    If (LL>1 & btof) then
