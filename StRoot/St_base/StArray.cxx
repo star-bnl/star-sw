@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.4 1999/04/30 13:15:55 fisyak Exp $
+// $Id: StArray.cxx,v 1.5 1999/05/04 22:45:22 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.5  1999/05/04 22:45:22  perev
+// Default ctr for StArray
+//
 // Revision 1.4  1999/04/30 13:15:55  fisyak
 // Ad StObject, modification StArray for StRootEvent
 //
@@ -17,7 +20,7 @@ Int_t StRegistry::SetColl (StStrArray *coll)
 // Register new container
 {
   assert(coll);
-  if (!fReg) fReg = new TObjArray(10,1);
+  if (!fReg) fReg = new TObjArray(10);
   
   const char *collname = coll->GetIDName();
   int i=0,n=fReg->GetLast();
