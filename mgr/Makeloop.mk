@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.27  1998/11/13 15:48:44  fisyak
+#  Merged version with NT
+#
 #  Revision 1.26  1998/11/13 00:19:31  fisyak
 #  Add flags for SCL St_trs_Maker
 #
@@ -157,7 +160,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/11/13 00:19:31 $ 
+#           Last modification $Date: 1998/11/13 15:48:44 $ 
 #  default setings
 # Current Working Directory
 #
@@ -165,8 +168,15 @@ CWD := $(shell pwd)
 ifdef SILENT
 .SILENT:
 endif       
-include $(STAR)/mgr/MakeEnv.mk
-include $(STAR)/mgr/MakeArch.mk
+
+ifdef STAF_MAKE_HOME
+ include $(STAF_MAKE_HOME)/MakeEnv.mk
+ include $(STAF_MAKE_HOME)/MakeArch.mk
+else
+ include $(STAR)/mgr/MakeEnv.mk
+ include $(STAR)/mgr/MakeArch.mk
+endif
+
 EMPTY      :=
 ZERO       :=0
 ONE        :=1
@@ -175,35 +185,36 @@ THREE      :=3
 FOUR       :=4
 FIVE       :=5
 ifndef MakePam
-MakePam :=$(strip $(wildcard $(CWD)/MakePam.mk))
+  MakePam :=$(strip $(wildcard $(CWD)/mgr/MakePam.mk))
 endif
 ifndef MakePam
-  MakePam :=$(strip $(wildcard $(CWD)/mgr/MakePam.mk))
+  MakePam :=$(strip $(wildcard $(STAF_MAKE_HOME)/MakePam.mk))
 endif
 ifndef MakePam
   MakePam :=$(strip $(wildcard $(STAR)/mgr/MakePam.mk))
 endif
 ifndef MakeDll
-MakeDll :=$(strip $(wildcard $(CWD)/MakeDll.mk))
+  MakeDll :=$(strip $(wildcard $(CWD)/mgr/MakeDll.mk))
 endif
 ifndef MakeDll
-  MakeDll :=$(strip $(wildcard $(CWD)/mgr/MakeDll.mk))
+  MakeDll :=$(strip $(wildcard $(STAF_MAKE_HOME)/MakeDll.mk))
 endif
 ifndef MakeDll
   MakeDll :=$(strip $(wildcard $(STAR)/mgr/MakeDll.mk))
 endif
 ifndef Makeloop
-Makeloop :=$(strip $(wildcard $(CWD)/Makeloop.mk))
+  Makeloop :=$(strip $(wildcard $(CWD)/mgr/Makeloop.mk))
 endif
 ifndef Makeloop
-  Makeloop :=$(strip $(wildcard $(CWD)/mgr/Makeloop.mk))
+  Makeloop :=$(strip $(wildcard $(STAF_MAKE_HOME)/Makeloop.mk))
 endif
 ifndef Makeloop
   Makeloop :=$(strip $(wildcard $(STAR)/mgr/Makeloop.mk))
 endif
-export MakePam
-export MakeDll
 export Makeloop
+export MakeDll
+export MakePam
+
 ifndef INP_DIR 
   INP_DIR := $(CWD)
 endif           
@@ -217,46 +228,30 @@ endif
 ROOT_DIR:= $(word 1,$(subst $(PAMS), ,$(INP_DIR)))
 LEVEL   := $(words  $(subst /, ,$(subst $(ROOT_DIR),, $(INP_DIR))))
 
-
 ifeq ($(LEVEL),$(ZERO))
-	SUBDIRS :=$(shell test -d pams && echo pams)
+	SUBDIRS := $(wildcard pams)
 else
-	DIRS    := $(strip $(wildcard *))
-	SUBDIRS := $(foreach dir, $(DIRS), $(shell test -d $(dir) && echo $(dir))) 
-	SUBDIRS := $(filter-out inc, $(SUBDIRS))
-	SUBDIRS := $(filter-out idl, $(SUBDIRS))
-	SUBDIRS := $(filter-out doc, $(SUBDIRS))
-	SUBDIRS := $(filter-out CVS, $(SUBDIRS))
-	SUBDIRS := $(filter-out wrk, $(SUBDIRS))
-	SUBDIRS := $(filter-out src, $(SUBDIRS))
-	SUBDIRS := $(filter-out exa, $(SUBDIRS))
-	SUBDIRS := $(filter-out kumac,$(SUBDIRS))
-	SUBDIRS := $(filter-out html,$(SUBDIRS))
+	DIRS    := $(subst /.,,$(strip $(wildcard */.)))
+#	SUBDIRS := $(foreach dir, $(DIRS), $(shell test -d $(dir) && echo $(dir))) 
+	SUBDIRS := $(filter-out inc idl doc CVS wrk src exa kumac html, $(DIRS))
 	SUBDIRS := $(strip    $(sort $(SUBDIRS)))
         SUBDIRS := $(filter-out util, $(SUBDIRS))
-        SUBDIRS := $(filter-out l3, $(SUBDIRS))
-ifneq (,$(findstring $(STAF_ARCH),hp_ux102))
-        SUBDIRS := $(filter-out trg, $(SUBDIRS))
-endif
 ifneq (,$(findstring sim, $(SUBDIRS)))
         SUBDIRS := $(filter-out sim, $(SUBDIRS))
-        DIRS    := $(strip $(wildcard sim/*))
-        SUBDIRS += $(foreach dir, $(DIRS), $(shell test -d $(dir) && \
-                test $(dir) != sim/CVS && test $(dir) != sim/kumac && \
-                test $(dir) != sim/inc && test $(dir) != sim/idl && \
-                echo $(dir))) 
+        DIRS    := $(subst /.,,$(strip $(wildcard sim/*/.)))
+        SUBDIRS += $(filter-out sim/CVS sim/kumac sim/idl sim/inc,$(DIRS))
 endif
 ifneq (,$(findstring gen, $(SUBDIRS)))
         SUBDIRS := $(filter-out gen, $(SUBDIRS))
-        DIRS    := $(strip $(wildcard gen/*))
-        SUBDIRS += $(foreach dir, $(DIRS), $(shell test -d $(dir) && \
-                test $(dir) != gen/CVS && test $(dir) != gen/kumac && \
-                test $(dir) != gen/inc && test $(dir) != gen/idl && \
-                echo $(dir))) 
+        DIRS    := $(subst /.,,$(strip $(wildcard gen/*/.)))
+        SUBDIRS += $(filter-out gen/CVS gen/kumac gen/inc gen/idl,$(DIRS))
 endif
 #. take out trg for sgi
-ifneq (,$(findstring $(STAF_ARCH),sgi_64 ))
+ifneq (,$(findstring $(STAR_SYS),sgi_64 ))
         SUBDIRS := $(filter-out trg, $(SUBDIRS))
+endif
+ifneq (,$(findstring $(STAR_SYS),hp_ux102))
+        SUBDIRS := $(filter-out l3, $(SUBDIRS))
 endif
 endif
 ifeq ($(LEVEL), $(TWO))  #default is domain
@@ -270,12 +265,12 @@ PKG     :=
 endif                          
 endif
 ifeq ($(LEVEL), $(THREE)) #package level
-DOM_DIR := $(shell cd $(INP_DIR)/../; pwd)
+DOM_DIR := $(subst / ,,$(dir $(INP_DIR)/../) )
 PKG     := $(NAME)
 SUBDIRS:=
 endif                       
 ifeq ($(LEVEL),$(FOUR)) #subpackage level
-DOM_DIR := $(shell cd $(INP_DIR)/../../; pwd)
+DOM_DIR := $(subst / ,,$(INP_DIR)/../../) )
 PKG     := $(NAME)
 endif
 ifndef DOMAIN
@@ -283,7 +278,7 @@ DOMAIN  := $(notdir $(DOM_DIR))
 endif
 SYS_DIR := $(ROOT_DIR)/.$(STAR_HOST_SYS)
 LIB_DIR := $(SYS_DIR)/lib
-SO_LIB  := $(LIB_DIR)/St_$(PKG).so
+SO_LIB  := $(LIB_DIR)/St_$(PKG).$(So)
 ifeq ($(LEVEL),$(FIVE))        
 .PHONY               : default
 all:
@@ -306,50 +301,42 @@ endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/xdf2root))
 XDF2ROOT := xdf2root
 endif
-ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/farm))
-FARM := farm
-endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/.share/tables))
 StRoot += St_Tables
 endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/StChain))
 StRoot += StChain
 endif
-ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/St_*_Maker))
-StRoot += St_Makers
-endif
-Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St_*_Maker))
-#Makers  :=  $(filter-out St_calib_Maker, $(Makers))
-#Makers  :=  $(filter-out St_dst_Maker, $(Makers))
+Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St_*_Maker)) 
 Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
-#Makers  :=  $(filter-out St_TLA_Maker, $(Makers))
 Makers  :=  $(filter-out St_laser_Maker, $(Makers))
 Makers  :=  $(filter-out St_mev_Maker, $(Makers))
 Makers  :=  $(filter-out St_tpctest_Maker, $(Makers))
+ifneq ($(EMPTY),$(Makers))
+StRoot += St_Makers
+endif
 endif
 #          I have subdrs
-.PHONY               :  all $(BASE) $(XDF2ROOT) $(FARM) $(TARGET) $(StRoot) test clean clean_lib clean_share clean_obj
+.PHONY               :  all $(BASE) $(XDF2ROOT) $(TARGET) $(StRoot) test clean clean_lib clean_share clean_obj
 #      I_have_subdirs
-all:  $(BASE) $(XDF2ROOT) $(FARM)  $(TARGETS) $(StRoot)
+all:  $(BASE) $(XDF2ROOT)  $(TARGETS) $(StRoot)
 ifndef NOROOT
-ROOT:      St_base xdf2root $(FARM) St_Makers StChain St_Tables
+ROOT:      St_base xdf2root St_Makers StChain St_Tables
 St_base:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base     SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.$(So)
 xdf2root:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root    SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so 
-farm:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/farm    SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/libfarm.so 
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.$(So) 
 St_Makers: $(Makers)
 StChain:   
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain    SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.$(So)
 St_Tables:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so NODEBUG=YES
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables   SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.$(So) NODEBUG=YES
 ifneq ($(EMPTY),$(findstring $(STAR_LEVEL),dev))
 St_TablesDoc: 
 	root.exe -b -q MakeHtmlTables.cxx
 endif
 St_%_Maker: 
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St_$(STEM)_Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_$(STEM)_Maker.so
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St_$(STEM)_Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_$(STEM)_Maker.$(So)
 endif
 %_all:  $(BASE)
 	$(MAKE)  -f $(Makeloop) -C $(STEM) $(MAKFLAGS) 
@@ -398,3 +385,7 @@ test_level:
 	@echo "Makeloop  = |"$(Makeloop)"|"	
 	@echo "MakePam   = |"$(MakePam)"|"	
 	@echo "MakeDll   = |"$(MakeDll)"|"
+	@echo "STAF_MAKE_HOME=|"$(STAF_MAKE_HOME)"|"
+	@echo "DIRS=|"$(DIRS)"|"
+	@echo "NT=$(NT)"
+
