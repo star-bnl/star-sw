@@ -5,23 +5,29 @@
 #include "emlLib.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C" 
+{
 #endif
-
+  
 #ifndef NT_TYPE_CODE_T
-typedef enum nt_type_code_t {
-   NT_TYPE_CHAR,
-   NT_TYPE_LOGICAL,
-   NT_TYPE_LONG,
-   NT_TYPE_U_LONG,
-   NT_TYPE_LONGLONG,
-   NT_TYPE_U_LONGLONG,
-   NT_TYPE_FLOAT,
-   NT_TYPE_DOUBLE,
-   NT_TYPE_UNKNOWN
+typedef enum nt_type_code_t 
+{
+  NT_TYPE_CHAR,
+  NT_TYPE_LOGICAL,
+  NT_TYPE_LONG,
+  NT_TYPE_U_LONG,
+  NT_TYPE_LONGLONG,
+  NT_TYPE_U_LONGLONG,
+  NT_TYPE_FLOAT,
+  NT_TYPE_DOUBLE,
+  NT_TYPE_UNKNOWN
 } NT_TYPE_CODE_T;
 #endif /* NT_TYPE_CODE_T */
-
+  
+STAFCV_T hbkCWNbook(long, char *);
+STAFCV_T hbkCWNhprnt(long);
+STAFCV_T hbkCWNcharBlock(long, char *, char *, char *);
+STAFCV_T hbkCWNscalarBlock(long, char *, int *, char *);
 size_t hbkCWNblockCount(long hid);
 char * hbkCWNblockName(long hid, size_t iblock);
 char * hbkCWNblockChform(long hid, size_t iblock);
@@ -38,6 +44,7 @@ char * hbkCWNtitle(long hid);
 size_t hbkCWNentryCount(long hid);
 STAFCV_T hbkCWNsetDataBuffer(long hid, size_t iblock, char *buffer);
 STAFCV_T hbkCWNputRowBlock(long hid, size_t irow, size_t iblock);
+STAFCV_T hbkCWNputRow(long hid);
 STAFCV_T hbkCWNgetRowBlock(long hid, size_t irow, size_t iblock);
 NT_TYPE_CODE_T hbkCWNcolumnType(long hid, size_t icolumn);
 STAFCV_T hbkCWNclear(long hid);

@@ -28,14 +28,16 @@
 */
 void kam_tnt_count_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
+  long npars = ku_npar();	/* no. of KUIP param.s */
 
-        STAFCV_T status = tnt_count();
+  STAFCV_T status = tnt_count();
 }
-STAFCV_T tnt_count()
+
+STAFCV_T
+tnt_count()
 {
-   printf("TNT:\tObject count = %d \n",tnt->count());
-   EML_SUCCESS(STAFCV_OK);
+  printf("TNT:\tObject count = %d \n",tnt->count());
+  EML_SUCCESS(STAFCV_OK);
 }
 
 /*---------------------------------------------------------------------
@@ -43,14 +45,16 @@ STAFCV_T tnt_count()
 */
 void kam_tnt_list_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
+  long npars = ku_npar();	/* no. of KUIP param.s */
 
-        STAFCV_T status = tnt_list();
+  STAFCV_T status = tnt_list();
 }
-STAFCV_T tnt_list()
+
+STAFCV_T 
+tnt_list()
 {
-   printf("%s",tnt->list() );
-   EML_SUCCESS(STAFCV_OK);
+  printf("%s", tnt->list());
+  EML_SUCCESS(STAFCV_OK);
 }
 
 /*---------------------------------------------------------------------
@@ -58,14 +62,16 @@ STAFCV_T tnt_list()
 */
 void kam_tnt_paw_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
+  long npars = ku_npar();	/* no. of KUIP param.s */
    
-        STAFCV_T status = tnt_paw();
+  STAFCV_T status = tnt_paw();
 }
-STAFCV_T tnt_paw() {
 
-   tnt_start_paw_();
-   EML_SUCCESS(STAFCV_OK);
+STAFCV_T 
+tnt_paw() {
+
+  tnt_start_paw_();
+  EML_SUCCESS(STAFCV_OK);
 }
 
 /*---------------------------------------------------------------------
@@ -73,14 +79,16 @@ STAFCV_T tnt_paw() {
 */
 void kam_tnt_share_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
+  long npars = ku_npar();	/* no. of KUIP param.s */
    
-        STAFCV_T status = tnt_share();
+  STAFCV_T status = tnt_share();
 }
-STAFCV_T tnt_share() {
 
-   tnt_start_share_();
-   EML_SUCCESS(STAFCV_OK);
+STAFCV_T 
+tnt_share() {
+
+  tnt_start_share_();
+  EML_SUCCESS(STAFCV_OK);
 }
 
 /*---------------------------------------------------------------------
@@ -88,22 +96,22 @@ STAFCV_T tnt_share() {
 */
 void kam_tnt_newcwntuple_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
-   long hid = ku_geti();	/* hid of CWNtuple */
-   char *tname = ku_gets();	/* name of tdmTable */
+  long npars = ku_npar();	/* no. of KUIP param.s */
+  long hid = ku_geti();	/* hid of CWNtuple */
+  char *tname = ku_gets();	/* name of tdmTable */
 
-        STAFCV_T status = tnt_newcwntuple(hid, tname);
+  STAFCV_T status = tnt_newcwntuple(hid, tname);
 }
-STAFCV_T tnt_newcwntuple(long hid, char* tname)
-{
-   tdmTable* table;
 
-   if( NULL == (table = tdm->findTable(tname))
-   ||  !tnt->createCWNtuple(hid,table)
-   ){
-      EML_ERROR(KAM_FAILURE);
-   }
-   EML_SUCCESS(STAFCV_OK);
+STAFCV_T 
+tnt_newcwntuple(long hid, char* tname)
+{
+  tdmTable* table = tdm->findTable(tname);
+
+  if (table == NULL || !tnt->createCWNtuple(hid,table)) {
+    EML_ERROR(KAM_FAILURE);
+  }
+  EML_SUCCESS(STAFCV_OK);
 }
  
 /*---------------------------------------------------------------------
@@ -111,20 +119,23 @@ STAFCV_T tnt_newcwntuple(long hid, char* tname)
 */
 void kam_tntcwntuple_hid_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
-   long hid = ku_geti();	/* hid of CWNtuple */
+  long npars = ku_npar();	/* no. of KUIP param.s */
+  long hid = ku_geti();	/* hid of CWNtuple */
    
-        STAFCV_T status = tntcwntuple_hid(hid);
+  STAFCV_T status = tntcwntuple_hid(hid);
 }
-STAFCV_T tntcwntuple_hid(long hid)
-{
-   tntCWNtuple* tuple;
 
-   if( !tnt->findCWNtuple(hid,tuple) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
-   }
-   printf("TNTCWNTUPLE:\tHID = %d \n",tuple->hid());
-   EML_SUCCESS(STAFCV_OK);
+STAFCV_T 
+tntcwntuple_hid(long hid)
+{
+  tntCWNtuple* tuple = tnt->findCWNtuple(hid);
+
+  if (tuple == NULL) {
+    EML_ERROR(KAM_OBJECT_NOT_FOUND);
+  }
+  printf("TNTCWNTUPLE:\tHID = %d \n",tuple->hid());
+
+  EML_SUCCESS(STAFCV_OK);
 }
  
 /*---------------------------------------------------------------------
@@ -132,20 +143,23 @@ STAFCV_T tntcwntuple_hid(long hid)
 */
 void kam_tntcwntuple_title_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
-   long hid = ku_geti();	/* hid of CWNtuple */
+  long npars = ku_npar();	/* no. of KUIP param.s */
+  long hid = ku_geti();	/* hid of CWNtuple */
    
-        STAFCV_T status = tntcwntuple_title(hid);
+  STAFCV_T status = tntcwntuple_title(hid);
 }
-STAFCV_T tntcwntuple_title(long hid)
-{
-   tntCWNtuple* tuple;
 
-   if( !tnt->findCWNtuple(hid,tuple) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
-   }
-   printf("TNTCWNTUPLE:\tTitle = (%s) \n",tuple->title());
-   EML_SUCCESS(STAFCV_OK);
+STAFCV_T 
+tntcwntuple_title(long hid)
+{
+  tntCWNtuple *tuple = tnt->findCWNtuple(hid);
+  
+  if (tuple == NULL) {
+    EML_ERROR(KAM_OBJECT_NOT_FOUND);
+  }
+  printf("TNTCWNTUPLE:\tTitle = (%s) \n",tuple->title());
+
+  EML_SUCCESS(STAFCV_OK);
 }
  
 /*---------------------------------------------------------------------
@@ -153,20 +167,23 @@ STAFCV_T tntcwntuple_title(long hid)
 */
 void kam_tntcwntuple_entrycount_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
-   long hid = ku_geti();	/* hid of CWNtuple */
+  long npars = ku_npar();	/* no. of KUIP param.s */
+  long hid = ku_geti();	/* hid of CWNtuple */
    
-        STAFCV_T status = tntcwntuple_entrycount(hid);
+  STAFCV_T status = tntcwntuple_entrycount(hid);
 }
-STAFCV_T tntcwntuple_entrycount(long hid)
-{
-   tntCWNtuple* tuple;
 
-   if( !tnt->findCWNtuple(hid,tuple) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
-   }
-   printf("TNTCWNTUPLE:\tEntry Count = %d \n",tuple->entryCount());
-   EML_SUCCESS(STAFCV_OK);
+STAFCV_T 
+tntcwntuple_entrycount(long hid)
+{
+  tntCWNtuple *tuple = tnt->findCWNtuple(hid);
+  
+  if (tuple == NULL) {
+    EML_ERROR(KAM_OBJECT_NOT_FOUND);
+  }
+  printf("TNTCWNTUPLE:\tEntry Count = %d \n",tuple->entryCount());
+
+  EML_SUCCESS(STAFCV_OK);
 }
  
 /*---------------------------------------------------------------------
@@ -174,20 +191,23 @@ STAFCV_T tntcwntuple_entrycount(long hid)
 */
 void kam_tntcwntuple_colcount_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
-   long hid = ku_geti();	/* hid of CWNtuple */
+  long npars = ku_npar();	/* no. of KUIP param.s */
+  long hid = ku_geti();	/* hid of CWNtuple */
    
-        STAFCV_T status = tntcwntuple_colcount(hid);
+  STAFCV_T status = tntcwntuple_colcount(hid);
 }
-STAFCV_T tntcwntuple_colcount(long hid)
-{
-   tntCWNtuple* tuple;
 
-   if( !tnt->findCWNtuple(hid,tuple) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
-   }
-   printf("TNTCWNTUPLE:\tColumn Count = %d \n",tuple->columnCount());
-   EML_SUCCESS(STAFCV_OK);
+STAFCV_T 
+tntcwntuple_colcount(long hid)
+{
+  tntCWNtuple *tuple = tnt->findCWNtuple(hid);
+  
+  if (tuple == NULL) {
+    EML_ERROR(KAM_OBJECT_NOT_FOUND);
+  }
+  printf("TNTCWNTUPLE:\tColumn Count = %d \n",tuple->columnCount());
+
+  EML_SUCCESS(STAFCV_OK);
 }
  
 /*---------------------------------------------------------------------
@@ -195,20 +215,23 @@ STAFCV_T tntcwntuple_colcount(long hid)
 */
 void kam_tntcwntuple_zebradir_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
-   long hid = ku_geti();	/* hid of CWNtuple */
+  long npars = ku_npar();	/* no. of KUIP param.s */
+  long hid = ku_geti();	/* hid of CWNtuple */
    
-        STAFCV_T status = tntcwntuple_zebradir(hid);
+  STAFCV_T status = tntcwntuple_zebradir(hid);
 }
-STAFCV_T tntcwntuple_zebradir(long hid)
-{
-   tntCWNtuple* tuple;
 
-   if( !tnt->findCWNtuple(hid,tuple) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
-   }
-/*   printf("TNTCWNTUPLE:\tZebra Dir = (%s) \n",tuple->zebraDir()); HACK*/
-   EML_SUCCESS(STAFCV_OK);
+STAFCV_T 
+tntcwntuple_zebradir(long hid)
+{
+  tntCWNtuple *tuple = tnt->findCWNtuple(hid);
+  
+  if (tuple == NULL) {
+    EML_ERROR(KAM_OBJECT_NOT_FOUND);
+  }
+  /*   printf("TNTCWNTUPLE:\tZebra Dir = (%s) \n",tuple->zebraDir()); HACK*/
+
+  EML_SUCCESS(STAFCV_OK);
 }
  
 /*---------------------------------------------------------------------
@@ -216,49 +239,74 @@ STAFCV_T tntcwntuple_zebradir(long hid)
 */
 void kam_tntcwntuple_gettable_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
-   long hid = ku_geti();	/* hid of CWNtuple */
-   char *tname = ku_gets();	/* name of tdmTable */
+  long npars = ku_npar();	/* no. of KUIP param.s */
+  long hid = ku_geti();	/* hid of CWNtuple */
+  char *tname = ku_gets();	/* name of tdmTable */
 
-        STAFCV_T status = tntcwntuple_gettable(hid, tname);
+  STAFCV_T status = tntcwntuple_gettable(hid, tname);
 }
-STAFCV_T tntcwntuple_gettable(long hid, char* tname)
-{
-   tntCWNtuple* tuple;
-   tdmTable* table;
 
-   if( !tnt->findCWNtuple(hid,tuple)
-   ||  (NULL == (table = tdm->findTable(tname)))
-/* ||  !tuple->getFromTable(table)			HACK */
-   ){
-      EML_ERROR(KAM_FAILURE);
-   }
-   EML_SUCCESS(STAFCV_OK);
+STAFCV_T 
+tntcwntuple_gettable(long hid, char* tname)
+{
+  tntCWNtuple* tuple = tnt->findCWNtuple(hid);
+  tdmTable* table = tdm->findTable(tname);
+  
+  if (tuple == NULL || table == NULL) {
+    EML_ERROR(KAM_FAILURE);
+  }
+
+  EML_SUCCESS(STAFCV_OK);
+}
+ 
+/*---------------------------------------------------------------------
+** TNT/CWNTUPLE/GETTABLE NTUPLE TABLE
+*/
+void kam_tntcwntuple_append_()
+{
+  long npars = ku_npar();	/* no. of KUIP param.s */
+  long hid = ku_geti();	/* hid of CWNtuple */
+  char *tname = ku_gets();	/* name of tdmTable */
+
+  STAFCV_T status = tntcwntuple_append(hid, tname);
+}
+
+STAFCV_T 
+tntcwntuple_append(long hid, char* tname)
+{
+  tntCWNtuple* tuple = tnt->findCWNtuple(hid);
+  tdmTable* table = tdm->findTable(tname);
+  
+  if (tuple == NULL || table == NULL) {
+    EML_ERROR(KAM_FAILURE);
+  }
+  tuple->append(table);
+
+  EML_SUCCESS(STAFCV_OK);
 }
  
 /*---------------------------------------------------------------------
 ** TNT/CWNTUPLE/PUTTABLE NTUPLE TABLE
 */
-void kam_tntcwntuple_puttable_()
+void
+kam_tntcwntuple_puttable_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
-   long hid = ku_geti();	/* hid of CWNtuple */
-   char *tname = ku_gets();	/* name of tdmTable */
+  long npars = ku_npar();	/* no. of KUIP param.s */
+  long hid = ku_geti();	/* hid of CWNtuple */
+  char *tname = ku_gets();	/* name of tdmTable */
 
-        STAFCV_T status = tntcwntuple_puttable(hid,tname);
+  STAFCV_T status = tntcwntuple_puttable(hid,tname);
 }
 STAFCV_T tntcwntuple_puttable(long hid, char* tname)
 {
-   tntCWNtuple* tuple;
-   tdmTable* table;
+  tntCWNtuple *tuple = tnt->findCWNtuple(hid);
+  tdmTable *table = tdm->findTable(tname);
 
-   if( !tnt->findCWNtuple(hid,tuple)
-   ||  (NULL == (table = tdm->findTable(tname)))
-/* ||  !tuple->putToTable(table)			HACK*/
-   ){
-      EML_ERROR(KAM_FAILURE);
-   }
-   EML_SUCCESS(STAFCV_OK);
+  if (tuple == NULL || table == NULL) {
+    EML_ERROR(KAM_FAILURE);
+  }
+
+  EML_SUCCESS(STAFCV_OK);
 }
  
 /*---------------------------------------------------------------------
@@ -266,41 +314,46 @@ STAFCV_T tntcwntuple_puttable(long hid, char* tname)
 */
 void kam_tntcwntuple_show_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
-   long hid = ku_geti();	/* hid of CWNtuple */
+  long npars = ku_npar();	/* no. of KUIP param.s */
+  long hid = ku_geti();	/* hid of CWNtuple */
    
-        STAFCV_T status = tntcwntuple_show(hid);
+  STAFCV_T status = tntcwntuple_show(hid);
 }
-STAFCV_T tntcwntuple_show(long hid)
-{
-   tntCWNtuple* tuple;
 
-   if( !tnt->findCWNtuple(hid,tuple)
-   ||  !tuple->show()
-   ){
-      EML_ERROR(KAM_FAILURE);
-   }
-   EML_SUCCESS(STAFCV_OK);
+STAFCV_T 
+tntcwntuple_show(long hid)
+{
+  tntCWNtuple *tuple = tnt->findCWNtuple(hid);
+
+  if (tuple == NULL) {
+    EML_ERROR(KAM_FAILURE);
+  }
+  tuple->show();
+
+  EML_SUCCESS(STAFCV_OK);
 }
  
 /*---------------------------------------------------------------------
 ** TNT/CWNTUPLE/PRINT TNTCWNTUPLE [ NROWS IFIRST ]
 */
-void kam_tntcwntuple_print_()
+void
+kam_tntcwntuple_print_()
 {
-   long npars = ku_npar();	/* no. of KUIP param.s */
-   long hid = ku_geti();	/* hid of CWNtuple */
+  long npars = ku_npar();	/* no. of KUIP param.s */
+  long hid = ku_geti();	/* hid of CWNtuple */
    
-        STAFCV_T status = tntcwntuple_print(hid);
+  STAFCV_T status = tntcwntuple_print(hid);
 }
-STAFCV_T tntcwntuple_print(long hid)
-{
-   tntCWNtuple* tuple;
 
-   if( !tnt->findCWNtuple(hid,tuple)
-   ||  !tuple->show()
-   ){
-      EML_ERROR(KAM_FAILURE);
-   }
-   EML_SUCCESS(STAFCV_OK);
+STAFCV_T 
+tntcwntuple_print(long hid)
+{
+  tntCWNtuple *tuple = tnt->findCWNtuple(hid);
+
+  if (tuple == NULL) {
+    EML_ERROR(KAM_FAILURE);
+  }
+  tuple->show();
+
+  EML_SUCCESS(STAFCV_OK);
 }

@@ -1,4 +1,4 @@
-
+#include "asuAlloc.h"
 #include "dstype.h"
 #include "dsuCWN.h"
 
@@ -13,18 +13,19 @@
 #endif
 
 /*----------------------------------------------------------------------
-** return DSL table spec string analagous to CWN chform string
+** return CWN chform string analogous to DSL table spec string
 ----------------------------------------------------------------------*/
-char * dsuCWNdsSpec2chform(char * spec)
-{
-   DS_DATASET_T *pTable=NULL;
-   char * chform=NULL;
-   char * pData=NULL;
+char * 
+dsuCWNdsSpec2chform(char *spec) {
+   DS_DATASET_T *pTable = NULL;
+   char *chform = NULL;
+   char *pData = NULL;
 
-   pTable = NULL; pData = NULL;
+   pTable = NULL; 
+   pData = NULL;
    if( !dsNewTable(&pTable,"dsu__temp",spec,0,pData)
    ||  NULL == (chform = dsuTableChform(pTable))
-   ||  !dsFreeDatase(&pTable)
+   ||  !dsFreeDataset(&pTable)
    ){
       EML_ERROR(INVALID_TABLE_SPEC);
    }
@@ -32,9 +33,10 @@ char * dsuCWNdsSpec2chform(char * spec)
 }
 
 /*----------------------------------------------------------------------
-** return CWN chform string analagous to DSL table spec string
+** return DSL table spec string analogous to CWN chform string
 ----------------------------------------------------------------------*/
-char * dsuCWNchform2dsSpec(char * chform)
+char * 
+dsuCWNchform2dsSpec(char *chform)
 {
 /* /////////////////////////////////////////////////////// WORKING */
    EML_ERROR(NOT_YET_IMPLEMENTED);
@@ -42,37 +44,36 @@ char * dsuCWNchform2dsSpec(char * chform)
 
 
 /*----------------------------------------------------------------------
-** create data buffer with 4-byte (longword) boundried table data cols
+** create data buffer with 4-byte (longword) aligned table data cols
 ----------------------------------------------------------------------*/
-STAFCV_T dsuLongwordifyBuffer(DS_DATASET_T *pTable, size_t irow
-		, char **pData)
-{
-   long ic;
-   size_t size,colCount,colNumber;
-   long expandedSize;
+STAFCV_T 
+dsuLongwordifyBuffer(DS_DATASET_T *pTable, size_t irow, char **pData) {
 
-/*- Calculate expanded size of row and alloc memory. -*/
-   if( !dsTableColumnCount(&colCount,pTable)
-   ||  !(0 < colCount)
-   ){
-      EML_ERROR(INVALID_TABLE);
-   }
-   expandedSize = 0;
-   for( ic=0;ic<colCount;ic++ ){
-      if( !dsColumnSize(&size, pTable,colNumber) ){
-	 EML_ERROR(INVALID_TABLE_CELL);
-      }
-      expandedSize += LONGWORDIFY(size);
-   }
-   *pData = (char*)MALLOC(expandedSize);
-   memset(pData,0,expandedSize);
+  long ic;
+  size_t size,colCount,colNumber;
+  long expandedSize;
+  
+  /*- Calculate expanded size of row and alloc memory. -*/
+  if( !dsTableColumnCount(&colCount,pTable)
+      ||  !(0 < colCount)){
+    EML_ERROR(INVALID_TABLE);
+  }
+  expandedSize = 0;
+  for( ic=0;ic<colCount;ic++ ){
+    if( !dsColumnSize(&size, pTable,colNumber) ){
+      EML_ERROR(INVALID_TABLE_CELL);
+    }
+    expandedSize += LONGWORDIFY(size);
+  }
+  *pData = (char *) MALLOC(expandedSize);
+  memset(pData,0,expandedSize);
 }
 
 /*----------------------------------------------------------------------
-** fill data buffer with 4-byte (longword) boundried table data
+** fill data buffer with 4-byte (longword) aligned table data
 ----------------------------------------------------------------------*/
-STAFCV_T dsuLongwordifyRow(DS_DATASET_T *pTable, size_t irow
-		, char **ppData)
+STAFCV_T 
+dsuLongwordifyRow(DS_DATASET_T *pTable, size_t irow, char **ppData) 
 {
    long ic,i;
    size_t colCount;
@@ -98,7 +99,7 @@ STAFCV_T dsuLongwordifyRow(DS_DATASET_T *pTable, size_t irow
 /*- Copy each cell of row into new expanded row. -*/
    for( ic=0;ic<colCount;ic++ ){
       if( !dsColumnTypeCode(&code, pTable,ic)
-      ||  !dsColumnElCount(&elCount, pTable, ic)
+      ||  !dsColumnElcount(&elCount, pTable, ic)
       ||  !dsCellAddress(&pCell, pTable, irow, ic)
       ||  !dsColumnSize(&colSize, pTable, ic)
       ){
@@ -164,7 +165,8 @@ size_t dsuColumnOffset(DS_DATASET_T *table, size_t icolumn)
 /*----------------------------------------------------------------------
 ** return CWN chform for DSL table (";" == block delimiter)
 ----------------------------------------------------------------------*/
-char * dsuTableChform(DS_DATASET_T *pTable)
+char * 
+dsuTableChform(DS_DATASET_T *pTable)
 {
    size_t colCount;
    int ic;
@@ -175,43 +177,40 @@ char * dsuTableChform(DS_DATASET_T *pTable)
    buffer = (char *)MALLOC(2048);	/* HACK - Max size */
    b = buffer;
 
-   if( !dsTableColumnCount(&colCount,pTable)
-   ||  !(0 < colCount)
-   ){
-      dsPerror("INVALID_TABLE");
-      chform = NULL;
-      FREE(buffer);
-      return chform;
+   /* Make sure this table has columns! */
+   if (!dsTableColumnCount(&colCount,pTable) 
+       || (colCount <= 0)) {
+     dsPerror("INVALID_TABLE");
+     chform = NULL;
+     FREE(buffer);
+     return chform;
    }
-   if( !dsColumnTypeCode(&last, pTable, 0)
-   ||  NULL == (c=dsuColumnChform(pTable,0))
-   ){
-	 dsPerror("INVALID_TABLE_COLUMN");
-	 chform = NULL;
-	 FREE(buffer);
-	 return chform;
+   if (!dsColumnTypeCode(&last, pTable, 0) 
+       || NULL == (c = dsuColumnChform(pTable,0))) {
+     dsPerror("INVALID_TABLE_COLUMN");
+     chform = NULL;
+     FREE(buffer);
+     return chform;
    }
-   strcpy(buffer,c); FREE(c);
-   for( ic=1;ic<colCount;ic++ ){
-      if( !dsColumnTypeCode(&code, pTable, (size_t)ic)
-      ||  NULL == (c=dsuColumnChform(pTable, (size_t)ic))
-      ){
-	 dsPerror("INVALID_TABLE_COLUMN");
-	 chform = NULL;
-	 FREE(buffer);
-	 return chform;
+   strcpy(buffer,c); 
+   FREE(c);
+   for (ic = 1; ic < colCount; ic++) {
+     if (!dsColumnTypeCode(&code, pTable, (size_t)ic)
+	 ||  NULL == (c = dsuColumnChform(pTable, (size_t)ic))) {
+       dsPerror("INVALID_TABLE_COLUMN");
+       chform = NULL;
+       FREE(buffer);
+       return chform;
       }
-      if( (DS_TYPE_CHAR == last && DS_TYPE_CHAR != code)
-      ||  (DS_TYPE_CHAR != last && DS_TYPE_CHAR == code)
-      ){
-	 strcat(buffer,";");	/* next block */
-      }
-      else {
-	 strcat(buffer,",");	/* next variable */
-      }
-      strcat(buffer,c); FREE(c);
+     if ((DS_TYPE_CHAR == last && DS_TYPE_CHAR != code)
+	 ||  (DS_TYPE_CHAR != last && DS_TYPE_CHAR == code)) {
+       strcat(buffer,";");	/* next block */
+     } else {
+       strcat(buffer,",");	/* next variable */
+     }
+     strcat(buffer,c); FREE(c);
    }
-   chform = (char*)MALLOC(strlen(buffer) +1);
+   chform = (char*)MALLOC(strlen(buffer) + 1);
    FREE(buffer);
    return chform;
 }
@@ -219,7 +218,8 @@ char * dsuTableChform(DS_DATASET_T *pTable)
 /*----------------------------------------------------------------------
 ** return CWN chform for column
 ----------------------------------------------------------------------*/
-char * dsuColumnChform(DS_DATASET_T *pTable, size_t icolumn)
+char * 
+dsuColumnChform(DS_DATASET_T *pTable, size_t icolumn)
 {
    char *name;
    DS_TYPE_CODE_T code;
@@ -233,7 +233,7 @@ char * dsuColumnChform(DS_DATASET_T *pTable, size_t icolumn)
    if( !dsColumnName(&name, pTable,colNumber)
    ||  !dsColumnTypeCode(&code, pTable,colNumber)
    ||  !dsColumnSize(&size, pTable, colNumber)
-   ||  !dsColumnElCount(&count, pTable, colNumber)
+   ||  !dsColumnElcount(&count, pTable, colNumber)
    ){
       dsPerror("INVALID_TABLE_COLUMN");
       chform = NULL;
@@ -251,13 +251,13 @@ char * dsuColumnChform(DS_DATASET_T *pTable, size_t icolumn)
 	 sprintf(chtype,"C*%s",MIN(32,LONGWORDIFY(size)));
          break;
       case DS_TYPE_OCTET:
-	 strcpy(chtype,"U*4:1");	/* :[0,255]");		*/
+	 strcpy(chtype,"U*4:8");	/* :[0,255]");		*/
          break;
       case DS_TYPE_SHORT:
-	 strcpy(chtype,"I*4:2");	/* :[-32768,32767]");	*/
+	 strcpy(chtype,"I*4:16");	/* :[-32768,32767]");	*/
          break;
       case DS_TYPE_U_SHORT:
-	 strcpy(chtype,"U*4:2");	/* :[0,65535]");	*/
+	 strcpy(chtype,"U*4:16");	/* :[0,65535]");	*/
          break;
       case DS_TYPE_LONG:
 	 strcpy(chtype,"I*4");

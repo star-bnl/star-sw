@@ -32,13 +32,13 @@ Commands for the Tables to NTuples ASP.
 ** >ACTION KAM_TNT_COUNT
 ** 
 ** ---------------------------------------------------------------------
-** ** TNT/LIST
-** >COMMAND LIST
-** >PARAMETERS
-** >GUIDANCE
-** List all known TNT objects.
-** .
-** >ACTION KAM_TNT_LIST
+** TNT/LIST
+>COMMAND LIST
+>PARAMETERS
+>GUIDANCE
+List all known TNT objects.
+.
+>ACTION KAM_TNT_LIST
 ** 
 ** ---------------------------------------------------------------------
 ** ** TNT/PAW
@@ -72,52 +72,52 @@ Create a new tntCWNtuple from a tdmTable.
 ************************************************************************
 ************************************************************************
 ** ** TNT/CWNTUPLE
-** >MENU CWNTUPLE
-** >GUIDANCE
-** tntCWNtuple commands.
-** .
+>MENU CWNTUPLE
+>GUIDANCE
+tntCWNtuple commands.
+.
 ************************************************************************
 ************************************************************************
 ** 
 ** ---------------------------------------------------------------------
 ** ** TNT/CWNTUPLE/HID NTUPLE
-** >COMMAND HID
-** >PARAMETERS
-** NTUPLE 'tntCWNtuple name.' C
-** >GUIDANCE
-** Show the HBOOK ID number of a tntCWNtuple Object.
-** .
-** >ACTION KAM_TNTCWNTUPLE_HID
-** 
+>COMMAND HID
+>PARAMETERS
+NTUPLE 'tntCWNtuple name.' C
+>GUIDANCE
+Show the HBOOK ID number of a tntCWNtuple Object.
+.
+>ACTION KAM_TNTCWNTUPLE_HID
+**
 ** ---------------------------------------------------------------------
 ** ** TNT/CWNTUPLE/TITLE NTUPLE
-** >COMMAND TITLE
-** >PARAMETERS
-** NTUPLE 'tntCWNtuple name.' C
-** >GUIDANCE
-** Show the HBOOK title of a tntCWNtuple Object.
-** .
-** >ACTION KAM_TNTCWNTUPLE_TITLE
-** 
+>COMMAND TITLE
+>PARAMETERS
+NTUPLE 'tntCWNtuple name.' C
+>GUIDANCE
+Show the HBOOK title of a tntCWNtuple Object.
+.
+>ACTION KAM_TNTCWNTUPLE_TITLE
+**
 ** ---------------------------------------------------------------------
 ** ** TNT/CWNTUPLE/ENTRYCOUNT NTUPLE
-** >COMMAND ENTRYCOUNT
-** >PARAMETERS
-** NTUPLE 'tntCWNtuple name.' C
-** >GUIDANCE
-** Show the number of entries filled.
-** .
-** >ACTION KAM_TNTCWNTUPLE_ENTRYCOUNT
+>COMMAND ENTRYCOUNT
+>PARAMETERS
+NTUPLE 'tntCWNtuple name.' C
+>GUIDANCE
+Show the number of entries filled.
+.
+>ACTION KAM_TNTCWNTUPLE_ENTRYCOUNT
 ** 
 ** ---------------------------------------------------------------------
 ** ** TNT/CWNTUPLE/COLUMNCOUNT NTUPLE
-** >COMMAND COLUMNCOUNT
-** >PARAMETERS
-** NTUPLE 'tntCWNtuple name.' C
-** >GUIDANCE
-** Show the number of columns.
-** .
-** >ACTION KAM_TNTCWNTUPLE_COLCOUNT
+>COMMAND COLUMNCOUNT
+>PARAMETERS
+NTUPLE 'tntCWNtuple name.' C
+>GUIDANCE
+Show the number of columns.
+.
+>ACTION KAM_TNTCWNTUPLE_COLCOUNT
 ** 
 ** ---------------------------------------------------------------------
 ** ** TNT/CWNTUPLE/ZEBRADIR NTUPLE
@@ -130,15 +130,15 @@ Create a new tntCWNtuple from a tdmTable.
 ** >ACTION KAM_TNTCWNTUPLE_ZEBRADIR
 ** 
 ** ---------------------------------------------------------------------
-** ** TNT/CWNTUPLE/GETTABLE NTUPLE TABLE
-** >COMMAND GETTABLE
-** >PARAMETERS
-** NTUPLE 'tntCWNtuple name.' C
-** TABLE 'tdmTable name.' C
-** >GUIDANCE
-** Get data from TABLE and put into NTUPLE.
-** .
-** >ACTION KAM_TNTCWNTUPLE_GETTABLE
+** ** TNT/CWNTUPLE/APPEND NTUPLE TABLE
+>COMMAND APPEND
+>PARAMETERS
+NTUPLE 'tntCWNtuple name.' I
+TABLE 'tdmTable name.' C
+>GUIDANCE
+Get data from TABLE and append to existing NTUPLE.
+.
+>ACTION KAM_TNTCWNTUPLE_APPEND
 ** 
 ** ---------------------------------------------------------------------
 ** ** TNT/CWNTUPLE/PUTTABLE NTUPLE TABLE

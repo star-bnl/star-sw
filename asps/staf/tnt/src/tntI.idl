@@ -24,7 +24,7 @@ readonly attribute long columnCount;
 
 //:----------------------------------------------- FUNCTIONS         --
 string tag(in long iColumn);
-STAFCV_T fill(in tdmTableI table);
+STAFCV_T import(in tdmTableI table);
 STAFCV_T append(in tdmTableI table);
 STAFCV_T clear();
 STAFCV_T export(in tdmTableI table);

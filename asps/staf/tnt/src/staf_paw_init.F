@@ -1,21 +1,29 @@
 C:---------------------------------------------------------------------
 C:- Full PAW Stuff
+c     ============================================================
       SUBROUTINE STAF_PAW_INIT()
+c     ============================================================
       IMPLICIT NONE
 C
-      INTEGER*4 NWPAW
-      REAL*4 PAWCOM
-      PARAMETER (NWPAW=2000000)
+      INTEGER NWPAW
+      REAL PAWCOM
+      PARAMETER (NWPAW=1000000) !DPM: changed from 2e6
       COMMON/PAWC/PAWCOM(NWPAW)
-      INTEGER*4 NWORDS
+      INTEGER NWORDS
+c
+c     This is the workstation type returned by the user.
+      INTEGER IWTYP
 C
-      INTEGER*4 IWTYP/1/
-C
-      LOGICAL*1 PAW_INITED
-      IF(PAW_INITED())RETURN
+      INTEGER*4 PAW_INIT_COUNT
+
+ 
+c
+c     Executable Statements:
+c     ======================
+      IF(PAW_INIT_COUNT().GT.0) RETURN
 C
       CALL PAW(NWPAW,IWTYP)
-      WRITE(*,*)'PAW initialized'
+      WRITE(*,*)'TNT: PAW initialized; IWTYP = ', IWTYP
       CALL KUEXEC('PROMPT ''STAF[]''')
 C
       RETURN

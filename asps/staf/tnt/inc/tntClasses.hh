@@ -16,6 +16,16 @@
 #include "tnt_macros.h"
 #include "tnt_types.h"
 
+typedef enum cwn_block_type_t {
+  UNDEFINED=0,
+  CHAR_BLOCK,
+  NUMB_BLOCK,
+  UNKNOWN
+}CWN_BLOCK_TYPE_T;
+
+size_t tntLongwordifyColumnSize(tdmTable *, long);
+size_t tntLongwordifyRowSize(tdmTable *);
+
 //:#####################################################################
 //:=============================================== CLASS              ==
 class tntNtuple: public virtual socObject {
@@ -33,12 +43,12 @@ public:
    virtual long columnCount ();
 
 //:----------------------------------------------- INTERFACE METHODS  --
-   virtual STAFCV_T fill (tdmTable* table);
-   virtual STAFCV_T append (tdmTable* table);
-   virtual STAFCV_T clear ();
-   virtual STAFCV_T export (tdmTable* table);
-   virtual STAFCV_T show ();
-   virtual STAFCV_T print (long ifirst, long nrows);
+   virtual STAFCV_T import (tdmTable* table) = 0;
+   virtual STAFCV_T append (tdmTable* table) = 0;
+   virtual STAFCV_T clear () = 0;
+   virtual STAFCV_T export (tdmTable* table) = 0;
+   virtual STAFCV_T show () = 0;
+   virtual STAFCV_T print (long ifirst, long nrows) = 0;
 
 protected:
 //:----------------------------------------------- PROT VARIABLES     --
@@ -47,8 +57,8 @@ protected:
 
 //:----------------------------------------------- PROT FUNCTIONS     --
    virtual char * tag (long iColumn);
-   virtual STAFCV_T getDataFromTable(tdmTable* table);
-   virtual STAFCV_T putDataToTable(tdmTable* table);
+   virtual STAFCV_T getDataFromTable(tdmTable* table) = 0;
+   virtual STAFCV_T putDataToTable(tdmTable* table) = 0;
 
 private:
 //:----------------------------------------------- PRIV VARIABLES     --
@@ -64,7 +74,7 @@ class tntCWNtuple: public virtual tntNtuple {
 public:
 //:----------------------------------------------- CTORS & DTOR       --
    tntCWNtuple();
-   tntCWNtuple(long hid, tdmTable* t);
+   tntCWNtuple(long, tdmTable *);
    tntCWNtuple(long hid);
    virtual ~tntCWNtuple();
 //:----------------------------------------------- ATTRIBUTES         --
@@ -74,8 +84,8 @@ public:
    virtual char * blockChform (long iBlock);
    virtual char * blockName (long iBlock);
    
-//:- OVERRIDE virutal FUNCTIONS
-   virtual STAFCV_T fill (tdmTable* table);
+//:- OVERRIDE virtual FUNCTIONS
+   virtual STAFCV_T import (tdmTable* table);
    virtual STAFCV_T append (tdmTable* table);
    virtual STAFCV_T clear ();
    virtual STAFCV_T export (tdmTable* table);
@@ -84,14 +94,19 @@ public:
 
 protected:
 //:----------------------------------------------- PROT VARIABLES     --
-   int numBlocks;
-   char **blockNames;
-   char **chforms;
-   char *dslSpec;
+  int numBlocks;
+  char **_blockPtr;
+  CWN_BLOCK_TYPE_T *_blockType;
+  char **_blockName;
+  char **chforms;
+  char *dslSpec;
 
 //:----------------------------------------------- PROT FUNCTIONS     --
-   long blockOffset(long iblock);
-   unsigned char isCharBlock(long iblock);
+  char *blockPtr(long iblock);
+  unsigned char isCharBlock(long iblock);
+  STAFCV_T getDataFromTable(tdmTable* table);
+  STAFCV_T putDataToTable(tdmTable* table);
+
 
 private:
 //:----------------------------------------------- PRIV VARIABLES     --
@@ -116,10 +131,10 @@ public:
    virtual char * list();
 
    virtual STAFCV_T deleteCWNtuple (long hid);
-   virtual STAFCV_T findCWNtuple (long hid, tntCWNtuple*& ntuple);
-   virtual STAFCV_T getCWNtuple (IDREF_T id, tntCWNtuple*& ntuple);
-   virtual STAFCV_T newCWNtuple (long hid, const char * spec);
-   virtual STAFCV_T createCWNtuple (long hid, tdmTable* table);
+   virtual tntCWNtuple *findCWNtuple (long hid);
+   virtual tntCWNtuple *getCWNtuple (IDREF_T id);
+   virtual tntCWNtuple *newCWNtuple (long hid);
+   virtual tntCWNtuple *createCWNtuple (long hid, tdmTable* table);
 
 protected:
 //:----------------------------------------------- PROT VARIABLES     --
