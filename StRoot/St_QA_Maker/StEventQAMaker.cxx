@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.18 2001/08/07 07:51:27 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.19 2001/08/23 17:57:36 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.19  2001/08/23 17:57:36  genevb
+// Added SVT hit flag
+//
 // Revision 2.18  2001/08/07 07:51:27  lansdell
 // primvtx check for different multiplicities crashed for MC data, now fixed
 //
@@ -1534,21 +1537,33 @@ void StEventQAMaker::MakeHistPoint() {
     totalHits += tpcHits->numberOfHits();
   }
   if (svtHits) {
-    for (UInt_t i=0; i<svtHits->numberOfBarrels(); i++)
-      for (UInt_t j=0; j<svtHits->barrel(i)->numberOfLadders(); j++)
-	for (UInt_t k=0; k<svtHits->barrel(i)->ladder(j)->numberOfWafers(); k++)
-	  for (UInt_t l=0; l<svtHits->barrel(i)->ladder(j)->wafer(k)->hits().size(); l++) {
-	    Float_t z = svtHits->barrel(i)->ladder(j)->wafer(k)->hits()[l]->position().z();
-	    Float_t phi = svtHits->barrel(i)->ladder(j)->wafer(k)->hits()[l]->position().phi();
-	    hists->m_pnt_zS->Fill(z);
-	    if (phi<0)
-	      hists->m_pnt_phiS->Fill(360+phi/degree);
-	    else
-	      hists->m_pnt_phiS->Fill(phi/degree);
-	    hists->m_pnt_barrelS->Fill(i+1); // physical barrel numbering starts at 1
+    ULong_t totalSvtHits = 0;
+    for (UInt_t i=0; i<svtHits->numberOfBarrels(); i++) {
+      StSvtBarrelHitCollection* svtbarrel = svtHits->barrel(i);
+      for (UInt_t j=0; j<svtbarrel->numberOfLadders(); j++) {
+        StSvtLadderHitCollection* svtladder = svtbarrel->ladder(j);
+	for (UInt_t k=0; k<svtladder->numberOfWafers(); k++) {
+          StSPtrVecSvtHit& svtwaferhits = svtladder->wafer(k)->hits();
+	  for (UInt_t l=0; l<svtwaferhits.size(); l++) {
+	    StSvtHit* svthit = svtwaferhits[l];
+	    if (svthit->flag() < 4) {
+	      Float_t z = svthit->position().z();
+	      Float_t phi = svthit->position().phi();
+	      hists->m_pnt_zS->Fill(z);
+	      if (phi<0)
+	        hists->m_pnt_phiS->Fill(360+phi/degree);
+	      else
+	        hists->m_pnt_phiS->Fill(phi/degree);
+	      hists->m_pnt_barrelS->Fill(i+1); // physical barrel numbering starts at 1
+              totalSvtHits++;
+            }
 	  }
-    hists->m_pnt_svt->Fill(svtHits->numberOfHits());
-    totalHits += svtHits->numberOfHits();
+        }
+      }
+    }
+    // totalSvtHits = svtHits->numberOfHits();
+    hists->m_pnt_svt->Fill(totalSvtHits);
+    totalHits += totalSvtHits;
   }
   if (ftpcHits) {
     // StFtpcHitCollection doesn't differentiate between W and E FTPCs
