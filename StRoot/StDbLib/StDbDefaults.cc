@@ -17,7 +17,6 @@ StDbDefaults::StDbDefaults(){
 }
 
 ////////////////////////////////////////////////////////////////////
-
 char*
 StDbDefaults::getServerFileName(const dbFindServerMode mode){
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.22 2001/02/08 23:23:56 porter Exp $
+ * $Id: StDbTable.cc,v 1.23 2001/02/09 23:06:25 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.23  2001/02/09 23:06:25  porter
+ * replaced ostrstream into a buffer with ostrstream creating the
+ * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
+ *
  * Revision 1.22  2001/02/08 23:23:56  porter
  * fixed initialization of schemaID in table & fixed some warnings when
  * compiled with NODEBUG
@@ -106,6 +110,10 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.23  2001/02/09 23:06:25  porter
+ * replaced ostrstream into a buffer with ostrstream creating the
+ * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
+ *
  * Revision 1.22  2001/02/08 23:23:56  porter
  * fixed initialization of schemaID in table & fixed some warnings when
  * compiled with NODEBUG
@@ -729,11 +737,11 @@ float* mfloat; double* mdouble;
   switch (type) {
   case Stchar:
     {
-        char commentName[1024];
-        ostrstream cn(commentName,1024);
-        cn<<name<<".text"<<ends;
+        ostrstream cn;
+        cn<<name<<".text"<<ends; char* commentName = cn.str();
         mchar = 0;
         if(!buff->ReadScalar(mchar,commentName))buff->ReadScalar(mchar,name);
+        delete [] commentName;
         if(mchar){
              unsigned int len1=strlen(mchar);
              strncpy(ptr,mchar,len1);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.2 2001/02/08 23:23:56 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.3 2001/02/09 23:06:24 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.3  2001/02/09 23:06:24  porter
+ * replaced ostrstream into a buffer with ostrstream creating the
+ * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
+ *
  * Revision 1.2  2001/02/08 23:23:56  porter
  * fixed initialization of schemaID in table & fixed some warnings when
  * compiled with NODEBUG
@@ -144,7 +148,7 @@
 #include <strstream.h>
 #include <string.h>
 
-#include <stdio.h>
+//#include <stdio.h>
 extern char** environ;
 
 #define __CLASS__ "StDbManagerImpl"
@@ -476,19 +480,23 @@ StDbManagerImpl::findServersXml(ifstream& is){
 char*
 StDbManagerImpl::findServerString(ifstream& is){
 
-char* line = new char[10240];
+  //char* line = new char[10240];
 char tmpline[256];
 bool done = false;
 bool started = false;
 char* id;
-ostrstream os(line,10240);
+//ostrstream os(line,10240);
+ char* line=0;
+ ostrstream os;
 
 while(!done){
 
    if(is.eof()){
      done = true; 
-     delete [] line;
-     line = 0; // and no new complete string was found
+     if(started) delete [] os.str();
+     return line;
+     //     delete [] line;
+     //     line = 0; // and no new complete string was found
    } else {
      is.getline(tmpline,255);
 
@@ -510,6 +518,8 @@ while(!done){
      } // started check          
    } // eof check 
  } // while loop
+
+ line=os.str();
 
 return line;
 }
@@ -1336,11 +1346,12 @@ char* id;
     id--; *id='_';
     delete [] tmpName;
  }
- char nameInfo[256];
- ostrstream ni(nameInfo,256);
+ ostrstream ni;
  ni<<" Found dbType="<<type<<" & dbDomain="<<domain;
  ni<<" from DataBase Name="<<dbName<<ends;
+ char* nameInfo = ni.str();
  printInfo(nameInfo,dbMDebug,__LINE__,__CLASS__,__METHOD__);
+ delete [] nameInfo;
 return true;
 #undef __METHOD__
 }

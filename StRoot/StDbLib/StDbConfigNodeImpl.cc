@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNodeImpl.cc,v 1.1 2001/01/22 18:37:52 porter Exp $
+ * $Id: StDbConfigNodeImpl.cc,v 1.2 2001/02/09 23:06:24 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNodeImpl.cc,v $
+ * Revision 1.2  2001/02/09 23:06:24  porter
+ * replaced ostrstream into a buffer with ostrstream creating the
+ * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
+ *
  * Revision 1.1  2001/01/22 18:37:52  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -100,11 +104,13 @@ StDbConfigNodeImpl::updateDbInfo(){
      setBranchID(0);
      char* version=StDbManager::Instance()->getExternalVersion(mdbType,mdbDomain);
      if(version && strcmp(version,mversion)){
-       char nMes[256]; ostrstream nm(nMes,256);
+       char *nMes; ostrstream nm;
        nm<<" Overriding Key="<<mversion<<" with Environment Var Key="<<version;
        nm<<" for DataBase=";
        nm<<StDbManager::Instance()->printDbName(mdbType,mdbDomain)<<ends;
+       nMes = nm.str();
        StDbManager::Instance()->printInfo(nMes,dbMWarn,__LINE__,__CLASS__,__METHOD__);
+       delete [] nMes;
        setVersion(version);
      }
   }
@@ -370,10 +376,12 @@ StDbConfigNodeImpl::addChildren(dbEnvList* elist){
     if(id){
       id++;
       if(strcmp(id,mname) && !findChildConfigNode(id)){
-        char nMes[256]; ostrstream nm(nMes,256);
+        char* nMes; ostrstream nm;
         nm<<" Adding DataBase="<<elist->envVar[i]<<" with KEY=";
         nm<<elist->envDef[i]<<" from Environment variable definition"<<ends;
+        nMes = nm.str();
 	StDbManager::Instance()->printInfo(nMes,dbMWarn,__LINE__,__CLASS__,__METHOD__);    
+        delete [] nMes;
             new StDbConfigNodeImpl(this,id,elist->envDef[i]);
       }
     }
@@ -386,11 +394,10 @@ void
 StDbConfigNodeImpl::printTables(int depth){
 
   if(StDbManager::Instance()->IsVerbose()){
-    char* pdepth = new char[depth+1];
-    ostrstream os(pdepth,depth+1);
+    ostrstream os;
     for(int k=0;k<depth;k++)os<<" ";
     os<<ends;
-
+    char* pdepth=os.str();
    TableList::iterator itr;
    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
      cout<<pdepth<<"Table="<<(*itr)->printName()<<", Version="<<(*itr)->printVersion();

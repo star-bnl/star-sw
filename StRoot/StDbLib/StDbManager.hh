@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.19 2001/01/22 18:37:55 porter Exp $
+ * $Id: StDbManager.hh,v 1.20 2001/02/09 23:06:24 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.20  2001/02/09 23:06:24  porter
+ * replaced ostrstream into a buffer with ostrstream creating the
+ * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
+ *
  * Revision 1.19  2001/01/22 18:37:55  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -107,6 +111,7 @@
 #define STDBMANAGER_HH
 
 // language include files 
+#include <strstream.h>
 #include <iostream.h>
 #include <time.h>
 

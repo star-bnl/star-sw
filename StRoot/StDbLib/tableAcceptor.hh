@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: tableAcceptor.hh,v 1.3 1999/12/03 22:24:01 porter Exp $
+ * $Id: tableAcceptor.hh,v 1.4 2001/02/09 23:06:26 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: tableAcceptor.hh,v $
+ * Revision 1.4  2001/02/09 23:06:26  porter
+ * replaced ostrstream into a buffer with ostrstream creating the
+ * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
+ *
  * Revision 1.3  1999/12/03 22:24:01  porter
  * expanded functionality used by online, fixed bug in
  * mysqlAccessor::getElementID(char*), & update StDbDataSet to
@@ -26,7 +30,7 @@
 
 
 #include "typeAcceptor.hh"
-#include <iostream.h>
+//#include <iostream.h>
 
 class StDbTable;
 
