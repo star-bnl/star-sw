@@ -2,7 +2,7 @@
 #define ROOT_Stt_PolyLine3D
 
 // ***********************************************************************
-// $Id: St_PolyLine3D.h,v 1.1 2004/08/08 21:50:47 fisyak Exp $ 
+// $Id: St_PolyLine3D.h,v 1.2 2004/08/08 22:05:37 fisyak Exp $ 
 // ***********************************************************************
 // * Defines 3D polyline base class to construct STAR "event" geometry
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -77,15 +77,21 @@ public:
         virtual Int_t     SetPoint(Int_t point, Float_t x, Float_t y, Float_t z){return fPoints ? fPoints->SetPoint(point,x,y,z): 0;}
         virtual Int_t     SetPoints(Int_t n, Float_t *p=0, Option_t *option="") {return fPoints ? fPoints->SetPoints(n,p,option): 0;}
 
-                void      SetPoints(Float_t* buffer){TShape::SetPoints(buffer);}
+#ifndef __CINT__
+# if ROOT_VERSION_CODE >= ROOT_VERSION(4,01,0)
+                void      SetPoints(Double_t* buffer){TShape::SetPoints(buffer);}
+# else                
+                void      SetPoints(Float_t* buffer) {TShape::SetPoints(buffer);}
+# endif                
+#endif                
          
 
         ClassDef(St_PolyLine3D,1)  //Defines 3D polyline base class to construct STAR "event" geometry
 };
 //__________________________________________________________________________
 // $Log: St_PolyLine3D.h,v $
-// Revision 1.1  2004/08/08 21:50:47  fisyak
-// Eliminate Star2Root library, move St_PolyLine3D to StEventDisplayMaker
+// Revision 1.2  2004/08/08 22:05:37  fisyak
+// Valery's correction for ROOT > 4.01.00
 //
 // Revision 1.2  2003/08/02 02:51:59  perev
 // warnOff
