@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.3 2000/08/26 20:36:28 caines Exp $
+// $Id: StSvtHitMaker.h,v 1.4 2000/11/30 20:42:08 caines Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.4  2000/11/30 20:42:08  caines
+// Some more evaluation and use dataase
+//
 // Revision 1.3  2000/08/26 20:36:28  caines
 // Adjustments for StSvtCoordinateTransform calls
 //
@@ -39,6 +42,7 @@ class St_srs_srspar;
 class StSvtHybridCollection;
 class StSvtAnalysedHybridClusters;
 class StSvtData;
+class StSvtGeantHits;
  
 class StSvtHitMaker : public StMaker
 {
@@ -55,6 +59,8 @@ class StSvtHitMaker : public StMaker
   void SaveIntoTable(int numOfCluster, int index);
   void SaveIntoNtuple(int numOfCluster, int index);
   void SetWriteNtuple(int iwrite=0){iWrite = iwrite;};
+  Int_t Eval();
+
  protected:
 
   int iWrite;
@@ -64,9 +70,12 @@ class StSvtHitMaker : public StMaker
   St_srs_srspar   *m_srs_srspar; //!
 
   StSvtHybridCollection *mSvtCluColl; //!
+  StSvtHybridCollection *mSvtGeantHitColl; //!
+
   StSvtAnalysedHybridClusters  *mSvtBigHit;  //!
   
   StSvtData *mSvtData; //!
+  StSvtGeantHits *mSvtGeantHit;  //!
   
   TH2F     *m_x_vs_y;  //! x vs y of Si points
   TH2F     **m_waf_no;  //! ladder no vs z of Si hit
@@ -74,6 +83,10 @@ class StSvtHitMaker : public StMaker
   TNtuple *m_ClusTuple;                       //!
   TFile   *m_hfile;                           //!
 
+  // Evaluation histos
+  TH1F *mXHitResolution;  //!
+  TH1F *mZHitResolution;  //!
+  TH2F *mHitResolution;   //!
 
   ClassDef(StSvtHitMaker,1)   //virtual base class for Makers
 

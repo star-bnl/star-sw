@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.5 2000/10/02 13:47:03 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.6 2000/11/30 20:42:08 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.6  2000/11/30 20:42:08  caines
+ * Some more evaluation and use dataase
+ *
  * Revision 1.5  2000/10/02 13:47:03  caines
  * Fixed some array bound problems. Better flagging of hits
  *
@@ -45,7 +48,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClassLibrary/StSvtData.hh"
 #include "StSvtAnalysedHybridClusters.hh"
-
+#include "StSvtSimulationMaker/StSvtGeantHits.hh"
 
 fstream cluInfo;
 
@@ -82,6 +85,10 @@ Int_t StSvtHitMaker::Init()
   mSvtCluColl = (StSvtHybridCollection*)(dataSet2->GetObject());
   assert(mSvtCluColl);
 
+  // get geant hits if running MC data
+  dataSet2 = GetDataSet("StSvtGeantHits");
+  if (dataSet2)
+    mSvtGeantHitColl = (StSvtHybridCollection*)(dataSet2->GetObject());
 
  // 		Create tables
   St_DataSetIter       local(GetInputDB("svt"));
@@ -156,8 +163,16 @@ Int_t StSvtHitMaker::Init()
     
     m_ClusTuple = new TNtuple("Clusters","Clusters","flag:xl:yl:x:y:z:charge:mom2x:mom2y:numAnodes:numPixels:peak:hybrid:evt");
 
-     cluInfo.open("ClusterInfo.dat",ios::out);
-    
+    mXHitResolution = new TH1F("hitXRes","Delta X for Hits",1000,-2.0,2.0);
+    mZHitResolution = new TH1F("hitZRes","Delta Z for Hits",1000,-2.0,2.0);			      
+    mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",1000,-2.0,2.0,1000,-2.0,2.0);
+			  
+    mXHitResolution->SetXTitle("delta X (cm)");
+    mZHitResolution->SetYTitle("delta Z (cm)");
+    mHitResolution->SetXTitle("delta X (cm)");
+    mHitResolution->SetYTitle("delta Z (cm)");
+
+    cluInfo.open("ClusterInfo.dat",ios::out);    
   }
 
   return  StMaker::Init();
@@ -168,15 +183,18 @@ Int_t StSvtHitMaker::Init()
 
 Int_t StSvtHitMaker::Make()
 {
-
   if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::Make() ..."  << endm;
  
- //              Create output tables
+  //              Create output tables
   St_scs_spt    *scs_spt    = new St_scs_spt("scs_spt",100);
   m_DataSet->Add(scs_spt);
 
-    TransformIntoSpacePoint();
-    FillHistograms();
+  TransformIntoSpacePoint();
+  FillHistograms();
+
+  if (mSvtGeantHitColl)
+    Eval();
+
   return kStOK;
 }
 
@@ -191,7 +209,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   svg_shape_st* shape = m_shape->GetTable();
   
   StSvtCoordinateTransform* SvtGeomTrans = new StSvtCoordinateTransform();
-  SvtGeomTrans->setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData);
+  SvtGeomTrans->setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
   StSvtLocalCoordinate localCoord(0,0,0);
   StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
   StGlobalCoordinate globalCoord(0,0,0); 
@@ -376,7 +394,6 @@ Int_t StSvtHitMaker::FillHistograms(){
 		      mSvtBigHit->svtHitData()[i].peakAdc,
 		      index,
 		      mSvtData->getEventNumber());
-    
     cluInfo<<mSvtData->getEventNumber()
 	   <<setw(13)<<  index
 	   <<setw(13)<<  mSvtBigHit->svtHit()[i].flag()
@@ -393,6 +410,57 @@ Int_t StSvtHitMaker::FillHistograms(){
 	   <<setw(13)<<  mSvtBigHit->svtHitData()[i].peakAdc<<endl;
   }
 }
+
+//_____________________________________________________________________________
+
+Int_t StSvtHitMaker::Eval()
+{
+  for(int barrel = 1;barrel <= mSvtCluColl->getNumberOfBarrels();barrel++) {
+    for (int ladder = 1;ladder <= mSvtCluColl->getNumberOfLadders(barrel);ladder++) {
+      for (int wafer = 1;wafer <= mSvtCluColl->getNumberOfWafers(barrel);wafer++) {
+	for (int hybrid = 1;hybrid <=mSvtCluColl->getNumberOfHybrids();hybrid++){
+	  
+	  int index = mSvtCluColl->getHybridIndex(barrel,ladder,wafer,hybrid);
+	  if(index < 0) continue;          
+	  
+	  mSvtBigHit = (StSvtAnalysedHybridClusters*)mSvtCluColl->at(index);
+	  if( !mSvtBigHit) continue;
+
+          mSvtGeantHit = (StSvtGeantHits*)mSvtGeantHitColl->at(index);
+          if( !mSvtGeantHit) continue;
+	  
+	  for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
+
+            float tim =  mSvtBigHit->WaferPosition()[clu].x();
+            float anod =  mSvtBigHit->WaferPosition()[clu].y();
+
+            float diffTime = 0,diffAnode = 0;
+
+             for( int gHit = 0; gHit < mSvtGeantHit->numberOfHits(); gHit++){
+               if(gHit == 0)
+                {
+                 diffTime = tim -  mSvtGeantHit->waferCoordinate()[gHit].timebucket();
+                 diffAnode = anod - mSvtGeantHit->waferCoordinate()[gHit].anode();
+		}
+               if ((fabs(tim -  mSvtGeantHit->waferCoordinate()[gHit].timebucket()) < fabs(diffTime)) &&
+		   (fabs(anod - mSvtGeantHit->waferCoordinate()[gHit].anode()) < fabs(diffAnode))) {
+		 diffTime = tim - mSvtGeantHit->waferCoordinate()[gHit].timebucket();
+		 diffAnode = anod - mSvtGeantHit->waferCoordinate()[gHit].anode();
+	       }
+	     }
+
+             mXHitResolution->Fill(diffTime);
+             mZHitResolution->Fill(diffAnode);
+
+	     mHitResolution->Fill(diffTime,diffAnode);
+	  }
+	}
+      }
+    }
+  }
+ 
+  return kStOK;
+} 
 
 //_____________________________________________________________________________
 Int_t StSvtHitMaker::Finish(){
