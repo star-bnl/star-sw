@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtThreeParticleAnalysis.cxx,v 1.3 2000/05/11 21:18:56 willson Exp $
+ * $Id: StHbtThreeParticleAnalysis.cxx,v 1.4 2000/07/25 03:26:52 willson Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtThreeParticleAnalysis.cxx,v $
+ * Revision 1.4  2000/07/25 03:26:52  willson
+ * Error with small event collections fixed.
+ *
  * Revision 1.3  2000/05/11 21:18:56  willson
  * Removed StHbtThreeParticleCorrFctn's...put methods in StHbtCorrFctn
  * Some methods in derived analysis classes moved to base analysis class
@@ -142,115 +145,122 @@ void StHbtThreeParticleAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
     // this should help speed things up
     StHbtTriplet* TheTriplet = new StHbtTriplet;
     
-    StHbtParticleIterator PartIter1;
-    StHbtParticleIterator PartIter2;
-    StHbtParticleIterator PartIter3;
-    StHbtCorrFctnIterator CorrFctnIter;
-    StHbtParticleIterator StartOuterLoop = picoEvent->FirstParticleCollection()->begin();  // always
-    StHbtParticleIterator EndOuterLoop   = picoEvent->FirstParticleCollection()->end();    // will be two less if identical
-    StHbtParticleIterator StartMiddleLoop;
-    StHbtParticleIterator EndMiddleLoop;
-    StHbtParticleIterator StartInnerLoop;
-    StHbtParticleIterator EndInnerLoop;
-    if (AnalyzeIdenticalParticles()) {             // only use First collection
-      EndOuterLoop--;
-      EndOuterLoop--;                                               // outer loop goes to next-to-next-to-last particle in First collection
-      EndMiddleLoop = picoEvent->FirstParticleCollection()->end() ;  // middle loop goes to next-to-last particle in First collection
-      EndMiddleLoop--;
-      EndInnerLoop = picoEvent->FirstParticleCollection()->end() ;  // inner loop goes to last particle in First collection
-    }
-    else {                                                          // nonidentical - loop over First, Second and Third collections
-      StartMiddleLoop = picoEvent->SecondParticleCollection()->begin(); // middle loop starts at first particle in Second collection
-      EndMiddleLoop   = picoEvent->SecondParticleCollection()->end() ;  // middle loop goes to last particle in Second collection
-      StartInnerLoop = picoEvent->ThirdParticleCollection()->begin(); // inner loop starts at first particle in Third collection
-      EndInnerLoop   = picoEvent->ThirdParticleCollection()->end() ;  // inner loop goes to last particle in Third collection
-    }
-    for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
-      if (AnalyzeIdenticalParticles()){
-	StartMiddleLoop = PartIter1;
-	StartMiddleLoop++;
-	StartInnerLoop = PartIter1;
-	StartInnerLoop++;
-	StartInnerLoop++;
+    
+    if ( (AnalyzeIdenticalParticles() && picoEvent->FirstParticleCollection()->size()>2) ||
+	 (!AnalyzeIdenticalParticles() && picoEvent->FirstParticleCollection()->size()>0 && picoEvent->SecondParticleCollection()->size()>0 && picoEvent->ThirdParticleCollection()->size()>0)) {
+      
+      StHbtParticleIterator PartIter1;
+      StHbtParticleIterator PartIter2;
+      StHbtParticleIterator PartIter3;
+      StHbtCorrFctnIterator CorrFctnIter;
+      StHbtParticleIterator StartOuterLoop = picoEvent->FirstParticleCollection()->begin();  // always
+      StHbtParticleIterator EndOuterLoop   = picoEvent->FirstParticleCollection()->end();    // will be two less if identical
+      StHbtParticleIterator StartMiddleLoop;
+      StHbtParticleIterator EndMiddleLoop;
+      StHbtParticleIterator StartInnerLoop;
+      StHbtParticleIterator EndInnerLoop;
+      if (AnalyzeIdenticalParticles()) {             // only use First collection
+	EndOuterLoop--;
+	EndOuterLoop--;                                               // outer loop goes to next-to-next-to-last particle in First collection
+	EndMiddleLoop = picoEvent->FirstParticleCollection()->end() ;  // middle loop goes to next-to-last particle in First collection
+	EndMiddleLoop--;
+	EndInnerLoop = picoEvent->FirstParticleCollection()->end() ;  // inner loop goes to last particle in First collection
       }
-      TheTriplet->SetTrack1(*PartIter1);
-      for (PartIter2 = StartMiddleLoop; PartIter2!=EndMiddleLoop;PartIter2++){
-	TheTriplet->SetTrack2(*PartIter2);
-	for (PartIter3 = StartInnerLoop; PartIter3!=EndInnerLoop;PartIter3++){
-	  TheTriplet->SetTrack3(*PartIter3);
-	  // The following lines have to be uncommented if you want TripletCutMonitors
-	  // they are not in for speed reasons
-	  // bool tmpPassTriplet = mTripletCut->Pass(TheTriplet);
-	  // mTripletCut->FillCutMonitor(TheTriplet, tmpPassTriplet);
-	  // if ( tmpPassTriplet ) {
-	  if (mTripletCut->Pass(TheTriplet)){
-	    for (CorrFctnIter=mCorrFctnCollection->begin();
-		 CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
-	      StHbtCorrFctn* CorrFctn = *CorrFctnIter;
-	      CorrFctn->AddRealTriplet(TheTriplet);
-	    }
-	  }  // if passed Triplet cut
-	}  // loop over third particle
-      }    // loop over second particle
-    }      // loop over first particle
-    
-    // ok, now make mixed Triplets, if the Mixing buffer is full
-    
-    cout << "StHbtThreeParticleAnalysis::ProcessEvent() - reals done" << endl;
-    if (MixingBufferFull()){
-      cout << "Mixing Buffer is full - lets rock and roll" << endl;
-    }
-    else {
-      cout << "Mixing Buffer not full -gotta wait " << MixingBuffer()->size() << endl;
-    }
-    if (MixingBufferFull()){
-      StartOuterLoop = picoEvent->FirstParticleCollection()->begin();
-      EndOuterLoop   = picoEvent->FirstParticleCollection()->end();
-      StHbtPicoEvent* storedEvent;
-      StHbtPicoEventIterator picoEventIter;
-      for (picoEventIter=MixingBuffer()->begin();picoEventIter!=MixingBuffer()->end();picoEventIter++){
-	storedEvent = *picoEventIter;
+      else {                                                          // nonidentical - loop over First, Second and Third collections
+	StartMiddleLoop = picoEvent->SecondParticleCollection()->begin(); // middle loop starts at first particle in Second collection
+	EndMiddleLoop   = picoEvent->SecondParticleCollection()->end() ;  // middle loop goes to last particle in Second collection
+	StartInnerLoop = picoEvent->ThirdParticleCollection()->begin(); // inner loop starts at first particle in Third collection
+	EndInnerLoop   = picoEvent->ThirdParticleCollection()->end() ;  // inner loop goes to last particle in Third collection
+      }
+      for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
 	if (AnalyzeIdenticalParticles()){
-	  StartMiddleLoop = storedEvent->FirstParticleCollection()->begin();
-	  EndMiddleLoop = storedEvent->FirstParticleCollection()->end();
-	  StartInnerLoop = storedEvent->FirstParticleCollection()->begin();
-	  EndInnerLoop = storedEvent->FirstParticleCollection()->end();
+	  StartMiddleLoop = PartIter1;
+	  StartMiddleLoop++;
+	  StartInnerLoop = PartIter1;
+	  StartInnerLoop++;
+	  StartInnerLoop++;
 	}
-	else{
-	  StartMiddleLoop = storedEvent->SecondParticleCollection()->begin();
-	  EndMiddleLoop = storedEvent->SecondParticleCollection()->end();
-	  StartInnerLoop = storedEvent->ThirdParticleCollection()->begin();
-	  EndInnerLoop = storedEvent->ThirdParticleCollection()->end();
-	}
-	for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
-	  TheTriplet->SetTrack1(*PartIter1);
-	  for (PartIter2=StartMiddleLoop;PartIter2!=EndMiddleLoop;PartIter2++){
-	    TheTriplet->SetTrack2(*PartIter2);
-	    for (PartIter3=StartInnerLoop;PartIter3!=EndInnerLoop;PartIter3++){
-	      TheTriplet->SetTrack3(*PartIter3);
-	      // testing...	      cout << "TheTriplet defined... going to Triplet cut... ";
-	      if (mTripletCut->Pass(TheTriplet)){
-		// testing...		cout << " TheTriplet passed TripletCut... ";
-		for (CorrFctnIter=mCorrFctnCollection->begin();
-		     CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
-		  StHbtCorrFctn* CorrFctn = *CorrFctnIter;
-		  CorrFctn->AddMixedTriplet(TheTriplet);
-		  // testing...cout << " TheTriplet has been added to MixedTriplet method " << endl;
-		}
-	      }  // if passed Triplet cut
-	    }  // loop over third particle
-	  }    // loop over second particle
-	}      // loop over first particle
-      }        // loop over pico-events stored in Mixing buffer
-      // Now get rid of oldest stored pico-event in buffer.
-      // This means (1) delete the event from memory, (2) "pop" the pointer to it from the MixingBuffer
-      picoEventIter = MixingBuffer()->end();
-      picoEventIter--;   // bug fixed malisa 27jul99 - end() is one BEYOND the end! (besides crashing on linux, this was a memory leak)
-      delete *picoEventIter;
-      MixingBuffer()->pop_back();
-    }  // if mixing buffer is full
+	TheTriplet->SetTrack1(*PartIter1);
+	for (PartIter2 = StartMiddleLoop; PartIter2!=EndMiddleLoop;PartIter2++){
+	  TheTriplet->SetTrack2(*PartIter2);
+	  for (PartIter3 = StartInnerLoop; PartIter3!=EndInnerLoop;PartIter3++){
+	    TheTriplet->SetTrack3(*PartIter3);
+	    // The following lines have to be uncommented if you want TripletCutMonitors
+	    // they are not in for speed reasons
+	    // bool tmpPassTriplet = mTripletCut->Pass(TheTriplet);
+	    // mTripletCut->FillCutMonitor(TheTriplet, tmpPassTriplet);
+	    // if ( tmpPassTriplet ) {
+	    if (mTripletCut->Pass(TheTriplet)){
+	      for (CorrFctnIter=mCorrFctnCollection->begin();
+		   CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
+		StHbtCorrFctn* CorrFctn = *CorrFctnIter;
+		CorrFctn->AddRealTriplet(TheTriplet);
+	      }
+	    }  // if passed Triplet cut
+	  }  // loop over third particle
+	}    // loop over second particle
+      }      // loop over first particle
+      
+      // ok, now make mixed Triplets, if the Mixing buffer is full
+      
+      cout << "StHbtThreeParticleAnalysis::ProcessEvent() - reals done" << endl;
+      if (MixingBufferFull()){
+	cout << "Mixing Buffer is full - lets rock and roll" << endl;
+      }
+      else {
+	cout << "Mixing Buffer not full -gotta wait " << MixingBuffer()->size() << endl;
+      }
+      if (MixingBufferFull()){
+	StartOuterLoop = picoEvent->FirstParticleCollection()->begin();
+	EndOuterLoop   = picoEvent->FirstParticleCollection()->end();
+	StHbtPicoEvent* storedEvent;
+	StHbtPicoEventIterator picoEventIter;
+	for (picoEventIter=MixingBuffer()->begin();picoEventIter!=MixingBuffer()->end();picoEventIter++){
+	  storedEvent = *picoEventIter;
+	  if (AnalyzeIdenticalParticles()){
+	    StartMiddleLoop = storedEvent->FirstParticleCollection()->begin();
+	    EndMiddleLoop = storedEvent->FirstParticleCollection()->end();
+	    StartInnerLoop = storedEvent->FirstParticleCollection()->begin();
+	    EndInnerLoop = storedEvent->FirstParticleCollection()->end();
+	  }
+	  else{
+	    StartMiddleLoop = storedEvent->SecondParticleCollection()->begin();
+	    EndMiddleLoop = storedEvent->SecondParticleCollection()->end();
+	    StartInnerLoop = storedEvent->ThirdParticleCollection()->begin();
+	    EndInnerLoop = storedEvent->ThirdParticleCollection()->end();
+	  }
+	  for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
+	    TheTriplet->SetTrack1(*PartIter1);
+	    for (PartIter2=StartMiddleLoop;PartIter2!=EndMiddleLoop;PartIter2++){
+	      TheTriplet->SetTrack2(*PartIter2);
+	      for (PartIter3=StartInnerLoop;PartIter3!=EndInnerLoop;PartIter3++){
+		TheTriplet->SetTrack3(*PartIter3);
+		// testing...	      cout << "TheTriplet defined... going to Triplet cut... ";
+		if (mTripletCut->Pass(TheTriplet)){
+		  // testing...		cout << " TheTriplet passed TripletCut... ";
+		  for (CorrFctnIter=mCorrFctnCollection->begin();
+		       CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
+		    StHbtCorrFctn* CorrFctn = *CorrFctnIter;
+		    CorrFctn->AddMixedTriplet(TheTriplet);
+		    // testing...cout << " TheTriplet has been added to MixedTriplet method " << endl;
+		  }
+		}  // if passed Triplet cut
+	      }  // loop over third particle
+	    }    // loop over second particle
+	  }      // loop over first particle
+	}        // loop over pico-events stored in Mixing buffer
+	// Now get rid of oldest stored pico-event in buffer.
+	// This means (1) delete the event from memory, (2) "pop" the pointer to it from the MixingBuffer
+	
+	picoEventIter = MixingBuffer()->end();
+	picoEventIter--;   // bug fixed malisa 27jul99 - end() is one BEYOND the end! (besides crashing on linux, this was a memory leak)
+	delete *picoEventIter;
+	MixingBuffer()->pop_back();
+      }  // if mixing buffer is full
+      MixingBuffer()->push_front(picoEvent);  // store the current pico-event in buffer
+      
+    }
     delete TheTriplet;
-    MixingBuffer()->push_front(picoEvent);  // store the current pico-event in buffer
   }    // if currentEvent is accepted by currentAnalysis
   EventEnd(hbtEvent);  // cleanup for EbyE 
   cout << "StHbtThreeParticleAnalysis::ProcessEvent() - return to caller ... " << endl;
