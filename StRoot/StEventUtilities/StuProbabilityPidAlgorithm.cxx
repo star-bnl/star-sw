@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.18 2000/12/18 23:22:58 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.19 2000/12/18 23:51:36 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
- * Revision 1.18  2000/12/18 23:22:58  aihong
- * big revision. eta bin and centrality bin added
+ * Revision 1.19  2000/12/18 23:51:36  aihong
+ * mExtrap related bug fixed
  *
  * Revision 1.10  2000/08/16 12:46:07  aihong
  * bug killed
@@ -681,8 +681,8 @@ void StuProbabilityPidAlgorithm::fillPIDByLookUpTable(double myCentrality, doubl
             float halfHeight=(11-2.0)*PathHeight/2.0;
 
      if (fabs(myRig) > 0.3) {
-      if ((myDedx<(((*mECenter)(positionPointer))+halfHeight-nn*PathHeight)) 
- && (myDedx > ( ((*mECenter)(positionPointer))-halfHeight+nn*PathHeight) )) 
+      if ((myDedx<(((*mPiCenter)(positionPointer))+halfHeight-nn*PathHeight)) 
+ && (myDedx > ( ((*mKCenter)(positionPointer))-halfHeight+nn*PathHeight) )) 
         mExtrap=true;
      }
 }
