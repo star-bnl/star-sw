@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client_zs.cxx,v 1.1 2001/04/18 19:49:32 ward Exp $
+ * $Id: client_zs.cxx,v 1.2 2003/01/29 13:55:18 ward Exp $
  * Author: J. Schambach
  ***************************************************************************
  * Description: sample top-level code should be used as a tutorial
@@ -8,6 +8,9 @@
  *
  ***************************************************************************
  * $Log: client_zs.cxx,v $
+ * Revision 1.2  2003/01/29 13:55:18  ward
+ * Turn off memory mapped operation in the examples, which appears to fail for 2003 daq files.
+ *
  * Revision 1.1  2001/04/18 19:49:32  ward
  * Added SVT example program client_zs.cxx from J. Schambach.
  *
@@ -87,7 +90,7 @@ int main(int argc, char *argv[])
   //while(offset != -1)
   for (eventNo=0; eventNo < 1; eventNo++ )
     {  
-      EventReader *er = getEventReader(fd,offset,(const char *)logfile,1);
+      EventReader *er = getEventReader(fd,offset,(const char *)logfile,0); // Memory-mapped operation fails for 2003 daq files.
       if(!er) 
 	{
           cout << "============================================" << endl;
