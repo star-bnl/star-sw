@@ -70,3 +70,7 @@ u_short StEEMCReader::getEemcData(int fiber,int channel,char type) {
   return 0;
 }
 
+int StEEMCReader::isEemcBankIn( char type) {
+  if(fEEMCImpReader) return fEEMCImpReader->isEemcBankIn( type);
+  return 0;
+}
