@@ -18,10 +18,10 @@ memset(&row,0,tableSet->GetRowSize());
 /* 0=no DB; 1 = no noise added; 2 = with noise(pedestal) 
    for embedding must be 1.
 */
-    row.keyDB[0] = 1;
+    row.keyDB[0] = 0;
     row.keyDB[1] = 0;
-    row.keyDB[2] = 1;
-    row.keyDB[3] = 1;
+    row.keyDB[2] = 0;
+    row.keyDB[3] = 0;
 
     /* time stamp */
     row.dateDB = 20020112;
