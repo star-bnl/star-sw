@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.271 2002/02/18 02:25:27 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.272 2002/02/19 18:41:40 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -124,7 +124,8 @@ Bfc_st BFC[] = {
 
 
   // Other chains/Calibration
-  {"LaserCal",""  ,"","db,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","", "Laser Calibration Chain",kFALSE},
+  {"LaserCal",""  ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","", 
+                                                                          "Laser Calibration Chain",kFALSE},
   {"VtxSeedCal","","",
    "pp2001 -l3onl -rich -rch -RichPiD -tofDat -v0 -xi -kink FindVtxSeed NoEvent -tree -tags -QA -EventQA",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
@@ -234,7 +235,7 @@ Bfc_st BFC[] = {
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"db"          ,"db"   ,"","StDbT,xdf2root"    ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
-  {"svtDb"       ,"svtDb","","db" ,                                "StSvtDbMaker","StSvtDbMaker","",kFALSE},
+  {"svtDb"       ,"svtDb","","SvtCL,db" ,                          "StSvtDbMaker","StSvtDbMaker","",kFALSE},
   {"dbutil"      ,""     ,"","SCL,svtDb"                   ,"","StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
@@ -333,7 +334,7 @@ Bfc_st BFC[] = {
   {"V0"          ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Xi"          ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"fpt"      ,"ftpc_tracks","globalChain","SCL"          
+  {"fpt"      ,"ftpc_tracks","ftpcChain","SCL"          
                                           ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
   {"Fglobal"    ,"fglobal","globalChain","SCL,tables,tls"
                  ,"StFtpcGlobalMaker","St_global,St_dst_Maker","FTPC track refit, fills dst_tracks",kFALSE},
