@@ -1,7 +1,7 @@
 // LinkDef.h
 /***************************************************************************
  *
- * $Id: StSclRootLinkDef.hh,v 1.1 1999/01/30 03:59:05 fisyak Exp $
+ * $Id: StarClassLibraryLinkDef.hh,v 1.1 1999/02/27 21:04:53 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -22,7 +22,10 @@
  *
  ***************************************************************************
  *
- * $Log: StSclRootLinkDef.hh,v $
+ * $Log: StarClassLibraryLinkDef.hh,v $
+ * Revision 1.1  1999/02/27 21:04:53  fisyak
+ * Account change for StarClassLibrary
+ *
  * Revision 1.1  1999/01/30 03:59:05  fisyak
  * Root Version of StarClassLibrary
  *
