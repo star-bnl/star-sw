@@ -152,7 +152,7 @@ Int_t StEmcAssociationMaker::Make()
     if(mPrint) cout <<"Doing association for detector "<<detnum<<endl;
     StDetectorId detId=static_cast<StDetectorId>(detnum+kBarrelEmcTowerId);
     StEmcDetector* detector=emcCollection->detector(detId);
-    StEmcClusterCollection* clusterColl;
+    StEmcClusterCollection* clusterColl=NULL;
     if (detector) clusterColl=detector->cluster();
     if (clusterColl)
     { 
