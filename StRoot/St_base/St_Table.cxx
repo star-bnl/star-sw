@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.89 1999/11/10 00:23:55 fine Exp $ 
+// $Id: St_Table.cxx,v 1.90 1999/11/30 23:54:04 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -13,6 +13,7 @@
 // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/st2tab.gif"> </P> End_Html //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+
  
 #include <iostream.h>
 #include <fstream.h>
@@ -1303,7 +1304,7 @@ St_Table *St_Table::New(const Char_t *name, const Char_t *type, void *array, UIn
   {
     TString TableType(type); 
     TString t = TableType.Strip();
-    t.ToLower();
+//    t.ToLower();  // remove this 
 
     const Char_t *classprefix="St_";
     const Int_t extralen = strlen(classprefix) + 1;
@@ -2644,6 +2645,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.90  1999/11/30 23:54:04  fine
+// Remove ToLower for Table types
+//
 // Revision 1.89  1999/11/10 00:23:55  fine
 // adjusted to ne ROOT 2.23
 //
