@@ -1,7 +1,10 @@
-// $Id: St_l3t_Maker.h,v 1.2 1999/02/19 14:39:32 fisyak Exp $
+// $Id: St_l3t_Maker.h,v 1.3 1999/02/19 17:39:33 fisyak Exp $
 // $Log: St_l3t_Maker.h,v $
-// Revision 1.2  1999/02/19 14:39:32  fisyak
-// New version from Pablo, tpc safe
+// Revision 1.3  1999/02/19 17:39:33  fisyak
+// change given name of Maker
+//
+// Revision 1.1  1999/02/12 13:52:50  fisyak
+// l3t maker from Pablo
 //
 // Revision 1.6  1999/01/12 19:50:20  sakrejda
 // QA histograms added to the tpt maker
@@ -46,7 +49,7 @@ class St_l3t_Maker : public StMaker {
     TH1F *m_l3_tan_dip;       //!tangent of the dip angle
     TH1F *m_l3_r0;            //!radius for the first point
  public: 
-   St_l3t_Maker(const char *name="tpc_tracks", const char *title="event/data/tpc/tracks");
+   St_l3t_Maker(const char *name="l3Tracks", const char *title="event/data/l3/tracks");
    virtual       ~St_l3t_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
