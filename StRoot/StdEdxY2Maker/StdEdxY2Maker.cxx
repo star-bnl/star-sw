@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.24 2004/04/05 23:22:49 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.25 2004/04/08 16:49:31 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -57,6 +57,8 @@
 #include "StThreeVector.hh" 
 #include "StHelixD.hh"
 #include "StTimer.hh"
+#include "StarClassLibrary/StParticleTypes.hh"
+
 // StDb
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
@@ -68,6 +70,7 @@
 // StEvent
 #include "StEventTypes.h"
 #include "StProbPidTraits.h"
+#include "StTpcDedxPidAlgorithm.h"
 const static StPidParticle NHYPS = kPidTriton;
 #include "dEdxTrack.h"
 extern  Double_t SumSeries(const Double_t &X,const Int_t &N,const Double_t *params);
@@ -129,7 +132,6 @@ static TH2D *Points =  0, *Points70 =  0;
 static TH2D *PointsB = 0, *Points70B = 0; 
 static TH2D *TPoints = 0, *TPoints70 = 0;
 static TH2D *TPointsB = 0, *TPoints70B = 0;
-static TH2D *TdEdxPF = 0, *TdEdxP70 = 0;
 static TH2D *hist70[NHYPS][2], *histz[NHYPS][2];
 static TH2D *hist70B[NHYPS][2], *histzB[NHYPS][2];
 static TProfile *histB[NHYPS][2], *histBB[NHYPS][2]; 
@@ -158,6 +160,18 @@ static TH3D *Prob = 0;
 #endif
 static TH2D *dx0dx = 0;
 static TH3D *dXdE  = 0, *dXdEA  = 0, *dXdEC  = 0;
+// QA histogramss
+static TH1D *fZOfBadHits = 0;
+static TH1D *fZOfGoodHits = 0;
+static TH1D *fPhiOfBadHits = 0;
+static TH1D *fTracklengthInTpcTotal = 0;
+static TH1D *fTracklengthInTpc = 0;
+static TH2D *fTdEdxP70   = 0, *fTdEdxPF   = 0;
+static TH2D *fTdEdxP70pi = 0;
+static TH2D *fTdEdxP70e  = 0;
+static TH2D *fTdEdxP70K  = 0;
+static TH2D *fTdEdxP70P  = 0;
+
 ClassImp(StdEdxY2Maker);
 
 //_____________________________________________________________________________
@@ -370,10 +384,6 @@ Int_t StdEdxY2Maker::Init(){
 			  150,10.,160., 500,-1.,4.);
       TPointsB  = new TH2D("TPointsB","dEdx(fit) versus length Bichsel", 
 			   150,10.,160., 500,-1.,4.);
-      TdEdxPF  = new TH2D("TdEdxPF","log10(dE/dx(fit)(keV/cm)) versus log10(p(GeV/v))", 
-			  150,-1.,2., 500,0.,2.5);
-      TdEdxP70 = new TH2D("TdEdxP70","log10(dE/dx(I70)(keV/cm)) versus log10(p(GeV/v))", 
-			  150,-1.,2., 500,0.,2.5);
       Points70  = new TH2D("Points70","dEdx(I70) versus no. of measured points",50,0,50.,500,-1.,4.);
       Points70B = new TH2D("Points70B","dEdx(I70) versus no. of measured points Bichsel",50,0,50.,500,-1.,4.);
       TPoints70= new TH2D("TPoints70","dEdx(fit) versus length", 
@@ -567,6 +577,7 @@ Int_t StdEdxY2Maker::Init(){
       branch->SetAutoDelete(kFALSE);
     }
   }
+  QAPlots(0);
   gMessMgr->SetLimit("StdEdxY2Maker:: mismatched Sector",20);
   gMessMgr->SetLimit("StdEdxY2Maker:: pad/TimeBucket out of range:",20);
   gMessMgr->SetLimit("StdEdxY2Maker:: Helix Pediction",20);
@@ -871,7 +882,9 @@ Int_t StdEdxY2Maker::Make(){
 	Int_t Id = gTrack->key();
 	Int_t NoFitPoints = gTrack->fitTraits().numberOfFitPoints();
 	NdEdx = 0;
+	
 	Double_t TrackLength70 = 0, TrackLength = 0;
+	Double_t TrackLengthTotal = 0;
 	for (unsigned int j=0; j<hvec.size(); j++) {
 	  StTpcHit *tpcHit = static_cast<StTpcHit *> (hvec[j]);
 	  if (! tpcHit) continue;
@@ -882,15 +895,15 @@ Int_t StdEdxY2Maker::Make(){
 		 << " position: " << tpcHit->position() 
 		 << " positionError: " << tpcHit->positionError() << endl;
 	  }
-	  if (! tpcHit->usedInFit()) continue;
-	  if (  tpcHit->flag()) continue;
+	  if (! tpcHit->usedInFit()) {BadHit(tpcHit->position()); continue;}
+	  if (  tpcHit->flag()) {BadHit(tpcHit->position()); continue;}
 	  Int_t sector = tpcHit->sector();
 	  Int_t row    = tpcHit->padrow();
 	  StThreeVectorD &normal = *mNormal[sector-1];
 	  const StThreeVectorD  &gMidPos = *mRowPosition[sector-1][row-1][0];
 	  // check that helix prediction is consistent with measurement
 	  Double_t s = gTrack->geometry()->helix().pathLength(gMidPos, normal);
-	  if (s > 1.e4) continue;
+	  if (s > 1.e4) {BadHit(tpcHit->position()); continue;}
 	  StThreeVectorD xyzOnPlane = gTrack->geometry()->helix().at(s);
 	  StGlobalCoordinate globalOnPlane(xyzOnPlane.x(),xyzOnPlane.y(),xyzOnPlane.z());
 	  StTpcPadCoordinate PadOnPlane;      transform(globalOnPlane,PadOnPlane);
@@ -939,18 +952,19 @@ Int_t StdEdxY2Maker::Make(){
 	  }
 #endif // XYZcheck
 #ifdef PadSelection
-	  if (iokCheck) continue;
+	  if (iokCheck) {BadHit(tpcHit->position()); continue;}
 #endif // PadSelection
 	  
 	  const StThreeVectorD  &gTopPos = *mRowPosition[sector-1][row-1][1];
 	  const StThreeVectorD  &gBotPos = *mRowPosition[sector-1][row-1][2];
 	  double s_out = gTrack->geometry()->helix().pathLength(gTopPos, normal);
-	  if (s_out > 1.e4) continue;
+	  if (s_out > 1.e4) {BadHit(tpcHit->position()); continue;}
 	  double s_in  = gTrack->geometry()->helix().pathLength(gBotPos, normal);
-	  if (s_in > 1.e4) continue;
+	  if (s_in > 1.e4) {BadHit(tpcHit->position()); continue;}
 	  Double_t dx = TMath::Abs(s_out-s_in);
+	  TrackLengthTotal += dx;
 #ifdef PadSelection
-	  if (dx < 0.5 || dx > 25.) continue;
+	  if (dx < 0.5 || dx > 25.) {BadHit(tpcHit->position()); continue;}
 #endif // PadSelection
 	  ESector kTpcOutIn = kTpcOuter;
 	  if (row <= 13) kTpcOutIn = kTpcInner;
@@ -1002,7 +1016,7 @@ Int_t StdEdxY2Maker::Make(){
 #endif
 	    }
 #endif // TpcSecRow
-	    if (gc < 0.0) continue;
+	    if (gc < 0.0) {BadHit(tpcHit->position()); continue;}
 	    dE *= gc;
 	    dES = dE;
 	    dE *= row > 13 ? PressureScaleO : PressureScaleI; 
@@ -1025,8 +1039,8 @@ Int_t StdEdxY2Maker::Make(){
 #ifdef DriftDistanceCorrection
 	    if (m_zCorrection) {
 	      tpcCorrection_st *cor = m_zCorrection->GetTable()+kTpcOutIn;
-	      if (cor->min > 0 && cor->min > CdEdx[NdEdx].ZdriftDistance) continue;
-	      if (cor->max > 0 && CdEdx[NdEdx].ZdriftDistance > cor->max) continue;
+	      if (cor->min > 0 && cor->min > CdEdx[NdEdx].ZdriftDistance) {BadHit(tpcHit->position()); continue;}
+	      if (cor->max > 0 && CdEdx[NdEdx].ZdriftDistance > cor->max) {BadHit(tpcHit->position()); continue;}
 	      dE *= TMath::Exp(-CalcCorrection(cor,CdEdx[NdEdx].ZdriftDistance));
 	    }
 #endif // DriftDistanceCorrection
@@ -1062,7 +1076,7 @@ Int_t StdEdxY2Maker::Make(){
 	  CdEdx[NdEdx].dES     = dES; // SecRow 
 	  CdEdx[NdEdx].dEZ     = dEZ; // Drift Distance
 	  CdEdx[NdEdx].dEX     = dEX; // dE correction
-	  if (dE <= 0 || dx <= 0) continue;
+	  if (dE <= 0 || dx <= 0) {BadHit(tpcHit->position()); continue;}
 	  TrackLength         += dx;
 	  CdEdx[NdEdx].sector  = sector;
 	  CdEdx[NdEdx].row     = row;
@@ -1104,11 +1118,15 @@ Int_t StdEdxY2Maker::Make(){
 	    if (Space2ChargeU) Space2ChargeU->Fill(global.position().perp(),global.position().z(),CdEdx[NdEdx].dEU);
 	  }
 #endif // SpaceChargeStudy
+	  if (fZOfGoodHits) fZOfGoodHits->Fill(tpcHit->position().z());
 	  NdEdx++;
 	  if (NdEdx > NoFitPoints) 
 	    gMessMgr->Error() << "StdEdxY2Maker:: NdEdx = " << NdEdx 
 			      << ">  NoFitPoints ="<< NoFitPoints << endm; 
 	}
+       if (fTracklengthInTpcTotal) fTracklengthInTpcTotal->Fill(TrackLengthTotal);
+       if (fTracklengthInTpc)      fTracklengthInTpc->Fill(TrackLength);
+	
 	if (NdEdx <= 0) continue;
 	//      if (TrackLength < TrackLengthCut) continue;
 	SortdEdx(NdEdx,CdEdx,dEdxS);
@@ -1197,6 +1215,7 @@ Int_t StdEdxY2Maker::Make(){
 	//      if (m_Calibration != 0 && bField && pTrack) Histogramming(gTrack);
       }
       if (m_Calibration != 0) Histogramming(gTrack);
+      QAPlots(gTrack);
     }
   }
   if (Debug() > 1) {
@@ -1231,7 +1250,6 @@ void StdEdxY2Maker::SortdEdx(Int_t N, dEdx_t *dE, dEdx_t *dES) {
 }
 //________________________________________________________________________________
 void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
-  static const Double_t Log10E = TMath::Log10(TMath::Exp(1.));
   StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
   Double_t pMomentum = g3.mag();
   Double_t Eta = g3.pseudoRapidity();
@@ -1287,13 +1305,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
       histB[l][sCharge]->Fill(bghyp[l],TMath::Log(Pred[l]));
       hist70B[l][sCharge]->Fill(bghyp[l],TMath::Log(I70/Pred70B[l]));
       histBB[l][sCharge]->Fill(bghyp[l],TMath::Log(PredB[l]));
-      TdEdxP70->Fill(TMath::Log10(pMomentum), TMath::Log10(I70)+6.);
       devZ[l] = TMath::Log(I70/Pred70B[l]);
     }
     if (pidF && TrackLength > 40.) {
       histz[l][sCharge]->Fill(bghyp[l],fitZ - TMath::Log(Pred[l]));
       histzB[l][sCharge]->Fill(bghyp[l],fitZ - TMath::Log(PredB[l]));
-      TdEdxPF->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
       devZs[l] = TMath::Abs(devZ[l])/fitdZ; //D70;
     }
   }
@@ -1787,4 +1803,100 @@ void StdEdxY2Maker::DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ){
   else {
     fitZ = fitdZ = chisq =  -999.;
   }
+}
+//________________________________________________________________________________
+void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
+  static StTpcDedxPidAlgorithm PidAlgorithm;
+  static StElectron* Electron = StElectron::instance();
+  static StPionPlus* Pion = StPionPlus::instance();
+  static StKaonPlus* Kaon = StKaonPlus::instance();
+  static StProton* Proton = StProton::instance();
+  static const Double_t Log10E = TMath::Log10(TMath::Exp(1.));
+  if (! gTrack) {
+    StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
+    TFile *f = 0;
+    if (chain) f = chain->GetTFile();
+    if (f) f->cd();
+   
+    fZOfBadHits = new TH1D("ZOfBadHits","Z of rejected clusters",100,-210,210);                        
+    fZOfGoodHits = new TH1D("ZOfGoodHits","Z of accepted clusters",100,-210,210);                        
+    fPhiOfBadHits = new TH1D("PhiOfBadHits","Phi of rejected clusters",100, -TMath::Pi(), TMath::Pi());
+    fTracklengthInTpcTotal = new TH1D("TracklengthInTpcTotal","Total track in TPC",100,0,200);         
+    fTracklengthInTpc = new TH1D("TracklengthInTpc","Track length in TPC used for dE/dx",100,0,200);   
+    fTdEdxPF    = new TH2D("TdEdxPF","log10(dE/dx(fit)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm", 
+			 150,-1.,2., 500,0.,2.5);
+    fTdEdxP70    = new TH2D("TdEdxP70","log10(dE/dx(I70)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm", 
+			 150,-1.,2., 500,0.,2.5);
+    fTdEdxP70pi  = new TH2D("TdEdxP70pi","log10(dE/dx(I70)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm |nSigmaPion| < 1", 
+			 150,-1.,2., 500,0.,2.5);
+    fTdEdxP70pi->SetMarkerColor(2);
+    fTdEdxP70e   = new TH2D("TdEdxP70e","log10(dE/dx(I70)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm |nSigmaElectron| < 1", 
+			 150,-1.,2., 500,0.,2.5);
+    fTdEdxP70e->SetMarkerColor(3);
+    fTdEdxP70K   = new TH2D("TdEdxP70K","log10(dE/dx(I70)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm |nSigmaKaon| < 1", 
+			 150,-1.,2., 500,0.,2.5);
+    fTdEdxP70K->SetMarkerColor(4);
+    fTdEdxP70P   = new TH2D("TdEdxP70P","log10(dE/dx(I70)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm |nSigmaProton| < 1", 
+			 150,-1.,2., 500,0.,2.5);
+    fTdEdxP70P->SetMarkerColor(6);
+    if (! f) {
+      AddHist(fZOfBadHits);           
+      AddHist(fPhiOfBadHits);         
+      AddHist(fTracklengthInTpcTotal);
+      AddHist(fTracklengthInTpc);     
+      AddHist(fTdEdxPF);
+      AddHist(fTdEdxP70);
+      AddHist(fTdEdxP70pi);
+      AddHist(fTdEdxP70e);
+      AddHist(fTdEdxP70K);
+      AddHist(fTdEdxP70P);
+    }
+  }
+  else {
+    StSPtrVecTrackPidTraits &traits = gTrack->pidTraits();
+    static StDedxPidTraits *pid, *pid70 = 0, *pidF = 0;
+    static Double_t TrackLength70, TrackLength, I70, D70, fitZ, fitdZ;
+    static StProbPidTraits *pidprob = 0;
+    static Int_t N70, NF;
+    pid = pid70 = pidF = 0;
+    TrackLength70 =  TrackLength =  I70 =  D70 = fitZ = fitdZ = 0; 
+    N70 = NF = 0;
+    for (unsigned int i = 0; i < traits.size(); i++) {
+      if (! traits[i]) continue;
+      if ( traits[i]->IsZombie()) continue;
+      pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
+      if (pid) {
+	if (pid->method() == kTruncatedMeanIdentifier) {
+	  pid70 = pid; I70 = pid70->mean(); N70 = pid70->numberOfPoints();
+	  TrackLength70 = pid70->length(); D70 = pid70->errorOnMean();
+	}
+	if (pid->method() == kLikelihoodFitIdentifier) {
+	  pidF = pid;
+	  fitZ = TMath::Log(pidF->mean()); NF = pidF->numberOfPoints(); 
+	  TrackLength = pidF->length(); fitdZ = pidF->errorOnMean(); 
+	}
+      }
+      else pidprob = dynamic_cast<StProbPidTraits*>(traits[i]);
+    }
+    StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
+    Double_t pMomentum = g3.mag();
+    if (pid70 && ! pidF) TrackLength = TrackLength70;
+    if (pidF && TrackLength > 40.) 
+      fTdEdxP70->Fill(TMath::Log10(pMomentum), TMath::Log10(I70)+6.);
+    if (pid70 && TrackLength70 > 40.) { 
+      fTdEdxPF->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
+      const StParticleDefinition* pd = gTrack->pidTraits(PidAlgorithm);
+      if (pd) {
+	if (TMath::Abs(PidAlgorithm.numberOfSigma(Electron)) < 1) fTdEdxP70e->Fill(TMath::Log10(pMomentum), TMath::Log10(I70)+6.);
+	if (TMath::Abs(PidAlgorithm.numberOfSigma(Pion)) < 1) fTdEdxP70pi->Fill(TMath::Log10(pMomentum), TMath::Log10(I70)+6.);
+	if (TMath::Abs(PidAlgorithm.numberOfSigma(Kaon)) < 1) fTdEdxP70K->Fill(TMath::Log10(pMomentum), TMath::Log10(I70)+6.);
+	if (TMath::Abs(PidAlgorithm.numberOfSigma(Proton)) < 1) fTdEdxP70P->Fill(TMath::Log10(pMomentum), TMath::Log10(I70)+6.);
+      }
+    }
+  }
+}
+//________________________________________________________________________________
+void StdEdxY2Maker::BadHit(const StThreeVectorF &xyz) {
+  if (fZOfBadHits) fZOfBadHits->Fill(xyz.z());
+  if (fPhiOfBadHits) fPhiOfBadHits->Fill(TMath::ATan2(xyz.y(),xyz.x()));
 }
