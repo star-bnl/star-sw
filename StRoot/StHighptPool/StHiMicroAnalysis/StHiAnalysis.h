@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiAnalysis.h,v 1.2 2002/05/31 21:58:29 jklay Exp $                                    
+ * $Id: StHiAnalysis.h,v 1.3 2002/06/12 21:48:43 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,8 +12,8 @@
  ***************************************************************************
  * 
  * $Log: StHiAnalysis.h,v $
- * Revision 1.2  2002/05/31 21:58:29  jklay
- * Updated analysis code to use new cut class
+ * Revision 1.3  2002/06/12 21:48:43  jklay
+ * Fixed the way East and West are filled
  *
  * Revision 1.1  2002/04/02 20:05:18  jklay
  * Bums analysis tools for highpt uDSTs
@@ -111,6 +111,9 @@ class StHiAnalysis : public StHiBaseAnalysis{
 
   EastWest ew[3]; //!
 
+//Note:  East and West, where track and vtx Z are on same side can be obtained by
+// setting the vertex Z cut to one side or the other and comparing the East from VtxZ<0 with
+// West from VtxZ>0 runs.
 
   TH3D* h3ResPtPrGlPtPrDcaXYGl; //!
   TH3D* h3ResPtPrGlPtGlDcaXYGl; //!
