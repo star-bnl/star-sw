@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.5 2000/07/16 22:32:23 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.6 2000/08/09 02:05:08 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.6  2000/08/09 02:05:08  caines
+ * Only add pixels in the ASIC-like sequence adjusting
+ *
  * Revision 1.5  2000/07/16 22:32:23  caines
  * Now also saves RAW data
  *
@@ -221,18 +224,17 @@ Int_t StSvtSeqAdjMaker::Make()
           mHybridToBeAdjData = (StSvtHybridData *)mSvtToBeAdjEvent->getObject(Barrel,Ladder,Wafer,Hybrid);
 	  if( !mHybridToBeAdjData) continue;
 
-	  mHybridRawData = new StSvtHybridData(Barrel,Ladder,Wafer,Hybrid);
-          
+	  mSvtPedSub->SubtractPed(mHybridToBeAdjData, index, mPedOffSet);
+
+
           //****** sequence adjusting has not begun yet, making copy of 
 	  // data for cluster fitter
 
-          mHybridRawData = mHybridToBeAdjData;
-          mSvtRawEvent->at(index) = mHybridRawData;
+	  mHybridRawData = new StSvtHybridData(*mHybridToBeAdjData);
+          (*mSvtRawEvent)[index] = mHybridRawData;
 
           mInvProd->SetHybridPointer(mHybridToBeAdjData);
 
-
-	  mSvtPedSub->SubtractPed(mHybridToBeAdjData, index, mPedOffSet);
 
 	  for( int Anode= 0; Anode<mHybridToBeAdjData->getAnodeList(anolist); Anode++)
             {
@@ -345,8 +347,8 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int Anode){
   int startTimeBin, len, status;
   StSequence* Sequence;
   unsigned char* adc;
-  int ExtraBefore=1;
-  int ExtraAfter=3;
+  int ExtraBefore=0;
+  int ExtraAfter=0;
  
 
   double tempBuffer = 0;
@@ -396,7 +398,7 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int Anode){
 
         mNumOfSeq = nSeqNow;
     
-	if( nSeqBefore >0 && nSeqBefore != nSeqNow){
+	if( nSeqBefore >0){
 	  mHybridToBeAdjData->SetListSequences(Anode, mNumOfSeq, tempSeq1);
 	}
 	// cout << "For Anode=" << Anode << " Number of sequnces was=" << nSeqBefore << " Number now=" << nSeqNow << endl;
