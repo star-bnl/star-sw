@@ -1,6 +1,9 @@
-// $Id: StAnalysisMaker.h,v 1.5 1999/07/15 13:56:41 perev Exp $
+// $Id: StAnalysisMaker.h,v 1.6 1999/07/30 22:56:02 kathy Exp $
 //
 // $Log: StAnalysisMaker.h,v $
+// Revision 1.6  1999/07/30 22:56:02  kathy
+// added new method and input param qaflag so that if turned on, a log file will be printed out with QA information
+//
 // Revision 1.5  1999/07/15 13:56:41  perev
 // cleanup
 //
@@ -53,23 +56,30 @@ class StEvent;
 
   // Maker generates a tag
   HighPtTag_st* theTag; //!
+  ofstream ofile;  // QA output file
+  Int_t nEvtProc;   // Number of events requested (QA)
 
 protected:
 
 public:
 
   StAnalysisMaker(const Char_t *name="analysis");
+  StAnalysisMaker(const char *,const Int_t,
+                  const Char_t *name="analysis");  // overloaded for QA
   virtual ~StAnalysisMaker();
   virtual void Clear(Option_t *option="");
   virtual Int_t Init();
   virtual Int_t  Make();
   virtual Int_t  Finish();
 
+  // fake copy constructor to fool CINT!  Necessary for QA.
+  StAnalysisMaker(const StAnalysisMaker &);
+
   // Tag accessor
   HighPtTag_st* tag() {return theTag;};
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 1.5 1999/07/15 13:56:41 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 1.6 1999/07/30 22:56:02 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StAnalysisMaker, 1)
     Int_t nevents;
