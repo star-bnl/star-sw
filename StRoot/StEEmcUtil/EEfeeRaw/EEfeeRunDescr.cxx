@@ -50,7 +50,7 @@ void EEfeeRunDescr :: clear() {
 //--------------------------------------------------
 //
 //--------------------------------------------------
-void EEfeeRunDescr :: print() {
+void EEfeeRunDescr :: print() const{
   printf("EEfeeRunDescr:: print()\nmTimeStamp=%ld --> %s",mTimeStamp,ctime((const time_t *)&mTimeStamp));
 
 printf("mProcessingTime =%ld --> %s",mProcessingTime ,

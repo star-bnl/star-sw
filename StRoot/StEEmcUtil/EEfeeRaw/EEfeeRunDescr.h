@@ -1,9 +1,12 @@
 #ifndef EEfeeRunDescr_h
 #define EEfeeRunDescr_h
 /*********************************************************************
- * $Id: EEfeeRunDescr.h,v 1.1 2003/01/28 23:17:14 balewski Exp $
+ * $Id: EEfeeRunDescr.h,v 1.2 2003/02/21 22:21:56 balewski Exp $
  *********************************************************************
  * $Log: EEfeeRunDescr.h,v $
+ * Revision 1.2  2003/02/21 22:21:56  balewski
+ * time stamp added
+ *
  * Revision 1.1  2003/01/28 23:17:14  balewski
  * start
  *
@@ -26,11 +29,10 @@
  * Initial revision
  *
  *********************************************************************/
-
-#include "TObject.h"
 #include <time.h>
 
 
+#include <TObject.h>
 
 class EEfeeRunDescr : public TObject {
  private:
@@ -42,7 +44,7 @@ class EEfeeRunDescr : public TObject {
  public:
   EEfeeRunDescr();
   virtual ~EEfeeRunDescr();
-  void  print();
+  void  print() const;
   void  clear();
   void setProcessingTime( time_t t)  { mProcessingTime = t; } ;
   void setTimeStamp( time_t t)  { mTimeStamp = t; } ;

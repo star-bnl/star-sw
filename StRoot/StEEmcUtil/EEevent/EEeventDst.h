@@ -4,12 +4,15 @@
 #ifndef EEeventDst_h
 #define EEeventDst_h
 /*********************************************************************
- * $Id: EEeventDst.h,v 1.1 2003/02/20 05:15:14 balewski Exp $
+ * $Id: EEeventDst.h,v 1.2 2003/02/21 22:21:47 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw Hits
  *********************************************************************
  * $Log: EEeventDst.h,v $
+ * Revision 1.2  2003/02/21 22:21:47  balewski
+ * time stamp added
+ *
  * Revision 1.1  2003/02/20 05:15:14  balewski
  * reorganization
  *
@@ -42,10 +45,12 @@
  * Initial revision
  *
  *********************************************************************/
+
 #include "TObject.h"
 
 class TClonesArray;
 class EEsectorDst;
+
 
 class EEeventDst :public TObject{
 
@@ -61,7 +66,8 @@ public:
   int  ID;
   DataType type; 
   int token;
-
+  unsigned int timeStamp;         //(unix time, GMT) 
+ 
   // hits  sorted by sectors
   TClonesArray  *Sec;   
   
