@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.cc,v 1.9 2004/03/30 21:16:18 caines Exp $
+ * $Id: St_SvtDb_Reader.cc,v 1.10 2004/07/26 00:06:08 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.cc,v $
+ * Revision 1.10  2004/07/26 00:06:08  munhoz
+ * read drift curve
+ *
  * Revision 1.9  2004/03/30 21:16:18  caines
  * Get daq parameters
  *
@@ -47,6 +50,7 @@
 #include "StSvtClassLibrary/StSvtConfig.hh"
 #include "StSvtClassLibrary/StSvtHybridPed.hh"
 #include "StSvtClassLibrary/StSvtHybridDriftVelocity.hh"
+#include "StSvtClassLibrary/StSvtHybridDriftCurve.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClassLibrary/StSvtHybridBadAnodes.hh"
 #include "StSvtClassLibrary/StSvtGeometry.hh"
@@ -56,6 +60,7 @@
 
 #include "tables/St_svtConfiguration_Table.h"
 #include "tables/St_svtDriftVelAvg_Table.h"
+#include "tables/St_svtDriftCurve_Table.h"
 #include "tables/St_svtBadAnodes_Table.h"
 #include "tables/St_svtPedestals_Table.h"
 #include "tables/St_svtRms_Table.h"
@@ -76,6 +81,7 @@ St_SvtDb_Reader::St_SvtDb_Reader()
   memset(svtDb,0,sizeof(svtDb));
   mSvtConfig = NULL;      
   mSvtDriftVeloc = NULL;
+  mSvtDriftCurve = NULL;
   mSvtPed = NULL; 
   mSvtRms = NULL; 
   mSvtGeom = NULL;        
@@ -259,6 +265,86 @@ void St_SvtDb_Reader::getDriftVelocityAverage(StSvtHybridCollection* svtDriftVel
 
 }
 
+//_____________________________________________________________________________
+StSvtHybridCollection* St_SvtDb_Reader::getDriftCurve()
+{
+  gMessMgr->Info() << "St_SvtDb_Reader::getDriftVelocityCurve" << endm;
+
+  if(!mSvtDriftCurve)
+    mSvtDriftCurve = new StSvtHybridCollection(mSvtConfig);
+
+  St_svtDriftCurve *driftVelocityCurve;
+  const int dbIndex = kCalibration;
+
+  svtDriftCurve_st *driftCurve;
+  StSvtHybridDriftCurve* hybridDriftCurve;
+
+  char path[100];
+  int index;
+
+  for (int barrel = 1;barrel <= mSvtConfig->getNumberOfBarrels();barrel++) {
+    for (int ladder = 1;ladder <= mSvtConfig->getNumberOfLadders(barrel);ladder++) {
+      for (int wafer = 1;wafer <= mSvtConfig->getNumberOfWafers(barrel);wafer++) {
+        for (int hybrid = 1;hybrid <= mSvtConfig->getNumberOfHybrids();hybrid++) {
+
+          index = mSvtConfig->getHybridIndex(barrel,ladder,wafer,hybrid);
+										    
+          if (index < 0) continue;
+
+            switch (barrel) {
+            case 1:
+	      sprintf(path,"InnerBarrel/Ladder_0%d/Wafer_0%d/Hybrid_0%d/svtDriftCurve",ladder,wafer,hybrid);
+	      break;
+	    case 2:
+              if (ladder < 10)
+                sprintf(path,"MiddleBarrel/Ladder_0%d/Wafer_0%d/Hybrid_0%d/svtDriftCurve",ladder,wafer,hybrid);
+              else
+                sprintf(path,"MiddleBarrel/Ladder_%d/Wafer_0%d/Hybrid_0%d/svtDriftCurve",ladder,wafer,hybrid);
+              break;
+	    case 3:
+	      if (ladder < 10)
+	        sprintf(path,"OuterBarrel/Ladder_0%d/Wafer_0%d/Hybrid_0%d/svtDriftCurve",ladder,wafer,hybrid);
+              else
+                sprintf(path,"OuterBarrel/Ladder_%d/Wafer_0%d/Hybrid_0%d/svtDriftCurve",ladder,wafer,hybrid);
+              break;
+          }
+
+          // get wafers position table
+	  if (svtDb[dbIndex]){
+	    driftVelocityCurve = (St_svtDriftCurve*)svtDb[dbIndex]->Find(path);
+	    if (!(driftVelocityCurve && driftVelocityCurve->HasData()) ){
+	      gMessMgr->Message("Error Finding SVT drift velocity curve","E");
+	      return NULL;
+	    }
+	  }
+	  else {
+            gMessMgr->Message("Error Finding SVT Calibration Db","E");
+            return NULL;
+          }
+
+          driftCurve = driftVelocityCurve->GetTable();
+
+          hybridDriftCurve = (StSvtHybridDriftCurve*)mSvtDriftCurve->at(index);
+          if (!hybridDriftCurve)
+            hybridDriftCurve = new StSvtHybridDriftCurve(barrel,ladder,wafer,hybrid);
+
+          // loop over data
+          for (int i=1; i<=3; i++)
+	    for (int j=1; j<=10; j++) {
+	      hybridDriftCurve->setParameter(i,j,driftCurve->driftCurve[i-1][j-1]);
+	      //cout << "adc = " << i << ", parameter = " << j << ", value = " << driftCurve->driftCurve[i-1][j-1] << endl;
+	    }
+	  
+          mSvtDriftCurve->put_at(hybridDriftCurve,index);
+
+        } // end of loop over hybrids
+      } // end of loop over wafers
+    } // end of loop over ladders
+  } // end of loop over barrels
+
+  return mSvtDriftCurve;
+}
+    
 //_____________________________________________________________________________
 StSvtHybridCollection* St_SvtDb_Reader::getPedestals()
 {
