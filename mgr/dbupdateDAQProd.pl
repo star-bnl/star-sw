@@ -23,6 +23,8 @@ my $debugOn=0;
 my $DISK1 = "/star/rcf/disk00001/star";
 my $DISK2 =  "/star/rcf/data09/reco";
 my $DISK3 = "/star/rcf/data10/reco";
+my $Disk4 = "/star/rcf/data05/reco";
+my $Disk5 = "/star/rcf/data07/reco";
 
 my $prodSr = "P00hg";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
@@ -214,12 +216,12 @@ my $kk = 0;
 
  for( $ll = 0; $ll<scalar(@SetD); $ll++) {
    $diskDstDirs[$ll] = $DISK2 . "/" . $SetD[$ll];
-   $kk++;
+#   $kk++;
    print "diskDstDir: $diskDstDirs[$ll]\n";
     
  }
-#   $diskDstDirs[$ll] = $DISK3 . "/" . $SetD[2];
-#    print "diskDstDir: $diskDstDirs[$ll]\n";  
+   $diskDstDirs[$ll] = $DISK3 . "/" . $SetD[2];
+    print "diskDstDir: $diskDstDirs[$ll]\n";  
 
  foreach $diskDir (@diskDstDirs) {
              if (-d $diskDir) {
