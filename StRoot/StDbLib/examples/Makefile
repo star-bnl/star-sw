@@ -29,7 +29,7 @@ CSTRUCTS= /online/production/dbAdmin/porter/StDb/include/
 
 ALL_CPPFLAGS += -I$(STDB_API) 
 ALL_CPPFLAGS += -I$(CSTRUCTS)
-ALL_LIBS = $(STDB_API)/StDbLib.so $(SHARED_LIBS) 
+ALL_LIBS = $(STDB_API)/StDbLib.a $(SHARED_LIBS) $(CLIBS)
 #-lgen
 
 EXEC_OBJS   =  $(ReadConfig).o 
