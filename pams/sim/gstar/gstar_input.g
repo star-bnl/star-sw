@@ -91,6 +91,11 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
                  eg_proc,parent
    Real          version,east_z,east_a,west_z,west_a,sqrts,b_max,
                  PP(3),vert(4),UBUF(10),a,b
+   integer       istat,eg_pid,moth,daut,num(5),Link,ia,jv
+   data          num/1,1,0,0,0/
+   character     Cform*8 /'/6I 9F'/
+   Real          phep,vhep
+   common/GHEPEVT/ istat,eg_pid,moth(2),daut(2),phep(5),vhep(4)
 *
 +CDE,GCUNIT,GCFLAG.
 *
@@ -126,15 +131,32 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
                          (16x,'VERTEX:',4F10.6,3i6)
      ivt += 1;           call AgSVERT(vert,-LabelVx,-Igate,Ubuf,0,nv) 
    }
-   else If Index(Line,'event')>0 & itr+ivt==0      " old format "
-   { i=Index(Line,'event');  line(i:i+6)='  ';
+   else If Line(1:6)=='HEPEVT' & itr+ivt==0  
+   { *             HEPEVT text format
+     read1 (line(8:),*) Ntrac,Ieven; (' gstar_Read HEPEVT:',i8,' event#',i6)
+
+     do itr=1,Ntrac
+     {  read5(li,*) istat,eg_pid,moth,daut,phep,vhep; (6i5,5F8.2,4F9.3)
+        num(3)=0;   If (itr==1) num(3)=1
+        Call RbSTORE ('/EVNT/GENE/GENT*',num,Cform,15,istat)
+        check Istat==1;       Call apdg2gea (eg_pid, ge_pid)
+	if ge_pid<=0 
+        {  if (Idebug>1) <W> eg_pid;(' gstar_read HEPEVT unknown particle',i6);
+           ge_pid = 1000000+eg_pid
+        }
+        Call AgSVERT ( vhep,   0,     jv,  0,  0, nv); 
+        Call AgSKINE ( phep,  ge_pid, nv, itr, 0, nt); 
+     }  Break
+   }
+   else If Index(Line,'event')>0 & itr+ivt==0     
+   { *              OLD text format
+     i=Index(Line,'event');  line(i:i+6)='  ';
      read1 (line,*) Ntrac,Ieven; (' gstar_ReadOld: ',i8,' event# ',i6)
      call VZERO(vert,4); call AgSVERT(vert,-1,-Igate,Ubuf,0,nv)
      do itr=1,Ntrac
-        read5 (li,*) ge_pid,PP; (16x,i6,3F8.3)
+     {  read5 (li,*) ge_pid,PP; (16x,i6,3F8.3)
         call AgSKINE(PP,ge_pid,nv,Ubuf,0,nt)
-     enddo  
-     break
+     }  break
    }
    else If LENOCC(Line)>0
    { <w> line(1:LENOCC(Line)); (' unknown line : ',a); }
