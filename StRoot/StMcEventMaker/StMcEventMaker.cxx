@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.41 2003/01/23 04:03:20 jeromel Exp $
+ * $Id: StMcEventMaker.cxx,v 1.42 2003/02/19 03:17:04 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.42  2003/02/19 03:17:04  calderon
+ * Code to fill the StMcCtbHitCollection from the g2t tables by the Gansinator.
+ *
  * Revision 1.41  2003/01/23 04:03:20  jeromel
  * Include fixed
  *
@@ -177,6 +180,7 @@ using std::find;
 #include "tables/St_g2t_event_Table.h"
 #include "tables/St_g2t_ftp_hit_Table.h"
 #include "tables/St_g2t_rch_hit_Table.h"
+#include "tables/St_g2t_ctf_hit_Table.h"
 #include "tables/St_g2t_svt_hit_Table.h"
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "tables/St_g2t_emc_hit_Table.h"
@@ -194,7 +198,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.41 2003/01/23 04:03:20 jeromel Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.42 2003/02/19 03:17:04 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -212,6 +216,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseRich        (kTRUE),
     doUseBemc        (kTRUE),
     doUseBsmd        (kTRUE),
+    doUseCtb         (kTRUE),
     ttemp(),
     ttempParticle(),
     mCurrentMcEvent(0)
@@ -333,6 +338,7 @@ Int_t StMcEventMaker::Make()
     St_g2t_rch_hit *g2t_rch_hitTablePointer =  (St_g2t_rch_hit *) geantDstI("g2t_rch_hit");
     St_g2t_emc_hit *g2t_emc_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_emc_hit");
     St_g2t_emc_hit *g2t_smd_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_smd_hit");
+    St_g2t_ctf_hit *g2t_ctb_hitTablePointer =  (St_g2t_ctf_hit *) geantDstI("g2t_ctb_hit"); // Added CTB Hits
     St_particle    *particleTablePointer    =  (St_particle    *) geantDstI("particle");
 
     // For backwards compatibility, look for the rch and particle tables also in the dstBranch
@@ -403,6 +409,15 @@ Int_t StMcEventMaker::Make()
 	    rchHitTable = g2t_rch_hitTablePointer->GetTable();
 	else
 	    cerr << "Table g2t_rch_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+	//
+	// Ctb Hit Table
+	//
+	g2t_ctf_hit_st *ctbHitTable;
+	if (g2t_ctb_hitTablePointer)
+	    ctbHitTable = g2t_ctb_hitTablePointer->GetTable();
+	else
+	    cerr << "Table g2t_rch_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+
 	//
 	// BEMC and BPRS Hit Table
 	//
@@ -743,58 +758,58 @@ Int_t StMcEventMaker::Make()
 	// TPC Hits
 	//
 	if (doUseTpc) {
-	if (g2t_tpc_hitTablePointer) {
-	StMcTpcHit* th = 0;
-	long NHits = g2t_tpc_hitTablePointer->GetNRows();
-	long iTrkId = 0;
-	long nBadVolId = 0;
-	long nPseudoPadrow = 0;
-	long ihit;
-	for(ihit=0; ihit<NHits; ihit++) {
-	    if (tpcHitTable[ihit].volume_id < 101 || tpcHitTable[ihit].volume_id > 2445) {
-		if (tpcHitTable[ihit].volume_id <= 202445 &&
-		    tpcHitTable[ihit].volume_id > 2445) nPseudoPadrow++; 
-		else nBadVolId++;
-		continue;
+	    if (g2t_tpc_hitTablePointer) {
+		StMcTpcHit* th = 0;
+		long NHits = g2t_tpc_hitTablePointer->GetNRows();
+		long iTrkId = 0;
+		long nBadVolId = 0;
+		long nPseudoPadrow = 0;
+		long ihit;
+		for(ihit=0; ihit<NHits; ihit++) {
+		    if (tpcHitTable[ihit].volume_id < 101 || tpcHitTable[ihit].volume_id > 2445) {
+			if (tpcHitTable[ihit].volume_id <= 202445 &&
+			    tpcHitTable[ihit].volume_id > 2445) nPseudoPadrow++; 
+			else nBadVolId++;
+			continue;
+		    }
+		    
+		    th = new StMcTpcHit(&tpcHitTable[ihit]);
+		    
+		    if(!mCurrentMcEvent->tpcHitCollection()->addHit(th)) {// adds hit th to collection
+			nBadVolId++;
+			delete th;
+			th = 0;
+			continue;
+		    }
+		    // point hit to its parent and add it to collection
+		    // of the appropriate track
+		    
+		    iTrkId = (tpcHitTable[ihit].track_p) - 1;
+		    
+		    th->setParentTrack(ttemp[iTrkId]);
+		    ttemp[iTrkId]->addTpcHit(th);
+	    
+		} // hit loop
+		cout << "Filled " << mCurrentMcEvent->tpcHitCollection()->numberOfHits() << " TPC Hits" << endl;
+		cout << "Found " << nPseudoPadrow << " Hits in Pseudo-Padrows." << endl;
+		if (nBadVolId) {gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
+						    << " TPC hits, wrong Volume Id." << endm;}
+		// Sort the hits
+		for (unsigned int iSector=0;
+		      iSector<mCurrentMcEvent->tpcHitCollection()->numberOfSectors(); iSector++)
+		    for (unsigned int iPadrow=0;
+			  iPadrow<mCurrentMcEvent->tpcHitCollection()->sector(iSector)->numberOfPadrows();
+			  iPadrow++) {
+			StSPtrVecMcTpcHit& tpcHits = mCurrentMcEvent->tpcHitCollection()->sector(iSector)->padrow(iPadrow)->hits();
+			sort (tpcHits.begin(), tpcHits.end(), compMcHit() );
+			
+		    }
+	    } // pointer exists
+	    else {
+		cout << "No TPC Hits in this event" << endl;
 	    }
-	    
-	    th = new StMcTpcHit(&tpcHitTable[ihit]);
-	    
-	    if(!mCurrentMcEvent->tpcHitCollection()->addHit(th)) {// adds hit th to collection
-		nBadVolId++;
-		delete th;
-		th = 0;
-		continue;
-	    }
-	    // point hit to its parent and add it to collection
-	    // of the appropriate track
-	    
-	    iTrkId = (tpcHitTable[ihit].track_p) - 1;
-	    
-	    th->setParentTrack(ttemp[iTrkId]);
-	    ttemp[iTrkId]->addTpcHit(th);
-	    
-	}
-	cout << "Filled " << mCurrentMcEvent->tpcHitCollection()->numberOfHits() << " TPC Hits" << endl;
-	cout << "Found " << nPseudoPadrow << " Hits in Pseudo-Padrows." << endl;
-	if (nBadVolId) {gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
-					   << " TPC hits, wrong Volume Id." << endm;}
-	// Sort the hits
-	{for (unsigned int iSector=0;
-	     iSector<mCurrentMcEvent->tpcHitCollection()->numberOfSectors(); iSector++)
-	    {for (unsigned int iPadrow=0;
-		 iPadrow<mCurrentMcEvent->tpcHitCollection()->sector(iSector)->numberOfPadrows();
-		 iPadrow++) {
-		StSPtrVecMcTpcHit& tpcHits = mCurrentMcEvent->tpcHitCollection()->sector(iSector)->padrow(iPadrow)->hits();
-		sort (tpcHits.begin(), tpcHits.end(), compMcHit() );
-	        
-	    }}}
-	}
-	else {
-	    cout << "No TPC Hits in this event" << endl;
-	}
-	}
-    
+	} // doUseTpc
+	
 	//
 	// SVT Hits
 	//
@@ -827,6 +842,7 @@ Int_t StMcEventMaker::Make()
 		
 	    }
 	    cout << "Filled " << mCurrentMcEvent->svtHitCollection()->numberOfHits() << " SVT Hits" << endl;
+	    cout << "Nhits, " << NHits << " rows from table" << endl;
 	    if (nBadVolId)
 		gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
 				    << " SVT hits, wrong Volume Id." << endm;
@@ -929,6 +945,32 @@ Int_t StMcEventMaker::Make()
 	}
 	} // do use rich
 
+	if (doUseCtb) {
+	if (g2t_ctb_hitTablePointer) {
+	    StMcCtbHit* ch = 0;
+	    long  NHits = g2t_ctb_hitTablePointer->GetNRows();
+	    long  iTrkId = 0;
+	    long ihit;
+	    for(ihit=0; ihit<NHits; ihit++) {
+		
+		ch = new StMcCtbHit(&ctbHitTable[ihit]);
+		mCurrentMcEvent->ctbHitCollection()->addHit(ch); // adds hit ch to collection
+		
+		// point hit to its parent and add it to collection
+		// of the appropriate track
+		
+		iTrkId = (ctbHitTable[ihit].track_p) - 1;
+		ch->setParentTrack(ttemp[iTrkId]);
+		ttemp[iTrkId]->addCtbHit(ch);
+		
+	    }
+	    cout << "Filled " << mCurrentMcEvent->ctbHitCollection()->numberOfHits() << " Ctb Hits" << endl;
+	    
+	}
+	else {
+	    cout << "No Ctb Hits in this event" << endl;
+	}
+	}
 	// BEMC and BPRS Hits
 	if (doUseBemc) fillBemc(g2t_emc_hitTablePointer);
 
