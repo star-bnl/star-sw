@@ -399,7 +399,6 @@ void StEmcMicroUtil::processStEventEMC()
       for(Int_t d=0;d<4;d++)
       {
         Int_t det =d+1;
-cout <<"det="<<det<<endl;
         StDetectorId detid=static_cast<StDetectorId>(d+kBarrelEmcTowerId);
         StPtrVecEmcCluster& cluster=point->cluster(detid);
         Int_t ptnc=0;
@@ -707,7 +706,6 @@ void StEmcMicroUtil::processMicroEventEMC()
     y = mag*sin(theta)*sin(phi);
     z = mag*cos(theta);
     StThreeVectorF p(x,y,z);
-    cout <<"point teta = "<<theta<<"  phi = "<<phi<<endl;
     StEmcPoint *pt=new StEmcPoint();
     pt->setEnergy(en);
     pt->setChiSquare(chi);
