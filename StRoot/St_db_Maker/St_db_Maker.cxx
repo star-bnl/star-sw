@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.58 2002/05/18 01:04:52 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.59 2002/06/14 14:03:11 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.59  2002/06/14 14:03:11  jeromel
+// Added warning if start=end fro date and time (i.e. 0 everywhere) for a table.
+//
 // Revision 1.58  2002/05/18 01:04:52  jeromel
 // Small modif adding more debugging of what it's doing ... In perticular,
 // the association string <-> DateTime is shown.
@@ -431,11 +434,19 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
   fDBBroker->SetStructSize(dat->GetRowSize());
 
   // 		if descriptor filled, no need for newdat
+  if ( fDBBroker->GetBeginDate() == 0 && fDBBroker->GetEndDate() == 0 &&
+       fDBBroker->GetBeginTime() == 0 && fDBBroker->GetEndTime() == 0 ){
+    Warning("UpdateTable","Table %s.%s Suspicious Ranges Date/Time %d->%d",
+	    dat->GetName(),dat->GetTitle(),
+	    fDBBroker->GetBeginDate(),fDBBroker->GetEndDate(),
+	    fDBBroker->GetBeginTime(),fDBBroker->GetEndTime()
+	    );
+  }
   void *dbstruct = fDBBroker->Use(dat->GetUniqueID(),parId);
   val[0].Set(fDBBroker->GetBeginDate(),fDBBroker->GetBeginTime());
   val[1].Set(fDBBroker->GetEndDate  (),fDBBroker->GetEndTime  ());
   if (!dbstruct) {
-  if(Debug()>1)  Warning("UpdateTable","Table %s.%s Not FOUND",dat->GetName(),dat->GetTitle());
+    if(Debug()>1)  Warning("UpdateTable","Table %s.%s Not FOUND",dat->GetName(),dat->GetTitle());
     return 1;
   }
 
@@ -697,6 +708,7 @@ TDataSet *St_db_Maker::GetDataBase(const char* logInput)
 TDatime St_db_Maker::GetDateTime() const
 { 
   if (!fIsDBTime) return StMaker::GetDateTime();
+  //(void )printf("**** fIsDBTime is set, returning its value\n");
   return fDBTime;
 }
 //_____________________________________________________________________________
@@ -704,8 +716,7 @@ void St_db_Maker::SetDateTime(Int_t idat,Int_t itim)
 { 
   fIsDBTime=0; if (idat==0) return;
   fIsDBTime=1; fDBTime.Set(idat,itim);  
-  (void) printf("QAInfo: SetDateTime : Setting Startup Date=%d Time=%d\n",
-		idat,itim);
+  (void) printf("QAInfo: SetDateTime : Setting Startup Date=%d Time=%d\n",idat,itim);
 }
 //_____________________________________________________________________________
 void   St_db_Maker::SetDateTime(const char *alias)
