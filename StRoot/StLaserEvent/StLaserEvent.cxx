@@ -1,8 +1,11 @@
 // 
 // ROOT Tree for Laser Events tracking by tpt. -- Bill Love
 //$Log: StLaserEvent.cxx,v $
+//Revision 1.4  2000/02/01 16:06:30  love
+//Added track invp and nfit to Hit object
+//
 //Revision 1.3  2000/01/12 21:54:08  love
-//Changed first line from //&Id$ to //$Id:
+//Changed first line from //&Id$ to //
 //
 //Revision 1.2  1999/12/01 15:22:38  love
 //Bringing up to date with new StLaserEventMaker.  Sorry 'bout that.
@@ -132,6 +135,22 @@ void StLaserEvent::AddHit(Float_t q,Float_t x,Float_t y,Float_t z,
    new(hits[fNhit++]) Hit(q,x,y,z,row,track,flag,tksector,tkzl,tkpsi,
    dx,dz,alpha,lambda,prf,zrf);
 }
+//______________________________________________________________________________
+void StLaserEvent::AddHit(Float_t q,Float_t x,Float_t y,Float_t z, 
+   Int_t row, Int_t track, Int_t flag, Int_t tksector, Float_t tkzl,
+ Float_t tkpsi, Float_t tkinvp, Int_t tknfit, Float_t dx,Float_t dz,
+ Float_t alpha,Float_t lambda, Float_t prf,Float_t zrf)
+{
+   // Add a new hit to the list of hits for this event.
+   // To avoid calling the very time consuming operator new for each hit,
+   // the standard but not well know C++ operator "new with placement"
+   // is called. If hits[i] is 0, a new Hit object will be created
+   // otherwise the previous Hit[i] will be overwritten.
+
+   TClonesArray &hits = *fHits;
+   new(hits[fNhit++]) Hit(q,x,y,z,row,track,flag,tksector,tkzl,tkpsi,
+   tkinvp,tknfit,dx,dz,alpha,lambda,prf,zrf);
+}
 
 //______________________________________________________________________________
 void StLaserEvent::AddPixel(Int_t row, Int_t pad,Int_t time,Int_t adc,
@@ -239,6 +258,32 @@ Hit::Hit(Float_t q,Float_t x, Float_t y, Float_t z,Int_t row, Int_t track,
    ftksector = tksector;
    ftkpsi = tkpsi;
    ftkzl = tkzl;
+   fdx = dx;
+   fdz = dz;
+   falpha = alpha;
+   flambda = lambda;
+   fprf = prf;
+   fzrf = zrf;
+}
+//______________________________________________________________________________
+Hit::Hit(Float_t q,Float_t x, Float_t y, Float_t z,Int_t row, Int_t track,
+  Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t tkinvp,
+  Int_t tknfit, Float_t dx, Float_t dz, Float_t alpha, Float_t lambda,
+  Float_t prf,Float_t zrf) : TObject()
+{
+   // Create a hit object.
+   fx = x;
+   fy = y;
+   fz = z;
+   fq = q;
+   frow = row;
+   ftrack = track;
+   fflag = flag;
+   ftksector = tksector;
+   ftkpsi = tkpsi;
+   ftkzl = tkzl;
+   ftkinvp = tkinvp;
+   ftknfit = tknfit;
    fdx = dx;
    fdz = dz;
    falpha = alpha;
