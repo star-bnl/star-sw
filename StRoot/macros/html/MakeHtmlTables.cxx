@@ -38,7 +38,7 @@
   if (NT) 
     lookup = "//sol/afs_rhic/star/packages/dev/.share/tables;../base;//sol/afs_rhic/star/packages/dev/.share/base";
   else
-    lookup = "/afs/rhic/star/packages/dev/.share/tables;../base;//sol/afs_rhic/star/packages/dev/.share/base";
+    lookup = "/afs/rhic/star/packages/dev/.share/tables:/afs/rhic/star/packages/dev/StRoot/base";
 
   html->SetSourceDir(lookup);
   if (NT) 
