@@ -67,7 +67,7 @@ StMiniMcMaker::StMiniMcMaker(const Char_t *name, const Char_t *title)
   mGhost(kFALSE), 
   mDebug(kFALSE),
   mMinPt(0),mMaxPt(99999),
-  mBField(.25),
+  mBField(-999),
   mNSplit(0),mNRc(0),mNGhost(0),mNContam(0)
     
 {
@@ -804,8 +804,7 @@ StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta)
   mMiniMcEvent->mMcVertexY     = mMcVertexPos->y();
   mMiniMcEvent->mMcVertexZ     = mMcVertexPos->z();
 
-  Float_t bField = mBField;
-  mMiniMcEvent->mMagField    = bField;
+  mMiniMcEvent->mMagField    = static_cast<Float_t>(mRcEvent->runInfo()->magneticField());
   
   Float_t ctb  = -1., zdce = -1, zdcw = -1;
 
@@ -1006,14 +1005,20 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     tinyRcTrack->setLastZ(hits.second->position().z());
     tinyRcTrack->setFirstPadrow(hits.first->padrow());
     tinyRcTrack->setLastPadrow(hits.second->padrow());
-    tinyRcTrack->setFirstFitPadrow(fitHits.first->padrow());
-    tinyRcTrack->setLastFitPadrow(fitHits.second->padrow());
-
     tinyRcTrack->setFirstSector(hits.first->sector());
     tinyRcTrack->setLastSector(hits.second->sector());
   }
   else{
-    cout << "Error: no hits?" << endl; exit(-1);
+    cout << "Error: no hits?" << endl;
+    cout << "tpc points : " << glTrack->detectorInfo()->numberOfPoints(kTpcId) << endl;
+  }
+  if (fitHits.first) {
+    tinyRcTrack->setFirstFitPadrow(fitHits.first->padrow());
+    tinyRcTrack->setLastFitPadrow(fitHits.second->padrow());
+  }
+  else {
+    cout << "Error: no hit with usedInFit()>0" << endl;
+    cout << "fit pts :" << glTrack->fitTraits().numberOfFitPoints(kTpcId) << endl;
   }
   
   tinyRcTrack->setFitPts(glTrack->fitTraits().numberOfFitPoints(kTpcId));
@@ -1023,7 +1028,7 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   tinyRcTrack->setNAssocMc(nAssocMc);
   tinyRcTrack->setNPossible(glTrack->numberOfPossiblePoints(kTpcId));
 
-
+  return;
 }
 
 /*
@@ -1148,7 +1153,13 @@ StMiniMcMaker::findFirstLastFitHit(const StTrack* track)
     vec.push_back(hit);
   }
   sort(vec.begin(),vec.end(),hitCmp);
-  return PAIRHIT(vec[0],vec[vec.size()-1]);   
+  if (vec.size()) {
+      return PAIRHIT(vec[0],vec[vec.size()-1]);   
+  }
+  else {
+      StTpcHit* empty = 0;
+      return PAIRHIT(empty,empty);
+  }
 }
 
 //--------- SIMPLE HELPERS--------------
