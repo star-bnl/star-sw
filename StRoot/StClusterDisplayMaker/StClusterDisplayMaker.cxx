@@ -1,5 +1,5 @@
 // Author : Dominik Flierl 
-// $Id: StClusterDisplayMaker.cxx,v 1.5 2000/09/15 21:20:20 fisyak Exp $
+// $Id: StClusterDisplayMaker.cxx,v 1.6 2001/05/14 19:36:11 flierl Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //                                                                      //
@@ -566,7 +566,7 @@ void StClusterDisplayMaker::Fill_Pixel()
 	      for ( Int_t pixelindex = 0 ; pixelindex <= numberoftimebucketsinthissequenz ; pixelindex++ )
 		{
 		  // Get adc value
-		  Short_t adc_value = (Short_t) adcarray[pixelindex+pixel_offset_pad].data;
+		  Short_t adc_value = (Short_t) adcarray[pixel_offset_pad++].data;
 		    
 		  // Get according bucket
 		  Int_t bucket_id = (Int_t) timebucketoffset + pixelindex;
