@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.3 2001/02/12 21:15:44 yepes Exp $
+// $Id: StPeCEvent.h,v 1.4 2001/04/27 19:32:07 akio Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.4  2001/04/27 19:32:07  akio
+// fixing a #define conflict bug
+//
 // Revision 1.3  2001/02/12 21:15:44  yepes
 // New version of StPeCMaker, lots of changes
 //
@@ -23,13 +26,14 @@
 //////////////////////////////////////////////////////////////////////
 #ifndef StPeCEvent_h
 #define StPeCEvent_h
+
 #include "Rtypes.h"
 #include "StPeCEnumerations.h"
 #include "TObject.h"
 #include "TClonesArray.h"
 #ifndef __CINT__
 #include "PhysicalConstants.h"
-#include "StEventTypes.h"
+///#include "StEventTypes.h"
 #endif /* __CINT__ */
 #include "StPeCPair.h"
 #include "StPeCTrack.h"

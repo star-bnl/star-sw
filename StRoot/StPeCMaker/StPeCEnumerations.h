@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEnumerations.h,v 1.4 2001/04/23 21:44:29 meissner Exp $
+// $Id: StPeCEnumerations.h,v 1.5 2001/04/27 19:32:07 akio Exp $
 // $Log: StPeCEnumerations.h,v $
+// Revision 1.5  2001/04/27 19:32:07  akio
+// fixing a #define conflict bug
+//
 // Revision 1.4  2001/04/23 21:44:29  meissner
 // add dEdx z variable to tree, setFormat(1) for tree, use private BetheBloch (temp solution)
 //
@@ -19,19 +22,17 @@
 //////////////////////////////////////////////////////////////////////
 #ifndef StPeCEnumerations_hh
 #define StPeCEnumerations_hh
+
 const Int_t nSpecies = 5 ;
 enum StPeCSpecies {pion, kaon, proton, electron, muon};
 
-
-#define mElectron 0.000510999
-#define mMuon     0.105658389
-#define mPion     0.139567
-#define mKaon     0.493677
-#define mProton   0.93827231
-
+const double mMassElectron =0.000510999;
+const double mMassMuon     =0.105658389;
+const double mMassPion     =0.139567;
+const double mMassKaon     =0.493677;
+const double mMassProton   =0.93827231;
 
 // Maximmum number of tracka
-#define StPeCnMaxTracks 10
-
+const int  StPeCnMaxTracks =10;
 
 #endif
