@@ -50,30 +50,30 @@ int   eut_extra_r_        ( EGR_GLOBTRK_ST* track,
 #define sgn(a)          ( ( (a) >  0. ) ? (1) : (-1) )
 
 
-TABLE_HEAD_ST       *geo_h      ;
-CTG_GEO_ST          *geo        ;
-TABLE_HEAD_ST       *slat_phi_h ;
-CTG_SLAT_PHI_ST     *slat_phi   ;
-TABLE_HEAD_ST       *slat_eta_h ;
-CTG_SLAT_ETA_ST     *slat_eta   ;
-TABLE_HEAD_ST       *particle_h ;
-G2T_TRACK_ST        *particle   ; 
-TABLE_HEAD_ST       *vertex_h   ;
-G2T_VERTEX_ST       *vertex     ; 
-TABLE_HEAD_ST       *hits_h     ;    
-G2T_CTF_HIT_ST      *hits       ;
-TABLE_HEAD_ST       *mslat_h    ;
-CTS_MSLAT_ST        *mslat      ;
-TABLE_HEAD_ST       *track_h    ;
-EGR_GLOBTRK_ST      *track      ;
-TABLE_HEAD_ST       *extra_h    ;
-CTE_EXTRA_ST        *extra      ;
-TABLE_HEAD_ST       *hypo_pid_h ;   
-EPI_HYPO_PID_ST     *hypo_pid   ;
-TABLE_HEAD_ST       *eval_h     ;
-CPE_EVAL_ST         *eval       ;
-TABLE_HEAD_ST       *kine_h     ;
-CPE_MKINE_ST        *kine       ; 
+TABLE_HEAD_ST       *lgeo_h      ;
+CTG_GEO_ST          *lgeo        ;
+TABLE_HEAD_ST       *lslat_phi_h ;
+CTG_SLAT_PHI_ST     *lslat_phi   ;
+TABLE_HEAD_ST       *lslat_eta_h ;
+CTG_SLAT_ETA_ST     *lslat_eta   ;
+TABLE_HEAD_ST       *lparticle_h ;
+G2T_TRACK_ST        *lparticle   ; 
+TABLE_HEAD_ST       *lvertex_h   ;
+G2T_VERTEX_ST       *lvertex     ; 
+TABLE_HEAD_ST       *lhits_h     ;    
+G2T_CTF_HIT_ST      *lhits       ;
+TABLE_HEAD_ST       *lmslat_h    ;
+CTS_MSLAT_ST        *lmslat      ;
+TABLE_HEAD_ST       *ltrack_h    ;
+EGR_GLOBTRK_ST      *ltrack      ;
+TABLE_HEAD_ST       *lextra_h    ;
+CTE_EXTRA_ST        *lextra      ;
+TABLE_HEAD_ST       *lhypo_pid_h ;   
+EPI_HYPO_PID_ST     *lhypo_pid   ;
+TABLE_HEAD_ST       *leval_h     ;
+CPE_EVAL_ST         *leval       ;
+TABLE_HEAD_ST       *lkine_h     ;
+CPE_MKINE_ST        *lkine       ; 
 
 
 
@@ -128,41 +128,41 @@ extern "C" long cpe_(
 {
    long  i, nkine, ikine ;
 
-   geo_h          = ge_h       ;
-   geo            = ge         ;
-   slat_phi_h     = slt_phi_h  ;
-   slat_phi       = slt_phi    ;
-   slat_eta_h     = slt_eta_h  ;
-   slat_eta       = slt_eta    ;
-   particle_h     = prticle_h  ;
-   particle       = prticle    ;
-   vertex_h       = vrtex_h    ;
-   vertex         = vrtex      ;
-   hits_h         = hts_h      ;
-   hits           = hts        ;
-   mslat_h        = mslt_h     ;
-   mslat          = mslt       ;
-   track_h        = trck_h     ;
-   track          = trck       ;
-   extra_h        = xtra_h     ;
-   extra          = xtra       ;
-   eval_h         = evl_h      ;
-   eval           = evl        ;
-   kine_h         = kne_h      ;
-   kine           = kne        ;
-   hypo_pid_h     = hpo_pid_h  ;
-   hypo_pid       = hpo_pid    ;
+   lgeo_h          = ge_h       ;
+   lgeo            = ge         ;
+   lslat_phi_h     = slt_phi_h  ;
+   lslat_phi       = slt_phi    ;
+   lslat_eta_h     = slt_eta_h  ;
+   lslat_eta       = slt_eta    ;
+   lparticle_h     = prticle_h  ;
+   lparticle       = prticle    ;
+   lvertex_h       = vrtex_h    ;
+   lvertex         = vrtex      ;
+   lhits_h         = hts_h      ;
+   lhits           = hts        ;
+   lmslat_h        = mslt_h     ;
+   lmslat          = mslt       ;
+   ltrack_h        = trck_h     ;
+   ltrack          = trck       ;
+   lextra_h        = xtra_h     ;
+   lextra          = xtra       ;
+   leval_h         = evl_h      ;
+   leval           = evl        ;
+   lkine_h         = kne_h      ;
+   lkine           = kne        ;
+   lhypo_pid_h     = hpo_pid_h  ;
+   lhypo_pid       = hpo_pid    ;
 /*-----------------------------------------------------------
      Zero eval and kine
 -------------------------------------------------------------*/
 
-   memset ( eval, 0, (int)eval_h->maxlen*sizeof(CPE_EVAL_ST) ) ;
-   memset ( kine, 0, (int)kine_h->maxlen*sizeof(CPE_MKINE_ST) ) ;
+   memset ( leval, 0, (int)leval_h->maxlen*sizeof(CPE_EVAL_ST) ) ;
+   memset ( lkine, 0, (int)lkine_h->maxlen*sizeof(CPE_MKINE_ST) ) ;
 
 /*------------------------------------------------------------
            Check there is something in pid
 -------------------------------------------------------------*/
-   if ( extra_h->nok < 1 ) return STAFCV_OK ;
+   if ( lextra_h->nok < 1 ) return STAFCV_OK ;
 /*------------------------------------------------------------
            Set track pointers                 
 -------------------------------------------------------------*/
@@ -178,7 +178,7 @@ extern "C" long cpe_(
            Loop over reconstructed tracks 
 -------------------------------------------------------------*/
 
-   for ( itof=0 ; itof<extra_h->nok ; itof++ ) {
+   for ( itof=0 ; itof<lextra_h->nok ; itof++ ) {
 //------------------------------------------------------------------
 //   Get info about MC track
 //------------------------------------------------------------------
@@ -193,7 +193,7 @@ extern "C" long cpe_(
 //-------------------------------------------------------------------
       cpe_get_hypo_pid ( itof ) ;
    }
-   eval_h->nok = track_h->nok ;
+   leval_h->nok = ltrack_h->nok ;
 
 /*-----------------------------------------------------------------------
       Loop over mkine and copy to tof array those particles that hit it
@@ -202,23 +202,23 @@ extern "C" long cpe_(
    for ( i=0 ; i<=MX_KINE ; i++ ) {
       ikine = particle_pointer[i] ;
       ikine = -ikine - 1 ;
-      if ( ikine >= 0 && ikine < particle_h->maxlen ) {
+      if ( ikine >= 0 && ikine < lparticle_h->maxlen ) {
          nkine++ ;
-         if ( nkine < kine_h->maxlen ) {
-            kine[nkine].id   = particle[ikine].id ; 
-            kine[nkine].ivor = particle[ikine].start_vertex_p  ; 
-            kine[nkine].pid  = particle[ikine].ge_pid ; 
-            kine[nkine].e    = particle[ikine].e     ; 
-            kine[nkine].p[0] = particle[ikine].p[0]  ; 
-            kine[nkine].p[1] = particle[ikine].p[1]  ; 
-            kine[nkine].p[2] = particle[ikine].p[2]  ; 
+         if ( nkine < lkine_h->maxlen ) {
+            lkine[nkine].id   = lparticle[ikine].id ; 
+            lkine[nkine].ivor = lparticle[ikine].start_vertex_p  ; 
+            lkine[nkine].pid  = lparticle[ikine].ge_pid ; 
+            lkine[nkine].e    = lparticle[ikine].e     ; 
+            lkine[nkine].p[0] = lparticle[ikine].p[0]  ; 
+            lkine[nkine].p[1] = lparticle[ikine].p[1]  ; 
+            lkine[nkine].p[2] = lparticle[ikine].p[2]  ; 
          }
          else
             printf ( " \n CPE_MAIN : nkine %i out of range ", nkine ) ;
       }
    } 
 
-   kine_h->nok = nkine + 1 ;
+   lkine_h->nok = nkine + 1 ;
 
    return STAFCV_OK ;
 
@@ -244,34 +244,34 @@ void cpe_get_mkine (  long itof ) {
 //------------------------------------------------------------------
 
 
-   long i_phi = extra[itof].iphi ;
-   long i_eta = extra[itof].ieta ;
+   long i_phi = lextra[itof].iphi ;
+   long i_eta = lextra[itof].ieta ;
    long islat =  mslat_pointer[i_phi][i_eta] ;
-   if ( islat >= 0 && islat < mslat_h->nok ) {
-      long imtrk = mslat[islat].mc_trk_id ;
+   if ( islat >= 0 && islat < lmslat_h->nok ) {
+      long imtrk = lmslat[islat].mc_trk_id ;
       if ( imtrk >= 0 && imtrk <= MX_KINE ) {
          imtrk = abs((int)particle_pointer[imtrk]) - 1 ;
-         if ( imtrk >= 0 && imtrk < particle_h->maxlen ) {
-            eval[itof].mtrk    = particle[imtrk].id ;
-            eval[itof].pid     = particle[imtrk].ge_pid;
-            eval[itof].mptot   = particle[imtrk].ptot ;
-            eval[itof].meta    = particle[imtrk].eta  ;
-            eval[itof].mphi    = atan2 ( particle[imtrk].p[1],
-                                         particle[imtrk].p[0] ) ;
-            eval[itof].mvtx = particle[imtrk].start_vertex_p   ;
+         if ( imtrk >= 0 && imtrk < lparticle_h->maxlen ) {
+            leval[itof].mtrk    = lparticle[imtrk].id ;
+            leval[itof].pid     = lparticle[imtrk].ge_pid;
+            leval[itof].mptot   = lparticle[imtrk].ptot ;
+            leval[itof].meta    = lparticle[imtrk].eta  ;
+            leval[itof].mphi    = atan2 ( lparticle[imtrk].p[1],
+                                          lparticle[imtrk].p[0] ) ;
+            leval[itof].mvtx = lparticle[imtrk].start_vertex_p   ;
 /*--------------------------------------------------------------
 		Find mother
 ---------------------------------------------------------------------*/
-            imvor = particle[imtrk].next_parent_p ;
+            imvor = lparticle[imtrk].next_parent_p ;
             
             if ( imvor > 0 && imvor <= MX_VERT ) {
                imvor = abs((int)vertex_pointer[imvor]) - 1L ;
-               if ( imvor >= 0 && imvor < vertex_h->maxlen ) {
-                  imother = vertex[imvor].parent_p ;
+               if ( imvor >= 0 && imvor < lvertex_h->maxlen ) {
+                  imother = lvertex[imvor].parent_p ;
                   if ( imother > 0 && imother <= MX_KINE ) {
                      imother = abs((int)particle_pointer[imother]) - 1 ;
-                     if ( imother >= 0 && imother < particle_h->maxlen ) 
-                        eval[itof].mother = particle[imother].ge_pid ;
+                     if ( imother >= 0 && imother < lparticle_h->maxlen ) 
+                        leval[itof].mother = lparticle[imother].ge_pid ;
                   }
                }
             }
@@ -302,53 +302,53 @@ void cpe_get_mkine (  long itof ) {
   float xp, yp, rp ;
 
 
-  eval[itof].id          = extra[itof].id      ;
-  eval[itof].nrow        = extra[itof].nrow    ;
-  eval[itof].tof_id      = extra[itof].id      ;
-  eval[itof].p           = extra[itof].p       ;
-  eval[itof].q           = extra[itof].q       ;
-  eval[itof].rimp        = extra[itof].rimp    ;
-  eval[itof].zimp        = extra[itof].zimp    ;
-  eval[itof].sleng       = extra[itof].sleng   ;
-  eval[itof].x_dis       = extra[itof].s_extra ;
-  eval[itof].phi         = extra[itof].phi     ;
-  eval[itof].eta         = extra[itof].eta     ;
+  leval[itof].id          = lextra[itof].id      ;
+  leval[itof].nrow        = lextra[itof].nrow    ;
+  leval[itof].tof_id      = lextra[itof].id      ;
+  leval[itof].p           = lextra[itof].p       ;
+  leval[itof].q           = lextra[itof].q       ;
+  leval[itof].rimp        = lextra[itof].rimp    ;
+  leval[itof].zimp        = lextra[itof].zimp    ;
+  leval[itof].sleng       = lextra[itof].sleng   ;
+  leval[itof].x_dis       = lextra[itof].s_extra ;
+  leval[itof].phi         = lextra[itof].phi     ;
+  leval[itof].eta         = lextra[itof].eta     ;
 
 
-  eval[itof].nslat       = extra[itof].nslat   ;
-  eval[itof].iphi        = extra[itof].iphi    ;
-  eval[itof].ieta        = extra[itof].ieta    ;
-  eval[itof].traw        = extra[itof].traw    ;
-  eval[itof].tcor        = extra[itof].tcor    ;
-  eval[itof].nmip        = extra[itof].nmip    ;
-  eval[itof].dz_lit      = extra[itof].dz_lit  ;
-  eval[itof].dz          = extra[itof].dz      ;
-  eval[itof].drphi       = extra[itof].drphi   ;
-  eval[itof].beta        = extra[itof].beta    ;
+  leval[itof].nslat       = lextra[itof].nslat   ;
+  leval[itof].iphi        = lextra[itof].iphi    ;
+  leval[itof].ieta        = lextra[itof].ieta    ;
+  leval[itof].traw        = lextra[itof].traw    ;
+  leval[itof].tcor        = lextra[itof].tcor    ;
+  leval[itof].nmip        = lextra[itof].nmip    ;
+  leval[itof].dz_lit      = lextra[itof].dz_lit  ;
+  leval[itof].dz          = lextra[itof].dz      ;
+  leval[itof].drphi       = lextra[itof].drphi   ;
+  leval[itof].beta        = lextra[itof].beta    ;
   
-  eval[itof].x_extra     = extra[itof].x_extra ;
-  eval[itof].y_extra     = extra[itof].y_extra ;
-  eval[itof].z_extra     = extra[itof].z_extra ;
+  leval[itof].x_extra     = lextra[itof].x_extra ;
+  leval[itof].y_extra     = lextra[itof].y_extra ;
+  leval[itof].z_extra     = lextra[itof].z_extra ;
 
 /*-------------------------------------------------------------------
       Fill evaluation array
       with hit information (last one right now)
 ---------------------------------------------------------------------*/
-  iphi = extra[itof].iphi ;
-  ieta = extra[itof].ieta ;
+  iphi = lextra[itof].iphi ;
+  ieta = lextra[itof].ieta ;
 
   if ( iphi > 0 && iphi <= MX_PHI &&
        ieta > 0 && ieta <= MX_ETA )
   {
      ihit =  hits_pointer[iphi][ieta] ;
-     if ( ihit >= 0 && ihit < hits_h->nok )
+     if ( ihit >= 0 && ihit < lhits_h->nok )
      {
-        eval[itof].mxhit = hits[ihit].x[0] ;
-        eval[itof].myhit = hits[ihit].x[1] ;
-        eval[itof].mzhit = hits[ihit].x[2] ;
+        leval[itof].mxhit = lhits[ihit].x[0] ;
+        leval[itof].myhit = lhits[ihit].x[1] ;
+        leval[itof].mzhit = lhits[ihit].x[2] ;
 
-        xp = hits[ihit].x[0] ;
-        yp = hits[ihit].x[1] ;
+        xp = lhits[ihit].x[0] ;
+        yp = lhits[ihit].x[1] ;
         rp = sqrt ( xp * xp + yp * yp ) ;
      }
      else
@@ -359,11 +359,11 @@ void cpe_get_mkine (  long itof ) {
       with mslat information
 ---------------------------------------------------------------------*/
      islat =  mslat_pointer[iphi][ieta] ;
-     if ( islat >= 0 && islat < mslat_h->nok )
+     if ( islat >= 0 && islat < lmslat_h->nok )
      {
-        eval[itof].mhits     = mslat[islat].n_hits  ;
-        eval[itof].msleng    = mslat[islat].s_length ;
-        eval[itof].mtof      = mslat[islat].tof     ;
+        leval[itof].mhits     = lmslat[islat].n_hits  ;
+        leval[itof].msleng    = lmslat[islat].s_length ;
+        leval[itof].mtof      = lmslat[islat].tof     ;
      }
   } 
   else
@@ -392,7 +392,7 @@ void cpe_get_mkine (  long itof ) {
 /*---------------------------------------------------------------------------
      Get global id
 ----------------------------------------------------------------------------*/
-   id          = extra[itof].id_globtrk  ;
+   id          = lextra[itof].id_globtrk  ;
 
    if ( id > 0 && id < TRACK_LEN ) {
 /*---------------------------------------------------------------------------
@@ -404,16 +404,16 @@ void cpe_get_mkine (  long itof ) {
 ----------------------------------------------------------------------------*/
          for ( ipart=0 ; ipart<3 ; ipart++ ) {
             ihypo = hypo_pid_pointer[ipart][idet-1][id] ;
-            if ( ihypo > -1 && ihypo < hypo_pid_h->maxlen ) {
+            if ( ihypo > -1 && ihypo < lhypo_pid_h->maxlen ) {
                if ( idet == 2 ) 
                {
-                  eval[itof].tpc_pr[ipart] = hypo_pid[ihypo].prob   ;
-                  eval[itof].tpc_ns[ipart] = hypo_pid[ihypo].nsigma ;
+                  leval[itof].tpc_pr[ipart] = lhypo_pid[ihypo].prob   ;
+                  leval[itof].tpc_ns[ipart] = lhypo_pid[ihypo].nsigma ;
                }
                else if ( idet == 3 )
                {
-                  eval[itof].tof_pr[ipart] = hypo_pid[ihypo].prob   ;
-                  eval[itof].tof_ns[ipart] = hypo_pid[ihypo].nsigma ;
+                  leval[itof].tof_pr[ipart] = lhypo_pid[ihypo].prob   ;
+                  leval[itof].tof_ns[ipart] = lhypo_pid[ihypo].nsigma ;
                }
             }
 /*---------------------------------------------------------------------------
@@ -450,8 +450,8 @@ void cpe_get_mkine (  long itof ) {
    for ( i=0 ; i < TRACK_LEN ; i++ )
        extra_pointer[i] = -1 ;
 
-   for ( i=0 ; i < extra_h->nok ; i++ ) {
-      id = extra[i].id ;
+   for ( i=0 ; i < lextra_h->nok ; i++ ) {
+      id = lextra[i].id ;
       if ( id >0 && id < TRACK_LEN )
            extra_pointer[id] = i ;
       else {
@@ -482,9 +482,9 @@ void cpe_get_mkine (  long itof ) {
    for ( i=0 ; i < MX_KINE ; i++ )
        particle_pointer[i] = 0 ;
 
-   for ( i=0 ; i<particle_h->nok ; i++ )
+   for ( i=0 ; i<lparticle_h->nok ; i++ )
    {
-      id = particle[i].id ;
+      id = lparticle[i].id ;
       if ( id >0 && id < MX_KINE )
            particle_pointer[id] = i + 1 ;
       else
@@ -513,9 +513,9 @@ void cpe_get_mkine (  long itof ) {
    for ( i=0 ; i < MX_VERT ; i++ )
        vertex_pointer[i] = 0 ;
 
-   for ( i=0 ; i<vertex_h->nok ; i++ )
+   for ( i=0 ; i<lvertex_h->nok ; i++ )
    {
-      id = vertex[i].id ;
+      id = lvertex[i].id ;
       if ( id >0 && id < MX_VERT )
            vertex_pointer[id] = i + 1 ;
       else
@@ -547,20 +547,20 @@ void cpe_get_mkine (  long itof ) {
          for ( k=0 ; k < 3 ; k++ )
             hypo_pid_pointer[k][j][i] = 0 ;
 
-   for ( i=0 ; i<hypo_pid_h->nok ; i++ )
+   for ( i=0 ; i< lhypo_pid_h->nok ; i++ )
    {
-      id = hypo_pid[i].id ;
+      id = lhypo_pid[i].id ;
       if ( id >0 && id < TRACK_LEN )
       {
 /*--------------------------------------------------------------------------
         Check what detector is this (keep only svt,tpc and TOF)
 ---------------------------------------------------------------------------*/
-         idet = hypo_pid[i].det ;
+         idet = lhypo_pid[i].det ;
          if ( idet > 3 || idet < 1 ) continue ;
 /*--------------------------------------------------------------------------
         Check particle
 ---------------------------------------------------------------------------*/
-         pid = hypo_pid[i].gid ;
+         pid = lhypo_pid[i].gid ;
          if ( pid == 8 || pid == 9 ) 
             ipid = 0 ;
          else if ( pid == 11 || pid == 12 )
@@ -603,21 +603,21 @@ void cpe_get_mkine (  long itof ) {
 /*-----------------------------------------------------------------------------
       Fill pointer array  
 -----------------------------------------------------------------------------*/
-   for ( i = 0 ; i < hits_h->nok ; i++ ) {
-      x     = hits[i].x[0] ;
-      y     = hits[i].x[1] ;
-      z     = hits[i].x[2] ;
+   for ( i = 0 ; i < lhits_h->nok ; i++ ) {
+      x     = lhits[i].x[0] ;
+      y     = lhits[i].x[1] ;
+      z     = lhits[i].x[2] ;
       float phi = atan2 ( y, x ) ;
       if ( phi < 0 ) phi += 2. * M_PI ;
-      iphi = ctg_i_phi ( phi, geo_h, geo, slat_phi_h, slat_phi ) ; 
+      iphi = ctg_i_phi ( phi, lgeo_h, lgeo, lslat_phi_h, lslat_phi ) ; 
       if ( iphi > 0 && iphi <= MX_PHI ) {
-         ieta = ctg_i_eta ( z, slat_eta_h, slat_eta ) ;
+         ieta = ctg_i_eta ( z, lslat_eta_h, lslat_eta ) ;
          if ( ieta > 0 && ieta <= MX_ETA ) { 
            hits_pointer[iphi][ieta] = i ;
 /*-----------------------------------------------------------------------------
        Set mkine pointer negative (this means particle hit ctf
 ------------------------------------------------------------------------------*/
-           itrk = hits[i].track_p ;
+           itrk = lhits[i].track_p ;
            if ( itrk >= 1 && itrk <= MX_KINE ) {
               particle_pointer[itrk] = -1 * abs((int)particle_pointer[itrk]) ;
            }
@@ -655,11 +655,11 @@ void cpe_get_mkine (  long itof ) {
 /*-----------------------------------------------------------------------------
       Fill pointer array
 -----------------------------------------------------------------------------*/
-   for ( i = 0 ; i < mslat_h->nok ; i++ ) {
-      iphi  = mslat[i].i_phi ;
+   for ( i = 0 ; i < lmslat_h->nok ; i++ ) {
+      iphi  = lmslat[i].i_phi ;
       if ( iphi > 0 && iphi <= MX_PHI )
       {
-         ieta = mslat[i].i_eta ;
+         ieta = lmslat[i].i_eta ;
          if ( ieta > 0 && ieta <= MX_ETA )
          {
            mslat_pointer[iphi][ieta] = i ;
