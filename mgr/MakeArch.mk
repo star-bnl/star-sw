@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.90  2000/03/18 21:59:47  perev
+#  change := to += for linux
+#
 #  Revision 1.89  2000/03/02 18:47:45  fisyak
 #  Add i386_redhat61
 #
@@ -245,7 +248,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 2000/03/02 18:47:45 $ 
+#             Last modification $Date: 2000/03/18 21:59:47 $ 
 #. default setings
 
 MAKE  := gmake
@@ -465,7 +468,7 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_re
   SO	   := $(CXX)
   CXXFLAGS := $(DEBUG) -fPIC -Wall -I/usr/include/g++
 ifeq (,$(findstring 2.22,$(ROOT_LEVEL)))
-  CXXFLAGS := -fno-rtti -fno-exceptions -fno-for-scope
+  CXXFLAGS += -fno-rtti -fno-exceptions -fno-for-scope
 endif
 #                                             -fpipe
   CFLAGS   := $(DEBUG) -fPIC -Wall
