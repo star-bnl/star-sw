@@ -1,7 +1,71 @@
-// $Id: StMessage.h,v 1.12 2003/09/22 01:30:41 perev Exp $
+/*!
+  \class StMessage
+  \author G. Van Buren, BNL
+
+  This is the class of messages used by StMessageManager in STAR.
+  Messages have a type and message specified at instantiation,
+  and also include a time-date stamp and options for printing.
+
+*/
+
+#ifndef ClassStMessage
+#define ClassStMessage
+
+#ifdef __ROOT__
+#include "Rtypes.h"
+#endif
+#include <time.h>
+
+enum StMessOpt {
+  kMessOptNone = 0U,
+  kMessOptDash = 1U,
+  kMessOptO = (1U << 1),
+  kMessOptE = (1U << 2),
+  kMessOptT = (1U << 3),
+  kMessOptS = (1U << 4),
+  kMessOptP = (1U << 5)
+  };
+
+class StMessage {
+
+ private:
+
+ protected:
+   char type[2];
+//   char* location;                    //!
+//   unsigned long runNumber;
+//   pair<long, long> eventId;
+   unsigned int option;
+   time_t messTime;
+   char* message;                     //!
+
+ public:
+   StMessage(const char* mess="", const char* ty="I", const char* opt="O");
+   StMessage(const StMessage&){;}
+   virtual ~StMessage();
+          void PrintInfo();
+           int Print(int nChars=-1);
+       time_t& GetTime() {return messTime;}
+   const char* GetType() const {return type;}
+         char* GetMessage() const {return message;}
+  unsigned int GetOption() const {return option;}
+         char* GetOptions() const;
+          void SetOptions(const char* opt);
+        size_t GetMemoryUsage();
+#ifdef __ROOT__
+   ClassDef(StMessage,0)
+#endif
+};
+
+#endif
+
+// $Id: StMessage.h,v 1.13 2003/09/25 21:18:14 genevb Exp $
 // $Log: StMessage.h,v $
+// Revision 1.13  2003/09/25 21:18:14  genevb
+// Changed option storage
+//
 // Revision 1.12  2003/09/22 01:30:41  perev
-// some cleanup
+//  some cleanup
 //
 // Revision 1.11  2001/05/16 15:50:56  genevb
 // Switch TROOT.h to Rtypes.h
@@ -36,55 +100,5 @@
 // Revision 1.1  1999/06/23 15:17:47  genevb
 // Introduction of StMessageManager
 //
+// Revision 1.0  1999/01/27 10:28:29  genevb
 //
-// Revision 1.1 1999/01/27 10:28:29 genevb
-//
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StMessage                                                            //
-//                                                                      //
-// This is the class of messages used by StMessageManager in STAR.      //
-// Messages have a type and message specified at instantiation,         //
-// and also include a time-date stamp and options for printing.         //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
-
-#ifndef ClassStMessage
-#define ClassStMessage
-
-#ifdef __ROOT__
-#include "Rtypes.h"
-#endif
-#include <time.h>
-
-class StMessage {
-
- private:
-
- protected:
-   char type[2];
-//   char* location;                    //!
-//   unsigned long runNumber;
-//   pair<long, long> eventId;
-   char* option;                      //!
-   time_t messTime;
-   char* message;                     //!
-
- public:
-   StMessage(const char* mess="", const char* ty="I", const char* opt="O");
-   StMessage(const StMessage&){;}
-   virtual ~StMessage();
-          void PrintInfo();
-           int Print(int nChars=-1);
-       time_t& GetTime() {return messTime;}
-   const char* GetType() const {return type;}
-         char* GetMessage() {return message;}
-         char* GetOptions() {return option;}
-          void SetOption(char* opt) {option = opt;}
-        size_t GetMemoryUsage();
-#ifdef __ROOT__
-   ClassDef(StMessage,0)
-#endif
-};
-
-#endif
