@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.h,v 1.5 1999/07/14 12:50:50 fisyak Exp $
+ * $Id: StTpcDedxPid.h,v 1.6 1999/08/03 18:22:08 ogilvie Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.h,v $
- * Revision 1.5  1999/07/14 12:50:50  fisyak
- * Add lost Set/Get functions
+ * Revision 1.6  1999/08/03 18:22:08  ogilvie
+ * improved dE/dx parameterization
+ *
+ * Revision 1.6  1999/08/03 18:22:08  ogilvie
+ * improved dE/dx parameterization
  *
  * Revision 1.5  1999/07/14 12:50:50  fisyak
  * Add lost Set/Get functions
@@ -49,14 +52,18 @@ public:
   Double_t meanPidFunction(Double_t mass) const;
   Double_t sigmaPidFunction(Double_t mass) const;
 
+  void setTpcDedxGain(Double_t gain)     {mTpcDedxGain = gain ;} 
   void setTpcDedxOffset(Double_t offset) {mTpcDedxOffset=offset;} 
   void setTpcDedxRise(Double_t rise)     {mTpcDedxRise = rise ;} 
   void setTpcDedxTcut(Double_t cut)     {mTpcDedxTcut = cut ;} 
 
+  Double_t getTpcDedxGain()              { return mTpcDedxGain ;} 
   Double_t getTpcDedxOffset()            { return mTpcDedxOffset ;} 
   Double_t getTpcDedxRise()              { return mTpcDedxRise;}
   Double_t getTpcDedxTcut()              { return mTpcDedxTcut;}
-  static Double_t mTpcDedxRise ;  
+    
+  static Double_t mTpcDedxGain ;
+  static Double_t mTpcDedxOffset ;
   static Int_t quickPid(Float_t rig, Float_t dedx);
 
 

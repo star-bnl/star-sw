@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.cxx,v 1.3 1999/07/13 13:20:35 fisyak Exp $
+ * $Id: StTpcDedxPid.cxx,v 1.4 1999/08/03 18:21:54 ogilvie Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.cxx,v $
- * Revision 1.3  1999/07/13 13:20:35  fisyak
- * Add lost Craig functions, use gufld for magnetic field
+ * Revision 1.4  1999/08/03 18:21:54  ogilvie
+ * improved dE/dx parameterization
+ *
+ * Revision 1.4  1999/08/03 18:21:54  ogilvie
+ * improved dE/dx parameterization
  *
  * Revision 1.3  1999/07/13 13:20:35  fisyak
  * Add lost Craig functions, use gufld for magnetic field
@@ -34,9 +37,10 @@
 #ifndef __CINT__
 #define gufld F77_NAME(gufld,GUFLD)
 #define quickid F77_NAME(quickid,QUICKID)
-Double_t StTpcDedxPid::mTpcDedxGain = 0.174325e-06;
-Double_t StTpcDedxPid::mTpcDedxOffset = -2.71889 ;
-Double_t StTpcDedxPid::mTpcDedxRise = 776.626 ;
+Double_t StTpcDedxPid::mTpcDedxGain = 0.211089-06;
+#endif
+Double_t StTpcDedxPid::mTpcDedxRise = 29.060 ;
+Double_t StTpcDedxPid::mTpcDedxGain = 0.211089e-06;
 Double_t StTpcDedxPid::mTpcDedxOffset = -3.75785 ;
 Double_t StTpcDedxPid::mTpcDedxRise = 29.706 ;
 Double_t StTpcDedxPid::mTpcDedxTcut = 1.50536 ;
@@ -52,11 +56,10 @@ Int_t StTpcDedxPid::detectorInfoAvailable() const
     return mTrack->tpcDedx() ? 1 : 0;
 }
 
-    
-    const StDedx* dedx = mTrack->tpcDedx() ;
-    
+Int_t StTpcDedxPid::meetsStandardPid() const
 {
-	usededx = 0;
+    Int_t usededx =1;
+    const StDedx* dedx = mTrack->tpcDedx() ;    
     if (dedx == 0) {
       //  cout << "no dedx pointer" << endl;
       usededx = 0;
@@ -103,7 +106,7 @@ Double_t StTpcDedxPid::meanPidFunction(Double_t mass) const
   Float_t b[3];
   gufld(x,b);
   Double_t bField     = b[2]*kilogauss;
-    
+
     // cast away const'ness (we know what we are doing here)
     Double_t momentum  = abs(mTrack->helix().momentum(bField));
 
@@ -112,11 +115,14 @@ Double_t StTpcDedxPid::meanPidFunction(Double_t mass) const
     
     // double bpar[3] = {0.1221537e-06,-4.608514, 5613.} ;
     // double bpar[3] = {0.174325e-06,-2.71889, 776.626} ;
-    Double_t rise = mTpcDedxRise*pow(beta*gamma,2);
-    Double_t dedxmean;
+    
+    Double_t gamma =sqrt(pow(momentum/mass,2)+1.);
+    Double_t beta = sqrt(1. - 1./pow(gamma,2));
+    Double_t rise = fabs(mTpcDedxRise)*pow(beta*gamma,2);
+    //  cout << "momentum" << momentum <<" mass "<< mass << " beta "<<beta <<
     //  "gamma " << gamma<< endl;
  
-	  (0.5*log(rise)-pow(beta,2)- mTpcDedxOffset);
+   Double_t dedxmean;
     if ( beta > 0) 
 	dedxmean = mTpcDedxGain/pow(beta,2)*
 	  (0.5*log(rise)-mTpcDedxTcut*pow(beta,2)- mTpcDedxOffset);
