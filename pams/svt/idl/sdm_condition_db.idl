@@ -1,0 +1,14 @@
+/*   sdm_condition_db_st.idl
+ *   Module: sdm
+ *   Table of strip condition
+ */
+struct sdm_condition_db {
+long id_strip;
+long is_active;
+};
+ 
+ 
+ 
+ 
+ 
+
