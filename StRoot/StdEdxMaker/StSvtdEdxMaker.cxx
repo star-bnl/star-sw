@@ -30,7 +30,16 @@ StSvtdEdxMaker::StSvtdEdxMaker(const char *name) : StMaker(name)
 StSvtdEdxMaker::~StSvtdEdxMaker(){
            
 }
+//_____________________________________________________________________________________________
+Int_t StSvtdEdxMaker::InitRun(Int_t RunNumber)
+{
 
+  if(Debug()) gMessMgr->Debug() << "In StSvtdEdxMaker::InitRun() ... "
+                               << GetName() << endm; 
+
+  if( GetSvtGeometry() != kStOK) return kStWarn;
+  return  kStOK;
+}
 //_____________________________________________________________________________________________
 Int_t StSvtdEdxMaker::Init()
 {
@@ -38,7 +47,7 @@ Int_t StSvtdEdxMaker::Init()
   if(Debug()) gMessMgr->Debug() << "In StSvtdEdxMaker::Init() ... "
                                << GetName() << endm; 
 
-  if( GetSvtGeometry() != kStOK) return kStWarn;
+  //if( GetSvtGeometry() != kStOK) return kStWarn;
 
 
   mSvtdEdx = new TH2F("SvtdEdx"," Svt dEdx",100,0.,2.,100,0.,0.03);
