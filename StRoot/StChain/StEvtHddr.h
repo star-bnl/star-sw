@@ -19,8 +19,9 @@ public:
   Int_t 	GetOldRunNumber() const {return mOldRunNumber;};
   const Char_t *GetEventType()    const {return (const Char_t*)mEventType;};
   UInt_t 	GetTriggerMask()  const {return mTriggerMask;};
-  UInt_t 	GetInputTriggerMask()  const {return mInputTriggerMask;};
-  Float_t       GetCenterOfMassEnergy() const {return mCenterOfMassEnergy;};
+  UInt_t 	GetInputTriggerMask()    const {return mInputTriggerMask;};
+  Float_t       GetCenterOfMassEnergy()  const {return mCenterOfMassEnergy;};
+  UInt_t       	GetBunchCrossingNumber(int i) const {return mBunchCrossingNumber[i];};
   Int_t       	GetAEast()        const {return mAEast;};
   Int_t       	GetZEast() 	  const {return mZEast;};
   Int_t       	GetAWest() 	  const {return mAWest;};
@@ -46,6 +47,8 @@ public:
   void		SetEventType(const Char_t *type){mEventType=type;};
   void 		SetTriggerMask(UInt_t tm)	{mTriggerMask=tm;};
   void 		SetInputTriggerMask(UInt_t tm)	{mInputTriggerMask=tm;};
+  void       	SetBunchCrossingNumber(UInt_t bcn0,UInt_t bcn1)
+		{mBunchCrossingNumber[0]=bcn0;mBunchCrossingNumber[1]=bcn1;}
   void       	SetCenterOfMassEnergy(float e)	{mCenterOfMassEnergy=e;};
   void     	SetBImpact  (float b)  	{mBImpact=b;};
   void     	SetPhiImpact(float p)  	{mPhImpact=p;};
@@ -58,7 +61,7 @@ public:
   void     	SetDateTime(int iDate,int iTime){mEventTime.Set(iDate,iTime);};
   void          SetDateTime(TDatime dt)	{mEventTime=dt;};
   void          SetGMTime(UInt_t ut);
-  void          SetProdDateTime()	{mProdTime.Set();};
+  void          SetProdDateTime(UInt_t ut=0);
   void     	SetIventNumber(int iv)	{mIventNumber=iv;};
   void     	SetEventSize(int is)	{mEventSize=is;};
   void     	SetEventNumber(int ev)	{mEventNumber=ev;};
@@ -83,7 +86,7 @@ protected:
     Float_t	mBImpact;		//Impact parameter
     Float_t	mPhImpact;		//Phi angle of impact
     Int_t       mGenerType;		//Gener type see below
-    UInt_t	mBunchCrossingNumber;
+    UInt_t	mBunchCrossingNumber[2];
     Int_t       mIventNumber;    	//sequential number in DAQ/Geant file
     Int_t       mEventSize;    		//size of event
     Int_t       mEventNumber;    
@@ -92,7 +95,7 @@ protected:
     TDatime     mProdTime;		//Production time
     TString     mEventType;
 
-ClassDef(StEvtHddr,2)                   // Event header
+ClassDef(StEvtHddr,3)                   // Event header
 };
 
 //__________________________________________________________________________________
@@ -118,7 +121,7 @@ struct EvtHddr_st
     Float_t	mBImpact;		//Impact parameter
     Float_t	mPhImpact;		//Phi angle of impact
     Int_t       mGenerType;		//Gener type see below
-    UInt_t	mBunchCrossingNumber;
+    UInt_t	mBunchCrossingNumber[2];
     Int_t       mIventNumber;    	//sequential number in DAQ/Geant file
     Int_t       mEventSize;    		//size of event
     Int_t       mEventNumber;    
