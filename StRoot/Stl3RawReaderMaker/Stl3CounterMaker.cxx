@@ -17,9 +17,12 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //
-//  $Id: Stl3CounterMaker.cxx,v 1.2 2002/02/20 22:09:49 struck Exp $
+//  $Id: Stl3CounterMaker.cxx,v 1.3 2002/02/20 23:31:10 struck Exp $
 //
 //  $Log: Stl3CounterMaker.cxx,v $
+//  Revision 1.3  2002/02/20 23:31:10  struck
+//  final tune-up
+//
 //  Revision 1.2  2002/02/20 22:09:49  struck
 //  added some debugging info
 //
@@ -67,7 +70,7 @@ Int_t Stl3CounterMaker::Init(){
   mL3On = kFALSE;
   mStoreDbTables = kTRUE;
 
-  SetDebug(1);
+  //SetDebug(1);
 
   mDaqFileName = new TString(GetBroadcast("DAQFile"));
   if (m_DebugLevel) cout << "daq file: " << mDaqFileName->Data() << endl;
@@ -350,11 +353,9 @@ Int_t Stl3CounterMaker::GetCounters()
 
 
 
-//_____________________________________________________________________________
+//____________________________________________________________________________
 Int_t Stl3CounterMaker::Finish()
 {
-
-  cout << "TTTTTTTTTTTTTTTT" << endl;
 
   if (!mStoreDbTables) return 0;
 
@@ -368,8 +369,8 @@ Int_t Stl3CounterMaker::Finish()
 
   if (gSystem->OpenDirectory(dirname.Data())==0) { 
         if (gSystem->mkdir(dirname.Data())) {
-	      cout << "Directory " << dirname << " creation failed" << endl;
-	      cout << "Putting l3counters.C in current directory" << endl;
+	      cout << "Stl3CounterMaker::Finish(): Directory " << dirname << " creation failed" << endl;
+	      cout << "Stl3CounterMaker::Finish(): Putting l3counters.C in current directory" << endl;
 	      for (int i=0;i<80;i++) filename[i]=0;
 	      sprintf(filename,"l3counters.%08d.%06d.C",GetDate(),GetTime());
 	}
