@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.9 1999/04/08 16:29:51 sakrejda Exp $
+// $Id: StMinidaqMaker.cxx,v 1.10 1999/04/08 19:02:43 liq Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.10  1999/04/08 19:02:43  liq
+// set protection to check whether the IT,ST,or SD empty
+//
 // Revision 1.9  1999/04/08 16:29:51  sakrejda
 // a call to tpg and seting parametrs in the maker removed
 //
@@ -341,10 +344,11 @@ void StMinidaqMaker::TransferData(){
                  St_type_index *m_it     = (St_type_index *) mdaqdata(labelit);
                  St_type_structtbl *m_st  = (St_type_structtbl *) mdaqdata(labelst);
                  St_type_shortdata *m_sd = (St_type_shortdata *) mdaqdata(labelsd);
-                 // judge whether the information of IT tables concerns to this Sector Number
+                 // make sure these input tables filled, then judge whether the information of IT tables concerns to this Sector Number
                  type_index_st  *mmp= m_it->GetTable(); 
                  Int_t kj=mmp->sector;
-                 if(kj==k){                                               
+                 cout<<"it size"<<m_it->GetNRows()<<"st size"<<m_st->GetNRows()<<"sd size"<<m_sd->GetNRows()<<endl;
+                 if(m_it->GetNRows()&&m_st->GetNRows()&&m_sd->GetNRows()&&kj==k){
                     tss_tsspar_st *tsspar = m_tsspar->GetTable();
                     tsspar->min_sect = k;
                     St_DataSetIter sect(sector);
@@ -372,7 +376,7 @@ void StMinidaqMaker::TransferData(){
 //_____________________________________________________________________________
 void StMinidaqMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.9 1999/04/08 16:29:51 sakrejda Exp $\n");
+  printf("* $Id: StMinidaqMaker.cxx,v 1.10 1999/04/08 19:02:43 liq Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
