@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.13 1999/07/09 03:47:04 lasiuk Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.14 1999/07/19 21:39:19 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,9 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
- * Revision 1.13  1999/07/09 03:47:04  lasiuk
- * add switch for singleElectron multiplication, gaussian random
- * number generator
+ * Revision 1.14  1999/07/19 21:39:19  lasiuk
+ * - addEntry() distributes charge on a (user) settable range of wires
+ * - setRangeOfWiresForChargeDistribution(int) added (default is 0)
  *
  * Revision 1.13  1999/07/09 03:47:04  lasiuk
  * add switch for singleElectron multiplication, gaussian random
@@ -78,19 +78,30 @@
  * Initial Revision
  *
  **************************************************************************/
+#include <algorithm>
+#include <unistd.h> // sleep
+
 #include "SystemOfUnits.h"
 #include "StTrsWireHistogram.hh"
-#include <unistd.h> // sleep
+
 StTrsWireHistogram* StTrsWireHistogram::mInstance = 0; // static data member
 HepJamesRandom  StTrsWireHistogram::mEngine;
 RandGauss       StTrsWireHistogram::mGaussianDistribution(mEngine);
 RandExponential StTrsWireHistogram::mExponentialDistribution(mEngine);
 
-StTrsWireHistogram::StTrsWireHistogram(StTpcGeometry* geoDb, StTpcSlowControl* scDb)
-    : mMin(-1), mMax(-1)
+StTrsWireHistogram::StTrsWireHistogram(StTpcGeometry* geoDb, StTpcSlowControl* scDb, StTrsDeDx* gasDb)
+    : mMin(-1),
+      mMax(-1),
+      mGeomDb(geoDb),
+      mSCDb(scDb),
+      mGasDb(gasDb),
+      mDoGasGain(true),
+      mDoGasGainFluctuations(false),
+      mGasGainCalculationDone(false),
+      mDoSingleElectronMultiplication(false),
+      mDoTimeDelay(false),
+      mRangeOfWiresForChargeDistribution(0)
 {
-    mGeomDb = geoDb;
-    mSCDb   = scDb;
     mNumberOfInnerSectorAnodeWires =
 	mGeomDb->numberOfInnerSectorAnodeWires();
     mNumberOfOuterSectorAnodeWires =
@@ -98,26 +109,19 @@ StTrsWireHistogram::StTrsWireHistogram(StTpcGeometry* geoDb, StTpcSlowControl* s
 
     mTotalNumberOfAnodeWires =
 	mNumberOfInnerSectorAnodeWires + mNumberOfOuterSectorAnodeWires;
-    //mSectorWires.assign(mTotalNumberOfAnodeWires);
     mSectorWires.resize(mTotalNumberOfAnodeWires);
-    PR(mTotalNumberOfAnodeWires);
+//     PR(mTotalNumberOfAnodeWires);
 
-    //Gas Gain
-    mDoGasGain                      = true;
-    mDoGasGainFluctuations          = false;
-    mGasGainCalculationDone         = false;
-    mDoSingleElectronMultiplication = false;
-    
-    //Time Delay At Collection
-    mDoTimeDelay = false;
+    gasGainCalculation();
+    mGasGainCalculationDone = true;
 }
 
 StTrsWireHistogram::~StTrsWireHistogram() {/* nopt */}
 
-StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlowControl* scDb)
+StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlowControl* scDb, StTrsDeDx* gasDb)
 {
     if(!mInstance) {
-	mInstance = new StTrsWireHistogram(geoDb, scDb);
+	mInstance = new StTrsWireHistogram(geoDb, scDb, gasDb);
     }
     else { // do nothing
 	cerr << "Cannot make a second instance of StTrsWireHistogram() " << endl;
@@ -138,17 +142,14 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
     int    wireLimit;
     double innerSectorBoundary =
 	mGeomDb->outerSectorEdge() - mGeomDb->ioSectorSpacing();
-    //PR(innerSectorBoundary);
     
     if(yCoordinateOfHit < innerSectorBoundary) { // in inner part of sector
-	//PR(mGeomDb->firstInnerSectorAnodeWire());
 	tmpWire =
 	    (yCoordinateOfHit - mGeomDb->firstInnerSectorAnodeWire())/mGeomDb->anodeWirePitch() + .5;
 	offSet = 0;
 	wireLimit = mGeomDb->numberOfInnerSectorAnodeWires() - 1;
     }
     else { // in outer part of sector
-	//PR(mGeomDb->firstOuterSectorAnodeWire());
 	tmpWire =
 	    (yCoordinateOfHit - mGeomDb->firstOuterSectorAnodeWire())/mGeomDb->anodeWirePitch() + .5;
 	offSet = mGeomDb->numberOfInnerSectorAnodeWires();
@@ -156,9 +157,10 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 	    mGeomDb->numberOfOuterSectorAnodeWires() - 1;
     }
 
+    //
     // CAREFUL at the i/o sector boundaries
     // let boundary wires catch more than +/- pitch/2
-    //if (tmpWire<0) tmpWire -=.5;
+    //
     int    wireIndex = static_cast<int>(tmpWire) + offSet; 
     if(wireIndex < offSet)
 	wireIndex = offSet;
@@ -167,8 +169,8 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 
     //PR(offSet);
     //PR(wireLimit);
-//     PR(wireIndex);
-//     PR(wireCoordinate(wireIndex));
+    //PR(wireIndex);
+    //PR(wireCoordinate(wireIndex));
 
     //
     // Check Wire Index before doing any further calculations:
@@ -176,69 +178,117 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
     if (wireIndex >= 0 &&
 	wireIndex < mTotalNumberOfAnodeWires) {
 
-// 	PR(bin.numberOfElectrons());
-	// Gas Gain
-      double avalancheFactor;
-      if(mDoGasGain) {
-	
-	if(mDoSingleElectronMultiplication) {
-	  double tmpElectrons = 0;
-	  PR(bin.numberOfElectrons());
-	  for(int ii=0; ii<static_cast<int>(bin.numberOfElectrons()); ii++) {
-	    avalancheFactor = avalanche(wireIndex);
-	    tmpElectrons += avalancheFactor;
-	  }
-	  bin.setNumberOfElectrons(tmpElectrons);
-	} // end of single electron
-	else {  // Do Gaussian scaling
-	  avalancheFactor = avalanche(wireIndex);
-	  bin.scaleNumberOfElectrons(avalancheFactor);
-	  //bin.scaleNumberOfElectrons(gaussianMultiplication(wireIndex));
-	}
-	
-      }  // end of gas gain
-      
-//  	PR(bin.numberOfElectrons());
+	//
+	// Distribute Charge on Multiple Wires!
+	//
+	double chargeFraction;
+	int lowestWireToCollectCharge =
+	    max(0,(wireIndex-mRangeOfWiresForChargeDistribution));
+	int highestWireToCollectCharge =
+	    min((mTotalNumberOfAnodeWires-1),(wireIndex+mRangeOfWiresForChargeDistribution));
 
-	// Time Delay
+	double delta = mGeomDb->anodeWirePitch()/2.;
+	double sigma =
+	    mGasDb->transverseDiffusionCoefficient()*sqrt(bin.position().z());
+
+	for(int kk=lowestWireToCollectCharge;
+	    kk<=highestWireToCollectCharge; kk++) {
+
+	    // the y coordinate of the wire:
+	    double yOfMiniSegment = wireCoordinate(kk);
+	    //
+	    // Make a new StTrsWireBinEntry
+	    //
+	    StThreeVector<double>
+		position(bin.position().x(),
+			 wireCoordinate(kk),
+			 bin.position().z());
+	    StTrsWireBinEntry
+		theNewSegment(position,0);
+	    
+	    //
+	    // Establish integration Limits:
+	    // Take care of charge conservatione (Integral to +/- infinity)
+	    double yLower = (kk == lowestWireToCollectCharge) ?
+		-9.e99 : (wireCoordinate(kk) - delta);
+	    double yUpper = (kk == highestWireToCollectCharge) ?
+		+9.e99 : wireCoordinate(kk) + delta;
+
+	    double arg1 = (yUpper-yCoordinateOfHit)/(M_SQRT2*sigma);
+	    double arg2 = (yLower-yCoordinateOfHit)/(M_SQRT2*sigma);
+
+	    chargeFraction = 0.5*(erf(arg1)-erf(arg2));
+
+	    //
+	    // Gas Gain
+	    double avalancheFactor = bin.numberOfElectrons()*chargeFraction;
+	    if(mDoGasGain) {
+		if(mDoSingleElectronMultiplication) {
+		    avalancheFactor =
+			exponentialAvalanche(kk, bin.numberOfElectrons()*chargeFraction);
+		}
+		else {  // Do Gaussian scaling
+		    avalancheFactor =
+			gaussianAvalanche(kk, bin.numberOfElectrons()*chargeFraction);
+		}
+	    }  // end of gas gain
+
+	    theNewSegment.setNumberOfElectrons(avalancheFactor);	
+      
+	    // Time Delay
 	    // Increase DriftLength Proportional to the Distance from the Wire
 	    // Keeping in mind a 2mm shift is approximately .1 timebins
 	    // This means 500 um is 2 mm!
 	    // Currently a linear function is used, but a better profile
 	    // can probably be found with some study.
 
-	if(mDoTimeDelay) {
-	    double distanceToWire = fabs(yCoordinateOfHit - wireCoordinate(wireIndex));
-	    {
+	    if(mDoTimeDelay) {
+		double distanceToWire =
+		    fabs(yCoordinateOfHit - wireCoordinate(wireIndex));
+		{
 #ifndef ST_NO_NAMESPACES
-		using namespace units;
+		    using namespace units;
 #endif
-		double increase = 250*micrometer/millimeter*distanceToWire;
-		//PR(increase);
-		double oldDriftLength = bin.position().z();
-		bin.position().setZ((oldDriftLength+increase));
+		    double increase = 250*micrometer/millimeter*distanceToWire;
+
+		    double oldDriftLength = bin.position().z();
+		    theNewSegment.position().setZ((oldDriftLength+increase));
+		}
 	    }
-	}
 
-	//
-	// Change coordinate of the wire!
-	//
-	//PR(bin.position());
-	bin.position().setY(wireCoordinate(wireIndex));
-	//PR(bin.position());
-//          cout << "add at wire # " << wireIndex <<endl;
-	mSectorWires[wireIndex].push_back(bin);
-	//PR(bin);
+	    //
+	    // You had better convince yourself
+	    // that this is really right!
+	    //
+	    // Change coordinate of the wire
+	    // due to diffusion.  Remember that this
+	    // is not needed in the single electron
+	    // limit!  That is the reason for the
+	    // strange scale factor!  Must be done
+	    // before the gas gain is calculated or
+	    // the factor is ~1
+	    //
+// 	    double ne = bin.numberOfElectrons()*chargeFraction;
+// 	    double scaledSigma = sqrt(fabs((ne-1)/ne)*sigma);
+// 	    double xPosition =
+// 		mGaussianDistribution.shoot(theNewSegment.position().x(),
+// 					    (scaledSigma));
+// 	    theNewSegment.position().setX(xPosition);
 
-	if (mMin<0) mMin = wireIndex;
-	if (mMax<0) mMax = wireIndex;
-	if (mMin > wireIndex) mMin = wireIndex;
-	if (mMax < wireIndex) mMax = wireIndex;
+	    mSectorWires[kk].push_back(theNewSegment);
+
+	    //
+	    // Set the limits for the wire Histogram
+	    if (mMin<0) mMin = kk;
+	    if (mMax<0) mMax = kk;
+	    if (mMin > kk) mMin = kk;
+	    if (mMax < kk) mMax = kk;
 	    
+	} // loop over kk wires
     }
-	else {
-	    cout << "wire " << wireIndex << " Out Of Wire Grid..."<< endl;
-	}
+    else {
+	cout << "wire " << wireIndex << " Out Of Wire Grid..."<< endl;
+    }
 }
 
 void StTrsWireHistogram::clear()
@@ -305,7 +355,8 @@ void StTrsWireHistogram::setDoGasGainFluctuations(bool doIt)
     mDoGasGainFluctuations = doIt;
 }
 
-// These two could be inline, but are only called once so probably doesn't matter
+// These two could be inline, but are only called once
+// so probably doesn't matter performance wise
 void StTrsWireHistogram::setGasGainInnerSector(double v)
 {
     mInnerSectorGasGain = v;
@@ -318,42 +369,50 @@ void StTrsWireHistogram::setGasGainOuterSector(double v)
     cout << "Gas gain OS: " << mOuterSectorGasGain << endl;
 }
 
-double StTrsWireHistogram::avalanche(int iWire)
+double StTrsWireHistogram::exponentialAvalanche(int iWire, double numElec)
 {
-    if(!mGasGainCalculationDone) {
-	gasGainCalculation();
-	mGasGainCalculationDone = true;
-    }
-
     double gasGainFactor;
-    if(mDoSingleElectronMultiplication) {
-      gasGainFactor = (mDoGasGainFluctuations) ?
-	exponentialFluctuations(iWire) :
-	noFluctuations(iWire);
+    double electrons = 0;
+    if(mDoGasGainFluctuations) {
+	int ctr = 0;
+	do {
+	    gasGainFactor = (iWire < mNumberOfInnerSectorAnodeWires) ?
+		mExponentialDistribution.shoot(mInnerSectorGasGain) :
+		mExponentialDistribution.shoot(mOuterSectorGasGain);
+	    electrons += gasGainFactor;
+	    ctr++;
+	} while(ctr<numElec);
     }
     else {
-      gasGainFactor = (mDoGasGainFluctuations) ?
-	gaussianMultiplication(iWire) :
-	noFluctuations(iWire);
+	electrons = (iWire < mNumberOfInnerSectorAnodeWires) ?
+	    numElec*mInnerSectorGasGain :
+	    numElec*mOuterSectorGasGain;
+    }
+    return electrons;
+}
+
+double StTrsWireHistogram::gaussianAvalanche(int iWire, double numElec)
+{
+    //
+    // The fluctuation values (13%) should be set via the
+    // db or some macro call.  For now we will keep them
+    // here
+    double innerFluc;
+    double outerFluc;
+    if(mDoGasGainFluctuations) {
+	innerFluc = .13;
+	outerFluc = .13;
+    }
+    else {
+	innerFluc = 0.;
+	outerFluc = 0.;
     }
 
-    return gasGainFactor;
+    return (iWire < mNumberOfInnerSectorAnodeWires) ?
+	mGaussianDistribution.shoot(mInnerSectorGasGain,innerFluc*mInnerSectorGasGain)*numElec :
+	mGaussianDistribution.shoot(mOuterSectorGasGain,outerFluc*mOuterSectorGasGain)*numElec;
 }
 
-double StTrsWireHistogram::gaussianMultiplication(int wireIndex)
-{
-    return (wireIndex<mNumberOfInnerSectorAnodeWires) ?
-	mGaussianDistribution.shoot(mInnerSectorGasGain,.13*mInnerSectorGasGain) :
-	mGaussianDistribution.shoot(mOuterSectorGasGain,.13*mOuterSectorGasGain);
-}
-
-
-double StTrsWireHistogram::exponentialFluctuations(int wireIndex) const
-{
-    return (wireIndex<mNumberOfInnerSectorAnodeWires) ?
-	mExponentialDistribution.shoot(mInnerSectorGasGain) :
-	mExponentialDistribution.shoot(mOuterSectorGasGain);
-}
 
 double StTrsWireHistogram::noFluctuations(int wireIndex) const
 {
@@ -365,8 +424,8 @@ void StTrsWireHistogram::gasGainCalculation()
 {
     // do calculation here and use values from db
     // For now use values from SN263
-//     mInnerSectorGasGain =
-// 	exp(scDb->innerSectorGasGainb*(innerSectorAnodeVoltage-innerSectorGasGainVzero));
-//     mOuterSectorGasGain =
-// 	exp(scDb->outerSectorGasGainb*(outerSectorAnodeVoltage-outerSectorGasGainVzero));
+    //     mInnerSectorGasGain =
+    // 	exp(scDb->innerSectorGasGainb*(innerSectorAnodeVoltage-innerSectorGasGainVzero));
+    //     mOuterSectorGasGain =
+    // 	exp(scDb->outerSectorGasGainb*(outerSectorAnodeVoltage-outerSectorGasGainVzero));
 }
