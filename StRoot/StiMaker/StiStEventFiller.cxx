@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.5 2003/02/25 16:56:20 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.6 2003/03/12 17:58:05 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.6  2003/03/12 17:58:05  pruneau
+ * fixing stuff
+ *
  * Revision 2.5  2003/02/25 16:56:20  pruneau
  * *** empty log message ***
  *
@@ -571,7 +574,20 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track)
   //
   // above is no longer used, instead use kITKalmanfitId as fitter and tpcOther as finding method
   gTrack->setEncodedMethod(mStiEncoded);
-  gTrack->setImpactParameter(impactParameter(track));//gTrack->setImpactParamter(track->getDca(vertex)); // change: need to calculate impact parameter or use 	gTrack->setLength(track->getTrackLength());
+  double impactParam = impactParameter(track);
+
+  const StiKalmanTrack * kktrack = static_cast<const StiKalmanTrack *>(track);
+  if (kktrack->isPrimary())
+    {
+      double dy,dz,d;
+      StiKalmanTrackNode * node = kktrack->getInnerMostHitNode();
+      cout << " vertex:" << node->getHit()<<endl;
+      dy = node->_p0 - node->getHit()->y();
+      dz = node->_p1 - node->getHit()->z();
+      d = sqrt(dy*dy+dz*dz);
+      cout << " impact par:"<< impactParam <<" dy:"<<dy<<" dz:"<<dz <<" sqrt(dy^2+dz^2):"<<d<<endl;
+    }
+  gTrack->setImpactParameter(impactParam );//gTrack->setImpactParamter(track->getDca(vertex)); // change: need to calculate impact parameter or use 	gTrack->setLength(track->getTrackLength());
   int maxPoints = track->getMaxPointCount();
   gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(maxPoints));
   fillGeometry(gTrack, track, false); // inner geometry
@@ -617,13 +633,14 @@ unsigned short StiStEventFiller::encodedStEventFitPoints(const StiTrack* track) 
   return (nFitTpc + 1000*nFitSvt + 10000*nFitSsd);
     
 }
-float StiStEventFiller::impactParameter(const StiTrack* track) {
+float StiStEventFiller::impactParameter(const StiTrack* track) 
+{
   if (!mEvent->primaryVertex()) {
     return DBL_MAX;
   }
     
   // get the innermost hit node
-  const StiKalmanTrack* kTrack = dynamic_cast<const StiKalmanTrack*>(track);
+  const StiKalmanTrack* kTrack = static_cast<const StiKalmanTrack*>(track);
   StiKalmanTrackNode*	node = kTrack->getInnerMostHitNode();
   // construct a Helix using Ben's Routines
   //StiGeometryTransform* transformer = StiGeometryTransform::instance();
@@ -643,10 +660,10 @@ float StiStEventFiller::impactParameter(const StiTrack* track) {
   // but StEvent uses StThreeVectorF for persistency...
   const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
   StThreeVector<double> vxD(vxF.x(),vxF.y(),vxF.z());
-  //cout << "primary vertex " << vxD << endl;
+  cout << "primary vertex " << vxD << endl;
   // return distance of closest approach to primary vertex
-  //cout << "helix " << helix << endl;
+  cout << "helix " << helix << endl;
   float dca = static_cast<float>(helix->distance(vxD));
-  //cout << "dca " << dca << endl;
+  cout << "dca " << dca << endl;
   return dca;
 }
