@@ -235,4 +235,27 @@ void StEmcPedestalMaker::savePedestals(int date,int time, bool DB)
 	delete f;
 	return;
 }
+//_____________________________________________________________________________
+void StEmcPedestalMaker::loadPedestals(char* file)
+{   
+	TFile *f = new TFile(file);
+	if(getSpec()) getSpec()->Reset();
+	if(mPedestal) mPedestal->Reset();
+	if(mRms) mRms->Reset();
+	if(mChi) mChi->Reset();
+	if(mStatus) mStatus->Reset();
+  TH2F* h = (TH2F*)f->Get("mSpec;1");
+  if(h && getSpec()) getSpec()->Add(h,1);
+  TH1F *g=(TH1F*)f->Get("mPed;1");
+  if(g && mPedestal) mPedestal->Add(g,1);
+  g=(TH1F*)f->Get("mRms;1");
+  if(g && mRms) mRms->Add(g,1);
+  g=(TH1F*)f->Get("mChi;1");
+  if(g && mChi) mChi->Add(g,1);
+  g=(TH1F*)f->Get("mStatus;1");
+  if(g && mStatus) mStatus->Add(g,1);
+	f->Close();
+	delete f;
+	return;
+}
 
