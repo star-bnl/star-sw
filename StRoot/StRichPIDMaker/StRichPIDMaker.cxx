@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.0 2000/08/09 16:26:19 gans Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.1 2000/08/13 01:25:58 gans Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.1  2000/08/13 01:25:58  gans
+ * Added directory changing when using pidMaker->printCanvas("directory/")
+ *
  * Revision 2.0  2000/08/09 16:26:19  gans
  * Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
@@ -100,11 +103,11 @@ using std::max;
 // for finite
 #include <math.h>
 #ifdef SUN
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.0 2000/08/09 16:26:19 gans Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.1 2000/08/13 01:25:58 gans Exp $";
 
 Int_t 
 StRichPIDMaker::Make() { 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.0 2000/08/09 16:26:19 gans Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.1 2000/08/13 01:25:58 gans Exp $";
   cout << "StRichPIDMaker::Make()" << endl;
   evtN++;
   
@@ -574,7 +577,7 @@ void StRichPIDMaker::drawPadPlane(StEvent* rEvent, bool kCreatePsFile) {
   padMonitor->drawRings();
   padMonitor->update();
   if(mUsePrintCanvas){
-      padMonitor->printCanvas(fileName,evtN);
+      padMonitor->printCanvas(mUsePrintCanvasDir,fileName,evtN);
   }
   if(mUseResidNTup){
       padMonitor->doResiduals(zVertex,mPrimaryTracksVEta,runId,eventId);
@@ -696,8 +699,9 @@ void StRichPIDMaker::setFileName(char * name){
 void StRichPIDMaker::useL3Tracking(){
     mUseL3Tracking = 1;}
 	array[3] = x;
-void StRichPIDMaker::usePrintCanvas(){
-    mUsePrintCanvas = 1;}
+void StRichPIDMaker::usePrintCanvas(const char * directory){
+    mUsePrintCanvas = 1;
+    sprintf(mUsePrintCanvasDir,"%s",directory);}
 	
 void StRichPIDMaker::useResidNTup(){
     mUseResidNTup = 1;}
