@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.6 2000/07/28 23:29:42 calderon Exp $
+ * $Id: StHit.cxx,v 2.7 2000/12/08 20:21:07 genevb Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.7  2000/12/08 20:21:07  genevb
+ * Changed kTofPatchId -> kTofId
+ *
  * Revision 2.6  2000/07/28 23:29:42  calderon
  * Added handling of Fit Flag: use this flag to tell if the point
  * is used in the fit.
@@ -38,7 +41,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.6 2000/07/28 23:29:42 calderon Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.7 2000/12/08 20:21:07 genevb Exp $";
 
 ClassImp(StHit)
 
@@ -122,8 +125,8 @@ StHit::detector() const
         return kFtpcWestId;
     case kFtpcEastId:
         return kFtpcEastId;
-    case kTofPatchId:
-        return kTofPatchId;
+    case kTofId:
+        return kTofId;
     case kCtbId:
         return kCtbId;
     case kSsdId:

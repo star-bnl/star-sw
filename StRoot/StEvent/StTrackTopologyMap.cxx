@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.9 2000/07/28 19:49:28 akio Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.10 2000/12/08 20:21:08 genevb Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
+ * Revision 2.10  2000/12/08 20:21:08  genevb
+ * Changed kTofPatchId -> kTofId
+ *
  * Revision 2.9  2000/07/28 19:49:28  akio
  * Change in Detector Id for Endcap SMD
  *
@@ -48,7 +51,7 @@ using std::adjacent_difference;
 using std::max_element;
 #endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.9 2000/07/28 19:49:28 akio Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.10 2000/12/08 20:21:08 genevb Exp $";
 
 ClassImp(StTrackTopologyMap)
 
@@ -157,7 +160,7 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
     case kCtbId:
         if (bit(54)) n++;
         break;
-    case kTofPatchId:
+    case kTofId:
         if (bit(55)) n++;
         break;
     case kRichId:
