@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerIdCollection.cxx,v 2.2 2003/01/30 18:37:19 ullrich Exp $
+ * $Id: StTriggerIdCollection.cxx,v 2.3 2003/03/14 21:44:47 jeromel Exp $
  *
  * Author: Thomas Ullrich, January 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerIdCollection.cxx,v $
+ * Revision 2.3  2003/03/14 21:44:47  jeromel
+ * delete to avoid memory leak
+ *
  * Revision 2.2  2003/01/30 18:37:19  ullrich
  * Changed name of method, now setNominal().
  *
@@ -34,7 +37,7 @@ StTriggerIdCollection::~StTriggerIdCollection()
     delete mL1TriggerId; mL1TriggerId = 0;
     delete mL2TriggerId; mL2TriggerId = 0;
     delete mL3TriggerId; mL3TriggerId = 0;
-    mNominalTriggerId = 0;
+    delete mNominalTriggerId; mNominalTriggerId = 0;
 }
 
 const StTriggerId*
