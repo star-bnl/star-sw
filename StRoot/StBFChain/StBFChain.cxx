@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.438 2004/09/01 00:14:12 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.439 2004/09/01 01:05:13 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -186,7 +186,7 @@ Bfc_st BFC1[] = {
   {"P2004"       ,""     ,"","B2004,l3onl,fcf,ToF,emcDY2,fpd,Corr4,ftpc,trgd,ZDCvtx,OSpaceZ2","",""
                 ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
   {"pp2004"     ,""   ,"","B2004,l3onl,fcf,ToF,emcDY2,fpd,Corr4,ppOpt,-PreVtx,ftpc,trgd,ZDCvtx,OSpaceZ2",
-                     "","""Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+                    "","","Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
 
 
   // Other chains/Calibration
