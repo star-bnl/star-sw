@@ -22,8 +22,8 @@ c:>------------------------------------------------------------------
       IMPLICIT NONE
 #include "emc_erj.inc"
 #include "emc_def.h"
-#include "math_constants.h"
-#include "phys_constants.h"
+#include "math_constants.inc"
+#include "phys_constants.inc"
       integer ncell_tot
       real ej_min
       save ncell_tot

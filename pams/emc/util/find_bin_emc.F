@@ -13,7 +13,7 @@ c*-
 #include "PAM.inc"
 #include "ems_control.inc"
 #include "emc_def.h"
-#include "math_constants.h"
+#include "math_constants.inc"
       RECORD / ems_control_st / ems_control(*)
       integer det,module,ebin,sub,iphi,nb,ne,p,s
       real eta, phi, etap, phip

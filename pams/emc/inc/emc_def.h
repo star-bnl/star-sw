@@ -9,7 +9,7 @@
 #define EPRS  6
 #define ESMDE 7         
 #define ESMDP 8
-
+#if 0
 /**********************************************************************************
 Detector Number:
 
@@ -52,5 +52,5 @@ ESMDP   8       1-24            ?               ?
 
 See also STAR note #0229 for geometry and numbering scheme
 **********************************************************************************/
-
+#endif
 

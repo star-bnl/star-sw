@@ -15,8 +15,8 @@ c:>------------------------------------------------------------------
      5     emc_egrid_par_h,     emc_egrid_par ,
      6        emc_energy_h,        emc_energy )
 #include "emc_def.h"
-#include "math_constants.h"
-#include "phys_constants.h"
+#include "math_constants.inc"
+#include "phys_constants.inc"
 c:>------------------------------------------------------------------
 C:ROUTINE:      INTEGER*4 EMC_EGRID
 C:DESCRIPTION:  charged and neutral energy in (eta,phi) grids...
