@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.254 2001/12/11 19:06:30 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.255 2001/12/18 01:47:52 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -101,24 +101,22 @@ Bfc_st BFC[] = {
 
   // Year 2 chains. 
   // B2001 is a base-chain for 2001 (with tpc+rhic). SVT not in 2001 but can be added
-  // as an extra option. 2001a is currently used by FastOffline and is the "experimental" chain.
+  // as an extra option. 2001a is currently used by FastOffline and is the "experimental" chain
+  // we used most often for the inclusion of new sub-systems.
   {"B2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                   ,"Base chain for 2001 (tpc+rhic)",kFALSE},
   {"P2001"       ,""  ,"",
    "B2001,l3onl,tofDat,AlignSectors,ExB,OBmap,OClock,OPr13",
    "",""                                       ,"Production chain for summer 2001 data (+ l3, tof)",kFALSE},
 
-  // all below P2001x are TEMPORARY chains. We will shift the numbering up
-  // as soon as the code will be toroughly tested. NoHits will be turned on
-  // later as a final touch. emcY2 removed on Sept 27th 2001. Replaced by
-  // emcDY2 in the first week of Nov 2001.
   {"P2001a"      ,""  ,"",
    "B2001,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13","",""
                                ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
-  {"P2001b"      ,""  ,"",
-   "B2001,ftpc,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13","",""       ,"P2001a -svt ",kFALSE},
 
-  {"pp2001"      ,""  ,"","pp,B2001,-PreVtx,-SpinTag","",""                         ,"pp 2001",kFALSE},
+  // pp Chains -- Experimental ; will follow P2001* chains model
+  {"pp2001"      ,""  ,"",
+   "pp,B2001,-PreVtx,-SpinTag,l3onl,tofDat,AlignSectors,ExB,OBmap,OClock,OPr13",
+   "",""                                                                                 ,"pp 2001",kFALSE},
 
 
   // Other chains
