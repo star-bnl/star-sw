@@ -3,6 +3,7 @@
 #include "TDataSet.h"
 #include "TTable.h"
 #include "StMaker.h"
+#include "TUnixTime.h"
 
 /// Needs a StMaker* passed in. This is because GetDatabase only works in a maker class. So this must be declared inside a maker.
 StDetectorDbRichVoltages::StDetectorDbRichVoltages(StMaker* maker){
@@ -15,8 +16,12 @@ StDetectorDbRichVoltages::StDetectorDbRichVoltages(StMaker* maker){
     mEventTime = 0;
 
     if(maker){
-	// For some reason, the maker GetDateTime is not in GMT!!!!
-	mEventTime = maker->GetDateTime().Convert() - 14400;
+
+	// Time conversions to avoid root automatically converting timezones
+	TDatime rootTime = maker->GetDateTime();
+	TUnixTime unixTime;
+	unixTime.SetGTime(rootTime.GetDate(),rootTime.GetTime());
+	mEventTime = unixTime.GetUTime();
 		
 	TDataSet* dataSet = maker->GetDataBase("RunLog/onl");
 	
