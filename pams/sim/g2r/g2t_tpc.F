@@ -63,7 +63,7 @@
             ip0 = iprt
             if (.not.local) call GDTOM(x,xx,1)
          endif
-         if (abs(Step*c(1))<2*par(1)-0.1) Elos=-abs(Elos)
+         if (abs(Step*c(1)) .lt. 2*par(1)-0.1) Elos=-abs(Elos)
 
          i=i+1
          g2t_tpc_hit_h.nok            = i
