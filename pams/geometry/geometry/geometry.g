@@ -1,5 +1,19 @@
-* $Id: geometry.g,v 1.58 2003/08/05 23:37:09 potekhin Exp $
+* $Id: geometry.g,v 1.59 2003/08/21 20:29:27 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.59  2003/08/21 20:29:27  potekhin
+* As per discussion with Jerome, I'm introducing
+* a cleaner versioning of the 2003 geometries:
+*
+* y2003a is now really the corrected year2003,
+* without any additions -- the SVT layer positions
+* have been updated and the old supogeo bug fixed.
+*
+* y2003b has same corrections as y2003a but will also
+* include extra material in the SVT, new ECAL configuration
+* as well as a new FPD, plus the Photon Multiplicity Detector.
+* Other changes will be done as needed. So for practical
+* purposes, this will be the actual Fall'03 geometry.
+*
 * Revision 1.58  2003/08/05 23:37:09  potekhin
 * Continued to use the CorrNum "correction level" to
 * correct older geometry bugs in a controlled and versioned
@@ -304,20 +318,49 @@ If LL>1
                      fpdm=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
-                  "geometry correction "
-                     CorrNum = 0;
                 }
 
 
-* Only have 8 characters max in the name, soo we have to go with y2003a, not "year".
-*
-* Corrections and enhancements in y2003a:
-*    extra material in SVT
+***********************************************************************
+* In y2003a:
 *    removed serious bugs from SUPOGEO
-*    corrected ECALGEO -- the shift variable
-*    added the Photon Multiplicity Detector (PHMD)
+*    corrected ECAL -- the shift variable
+*    corrected CVT  -- the layer radii correction
 
-  on Y2003A    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
+  on Y2003A    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     btofconfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,0}; shift={75,0}; " 60 sectors " 
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=1     " sectors 2-5 filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+                  "geometry correction "
+                     CorrNum = 1;
+                }
+
+***********************************************************************
+* Corrections and enhancements in y2003b:
+*    extra material in SVT
+*    added the Photon Multiplicity Detector (PHMD)
+*    added newly installed parts of ECAL (to be done)
+
+  on Y2003B    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -345,6 +388,7 @@ If LL>1
                   "Photon Multiplicity Detector Version "
                      PhmdVersion = 1;
                 }
+
 
   on Y2003X    { same as year2003 but with full calorimeters
                   "svt: 3 layers ";
@@ -418,6 +462,10 @@ If LL>1
 * - to save secondaries AFTER all decays:      DETP TRAC DCAY 210 210 0.1 0.01
    dcay={210,210,0.1,0.01}
    If LL>1 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
+*
+*  Advertise the geometry correction level that we'll be
+*  increasingly using to implement intra-year corrections:
+   write(*,*) 'Geometry Correction Level:', CorrNum
 *
    if (rich) ItCKOV = 1
    if (cave)        Call cavegeo
