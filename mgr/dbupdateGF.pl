@@ -42,8 +42,9 @@ struct JFileAttr => {
 
 my $debugOn = 0;
 
-  my @dirSet = ("auau100", "auau200", "augas100", "pau200", "pp200", "pp400", "sisi200");
-
+# my @dirSet = ("auau100", "auau128", "auau200", "augas100", "pau200", "pp200", "sisi200");
+my @dirSet = ("auau128","auau200");
+my @dirSet = 
 my $topHpssSink  =  "/home/starsink/raw";
 my $topHpssReco  =  "/home/starreco/reco";
 
@@ -85,7 +86,7 @@ my $jobIn_no = 0;
 ########## Find GEANT files in HPSS
 
  $hpssGeantDirs[0] = $topHpssSink . "/" . "auau200";
- $hpssGeantDirs[1] = $topHpssSink . "/" . "pau200";
+ $hpssGeantDirs[1] = $topHpssSink . "/" . "auau128";
  $hpssGeantDirs[2] = $topHpssSink . "/" . "pp200";
  $checkedSimuDirs[0] = 0; 
  $checkedSimuDirs[1] = 0;
@@ -170,8 +171,7 @@ my $ztime = "000000";
    $mcTime  = ($$eachGeantFile)->timeS;
    $msize = ($$eachGeantFile)->size;
    $flagHash{$mfName} = ($$eachGeantFile)->iflag;
-#   $mcTime = substr ($mgTime,-8) ;
-#   print "Time = ",  $mcTime, "\n";
+
     foreach my $gtfile (@jobIn_set){
        $dbset = ($$gtfile)->gset;
        $dbfname = ($$gtfile)->gname;
@@ -183,8 +183,7 @@ my $ztime = "000000";
        $dbctime = $gtime;
 
         if ( ($mfName eq $dbfname) and ($mdataSet eq $dbset)) { 
-          if ( ($msize eq $dbfsize) and ($mcTime eq $dbctime)) {
-#         if ( $msize eq $dbfsize) {  
+          if ( ($msize eq $dbfsize) and ($mcTime eq $dbctime)) { 
            $flagHash{$mfName} = 0;
          } else {
            $flagHash{$mfName} = 2;  
@@ -257,16 +256,16 @@ if ( $gflag eq 1) {
    &fillDbTable();
  }
 
-#elsif ( $gflag eq 2) {
+elsif ( $gflag eq 2) {
   
-# print "Files to be updated :", "\n";    
-# print "Set: ", $mdataSet, "Path: ", $mpath,"File:", $mfName, "Date:", $mcTime, "\n";
+ print "Files to be updated :", "\n";    
+ print "Set: ", $mdataSet, "Path: ", $mpath,"File:", $mfName, "Date:", $mcTime, "\n";
 
 ## update GEANT files in Files Catalog 
 #   print "Updating Files Catalog\n";
 #   &updateDbTable();  
 
-#}
+}
 }
  &StDbProdDisconnect();
 
@@ -349,7 +348,7 @@ sub walkHpss {
  my $ppath;
 
   for ($ii=0; $ii<$nHpssDirs; $ii++) {
-    print "Dir ".$dirs->[$ii]." check: ".$checked->[$ii]."\n" ;
+#    print "Dir ".$dirs->[$ii]." check: ".$checked->[$ii]."\n" ;
      if ( ! $checked->[$ii] ) {
     my @dird = $ftp->dir($dirs->[$ii]);
        $checked->[$ii] = 1;
@@ -367,7 +366,7 @@ sub walkHpss {
          $fullDir = $dirs->[$ii]."/".$name;
          $dirs->[$nHpssDirs] = $fullDir;
   
-         print "Dir  ".$fullDir."\n";
+#         print "Dir  ".$fullDir."\n";
           $dpath = $fullDir;
           $dpath =~ s/$home\///;
           @tk = split(/\//,$dpath);
