@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.39 1999/01/31 02:03:08 fine Exp $ 
+// $Id: St_Table.cxx,v 1.40 1999/02/03 23:19:15 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.40  1999/02/03 23:19:15  fine
+// St_Table:: protection for SavePrimitive has been introduced
+//
 // Revision 1.39  1999/01/31 02:03:08  fine
 // St_DataSetIter::Notify - new method + clean up
 //
@@ -774,14 +777,23 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *, const 
  }
 
 //______________________________________________________________________________
+static void ClosePrimitive(ofstream &out)
+{
+  out << "// The output table was bad-defined!" << endl
+      << " fprintf(stderr, \"Bad table found. Please remove me\\n\");" << endl
+      << " return 0; }" 
+      << endl;
+}
+//______________________________________________________________________________
 void St_Table::SavePrimitive(ofstream &out, Option_t *)
 {
    // Save a primitive as a C++ statement(s) on output stream "out".
- 
+
+   out << "St_DataSet *CreateTable() { " << endl;
+
    Int_t rowStep =  1; // The maximun values to print per line
    Int_t rowNumber = GetSize();
-//   Int_t rowNumber = 3; // Just to debug code only
-   if (!rowNumber) return;
+   if (!rowNumber)  {ClosePrimitive(out); return; }
 
    Int_t cdate = 0;
    Int_t ctime = 0;
@@ -789,14 +801,14 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
    Bool_t isdate = kFALSE;
 //   char *pname; 
 
-   if  (GetNRows() == 0) return;
+   if  (GetNRows() == 0) {ClosePrimitive(out); return;}
 
    TClass *classPtr = GetRowClass();
 
 
    if (classPtr == 0) return;
    if (!classPtr->GetListOfRealData()) classPtr->BuildRealData();
-   if (!classPtr->GetNdata()) return;
+   if (!classPtr->GetNdata()) {ClosePrimitive(out); return;}
 
    TIter      next( classPtr->GetListOfDataMembers());
 
@@ -809,16 +821,15 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
    const Char_t *rowId = "row";
    const Char_t *tableId = "tableSet";
    // Generate the header
-   if (!rowCount) return;
+   if (!rowCount) {ClosePrimitive(out); return;}
 
-    out << "St_DataSet *CreateTable() { " << endl
-        << "// -----------------------------------------------------------------" << endl
-        << "// "   << Path() 
+   out << "// -----------------------------------------------------------------" << endl
+       << "// "   << Path() 
                         << " Allocated rows: "<<fN
                         <<"  Used rows: "<<*s_MaxIndex
                         <<"  Row size: " << *s_Size << " bytes"
                         <<endl 
-        << "// "  << " Table: " << classPtr->GetName()<<"[0]--> "
+       << "// "  << " Table: " << classPtr->GetName()<<"[0]--> "
                          << classPtr->GetName()<<"["<<rowNumber-1 <<"]" 
       << endl
       << "// ====================================================================" << endl
