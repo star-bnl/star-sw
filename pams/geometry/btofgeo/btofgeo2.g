@@ -1,5 +1,8 @@
-* $Id: btofgeo2.g,v 1.1 2000/11/22 17:49:07 nevski Exp $
+* $Id: btofgeo2.g,v 1.2 2001/03/14 00:03:50 nevski Exp $
 * $Log: btofgeo2.g,v $
+* Revision 1.2  2001/03/14 00:03:50  nevski
+* btof corrected by F.Geurts
+*
 * Revision 1.1  2000/11/22 17:49:07  nevski
 * tof geometry versions 1 and 2 preserved in btofgeo1, version 3 goes in btofgeo2
 *
@@ -23,6 +26,11 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 *                          FG- default TOF_choice is now 4 (single-tray TOF)
 *            04 May  2000  FG- removed the (unused) BMTM block
 *            27 Jul  2000  FG- TOFp is now on the EAST side, position 32
+*            22 Nov  2000  PN- tof geometry versions 1 and 2 preserved
+*                              in tofgeo1, version 3 goes in btofgeo2
+*            08 Feb  2001  FG- final positions of the slats and FEE boards
+*            20 Feb  2001  FG- fixed bug in outer CTB slab dimensioning,
+*                              water in TOFp cooling loops
 *
 *******************************************************************************
 +CDE,AGECOM,GCUNIT,GCONST.
@@ -50,7 +58,7 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
                        BaseLen,  BaseMaxR, BaseMinR, 
                        ElecThck, Wrap,     Shim   }
 *
-      Structure TOFF { SlatLen, 
+      Structure TOFF { BoxWidth, SlatLen, 
                        Slat01z,  Slat02z,  Slat03z,  Slat04z,  Slat05z, 
                        Slat06z,  Slat07z,  Slat08z,  Slat09z,  Slat10z, 
                        SlatThck, SlatWid,  SlatAng,
@@ -119,19 +127,20 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
          Shim      = 0.26       ! thickness of shim to position slat 2
 *
       Fill TOFF ! time of flight stats
+         BoxWidth  = 21.0875  ! width of the 5w box (BMTD)
          SlatLen   = 20.0     ! slat length
-         Slat01z   =  104.956 ! 5_wide_slat Z position for row 1 from AutoCAD
-         Slat02z   =   82.798 ! 4_wide_slat Z position for row 2 from AutoCAD
-         Slat03z   =   60.764 ! 4_wide_slat Z position for row 3 from AutoCAD
-         Slat04z   =   38.634 ! 4_wide_slat Z position for row 4 from AutoCAD
-         Slat05z   =   16.014 ! 4_wide_slat Z position for row 5 from AutoCAD
-         Slat06z   =   -5.886 ! 4_wide_slat Z position for row 6 from AutoCAD
-         Slat07z   =  -28.286 ! 4_wide_slat Z position for row 7 from AutoCAD
-         Slat08z   =  -50.806 ! 4_wide_slat Z position for row 8 from AutoCAD
-         Slat09z   =  -73.466 ! 4_wide_slat Z position for row 9 from AutoCAD
-         Slat10z   =  -96.296 ! 4_wide_slat Z position for row 10 from AutoCAD
+         Slat01z   =  104.938 ! 5_wide_slat Z position for row 1 from AutoCAD
+         Slat02z   =   84.060 ! 4_wide_slat Z position for row 2 from AutoCAD
+         Slat03z   =   62.860 ! 4_wide_slat Z position for row 3 from AutoCAD
+         Slat04z   =   41.254 ! 4_wide_slat Z position for row 4 from AutoCAD
+         Slat05z   =   18.966 ! 4_wide_slat Z position for row 5 from AutoCAD
+         Slat06z   =   -3.954 ! 4_wide_slat Z position for row 6 from AutoCAD
+         Slat07z   =  -27.528 ! 4_wide_slat Z position for row 7 from AutoCAD
+         Slat08z   =  -51.254 ! 4_wide_slat Z position for row 8 from AutoCAD
+         Slat09z   =  -75.634 ! 4_wide_slat Z position for row 9 from AutoCAD
+         Slat10z   = -100.683 ! 4_wide_slat Z position for row 10 from AutoCAD
          SlatThck  = 2.0      ! scintillator slab thicknesses
-         SlatWid   = 4.0      ! scintillator slab width
+         SlatWid   = 3.81     ! scintillator slab width (4.0)
          SlatAng   = 11.5     ! slat assy. angle w.r.t. tray
          PmtLen    = 5.0      ! PMT length
          PmtMaxR   = 1.91     ! PMT max radius
@@ -145,17 +154,17 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
          ElecHgt   = 3.0      ! FEE Board height in tray... (rails/loop too).
          ElecThck  = 0.17     ! FEE Board thickness (67 mils)
          ElecWid   = 20.3     ! FEE Board width (was 21)
-         ElecLen   = 5.1      ! FEE Board length (was 16)
-         Elec01z   = 106.350  ! FEE Z position for row 1 from AutoCAD
-         Elec02z   =  84.049  ! FEE Z position for row 2 from AutoCAD
-         Elec03z   =  61.981  ! FEE Z position for row 3 from AutoCAD
-         Elec04z   =  39.851  ! FEE Z position for row 4 from AutoCAD
-         Elec05z   =  17.231  ! FEE Z position for row 5 from AutoCAD
-         Elec06z   =  -4.669  ! FEE Z position for row 6 from AutoCAD
-         Elec07z   = -27.069  ! FEE Z position for row 7 from AutoCAD
-         Elec08z   = -49.589  ! FEE Z position for row 8 from AutoCAD
-         Elec09z   = -72.249  ! FEE Z position for row 9 from AutoCAD
-         Elec10z   = -95.079  ! FEE Z position for row 10 from AutoCAD
+         ElecLen   = 5.715    ! FEE Board length (was 16)
+         Elec01z   = 105.610  ! FEE Z position for row 1 from AutoCAD
+         Elec02z   =  84.573  ! FEE Z position for row 2 from AutoCAD
+         Elec03z   =  63.224  ! FEE Z position for row 3 from AutoCAD
+         Elec04z   =  41.667  ! FEE Z position for row 4 from AutoCAD
+         Elec05z   =  19.379  ! FEE Z position for row 5 from AutoCAD
+         Elec06z   =  -3.542  ! FEE Z position for row 6 from AutoCAD
+         Elec07z   = -27.165  ! FEE Z position for row 7 from AutoCAD
+         Elec08z   = -50.841  ! FEE Z position for row 8 from AutoCAD
+         Elec09z   = -75.170  ! FEE Z position for row 9 from AutoCAD
+         Elec10z   = -100.270 ! FEE Z position for row 10 from AutoCAD
          RailThck  = 0.2      ! Cooling loop rail thickness
          RailWid   = 1.5      ! Cooling loop rail width
          CoolOutR  = 0.635    ! Cooling loop pipe outer radius, 0.5in/2
@@ -251,7 +260,10 @@ Block BMTC  is  the Main Tray Cavity filled with thedetails for CTB
 *---- inner slab + readout
       zpos  =  (tray_length-ctbb_Slab1Len)/2-tray_WallThk-ctbb_Wrap
       xpos  =  -tray_Height/2+ctbb_Slab1x
-      Create and Position BXSA  X=xpos  Z=zpos
+      Create and Position BXSA  dx=ctbb_SlabThck/2 ,
+                                dy=ctbb_SlabWid/2 ,
+                                dz=ctbb_Slab1Len/2,
+                                X=xpos  Z=zpos
       zpos = zpos - (ctbb_Slab1Len + ctbb_ConvLen)/2
       Create and Position BCCV  X=xpos  Z=zpos,
                      Dx1=ctbb_SlabThck/2  Dx2=ctbb_SlabThck/2,
@@ -268,11 +280,10 @@ Block BMTC  is  the Main Tray Cavity filled with thedetails for CTB
 *---- outer slab + readout
       zpos  =  (tray_length-ctbb_Slab2Len)/2-tray_WallThk-ctbb_Wrap-ctbb_Shim
       xpos  =  -tray_Height/2+ctbb_Slab2x
-      Create and Position BXSA          dx=ctbb_SlabThck/2,
-                                        dy=ctbb_SlabWid/2,
-                                        dz=ctbb_Slab2Len/2,
-                                        X=xpos,
-                                        Z=-zpos
+      Create and Position BXSA dx=ctbb_SlabThck/2,
+                               dy=ctbb_SlabWid/2,
+                               dz=ctbb_Slab2Len/2,
+                               X=xpos Z=-zpos
       zpos = zpos - (ctbb_Slab2len + ctbb_ConvLen)/2
                  Position BCCV  X=xpos  Z=-zpos  alphax=180,
                      Dx1=ctbb_SlabThck/2  Dx2=ctbb_SlabThck/2,
@@ -343,12 +354,12 @@ Block BMAA is a box for a 4wide AND 5wide phi column of TOF Scintillators
       if (iwid==4) then
 *  ----  the 4wide mother box...
          Shape  BOX    dx=tray_height/2-tray_WallThk,  
-                       dy=0.81*(tray_Width/2-tray_WallThk),
+                       dy=0.8*toff_BoxWidth/2,
                        dz=sublen/2. 
       else
 *---- the 5wide mother box...
          Shape  BOX    dx=tray_height/2-tray_WallThk,  
-                       dy=tray_Width/2-tray_WallThk,
+                       dy=toff_BoxWidth/2,
                        dz=15.5 
       endif
       Create    BMTD  " dont need to positition it, because this is division" 
@@ -414,7 +425,7 @@ Block BXSA  is  the active trigger scintillator SLAB for ctb
       Attribute BXSA      seen=1   colo=3
       Material polystyren
       Medium   sensitive    IsVol=1
-      Shape   BOX    dx=ctbb_SlabThck/2  dy=ctbb_SlabWid/2  dz=ctbb_Slab1Len/2
+      Shape   BOX    dx=0  dy=0 dz=0
 *
 *   hit options: H - put in GEANT hit field (instead of PseudoVolumes)
 *                S - Single step
@@ -583,6 +594,16 @@ Block BCOO  are the cooling rails/loops
              Z=tray_Length/2-tray_WallThk-toff_RailThck-toff_CoolOutR,
              alphaX=90,
              konly='MANY'
+      Create BWAT Rmin=0 Rmax=toff_CoolInnR dz=tray_Length/2-tray_WallThk
+      Position BWAT   X=toff_ElecHgt-3.*toff_RailThck/2.-toff_CoolOutR,
+             Y=(tray_width/2-toff_RailThck-tray_WallThk-toff_CoolOutR)
+      Position BWAT  X=toff_ElecHgt-3.*toff_RailThck/2.-toff_CoolOutR,
+             Y=-(tray_width/2-toff_RailThck-tray_WallThk-toff_CoolOutR)
+      Create BWAT Rmin=0 Rmax=toff_CoolInnR,
+                  dz=tray_width/2-tray_WallThk-2.*toff_CoolOutR-toff_RailThck
+      Position BWAT  X=toff_ElecHgt-3.*toff_RailThck/2.-toff_CoolOutR Y=0.0,
+             Z=tray_Length/2-tray_WallThk-toff_RailThck-toff_CoolOutR,
+             alphaX=90
 EndBlock
 Block BRAI  is the Rail for the cooling loop
       Attribute BRAI   seen=1  colo=7
@@ -595,7 +616,7 @@ Block BPIP  is the Long Pipe for the cooling loop
       Shape     TUBE Rmin=0  Rmax=0  Dz=0
 EndBlock
 Block BPIQ  is the Short Pipe for the cooling loop
-      Attribute BPIP seen=1  colo=7
+      Attribute BPIQ seen=1  colo=7
       Material  Aluminium
       Shape     TUBE Rmin=0  Rmax=0  Dz=0
 EndBlock
@@ -658,14 +679,15 @@ EndBlock
 Block BCOV  is  a whole TPC cooling channel
       Attribute BCOV   seen=1   colo=2
       Shape     TUBE   Rmin=0   Rmax=tray_CoolOutR
-      Create and Position BWAT 
+      Create and Position BWAT Rmin=0  Rmax=tray_CoolInnR
 EndBlock
 Block BWAT  is  TPC cooling water
       Attribute BWAT   seen=1   colo=3
       Component H2     A=1   Z=1   W=2
       Component O      A=16  Z=8   W=1
       Mixture   Water  Dens=1.0
-      Shape     TUBE   Rmin=0  Rmax=tray_CoolInnR
+      Shape     TUBE
+**   Rmin=0  Rmax=0
 EndBlock
 *
 * ----------------------------------------------------------------------------
