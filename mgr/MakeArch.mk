@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.66  1999/03/12 01:33:40  fisyak
+#  Take out -lI77 -lF77 for RedHat 5.1/5.2
+#
 #  Revision 1.65  1999/03/07 14:50:53  wenaus
 #  Clean up Sun CC5 handling
 #
@@ -173,7 +176,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/03/07 14:50:53 $ 
+#             Last modification $Date: 1999/03/12 01:33:40 $ 
 #. default setings
 
 MAKE  := gmake
@@ -401,7 +404,11 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_re
 #  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -lg2c -lI77
 #  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib -lg2c -lI77 -lF77
   FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib -L/usr/local/egcs-1.1.1 \
-              -L/usr/local/egcs-1.1.1/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.60 -lg2c -lI77 -lF77 -lcrypt 
+              -L/usr/local/egcs-1.1.1/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.60 -lg2c 
+ifneq (,$(findstring $(STAR_SYS),i386_linux2))
+  FLIBS   += -lI77 -lF77
+endif
+  FLIBS   += -lcrypt
   FFLAGS   := -DPGI  $(DEBUG)
   FEXTEND  := -Mextend
   YACC     := bison -y
