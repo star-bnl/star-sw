@@ -1,5 +1,10 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.6 2000/06/13 14:25:56 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.7 2000/06/15 09:13:34 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.7  2000/06/15 09:13:34  oldi
+// No tracking is performed (return kStWarn instead) if the z-position of the
+// main vertex is off by more than 100 cm from z = 0. Different error messages
+// (depending on how far the vertex is off) are printed.
+//
 // Revision 1.6  2000/06/13 14:25:56  oldi
 // Changed cout to gMessMgr->Message().
 // Printed output changed (slightly).
@@ -162,8 +167,10 @@ Int_t StFtpcTrackMaker::Make()
     if (isnan(vertex->GetZ())) {
       // handels problem if there are not enough tracks and therefore a vertex cannot be found
       *gMessMgr << endm;
-      gMessMgr->Error() << "No vertex found! Ftpc tracking stopped!" << endm;
+      gMessMgr->Message("", "E", "OST") << "No vertex found! Ftpc tracking stopped!" << endm;
       delete vertex;
+
+      // No Tracking
       return kStWarn;
     }
 
@@ -207,8 +214,31 @@ Int_t StFtpcTrackMaker::Make()
   
   *gMessMgr << " " << fpt_fptpar->primary_vertex[0] << ", " << fpt_fptpar->primary_vertex[1] << ", " << fpt_fptpar->primary_vertex[2] << "." << endm;
   
-  if (TMath::Abs(fpt_fptpar->primary_vertex[2]) > 50.) {
-    gMessMgr->Message("Found vertex is more than 50 cm off from z = 0!", "W", "OTS");
+
+  // check for the position of the main vertex
+
+  Double_t z = TMath::Abs(fpt_fptpar->primary_vertex[2]);
+  
+  if (z > 50.) {
+    
+    if (z > 162.45) {
+      gMessMgr->Message("Found vertex lies inside of one Ftpc. No Ftpc tracking possible.", "E", "OTS");
+      
+      // No tracking!
+      return kStWarn;   
+    }
+    
+    else if (z > 100.) {
+      gMessMgr->Message("Found vertex is more than 100 cm off from z = 0. Ftpc tracking makes no sense.", "E", "OTS");
+      
+      // No tracking!
+      return kStWarn;
+    }
+    
+    else {
+      gMessMgr->Message("Found vertex is more than 50 cm off from z = 0 but  Ftpc tracking is still possible", "W", "OTS");
+      // Do tracking.
+    }
   }
 
   Double_t vertexPos[3] = {fpt_fptpar->primary_vertex[0], fpt_fptpar->primary_vertex[1], fpt_fptpar->primary_vertex[2]};
@@ -352,7 +382,7 @@ void StFtpcTrackMaker::PrintInfo()
   // prints some information
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.6 2000/06/13 14:25:56 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.7 2000/06/15 09:13:34 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
