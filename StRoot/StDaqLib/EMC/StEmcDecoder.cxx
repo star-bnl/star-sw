@@ -18,12 +18,12 @@ StEmcDecoder::StEmcDecoder(unsigned int date,unsigned int time)
   for(int RDO=0;RDO<4800;RDO++)
   {
     int id=0;
-    if(GetTowerIdFromDaqId(RDO,id)==1) ReverseOrder[id-1]=RDO;
+    if(GetTowerIdFromDaqId(RDO,id)==1) if(id>0) ReverseOrder[id-1]=RDO;
   }
 	for(int BOX=1;BOX<=60;BOX++) for(int P=1;P<=80;P++)
 	{
 		int id=0;
-		if(GetTowerIdFromPMTBox(BOX,P,id)==1) 
+		if(GetTowerIdFromPMTBox(BOX,P,id)==1) if(id>0) 
 		{
 			ReversePMT_Box[id-1][0] = BOX;
 			ReversePMT_Box[id-1][1] = P;
@@ -36,7 +36,7 @@ StEmcDecoder::StEmcDecoder(unsigned int date,unsigned int time)
     for(int index=0;index<4800;index++)
     {
       int status=GetSmdCoord(RDO,index,det,m,e,s);
-      if(status==1)
+      if(status==1 && m>0 && e>0 && s>0)
       {
         if(det==3)
         {
