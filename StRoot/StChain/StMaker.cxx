@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.138 2004/01/26 22:47:26 perev Exp $
+// $Id: StMaker.cxx,v 1.139 2004/01/28 04:37:26 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -628,6 +628,11 @@ Int_t StMaker::Make()
      if (hd && hd->GetRunNumber()!=oldrun) {
        if (oldrun>-1) maker->FinishRun(oldrun);
        run = hd->GetRunNumber();  
+       if (Debug() && this == fgStChain && m_LastRun!=run){
+         m_LastRun = run;
+         printf(" +++ New RunNumber found=%d (previous = %d)\n",run,oldrun);
+         hd->Print();
+       }
        maker->InitRun(run);
        maker->m_LastRun=run;
      }
@@ -1212,6 +1217,9 @@ AGAIN: switch (fState) {
 }
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.139  2004/01/28 04:37:26  perev
+// Print of new Run added
+//
 // Revision 1.138  2004/01/26 22:47:26  perev
 // Account stage (init,make,..)
 //
