@@ -1,5 +1,5 @@
-/**********************************NoiseSimulator.cxx**\
- * $Id: StRichNoiseSimulator.cxx,v 1.2 2000/01/25 22:02:21 lasiuk Exp $
+/**********************************************************************
+ * $Id: StRichNoiseSimulator.cxx,v 1.3 2000/02/08 16:28:30 lasiuk Exp $
  *
  * Description:
  *
@@ -10,10 +10,11 @@
  *  is applied to the factor. 
  *
  *
- ******************************************************
+ **********************************************************************
  * $Log: StRichNoiseSimulator.cxx,v $
- * Revision 1.2  2000/01/25 22:02:21  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:28:30  lasiuk
+ * change to class.  Use dbs and random number generators
+ * from data members
  *
  * Revision 1.2  2000/01/25 22:02:21  lasiuk
  * Second Revision
@@ -21,33 +22,36 @@
  * Revision 1.1  2000/01/18 21:32:03  lasiuk
  * Initial Revision
  *
- ******************************************************/
-
+ **********************************************************************/
 #ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
 #endif
 
-#include "StRichOtherAlgorithms.h"
-#include "StRichPhysicsDb.h"
 #include "StRichNoiseSimulator.h"
+
 #ifdef RICH_WITH_VIEWER
 #include "StRichViewer.h"
 #endif
 
-  
-    double StRichNoiseSimulator::operator()(void) const
-    {
-	static StRichPhysicsDb* physDB     = StRichPhysicsDb::getDb();
-	static double electric_noise = physDB->electric_noise;
-	static Randoms random;                 // declarations
- 
-	double noise = electric_noise * random.Gauss();
+StRichNoiseSimulator::StRichNoiseSimulator()
+{
+    mPhysicsDb = StRichPhysicsDb::getDb();
+    mElectricNoise = mPhysicsDb->electronicNoiseLevel();
+}
+
+StRichNoiseSimulator::~StRichNoiseSimulator()
+{ /* nopt */ }
+
+double StRichNoiseSimulator::operator()(void) const
+{
+    double noise = mElectricNoise * mRandom.Gauss();
+
 #ifdef RICH_WITH_VIEWER
-	if (StRichViewer::histograms )
-	    StRichViewer::getView()->mNoise->Fill(noise);
+    if (StRichViewer::histograms )
+	StRichViewer::getView()->mNoise->Fill(noise);
 #endif
 	return noise;
-    }
+}
     
 #ifndef ST_NO_NAMESPACES
 //}
