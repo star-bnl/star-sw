@@ -24,13 +24,10 @@
 
       real row,pad,pad_min,pad_max
 
-      print *,"begin to run TFS_FILL_TPHITCLUS"
+      print *,"begin to run TFS_FILL_TPHIT_PAD_TMBK"
       nhits=tphit_h.nok
 
       do ihit=1,nhits
-
-	if (tphit(ihit).flag.eq.0.or.tphit(ihit).flag.eq.1 )then 
-
 c calculate the pads used by this hit
           xglobal(1)=tphit(ihit).x
           xglobal(2)=tphit(ihit).y
@@ -45,28 +42,47 @@ c calculate the pads used by this hit
      >   print *,'wrong sector number,isect=',isect,'jsect=',jsect
           row=irow
           ret=tgc_x_to_pad(row,xlocal(1),pad,pad_plane_h,pad_plane)
+          
+c the following conventions:
+c http://www.star.bnl.gov/STAR/html/starsas_mail_l/0010.html
+c for pad #1   x_to_pad   would return   numbers between 0.5 and 1.5
+c (this actually came from na49)
+          ipad=int(pad+0.5)
 
-          ipad=pad
-
+          if(ipad.le.0.or.ipad.gt.pad_plane(1).npads(irow))then
+             print *,'wrong hit location,mark it flag=14,ihit=',ihit,
+     >  ',old flag=',tphit(ihit).flag
+            tphit(ihit).flag=14
+          endif
+ 
           sigma_x=tphit(ihit).prf
-c        ret=tgc_x_to_pad(row,xlocal(1)-sigma_x*1.5,pad_min,pad_plane_h,pad_plane)
-c        ret=tgc_x_to_pad(row,xlocal(1)+sigma_x*1.5,pad_max,pad_plane_h,pad_plane)
+
           ret=tgc_x_to_pad(row,xlocal(1)+sigma_x*1.5,pad_min,
      *        pad_plane_h,pad_plane)
           ret=tgc_x_to_pad(row,xlocal(1)-sigma_x*1.5,pad_max,
      *        pad_plane_h,pad_plane)
 
-          min_pad=pad_min
-          max_pad=pad_max
+          min_pad=int(pad_min+0.5)
+          max_pad=int(pad_max+0.5)
 
+          if(min_pad.le.0.or.
+     > min_pad.gt.pad_plane(1).npads(irow))then
+             tphit(ihit).flag=-14
+             min_pad=1
+          endif
+
+          if(max_pad.le.0.or.
+     >  max_pad.gt.pad_plane(1).npads(irow)) then
+             tphit(ihit).flag=-14
+             max_pad=pad_plane(1).npads(irow)
+          endif
+          
           npads=max_pad-min_pad+1
-
-c          print *,"ihit=",ihit,"id=",tphit(ihit).id,
-c     * "ihit=",ihit,
-c     * "clus id=",tphit(ihit).id
-c          print *,"sector=",isect,",irow=",irow
-c          print *,"xlocal(1)=",xlocal(1),"ipad=",ipad
-c          print *,"min_pad=",min_pad,"max_pad=",max_pad
+          if(npads.le.0.or.npads.gt.pad_plane(1).npads(irow))then
+              print *,'wrong npads, mark it to flag=14, npad=',npads,
+     >   ',ihit=',ihit,',old flag=',tphit(ihit).flag
+             tphit(ihit).flag=14
+          endif              
 
           tphit(ihit).npads=npads
           tphit(ihit).minpad=min_pad
@@ -88,7 +104,7 @@ c calculate the tmbks used by this hit
           tphit(ihit).ntmbk=ntmbk
           tphit(ihit).mintmbk=min_tmbk
           tphit(ihit).maxtmbk=max_tmbk
-       endif
+c       endif
       enddo
 
       tfs_fill_tphit_pad_tmbk=STAFCV_OK
