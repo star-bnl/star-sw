@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 1.13 1999/03/30 18:54:15 genevb Exp $
+% $Id: StEvent.tex,v 1.14 1999/03/30 19:11:53 genevb Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
@@ -21,8 +21,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.13  1999/03/30 18:54:15  genevb
-% Add Xi documentation
+% Revision 1.14  1999/03/30 19:11:53  genevb
+% Correct typo from last change
+%
+% Revision 1.18  1999/04/13 23:27:23  genevb
+% Slightly refined vertex code, updated V0, Xi vertex documentation
 %
 % Revision 1.17  1999/04/08 15:27:52  ullrich
 % Added description of PID classes
@@ -143,8 +146,8 @@
 % Added description of new method of StVertex.
 %
 % Revision 2.22  2000/03/02 12:40:40  ullrich
-  {\LARGE $ $Revision: 1.13 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/30 18:54:15 $ $}  % replaced by cvs with current revision
+% Added description of modified StTpcDedxPidAlgorithm
+%
 % Revision 2.21  2000/02/28 19:37:26  ullrich
 % Added the hypperref package to add bookmarks and hyperlinks
 % tp pdf documents.
@@ -152,14 +155,14 @@
 % Revision 2.20  2000/02/24 13:25:12  ullrich
 % Added RICH and EMC to the reference section. Created
 % (empty) section for EMC and RICH in User Guide.
-  {\LARGE $ $Revision: 1.13 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/30 18:54:15 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.14 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/30 19:11:53 $ $}  % replaced by cvs with current revision
 %
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.13 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/30 18:54:15 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.14 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/30 19:11:53 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -303,7 +306,7 @@ are not guaranteed to compile. Their only purpose is to illustrate a
 specific feature and not to provide a fully functional programming
 unit.
 
-  {\LARGE $ $Date: 1999/03/30 18:54:15 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/30 19:11:53 $ $}  % replaced by cvs with current revision
      \advance\leftmargin by \labelsep%
 \section{Further documentation}
 \label{sec:furtherdoc}
@@ -3352,7 +3355,7 @@ unsigned long countGoodV0s(StEvent *event, double limit)
 
 \item[Related Classes]
     \name{StVertex} serves as a base class for StV0Vertex and StXiVertex.
-    table entry.\index{dst_vertex.idl}
+    All vertices in one event are stored
     in the StVertexCollection class. The collection stores the
     vertices by pointer; it is a polymorphic container.
     The same collection holds also the derived vertex types.
