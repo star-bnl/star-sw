@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: calculateEventPlaneEventCut.cxx,v 1.2 2001/07/21 12:04:28 rcwells Exp $
+ * $Id: calculateEventPlaneEventCut.cxx,v 1.3 2001/07/22 19:57:05 rcwells Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: calculateEventPlaneEventCut.cxx,v $
+ * Revision 1.3  2001/07/22 19:57:05  rcwells
+ * Fixed switch in calculateEventPlaneEventCut
+ *
  * Revision 1.2  2001/07/21 12:04:28  rcwells
  * Only calls FlowAnalysis if using HbtEvent
  *
@@ -74,7 +77,7 @@ bool calculateEventPlaneEventCut::Pass(const StHbtEvent* event){
       RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
       event->SetReactionPlaneSubEventDifference(RP1-RP2,1);
       // if Flow Analysis is switched on ... make correction histogram
-      if (mFromHBT && mFlowAnalysisMaker) mFlowAnalysisMaker->Make();
+      if (mFlowAnalysisMaker) mFlowAnalysisMaker->Make();
     }
     else {
       cout << "No flow event found" << endl;
