@@ -60,7 +60,7 @@ C     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                 I,J,L,K,M,N,Ia,Lc,Lp,Mj,NDDD,NCCC
   Character     Csys*4,Table*10,Cbank*4
   Character*80  Cpath,Cdest,Spec,format
-  Character*1 Source,Destin
+  Character*4 Source,Destin
   EQUIVALENCE   (L,Lpar)
   common /agcstaffor/ nddd,nccc,format
 *
