@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.70 2003/05/06 18:38:05 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.71 2003/05/06 21:33:04 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -192,12 +192,6 @@ Int_t StFlowAnalysisMaker::Init() {
   mHistTrigger->SetYTitle("Counts");
 
   // Charge
-  // Tpc
-  mHistChargeTpc = new TH1F("Flow_Charge_Tpc", "Flow_Charge_Tpc",
-      nChargeBins, chargeMin, chargeMax);
-  mHistChargeTpc->SetXTitle("Charge");
-  mHistChargeTpc->SetYTitle("Counts");
-    
   // Ftpc
   mHistChargeFtpc = new TH1F("Flow_Charge_Ftpc", "Flow_Charge_Ftpc",
       nChargeBins, chargeMin, chargeMax);
@@ -1140,19 +1134,6 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistYield2D->SetYTitle("Pt (GeV)");
       delete histTitle;
 
-      // Yield(eta,phi)
-      histTitle = new TString("Flow_EtaPhi2D_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistEtaPhi2D = new TH2D(histTitle->Data(),
-        histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax,
-			   Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistEtaPhi2D->Sumw2();
-      histFull[k].histFullHar[j].mHistEtaPhi2D->SetXTitle("Pseudorapidty");
-      histFull[k].histFullHar[j].mHistEtaPhi2D->SetYTitle("Azimuthal Angle (rad)");
-      delete histTitle;
-
       // Flow observed
       histTitle = new TString("Flow_vObs2D_Sel");
       histTitle->Append(*countSels);
@@ -1191,7 +1172,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.70 2003/05/06 18:38:05 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.71 2003/05/06 21:33:04 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1426,7 +1407,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
       if (strcmp(pid, "e-")   == 0)  electronN++;
       if (strcmp(pid, "e+")   == 0)  positronN++;
       
-      mHistChargeTpc->Fill((float)charge);
       mHistDcaGlobalTpc->Fill(dcaGlobal);
       mHistChi2Tpc     ->Fill(chi2);
       mHistFitPtsTpc   ->Fill((float)fitPts);
@@ -1635,7 +1615,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    histFull[k].histFullHar[j].mHistPhiFarWest->Fill(phi,wt);
 	  }
 	  histFull[k].histFullHar[j].mHistYield2D->Fill(eta, pt);
-	  histFull[k].histFullHar[j].mHistEtaPhi2D->Fill(eta, phi);
 
 	  if (pFlowEvent->FirstLastPoints() && !pFlowEvent->FirstLastPhiWgt()) {
 	    kTpcFarEast = kFALSE;
@@ -2046,6 +2025,9 @@ void StFlowAnalysisMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.71  2003/05/06 21:33:04  posk
+// Removed some histograms.
+//
 // Revision 1.70  2003/05/06 18:38:05  posk
 // Removed StFlowTagMaker.
 //

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.50 2003/05/02 21:11:13 posk Exp $
+// $Id: plot.C,v 1.51 2003/05/06 21:33:07 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -66,7 +66,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_MultOverOrig",
     "Flow_MultEta",
     "Flow_MultPart",
-    "Flow_Charge_Tpc",
     "Flow_Charge_Ftpc",
     "Flow_DcaGlobal_Tpc",
     "Flow_DcaGlobal_Ftpc",
@@ -132,9 +131,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_Yield2D_Sel",
     "Flow_Yield.Eta_Sel",
     "Flow_Yield.Pt_Sel",
-    "Flow_EtaPhi2D_Sel",
-    "Flow_EtaPhi.Eta_Sel",
-    "Flow_EtaPhi.Phi_Sel",
     "Flow_Psi_Subs",
     "Flow_Psi_Sel",
     "Flow_Psi_Diff_Sel",
@@ -168,7 +164,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_MultOverOrig",
     "Flow_MultEta",
     "Flow_MultPart",
-    "Flow_Charge_Tpc",
     "Flow_DcaGlobal_Tpc",
     "Flow_Chi2_Tpc",
     "Flow_FitPts_Tpc",
@@ -215,9 +210,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_Yield2D_Sel",
     "Flow_Yield.Eta_Sel",
     "Flow_Yield.Pt_Sel",
-    "Flow_EtaPhi2D_Sel",
-    "Flow_EtaPhi.Eta_Sel",
-    "Flow_EtaPhi.Phi_Sel",
     "Flow_Psi_Subs",
     "Flow_Psi_Sel",
 //     "Flow_Psi_Diff_Sel",
@@ -240,10 +232,10 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   int nSingles;
   if (includeFtpc) {
     const int nNames = sizeof(baseName1) / sizeof(char*);
-    nSingles = 49 + 1;
+    nSingles = 48 + 1;
   } else {
     const int nNames = sizeof(baseName2) / sizeof(char*);
-    nSingles = 49 + 1 - 19;
+    nSingles = 48 + 1 - 19;
   }
 
   // construct arrays of base and short names
@@ -879,6 +871,9 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.51  2003/05/06 21:33:07  posk
+// Removed some histograms.
+//
 // Revision 1.50  2003/05/02 21:11:13  posk
 // Reduced the number of harmonics from 3 to 2.
 //
