@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.8 2002/02/01 17:45:56 lasiuk Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.9 2002/02/12 15:31:35 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.9  2002/02/12 15:31:35  lasiuk
+ * changes to remove formatting of tuple structures
+ *
  * Revision 1.8  2002/02/01 17:45:56  lasiuk
  * Mods for gcc(7.2)
  * outer helix usage
@@ -181,7 +184,7 @@ Int_t StRichSpectraMaker::Init() {
     cout << "StRichSpectraMaker::init()" << endl;
     
 #ifdef RICH_SPECTRA_HISTOGRAM
-    mFile = new TFile("/star/rcf/scratch/lasiuk/theta/Spectra.root","RECREATE","Pid Ntuples");
+    mFile = new TFile("/star/rcf/scratch/lasiuk/theta/SpectraFeb11.root","RECREATE","Pid Ntuples");
     //mFile = new TFile("/star/rcf/scratch/lasiuk/2000/Spectra01hi_geom.root","RECREATE","Pid Ntuples");
     mFile->SetFormat(1);
 
@@ -191,7 +194,7 @@ Int_t StRichSpectraMaker::Init() {
     //
     mEvt = new TNtuple("evt","Event Characteristics","vx:vy:vz:nPrim:nRich:ctb:zdc");
     
-    mTrack = new TNtuple("track","Identified Tracks","vz:p:px:py:pz:pt:eta:sdca2:sdca3:x:y:dx:dy:cdx:cdy:theta:sig:np:peak:peaknp:totnp:mass2:q:flag:lint:lintr:alpha:lpx:lpy:lpz:nFit:dedx:fpx:fpy:fpz:chi");
+    mTrack = new TNtuple("track","Identified Tracks","vz:p:px:py:pz:pt:eta:sdca2:sdca3:x:y:dx:dy:cdx:cdy:theta:sig:np:peak:peaknp:totnp:mass2:q:flag:lint:lintr:alpha:lpx:lpy:lpz:nFit:dedx:fpx:fpy:fpz:chi:dpi:ndpi:dk:ndk:dp:ndp");
     //
     // this is at the Cerenkov photon level
     //
@@ -532,7 +535,7 @@ Int_t StRichSpectraMaker::Make() {
     // The track loop
     //
     //
-    float trackTuple[36] = {-999.};
+    float trackTuple[42] = {-999.};
     trackTuple[0] = mVertexPos.z();
 
     cout << "Looping over " << mNumberOfPrimaries << " primary Tracks" << endl;
@@ -694,6 +697,12 @@ Int_t StRichSpectraMaker::Make() {
 	PR(track->fitTraits().chi2());
 	trackTuple[35] = track->fitTraits().chi2();
 
+	trackTuple[36] = mD[0];
+	trackTuple[37] = mNpd[0];
+	trackTuple[38] = mD[1];
+	trackTuple[39] = mNpd[1];
+	trackTuple[40] = mD[2];
+	trackTuple[41] = mNpd[2];
 #ifdef RICH_SPECTRA_HISTOGRAM
 	mTrack->Fill(trackTuple);
 #endif
@@ -721,7 +730,7 @@ Int_t StRichSpectraMaker::Make() {
 void StRichSpectraMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.8 2002/02/01 17:45:56 lasiuk Exp $\n");
+    printf("* $Id: StRichSpectraMaker.cxx,v 1.9 2002/02/12 15:31:35 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -891,6 +900,7 @@ StRichSpectraMaker::expectedCerenkov(float p, int pid) const
 // ----------------------------------------------------
 bool StRichSpectraMaker::evaluateEvent() {
 
+#ifdef RICH_SPECTRA_HISTOGRAM
     float tuple[7];
 
     tuple[0] = mVertexPos.x();
@@ -924,7 +934,8 @@ bool StRichSpectraMaker::evaluateEvent() {
     tuple[6] = zdcAdc; //zdc ;
 
     mEvt->Fill(tuple);
-
+#endif
+    
     return true;
 }
 
@@ -1067,7 +1078,9 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 	// 1) copies the hits into a vector
 	// 2) checks the photon Information
 	//
-	
+
+	mD[0] = FLT_MAX; mD[1]=FLT_MAX; mD[2]=FLT_MAX;
+	mNpd[0] = FLT_MAX; mNpd[1]=FLT_MAX; mNpd[2]=FLT_MAX;
 	for(size_t kk=0; kk<theRichPids.size(); kk++) {
 
 	    //
@@ -1120,6 +1133,8 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
    		}
  	    }
 	    meanD /= numberOfCts;
+	    mD[kk] = meanD;
+	    mNpd[kk] = numberOfCts;
 	    PR(meanD);
 	    
 //  	    PR(theRingHits.size());
@@ -1259,9 +1274,9 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
  	tuple[13] = mEvent->id();
 	tuple[14] = track->geometry()->charge();
 	tuple[15] = mVertexPos.z();
-
+#ifdef RICH_SPECTRA_HISTOGRAM
  	mCerenkov->Fill(tuple);
-
+#endif
 	mHistogram->addEntry(StRichCerenkovPhoton(mTracer->cerenkovAngle(),
 						  mTracer->azimuth(),
 						  uniqueRingHits[mm]));
@@ -1411,8 +1426,10 @@ StThreeVectorF StRichSpectraMaker::calculateRadiationPoint(StTrack* track, StThr
 				 mMagField,
 				 theHelix.charge(mMagField));
 
+    // Can we get a handle on the effect of the residual...
     // define the wire plane as the point of extrapolation
-    StRichLocalCoordinate lPadPlanePt(0.2*centimeter, 0.0, 0.0);
+    //StRichLocalCoordinate lPadPlanePt(0.2*centimeter, 0.0, 0.0);
+    StRichLocalCoordinate lPadPlanePt(0.0, 0.0,0.2*centimeter);
     StGlobalCoordinate    gPadPlanePt;
 
     (*mTransform)(lPadPlanePt,gPadPlanePt);

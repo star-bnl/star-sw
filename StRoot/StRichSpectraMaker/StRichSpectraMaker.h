@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.h,v 1.8 2002/02/01 17:45:56 lasiuk Exp $
+ * $Id: StRichSpectraMaker.h,v 1.9 2002/02/12 15:31:35 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRichSpectraMaker.h,v $
+ * Revision 1.9  2002/02/12 15:31:35  lasiuk
+ * changes to remove formatting of tuple structures
+ *
  * Revision 1.8  2002/02/01 17:45:56  lasiuk
  * Mods for gcc(7.2)
  * outer helix usage
@@ -53,7 +56,7 @@
 using std::pair;
 #endif
 
-#define RICH_SPECTRA_HISTOGRAM 1
+//#define RICH_SPECTRA_HISTOGRAM 1
 //RICH_WITH_PAD_MONITOR 1
 
 #ifdef RICH_SPECTRA_HISTOGRAM
@@ -179,8 +182,8 @@ protected:
     StThreeVectorF mQuartzRadPoint;
 
     int            mUniqueRingHits;
-
-
+    float          mD[3];
+    float          mNpd[3];
 
     
     StRichCoordinateTransform* mTransform;//!
@@ -224,7 +227,7 @@ protected:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.8 2002/02/01 17:45:56 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.9 2002/02/12 15:31:35 lasiuk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:
