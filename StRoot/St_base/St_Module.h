@@ -1,10 +1,13 @@
 //*-- Author : Valeri Fine (Faine); E-mail: fine@bnl.gov, fine@mail.cern.ch
 //*CMZ : 23/03/98
 // Copyright (C) FineSoft, Valery Fine at Brookhaven National Laboratory (fine@bnl.gov)
-// $Id: St_Module.h,v 1.5 1999/02/24 17:10:57 fine Exp $
+// $Id: St_Module.h,v 1.6 1999/07/28 15:36:33 fisyak Exp $
 // $Log: St_Module.h,v $
+// Revision 1.6  1999/07/28 15:36:33  fisyak
+// Resolve clash with TSystem for ELogLevel
+//
 // Revision 1.5  1999/02/24 17:10:57  fine
-// St_Table  New and Purge method have been introdiced, some clean up for St_module as well
+//  St_Table  New and Purge method have been introdiced, some clean up for St_module as well
 //
 // Revision 1.4  1998/11/25 21:58:34  fisyak
 // Cleanup
@@ -72,13 +75,13 @@ typedef enum {kNoWarning     // No message
              ,kError         // print out the severe errors (like zero pointers)
              ,kWarning       // print out the warning too
              ,kIgnore
-             } ELogLevel;
+             } EModuleLogLevel;
 private:
 	EModuleTypes   st_Type;          // kCtype, kCPlusplustype, kFortran
         char          *st_Name;          // Name of the module for the dynamic loading
         Int_t          fN;               // The length of the array
         Int_t          fIndex;           // The index pof the current element
-        ELogLevel      fTraceLogLevel;   // the level of the diagnostic messages (0-3)
+        EModuleLogLevel fTraceLogLevel;   // the level of the diagnostic messages (0-3)
 protected:
 
 	void        **st_Params;        // The total 
