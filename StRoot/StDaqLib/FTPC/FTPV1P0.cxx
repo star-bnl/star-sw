@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0.cxx,v 1.3 2001/06/19 20:51:21 jeromel Exp $
+ * $Id: FTPV1P0.cxx,v 1.4 2001/06/25 22:57:22 jcs Exp $
  * Author: M.J. LeVine, J.Klay, H.Huemmler
  ***************************************************************************
  * Description:  FTPV1P0 implementation
@@ -10,6 +10,9 @@
  * JLK 11-Jul-2000 Added new geometry files to correctly navigate banks
  ***************************************************************************
  * $Log: FTPV1P0.cxx,v $
+ * Revision 1.4  2001/06/25 22:57:22  jcs
+ * add correction for FTPC sector handling
+ *
  * Revision 1.3  2001/06/19 20:51:21  jeromel
  * Commited for Janet S.
  *
@@ -180,7 +183,15 @@ FTPV1P0_PADK_SR *FTPV1P0_Reader::getPADKReader(int sector)
 {
   
   FTPV1P0_PADK_SR *p;
-  p = padk[sector];
+
+  if ((sector <= 0) || (sector > 60))
+  {
+    pERROR(ERR_BAD_ARG);
+    return NULL;
+  }
+
+//  p = padk[sector];
+  p = padk[sector-1];     //JCS
   if(p == NULL)
   {
     p = new FTPV1P0_PADK_SR(sector, this);
@@ -192,13 +203,15 @@ FTPV1P0_PADK_SR *FTPV1P0_Reader::getPADKReader(int sector)
       return NULL;
     }
   }
-  padk[sector] = p;
+//  padk[sector] = p;
+  padk[sector-1] = p;
   return p;
 }
 
 FTPV1P0_Reader::FTPV1P0_Reader(EventReader *er, classname(Bank_FTPP) *pftp)
 {
   pBankFTPP = pftp;  // copy arg into class variable
+  ercpy = er; // squirrel away pointer eventreader for our friends
 
   if (!pBankFTPP->test_CRC()) ERROR(ERR_CRC);
   if (pBankFTPP->swap() < 0) ERROR(ERR_SWAP);
