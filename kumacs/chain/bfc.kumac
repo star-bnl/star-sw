@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.72 1998/10/13 16:14:29 kathy Exp $
+* * $Id: bfc.kumac,v 1.73 1998/10/20 21:08:09 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.73  1998/10/20 21:08:09  kathy
+* changed default settings
+*
 * Revision 1.72  1998/10/13 16:14:29  kathy
 * change default input settings
 *
@@ -288,7 +291,7 @@ MACRO bfc _
    ebye_analysis_switch=1 _
    gstar_settings=' field_only' _
    domain=' geometry g2t ftpc tpc emc ctf mwc svt global ' _
-   chain=' fzin rg2t tpg svg tfs srs ems ctf mwc fss fcl fpt_s fte_s tpt tid tte_e sgr drhd dehd svm egr evr ev0 ddedx dpnt desum dmsft drsum evout ' _
+   chain=' fzin rg2t tpg svg tss tcl tcl_e srs ems ctf mwc fss fcl fpt fte tpt tid tte_e sgr spr drhd dehd svm egr evr ev0 ddedx dpnt desum dmsft drsum dout ' _
    skip=0 _
    no_events=1 _
  input_data_file=/disk1/star/kathy/year2a_psc079_01_46evts.fza _
