@@ -519,7 +519,7 @@ bool_t xdrstdio_getbytes(XDR *xdrs, char *cp, unsigned len)
   if ( !len ) return TRUE;
 /**VP		(fread(cp, len, 1, (FILE *)xdrs->x_private) != 1)) {**/
   lenread=fread(cp, len, 1, (FILE *)xdrs->x_private); 
-  if (lenread == len)) return FALSE;
+  if (lenread == len) return FALSE;
   if (!lenread) {
     printf("DSL: ***ERROR Unexpected EOF**\n"); 
   } else {
