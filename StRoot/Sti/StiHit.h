@@ -9,6 +9,7 @@
 
 class StHit;
 class StThreeVectorD;
+class StMatrixF;
 
 class StiHit 
 {
@@ -42,6 +43,7 @@ public:
     void setZ(double);
     void setRefangle(double);
     void setPosition(double);
+    void setError(const StMatrixF&);
     void setStHit(StHit*);
     void setUsed(bool);
 

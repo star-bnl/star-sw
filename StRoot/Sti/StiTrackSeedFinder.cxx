@@ -24,7 +24,6 @@ StiTrackSeedFinder::StiTrackSeedFinder(StiHitContainer* h)
 {
 
     //Setup a default 2 hit filter
-    mhitcombofilter;
     StiRectangular2HitComboFilter* temp = new StiRectangular2HitComboFilter();
     temp->deltaD = 1.; //TEMP
     temp->deltaZ = 1.; //TEMP
