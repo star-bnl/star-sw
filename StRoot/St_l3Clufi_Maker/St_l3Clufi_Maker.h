@@ -1,5 +1,8 @@
-// $Id: St_l3Clufi_Maker.h,v 1.1.1.1 1999/11/19 18:31:48 flierl Exp $
+// $Id: St_l3Clufi_Maker.h,v 1.2 1999/12/07 23:13:53 flierl Exp $
 // $Log: St_l3Clufi_Maker.h,v $
+// Revision 1.2  1999/12/07 23:13:53  flierl
+// histogramms created and filled
+//
 // Revision 1.1.1.1  1999/11/19 18:31:48  flierl
 // test
 //
@@ -52,7 +55,7 @@
 //class St_stk_stkpar;
 class St_l3Clufi_Maker : public StMaker {
  private:
-    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.1.1.1 1999/11/19 18:31:48 flierl Exp $";
+    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.2 1999/12/07 23:13:53 flierl Exp $";
      
     //
     // l3 clusterfinding variables
@@ -69,6 +72,12 @@ class St_l3Clufi_Maker : public StMaker {
     St_hitarray*   St_hit_bank[12];//!
     hitarray_st* hit_bank_array[12];//!
 
+    // histos
+    TH1F* x_dis;
+    TH1F* y_dis; 
+    TH1F* z_dis; 
+    TH1F* charge_dis;
+
  protected:
  public: 
     //
@@ -84,7 +93,7 @@ class St_l3Clufi_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.1.1.1 1999/11/19 18:31:48 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.2 1999/12/07 23:13:53 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_l3Clufi_Maker, 1)   //StAF chain virtual base class for Makers
 };
