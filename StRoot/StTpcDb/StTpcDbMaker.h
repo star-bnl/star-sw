@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.11 2001/06/21 16:27:52 perev Exp $
+ * $Id: StTpcDbMaker.h,v 1.12 2001/10/25 22:59:36 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.12  2001/10/25 22:59:36  hardtke
+ * Add function tpc_localsector_to_local
+ *
  * Revision 1.11  2001/06/21 16:27:52  perev
  * two error matrix transformation methods added
  *
@@ -58,6 +61,7 @@
 #define tpc_pad_to_x_ F77_NAME(tpc_pad_to_x,TPC_PAD_TO_X)
 #define tpc_x_to_pad_ F77_NAME(tpc_x_to_pad,TPC_X_TO_PAD)
 #define tpc_local_to_global_ F77_NAME(tpc_local_to_global,TPC_LOCAL_TO_GLOBAL)
+#define tpc_localsector_to_local_ F77_NAME(tpc_localsector_to_local,TPC_LOCALSECTOR_TO_LOCAL)
 #define tpc_local_to_global_err_ F77_NAME(tpc_local_to_global_err,TPC_LOCAL_TO_GLOBAL_ERR)
 #define tpc_local_to_global_emx_ F77_NAME(tpc_local_to_global_emx,TPC_LOCAL_TO_GLOBAL_EMX)
 #define tpc_global_to_local_ F77_NAME(tpc_global_to_local,TPC_GLOBAL_TO_LOCAL)
@@ -91,6 +95,9 @@ R__EXTERN int type_of_call tpc_local_to_global_emx_(int &,const float *,float *)
 }
 extern "C" {
 R__EXTERN int type_of_call tpc_local_to_global_(int *,const float *,float *);
+}
+extern "C" {
+R__EXTERN int type_of_call tpc_localsector_to_local_(int *,const float *,float *);
 }
 extern "C" {
 R__EXTERN int type_of_call tpc_global_to_local_(int *,float *,float *);
@@ -150,7 +157,7 @@ class StTpcDbMaker : public StMaker {
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.11 2001/06/21 16:27:52 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.12 2001/10/25 22:59:36 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker, 1)   //StAF chain virtual base class for Makers
 };
