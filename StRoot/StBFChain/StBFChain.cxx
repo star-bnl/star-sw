@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.63 2000/02/09 22:13:00 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.64 2000/02/09 22:27:06 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.64  2000/02/09 22:27:06  fisyak
+// Add tpcDB in default tpc chain
+//
 // Revision 1.63  2000/02/09 22:13:00  fisyak
 // Dave's correction for tpcDb
 //
@@ -338,7 +341,7 @@ BfcItem BFC[] = {
   {"calib"       ,""  ,"","xdf2root"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"magF"        ,"","","NoFieldSet,StDbT,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
-  {"tpc"         ,"tpc","","tpc_T,tls,db,tcl,tpt,PreVtx"               ,"StChainMaker","StChain","",kFALSE},
+  {"tpc"         ,"tpc","","tpc_T,tls,db,tpcDB,tcl,tpt,PreVtx"         ,"StChainMaker","StChain","",kFALSE},
   {"tpcDB"       ,"tpcDB","tpc","dbutil"                               ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"Trs"         ,"","tpc","scl"                      ,"StTrsMaker","St_tpcdaq_Maker,StTrsMaker","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpc","tpc_T"                   ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
@@ -508,7 +511,7 @@ Int_t StBFChain::Instantiate()
 	    if (userDB) gMessMgr->QAInfo() << " User DataBase == " << PWD.Data() << "/" << userDB << endm;  
 	    dbMk = new St_db_Maker("db",mainDB,userDB);
 	    if (GetOption("tpcDB")) {
-	      GeometryMk = new St_db_Maker("Geometry","MySQL:Geometry");
+	      GeometryMk = new St_db_Maker("Geometry","MySQL:Geometry_tpc");
 	      CalibrationsMk = new St_db_Maker("Calibrations","MySQL:Calibrations_tpc");
 	      //            ConditionsMk = new St_db_Maker("Conditions","MySQL:Conditions");
 	    }
