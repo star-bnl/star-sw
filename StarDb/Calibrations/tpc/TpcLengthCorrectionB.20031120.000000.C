@@ -27,20 +27,20 @@ TDataSet *CreateTable() {
   memset(&row,0,tableSet->GetRowSize()); // 0
   row.nrows      =       nrows;
   row.idx        =           5;
-  row.npar       =          -2;//Track lenths instead of log TPointsBUGPHist964P05ia_dedx
+  row.npar       =          -2;//Track lenths instead of logTPointsBGPHist965P05ia_dedx
   row.min        =           0.;//  default clustering == fcf                     
   row.max        =           0.;//                         
-  row.a[0]	 = 4.78470e-02;//
+  row.a[0]	 =-3.38543e-02;//4.78470e-02;//
   row.a[1]	 = 4.73639e-04;//
   tableSet->AddAt(&row);// 4 -> I
   memset(&row,0,tableSet->GetRowSize()); // 0
   row.nrows      =        nrows;
   row.idx        =            6;
-  row.npar       =            4;//TPointsBUGPHist964P05ia_dedx
-  row.a[0]	 =  7.20752e-03; 
-  row.a[1]	 =  1.95111e-01;
-  row.a[2]	 = -7.14778e-02;
-  row.a[3]	 =  6.93481e-03;
+  row.npar       =            4;//TPointsBGPHist965P05ia_dedx
+  row.a[0]	 =  9.71386e-02; 
+  row.a[1]	 =  1.25457e-01;
+  row.a[2]	 = -5.34360e-02;
+  row.a[3]	 =  5.37993e-03;
   tableSet->AddAt(&row);// 5 -> sigma.I
 #if 0
   memset(&row,0,tableSet->GetRowSize()); // 0
