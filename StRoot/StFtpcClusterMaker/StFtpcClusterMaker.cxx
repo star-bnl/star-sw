@@ -1,5 +1,11 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.53 2003/07/04 00:35:53 perev Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.54 2003/07/15 09:35:41 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.54  2003/07/15 09:35:41  jcs
+// do not re-flavor FTPC drift maps if already flavored to avoid creating
+// memory leak.
+// meomory leak will occur if flavor (i.e. magnetic field) changes within one
+// *.fz file (only possible for MC data)
+//
 // Revision 1.53  2003/07/04 00:35:53  perev
 // Defence against luch of DB info added
 //
@@ -247,12 +253,18 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
   gufld(x,b);
   Double_t gFactor = b[2]/4.980;
 
+  if (gFactor == CurrentgFactor) {
+    gMessMgr->Info()<<"StFtpcClusterMaker::InitRun("<<runnumber<<") - FTPC drift maps are already 'flavored' for gFactor = "<<gFactor<<endm;
+  }    
+  else {
+
   mDbMaker     = (St_db_Maker*)GetMaker("db");
   Int_t dbDate = mDbMaker->GetDateTime().GetDate();
   cout<<"StFtpcClusterMaker: dbDate = "<<dbDate<<endl;
-
   
-  gMessMgr->Info() << "StFtpcClusterMaker::InitRun: gFactor is "<<gFactor<<endm;
+  gMessMgr->Info() << "StFtpcClusterMaker::InitRun("<<runnumber<<") - 'flavor' FTPC drift maps for gFactor = "<<gFactor<<endm;
+  if (CurrentgFactor != 999) gMessMgr->Info() << "StFtpcClusterMaker::InitRun("<<runnumber<<") WARNING !!! possible memory leak"<<endm;
+  CurrentgFactor = gFactor;
   
   // Load the correct FTPC drift maps depending on magnetic field
 
@@ -292,10 +304,13 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
      gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to ffn10kv"<<endm;
   }     
+ } 
   return 0;
 }
 //_____________________________________________________________________________
 Int_t StFtpcClusterMaker::Init(){
+
+  CurrentgFactor = 999;
 
   St_DataSet *ftpc = GetDataBase("ftpc");
   assert(ftpc);
