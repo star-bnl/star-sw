@@ -20,7 +20,7 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
 //
-// $Id: Axis3D.cxx,v 1.12 1999/12/16 00:36:29 fine Exp $ 
+// $Id: Axis3D.cxx,v 1.13 1999/12/16 00:40:17 fine Exp $ 
 //
 
 #include <iostream.h>
@@ -65,7 +65,7 @@
 //    -  move:
 // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/MovePicture.gif"> </P> End_Html 
 //    -  zoom:
-// Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/MovePicture.gif"> </P> End_Html 
+// Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/ZoomPicture.gif"> </P> End_Html 
 //  its 3D view with <left-mouse button> press / move.
 //  The "Zoom" deactivates itself just the user release the <left-mouse button>
 //
@@ -698,6 +698,9 @@ TAxis3D *TAxis3D::ToggleZoom(TVirtualPad *pad)
 //_______________________________________________________________________________________
 
 // $Log: Axis3D.cxx,v $
+// Revision 1.13  1999/12/16 00:40:17  fine
+// new comment-html-gif file introduced
+//
 // Revision 1.12  1999/12/16 00:36:29  fine
 // new comment-html-gif file introduced
 //
