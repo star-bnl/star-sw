@@ -2,9 +2,12 @@
 #ifndef EEmcL3Tracks_h
 #define EEmcL3Tracks_h
 /*********************************************************************
- * $Id: EEmcL3Tracks.h,v 1.3 2003/05/27 19:11:44 zolnie Exp $
+ * $Id: EEmcL3Tracks.h,v 1.4 2003/05/28 21:02:49 zolnie Exp $
  *********************************************************************
  * $Log: EEmcL3Tracks.h,v $
+ * Revision 1.4  2003/05/28 21:02:49  zolnie
+ * added getNumberOfTracks method
+ *
  * Revision 1.3  2003/05/27 19:11:44  zolnie
  * added dE/dx info
  *
@@ -76,8 +79,8 @@ public:
 
   void       getVertex(float& x,float& y,float& z) {x=mVertX; y=mVertY; z=mVertZ;};
   Float_t    getdEdx  (int i) { return (0<=i && i<mNTracks) ?  mDedx[i] : -MAXFLOAT; }
+  Int_t      getNumberOfTracks() { return mNTracks; }
   EEmcHelix* getHelix (int i) ; 
-  
 
   void print(FILE *f = stdout) const;
 
