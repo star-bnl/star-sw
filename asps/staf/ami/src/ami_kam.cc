@@ -90,6 +90,7 @@ void kam_ami_call_()
       tnames[np-1] = ku_gets();
    }
 	STAFCV_T status = ami_call(pname,npars-1,tnames);
+   delete[] tnames;
 }
 /*------------------------------------*/
 STAFCV_T ami_call(char* name,long ntabs,char **tnames)
@@ -104,7 +105,7 @@ STAFCV_T ami_call(char* name,long ntabs,char **tnames)
 //- WARNING!!! - PAM status already recorded!!!
    return ami->callInvoker(name, tbls);
 // if( !ami->callInvoker(name, tbls) ){
-//    EML_ERROR(KAM_METHOD_FAILURE);
+//    EML_FAILURE(KAM_METHOD_FAILURE);
 // }
 // EML_SUCCESS(STAFCV_OK);
 
@@ -132,7 +133,7 @@ STAFCV_T amiinvoker_rank(char* name)
    amiInvoker* pam;		/* amiInvoker object */
 
    if( NULL == (pam = ami->findInvoker(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    printf("AMI:\tAnalysis module rank = %d \n",pam->rank());
    EML_SUCCESS(STAFCV_OK);
@@ -162,7 +163,7 @@ STAFCV_T amiinvoker_show(char* name, char* opts)
    amiInvoker* pam;		/* amiInvoker object */
 
    if( NULL == (pam = ami->findInvoker(name)) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      EML_FAILURE(KAM_OBJECT_NOT_FOUND);
    }
    int rank = pam->rank();
    char *c;
@@ -200,7 +201,7 @@ void kam_amiinvoker_init_()
 /*------------------------------------*/
 STAFCV_T amiinvoker_init(char* name)
 {
-   EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+   EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -222,7 +223,7 @@ void kam_amiinvoker_start_()
 /*------------------------------------*/
 STAFCV_T amiinvoker_start(char* name)
 {
-   EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+   EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 
 /*
@@ -244,6 +245,6 @@ void kam_amiinvoker_stop_()
 /*------------------------------------*/
 STAFCV_T amiinvoker_stop(char* name)
 {
-   EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+   EML_FAILURE(KAM_NOT_YET_IMPLEMENTED);
 }
 

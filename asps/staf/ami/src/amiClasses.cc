@@ -26,7 +26,7 @@ amiInvoker:: amiInvoker(const char * name, long rank
 		: socObject(name, "amiInvoker") {
    myPtr = (SOC_PTR_T)this;
    if( rank != specs._length){
-      EML_LOG_ERROR(BAD_MODULE_RANK);
+      EML_WARNING(BAD_MODULE_RANK);
       myRank=-1; /*-AMI_E_NO_MODULE_RANK-*/
       return;
    }
@@ -69,13 +69,21 @@ char * amiInvoker::  listing () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char amiInvoker :: implementsInterface (const char * iface) {
+   if( 0 == strcmp("amiInvoker",iface)
+   ||  socObject::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
 STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
 
    STAFCV_T status;
 
 //- Check number of tables in sequence.
    if( tbl._length != rank() ){
-      EML_PRINTF("PAM = (%s) \n",name());
+      EML_CONTEXT("PAM = (%s) \n",name());
       EML_ERROR(WRONG_PAM_RANK);
    }
 //- Create arrays of TAS-structs for tables.
@@ -88,7 +96,7 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
    for( int i=0;i<tbl._length;i++ ){
 //- Check types of tables in sequence.
       if( !((tbl._buffer[i])->isType(myTblSpecs[i])) ){
-	 EML_PRINTF("table #%d (%s) is wrong type\n",i
+	 EML_CONTEXT("table #%d (%s) is wrong type\n",i
 			,(tbl._buffer[i])->name());
 	 delete[] h;
 	 delete[] d;
@@ -171,6 +179,14 @@ amiBroker:: ~amiBroker() {
 //:**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char amiBroker :: implementsInterface (const char * iface) {
+   if( 0 == strcmp("amiBroker",iface)
+   ||  socFactory::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
 STAFCV_T amiBroker:: callInvoker (const char * name
 		, const STRING_SEQ_T& tnames) {
 
@@ -189,6 +205,8 @@ STAFCV_T amiBroker:: callInvoker (const char * name
    tables._length = tnames._length;
    tables._maximum = tnames._maximum;
    tables._buffer = new tdmTable* [tnames._maximum];
+
+//				HACK -- MUST BE DELETED LATER!!!
 
    char *c,*cc;
    char *table_name=NULL;
@@ -220,7 +238,7 @@ STAFCV_T amiBroker:: callInvoker (const char * name
 	       EML_ERROR(CANT_CREATE_OBJECT);
 	    }
 	    else {
-	       EML_MESSAGE(WARNING: Table created with 1 row.);
+	       EML_WARNING(Table created with 1 row.);
 	    }
 	 }
       }
