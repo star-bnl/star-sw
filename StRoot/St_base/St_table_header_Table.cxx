@@ -1,10 +1,10 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: St_table_header_Table.cxx,v 1.4 2000/03/30 05:20:52 fine Exp $
+// $Id: St_table_header_Table.cxx,v 1.5 2000/04/13 23:12:07 fine Exp $
 //
 #include "St_table_header_Table.h"
 /////////////////////////////////////////////////////////////////////////
 //                                                                     //
-//  Class St_table_header fcreate and ill the STAF "table header"      //
+//  Class St_table_header creates and fills the STAF "table header"    //
 //  to call STAF module (pams) properly                                //
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
@@ -12,7 +12,7 @@
 #include "Stypes.h"
 
 TTableDescriptor *St_table_header::fgColDescriptors = 0;
-TableClassImp(St_table_header,table_head)
+TableClassImp(St_table_header,table_head_st)
 
 //______________________________________________________________________________
 St_table_header::St_table_header(const TTable *table) 
@@ -52,6 +52,9 @@ void *ReAllocate(table_head_st *header, Int_t newsize)
 
 //______________________________________________________________________________
 // $Log: St_table_header_Table.cxx,v $
+// Revision 1.5  2000/04/13 23:12:07  fine
+// Bug fix
+//
 // Revision 1.4  2000/03/30 05:20:52  fine
 // bug fixed
 //
