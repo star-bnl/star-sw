@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list_all.C,v 1.2 1999/09/21 15:07:03 kathy Exp $ 
+// $Id: bfcread_hist_list_all.C,v 1.3 1999/11/03 17:13:00 kathy Exp $ 
 // $Log: bfcread_hist_list_all.C,v $
+// Revision 1.3  1999/11/03 17:13:00  kathy
+// fixed macros so they use StIOMaker instead of StTreeMaker
+//
 // Revision 1.2  1999/09/21 15:07:03  kathy
 // change to have notes on input values at top of each macro, also clean up notes on usage and remove the usage of method St_QA_Maker::SetPntrToHistUtil which is not going to be used now that I made St_QA_Maker totally independent of the histogram printing
 //
@@ -30,25 +33,27 @@ void bfcread_hist_list_all(const char
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
-    gSystem->Load("StTreeMaker");
+    gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
    
 
-//  Input Tree
-  StTreeMaker *treeMk = new StTreeMaker("treeRead",MainFile);
-  treeMk->SetIOMode("r");
-  treeMk->SetDebug();
-  treeMk->SetBranch("*",0,"0");  		//deactivate all branches
-  treeMk->SetBranch("histBranch",0,"r");	//activate histBranch
+// setup chain with IOMaker - can read in .dst.root, .dst.xdf files
+  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
+  IOMk->SetDebug();
+  IOMk->SetIOMode("r");
+  IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+//  IOMk->SetBranch("tpc_tracks",0,"r"); //activate tpc_tracks Branch
+//  IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
+  IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch
 
 
 // --- now execute chain member functions
-  treeMk->Init();
-  treeMk->Clear();
-  treeMk->Make();
+  IOMk->Init();
+  IOMk->Clear();
+  IOMk->Make();
 
 // Now look at histograms:
-    Event = treeMk->GetDataSet("hist");
+    Event = IOMk->GetDataSet("hist");
       if (Event) {
 	cout << "Here is list of all histograms: " << endl;
           Event->ls(9); 

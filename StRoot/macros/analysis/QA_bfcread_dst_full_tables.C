@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_full_tables.C,v 1.6 1999/07/30 17:05:49 kathy Exp $
+// $Id: QA_bfcread_dst_full_tables.C,v 1.7 1999/11/03 17:12:58 kathy Exp $
 // $Log: QA_bfcread_dst_full_tables.C,v $
+// Revision 1.7  1999/11/03 17:12:58  kathy
+// fixed macros so they use StIOMaker instead of StTreeMaker
+//
 // Revision 1.6  1999/07/30 17:05:49  kathy
 // changed to use goto in loop instead of for loop because of CINT problems
 //
@@ -40,7 +43,7 @@ class St_DataSet;
 St_DataSet *Event;
 
 
-void QA_bfcread_dst_full_tables(Int_t nevents=20, 
+void QA_bfcread_dst_full_tables(Int_t nevents=15, 
  const char *MainFile=
  "/disk00000/star/test/dev/tfs_Linux/Wed/year_2a/psc0208_01_40evts.dst.root",
  const char *fname="qa_full_tables.txt")
@@ -50,25 +53,30 @@ void QA_bfcread_dst_full_tables(Int_t nevents=20,
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
-  gSystem->Load("StTreeMaker");
+  gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
 
   ofstream fout(fname);
 
+// setup chain with IOMaker - can read in .dst.root, .dst.xdf files
+  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
+  IOMk->SetDebug();
+  IOMk->SetIOMode("r");
+  IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+//  IOMk->SetBranch("tpc_tracks",0,"r"); //activate tpc_tracks Branch
+//  IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
+  IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch
+
+  
   fout << "QAInfo: " << MainFile << endl << endl;
   cout << "QAInfo: " << MainFile << endl << endl;
 
 //  Setup top part of chain
   chain = new StChain("bfc");
   chain->SetDebug();
+
    
-//  Input Tree
-  StTreeMaker *treeMk = new StTreeMaker("treeRead",MainFile);
-  treeMk->SetIOMode("r");
-  treeMk->SetDebug();
-  treeMk->SetBranch("*",0,"0");  		//deactivate all branches
-  treeMk->SetBranch("dstBranch",0,"r");	//activate EventBranch
-  
+
 // --- now execute chain member functions
   chain->Init();
  
@@ -99,7 +107,7 @@ void QA_bfcread_dst_full_tables(Int_t nevents=20,
   Int_t cnt_g2t_rch_hit=0;
   Int_t cnt_kinkVertex=0;
   Int_t cnt_ev0_eval=0;
-
+  Int_t cnt_l3Track=0;
 
 // Loop over events
   int iret=0,iev=0;
@@ -162,6 +170,8 @@ void QA_bfcread_dst_full_tables(Int_t nevents=20,
                cnt_kinkVertex++;
              if (strcmp(obj->GetName(),"ev0_eval")==0) 
                cnt_ev0_eval++;
+             if (strcmp(obj->GetName(),"l3Track")==0) 
+               cnt_l3Track++;
            }
          }
        }
@@ -236,6 +246,8 @@ void QA_bfcread_dst_full_tables(Int_t nevents=20,
   cout  << "QAInfo: total # g2t_rch_hit tables = " << cnt_g2t_rch_hit << endl;
   fout  << "QAInfo: total # g2t_rch_hit tables = " << cnt_g2t_rch_hit << endl;
 
+  cout << "QAInfo: total # l3Track tables = " << cnt_l3Track << endl;
+  fout << "QAInfo: total # l3Track tables = " << cnt_l3Track << endl;
 
 // ------------------------------------------------------------
 
