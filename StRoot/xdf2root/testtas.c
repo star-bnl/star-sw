@@ -16,12 +16,14 @@ TBS ...
 #include <string.h>
 #define DS_PRIVATE
 #include "dsxdr.h"
+/*
 #ifdef sun
 int printf(char *fmt, ...);
 int fprintf(FILE *stream, char *fmt, ...);
 char *memset(void *ptr, int val , int n);
 void fclose(FILE *stream);
 #endif
+*/
 
 typedef struct base_type {float x, y, z;}BASE_TYPE;
 #define BASE_DECL "struct base_type {float x, y, z;}"
