@@ -3,9 +3,8 @@
 
 #include <iostream.h>
 #include <stdlib.h>
-#include "TObject.h"
 
-class StiDedxCalculator : public TObject
+class StiDedxCalculator 
 {
   // Helper class used to perform the calculation of a truncated 
   // dedx average using low and high cuts on the samples.
@@ -14,7 +13,7 @@ class StiDedxCalculator : public TObject
  public:
 
   StiDedxCalculator();
-  ~StiDedxCalculator(){};
+  virtual ~StiDedxCalculator(){};
   
   void  setRange(float min, float max)  { low = min; high = max; };
   
@@ -25,9 +24,6 @@ class StiDedxCalculator : public TObject
 
   double low;
   double high;
-
-  ClassDef(StiDedxCalculator, 1)
-
 };
 
 #endif

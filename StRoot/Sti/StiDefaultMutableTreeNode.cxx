@@ -1,6 +1,3 @@
-#include "StiDefaultMutableTreeNode.h"
-
-ClassImp(StiDefaultMutableTreeNode)
 //-----------------------------------------------------------------------------
 // A <code>StiDefaultMutableTreeNode</code> is a general-purpose node in a tree data
 // structure. A tree node may have at most one parent and 0 or more children.
@@ -14,10 +11,6 @@ ClassImp(StiDefaultMutableTreeNode)
 // <p>
 // This class provides enumerations for efficiently traversing a tree or
 // subtree in various orders or for following the path between two nodes.
-// A <code>StiDefaultMutableTreeNode</code> may also hold a reference to a user object, the
-// use of which is left to the user.  Asking a <code>StiDefaultMutableTreeNode</code> for its
-// string representation with <code>toString()</code> returns the string
-// representation of its user object.
 // <p>
 // <b>This is not a thread safe class.</b>If you intend to use
 // a StiDefaultMutableTreeNode (or a tree of TreeNodes) in more than one thread, you
@@ -38,74 +31,36 @@ ClassImp(StiDefaultMutableTreeNode)
 //
 //-----------------------------------------------------------------------------
 
+#include "StiDefaultMutableTreeNode.h"
+
 
 StiDefaultMutableTreeNode::StiDefaultMutableTreeNode()
-//--------------------------------------------------------------
-// Creates a tree node that has no parent and no children, but which
-// allows children.
-//--------------------------------------------------------------
+  //--------------------------------------------------------------
+  // Creates a tree node that has no parent and no children, but which
+  // allows children.
+  //--------------------------------------------------------------
 {
-  initialize(0,true,1);
+  initialize(true);
 }
 
-StiDefaultMutableTreeNode::StiDefaultMutableTreeNode(TObject *  userObj) 
-//--------------------------------------------------------------
-// Creates a tree node with no parent, no children, but which allows 
-// children, and initializes it with the specified user object.
-// 
-// @param userObject an TObject *  provided by the user that constitutes
-//                   the node's data
-//--------------------------------------------------------------
+StiDefaultMutableTreeNode::StiDefaultMutableTreeNode(bool allowsChild) 
+  //--------------------------------------------------------------
+  // Creates a tree node with no parent, no children
+  // 
+  // @param allowsChildren if true, the node is allowed to have child
+  //        nodes -- otherwise, it is always a leaf node
+  //--------------------------------------------------------------
 {
-  initialize(userObj, true,1);
+  initialize(allowsChild);
 }
 
-StiDefaultMutableTreeNode::StiDefaultMutableTreeNode(TObject *  userObj, bool allowsChild) 
-     //--------------------------------------------------------------
-     // Creates a tree node with no parent, no children, initialized with
-     // the specified user object, and that allows children only if
-     // specified.
-     // 
-     // @param userObject an TObject *  provided by the user that constitutes
-     //        the node's data
-     // @param allowsChildren if true, the node is allowed to have child
-     //        nodes -- otherwise, it is always a leaf node
-     //--------------------------------------------------------------
-{
-  initialize(userObj, allowsChild, 1);
-}
-
-StiDefaultMutableTreeNode::StiDefaultMutableTreeNode(TObject *  userObj,
-						     int        childArraySize) 
-     //--------------------------------------------------------------
-     // Creates a tree node with no parent, no children, initialized with
-     // the specified user object, and that allows children, with an initial
-     // number as specified
-     // 
-     // @param userObject an TObject *  provided by the user that constitutes
-     //        the node's data
-     // @param childrenArraySize initial number of children
-     //--------------------------------------------------------------
-{
-  initialize(userObj, true, childArraySize);
-}
-
-void StiDefaultMutableTreeNode::initialize(TObject *  userObj, 
-					   bool    allowsChild,
-					   int        childrenArraySize)
+void StiDefaultMutableTreeNode::initialize(bool allowsChild)
 {
   //-------------------------------------------------------------------------------
   //  Initialize data members of the class
   //-------------------------------------------------------------------------------
-  
   parent         = 0;
   allowsChildren = allowsChild;
-  userObject     = userObj;
-  if (allowsChildren)
-    {
-      int size = childrenArraySize > 0 ? childrenArraySize : 1;
-      children = new TObjArray(size);
-    }
 }
 
 
@@ -132,16 +87,19 @@ void StiDefaultMutableTreeNode::insert(StiTreeNode * newChild, int childIndex)
       cout << "StiDefaultMutableTreeNode::insert() - ERROR" << endl
 	   << "     Attempting to insert a node into a node " << endl
 	   << "     which does not accept children" << endl;
+      return;
     }
   else if (newChild == 0) 
     {
       cout << "StiDefaultMutableTreeNode::insert() - ERROR" << endl
 	   << "     Attempting to insert null object " << endl;
+      return;
     } 
   else if (isNodeAncestor(newChild)) 
     {
       cout << "StiDefaultMutableTreeNode::insert() - ERROR" << endl
 	   << "     Attempting to insert node which is an ancestor" << endl;
+      return;
     }
   
   StiDefaultMutableTreeNode * oldParent = (StiDefaultMutableTreeNode *) newChild->getParent();
@@ -151,28 +109,31 @@ void StiDefaultMutableTreeNode::insert(StiTreeNode * newChild, int childIndex)
       oldParent->remove(newChild);
     }
   newChild->setParent(this);
-  if (children == 0) 
-    {
-      children = new TObjArray(1);
-    }
-  children->AddAt(newChild, childIndex);
+  
+  // insert the child at the end of the queue for now....
+  children.push_back(dynamic_cast<StiDefaultMutableTreeNode *>(newChild));
 }
 
 void StiDefaultMutableTreeNode::remove(int childIndex) 
-//--------------------------------------------------------------
-// Removes the child at the specified index from this node's children
-// and sets that node's parent to 0. The child node to remove
-// must be a <code>StiTreeNode *</code>.
-//
-// @param	childIndex	the index in this node's child array
-//				of the child to remove
-// @exception	ArrayIndexOutOfBoundsException	if
-//				<code>childIndex</code> is out of bounds
-//--------------------------------------------------------------
+  //--------------------------------------------------------------
+  // Removes the child at the specified index from this node's children
+  // and sets that node's parent to 0. The child node to remove
+  // must be a <code>StiTreeNode *</code>.
+  //
+  // @param	childIndex	the index in this node's child array
+  //				of the child to remove
+  // @exception	ArrayIndexOutOfBoundsException	if
+  //				<code>childIndex</code> is out of bounds
+  //--------------------------------------------------------------
 {
-  StiDefaultMutableTreeNode * child = (StiDefaultMutableTreeNode * )getChildAt(childIndex);
-  children->RemoveAt(childIndex);
-  child->setParent(0);
+  StiDefaultMutableTreeNodeIterator iter = children.begin();
+  for (int i=0;i<childIndex;i++)
+    iter++;
+  StiDefaultMutableTreeNode * child = *iter;
+  if (child!=0)
+    child->setParent(0);
+  children.erase(iter);
+
 }
 
 //--------------------------------------------------------------
@@ -208,12 +169,7 @@ StiTreeNode *  StiDefaultMutableTreeNode::getParent()
 //--------------------------------------------------------------
 StiTreeNode *  StiDefaultMutableTreeNode::getChildAt(int index) 
 {
-  if (children == 0)
-    {
-      cout << "StiDefaultMutableTreeNode::getChildAt(int index) - ERROR" << endl 
-	   <<     "node has no children" << endl;
-    }
-  return (StiTreeNode * )(*children)[index];
+  return children[index];
 }
 
 //--------------------------------------------------------------
@@ -223,14 +179,7 @@ StiTreeNode *  StiDefaultMutableTreeNode::getChildAt(int index)
 //--------------------------------------------------------------
 int StiDefaultMutableTreeNode::getChildCount() 
 {
-  if (children == 0) 
-    {
-      return 0;
-    } 
-  else 
-    {
-      return children->GetSize();
-    }
+  return children.size();
 }
 
 //--------------------------------------------------------------
@@ -256,7 +205,7 @@ int StiDefaultMutableTreeNode::getIndex(StiTreeNode *  aChild)
     {
       return -1;
     }
-  return children->IndexOf(aChild);	// linear search
+  return 0;//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 }
 
 //--------------------------------------------------------------
@@ -291,32 +240,6 @@ bool StiDefaultMutableTreeNode::getAllowsChildren()
 }
 
 //--------------------------------------------------------------
-// Sets the user object for this node to <code>userObject</code>.
-//
-// @param	userObject	the TObject *  that constitutes this node's 
-//                          user-specified data
-// @see	#getUserObject
-// @see	#toString
-//--------------------------------------------------------------
-void StiDefaultMutableTreeNode::setUserObject(TObject *  object) 
-{
-  userObject = object;
-}
-
-//--------------------------------------------------------------
-// Returns this node's user object.
-//
-// @return	the TObject *  stored at this node by the user
-// @see	#setUserObject
-// @see	#toString
-//--------------------------------------------------------------
-TObject *  StiDefaultMutableTreeNode::getUserObject() 
-{
-  return userObject;
-}
-
-
-//--------------------------------------------------------------
 //  Derived methods
 //--------------------------------------------------------------
 
@@ -348,13 +271,13 @@ void StiDefaultMutableTreeNode::remove(StiTreeNode *  aChild)
       cout << "StiDefaultMutableTreeNode::remove(StiTreeNode *  aChild) - ERROR" << endl 
 	   << "      argument is 0";
     }
-  
-  if (!isNodeChild(aChild)) 
+  StiDefaultMutableTreeNodeIterator iter;
+
+  for (iter=children.begin();iter!=children.end();iter++)
     {
-      cout << "StiDefaultMutableTreeNode::remove(StiTreeNode *  aChild)  - ERROR" << endl 
-	   << "    argument is not a child";
+      if (aChild==*iter)
+	children.erase(iter);
     }
-  remove(getIndex(aChild));	// linear search
 }
 
 //--------------------------------------------------------------
@@ -363,10 +286,7 @@ void StiDefaultMutableTreeNode::remove(StiTreeNode *  aChild)
 //--------------------------------------------------------------
 void StiDefaultMutableTreeNode::removeAllChildren() 
 {
-  for (int i = getChildCount()-1; i >= 0; i--) 
-    {
-      remove(i);
-    }
+  children.erase(children.begin(),children.end());
 }
 
 //--------------------------------------------------------------
@@ -375,13 +295,9 @@ void StiDefaultMutableTreeNode::removeAllChildren()
 //--------------------------------------------------------------
 void StiDefaultMutableTreeNode::removeAllChildrenBut(StiTreeNode *  aChild) 
 {
-  for (int i = getChildCount()-1; i >= 0; i--) 
-    {
-      if (getChildAt(i)!=aChild)
-	{
-	  remove(i);
-	}
-    }
+  children.erase(children.begin(),children.end());
+  if (aChild!=0)
+    children.push_back(dynamic_cast<StiDefaultMutableTreeNode*>(aChild));
 }
 
 

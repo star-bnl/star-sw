@@ -1,8 +1,5 @@
-//Sti
 #include "StiTrack.h"
 #include "StiUnidentifiedTrackFilter.h"
-
-ClassImp(StiUnidentifiedTrackFilter)
 
 StiUnidentifiedTrackFilter::StiUnidentifiedTrackFilter()
 {

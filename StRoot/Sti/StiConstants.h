@@ -1,7 +1,5 @@
 #ifndef StiConstants_HH
 #define StiConstants_HH
-#include "TObject.h"
-
 
 class StiConstants
 {
@@ -11,8 +9,6 @@ class StiConstants
   static int Warning;
   static int Error;
   static int SevereError;
-    
-    ClassDef(StiConstants, 1)
 };
 
 #endif

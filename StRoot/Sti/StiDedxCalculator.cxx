@@ -1,8 +1,5 @@
 #include "StiDedxCalculator.h"
 
-ClassImp(StiDedxCalculator)
-
-
 StiDedxCalculator::StiDedxCalculator()
 {
   setDefaults();
