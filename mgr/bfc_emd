@@ -1,8 +1,8 @@
 #!/usr/local/bin/perl
-# $Id: bfc_emd,v 1.2 2000/08/25 20:09:04 didenko Exp $
+# $Id: bfc_emd,v 1.3 2000/08/25 20:21:42 didenko Exp $
 # $Log: bfc_emd,v $
-# Revision 1.2  2000/08/25 20:09:04  didenko
-# fix input
+# Revision 1.3  2000/08/25 20:21:42  didenko
+# fixed typo
 #
 # Revision 1.1  2000/08/25 19:16:42  didenko
 # bfc foe embedding
@@ -124,7 +124,7 @@ my $NofEvents = 1000;
 my $fzIn  = "fz";
 my $daqIn = "daq";
 
-my $cmd = " root4star -b -q 'bfcMixer.C(" . $NofEvents . ",\"" . $fzIn . ",\"" . $input_fz . ",\"" . $daqIn . ",\"" . $input_file . "\")\'";
+my $cmd = " root4star -b -q 'bfcMixer.C(" . $NofEvents . ",\"" . $fzIn . "\",\"" . $input_fz . "\",\"" . $daqIn . "\",\"" . $input_file . "\")\'";
 print $cmd,"\n";
 system $cmd;
 system 'echo "Finished job execution at" `date` " on " `hostname`'; 
