@@ -38,22 +38,26 @@ ClassImp(St_DataSetIter)
 //////////////////////////////////////////////////////////////////////////
  
 //______________________________________________________________________________
- St_DataSetIter::St_DataSetIter(St_DataSet *l, Bool_t dir)
+ St_DataSetIter::St_DataSetIter(St_DataSet *link, Bool_t dir)
  {
-  fRootDataSet=l; fWorkingDataSet=l;fDepth=1;fMaxDepth=1;
+  fWorkingDataSet= fRootDataSet   =link;
+  fMaxDepth      = fDepth         =1;
   fDataSet=0;
-  fNext = l ? new TIter(l->GetList() ,dir):0;
+  fNext = link ? new TIter(link->GetList() ,dir):0;
  }
  
 //______________________________________________________________________________
- St_DataSetIter::St_DataSetIter(St_DataSet *l, Int_t depth, Bool_t dir)
+ St_DataSetIter::St_DataSetIter(St_DataSet *link, Int_t depth, Bool_t dir)
 { 
-  fRootDataSet=l; fWorkingDataSet=l; fMaxDepth=depth;fDepth=1;fDataSet=0; 
-  fNext = (l)? new TIter(l->GetList() ,dir):0;
+  fRootDataSet = fWorkingDataSet = link; 
+  fMaxDepth    = depth;
+  fDepth       = 1;
+  fDataSet     = 0; 
+  fNext = (link)? new TIter(link->GetList() ,dir):0;
 
   // Create a DataSet iterator to pass all nodes of the 
   //     "depth"  levels
-  //  of  St_DataSet *l  
+  //  of  St_DataSet *link  
 
   if (fMaxDepth != 1) {
      fNextSet[fDepth-1]= fNext;
@@ -330,6 +334,8 @@ void St_DataSetIter::Notify(St_DataSet *)
   //
   //  This dummy method is called when St_DataSetIter::Find dive in "dataset"
   //  to look for thew next level of the dataset's
+  //  printf("void St_DataSetIter::Notify(St_DataSet *) level: %d %s\n",fDepth,ds->GetName());
+  //
 } 
 //______________________________________________________________________________
 Int_t St_DataSetIter::Rmdir(St_DataSet *dataset,Option_t *)
@@ -364,6 +370,7 @@ St_DataSet *St_DataSetIter::Next( EDataSetPass mode)
   if (fMaxDepth==1) fDataSet = fNext ? NextDataSet(*fNext) :0;
   else {
     // Check the whether the next level does exist 
+    Bool_t mustNotify = kFALSE;
     if (fDataSet && (fDepth < fMaxDepth || fMaxDepth ==0) && mode == kContinue ) 
     {
       // create the next level iterator, go deeper
@@ -371,6 +378,7 @@ St_DataSet *St_DataSetIter::Next( EDataSetPass mode)
       // Look for the next level
       if (list && list->GetSize() ) {
          fDepth++;
+         mustNotify = kTRUE;
          if (fDepth >= 100) 
             Error("Next()"
                   ," to many nested levels of your St_DataSet has been detected");
@@ -396,6 +404,7 @@ St_DataSet *St_DataSetIter::Next( EDataSetPass mode)
              fDataSet = set;
         }
       }
+      if (mustNotify && fDataSet) Notify((St_DataSet *)fDataSet);
     }
   }
   return (St_DataSet *)fDataSet;
@@ -477,7 +486,9 @@ St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
         if (yes) 
         {//go down
           Notify(dsnext);
+          fDepth++;
           ds = Find(name+len,dsnext,mkdirflag);
+          fDepth--;
           if (ds) 
              return ds;
         }

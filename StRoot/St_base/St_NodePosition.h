@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
-// $Id: St_NodePosition.h,v 1.8 1999/03/30 22:30:14 fine Exp $
+// $Id: St_NodePosition.h,v 1.9 1999/04/02 23:36:04 fine Exp $
 // $Log: St_NodePosition.h,v $
+// Revision 1.9  1999/04/02 23:36:04  fine
+// Collapsed geometry structures has been implemeted
+//
 // Revision 1.8  1999/03/30 22:30:14  fine
-// Visibility test has been added for Paint method
+//  Visibility test has been added for Paint method
 //
 // Revision 1.7  1999/03/27 22:44:59  fine
 // Working 3D St_node with X3d and OpenGL
@@ -75,6 +78,7 @@ class St_NodePosition  : public TObject /*, public St_DefineSet */ {
         virtual void        Local2Master(Double_t *local, Double_t *master);
         virtual void        Local2Master(Float_t *local, Float_t *master);
         virtual void        Paint(Option_t *option="");
+        virtual void        Print(Option_t *option="");
         virtual void        UpdatePosition(Option_t *option="");
         virtual void        SavePrimitive(ofstream &out, Option_t *option);
 

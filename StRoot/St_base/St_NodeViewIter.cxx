@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/01/99  
-// $Id: St_NodeViewIter.cxx,v 1.3 1999/03/29 19:25:26 fine Exp $
+// $Id: St_NodeViewIter.cxx,v 1.4 1999/04/02 23:36:05 fine Exp $
 // $Log: St_NodeViewIter.cxx,v $
+// Revision 1.4  1999/04/02 23:36:05  fine
+// Collapsed geometry structures has been implemeted
+//
 // Revision 1.3  1999/03/29 19:25:26  fine
 // Visibility flag have been activated. Some working correction
 //
@@ -28,7 +31,8 @@ St_NodePosition *St_NodeViewIter::GetPosition(Int_t level)
   Int_t thisLevel = level;
   if (!thisLevel) thisLevel = fDepth;
   St_NodePosition *pos = 0;
-  if (m_Positions) pos=(St_NodePosition *)m_Positions->At(thisLevel);
+  if (m_Positions) 
+     pos=(St_NodePosition *)m_Positions->At(thisLevel);
   return pos;
 }
 
@@ -46,8 +50,8 @@ St_NodePosition St_NodeViewIter::operator[](Int_t level)
 //______________________________________________________________________________
 void St_NodeViewIter::Notify(St_DataSet *set)
 {
-  St_NodeView     *view       = (St_NodeView *) set;
-  St_NodePosition *position   = view->GetPosition();
+  St_NodeView     *view         = (St_NodeView *) set;
+  St_NodePosition *position     = view->GetPosition();
   if (!m_Positions) m_Positions = new TClonesArray("St_NodePosition",100);
   St_NodePosition *newPosition=UpdateTempMatrix(position);
 //  m_Positions->AddAtAndExpand(newPosition,fDepth);

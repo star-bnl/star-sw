@@ -3,7 +3,8 @@
 #include "TBrowser.h"
 ClassImp(St_ObjectSet)
 //_____________________________________________________________________________
-St_ObjectSet::St_ObjectSet(const Char_t *name, TObject *obj):St_DataSet(name),fObj(obj){;}
+St_ObjectSet::St_ObjectSet(const Char_t *name, TObject *obj):St_DataSet(name),fObj(obj)
+{SetTitle("St_ObjectSet");}
 //_____________________________________________________________________________
 St_ObjectSet::St_ObjectSet(TObject *obj) : St_DataSet("unknown","St_ObjectSet")
               ,fObj(obj){;}
