@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.28 2000/02/07 19:49:05 kathy Exp $
+// $Id: StEventQAMaker.cxx,v 1.29 2000/02/10 03:19:26 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.29  2000/02/10 03:19:26  lansdell
+// filled new histograms as per St_QA_Maker.cxx
+//
 // Revision 1.28  2000/02/07 19:49:05  kathy
 // removed L3 trigger histograms and methods that created them - this table is no longer standard on the DST; created methods BookHistEval and MakeHistEval for geant vs reco evaluation histograms; filled geant vs reco evaluation histograms for table-based data
 //
@@ -149,11 +152,15 @@ void StEventQAMaker::MakeHistEvSum() {
 
     m_trk_tot_gd->Fill(trk_good/trk_tot); 
     m_glb_trk_tot->Fill(trk_tot);
+    m_glb_trk_tot_sm->Fill(trk_tot);
     m_glb_trk_plusminus->Fill(trk_plus/trk_minus);
-    m_vert_total->Fill(event_summary->numberOfVertices());
+    m_glb_trk_plusminus_sm->Fill(trk_plus/trk_minus);
     m_glb_trk_prim->Fill(event_summary->numberOfGoodPrimaryTracks());
-
+    m_glb_trk_prim_sm->Fill(event_summary->numberOfGoodPrimaryTracks());
+    m_vert_total->Fill(event_summary->numberOfVertices());
+    m_vert_total_sm->Fill(event_summary->numberOfVertices());
     m_mean_pt->Fill(event_summary->meanPt());
+    m_mean_pt_sm->Fill(event_summary->meanPt());
     m_mean_eta->Fill(event_summary->meanEta());
     m_rms_eta->Fill(event_summary->rmsEta());
 
@@ -273,7 +280,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_nfptonpt_momT->Fill(lmevmom,nfitntot);
 	m_nfptonpt_etaT->Fill(eta,nfitntot);
 	// had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
-	// for some strange reason... -CL
+	// for some strange reason... -CPL
 	Float_t phi_deg = 180+globtrk->geometry()->origin().phi()/degree;
 	Float_t psi_deg = globtrk->geometry()->psi()/degree;
 	m_psi_phiT->Fill(phi_deg,psi_deg);
@@ -337,7 +344,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_nfptonpt_momTS->Fill(lmevmom,nfitntot);
 	m_nfptonpt_etaTS->Fill(eta,nfitntot);
 	// had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
-	// for some strange reason... -CL
+	// for some strange reason... -CPL
 	Float_t phi_deg = 180+globtrk->geometry()->origin().phi()/degree;
 	Float_t psi_deg = globtrk->geometry()->psi()/degree;
 	m_psi_phiTS->Fill(phi_deg,psi_deg);
@@ -345,7 +352,7 @@ void StEventQAMaker::MakeHistGlob() {
 
 // now fill all FTPC East histograms ------------------------------------------
       if (globtrk->flag()>700 && globtrk->flag()<800 && globtrk->pidTraits()[0]->detector()==5) {             // didn't loop over pidTraits vector this time
-                               // -> should I have? -CL
+                               // -> should I have? -CPL
 // these are TPC & FTPC
 	m_pointFE->Fill(globtrk->detectorInfo()->numberOfPoints());
 	m_max_pointFE->Fill(globtrk->numberOfPossiblePoints());
@@ -378,7 +385,7 @@ void StEventQAMaker::MakeHistGlob() {
       }
 // now fill all FTPC West histograms ------------------------------------------
       if (globtrk->flag()>700 && globtrk->flag()<800 && globtrk->pidTraits()[0]->detector()==4) {             // didn't loop over pidTraits vector this time
-                               // -> should I have? -CL
+                               // -> should I have? -CPL
 // these are TPC & FTPC
 	m_pointFW->Fill(globtrk->detectorInfo()->numberOfPoints());
 	m_max_pointFW->Fill(globtrk->numberOfPossiblePoints());
@@ -412,7 +419,9 @@ void StEventQAMaker::MakeHistGlob() {
     }
   }
   m_globtrk_tot->Fill(cnttrk);
+  m_globtrk_tot_sm->Fill(cnttrk);
   m_globtrk_good->Fill(cnttrkg);
+  m_globtrk_good_sm->Fill(cnttrkg);
 }
 
 //_____________________________________________________________________________
@@ -429,7 +438,7 @@ void StEventQAMaker::MakeHistDE() {
     StSPtrVecTrackPidTraits &trkPidTr = theTrack->pidTraits();
     if (trkPidTr.size() > 0) {
 
-      //  should use dynamic_cast, but will crash in root4star (why?) -CL
+      //  should use dynamic_cast, but will crash in root4star (why?) -CPL
       //StDedxPidTraits *dedxPidTr = dynamic_cast<StDedxPidTraits*>(trkPidTr[0]);
       StDedxPidTraits *dedxPidTr = (StDedxPidTraits*)(trkPidTr[0]);
       if (dedxPidTr) {
@@ -474,6 +483,7 @@ void StEventQAMaker::MakeHistPrim() {
   if (primVtx) {
     cnttrk = primVtx->numberOfDaughters();
     m_primtrk_tot->Fill(cnttrk);
+    m_primtrk_tot_sm->Fill(cnttrk);
 
     for (UInt_t i=0; i<primVtx->numberOfDaughters(); i++) {
       StTrack *primtrk = primVtx->daughter(i);
@@ -499,7 +509,7 @@ void StEventQAMaker::MakeHistPrim() {
 
 	// need to find position on helix closest to first point on track since
 	// the primary vertex is used as the first point on helix for primary
-	// tracks -CL
+	// tracks -CPL
 	double s = primtrk->geometry()->helix().
 	           pathLength(primtrk->detectorInfo()->firstPoint());
 	StThreeVectorF dif = primtrk->detectorInfo()->firstPoint() -
@@ -555,6 +565,7 @@ void StEventQAMaker::MakeHistPrim() {
       }
     }
     m_primtrk_good->Fill(cnttrkg);
+    m_primtrk_good_sm->Fill(cnttrkg);
   }
 }
 
@@ -567,14 +578,14 @@ void StEventQAMaker::MakeHistGen() {
 /*
   if (Debug()) cout << " *** in StEventQAMaker - filling particle histograms " << endl;
 
-  // THIS IS NOT FINISHED AND WILL NOT COMPILE YET! -CL
+  // THIS IS NOT FINISHED AND WILL NOT COMPILE YET! -CPL
 
   StSPtrVecTrackNode &theNodes = event->trackNodes();
   Int_t nchgpart = 0;
   Int_t totpart = 0;
 
   for (UInt_t i=0; i<theNodes.size(); i++) {
-    StTrack *theTrack = theNodes[i]->track(global);  // need primary too? -CL
+    StTrack *theTrack = theNodes[i]->track(global);  // need primary too? -CPL
     if (!theTrack) continue;
     totpart++;
     StParticleDefinition *part = theTrack->fitTraits().pidHypothesis();
@@ -599,7 +610,9 @@ void StEventQAMaker::MakeHistGen() {
     }
   }
   m_H_npart->Fill(totpart);
+  m_H_npart_sm->Fill(totpart);
   m_H_ncpart->Fill(nchgpart);
+  m_H_ncpart_sm->Fill(nchgpart);
 */
 }
 
@@ -644,7 +657,7 @@ void StEventQAMaker::MakeHistPID() {
 /*
   if (Debug()) cout << " *** in StEventQAMaker - filling PID histograms " << endl;
   
-  // THIS IS NOT FINISHED AND WILL NOT COMPILE YET! -CL
+  // THIS IS NOT FINISHED AND WILL NOT COMPILE YET! -CPL
 
   StPrimaryVertex *primVtx = event->primaryVertex();
   UInt_t daughters=0;
@@ -663,7 +676,7 @@ void StEventQAMaker::MakeHistPID() {
     if (!theTrack) continue;
     StTrackPidTraits *trkPidTr = theTrack->pidTraits()[0];
     if (trkPidTr) {
-      //  should use dynamic_cast, but will crash in root4star (why?) -CL
+      //  should use dynamic_cast, but will crash in root4star (why?) -CPL
       //StDedxPidTraits *dedxPidTr = dynamic_cast<StDedxPidTraits*>(trkPidTr);
       StDedxPidTraits *dedxPidTr = (StDedxPidTraits*)(trkPidTr);
       if (dedxPidTr) {
@@ -679,7 +692,7 @@ void StEventQAMaker::MakeHistPID() {
 
       if (primtrk->flag()>0) {
 */
-/* ===== Old DST table-based code... -CL
+/* ===== Old DST table-based code... -CPL
 
   // spectra-PID diagnostic histograms
   St_dst_track      *primtrk     = (St_dst_track     *) dstI["primtrk"];
@@ -817,6 +830,7 @@ void StEventQAMaker::MakeHistVertex() {
             xiVtx.size() + kinkVtx.size(); //this gives 3 less than the DSTs!!
                                            //->needs to be fixed !!!
   m_v_num->Fill(cntrows);
+  m_v_num_sm->Fill(cntrows);
 }
 
 //_____________________________________________________________________________
@@ -873,7 +887,7 @@ void StEventQAMaker::MakeHistPoint() {
     totalHits += svtHits->numberOfHits();
   }
   if (ftpcHits) {
-    // it's better to do this with det_id, but need to code -CL
+    // it's better to do this with det_id, but need to code -CPL
     for (UInt_t i=0; i<10; i++)
       ftpcHitsW += ftpcHits->plane(i)->numberOfHits();
     for (UInt_t j=10; j<20; j++)
@@ -888,6 +902,8 @@ void StEventQAMaker::MakeHistPoint() {
     totalHits += ssdHits->numberOfHits();
   }
   m_pnt_tot->Fill(totalHits);
+  m_pnt_tot_med->Fill(totalHits);
+  m_pnt_tot_sm->Fill(totalHits);
 }
 
 //_____________________________________________________________________________
@@ -907,8 +923,8 @@ void StEventQAMaker::MakeHistV0Eval() {
 /*
   if (Debug()) cout << " *** in StEventQAMaker - filling ev0_eval histograms " << endl;
 
-  // THIS IS NOT FINISHED AND WILL NOT COMPILE YET! -CL
-  // This table does not seem to exist in the new StEvent. -CL
+  // THIS IS NOT FINISHED AND WILL NOT COMPILE YET! -CPL
+  // This table does not seem to exist in the new StEvent. -CPL
 
   St_DataSetIter dstI(dst);           
 
