@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- * $Id: EEmcSmdGeom.h,v 1.2 2004/02/03 22:57:54 jwebb Exp $
+ * $Id: EEmcSmdGeom.h,v 1.3 2004/07/01 15:35:50 jwebb Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -25,6 +25,11 @@
  *****************************************************************************
  *
  * $Log: EEmcSmdGeom.h,v $
+ * Revision 1.3  2004/07/01 15:35:50  jwebb
+ * Added placeholder method getIntersection(Int_t,Float_t,Float_t).  For now
+ * it just calls the getIntersection with strips converted to integers.
+ * Later we will write code to handle fractional strips.
+ *
  * Revision 1.2  2004/02/03 22:57:54  jwebb
  * Added StEEmcSmdGeom::instance(), which is sort of needed...
  *
@@ -162,7 +167,12 @@ class EEmcSmdGeom : public TObject {
   //   fiducial area of the detector.  Note: the z-component returned
   //   will be the average z of the U and V detector planes.
   //
+  // For now, ignore fractional position w/in strip.  Placeholder code
+  //   for when we do it right.
+  //
   TVector3 getIntersection ( Int_t iSec, Int_t iUStrip, Int_t iVStrip );
+  TVector3 getIntersection ( Int_t iSec, Float_t iUStrip, Float_t iVStrip )
+    { return getIntersection( iSec, (Int_t)iUStrip, (Int_t)iVStrip ); }
   TVector3 getIntersection ( StructEEmcStrip *u, StructEEmcStrip *v );
   // 
   // Return the number of strips for the specified orientation for this
