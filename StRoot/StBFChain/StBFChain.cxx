@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.129 2000/08/15 23:57:12 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.130 2000/08/18 21:17:00 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -423,7 +423,7 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "StV0Maker" && GetOption("Ev03")) mk->SetMode(1); // Turn on alternative V0 method
 	  if (maker == "St_trg_Maker") {
 	    Int_t mode = 0;
-	    if (GetOption("Phyiscs"))   mode += 1;
+	    if (GetOption("Physics"))   mode += 1;
 	    if (GetOption("LaserTest")) mode += 2;
 	    if (mode) mk->SetMode(mode);
 	  }
