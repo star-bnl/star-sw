@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtInverseProducts.cc,v 1.1 2000/06/15 20:04:54 caines Exp $
+ * $Id: StSvtInverseProducts.cc,v 1.2 2000/07/11 18:36:15 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtInverseProducts.cc,v $
+ * Revision 1.2  2000/07/11 18:36:15  caines
+ * Updates to save more of sequence for fitting
+ *
  * Revision 1.1  2000/06/15 20:04:54  caines
  * Initial versions of sequence adjusting codes
  *
@@ -82,9 +85,9 @@ void StSvtInverseProducts::FindInvProducts( int PedOffSet, int Anode)
 	     k = (int)adcValue[j] - PedOffSet;
 	   }
 	   if( k >= 0 && k < 13) mProdOfInvProb *= mProbTable[k]; 
-	   else if(k >= -13 && k < 0) mProdOfInvProb *= (1 - mProbTable[abs(k)]);
+	   else if(k >= -13 && k < 0) mProdOfInvProb *= 1/(1 - 1/mProbTable[abs(k)]);
 	   else if(k > 13) mProdOfInvProb *= mProbTable[13];
-	   else  mProdOfInvProb *= (1 - mProbTable[13]);
+	   else  mProdOfInvProb *= 1/(1 - 1/mProbTable[13]);
 	   }
          //cout<<mProdOfInvProb<<endl;
 	 // cout<< log(mProdOfInvProb)<<endl;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.2 2000/07/03 02:07:56 perev Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.3 2000/07/11 18:36:15 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.3  2000/07/11 18:36:15  caines
+ * Updates to save more of sequence for fitting
+ *
  * Revision 1.2  2000/07/03 02:07:56  perev
  * StEvent: vector<TObject*>
  *
@@ -87,6 +90,7 @@ Int_t StSvtSeqAdjMaker::Init()
   mSvtPedSub = new StSvtPedSub();
   ok = mSvtPedSub->ReadFromFile( mPedFile, mSvtEvent);
 
+  mSvtEvent->setPedOffset(mPedOffSet);
   return  StMaker::Init();
   
 
@@ -252,9 +256,14 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int Anode){
       }
       if( count2 > m_n_seq_hi && count1 > m_n_seq_lo){
 	//	cout << "Adjusting Sequences for Anode=" << Anode<<  endl;
-	tempSeq1[nSeqNow].startTimeBin = startTimeBin + j - count1;
-	tempSeq1[nSeqNow].length=count1;
-	tempSeq1[nSeqNow].firstAdc=&adc[j - count1];
+	tempSeq1[nSeqNow].firstAdc=&adc[j- count1 - 3];
+	tempSeq1[nSeqNow].startTimeBin = startTimeBin + j - count1 -3;
+	if( tempSeq1[nSeqNow].startTimeBin < 0){
+	  tempSeq1[nSeqNow].startTimeBin=0;
+	}
+	tempSeq1[nSeqNow].length=count1+5;
+	if( tempSeq1[nSeqNow].length + tempSeq1[nSeqNow].startTimeBin  > 128) 
+	  tempSeq1[nSeqNow].length=128-tempSeq1[nSeqNow].startTimeBin;
 	nSeqNow++;
       }
     }
@@ -277,7 +286,7 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int Anode){
   // counts that do not have the shape of noise
 
   int nSeqBefore, nSeqNow, count;
-  int stTimeBin, len, status;
+  int startTimeBin, len, status;
   StSequence* Sequence;
   unsigned char* adc;
 
@@ -290,29 +299,35 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int Anode){
       
       for(int Seq = 0; Seq < nSeqBefore; Seq++) 
          {
-          stTimeBin =Sequence[Seq].startTimeBin; 
+          startTimeBin =Sequence[Seq].startTimeBin; 
           len = Sequence[Seq].length;
           adc = Sequence[Seq].firstAdc;
 
             for(int j = 0 ; j < len; j++)
 	      { 
                 count = 0;
-                tempBuffer = mInvProd->GetBuffer(stTimeBin + j);
+                tempBuffer = mInvProd->GetBuffer(startTimeBin + j);
 
                 while(tempBuffer > m_inv_prod_lo && j < len)
 		  {
                     ++count;
                     ++j;
-                    tempBuffer = mInvProd->GetBuffer(stTimeBin + j);
+                    tempBuffer = mInvProd->GetBuffer(startTimeBin + j);
                     if(count >  m_n_seq_lo && (tempBuffer < m_inv_prod_lo || j == len))
 		      {
-                       	tempSeq1[nSeqNow].startTimeBin = stTimeBin + j - count;
-                  	tempSeq1[nSeqNow].length=count;
-                	tempSeq1[nSeqNow].firstAdc=&adc[j - count];
-                	nSeqNow++;
-	//	cout << "nSeqNow = " <<nSeqNow-1 <<" FirstTimeBin = " <<tempSeq[nSeqNow].startTimeBin << " length = " << Sequence[nSeqNow-1].length  << endl;
+			tempSeq1[nSeqNow].firstAdc=&adc[j- count - 3];
+			tempSeq1[nSeqNow].startTimeBin = startTimeBin + j - count -3;
+			if( tempSeq1[nSeqNow].startTimeBin < 0){
+			  tempSeq1[nSeqNow].startTimeBin=0;
+			}
+			tempSeq1[nSeqNow].length=count+5;
+			if( tempSeq1[nSeqNow].length + 
+			    tempSeq1[nSeqNow].startTimeBin>128)
+			  tempSeq1[nSeqNow].length=128-
+			    tempSeq1[nSeqNow].startTimeBin;
+			nSeqNow++;
                       }
-                   }
+		  }
               }
 	  } // Sequence loop
 
@@ -321,7 +336,7 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int Anode){
 	if( nSeqBefore >0 && nSeqBefore != nSeqNow){
 	  mHybridData->SetListSequences(Anode, mNumOfSeq, tempSeq1);
 	}
-      // cout << "For Anode=" << Anode << " Number of sequnces was=" << nSeqBefore << " Number now=" << nSeqNow << endl;
+	// cout << "For Anode=" << Anode << " Number of sequnces was=" << nSeqBefore << " Number now=" << nSeqNow << endl;
 
  return kStOK;
 }
