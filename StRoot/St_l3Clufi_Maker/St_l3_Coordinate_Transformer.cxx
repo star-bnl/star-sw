@@ -21,8 +21,9 @@ St_l3_Coordinate_Transformer::St_l3_Coordinate_Transformer()
 
     // initialize transformations
     //Use_transformation_provided_by_db() ;
+    //Set_parameters_by_hand() ;
     //Get_parameters_from_db() ;
-    Set_parameters_by_hand() ;
+    Use_transformation_provided_by_db() ;
     //Print_parameters() ;    
 }
 //______________________________
@@ -153,6 +154,9 @@ void St_l3_Coordinate_Transformer::Use_transformation_provided_by_db()
   StGlobalCoordinate* glo   = new StGlobalCoordinate();
   StTpcCoordinateTransform tra(gStTpcDb);
 
+  // shaping time
+  Double_t tau3 = 3 * (gStTpcDb->Electronics()->tau() * 1e-09) * (gStTpcDb->DriftVelocity()) ;
+
   // inner row sector 1 (east)
   padco->setSector(1);
   padco->setRow(5);
@@ -165,7 +169,7 @@ void St_l3_Coordinate_Transformer::Use_transformation_provided_by_db()
   tra(*padco,*glo);
   Double_t z_0 = glo->position().z();
   Double_t lengthPerTb_inner_east = fabs((z_0-z_100)/100) ;
-  drift_length_inner_east = fabs(glo->position().z()+0.5*lengthPerTb_inner_east) ;
+  drift_length_inner_east = fabs(glo->position().z()+0.0*lengthPerTb_inner_east+tau3);
     
   //cout << "sector : " << padco->sector() << "\t"; 
   //cout << "length per tb inner = " << lengthPerTb  << "\t";
@@ -182,7 +186,7 @@ void St_l3_Coordinate_Transformer::Use_transformation_provided_by_db()
   tra(*padco,*glo);
   z_0 = glo->position().z();
   Double_t lengthPerTb_outer_east = fabs((z_0-z_100)/100) ;
-  drift_length_outer_east = fabs(glo->position().z()+0.5*lengthPerTb_outer_east) ;
+  drift_length_outer_east = fabs(glo->position().z()+0.0*lengthPerTb_outer_east+tau3) ;
 
   //cout << "sector : " << padco->sector() << "\t"; 
   //cout << "length per tb outer = " << lengthPerTb  << "\t";
@@ -200,7 +204,7 @@ void St_l3_Coordinate_Transformer::Use_transformation_provided_by_db()
   tra(*padco,*glo);
   z_0 = glo->position().z();
   Double_t lengthPerTb_inner_west = fabs((z_0-z_100)/100) ;
-  drift_length_inner_west = fabs(glo->position().z()-0.5*lengthPerTb_inner_west) ;
+  drift_length_inner_west = fabs(glo->position().z()-0.0*lengthPerTb_inner_west-tau3) ;
 
   //cout << "sector : " << padco->sector() << "\t"; 
   //cout << "length per tb inner = " << lengthPerTb_w  << "\t";
@@ -217,7 +221,7 @@ void St_l3_Coordinate_Transformer::Use_transformation_provided_by_db()
   tra(*padco,*glo);
   z_0 = glo->position().z();
   Double_t lengthPerTb_outer_west = fabs((z_0-z_100)/100) ;
-  drift_length_outer_west = fabs(glo->position().z()-0.5*lengthPerTb_outer_west) ;
+  drift_length_outer_west = fabs(glo->position().z()-0.0*lengthPerTb_outer_west-tau3) ;
 
   //cout << "sector : " << padco->sector() << "\t"; 
   //cout << "length per tb outer = " << lengthPerTb_w  << "\t";
@@ -247,13 +251,16 @@ void St_l3_Coordinate_Transformer::Get_parameters_from_db()
   Double_t outer_effective_driftlength = gStTpcDb->Dimensions()->outerEffectiveDriftDistance();
   Double_t frequency =  gStTpcDb->Electronics()->samplingFrequency();
   Double_t tzero = gStTpcDb->Electronics()->tZero();
+  Double_t tau = gStTpcDb->Electronics()->tau();
+  Double_t shapingtime = gStTpcDb->Electronics()->shapingTime();
     
   cout << "The driftvelocity is set to : " << driftvelocity << endl;
   cout << "The innerdrift is set to    : " << inner_effective_driftlength << endl;
   cout << "The outerdrift is set to    : " << outer_effective_driftlength << endl;
   cout << "The tzero is set to         : " << tzero << endl;
   cout << "Frequency ist set to        : " << frequency << endl;
-
+  cout << "tau                         : " << tau << endl ;  
+  cout << "shapingtime                         : " << shapingtime << endl ;
 
   lengthPerTb = 1 / frequency / (1E6) * driftvelocity ; // cm per timebucket
   drift_length_inner_west = inner_effective_driftlength + 3 * tzero * (1E-9) * driftvelocity  ;  // cm
