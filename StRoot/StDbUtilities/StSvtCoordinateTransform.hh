@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.hh,v 1.6 2001/06/13 16:01:26 caines Exp $
+ * $Id: StSvtCoordinateTransform.hh,v 1.7 2001/08/16 20:24:36 caines Exp $
  *
  * Author: Helen Caines made this on  April 14 2000
  *
@@ -50,11 +50,13 @@ class StSvtWaferCoordinate;
 class StSvtConfig;
 class svg_shape_st;
 class srs_srspar_st;
-
+class StTpcCoordinateTransform;
+class StTpcDb;
 class StSvtCoordinateTransform {
 public:
 
   StSvtCoordinateTransform();
+  StSvtCoordinateTransform(StTpcDb* tpcDbPointer);  
   ~StSvtCoordinateTransform();
   
   //      Raw Data          <-->  Global Coordinate
@@ -79,7 +81,7 @@ public:
   double UnCalcTransLength(double x);
   int IsOnWaferZ( const StThreeVector<double>& x, int HardWarePos);
   int IsOnWaferR(const StThreeVector<double>& x, int HardWarePos);
-
+  StTpcCoordinateTransform* TpcTransform;
 private:
   
   svg_geom_st *mgeom;
@@ -87,16 +89,6 @@ private:
   srs_srspar_st *mparam;
   StSvtConfig *mconfig;
 
-};
-
-inline void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
-							svg_geom_st* geom, 
-							svg_shape_st* shape,
-							StSvtConfig* config){
-  mparam = param;
-  mgeom = geom;
-  mconfig = config;
-  mshape = shape;
 };
 
 #endif
