@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: GenericTripletCut.cxx,v 1.5 2000/08/15 23:24:24 lisa Exp $
+ * $Id: GenericTripletCut.cxx,v 1.6 2001/06/03 21:05:07 willson Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: GenericTripletCut.cxx,v $
+ * Revision 1.6  2001/06/03 21:05:07  willson
+ * Cuts on entrance separation
+ *
  * Revision 1.5  2000/08/15 23:24:24  lisa
  * Fixed small typo in preprocessor directive ifdef
  *
@@ -31,7 +34,8 @@ ClassImp(GenericTripletCut)
 #endif
 
 //__________________
-GenericTripletCut::GenericTripletCut(){
+GenericTripletCut::GenericTripletCut(float EntSepCut){
+  mEntSepCut = EntSepCut;
   mNTripletsPassed = mNTripletsFailed = 0;
 }
 //__________________
@@ -41,8 +45,9 @@ GenericTripletCut::GenericTripletCut(){
 //__________________
 bool GenericTripletCut::Pass(const StHbtTriplet* Triplet){
   bool temp = true;
+  if (mEntSepCut) temp = (Triplet->NominalTpcEntranceSeparation()>mEntSepCut);
   temp ? mNTripletsPassed++ : mNTripletsFailed++;
-  return true;
+  return temp;
 }
 //__________________
 StHbtString GenericTripletCut::Report(){
