@@ -1,11 +1,13 @@
 * created 6/5/98 Kathy Turner
 * editted 6/8/98 Kathy Turner - put tables in correct directories
+*                             - and make so can enter values by hand
 * 
 * **** 
 * This kumac reads from a file and runs gstar then g2t.
-* The input file can be from an event generator or a txt file.
-* The default value of the test program is to read from a txt file.
-*************************************************************
+* The input file can be from an event generator or a txt file 
+* OR: can enter values by hand and use "phase" - use intype=phase
+* 
+* ************************************************************
 * ***** IMPORTANT NOTE *************
 * - See also notes from Pavel Nevski on his WWW page about this:
 * - The extension of the input file (first letter) tells Geant
@@ -19,13 +21,13 @@
 * notes:  
 *   => instead of using an input file, can generate a muon directly using:
 *    phase 1 5 10 10 .95 .95 1.56 1.58 OR
-* OR gkin etc.
-*  but you must edit the kumac below to do it.
+* 
 ******************************************************************
 macro run__
    nev=1 _
    debugger=on _
    input_file=muons_central_2.txt _
+   intype=file _
    output_file=muons_central_2.xdf _
    phystype=muons _
    geomtype=muons _
@@ -110,21 +112,29 @@ def [DEFAULT]
 
 * ************ OPEN INPUT FILE *********************************
 * open input file - this in in GEANT format!
-  user/input tx [input_file]
-  
+ 
+ if [intype].eq.file then
+   user/input tx [input_file]
+   message ' use input file to run '
+ elseif [intype].eq.phase then
+   message ' enter particles to generate by hand '
+ else
+   message 'invalid input type'
+ endif
     
 *************** LOOP OVER EVENTS *****************************
   
    do iev = 1,[nev]
+     
+* if inputting values by hand:
+     if [intype].eq.phase then
+       exec gstar#input_phase
+      endif
  
 *  do for debugging:
-     if [debugger].eq.on then
+     if [debugger].eq.on then 
        next; dcut cave z 225 10 10 .04 .04
      endif
-     
-
-* if you want to generate particles by hand, do it here 
-*   using phase or gkin
      
 * run gstar/g2t - automatically reads next event from input file 
      exec gstar#process_event
