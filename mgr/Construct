@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.124 2003/01/12 21:54:03 perev Exp $
+# $Id: Construct,v 1.125 2003/02/11 21:54:02 jeromel Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
@@ -54,7 +54,7 @@ $INCLUDE = "#" . $include;
 #$EXPORT  = "#.share";
 $EXPORT  = $BUILD . "/.share";
 $LIBPATH = $LIB;
-print "Set LIB = $LIB BIN = $BIN OBJ = $OBJ SHARE = $BUILD\n";
+print "Set LIB = $LIB BIN = $BIN OBJ = $OBJ SHARE = $EXPORT\n";
 print "    INCLUDE = $INCLUDE LIBPATH = $LIBPATH\n";
 my $ROOTLIBS = "";
 my $ROOTGLIBS = "";
@@ -112,7 +112,7 @@ else { $param::keep = 1; }
 
 if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
     $CERNLIBS .= " "
-      . `cernlib geant321 pawlib packlib graflib/X11 packlib mathlib kernlib `;
+      . `cernlib geant321 pawlib packlib graflib/X11 packlib mathlib kernlib`;
     chop($CERNLIBS);
     $Libraries = $CERNLIBS . " ";
     $Libraries .= " " . $FLIBS . " " . $CLIBS . " ";
