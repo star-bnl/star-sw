@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPhysicsDb.h,v 1.2 2000/01/25 22:02:22 lasiuk Exp $
+ * $Id: StRichPhysicsDb.h,v 1.3 2000/02/08 16:29:35 lasiuk Exp $
  *
  * Description:
  *  The two classes defined below, geometryDB and physicsDB,
@@ -21,8 +21,8 @@
  *
  **************************************************************
  * $Log: StRichPhysicsDb.h,v $
- * Revision 1.2  2000/01/25 22:02:22  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:29:35  lasiuk
+ * include gasGainAmplification factor here instead of geometry
  *
  *
  * Revision 1.3  2000/02/08 16:29:35  lasiuk
@@ -43,7 +43,7 @@
 
 #ifndef ST_RICH_PHYSICS_H
 #define ST_RICH_PHYSICS_H
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+
 #include <vector>
 //#include <memory>
 
@@ -58,66 +58,66 @@ using std::vector;
 #include "StRichPhysicsDbInterface.h"
 
 class StRichPhysicsDb : public StRichPhysicsDbInterface {
-    double polia() const;
-    double averageNumberOfInteractions() const;
-    
+public:        
+    static StRichPhysicsDb* getDb();
 
     double version() const;
-    // Efficiency
-    double feedBackPhotonProbability() const;
-    double electronicNoiseLevel() const;    
-    double electronCharge() const;    
-    double photonToPadEfficiency() const;
-    double electronDistribution(int) const;    
-    int    adcThreshold()                const;
-    double maximumElectronEnergy() const;
-    int averagePedestal() const;
-    double adcConversion() const;
-	
-    int adcThreshold() const;
-    int adcChannelWidth() const;
 
-    void   print(ostream& os = cout) const;
+    // Efficiency
+    double photonToPadEfficiency() const;
+    double photoConversionEfficiency() const;
+    double feedBackPhotonProbability() const;
+
+    
+    double maximumElectronEnergy()       const;
+    double polia() const;
+    double averageNumberOfInteractions() const;
+    double electronDistribution(int)     const;    
+    double maximumElectronEnergyProbability()       const;
+    double gasGainAmplification()        const;
+    // Electronics
+    int    averagePedestal()             const;
+    double adcConversion()               const;
+    int    adcThreshold()                const;
+    int    adcChannelWidth()             const;
     double electronicNoiseLevel()        const;    
     double electronCharge()              const;    
-	double mVersion;
-	
-	double mPolia;                  // parameter of Polia distribution
-	double avg_n_inter;            // average number of interactions
-	
-	double phot2pad;               // efficiency of secondary photon hiting CsI pad
-	
-	double phot2elec;              // efficency of a secondary photon kicking out
-	// an electron from CsI
-	
-	double avl2phot;               // probability of feedback photons from avalanche
-	double electric_noise;         // electronic noise simulation 
-	double e_charge;               // charge of electron [coulomb]
+
     void   print(ostream& os = cout)     const;
+    
+public:
+    double mVersion;
+	
+    double mPolia;                 // parameter of Polia distribution
+    double avg_n_inter;            // average number of interactions
+    double mGasGainAmplification;
+    double phot2pad;               // efficiency of secondary photon hiting CsI pad
+    double phot2elec;              // efficency of a secondary photon kicking out
+                                   // an electron from CsI
     double avl2phot;               // probability of feedback photons from avalanche
-	vector<double> e_distribut;  // distribution of e- per interactions
+    double electric_noise;         // electronic noise simulation 
     //double e_charge;               // charge of electron [coulomb]
-	vector<double, allocator<double> > e_distribut;
+    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<double> e_distribut;  // distribution of e- per interactions
-	// contains a serie of increasing numbers related 
-	// to the distribution. (cf.definition in .cxx) 
-	double e_max;                  // maximum value in e_distribut 
+#else
+    vector<double, allocator<double> > e_distribut;
+#endif
 	
-	int pedestal;                  // average channel pedestal
-	double adc_factor;             // multiplication factor for ADC conversion
-	int adc_threshold;             // lower threshold for adc counts
-	int channel_width;             // adc channel width in bits
+    // contains a serie of increasing numbers related 
+    // to the distribution. (cf.definition in .cxx) 
+    double e_max;                  // maximum value in e_distribut 
 	
-    protected:
-	StRichPhysicsDb();
+    int    pedestal;                  // average channel pedestal
+    double adc_factor;                // multiplication factor for ADC conversion
+    int    adc_threshold;             // lower threshold for adc counts
     int    channel_width;             // adc channel width in bits
-    private: 
-	void common_fill();            // common fill between my_fill and star_fill
-	void star_fill();              // fill DB from star central DB 
-	void my_fill();                // fill DB with my own stuff 
+    
+protected:
+    StRichPhysicsDb();
+	
 private: 
-	static StRichPhysicsDb* p2Db;       // handle to only instance 
+    void common_fill();            // common fill between my_fill and star_fill
     void star_fill();              // fill DB from star central DB 
     void my_fill();                // fill DB with my own stuff 
 	
@@ -126,8 +126,9 @@ private:
 inline double StRichPhysicsDb::version() const {return mVersion;}
 inline double StRichPhysicsDb::polia() const { return mPolia;}
 inline double StRichPhysicsDb::averageNumberOfInteractions() const { return avg_n_inter;}
-inline double StRichPhysicsDb::electronCharge() const { return e_charge;}    
+inline double StRichPhysicsDb::photonToPadEfficiency() const { return phot2pad;}
 inline double StRichPhysicsDb::photoConversionEfficiency() const { return phot2elec;}
+inline double StRichPhysicsDb::feedBackPhotonProbability() const { return avl2phot;}
 inline double StRichPhysicsDb::electronicNoiseLevel() const { return electric_noise;}    
 inline double StRichPhysicsDb::maximumElectronEnergy() const { return e_max;}
 inline double StRichPhysicsDb::electronDistribution(int i) const { return e_distribut[i];}    
