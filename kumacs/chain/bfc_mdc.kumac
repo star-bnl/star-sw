@@ -1,5 +1,8 @@
-* $Id: bfc_mdc.kumac,v 1.15 1998/08/03 20:41:58 kathy Exp $
+* $Id: bfc_mdc.kumac,v 1.16 1998/08/07 23:44:51 kathy Exp $
 * $Log: bfc_mdc.kumac,v $
+* Revision 1.16  1998/08/07 23:44:51  kathy
+* made output_file to be used for fzout or evout; removed unnecessary user/input from bfc_util with evgin
+*
 * Revision 1.15  1998/08/03 20:41:58  kathy
 * now use detp geometry instead of bfc_util#bfc_gstar_setup to load settings for gstar
 *
@@ -127,7 +130,7 @@
 * svm        - tpc and svt track matching
 * egr        - refit global tracks
 * ev0        - Strange particle reconstruction
-* fzout      - write out fz file from gstar
+* fzout      - write out fz file from gstar (only works if you run gstar!)
 * evout      - write event & run directories into xdf file
 *
 * 
@@ -231,7 +234,8 @@ MACRO bfc_mdc _
  macro/global/create TOP              [TOP]
  macro/global/create geomtype         [geomtype]
  macro/global/create phystype         [phystype]   
- macro/global/create output_fzd_file ""                   'Output fz file'
+ macro/global/create output_fzd_file   ""      'Output fz file'
+ macro/global/create output_xdf_file   ""      'Output xdf file' 
 * trace off
    
 ***********************************************************
@@ -252,6 +256,7 @@ MACRO bfc_mdc _
  message ' *** tpc_sector_last         --> ' [tpc_sector_last]
  message ' *** physics type            --> ' [phystype]
  message ' *** geometry type           --> ' [geomtype]   
+ 
 ***********************************************************
 * BEGINNING STUFF 
 * **********************************************************
@@ -291,7 +296,7 @@ MACRO bfc_mdc _
    endif
    i1 = $format([iev1],i4.4)
    i2 = $format([iev2],i4.4)
-   output_file = [prefix_out]_[i1]_[i2].xdf
+   output_xdf_file = [prefix_out]_[i1]_[i2].xdf
      exec [TOP]/kumacs/chain/bfc_util#bfc_init chain=evout  
    output_fzd_file = [prefix_out]_[i1]_[i2].fzd
      exec [TOP]/kumacs/chain/bfc_util#bfc_init chain=fzout  
