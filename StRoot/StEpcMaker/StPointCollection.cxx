@@ -3,6 +3,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.9  2001/09/24 15:14:55  pavlinov
+// No public constructor for StEmcGeom
+//
 // Revision 1.8  2001/08/18 22:13:49  subhasis
 // phi-cluster attached to cat#3 points corrected
 //
@@ -84,7 +87,7 @@ ClassImp(StPointCollection)
 
 
   StEmcGeom *BemcGeomIn;
-  StEmcGeom *BemcGeomOut;
+//  StEmcGeom *BemcGeomOut;  21-sep-2001 unused
 
 const TString detname[] = {"Bemc", "Bsmde", "Bsmdp"};
 // Extern for sorted emc-smd
@@ -135,8 +138,8 @@ Int_t
 
 // Getting BemcGeom to obtain radius etc
 
-   BemcGeomIn  = new StEmcGeom("bemc");
-   BemcGeomOut = new StEmcGeom("bemc");                                        
+   BemcGeomIn  = StEmcGeom::getEmcGeom("bemc");
+   //   BemcGeomOut = StEmcGeom::getEmcGeom("bemc"); 21-sep-2001 unused
 
   if(TrackToFit.size()>0){
     cout<<" Taking Tracks from StEvent for track matching**"<<endl;
@@ -806,7 +809,7 @@ void
 	 matchlist_bsmdp_clus[i1][i2].clear();
      }
    }
-   StEmcGeom* GeomIn  = new StEmcGeom("bemc");
+   StEmcGeom* GeomIn  = StEmcGeom::getEmcGeom("bemc");
 
   //BEMC
 
