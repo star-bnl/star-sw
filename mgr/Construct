@@ -44,18 +44,17 @@ my $CLIBS    = "";
 my $FLIBS    = "";
 my $OSFID    = "";
 my $ROOTCINTD= "";
-my $CPPPATH  = "";
-my $INCLUDE_PATH = $INCLUDE;
 my $LINKMODULECOM  = "";
+my $INCLUDE_PATH = $INCLUDE;
 $_ = $STAR_SYS;
 print "System: ", $_,"\n";
-if (/^i386_linux2/ || /^i386_redhat50/ || /^i386_redhat51/ ||  /^i386_redhat52/ || /^i386_redhat60/) {
+#if (/^i386_linux2/ || /^i386_redhat50/ || /^i386_redhat51/ ||  /^i386_redhat52/ || /^i386_redhat60/) {
+if (/^i386_/) {
 #    case linux but gcc is EGCS
 #  ====================
   $OSFID    = "lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
   $FC       = "pgf77";
   $CXXFLAGS = " -fPIC -Wall";
-#  $CPPPATH .= "/usr/local/include/g++:";
 #                                             -fpipe
   $CFLAGS   = " -fPIC -Wall";
   $CPPFLAGS .= " f2cFortran";
@@ -113,7 +112,6 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $SO        =  $CXX;
   $SOFLAGS   =  " -G";
   my $STDHOME = "/afs/rhic/star/packages/ObjectSpace/2.0m";
-#  $CPPPATH .= $STDHOME . ":" . $STDHOME ."/ospace/std:" . $STDHOME . "/ospace:";
   $CXXFLAGS .= " -I" . $STDHOME . " -I" . $STDHOME ."/ospace/std -I" . $STDHOME . "/ospace";
 }
 elsif (/^intel_wnt/) {
@@ -171,48 +169,28 @@ print "CXX =\t",$CXX,";\tCXXFLAGS = \t",$CXXFLAGS,"\n";
 print "FC  =\t",$FC,";\tFFLAGS = \t",$FFLAGS,"\tFLIBS =\t",$FLIBS,"\n"; 
 print "LD  =\t",$LD,";\t$LDFLGAS = \t",$LDFLAGS,"\n";
 print "SO  =\t",$SO,";\t$SOFLGAS = \t",$SOFLAGS,"\n";
-print "INCLUDE = ",$INCLUDE,"\n";
 (my $inc = $INCLUDE) =~ s/\#//g;
 
-#$CPPPATH .= ".:" . $inc .":StRoot:pams:.share:.share/tables";#:StRoot/StDbLib:StRoot/StDbLib/Calibrations:StRoot/StDbLib/Conditions:StRoot/StDbLib/Geometry";
 my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
-$CPPPATH = "/usr/include:" .  $INCLUDE . ":.:StRoot:pams:.share:.share/tables:" . $ROOTSRC . ":" . $STAF . "/inc:/opt/star/include:" . $CERN_ROOT . "/include";
-#my @includes = ("St_base","StChain","StUtilities","xdf2root","StarClassLibrary","StEvent","StDbLib");
-#foreach my $inc (@includes) {
-#  $CPPPATH .= ":StRoot/" . $inc;
-#}
-#$CPPPATH =~ s/:/$PATH_SEPARATOR/g;
-#$FCPPPATH = "-I.. -I../.. -I" . $CERN_ROOT ."/include -I" . $CERN_ROOT . "/include/geant321";
+#$CPPPATH = $INCLUDE . ":#StRoot:" .  $ROOTSRC . ":" . $STAF . "/inc:/opt/star/include:";
+$CPPPATH = $INCLUDE . ":#StRoot:#pams:" . $INCLUDE . "/tables:" .  $ROOTSRC . ":" . $STAF . "/inc:/opt/star/include:";
 $FCPPPATH = "-I" . $STAR ."/cern/geant321 -I" . $STAR . "/cern/geant321/geant321";
 print "CPPPATH = ",$CPPPATH,"\n";
 print "STAR = ",$STAR,"\n";
-push @Reps, $STAR;
 Repository ($STAR);
 (my $DirPath  = cwd()) =~ s/\/$//g;#print " in DirPath=$DirPath\n";
+my @Repo = Repository_List; print "Repositories = |@Repo|\n";
+my @Reps = ($DirPath);
+foreach my $rep (@Repo) {
+  push @Reps, $rep;
+} print "Repositories: @Reps\n";
 if ($STAR_SYS !~ /^intel_wnt/) {
-  $INCLUDE_PATH = "";
   $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %<";
 }
 else {
   $LINKMODULECOM = 
 "BINDEXPLIB.exe %> %< > %>.def && %AR %ARFLAGS %Lout%>.lib  %< -def:%>.def && %SO %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
-  $CPPPATH = "";
-  $FCPPPATH = "";
-  foreach my $dir ($DirPath, @Reps) {
-    $INCLUDE_PATH .= ";" . $dir;
-    $INCLUDE_PATH .= ";" . $dir . "/inc";
-    $INCLUDE_PATH .= ";" . $dir . "/StRoot";
-    $INCLUDE_PATH .= ";" . $dir . "/pams";
-    $INCLUDE_PATH .= ";" . $dir . "/.share/tables";
-    foreach my $inc (@includes) {
-      $INCLUDE_PATH .= ";" . $dir . "/StRoot/" . $inc;
-    }
-  }
-  $INCLUDE_PATH .= ";" . $ROOTSRC . "/src";
-  $INCLUDE_PATH .= ";" . $STAF . "/inc";
-  $INCLUDE_PATH .= ";" . $CERN_ROOT . "/include";
 }
-my @Repo = Repository_List; print "Repositories = @Repo\n";
 $env = new cons(
 		'CPPPATH'      => $CPPPATH,
 		'CPPFLAGS'     => $CPPFLAGS,
@@ -270,6 +248,7 @@ $env = new cons(
 				  },
 		'SUFOBJ'	=> "." . $O,
 		'ENV'	        => { 'PATH' => $PATH,
+				     'INCLUDE' => $INCLUDE_PATH,
 				     'ROOTSYS' => $ROOTSYS,
 				     'ROOTSRC' => $ROOTSRC,
 				     'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH,
@@ -277,42 +256,32 @@ $env = new cons(
 				     'STAR' => $STAR,
 				     'STAF' => $STAF,
 				     'STAR_BIN' => $STAR_BIN,
-				     'INCLUDE' => $INCLUDE_PATH,
 				     'TEMP' => $TEMP,
 				     'TMP'  => $TMP,
 				     'STAR_SYS' => $STAR_SYS,
 				     'LIB'   => $LIB
 				   },
 	       );
-#Command $env 
 my $build  = "." . $STAR_HOST_SYS; print "build for $build\n";
-#if (! -d $build) {mkdir $build, 0664;}
 $BUILD  = "#" . $build;
 $LIB    = $BUILD . "/lib";
 $BIN    = $BUILD . "/bin"; 
 $OBJ    = $BUILD . "/obj";
 my $obj = $build . "/obj";
 Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
-#if (! -d "$obj")   {mkdir $obj, 0664;}
-#if ($STAR_SYS =~ /^intel_wnt/) {@dirs = ("StRoot/St_base");}
-#else {@dirs = ("StRoot","pams","pams/tables");}#,"cern/minicern","cern/geant321");}
 my @subdirs = ();
 my @idlT = ();
 my @incT = ();
+# make Targets and install includes
 foreach my $dir ("StRoot","pams") {
   if (-d $dir) {
     opendir (DIR, $dir) or die "Can't open $dir\n";
     my @subdirS = readdir DIR;
     closedir DIR; #print "subdirS = @subdirS\n";
     foreach my $sub_dir (@subdirS) {
-      if ($sub_dir =~ /^macros$/  ||
-#	  $sub_dir =~ /^StHbtMaker$/ ||
-#	  $sub_dir =~ /^StDbLib$/    ||
-#	  $sub_dir =~ /^StDbMaker$/  ||
-#	  $sub_dir =~ /^StAssociationMaker$/    ||
+      # skip unwanted directories
+      if ($sub_dir =~ /^macros$/     ||
 	  $sub_dir =~ /^StTpcDb$/    ||
-#          $sub_dir =~ /^trg$/        ||
-#	  $sub_dir =~ /^StTrsMaker$/ ||
           $sub_dir =~ /^test$/)  {next;}
       if ($STAR_SYS =~ /sun4x/ && $sub_dir =~ /^StAssociationMaker$/) {next;}
       my $sub_DIR = $dir . "/" . $sub_dir; #print "sub_DIR = $sub_DIR\n";
@@ -329,8 +298,8 @@ foreach my $dir ("StRoot","pams") {
 		$subsub_dir =~ /CVS/     || $subsub_dir =~ /^doc/ ||
 		$subsub_dir =~ /^local/  || $subsub_dir =~ /^run/ ||
 		$subsub_dir =~ /^example/|| $subsub_dir =~ /^kumac/) {next;}
-	    #print "subsub :  $subsub_dir /  $subsub_DIR\n";
-	    if ($subsub_dir =~ /^inc$/) {
+#	    print "subsub :  $subsub_dir /  $subsub_DIR\n";
+	    if ($subsub_dir =~ /^inc$/ || $subsub_dir =~ /^include$/) {
 	      opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
 	      my @incs = readdir DIR; 
 	      closedir DIR; #print "incs = @incs\n";
@@ -338,6 +307,23 @@ foreach my $dir ("StRoot","pams") {
 		if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/ ) {
 		  push @incT, $subsub_DIR ."/" . $inc; #print "+++ add $inc\n";
 		}
+	      }
+	      next;
+	    }
+	    if ($subdir =~ /^StHbtMaker$/ ||
+		$subdir =~ /^StDaqLib$/) {# print "subdir ===> $subdir\n";
+	      opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
+	      my @inchbt = readdir DIR; 
+	      my @incHbt = ();
+	      closedir DIR; #print "incs = @incs\n";
+	      foreach my $inc (@inchbt) {
+		if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/ ) {
+		  push @incHbt, $subsub_DIR ."/" . $inc; #print "+++ add $inc\n";
+		}
+	      }
+	      if ($#incHbt > -1) {
+		my $include_Hbt = $INCLUDE . "/" . $sibsub_dir;# print "Install  $include_Hbt, @incHbt\n";
+		Install $env $include_Hbt, @incHbt; 
 	      }
 	      next;
 	    }
@@ -368,7 +354,13 @@ foreach my $dir ("StRoot","pams") {
 	    $sub_dir =~ /^xdf2root$/ ||
 	    $sub_dir =~ /^StarClassLibrary$/ ||
 	    $sub_dir =~ /^StEvent$/ ||
+	    $sub_dir =~ /^StMcEvent$/ ||
+	    $sub_dir =~ /^StMagF$/ ||
 	    $sub_dir =~ /^StAnalysisUtilities$/ ||
+	    $sub_dir =~ /^St_geant_Maker$/ ||
+	    $sub_dir =~ /^St_db_Maker$/ ||
+	    $sub_dir =~ /^StTreeMaker$/ ||
+	    $sub_dir =~ /^StIOMaker$/ ||
 	    $sub_dir =~ /^StDbLib$/) {
 	  opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
 	  my @incs = readdir DIR; 
@@ -379,7 +371,47 @@ foreach my $dir ("StRoot","pams") {
 	    }
 	  }
 	}
+# special directories exported to include with their directory names
+	next if $sub_dir ne "StMcEventMaker" && $sub_dir ne "StEventMaker";
+#	print "sub_dir ==== $sub_dir ====\n";
+	opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
+	my @inc_local = readdir DIR; 
+	closedir DIR;# print "incs = @inc_local\n";
+	my @inclT     = ();
+	foreach my $inc (@inc_local) {
+	  if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ ||$inc =~ /\.inc$/) { 
+	    push @inclT, $sub_DIR ."/" . $inc; #print "+++ add $inc\n";
+	  }
+	}
+	if ($#inclT > -1) {
+	  my $include_dir = $INCLUDE . "/" . $sub_dir;# print "Install $include_dir, @inclT\n";
+	  Install $env $include_dir, @inclT;
+	}
       }
+    }
+  }
+}
+my $db_dir  = "StDb/include"; #print "db_dir = $db_dir\n";
+if (-d $db_dir) {
+  opendir (DIR, $db_dir) or die "Can't open $db_dir\n";
+  my @subdirS = readdir DIR; 
+  closedir DIR; #print "subdirS = @subdirS\n";
+  foreach my $sub_dir (@subdirS) {
+    next if ($sub_dir =~  /\./ || $sub_dir =~ /\.\./ || $sub_dir =~ /CVS/); 
+    my $sub_DIR = $db_dir . "/" . $sub_dir;
+    if (-d $sub_DIR) { 
+      opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
+      my @incDb = readdir DIR;
+      closedir DIR; #print "incDb = @incDb\n";
+      my @incsDb = ();
+      foreach my $inc (@incDb) {
+	next if $inc !~ /\.h$/ && $inc !~ /\.hh$/;
+	push @incsDb, $db_dir . "/" . $sub_dir . "/" . $inc;
+      }
+      if ($#incsDb > -1) {
+	my $inc_sub_dir = $INCLUDE . "/" . $sub_dir; #print "Install in $inc_sub_dir : @incsDb\n";
+	Install $env $inc_sub_dir, @incsDb;
+      } 
     }
   }
 }
@@ -395,9 +427,11 @@ print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ\n";# Targets = @Targets\n";
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
 Default qw (   .  );
 if ($#incT > -1) {Install $env $INCLUDE, @incT;}
-if ($#idlT > -1) {Install $env '.share/tables', @idlT;}
+if ($#idlT > -1) {
+  my $tables = $INCLUDE . "/tables";
+  Install $env $tables, @idlT;
+}
 Build  @Targets;
-#Install $env '#include', 'pams/ctf/inc/ctfgeo.h';
 #________________________________________________________________________________
 # Builder for a C++ module
 package build::command::cxx;
@@ -681,7 +715,6 @@ sub script::wanted_inc {
       push @search_files, $name; }
   }
 }
-#________________________________________
 #____________________________________________________________
 sub rmkdir {
   (my $Dir = $_[0]) =~ s/\\/\//g; 
@@ -693,3 +726,40 @@ sub rmkdir {
     if (!-d $dir && ! mkdir($dir,0755)) {die "$0: can't create directory $path ($!).\n";}
   }
 }
+#________________________________________
+sub sortu {
+  my $old = "";
+  my @sorted_and_uniq = ();
+  foreach my $name (@_) {
+    next if $old eq $name;
+    push @sorted_and_uniq, $name;
+  }
+  return @sorted_and_uniq;
+}
+#________________________________________
+sub script::find_Template {
+  if (defined($AFS)) {$File::Find::dont_use_nlink;}
+  @search_files   = ();
+  &File::Find::find(\&wanted_Template, @_);
+  for my $dir (@_) {
+    my $i = 0;
+    for ($i=0;$i<=$#search_files;$i++) {
+      #      print "i = ",$i, "src =", $search_files[$i],"\n";
+      my $file = $search_files[$i];
+      $file =~ s/$dir\///g;
+      $search_files[$i] = $file;
+    }
+  }
+  #  print "find_source found $#search_files + 1 files\n";
+  return @search_files;
+}
+#________________________________________
+sub script::wanted_Template {
+  #  print "wanted ",$_,"\n";
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  if ( -d $_ && ! /^Templates\.Db$/) {return;}
+  if (/\.o$/) {print "$name\n";
+    push @search_files, $name; 
+  }
+}
+#________________________________________
