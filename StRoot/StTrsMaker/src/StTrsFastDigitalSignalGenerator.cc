@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.2 1998/11/13 21:31:37 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.3 1998/11/16 14:48:45 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.2  1998/11/13 21:31:37  lasiuk
- * diagnostics
+ * Revision 1.3  1998/11/16 14:48:45  lasiuk
+ * use typedefs from StTrsSector
  *
  * Revision 1.7  1999/01/23 02:32:22  lasiuk
  * sun friendly
@@ -75,15 +75,10 @@ StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec
 
 StTrsDigitalSignalGenerator*
 StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec)
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-    vector<StTrsAnalogSignal> currentPad;
-#else
-    vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> > currentPad;
-#endif    
-    for(int irow=0; irow<mSector->size(); irow++) {
-        cout << "Current ROW: " << irow << endl;
+    if(!mInstance) {
+    cout << "digitize here " << endl;
+    PR(mSimpleConversion);
     // Loop over the sector
-	  cout << " Current PAD: " << ipad << endl;
     // else  do nothing
     for(int irow=0; irow<mSector->numberOfRows(); irow++) {
 	for(int ipad=0; ipad<mSector->padsOfRow(irow).size(); ipad++) {
