@@ -26,7 +26,8 @@ enum StDetectorId {
   kTpcSsdId    = kTpcSsdIdentifier,
   kTpcSvtId    = kTpcSvtIdentifier,        
   kTpcSsdSvtId = kTpcSsdSvtIdentifier,        
-  kSsdSvtId    = kSsdSvtIdentifier  
+  kSsdSvtId    = kSsdSvtIdentifier,
+  kL3TpcId     = kL3TpcIdentifier
 };
 #endif
 

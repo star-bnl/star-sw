@@ -55,5 +55,5 @@
 #define kTpcSvtIdentifier             22
 #define kTpcSsdSvtIdentifier          23
 #define kSsdSvtIdentifier             24
-
+#define kL3TpcIdentifier              25
 #endif /*STDETECTORDEFINITIONS*/
