@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPid.cxx,v 2.2 2000/11/01 16:45:43 lasiuk Exp $
+ * $Id: StRichPid.cxx,v 2.3 2000/11/21 19:47:33 lasiuk Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,11 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPid.cxx,v $
- * Revision 2.2  2000/11/01 16:45:43  lasiuk
- * Keep the pointers to the hits that are associated with the track
- * in order to use the bit flag information.  These are kept
- * in an StPtrVec (does not own the hits)  The PDG encoded number
- * is kept as a data member now
+ * Revision 2.3  2000/11/21 19:47:33  lasiuk
+ * add the d information for each hit
+ * use the TArrayF
  *
  * Revision 2.3  2000/11/21 19:47:33  lasiuk
  * add the d information for each hit
@@ -32,7 +30,7 @@
  ***************************************************************************/
 #include "StRichPid.h"
 
-static const char rcsid[] = "$Id: StRichPid.cxx,v 2.2 2000/11/01 16:45:43 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPid.cxx,v 2.3 2000/11/21 19:47:33 lasiuk Exp $";
 
 ClassImp(StRichPid)
 
@@ -60,6 +58,36 @@ StRichPid::StRichPid(StParticleDefinition* type, StThreeVectorD resid, Float_t t
 StRichPid::~StRichPid() {/* noop */}
 
 void StRichPid::setRingType(StParticleDefinition* t)   {
+    mParticleType=t;
+    mParticleNumber = t->pdgEncoding();
+}
+
+TArrayF& StRichPid::getDVector() {return mDDistribution;}
+
+float StRichPid::getD(int i) {
+    //
+    // should really be a constant
+    // function, but ROOT does not
+    // use const to define At(int)
+
+    //
+    // Bounds Check
+    //
+    if(i>=0 && mDDistribution.GetSize() < i) {
+	return mDDistribution.At(i);
+    }
+    else {
+	cout << "StRichPid::getD()\n";
+	cout << "\tERROR: out of bounds\n";
+	cout << "\treturn -999" << endl;
+	return -999.;
+    }
+}
+
+void StRichPid::addNormalizedD(float d) {
+
+    int currentSize = mDDistribution.GetSize();
+    mDDistribution.Set(currentSize+1);
 
     mDDistribution.AddAt(d,currentSize);
 }
