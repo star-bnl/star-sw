@@ -1,7 +1,7 @@
-// $Id: St_TableNtuple.cxx,v 1.1 1999/02/03 22:37:47 fine Exp $
+// $Id: St_TableNtuple.cxx,v 1.2 1999/02/17 22:54:13 genevb Exp $
 // $Log: St_TableNtuple.cxx,v $
-// Revision 1.1  1999/02/03 22:37:47  fine
-// a new class St_TableNtuple by  Gene Van Buren has been introduced
+// Revision 1.2  1999/02/17 22:54:13  genevb
+// Fixed errors when no tables/datasets found in St_TableNtuple
 //
 //
 // Revision 1.1 1999/01/27 10:28:29 genevb
@@ -91,12 +91,12 @@ St_TableNtuple::St_TableNtuple() : TTree() {
 //
 // Default constructor for St_TableNtuple()
 //
-  fNvar = 0;
-  fArgs = 0;
-  fClassPtr = 0;
-  fType = 0;
-  fOffset = 0;
-  fTableClass = "";
+  mNvar = 0;
+  mArgs = 0;
+  mClassPtr = 0;
+  mType = 0;
+  mOffset = 0;
+  mTableClass = "";
 }
 //_____________________________________________________________________________
 St_TableNtuple::St_TableNtuple(const St_Table &table, Int_t bufsize) :
@@ -105,12 +105,12 @@ St_TableNtuple::St_TableNtuple(const St_Table &table, Int_t bufsize) :
 // St_TableNtuple() constructs a TTree as an ntuple with columns as determined
 // by a table.
 //
-  fNvar = 0;
-  fArgs = 0;
-  fClassPtr = 0;
-  fType = 0;
-  fOffset = 0;
-  fTableClass = "";
+  mNvar = 0;
+  mArgs = 0;
+  mClassPtr = 0;
+  mType = 0;
+  mOffset = 0;
+  mTableClass = "";
   LearnTable(table,kTRUE,bufsize);
   PrintInfo();
 }
@@ -146,7 +146,7 @@ Int_t St_TableNtuple::AddTFile(TFile &f, Char_t *dataset, Char_t *tname, Int_t f
 //               -1 events (default) means read the entire file
 // Number of events actually read is returned
 //
-  St_DataSet *set;
+  St_DataSet *set=0;
   Int_t keys = f.GetNkeys();
   if (firstEvent > keys) return 0;
   Int_t stopEvent = firstEvent + nEvents;
@@ -155,15 +155,25 @@ Int_t St_TableNtuple::AddTFile(TFile &f, Char_t *dataset, Char_t *tname, Int_t f
     stopEvent = keys;
   }
 
+  St_Table *table=0;
+  Int_t j=0;
   for (Int_t i=firstEvent; i<stopEvent; i++) {
     printf("Adding event %d to ntuple.\n",i);
-    set = (St_DataSet *) f.GetKey(dataset,i)->ReadObj();
-    St_DataSetIter iter(set);
-    Fill(* (St_Table *) iter(tname) );
+    if (set = (St_DataSet *) f.GetKey(dataset,i)->ReadObj()) {
+      St_DataSetIter iter(set);
+      if (table = (St_Table *) iter(tname)) {
+        Fill(*table);
+        j++;
+      } else {
+        printf("St_TableNtuple Warning: table %s not found in dataset %s.\n",tname,dataset);
+      }
+    } else {
+      printf("St_TableNtuple Warning: dataset %s not found in event.\n",dataset);
+    }
     delete set; set=0;
   }
 
-  return nEvents;
+  return j;
 }
 //_____________________________________________________________________________
 Int_t St_TableNtuple::AddXDFFile(const Char_t *file, Char_t *dataset, Char_t *tname, Int_t firstEvent, Int_t nEvents) {
@@ -202,17 +212,28 @@ Int_t St_TableNtuple::AddXDFFile(St_XDFFile &f, Char_t *dataset, Char_t *tname, 
   }
     
   i=0;
+  Int_t j=0;
+  St_DataSet *set=0;
+  St_Table *table=0;
   while ((event = f.NextEventGet()) && ((i < nEvents) || (nEvents < 0))) {
     printf("Adding event %d to ntuple.\n",(firstEvent+(i++)));
     St_DataSetIter event_iter(event);
-    St_DataSet *set = event_iter(dataset);
-    St_DataSetIter iter(set);
-    Fill(* (St_Table *) iter(tname) );
-    set=0;
+    if (set = event_iter(dataset)) {
+      St_DataSetIter iter(set);
+      if (table = (St_Table *) iter(tname)) {
+        Fill(*table);
+        j++;
+      } else {
+        printf("St_TableNtuple Warning: table %s not found in dataset %s.\n",tname,dataset);
+      }
+      set=0;
+    } else {
+      printf("St_TableNtuple Warning: dataset %s not found in event.\n",dataset);
+    }
     delete event; event=0;
   }
 
-  return i;
+  return j;
 }
 //_____________________________________________________________________________
 void St_TableNtuple::Browse(TBrowser *b) {
@@ -239,10 +260,10 @@ Int_t St_TableNtuple::Fill(const St_Table &table, Int_t firstRow, Int_t nRows) {
   Int_t tRows = table.GetNRows();
 
 // Check for knowledge of table
-  if (!fClassPtr) LearnTable(table);
+  if (!mClassPtr) LearnTable(table);
 
 // Check for table compatibility
-  if (!fClassPtr || (fClassPtr != table.GetRowClass())) {
+  if (!mClassPtr || (mClassPtr != table.GetRowClass())) {
     printf("St_TableNtuple Error: Table incompatible with constructed St_TableNtuple.\n");
     return 0;
   }
@@ -254,27 +275,27 @@ Int_t St_TableNtuple::Fill(const St_Table &table, Int_t firstRow, Int_t nRows) {
 // Loop over table rows
   thisRow = ((Int_t) table.GetArray()) + (firstRow * rowSize);
   for (i=0; i<nRows; i++) {
-    for (j=0; j<fNvar; j++) {
-      pointer = (void *)(thisRow + fOffset[j]);
-      switch (fType[j]) {
-        case kFloat :{ Float_t *pF1  =  (Float_t *) fArgs[j];
+    for (j=0; j<mNvar; j++) {
+      pointer = thisRow + mOffset[j];
+      switch (mType[j]) {
+        case kFloat :{ Float_t *pF1  =  (Float_t *) mArgs[j];
                        Float_t *pF2  =  (Float_t *) pointer;
                        *pF1 = *pF2; break;}
         case kLong  :{ }
-        case kInt   :{ Int_t *pI1    =    (Int_t *) fArgs[j];
+        case kInt   :{ Int_t *pI1    =    (Int_t *) mArgs[j];
                        Int_t *pI2    =    (Int_t *) pointer;
                        *pI1 = *pI2; break;}
-        case kShort :{ Short_t *pS1  =  (Short_t *) fArgs[j];
+        case kShort :{ Short_t *pS1  =  (Short_t *) mArgs[j];
                        Short_t *pS2  =  (Short_t *) pointer;
                        *pS1 = *pS2; break;}
-        case kUShort:{ UShort_t *ps1 = (UShort_t *) fArgs[j];
+        case kUShort:{ UShort_t *ps1 = (UShort_t *) mArgs[j];
                        UShort_t *ps2 = (UShort_t *) pointer;
                        *ps1 = *ps2; break;}
-        case kDouble:{ Double_t *pD1 = (Double_t *) fArgs[j];
+        case kDouble:{ Double_t *pD1 = (Double_t *) mArgs[j];
                        Double_t *pD2 = (Double_t *) pointer;
                        *pD1 = *pD2; break;}
         case kULong :{ }
-        case kUInt  :{ UInt_t *pi1   =   (UInt_t *) fArgs[j];
+        case kUInt  :{ UInt_t *pi1   =   (UInt_t *) mArgs[j];
                        UInt_t *pi2   =   (UInt_t *) pointer;
                        *pi1 = *pi2; break;}
         default     :{ cout << "*** Warning: Fill() tried to add invalid data type." << endl; }
@@ -294,25 +315,25 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
 //  buildTree - if kTRUE, then add TBranches to the TTree for each table
 //              column (default=kFALSE)
 //
-  fClassPtr = table.GetRowClass();
-  if (!fClassPtr) return;
+  mClassPtr = table.GetRowClass();
+  if (!mClassPtr) return;
   if (buildTree)
-    fTableClass = fClassPtr->GetName();
-  else if (fTableClass != fClassPtr->GetName()) {
-    fClassPtr = 0;
+    mTableClass = mClassPtr->GetName();
+  else if (mTableClass != mClassPtr->GetName()) {
+    mClassPtr = 0;
     return;
   }
 
-  if (!fClassPtr->GetListOfRealData()) fClassPtr->BuildRealData();
-  if (!(fClassPtr->GetNdata())) return;
+  if (!mClassPtr->GetListOfRealData()) mClassPtr->BuildRealData();
+  if (!(mClassPtr->GetNdata())) return;
   Int_t rowSize = table.GetRowSize();
 
-  fArgs = new void*[rowSize];
-  fType = new NumType[rowSize];
-  fOffset = new Int_t[rowSize];
+  mArgs = new void*[rowSize];
+  mType = new NumType[rowSize];
+  mOffset = new Int_t[rowSize];
   Int_t *pvars = new Int_t[(rowSize+1)];
   Char_t **ty = new Char_t*[rowSize];
-  const Char_t *types;
+  Char_t *types;
   Char_t *varname;
   Char_t varlist[1000];
   Char_t vartemp[80];
@@ -325,49 +346,50 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
   Int_t count = 0;
 
   pvars[0] = 0;
-  TIter next(fClassPtr->GetListOfDataMembers());
+  TIter next(mClassPtr->GetListOfDataMembers());
+  next.Reset();
   TDataMember *member = 0;
   while (member = (TDataMember *) next()) {
     varname = (Char_t *) member->GetName();   
     TDataType *memberType = member->GetDataType();
     types = memberType->GetTypeName();
     if (!strcmp("float", types)) {
-      fType[count] = kFloat ; ty[count]="/F"; }
+      mType[count] = kFloat ; ty[count]="/F"; }
     else if (!strcmp("int", types)) {
-      fType[count] = kInt   ; ty[count]="/I"; }
+      mType[count] = kInt   ; ty[count]="/I"; }
     else if (!strcmp("long", types)) {
-      fType[count] = kLong  ; ty[count]="/I"; }
+      mType[count] = kLong  ; ty[count]="/I"; }
     else if (!strcmp("short", types)) {
-      fType[count] = kShort ; ty[count]="/S"; }
+      mType[count] = kShort ; ty[count]="/S"; }
     else if (!strcmp("double", types)) {
-      fType[count] = kDouble; ty[count]="/D"; }
+      mType[count] = kDouble; ty[count]="/D"; }
     else if (!strcmp("unsigned int", types)) {
-      fType[count] = kUInt  ; ty[count]="/i"; }
+      mType[count] = kUInt  ; ty[count]="/i"; }
     else if (!strcmp("unsigned long", types)) {
-      fType[count] = kULong ; ty[count]="/i"; }
+      mType[count] = kULong ; ty[count]="/i"; }
     else if (!strcmp("unsigned short", types)) {
-      fType[count] = kUShort; ty[count]="/s"; }
+      mType[count] = kUShort; ty[count]="/s"; }
     else {
       if (buildTree) {
         cout << "Not including table column " << varname;
         cout << ", type " << types << endl;
       }
-      fType[count] = kNAN;
+      mType[count] = kNAN;
     }
-    if (fType[count]) {
+    if (mType[count]) {
       if (memberDim = member->GetArrayDim()) {
         memberSize = memberType->Size();
         tempvar = varname;
         varname = vartemp;
       }
-      fOffset[count] = member->GetOffset();
+      mOffset[count] = member->GetOffset();
       for (i=0; i<(memberDim+1); i++) {
         if (memberDim) sprintf(vartemp,"%s%d",tempvar,i);
         if (i) {
-          fOffset[count] = fOffset[count-1] + memberSize;
-          fType[count] = fType[count-1]; ty[count] = ty[count-1];
+          mOffset[count] = mOffset[count-1] + memberSize;
+          mType[count] = mType[count-1]; ty[count] = ty[count-1];
         }
-        fArgs[count] = memberType->Class()->New();
+        mArgs[count] = memberType->Class()->New();
         pvars[count+1] = pvars[count] + 1 + strlen(varname);
         if (!count++) {
           strcpy(varlist,varname);
@@ -379,14 +401,14 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
     }
   }
 
-  if (buildTree) fNvar = count;
-  else if (fNvar != count) {
-    fClassPtr = 0;
+  if (buildTree) mNvar = count;
+  else if (mNvar != count) {
+    mClassPtr = 0;
     return;
   }
 
   TBranch *branch;
-  for (i=0; i<fNvar; i++) {
+  for (i=0; i<mNvar; i++) {
     pv = pvars[i+1] - 1;
     varlist[pv] = 0;
     pv = pvars[i];
@@ -394,22 +416,22 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
     if (buildTree) {
       strcpy(vartemp,tempvar);
       strcat(vartemp,ty[i]);
-      TTree::Branch(tempvar,fArgs[i],vartemp,bufsize);
+      TTree::Branch(tempvar,mArgs[i],vartemp,bufsize);
     } else {
       if (!(branch = TTree::GetBranch(tempvar))) {
-        fClassPtr = 0;
+        mClassPtr = 0;
         return;
       }
-      branch->SetAddress(fArgs[i]);
+      branch->SetAddress(mArgs[i]);
     }
   }
 }
 //_____________________________________________________________________________
 void St_TableNtuple::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_TableNtuple.cxx,v 1.1 1999/02/03 22:37:47 fine Exp $\n");
+  printf("* $Id: St_TableNtuple.cxx,v 1.2 1999/02/17 22:54:13 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
-  printf("* Using %d columns from table with:\n",fNvar);
+  printf("* Using %d columns from table with:\n",mNvar);
   printf("*   Name: %s\n",GetName());
   printf("*  Title: %s\n",GetTitle());
   printf("**************************************************************\n");
