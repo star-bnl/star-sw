@@ -16,6 +16,7 @@ public:
 
   StDb_tpcWirePlanes(const char* name): StDbTableComponent(name),mstruct(0) {}; 
   StDb_tpcWirePlanes(StDb_tpcWirePlanes& c) : StDbTableComponent(c) {
+                                     mstruct=0;
                                      tpcWirePlanes *a = c.getTable();
                                      if(a)mstruct=new tpcWirePlanes(*a);};
 

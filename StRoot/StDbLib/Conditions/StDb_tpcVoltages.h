@@ -16,6 +16,7 @@ public:
 
   StDb_tpcVoltages(const char* name): StDbTableComponent(name),mstruct(0) {}; 
   StDb_tpcVoltages(StDb_tpcVoltages& c) : StDbTableComponent(c) {
+                                     mstruct=0;
                                      tpcVoltages *a = c.getTable();
                                      if(a)mstruct=new tpcVoltages(*a);};
 

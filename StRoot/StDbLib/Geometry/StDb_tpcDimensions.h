@@ -16,6 +16,7 @@ public:
 
   StDb_tpcDimensions(const char* name): StDbTableComponent(name),mstruct(0) {}; 
   StDb_tpcDimensions(StDb_tpcDimensions& c) : StDbTableComponent(c) {
+                                     mstruct=0;
                                      tpcDimensions *a = c.getTable();
                                      if(a)mstruct=new tpcDimensions(*a);};
 

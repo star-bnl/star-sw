@@ -16,6 +16,7 @@ public:
 
   StDb_tpcGas(const char* name): StDbTableComponent(name),mstruct(0) {}; 
   StDb_tpcGas(StDb_tpcGas& c) : StDbTableComponent(c) {
+                                     mstruct=0;
                                      tpcGas *a = c.getTable();
                                      if(a)mstruct=new tpcGas(*a);};
 

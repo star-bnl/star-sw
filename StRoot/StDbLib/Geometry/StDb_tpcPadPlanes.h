@@ -16,6 +16,7 @@ public:
 
   StDb_tpcPadPlanes(const char* name): StDbTableComponent(name),mstruct(0) {}; 
   StDb_tpcPadPlanes(StDb_tpcPadPlanes& c) : StDbTableComponent(c) {
+                                     mstruct=0;
                                      tpcPadPlanes *a = c.getTable();
                                      if(a)mstruct=new tpcPadPlanes(*a);};
 

@@ -16,6 +16,7 @@ public:
 
   StDb_tpcElectronics(const char* name): StDbTableComponent(name),mstruct(0) {}; 
   StDb_tpcElectronics(StDb_tpcElectronics& c) : StDbTableComponent(c) {
+                                     mstruct=0;
                                      tpcElectronics *a = c.getTable();
                                      if(a)mstruct=new tpcElectronics(*a);};
 
