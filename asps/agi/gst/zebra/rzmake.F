@@ -1,7 +1,10 @@
 *
-* $Id: rzmake.F,v 1.6 1998/10/08 02:13:37 perev Exp $
+* $Id: rzmake.F,v 1.7 1999/03/04 03:26:58 didenko Exp $
 *
 * $Log: rzmake.F,v $
+* Revision 1.7  1999/03/04 03:26:58  didenko
+* updates from Pavel
+*
 * Revision 1.6  1998/10/08 02:13:37  perev
 * RZMAKE nrec=1m only for new format
 *
@@ -289,7 +292,7 @@ C     RZfile maked always with Exchange mode for LINUX
          ENDIF
       ENDIF
 *
-*            Write empty record for locks
+*            Write empty record for locks'
 *
       CALL RZIODO(LUN,LREC,1,IQ(KQSP+LTOP+1),2)
       IF(IQUEST(1).NE.0) GO TO 99
@@ -326,7 +329,7 @@ C     RZfile maked always with Exchange mode for LINUX
 *     +            ' of RZ prior to release 94B')
         IQ(KQSP+LTOP+KRZVER) = 1
       ELSE
-        WRITE(IQLOG,7007)
+        WRITE(IQLOG,7007) CHDIR
  7007 FORMAT(10x,'RZMAKE. OLD RZ format selected for ',a/,
      +       10x,'This file will have the limit on the number of',
      +           ' blocks < 64 K')
