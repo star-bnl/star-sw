@@ -21,8 +21,8 @@ Section II. Advanced features
 <a href="#ii2">II-2.  Specifying options and output streams</a>
 <a href="#ii3">II-3.  Non-accounted messages</a>
 <a href="#ii4">II-4.  Turning off printing of message prefix</a>
-<a href="#ii5">II-5.  Turning off printing of the time-date stamp</a>
-<a href="#ii6">II-6.  Turning off printing of the leading "St"</a>
+<a href="#ii5">II-5.  Turning off printing of the leading "St"</a>
+<a href="#ii6">II-6.  Turning on printing of the time-date stamp</a>
 <a href="#ii7">II-7.  Access to the current message</a>
 <a href="#ii8">II-8.  Finding a message</a>
 <a href="#ii9">II-9.  Finding a list of messages</a>
@@ -282,19 +282,19 @@ for the printout. The out() and err() message calls do this by default.
 
 </pre>
 <hr align=left width="50%">
-<a name="ii5">*** II-5.  Turning off printing of the time-date stamp</a>
-<pre>
-
-Use the option "T". Remember, "O" or "E" must also be in the option
-string for the printout. QAInfo messages by default have this option.
-
-</pre>
-<hr align=left width="50%">
-<a name="ii6">*** II-6.  Turning off printing of the leading "St"</a>
+<a name="ii5">*** II-5.  Turning off printing of the leading "St"</a>
 <pre>
 
 Use the option "S". Remember, "O" or "E" must also be in the option
 string for the printout. QAInfo messages by default have this option.
+
+</pre>
+<hr align=left width="50%">
+<a name="ii6">*** II-6.  Turning on printing of the time-date stamp</a>
+<pre>
+
+Use the option "T". Remember, "O" or "E" must also be in the option
+string for the printout. Debug messages by default have this option.
 
 </pre>
 <hr align=left width="50%">
