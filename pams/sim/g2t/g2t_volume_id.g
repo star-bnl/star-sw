@@ -34,7 +34,7 @@
           call RBPOPD
           print *,' g2t_volume_id: TPC version =',tpcg_version
           print *,'              : TOF version =',btog_version,
-                                 ' TOF choice  =',btog_choice
+                                 ' TOF choice  =',btog_choice,btog_posit1
       endif
       volume_id = 0
 *
@@ -165,6 +165,7 @@
         endif
 	eta=idigi(2)+1
         strip=idigi(3)+1
+*       print *,' smd eta,strip=',eta,strip
         If (forw_back==4) forw_back=3
         If (rileft==1) then
           phi=60-phi+1
