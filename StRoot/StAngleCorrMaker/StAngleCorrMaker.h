@@ -22,7 +22,7 @@
 //#include "tables/HighPtTag.h"
 
 #include <TOrdCollection.h>
-
+#include <TFile.h>
 class StEvent;
 class StRun;
 class TH1F;
@@ -31,18 +31,16 @@ class StAngleCorrMaker : public StMaker {
 
 private:
 
-  Bool_t drawinit;
-  Char_t collectionName[256];
-
   // Maker generates a container of tracks 
   TOrdCollection* mCollectionOfTracks;
-  int mNumberEvents ;
+  int mNumberEventsInPool ;
 
-  void MakeHistograms();
   void analyseRealPairs(StEvent&, int);
+  void analyseMixedPairs();
 
 protected:
   // maker generates some histograms
+  TFile* mOutput;
   TH1F* mHistPhiNumerator;
   TH1F* mHistPhiDenominator;
 
