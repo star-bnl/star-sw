@@ -20,7 +20,7 @@
 bool StiKalmanTrackNode::recurse = false;
 bool StiKalmanTrackNode::elossCalculated = false;
 bool StiKalmanTrackNode::mcsCalculated   = false;
-double StiKalmanTrackNode::kField = 0.5;
+double StiKalmanTrackNode::kField = 0.25;
 double StiKalmanTrackNode::massHypothesis = 0.13957018;
 
 //_____________________________________________________________________________
@@ -220,13 +220,20 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
   
   pt = kField/c;
   sinPhi = c*fX-fP2;
-  cosPhi = sqrt(1-sinPhi*sinPhi);
+	double ss = sinPhi*sinPhi;
+	if (ss>1.)
+		{
+			cout << "StiKalmanTrackNode::getMomentum - sin(phi)^2 > 1" << endl;
+			cout << " c/fx/fP2/sin(phi):" << c << "\t" << fX << "\t" << fP2 << "\t" << sinPhi << endl;
+			ss = 1.;
+		}
+  cosPhi = sqrt(1-ss);
   p[0] = pt*cosPhi;
   p[1] = pt*sinPhi;
   p[2] = pt*fP4;
   if (e==0)
     return;
-  double sa = 1-(c*fX-fP2)*(c*fX-fP2);
+  double sa = 1-ss;
   if (sa<0)
     {
       cout << "StiKalmanTrackNode::getMomentum() - Error - sa<0 - Value was:" << sa << " - reset to sa=0." << endl;
@@ -379,16 +386,21 @@ double StiKalmanTrackNode::getPt() const
   return pt;
 }
 
-int StiKalmanTrackNode::propagate(StiDetector * tDet)	throw (Exception)
+int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode, 
+																	StiDetector * tDet)	throw (Exception)
 {
   int position = 0;
+	setState(pNode);
   StiPlacement * tPlace = tDet->getPlacement();
   double tAlpha = tPlace->getNormalRefAngle();
   double dAlpha = tAlpha - fAlpha;
   if (dAlpha>1e-2)   // perform rotation if needed
-    rotate(dAlpha);
+		{
+			cout << " doing rotation <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
+			rotate(dAlpha);
+		}
   double x, x0, rho;
-  position = StiMaterialInteraction::findIntersection(this,tDet,x,x0,rho);
+  position = StiMaterialInteraction::findIntersection(pNode,tDet,x,x0,rho);
 	cout << "propagate x/x0/rho:" << x << "\t" << x0 << "\t" << rho << endl;
   propagate(x,x0,rho);
   return position;
@@ -400,8 +412,22 @@ void  StiKalmanTrackNode::propagate(double xk,
   throw (Exception)
 {
   double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
-  double c1=fP3*x1 - fP2, r1=sqrt(1.- c1*c1);
-  double c2=fP3*x2 - fP2, r2=sqrt(1.- c2*c2);
+  double c1=fP3*x1 - fP2;
+	double c1sq = c1*c1; 
+	if (c1sq>1.) 
+		{
+			cout << "c1sq:" << c1sq << endl;
+			c1sq = 0.99999999;
+		}
+	double r1=sqrt(1.- c1sq );
+  double c2=fP3*x2 - fP2; 
+	double c2sq = c2*c2; 
+	if (c2sq>1.) 
+		{
+			cout << "c2sq:" << c2sq << endl;
+			c2sq = 0.99999999;
+		}
+	double r2=sqrt(1.- c2sq );
   fP0 = fP0 + dx*(c1+c2)/(r1+r2);
   fP1 = fP1 + dx*(c1+c2)/(c1*r2 + c2*r1)*fP4; 
 
@@ -593,18 +619,17 @@ void StiKalmanTrackNode::rotate(double alpha) throw ( Exception)
   double y1=fP0;
   double ca=cos(alpha);
   double sa=sin(alpha);
-  double r1=fP3*fX - fP2;
+  double r1=fP3*fX - fP2; 
+	if (r1>=1) r1 = 0.99999;
+	if (r1<=-1) r1 = -0.99999;
   
   fX = x1*ca + y1*sa;
   fP0=-x1*sa + y1*ca;
   fP2=fP2*ca + (fP3*y1 + sqrt(1.- r1*r1))*sa;
   
   double r2=fP3*fX - fP2;
-  if (r2>= 0.9999999 || r2<0.9999999)
-    {
-      throw new Exception(" StiKalmanTrackNode - Warning: Rotation failed - case 1!\n");
-    }
-  
+  if (r2>=1) r2 = 0.99999;
+  if (r2<=-1) r2 = -0.99999;
   double y0=fP0 + sqrt(1.- r2*r2)/fP3;
   if ((fP0-y0)*fP3 >= 0.) 
     {
@@ -652,6 +677,7 @@ void StiKalmanTrackNode::extendToVertex() throw (Exception)
   // This function propagates tracks to the "vertex".
   //-----------------------------------------------------------------
   double c=fP3*fX - fP2;
+
   double tgf=-fP2/(fP3*fP0 + sqrt(1-c*c));
   double snf=tgf/sqrt(1.+ tgf*tgf);
   double xv=(fP2+snf)/fP3;

@@ -50,6 +50,7 @@ StiIntersection StiMaterialInteraction::findIntersection(
   default:
     return kFailed;
   }
+	
 
 } // findIntersection
 
@@ -65,7 +66,13 @@ StiIntersection StiMaterialInteraction::findPlanarIntersection(
   //---------------------------------------------------
   // first, do the intersection of the node's momentum 
   // vector with the detector plane in global coords.
-
+  /*
+double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
+  double c1=fP3*x1 - fP2, r1=sqrt(1.- c1*c1);
+  double c2=fP3*x2 - fP2, r2=sqrt(1.- c2*c2);
+  fP0 = fP0 + dx*(c1+c2)/(r1+r2);
+  fP1 = fP1 + dx*(c1+c2)/(c1*r2 + c2*r1)*fP4; 
+	*/
   // get momentum of node in global coords
   double adMomentum[3];
   pNode->getMomentum(adMomentum);
@@ -138,7 +145,13 @@ StiIntersection StiMaterialInteraction::findPlanarIntersection(
   double dOuterY = dInnerY + 2.*EDGE_HALF_WIDTH;
   double dInnerZ = pShape->getHalfDepth() - EDGE_HALF_WIDTH;
   double dOuterZ = dInnerZ + 2.*EDGE_HALF_WIDTH;
-  
+
+	/*  cout << "y,z:" << dYoffset << "\t" << dZoffset << endl
+			 << "dInnerY:" << dInnerY
+			 << " dOuterY:" << dOuterY
+			 << " dInnerZ:" << dInnerZ
+			 << " dOuterZ:" << dOuterZ << endl;
+	*/
   // direct hit
   if(fabs(dYoffset)<dInnerY && fabs(dZoffset)<dInnerZ){ return kHit; }
 
