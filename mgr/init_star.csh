@@ -1,4 +1,7 @@
 #  $Log: init_star.csh,v $
+#  Revision 1.5  1998/02/17 18:06:48  fisyak
+#  Add dropit for PATH
+#
 #  Revision 1.4  1998/02/13 14:18:20  fisyak
 #  Simplify Makefile, reduce SLibrary
 #
@@ -16,7 +19,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/13 14:18:20 $ 
+#             Last modification $Date: 1998/02/17 18:06:48 $ 
 #! /bin/csh -f
 #. default setings
 	setenv CC        gcc
@@ -233,10 +236,8 @@ switch ($SYS_HOST_STAR)
 	    setenv OPSYS UNKNOWN
     breaksw
 endsw
-if ($?LD_LIBRARY_PATH == 0) setenv LD_LIBRARY_PATH "$STAR_LD_LIBRARY_PATH" 
-if ( (`echo $LD_LIBRARY_PATH | awk '{print index($0,"/afs/rhic/star/packages")}' `) == 0 ) then
-	setenv LD_LIBRARY_PATH "$STAR_LD_LIBRARY_PATH":"$LD_LIBRARY_PATH"
-endif
+setenv LD_LIBRARY_PATH "$STAR_LD_LIBRARY_PATH":"$LD_LIBRARY_PATH"
+if ( -e $STAR/mgr/dropit ) setenv LD_LIBRARY_PATH `$STAR/mgr/dropit $LD_LIBRARY_PATH ""`
 unset STAR_LD_LIBRARY_PATH
 
 

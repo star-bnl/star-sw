@@ -1,4 +1,7 @@
 #  $Log: Makefile,v $
+#  Revision 1.9  1998/02/17 18:06:46  fisyak
+#  Add dropit for PATH
+#
 #  Revision 1.8  1998/02/14 02:08:20  fisyak
 #  Add silent mode for make
 #
@@ -19,7 +22,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/14 02:08:20 $ 
+#             Last modification $Date: 1998/02/17 18:06:46 $ 
 ifdef SILENT
 .SILENT:
 endif
@@ -202,9 +205,11 @@ NAMES_O   = $(notdir $(FILES_O))
 ifeq ($(LEVEL),$(TWO)) # domain level: add all domain IDM
 ifneq ($(EMPTY),$(FILES_IDM))
 IDLSD    := $(wildcard $(STAR)/$(PAMS)/$(DOMAIN)/*/*.idl $(STAR)/$(PAMS)/$(DOMAIN)/*/*/*.idl)
+ifneq ($(EMPTY),$(IDLSD))
 FILES_DD := $(shell egrep -l 'interface.*:.*amiModule' $(IDLSD))
 NAMES_IDM+= $(basename $(notdir $(FILES_DD)))
 override  NAMES_IDM := $(sort $(NAMES_IDM))
+endif
 endif
 endif
 ifneq (,$(NAMES_IDM))
@@ -244,12 +249,19 @@ endif
 # phony - not a file
 .PHONY               : $(PKG) depend clean test
 all                  : $(PKG)  
-$(PKG)               : $(LIB_DIR)/$(PKG_LIB) $(LIB_DIR)/$(PKG_SL)
+$(PKG)               : $(LIB_DIR)/$(PKG_SL)
+ifeq ($(FILES_IDM),$(EMPTY))
+$(LIB_DIR)/$(PKG_SL): $(FILES_O)
+	$(LD) $(LDFLAGS) $(FILES_O) -o $(LIB_DIR)/$(PKG_SL) \
+        $(LIBRARIES) $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS)
+else
 $(LIB_DIR)/$(PKG_SL): $(FILES_K) $(LIB_DIR)/$(PKG_LIB)
 	$(LD) $(LDFLAGS) $(FILES_K) -o $(LIB_DIR)/$(PKG_SL) \
         $(LIBRARIES) $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS) 
+	@echo "          Shared library " $(LIB_DIR)/$(PKG_SL) " has been created"
 $(LIB_DIR)/$(PKG_LIB): $(FILES_O)
 	$(AR) $(ARFLAGS) $(LIB_DIR)/$(PKG_LIB) $(FILES_O)
+	@echo "          Library " $(LIB_DIR)/$(PKG_LIB) " has been updated"
 #--------- module ---------
 $(OBJ_DIR)/$(PKG)_init.o: $(FILES_IDM) 
 	@if [ -f $(GEN_DIR)/$(PKG)_init.cc ]; then  rm $(GEN_DIR)/$(PKG)_init.cc ; fi
@@ -271,6 +283,7 @@ ifneq ($(NAMES_IDM),)
 	@echo 'int  $(PKG)_stop () { return 1; }'       >> $(GEN_DIR)/$(PKG)_init.cc
 endif    #
 	$(CXX) $(CPPFLAGS) $(CPPFLAGG) $(CXXFLAGS) -c $(GEN_DIR)/$(PKG)_init.cc -o $(ALL_TAGS)
+endif
 #--------  idm, idl --------
 $(GEN_DIR)/%.h $(GEN_DIR)/%.inc %.h %.inc: %.idl
 	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(ALL_DEPS)
@@ -360,7 +373,6 @@ test_files:
 	@echo "NAMES_CC  =" $(NAMES_CC)
 	@echo "NAMES_C   =" $(NAMES_C)
 	@echo "NAMES_F   =" $(NAMES_F)
-	@echo "IDLSD     =" $(IDLSD)
 test_mk:
 	@echo "MAKEFILES =" $(MAKEFILES)
 	@echo "VPATH     =" $(VPATH)
@@ -411,5 +423,6 @@ test_dir:
 	@echo "SUBDIRS   =" $(SUBDIRS)
 	@echo "sources   =" $(sources)
 	@echo "SRC_DIRS  =" $(SRC_DIRS)
+	@echo "IDLS      =" $(IDLS)
 	@echo "IDLSD     =" $(IDLSD)
 	@echo "FILES_DD  =" $(FILES_DD)
