@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.22 2000/12/14 22:01:19 vlmrz Exp $
+// $Id: St_mwc_Maker.cxx,v 1.23 2000/12/20 04:42:19 vlmrz Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.23  2000/12/20 04:42:19  vlmrz
+// *** empty log message ***
+//
 // Revision 1.22  2000/12/14 22:01:19  vlmrz
 // *** empty log message ***
 //
@@ -192,6 +195,7 @@ Int_t St_mwc_Maker::Make(){
 
    St_mwc_mevent *mevent = new St_mwc_mevent("mevent",96);
    St_mwc_sector *sector = new St_mwc_sector("sector",96);
+   St_mwc_raw    *raww    = new St_mwc_raw("raww",1056);
    St_mwc_raw    *raw    = new St_mwc_raw("raw",1056);
 //   the cor table is not implemented
 //     St_mwc_cor    *cor    = new St_mwc_cor("cor",384);
@@ -222,7 +226,7 @@ Int_t St_mwc_Maker::Make(){
                           m_mpar,
                           mevent,
                           sector,
-                          raw,
+                          raww,
                           m_pars);
    if (mwc_result != kSTAFCV_OK)
    {
@@ -230,15 +234,25 @@ Int_t St_mwc_Maker::Make(){
       return kStWarn;
    }
 
+ 
+   mwc_raw_st    *vladimir = raww->GetTable();
+   for (int hh = 0; hh<1056;hh++) {
+   mwc_raw_st *rw = new mwc_raw_st();
+   (rw)->sector = (vladimir+hh)->sector;
+   (rw)->count = (vladimir+hh)->count;
+   raw->AddAt(rw,hh);
+   }
+
    mwc_sector_st *sec = sector->GetTable();
-   mwc_raw_st    *rw  = raw->GetTable();
+   mwc_raw_st    *rw  = raw->GetTable(); 
    for (int jj = 0;jj<=10;jj++){
      Int_t nhts = 0;
      for (int ii=jj*96;ii<=95+jj*96;ii++){
  
        if ( (rw+ii)->count ){
          nhts = nhts + (rw+ii)->count;
-	 /*	 printf("raw sector: %2d count %3d phi %2d eta %d nhit %2d tot_hit "
+	 /*basic debugging - turn this on if needed:
+        	 printf("raw sector: %2d count %3d phi %2d eta %d nhit %2d tot_hit "
 		"%3d de %f\n",(rw+ii)->sector,(rw+ii)->count,
 		(sec+ii-jj*96)->iphi,(sec+ii-jj*96)->ieta,(sec+ii-jj*96)->nhit,
 		(sec+ii-jj*96)->tot_hit,(sec+ii-jj*96)->de);*/
