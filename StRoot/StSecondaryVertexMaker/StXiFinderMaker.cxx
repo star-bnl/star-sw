@@ -272,8 +272,8 @@ Bool_t StXiFinderMaker::UseV0() {
   StThreeVectorF pBach,diffc,batv,v0atv;
   
   //Bloc 5bis
-  double dca,bxi,bBach,bV0;
-  //double ptot_b2,epi,ek,ptot_v02,ela,ptot_2,ptot,exi,eom,bdotx,vdotx,ppar,npar,pper;
+  double dca,bxi;
+  //double ptot_b2,epi,ek,ptot_v02,ela,ptot_2,ptot,exi,eom,bdotx,vdotx,ppar,npar,pper,bBach,bV0;
   StThreeVectorF pXi;
   
   //Function helixDCA
@@ -294,14 +294,14 @@ Bool_t StXiFinderMaker::UseV0() {
   posKey=v0Vertex->daughter(positive)->key();
   parsXi = exipar->GetTable(det_id_v0-1); //Xi cut parameters using detector id from V0
   xV0=v0Vertex->position();
+  impact = xV0-xPvx;
+  //Cut: V0 decay length
+  if (impact.mag2() < (parsXi->rv_v0*parsXi->rv_v0)) return usedV0;
   pV0=v0Vertex->momentum();
   dpV0.setX(pV0.x()/abs(pV0));
   dpV0.setY(pV0.y()/abs(pV0));
   dpV0.setZ(pV0.z()/abs(pV0));
   ptV0=::sqrt(pV0.x()*pV0.x()+pV0.y()*pV0.y());
-  impact = xV0-xPvx;
-  //Cut: V0 decay length
-  if (impact.mag2() < (parsXi->rv_v0*parsXi->rv_v0)) return usedV0;
   
   // All the stuff needed to make rotating simpler inside the loop
   epsDipAngle=1.;
@@ -606,11 +606,11 @@ Bool_t StXiFinderMaker::UseV0() {
               //Cut: remove if V0 points away from Xi vertex
               if (((xV0.x()-v0atv.x())*pV0.x() + (xV0.y()-v0atv.y())*pV0.y() + (xV0.z()-v0atv.z())*pV0.z()) <= 0.) continue;
               dca=(v0atv.x()-batv.x())*(v0atv.x()-batv.x()) + (v0atv.y()-batv.y())*(v0atv.y()-batv.y()) + (v0atv.z()-batv.z())*(v0atv.z()-batv.z());
+              //Cut: dca Xi daughters
+              if (dca > (parsXi->dca_max*parsXi->dca_max)) continue;
               xpp.setX((v0atv.x()+batv.x())/2.);
               xpp.setY((v0atv.y()+batv.y())/2.);
               xpp.setZ((v0atv.z()+batv.z())/2.);
-              //Cut: dca Xi daughters
-              if (dca > (parsXi->dca_max*parsXi->dca_max)) continue;
               //Cut: Xi decay length
               if (((xpp.x()-xPvx.x())*(xpp.x()-xPvx.x())+(xpp.y()-xPvx.y())*(xpp.y()-xPvx.y())+(xpp.z()-xPvx.z())*(xpp.z()-xPvx.z())) <= (parsXi->rv_xi*parsXi->rv_xi)) continue;
               //Calculate xi impact parameter
@@ -632,11 +632,13 @@ Bool_t StXiFinderMaker::UseV0() {
               origin_tmp.setZ(xpp.z());
               StHelixD *globHelix = new StHelixD(curvature_tmp, dip_tmp, phase_tmp, origin_tmp, h_tmp);
               bxi=globHelix->distance(xPvx);
-              delete globHelix;
-              globHelix=0;
               //End of helixDCA
               //Cut: dca Xi to primary vertex
-              if (bxi > parsXi->bxi_max) continue;
+              if (bxi > parsXi->bxi_max)
+                 {delete globHelix;
+                  globHelix=0;
+                  continue;
+                  }
               //Calculate parent and daughter kinematics
               /*ptot_b2=xOrig.x()*xOrig.x()+xOrig.y()*xOrig.y()+xOrig.z()*xOrig.z();
               epi=::sqrt(ptot_b2+M_PION_MINUS*M_PION_MINUS);
@@ -661,14 +663,21 @@ Bool_t StXiFinderMaker::UseV0() {
                   pper=::sqrt(ptot_v02-ppar*ppar);
                   }*/
               //Calculate daughter impact parameters
-              bBach=trk[k]->impactParameter();
-              bV0=fabs(v0Vertex->dcaParentToPrimaryVertex());
+              StThreeVectorD p1 = globHelix->at(globHelix->pathLength(xPvx));
+              StThreeVectorD p2(p1.x()-globHelix->xcenter(),p1.y()-globHelix->ycenter(),0);
+              StThreeVectorD p3(xPvx.x()-globHelix->xcenter(),xPvx.y()-globHelix->ycenter(),0);
+              if (p3.mag2() > p2.mag2()) dca=(-::sqrt(dca));
+                 else dca=::sqrt(dca);
+              delete globHelix;
+              globHelix=0;
+              /*bBach=trk[k]->impactParameter();
+              bV0=fabs(v0Vertex->dcaParentToPrimaryVertex());*/
               xiVertex = new StXiVertex();
               xiVertex->setPosition(xpp);
               xiVertex->addDaughter(trk[k]);
               xiVertex->setDcaBachelorToPrimaryVertex(trk[k]->impactParameter());
               xiVertex->setMomentumOfBachelor(xOrig);
-              xiVertex->setDcaDaughters(::sqrt(dca));
+              xiVertex->setDcaDaughters(dca);
               xiVertex->setDcaParentToPrimaryVertex(bxi);
               xiVertex->setV0Vertex(v0Vertex);
               
@@ -701,8 +710,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.16 2004/02/03 14:29:36 faivre Exp $
+// $Id: StXiFinderMaker.cxx,v 1.17 2004/02/04 14:24:58 faivre Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.17  2004/02/04 14:24:58  faivre
+// Add sign of dcaXiDaughters, slightly move cuts, small cleanup.
+//
 // Revision 1.16  2004/02/03 14:29:36  faivre
 // Spring-cleaning 2 months early ;-)  Algo strictly equivalent to previous one although huge reshaping.
 //
