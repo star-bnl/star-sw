@@ -1,0 +1,36 @@
+<pre><h3>SUBROUTINE STR_FLOAT_HOST_TO_IEEE( Ireal )</h3>
+
+
+	INTEGER Ireal !Integer-cast of a Host-style floating number.
+
+*  Description:
+*	No-op under SGI!
+
+*	Convert Ireal, which is passed to this routine as an integer
+*	cast of a Host-style floating number, into an IEEE-style floating
+*	number:
+*	                       DEC-style
+*
+*	_31_____________  16_15_________14___________7_6______________0_
+*	|fraction (F2) ...  | sign (S) | exponent (E) | fraction (F1)  |
+*	|-------------------|----------|--------------|----------------|
+*	                 LSB                          MSB
+*
+*	With the usual:  x = (+/-) f * 2**k
+*	"+/-" is "+" is S (bit 15) is 0, and "-" if not.
+*	"f" is always positive, and:  1 .GT. f   1/2  .LE. f
+*	The leading bit of "f" is always omitted (the "hidden" bit).
+*
+*	           F1(shifted up 16 bits) + F2(shifted down 16 bits) + 2**23
+*	"f"  =   ------------------------------------------------------------
+*	                                   2**24
+*
+*	Note that the MSB of "f" is bit 6, from F1.
+*
+*	"k" is:   E(shifted down 7 bits)
+*
+*	Note that bit 14 (in E) is the sign bit of E.  For E=0, S=0, "x" is
+*	defined to be zero.  For E=0, S=1, "x" is a reserved operand - illegal.
+
+
+</pre>
