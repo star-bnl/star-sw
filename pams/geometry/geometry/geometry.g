@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.81 2004/02/10 00:27:57 potekhin Exp $
+* $Id: geometry.g,v 1.82 2004/03/04 02:38:38 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.82  2004/03/04 02:38:38  potekhin
+* Added modifications COMPLETE, to exclude SISD
+* as per Kai request -- won't affect anybody else
+*
 * Revision 1.81  2004/02/10 00:27:57  potekhin
 * The SVT group wanted the correction in the SVT geometry,
 * which we discovered that we needed earlier this year, to
@@ -517,7 +521,7 @@ If LL>1
                      phmd=on;
                      PhmdVersion = 1;
                   "Silicon Strip Detector Version "
-                     sisd=on;
+                     sisd=off;
                      SisdConfig = 1;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
