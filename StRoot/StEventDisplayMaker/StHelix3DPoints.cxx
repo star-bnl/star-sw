@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   21/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHelix3DPoints.cxx,v 1.1 1999/11/02 01:49:52 fine Exp $
+// $Id: StHelix3DPoints.cxx,v 1.2 1999/11/16 14:41:03 fine Exp $
 // $Log: StHelix3DPoints.cxx,v $
+// Revision 1.2  1999/11/16 14:41:03  fine
+// TObject::Distancetoprimitive implementation, GetXYZ has been removed
+//
 // Revision 1.1  1999/11/02 01:49:52  fine
 // The primitives moved from StEvent
 //
@@ -87,6 +90,12 @@ StHelix3DPoints::StHelix3DPoints(StTrack *track, Float_t length,Int_t lastPositi
 //________________________________________________________________________________
 StHelix3DPoints::~StHelix3DPoints(){ if (m_Owner) delete m_Helix; }
  
+
+
+//______________________________________________________________________________
+Int_t StHelix3DPoints::DistancetoPrimitive(Int_t px, Int_t py)
+{  assert(kFALSE); return -1; }
+
 //________________________________________________________________________________
 Int_t  StHelix3DPoints::GetLastPosition()const {
   return Size()-1;
@@ -136,34 +145,3 @@ void StHelix3DPoints::SetOption(Option_t *){;}
 Int_t StHelix3DPoints::SetPoint(Int_t , Float_t, Float_t , Float_t ){return 0;}
 //________________________________________________________________________________
 Int_t StHelix3DPoints::SetPoints(Int_t , Float_t *, Option_t *) {return 0;}
-
-//______________________________________________________________________________
-Float_t *StHelix3DPoints::GetXYZ(Float_t *xyz,Int_t idx,Int_t num)  const
-{
-  //
-  // GetXYZ(Float_t *xyz,Int_t idx,Int_t num=1) fills the buffer supplied
-  // by the calling code with the points information.
-  //
-  //  Input parameters:
-  //  ----------------
-  //   Float_t *xyz - an external user supplied floating point array.
-  //   Int_t    num - the total number of the points to be copied
-  //                  the dimension of that array the size of the
-  //                  array is num*sizeof(Float_t) at least
-  //   Int_t    idx - The index of the first copy to be taken.
-  //
-  //  Return: The pointer to the buffer array supplied
-  //  ------
-
-  if (xyz) {
-    Int_t size = TMath::Min(idx+num,Size());
-    Int_t j=0;
-    Int_t i = 0;
-    for (i=idx;i<size;i++) {
-      xyz[j++] = GetX(i); 
-      xyz[j++] = GetY(i); 
-      xyz[j++] = GetZ(i);
-    }
-  }
-  return xyz;
-}
