@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.38 2003/12/12 02:33:06 oldi Exp $
+//  $Id: StFlowMaker.h,v 1.39 2004/05/05 21:13:44 aihong Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -66,7 +66,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.38 2003/12/12 02:33:06 oldi Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.39 2004/05/05 21:13:44 aihong Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -80,6 +80,8 @@ protected:
   Flow::PhiWgtFtpc_t   mPhiWgtFtpcEast;           //! To make event plane isotropic
   Flow::PhiWgtFtpc_t   mPhiWgtFtpcWest;           //! To make event plane isotropic
   Flow::PhiWgtFtpc_t   mPhiWgtFtpcFarWest;        //! To make event plane isotropic
+  Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtWest;	  //! ZDCSMD west Psi
+  Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtEast;      //! ZDCSMD east Psi
 
 private:
   TString          mEventFileName;            //! IO Maker file name
@@ -171,6 +173,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.39  2004/05/05 21:13:44  aihong
+//  Gang's code for ZDC-SMD added
+//
 //  Revision 1.38  2003/12/12 02:33:06  oldi
 //  Read from PicoDST version 4 enabled again (some simulations are in this format).
 //
