@@ -1,4 +1,4 @@
-// $Id: EEsoloPi0.cxx,v 1.1 2004/04/14 17:09:08 balewski Exp $
+// $Id: EEsoloPi0.cxx,v 1.2 2004/05/05 04:39:45 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -22,9 +22,8 @@
 #include "StEEmcDbMaker/EEmcDbItem.h"
 
 
-#ifdef __ROOT_
-  asdgashdgasgdasghj
-  #include "../EEmcDb/EEmcDb.h"
+#ifdef NO_ROOT4STAR
+  #include "EEmcDb/EEmcDb.h"
 #else
   #include "StEEmcDbMaker/StEEmcDbMaker.h"
 #endif
@@ -213,14 +212,15 @@ void EEsoloPi0::print(){
   }
 }
   
-
+#ifdef NO_ROOT4STAR
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
-int EEsoloPi0::sort(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eHead, int n1, int n2 ){
+int EEsoloPi0::sort(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eHead, int ctbMin, int ctbMax ){
   static int time0=-1;
   if(time0<0) time0=eHead->getTimeStamp();
   timeSec=eHead->getTimeStamp()-time0;
+  int n1=0,n2=0;
 
   if(eTrig) { // check CTB multiplicity 
     // Find number of ctb slats which fired
@@ -229,9 +229,9 @@ int EEsoloPi0::sort(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eH
     for ( isl = 0; isl < 240; isl++ ) {
       ctbSum+= eTrig -> CTB[isl];
     }
-    //printf("ctbSum=%d nCtb=%d\n",ctbSum,nSlat);
+    // printf("ctbSum=%d \n",ctbSum);
     hA[7]->Fill(ctbSum); 
-    if(ctbSum<n1 || ctbSum>n2) return 0;
+    if(ctbSum<ctbMin || ctbSum>ctbMax) return 0;
   }
 
   clear();
@@ -252,19 +252,24 @@ int EEsoloPi0::sort(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eH
 
     int crateID=b->getCrateID();    
     if(crateID>MaxTwCrateID) continue; // just tower crates
+    n1++;
     int chan;
     UShort_t* data=b->getData();
     int nd=b->getValidDataLen();
+    
 
     for(chan=0;chan<nd;chan++) {
       const  EEmcDbItem  *x=db->getByCrate(crateID,chan);
       if(x==0) continue; 
+      if(x->fail ) continue; // drop broken channels
 
       float value=data[chan]; // raw ADC 
       if(value <x->thr) continue;
-      value-=x->ped;
+      n2++;
       
       int ii=(x->sec-1)*60+(x->sub-'A')*12+x->eta-1;
+      //printf("ii=%d '%s' --> %f th=%f\n",ii,x->name,value,x->thr);
+      value-=x->ped;
 
 
       // if(ii>500) continue;
@@ -291,7 +296,6 @@ int EEsoloPi0::sort(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eH
 
       hA[5]->Fill(recoEner/cosh(etaCenter));
 
-      // printf("%d %d --> %f\n",iEta, iPhi,value);
     }
   }
   
@@ -304,6 +308,7 @@ int EEsoloPi0::sort(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eH
 
 }
 
+#endif
 
 //---------------------------------------------------
 //---------------------------------------------------

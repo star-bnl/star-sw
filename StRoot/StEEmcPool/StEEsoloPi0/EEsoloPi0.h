@@ -3,7 +3,7 @@
 #ifndef EEsoloPi0_h
 #define EEsoloPi0_h
 /*********************************************************************
- * $Id: EEsoloPi0.h,v 1.2 2004/04/14 19:34:01 balewski Exp $
+ * $Id: EEsoloPi0.h,v 1.3 2004/05/05 04:39:45 balewski Exp $
  *********************************************************************
  * Descripion:
  *  finds pi0 based on EEMC tower response
@@ -20,9 +20,9 @@ class EEstarTrig;
 class EEmcEventHeader;
 #include "StEEmcUtil/EEfeeRaw/EEdims.h"
 
-#ifdef __ROOT_
-  #define MYDB EEmcDb
-  #include "../EEmcDb/EEmcDb.h"
+#ifdef NO_ROOT4STAR
+  class EEmcDb;
+  typedef EEmcDb MYDB;
 #else
   class StEEmcDbMaker;
   typedef StEEmcDbMaker MYDB;
@@ -68,7 +68,9 @@ class EEsoloPi0 :public TObject{
   virtual ~EEsoloPi0();
   void print();
   void finish();
+#ifdef NO_ROOT4STAR
   int sort(EEfeeRawEvent  *feeEve, EEstarTrig *eTrig=0,EEmcEventHeader *eHead=0, int n1=0, int n2=240);
+#endif
   void init( MYDB *, TObjArray * L=0);
   void set(float a, float b,  float d, float m1=0.11, float m2=0.16 )
     {scaleFactor =a; seedEnergy=b;  shapeLimit=d;  mLo=m1; mHi=m2; }
@@ -80,6 +82,9 @@ class EEsoloPi0 :public TObject{
 
 /*****************************************************************
  * $Log: EEsoloPi0.h,v $
+ * Revision 1.3  2004/05/05 04:39:45  balewski
+ * works with muDst & ezTree
+ *
  * Revision 1.2  2004/04/14 19:34:01  balewski
  * access to trigger data
  *
