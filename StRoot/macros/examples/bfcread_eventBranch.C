@@ -1,5 +1,8 @@
-// $Id: bfcread_eventBranch.C,v 1.8 2001/09/20 20:13:57 genevb Exp $
+// $Id: bfcread_eventBranch.C,v 1.9 2004/01/23 15:06:23 fisyak Exp $
 // $Log: bfcread_eventBranch.C,v $
+// Revision 1.9  2004/01/23 15:06:23  fisyak
+// Add gSystem->Load(StBichsel) by Lee request
+//
 // Revision 1.8  2001/09/20 20:13:57  genevb
 // Remove StEventMaker
 //
@@ -66,6 +69,7 @@ void bfcread_eventBranch(
     gSystem->Load("StUtilities");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
+    gSystem->Load("StBichsel");
     gSystem->Load("StEvent");
     //    gSystem->Load("StMagF");
     gSystem->Load("StAnalysisMaker");
