@@ -1,5 +1,9 @@
-* $Id: tfs_ini.F,v 1.5 1999/07/19 19:15:49 genevb Exp $
+* $Id: tfs_ini.F,v 1.6 1999/10/11 16:53:13 sakrejda Exp $
 * $Log: tfs_ini.F,v $
+* Revision 1.6  1999/10/11 16:53:13  sakrejda
+* Obsolete parameters removed and the old code to do the pileup
+* deleted (not Akio's , akio's is still in!). It did not work anyway.
+*
 * Revision 1.5  1999/07/19 19:15:49  genevb
 * Use StMessMgr
 *
@@ -147,12 +151,12 @@ C     *** DSW  03/29/1997 ***
          omega_tau = 0.0
       endif
 
-      sprf_02(1)  = par(1).sprf_0(1)**2
-      sprf_02(2)  = par(1).sprf_0(2)**2
-      sprf_dr2(1) = par(1).sprf_dr0(1)**2/(Const + omega_tau**2)
-      sprf_dr2(2) = par(1).sprf_dr0(2)**2/(Const + omega_tau**2)
-      sprf_ta2(1) = par(1).sprf_ta(1)**2
-      sprf_ta2(2) = par(1).sprf_ta(2)**2
+      sprf_02(1)  = ctrl(1).sprf_0(1)**2
+      sprf_02(2)  = ctrl(1).sprf_0(2)**2
+      sprf_dr2(1) = ctrl(1).sprf_dr0(1)**2/(Const + omega_tau**2)
+      sprf_dr2(2) = ctrl(1).sprf_dr0(2)**2/(Const + omega_tau**2)
+      sprf_ta2(1) = ctrl(1).sprf_ta(1)**2
+      sprf_ta2(2) = ctrl(1).sprf_ta(2)**2
 
        
 C     longitudinal coefficient of diffusion (units :- sqrt(cm))
@@ -186,40 +190,40 @@ C     See Roy B.'s mail to DSW dated May 7, 1997.
 C     P10 ionization potential  in GeV
       Ion_Pot = 28.5e-9 
 
-      if (par(1).sys_test.eq.0) then
-         sigma02(1)   = par(1).sigma0(1)**2
-         sigma02(2)   = par(1).sigma0(2)**2
+      if (ctrl(1).sys_test.eq.0) then
+         sigma02(1)   = ctrl(1).sigma0(1)**2
+         sigma02(2)   = ctrl(1).sigma0(2)**2
          sigmad2(1)   = sprf_dr2(1)
          sigmad2(2)   = sprf_dr2(2)
-         ang_wireF(1) = par(1).ang_wireF(1)
-         ang_wireF(2) = par(1).ang_wireF(2)
-         ang_padF(1)  = par(1).ang_padF(1)
-         ang_padF(2)  = par(1).ang_padF(2)
-      elseif (par(1).sys_test.ge.1) then
-         sigma02(3)   = par(1).sigma0(3)**2
-         sigma02(4)   = par(1).sigma0(4)**2
-         sigmad2(3)   = par(1).sprf_dr0(3)**2
-         sigmad2(4)   = par(1).sprf_dr0(4)**2
-         ang_wireF(3) = par(1).ang_wireF(3)
-         ang_wireF(4) = par(1).ang_wireF(4)
-         ang_padF(3)  = par(1).ang_padF(3)
-         ang_padF(4)  = par(1).ang_padF(4)
+         ang_wireF(1) = ctrl(1).ang_wireF(1)
+         ang_wireF(2) = ctrl(1).ang_wireF(2)
+         ang_padF(1)  = ctrl(1).ang_padF(1)
+         ang_padF(2)  = ctrl(1).ang_padF(2)
+      elseif (ctrl(1).sys_test.ge.1) then
+         sigma02(3)   = ctrl(1).sigma0(3)**2
+         sigma02(4)   = ctrl(1).sigma0(4)**2
+         sigmad2(3)   = ctrl(1).sprf_dr0(3)**2
+         sigmad2(4)   = ctrl(1).sprf_dr0(4)**2
+         ang_wireF(3) = ctrl(1).ang_wireF(3)
+         ang_wireF(4) = ctrl(1).ang_wireF(4)
+         ang_padF(3)  = ctrl(1).ang_padF(3)
+         ang_padF(4)  = ctrl(1).ang_padF(4)
       endif
       
 C     calculate limits for the transition from prf to projected width
-      alow  = par(1).alpha_lo * C_RAD_PER_DEG
-      ahigh = par(1).alpha_hi * C_RAD_PER_DEG
+      alow  = ctrl(1).alpha_lo * C_RAD_PER_DEG
+      ahigh = ctrl(1).alpha_hi * C_RAD_PER_DEG
       ascale = ( ahigh - alow )
       
 C     calculate merging criterion
-      rsep(1) = par(1).drmin * par(1).padwid(1)
-      rsep(2) = par(1).drmin * par(1).padwid(2)
-      zsep    = par(1).dzmin * xlength / par(1).zbmax
+      rsep(1) = ctrl(1).drmin * par(1).padwid(1)
+      rsep(2) = ctrl(1).drmin * par(1).padwid(2)
+      zsep    = ctrl(1).dzmin * xlength / par(1).zbmax
       
 C     calculate merging limits
-      rplim(1) = par(1).merge_r * par(1).padwid(1)
-      rplim(2) = par(1).merge_r * par(1).padwid(2)
-      zlim     = par(1).merge_z * xlength / par(1).zbmax
+      rplim(1) = ctrl(1).merge_r * par(1).padwid(1)
+      rplim(2) = ctrl(1).merge_r * par(1).padwid(2)
+      zlim     = ctrl(1).merge_z * xlength / par(1).zbmax
       
  999  return
       end

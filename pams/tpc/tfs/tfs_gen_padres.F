@@ -1,5 +1,9 @@
-* $Id: tfs_gen_padres.F,v 1.10 1998/12/16 02:01:34 fisyak Exp $
+* $Id: tfs_gen_padres.F,v 1.11 1999/10/11 16:53:11 sakrejda Exp $
 * $Log: tfs_gen_padres.F,v $
+* Revision 1.11  1999/10/11 16:53:11  sakrejda
+* Obsolete parameters removed and the old code to do the pileup
+* deleted (not Akio's , akio's is still in!). It did not work anyway.
+*
 * Revision 1.10  1998/12/16 02:01:34  fisyak
 * CLeanup for NT
 *
@@ -27,12 +31,14 @@
 * Revision 1.1  1998/01/27 01:47:22  fisyak
 * Split sources
 *
-      SUBROUTINE TFS_GEN_PADRES( par_h, par, tphit_h, tphit )
+      SUBROUTINE TFS_GEN_PADRES( par_h, par, ctrl_h, ctrl, tphit_h, tphit )
       IMPLICIT NONE
 C-----------------------------------------------------------------------
 C     Input Arguments:
 C       par_h   = header for TFS fspar table
 C       par    = rows of TFS fspar table
+C       ctrl_h   = header for TFS fsctrl table
+C       ctrl    = rows of TFS fsctrl table
 C       tphit_h = header of TCL tphit table
 C       tphit  = rows of TFC tphit table
 C
@@ -66,6 +72,7 @@ C     DH               03/02/98         use math and physical constants
 C-----------------------------------------------------------------------
 #include "PAM.inc"
 #include "tfs_fspar.inc"
+#include "tfs_fsctrl.inc"
 #include "tcl_tphit.inc"
 #include "math_constants.inc"
 #include "phys_constants.inc"
@@ -73,6 +80,8 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
       RECORD / table_head_st / par_h
       RECORD / tfs_fspar_st / par(*)
+      RECORD / table_head_st / ctrl_h
+      RECORD / tfs_fsctrl_st / ctrl(*)
       RECORD / table_head_st / tphit_h
       RECORD / tcl_tphit_st / tphit(*)
 C-----------------------------------------------------------------------
@@ -317,17 +326,17 @@ C     scale wprf to meet wmin between 45.0 < alpha < 72.0 degrees
 C     store the pad/z-response width in tphit table
                
                tphit(k).prf = sigma_response
-               if( tphit(k).prf .gt. par(1).reslim )
-     >              tphit(k).prf = par(1).reslim
+               if( tphit(k).prf .gt. ctrl(1).reslim )
+     >              tphit(k).prf = ctrl(1).reslim
                if( tlen .eq. 0 ) then
-                  tphit(k).zrf = par(1).reslim
+                  tphit(k).zrf = ctrl(1).reslim
                else
 C     z-width (half width plus something for diffusion)
                   tphit(k).zrf = 0.5 * ( tlen*diptan ) + ! projected width
      >                 sqrt( sig_ldiff2 * dlen + ! diffusion
      >                 sig_shape2 ) ! shaping time
-                  if( tphit(k).zrf .gt. par(1).reslim )
-     >                 tphit(k).zrf = par(1).reslim
+                  if( tphit(k).zrf .gt. ctrl(1).reslim )
+     >                 tphit(k).zrf = ctrl(1).reslim
                endif
                
 
@@ -355,7 +364,7 @@ C     Until then use Neff_b = 24.84 which is a good approximation.
                if( theta .lt. 0.0175 ) then
                   sigma_tr = sigma_response / sqrt(12.0)
                else
-                  if(par(1).sys_test.eq.0)then
+                  if(ctrl(1).sys_test.eq.0)then
                      siga2(ipad)  = sigma02(ipad)/Nh**2
                      sigb2(ipad)  = sigmad2(ipad)/Nh
                      sigc2(ipad)  = ang_wireF(ipad)*wire_space2/
@@ -369,7 +378,7 @@ C     General simulations.
      >                    sigb2(ipad)*dlen/calpha2      +
      >                    (sigc2(ipad)+sigd2(ipad))*tan(alpha)**2 )
                      
-                  elseif(par(1).sys_test.eq.1)then
+                  elseif(ctrl(1).sys_test.eq.1)then
                      siga2(ipad)  = sigma02(ipad+2)/Nh**2
                      sigb2(ipad)  = sigmad2(ipad+2)/Nh
                      sigc2(ipad)  = ang_wireF(ipad+2)*wire_space2/
@@ -383,7 +392,7 @@ C     System test  simulations.
      >                    sigb2(ipad)*dlen/calpha2      +
      >                    (sigc2(ipad)+sigd2(ipad))*
      >                    abs(tan(alpha))**1.2 )
-                  elseif(par(1).sys_test.eq.2)then
+                  elseif(ctrl(1).sys_test.eq.2)then
 C     Use a parametrization solely based on the  cosmic ray test data in the
 C     limited crossing angle region  [-45, 45] degrees.  --- DSW  6/17/97 ---
                      sigma_tr = 0.04  
@@ -399,9 +408,9 @@ C
 CDH   I suspect that the variables defined here are different than what is
 c     in Blum and Rolandi.  Using the substitution rules (B&R eqn. 6.10),
 c     alpha is the DIP ANGLE (?).  DH January 14, 1998.
-               if (par(1).sys_test.eq.0) then
+               if (ctrl(1).sys_test.eq.0) then
                   sigb2(ipad)  = sigmad2(ipad)/Nh
-               elseif(par(1).sys_test.eq.1)then
+               elseif(ctrl(1).sys_test.eq.1)then
                   sigb2(ipad)  = sigmad2(ipad+2)/Nh
                endif
                
@@ -412,7 +421,7 @@ CDH               CC  = 0.64*wire_space2/(180.*Neff_b)
                BB  = wire_space2*tan(lambda)**2/(12.*Neff_b)
                CC  = 0.64*wire_space2/(180.*Neff_b)
                
-               if(par(1).sys_test.lt.2)then
+               if(ctrl(1).sys_test.lt.2)then
 CDH                  if( theta .lt. 0.0175 ) then
 CDH                     sigma_l      = sqrt( CC )
 CDH                  else
@@ -420,7 +429,7 @@ CDH                     sigma_l      = sqrt( AA + BB + CC )
 CDH                  endif
 CDH   add temporary fudge factor of 0.07**2. DH January 15, 1998. 
                   sigma_l = sqrt( 0.0049 + AA + BB + CC )
-               elseif(par(1).sys_test.eq.2)then
+               elseif(ctrl(1).sys_test.eq.2)then
 C     Use a parametrization solely based on the  cosmic ray test data in the
 C     limited dip angle region  [-45, 45] degrees. --- DSW  6/17/97 ---
                   sigma_l = 0.04 
