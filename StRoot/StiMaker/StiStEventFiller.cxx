@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.9 2002/06/05 20:31:15 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 1.10 2002/06/18 18:08:34 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.10  2002/06/18 18:08:34  pruneau
+ * some cout statements removed/added
+ *
  * Revision 1.9  2002/06/05 20:31:15  calderon
  * remove some redundant statements, the call to
  * StTrackNode::addTrack()
@@ -172,36 +175,32 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
 	StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo(); 
 	
-	for (KalmanTrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt){
-		const StiKalmanTrack* kTrack = (*trackIt).second;
-		
-		// Mike's test of track->stHits();
-		//vector<StHit*> vec = kTrack->stHits();
-		//cout <<" --- Hits for next track --- "<<endl;
-		//for_each(vec.begin(), vec.end(), StreamStHit());
-		
-		//cout << "StiStEventFiller::fillEvent() - INFO - track: " << *kTrack << endl;
-		
-		// detector info
-		StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
-		fillDetectorInfo(detInfo,kTrack);
-		
-		// track node where the new StTrack will reside
-		StTrackNode* trackNode = new StTrackNode;
-		
-		// actual filling of StTrack from StiTrack
-		StGlobalTrack* gTrack = new StGlobalTrack;
-		
-		try {
+	int errorCount=0;
+	for (KalmanTrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt)
+		{
+			const StiKalmanTrack* kTrack = (*trackIt).second;
+			// Mike's test of track->stHits();
+			//vector<StHit*> vec = kTrack->stHits();
+			//cout <<" --- Hits for next track --- "<<endl;
+			//for_each(vec.begin(), vec.end(), StreamStHit());
+			//cout << "StiStEventFiller::fillEvent() - INFO - track: " << *kTrack << endl;
+			// detector info
+			StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
+			fillDetectorInfo(detInfo,kTrack);
+			
+			// track node where the new StTrack will reside
+			StTrackNode* trackNode = new StTrackNode;
+			// actual filling of StTrack from StiTrack
+			StGlobalTrack* gTrack = new StGlobalTrack;
+			
+			try {
 		    fillTrack(gTrack,kTrack);
-
 		    // filling successful,
 		    // set up relationships between objects
 		    detInfoVec.push_back(detInfo);
 		    trNodeVec.push_back(trackNode);
 		    gTrack->setDetectorInfo(detInfo);
 		    trNodeVec.back()->addTrack(gTrack);
-		    
 		    // reuse the utility to fill the topology map
 		    // this has to be done at the end as it relies on
 		    // having the proper track->detectorInfo() relationship
@@ -209,23 +208,27 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 		    StuFixTopoMap(gTrack);
 		    mTrkNodeMap.insert(map<const StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
 		    if (trackNode->entries(global)<1)
-			cout << "StiStEventFiller::fillEvent() - ERROR - Track Node has no entries!! " << endl;
+					cout << "StiStEventFiller::fillEvent() - ERROR - Track Node has no entries!! " << endl;
+			}
+			catch (runtime_error & rte ) 
+				{
+					if (++errorCount<5)
+						cout << "StiStEventFiller::fillEvent() - WARNING - runtime exception filling track: "
+								 << rte.what() << endl;
+					delete trackNode;
+					delete detInfo;
+					delete gTrack;
+				}
+			catch (...) 
+				{
+					cout << "StiStEventFiller::fillEvent() - WARNING - Unknown exception filling track."<<endl;
+					delete trackNode;
+					delete detInfo;
+					delete gTrack;
+				}
 		}
-		catch (runtime_error & rte ) {
-		    cout << "StiStEventFiller::fillEvent() - WARNING - runtime exception filling track: "
-			 << rte.what() << endl;
-		    delete trackNode;
-		    delete detInfo;
-		    delete gTrack;
-		}
-		catch (...) {
-		    cout << "StiStEventFiller::fillEvent() - WARNING - Unknown exception filling track."<<endl;
-		    delete trackNode;
-		    delete detInfo;
-		    delete gTrack;
-		}
-		
-    }
+	if (errorCount>4)
+		cout << "There were "<<errorCount<<"runtime_error while filling StEvent"<<endl;
     
 	return mEvent;
 }
@@ -250,53 +253,59 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
     StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo();
 
 
+		int skippedCount=0;
     // loop over StiKalmanTracks
-    for (KalmanTrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt){
-	// get track and corresponding StTrackNode
-	const StiKalmanTrack* kTrack = (*trackIt).second;	
-	map<const StiKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
-	if (itKtrack == mTrkNodeMap.end()) {
-	    cout << "skipping track which was not entered in an StTrackNode" << endl;
-	    continue;
-	}
-	if (kTrack->isPrimary()) {
-	    StTrackNode* currentTrackNode = (*itKtrack).second;
-
-	    if (currentTrackNode->entries(global)<1) {
-		cout << "skipping Node: this node should have a global track but doesn't" << endl;
-		continue;
-	    }
-	    // detector info
-	    StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
-	    fillDetectorInfo(detInfo,kTrack);
-
-	    // actual filling of StTrack from StiTrack
-	    StPrimaryTrack* pTrack = new StPrimaryTrack;
-	    
-	    try	{
-		fillTrack(pTrack,kTrack);
-
-		// set up relationships between objects
-		detInfoVec.push_back(detInfo);
-		pTrack->setDetectorInfo(detInfo);
-		currentTrackNode->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
-		vertex->addDaughter(pTrack);
-	    
-		StuFixTopoMap(pTrack);
-	    }
-	    catch (runtime_error & rte ) {
-		cout << "StiStEventFiller::fillEventPrimaries() - runtime exception, filling track: "
-		     << rte.what() << endl;
-		delete detInfo;
-		delete pTrack;
-	    }
-	    catch (...) {
-		cout << "StiStEventFiller::fillEventPrimaries() - Unknown exception, filling track."<<endl;
-		delete detInfo;
-		delete pTrack;
-	    }
-	}
-    } // kalman track loop
+    for (KalmanTrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt)
+			{
+				// get track and corresponding StTrackNode
+				const StiKalmanTrack* kTrack = (*trackIt).second;	
+				map<const StiKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
+				if (itKtrack == mTrkNodeMap.end()) 
+					{
+						if (++skippedCount<5)
+							cout << "skipping track which was not entered in an StTrackNode" << endl;
+						continue;
+					}
+				if (kTrack->isPrimary()) {
+					StTrackNode* currentTrackNode = (*itKtrack).second;
+					
+					if (currentTrackNode->entries(global)<1) {
+						cout << "skipping Node: this node should have a global track but doesn't" << endl;
+						continue;
+					}
+					// detector info
+					StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
+					fillDetectorInfo(detInfo,kTrack);
+					
+					// actual filling of StTrack from StiTrack
+					StPrimaryTrack* pTrack = new StPrimaryTrack;
+					
+					try	{
+						fillTrack(pTrack,kTrack);
+						
+						// set up relationships between objects
+						detInfoVec.push_back(detInfo);
+						pTrack->setDetectorInfo(detInfo);
+						currentTrackNode->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
+						vertex->addDaughter(pTrack);
+						
+						StuFixTopoMap(pTrack);
+					}
+					catch (runtime_error & rte ) {
+						cout << "StiStEventFiller::fillEventPrimaries() - runtime exception, filling track: "
+								 << rte.what() << endl;
+						delete detInfo;
+						delete pTrack;
+					}
+					catch (...) {
+						cout << "StiStEventFiller::fillEventPrimaries() - Unknown exception, filling track."<<endl;
+						delete detInfo;
+						delete pTrack;
+					}
+				}
+			} // kalman track loop
+		if (skippedCount>0)
+			cout << "A total of "<<skippedCount<<" StiTracks were skipped"<<endl;
     mTrkNodeMap.clear();  // need to reset for the next event
     
     return mEvent;

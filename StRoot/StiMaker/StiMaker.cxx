@@ -7,6 +7,9 @@
 //
 //
 // $Log: StiMaker.cxx,v $
+// Revision 1.97  2002/06/18 18:08:34  pruneau
+// some cout statements removed/added
+//
 // Revision 1.96  2002/06/04 19:45:31  pruneau
 // including changes for inside out tracking
 //
@@ -233,12 +236,12 @@ Int_t StiMaker::Make()
       //Init seed finder for start
       StiSeedFinder * seedFinder = toolkit->getTrackSeedFinder();
       if (seedFinder)
-	seedFinder->reset();
+				seedFinder->reset();
       else
-	{
-	  cout << "StiMaker::Make() - FATAL - seedFinder==0" << endl;
-	  return 0;
-	}
+				{
+					cout << "StiMaker::Make() - FATAL - seedFinder==0" << endl;
+					return 0;
+				}
       cout <<"StiMaker::Make() - INFO - Call TrackSeedFinder reset completed"<<endl;
       if (ioBroker->simulated()) 
 	{
