@@ -78,6 +78,24 @@ void EEfeeRawEvent ::addFeeDataBlock(EEfeeDataBlock* b){
 //--------------------------------------------------
 //--------------------------------------------------
 
+int EEfeeRawEvent::getNGoodBlock() {
+  int ic;
+  int nOK=0;
+  for(ic=0;ic<block->GetEntries();ic++) {
+    EEfeeDataBlock *b=(EEfeeDataBlock *)block->At(ic);
+    if(!b->isValid()) continue;
+    // printf("icr=%d san=%d ok=%d\n",ic,b->getSanity(),nOK);
+    nOK++;
+  }
+  return nOK;
+}
+
+
+
+//--------------------------------------------------
+//--------------------------------------------------
+//--------------------------------------------------
+
 int EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken, HeadVer headVersion) {
 
   /* check for:
@@ -198,6 +216,9 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.20  2004/09/07 20:32:01  balewski
+ * more methods, remove questionable spin bits interpetation
+ *
  * Revision 1.19  2004/08/24 20:30:08  balewski
  * for Renne LED test with mini
  *

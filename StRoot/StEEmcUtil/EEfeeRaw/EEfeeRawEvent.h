@@ -1,7 +1,7 @@
 #ifndef EEfeeRawEvent_h
 #define EEfeeRawEvent_h
 /*********************************************************************
- * $Id: EEfeeRawEvent.h,v 1.11 2004/07/09 02:38:05 balewski Exp $
+ * $Id: EEfeeRawEvent.h,v 1.12 2004/09/07 20:32:01 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Events
@@ -26,6 +26,7 @@ class EEfeeRawEvent :public TObject {
   void clear();
   void setID(int i){ ID=i; }
   int  getID() const{return ID;};
+  int getNGoodBlock();
   void addFeeDataBlock(EEfeeDataBlock*);
   int maskWrongCrates( long timeStamp,   unsigned token, HeadVer ver=headVer1);
   void maskBEMC(); // tmp
@@ -36,6 +37,9 @@ class EEfeeRawEvent :public TObject {
 
 /*
  * $Log: EEfeeRawEvent.h,v $
+ * Revision 1.12  2004/09/07 20:32:01  balewski
+ * more methods, remove questionable spin bits interpetation
+ *
  * Revision 1.11  2004/07/09 02:38:05  balewski
  * BTOW data are not masked out any more but headres are checked as for EEMC
  *
