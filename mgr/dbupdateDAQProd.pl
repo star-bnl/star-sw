@@ -32,18 +32,19 @@ my $topHpssReco  =  "/home/starreco/reco";
 my @SetD = (
              "P00he/2000/06",
              "P00he/2000/07",
+             "P00he/2000/08", 
 );
 
 my @SetS = (
              "daq/2000/06",
              "daq/2000/07"
-#             "daq/2000/08",
+             "daq/2000/08",
 );
 
 my @DirD = (
             "2000/06",
-            "2000/07"
-#            "2000/08"
+            "2000/07",
+            "2000/08",
 );
 
 my $recoDir = ("daq");
