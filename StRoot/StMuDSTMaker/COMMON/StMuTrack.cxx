@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.8 2003/10/30 20:08:13 perev Exp $
+ * $Id: StMuTrack.cxx,v 1.9 2003/11/07 15:23:26 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -131,12 +131,16 @@ void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
   StDedxPidTraits* dedxPidTraits =0;
   unsigned int size = traits.size();
   for (unsigned int i = 0; i < size; i++) {
-    if ( !(dedxPidTraits=dynamic_cast<StDedxPidTraits*>(traits[i])) ) continue;
-    if (dedxPidTraits->method() == kTruncatedMeanIdentifier)  mProbPidTraits.setdEdxTruncated( dedxPidTraits->mean() ); 
-    if (dedxPidTraits->method() == kLikelihoodFitIdentifier)  {
-      mProbPidTraits.setdEdxFit( dedxPidTraits->mean() ); 
-      mProbPidTraits.setdEdxTrackLength( dedxPidTraits->length() ); 
-    }
+      if ( !(dedxPidTraits=dynamic_cast<StDedxPidTraits*>(traits[i])) ) continue;
+      if (dedxPidTraits->method() == kTruncatedMeanIdentifier)  {
+	  mProbPidTraits.setdEdxTruncated( dedxPidTraits->mean() ); 
+	  mProbPidTraits.setdEdxErrorTruncated( dedxPidTraits->errorOnMean() ); 
+      }
+      if (dedxPidTraits->method() == kLikelihoodFitIdentifier)  {
+	  mProbPidTraits.setdEdxFit( dedxPidTraits->mean() ); 
+	  mProbPidTraits.setdEdxErrorFit( dedxPidTraits->errorOnMean() ); 
+	  mProbPidTraits.setdEdxTrackLength( dedxPidTraits->length() ); 
+      }
   }
 
   // get the StProbPidTraits 
@@ -157,6 +161,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.9  2003/11/07 15:23:26  laue
+ * added error on dEdx measurements to the StMuProbPidTraits
+ *
  * Revision 1.8  2003/10/30 20:08:13  perev
  * Check of quality added
  *
