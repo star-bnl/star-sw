@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableSorter.cxx,v 1.24 1999/12/07 22:26:27 fine Exp $
+// $Id: St_TableSorter.cxx,v 1.25 2000/01/12 01:24:52 fine Exp $
 
 #include <stdlib.h> 
 #include "St_TableSorter.h"
@@ -84,11 +84,46 @@ St_TableSorter::St_TableSorter() : m_simpleArray(0),m_ParentTable(dummyTable)
   m_simpleArray=0;
 }
 //_____________________________________________________________________________
+St_TableSorter::St_TableSorter(const table_head_st *header, TString &colName, Int_t firstRow
+                               ,Int_t numberRows):
+                              m_simpleArray(0),m_ParentTable(*((St_Table *)header->dsl_pointer))
+{
+  //
+  // St_TableSorter ctor sort the input table define dby header along its column defined 
+  //                     with colName
+  //
+  //    - colName    - may be followed by the square brackets with integer number inside, 
+  //                   if that columm is an array (for example "phys[3]").
+  //                   NO expression inside of [], only a single integer number allowed !
+  //    - firstRow   - the first table row to sort from (=0 by default)
+  //    - numberRows - the number of the table rows to sort (=0 by default)
+  //                   = 0 means sort all rows from the "firstRow" by the end of table
+  //
+
+BuildSorter(colName, firstRow, numberRows); }
+
+//_____________________________________________________________________________
 St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t firstRow
                                ,Int_t numberRows):m_simpleArray(0),m_ParentTable(table)
 {
   //
   // St_TableSorter ctor sort the input table along its column defined with colName
+  //
+  //    - colName    - may be followed by the square brackets with integer number inside, 
+  //                   if that columm is an array (for example "phys[3]").
+  //                   NO expression inside of [], only a single integer number allowed !
+  //    - firstRow   - the first table row to sort from (=0 by default)
+  //    - numberRows - the number of the table rows to sort (=0 by default)
+  //                   = 0 means sort all rows from the "firstRow" by the end of table
+  //
+ BuildSorter(colName, firstRow, numberRows); 
+}
+
+//_____________________________________________________________________________
+void St_TableSorter::BuildSorter(TString &colName, Int_t firstRow, Int_t numberRows)
+{
+  //
+  // BuildSorter backs St_TableSorter ctor
   //
   //    - colName    - may be followed by the square brackets with integer number inside, 
   //                   if that columm is an array (for example "phys[3]").
@@ -103,7 +138,7 @@ St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t fir
   m_colType      = kNAN;
   m_simpleArray  = 0;
 
-  TString n = table.GetName();
+  TString n = m_ParentTable.GetName();
   n += ".";
   n += colName;
   SetName(n);
@@ -794,6 +829,9 @@ void St_TableSorter::ShowMembers(TMemberInspector &R__insp, char *R__parent)
 //______________________________________________________________________________
 //______________________________________________________________________________
 // $Log: St_TableSorter.cxx,v $
+// Revision 1.25  2000/01/12 01:24:52  fine
+// several methods to use St_Table class from the <converted> C program to C++
+//
 // Revision 1.24  1999/12/07 22:26:27  fine
 // Clean up to remove the compilation warnings
 //

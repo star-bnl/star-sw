@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.90 1999/11/30 23:54:04 fine Exp $ 
+// $Id: St_Table.cxx,v 1.91 2000/01/12 01:24:50 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -1325,6 +1325,12 @@ St_Table *St_Table::New(const Char_t *name, const Char_t *type, void *array, UIn
   }
   return table; 
 }
+//______________________________________________________________________________
+void  St_Table::Object(St_Table *&table, const table_head_st *header )
+{
+ // return a pointer to the C++ object by table header sullplied;
+assert(header); table =  (St_Table *)header->dsl_pointer;
+}
 
 //______________________________________________________________________________
 Char_t *St_Table::Print(Char_t *strbuf,Int_t lenbuf) const 
@@ -2645,6 +2651,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.91  2000/01/12 01:24:50  fine
+// several methods to use St_Table class from the <converted> C program to C++
+//
 // Revision 1.90  1999/11/30 23:54:04  fine
 // Remove ToLower for Table types
 //
