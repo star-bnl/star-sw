@@ -59,7 +59,7 @@ StiGeometryTransform::StiGeometryTransform()
     //cout <<"instantiate TPC coord x-form"<<endl;
     tpcTransform = new StTpcCoordinateTransform(gStTpcDb);
 
-    //cout <<"Generating Padrow Radius Map"<<endl;
+    cout <<"Generating Padrow Radius Map"<<endl;
 
     // store svt + ssd as padrows 1-7
     for (unsigned int padrow=1; padrow<=7; ++padrow){
@@ -67,6 +67,9 @@ StiGeometryTransform::StiGeometryTransform()
       mpadrowradiusmap.insert( padrow_radius_map_ValType( padrow, center ) );
     }
 
+    // store ifc as padrow 10
+    mpadrowradiusmap.insert( padrow_radius_map_ValType( 
+        10, gStTpcDb->Dimensions()->ifcRadius()) );
     for (unsigned int padrow=1; padrow<=45; ++padrow) {
 	double center = centerForTpcPadrow(1, padrow).perp();
         mpadrowradiusmap.insert( padrow_radius_map_ValType( padrow + 100, 

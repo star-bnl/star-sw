@@ -71,6 +71,7 @@ void StiDetector::updateCenterRep()
         centerRadius = normalRadius;
     }
 
+/*
     cout << "yMax = " << yMax << endl
          << "yMin = " << yMin << endl
          << "normalRefAngle = " << normalRefAngle << endl
@@ -79,6 +80,7 @@ void StiDetector::updateCenterRep()
          << "orientationAngle = " << orientationAngle << endl
          << "centerRefAngle = " << centerRefAngle << endl
          << "centerRadius = " << centerRadius << endl;
+*/
 }
 
 void StiDetector::build(const char* buildfile)
