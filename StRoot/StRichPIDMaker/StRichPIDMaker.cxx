@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.30 2000/12/14 21:09:06 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.31 2000/12/15 00:05:18 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.31  2000/12/15 00:05:18  horsley
+ * added associated Mip's charge to dist ntuple
+ *
  * Revision 2.30  2000/12/14 21:09:06  horsley
  * fixed  error in filling ntuple with StTrack's momentum
  *
@@ -238,7 +241,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.30 2000/12/14 21:09:06 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.31 2000/12/15 00:05:18 horsley Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -1400,6 +1403,10 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	if (mcTrack) geantID = mcTrack->getStMcTrack()->particleDefinition()->pdgEncoding(); 
 #endif
 
+	float amipq = -999;
+	if (currentTrack->getAssociatedMIP()) {
+	  amipq = currentTrack->getAssociatedMIP()->charge();
+	}
 	distHits[0] = innerRingPoint.x();
 	distHits[1] = innerRingPoint.y();
 	distHits[2] = outerRingPoint.x();
@@ -1443,7 +1450,6 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	distHits[25] = minDistToConsPsiRefLine;
 	
 	distHits[26] = abs(trackMomentum);
-	//distHits[27] = currentTrack->getStTrack()->geometry()->helix().h();
 	distHits[27] = currentTrack->getStTrack()->geometry()->charge();
 	distHits[28] = mVertexPos.z();
 
@@ -1451,8 +1457,9 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	distHits[30] = ringCalculator->getConstantAreaAngle()/degree;
 	distHits[31] = currentTrack->getEnergyLoss();
 	distHits[32] = mEventRunId;
+	distHits[33] = amipq;
 #ifdef myRICH_WITH_MC
-	distHits[33] = geantID;
+	distHits[34] = geantID;
 #endif
 
 
@@ -1778,9 +1785,9 @@ bool StRichPIDMaker::checkTrack(StTrack* track) {
 
 
 #ifdef myRICH_WITH_MC
-  float distHits[34];
+  float distHits[35];
 #else
-  float distHits[33];
+  float distHits[34];
 #endif
 
   distHits[0] = 0;
@@ -1831,9 +1838,9 @@ bool StRichPIDMaker::checkTrack(StTrack* track) {
   distHits[30] = 0;
   distHits[31] = 0;
   distHits[32] = mEventRunId;
-  
-#ifdef myRICH_WITH_MC
   distHits[33] = 0;
+#ifdef myRICH_WITH_MC
+  distHits[34] = 0;
 #endif  
 
   distup->Fill(distHits);
@@ -1906,11 +1913,17 @@ bool StRichPIDMaker::checkTrack(StRichTrack* track) {
 #ifdef myRICH_WITH_NTUPLE
 
 #ifdef myRICH_WITH_MC
-  float distHits[34];
+  float distHits[35];
 #else
-  float distHits[33];
+  float distHits[34];
 #endif
 
+
+  float amipq = -999;
+  if (track->getAssociatedMIP()) {
+    amipq = track->getAssociatedMIP()->charge();
+  }
+  
   distHits[0] = 0;
   distHits[1] = 0;
   distHits[2] = 0;
@@ -1958,9 +1971,11 @@ bool StRichPIDMaker::checkTrack(StRichTrack* track) {
   distHits[30] = 0;
   distHits[31] = 0;
   distHits[32] = mEventRunId;
- 
+  distHits[33] = amipq;
+  
+  
 #ifdef myRICH_WITH_MC
-  distHits[33] = 0;
+  distHits[34] = 0;
 #endif
 
 
@@ -3680,9 +3695,9 @@ void StRichPIDMaker::initNtuples() {
   //file = new TFile("/star/rcf/scratch/lasiuk/ex","RECREATE");
     file->SetFormat(1);
 #ifdef myRICH_WITH_MC
-    distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx:refit:constang:energyloss:runid:gid");
+    distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx:refit:constang:energyloss:runid:amipq:gid");
 #else
-    distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx:refit:constang:energyloss:runid");
+    distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx:refit:constang:energyloss:runid:amipq");
 #endif
 
     trackNtuple = new TNtuple("trackNtuple","trackwise tuple","evtn:nprimaries:nnegprimaries:posz:negz:vz:nrichtracks:globalp:globalpt:globalpx:globalpy:globalpz:localpx:localpy:localpz:eta:q:amipq:amipx:amipy:pmipx:pmipy:radx:rady:oradx:orady:otheta:ophi:ctbx:ctby:ctbz:firstrow:lastrow:lasthitx:lasthity:lasthitz:lasthitdca:pathlength:maxchain:maxgap:theta:phi:tpchits:tpcfitpoints:pionfactor:piontotalarea:pionconstarea:piontotalangle:pionconstangle:piontotalhits:pionconsthits:kaonfactor:kaontotalarea:kaonconstarea:kaontotalangle:kaonconstangle:kaontotalhits:kaonconsthits:protonfactor:protontotalarea:protonconstarea:protontotalangle:protonconstangle:protontotalhits:protonconsthits:innerwave:outerwave");
