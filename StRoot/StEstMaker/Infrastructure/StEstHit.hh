@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstHit.hh,v 1.2 2001/01/25 18:15:21 lmartin Exp $
+ * $Id: StEstHit.hh,v 1.3 2001/01/26 09:49:25 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StEstHit.hh,v $
+ * Revision 1.3  2001/01/26 09:49:25  lmartin
+ * Minor changes. Useless data member mEvalTrack removed. Short description of the
+ * data members added.
+ *
  * Revision 1.2  2001/01/25 18:15:21  lmartin
  * New method DetachFromWafer.
  *
@@ -29,19 +33,18 @@ class StEstTracker;
 class StEstHit {
 
 protected:
-  StEstWafer*   mDetector;
-  StEstBranch** mBranch;
-  StThreeVectorD* mXL;   // local coor
-  StThreeVectorD* mXG;   // global coor
-  long mNShare;
-  long mMaxShare;
-  long mNBranch;
-  long mMaxBranches;
-  int mDebugLevel;
-  long mId;
-  long mMcId;
-  int mFlag; // 0=hit available 1=hit already used -1=problems
-  long mEvalTrack; // number of ideal track
+  StEstWafer*   mDetector; // pointer to the wafer of the hit
+  StEstBranch** mBranch; // list of pointer to the branches using the hit
+  StThreeVectorD* mXL;   // local coordinates
+  StThreeVectorD* mXG;   // global coordinates
+  long mNShare; // number of tracks sharing the hit
+  long mMaxShare; // maximum number of tracks sharing the hit
+  long mNBranch; // number of branches sharing the hit
+  long mMaxBranches; // maximum number of branches sharing the hit
+  int mDebugLevel; //Control the printing level in the class methods
+  long mId; // Id of the hit from scs_spt
+  long mMcId; // McId of the hit from scs_spt
+  int mFlag; // 0=hit available 1=hit already used and frozen -1=problems
 
 public:
   
