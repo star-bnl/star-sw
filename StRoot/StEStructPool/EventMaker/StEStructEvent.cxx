@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.2 2004/02/27 02:28:04 prindle Exp $
+ * $Id: StEStructEvent.cxx,v 1.3 2004/06/09 22:39:09 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -88,6 +88,7 @@ void StEStructEvent::Clear(Option_t *option) {
 //                  impact parameter in case data comes from an event generator.
 void StEStructEvent::SetCentrality(Double_t impact) {
   mCentrality=StEStructCentrality::Instance()->centrality(impact);
+  mPtCentrality=StEStructCentrality::Instance()->ptCentrality(impact);
 }
 
 //-------------------------------------------------------
@@ -124,7 +125,15 @@ StEStructTrackCollection * StEStructEvent::TrackCollectionP() const { return mTr
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.3  2004/06/09 22:39:09  prindle
+ * Expanded centrality class.
+ * Call to set centrality from event reader.
+ *
+ *
+ * CVS :nded ----------------------------------------------------------------------
+ *
  * Revision 1.2  2004/02/27 02:28:04  prindle
+ *
  * Small modification to StEStructCentrality in EventMaker branch.
  * Many modifications to Fluctuations branch, although that branch is not
  * stable yet.

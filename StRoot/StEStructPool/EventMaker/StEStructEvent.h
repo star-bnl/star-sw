@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.h,v 1.2 2004/02/27 02:28:04 prindle Exp $
+ * $Id: StEStructEvent.h,v 1.3 2004/06/09 22:39:10 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -46,6 +46,7 @@ class StEStructEvent : public TObject {
   // non-persistent data to merge old event and 2ptevent classes
 
   Int_t mCentrality;               //! centrality measure (depends on analysis)
+  Int_t mPtCentrality;             //! centrality measure (depends on analysis)
   StEStructTrackCollection * mTrackCollectionM; //! negative charge list
   StEStructTrackCollection * mTrackCollectionP; //! positive charge list
 
@@ -64,7 +65,8 @@ class StEStructEvent : public TObject {
   Int_t OrigMult() const { return mOrigMult; };
   Int_t CentMult() const { return mCentMult; };
 
-  Float_t Centrality() const { return mCentrality; };
+  Int_t Centrality() const { return mCentrality; };
+  Int_t PtCentrality() const { return mPtCentrality; };
 
   Float_t Vx() const { return mVx; }
   Float_t Vy() const { return mVy; }
@@ -114,7 +116,15 @@ class StEStructEvent : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructEvent.h,v $
+ * Revision 1.3  2004/06/09 22:39:10  prindle
+ * Expanded centrality class.
+ * Call to set centrality from event reader.
+ *
+ *
+ * CVS :nded ----------------------------------------------------------------------
+ *
  * Revision 1.2  2004/02/27 02:28:04  prindle
+ *
  * Small modification to StEStructCentrality in EventMaker branch.
  * Many modifications to Fluctuations branch, although that branch is not
  * stable yet.
