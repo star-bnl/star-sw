@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventInfo.cxx,v 2.3 2001/04/05 04:00:49 ullrich Exp $
+ * $Id: StEventInfo.cxx,v 2.4 2001/09/19 04:48:08 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jun 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventInfo.cxx,v $
+ * Revision 2.4  2001/09/19 04:48:08  ullrich
+ * Added event size.
+ *
  * Revision 2.3  2001/04/05 04:00:49  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -23,7 +26,7 @@
 #include "StEventInfo.h"
 #include "tables/St_event_header_Table.h"
 
-static const char rcsid[] = "$Id: StEventInfo.cxx,v 2.3 2001/04/05 04:00:49 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventInfo.cxx,v 2.4 2001/09/19 04:48:08 ullrich Exp $";
 
 ClassImp(StEventInfo)
 
@@ -35,6 +38,7 @@ StEventInfo::StEventInfo()
     mTriggerMask = 0;
     mBunchCrossingNumber[0] = 0;
     mBunchCrossingNumber[1] = 0;
+    mEventSize = 0;
 }
  
 StEventInfo::StEventInfo(const event_header_st& evtHdr)
@@ -46,6 +50,7 @@ StEventInfo::StEventInfo(const event_header_st& evtHdr)
     mTriggerMask = evtHdr.trig_mask;
     mBunchCrossingNumber[0] = evtHdr.bunchXing[0];
     mBunchCrossingNumber[1] = evtHdr.bunchXing[1];
+    mEventSize = 0;
 }
 
 StEventInfo::~StEventInfo() { /* noop */ }
@@ -71,6 +76,9 @@ StEventInfo::bunchCrossingNumber(unsigned int i) const
     return i<2 ? mBunchCrossingNumber[i] : 0;
 }
 
+unsigned int
+StEventInfo::eventSize() const { return mEventSize; }
+
 void
 StEventInfo::setType(const char* val) { mType = val; }
 
@@ -91,3 +99,6 @@ StEventInfo::setBunchCrossingNumber(unsigned int val, unsigned int i)
 {
     if (i<2) mBunchCrossingNumber[i] = val;
 }
+
+void
+StEventInfo::setEventSize(unsigned int val) { mEventSize = val; }
