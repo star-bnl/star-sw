@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.1 1999/02/11 15:44:28 wenaus Exp $
+// $Id: doEvents.C,v 1.2 1999/02/11 16:22:51 wenaus Exp $
 // $Log: doEvents.C,v $
-// Revision 1.1  1999/02/11 15:44:28  wenaus
-// macro to read DSTs into StEvent and analyze
+// Revision 1.2  1999/02/11 16:22:51  wenaus
+// load StEvent for Linux
+//
+// Revision 1.2  1999/02/11 16:22:51  wenaus
+// load StEvent for Linux
 //
 // Revision 1.1  1999/02/11 15:44:28  wenaus
 //          to fill StEvent and StAnalysisMaker to show example of analysis
@@ -60,6 +63,7 @@ void doEvents(const Int_t nevents=999,
   gSystem->Load("xdf2root");
   // Dynamically link needed shared libs
   gSystem->Load("StSclRoot");
+  gSystem->Load("StUtilities");
   gSystem->Load("StEventReaderMaker");
 //  gSystem->Load("StEventReaderMaker");
 //  gSystem->Load("St_geom_Maker");
