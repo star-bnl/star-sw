@@ -39,7 +39,7 @@
 *
 * 5. call_bfc_read_dst_smdst.kumac
 *    - read in dst
-*    - execute smdst package
+*    - execute sdst package
 *    - write out ntuple
 *    - write out full event tables 
 * 
@@ -49,6 +49,11 @@
 *    - write out ntuple
 *    - write out full event tables 
 *
+* 7. call_bfc_read_dst_rereco.kumac
+*    - created for regeneration of MDC1 dsts on objectivity db
+*   *- read in dst
+*    - exec ev02,ev0d,sdst2,desum,drsum
+*    - write out file with 2 ntuples 
 ************************************************************************
 
 
