@@ -1,0 +1,60 @@
+// This class is only a container of all the parameters I need.
+// C/C++
+#ifndef STAR_StTpcCalibSetup
+#define STAR_StTpcCalibSetup
+
+#include <strstream.h>
+#include "TH1.h"
+
+class StTpcCalibSetup {
+
+ private:
+  int  mMaxNumberOfCorruptedTB;
+  ostrstream* mBadFileName; //!
+  ostrstream* mRootOutFileName; //!
+
+  int mFirstTB;
+  int mLastTB;
+
+  int mMinDistToPulse;
+  int mExpectedPulsePos;
+
+  int mNSidePadsExcluded;
+
+ public:
+  StTpcCalibSetup();
+  void setMaxNumberOfCorruptedTB(int aNumber)
+    {mMaxNumberOfCorruptedTB=aNumber;}
+  const int& getMaxNumberOfCorruptedTB() const
+    {return mMaxNumberOfCorruptedTB;}
+  void setBadFileName(char* aCalibOutFileName);
+  const char* getBadFileName() const
+    {return mBadFileName->str();}
+  void setRootOutFileName(char* aRootOutFileName);
+  const char* getRootOutFileName() const
+    {return mRootOutFileName->str();}  
+  void setMinDistToPulse(int aMinDistToPulse)
+    {mMinDistToPulse=aMinDistToPulse;}
+  const int& getMinDistToPulse() const
+    {return mMinDistToPulse;}
+  void setExpectedPulsePos(int aExpectedPulsePos)
+    {mExpectedPulsePos=aExpectedPulsePos;}
+  const int& getExpectedPulsePos() const
+    {return mExpectedPulsePos;}
+  void setNSidePadsExcluded(int aNSidePadsExcluded)
+    {mNSidePadsExcluded=aNSidePadsExcluded;}
+  const int& getNSidePadsExcluded() const
+    {return mNSidePadsExcluded;}
+  void setFirstTB(int aFirstTB)
+    {mFirstTB=aFirstTB;}
+  const int getFirstTB() const
+    {return mFirstTB;}
+  void setLastTB(int aLastTB)
+    {mLastTB=aLastTB;}
+  const int getLastTB() const
+    {return mLastTB;}
+
+  ClassDef(StTpcCalibSetup, 1) //
+};
+
+#endif
