@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.7 2001/08/16 18:32:20 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.8 2001/08/21 19:51:06 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.8  2001/08/21 19:51:06  jcs
+// correct value of sizeOfTimebin now in MySQL database - remove from code
+//
 // Revision 1.7  2001/08/16 18:32:20  jcs
 // set value of tzero = 1.937
 //
@@ -59,8 +62,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     mRadiansPerPad              = dimensionsTable->radiansPerPad;
     mRadiansPerBoundary         = dimensionsTable->radiansPerGap;
     mNumberOfTimebins           = dimensionsTable->numberOfTimebinsPerSector;
-//    mMicrosecondsPerTimebin     = dimensionsTable->sizeOfTimebin;
-    mMicrosecondsPerTimebin     = 0.21316;
+    mMicrosecondsPerTimebin     = dimensionsTable->sizeOfTimebin;
     mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
     mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
   } else {
@@ -180,8 +182,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     mRadiansPerPad          = dimensionsTable->radiansPerPad;
     mRadiansPerBoundary     = dimensionsTable->radiansPerGap;
     mNumberOfTimebins       = dimensionsTable->numberOfTimebinsPerSector;
-//    mMicrosecondsPerTimebin = dimensionsTable->sizeOfTimebin;
-    mMicrosecondsPerTimebin     = 0.21316;
+    mMicrosecondsPerTimebin = dimensionsTable->sizeOfTimebin;
     mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
     mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
   } else {
