@@ -17,7 +17,6 @@
      float timeDiffusionErrors[3];  /* point error[cm] in time direction as */
                                     /* function of driftlength up to 2nd order*/
      float lorentzAngleFactor;      /* lorentz angle correction factor */
-     float dvdpCalcOffset;          /* offset for dv/dp-calculation (in Torr) */
      float padBadFitError;          /* additional error for bad-fit clusters*/
      float timeBadFitError;         /* additional error for bad-fit clusters*/
      float padUnfoldError;          /* additional error for unfolded clusters*/
@@ -35,7 +34,5 @@
      float zDirectionError;         /* parameter for error in z-direction */
 
        // run parameters
-     long directionOfMagnetField;   /* magnetic field direction (+/-1) */
-     float baseTemperature;         /* base temperature for calculations */
      float normalizedNowPressure;   /* normalized air pressure (in hPa) */
    };
