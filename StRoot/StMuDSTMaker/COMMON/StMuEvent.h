@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.10 2004/08/04 17:57:13 mvl Exp $
+ * $Id: StMuEvent.h,v 1.11 2004/12/02 00:19:52 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -86,6 +86,7 @@ class StMuEvent : public TObject {
   double ctbMultiplicity();
   ///    The StMuDst is supposed to be structured in 'physical events'.  Therefore there is only 1 primary vertex per mu event.
   StThreeVectorF primaryVertexPosition();
+  StThreeVectorF primaryVertexErrors();
  protected:
   void clear();
   void fill(const StEvent*);
@@ -112,10 +113,11 @@ class StMuEvent : public TObject {
   Float_t mReactionPlane[2];              
   Float_t mReactionPlanePtWgt[2];              
 
+  StThreeVectorF mPrimaryVertexError;
   friend class StMuDst;
   friend class StMuDstMaker;
   friend class StMuL3EventSummary;
-  ClassDef(StMuEvent,5)
+  ClassDef(StMuEvent,6)
 };
 
 inline int StMuEvent::eventId() { return mEventInfo.id();}
@@ -158,11 +160,15 @@ inline double StMuEvent::ctbMultiplicity() {
   return ctb;
 }
 inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.primaryVertexPosition();}
+inline StThreeVectorF StMuEvent::primaryVertexErrors() { return mPrimaryVertexError;}
 
 #endif
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.11  2004/12/02 00:19:52  mvl
+ * Added error on primary vertex
+ *
  * Revision 1.10  2004/08/04 17:57:13  mvl
  * Added EMC trigger information and fpd trigger (tower) information
  *

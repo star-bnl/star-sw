@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.8 2004/08/04 17:57:13 mvl Exp $
+ * $Id: StMuEvent.cxx,v 1.9 2004/12/02 00:19:52 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -35,7 +35,7 @@ ClassImp(StMuEvent)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-StMuEvent::StMuEvent() {
+StMuEvent::StMuEvent() : mPrimaryVertexError(-999.,-999.,-999) {
   DEBUGMESSAGE("");
   int n = (char*)mReactionPlanePtWgt - (char*)&mRefMultPos+sizeof(mReactionPlanePtWgt);
   memset(&mRefMultPos,0,n);
@@ -43,7 +43,7 @@ StMuEvent::StMuEvent() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-StMuEvent::StMuEvent(const StEvent* event) {
+StMuEvent::StMuEvent(const StEvent* event) : mPrimaryVertexError(-999.,-999.,-999.) {
   try {
     fill(event);
   }
@@ -79,6 +79,10 @@ void StMuEvent::fill(const StEvent* event){
   mRunInfo = *event->runInfo();
   mEventInfo = *event->info();
   mEventSummary = *event->summary();
+  const StPrimaryVertex *p_vtx=event->primaryVertex();
+  if (p_vtx) {
+    mPrimaryVertexError=p_vtx->positionError();
+  }
 
   if ( !event->triggerDetectorCollection() ) {
     DEBUGVALUE2(event->type());
@@ -116,6 +120,9 @@ void StMuEvent::fill(const StEvent* event){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.9  2004/12/02 00:19:52  mvl
+ * Added error on primary vertex
+ *
  * Revision 1.8  2004/08/04 17:57:13  mvl
  * Added EMC trigger information and fpd trigger (tower) information
  *
