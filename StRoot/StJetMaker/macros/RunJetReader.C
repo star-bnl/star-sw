@@ -7,7 +7,7 @@ int total=0;
 
 void RunJetReader(int nevents=300,
 		  const char* dir = "",
-		  const char* file = "/star/data16/reco/ppLong-1/FullField/P03ih/2003/150/st_physics_4150010_raw_0010005.MuDst.root",
+		  const char* file = "/star/data35/reco/productionPP/ReversedFullField/P04ij/2004/117/st_physics_5117052_raw_2010002.MuDst.root",
 		  const char *filter = "",
 		  const char* jetInFile = "./4150010_raw_0010005emc.root")
 {
@@ -47,7 +47,6 @@ void RunJetReader(int nevents=300,
 
     //Database
     St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
-    dbMk->SetDateTime(20030101,10000); 
 
     //EmcAdc2EMaker
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
