@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cxx,v 2.5 2002/03/08 20:28:36 ullrich Exp $
+ * $Id: StV0Vertex.cxx,v 2.6 2002/03/08 22:16:20 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cxx,v $
+ * Revision 2.6  2002/03/08 22:16:20  jeromel
+ * Extra version needed to be read (Thomas)
+ *
  * Revision 2.5  2002/03/08 20:28:36  ullrich
  * Custom Streamer written.
  *
@@ -42,7 +45,7 @@ using std::copy;
 
 ClassImp(StV0Vertex)
 
-static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.5 2002/03/08 20:28:36 ullrich Exp $";
+static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.6 2002/03/08 22:16:20 jeromel Exp $";
 
 StV0Vertex::StV0Vertex()
 {
@@ -181,6 +184,8 @@ StV0Vertex::setDcaDaughters(float val) { mDcaDaughters = val; }
 void
 StV0Vertex::setDcaParentToPrimaryVertex(float val) { mDcaParentToPrimaryVertex = val; }
 
+
+/// Custom streamer
 void StV0Vertex::Streamer(TBuffer &R__b)
 {
     // Stream an object of class .
@@ -192,13 +197,26 @@ void StV0Vertex::Streamer(TBuffer &R__b)
 	    Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
 	    return;
 	}
-	//====process old versions before automatic schema evolution
+
+	// *** HACK ***
+	//==== process old versions which were saved properly 
+	//     by sheer luck.
 	StVertex::Streamer(R__b);
 	mDaughters.Streamer(R__b);
 	R__b >> mDcaDaughtersToPrimaryVertex[0];
 	R__b >> mDcaDaughtersToPrimaryVertex[1];
+	
+	// Old format : had an extra version saved.
+	// Was previously saved as StThreeVectorF mMomentumOfDaughters[2];
+	// with StThreeVectorF having a custom streamer (therefore the
+	// extra version).
+	UInt_t R__s2, R__c2;
+	Version_t R__v2 = R__b.ReadVersion(&R__s2, &R__c2);
 	mMomentumOfDaughters_0.Streamer(R__b);
 	mMomentumOfDaughters_1.Streamer(R__b);
+
+	
+	// Come back to other data members
 	R__b >> mDcaDaughters;
 	R__b >> mDcaParentToPrimaryVertex;
 	R__b.CheckByteCount(R__s, R__c, Class());
