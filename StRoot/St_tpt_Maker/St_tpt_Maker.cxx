@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.17 1999/02/26 00:08:18 didenko Exp $
+// $Id: St_tpt_Maker.cxx,v 1.18 1999/02/26 17:25:38 kathy Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.18  1999/02/26 17:25:38  kathy
+// fix histograms
+//
 // Revision 1.17  1999/02/26 00:08:18  didenko
 // fixed bug
 //
@@ -142,14 +145,17 @@ Int_t St_tpt_Maker::Init(){
     }
   }
   // Create Histograms
-  m_hits_on_track = new TH1F("hits_on_track","Number of hits on reconstructed tracks",50,.5,50.5);
-  m_hits_in_fit   = new TH1F("hits_in_fit","Number of hits used in the momentum fit",50,.5,50.5);
-  m_azimuth       = new TH1F("azimuth","Azimuthal distribution of tracks",60,0.,360.0);
-  m_tan_dip       = new TH1F("tan_dip","Distribution of the dip angle",100,-1.5,1.5);
-  m_r0            = new TH1F("r0","Radius for the first point",100,50.0,200);
-  m_invp          = new TH1F("invp","1/Pt inverse momentum",100,0.0,10.0);
+  m_hits_on_track = new TH1F("TptrackHitsOnTrk","Number of hits on reconstructed tracks",50,.5,50.5);
+  m_hits_in_fit   = new TH1F("TptrackHitsInFit","Number of hits used in the momentum fit",50,.5,50.5);
+  m_azimuth       = new TH1F("TptrackPhi","Azimuthal distribution of tracks",60,0.,360.0);
+  m_tan_dip       = new TH1F("TptrackTanDip","Distribution of the dip angle",100,-1.5,1.5);
+  m_r0            = new TH1F("TptrackR0","Radius for the first point",100,50.0,200);
+  m_invp          = new TH1F("TptrackInvpt","1/Pt inverse momentum",100,0.0,10.0);
+
+  // create ntuple
   m_final = new TNtuple("final","Tpctest tracks and hits",
      "evno:alpha:lambda:row:x:y:z:track:cluster:q:xave:sigma:zrf:prf:nfit:invp:psi:phi0:r0:tanl:z0:chisqxy:chisqz:nseq");
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -295,7 +301,7 @@ void St_tpt_Maker::MakeHistograms() {
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.17 1999/02/26 00:08:18 didenko Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.18 1999/02/26 17:25:38 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

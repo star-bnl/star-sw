@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.21 1999/02/25 03:36:05 sakrejda Exp $
+// $Id: St_tcl_Maker.cxx,v 1.22 1999/02/26 17:25:30 kathy Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.22  1999/02/26 17:25:30  kathy
+// fix histograms
+//
 // Revision 1.21  1999/02/25 03:36:05  sakrejda
 // Threshold lowered, was set for the test data
 //
@@ -149,19 +152,19 @@ Int_t St_tcl_Maker::Init(){
   // Create Histograms
 
   // for tph pam
-  m_nseq_hit   = new TH1F("tcl_nseq_hit","num seq in hit",50,0.,200.);
-  m_tpc_row    = new TH1F("tcl_tpc_row","tpc row num",150,100.,250.);
-  m_x_of_hit   = new TH1F("tcl_x_of_hit","x dist of hits",50,-200.,200.);
-  m_y_of_hit   = new TH1F("tcl_y_of_hit","y dist of hits",50,-200.,200.);
-  m_z_of_hit   = new TH1F("tcl_z_of_hit","z dist of hits",50,-250.,250.);
-  m_charge_hit = new TH1F("tcl_charge_hit","total charge in hit",50,0.,0.0001);
-  m_alpha      = new TH1F("tcl_alpha","crossing angle in xy",50,-200.,200.);
-  m_phi        = new TH1F("tcl_phi","orientation of hit wrt padplane",64,0.,64.);
-  m_lambda     = new TH1F("tcl_lambda","dip angle(radians)",64,0.,64.);
+  m_nseq_hit   = new TH1F("TclTphitNseq","num seq in hit",50,0.,200.);
+  m_tpc_row    = new TH1F("TclTphitRow","tpc row num",150,100.,250.);
+  m_x_of_hit   = new TH1F("TclTphitHitX","x dist of hits",50,-200.,200.);
+  m_y_of_hit   = new TH1F("TclTphitHitY","y dist of hits",50,-200.,200.);
+  m_z_of_hit   = new TH1F("TclTphitHitZ","z dist of hits",50,-250.,250.);
+  m_charge_hit = new TH1F("TclTphitTotChargeHit","total charge in hit",50,0.,0.0001);
+  m_alpha      = new TH1F("TclTphitAlpha","crossing angle in xy",50,-200.,200.);
+  m_phi        = new TH1F("TclTphitPhi","orientation of hit wrt padplane",64,0.,64.);
+  m_lambda     = new TH1F("TclTphitLambda","dip angle(radians)",64,0.,64.);
 
   // for tcl pam
-  m_nseq_cluster = new TH1F("tcl_nseq_cluster"," num seq in cluster",50,0.,200.);
-  m_nhits = new TH1F("tcl_nhits"," estimated num overlapping hits in cluster",50,0.,200.);
+  m_nseq_cluster = new TH1F("TclTpclusterNseqCluster"," num seq in cluster",50,0.,200.);
+  m_nhits = new TH1F("TclTpclusterNhits"," estimated num overlapping hits in cluster",50,0.,200.);
   
   return StMaker::Init();
 }
@@ -263,7 +266,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.21 1999/02/25 03:36:05 sakrejda Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.22 1999/02/26 17:25:30 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

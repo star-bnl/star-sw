@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.2 1999/02/19 14:39:31 fisyak Exp $
+// $Id: St_l3t_Maker.cxx,v 1.3 1999/02/26 17:25:11 kathy Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.3  1999/02/26 17:25:11  kathy
+// fix histograms
+//
 // Revision 1.2  1999/02/19 14:39:31  fisyak
 // New version from Pablo, tpc safe
 //
@@ -151,10 +154,10 @@ Int_t St_l3t_Maker::Init(){
 //
   l3->Add ( m_sl3TpcPara ) ;
 //
-  m_l3_hits_on_track = new TH1F("hits_on_track","Number of hits on reconstructed tracks",50,.5,50.5);
-  m_l3_azimuth       = new TH1F("azimuth","Azimuthal distribution of tracks",60,0.,360.0);
-  m_l3_tan_dip       = new TH1F("tan_dip","Distribution of the dip angle",100,-1.5,1.5);
-  m_l3_r0            = new TH1F("r0","Radius for the first point",100,50.0,200);
+  m_l3_hits_on_track = new TH1F("L3tL3trackNumHits","Number of hits on reconstructed tracks",50,.5,50.5);
+  m_l3_azimuth       = new TH1F("L3tL3trackPhi","Azimuthal distribution of tracks",60,0.,360.0);
+  m_l3_tan_dip       = new TH1F("L3tL3trackTanDip","Distribution of the dip angle",100,-1.5,1.5);
+  m_l3_r0            = new TH1F("L3tL3trackR0","Radius for the first point",100,50.0,200);
 //
   return StMaker::Init();
 }
@@ -210,7 +213,7 @@ void St_l3t_Maker::MakeHistograms() {
 //_____________________________________________________________________________
 void St_l3t_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_l3t_Maker.cxx,v 1.2 1999/02/19 14:39:31 fisyak Exp $\n");
+  printf("* $Id: St_l3t_Maker.cxx,v 1.3 1999/02/26 17:25:11 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
