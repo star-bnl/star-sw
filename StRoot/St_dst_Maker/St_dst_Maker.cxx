@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.7 1999/02/23 02:09:02 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.8 1999/02/26 02:31:55 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.8  1999/02/26 02:31:55  fisyak
+// Replace emc hits by emc raw tables
+//
 // Revision 1.7  1999/02/23 02:09:02  fisyak
 // Add emc hits to dst
 //
@@ -66,6 +69,7 @@
 #include "St_dst_rch_Table.h"
 #include "St_dst_tof_trk_Table.h"
 #include "St_dst_tof_evt_Table.h"
+#include "St_ems_hits_Table.h"
 
 ClassImp(St_dst_Maker)
 
@@ -140,17 +144,31 @@ Int_t St_dst_Maker::Make(){
     St_DataSet *trg = gStChain->DataSet("trg");
     if (trg) {
       St_DataSetIter trgI(trg);
-      St_dst_TriggerDetectors *dst = (St_dst_TriggerDetectors *) trgI("dst_TriggerDetectors");
+      St_dst_TriggerDetectors *dst = (St_dst_TriggerDetectors *) trgI["dst_TriggerDetectors"];
       if (dst)          m_DataSet->Shunt(dst);
     }
     St_DataSet *l3t = gStChain->DataSet("l3Tracks");
     if (l3t) {
       St_DataSetIter l3tI(l3t);
-      St_tpt_track   *track = (St_tpt_track *) l3tI("l3Track");
+      St_tpt_track   *track = (St_tpt_track *) l3tI["l3Track"];
       if (track)         m_DataSet->Shunt(track);
     }
+#if 0
     St_DataSet *emc = gStChain->DataSet("emc_hits");
     if (emc) {m_DataSet->Shunt(emc);}
+#endif
+    St_DataSet *emc = gStChain->DataSet("emc_raw");
+    if (emc) {
+      St_DataSetIter emcI(emc);
+      St_ems_hits *ems_hits_bemc = (St_ems_hits *) emcI["ems_hits_bemc"];
+      if (ems_hits_bemc) m_DataSet->Shunt(ems_hits_bemc);
+      St_ems_hits *ems_hits_bsmd = (St_ems_hits *) emcI["ems_hits_bsmd"];
+      if (ems_hits_bsmd) m_DataSet->Shunt(ems_hits_bsmd);
+      St_ems_hits *ems_hits_eemc = (St_ems_hits *) emcI["ems_hits_eemc"];
+      if (ems_hits_eemc) m_DataSet->Shunt(ems_hits_eemc);
+      St_ems_hits *ems_hits_esmd = (St_ems_hits *) emcI["ems_hits_esmd"];
+      if (ems_hits_esmd) m_DataSet->Shunt(ems_hits_esmd);
+    }
   }
   
   return kStOK;
@@ -158,7 +176,7 @@ Int_t St_dst_Maker::Make(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_dst_Maker.cxx,v 1.7 1999/02/23 02:09:02 fisyak Exp $\n");
+  printf("* $Id: St_dst_Maker.cxx,v 1.8 1999/02/26 02:31:55 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
