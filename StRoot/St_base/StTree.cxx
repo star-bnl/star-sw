@@ -403,7 +403,7 @@ StTree *StTree::GetTree(TFile *file, const char *treeName)
 void StTree::SetBaseName(const char *baseName)
 {
   fBaseName = baseName;
-  fBaseName = gSystem->BaseName((const char*)fBaseName);
+//  fBaseName = gSystem->BaseName((const char*)fBaseName);
   int idot  = fBaseName.Index(".");
   if (idot>0) fBaseName.Remove(idot);
 }  
