@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstRefitBranch.cxx,v 1.7 2003/04/30 20:36:54 perev Exp $
+ * $Id: StEstRefitBranch.cxx,v 1.8 2004/01/26 22:47:17 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstRefitBranch.cxx,v $
+ * Revision 1.8  2004/01/26 22:47:17  caines
+ * Take out prolific print statement
+ *
  * Revision 1.7  2003/04/30 20:36:54  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -201,7 +204,7 @@ int StEstTracker::RefitBranch(StEstBranch *br, int usevertex, int *fitstatus) {
 	  dx = br->GetHit(isvt)->GetGlobE()->x();
 	  dy = br->GetHit(isvt)->GetGlobE()->y();
 	  dz = br->GetHit(isvt)->GetGlobE()->z();
-	  cout << "EST-INFO : dx ="<<dx<<"  dy="<<dy<<"  dz="<<dz<<endl;
+//	  cout << "EST-INFO : dx ="<<dx<<"  dy="<<dy<<"  dz="<<dz<<endl;
 // 	  dx = 0.001;
 // 	  dy = 0.001;
 // 	  dz = 0.001;
