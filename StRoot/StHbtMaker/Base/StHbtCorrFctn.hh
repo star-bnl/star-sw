@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCorrFctn.hh,v 1.9 2000/06/29 23:01:10 finch Exp $
+ * $Id: StHbtCorrFctn.hh,v 1.10 2001/06/21 19:06:48 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtCorrFctn.hh,v $
+ * Revision 1.10  2001/06/21 19:06:48  laue
+ * Some minor structural changes (forward declarations, etc)
+ *
  * Revision 1.9  2000/06/29 23:01:10  finch
  * added an extra base class for Parity Computations
  *
@@ -49,11 +52,12 @@
 #ifndef StHbtCorrFctn_hh
 #define StHbtCorrFctn_hh
 
-#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
-#include "StHbtMaker/Infrastructure/StParityTypes.hh"
+#include "StHbtMaker/Base/StHbtBaseAnalysis.h"
+#include "StHbtMaker/Infrastructure/StParityTypes.hh"  // can not forward declare typedefs
+#include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
 #include "StHbtMaker/Infrastructure/StHbtTriplet.hh"
-#include "StHbtMaker/Infrastructure/StHbtEvent.hh"
+#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 
 class StHbtCorrFctn{
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPairCut.h,v 1.9 2000/06/29 23:01:10 finch Exp $
+ * $Id: StHbtPairCut.h,v 1.10 2001/06/21 19:06:49 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPairCut.h,v $
+ * Revision 1.10  2001/06/21 19:06:49  laue
+ * Some minor structural changes (forward declarations, etc)
+ *
  * Revision 1.9  2000/06/29 23:01:10  finch
  * added an extra base class for Parity Computations
  *
@@ -71,9 +74,14 @@
 
 #include <string>
 
-#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
-#include "StHbtMaker/Infrastructure/StParityTypes.hh"
+class StHbtBaseAnalysis;
+
+//#include "StHbtMaker/Base/StHbtBaseAnalysis.h"
+#include "StHbtMaker/Infrastructure/StParityTypes.hh"  // can not forward declare typedefs
+#include "StHbtMaker/Infrastructure/StHbtString.hh"
+#include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
+#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 #include "StHbtMaker/Infrastructure/StHbtCutMonitorHandler.h"
 
 class StHbtPairCut : public StHbtCutMonitorHandler {

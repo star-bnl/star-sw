@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventReader.hh,v 1.10 2001/05/25 23:23:58 lisa Exp $
+ * $Id: StHbtEventReader.hh,v 1.11 2001/06/21 19:06:49 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEventReader.hh,v $
+ * Revision 1.11  2001/06/21 19:06:49  laue
+ * Some minor structural changes (forward declarations, etc)
+ *
  * Revision 1.10  2001/05/25 23:23:58  lisa
  * Added in StHbtKink stuff
  *
@@ -54,12 +57,15 @@
 
 #ifndef StHbtEventReader_hh
 #define StHbtEventReader_hh
-#include "StHbtMaker/Infrastructure/StHbtEvent.hh"
-#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
-#include "StHbtMaker/Base/StHbtEventCut.h"
-#include "StHbtMaker/Base/StHbtTrackCut.h"
-#include "StHbtMaker/Base/StHbtV0Cut.h"
-#include "StHbtMaker/Base/StHbtKinkCut.h"
+
+class StHbtEvent;
+class StHbtEventCut;
+class StHbtTrackCut;
+class StHbtV0Cut;
+class StHbtKinkCut;
+
+#include "StMaker.h"
+#include "StHbtMaker/Infrastructure/StHbtString.hh"
 
 class StHbtEventReader {
 
@@ -91,14 +97,14 @@ public:
 
   int Status(){return mReaderStatus;} // StHbtManager looks at this for guidance if it gets null pointer from ReturnHbtEvent
 
-  virtual void SetEventCut(StHbtEventCut* ecut){mEventCut=ecut;}
-  virtual void SetTrackCut(StHbtTrackCut* pcut){mTrackCut=pcut;}
-  virtual void SetV0Cut(StHbtV0Cut* pcut){mV0Cut=pcut;}
-  virtual void SetKinkCut(StHbtKinkCut* pcut){mKinkCut=pcut;}
-  virtual StHbtEventCut* EventCut(){return mEventCut;}
-  virtual StHbtTrackCut* TrackCut(){return mTrackCut;}
-  virtual StHbtV0Cut*    V0Cut(){return mV0Cut;}
-  virtual StHbtKinkCut*    KinkCut(){return mKinkCut;}
+  virtual void SetEventCut(StHbtEventCut* ecut);
+  virtual void SetTrackCut(StHbtTrackCut* pcut);
+  virtual void SetV0Cut(StHbtV0Cut* pcut);
+  virtual void SetKinkCut(StHbtKinkCut* pcut);
+  virtual StHbtEventCut* EventCut();
+  virtual StHbtTrackCut* TrackCut();
+  virtual StHbtV0Cut*    V0Cut();
+  virtual StHbtKinkCut*    KinkCut();
 
   /* control of debug informations print out, my rule is: */
   /* 0: no output at all                                  */
@@ -106,46 +112,13 @@ public:
   /* 2: once per event                                    */
   /* 3: once per track                                    */
   /* 4: once per pair                                     */
- int Debug(){return mDebug;} 
+  int Debug(){return mDebug;} 
   void SetDebug(int d){mDebug=d;}
-#ifdef __ROOOT__
+
+#ifdef __ROOT__
   ClassDef(StHbtEventReader,0)
 #endif
 };
-
-inline StHbtString StHbtEventReader::Report(){
-  StHbtString temp = "\n This is the base class StHbtEventReader reporting";
-  temp += "\n---> EventCuts in Reader: ";
-  if (mEventCut) {
-    temp += mEventCut->Report();
-  }
-  else {
-    temp += "NONE";
-  }
-  temp += "\n---> TrackCuts in Reader: ";
-  if (mTrackCut) {
-    temp += mTrackCut->Report();
-  }
-  else {
-    temp += "NONE";
-  }
-  temp += "\n---> V0Cuts in Reader: ";
-  if (mV0Cut) {
-    temp += mV0Cut->Report();
-  }
-  else {
-    temp += "NONE";
-  }
-  temp += "\n---> KinkCuts in Reader: ";
-  if (mKinkCut) {
-    temp += mKinkCut->Report();
-  }
-  else {
-    temp += "NONE";
-  }
-  temp += "\n";
-  return temp;
-}
 
 
 #endif
