@@ -21,38 +21,20 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
 my $debugOn=0;
 
 my @Sets = (
-              "auau128/hijing/b0_3/halffield/year_1e/hadronic_on",
-              "auau128/hijing/b0_12/halffield/year_1e/hadronic_on", 
-#              "auau200/single/default/central/year_1e/hadronic_on", 
-              "auau200/single/default/halffield/year_1e/hadronic_on",
-              "auau200/rqmd/default/b0_14/year_1h/hadronic_on",
-              "auau130/mevsim/vanilla_flow/central/year_1h/hadronic_on",
-              "auau130/mevsim/vanilla/central/year_1e/hadronic_on",
-              "auau130/mevsim/vanilla/central/year_1h/hadronic_on",
-              "auau130/mevsim/vanilla_flow/central/year_1e/hadronic_on",
-              "auau130/mevsim/vanilla_dynamic/central/year_1e/hadronic_on",
-              "auau130/mevsim/vanilla_dynamic/central/year_1h/hadronic_on",
-              "auau130/mevsim/vanilla_omega/central/year_1e/hadronic_on",
-              "auau130/mevsim/vanilla_omega/central/year_1h/hadronic_on",
-              "auau130/mevsim/vanilla_cocktail/central/year_1h/hadronic_on",
-              "auau130/mevsim/vanilla_trigger/central/year_1e/hadronic_on",
-              "auau130/mevsim/vanilla_trigger/central/year_1h/hadronic_on", 
-              "auau130/mevsim/vanilla_resonance/central/year_1h/hadronic_on",
-              "auau130/nexus/default/b0_3/year_1e/hadronic_on",
-#             "pp200/pythia/default/minibias/year_2a/hadronic_on",
-#              "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on",
-#              "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on" 
-#               "auau200/hijing135/default/b0_3/year_1h/hadronic_on",
+             "auau130/hijing/b0_3_jet05/year_1h/halffield/hadronic_on",
+             "auau130/hijing/b0_15/year_1h/halffield/hadronic_on",
+             "auau130/hijing/b0_3/year_1e/halffield/hadronic_on",
+             "auau130/hijing/b3_6/year_1e/halffield/hadronic_on",
 );
 
-my $prodPeriod = "prod6"; 
-my @chName = ("tfs7h","tfs8a") ;
-my $prodDir = "tfs_7";              
-my $chainDir = "tfs";
+my $prodPeriod = "P00hi"; 
+my @chName = ("trs1i","tfs8a") ;
+my $prodDir = "trs_1i";              
+my $chainDir = "trs";
 
 ###Set directories to be created for jobfiles
 
-my $DISK1        = "/star/rcf/disk00001/star/";
+my $DISK1        = "/star/rcf/prodlog/";
 my $TOPHPSS_SINK = "/home/starsink/raw";
 my $TOPHPSS_RECO = "/home/starreco/reco";
 my $JOB_LOG;
@@ -112,8 +94,8 @@ my $jb_fstat;
  my $mNoVert = 0;
  my $mchName = "n\/a";
  my $mnodeId = "n\/a";
- my $startId = "Job_prod6";
- my $startSer = "prod6";
+ my $startId = "Job_p00hk";
+ my $startSer = "p00hk";
  my $new_id = 0;
 
 ### start loop over input files
@@ -218,7 +200,7 @@ my $filename;
 
           $mprodSr = $prodPeriod; 
           $myID = 100000000 + $new_id;
-          $mjobID = "Job". $myID . "_" . $prodPeriod ."_". $mNikName;
+          $mjobID = "Job". $myID . "/" . $prodPeriod ."/". $mNikName;
           $mflName = $flname;
           $msumFile = $jfile . ".sum";
           $msumDir = $SUM_DIR;
@@ -340,7 +322,7 @@ my $filename;
      my $hpss_dst_file2 = $gfile . ".tags.root";
      my $hpss_dst_file3 = $gfile . ".runco.root";
      my $hpss_dst_file4 = $gfile . ".geant.root";
-#     my $hpss_dst_file5 = $gfile . ".event.root";
+     my $hpss_dst_file5 = $gfile . ".event.root";
      my $executable     = "/afs/rhic/star/packages/" . $jlibVer . "/mgr/bfcm.csh";
      my $executableargs = $fchain;
      my $log_dir       = $logDir;
@@ -356,7 +338,7 @@ my $filename;
        print TOM_SCRIPT "      inputdir[0]=$hpss_raw_dir\n";
        print TOM_SCRIPT "      inputfile[0]=$hpss_raw_file\n";
        print TOM_SCRIPT "#output\n";
-       print TOM_SCRIPT "      outputnumstreams=5\n";
+       print TOM_SCRIPT "      outputnumstreams=6\n";
        print TOM_SCRIPT "#output stream \n";
        print TOM_SCRIPT "      outputstreamtype[0]=HPSS\n";
        print TOM_SCRIPT "      outputdir[0]=$hpss_dst_dir\n";
@@ -373,6 +355,9 @@ my $filename;
        print TOM_SCRIPT "      outputstreamtype[4]=HPSS\n";
        print TOM_SCRIPT "      outputdir[4]=$hpss_dst_dir\n";
        print TOM_SCRIPT "      outputfile[4]=$hpss_dst_file4\n";
+       print TOM_SCRIPT "      outputstreamtype[5]=HPSS\n";
+       print TOM_SCRIPT "      outputdir[5]=$hpss_dst_dir\n";
+       print TOM_SCRIPT "      outputfile[5]=$hpss_dst_file5\n";
        print TOM_SCRIPT "#standard out -- Should be five outputs\n";
        print TOM_SCRIPT "      stdoutdir=$log_dir\n";
        print TOM_SCRIPT "      stdout=$log_name\n";
