@@ -39,14 +39,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "TROOT.h"
+
+#if ROOT_VERSION_CODE < ROOT_VERSION(3,00,0)
+#define __OLDROOT__
+#endif
+
 #include "TFile.h"
 #include "TKey.h"
 #include "TTree.h"
 #include "TChain.h"
 #include "TBranch.h"
+#ifndef __OLDROOT__
 #include "TBranchElement.h"
 #include "TFriendElement.h"
+#endif
 #include "TLeaf.h"
 #include "TTreeHelper.h"
 #include "TList.h"
@@ -222,7 +230,9 @@ void TTreeHelper::Init()
   fTreeNumb = 0;
   if (fTree==0) return;
   if (fTree->IsA()==TChain::Class()) fChain=(TChain*)fTree;
+#ifndef __OLDROOT__
   fTree->SetMakeClass(1);
+#endif
   fTree->SetBranchStatus("*",0);
   if (fTree->IsA()==TChain::Class()) 
     ((TChain*)fTree)->SetNotify(this);
@@ -257,11 +267,15 @@ void TTreeHelper::GetInfo(const TBranch *tbp, const char *&tyName
    } }
 
    int max = 0;
+#ifndef __OLDROOT__
    if (tb->IsA()==TBranchElement::Class()) {
      TBranchElement *te = (TBranchElement*)tb;
      max = te->GetMaximum();
      brType  = te->GetType();
-   } else {
+   } 
+     else 
+#endif
+   {
 
      TLeaf *lf = (TLeaf*)tb->GetListOfLeaves()->First();
      TLeaf *lc = 0;
@@ -288,7 +302,9 @@ TBranch *TTreeHelper::GetBranch(const char* brName,TTree *tree)
   if (branch) return branch;
   branch = GetBranch(brName,tree->GetListOfLeaves()  ,1);
   if (branch) return branch;
+#ifndef __OLDROOT__
   branch = GetBranch(brName,tree->GetListOfFriends() ,2);
+#endif
   return branch;
 }
 //______________________________________________________________________________
@@ -305,9 +321,11 @@ TBranch *TTreeHelper::GetBranch(const char* brName,TSeqCollection *brList,Int_t 
       switch(flag) {
         case 0: branch = (TBranch*)to; 			break;
         case 1: branch = ((TLeaf*)to)->GetBranch();	break;
+#ifndef __OLDROOT__
         case 2: tree = ((TFriendElement*)to)->GetTree();
                 branch = GetBranch(brName,tree);
                 if (branch) return branch;		break;
+#endif
       }
       int inLen = strcspn(branch->GetName(),"[ ");
       int inDot = strcspn(branch->GetName(),"[ .");
