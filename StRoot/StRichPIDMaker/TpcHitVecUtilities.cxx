@@ -1,7 +1,7 @@
 
 // TpcHitVecUtilities.cxx
 // M.L. Miller, Yale Software, 8/00
-
+#ifdef NEVER
 #include "TpcHitVecUtilities.h"
 // StEvent
 #include "StEventTypes.h"
@@ -80,3 +80,4 @@ bool zHitLessThan::operator() (const StTpcHit* hit1, const StTpcHit* hit2) const
 {
     return ( hit1->position().z() < hit2->position().z() );
 };
+#endif

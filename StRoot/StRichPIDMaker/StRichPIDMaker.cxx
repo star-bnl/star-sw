@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.40 2001/04/17 18:21:05 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.41 2001/04/25 00:31:40 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.41  2001/04/25 00:31:40  lasiuk
+ * HP changes.  removal of reprocessTraits()
+ *
  * Revision 2.40  2001/04/17 18:21:05  horsley
  * updated default index of refraction values, made correction to hit filter
  *
@@ -286,7 +289,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.40 2001/04/17 18:21:05 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.41 2001/04/25 00:31:40 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -710,13 +713,13 @@ Int_t StRichPIDMaker::Make() {
       //
       // reprocessTheTraits is commented out for now
       //
-      if(!this->reprocessTheTraits(theTraits)) {
-	  //
-	  // if necessary I can take action here
-	  //
-	  cout << "StRichPIDMaker::Make()\n";
-	  cout << "\treprocessTheTraits() failed." << endl;
-       }
+//       if(!this->reprocessTheTraits(theTraits)) {
+// 	  //
+// 	  // if necessary I can take action here
+// 	  //
+// 	  cout << "StRichPIDMaker::Make()\n";
+// 	  cout << "\treprocessTheTraits() failed." << endl;
+//        }
       
       //
       // fill the StTrack's StRichPidTrait with RICH PID info
