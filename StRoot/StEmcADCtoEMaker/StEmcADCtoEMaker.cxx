@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.70 2004/04/13 15:22:08 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.71 2004/04/14 15:54:51 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.71  2004/04/14 15:54:51  suaide
+// small bug fixed on some vector initialization
+//
 // Revision 1.70  2004/04/13 15:22:08  suaide
 // svaeHistograms method added and small bug fixed
 //
@@ -484,6 +487,7 @@ Bool_t StEmcADCtoEMaker::getTables()
           }
           else for(int i=0;i<4800;i++) for(int j=0;j<5;j++) mCalib[det][i][j] = 0;
         } 
+        else for(int i=0;i<4800;i++) for(int j=0;j<5;j++) mCalib[det][i][j] = 0;
 		
 		    TableName = detname[det]+"Gain";
 		    St_emcGain* b = (St_emcGain*) mDb->Find(TableName.Data());
@@ -498,6 +502,8 @@ Bool_t StEmcADCtoEMaker::getTables()
           else for(int i=0;i<4800;i++) mGain[det][i] = 1;
           
 		    }
+        else for(int i=0;i<4800;i++) mGain[det][i] = 1;
+        
 		    if(mControlADCtoE->DeductPedestal[det]==1)
 		    {
 			    TableName = detname[det]+"Ped";
@@ -529,9 +535,10 @@ Bool_t StEmcADCtoEMaker::getTables()
             mHasCalib[det] = kTRUE;
             for(int i=0;i<18000;i++) for(int j=0;j<5;j++) mCalib[det][i][j] = smdcalibst[0].AdcToE[i][j];
           }
-          else for(int i=0;i<18000;i++) for(int j=0;j<5;j++) mCalib[det][i][j] = 0;
-          
+          else for(int i=0;i<18000;i++) for(int j=0;j<5;j++) mCalib[det][i][j] = 0;         
 		    }
+        else for(int i=0;i<18000;i++) for(int j=0;j<5;j++) mCalib[det][i][j] = 0;
+        
 		    TableName = detname[det]+"Gain";
 		    St_smdGain* b = (St_smdGain*) mDb->Find(TableName.Data());
 		    if(b) 
@@ -544,6 +551,7 @@ Bool_t StEmcADCtoEMaker::getTables()
           }
           else for(int i=0;i<18000;i++) mGain[det][i] = 1;
         }
+        else for(int i=0;i<18000;i++) mGain[det][i] = 1;
 		
 		    if(mControlADCtoE->DeductPedestal[det]==1)
 		    {
