@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.20 2000/03/27 02:59:46 fine Exp $
+// $Id: rootlogon.C,v 1.21 2000/04/13 23:10:08 fisyak Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.21  2000/04/13 23:10:08  fisyak
+// Take out Load of libSTAR and Star2Root
+//
 // Revision 1.20  2000/03/27 02:59:46  fine
 // Star2Root has been added to logon
 //
@@ -122,7 +125,7 @@ TBuffer::SetGlobalWriteParam(2003);
  printf("QAInfo:You are using STAR_LEVEL : %s and ROOT_LEVEL : %s \n",  STAR_LEVEL.Data(),ROOT_LEVEL.Data());
   gSystem->Exec("echo $USER from $HOST in STAR_LEVEL=$STAR_LEVEL / STAR_VERSION=$STAR_VERSION  `date` >>  $GROUP_DIR/statistics/root4star${STAR_VERSION}");
   gSystem->SetIncludePath("-I./include -I./StRoot -I$STAR/include -I$STAR/StRoot -I$STAF/inc -I$CERN_ROOT/include -I$ROOTSYS/src");
-  gSystem->Load("libSTAR");
-  gSystem->Load("Star2Root");
+  //  gSystem->Load("libSTAR");
+  //  gSystem->Load("Star2Root");
 }
  
