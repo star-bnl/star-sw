@@ -1,6 +1,6 @@
-/***************************************************************************
+ /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.19 2003/11/07 17:38:10 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.20 2004/03/22 21:41:05 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -20,6 +20,7 @@ using namespace std;
 #include <math.h>
 #include <sys/times.h>
 
+#include "TFile.h"
 #include "StChain.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -54,6 +55,10 @@ double mme;
 double mmpr;
 double mmpi;
 double mmk;
+
+TH1F* adcValHist;
+long eventNum;
+long latestrunNum;
 
   // This is the Energy deposit function.  It calculates the amount of 
   // energy deposited by a charged particle 
@@ -114,6 +119,10 @@ StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name,
   mmpr = .9383;
   mmpi = .1396;
   mmk = .4937;
+  noAbortions = false;
+  simpleCal = false;
+
+  //adcValHist = new TH1F("PerEventYeild", "ADC Value", 1024, 0.0, 1024.0);
 }
 
 Int_t StEmcTpcFourPMaker::Make() {
@@ -289,37 +298,51 @@ Int_t StEmcTpcFourPMaker::Make() {
 	  if(adc2E)
 	    {
 	      if(data->TowerStatus[hitId-1] != 1) continue;
-	      energy = towerProxy->energyFunction(
+	      if(simpleCal)
+                {
+                  energy = 0.0125*static_cast<double>(data->TowerADC[hitId-1]);
+                }
+              else
+                {
+	          energy = towerProxy->energyFunction(
 						  runNumber, 
 						  hitId-1, 
 						  data->TowerADC[hitId-1], 
 						  data->TowerEnergy[hitId-1]);
+                }
 	    }
 	  else // Calibration!!!!  MuDst does not contain energy.
 	    {
 	      float ADC = 0; 
 	      float PED = 0;
 	      ADC = muEmc->getTowerADC(hitId, bemc);
-	      PED = static_cast<float>(emcpedtbl[0].AdcPedestal[hitId-1])
-		/100.0;
-	      //PED = static_cast<double>(static_cast<int>(PED));
-	      float ADCSUB = ADC-PED;
-	      energy = 0;
-	      float ADCPOWER = 1;
-	      for(int i = 0; i < 5; i++)
-		{
-		  float c = 0;
-		  c = emccalibtbl[0].AdcToE[hitId-1][i];
-		  energy += c*ADCPOWER;
-		  ADCPOWER *= ADCSUB;
-		}
-	      if(PED <= 0) energy = 0;
-	      float gain = 1;
-	      if(emcgaintbl != NULL)
-		gain = emcgaintbl[0].Gain[hitId-1];
-	      if(gain < .1)  // gain shouldn't have a large or negative effect
-		gain = 1;
-	      //energy *= gain;
+              if(simpleCal)
+                {
+                  energy = 0.0125*ADC;
+                }
+              else
+                {
+	      	  PED = static_cast<float>(emcpedtbl[0].AdcPedestal[hitId-1])
+		    /100.0;
+	          //PED = static_cast<double>(static_cast<int>(PED));
+	          float ADCSUB = ADC-PED;
+	          energy = 0;
+	          float ADCPOWER = 1;
+	          for(int i = 0; i < 5; i++)
+		    {
+		      float c = 0;
+		      c = emccalibtbl[0].AdcToE[hitId-1][i];
+		      energy += c*ADCPOWER;
+		      ADCPOWER *= ADCSUB;
+		    }
+	          if(PED <= 0) energy = 0;
+	          float gain = 1;
+	          if(emcgaintbl != NULL)
+		    gain = emcgaintbl[0].Gain[hitId-1];
+	          if(gain < .1)  // gain shouldn't have a large or negative effect
+		    gain = 1;
+	          //energy *= gain;
+                }
 	    }
 
 	  sumEMC += energy;
@@ -339,7 +362,8 @@ Int_t StEmcTpcFourPMaker::Make() {
     }
 
   // Now Bail if the energy is absurd
-  if(sumEMC >= EMCSanityThreshold) return kStOK; 
+  if(!noAbortions)
+    if(sumEMC >= EMCSanityThreshold) return kStOK; 
 
   // Connect the points with the tracks when they are within radiussqr 
   binmap.correlate(radiussqr);
@@ -359,9 +383,9 @@ Int_t StEmcTpcFourPMaker::Make() {
     double trackE = pTrack.E();
     double pointE = binmap.moddPoints[point].E();
     double ediff = fabs(trackE - pointE);
-    if(ediff < 0.2*pointE)
+    if(ediff < 0.5*pointE)
       pTrack.probEIsOne();
-    if(trackE < 0.5*pointE)
+    if(trackE < 0.3*pointE)
       pTrack.probEIsZero();
     break;
   }
@@ -390,17 +414,21 @@ Int_t StEmcTpcFourPMaker::Make() {
       if(cPoint.P().e() > maxPointValue)
 	maxPointValue = cPoint.P().e();
     }
-  if(numberPoints > maxPoints)  // If there are too many points
-    return kStOK; // don't try to analyze this event
-  const StTriggerId &trigger = uEvent->triggerIdCollection().nominal();
+  if(!noAbortions)
+    if(numberPoints > maxPoints)  // If there are too many points
+      return kStOK; // don't try to analyze this event
   // If it is a hightower trigger event, but somehow the high tower
   // is missing from the points, skip the event to avoid weird emc biases.
-  if(trigger.isTrigger(1101))
-    if(maxPointValue < 2.5)
-      return kStOK;
-  if(trigger.isTrigger(1102))
-    if(maxPointValue < 3.5)
-      return kStOK;
+  if(!noAbortions)
+    {
+      const StTriggerId &trigger = uEvent->triggerIdCollection().nominal();
+      if(trigger.isTrigger(1101) || trigger.isTrigger(2201))
+	if(maxPointValue < 2.5)
+	  return kStOK;
+      if(trigger.isTrigger(1102) || trigger.isTrigger(2202))
+	if(maxPointValue < 3.5)
+	  return kStOK;
+    }
 
   // Add TPC tracks
   long index = 0;
@@ -491,11 +519,37 @@ Int_t StEmcTpcFourPMaker::Make() {
   ///static_cast<double>(CLOCKS_PER_SEC);
   //cout << "Time to add points for jet finding: " << timeLengths[timeindex++] << endl;
 
+  if(adc2E)
+    {
+      unsigned int runNumber = uEvent->runNumber();
+      StBemcData* histadcdata = adc2E->getBemcData();
+      for(int hitId = 1; hitId <= maxHits; hitId++)
+	{
+	  if(towerProxy->isGood(runNumber, hitId-1) == false) { 
+	    //cout << "throwing away tower: " << hitId-1 << endl; 
+	    continue; }
+	  //adcValHist->Fill(static_cast<double>(histadcdata->TowerADC[hitId-1]));
+	}
+    }
+  eventNum = uEvent->eventId();
+  latestrunNum = uEvent->runNumber();
   aborted = false;
   return kStOk;
 }
 
+Int_t StEmcTpcFourPMaker::Finish()
+{
+  TString name("/star/rcf/pwg/spin/henry/spindst/adchists/");
+  stringstream evnumstrstrm;
+  evnumstrstrm << latestrunNum << "-" << eventNum << ".root";
+  TString numstr(evnumstrstrm.str().c_str());
+  name += numstr;
+  //TFile *outfile = new TFile(name, "RECREATE");
 
-
-
+  //static_cast<TH1*>(adcValHist)->SetDirectory(static_cast<TDirectory*>(outfile));
+  //outfile->Write();
+  //outfile->Close();
+  //delete outfile;
+  return kStOk;
+}
 

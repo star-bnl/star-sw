@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.17 2004/02/26 22:23:34 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.18 2004/03/22 21:41:05 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.18  2004/03/22 21:41:05  thenry
+ * Added UseSimpleADCCal() switch for proper analysis of Pythia Data
+ *
  * Revision 1.17  2004/02/26 22:23:34  thenry
  * Fixed eta-Shift zVertex bug.
  *
@@ -600,10 +603,14 @@ class StEmcTpcFourPMaker : public StFourPMaker {
   long numberPoints;
   bool aborted;
   bool noAbortions;
+  bool simpleCal;
  public:
   createdPointVector fakePoints;
   double mPIDR, mKDR, mPRDR, mEDR, mCAD;
   EMCHitType useType;
+
+  // Use 12.5 MeV/c simple ADC calibration (for use with Pythia MC)
+  void UseSimpleADCCal(void) { simpleCal = true; };
 
   // Stop abortions, useful for simulated data
   void SetNoAbortions(void) { noAbortions = true; };
