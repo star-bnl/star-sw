@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.11 1999/03/09 16:30:24 fine Exp $
+//! $Id: St_QA_Maker.h,v 1.12 1999/03/11 21:13:14 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.12  1999/03/11 21:13:14  kathy
+//! update to hist limits
+//!
 //! Revision 1.11  1999/03/09 16:30:24  fine
 //! Workqround of the St_io_Maker bug
 //!
@@ -83,7 +86,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
    Bool_t drawinit;
-//! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.11 1999/03/09 16:30:24 fine Exp $";
+//! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.12 1999/03/11 21:13:14 kathy Exp $";
    //! Histograms booking constants
    static const Int_t nxpT;
    static const Int_t nyeta;
@@ -179,8 +182,9 @@ class St_QA_Maker : public StMaker {
    TH1F     *m_vrtx_chisq;    //! primary vrtx chisq
 
 // for method MakeGlob - from table globtrk
-   TH1F     *m_pT;            //! pT  recostructed
-   TH1F     *m_eta;           //! eta recostructed
+   TH1F     *m_pT;            //! pT  reconstructed
+   TH1F     *m_pT_fr;            //! pT  reconstructed - full range
+   TH1F     *m_eta;           //! eta reconstructed
    TH2F     *m_pT_eta_rec;    //! pT versus eta Spectra for reconstructed
    TH2F     *m_mom_trklength; //! mom vs. trk length
    TH1F     *m_point;         //! number of points on the track
@@ -245,6 +249,13 @@ class St_QA_Maker : public StMaker {
    TH1F     *m_v_z;     //!   system
    TH1F     *m_v_pchi2; //! P(chi^2,ndf) of vertex fit
 
+   TH1F     *m_pv_detid; //! row1-detector id where vertex was found 
+   TH1F     *m_pv_vtxid; //! row1-vertex type
+   TH1F     *m_pv_x;     //! row1-vertex coordinates in
+   TH1F     *m_pv_y;     //!  STAR reference 
+   TH1F     *m_pv_z;     //!   system
+   TH1F     *m_pv_pchi2; //! row1-P(chi^2,ndf) of vertex fit
+
 // for method MakeHistTofEvt
     TH1F *m_te_ntpttrk;   //!no. of tpc tracks in event  
     TH1F *m_te_nttetrk;   //!no. of tte tracks associated with tpt tracks
@@ -271,16 +282,14 @@ class St_QA_Maker : public StMaker {
     TH1F *m_ehbe_tnrg1; //! bemc tot energy detector 1
     TH1F *m_ehbe_hits2; //! bemc # hits detector 2
     TH1F *m_ehbe_tnrg2; //! bemc tot energy detector 2
-    TH1F *m_ehbe_nrg1;  //! bemc energy per hit, detector 1
-    TH1F *m_ehbe_nrg2;  //! bemc energy per hit, detector 2
+
 
 // for method MakeHistEmsHitsBsmd
     TH1F *m_ehbs_hits3; //! bemc # hits detector 3
     TH1F *m_ehbs_tnrg3; //! bemc tot energy detector 3
     TH1F *m_ehbs_hits4; //! bemc # hits detector 4
     TH1F *m_ehbs_tnrg4; //! bemc tot energy detector 4 
-    TH1F *m_ehbs_nrg3;  //! bemc energy per hit, detector 3
-    TH1F *m_ehbs_nrg4;  //! bemc energy per hit, detector 4
+
 
 // for method MakeHistXi
 
@@ -339,5 +348,13 @@ inline void St_QA_Maker::SetHistsNames(const Char_t *firstName, const Char_t *la
 inline void St_QA_Maker::SetZones(Int_t columns, Int_t rows){ m_PadColumns =columns; m_PadRows = rows;}
 inline void St_QA_Maker::SetPaperSize(Int_t width, Int_t height){ m_PaperWidth = width; m_PaperHeight = height;}
 inline void St_QA_Maker::SetPostScriptFile(const Char_t *psFileName){ m_PsFileName = psFileName;}
+
+
+
+
+
+
+
+
 
 
