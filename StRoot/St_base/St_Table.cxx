@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.9 1998/07/23 22:12:00 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.10 1998/08/18 14:05:07 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.10  1998/08/18 14:05:07  fisyak
+// Add to bfc dst
+//
 // Revision 1.9  1998/07/23 22:12:00  fisyak
 // Recover after Correction for root 2.09
 //
@@ -25,6 +28,7 @@
 #include "TBuffer.h"
 #include "TMath.h"
 #include "TClass.h"
+#include "TString.h"
 #include "Api.h"
 
 #include "St_Table.h"
@@ -41,10 +45,19 @@ Int_t St_Table::MakeWrapClass(Text_t *name)
  //
   Char_t filename[500];
   if (!name) { return -1;}
-  strcpy(filename,name);
+  strcpy(filename,name); 
   strcat(filename,".h");
-  gROOT->LoadMacro(filename);
-  St_Table t(name,1);
+//  gROOT->LoadMacro(filename);
+   G__loadfile(filename);
+ // Pull the "structure name from the file
+  Char_t *structname = strrchr(name,'/');
+  if (structname) 
+    structname++;
+  else if (structname = strrchr(name,':'))
+    structname++;
+  else
+   structname = name;
+  St_Table t(structname,1);
   t.StafStreamer();
   return 0;
 }
@@ -176,10 +189,7 @@ Char_t *St_Table::Create()
 //______________________________________________________________________________
 void St_Table::Browse(TBrowser *b){
   St_DataSet::Browse(b);
-#ifndef WIN32
   Inspect();
-#endif
-  ls("*");
 }
 //______________________________________________________________________________
 void St_Table::Delete()
@@ -331,9 +341,12 @@ Char_t *St_Table::Print(Char_t *strbuf,Int_t lenbuf) const
 
     IndentLevel();
 
-    if (lenbuf>0) 
+    if (lenbuf>0) {
 //        out << " " << t->Name() << " " << data.Name();
-        iOut += sprintf(strbuf+iOut," %s %s",t->Name(),data.Name());
+    TString name = t->Name();
+    name.ReplaceAll("unsigned char","octet");
+        iOut += sprintf(strbuf+iOut," %s %s",name.Data(),data.Name());
+    }
     else
         cout << '\t'<< t->Name() << '\t'<< data.Name();
 
@@ -569,7 +582,6 @@ void St_Table::StafStreamer(Char_t *structname, FILE *fl)
    MakeHeader(prefix,tablename,suffix);
 
    fprintf(fp, "#include \"%s%s%s.h\"\n",prefix,tablename,suffix);
-   fprintf(fp, "#include \"%s%s%s.h\"\n",prefix,tablename,suffix);
    fprintf(fp, "#include \"Stypes.h\"\n");
    fprintf(fp, "/////////////////////////////////////////////////////////////////////////\n");
    fprintf(fp, "//\n");
@@ -675,7 +687,7 @@ void St_Table::StafStreamer(Char_t *structname, FILE *fl)
                         if ((m.Type())->Property() & G__BIT_ISENUM)
                            fprintf(fp, "        R__b.ReadStaticArray((Int_t*)(%s.%s));\n", row,m.Name());
                         else
-                           fprintf(fp, "        R__b.ReadStaticArray((%s*)(%s.%s))%s;\n", m.Type()->TrueName(), row, m.Name());
+                           fprintf(fp, "        R__b.ReadStaticArray((%s*)(%s.%s));\n", m.Type()->TrueName(), row, m.Name());
                      } else {
                         if ((m.Type())->Property() & G__BIT_ISENUM)
                            fprintf(fp, "        R__b.ReadStaticArray((Int_t*)(%s.%s));\n", row, m.Name());
@@ -826,12 +838,12 @@ void St_Table::Streamer(TBuffer &b)
      LinkHeader();
     //   Create a table to fit nok rows
      Set(*s_MaxIndex);
-     printf(" Read:s_Size = %i fN = %i \n", *s_Size, fN);
+     //     printf(" Read:s_Size = %i fN = %i \n", *s_Size, fN);
    } else {
       St_DataSet::Streamer(b);
       b << fN;
       StreamerHeader(b);
-      printf(" Write: s_Size = %i  fN = %i head size =  %i \n", *s_Size, fN, sizeof(table_head_st));
+      //      printf(" Write: s_Size = %i  fN = %i head size =  %i \n", *s_Size, fN, sizeof(table_head_st));
    }
 }
  

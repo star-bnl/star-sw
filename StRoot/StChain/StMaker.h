@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.4 1998/07/20 15:08:09 fisyak Exp $
+// $Id: StMaker.h,v 1.5 1998/08/18 14:05:02 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.5  1998/08/18 14:05:02  fisyak
+// Add to bfc dst
+//
 // Revision 1.4  1998/07/20 15:08:09  fisyak
 // Add tcl and tpt
 //
@@ -13,7 +16,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "St_DataSet.h"
-
+#include <TString.h>
 #ifndef ROOT_TClonesArray
 #include <TClonesArray.h>
 #endif
@@ -33,6 +36,7 @@ protected:
    TString        m_BranchName;  //Name of branch (if any)
    TList         *m_Histograms;  //Pointer to list supporting Maker histograms
    St_DataSet    *m_DataSet;     //Pointer to the Maker's dataset
+   TString        m_BranchFile;  //
 
 public:
 
@@ -59,8 +63,9 @@ public:
    virtual void   MakeBranch();
    virtual void   Save(Int_t save=1) {m_Save = save;}
    virtual void   SetChainAddress(TChain *chain);
-
-   ClassDef(StMaker, 1)   //ATLFast virtual base class for Makers
+   virtual void   SetBranchFile (TString &name){m_BranchFile = name;}  // *MENU*
+   virtual TString  GetBranchFile (){return m_BranchFile;}
+   ClassDef(StMaker, 1)   //StChain virtual base class for Makers
 };
 
 #endif

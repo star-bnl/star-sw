@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.11 1998/08/07 19:34:53 fisyak Exp $
+// $Id: StChain.cxx,v 1.12 1998/08/18 14:05:01 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.12  1998/08/18 14:05:01  fisyak
+// Add to bfc dst
+//
 // Revision 1.11  1998/08/07 19:34:53  fisyak
 // Add St_run_Maker
 //
@@ -212,8 +215,10 @@ ClassImp(StChain)
 
 
 //_____________________________________________________________________________
-StChain::StChain() : TNamed("StChain","The STAR default chain")
+StChain::StChain() 
 {
+   SetName("StChain");
+   SetTitle("The STAR default chain");
    m_Tree          = 0;
    m_Makers        = 0;
    m_Mode          = 0;
@@ -223,9 +228,9 @@ StChain::StChain() : TNamed("StChain","The STAR default chain")
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title)
-        : TNamed(name,title)
 {
-
+   SetName(name);
+   SetTitle(title);
    gStChain      = this;
    m_Version     = 100;       //StChain  version number and release date
    m_VersionDate = 180698;
@@ -451,7 +456,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.11 1998/08/07 19:34:53 fisyak Exp $    *\n");
+   printf("* $Id: StChain.cxx,v 1.12 1998/08/18 14:05:01 fisyak Exp $    *\n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
@@ -508,10 +513,25 @@ void StChain::MakeTree(const char* name, const char*title)
 
    TIter next(m_Makers);
    StMaker *maker;
+   //   Save();
+   //   MakeBranch();
    while ((maker = (StMaker*)next())) {
+      maker->Save();
       maker->MakeBranch();
    }
 }
+//_____________________________________________________________________________
+void StChain::MakeBranch()
+{
+//   Adds the list of physics objects to the ATLFast tree as a new branch
+   if (m_Save == 0 || m_Tree == 0) return;
+
+//  Make a branch tree if a branch name has been set
+   Int_t buffersize = 4000;
+   m_BranchName = GetName();
+   m_Tree->Branch(m_BranchName.Data(),ClassName(), this, buffersize);
+}
+
 
 //_____________________________________________________________________________
 void StChain::SetDefaultParameters()
@@ -650,7 +670,7 @@ void StChain::Streamer(TBuffer &R__b)
 
    if (R__b.IsReading()) {
       R__b.ReadVersion(); //  Version_t R__v = R__b.ReadVersion();
-      TNamed::Streamer(R__b);
+      StMaker::Streamer(R__b);
       if (!gStChain) gStChain = this;
       gROOT->GetListOfBrowsables()->Add(this,"StChain");
       R__b >> m_Version;
@@ -663,7 +683,7 @@ void StChain::Streamer(TBuffer &R__b)
  //     m_HistBrowser.Streamer(R__b);
    } else {
       R__b.WriteVersion(StChain::IsA());
-      TNamed::Streamer(R__b);
+      StMaker::Streamer(R__b);
       R__b << m_Version;
       R__b << m_VersionDate;
       R__b << m_Run;
