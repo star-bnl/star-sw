@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.hh,v 1.4 1999/01/18 21:01:42 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.hh,v 1.5 1999/02/16 23:34:19 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.hh,v $
- * Revision 1.4  1999/01/18 21:01:42  lasiuk
- * use fractionSampled(); enumerated types for function selection
+ * Revision 1.5  1999/02/16 23:34:19  lasiuk
+ * inline 2 functions
+ * merge operations for speed up (after profiler0
  *
  * Revision 1.4  1999/01/18 21:01:42  lasiuk
  * use fractionSampled(); enumerated types for function selection
@@ -66,12 +67,12 @@ public:
     // charge generation
     void   setChargeDistribution(StDistribution);
     void   inducedChargeOnPad(StTrsWireHistogram*);
-    double signalOnPad(double, double, double, double, double, double);
+    inline double signalOnPad(double, double, double, double, double, double);
 
     // sampling
     void   setElectronicSampler(StSignal);
     void   sampleAnalogSignal();
-    double signalSampler(double, StTrsAnalogSignal&);
+    inline double signalSampler(double, StTrsAnalogSignal&);
 
 private:
     // charge generation
@@ -95,7 +96,85 @@ protected:
 private:
     static StTrsAnalogSignalGenerator* mInstance;
 
+    double         mDriftVelocity;
+    double         mTimeBinWidth;
+    double         mTau;
+    double         mTau1;
+    double         mTau2;
+    double         mSymGausApproxFactor;
+    double         mAsymGausApproxFactor;
+    double         mAsymGausUnRestFactor;
+    
     StDistribution mChargeDistribution;
     StSignal       mSampler;
 };
+inline double StTrsSlowAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal& sig)
+{
+    //
+    // This is where the function for the Signal Sampling is selected
+    // Add a function that returns the amplitude of a signal at
+    // a time 't' given the position in time and amplitude of all
+    // the other signals (contained in the StTrsAnalogSignal 'sig'
+    // -- symmetricGaussianResponse
+    // -- asymmetricGaussianResponse
+    // -- endoResponse
+
+    if(mSampler == (StTrsSlowAnalogSignalGenerator::undefined)) {
+	cerr << "ERROR: no function selected" << endl;
+	// this would be a good place to throw an exception
+	exit(0);
+    }
+    
+    switch(mSampler)
+	{
+	case symmetricGaussianApproximation:
+	    return symmetricGaussianApproximateResponse(t, sig);
+	    break;
+	case delta:
+	    return deltaResponse(t, sig);
+	    break;
+	case symmetricGaussianExact:
+	    return symmetricGaussianExactResponse(t, sig);
+	    break;
+	case asymmetricGaussianApproximation:
+	    return asymmetricGaussianApproximateResponse(t, sig);
+	    break;
+	case realShaper:
+	    return realShaperResponse(t,sig);
+	    break;
+	    //case StSignal::asymmetricGaussianResponseWithUnRestoredBaseline:
+	    //return asymmetricGaussianResponseWithUnRestoredBaseline(t, sig);
+	    //break;
+	default:
+	    cerr << "Default Function Selected. ERROR!" << endl;
+	    exit(0);
+	    break;
+	}
+}
+
+inline double StTrsSlowAnalogSignalGenerator::signalOnPad(double xo, double yo, double xl, double xu, double yl, double yu)
+{
+//     cout << "StTrsSlowAnalogSignalGenerator::signalOnPad()" << endl;
+     switch(mChargeDistribution)
+	{
+	case endo:
+// 	    cout << "********************Endo" << endl;
+	    return endoChargeIntegral(xo,yo,xl,xu,yl,yu);
+	    break;
+ 	case gatti:
+//  	    cout << "********************GATTI" << endl;
+// 	    return gattiChargeIntegral(xo,yo,xl,xu,yl,yu);
+	    cout << "Gatti Distribution Not Implemented Yet!" << endl;
+	    exit(0);
+ 	    break;
+	case dipole:
+// 	    cout << "********************DIPOLE" << endl;
+	    return imageChargeIntegral(xo,yo,xl,xu,yl,yu);
+	    break;
+	default:
+	    cerr << "Default Function Selected. ERROR!" << endl;
+	    exit(0);
+	    break;
+	}
+}
 #endif
