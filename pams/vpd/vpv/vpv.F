@@ -1,18 +1,18 @@
 CC:>--------------------------------------------------------------------
-CC: FILE:       vpv_am.F.template
+CC: FILE:       vpv.F.template
 CC: HISTORY:
 CC:             00jan96-v000a-hpl- Created by stic Version
 CC:  Id: idl.y,v 1.8 1996/10/15 18:33:35 ward Exp  
 CC:<--------------------------------------------------------------------
 
-      INTEGER*4 FUNCTION VPV_AM(
+      INTEGER*4 FUNCTION VPV(
      1            vpar_h,                vpar ,
      2            vraw_h,                vraw ,
      4            vver_h,                vver ) 
       IMPLICIT NONE
-#include "vpv_am.inc"
+#include "vpv.inc"
 CC:>--------------------------------------------------------------------
-CC: ROUTINE:    VPV_AM
+CC: ROUTINE:    VPV
 CC: DESCRIPTION: Simulates VPD vertex locator.
 CC:        
 CC:        
@@ -98,7 +98,7 @@ C
 *              
          end do
       else
-         vpv_am = STAFCV_BAD
+         vpv = STAFCV_BAD
          return
       endif  
 *      
@@ -115,7 +115,7 @@ C
 *         print*,'* vpd_dst(1).dist is the distance between           * '
 *         print*,'* the two VPDs in centimeters !!!!!                 * '
 *         print*,'***************************************************** '
-         vpv_am = STAFCV_BAD
+         vpv = STAFCV_BAD
          return
       endif
          
@@ -126,7 +126,7 @@ C
 *         print*,'* Restart with a value for vpd_dst(1).dist in       * '
 *         print*,'* units of centimeters !!!!!                        * '
 *         print*,'***************************************************** '
-         vpv_am = STAFCV_BAD
+         vpv = STAFCV_BAD
          return
       endif
 
@@ -134,7 +134,7 @@ C
 *         print*,' ************************************************ '
 *         print*,' * No hit in one of the VPDs!                   * '
 *         print*,' ************************************************ '
-         vpv_am = STAFCV_BAD
+         vpv = STAFCV_BAD
          return
       endif
 
@@ -142,7 +142,7 @@ C
 *        print*,' ************************************************ '
 *        print*,' * Sum of times is zero (or less)!              * '
 *        print*,' ************************************************ '
-        vpv_am = STAFCV_BAD
+        vpv = STAFCV_BAD
         return
       endif   
 
@@ -156,7 +156,7 @@ C
       vver(vver_h.nok).pos_time     = pos_t    
       vver(vver_h.nok).vert         = vertex
 *
-      VPV_AM=STAFCV_OK
+      VPV=STAFCV_OK
 999   RETURN
       END
 
