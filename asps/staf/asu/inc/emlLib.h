@@ -131,6 +131,7 @@ extern CC_P char * emlContext(char *fmt, ...);
 	{sprintf(eml_buffer,"%s-%s.%d\n",#CODE,__FILE__,__LINE__); \
 	strcat(eml_stack,eml_buffer); \
 	SETCV(STAFCV_BAD); \
+        { int One=1; set_quest_(&One);}\
 	}
 #define EML_PUSHSUCCESS(CODE) \
 	{ SETCV(STAFCV_OK); }

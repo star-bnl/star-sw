@@ -176,7 +176,7 @@ void asuMallocAdd(void *p, size_t size, char* file, int line)
    int *c = &patt;
 
    if (!p) {/* Not enough space*/
-      fprintf(stderr,"ASU_ALLOC: ***Error***: No Space\n");
+      fprintf(stderr,"ASU_ALLOC: ***Error***: No more memory available\n");
       asuMallocPrintTrace(p,size,file,line);
       fprintf(stderr,"\n");}
    

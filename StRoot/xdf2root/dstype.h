@@ -58,7 +58,7 @@ extern "C" {
 #define DS_MAX_NAME_LEN	31		/* max length of a name */
 #define DS_MAX_NEST		10		/* max levels of nested structs */
 #ifndef VXWORKS
-#define DS_MAX_SPEC_LEN	10000	/* max length of specifier string */
+#define DS_MAX_SPEC_LEN	100000	/* max length of specifier string */ /*Increased by VP*/
 #else
 #define DS_MAX_SPEC_LEN	1000	/* max length of specifier string */
 #endif
