@@ -21,6 +21,7 @@
        float     p[3];        /* calculated vertex momentum */
        float     v[3];        /* calculated vertex position */
        float     theta;       /* calc. angle to beamline at vertex*/
+       float     curvature;   /* Track curvature (1/cm) */
     };
 
-/*  Last mod. for fpt_fptrack: $Date: 1998/03/30 09:37:27 $ */
+/*  Last mod. for fpt_fptrack: $Date: 1999/10/19 15:15:31 $ */
