@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.cxx,v 1.4 1998/08/14 15:25:58 fisyak Exp $
+// $Id: St_TLA_Maker.cxx,v 1.5 1998/10/02 13:46:08 fine Exp $
 // $Log: St_TLA_Maker.cxx,v $
+// Revision 1.5  1998/10/02 13:46:08  fine
+// DataSet->DataSetIter
+//
 // Revision 1.4  1998/08/14 15:25:58  fisyak
 // add options
 //
@@ -17,7 +20,7 @@
 
 #include "St_TLA_Maker.h"
 #include "StChain.h"
-#include "St_DataSet.h"
+#include "St_DataSetIter.h"
 ClassImp(St_TLA_Maker)
 
 //_____________________________________________________________________________
@@ -58,7 +61,7 @@ Int_t St_TLA_Maker::Make(){
 //_____________________________________________________________________________
 void St_TLA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_TLA_Maker.cxx,v 1.4 1998/08/14 15:25:58 fisyak Exp $\n");
+  printf("* $Id: St_TLA_Maker.cxx,v 1.5 1998/10/02 13:46:08 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
