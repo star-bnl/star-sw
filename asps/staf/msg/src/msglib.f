@@ -62,7 +62,6 @@
 	INCLUDE 'msg_inc'
 
 	LOGICAL ACTIVE,COUNTING
-	LOGICAL MSG_ENABLED
 
 	INTEGER LID !Local copy of ID.
 
@@ -107,8 +106,6 @@
 *   Error conditions:  none
 
 	INCLUDE 'msg_inc'
-
-	INTEGER LINE_LEN,I
 
 *	Display message on terminal:
 	CALL MSG_TO_LUN_OUT(MSG,LINES,MSG_TL)
@@ -159,7 +156,6 @@
 	RETURN
 	END
 
- !Check if abort limit is exceeded, and maybe abort.
 
 	SUBROUTINE MSG_COUNT(PREFIX)
 
@@ -182,7 +178,6 @@
 
 	INTEGER ID,WPT,SPT
 	LOGICAL ACTIVE,COUNTING
-	CHARACTER*80 W80
 
 *	First check to see if there is a wildcard in the specified prefix:
 	WPT=INDEX(PREFIX,'*')
@@ -236,7 +231,6 @@
 
 	INTEGER ID,WPT,SPT
 	LOGICAL ACTIVE,COUNTING
-	CHARACTER*80 W80
 
 *	First check to see if there is a wildcard in the specified prefix:
 	WPT=INDEX(PREFIX,'*')
@@ -453,7 +447,6 @@
 
 	INTEGER ID,WPT,SPT
 	LOGICAL ACTIVE,COUNTING
-	CHARACTER*80 W80
 
 *	First check to see if there is a wildcard in the specified prefix:
 	WPT=INDEX(PREFIX,'*')
@@ -483,7 +476,10 @@
 *	  Check that the message-prefix is in the index, enter it
 *	  in the index if necessary, and return its ID:
 	  CALL MSG_CHECK(PREFIX,ID,ACTIVE,COUNTING)
-	  IF (ID.GT.0) MSG_Active(ID)=.TRUE.
+	  IF (ID.GT.0) THEN
+	    MSG_Active(ID)=.TRUE.
+	    MSG_Counting(ID)=.TRUE. !Active, No-Counting is an illegal state.
+	  END IF
 
 	END IF !WPT.EQ.1
 
@@ -521,11 +517,9 @@
 
 	INCLUDE 'msg_inc'
 
-	LOGICAL ACTIVE,COUNTING,FOUND
+	LOGICAL ACTIVE,COUNTING
 
 	INTEGER LID !Local copy of ID.
-
-	LOGICAL MSG_FIND
 
 
 	LID=ID
@@ -713,8 +707,6 @@
 *	.FALSE. for close failure of journal file.
 
 	INCLUDE 'msg_inc'
-
-	CHARACTER*80 MSG
 
 	INTEGER id1
 
@@ -933,7 +925,6 @@
 
 	INTEGER ID,WPT,SPT
 	LOGICAL ACTIVE,COUNTING
-	CHARACTER*80 W80
 
 *	First check to see if there is a wildcard in the specified prefix:
 	WPT=INDEX(PREFIX,'*')
@@ -1058,7 +1049,6 @@
 
 	INTEGER ID,WPT,SPT
 	LOGICAL ACTIVE,COUNTING
-	CHARACTER*80 W80
 
 *	First check to see if there is a wildcard in the specified prefix:
 	WPT=INDEX(PREFIX,'*')
@@ -1298,7 +1288,6 @@
 
 	INTEGER ID,WPT,SPT
 	LOGICAL ACTIVE,COUNTING
-	CHARACTER*80 W80
 
 *	First check to see if there is a wildcard in the specified prefix:
 	WPT=INDEX(PREFIX,'*')
@@ -1769,13 +1758,6 @@
 	CHARACTER*(*) MSG(*) !1 or more line character-string message
 	                     !submitted for display.
 	INTEGER LINES  !Number of lines in MSG.
-
-*   Input/Output argument:
-	INTEGER ID     !STAR-standard message ID.  Set to zero by caller 
-                       !before first call, set by MESSAGE on first call by
-                       !looking up or entering the prefix contained in MSG
-                       !(prefix is everything before the first space) in
-	               !the index of STAR-standard message prefixes.
 
 *   Output arguments: none
 

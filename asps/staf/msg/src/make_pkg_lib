@@ -7,14 +7,14 @@
 #
 #  Created: 8-Jan-1993   D. Olson
 #
-#  Modified 22-Mar-1993  R. Hackenburg, for the msg package.  Uses msg's
-#                        local Makefile, invoked with "make -e all" from here.
+#  Modified 22-Mar-1993  R. Hackenburg, for any package with its own Makefile.
+#                        Invokes the package's Makefile with "make -e all" from here.
 #                        Added *_DBG definitions, flags, etc.  Libraries are
 #                        produced here in two flavors, debug and nodebug.
 #
 #
 echo "Start rebuilding library at `date` for architecture $STAR_ARCH"
-echo "This is the personalized msg version of make_pkg_lib."
+echo "This is the package's-own-Makefile version of make_pkg_lib."
 #
 #
 #
@@ -26,23 +26,27 @@ if ("`alias mv `" == "mv -i") then
 endif
 #
 if ( "$STAR_ARCH" == "sun4" ) then
-   set ARFLAGS     = ( lqv )
-   set FFLAGS      = ( -xl -e -c )
-   set FFLAGS_DBG  = ( -xl -e -c -g )
-   set CCFLAGS     = ( -c -D SUN -I ../inc )
-   set CCFLAGS_DBG = ( -c -g -D SUN -I ../inc )
+   setenv ARCH_TAG    "_sun"
+   setenv ARFLAGS     " lqv "
+   setenv FFLAGS      " -xl -e -c "
+   setenv FFLAGS_DBG  " -xl -e -c -g "
+   setenv CCFLAGS     " -c -DSUN "
+   setenv CCFLAGS_DBG " -c -g -DSUN "
 else if ( "$STAR_ARCH" == "hpux" ) then
-   set ARFLAGS     = ( lqv )
-   set FFLAGS      = ( +e +es -c +ppu )
-   set FFLAGS_DBG  = ( +e +es -c -g +ppu )
-   set CCFLAGS     = ( -c -D HPUX -I ../inc )
-   set CCFLAGS_DBG = ( -c -g -D HPUX -I ../inc )
+   setenv ARCH_TAG    "_hpu"
+   setenv ARFLAGS     " lqv "
+   setenv FFLAGS      " +e +es -c +ppu "
+   setenv FFLAGS_DBG  " +e +es -c -g +ppu "
+   setenv CCFLAGS     " -c -DHPUX "
+   setenv CCFLAGS_DBG " -c -g -DHPUX "
 else if ( "$STAR_ARCH" == "irix" ) then
-   set ARFLAGS     = ( slqv )
-   set FFLAGS      = ( -extend_source -c -O -w )
-   set FFLAGS_DBG  = ( -extend_source -c -g -w )
-   set CCFLAGS     = ( -c -O -w -DIRIX -I../inc )
-   set CCFLAGS_DBG = ( -c -g -w -DIRIX -I../inc )
+   setenv ARCH_TAG    "_sgi"
+   setenv ARFLAGS     " slqv "
+   setenv FFLAGS      " -extend_source -c -O -w "
+   setenv FFLAGS_DBG  " -extend_source -c -g -w "
+   setenv CCFLAGS     " -c -O -ansi -fullwarn -v -prototypes -DIRIX "
+   setenv CCFLAGS_DBG " -c -g -ansi -fullwarn -v -prototypes -DIRIX "
+
 #
 #  INCLUDES under irix require this step...
 #
@@ -95,17 +99,19 @@ if( $PKG != "tas" ) then
 endif
 #
 echo "Executing '"make -e all"' on ../src"
+echo "architecture tag is $ARCH_TAG"
 echo "f77 flags are $FFLAGS and f77 debug flags are $FFLAGS_DBG"
 echo "cc  flags are $CCFLAGS and cc debug flags are $CCFLAGS_DBG"
 cd ../src
 make -e all
-
-echo "Moving all .a and .o files to ../lib/$STAR_ARCH"
-mv *.o ../lib/$STAR_ARCH
+echo "Moving all .a files to ../lib/$STAR_ARCH"
 mv *.a ../lib/$STAR_ARCH
+echo "Removing all .o files"
+rm -f *.o
 #
 echo "cleaning up include file links.."
 rmlink *
+rmlink ../lib/*
 #
 echo "Done at `date`"
 
