@@ -1,5 +1,8 @@
-* $Id: tdi_fit.F,v 1.4 1999/12/17 16:33:14 sakrejda Exp $
+* $Id: tdi_fit.F,v 1.5 2000/02/23 23:25:35 hardtke Exp $
 * $Log: tdi_fit.F,v $
+* Revision 1.5  2000/02/23 23:25:35  hardtke
+* replace tpg functions with tpc functions
+*
 * Revision 1.4  1999/12/17 16:33:14  sakrejda
 * Introduced additional variable to avoid mod(short,int)
 *
@@ -222,7 +225,7 @@ c            if( alpha .gt. 90. ) alpha = 180. - alpha
             p_g(1) = sin(atan(slope_xy))
             p_g(2) = cos(atan(slope_xy))
             p_g(3) = 0.
-            call tgc_global_to_local_p(isector,p_g,p_l)
+            call tpc_global_to_local_p(isector,p_g,p_l)
             alpha = atand(p_l(1)/p_l(2))
 
             lambda = atand(slope_yz)
