@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   26/02/2000
-// $Id: TChair.h,v 1.1 2000/02/28 03:42:24 fine Exp $
+// $Id: TChair.h,v 1.2 2000/03/10 22:36:34 fine Exp $
 #ifndef STAR_TChair
 #define STAR_TChair
   
@@ -25,6 +25,8 @@ private:
    
 protected:
    St_Table    *GetThisTable() const {return fTable; }
+   static void  *GetOffset(const void *base,ULong_t offset) { return (void  *)((Char_t *)base + offset);}
+   TChair(){ fTable = 0; }
 
 public:
  
@@ -35,7 +37,7 @@ public:
   
    virtual     void       Adopt(Int_t n, void *array){GetThisTable()->Adopt(n,array);}
    virtual     void       AddAt(const void *c, Int_t i){GetThisTable()->AddAt(c,i);}
-              const void *At(Int_t i) const {return At(i);}
+              const void *At(Int_t i) const {return GetThisTable()->At(i);}
    virtual     void       Browse(TBrowser *b){GetThisTable()->Browse(b);}
    virtual     void       CopySet(TChair &chair){GetThisTable()->CopySet(*chair.GetThisTable());}
                Int_t      CopyRows(const TChair *srcChair, Int_t srcRow=0, Int_t dstRow=0, Int_t nRows=0, Bool_t expand=kFALSE)
@@ -47,11 +49,12 @@ public:
    virtual     TH1       *Draw(const Text_t *varexp, const Text_t *selection, Option_t *option="",
                                Int_t nentries=1000000000, Int_t firstentry=0) {
                            return GetThisTable()->Draw(varexp,selection,option,nentries,firstentry);}
-   virtual     void      *GetArray() const    {return GetThisTable()->GetArray();}
+   virtual     Char_t    *GetArray() const    {return (Char_t *)GetThisTable()->GetArray();}
    virtual     TClass    *GetRowClass() const {return GetThisTable()->GetRowClass();}
    virtual     Long_t     GetNRows() const    {return GetThisTable()->GetNRows();}
    virtual     Long_t     GetRowSize() const  {return GetThisTable()->GetRowSize();}
    virtual     Long_t     GetTableSize() const{return GetThisTable()->GetTableSize();}
+               const St_Table  *GetTable() const {return fTable; }
    virtual     St_tableDescriptor *GetTableDescriptors() const {return GetThisTable()->GetTableDescriptors();}
    virtual     St_tableDescriptor *GetRowDescriptors()   const {return GetThisTable()->GetRowDescriptors();}
    virtual     const Char_t       *GetType()             const {return GetThisTable()->GetType();}
@@ -112,6 +115,12 @@ inline const void *TChair::operator[](Int_t i) const
 }
 
 // $Log: TChair.h,v $
+// Revision 1.2  2000/03/10 22:36:34  fine
+// method At(i) bug fix
+//
+// Revision 1.1  2000/03/09 21:57:03  fine
+// TChair class to be moved to ROOT later
+//
 // Revision 1.1  2000/02/28 03:42:24  fine
 // New base class to provide a custom interface to the St_Table objects
 //
