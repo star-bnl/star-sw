@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.27 2004/07/19 22:00:44 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.28 2005/03/23 14:33:18 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.28  2005/03/23 14:33:18  jcs
+// changes to use body + extra temperature readings starting with y2005
+// (necessary for embedding)
+//
 // Revision 1.27  2004/07/19 22:00:44  jcs
 // add run number to averageTemperatureWest/East calling sequence
 //
@@ -155,7 +159,8 @@ StMaker(name),
     m_driftfield(0),
     m_gas(0),
     m_electronics(0),
-    m_cathode(0)
+    m_cathode(0),
+    m_temps(0)
 {
 }
 //_____________________________________________________________________________
@@ -236,6 +241,7 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
   m_gas        = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
   m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
   m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
+  m_temps       = (St_ftpcTemps *)dblocal_calibrations("ftpcTemps");
   
   // Get Database for gain factors and time offset
   m_ampslope = (St_ftpcAmpSlope *)dblocal_calibrations("ftpcAmpSlope" );
@@ -347,8 +353,8 @@ Int_t StFtpcSlowSimMaker::Make(){
                                                            m_slowsimgas,
                                                            m_slowsimpars);
 
-    cout<<"paramReader->gasTemperatureWest() = "<<paramReader->gasTemperatureWest()<<endl;
-    cout<<"paramReader->gasTemperatureEast() = "<<paramReader->gasTemperatureEast()<<endl;
+//  cout<<"paramReader->gasTemperatureWest() = "<<paramReader->gasTemperatureWest()<<endl;
+//  cout<<"paramReader->gasTemperatureEast() = "<<paramReader->gasTemperatureEast()<<endl;
 
     if ( paramReader->gasTemperatureWest() == 0 && paramReader->gasTemperatureEast() == 0) {
        cout<<"Using the following values from database:"<<endl;
@@ -409,7 +415,8 @@ Int_t StFtpcSlowSimMaker::Make(){
 
       StFtpcGasUtilities *gasUtils = new StFtpcGasUtilities(paramReader,
                                                             dbReader,
-				                            gas);
+				                            gas,
+                                                            m_temps);
 
       returnCode = gasUtils->barometricPressure();
 
