@@ -1,61 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.13 2003/08/22 20:52:20 balewski Exp $
-// $Log: StEEmcDbMaker.cxx,v $
-// Revision 1.13  2003/08/22 20:52:20  balewski
-// access to stat-table
-//
-// Revision 1.12  2003/08/02 01:02:17  perev
-// change %d to %p int printf
-//
-// Revision 1.11  2003/07/18 18:31:46  perev
-// test for nonexistance of XXXReader added
-//
-// Revision 1.10  2003/04/27 23:08:13  balewski
-// clean up of daq-reader
-//
-// Revision 1.9  2003/04/25 14:42:00  jeromel
-// Minor change in messaging
-//
-// Revision 1.8  2003/04/16 20:33:51  balewski
-// small fixes in eemc daq reader
-//
-// Revision 1.7  2003/04/02 20:42:23  balewski
-// tower-->tube mapping
-//
-// Revision 1.6  2003/03/26 21:28:02  balewski
-// fix
-//
-// Revision 1.5  2003/03/26 15:26:23  balewski
-// add print()
-//
-// Revision 1.4  2003/03/07 15:35:44  balewski
-// towards EEMC daq reader
-//
-// Revision 1.3  2003/02/18 22:01:40  balewski
-// fixes
-//
-// Revision 1.2  2003/02/18 19:55:53  balewski
-// add pedestals
-//
-// Revision 1.1  2003/01/28 23:18:34  balewski
-// start
-//
-// Revision 1.5  2003/01/06 17:09:21  balewski
-// DB-fix
-//
-// Revision 1.4  2003/01/03 23:37:56  balewski
-// move to robinson
-//
-// Revision 1.3  2002/12/05 14:22:24  balewski
-// cleanup, time stamp fixed
-//
-// Revision 1.2  2002/12/04 13:39:04  balewski
-// remove dependency on dbase/
-//
-// Revision 1.1  2002/11/30 20:01:26  balewski
-// start DB interface for EEMC RELATED ROUTINES
-//
+// $Id: StEEmcDbMaker.cxx,v 1.14 2003/08/25 17:57:12 balewski Exp $
  
 #include <TDatime.h>
 #include <time.h>
@@ -304,90 +249,30 @@ void  StEEmcDbMaker::mReloadDb  (){
     return ;
     // down-stream makers should check for presence of dataset
   }
-  eedb->ls(2);
+  eedb->ls(2);  
 
 
   int is;
   for(is=0; is< mNSector; is++) {
     int secID=is+mfirstSecID;
-    char secTx[100];
-    sprintf(secTx,"sector%2.2d",secID);
-    char name[100];
+
     mDbsectorID[is]=secID;
- 
-    sprintf(name,"%s/eemcADCconf",secTx); //.................
-    printf("request=%s==>",name);
-    St_eemcDbADCconf *ds1= (St_eemcDbADCconf *)eedb->Find(name);
+    
+    mDbADCconf[is]=
+      getTable<St_eemcDbADCconf,eemcDbADCconf_st>(eedb,secID,"eemcADCconf");
+    
+    mDbPMTconf[is]=
+      getTable<St_eemcDbPMTconf,eemcDbPMTconf_st>(eedb,secID,"eemcPMTconf");
 
-    if(ds1) {
-      assert(ds1->GetNRows()==1); // DB TABLE HAS ONLY ONE ROW
-      mDbADCconf[is]=(eemcDbADCconf_st *) ds1->GetArray();
-      assert(mDbADCconf[is]); // db error if not delivered
-      printf("\n  comm='%s'\n",mDbADCconf[is]->comment);
-      mCleanDbNames(mDbADCconf[is]->name, EEMCDbMaxAdcName);   
-      nFound++;
-    } else {
-      printf("Not Found in DB, continue \n");
-    }
+    mDbPMTcal[is]=
+      getTable<St_eemcDbPMTcal,eemcDbPMTcal_st>(eedb,secID,"eemcPMTcal");
 
-    sprintf(name,"%s/eemcPMTconf",secTx);//.................
-    printf("request=%s==>",name);
-    St_eemcDbPMTconf *ds2= (St_eemcDbPMTconf *)eedb->Find(name);
-    if(ds2) {
-      assert(ds2->GetNRows()==1);  // DB TABLE HAS ONLY ONE ROW
-      mDbPMTconf[is]=(eemcDbPMTconf_st *) ds2->GetArray();
-      assert(mDbPMTconf[is]); // db error
-      printf("\n  comm='%s'\n",mDbPMTconf[is]->comment);
-      mCleanDbNames(mDbPMTconf[is]->name, EEMCDbMaxAdcName);
-      nFound++;
-    } else {
-      printf("Not Found in DB : %s , continue \n",name);
-    }
+    mDbPMTped[is]=
+      getTable<St_eemcDbPMTped,eemcDbPMTped_st>(eedb,secID,"eemcPMTped");
 
-    sprintf(name,"%s/eemcPMTcal",secTx); //.................
-    printf("request=%s==>",name);
-    St_eemcDbPMTcal *ds3= (St_eemcDbPMTcal *)eedb->Find(name);
-    if(ds3) {
-      assert(ds3->GetNRows()==1);  // DB TABLE HAS ONLY ONE ROW
-      mDbPMTcal[is]=(eemcDbPMTcal_st *) ds3->GetArray();
-      assert(mDbPMTcal[is]); // db error
-      printf("\n  comm='%s'\n",mDbPMTcal[is]->comment);
-      mCleanDbNames(mDbPMTcal[is]->name, EEMCDbMaxAdcName);
-      nFound++;
-    } else {
-      printf("Not Found in DB : %s , continue \n",name);
-    }
-
-    sprintf(name,"%s/eemcPMTped",secTx); //.................
-    printf("request=%s==>",name);
-    St_eemcDbPMTped *ds4= (St_eemcDbPMTped *)eedb->Find(name);
-    if(ds4) {
-      assert(ds4->GetNRows()==1);  // DB TABLE HAS ONLY ONE ROW
-      mDbPMTped[is]=(eemcDbPMTped_st *) ds4->GetArray();
-      assert(mDbPMTped[is]); // db error
-      printf("\n  comm='%s'\n",mDbPMTped[is]->comment);
-      mCleanDbNames(mDbPMTped[is]->name, EEMCDbMaxAdcName);
-      nFound++;
-    } else {
-      printf("Not Found in DB : %s , continue \n",name);
-    }
-
-
-    sprintf(name,"%s/eemcPMTstat",secTx); //.................
-    printf("request=%s==>",name);
-    St_eemcDbPMTstat *ds5= (St_eemcDbPMTstat *)eedb->Find(name);
-    if(ds5) {
-      assert(ds5->GetNRows()==1);  // DB TABLE HAS ONLY ONE ROW
-      mDbPMTstat[is]=(eemcDbPMTstat_st *) ds5->GetArray();
-      assert(mDbPMTstat[is]); // db error
-      printf("\n  comm='%s'\n",mDbPMTstat[is]->comment);
-      mCleanDbNames(mDbPMTstat[is]->name, EEMCDbMaxAdcName);
-      nFound++;
-    } else {
-      printf("Not Found in DB : %s , continue \n",name);
-    }
-
-
+    mDbPMTstat[is]=
+      getTable<St_eemcDbPMTstat,eemcDbPMTstat_st>(eedb,secID,"eemcPMTstat");
+    
   } // end of loop over sectors
 
  
@@ -578,3 +463,98 @@ void StEEmcDbMaker::mCleanDbNames(char * buf, int len){
   for(k=0;k<len;k++) 
     if( buf[k]==EEMCDbStringDelim) buf[k]=0;
 }
+
+//_________________________________________________________
+//_________________________________________________________
+//_________________________________________________________
+
+template<class St_T, class T_st> T_st *  StEEmcDbMaker::getTable(TDataSet *eedb, int secID, TString tabName){
+
+  //  printf("\n\n%s ::TTT --> %s, size=%d\n\n\n",GetName(),tabName.Data(),sizeof(T_st));
+
+  char name[1000];
+  sprintf(name,"sector%2.2d/%s",secID,tabName.Data());
+  printf("request=%s==>",name);
+  St_T *ds= (St_T *)eedb->Find(name);
+  if(ds==0) {
+    printf(" not Found in DB, continue \n");
+    return NULL;
+  }
+
+  if(ds->GetNRows()!=1) {
+    printf(" no records\n");
+    return NULL;
+  }
+  
+  T_st *tab=(T_st *) ds->GetArray();
+
+  if(tab==0) {
+    printf(" GetArray() failed\n");
+    return NULL;
+  }
+  
+  printf("'%s'\n",tab->comment);
+  mCleanDbNames(tab->name, EEMCDbMaxAdcName);
+  nFound++;
+  return tab;
+}
+
+
+// $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.14  2003/08/25 17:57:12  balewski
+// use teplate to access DB-tables
+//
+// Revision 1.13  2003/08/22 20:52:20  balewski
+// access to stat-table
+//
+// Revision 1.12  2003/08/02 01:02:17  perev
+// change %d to %p int printf
+//
+// Revision 1.11  2003/07/18 18:31:46  perev
+// test for nonexistance of XXXReader added
+//
+// Revision 1.10  2003/04/27 23:08:13  balewski
+// clean up of daq-reader
+//
+// Revision 1.9  2003/04/25 14:42:00  jeromel
+// Minor change in messaging
+//
+// Revision 1.8  2003/04/16 20:33:51  balewski
+// small fixes in eemc daq reader
+//
+// Revision 1.7  2003/04/02 20:42:23  balewski
+// tower-->tube mapping
+//
+// Revision 1.6  2003/03/26 21:28:02  balewski
+// fix
+//
+// Revision 1.5  2003/03/26 15:26:23  balewski
+// add print()
+//
+// Revision 1.4  2003/03/07 15:35:44  balewski
+// towards EEMC daq reader
+//
+// Revision 1.3  2003/02/18 22:01:40  balewski
+// fixes
+//
+// Revision 1.2  2003/02/18 19:55:53  balewski
+// add pedestals
+//
+// Revision 1.1  2003/01/28 23:18:34  balewski
+// start
+//
+// Revision 1.5  2003/01/06 17:09:21  balewski
+// DB-fix
+//
+// Revision 1.4  2003/01/03 23:37:56  balewski
+// move to robinson
+//
+// Revision 1.3  2002/12/05 14:22:24  balewski
+// cleanup, time stamp fixed
+//
+// Revision 1.2  2002/12/04 13:39:04  balewski
+// remove dependency on dbase/
+//
+// Revision 1.1  2002/11/30 20:01:26  balewski
+// start DB interface for EEMC RELATED ROUTINES
+//
