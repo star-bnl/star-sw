@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.21 2000/03/30 05:26:26 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.22 2000/06/23 18:39:05 margetis Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.22  2000/06/23 18:39:05  margetis
+* full update on nmax routine with simpler/better calculation and magnet off handling
+*
 * Revision 1.21  2000/03/30 05:26:26  sakrejda
 * Initialisation fir idi2 added.
 *
@@ -251,31 +254,32 @@ C
 **cc      if (track(ipt).psi.gt.180.0) track(ipt).psi = 
 **cc     +     track(ipt).psi - 360.0
 C
-
-      if(nposOn.and.abs(bfield(3)).gt.0.1) then
+      
+      if(nposOn) then
 c---- Calculation of possible (maximum) number of points
-
-C convert to Tesla
-      bfield(1) = bfield(1)/10.
-      bfield(2) = bfield(2)/10.
-      bfield(3) = bfield(3)/10.
-
-C*** Copy parameters to local table
-              trakl(1)   = track(ipt).r0
-              trakl(2)   = track(ipt).phi0*C_RAD_PER_DEG !degrees to radians
-              trakl(3)   = track(ipt).z0
-              trakl(4)   = track(ipt).psi*C_RAD_PER_DEG !degrees to radians
-              trakl(5)   = track(ipt).tanl
-              trakl(6)   = track(ipt).q
-              IF((abs(bfield(3)).gt.0.001).AND.((track(ipt).invp).gt.0.001)) THEN
-                 rr=1./(C_D_CURVATURE*bfield(3)*10.*track(ipt).invp)
-              ELSE
-                 rr=9999999.
-              ENDIF
-              call n_max(trakl,rr,nmax,bfield(3))
+         
+C     convert to Tesla
+         bfield(1) = bfield(1)/10.
+         bfield(2) = bfield(2)/10.
+         bfield(3) = bfield(3)/10.
+         
+C***  Copy parameters to local table
+         trakl(1)   = track(ipt).r0
+         trakl(2)   = track(ipt).phi0*C_RAD_PER_DEG !degrees to radians
+         trakl(3)   = track(ipt).z0
+         trakl(4)   = track(ipt).psi*C_RAD_PER_DEG !degrees to radians
+         trakl(5)   = track(ipt).tanl
+         trakl(6)   = track(ipt).q
+         IF((abs(bfield(3)).gt.0.001).AND.((track(ipt).invp).gt.0.001)) THEN
+            rr=1./(C_D_CURVATURE*bfield(3)*10.*track(ipt).invp)
+            call n_max(trakl,rr,nmax,bfield(3))
+         ELSE
+            call n_max_zero(trakl,nmax)
+         ENDIF
       endif
-      track(ipt).npos = nmax
+         track(ipt).npos = nmax
 c--------------------------------------------------------
-
-      tpt_load_track = STAFCV_OK
-      end
+         
+         tpt_load_track = STAFCV_OK
+         end
+      
