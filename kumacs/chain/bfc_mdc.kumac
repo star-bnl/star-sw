@@ -72,7 +72,7 @@ MACRO bfc_mdc _
 ff    = $format([no_in_bunch]*int([first]/[no_in_bunch])+1,i5)
 f     = [ff]
 l     = [f]+[no_in_bunch]-1
-last  = [f]+[no_in_bunch]-1
+last  = [first]+[no_events]-1
 
 input_file = [prefix_in]_[f]_[l].xdf
 if [no_in_bunch]>[nsplit] then | split mode
@@ -92,8 +92,9 @@ endif
 * PRINT OUT INPUT VALUES
 ***********************************************************
 
-message ' *** Input file                    --> ' [input_file]
+message ' *** First event to process        --> ' [first]
 message ' *** Num Events to process         --> ' [no_events]
+message ' *** Input file                    --> ' [input_file]
 message ' *** domains to load               --> ' [domain]
 message ' *** modules to process            --> ' [chain]   
 message ' *** Output file name              --> ' [output_file]
@@ -119,7 +120,7 @@ message ' *** Output file name              --> ' [output_file]
    iev1=[iev]
    iev2=[iev]+[nsplit]-1
    if [iev2]>[last] then
-     iev2 = [last
+     iev2 = [last]
    endif
    i1 = $format([iev1],i4.4)
    i2 = $format([iev2],i4.4)
