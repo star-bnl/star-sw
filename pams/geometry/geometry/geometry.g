@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.77 2003/12/17 22:15:18 potekhin Exp $
+* $Id: geometry.g,v 1.78 2004/01/19 22:53:27 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.78  2004/01/19 22:53:27  potekhin
+* A small additional piece of logic to steer the
+* construction of the barrel calorimeter, better
+* code layout and comments
+*
 * Revision 1.77  2003/12/17 22:15:18  potekhin
 * a) In accordance with recent modifications, we also
 * introduce the configuration variable for the beam
@@ -288,9 +293,7 @@
               on/.true./,off/.false./
 
 
-* btof tray configuration: btofconfig variable
 
-   Integer    btofconfig
 
 *  Codes:
 *  1 - full ctb,         2 - full TOFp based tof,   3 - partial TOFp based tof,
@@ -301,7 +304,15 @@
    Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,kgeom,nmod(2),nonf(3),
               ecal_config, ecal_fill,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,
-              CorrNum, PhmdVersion, SisdConfig, PipeConfig
+              btofconfig,
+              CorrNum, PhmdVersion, SisdConfig, PipeConfig, CalbConfig
+
+* configuration variables for tuning the geometry:
+*            btofconfig  -- tof trays
+*            PhmdVersion -- photon multiplicity detector
+*            SisdConfig  -- silicon strip
+*            PipeConfig  -- beam pipe
+*            CalbConfig  -- barrel calorimeter
 
 * CorrNum allows us to control incremental bug fixes in a more
 * organized manner
@@ -340,6 +351,8 @@ replace[;ON#{#;] with [
    PhmdVersion = 0
    SisdConfig  = 0
    PipeConfig  = 2 ! Default, Be pipe used in most of the runs =<2003
+   btofconfig  = 1 ! ctb only
+   CalbConfig  = 0 ! really make use of it starting in y2004
 
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
@@ -354,7 +367,6 @@ replace[;ON#{#;] with [
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
-   btofconfig = 1        " ctb only                                       "
    Nsi=7; Wfr=0;  Wdm=0; " SVT+SSD, wafer number and width as in code     "
    svtw=on               " water+water manifold in svt, off for Y2000 only"
    mwx=2                 " for Year_1? mwx=1 limites x in mwc hits (<Y2K) "
@@ -689,7 +701,11 @@ If LL>1
                      btofconfig=5;
                   "calb" 
                      ems=on
-                     nmod={60,30}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+                     CalbConfig = 1
+* remember that with this config, the following vars assume a different meaning
+* because we have to (unfortunately) switch from divisions to copies and
+* introduce a map
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
                   "ecal"
                      ecal_config=1   " one ecal patch, west "
                      ecal_fill=3     " all sectors filled "
@@ -879,14 +895,22 @@ If LL>1
    Call AGSFLAG('SIMU',1)
    if (vpdd) Call vpddgeo
 
-******************************************************************
+********************** BARREL CALORIMETER ************************
 *  - Set up the parameters for the barrel calorimeter
    If (LL>1 & calb) then
      call AgDETP new ('CALB')
      if (ems)  call AgDETP add ('calg.nmodule=',Nmod, 2)
      if (ems)  call AgDETP add ('calg.shift=',  shift,2)
    endif
-   if (calb) Call calbgeo
+
+
+   if (calb) then ! Pick the version:
+       if(CalbConfig==0) Call calbgeo
+       if(CalbConfig==1) then
+           write(*,*) '************** Creating the new version of the Barrel Calorimeter'
+           Call calbgeo1
+       endif
+   endif
 ******************************************************************
 *  - Set up the parameters for the RICH counter
    if (LL>1 & rich) then
