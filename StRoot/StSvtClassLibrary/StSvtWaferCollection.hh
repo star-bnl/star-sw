@@ -1,25 +1,23 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.hh,v 1.4 2001/08/16 21:02:03 munhoz Exp $
+ * $Id: StSvtWaferCollection.hh,v 1.1 2001/08/16 21:02:04 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
  *
- * Description: SVT Hybrid Array BASE class
+ * Description: SVT Wafer Array BASE class
  *
  ***************************************************************************
  *
- * $Log: StSvtHybridCollection.hh,v $
- * Revision 1.4  2001/08/16 21:02:03  munhoz
+ * $Log: StSvtWaferCollection.hh,v $
+ * Revision 1.1  2001/08/16 21:02:04  munhoz
  * changing StObjArray to StStrArray. StSvtConfig reestructured. New classes for geometry DB
  *
- * Revision 1.3  2000/11/30 20:39:12  caines
- * Changed to allow us of database
  *
  **************************************************************************/
 
-#ifndef STSVTHYBRIDCOLLECTION_HH
-#define STSVTHYBRIDCOLLECTION_HH
+#ifndef STSVTWAFERCOLLECTION_HH
+#define STSVTWAFERCOLLECTION_HH
 
 #define MAX_NUMBER_OF_BARRELS  3
 
@@ -29,20 +27,19 @@ class StSvtHybridObject;
 class StSvtConfig;
 class TString;
 
-class StSvtHybridCollection: public StStrArray
+class StSvtWaferCollection: public StStrArray
 {
 public:
-  StSvtHybridCollection();
-  StSvtHybridCollection(StSvtConfig* config);
-  StSvtHybridCollection(const char* config);
-  virtual ~StSvtHybridCollection();
+  StSvtWaferCollection();
+  StSvtWaferCollection(StSvtConfig* config);
+  StSvtWaferCollection(const char* config);
+  virtual ~StSvtWaferCollection();
 
   int getNumberOfBarrels();
   int getNumberOfLadders(int barrel);
   int getNumberOfWafers(int barrel);
-  int getNumberOfHybrids();
-  int getTotalNumberOfHybrids();
-  int getHybridIndex(int barrel, int ladder, int wafer, int hybrid);
+  int getTotalNumberOfWafers();
+  int getWaferIndex(int barrel, int ladder, int wafer);
 
   void setConfiguration(const char* config); // Set the SVT configuration
   void setConfiguration(StSvtConfig* config); // Set the SVT configuration
@@ -52,14 +49,14 @@ public:
   //StSvtHybridObject* At(int index);  // needed for backward compatibility
   //void AddAt(StSvtHybridObject* object, int index);  // needed for backward compatibility
 
-  StSvtHybridObject* getObject(int barrel, int ladder, int wafer, int hybrid); // Returns a object of the collection
+  StSvtHybridObject* getObject(int barrel, int ladder, int wafer); // Returns a object of the collection
 
 protected:
 
   StSvtConfig* mSvtConfig;    //! SVT Configuration 
   TString mConfig;               // SVT Configuration 
 
-  ClassDef(StSvtHybridCollection,1)
+  ClassDef(StSvtWaferCollection,1)
 };
 
 #endif
