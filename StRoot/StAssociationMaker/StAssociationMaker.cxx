@@ -1,13 +1,16 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.15 1999/12/14 07:07:41 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.16 2000/01/12 00:30:55 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.16  2000/01/12 00:30:55  calderon
+ * Modified Kink Vertex association as per Lee's request.
+ *
+ * Revision 1.16  2000/01/12 00:30:55  calderon
+ * Modified Kink Vertex association as per Lee's request.
+ *
  * Revision 1.15  1999/12/14 07:07:41  calderon
  * Added Ratio Number of Common Hits / Number of Reconstructed Hits for
  * each detector.
- * Numbering scheme from StEvent & StMcEvent as per SVT request
- * Added Kink, V0 and Xi vertex associations.
- *
  * Numbering scheme from StEvent & StMcEvent as per SVT request
  * Added Kink, V0 and Xi vertex associations.
  *
@@ -1103,10 +1106,12 @@ Int_t StAssociationMaker::Make()
 
     
     cout << "Kinks..." << endl;
-    pair<rcTrackMapIter, rcTrackMapIter> kinkBounds;
+
     // Loop over Kinks
 
+    pair<rcTrackMapIter, rcTrackMapIter> kinkBoundsDaughter, kinkBoundsParent;
     StKinkVertex* rcKink  = 0;
+    StTrack* kinkDaughter  = 0;
     StTrack* kinkParent  = 0;
     StGlobalTrack* gKinkDaughter = 0;
     StGlobalTrack* gKinkParent = 0;
@@ -1118,22 +1123,37 @@ Int_t StAssociationMaker::Make()
 	
 	rcKink = *kvi; // Got Kink ...
 	kinkDaughter  = rcKink->daughter(0);
+	gKinkDaughter = dynamic_cast<StGlobalTrack*>(kinkDaughter);
+	if (!gKinkDaughter) continue;
+	// Got Daughter
+	kinkParent  = rcKink->parent();
 	gKinkParent = dynamic_cast<StGlobalTrack*>(kinkParent);
-	kinkBounds = mRcTrackMap->equal_range(gKinkDaughter);
+	if (!gKinkParent) continue;
 	// Got Parent
-	for (rcTrackMapIter trkIter = kinkBounds.first; trkIter!=kinkBounds.second; trkIter++) {
+	
 	kinkBoundsDaughter = mRcTrackMap->equal_range(gKinkDaughter);
 	// Loop over associated tracks of the daughter
 	for (rcTrackMapIter trkIter = kinkBoundsDaughter.first; trkIter!=kinkBoundsDaughter.second; trkIter++) {
 	    mcDaughter = (*trkIter).second->partnerMcTrack(); // Get associated daughter
-	    mcParent = mcKink->parent(); // Check that parents match
-	    if (mcParent && rcKink->geantIdParent() == mcParent->geantId()) {
-		// Got a candidate
-		mRcKinkMap->insert(rcKinkMapValType (rcKink, mcKink));
-		mMcKinkMap->insert(mcKinkMapValType (mcKink, rcKink));
+	    
+	    mcKink = mcDaughter->startVertex(); // Get Kink candidate 
+	    if (mcKink == primary || mcKink == 0) continue;  // Check that it's not primary
+	    mcParent = mcKink->parent();
+	    
+	    // Check that parents match
+	    kinkBoundsParent = mRcTrackMap->equal_range(gKinkParent);
+	    // loop over associated tracks of the parent
+	    for (rcTrackMapIter trkIter2 = kinkBoundsParent.first;
+		 trkIter2!=kinkBoundsParent.second; trkIter2++) {
+		// Get associated parent
+		if (mcParent == (*trkIter2).second->partnerMcTrack() ) {
+		    
+		    // Got a candidate!!
 		    mRcKinkMap->insert(rcKinkMapValType (rcKink, mcKink));
+		    mMcKinkMap->insert(mcKinkMapValType (mcKink, rcKink));
 		}
-    }
+	    }
+	    
 	}
     } // kink loop
 	
@@ -1174,7 +1194,8 @@ Int_t StAssociationMaker::Make()
 		    mMcV0Map->insert(mcV0MapValType (mcDaughter1->startVertex(), rcV0));
 		    
 		}
-    }
+	    }
+	}
 	
     } // V0 loop
     
