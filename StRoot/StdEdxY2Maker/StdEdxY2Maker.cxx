@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.21 2004/02/02 19:55:16 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.22 2004/02/10 00:31:27 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -70,8 +70,6 @@
 #include "StProbPidTraits.h"
 const static StPidParticle NHYPS = kPidTriton;
 #include "dEdxTrack.h"
-extern   void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *u, Int_t flag);
-extern   void Landau(Double_t x, Double_t *val);
 extern  Double_t SumSeries(const Double_t &X,const Int_t &N,const Double_t *params);
 extern  Double_t SumSeries(const Double_t &X,const Int_t &N,const Float_t *params);
 enum ESector  {kTpcOuter = 0, kTpcInner = 1};
@@ -1706,7 +1704,7 @@ Double_t StdEdxY2Maker::CalcCorrection(const tpcCorrection_st *cor,const Double_
   else return 0;
 }
 //________________________________________________________________________________
-void Landau(Double_t x, Double_t *val){
+void StdEdxY2Maker::Landau(Double_t x, Double_t *val){
   // TMath::Log from Landau
   //  TF1 *LandauF = new TF1("LandauF","exp([0]-0.5*((x-[1])/[2])*((x-[1])/[2])+exp([3]-0.5*((x-[4])/[5])*((x-[4])/[5])))");
   static Double_t params[6] = {
@@ -1724,7 +1722,7 @@ void Landau(Double_t x, Double_t *val){
   val[1] = - (dev1/params[2]+c*dev2/params[5]);
 }
 //________________________________________________________________________________
-void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
+void StdEdxY2Maker::fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 {
   static Double_t sigma_p[3] = {// sigma versus ::log(dX)
     5.31393e-01,//    1  p0  1.33485e-03   7.13072e-07   7.08416e-08
