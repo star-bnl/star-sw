@@ -71,7 +71,7 @@ macro tcl_slow
   cd /dui/data/tpc/hits
   
     tdm/newtable tpcluster tcl_tpcluster   20000
-    tdm/newtable tpseq     tcl_tp_seq     100000
+    tdm/newtable tpseq     tcl_tp_seq     2000000
     
     cd /dui/constants/tpc/params
       tdm/newtable tcl_sector_index tcl_sector_index 1  
