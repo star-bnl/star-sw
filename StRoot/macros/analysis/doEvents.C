@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.73 2002/01/15 18:28:53 perev Exp $
+// $Id: doEvents.C,v 1.74 2002/02/23 19:25:55 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -193,6 +193,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
      IOMk->SetBranch("dstBranch",0,"r");
 //     IOMk->SetBranch("runcoBranch",0,"r");
      IOMk->SetDebug();
+//for test only     IOMk->SetMaxEvent(2);
 
 //		DB ON
     if (tflag.Contains("dbon")) {
@@ -212,14 +213,22 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     //
     StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");
 
+/////////////////////////////////////////////////////////////////////
+//  IT IS THE PLACE TO ADD USER MAKERS
+//  LIKE:
+//  gSystem->Load("StUserMaker");
+//  StUserMaker *UserMk = new StUserMaker("UserName");
+//  UserMk->SetSome(2002);
+/////////////////////////////////////////////////////////////////////
     // WriteOut StEvent
     Int_t wrStEOut = tflag.Contains("evout");
     if (wrStEOut) {
       cout << "!!!! doEvents: will write out .event.root file !!" << endl << endl;
-      StTreeMaker *outMk = new StTreeMaker("EvOut","","bfcTree");
-        outMk->SetIOMode("w");
-        outMk->SetBranch("eventBranch","test.event.root","w");
-        outMk->IntoBranch("eventBranch","StEvent");
+      StIOMaker *outMk = new StIOMaker("EvOut","w","test.event.root","bfcTree");
+//        outMk->SetBranch("eventBranch","test.event.root","w");
+        outMk->IntoBranch("evtselBranch","StEvent");
+      IOMk->SetNotify("CloseFile",outMk);
+      IOMk->SetNotify("OpenFile" ,outMk);
     }
 
 
@@ -319,6 +328,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.74  2002/02/23 19:25:55  perev
+// NotifyMe used
+//
 // Revision 1.73  2002/01/15 18:28:53  perev
 // @file logic added
 //
