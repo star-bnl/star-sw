@@ -52,7 +52,7 @@ class StBFChain : public StChain {
    virtual Int_t       AddAB (const Char_t *after="",const StMaker *maker=0,const Int_t Opt=1);
    virtual Int_t       AddAfter  (const Char_t *after, const StMaker *maker) {return AddAB (after,maker);}
    virtual Int_t       AddBefore (const Char_t *before,const StMaker *maker) {return AddAB (before,maker,-1);}
-   virtual Int_t       ParseString (const TString &tChain, TObjArray &Opt);
+   static  Int_t       ParseString (const TString &tChain, TObjArray &Opt);
    void                SetFlags(const Char_t *Chain="gstar tfs"); // *MENU*
    void                Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0); // *MENU
    void                SetInputFile(const Char_t *infile=0);                          // *MENU
@@ -83,7 +83,7 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const Char_t  *Opt) const {return GetOption(kOpt(Opt));}
    virtual Char_t     *GetOptionString(const Char_t  *);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.29 2004/03/01 17:32:17 fisyak Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.30 2004/06/24 22:02:01 fisyak Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class

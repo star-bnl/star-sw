@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.68  2004/05/25 07:10:04  jcs
+// initialize StFtpcSoftwareMonitor*ftpcMon
+//
 // Revision 1.67  2004/05/24 13:35:32  jcs
 // create a new StFtpcSoftwareMonitor if none exists
 //
@@ -400,7 +403,7 @@ Int_t StFtpcClusterMaker::Make()
     }
   } else mFtpcHitColl = 0;
 
-  StFtpcSoftwareMonitor* ftpcMon;
+  StFtpcSoftwareMonitor* ftpcMon = NULL;
   if (mCurrentEvent->softwareMonitor()) {
      ftpcMon = mCurrentEvent->softwareMonitor()->ftpc();
      if (!ftpcMon){

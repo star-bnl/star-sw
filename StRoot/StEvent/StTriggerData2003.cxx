@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.cxx,v 2.5 2004/02/11 01:39:52 ullrich Exp $
+ * $Id: StTriggerData2003.cxx,v 2.7 2004/06/30 00:12:09 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.cxx,v $
+ * Revision 2.7  2004/06/30 00:12:09  ullrich
+ * Added ZDC info to dump().
+ *
+ * Revision 2.6  2004/06/29 22:37:35  ullrich
+ * Added missing access function for ZDC. Currently same as 2004.
+ *
  * Revision 2.5  2004/02/11 01:39:52  ullrich
  * Use enumeration StBeamDirector for east/west. Add member for ZDC vertex.
  *
@@ -417,6 +423,51 @@ unsigned short StTriggerData2003::fpdSum(StBeamDirection eastwest, int module) c
     return mData->TrgSum.DSMdata.FPD[map[eastwest][module]] % nbit[eastwest][module];
 }
 
+unsigned short StTriggerData2003::zdcAtChannel(int channel, int prepost) const
+{
+    static const int dsmmap[16]={7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8};
+  if(channel>=0 && channel<16){ return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[dsmmap[channel]]; }
+  return 0;
+}
+
+unsigned short StTriggerData2003::zdcAtAddress(int address, int prepost) const
+{
+  if(address>=0 && address<16){ return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[address]; }
+  return 0;
+}
+
+unsigned short StTriggerData2003::zdcUnAttenuated(StBeamDirection eastwest, int prepost) const
+{
+  if(eastwest==east) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[3];}
+  if(eastwest==west) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[0];}
+  return 0;
+}
+
+unsigned short StTriggerData2003::zdcAttenuated(StBeamDirection eastwest, int prepost) const
+{
+  if(eastwest==east) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[13];}
+  if(eastwest==west) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[10];}
+  return 0;
+}
+
+unsigned short StTriggerData2003::zdcADC(StBeamDirection eastwest, int pmt, int prepost) const
+{
+  if(eastwest==east && pmt==1) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[7];}
+  if(eastwest==east && pmt==2) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[6];}
+  if(eastwest==east && pmt==3) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[5];}
+  if(eastwest==west && pmt==1) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[3];}
+  if(eastwest==west && pmt==2) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[2];}
+  if(eastwest==west && pmt==3) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[1];}
+  return 0;
+}
+
+unsigned short StTriggerData2003::zdcTDC(StBeamDirection eastwest, int prepost) const
+{
+  if(eastwest==east) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[8];}
+  if(eastwest==west) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[9];}
+  return 0;
+}
+
 void StTriggerData2003::dump() const
 {
     printf("***** StTriggerData Dump *****\n");
@@ -454,6 +505,12 @@ void StTriggerData2003::dump() const
     printf(" FPD West South PS: ");for(int i=1; i<= 7;i++){ printf("%d ",fpd(west,5,i,0));  }; printf("\n");
     printf(" FPD Sums East    : ");for(int j=0; j<4 ;j++) printf("%d ",fpdSum(east,j));        printf("\n");
     printf(" FPD Sums West    : ");for(int j=0; j<4 ;j++) printf("%d ",fpdSum(west,j));        printf("\n");
+    printf(" ZDC ADC  East    : ");for(int j=1; j<4 ;j++) printf("%d ",zdcADC(east,j));        printf("\n");
+    printf(" ZDC ADC  West    : ");for(int j=1; j<4 ;j++) printf("%d ",zdcADC(west,j));        printf("\n");
+    printf(" ZDC Sum(A) East  : ");printf("%d ",zdcAttenuated(east));        printf("\n");
+    printf(" ZDC Sum(A) West  : ");printf("%d ",zdcAttenuated(west));        printf("\n");
+    printf(" ZDC Sum(UA) East : ");printf("%d ",zdcUnAttenuated(east));      printf("\n");
+    printf(" ZDC Sum(UA) West : ");printf("%d ",zdcUnAttenuated(west));      printf("\n");
     printf("\n");
     printf("***** StTriggerData Dump *****\n");
 }

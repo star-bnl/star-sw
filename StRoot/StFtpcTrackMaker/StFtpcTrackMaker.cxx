@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.59 2004/05/24 13:46:39 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.60 2004/05/25 07:25:47 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.60  2004/05/25 07:25:47  jcs
+// initialize StFtpcSoftwareMonitor*ftpcMon
+//
 // Revision 1.59  2004/05/24 13:46:39  jcs
 // fill StFtpcSoftwareMonitor not dst_mon_soft_ftpc
 //
@@ -529,7 +532,7 @@ Int_t StFtpcTrackMaker::Make()
     tracker->EstimateVertex(tracker->GetVertex(), 1);
   }
 
-  StFtpcSoftwareMonitor* ftpcMon;
+  StFtpcSoftwareMonitor* ftpcMon = NULL;
   if (event->softwareMonitor()) {
      ftpcMon = event->softwareMonitor()->ftpc();
      if (!ftpcMon){
@@ -783,7 +786,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.59 2004/05/24 13:46:39 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.60 2004/05/25 07:25:47 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {

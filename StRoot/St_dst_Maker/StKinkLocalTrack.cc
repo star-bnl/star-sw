@@ -1,5 +1,8 @@
-// $Id: StKinkLocalTrack.cc,v 1.11 2003/09/07 03:49:07 perev Exp $
+// $Id: StKinkLocalTrack.cc,v 1.12 2004/06/02 15:02:45 cmironov Exp $
 // $Log: StKinkLocalTrack.cc,v $
+// Revision 1.12  2004/06/02 15:02:45  cmironov
+// Naming clash solved by changing names
+//
 // Revision 1.11  2003/09/07 03:49:07  perev
 // gcc 3.2 + WarnOff
 //
@@ -33,7 +36,7 @@
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
-StKinkLocalTrack::StKinkLocalTrack():
+StOldKinkLocalTrack::StOldKinkLocalTrack():
   mHelix(0, 0, 0, StThreeVectorD()) 
 {
   mId = 0;
@@ -51,7 +54,7 @@ StKinkLocalTrack::StKinkLocalTrack():
   mStartRadius2D = 0.;
 }
 
-StKinkLocalTrack::StKinkLocalTrack(dst_track_st* trk, Float_t curvature, Float_t dip,
+StOldKinkLocalTrack::StOldKinkLocalTrack(dst_track_st* trk, Float_t curvature, Float_t dip,
 				   Float_t phase, StThreeVectorD origin, Int_t h) :
   mHelix(curvature, dip, phase, origin, h)
 {
@@ -70,20 +73,20 @@ StKinkLocalTrack::StKinkLocalTrack(dst_track_st* trk, Float_t curvature, Float_t
   mStartRadius2D = trk->r0;
 }
 
-StKinkLocalTrack::~StKinkLocalTrack() {
+StOldKinkLocalTrack::~StOldKinkLocalTrack() {
 }
 
 
-Int_t StKinkLocalTrack::Compare(const TObject *obj) const
+Int_t StOldKinkLocalTrack::Compare(const TObject *obj) const
 {
-  if( mStartRadius2D == ((StKinkLocalTrack*)obj)->mStartRadius2D ) return 0;
-  if( mStartRadius2D <  ((StKinkLocalTrack*)obj)->mStartRadius2D ) return -1;
+  if( mStartRadius2D == ((StOldKinkLocalTrack*)obj)->mStartRadius2D ) return 0;
+  if( mStartRadius2D <  ((StOldKinkLocalTrack*)obj)->mStartRadius2D ) return -1;
   return 1;
 }
 
-Bool_t StKinkLocalTrack::IsEqual(const TObject *obj) const
+Bool_t StOldKinkLocalTrack::IsEqual(const TObject *obj) const
 {
   if (this == obj) return 1;
-  if (StKinkLocalTrack::Class() != obj->IsA()) return 0;
-  return mStartRadius2D == ((StKinkLocalTrack*)obj)->mStartRadius2D;
+  if (StOldKinkLocalTrack::Class() != obj->IsA()) return 0;
+  return mStartRadius2D == ((StOldKinkLocalTrack*)obj)->mStartRadius2D;
 }

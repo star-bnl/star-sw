@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.35 2004/05/03 23:32:10 perev Exp $
+// $Id: StKinkMaker.cxx,v 1.36 2004/06/02 15:02:45 cmironov Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.36  2004/06/02 15:02:45  cmironov
+// Naming clash solved by changing names
+//
 // Revision 1.35  2004/05/03 23:32:10  perev
 // Possible non init WarnOff
 //
@@ -232,7 +235,7 @@ Int_t StOldKinkMaker::Make(){
   tkf_tkfpar_st *tkfpar = m_tkfpar->GetTable();
   dst_track_st  *dstTrackStart  = globtrk->GetTable();
 
-  StKinkLocalTrack* tempTrack;
+  StOldKinkLocalTrack* tempTrack;
   TObjArray trackArray(MAXNUMOFTRACKS);
   trackArray.SetOwner();
   
@@ -270,7 +273,7 @@ Int_t StOldKinkMaker::Make(){
 	    Float_t z0 = dstTrackPtr->z0;
 	    StThreeVectorD origin(x0, y0, z0);  
 	    
-	    tempTrack = new StKinkLocalTrack(dstTrackPtr,
+	    tempTrack = new StOldKinkLocalTrack(dstTrackPtr,
 					     curvature/centimeter,
 					     dip*radian, 
 					     phase*radian,
@@ -291,7 +294,7 @@ Int_t StOldKinkMaker::Make(){
   
   for( i = 0; i < trackArray.GetLast(); i++)
     {
-      myTrack1 = (StKinkLocalTrack*)trackArray.At(i);
+      myTrack1 = (StOldKinkLocalTrack*)trackArray.At(i);
 
       //if(fabs( myTrack1->helix().dipAngle()) > tkfpar->parentDipAngleMax ) continue;  
       if( myTrack1->pt() < tkfpar->parentPtMin ) continue;     
@@ -301,7 +304,7 @@ Int_t StOldKinkMaker::Make(){
       
       for( j = i+1; j <= trackArray.GetLast(); j++)
 	{
-	  myTrack2 = (StKinkLocalTrack*)trackArray.At(j);
+	  myTrack2 = (StOldKinkLocalTrack*)trackArray.At(j);
 
 	  if( myTrack1->charge() != myTrack2->charge() ) continue;
 	  if( myTrack2->startRadius2D() < tkfpar->vertexRMin2D ) continue;

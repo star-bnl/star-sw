@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.h,v 1.17 2004/03/16 20:59:37 jeromel Exp $
+// $Id: StKinkMaker.h,v 1.18 2004/06/02 15:02:45 cmironov Exp $
 // $Log: StKinkMaker.h,v $
+// Revision 1.18  2004/06/02 15:02:45  cmironov
+// Naming clash solved by changing names
+//
 // Revision 1.17  2004/03/16 20:59:37  jeromel
 // Naming clash resolved by changing name
 //
@@ -68,7 +71,7 @@ class St_dst_track;
 class St_dst_vertex;
 class St_dst_tkf_vertex;
 
-class StKinkLocalTrack;
+class StOldKinkLocalTrack;
 class StKinkTrkIdCheck;
 class StPhysicalHelixD;
 
@@ -78,8 +81,8 @@ class StOldKinkMaker : public StMaker {
   Bool_t            m_kinkEvalOn;   //switch for the evaluation
   St_tkf_tkfpar    *m_tkfpar;          //!
 
-  StKinkLocalTrack *myTrack1;          //! 
-  StKinkLocalTrack *myTrack2;          //!
+  StOldKinkLocalTrack *myTrack1;          //! 
+  StOldKinkLocalTrack *myTrack2;          //!
 
   dst_tkf_vertex_st kinkVtxRow;        //!
   dst_vertex_st     dstVtxRow;         //!
@@ -115,7 +118,7 @@ class StOldKinkMaker : public StMaker {
   virtual  void   kinkEvalOn() {kinkEval();} 
   virtual  void   kinkEvalOff(){kinkEval(kFALSE);}      
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.17 2004/03/16 20:59:37 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.18 2004/06/02 15:02:45 cmironov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StOldKinkMaker,0)  
 };
     

@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.417 2004/05/21 20:44:41 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.422 2004/06/30 19:17:47 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -185,6 +185,8 @@ Bfc_st BFC1[] = {
                                                                        ,"Base chain for 2004 (tpc)",kFALSE},
   {"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,ftpc,trgd,OSpaceZ2","",""
                 ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+  {"pp2004"     ,""    ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,,ppOpt,-PreVtx,ftpc,trgd,OSpaceZ2","",""
+                         ,"Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
 
 
   // Other chains/Calibration
@@ -733,22 +735,26 @@ Bfc_st BFC2[] = {
   {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
                  ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
 
-  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
+  {"pp2003"      ,"" ,"",  "B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
            ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
+
   {"Idst"        ,""  ,"",
-"l0,dst,event,dEdxY2,genvtx,eemcD,tofDat,emcDY2,fpd,Kink2,xi2,svtdEdx,SvtIT,ftpc,trgd,CMuDst,analysis,EventQA" 
-                                                                                          ,"","","",kFALSE},
-  {"I2003"       ,""  ,"","ry2003,tpc_daq,tpcI,fcf,Physics,Idst,beamLine,tags,Tree,evout"
-   ,"",""                                                               ,"Base chain for 2003 ITTF",kFALSE},
-  {"dau2003i"    ,""  ,"","I2003,Corr2,ppOpt,l3onl,svt_daq,SvtD","",""
-                                        ,"Production chain for winter 2003 data dau2003a with ITTF",kFALSE},
+   "l0,dst,event,dEdxY2,genvtx,Kink2,xi2,svtdEdx,SvtIT,CMuDst,analysis,compend,EventQA"   ,"","","",kFALSE},
+  {"B2003I"      ,"","","ry2003,in,tpc_daq,tpcI,fcf,Physics,Idst,beamLine,tags,Tree,evout"
+                                                                  ,"","","Base chain for 2003 ITTF",kFALSE},
+  {"dau2003i"    ,""  ,"",  "B2003I,CtbMatchVtx,Corr2,ppOpt,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd",
+                                   "","","Production chain for winter 2003 data dau2003a with ITTF",kFALSE},
+  {"pp2003i"     ,""  ,"",
+                    "B2003I,CtbMatchVtx,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd",
+                                   "","","Production chain for winter 2003 data dau2003a with ITTF",kFALSE},
 
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
   {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2004 (tpc)",kFALSE},
   {"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,ftpc,trgd,OSpaceZ2","",""
                 ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
-
+  {"pp2004"     ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,ppOpt,-PreVtx,ftpc,trgd,OSpaceZ2","",""
+                         ,"Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
 
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","",
@@ -932,7 +938,8 @@ Bfc_st BFC2[] = {
                          ,"StppTrigMaker","StppSpin","Add emulation of pp Trigger based on CTB+MWC",kFALSE},
 
   {"tpc"         ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StMaker","StChain","",kFALSE},
-  {"tpcI"        ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,TpcHitMover","StMaker","StChain","tpc with ITTF",kFALSE},
+  {"tpcI"        ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,TpcHitMover"
+                                                               ,"StMaker","StChain","tpc with ITTF",kFALSE},
   {"Trs"         ,"Trs","tpcChain","scl,tpcDB,tpc_daq,Simu"           ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"TrsMini"     ,"","tpcChain","scl,tpcDB,-Trs,-tpc_daq,Simu","StTrsMiniMaker","StTrsMiniMaker","",kFALSE},
 
@@ -1107,6 +1114,8 @@ Bfc_st BFC2[] = {
   {"bbcSim"         ,"","","db,geant","StBbcSimulationMaker","StBbcSimulationMaker","BBC Simulator",kFALSE},
 
   {"analysis"    ,"","","StEvent"        ,"StAnalysisMaker","StAnalysisMaker","Example of Analysis",kFALSE},
+  {"compend"     ,"","","event",                          "StEventCompendiumMaker","StEventCompendiumMaker",
+                                                                 "Fill event summary in ITTF Chain",kFALSE},
   {"pec"         ,"PeC","","Event"                       ,"StPeCMaker","StPeCMaker","PCollAnalysis",kFALSE},
   {"RichSpectra" ,"","",""                            ,"StRichSpectraMaker","StRichSpectraMaker","",kFALSE},
 
@@ -1303,7 +1312,11 @@ Int_t StBFChain::Instantiate()
 	  if (Key.CompareTo("db",TString::kIgnoreCase) == 0) {
             if (!dbMk && ! GetChain()->GetMaker(fBFC[i].Name)) {
 	      if (!GetOption("NoMySQLDb") && !GetOption("NoCintDb"))
-		dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
+		if ( GetOption("NoCintCalDb") ){ 
+		  dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$STAR/StarDb");
+		} else {
+		  dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
+		}
 	      else {
 		if (GetOption("NoMySQLDb") && GetOption("NoCintDb"))
 		  dbMk = new St_db_Maker(fBFC[i].Name,"$PWD/StarDb");

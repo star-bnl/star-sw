@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.160 2004/04/07 19:00:56 perev Exp $
+// $Id: bfc.C,v 1.161 2004/06/08 22:40:44 jeromel Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -135,10 +135,16 @@ void bfc(const Int_t First,
       tptMk->tptResOn();    // Turn on the residual table
     }
   }
+#if 0
+  // this block is meant as an example ONLY
+  // The default values are set in StRoot/StPass0CalibMaker/ StTpcT0Maker 
+  // constructor and are suitable for production. You can change it here
+  // for test purposes.
   if (chain->GetOption("TpcT0")) {
     StTpcT0Maker *t0mk = (StTpcT0Maker *) chain->GetMaker("TpcT0");
     if (t0mk) t0mk->SetDesiredEntries(10);
   }
+#endif
   if (chain->GetOption("McAss")) {
     // Define the cuts for the Associations
     cout << "Setting the Parameters for the Association Maker in bfc" << endl;

@@ -337,7 +337,8 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
         {
         //cout << "position<=kEdgeZplus" << endl;
         testNode.setDetector(tDet);
-        bool active = tDet->isActive();
+        //bad//bool active = tDet->isActive();
+        bool active = tDet->isActive(testNode._p0,testNode._p1);
         if (active&&(testNode.nullCount<_pars.maxNullCount&&testNode.contiguousNullCount<_pars.maxContiguousNullCount))
           {
           // active detector may have a hit
@@ -379,7 +380,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
           node->nullCount           = sNode->nullCount;
           node->contiguousNullCount = sNode->contiguousNullCount;
           node->hitCount            = sNode->hitCount;
-          node->contiguousHitCount  = 0;
+          //node->contiguousHitCount  = 0;
           }
         else // there should have been a hit but we found none
           {
