@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.158 2004/11/03 22:30:12 fine Exp $
+// $Id: StMaker.cxx,v 1.159 2004/11/04 22:26:38 fine Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -16,7 +16,7 @@
  * The method will be described.
  *                                                                     
  */
-//#define STAR_LOGGER 1
+#define STAR_LOGGER 1
 
 #include "Stiostream.h"
 #include <stdio.h>
@@ -74,13 +74,16 @@ static const int   DBtimes[]=  {
         0,          0,         0,         0,          0
 };
 
+// Turn the logger of the current maker
+#define TURN_LOGGER(maker) StTurnLogger(maker->GetLogger())
 
+        
 ClassImp(StMaker)
 
 static void doPs(const char *who,const char *where);
 
 //_____________________________________________________________________________
-StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker")
+StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fLoggerHold(0)
 {
    SetActive();
    SetMode();
@@ -262,6 +265,9 @@ void StMaker::SetNotify(const char* about, StMaker *mk)
 //______________________________________________________________________________
 void StMaker::NotifyEm(const char* about, const void *ptr)
 {
+// Turn the logger of the current maker
+  TURN_LOGGER(this);
+  
   TDataSet *set = Find(".notify");
   if (!set) return;
   TDataSetIter iter(set);
@@ -270,6 +276,7 @@ void StMaker::NotifyEm(const char* about, const void *ptr)
     if (strcmp(about,os->GetName()))	continue;
     StMaker *mk=(StMaker*)os->GetObject();
     if (!mk)				continue;
+    TURN_LOGGER(mk);
     mk->NotifyMe(about,ptr);
   }
 
@@ -335,6 +342,8 @@ TDataSet *StMaker::FindDataSet(const char* logInput,
                                 const StMaker *uppMk,
                                 const StMaker *dowMk) const
 {
+  TURN_LOGGER(this);
+
 TDataSetIter nextMk(0);
 TString actInput,findString,tmp;
 TDataSet *dataset,*dir;
@@ -429,6 +438,7 @@ FOUND: if (uppMk || dowMk) 	return dataset;
 //______________________________________________________________________________
 TDataSet *StMaker::GetDataBase(const char* logInput)
 {
+  TURN_LOGGER(this);
   TDataSet *ds;
   StMaker  *mk;
   StMakerIter mkiter(this);
@@ -461,6 +471,8 @@ Int_t   StMaker::GetValidity(const TTable *tb, TDatime *val) const
 //_____________________________________________________________________________
 void StMaker::Clear(Option_t *option)
 {
+  TURN_LOGGER(this);
+
   m_MakeReturn = 0;
   if(option){};
   if (m_DataSet) m_DataSet->Delete();
@@ -476,6 +488,7 @@ void StMaker::Clear(Option_t *option)
       maker->SetBit(kCleaBeg);
       maker->StartTimer();
       if (maker->fMemStatClear && GetNumber()>20) maker->fMemStatClear->Start();
+      TURN_LOGGER(maker);
       maker->Clear(option);
       if (maker->fMemStatClear && GetNumber()>20) maker->fMemStatClear->Stop();
       maker->StopTimer();
@@ -494,6 +507,7 @@ void StMaker::Clear(Option_t *option)
 //_____________________________________________________________________________
 Int_t StMaker::Init()
 {   
+   TURN_LOGGER(this);  
    TObject  *objLast,*objHist;
    TList *tl = GetMakeList();
    if (!tl) return kStOK;
@@ -503,7 +517,8 @@ Int_t StMaker::Init()
    int curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker*)nextMaker())) {
 
-     // save last created histogram in current Root directory
+      TURN_LOGGER(maker);
+      // save last created histogram in current Root directory
       gROOT->cd();
       objLast = gDirectory->GetList()->Last();
 
@@ -526,7 +541,7 @@ Int_t StMaker::Init()
       maker->fMemStatMake  = new TMemStat(ts2);
       ts2 = ts1; ts2+="Clear";
       maker->fMemStatClear = new TMemStat(ts2);
-
+      
       if ( maker->Init()) {
 #ifdef STAR_LOGGER 
         LOG_ERROR << "   Maker "<< maker->GetName() << " failed in Init" << endm;
@@ -559,8 +574,11 @@ Int_t StMaker::Init()
     }
   return kStOK; 
 }
+//_____________________________________________________________________________
 void StMaker::StartMaker()
 {
+  // Save the previous logger status
+  if (!fLoggerHold) fLoggerHold = new StTurnLogger(GetLogger());
   if (!m_DataSet) {//Keep legacy code
     m_DataSet = Find(".data");
     if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
@@ -607,6 +625,9 @@ void StMaker::EndMaker(int ierr)
 
 
   StopTimer();
+  // Restore the previous logger status
+  if (fLoggerHold) { delete fLoggerHold; fLoggerHold = 0;}
+  
 }
 
 //_____________________________________________________________________________
@@ -616,6 +637,8 @@ void StMaker::EndMaker(int ierr)
  */
 Int_t StMaker::Finish()
 {
+   TURN_LOGGER(this);
+
    int nerr = 0;
    int run = GetRunNumber();
    if (run>-1) FinishRun(run);   
@@ -638,16 +661,18 @@ Int_t StMaker::Finish()
    int fst=1;
    while ((maker = (StMaker*)next())) {
  #ifdef STAR_LOGGER  
+      TURN_LOGGER(maker);
+
       if (fst) {
         fst=0;
-        LOG_INFO <<
+        LOG_QA <<
             Form("=================================================================================") << endm;
-        LOG_INFO <<
-            Form("QAInfo: Chain %20s::%-20s Ast =%6.2f        Cpu =%6.2f "
+        LOG_QA <<
+            Form("QAInfo:Chain %20s::%-20s Ast =%6.2f        Cpu =%6.2f "
                    ,ClassName(),GetName(),totalRealTime,totalCpuTime) << endm;
       }
-        LOG_INFO <<
-           Form("QAInfo: Maker %20s::%-20s Ast =%6.2f(%4.1f%%) Cpu =%6.2f(%4.1f%%) "
+        LOG_QA <<
+           Form("QAInfo:Maker %20s::%-20s Ast =%6.2f(%4.1f%%) Cpu =%6.2f(%4.1f%%) "
              ,maker->ClassName(),maker->GetName()
              ,maker->RealTime()
              ,100*maker->RealTime()/totalRealTime
@@ -658,7 +683,7 @@ Int_t StMaker::Finish()
       TString tail;
       for (int j=0;j<=kStFatal;j++) {
         if (fTallyMaker[j]) tail += Form(" %s=%d",ee[j],fTallyMaker[j]);}
-      LOG_INFO << (const char *) tail << endm;     
+      LOG_QA << (const char *) tail << endm;     
 #else
      if (fst) {
         fst=0;
@@ -684,6 +709,8 @@ Int_t StMaker::Finish()
    int curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker*)next())) 
    {
+      TURN_LOGGER(maker);
+
       if (maker->TestBit(kFiniEnd)) 
         maker->Warning("Finish","maker %s.%s Finished twice"
                ,maker->GetName(),maker->ClassName());
@@ -729,6 +756,8 @@ Int_t StMaker::Finish()
  */
 Int_t StMaker::Make()
 {
+   TURN_LOGGER(this);
+
 //   Loop on all makers
    Int_t ret,run=-1,oldrun;
    TList *tl = GetMakeList();
@@ -740,6 +769,7 @@ Int_t StMaker::Make()
    int curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker*)nextMaker())) {
      if (!maker->IsActive()) continue;
+     TURN_LOGGER(maker);
      Assert(maker->TestBit(kMakeBeg)==0);
      maker->SetBit(kMakeBeg);
      StMkDeb::SetCurrent(maker,2);
@@ -793,7 +823,7 @@ Int_t StMaker::Make()
 void StMaker::FatalErr(int Ierr, const char *com)
 {
 #ifdef STAR_LOGGER     
-    LOG_QA << Form("%s::Fatal: Error %d %s\n",GetName(),Ierr,com) << endm;
+    LOG_QA << Form("QAInfo:%s::Fatal: Error %d %s\n",GetName(),Ierr,com) << endm;
 #else
     printf("QAInfo:%s::Fatal: Error %d %s\n",GetName(),Ierr,com);
 #endif        
@@ -836,8 +866,13 @@ void StMaker::PrintInfo()
 {
    const char *cvs = GetCVS();
    const char *built = strstr(cvs,"built");
+#ifdef STAR_LOGGER       
+   if (built > cvs) LOG_QA << Form("QAInfo:%-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs)<< endm;
+   else             LOG_QA << Form("QAInfo:%-20s    from %s\n",ClassName(),cvs) << endm;
+#else   
    if (built > cvs) printf("QAInfo:%-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs);
    else             printf("QAInfo:%-20s    from %s\n",ClassName(),cvs);
+#endif   
 //     Print info for all defined Makers
    TIter next(GetMakeList());
    StMaker *maker;
@@ -907,8 +942,13 @@ const Char_t *StMaker::GetEventType() const
 void StMaker::PrintTimer(Option_t *option) 
 {
    if(option){};
+#ifdef STAR_LOGGER       
+   LOG_QA << Form("QAInfo:%-20s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds, Entries = %d",GetName()
+           ,m_Timer.RealTime(),m_Timer.CpuTime(),m_Timer.Counter());
+#else   
    Printf("QAInfo:%-20s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds, Entries = %d",GetName()
            ,m_Timer.RealTime(),m_Timer.CpuTime(),m_Timer.Counter());
+#endif
 }
 
 //_____________________________________________________________________________
@@ -1203,14 +1243,22 @@ static void doPs(const char *who, const char *where)
     ps = (ps) ? "yes" : "";
   }
   if (!ps[0]) return;
+#ifdef STAR_LOGGER  
+  LOG_QA << Form("QAInfo: doPs for %20s:%12s \t",who,where);
+#else
   printf("QAInfo: doPs for %20s:%12s \t",who,where);
+#endif    
   TMemStat::PrintMem(0);
+#ifdef STAR_LOGGER  
+  LOG_QA << endm;
+#else  
   printf("\n");
+#endif  
 }
 
 //_____________________________________________________________________________
 void StMaker::Streamer(TBuffer &)
-{ Error("Streamer"," attempt to write %s\n ",GetName());
+{ LOG_FATAL << Form("%s::Streamer - attempt to write %s",ClassName(),GetName());
   assert(0);
 }
 //______________________________________________________________________________
@@ -1530,6 +1578,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.159  2004/11/04 22:26:38  fine
+// populate the package with save/restore the logger and edit some messages
+//
 // Revision 1.158  2004/11/03 22:30:12  fine
 // Instantiate the logger per maker and clean up
 //

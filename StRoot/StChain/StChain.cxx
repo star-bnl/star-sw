@@ -39,6 +39,7 @@
 #include "TSystem.h"
 #include "StChain.h"
 #include "StEvtHddr.h"
+#include "StMessMgr.h"
 
 ClassImp(StChain)
 
@@ -124,24 +125,33 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
      mNTotal++;
      evnt.Stop("QAInfo:");
      //  evnt.Show("QAInfo:");
-     printf ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time %d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
+     LOG_QA << Form
+     /*printf */ ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time %d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds",
 	jCur,GetRunNumber(),GetEventNumber(),GetDate(), GetTime(),
-	     iMake,evnt.GetRealTime("QAInfo:"),evnt.GetCpuTime("QAInfo:"));
+	     iMake,evnt.GetRealTime("QAInfo:"),evnt.GetCpuTime("QAInfo:")) 
+     << endm;
   }
 
-  printf ("QAInfo:EventLoop completed code %d",iMake);
+  LOG_QA << Form
+ /*printf */ ("QAInfo:EventLoop completed code %d",iMake)
+  << endm;
   gSystem->Exec("date");
   TDatime t;
-  printf ("\nQAInfo:Run is finished at Date/Time %i/%i; Total events processed :%i and not completed: %i\n",
-	    t.GetDate(),t.GetTime(),mNTotal,mNFailed);
+  LOG_QA << Form
+ /* printf */ ("QAInfo:Run is finished at Date/Time %i/%i; Total events processed :%i and not completed: %i",
+	    t.GetDate(),t.GetTime(),mNTotal,mNFailed)
+        << endm;
 
   fflush(stdout);
   return iMake;
 }
 
 
-// $Id: StChain.cxx,v 1.49 2004/08/03 17:18:46 perev Exp $
+// $Id: StChain.cxx,v 1.50 2004/11/04 22:26:38 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.50  2004/11/04 22:26:38  fine
+// populate the package with save/restore the logger and edit some messages
+//
 // Revision 1.49  2004/08/03 17:18:46  perev
 // EventLoop corrected according to current policy
 //

@@ -36,6 +36,7 @@ class TMemStat;
 class StEvtHddr;
 
 class StMessMgr;
+class StTurnLogger;
 
 class StTestMaker;
 class StMaker : public TDataSet{
@@ -71,10 +72,12 @@ protected:
    TMemStat       *fMemStatMake;        //!TMemStat for Make
    TMemStat       *fMemStatClear;       //!TMemStat for Clear
 
-   StMessMgr      *fLogger;
+   StMessMgr      *fLogger;             // This object logger instance
+   StTurnLogger   *fLoggerHold;         // hold the pointer to the previous StMessMgr
 
 protected:
-   inline StMessMgr    *GetLogger(){return fLogger;}
+//   inline StMessMgr    *GetLogger(){return fLogger;}
+   inline StMessMgr    *GetLogger() const {return fLogger;}
 public:
 
    /// Constructor & Destructor
@@ -205,7 +208,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.69 2004/11/03 01:30:29 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.70 2004/11/04 22:26:38 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -263,8 +266,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.69 2004/11/03 01:30:29 fine Exp $
+// $Id: StMaker.h,v 1.70 2004/11/04 22:26:38 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.70  2004/11/04 22:26:38  fine
+// populate the package with save/restore the logger and edit some messages
+//
 // Revision 1.69  2004/11/03 01:30:29  fine
 // remove the redundant logger macro. They have been moved to the abstarct messager
 //
