@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.10 1999/12/14 18:33:21 kathy Exp $
+// $Id: StEventQAMaker.cxx,v 1.11 1999/12/16 03:56:19 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.11  1999/12/16 03:56:19  lansdell
+// mirrored Kathy's changes in St_QA_Maker.cxx: separated tpc and tpc+svt histograms for global tracks using StEvent; added r0,phi0,z0,curvature histograms for global tracks in the tpc
+//
 // Revision 1.10  1999/12/14 18:33:21  kathy
 // removed 4 ftpc histograms as per Janet's request
 //
@@ -152,11 +155,15 @@ void StEventQAMaker::MakeHistGlob() {
 	             (globtrk->geometry()->origin().y());
       Float_t zdif = (globtrk->detectorInfo()->firstPoint().z()) -
 	             (globtrk->geometry()->origin().z());
-      Float_t radf = TMath::Power((globtrk->detectorInfo()->firstPoint().x()),
-				  2) +
-	             TMath::Power((globtrk->detectorInfo()->firstPoint().y()),
-				  2);
+      Float_t radf = pow((globtrk->detectorInfo()->firstPoint().x()),2) +
+	             pow((globtrk->detectorInfo()->firstPoint().y()),2);
       radf = TMath::Sqrt(radf);
+
+      // I had to calculate r0 and phi0 b/c StEvent doesn't keep these
+      // variables as far as I can tell. -CL
+      Float_t r0 = sqrt(pow(globtrk->geometry()->origin().x(),2) + 
+			pow(globtrk->geometry()->origin().y(),2));
+      Float_t phi0 = acos(globtrk->geometry()->origin().x()/r0)/degree;
 
 // from Lanny on 2 Jul 1999 9:56:03
 //1. x0,y0,z0 are coordinates on the helix at the starting point, which
@@ -170,7 +177,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_det_id->Fill(globtrk->pidTraits()[k]->detector());
 
 // now fill all TPC histograms ------------------------------------------------
-      if (globtrk->flag()<700) {
+      if (globtrk->flag()>100 && globtrk->flag()<200) {
 
 // these are TPC only
 	m_glb_xf0->Fill(xdif);
@@ -183,6 +190,12 @@ void StEventQAMaker::MakeHistGlob() {
 	m_max_pointT->Fill(globtrk->numberOfPossiblePoints());
 	m_fit_pointT->Fill(globtrk->fitTraits().numberOfFitPoints());
 	m_glb_chargeT->Fill(globtrk->geometry()->charge());
+
+	m_glb_r0T->Fill(r0);
+	m_glb_phi0T->Fill(phi0);
+	m_glb_z0T->Fill(globtrk->geometry()->origin().z());
+	m_glb_curvT->Fill(globtrk->geometry()->curvature());
+
 	m_glb_xfT->Fill(globtrk->detectorInfo()->firstPoint().x());
 	m_glb_yfT->Fill(globtrk->detectorInfo()->firstPoint().y());
 	m_glb_zfT->Fill(globtrk->detectorInfo()->firstPoint().z());
@@ -225,6 +238,68 @@ void StEventQAMaker::MakeHistGlob() {
 	m_chisq1_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq1);
 	m_nfptonpt_momT->Fill(lmevmom,nfitntot);
 	m_nfptonpt_etaT->Fill(eta,nfitntot);
+      }
+
+// now fill all TPC+SVT histograms --------------------------------------------
+
+      if (globtrk->flag()>500 && globtrk->flag()<600 ) {
+
+        m_glb_xf0TS->Fill(xdif);
+        m_glb_yf0TS->Fill(ydif);
+        m_glb_zf0TS->Fill(zdif);
+	m_glb_impactTS->Fill(globtrk->impactParameter());
+
+	m_pointTS->Fill(globtrk->detectorInfo()->numberOfPoints());
+	m_max_pointTS->Fill(globtrk->numberOfPossiblePoints());
+	m_fit_pointTS->Fill(globtrk->fitTraits().numberOfFitPoints());
+	m_glb_chargeTS->Fill(globtrk->geometry()->charge());
+
+	m_glb_r0TS->Fill(r0);
+	m_glb_phi0TS->Fill(phi0);
+	m_glb_z0TS->Fill(globtrk->geometry()->origin().z());
+	m_glb_curvTS->Fill(globtrk->geometry()->curvature());
+
+	m_glb_xfTS->Fill(globtrk->detectorInfo()->firstPoint().x());
+	m_glb_yfTS->Fill(globtrk->detectorInfo()->firstPoint().y());
+	m_glb_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z());
+	m_glb_radfTS->Fill(radf);
+	m_glb_ratioTS->Fill(nfitntot);
+        m_glb_ratiomTS->Fill(nfitnmax);
+
+	//originally t->psi... but psi()=t->psi*degree in StEvent -CL
+	m_psiTS->Fill(globtrk->geometry()->psi());
+	//originally was t->tanl -CL
+	m_tanlTS->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
+	m_glb_thetaTS->Fill(theta);
+	m_etaTS->Fill(eta);
+	m_pTTS->Fill(pT);
+	m_momTS->Fill(gmom);
+	m_lengthTS->Fill(globtrk->length());
+	m_chisq0TS->Fill(chisq0);
+	m_chisq1TS->Fill(chisq1);
+
+	m_globtrk_xf_yfTS->Fill(globtrk->detectorInfo()->firstPoint().x(),
+			       globtrk->detectorInfo()->firstPoint().y());
+	m_eta_trklengthTS->Fill(eta,globtrk->length());
+	m_npoint_lengthTS->Fill(globtrk->length(),
+	      		       Float_t(globtrk->detectorInfo()->numberOfPoints()));
+	m_fpoint_lengthTS->Fill(globtrk->length(),
+			       Float_t(globtrk->fitTraits().numberOfFitPoints()));
+
+	m_pT_eta_recTS->Fill(eta,lmevpt);
+	m_tanl_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z(),
+		         Float_t(TMath::Tan(globtrk->geometry()->dipAngle())));
+	m_mom_trklengthTS->Fill(globtrk->length(),lmevmom);
+	m_chisq0_momTS->Fill(lmevmom,chisq0);
+	m_chisq1_momTS->Fill(lmevmom,chisq1);
+	m_chisq0_etaTS->Fill(eta,chisq0);
+	m_chisq1_etaTS->Fill(eta,chisq1);
+	m_chisq0_dipTS->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq0);
+	m_chisq1_dipTS->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq1);
+	m_chisq0_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq0);
+	m_chisq1_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq1);
+	m_nfptonpt_momTS->Fill(lmevmom,nfitntot);
+	m_nfptonpt_etaTS->Fill(eta,nfitntot);
       }
 
 // now fill all FTPC East histograms ------------------------------------------
@@ -327,8 +402,8 @@ void StEventQAMaker::MakeHistDE() {
       if (dedxPidTr) {
 	if (trkPidTr[0]->detector()==1) {
 	  m_ndedxT->Fill(dedxPidTr->numberOfPoints());
-	  m_dedx0T->Fill(dedxPidTr->mean()*1e6);
-	  m_dedx1T->Fill(dedxPidTr->sigma()*1e6);
+	  m_dedx0T->Fill(dedxPidTr->mean());
+	  m_dedx1T->Fill(dedxPidTr->sigma());
 	}
 	if (trkPidTr[0]->detector()==4) {
 	  m_ndedxFW->Fill(dedxPidTr->numberOfPoints());

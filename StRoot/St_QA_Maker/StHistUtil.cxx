@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.15 1999/12/15 20:32:17 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.16 1999/12/16 03:56:20 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.16  1999/12/16 03:56:20  lansdell
+// mirrored Kathy's changes in St_QA_Maker.cxx: separated tpc and tpc+svt histograms for global tracks using StEvent; added r0,phi0,z0,curvature histograms for global tracks in the tpc
+//
 // Revision 1.15  1999/12/15 20:32:17  kathy
 // separated the tpc and tpc+svt histograms for globtrk table; had to book and fill new histograms, add histograms to default logy list AND had to change what values of iflag I cut on for filling each different type of track in makehistglob method
 //
@@ -598,6 +601,9 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "StEQaGtrkNPntFitT",
  "StEQaGtrkPtT",
  "StEQaGtrkPT",
+ "StEQaGtrkR0T",
+ "StEQaGtrkZ0T",
+ "StEQaGtrkCurvT",
  "StEQaGtrkXfT",
  "StEQaGtrkYfT",
  "StEQaGtrkZfT",
@@ -608,6 +614,28 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "StEQaGtrkThetaT",
  "StEQaGtrkEtaT",
  "StEQaGtrkLengthT",
+ "StEQaGtrkXf0TS",
+ "StEQaGtrkYf0TS",
+ "StEQaGtrkZf0TS",
+ "StEQaGtrkImpactTS",
+ "StEQaGtrkNPntTS",
+ "StEQaGtrkNPntMaxTS",
+ "StEQaGtrkNPntFitTS",
+ "StEQaGtrkPtTS",
+ "StEQaGtrkPTS",
+ "StEQaGtrkR0TS",
+ "StEQaGtrkZ0TS",
+ "StEQaGtrkCurvTS",
+ "StEQaGtrkXfTS",
+ "StEQaGtrkYfTS",
+ "StEQaGtrkZfTS",
+ "StEQaGtrkRTS",
+ "StEQaGtrkRnfTS",
+ "StEQaGtrkRnmTS",
+ "StEQaGtrkTanlTS",
+ "StEQaGtrkThetaTS",
+ "StEQaGtrkEtaTS",
+ "StEQaGtrkLengthTS",
  "StEQaGtrkNPntFE",
  "StEQaGtrkNPntMaxFE",
  "StEQaGtrkNPntFitFE",
