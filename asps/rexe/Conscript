@@ -29,7 +29,7 @@ print "build $pkg with cons\n";
 my $CXXFLAGS = $env->{CXXFLAGS};
 my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib:" . $env->{LIBPATH};
 my $LIBS  = $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS} . " " . $env->{LIBS};
-if ($STAR) {$LIBS .= " -lStar -lStar2Root";}
+if ($env->{ENV}->{STAR}) {$LIBS .= " -lStar -lStar2Root";}
 my $Libraries =  $env->{Libraries};
 if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
 $env2 = $env->clone('CPPPATH'      => $CPPPATH,
