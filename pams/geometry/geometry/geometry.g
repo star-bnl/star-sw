@@ -1,4 +1,4 @@
-   subroutine geometry_init
+   subroutine geometry
 *
    Call cavegeo
    Call pipegeo
@@ -12,6 +12,7 @@
    Call magpgeo
    Call mfldgeo
    Call ggclos
+   call agphysi
 *
    end
 
