@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 1.12 2000/05/25 21:35:32 fisyak Exp $
+ * $Id: StRchMaker.h,v 1.13 2000/06/13 18:26:13 dunlop Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,8 +9,11 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRchMaker.h,v $
- * Revision 1.12  2000/05/25 21:35:32  fisyak
- * Make rootcint happy
+ * Revision 1.13  2000/06/13 18:26:13  dunlop
+ * Modified SetMode (public)
+ *
+ * Revision 1.13  2000/06/13 18:26:13  dunlop
+ * Modified SetMode (public)
  *
  * Revision 1.12  2000/05/25 21:35:32  fisyak
  * Make rootcint happy
@@ -147,16 +150,16 @@ private:
     // hits
     TH1F* mhc;//!
     TH1F* mhmc;//!
-	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.12 2000/05/25 21:35:32 fisyak Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.13 2000/06/13 18:26:13 dunlop Exp $ built "__DATE__" "__TIME__ ;
 #endif
     virtual const char *GetCVS() const	{
-    
+	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.13 2000/06/13 18:26:13 dunlop Exp $ built "__DATE__" "__TIME__ ;
 	return cvs;
     }
 public:
     virtual void SetMode(Int_t mode=0) {
 	m_Mode = mode;
-    
+	mDaq = 1-mode; // mDaq has opposite behavior from corresponding
 	// variable in St_tpcdaq_Maker, so reverse it. 
     }
 private:
