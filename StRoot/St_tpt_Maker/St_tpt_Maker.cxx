@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.73 2003/09/02 17:59:31 perev Exp $
+// $Id: St_tpt_Maker.cxx,v 1.74 2004/01/27 03:47:35 jeromel Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.74  2004/01/27 03:47:35  jeromel
+// Indent and define TPT_CORRECTION
+//
 // Revision 1.73  2003/09/02 17:59:31  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -244,7 +247,14 @@
 #include "StDbUtilities/StSectorAligner.h"
 #include "StDbUtilities/StCoordinates.hh"
 
+// Corrections moved in StTpcHitMoverMaker. However, for
+// debugging purposes, you may set this to one and run with 
+// -TpcHitMover option.
+#define TPT_CORRECTION 0
+
+#if TPT_CORRECTION
 static StMagUtilities* m_ExB = 0 ;
+#endif
 
 void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHeight);
  
@@ -283,9 +293,9 @@ Int_t St_tpt_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_tpt_Maker::InitRun(int runnumber){
   //Suppress annoying messages
-gMessMgr->SetLimit("TPTROOT1-E1",10);
-gMessMgr->SetLimit("TPTOUT2-E1",10);
-gMessMgr->SetLimit("TPTRSP-E1",10);
+  gMessMgr->SetLimit("TPTROOT1-E1",10);
+  gMessMgr->SetLimit("TPTOUT2-E1",10);
+  gMessMgr->SetLimit("TPTRSP-E1",10);
 
   // Create tables
   St_DataSet *tpcpars = GetInputDB("tpc");
@@ -293,31 +303,31 @@ gMessMgr->SetLimit("TPTRSP-E1",10);
   
   St_DataSetIter       gime(tpcpars);
   
-// 		TPG parameters
+  // 		TPG parameters
   m_tpg_pad_plane = (St_tpg_pad_plane *)  GetDataSet("tpcDB/.const/tpg_pad_plane");
   if (!(m_tpg_pad_plane)) Error("Init","no tpg_pad_plane is not initialized. \n");
   assert(m_tpg_pad_plane);
   
-// 		TCL parameters
+  // 		TCL parameters
   m_type = (St_tcl_tpc_index_type *) gime("tclpars/type");
   if (!m_type) Error("Init"," Clustering parameters have not been initialized");
   assert(m_type);
   
-// 		TPT parameters
+  // 		TPT parameters
   m_tpt_pars  = (St_tpt_pars* ) gime("tptpars/tpt_pars" );
   m_tpt_spars = (St_tpt_spars*) gime("tptpars/tpt_spars");
   if (!(m_tpt_pars && m_tpt_spars)) 
     Error("Init", "tpt parameters have not been initialized" );
   assert(m_tpt_pars && m_tpt_spars);
   
-// 	 	TTE parameters
+  // 	 	TTE parameters
   m_tte_control = (St_tte_control *) gime("ttepars/tte_control");
   assert(m_tte_control);
   
-// 		Create Histograms
+  // 		Create Histograms
 
 
-// reconstructed track histograms from values calculated in St_tpt_Maker:
+  // reconstructed track histograms from values calculated in St_tpt_Maker:
   m_hits_on_track = new TH1F("TptrackHitsOnTrk","Number of hits on reconstructed tracks",50,.5,50.5);
   m_hits_in_fit   = new TH1F("TptrackHitsInFit","Number of hits used in the momentum fit",50,.5,50.5);
   m_azimuth       = new TH1F("TptrackPhi"      ,"Azimuthal distribution of tracks",60,0.,360.0);
@@ -325,13 +335,13 @@ gMessMgr->SetLimit("TPTRSP-E1",10);
   m_r0            = new TH1F("TptrackR0"       ,"Radius for the first point",100,50.0,200);
   m_invp          = new TH1F("TptrackInvpt"    ,"1/Pt inverse momentum",100,0.0,10.0);
 
-// 		Create ntuple
+  // 		Create ntuple
   m_final = new TNtuple("final","Tpctest tracks and hits",
      "evno:alpha:lambda:row:x:y:z:track:cluster:q:xave:sigma:zrf:prf:nfit:invp:psi:phi0:r0:tanl:z0:chisqxy:chisqz:nseq");
- // xave and sigma are not filled anymore because they came from aux table (RAI)
+  // xave and sigma are not filled anymore because they came from aux table (RAI)
 
-// if m_tteEvalOn=kTrue, then initialize the histograms of the efficiency and momentum resolution
-//  cout<<"kFALSE="<<kFALSE<<endl;
+  // if m_tteEvalOn=kTrue, then initialize the histograms of the efficiency and momentum resolution
+  //  cout<<"kFALSE="<<kFALSE<<endl;
 
   if(m_tteEvalOn){VertexEffResolutionInit();}
   return kStOK;
@@ -347,6 +357,8 @@ Int_t St_tpt_Maker::Make(){
   if (!tpc_data) return 0;
   
   // 		Clusters exist -> do tracking
+  //tpc_data->ls(4);
+  //(void) printf("DEBUG2 :: [%s]\n",m_InputHitName.Data());
   St_DataSetIter gime(tpc_data);
   St_tcl_tphit     *tphit = (St_tcl_tphit     *) gime(m_InputHitName);
   if (! tphit) return kStWarn;
@@ -419,6 +431,9 @@ Int_t St_tpt_Maker::Make(){
 
   //			TPT
   if (!m_iftteTrack) {
+#if TPT_CORRECTION
+//==========================================================================
+// this part has moved to StTpcHitMover
     //
     //undo ExB distortions - only if ExB switch is set
     //
@@ -472,22 +487,23 @@ Int_t St_tpt_Maker::Make(){
 
     // now move hits to global coordinates;
     
-      tcl_tphit_st* spc = tphit->GetTable();
-      float x[3];
-      StTpcCoordinateTransform transform(gStTpcDb);
+    tcl_tphit_st* spc = tphit->GetTable();
+    float x[3];
+    StTpcCoordinateTransform transform(gStTpcDb);
 
-      for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ ){
+    for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ ){
 
-	 x[0] = spc->x;      x[1] = spc->y;      x[2] = spc->z;
-         StTpcLocalCoordinate local(x[0],x[1],x[2]);
-         StGlobalCoordinate global;
-	 transform(local,global);
+      x[0] = spc->x;      x[1] = spc->y;      x[2] = spc->z;
+      StTpcLocalCoordinate local(x[0],x[1],x[2]);
+      StGlobalCoordinate global;
+      transform(local,global);
 
-	 spc->x = global.position().x(); 
-         spc->y = global.position().y(); 
-         spc->z = global.position().z();
-      }
- 
+      spc->x = global.position().x(); 
+      spc->y = global.position().y(); 
+      spc->z = global.position().z();
+    }
+//=========================================================================
+#endif
 
 
 
