@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTTreeReader.h,v 1.1 2001/06/21 19:18:42 laue Exp $
+ * $Id: StHbtTTreeReader.h,v 1.2 2001/09/19 16:14:58 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -63,6 +63,7 @@ private:
   int initWrite(string, string);
   int uninitWrite();
   int fillChain(TChain* chain, const char* dir, const char* filter, const char* extention, const int maxFiles);
+  int fillChain(TChain* chain, const char* list, const int maxFiles);
 
  protected:
   
@@ -94,6 +95,9 @@ inline void StHbtTTreeReader::SetDebug(int debug) {mDebug=debug;}
 /***************************************************************************
  *
  * $Log: StHbtTTreeReader.h,v $
+ * Revision 1.2  2001/09/19 16:14:58  laue
+ * filelist option added
+ *
  * Revision 1.1  2001/06/21 19:18:42  laue
  * Modified Files: (to match the changed base classes)
  * 	StHbtAsciiReader.cxx StHbtAsciiReader.h
