@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.cxx,v 1.2 2004/03/29 19:10:56 dongx Exp $
+ * $Id: StTofrNtupleMaker.cxx,v 1.3 2004/04/09 16:13:23 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.cxx,v $
+ * Revision 1.3  2004/04/09 16:13:23  dongx
+ * fix a potential bug causing crash
+ *
  * Revision 1.2  2004/03/29 19:10:56  dongx
  * correct the pVPD ADC read-out for year2 and year3
  *
@@ -426,7 +429,11 @@ Int_t StTofrNtupleMaker::Make(){
 
       mCellData.trackId     = (Int_t)thisTrack->key();
       mCellData.charge      = theTrackGeometry->charge();
-      mCellData.ntrackpoints= thisTrack->detectorInfo()->numberOfPoints(kTpcId);
+      if(thisTrack->detectorInfo()) {
+	mCellData.ntrackpoints= thisTrack->detectorInfo()->numberOfPoints(kTpcId);
+      } else {
+	mCellData.ntrackpoints=0;
+      }
       mCellData.nfitpoints  = thisTrack->fitTraits().numberOfFitPoints(kTpcId);
       mCellData.dca         = globalTrack->geometry()->helix().distance(event->primaryVertex()->position());
       mCellData.s           = (float)fabs(pathLength);
