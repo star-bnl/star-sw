@@ -1,7 +1,14 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 2.6 2003/09/02 17:58:41 perev Exp $
+ * $Id: StMcHit.hh,v 2.7 2003/10/08 20:17:55 calderon Exp $
  * $Log: StMcHit.hh,v $
+ * Revision 2.7  2003/10/08 20:17:55  calderon
+ * -using <iostream>, std::cout, std::ostream.
+ * -changes in FTPC volume Id.
+ *   o Causes changes in decoding of plane().
+ *   o sector() is added.
+ *   o print volumeId and sector() in the operator<<.
+ *
  * Revision 2.6  2003/09/02 17:58:41  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -36,7 +43,11 @@
 #ifndef StMcHit_hh
 #define StMcHit_hh
 
-#include <Stiostream.h>
+#include <iostream>
+#ifndef ST_NO_NAMESPACES
+using std::ostream;
+using std::cout;
+#endif
 #include "StThreeVectorF.hh"
 
 class StMcTrack;
