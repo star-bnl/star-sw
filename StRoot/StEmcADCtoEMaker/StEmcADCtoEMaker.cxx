@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.59 2003/10/10 13:38:28 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.60 2003/10/10 14:26:12 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.60  2003/10/10 14:26:12  suaide
+// small fix
+//
 // Revision 1.59  2003/10/10 13:38:28  suaide
 // change to allow RMS or Energy CUT. Default is now RMS.
 //
@@ -1089,7 +1092,7 @@ Bool_t StEmcADCtoEMaker::saveHit(Int_t det,Int_t idh, Int_t cap)
 	if(S!=STATUS_OK) save = kFALSE;   
   if(mControlADCtoE->CutOff[det]>0) 
   {
-    if(mControlADCtoE->CutOff[det]==1)
+    if(mControlADCtoE->CutOffType[det]==1)
     {
       if(RMS>0 && PED>0)
       {
