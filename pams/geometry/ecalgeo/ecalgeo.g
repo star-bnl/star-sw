@@ -1,8 +1,20 @@
-* $Id: ecalgeo.g,v 1.11 2001/08/18 21:17:41 yqwang Exp $
+* $Id: ecalgeo.g,v 1.12 2001/08/23 16:12:19 yqwang Exp $
 * $Name:  $
 * $Log: ecalgeo.g,v $
-* Revision 1.11  2001/08/18 21:17:41  yqwang
-* *** empty log message ***
+* Revision 1.12  2001/08/23 16:12:19  yqwang
+* Revision 1.12  2001/08/23 12:15:41  yqwang
+* Each (West (1) , East (2)) Endcap (Fpd) has possible
+*                            XOffset, YOffset, and ZOffset.
+* Each Lgd has its own ZPoz and XDis, YDis.
+* South Lgd is tilted, but not the top and bottom
+* Update Elgg_DGap value
+*
+* Revision 1.11  2001/08/20 21:17:41  yqwang
+* Each (West (1) , East (2)) Endcap (Fpd) has possible
+*                            XOffset, YOffset, and ZOffset.
+* Each Lgd has its own ZPoz and XDis, YDis.
+* South Lgd is tilted, but not the top and bottom
+* Update Elgg_DGap value
 *
 * Revision 1.10  2001/04/09 14:20:24  akio
 * set default to de, not cherenkov, for fpd
@@ -54,7 +66,7 @@ Author    Rashid Mehdiyev
 *
       Structure  Emcg { Version,Onoff(3),ChkvSim }
       Structure  EMCS { Type,ZOrig,ZEnd,EtaMin,EtaMax,
-			PhiMin,PhiMax,Offset,
+			PhiMin,PhiMax,XOffset(2),YOffset(2),ZOffset(2),
 			Nsupsec,Nsector,Nsection,Nslices,
 			Front,Gten,Plate,PlateS,PlateB,
                         Hub,Rmshift,SMShift,GapPlt,GapCel,GapSMD}
@@ -67,7 +79,7 @@ Author    Rashid Mehdiyev
 *
       Structure  EXSE {Jsect,Swidth,Aplate}
 *
-      Structure  ELGG {Width,Depth,ZPos(4),DGap,NPhi,NEta,RDis(4),DipAng,
+      Structure  ELGG {Width,Depth,ZPos(8),DGap,NPhi,NEta,XDis(8),YDis(8),DipAng,
 	               AlThick,SiRubDz,PhCathDz,PhCathR,MuMetDz,MuMetR}
 *
       Structure  ELGM {Density,RadLen,Index,PbContent,CritEne,MoliereR}
@@ -114,7 +126,7 @@ Author    Rashid Mehdiyev
 *
 Fill  EMCG                          ! EM EndCAp Calorimeter basic data 
       Version  = 4.1                ! Geometry version 
-      OnOff    = {1,2,2}            ! =0 no, =1 west, =2 east, =3 both for endcap, fpd and PbG		
+      OnOff    = {3,3,3}            ! =0 no, =1 west, =2 east, =3 both for endcap, fpd and PbG		
       ChkvSim  = 0                  ! = 0 de, = 1 Cherenkov simulation for PbG
 Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
       Type     = 1                  ! =1 endcap, =2 fpd edcap prototype
@@ -124,7 +136,9 @@ Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
       EtaMax   = 2.0,               ! lower feducial eta cut
       PhiMin   = -180               ! Min phi 
       PhiMax   = 180                ! Max phi
-      Offset   = 0.0                ! offset in x
+      XOffset   = {0.0,0.0}         ! offsets in x: signed according to global coords
+      YOffset   = {0.0,0.0}         ! offsets in y: signed according to global coords
+      ZOffset   = {0.0,0.0}         ! offsets in z: signed according to global coords
       Nsupsec  = 12                 ! Number of azimuthal supersectors        
       Nsector  = 60                 ! Number of azimutal sectors (Phi granularity)
       Nslices  = 5                  ! number of phi slices in supersector
@@ -142,13 +156,15 @@ Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
       GapSMD   = 3.2                ! space for SMD detector
 Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
       Type     =  2                 ! =1 endcap, =2 fpd edcap prototype
-      ZOrig    =  820               ! calorimeter origin in z
-      ZEnd     =  856.507           ! Calorimeter end in z
+      ZOrig    =  800               ! calorimeter origin in z
+      ZEnd     =  836.507           ! Calorimeter end in z
       EtaMin   =  1.6317            ! upper feducial eta cut 
       EtaMax   =  2.0               ! lower feducial eta cut
       PhiMin   =  -9                ! Min phi 
       PhiMax   =   9                ! Max phi
-      Offset   = 50.0	            ! offset in x
+      XOffset  = {50.0,50.0}	    ! offsets in x: signed according to global coords
+      YOffset  = {0.0,0.0}	    ! offsets in y: signed according to global coords
+      ZOffset  = {0.0,-20.0}	    ! offsets in z: signed according to global coords
       Nsupsec  =    1               ! Number of azimuthal supersectors        
       Nsector  =    3               ! Number of azimutal sectors (Phi granularity)
       Nslices  =    3               ! number of phi slices in supersector
@@ -244,11 +260,12 @@ Fill EXSE           ! Second SMD section
 Fill ELGG                                    ! PbG detector geometry
       Width    = 3.8			     ! PbG width	
       Depth    = 45.0			     ! PbG depth
-      DGap     = 0.01			     ! Gap between PbG
-      Zpos     = {800.0,820.0,805.0,800.0}   ! Z positions
+      DGap     = 0.40			     ! Gap between PbG
+      Zpos     = {800.0,820.0,800.0,800.0,800.0,820.0,798.9,800.0}   ! Z positions
       NPhi     = 4			     ! # of tower in phi
       NEta     = 4                           ! # of tower in eta
-      RDis     = {30.0,30.0,30.0,30.0}       ! distances from beam
+      XDis     = {0.0,30.0,0.0,-30.0,0.0,30.0,0.0,-30.0}       ! x-distances from beam
+      YDis     = {30.0,0.0,-30.0,0.0,30.0,0.0,-30.0,0.0}       ! y-distances from beam
       DipAng   = 15.0                        ! Dip angle
       AlThick  = 0.002			     ! almunim wrap thinkness
       SiRubDz  = 2.0			     ! silicon lubber thinkness
@@ -276,8 +293,9 @@ Fill ELGM				     ! PbG detector materials
 * Endcap
       USE EMCS type=1
       USE EETR type=1
-      orgkeep =  emcs_ZOrig
-      endkeep =  emcs_ZEnd
+* orgkeep and endkeep are for both Endcap and Fpd!!!
+        orgkeep =  emcs_ZOrig
+        endkeep =  emcs_ZEnd
       if(emcg_OnOff(1)>0) then
         diff = 0.0
         center  = (emcs_ZOrig+emcs_ZEnd)/2
@@ -291,10 +309,10 @@ Fill ELGM				     ! PbG detector materials
         dphi = (emcs_PhiMax-emcs_PhiMin)/emcs_Nsector
         Create ECAL
         if(emcg_OnOff(1)==1 | emcg_OnOff(1)==3) then
-		Position ECAL in CAVE z=+center
+		Position ECAL in CAVE z=+center+emcs_zoffset(1) x=emcs_xoffset(1) y=emcs_yoffset(1)
 	endif
         if(emcg_OnOff(1)==2 | emcg_OnOff(1)==3) then
-		Position ECAL in CAVE z=-center ThetaZ=180
+		Position ECAL in CAVE z=-center+emcs_zoffset(2) x=emcs_xoffset(2) y=emcs_yoffset(2) ThetaZ=180
 	endif
 
         If(section > emcs_Zend) then
@@ -310,7 +328,7 @@ Fill ELGM				     ! PbG detector materials
         USE EMCS type=2
         USE EETR type=2
         diff = emcs_ZOrig - orgkeep
-        center = (emcs_ZOrig+emcs_ZEnd)/2
+	center = (emcs_ZOrig+emcs_ZEnd)/2
         Tan_Upp = tanf(emcs_EtaMin)  
         Tan_Low = tanf(emcs_EtaMax)
         rshift  = emcs_Hub * sqrt(1. + Tan_Low*Tan_Low)
@@ -320,10 +338,10 @@ Fill ELGM				     ! PbG detector materials
         dphi = (emcs_PhiMax-emcs_PhiMin)/emcs_Nsector
         Create    ECAL
         if(emcg_OnOff(2)==1 | emcg_OnOff(2)==3) then
-		Position ECAL in CAVE z=+center x=emcs_Offset
+		Position ECAL in CAVE z=+center+emcs_zoffset(1) x=emcs_xOffset(1) y=emcs_yoffset(1)
 	endif
         if(emcg_OnOff(2)==2 | emcg_OnOff(2)==3) then
-		Position ECAL in CAVE z=-center x=emcs_Offset ThetaZ=180
+		Position ECAL in CAVE z=-center+emcs_zoffset(2) x=emcs_xOffset(2) y=emcs_yoffset(2) ThetaZ=180
 	endif
 
         If(section > emcs_Zend) then
@@ -341,34 +359,34 @@ Fill ELGM				     ! PbG detector materials
 * West
         if(emcg_OnOff(2)==1 | emcg_OnOff(2)==3) then
 * top
-                Create and Position ELGD in CAVE z=ELGG_ZPos(1)+ztot y=ELGG_Rdis(1)+yy x=0, 
+                Create and Position ELGD in CAVE z=ELGG_ZPos(1)+ztot y=ELGG_Ydis(1)+yy x=ELGG_Xdis(1), 
                                phix=0    phiy=90               phiz=90,
                                thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng
-* north
-                Create and Position ELGD in CAVE z=ELGG_ZPos(4)+ztot x=-ELGG_Rdis(4)+yy y=0,
-                               phix=90   phiy=180              phiz=0,
-                               thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng 
+* south
+                Create and Position ELGD in CAVE z=ELGG_ZPos(2)+ztot x=ELGG_Xdis(2)+yy y=ELGG_Ydis(2),
+                               phix=270  phiy=0                phiz=0,
+                               thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng
 * bottom
-                Create and Position ELGD in CAVE z=ELGG_ZPos(3)+ztot y=-(ELGG_Rdis(3)+yy) x=0,
+                Create and Position ELGD in CAVE z=ELGG_ZPos(3)+ztot y=ELGG_Ydis(3)-yy x=ELGG_Xdis(3),
                                phix=180  phiy=270              phiz=-90,
                                thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng 
-* south
-                Create and Position ELGD in CAVE z=ELGG_ZPos(2)+ztot x=(ELGG_Rdis(2)+yy) y=0,
-                               phix=270  phiy=0                phiz=-180,
-                               thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng 
+* north
+*                Create and Position ELGD in CAVE z=ELGG_ZPos(4)+ztot x=ELGG_Xdis(4)-yy y=ELGG_Ydis(4),
+*                               phix=90   phiy=180              phiz=0,
+*                               thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng  
         endif
 * East
         if(emcg_OnOff(3)==2 | emcg_OnOff(3)==3) then
 * top
-                Create and Position ELGD in CAVE z=-(ELGG_ZPos(1)+ztot) y=ELGG_Rdis(1)+yy x=0,
+                Create and Position ELGD in CAVE z=-(ELGG_ZPos(1)+ztot) y=ELGG_Ydis(5)+yy x=ELGG_Xdis(5),
                                phix=180  phiy=90               phiz=90,
                                thetax=90 thetay=90             thetaz=180
 * south
-                Create and Position ELGD in CAVE z=-(ELGG_ZPos(2)+ztot) x=ELGG_Rdis(2)+yy y=0,
+                Create and Position ELGD in CAVE z=-(ELGG_ZPos(2)+ztot) x=ELGG_Xdis(6)+yy y=ELGG_Ydis(6),
                                phix=90   phiy=0                phiz=0,
                                thetax=90 thetay=90-ELGG_DipAng thetaz=180-ELGG_DipAng
 * bottom
-                Create and Position ELGD in CAVE z=-(ELGG_ZPos(3)+ztot) y=-(ELGG_Rdis(3)+yy) x=0,
+                Create and Position ELGD in CAVE z=-(ELGG_ZPos(3)+ztot) y=ELGG_Ydis(7)-yy x=ELGG_Xdis(7),
                                phix=0    phiy=-90              phiz=-90,
                                thetax=90 thetay=90             thetaz=180
         endif
