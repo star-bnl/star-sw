@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.28 2002/02/24 21:19:21 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.29 2002/02/25 16:23:24 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.29  2002/02/25 16:23:24  suaide
+// reduced SMD threshold
+//
 // Revision 1.28  2002/02/24 21:19:21  suaide
 // clean up and modifications on the settings that allow to save only hits
 // above a given threshold that can be defined for each sub detector.
@@ -71,7 +74,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
 
   Int_t calib[]   = {1, 0, 1, 1, 0, 0, 0, 0};
   Int_t pedSub[]  = {1, 0, 1, 1, 0, 0, 0, 0};
-  Int_t adcCut[]  = {-1, -1, 7, 7, -1, -1, -1, -1};
+  Int_t adcCut[]  = {-1, -1, 4, 4, -1, -1, -1, -1};
   Int_t onlyCal[] = {0, 0, 0, 0, 0, 0, 0, 0};
   
   for(Int_t i=0; i<MAXDET; i++)
