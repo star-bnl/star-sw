@@ -1,4 +1,4 @@
-// $Id: StClusterDisplayMaker.h,v 1.1 2000/07/07 02:31:31 flierl Exp $
+// $Id: StClusterDisplayMaker.h,v 1.2 2000/07/09 20:15:55 flierl Exp $
 #ifndef STAR_StClusterDisplayMaker
 #define STAR_StClusterDisplayMaker
 
@@ -18,7 +18,7 @@
 class StClusterDisplayMaker : public StMaker {
 
  private:
-    // static Char_t  m_VersionCVS = "$Id: StClusterDisplayMaker.h,v 1.1 2000/07/07 02:31:31 flierl Exp $";
+    // static Char_t  m_VersionCVS = "$Id: StClusterDisplayMaker.h,v 1.2 2000/07/09 20:15:55 flierl Exp $";
     TTree* mytree ;
     TH2S*  myhist ;
         
@@ -69,8 +69,7 @@ class StClusterDisplayMaker : public StMaker {
 // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
 
    // my member functions
-   void Fill_Pixel_into_histo_outer() ;
-   void Fill_Pixel_into_histo_inner() ;
+   void Fill_Pixel() ;
    void Fill_Pixel_into_histo_artificial(TH2S* histo, Int_t row, Int_t sec) ;
    TTree* GetTree() {return mytree;};
    TH2S* GetHist() {return myhist;};
@@ -80,7 +79,7 @@ class StClusterDisplayMaker : public StMaker {
    TGraphErrors* Get_graph_matched_points() { return matched_points;} ;
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StClusterDisplayMaker.h,v 1.1 2000/07/07 02:31:31 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StClusterDisplayMaker.h,v 1.2 2000/07/09 20:15:55 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StClusterDisplayMaker, 1)   //StAF chain virtual base class for Makers
 };
