@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.9 2000/02/02 16:35:48 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.10 2000/02/08 19:45:31 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.10  2000/02/08 19:45:31  kathy
+// added a few more hist to print list for cosmics
+//
 // Revision 1.9  2000/02/02 16:35:48  kathy
 // fixing hist names in default lists
 //
@@ -1120,9 +1123,13 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   if (strcmp(dirName,"QA")==0 && strcmp(analType,"Cosmic")==0) {
    Char_t* sdefList1[] = {
  "TabQaEvsumTrkTot",
+ "TabQaEvsumTrkTotsm",
  "TabQaEvsumPlusMinusTrk",
+ "TabQaEvsumPlusMinusTrksm",
  "TabQaEvsumMeanPt",
+ "TabQaEvsumMeanPtsm",
  "TabQaGtrkGood",
+ "TabQaGtrkGoodsm",
  "TabQaGtrkNPntT",
  "TabQaGtrkNPntMaxT",
  "TabQaGtrkNPntFitT",
