@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: parseXmlString.cc,v 1.3 1999/12/28 21:31:42 porter Exp $
+ * $Id: parseXmlString.cc,v 1.4 2000/01/10 20:37:55 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: parseXmlString.cc,v $
+ * Revision 1.4  2000/01/10 20:37:55  porter
+ * expanded functionality based on planned additions or feedback from Online work.
+ * update includes:
+ * 	1. basis for real transaction model with roll-back
+ * 	2. limited SQL access via the manager for run-log & tagDb
+ * 	3. balance obtained between enumerated & string access to databases
+ * 	4. 3-levels of diagnostic output: Quiet, Normal, Verbose
+ * 	5. restructured Node model for better XML support
+ *
  * Revision 1.3  1999/12/28 21:31:42  porter
  * added 'using std::vector' and 'using std::list' for Solaris CC5 compilation.
  * Also fixed some warnings arising from the CC5 compiles
@@ -57,7 +66,6 @@ p1[size]='\0';
  delete [] p1;
  return retVal;
  // return removeBlankEnds(p1); 
-
 }
 
 /////////////////////////////////////////////////////////////////
@@ -158,7 +166,7 @@ parseXmlString::removeBlankEnds(char* line){
  strncpy(tmp,p1,size);
  tmp[size] = '\0';
 
- // delete [] line;
+ //delete [] line;
  return tmp;
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.4 1999/10/19 14:30:37 porter Exp $
+ * $Id: MysqlDb.h,v 1.5 2000/01/10 20:37:53 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.5  2000/01/10 20:37:53  porter
+ * expanded functionality based on planned additions or feedback from Online work.
+ * update includes:
+ * 	1. basis for real transaction model with roll-back
+ * 	2. limited SQL access via the manager for run-log & tagDb
+ * 	3. balance obtained between enumerated & string access to databases
+ * 	4. 3-levels of diagnostic output: Quiet, Normal, Verbose
+ * 	5. restructured Node model for better XML support
+ *
  * Revision 1.4  1999/10/19 14:30:37  porter
  * modifications relevant to use with StDbBroker and future merging with
  * "params" database structure + some docs + suppressing diagnostics messages
@@ -114,6 +123,7 @@ public:
   char **DecodeStrArray(char* strinput , int &aLen) ; 
   char* CodeStrArray(char** strarr , int aLen);
   virtual int GetLastInsertID(){ return (int)mysql_insert_id(&mData);}
+  virtual bool QueryStatus() { return mqueryState; }
 
 protected:
   virtual void RazQuery() ;

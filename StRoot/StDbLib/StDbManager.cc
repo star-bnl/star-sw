@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.cc,v 1.11 1999/12/28 21:31:42 porter Exp $
+ * $Id: StDbManager.cc,v 1.12 2000/01/10 20:37:54 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.12  2000/01/10 20:37:54  porter
+ * expanded functionality based on planned additions or feedback from Online work.
+ * update includes:
+ * 	1. basis for real transaction model with roll-back
+ * 	2. limited SQL access via the manager for run-log & tagDb
+ * 	3. balance obtained between enumerated & string access to databases
+ * 	4. 3-levels of diagnostic output: Quiet, Normal, Verbose
+ * 	5. restructured Node model for better XML support
+ *
  * Revision 1.11  1999/12/28 21:31:42  porter
  * added 'using std::vector' and 'using std::list' for Solaris CC5 compilation.
  * Also fixed some warnings arising from the CC5 compiles
@@ -46,11 +55,60 @@ StDbManager* StDbManager::mInstance=0;
 
 StDbManager::~StDbManager(){
  
-
-  //  if(m_configNode)m_configNode->deleteTree();
   deleteServers();
   deleteDomains();
   deleteTypes();
+
+}
+
+////////////////////////////////////////////////////////////////
+//
+//
+// protected methods
+//
+//
+////////////////////////////////////////////////////////////////
+
+void
+StDbManager::initTypes(){
+
+
+addDbType(dbStDb,"StarDb"); 
+addDbType(dbRunLog,"RunLog"); 
+addDbType(dbServer,"StDbServer"); 
+addDbType(dbConditions,"Conditions"); 
+addDbType(dbCalibrations,"Calibrations"); 
+addDbType(dbGeometry,"Geometry"); 
+addDbType(dbRunCatalog,"RunCatalog"); 
+addDbType(dbConfigurations,"Configurations"); 
+addDbType(dbRunParams,"RunParams"); 
+addDbType(dbTestScheme,"TestScheme"); 
+
+}
+
+////////////////////////////////////////////////////////////////
+
+void
+StDbManager::addDbType(StDbType type, const char* typeName){
+  mTypes.push_back(new dbType(type,typeName));
+}
+
+////////////////////////////////////////////////////////////////
+
+void
+StDbManager::initDomains(){
+
+mDomains.push_back(new dbDomain(dbStar,"Star")); 
+mDomains.push_back(new dbDomain(dbTpc,"tpc")); 
+mDomains.push_back(new dbDomain(dbFtpc,"ftpc")); 
+mDomains.push_back(new dbDomain(dbEmc,"emc")); 
+mDomains.push_back(new dbDomain(dbSvt,"svt")); 
+mDomains.push_back(new dbDomain(dbCtb,"ctb")); 
+mDomains.push_back(new dbDomain(dbTrg,"trg")); 
+mDomains.push_back(new dbDomain(dbDaq,"daq")); 
+mDomains.push_back(new dbDomain(dbScaler,"scaler")); 
+mDomains.push_back(new dbDomain(dbGlobal,"global")); 
+mDomains.push_back(new dbDomain(dbL3,"l3")); 
 
 }
 
@@ -110,136 +168,49 @@ StDbManager::deleteTypes(){
 
 }
 
-////////////////////////////////////////////////////////////////
-
-char*
-StDbManager::getDbTypeName(StDbType type){
-
-char* name;
-  for(dbTypes::iterator itr=mTypes.begin();
-      itr != mTypes.end(); ++itr){
-    if((*itr)->type == type){
-      name = (*itr)->name;
-      break;
-    }
-  }
-
-return mstringDup(name);
-}     
-
-////////////////////////////////////////////////////////////////
-
-char*
-StDbManager::getDbDomainName(StDbDomain domain){
-
-char* name;
-  for(dbDomains::iterator itr=mDomains.begin();
-      itr != mDomains.end(); ++itr){
-    if((*itr)->domain == domain){
-      name = (*itr)->name;
-      break;
-    }
-  }
-
-char* retName=mstringDup(name);
-if(strcmp(retName,"unknown")==0)retName=0;
-
-return retName;
-}     
-
-
-////////////////////////////////////////////////////////////////
-
-StDbType
-StDbManager::getDbType(const char* typeName){
-
-StDbType retType;
-  for(dbTypes::iterator itr=mTypes.begin();
-      itr != mTypes.end(); ++itr){
-    if(strcmp((*itr)->name,typeName)==0){
-      retType = (*itr)->type;
-      break;
-    }
-  }
-
-return retType;
-}     
-
-
-////////////////////////////////////////////////////////////////
-
-StDbDomain
-StDbManager::getDbDomain(const char* domainName){
-
-StDbDomain retType;
-  for(dbDomains::iterator itr=mDomains.begin();
-      itr != mDomains.end(); ++itr){
-    if(strcmp((*itr)->name,domainName) ==0){
-      retType = (*itr)->domain;
-      break;
-    }
-  }
-
-
-return retType;
-}     
-
-////////////////////////////////////////////////////////////////
-
-void
-StDbManager::initServers(const char* refFile){
-
-  if(!refFile){
-  //
-  // No longer called. servers are created as needed 
-  //
-  /*
-  StDbServer* mserver = 0;
-  cout << "StDbManager:: Creating Server List " << endl;
-  mservers.push_back(new StDbServer(StarDb,Star,"StarDb","Star"));
-  mservers.push_back(new StDbServer(Conditions,Star,"Conditions","Star"));
-  mservers.push_back(new StDbServer(Calibrations,Star,"Calibrations","Star"));
-  mservers.push_back(new StDbServer(Geometry,Star,"Geometry","Star"));
-  mservers.push_back(new StDbServer(Conditions,Tpc,"Conditions","tpc"));
-  mservers.push_back(new StDbServer(Calibrations,Tpc,"Calibrations","tpc"));
-  mservers.push_back(new StDbServer(Geometry,Tpc,"Geometry","tpc"));
-  */
-  }
-
-}
 
 ////////////////////////////////////////////////////////////////
 
 void
 StDbManager::lookUpServers(){
 
-  //cout << "looking up Servers " << endl;
-
+int it=1;
 char* xmlfile1 = getFileName("HOME");
 char* xmlfile2 = getFileName("STDB_SERVERS");
 char* xmlfile3 = getFileName("STAR","/StDb/servers");
 
+ if(misVerbose)cout<<endl<<"**** Order of Files searched for Servers **** "<<endl;
 if(xmlfile1){
  ifstream is1(xmlfile1);
 
- //cout << "Trying HomeDir " << xmlfile1 << endl;
-
- if(is1)findServersXml(is1);
+ if(is1){
+   if(misVerbose)cout<<"  "<<it<<". "<< xmlfile1 <<endl;
+   findServersXml(is1);
+   it++;
+ }
  delete [] xmlfile1;
 }
 
 if(xmlfile2){
  ifstream is2(xmlfile2);
- if(is2)findServersXml(is2);
+ if(is2){
+   if(misVerbose)cout<<"  "<<it<<". "<<xmlfile2 <<endl;
+   findServersXml(is2);
+   it++;
+ }
  delete [] xmlfile2;
 }
 
 if(xmlfile3){
  ifstream is3(xmlfile3);
- if(is3)findServersXml(is3);
+ if(is3){
+   if(misVerbose)cout<<"  "<<it<<". "<<xmlfile3 <<endl;
+   findServersXml(is3);
+ }
  delete [] xmlfile3;
 }
 
+ if(misVerbose) cout <<"*********************************************" << endl<<endl;;
 mhasServerList = true;
 
 }
@@ -277,19 +248,14 @@ return xmlFile;
 void
 StDbManager::findServersXml(ifstream& is){
 
-
-  //cout << " finding Server from ifstream " << endl;
-  //  parseXmlString mparser;
   char* stardatabase;
 
   while(!is.eof()){
 
-    //cout << " not eof yet " << endl;
-  // builds 1 string from file contained by "<StDbServer> ... </StDbServer>"
-  
-
   stardatabase = findServerString(is); 
   if(!stardatabase) continue;
+
+  // local DTD ...
   char bserver[32]="<server>"; char eserver[32]="</server>";
   char bhost[32]="<host>"; char ehost[32]="</host>";
   char bsock[32]="<socket>"; char esock[32]="</socket>";
@@ -297,10 +263,6 @@ StDbManager::findServersXml(ifstream& is){
   char bdb[32]="<databases>"; char edb[32]="</databases>";
   int portNum = 0;
 
-  //  char* servName = mparser.getString(stardatabase,"<server>","</server>");
-  //  char* hostName = mparser.getString(stardatabase,"<host>","</host>");
-  //  char* uSocket = mparser.getString(stardatabase,"<socket>","</socket>");
-  //  char* portNumber = mparser.getString(stardatabase,"<port>","</port>");
   char* servName = mparser.getString(stardatabase,(char*)bserver,(char*)eserver);
   char* hostName = mparser.getString(stardatabase,(char*)bhost,(char*)ehost);
   char* uSocket = mparser.getString(stardatabase,(char*)bsock,(char*)esock);
@@ -311,18 +273,16 @@ StDbManager::findServersXml(ifstream& is){
     delete [] portNumber;
   }
 
-  //  char* dbNames = mparser.getString(stardatabase,"<databases>","</databases>");
   char* dbNames = mparser.getString(stardatabase,(char*)bdb,(char*)edb);
 
    StDbServer* server = new StDbServer();
-   server->setServerName(servName); delete [] servName;
-   server->setHostName(hostName); delete [] hostName;
-   server->setUnixSocket(uSocket); delete [] uSocket;
+   server->setServerName((const char*)servName); delete [] servName;
+   server->setHostName((const char*)hostName); delete [] hostName;
+   server->setUnixSocket((const char*)uSocket); delete [] uSocket;
    server->setPortNumber(portNum); 
 
   if( !dbNames && !mhasDefaultServer ){
 
-    //cout << " setting the default Server" << endl;
     server->setIsDefaultServer();
     mservers.push_back(server);
     mhasDefaultServer = true;
@@ -335,8 +295,6 @@ StDbManager::findServersXml(ifstream& is){
 
     while(p1){
       aname = getNextName(p1); // p1 is reset to after next "," 
-      //cout << " dbName = " << aname;
-      //if(p1) cout << " & the remaining are = " << p1<< endl;
       aserver = new StDbServer(*server);
       aserver->setDbName(aname);
       mservers.push_back(aserver);
@@ -430,6 +388,28 @@ return nextName;
 
 ////////////////////////////////////////////////////////////////
 
+char*
+StDbManager::mstringDup(const char* str){
+
+char* retString=0;
+if(!str)return retString;
+retString = new char[strlen(str)+1];
+strcpy(retString,str);
+
+return retString;
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+//
+//  public methods
+//
+//
+///////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////
+
 StDbServer*
 StDbManager::findServer(StDbType type, StDbDomain domain){
 
@@ -437,7 +417,6 @@ StDbManager::findServer(StDbType type, StDbDomain domain){
  StDbServer* server = 0;
 
  // first check if it exists in list
-
  for(ServerList::iterator itr = mservers.begin();
      itr != mservers.end(); ++itr){
    if((*itr)->getDbDomain()==domain && (*itr)->getDbType()==type){
@@ -447,20 +426,15 @@ StDbManager::findServer(StDbType type, StDbDomain domain){
  }
 
  // if not build from default server
-
  if(!server){ 
 
     char * typeName = getDbTypeName(type);
     char * domainName = getDbDomainName(domain);
-    //cout << " looking for Default server " << endl;
     StDbServer* defaultServer = findDefaultServer();
 
     if(defaultServer){
-      // cout << " creating real server from default " << endl;
      server = new StDbServer(*defaultServer);
-     // cout << "  Setting real DB attributes " << endl;
      server->setDataBase(type,domain,typeName,domainName);
-     // cout << "  adding to list " << endl;
      mservers.push_back(server);
     }
 
@@ -470,18 +444,65 @@ StDbManager::findServer(StDbType type, StDbDomain domain){
 
  // connect to database if needed
 
- //cout << server->getServerName() << " & " << server->isconnected() << endl;
  if(server && !server->isconnected()){
    server->init();
-   //  cout << " Connecting Server " << endl;
  }
- // report failure
 
+ // report failure
  if(!server) {
-   cerr << "No Such Server :: " << endl;
-   cerr << "Type Name= " << getDbTypeName(type) << endl;
-   cerr << "Domain Name = " << getDbDomainName(domain) << endl;
+   cerr << "ERROR:::   No Such Server  " << endl;
+   cerr << "DataBase Type Name= " << getDbTypeName(type) << endl;
+   cerr << "DataBase Domain Name = " << getDbDomainName(domain) << endl;
+   cerr << endl;
 }
+
+return server;
+}
+
+
+////////////////////////////////////////////////////////////////
+
+StDbServer*
+StDbManager::findServer(StDbNode* node){
+
+return findServer(node->getDbType(),node->getDbDomain());
+}
+
+
+////////////////////////////////////////////////////////////////
+
+StDbServer*
+StDbManager::findServer(const char* typeName, const char* domainName){
+
+return findServer(getDbType(typeName),getDbDomain(domainName));
+}
+
+////////////////////////////////////////////////////////////////
+
+StDbServer*
+StDbManager::findServer(const char* databaseName){
+
+  // if databaseName contains "_" then = 'dbTypeName_dbDomainName'
+  // else = 'dbTypeName' and dbDomainName="Star"
+
+char* dbName = new char[strlen(databaseName)+1];
+strcpy(dbName,databaseName);
+char* domainName;
+
+char* id=strstr(dbName,"_");
+if(id){
+   *id='\0';
+    id++;
+    domainName=new char[strlen(id)+1];
+    strcpy(domainName,id);
+} else {
+    domainName=new char[strlen("Star")+1];
+    strcpy(domainName,"Star");
+}
+
+StDbServer* server=findServer(dbName,(const char*) domainName);
+delete [] domainName;
+delete [] dbName;
 
 return server;
 }
@@ -494,8 +515,6 @@ StDbManager::findDefaultServer(){
 
  StDbServer* server = 0;
 
- // first check if it exists in list
-
  for(ServerList::iterator itr = mservers.begin();
      itr != mservers.end(); ++itr){
    if((*itr)->isDefault()){
@@ -504,37 +523,167 @@ StDbManager::findDefaultServer(){
    }
  }
 
- /*
- if(server){
-    cout << " found default " << endl;
- } else {
-    cout << " default not found " << endl;
- }
- */
 return server;
-
 }
+
+////////////////////////////////////////////////////////////////
+
+char*
+StDbManager::getDbTypeName(StDbType type){
+
+char* name=0;
+  for(dbTypes::iterator itr=mTypes.begin();
+      itr != mTypes.end(); ++itr){
+    if((*itr)->type == type){
+      name = (*itr)->name;
+      break;
+    }
+  }
+
+if(!name) {
+  if(misVerbose)cerr<<" Type Name not found for type enum="<<(int)type<<endl;
+
+  return name;
+}
+
+if(misVerbose)cout<<" Type Name "<<name<<" found for type enum="<<(int)type<<endl;
+
+return mstringDup(name);
+}     
+
+////////////////////////////////////////////////////////////////
+
+char*
+StDbManager::getDbDomainName(StDbDomain domain){
+
+if(domain==dbDomainUnknown)return mstringDup("Star");
+
+char* name=0;
+  for(dbDomains::iterator itr=mDomains.begin();
+      itr != mDomains.end(); ++itr){
+    if((*itr)->domain == domain){
+      name = (*itr)->name;
+      break;
+    }
+  }
+
+if(!name) {
+  if(misVerbose)cerr<<" Domain Name not found for domain enum="<<(int)domain<<endl;
+  return name;
+}
+ if(misVerbose)cout<<" Domain Name "<<name<<" found for domain enum="<<(int)domain<<endl;
+
+return mstringDup(name);
+}     
+
+
+////////////////////////////////////////////////////////////////
+
+StDbType
+StDbManager::getDbType(const char* typeName){
+
+  StDbType retType=dbUser;// assume unknown = dbUser
+  if(misVerbose)cout << "Finding dbType for typeName= "<<typeName<<endl;
+  int ifound = 0;
+  for(dbTypes::iterator itr=mTypes.begin();
+      itr != mTypes.end(); ++itr){
+    if(strcmp((*itr)->name,typeName)==0){
+      retType = (*itr)->type;
+      ifound = 1;
+      break;
+    }
+  }
+
+if(!ifound)addDbType(retType,typeName); //This'll overwrite User db definition
+
+return retType;
+}     
+
+
+////////////////////////////////////////////////////////////////
+
+StDbDomain
+StDbManager::getDbDomain(const char* domainName){
+
+StDbDomain retType=dbDomainUnknown;
+  for(dbDomains::iterator itr=mDomains.begin();
+      itr != mDomains.end(); ++itr){
+    if(strcmp((*itr)->name,domainName) ==0){
+      retType = (*itr)->domain;
+      break;
+    }
+  }
+
+return retType;
+}     
 
 
 ////////////////////////////////////////////////////////////////
 
 StDbConfigNode*
-StDbManager::initConfig(const char* configName){
+StDbManager::initConfig(const char* dbName){
 
-StDbConfigNode* configNode = new StDbConfigNode(StarDb,Star,"StarDb",configName);
-configNode->buildTree();
+char* type; 
+char* domain;
 
-return configNode;
+getDataBaseInfo(dbName,type,domain);
+
+StDbType dbtype = getDbType((const char*) type);
+StDbDomain dbdomain = getDbDomain((const char*) domain);
+
+delete [] type;
+delete [] domain;
+
+return initConfig(dbtype,dbdomain);
 }
 
 ////////////////////////////////////////////////////////////////
+
+StDbConfigNode*
+StDbManager::initConfig(const char* dbName, const char* configName){
+
+char* type; 
+char* domain;
+
+getDataBaseInfo(dbName,type,domain);
+
+StDbType dbtype = getDbType((const char*) type);
+StDbDomain dbdomain = getDbDomain((const char*) domain);
+
+delete [] type;
+delete [] domain;
+
+return initConfig(dbtype,dbdomain,configName);
+}
+
+////////////////////////////////////////////////////////////////
+
+StDbConfigNode*
+StDbManager::initConfig(StDbType type, StDbDomain domain){
+
+StDbConfigNode * configNode = 0;
+
+char* name;
+ if(domain == dbStar){
+  name = getDbTypeName(type);
+ } else {
+  name = getDbDomainName(domain);
+ }
+
+ configNode = new StDbConfigNode(type,domain,name);
+ configNode->buildTree();
+ return configNode;
+}
+
+////////////////////////////////////////////////////////////////
+
 StDbConfigNode*
 StDbManager::initConfig(StDbType type, StDbDomain domain, const char* configName){
 
 StDbConfigNode * configNode = 0;
 
 char* name;
- if(domain == Star){
+ if(domain == dbStar){
   name = getDbTypeName(type);
  } else {
   name = getDbDomainName(domain);
@@ -551,7 +700,7 @@ void
 StDbManager::setRequestTime(unsigned int time){
 
 mcheckTime.munixTime = time;
-StDbServer* server = findServer(StarDb,Star);
+StDbServer* server = findServer(dbStDb,dbStar);
 if(server)mcheckTime.mdateTime = server->getDateTime(time);
 
 }
@@ -562,7 +711,7 @@ void
 StDbManager::setRequestTime(const char* time){
 
 mcheckTime.setDateTime(time);
-StDbServer* server = findServer(StarDb,Star);
+StDbServer* server = findServer(dbStDb,dbStar);
 if(server)mcheckTime.munixTime = server->getUnixTime(time);
 
 }
@@ -573,7 +722,7 @@ void
 StDbManager::setStoreTime(unsigned int time){
 
 mstoreTime.munixTime = time;
-StDbServer* server = findServer(StarDb,Star);
+StDbServer* server = findServer(dbStDb,dbStar);
 if(server)mstoreTime.mdateTime = server->getDateTime(time);
 
 }
@@ -584,7 +733,7 @@ void
 StDbManager::setStoreTime(const char* time){
 
 mstoreTime.setDateTime(time);
-StDbServer* server = findServer(StarDb,Star);
+StDbServer* server = findServer(dbStDb,dbStar);
 if(server)mstoreTime.munixTime = server->getUnixTime(time);
 
 }
@@ -612,7 +761,7 @@ StDbManager::getDateStoreTime(){ return mstoreTime.mdateTime; }
 ////////////////////////////////////////////////////////////////
 
 bool
-StDbManager::IsValid(StDbTableI* table){
+StDbManager::IsValid(StDbTable* table){
 
  unsigned int time = mcheckTime.munixTime;
 
@@ -626,141 +775,162 @@ return retVal;
 
 ////////////////////////////////////////////////////////////////
 
-void
-StDbManager::fetchDbTable(StDbTableI* table){
+bool
+StDbManager::fetchDbTable(StDbTable* table){
+bool retVal = false;
 
   if(!table){
-    cout << "Cannot Update StDbTable=0" << endl;
+    cout << "Cannot Update Null pointer to StDbTable" << endl;
+    return retVal;
   } else {
 
-  if(!mcheckTime.munixTime && !mcheckTime.mdateTime)return;
+    if(!mcheckTime.munixTime && !mcheckTime.mdateTime)return retVal;
 
-  StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
-  server->QueryDb((StDbTable*)table,mcheckTime.munixTime);  // table is filled 
-
+    StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
+    if(!server)return retVal;
+    if(!server->QueryDb(table,mcheckTime.munixTime)){
+     if(!server->reConnect())return retVal;
+     if(!server->QueryDb(table,mcheckTime.munixTime))return retVal;
+    }
+     
+     // table is filled 
   }
+
+return true;
 }
+
+bool
+StDbManager::fetchDbTable(StDbTable* table, char* whereClause){
+bool retVal = false;
+
+  if(!table){
+    cout << "Cannot Update Null pointer to StDbTable" << endl;
+    return retVal;
+  } else {
+
+
+    StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
+    if(!server)return retVal;
+    if(!server->QueryDb(table,whereClause)){
+     if(!server->reConnect())return retVal;
+     if(!server->QueryDb(table,whereClause))return retVal;
+    }
+     
+     // table is filled 
+  }
+
+return true;
+}
+     
+
 
 ////////////////////////////////////////////////////////////////
 
-void
+bool
 StDbManager::fetchAllTables(StDbConfigNode* node){
 
+bool retVal=false;
+
   if(!mcheckTime.munixTime && !mcheckTime.mdateTime){
-    cerr<< "No storage time set"; return;
+    cerr<< "No storage time set";
+    return retVal;
   }
 
   if(node->hasData()){
     TableIter* itr = node->getTableIter();
-    StDbTableI* table = 0;
+    StDbTable* table = 0;
+    retVal = true;
     while(!itr->done()){
       table = itr->next();
-      fetchDbTable(table);
+      retVal = (retVal && fetchDbTable(table));
     }
   delete itr;
   }
 
-  if(node->hasChildren())fetchAllTables(node->getFirstChildNode());
-  StDbConfigNode* nextNode = 0;
-  if((nextNode=node->getNextNode()))fetchAllTables(nextNode);
+bool children = true;
+bool siblings = true;
 
-}
-    
+  if(node->hasChildren())children = fetchAllTables(node->getFirstChildNode());
+  StDbConfigNode* nextNode = 0;
+  if((nextNode=node->getNextNode()))siblings = fetchAllTables(nextNode);
+
+return (retVal && children && siblings);
+}   
 
 ////////////////////////////////////////////////////////////////
 
-void
-StDbManager::storeDbTable(StDbTableI* table){
+bool
+StDbManager::storeDbTable(StDbTable* table){
+bool retVal = false;
 
   if(!table){
     cout << "Cannot Update StDbTable=0" << endl;
+    return retVal;
   } else {
 
     //  table->setRequestTime(time);
-  if(!mstoreTime.munixTime && !mstoreTime.mdateTime){
-    cerr<< "No storage time set"; return;
-  }
-  StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
-  server->WriteDb((StDbTable*)table,mstoreTime.munixTime);  // table is filled 
+    if(!mstoreTime.munixTime && !mstoreTime.mdateTime){
+      cerr<< "No storage time set"; return retVal;   
+    }
+
+    StDbServer* server = findServer(table->getDbType(),table->getDbDomain());
+    if(!server)return retVal;
+
+    if(!server->WriteDb(table,mstoreTime.munixTime)){
+     if(!server->reConnect())return retVal;  // table is filled 
+     if(!server->WriteDb(table,mstoreTime.munixTime))return retVal; 
+   }    
 
   }
+
+return true;
 }
 
 ////////////////////////////////////////////////////////////////
 
-void
+bool
 StDbManager::storeAllTables(StDbConfigNode* node){
 
+bool retVal = false;
+
   if(!mstoreTime.munixTime && !mstoreTime.mdateTime){
-    cerr<< "No storage time set"; return;
+    cerr<< "No storage time set"; return retVal;
   }
 
   if(node->hasData()){
     TableIter* itr = node->getTableIter();
-    StDbTableI* table = 0;
+    StDbTable* table = 0;
+    retVal = true;
     while(!itr->done()){
       table = itr->next();
-      storeDbTable(table);
+      retVal = (retVal && storeDbTable(table));
     }
   delete itr;
   }
 
-  if(node->hasChildren())storeAllTables(node->getFirstChildNode());
+bool children = true;
+bool siblings = true;
+
+  if(node->hasChildren())children = storeAllTables(node->getFirstChildNode());
   StDbConfigNode* nextNode = 0;
-  if((nextNode=node->getNextNode()))storeAllTables(nextNode);
+  if((nextNode=node->getNextNode()))siblings = storeAllTables(nextNode);
 
-}
-    
-
-////////////////////////////////////////////////////////////////
-
-void
-StDbManager::initTypes(){
-
-mTypes.push_back(new dbType(StarDb,"StarDb")); 
-mTypes.push_back(new dbType(RunLog,"RunLog")); 
-mTypes.push_back(new dbType(DbServer,"StDbServer")); 
-mTypes.push_back(new dbType(Conditions,"Conditions")); 
-mTypes.push_back(new dbType(Calibrations,"Calibrations")); 
-mTypes.push_back(new dbType(Geometry,"Geometry")); 
-mTypes.push_back(new dbType(RunCatalog,"RunCatalog")); 
-mTypes.push_back(new dbType(Configurations,"Configurations")); 
-mTypes.push_back(new dbType(RunParams,"RunParams")); 
-mTypes.push_back(new dbType(TestScheme,"TestScheme")); 
-
+return (retVal && children && siblings);
 }
 
-////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
-void
-StDbManager::initDomains(){
+int
+StDbManager::storeConfig(StDbConfigNode* node, int currentID){
 
-mDomains.push_back(new dbDomain(Star,"Star")); 
-mDomains.push_back(new dbDomain(Tpc,"tpc")); 
-mDomains.push_back(new dbDomain(Ftpc,"ftpc")); 
-mDomains.push_back(new dbDomain(Emc,"emc")); 
-mDomains.push_back(new dbDomain(Svt,"svt")); 
-mDomains.push_back(new dbDomain(Ctb,"ctb")); 
-mDomains.push_back(new dbDomain(Trg,"trg")); 
-mDomains.push_back(new dbDomain(Daq,"daq")); 
-mDomains.push_back(new dbDomain(Scaler,"scaler")); 
-mDomains.push_back(new dbDomain(Global,"global")); 
-mDomains.push_back(new dbDomain(L3,"l3")); 
+StDbServer* server=findServer(node->getDbType(),node->getDbDomain());
 
+int nodeID=server->WriteDb(node,currentID);
+if(node->hasChildren())storeConfig(node->getFirstChildNode(),nodeID);
+if(node->getNextNode())storeConfig(node->getNextNode(),currentID);
+
+return true;
 }
-
-////////////////////////////////////////////////////////////////
-char*
-StDbManager::mstringDup(const char* str){
-
-char* retString=0;
-if(!str)return retString;
-retString = new char[strlen(str)+1];
-strcpy(retString,str);
-
-return retString;
-}
-
 
 ////////////////////////////////////////////////////////////////
 
@@ -772,7 +942,7 @@ char* tmpName=new char[strlen(dbName)+1];
 strcpy(tmpName,dbName);
 
 
-char* id = strstr(tmpName,"/");
+char* id = strstr(tmpName,"_");
 if(!id) {
 type = new char[strlen(tmpName)+1];
 strcpy(type,tmpName);
@@ -791,8 +961,28 @@ strcpy(domain,id);
 retVal = true;
 
 delete [] tmpName;
+ if(misVerbose){
+   cout << "From database name = "<<dbName<<endl;
+   cout << "Returning DbType = "<<type<<" & DbDomain= "<<domain<< endl;
+ }
 return retVal;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

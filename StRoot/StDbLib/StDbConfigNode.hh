@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.hh,v 1.9 1999/12/28 21:31:41 porter Exp $
+ * $Id: StDbConfigNode.hh,v 1.10 2000/01/10 20:37:53 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.hh,v $
+ * Revision 1.10  2000/01/10 20:37:53  porter
+ * expanded functionality based on planned additions or feedback from Online work.
+ * update includes:
+ * 	1. basis for real transaction model with roll-back
+ * 	2. limited SQL access via the manager for run-log & tagDb
+ * 	3. balance obtained between enumerated & string access to databases
+ * 	4. 3-levels of diagnostic output: Quiet, Normal, Verbose
+ * 	5. restructured Node model for better XML support
+ *
  * Revision 1.9  1999/12/28 21:31:41  porter
  * added 'using std::vector' and 'using std::list' for Solaris CC5 compilation.
  * Also fixed some warnings arising from the CC5 compiles
@@ -32,11 +41,9 @@
 #ifndef STDBCONFIGNODE_HH
 #define STDBCONFIGNODE_HH
 
-//#include "StDbTable.h"
-#include "StDbDefs.hh"
+#include "StDbNode.hh"
 
 class StDbTable;
-class StDbTableI;
 class StDbFactoryI;
 class TableIter;
 
@@ -58,16 +65,11 @@ class TableList;
 
 class TableIter;
 
-class StDbConfigNode {
+class StDbConfigNode : public StDbNode {
 
  friend class TableIter;
 
 private:
-
- char* mnodeName;
- char* mconfigName;
- StDbType mdbType;
- StDbDomain mdbDomain;
 
  StDbConfigNode* mfirstChildNode;
  StDbConfigNode* mnextNode;
@@ -80,82 +82,104 @@ protected:
     mnextNode = 0;
     mparentNode = 0;
     mhasData = false;
-    mnodeName = 0;
-    mconfigName = 0;
     mfactory = 0;
   };
 
 
  StDbFactoryI* mfactory;
- TableList mTables;
- bool mhasData;
+ TableList     mTables;
+ bool          mhasData;
+
  void deleteTables();
  bool compareTables(StDbTable* tab1, StDbTable* tab2);
-
+ void resolveNodeInfo(StDbNodeInfo*& node);
 
 public:
 
-  StDbConfigNode(): mnodeName(0), mconfigName(0) { zeroNodes();};
-  StDbConfigNode(StDbType type, StDbDomain domain, const char* nodeName, const char* configName);
-  StDbConfigNode(StDbConfigNode* parent, const char* nodeName, const char* configName);
+  //  StDbConfigNode() { zeroNodes();};
+  StDbConfigNode( StDbType type, 
+                  StDbDomain domain, 
+                  const char* nodeName, 
+                  const char* configName="none");
+
+  StDbConfigNode( StDbConfigNode* parent, 
+                  const char* nodeName, 
+                  const char* configName);
+
+  StDbConfigNode( StDbConfigNode* parent, 
+                  StDbNodeInfo* node);
+
+  
 
   virtual ~StDbConfigNode(); 
-  virtual void setName(const char* name); 
-  virtual char* getName() const ;
-  virtual void setConfigName(const char* name); 
-  virtual char* getConfigName() const ;
-  virtual void setDbType(StDbType type) {mdbType = type;};
-  virtual StDbType getDbType() const { return mdbType;};
-  virtual void setDbDomain(StDbDomain domain) {mdbDomain = domain;};
-  virtual StDbDomain getDbDomain() const { return mdbDomain;};
 
   virtual void resetConfig(const char* configName);
   
+  // set & get node relations
   virtual void setNextNode(StDbConfigNode* node) { mnextNode = node;}; 
   virtual void setParentNode(StDbConfigNode* node); 
   virtual void setFirstChildNode(StDbConfigNode* node); 
   virtual void appendNode(StDbConfigNode* node); 
+
   virtual StDbConfigNode* getNextNode() const { return mnextNode;} ;
   virtual StDbConfigNode* getParentNode() const {return mparentNode;}; 
   virtual StDbConfigNode* getFirstChildNode() const {return mfirstChildNode;}; 
 
+  // Tree operations
   virtual void deleteTree();
   virtual void buildTree();
   virtual void deleteChildren();
 
+  // check container
   virtual bool hasChildren();
   virtual bool hasData();
   virtual void printTree();
 
-  virtual StDbTable* addDbTable(const char* tableName, const char* version="default", bool isBaseLine = false);
-  virtual StDbTable* addTable(const char* tableName, const char* version="default", bool isBaseLine = false);
-  // virtual StDbTable* findTable(const char* tableName, const char* version, int elementID);
+  // Table operations
+  virtual StDbTable* addDbTable(const char* tableName, 
+                                const char* version="default");
+  virtual StDbTable* addTable(const char* tableName, 
+                              const char* version="default");
+
+  virtual StDbTable* addTable(StDbNodeInfo* node);
+
+
+  virtual StDbTable* findTable(const char* name, const char* subPath="/");
   virtual StDbTable* findLocalTable(const char* name);
   virtual void removeTable(StDbTable* table);
   virtual TableIter* getTableIter();
-  virtual StDbConfigNode* findConfigNode(StDbType type, StDbDomain domain);
+
+  // node operations
+  virtual StDbConfigNode* findConfigNode(StDbType type, 
+                                         StDbDomain domain, 
+                                         const char* subPath);
+
+  virtual StDbConfigNode* findConfigNode(StDbType type, 
+                                         StDbDomain domain);
+
+  virtual StDbConfigNode* findConfigNode(const char* subPath);
+
   virtual bool isNode(StDbType type, StDbDomain domain);
 
+  // For Offline Root CLI
   //ClassDef(StDbConfigNode,0)
 
 }; 
 
 inline
 bool StDbConfigNode::isNode(StDbType type, StDbDomain domain){
-bool retVal = false;
-if(mdbDomain == domain && mdbType == type)retVal = true;
-return retVal;
+if(mnode.dbDomain == domain && mnode.dbType == type)return  true;
+return false;
 }
 
 inline
 bool StDbConfigNode::hasData(){ return mhasData;};
 
 inline
-bool StDbConfigNode::hasChildren(){
-bool retVal = false;
-if(mfirstChildNode)retVal=true;
-return retVal;
-}
+bool StDbConfigNode::hasChildren(){ if(mfirstChildNode)return true;
+return false;
+};
+
 
 #endif
 

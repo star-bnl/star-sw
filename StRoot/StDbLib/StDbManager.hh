@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.9 1999/12/28 21:31:42 porter Exp $
+ * $Id: StDbManager.hh,v 1.10 2000/01/10 20:37:54 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.10  2000/01/10 20:37:54  porter
+ * expanded functionality based on planned additions or feedback from Online work.
+ * update includes:
+ * 	1. basis for real transaction model with roll-back
+ * 	2. limited SQL access via the manager for run-log & tagDb
+ * 	3. balance obtained between enumerated & string access to databases
+ * 	4. 3-levels of diagnostic output: Quiet, Normal, Verbose
+ * 	5. restructured Node model for better XML support
+ *
  * Revision 1.9  1999/12/28 21:31:42  porter
  * added 'using std::vector' and 'using std::list' for Solaris CC5 compilation.
  * Also fixed some warnings arising from the CC5 compiles
@@ -41,9 +50,8 @@ class dbType;
 class dbDomain;
 class StDbServer;
 class StDbTable;
-class StDbTableI;
 class StDbConfigNode;
-//class StDbTime;
+class StDbNode;
 
 #ifndef __CINT__
 #include <list>
@@ -71,13 +79,19 @@ class StDbManager {
 
 private:
 
+  bool misVerbose; // these give 3 levels of verbosity: verbose, normal, quiet.
+  bool misQuiet;   // normal=!misVerbose && !misQuiet
   dbTypes mTypes;  // enum mapping shortcut
   dbDomains mDomains; // enum mapping shortcut
   ServerList mservers;  // servers to handle the Query 
   parseXmlString mparser; // parses strings in XML
 
-  StDbManager(): mhasServerList(false), mhasDefaultServer(false) { initTypes(); initDomains();};
+  StDbManager(): misVerbose(false), misQuiet(false), mhasServerList(false), mhasDefaultServer(false)             { 
+                                        initTypes(); 
+                                        initDomains(); 
+                                   };
 
+  // singleton pointer
   static StDbManager* mInstance;
 
   bool mhasServerList;
@@ -87,8 +101,10 @@ private:
 
 protected:
 
-  virtual void initServers(const char* refFile = 0);
+  // server methods needed internally
+  //  virtual void initServers(const char* refFile = 0);
   virtual void initTypes();
+  virtual void addDbType(StDbType type, const char* typeName);
   virtual void initDomains();
   virtual void deleteServers();
   virtual void deleteTypes();
@@ -96,15 +112,17 @@ protected:
 
   // These lookup up ServerInfo from XML files
 
-  virtual void lookUpServers();
+  virtual void  lookUpServers();
   virtual char* getFileName(const char* envName, const char* subDirName=0);
-  virtual void findServersXml(ifstream& is);  
+  virtual void  findServersXml(ifstream& is);  
   virtual char* findServerString(ifstream& is);
   virtual char* getNextName(char*& name);
 
-  char* mstringDup(const char* str);
+  char* mstringDup(const char* str); //  strdup(..) is not ANSI
 
 public:
+
+  // access to this singleton object
 
   static StDbManager* Instance(){
     if(!mInstance){
@@ -115,38 +133,56 @@ public:
 
   virtual ~StDbManager();
 
-  virtual StDbConfigNode* initConfig(const char* configName);
-  virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain, const char* configName=0);
+  // get Container for StDbTables..
+  virtual StDbConfigNode* initConfig(const char* databaseName);
+  virtual StDbConfigNode* initConfig(const char* databaseName, const char* configName);
+  virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain);
+  virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain, const char* configName);
 
+  virtual bool IsVerbose() const { return misVerbose;};
+  virtual void setVerbose(bool isVerbose){ misVerbose=isVerbose;
+                                           if(isVerbose) misQuiet=false;};
+  virtual bool IsQuiet() const { return misQuiet;};
+  virtual void setQuiet(bool isQuiet){ misQuiet=isQuiet;
+                                       if(isQuiet)misVerbose=false;};
+
+  // find servers by various methods
   virtual StDbServer* findServer(StDbType type, StDbDomain domain);
+  virtual StDbServer* findServer(StDbNode* node);
+  virtual StDbServer* findServer(const char* dbType, const char* dbDomain);
+  virtual StDbServer* findServer(const char* databaseName);
   virtual StDbServer* findDefaultServer();
 
   // helper functions to map enumeration to type
-
-  virtual char* getDbTypeName(StDbType type);
-  virtual char* getDbDomainName(StDbDomain domain);
-  virtual StDbType getDbType(const char* typeName);
+  virtual char*      getDbTypeName(StDbType type);
+  virtual char*      getDbDomainName(StDbDomain domain);
+  virtual StDbType   getDbType(const char* typeName);
   virtual StDbDomain getDbDomain(const char* domainName);
 
-  virtual void setRequestTime(unsigned int time);
-  virtual void setRequestTime(const char* time);
+  // time stamp methods
+  virtual void         setRequestTime(unsigned int time);
+  virtual void         setRequestTime(const char* time);
   virtual unsigned int getUnixCheckTime();
-  virtual char* getDateCheckTime();
-  virtual void setStoreTime(unsigned int time);
-  virtual void setStoreTime(const char* time);
+  virtual char*        getDateCheckTime();
+  virtual void         setStoreTime(unsigned int time);
+  virtual void         setStoreTime(const char* time);
   virtual unsigned int getUnixStoreTime();
-  virtual char* getDateStoreTime();
+  virtual char*        getDateStoreTime();
+
+  // find the dbType & dbDomain for a database=>dbname
   virtual bool getDataBaseInfo(const char* dbname, char*& type, char*& domain);
  
-  //  virtual bool IsValid(StDbTableI* table, int time);
-  //  virtual void fetchDbTable(StDbTableI* table, int time);
 
-  virtual bool IsValid(StDbTableI* table);
-  virtual void fetchDbTable(StDbTableI* table);
-  virtual void fetchAllTables(StDbConfigNode* node);
-  virtual void storeDbTable(StDbTableI* table);
-  virtual void storeAllTables(StDbConfigNode* node);
+  // fetch & store methods for data
+  virtual bool IsValid(StDbTable* table);
+  virtual bool fetchDbTable(StDbTable* table);
+  virtual bool fetchDbTable(StDbTable* table, char* whereClause);
+  virtual bool fetchAllTables(StDbConfigNode* node);
+  virtual bool storeDbTable(StDbTable* table);
+  virtual bool storeAllTables(StDbConfigNode* node);
+  virtual int  storeConfig(StDbConfigNode* node, int currentID=0);
 
+  // make ROOT-CLI via star-ofl "makefiles"
   // ClassDef(StDbManager,0)
 
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: typeAcceptor.hh,v 1.4 1999/12/03 22:24:01 porter Exp $
+ * $Id: typeAcceptor.hh,v 1.5 2000/01/10 20:37:55 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: typeAcceptor.hh,v $
+ * Revision 1.5  2000/01/10 20:37:55  porter
+ * expanded functionality based on planned additions or feedback from Online work.
+ * update includes:
+ * 	1. basis for real transaction model with roll-back
+ * 	2. limited SQL access via the manager for run-log & tagDb
+ * 	3. balance obtained between enumerated & string access to databases
+ * 	4. 3-levels of diagnostic output: Quiet, Normal, Verbose
+ * 	5. restructured Node model for better XML support
+ *
  * Revision 1.4  1999/12/03 22:24:01  porter
  * expanded functionality used by online, fixed bug in
  * mysqlAccessor::getElementID(char*), & update StDbDataSet to
@@ -30,27 +39,27 @@ class typeAcceptor {
 public:
 
   virtual ~typeAcceptor(){};
-  virtual void pass(char* name, short& i, int len) = 0;  
-  virtual void pass(char* name, int& i, int len) = 0;  
-  virtual void pass(char* name, long& i, int len) = 0;  
-  virtual void pass(char* name, unsigned short& i, int len) = 0;  
-  virtual void pass(char* name, unsigned int& i, int len) = 0;  
-  virtual void pass(char* name, unsigned long& i, int len) = 0;  
-  virtual void pass(char* name, float& i, int len) = 0;
-  virtual void pass(char* name, double& i, int len) = 0;
+  virtual void pass(char* name, short& i, int& len) = 0;  
+  virtual void pass(char* name, int& i, int& len) = 0;  
+  virtual void pass(char* name, long& i, int& len) = 0;  
+  virtual void pass(char* name, unsigned short& i, int& len) = 0;  
+  virtual void pass(char* name, unsigned int& i, int& len) = 0;  
+  virtual void pass(char* name, unsigned long& i, int& len) = 0;  
+  virtual void pass(char* name, float& i, int& len) = 0;
+  virtual void pass(char* name, double& i, int& len) = 0;
 
-  virtual void pass(char* name, char*& i, int len) = 0;
-  virtual void pass(char* name, unsigned char& i, int len) = 0;
-  virtual void pass(char* name, unsigned char*& i, int len) = 0;
+  virtual void pass(char* name, char*& i, int& len) = 0;
+  virtual void pass(char* name, unsigned char& i, int& len) = 0;
+  virtual void pass(char* name, unsigned char*& i, int& len) = 0;
 
-  virtual void pass(char* name, short*& i, int len) = 0;  
-  virtual void pass(char* name, int*& i, int len) = 0;  
-  virtual void pass(char* name, long*& i, int len) = 0;  
-  virtual void pass(char* name, unsigned short*& i, int len) = 0;  
-  virtual void pass(char* name, unsigned int*& i, int len) = 0;  
-  virtual void pass(char* name, unsigned long*& i, int len) = 0;  
-  virtual void pass(char* name, float*& i, int len) = 0;
-  virtual void pass(char* name, double*& i, int len) = 0;
+  virtual void pass(char* name, short*& i, int& len) = 0;  
+  virtual void pass(char* name, int*& i, int& len) = 0;  
+  virtual void pass(char* name, long*& i, int& len) = 0;  
+  virtual void pass(char* name, unsigned short*& i, int& len) = 0;  
+  virtual void pass(char* name, unsigned int*& i, int& len) = 0;  
+  virtual void pass(char* name, unsigned long*& i, int& len) = 0;  
+  virtual void pass(char* name, float*& i, int& len) = 0;
+  virtual void pass(char* name, double*& i, int& len) = 0;
 
 };
 
