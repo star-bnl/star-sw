@@ -1,5 +1,8 @@
-// $Id: St_TableNtuple.h,v 1.3 1999/02/18 00:25:53 genevb Exp $
+// $Id: St_TableNtuple.h,v 1.4 1999/02/18 15:26:10 genevb Exp $
 // $Log: St_TableNtuple.h,v $
+// Revision 1.4  1999/02/18 15:26:10  genevb
+// Updated help, table name defaults to dataset name
+//
 // Revision 1.3  1999/02/18 00:25:53  genevb
 // St_TableNtuple: Histogramming ranges fixed, buffer size increased
 //
@@ -13,7 +16,7 @@
 //                                                                      //
 // St_TableNtuple                                                       //
 //                                                                      //
-// St_TableNtuple is a class to convert STAR Tables into ntuples        //
+// St_TableNtuple is a class to convert STAR Tables into ntuples.       //
 // The class inherits from TTree, so it can be used just as a           //
 // TTree would (Draw(), etc.). Columns are not made for table           //
 // entries which are not basic numerical entities. Table entries        //
@@ -62,10 +65,10 @@ class St_TableNtuple : public TTree {
                    St_TableNtuple();
                    St_TableNtuple(const St_Table &table, Int_t bufsize=1000000);
                    ~St_TableNtuple();
-   virtual   Int_t AddTFile(const Char_t *file, Char_t *dataset, Char_t *tname, Int_t firstEvent=1, Int_t nEvents=-1);
-   virtual   Int_t AddTFile(TFile &f, Char_t *dataset, Char_t *tname, Int_t firstEvent=1, Int_t nEvents=-1);
-   virtual   Int_t AddXDFFile(const Char_t *file, Char_t *dataset, Char_t *tname, Int_t firstEvent=1, Int_t nEvents=-1);
-   virtual   Int_t AddXDFFile(St_XDFFile &f, Char_t *dataset, Char_t *tname, Int_t firstEvent=1, Int_t nEvents=-1);
+   virtual   Int_t AddTFile(const Char_t *file, Char_t *dataset, Char_t *tname="same", Int_t firstEvent=1, Int_t nEvents=-1);
+   virtual   Int_t AddTFile(TFile &f, Char_t *dataset, Char_t *tname="same", Int_t firstEvent=1, Int_t nEvents=-1);
+   virtual   Int_t AddXDFFile(const Char_t *file, Char_t *dataset, Char_t *tname="same", Int_t firstEvent=1, Int_t nEvents=-1);
+   virtual   Int_t AddXDFFile(St_XDFFile &f, Char_t *dataset, Char_t *tname="same", Int_t firstEvent=1, Int_t nEvents=-1);
    virtual    void Browse(TBrowser *b);
    virtual   Int_t Fill(const St_Table &table, Int_t firstRow=0, Int_t nRows=-1);
    virtual   Int_t GetNvar() const { return mNvar; }
