@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.h,v 2.1 2000/09/13 21:00:42 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.h,v 2.2 2000/09/29 19:04:43 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,12 +11,14 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.h,v $
- * Revision 2.1  2000/09/13 21:00:42  lasiuk
- * Begin modification for cluster/hit deconvolution
- * - remove matrix interface
- * - add necessary members
- * - unify cog calculation
- * - mapping code is not in place
+ * Revision 2.2  2000/09/29 19:04:43  lasiuk
+ * hit calculation factorized to allow
+ * deconvolution.  A flag was added to denote
+ * this process (eDeconvolution).
+ * MC info restored in classifyHit() member
+ * cut parameters (for decon) added in initializeCutParameters()
+ * startAmplitude set to 0.  This keeps track of the local
+ * max of the hit now.
  *
  * Revision 2.2  2000/09/29 19:04:43  lasiuk
  * hit calculation factorized to allow
@@ -82,6 +84,8 @@ class StRichCoordinateTransform;
 class StRichReaderInterface;
 #endif
 // #ifndef ST_NO_TEMPLATE_DEF_ARGS
+// typedef stack<StRichSinglePixel*> PixelStack;
+// typedef vector<StRichCluster*>    ClusterVector;
 // typedef vector<StRichHit*>        HitVector;
 // #else
 // typedef stack<StRichSinglePixel*, allocator<StRichSinglePixel*> > PixelStack;
@@ -127,12 +131,18 @@ public:
     bool makeTheClustersAndFilter(); 
     bool simpleHitsFromClusters();
 
+    void calculateHitsInLocalCoordinates();
+    void calculateHitsInGlobalCoordinates();
     
     void dumpClusterInformation(ostream& os=cout) const;
-    bool constructTheMatrix(StRichSinglePixel*, vector<StRichSinglePixel*>*);
-    bool constructTheMatrix(StRichSimpleCluster*, vector<StRichSinglePixel*>*);
-    bool constructTheAdjacentNeighbors(StRichSinglePixel*, vector<StRichSinglePixel*>*);
-    bool constructTheNearestNeighbors(StRichSinglePixel*, vector<StRichSinglePixel*>*);
+    void dumpHitInformation(ostream& os=cout)     const;
+
+    void clearAndDestroyAll();
+
+private:
+    // fill cut parameters.  Should be from "Performance DB"
+    void initializeCutParameters();
+    //
     // pixel selection
     void calculateNeighborVector(int, vector<int>&, StRichBoxType=eOdd);
     bool constructNeighborMatrixFromVector(StRichSinglePixel*, vector<int>&,
@@ -143,10 +153,14 @@ public:
     bool constructTheAdjacentNeighbors(StRichSinglePixel*, int, vector<StRichSinglePixel*>*);
     bool constructTheNearestNeighbors(StRichSinglePixel*, int, vector<StRichSinglePixel*>*);
 
-    
+    //
+    // centroid determination
+    bool centerOfGravity(vector<StRichSinglePixel*>&, StRichHitInformation*);
+
+    //
     // Topology routines
     size_t findTheLocalMaximaInCluster(StRichSimpleCluster*, vector<StRichSinglePixel*>&);
-    bool useTheMovingMatrix(StRichSinglePixel*, StRichHitInformation*);
+    
     bool fillHitInformation(StRichHitInformation&);
 
     //
@@ -163,9 +177,22 @@ public:
     //bool removeSmallClusters();
     //bool removeBigClusters();
     void clearAndDestroyThePixels();
-    
+    void clearAndDestroyTheClusters();
+    void clearAndDestroyTheHits();
     
 private:
+    StRichGeometryDb*            mGeometryDb;
+
+    // Dimensions X x Y
+    int mX;
+    int mY;
+
+    // Pixel collection
+    StRichSinglePixelCollection  mThePixels;
+
+    // cut parameters (loaded from "Performance DB")
+    int mMaxSaturatedPads;
+    int mMaxClusterLength;
     int mMaxClusterWidth;
     float mMaxAspectRatio; // length/width
     float mMinChargeFraction;  // fraction of charge central pad possess
