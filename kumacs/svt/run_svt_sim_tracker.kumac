@@ -102,9 +102,6 @@ Message 'Doing' [no_events] 'events'
  endif
 
 
-  G2Tfile
- ls
-
  *****************************************
  * event loop
  *****************************************
@@ -119,10 +116,9 @@ Message 'Doing' [no_events] 'events'
  
     if (staf_status(1).ne.STAFCV_OK) goto EOF
 
-    
-    message 'part 1 '
-     pwd
-$cptime
+   
+
+  message 'cput time is ' $cptime
  
  *  SVT detector response simulation 
 
@@ -136,8 +132,7 @@ $cptime
       message ' SVT simulator not valid!!'
     endif
 
-    message ' part 2 '
-    pwd
+
 
 * SVT track finding and momentum reconstruction -----------------------
 
@@ -151,22 +146,17 @@ $cptime
       message ' svt_tracker not valid! '
     endif
     
-    message ' part 3 '
-    pwd
     
   ls /dui/data/svt/tracks
 
   NEXT_EVENT:
  
-  message ' part 4 '
-  pwd
   
 enddo
 
 *  task is completed
 EOF:
  
- message ' part 5 '
-  pwd
+
 RETURN
 
