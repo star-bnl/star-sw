@@ -1,40 +1,28 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.7 2000/01/24 14:39:33 perev Exp $
+ * $Id: StFTPCReader.h,v 1.1 2000/01/24 14:39:33 perev Exp $
  *
- * Author: Victor Perev
+ * Author: Holm Huemmler
  ***************************************************************************
  *
- * Description: Offline Wrapper for DAQ reader classes
+ * Description: Offline Wrapper for DAQ FTPC reader classes
  *
  ***************************************************************************
  *
- * $Log: StDAQReader.h,v $
- * Revision 1.7  2000/01/24 14:39:33  perev
+ * $Log: StFTPCReader.h,v $
+ * Revision 1.1  2000/01/24 14:39:33  perev
  * FTPC (HolmMade) is added
  *
- * Revision 1.6  1999/12/15 18:40:59  perev
- * Keep undeleted all DAQ wrapper classes
- *
- * Revision 1.5  1999/08/06 16:20:59  perev
- * RICHReader added
- *
- * Revision 1.4  1999/08/01 00:14:50  perev
- * leak removed author added
- *
- * Revision 1.3  1999/08/01 00:10:57  perev
- * leak removed author added
  *
  *
  **************************************************************************/
-#ifndef _StDAQReader_
-#define _StDAQReader_
+#ifndef _StFTPCReader_
+#define _StFTPCReader_
 
 #ifndef __CINT__
 #include "StDaqLib/GENERIC/EventReader.hh"
-#include "StDaqLib/RICH/RICH_Reader.hh"
-
 #endif /*__CINT__*/
+#include "StDAQReader.h"
 
 //		Forward declarations
 struct  EventInfo;
@@ -53,99 +41,36 @@ typedef RICH_Reader StRICHReader;
 //
 
 
-typedef struct TPCSequence
-{
-  unsigned short startTimeBin;
-  unsigned short Length;
-  unsigned char *FirstAdc;
+struct TPCSequence;
 
-}TPCSequence;
+struct TPCCluster;
 
-typedef struct TPCCluster
-{
-  short start_time_bin;
-  short stop_time_bin;
-}TPCCluster;
-
-
-
-typedef struct TPCGain
-{
-  int t0;          // t0 * 16
-  int t0_rms;      // t0_rms * 16
-  int rel_gain;    // rel_gain * 64
-}TPCGain;
+struct TPCGain;
 
 class StTPCReader;
-class StFTPCReader;
- 
-class StDAQReader 
-{
-friend class StTPCReader;
-friend class StFTPCReader;
-public:
-  StDAQReader(const char *file=0);
-  virtual ~StDAQReader();
+class StDAQReader;
 
-  virtual int open(const char *file);
-  virtual int close();
-  virtual int isOpened(){ return (fFd != (-1));};
-  virtual int readEvent();
-  virtual int skipEvent(int nskip);
-  virtual int getRunNumber() const;
-  virtual int getEventNumber() const;
-  virtual unsigned int getUnixTime() const;
-  virtual unsigned int getTrigWord() const;
-  virtual unsigned int getTrigInputWord() const;
-  
-  virtual int TPCPresent()  const;  
-  virtual int SVTPresent()  const; 
-  virtual int TOFPresent()  const;
-  virtual int EMCPresent()  const;
-  virtual int SMDPresent()  const;
-  virtual int FTPCPresent() const;
-  virtual int RICHPresent() const;
-  virtual int TRGDetectorsPresent() const;
-  virtual int L3Present()   const;
 
-  virtual void setTPCVersion(const char* vers = "TPCV2P0"); 
-  virtual void setFTPCVersion(const char* vers = "FTPV1P0"); 
-  StTPCReader *getTPCReader(); 
-  StRICHReader *getRICHReader(); 
-  StFTPCReader *getFTPCReader(); 
-  virtual void printEventInfo();
+#include "St_fss_Maker/StFssSectorReader.hh"
 
-protected:
-int fFd;	//File descriptor
-EventReader *fEventReader;  
-StTPCReader *fTPCReader;  
-StFTPCReader *fFTPCReader;  
-StRICHReader *fRICHReader;
-long fOffset;
-DAQEventInfo *fEventInfo;
-char *fFile;
-char fTPCVersion[12];
-char fFTPCVersion[12];
-
-};
-
-class  StTPCReader
+class  StFTPCReader 
 {
   public:
   friend class StDAQReader;
 
-  StTPCReader(StDAQReader *rd);
-  virtual ~StTPCReader();
-  virtual  int close();
+  StFTPCReader(StDAQReader *rd);
+  StFTPCReader(unsigned short *fcl_ftpcsqndx, int nSeq,
+	       char *fcl_ftpcadc, int nAdc);
+  virtual ~StFTPCReader();
 
-  int getMaxPad(int PadRow) const;	//Number of pads in padrow
+  int getMaxPad(int PadRow) const {return 160;};	//Number of pads in padrow
 
   virtual int getPadList(int Sector, int PadRow, unsigned char *&padList);
       // Fills (*padList[]) with the list of pad numbers containing hits
       // returns number of pads in (*padList)[]
       // or negative if call fails
   
-  virtual int getSequences(int Sector, int PadRow, int Pad, int &nSeq,
+  virtual int getSequences(int Sector, int PadRow, int Pad, int *nSeq,
 			   TPCSequence *&SeqData);
       	//  Fills (*SeqData)[] along with the ADC
       	// buffers pointed to by (*SeqData)[]
@@ -207,7 +132,7 @@ protected:
   virtual void setSector(int sector);
 
   StDAQReader 		*fDAQReader;
-  DetectorReader 	*fTPCImpReader;
+  DetectorReader 	*fFTPCImpReader;
   ZeroSuppressedReader 	*fZeroSuppressedReader;
   ADCRawReader 		*fADCRawReader;
   PedestalReader 	*fPedestalReader;
@@ -217,6 +142,12 @@ protected:
   BadChannelReader 	*fBadChannelReader;
 
   int fSector;
-};
 
+  int simu;
+  unsigned short *m_ftpcsqndx;
+  int m_numSqndx;
+  char *m_ftpcadc;
+  int m_numAdc;
+  StFssSectorReader *mSecReader;
+};
 #endif
