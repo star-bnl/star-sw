@@ -36,7 +36,7 @@ $CPPPATH  = "#asps/Simulation/starsim/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{INCDIR}; 
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/src/pawlib/paw/ntuple";
-$CPPFLAGS  = "-Df2cFortran -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
+$CPPFLAGS  = "-DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
 if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/) {
   $FPPFLAGS .= " -DCERNLIB_LINUX";
   $CPPFLAGS .= " -DCERNLIB_LINUX";
@@ -44,6 +44,7 @@ if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/) {
 if ($STAR_SYS =~ /^rh80/) {
   $FPPFLAGS .= " -DCERNLIB_MYSQL";
   $CPPFLAGS .= " -DCERNLIB_MYSQL";
+  $CPPFLAGS  = " -Df2cFortran -DCERNLIB_QMGLIBC";
 }
 if ($FC =~ /pgf77/) { 
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
