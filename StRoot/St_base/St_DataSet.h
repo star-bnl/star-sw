@@ -23,10 +23,10 @@ class St_DataSet : public TNamed
  friend class St_DataSetIter;
  friend class St_TableIter;
  private:
-    St_Table    *s_StafTable;       // The pointer to the STAF STAR tables for this data set
+    St_Table    *s_StafTable;       // The pointer to the STAF tables for this data set
     TList       *s_ListOfDataSet;   // List of the STAF DataSet objects
  protected:
-    virtual void SetParent(St_DataSet *parent){if (s_ListOfDataSet) /*s_ListOfDataSet->SetParent(parent)*/;}
+   virtual void SetParent(St_DataSet *parent);
  public:
     St_DataSet(const Char_t *name="", St_DataSet *parent=0);
     virtual ~St_DataSet();
@@ -54,14 +54,10 @@ inline St_Table   *St_DataSet::GetStafTable(){ return GetTableObj(); }
 inline St_Table   *St_DataSet::GetTableObj() { return s_StafTable; }
 inline TList      *St_DataSet::GetListOfDataset(){ return s_ListOfDataSet; }
 inline Int_t       St_DataSet::GetListSize(){ return s_ListOfDataSet ? s_ListOfDataSet->GetSize():0; }
-inline St_DataSet *St_DataSet::GetParent(){
-#ifdef WIN32
-  return s_ListOfDataSet ? (St_DataSet *)(s_ListOfDataSet->GetParent()):0;
-#else
-  return 0;
-#endif
-}
-inline Bool_t      St_DataSet::IsFolder(){ return (!s_StafTable && s_ListOfDataSet->Last());}
+inline St_DataSet *St_DataSet::GetParent(){ return s_ListOfDataSet ? 
+                               (St_DataSet *)(s_ListOfDataSet->GetParent()):0;}
+inline Bool_t    St_DataSet::IsFolder(){ return (!s_StafTable && s_ListOfDataSet->Last());}
+inline void      St_DataSet::SetParent(St_DataSet *parent){if (s_ListOfDataSet) s_ListOfDataSet->SetParent(parent);}
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
