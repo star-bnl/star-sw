@@ -10,88 +10,67 @@
 #include <stdlib.h>
 
 #include "StSvtElectronCloud.hh"
-#include "StThreeVector.hh"
 
 class StSvtSignal;
-class StSvtHybridPixels;
 class StSvtHybridPixelsD;
-//class StSvtWaferCoordinate;
-//class svg_geom_st;
+
+#define SvtSim_MaxBufferSize 20
 
 typedef struct  PasaSignalAttributes
- {
+{
+   int anode[SvtSim_MaxBufferSize];                   //actual anode
+   double mPeak[SvtSim_MaxBufferSize];
+   double mTimeCenter[SvtSim_MaxBufferSize];
+   double mTimeWidth[SvtSim_MaxBufferSize];
+   double mUnderShoot[SvtSim_MaxBufferSize];
+   double mTempBuffer[SvtSim_MaxBufferSize][128];
+   double mCharge[SvtSim_MaxBufferSize];
+};
 
-   int anode[10];                   //actual anode
-   double mPeak[10];
-   double mTimeCenter[10];
-   double mTimeWidth[10];
-   double mUnderShoot[10];
-   double mTempBuffer[10][128];
-   double mCharge[10];
- 
- } PasaSignalAttributes;
-
-class StSvtSimulation
+class StSvtSimulation:public TObject
 {
 public:
   StSvtSimulation();
   ~StSvtSimulation();
 
   void setOptions(int option);
-  void setPointers(StSvtElectronCloud* elCloud ,StSvtAngles* svtAngles);
+  void setElCloud(StSvtElectronCloud* elCloud);
   void setAnodeTimeBinSizes(double timBinSize, double anodeSize);
   void setDriftVelocity(double driftVelocity);
   void setTrappingConst(double trapConst);
-  
-
-  void openFiles(int k, int option);
-  void closeFiles(int k, int option);
-  int writeFiles1(int c, int i, int n, double t, double adc);
-  int writeFiles2(int c,int i, double timeBin,double timeCenter,double width, double peak);
-  
-
-  //StSvtWaferCoordinate toLocalCoord(StThreeVector<double>& x,StSvtCoordinateTransform  *coTransform);
-  //void calcAngles(svg_geom_st *geom_st, double x, double y, double z, int mLayer, int mLadder, int mWafer );
-
-  void doCloud_FixHitPos(double anode,double time, double Energy);
-  void doCloud_VaryHitPos(double anode,double Energy);
+  void setPasaSigAttributes(int pasaSigAttributes, int numOfAnodesPerHit=0);
+ 
   void doCloud(double time, double Energy,double mTheta,double mPhi);
-  void calcPeakAndWidth(int k,double mAnHit, double mTimeHit, int option);
   void fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixelsD *svtSimDataPixels); 
  
-  void setPasaSigAttributes(int pasaSigAttributes, int numOfAnodesPerHit=0);
-  void resetAnodeAttributes(int numOfAnodes);
-  void resetSignal(int an, int lTBin, int hTBin);
-
   PasaSignalAttributes getPasaSigAttributes();
   double getPeak();
 
   
 private:
-  
-  int mNumOfHybrids;
-  int mNumOfHitsPerHyb;
+
+  void resetAnodeAttributes();
+  void resetBuffer();
+
   int mNumOfAnodesPerHit;
-  int mLowBin;
-  int mHiBin;
   int mUpperAn;
   int mLowerAn;
-  int mPasaSigAttributes;
+
+  int mPasaDebug; //for debugging
 
   double mTimeBinSize;
   double mAnodeSize;
   double mDriftVelocity;
-  double mTrapConst;
   int mSignalOption;
-
   double mPeakSignal;
 
   StSvtElectronCloud* mElectronCloud;  //!
   StSvtSignal* mSvtSignal;             //!
-  StSvtAngles* mSvtAngles;             //!
+
+  //structure used for debugging
   PasaSignalAttributes mPasaSignals;   //!
 
-  // ClassDef(StSvtSimulation,1)
+  ClassDef(StSvtSimulation,2)
 
 };
 

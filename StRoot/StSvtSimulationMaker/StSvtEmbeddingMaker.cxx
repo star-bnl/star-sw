@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.cxx,v 1.8 2004/07/09 00:17:45 caines Exp $
+ * $Id: StSvtEmbeddingMaker.cxx,v 1.9 2005/02/09 14:33:35 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.cxx,v $
- * Revision 1.8  2004/07/09 00:17:45  caines
- * Code no longer kill code is things go wrong, also  by default dont do anthing if SVT not there
+ * Revision 1.9  2005/02/09 14:33:35  caines
+ * New electron expansion routine
  *
  * Revision 1.5  2004/02/24 15:53:21  caines
  * Read all params from database
@@ -115,10 +115,10 @@ Int_t StSvtEmbeddingMaker::Make()
     if (mPlainSimIfNoSVT){//run plain simulation instead of embedding
       mRunningEmbedding=kFALSE; //run plain simulation
     }
-    else
+    else 
       { //clear data and get out
 	ClearOutputData();
-	gMessMgr->Info()<<"SVT SlowSimulation: SKIPPING THIS EVENT - no SVT in rela data!!"<<endm;
+	gMessMgr->Info()<<"SVT SlowSimulation: SKIPPING THIS EVENT - no SVT in real data!!"<<endm;
 	return kStOk;
       }  
   }
@@ -128,11 +128,13 @@ Int_t StSvtEmbeddingMaker::Make()
   if (mRunningEmbedding) sprintf(st,"EMBEDDING");
   else sprintf(st,"PLAIN SIMULATION");
   gMessMgr->Info()<<"SVT SlowSimulation is running in the state of :"<<st<<endm;
- 
-  Int_t res;
-  res=GetSvtData();
-  if (res!=kStOk) return res;
 
+  if (mRunningEmbedding)
+    { 
+      Int_t res;
+      res=GetSvtData();
+      if (res!=kStOk) return res;
+    }
   ClearMask(); //it has to be cleared here - needed for plain simulation
 
   for(int Barrel = 1;Barrel <= mSimPixelColl->getNumberOfBarrels();Barrel++) {
@@ -236,9 +238,13 @@ Int_t StSvtEmbeddingMaker::GetSvtData()
   if (!mRunningEmbedding) return kStOk; //dont read real data if you don't need them
   dataSet = GetDataSet("StSvtRawData");
   if (dataSet) mRealDataColl= (StSvtData*)(dataSet->GetObject());
+  else gMessMgr->Error()<<"No StSvtRawData in the chain"<<endm;
   if (!mRealDataColl)      //switching to plain simulation, because there is no raw data
-     gMessMgr->Info()<<"Note: StSvtEmbeddingMaker is set to do embbeding, but found no raw data- embedding into empty event!!!"<<endm;
-
+    {
+      gMessMgr->Error()<<"Note: StSvtEmbeddingMaker is set to do embbeding, but found no raw data- embedding into empty event!!!"<<endm;
+      return kStErr;
+    }
+  
   return kStOk;
 }
  
@@ -412,8 +418,13 @@ Int_t StSvtEmbeddingMaker::NoSvt()
     return kTRUE;
   }
   
-  if (!daqReader->SVTPresent ())return kTRUE; //No SVT in the datastream 
+  if (!daqReader->SVTPresent ())
+    {
+      gMessMgr->Info()<<("NO SVT in DAQ")<<endm;
+      return kTRUE; //No SVT in the datastream 
+    }
   
+  gMessMgr->Info()<<("SVT found in DAQ")<<endm;
   return kFALSE;
 }
 
@@ -438,13 +449,13 @@ void StSvtEmbeddingMaker::ClearOutputData()
              tmpPixels = new StSvtHybridPixelsD(Barrel, Ladder, Wafer, Hybrid);
              mSimPixelColl->put_at(tmpPixels,index);
            }
-
+	   
 	   tmpPixels->setPedOffset(0);
            tmpPixels->reset();
-
+	   
          }
        }
      }
   }
-
+  
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.7 2004/07/09 00:17:45 caines Exp $
+ * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.8 2005/02/09 14:33:35 caines Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -50,23 +50,20 @@ Int_t StSvtOnlineSeqAdjSimMaker::GetConfig()
   mConfig=NULL;
   St_DataSet *dataSet = NULL;
   dataSet = GetDataSet("StSvtConfig");
-  
   if (!dataSet)
     {
       gMessMgr->Warning() << " No SvtConfig  data set" << endm;
-      dataSet = new St_ObjectSet("StSvtConfig");                                                               
+      dataSet = new St_ObjectSet("StSvtConfig");
       AddConst(dataSet);
-      mConfig=NULL;
-    }
+     }
+   else mConfig=((StSvtConfig*)(dataSet->GetObject()));
   
-  mConfig=((StSvtConfig*)(dataSet->GetObject()));
- 
   if (!mConfig) {
     gMessMgr->Warning() << "SvtConfig data set is empty- seting default full configuration" << endm;
     mConfig=new StSvtConfig();
     mConfig->setConfiguration("FULL");
     dataSet->SetObject(mConfig);
-  }
+    }
   
   return kStOk;
 }

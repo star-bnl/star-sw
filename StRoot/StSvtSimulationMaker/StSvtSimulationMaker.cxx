@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.25 2004/07/09 00:17:45 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.26 2005/02/09 14:33:35 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,8 +18,8 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
- * Revision 1.25  2004/07/09 00:17:45  caines
- * Code no longer kill code is things go wrong, also  by default dont do anthing if SVT not there
+ * Revision 1.26  2005/02/09 14:33:35  caines
+ * New electron expansion routine
  *
  * Revision 1.20  2004/02/24 15:53:22  caines
  * Read all params from database
@@ -114,19 +114,17 @@ using namespace std;
 #include "StSvtSignal.hh"
 #include "StSvtSimulation.hh"
 #include "StSvtGeantHits.hh"
-#include "StSvtSimulationMaker.h"
-
-
 
 #include "tables/St_g2t_svt_hit_Table.h"
 //#include "StSvtConversionTable.h"
 
+#include "StSvtSimulationMaker.h"
 
 ClassImp(StSvtSimulationMaker)
 
   /*! hardvired constants
    * mTimeBinSize = 0.04;  // Micro Secs -  this is quite accurate according to Dave Lynn
-   * mDefaultDriftVelocity = 1.E-5*675000;  // used only if there is no database
+   * mDefaultDriftVelocity = 1.E-5*675000;  // [mm/us] used only if there is no database
    * mDiffusionConst=0.0035;   // [mm**2/micro seconds] default=0.0035 (for silicon)
    * mLifeTime=1000000.0;     // [us]   default =1000000.0
    * mTrapConst=4.0e-5;       // [us]   default =0
@@ -142,17 +140,13 @@ ClassImp(StSvtSimulationMaker)
 StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
 { 
    if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor"<<endm;
-  
   //electron cloud settings - these can be tuned;
   mDiffusionConst= cDiffusionConst;   // [mm**2/micro seconds] default=0.0035 (for silicon)
   mLifeTime=cLifeTime;     // [us]   //default =1000000.0
   mTrapConst=cTrapConst;       // [us]   //default =0
 
   //options - can be set by setOptions
-  mExpOption = "both";     // both, coulomb, diffusion
-  mWrite = 0;              // Debug option
-  mFineDiv = 0;            // Debug option = 0 to use finer scales for signal width outputs 
-  mSigOption = 0;          // Debug option 
+  mSigOption = 0;          // use both PASA codes
   
   
   //initial cleanup
@@ -167,7 +161,6 @@ StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
 
   counter = NULL;
   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor...END"<<endm;
- 
 }
 
 //____________________________________________________________________________
@@ -215,12 +208,9 @@ void StSvtSimulationMaker::setDiffusionConst(double diffConst)
 
 //____________________________________________________________________________
 //mainly for debugging
-Int_t StSvtSimulationMaker::setOptions(char* option1, int option2, int option3, int option4)
+Int_t StSvtSimulationMaker::setOptions(int SigOption)
 {
-  mExpOption = option1;  
-  mWrite = option2;
-  mFineDiv = option3;
-  mSigOption = option4;
+  mSigOption = SigOption;
 
   return kStOK;
 }
@@ -235,16 +225,15 @@ Int_t StSvtSimulationMaker::Init()
   // init objects that do parts of simulation
   mSvtAngles =  new StSvtAngles();
  
-  mElectronCloud = new StSvtElectronCloud(mExpOption,mWrite,mFineDiv);
-  mElectronCloud->setSiliconProp();
+  mElectronCloud = new StSvtElectronCloud();
   mElectronCloud->setElectronLifeTime(mLifeTime);
   mElectronCloud->setDiffusionConst(mDiffusionConst);
+  mElectronCloud->setTrappingConst(mTrapConst);
 
   mSvtSimulation = new StSvtSimulation();
   mSvtSimulation->setOptions(mSigOption);
-  mSvtSimulation->setPointers(mElectronCloud, mSvtAngles);
-  mSvtSimulation->setTrappingConst(mTrapConst); 
-
+  mSvtSimulation->setElCloud(mElectronCloud);
+ 
   mCoordTransform=new StSvtCoordinateTransform();  
    
   if(Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Init() -End"<<endm;
@@ -272,7 +261,6 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   
   //mTimeBinSize = 1.E6/mSvtSrsPar->fsca;  // Micro Secs
   //mAnodeSize = mSvtSrsPar->pitch*10;  // mm
-  //mDriftVelocity = 1.E-5*mSvtSrsPar->vd;  // mm/MicroSec (?)
   // *****values hard wired for the time being - should be in database
   mTimeBinSize = cTimeBinSize;  // Micro Secs - Petr: this is quite accurate according to Dave
   mAnodeSize = mSvtGeom->getAnodePitch()*10;  // mm

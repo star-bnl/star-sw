@@ -1,7 +1,7 @@
-// $Id: StSvtSimulationMaker.h,v 1.14 2004/07/09 00:17:45 caines Exp $
+// $Id: StSvtSimulationMaker.h,v 1.15 2005/02/09 14:33:36 caines Exp $
 // $Log: StSvtSimulationMaker.h,v $
-// Revision 1.14  2004/07/09 00:17:45  caines
-// Code no longer kill code is things go wrong, also  by default dont do anthing if SVT not there
+// Revision 1.15  2005/02/09 14:33:36  caines
+// New electron expansion routine
 //
 // Revision 1.12  2004/03/30 21:27:12  caines
 // Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
@@ -90,7 +90,7 @@ class StSvtSimulationMaker : public StMaker
   virtual ~StSvtSimulationMaker(); //** destructor should be virtual
 
   ///seting different options and configurations - for testing purposes
-   Int_t setOptions(char* option1, int option2, int option3, int option4);
+   Int_t setOptions(int SigOption);
   Int_t setConst(double timBinSize, double anodeSize);
  
   ///inherited maker routines
@@ -127,7 +127,9 @@ class StSvtSimulationMaker : public StMaker
   TNtuple* GetNTuple(){return mNTuple;}
 
  private:
-
+  
+  ClassDef(StSvtSimulationMaker,4)       //!
+ 
   // initial options
   double mLifeTime;        //!
   double mTrapConst;       //!
@@ -136,9 +138,6 @@ class StSvtSimulationMaker : public StMaker
   double mAnodeSize;       //! 
   int    mPedOffset;       //!  not absolutely necesary to be already here - could be added in EmbeddingMaker, but it works
 
-  char* mExpOption;    //!  
-  Int_t mWrite;        //! for signal width outputs
-  Int_t mFineDiv;      //! mFineDiv = 0 to use finer scales for signal width outputs 
   Int_t mSigOption;    //!
    
   Int_t  mNumOfHybrids;         //!could be used to override number of simulated hybrids
@@ -150,8 +149,8 @@ class StSvtSimulationMaker : public StMaker
 
   ///tools-owned by maker
   StSvtAngles                  *mSvtAngles;          //! created in Init (desctructor kills)
-  StSvtElectronCloud           *mElectronCloud;      //! created in Init (desctructor kills)
-  StSvtSimulation              *mSvtSimulation;      //! created in Init (desctructor kills)
+  StSvtElectronCloud           *mElectronCloud;      
+  StSvtSimulation              *mSvtSimulation;      
   StSvtCoordinateTransform     *mCoordTransform;     //! created in Init (desctructor kills)
   
   //data for each run
@@ -169,12 +168,12 @@ class StSvtSimulationMaker : public StMaker
   int                          *counter;                //!
   TFile                        *mNtFile;                //! 
   TNtuple                      *mNTuple;                //! 
+
     
-
+    
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.14 2004/07/09 00:17:45 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
-
-  ClassDef(StSvtSimulationMaker,3)
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.15 2005/02/09 14:33:36 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
+    
 
   
 };

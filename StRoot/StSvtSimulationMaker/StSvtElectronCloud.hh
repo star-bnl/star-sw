@@ -4,62 +4,57 @@
 #include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
+#include "StObject.h"
 
-class StSvtElectronCloud
+/*!
+ *
+ * \class  StSvtElectronCloud
+ * \author Chaloupka
+ * \date   2004/11/23
+ * \brief SVT electron cloud expansion routines
+ *        Simulates electron cloud expansion inside of the silicon wafer  
+ */
+
+class StSvtElectronCloud:public StObject
 {
 public:
-  StSvtElectronCloud(char* option,int option1, int option2);
+  StSvtElectronCloud();
   ~StSvtElectronCloud();
 
-  void openFiles();
-  void closeFiles();
-  void setPar(double energy,double theta, double phi,double timeBinSize);
+  //routines to set
   void setSiliconProp();
-  void setInitWidths(double w1, double w2);
   void setElectronLifeTime(double tLife);
   void setDriftVelocity(double driftVel);
   void setTrappingConst(double trapConst);
   void setDiffusionConst(double diffConst);
-  void calculateWidthAtAnode(double mTc);
-  int runge_kutta4(int stepBefore, int numBinDiv, double steplen);
-  int adamsBushFort(int stepBefore, int numBinDiv, double steplen);
-  double sigmaXSqFunc(double tim, double sigmaSq1, double sigmaSq2,double phi);
-  double sigmaYSqFunc(double tim, double sigmaSq1, double sigmaSq2,double phi);
-  double sigmaXYSqFunc(double tim, double sigmaSq1, double sigmaSq2,double phi);
-  double func1(double tim, double sigmaSq1, double sigmaSq2);
-  double func2(double tim, double sigmaSq1, double sigmaSq2);
-  double getSigma1();
-  double getSigma2();
-  double getSigma1Sq();
-  double getSigma2Sq();
+
+  void setPar(double energy,double theta, double phi,double timeBinSize); 
+  void CalcExpansion(double mTc);
+  void runge_kutta4(int steps, double t0, double steplen,int save);
+  void adamsBushFort(int steps, double t0, double steplen);
+
+  double getSigmaDrift();
+  double getSigmaAnode();
+  double getSigmaCorr();
+  double getSigmaMajor();
+  double getSigmaMinor();
   double getPhi();
   double getChargeAtAnode();
-
+  // double getTotCharge(){return mTotCharge;}; 
 private:
+  void setInitWidths(double w1, double w2);
+ 
+  double mSigX;
+  double mSigY ;
+  double mSigXY;
+ 
+  double m_dSigX[4];
+  double m_dSigY[4];
+  double m_dSigXY[4];
 
-  char* mOption;
-  int  mWrite,mFineDiv;
-
-  double mSigma10;
-  double mSigma1;
-  double mSigma20;
-  double mSigma2;
-  double mSigmaXSqPrev ;
-  double mSigmaYSqPrev ;
-  double mSigmaXYSqPrev ;
-  double mSigmaXSqNow ;
-  double mSigmaYSqNow ;
-  double mSigmaXYSqNow ;
-  /*
-    double mSigmaSq1[129]; 
-    double mSigmaSq2[129];
-  */
-  double dSigmaXSqBydt[4];
-  double dSigmaYSqBydt[4];
-  double dSigmaXYSqBydt[4];
-
- double mChargeNow;
-
+  double mChargeNow;
+  double mTotCharge;
+  
   double mEnergy;
   double mTheta;
   double mPhi;
@@ -67,7 +62,6 @@ private:
 
   double mDriftVel;
   double mTimBinSize;
-  double mTotCharge;
   
   double mSDD_thickness;                      //  [mm]
   double mTrapConst;
@@ -80,7 +74,10 @@ private:
   double mSi_Mobility;                     // [mm**2/(V-micro seconds)]
   double mLifeTime;                           // [micro seconds]
 
-  void CalculateDiffXY();                   
+  void CalculateDiffXY();          
+  void GetDerivatives(double &dSx,double &dSy,double &dSxy,double SX,double SY,double SXY,double time);
+
+  ClassDef(StSvtElectronCloud,1)         
 };
 
 #endif

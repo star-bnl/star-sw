@@ -17,7 +17,7 @@ public:
   void setOption(int option);
   void setAnodeTimeBinSizes(double timBinSize, double anodeSize);
   void setDriftVelocity(double driftVelocity);
-  void getCloud(StSvtElectronCloud* elCloud);
+  void setCloud(StSvtElectronCloud* elCloud);
   double chargeFraction(int an, double anHit);
   int timeCenterAndWidth(double anHit,double timeHit);
   void setTimeWidth(double timWidth);
@@ -57,10 +57,9 @@ public:
   void resetSignal(int lBin, int hBin);
 
 private:
-  double mAnHit, mPhi; 
+  double mTotalHitCharge;
   double mAnRightEdge;
   double mAnLeftEdge;
-  double mChargeAtAnodes;
   double mFractionOfCharge;
   double mCollectedCharge;
 
@@ -73,9 +72,7 @@ private:
   double mAnodeSize;
 
   double mSigmaMajor;
-  double mSigmaMajor2;
   double mSigmaMinor;
-  double mSigmaMinor2;
   double mTimeCenter;
   double mTimeWidth;
   double mPeakSignal;
