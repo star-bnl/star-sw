@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtHybridPixels2.cc,v 1.1.1.1 2000/03/10 14:26:21 munhoz Exp $
+ * $Id: StSvtHybridPixels2.cc,v 1.2 2003/09/02 17:59:06 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridPixels2.cc,v $
+ * Revision 1.2  2003/09/02 17:59:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
  *
@@ -23,7 +26,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StArray.h"
 #include "StSvtHybridPixels.hh"
 #include "StSvtHybridPixels2.hh"

@@ -2,7 +2,7 @@
 /// \author M.L. Miller (Yale Software) 10/01
 #ifndef StiLocalTrackSeedFinder_HH
 #define StiLocalTrackSeedFinder_HH
-#include <iostream>
+#include "Stiostream.h"
 using std::ostream;
 #include <vector>
 using std::vector;

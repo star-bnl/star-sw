@@ -587,7 +587,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 					}
 					else {
 						if(charge < (old_scharge - min_adc)) {
-							//llog("MARK!") ;
+							//l::log("MARK!") ;
 							nresx->flags |= FCF_FALLING ;
 						}
 					}
@@ -671,7 +671,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 } 
 
 
-fcfClass::fcfClass(int det, u_short *table = NULL) 
+fcfClass::fcfClass(int det, u_short *table) 
 {
 	detector = det ;
 

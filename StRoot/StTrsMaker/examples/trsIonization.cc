@@ -1,6 +1,6 @@
 //*******************************************************************
 // 
-// $Id: trsIonization.cc,v 1.2 1998/11/13 00:24:36 lasiuk Exp $
+// $Id: trsIonization.cc,v 1.3 2003/09/02 17:59:15 perev Exp $
 //
 //*******************************************************************
 //
@@ -16,6 +16,9 @@
 //*******************************************************************
 //
 // $Log: trsIonization.cc,v $
+// Revision 1.3  2003/09/02 17:59:15  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  1998/11/13 00:24:36  lasiuk
 // TRUE/FALSE, pntrs in Db
 //
@@ -27,7 +30,7 @@
 //
 //*******************************************************************
 								     
-#include <fstream.h>
+#include "Stiostream.h"
 #include <unistd.h>
 #include <vector>
 #include <string>

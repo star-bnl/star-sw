@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.23 2003/05/26 13:44:19 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.24 2003/09/02 17:58:50 perev Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.24  2003/09/02 17:58:50  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.23  2003/05/26 13:44:19  suaide
 // added setPrint() method
 //
@@ -112,7 +115,7 @@
 //                                                             
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <cmath>
 #include "StChain.h"
 #include "TDataSetIter.h"
@@ -503,7 +506,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.23 2003/05/26 13:44:19 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.24 2003/09/02 17:58:50 perev Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

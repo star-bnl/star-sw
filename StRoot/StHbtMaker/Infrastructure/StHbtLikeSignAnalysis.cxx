@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtLikeSignAnalysis.cxx,v 1.3 2002/04/22 14:47:54 laue Exp $
+ * $Id: StHbtLikeSignAnalysis.cxx,v 1.4 2003/09/02 17:58:32 perev Exp $
  *
  * Author: Frank Laue, Ohio State, Laue@mps.ohio-state.edu
  ***************************************************************************
@@ -18,7 +18,7 @@
 #include "StHbtMaker/Base/StHbtV0Cut.h"
 #include "StHbtMaker/Infrastructure/StHbtPicoEventCollectionVector.hh"
 #include "StHbtMaker/Infrastructure/StHbtPicoEventCollectionVectorHideAway.hh"
-#include <iostream>
+#include "Stiostream.h"
 
 #ifdef __ROOT__ 
 ClassImp(StHbtLikeSignAnalysis)

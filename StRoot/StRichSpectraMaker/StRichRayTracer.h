@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichRayTracer.h,v 1.6 2002/05/21 22:52:56 lasiuk Exp $
+ * $Id: StRichRayTracer.h,v 1.7 2003/09/02 17:58:55 perev Exp $
  *
  * Author:  bl Feb 21, 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.h,v $
+ * Revision 1.7  2003/09/02 17:58:55  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.6  2002/05/21 22:52:56  lasiuk
  * attempt 2
  *
@@ -33,7 +36,7 @@
 #ifndef StRichRayTracer_h
 #define StRichRayTracer_h
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>

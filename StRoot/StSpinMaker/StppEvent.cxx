@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.15 2003/07/16 19:58:32 perev Exp $
+// $Id: StppEvent.cxx,v 1.16 2003/09/02 17:59:01 perev Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.16  2003/09/02 17:59:01  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.15  2003/07/16 19:58:32  perev
 // Cleanup of StTriggerData2003 at all
 //
@@ -71,7 +74,7 @@
 // Revision 1.0  2001/06/14 Akio Ogawa
 //
 //////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StEventTypes.h"
 #include "StEvent.h"
@@ -315,7 +318,7 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
     }
   
     if(sumPt>0.0){
-	vectorSumPt = sqrt(sumPx*sumPx+sumPy*sumPy);
+	vectorSumPt = ::sqrt(sumPx*sumPx+sumPy*sumPy);
 	weightedPhi = (float)atan2((double)sumPy,(double)sumPx);
 	weightedEta/= sumPt; 
     }else{

@@ -5,7 +5,7 @@
 * This is responsible for emc equalization
 ***********************************************************************/
 #include "StEmcEqualSpectra.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "emc_def.h"
 #include "TCanvas.h"
@@ -159,7 +159,7 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
 		m2 = f->GetParameter(1);
 		A2 = f->GetParameter(0);
 		a=m1/m2;
-		b=-log((A2*I1)/(A1*I2));
+		b=-::log((A2*I1)/(A1*I2));
 		EqDone=kTRUE;
     if(!finite(a) || !finite(b) || a<=0 || b>1000) EqDone = kFALSE;
     b=0;

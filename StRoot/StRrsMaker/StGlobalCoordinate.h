@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StGlobalCoordinate.h,v 2.0 2000/08/09 16:16:58 gans Exp $
+ * $Id: StGlobalCoordinate.h,v 2.1 2003/09/02 17:58:55 perev Exp $
  *
  * Author:  brian Jan 27, 2000
  *
@@ -11,6 +11,9 @@
  *************************************************************************
  *
  * $Log: StGlobalCoordinate.h,v $
+ * Revision 2.1  2003/09/02 17:58:55  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.0  2000/08/09 16:16:58  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -22,7 +25,7 @@
 #ifndef ST_GLOBAL_COORDINATE_HH
 #define ST_GLOBAL_COORDINATE_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StGlobals.hh"
 #include "StThreeVector.hh"

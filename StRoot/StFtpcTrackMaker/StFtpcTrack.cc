@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.26 2003/01/20 09:16:30 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.27 2003/09/02 17:58:16 perev Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.27  2003/09/02 17:58:16  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.26  2003/01/20 09:16:30  oldi
 // Calculation of residuals simplified.
 //
@@ -892,7 +895,7 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
 	
 	Double_t newMomentumCross = absMomentum*stepLength/twistRadius;
 	Double_t newMomentumParallel = 
-	  sqrt(absMomentum * absMomentum - newMomentumCross * newMomentumCross);
+	  ::sqrt(absMomentum * absMomentum - newMomentumCross * newMomentumCross);
 	currentMomentum.setMagnitude(newMomentumParallel);
 	StThreeVector<Double_t> momentumChange(perpField);
 	momentumChange.setMagnitude(newMomentumCross);
@@ -925,8 +928,8 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
       }
       
       // calculate fit quality indicators only if needed
-      //       Double_t distHitHelix=sqrt((xval[i]-x(plength))*(xval[i]-x(plength))+(yval[i]-y(plength))*(yval[i]-y(plength)));
-      //       Double_t distHelixFit=sqrt((x(plength)-currentPosition.x())*(x(plength)-currentPosition.x())+(y(plength)-currentPosition.y())*(y(plength)-currentPosition.y()));
+      //       Double_t distHitHelix=::sqrt((xval[i]-x(plength))*(xval[i]-x(plength))+(yval[i]-y(plength))*(yval[i]-y(plength)));
+      //       Double_t distHelixFit=::sqrt((x(plength)-currentPosition.x())*(x(plength)-currentPosition.x())+(y(plength)-currentPosition.y())*(y(plength)-currentPosition.y()));
       
     }
     
@@ -998,7 +1001,7 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
 Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t yw[], Int_t num)
 {
 #ifndef __IOSTREAM__
-#include <iostream.h>
+#include <Stiostream.h>
 #endif
   
   Int_t i;
@@ -1137,7 +1140,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
   
   Double_t R = 0;
   if ((wNew-w) < 10e-16 && (w-wNew) < 10e-16) {
-    R = sqrt(a * a + b * b + gamma);
+    R = ::sqrt(a * a + b * b + gamma);
     xc = a + xav;
     yc = b + yav;
   }
@@ -1151,7 +1154,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
   //       x[i] = x[i] + xav;
   //       y[i] = y[i] + yav;
   
-  //       Double_t err = R - sqrt(xw[i]*(x[i]-xc)*xw[i]*(x[i]-xc) 
+  //       Double_t err = R - ::sqrt(xw[i]*(x[i]-xc)*xw[i]*(x[i]-xc) 
   // 			    + yw[i]*(y[i]-yc)*yw[i]*(y[i]-yc));
   //       chi2 += err*err;
   //       wchi2 += xw[i]*xw[i]+yw[i]*yw[i];
@@ -1163,7 +1166,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
     x[i] = x[i] + xav;
     y[i] = y[i] + yav;
     
-    Double_t err = R - sqrt((x[i] - xc) * (x[i] - xc) + (y[i] - yc) * (y[i] - yc));
+    Double_t err = R - ::sqrt((x[i] - xc) * (x[i] - xc) + (y[i] - yc) * (y[i] - yc));
     chi2 += err * err;
     
     if (i>0) {
@@ -1211,7 +1214,7 @@ void StFtpcTrack::LineFit(Double_t *xval, Double_t *yval, Double_t *zval, Double
     lastangle = angle;
     
     // do sums
-    weight = sqrt(xw[i] * xw[i] * cos(angle) * cos(angle)
+    weight = ::sqrt(xw[i] * xw[i] * cos(angle) * cos(angle)
 		  + yw[i] * yw[i] * sin(angle) * sin(angle));
     x_ss += weight;
     x_sang += weight * angle;

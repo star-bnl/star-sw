@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.10 2003/07/17 22:49:31 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.11 2003/09/02 17:59:06 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.11  2003/09/02 17:59:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.10  2003/07/17 22:49:31  caines
  * Change errors to 300 microns
  *
@@ -43,7 +46,7 @@
  * Revision
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 
 #include "StSvtAnalysis.hh"
@@ -127,8 +130,8 @@ int StSvtAnalysedHybridClusters::setSvtHit(StSvtAnalysis* mSvtAnalysis,
     mPos[hit].setY((float)mSvtAnalysis->GetMeanClusterAnode(hit));
     mPos[hit].setZ(0.0);
     
-    mGlobalPos.setX(sqrt(mSvtAnalysis->GetCluXCov(hit)));
-    mGlobalPos.setY(sqrt(mSvtAnalysis->GetCluYCov(hit)));
+    mGlobalPos.setX(::sqrt(mSvtAnalysis->GetCluXCov(hit)));
+    mGlobalPos.setY(::sqrt(mSvtAnalysis->GetCluYCov(hit)));
     mGlobalPos.setZ(0.0042);
 
     mGlobalPos.setX(0.03);

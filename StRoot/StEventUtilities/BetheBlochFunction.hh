@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BetheBlochFunction.hh,v 1.1 2000/07/22 22:27:14 aihong Exp $
+ * $Id: BetheBlochFunction.hh,v 1.2 2003/09/02 17:58:09 perev Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BetheBlochFunction.hh,v $
+ * Revision 1.2  2003/09/02 17:58:09  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2000/07/22 22:27:14  aihong
  * move files from StPidAmpMaker to StEventUtilities
  *
@@ -58,7 +61,7 @@ double BetheBlochFunction(double *rig,double *par) {
           if (gb2 > 0.0) b2=1.0/(1.0 + 1.0/gb2);
           else return 0.0;
 
-	  myDedx=calib*charge*charge*(1.0/pow(b2,prefactor))*(pow(log(myValue*gb2),0.7) - postfactor*b2 )- mFactor;
+	  myDedx=calib*charge*charge*(1.0/::pow(b2,prefactor))*(::pow(::log(myValue*gb2),0.7) - postfactor*b2 )- mFactor;
           if (myDedx > satura) myDedx=satura;   
 
           return myDedx;

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.cxx,v 1.10 2003/07/07 21:58:20 posk Exp $
+// $Id: StFlowScalarProdMaker.cxx,v 1.11 2003/09/02 17:58:11 perev Exp $
 //
 // Authors: Method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -10,7 +10,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
@@ -162,7 +162,7 @@ Int_t StFlowScalarProdMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowScalarProd", 2);
-  gMessMgr->Info("##### FlowScalarProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.10 2003/07/07 21:58:20 posk Exp $");
+  gMessMgr->Info("##### FlowScalarProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.11 2003/09/02 17:58:11 perev Exp $");
 
   return StMaker::Init();
 }
@@ -304,7 +304,7 @@ Int_t StFlowScalarProdMaker::Finish() {
       sprintf(countHars,"%d",j+1);
 
       //Calculate the resolution
-      mRes[k][j]    = sqrt(histFull[k].mHistRes->GetBinContent(j+1))*2.;
+      mRes[k][j]    = ::sqrt(histFull[k].mHistRes->GetBinContent(j+1))*2.;
       mResErr[k][j] = (histFull[k].mHistRes->GetBinError(j+1))*2./mRes[k][j];
 
       // Create the v 2D histogram
@@ -346,7 +346,7 @@ Int_t StFlowScalarProdMaker::Finish() {
       delete histTitle;
       AddHist(histFull[k].histFullHar[j].mHist_vPt);
 
-      // Calulate v = vObs / Resolution or Q.u/(2sqrt(<Q_a.Q_b>))
+      // Calulate v = vObs / Resolution or Q.u/(2::sqrt(<Q_a.Q_b>))
       if (mRes[k][j]) {
 	cout << "##### Resolution of the " << j+1 << "th harmonic = " << 
 	  mRes[k][j] << " +/- " << mResErr[k][j] << endl;
@@ -360,7 +360,7 @@ Int_t StFlowScalarProdMaker::Finish() {
 	// The systematic error of the resolution is folded in.
 	error = histFull[k].mHist_v->GetBinError(j+1);
 	error /= mRes[k][j];
-	totalError = fabs(content) * sqrt((error/content)*(error/content) +
+	totalError = fabs(content) * ::sqrt((error/content)*(error/content) +
 	       (mResErr[k][j]/mRes[k][j])*(mResErr[k][j]/mRes[k][j]));
 	histFull[k].mHist_v->SetBinError(j+1, totalError);
 	cout << "##### v" << j+1 << "= (" << content << " +/- " << error << 
@@ -408,6 +408,9 @@ void StFlowScalarProdMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.cxx,v $
+// Revision 1.11  2003/09/02 17:58:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.10  2003/07/07 21:58:20  posk
 // Made units of momentum GeV/c instead of GeV.
 //

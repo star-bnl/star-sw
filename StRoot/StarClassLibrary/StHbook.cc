@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbook.cc,v 1.3 2001/05/30 18:12:32 perev Exp $
+ * $Id: StHbook.cc,v 1.4 2003/09/02 17:59:34 perev Exp $
  *
  * Author: Thomas Ullrich, Yale University
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbook.cc,v $
+ * Revision 1.4  2003/09/02 17:59:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2001/05/30 18:12:32  perev
  * string.h added
  *
@@ -25,7 +28,7 @@
  * Initial Revision
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "StGlobals.hh"

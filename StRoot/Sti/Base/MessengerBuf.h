@@ -6,14 +6,13 @@
 #ifndef MESSENGER_BUF_H
 #define MESSENGER_BUF_H
 
-#include <strstream.h>
-
+#include "Stsstream.h"
+using namespace std;
 #ifdef __CINT__
 class streambuf;
 class MessengerBuf;
 #else
-
-class MessengerBuf: public streambuf{
+class MessengerBuf: public std::streambuf {
 public:
     MessengerBuf(unsigned int routing);
     virtual ~MessengerBuf();

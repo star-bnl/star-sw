@@ -27,7 +27,7 @@
 #include "StEmcUtil/projection/StEmcPosition.h"
 #include <math.h>
 #include <TFile.h>
-#include <iostream.h>
+#include <Stiostream.h>
 
 ClassImp(StEmcEnergy)
 
@@ -403,7 +403,7 @@ void StEmcEnergy::geantEmEtInBtow(Int_t option)
           {
             Float_t stopVertexX = tracks[i]->stopVertex()->position().x();
             Float_t stopVertexY = tracks[i]->stopVertex()->position().y();
-            Float_t radiusStopVertex = sqrt ( pow( stopVertexX ,2 ) + pow( stopVertexY, 2  ) );
+            Float_t radiusStopVertex = sqrt ( ::pow( stopVertexX ,2 ) + ::pow( stopVertexY, 2  ) );
             if (radiusStopVertex < mBemcGeom->Radius()) checkStopVertex = 1;          
           }
         

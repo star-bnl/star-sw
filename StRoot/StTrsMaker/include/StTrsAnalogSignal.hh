@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsAnalogSignal.hh,v 1.4 2000/01/10 23:11:30 lasiuk Exp $
+ * $Id: StTrsAnalogSignal.hh,v 1.5 2003/09/02 17:59:16 perev Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTrsAnalogSignal.hh,v $
+ * Revision 1.5  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.4  2000/01/10 23:11:30  lasiuk
  * Include MACROS for compatibility with SUN CC5.0
  *
@@ -29,7 +32,7 @@
 #ifndef ST_TRS_ANALOGSIGNAL_HH
 #define ST_TRS_ANALOGSIGNAL_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <utility>
 
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500

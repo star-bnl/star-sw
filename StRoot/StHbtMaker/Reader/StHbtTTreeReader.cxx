@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTTreeReader.cxx,v 1.7 2003/05/16 21:30:18 magestro Exp $
+ * $Id: StHbtTTreeReader.cxx,v 1.8 2003/09/02 17:58:34 perev Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -52,8 +52,8 @@ ClassImp(StHbtTTreeReader)
 
 //__________________
 StHbtTTreeReader::StHbtTTreeReader(StHbtIOMode mode, StIOMaker* io, 
-				   const char* dirName, const char* fileName, const char* extention=".hbtTTreeMuDst", 
-				   const char* filter=".", int maxFiles=99999)
+				   const char* dirName, const char* fileName, const char* extention, 
+				   const char* filter, int maxFiles)
   : mIOMaker(io), mTrackType(primary), mIOMode(mode), mMaxFiles(maxFiles), mDebug(0), mCurrentFile(0), 
   mTTree(0), split(99), comp(2), bufsize(256000/4)  {
   if (mDebug) cout << "StHbtTTreeReader::StHbtTTreeReader(...)"<< endl;
@@ -379,6 +379,9 @@ int StHbtTTreeReader::fillChain(TChain* chain, const char* dir, const char* filt
 /***************************************************************************
  *
  * $Log: StHbtTTreeReader.cxx,v $
+ * Revision 1.8  2003/09/02 17:58:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.7  2003/05/16 21:30:18  magestro
  * Removed obsolete include file
  *

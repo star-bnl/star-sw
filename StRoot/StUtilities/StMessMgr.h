@@ -1,5 +1,8 @@
-// $Id: StMessMgr.h,v 1.12 2001/05/14 20:53:20 genevb Exp $
+// $Id: StMessMgr.h,v 1.13 2003/09/02 17:59:20 perev Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.13  2003/09/02 17:59:20  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.12  2001/05/14 20:53:20  genevb
 // Add features to examine memory use, switch from TDatime to time_t
 //
@@ -63,8 +66,8 @@ class StMessage;
 class messVec;
 #endif
 
-#include <strstream.h>
-
+#include <Stsstream.h>
+#include <Stiostream.h>
 
 class StMessMgr : public ostrstream {
    friend ostream& operator<<(ostream& ,StMessage*);

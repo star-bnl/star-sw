@@ -1,5 +1,8 @@
-// $Id: EEmcEventHeader.cxx,v 1.6 2003/06/03 02:41:03 zolnie Exp $ 
+// $Id: EEmcEventHeader.cxx,v 1.7 2003/09/02 17:57:55 perev Exp $ 
 // $Log: EEmcEventHeader.cxx,v $
+// Revision 1.7  2003/09/02 17:57:55  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.6  2003/06/03 02:41:03  zolnie
 // *** empty log message ***
 //
@@ -22,7 +25,7 @@
 
 #include "EEmcEventHeader.h"
  
-#include <iostream.h>
+#include <Stiostream.h>
 
 ClassImp(EEmcEventHeader)
 

@@ -4,7 +4,7 @@
 
 /*! \class StiHitErrorMaker
   The hit errors are ideally derived purely from the geometry of the
-  detector; error(x)=(cell size length in x)/sqrt(12). However, realistic 
+  detector; error(x)=(cell size length in x)/::sqrt(12). However, realistic 
   hit errors are often calculated from the hit residuals.
 
   The ITTF hit errors can be assigned using either the default geometric
@@ -78,7 +78,7 @@ double StiHitError::calcEr(double intr, double drift, double stan,
   double rang = angle/DEG2RAD;
   double cosa = cos(rang);
   double tana = tan(rang);
-  double calE = sqrt(intr + drift*dlen/(cosa*cosa) + stan*(tana*tana));
+  double calE = ::sqrt(intr + drift*dlen/(cosa*cosa) + stan*(tana*tana));
   
   return calE;
 }

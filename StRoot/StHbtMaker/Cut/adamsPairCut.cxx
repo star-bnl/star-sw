@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: adamsPairCut.cxx,v 1.1 2002/12/13 12:16:24 kisiel Exp $
+ * $Id: adamsPairCut.cxx,v 1.2 2003/09/02 17:58:21 perev Exp $
  *
  * Author: Adam Kisiel, Warsaw University of Technology, kisiel@if.pw.edu.pl
  ***************************************************************************
@@ -17,7 +17,7 @@
 #include "StHbtMaker/Cut/adamsPairCut.h"
 #include <string>
 #include <cstdio>
-#include <strstream.h>
+#include <Stsstream.h>
 
 #ifdef __ROOT__
 ClassImp(adamsPairCut)

@@ -1,10 +1,13 @@
 /***************************************************************
- * $Id: StRichDrawableTMip.cxx,v 2.2 2000/11/01 16:54:24 lasiuk Exp $
+ * $Id: StRichDrawableTMip.cxx,v 2.3 2003/09/02 17:58:52 perev Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTMip.cxx,v $
+ * Revision 2.3  2003/09/02 17:58:52  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.2  2000/11/01 16:54:24  lasiuk
  * simplify default arguments in c'tor
  *
@@ -22,8 +25,8 @@
  * Intitial
  *
  ***************************************************************/
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #ifdef __ROOT__
 
 #include "SystemOfUnits.h"
@@ -100,8 +103,8 @@ StRichDrawableTMip::StRichDrawableTMip(StRichDrawableTTrack * drawableTrackP)
 	mGeantX = geantTrackP->getGeantMIP().x();
 	mGeantY = geantTrackP->getGeantMIP().y();
 	if(mGeantX > -998 && mGeantY > -998){
-	    mGeantResidual =sqrt( pow(mGeantX - trackP->getProjectedMIP().x(),2)
-				+ pow(mGeantY - trackP->getProjectedMIP().y(),2));
+	    mGeantResidual =::sqrt( ::pow(mGeantX - trackP->getProjectedMIP().x(),2)
+				+ ::pow(mGeantY - trackP->getProjectedMIP().y(),2));
 	}
 	
 	mGeantXImpactRadiator = geantTrackP->getGeantImpactPointAtRadiator().x();

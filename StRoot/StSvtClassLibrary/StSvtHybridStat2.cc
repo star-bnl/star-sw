@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtHybridStat2.cc,v 1.2 2000/07/03 02:07:54 perev Exp $
+ * $Id: StSvtHybridStat2.cc,v 1.3 2003/09/02 17:59:06 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridStat2.cc,v $
+ * Revision 1.3  2003/09/02 17:59:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2000/07/03 02:07:54  perev
  * StEvent: vector<TObject*>
  *
@@ -118,7 +121,7 @@ float StSvtHybridStat2::getRMS(int anode, int time, int capacitor)
   else 
     return 0;
 
-  float rms = sqrt(meanSQ - mean*mean);
+  float rms = ::sqrt(meanSQ - mean*mean);
 
   return rms;
 }

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StSpinTagMaker.cxx,v 1.3 2003/04/30 20:39:59 perev Exp $
+// $Id: StSpinTagMaker.cxx,v 1.4 2003/09/02 18:00:19 perev Exp $
 // $Log: StSpinTagMaker.cxx,v $
+// Revision 1.4  2003/09/02 18:00:19  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.3  2003/04/30 20:39:59  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -74,7 +77,7 @@ Int_t StSpinTagMaker::Make(){
     if(nprim == 1) {
       row.nPrimary++;
       StTrack *tp = exnode[i]->track(primary);
-      float pt = sqrt(tp->geometry()->momentum().x()*tp->geometry()->momentum().x()+
+      float pt = ::sqrt(tp->geometry()->momentum().x()*tp->geometry()->momentum().x()+
 		      tp->geometry()->momentum().y()*tp->geometry()->momentum().y());
       if(pt>row.maxPt) row.maxPt = pt;
       row.sumAbsPt += pt;

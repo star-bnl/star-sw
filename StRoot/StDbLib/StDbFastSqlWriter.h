@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbFastSqlWriter.h,v 1.1 2003/04/11 22:47:36 porter Exp $
+ * $Id: StDbFastSqlWriter.h,v 1.2 2003/09/02 17:57:49 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbFastSqlWriter.h,v $
+ * Revision 1.2  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2003/04/11 22:47:36  porter
  * Added a fast multi-row write model specifically needed by the daqEventTag
  * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
@@ -41,12 +44,11 @@
 #ifndef STDBXMLWRITER_HH
 #define STDBXMLWRITER_HH
 
-#include "tableAcceptor.hh"
-#include <iostream.h>
-#include <fstream.h>
 #include <stdlib.h>
-#include <strstream.h>
 #include <string.h>
+#include "tableAcceptor.hh"
+#include <Stiostream.h>
+#include <Stsstream.h>
 
 class StDbTable;
 

@@ -1,5 +1,8 @@
-// $Id: StEEmcDataMaker.cxx,v 1.6 2003/08/18 21:31:42 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.7 2003/09/02 17:57:54 perev Exp $
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.7  2003/09/02 17:57:54  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.6  2003/08/18 21:31:42  balewski
 // new adc--> energy formula, still no absolute gain
 //
@@ -31,7 +34,7 @@
 // towards EEMC daq reader
 //
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include <assert.h>
 

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofHit.h,v 2.7 2003/07/09 20:14:20 ullrich Exp $
+ * $Id: StTofHit.h,v 2.8 2003/09/02 17:58:05 perev Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofHit.h,v $
+ * Revision 2.8  2003/09/02 17:58:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.7  2003/07/09 20:14:20  ullrich
  * New methods added.
  *
@@ -40,7 +43,7 @@
 #ifndef StTofHit_hh
 #define StTofHit_hh
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StHit.h"
 
 class StParticleDefinition;

@@ -1,4 +1,4 @@
-#include <iostream>
+#include "Stiostream.h"
 #include <cmath>
 #include "StThreeVector.hh"
 #include "StEventTypes.h"
@@ -12,6 +12,7 @@
 #include "Sti/StiDetector.h"
 #include "StEvent.h"
 #include "StMcEvent.hh"
+using namespace std;
 
 StiEmcHitLoader::StiEmcHitLoader()
   : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("EmcHitLoader")
@@ -36,10 +37,11 @@ void StiEmcHitLoader::loadHits(StEvent* source,
   double x,y,z;
   unsigned int layer;
   unsigned int sector;
-  vector<StEmcPoint*>::const_iterator pointIter;
+//VP  vector<StEmcPoint*>::const_iterator pointIter;
+  const_StEmcPointIterator pointIter;
   const StEmcCollection* emcCollection = source->emcCollection();
   const StSPtrVecEmcPoint & barrelPoints = emcCollection->barrelPoints();
-  for (pointIter=barrelPoints.begin();
+    for (pointIter=barrelPoints.begin();
        pointIter!=barrelPoints.end();
        pointIter++)
     {

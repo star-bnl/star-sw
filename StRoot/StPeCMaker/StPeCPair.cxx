@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.12 2003/03/19 15:35:47 yepes Exp $
+// $Id: StPeCPair.cxx,v 1.13 2003/09/02 17:58:46 perev Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.13  2003/09/02 17:58:46  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.12  2003/03/19 15:35:47  yepes
 // *** empty log message ***
 //
@@ -40,7 +43,7 @@
 // Revision 1.0  2000/03/20 23:28:50  nystrand
 //
 //////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StPeCPair.h"
 #include "StEventTypes.h"
 
@@ -173,7 +176,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
    Float_t p1AlongPtot = p*p1/p.mag() ; 
    Float_t p2AlongPtot = p*p2/p.mag() ;
 
-   Float_t pt1Ptot = sqrt(p1.mag()*p1.mag()-p1AlongPtot*p1AlongPtot);
+   Float_t pt1Ptot = ::sqrt(p1.mag()*p1.mag()-p1AlongPtot*p1AlongPtot);
 
    pPtArm = pt1Ptot ;
    pAlpha = (p1AlongPtot-p2AlongPtot)/(p1AlongPtot+p2AlongPtot);

@@ -1,7 +1,7 @@
 #ifndef StiDefaultMutableTreeNode_H
 #define StiDefaultMutableTreeNode_H 1
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <vector>
 #include "StiTreeNode.h"

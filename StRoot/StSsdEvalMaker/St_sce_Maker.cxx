@@ -3,12 +3,15 @@
  ***************************************************************************
  *
  * $Log: St_sce_Maker.cxx,v $
+ * Revision 1.6  2003/09/02 17:59:03  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2002/03/25 20:14:04  suire
  * Small memory leak fixes, doxygen documentation
  *
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "St_sce_Maker.h"
 #include "StChain.h"
@@ -300,7 +303,7 @@ void St_sce_Maker::writeScmHistograms()
 void St_sce_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_sce_Maker.cxx,v 1.5 2002/03/25 20:14:04 suire Exp $\n");
+  printf("* $Id: St_sce_Maker.cxx,v 1.6 2003/09/02 17:59:03 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

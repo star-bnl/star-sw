@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.5 2003/06/25 23:04:35 thenry Exp $
+ * $Id: StJetMaker.h,v 1.6 2003/09/02 17:58:39 perev Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.6  2003/09/02 17:58:39  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2003/06/25 23:04:35  thenry
  * Added proxy make option
  *
@@ -45,7 +48,7 @@
 #include "StMaker.h"
 #include "StSpinMaker/StppJetAnalyzer.h"
 #include <string>
-#include <iostream>
+#include "Stiostream.h"
 #include <map>
 #include <algorithm>
 using namespace std;

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcCluster.h,v 2.6 2002/02/22 22:56:47 jeromel Exp $
+ * $Id: StEmcCluster.h,v 2.7 2003/09/02 17:58:05 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.h,v $
+ * Revision 2.7  2003/09/02 17:58:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.6  2002/02/22 22:56:47  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -37,7 +40,7 @@
 #ifndef StEmcCluster_hh
 #define StEmcCluster_hh
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StObject.h"
 #include "StContainers.h"
 

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtWaferCoordinate.hh,v 1.5 2001/11/06 20:57:03 caines Exp $
+ * $Id: StSvtWaferCoordinate.hh,v 1.6 2003/09/02 17:57:51 perev Exp $
  *
  * Author:  Manuel CBS Oct 1999
  *
@@ -11,6 +11,9 @@
  ************************************************************************
  *
  * $Log: StSvtWaferCoordinate.hh,v $
+ * Revision 1.6  2003/09/02 17:57:51  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2001/11/06 20:57:03  caines
  * Add function to get barrel number
  *
@@ -36,7 +39,7 @@
  ***********************************************************************/
 #ifndef ST_SVT_WAFER_COORDINATE_HH
 #define ST_SVT_WAFER_COORDINATE_HH
-#include <iostream.h>
+#include <Stiostream.h>
 
 class StSvtWaferCoordinate
 { 

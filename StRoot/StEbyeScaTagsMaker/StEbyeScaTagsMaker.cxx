@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.24 2002/05/07 23:12:38 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.25 2003/09/02 17:57:58 perev Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.25  2003/09/02 17:57:58  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.24  2002/05/07 23:12:38  jgreid
  * blunderbug fix
  *
@@ -271,13 +274,13 @@ Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
               dcaM = (fabs(dca.mag()))/centimeter;
 
               // calculate mt (needed for temperature calculation)
-              mt = sqrt(pt*pt + PI_MASS*PI_MASS)-PI_MASS;
+              mt = ::sqrt(pt*pt + PI_MASS*PI_MASS)-PI_MASS;
               imtbin  = (int) ((mt - mt_min)/mt_binsize);
 
               // calculate eta
               dip = currentTrack->geometry()->dipAngle();
               theta = (M_PI/2.0)-dip;
-              eta = -log(tan(theta/2.0));
+              eta = -::log(tan(theta/2.0));
 
               // ** transverse DCA cut [cut #4] 
               if (((dcaX > dcaX_min) && (dcaX < dcaX_max)) && ((dcaY > dcaY_min) && (dcaY < dcaY_max))) {
@@ -403,15 +406,15 @@ float StEbyeScaTagsMaker::mtInverseSlope(double *mthisto, int ibegin, int istop)
 
   mt_binsize  = (mt_max - mt_min)/NBINS;
 
-  /*  Do a Linear Least Square fit to  log(dN/mt*dy*dmt) = -mt/T  */
+  /*  Do a Linear Least Square fit to  ::log(dN/mt*dy*dmt) = -mt/T  */
   for  (index=ibegin; index<istop;  index++) {
     if (!mthisto[index])
       continue;
     mtx  = mt_binsize*(float)index + mt_binsize/2.;
     sx  += mtx;
-    sy  += log(mthisto[index]);
+    sy  += ::log(mthisto[index]);
     sxx += mtx*mtx;
-    sxy += log(mthisto[index])*mtx;
+    sxy += ::log(mthisto[index])*mtx;
     s++;
   }
   delta    = s*sxx - sx*sx;

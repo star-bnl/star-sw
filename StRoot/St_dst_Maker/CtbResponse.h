@@ -3,7 +3,7 @@
 
 #include <TH1.h>
 #include "StVertexMaker.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>

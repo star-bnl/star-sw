@@ -1,5 +1,8 @@
-// $Id: StFtpcDisplay.hh,v 1.9 2003/01/16 18:04:32 oldi Exp $
+// $Id: StFtpcDisplay.hh,v 1.10 2003/09/02 17:58:16 perev Exp $
 // $Log: StFtpcDisplay.hh,v $
+// Revision 1.10  2003/09/02 17:58:16  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.9  2003/01/16 18:04:32  oldi
 // Bugs eliminated. Now it compiles on Solaris again.
 // Split residuals for global and primary fit.
@@ -21,7 +24,7 @@
 // It is now possible to display tracks which should be longer (so called 'short tracks').
 //
 // Revision 1.5  2000/07/28 09:45:42  hummler
-// change "iostream.h" to <iostream.h> for correct path
+// change "Stiostream.h" to <Stiostream.h> for correct path
 //
 // Revision 1.4  2000/07/18 21:22:16  oldi
 // Changes due to be able to find laser tracks.
@@ -56,7 +59,7 @@
 #ifndef STAR_StFtpcDisplay
 #define STAR_StFtpcDisplay
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "TObjArray.h"
 #include "TObject.h"

@@ -1,7 +1,10 @@
 ///
-// $Id: StPi0Candidate.h,v 1.2 2001/03/13 16:23:04 subhasis Exp $
+// $Id: StPi0Candidate.h,v 1.3 2003/09/02 17:58:03 perev Exp $
 //
 // $Log: StPi0Candidate.h,v $
+// Revision 1.3  2003/09/02 17:58:03  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  2001/03/13 16:23:04  subhasis
 // StEmcGeom.h moved from St_emc_Maker
 //
@@ -16,7 +19,7 @@
 #define STAR_StPi0Candidate
 
 #include <math.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TArrayI.h"
 #include "TObject.h"
 //#include "St_emc_Maker/StEmcHitCollection.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbInit.cxx,v 1.5 2000/01/14 14:49:10 porter Exp $
+ * $Id: DbInit.cxx,v 1.6 2003/09/02 17:55:35 perev Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: DbInit.cxx,v $
+ * Revision 1.6  2003/09/02 17:55:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2000/01/14 14:49:10  porter
  * set verbose level for checking, added $Id & $Logs, & made node container
  * more robust for interactions with StDbLib
@@ -17,7 +20,7 @@
  *
  **************************************************************************/
 //this function check if it is possible to connect to database server
-#include <iostream.h>
+#include <Stiostream.h>
 #include "mysql.h"
 
 extern "C" int DbInit(const char * dbName)

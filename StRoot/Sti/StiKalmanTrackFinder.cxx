@@ -9,7 +9,7 @@
 /// appear in the supporting documentation. The authors make no claims 
 /// about the suitability of this software for any purpose. It is     
 /// provided "as is" without express or implied warranty.             
-#include <iostream>
+#include "Stiostream.h"
 #include <stdexcept>
 #include <math.h>
 using namespace std;

@@ -1,6 +1,9 @@
-// $Id: StMcCalorimeterHit.hh,v 2.2 2000/06/06 02:58:40 calderon Exp $
+// $Id: StMcCalorimeterHit.hh,v 2.3 2003/09/02 17:58:41 perev Exp $
 //
 // $Log: StMcCalorimeterHit.hh,v $
+// Revision 2.3  2003/09/02 17:58:41  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 2.2  2000/06/06 02:58:40  calderon
 // Introduction of Calorimeter classes.  Modified several classes
 // accordingly.
@@ -12,7 +15,7 @@
 #ifndef StMcCalorimeterHit_hh
 #define StMcCalorimeterHit_hh
 
-#include <iostream.h>
+#include <Stiostream.h>
 //#include "StMemoryPool.hh"
 
 class StMcTrack;

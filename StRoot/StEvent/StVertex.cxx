@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 2.8 2001/05/30 17:45:55 perev Exp $
+ * $Id: StVertex.cxx,v 2.9 2003/09/02 17:58:06 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
+ * Revision 2.9  2003/09/02 17:58:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.8  2001/05/30 17:45:55  perev
  * StEvent branching
  *
@@ -51,7 +54,7 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 2.8 2001/05/30 17:45:55 perev Exp $";
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.9 2003/09/02 17:58:06 perev Exp $";
 
 StVertex::StVertex()
 {
@@ -118,7 +121,7 @@ StVertex::covariantMatrix() const
 StThreeVectorF
 StVertex::positionError() const
 {
-    return StThreeVectorF(sqrt(mCovariantMatrix[0]), sqrt(mCovariantMatrix[2]), sqrt(mCovariantMatrix[5]));
+    return StThreeVectorF(::sqrt(mCovariantMatrix[0]), ::sqrt(mCovariantMatrix[2]), ::sqrt(mCovariantMatrix[5]));
 }
 
 StTrack*

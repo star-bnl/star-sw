@@ -1,10 +1,10 @@
 #include "EMC_BarrelReader.hh"
 #include <assert.h>
 #define MAX_ADC 0xFFF
-#include <fstream.h>
+#include "Stiostream.h"
 #include <time.h>
 #include <stdlib.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdio.h>
 
 //ofstream fout("decode.out");
@@ -260,7 +260,7 @@ int EMC_BarrelReader::ProcessBarrelTower(const Bank_EMCP* EmcPTR)
     {
       Bank_TOWERADCR* toweradc=getBarrelADC(towerfiber);
       
-      if(toweradc) int fillstat= FillBarrelTower(toweradc);
+      if(toweradc) FillBarrelTower(toweradc);
       else cout<<" ADCR absent , looking for ADCD"<<endl;
 
       toweradc=0;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtThreeParticleAnalysis.cxx,v 1.7 2002/08/22 13:14:25 willson Exp $
+ * $Id: StHbtThreeParticleAnalysis.cxx,v 1.8 2003/09/02 17:58:32 perev Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtThreeParticleAnalysis.cxx,v $
+ * Revision 1.8  2003/09/02 17:58:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.7  2002/08/22 13:14:25  willson
  * Removed some warnings
  *
@@ -536,7 +539,7 @@ void StHbtThreeParticleAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 		  C2Q31 = mQ2CF->GetBinContent(bin3);
 		  C3    = mNormFactor*(mQ3CF->GetBinContent(bin4));
 		  
-		  termt  = sqrt(fabs((C2Q12-1.0)*(C2Q23-1.0)*(C2Q31-1.0)));
+		  termt  = ::sqrt(fabs((C2Q12-1.0)*(C2Q23-1.0)*(C2Q31-1.0)));
 		  if (termt) {
 		    cosphi = ((C3-1.0) - (C2Q12-1.0) - (C2Q23-1.0) - (C2Q31-1.0))/(2.0*termt);
 		    // cout << "CosPhi = " << cosphi << " Q12 = " << TheTriplet->qInv12() << " Q23 = " << TheTriplet->qInv23() << " Q31 = " << TheTriplet->qInv31() << " Q3 = " << TheTriplet->qInv() << " termt = " << termt << endl;
@@ -544,7 +547,7 @@ void StHbtThreeParticleAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 		    arg2 = mQ2CF->GetBinError(bin1)*(1.0 + (C2Q23-1.0)*(C2Q31-1.0)*cosphi/termt);
 		    arg3 = mQ2CF->GetBinError(bin2)*(1.0 + (C2Q31-1.0)*(C2Q12-1.0)*cosphi/termt);
 		    arg4 = mQ2CF->GetBinError(bin3)*(1.0 + (C2Q12-1.0)*(C2Q23-1.0)*cosphi/termt);
-		    cosphiError = (1.0/(2.0*termt))*sqrt(arg1*arg1+arg2*arg2+arg3*arg3+arg4*arg4);
+		    cosphiError = (1.0/(2.0*termt))*::sqrt(arg1*arg1+arg2*arg2+arg3*arg3+arg4*arg4);
 		  }
 		  else {
 		    cosphi = 0.0;
@@ -1251,14 +1254,14 @@ int StHbtThreeParticleAnalysis::CalculateCosPhi(StHbtSectoredPicoEvent *picoEven
 	  C2Q31 = mQ2CF->GetBinContent(bin3);
 	  C3    = mNormFactor*(mQ3CF->GetBinContent(bin4));
 	  
-	  termt  = sqrt(fabs((C2Q12-1.0)*(C2Q23-1.0)*(C2Q31-1.0)));
+	  termt  = ::sqrt(fabs((C2Q12-1.0)*(C2Q23-1.0)*(C2Q31-1.0)));
 	  if (termt) {
 	    cosphi = ((C3-1.0) - (C2Q12-1.0) - (C2Q23-1.0) - (C2Q31-1.0))/(2.0*termt);
 	    arg1 = mQ3CF->GetBinError(bin4);
 	    arg2 = mQ2CF->GetBinError(bin1)*(1.0 + (C2Q23-1.0)*(C2Q31-1.0)*cosphi/termt);
 	    arg3 = mQ2CF->GetBinError(bin2)*(1.0 + (C2Q31-1.0)*(C2Q12-1.0)*cosphi/termt);
 	    arg4 = mQ2CF->GetBinError(bin3)*(1.0 + (C2Q12-1.0)*(C2Q23-1.0)*cosphi/termt);
-	    cosphiError = (1.0/(2.0*termt))*sqrt(arg1*arg1+arg2*arg2+arg3*arg3+arg4*arg4);
+	    cosphiError = (1.0/(2.0*termt))*::sqrt(arg1*arg1+arg2*arg2+arg3*arg3+arg4*arg4);
 	  }
 	  else {
 	    cosphi = 0.0;
@@ -1336,14 +1339,14 @@ int StHbtThreeParticleAnalysis::CalculateCosPhi(StHbtSectoredPicoEvent *picoEven
 	    C2Q31 = mQ2CF->GetBinContent(bin3);
 	    C3    = mNormFactor*(mQ3CF->GetBinContent(bin4));
 	    
-	    termt  = sqrt(fabs((C2Q12-1.0)*(C2Q23-1.0)*(C2Q31-1.0)));
+	    termt  = ::sqrt(fabs((C2Q12-1.0)*(C2Q23-1.0)*(C2Q31-1.0)));
 	    if (termt) {
 	      cosphi = ((C3-1.0) - (C2Q12-1.0) - (C2Q23-1.0) - (C2Q31-1.0))/(2.0*termt);
 	      arg1 = mQ3CF->GetBinError(bin4);
 	      arg2 = mQ2CF->GetBinError(bin1)*(1.0 + (C2Q23-1.0)*(C2Q31-1.0)*cosphi/termt);
 	      arg3 = mQ2CF->GetBinError(bin2)*(1.0 + (C2Q31-1.0)*(C2Q12-1.0)*cosphi/termt);
 	      arg4 = mQ2CF->GetBinError(bin3)*(1.0 + (C2Q12-1.0)*(C2Q23-1.0)*cosphi/termt);
-	      cosphiError = (1.0/(2.0*termt))*sqrt(arg1*arg1+arg2*arg2+arg3*arg3+arg4*arg4);
+	      cosphiError = (1.0/(2.0*termt))*::sqrt(arg1*arg1+arg2*arg2+arg3*arg3+arg4*arg4);
 	    }
 	    else {
 	      cosphi = 0.0;
@@ -1403,14 +1406,14 @@ int StHbtThreeParticleAnalysis::CalculateCosPhi(StHbtSectoredPicoEvent *picoEven
 	    C2Q31 = mQ2CF->GetBinContent(bin3);
 	    C3    = mNormFactor*(mQ3CF->GetBinContent(bin4));
 	    
-	    termt  = sqrt(fabs((C2Q12-1.0)*(C2Q23-1.0)*(C2Q31-1.0)));
+	    termt  = ::sqrt(fabs((C2Q12-1.0)*(C2Q23-1.0)*(C2Q31-1.0)));
 	    if (termt) {
 	      cosphi = ((C3-1.0) - (C2Q12-1.0) - (C2Q23-1.0) - (C2Q31-1.0))/(2.0*termt);
 	      arg1 = mQ3CF->GetBinError(bin4);
 	      arg2 = mQ2CF->GetBinError(bin1)*(1.0 + (C2Q23-1.0)*(C2Q31-1.0)*cosphi/termt);
 	      arg3 = mQ2CF->GetBinError(bin2)*(1.0 + (C2Q31-1.0)*(C2Q12-1.0)*cosphi/termt);
 	      arg4 = mQ2CF->GetBinError(bin3)*(1.0 + (C2Q12-1.0)*(C2Q23-1.0)*cosphi/termt);
-	      cosphiError = (1.0/(2.0*termt))*sqrt(arg1*arg1+arg2*arg2+arg3*arg3+arg4*arg4);
+	      cosphiError = (1.0/(2.0*termt))*::sqrt(arg1*arg1+arg2*arg2+arg3*arg3+arg4*arg4);
 	    }
 	    else {
 	      cosphi = 0.0;
@@ -1484,14 +1487,14 @@ int StHbtThreeParticleAnalysis::CalculateCosPhi(StHbtSectoredPicoEvent *picoEven
 	  C2Q31 = mQ2CF->GetBinContent(bin3);
 	  C3    = mNormFactor*(mQ3CF->GetBinContent(bin4));
 	  
-	  termt  = sqrt(fabs((C2Q12-1.0)*(C2Q23-1.0)*(C2Q31-1.0)));
+	  termt  = ::sqrt(fabs((C2Q12-1.0)*(C2Q23-1.0)*(C2Q31-1.0)));
 	  if (termt) {
 	    cosphi = ((C3-1.0) - (C2Q12-1.0) - (C2Q23-1.0) - (C2Q31-1.0))/(2.0*termt);
 	    arg1 = mQ3CF->GetBinError(bin4);
 	    arg2 = mQ2CF->GetBinError(bin1)*(1.0 + (C2Q23-1.0)*(C2Q31-1.0)*cosphi/termt);
 	    arg3 = mQ2CF->GetBinError(bin2)*(1.0 + (C2Q31-1.0)*(C2Q12-1.0)*cosphi/termt);
 	    arg4 = mQ2CF->GetBinError(bin3)*(1.0 + (C2Q12-1.0)*(C2Q23-1.0)*cosphi/termt);
-	    cosphiError = (1.0/(2.0*termt))*sqrt(arg1*arg1+arg2*arg2+arg3*arg3+arg4*arg4);
+	    cosphiError = (1.0/(2.0*termt))*::sqrt(arg1*arg1+arg2*arg2+arg3*arg3+arg4*arg4);
 	  }
 	  else {
 	    cosphi = 0.0;

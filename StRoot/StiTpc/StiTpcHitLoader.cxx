@@ -1,4 +1,4 @@
-#include <iostream>
+#include "Stiostream.h"
 #include <stdexcept>
 #include <cmath>
 #include <stdio.h>
@@ -78,7 +78,8 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 		   << " sector:"<<sector<<endl;
 	      throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- Detector element not found");
 	    }
-	  for (vector<StTpcHit*>::const_iterator iter = hitvec.begin();
+            const_StTpcHitIterator iter;
+	    for (iter = hitvec.begin();
 	       iter != hitvec.end(); 
 	       iter++) 
 	    {

@@ -1,7 +1,7 @@
 ///\File StiEvaluableTrackSeedFinder.cxx
 ///\author M.L. Miller (Yale Software) 04/01
 //Std
-#include <iostream>
+#include "Stiostream.h"
 #include <algorithm>
 using std::for_each;
 using std::equal_range;

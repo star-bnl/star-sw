@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.3 2003/04/16 15:27:51 suaide Exp $
+ * $Id: StEmcGeom.cxx,v 1.4 2003/09/02 17:58:01 perev Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.4  2003/09/02 17:58:01  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2003/04/16 15:27:51  suaide
  * small fix on default geant geometry
  *
@@ -449,10 +452,10 @@ void StEmcGeom::initBSMDE(){
       mZlocal[i] = shift2 + (seta2wdh+seta12wdh)*2*(i-75);
       zb[i+1]    = zb[i]  + (seta2wdh+seta12wdh)*2;
     }
-    mEta[i]  = -log(tan(atan2(mRadius,mZlocal[i])/2.0));
-    mEtaB[i] = -log(tan(atan2(mRadius,zb[i])/2.0));
+    mEta[i]  = -::log(tan(atan2(mRadius,mZlocal[i])/2.0));
+    mEtaB[i] = -::log(tan(atan2(mRadius,zb[i])/2.0));
   }
-  mEtaB[mNEta] = -log(tan(atan2(mRadius,zb[mNEta])/2.0));
+  mEtaB[mNEta] = -::log(tan(atan2(mRadius,zb[mNEta])/2.0));
 
   // Phi variable ( Y direction)
   mYlocal.Set(mNSub); mYlocal[0] = 0.0;
@@ -699,10 +702,10 @@ void StEmcGeom::initEEMCorEPRS()  //wrong need to update
 
   // Phi variable ( Y direction)
   mYlocal.Set(mNSub);  
-  mYlocal[0] =   mYWidth/2.;    mYlocal[1] = - mYlocal[0];  
+  mYlocal[0] =   mYWidth/2;    mYlocal[1] = - mYlocal[0];  
 
   mPhi.Set(mNSub); 
-  mPhi[0] =  atan2(mYWidth/2.,mRadius);    mPhi[1] = -mPhi[0];
+  mPhi[0] =  atan2(mYWidth/2,mRadius);    mPhi[1] = -mPhi[0];
 
   //  cout<<" Default constructor for StEmcGeom (Ver. 1.00 # 20-Jun-1999 )"<<endl;
 }
@@ -731,7 +734,7 @@ void StEmcGeom::initESMDE(){  //wrong need to update
   for(i=0; i<mNEta; i++) {
     if(i<mNEta/2) mZlocal[i] = shift1 + (seta1wdh+seta12wdh)*2*i;
     else mZlocal[i] = shift2 + (seta2wdh+seta12wdh)*2*(i-75);
-    mEta[i] = -log(tan(atan2(mRadius,mZlocal[i])/2.0));
+    mEta[i] = -::log(tan(atan2(mRadius,mZlocal[i])/2.0));
   }
 
   // Phi variable ( Y direction)

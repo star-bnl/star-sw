@@ -1,6 +1,6 @@
 /***************************************************************************
  * 
- * $Id: StHbook.hh,v 1.1 1999/01/30 03:59:02 fisyak Exp $
+ * $Id: StHbook.hh,v 1.2 2003/09/02 17:59:34 perev Exp $
  *
  * Author:  Thomas Ullrich, Yale University
  *          adapted for SCL by bl July 1998
@@ -76,6 +76,9 @@
  ***************************************************************************
  *
  * $Log: StHbook.hh,v $
+ * Revision 1.2  2003/09/02 17:59:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  1999/01/30 03:59:02  fisyak
  * Root Version of StarClassLibrary
  *
@@ -86,7 +89,7 @@
 #ifndef ST_HBOOK_HH
 #define ST_HBOOK_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <stdio.h>
 

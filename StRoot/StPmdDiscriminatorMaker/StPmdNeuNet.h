@@ -43,7 +43,7 @@
 #include "TPad.h"
 #include "math.h"
 #include "stdlib.h"
-#include "iostream.h"
+#include "Stiostream.h"
 #include "StPmdDiscriminatorMaker.h"
 
 ////////////////////////////////////////////// the classes /////////////////////////////////////

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.22 2003/04/16 02:04:24 munhoz Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.23 2003/09/02 17:57:51 perev Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -604,7 +604,7 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
 //   aa=l/mparam->vd;
 //   bb=(b*l/mparam->vd-l-a*d+d);
 //   cc=(d*b-b*l);
-//   v2=(-bb+sqrt(pow(bb,2)-4*aa*cc))/(2*aa);
+//   v2=(-bb+::sqrt(::pow(bb,2)-4*aa*cc))/(2*aa);
 //   v1=(v2+b)/a; /* using Sanjeev's fit from the bench */
   
 //   v1=v1*0.8;  
@@ -681,7 +681,7 @@ double StSvtCoordinateTransform::UnCalcDriftLength(const StSvtLocalCoordinate& a
 //   aa=l/mparam->vd;
 //   bb=(b*l/mparam->vd-l-a*d+d);
 //   cc=(d*b-b*l);
-//   v2=(-bb+sqrt(pow(bb,2)-4*aa*cc))/(2*aa);
+//   v2=(-bb+::sqrt(::pow(bb,2)-4*aa*cc))/(2*aa);
 //   v1=(v2+b)/a; /* using Sanjeev's fit from the bench */
   
 //   v1=v1*0.8;  

@@ -1,6 +1,7 @@
 #ifndef StDetectorDbTriggerID_h
 #define StDetectorDbTriggerID_h
 
+#include <Stiostream.h>
 #include "StMaker.h"
 
 struct triggerID_st;
@@ -8,13 +9,6 @@ struct trigPrescales_st;
 struct L0TriggerInfo_st;
 struct defaultTrgLvl_st;
 
-#ifdef sun
-#include <iostream.h>
-#endif
-
-#ifndef sun
-class ostream;
-#endif
 
 enum { kDbTriggerBadID = 999 };
 

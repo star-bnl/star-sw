@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StRichIonization.cxx,v 2.0 2000/08/09 16:17:01 gans Exp $
+ * $Id: StRichIonization.cxx,v 2.1 2003/09/02 17:58:56 perev Exp $
  *
  * Description:
  *  StRichIonization simulates the charged particle track through the gas.
@@ -22,6 +22,9 @@
  *
  *********************************************************************
  * $Log: StRichIonization.cxx,v $
+ * Revision 2.1  2003/09/02 17:58:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.0  2000/08/09 16:17:01  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -96,7 +99,7 @@ StRichIonization::StRichIonization()
     // mPlateau     = x1
     // mShapeOfRise = m
     // interSectionOfRiseAndPlateau = xa
-    // bigx           = log(bg) in base 10
+    // bigx           = ::log(bg) in base 10
     // saturationTerm = d
 
     mKonstant = 0.1536*MeV*centimeter2/gram;
@@ -120,9 +123,9 @@ StRichIonization::StRichIonization()
 
     // rise and plateau intersection -- xa
     mIntersectionOfRiseAndPlateau =
-	log(1.649*mIonize/eV/(28.8*sqrt(mDensity*centimeter3/gram*mZa)));
+	::log(1.649*mIonize/eV/(28.8*::sqrt(mDensity*centimeter3/gram*mZa)));
 
-    mF = 4.606*(mIntersectionOfRiseAndPlateau-mFirstCorner)/(pow((mPlateau-mFirstCorner),mShapeOfRise));   
+    mF = 4.606*(mIntersectionOfRiseAndPlateau-mFirstCorner)/(::pow((mPlateau-mFirstCorner),mShapeOfRise));   
 }
 
 StRichIonization::~StRichIonization() { /* nopt */ }
@@ -195,10 +198,10 @@ double StRichIonization::betheBloch(double bg)
     // nomenclature is as follows:
 
     // Low energy cutOFF:
-    if(log(bg)<-1)
+    if(::log(bg)<-1)
  	return mSaturationValue;
 
-    double bigx = log(bg)/log(10.);
+    double bigx = ::log(bg)/::log(10.);
     
     // Saturation term
     //double d;
@@ -206,7 +209,7 @@ double StRichIonization::betheBloch(double bg)
     if (bigx<mFirstCorner)
 	saturationTerm=0;
     else if ((bigx>mFirstCorner) && (bigx<mPlateau))
-	saturationTerm=4.606*(bigx-mIntersectionOfRiseAndPlateau)+mF*(pow((mPlateau-bigx),mShapeOfRise));
+	saturationTerm=4.606*(bigx-mIntersectionOfRiseAndPlateau)+mF*(::pow((mPlateau-bigx),mShapeOfRise));
     else if(bigx>mPlateau)
 	saturationTerm=4.606*(bigx-mIntersectionOfRiseAndPlateau);
 
@@ -216,12 +219,12 @@ double StRichIonization::betheBloch(double bg)
     // Compute the minimum
     double bgMin = 3.;
     double te =
-	konstant + 2*log(bgMin) - (sqr(bgMin)/(sqr(bgMin)+1)) - log(sqr(bgMin)/(sqr(bgMin)+1));
+	konstant + 2*::log(bgMin) - (sqr(bgMin)/(sqr(bgMin)+1)) - ::log(sqr(bgMin)/(sqr(bgMin)+1));
     double Io
-	= mAlfat*((sqr(bgMin)+1)/sqr(bgMin))*(log((electron_mass_c2/MeV*mAlfat)/(sqr(mIonize)))+te);
+	= mAlfat*((sqr(bgMin)+1)/sqr(bgMin))*(::log((electron_mass_c2/MeV*mAlfat)/(sqr(mIonize)))+te);
       
-    te = konstant + 2*log(bg) - (sqr(bg)/(sqr(bg)+1)) - log(sqr(bg)/(sqr(bg)+1)) - saturationTerm;
-    double I = mAlfat*((sqr(bg)+1)/sqr(bg))*(log((electron_mass_c2/MeV*mAlfat)/(sqr(mIonize)))+te);
+    te = konstant + 2*::log(bg) - (sqr(bg)/(sqr(bg)+1)) - ::log(sqr(bg)/(sqr(bg)+1)) - saturationTerm;
+    double I = mAlfat*((sqr(bg)+1)/sqr(bg))*(::log((electron_mass_c2/MeV*mAlfat)/(sqr(mIonize)))+te);
 
     return (I/Io);
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVectorF.hh,v 1.3 2000/09/25 20:22:54 ullrich Exp $
+ * $Id: StLorentzVectorF.hh,v 1.4 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StLorentzVectorF.hh,v $
+ * Revision 1.4  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2000/09/25 20:22:54  ullrich
  * Removed inheritance from TObject.
  *
@@ -163,9 +166,9 @@ inline float StLorentzVectorF::m() const
 {
     float mass2 = m2();
     if (mass2 < 0)
-	return -sqrt(-mass2);
+	return -::sqrt(-mass2);
     else
-	return sqrt(mass2);
+	return ::sqrt(mass2);
 }
 
 inline float StLorentzVectorF::mt2() const
@@ -180,9 +183,9 @@ inline float StLorentzVectorF::mt() const
     // return e()*e() - pz()*pz();
     float massPerp2 = mt2();
     if (massPerp2 < 0)
-	return -sqrt(-massPerp2);
+	return -::sqrt(-massPerp2);
     else
-	return sqrt(massPerp2);
+	return ::sqrt(massPerp2);
 }
 
 inline void StLorentzVectorF::setPx(float x) {mThreeVector.setX(x);}
@@ -279,7 +282,7 @@ inline float& StLorentzVectorF::operator[] (size_t i)
 
 inline float StLorentzVectorF::rapidity() const
 {
-    return 0.5*log((mX4+mThreeVector.z())/(mX4-mThreeVector.z()));
+    return 0.5*::log((mX4+mThreeVector.z())/(mX4-mThreeVector.z()));
 }
 
 inline StLorentzVectorF StLorentzVectorF::operator- ()

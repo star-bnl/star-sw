@@ -76,7 +76,7 @@ Int_t StSpectraTagMaker::Make(){
      px = track->geometry()->momentum().x();
      py = track->geometry()->momentum().y();
      pz = track->geometry()->momentum().z();
-     momentum = sqrt(px*px+py*py+pz*pz);
+     momentum = ::sqrt(px*px+py*py+pz*pz);
      dedx_deuteron = dEdx_formula(momentum, 1.88);
      chargesign = track->geometry()->charge();
      dedx = 0.0;
@@ -95,7 +95,7 @@ Int_t StSpectraTagMaker::Make(){
         }
       }
       //look for Abar candidate:  require 20 hits, 10 dE/dx samples, negative charge, Z_deuteron>0.5, apparent momentum < 5, apparent momentum <0.2
-     z_deuteron = log(dedx/dedx_deuteron);
+     z_deuteron = ::log(dedx/dedx_deuteron);
      if (z_deuteron<0.5) continue;
      if (npntfit<20) continue;
      if (ndedx<10) continue;

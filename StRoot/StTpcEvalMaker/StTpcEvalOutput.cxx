@@ -6,7 +6,7 @@
 //-------------------------------------------------
 // class definitions for StTpcEvalOutput
 //-------------------------------------------------
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <string>
 

@@ -6,7 +6,7 @@ double dEdx_formula(double x,double massin){
   double real_momentum = x;
   double mass = massin;
   double bg2 = real_momentum*real_momentum/(mass*mass);
-  double bg = sqrt(bg2);
+  double bg = ::sqrt(bg2);
   double result = bb->operator()(bg);
   return result;
 }

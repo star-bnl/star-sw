@@ -1,5 +1,5 @@
 #include <math.h>
-#include <iostream>
+#include "Stiostream.h"
 #include <string>
 #include <map>
 #include "StiMaterial.h"

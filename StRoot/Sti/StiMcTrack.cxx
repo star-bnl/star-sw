@@ -13,10 +13,10 @@ StiMcTrack::StiMcTrack()
 StiMcTrack::~StiMcTrack()
 {}
 
-void StiMcTrack::fit(int direction=kOutsideIn)
+void StiMcTrack::fit(int direction)
 {}
 
-bool StiMcTrack::find(int direction=kOutsideIn)
+bool StiMcTrack::find(int direction)
 {
   return true;
 }

@@ -14,6 +14,11 @@
 
 #ifndef StiKTNIterator_HH
 #define StiKTNIterator_HH
+#ifdef GNU_GCC
+  #if __GNUC__<3
+    #define HACK_forward_iterator
+  #endif
+#endif
 
 #include <iterator>
 using namespace std;
@@ -23,7 +28,7 @@ typedef StiKalmanTrackNode KTN_t;
 
 //This is a temp hack to get around old gcc ansi-non-compliant STL implementation
 class StiKTNForwardIterator
-#ifndef GNU_GCC
+#ifndef HACK_forward_iterator
     : public iterator<forward_iterator_tag, KTN_t, ptrdiff_t, KTN_t*, KTN_t&>
 #else
     : public forward_iterator<KTN_t, int>
@@ -112,7 +117,7 @@ inline StiKTNForwardIterator StiKTNForwardIterator::end()
 
 //This is a temp hack to get around old gcc ansi-non-compliant STL implementation
 class StiKTNBidirectionalIterator
-#ifndef GNU_GCC
+#ifndef HACK_forward_iterator
     : public iterator<bidirectional_iterator_tag, KTN_t, ptrdiff_t, KTN_t*, KTN_t&>
 #else
     : public bidirectional_iterator<KTN_t, int>

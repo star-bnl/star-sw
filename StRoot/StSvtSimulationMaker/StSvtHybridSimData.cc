@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridSimData.cc,v 1.4 2003/07/31 19:18:10 caines Exp $
+ * $Id: StSvtHybridSimData.cc,v 1.5 2003/09/02 17:59:09 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridSimData.cc,v $
+ * Revision 1.5  2003/09/02 17:59:09  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.4  2003/07/31 19:18:10  caines
  * Petrs improved simulation code
  *
@@ -29,10 +32,10 @@
 //                                                                        //
 ////////////////////////////////////////////////////////////////////////////
 
+#include "Stiostream.h"
 #include "StSvtHybridSimData.hh"
 #include "StSequence.hh"
 #include "StSvtClassLibrary/StSvtHybridPixelsC.hh"
-#include "iostream.h"
 
 ClassImp(StSvtHybridSimData)
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulation.cc,v 1.6 2003/07/31 19:18:10 caines Exp $
+ * $Id: StSvtSimulation.cc,v 1.7 2003/09/02 17:59:09 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulation.cc,v $
+ * Revision 1.7  2003/09/02 17:59:09  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.6  2003/07/31 19:18:10  caines
  * Petrs improved simulation code
  *
@@ -30,7 +33,7 @@
  *
  **************************************************************************/
 
-#include <fstream.h>
+#include "Stiostream.h"
 
 #include "StSvtClassLibrary/StSvtHybridPixelsC.hh"
 #include "StDbUtilities/StGlobalCoordinate.hh"
@@ -398,9 +401,9 @@ double StSvtSimulation::makeGausDev(double sigma)
         
     } while(rsq >= 1.0 || rsq == 0.0);
 
-     fac = sigma*sqrt(-2.0*log(rsq)/rsq);
+     fac = sigma*::sqrt(-2.0*::log(rsq)/rsq);
 
-     gset = v1*fac;  // gset = 3.0*sqrt(-2.0*log(rsq))*(v1/sqrt(rsq))
+     gset = v1*fac;  // gset = 3.0*::sqrt(-2.0*::log(rsq))*(v1/::sqrt(rsq))
      iset = 1;
      return v2*fac;
    }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.27 2003/05/02 23:54:22 hardtke Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.28 2003/09/02 17:59:19 perev Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.28  2003/09/02 17:59:19  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.27  2003/05/02 23:54:22  hardtke
  * Allow user to adjust normalFactor (i.e. Fudge Factor)
  *
@@ -152,9 +155,9 @@ using std::sort;
 #endif
 
 
-static const double sigmaL = .037*centimeter/sqrt(centimeter);
-//static const double sigmaT = .0633*centimeter/sqrt(centimeter);
-static const double sqrtTwoPi = sqrt(twopi);
+static const double sigmaL = .037*centimeter/::sqrt(centimeter);
+//static const double sigmaT = .0633*centimeter/::sqrt(centimeter);
+static const double sqrtTwoPi = ::sqrt(twopi);
 StTrsAnalogSignalGenerator* StTrsParameterizedAnalogSignalGenerator::mInstance = 0; 
 // static data member
 
@@ -439,7 +442,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	    //   cout<<Dx<<" "<<D[2]<<" "<<mDriftVelocity<<endl;
            
 	   if( z<0.){cout<<"wrong z in function StTrsPara..e..."<<z<<endl;continue;}   
-	    sigmaLz=sigmaL* sqrt(z);
+	    sigmaLz=sigmaL* ::sqrt(z);
              sigmaLt=sigmaLz/mDriftVelocity;
 	     signalTime =
 	       (z-offset)/mDriftVelocity; //inner outer offset is already in z
@@ -455,7 +458,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
             bin_low=max(0,(int)(signalTime/mTimeBinWidth)-timeBinLowerLimit+1);            
             bin_high=min(max_bin-1,(int)(signalTime/mTimeBinWidth)+timeBinUpperLimit);     
 	  
-	    //  K = sigmaLoverTau*sqrt(z)/mDriftVelocity; 
+	    //  K = sigmaLoverTau*::sqrt(z)/mDriftVelocity; 
 	   
 
            
@@ -620,8 +623,8 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
                     
 		    //	    localXDirectionCoupling[ipad2]  =
 
-		    //     mPadResponseFunctionSigma/sqrt(sigma_xpad2)*exp(-0.5*delx*delx/sigma_xpad2);   //sqrt(2pi) is absorbed in the local Y coupling
-                     localXDirectionCoupling[ipad2]= mPadResponseFunctionSigma/Dx*(erf_fast((Dx/2-delx)/sqrt(2*sigma_xpad2))-erf_fast((-Dx/2-delx)/sqrt(2*sigma_xpad2)))*0.5;   //sqrt(2pi) is absorbed in the local Y coupling
+		    //     mPadResponseFunctionSigma/::sqrt(sigma_xpad2)*exp(-0.5*delx*delx/sigma_xpad2);   //::sqrt(2pi) is absorbed in the local Y coupling
+                     localXDirectionCoupling[ipad2]= mPadResponseFunctionSigma/Dx*(erf_fast((Dx/2-delx)/::sqrt(2*sigma_xpad2))-erf_fast((-Dx/2-delx)/::sqrt(2*sigma_xpad2)))*0.5;   //::sqrt(2pi) is absorbed in the local Y coupling
                                 
                       
 		    //	    cout<<ipad2<<" "<<localXDirectionCoupling[ipad2]<<" "<<endl;
@@ -745,16 +748,16 @@ double StTrsParameterizedAnalogSignalGenerator::realShaperResponse(double tbin, 
     double value=0.0;
     
     
-    //double sigmaL = .05*centimeter/sqrt(centimeter);
+    //double sigmaL = .05*centimeter/::sqrt(centimeter);
     // double t = mTimeBinWidth*(tbin+.5);//started from the center of time bin
     //double t = mTimeBinWidth*(tbin);//  started from the edge of time bin ,HL
     t = tbin; //passed it directly.
     
     tzero = sig.time() ;// Hui Long,8/26/99
     // tzero =0;
-    //double K = sigmaL*sqrt(sig.time())/(tau*sqrt(driftVelocity));
-    K = sigmaLoverTau*sqrt((tzero- mTimeShiftOfSignalCentroid)/mDriftVelocity);//retrieve the real drift length,HL,8/31/99
-    //UNITS:   sigmaL:  cm/sqrt(cm)
+    //double K = sigmaL*::sqrt(sig.time())/(tau*::sqrt(driftVelocity));
+    K = sigmaLoverTau*::sqrt((tzero- mTimeShiftOfSignalCentroid)/mDriftVelocity);//retrieve the real drift length,HL,8/31/99
+    //UNITS:   sigmaL:  cm/::sqrt(cm)
     //         mTau:    second
     //         tzero:  second
     //          mTimeBinwidth : second
@@ -787,7 +790,7 @@ double StTrsParameterizedAnalogSignalGenerator::addNoise(double sigma)
    z = drand48();
    x = z * 6.283185;
    
-   return sigma*sin(x)*sqrt(-2*log(y));//Gaussian with mean=0
+   return sigma*sin(x)*::sqrt(-2*::log(y));//Gaussian with mean=0
     
  }
 
@@ -847,7 +850,7 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
 
                         for(int itbin=bin_low;itbin<=bin_high;itbin++){
                         timeBinT = itbin*mTimeBinWidth; 
-                        K = sigmaLoverTau*sqrt((signalTime- mTimeShiftOfSignalCentroid)/mDriftVelocity);
+                        K = sigmaLoverTau*::sqrt((signalTime- mTimeShiftOfSignalCentroid)/mDriftVelocity);
                         lambda =  (-timeBinT +signalTime)/(K*mTau) + K;
                         lambdasqr = lambda*lambda;
 			SignalInTimeBin[itbin]+=(sqr(K)*exp(K*(lambda-.5*K))*

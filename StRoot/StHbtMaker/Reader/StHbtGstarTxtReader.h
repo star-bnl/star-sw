@@ -18,7 +18,7 @@
 #define StHbtGstarTxtReader_hh
 
 class StEvent;
-class ifstream;
+//VP class ifstream;
 
 #ifdef __ROOT__
 #include "StMaker.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdAlign.cc,v 1.3 2001/06/16 00:14:42 jeromel Exp $
+ * $Id: StSsdAlign.cc,v 1.4 2003/09/02 17:59:05 perev Exp $
  *
  * Author: Ludovic Gaudichet
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSsdAlign.cc,v $
+ * Revision 1.4  2003/09/02 17:59:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2001/06/16 00:14:42  jeromel
  * REmoved unused var
  *
@@ -410,8 +413,8 @@ globalPoint StSsdAlign::findVertex(int ev)
 			  a.y = p0.y - lambda*b.y;
 			  a.z = p0.z - lambda*b.z;
 
-			  if ( (sqrt(a.z*a.z) < vertex_length) &&
-			       (sqrt(a.x*a.x + a.y*a.y) < vertex_width) )
+			  if ( (::sqrt(a.z*a.z) < vertex_length) &&
+			       (::sqrt(a.x*a.x + a.y*a.y) < vertex_width) )
 			    {
 			      eventTracks[num_track].p[0] = p0;
 			      eventTracks[num_track].waferID[0] = barrel0;
@@ -1306,7 +1309,7 @@ void StSsdAlign::tetaDistri(int &nval, double *teta)
       else
 	{
 	  teta[compt] =
-	    atan( sqrt( mEvents[ev]->getTrack(itrack)->b.x*mEvents[ev]->getTrack(itrack)->b.x +
+	    atan( ::sqrt( mEvents[ev]->getTrack(itrack)->b.x*mEvents[ev]->getTrack(itrack)->b.x +
 			mEvents[ev]->getTrack(itrack)->b.z*mEvents[ev]->getTrack(itrack)->b.z )/
 		  fabs(mEvents[ev]->getTrack(itrack)->b.y) );
 	  itrack++;

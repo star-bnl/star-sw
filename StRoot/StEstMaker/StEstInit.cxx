@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.13 2002/11/21 23:02:48 caines Exp $
+ * $Id: StEstInit.cxx,v 1.14 2003/09/02 17:58:04 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.14  2003/09/02 17:58:04  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.13  2002/11/21 23:02:48  caines
  * Fix helicity initialization for TPC tracks and no longer use assumed vertex if one isnt there
  *
@@ -270,7 +273,7 @@ int StEstTracker::SVTInit(StSvtGeometry*   svggeom,
     zmin = (int)floor((mIndexWaf[il]->GetX()->z() - svgshape[shape].shape[1])/mZBin) + mNZBins/2;
     zmax = (int)floor((mIndexWaf[il]->GetX()->z() + svgshape[shape].shape[1])/mZBin) + mNZBins/2;
     phi0 = ( atan2(mIndexWaf[il]->GetX()->y(),mIndexWaf[il]->GetX()->x()) + M_PI)*C_DEG_PER_RAD;
-    r = sqrt(mIndexWaf[il]->GetX()->x() * mIndexWaf[il]->GetX()->x() + 
+    r = ::sqrt(mIndexWaf[il]->GetX()->x() * mIndexWaf[il]->GetX()->x() + 
 	     mIndexWaf[il]->GetX()->y() * mIndexWaf[il]->GetX()->y());
     dphi=atan(svgshape[shape].shape[0]/r)*C_DEG_PER_RAD;
     pmin= (int)floor((phi0-dphi)/mPhiBin);
@@ -422,7 +425,7 @@ int StEstTracker::SVTInit(StSvtGeometry*   svggeom,
 	
 	xg = new StThreeVectorD(scsspt[il].x[0],scsspt[il].x[1],scsspt[il].x[2]);
 	xl = new StThreeVectorD(scsspt[il].xl[0],scsspt[il].xl[1],0);
-	eg = new StThreeVectorD(sqrt(scsspt[il].cov[0]),sqrt(scsspt[il].cov[1]),sqrt(scsspt[il].cov[2]));
+	eg = new StThreeVectorD(::sqrt(scsspt[il].cov[0]),::sqrt(scsspt[il].cov[1]),::sqrt(scsspt[il].cov[2]));
 	el = new StThreeVectorD(0,0,0);
 	
 	//create a hit object
@@ -595,7 +598,7 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
     // sorting TPC hits on the radius
     mTPCTrack[il]->SortHits();
     if (mTPCTrack[il]->GetFlag()>0 && mTPCTrack[il]->GetNHits()>0) {
-      rrr = sqrt(mTPCTrack[il]->mR[mTPCTrack[il]->mHitIndex[0]]->x()*mTPCTrack[il]->mR[mTPCTrack[il]->mHitIndex[0]]->x()
+      rrr = ::sqrt(mTPCTrack[il]->mR[mTPCTrack[il]->mHitIndex[0]]->x()*mTPCTrack[il]->mR[mTPCTrack[il]->mHitIndex[0]]->x()
 		 + mTPCTrack[il]->mR[mTPCTrack[il]->mHitIndex[0]]->y()*mTPCTrack[il]->mR[mTPCTrack[il]->mHitIndex[0]]->y());
       mTPCTrack[il]->SetR(rrr);
       if (fabs(r0[il] - rrr)>30) {

@@ -33,7 +33,7 @@ bool StiDefaultHitAssociationFilter::accept(const StiHit * h1,const StiHit * h2)
 {
   double dy = h1->y()- h2->y();
   double dz = h1->z()- h2->z();
-  double dr = sqrt(dy*dy+dz*dz);
+  double dr = ::sqrt(dy*dy+dz*dz);
   if (dr>0)
     _quality = 1/dr;
   else

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMCSlat.cxx,v 2.4 2003/05/21 18:23:18 ullrich Exp $
+ * $Id: StTofMCSlat.cxx,v 2.5 2003/09/02 17:58:06 perev Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofMCSlat.cxx,v $
+ * Revision 2.5  2003/09/02 17:58:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.4  2003/05/21 18:23:18  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -23,10 +26,10 @@
  * Initial Revision.
  *
  **************************************************************************/
-#include "iostream.h"
+#include "Stiostream.h"
 #include "StTofMCSlat.h"
 
-static const char rcsid[] = "$Id: StTofMCSlat.cxx,v 2.4 2003/05/21 18:23:18 ullrich Exp $";
+static const char rcsid[] = "$Id: StTofMCSlat.cxx,v 2.5 2003/09/02 17:58:06 perev Exp $";
 
 ClassImp(StTofMCSlat)
 

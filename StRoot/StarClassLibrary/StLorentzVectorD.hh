@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVectorD.hh,v 1.3 2000/09/25 20:22:51 ullrich Exp $
+ * $Id: StLorentzVectorD.hh,v 1.4 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StLorentzVectorD.hh,v $
+ * Revision 1.4  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2000/09/25 20:22:51  ullrich
  * Removed inheritance from TObject.
  *
@@ -172,9 +175,9 @@ inline double StLorentzVectorD::m() const
 {
     double mass2 = m2();
     if (mass2 < 0)
-	return -sqrt(-mass2);
+	return -::sqrt(-mass2);
     else
-	return sqrt(mass2);
+	return ::sqrt(mass2);
 }
 
 inline double StLorentzVectorD::mt2() const
@@ -189,9 +192,9 @@ inline double StLorentzVectorD::mt() const
     // return e()*e() - pz()*pz();
     double massPerp2 = mt2();
     if (massPerp2 < 0)
-	return -sqrt(-massPerp2);
+	return -::sqrt(-massPerp2);
     else
-	return sqrt(massPerp2);
+	return ::sqrt(massPerp2);
 }
 
 inline void StLorentzVectorD::setPx(double x) {mThreeVector.setX(x);}
@@ -288,7 +291,7 @@ inline double& StLorentzVectorD::operator[] (size_t i)
 
 inline double StLorentzVectorD::rapidity() const
 {
-    return 0.5*log((mX4+mThreeVector.z())/(mX4-mThreeVector.z()));
+    return 0.5*::log((mX4+mThreeVector.z())/(mX4-mThreeVector.z()));
 }
 
 inline StLorentzVectorD StLorentzVectorD::operator- ()

@@ -1,7 +1,10 @@
 //
-// $Id: StEmcPreCluster.h,v 1.6 2001/04/17 23:51:30 pavlinov Exp $
+// $Id: StEmcPreCluster.h,v 1.7 2003/09/02 17:58:49 perev Exp $
 //
 // $Log: StEmcPreCluster.h,v $
+// Revision 1.7  2003/09/02 17:58:49  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.6  2001/04/17 23:51:30  pavlinov
 // Clean up before MDC4
 //
@@ -49,7 +52,7 @@
 #define STAR_StEmcPreCluster
 
 #include <math.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TArrayI.h"
 #include "StObject.h"
 #include "StEvent/StEmcDetector.h"

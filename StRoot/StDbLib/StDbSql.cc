@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.20 2003/04/11 22:47:36 porter Exp $
+ * $Id: StDbSql.cc,v 1.21 2003/09/02 17:57:49 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.21  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.20  2003/04/11 22:47:36  porter
  * Added a fast multi-row write model specifically needed by the daqEventTag
  * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
@@ -109,8 +112,8 @@
 #include "StDbTable.h"
 #include "StDbFastSqlWriter.h"
 
-#include <strstream.h>
-#include <iostream.h>
+#include <Stsstream.h>
+#include <Stiostream.h>
 
 #define __CLASS__ "StDbSql"
 
@@ -263,7 +266,7 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
  // terminate the baseString
    bs<<" "<<ends;
 
-   char* baseString = bs.str();
+   const char* baseString = bs.str();
    bs.freeze(0);
 
  //--> add element ID list part of query
@@ -750,7 +753,7 @@ StDbSql::WriteDbNoIndex(StDbTable* table, unsigned int storeTime){
   char* sTime=getDateTime(storeTime);
 
   int numRows=table->GetNRows();
-  char* colList=cList.str();
+  const char* colList=cList.str();
   int i;
   bool hasBinary=false;
   if(Db.InputStart(dataTable,&buff,colList,numRows,hasBinary)){
@@ -773,7 +776,7 @@ StDbSql::WriteDbNoIndex(StDbTable* table, unsigned int storeTime){
       StDbFastSqlWriter writer(fsql);
       writer.ioTable(table);
       fsql<<ends;
-      char* sql=fsql.str();
+      const char* sql=fsql.str();
       Db<<sql; fsql.freeze(0);
       if(Db.InputEnd()){
 	retVal=1;

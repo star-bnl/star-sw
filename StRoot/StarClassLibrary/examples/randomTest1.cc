@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: randomTest1.cc,v 1.1 1999/02/17 12:44:01 ullrich Exp $
+ * $Id: randomTest1.cc,v 1.2 2003/09/02 17:59:38 perev Exp $
  *
  * Author: Brian Lasiuk, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: randomTest1.cc,v $
+ * Revision 1.2  2003/09/02 17:59:38  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  1999/02/17 12:44:01  ullrich
  * New Revision
  *
@@ -17,7 +20,7 @@
  * Initial Revision
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <string>
 #include "StGlobals.hh"
 #include "StPrompt.hh"

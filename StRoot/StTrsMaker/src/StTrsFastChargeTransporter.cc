@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.15 2000/07/30 02:39:51 long Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.16 2003/09/02 17:59:19 perev Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
+ * Revision 1.16  2003/09/02 17:59:19  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.15  2000/07/30 02:39:51  long
  * comment out diffusion calculations,they will be done in other place.
  *
@@ -121,12 +124,12 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg,dou
     
     if( b <mB2[1])
         
-         SigmaT= b<mB2[0]? mSigmaTransverse *sqrt(drift/(mK[0]*b+mb[0])):
-                         mSigmaTransverse *sqrt(drift/(mK[1]*b+mb[1])) ;
+         SigmaT= b<mB2[0]? mSigmaTransverse *::sqrt(drift/(mK[0]*b+mb[0])):
+                         mSigmaTransverse *::sqrt(drift/(mK[1]*b+mb[1])) ;
     else
-         SigmaT= b<mB2[2]? mSigmaTransverse *sqrt(drift/(mK[2]*b+mb[2])):
-                         mSigmaTransverse *sqrt(drift/(mK[3]*b+mb[3])) ;
-     SigmaL=   mSigmaLongitudinal*sqrt(drift);
+         SigmaT= b<mB2[2]? mSigmaTransverse *::sqrt(drift/(mK[2]*b+mb[2])):
+                         mSigmaTransverse *::sqrt(drift/(mK[3]*b+mb[3])) ;
+     SigmaL=   mSigmaLongitudinal*::sqrt(drift);
     // Projection onto pad plane
     //PR(mGeomDb->frischGrid());
     //double frischGrid = (seg.position().z() > 0) ?
@@ -155,7 +158,7 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg,dou
     // while in transport.  Must be scaled by the number
     // of electrons in the charge cluster
     //
-    double ne = sqrt(seg.charge());
+    double ne = ::sqrt(seg.charge());
     if (mTransverseDiffusion) {
       //	seg.position().setX(mGaussDistribution.shoot(seg.position().x(),
       // 					     SigmaT/ne));

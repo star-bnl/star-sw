@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.4 2003/05/29 13:11:51 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.5 2003/09/02 17:58:48 perev Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -11,6 +11,9 @@
  ***********************************************************
  *
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.5  2003/09/02 17:58:48  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.4  2003/05/29 13:11:51  subhasis
  * lev1, lev2 dimension increased from 20 to 50
  *
@@ -21,7 +24,7 @@
  * Clustering for CPV plane implemented same as PMD plane
  ***********************************************************/
 
-#include<iostream.h>
+#include<Stiostream.h>
 #include<assert.h>
 #include<math.h>
 #include"TROOT.h"
@@ -53,7 +56,7 @@ Double_t crd_org[2][96][72];
 
 Int_t iord[2][6912], infocl[2][96][72], inford[3][6912], clno;
 const Int_t nmx=6912;   //! (72 x 96)maximum number of cells in a supermodule
-const Double_t pi=3.141593, sqrth=sqrt(3.)/2.;
+const Double_t pi=3.141593, sqrth=::sqrt(3.)/2.;
 
 StPmdGeom *geom=new StPmdGeom(); //! utility class
 //-------------------------------------------------
@@ -464,7 +467,7 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 	  lev1[0]=0; lev2[0]=0;
 	  for(k=0; k<=ig; k++){  // loop over all clus found after gaussian.
 	    dist=Dist(x[j], y[j], xc[k], yc[k]); 
-	    if(dist < sqrt(3.) ){
+	    if(dist < ::sqrt(3.) ){
 	      lev1[0]++; i1=lev1[0]; lev1[i1]=k;
 	    }else{
 	      if(dist < 2.1){
@@ -610,7 +613,7 @@ void StPmdClustering::gaussfit(Int_t ncell, Int_t nclust, Double_t &x, Double_t 
 /*! distance between centre of two clusters */
 Double_t StPmdClustering::Dist(Double_t x1, Double_t y1, Double_t x2, Double_t y2)
 {
-  return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+  return ::sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
 }
 //----------------------------------------------
 /*! Super clusters are constructed by using crclust function and

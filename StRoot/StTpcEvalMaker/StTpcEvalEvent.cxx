@@ -1,5 +1,8 @@
-//  $Id: StTpcEvalEvent.cxx,v 1.3 2001/04/06 22:27:15 flierl Exp $
+//  $Id: StTpcEvalEvent.cxx,v 1.4 2003/09/02 17:59:13 perev Exp $
 //  $Log: StTpcEvalEvent.cxx,v $
+//  Revision 1.4  2003/09/02 17:59:13  perev
+//  gcc 3.2 updates + WarnOff
+//
 //  Revision 1.3  2001/04/06 22:27:15  flierl
 //  add zillion of comments
 //
@@ -175,13 +178,13 @@ void MatchedTrackPair::addHitResolution(StThreeVectorF& reso) {
   mSpatialResolution /= mHitCounter;
 
   Float_t mx;
-  mx = sqrt(mSpatialResolutionRMS.x()*mSpatialResolutionRMS.x()
+  mx = ::sqrt(mSpatialResolutionRMS.x()*mSpatialResolutionRMS.x()
 	    + reso.x()*reso.x());
   mSpatialResolutionRMS.setX(mx);
-  mx = sqrt(mSpatialResolutionRMS.y()*mSpatialResolutionRMS.y()
+  mx = ::sqrt(mSpatialResolutionRMS.y()*mSpatialResolutionRMS.y()
 	    + reso.y()*reso.y());
   mSpatialResolutionRMS.setY(mx);
-  mx = sqrt(mSpatialResolutionRMS.z()*mSpatialResolutionRMS.z()
+  mx = ::sqrt(mSpatialResolutionRMS.z()*mSpatialResolutionRMS.z()
 	    + reso.z()*reso.z());
   mSpatialResolutionRMS.setZ(mx);
 

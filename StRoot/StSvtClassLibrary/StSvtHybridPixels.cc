@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtHybridPixels.cc,v 1.3 2000/11/30 20:39:12 caines Exp $
+ * $Id: StSvtHybridPixels.cc,v 1.4 2003/09/02 17:59:06 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridPixels.cc,v $
+ * Revision 1.4  2003/09/02 17:59:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2000/11/30 20:39:12  caines
  * Changed to allow us of database
  *
@@ -25,7 +28,7 @@
 //                                                                        //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StSvtHybridPixels.hh"
 
 ClassImp(StSvtHybridPixels)

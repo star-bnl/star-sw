@@ -11,7 +11,7 @@ Bichsel::Bichsel() {
 						      );
 }
 //________________________________________________________________________________
-Double_t  Bichsel::GetI70(Double_t log10bg, Double_t log2dx, Int_t kase=0)  {
+Double_t  Bichsel::GetI70(Double_t log10bg, Double_t log2dx, Int_t kase)  {
   return m_dEdxParameterization->GetI70(log10bg,log2dx,kase)
 #ifndef P03ia
     *TMath::Exp(-TofCorrection(log2dx))
@@ -24,9 +24,9 @@ Double_t  Bichsel::TofCorrection(Double_t log10bg) {
     /*   0  Offset          */   1.33408e-01,// 1.72376e-01,
     /*   1  beta2Inv1       */  -4.30665e-01,
     /*   2  beta2Inv2       */   1.29081e-01,
-    /*   3  log(beta*gamma)1*/  -9.94174e-02,
-    /*   4  log(beta*gamma)2*/   1.70633e-02,
-    /*   5  log(beta*gamma)3*/  -1.03019e-03,
+    /*   3  ::log(beta*gamma)1*/  -9.94174e-02,
+    /*   4  ::log(beta*gamma)2*/   1.70633e-02,
+    /*   5  ::log(beta*gamma)3*/  -1.03019e-03,
   };
   Double_t poverm = TMath::Power(10.,log10bg);
   Double_t beta2Inv  = 1. + 1./(poverm*poverm);

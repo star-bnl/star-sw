@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StProbPidTraits.cxx,v 2.1 2002/10/31 22:47:11 fisyak Exp $
+ * $Id: StProbPidTraits.cxx,v 2.2 2003/09/02 17:58:05 perev Exp $
  *
  * Author: Yuri Fisyak, Oct 2002
  ***************************************************************************
@@ -10,17 +10,20 @@
  ***************************************************************************
  *
  * $Log: StProbPidTraits.cxx,v $
+ * Revision 2.2  2003/09/02 17:58:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.1  2002/10/31 22:47:11  fisyak
  * Add new class to keep H.Bichsel probabilities for each mass hypothesis
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StProbPidTraits.h"
 #include "StParticleTypes.hh"
 #include "TMath.h"
 ClassImp(StProbPidTraits)
 
-static const char rcsid[] = "$Id: StProbPidTraits.cxx,v 2.1 2002/10/31 22:47:11 fisyak Exp $";
+static const char rcsid[] = "$Id: StProbPidTraits.cxx,v 2.2 2003/09/02 17:58:05 perev Exp $";
 StParticleDefinition *StProbPidTraits::mPidParticleDefinitions[KPidParticles] = {
   StElectron::instance(),
   StProton::instance(),     

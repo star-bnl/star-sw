@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.6 2003/05/20 20:46:04 thenry Exp $
+// $Id: StJets.cxx,v 1.7 2003/09/02 17:59:01 perev Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.7  2003/09/02 17:59:01  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.6  2003/05/20 20:46:04  thenry
 // Accidentally left debug output line in last commit.
 //
@@ -53,7 +56,7 @@
 //////////////////////////////////////////////////////////////////////
 
 //std
-#include <iostream>
+#include "Stiostream.h"
 
 //StJetFinder
 #include "StJetFinder/StProtoJet.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbSlowControl.hh,v 1.4 2000/05/18 17:48:47 long Exp $
+ * $Id: StTpcDbSlowControl.hh,v 1.5 2003/09/02 17:59:16 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbSlowControl.hh,v $
+ * Revision 1.5  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.4  2000/05/18 17:48:47  long
  * re_pointing drift velocity to calibrated drift velocity
  *
@@ -34,7 +37,7 @@
 #ifndef ST_TPC_DB_SLOW_CONTROL_HH
 #define ST_TPC_DB_SLOW_CONTROL_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 
 #include "SystemOfUnits.h"

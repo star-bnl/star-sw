@@ -1,5 +1,8 @@
-//$Id: estimateVertexZ.cc,v 1.10 2001/04/25 19:09:46 perev Exp $
+//$Id: estimateVertexZ.cc,v 1.11 2003/09/02 17:59:31 perev Exp $
 //$Log: estimateVertexZ.cc,v $
+//Revision 1.11  2003/09/02 17:59:31  perev
+//gcc 3.2 updates + WarnOff
+//
 //Revision 1.10  2001/04/25 19:09:46  perev
 //HPcorrs
 //
@@ -33,7 +36,7 @@ void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHei
   {for( Int_t i=0; i<hitNumber; i++,tphitPtr++) {
     Float_t hitX = tphitPtr->x;     
     Float_t hitY = tphitPtr->y;     
-    radius2D[i] = sqrt( hitX*hitX + hitY*hitY );
+    radius2D[i] = ::sqrt( hitX*hitX + hitY*hitY );
   }}
   
   tphitPtr = tphitT;

@@ -54,10 +54,10 @@ double StHbtThPairGaussFit::GetRejectionProb2Size (double aX, double aY, double 
     tEM1= &mSourceDist1;
     tEM2= &mSourceDist2;
   }
-  return exp(-0.5*((pow(tEM1->x(),2)+pow(tEM2->x(),2))*tCorSizeX
-		   +(pow(tEM1->y(),2)+pow(tEM2->y(),2))*tCorSizeY
-		   +(pow(tEM1->z(),2)+pow(tEM2->z(),2))*tCorSizeZ
-		   +(pow(tEM1->t(),2)+pow(tEM2->t(),2))*tCorSizeT));
+  return exp(-0.5*((::pow(tEM1->x(),2)+::pow(tEM2->x(),2))*tCorSizeX
+		   +(::pow(tEM1->y(),2)+::pow(tEM2->y(),2))*tCorSizeY
+		   +(::pow(tEM1->z(),2)+::pow(tEM2->z(),2))*tCorSizeZ
+		   +(::pow(tEM1->t(),2)+::pow(tEM2->t(),2))*tCorSizeT));
   */
 }
 

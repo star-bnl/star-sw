@@ -75,7 +75,7 @@ MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse
     StThreeVectorD posDCA = TrkHlx.at(spath);
     //cout<<" DCA Position: "<<posDCA<<endl;
     double x_m = posDCA.x(), y_m = posDCA.y();
-    double dmin = sqrt(x_m*x_m + y_m*y_m);
+    double dmin = ::sqrt(x_m*x_m + y_m*y_m);
     if( dmin > MaxTrkDcaRxy ) continue;
     n2++;
     head->hmtr[0]->Fill(2);
@@ -101,7 +101,7 @@ MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse
     //Find momentum direction at vertex point
     StThreeVectorD pmom;
     pmom = TrkHlx.momentumAt(spath, bfield*tesla);
-    double beta = pmom.mag()/sqrt(pmom.mag()*pmom.mag()+0.139*0.139); //Assume pion 
+    double beta = pmom.mag()/::sqrt(pmom.mag()*pmom.mag()+0.139*0.139); //Assume pion 
     float strag=0.0136/beta/pmom.mag()*fabs(spath);
     if(fabs(bfield)<0.01) strag=0.0136*fabs(spath);
 
@@ -128,7 +128,7 @@ MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse
     }
     
     StThreeVectorD posCTB = TrkHlx.at(d2.second);
-    double xmagn = sqrt( posCTB.x()*posCTB.x() + posCTB.y()*posCTB.y() );
+    double xmagn = ::sqrt( posCTB.x()*posCTB.x() + posCTB.y()*posCTB.y() );
     // printf(" punch2 x,y,z=%.1f, %.1f, %.1f, Rxy=%.1f\n",posCTB.x(),posCTB.y(),posCTB.z(),xmagn);
     
     float phi=atan2(posCTB.y(),posCTB.x());

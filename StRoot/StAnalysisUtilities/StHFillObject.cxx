@@ -1,5 +1,8 @@
-// $Id: StHFillObject.cxx,v 1.6 2001/05/31 02:39:47 perev Exp $
+// $Id: StHFillObject.cxx,v 1.7 2003/09/02 17:55:25 perev Exp $
 // $Log: StHFillObject.cxx,v $
+// Revision 1.7  2003/09/02 17:55:25  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.6  2001/05/31 02:39:47  perev
 // const(ing)
 //
@@ -48,7 +51,7 @@
 #include "TArrayD.h"
 #include "TClass.h"
 #include <string.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "StMessMgr.h"
 // Need for StHFillFormula::Eval

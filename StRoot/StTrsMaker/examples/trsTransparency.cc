@@ -1,5 +1,5 @@
 //*************************************************************
-// $Id: trsTransparency.cc,v 1.2 1998/11/13 00:24:37 lasiuk Exp $
+// $Id: trsTransparency.cc,v 1.3 2003/09/02 17:59:15 perev Exp $
 //
 // Author: brian, October 1998
 //
@@ -9,6 +9,9 @@
 //          Data Bases.
 //
 // $Log: trsTransparency.cc,v $
+// Revision 1.3  2003/09/02 17:59:15  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  1998/11/13 00:24:37  lasiuk
 // TRUE/FALSE, pntrs in Db
 //
@@ -19,7 +22,7 @@
 // Initial Revision
 //
 /********************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <unistd.h>    // needed for access()
 
 #include <string>

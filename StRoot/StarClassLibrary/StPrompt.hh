@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrompt.hh,v 1.5 2002/05/01 01:09:50 ullrich Exp $
+ * $Id: StPrompt.hh,v 1.6 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Thomas Ullrich, Oct 15 1997
  ***************************************************************************
@@ -32,6 +32,9 @@
  ***************************************************************************
  *
  * $Log: StPrompt.hh,v $
+ * Revision 1.6  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2002/05/01 01:09:50  ullrich
  * Changed int to unsigned int to get rid of warning message.
  *
@@ -54,8 +57,8 @@
 #ifndef ST_PROMPT_HH
 #define ST_PROMPT_HH
 
-#include <iostream.h>
-#include <strstream.h>
+#include <Stiostream.h>
+#include <Stsstream.h>
 #include <string>
 #include <ctype.h>
 #if !defined(ST_NO_NAMESPACES)

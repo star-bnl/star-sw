@@ -38,47 +38,47 @@
 #ifndef trgStructures2003_h
 #define trgStructures2003_h
 
-#define MAX_L0_DATA_BLOCKS    11              /* Maximum number of L0 Data Blocks:  current + npre + npost */
-#define MAX_RAW_DATA_BLOCKS   11              /* Maximum number of Raw Data Blocks:  current + npre + npost */
-#define FORMAT_VERSION   0x20                 /* Format Version number for trigger data */
-#define EV_DESC_LEN      sizeof(EvtDescData)  /* Number of bytes in event descriptor */
-#define L0DSM_DATA_LEN   sizeof(L0_DSM_Data)  /* Size of data block in L0 DSM Tree */
-#define RAW_DET_DATA_LEN sizeof(RawTrgDet)    /* Size of Raw Detector Data from CTB, MWC with headers */
-#define TRG_SUM_LEN      sizeof(TrgSumData)   /* Number of bytes in the trigger summary for DAQ with headers */
+#define y3MAX_L0_DATA_BLOCKS    11              /* Maximum number of L0 Data Blocks:  current + npre + npost */
+#define y3MAX_RAW_DATA_BLOCKS   11              /* Maximum number of Raw Data Blocks:  current + npre + npost */
+#define y3FORMAT_VERSION   0x20                 /* Format Version number for trigger data */
+#define y3EV_DESC_LEN      sizeof(EvtDescData)  /* Number of bytes in event descriptor */
+#define y3L0DSM_DATA_LEN   sizeof(L0_DSM_Data)  /* Size of data block in L0 DSM Tree */
+#define y3RAW_DET_DATA_LEN sizeof(RawTrgDet)    /* Size of Raw Detector Data from CTB, MWC with headers */
+#define y3TRG_SUM_LEN      sizeof(TrgSumData)   /* Number of bytes in the trigger summary for DAQ with headers */
 
-#define L1_DATA_LEN  (EV_DESC_LEN+TRG_SUM_LEN)   /* Size of data passed from L1ANA to L2 */ 
-#define TRG_EVT_LEN  (L1_DATA_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN))  /* Max size of a trigger event */
-#define TDI_EVT_LEN  (EV_DESC_LEN+TRG_SUM_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN)) /* size of event sent to TDI */
+#define y3L1_DATA_LEN  (y3EV_DESC_LEN+y3TRG_SUM_LEN)   /* Size of data passed from L1ANA to L2 */ 
+#define y3TRG_EVT_LEN  (y3L1_DATA_LEN+(y3MAX_RAW_DATA_BLOCKS*y3RAW_DET_DATA_LEN))  /* Max size of a trigger event */
+#define y3TDI_EVT_LEN  (y3EV_DESC_LEN+y3TRG_SUM_LEN+(y3MAX_RAW_DATA_BLOCKS*y3RAW_DET_DATA_LEN)) /* size of event sent to TDI */
 
-#define L0_SUM_LEN           148              /* Number of bytes in L0 Summary + Header */
-#define L1_SUM_LEN           132              /* Number of bytes in L1 Summary + Header */
-#define L2_SUM_LEN           116              /* Number of bytes in L2 Summary + Header */
-#define L0_REG_LEN            16              /* Number of bytes in L0 Register + Header */
+#define y3L0_SUM_LEN           148              /* Number of bytes in L0 Summary + Header */
+#define y3L1_SUM_LEN           132              /* Number of bytes in L1 Summary + Header */
+#define y3L2_SUM_LEN           116              /* Number of bytes in L2 Summary + Header */
+#define y3L0_REG_LEN            16              /* Number of bytes in L0 Register + Header */
 
-#define CTB_DATA_OFFSET        8              /* Number of bytes CTB Raw data is offset in raw trigger structure */
-#define RAW_CTB_LEN          256              /* Number of bytes in raw CTB DSMs */
-#define MWC_DATA_OFFSET      272              /* Number of bytes MWC Raw data is offset in raw trigger structure */
-#define RAW_MWC_LEN          128              /* Number of bytes in raw CTB DSMs */
-#define BCE_DATA_OFFSET      408              /* Number of bytes BMC Raw data is offset in raw trigger structure */
-#define RAW_BCE_LEN          240  
-#define BCW_DATA_OFFSET      648
-#define RAW_BCW_LEN          240 
-#define BC1_DATA_OFFSET      888
-#define RAW_BC1_LEN           96 
-#define EEC_DATA_OFFSET      992
-#define RAW_EEC_LEN          176 
-#define FPE_DATA_OFFSET     1176              /* everything after this will have to be re-done */
-#define RAW_FPE_LEN          208
-#define FPW_DATA_OFFSET     1384
-#define RAW_FPW_LEN          208
-#define BBC_DATA_OFFSET     1600
-#define RAW_BBC_LEN          144              /* Number of bytes in BBC and ZDC raw data structures */
+#define y3CTB_DATA_OFFSET        8              /* Number of bytes CTB Raw data is offset in raw trigger structure */
+#define y3RAW_CTB_LEN          256              /* Number of bytes in raw CTB DSMs */
+#define y3MWC_DATA_OFFSET      272              /* Number of bytes MWC Raw data is offset in raw trigger structure */
+#define y3RAW_MWC_LEN          128              /* Number of bytes in raw CTB DSMs */
+#define y3BCE_DATA_OFFSET      408              /* Number of bytes BMC Raw data is offset in raw trigger structure */
+#define y3RAW_BCE_LEN          240  
+#define y3BCW_DATA_OFFSET      648
+#define y3RAW_BCW_LEN          240 
+#define y3BC1_DATA_OFFSET      888
+#define y3RAW_BC1_LEN           96 
+#define y3EEC_DATA_OFFSET      992
+#define y3RAW_EEC_LEN          176 
+#define y3FPE_DATA_OFFSET     1176              /* everything after this will have to be re-done */
+#define y3RAW_FPE_LEN          208
+#define y3FPW_DATA_OFFSET     1384
+#define y3RAW_FPW_LEN          208
+#define y3BBC_DATA_OFFSET     1600
+#define y3RAW_BBC_LEN          144              /* Number of bytes in BBC and ZDC raw data structures */
 
 
-#define ADD_BIT_PILEUP         0              /* Contamination/Pileup bit in event descriptor add-bits */
-#define ADD_BIT_FORCE          5              /* Force store of this event */
-#define ADD_BIT_L2_5           6              /* Level 2.5 abort */
-#define ADD_BIT_SIM            7              /* Simulated event - used by DAQ */
+#define y3ADD_BIT_PILEUP         0              /* Contamination/Pileup bit in event descriptor add-bits */
+#define y3ADD_BIT_FORCE          5              /* Force store of this event */
+#define y3ADD_BIT_L2_5           6              /* Level 2.5 abort */
+#define y3ADD_BIT_SIM            7              /* Simulated event - used by DAQ */
 
 /********** Trigger Structures ***********/
 
@@ -197,7 +197,7 @@ typedef struct {
 struct TrgDataType2003{
   EvtDescData2003    EvtDesc;            /* L1 Event Descriptor Data */
   TrgSumData2003     TrgSum;             /* Summary data */
-  RawTrgDet2003      rawTriggerDet[MAX_RAW_DATA_BLOCKS];    
+  RawTrgDet2003      rawTriggerDet[y3MAX_RAW_DATA_BLOCKS];    
 } ;         /* 19704 bytes */
                                            /* Raw Detector Data with pre and post History */
 

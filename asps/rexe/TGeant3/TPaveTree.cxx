@@ -15,6 +15,9 @@
 
 /*
 $Log: TPaveTree.cxx,v $
+Revision 1.4  2003/09/02 18:00:20  perev
+gcc 3.2 updates + WarnOff
+
 Revision 1.3  2001/02/10 20:31:29  fisyak
 New dev release
 
@@ -48,8 +51,7 @@ Introduction of the Copyright and cvs Log
 //End_Html
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
-#include <fstream.h>
-#include <iostream.h>
+#include "Stiostream.h"
 
 #include <TROOT.h>
 #include <TVirtualPad.h>
@@ -97,7 +99,7 @@ TPaveTree::TPaveTree(const TPaveTree &PaveTree)
 }
 
 //_____________________________________________________________________________
-void TPaveTree::Copy(TObject &obj)
+void TPaveTree::Copy(TObject &obj) const
 {
   //
   //  Copy this PaveTree to PaveTree

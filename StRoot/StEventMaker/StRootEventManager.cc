@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.11 2003/01/22 21:42:00 genevb Exp $
+ * $Id: StRootEventManager.cc,v 2.12 2003/09/02 17:58:09 perev Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
+ * Revision 2.12  2003/09/02 17:58:09  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.11  2003/01/22 21:42:00  genevb
  * Fix solaris compilation
  *
@@ -49,14 +52,13 @@
  * Revised to build new StEvent version
  *
  **************************************************************************/
+#include <string>
+#include <Stsstream.h>
+#include <Stiostream.h>
 #include "Rtypes.h"
 #include "StRootEventManager.hh"
 #include "StChain.h"
-#include <string>
-#include <strstream.h>
-#if !defined(ST_NO_NAMESPACES)
 using std::string;
-#endif
 
 StRootEventManager::StRootEventManager():StEventManager() { /* noop */ }
 

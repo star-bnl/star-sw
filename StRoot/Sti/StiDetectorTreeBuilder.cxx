@@ -2,7 +2,7 @@
 //M.L. Miller (Yale Software)
 //07/01
 
-#include <iostream>
+#include "Stiostream.h"
 #include <stdio.h>
 #include <dirent.h>
 #include <sys/stat.h>

@@ -1,7 +1,7 @@
 #ifndef StNegativeTracks_HH
 #define StNegativeTracks_HH
 #include "StRareTrackCut.h"
-#include <iostream.h>
+#include <Stiostream.h>
 class StPrimaryTrack;
 class StNegativeTracks : public StRareTrackCut {
  

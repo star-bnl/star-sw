@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide 
 // 
-// $Id: StEmcGainMonitor.cxx,v 1.7 2003/01/11 23:34:50 suaide Exp $
+// $Id: StEmcGainMonitor.cxx,v 1.8 2003/09/02 17:57:59 perev Exp $
 // $Log: StEmcGainMonitor.cxx,v $
+// Revision 1.8  2003/09/02 17:57:59  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.7  2003/01/11 23:34:50  suaide
 // added back. Deleted by mistake before
 //
@@ -31,7 +34,7 @@
 // Add README
 //
 #include "StEmcGainMonitor.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include <stdlib.h>
 #include "TSystem.h"
@@ -145,7 +148,7 @@ void StEmcGainMonitor::CalculateGain(Int_t i)
         Int_t ibin1 = h->FindBin(mAdc2);
         Float_t stat = h->Integral(ibin0,ibin1);
         mGain[id-1] = mAvgRef[id-1]/AVG; 
-        mGainErr[id-1] = mGain[id-1]*sqrt(1/mStatRef[id-1]+1/stat);
+        mGainErr[id-1] = mGain[id-1]*::sqrt(1/mStatRef[id-1]+1/stat);
         avgErr+=(mGainErr[id-1]/mGain[id-1]);
         n++;
         if(mHistGain)mHistGain->Fill((Float_t)i,mGain[id-1]);

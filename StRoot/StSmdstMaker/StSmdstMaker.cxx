@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.17 2000/01/04 22:08:41 fisyak Exp $
+// $Id: StSmdstMaker.cxx,v 1.18 2003/09/02 17:58:59 perev Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.18  2003/09/02 17:58:59  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.17  2000/01/04 22:08:41  fisyak
 // replace agufld by gufld
 //
@@ -285,7 +288,7 @@ Int_t StSmdstMaker::FillV0Table() {
      dx = pos.x() - primX;
      dy = pos.y() - primY;
      dz = pos.z() - primZ;
-     dv0 = sqrt( dx*dx + dy*dy + dz*dz );
+     dv0 = ::sqrt( dx*dx + dy*dy + dz*dz );
 
      if (( vertex->dcaDaughters() <= m_max_dca ) &&
          ( vertex->dcaParentToPrimaryVertex() <= m_max_bv0 ) &&
@@ -306,26 +309,26 @@ Int_t StSmdstMaker::FillV0Table() {
        ptotp2 = pMom.mag2();
        pdotn  = nMom.dot(pMom);
 
-       eprp = sqrt(mMasspr2 + ptotp2);
-       eprn = sqrt(mMasspr2 + ptotn2);
-       epip = sqrt(mMasspi2 + ptotp2);
-       epin = sqrt(mMasspi2 + ptotn2);
+       eprp = ::sqrt(mMasspr2 + ptotp2);
+       eprn = ::sqrt(mMasspr2 + ptotn2);
+       epip = ::sqrt(mMasspi2 + ptotp2);
+       epin = ::sqrt(mMasspi2 + ptotn2);
        
-       mala = sqrt( mMasspr2 + mMasspi2 + 2*(eprp*epin - pdotn) );
-       malb = sqrt( mMasspr2 + mMasspi2 + 2*(epip*eprn - pdotn) );
-       mak0 = sqrt( mMasspi2 + mMasspi2 + 2*(epip*epin - pdotn) );
+       mala = ::sqrt( mMasspr2 + mMasspi2 + 2*(eprp*epin - pdotn) );
+       malb = ::sqrt( mMasspr2 + mMasspi2 + 2*(epip*eprn - pdotn) );
+       mak0 = ::sqrt( mMasspi2 + mMasspi2 + 2*(epip*epin - pdotn) );
 
        StThreeVectorF vMom = pMom + nMom;
 
        pt2   = vMom.perp2();
        ptot2 = vMom.mag2();
-       ptot  = sqrt(ptot2);
+       ptot  = ::sqrt(ptot2);
 
        ppp = ( ptotp2 + pdotn )/ptot;
        ppn = ( ptotn2 + pdotn )/ptot;
 
-       ela = sqrt( mMassla2 + ptot2 );
-       ek0 = sqrt( mMassk02 + ptot2 );
+       ela = ::sqrt( mMassla2 + ptot2 );
+       ek0 = ::sqrt( mMassk02 + ptot2 );
 
 //       m_v0->id        = v0_vertex[in].id;
        m_v0->id        = 0;
@@ -349,7 +352,7 @@ Int_t StSmdstMaker::FillV0Table() {
          m_v0->npp       = pTrack->fitTraits().numberOfFitPoints();
        } else m_v0->npp       = 0;
        m_v0->alpha     = (ppp - ppn)/(ppp + ppn);
-       m_v0->ptarm     = sqrt(fabs(ptotp2 - ppp*ppp));
+       m_v0->ptarm     = ::sqrt(fabs(ptotp2 - ppp*ppp));
        m_v0->bn        = vertex->dcaDaughterToPrimaryVertex(negative);
        m_v0->bp        = vertex->dcaDaughterToPrimaryVertex(positive);
        m_v0->dca       = vertex->dcaDaughters();
@@ -376,9 +379,9 @@ Int_t StSmdstMaker::FillV0Table() {
 //         C_D_CURVATURE*bf[2]*track[nkey].invpt;
        m_v0->sagn      = 0;
        m_v0->sagp      = 0;
-       m_v0->rapla     = log((ela+vMom.z())/sqrt(mMassla2+pt2));
+       m_v0->rapla     = ::log((ela+vMom.z())/::sqrt(mMassla2+pt2));
        m_v0->raplb     = m_v0->rapla;
-       m_v0->rapk0     = log((ek0+vMom.z())/sqrt(mMassk02+pt2));
+       m_v0->rapk0     = ::log((ek0+vMom.z())/::sqrt(mMassk02+pt2));
        m_v0->theta     = nMom.angle(pMom) * C_DEG_PER_RAD;
 
        smdst_v0->AddAt(m_v0,out);
@@ -473,12 +476,12 @@ void StSmdstMaker::FillXiHistograms() {
       ptotv2 = vMom.mag2();
       bdotv = vMom.dot(bMom);
 
-      ek0b = sqrt(mMassk02 + ptotb2);
-      epib = sqrt(mMasspi2 + ptotb2);
-      elav = sqrt(mMassla2 + ptotv2);
+      ek0b = ::sqrt(mMassk02 + ptotb2);
+      epib = ::sqrt(mMasspi2 + ptotb2);
+      elav = ::sqrt(mMassla2 + ptotv2);
 
-      maxi = sqrt( mMassla2 + mMasspi2 + 2*(elav*epib - bdotv) );
-      maom = sqrt( mMassla2 + mMassk02 + 2*(elav*ek0b - bdotv) );
+      maxi = ::sqrt( mMassla2 + mMasspi2 + 2*(elav*epib - bdotv) );
+      maom = ::sqrt( mMassla2 + mMassk02 + 2*(elav*ek0b - bdotv) );
 
       m_xi_mass->Fill(maxi);
       m_om_mass->Fill(maom);

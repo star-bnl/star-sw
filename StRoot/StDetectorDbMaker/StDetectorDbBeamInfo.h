@@ -1,15 +1,7 @@
 #ifndef StDetectorDbBeamInfo_h
 #define StDetectorDbBeamInfo_h
-
-#include "StMaker.h"
-
-#ifdef sun
-#include <iostream.h>
-#endif
-
-#ifndef sun
-class ostream;
-#endif
+#include <Stiostream.h>
+class StMaker;
 class  TTable;
 struct beamInfo_st;
 

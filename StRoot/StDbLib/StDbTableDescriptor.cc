@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.20 2002/01/30 15:40:48 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.21 2003/09/02 17:57:50 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.21  2003/09/02 17:57:50  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.20  2002/01/30 15:40:48  porter
  * changed limits on flavor tag & made defaults retrieving more readable
  *
@@ -112,7 +115,7 @@
 #include "StDbTableDescriptor.h"
 #include <stdlib.h>
 #include <math.h>
-#include <iostream.h>
+#include <Stiostream.h>
 
 
 /////////////////////////////////////////////////////////////////////////

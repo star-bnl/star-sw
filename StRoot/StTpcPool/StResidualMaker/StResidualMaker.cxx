@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StResidualMaker.cxx,v 1.3 2003/04/30 20:38:53 perev Exp $
+ * $Id: StResidualMaker.cxx,v 1.4 2003/09/02 17:59:13 perev Exp $
  *
  * Author: malisa
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StResidualMaker.cxx,v $
+ * Revision 1.4  2003/09/02 17:59:13  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2003/04/30 20:38:53  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -472,7 +475,7 @@ TCanvas* StResidualMaker::fitRMShisto(TH1* rmshisto)
 
   // NB: root uses "abs" instead of "fabs"
   TF2* fitfunc = new TF2("BlumRolandi",
-			 "sqrt(abs([0])+abs([1])*x/(cos(y/57.2958))**2+abs([2])*tan(y/57.2958)**2)",
+			 "::sqrt(abs([0])+abs([1])*x/(cos(y/57.2958))**2+abs([2])*tan(y/57.2958)**2)",
 			 0.0,200.0,-50.0,50.0);
   fitfunc->SetParName(0,"Sig2Intrinsic");
   fitfunc->SetParName(1,"Sig2Diffusion");

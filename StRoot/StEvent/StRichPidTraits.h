@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRichPidTraits.h,v 2.12 2002/02/22 22:56:50 jeromel Exp $
+ * $Id: StRichPidTraits.h,v 2.13 2003/09/02 17:58:05 perev Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.h,v $
+ * Revision 2.13  2003/09/02 17:58:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.12  2002/02/22 22:56:50  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -56,7 +59,7 @@
 #ifndef StRichPidTraits_hh
 #define StRichPidTraits_hh
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StTrackPidTraits.h"
 #include "StParticleDefinition.hh"
 #include "StContainers.h"

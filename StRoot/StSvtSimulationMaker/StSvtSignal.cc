@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.5 2003/07/31 19:18:10 caines Exp $
+ * $Id: StSvtSignal.cc,v 1.6 2003/09/02 17:59:09 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.6  2003/09/02 17:59:09  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2003/07/31 19:18:10  caines
  * Petrs improved simulation code
  *
@@ -29,7 +32,7 @@
 
 #include <math.h>
 #include <string.h>
-#include <fstream.h>
+#include "Stiostream.h"
 
 #include "StSvtElectronCloud.hh"
 #include "StSvtSignal.hh"
@@ -183,8 +186,8 @@ void StSvtSignal::getCloud(StSvtElectronCloud* elCloud)
  sigmaMajor2 = elCloud->getSigma1Sq();
  sigmaMinor2 = elCloud->getSigma2Sq();
  
- sigmaMajor = sqrt(sigmaMajor2);               // [mm]
- sigmaMinor = sqrt(sigmaMinor2);               // [mm]
+ sigmaMajor = ::sqrt(sigmaMajor2);               // [mm]
+ sigmaMinor = ::sqrt(sigmaMinor2);               // [mm]
  sigmaSqDiff = sigmaMajor2 - sigmaMinor2;
  sigmaSqDiff2 = sigmaSqDiff*sigmaSqDiff;
 
@@ -287,7 +290,7 @@ int StSvtSignal::timeCenterAndWidth(double anHit,double timeHit)
 
  mTimeCenter = mTimeHit + (relTimeCenter/mDriftVel);       //micro seconds
  //cout<<" mTimeCenter = "<< mTimeCenter<<endl;
- mTimeWidth = sqrt((timeWidth2/driftVel2) + GAP_TWIDTH);          //micro seconds 
+ mTimeWidth = ::sqrt((timeWidth2/driftVel2) + GAP_TWIDTH);          //micro seconds 
  //cout<<"mTimeWidth = "<<mTimeWidth<<endl;
 
  if(isnan(mTimeWidth))
@@ -793,7 +796,7 @@ double StSvtSignal::analConvInt(double tim, double sigmat, double tc)
   //a = 1.0/mTau_s;          b = 1.0/mTau_l;         c = b - a;
   a = 90.909090909091;   b = 2.0;             c = -88.909090909091;
 
-  //bc5 = b/pow(c,5);   bc4 = b/pow(c,4);    bc3 = b/(2*pow(c,3));   bc2 = b/(6*c*c);    ac1 = a/(24*c);
+  //bc5 = b/::pow(c,5);   bc4 = b/::pow(c,4);    bc3 = b/(2*::pow(c,3));   bc2 = b/(6*c*c);    ac1 = a/(24*c);
 
     bc5 = -0.00000000035999; bc4 = 0.00000003200702; 
     bc3 = -0.00000142285777;  bc2 = 0.00004216833039; 
@@ -808,7 +811,7 @@ double StSvtSignal::analConvInt(double tim, double sigmat, double tc)
    Erra = prob2(ta,sigmat);  expa = exp(-a*(tim - tc - a*(sigmat2*0.5)));
 
 
-   gaus = (sigmat/sqrt(2*M_PI))*exp(-0.5*ta2/sigmat2);
+   gaus = (sigmat/::sqrt(2*M_PI))*exp(-0.5*ta2/sigmat2);
 
   //double c1d1 = expb*Errb;
   //double c2d2 = expa*Erra;
@@ -867,7 +870,7 @@ double StSvtSignal::gausInput(double tim)
   
   PI = M_PI;
  //cout<<"tim = "<<tim<<endl;
- // 1.0/sqrt(2*PI) = 0.39894228040143;
+ // 1.0/::sqrt(2*PI) = 0.39894228040143;
 
  tPr2 = 0.5*tim*tim/(mTimeWidth*mTimeWidth);
 
@@ -888,7 +891,7 @@ double StSvtSignal::pasaRes(double tim)
   //a = 1.0/mTau_s;          b = 1.0/mTau_l;         c = b - a;
   a = 90.909090909091;   b = 2.0;             c = -88.909090909091;
 
-  //bc5 = b/pow(c,5);   bc4 = b/pow(c,4);    bc3 = b/(2*pow(c,3));   bc2 = b/(6*c*c);    ac1 = a/(24*c);
+  //bc5 = b/::pow(c,5);   bc4 = b/::pow(c,4);    bc3 = b/(2*::pow(c,3));   bc2 = b/(6*c*c);    ac1 = a/(24*c);
     bc5 = -0.00000000035999; bc4 = 0.00000003200702; 
     bc3 = -0.00000142285777;  bc2 = 0.00004216833039; 
     ac1 = -0.04260395364689;
@@ -967,7 +970,7 @@ double StSvtSignal::prob2(double num , double  sigma)
     
      }
 
-     mErrf = (2.0/sqrt(M_PI))*mSum;
+     mErrf = (2.0/::sqrt(M_PI))*mSum;
 
      if(num < 0.0)
        mErrf = (-1.0)*mErrf;

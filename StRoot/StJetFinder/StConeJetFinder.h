@@ -75,7 +75,7 @@ public:
     void setDoSplitMerge(bool v) {mDoSplitMerge=v;}
     bool doSplitMerge() const {return mDoSplitMerge;}
 
-    ///Use r/sqrt(2) for iteration search?
+    ///Use r/::sqrt(2) for iteration search?
     void setDoMidpointFix(bool v) {mDoMidpointFix=v;}
     bool doMidpointFix() const {return mDoMidpointFix;}
 

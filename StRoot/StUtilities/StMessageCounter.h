@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.h,v 1.11 2000/06/07 00:05:36 genevb Exp $
+// $Id: StMessageCounter.h,v 1.12 2003/09/02 17:59:20 perev Exp $
 // $Log: StMessageCounter.h,v $
+// Revision 1.12  2003/09/02 17:59:20  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.11  2000/06/07 00:05:36  genevb
 // Added FixOn(), enforcing no limits on a specific message type/string
 //
@@ -48,7 +51,8 @@
 #define ClassStMessageCounter
 
 #include "StMessTypeList.h"
-#include <strstream.h>
+#include <Stsstream.h>
+#include <Stiostream.h>
 
 typedef StVector(char*) messCharVec;
 typedef StVector(char*)::iterator messCharVecIter;

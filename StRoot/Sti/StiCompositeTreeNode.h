@@ -1,4 +1,4 @@
-//StiCompositeTreeNode
+//StiCompositeTreeNode                        
 //M.L. Miller (Yale Software)
 //07/01
 
@@ -59,7 +59,7 @@
 #ifndef StiCompositeTreeNode_H
 #define StiCompositeTreeNode_H
 
-#include <iostream>
+#include "Stiostream.h"
 #include <iterator>
 #include <vector>
 #include <string>

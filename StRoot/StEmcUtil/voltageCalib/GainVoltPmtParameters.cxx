@@ -176,7 +176,7 @@ double GainVoltPmtParameters::getGain(double voltage) const
 {
   if (voltage<=0)
     throw runtime_error("GainVoltPmtParameters::getGain(double) - F - given voltage<0");
-  return exp(_a+_b*log(voltage));
+  return exp(_a+_b*::log(voltage));
 }
 
 ///Get the voltage need to obtain the given relative gain
@@ -184,7 +184,7 @@ double GainVoltPmtParameters::getVoltage(double gain) const
 {
   if (gain<=0)
     throw runtime_error("GainVoltPmtParameters::getGain(double) - F - given gain<0");
-  return exp(log(gain)/_b-_a);
+  return exp(::log(gain)/_b-_a);
 }
 
 //Get the ChiSquare of the fit 

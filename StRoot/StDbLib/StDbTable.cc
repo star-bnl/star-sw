@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.34 2003/04/11 22:47:36 porter Exp $
+ * $Id: StDbTable.cc,v 1.35 2003/09/02 17:57:49 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.35  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.34  2003/04/11 22:47:36  porter
  * Added a fast multi-row write model specifically needed by the daqEventTag
  * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
@@ -155,6 +158,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.35  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.34  2003/04/11 22:47:36  porter
  * Added a fast multi-row write model specifically needed by the daqEventTag
  * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
@@ -308,8 +314,8 @@
 #include "StDbDefaults.hh"
 #include "StDbManager.hh"
 #include <string.h>
-#include <iostream.h>
-#include <strstream.h>
+#include <Stiostream.h>
+#include <Stsstream.h>
 #include <malloc.h>
 #ifdef __ROOT__
 ClassImp(StDbTable)
@@ -916,7 +922,7 @@ float* mfloat; double* mdouble;
   case Stchar:
     {
         ostrstream cn;
-        cn<<name<<".text"<<ends; char* commentName = cn.str();
+        cn<<name<<".text"<<ends; const char* commentName = cn.str();
         mchar = 0;
         if(!buff->ReadScalar(mchar,commentName))buff->ReadScalar(mchar,name);
         if(mchar){

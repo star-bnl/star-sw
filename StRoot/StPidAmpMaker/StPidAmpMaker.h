@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StPidAmpMaker.h,v 1.8 2002/02/14 21:25:56 aihong Exp $
+// $Id: StPidAmpMaker.h,v 1.9 2003/09/02 17:58:47 perev Exp $
 //
 // Authors: Aihong Tang
 //
@@ -12,7 +12,7 @@
 
 #ifndef StPidAmpMaker_H
 #define StPidAmpMaker_H
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "StPidProbabilityConst.hh"
@@ -39,7 +39,7 @@ public:
   Int_t    Finish();
   void     SetMultBinNumber(int val);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.8 2002/02/14 21:25:56 aihong Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.9 2003/09/02 17:58:47 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -68,6 +68,9 @@ inline void StPidAmpMaker::SetMultBinNumber(int val) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StPidAmpMaker.h,v $
+// Revision 1.9  2003/09/02 17:58:47  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.8  2002/02/14 21:25:56  aihong
 // re-install the new version
 //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTriplet.cc,v 1.3 2001/06/05 00:59:29 willson Exp $
+ * $Id: StHbtTriplet.cc,v 1.4 2003/09/02 17:58:32 perev Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTriplet.cc,v $
+ * Revision 1.4  2003/09/02 17:58:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2001/06/05 00:59:29  willson
  * Added entrance separation and quality methods
  *
@@ -89,7 +92,7 @@ StHbtTriplet::~StHbtTriplet() {/* no-op */}
 //_________________
 double StHbtTriplet::qInv() const
 {
-    double dq = sqrt(fabs((mTrack1->FourMomentum() - mTrack2->FourMomentum()).m2()) +
+    double dq = ::sqrt(fabs((mTrack1->FourMomentum() - mTrack2->FourMomentum()).m2()) +
                 fabs((mTrack2->FourMomentum() - mTrack3->FourMomentum()).m2()) +
                 fabs((mTrack3->FourMomentum() - mTrack1->FourMomentum()).m2()));
     return (dq);
@@ -97,19 +100,19 @@ double StHbtTriplet::qInv() const
 //_________________
 double StHbtTriplet::qInv12() const
 {
-    double dq = sqrt(fabs((mTrack1->FourMomentum() - mTrack2->FourMomentum()).m2()));
+    double dq = ::sqrt(fabs((mTrack1->FourMomentum() - mTrack2->FourMomentum()).m2()));
     return (dq);
 }
 //_________________
 double StHbtTriplet::qInv23() const
 {
-    double dq = sqrt(fabs((mTrack2->FourMomentum() - mTrack3->FourMomentum()).m2()));
+    double dq = ::sqrt(fabs((mTrack2->FourMomentum() - mTrack3->FourMomentum()).m2()));
     return (dq);
 }
 //_________________
 double StHbtTriplet::qInv31() const
 {
-    double dq = sqrt(fabs((mTrack3->FourMomentum() - mTrack1->FourMomentum()).m2()));
+    double dq = ::sqrt(fabs((mTrack3->FourMomentum() - mTrack1->FourMomentum()).m2()));
     return (dq);
 }
 //_________________

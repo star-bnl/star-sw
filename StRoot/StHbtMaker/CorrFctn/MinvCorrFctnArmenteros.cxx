@@ -1,6 +1,6 @@
 /***************************************************************************
  * 
- * $Id: MinvCorrFctnArmenteros.cxx,v 1.3 2000/06/15 18:52:42 willson Exp $
+ * $Id: MinvCorrFctnArmenteros.cxx,v 1.4 2003/09/02 17:58:20 perev Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctnArmenteros.cxx,v $
+ * Revision 1.4  2003/09/02 17:58:20  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2000/06/15 18:52:42  willson
  * HbtAnalysis() method must be cast to specific analysis
  * rotateEventCut installed
@@ -138,5 +141,5 @@ inline pairD armenteros(const StHbtPair* pair ) {
   float ppp = ( ptotp2 + pdotn )/ptot;
   float ppn = ( ptotn2 + pdotn )/ptot;
   
-  return pairD( (ppp - ppn)/(ppp + ppn), sqrt(fabs(ptotp2 - ppp*ppp)) );
+  return pairD( (ppp - ppn)/(ppp + ppn), ::sqrt(fabs(ptotp2 - ppp*ppp)) );
 }

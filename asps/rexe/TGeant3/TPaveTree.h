@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TPaveTree.h,v 1.2 2000/04/23 19:18:14 fisyak Exp $ */
+/* $Id: TPaveTree.h,v 1.3 2003/09/02 18:00:20 perev Exp $ */
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -23,7 +23,7 @@ public:
   TPaveTree(Coord_t x1, Coord_t y1,Coord_t x2 ,Coord_t y2, const Text_t *label);
   TPaveTree(const TPaveTree &PaveTree);
   virtual      ~TPaveTree();
-  void  Copy(TObject &PaveTree);
+  void  Copy(TObject &PaveTree) const;
   virtual void  DrawSpec(); // *MENU*
   virtual void  DrawTree(Int_t levmax=15, Int_t iselt=111); // *MENU*
   virtual void  DrawTreeParent(Int_t levmax=3, Int_t iselt=111); // *MENU*

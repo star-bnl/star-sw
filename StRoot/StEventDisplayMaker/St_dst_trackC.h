@@ -22,5 +22,5 @@ inline StDetectorId St_dst_trackC::detector(Int_t i) const { return (StDetectorI
 //_____________________________________________________________________________
 inline Double_t St_dst_trackC::AbsMoment(Int_t i){
    momentum(i); 
-   return  sqrt(mMomentum[0]*mMomentum[0]+mMomentum[1]*mMomentum[1]+mMomentum[2]*mMomentum[2]);
+   return  ::sqrt(mMomentum[0]*mMomentum[0]+mMomentum[1]*mMomentum[1]+mMomentum[2]*mMomentum[2]);
 }

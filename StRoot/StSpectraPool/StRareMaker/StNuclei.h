@@ -1,7 +1,7 @@
 #ifndef STNuclei_HH
 #define STNuclei_HH
 #include "StRareTrackCut.h"
-#include <iostream.h>
+#include <Stiostream.h>
 class StPrimaryTrack;
 class StNuclei : public StRareTrackCut {
  

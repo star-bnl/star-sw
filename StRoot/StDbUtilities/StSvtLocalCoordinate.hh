@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtLocalCoordinate.hh,v 1.3 2000/08/21 16:16:26 calderon Exp $
+ * $Id: StSvtLocalCoordinate.hh,v 1.4 2003/09/02 17:57:51 perev Exp $
  *
  * Author:  Manuel CBS Oct 1999
  *
@@ -11,6 +11,9 @@
  ************************************************************************
  *
  * $Log: StSvtLocalCoordinate.hh,v $
+ * Revision 1.4  2003/09/02 17:57:51  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2000/08/21 16:16:26  calderon
  * Helen's first version of Svt Coordinate classes.
  *
@@ -30,7 +33,7 @@
  ***********************************************************************/
 #ifndef ST_SVT_LOCAL_COORDINATE_HH
 #define ST_SVT_LOCAL_COORDINATE_HH
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StThreeVector.hh"
 

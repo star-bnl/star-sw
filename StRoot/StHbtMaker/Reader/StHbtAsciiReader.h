@@ -17,8 +17,8 @@
 #ifndef StHbtAsciiReader_hh
 #define StHbtAsciiReader_hh
 
-class ifstream;
-class ofstream;
+//VP class ifstream;
+//VP class ofstream;
 class StHbtEvent;
 
 #include "StHbtMaker/Infrastructure/StHbtString.hh"

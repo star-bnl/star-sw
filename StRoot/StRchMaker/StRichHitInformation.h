@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichHitInformation.h,v 2.2 2000/09/29 19:05:25 lasiuk Exp $
+ * $Id: StRichHitInformation.h,v 2.3 2003/09/02 17:58:51 perev Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichHitInformation.h,v $
+ * Revision 2.3  2003/09/02 17:58:51  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.2  2000/09/29 19:05:25  lasiuk
  * number of pads added as well as ostream operator
  *
@@ -21,7 +24,7 @@
 #ifndef ST_RICH_HIT_INFORMATION_H
 #define ST_RICH_HIT_INFORMATION_H
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StThreeVector.hh"
 

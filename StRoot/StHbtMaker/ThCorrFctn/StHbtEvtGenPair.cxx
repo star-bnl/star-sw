@@ -22,7 +22,7 @@
 
 ClassImp(StHbtEvtGenPair)
 
-StHbtEvtGenPair::StHbtEvtGenPair(short aDecoralate=0) : 
+StHbtEvtGenPair::StHbtEvtGenPair(short aDecoralate) : 
   StHbtThPair(),mDecoralate(aDecoralate) {
   if(mDecoralate==2){
     mNStoredPos=100;
@@ -146,10 +146,10 @@ void StHbtEvtGenPair::setVariables(const StHbtPair* aPair){
 	      //mCVK = tPz*tPz;
 	      double tMt = tE*tE - tPz*tPz;//mCVK;
 	      //mCVK += tPt;
-	      //mCVK = sqrt(mCVK);
-	      double tM =   sqrt(tMt - tPt);
-	      tMt = sqrt(tMt);
-	      tPt = sqrt(tPt);
+	      //mCVK = ::sqrt(mCVK);
+	      double tM =   ::sqrt(tMt - tPt);
+	      tMt = ::sqrt(tMt);
+	      tPt = ::sqrt(tPt);
 	  
 	      double tROut = mRandVar[0]*sigma+mu;
 	      double tRSide = mRandVar[1]*sigma;

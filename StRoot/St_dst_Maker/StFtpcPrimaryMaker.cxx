@@ -1,5 +1,8 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.14 2002/11/28 09:42:10 oldi Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.15 2003/09/02 17:59:26 perev Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.15  2003/09/02 17:59:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.14  2002/11/28 09:42:10  oldi
 // Code was prepared to fill momentum values at outermost points on tracks.
 // This feature is not used up to now.
@@ -48,7 +51,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -197,7 +200,7 @@ Int_t StFtpcPrimaryMaker::Make(){
     
     if ( trk->flag == 1) { 
       
-      ptrk->r0    = sqrt(trk->v[0]*trk->v[0] + trk->v[1]*trk->v[1]);
+      ptrk->r0    = ::sqrt(trk->v[0]*trk->v[0] + trk->v[1]*trk->v[1]);
       ptrk->phi0  = atan2(trk->v[1],trk->v[0]) * C_DEG_PER_RAD;
       ptrk->z0    = trk->v[2];
       ptrk->psi   = atan2(trk->p[1],trk->p[0]);
@@ -205,7 +208,7 @@ Int_t StFtpcPrimaryMaker::Make(){
 	ptrk->psi = ptrk->psi + C_2PI;
       }
       ptrk->psi = ptrk->psi * C_DEG_PER_RAD;
-      ptrk->invpt = 1./sqrt(trk->p[0]*trk->p[0]+trk->p[1]*trk->p[1]);
+      ptrk->invpt = 1./::sqrt(trk->p[0]*trk->p[0]+trk->p[1]*trk->p[1]);
       ptrk->tanl  = trk->p[2] * ptrk->invpt;
       ptrk->curvature = trk->curvature;
 
@@ -213,7 +216,7 @@ Int_t StFtpcPrimaryMaker::Make(){
       // r0out, phi0out, z0out, psiout, tanlout, invptout 
       // in the dst_track table are needed.
       /*
-      ptrk->r0out    = sqrt(trk->l[0]*trk->l[0] + trk->l[1]*trk->l[1]);
+      ptrk->r0out    = ::sqrt(trk->l[0]*trk->l[0] + trk->l[1]*trk->l[1]);
       ptrk->phi0out  = atan2(trk->l[1],trk->l[0]) * C_DEG_PER_RAD;
       ptrk->z0out    = trk->l[2];
 
@@ -225,7 +228,7 @@ Int_t StFtpcPrimaryMaker::Make(){
 	ptrk->psiout = ptrk->psiout + C_2PI;
       }
       ptrk->psiout = ptrk->psiout * C_DEG_PER_RAD;
-      ptrk->invptout = 1./sqrt(trk->p[0]*trk->p[0]+trk->p[1]*trk->p[1]);
+      ptrk->invptout = 1./::sqrt(trk->p[0]*trk->p[0]+trk->p[1]*trk->p[1]);
       ptrk->tanlout  = trk->p[2] * ptrk->invptout;
       */
 

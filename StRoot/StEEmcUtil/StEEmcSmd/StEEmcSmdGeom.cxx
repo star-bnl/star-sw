@@ -1,7 +1,7 @@
 
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.cxx,v 1.4 2003/08/22 15:14:26 wzhang Exp $
+ * $Id: StEEmcSmdGeom.cxx,v 1.5 2003/09/02 17:57:56 perev Exp $
  *
  * Author: Wei-Ming Zhang 
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StEEmcSmdGeom.cxx,v $
+ * Revision 1.5  2003/09/02 17:57:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.4  2003/08/22 15:14:26  wzhang
  * Added ClassImp and method stripEnd
  *
@@ -181,14 +184,14 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
 	  StructEEmcStrip*    stripPtr = new StructEEmcStrip;
 	  stripPtr->stripId = stripId; 
 
-	  x0Corr = x0[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
-	  y2Corr = y2[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
+	  x0Corr = x0[iEta] - kEEmcSmdROffset[iPlane - 1]*::sqrt(0.5);
+	  y2Corr = y2[iEta] - kEEmcSmdROffset[iPlane - 1]*::sqrt(0.5);
           if(kEEmcSmdMapEdge[iPlane-1][iMod-1]) {      
-	    y1Corr = y1Edge[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
+	    y1Corr = y1Edge[iEta] - kEEmcSmdROffset[iPlane - 1]*::sqrt(0.5);
 	    lengthCorr = lengthEdge[iEta];
           }
 	  else { 
-	    y1Corr = y1[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
+	    y1Corr = y1[iEta] - kEEmcSmdROffset[iPlane - 1]*::sqrt(0.5);
 	    lengthCorr = length[iEta];
           }
 
@@ -201,9 +204,9 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
           globalY2 = x0Corr*cos(vPhiRotation[iMod-1]) + 
 		                      y2Corr*sin(vPhiRotation[iMod-1]);
 
-	  r = sqrt(globalX1*globalX1 + globalY1*globalY1);
+	  r = ::sqrt(globalX1*globalX1 + globalY1*globalY1);
 	  if(r < rMin) rMin = r;
-	  r = sqrt(globalX2*globalX2 + globalY2*globalY2);
+	  r = ::sqrt(globalX2*globalX2 + globalY2*globalY2);
 	  if(r > rMax) rMax = r;
 
 //Fill vStripPtrVec 
@@ -269,15 +272,15 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
 	  StructEEmcStrip*    stripPtr = new StructEEmcStrip;
 	  stripPtr->stripId = stripId; 
 
-	  x0Corr = x0[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
-	  y2Corr = y2[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
+	  x0Corr = x0[iEta] - kEEmcSmdROffset[iPlane - 1]*::sqrt(0.5);
+	  y2Corr = y2[iEta] - kEEmcSmdROffset[iPlane - 1]*::sqrt(0.5);
 	    
           if(kEEmcSmdMapEdge[iPlane-1][iMod-1]) {      
-	    y1Corr = y1Edge[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
+	    y1Corr = y1Edge[iEta] - kEEmcSmdROffset[iPlane - 1]*::sqrt(0.5);
 	    lengthCorr = lengthEdge[iEta];
 	  }
 	  else { 
-	    y1Corr = y1[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
+	    y1Corr = y1[iEta] - kEEmcSmdROffset[iPlane - 1]*::sqrt(0.5);
 	    lengthCorr = length[iEta];
           }
 	   
@@ -290,9 +293,9 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
           globalY2 = y2Corr*cos(uPhiRotation[iMod-1]) - 
 		                     x0Corr*sin(uPhiRotation[iMod-1]);
 
-	  r = sqrt(globalX1*globalX1 + globalY1*globalY1);
+	  r = ::sqrt(globalX1*globalX1 + globalY1*globalY1);
 	  if(r < rMin) rMin = r;
-	  r = sqrt(globalX2*globalX2 + globalY2*globalY2);
+	  r = ::sqrt(globalX2*globalX2 + globalY2*globalY2);
 	  if(r > rMax) rMax = r;
 
 //Fill uStripPtrVec 
@@ -366,7 +369,7 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
      Int_t moduleId = 0;
      float phiMin, phiMax, rMin, rMax;
      float phi = point.phi();
-     float r = sqrt(point.x()*point.x() + point.y()*point.y());
+     float r = ::sqrt(point.x()*point.x() + point.y()*point.y());
 
      for (int iMod = 1; iMod <= kEEmcNumSectors; iMod++) {
        if(kEEmcSmdMapUV[planeId-1][iMod-1] > 0 && IsSectorIn(iMod)) {       
@@ -436,7 +439,7 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
           y1 = (*p)->end1.y();
           x2 = (*p)->end2.x();
           y2 = (*p)->end2.y();
-	  mu = -1.0/sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1)) *
+	  mu = -1.0/::sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1)) *
 		                 ((x2*y1-x1*y2)/fabs(x2*y1-x1*y2));
 // distance d carries a sign
 	  d = ((y2-y1)*point.x() + (x1-x2)*point.y() + (x2*y1-x1*y2))*mu;
@@ -470,7 +473,7 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
     bool match = false;
     if(stripId1.layerId == stripId2.layerId &&
        stripId1.moduleId == stripId2.moduleId) {
-         if((fabs(stripId1.etaId - stripId2.etaId) <= nTolerance))
+         if((abs(stripId1.etaId - stripId2.etaId) <= nTolerance))
            match = true;
     }
     return match;

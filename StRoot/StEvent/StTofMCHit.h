@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofMCHit.h,v 2.3 2003/05/21 18:22:46 ullrich Exp $
+ * $Id: StTofMCHit.h,v 2.4 2003/09/02 17:58:06 perev Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofMCHit.h,v $
+ * Revision 2.4  2003/09/02 17:58:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.3  2003/05/21 18:22:46  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -28,7 +31,7 @@
 #ifndef StTofMCHit_hh
 #define StTofMCHit_hh
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StTofHit.h"
 
 class StTofMCHit : public StTofHit {

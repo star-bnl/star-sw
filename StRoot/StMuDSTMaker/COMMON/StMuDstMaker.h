@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.20 2003/04/15 18:48:36 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.21 2003/09/02 17:58:44 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -80,7 +80,7 @@ class StMuDstMaker : public StMaker {
     ~StMuDstMaker();
     
   int Init();
-  void Clear();
+  void Clear(Option_t *option="");
   int Make();
   int Finish();
 
@@ -126,7 +126,7 @@ class StMuDstMaker : public StMaker {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.20 2003/04/15 18:48:36 laue Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.21 2003/09/02 17:58:44 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -292,6 +292,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.21  2003/09/02 17:58:44  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.20  2003/04/15 18:48:36  laue
  * Minor changes to be able to filter MuDst.root files and an example
  * how to do this. The StMuDstFilterMaker is just an example, it has to be

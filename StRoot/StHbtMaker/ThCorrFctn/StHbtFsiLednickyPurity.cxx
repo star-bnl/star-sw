@@ -16,8 +16,7 @@
 
 #include "StHbtMaker/ThCorrFctn/StHbtFsiLednickyPurity.h"
 #include "StarCallf77.h"
-#include <strstream.h>
-#include <iomanip.h>
+#include <Stsstream.h>
 
 
 #ifdef SOLARIS

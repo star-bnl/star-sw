@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtClusterFinder.cc,v 1.8 2003/01/28 20:28:18 munhoz Exp $
+ * $Id: StSvtClusterFinder.cc,v 1.9 2003/09/02 17:59:06 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterFinder.cc,v $
+ * Revision 1.9  2003/09/02 17:59:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.8  2003/01/28 20:28:18  munhoz
  * new filters for clusters
  *
@@ -27,6 +30,9 @@
  *  now runs faster.
  *
  * $Log: StSvtClusterFinder.cc,v $
+ * Revision 1.9  2003/09/02 17:59:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.8  2003/01/28 20:28:18  munhoz
  * new filters for clusters
  *
@@ -53,7 +59,7 @@
  *
  **************************************************************************/
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StSvtClusterFinder.hh"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
 #include "StSequence.hh"

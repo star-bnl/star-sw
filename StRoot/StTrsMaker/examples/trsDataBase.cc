@@ -1,5 +1,5 @@
 //*******************************************************/
-// $Id: trsDataBase.cc,v 1.2 1999/01/26 20:40:08 lasiuk Exp $
+// $Id: trsDataBase.cc,v 1.3 2003/09/02 17:59:15 perev Exp $
 //
 // Author: brian, October 1998
 //
@@ -7,6 +7,9 @@
 //          a data base and reference its components.
 //
 // $Log: trsDataBase.cc,v $
+// Revision 1.3  2003/09/02 17:59:15  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  1999/01/26 20:40:08  lasiuk
 // magnetic field db
 //
@@ -17,7 +20,7 @@
 // Initial Revision
 //
 /********************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <unistd.h>    // needed for access()
 
 #include <string>

@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.28 2003/08/02 08:22:43 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.29 2003/09/02 17:59:41 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.29  2003/09/02 17:59:41  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.28  2003/08/02 08:22:43  pruneau
  * best performance so far
  *
@@ -586,8 +589,8 @@ double StiKalmanTrack::getTrackLength() const
   double dy=out.y()-in.y();
   double dz=out.z()-in.z();
   double curvature = inNode->getCurvature();
-  double s = 2*asin(sqrt(dx*dx+dy*dy)*curvature/2.)/curvature;
-  return sqrt(dz*dz+s*s);
+  double s = 2*asin(::sqrt(dx*dx+dy*dy)*curvature/2.)/curvature;
+  return ::sqrt(dz*dz+s*s);
 }
 
 
@@ -928,12 +931,12 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 	dx=tNode->_x- localVertex.x();
 	dy=tNode->_p0- localVertex.y();
 	dz=tNode->_p1- localVertex.z();
-	d= sqrt(dx*dx+dy*dy+dz*dz);
+	d= ::sqrt(dx*dx+dy*dy+dz*dz);
 	/*	cout << " dx:"<< dx
 	<< " dy:"<< dy
 	<< " dz:"<< dz
 	<< " d: "<< d<<endl;*/
-	_dca = sqrt(dy*dy+dz*dz);
+	_dca = ::sqrt(dy*dy+dz*dz);
 
       if (chi2<pars->maxChi2Vertex)
 	{

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.42 2003/07/16 19:58:30 perev Exp $
+ * $Id: EventReader.cxx,v 1.43 2003/09/02 17:55:31 perev Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.43  2003/09/02 17:55:31  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.42  2003/07/16 19:58:30  perev
  * Cleanup of StTriggerData2003 at all
  *
@@ -902,7 +905,7 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
   }
 
   bytesRead=read(herbFd,data,numberOfDataWords*sizeof(unsigned long));
-  if(bytesRead!=numberOfDataWords*sizeof(unsigned long)) return TRUE;
+  if(bytesRead!=int(numberOfDataWords*sizeof(unsigned long))) return TRUE;
   if(doTheByteSwap) for(i=0;i<numberOfDataWords;i++) Swap4(data+i);
 
   if(!strcmp(bankname,"TPCMZP")||!strcmp(bankname,"FTPMZP")) {
@@ -912,7 +915,7 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
   for(i=beg;i<end;i+=2) {
     if(data[i+1]==0) continue; /* len is 0 */
     if(data[i]==0) {
-      PP"Bank '%s' (at offset %d bytes in the .daq file) points to itself (data word %d counting from 1).\n",
+      PP"Bank '%s' (at offset %ld bytes in the .daq file) points to itself (data word %d counting from 1).\n",
           bankname,currentOffset,i+1);
       return TRUE; 
     }

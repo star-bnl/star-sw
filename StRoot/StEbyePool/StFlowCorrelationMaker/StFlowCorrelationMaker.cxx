@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCorrelationMaker.cxx,v 1.2 2002/02/10 22:12:45 perev Exp $
+// $Id: StFlowCorrelationMaker.cxx,v 1.3 2003/09/02 17:57:58 perev Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer
 //
@@ -10,7 +10,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include "StMaker.h"
@@ -520,7 +520,7 @@ Int_t StFlowCorrelationMaker::Init() {
 
 
   gMessMgr->SetLimit("##### FlowCorrelation", 20);
-  gMessMgr->Info("##### FlowCorrelation: $Id: StFlowCorrelationMaker.cxx,v 1.2 2002/02/10 22:12:45 perev Exp $");
+  gMessMgr->Info("##### FlowCorrelation: $Id: StFlowCorrelationMaker.cxx,v 1.3 2003/09/02 17:57:58 perev Exp $");
 
   return StMaker::Init();
 }
@@ -756,6 +756,9 @@ Int_t StFlowCorrelationMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCorrelationMaker.cxx,v $
+// Revision 1.3  2003/09/02 17:57:58  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  2002/02/10 22:12:45  perev
 // Outdated SetFormat removed
 //

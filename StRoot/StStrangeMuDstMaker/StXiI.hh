@@ -13,9 +13,9 @@
 #define StXiI_hh
 
 #include "StV0I.hh"
-static const Float_t M_OMEGA_2 = pow(M_OMEGA_MINUS,2);
-static const Float_t M_XI_2 = pow(M_XI_MINUS,2);
-static const Float_t M_KAON_MINUS_2 = pow(M_KAON_MINUS,2);
+static const Float_t M_OMEGA_2 = ::pow(M_OMEGA_MINUS,2);
+static const Float_t M_XI_2 = ::pow(M_XI_MINUS,2);
+static const Float_t M_KAON_MINUS_2 = ::pow(M_KAON_MINUS,2);
 
 /// Enumeration of Xi daughter types
 enum StXiDaughter {bachelor, v0};
@@ -233,15 +233,15 @@ inline Float_t StXiI::decayDistanceV0() const {
 }
 
 inline Float_t StXiI::decayLengthV0() const {
-  return sqrt(pow(decayVertexV0X() - decayVertexXiX(),2) +
-              pow(decayVertexV0Y() - decayVertexXiY(),2) +
-              pow(decayVertexV0Z() - decayVertexXiZ(),2));
+  return ::sqrt(::pow(decayVertexV0X() - decayVertexXiX(),2) +
+              ::pow(decayVertexV0Y() - decayVertexXiY(),2) +
+              ::pow(decayVertexV0Z() - decayVertexXiZ(),2));
 }
 
 inline Float_t StXiI::decayLengthXi() const {
-  return sqrt(pow(decayVertexXiX() - mEvent->primaryVertexX(),2) +
-              pow(decayVertexXiY() - mEvent->primaryVertexY(),2) +
-              pow(decayVertexXiZ() - mEvent->primaryVertexZ(),2));
+  return ::sqrt(::pow(decayVertexXiX() - mEvent->primaryVertexX(),2) +
+              ::pow(decayVertexXiY() - mEvent->primaryVertexY(),2) +
+              ::pow(decayVertexXiZ() - mEvent->primaryVertexZ(),2));
 }
 
 inline TVector3 StXiI::momBachelor() {
@@ -256,85 +256,85 @@ inline Float_t StXiI::alphaXi() {
 }
 
 inline Float_t StXiI::ptArmXi() {
-  return sqrt(Ptot2V0() - pow(MomV0AlongXi(),2));
+  return ::sqrt(Ptot2V0() - ::pow(MomV0AlongXi(),2));
 }
 
 inline Float_t StXiI::eOmega() {
-  return sqrt(Ptot2Xi()+M_OMEGA_2);
+  return ::sqrt(Ptot2Xi()+M_OMEGA_2);
 }
 
 inline Float_t StXiI::eXi() {
-  return sqrt(Ptot2Xi()+M_XI_2);
+  return ::sqrt(Ptot2Xi()+M_XI_2);
 }
 
 inline Float_t StXiI::eHypXi(Float_t mass) {
-  return sqrt(Ptot2Xi()+pow(mass,2));
+  return ::sqrt(Ptot2Xi()+::pow(mass,2));
 }
 
 inline Float_t StXiI::eBachelorHyp(Float_t mass) {
-  return sqrt(Ptot2Bachelor()+pow(mass,2));
+  return ::sqrt(Ptot2Bachelor()+::pow(mass,2));
 }
 
 inline Float_t StXiI::eBachelorPion() {
-  return sqrt(Ptot2Bachelor()+M_PION_MINUS_2);
+  return ::sqrt(Ptot2Bachelor()+M_PION_MINUS_2);
 }
 
 inline Float_t StXiI::eBachelorKaon() {
-  return sqrt(Ptot2Bachelor()+M_KAON_MINUS_2);
+  return ::sqrt(Ptot2Bachelor()+M_KAON_MINUS_2);
 }
 
 inline Float_t StXiI::massHypXi(Float_t massV0, Float_t massBachelor) {
-  return sqrt(pow(eHypV0(massV0)+eBachelorHyp(massBachelor),2)-Ptot2Xi());
+  return ::sqrt(::pow(eHypV0(massV0)+eBachelorHyp(massBachelor),2)-Ptot2Xi());
 }
 
 inline Float_t StXiI::massOmega() {
-  return sqrt(pow(eLambda()+eBachelorKaon(),2)-Ptot2Xi());
+  return ::sqrt(::pow(eLambda()+eBachelorKaon(),2)-Ptot2Xi());
 }
 
 inline Float_t StXiI::massXi() {
-  return sqrt(pow(eLambda()+eBachelorPion(),2)-Ptot2Xi());
+  return ::sqrt(::pow(eLambda()+eBachelorPion(),2)-Ptot2Xi());
 }
 
 inline Float_t StXiI::rapHypXi(Float_t mass) {
   Float_t mMomXiZ = momXiZ();
   Float_t eX = eHypXi(mass);
-  return 0.5*log((eX+mMomXiZ)/(eX-mMomXiZ));
+  return 0.5*::log((eX+mMomXiZ)/(eX-mMomXiZ));
 }
 
 inline Float_t StXiI::rapOmega() {
   Float_t mMomXiZ = momXiZ();
   Float_t eom = eOmega();
-  return 0.5*log((eom+mMomXiZ)/(eom-mMomXiZ));
+  return 0.5*::log((eom+mMomXiZ)/(eom-mMomXiZ));
 }
 
 inline Float_t StXiI::rapXi() {
   Float_t mMomXiZ = momXiZ();
   Float_t exi = eXi();
-  return 0.5*log((exi+mMomXiZ)/(exi-mMomXiZ));
+  return 0.5*::log((exi+mMomXiZ)/(exi-mMomXiZ));
 }
 
 inline Float_t StXiI::cTauOmega() {
-  return M_OMEGA_MINUS*decayLengthXi()/sqrt(Ptot2Xi());
+  return M_OMEGA_MINUS*decayLengthXi()/::sqrt(Ptot2Xi());
 }
 
 inline Float_t StXiI::cTauXi() {
-  return M_XI_MINUS*decayLengthXi()/sqrt(Ptot2Xi());
+  return M_XI_MINUS*decayLengthXi()/::sqrt(Ptot2Xi());
 }
 
 inline Float_t StXiI::ptBachelor() {
-  return sqrt(Ptot2Bachelor()-pow(momBachelorZ(),2));
+  return ::sqrt(Ptot2Bachelor()-::pow(momBachelorZ(),2));
 }
 
 inline Float_t StXiI::ptotBachelor() {
-  return sqrt(Ptot2Bachelor());
+  return ::sqrt(Ptot2Bachelor());
 }
 
 inline Float_t StXiI::ptXi() {
-  return sqrt(Pt2Xi());
+  return ::sqrt(Pt2Xi());
 }
 
 inline Float_t StXiI::ptotXi() {
-  return sqrt(Ptot2Xi());
+  return ::sqrt(Ptot2Xi());
 }
 
 inline Float_t StXiI::thetaXi() {
@@ -342,7 +342,7 @@ inline Float_t StXiI::thetaXi() {
 }
 
 inline Float_t StXiI::pseudoRapXi() {
-  return (-log(tan(thetaXi()/2.)));
+  return (-::log(tan(thetaXi()/2.)));
 }
 
 inline Float_t StXiI::thetaBachelor() {
@@ -350,19 +350,19 @@ inline Float_t StXiI::thetaBachelor() {
 }
 
 inline Float_t StXiI::pseudoRapBachelor() {
-  return (-log(tan(thetaBachelor()/2.)));
+  return (-::log(tan(thetaBachelor()/2.)));
 }
 
 inline Float_t StXiI::mtHypXi(Float_t mass) {
-  return sqrt(Pt2Xi() + pow(mass,2));
+  return ::sqrt(Pt2Xi() + ::pow(mass,2));
 }
 
 inline Float_t StXiI::mtOmega() {
-  return sqrt(Pt2Xi() + M_OMEGA_2);
+  return ::sqrt(Pt2Xi() + M_OMEGA_2);
 }
 
 inline Float_t StXiI::mtXi() {
-  return sqrt(Pt2Xi() + M_XI_2);
+  return ::sqrt(Pt2Xi() + M_XI_2);
 }
 
 inline Float_t StXiI::mtm0HypXi(Float_t mass) {
@@ -378,16 +378,16 @@ inline Float_t StXiI::mtm0Xi() {
 }
 
 inline Float_t StXiI::Ptot2Bachelor () {
-  return (pow(momBachelorX(),2) +
-          pow(momBachelorY(),2) + pow(momBachelorZ(),2));
+  return (::pow(momBachelorX(),2) +
+          ::pow(momBachelorY(),2) + ::pow(momBachelorZ(),2));
 }
 
 inline Float_t StXiI::Pt2Xi() {
-  return (pow(momXiX(),2) + pow(momXiY(),2));
+  return (::pow(momXiX(),2) + ::pow(momXiY(),2));
 }
 
 inline Float_t StXiI::Ptot2Xi() {
-  return (Pt2Xi() + pow(momXiZ(),2));
+  return (Pt2Xi() + ::pow(momXiZ(),2));
 }
 
 inline Float_t StXiI::MomBachelorAlongXi() {
@@ -395,7 +395,7 @@ inline Float_t StXiI::MomBachelorAlongXi() {
   if (mPtot2Xi)
     return (momBachelorX()*momXiX() + 
             momBachelorY()*momXiY() +
-            momBachelorZ()*momXiZ()) / sqrt(mPtot2Xi);
+            momBachelorZ()*momXiZ()) / ::sqrt(mPtot2Xi);
   return 0.;
 }
 
@@ -404,7 +404,7 @@ inline Float_t StXiI::MomV0AlongXi() {
   if (mPtot2Xi)
     return (momV0X()*momXiX() + 
             momV0Y()*momXiY() + 
-            momV0Z()*momXiZ()) / sqrt(mPtot2Xi);
+            momV0Z()*momXiZ()) / ::sqrt(mPtot2Xi);
   return 0.;
 }
 
@@ -460,8 +460,11 @@ inline TVector3 StXiI::momXiFrame(Float_t m1, Float_t m2, StXiDaughter type) {
 
 
 /***********************************************************************
- * $Id: StXiI.hh,v 3.9 2003/08/26 22:36:28 genevb Exp $
+ * $Id: StXiI.hh,v 3.10 2003/09/02 17:59:04 perev Exp $
  * $Log: StXiI.hh,v $
+ * Revision 3.10  2003/09/02 17:59:04  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 3.9  2003/08/26 22:36:28  genevb
  * Calculate Xi momenta at/near primary vertex
  *

@@ -4,7 +4,7 @@
 //
 //                                                                      
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include <assert.h>
 #include <math.h>
 #include "TROOT.h"
@@ -948,8 +948,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.17 2003/04/30 20:36:47 perev Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.18 2003/09/02 17:58:00 perev Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.18  2003/09/02 17:58:00  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.17  2003/04/30 20:36:47  perev
 // Warnings cleanup. Modified lines marked VP
 //

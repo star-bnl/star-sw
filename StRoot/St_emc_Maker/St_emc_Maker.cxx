@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.cxx,v 1.12 2003/04/30 20:39:16 perev Exp $
+// $Id: St_emc_Maker.cxx,v 1.13 2003/09/02 17:59:29 perev Exp $
 // $Log: St_emc_Maker.cxx,v $
+// Revision 1.13  2003/09/02 17:59:29  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.12  2003/04/30 20:39:16  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -38,7 +41,7 @@
 // St_emc_Maker class for <FONT COLOR="RED"> EMC</FONT> dataset         //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "St_emc_Maker.h"
 #include "StChain.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0SpectraAnalysis.cc,v 1.2 2000/03/28 03:20:06 munhoz Exp $
+ * $Id: StV0SpectraAnalysis.cc,v 1.3 2003/09/02 17:58:59 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StV0SpectraAnalysis.cc,v $
+ * Revision 1.3  2003/09/02 17:58:59  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2000/03/28 03:20:06  munhoz
  * correcting normalization of weighted histogram
  *
@@ -165,25 +168,25 @@ void StV0SpectraAnalysis::fillHistograms(StEvent& event)
       posMom = v0Vertex->momentumOfDaughter(positive);
       negMom = v0Vertex->momentumOfDaughter(negative);
       
-      posEnergy = sqrt(posMom.mag2() + mDaughterPos->mass()*mDaughterPos->mass());
-      negEnergy = sqrt(negMom.mag2() + mDaughterNeg->mass()*mDaughterNeg->mass());
+      posEnergy = ::sqrt(posMom.mag2() + mDaughterPos->mass()*mDaughterPos->mass());
+      negEnergy = ::sqrt(negMom.mag2() + mDaughterNeg->mass()*mDaughterNeg->mass());
       
       pdotn = ( posMom.x()*negMom.x() +
 		posMom.y()*negMom.y() +
 		posMom.z()*negMom.z());
       
-      massInv = sqrt( mDaughterPos->mass()*mDaughterPos->mass() + 
+      massInv = ::sqrt( mDaughterPos->mass()*mDaughterPos->mass() + 
 		      mDaughterNeg->mass()*mDaughterNeg->mass() +
 		      2*(posEnergy*negEnergy - pdotn) );
       
       //Calculate pt, mt, eta and y
       v0Mom  = v0Vertex->momentum();            
       pt  = v0Mom.perp();
-      mt = sqrt( v0Mom.perp2() + mMassPid*mMassPid );
-      E  = sqrt( v0Mom.mag2() + mMassPid*mMassPid );
+      mt = ::sqrt( v0Mom.perp2() + mMassPid*mMassPid );
+      E  = ::sqrt( v0Mom.mag2() + mMassPid*mMassPid );
       pz = v0Mom.z();
-      y  = 0.5*log((E+pz)/(E-pz)); 
-      pseudoy = 0.5*log((v0Mom.mag()+pz)/(v0Mom.mag()-pz));
+      y  = 0.5*::log((E+pz)/(E-pz)); 
+      pseudoy = 0.5*::log((v0Mom.mag()+pz)/(v0Mom.mag()-pz));
       if (mAbscissa == kRapidity) {
 	xvalue = y;
       } else if (mAbscissa == kPseudoRapidity) {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.40 2003/01/08 19:43:10 perev Exp $
+ * $Id: StDbBroker.cxx,v 1.41 2003/09/02 17:55:35 perev Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.41  2003/09/02 17:55:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.40  2003/01/08 19:43:10  perev
  * CleanUp
  *
@@ -139,9 +142,8 @@
  *
  *
  **************************************************************************/
-#include <strstream.h>
-#include <iostream.h>
-#include <iomanip.h>
+#include <Stsstream.h>
+#include <Stiostream.h>
 #include <stdlib.h> 
 
 #include "TString.h"
@@ -292,7 +294,7 @@ unsigned int numElements = mdescriptor->NumberOfColumns();
      for(int k=0; k<(int)mdescriptor->Dimensions(i)-1;k++) 
        os<<index[k]<<",";
      os<<index[mdescriptor->Dimensions(i)-1]<<ends;
-     char* lengthString = os.str(); 
+     const char* lengthString = os.str(); 
      buff.WriteScalar(lengthString,"length");
      os.freeze(0);
      //     delete [] lengthString;
@@ -381,9 +383,9 @@ StDbBroker::SetDateTime(UInt_t date, UInt_t time)
    //   ostrstream ds(dateTime,16);
    //   char timeCheck[7];
    //   ostrstream ts(timeCheck,7);
-   char* dateTime;
+   const char* dateTime;
    ostrstream ds;
-   char* timeCheck;
+   const char* timeCheck;
    ostrstream ts;
 
    ts<<m_DateTime[1]<<ends;
@@ -516,7 +518,7 @@ bool StDbBroker::UseRunLog(StDbTable* table){
       rq<<" AND unix_timestamp(entryTime)<="<<prodTime<<ends;
     } 
 
-    bool fetchStatus=mgr->fetchDbTable(table,rq.str());
+    bool fetchStatus=mgr->fetchDbTable(table,(char*)rq.str());
     rq.freeze(0);
 
 return fetchStatus;
@@ -526,21 +528,20 @@ return fetchStatus;
 Int_t StDbBroker::WriteToDb(void* pArray, int tabID){
 #define __METHOD__ "WriteToDb(pArray,tabID)"
 
-  char errMessage[256];
-  ostrstream em(errMessage,256);
+  ostrstream em;
   if(!pArray || tabID==0) {
     em<<" Write Failed -> either data-array or tableID is incomplete"<<ends;
-    return mgr->printInfo(errMessage,dbMErr,__LINE__,__CLASS__,__METHOD__);
+    return mgr->printInfo(em.str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
   }
   if(!m_Nodes){
     em<<"Write Failed -> incomplete table context. Try InitConfig() 1st"<<ends;
-    return mgr->printInfo(errMessage,dbMErr,__LINE__,__CLASS__,__METHOD__);
+    return mgr->printInfo(em.str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
   }
   StDbNode* anode= m_Nodes->getNode(tabID);
   StDbTable* table=dynamic_cast<StDbTable*>(anode);
   if(!table){
     em<<"Write Failed -> tableID="<<tabID<<" is not known " <<ends;
-    return mgr->printInfo(errMessage,dbMErr,__LINE__,__CLASS__,__METHOD__);
+    return mgr->printInfo(em.str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
   }
 
   if(!table->hasDescriptor())table->setDescriptor(GetTableDescriptor());
@@ -557,12 +558,11 @@ Int_t StDbBroker::WriteToDb(void* pArray, int tabID){
 //_____________________________________________________________________________
 Int_t StDbBroker::WriteToDb(void* pArray, const char* fullPath, int* idList){
 #define __METHOD__ "WriteToDb(pArray,fullPath,idList)"
-  char errMessage[256];
-  ostrstream em(errMessage,256);
+  ostrstream em;
 
   if(!pArray || !fullPath) {
     em<<" Write Failed:: either data-array or path is incomplete"<<ends;
-    return mgr->printInfo(errMessage,dbMErr,__LINE__,__CLASS__,__METHOD__);
+    return mgr->printInfo(em.str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
   }
 
   char* path=new char[strlen(fullPath)+1]; 
@@ -598,9 +598,7 @@ Int_t StDbBroker::WriteToDb(void* pArray, const char* fullPath, int* idList){
      if(i==icount){
        dbName=aword[i];
      } else {
-       tmpName[0]='\0';
-       ostrstream dbn(tmpName,128);
-       dbn<<aword[i-1]<<"_"<<aword[i]<<ends;
+       sprintf(tmpName,"%s_%s",aword[i-1],aword[i]);
        dbName=(char*)tmpName;
      }
      table=findTable(dbName);
@@ -610,7 +608,7 @@ Int_t StDbBroker::WriteToDb(void* pArray, const char* fullPath, int* idList){
    if(!table){
      em<<"Write Failed table="<<m_tableName<<" not found in db="<<dbName<<ends;
      delete [] path;
-     return mgr->printInfo(errMessage,dbMErr,__LINE__,__CLASS__,__METHOD__);
+     return mgr->printInfo(em.str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
    }
 
    table->setDescriptor(GetTableDescriptor());

@@ -69,8 +69,8 @@ inline int   StL3RareTrack::flag() const {return mFlag;}
 inline float StL3RareTrack::px() const {return mPx;}
 inline float StL3RareTrack::py() const {return mPy;}
 inline float StL3RareTrack::pz() const {return mPz;}
-inline float StL3RareTrack::p() const {return sqrt(mPx*mPx+mPy*mPy+mPz*mPz);}
-inline float StL3RareTrack::pt() const {return sqrt(mPx*mPx+mPy*mPy);}
+inline float StL3RareTrack::p() const {return ::sqrt(mPx*mPx+mPy*mPy+mPz*mPz);}
+inline float StL3RareTrack::pt() const {return ::sqrt(mPx*mPx+mPy*mPy);}
 inline short StL3RareTrack::chargesign() const {return mChargesign;}
 inline float StL3RareTrack::dca2d() const {return mDca2d;} 
 inline float StL3RareTrack::dedx() const {return mDedx;}

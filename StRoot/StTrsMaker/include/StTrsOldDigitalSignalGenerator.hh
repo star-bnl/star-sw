@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOldDigitalSignalGenerator.hh,v 1.1 1999/11/05 22:17:05 calderon Exp $
+ * $Id: StTrsOldDigitalSignalGenerator.hh,v 1.2 2003/09/02 17:59:16 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsOldDigitalSignalGenerator.hh,v $
+ * Revision 1.2  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  1999/11/05 22:17:05  calderon
  * Made private copy constructor and operator= in StTrsDigitalSector.
  * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
@@ -39,7 +42,7 @@
 #ifndef ST_TRS_FAST_DIGITAL_SIGNAL_GENERATOR_HH
 #define ST_TRS_FAST_DIGITAL_SIGNAL_GENERATOR_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StTrsDigitalSignalGenerator.hh"
 
 class StTrsOldDigitalSignalGenerator : public StTrsDigitalSignalGenerator {

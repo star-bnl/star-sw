@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichDrawableTControl.cxx,v 2.2 2003/04/30 20:38:03 perev Exp $
+ * $Id: StRichDrawableTControl.cxx,v 2.3 2003/09/02 17:58:52 perev Exp $
  *
  * Description: A Clickabe Control Button
  *
@@ -7,7 +7,7 @@
 
 #ifdef __ROOT__
 #include "StRichDrawableTControl.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TBox.h"
 #include "TPaveText.h"
 #include "TCanvas.h"

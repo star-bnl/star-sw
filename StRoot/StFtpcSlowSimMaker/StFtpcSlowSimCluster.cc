@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimCluster.cc,v 1.8 2003/07/03 13:28:59 fsimon Exp $
+// $Id: StFtpcSlowSimCluster.cc,v 1.9 2003/09/02 17:58:16 perev Exp $
 // $Log: StFtpcSlowSimCluster.cc,v $
+// Revision 1.9  2003/09/02 17:58:16  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.8  2003/07/03 13:28:59  fsimon
 // Functionality for cathode offset simulation: Additional parameters for
 // StFtpcSlowSimField::GetVelocityZ
@@ -35,7 +38,7 @@
 //  Date:  Oct 25, 1996
 ///////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StFtpcSlowSimCluster.hh"
 #include "StFtpcSlowSimField.hh"
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
@@ -130,8 +133,8 @@ void StFtpcSlowSimCluster::Print() const
 {
     cout << " Cluster parameter : " << endl;
     cout << "number of electrons = " << electron << endl;
-    cout << "sigma_rad [um]      = " << sqrt(sigma_rad_squared) << endl;
-    cout << "sigma_phi [um]      = " << sqrt(sigma_phi_squared) << endl;
+    cout << "sigma_rad [um]      = " << ::sqrt(sigma_rad_squared) << endl;
+    cout << "sigma_phi [um]      = " << ::sqrt(sigma_phi_squared) << endl;
     cout << "currentPhi [deg]   = " << currentPhi << endl;
     cout << "currentRadius [cm]    = " << currentRadius << endl;
     cout << "Td [usec]   = " << drift_time << endl;

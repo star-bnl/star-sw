@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdSimulatorMaker.cxx,v 1.5 2003/08/04 19:04:54 perev Exp $
+ * $Id: StPmdSimulatorMaker.cxx,v 1.6 2003/09/02 17:58:49 perev Exp $
  * Author: Subhasis Chattopadhyay
  *         Premomoy Ghosh
  ***************************************************************
@@ -9,6 +9,9 @@
  *
  ****************************************************************
  * $Log: StPmdSimulatorMaker.cxx,v $
+ * Revision 1.6  2003/09/02 17:58:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2003/08/04 19:04:54  perev
  * warnOff
  *
@@ -22,7 +25,7 @@
  * Calibration and readout resolution added
  *
  ****************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <assert.h>
 #include <math.h>
 #include "TROOT.h"
@@ -464,7 +467,7 @@ void StPmdSimulatorMaker::calAdc(StPmdDetector* pdet,Int_t id){
 
 Float_t StPmdSimulatorMaker::keV_ADC(Float_t edep, Float_t& adc)
 {
-  adc=mlcon0 + mlcon1*edep + mlcon2*pow(edep,2);
+  adc=mlcon0 + mlcon1*edep + mlcon2*::pow(edep,2);
   return kStOK;
 }
 /****************************/
@@ -472,7 +475,7 @@ Float_t StPmdSimulatorMaker::keV_ADC(Float_t edep, Float_t& adc)
  Float_t StPmdSimulatorMaker::ADC_Readout(Float_t adc,Int_t& ADC)
 {
   Float_t reso_percent=0., reso=0.;
-  reso_percent=mpcon0 + mpcon1*adc + mpcon2*pow(adc,2);
+  reso_percent=mpcon0 + mpcon1*adc + mpcon2*::pow(adc,2);
   reso=(reso_percent*100.)/adc;
 
   Float_t adcprime=gRandom->Gaus(adc,reso);

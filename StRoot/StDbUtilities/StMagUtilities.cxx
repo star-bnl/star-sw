@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.35 2003/06/27 18:41:14 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.36 2003/09/02 17:57:51 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.36  2003/09/02 17:57:51  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.35  2003/06/27 18:41:14  jhthomas
  * Add new function called FixSpaceChargeDistortion( ,,,,, )
  * It can be used to convert the old (Uniform) space charge corrections to
@@ -210,7 +213,7 @@ StMagUtilities::StMagUtilities ()
 
 /// StMagUtilities constructor using the DataBase
 
-StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode = 0 )
+StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
 
 { 
   gMap = kMapped ;                    // Do once & Select the B field map (mapped field or constant)
@@ -223,7 +226,7 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode = 0
 
 /// StMagUtilities constructor not using the DataBase
 
-StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t mode = 0 )       
+StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t mode )       
 
 { 
   gFactor = factor ;
@@ -360,9 +363,9 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
   StarMagE   =  TMath::Abs(CathodeV/TPC_Z0) ;           // STAR Electric Field (V/cm) Magnitude
   OmegaTau   =  -11.0 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note the sign of B is important 
 
-  Const_0    =  1. / ( 1. + pow( OmegaTau, 2 ) ) ;
-  Const_1    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
-  Const_2    =  pow( OmegaTau, 2 ) / ( 1. + pow( OmegaTau, 2 ) ) ;
+  Const_0    =  1. / ( 1. + ::pow( OmegaTau, 2 ) ) ;
+  Const_1    =  OmegaTau / ( 1. + ::pow( OmegaTau, 2 ) ) ;
+  Const_2    =  ::pow( OmegaTau, 2 ) / ( 1. + ::pow( OmegaTau, 2 ) ) ;
 
   cout << "StMagUtilities::DriftVel     =  " << StarDriftV << " cm/microsec" <<  endl ; 
   cout << "StMagUtilities::TPC_Z0       =  " << TPC_Z0 << " cm" << endl ; 
@@ -1035,7 +1038,7 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 	      for ( Int_t n = 1 ; n < Nterms ; ++n ) 
 		{
 		  Double_t k  = n * TMath::Pi() / TPC_Z0 ;  // Integrated Charge Density
-		  Double_t Zterm = pow(-1,(n+1)) * ( 1.0 - TMath::Cos( k * ( TPC_Z0 - z ) ) ) ;
+		  Double_t Zterm = TMath::Power(-1,(n+1)) * ( 1.0 - TMath::Cos( k * ( TPC_Z0 - z ) ) ) ;
 		  //Double_t k  = (2*n-1) * TMath::Pi() / TPC_Z0 ;  // Uniform Charge Density
 		  //Double_t Zterm = 1.0 + TMath::Cos( k *  z ) ;   // Uniform Charge Density
 		  Double_t Cn = -4.0 / ( k*k*k * TPC_Z0 * StarMagE ) ;
@@ -1759,9 +1762,8 @@ void StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
 /// Convert from the old (Uniform) space charge correction to the new (1/R**2) space charge correction. 
 
 void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_t x[3], const Float_t p[3], 
-					   const Prime PrimaryOrGlobal, Float_t x_new[3], Float_t p_new[3],
-		         const unsigned int RowMask1 = 0xFFFFFF00 , const unsigned int RowMask2 = 0x1FFFFF,
-                                                                        const Float_t VertexError = 0.0200 )
+					        const Prime PrimaryOrGlobal, Float_t x_new[3], Float_t p_new[3],
+		         const unsigned int RowMask1  , const unsigned int RowMask2 ,const Float_t VertexError)
 // Applicable to 200 GeV Au+Au data that is on the P02ge (and other) microDSTs.
 // Given the charge and momentum of a particle and a point on the circular path described by the particle , 
 // this function returns the new position of the point (cm) and the new momentum of the particle (GeV).  This 
@@ -1824,7 +1826,7 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
       else              R[i] = 127.195 + (i-INNER)*2.0 ;
     }
 
-  if (Y0 == 0.0)  Direction = TMath::Sign(1.0,p[1]) ;
+  if (Y0 == 0.0)  Direction = TMath::Sign((float)1.0,p[1]) ;
   else
     {
       Direction = 1.0 ;

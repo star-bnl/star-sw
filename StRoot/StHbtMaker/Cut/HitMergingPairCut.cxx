@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: HitMergingPairCut.cxx,v 1.1 2001/12/14 23:11:27 fretiere Exp $
+ * $Id: HitMergingPairCut.cxx,v 1.2 2003/09/02 17:58:21 perev Exp $
  *
  * Author: Fabrice Retiere
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: HitMergingPairCut.cxx,v $
+ * Revision 1.2  2003/09/02 17:58:21  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2001/12/14 23:11:27  fretiere
  * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
  * 
@@ -24,7 +27,7 @@
 #include "Infrastructure/StHbtPair.hh"
 #include <string>
 #include <cstdio>
-#include <strstream.h>
+#include <Stsstream.h>
 
 #ifdef __ROOT__
 ClassImp(HitMergingPairCut)

@@ -1,7 +1,7 @@
 #ifndef STACCEPTALLEVENTS_HH
 #define STACCEPTALLEVENTS_HH
 #include "StRareEventCut.h"
-#include <iostream.h>
+#include <Stiostream.h>
 class StEvent;
 class StAcceptAllEvents : public StRareEventCut {
  

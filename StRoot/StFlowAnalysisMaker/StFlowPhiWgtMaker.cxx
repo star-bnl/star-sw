@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowPhiWgtMaker.cxx,v 1.2 2003/07/30 22:01:55 oldi Exp $
+// $Id: StFlowPhiWgtMaker.cxx,v 1.3 2003/09/02 17:58:11 perev Exp $
 //
 // Authors: Art Poskanzer and Jamie Dunlop, May 2003
 //
@@ -10,7 +10,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include "StMaker.h"
@@ -305,7 +305,7 @@ Int_t StFlowPhiWgtMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowPhiWgt", 2);
-  gMessMgr->Info("##### FlowPhiWgt: $Id: StFlowPhiWgtMaker.cxx,v 1.2 2003/07/30 22:01:55 oldi Exp $");
+  gMessMgr->Info("##### FlowPhiWgt: $Id: StFlowPhiWgtMaker.cxx,v 1.3 2003/09/02 17:58:11 perev Exp $");
 
   return StMaker::Init();
 }
@@ -570,6 +570,9 @@ Int_t StFlowPhiWgtMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPhiWgtMaker.cxx,v $
+// Revision 1.3  2003/09/02 17:58:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  2003/07/30 22:01:55  oldi
 // PtWgtSaturation parameter introduced.
 //

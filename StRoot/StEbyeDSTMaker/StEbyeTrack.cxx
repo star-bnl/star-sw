@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeTrack.cxx,v 1.2 2000/09/01 22:59:11 jgreid Exp $
+ * $Id: StEbyeTrack.cxx,v 1.3 2003/09/02 17:57:57 perev Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -14,6 +14,9 @@
  **********************************************************************
  *
  * $Log: StEbyeTrack.cxx,v $
+ * Revision 1.3  2003/09/02 17:57:57  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2000/09/01 22:59:11  jgreid
  * version 1 revision ; multiple file handling + additional data members added
  *
@@ -64,11 +67,11 @@ StEbyeTrack::StEbyeTrack(StEbyeTrack *track) : TObject() {
 }
 
 Float_t StEbyeTrack::Pt() { 
-  return sqrt((mPx*mPx)+(mPy*mPy)); 
+  return ::sqrt((mPx*mPx)+(mPy*mPy)); 
 }
 
 Float_t StEbyeTrack::Mt(Float_t mass) { 
-  return sqrt((mPx*mPx)+(mPy*mPy)+(mass*mass)); 
+  return ::sqrt((mPx*mPx)+(mPy*mPy)+(mass*mass)); 
 }
 
 Float_t StEbyeTrack::E(Float_t mass) { 
@@ -78,19 +81,19 @@ Float_t StEbyeTrack::E(Float_t mass) {
 Float_t StEbyeTrack::Rapidity(Float_t mass) { 
   Float_t E = this->E(mass);
 
-  return 0.5*log((E+mPz)/(E-mPz)); 
+  return 0.5*::log((E+mPz)/(E-mPz)); 
 }
 
 Float_t StEbyeTrack::Dca() { 
-  return (sqrt((mBxPrimary*mBxPrimary)+(mByPrimary*mByPrimary)+(mBzPrimary*mBzPrimary))); 
+  return (::sqrt((mBxPrimary*mBxPrimary)+(mByPrimary*mByPrimary)+(mBzPrimary*mBzPrimary))); 
 }
 
 Float_t StEbyeTrack::DcaPrimary() { 
-  return (sqrt((mBxPrimary*mBxPrimary)+(mByPrimary*mByPrimary)+(mBzPrimary*mBzPrimary))); 
+  return (::sqrt((mBxPrimary*mBxPrimary)+(mByPrimary*mByPrimary)+(mBzPrimary*mBzPrimary))); 
 }
 
 Float_t StEbyeTrack::DcaGlobal() { 
-  return (sqrt((mBxGlobal*mBxGlobal)+(mByGlobal*mByGlobal)+(mBzGlobal*mBzGlobal))); 
+  return (::sqrt((mBxGlobal*mBxGlobal)+(mByGlobal*mByGlobal)+(mBzGlobal*mBzGlobal))); 
 }
 
 Float_t StEbyeTrack::PIDpiPlus() { 

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.h,v 1.4 2003/07/17 23:47:11 akio Exp $
+// $Id: StJet.h,v 1.5 2003/09/02 17:59:01 perev Exp $
 // $Log: StJet.h,v $
+// Revision 1.5  2003/09/02 17:59:01  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.4  2003/07/17 23:47:11  akio
 // bug fix. Thanks Dylan
 //
@@ -59,7 +62,7 @@ public:
     int     charge;
     
     Float_t      ez() const {return E()*tanh(Eta());}
-    Float_t      et() const {return E()*pow(1.0-tanh(Eta())*tanh(Eta()),0.5);}
+    Float_t      et() const {return E()*::pow(1.0-tanh(Eta())*tanh(Eta()),0.5);}
     ClassDef(StJet,3)
 };
 

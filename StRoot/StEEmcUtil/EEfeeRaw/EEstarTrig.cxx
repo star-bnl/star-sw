@@ -1,6 +1,6 @@
 #include "EEstarTrig.h"
  
-#include <iostream.h>
+#include <Stiostream.h>
 
 ClassImp(EEstarTrig)
 

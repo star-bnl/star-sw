@@ -1,4 +1,4 @@
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -30,11 +30,11 @@ double StSvtHybridNoise::makeGausDev(double sigma,double mean)
         
     } while(rsq >= 1.0 || rsq == 0.0);
 
-     u = sqrt(-2.0*log(rsq)/rsq);
+     u = ::sqrt(-2.0*::log(rsq)/rsq);
 
      iset = 1;
      //return mean + sigma*v2*u;
-     return sigma*v2*u;  // sigma*sqrt(-2.0*log(rsq))*(v1/sqrt(rsq))
+     return sigma*v2*u;  // sigma*::sqrt(-2.0*::log(rsq))*(v1/::sqrt(rsq))
    }
   else
     {
@@ -74,8 +74,8 @@ double StSvtHybridNoise::countAboveThreshold(double sigma, double randNum)
 
  double count = 0;
 
- count = sigma*sqrt(2*M_PI)*randNum;
- count =sigma*sqrt( -2.0*log(count));
+ count = sigma*::sqrt(2*M_PI)*randNum;
+ count =sigma*::sqrt( -2.0*::log(count));
 
  return count;
  }

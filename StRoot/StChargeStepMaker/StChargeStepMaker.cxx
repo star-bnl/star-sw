@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.11 2003/04/30 20:36:25 perev Exp $
+// $Id: StChargeStepMaker.cxx,v 1.12 2003/09/02 17:55:30 perev Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.12  2003/09/02 17:55:30  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.11  2003/04/30 20:36:25  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -39,8 +42,7 @@
 // StChargeStepMaker class for Makers                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include "StChargeStepMaker.h"
@@ -331,7 +333,7 @@ Int_t StChargeStepMaker::Make() {
 
 void StChargeStepMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.11 2003/04/30 20:36:25 perev Exp $\n");
+  printf("* $Id: StChargeStepMaker.cxx,v 1.12 2003/09/02 17:55:30 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

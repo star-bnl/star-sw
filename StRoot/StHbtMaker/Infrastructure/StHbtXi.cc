@@ -12,24 +12,24 @@ void StHbtXi::UpdateXi(){
    mPtotXi = mMomXi.mag();
    mPtBac  = momBac().perp();
    mPtotBac= momBac().mag();
-   mEXi= sqrt(mPtotXi*mPtotXi+M_XI_MINUS*M_XI_MINUS);
-   mEOmega= sqrt(mPtotXi*mPtotXi+M_OMEGA_MINUS*M_OMEGA_MINUS);
-   mEBacPion = sqrt(ptotBac()*ptotBac()+M_PION_MINUS*M_PION_MINUS);
-   mEBacKaon = sqrt(ptotBac()*ptotBac()+M_KAON_MINUS*M_KAON_MINUS);
+   mEXi= ::sqrt(mPtotXi*mPtotXi+M_XI_MINUS*M_XI_MINUS);
+   mEOmega= ::sqrt(mPtotXi*mPtotXi+M_OMEGA_MINUS*M_OMEGA_MINUS);
+   mEBacPion = ::sqrt(ptotBac()*ptotBac()+M_PION_MINUS*M_PION_MINUS);
+   mEBacKaon = ::sqrt(ptotBac()*ptotBac()+M_KAON_MINUS*M_KAON_MINUS);
 
-   MomV0AlongXi  =  momV0()*mMomXi / sqrt(pow(mPtotXi,2));
-   MomBacAlongXi =  momBac()*mMomXi / sqrt(pow(mPtotXi,2));
+   MomV0AlongXi  =  momV0()*mMomXi / ::sqrt(::pow(mPtotXi,2));
+   MomBacAlongXi =  momBac()*mMomXi / ::sqrt(::pow(mPtotXi,2));
 
    mAlphaXi = (MomBacAlongXi-MomV0AlongXi)/(MomBacAlongXi+MomV0AlongXi);
-   mPtArmXi =  sqrt(ptotBac()*ptotBac() - MomBacAlongXi*MomBacAlongXi);
-   mMassXi = sqrt(pow(eBacPion()+eLambda(),2)-pow(mPtotXi,2));
-   mMassOmega = sqrt(pow(eBacKaon()+eLambda(),2)-pow(mPtotXi,2));
+   mPtArmXi =  ::sqrt(ptotBac()*ptotBac() - MomBacAlongXi*MomBacAlongXi);
+   mMassXi = ::sqrt(::pow(eBacPion()+eLambda(),2)-::pow(mPtotXi,2));
+   mMassOmega = ::sqrt(::pow(eBacKaon()+eLambda(),2)-::pow(mPtotXi,2));
 
-   mRapXi = 0.5*log( (eXi()+mMomXi.z()) / (eXi()-mMomXi.z()) );
-   mCTauXi = M_XI_MINUS*(mDecayLengthXi) / sqrt( pow((double)mMomXi.mag(),2.) );
+   mRapXi = 0.5*::log( (eXi()+mMomXi.z()) / (eXi()-mMomXi.z()) );
+   mCTauXi = M_XI_MINUS*(mDecayLengthXi) / ::sqrt( ::pow((double)mMomXi.mag(),2.) );
    
-   mRapOmega = 0.5*log( (eOmega()+mMomXi.z()) / (eOmega()-mMomXi.z()) );// eO,
-   mCTauOmega = M_OMEGA_MINUS*(mDecayLengthXi) / sqrt( pow((double)mMomXi.mag(),2.) );
+   mRapOmega = 0.5*::log( (eOmega()+mMomXi.z()) / (eOmega()-mMomXi.z()) );// eO,
+   mCTauOmega = M_OMEGA_MINUS*(mDecayLengthXi) / ::sqrt( ::pow((double)mMomXi.mag(),2.) );
 }
 // -----------------------------------------------------------------------
 #ifdef __ROOT__

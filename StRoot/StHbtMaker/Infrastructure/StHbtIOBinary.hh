@@ -14,8 +14,8 @@
 #include "StarClassLibrary/StPhysicalHelix.hh"
 #include <float.h>    // these tell maximum values of types so we
 #include <limits.h>   // don't write the characters "inf" to our microDST
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 
 typedef unsigned int colSizeType;
 

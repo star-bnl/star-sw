@@ -3,7 +3,7 @@
 // Revision 1.0  2000/12/15           Pablo Yepes: yepes@rice.edu
 //
 //////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StPeCTrack.h"
 #include "StEventTypes.h"
 // Temp fix to avoid Yuris new version
@@ -37,7 +37,7 @@ void StPeCTrack::set ( Int_t _primary, StTrack* trk) {
   pt      = trk->geometry()->momentum().perp();
   p      = trk->geometry()->momentum().mag();
   psi     = trk->geometry()->momentum().phi();
-  eta     = -log(tan(trk->geometry()->momentum().theta()/2.));
+  eta     = -::log(tan(trk->geometry()->momentum().theta()/2.));
   phi0    = trk->geometry()->origin().phi(); 
   z0      = trk->geometry()->origin().z(); 
   r0      = trk->geometry()->origin().perp(); 
@@ -85,7 +85,7 @@ void StPeCTrack::set(Int_t _primary, StMuTrack* trk)
    pt = trk->momentum().perp();
    p = trk->momentum().mag();
    psi = trk->momentum().phi();
-   eta = -log(tan(trk->momentum().theta()/2.));
+   eta = -::log(tan(trk->momentum().theta()/2.));
    phi0 = trk->firstPoint().phi();
    z0 = trk->firstPoint().z(); 
    r0 = trk->firstPoint().perp(); 

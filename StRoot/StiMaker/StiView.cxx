@@ -1,5 +1,5 @@
 #include <stdexcept>
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StiView.h"
 #include "Sti/StiDetectorContainer.h"
 #include "StiGui/StiRootDrawableDetector.h"

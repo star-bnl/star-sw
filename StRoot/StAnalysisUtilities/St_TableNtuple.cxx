@@ -1,8 +1,11 @@
 //*CMZ :          23/02/99  18.27.27  by Gene Van Buren ( genevb@bnl.gov)
 //*-- Author :    Gene Van Buren ( genevb@bnl.gov)   23/02/99
 //
-// $Id: St_TableNtuple.cxx,v 1.2 1999/12/02 03:20:20 perev Exp $
+// $Id: St_TableNtuple.cxx,v 1.3 2003/09/02 17:55:26 perev Exp $
 // $Log: St_TableNtuple.cxx,v $
+// Revision 1.3  2003/09/02 17:55:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  1999/12/02 03:20:20  perev
 // cast's for CC5
 //
@@ -109,7 +112,7 @@
 //      t1.Draw("var1:var2","condition1 && condition2");
 // etc.
 //
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TROOT.h"
 #include "St_TableNtuple.h"
 #include "St_Table.h"
@@ -346,7 +349,7 @@ Int_t St_TableNtuple::Fill(const St_Table &table, Int_t firstRow, Int_t nRows) {
     TTree::Fill();
     thisRow += rowSize;
   }
-  TTree::SetEstimate(TTree::GetEntries());
+  TTree::SetEstimate((int)TTree::GetEntries());
   return nRows;
 }
 //_____________________________________________________________________________
@@ -475,7 +478,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
 //_____________________________________________________________________________
 void St_TableNtuple::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_TableNtuple.cxx,v 1.2 1999/12/02 03:20:20 perev Exp $\n");
+  printf("* $Id: St_TableNtuple.cxx,v 1.3 2003/09/02 17:55:26 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("* Using %d columns from table with:\n",mNvar);
   printf("*   Name: %s\n",GetName());

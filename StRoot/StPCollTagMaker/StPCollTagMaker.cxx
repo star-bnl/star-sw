@@ -108,7 +108,7 @@ Int_t StPCollTagMaker::Make(){
   } 
  
   row.numberOfPrimaryTracks=NPrimaryTracks;
-  row.vectorSumOfPt = sqrt(SumPx*SumPx+SumPy*SumPy);
+  row.vectorSumOfPt = ::sqrt(SumPx*SumPx+SumPy*SumPy);
   tagtab->AddAt(&row,0);
 
  return kStOK;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0_ADCR_SR.cxx,v 1.3 2001/05/10 15:19:08 jschamba Exp $
+ * $Id: SVTV1P0_ADCR_SR.cxx,v 1.4 2003/09/02 17:55:33 perev Exp $
  *      
  * Author: Jeff Landgraf, M.J. LeVine, Marcelo Munhoz, J. Schambach
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: SVTV1P0_ADCR_SR.cxx,v $
+ * Revision 1.4  2003/09/02 17:55:33  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2001/05/10 15:19:08  jschamba
  * unscrambling of Format = 2 data was done each time initialize was called. Rewrite header
  * to indicate Format = 0 after unscrambling prevents this.
@@ -23,7 +26,7 @@
  *
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 
 
 #include "StDaqLib/GENERIC/EventReader.hh"

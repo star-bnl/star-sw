@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixD.hh,v 1.7 2001/12/05 23:34:44 ullrich Exp $
+ * $Id: StMatrixD.hh,v 1.8 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StMatrixD.hh,v $
+ * Revision 1.8  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.7  2001/12/05 23:34:44  ullrich
  * Added Victor modifications to cope with error recovery.
  *
@@ -41,7 +44,7 @@
 #ifndef ST_MATRIX_D_HH
 #define ST_MATRIX_D_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StThreeVectorF.hh"
 #include "StLorentzVectorF.hh"
 #include "StThreeVectorD.hh"

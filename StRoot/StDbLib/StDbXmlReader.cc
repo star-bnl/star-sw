@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.cc,v 1.9 2001/10/24 04:05:20 porter Exp $
+ * $Id: StDbXmlReader.cc,v 1.10 2003/09/02 17:57:50 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.cc,v $
+ * Revision 1.10  2003/09/02 17:57:50  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.9  2001/10/24 04:05:20  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -51,11 +54,27 @@
  *
  **************************************************************************/
 #include "StDbXmlReader.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <string.h>
-#include <fstream.h>
-#include <strstream.h>
+#include <Stsstream.h>
 #include "dbStruct.hh"
+
+template<class T>
+static void passAux(elem* e, T*& i,  int& len)
+{
+  len = e->size.isize;
+  i = new T[len];
+  memset(i,0,sizeof(T)*len);
+  const char* p1 = e->val.data;
+  const char* p2=p1;
+  int iloop = 0;
+  for(;1;p2++) {
+     if (p2[0] && p2[0]!=',') 		continue;
+     i[iloop++] = (T)atof(p1);
+     p1=p2+1;
+     if (iloop==len || p2[0]==0) 	break;
+  }
+}
 
 //----------------------------------------------------
 StDbXmlReader::StDbXmlReader(){ tab = new dbTable(); }
@@ -321,7 +340,6 @@ int len,j;
 char *p1,*p2,*hlen;
 int ilist;
 int iline;
-char* fullLine;
 
  for(int k=0;k<a->nelems;k++){
 
@@ -329,8 +347,8 @@ char* fullLine;
 
      // get Type
 
-   p1=strstr(loca[e->istart],e->startKey);
-   for(j=0;j<(int)strlen(e->startKey);j++)p1++;
+   p1=strstr(loca[e->istart],e->startKey) + strlen(e->startKey);
+
    p2=strstr(loca[e->istart],">");
    len = strlen(p1) - strlen(p2);
    e->type = new char[len];
@@ -351,7 +369,7 @@ char* fullLine;
    p1=strstr(loca[e->istart],e->size.startKey);
 
 if(p1){
-   for(j=0;j<(int)strlen(e->size.startKey);j++)p1++;
+   p1+=strlen(e->size.startKey);
    p2=strstr(loca[e->istart],e->size.endKey);
    len = strlen(p1) - strlen(p2)+1;
    hlen = new char[len];
@@ -368,7 +386,7 @@ if(p1){
    if(p1){
      // <element Type> ...     <value> data </value>
      // </element Type>
-      for(j=0;j<(int)strlen((e->val).startKey);j++)p1++;
+      p1+=strlen((e->val).startKey);
       while(p1[0]==' ')p1++;
       p2=strstr(loca[e->istart],(e->val).endKey);
       len = strlen(p1) - strlen(p2);
@@ -384,14 +402,12 @@ if(p1){
      ilist =e->iend - e->istart;
      iline =0;
      for(j=2;j<ilist;j++)iline += strlen(loca[e->istart+j]);
-     fullLine=new char[iline+1];
-     ostrstream fs(fullLine,iline+1);
+     ostrstream fs;
      for(j=2;j<ilist;j++) fs<<loca[e->istart+j]; //<<endl;
      fs << ends;
-     e->val.data = new char[strlen(fullLine)+1];
+     e->val.data = new char[strlen(fs.str())+1];
      //cout << "TEST:: " << fullLine << " len = " << strlen(fullLine) << endl;
-     strcpy(e->val.data,fullLine);
-     delete [] fullLine;
+     strcpy(e->val.data,fs.str());
 
    }
 
@@ -424,45 +440,11 @@ StDbXmlReader::pass(char* name, unsigned char& i,  int& len){
 ////////////////////////////////////////////////////////////////////////
 
 void
-StDbXmlReader::pass(char* name, unsigned char*& i,  int& len){
+StDbXmlReader::pass(char* name, unsigned char*& i,  int& len)
+{
  elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
- if(strstr(e->type,"UChar")){ //strcmp(e->type,"UCharArray")==0){
-
-   len = e->size.isize; 
-   i = new unsigned char[len];
-   char* p1;
-   char* p2;
-   char* dstring;
-   int idata =strlen((e->val).data)+1;
-   char* tmp = new char[idata];
-   char* dataString = new char[idata];
-   ostrstream os(dataString,idata);
-   os << (e->val).data <<ends;
-   int iloc;
-   int ilen;
-   for(int iloop=0; iloop<len-1; iloop++){
-     p1 = strstr(dataString,","); 
-     iloc = p1-dataString;
-      p2 = &dataString[0];
-      strncpy(tmp,p2,iloc); tmp[iloc]='\0';
-      //      cout << "Data passed " << tmp << " from " << dataString << endl;
-      i[iloop] = atoi(tmp);
-      p1++; 
-      ilen = strlen(dataString)-iloc;
-      dstring=new char[ilen];
-      strncpy(dstring,p1,ilen);
-      delete [] dataString;
-      dataString = new char[strlen(dstring)+1];
-      strcpy(dataString,dstring);
-      delete [] dstring;                  
-   }
-      i[len-1] = atoi(dataString);
-      delete [] dataString;
-      delete [] tmp;
-
- }// strcmp==0
-
-   
+ if(!strstr(e->type,"UChar")) return;
+ passAux(e,i,len);
 }
 
 
@@ -484,43 +466,10 @@ void
 StDbXmlReader::pass(char* name, short*& i,  int& len){
 
  elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
- if(strstr(e->type,"Short")){ //strcmp(e->type,"ShortArray")==0){
-
-   len = e->size.isize;
-   i = new short[len];
-   char* p1;
-   char* p2;
-   char* dstring;
-   int idata =strlen((e->val).data)+1;
-   char* tmp = new char[idata];
-   char* dataString = new char[idata];
-   ostrstream os(dataString,idata);
-   os << (e->val).data <<ends;
-   int iloc;
-   int ilen;
-   for(int iloop=0; iloop<len-1; iloop++){
-     p1 = strstr(dataString,","); 
-     iloc = p1-dataString;
-      p2 = &dataString[0];
-      strncpy(tmp,p2,iloc); tmp[iloc]='\0';
-      //      cout << "Data passed " << tmp << " from " << dataString << endl;
-      i[iloop] = atoi(tmp);
-      p1++; 
-      ilen = strlen(dataString)-iloc;
-      dstring=new char[ilen];
-      strncpy(dstring,p1,ilen);
-      delete [] dataString;
-      dataString = new char[strlen(dstring)+1];
-      strcpy(dataString,dstring);
-      delete [] dstring;                  
-   }
-      i[len-1] = atoi(dataString);
-      delete [] dataString;
-      delete [] tmp;
-
- }// strcmp==0
-
+ if(!strstr(e->type,"Short"))return;
+ passAux(e,i,len);
 }
+
 
 //----------------------------------------------------
 
@@ -537,45 +486,9 @@ void
 StDbXmlReader::pass(char* name, unsigned short*& i,  int& len){
 
  elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
- if(strstr(e->type,"UShort")){ //strcmp(e->type,"UShortArray")==0){
-
-   len = e->size.isize;
-   i = new unsigned short[len];
-   char* p1;
-   char* p2;
-   char* dstring;
-   int idata =strlen((e->val).data)+1;
-   char* tmp = new char[idata];
-   char* dataString = new char[idata];
-   ostrstream os(dataString,idata);
-   os << (e->val).data <<ends;
-   int iloc;
-   int ilen;
-   for(int iloop=0; iloop<len-1; iloop++){
-     p1 = strstr(dataString,","); 
-     iloc = p1-dataString;
-      p2 = &dataString[0];
-      strncpy(tmp,p2,iloc); tmp[iloc]='\0';
-      //      cout << "Data passed " << tmp << " from " << dataString << endl;
-      i[iloop] = atoi(tmp);
-      p1++; 
-      ilen = strlen(dataString)-iloc;
-      dstring=new char[ilen];
-      strncpy(dstring,p1,ilen);
-      delete [] dataString;
-      dataString = new char[strlen(dstring)+1];
-      strcpy(dataString,dstring);
-      delete [] dstring;                  
-   }
-      i[len-1] = atoi(dataString);
-      delete [] dataString;
-      delete [] tmp;
-
- }// strcmp==0
-
+ if(!strstr(e->type,"UShort"))return;
+ passAux(e,i,len);
 }
-
-
 
 void
 StDbXmlReader::pass(char* name, int& i,  int& len){
@@ -592,47 +505,8 @@ StDbXmlReader::pass(char* name, int*& i,  int& len){
 
   //  cout << "In IntArray " << endl;
  elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
- if(strstr(e->type,"Int")){ 
-
-   len = e->size.isize;
-   i = new int[len];
-   char* p1;
-   char* p2;
-   char* dstring;
-   /* 
-   if(strlen((e->val).data) > 5) {
-     cout << "My size = " << e->size.isize << endl;
-     cout << "My data = " << (e->val).data << endl;
-   }
-   */
-   int idata =strlen((e->val).data)+1;
-   char* tmp = new char[idata];
-   char* dataString = new char[idata];
-   ostrstream os(dataString,idata);
-   os << (e->val).data <<ends;
-   int iloc;
-   int ilen;
-   for(int iloop=0; iloop<len-1; iloop++){
-     p1 = strstr(dataString,","); 
-     iloc = p1-dataString;
-      p2 = &dataString[0];
-      strncpy(tmp,p2,iloc); tmp[iloc]='\0';
-      i[iloop] = atoi(tmp);
-      p1++; 
-      ilen = strlen(dataString)-iloc;
-      dstring=new char[ilen];
-      strncpy(dstring,p1,ilen);
-      delete [] dataString;
-      dataString = new char[strlen(dstring)+1];
-      strcpy(dataString,dstring);
-      delete [] dstring;                  
-   }
-      i[len-1] = atoi(dataString);
-      delete [] dataString;
-      delete [] tmp;
-
- }// strcmp==0
-
+ if(!strstr(e->type,"Int")) return; 
+ passAux(e,i,len);
 }
 void
 StDbXmlReader::pass(char* name,unsigned int& i,  int& len){
@@ -646,41 +520,8 @@ void
 StDbXmlReader::pass(char* name,unsigned int*& i,  int& len){
 
  elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
- if(strstr(e->type,"UInt")){ //strcmp(e->type,"UIntArray")==0){
-
-   len = e->size.isize;
-   i = new unsigned int[len];
-   char* p1;
-   char* p2;
-   char* dstring;
-   int idata =strlen((e->val).data)+1;
-   char* tmp = new char[idata];
-   char* dataString = new char[idata];
-   ostrstream os(dataString,idata);
-   os << (e->val).data <<ends;
-   int iloc;
-   int ilen;
-   for(int iloop=0; iloop<len-1; iloop++){
-     p1 = strstr(dataString,","); 
-     iloc = p1-dataString;
-      p2 = &dataString[0];
-      strncpy(tmp,p2,iloc); tmp[iloc]='\0';
-      i[iloop] = atoi(tmp);
-      p1++; 
-      ilen = strlen(dataString)-iloc;
-      dstring=new char[ilen];
-      strncpy(dstring,p1,ilen);
-      delete [] dataString;
-      dataString = new char[strlen(dstring)+1];
-      strcpy(dataString,dstring);
-      delete [] dstring;                  
-   }
-      i[len-1] = atoi(dataString);
-      delete [] dataString;
-      delete [] tmp;
-
- }// strcmp==0
-
+ if(!strstr(e->type,"UInt"))return;
+ passAux(e,i,len);
 }
 
 //----------------------------------------------------
@@ -698,43 +539,8 @@ void
 StDbXmlReader::pass(char* name, long*& i,  int& len){
 
  elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
- if(strstr(e->type,"Long")){ //strcmp(e->type,"LongArray")==0){
-
-   len = e->size.isize;
-   i = new long[len];
-
-   char* p1;
-   char* p2;
-   char* dstring;
-   int idata =strlen((e->val).data)+1;
-   char* tmp = new char[idata];
-   char* dataString = new char[idata];
-   ostrstream os(dataString,idata);
-   os << (e->val).data <<ends;
-   int iloc;
-   int ilen;
-   for(int iloop=0; iloop<len-1; iloop++){
-     p1 = strstr(dataString,","); 
-     iloc = p1-dataString;
-      p2 = &dataString[0];
-      strncpy(tmp,p2,iloc); tmp[iloc]='\0';
-      //      cout << "Data passed " << tmp << " from " << dataString << endl;
-      i[iloop] = atoi(tmp);
-      p1++; 
-      ilen = strlen(dataString)-iloc;
-      dstring=new char[ilen];
-      strncpy(dstring,p1,ilen);
-      delete [] dataString;
-      dataString = new char[strlen(dstring)+1];
-      strcpy(dataString,dstring);
-      delete [] dstring;                  
-   }
-      i[len-1] = atol(dataString);
-      delete [] dataString;
-      delete [] tmp;
-
- }// strcmp==0
-
+ if(!strstr(e->type,"Long")) return;
+ passAux(e,i,len);
 }
 
 //----------------------------------------------------
@@ -765,42 +571,8 @@ void
 StDbXmlReader::pass(char* name, unsigned long*& i,  int& len){
 
  elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
- if(strstr(e->type,"ULong")){ //strcmp(e->type,"ULongArray")==0){
-
-   len = e->size.isize;
-   i = new unsigned long[len];
-   char* p1;
-   char* p2;
-   char* dstring;
-   int idata =strlen((e->val).data)+1;
-   char* tmp = new char[idata];
-   char* dataString = new char[idata];
-   ostrstream os(dataString,idata);
-   os << (e->val).data <<ends;
-   int iloc;
-   int ilen;
-   for(int iloop=0; iloop<len-1; iloop++){
-     p1 = strstr(dataString,","); 
-     iloc = p1-dataString;
-      p2 = &dataString[0];
-      strncpy(tmp,p2,iloc); tmp[iloc]='\0';
-      //      cout << "Data passed " << tmp << " from " << dataString << endl;
-      i[iloop] = atoi(tmp);
-      p1++; 
-      ilen = strlen(dataString)-iloc;
-      dstring=new char[ilen];
-      strncpy(dstring,p1,ilen);
-      delete [] dataString;
-      dataString = new char[strlen(dstring)+1];
-      strcpy(dataString,dstring);
-      delete [] dstring;                  
-   }
-      i[len-1] = atol(dataString);
-      delete [] dataString;
-      delete [] tmp;
-
- }// strcmp==0
-
+ if(!strstr(e->type,"ULong"))return;
+ passAux(e,i,len);
 }
 
 
@@ -810,92 +582,18 @@ void
 StDbXmlReader::pass(char* name, float*& i,  int& len){
 
  elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
- if(strstr(e->type,"Float")){ 
-   //strcmp(e->type,"Float")==0){
-
-   //   cout << "In Float " << (e->val).data << " & " << e->size.isize<<endl;
-
-   len = e->size.isize;
-   i = new float[len];
-   char* p1;
-   char* p2;
-   char* dstring;
-   int idata =strlen((e->val).data)+1;
-   char* tmp = new char[idata];
-   char* dataString = new char[idata];
-   ostrstream os(dataString,idata);
-   os << (e->val).data <<ends;
-   int iloc;
-   int ilen;
-   for(int iloop=0; iloop<len-1; iloop++){
-     p1 = strstr(dataString,","); 
-     iloc = p1-dataString;
-      p2 = &dataString[0];
-      strncpy(tmp,p2,iloc); tmp[iloc]='\0';
-      //      cout << "Data passed " << tmp << " from " << dataString << endl;
-      i[iloop] = (float)atof(tmp);
-      p1++; 
-      ilen = strlen(dataString)-iloc;
-      dstring=new char[ilen];
-      strncpy(dstring,p1,ilen);
-      delete [] dataString;
-      dataString = new char[strlen(dstring)+1];
-      strcpy(dataString,dstring);
-      delete [] dstring;                  
-   }
-      i[len-1] = (float)atof(dataString);
-      delete [] dataString;
-      delete [] tmp;
-
- }// strcmp==0
-
+ if(!strstr(e->type,"Float")) return; 
+ passAux(e,i,len);
 }
-
 //----------------------------------------------------
 
 void
 StDbXmlReader::pass(char* name, double*& i,  int& len){
 
  elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
- if(strstr(e->type,"Double")){ //strcmp(e->type,"DoubleArray")==0){
-
- 
-   len = e->size.isize;
-   i = new double[len];
-   char* p1;
-   char* p2;
-   char* dstring;
-   int idata =strlen((e->val).data)+1;
-   char* tmp = new char[idata];
-   char* dataString = new char[idata];
-   ostrstream os(dataString,idata);
-   os << (e->val).data <<ends;
-   int iloc;
-   int ilen;
-   for(int iloop=0; iloop<len-1; iloop++){
-     p1 = strstr(dataString,","); 
-     iloc = p1-dataString;
-      p2 = &dataString[0];
-      strncpy(tmp,p2,iloc); tmp[iloc]='\0';
-      //      cout << "Data passed " << tmp << " from " << dataString << endl;
-      i[iloop] = atof(tmp);
-      p1++; 
-      ilen = strlen(dataString)-iloc;
-      dstring=new char[ilen];
-      strncpy(dstring,p1,ilen);
-      delete [] dataString;
-      dataString = new char[strlen(dstring)+1];
-      strcpy(dataString,dstring);
-      delete [] dstring;                  
-   }
-      i[len-1] = atof(dataString);
-      delete [] dataString;
-      delete [] tmp;
-
- }// strcmp==0
-
+ if(!strstr(e->type,"Double"))return;
+ passAux(e,i,len);
 }
-
 //----------------------------------------------------
 
 void

@@ -1,4 +1,4 @@
-#include <fstream.h>
+#include "Stiostream.h"
 #include "Sti/Base/Messenger.h"
 #include "Sti/Base/MessageType.h"
 #include "Sti/StiDetector.h"

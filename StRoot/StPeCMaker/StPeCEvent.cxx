@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.14 2003/03/20 20:10:58 yepes Exp $
+// $Id: StPeCEvent.cxx,v 1.15 2003/09/02 17:58:46 perev Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.15  2003/09/02 17:58:46  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.14  2003/03/20 20:10:58  yepes
 // double counting of tracks corrected
 //
@@ -53,7 +56,7 @@
 //  Place the cut on  track->flag() in a unuque place (Internal track array?)
 //  Understand the dublication of StPeCTrack  (does a tree work with pointers)
 // ///////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StPeCEvent.h"
 #include "StEventTypes.h"
 #include "StPeCEnumerations.h"
@@ -166,7 +169,7 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
   nPrim             = NPrimaries ;
   nTot              = NGlobal  ;
   qTot = SumQ ;
-  pt   = sqrt( SumPx*SumPx + SumPy*SumPy );
+  pt   = ::sqrt( SumPx*SumPx + SumPy*SumPy );
 
   //cout << "Number of Primary Vertices " << event->numberOfPrimaryVertices() << endl;
   StPrimaryVertex* vtx = event->primaryVertex();
@@ -175,7 +178,7 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
     xVertex = vtx->position().x();
     yVertex = vtx->position().y();
     zVertex = vtx->position().z();
-    rVertex = sqrt(xVertex*xVertex + yVertex*yVertex);
+    rVertex = ::sqrt(xVertex*xVertex + yVertex*yVertex);
     
     if ( infoLevel > 1 ) {
        cout << "StPeCEvent : primary vertex x:" << xVertex << " y: "  <<  yVertex  << " z: " << zVertex << " r: " << rVertex <<endl;
@@ -292,7 +295,7 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
       xVertex = vtx.x();
       yVertex = vtx.y();
       zVertex = vtx.z();
-      rVertex = sqrt(xVertex*xVertex + yVertex*yVertex);
+      rVertex = ::sqrt(xVertex*xVertex + yVertex*yVertex);
    }
    else {
       xVertex = -9999.;
@@ -329,7 +332,7 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
 
    nTot = nGlobals ;
    qTot = SumQ;
-   pt = sqrt(SumPx * SumPx + SumPy * SumPy );
+   pt = ::sqrt(SumPx * SumPx + SumPy * SumPy );
     
    if ( nGlobals > StPeCnMaxTracks ) return 1 ; 
 

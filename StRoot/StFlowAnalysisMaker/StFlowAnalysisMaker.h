@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.40 2003/08/06 20:54:09 oldi Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.41 2003/09/02 17:58:10 perev Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -13,7 +13,7 @@
 
 #ifndef StFlowAnalysisMaker_H
 #define StFlowAnalysisMaker_H
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "TVector2.h"
@@ -57,7 +57,7 @@ public:
   void     SetPtRange_for_vEta(Float_t lo, Float_t hi);
   void     SetEtaRange_for_vPt(Float_t lo, Float_t hi);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.40 2003/08/06 20:54:09 oldi Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.41 2003/09/02 17:58:10 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -69,7 +69,7 @@ private:
   TVector2 mQ[Flow::nSels][Flow::nHars];                     //! flow vector
   Float_t  mPsi[Flow::nSels][Flow::nHars];                   //! event plane angle
   UInt_t   mMult[Flow::nSels][Flow::nHars];                  //! multiplicity
-  Float_t  m_q[Flow::nSels][Flow::nHars];                    //! Q/sqrt(Mult)
+  Float_t  m_q[Flow::nSels][Flow::nHars];                    //! Q/::sqrt(Mult)
   TVector2 mQSub[Flow::nSels*Flow::nSubs][Flow::nHars];      //! flow vector subs
   Float_t  mPsiSub[Flow::nSels*Flow::nSubs][Flow::nHars];    //! plane angle subs
   UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   //! multiplicity subs
@@ -236,6 +236,9 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.41  2003/09/02 17:58:10  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.40  2003/08/06 20:54:09  oldi
 // Introduction of possibility to exclude pt ranges for v(eta) and eta regions
 // for v(pt) histograms. Default behavior stays the same (all available tracks

@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.26 2002/04/08 22:35:27 vlmrz Exp $
+// $Id: St_mwc_Maker.cxx,v 1.27 2003/09/02 17:59:30 perev Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.27  2003/09/02 17:59:30  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.26  2002/04/08 22:35:27  vlmrz
 // *** empty log message ***
 //
@@ -118,7 +121,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
-#include <iostream.h>
+#include <Stiostream.h>
 ClassImp(St_mwc_Maker)
  
 //_____________________________________________________________________________
@@ -261,7 +264,7 @@ Int_t St_mwc_Maker::Make(){
     g2t_mwc_hit_st *test_fake_mwc_hit = g2t_mwc_hit->GetTable(i);
     Float_t* x = test_fake_mwc_hit->x;
     //a lot of work required here
-    Float_t rhit   = sqrt(x[1]*x[1]+x[0]*x[0]);
+    Float_t rhit   = ::sqrt(x[1]*x[1]+x[0]*x[0]);
 
     if((rhit>r1min)&&(rhit<r2max+10.0)){
       Float_t phihit = atan2(x[1],x[0]);

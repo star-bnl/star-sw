@@ -4,7 +4,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "St_sdm_Maker.h"
 #include "StChain.h"
@@ -113,7 +113,7 @@ Int_t St_sdm_Maker::Make()
 void St_sdm_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_sdm_Maker.cxx,v 1.1 2000/07/21 15:10:32 hippolyt Exp $\n");
+  printf("* $Id: St_sdm_Maker.cxx,v 1.2 2003/09/02 17:59:30 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

@@ -9,7 +9,7 @@
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventTypes.h"
 #include "TStopwatch.h"
-#include <fstream.h>
+#include "Stiostream.h"
 #include "TFile.h"
 #include "time.h"
 #include "TDatime.h"
@@ -183,7 +183,7 @@ void StSmdPedMaker::CalculatePedestals()
       if(mSmdPedSum[i][j][k]>0)
       {
         mSmdPed[i][j][k] = mSmdPedX[i][j][k]/mSmdPedSum[i][j][k];
-        mSmdRMS[i][j][k] = sqrt(mSmdPedX2[i][j][k]/mSmdPedSum[i][j][k]-mSmdPed[i][j][k]*mSmdPed[i][j][k]);
+        mSmdRMS[i][j][k] = ::sqrt(mSmdPedX2[i][j][k]/mSmdPedSum[i][j][k]-mSmdPed[i][j][k]*mSmdPed[i][j][k]);
       }
 }
 //_____________________________________________________________________________

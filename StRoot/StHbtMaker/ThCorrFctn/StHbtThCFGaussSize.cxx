@@ -20,7 +20,7 @@
 #include "StHbtMaker/Base/StHbtRoot1DCF.hh"
 
 #include <string.h>
-#include <strstream.h>
+#include <Stsstream.h>
 
 StHbtThCFGaussSize::StHbtThCFGaussSize() 
 {cout << "default constructor - must not be called "<<endl ; exit(0);}

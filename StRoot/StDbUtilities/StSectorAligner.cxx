@@ -1,7 +1,7 @@
 #include "StSectorAligner.h"
 #include "StThreeVectorF.hh"
 
-#include <iostream>
+#include "Stiostream.h"
 #include <math.h>
 #include <assert.h>
 

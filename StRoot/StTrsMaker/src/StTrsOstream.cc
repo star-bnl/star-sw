@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOstream.cc,v 1.9 2001/02/16 16:56:24 fisyak Exp $
+ * $Id: StTrsOstream.cc,v 1.10 2003/09/02 17:59:19 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsOstream.cc,v $
+ * Revision 1.10  2003/09/02 17:59:19  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.9  2001/02/16 16:56:24  fisyak
  * Make Solaris happy
  *
@@ -62,6 +65,7 @@
  *
  **************************************************************************/
 #include <utility>
+#include <iterator>
 #include <time.h>
 #include <sys/utsname.h>
 #include "StTrsOstream.hh"

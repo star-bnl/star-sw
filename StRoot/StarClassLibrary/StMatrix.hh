@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.13 2002/07/02 22:20:53 ullrich Exp $
+ * $Id: StMatrix.hh,v 1.14 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
+ * Revision 1.14  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.13  2002/07/02 22:20:53  ullrich
  * Add dummy return statements to get rid of warnings under Linux.
  *
@@ -205,7 +208,7 @@
 #ifndef ST_MATRIX_HH
 #define ST_MATRIX_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include <vector>
 #if !defined(ST_NO_NAMESPACES)

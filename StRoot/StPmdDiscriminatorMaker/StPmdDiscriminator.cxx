@@ -1,6 +1,6 @@
 /****************************************************
  *
- * $Id: StPmdDiscriminator.cxx,v 1.2 2003/05/29 13:12:51 subhasis Exp $
+ * $Id: StPmdDiscriminator.cxx,v 1.3 2003/09/02 17:58:48 perev Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -12,13 +12,16 @@
  ******************************************************
  *
  * $Log: StPmdDiscriminator.cxx,v $
+ * Revision 1.3  2003/09/02 17:58:48  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2003/05/29 13:12:51  subhasis
  * several changes to include NN
  *
  *
  ******************************************************/
 
-#include<iostream.h>
+#include<Stiostream.h>
 #include<assert.h>
 #include<math.h>
 #include"TROOT.h"

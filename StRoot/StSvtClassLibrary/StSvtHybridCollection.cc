@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.cc,v 1.10 2001/11/12 22:55:22 caines Exp $
+ * $Id: StSvtHybridCollection.cc,v 1.11 2003/09/02 17:59:06 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCollection.cc,v $
+ * Revision 1.11  2003/09/02 17:59:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.10  2001/11/12 22:55:22  caines
  * Delete mConfig when delete called to fix memory leak
  *
@@ -40,7 +43,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StObject.h"
 #include "StSvtHybridCollection.hh"
 #include "StSvtConfig.hh"

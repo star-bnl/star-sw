@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.72 2002/02/22 19:20:28 hardtke Exp $
+// $Id: St_tpt_Maker.cxx,v 1.73 2003/09/02 17:59:31 perev Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.73  2003/09/02 17:59:31  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.72  2002/02/22 19:20:28  hardtke
 // change order of instantiation for Jim
 //
@@ -215,7 +218,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "St_tpt_Maker.h"
 #include "StChain.h"
@@ -727,7 +730,7 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
   m_vertexX_vertexY->Fill(vertex[0],vertex[1]);
   m_vertexX_vertexZ->Fill(vertex[0],vertex[2]);
   
-  Float_t vertex_xy=sqrt(vertex[0]*vertex[0]+vertex[1]*vertex[1]);
+  Float_t vertex_xy=::sqrt(vertex[0]*vertex[0]+vertex[1]*vertex[1]);
   
   m_vertex_xy->Fill(vertex_xy);
   
@@ -754,15 +757,15 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
     Float_t ptg=wr->ptg;
     Float_t pzg=wr->pzg;
     Float_t pzr=wr->pzr;
-    Float_t pg=sqrt(ptg*ptg+pzg*pzg); 
-    Float_t pr=sqrt(ptr*ptr+pzr*pzr); 
+    Float_t pg=::sqrt(ptg*ptg+pzg*pzg); 
+    Float_t pr=::sqrt(ptr*ptr+pzr*pzr); 
     
     Int_t vid=wr->vid;
     Int_t nfst=wr->nfst;
     Int_t nrec1=wr->nrec1;
     
     if(vid==1&&nfst>5&&(pg-pzg)!=0.0){
-      Float_t rapidity=-0.5*log((pg+pzg)/(pg-pzg));
+      Float_t rapidity=-0.5*::log((pg+pzg)/(pg-pzg));
       m_rapidity1->Fill(rapidity);
       m_rapidity_total1->Fill(rapidity);
       m_ptg_rapidity_1->Fill(ptg,rapidity);

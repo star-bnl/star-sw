@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVector.hh,v 1.7 2003/05/01 19:24:31 ullrich Exp $
+ * $Id: StLorentzVector.hh,v 1.8 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StLorentzVector.hh,v $
+ * Revision 1.8  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.7  2003/05/01 19:24:31  ullrich
  * Corrected problem in boost().
  *
@@ -197,9 +200,9 @@ inline T StLorentzVector<T>::m() const
 {
     T mass2 = m2();
     if (mass2 < 0)
-	return -sqrt(-mass2);
+	return -::sqrt(-mass2);
     else
-	return sqrt(mass2);
+	return ::sqrt(mass2);
 }
 
 template<class T>
@@ -216,9 +219,9 @@ inline T StLorentzVector<T>::mt() const
     // return e()*e() - pz()*pz();
     T massPerp2 = mt2();
     if (massPerp2 < 0)
-	return -sqrt(-massPerp2);
+	return -::sqrt(-massPerp2);
     else
-	return sqrt(massPerp2);
+	return ::sqrt(massPerp2);
 }
 
 template<class T>
@@ -358,7 +361,7 @@ inline T& StLorentzVector<T>::operator[] (size_t i)
 template<class T>
 inline T StLorentzVector<T>::rapidity() const
 {
-    return 0.5*log((mX4+mThreeVector.z())/(mX4-mThreeVector.z()));
+    return 0.5*::log((mX4+mThreeVector.z())/(mX4-mThreeVector.z()));
 }
 
 template<class T>

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.17 2003/05/15 06:08:41 aihong Exp $
+// $Id: StFlowSelection.h,v 1.18 2003/09/02 17:58:12 perev Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -10,7 +10,7 @@
 
 #ifndef _StFlowSelection_INCLUDED_
 #define _StFlowSelection_INCLUDED_
-#include <iostream.h>
+#include <Stiostream.h>
 #include <string.h>
 #include <stdlib.h>
 #include "Rtypes.h"
@@ -141,6 +141,9 @@ inline void StFlowSelection::SetSubevent(const Int_t& subN) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.18  2003/09/02 17:58:12  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.17  2003/05/15 06:08:41  aihong
 // default PID is changed from none to NA, SetDedxPtsPart() added
 //

@@ -1,11 +1,14 @@
 /*******************************************************************
- * $Id: StRichASCIIReader.h,v 2.0 2000/08/09 16:16:58 gans Exp $
+ * $Id: StRichASCIIReader.h,v 2.1 2003/09/02 17:58:55 perev Exp $
  *
  * Description:
  *   Reads ASCII files for processing in examples
  *   Used for stand-alone
  ********************************************************************
  * $Log: StRichASCIIReader.h,v $
+ * Revision 2.1  2003/09/02 17:58:55  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.0  2000/08/09 16:16:58  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -21,7 +24,7 @@
 #ifndef ST_RICH_ASCII_READER_H
 #define ST_RICH_ASCII_READER_H
 
-#include <fstream.h>
+#include "Stiostream.h"
 #include <string>
 #include "StThreeVector.hh"
 

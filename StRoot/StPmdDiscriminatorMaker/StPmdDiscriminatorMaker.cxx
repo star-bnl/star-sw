@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdDiscriminatorMaker.cxx,v 1.3 2003/08/04 18:53:44 perev Exp $
+ * $Id: StPmdDiscriminatorMaker.cxx,v 1.4 2003/09/02 17:58:48 perev Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -9,6 +9,9 @@
  *
  ****************************************************************
  * $Log: StPmdDiscriminatorMaker.cxx,v $
+ * Revision 1.4  2003/09/02 17:58:48  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2003/08/04 18:53:44  perev
  * warnOff
  *
@@ -16,7 +19,7 @@
  * several changes to include NN
  *
  ****************************************************************/
-#include<iostream.h>
+#include<Stiostream.h>
 #include<assert.h>
 #include<math.h>
 #include"TROOT.h"
@@ -262,8 +265,8 @@ Int_t StPmdDiscriminatorMaker::PrepareInputforNN(StPmdDetector* pmd_det,StPmdDet
 	    for(Int_t ibineta=0;ibineta<400;ibineta++){
 	      for(Int_t ibinphi=0;ibinphi<1400;ibinphi++){
 		if(EtaPhiArr_CPV[ibineta][ibinphi]!=-999 && EtaPhiArr_CPV[ibineta][ibinphi]!=0){
-		  Float_t etadiff=fabs(ibineta-etabin);
-		  Float_t phidiff=fabs(ibinphi-phibin);
+		  Float_t etadiff=abs(ibineta-etabin);
+		  Float_t phidiff=abs(ibinphi-phibin);
 	          mEtaPhi->Fill(etadiff,phidiff);
 	          mEtadiff->Fill(etadiff);
 	          mPhidiff->Fill(phidiff);

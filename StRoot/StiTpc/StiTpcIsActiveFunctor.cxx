@@ -1,4 +1,4 @@
-#include <iostream>
+#include "Stiostream.h"
 #include "StiTpcIsActiveFunctor.h"
 
 StiTpcIsActiveFunctor::StiTpcIsActiveFunctor(bool active, bool west, bool east)

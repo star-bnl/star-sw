@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StROOTMagneticField.hh,v 1.2 1999/06/16 14:26:51 fisyak Exp $
+ * $Id: StROOTMagneticField.hh,v 1.3 2003/09/02 17:59:16 perev Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StROOTMagneticField.hh,v $
+ * Revision 1.3  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  1999/06/16 14:26:51  fisyak
  * Add flags for egcs on Solaris
  *
@@ -21,7 +24,7 @@
 #ifndef ST_ROOT_MAGNETIC_FIELD
 #define ST_ROOT_MAGNETIC_FIELD
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #if  defined(__sun) && ! defined(__GNUG__)
 #include <stdcomp.h>

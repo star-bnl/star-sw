@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventReader.hh,v 1.12 2001/09/05 20:41:00 laue Exp $
+ * $Id: StHbtEventReader.hh,v 1.13 2003/09/02 17:58:20 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEventReader.hh,v $
+ * Revision 1.13  2003/09/02 17:58:20  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.12  2001/09/05 20:41:00  laue
  * Updates of the hbtMuDstTree microDSTs
  *
@@ -60,7 +63,7 @@
 
 #ifndef StHbtEventReader_hh
 #define StHbtEventReader_hh
-
+#include "Stiostream.h"
 class StHbtEvent;
 class StHbtEventCut;
 class StHbtTrackCut;

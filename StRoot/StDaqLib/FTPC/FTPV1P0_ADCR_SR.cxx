@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_ADCR_SR.cxx,v 1.2 2001/06/19 20:51:21 jeromel Exp $
+ * $Id: FTPV1P0_ADCR_SR.cxx,v 1.3 2003/09/02 17:55:31 perev Exp $
  * Author: Jeff Landgraf, J.Klay, H.Huemmler
  ***************************************************************************
  * Description: FTP (v1.0) raw ADC reader 
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: FTPV1P0_ADCR_SR.cxx,v $
+ * Revision 1.3  2003/09/02 17:55:31  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2001/06/19 20:51:21  jeromel
  * Commited for Janet S.
  *
@@ -23,7 +26,7 @@
  *
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 
 
 #include "StDaqLib/GENERIC/EventReader.hh"

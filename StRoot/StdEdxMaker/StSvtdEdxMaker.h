@@ -11,7 +11,7 @@
 #endif
 
 #define MAXPOINTS 20
-#include <iostream.h>
+#include <Stiostream.h>
 
 class TH2F;
 class StSvtGeometry;

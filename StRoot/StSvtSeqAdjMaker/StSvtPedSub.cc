@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedSub.cc,v 1.7 2001/07/22 20:31:28 caines Exp $
+ * $Id: StSvtPedSub.cc,v 1.8 2003/09/02 17:59:08 perev Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedSub.cc,v $
+ * Revision 1.8  2003/09/02 17:59:08  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.7  2001/07/22 20:31:28  caines
  * Better tuning for real data. Common mode noise calc and sub. Avoid overlapping seq. Fill histograms only in debug
  *
@@ -39,7 +42,7 @@
 #include "StSvtClassLibrary/StSvtHybridPed.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StMessMgr.h"
-#include <iostream.h>
+#include <Stiostream.h>
 
 StSvtPedSub::StSvtPedSub( StSvtHybridCollection *PedPointer)
 {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcVertexMaker.cxx,v 1.3 2001/10/05 13:39:56 jeromel Exp $
+ * $Id: StZdcVertexMaker.cxx,v 1.4 2003/09/02 17:59:21 perev Exp $
  *
  * Author:  Johan E. Gonzalez, August 2001
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StZdcVertexMaker.cxx,v $
+ * Revision 1.4  2003/09/02 17:59:21  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2001/10/05 13:39:56  jeromel
  * Changes made by Lee Barnby.
  *
@@ -39,7 +42,7 @@
 
 //#include "StEventMaker/StEventMaker.h"
 
-static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.3 2001/10/05 13:39:56 jeromel Exp $";
+static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.4 2003/09/02 17:59:21 perev Exp $";
 
 ClassImp(StZdcVertexMaker)
 
@@ -161,8 +164,8 @@ Int_t StZdcVertexMaker::Make()
     float tdcE = tt->adcZDC[8];
     float tdcW = tt->adcZDC[9];
     
-    float VertexZ = ((tdcW-(mWAP0+(mWAP1*adcW)+(mWAP2*pow(adcW,2))+(mWAP3*pow(adcW,3))))-
-                     (tdcE-(mEAP0+(mEAP1*adcE)+(mEAP2*pow(adcE,2))+(mEAP3*pow(adcE,3)))))*mVPAR + mOFF;
+    float VertexZ = ((tdcW-(mWAP0+(mWAP1*adcW)+(mWAP2*::pow(adcW,2))+(mWAP3*::pow(adcW,3))))-
+                     (tdcE-(mEAP0+(mEAP1*adcE)+(mEAP2*::pow(adcE,2))+(mEAP3*::pow(adcE,3)))))*mVPAR + mOFF;
 
     //
     //  Store VertexZ 

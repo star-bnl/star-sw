@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichSimpleHit.h,v 2.2 2000/11/01 16:52:43 lasiuk Exp $
+ * $Id: StRichSimpleHit.h,v 2.3 2003/09/02 17:58:51 perev Exp $
  *
  * Description:
  *   Definition of the Hit object as reconstructed by
@@ -7,6 +7,9 @@
  *
  ***************************************************************
  * $Log: StRichSimpleHit.h,v $
+ * Revision 2.3  2003/09/02 17:58:51  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.2  2000/11/01 16:52:43  lasiuk
  * Use the enumerated types from StEvent.  correct the NAMESPACE macro
  * and print more bits in the printBit member
@@ -37,7 +40,7 @@
 #ifndef ST_RICH_SIMPLE_HIT
 #define ST_RICH_SIMPLE_HIT
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <vector>
 
 #ifndef ST_NO_NAMESPACES

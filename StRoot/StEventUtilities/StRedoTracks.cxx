@@ -66,7 +66,7 @@ Int_t StRedoTracks::Make(){
   StSPtrVecTrackNode& theNodes = event->trackNodes();
 
   // Assign an error to the primary vertex for primary track fits
-  // Currently set to 200 microns for infinite tracks, goes as 1/sqrt(Ntracks)
+  // Currently set to 200 microns for infinite tracks, goes as 1/::sqrt(Ntracks)
   UInt_t nPrims = pvtx->numberOfDaughters();
   Float_t pv_err = TMath::Sqrt(0.0004 + (0.11/nPrims));
 
@@ -123,8 +123,11 @@ Int_t StRedoTracks::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-// $Id: StRedoTracks.cxx,v 1.3 2003/07/02 15:32:38 genevb Exp $
+// $Id: StRedoTracks.cxx,v 1.4 2003/09/02 17:58:09 perev Exp $
 // $Log: StRedoTracks.cxx,v $
+// Revision 1.4  2003/09/02 17:58:09  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.3  2003/07/02 15:32:38  genevb
 // Remove StTpcDb.so dependence
 //

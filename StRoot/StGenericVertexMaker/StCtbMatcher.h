@@ -38,7 +38,7 @@ unsigned int EtaAndPhiToOrriginAtCTB(StTrack* rTrack, // Pointer to Track
 	phi+= 360;
     
     double theta = atan2(pos.perp(),pos.z());
-    double eta = -log(tan(theta/2.0));
+    double eta = -::log(tan(theta/2.0));
     trackEtaInCTBFrame = eta;
     
     // if |eta| < 1 then track should have hit the CTB.

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: vecTest.cc,v 1.3 1999/12/21 15:15:01 ullrich Exp $
+ * $Id: vecTest.cc,v 1.4 2003/09/02 17:59:38 perev Exp $
  *
  * Author: Thomas Ullrich, April 1998
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: vecTest.cc,v $
+ * Revision 1.4  2003/09/02 17:59:38  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  1999/12/21 15:15:01  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -204,7 +207,7 @@ int main()
 	
 	StLorentzVector<double> pion(pionMomentum, pionMomentum.massHypothesis(139));
 	cout << "pion is: " << pion << endl;
-	double mass = sqrt(sqr(pion.e()) - pion.vect().mag2());
+	double mass = ::sqrt(sqr(pion.e()) - pion.vect().mag2());
 	cout << "Mass is: (" << pion.e() << ")^2 - (" << pion.vect().mag() << ")^2 = " <<  mass << endl;
 
 	

@@ -1,13 +1,13 @@
 /***************************************************************************
  *
- * $Id: StTpcHitErrorsI.h,v 1.1 2002/04/02 00:16:32 hardtke Exp $
+ * $Id: StTpcHitErrorsI.h,v 1.2 2003/09/02 17:59:12 perev Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
  *
  * Description: Abstract Interface for Tpc Hit Errors
  *              The errors are parameterized as 
- *              error = sqrt(Sig2Intrinsic+Sig2Drift*driftlength/cos(angle)**2+
+ *              error = ::sqrt(Sig2Intrinsic+Sig2Drift*driftlength/cos(angle)**2+
  *                           Sig2Tan*tan(angle)**2)
  *              The angle is the crossing angle for the padrow direction errors
  *              and the dip angle for the drift direction errors

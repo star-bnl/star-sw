@@ -5,7 +5,7 @@
 * This is responsible for MIP Calibration
 ***********************************************************************/
 #include "StEmcMipSpectra.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "emc_def.h"
 #include "TCanvas.h"
@@ -202,8 +202,8 @@ Bool_t StEmcMipSpectra::CalibrateByMip(Int_t bin,TH1D* SpectraTemp,
     Float_t b=(Float_t) lastadc;
     Float_t yb=0;
     for(Int_t i=0;i<3;i++) yb+=SpectraTemp->GetBinContent(SpectraTemp->FindBin((Float_t)(lastadc+i-1)))/3.;
-    a[6]=(b-a[3])/sqrt(fabs(2*log(a[4]/yb)));       // background width  
-    a[1]=SpectraTemp->GetBinContent(SpectraTemp->FindBin((Float_t)adcmip))-a[4]*exp(-0.5*pow((a[2]-a[5])/a[6],2));  // mip amplitude
+    a[6]=(b-a[3])/::sqrt(fabs(2*::log(a[4]/yb)));       // background width  
+    a[1]=SpectraTemp->GetBinContent(SpectraTemp->FindBin((Float_t)adcmip))-a[4]*exp(-0.5*::pow((a[2]-a[5])/a[6],2));  // mip amplitude
   }
   else
   {
@@ -214,18 +214,18 @@ Bool_t StEmcMipSpectra::CalibrateByMip(Int_t bin,TH1D* SpectraTemp,
   
   cout <<"firstadc = "<<firstadc<<"  lastadc = "<<lastadc<<endl;
 
-  a[3]=log(a[2]+a[3])-log(a[2]);
-  a[2]=log(a[2]);    
-  a[6]=log(a[5]+a[6])-log(a[5]);
-  a[5]=log(a[5]);
+  a[3]=::log(a[2]+a[3])-::log(a[2]);
+  a[2]=::log(a[2]);    
+  a[6]=::log(a[5]+a[6])-::log(a[5]);
+  a[5]=::log(a[5]);
 
   for(Int_t i=firstadc;i<lastadc;i++) 
   {
     Int_t ibin = SpectraTemp->FindBin(i);
     Float_t value = SpectraTemp->GetBinContent(ibin);
-    Float_t sig=sqrt(value);
+    Float_t sig=::sqrt(value);
     if (sig==0) sig=1;
-    fit->AddPoint(log((Float_t)i),value,sig);
+    fit->AddPoint(::log((Float_t)i),value,sig);
   }
   for(Int_t i=1;i<=fit->GetNParam();i++) 
   {
@@ -250,7 +250,7 @@ Bool_t StEmcMipSpectra::CalibrateByMip(Int_t bin,TH1D* SpectraTemp,
   Float_t sa   = ea[1];
   Float_t sb   = ea[2];    
   Float_t w    = expa-expab;
-  Float_t ew   = sqrt(expab*expab*(sa*sa+sb*sb)+expa*expa*sa*sa);
+  Float_t ew   = ::sqrt(expab*expab*(sa*sa+sb*sb)+expa*expa*sa*sa);
   Float_t mip  = expa;
   Float_t emip = exp(mip*ea[1]/a[1]);
   

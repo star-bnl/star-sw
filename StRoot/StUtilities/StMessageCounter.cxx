@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.cxx,v 1.16 2000/06/07 00:05:36 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.17 2003/09/02 17:59:20 perev Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.17  2003/09/02 17:59:20  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.16  2000/06/07 00:05:36  genevb
 // Added FixOn(), enforcing no limits on a specific message type/string
 //
@@ -61,7 +64,7 @@
 StMessageCounter* StMessageCounter::mInstance = 0;
 
 //_____________________________________________________________________________
-StMessageCounter::StMessageCounter() : ostrstream(new char[4096],4096,ios::out),
+StMessageCounter::StMessageCounter() : ostrstream(),
 limitMessage(" - COUNT LIMIT REACHED!\n") {
   messTypeList = StMessTypeList::Instance();
   yesLimits = 0;
@@ -114,8 +117,8 @@ void StMessageCounter::SetLimit(const char* str, int n) {
         if (limitNList[index] == -5) return;  // -5 means fixed with no limit
         if ((n < 0) && (n != -5)) {
           limitList.erase(curString);
-          limitNList.erase(&(limitNList[index]));
-          limitNCountList.erase(&(limitNCountList[index]));
+          limitNList.erase(limitNList.begin()+index);
+          limitNCountList.erase(limitNCountList.begin()+index);
         } else {
           limitNList[index] = n;
         }
@@ -247,7 +250,7 @@ void StMessageCounter::AddType(const char* type) {
       if (*type == *(*curString)) {
         SetLimit((*curString),limitWNList[index]);
         limitWList.erase(curString);
-        limitWNList.erase(&(limitWNList[index]));
+        limitWNList.erase(limitWNList.begin()+index);
         return;
       }
       index++;

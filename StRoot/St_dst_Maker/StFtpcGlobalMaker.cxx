@@ -1,5 +1,8 @@
-// $Id: StFtpcGlobalMaker.cxx,v 1.13 2002/11/28 10:08:12 jcs Exp $
+// $Id: StFtpcGlobalMaker.cxx,v 1.14 2003/09/02 17:59:25 perev Exp $
 // $Log: StFtpcGlobalMaker.cxx,v $
+// Revision 1.14  2003/09/02 17:59:25  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.13  2002/11/28 10:08:12  jcs
 // simplify id_start_vertex comment and code
 //
@@ -50,7 +53,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -268,7 +271,7 @@ Int_t StFtpcGlobalMaker::Make(){
 
     //  radius at start of track (cm) 
     globtrk[iglobtrk].r0   = 
-      sqrt(fptrack[itrk].v[0]*fptrack[itrk].v[0]
+      ::sqrt(fptrack[itrk].v[0]*fptrack[itrk].v[0]
 	   + fptrack[itrk].v[1]*fptrack[itrk].v[1]);
 
     //  azimuthal angle at start of track (deg)
@@ -291,7 +294,7 @@ Int_t StFtpcGlobalMaker::Make(){
 
     //  1/pt at start 
     globtrk[iglobtrk].invpt =  
-      1./sqrt(fptrack[itrk].p[0]*fptrack[itrk].p[0]
+      1./::sqrt(fptrack[itrk].p[0]*fptrack[itrk].p[0]
 	      +fptrack[itrk].p[1]*fptrack[itrk].p[1]);
 
     //  tan(dip) = pz/pt at start
@@ -307,7 +310,7 @@ Int_t StFtpcGlobalMaker::Make(){
     /*
     //  radius at end of track (cm) 
     globtrk[iglobtrk].r0out   = 
-      sqrt(fptrack[itrk].l[0]*fptrack[itrk].l[0]
+      ::sqrt(fptrack[itrk].l[0]*fptrack[itrk].l[0]
 	   + fptrack[itrk].l[1]*fptrack[itrk].l[1]);
 
     //  azimuthal angle at end of track (deg)
@@ -334,7 +337,7 @@ Int_t StFtpcGlobalMaker::Make(){
 
     //  1/pt at end 
     globtrk[iglobtrk].invptout =  
-      1./sqrt(fptrack[itrk].p[0]*fptrack[itrk].p[0]
+      1./::sqrt(fptrack[itrk].p[0]*fptrack[itrk].p[0]
 	      +fptrack[itrk].p[1]*fptrack[itrk].p[1]);
 
     //  tan(dip) = pz/pt at end

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeEvent.h,v 1.3 2000/09/01 22:59:11 jgreid Exp $
+ * $Id: StEbyeEvent.h,v 1.4 2003/09/02 17:57:57 perev Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -14,6 +14,9 @@
  **********************************************************************
  *
  * $Log: StEbyeEvent.h,v $
+ * Revision 1.4  2003/09/02 17:57:57  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2000/09/01 22:59:11  jgreid
  * version 1 revision ; multiple file handling + additional data members added
  *
@@ -29,7 +32,7 @@
 #ifndef _StEbyeEvent
 #define _StEbyeEvent
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TObject.h"
 #include "TClonesArray.h"
 #include "StEbyeTrack.h"

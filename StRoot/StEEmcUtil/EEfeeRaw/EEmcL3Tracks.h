@@ -2,9 +2,12 @@
 #ifndef EEmcL3Tracks_h
 #define EEmcL3Tracks_h
 /*********************************************************************
- * $Id: EEmcL3Tracks.h,v 1.9 2003/06/02 17:34:35 zolnie Exp $
+ * $Id: EEmcL3Tracks.h,v 1.10 2003/09/02 17:57:55 perev Exp $
  *********************************************************************
  * $Log: EEmcL3Tracks.h,v $
+ * Revision 1.10  2003/09/02 17:57:55  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.9  2003/06/02 17:34:35  zolnie
  * fixed bug in EEmcHelix
  *
@@ -65,7 +68,7 @@ public:
   Float_t Oz()     const { return mOz;  }
   Float_t Px()     const { return mPx;  }
   Float_t Py()     const { return mPy;  }
-  Float_t Pt()     const { return sqrt(mPx*mPx+mPy*mPy);  }
+  Float_t Pt()     const { return ::sqrt(mPx*mPx+mPy*mPy);  }
   Float_t Pz()     const { return mPz;  }
   Int_t   Q ()     const { return mQ;   }
   Float_t B ()     const { return mB;   } 

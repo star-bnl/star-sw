@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandomEngine.h,v 1.3 1999/12/21 15:13:56 ullrich Exp $
+ * $Id: RandomEngine.h,v 1.4 2003/09/02 17:59:34 perev Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -32,6 +32,9 @@
  ***************************************************************************
  *
  * $Log: RandomEngine.h,v $
+ * Revision 1.4  2003/09/02 17:59:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  1999/12/21 15:13:56  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -48,8 +51,8 @@
 #ifndef HepRandomEngine_h
 #define HepRandomEngine_h 1
 
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include <math.h>
 #include <vector>
 #if !defined(ST_NO_NAMESPACES)

@@ -133,7 +133,7 @@
 //     train.SetFormulaTree(t1);
 //     
 //   //  second, we define the formula's : here we have 5 input neurons, so
-//   //  the formula has 5 parts, we could also use sqrt(v1) for example ...  
+//   //  the formula has 5 parts, we could also use ::sqrt(v1) for example ...  
 //     valid.SetInFormula("v1:v2:v3:v4:v5");
 //     train.SetInFormula("v1:v2:v3:v4:v5");
 //     
@@ -279,7 +279,7 @@
 //     Float_t maxihtr=(Float_t)TMath::Max(h1tr.GetMaximum(),h2tr.GetMaximum());
 //     Float_t maxihva=(Float_t)TMath::Max(h1va.GetMaximum(),h2va.GetMaximum());
 //     maxihtr=TMath::Max(maxihtr,maxihva);
-//     h1tr.SetMaximum(maxihtr+sqrt(maxihtr));
+//     h1tr.SetMaximum(maxihtr+::sqrt(maxihtr));
 //    
 //     h1tr.Draw();h2tr.Draw("same");
 //     h1va.Draw("esame");h2va.Draw("esame");

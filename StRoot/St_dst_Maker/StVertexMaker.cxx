@@ -10,7 +10,7 @@
  */
 
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include "StVertexMaker.h"
@@ -423,8 +423,11 @@ void StVertexMaker::UnFixVertex(){
 
 
 //_____________________________________________________________________________
-// $Id: StVertexMaker.cxx,v 1.8 2003/08/19 15:37:29 jeromel Exp $
+// $Id: StVertexMaker.cxx,v 1.9 2003/09/02 17:59:26 perev Exp $
 // $Log: StVertexMaker.cxx,v $
+// Revision 1.9  2003/09/02 17:59:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.8  2003/08/19 15:37:29  jeromel
 // if(EstGlobal and m_Mode == 4) (???). Replaced with &&
 // Logic is slightly changed as follow :

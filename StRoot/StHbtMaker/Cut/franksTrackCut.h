@@ -22,7 +22,7 @@
 //#include "StMaker.h"
 //#endif
 
-#include <strstream>
+#include <Stsstream.h>
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 
 class franksTrackCut : public StHbtTrackCut

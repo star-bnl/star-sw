@@ -1,6 +1,9 @@
 //-----------------------------------------------------------------------
-// * $Id: StTpcEvalMaker.cxx,v 1.9 2001/08/10 12:14:24 flierl Exp $
+// * $Id: StTpcEvalMaker.cxx,v 1.10 2003/09/02 17:59:13 perev Exp $
 // * $Log: StTpcEvalMaker.cxx,v $
+// * Revision 1.10  2003/09/02 17:59:13  perev
+// * gcc 3.2 updates + WarnOff
+// *
 // * Revision 1.9  2001/08/10 12:14:24  flierl
 // * correct call to number of tracks
 // *
@@ -32,15 +35,13 @@
 // class definition of StTpcEvalMaker
 //-----------------------------------------------------------------------
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <iterator>
-#if !defined(ST_NO_NAMESPACES)
 using std::distance;
-#endif
 #include <math.h>
 
 #include "StGlobals.hh"
@@ -81,7 +82,7 @@ using std::distance;
 #include "StTpcEvalEvent.h"
 #include "StTpcEvalHistograms.h"
 
-static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.9 2001/08/10 12:14:24 flierl Exp $";
+static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.10 2003/09/02 17:59:13 perev Exp $";
 ClassImp(StTpcEvalMaker)
 
 //-------------------------------------------------
@@ -237,8 +238,9 @@ void StTpcEvalMaker::fillHeader()
     while (mcTrkIter2 != mStMcEvent->tracks().end() && !((*mcTrkIter2)->key())) ++mcTrkIter2;
     //changed to old style distance function because of sun compiler
     unsigned int geantTrks = 0;
-    distance(mcTrkIter2, mStMcEvent->tracks().end(), geantTrks);
-    //    geantTrks = distance(mcTrkIter2, mStMcEvent->tracks().end());
+//VP    distance(mcTrkIter2, mStMcEvent->tracks().end(), geantTrks);
+      geantTrks = mStMcEvent->tracks().end()-mcTrkIter2;
+//    geantTrks = distance(mcTrkIter2, mStMcEvent->tracks().end());
     
     // get some numbers
     globTrks = mStEvent->trackNodes().size();

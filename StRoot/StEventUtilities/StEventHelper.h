@@ -67,7 +67,7 @@ public:
              virtual Int_t   Size() const          {return fSize;}
              virtual TObject *GetObject() const    {return fObj;}
                      void    Add(StPoints3DABC *add);
-
+                     Int_t   Add(float x, float y, float z){return TPoints3DABC::Add(x,y,z);} //WarnOff
 // Dummies
                virtual Int_t DistancetoPrimitive(Int_t px, Int_t py){return -1;}
                virtual Int_t GetLastPosition() const {return 0;}

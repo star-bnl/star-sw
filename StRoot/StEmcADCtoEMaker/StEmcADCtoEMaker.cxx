@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.45 2003/08/29 19:34:22 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.46 2003/09/02 17:57:58 perev Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.46  2003/09/02 17:57:58  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.45  2003/08/29 19:34:22  suaide
 // small modification in the histogram binning
 //
@@ -96,7 +99,7 @@
 #include "StEmcADCtoEMaker.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "StEmcUtil/others/emcDetectorName.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
@@ -199,8 +202,8 @@ Int_t StEmcADCtoEMaker::Init()
         Float_t center;
         mGeo[i]->getPhiModule(m,center);
         PhiBins1[j]=center-PhiB[s-1];
-        Float_t ee,pp;
-        Int_t id;
+        //Float_t ee,pp;
+        //Int_t id;
         //if(i==3 && s<=nSub) mGeo[i]->getId(m,1,s,id);
         //if(i==3 && s<=nSub) mGeo[i]->getEtaPhi(id,ee,pp);
         //if(i==3 && s<=nSub) cout <<"j = "<<j<<"  center = "<<center<<"  DPhi = "<<PhiB[s-1]<<"  m = "<<m<<"  s = "<<s<<"  PhiBins1 = "<<PhiBins1[j]<<"  phi = "<<pp<<endl;

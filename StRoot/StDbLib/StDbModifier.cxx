@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbModifier.cxx,v 1.3 2002/03/15 22:08:07 porter Exp $
+ * $Id: StDbModifier.cxx,v 1.4 2003/09/02 17:57:49 perev Exp $
  *
  * Author: Masashi Kaneta, updated by R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbModifier.cxx,v $
+ * Revision 1.4  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2002/03/15 22:08:07  porter
  * fixed retval in modifier
  *
@@ -23,9 +26,8 @@
  **************************************************************************/
 
 #include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
 #include <stdlib.h>
+#include <Stiostream.h>
 
 #include "TROOT.h"
 #include "TInterpreter.h"

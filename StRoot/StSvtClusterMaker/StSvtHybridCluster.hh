@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCluster.hh,v 1.1 2000/07/06 03:50:34 caines Exp $
+ * $Id: StSvtHybridCluster.hh,v 1.2 2003/09/02 17:59:07 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCluster.hh,v $
+ * Revision 1.2  2003/09/02 17:59:07  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2000/07/06 03:50:34  caines
  * First version of cluster finder and fitter
  *
@@ -18,7 +21,7 @@
 #ifndef STSVTHYBRIDCLUSTER_HH
 #define STSVTHYBRIDCLUSTER_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StSvtClusterFinder.hh"
 
 typedef struct  StSvtClusterMemberInfo

@@ -18,7 +18,7 @@
 #define StHbtThCFGaussSize_h
 
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StHbtMaker/ThCorrFctn/StHbtThCorrFctnCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"

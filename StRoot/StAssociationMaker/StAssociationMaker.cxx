@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.36 2003/06/27 03:01:18 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.37 2003/09/02 17:55:28 perev Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.37  2003/09/02 17:55:28  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.36  2003/06/27 03:01:18  calderon
  * The z cut now depends on z_mc.
  * The parameterization is done in the parameter DB
@@ -161,7 +164,8 @@
  *
  *************************************************/
 
-#include <iostream.h>
+#include <Stiostream.h>
+#include <iterator>
 #include <stdlib.h>
 #include <string>
 #include <vector>
@@ -336,7 +340,7 @@ ostream& operator<<(ostream& out, const rcTrackMapType& tm)
     copy(tm.begin(),tm.end(), ostream_iterator<rcTrackMapValType>(out,"\n"));
     
 #else
-    out << "Sorry, can't use ostream_iterator with this version of iostream.h !" << endl ;
+    out << "Sorry, can't use ostream_iterator with this version of Stiostream.h !" << endl ;
 #endif
     return out;
 }
@@ -346,7 +350,7 @@ ostream& operator<<(ostream& out, const mcTrackMapType& tm)
 #if __SUNPRO_CC != 0x500
     copy(tm.begin(),tm.end(), ostream_iterator<mcTrackMapValType>(out,"\n"));
 #else
-    out << "Sorry, can't use ostream_iterator with this version of iostream.h !" << endl ;
+    out << "Sorry, can't use ostream_iterator with this version of Stiostream.h !" << endl ;
 #endif
     return out;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerId.h,v 2.3 2003/02/18 22:19:58 jeromel Exp $
+ * $Id: StTriggerId.h,v 2.4 2003/09/02 17:58:06 perev Exp $
  *
  * Author: Thomas Ullrich, January 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerId.h,v $
+ * Revision 2.4  2003/09/02 17:58:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.3  2003/02/18 22:19:58  jeromel
  * Skip mIdx
  *
@@ -23,7 +26,7 @@
 #ifndef StTriggerId_hh
 #define StTriggerId_hh
 #include "StObject.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <vector>
 
 #define TRIGGER_ID_DIM 32

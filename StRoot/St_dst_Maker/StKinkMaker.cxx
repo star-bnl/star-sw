@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.31 2001/04/18 21:49:10 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.32 2003/09/02 17:59:26 perev Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.32  2003/09/02 17:59:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.31  2001/04/18 21:49:10  wdeng
 // The argument of asin function
 //
@@ -80,7 +83,7 @@
 //
 // Revision 1.5  1999/07/07 15:47:53  wdeng
 // add Id and Log at the first two lines for the purpose of version maintainance
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -239,7 +242,7 @@ Int_t StKinkMaker::Make(){
       {
 	Float_t dstTrkStartRadius2D = dstTrackPtr->r0;
 	Float_t dstTrkEndRadius2D = 
-	             sqrt( dstTrackPtr->x_last[0] * dstTrackPtr->x_last[0] 
+	             ::sqrt( dstTrackPtr->x_last[0] * dstTrackPtr->x_last[0] 
                          + dstTrackPtr->x_last[1] * dstTrackPtr->x_last[1] );
 	if( dstTrkStartRadius2D < tkfpar->vertexRMin2D &&
             dstTrkEndRadius2D > tkfpar->vertexRMax2D ) 
@@ -307,7 +310,7 @@ Int_t StKinkMaker::Make(){
  	  if( numOfSolution == 0 ) continue;
 	  if( numOfSolution == 1 ) 
 	    {
-	      Float_t radius2D = sqrt(xCords[0]*xCords[0] + yCords[0]*yCords[0]);
+	      Float_t radius2D = ::sqrt(xCords[0]*xCords[0] + yCords[0]*yCords[0]);
 	      if( (radius2D < tkfpar->vertexRMin2D) || 	  
 		  (radius2D > tkfpar->vertexRMax2D) )  continue;
 	      xtarget = xCords[0];	    
@@ -315,17 +318,17 @@ Int_t StKinkMaker::Make(){
 	    }
 	  if ( numOfSolution == 2 )
 	    {
-	      Float_t radiusOne2D = sqrt(xCords[0]*xCords[0] + yCords[0]*yCords[0]);
-	      Float_t radiusTwo2D = sqrt(xCords[1]*xCords[1] + yCords[1]*yCords[1]);
+	      Float_t radiusOne2D = ::sqrt(xCords[0]*xCords[0] + yCords[0]*yCords[0]);
+	      Float_t radiusTwo2D = ::sqrt(xCords[1]*xCords[1] + yCords[1]*yCords[1]);
 	      if( (radiusOne2D > tkfpar->vertexRMin2D) && 	  
 		  (radiusOne2D < tkfpar->vertexRMax2D) &&
 		  (radiusTwo2D > tkfpar->vertexRMin2D) && 	  
 		  (radiusTwo2D < tkfpar->vertexRMax2D) ) 
 		{
-		  Float_t distanceOne = sqrt(pow((xCords[0]-myTrack2->startPoint(0)), 2) + 
-					     pow((yCords[0]-myTrack2->startPoint(1)), 2));
-		  Float_t distanceTwo = sqrt(pow((xCords[1]-myTrack2->startPoint(0)), 2) + 
-					     pow((yCords[1]-myTrack2->startPoint(1)), 2));	
+		  Float_t distanceOne = ::sqrt(::pow((xCords[0]-myTrack2->startPoint(0)), 2) + 
+					     ::pow((yCords[0]-myTrack2->startPoint(1)), 2));
+		  Float_t distanceTwo = ::sqrt(::pow((xCords[1]-myTrack2->startPoint(0)), 2) + 
+					     ::pow((yCords[1]-myTrack2->startPoint(1)), 2));	
 		  if ( distanceOne < distanceTwo ) 
 		    {
 		      xtarget = xCords[0];	    
@@ -375,14 +378,14 @@ Int_t StKinkMaker::Make(){
 	  mKinkVertex.setY((point1AtDca[1]+point2AtDca[1])/2.);
 	  mKinkVertex.setZ((point1AtDca[2]+point2AtDca[2])/2.);
 	  
-	  Float_t distanceKinkParent2D   = sqrt( pow(mKinkVertex.x()-myTrack1->lastPoint(0), 2) +
-					         pow(mKinkVertex.y()-myTrack1->lastPoint(1), 2) );
+	  Float_t distanceKinkParent2D   = ::sqrt( ::pow(mKinkVertex.x()-myTrack1->lastPoint(0), 2) +
+					         ::pow(mKinkVertex.y()-myTrack1->lastPoint(1), 2) );
 	  
-	  Float_t distanceKinkDaughter2D = sqrt( pow(mKinkVertex.x()-myTrack2->startPoint(0), 2) +
-						 pow(mKinkVertex.y()-myTrack2->startPoint(1), 2) );
+	  Float_t distanceKinkDaughter2D = ::sqrt( ::pow(mKinkVertex.x()-myTrack2->startPoint(0), 2) +
+						 ::pow(mKinkVertex.y()-myTrack2->startPoint(1), 2) );
 	  
-	  Float_t distanceKinkParentZ    = sqrt( pow(mKinkVertex.z()-myTrack1->lastPoint(2), 2) );
-	  Float_t distanceKinkDaughterZ  = sqrt( pow(mKinkVertex.z()-myTrack2->startPoint(2), 2) );
+	  Float_t distanceKinkParentZ    = ::sqrt( ::pow(mKinkVertex.z()-myTrack1->lastPoint(2), 2) );
+	  Float_t distanceKinkDaughterZ  = ::sqrt( ::pow(mKinkVertex.z()-myTrack2->startPoint(2), 2) );
 	  
 	  if( distanceKinkParent2D > tkfpar->distanceKinkParent2D ) continue; 
 	  if( distanceKinkDaughter2D > tkfpar->distanceKinkDaughter2D ) continue; 
@@ -491,14 +494,14 @@ void StKinkMaker::FillTableRow()
 {	  
   StThreeVectorD pMomMinusDMom = parentMoment - daughterMoment;
   
-  Float_t  deltaKaonMuon = fabs(sqrt(parentMoment.mag2() + kaonMass*kaonMass)   -
-				sqrt(daughterMoment.mag2() + muonMass*muonMass) - 
+  Float_t  deltaKaonMuon = fabs(::sqrt(parentMoment.mag2() + kaonMass*kaonMass)   -
+				::sqrt(daughterMoment.mag2() + muonMass*muonMass) - 
 				pMomMinusDMom.mag());
-  Float_t  deltaKaonPion = fabs(sqrt(parentMoment.mag2() + kaonMass*kaonMass)   -
-				sqrt(daughterMoment.mag2() + pionMass*pionMass) - 
-				sqrt(pMomMinusDMom.mag2() + pi0Mass*pi0Mass));
-  Float_t  deltaPionMuon = fabs(sqrt(parentMoment.mag2() + pionMass*pionMass)   -
-				sqrt(daughterMoment.mag2() + muonMass*muonMass) - 
+  Float_t  deltaKaonPion = fabs(::sqrt(parentMoment.mag2() + kaonMass*kaonMass)   -
+				::sqrt(daughterMoment.mag2() + pionMass*pionMass) - 
+				::sqrt(pMomMinusDMom.mag2() + pi0Mass*pi0Mass));
+  Float_t  deltaPionMuon = fabs(::sqrt(parentMoment.mag2() + pionMass*pionMass)   -
+				::sqrt(daughterMoment.mag2() + muonMass*muonMass) - 
 				pMomMinusDMom.mag());  
   
   if( (deltaKaonPion < deltaKaonMuon) && (deltaKaonPion < deltaPionMuon) ) 
@@ -574,13 +577,13 @@ void StKinkMaker::FillTableRow()
   kinkVtxRow.dca  = dca;
   kinkVtxRow.dcad = daughterImpact;
   kinkVtxRow.dcap = parentImpact;
-  kinkVtxRow.dlf  = sqrt( pow(myTrack2->startPoint(0)-myTrack1->lastPoint(0), 2) +
-			  pow(myTrack2->startPoint(1)-myTrack1->lastPoint(1), 2) + 
-			  pow(myTrack2->startPoint(2)-myTrack1->lastPoint(2), 2) ); 
+  kinkVtxRow.dlf  = ::sqrt( ::pow(myTrack2->startPoint(0)-myTrack1->lastPoint(0), 2) +
+			  ::pow(myTrack2->startPoint(1)-myTrack1->lastPoint(1), 2) + 
+			  ::pow(myTrack2->startPoint(2)-myTrack1->lastPoint(2), 2) ); 
   
-  kinkVtxRow.dlv  = sqrt( pow(mKinkVertex.x()-myTrack1->lastPoint(0), 2) +
-			  pow(mKinkVertex.y()-myTrack1->lastPoint(1), 2) +
-			  pow(mKinkVertex.z()-myTrack1->lastPoint(2), 2) );
+  kinkVtxRow.dlv  = ::sqrt( ::pow(mKinkVertex.x()-myTrack1->lastPoint(0), 2) +
+			  ::pow(mKinkVertex.y()-myTrack1->lastPoint(1), 2) +
+			  ::pow(mKinkVertex.z()-myTrack1->lastPoint(2), 2) );
   
   kinkVtxRow.dE[0] = deltaKaonMuon;
   kinkVtxRow.dE[1] = deltaKaonPion;
@@ -784,7 +787,7 @@ Int_t StKinkMaker::MeetTwoHelices2D(const Float_t cut,
   // Find the two intersections 
   a = xc1[0]-xc2[0];
   b = xc1[1]-xc2[1];
-  dia = sqrt(a*a + b*b);
+  dia = ::sqrt(a*a + b*b);
   dtouch = dia - r1 - r2;
   c = (r1*r1 - r2*r2 + a*a + b*b)/2.0;
   d = (a*a + b*b)*r1*r1 - c*c;
@@ -811,16 +814,16 @@ Int_t StKinkMaker::MeetTwoHelices2D(const Float_t cut,
         {
           flag = 1;
         }
-      om1       = ( -b*c+fabs(a*sqrt(d)) ) / (a*a+b*b);
-      om2       = ( -b*c-fabs(a*sqrt(d)) ) / (a*a+b*b);
+      om1       = ( -b*c+fabs(a*::sqrt(d)) ) / (a*a+b*b);
+      om2       = ( -b*c-fabs(a*::sqrt(d)) ) / (a*a+b*b);
       
       // Find the right pair
       if ( (r1*r1-om1*om1) >= 0.0)
         {
-          ph1 = sqrt(r1*r1-om1*om1);
+          ph1 = ::sqrt(r1*r1-om1*om1);
           ph2 = -ph1;
-	  if ( fabs(pow((ph1+a), 2)+pow((om1+b), 2)-r2*r2) 
-	       <= fabs(pow((ph2+a), 2) + pow((om1+b), 2) - r2*r2) )
+	  if ( fabs(::pow((ph1+a), 2)+::pow((om1+b), 2)-r2*r2) 
+	       <= fabs(::pow((ph2+a), 2) + ::pow((om1+b), 2) - r2*r2) )
             {
 	      xCords[0] = ph1+xc1[0];
             }
@@ -834,10 +837,10 @@ Int_t StKinkMaker::MeetTwoHelices2D(const Float_t cut,
       // Second pair
       if ( (r1*r1-om2*om2) >= 0.0)
         {
-          ph1 = sqrt(r1*r1-om2*om2);
+          ph1 = ::sqrt(r1*r1-om2*om2);
           ph2 = -ph1;
-          if ( fabs(pow((ph1+a), 2) + pow((om2+b), 2) - r2*r2)
-	       <= fabs(pow((ph2+a), 2) + pow((om2+b), 2) - r2*r2) )
+          if ( fabs(::pow((ph1+a), 2) + ::pow((om2+b), 2) - r2*r2)
+	       <= fabs(::pow((ph2+a), 2) + ::pow((om2+b), 2) - r2*r2) )
             {
               xCords[1] = ph1 + xc1[0];
             }
@@ -884,7 +887,7 @@ Float_t  StKinkMaker::DcaTwoLines(const StThreeVectorD& t1Project,
   a3 = sxz1*syz2-syz1*sxz2;
   
   mdca = fabs(dx*a1 + dy*a2 + dz*a3);
-  mdca = mdca / sqrt(a1*a1 + a2*a2 + a3*a3);
+  mdca = mdca / ::sqrt(a1*a1 + a2*a2 + a3*a3);
   
   if ( (syz1 != 0) && (syz2 != 0) )
     {

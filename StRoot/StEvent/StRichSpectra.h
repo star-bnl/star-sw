@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRichSpectra.h,v 2.4 2002/02/22 22:56:50 jeromel Exp $
+ * $Id: StRichSpectra.h,v 2.5 2003/09/02 17:58:05 perev Exp $
  *
  * Author: Brian Lasiuk, Dec 14, 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  *
  ***************************************************************************
  * $Log: StRichSpectra.h,v $
+ * Revision 2.5  2003/09/02 17:58:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.4  2002/02/22 22:56:50  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -30,7 +33,7 @@
 #ifndef StRichSpectra_hh
 #define StRichSpectra_hh
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <float.h>
 #include "StObject.h"
 

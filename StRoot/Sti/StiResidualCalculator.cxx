@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.5 2003/06/10 16:23:29 andrewar Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.6 2003/09/02 17:59:41 perev Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.6  2003/09/02 17:59:41  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.5  2003/06/10 16:23:29  andrewar
  * Added functions to residual calculator. Added parallel hist set for
  * different detector layers.
@@ -386,9 +389,9 @@ void StiResidualCalculator::NodeResidue(StiKalmanTrackNode iNode,
   double nodeYE = iNode.eyy;
   //cout <<" D: "<<nodeZE<<endl;
 
-  if(nodeYE>0) nodeYE=sqrt(nodeYE);
+  if(nodeYE>0) nodeYE=::sqrt(nodeYE);
   else nodeYE=1.;
-  if(nodeZE>0) nodeYE=sqrt(nodeZE);
+  if(nodeZE>0) nodeYE=::sqrt(nodeZE);
   else nodeZE=1.;
 
   HitVectorType::iterator iH = hitVec.begin();
@@ -508,7 +511,7 @@ void StiResidualCalculator::FillHist(int offset, double z, double y,
   if(hist) hist->Fill(dip,z, dze);
   else check=-1;
 
-  double diff = sqrt(dy*dy+dz*dz);
+  double diff = ::sqrt(dy*dy+dz*dz);
   iH = mResidualCrossDip.begin();
   hist = *(iH+offset);
   if(hist) hist->Fill(cross, dip, diff);

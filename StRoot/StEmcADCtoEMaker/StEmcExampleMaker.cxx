@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide and Marcia Moura
 // 
-// $Id: StEmcExampleMaker.cxx,v 1.2 2003/04/30 20:36:41 perev Exp $
+// $Id: StEmcExampleMaker.cxx,v 1.3 2003/09/02 17:57:59 perev Exp $
 // $Log: StEmcExampleMaker.cxx,v $
+// Revision 1.3  2003/09/02 17:57:59  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  2003/04/30 20:36:41  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -15,7 +18,7 @@
 #include "StChain.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StEmcUtil/geometry/StEmcGeom.h"
 
 ClassImp(StEmcExampleMaker)

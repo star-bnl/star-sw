@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvLikeSignCorrFctn_MinvYPt.cxx,v 1.1 2001/06/21 19:08:41 laue Exp $
+ * $Id: MinvLikeSignCorrFctn_MinvYPt.cxx,v 1.2 2003/09/02 17:58:20 perev Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -202,28 +202,28 @@ StHbtString MinvLikeSignCorrFctn_MinvYPt::Report(){
 //____________________________
 inline void MinvLikeSignCorrFctn_MinvYPt::AddRealPair(const StHbtPair* pair){
   mMinv = pair->mInv(); mY = pair->fourMomentumSum().rapidity(); 
-  mPt = pair->fourMomentumSum().vect().perp(); mMt = sqrt(pow(mMinv,2.)+pow(mPt,2.)); 
+  mPt = pair->fourMomentumSum().vect().perp(); mMt = ::sqrt(::pow(mMinv,2.)+::pow(mPt,2.)); 
   mNumeratorPt->Fill(mMinv,mY,mPt);
   mNumeratorMt->Fill(mMinv,mY,mMt-mM0);
 }
 //____________________________
 inline void MinvLikeSignCorrFctn_MinvYPt::AddMixedPair(const StHbtPair* pair){
   mMinv = pair->mInv(); mY = pair->fourMomentumSum().rapidity(); 
-  mPt = pair->fourMomentumSum().vect().perp(); mMt = sqrt(pow(mMinv,2.)+pow(mPt,2.));
+  mPt = pair->fourMomentumSum().vect().perp(); mMt = ::sqrt(::pow(mMinv,2.)+::pow(mPt,2.));
   mMixedEventDenominatorPt->Fill(mMinv,mY,mPt);
   mMixedEventDenominatorMt->Fill(mMinv,mY,mMt-mM0);
 }
 //____________________________
 inline void MinvLikeSignCorrFctn_MinvYPt::AddLikeSignPositivePair(const StHbtPair* pair){
   mMinv = pair->mInv(); mY = pair->fourMomentumSum().rapidity(); 
-  mPt = pair->fourMomentumSum().vect().perp(); mMt = sqrt(pow(mMinv,2.)+pow(mPt,2.));
+  mPt = pair->fourMomentumSum().vect().perp(); mMt = ::sqrt(::pow(mMinv,2.)+::pow(mPt,2.));
   mPositiveDenominatorPt->Fill(mMinv,mY,mPt);
   mPositiveDenominatorMt->Fill(mMinv,mY,mMt-mM0);
 }
 //____________________________
 inline void MinvLikeSignCorrFctn_MinvYPt::AddLikeSignNegativePair(const StHbtPair* pair){
   mMinv = pair->mInv(); mY = pair->fourMomentumSum().rapidity(); 
-  mPt = pair->fourMomentumSum().vect().perp(); mMt = sqrt(pow(mMinv,2.)+pow(mPt,2.));
+  mPt = pair->fourMomentumSum().vect().perp(); mMt = ::sqrt(::pow(mMinv,2.)+::pow(mPt,2.));
   mNegativeDenominatorPt->Fill(mMinv,mY,mPt);
   mNegativeDenominatorMt->Fill(mMinv,mY,mMt-mM0);
 }

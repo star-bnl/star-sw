@@ -2,7 +2,7 @@
 
 //This file is an example of how to use the combination iterator.
 
-#include <iostream>
+#include "Stiostream.h"
 using std::cout;
 using std::endl;
 

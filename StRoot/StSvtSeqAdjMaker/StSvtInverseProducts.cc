@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtInverseProducts.cc,v 1.4 2000/11/30 20:45:56 caines Exp $
+ * $Id: StSvtInverseProducts.cc,v 1.5 2003/09/02 17:59:08 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtInverseProducts.cc,v $
+ * Revision 1.5  2003/09/02 17:59:08  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.4  2000/11/30 20:45:56  caines
  * Dynamically calc prob values, use database
  *
@@ -20,8 +23,8 @@
  * Initial versions of sequence adjusting codes
  *
  **************************************************************************/
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include <stdlib.h>
 #include <math.h>
 

@@ -1,5 +1,5 @@
 /**
- * $Id: StTinyMcTrack.h,v 1.3 2003/05/08 02:09:20 calderon Exp $
+ * $Id: StTinyMcTrack.h,v 1.4 2003/09/02 17:58:43 perev Exp $
  * \file  StTinyMcTrack.h
  * \brief   Persistent MC track class.
  * 
@@ -10,6 +10,9 @@
  * There will be a container of all MC tracks, and these will also be entered into the Matched and Contamination
  * collections as Pairs, with their corresponding RC track.
  * $Log: StTinyMcTrack.h,v $
+ * Revision 1.4  2003/09/02 17:58:43  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2003/05/08 02:09:20  calderon
  * Added data members for svt and ftpc fit points for StTinyRcTrack.
  * Added data members for svt and ftpc hits for StTinyMcTrack.
@@ -50,7 +53,7 @@ class StTinyMcTrack : public TObject {
   float pxMc() const { return mPtMc*cos(mPhiMc); }
   float pyMc() const { return mPtMc*sin(mPhiMc); }
   float pzMc() const { return mPzMc; }
-  float pMc()  const { return sqrt((mPtMc*mPtMc)+(mPzMc*mPzMc)); }
+  float pMc()  const { return ::sqrt((mPtMc*mPtMc)+(mPzMc*mPzMc)); }
   float etaMc() const { return mEtaMc; }
   float phiMc() const { return mPhiMc; }
   short nHitMc() const { return mNHitMc; }
@@ -86,6 +89,9 @@ private:
 #endif
 //
 // $Log: StTinyMcTrack.h,v $
+// Revision 1.4  2003/09/02 17:58:43  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.3  2003/05/08 02:09:20  calderon
 // Added data members for svt and ftpc fit points for StTinyRcTrack.
 // Added data members for svt and ftpc hits for StTinyMcTrack.

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.20 2003/01/31 19:43:20 magestro Exp $
+ * $Id: StHbtEvent.cc,v 1.21 2003/09/02 17:58:32 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.21  2003/09/02 17:58:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.20  2003/01/31 19:43:20  magestro
  * several casts added to remove compiler warnings
  *
@@ -549,11 +552,11 @@ void StHbtEvent::SetNumberOfGoodTracks(const unsigned short& tracks){mNumberOfGo
 void StHbtEvent::SetUncorrectedNumberOfPositivePrimaries(const unsigned int& tracks){mUncorrectedNumberOfPositivePrimaries = tracks;}
 void StHbtEvent::SetUncorrectedNumberOfNegativePrimaries(const unsigned int& tracks){mUncorrectedNumberOfNegativePrimaries = tracks;}
 void StHbtEvent::SetUncorrectedNumberOfPrimaries(const unsigned int& tracks){mUncorrectedNumberOfPrimaries = tracks;}
-void StHbtEvent::SetReactionPlane(const float& rp, const int& wgt=0){
+void StHbtEvent::SetReactionPlane(const float& rp, const int& wgt){
   (wgt) ? mReactionPlanePtWgt[0]=rp : mReactionPlane[0]=rp;
 }
-void StHbtEvent::SetReactionPlaneError(const float& rp, const int& wgt=0){ SetReactionPlaneSubEventDifference(rp,wgt); }
-void StHbtEvent::SetReactionPlaneSubEventDifference(const float& rp, const int& wgt=0){
+void StHbtEvent::SetReactionPlaneError(const float& rp, const int& wgt){ SetReactionPlaneSubEventDifference(rp,wgt); }
+void StHbtEvent::SetReactionPlaneSubEventDifference(const float& rp, const int& wgt){
   (wgt) ? mReactionPlanePtWgt[1]=rp : mReactionPlane[1]=rp;
 }
 void StHbtEvent::SetPrimVertPos(const StHbtThreeVector& vp){mPrimVertPos = vp;}
@@ -573,11 +576,11 @@ unsigned short StHbtEvent::NumberOfGoodTracks() const {return mNumberOfGoodTrack
 unsigned int StHbtEvent::UncorrectedNumberOfPositivePrimaries() const {return mUncorrectedNumberOfPositivePrimaries;}
 unsigned int StHbtEvent::UncorrectedNumberOfNegativePrimaries() const {return mUncorrectedNumberOfNegativePrimaries;}
 unsigned int StHbtEvent::UncorrectedNumberOfPrimaries() const {return mUncorrectedNumberOfPrimaries;}
-float StHbtEvent::ReactionPlane(const int& wgt=0) const { 
+float StHbtEvent::ReactionPlane(const int& wgt) const { 
   return (wgt) ? mReactionPlanePtWgt[0] : mReactionPlane[0];
 }
-float StHbtEvent::ReactionPlaneError(const int& wgt=0) const {return ReactionPlaneSubEventDifference(wgt);}
-float StHbtEvent::ReactionPlaneSubEventDifference(const int& wgt=0) const { 
+float StHbtEvent::ReactionPlaneError(const int& wgt) const {return ReactionPlaneSubEventDifference(wgt);}
+float StHbtEvent::ReactionPlaneSubEventDifference(const int& wgt) const { 
   return (wgt) ? mReactionPlanePtWgt[0] : mReactionPlane[0]; 
 }
 StHbtV0Collection* StHbtEvent::V0Collection() const {return mV0Collection;}

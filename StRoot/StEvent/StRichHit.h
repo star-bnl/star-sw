@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRichHit.h,v 2.5 2002/02/22 22:56:49 jeromel Exp $
+ * $Id: StRichHit.h,v 2.6 2003/09/02 17:58:05 perev Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRichHit.h,v $
+ * Revision 2.6  2003/09/02 17:58:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.5  2002/02/22 22:56:49  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -36,7 +39,7 @@
 #ifndef StRichHit_hh
 #define StRichHit_hh
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StHit.h"
 
 class StRichHit : public StHit {

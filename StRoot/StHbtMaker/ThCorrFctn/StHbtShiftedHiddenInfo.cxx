@@ -83,19 +83,19 @@ inline  void  StHbtShiftedHiddenInfo::setInitialMom(const StHbtLorentzVector* aP
   Double_t thetaer = aMomRes->getThetaError(totmom);
   Double_t Deltapx = px * pter - py * phier * DEGTORAD;
   Double_t Deltapy = py * pter + px * phier * DEGTORAD;
-  Double_t Deltapz = pz * pter + ptmom * thetaer * DEGTORAD / (pow((ptmom/pz),2));
+  Double_t Deltapz = pz * pter + ptmom * thetaer * DEGTORAD / (::pow((ptmom/pz),2));
   mShiftedMom.setX(px + aRand->Gaus(0,fabs(Deltapx)));
   mShiftedMom.setY(py + aRand->Gaus(0,fabs(Deltapy)));
   mShiftedMom.setZ(pz + aRand->Gaus(0,fabs(Deltapz)));
   switch (abs(mPid)) {
   case 211:
-    mShiftedMom.setT(sqrt((0.139*0.139 + mShiftedMom.x() * mShiftedMom.x() + mShiftedMom.y() * mShiftedMom.y() + mShiftedMom.z() * mShiftedMom.z())));
+    mShiftedMom.setT(::sqrt((0.139*0.139 + mShiftedMom.x() * mShiftedMom.x() + mShiftedMom.y() * mShiftedMom.y() + mShiftedMom.z() * mShiftedMom.z())));
     break;
   case 321:
-    mShiftedMom.setT(sqrt((0.493*0.493 + mShiftedMom.x() * mShiftedMom.x() + mShiftedMom.y() * mShiftedMom.y() + mShiftedMom.z() * mShiftedMom.z())));
+    mShiftedMom.setT(::sqrt((0.493*0.493 + mShiftedMom.x() * mShiftedMom.x() + mShiftedMom.y() * mShiftedMom.y() + mShiftedMom.z() * mShiftedMom.z())));
     break;
   case 2212:
-    mShiftedMom.setT(sqrt((0.938*0.938 + mShiftedMom.x() * mShiftedMom.x() + mShiftedMom.y() * mShiftedMom.y() + mShiftedMom.z() * mShiftedMom.z())));
+    mShiftedMom.setT(::sqrt((0.938*0.938 + mShiftedMom.x() * mShiftedMom.x() + mShiftedMom.y() * mShiftedMom.y() + mShiftedMom.z() * mShiftedMom.z())));
     break;
 
   }

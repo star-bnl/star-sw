@@ -416,10 +416,10 @@ inline double  StiKalmanTrack::getRapidity()       const
   double mass = getMass();
   if (mass<0)
     throw runtime_error("StiKalmanTrack::getRapidity() - particle mass unknown");
-  double e = sqrt(mass*mass+p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
+  double e = ::sqrt(mass*mass+p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
   if (e<=p[2])
     throw runtime_error("StiKalmanTrack::getRapidity() - Error: e<=pz");
-  return 0.5*log(e+p[2]/e-p[2]);
+  return 0.5*::log(e+p[2]/e-p[2]);
 }
 
 /*!
@@ -437,9 +437,9 @@ inline double  StiKalmanTrack::getPseudoRapidity() const
   // which may (or not) be the primary vertex. 
   double tanTheta = tan(M_PI/4.- getInnerMostHitNode()->getDipAngle()/2. );
   if (tanTheta>0.)
-    return -log(tanTheta);
+    return -::log(tanTheta);
   else
-    throw runtime_error("StiKalmanTrack::getPseudoRapidity() -E- Attempting log(non positive number)");
+    throw runtime_error("StiKalmanTrack::getPseudoRapidity() -E- Attempting ::log(non positive number)");
 }
 
 /*! 

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtHybridPixelsC.cc,v 1.2 2002/02/12 23:09:50 munhoz Exp $
+ * $Id: StSvtHybridPixelsC.cc,v 1.3 2003/09/02 17:59:06 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridPixelsC.cc,v $
+ * Revision 1.3  2003/09/02 17:59:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2002/02/12 23:09:50  munhoz
  * fixing problems for new compiler
  *
@@ -31,7 +34,7 @@
 //                                                                        //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StSvtHybridPixelsC.hh"
 
 ClassImp(StSvtHybridPixelsC)

@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.18 2003/06/27 13:11:25 putschke Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.19 2003/09/02 17:58:17 perev Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.19  2003/09/02 17:58:17  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.18  2003/06/27 13:11:25  putschke
 // *** empty log message ***
 //
@@ -82,7 +85,7 @@ using namespace units;
 #include "tables/St_MagFactor_Table.h"
 
 #include "TMath.h"
-#include "iostream.h"
+#include "Stiostream.h"
 
 ////////////////////////////////////////////////////////////////////////
 // StFtpcTrackingParams                                               //

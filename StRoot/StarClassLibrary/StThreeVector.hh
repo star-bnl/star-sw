@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.8 2002/06/21 17:47:37 genevb Exp $
+ * $Id: StThreeVector.hh,v 1.9 2003/09/02 17:59:35 perev Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.9  2003/09/02 17:59:35  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.8  2002/06/21 17:47:37  genevb
  * Added pseudoProduct
  *
@@ -49,7 +52,7 @@
 #define ST_THREE_VECTOR_HH
 
 #ifndef __CINT__
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #ifdef GNU_GCC
 #    include <stddef.h>
@@ -262,8 +265,8 @@ inline T StThreeVector<T>::pseudoRapidity() const
     //
     // change code to more optimal:
     // double m = mag();
-    // return 0.5*log( (m+z())/(m-z()) );
-    return -log(tan(theta()/2.));
+    // return 0.5*::log( (m+z())/(m-z()) );
+    return -::log(tan(theta()/2.));
 }
 
 template<class T>
@@ -275,7 +278,7 @@ inline StThreeVector<T> StThreeVector<T>::unit() const
 template <class T>
 T StThreeVector<T>::massHypothesis(T mass) const
 {
-    return sqrt((*this)*(*this) + mass*mass);
+    return ::sqrt((*this)*(*this) + mass*mass);
 }
 
 template <class T>
@@ -329,7 +332,7 @@ void StThreeVector<T>::rotateZ(T angle)
 template<class T>
 inline T StThreeVector<T>::perp() const
 {
-    return sqrt(mX1*mX1+mX2*mX2);
+    return ::sqrt(mX1*mX1+mX2*mX2);
 }
 
 template<class T>
@@ -347,7 +350,7 @@ inline T StThreeVector<T>::magnitude() const
 template<class T>
 inline T StThreeVector<T>::mag() const
 {
-    return sqrt(mX1*mX1+mX2*mX2+mX3*mX3);
+    return ::sqrt(mX1*mX1+mX2*mX2+mX3*mX3);
 }
 
 template<class T>
@@ -545,7 +548,7 @@ inline T StThreeVector<T>::angle(const StThreeVector<X>& vec) const
 {
     double norm = this->mag2()*vec.mag2();
     
-    return norm > 0 ? acos(this->dot(vec)/(sqrt(norm))) : 0;
+    return norm > 0 ? acos(this->dot(vec)/(::sqrt(norm))) : 0;
 }
 
 template<class T>

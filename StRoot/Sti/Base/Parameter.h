@@ -7,7 +7,9 @@
 
 #include "Named.h"
 #include "Described.h"
+#include "Stiostream.h"
 #include <stdexcept>
+using namespace std;
 
 /*! Class defining a mutable and generic parameter.
  <p>

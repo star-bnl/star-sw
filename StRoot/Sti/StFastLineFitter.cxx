@@ -3,7 +3,7 @@
 //03/01
 
 #include <math.h>
-#include <iostream>
+#include "Stiostream.h"
 #include "Sti/Base/Messenger.h"
 #include "Sti/Base/MessageType.h"
 #include "StFastLineFitter.h"
@@ -102,8 +102,8 @@ int StFastLineFitter::dofit()
     /* double varsq=chi/(static_cast<double>(n)-2.) */
     
     /*  calculate covariance matrix */
-    /*  siga=sqrt(varsq*sxx/det) */
-    /*  sigb=sqrt(varsq*sum/det) */
+    /*  siga=::sqrt(varsq*sxx/det) */
+    /*  sigb=::sqrt(varsq*sum/det) */
     
     msiga = sum/det;
     msigb = sxx/det;

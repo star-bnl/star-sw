@@ -1,4 +1,4 @@
-#include <iostream>
+#include "Stiostream.h"
 #include <cmath>
 
 #include "StEventTypes.h"
@@ -51,7 +51,8 @@ void StiFtpcHitLoader::loadHits(StEvent* source,
 	{
 	  ftpcHitSectorCollection = ftpcHitPlaneCollection->sector(sector);
 	  const StSPtrVecFtpcHit&hitVector = ftpcHitSectorCollection->hits();
-	  vector<StFtpcHit*>::const_iterator iter;
+//VP	  vector<StFtpcHit*>::const_iterator iter;
+          const_StFtpcHitIterator iter;
 	  for (iter=hitVector.begin();
 	       iter!=hitVector.end();
 	       iter++)

@@ -3,7 +3,7 @@
 #include <vector>
 #include "StiGui/StiDrawable.h"
 #include "StiGui/StiTPolyMarker3D.h"
-
+using namespace std;
 class StiRootDrawableHits : public StiDrawable, public vector<double>
 {
 public:

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtInverseProducts.hh,v 1.3 2000/11/30 20:45:56 caines Exp $
+ * $Id: StSvtInverseProducts.hh,v 1.4 2003/09/02 17:59:08 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtInverseProducts.hh,v $
+ * Revision 1.4  2003/09/02 17:59:08  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2000/11/30 20:45:56  caines
  * Dynamically calc prob values, use database
  *
@@ -20,7 +23,7 @@
 #ifndef STSVTINVERSEPRODUCTS_HH
 #define STSVTINVERSEPRODUCTS_HH
 
-#include <fstream.h>
+#include "Stiostream.h"
 #include "StSvtProbValues.hh"
 
 class StSvtHybridData;

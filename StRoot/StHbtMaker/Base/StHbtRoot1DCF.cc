@@ -14,8 +14,8 @@
  ***************************************************************************/
 
 #include "StHbtMaker/Base/StHbtRoot1DCF.hh"
-#include <strstream.h>
-#include <iostream.h>
+#include <Stsstream.h>
+#include <Stiostream.h>
 
 #ifdef __ROOT__
 ClassImp(StHbtRoot1DCF)
@@ -94,8 +94,8 @@ void StHbtRoot1DCF::Finish(){
     for(i=0;i<tNcell;i++){
       if (mDenominator->GetBinContent(i)) {
 	mRatio->SetBinError(i,
-			    sqrt((pow(mNumerator->GetBinError(i),2)/mDenominator->GetBinContent(i)-
-				  pow(mRatio->GetBinContent(i),2))/mDenominator->GetBinContent(i)));
+			    ::sqrt((::pow(mNumerator->GetBinError(i),2)/mDenominator->GetBinContent(i)-
+				  ::pow(mRatio->GetBinContent(i),2))/mDenominator->GetBinContent(i)));
       } else {
 	mRatio->SetBinError(i,0.);
       }

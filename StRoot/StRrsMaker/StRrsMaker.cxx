@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 2.3 2001/11/16 19:40:46 jeromel Exp $
+ * $Id: StRrsMaker.cxx,v 2.4 2003/09/02 17:58:56 perev Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
+ * Revision 2.4  2003/09/02 17:58:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.3  2001/11/16 19:40:46  jeromel
  * Another one ...
  *
@@ -96,7 +99,7 @@
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
 
-//#include <iostream.h>
+//#include <Stiostream.h>
 #include <string>
 
 #ifndef ST_NO_NAMESPACES
@@ -567,7 +570,7 @@ Int_t StRrsMaker::Make()
 // 			    << tpc_hit[zz].x[0] << " "
 // 			    << tpc_hit[zz].x[1] << " "
 // 			    << tpc_hit[zz].x[2] << " ";
-// 			double ptot = (sqrt(tpc_hit[zz].p[0]*tpc_hit[zz].p[0]+
+// 			double ptot = (::sqrt(tpc_hit[zz].p[0]*tpc_hit[zz].p[0]+
 // 					    tpc_hit[zz].p[1]*tpc_hit[zz].p[1]+
 // 					    tpc_hit[zz].p[2]*tpc_hit[zz].p[2]));
 // 			raw << ptot                << endl;

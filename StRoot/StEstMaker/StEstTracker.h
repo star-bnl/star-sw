@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.h,v 1.12 2003/04/30 20:36:55 perev Exp $
+ * $Id: StEstTracker.h,v 1.13 2003/09/02 17:58:04 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.h,v $
+ * Revision 1.13  2003/09/02 17:58:04  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.12  2003/04/30 20:36:55  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -78,7 +81,7 @@ struct StEstProjOut {
   int nwaf;                   /* number of wafers in fwafer array */
   int nhit;                   /* number of hits in hit array */
   StEstHit* hit[MAXHITPROJ];/* pointers to hits found in projection */
-  double dist[MAXHITPROJ];    /* sqrt(distl^2+distw^2) */
+  double dist[MAXHITPROJ];    /* ::sqrt(distl^2+distw^2) */
   double distw[MAXHITPROJ];   /* distance between projection point and hit */
   double distl[MAXHITPROJ];   /* distance between projection point and hit */
 };

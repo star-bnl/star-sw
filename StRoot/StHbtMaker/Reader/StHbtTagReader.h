@@ -10,7 +10,7 @@
 #include "TLeaf.h"
 
 #ifdef __CC5__
-  #include <iostream.h>
+  #include <Stiostream.h>
 #endif
 
 

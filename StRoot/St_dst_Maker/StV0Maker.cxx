@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.36 2002/09/13 17:51:04 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.37 2003/09/02 17:59:26 perev Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.37  2003/09/02 17:59:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.36  2002/09/13 17:51:04  genevb
 // Better handling of full or corrupt tables
 //
@@ -105,7 +108,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -129,7 +132,7 @@
 St_dst_xi_vertex* dst_xi_vertex = 0;
 St_dst_tkf_vertex* dst_tkf_vertex = 0;
 Int_t rsize,rvsize,lastV0;
-float ptV0_cut_sq = pow(3.5,2); // Don't trim on dcapnmin above ptV0 = 3.5
+float ptV0_cut_sq = ::pow(3.5,2); // Don't trim on dcapnmin above ptV0 = 3.5
 
 
 ClassImp(StV0Maker)
@@ -328,8 +331,8 @@ void StV0Maker::Trim(){
   for (Int_t iv0 = 0; iv0 < dst_v0_vertex->GetNRows(); iv0++) {
     dst_v0_vertex_st* v0row = dst_v0_vertex->GetTable(iv0);
     Bool_t isXiV0 = (v0row->dcav0 < 0);
-    float ptV0_sq = pow((v0row->neg_px + v0row->pos_px),2) +
-                    pow((v0row->neg_py + v0row->pos_py),2);
+    float ptV0_sq = ::pow((v0row->neg_px + v0row->pos_px),2) +
+                    ::pow((v0row->neg_py + v0row->pos_py),2);
     // Current cuts are different for dcaV0 and dcapnmin (pt below 3.5 GeV/c)
     Bool_t passV0 = (TMath::Abs(v0row->dcav0) < pars->dcav0) &&
                     ((ptV0_sq >= ptV0_cut_sq) ||
@@ -352,8 +355,8 @@ void StV0Maker::Trim(){
         dst_v0_vertex_st* v0rowL = dst_v0_vertex->GetTable(lastV0);
         if (! (isXiV0 = (v0rowL->dcav0 < 0)) ) {
           // Calculate passV0 only if isXiV0 is false (only reason we need it)
-          ptV0_sq = pow((v0rowL->neg_px + v0rowL->pos_px),2) +
-                    pow((v0rowL->neg_py + v0rowL->pos_py),2);
+          ptV0_sq = ::pow((v0rowL->neg_px + v0rowL->pos_px),2) +
+                    ::pow((v0rowL->neg_py + v0rowL->pos_py),2);
           // Current cuts are different for dcaV0 and 
           // dcapnmin (pt below 3.5 GeV/c)
           passV0 = (TMath::Abs(v0rowL->dcav0) < pars->dcav0) &&

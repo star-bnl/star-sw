@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: StRichLocalCoordinate.h,v 2.0 2000/08/09 16:17:01 gans Exp $
+ * $Id: StRichLocalCoordinate.h,v 2.1 2003/09/02 17:58:56 perev Exp $
  *
  * Author: brian Jan 20, 2000
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StRichLocalCoordinate.h,v $
+ * Revision 2.1  2003/09/02 17:58:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.0  2000/08/09 16:17:01  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -22,7 +25,7 @@
 #ifndef ST_RICH_LOCAL_COORDINATE_HH
 #define ST_RICH_LOCAL_COORDINATE_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StGlobals.hh"
 #include "StThreeVector.hh"

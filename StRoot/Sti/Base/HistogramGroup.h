@@ -1,6 +1,8 @@
 #ifndef HistogramGroup_H_Included 
 #define HistogramGroup_H_Included 
 #include <vector>
+#include <string>
+using namespace std;
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Described.h"
 #include <TH1.h>

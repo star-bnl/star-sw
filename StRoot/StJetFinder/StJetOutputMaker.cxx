@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.cxx,v 1.4 2003/08/27 18:10:08 thenry Exp $
+ * $Id: StJetOutputMaker.cxx,v 1.5 2003/09/02 17:58:39 perev Exp $
  * 
  * Author: Thomas Henry May 2003
  ***************************************************************************
@@ -14,7 +14,7 @@
  */
 
 #ifdef __ROOT__
-#include <iostream>
+#include "Stiostream.h"
 #include <fstream>
 #include "TLorentzVector.h"
 #include "StSpinMaker/StJets.h"
@@ -303,7 +303,7 @@ istream& read(istream &is, short &toRead)
 
 ostream& write(ostream &os, const char *toWrite, int size)
 {
-  int pos = os.tellp();
+  streampos pos = os.tellp();
   os.write(toWrite, size);
   pos += size;
   if(static_cast<int>(os.tellp()) != pos)
@@ -313,7 +313,7 @@ ostream& write(ostream &os, const char *toWrite, int size)
 
 istream& read(istream &is, char *toRead, int size)
 {
-  int pos = is.tellg();
+  streampos pos = is.tellg();
   is.read(toRead, size);
   if(is.eof()) throw eofException();
   pos += size;

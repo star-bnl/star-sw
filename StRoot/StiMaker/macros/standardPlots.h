@@ -1,9 +1,12 @@
 /*
- * $Id: standardPlots.h,v 1.6 2002/08/26 22:17:16 andrewar Exp $
+ * $Id: standardPlots.h,v 1.7 2003/09/02 18:00:00 perev Exp $
  * A. Rose, WSU
  *
  *
  * $Log: standardPlots.h,v $
+ * Revision 1.7  2003/09/02 18:00:00  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.6  2002/08/26 22:17:16  andrewar
  * Added multi-file input functionality (see doRun() for examples of use). Added
  * cut string to provided easy equivalence of cut function in on-the-fly hists.
@@ -29,7 +32,7 @@
 #ifndef standardPlots_h
 #define standardPlots_h
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>

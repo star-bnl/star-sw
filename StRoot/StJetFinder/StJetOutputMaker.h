@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.h,v 1.4 2003/08/27 18:10:08 thenry Exp $
+ * $Id: StJetOutputMaker.h,v 1.5 2003/09/02 17:58:39 perev Exp $
  * $Log: StJetOutputMaker.h,v $
+ * Revision 1.5  2003/09/02 17:58:39  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.4  2003/08/27 18:10:08  thenry
  * Added a few cut variables, and fixed the saving of the EMC subjet points
  *
@@ -31,9 +34,8 @@
 #ifndef _JetEvent_h
 #define _JetEvent_h
 #include <map>
-#include <fstream>
 #include <string>
-#include <iostream>
+#include "Stiostream.h"
 #include <vector>
 #include <typeinfo>
 using namespace std;
@@ -320,9 +322,10 @@ istream& read(istream &is, char *toRead, int size);
 template <class T>
 ostream& write(ostream &os, vector<T> &toWrite)
 {
+  typedef vector<T>::iterator vectorTiter;
   unsigned short size = toWrite.size();
   write(os, reinterpret_cast<char*>(&size), sizeof(size));
-  for(vector<T>::iterator it = toWrite.begin(); 
+  for(vectorTiter it = toWrite.begin(); 
       it != toWrite.end(); ++it)
     {
       write(os, *it);

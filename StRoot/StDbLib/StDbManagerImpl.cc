@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.14 2002/11/24 01:39:16 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.15 2003/09/02 17:57:49 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.15  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.14  2002/11/24 01:39:16  porter
  * added Pmd domain
  *
@@ -182,8 +185,8 @@
 #include "StDbTableIter.hh"
 #include "dbCollection.h"
 #include "StDbMessenger.hh"
-#include <iostream.h>
-#include <strstream.h>
+#include <Stiostream.h>
+#include <Stsstream.h>
 #include <string.h>
 
 #ifdef HPUX
@@ -541,7 +544,7 @@ while(!done){
    } // eof check 
  } // while loop
 
- char* tmpString=os.str();
+ const char* tmpString=os.str();
  line= new char[strlen(tmpString)+1];
  strcpy(line,tmpString);
  os.freeze(0);

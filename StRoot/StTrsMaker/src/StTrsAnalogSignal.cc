@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsAnalogSignal.cc,v 1.3 1999/01/15 11:02:57 lasiuk Exp $
+ * $Id: StTrsAnalogSignal.cc,v 1.4 2003/09/02 17:59:19 perev Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTrsAnalogSignal.cc,v $
+ * Revision 1.4  2003/09/02 17:59:19  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  1999/01/15 11:02:57  lasiuk
  * modify << operator for STL use
  *
@@ -23,7 +26,7 @@
  * Initial Revision
  *
  ******************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StTrsAnalogSignal.hh"
 
 StTrsAnalogSignal::StTrsAnalogSignal(float t, float amp)

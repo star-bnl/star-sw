@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.51 2002/02/22 14:34:25 dunlop Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.52 2003/09/02 17:58:53 perev Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.52  2003/09/02 17:58:53  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.51  2002/02/22 14:34:25  dunlop
  * Loosened cuts to match StRichSpectraMaker
  *
@@ -247,7 +250,7 @@ using std::less;
 #include "TH1.h"
 #include "TH3.h"
 #include "TNtuple.h"
-#include <fstream.h>
+#include "Stiostream.h"
 #include <math.h>
 #include <float.h>
 #ifdef SUN
@@ -328,7 +331,7 @@ using std::less;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.51 2002/02/22 14:34:25 dunlop Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.52 2003/09/02 17:58:53 perev Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -1878,32 +1881,32 @@ bool StRichPIDMaker::checkTrack(StTrack* track) {
     float bitmask = 0;
     if (track->flag()<0) {
 	status = false;
-	bitmask += pow(2.,0);
+	bitmask += ::pow(2.,0);
     }
     
     if (!track->geometry()) {
 	status = false;
-	bitmask += pow(2.,1);
+	bitmask += ::pow(2.,1);
     }
     
     if (track->geometry()->helix().distance(mVertexPos) > mDcaCut) {
 	status = false;
-	bitmask += pow(2.,2);
+	bitmask += ::pow(2.,2);
     }
     
     if (track->fitTraits().numberOfFitPoints(kTpcId) < mFitPointsCut) {
 	status = false;
-	bitmask += pow(2.,3);
+	bitmask += ::pow(2.,3);
     }
     
     if (fabs(track->geometry()->momentum().pseudoRapidity()) > mEtaCut) {
 	status = false;
-	bitmask += pow(2.,4);
+	bitmask += ::pow(2.,4);
     }
     
     if (track->geometry()->momentum().perp() < mPtCut) {
 	status = false;
-	bitmask += pow(2.,5);
+	bitmask += ::pow(2.,5);
     }
     //cout << "StRichPIDMaker:checkTrack()\n";
     //cout << "\tbitmask = " << bitmask << endl;
@@ -1944,7 +1947,7 @@ bool StRichPIDMaker::checkTrack(StTrack* track) {
   distHits[16] = track->geometry()->momentum().z();
   
   // Track incident angle
-  //theta = acos(-pz/sqrt(px**2+py**2+pz**2))
+  //theta = acos(-pz/::sqrt(px**2+py**2+pz**2))
   distHits[17] = 0;
   distHits[18] = mEventN;
   
@@ -1986,52 +1989,52 @@ bool StRichPIDMaker::checkTrack(StRichTrack* track) {
     float bitmask = 0;
     if (fabs(extrapolatedPosition.x()) > (mPadPlaneDimension.x() - mPadPlaneCut)) {
 	status = false;
-	bitmask += pow(2.,6);
+	bitmask += ::pow(2.,6);
     }
 
     if ( fabs(extrapolatedPosition.y()) > (mPadPlaneDimension.y() - mPadPlaneCut) ) {
 	status = false;
-	bitmask += pow(2.,7);
+	bitmask += ::pow(2.,7);
     }
   
     if (fabs(extrapolatedPosition.x()) < (mPadPlaneCut) ) {
 	status = false;
-	bitmask += pow(2.,8);
+	bitmask += ::pow(2.,8);
     }
 
     if (fabs(extrapolatedPosition.y()) < (mPadPlaneCut) ) {
 	status = false;
-	bitmask += pow(2.,9);
+	bitmask += ::pow(2.,9);
     }
   
     if (fabs(impactPoint.x()) > (mRadiatorDimension.x() - mRadiatorCut) ) {
 	status = false;
-	bitmask += pow(2.,10);
+	bitmask += ::pow(2.,10);
     }
 
     if (fabs(impactPoint.y()) > (mRadiatorDimension.y() - mRadiatorCut) ) {
 	status = false;
-	bitmask += pow(2.,11);
+	bitmask += ::pow(2.,11);
     }
 
     if (fabs(impactPoint.x()) < (mRadiatorCut)) {
 	status = false;
-	bitmask += pow(2.,12);
+	bitmask += ::pow(2.,12);
     }
 
     if (fabs(impactPoint.y()) < (mRadiatorCut)) {
 	status = false;
-	bitmask += pow(2.,13);
+	bitmask += ::pow(2.,13);
     }
 
     if (track->getPathLength()<0 || track->getPathLength()>mPathCut/centimeter) {
 	status = false;
-	bitmask += pow(2.,14);
+	bitmask += ::pow(2.,14);
     }
 	 
     if (track->getLastHit().perp()<mLastHitCut) { 
 	status = false;
-	bitmask += pow(2.,15);
+	bitmask += ::pow(2.,15);
     }
 
     //cout << "StRichPIDMaker::checkTrack(St)\n";
@@ -2077,7 +2080,7 @@ bool StRichPIDMaker::checkTrack(StRichTrack* track) {
   distHits[16] = track->getStTrack()->geometry()->momentum().z();
   
   // Track incident angle
-  //theta = acos(-pz/sqrt(px**2+py**2+pz**2))
+  //theta = acos(-pz/::sqrt(px**2+py**2+pz**2))
   distHits[17] = 0;
   distHits[18] = mEventN;
   

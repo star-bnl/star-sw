@@ -22,7 +22,7 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 
 #include "TRandom.h"
-#include <strstream.h>
+#include <Stsstream.h>
 
 #ifdef __ROOT__
   ClassImp(StHbtThCFGaussFit)

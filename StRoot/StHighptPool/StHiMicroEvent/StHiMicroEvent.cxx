@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiMicroEvent.cxx,v 1.2 2002/06/05 02:31:51 jklay Exp $
+ * $Id: StHiMicroEvent.cxx,v 1.3 2003/09/02 17:58:36 perev Exp $
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StHiMicroEvent.cxx,v $
+ * Revision 1.3  2003/09/02 17:58:36  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2002/06/05 02:31:51  jklay
  * New Nch centrality limits from Zhangbu added
  *
@@ -20,7 +23,7 @@
  *
  **************************************************************************/
 #include "StHiMicroEvent.h"
-#include <iostream>
+#include "Stiostream.h"
 
 #define DEBUG 1
 // set the static pointers to zero.

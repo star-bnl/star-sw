@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIstream.cc,v 1.13 2001/02/16 16:56:21 fisyak Exp $
+ * $Id: StTrsIstream.cc,v 1.14 2003/09/02 17:59:19 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsIstream.cc,v $
+ * Revision 1.14  2003/09/02 17:59:19  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.13  2001/02/16 16:56:21  fisyak
  * Make Solaris happy
  *
@@ -71,6 +74,7 @@
  *
  **************************************************************************/
 #include <utility>
+#include <iterator>
 #include "StTrsIstream.hh"
 #include "StTrsRawDataEvent.hh"
 #include "StTrsDigitalSector.hh"
@@ -203,7 +207,7 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
 		if (lengthData>0) { // We have data, read it in
 		    digitalPadData.resize(lengthData);
 //yf                ifs.read((char *)static_cast<unsigned char*>(digitalPadData.begin()), lengthData);
-		    ifs.read((char *)(digitalPadData.begin()), lengthData);
+		    ifs.read((char *)(&digitalPadData[0]), lengthData);
     
 		    bool PrintToScreen = false;
 		    if (PrintToScreen) {

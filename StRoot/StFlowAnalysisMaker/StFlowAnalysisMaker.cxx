@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.77 2003/08/26 21:10:10 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.78 2003/09/02 17:58:10 perev Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -11,7 +11,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include "StMaker.h"
@@ -540,7 +540,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				"Flow_MeanDedxPos2D",
 				nMomenBins, pMin, pMax,
 				nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPos2D->SetXTitle("log(momentum) (GeV/c)");
+  mHistMeanDedxPos2D->SetXTitle("::log(momentum) (GeV/c)");
   mHistMeanDedxPos2D->SetYTitle("mean dEdx");
   
   // MeanDedxNeg
@@ -548,7 +548,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				"Flow_MeanDedxNeg2D",
 				nMomenBins, pMin, pMax,
 			   nDedxBins, 0, dEdxMax);
-  mHistMeanDedxNeg2D->SetXTitle("log(momentum) (GeV/c)");
+  mHistMeanDedxNeg2D->SetXTitle("::log(momentum) (GeV/c)");
   mHistMeanDedxNeg2D->SetYTitle("mean dEdx");
   
   // MeanDedx PiPlus
@@ -556,7 +556,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				   "Flow_MeanDedxPiPlus2D",
 				   nMomenBins, pMin, pMax,
 				   nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPiPlus2D->SetXTitle("log(momentum) (GeV/c)");
+  mHistMeanDedxPiPlus2D->SetXTitle("::log(momentum) (GeV/c)");
   mHistMeanDedxPiPlus2D->SetYTitle("mean dEdx");
   
   // MeanDedxPiMinus
@@ -564,7 +564,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				    "Flow_MeanDedxPiMinus2D",
 				    nMomenBins, pMin, pMax,
 				    nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPiMinus2D->SetXTitle("log(momentum) (GeV/c)");
+  mHistMeanDedxPiMinus2D->SetXTitle("::log(momentum) (GeV/c)");
   mHistMeanDedxPiMinus2D->SetYTitle("mean dEdx");
   
   // MeanDedxProton
@@ -572,7 +572,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				   "Flow_MeanDedxProton2D",
 				   nMomenBins, pMin, pMax,
 				   nDedxBins, 0, dEdxMax);
-  mHistMeanDedxProton2D->SetXTitle("log(momentum) (GeV/c)");
+  mHistMeanDedxProton2D->SetXTitle("::log(momentum) (GeV/c)");
   mHistMeanDedxProton2D->SetYTitle("mean dEdx");
   
   // MeanDedxPbar
@@ -580,7 +580,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				 "Flow_MeanDedxPbar2D",
 				 nMomenBins, pMin, pMax,
 				 nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPbar2D->SetXTitle("log(momentum) (GeV/c)");
+  mHistMeanDedxPbar2D->SetXTitle("::log(momentum) (GeV/c)");
   mHistMeanDedxPbar2D->SetYTitle("mean dEdx");
   
   // MeanDedxKplus
@@ -588,7 +588,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				  "Flow_MeanDedxKplus2D",
 				  nMomenBins, pMin, pMax,
 				  nDedxBins, 0, dEdxMax);
-  mHistMeanDedxKplus2D->SetXTitle("log(momentum) (GeV/c)");
+  mHistMeanDedxKplus2D->SetXTitle("::log(momentum) (GeV/c)");
   mHistMeanDedxKplus2D->SetYTitle("mean dEdx");
   
   // MeanDedxKminus
@@ -596,7 +596,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				   "Flow_MeanDedxKminus2D",
 				   nMomenBins, pMin, pMax,
 				   nDedxBins, 0, dEdxMax);
-  mHistMeanDedxKminus2D->SetXTitle("log(momentum) (GeV/c)");
+  mHistMeanDedxKminus2D->SetXTitle("::log(momentum) (GeV/c)");
   mHistMeanDedxKminus2D->SetYTitle("mean dEdx");
   
   // MeanDedxDeuteron
@@ -604,7 +604,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				     "Flow_MeanDedxDeuteron2D",
 				     nMomenBins, pMin, pMax,
 				     nDedxBins, 0, dEdxMax);
-  mHistMeanDedxDeuteron2D->SetXTitle("log(momentum) (GeV/c)");
+  mHistMeanDedxDeuteron2D->SetXTitle("::log(momentum) (GeV/c)");
   mHistMeanDedxDeuteron2D->SetYTitle("mean dEdx");
 
   // MeanDedxAntiDeuteron
@@ -612,7 +612,7 @@ Int_t StFlowAnalysisMaker::Init() {
 					 "Flow_MeanDedxAntiDeuteron2D",
 					 nMomenBins, pMin, pMax,
 					 nDedxBins, 0, dEdxMax);
-  mHistMeanDedxAntiDeuteron2D->SetXTitle("log(momentum) (GeV/c)");
+  mHistMeanDedxAntiDeuteron2D->SetXTitle("::log(momentum) (GeV/c)");
   mHistMeanDedxAntiDeuteron2D->SetYTitle("mean dEdx");
   
   // MeanDedxElectron
@@ -620,7 +620,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				     "Flow_MeanDedxElectron2D",
 				     nMomenBins, pMin, pMax,
 				     nDedxBins, 0, dEdxMax);
-  mHistMeanDedxElectron2D->SetXTitle("log(momentum) (GeV/c)");
+  mHistMeanDedxElectron2D->SetXTitle("::log(momentum) (GeV/c)");
   mHistMeanDedxElectron2D->SetYTitle("mean dEdx");
   
   // MeanDedxPositron
@@ -628,7 +628,7 @@ Int_t StFlowAnalysisMaker::Init() {
 				     "Flow_MeanDedxPositron2D",
 				     nMomenBins, pMin, pMax,
 				     nDedxBins, 0, dEdxMax);
-  mHistMeanDedxPositron2D->SetXTitle("log(momentum) (GeV/c)");
+  mHistMeanDedxPositron2D->SetXTitle("::log(momentum) (GeV/c)");
   mHistMeanDedxPositron2D->SetYTitle("mean dEdx");
   
   TString* histTitle;
@@ -1094,7 +1094,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHist_q = new TH1F(histTitle->Data(),
         histTitle->Data(), n_qBins, qMin, qMax);
       histFull[k].histFullHar[j].mHist_q->Sumw2();
-      histFull[k].histFullHar[j].mHist_q->SetXTitle("q = |Q|/sqrt(Mult)");
+      histFull[k].histFullHar[j].mHist_q->SetXTitle("q = |Q|/::sqrt(Mult)");
       histFull[k].histFullHar[j].mHist_q->SetYTitle("Counts");
       delete histTitle;
       
@@ -1161,7 +1161,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.77 2003/08/26 21:10:10 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.78 2003/09/02 17:58:10 perev Exp $");
 
   return StMaker::Init();
 }
@@ -1359,7 +1359,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     Char_t pid[10];
     strcpy(pid, pFlowTrack->Pid());
     float totalp    = pFlowTrack->P();
-    float logp      = log(totalp);
+    float logp      = ::log(totalp);
     float dEdx      = pFlowTrack->Dedx();
     StTrackTopologyMap map = pFlowTrack->TopologyMap();
 
@@ -1752,7 +1752,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   float etaSymZInterceptTpc = 0.00023;  // new values introduced for 200 GeV
   float etaSymZSlopeTpc = -0.00394;     // data based on full statistics
   etaSymTpc -= (etaSymZInterceptTpc + etaSymZSlopeTpc * vertexZ);                   // corrected for acceptance
-  etaSymTpc *= sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
+  etaSymTpc *= ::sqrt((etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
   mHistEtaSymTpc->Fill(etaSymTpc);
 
   
@@ -1760,7 +1760,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   float etaSymZInterceptFtpc = -0.0077; // values for the FTPC based on 200 GeV data with
   float etaSymZSlopeFtpc = 0.0020;      // all sectors and 'bad runs' (323-325) excluded
   etaSymFtpc -= (etaSymZInterceptFtpc + etaSymZSlopeFtpc * vertexZ); // corrected for acceptance
-  etaSymFtpc *= sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN));  // corrected for statistics
+  etaSymFtpc *= ::sqrt((etaSymPosFtpcN + etaSymNegFtpcN));  // corrected for statistics
   mHistEtaSymFtpc->Fill(etaSymFtpc);
 
   // PID multiplicities
@@ -1790,7 +1790,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 static Double_t resEventPlane(double chi) {
   // Calculates the event plane resolution as a function of chi
 
-  double con = 0.626657;                   // sqrt(pi/2)/2
+  double con = 0.626657;                   // ::sqrt(pi/2)/2
   double arg = chi * chi / 4.;
 
   Double_t res = con * chi * exp(-arg) * (TMath::BesselI0(arg) +
@@ -1805,7 +1805,7 @@ static Double_t resEventPlaneK2(double chi) {
   // Calculates the event plane resolution as a function of chi
   //  for the case k=2.
 
-  double con = 0.626657;                   // sqrt(pi/2)/2
+  double con = 0.626657;                   // ::sqrt(pi/2)/2
   double arg = chi * chi / 4.;
 
   double besselOneHalf = sqrt(arg/halfpi) * sinh(arg)/arg;
@@ -1822,7 +1822,7 @@ static Double_t resEventPlaneK3(double chi) {
   // Calculates the event plane resolution as a function of chi
   //  for the case k=3.
 
-  double con = 0.626657;                   // sqrt(pi/2)/2
+  double con = 0.626657;                   // ::sqrt(pi/2)/2
   double arg = chi * chi / 4.;
 
   Double_t res = con * chi * exp(-arg) * (TMath::BesselI1(arg) +
@@ -1877,7 +1877,7 @@ Int_t StFlowAnalysisMaker::Finish() {
 
   cout << endl << "##### Analysis Maker:" << endl;
 
-  // Calculate resolution from sqrt(mHistCos)
+  // Calculate resolution from ::sqrt(mHistCos)
   double cosPair[Flow::nSels][Flow::nHars];
   double cosPairErr[Flow::nSels][Flow::nHars];
   double content;
@@ -1905,20 +1905,20 @@ Int_t StFlowAnalysisMaker::Finish() {
       cosPairErr[k][j] = histFull[k].mHistCos->GetBinError(j+1);
       if (cosPair[k][j] > 0.) {
 	if (pFlowEvent->EtaSubs()) { // sub res only
-	  double resSub = sqrt(cosPair[k][j]);
+	  double resSub = ::sqrt(cosPair[k][j]);
 	  double resSubErr = cosPairErr[k][j] / (2. * resSub);
 	  mRes[k][j]    = resSub;
 	  mResErr[k][j] = resSubErr;
 	} else if (order==4. || order==6.|| order==8.) { // 2nd harmonic event plane
 	    double deltaResSub = 0.005;  // differential for the error propergation
-	    double resSub = sqrt(cosPair[k][1]);
+	    double resSub = ::sqrt(cosPair[k][1]);
 	    double resSubErr = cosPairErr[k][1] / (2. * resSub);
 	    double chiSub = chi(resSub);
 	    double chiSubDelta = chi(resSub + deltaResSub);
 	    double mResDelta;
 	    if (order==4.) {
-	      mRes[k][j] = resEventPlaneK2(sqrt(2.) * chiSub); // full event plane res.
-	      mResDelta = resEventPlaneK2(sqrt(2.) * chiSubDelta);
+	      mRes[k][j] = resEventPlaneK2(::sqrt(2.) * chiSub); // full event plane res.
+	      mResDelta = resEventPlaneK2(::sqrt(2.) * chiSubDelta);
 	    } else if (order==6.) {
 	      mRes[k][j] = resEventPlaneK3(sqrt(2.) * chiSub); // full event plane res.
 	      mResDelta = resEventPlaneK3(sqrt(2.) * chiSubDelta);
@@ -1934,12 +1934,12 @@ Int_t StFlowAnalysisMaker::Finish() {
 	    mResErr[k][j] = 0.007;
 	  } else {
 	    double deltaResSub = 0.005;  // differential for the error propergation
-	    double resSub = sqrt(cosPair[k][j]);
+	    double resSub = ::sqrt(cosPair[k][j]);
 	    double resSubErr = cosPairErr[k][j] / (2. * resSub);
 	    double chiSub = chi(resSub);
 	    double chiSubDelta = chi(resSub + deltaResSub);
-	    mRes[k][j] = resEventPlane(sqrt(2.) * chiSub); // full event plane res.
-	    double mResDelta = resEventPlane(sqrt(2.) * chiSubDelta);
+	    mRes[k][j] = resEventPlane(::sqrt(2.) * chiSub); // full event plane res.
+	    double mResDelta = resEventPlane(::sqrt(2.) * chiSubDelta);
 	    mResErr[k][j] = resSubErr * fabs((double)mRes[k][j] - mResDelta) 
 	      / deltaResSub;
 	  }
@@ -2005,7 +2005,7 @@ Int_t StFlowAnalysisMaker::Finish() {
 	// The systematic error of the resolution is folded in.
 	error = histFull[k].mHist_v->GetBinError(j+1);
 	error /= mRes[k][j];
-	totalError = fabs(content) * sqrt((error/content)*(error/content) +
+	totalError = fabs(content) * ::sqrt((error/content)*(error/content) +
 	       (mResErr[k][j]/mRes[k][j])*(mResErr[k][j]/mRes[k][j]));
 	histFull[k].mHist_v->SetBinError(j+1, totalError);
 	cout << "##### v" << j+1 << "= (" << content << " +/- " << error << 
@@ -2164,6 +2164,9 @@ inline void StFlowAnalysisMaker::SetEtaRange_for_vPt(Float_t lo, Float_t hi) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.78  2003/09/02 17:58:10  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.77  2003/08/26 21:10:10  posk
 // Calculates v8 if nHars=8.
 //
@@ -2370,7 +2373,7 @@ inline void StFlowAnalysisMaker::SetEtaRange_for_vPt(Float_t lo, Float_t hi) {
 // Reduced Include Path
 //
 // Revision 1.4  1999/09/03 01:05:59  fisyak
-// replace iostream/stdlib by iostream.h/stdlib.h
+// replace iostream/stdlib by Stiostream.h/stdlib.h
 //
 // Revision 1.3  1999/08/24 18:02:37  posk
 // Calculates event plane resolution.

@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.cxx,v 1.11 2001/05/31 16:11:01 fisyak Exp $
+// $Id: StPreVertexMaker.cxx,v 1.12 2003/09/02 17:59:26 perev Exp $
 // $Log: StPreVertexMaker.cxx,v $
+// Revision 1.12  2003/09/02 17:59:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.11  2001/05/31 16:11:01  fisyak
 // Make m_Mode in StPreVertexMaker bitwise
 //
@@ -34,7 +37,7 @@
 // Initial version. This maker reads in tptrack and produces a preliminary primary vertex.
 //
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 
 #include "StPreVertexMaker.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcSimpleSlowControl.hh,v 1.2 1999/04/07 00:45:27 lasiuk Exp $
+ * $Id: StTpcSimpleSlowControl.hh,v 1.3 2003/09/02 17:59:16 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcSimpleSlowControl.hh,v $
+ * Revision 1.3  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  1999/04/07 00:45:27  lasiuk
  * addition of gas gain
  *
@@ -29,7 +32,7 @@
 #ifndef ST_TPC_SIMPLE_SLOW_CONTROL_HH
 #define ST_TPC_SIMPLE_SLOW_CONTROL_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "SystemOfUnits.h"
 #include "StTpcSlowControl.hh"
 

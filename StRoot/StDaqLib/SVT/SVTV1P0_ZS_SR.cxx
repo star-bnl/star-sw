@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0_ZS_SR.cxx,v 1.4 2003/02/20 21:39:45 ward Exp $
+ * $Id: SVTV1P0_ZS_SR.cxx,v 1.5 2003/09/02 17:55:33 perev Exp $
  *      
  * Author: J. Schambach
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0_ZS_SR.cxx,v $
+ * Revision 1.5  2003/09/02 17:55:33  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.4  2003/02/20 21:39:45  ward
  * Remove voluminous warning message.
  *
@@ -25,7 +28,7 @@
  *
  *      
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "SVTV1P0.hh"
@@ -287,7 +290,7 @@ int SVTV1P0_ZS_SR::initialize()
 	else { // normal sequence word found
 	  unsigned short work = seqd_p->sequence[i];
 	  int start = work>>6;
-	  int len = work & 0x1f;
+	  int len = work & 0x1f; if(len){/*nothing*/}
 	  if (start >= oldstart) { // still on same pad
 	    Anode_array[hybrid-1][anode-1].nseq++;
 	    oldstart = start;
@@ -439,7 +442,7 @@ int SVTV1P0_ZS_SR::getFeeSequences(int Fee, int Pin, int *nSeq,
 int SVTV1P0_ZS_SR::getSpacePts(int Hybrid, int *nSpacePts, SpacePt **SpacePts)
 {
   classname(Bank_SVTMZCLD) *cld;
-  int numSpPts = 0;
+//  int numSpPts = 0; 
   INT32 hybridID =
     Hybrid | 
     (wafer << 2) |

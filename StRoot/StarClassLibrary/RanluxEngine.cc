@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RanluxEngine.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
+ * $Id: RanluxEngine.cc,v 1.3 2003/09/02 17:59:34 perev Exp $
  *
  * Author: Original code from CLHEP by G. Cosmo
  *         modified for SCL bl
@@ -22,6 +22,9 @@
  ***************************************************************************
  *
  * $Log: RanluxEngine.cc,v $
+ * Revision 1.3  2003/09/02 17:59:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  1999/12/07 23:43:04  ullrich
  * Modified to get rid of warnings on Linux.
  *
@@ -36,8 +39,8 @@
 
 RanluxEngine::RanluxEngine(long seed, HepInt lux)
 : int_modulus(0x1000000),
-  mantissa_bit_24((HepFloat) pow(0.5,24.)),
-  mantissa_bit_12((HepFloat) pow(0.5,12.))
+  mantissa_bit_24((HepFloat) ::pow(0.5,24.)),
+  mantissa_bit_12((HepFloat) ::pow(0.5,12.))
 {
    luxury = lux;
    setSeed(seed, luxury);
@@ -48,8 +51,8 @@ RanluxEngine::~RanluxEngine() {}
 
 RanluxEngine::RanluxEngine(const RanluxEngine &p)
 : int_modulus(0x1000000),
-  mantissa_bit_24((HepFloat) pow(0.5,24.)),
-  mantissa_bit_12((HepFloat) pow(0.5,12.))
+  mantissa_bit_24((HepFloat) ::pow(0.5,24.)),
+  mantissa_bit_12((HepFloat) ::pow(0.5,12.))
 {
   if ((this != &p) && (&p)) {
     theSeed = p.getSeed();

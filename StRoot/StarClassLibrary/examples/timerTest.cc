@@ -1,6 +1,6 @@
 #include "StTimer.hh"
 #include <time.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 
 
@@ -29,7 +29,7 @@ int main()
 
    const size_t NumSqrt = 1000000;
    double x;
-   for (int i=0; i<NumSqrt; i++) x = sqrt(double(i));
+   for (int i=0; i<NumSqrt; i++) x = ::sqrt(double(i));
 
    timer.stop();
    

@@ -5,7 +5,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include "iostream.h"
+#include "Stiostream.h"
 #include "St_trg_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -982,8 +982,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.44 2003/07/16 19:58:35 perev Exp $
+// $Id: St_trg_Maker.cxx,v 1.45 2003/09/02 17:59:33 perev Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.45  2003/09/02 17:59:33  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.44  2003/07/16 19:58:35  perev
 // Cleanup of StTriggerData2003 at all
 //

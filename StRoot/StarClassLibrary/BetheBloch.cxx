@@ -10,7 +10,7 @@
 // this is done by
 // 1) reading the kinetic energy and dedx value
 // 2) obtain energy by energy = kinetic energy + mass
-// 3) calculate beta*gamma = p/m where p = sqrt(e^2 - m^2)
+// 3) calculate beta*gamma = p/m where p = ::sqrt(e^2 - m^2)
 // 4) insert into the map of beta gamma - dedx values
 //
 // The function returns a linear interpolation between
@@ -21,7 +21,7 @@
 // There is an overall normalization factor obtained from a fit
 // and there is a relative normalization factor between the simple
 // 1/beta^2 region and the values from the table.
-#include <iostream.h>
+#include <Stiostream.h>
 #include <vector>
 #include "BetheBloch.h"
 #include "TMath.h"
@@ -449,7 +449,7 @@ BetheBloch::BetheBloch(){
     for(size_t i=0; i<ionizVec.size(); ++i) {
 // 	double energy = kinVec[i];
 // 	energy +=muonmass; // kinetic energy = energy - mass
-// 	double betagamma = sqrt(energy*energy-muonmass*muonmass)/muonmass;
+// 	double betagamma = ::sqrt(energy*energy-muonmass*muonmass)/muonmass;
 // 	mMap.insert(map<double,double>::value_type(betagamma,ionizVec[i]));
 	mMap.insert(map<double,double>::value_type(kinVec[i],ionizVec[i]));
 	
@@ -558,7 +558,7 @@ Double_t BetheBloch::Sirrf(Double_t Poverm, Double_t Length, Int_t k) {
   return sirrf;
 }
 //________________________________________________________________________________
-Double_t  BetheBloch::Girrf(Double_t poverm,  Double_t Tmin=1.e-3, Int_t k = 0) {
+Double_t  BetheBloch::Girrf(Double_t poverm,  Double_t Tmin, Int_t k) {
   //        returns value of relative ionisation normalised to value
   //        at p/m=4 poverm    p/m (=beta gamma)             (input)
   //        k = 0 (default) pi+/-,K+/-,P/pbar, deuteron, ..

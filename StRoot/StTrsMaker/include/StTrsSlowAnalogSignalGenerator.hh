@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.hh,v 1.5 1999/02/16 23:34:19 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.hh,v 1.6 2003/09/02 17:59:16 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.hh,v $
+ * Revision 1.6  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  1999/02/16 23:34:19  lasiuk
  * inline 2 functions
  * merge operations for speed up (after profiler0
@@ -39,7 +42,7 @@
 #ifndef ST_TRS_SLOW_ANALOG_SIGNAL_GENERATOR_HH
 #define ST_TRS_SLOW_ANALOG_SIGNAL_GENERATOR_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StTrsAnalogSignalGenerator.hh"
 
 class StTrsSlowAnalogSignalGenerator : public  StTrsAnalogSignalGenerator {

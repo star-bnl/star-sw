@@ -82,7 +82,7 @@ inline  void  StHbtSmearedHiddenInfo::setInitialMom(const StHbtLorentzVector* aP
   /* Getting the error distribution widths */
   //  Float_t Deltapx = px * pter - py * phier * DEGTORAD;
   //  Float_t Deltapy = py * pter + px * phier * DEGTORAD;
-  //  Float_t Deltapz = pz * pter + ptmom * thetaer * DEGTORAD / (pow((ptmom/pz),2));
+  //  Float_t Deltapz = pz * pter + ptmom * thetaer * DEGTORAD / (::pow((ptmom/pz),2));
   // Angles now in readians - do not recalculate them!
   Float_t Deltapx = TMath::Abs(px) * per + TMath::Abs(py) * phier + TMath::Abs(px * (1/TMath::Tan(thetaan))) * thetaer;
   Float_t Deltapy = TMath::Abs(py) * per + TMath::Abs(px) * phier + TMath::Abs(py * (1/TMath::Tan(thetaan))) * thetaer;
@@ -97,13 +97,13 @@ inline  void  StHbtSmearedHiddenInfo::setInitialMom(const StHbtLorentzVector* aP
   /* Calclating the energy */
   switch (abs(mPid)) {
   case 211:
-    mSmearedMom.setT(sqrt((0.139*0.139 + mSmearedMom.x() * mSmearedMom.x() + mSmearedMom.y() * mSmearedMom.y() + mSmearedMom.z() * mSmearedMom.z())));
+    mSmearedMom.setT(::sqrt((0.139*0.139 + mSmearedMom.x() * mSmearedMom.x() + mSmearedMom.y() * mSmearedMom.y() + mSmearedMom.z() * mSmearedMom.z())));
     break;
   case 321:
-    mSmearedMom.setT(sqrt((0.493*0.493 + mSmearedMom.x() * mSmearedMom.x() + mSmearedMom.y() * mSmearedMom.y() + mSmearedMom.z() * mSmearedMom.z())));
+    mSmearedMom.setT(::sqrt((0.493*0.493 + mSmearedMom.x() * mSmearedMom.x() + mSmearedMom.y() * mSmearedMom.y() + mSmearedMom.z() * mSmearedMom.z())));
     break;
   case 2212:
-    mSmearedMom.setT(sqrt((0.938*0.938 + mSmearedMom.x() * mSmearedMom.x() + mSmearedMom.y() * mSmearedMom.y() + mSmearedMom.z() * mSmearedMom.z())));
+    mSmearedMom.setT(::sqrt((0.938*0.938 + mSmearedMom.x() * mSmearedMom.x() + mSmearedMom.y() * mSmearedMom.y() + mSmearedMom.z() * mSmearedMom.z())));
     break;
 
   }

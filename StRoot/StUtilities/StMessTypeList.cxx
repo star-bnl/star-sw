@@ -1,5 +1,8 @@
-// $Id: StMessTypeList.cxx,v 1.8 1999/09/14 15:42:02 genevb Exp $
+// $Id: StMessTypeList.cxx,v 1.9 2003/09/02 17:59:20 perev Exp $
 // $Log: StMessTypeList.cxx,v $
+// Revision 1.9  2003/09/02 17:59:20  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.8  1999/09/14 15:42:02  genevb
 // Some bug fixes, workaround for nulls in strings
 //
@@ -33,7 +36,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "StMessTypeList.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <ctype.h>
 
 StMessTypePair::StMessTypePair(const char* ty, const char* te) :

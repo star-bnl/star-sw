@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 using std::string;
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 
 class StiFilter

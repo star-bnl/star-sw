@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: tofPathLength.cc,v 1.3 2003/08/06 23:42:56 geurts Exp $
+ * $Id: tofPathLength.cc,v 1.4 2003/09/02 17:59:10 perev Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: tofPathLength.cc,v $
+ * Revision 1.4  2003/09/02 17:59:10  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2003/08/06 23:42:56  geurts
  * function definitions in seperate header file
  *
@@ -74,7 +77,7 @@ double tofPathLength(const StThreeVector<double>*  beginPoint, const StThreeVect
   double xdif =  endPoint->x() - beginPoint->x();
   double ydif =  endPoint->y() - beginPoint->y();
   
-  double C = sqrt(xdif*xdif + ydif*ydif);
+  double C = ::sqrt(xdif*xdif + ydif*ydif);
   double s_perp = C;
   if (curvature){
     double R = 1/curvature;
@@ -82,7 +85,7 @@ double tofPathLength(const StThreeVector<double>*  beginPoint, const StThreeVect
   }
 
   double s_z = fabs(endPoint->z() - beginPoint->z());
-  double value = sqrt(s_perp*s_perp + s_z*s_z);
+  double value = ::sqrt(s_perp*s_perp + s_z*s_z);
 
   return(value);
 }

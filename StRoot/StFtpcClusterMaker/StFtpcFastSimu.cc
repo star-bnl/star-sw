@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.25 2002/09/16 12:43:22 jcs Exp $
+// $Id: StFtpcFastSimu.cc,v 1.26 2003/09/02 17:58:14 perev Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.26  2003/09/02 17:58:14  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.25  2002/09/16 12:43:22  jcs
 // replace large statically dimensioned arrays with dynamically dimensioned arrays
 //
@@ -82,7 +85,7 @@
 #include "StFtpcParamReader.hh"
 #include "StFtpcDbReader.hh"
 #include "StFtpcGeantReader.hh"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "StMessMgr.h"
 #include "PhysicalConstants.h"
@@ -231,7 +234,7 @@ int StFtpcFastSimu::ffs_gen_padres()
 	  phi += twopi;
 
 	//       Radius of Hit
-	Rh = sqrt(xi*xi + yi*yi);
+	Rh = ::sqrt(xi*xi + yi*yi);
 
 	//       Drift velocity at hit [cm/microsec]
 	Vh = Vhm[0] + Vhm[1]*Rh + Vhm[2]*Rh*Rh + Vhm[3]*Rh*Rh*Rh;
@@ -296,7 +299,7 @@ int StFtpcFastSimu::ffs_gen_padres()
 	sigPhi = err_azi[0]+err_azi[1]*Rh+err_azi[2]*sqr(Rh)+err_azi[3]*sqr(Rh)*Rh;
 
 	//   Sigma_tr response
-	sigma_tr = sqrt(sqr(sigPhi)+(sqr(mDb->padLength()*tan(alpha))));
+	sigma_tr = ::sqrt(sqr(sigPhi)+(sqr(mDb->padLength()*tan(alpha))));
 
 	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -307,7 +310,7 @@ int StFtpcFastSimu::ffs_gen_padres()
 	  err_rad[3]*sqr(Rh)*Rh;
 
 	//mk Sigma longitudinal at anode [micron] 
-	sigma_l = sqrt(sqr(sigTimeb)+sqr(mDb->padLength()*tan(lambda)));
+	sigma_l = ::sqrt(sqr(sigTimeb)+sqr(mDb->padLength()*tan(lambda)));
 
 	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -433,7 +436,7 @@ int StFtpcFastSimu::ffs_hit_smear(float phi,
     // and transverse direction
     
     *st_dev_x = sqr(cos(phi)) * sqr(st_dev_l) + sqr(sin(phi)) * sqr(st_dev_t);
-    *st_dev_x = (sqrt(*st_dev_x))*micrometer;
+    *st_dev_x = (::sqrt(*st_dev_x))*micrometer;
 
     *st_dev_y = sqr(sin(phi)) * sqr(st_dev_l) + sqr(cos(phi)) * sqr(st_dev_t);
     *st_dev_y = sqrt (*st_dev_y)*micrometer;
@@ -563,7 +566,7 @@ int StFtpcFastSimu::ffs_merge_tagger()
 	mPoint[i].SetFlags(0);
 	
 	// azimuthal direction
-	r1[i] = sqrt(sqr(mPoint[i].GetX()) + sqr(mPoint[i].GetY()));
+	r1[i] = ::sqrt(sqr(mPoint[i].GetX()) + sqr(mPoint[i].GetY()));
 	phi1[i] = atan2((double) mPoint[i].GetY(),
                         (double) mPoint[i].GetX());
 	if ( phi1[i] < 0.0 ) 

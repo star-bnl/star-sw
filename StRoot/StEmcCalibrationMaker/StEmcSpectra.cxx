@@ -5,7 +5,7 @@
 * This is a general EMCSpectra class
 ***********************************************************************/
 #include "StEmcSpectra.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "emc_def.h"
 #include "TCanvas.h"
@@ -182,7 +182,7 @@ Bool_t StEmcSpectra::GetMeanAndRms(Int_t position,Float_t amin,Float_t amax,
     if(sum>0)
     {
       mean /= sum;
-      rms   = sqrt(rms/sum-mean*mean);
+      rms   = ::sqrt(rms/sum-mean*mean);
     } else ok = kFALSE;
   }
   *m    = mean;
@@ -207,7 +207,7 @@ Bool_t StEmcSpectra::GetLogMeanAndRms(Int_t position,Float_t amin,Float_t amax,
     {
       Float_t w = tmp->GetBinContent(j);
 			if(w==1) w=1.5;
-		  if(w>0) w = log(w);
+		  if(w>0) w = ::log(w);
 		  Float_t x = tmp->GetBinCenter(j);
       mean += w*x;
       sum  += w;
@@ -216,7 +216,7 @@ Bool_t StEmcSpectra::GetLogMeanAndRms(Int_t position,Float_t amin,Float_t amax,
     if(sum>0)
     {
 	    mean /= sum;
-      rms   = sqrt(rms/sum-mean*mean);
+      rms   = ::sqrt(rms/sum-mean*mean);
     } else ok = kFALSE;
   }
   *m    = mean;
@@ -246,7 +246,7 @@ Bool_t StEmcSpectra::GetOccupancy(Float_t minimum,Float_t* m,
   avg=avg/temp;
   sigma = sigma/temp-avg*avg;
   if(sigma<0) sigma=0;
-  sigma=sqrt(sigma);
+  sigma=::sqrt(sigma);
   number=number/temp;
   *m=avg;
   *r=sigma;
@@ -273,7 +273,7 @@ Bool_t StEmcSpectra::GetOccupancyEtaBin(Float_t minimum,Float_t* m,
   }
   if(temp==0) return kFALSE;
   avg=avg/temp;
-  sigma=sqrt(sigma/temp-avg*avg);
+  sigma=::sqrt(sigma/temp-avg*avg);
   number=number/temp;
   *m=avg;
   *r=sigma;
@@ -396,7 +396,7 @@ void StEmcSpectra::DrawAllEtaBin(Int_t etabin,Float_t Norm)
       for(int i=1;i<=mHistTmp[1]->GetNbinsX();i++)
       {
         Float_t y = scale1*mHistTmp[1]->GetBinContent(i);
-        Float_t ey = sqrt(y)/scale1;
+        Float_t ey = ::sqrt(y)/scale1;
         mHistTmp[1]->SetBinError(i,ey);
       }
       canvas8->cd(1);

@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StHbtV0.hh,v $
+ * Revision 1.13  2003/09/02 17:58:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.12  2003/01/14 09:45:14  renault
  * enable this class to be used for theorical calculations.
  *
@@ -66,7 +69,7 @@
 #ifndef StHbtV0_hh
 #define StHbtV0_hh
 
-#include <fstream.h>
+#include "Stiostream.h"
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh" //same as in StHbtTrack.hh
 #include "StarClassLibrary/StPhysicalHelixD.hh" // Gael 12 Sept 02
 #ifdef __ROOT__

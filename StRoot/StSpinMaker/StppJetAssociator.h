@@ -5,7 +5,7 @@
 #ifndef StppJetAssociator_HH
 #define StppJetAssociator_HH
 
-#include <iostream>
+#include "Stiostream.h"
 #include <cmath>
 #include <vector>
 #include <map>

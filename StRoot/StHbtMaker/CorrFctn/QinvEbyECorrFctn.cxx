@@ -300,7 +300,7 @@ void QinvEbyECorrFctn::Rms_by_hand(double& Width_MeV, double& Width_fm) {
     //cout << "sum "<< sum << endl;
     //cout << "S_y " << S_y << endl;
     
-    Width_MeV = sqrt(fabs(sum/(S_y))) ;
+    Width_MeV = ::sqrt(fabs(sum/(S_y))) ;
     Width_fm  = 0.197327/Width_MeV ;
 
     cout << "Rough rms calculation : " << (double) Width_MeV << "\t";

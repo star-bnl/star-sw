@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.10 2003/08/20 18:50:21 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.11 2003/09/02 17:58:41 perev Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.11  2003/09/02 17:58:41  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.10  2003/08/20 18:50:21  calderon
  * Addition of Tof classes and Pixel classes.  Modified track, event, and
  * container code to reflect this.
@@ -61,7 +64,7 @@
 #ifndef StMcEvent_hh
 #define StMcEvent_hh
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StMcContainers.hh" 
 #include "TString.h"

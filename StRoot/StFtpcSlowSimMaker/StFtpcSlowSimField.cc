@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.cc,v 1.13 2003/07/03 13:30:54 fsimon Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.14 2003/09/02 17:58:16 perev Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.14  2003/09/02 17:58:16  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.13  2003/07/03 13:30:54  fsimon
 // Implementation of cathode offset simulation:
 // 	The inner radius (and thus the E-field) is changed according to
@@ -54,8 +57,8 @@
 //          02/27/98    Janet Seyboth   correct definition of new arrays
 ///////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include "PhysicalConstants.h"
 
 #include "StFtpcSlowSimField.hh"
@@ -107,7 +110,7 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
 
     grid_point[i].rhit = innerRadius + i * del_r;
 
-    eff = fabs(cathodeVoltage) / log(outerRadius / innerRadius)
+    eff = fabs(cathodeVoltage) / ::log(outerRadius / innerRadius)
       / grid_point[i].rhit;
     grid_point[i].ef   = eff;
 
@@ -313,7 +316,7 @@ void StFtpcSlowSimField::GetVelocityZ(const float inverseRadius, const int padro
   if (padrow >= 10) fieldPadrow = padrow - 10; // bField symmetric, no diff east/west !
   //float e_now=radTimesField * inverseRadius;
   // e - Field corrected for changed cathode:
-  float e_now=radTimesField * inverseRadius * (log(outerRadius / (innerRadius))/log(outerRadius / newR));
+  float e_now=radTimesField * inverseRadius * (::log(outerRadius / (innerRadius))/::log(outerRadius / newR));
   int iLower= (int)((e_now-EFieldMin)*EFieldStepInverted);
   int iUpper= iLower + 1;
   int padrowIndex= nMagboltzBins*fieldPadrow;

@@ -1,7 +1,7 @@
 #ifndef STSVTSIGNAL_HH
 #define STSVTSIGNAL_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <string.h>
 #include <math.h>
 
@@ -115,7 +115,7 @@ private:
 
 /*inline void StSvtSignal::arrays()
 {
- mArray1[0] = 2.46196981473530512524*pow(0.1,10);
+ mArray1[0] = 2.46196981473530512524*::pow(0.1,10);
  mArray1[1] = 0.564189564831068821977;
  mArray1[2] = 7.46321056442269912687;
  mArray1[3] = 48.6371970985681366614;

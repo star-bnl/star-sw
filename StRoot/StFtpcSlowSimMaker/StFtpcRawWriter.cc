@@ -1,5 +1,8 @@
-// $Id: StFtpcRawWriter.cc,v 1.6 2003/01/29 12:06:34 fsimon Exp $
+// $Id: StFtpcRawWriter.cc,v 1.7 2003/09/02 17:58:16 perev Exp $
 // $Log: StFtpcRawWriter.cc,v $
+// Revision 1.7  2003/09/02 17:58:16  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.6  2003/01/29 12:06:34  fsimon
 // Include switch to enable/disable turning of pad order for ASIC 2 in FTPC E
 // Was an error on Y2001/2002 DAQ mapping
@@ -20,7 +23,7 @@
 // used by StFtpcSlowSimulator to write simulated data to tables
 
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StFtpcRawWriter.hh"
 #include "StMessMgr.h"
 

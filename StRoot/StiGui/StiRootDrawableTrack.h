@@ -4,6 +4,7 @@
 #include <deque>
 #include "StiGui/StiDrawable.h"
 #include "StiGui/StiTPolyLine3D.h"
+using namespace std;
 
 /*! \class StiRootDrawableTrack
   Concrete class used to draw tracks

@@ -1,8 +1,11 @@
 //  modified by JB 2/2/01: trigOnCtb() isolated and upgraded
 // 
 //*-- Author : George , Jan Balewski 
-// $Id: StppTrigMaker.cxx,v 1.9 2002/04/19 22:24:23 perev Exp $
+// $Id: StppTrigMaker.cxx,v 1.10 2003/09/02 18:00:19 perev Exp $
 // $Log: StppTrigMaker.cxx,v $
+// Revision 1.10  2003/09/02 18:00:19  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.9  2002/04/19 22:24:23  perev
 // fixes for ROOT/3.02.07
 //
@@ -34,7 +37,7 @@
 // 
 //                                                                     
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include <assert.h>
 
 #include <math.h>

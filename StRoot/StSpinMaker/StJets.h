@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.4 2003/05/20 20:22:45 thenry Exp $
+// $Id: StJets.h,v 1.5 2003/09/02 17:59:01 perev Exp $
 // $Log: StJets.h,v $
+// Revision 1.5  2003/09/02 17:59:01  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.4  2003/05/20 20:22:45  thenry
 // Moved body of jetTrackIndices to cxx.
 //
@@ -94,6 +97,7 @@ public:
     virtual ~StJets();
     
     void Clear(bool clearTracks = false);
+    void Clear(const char *opt){TObject::Clear(opt);}//WarnOff
     void  print();
 
     ///add a jet to the container

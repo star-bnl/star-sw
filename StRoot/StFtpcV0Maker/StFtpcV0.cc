@@ -1,6 +1,9 @@
-// $Id: StFtpcV0.cc,v 1.5 2001/01/27 19:52:38 jcs Exp $
+// $Id: StFtpcV0.cc,v 1.6 2003/09/02 17:58:19 perev Exp $
 //
 // $Log: StFtpcV0.cc,v $
+// Revision 1.6  2003/09/02 17:58:19  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.5  2001/01/27 19:52:38  jcs
 // get pi constants from PhysicalConstants.h
 //
@@ -523,7 +526,7 @@ int StFtpcV0::HelixInter(double xcH1,double ycH1,double pitchH1,double radiusH1,
 
 
   int status = 0;
-  double w = sqrt( (xcH1-xcH2)*(xcH1-xcH2) + (ycH1-ycH2)*(ycH1-ycH2) ); //dist between centers
+  double w = ::sqrt( (xcH1-xcH2)*(xcH1-xcH2) + (ycH1-ycH2)*(ycH1-ycH2) ); //dist between centers
 
   double theta=atan2(ycH2-ycH1,xcH2-xcH1);  // angle between centers
   if (theta<0) theta = theta + twopi;

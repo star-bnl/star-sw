@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.hh,v 1.11 2002/11/06 13:48:06 oldi Exp $
+// $Id: StFtpcVertex.hh,v 1.12 2003/09/02 17:58:17 perev Exp $
 // $Log: StFtpcVertex.hh,v $
+// Revision 1.12  2003/09/02 17:58:17  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.11  2002/11/06 13:48:06  oldi
 // IFlag and Id added as data members.
 // New functionality introduced (to clean up StFtpcTrackMaker.cxx).
@@ -71,7 +74,7 @@
 #ifndef STAR_StFtpcVertex
 #define STAR_StFtpcVertex
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TObject.h"
 #include "TObjArray.h"
 #include "TH1.h"

@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichMaterialsDbInterface.h,v 2.2 2001/04/10 16:56:07 lasiuk Exp $
+ * $Id: StRichMaterialsDbInterface.h,v 2.3 2003/09/02 17:58:53 perev Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDbInterface.h,v $
+ *  Revision 2.3  2003/09/02 17:58:53  perev
+ *  gcc 3.2 updates + WarnOff
+ *
  *  Revision 2.2  2001/04/10 16:56:07  lasiuk
  *  Change parameters to bring into line with richgeo.g and CERN.
  *
@@ -22,7 +25,7 @@
 #ifndef ST_RICH_MATERIALS_INTERFACE_H
 #define ST_RICH_MATERIALS_INTERFACE_H
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StThreeVector.hh"
 
 class StRichMaterialsDbInterface {

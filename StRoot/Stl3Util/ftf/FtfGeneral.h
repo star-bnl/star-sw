@@ -20,9 +20,9 @@
 
 
 // needed for solaris cc5
-#if !defined(ST_NO_NAMESPACES)
 using namespace std;
-#endif
+using std::min;
+using std::max;
 
 //
 //    Some constants 
@@ -35,8 +35,8 @@ const double bFactor = 0.0029979 ;
 //
 //-->   Functions
 //
-#define min(a,b)    ( ( (a) < (b) ) ? (a) : (b) )
-#define max(a,b)    ( ( (a) > (b) ) ? (a) : (b) )
+//VP #define min(a,b)    ( ( (a) < (b) ) ? (a) : (b) )
+//VP #define max(a,b)    ( ( (a) > (b) ) ? (a) : (b) )
 #define seta(r,z)   (float)(3.0F * (z) / (fabs(z)+2.0F*(r)))
 #define reta(eta,r) ((2.F*(r)*eta / ( 3 - fabs(eta)) )) 
 #define sgn(a)      (float)( ( (a) > 0   ) ? (1) :(-1) )
@@ -44,7 +44,7 @@ const double bFactor = 0.0029979 ;
 
 
 extern double fmod(double,double);
-extern double sqrt(double);
+extern double ::sqrt(double);
 extern double fabs(double);
 extern double atan2(double,double);
 

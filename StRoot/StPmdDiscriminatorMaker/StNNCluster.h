@@ -4,7 +4,7 @@
  */
 /**************************************************************
  *
- * $Id: StNNCluster.h,v 1.1 2003/05/29 13:20:07 subhasis Exp $
+ * $Id: StNNCluster.h,v 1.2 2003/09/02 17:58:48 perev Exp $
  *
  * Author:
  **************************************************************
@@ -14,8 +14,11 @@
  **************************************************************
 *
 * $Log: StNNCluster.h,v $
+* Revision 1.2  2003/09/02 17:58:48  perev
+* gcc 3.2 updates + WarnOff
+*
 * Revision 1.1  2003/05/29 13:20:07  subhasis
-* NN Input cluster
+*  NN Input cluster
 *
 *
 ***************************************************************/
@@ -23,7 +26,7 @@
 #define STAR_StNNCluster
 
 #include <math.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TArrayI.h"
 #include "StObject.h"
 #include "StPmdUtil/StPmdGeom.h"

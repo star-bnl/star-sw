@@ -25,7 +25,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "StChain.h"
 #include "St_DataSetIter.h"

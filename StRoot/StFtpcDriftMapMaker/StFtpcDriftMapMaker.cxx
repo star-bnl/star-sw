@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.16 2002/09/24 09:50:09 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.17 2003/09/02 17:58:15 perev Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.17  2003/09/02 17:58:15  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.16  2002/09/24 09:50:09  jcs
 // Remove gufld remains
 //
@@ -55,7 +58,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "StFtpcDriftMapMaker.h"
 #include "StFtpcMagboltz1.hh"
@@ -191,9 +194,9 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
 	  
  	  magField->BField(posVector, bVector); 
 	  printf("pos %f %f %f field %f %f %f\n", posVector[0], posVector[1], posVector[2], bVector[0], bVector[1], bVector[2]);
- 	  bMag=sqrt(bVector[0]*bVector[0] + bVector[1]*bVector[1] +  
+ 	  bMag=::sqrt(bVector[0]*bVector[0] + bVector[1]*bVector[1] +  
  		    bVector[2]*bVector[2]); 
- 	  bRadial=sqrt(bVector[0]*bVector[0] + bVector[1]*bVector[1]); 
+ 	  bRadial=::sqrt(bVector[0]*bVector[0] + bVector[1]*bVector[1]); 
  	  bTheta=acos(bRadial/bMag)*90/acos(0.0); 
           // set sign of angle between E and B fields 
           bTheta = (factor/fabs(factor)) * bTheta;

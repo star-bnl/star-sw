@@ -390,7 +390,7 @@ Bool_t StXiFinderMaker::UseV0() {
           ///"heli" and "trk" : cf StRoot/St_dst_Maker/StV0FinderMaker.cxx (STAT).
           
           //Determine detector id of pair for parsXi
-          det_id_xi=TMath::Max(det_id_v0,detId[k]);
+          det_id_xi=TMath::Max((int)det_id_v0,(int)detId[k]);
           //Xi cut parameters
           parsXi=exipar->GetTable(det_id_xi-1);
           
@@ -432,11 +432,11 @@ Bool_t StXiFinderMaker::UseV0() {
               dtmp=atmp*atmp+1.;
               ctmp=dtmp*rsq-btmp*btmp;
               if (ctmp < 0)
-                 {dist=fabs(xd*pV0.y()-yd*pV0.x())/sqrt(pV0.x()*pV0.x()+pV0.y()*pV0.y());
+                 {dist=fabs(xd*pV0.y()-yd*pV0.x())/::sqrt(pV0.x()*pV0.x()+pV0.y()*pV0.y());
                   if (dist >= (1/bachGeom->curvature()+parsXi->dca_max)) iflag1=5;
                       else
                      {iflag1=3;
-                      ctmp=sqrt(rsq/(atmp*atmp+1.));
+                      ctmp=::sqrt(rsq/(atmp*atmp+1.));
                       dtmp=-atmp*ctmp;
                       btmp=dtmp*xd+ctmp*yd;
                       if (btmp > 0.)
@@ -451,7 +451,7 @@ Bool_t StXiFinderMaker::UseV0() {
                   }
                   else
                  {if (ctmp == 0) iflag1=3;
-                  ctmp=sqrt(ctmp);
+                  ctmp=::sqrt(ctmp);
                   abtmp=atmp*btmp;
                   btmp=btmp+yc;
                   xOut[0]=(-abtmp+ctmp)/dtmp+xc;
@@ -465,7 +465,7 @@ Bool_t StXiFinderMaker::UseV0() {
               xOut[1]=xV0.x();
               ctmp=rsq-xd*xd;
               if (ctmp <= 0)
-                 {dist=fabs(xd*pV0.y()-yd*pV0.x())/sqrt(pV0.x()*pV0.x()+pV0.y()*pV0.y());
+                 {dist=fabs(xd*pV0.y()-yd*pV0.x())/::sqrt(pV0.x()*pV0.x()+pV0.y()*pV0.y());
                   if (dist >= (1/bachGeom->curvature()+parsXi->dca_max)) iflag1=5;
                       else
                      {iflag1=3;
@@ -476,7 +476,7 @@ Bool_t StXiFinderMaker::UseV0() {
                   }
                   else
                  {if (ctmp == 0) iflag1=3;
-                  ctmp=sqrt(ctmp);
+                  ctmp=::sqrt(ctmp);
                   yOut[0]=yc+ctmp;
                   yOut[1]=yc-ctmp;
                   }
@@ -495,7 +495,7 @@ Bool_t StXiFinderMaker::UseV0() {
               
               
               //Subroutine update_track_param
-              rr=sqrt(bachGeom->origin().x()*bachGeom->origin().x()+bachGeom->origin().y()*bachGeom->origin().y());
+              rr=::sqrt(bachGeom->origin().x()*bachGeom->origin().x()+bachGeom->origin().y()*bachGeom->origin().y());
               xi=bachGeom->origin().x();
               yi=bachGeom->origin().y();
               axb=(xi-xc)*(yOut[i]-yc)-(yi-yc)*(xOut[i]-xc);
@@ -516,7 +516,7 @@ Bool_t StXiFinderMaker::UseV0() {
               
               //Subroutine track_mom
               xOrig=bachGeom2->momentum();
-              pt=sqrt(xOrig.x()*xOrig.x()+xOrig.y()*xOrig.y());
+              pt=::sqrt(xOrig.x()*xOrig.x()+xOrig.y()*xOrig.y());
               xOrig.setX(pt*TMath::Cos(bachGeom2->psi()));
               xOrig.setY(pt*TMath::Sin(bachGeom2->psi()));
               //End of track_mom
@@ -536,7 +536,7 @@ Bool_t StXiFinderMaker::UseV0() {
               s2=s2/denom;
               //Check validity of linear approx. (distance moved in x and y << r1)
               // If only mildly invalid, re-try starting with new point (up to 3 tries)
-              valid=fabs(s2*sqrt(pBach.x()*pBach.x()+pBach.y()*pBach.y()));
+              valid=fabs(s2*::sqrt(pBach.x()*pBach.x()+pBach.y()*pBach.y()));
               while ((valid < (0.02/bachGeom->curvature())) && (tries < 4) && (valid > (0.001/bachGeom->curvature())))
                  {tries++;
                   batv.setX(pBach.x()*s2+xOut[i]);
@@ -554,7 +554,7 @@ Bool_t StXiFinderMaker::UseV0() {
                       }
                       else
                      {ctmp=dtmp/atmp;
-                      yy=1/(bachGeom->curvature()*sqrt(ctmp*ctmp+1.));
+                      yy=1/(bachGeom->curvature()*::sqrt(ctmp*ctmp+1.));
                       zz=ctmp*yy;
                       if (atmp > 0.)
                          {xAns=-zz+xc;
@@ -571,7 +571,7 @@ Bool_t StXiFinderMaker::UseV0() {
                   
                   
                   //Subroutine update_track_param
-                  rr=sqrt(bachGeom->origin().x()*bachGeom->origin().x()+bachGeom->origin().y()*bachGeom->origin().y());
+                  rr=::sqrt(bachGeom->origin().x()*bachGeom->origin().x()+bachGeom->origin().y()*bachGeom->origin().y());
                   xi=bachGeom->origin().x();
                   yi=bachGeom->origin().y();
                   axb=(xi-xc)*(yOut[i]-yc)-(yi-yc)*(xOut[i]-xc);
@@ -592,7 +592,7 @@ Bool_t StXiFinderMaker::UseV0() {
                   
                   //Subroutine track_mom
                   xOrig=bachGeom2->momentum();
-                  pt=sqrt(xOrig.x()*xOrig.x()+xOrig.y()*xOrig.y());
+                  pt=::sqrt(xOrig.x()*xOrig.x()+xOrig.y()*xOrig.y());
                   xOrig.setX(pt*TMath::Cos(bachGeom2->psi()));
                   xOrig.setY(pt*TMath::Sin(bachGeom2->psi()));
                   //End of track_mom
@@ -611,7 +611,7 @@ Bool_t StXiFinderMaker::UseV0() {
                   s2=s2/denom;
                   //Check validity of linear approx. (distance moved in x and y << r1)
                   // If only mildly invalid, re-try starting with new point (up to 3 tries)
-                  valid=fabs(s2*sqrt(pBach.x()*pBach.x()+pBach.y()*pBach.y()));
+                  valid=fabs(s2*::sqrt(pBach.x()*pBach.x()+pBach.y()*pBach.y()));
                   }//End of the while-loop.
               if ((valid < (0.02/bachGeom->curvature())) && (tries < 4))
                  {batv.setX(pBach.x()*s2+xOut[i]);
@@ -628,11 +628,11 @@ Bool_t StXiFinderMaker::UseV0() {
                   //End of block 5 and beginning of block 5bis.
                   
                   if (check > 0.0)
-                     {dca=sqrt((v0atv.x()-batv.x())*(v0atv.x()-batv.x()) + (v0atv.y()-batv.y())*(v0atv.y()-batv.y()) + (v0atv.z()-batv.z())*(v0atv.z()-batv.z()));
+                     {dca=::sqrt((v0atv.x()-batv.x())*(v0atv.x()-batv.x()) + (v0atv.y()-batv.y())*(v0atv.y()-batv.y()) + (v0atv.z()-batv.z())*(v0atv.z()-batv.z()));
                       xpp.setX((v0atv.x()+batv.x())/2.);
                       xpp.setY((v0atv.y()+batv.y())/2.);
                       xpp.setZ((v0atv.z()+batv.z())/2.);
-                      rv=sqrt((xpp.x()-xPvx.x())*(xpp.x()-xPvx.x())+(xpp.y()-xPvx.y())*(xpp.y()-xPvx.y())+(xpp.z()-xPvx.z())*(xpp.z()-xPvx.z()));
+                      rv=::sqrt((xpp.x()-xPvx.x())*(xpp.x()-xPvx.x())+(xpp.y()-xPvx.y())*(xpp.y()-xPvx.y())+(xpp.z()-xPvx.z())*(xpp.z()-xPvx.z()));
                       //decide here if it is a good candidate
                       if ((dca<=parsXi->dca_max) && (rv>parsXi->rv_xi))
                          {//calculate xi impact parameter
@@ -646,7 +646,7 @@ Bool_t StXiFinderMaker::UseV0() {
                               else
                              {//helixDCA(charge,xpp,pXi,bxi);
                               //helixDCA is defined in exi_c_utils.cc (pams/global/exi/).
-                              pt_tmp = sqrt(pXi.x()*pXi.x()+pXi.y()*pXi.y());
+                              pt_tmp = ::sqrt(pXi.x()*pXi.x()+pXi.y()*pXi.y());
 			      //Here I want the field on kGauss
                               bcharge_tmp = charge*(Bfield/kilogauss);
                               curvature_tmp = TMath::Abs(bcharge_tmp)*C_D_CURVATURE/pt_tmp;
@@ -666,26 +666,26 @@ Bool_t StXiFinderMaker::UseV0() {
                           if (iflag == 0)
                              {//calculate parent and daughter kinematics
                               ptot_b2=xOrig.x()*xOrig.x()+xOrig.y()*xOrig.y()+xOrig.z()*xOrig.z();
-                              epi=sqrt(ptot_b2+M_PION_MINUS*M_PION_MINUS);
-                              ek=sqrt(ptot_b2+M_KAON_MINUS*M_KAON_MINUS);
+                              epi=::sqrt(ptot_b2+M_PION_MINUS*M_PION_MINUS);
+                              ek=::sqrt(ptot_b2+M_KAON_MINUS*M_KAON_MINUS);
                               ptot_v02=pV0.x()*pV0.x()+pV0.y()*pV0.y()+pV0.z()*pV0.z();
-                              ela=sqrt(ptot_v02+M_LAMBDA*M_LAMBDA);
+                              ela=::sqrt(ptot_v02+M_LAMBDA*M_LAMBDA);
                               ptot_2=pXi.x()*pXi.x()+pXi.y()*pXi.y()+pXi.z()*pXi.z();
-                              ptot=sqrt(ptot_2);
-                              exi=sqrt(ptot_2+M_XI_MINUS*M_XI_MINUS);
-                              eom=sqrt(ptot_2+M_OMEGA_MINUS*M_OMEGA_MINUS);
+                              ptot=::sqrt(ptot_2);
+                              exi=::sqrt(ptot_2+M_XI_MINUS*M_XI_MINUS);
+                              eom=::sqrt(ptot_2+M_OMEGA_MINUS*M_OMEGA_MINUS);
                               //calculate Armenteros variables
                               bdotx=xOrig.x()*pXi.x()+xOrig.y()*pXi.y()+xOrig.z()*pXi.z();
                               vdotx=pV0.x()*pXi.x()+pV0.y()*pXi.y()+pV0.z()*pXi.z();
                               if (bachGeom->charge() > 0)
                                  {ppar=bdotx/ptot;
                                   npar=vdotx/ptot;
-                                  pper=sqrt(ptot_b2-ppar*ppar);
+                                  pper=::sqrt(ptot_b2-ppar*ppar);
                                   }
                                   else
                                  {ppar=vdotx/ptot;
                                   npar=bdotx/ptot;
-                                  pper=sqrt(ptot_v02-ppar*ppar);
+                                  pper=::sqrt(ptot_v02-ppar*ppar);
                                   }
                               //calculate daughter impact parameters
                               bBach=trk[k]->impactParameter();
@@ -736,8 +736,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.11 2003/08/22 17:47:14 caines Exp $
+// $Id: StXiFinderMaker.cxx,v 1.12 2003/09/02 17:58:59 perev Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.12  2003/09/02 17:58:59  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.11  2003/08/22 17:47:14  caines
 // Get sign AND magnitude of mag field correctly for Xi and V0 finder
 //

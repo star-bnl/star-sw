@@ -256,7 +256,7 @@ Float_t StEmcMicroUtil::calcDcaSigned(StTrack* track)
   double yCenter = track->geometry()->helix().ycenter();
   double radius = 1.0/track->geometry()->helix().curvature();
 
-  double dPosCenter = sqrt( (pos.x() - xCenter) * (pos.x() - xCenter) +
+  double dPosCenter = ::sqrt( (pos.x() - xCenter) * (pos.x() - xCenter) +
 			    (pos.y() - yCenter) * (pos.y() - yCenter));
 
   return (Float_t) (radius - dPosCenter);

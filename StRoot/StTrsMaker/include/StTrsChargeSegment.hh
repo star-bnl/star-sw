@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.hh,v 1.8 2000/01/10 23:11:31 lasiuk Exp $
+ * $Id: StTrsChargeSegment.hh,v 1.9 2003/09/02 17:59:16 perev Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.hh,v $
+ * Revision 1.9  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.8  2000/01/10 23:11:31  lasiuk
  * Include MACROS for compatibility with SUN CC5.0
  *
@@ -62,7 +65,7 @@
 #ifndef ST_TRS_CHARGE_SEGMENT_HH
 #define ST_TRS_CHARGE_SEGMENT_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <list>
 
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500

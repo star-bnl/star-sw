@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSimpleHit.cxx,v 2.2 2000/11/01 16:52:41 lasiuk Exp $
+ * $Id: StRichSimpleHit.cxx,v 2.3 2003/09/02 17:58:51 perev Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichSimpleHit.cxx,v $
+ * Revision 2.3  2003/09/02 17:58:51  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.2  2000/11/01 16:52:41  lasiuk
  * Use the enumerated types from StEvent.  correct the NAMESPACE macro
  * and print more bits in the printBit member
@@ -74,7 +77,7 @@ void StRichSimpleHit::printBits() const
     const int numberOfBits = 15;  // a long is really 32 bits you know
     cout << "StRichSimpleHitFlags: ";
     for(int ii=0; ii<numberOfBits; ii++) {
-	unsigned long mask = static_cast<unsigned long>(pow(2.,ii));
+	unsigned long mask = static_cast<unsigned long>(::pow(2.,ii));
 	cout << ((mFlags & mask) == 0 ? 0 : 1);
     }
     cout << endl;

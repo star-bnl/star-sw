@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.cxx,v 1.7 1999/09/24 01:23:38 fisyak Exp $
+// $Id: StEmcHitCollection.cxx,v 1.8 2003/09/02 17:59:28 perev Exp $
 // $Log: StEmcHitCollection.cxx,v $
+// Revision 1.8  2003/09/02 17:59:28  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.7  1999/09/24 01:23:38  fisyak
 // Reduced Include Path
 //
@@ -26,7 +29,7 @@
 // StEmcHitCollection class for EMC Calibrated hits                             //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "StEmcHitCollection.h"
 #include "St_TableSorter.h"

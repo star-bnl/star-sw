@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StuCutTrack.cxx,v 1.2 1999/12/21 16:12:26 posk Exp $
+// $Id: StuCutTrack.cxx,v 1.3 2003/09/02 17:58:09 perev Exp $
 //
 // Author: Art Poskanzer, LBNL, Dec 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StuCutTrack.cxx,v $
+// Revision 1.3  2003/09/02 17:58:09  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  1999/12/21 16:12:26  posk
 // Updates.
 //
@@ -20,8 +23,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
-#include <iomanip.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "StEvent.h"
 #include "StEventTypes.h"

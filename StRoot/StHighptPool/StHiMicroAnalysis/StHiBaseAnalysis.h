@@ -1,7 +1,7 @@
 #ifndef StHiBaseAnalysis_H
 #define StHiBaseAnalysis_H
 
-#include <iostream>
+#include "Stiostream.h"
 #include <utility>
 #include <cstdlib>
 
@@ -32,7 +32,7 @@
 #include "TGraphAsymmErrors.h"
 
 #include <utility>
-#include <fstream.h>
+#include "Stiostream.h"
 #include <cstdlib>
 
 

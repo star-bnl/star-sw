@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: SVTV1P0.Banks.cxx,v 1.3 2001/04/18 19:47:24 ward Exp $
+ * $Id: SVTV1P0.Banks.cxx,v 1.4 2003/09/02 17:55:32 perev Exp $
  *
  * Author: Marcelo Munhoz, J. Schambach
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: SVTV1P0.Banks.cxx,v $
+ * Revision 1.4  2003/09/02 17:55:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2001/04/18 19:47:24  ward
  * StDaqLib/SVT stuff from Jo Schambach.
  *
@@ -23,7 +26,7 @@
  *
  **************************************************************************/
 #include <assert.h>
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StDaqLib/GENERIC/swaps.hh"
 #include "SVTV1P0.Banks.hh"

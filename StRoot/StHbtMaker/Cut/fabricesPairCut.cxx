@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: fabricesPairCut.cxx,v 1.2 2002/12/12 17:03:51 kisiel Exp $
+ * $Id: fabricesPairCut.cxx,v 1.3 2003/09/02 17:58:21 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: fabricesPairCut.cxx,v $
+ * Revision 1.3  2003/09/02 17:58:21  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2002/12/12 17:03:51  kisiel
  * Add NDedxHits cut, slight modification for Y cuts and Fabrices probability
  *
@@ -40,7 +43,7 @@
 #include "StHbtMaker/Cut/fabricesPairCut.h"
 #include <string>
 #include <cstdio>
-#include <strstream.h>
+#include <Stsstream.h>
 
 #ifdef __ROOT__
 ClassImp(fabricesPairCut)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.22 2003/04/11 22:47:36 porter Exp $
+ * $Id: StDbTable.h,v 1.23 2003/09/02 17:57:49 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.23  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.22  2003/04/11 22:47:36  porter
  * Added a fast multi-row write model specifically needed by the daqEventTag
  * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
@@ -127,7 +130,7 @@
 //#include "StDbBufferI.h"
 #include "StDbStoreInfo.hh"
 #include <string.h>
-//#include <iostream.h>
+//#include <Stiostream.h>
 
 class StDbBufferI;
 class StDbBuffer;

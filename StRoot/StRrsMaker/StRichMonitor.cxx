@@ -1,11 +1,14 @@
 /*******************************************************
- * $Id: StRichMonitor.cxx,v 2.0 2000/08/09 16:17:02 gans Exp $
+ * $Id: StRichMonitor.cxx,v 2.1 2003/09/02 17:58:56 perev Exp $
  *
  * Description:
  *  Implementation of the Viewer displaying module
  *
  ********************************************************
  * $Log: StRichMonitor.cxx,v $
+ * Revision 2.1  2003/09/02 17:58:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.0  2000/08/09 16:17:02  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -21,7 +24,7 @@
 #ifdef RICH_WITH_MONITOR
 #include "StRichMonitor.h"
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "TLine.h"
 

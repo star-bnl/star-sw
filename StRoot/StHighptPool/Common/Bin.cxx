@@ -1,5 +1,5 @@
 #include "Bin.h"
-#include <iostream>
+#include "Stiostream.h"
 #ifndef ST_NO_NAMESPACES
 using namespace std;
 #endif

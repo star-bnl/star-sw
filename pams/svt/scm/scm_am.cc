@@ -5,7 +5,7 @@
 **:  Id: idl.y,v 1.17 1999/06/19 19:21:00 fisyak Exp  
 **:<------------------------------------------------------------------*/
 #include "scm_am.h"
-#include <iostream.h>
+#include "Stiostream.h"
 #include <stdlib.h>
 #include <math.h>
 #include "StScmBarrel.hh"

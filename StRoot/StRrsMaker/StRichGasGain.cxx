@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichGasGain.cxx,v 2.4 2003/08/25 14:30:09 hippolyt Exp $
+ * $Id: StRichGasGain.cxx,v 2.5 2003/09/02 17:58:56 perev Exp $
  *
  * Description:
  *  StRichGasGain computes an amplification factor of an
@@ -35,6 +35,9 @@
  *
  ****************************************************************
  * $Log: StRichGasGain.cxx,v $
+ * Revision 2.5  2003/09/02 17:58:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.4  2003/08/25 14:30:09  hippolyt
  * Optimized value of the gain for charged particles: 2.3
  *
@@ -173,7 +176,7 @@ void StRichGasGain::feedbackPhoton(StRichMiniHit* hit, double q, list<StRichMini
 	cost = 	mRandom.Flat();
 	phi  =  2*M_PI *  mRandom.Flat();
 	
-	dist = mAnodePadPlaneSeparation * sqrt( 1 - cost*cost ) / cost;
+	dist = mAnodePadPlaneSeparation * ::sqrt( 1 - cost*cost ) / cost;
 #ifdef RICH_WITH_VIEWER
 	if ( StRichViewer::histograms ) {
 	    StRichViewer::getView()->mDist->Fill(dist);

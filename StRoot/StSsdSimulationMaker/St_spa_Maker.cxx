@@ -3,12 +3,15 @@
  **************************************************************************
  *
  * $Log: St_spa_Maker.cxx,v $
+ * Revision 1.4  2003/09/02 17:59:04  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2002/03/25 20:06:44  suire
  * Doxygen documentation, cleaning
  *
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "St_spa_Maker.h"
 #include "StChain.h"

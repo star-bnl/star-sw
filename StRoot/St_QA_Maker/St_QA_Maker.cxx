@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.15 2003/02/28 16:01:09 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.16 2003/09/02 17:59:21 perev Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.16  2003/09/02 17:59:21  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 2.15  2003/02/28 16:01:09  genevb
 // Further improvements for previous check-in
 //
@@ -55,7 +58,7 @@
 //                                                                       //
 ///////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "PhysicalConstants.h"
 #include <math.h>
 #include "TMath.h"
@@ -412,9 +415,9 @@ void St_QA_Maker::MakeHistGlob(){
 	Float_t xcenter = x0s - TMath::Cos(t->phi0*degree)/t->curvature;
 	Float_t ycenter = y0s - TMath::Sin(t->phi0*degree)/t->curvature;
 	Float_t rcircle = 1./t->curvature;
-	Float_t centerOfCircleToFP = sqrt(pow(xcenter-t->x_first[0],2) +
-					  pow(ycenter-t->x_first[1],2));
-	Float_t azimdif = sqrt(pow(xdif,2)+pow(ydif,2));
+	Float_t centerOfCircleToFP = ::sqrt(::pow(xcenter-t->x_first[0],2) +
+					  ::pow(ycenter-t->x_first[1],2));
+	Float_t azimdif = ::sqrt(::pow(xdif,2)+::pow(ydif,2));
 	if (rcircle<centerOfCircleToFP) azimdif *= -1.;
 
         Float_t logImpact = TMath::Log10(t->impact); 
@@ -822,9 +825,9 @@ void St_QA_Maker::MakeHistPrim(){
 	Float_t xcenter = x0s - TMath::Cos(t->phi0*degree)/t->curvature;
 	Float_t ycenter = y0s - TMath::Sin(t->phi0*degree)/t->curvature;
 	Float_t rcircle = 1./t->curvature;
-	Float_t centerOfCircleToFP = sqrt(pow(xcenter-t->x_first[0],2) +
-					  pow(ycenter-t->x_first[1],2));
-	Float_t azimdif = sqrt(pow(xdif,2)+pow(ydif,2));
+	Float_t centerOfCircleToFP = ::sqrt(::pow(xcenter-t->x_first[0],2) +
+					  ::pow(ycenter-t->x_first[1],2));
+	Float_t azimdif = ::sqrt(::pow(xdif,2)+::pow(ydif,2));
 	if (rcircle<centerOfCircleToFP) azimdif *= -1.;
 
         Float_t radf = TMath::Power((t->x_first[0]),2) + 
@@ -1256,14 +1259,14 @@ void St_QA_Maker::MakeHistVertex(){
 	Float_t e2 = xi->px_b*xi->px_b +  xi->py_b*xi->py_b
 	  + xi->pz_b*xi->pz_b;
 	e2 += m_pimass2;
-	e1 = sqrt(e1);
-	e2 = sqrt(e2);
+	e1 = ::sqrt(e1);
+	e2 = ::sqrt(e2);
 	Float_t e3 = e1 + e2;
 	px += xi->px_b;
 	py += xi->py_b;
 	pz += xi->pz_b;
 	Float_t psq =  px*px + py*py + pz*pz;
-	Float_t inv_mass_xi = sqrt(e3*e3 - psq);
+	Float_t inv_mass_xi = ::sqrt(e3*e3 - psq);
 
         hists->m_xi_ma_hist->Fill(inv_mass_xi);
       }

@@ -14,8 +14,8 @@
  * 
  **************************************************************************/
 #define HBT_BFIELD 0.5*tesla
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include "StHbtMaker/Reader/StHbtGstarTxtReader.h"
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
@@ -55,11 +55,11 @@ double dedxMean_geantTxt(double mass, double momentum){
   double tpcDedxOffset = -2.71889; 
   double tpcDedxRise = 776.626;
   
-  double gamma = sqrt(pow(momentum/mass,2)+1.);
-  double beta = sqrt(1. - 1./pow(gamma,2));
-  double rise = tpcDedxRise*pow(beta*gamma,2);      
+  double gamma = ::sqrt(::pow(momentum/mass,2)+1.);
+  double beta = ::sqrt(1. - 1./::pow(gamma,2));
+  double rise = tpcDedxRise*::pow(beta*gamma,2);      
   if ( beta > 0)
-    dedxMean = tpcDedxGain/pow(beta,2) * (0.5*log(rise)-pow(beta,2)- tpcDedxOffset);
+    dedxMean = tpcDedxGain/::pow(beta,2) * (0.5*::log(rise)-::pow(beta,2)- tpcDedxOffset);
   else
     dedxMean = 1000.;
   return dedxMean;

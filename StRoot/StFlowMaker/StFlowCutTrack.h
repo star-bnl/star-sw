@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.19 2003/01/14 14:14:16 oldi Exp $
+// $Id: StFlowCutTrack.h,v 1.20 2003/09/02 17:58:11 perev Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -16,7 +16,7 @@
 
 #ifndef _StFlowCutTrack_INCLUDED_
 #define _StFlowCutTrack_INCLUDED_
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "Rtypes.h"
 class StTrack;
@@ -185,6 +185,9 @@ inline void StFlowCutTrack::IncludeFtpcTracks(Bool_t ftpc_include) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.20  2003/09/02 17:58:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.19  2003/01/14 14:14:16  oldi
 // Possibility to exclude TPC tracks completely (= FTPC only).
 //
@@ -254,7 +257,7 @@ inline void StFlowCutTrack::IncludeFtpcTracks(Bool_t ftpc_include) {
 // New centralities. pt and eta cuts.
 //
 // Revision 1.2  2000/07/12 17:54:36  posk
-// Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
+// Added chi2 and dca cuts. Multiplied EtaSym by ::sqrt(mult).
 // Apply cuts when reading picoevent file.
 //
 // Revision 1.1  2000/03/02 23:02:43  posk

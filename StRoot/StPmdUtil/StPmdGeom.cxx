@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.2 2003/05/12 12:07:13 subhasis Exp $
+ * $Id: StPmdGeom.cxx,v 1.3 2003/09/02 17:58:49 perev Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.3  2003/09/02 17:58:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2003/05/12 12:07:13  subhasis
  * Mapping added
  *
@@ -190,9 +193,9 @@ void StPmdGeom::IntDetCell_xy(Int_t nmod,Int_t row, Int_t col,Float_t& xreal, Fl
 //! function for calculating eta,phi from x, y
 
 void StPmdGeom::Cell_eta_phi(Float_t xreal,Float_t yreal,Float_t& eta,Float_t& phi){
-  Float_t rdist = (sqrt(xreal*xreal + yreal*yreal))/mzreal;
+  Float_t rdist = (::sqrt(xreal*xreal + yreal*yreal))/mzreal;
   Float_t theta = atan(rdist);
-  eta = log(tan(0.5*theta));
+  eta = ::log(tan(0.5*theta));
   if( xreal==0) {
     if(yreal>0) phi = 1.571428;
     if(yreal<0) phi = -1.571428;

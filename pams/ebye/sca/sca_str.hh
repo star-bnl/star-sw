@@ -5,7 +5,7 @@
 #ifndef _sca_str_included_
 #define _sca_str_included_
 
-#include <fstream.h>
+#include "Stiostream.h"
 #include <string.h>
 #include <stdlib.h>
 #define MAX_RANKS 10

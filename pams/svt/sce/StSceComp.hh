@@ -1,6 +1,6 @@
 #ifndef STSCECOMP_HH
 #define STSCECOMP_HH
-#include <iostream.h>
+#include "Stiostream.h"
 #include <stdlib.h>
 #include <math.h>
 

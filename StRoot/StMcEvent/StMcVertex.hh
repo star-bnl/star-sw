@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.hh,v 2.6 2003/08/20 18:50:21 calderon Exp $
+ * $Id: StMcVertex.hh,v 2.7 2003/09/02 17:58:41 perev Exp $
  * $Log: StMcVertex.hh,v $
+ * Revision 2.7  2003/09/02 17:58:41  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.6  2003/08/20 18:50:21  calderon
  * Addition of Tof classes and Pixel classes.  Modified track, event, and
  * container code to reflect this.
@@ -38,7 +41,7 @@
 #ifndef StMcVertex_hh
 #define StMcVertex_hh
 #include "StMcContainers.hh"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <string>
 #ifndef ST_NO_NAMESPACES
 using std::string;

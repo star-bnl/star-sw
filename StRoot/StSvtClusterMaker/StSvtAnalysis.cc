@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.18 2003/04/30 20:38:45 perev Exp $
+ * $Id: StSvtAnalysis.cc,v 1.19 2003/09/02 17:59:06 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -62,6 +62,9 @@
  *           
  * 
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.19  2003/09/02 17:59:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.18  2003/04/30 20:38:45  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -119,9 +122,8 @@
  * 
  *
  **************************************************************************/
-#include <iostream.h>
-#include <fstream.h>
-#include <iomanip.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
@@ -153,7 +155,7 @@ StSvtAnalysis::StSvtAnalysis(int TotalNumberOfHybrids)
   mMom0 = 0, mNeff = 0;
   mDriftMom1 = 0, mAnodeMom1 = 0;
   mDriftMom2 = 0, mAnodeMom2 = 0; mMom0 = 0, mNeff = 0;
-  mX_err=72., mY_err=75.;                          //default bin size/sqrt(12)
+  mX_err=72., mY_err=75.;                          //default bin size/::sqrt(12)
 
   setMemory();
   setArrays(TotalNumberOfHybrids);
@@ -648,8 +650,8 @@ void StSvtAnalysis::finalMoments(int clu,int numAnodes)
      mMom0 = (double)mSumAdc;
      mDriftMom1 = (double)mDriftMom1/mSumAdc;
      mAnodeMom1 = (double)mAnodeMom1/mSumAdc;
-     mDriftMom2 = sqrt((double)mDriftMom2/mSumAdc - mDriftMom1*mDriftMom1); /*note no N/N-1*/
-     mAnodeMom2 = sqrt((double)mAnodeMom2/mSumAdc - mAnodeMom1*mAnodeMom1);
+     mDriftMom2 = ::sqrt((double)mDriftMom2/mSumAdc - mDriftMom1*mDriftMom1); /*note no N/N-1*/
+     mAnodeMom2 = ::sqrt((double)mAnodeMom2/mSumAdc - mAnodeMom1*mAnodeMom1);
      if (mDriftMom2>1000 || mDriftMom2<0 || mAnodeMom2>1000 || mAnodeMom2<0)   /*calc fails occasionally*/
      {
        mDriftMom2 = -999; mAnodeMom2 = -999; mNeff = 0;
@@ -660,14 +662,14 @@ void StSvtAnalysis::finalMoments(int clu,int numAnodes)
        double Neff = (double) mSumAdc*mSumAdc/mNeff;  
        if (Neff>1.5)                                                 //make sure calc. does not mess up
        {
-         mDriftMom2 = mDriftMom2 * sqrt( (double(mNeff)/(mNeff-1)) );
-         mAnodeMom2 = mAnodeMom2 * sqrt( (double(mNeff)/(mNeff-1)) );
-         if (mDriftMom2!=0) mY_err = 260.e-4*mDriftMom2/sqrt(double(mNeff)); /*is 0 for 1 drift wonders. Units: cm*/
-         if (mAnodeMom2!=0) mX_err = 250.e-4*mAnodeMom2/sqrt(double(mNeff)); /*is 0 for 1 anode wonders. Units: cm*/
+         mDriftMom2 = mDriftMom2 * ::sqrt( (double(mNeff)/(mNeff-1)) );
+         mAnodeMom2 = mAnodeMom2 * ::sqrt( (double(mNeff)/(mNeff-1)) );
+         if (mDriftMom2!=0) mY_err = 260.e-4*mDriftMom2/::sqrt(double(mNeff)); /*is 0 for 1 drift wonders. Units: cm*/
+         if (mAnodeMom2!=0) mX_err = 250.e-4*mAnodeMom2/::sqrt(double(mNeff)); /*is 0 for 1 anode wonders. Units: cm*/
        }
    
-       if (numAnodes==1 && mAnodeMom2==0) mAnodeMom2=0.288;    //bin width/sqrt(12)
-       if ( (GetLastTimeBin(clu)-GetFirstTimeBin(clu))==0 && mDriftMom2==0) mDriftMom2=0.288;  //bin width/sqrt(12)
+       if (numAnodes==1 && mAnodeMom2==0) mAnodeMom2=0.288;    //bin width/::sqrt(12)
+       if ( (GetLastTimeBin(clu)-GetFirstTimeBin(clu))==0 && mDriftMom2==0) mDriftMom2=0.288;  //bin width/::sqrt(12)
 
      }
      else
@@ -1112,8 +1114,8 @@ int StSvtAnalysis::Fit_Peaks(int iRows, int iCols, int iNumPeaks, POINT *Peaks, 
     mCluFlag[m_clu]                 = 2;                     //says deconvoluted hit
     mSecondMomClusterTimeBin[m_clu] = MomX;                  //Not really accuratly determined
     mSecondMomClusterAnode[m_clu]   = MomY;                  //Not really accuratly determined
-    mCluXCov[m_clu]                 = sqrt(2.)*CovX*Peaks[i].error; //errors based on origional error scaled by peak/valley
-    mCluYCov[m_clu]                 = sqrt(2.)*CovY*Peaks[i].error;
+    mCluXCov[m_clu]                 = ::sqrt(2.)*CovX*Peaks[i].error; //errors based on origional error scaled by peak/valley
+    mCluYCov[m_clu]                 = ::sqrt(2.)*CovY*Peaks[i].error;
     mCluNumPixels[m_clu]            = 9999;   //so dont mess up signal/noise calculation.
     mCluNumAnodes[m_clu]            = 9999;   //ill defined for deconvolution
    

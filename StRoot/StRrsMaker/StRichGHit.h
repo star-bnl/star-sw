@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichGHit.h,v 2.0 2000/08/09 16:17:00 gans Exp $
+ * $Id: StRichGHit.h,v 2.1 2003/09/02 17:58:56 perev Exp $
  *
  * Description:
  *   StRichGHit is a data type containing information
@@ -14,6 +14,9 @@
  *       
  ***************************************************************
  * $Log: StRichGHit.h,v $
+ * Revision 2.1  2003/09/02 17:58:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.0  2000/08/09 16:17:00  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -46,7 +49,7 @@
 #ifndef ST_RICH_GHIT_H
 #define ST_RICH_GHIT_H
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <string>
 
 #include "StThreeVector.hh"

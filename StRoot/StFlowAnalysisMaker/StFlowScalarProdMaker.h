@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.h,v 1.4 2003/01/10 16:40:52 oldi Exp $
+// $Id: StFlowScalarProdMaker.h,v 1.5 2003/09/02 17:58:11 perev Exp $
 //
 // Authors: method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -12,7 +12,7 @@
 
 #ifndef StFlowScalarProdMaker_H
 #define StFlowScalarProdMaker_H
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "TVector2.h"
@@ -42,7 +42,7 @@ public:
   Int_t    Finish();
   void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowScalarProdMaker.h,v 1.4 2003/01/10 16:40:52 oldi Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowScalarProdMaker.h,v 1.5 2003/09/02 17:58:11 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -96,6 +96,9 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.h,v $
+// Revision 1.5  2003/09/02 17:58:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.4  2003/01/10 16:40:52  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mercedesStarStandardEventCut.h,v 1.1 2002/02/22 15:50:01 mercedes Exp $
+ * $Id: mercedesStarStandardEventCut.h,v 1.2 2003/09/02 17:58:21 perev Exp $
  *
  * Author: Mercedes Lopez Noriega , Ohio State, mercedes@pacific.mps.ohio-state.edu
  *
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: mercedesStarStandardEventCut.h,v $
+ * Revision 1.2  2003/09/02 17:58:21  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2002/02/22 15:50:01  mercedes
  * added StarStandard multiplicity cut for charge hadrons (2001 data)
  *
@@ -32,7 +35,7 @@
 
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #ifdef HPUX
-#include <fstream.h>
+#include "Stiostream.h"
 #else
 #include <fstream>
 #endif

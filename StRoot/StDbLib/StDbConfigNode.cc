@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.22 2003/01/10 04:19:20 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.23 2003/09/02 17:57:49 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.23  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.22  2003/01/10 04:19:20  porter
  * added feature of getting timestamp list (but no data) for a table.
  * fixed 2 features sometimes used in online in query-by-whereclause.
@@ -104,8 +107,8 @@
  * each header and src file
  *
  **************************************************************************/
-#include <iostream.h>
-#include <strstream.h>
+#include <Stiostream.h>
+#include <Stsstream.h>
 #include <string.h>
 
 #include "StDbConfigNode.hh"

@@ -1,6 +1,9 @@
-// $Id: StFtpcMagboltz2.cc,v 1.3 2003/04/30 20:37:15 perev Exp $
+// $Id: StFtpcMagboltz2.cc,v 1.4 2003/09/02 17:58:15 perev Exp $
 //
 // $Log: StFtpcMagboltz2.cc,v $
+// Revision 1.4  2003/09/02 17:58:15  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.3  2003/04/30 20:37:15  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -199,7 +202,7 @@ L2:
     }
     
     if (ielow == 1) {
-	inpt_1.efinal *= sqrt(2.);
+	inpt_1.efinal *= ::sqrt(2.);
 	setp_1.estart = inpt_1.efinal / 20.;
 	goto L2;
     }
@@ -299,9 +302,9 @@ int StFtpcMagboltz2::mixer_()
 	aj = (double) (i__ - 1);
 	mix2_1.e[i__ - 1] = ehalf + inpt_1.estep * aj;
 /* L3: */
-	mix2_1.eroot[i__ - 1] = sqrt(mix2_1.e[i__ - 1]);
+	mix2_1.eroot[i__ - 1] = ::sqrt(mix2_1.e[i__ - 1]);
     }
-    mix2_1.eroot[0] = sqrt(ehalf);
+    mix2_1.eroot[0] = ::sqrt(ehalf);
     for (i__ = 1; i__ <= 2; ++i__) {
 	kin1[i__ - 1] = 0;
 	kin2[i__ - 1] = 0;
@@ -689,11 +692,11 @@ L620:
 /* ------------------------------------------------------------------- */
     bp = setp_1.efield * setp_1.efield * cnsts1_1.const1;
     f2 = setp_1.efield * cnsts1_1.const3;
-    elow = setp_1.tmax * (setp_1.tmax * bp - f2 * sqrt(inpt_1.efinal * .5)) / 
+    elow = setp_1.tmax * (setp_1.tmax * bp - f2 * ::sqrt(inpt_1.efinal * .5)) / 
 	    inpt_1.estep - 1.;
     if(elow>setp_1.small)
       elow=setp_1.small;
-    ehi = setp_1.tmax * (setp_1.tmax * bp + f2 * sqrt(inpt_1.efinal * .5)) / 
+    ehi = setp_1.tmax * (setp_1.tmax * bp + f2 * ::sqrt(inpt_1.efinal * .5)) / 
 	    inpt_1.estep + 1.;
     if (ehi > (float)1e4) {
 	ehi = (float)1e4;
@@ -932,12 +935,12 @@ int StFtpcMagboltz2::setup_(float *e_magni__,
     boltzj = 1.3806503e-23;
     awb = 17588201740.;
     alosch = 2.6867775e19;
-    eovm = sqrt(cnsts_1.echarg * 2. / cnsts_1.emass) * 100.;
+    eovm = ::sqrt(cnsts_1.echarg * 2. / cnsts_1.emass) * 100.;
     abzero = 273.15;
     atmos = 760.;
     cnsts1_1.const1 = awb / 2. * 1e-19;
     cnsts1_1.const2 = cnsts1_1.const1 * .01;
-    cnsts1_1.const3 = sqrt(awb * .2) * 1e-9;
+    cnsts1_1.const3 = ::sqrt(awb * .2) * 1e-9;
     cnsts1_1.const4 = cnsts1_1.const3 * alosch * 1e-15;
     cnsts1_1.const5 = cnsts1_1.const3 / 2.;
 
@@ -1064,7 +1067,7 @@ L1:
     mratio_1.van4 = ratio_1.frac4 * corr * cnsts1_1.const4;
     mratio_1.van = corr * 100. * cnsts1_1.const4;
 /* CALCULATE THERMAL VELOCITY DISTRIBUTION INTEGRALS */
-    thrm_1.con = 1e-13 / sqrt(cnsts_1.amu / (boltzj * 2. * (inpt_1.tempc + 
+    thrm_1.con = 1e-13 / ::sqrt(cnsts_1.amu / (boltzj * 2. * (inpt_1.tempc + 
 	    abzero)));
 /* N.B.  LOADED ERROR FUNCTION INTEGRALS IN DATA ARRAY . */
 
@@ -1205,16 +1208,16 @@ int StFtpcMagboltz2::monte_()
 	    if(i__>10)
 	      i__=10;
 	    tlim = setp_1.tcfmax[i__ - 1];
-	    t = -log(r1) / tlim + tdash;
+	    t = -::log(r1) / tlim + tdash;
 	    tdash = t;
-	    ap = dcz1 * f2 * sqrt(e1);
+	    ap = dcz1 * f2 * ::sqrt(e1);
 	    e = e1 + (ap + bp * t) * t;
 	    ie = (int) (e / inpt_1.estep) + 1;
 	    ie = min(ie,2000);
 	    if (large_2.tcf[ie - 1] <= tlim) {
 		goto L122;
 	    }
-	    tdash += log(r1) / tlim;
+	    tdash += ::log(r1) / tlim;
 	    setp_1.tcfmax[i__ - 1] *= 1.05;
 /*     WRITE(6,996) */
 /* 996  FORMAT(/,5X,' WARNING NULL COLLISION TIME INCREASED',/) */
@@ -1240,15 +1243,15 @@ L137:
 		outpt_1.tmax1 = t;
 	    }
 	    tdash = 0.;
-	    const6 = sqrt(e1 / e);
+	    const6 = ::sqrt(e1 / e);
 	    dcx2 = dcx1 * const6;
 	    dcy2 = dcy1 * const6;
-	    dcz2 = dcz1 * const6 + setp_1.efield * t * cnsts1_1.const5 / sqrt(
+	    dcz2 = dcz1 * const6 + setp_1.efield * t * cnsts1_1.const5 / ::sqrt(
 		    e);
 	    a = ap * t;
 	    b = bp * t2;
 	    sume2 += t * (e1 + a / 2. + b / 3.);
-	    const7 = const9 * sqrt(e1);
+	    const7 = const9 * ::sqrt(e1);
 	    a = t * const7;
 	    ++ncol;
 	    cx1 = dcx1 * const7;
@@ -1381,11 +1384,11 @@ L56:
 	    arg1 = 1. - s1 * ei / e;
 	    if(arg1<setp_1.small)
 	      arg1=setp_1.small;
-	    d__ = 1. - f3 * sqrt(arg1);
+	    d__ = 1. - f3 * ::sqrt(arg1);
 	    e1 = e * (1. - ei / (s1 * e) - d__ * 2. / s2);
 	    if(e1<setp_1.small)
 	      e1=setp_1.small;
-	    q = sqrt(e / e1 * arg1) / s1;
+	    q = ::sqrt(e / e1 * arg1) / s1;
 	    if(q>1.0)
 	      q=1.0;
 	    setp_1.theta = asin(q * sin(theta0));
@@ -1398,7 +1401,7 @@ L56:
 	    f5 = sin(setp_1.theta);
 	    if(dcz2>1.0)
 	      dcz2=1.0;	    
-	    argz = sqrt(dcx2 * dcx2 + dcy2 * dcy2);
+	    argz = ::sqrt(dcx2 * dcx2 + dcy2 * dcy2);
 	    if (argz == 0.) {
 /*      WRITE(6,9232) ITER,ID,E1 */
 /* 9232  FORMAT(3X,'WARNING ARGZ= 0.0 AT ITER =',I10,' ID =',I
@@ -1419,7 +1422,7 @@ L130:
 		s3 = s1 - 1.;
 		s4 = 1. / s3;
 		ano = s4 * arat;
-		cor1 = 1. / sqrt(ano);
+		cor1 = 1. / ::sqrt(ano);
 		r5 = quasiRandom.flat();
 		r6 = r5 * 2. - 1.;
 		r5 = fabs(r6);
@@ -1465,15 +1468,15 @@ L265:
 		if (r6 < 0.) {
 		    cz1del = -cz1del;
 		}
-		vtot = const9 * sqrt(e);
+		vtot = const9 * ::sqrt(e);
 		cx1del = vtot * dcx2 * s3 + cx1del;
 		cy1del = vtot * dcy2 * s3 + cy1del;
 		cz1del = vtot * dcz2 * s3 + cz1del;
-		vtot = const9 * sqrt(e1);
+		vtot = const9 * ::sqrt(e1);
 		cx1 = vtot * dcx1 + cx1del;
 		cy1 = vtot * dcy1 + cy1del;
 		cz1 = vtot * dcz1 + cz1del;
-		vtot = sqrt(cx1 * cx1 + cy1 * cy1 + cz1 * cz1);
+		vtot = ::sqrt(cx1 * cx1 + cy1 * cy1 + cz1 * cz1);
 		dcx1 = cx1 / vtot;
 		dcy1 = cy1 / vtot;
 		dcz1 = cz1 / vtot;
@@ -1549,10 +1552,10 @@ int StFtpcMagboltz2::output_()
 	goto L800;
     }
     dtovmb = difvel_1.diftr * setp_1.efield / vel_1.wz;
-    dtmn = sqrt(difvel_1.diftr * 2. / vel_1.wz) * 1e4;
+    dtmn = ::sqrt(difvel_1.diftr * 2. / vel_1.wz) * 1e4;
     printf("TRANSVERSE DIFFUSION   =%10.3e CM.**2/SEC.\n     = %9.3f EV.      =%6.1f MICRONS/CENTIMETER**0.5\n", difvel_1.diftr, dtovmb, dtmn);
     dlovmb = difvel_1.difln * setp_1.efield / vel_1.wz;
-    dlmn = sqrt(difvel_1.difln * 2. / vel_1.wz) * 1e4;
+    dlmn = ::sqrt(difvel_1.difln * 2. / vel_1.wz) * 1e4;
     printf("LONGITUDINAL DIFFUSION =%10.3e CM.**2/SEC.\n     = %9.3f EV.      =%6.1f MICRONS/CENTIMETER**0.5\n", difvel_1.difln, dlovmb, dlmn);
     goto L900;
 L800:
@@ -1618,7 +1621,7 @@ L900:
     if (freatt == 0.) {
 	goto L222;
     }
-    delatt = sqrt(freatt * outpt_1.st) / outpt_1.st;
+    delatt = ::sqrt(freatt * outpt_1.st) / outpt_1.st;
     erratt = delatt * 100. / freatt;
 L222:
     attch = freatt / vel_1.wz * 1e12;
@@ -1627,7 +1630,7 @@ L222:
     if (freion == 0.) {
 	goto L224;
     }
-    delion = sqrt(freion * outpt_1.st) / outpt_1.st;
+    delion = ::sqrt(freion * outpt_1.st) / outpt_1.st;
     errion = delion * 100. / freion;
 L224:
     inpt_1.alpha = freion / vel_1.wz * 1e12;
@@ -1762,7 +1765,7 @@ int StFtpcMagboltz2::montea_()
     dcx1 = sin(setp_1.theta) * cos(setp_1.phi);
     dcy1 = sin(setp_1.theta) * sin(setp_1.phi);
 /* INITIAL VELOCITY */
-    vtot = const9 * sqrt(e1);
+    vtot = const9 * ::sqrt(e1);
     cx1 = dcx1 * vtot;
     cy1 = dcy1 * vtot;
     cz1 = dcz1 * vtot;
@@ -1781,16 +1784,16 @@ int StFtpcMagboltz2::montea_()
 	    i__ = (int) (e1 / deltae) + 1;
 	    i__ = min(i__,10);
 	    tlim = setp_1.tcfmax[i__ - 1];
-	    t = -log(r1) / tlim + tdash;
+	    t = -::log(r1) / tlim + tdash;
 	    tdash = t;
-	    ap = dcz1 * f2 * sqrt(e1);
+	    ap = dcz1 * f2 * ::sqrt(e1);
 	    e = e1 + (ap + bp * t) * t;
 	    ie = (int) (e / inpt_1.estep) + 1;
 	    ie = min(ie,2000);
 	    if (large_2.tcf[ie - 1] <= tlim) {
 		goto L122;
 	    }
-	    tdash += log(r1) / tlim;
+	    tdash += ::log(r1) / tlim;
 	    setp_1.tcfmax[i__ - 1] *= 1.05;
 /*     WRITE(6,996) */
 /* 996  FORMAT(/,5X,' WARNING NULL COLLISION TIME INCREASED',/) */
@@ -1819,18 +1822,18 @@ L137:
 	    wbt = bfld_1.wb * t;
 	    coswt = cos(wbt);
 	    sinwt = sin(wbt);
-	    const6 = sqrt(e1 / e);
+	    const6 = ::sqrt(e1 / e);
 	    cx2 = cx1 * coswt - cy1 * sinwt;
 	    cy2 = cy1 * coswt + cx1 * sinwt;
-	    vtot = const9 * sqrt(e);
+	    vtot = const9 * ::sqrt(e);
 	    dcx2 = cx2 / vtot;
 	    dcy2 = cy2 / vtot;
-	    dcz2 = dcz1 * const6 + setp_1.efield * t * cnsts1_1.const5 / sqrt(
+	    dcz2 = dcz1 * const6 + setp_1.efield * t * cnsts1_1.const5 / ::sqrt(
 		    e);
 	    a = ap * t;
 	    b = bp * t2;
 	    sume2 += t * (e1 + a / 2. + b / 3.);
-	    const7 = const9 * sqrt(e1);
+	    const7 = const9 * ::sqrt(e1);
 	    a = t * const7;
 	    ++ncol;
 	    dx = (cx1 * sinwt - cy1 * (1. - coswt)) / bfld_1.wb;
@@ -1962,11 +1965,11 @@ L56:
 	    arg1 = 1. - s1 * ei / e;
 	    if(arg1<setp_1.small)
 	      arg1=setp_1.small;
-	    d__ = 1. - f3 * sqrt(arg1);
+	    d__ = 1. - f3 * ::sqrt(arg1);
 	    e1 = e * (1. - ei / (s1 * e) - d__ * 2. / s2);
 	    if(e1<setp_1.small)
 	      e1=setp_1.small;
-	    q = sqrt(e / e1 * arg1) / s1;
+	    q = ::sqrt(e / e1 * arg1) / s1;
 	    if(q>1.)
 	      q=1.;
 	    setp_1.theta = asin(q * sin(theta0));
@@ -1979,8 +1982,8 @@ L56:
 	    f5 = sin(setp_1.theta);
 	    if(dcz2<1.)
 	      dcz2=1.;
-	    vtot = const9 * sqrt(e1);
-	    argz = sqrt(dcx2 * dcx2 + dcy2 * dcy2);
+	    vtot = const9 * ::sqrt(e1);
+	    argz = ::sqrt(dcx2 * dcx2 + dcy2 * dcy2);
 	    if (argz == 0.) {
 /*      WRITE(6,9232) ITER,ID,E1 */
 /* 9232  FORMAT(3X,'WARNING ARGZ= 0.0 AT ITER =',I10,' ID =',I
@@ -2132,7 +2135,7 @@ int StFtpcMagboltz2::monteb_()
     dcx1 = sin(setp_1.theta) * cos(setp_1.phi);
     dcy1 = sin(setp_1.theta) * sin(setp_1.phi);
 /*     INITIAL VELOCITY */
-    vtot = const9 * sqrt(e1);
+    vtot = const9 * ::sqrt(e1);
     cx1 = dcx1 * vtot;
     cy1 = dcy1 * vtot;
     cz1 = dcz1 * vtot;
@@ -2149,7 +2152,7 @@ int StFtpcMagboltz2::monteb_()
 	    if(i__>10)
 	      i__=10;
 	    tlim = setp_1.tcfmax[i__ - 1];
-	    t = -log(r1) / tlim + tdash;
+	    t = -::log(r1) / tlim + tdash;
 	    tdash = t;
 	    wbt = bfld_1.wb * t;
 	    coswt = cos(wbt);
@@ -2166,7 +2169,7 @@ int StFtpcMagboltz2::monteb_()
 	    if (large_2.tcf[ie - 1] <= tlim) {
 		goto L122;
 	    }
-	    tdash += log(r1) / tlim;
+	    tdash += ::log(r1) / tlim;
 	    setp_1.tcfmax[i__ - 1] *= 1.05;
 
 /*     WRITE(6,996) */
@@ -2198,7 +2201,7 @@ L137:
 	    cy2 = (cy1 - bfld_1.eovb) * coswt + cz1 * sinwt + bfld_1.eovb;
 	    cz2 = cz1 * coswt - (cy1 - bfld_1.eovb) * sinwt;
 /* CALC DIRECTION COSINE */
-	    vtot = sqrt(cx2 * cx2 + cy2 * cy2 + cz2 * cz2);
+	    vtot = ::sqrt(cx2 * cx2 + cy2 * cy2 + cz2 * cz2);
 	    dcx2 = cx2 / vtot;
 	    dcy2 = cy2 / vtot;
 	    dcz2 = cz2 / vtot;
@@ -2357,10 +2360,10 @@ L56:
 	    f9 = cos(phi0);
 	    arg1 = 1. - s1 * ei / e;
 	    arg1 = max(arg1,setp_1.small);
-	    d__ = 1. - f3 * sqrt(arg1);
+	    d__ = 1. - f3 * ::sqrt(arg1);
 	    e1 = e * (1. - ei / (s1 * e) - d__ * 2. / s2);
 	    e1 = max(e1,setp_1.small);
-	    q = sqrt(e / e1 * arg1) / s1;
+	    q = ::sqrt(e / e1 * arg1) / s1;
 	    q = min(q,1.);
 	    setp_1.theta = asin(q * sin(theta0));
 	    f6 = cos(setp_1.theta);
@@ -2371,8 +2374,8 @@ L56:
 	    }
 	    f5 = sin(setp_1.theta);
 	    dcz2 = min(dcz2,1.);
-	    vtot = const9 * sqrt(e1);
-	    argz = sqrt(dcx2 * dcx2 + dcy2 * dcy2);
+	    vtot = const9 * ::sqrt(e1);
+	    argz = ::sqrt(dcx2 * dcx2 + dcy2 * dcy2);
 	    if (argz == 0.) {
 /*      WRITE(6,9232) ITER,ID,E1 */
 /* 9232  FORMAT(3X,'WARNING ARGZ= 0.0 AT ITER =',I10,' ID =',I
@@ -2554,7 +2557,7 @@ int StFtpcMagboltz2::montec_()
   dcx1 = sin(setp_1.theta) * cos(setp_1.phi);
   dcy1 = sin(setp_1.theta) * sin(setp_1.phi);
   /*     INITIAL VELOCITY */
-  vtot = const9 * sqrt(e1);
+  vtot = const9 * ::sqrt(e1);
   cx1 = dcx1 * vtot;
   cy1 = dcy1 * vtot;
   cz1 = dcz1 * vtot;
@@ -2586,7 +2589,7 @@ int StFtpcMagboltz2::montec_()
   i__1 = inpt_1.itmax;
   for (j1 = 1; j1 <= i__1; ++j1) {
     for (j2 = 1; j2 <= j2m; ++j2) {
-      r1 = log(quasiRandom.flat());
+      r1 = ::log(quasiRandom.flat());
       i__ = (int) (e1 * invDeltae);
       if(i__>9)
 	i__=9;
@@ -2629,7 +2632,7 @@ int StFtpcMagboltz2::montec_()
 	      cy2 = (cy1 - bfld_1.eovb) * coswt + cz1 * sinwt + bfld_1.eovb;
 	      cz2 = cz1 * coswt - (cy1 - bfld_1.eovb) * sinwt;
 	      /* CALC DIRECTION COSINE */
-	      ivtot = 1/sqrt(cx2 * cx2 + cy2 * cy2 + cz2 * cz2);
+	      ivtot = 1/::sqrt(cx2 * cx2 + cy2 * cy2 + cz2 * cz2);
 	      dcx2 = cx2 * ivtot;
 	      dcy2 = cy2 * ivtot;
 	      dcz2 = cz2 * ivtot;
@@ -2762,11 +2765,11 @@ int StFtpcMagboltz2::montec_()
 	      arg1 = 1. - s1 * ei *invE;
 	      if(arg1<setp_1.small)
 		arg1=setp_1.small;
-	      d__ = 1. - f3 * sqrt(arg1);
+	      d__ = 1. - f3 * ::sqrt(arg1);
 	      e1 = e * (1. - ei * invS1 * invE - d__ * 2. / s2);
 	      if(e1<setp_1.small)
 		e1=setp_1.small;
-	      q = sqrt(e / e1 * arg1) * invS1;
+	      q = ::sqrt(e / e1 * arg1) * invS1;
 	      if(q>1.)
 		q=1.;
 	      f5=q * sin(theta0);
@@ -2779,8 +2782,8 @@ int StFtpcMagboltz2::montec_()
 	      }
 	      if(dcz2>1.)
 		dcz2=1.;
-	      vtot = const9 * sqrt(e1);
-	      argz = sqrt(dcx2 * dcx2 + dcy2 * dcy2);
+	      vtot = const9 * ::sqrt(e1);
+	      argz = ::sqrt(dcx2 * dcx2 + dcy2 * dcy2);
 	      if (argz == 0.) {
 		dcz1 = f6;
 		dcx1 = f9 * f5;
@@ -2934,16 +2937,16 @@ int StFtpcMagboltz2::elimit_(int *ielow)
 	i__ = (int) (e1 / deltae) + 1;
 	i__ = min(i__,10);
 	tlim = setp_1.tcfmax[i__ - 1];
-	t = -log(r1) / tlim + tdash;
+	t = -::log(r1) / tlim + tdash;
 	tdash = t;
-	ap = dcz1 * f2 * sqrt(e1);
+	ap = dcz1 * f2 * ::sqrt(e1);
 	e = e1 + (ap + bp * t) * t;
 	ie = (int) (e / inpt_1.estep) + 1;
 	ie = min(ie,2000);
 	if (large_2.tcf[ie - 1] <= tlim) {
 	    goto L122;
 	}
-	tdash += log(r1) / tlim;
+	tdash += ::log(r1) / tlim;
 	setp_1.tcfmax[i__ - 1] *= 1.05;
 	goto L210;
 
@@ -2966,10 +2969,10 @@ L137:
 	    return 0;
 	}
 	tdash = 0.;
-	const6 = sqrt(e1 / e);
+	const6 = ::sqrt(e1 / e);
 	dcx2 = dcx1 * const6;
 	dcy2 = dcy1 * const6;
-	dcz2 = dcz1 * const6 + setp_1.efield * t * cnsts1_1.const5 / sqrt(e);
+	dcz2 = dcz1 * const6 + setp_1.efield * t * cnsts1_1.const5 / ::sqrt(e);
 /* ------------------------------------------------------------------
 --- */
 /*     DETERMINATION OF REAL COLLISION TYPE */
@@ -3043,10 +3046,10 @@ L56:
 	f9 = cos(phi0);
 	arg1 = 1. - s1 * ei / e;
 	arg1 = max(arg1,setp_1.small);
-	d__ = 1. - f3 * sqrt(arg1);
+	d__ = 1. - f3 * ::sqrt(arg1);
 	e1 = e * (1. - ei / (s1 * e) - d__ * 2. / s2);
 	e1 = max(e1,setp_1.small);
-	q = sqrt(e / e1 * arg1) / s1;
+	q = ::sqrt(e / e1 * arg1) / s1;
 	q = min(q,1.);
 	setp_1.theta = asin(q * sin(theta0));
 	f6 = cos(setp_1.theta);
@@ -3057,7 +3060,7 @@ L56:
 	}
 	f5 = sin(setp_1.theta);
 	dcz2 = min(dcz2,1.);
-	argz = sqrt(dcx2 * dcx2 + dcy2 * dcy2);
+	argz = ::sqrt(dcx2 * dcx2 + dcy2 * dcy2);
 	if (argz == 0.) {
 	    dcz1 = f6;
 	    dcx1 = f9 * f5;
@@ -3142,7 +3145,7 @@ int StFtpcMagboltz2::elimitb_(int *ielow)
     dcx1 = sin(setp_1.theta) * cos(setp_1.phi);
     dcy1 = sin(setp_1.theta) * sin(setp_1.phi);
 
-    vtot = const9 * sqrt(e1);
+    vtot = const9 * ::sqrt(e1);
     cx1 = dcx1 * vtot;
     cy1 = dcy1 * vtot;
     cz1 = dcz1 * vtot;
@@ -3156,7 +3159,7 @@ int StFtpcMagboltz2::elimitb_(int *ielow)
 	i__ = (int) (e1 / deltae) + 1;
 	i__ = min(i__,10);
 	tlim = setp_1.tcfmax[i__ - 1];
-	t = -log(r1) / tlim + tdash;
+	t = -::log(r1) / tlim + tdash;
 	tdash = t;
 	wbt = bfld_1.wb * t;
 	coswt = cos(wbt);
@@ -3168,7 +3171,7 @@ int StFtpcMagboltz2::elimitb_(int *ielow)
 	if (large_2.tcf[ie - 1] <= tlim) {
 	    goto L122;
 	}
-	tdash += log(r1) / tlim;
+	tdash += ::log(r1) / tlim;
 	setp_1.tcfmax[i__ - 1] *= 1.05;
 	goto L210;
 
@@ -3194,7 +3197,7 @@ L137:
 	cx2 = cx1;
 	cy2 = (cy1 - bfld_1.eovb) * coswt + cz1 * sinwt + bfld_1.eovb;
 	cz2 = cz1 * coswt - (cy1 - bfld_1.eovb) * sinwt;
-	vtot = sqrt(cx2 * cx2 + cy2 * cy2 + cz2 * cz2);
+	vtot = ::sqrt(cx2 * cx2 + cy2 * cy2 + cz2 * cz2);
 	dcx2 = cx2 / vtot;
 	dcy2 = cy2 / vtot;
 	dcz2 = cz2 / vtot;
@@ -3271,10 +3274,10 @@ L56:
 	f9 = cos(phi0);
 	arg1 = 1. - s1 * ei / e;
 	arg1 = max(arg1,setp_1.small);
-	d__ = 1. - f3 * sqrt(arg1);
+	d__ = 1. - f3 * ::sqrt(arg1);
 	e1 = e * (1. - ei / (s1 * e) - d__ * 2. / s2);
 	e1 = max(e1,setp_1.small);
-	q = sqrt(e / e1 * arg1) / s1;
+	q = ::sqrt(e / e1 * arg1) / s1;
 	q = min(q,1.);
 	setp_1.theta = asin(q * sin(theta0));
 	f6 = cos(setp_1.theta);
@@ -3285,8 +3288,8 @@ L56:
 	}
 	f5 = sin(setp_1.theta);
 	dcz2 = min(dcz2,1.);
-	vtot = const9 * sqrt(e1);
-	argz = sqrt(dcx2 * dcx2 + dcy2 * dcy2);
+	vtot = const9 * ::sqrt(e1);
+	argz = ::sqrt(dcx2 * dcx2 + dcy2 * dcy2);
 	if (argz == 0.) {
 	    dcz1 = f6;
 	    dcx1 = f9 * f5;
@@ -3380,7 +3383,7 @@ int StFtpcMagboltz2::elimitc_(int *ielow)
     dcx1 = sin(setp_1.theta) * cos(setp_1.phi);
     dcy1 = sin(setp_1.theta) * sin(setp_1.phi);
 
-    vtot = const9 * sqrt(e1);
+    vtot = const9 * ::sqrt(e1);
     cx1 = dcx1 * vtot;
     cy1 = dcy1 * vtot;
     cz1 = dcz1 * vtot;
@@ -3394,7 +3397,7 @@ int StFtpcMagboltz2::elimitc_(int *ielow)
 	i__ = (int) (e1 / deltae) + 1;
 	i__ = min(i__,10);
 	tlim = setp_1.tcfmax[i__ - 1];
-	t = -log(r1) / tlim + tdash;
+	t = -::log(r1) / tlim + tdash;
 	tdash = t;
 	wbt = bfld_1.wb * t;
 	coswt = cos(wbt);
@@ -3407,7 +3410,7 @@ int StFtpcMagboltz2::elimitc_(int *ielow)
 	if (large_2.tcf[ie - 1] <= tlim) {
 	    goto L122;
 	}
-	tdash += log(r1) / tlim;
+	tdash += ::log(r1) / tlim;
 	setp_1.tcfmax[i__ - 1] *= 1.05;
 	goto L210;
 
@@ -3433,7 +3436,7 @@ L137:
 	cx2 = cx1 + f1 * t;
 	cy2 = (cy1 - eovb1) * coswt + cz1 * sinwt + eovb1;
 	cz2 = cz1 * coswt - (cy1 - eovb1) * sinwt;
-	vtot = sqrt(cx2 * cx2 + cy2 * cy2 + cz2 * cz2);
+	vtot = ::sqrt(cx2 * cx2 + cy2 * cy2 + cz2 * cz2);
 	dcx2 = cx2 / vtot;
 	dcy2 = cy2 / vtot;
 	dcz2 = cz2 / vtot;
@@ -3510,10 +3513,10 @@ L56:
 	f9 = cos(phi0);
 	arg1 = 1. - s1 * ei / e;
 	arg1 = max(arg1,setp_1.small);
-	d__ = 1. - f3 * sqrt(arg1);
+	d__ = 1. - f3 * ::sqrt(arg1);
 	e1 = e * (1. - ei / (s1 * e) - d__ * 2. / s2);
 	e1 = max(e1,setp_1.small);
-	q = sqrt(e / e1 * arg1) / s1;
+	q = ::sqrt(e / e1 * arg1) / s1;
 	q = min(q,1.);
 	setp_1.theta = asin(q * sin(theta0));
 	f6 = cos(setp_1.theta);
@@ -3524,8 +3527,8 @@ L56:
 	}
 	f5 = sin(setp_1.theta);
 	dcz2 = min(dcz2,1.);
-	vtot = const9 * sqrt(e1);
-	argz = sqrt(dcx2 * dcx2 + dcy2 * dcy2);
+	vtot = const9 * ::sqrt(e1);
+	argz = ::sqrt(dcx2 * dcx2 + dcy2 * dcy2);
 	if (argz == 0.) {
 	    dcz1 = f6;
 	    dcx1 = f9 * f5;
@@ -3657,11 +3660,11 @@ int StFtpcMagboltz2::gas2_(double *q, double *qin, int *nin,
 	if (en == (float)0.) {
 	    goto L200;
 	}
-	ak = sqrt(en / inpt_1.ary);
+	ak = ::sqrt(en / inpt_1.ary);
 	ak2 = ak * ak;
 	ak3 = ak2 * ak;
 	ak4 = ak3 * ak;
-	an0 = -aa * ak * (apol * (float)4. / (float)3. * ak2 * log(ak) + (
+	an0 = -aa * ak * (apol * (float)4. / (float)3. * ak2 * ::log(ak) + (
 		float)1.) - api * apol / (float)3. * ak2 + dd * ak3 + ff * 
 		ak4;
 	an1 = api / (float)15. * apol * ak2 - a1 * ak3;
@@ -3719,7 +3722,7 @@ L220:
 	b = (xeni[j - 2] * yxeni[j - 1] - xeni[j - 1] * yxeni[j - 2]) / (xeni[
 		j - 2] - xeni[j - 1]);
 	d__1 = a * en + b;
-	q[i__ * 6 + 3] = pow(c_b524, d__1) * (float)1e-18;
+	q[i__ * 6 + 3] = ::pow(c_b524, d__1) * (float)1e-18;
 L230:
 	q[i__ * 6 + 4] = (float)0.;
 	q[i__ * 6 + 5] = (float)0.;
@@ -4054,8 +4057,8 @@ int StFtpcMagboltz2::gas5_(double *q, double *qin, int *nin,
 	if (en == (float)0.) {
 	    goto L200;
 	}
-	ak = sqrt(en / inpt_1.ary);
-	an0 = -aa * ak * (apol * (float)4. / (float)3. * ak * ak * log(ak) + (
+	ak = ::sqrt(en / inpt_1.ary);
+	an0 = -aa * ak * (apol * (float)4. / (float)3. * ak * ak * ::log(ak) + (
 		float)1.) - api * apol / (float)3. * ak * ak + dd * ak * ak * 
 		ak + ff * ak * ak * ak * ak;
 	an1 = (ak * (float).56 * ak - a1 * ak * ak * ak) / (b1 * ak * ak + (

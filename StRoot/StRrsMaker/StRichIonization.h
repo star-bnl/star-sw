@@ -1,5 +1,5 @@
 /***********************************************************************
- *  $Id: StRichIonization.h,v 2.0 2000/08/09 16:17:01 gans Exp $
+ *  $Id: StRichIonization.h,v 2.1 2003/09/02 17:58:56 perev Exp $
  *
  * Description:
  *   StRichIonization function object contains ionization algorithm
@@ -14,6 +14,9 @@
  *
  ***************************************************************************
  * $Log: StRichIonization.h,v $
+ * Revision 2.1  2003/09/02 17:58:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.0  2000/08/09 16:17:01  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -97,7 +100,7 @@ private:
     // mPlateau     = x1
     // mShapeOfRise = m
     // interSectionOfRiseAndPlateau = xa
-    // bigx           = log(bg) in base 10
+    // bigx           = ::log(bg) in base 10
     // saturationTerm = d
     
     double mKonstant;

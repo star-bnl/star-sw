@@ -1,7 +1,7 @@
 ///\File StiTrackSeedFinder.cxx
 ///\author M.L. Miller (Yale Software) 03/01
 ///\author C. Pruneau (Wayne) Jan 2003
-#include <iostream.h>
+#include <Stiostream.h>
 //StarClassLibrary
 #include "StGetConfigValue.hh"
 #include "StThreeVectorF.hh"

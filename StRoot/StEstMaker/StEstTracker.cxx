@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.14 2002/11/21 23:02:48 caines Exp $ 
+ * $Id: StEstTracker.cxx,v 1.15 2003/09/02 17:58:04 perev Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.15  2003/09/02 17:58:04  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.14  2002/11/21 23:02:48  caines
  * Fix helicity initialization for TPC tracks and no longer use assumed vertex if one isnt there
  *
@@ -447,17 +450,17 @@ void StEstTracker::BuildIdealBranches() {
 		  sd=branch->GetHelix()->pathLength(XWaf,NWaf);
 		  if (sd<1000) {
 		    Proj=branch->GetHelix()->at(sd);
-		    dist=sqrt((Proj.x()-Eval_mchits[mcid][j]->GetGlobX()->x())*
+		    dist=::sqrt((Proj.x()-Eval_mchits[mcid][j]->GetGlobX()->x())*
 			      (Proj.x()-Eval_mchits[mcid][j]->GetGlobX()->x()) + 
 			      (Proj.y()-Eval_mchits[mcid][j]->GetGlobX()->y())*
 			      (Proj.y()-Eval_mchits[mcid][j]->GetGlobX()->y()) +
 			      (Proj.z()-Eval_mchits[mcid][j]->GetGlobX()->z())*
 			      (Proj.z()-Eval_mchits[mcid][j]->GetGlobX()->z()));
-		    distw=sqrt((Proj.x()-Eval_mchits[mcid][j]->GetGlobX()->x())*
+		    distw=::sqrt((Proj.x()-Eval_mchits[mcid][j]->GetGlobX()->x())*
 			       (Proj.x()-Eval_mchits[mcid][j]->GetGlobX()->x()) + 
 			       (Proj.y()-Eval_mchits[mcid][j]->GetGlobX()->y())*
 			       (Proj.y()-Eval_mchits[mcid][j]->GetGlobX()->y()));
-		    distl=sqrt((Proj.z()-Eval_mchits[mcid][j]->GetGlobX()->z())*
+		    distl=::sqrt((Proj.z()-Eval_mchits[mcid][j]->GetGlobX()->z())*
 			       (Proj.z()-Eval_mchits[mcid][j]->GetGlobX()->z()));
 		    
 		    branch->AddHit(Eval_mchits[mcid][j],dist);
@@ -551,17 +554,17 @@ void StEstTracker::BuildFindableBranches() {
 
 		  if (sd<1000) {
 		    Proj=branch->GetHelix()->at(sd);
-		    dist=sqrt((Proj.x()-Eval_mchits[mcid][j]->GetGlobX()->x())*
+		    dist=::sqrt((Proj.x()-Eval_mchits[mcid][j]->GetGlobX()->x())*
 			      (Proj.x()-Eval_mchits[mcid][j]->GetGlobX()->x()) + 
 			      (Proj.y()-Eval_mchits[mcid][j]->GetGlobX()->y())*
 			      (Proj.y()-Eval_mchits[mcid][j]->GetGlobX()->y()) +
 			      (Proj.z()-Eval_mchits[mcid][j]->GetGlobX()->z())*
 			      (Proj.z()-Eval_mchits[mcid][j]->GetGlobX()->z()));
-		    distw=sqrt((Proj.x()-Eval_mchits[mcid][j]->GetGlobX()->x())*
+		    distw=::sqrt((Proj.x()-Eval_mchits[mcid][j]->GetGlobX()->x())*
 			       (Proj.x()-Eval_mchits[mcid][j]->GetGlobX()->x()) + 
 			       (Proj.y()-Eval_mchits[mcid][j]->GetGlobX()->y())*
 			       (Proj.y()-Eval_mchits[mcid][j]->GetGlobX()->y()));
-		    distl=sqrt((Proj.z()-Eval_mchits[mcid][j]->GetGlobX()->z())*
+		    distl=::sqrt((Proj.z()-Eval_mchits[mcid][j]->GetGlobX()->z())*
 			       (Proj.z()-Eval_mchits[mcid][j]->GetGlobX()->z()));
 		    if (distl<mParams[CorrectPass]->geomcutl[slay] && 
 			distw<mParams[CorrectPass]->geomcutw[slay]) {

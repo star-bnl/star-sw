@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcROOTGeometry.cc,v 1.7 2001/03/30 21:23:20 jeromel Exp $
+ * $Id: StTpcROOTGeometry.cc,v 1.8 2003/09/02 17:59:18 perev Exp $
  *
  * Author: brian May March 22, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcROOTGeometry.cc,v $
+ * Revision 1.8  2003/09/02 17:59:18  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.7  2001/03/30 21:23:20  jeromel
  * Fixes for Insure smooth compilation (return type)
  *
@@ -299,7 +302,7 @@ double StTpcROOTGeometry::innerSectorAnodeWire(int n) const
 // change return type for sun ??
 bool StTpcROOTGeometry::acceptance(StThreeVector<StDouble>& tmp) const
 {
-    double radial = sqrt((tmp.x()*tmp.x())+(tmp.y()*tmp.y()));
+    double radial = ::sqrt((tmp.x()*tmp.x())+(tmp.y()*tmp.y()));
 
     if((radial > mIfcRadius) &&
        (radial < mOfcRadius) &&

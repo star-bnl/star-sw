@@ -1,4 +1,4 @@
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StDetectorDbMagnet.h"
 #include "tables/St_starMagOnl_Table.h"
 

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StGlobalCoordinate.hh,v 1.3 2000/04/28 16:40:35 calderon Exp $
+ * $Id: StGlobalCoordinate.hh,v 1.4 2003/09/02 17:57:51 perev Exp $
  *
  * Author:  brian Feb 6, 1998
  *
@@ -11,6 +11,9 @@
  *************************************************************************
  *
  * $Log: StGlobalCoordinate.hh,v $
+ * Revision 1.4  2003/09/02 17:57:51  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2000/04/28 16:40:35  calderon
  * added constructor taking StThreeVectorF, because that's what
  * StHits and StMcHits have.
@@ -49,7 +52,7 @@
 #ifndef ST_GLOBAL_COORDINATE_HH
 #define ST_GLOBAL_COORDINATE_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StThreeVector.hh"
 class StThreeVectorF;

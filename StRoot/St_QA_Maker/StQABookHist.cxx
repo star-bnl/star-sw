@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.40 2003/04/19 00:17:49 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.41 2003/09/02 17:59:21 perev Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.41  2003/09/02 17:59:21  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 2.40  2003/04/19 00:17:49  genevb
 // Updated for dAu/pp running
 //
@@ -130,7 +133,7 @@
 //                                                                       //
 ///////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "QAH.h"
 #include "StQABookHist.h"

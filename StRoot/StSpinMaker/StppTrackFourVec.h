@@ -98,7 +98,7 @@ inline double StppTrackFourVec::rapidity() const
 //4-th component
 inline double StppTrackFourVec::eT() const
 {
-    return sqrt(e()*e()*pt()*pt()/(p()*p()));
+    return ::sqrt(e()*e()*pt()*pt()/(p()*p()));
 }
 
 inline double StppTrackFourVec::eZ() const

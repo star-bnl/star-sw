@@ -22,7 +22,7 @@ YKPLongitudinal::YKPLongitudinal( TString ctype, TString frame ,
 				  const int& nbins, const float& QLo, const float& QHi, 
 				  const int& nKtbins, const double& ktMin, const double& ktMax,
 				  const int& nYbins,  const double& YMin,  const double& YMax,
-				  const int& nbinsQINV = 100, const float& QLoQINV = 0.0 , const float& QHiQINV = 0.2 )
+				  const int& nbinsQINV, const float& QLoQINV , const float& QHiQINV )
 {
   // set correlation function type
   if ( !ctype.CompareTo("YKP") || !ctype.CompareTo("BP") )

@@ -1,6 +1,9 @@
-// $Id: StFtpcV0Maker.cxx,v 1.13 2000/11/29 08:32:48 jcs Exp $
+// $Id: StFtpcV0Maker.cxx,v 1.14 2003/09/02 17:58:19 perev Exp $
 //
 // $Log: StFtpcV0Maker.cxx,v $
+// Revision 1.14  2003/09/02 17:58:19  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.13  2000/11/29 08:32:48  jcs
 // remove obsolete include
 //
@@ -35,7 +38,7 @@
 #include <stdlib.h>
 
 // Regular C++ 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "TStyle.h"
 

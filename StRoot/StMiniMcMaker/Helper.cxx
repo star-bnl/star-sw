@@ -83,7 +83,7 @@ static Double_t sectorY[] = {
  */
 
 double distance(double a1, double b1, double a2, double b2){
-  return sqrt( (a1-b1)*(a1-b1) + (a2-b2)*(a2-b2) );
+  return ::sqrt( (a1-b1)*(a1-b1) + (a2-b2)*(a2-b2) );
 }
 
 /*
@@ -218,7 +218,7 @@ propagateToPadrow(const StPhysicalHelixD& helix,
   //
   // Then
   //
-  // x = -d*cos(theta) +- sqrt(R^2 - d^2*(1-cos^2(theta)))
+  // x = -d*cos(theta) +- ::sqrt(R^2 - d^2*(1-cos^2(theta)))
   // 
   // '-' is used if cos(theta)<0, and '+' if cos(theta)>0.  The overall sign
   // is determined by whether or not the hit is in the circle, as above.

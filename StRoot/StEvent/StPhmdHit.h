@@ -4,7 +4,7 @@
 */
 /********************************************************************
  *
- * $Id: StPhmdHit.h,v 2.3 2003/04/22 00:08:14 ullrich Exp $
+ * $Id: StPhmdHit.h,v 2.4 2003/09/02 17:58:05 perev Exp $
  *
  * Author: Subhasis Chattopadhyay, Dec 2002
  ********************************************************************
@@ -14,6 +14,9 @@
  ********************************************************************
  *
  * $Log: StPhmdHit.h,v $
+ * Revision 2.4  2003/09/02 17:58:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.3  2003/04/22 00:08:14  ullrich
  * Removed //! comments
  *
@@ -28,7 +31,7 @@
 #define StPhmdHit_hh
 
 #include <math.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StObject.h"
 
 class StPhmdHit : public StObject {

@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.20 2003/07/18 18:31:47 perev Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.21 2003/09/02 17:58:16 perev Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.21  2003/09/02 17:58:16  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.20  2003/07/18 18:31:47  perev
 // test for nonexistance of XXXReader added
 //
@@ -76,7 +79,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "StFtpcSlowSimMaker.h"
 #include "StFtpcSlowSimulator.hh"

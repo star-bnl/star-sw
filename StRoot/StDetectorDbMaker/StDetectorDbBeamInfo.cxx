@@ -1,4 +1,5 @@
-#include <iostream.h>
+#include <Stiostream.h>
+#include "StMaker.h"
 #include "StDetectorDbBeamInfo.h"
 #include "tables/St_beamInfo_Table.h"
 

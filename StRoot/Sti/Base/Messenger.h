@@ -6,7 +6,7 @@
 #ifndef MESSENGER_H
 #define MESSENGER_H
 
-#include <iostream>
+#include "Stiostream.h"
 #include <map>
 #include "MessengerBuf.h"
 #include "MessageType.h"

@@ -17,7 +17,7 @@
  **************************************************************************/
 #ifndef ST_MIXER_PARAMETERIZED_DIGITAL_SIGNAL_GENERATOR_HH
 #define ST_MIXER_PARAMETERIZED_DIGITAL_SIGNAL_GENERATOR_HH
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StTrsMaker/include/StTrsDigitalSignalGenerator.hh"
 class StMixerFastDigitalSignalGenerator : public StTrsDigitalSignalGenerator {
 public:

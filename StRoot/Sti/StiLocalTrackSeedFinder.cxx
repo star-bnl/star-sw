@@ -287,7 +287,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
 
   //Now calculate the projection of window onto that plane:
   double beta_ry = atan2(dr, dy);
-  double rho_ry = sqrt(dr*dr + dy*dy);
+  double rho_ry = ::sqrt(dr*dr + dy*dy);
   double alpha_ry = atan2(mExtrapDeltaY, 2.*rho_ry);
   double tanplus_ry = tan(beta_ry+alpha_ry);
   double tanminus_ry = tan(beta_ry-alpha_ry);
@@ -302,7 +302,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
   double z3 = (r3 - b_rz) * m_rzInv;
     
   double beta_rz = atan2(dr, dz);
-  double rho_rz = sqrt(dr*dr + dz*dz);
+  double rho_rz = ::sqrt(dr*dr + dz*dz);
   double alpha_rz = atan2(mExtrapDeltaZ, 2.*rho_rz);
   double tanplus_rz = tan(beta_rz+alpha_rz);
   double tanminus_rz = tan(beta_rz-alpha_rz);

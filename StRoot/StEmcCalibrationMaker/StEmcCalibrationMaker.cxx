@@ -9,7 +9,7 @@
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventTypes.h"
 #include "TStopwatch.h"
-#include <fstream.h>
+#include "Stiostream.h"
 #include "TFile.h"
 #include "StMessMgr.h"
 #include "StarClassLibrary/SystemOfUnits.h"

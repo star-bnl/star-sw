@@ -2,6 +2,9 @@
 // $Id EfficiencyAnalysis.cxx $
 //
 // $Log: EfficiencyAnalysis.cxx,v $
+// Revision 1.7  2003/09/02 17:59:47  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.6  2003/07/22 17:20:24  pruneau
 // adding performance evaluation tools
 //
@@ -25,7 +28,7 @@
 //
 #include "EfficiencyAnalysis.h"
 
-#include <iostream>
+#include "Stiostream.h"
 
 #include "StiEvalUtil.h"
 
@@ -1151,19 +1154,19 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
         // only for pull plots: if 0 then ITTF ; if 1 then TPT
 	if (mPullType==0) 
 	{
-	    tanGl_err = sqrt(minimcpair->errGl(4));
-	    tanPr_err = sqrt(minimcpair->errPr(4));
+	    tanGl_err = ::sqrt(minimcpair->errGl(4));
+	    tanPr_err = ::sqrt(minimcpair->errPr(4));
 			
-	    curvGl_err= sqrt(minimcpair->errGl(3));
-	    curvPr_err= sqrt(minimcpair->errPr(3));
+	    curvGl_err= ::sqrt(minimcpair->errGl(3));
+	    curvPr_err= ::sqrt(minimcpair->errPr(3));
 	}
 	if (mPullType==1)
 	{
-	    tanGl_err = sqrt(minimcpair->errGl(2));
-            tanPr_err = sqrt(minimcpair->errPr(2));
+	    tanGl_err = ::sqrt(minimcpair->errGl(2));
+            tanPr_err = ::sqrt(minimcpair->errPr(2));
 
-            curvGl_err= B*c*sqrt(minimcpair->errGl(4))/100.;
-            curvPr_err= B*c*sqrt(minimcpair->errPr(4))/100.;
+            curvGl_err= B*c*::sqrt(minimcpair->errGl(4))/100.;
+            curvPr_err= B*c*::sqrt(minimcpair->errPr(4))/100.;
 	}
 
 	ptPr_err  = curvPr_err * pt/curvPr;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpMatchMaker.cxx,v 1.1 2003/08/08 18:31:26 geurts Exp $
+ * $Id: StTofpMatchMaker.cxx,v 1.2 2003/09/02 17:59:11 perev Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofpMatchMaker.cxx,v $
+ * Revision 1.2  2003/09/02 17:59:11  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2003/08/08 18:31:26  geurts
  * first release
  *
@@ -679,8 +682,8 @@ Int_t StTofpMatchMaker::Make(){
       //    (middle plane is the average of first and last plane, which is mathematically
       //     the same as SlatHitVec.hitPosition ... )
       StThreeVectorD *pInnerLayer, *pOuterLayer;
-      pInnerLayer =  allMatchedSlatsVec[ii].layerHitPositions.begin();
-      pOuterLayer =  allMatchedSlatsVec[ii].layerHitPositions.end() - 1;
+      pInnerLayer =  &(*(allMatchedSlatsVec[ii].layerHitPositions.begin()));
+      pOuterLayer =  &(*(allMatchedSlatsVec[ii].layerHitPositions.end() - 1));
 
       //--- dig out from the dedx and rich pid traits (only for Debug mode)
       float dedx(0.), cherang(0);

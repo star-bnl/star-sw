@@ -3,12 +3,15 @@
  **************************************************************************
  *
  * $Log: St_scf_Maker.cxx,v $
+ * Revision 1.4  2003/09/02 17:59:03  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.3  2002/03/25 20:13:05  suire
  * Small memory leak fixes, doxygen documentation
  *
  *
  **************************************************************************/
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "St_scf_Maker.h"
 #include "StChain.h"
@@ -103,7 +106,7 @@ void St_scf_Maker::makeScfCtrlHistograms()
     Int_t clustSide   = 0;  // pside = 0 et nside = 1 
     scf_cluster_st *dClus = scf_cluster->GetTable();
     sls_ctrl_st *sls_ctrl_t = m_sls_ctrl->GetTable();
-    Float_t convAdcToE = (sls_ctrl_t[0].ADCDynamic*sls_ctrl_t[0].NElectronInAMip)/(pow(2,sls_ctrl_t[0].NBitEncoding));
+    Float_t convAdcToE = (sls_ctrl_t[0].ADCDynamic*sls_ctrl_t[0].NElectronInAMip)/(::pow(2,sls_ctrl_t[0].NBitEncoding));
     for (Int_t iScf = 0; iScf < scf_cluster->GetNRows(); iScf++, dClus++)
       {
 	clustSide = ((dClus->id_cluster/10000)-(dClus->id_cluster/100000)*10);

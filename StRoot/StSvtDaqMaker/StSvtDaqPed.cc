@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqPed.cc,v 1.1 2001/07/11 23:29:48 munhoz Exp $
+ * $Id: StSvtDaqPed.cc,v 1.2 2003/09/02 17:59:08 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqPed.cc,v $
+ * Revision 1.2  2003/09/02 17:59:08  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2001/07/11 23:29:48  munhoz
  * adding capability for zero suppressed and pedestal reading
  *
@@ -22,7 +25,7 @@
 //                                                                        //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StSvtHybridDaqPed.hh"
 #include "StSvtDaqPed.hh"
 #include "StDAQMaker/StSVTReader.h"

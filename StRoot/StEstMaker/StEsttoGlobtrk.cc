@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEsttoGlobtrk.cc,v 1.9 2001/06/13 18:27:19 caines Exp $
+ * $Id: StEsttoGlobtrk.cc,v 1.10 2003/09/02 17:58:04 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEsttoGlobtrk.cc,v $
+ * Revision 1.10  2003/09/02 17:58:04  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.9  2001/06/13 18:27:19  caines
  * Filled flag variable so its non zero
  *
@@ -103,7 +106,7 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
       svtTrkPtr->tanl = tan(mTrack[i]->GetBranch(0)->GetHelix()->dipAngle());
       q = ((b[2] * mTrack[i]->GetBranch(0)->GetHelix()->h()) > 0 ? -1 : 1);
       svtTrkPtr->invpt = q/mTrack[i]->GetTPCTrack()->GetPt();
-      svtTrkPtr->r0 = sqrt(mTrack[i]->GetBranch(0)->GetHelix()->x(0)*
+      svtTrkPtr->r0 = ::sqrt(mTrack[i]->GetBranch(0)->GetHelix()->x(0)*
 			   mTrack[i]->GetBranch(0)->GetHelix()->x(0)
 			   +mTrack[i]->GetBranch(0)->GetHelix()->y(0)*
 			   mTrack[i]->GetBranch(0)->GetHelix()->y(0));

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: circleFitTest.cc,v 1.1 1999/12/21 16:29:39 ullrich Exp $
+ * $Id: circleFitTest.cc,v 1.2 2003/09/02 17:59:37 perev Exp $
  *
  * Author: Thomas Ullrich, Dec 1999
  ***************************************************************************
@@ -10,12 +10,15 @@
  ***************************************************************************
  *
  * $Log: circleFitTest.cc,v $
+ * Revision 1.2  2003/09/02 17:59:37  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  1999/12/21 16:29:39  ullrich
  * Initial Revision
  *
  **************************************************************************/
 #include "StFastCircleFitter.hh"
-#include <iostream.h>
+#include <Stiostream.h>
 #include <cstdlib>
 
 int main()

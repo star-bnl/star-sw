@@ -25,7 +25,7 @@ public:
            Int_t  MakeRead();
            Int_t  MakeRead(const StUKey &);
            Int_t  MakeWrite();
-           Int_t  Open();
+           Int_t  Open(const char * = 0);
            Int_t  OpenRead();
            Int_t  OpenWrite();
            void   Close(Option_t *opt=0);
@@ -59,7 +59,7 @@ StIOInterFace *Load();
    Int_t  fSkip    ;		//! 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.11 2002/02/23 19:11:47 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.12 2003/09/02 17:58:38 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StIOMaker, 1)   //StAR chain virtual base class for Makers
 };

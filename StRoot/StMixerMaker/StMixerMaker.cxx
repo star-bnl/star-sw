@@ -13,9 +13,9 @@
 #include <sys/stat.h>   // For binary file input (the DAQ data file).
 #include <fcntl.h>      // For binary file input (the DAQ data file).
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <unistd.h>    // needed for access()/sleep()
-#include <fstream.h>
+#include "Stiostream.h"
 #include <math.h>
 #include <string>
 #include <algorithm>

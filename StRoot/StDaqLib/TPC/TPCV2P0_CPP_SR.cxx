@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_CPP_SR.cxx,v 1.6 2000/02/03 21:18:36 levine Exp $
+ * $Id: TPCV2P0_CPP_SR.cxx,v 1.7 2003/09/02 17:55:33 perev Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC reader for raw cluster pointer banks (TPCCPPR)
@@ -8,11 +8,14 @@
  *   change log
  * 06-May-99 MJL code cloned from Jeff's ADCR_SR
  * 22-Jun-99 MJL added TPCV2P0_CPP_SR::getAsicParams(struct ASIC_params *);
- * 29-Aug-99 MJL #include <iostream.h> for HP platform
+ * 29-Aug-99 MJL #include <Stiostream.h> for HP platform
  * 03-Feb-00 MJL print ASCI params so PT Barnum's clientele can grock them
  *
  ***************************************************************************
  * $Log: TPCV2P0_CPP_SR.cxx,v $
+ * Revision 1.7  2003/09/02 17:55:33  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.6  2000/02/03 21:18:36  levine
  * change printout of ASIC parameters to idiot-proof mode
  *
@@ -38,7 +41,7 @@
  *
  **************************************************************************/
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "TPCV2P0.hh"

@@ -1,6 +1,6 @@
 //#include "StDetectorDbMaker/StDetectorDbEmcRDOMasks.h"
 #include "StiEmc/StiEmcIsActiveFunctor.h"
-#include <iostream>
+#include "Stiostream.h"
 
 //StDetectorDbEmcRDOMasks *StiEmcIsActiveFunctor::_rdoMasks = 0;
 

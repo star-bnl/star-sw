@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.30 2003/08/04 14:38:10 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.31 2003/09/02 17:58:44 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -267,7 +267,7 @@ int StMuDstMaker::Init(){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::Clear(){
+void StMuDstMaker::Clear(const char *){
   DEBUGMESSAGE2("");
   clear();
   DEBUGMESSAGE3("out");
@@ -889,6 +889,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.31  2003/09/02 17:58:44  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.30  2003/08/04 14:38:10  laue
  * Alex Suaide's updated for the EMC. Now EEMC is included.
  *

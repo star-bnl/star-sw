@@ -1,3 +1,4 @@
+#include "Stiostream.h"
 #include "StiVertexFinder.h"
 #include "StiToolkit.h"
 

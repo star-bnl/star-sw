@@ -2,7 +2,7 @@
 #define StMuException_hh
 
 #include <string>
-#include <iostream>
+#include "Stiostream.h"
 #include <typeinfo>
 
 #ifndef ST_NO_NAMESPACES

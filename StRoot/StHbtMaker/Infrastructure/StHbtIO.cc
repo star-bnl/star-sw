@@ -89,7 +89,7 @@ istream& operator>>(istream& in,  StHbtTrack& trk){
   trk.mP.setY(y); 
   trk.mP.setZ(z); 
   // Pt is derived
-  trk.mPt = sqrt(x*x+y*y);
+  trk.mPt = ::sqrt(x*x+y*y);
   // now set up the StPhysicalHelixD
   StThreeVectorD origin(xorigin,yorigin,zorigin);
   trk.mHelix.setParameters(curvature,dipAngle,phase,origin,h);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.20 2003/08/02 01:14:11 perev Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.21 2003/09/02 17:58:06 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.21  2003/09/02 17:58:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.20  2003/08/02 01:14:11  perev
  * warnOff
  *
@@ -94,7 +97,7 @@
 #include "StBichsel/Bichsel.h"
 //VP static Bichsel *m_Bichsel = 0;
 static BetheBloch *theBetheBloch = 0;
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.20 2003/08/02 01:14:11 perev Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.21 2003/09/02 17:58:06 perev Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -185,7 +188,7 @@ StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
 	dedx_resolution = sigmaPidFunction(particle) ;
 	//     return (mTraits->mean() - dedx_expected)/dedx_resolution ;
     }
-    z = log(mTraits->mean()/dedx_expected);
+    z = ::log(mTraits->mean()/dedx_expected);
     return z/dedx_resolution ;
 }
 
@@ -211,5 +214,5 @@ StTpcDedxPidAlgorithm::sigmaPidFunction(const StParticleDefinition* particle) co
     
     double nDedxPoints = mTraits->numberOfPoints() ;
     
-    return nDedxPoints > 0 ? 0.45  /sqrt(nDedxPoints) : 1000.;
+    return nDedxPoints > 0 ? 0.45  /::sqrt(nDedxPoints) : 1000.;
 }

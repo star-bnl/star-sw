@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandExponential.h,v 1.1 1999/01/30 03:59:00 fisyak Exp $
+ * $Id: RandExponential.h,v 1.2 2003/09/02 17:59:34 perev Exp $
  *
  * Author:  Gabriele Cosmo - Created: 5th September 1995
  *          modified for SCL bl
@@ -23,6 +23,9 @@
  ***************************************************************************
  *
  * $Log: RandExponential.h,v $
+ * Revision 1.2  2003/09/02 17:59:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  1999/01/30 03:59:00  fisyak
  * Root Version of StarClassLibrary
  *
@@ -117,32 +120,32 @@ inline RandExponential::RandExponential(HepRandomEngine * anEngine)
 : localEngine(anEngine), deleteEngine(true) {}
 
 inline HepDouble RandExponential::shoot() {
-  return -log(HepRandom::getTheGenerator()->flat());
+  return -::log(HepRandom::getTheGenerator()->flat());
 }
 
 inline HepDouble RandExponential::shoot(HepDouble mean) {
-  return -log(HepRandom::getTheGenerator()->flat())*mean;
+  return -::log(HepRandom::getTheGenerator()->flat())*mean;
 }
 
 //-------------
 
 inline HepDouble RandExponential::shoot(HepRandomEngine* anEngine) {
-  return -log(anEngine->flat());
+  return -::log(anEngine->flat());
 }
 
 inline HepDouble RandExponential::shoot(HepRandomEngine* anEngine,
                                         HepDouble mean) {
-  return -log(anEngine->flat())*mean;
+  return -::log(anEngine->flat())*mean;
 }
 
 //-------------
 
 inline HepDouble RandExponential::fire() {
-  return -log(localEngine->flat());
+  return -::log(localEngine->flat());
 }
 
 inline HepDouble RandExponential::fire(HepDouble mean) {
-  return -log(localEngine->flat())*mean;
+  return -::log(localEngine->flat())*mean;
 }
 
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctnKt.cxx,v 1.2 2003/01/31 19:21:09 magestro Exp $
+ * $Id: BPLCMSFrame3DCorrFctnKt.cxx,v 1.3 2003/09/02 17:58:20 perev Exp $
  *
  * Author: Mercedes Lopez Noriega, OSU, mercedes@pacific.mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: BPLCMSFrame3DCorrFctnKt.cxx,v $
+ * Revision 1.3  2003/09/02 17:58:20  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  2003/01/31 19:21:09  magestro
  * Cleared up simple compiler warnings on i386_linux24
  *
@@ -31,7 +34,7 @@ ClassImp(BPLCMSFrame3DCorrFctnKt)
 
 //____________________________
 BPLCMSFrame3DCorrFctnKt::BPLCMSFrame3DCorrFctnKt(char* title, const int& nbins, const float& QLo, const float& QHi,
-						 const int& nCFs=20, const float& KtLo=0.0, const float& KtHi=1.0){
+						 const int& nCFs, const float& KtLo, const float& KtHi){
 
   // set some stuff...
 

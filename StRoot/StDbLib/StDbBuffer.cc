@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.18 2003/04/11 22:47:35 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.19 2003/09/02 17:57:49 perev Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.19  2003/09/02 17:57:49  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.18  2003/04/11 22:47:35  porter
  * Added a fast multi-row write model specifically needed by the daqEventTag
  * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
@@ -100,8 +103,8 @@
 #include "StDbBuffer.h"
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
-#include <strstream.h>
+#include <Stiostream.h>
+#include <Stsstream.h>
 
 
 #ifdef HPUX

@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSinglePixel.h,v 2.1 2001/12/05 21:05:18 lasiuk Exp $
+ * $Id: StRichSinglePixel.h,v 2.2 2003/09/02 17:58:56 perev Exp $
  *
  * Description:
  *  Definition of a single pixel object
@@ -9,6 +9,9 @@
  ****************************************************************
  *
  * $Log: StRichSinglePixel.h,v $
+ * Revision 2.2  2003/09/02 17:58:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.1  2001/12/05 21:05:18  lasiuk
  * Fix the std namespace declaration
  * to conform with SUN CC6.0
@@ -40,7 +43,7 @@
 #ifndef ST_RICH_SINGLE_PIXEL_H
 #define ST_RICH_SINGLE_PIXEL_H
 #ifndef __CINT__
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stack>
 
 #ifndef ST_NO_NAMESPACES

@@ -15,8 +15,8 @@
  **************************************************************************/
 
 
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #include "StHbtMaker/Base/StHbtTrackCut.h"

@@ -18,7 +18,7 @@
 #ifndef STI_LOCAL_COORDINATE_H
 #define STI_LOCAL_COORDINATE_H
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "StThreeVector.hh"
 

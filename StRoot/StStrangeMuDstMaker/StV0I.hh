@@ -21,12 +21,12 @@
 
 class StStrangeEvMuDst;
 R__EXTERN StTrackTopologyMap* gFakeTopoPtr;
-static const Float_t M_LAMBDA_2 = pow(M_LAMBDA,2);
-static const Float_t M_KAON_0_SHORT_2 = pow(M_KAON_0_SHORT,2);
-static const Float_t M_PROTON_2 = pow(M_PROTON,2);
-static const Float_t M_ANTIPROTON_2 = pow(M_ANTIPROTON,2);
-static const Float_t M_PION_PLUS_2 = pow(M_PION_PLUS,2);
-static const Float_t M_PION_MINUS_2 = pow(M_PION_MINUS,2);
+static const Float_t M_LAMBDA_2 = ::pow(M_LAMBDA,2);
+static const Float_t M_KAON_0_SHORT_2 = ::pow(M_KAON_0_SHORT,2);
+static const Float_t M_PROTON_2 = ::pow(M_PROTON,2);
+static const Float_t M_ANTIPROTON_2 = ::pow(M_ANTIPROTON,2);
+static const Float_t M_PION_PLUS_2 = ::pow(M_PION_PLUS,2);
+static const Float_t M_PION_MINUS_2 = ::pow(M_PION_MINUS,2);
 
 class StV0I {
 public:
@@ -291,9 +291,9 @@ inline StStrangeEvMuDst *StV0I::event() {
 
 inline Float_t StV0I::decayLengthV0() const {
      if (mEvent)
-       return sqrt(pow(decayVertexV0X() - mEvent->primaryVertexX(),2) +
-                   pow(decayVertexV0Y() - mEvent->primaryVertexY(),2) +
-                   pow(decayVertexV0Z() - mEvent->primaryVertexZ(),2));
+       return ::sqrt(::pow(decayVertexV0X() - mEvent->primaryVertexX(),2) +
+                   ::pow(decayVertexV0Y() - mEvent->primaryVertexY(),2) +
+                   ::pow(decayVertexV0Z() - mEvent->primaryVertexZ(),2));
      return 0.;
 }
 
@@ -310,19 +310,19 @@ inline TVector3 StV0I::momV0() {
 }
 
 inline Float_t StV0I::Ptot2Pos() {
-     return (pow(momPosX(),2) + pow(momPosY(),2) + pow(momPosZ(),2));
+     return (::pow(momPosX(),2) + ::pow(momPosY(),2) + ::pow(momPosZ(),2));
 }
 
 inline Float_t StV0I::Ptot2Neg() {
-     return (pow(momNegX(),2) + pow(momNegY(),2) + pow(momNegZ(),2));
+     return (::pow(momNegX(),2) + ::pow(momNegY(),2) + ::pow(momNegZ(),2));
 }
 
 inline Float_t StV0I::Pt2V0() {
-     return (pow(momV0X(),2) + pow(momV0Y(),2));
+     return (::pow(momV0X(),2) + ::pow(momV0Y(),2));
 }
 
 inline Float_t StV0I::Ptot2V0() {
-     return (Pt2V0() + pow(momV0Z(),2));
+     return (Pt2V0() + ::pow(momV0Z(),2));
 }
 
 inline Float_t StV0I::MomPosAlongV0() {
@@ -330,7 +330,7 @@ inline Float_t StV0I::MomPosAlongV0() {
      if (mPtot2V0)
        return (momPosX()*momV0X() + 
                momPosY()*momV0Y() +
-               momPosZ()*momV0Z()) / sqrt(mPtot2V0);
+               momPosZ()*momV0Z()) / ::sqrt(mPtot2V0);
      return 0.;
 }
 
@@ -339,7 +339,7 @@ inline Float_t StV0I::MomNegAlongV0() {
      if (mPtot2V0)
        return (momNegX()*momV0X() + 
                momNegY()*momV0Y() +
-               momNegZ()*momV0Z()) / sqrt(mPtot2V0);
+               momNegZ()*momV0Z()) / ::sqrt(mPtot2V0);
      return 0.;
 }
 
@@ -351,109 +351,109 @@ inline Float_t StV0I::alphaV0() {
 }
 
 inline Float_t StV0I::ptArmV0() {
-  return sqrt(Ptot2Pos() - pow(MomPosAlongV0(),2));
+  return ::sqrt(Ptot2Pos() - ::pow(MomPosAlongV0(),2));
 }
 
 inline Float_t StV0I::eHypV0(Float_t mass) {
-  return sqrt(Ptot2V0()+pow(mass,2));
+  return ::sqrt(Ptot2V0()+::pow(mass,2));
 }
 
 inline Float_t StV0I::eLambda() {
-  return sqrt(Ptot2V0()+M_LAMBDA_2);
+  return ::sqrt(Ptot2V0()+M_LAMBDA_2);
 }
 
 inline Float_t StV0I::eK0Short() {
-  return sqrt(Ptot2V0()+M_KAON_0_SHORT_2);
+  return ::sqrt(Ptot2V0()+M_KAON_0_SHORT_2);
 }
 
 inline Float_t StV0I::ePosHyp(Float_t mass) {
-  return sqrt(Ptot2Pos()+pow(mass,2));
+  return ::sqrt(Ptot2Pos()+::pow(mass,2));
 }
 
 inline Float_t StV0I::eNegHyp(Float_t mass) {
-  return sqrt(Ptot2Neg()+pow(mass,2));
+  return ::sqrt(Ptot2Neg()+::pow(mass,2));
 }
 
 inline Float_t StV0I::ePosProton() {
-  return sqrt(Ptot2Pos()+M_PROTON_2);
+  return ::sqrt(Ptot2Pos()+M_PROTON_2);
 }
 
 inline Float_t StV0I::eNegProton() {
-  return sqrt(Ptot2Neg()+M_ANTIPROTON_2);
+  return ::sqrt(Ptot2Neg()+M_ANTIPROTON_2);
 }
 
 inline Float_t StV0I::ePosPion() {
-  return sqrt(Ptot2Pos()+M_PION_PLUS_2);
+  return ::sqrt(Ptot2Pos()+M_PION_PLUS_2);
 }
 
 inline Float_t StV0I::eNegPion() {
-  return sqrt(Ptot2Neg()+M_PION_MINUS_2);
+  return ::sqrt(Ptot2Neg()+M_PION_MINUS_2);
 }
 
 inline Float_t StV0I::massHypV0(Float_t massPos, Float_t massNeg) {
-  return sqrt(pow(ePosHyp(massPos)+eNegHyp(massNeg),2)-Ptot2V0());
+  return ::sqrt(::pow(ePosHyp(massPos)+eNegHyp(massNeg),2)-Ptot2V0());
 }
 
 inline Float_t StV0I::massLambda() {
-  return sqrt(pow(ePosProton()+eNegPion(),2)-Ptot2V0());
+  return ::sqrt(::pow(ePosProton()+eNegPion(),2)-Ptot2V0());
 }
 
 inline Float_t StV0I::massAntiLambda() {
-  return sqrt(pow(eNegProton()+ePosPion(),2)-Ptot2V0());
+  return ::sqrt(::pow(eNegProton()+ePosPion(),2)-Ptot2V0());
 }
 
 inline Float_t StV0I::massK0Short() {
-  return sqrt(pow(ePosPion()+eNegPion(),2)-Ptot2V0());
+  return ::sqrt(::pow(ePosPion()+eNegPion(),2)-Ptot2V0());
 }
 
 inline Float_t StV0I::rapHypV0(Float_t mass) {
   Float_t ehyp = eHypV0(mass);
   Float_t mMomV0Z = momV0Z();
-  return 0.5*log((ehyp+mMomV0Z)/(ehyp-mMomV0Z));
+  return 0.5*::log((ehyp+mMomV0Z)/(ehyp-mMomV0Z));
 }
 
 inline Float_t StV0I::rapLambda() {
   Float_t ela = eLambda();
   Float_t mMomV0Z = momV0Z();
-  return 0.5*log((ela+mMomV0Z)/(ela-mMomV0Z));
+  return 0.5*::log((ela+mMomV0Z)/(ela-mMomV0Z));
 }
 
 inline Float_t StV0I::rapK0Short() {
   Float_t ek0 = eK0Short();
   Float_t mMomV0Z = momV0Z();
-  return 0.5*log((ek0+mMomV0Z)/(ek0-mMomV0Z));
+  return 0.5*::log((ek0+mMomV0Z)/(ek0-mMomV0Z));
 }
 
 inline Float_t StV0I::cTauLambda() {
-  return M_LAMBDA*decayLengthV0()/sqrt(Ptot2V0());
+  return M_LAMBDA*decayLengthV0()/::sqrt(Ptot2V0());
 }
 
 inline Float_t StV0I::cTauK0Short() {
-  return M_KAON_0_SHORT*decayLengthV0()/sqrt(Ptot2V0());
+  return M_KAON_0_SHORT*decayLengthV0()/::sqrt(Ptot2V0());
 }
 
 inline Float_t StV0I::ptPos() {
-  return sqrt(Ptot2Pos()-pow(momPosZ(),2));
+  return ::sqrt(Ptot2Pos()-::pow(momPosZ(),2));
 }
 
 inline Float_t StV0I::ptotPos() {
-  return sqrt(Ptot2Pos());
+  return ::sqrt(Ptot2Pos());
 }
 
 inline Float_t StV0I::ptNeg() {
-  return sqrt(Ptot2Neg()-pow(momNegZ(),2));
+  return ::sqrt(Ptot2Neg()-::pow(momNegZ(),2));
 }
 
 inline Float_t StV0I::ptotNeg() {
-  return sqrt(Ptot2Neg());
+  return ::sqrt(Ptot2Neg());
 }
 
 inline Float_t StV0I::ptV0() {
-  return sqrt(Pt2V0());
+  return ::sqrt(Pt2V0());
 }
 
 inline Float_t StV0I::ptotV0() {
-  return sqrt(Ptot2V0());
+  return ::sqrt(Ptot2V0());
 }
 
 inline Float_t StV0I::thetaV0() {
@@ -461,7 +461,7 @@ inline Float_t StV0I::thetaV0() {
 }
 
 inline Float_t StV0I::pseudoRapV0() {
-  return (-log(tan(thetaV0()/2.)));
+  return (-::log(tan(thetaV0()/2.)));
 }
 
 inline Float_t StV0I::thetaPos() {
@@ -469,7 +469,7 @@ inline Float_t StV0I::thetaPos() {
 }
 
 inline Float_t StV0I::pseudoRapPos() {
-  return (-log(tan(thetaPos()/2.)));
+  return (-::log(tan(thetaPos()/2.)));
 }
 
 inline Float_t StV0I::thetaNeg() {
@@ -477,19 +477,19 @@ inline Float_t StV0I::thetaNeg() {
 }
 
 inline Float_t StV0I::pseudoRapNeg() {
-  return (-log(tan(thetaNeg()/2.)));
+  return (-::log(tan(thetaNeg()/2.)));
 }
 
 inline Float_t StV0I::mtHypV0(Float_t mass) {
-  return sqrt(Pt2V0()+pow(mass,2));
+  return ::sqrt(Pt2V0()+::pow(mass,2));
 }
 
 inline Float_t StV0I::mtLambda() {
-  return sqrt(Pt2V0()+M_LAMBDA_2);
+  return ::sqrt(Pt2V0()+M_LAMBDA_2);
 }
 
 inline Float_t StV0I::mtK0Short() {
-  return sqrt(Pt2V0()+M_KAON_0_SHORT_2);
+  return ::sqrt(Pt2V0()+M_KAON_0_SHORT_2);
 }
 
 inline Float_t StV0I::mtm0HypV0(Float_t mass) {
@@ -592,8 +592,11 @@ inline void StV0I::Clear() {
 
 
 /***********************************************************************
- * $Id: StV0I.hh,v 3.9 2003/05/30 21:20:19 genevb Exp $
+ * $Id: StV0I.hh,v 3.10 2003/09/02 17:59:04 perev Exp $
  * $Log: StV0I.hh,v $
+ * Revision 3.10  2003/09/02 17:59:04  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 3.9  2003/05/30 21:20:19  genevb
  * doxygen savvy, encoding of FTPC mults, change virtual funcs
  *

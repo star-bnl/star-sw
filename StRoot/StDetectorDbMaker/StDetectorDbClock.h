@@ -1,16 +1,10 @@
 #ifndef StDetectorDbClock_h
 #define StDetectorDbClock_h
+#include <Stiostream.h>
 
 #include "StMaker.h"
 
 struct starClockOnl_st;
-#ifdef sun
-#include <iostream.h>
-#endif
-
-#ifndef sun
-class ostream;
-#endif
 
 class StDetectorDbClock{
 public:

@@ -1,5 +1,8 @@
-// $Id: StTpcFEEGainCalibMaker.cxx,v 1.6 2003/07/18 18:31:49 perev Exp $
+// $Id: StTpcFEEGainCalibMaker.cxx,v 1.7 2003/09/02 17:59:11 perev Exp $
 // $Log: StTpcFEEGainCalibMaker.cxx,v $
+// Revision 1.7  2003/09/02 17:59:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.6  2003/07/18 18:31:49  perev
 // test for nonexistance of XXXReader added
 //
@@ -18,8 +21,8 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 // C/C++
-#include <iostream.h>
-#include <fstream.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
@@ -134,7 +137,7 @@ Int_t StTpcFEEGainCalibMaker::Make(){
 //_____________________________________________________________________________
 void StTpcFEEGainCalibMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTpcFEEGainCalibMaker.cxx,v 1.6 2003/07/18 18:31:49 perev Exp $\n");
+  printf("* $Id: StTpcFEEGainCalibMaker.cxx,v 1.7 2003/09/02 17:59:11 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

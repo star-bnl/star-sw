@@ -3,7 +3,7 @@
 // Revision 1.0  2000/12/18 yepes 
 //
 //////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "StPeCGeant.h"
 #include "tables/St_g2t_track_Table.h"
@@ -79,14 +79,14 @@ Int_t StPeCGeant::fill ( TDataSet* geant ) {
       e   += trkT[i].e   ;
    }
    
-   gPt  = sqrt(px*px+py*py);
+   gPt  = ::sqrt(px*px+py*py);
    gPsi = atan2(py,px);
    if ( gPsi < 0 ) gPsi += M_PI ;
-   gMass = sqrt(e*e-gPt*gPt-gPz*gPz);
+   gMass = ::sqrt(e*e-gPt*gPt-gPz*gPz);
 
    float theta = atan2(gPt,gPz);
-   gEta = -log(tan(theta/2.)) ;
-   gY   = 0.5*log((e+gPz)/(e-gPz));
+   gEta = -::log(tan(theta/2.)) ;
+   gY   = 0.5*::log((e+gPz)/(e-gPz));
 
    St_g2t_vertex*  vtx = 0 ;
    vtx = (St_g2t_vertex *)geant->Find("g2t_vertex") ;

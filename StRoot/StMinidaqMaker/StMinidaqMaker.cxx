@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.18 2000/06/26 22:12:08 fisyak Exp $
+// $Id: StMinidaqMaker.cxx,v 1.19 2003/09/02 17:58:43 perev Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.19  2003/09/02 17:58:43  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.18  2000/06/26 22:12:08  fisyak
 // remove params
 //
@@ -74,7 +77,7 @@
 // StMinidaqMaker class for Makers                                      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include <strings.h>
 #include <assert.h>
 #include "StMinidaqMaker.h"

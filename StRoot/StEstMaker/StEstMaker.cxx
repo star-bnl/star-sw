@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.20 2003/04/30 20:36:54 perev Exp $
+ * $Id: StEstMaker.cxx,v 1.21 2003/09/02 17:58:04 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.21  2003/09/02 17:58:04  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.20  2003/04/30 20:36:54  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -463,29 +466,29 @@ Int_t StEstMaker::Make() {
 
   for (int i=0;i<mNPass;i++){
     waferGeom = (StSvtWaferGeometry*)m_geom->at(6);
-    mParams[i]->lrad[0][0] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+    mParams[i]->lrad[0][0] = ::sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
     waferGeom = (StSvtWaferGeometry*)m_geom->at(2);
-    mParams[i]->lrad[0][1] =sqrt(waferGeom->x(0)*waferGeom->x(0)+
+    mParams[i]->lrad[0][1] =::sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
     waferGeom = (StSvtWaferGeometry*)m_geom->at(41);
-    mParams[i]->lrad[1][0] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+    mParams[i]->lrad[1][0] = ::sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
     waferGeom = (StSvtWaferGeometry*)m_geom->at(35);
-    mParams[i]->lrad[1][1] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+    mParams[i]->lrad[1][1] = ::sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
     waferGeom = (StSvtWaferGeometry*)m_geom->at(115);
-    mParams[i]->lrad[2][0] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+    mParams[i]->lrad[2][0] = ::sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
     waferGeom = (StSvtWaferGeometry*)m_geom->at(108);
-    mParams[i]->lrad[2][1] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+    mParams[i]->lrad[2][1] = ::sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
     /*
     waferGeom = (StSvtWaferGeometry*)m_geom->at(116);
-    mParams[i]->lrad[3][0] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+    mParams[i]->lrad[3][0] = ::sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
     waferGeom = (StSvtWaferGeometry*)m_geom->at(116);
-    mParams[i]->lrad[3][1] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+    mParams[i]->lrad[3][1] = ::sqrt(waferGeom->x(0)*waferGeom->x(0)+
 				  waferGeom->x(1)*waferGeom->x(1));
     */
   }

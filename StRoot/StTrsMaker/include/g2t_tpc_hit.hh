@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: g2t_tpc_hit.hh,v 1.2 1999/02/14 20:42:17 lasiuk Exp $
+ * $Id: g2t_tpc_hit.hh,v 1.3 2003/09/02 17:59:16 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: g2t_tpc_hit.hh,v $
+ * Revision 1.3  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  1999/02/14 20:42:17  lasiuk
  * use 3 vectors
  *
@@ -25,7 +28,7 @@
  **************************************************************************/
 #ifndef ST_G2T_HH
 #define ST_G2T_HH
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StThreeVector.hh"
 
 struct g2t_tpc_hit {            /* G2t_tpc_hit */ 

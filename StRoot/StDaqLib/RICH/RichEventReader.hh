@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RichEventReader.hh,v 1.1 2000/04/25 14:55:28 xzb Exp $
+ * $Id: RichEventReader.hh,v 1.2 2003/09/02 17:55:32 perev Exp $
  * Author: Zhangbu Xu
  ***************************************************************************
  * Description: definition for Rich Standalone event reader
@@ -21,6 +21,9 @@
  *
  ***************************************************************************
  * $Log: RichEventReader.hh,v $
+ * Revision 1.2  2003/09/02 17:55:32  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2000/04/25 14:55:28  xzb
  * Clean up RICH_Reader array, add RichEventReader for standalone data file
  *
@@ -79,7 +82,7 @@
 #ifndef RICHEVENTREADER_HH
 #define RICHEVENTREADER_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include <sys/types.h>
 

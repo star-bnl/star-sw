@@ -5,7 +5,7 @@
 #ifndef StProtoJet_HH
 #define StProtoJet_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 
 #include <list>

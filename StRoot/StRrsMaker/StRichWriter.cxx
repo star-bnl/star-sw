@@ -1,10 +1,13 @@
 /*****************************************************
- * $Id: StRichWriter.cxx,v 2.1 2003/04/30 20:38:20 perev Exp $
+ * $Id: StRichWriter.cxx,v 2.2 2003/09/02 17:58:56 perev Exp $
  *
  * Description:
  *  Implementation of the StRichWriter output object.
  ******************************************************
  * $Log: StRichWriter.cxx,v $
+ * Revision 2.2  2003/09/02 17:58:56  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 2.1  2003/04/30 20:38:20  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -51,7 +54,7 @@
  ******************************************************/
 
 // STL
-#include <iostream.h>
+#include <Stiostream.h>
 
 // ROOT
 #ifdef __ROOT__

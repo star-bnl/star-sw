@@ -1,7 +1,10 @@
 //*-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StEEmcTrigSimuMaker.cxx,v 1.4 2003/07/18 18:31:46 perev Exp $
+// $Id: StEEmcTrigSimuMaker.cxx,v 1.5 2003/09/02 17:57:55 perev Exp $
 // $Log: StEEmcTrigSimuMaker.cxx,v $
+// Revision 1.5  2003/09/02 17:57:55  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.4  2003/07/18 18:31:46  perev
 // test for nonexistance of XXXReader added
 //
@@ -20,7 +23,7 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 #include "TFile.h"
 #include "TArrayF.h"

@@ -45,7 +45,7 @@ double gamovCorrect(const StHbtPair* pair,
   VcmsX = VcmsXnew;
   // Gamma and Beta
   beta = VcmsX;
-  gamma = 1.0/sqrt( 1.0-beta*beta );
+  gamma = 1.0/::sqrt( 1.0-beta*beta );
 
   // Rotate p1 and p2 to new frame
   px1new = px1*cos(psi)+py1*sin(psi);
@@ -83,7 +83,7 @@ double gamovCorrect(const StHbtPair* pair,
   vz2cms = pz2/e2new;
 
   // Velocity difference in CMS frame
-  dv = sqrt( (vx1cms-vx2cms)*(vx1cms-vx2cms) +
+  dv = ::sqrt( (vx1cms-vx2cms)*(vx1cms-vx2cms) +
              (vy1cms-vy2cms)*(vy1cms-vy2cms) +
              (vz1cms-vz2cms)*(vz1cms-vz2cms) );
   

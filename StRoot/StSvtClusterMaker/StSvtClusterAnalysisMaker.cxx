@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.24 2003/04/30 20:38:45 perev Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.25 2003/09/02 17:59:06 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.25  2003/09/02 17:59:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.24  2003/04/30 20:38:45  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -78,8 +81,7 @@
  *
  **************************************************************************/
 
-#include <fstream.h>
-#include <iomanip.h>
+#include "Stiostream.h"
 
 #include "StChain.h"
 #include "St_DataSetIter.h"

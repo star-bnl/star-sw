@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.53 2003/07/30 01:40:42 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.54 2003/09/02 18:00:21 perev Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -163,6 +163,7 @@
 #	$CXXFLAGS    .= " -ansi -pedantic"; 
 	$CXXFLAGS    .= " -Wall";# -W -Wwrite-strings -Wpointer-arith";# -Wnested-externs";
 	$CXXFLAGS    .= " -Woverloaded-virtual";# -Wbad-function-cast";
+#	$CXXFLAGS    .= " -Werror";# warning==error;
 #	$CXXFLAGS    .= " -fnonnull-objects";
 	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
 	  $DEBUG = "-O -g -march=pentium -mcpu=pentium -malign-loops=2";

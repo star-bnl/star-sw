@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrgMaker.cxx,v 1.8 2002/03/25 21:34:18 ward Exp $
+ * $Id: StTrgMaker.cxx,v 1.9 2003/09/02 17:59:14 perev Exp $
  *
  * Author: Herbert Ward April 2001
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTrgMaker.cxx,v $
+ * Revision 1.9  2003/09/02 17:59:14  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.8  2002/03/25 21:34:18  ward
  * Three bug fixes.
  *
@@ -150,7 +153,7 @@ Int_t StTrgMaker::Make() {
       curvature=geo->curvature();
       phi0=o.phi()*180/3.1415926;    // StEvent is in radians, contrary to STAR convention.
       psi=geo->psi()*180/3.1415926;  // StEvent is in radians, contrary to STAR convention.
-      r0=sqrt(o.x()*o.x()+o.y()*o.y());
+      r0=::sqrt(o.x()*o.x()+o.y()*o.y());
       tanl=tan(geo->dipAngle());
       z0=o.z();
       // fprintf(out,"%2d %2d %g %g %g %g %g %g\n",++BBB,q,curvature,phi0,psi,r0,tanl,z0);
@@ -181,7 +184,7 @@ void StTrgMaker::FindIntersectionOfTwoCircles(
   transX=-center1x; transY=-center1y; /* Translation necessary to put center of circle 1 at origin. */
   center1x=0; center1y=0; center2x+=transX; center2y+=transY; /* Do translation. */
   angle=-atan2(center2y,center2x); /* Rotation necessary to put center of circle 2 on x-axis. */
-  center2x=sqrt(center2x*center2x+center2y*center2y); center2y=0; /* Do rotation. */
+  center2x=::sqrt(center2x*center2x+center2y*center2y); center2y=0; /* Do rotation. */
 
   /* The two intersection points have the same x coordinate.  A little simple algebra gives */
   /* this x value and also the two y values (by symmetry, y1 = -y2). */
@@ -198,8 +201,8 @@ void StTrgMaker::FindIntersectionOfTwoCircles(
   /* PP"BBB nip = %d\n",*numIntersectionPoints); */
 
   if(*numIntersectionPoints>0) {
-    *intersection1y=+sqrt(radicand);
-    *intersection2y=-sqrt(radicand);
+    *intersection1y=+::sqrt(radicand);
+    *intersection2y=-::sqrt(radicand);
 
     /* Now rotate and tranlate the two intersection points back to the original frame. */
     /* PP"BBB angle = %g degrees\n",angle*180/PI); */
@@ -253,7 +256,7 @@ void StTrgMaker::Location2Sector(double tanl,double xAtMwc,
   else if( -45<=ang && ang<= -15) { *sect= 4; mid= -30; }
   else assert(0);
 
-  rad=sqrt(xAtMwc*xAtMwc+yAtMwc*yAtMwc);
+  rad=::sqrt(xAtMwc*xAtMwc+yAtMwc*yAtMwc);
   if(rad >=  53.000 && rad <  85.000 ) { *subsect=1; rmid=( 53.000+ 85.000)/2.0; }
   if(rad >=  85.000 && rad < 117.000 ) { *subsect=2; rmid=( 85.000+117.000)/2.0; }
   if(rad >= 125.395 && rad < 157.395 ) { *subsect=3; rmid=(125.395+157.395)/2.0; }
@@ -353,10 +356,10 @@ void StTrgMaker::DoOneTrackCtb(FILE *oo,long q,double curvature,double phi0,
   /* Do the points for the inner slats first. */
   if(numberIntersectionPointsInner==2) {
     dotProduct1=xUnitVector*(intersectionInner1X-xstart)+yUnitVector*(intersectionInner1Y-ystart);
-    dotProduct1/=sqrt((intersectionInner1X-xstart)*(intersectionInner1X-xstart)+
+    dotProduct1/=::sqrt((intersectionInner1X-xstart)*(intersectionInner1X-xstart)+
                       (intersectionInner1Y-ystart)*(intersectionInner1Y-ystart)); /* Normalize. */
     dotProduct2=xUnitVector*(intersectionInner2X-xstart)+yUnitVector*(intersectionInner2Y-ystart);
-    dotProduct2/=sqrt((intersectionInner2X-xstart)*(intersectionInner2X-xstart)+
+    dotProduct2/=::sqrt((intersectionInner2X-xstart)*(intersectionInner2X-xstart)+
                       (intersectionInner2Y-ystart)*(intersectionInner2Y-ystart)); /* Normalize. */
     if(dotProduct1>=dotProduct2) {
       innerIntersectionX=intersectionInner1X; innerIntersectionY=intersectionInner1Y;
@@ -371,10 +374,10 @@ void StTrgMaker::DoOneTrackCtb(FILE *oo,long q,double curvature,double phi0,
   /* Now do the points for the outer slats. */
   if(numberIntersectionPointsOuter==2) {
     dotProduct1=xUnitVector*(intersectionOuter1X-xstart)+yUnitVector*(intersectionOuter1Y-ystart);
-    dotProduct1/=sqrt((intersectionOuter1X-xstart)*(intersectionOuter1X-xstart)+
+    dotProduct1/=::sqrt((intersectionOuter1X-xstart)*(intersectionOuter1X-xstart)+
                       (intersectionOuter1Y-ystart)*(intersectionOuter1Y-ystart)); /* Normalize. */
     dotProduct2=xUnitVector*(intersectionOuter2X-xstart)+yUnitVector*(intersectionOuter2Y-ystart);
-    dotProduct2/=sqrt((intersectionOuter2X-xstart)*(intersectionOuter2X-xstart)+
+    dotProduct2/=::sqrt((intersectionOuter2X-xstart)*(intersectionOuter2X-xstart)+
                       (intersectionOuter2Y-ystart)*(intersectionOuter2Y-ystart)); /* Normalize. */
     if(dotProduct1>=dotProduct2) {
       outerIntersectionX=intersectionOuter1X; outerIntersectionY=intersectionOuter1Y;

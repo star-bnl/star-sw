@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.15 2003/01/29 12:12:37 fsimon Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.16 2003/09/02 17:58:16 perev Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.16  2003/09/02 17:58:16  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.15  2003/01/29 12:12:37  fsimon
 // Additional comments to illustrate ASIC mapping
 //
@@ -66,7 +69,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include <stdlib.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include "PhysicalConstants.h"
 
 #include "StMessMgr.h"
@@ -160,7 +163,7 @@ void  StFtpcSlowSimReadout::PadResponse(const StFtpcSlowSimCluster *cl)
       
     if(DEBUG)
       cout << "StFtpcSlowSimReadout::PadResponse: pad_off=" << pad_off <<  "sig_phi=" << sig_phi << endl;
-    sigma_pad =  sqrt(sig_phi*sig_phi + prf*prf ); 
+    sigma_pad =  ::sqrt(sig_phi*sig_phi + prf*prf ); 
 }
 
 
@@ -177,7 +180,7 @@ void StFtpcSlowSimReadout::ShaperResponse(const StFtpcSlowSimCluster *cl)
   //cout << "ShaperResponse...\n";
   if(DEBUG)
     cout << "time_off=" << time_off <<  "sig_rad=" << sig_rad << endl;
-  sigma_tim = sqrt( sig_time*sig_time + srf*srf) ;
+  sigma_tim = ::sqrt( sig_time*sig_time + srf*srf) ;
 }
 
 void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int irow)
@@ -217,7 +220,7 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
       // store center of cluster
       float mid_phi = phi;
       float mid_time = time;
-      float hypo = sqrt((pad_off/pad_pitch)*(pad_off/pad_pitch)
+      float hypo = ::sqrt((pad_off/pad_pitch)*(pad_off/pad_pitch)
 			+(time_off/((double)mDb->microsecondsPerTimebin()*1000))*
 			(time_off/((double)mDb->microsecondsPerTimebin()*1000)));
       int n_sub_hits = (int) (2*hypo);
@@ -501,8 +504,8 @@ void StFtpcSlowSimReadout::polya(const int ggnch, const float gglow,
 // c.f.: Ronaldo Bellazzini and Mario Spezziga
 //       La Rivista del Nuovo Cimento V17N12(1994)1.
 //
-//       m=3/2, gamma(m)=sqrt(pi)/2=0.8862269
-//       polya(k) = m*pow((m*k),(m-1))*exp(-m*k)/gamma(m)
+//       m=3/2, gamma(m)=::sqrt(pi)/2=0.8862269
+//       polya(k) = m*::pow((m*k),(m-1))*exp(-m*k)/gamma(m)
 //
     float m_polya = 1.5;
     float c_polya = 1.6925687;
@@ -513,7 +516,7 @@ void StFtpcSlowSimReadout::polya(const int ggnch, const float gglow,
     int i;
     for (i=1; i<ggnch; ++i) {
         x       = m_polya*(i*ggdelta+gglow);
-        p       = c_polya*pow(x,(m_polya-1.0))*exp(-x);
+        p       = c_polya*::pow(double(x),double(m_polya-1.0))*exp(-x);
         pcum[i] = pcum[i-1] + p ;
     }
 
@@ -565,7 +568,7 @@ float StFtpcSlowSimReadout::InteGauss(const float x_1, const float x_2,
            x += del_x;
      }
 
-     return del_x*0.39894228*sum; // 1/sqrt(twopi)=0.39894228
+     return del_x*0.39894228*sum; // 1/::sqrt(twopi)=0.39894228
 }
 
 float StFtpcSlowSimReadout::ranmar()

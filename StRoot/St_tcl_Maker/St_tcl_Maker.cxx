@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.69 2003/04/29 16:23:28 perev Exp $
+// $Id: St_tcl_Maker.cxx,v 1.70 2003/09/02 17:59:31 perev Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.70  2003/09/02 17:59:31  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.69  2003/04/29 16:23:28  perev
 // non TPCoriented cleanup
 //
@@ -50,7 +53,7 @@
 // St_tcl_Maker class for Makers                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include "St_tcl_Maker.h"
@@ -472,7 +475,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.69 2003/04/29 16:23:28 perev Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.70 2003/09/02 17:59:31 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -795,16 +798,16 @@ Int_t St_tcl_Maker::CalculateQuadrupoleMoms(
   if((totChargeEq1)>0) timeSigma2Eq13   /=(totChargeEq1); else timeSigma2Eq13=0;
   if((totChargeEq1)>0) padTimeSigma2Eq14/=(totChargeEq1); else padTimeSigma2Eq14=0;
 
-  padSigma2Eq12    /=2;      // This represents the sqrt(2) in Eqs 10 and 11.
-  timeSigma2Eq13   /=2;      // This represents the sqrt(2) in Eqs 10 and 11.
-  padTimeSigma2Eq14/=2;      // This represents the sqrt(2) in Eqs 10 and 11.
+  padSigma2Eq12    /=2;      // This represents the ::sqrt(2) in Eqs 10 and 11.
+  timeSigma2Eq13   /=2;      // This represents the ::sqrt(2) in Eqs 10 and 11.
+  padTimeSigma2Eq14/=2;      // This represents the ::sqrt(2) in Eqs 10 and 11.
 
-  padSigma1Eq5 =sqrt(padSigma1Eq5);
-  timeSigma1Eq6=sqrt(timeSigma1Eq6);
-  // sometimes this is sqrt(-): padTimeSigma1Eq7=sqrt(padTimeSigma1Eq7);
-  padSigma2Eq12 =sqrt(padSigma2Eq12);
-  timeSigma2Eq13=sqrt(timeSigma2Eq13);
-  // sometimes this is sqrt(-): padTimeSigma2Eq14=sqrt(padTimeSigma2Eq14);
+  padSigma1Eq5 =::sqrt(padSigma1Eq5);
+  timeSigma1Eq6=::sqrt(timeSigma1Eq6);
+  // sometimes this is ::sqrt(-): padTimeSigma1Eq7=::sqrt(padTimeSigma1Eq7);
+  padSigma2Eq12 =::sqrt(padSigma2Eq12);
+  timeSigma2Eq13=::sqrt(timeSigma2Eq13);
+  // sometimes this is ::sqrt(-): padTimeSigma2Eq14=::sqrt(padTimeSigma2Eq14);
 
   if(padSigma1Eq5!=0 && timeSigma1Eq6 !=0) {
     ecc1Eq15=(padTimeSigma1Eq7)/((padSigma1Eq5)*(timeSigma1Eq6));

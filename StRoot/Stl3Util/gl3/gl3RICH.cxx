@@ -125,9 +125,9 @@ int gl3RICH::decide ( )
 	 double px = gTrack->pt * cos(gTrack->psi);
 	 double py = gTrack->pt * sin(gTrack->psi);
 	 double pz = gTrack->pt * gTrack->tanl;
-	 double p = sqrt(px*px+py*py+pz*pz);
+	 double p = ::sqrt(px*px+py*py+pz*pz);
 	 // pseudorapidity
-	 double eta = -log(tan(acos(pz/p)/2));
+	 double eta = -::log(tan(acos(pz/p)/2));
 
 
      // cut nHits, P, Pt and eta
@@ -165,14 +165,14 @@ int gl3RICH::decide ( )
         if( lastHit.z>=mGlobalRichEdgeZmin && lastHit.z<=mGlobalRichEdgeZmax )
         {
         // Rlast
-        double Rlast=sqrt(lastHit.x*lastHit.x+lastHit.y*lastHit.y);
+        double Rlast=::sqrt(lastHit.x*lastHit.x+lastHit.y*lastHit.y);
 	    
         // dca
         closestHitToEventVertex = gTrack->closestApproach( event->getVertex().Getx(), event->getVertex().Gety() );    
         double dx=fabs( event->getVertex().Getx() - closestHitToEventVertex.x );
         double dy=fabs( event->getVertex().Gety() - closestHitToEventVertex.y );
         double dz=fabs( event->getVertex().Getz() - closestHitToEventVertex.z );
-        double dca=sqrt(dx*dx+dy*dy+dz*dz);
+        double dca=::sqrt(dx*dx+dy*dy+dz*dz);
 
 #ifdef GL3ROOT
 

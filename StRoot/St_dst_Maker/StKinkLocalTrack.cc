@@ -1,5 +1,8 @@
-// $Id: StKinkLocalTrack.cc,v 1.9 2001/04/09 19:56:55 wdeng Exp $
+// $Id: StKinkLocalTrack.cc,v 1.10 2003/09/02 17:59:26 perev Exp $
 // $Log: StKinkLocalTrack.cc,v $
+// Revision 1.10  2003/09/02 17:59:26  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.9  2001/04/09 19:56:55  wdeng
 // Added 'const' to Compare function signature
 //
@@ -60,7 +63,7 @@ StKinkLocalTrack::StKinkLocalTrack(dst_track_st* trk, Float_t curvature, Float_t
   mLastPoint[0] = trk->x_last[0];
   mLastPoint[1] = trk->x_last[1];
   mLastPoint[2] = trk->x_last[2];
-  mEndRadius2D = sqrt(trk->x_last[0]*trk->x_last[0] + trk->x_last[1]*trk->x_last[1]);
+  mEndRadius2D = ::sqrt(trk->x_last[0]*trk->x_last[0] + trk->x_last[1]*trk->x_last[1]);
   mStartRadius2D = trk->r0;
 }
 

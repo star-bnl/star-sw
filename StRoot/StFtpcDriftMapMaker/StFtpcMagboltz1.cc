@@ -1,7 +1,10 @@
 
-// $Id: StFtpcMagboltz1.cc,v 1.1 2000/12/20 08:44:02 jcs Exp $
+// $Id: StFtpcMagboltz1.cc,v 1.2 2003/09/02 17:58:15 perev Exp $
 //
 // $Log: StFtpcMagboltz1.cc,v $
+// Revision 1.2  2003/09/02 17:58:15  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.1  2000/12/20 08:44:02  jcs
 // Replace pam/ftpc/fmg with maker
 //
@@ -296,7 +299,7 @@ int StFtpcMagboltz1::bfield_(int *nstep1)
 	d__2 = mix2_1.qtot[j - 1];
 	mag_1.denom[j - 1] = cnsts_1.echarg * (d__1 * d__1) / (cnsts_1.emass *
 		 2e6 * en * (d__2 * d__2));
-	mag_1.sod[j - 1] = sqrt(mag_1.denom[j - 1]) * bsin;
+	mag_1.sod[j - 1] = ::sqrt(mag_1.denom[j - 1]) * bsin;
 	mag_1.cod2[j - 1] = mag_1.denom[j - 1] * cos2;
 	mag_1.sod2[j - 1] = mag_1.denom[j - 1] * sin2;
 	mag_1.scd[j - 1] = mag_1.denom[j - 1] * sincos;
@@ -997,11 +1000,11 @@ int *n2ro, double *e, double *ein, double *e2ro, char *name__,
 	if (en == (float)0.) {
 	    goto L200;
 	}
-	ak = sqrt(en / inpt_1.ary);
-	an0 = -aa * ak * (apol * (float)4. / (float)3. * ak * ak * log(ak) + (
+	ak = ::sqrt(en / inpt_1.ary);
+	an0 = -aa * ak * (apol * (float)4. / (float)3. * ak * ak * ::log(ak) + (
 		float)1.) - api * apol / (float)3. * ak * ak + dd * ak * ak * 
 		ak + ff * ak * ak * ak * ak;
-	an1 = api / (float)15. * apol * ak * ak * ((float)1. - sqrt(en / e1));
+	an1 = api / (float)15. * apol * ak * ak * ((float)1. - ::sqrt(en / e1));
 	an2 = api * apol * ak * ak / (float)105.;
 	an0 = atan(an0);
 	an1 = atan(an1);
@@ -1058,7 +1061,7 @@ L220:
 	b = (xeni[j - 2] * yxeni[j - 1] - xeni[j - 1] * yxeni[j - 2]) / (xeni[
 		j - 2] - xeni[j - 1]);
 	d__1 = a * en + b;
-	q[i__ * 6 + 3] = pow(c_b12, d__1) * (float)1e-18;
+	q[i__ * 6 + 3] = ::pow(c_b12, d__1) * (float)1e-18;
 L230:
 	q[i__ * 6 + 4] = (float)0.;
 	q[i__ * 6 + 5] = (float)0.;
@@ -1613,8 +1616,8 @@ int *n2ro, double *e, double *ein, double *e2ro, char *name__,
 	if (en == (float)0.) {
 	    goto L200;
 	}
-	ak = sqrt(en / inpt_1.ary);
-	an0 = -aa * ak * (apol * (float)4. / (float)3. * ak * ak * log(ak) + (
+	ak = ::sqrt(en / inpt_1.ary);
+	an0 = -aa * ak * (apol * (float)4. / (float)3. * ak * ak * ::log(ak) + (
 		float)1.) - api * apol / (float)3. * ak * ak + dd * ak * ak * 
 		ak + ff * ak * ak * ak * ak;
 	an1 = (ak * (float).56 * ak - a1 * ak * ak * ak) / (b1 * ak * ak + (
@@ -2027,25 +2030,25 @@ L100:
 	    goto L170;
 	}
 	qdrot[i__ - 1] = ratio_1.an1 * q1[i__ * 6 - 1] * (float)2. * e1[5] * 
-		inpt_1.ary * log(en / sqrt(e1[5] * inpt_1.akt));
+		inpt_1.ary * ::log(en / ::sqrt(e1[5] * inpt_1.akt));
 L170:
 	if (e2[5] == (float)0.) {
 	    goto L171;
 	}
 	qdrot[i__ - 1] += ratio_1.an2 * q2[i__ * 6 - 1] * (float)2. * e2[5] * 
-		inpt_1.ary * log(en / sqrt(e2[5] * inpt_1.akt));
+		inpt_1.ary * ::log(en / ::sqrt(e2[5] * inpt_1.akt));
 L171:
 	if (e3[5] == (float)0.) {
 	    goto L172;
 	}
 	qdrot[i__ - 1] += ratio_1.an3 * q3[i__ * 6 - 1] * (float)2. * e3[5] * 
-		inpt_1.ary * log(en / sqrt(e3[5] * inpt_1.akt));
+		inpt_1.ary * ::log(en / ::sqrt(e3[5] * inpt_1.akt));
 L172:
 	if (e4[5] == (float)0.) {
 	    goto L173;
 	}
 	qdrot[i__ - 1] += ratio_1.an4 * q4[i__ * 6 - 1] * (float)2. * e4[5] * 
-		inpt_1.ary * log(en / sqrt(e4[5] * inpt_1.akt));
+		inpt_1.ary * ::log(en / ::sqrt(e4[5] * inpt_1.akt));
 
 L173:
 	mix1_1.qelm[i__ - 1] = mix1_1.qelm[i__ - 1] * mix2_1.e[i__ - 1] * 
@@ -2386,7 +2389,7 @@ int StFtpcMagboltz1::nalpha_()
     }
     simp_(&sum);
     velx1 = -sum * mag_1.eovm;
-    vtot1 = sqrt(velx1 * velx1 + vely1 * vely1 + velz1 * velz1);
+    vtot1 = ::sqrt(velx1 * velx1 + vely1 * vely1 + velz1 * velz1);
     i__1 = inpt_1.nstep1;
     for (j = 1; j <= i__1; ++j) {
 /* L10: */
@@ -2400,7 +2403,7 @@ int StFtpcMagboltz1::nalpha_()
     if (cjk < (float)0.) {
 	goto L15;
     }
-    inpt_1.alpnew = vtot1 / (dss * (float)2.) - sqrt(cjk);
+    inpt_1.alpnew = vtot1 / (dss * (float)2.) - ::sqrt(cjk);
     goto L16;
 L15:
     inpt_1.alpnew = ratei / vtot1;
@@ -2432,7 +2435,7 @@ L16:
     }
     simp_(&sum);
     velx = -sum * mag_1.eovm;
-    vtot = sqrt(velx * velx + vely * vely + velz * velz);
+    vtot = ::sqrt(velx * velx + vely * vely + velz * velz);
     if (cjk < (float)0.) {
       printf("WARNING NALPHA DID NOT CONVERGE (SUBROUTINE NALPHA)\n");
     }
@@ -2543,7 +2546,7 @@ int StFtpcMagboltz1::output_(int *n)
     simp_(&sum);
     velx1 = -sum * mag_1.eovm;
     vtot12 = velx1 * velx1 + vely1 * vely1 + velz1 * velz1;
-    vtot1 = sqrt(vtot12);
+    vtot1 = ::sqrt(vtot12);
 /* Computing 2nd power */
     d__1 = vtot1 / (dss * (float)2.);
     cjk = d__1 * d__1 - ratei / dss;
@@ -2553,7 +2556,7 @@ int StFtpcMagboltz1::output_(int *n)
     if (cjk < (float)0. || ratei == (float)0.) {
 	goto L15;
     }
-    inpt_1.alpha = vtot1 / (dss * (float)2.) - sqrt(cjk);
+    inpt_1.alpha = vtot1 / (dss * (float)2.) - ::sqrt(cjk);
     goto L16;
 L15:
     inpt_1.alpha = ratei / vtot1;
@@ -2595,7 +2598,7 @@ L16:
     simp_(&sum);
     velx = -sum * mag_1.eovm;
     vtot2 = velx * velx + vely * vely + mk_1.velz * mk_1.velz;
-    vtot = sqrt(vtot2);
+    vtot = ::sqrt(vtot2);
     ri = inpt_1.alpha * vtot1;
     i__1 = inpt_1.nstep1;
     for (j = 1; j <= i__1; ++j) {
@@ -2748,14 +2751,14 @@ L16:
     printf(" F0 =%f AT FINAL ENERGY OF %f EV.\n",f0c_1.f[inpt_1.nstep1 - 1],inpt_1.efinal);
     printf("LONGITUDINAL DIFFUSION =%f CM.**2/SEC.     = %f EV. \n",dl,dlovmb);
 /* cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc */
-/* convert long. diff. to um/sqrt(cm) by W.Gong */
+/* convert long. diff. to um/::sqrt(cm) by W.Gong */
 /* also applying the correction */
     fudge = dl / dzz;
-    mk_1.sig_long__ = sqrt(dl * (float)2. * (float)1e6 / mk_1.velz) * (float)
+    mk_1.sig_long__ = ::sqrt(dl * (float)2. * (float)1e6 / mk_1.velz) * (float)
 	    10.;
-    mk_1.sig_tranx__ = sqrt(dxx * (float)2. * (float)1e6 / mk_1.velz) * (
+    mk_1.sig_tranx__ = ::sqrt(dxx * (float)2. * (float)1e6 / mk_1.velz) * (
 	    float)10.;
-    mk_1.sig_trany__ = sqrt(dyy * (float)2. * (float)1e6 / mk_1.velz) * (
+    mk_1.sig_trany__ = ::sqrt(dyy * (float)2. * (float)1e6 / mk_1.velz) * (
 	    float)10.;
 /* L9921: */
     mk_1.btheta_mk__ = mag_1.btheta;
@@ -2840,7 +2843,7 @@ int StFtpcMagboltz1::setup_(int *last)
     boltz = 8.617343e-5;
     awb = 17588196200.;
     alosch = 2.686763e19;
-    mag_1.eovm = sqrt(cnsts_1.echarg * (float)2. / cnsts_1.emass) * (float)
+    mag_1.eovm = ::sqrt(cnsts_1.echarg * (float)2. / cnsts_1.emass) * (float)
 	    100.;
 
 
@@ -2878,7 +2881,7 @@ int StFtpcMagboltz1::setup_(int *last)
 	aj = (double) j;
 	mix2_1.e[i__ - 1] = aj * inpt_1.estep;
 /* L10: */
-	mix2_1.eroot[i__ - 1] = sqrt(mix2_1.e[i__ - 1]);
+	mix2_1.eroot[i__ - 1] = ::sqrt(mix2_1.e[i__ - 1]);
     }
     mix2_1.eroot[0] = 1e-10;
 

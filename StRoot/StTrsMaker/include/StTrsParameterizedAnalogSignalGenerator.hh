@@ -21,7 +21,7 @@
 
 #include "StTpcDb/StTpcDb.h"
 #include "TRandom.h"
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StTrsAnalogSignalGenerator.hh"
 class StTrsParameterizedAnalogSignalGenerator : public  StTrsAnalogSignalGenerator {
 public:

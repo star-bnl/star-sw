@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.15 2003/07/07 21:58:19 posk Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.16 2003/09/02 17:58:10 perev Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -15,7 +15,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
@@ -360,7 +360,7 @@ Int_t StFlowCumulantMaker::Init() {
 	
 	double theTempPhi = twopi*((double)qIndex) /  // Eq. (PG5)
 	  ((double)Flow::nCumulDiff_qMax); 
-	double theRz = r0*sqrt(cumulIndex);
+	double theRz = r0*::sqrt((double)cumulIndex);
 	histFull[k].histFullHar[j].mDiffXz[pq] = theRz*cos(theTempPhi);
 	histFull[k].histFullHar[j].mDiffYz[pq] = theRz*sin(theTempPhi);
       }
@@ -383,7 +383,7 @@ Int_t StFlowCumulantMaker::Init() {
 
 	double theTempPhi = twopi*((double)qIndex) /
 	  ((double)Flow::nCumulInteg_qMax); 
-	double theRz = r0*sqrt(cumulIndex);
+	double theRz = r0*::sqrt((double)cumulIndex);
 	histFull[k].histFullHar[j].mIntegXz[pq] = theRz*cos(theTempPhi);
 	histFull[k].histFullHar[j].mIntegYz[pq] = theRz*sin(theTempPhi);
 	
@@ -411,7 +411,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.15 2003/07/07 21:58:19 posk Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.16 2003/09/02 17:58:10 perev Exp $");
 
   return StMaker::Init();
 }
@@ -503,7 +503,7 @@ void StFlowCumulantMaker::FillParticleHistograms() {
       pFlowSelect->SetSelection(k);
       pFlowSelect->SetHarmonic(j);
       
-      theSqrtOfSumWgtSqr[k][j] = sqrt(pFlowEvent->SumWeightSquare(pFlowSelect));
+      theSqrtOfSumWgtSqr[k][j] = ::sqrt(pFlowEvent->SumWeightSquare(pFlowSelect));
       
       for (int pq = 0; pq < Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax; pq++) {
 	
@@ -576,7 +576,7 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 	    // begin with 0. which is "q" in (B6, PG5)
 	    
 	    //Calculate PG11
-	    double theCoeff = pow(r0*sqrt(theCumulOrder), m_M) /
+	    double theCoeff = ::pow(r0*::sqrt(double(theCumulOrder)), double(m_M)) /
 	      float(Flow::nCumulDiff_qMax); // first term in (B7)
 	    double theCosTerm = cos(twopi*float(qIndex)*float(m_M) /
 				    float(Flow::nCumulDiff_qMax)); // cos() in (B7)
@@ -752,11 +752,11 @@ if (ord>0)  histFull[k].mHist_v[ord]->Scale(1./profScale);
 
 	if (mOldMethod) {
 	  CpInteg[theCumulOrder-1] +=
-	    (log(histFull[k].histFullHar[j].mCumulIntegG0[pq]) /
+	    (::log(histFull[k].histFullHar[j].mCumulIntegG0[pq]) /
 	     ((float)Flow::nCumulInteg_qMax));
 	} else {
 	  CpInteg[theCumulOrder-1] +=
-	    (mAvMult*(pow(histFull[k].histFullHar[j].mCumulIntegG0[pq], 1./mAvMult) -1.) /
+	    (mAvMult*(::pow(histFull[k].histFullHar[j].mCumulIntegG0[pq], 1./mAvMult) -1.) /
 	     float(Flow::nCumulInteg_qMax)); // (B3, PG6) 
 	}
       }
@@ -842,9 +842,9 @@ if (ord>0) histFull[k].histFullHar[j].mHist_vPt[ord]->Scale(1./profScale);
 	q2[j] = cumulInteg1[j]-1.;  // old paper (Eq. 74a)
 	q4[j] = -1.*cumulInteg2[j]-(1./mAvWgtMult_q4); 
 	q6[j] = (1./4.)*cumulInteg3[j]-(1./(mAvWgtMult_q6)); 
-	meanIntegV[j]  = sqrt(q2[j]);        // <Q>  for 2-part,  m=1
+	meanIntegV[j]  = ::sqrt(q2[j]);        // <Q>  for 2-part,  m=1
 	meanIntegV2[j] = q2[j];              // <Q**2>for 2-part, m=2
-	meanIntegV3[j] = pow(q4[j],3./4.);   // <Q**3>for 4-part, m=1
+	meanIntegV3[j] = ::pow(q4[j],3./4.);   // <Q**3>for 4-part, m=1
 	meanIntegV4[j] = q4[j];              // <Q**4>for 4-part, m=2
        
 	if (q2[j]<0.) cout<<" Sel"<<k+1<<", <Q**2> less than zero ! v"
@@ -853,9 +853,9 @@ if (ord>0) histFull[k].histFullHar[j].mHist_vPt[ord]->Scale(1./profScale);
 			  <<j+1<<" from 4 particle correlation failed."<<endl;
          
       } else { // new method, Eq. (PG8)
-	meanIntegV[j]  = sqrt(cumulInteg1[j]);           // <v>    2-part, m=1
+	meanIntegV[j]  = ::sqrt(cumulInteg1[j]);           // <v>    2-part, m=1
 	meanIntegV2[j] = cumulInteg1[j];                 // <v**2> 2-part, m=2
-	meanIntegV3[j] = pow(-1.*cumulInteg2[j], 3./4.); // <v**3> 4-part, m=1
+	meanIntegV3[j] = ::pow(-1.*cumulInteg2[j], 3./4.); // <v**3> 4-part, m=1
 	meanIntegV4[j] = -1.*cumulInteg2[j];             // <v**4> 4-part, m=2
 
         if (meanIntegV2[j]<0.) cout<<" Sel"<<k+1<<", <V**2> less than zero ! v"
@@ -1049,6 +1049,9 @@ void StFlowCumulantMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.16  2003/09/02 17:58:10  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.15  2003/07/07 21:58:19  posk
 // Made units of momentum GeV/c instead of GeV.
 //

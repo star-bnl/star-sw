@@ -1,3 +1,4 @@
+#include "Stiostream.h"
 #include "StiEvaluatorHistograms.h"
 #include "StMiniMcEvent/StMiniMcEvent.h"
 #include "StMiniMcEvent/StMiniMcPair.h"
@@ -148,7 +149,7 @@ void StiEvaluatorHistograms::calculateSTD(TProfile * h1, TProfile * h2, TH1D * h
       v2=h2->GetBinContent(i);
       double var = v2-v1*v1;
       if (var>0)
-	s = sqrt(var);
+	s = ::sqrt(var);
       else
 	s = -1;
       h->SetBinContent(i,s);

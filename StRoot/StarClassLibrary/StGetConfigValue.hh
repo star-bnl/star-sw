@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGetConfigValue.hh,v 1.2 1999/12/21 15:14:00 ullrich Exp $
+ * $Id: StGetConfigValue.hh,v 1.3 2003/09/02 17:59:34 perev Exp $
  *
  * Author: Thomas Ullrich, Nov 4, 1997
  ***************************************************************************
@@ -41,6 +41,9 @@
  ***************************************************************************
  *
  * $Log: StGetConfigValue.hh,v $
+ * Revision 1.3  2003/09/02 17:59:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  1999/12/21 15:14:00  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -54,8 +57,8 @@
 #ifndef ST_GET_CONFIG_VALUE_HH
 #define ST_GET_CONFIG_VALUE_HH
 
-#include <fstream.h>
-#include <strstream.h>
+#include "Stiostream.h"
+#include <Stsstream.h>
 #include <string>
 #include "StGlobals.hh"
 #if !defined(ST_NO_NAMESPACES)

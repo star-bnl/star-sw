@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsMiniChargeSegment.hh,v 1.2 1999/01/18 21:03:30 lasiuk Exp $
+ * $Id: StTrsMiniChargeSegment.hh,v 1.3 2003/09/02 17:59:16 perev Exp $
  *
  * Author: brian
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsMiniChargeSegment.hh,v $
+ * Revision 1.3  2003/09/02 17:59:16  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.2  1999/01/18 21:03:30  lasiuk
  * Jan 18,1999
  *
@@ -37,7 +40,7 @@
 #ifndef ST_TRS_MINI_CHARGE_SEGMENT_HH
 #define ST_TRS_MINI_CHARGE_SEGMENT_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <vector>
 
 #include "StGlobals.hh"

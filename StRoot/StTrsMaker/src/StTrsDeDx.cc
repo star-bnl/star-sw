@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.14 2000/06/07 02:03:11 lasiuk Exp $
+ * $Id: StTrsDeDx.cc,v 1.15 2003/09/02 17:59:19 perev Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
+ * Revision 1.15  2003/09/02 17:59:19  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.14  2000/06/07 02:03:11  lasiuk
  * exit/abort ultimatum
  *
@@ -170,8 +173,8 @@ void StTrsDeDx::doInitialization()
 	mExponent = 2.2;
 
 	// ??? same as P10 currently  
-	mSigmaTransverse   = 600*micrometer/sqrt(centimeter);
-	mSigmaLongitudinal = 300*micrometer/sqrt(centimeter);
+	mSigmaTransverse   = 600*micrometer/::sqrt(centimeter);
+	mSigmaLongitudinal = 300*micrometer/::sqrt(centimeter);
 	
 	mDensity  = 0.000839*gram/centimeter3;
 	mZa       =  .5;        // Z/A
@@ -184,8 +187,8 @@ void StTrsDeDx::doInitialization()
 	mExponent = 2.0;
 
 	// ??? same as P10 currently  
-	mSigmaTransverse   = 600*micrometer/sqrt(centimeter);
-	mSigmaLongitudinal = 300*micrometer/sqrt(centimeter);
+	mSigmaTransverse   = 600*micrometer/::sqrt(centimeter);
+	mSigmaLongitudinal = 300*micrometer/::sqrt(centimeter);
 	
 	mDensity  = 0.00166*gram/centimeter3;
 	mZa       =  .45;
@@ -198,8 +201,8 @@ void StTrsDeDx::doInitialization()
 	mExponent = 2.0;
 
 	// ArCH4 (90:10) at 160 V/cm    From Alber et al. NIM (NA49)  
-	mSigmaTransverse   = 633*micrometer/sqrt(centimeter);
-	mSigmaLongitudinal = 370*micrometer/sqrt(centimeter);
+	mSigmaTransverse   = 633*micrometer/::sqrt(centimeter);
+	mSigmaLongitudinal = 370*micrometer/::sqrt(centimeter);
 
 	// For P10 (see writeup)
 	mAttachment        = 10.2/(1.e-6*second*bar*bar);//5.167e-4 per microsecond 
@@ -215,7 +218,7 @@ void StTrsDeDx::doInitialization()
     // Common to all
     mMeanFreePath = 1./mPairs;
     mEReduced     = 1 - mExponent;
-    mEE           = pow(mIonize,mEReduced);
+    mEE           = ::pow(mIonize,mEReduced);
     mEndPoint     = 1000*mW;
     mAlfat        = mKonstant*gram/MeV/centimeter2*mZa*mPadLength/centimeter; 
 }
@@ -255,10 +258,10 @@ int StTrsDeDx::secondary(double* primaryEnergy) const
     // Generate a 1/E^n distribution where n is (mExponent)
     
     double energyDistribution =
-	mFlatDistribution.shoot()*(mEE - pow(mEndPoint,mEReduced));
+	mFlatDistribution.shoot()*(mEE - ::pow(mEndPoint,mEReduced));
 
     *primaryEnergy =
-	pow(mEE - energyDistribution,(1/mEReduced));
+	::pow(mEE - energyDistribution,(1/mEReduced));
     
     double numberOfSecondaries = (*primaryEnergy - mIonize)/mW;
 
@@ -311,18 +314,18 @@ double StTrsDeDx::betheBloch(double bg) const
     // shape of rise
     double m = 2.5;
 
-    double xa=log(1.649*mIonize/eV/(28.8*sqrt(mDensity*centimeter3/gram*mZa)));
+    double xa=::log(1.649*mIonize/eV/(28.8*::sqrt(mDensity*centimeter3/gram*mZa)));
 
-    double f = 4.606*(xa-x0)/(pow((x1-x0),m));
+    double f = 4.606*(xa-x0)/(::pow((x1-x0),m));
     
-    double bigx = log(bg)/log(10.);
+    double bigx = ::log(bg)/::log(10.);
     
     // Saturation term
     double d;
     if (bigx<x0)
 	d=0;
     else if ((bigx>x0) && (bigx<x1))
-	d=4.606*(bigx-xa)+f*(pow((x1-bigx),m));
+	d=4.606*(bigx-xa)+f*(::pow((x1-bigx),m));
     else if(bigx>x1)
 	d=4.606*(bigx-xa);
 
@@ -331,11 +334,11 @@ double StTrsDeDx::betheBloch(double bg) const
 
     // Compute the minimum
     double bgMin = 3.;
-    double te = k + 2*log(bgMin) - (sqr(bgMin)/(sqr(bgMin)+1)) - log(sqr(bgMin)/(sqr(bgMin)+1));
-    double Io = mAlfat*((sqr(bgMin)+1)/sqr(bgMin))*(log((electron_mass_c2/MeV*mAlfat)/(sqr(mIonize)))+te);
+    double te = k + 2*::log(bgMin) - (sqr(bgMin)/(sqr(bgMin)+1)) - ::log(sqr(bgMin)/(sqr(bgMin)+1));
+    double Io = mAlfat*((sqr(bgMin)+1)/sqr(bgMin))*(::log((electron_mass_c2/MeV*mAlfat)/(sqr(mIonize)))+te);
       
-    te = k + 2*log(bg) - (sqr(bg)/(sqr(bg)+1)) - log(sqr(bg)/(sqr(bg)+1)) - d;
-    double I = mAlfat*((sqr(bg)+1)/sqr(bg))*(log((electron_mass_c2/MeV*mAlfat)/(sqr(mIonize)))+te);
+    te = k + 2*::log(bg) - (sqr(bg)/(sqr(bg)+1)) - ::log(sqr(bg)/(sqr(bg)+1)) - d;
+    double I = mAlfat*((sqr(bg)+1)/sqr(bg))*(::log((electron_mass_c2/MeV*mAlfat)/(sqr(mIonize)))+te);
 
     return (I/Io);
 }
@@ -370,7 +373,7 @@ double StTrsDeDx::betheBlochTSS(double p, double z, double m)
 
     double percentage[ncomp] = {90.0, 10.0};
 
-    double energy = sqrt(p*p+m*m);
+    double energy = ::sqrt(p*p+m*m);
     double beta   = p/energy;
     double beta2  = beta*beta;
     double gamma  = energy/m;
@@ -383,9 +386,9 @@ double StTrsDeDx::betheBlochTSS(double p, double z, double m)
 	prefactor =
 	    K*z2*Zcomp[icomp]/(Acomp[icomp]/(gram/mole)*beta2)*rhocomp[icomp]; 
      
-	arg = beta*gamma*sqrt(2.*me*emax)/I[icomp];
+	arg = beta*gamma*::sqrt(2.*me*emax)/I[icomp];
 	dedxComp[icomp] =
-	    (weight/rhocomp[icomp])*prefactor*(log(arg)-beta2/2.);
+	    (weight/rhocomp[icomp])*prefactor*(::log(arg)-beta2/2.);
     }
         
     return (rhoP10*(dedxComp[0] + dedxComp[1]));    

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.h,v 1.5 2000/01/27 19:29:50 fisyak Exp $
+ * $Id: StStrangeTagsMaker.h,v 1.6 2003/09/02 17:59:05 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.h,v $
+ * Revision 1.6  2003/09/02 17:59:05  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.5  2000/01/27 19:29:50  fisyak
  * Put StrangeTag to .data
  *
@@ -29,7 +32,7 @@
 #ifndef StStrangeTagsMaker_HH
 #define StStrangeTagsMaker_HH
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TROOT.h"
 #include "StMaker.h"
 #include "tables/St_StrangeTag_Table.h"
@@ -60,7 +63,7 @@ private:
     Float_t         mMassla2;
     
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.5 2000/01/27 19:29:50 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.6 2003/09/02 17:59:05 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StStrangeTagsMaker, 1)   // macro for rootcint
 };

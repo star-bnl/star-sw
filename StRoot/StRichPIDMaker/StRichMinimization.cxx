@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichMinimization.cxx,v 2.6 2000/11/21 16:24:22 horsley Exp $
+ * $Id: StRichMinimization.cxx,v 2.7 2003/09/02 17:58:53 perev Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMinimization.cxx,v $
+ *  Revision 2.7  2003/09/02 17:58:53  perev
+ *  gcc 3.2 updates + WarnOff
+ *
  *  Revision 2.6  2000/11/21 16:24:22  horsley
  *  Major overhaul of StRichArea, introduced monte carlo integration cross check,
  *  all possible areas, angles calculated together. StRichRingCalculator, StRichPIDMaker modified to support new StRichArea. StRichPIDMaker's hit finder
@@ -43,9 +46,8 @@
 #include "StRichMinimization.h"
 
 #include <unistd.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <iomanip.h>
+#include <Stiostream.h>
+#include "Stiostream.h"
 #include <math.h>
 
 #include <stdio.h>

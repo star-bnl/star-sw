@@ -1,3 +1,4 @@
+#include "Stiostream.h"
 #include "StiEvaluator/ResolutionPlots.h"
 #include "StMiniMcEvent/StMiniMcEvent.h"
 #include "StMiniMcEvent/StMiniMcPair.h"
@@ -241,13 +242,13 @@ void ResolutionPlots::fill(StMiniMcEvent* minimcevent)
 	  // only for pull plots: if 0 then ITTF ; if 1 then TPT
 	  if (_pullType==0) 
 	    {
-	      tanError  = sqrt(minimcpair->errPr(4));
-	      curvError = sqrt(minimcpair->errPr(3));
+	      tanError  = ::sqrt(minimcpair->errPr(4));
+	      curvError = ::sqrt(minimcpair->errPr(3));
 	    }
 	  else if (_pullType==1)
 	    {
-	      tanError  = sqrt(minimcpair->errPr(2));
-	      curvError = B*c*sqrt(minimcpair->errPr(4))/100.;
+	      tanError  = ::sqrt(minimcpair->errPr(2));
+	      curvError = B*c*::sqrt(minimcpair->errPr(4))/100.;
 	    } 
 	}
       else // globals
@@ -257,13 +258,13 @@ void ResolutionPlots::fill(StMiniMcEvent* minimcevent)
 	  // only for pull plots: if 0 then ITTF ; if 1 then TPT
 	  if (_pullType==0) 
 	    {
-	      tanError = sqrt(minimcpair->errGl(4));
-	      curvError= sqrt(minimcpair->errGl(3));
+	      tanError = ::sqrt(minimcpair->errGl(4));
+	      curvError= ::sqrt(minimcpair->errGl(3));
 	    }
 	  else if (_pullType==1)
 	    {
-	      tanError = sqrt(minimcpair->errGl(2));
-	      curvError= B*c*sqrt(minimcpair->errGl(4))/100.;
+	      tanError = ::sqrt(minimcpair->errGl(2));
+	      curvError= B*c*::sqrt(minimcpair->errGl(4))/100.;
 	    }
 	}
       ptError = curvError* pt_rec/curv_rec;

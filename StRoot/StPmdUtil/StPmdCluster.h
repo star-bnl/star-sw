@@ -4,7 +4,7 @@
  */
 /**************************************************************
  *
- * $Id: StPmdCluster.h,v 1.2 2003/05/12 12:07:12 subhasis Exp $
+ * $Id: StPmdCluster.h,v 1.3 2003/09/02 17:58:49 perev Exp $
  *
  * Author:
  **************************************************************
@@ -14,6 +14,9 @@
  **************************************************************
 *
 * $Log: StPmdCluster.h,v $
+* Revision 1.3  2003/09/02 17:58:49  perev
+* gcc 3.2 updates + WarnOff
+*
 * Revision 1.2  2003/05/12 12:07:12  subhasis
 * Mapping added
 *
@@ -23,7 +26,7 @@
 #define STAR_StPmdCluster
 
 #include <math.h>
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TArrayI.h"
 #include "StObject.h"
 #include "StPmdUtil/StPmdGeom.h"

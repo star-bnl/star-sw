@@ -1,6 +1,6 @@
 #ifndef HtmlAttribute_H
 #define HtmlAttribute_H
-#include <iostream>
+#include "Stiostream.h"
 #include <string>
 #include <math.h>
 #include <stdexcept>

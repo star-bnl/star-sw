@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.17 2002/11/26 02:23:38 perev Exp $
+// $Id: StObject.cxx,v 1.18 2003/09/02 17:59:24 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.18  2003/09/02 17:59:24  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.17  2002/11/26 02:23:38  perev
 // new ROOT adoptation
 //
@@ -345,7 +348,7 @@ void StXRefManager::AddColl (const StStrArray *sarr)
    fUpd=1;
    UInt_t u;
    const TObject *to, **p;
-   TObject * const *it= sarr->begin(); 
+   const_VecTObjIter it= sarr->begin(); 
    for(int i=0;i<size;i++) {
      if (!(to = it[i]))			continue;
      if (!(u = to->GetUniqueID()))	continue;

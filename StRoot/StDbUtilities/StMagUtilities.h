@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.21 2003/06/27 18:47:12 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.22 2003/09/02 17:57:51 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.22  2003/09/02 17:57:51  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.21  2003/06/27 18:47:12  jhthomas
  * Add new function called FixSpaceChargeDistortion( ,,,,, )
  *
@@ -64,9 +67,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <iomanip.h>
+#include <Stiostream.h>
 #include "TSystem.h"
 #include "TROOT.h"        // Stop at this point and put further includes in .cxx file
 

@@ -1,6 +1,6 @@
 // *-- Author : Victor Perevoztchikov
 // 
-// $Id: StMuEEDemoMaker.cxx,v 1.2 2003/08/28 17:52:57 balewski Exp $
+// $Id: StMuEEDemoMaker.cxx,v 1.3 2003/09/02 17:57:54 perev Exp $
 
 #include "StMuEEDemoMaker.h"
 
@@ -159,8 +159,8 @@ Int_t StMuEEDemoMaker::Make(){
     printf("EEMC depth=%d nClust=%d\n",n,nClusters);
     for (int i=0; i<nClusters; i++) {
       StMuEmcCluster* c =  emc->getCluster(i,n);
-      printf("Cluster(%02i,%02i): energy=%f phi=%f eta=%f nHits=%d
-\n",n,i,c->getEnergy(), c->getPhi(), c->getEta(), c->getNHits() ); 
+      printf("Cluster(%02i,%02i): energy=%f phi=%f eta=%f nHits=%d\n"
+             ,n,i,c->getEnergy(), c->getPhi(), c->getEta(), c->getNHits() ); 
       }
   }
 
@@ -179,6 +179,9 @@ Int_t StMuEEDemoMaker::Make(){
 
 
 // $Log: StMuEEDemoMaker.cxx,v $
+// Revision 1.3  2003/09/02 17:57:54  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  2003/08/28 17:52:57  balewski
 // works for SMD, Wei-Ming fix
 //

@@ -67,7 +67,8 @@ class StStrangeMuDstMaker : public StMaker {
   //@{
   void SetRead (const char* eFile=0, char* treeName=0);
   void SetRead (StFile* eFiles, char* treeName=0);
-  void SetWrite(const char* eFile=0);
+  void SetWrite(const char* eFile);
+  void SetWrite(){SetWrite(0);}
   void SetNoKeep();
   char* GetFile() const;
   //@}
@@ -158,7 +159,7 @@ class StStrangeMuDstMaker : public StMaker {
   virtual void  Clear(Option_t *option="");
   virtual Int_t Finish();
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.14 2003/07/09 21:58:30 genevb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.15 2003/09/02 17:59:04 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   //@}
@@ -341,8 +342,11 @@ inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
 
 //____________________________________________________________________
 //
-// $Id: StStrangeMuDstMaker.h,v 3.14 2003/07/09 21:58:30 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.15 2003/09/02 17:59:04 perev Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.15  2003/09/02 17:59:04  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 3.14  2003/07/09 21:58:30  genevb
 // Use Get/SetMode() from StMaker
 //

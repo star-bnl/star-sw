@@ -144,7 +144,7 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
   const StThreeVectorD& origin = track->geometry()->origin();
   Float_t xO = origin.x();
   Float_t yO = origin.y();
-  Float_t distToOrigin = sqrt( pow(xO, 2) + pow(yO, 2) );    
+  Float_t distToOrigin = ::sqrt( ::pow(xO, 2) + ::pow(yO, 2) );    
   if ( distToOrigin < emcRadius )
   {
     Bool_t projTrackOk = projTrack( position, momentum, track, magField, emcRadius );
@@ -165,7 +165,7 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
 {  
   Float_t startVertexX = mcTrack->startVertex()->position().x();
   Float_t startVertexY = mcTrack->startVertex()->position().y();
-  Float_t startVtxToOrigin = sqrt( pow( startVertexX, 2 ) + pow( startVertexY, 2 ) );
+  Float_t startVtxToOrigin = ::sqrt( ::pow( startVertexX, 2 ) + ::pow( startVertexY, 2 ) );
 
   if ( !mcTrack->stopVertex() && startVtxToOrigin < emcRadius )    
   {
@@ -185,7 +185,7 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
   {
     Float_t stopVertexX = mcTrack->stopVertex()->position().x();
     Float_t stopVertexY = mcTrack->stopVertex()->position().y();
-    stopVtxToOrigin = sqrt( pow( stopVertexX,2 ) + pow(stopVertexY,2) );
+    stopVtxToOrigin = ::sqrt( ::pow( stopVertexX,2 ) + ::pow(stopVertexY,2) );
   }
   
   if (stopVtxToOrigin >= emcRadius)
@@ -320,7 +320,7 @@ Float_t StEmcPosition::getDistTowerToTrack( Double_t trackEta, Double_t trackPhi
     towerToTrackdEta = towerEta-trackEta;
     towerToTrackdPhi = towerPhi-trackPhi;
       
-    mdistTowerToTrack = sqrt( pow(towerToTrackdEta, 2) + pow(towerToTrackdPhi, 2) );
+    mdistTowerToTrack = ::sqrt( ::pow(towerToTrackdEta, 2) + ::pow(towerToTrackdPhi, 2) );
   
     return mdistTowerToTrack;
   }

@@ -1,4 +1,4 @@
-#include <iostream.h>
+#include <Stiostream.h>
 #include <math.h>
 
 #include "RdoFinder.h"
@@ -266,7 +266,7 @@ int RdoFinder::GotoNextCross(float *p,int *last_cross,int pos_side_sector){
                  p[9]*sin(division_ang - M_PI/2);
 
     if(fabs(x_c-x_cross)>p[10]) continue;
-    float delta_y = sqrt(p[10]*p[10] - (x_c-x_cross)*(x_c-x_cross));
+    float delta_y = ::sqrt(p[10]*p[10] - (x_c-x_cross)*(x_c-x_cross));
     float y_c = -p[8]*sin(division_ang - M_PI/2) + 
                  p[9]*cos(division_ang - M_PI/2);
     for(int j=0;j<2;j++){
@@ -371,7 +371,7 @@ int RdoFinder::FindPointsBetween(dst_track_st *t,float *p,float r_first_row, flo
   }
 
   {// finding first z
-    float temp = sqrt((p[0]-x0)*(p[0]-x0)+(p[1]-y0)*(p[1]-y0))/2/p[10];
+    float temp = ::sqrt((p[0]-x0)*(p[0]-x0)+(p[1]-y0)*(p[1]-y0))/2/p[10];
     float temp_ang = (temp<1) ? 2*asin(temp) : M_PI;
     if((x0*x0+y0*y0)>(p[0]*p[0]+p[1]*p[1])){
       p[2] = z0 - temp_ang*p[10]*tan(dip);
@@ -430,7 +430,7 @@ int RdoFinder::FindPointsBetween(dst_track_st *t,float *p,float r_first_row, flo
   }
 
   {// finding last z
-    float temp = sqrt((p[3]-x0)*(p[3]-x0)+(p[4]-y0)*(p[4]-y0))/2/p[10];
+    float temp = ::sqrt((p[3]-x0)*(p[3]-x0)+(p[4]-y0)*(p[4]-y0))/2/p[10];
     float temp_ang = (temp<1) ? 2*asin(temp) : M_PI;
     if((x0*x0+y0*y0)<(p[3]*p[3]+p[4]*p[4])){
       p[5] = z0 + temp_ang*p[10]*tan(dip); 
@@ -527,7 +527,7 @@ int RdoFinder::FindPointsBetween(StTrack *t,float *p,float r_first_row, float r_
   }
 
   {// finding first z
-    float temp = sqrt((p[0]-x0)*(p[0]-x0)+(p[1]-y0)*(p[1]-y0))/2/p[10];
+    float temp = ::sqrt((p[0]-x0)*(p[0]-x0)+(p[1]-y0)*(p[1]-y0))/2/p[10];
     float temp_ang = (temp<1) ? 2*asin(temp) : M_PI;
     if((x0*x0+y0*y0)>(p[0]*p[0]+p[1]*p[1])){
       p[2] = z0 - temp_ang*p[10]*tan(dip);
@@ -586,7 +586,7 @@ int RdoFinder::FindPointsBetween(StTrack *t,float *p,float r_first_row, float r_
   }
 
   {// finding last z
-    float temp = sqrt((p[3]-x0)*(p[3]-x0)+(p[4]-y0)*(p[4]-y0))/2/p[10];
+    float temp = ::sqrt((p[3]-x0)*(p[3]-x0)+(p[4]-y0)*(p[4]-y0))/2/p[10];
     float temp_ang = (temp<1) ? 2*asin(temp) : M_PI;
     if((x0*x0+y0*y0)<(p[3]*p[3]+p[4]*p[4])){
       p[5] = z0 + temp_ang*p[10]*tan(dip); 
@@ -637,7 +637,7 @@ int RdoFinder::FindRowCrossing(float* p,float y_row, float* x, int first_or_seco
     float dy   = fabs(y_row-ly_c); 
     if(dy > p[10]) continue;
 
-    float dx = sqrt(p[10]*p[10] - dy*dy);
+    float dx = ::sqrt(p[10]*p[10] - dy*dy);
     float x1 = lx_c + dx;
     float x2 = lx_c - dx;
     
@@ -682,9 +682,9 @@ int RdoFinder::IsItBetween(float x,float y,float* p){
   float y3 = p[4] - p[9];
 
   if((x1*y2-y1*x2)*(x2*y3-y2*x3)>0){
-    float temp1 = sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))/2/p[10];
+    float temp1 = ::sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))/2/p[10];
     if(temp1>=1) return 0;
-    float temp2 = sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))/2/p[10];
+    float temp2 = ::sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))/2/p[10];
     if(temp2>=1) return 0;
     if(2*asin(temp1)+2*asin(temp2) < M_PI) return 1;
   }

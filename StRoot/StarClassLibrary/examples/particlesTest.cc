@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: particlesTest.cc,v 1.1 1999/05/17 11:10:41 ullrich Exp $
+ * $Id: particlesTest.cc,v 1.2 2003/09/02 17:59:38 perev Exp $
  *
  * Author: Thomas Ullrich, May 1999 
  ***************************************************************************
@@ -11,12 +11,14 @@
  ***************************************************************************
  *
  * $Log: particlesTest.cc,v $
+ * Revision 1.2  2003/09/02 17:59:38  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  1999/05/17 11:10:41  ullrich
  * Initial Revision
  *
  **************************************************************************/
-#include <iostream.h>
-#include <iomanip.h>
+#include <Stiostream.h>
 #include <typeinfo>
 #include "StParticleTable.hh"
 #include "StParticleTypes.hh"

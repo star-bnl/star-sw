@@ -1,5 +1,5 @@
-// $Id: StDefaultFilter.cxx,v 1.10 2002/04/14 21:58:15 perev Exp $
-#include "iostream.h"
+// $Id: StDefaultFilter.cxx,v 1.11 2003/09/02 17:58:08 perev Exp $
+#include "Stiostream.h"
 #include "TH1.h"
 #include "StDefaultFilter.h"
 #include "TTableSorter.h"
@@ -276,6 +276,9 @@ void StDefaultFilter::Distribution(St_dst_track *track,TH1F &de)
 }
 //_____________________________________________________________________________
 // $Log: StDefaultFilter.cxx,v $
+// Revision 1.11  2003/09/02 17:58:08  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.10  2002/04/14 21:58:15  perev
 // Increase size of hit 10 times
 //

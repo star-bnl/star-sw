@@ -58,27 +58,27 @@ void StHbtV0::UpdateV0(){
    mPtotPos= mMomPos.mag();
    mPtNeg  = mMomNeg.perp();
    mPtotNeg= mMomNeg.mag();
-   mELambda= sqrt(mPtotV0*mPtotV0+M_LAMBDA*M_LAMBDA);
-   mEK0Short= sqrt(mPtotV0*mPtotV0+M_KAON_0_SHORT*M_KAON_0_SHORT);
-   mEPosProton = sqrt(mPtotPos*mPtotPos+M_PROTON*M_PROTON);
-   mENegProton = sqrt(mPtotNeg*mPtotNeg+M_PROTON*M_PROTON);
-   mEPosPion = sqrt(mPtotPos*mPtotPos+M_PION_PLUS*M_PION_PLUS);
-   mENegPion = sqrt(mPtotNeg*mPtotNeg+M_PION_MINUS*M_PION_MINUS);
+   mELambda= ::sqrt(mPtotV0*mPtotV0+M_LAMBDA*M_LAMBDA);
+   mEK0Short= ::sqrt(mPtotV0*mPtotV0+M_KAON_0_SHORT*M_KAON_0_SHORT);
+   mEPosProton = ::sqrt(mPtotPos*mPtotPos+M_PROTON*M_PROTON);
+   mENegProton = ::sqrt(mPtotNeg*mPtotNeg+M_PROTON*M_PROTON);
+   mEPosPion = ::sqrt(mPtotPos*mPtotPos+M_PION_PLUS*M_PION_PLUS);
+   mENegPion = ::sqrt(mPtotNeg*mPtotNeg+M_PION_MINUS*M_PION_MINUS);
   
-   MomNegAlongV0 =  mMomNeg*mMomV0 / sqrt(pow(mPtotV0,2));
-   MomPosAlongV0 =  mMomPos*mMomV0 / sqrt(pow(mPtotV0,2));
+   MomNegAlongV0 =  mMomNeg*mMomV0 / ::sqrt(::pow(mPtotV0,2));
+   MomPosAlongV0 =  mMomPos*mMomV0 / ::sqrt(::pow(mPtotV0,2));
 
    mAlphaV0 = (MomPosAlongV0-MomNegAlongV0)/(MomPosAlongV0+MomNegAlongV0);
-   mPtArmV0 =  sqrt(mPtotPos*mPtotPos - MomPosAlongV0*MomPosAlongV0);
-   mMassLambda = sqrt(pow(mEPosProton+mENegPion,2)-pow(mPtotV0,2));
-   mMassAntiLambda = sqrt(pow(mENegProton+mEPosPion,2)-pow(mPtotV0,2));
-   mMassK0Short = sqrt(pow(mENegPion+mEPosPion,2)-pow(mPtotV0,2));
+   mPtArmV0 =  ::sqrt(mPtotPos*mPtotPos - MomPosAlongV0*MomPosAlongV0);
+   mMassLambda = ::sqrt(::pow(mEPosProton+mENegPion,2)-::pow(mPtotV0,2));
+   mMassAntiLambda = ::sqrt(::pow(mENegProton+mEPosPion,2)-::pow(mPtotV0,2));
+   mMassK0Short = ::sqrt(::pow(mENegPion+mEPosPion,2)-::pow(mPtotV0,2));
 
-   mRapLambda = 0.5*log( (mELambda+mMomV0.z()) / (mELambda-mMomV0.z()) );
-   mCTauLambda = M_LAMBDA*(mDecayLengthV0) / sqrt( pow((double)mMomV0.mag(),2.) );
+   mRapLambda = 0.5*::log( (mELambda+mMomV0.z()) / (mELambda-mMomV0.z()) );
+   mCTauLambda = M_LAMBDA*(mDecayLengthV0) / ::sqrt( ::pow((double)mMomV0.mag(),2.) );
    
-   mRapK0Short = 0.5*log( (mEK0Short+mMomV0.z()) / (mEK0Short-mMomV0.z()) );
-   mCTauK0Short = M_KAON_0_SHORT*(mDecayLengthV0) / sqrt( pow((double)mMomV0.mag(),2.) );
+   mRapK0Short = 0.5*::log( (mEK0Short+mMomV0.z()) / (mEK0Short-mMomV0.z()) );
+   mCTauK0Short = M_KAON_0_SHORT*(mDecayLengthV0) / ::sqrt( ::pow((double)mMomV0.mag(),2.) );
 
 }
 // -----------------------------------------------------------------------

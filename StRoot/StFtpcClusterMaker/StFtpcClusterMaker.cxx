@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.56 2003/08/21 14:27:24 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.57 2003/09/02 17:58:14 perev Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.57  2003/09/02 17:58:14  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.56  2003/08/21 14:27:24  jcs
 // remove temporary fix to prevent segmentation violation which occurred when  more than one run per job
 //
@@ -180,7 +183,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -764,7 +767,7 @@ void StFtpcClusterMaker::MakeHistograms()
 //  m_npad_nbin->Fill(npad,nbin);
   
    // Fill cluster radius histograms
-   Float_t rpos = sqrt(r->x*r->x + r->y*r->y);
+   Float_t rpos = ::sqrt(r->x*r->x + r->y*r->y);
    if (r->row <=10 ) 
      {
        m_cluster_radial_West->Fill(rpos);

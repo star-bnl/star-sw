@@ -3,7 +3,7 @@
 // StTreeMaker class for Makers                                      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
+#include <Stiostream.h>
 #include "TError.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"

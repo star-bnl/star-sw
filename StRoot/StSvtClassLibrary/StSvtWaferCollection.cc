@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtWaferCollection.cc,v 1.1 2001/08/16 21:02:04 munhoz Exp $
+ * $Id: StSvtWaferCollection.cc,v 1.2 2003/09/02 17:59:06 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtWaferCollection.cc,v $
+ * Revision 1.2  2003/09/02 17:59:06  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 1.1  2001/08/16 21:02:04  munhoz
  * changing StObjArray to StStrArray. StSvtConfig reestructured. New classes for geometry DB
  *
@@ -26,7 +29,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StObject.h"
 #include "StSvtWaferCollection.hh"
 #include "StSvtConfig.hh"

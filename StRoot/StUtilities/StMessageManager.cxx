@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.32 2001/05/14 20:53:20 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.33 2003/09/02 17:59:20 perev Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.33  2003/09/02 17:59:20  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.32  2001/05/14 20:53:20  genevb
 // Add features to examine memory use, switch from TDatime to time_t
 //
@@ -525,7 +528,7 @@ messVecIter StMessageManager::FindMessageIter(const char* s1, const char* s2,
     if ((strstr(curMess,s1)) && (strstr(curMess,s2)) &&
         (strstr(curMess,s3)) && (strstr(curMess,s4))) return current;
   }
-  return 0;
+  return list->end();
 }
 //_____________________________________________________________________________
 StMessage* StMessageManager::FindMessage(const char* s1, const char* s2,
@@ -535,7 +538,7 @@ StMessage* StMessageManager::FindMessage(const char* s1, const char* s2,
 // First message which contains matches to the strings s1,s2,s3,s4 is returned.
 //
   messVecIter current = FindMessageIter(s1,s2,s3,s4,list);
-  return ( (current) ? (*current) : 0 );
+  return  (current!=list->end()) ? (*current) : 0 ;
 }
 //_____________________________________________________________________________
 messVec* StMessageManager::FindMessageList(const char* s1, const char* s2,
@@ -577,12 +580,12 @@ int StMessageManager::RemoveMessage(StMessage* mess) {
   if (!mess) return 3;
   const char* curMess = mess->GetMessage();
   messVecIter current = FindMessageIter(curMess);
-  if (!current) return 1;
+  if (current==messList.end()) return 1;
   messList.erase(current);
   int typeN = messTypeList->FindTypeNum(mess->GetType());
   current = FindMessageIter(curMess,emptyString,emptyString,
                                         emptyString,messCollection[typeN]);
-  if (!current) return 2;
+  if (current==messCollection[typeN]->end()) return 2;
   messCollection[typeN]->erase(current);
   delete mess;
   if (mess==gMessage) gMessage = 0;
@@ -705,7 +708,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.32 2001/05/14 20:53:20 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.33 2003/09/02 17:59:20 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

@@ -6,8 +6,11 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: StMicky.cxx,v 1.5 1999/12/07 22:33:10 fine Exp $
+// $Id: StMicky.cxx,v 1.6 2003/09/02 17:59:24 perev Exp $
 // $Log: StMicky.cxx,v $
+// Revision 1.6  2003/09/02 17:59:24  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.5  1999/12/07 22:33:10  fine
 // Clean up to remove compilation warnings
 //
@@ -28,7 +31,7 @@
 //
 //
 
-#include <iostream.h>
+#include <Stiostream.h>
 #include "StMicky.h"
 
 inline double dabs(double d){ return d>0?d: -d;}

@@ -13,8 +13,8 @@
  *
  ***************************************************************************/
 
-#include <iostream.h>  
-#include <strstream.h>
+#include <Stiostream.h>  
+#include <Stsstream.h>
 #include <stdlib.h>
 
 #include "StHbtMaker/Base/StHbtThPair.hh"
@@ -117,7 +117,7 @@ double StHbtThPair::RealqSideCMS() const {
     double x2 = mMomentum2->x();  double y2 = mMomentum2->y();
 
     double xt = x1+x2;  double yt = y1+y2;
-    double k1 = sqrt(xt*xt+yt*yt);
+    double k1 = ::sqrt(xt*xt+yt*yt);
 
     double tmp = 2.0*(x1*y2-x2*y1)/k1;
 
@@ -130,7 +130,7 @@ double StHbtThPair::RealqOutCMS() const {
     double dy = mMomentum1->y() - mMomentum2->y();
     double yt = mMomentum1->y() + mMomentum2->y();
 
-    double k1 = (sqrt(xt*xt+yt*yt));
+    double k1 = (::sqrt(xt*xt+yt*yt));
     double k2 = (dx*xt+dy*yt);
     double tmp = k2/k1;
     return (tmp);
@@ -143,7 +143,7 @@ double StHbtThPair::RealqLongCMS() const {
     double tt = mMomentum1->t() + mMomentum2->t();
 
     double beta = zz/tt;
-    double gamma = 1.0/sqrt(1.0 - beta*beta);
+    double gamma = 1.0/::sqrt(1.0 - beta*beta);
 
     double temp = gamma*(dz - beta*dt);
     return (temp);
@@ -158,9 +158,9 @@ double StHbtThPair::RealqOutPf() const
   double xt = mMomentum1->x() + mMomentum2->x();
   double yt = mMomentum1->y() + mMomentum2->y();
   
-  double k1 = sqrt(xt*xt + yt*yt);
+  double k1 = ::sqrt(xt*xt + yt*yt);
   double bOut = k1/tt;
-  double gOut = 1.0/sqrt(1.0 - bOut*bOut);
+  double gOut = 1.0/::sqrt(1.0 - bOut*bOut);
   
   double temp = gOut*(this->RealqOutCMS() - bOut*dt);
   return (temp);
@@ -196,10 +196,10 @@ void StHbtThPair::calcMomParameters() const{ // fortran like function! faster?
   double tP = tPz*tPz;
   double tMt = tE*tE - tP;
   tP += mPt;
-  tP = sqrt(tP);
-  double tM =   sqrt(tMt - mPt);
-  tMt = sqrt(tMt);
-  mPt = sqrt(mPt);
+  tP = ::sqrt(tP);
+  double tM =   ::sqrt(tMt - mPt);
+  tMt = ::sqrt(tMt);
+  mPt = ::sqrt(mPt);
   mBetat = mPt/tMt;
   mUt = mPt/tMt;
 
@@ -216,7 +216,7 @@ void StHbtThPair::calcMomParameters() const{ // fortran like function! faster?
   // Boost to pair cms
   mKStarOut = tMt/tM * (mKStarOut - mPt/tMt * tE1L);
 
-  mKStar = sqrt(mKStarOut*mKStarOut+mKStarSide*mKStarSide+
+  mKStar = ::sqrt(mKStarOut*mKStarOut+mKStarSide*mKStarSide+
 		mKStarLong*mKStarLong);
 
   mCVK = (mKStarOut*mPt + mKStarLong*tPz)/mKStar/mCVK;
@@ -234,16 +234,16 @@ void StHbtThPair::calcPosParameters() const{ // fortran like function! faster?
   double tE = mMomentum1->e()+mMomentum2->e();
   double tPt = tPx*tPx + tPy*tPy;
   double tMt = tE*tE - tPz*tPz;
-  double tM =   sqrt(tMt - tPt);
-  tMt = sqrt(tMt);
-  tPt = sqrt(tPt);
+  double tM =   ::sqrt(tMt - tPt);
+  tMt = ::sqrt(tMt);
+  tPt = ::sqrt(tPt);
    
   double tDX = mEmPoint1->x()-mEmPoint2->x();
   double tDY = mEmPoint1->y()-mEmPoint2->y();
   mRLong = mEmPoint1->z()-mEmPoint2->z();
   mDTime = mEmPoint1->t()-mEmPoint2->t();
   
-  mRTrans = tDX>0.? sqrt(tDX*tDX+tDY*tDY) : -1.*sqrt(tDX*tDX+tDY*tDY);
+  mRTrans = tDX>0.? ::sqrt(tDX*tDX+tDY*tDY) : -1.*::sqrt(tDX*tDX+tDY*tDY);
   mROut = (tDX*tPx + tDY*tPy)/tPt;
   mRSide = (-tDX*tPy + tDY*tPx)/tPt;
   mRSidePairCMS = mRSide;
@@ -257,7 +257,7 @@ void StHbtThPair::calcPosParameters() const{ // fortran like function! faster?
   tGamma = tMt/tM;
   mROutPairCMS = tGamma*(mROut - tBeta* mDTimePairLCMS);
   mDTimePairCMS = tGamma*(mDTimePairLCMS - tBeta* mROut);
-  mRStar = sqrt(mROutPairCMS*mROutPairCMS + mRSidePairCMS*mRSidePairCMS +
+  mRStar = ::sqrt(mROutPairCMS*mROutPairCMS + mRSidePairCMS*mRSidePairCMS +
 		mRLongPairCMS*mRLongPairCMS);
 
 
@@ -271,7 +271,7 @@ void StHbtThPair::calcPosParameters() const{ // fortran like function! faster?
   //mRLong = Pz*mRLong>0? mRLong : -mRLong;
   //mRLongPairCMS = Pz*mRLongPairCMS>0? mRLongPairCMS : -mRLongPairCMS;
   mDTimePairCMS = (E* mDTime - tRS12) / M;
-  mRStar = sqrt(DXPairCMS*DXPairCMS + DYPairCMS*DYPairCMS +
+  mRStar = ::sqrt(DXPairCMS*DXPairCMS + DYPairCMS*DYPairCMS +
 		mRLongPairCMS * mRLongPairCMS);
   mROutPairCMS = (DXPairCMS*Px + DYPairCMS*Py)/Ptrans;
   mRSidePairCMS = (-DXPairCMS*Py + DYPairCMS*Px)/Ptrans;

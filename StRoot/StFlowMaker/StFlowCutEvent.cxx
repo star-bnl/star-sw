@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.30 2003/07/30 22:05:28 oldi Exp $
+// $Id: StFlowCutEvent.cxx,v 1.31 2003/09/02 17:58:11 perev Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -9,8 +9,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
-#include <iomanip.h>
+#include <Stiostream.h>
 #include <stdlib.h>
 #include "StFlowCutEvent.h"
 #include "StFlowCutTrack.h"
@@ -358,11 +357,11 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StEvent* pEvent) {
   // Tpc
   float etaSymZSlopeTpc = 0.003;
   etaSymTpc += (etaSymZSlopeTpc * vertexZ); // correction for acceptance
-  etaSymTpc *= sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
+  etaSymTpc *= ::sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
   // Ftpc
   //float etaSymZSlopeFtpc = 0.003;  // Has to be evaluated, still, therefore ...
   //etaSymFtpc += (etaSymZSlopeFtpc * vertexZ); // ... NOT correctly corrected for acceptance
-  etaSymFtpc *= sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN)); // corrected for statistics
+  etaSymFtpc *= ::sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN)); // corrected for statistics
 
   if (mEtaSymTpcCuts[1] > mEtaSymTpcCuts[0] && 
       (etaSymTpc < mEtaSymTpcCuts[0] || etaSymTpc >= mEtaSymTpcCuts[1])) {
@@ -410,11 +409,11 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StFlowPicoEvent* pPicoEvent) {
   // Tpc
   float etaSymZSlopeTpc = 0.003;
   etaSymTpc += (etaSymZSlopeTpc * vertexZ); // correction for acceptance
-  etaSymTpc *= sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
+  etaSymTpc *= ::sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
   // Ftpc
   //float etaSymZSlopeFtpc = 0.003;  // Has to be evaluated, still, therefore ...
   //etaSymFtpc += (etaSymZSlopeFtpc * vertexZ); // ... NOT correctly corrected for acceptance
-  etaSymFtpc *= sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN)); // corrected for statistics
+  etaSymFtpc *= ::sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN)); // corrected for statistics
 
   if (mEtaSymTpcCuts[1] > mEtaSymTpcCuts[0] && 
       (etaSymTpc < mEtaSymTpcCuts[0] || etaSymTpc >= mEtaSymTpcCuts[1])) {
@@ -463,11 +462,11 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StMuEvent* pMuEvent) {
   // Tpc
   float etaSymZSlopeTpc = 0.003;
   etaSymTpc += (etaSymZSlopeTpc * vertexZ); // correction for acceptance
-  etaSymTpc *= sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
+  etaSymTpc *= ::sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
   // Ftpc
   //float etaSymZSlopeFtpc = 0.003;  // Has to be evaluated, still, therefore ...
   //etaSymFtpc += (etaSymZSlopeFtpc * vertexZ); // ... NOT correctly corrected for acceptance
-  etaSymFtpc *= sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN)); // corrected for statistics
+  etaSymFtpc *= ::sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN)); // corrected for statistics
 
   if (mEtaSymTpcCuts[1] > mEtaSymTpcCuts[0] && 
       (etaSymTpc < mEtaSymTpcCuts[0] || etaSymTpc >= mEtaSymTpcCuts[1])) {
@@ -526,6 +525,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.31  2003/09/02 17:58:11  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.30  2003/07/30 22:05:28  oldi
 // To get rid of beam gas events events with one empty FTPC or one empty half of
 // the TPC are removed.
@@ -590,7 +592,7 @@ void StFlowCutEvent::PrintCutList() {
 // Changed to ConstIterator for new StEvent and removed comparison int uint
 //
 // Revision 1.14  2000/07/12 17:54:33  posk
-// Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
+// Added chi2 and dca cuts. Multiplied EtaSym by ::sqrt(mult).
 // Apply cuts when reading picoevent file.
 //
 // Revision 1.13  2000/06/30 14:48:29  posk

@@ -8,7 +8,7 @@
 //adapted from Akio Ogawa's code
 
 //std
-#include <iostream>
+#include "Stiostream.h"
 #include <cmath>
 #include <algorithm>
 
@@ -58,7 +58,7 @@ double StJetEtCell::distance(const StJetEtCell& rhs) const
 {
     double dEta = deltaEta(rhs);
     double dPhi = deltaPhi(rhs);
-    return sqrt(dEta*dEta + dPhi*dPhi);
+    return ::sqrt(dEta*dEta + dPhi*dPhi);
 }
 
 const StFourVec& StJetEtCell::centroid()

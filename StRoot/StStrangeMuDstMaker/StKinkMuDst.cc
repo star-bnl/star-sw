@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.cc,v 3.8 2002/04/30 16:02:47 genevb Exp $
+ * $Id: StKinkMuDst.cc,v 3.9 2003/09/02 17:59:04 perev Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.cc,v $
+ * Revision 3.9  2003/09/02 17:59:04  perev
+ * gcc 3.2 updates + WarnOff
+ *
  * Revision 3.8  2002/04/30 16:02:47  genevb
  * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
  *
@@ -85,7 +88,7 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex) : StKinkBase()
     mParentPrimMomentumY = 999.;
     mParentPrimMomentumZ = 999.;
   }
-  mParentPrimMomentum = sqrt( mParentPrimMomentumX*mParentPrimMomentumX +
+  mParentPrimMomentum = ::sqrt( mParentPrimMomentumX*mParentPrimMomentumX +
                           mParentPrimMomentumY*mParentPrimMomentumY +
                           mParentPrimMomentumZ*mParentPrimMomentumZ );
 
@@ -183,7 +186,7 @@ void
 StKinkMuDst::findTransverseMomentum()
 {
   mTransverseMomentum = 
-    sqrt( mParentMomentumX * mParentMomentumX
+    ::sqrt( mParentMomentumX * mParentMomentumX
 	+ mParentMomentumY * mParentMomentumY );
 }
 
@@ -191,7 +194,7 @@ void
 StKinkMuDst::findTransverseMassKaon()
 {
   mTransverseMassKaon = 
-    sqrt(  M_KAON_PLUS * M_KAON_PLUS
+    ::sqrt(  M_KAON_PLUS * M_KAON_PLUS
 	 + mTransverseMomentum * mTransverseMomentum );
 }
 
@@ -199,7 +202,7 @@ void
 StKinkMuDst::findTransverseMassPion()
 {
   mTransverseMassPion = 
-    sqrt(  M_PION_PLUS * M_PION_PLUS
+    ::sqrt(  M_PION_PLUS * M_PION_PLUS
 	 + mTransverseMomentum * mTransverseMomentum );
 }
 
@@ -207,25 +210,25 @@ void
 StKinkMuDst::findRapidityKaon()
 {
   Float_t mTotalEnergy = 
-    sqrt( M_KAON_PLUS * M_KAON_PLUS
+    ::sqrt( M_KAON_PLUS * M_KAON_PLUS
 	+ mParentMomentumX * mParentMomentumX
 	+ mParentMomentumY * mParentMomentumY
 	+ mParentMomentumZ * mParentMomentumZ );
  
   mRapidityKaon = 
-    log( (mTotalEnergy + mParentMomentumZ)/mTransverseMassKaon );
+    ::log( (mTotalEnergy + mParentMomentumZ)/mTransverseMassKaon );
 }
 
 void
 StKinkMuDst::findRapidityPion()
 {
   Float_t mTotalEnergy = 
-    sqrt( M_PION_PLUS * M_PION_PLUS
+    ::sqrt( M_PION_PLUS * M_PION_PLUS
 	+ mParentMomentumX * mParentMomentumX
 	+ mParentMomentumY * mParentMomentumY
 	+ mParentMomentumZ * mParentMomentumZ );
  
   mRapidityPion = 
-    log( (mTotalEnergy + mParentMomentumZ)/mTransverseMassPion );
+    ::log( (mTotalEnergy + mParentMomentumZ)/mTransverseMassPion );
 }
 

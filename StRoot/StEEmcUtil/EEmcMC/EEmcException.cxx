@@ -1,5 +1,8 @@
-// $Id: EEmcException.cxx,v 1.2 2003/02/20 20:13:20 balewski Exp $
+// $Id: EEmcException.cxx,v 1.3 2003/09/02 17:57:56 perev Exp $
 // $Log: EEmcException.cxx,v $
+// Revision 1.3  2003/09/02 17:57:56  perev
+// gcc 3.2 updates + WarnOff
+//
 // Revision 1.2  2003/02/20 20:13:20  balewski
 // fixxy
 // xy
@@ -19,7 +22,7 @@
 //
 
 #include <stdio.h>
-#include <iostream.h>
+#include <Stiostream.h>
 
 #include "EEmcException.h"
 
