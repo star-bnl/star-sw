@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.24 1999/12/15 01:28:56 nystrand Exp $
+// $Id: StPrimaryMaker.cxx,v 1.25 1999/12/16 19:00:24 margetis Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.25  1999/12/16 19:00:24  margetis
+// copy n_max_point to primtrk variable
+//
 // Revision 1.24  1999/12/15 01:28:56  nystrand
 // changed return code from lmv to be consistent with evr
 //
@@ -390,6 +393,7 @@ Int_t StPrimaryMaker::Make(){
   dst_track_st* primtrkPtr = primtrk->GetTable();  
   for( Int_t i=0; i<primtrk->GetNRows(); i++, globtrkPtr++, primtrkPtr++) {
     primtrkPtr->id_start_vertex = globtrkPtr->id_start_vertex;
+    primtrkPtr->n_max_point = globtrkPtr->n_max_point;
   } 
  
 
