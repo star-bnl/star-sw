@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.7 2003/02/19 03:16:05 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.8 2003/03/18 22:37:43 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.8  2003/03/18 22:37:43  calderon
+ * Added member mSubProcessId which is used for Pythia events.
+ * Only is set from constructor from g2t_event table.
+ *
  * Revision 2.7  2003/02/19 03:16:05  calderon
  * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
  * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
@@ -89,6 +93,7 @@ public:
     unsigned long                zEast() const;
     unsigned long                nEast() const;
     unsigned long                numberOfPrimaryTracks() const;
+    unsigned long                subProcessId() const;
     float                        impactParameter() const;
     float                        phiReactionPlane() const;
     float                        triggerTimeOffset() const;
@@ -158,6 +163,7 @@ protected:
     unsigned long                  mZEast;
     unsigned long                  mNEast;
     unsigned long                  mPrimaryTracks;
+    unsigned long                  mSubProcessId; // Pythia subprocess Id
     float                          mImpactParameter;
     float                          mPhiReactionPlane;
     float                          mTriggerTimeOffset;
@@ -201,6 +207,8 @@ inline unsigned long StMcEvent::zEast() const { return mZEast;}
 inline unsigned long StMcEvent::nEast() const { return mNEast;}
 
 inline unsigned long StMcEvent::numberOfPrimaryTracks() const { return mPrimaryTracks;}
+
+inline unsigned long StMcEvent::subProcessId() const { return mSubProcessId;}
 
 inline float StMcEvent::impactParameter() const { return mImpactParameter; }
 
