@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.84  1999/08/29 17:21:51  fisyak
+#  Add i386_redhat60
+#
 #  Revision 1.83  1999/08/20 13:13:28  fisyak
 #  Devorce StAF and STAR Library
 #
@@ -227,7 +230,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/08/20 13:13:28 $ 
+#             Last modification $Date: 1999/08/29 17:21:51 $ 
 #. default setings
 
 MAKE  := gmake
@@ -434,7 +437,7 @@ ifneq (,$(findstring $(STAR_SYS),rs_aix31 rs_aix32 rs_aix41))
   FEXTEND := -e
 endif 
 
-ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_redhat52))
+ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_redhat52 i386_redhat60))
 #    case linux but gcc is EGCS
 #  ====================
   LINUX :=YESS
