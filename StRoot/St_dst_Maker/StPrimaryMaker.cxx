@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.44 2000/04/20 20:38:51 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.45 2000/04/29 19:57:23 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.45  2000/04/29 19:57:23  caines
+// Protection for zero global tracks and tpc hits not on tpc tracks
+//
 // Revision 1.44  2000/04/20 20:38:51  caines
 // More fixing for the -1 problem
 //
@@ -281,8 +284,11 @@ Int_t StPrimaryMaker::Make(){
   St_DataSetIter matchI(match);         
   
   St_dst_track     *globtrk  = (St_dst_track *) matchI("globtrk");
+
+  if (! globtrk)    {globtrk = new St_dst_track("globtrk",1); AddGarb(globtrk);}
+
   St_svm_evt_match *evt_match = (St_svm_evt_match *) matchI("evt_match");
-  St_sgr_groups     *tpc_groups = (St_sgr_groups *) matchI("tpc_groups");
+  if (! globtrk)    {evt_match = new St_svm_evt_match("evt_match",1); AddGarb(evt_match);}
   St_dst_track     *primtrk     = 0;   
 
   St_dst_vertex *vertex = new St_dst_vertex("vertex", 4); 
@@ -317,6 +323,9 @@ Int_t StPrimaryMaker::Make(){
   }
   if (! tphit)    {tphit = new St_tcl_tphit("tphit",1); AddGarb(tphit);} 
   
+  St_sgr_groups     *tpc_groups = (St_sgr_groups *) matchI("tpc_groups");
+  if (! tpc_groups)    {tpc_groups = new St_sgr_groups("tpc_groups",1); AddGarb(tpc_groups);} 
+  
   St_DataSet     *svtracks = GetInputDS("svt_tracks");
   St_DataSet     *svthits  = GetInputDS("svt_hits");
   
@@ -344,7 +353,12 @@ Int_t StPrimaryMaker::Make(){
     if( !stk_track){ stk_track = new St_stk_track("stk_tracks",5000); AddGarb(stk_track);}
   } 
 
-  long NGlbTrk = globtrk->GetNRows();
+  long NGlbTrk = 0;
+
+  if( globtrk){
+   NGlbTrk = globtrk->GetNRows();
+    
+  }
 
   if (m_fixedVertex) {  // Fixed primary vertex
     gMessMgr->Warning("StPrimaryMaker: --------- WARNING!!! ---------","E-");
@@ -450,8 +464,7 @@ Int_t StPrimaryMaker::Make(){
     
     // egr2
     if (tphit && stk_track) {
-      int nglob = globtrk->GetNRows();
-      primtrk = new St_dst_track("primtrk",nglob);
+      primtrk = new St_dst_track("primtrk", NGlbTrk);
       AddData(primtrk);
       
       if(Debug())
