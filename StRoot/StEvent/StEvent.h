@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.19 2001/04/23 19:28:14 ullrich Exp $
+ * $Id: StEvent.h,v 2.20 2001/05/17 22:56:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.20  2001/05/17 22:56:33  ullrich
+ * Removed all usage of dst_summary_param.
+ *
  * Revision 2.19  2001/04/23 19:28:14  ullrich
  * Added StClusteringHints and methods to access it.
  *
@@ -84,7 +87,6 @@
 
 class event_header_st;
 class dst_event_summary_st;
-class dst_summary_param_st;
 class StEventClusteringHints;
 class StEventInfo;
 class StEventSummary;
@@ -109,8 +111,7 @@ class StEvent : public St_DataSet {
 public:
     StEvent();
     StEvent(const event_header_st&,
-            const dst_event_summary_st&,
-            const dst_summary_param_st&);
+            const dst_event_summary_st&);
     StEvent(const event_header_st&);
     virtual ~StEvent();
 
