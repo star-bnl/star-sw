@@ -19,6 +19,7 @@
 * 1Aug98  K. Turner - tid now separated out of tpt
 * 3Aug98  K. Turner - use new detp geometry command instead of bfc_gstar_setup
 * 7Aug98  K. Turner - removed unneeded user/input under evgin in bfc_process 
+* 11Aug98 K. Turner - now make split_off default for running gstar 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -39,7 +40,7 @@
 *  THESE NEXT 4 MUST BE DONE IN THIS ORDER!!!!
    message ' *** SET GEOMETRY: physics type -->   ' [phystype]
    message ' *** SET GEOMETRY: geometry type -->  ' [geomtype]
-   detp geometry [phystype] [geomtype]
+   detp geometry [phystype] [geomtype] split_off
    exec bfc_util#bfc_g2t_b4_load    [chain]
    exec load_libraries#run          [domain]
    exec bfc_util#bfc_g2t_after_load [chain]
