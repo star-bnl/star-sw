@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.79 2000/01/11 15:28:32 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.80 2000/01/31 22:15:26 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.80  2000/01/31 22:15:26  kathy
+// added Gene's code to make mass plot for Xi's in table and StEvent versions
+//
 // Revision 1.79  2000/01/11 15:28:32  kathy
 // limits on residual histograms changed; St_QA_Maker changed to give proper inputs to routine prop_one_track which is from pams/global/egr - NOTE! Now St_QA_Maker class requires that you load the St_global librarycvs -n update!
 //
@@ -1001,7 +1004,8 @@ void St_QA_Maker::MakeHistV0(){
     m_v0->Fill(cntrows);
 
     Float_t m_prmass2 = proton_mass_c2*proton_mass_c2;
-    Float_t m_pimass2 = (0.139567*0.139567);
+    Float_t m_pimass2 = (pion_minus_mass_c2*pion_minus_mass_c2);
+
     for (Int_t k=0; k<dst_v0_vertex->GetNRows(); k++, v0++){
       Float_t e1a = v0->pos_px*v0->pos_px +  v0->pos_py*v0->pos_py
 	+ v0->pos_pz*v0->pos_pz;
@@ -1111,15 +1115,62 @@ void St_QA_Maker::MakeHistXi(){
     
   St_DataSetIter dstI(dst);           
 
-  St_dst_xi_vertex *xi = (St_dst_xi_vertex*) dstI["dst_xi_vertex"];
-  if (xi) {
+  St_dst_xi_vertex *dst_xi = (St_dst_xi_vertex*) dstI["dst_xi_vertex"];
+  if (dst_xi) {
 
     Int_t cntrows=0;
-    cntrows = xi->GetNRows();
+    cntrows = dst_xi->GetNRows();
     m_xi_tot->Fill(cntrows);
 
-  }
+    St_dst_v0_vertex *dst_v0 = (St_dst_v0_vertex*)
+dstI["dst_v0_vertex"];
+    if (!dst_v0) {
+      cout << "Error! No V0 table found for Xi's.";
+      return;
+    }
 
+    dst_xi_vertex_st *xi = dst_xi->GetTable();
+    dst_v0_vertex_st *v0sav = dst_v0->GetTable();
+    Int_t v0last = dst_v0->GetNRows() - 1;
+    dst_v0_vertex_st *v0end = dst_v0->GetTable(v0last);
+    Float_t m_lamass2 = (lambda_mass_c2*lambda_mass_c2);
+    Float_t m_pimass2 = (pion_minus_mass_c2*pion_minus_mass_c2);
+
+    for (Int_t k=0; k<cntrows; k++, xi++){
+      dst_v0_vertex_st *v0 = v0sav;
+
+      while ((v0 != v0end) && (v0->id != xi->id_v0)) v0++;
+      if (v0->id != xi->id_v0) {
+        cout << "Error! V0 associated with Xi not found." << endl;
+        return;
+      }
+
+      Float_t px = v0->pos_px+v0->neg_px;
+      Float_t py = v0->pos_py+v0->neg_py;
+      Float_t pz = v0->pos_pz+v0->neg_pz;
+
+      Float_t e1 = px*px + py*py + pz*pz;
+      e1 +=  m_lamass2;
+
+      Float_t e2 = xi->px_b*xi->px_b +  xi->py_b*xi->py_b
+        + xi->pz_b*xi->pz_b;
+      e2 += m_pimass2;
+
+      e1 = sqrt(e1);
+      e2 = sqrt(e2);
+      Float_t e3 = e1 + e2;
+
+      px += xi->px_b;
+      py += xi->py_b;
+      pz += xi->pz_b;
+
+      Float_t psq =  px*px + py*py + pz*pz;
+      Float_t inv_mass_xi = sqrt(e3*e3 - psq);
+
+      m_xi_ma_hist->Fill(inv_mass_xi);
+    }
+
+  }
 }
 
 //_____________________________________________________________________________

@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.22 2000/01/14 23:14:23 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.23 2000/01/31 22:15:24 kathy Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.23  2000/01/31 22:15:24  kathy
+// added Gene's code to make mass plot for Xi's in table and StEvent versions
+//
 // Revision 1.22  2000/01/14 23:14:23  lansdell
 // for primtrk, now find residuals correctly
 //
@@ -591,7 +594,7 @@ void StEventQAMaker::MakeHistV0() {
 
   if (v0vertices.size() > 0) {
     Float_t m_prmass2 = proton_mass_c2*proton_mass_c2;
-    Float_t m_pimass2 = (0.139567*0.139567);
+    Float_t m_pimass2 = (pion_minus_mass_c2*pion_minus_mass_c2);
 
     for (UInt_t k=0; k<v0vertices.size(); k++) {
       StV0Vertex *v0 = v0vertices[k];
@@ -795,14 +798,32 @@ void StEventQAMaker::MakeHistVertex() {
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistXi() {
-
-  if (Debug()) cout << " *** in StEventQAMaker - filling dst_xi_vertex histograms " << endl;
+void StEventQAMaker::MakeHistXi()
+{
+  if (Debug()) cout << 
+   " *** in StEventQAMaker - filling dst_xi_vertex histograms " << endl;
 
   StSPtrVecXiVertex &xi = event->xiVertices();
   Int_t cntrows=0;
   cntrows = xi.size();
   m_xi_tot->Fill(cntrows);
+
+  Float_t m_lamass2 = (lambda_mass_c2*lambda_mass_c2);
+  Float_t m_pimass2 = (pion_minus_mass_c2*pion_minus_mass_c2);
+
+  for (Int_t k=0; k<cntrows; k++) {
+    StXiVertex *vertex = xi[k];
+    const StThreeVectorF& pMom = vertex->momentumOfBachelor();
+    StThreeVectorF lMom = vertex->momentumOfV0();
+    StThreeVectorF xMom = lMom + pMom;
+    Float_t pP2 = pMom.mag2();
+    Float_t pL2 = lMom.mag2();
+    Float_t pX2 = xMom.mag2();
+    Float_t epi = sqrt(pP2 + m_pimass2);
+    Float_t ela = sqrt(pL2 + m_lamass2);
+    Float_t eXi = ela + epi;
+  }
+
 }
 
 //_____________________________________________________________________________

@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.14 2000/01/07 20:35:00 kathy Exp $ 
+//! $Id: StQABookHist.h,v 1.15 2000/01/31 22:15:25 kathy Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.15  2000/01/31 22:15:25  kathy
+//! added Gene's code to make mass plot for Xi's in table and StEvent versions
+//!
 //! Revision 1.14  2000/01/07 20:35:00  kathy
 //! make some corrections to filling hist; add point hist for each det separately
 //!
@@ -59,7 +62,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.14 2000/01/07 20:35:00 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.15 2000/01/31 22:15:25 kathy Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -384,7 +387,9 @@ class StQABookHist : public StMaker {
   
   
   // for method MakeHistXi
-   TH1F     *m_xi_tot;   //! number of xi vertices
+   TH1F     *m_xi_tot;     //! number of xi vertices
+   TH1F     *m_xi_ma_hist; //!  xi Mass
+
   
   // for method MakeHistPoint
    TH1F     *m_pnt_tot;   //! number of hits total
@@ -470,7 +475,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.14 2000/01/07 20:35:00 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.15 2000/01/31 22:15:25 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };
