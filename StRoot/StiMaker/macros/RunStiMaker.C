@@ -1,3 +1,4 @@
+#include <iostream>
 
 Int_t    usePath = 0;
 Int_t    nFile = 0;
@@ -191,9 +192,11 @@ void RunStiMaker(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, c
     //StiMaker
     StiMaker* anaMk = StiMaker::instance();
   
+    cout <<"\n --- Setup StiIOBroker ---\n"<<endl;
+
     //StiIOBroker
     StiRootIOBroker* stiIO = new StiRootIOBroker();
-  
+
     stiIO->setTPHFMinPadrow(1);
     stiIO->setTPHFMaxPadrow(45);
     stiIO->setETSFLowerBound(5);
@@ -243,7 +246,37 @@ void RunStiMaker(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, c
     enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=2};
     //stiIO->setSeedFinderType(kEvaluable);
     stiIO->setSeedFinderType(kComposite);
-  
+
+    //Set up the track filter (this mas to macth the correspoinding enumeration in StiIOBroker.h)
+    enum FilterType {kPtFilter=0, kEtaFilter=1, kChi2Filter=2, kNptsFilter=3, kNFitPtsFilter=4,
+		     kNGapsFilter=5, kFitPointRatioFilter=6, kPrimaryDcaFilter=7};
+    
+    stiIO->addFilterType(kPtFilter);
+    stiIO->setFilterPtMin(.1); //GeV
+    stiIO->setFilterPtMax(50.); //GeV
+
+    stiIO->addFilterType(kEtaFilter);
+    stiIO->setFilterEtaMin(-2.);
+    stiIO->setFilterEtaMax(2.);
+
+    stiIO->addFilterType(kChi2Filter);
+    stiIO->setFilterChi2Max(10.);
+
+    stiIO->addFilterType(kNptsFilter);
+    stiIO->setFilterNptsMin(8);
+
+    stiIO->addFilterType(kNFitPtsFilter);
+    stiIO->setFilterNFitPtsMin(5);
+
+    stiIO->addFilterType(kNGapsFilter);
+    stiIO->setFilterNGapsMax(20);
+
+    //stiIO->addFilterType(kFitPointRatioFilter);
+    //stiIO->setFilterFitPointRatioMin(.5);
+    
+    stiIO->addFilterType(kPrimaryDcaFilter);
+    stiIO->setFilterPrimaryDcaMax(100.);
+        
     stiIO->setSimulated(simulated);
     anaMk->setEvaluationFileName(outfile);
   
@@ -286,6 +319,8 @@ void RunStiMaker(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, c
 	cout <<"Batch option detector.  Run Integrated Tracker in non-Gui Mode."<<endl;
 	stiIO->setUseGui(false);
     }
+
+    cout <<"\n --- Done setting up StiIOBroker --- \n"<<endl;
     
     // WriteOut StEvent
     if (wrStEOut) {
@@ -308,7 +343,6 @@ void RunStiMaker(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, c
     // Initialize chain
     //
 
-    cout<<"I got here"<<endl;
     Int_t iInit = chain->Init();
     if (iInit) chain->Fatal(iInit,"on init");
     //chain->PrintInfo();

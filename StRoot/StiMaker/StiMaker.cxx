@@ -43,6 +43,7 @@
 #include "Sti/StiTrackMerger.h"
 #include "Sti/StiLocalTrackMerger.h"
 #include "Sti/Messenger.h"
+#include "Sti/StiDynamicTrackFilter.h"
 
 //StiGui
 #include "StiGui/StiGuiFactoryTypes.h"
@@ -83,6 +84,8 @@ StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 mSeedFinder(0),
 					 //Tracker
 					 mtracker(0),
+					 //Filter
+					 mFilter(0),
 					 //flags
 					 mBuilt(false),
 					 //Members
@@ -122,6 +125,9 @@ StiMaker::~StiMaker()
 
     delete mTrackMerger;
     mTrackMerger = 0;
+
+    delete mFilter;
+    mFilter=0;
 
     if (StiIOBroker::instance()->useGui()) {
 	StiDisplayManager::kill();
@@ -203,7 +209,8 @@ Int_t StiMaker::Init()
 Int_t StiMaker::InitRun(int run)
 {
     if (!mBuilt) {
-	
+
+	cout <<"\n --- StiMaker::InitRun(): Building --- \n"<<endl;
 	mBuilt=true;
 
 	Messenger::init();
@@ -325,6 +332,11 @@ Int_t StiMaker::InitRun(int run)
 	else { //catch all
 	    cout <<"StiMaker::init(). ERROR:\t unkown SeedFinderType"<<endl;
 	}
+
+	//Track filter
+	mFilter = new StiDynamicTrackFilter(StiIOBroker::instance());
+	cout <<"\n--- HitFilter ---\n"<<endl;
+	mFilter->print();
 	
 	//The Tracker
 	mtracker = new StiKalmanTrackFinder();
@@ -346,6 +358,7 @@ Int_t StiMaker::InitRun(int run)
 	    StiEvaluator::instance(mEvalFileName);
 	}
 	
+	cout <<"\n --- StiMaker::InitRun(): Done building --- \n"<<endl;
     }
     return StMaker::Init();
 }
@@ -353,6 +366,8 @@ Int_t StiMaker::InitRun(int run)
 Int_t StiMaker::Make()
 {
     cout <<" \n\n ------------ You have entered StiMaker::Make() ----------- \n\n"<<endl;
+    cout <<"\n--- HitFilter ---\n";
+    mFilter->print();
     
     StEvent* rEvent = 0;
     rEvent = (StEvent*) GetInputDS("StEvent");
