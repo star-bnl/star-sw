@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.7 1999/12/21 18:14:14 posk Exp $
+// $Id: plot.C,v 1.8 2000/01/13 21:50:24 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker
@@ -9,6 +9,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.8  2000/01/13 21:50:24  posk
+// Updates and corrections.
+//
 // Revision 1.7  1999/12/21 18:14:14  posk
 // More graphs.
 //
@@ -40,6 +43,9 @@ const Float_t twopi  = 2. * 3.1416;
 const Float_t etaMax = 2.;
 const Float_t ptMax  = 2.;
 
+// gSystem->Load("boldStyle");
+// boldStyle();
+
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
@@ -49,11 +55,12 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   // also projections of some of these histograms
   const char* baseName[] = { "Flow_Res_Sel",
 			     "Flow_Charge",
-			     "Flow_ImpactPar",
+			     "Flow_Dca",
 			     "Flow_Chi2",
 			     "Flow_FitPts",
 			     "Flow_MaxPts",
 			     "Flow_FitOverMax",
+			     "Flow_Mult",
 			     "Flow_OrigMult",
 			     "Flow_MultOverOrig",
 			     "Flow_VertexZ",
@@ -313,6 +320,7 @@ TCanvas* plotResolution(){
   TDatime now;
   TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
   date->Draw();
+  TLine* lineZeroHar = new TLine(0.5, 0., 6.5, 0.);
   TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.97,0.99);
   graphPad->Draw();
   graphPad->cd();
@@ -338,6 +346,7 @@ TCanvas* plotResolution(){
       graphPad->cd(padN);
       gStyle->SetOptStat(0);
       hist->Draw();
+      if (j == 0) lineZeroHar->Draw();
       hist->Print("all");
       delete histName;
     }
@@ -395,7 +404,7 @@ TCanvas* plotSingles(char* shortName){
     gStyle->SetOptStat(10);
     if (projZY) projZY->Draw("COLZ");
   } else 
-  if (strstr(shortName,"2D")!=0) {      // 2D
+  if (strstr(shortName,"2D")!=0) {             // 2D
     gStyle->SetOptStat(10);
     hist->Draw("COLZ");
   } else if (strstr(shortName,".Eta")!=0) {    // 2D Eta projection

@@ -1,8 +1,9 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.8 1999/12/21 21:28:33 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.9 2000/01/13 21:49:14 posk Exp $
 //
-// Author: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
+// Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
+//
 //////////////////////////////////////////////////////////////////////
 //
 // Description:  Maker to fill the Flow EbyE Tag database
@@ -10,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.9  2000/01/13 21:49:14  posk
+// Updates and corrections.
+//
 // Revision 1.8  1999/12/21 21:28:33  posk
 // Updated the README file.
 //
@@ -86,7 +90,7 @@ Int_t StFlowTagMaker::Make()
     return kStOK;     // no StFlowEvent or no Tag pointer
   }
 
-  //printTag();
+  if (Debug()) printTag();
 
   // fill histograms from the Flow Tags
   fillHistograms();
@@ -98,7 +102,7 @@ Int_t StFlowTagMaker::Make()
 
 void StFlowTagMaker::PrintInfo() 
 {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.8 1999/12/21 21:28:33 posk Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.9 2000/01/13 21:49:14 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -128,11 +132,12 @@ Int_t StFlowTagMaker::Finish() {
 
 Int_t StFlowTagMaker::Init()
 {
+  // Book histograms
+
   static const int& nHars = Flow::nHars;
   static const int& nSels = Flow::nSels;
   static const int& nSubs = Flow::nSubs;
 
-  // Book histograms
   enum { nPsiBins    = 100,
 	 nMeanPtBins = 100,
 	 nMultBins   = 100,
