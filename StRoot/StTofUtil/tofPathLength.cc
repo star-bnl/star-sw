@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: tofPathLength.cc,v 1.1 2003/04/15 01:45:16 geurts Exp $
+ * $Id: tofPathLength.cc,v 1.2 2003/07/11 05:08:49 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: tofPathLength.cc,v $
+ * Revision 1.2  2003/07/11 05:08:49  geurts
+ * added extra overloaded function.
+ *
  * Revision 1.1  2003/04/15 01:45:16  geurts
  * Introduction of standalone function for TOF path length calculation
  *
@@ -22,6 +25,7 @@
 double tofPathLength(const StThreeVector<double>*, const StThreeVector<double>*, const double);
 double tofPathLength(const StThreeVectorD*, const StThreeVectorD*, const double);
 double tofPathLength(const StThreeVectorF*, const StThreeVectorD*, const double);
+double tofPathLength(const StThreeVectorF*, const StThreeVectorF*, const double);
 
 
 // ----------------------------------------------------------------------------------------------
@@ -41,6 +45,19 @@ double tofPathLength(const StThreeVectorD*  beginPoint, const StThreeVectorD* en
 
 
 double tofPathLength(const StThreeVectorF* beginPoint, const StThreeVectorD* endPoint, const double curvature){
+  double x,y,z;
+  x = (double)beginPoint->x();
+  y = (double)beginPoint->y();
+  z = (double)beginPoint->z();
+  StThreeVector<double> bp (x,y,z);
+  x = (double)endPoint->x();
+  y = (double)endPoint->y();
+  z = (double)endPoint->z();
+  StThreeVector<double> ep(x,y,z);
+  return tofPathLength(&bp,&ep,curvature);
+}
+
+double tofPathLength(const StThreeVectorF* beginPoint, const StThreeVectorF* endPoint, const double curvature){
   double x,y,z;
   x = (double)beginPoint->x();
   y = (double)beginPoint->y();
