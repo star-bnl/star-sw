@@ -12,7 +12,6 @@ use Class::Struct;
 use CGI;
 
 require "/afs/rhic/star/packages/SL99h/mgr/dbDaqOperaSetup.pl";
-#require "dbDaqOperaSetup.pl";
 
 my $debugOn=0;
 
@@ -42,7 +41,7 @@ struct JFileAttr => {
 		    };
 
 
- $sql="SELECT DstDir, fileName, mfield  FROM $DaqOperationT where HPSS_size = 0 AND disk_size = 0 AND jobfile = 'no' ";
+ $sql="SELECT DstDir, fileName, mfield  FROM $DaqOperationT where disk_size = 0 AND jobfile = 'no' ";
  $cursor =$dbh->prepare($sql)
   || die "Cannot prepare statement: $DBI::errstr\n";
  $cursor->execute;
@@ -118,13 +117,13 @@ exit();
        my $hpss_dst_file3 = $gfile . ".dst.xdf";
        my $executable     = "/afs/rhic/star/packages/SL99g/mgr/bfc.csh";
   if ($ffield eq 0) {
-       $executableargs  = "off,tdaq,tpc,FieldOff,global,dst,tree,xout";
+       $executableargs  = "off,tdaq,tpc,FieldOff,global,dst,event,analysis,tree,xout";
      }
  elsif($ffield eq 50) {
-      $executableargs  = "off,tdaq,tpc,HalfField,global,dst,tree,xout";
+      $executableargs  = "off,tdaq,tpc,HalfField,global,dst,event,analysis,tree,xout";
      }
  elsif($ffield eq 100) {
-      $executableargs  = "off,tdaq,tpc,FieldOn,global,dst,tree,xout";
+      $executableargs  = "off,tdaq,tpc,FieldOn,global,dst,event,analysis,tree,xout";
      }
 
        my $log_dir       = $JOB_LOG . "/" . $process;
