@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.50 2000/01/14 01:16:36 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.51 2000/01/14 23:16:21 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.51  2000/01/14 23:16:21  fisyak
+// remove possibility of strlen(0)
+//
 // Revision 1.50  2000/01/14 01:16:36  fisyak
 // Add xdf2root for calib
 //
@@ -582,7 +585,7 @@ void StBFChain::SetFlags(const Char_t *Chain, Bool_t Force)
 {
   if (ChainFlagSet && !Force) return;
   Int_t k;
-  if (!Chain || !strlen(Chain)) {
+  if (!Chain || !Chain[0] || !strlen(Chain)) {
     printf ("\tPossible Chain Options are: \n"); 
     for (k=0;k<NoChainOptions;k++)
       printf (" %2d:[-]%-12s:%-12s:%-6s:%-12s :%s :%s :%s\n"
@@ -615,6 +618,7 @@ void StBFChain::SetFlags(const Char_t *Chain, Bool_t Force)
       (GetOption("Match") || GetOption("Primary") || GetOption("V0") ||
        GetOption("Xi")    || GetOption("Kink"))) SetOption("global");
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval"); 
+  if (!GetOption("event")) SetOption("-analysis");
   //  SetOption("-emc");
   //  SetOption("-Kink");
   // Print set values
