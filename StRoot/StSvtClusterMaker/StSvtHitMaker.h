@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.2 2000/08/24 04:26:56 caines Exp $
+// $Id: StSvtHitMaker.h,v 1.3 2000/08/26 20:36:28 caines Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.3  2000/08/26 20:36:28  caines
+// Adjustments for StSvtCoordinateTransform calls
+//
 // Revision 1.2  2000/08/24 04:26:56  caines
 // Printout for debugging
 //
@@ -20,18 +23,16 @@
 
 #include "tables/St_scs_spt_Table.h"
 #include "tables/St_srs_srspar_Table.h"
-#include "tables/St_svg_config_Table.h"
 #include "tables/St_svg_shape_Table.h"
 #include "tables/St_svg_geom_Table.h"
 
 
 #include "TH2.h"
 
-class TFIle;
+class TFile;
 class TNtuple;
 
 class St_scs_spt;
-class St_svg_config;
 class St_svg_shape;
 class St_svg_geom;
 class St_srs_srspar;
@@ -58,7 +59,6 @@ class StSvtHitMaker : public StMaker
 
   int iWrite;
 
-  St_svg_config   *m_config;//!
   St_svg_shape    *m_shape; //!
   St_svg_geom     *m_geom;  //!
   St_srs_srspar   *m_srs_srspar; //!
