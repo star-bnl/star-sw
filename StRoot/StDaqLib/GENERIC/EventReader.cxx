@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.33 2001/12/29 22:04:31 ward Exp $
+ * $Id: EventReader.cxx,v 1.34 2001/12/30 23:53:42 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.34  2001/12/30 23:53:42  ward
+ * Fixed FTPC pointer errors, and other cleanup.
+ *
  * Revision 1.33  2001/12/29 22:04:31  ward
  * Disabled corruption checks of all FTP banks.
  *
@@ -770,9 +773,9 @@ void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
   *beg=-123; *end=-123;
   assert(strcmp(xx,  "TPCMZP"));
 
-  // Dec 29 2001.
-  // FTPP points to itself, and FTPMZP points to FTPP.  This is too much confusion for me to deal with.
-  // I'm just going to disable all checks of all FTP banks (next line).
+  // Dec 30 2001.  The FTP pointers were messed up.  If you want to correct them, use
+  // either ~ward/corruptionDetector/corrDet.c or the code in StDaqLib/FTPC.  In the
+  // meantime, the line below disables all FTPC checks.
   if(xx[0]=='F'&&xx[1]=='T'&&xx[2]=='P') { *beg=0; *end= 0; return; }
 
   if(!strcmp(xx,   "DATAP")) { *beg=7; *end=26; }
@@ -789,7 +792,7 @@ void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
   if(!strcmp(xx, "SVTSECP")) { *beg=1; *end=24; }
   if(!strcmp(xx,  "SVTRBP")) { *beg=1; *end= 6; }
   assert(strcmp(xx,  "FTPMZP"));
-  if(!strcmp(xx,    "FTPP")) { *beg=1; *end=48; }
+  if(!strcmp(xx,    "FTPP")) { *beg=1; *end=4; } // Changed from 48 to 4, Dec 30 2001 by H Ward.
   if(!strcmp(xx, "FTPSECP")) { *beg=1; *end= 24; }
   if(!strcmp(xx,  "FTPRBP")) { *beg=1; *end=6; }
   if(!strcmp(xx,    "TOFP")) { *beg=1; *end=8; }
@@ -841,7 +844,7 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
   numberOfDataWords=header[2]-10;
   if(numberOfDataWords>DATA) { printf("%d %d, bankname=%s.\n",numberOfDataWords,DATA,bankname); }
   assert(numberOfDataWords<=DATA);
-  if(!strcmp(bankname,"TPCMZP")||!strcmp(bankname,"SVTMZP")||!strcmp(bankname,"FTPMZP")) { beg=0; end=numberOfDataWords-1; }
+  if(!strcmp(bankname,"TPCMZP")) { beg=0; end=numberOfDataWords-1; }
   else if(!strcmp(bankname,"EMCP")) { beg=0; end=0; }
   else WhereAreThePointers(&beg,&end,bankname); 
   if(end>=numberOfDataWords) {
