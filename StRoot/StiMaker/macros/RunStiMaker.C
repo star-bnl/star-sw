@@ -15,9 +15,8 @@ void RunStiMaker(Int_t nevents=1,
 		 bool doFit=true, /* true->fit track only */
 		 //bool doFit=false, /* false->find track only */
 		 
-                 //const char *MainFile="/scr20/ittf/data/DEV_9_12_01/*.event.root")
                  //const char *MainFile="/scr20/ittf/data/DEV_10_04_01/*.event.root")
-                 const char* MainFile="/star/rcf/pwg/spectra/mmiller/data/*.event.root")
+                 const char* MainFile="/scr20/ittf/data/DEV_10_8_01/*.event.root")
     
 {    
     // Dynamically link needed shared libs
