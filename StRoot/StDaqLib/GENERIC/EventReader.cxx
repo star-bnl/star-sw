@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.28 2001/05/14 16:25:58 ward Exp $
+ * $Id: EventReader.cxx,v 1.29 2001/06/19 21:07:23 jeromel Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.29  2001/06/19 21:07:23  jeromel
+ * add FTPC implementation (Janet S.)
+ *
  * Revision 1.28  2001/05/14 16:25:58  ward
  * Temporary code to skip corruption check for FTPC banks.
  *
@@ -765,7 +768,11 @@ void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
   if(!strcmp(xx,    "SVTP")) { *beg=1; *end= 8; }
   if(!strcmp(xx, "SVTSECP")) { *beg=1; *end=24; }
   if(!strcmp(xx,  "SVTRBP")) { *beg=1; *end= 6; }
-  if(xx[0]=='F'&&xx[1]=='T'&&xx[2]=='P') { *beg=0; *end= 0; return; } // bbb I don't have good doc for FTPC yet
+  assert(strcmp(xx,  "FTPMZP"));
+  if(!strcmp(xx,    "FTPP")) { *beg=1; *end=48; }
+  if(!strcmp(xx, "FTPSECP")) { *beg=1; *end= 24; }
+  if(!strcmp(xx,  "FTPRBP")) { *beg=1; *end=6; }
+//  if(xx[0]=='F'&&xx[1]=='T'&&xx[2]=='P') { *beg=0; *end= 0; return; } // bbb I don't have good doc for FTPC yet
   (*beg)--; (*end)--;
   if((*beg)<0||(*end)<0) {
     printf("Please add code to WhereAreThePointers for '%s'.\n",xx);
@@ -810,7 +817,7 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
   numberOfDataWords=header[2]-10;
   if(numberOfDataWords>DATA) { printf("%d %d, bankname=%s.\n",numberOfDataWords,DATA,bankname); }
   assert(numberOfDataWords<=DATA);
-  if(!strcmp(bankname,"TPCMZP")||!strcmp(bankname,"SVTMZP")) { beg=0; end=numberOfDataWords-1; }
+  if(!strcmp(bankname,"TPCMZP")||!strcmp(bankname,"SVTMZP")||!strcmp(bankname,"FTPMZP")) { beg=0; end=numberOfDataWords-1; }
   else WhereAreThePointers(&beg,&end,bankname); 
   if(end>=numberOfDataWords) {
     PP"end=%d, numberOfDataWords=%d, bankname=%s.\n",end,numberOfDataWords,bankname);
@@ -821,7 +828,7 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
   if(bytesRead!=numberOfDataWords*sizeof(unsigned long)) return TRUE;
   if(doTheByteSwap) for(i=0;i<numberOfDataWords;i++) Swap4(data+i);
 
-  if(!strcmp(bankname,"TPCMZP")) {
+  if(!strcmp(bankname,"TPCMZP")||!strcmp(bankname,"FTPMZP")) {
     if(data[5]!=0&&(data[1]==0||data[3]==0)) return TRUE; /* TPCADCX should be present only if SEQD & ADCD are too. */
   }
 
