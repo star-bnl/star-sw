@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.129 2003/07/02 01:58:28 jeromel Exp $
+# $Id: Construct,v 1.130 2003/07/02 02:44:07 jeromel Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -120,18 +120,25 @@ else { $param::keep = 1; }
 
 
 if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
-    my($packl,$cernl);
+    my($packl,$cernl,$kernl);
 
-    if ( -e "$CERN/$CERN_LEVEL/bin/cernlib_noshift"){
+    if ( -e "$CERN/$CERN_LEVEL/bin/cernlib_noshift"      &&
+	 -e "$CERN/$CERN_LEVEL/lib/libpacklib_noshift.a" &&
+	 -e "$CERN/$CERN_LEVEL/lib/libkernlib_noshift.a" ){
 	$cernl = "cernlib_noshift";
 	$packl = "packlib_noshift";
+	$kernl = "kernlib_noshift";
     } else {
 	print "WARNING :: Using default packlib (with possibly shift)";
 	$cernl = "cernlib";
 	$packl = "packlib";
+	$kernl = "kernlib";
     }
     $CERNLIBS .= " "
-	. `$cernl geant321 pawlib $packl graflib/X11 packlib mathlib kernlib`;
+	. `$cernl geant321 pawlib packlib graflib/X11 packlib mathlib kernlib`;
+
+    $CERNLIBS =~ s/packlib\./$packl\./g;
+    $CERNLIBS =~ s/kernlib\./$kernl\./g;
 
     chop($CERNLIBS);
     $Libraries = $CERNLIBS . " ";
