@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.13 2004/01/30 00:14:42 munhoz Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.14 2004/02/03 21:47:27 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.14  2004/02/03 21:47:27  perev
+ * Error ==>Warning
+ *
  * Revision 1.13  2004/01/30 00:14:42  munhoz
  * few corrections to pedestal reading and adding getDaqReader method
  *
@@ -229,8 +232,8 @@ Int_t StSvtDaqMaker::GetSvtData()
 {
 
   if(  !daqReader->SVTPresent ()){
-    gMessMgr->Error() << "SVT -No SVT Present but trying to read it" << endm;
-    return kStErr;
+    gMessMgr->Warning() << "SVT -No SVT Present but trying to read it" << endm;
+    return kStWarn;
   }
   svtReader = daqReader->getSVTReader();
   assert(svtReader);
@@ -252,9 +255,9 @@ Int_t StSvtDaqMaker::GetSvtPed()
 {
 
   if(  !daqReader->SVTPresent ()){
-    gMessMgr->Error() << "SVT -No SVT Present but trying to read it" << endm;
+    gMessMgr->Warning() << "SVT -No SVT Present but trying to read it" << endm;
     if( fSvtPed) Reset();
-    return kStErr;
+    return kStWarn;
   }
   svtReader = daqReader->getSVTReader();
   assert(svtReader);
@@ -276,9 +279,9 @@ Int_t StSvtDaqMaker::GetSvtRMSPed()
 {
 
   if(  !daqReader->SVTPresent ()){
-    gMessMgr->Error() << "SVT -No SVT Present but trying to read it" << endm;
+    gMessMgr->Warning() << "SVT -No SVT Present but trying to read it" << endm;
     if( fSvtRMSPed) Reset();
-    return kStErr;
+    return kStWarn;
   }
   svtReader = daqReader->getSVTReader();
   assert(svtReader);
@@ -373,7 +376,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.13 2004/01/30 00:14:42 munhoz Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.14 2004/02/03 21:47:27 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
