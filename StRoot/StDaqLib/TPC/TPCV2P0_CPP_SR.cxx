@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_CPP_SR.cxx,v 1.5 2000/01/04 20:55:04 levine Exp $
+ * $Id: TPCV2P0_CPP_SR.cxx,v 1.6 2000/02/03 21:18:36 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC reader for raw cluster pointer banks (TPCCPPR)
@@ -9,9 +9,13 @@
  * 06-May-99 MJL code cloned from Jeff's ADCR_SR
  * 22-Jun-99 MJL added TPCV2P0_CPP_SR::getAsicParams(struct ASIC_params *);
  * 29-Aug-99 MJL #include <iostream.h> for HP platform
+ * 03-Feb-00 MJL print ASCI params so PT Barnum's clientele can grock them
  *
  ***************************************************************************
  * $Log: TPCV2P0_CPP_SR.cxx,v $
+ * Revision 1.6  2000/02/03 21:18:36  levine
+ * change printout of ASIC parameters to idiot-proof mode
+ *
  * Revision 1.5  2000/01/04 20:55:04  levine
  * Implemented memory-mapped file access in EventReader.cxx. Old method
  * (via seeks) is still possible by setting mmapp=0 in
@@ -71,10 +75,13 @@ int TPCV2P0_CPP_SR::initialize()
       classname(Bank_TPCCPPR) *cpp = banks[rcb][mz];
       if (cpp)
       if (detector->ercpy->verbose) 
-	printf("ASIC params sec%d RB%d MZ %d: TH_LO %d, TH_HI %d, NSEQ_LO %d, NSEQ_HI %d\n",sector+1, rcb+1, mz+1, 
+	printf("ASIC params sec%d RB%d MZ %d:\
+\nLow threshold: >%d ADC counts in  >%d consecutive bins\
+\nHigh threshold: >%d ADC counts in >%d of these bins\n",
+	       sector+1, rcb+1, mz+1, 
 	     cpp->asic_params.thresh_lo,
-	     cpp->asic_params.thresh_hi,
 	     cpp->asic_params.n_seq_lo,
+	     cpp->asic_params.thresh_hi,
 	     cpp->asic_params.n_seq_hi);
     }
   }
