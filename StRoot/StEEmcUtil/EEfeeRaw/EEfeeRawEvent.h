@@ -1,7 +1,7 @@
 #ifndef EEfeeRawEvent_h
 #define EEfeeRawEvent_h
 /*********************************************************************
- * $Id: EEfeeRawEvent.h,v 1.7 2003/12/02 17:22:08 balewski Exp $
+ * $Id: EEfeeRawEvent.h,v 1.8 2003/12/10 04:43:19 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Events
@@ -10,12 +10,13 @@
 #include "TClonesArray.h"
 
 class EEfeeDataBlock;
+
 class EEfeeRawEvent :public TObject {
   int ID; // event ID
-  
-public:
-  TClonesArray  *block; 
 
+ public:
+  TClonesArray  *block; 
+  
   EEfeeRawEvent();
   virtual ~EEfeeRawEvent();
   void print(int flag=1) const;
@@ -31,6 +32,9 @@ public:
 
 /*
  * $Log: EEfeeRawEvent.h,v $
+ * Revision 1.8  2003/12/10 04:43:19  balewski
+ * first QA
+ *
  * Revision 1.7  2003/12/02 17:22:08  balewski
  * fix after version mixup
  *
