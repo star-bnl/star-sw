@@ -5,7 +5,7 @@
 #######################################################################
 .PHONY: all clean test help setup config install default
 #
-VERSION			:= "$Id: Makefile,v 1.5 1997/02/25 20:15:48 ward Exp $"
+VERSION			:= "$Id: Makefile,v 1.6 1997/04/11 19:58:50 ward Exp $"
 #
 default: all
 #
@@ -46,7 +46,9 @@ empty:
 #
 #?make test        - Test current environment for SLM compatability.
 test:
-	@echo " The following variables must be properly defined: "
+	@echo "########################################################"
+	@echo "### The following variables must be properly defined:###"
+	@echo "########################################################"
 	@echo "          SLM_DIR = " $(SLM_DIR)
 	@echo "        STAR_ARCH = " $(STAR_ARCH)
 	@echo "          CVSROOT = " $(CVSROOT)

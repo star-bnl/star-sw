@@ -5,10 +5,12 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "dstype.h"
 #include "dsxdr.h"
 #include "dscuts.h"
 /***********************************************************  DEFINES  **/
+#define TOLERANCE 0.0001
 #define ERR_1 "The number typed in the subscript box is too small.\nMin=1."
 #define ERR_2 "The number typed in the subscript box\nis too big.\nMax=%d"
 #define ERR_3 "Subscript for column array type is out of range in cuts."
@@ -27,18 +29,24 @@
 #define OPERATOR_TYPE_LE   4
 #define OPERATOR_TYPE_EQ   5
 /***********************************************************  GLOBALS  **/
-char gStr[DSU_SIZE_OF_GSTR];
-int gTableError,gAlreadyDidIt;
-char gCopy[PSIZE];
-int gDone;
+int dsu_gHaveAnInt,dsu_gRow;
+char dsu_gToken[80];
+char *dsu_gExpr;
+DS_DATASET_T *dsu_gTblPtr;
+char dsu_gStr[DSU_SIZE_OF_GSTR];
+int dsu_gTableError,dsu_gAlreadyDidIt;
+char dsu_gCopy[PSIZE];
+int dsu_gDone;
 /***********************************************************  DEFINES  **/
 #define GRAPHICS 0
 #define TEXT 1
 #define PROGRESS 2
+/***********************************************************  PROTOTYPES **/
+void dsuLevel2(float *answer);
+int Equal(int demandInteger,float v1,float v2);
 /***********************************************************  FUNCTIONS  **/
-
 void Say1(char *x) {
-  if(!gAlreadyDidIt) { gAlreadyDidIt=TRUE; printf("%s\n",x); }
+  if(!dsu_gAlreadyDidIt) { dsu_gAlreadyDidIt=TRUE; printf("%s\n",x); }
 }
 void GetLocationAndTypeOfOperator(char *cc,int *location,int *type) {
   char k1,k2; int fo,ii; *type=OPERATOR_TYPE_PE;  /* PE=parse error */
@@ -70,36 +78,131 @@ int StripSubAndRetItsValue(char *xx) {
   }
   if(rv<1) rv=1; return rv-1;
 }
-float dsu_Val(char *cc,DS_DATASET_T *pTable,long row) {
+float dsuVal(char *cc) {
   size_t sizetRow,colNum;
   int dataType; float rv,fv; long iv; int sub;
   if(HasLetters(cc)) {
-    sizetRow=row;
+    sizetRow=dsu_gRow;
     sub=StripSubAndRetItsValue(cc);
-    if(!dsFindColumn(&colNum,pTable,cc)) {
+    if(!dsFindColumn(&colNum,dsu_gTblPtr,cc)) {
       PP"Fatal error: can't find column \"%s\".\n",cc);
-      gDone=7; return 0.0;
+      dsu_gDone=7; return 0.0;
     }
-    if(!TableValue(&dataType,gStr,&fv,&iv,sizetRow,colNum,pTable,sub)) {
-      gTableError=TRUE; return 0.0;
+    if(!TableValue(&dataType,dsu_gStr,&fv,&iv,
+              sizetRow,colNum,dsu_gTblPtr,sub)) {
+      dsu_gTableError=TRUE; return 0.0;
     }
     if(dataType==DSU_FLOAT) rv=fv;
-    else if(dataType==DSU_INTEGER) rv=iv;
+    else if(dataType==DSU_INTEGER) { dsu_gHaveAnInt=TRUE; rv=iv; }
     else if(dataType==DSU_STRING) {
       PP"Fatal error:  char string used in cuts.\n");
-      gDone=7; return 0.0;
+      dsu_gDone=7; return 0.0;
     }
     /* PP"Val rets %f.  dataType=%d\n------------------\n",rv,dataType); */
     return rv;
   } else return(atof(cc));
 }
+#define DSU_DELIMITERS "+-*/()"
+int dsuIsDelim(char x) {
+  if(strchr(DSU_DELIMITERS,*dsu_gExpr)) return 7;
+  return 0;
+}
+void GetToken(void) {
+  char *tmp=dsu_gToken;
+  *tmp=0;
+  if(!*dsu_gExpr) return; /* end of expression */
+  while(isspace(*dsu_gExpr)) ++dsu_gExpr; /* skip white space */
+  if(dsuIsDelim(*dsu_gExpr)) {
+    *tmp++=*dsu_gExpr++;
+  } else {                   /* else if(isalpha(*dsu_gExpr)) old stuff */
+    while(!dsuIsDelim(*dsu_gExpr)) *tmp++=*dsu_gExpr++;
+  }
+  *tmp=0;  /* End the found-token string with a zero. */
+}
+void dsuLevel5(float *answer) { /* Parentheses. */
+  if(*dsu_gToken=='(') {
+    GetToken();
+    dsuLevel2(answer); /* Here's the recursion. */
+    if(*dsu_gToken!=')') {
+      PP"UNBALANCED PARENTHESES.%c\n",7); *answer=0; return;
+    }
+    GetToken(); /* Throw away the final ) without checking for it. */
+  } else {
+    *answer=dsuVal(dsu_gToken); /* Both table values and constants. */
+    GetToken();
+  }
+}
+void dsuLevel4(float *answer) { /* Unary + or - */
+  register char op;
+  if((op=*dsu_gToken)=='+' || op=='-') {
+    GetToken();
+  }
+  dsuLevel5(answer);
+  if(op=='-') *answer = -(*answer);
+}
+void dsuLevel3(float *answer) { /* Multiplication or division. */
+  register char op; float temp; 
+  dsu_gHaveAnInt=FALSE;
+  dsuLevel4(answer);
+  while((op=*dsu_gToken)=='*' || op=='/') {
+    GetToken(); dsuLevel4(&temp);
+    if(op=='*') *answer=*answer*temp;
+    else if(op=='/') {
+      if(temp==0.0) *answer=1e15;
+      else {
+        if(!dsu_gHaveAnInt) *answer=*answer/temp;
+        else *answer=((int)*answer)/((int)temp);
+      }
+    }
+  }
+}
+void dsuLevel2(float *answer) { /* Addition and subtraction. */
+  register char op; float temp; 
+  dsuLevel3(answer);
+  while((op=*dsu_gToken)=='+' || op=='-') {
+    GetToken(); dsuLevel3(&temp);
+    if(op=='+') *answer=*answer+temp;
+    else if(op=='-') *answer=*answer-temp;
+  }
+}
+float dsuLevel1(char *expr,DS_DATASET_T *pTable,long row) {
+                 /* This function is the entry point for parsing recursion. */
+  float answer;
+  dsu_gTblPtr=pTable; /* Don't carry this thru all the parsing recursion. */
+  dsu_gRow=row;       /* Don't carry this thru all the parsing recursion. */
+  dsu_gExpr=expr; /* Global dsu_gExpr is used in         parsing recursion. */
+  GetToken();     /* Uses dsu_gExpr and fills dsu_gToken. */
+
+  /* globals: dsu_gExpr, dsu_gToken, dsu_gRow, dsu_gTblPtr */
+  dsuLevel2(&answer);
+  return answer;
+}
 float dsu_Val1(char *cc,int loc,DS_DATASET_T *pTable,long row) {
   char dd[PSIZE]; strcpy(dd,cc); dd[loc]='\0';
-  return dsu_Val(dd,pTable,row);
+  return dsuLevel1(dd,pTable,row);
 }
 float dsu_Val2(char *cc,int loc,DS_DATASET_T *pTable,long row) {
   char dd[PSIZE]; strcpy(dd,cc+loc+4);
-  return dsu_Val(dd,pTable,row);
+  return dsuLevel1(dd,pTable,row);
+}
+int ProbablyInteger(float x) {
+  int ix; float x2;
+  if(x<0) x=-x;
+  ix=x+0.5;
+  x2=ix;
+  if(Equal(0,x,x2)) return TRUE;
+  return FALSE;
+}
+int Equal(int demandInt,float v1,float v2) {
+  /* Approx int equality tests.  HACK */
+  float rat;
+  if(v1==v2) return TRUE;
+  if(v1==-v2) return FALSE;
+  if( !demandInt|| (ProbablyInteger(v1)&&ProbablyInteger(v2)) ) {
+    rat=(v1-v2)/(v1+v2);
+    if(rat>-TOLERANCE&&rat<TOLERANCE) return TRUE;
+  }
+  return FALSE;
 }
 int SingleExpressionResult(DS_DATASET_T *pTable,long row,char *cuts) {
   int location,type;  /* type tells whether .gt., .lt., etc. */
@@ -113,11 +216,11 @@ int SingleExpressionResult(DS_DATASET_T *pTable,long row,char *cuts) {
   ** OPERATOR_TYPE_LT, OPERATOR_TYPE_EQ,v1,v2); */
 #endif
   switch(type) {
-    case OPERATOR_TYPE_LE: return(v1<=v2);
-    case OPERATOR_TYPE_GE: return(v1>=v2);
-    case OPERATOR_TYPE_GT: return(v1> v2);
-    case OPERATOR_TYPE_LT: return(v1< v2);
-    case OPERATOR_TYPE_EQ: return(v1==v2);
+    case OPERATOR_TYPE_LE: if(Equal(7,v1,v2)) return TRUE; return(v1<v2);
+    case OPERATOR_TYPE_GE: if(Equal(7,v1,v2)) return TRUE; return(v1>v2);
+    case OPERATOR_TYPE_GT: return(v1>v2);
+    case OPERATOR_TYPE_LT: return(v1<v2);
+    case OPERATOR_TYPE_EQ: return Equal(7,v1,v2);
     case OPERATOR_TYPE_PE: Say1("Parse error on cuts.");  return PARSE_ERR;
     default: PP"fatal error in module evl_vs\n");
   }
@@ -191,7 +294,7 @@ int PassCuts(DS_DATASET_T *pTable,long row,char *cuts) {
   /* if(row!=1) return FALSE; */
   if(*cuts=='\0') return TRUE;  /* no cuts, so return TRUE */
   DelWhiteSpace(cuts); /* October 9 1995 ToLowerCase(cuts); */ 
-  strncpy(gCopy,cuts,PSIZE-2); strncpy(copy,cuts,PSIZE-2);
+  strncpy(dsu_gCopy,cuts,PSIZE-2); strncpy(copy,cuts,PSIZE-2);
   if(!DelOutParens(cuts)) {
     Say1("Parse error in dsuDoCuts().");
     return PARSE_ERR; /* BBB This was TRUE as from evl. */
@@ -255,7 +358,7 @@ int dsuDoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
   size_t numRows; long ii; char copy[COPY],litCopy[SHOW+5]; /* 5 for "..." */
   strncpy(copy,cuts,COPY-2); ConvertFromCtoFortran(copy);
   if(strlen(copy)>COPY-4) { Say1("Cuts string too big."); return FALSE; }
-  gAlreadyDidIt=FALSE;
+  dsu_gAlreadyDidIt=FALSE;
   strncpy(litCopy,cuts,SHOW+1); litCopy[SHOW]='\0';
   if(strlen(cuts)>SHOW) strcat(litCopy,"...");
   if(sizeof(char)!=1) {
@@ -264,10 +367,10 @@ int dsuDoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
   }
   dsTableRowCount(&numRows,pTable);
   for(ii=nBytes-1;ii>=0;ii--) ba[ii]=0;
-  gTableError=FALSE;
+  dsu_gTableError=FALSE;
   for(ii=0;ii<numRows;ii++) {
     if(ii%150==0) dsu_Progress(ii,(int)numRows,NULL,NULL);
-    if(gTableError) { Say1("Error 66d in dsuDoCuts()."); return FALSE; }
+    if(dsu_gTableError) { Say1("Error 66d in dsuDoCuts()."); return FALSE; }
     switch(PassCuts(pTable,ii,copy)) {
       case TRUE: SetThisRow(ii,ba); break;
       case FALSE: break;

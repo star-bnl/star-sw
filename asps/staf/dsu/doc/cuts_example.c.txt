@@ -5,7 +5,7 @@
 typedef int myBool;
 DS_DATASET_T *gPtr=NULL;
 long gRows;
-char *gHurdygurdy;
+char *gCutsString;
 #define NBYTES 10000
 /***********************************************************  FUNCTIONS  **/
 void Uerror(int x) {
@@ -53,7 +53,7 @@ void DoTheRecipe(void) {
   gRows=nBytes;
   if(nBytes/8>NBYTES-2) Uerror(112);
   printf("Above dsuDoCuts\n");
-  if(!dsuDoCuts(NBYTES,ba,gHurdygurdy,gPtr)) Uerror(113);
+  if(!dsuDoCuts(NBYTES,ba,gCutsString,gPtr)) Uerror(113);
   printf("Below dsuDoCuts\n");
   for(jj=0;jj<nBytes;jj++) {
     if(dsuRowPassedCuts(ba,jj)) printf("Row %d passed cuts.\n",jj+1);
@@ -62,7 +62,7 @@ void DoTheRecipe(void) {
 void main(argc,argv) int argc; char **argv; {
   FILE *stream; XDR xdr; DS_DATASET_T *dsPtr=NULL;
   if(argc!=3) Usage((char*)argv[0]);
-  gHurdygurdy=argv[2];
+  gCutsString=argv[2];
   CreateDsPointer(argv[1],&stream,&xdr,&dsPtr);
   printf("The ds pointer is %p.\n",dsPtr);
   gPtr=NULL;

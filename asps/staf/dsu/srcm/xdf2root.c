@@ -891,9 +891,9 @@ void WriteMainEventC() {
   FF"main(int nnn, char **aaa) {\n");
   FF"  char *table;\n");
   FF"   TROOT simple(\"simple\",\"From xdf2root\");\n");
-  if(gOptionC) FF"   Int_t nevent=0,comp=0,splt=0; ");
-  else         FF"   Int_t nevent=0,comp=1,splt=0; ");
-  FF"// comp=0 -> no compress splt=0 -> no branches\n");
+  if(gOptionC) FF"   Int_t nevent=0,comp=0,split=0; ");
+  else         FF"   Int_t nevent=0,comp=1,split=0; ");
+  FF"// comp=0 -> no compress split=0 -> no branches\n");
   FF"   Int_t nb=0,ev,t,bufs,nrow;\n");
   FF"   Event *event; TBranch *b=0;\n");
   FF"   TStopwatch timer; timer.Start();\n");
@@ -906,7 +906,7 @@ void WriteMainEventC() {
   FF"   TTree *tree=new TTree(\"T\",\"An example of a ROOT tree\");\n");
   FF"   tree->SetAutoSave(1000000000);  ");
   FF"// autosave when 1 Gbyte written\n");
-  FF"   bufs=256000; if (splt) bufs /= 4;\n");
+  FF"   bufs=256000; if (split) bufs /= 4;\n");
   FF"\n");
   FF"   for(ev=0;ev<9999;ev++) {\n");
   FF"      if(!GetNextEvent((int)ev)) break; nevent++;\n");
@@ -917,7 +917,7 @@ void WriteMainEventC() {
   /* FF"      cout<<\"event=\"<<ev<<endl;\n"); */
   FF"      event=new Event();\n");
   FF"      if(b) b->SetAddress(event); ");
-  FF"else b=tree->Branch(\"event\",event,bufs,splt);\n");
+  FF"else b=tree->Branch(\"event\",event,bufs,split);\n");
   FF"\n");
   for(itbl=0;itbl<gNtable;itbl++) {
     FF"      table=\"%s\"; nrow=NumberOfRows(table);\n",gTableName[itbl]);
@@ -942,7 +942,7 @@ void WriteMainEventC() {
   FF"processed.\\n\",nevent,nb);\n");
   FF"   printf(\"RealTime=%%f seconds, ");
   FF"CpuTime=%%f seconds\\n\",rtime,ctime);\n");
-  FF"   printf(\"compression level=%%d, splt=%%d.\\n\",comp,splt);\n");
+  FF"   printf(\"compression level=%%d, split=%%d.\\n\",comp,split);\n");
   FF"   printf(\"You wrote %%f ");
   FF"Mbytes/Realtime seconds\\n\",mbytes/rtime);\n");
   FF"   printf(\"You wrote %%f ");
@@ -1482,8 +1482,11 @@ void CheckForDslHeaders() {
   char *fn="$STAR_LIB/$STAR_SYS_LEVEL/sys/inc/dstype.h";
   if(!FileExists(fn)) {
     Ose();
-    PP"I can't read %s.\nPlease check your afs token, and the\n",fn);
+    PP"I can't read %s.\nPlease check your afs token (klog), and the\n",fn);
     PP"values of the env vars STAR_LIB and STAR_SYS_LEVEL.\n");
+    PP"You might try\n");
+    PP"STAR_LIB = /afs/rhic/star/arch/sun4os5pc\n");
+    PP"STAR_SYS_LEVEL = dev\n");
     Exit(__LINE__);
   }
 }
@@ -1529,7 +1532,11 @@ void Set_gDir(char *fullpath) {
   if(strlen(fullpath+i+1)>FN) ERR;
   strcpy(fn,fullpath+i+1);
   for(i=strlen(fn)-1;i>=0;i--) if(fn[i]=='.') break;
-  if(i<0) ERR;
+  if(i<0) {
+    Ose();
+    PP"Fatal error.  I was expecting a period in this: '%s'.\n",fn);
+    PP"fullpath=%s.\n",fullpath); exit(2);
+  }
   fn[i]=0;
   if(strlen(prefix1)+1+strlen(fn)>DIR) ERR;
   if(strlen(prefix2)+1+strlen(fn)>DIR) ERR;
@@ -1546,7 +1553,7 @@ void main(int nnnn,char *aaaa[]) {
     strcpy(absolutePathForInputFile,inFile);
   } else {
     if(strlen(gBaseDir)+1+strlen(inFile)>APFIF) ERR;
-    sprintf(absolutePathForInputFile,"%s/%s",inFile);
+    sprintf(absolutePathForInputFile,"%s/%s",gBaseDir,inFile);
   }
   Set_gDir(absolutePathForInputFile);
   SetEnvironmentalVariables();
