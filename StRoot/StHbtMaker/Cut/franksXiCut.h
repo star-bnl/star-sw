@@ -6,7 +6,7 @@
 //#endif
 
 #include "StHbtMaker/Base/StHbtXiCut.h"
-#include "StHbtMaker/Infrastructure/StHbtXi.hh"
+#include "StHbtMaker/Infrastructure/StHbtXi.hh"	//9-17-99 seems like good idea
 
 class franksXiCut : public StHbtXiCut {
 
@@ -19,17 +19,15 @@ public:
 
   virtual StHbtString Report();
 
-  void SetV0Type(const char* type);
-  void SetV0MassRange(const float& lo, const float& hi);
-  void SetdcaV0daughters(const float& lo, const float& hi);
-  void SetdcaV0ToPrimVertex(const float& lo, const float& hi);
-  void SetdecayLengthV0(const float& lo, const float& hi);
-  void SettpcHitsPos(const int& lo, const int& hi);
-  void SettpcHitsNeg(const int& lo, const int& hi);
-  void SetdcaPosToPrimVertex(const float& lo, const float& hi);
-  void SetdcaNegToPrimVertex(const float& lo, const float& hi);
-  void SetptArmV0(const float& lo, const float& hi);
-  void SetalphaV0(const float& lo, const float& hi);
+  void SetXiType(const char* type);
+  void SetXiMassRange(const float& lo, const float& hi);
+  void SetdcaXidaughters(const float& lo, const float& hi);
+  void SetdcaXiToPrimVertex(const float& lo, const float& hi);
+  void SetdecayLengthXi(const float& lo, const float& hi);
+  void SettpcHitsBac(const int& lo, const int& hi);
+  void SetdcaBacToPrimVertex(const float& lo, const float& hi);
+  void SetptArmXi(const float& lo, const float& hi);
+  void SetalphaXi(const float& lo, const float& hi);
   void SetPt(const float& lo, const float& hi);
   void SetRapidity(const float& lo, const float& hi);
   void SetdEdx(const float& charge, const float& m1, const float& c1, const float& m2, const float& c2);
@@ -37,25 +35,23 @@ public:
 
 private:   // here are the quantities we want to cut on...
 
-  float             mV0MassRange[2];        //Invariant mass limits
-  float             mdcaV0daughters[2];     //DCA between 2 tracks
-  float             mdcaV0ToPrimVertex[2];  //DCA between V0 and event vertex
-  float             mdecayLengthV0[2];      //decay length from prim. vertex
-  int               mtpcHitsPos[2];         //no. of tpc hits on pos track
-  int               mtpcHitsNeg[2];         //no. of tpc hits on neg track
-  float             mdcaPosToPrimVertex[2];  //min. value + track at intersect
-  float             mdcaNegToPrimVertex[2];  //min. value - track at intersect
-  float             mptArmV0[2];             //pt Armenteros
-  float             malphaV0[2];             //alpha Armenteros
+  float             mXiMassRange[2];        //Invariant mass limits
+  float             mdcaXidaughters[2];     //DCA between 2 tracks
+  float             mdcaXiToPrimVertex[2];  //DCA between V0 and event vertex
+  float             mdecayLengthXi[2];      //decay length from prim. vertex
+  int               mtpcHitsBac[2];         //no. of tpc hits on pos track
+  float             mdcaBacToPrimVertex[2]; //min. value + track at intersect
+  float             mptArmXi[2];            //pt Armenteros
+  float             malphaXi[2];            //alpha Armenteros
   float             mPt[2];                 //pt of V0
   float             mRapidity[2];           //rapidity of V0
-  float             mdEdx[4];        // dEdx lines for daughter track
+  float             mdEdx[4];               // dEdx lines for daughter track
   float             mChargedEdx;            // Charge of track to use in dedx
 
-  long              mNPassed;
-  long              mNFailed;
+  long              mNXisPassed;
+  long              mNXisFailed;
 
-  char*             V0Type;                // String selecting v0 (la,antil,k0)
+  char*             XiType;                // String selecting v0 (la,antil,k0)
 
 #ifdef __ROOT__ 
   ClassDef(franksXiCut, 1)
@@ -63,28 +59,24 @@ private:   // here are the quantities we want to cut on...
 };
 
 
-inline void franksXiCut::SetV0MassRange(const float& lo, const float& hi) {
-mV0MassRange[0] =lo; mV0MassRange[1]=hi;}
-inline void franksXiCut::SetdcaV0daughters(const float& lo, const float& hi)
-{mdcaV0daughters[0]=lo; mdcaV0daughters[1]=hi;}
-inline void franksXiCut::SetdcaV0ToPrimVertex(const float& lo, const float& hi)
-{mdcaV0ToPrimVertex[0]=lo; mdcaV0ToPrimVertex[1]=hi;}
-inline void franksXiCut::SetdecayLengthV0(const float& lo, const float& hi)
-{mdecayLengthV0[0]=lo; mdecayLengthV0[1]=hi;}
+inline void franksXiCut::SetXiMassRange(const float& lo, const float& hi) {
+mXiMassRange[0] =lo; mXiMassRange[1]=hi;}
+inline void franksXiCut::SetdcaXidaughters(const float& lo, const float& hi)
+{mdcaXidaughters[0]=lo; mdcaXidaughters[1]=hi;}
+inline void franksXiCut::SetdcaXiToPrimVertex(const float& lo, const float& hi)
+{mdcaXiToPrimVertex[0]=lo; mdcaXiToPrimVertex[1]=hi;}
+inline void franksXiCut::SetdecayLengthXi(const float& lo, const float& hi)
+{mdecayLengthXi[0]=lo; mdecayLengthXi[1]=hi;}
 
-inline void franksXiCut::SettpcHitsPos(const int& lo, const int& hi)
-{mtpcHitsPos[0]=lo;mtpcHitsPos[1]=hi;}
-inline void franksXiCut::SettpcHitsNeg(const int& lo, const int& hi)
-{mtpcHitsNeg[0]=lo;mtpcHitsNeg[1]=hi;}
+inline void franksXiCut::SettpcHitsBac(const int& lo, const int& hi)
+{mtpcHitsBac[0]=lo;mtpcHitsBac[1]=hi;}
 
-inline void franksXiCut::SetdcaPosToPrimVertex(const float& lo, const float& hi)
-{mdcaPosToPrimVertex[0]=lo; mdcaPosToPrimVertex[1]=hi;}
-inline void franksXiCut::SetdcaNegToPrimVertex(const float& lo, const float& hi)
-{mdcaNegToPrimVertex[0]=lo; mdcaNegToPrimVertex[1]=hi;}
-inline void franksXiCut::SetptArmV0(const float& lo, const float& hi)
-{mptArmV0[0]=lo; mptArmV0[1]=hi;}
-inline void franksXiCut::SetalphaV0(const float& lo, const float& hi)
-{malphaV0[0]=lo; malphaV0[1]=hi;}
+inline void franksXiCut::SetdcaBacToPrimVertex(const float& lo, const float& hi)
+{mdcaBacToPrimVertex[0]=lo; mdcaBacToPrimVertex[1]=hi;}
+inline void franksXiCut::SetptArmXi(const float& lo, const float& hi)
+{mptArmXi[0]=lo; mptArmXi[1]=hi;}
+inline void franksXiCut::SetalphaXi(const float& lo, const float& hi)
+{malphaXi[0]=lo; malphaXi[1]=hi;}
 
 inline void franksXiCut::SetdEdx(const float& charge,
 				 const float& m1,  const float& c1,
@@ -96,27 +88,8 @@ inline void franksXiCut::SetPt(const float& lo, const float& hi)
 inline void franksXiCut::SetRapidity(const float& lo,const float& hi)
 {mRapidity[0]=lo; mRapidity[1]=hi;}
 
-inline void franksXiCut::SetV0Type(const char* type)
-{V0Type = (char*)type;}
+inline void franksXiCut::SetXiType(const char* type)
+{XiType = (char*)type;}
 
 #endif
 
-
-
-/***************************************************************************
- *
- * $Id: franksXiCut.h,v 1.1 2001/09/05 20:41:25 laue Exp $
- *
- * Authors: Frank Laue, BNL, laue@bnl.gov
- ***************************************************************************
- *
- * Description: part of STAR HBT Framework: StHbtMaker package
- *
- ***************************************************************************
- *
- * $Log: franksXiCut.h,v $
- * Revision 1.1  2001/09/05 20:41:25  laue
- * Updates of the hbtMuDstTree microDSTs
- *
- *
- **************************************************************************/

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: rotationEventCut.h,v 1.2 2001/06/21 19:09:44 laue Exp $
+ * $Id: rotationEventCut.h,v 1.3 2001/12/05 15:13:22 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: rotationEventCut.h,v $
+ * Revision 1.3  2001/12/05 15:13:22  laue
+ * rotationEventCut.h: cut on l3 trigger algorithm
+ * franksXiCut.cxx: updates
+ *
  * Revision 1.2  2001/06/21 19:09:44  laue
  * updated to match changed base classes
  *
@@ -46,6 +50,7 @@ public:
   void SetNumberOfV0s(const int& lo,const int& hi);
   void SetVertZPos(const float& lo, const float& hi);
   void SetReactionPlaneError(const float& lo, const float& hi);
+  void SetL3TriggerAlgorithm(const unsigned int&);
   void SetSmear(const float& s=0);
   void RotationOn();
   void RotationOff();
@@ -74,6 +79,7 @@ private:   // here are the quantities I want to cut on...
   int mNumberOfTracks[2];
   int mNumberOfV0s[2];
   float mReactionPlaneError[2];
+  unsigned int mL3TriggerAlgorithm;
 
   long mNEventsPassed;
   long mNEventsFailed;
@@ -93,6 +99,7 @@ inline void rotationEventCut::SetNumberOfTracks(const int& lo, const int& hi){mN
 inline void rotationEventCut::SetNumberOfV0s(const int& lo, const int& hi){mNumberOfV0s[0]=lo; mNumberOfV0s[1]=hi;}
 inline void rotationEventCut::SetVertZPos(const float& lo, const float& hi){mVertZPos[0]=lo; mVertZPos[1]=hi;}
 inline void rotationEventCut::SetReactionPlaneError(const float& lo, const float& hi){mReactionPlaneError[0]=lo; mReactionPlaneError[1]=hi;}
+inline void rotationEventCut::SetL3TriggerAlgorithm(const unsigned int& l3) {mL3TriggerAlgorithm=l3;}
 inline void rotationEventCut::SetSmear(const float& s){ mSmear = s;}
 inline void rotationEventCut::RotationOn() { mRotation = true; }
 inline void rotationEventCut::RotationOff() { mRotation = false; }
@@ -119,6 +126,7 @@ inline rotationEventCut::rotationEventCut(rotationEventCut& c) : StHbtEventCut(c
   mNumberOfV0s[1] = c.mNumberOfV0s[1];
   mReactionPlaneError[0] = c.mReactionPlaneError[0];
   mReactionPlaneError[1] = c.mReactionPlaneError[1];
+  mL3TriggerAlgorithm = c.mL3TriggerAlgorithm;
   mNEventsPassed = 0;
   mNEventsFailed = 0;
 }
