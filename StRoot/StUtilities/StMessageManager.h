@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.16 2000/02/29 16:41:57 genevb Exp $
+// $Id: StMessageManager.h,v 1.17 2000/03/30 16:12:55 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.17  2000/03/30 16:12:55  genevb
+// Add NoLimits() capability to turn off message limiting.
+//
 // Revision 1.16  2000/02/29 16:41:57  genevb
 // Fortran-compliant interface
 //
@@ -172,6 +175,7 @@ class StMessageManager : public StMessMgr {
    virtual       void RemoveLimit(const char* str) {SetLimit(str,-1);}
    virtual       void SwitchOff(const char* str) {SetLimit(str,0);}
    virtual       void SwitchOn(const char* str) {RemoveLimit(str);}
+   virtual       void NoLimits() {messCounter->NoLimits();}
    virtual       void Summary(size_t nTerms=1);
    virtual        int AddType(const char* type, const char* text);
    virtual        int ListTypes() {return messTypeList->ListTypes();}

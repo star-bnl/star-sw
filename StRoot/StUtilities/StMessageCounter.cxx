@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.cxx,v 1.14 2000/03/24 14:48:39 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.15 2000/03/30 16:12:55 genevb Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.15  2000/03/30 16:12:55  genevb
+// Add NoLimits() capability to turn off message limiting.
+//
 // Revision 1.14  2000/03/24 14:48:39  genevb
 // Insurance on end-of-strings
 //
@@ -61,6 +64,7 @@ StMessageCounter::StMessageCounter() : ostrstream(new char[4096],4096,ios::out),
 limitMessage(" - COUNT LIMIT REACHED!\n") {
   messTypeList = StMessTypeList::Instance();
   yesLimits = 0;
+  noLimits = 0;
 }
 //_____________________________________________________________________________
 StMessageCounter::~StMessageCounter() {
@@ -74,6 +78,7 @@ StMessageCounter* StMessageCounter::Instance() {
 }
 //_____________________________________________________________________________
 void StMessageCounter::SetLimit(const char* str, int n) {
+  if (noLimits) return;
   if (!yesLimits && (n >= 0)) yesLimits = 1;
   const size_t len = strlen(str);
   char* temp;
@@ -179,7 +184,7 @@ int StMessageCounter::CheckLimit(char* mess, const char* type) {
   int typeNewSize = limitTCountList[typeN] + 1;
   limitTCountList[typeN] = typeNewSize;
 
-  if (yesLimits) {
+  if (yesLimits && (! noLimits)) {
     seekp(0);
     int limit = limitTList[typeN];
     if (typeNewSize == limit) {
