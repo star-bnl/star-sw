@@ -78,12 +78,6 @@ Int_t StEmcCalibrationMaker::Make()
 {  
   zeroAll();
 	mStEvent = (StEvent*)GetInputDS("StEvent");
-	mBemcData = (StBemcData*)GetInputDS("bemcData");
-	if(mBemcData)
-	{
-		 mCTBSum = mBemcData->CTBSum;
-		 mZDCSum = mBemcData->ZDCSum;
-	}
 	if(!mStEvent) return kStOk;
   mEmcCol=(StEmcCollection*)mStEvent->emcCollection();  
   if(!mEmcCol) return kStOk;
