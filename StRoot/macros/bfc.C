@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.62 1999/06/10 17:01:41 snelling Exp $
+// $Id: bfc.C,v 1.63 1999/06/11 23:27:04 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.63  1999/06/11 23:27:04  fisyak
+// Change Event type from St_DataSet to StEvent
+//
 // Revision 1.62  1999/06/10 17:01:41  snelling
 // changed order switches so Eval would not turn on defaultchain
 //
@@ -105,6 +108,8 @@
 TBrowser *b = 0;
 class StChain;        
 StChain  *chain=0;
+class StEvent;
+StEvent *Event;
 class St_xdfin_Maker; St_xdfin_Maker *xdfMk=0;     
 class St_XDFFile;     St_XDFFile     *xdf_out = 0; 
 class St_geant_Maker; St_geant_Maker *geant   = 0;   
@@ -754,5 +759,6 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, C
     printf ("Run completed ");
     gSystem->Exec("date");
   }
+  else Event = (StEvent *) chain->GetInputDS("StEvent");
   //  else {b = new TBrowser("BFC chain",chain);}
 }
