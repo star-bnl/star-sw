@@ -47,28 +47,15 @@
 
 StiKalmanTrackFinder::StiKalmanTrackFinder()
 {
-  setDefaults();
-  reset();
+    cout <<"StiKalmanTrackFinder::StiKalmanTrackFinder()"<<endl;    
+    reset();
 }
 
 
 StiKalmanTrackFinder::~StiKalmanTrackFinder()
 {
-}
-
-void StiKalmanTrackFinder::setDefaults()
-{
-  //----------------------------------------------------------
-  // Perform all operations relevant to initialize this track
-  // finder.
-  // Instantiate default seed finder and track filter.
-  // Default helper objects such as the finder and filter 
-  // can be set directly using the appropriate set methods
-  // once the trackFinder object is instantiated. 
-  //----------------------------------------------------------  
-  trackSeedFinder = new StiTrackSeedFinder();
-  trackFilter     = new StiTrackFilter();
-  reset();
+    cout <<"StiKalmanTrackFinder::~StiKalmanTrackFinder()"<<endl;
+    
 }
 
 void StiKalmanTrackFinder::reset()
@@ -85,31 +72,86 @@ void StiKalmanTrackFinder::reset()
 
 }
 
+bool StiKalmanTrackFinder::isValid(bool debug) const
+{
+    return StiTrackFinder::isValid(debug);
+}
+
+//Temporary patch, to test seed finder (MLM, 8/20/01)
+void StiKalmanTrackFinder::doNextAction()
+{
+    if (trackSeedFinder->hasMore()) {
+	StiKalmanTrack* track = trackSeedFinder->next();
+	if (track) {
+	    cout <<"StiKalmanTrackFinder::doNextAction()\tgot track"<<endl;}
+	else {
+	    cout <<"StiKalmanTrackFinder::doNextAction()\ttrack==0"<<endl;}
+    }
+    else if (geometryContainer->hasMoreStartPoints()) {
+	geometryContainer->nextStartPoint();
+	initSeedFinderForStart();
+	cout <<"StiKalmanTrackFinder::doNextAction()\tSet to next start point"<<endl;
+    }
+    else {
+	cout <<"StiKalmanTrackFinder::doNextAction():\tNo more start points"<<endl;
+    }
+	
+    return;
+}
+
+void StiKalmanTrackFinder::initSeedFinderForStart()
+{
+    StiTrackSeedFinder* seedfinder = dynamic_cast<StiTrackSeedFinder*>(trackSeedFinder);
+    if (!seedfinder) {
+	cout <<"StiKalmanTrackFinder::initSeedFinderForStart(): Error!\t cast failed"<<endl;
+	return;
+    }
+    
+    seedfinder->clear();
+    StiDetectorContainer& rdet = (*geometryContainer);
+    //Get Outer 3 layers
+    for (int i=0; i<3; ++i) {
+	StiDetector* layer = *rdet;
+	seedfinder->addLayer( layer->getPlacement()->getCenterRefAngle(),
+			      layer->getPlacement()->getCenterRadius());
+	rdet.moveIn();
+    }
+    //Move back out to where we were
+    for (int i=0; i<3; ++i) {
+	rdet.moveOut();
+    }
+    //trackSeedFinder->print();
+    return;
+}
+
 void StiKalmanTrackFinder::findTracks()
 {
-  //-----------------------------------------------------------------
-  // Find all possible tracks in the given set of hits/points.
-  // 
-  // Note: The following objects must be set
-  // trackSeedFinder  : a helper class object used to find track seeds
-  // trackFilter      : a helper class object used to filter tracks 
-  //                    before they are added to the track store.
-  // trackContainer   : track container
-  //-----------------------------------------------------------------
-  
-  StiTrack * t;
-  
-  while (trackSeedFinder->hasMore())
-    {
-      t = trackSeedFinder->next(); // obtain a pointer to the next track candidate/seed
- 	     
-      if (findTrack(t)==StiConstants::Ok)
-	{
-	  if (trackFilter->accept(t))
-	    trackContainer->push_back(t);
-	}
+    //-----------------------------------------------------------------
+    // Find all possible tracks in the given set of hits/points.
+    // 
+    // Note: The following objects must be set
+    // trackSeedFinder  : a helper class object used to find track seeds
+    // trackFilter      : a helper class object used to filter tracks 
+    //                    before they are added to the track store.
+    // trackContainer   : track container
+    //-----------------------------------------------------------------
+    
+    StiTrack * t;
+    
+    while (trackSeedFinder->hasMore()){
+
+	t = trackSeedFinder->next(); // obtain a pointer to the next track candidate/seed
+	if (t!=0) { //check for null pointer
+	    
+	    if (findTrack(t)==StiConstants::Ok) {
+		
+		if (trackFilter->accept(t)) {
+		    trackContainer->push_back(t);
+		}
+	    }
+	} 
     }
-  status = StiConstants::Ok;
+    status = StiConstants::Ok;
 }
 
 int StiKalmanTrackFinder::findTrack(StiTrack * t)
