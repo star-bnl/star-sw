@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.19 2000/04/26 18:58:39 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.20 2000/05/17 22:23:01 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
+ * Revision 1.20  2000/05/17 22:23:01  lasiuk
+ * get rid of compile warnings
+ *
  * Revision 1.19  2000/04/26 18:58:39  lasiuk
  * comment diagnostics
  *
@@ -388,7 +391,7 @@ Int_t StRrsMaker::Make()
  		return kStWarn;
  	    }
 
-	    int numberOfTracks          =  g2t_track->GetNRows();
+	    //int numberOfTracks          =  g2t_track->GetNRows();
 	    //PR(numberOfTracks);
 	    
 	    g2t_track_st *track =  g2t_track->GetTable();
@@ -405,10 +408,10 @@ Int_t StRrsMaker::Make()
 		return kStWarn;
 	    }
 
-	    int no_tpc_hits         =  g2t_tpc_hit->GetNRows();
+	    //int no_tpc_hits         =  g2t_tpc_hit->GetNRows();
 	    //PR(no_tpc_hits);
 
-	    g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
+	    //g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
 
 	    St_g2t_rch_hit *g2t_rch_hit =
 		static_cast<St_g2t_rch_hit *>(geant("g2t_rch_hit"));
@@ -503,7 +506,7 @@ Int_t StRrsMaker::Make()
 			 rch_hit->ds*centimeter,
 			 rch_hit->de*GeV,
 			 particleMass,
-			 rch_hit->id,
+			 (rch_hit->track_p)-1, //rch_hit->id,
 			 track[(tmpTrackP)-1].ge_pid,
 			 volumeName);
 
@@ -620,12 +623,13 @@ Int_t StRrsMaker::Make()
     for ( int i = 0; i < mWriter->rows(); i++ ) {
 	for ( int j = 0; j < mWriter->cols(); j++ ) {
 
-	    if(mAddElectricNoise)
-		mWriter->getSignal(i,j).signal +=  mNoiseSimulator();
-	    
+	    if(mAddElectricNoise) {
+		//mWriter->getSignal(i,j).signal +=  mNoiseSimulator();
+		mWriter->putSignal(i,j,mNoiseSimulator(),0,0,0,eNoise);
+	    }
 	    mWriter->getSignal(i,j).signal =
 		mADC( mWriter->getSignal(i,j).signal );
-	    
+
 #ifdef RICH_WITH_VIEWER
 	    if (StRichViewer::histograms )
 		StRichViewer::getView()->mADCSignal->Fill(i,j,mWriter->getSignal(i,j).signal);
@@ -633,7 +637,7 @@ Int_t StRrsMaker::Make()
 	}
     }
 
-//     cout << "cleanup" << endl;
+    //cout << "cleanup" << endl;
     mWriter->cleanUpMCInfo();
     
     if(mWriteToFile) {
@@ -676,30 +680,27 @@ Int_t StRrsMaker::Make()
 	    if(theADCValue) {
 #ifdef RICH_DIAGNOSTIC
 // 		raw << "c/r/adc: " << iCol << ' ' << iRow << ' ' << theADCValue << endl;
-		raw << iCol << ' ' << iRow << ' ' << theADCValue << endl;
-// 		for(listIter  = aListOfMCInfo.begin();
-// 		    listIter != aListOfMCInfo.end();
-// 		    listIter++) {
-// 		    raw << "\t" << *listIter << endl;
-// 		}
+		cout << iCol << ' ' << iRow << ' ' << theADCValue << endl;
+ 		for(listIter  = aListOfMCInfo.begin();
+ 		    listIter != aListOfMCInfo.end();
+ 		    listIter++) {
+ 		    cout << "\t" << *listIter << endl;
+ 		}
 #endif // DIAGNOSTIC
 		
 #ifdef RICH_WITH_PADMONITOR
- 		StRichSingleMCPixel anMCPixel(iCol,iRow,theADCValue,aListOfMCInfo);
+ 		StRichSimpleMCPixel anMCPixel(iCol,iRow,theADCValue,aListOfMCInfo);
  		thePadMonitor->drawPad(anMCPixel);
 #endif // PAD MONITOR
 // #ifdef RICH_DIAGNOSTIC
-//   		raw << "r/c/adc: " << iRow << ' ' << iCol << ' ' << theADCValue << endl;
-//  		anIDList MCInfo = theReader.GetMCDetectorInfo(iRow, iCol);
-//  		anIDList::iterator iter;
-//  		for(iter = MCInfo.begin();
-//  		    iter!= MCInfo.end();
-//  		    iter++) {
-//  		    raw << ">>* MCinfo.G_ID= "
-//  			<< iter->mG_ID << "MCinfo.trackp= "
-//  			<< iter->mTrackp << "MCinfo.amount= "
-//  			<< iter->mAmount << endl;
-// 		}
+//    		cout << "r/c/adc: " << iRow << ' ' << iCol << ' ' << theADCValue << endl;
+//   		anIDList MCInfo = theReader.GetMCDetectorInfo(iRow, iCol);
+//   		anIDList::iterator iter;
+//   		for(iter = MCInfo.begin();
+//   		    iter!= MCInfo.end();
+//   		    iter++) {
+//   		    cout << ">>* MCinfo.G_ID= " << *iter << endl;
+//  		}
 // #endif
 	    
 	    } // if(theADCValue)
