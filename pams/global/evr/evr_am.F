@@ -222,19 +222,19 @@ C
         index=privert_h.nok + 1
         if (evrpar(1).use.eq.0) then
            privert(index).det_id = 1
-           privert(index).  = 0.0150
-           privert(index).  = 0.0150
-           privert(index).  = 0.0200
+           privert(index).sigma(1)  = 0.0150
+           privert(index).sigma(2)  = 0.0150
+           privert(index).sigma(3)  = 0.0200
         elseif (evrpar(1).use.eq.1) then
            privert(index).det_id = 2
-           privert(index).  = 0.0050
-           privert(index).  = 0.0050
-           privert(index).  = 0.0050
+           privert(index).sigma(1)  = 0.0050
+           privert(index).sigma(2)  = 0.0050
+           privert(index).sigma(3)  = 0.0050
         elseif (evrpar(1).use.eq.2) then
            privert(index).det_id = 3
-           privert(index).  = 0.0150
-           privert(index).  = 0.0150
-           privert(index).  = 0.0200
+           privert(index).sigma(1)   = 0.0150
+           privert(index).sigma(2)  = 0.0150
+           privert(index).sigma(3)  = 0.0200
         endif
 CC        privert(index).match = evrpar(1).match
 CC        privert(index).ptmin = evrpar(1).ptmin
