@@ -1,7 +1,10 @@
-* $Id: tte.F,v 1.5 1998/03/04 21:45:04 hardtke Exp $
+* $Id: tte.F,v 1.6 1998/03/19 01:06:14 sakrejda Exp $
 * $Log: tte.F,v $
-* Revision 1.5  1998/03/04 21:45:04  hardtke
-* change pid in tte_eval to long and fill table entry
+* Revision 1.6  1998/03/19 01:06:14  sakrejda
+* float added in the qfact calculation thanks to Joachim Nystrand
+*
+* Revision 1.6  1998/03/19 01:06:14  sakrejda
+* float added in the qfact calculation thanks to Joachim Nystrand
 *
 * Revision 1.5  1998/03/04 21:45:04  hardtke
 * change pid in tte_eval to long and fill table entry
@@ -410,7 +413,7 @@ c        provided the track was reconstructed........
             it=list_tracks(evmc(i).recid)
             evmc(i).ptr = 1.0/track(it).invp
             evmc(i).ptvr=evmc(i).ptr
-            evmc(i).qfact = evmc(i).nrec1/track(it).nrec
+            evmc(i).pzr = evmc(i).ptr*track(it).tanl
             evmc(i).pzvr = evmc(i).pzr
 c           and calculate the quality factor
             evmc(i).qfact = real(evmc(i).nrec1)/real(track(it).nrec)
