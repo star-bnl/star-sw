@@ -1,6 +1,6 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.49  1998/12/10 22:47:47  fine
-#  Correction for fit Window NT branch
+#  Revision 1.50  1998/12/11 22:08:11  perev
+#  redhat51
 #
 #  Revision 1.48  1998/12/04 01:17:29  fisyak
 #  fix for fortran source in StRoot
@@ -128,7 +128,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/12/10 22:47:47 $ 
+#             Last modification $Date: 1998/12/11 22:08:11 $ 
 #. default setings
 
 MAKE  := gmake
@@ -335,7 +335,7 @@ ifndef EGCS_ON
   CFLAGS   := $(DEBUG) -fPIC
   CPPFLAGS += f2cFortran
   LDFLAGS  := $(DEBUG) -Wl,-Bstatic
-  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic -Wl,-noinhibit-exec   
+  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic    
   SOFLAGS  := $(DEBUG) -shared  
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
   CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
@@ -368,7 +368,7 @@ else
   CFLAGS   := $(DEBUG) -fPIC
   CPPFLAGS += f2cFortran
   LDFLAGS  := $(DEBUG) -Wl,-Bstatic
-  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic -Wl,-noinhibit-exec   
+  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic    
   SOFLAGS  := $(DEBUG) -shared  
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
   CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
