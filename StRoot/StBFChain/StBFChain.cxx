@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.153 2000/11/24 17:28:10 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.154 2000/11/25 23:20:48 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -17,6 +17,7 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "StTreeMaker/StTreeMaker.h"
 #include "StIOMaker/StIOMaker.h"
+#include "StChallenger/StChallenger.h"
 #include "StMessMgr.h"
 //_____________________________________________________________________
 Bfc_st BFC[] = {
@@ -188,21 +189,23 @@ Bfc_st BFC[] = {
   {"emc"    ,"emcChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"      ,"StMaker","StChain","",kFALSE},
   {"ems"    ,"emc_raw","emcChain","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
   {"emh"    ,"emc_hits","emcChain","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
-  {"global"      ,"globalChain","","globT,Match,primary,v0,xi,kink,dst,SCL"
+  {"global"      ,"globalChain","","globT,Match,primary,v0,xi,kink,dst,dEdx,SCL"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Fglobal"    ,"fglobal","globalChain","SCL,tables,tls"
-                                                 ,"StFtpcGlobalMaker","St_global,St_dst_Maker","",kFALSE},
+                                                   ,"StFtpcGlobalMaker","St_global,St_dst_Maker","",kFALSE},
+  {"point"      ,"point","globalChain","SCL,tables,tls","StPointlMaker","St_global,St_dst_Maker","",kFALSE},
   {"Primary"     ,"primary","globalChain","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Fprimary"    ,"fprimary","globalChain","SCL,tables,tls"
-                                               ,"StFtpcPrimaryMaker","St_global,St_dst_Maker","",kFALSE},
+                                                  ,"StFtpcPrimaryMaker","St_global,St_dst_Maker","",kFALSE},
   {"V0"          ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Xi"          ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"dst"         ,"dst","globalChain","SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker" 
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"dEdx"       ,"dEdx","globalChain","globT,tpcDb","StdEdxMaker","StTableUtilities,StdEdxMaker","",kFALSE},
   {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain","emh"                    ,"StPreEclMaker","StPreEclMaker","",kFALSE},
@@ -234,7 +237,6 @@ Bfc_st BFC[] = {
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"dEdxTree"    ,"dEdx","","in,globT,tpcDb,Event","StDeDxTreeMaker","StAnalysisMaker,StDeDxTreeMaker"
                                                                                                 ,"",kFALSE},
-  {"dEdx"        ,"dEdx","","in,globT,tpcDb,Event","StdEdxMaker","StAnalysisMaker,StdEdxMaker"  ,"",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"","","SCL,St_geom"               ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
   {"Mc"          ,"McChain","","sim_T,globT,McAss,McAna"                    ,"StMaker","StChain","",kFALSE},
@@ -647,6 +649,61 @@ void StBFChain::SetFlags(const Char_t *Chain)
 }
 //_____________________________________________________________________
 void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
+  TString gc("");
+  if (infile) {
+    if (strlen(infile) > 2) {
+      gc = TString(infile,3);
+      gc.ToLower();
+    }
+    if (gc == "gc:") SetGC(infile+3);
+    else             SetInputFile(infile);
+  }
+  SetOutputFile(outfile);
+}
+//_____________________________________________________________________
+void StBFChain::SetGC (const Char_t *queue){
+  TString Queue(queue);
+  gMessMgr->QAInfo() << "Requested GC queue is :\t" << Queue.Data() << endm;
+  TObjArray Opts;
+  ParseString(Queue,Opts);
+  TIter next(&Opts);
+  TObjString *Opt;
+  static TString ARGV[40];
+  Int_t Argc = -1;
+  while ((Opt = (TObjString *) next())) {
+    TString string = Opt->GetString();
+    const Char_t *argv = string.Data();
+    if (argv[0] == '-') {
+      switch (argv[1]) {
+      case 'o':
+      case 'i':
+      case 'c':
+      case 'q':
+      case 's':
+      case 'n':
+      case 'm':
+      case 't':
+      case '-': // now do --options, they get added to Config
+        ARGV[++Argc] = string.Data();
+        Argc++;        
+	break;
+      default :
+	gMessMgr->QAInfo() << "Unrecognized option :\t" << string << endm;
+	break;
+      }
+    }
+    else if (Argc > 0) {ARGV[Argc] += " "; ARGV[Argc] += string;}
+  }
+  Opts.Delete();
+  fSetFiles = (StFileI *)StChallenger::Challenge();
+  fSetFiles->SetDebug();
+  Argc++;
+  Char_t **Argv = new Char_t* [Argc];
+  for (int i=0;i<Argc;i++)  {Argv[i] = (Char_t *) ARGV[i].Data();}
+  fSetFiles->Init(Argc,(const Char_t **) Argv);
+}
+//_____________________________________________________________________
+void StBFChain::SetInputFile (const Char_t *infile){
   // define input file
   if (infile) fInFile = new TString(infile);
   if (!GetOption("NoInput")) {
@@ -722,6 +779,9 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
     }
   }
   if (fInFile) gMessMgr->QAInfo() << "Input file name = " << fInFile->Data() << endm;
+}
+//_____________________________________________________________________
+void StBFChain::SetOutputFile (const Char_t *outfile){
   if (outfile)               fFileOut = new TString(outfile);
   else {
     if (GetOption("gstar"))  fFileOut = new TString("gtrack.root");

@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.56 2000/09/09 18:09:21 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.57 2000/11/25 23:21:55 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.57  2000/11/25 23:21:55  fisyak
+// Add dEdx maker to production chain
+//
 // Revision 1.56  2000/09/09 18:09:21  fisyak
 // Janet Seyboth corrections
 //
@@ -172,7 +175,7 @@
 #include "tables/St_dst_mon_soft_rich_Table.h"
 #include "tables/St_sgr_groups_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.56 2000/09/09 18:09:21 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.57 2000/11/25 23:21:55 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -481,7 +484,7 @@ Int_t  St_dst_Maker::Filler(){
   else {
      dst_dedx->ReAllocate(20000);
   }
- 
+#if 0 
   iRes = dst_dedx_filler(tptrack,stk_track,tpc_dedx,dst_dedx);
     //     ===========================================
   if (iRes !=kSTAFCV_OK) {
@@ -489,7 +492,7 @@ Int_t  St_dst_Maker::Filler(){
     gMessMgr->Warning() << "Problem on return from DST_DEDX_FILLER" << endm;
     if(Debug()) gMessMgr->Debug() << " run_dst: finshed calling dst_dedx_filler" << endm;
   }
-  
+#endif
   
  // dst_mon_soft
   St_DataSet *ftpc_tracks = GetInputDS("ftpc_tracks");
