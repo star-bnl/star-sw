@@ -58,8 +58,8 @@ foreach my $idll (@idlT) {
   if (-r $IDL) { 
     my @Deps = ($idll);# print "Deps: $Deps[0]\n";
     if ($STAR_SYS !~ /^intel_wnt$/) {
-      Command $env2 [$idlh],        @Deps, qq (stic.pl %> -H -q %1 );
-      Command $env2 [$idli],        @Deps, qq (stic.pl %> -H -q %1 );
+      Command $env2 [$idlh],        @Deps, qq (stic.pl %>  -q %1 );
+      Command $env2 [$idli],        @Deps, qq (stic.pl %>  -q %1 );
       push @Deps, $idlh;
       Command $env2 [$idlH],        @Deps, qq (ConstructTable.pl %>);
       push @Deps, $idlH;
