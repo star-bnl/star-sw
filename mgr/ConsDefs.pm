@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.73 2004/06/09 19:13:27 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.74 2004/07/29 17:44:57 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -169,36 +169,45 @@
 
 
  if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
-   my($packl,$cernl,$kernl);
+   my($packl,$cernl,$kernl,$strip);
    
-   if ( -e "$CERN_ROOT/bin/cernlib_noshift"      &&
-	-e "$CERN_ROOT/lib/libpacklib_noshift.a" &&
+   $strip = "";
+   if ( -e "$CERN_ROOT/lib/libpacklib_noshift.a" &&
 	-e "$CERN_ROOT/lib/libkernlib_noshift.a" ){
-     $cernl = "$CERN_ROOT/bin/cernlib_noshift";
-     $packl = "packlib_noshift";
-     $kernl = "kernlib_noshift";
+       if ( -e "$CERN_ROOT/bin/cernlib_noshift"){
+	   $cernl = "$CERN_ROOT/bin/cernlib_noshift";
+       } else {
+	   $cernl = "$CERN_ROOT/bin/cernlib";
+	   $strip = "-lshift";
+       }
+       $packl = "packlib_noshift";
+       $kernl = "kernlib_noshift";
+
    } else {
-     if ( ! -e "$CERN_ROOT/bin/cernlib"){
-       print 
-	 "\n",
-	 " ** WARNING  ** Could not find $CERN_ROOT/bin/cernlib\n",
-	 "                Will attempt to proceed and assume it is in\n",
-	 "                your path ...\n",
-	 "\n";
+       #if ( ! -e "$CERN_ROOT/bin/cernlib"){
+       #   print 
+       #       "\n",
+       #       " ** WARNING  ** Could not find $CERN_ROOT/bin/cernlib\n",
+       #       "                Will attempt to proceed and assume it is in\n",
+       #       "                your path ...\n",
+       #       "\n";
+       #   $cernl = "cernlib";
+       #} else {
+       #   $cernl = "$CERN_ROOT/bin/cernlib";
+       #}
+       #print "WARNING :: Using default packlib (with possibly shift)\n";
+       #$packl = "packlib";
+       #$kernl = "kernlib";
+       print "WARNING: using cernlib from the default path\n";
        $cernl = "cernlib";
-     } else {
-       $cernl = "$CERN_ROOT/bin/cernlib";
-     }
-     print "WARNING :: Using default packlib (with possibly shift)\n";
-     $packl = "packlib";
-     $kernl = "kernlib";
+       $packl = "packlib";
+       $kernl = "kernlib";
    }
    
-#   $CERNLIBS .= " " . `$cernl geant321 pawlib packlib graflib/X11 packlib mathlib kernlib`;
    $CERNLIBS .= " " . `$cernl pawlib packlib graflib/X11 packlib mathlib kernlib`;
-
    $CERNLIBS =~ s/packlib\./$packl\./g;
    $CERNLIBS =~ s/kernlib\./$kernl\./g;
+   $CERNLIBS =~ s/$strip//g if ($strip ne "");
    
    chop($CERNLIBS);
  }
@@ -210,6 +219,7 @@
 	$PLATFORM      = "linux";
 	$ARCH          = "linuxicc";
 	$PGI           = "";
+	$PGILIB        = "";
 	$CC            = "icc";
 	$CXX           = "icc";
 	$CPP           = $CC . " -EP";
@@ -583,6 +593,7 @@
           'SHLIB_PATH'      => $SHLIB_PATH,
           'LIB'             => $LIB,
           'PGI'             => $PGI,
+          'PGILIB'          => $PGILIB,
           'STAR'            => $STAR,
           'CERN_ROOT'       => $CERN_ROOT,
           'STAF'            => $STAF,
