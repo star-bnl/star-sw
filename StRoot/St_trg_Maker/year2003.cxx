@@ -33,6 +33,7 @@ void St_trg_Maker::SecondDstDaq2003(St_dst_L0_Trigger *dst2) {
   tt->MWC_CTB_moment   = 0;
 }
 
+/// This method copies Ctb and Mwc trigger data to the dst_TrgDet_st table
 void St_trg_Maker::CtbMwcDaq2003(St_dst_TrgDet *dst1) {
   int npre,npost,pp,i,tray,slat,subsector,sector;
   dst_TrgDet_st *tt = dst1->GetTable();
@@ -45,12 +46,14 @@ void St_trg_Maker::CtbMwcDaq2003(St_dst_TrgDet *dst1) {
   tt->npost=npost;
   for(pp=0;pp<1+npre+npost;pp++) {
     assert(pp<PREPOST);
+    // CTB information
     for(slat=0;slat<2;slat++) {
       for(tray=0;tray<120;tray++) {
         tt->nCtb[tray][slat][pp]=gs2003->rawTriggerDet[pp].CTB[ctbmap[tray][slat]];
         tt->timeCtb[tray][slat][pp]=0;
       }
     }
+    // MWC information 
     for(sector=0;sector<24;sector++) {
       for(subsector=0;subsector<4;subsector++) {
         tt->nMwc[sector][subsector][pp]=gs2003->rawTriggerDet[pp].MWC[mwcmap[sector][subsector]];
@@ -234,6 +237,7 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
   // dumpDataToScreenAndExit();
   VpdDaq2003(dst1);                // The function
   ZdcDaq2003(dst1);                // St_trg_Maker::Sim
+  BbcDaq2003(dst1);                //   <--- this will be in as a hack
   CtbMwcDaq2003(dst1);             // has four lines
   SecondDstDaq2003(dst2);          // which are analogous to these four.
   TakeCareOfL1andL2Daq2003(dst3,dst4);
@@ -282,8 +286,20 @@ void St_trg_Maker::ZdcDaq2003(St_dst_TrgDet *dst1) {
   tt->adcZDCWest=gs2003->rawTriggerDet[0].ZDC[10];
   tt->adcZDCsum=gs2003->rawTriggerDet[0].ZDC[13]+gs2003->rawTriggerDet[0].ZDC[10];
 }
+
+
+/// Following this layout of one routine per trigger to recover
+void St_trg_Maker::BbcDaq2003(St_dst_TrgDet *dst1) {
+  int i;
+  dst_TrgDet_st *tt = dst1->GetTable();
+  for(i=0; i < 80 ;i++) { 
+    tt->BBC[i] = gs2003->rawTriggerDet[0].BBC[i];
+  }
+}
+
 void St_trg_Maker::dumpDataToScreenAndExit2003() {
   //int i;
   exit(2);
 }
+
 
