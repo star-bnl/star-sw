@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.35 2001/09/12 23:49:22 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.36 2001/09/18 00:16:06 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.36  2001/09/18 00:16:06  ullrich
+ * Fill and add StRunInfo.
+ *
  * Revision 2.35  2001/09/12 23:49:22  ullrich
  * Removed code to build StRun and StRunSummary.
  *
@@ -135,6 +138,7 @@
 #include <vector>
 #include <algorithm>
 #include <utility>
+#include <cstdlib>
 #include "StEventMaker/StEventMaker.h"
 #include "StEventMaker/StRootEventManager.hh"
 #include "PhysicalConstants.h"
@@ -145,6 +149,7 @@
 #include "StTimer.hh"
 #include "StGlobals.hh"
 #include "StEvtHddr.h"
+#include "StTpcDb/StTpcDb.h"
 
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
@@ -158,7 +163,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.35 2001/09/12 23:49:22 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.36 2001/09/18 00:16:06 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -168,6 +173,7 @@ StEventMaker::StEventMaker(const char *name, const char *title) : StMaker(name)
     mEventManager = new StRootEventManager();
     mEventManager->setMaker(this);
     mCurrentEvent = 0;
+    mCurrentRunInfo = 0;
     doLoadTpcHits     = kTRUE;
     doLoadFtpcHits    = kTRUE;
     doLoadSvtHits     = kTRUE;
@@ -182,6 +188,7 @@ StEventMaker::StEventMaker(const char *name, const char *title) : StMaker(name)
 StEventMaker::~StEventMaker()
 {
     delete mEventManager;
+    delete mCurrentRunInfo;
 }
 
 void
@@ -850,6 +857,32 @@ StEventMaker::makeEvent()
     if (header) {
 	mCurrentEvent->setTriggerMask(header->GetTriggerMask());
     }
+
+    //
+    //  Handle StRunInfo
+    //
+    if (!mCurrentRunInfo) mCurrentRunInfo = new StRunInfo;
+    if (mCurrentEvent->runId() != mCurrentRunInfo->runId()) {
+	mCurrentRunInfo->setRunId(mCurrentEvent->runId());
+	mCurrentRunInfo->setProductionTime(time(0));                 
+	mCurrentRunInfo->setProductionVersion(getenv("STAR_VERSION"));
+	if (header) {
+	    mCurrentRunInfo->setCenterOfMassEnergy(header->GetCenterOfMassEnergy());             
+	    mCurrentRunInfo->setBeamMassNumber(east, header->GetAEast());  
+	    mCurrentRunInfo->setBeamMassNumber(east, header->GetAWest());  
+	    mCurrentRunInfo->setBeamCharge(east, header->GetZEast());
+	    mCurrentRunInfo->setBeamCharge(west, header->GetZWest());
+	}
+	if (mCurrentEvent->summary())
+	    mCurrentRunInfo->setMagneticField(mCurrentEvent->summary()->magneticField());
+	if (gStTpcDb) {
+	    mCurrentRunInfo->setTpcDriftVelocity(east, gStTpcDb->DriftVelocity());	
+	    mCurrentRunInfo->setTpcDriftVelocity(west, gStTpcDb->DriftVelocity());
+	}
+    }
+    if (mCurrentRunInfo)
+	mCurrentEvent->setRunInfo(new StRunInfo(*mCurrentRunInfo));
+
     
     return kStOK;
 }
