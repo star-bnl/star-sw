@@ -1,5 +1,9 @@
-// $Id: StMcEventReadMacro.C,v 1.17 2001/04/09 17:47:15 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.18 2002/08/15 14:49:27 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.18  2002/08/15 14:49:27  calderon
+// Go back to loading St_Tables instead of loading each table individually...
+// (as was the case since revision 1.12 back in April 2000!)
+//
 // Revision 1.17  2001/04/09 17:47:15  calderon
 // load StEmcUtil instead of St_emc_Maker
 //
@@ -82,16 +86,16 @@ const char *MainFile=
 // Load all the System libraries
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("libglobal_Tables");
-    gSystem->Load("libgen_Tables");
-    gSystem->Load("libsim_Tables");
+    gSystem->Load("St_Tables");
     gSystem->Load("StUtilities");
 
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     
-//     gSystem->Load("St_emc_Maker");
-     gSystem->Load("StEmcUtil");
+    gSystem->Load("StDetectorDbMaker");
+    gSystem->Load("StTpcDb");
+    gSystem->Load("StEvent");
+    gSystem->Load("StEmcUtil");
     
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
