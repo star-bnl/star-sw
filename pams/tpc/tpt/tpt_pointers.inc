@@ -1,5 +1,6 @@
       INTEGER mxpnt, mxtrack
-      PARAMETER (mxpnt=50, mxtrack=20000)
+*      PARAMETER (mxpnt=50, mxtrack=20000)
+      PARAMETER (mxpnt=100, mxtrack=20000) !liq
 
       STRUCTURE /track_pointers/
 	  INTEGER*4    nhit                 ! number of his per track

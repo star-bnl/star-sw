@@ -21,6 +21,7 @@
 * editted 8/3/98  K. Turner - use detp to setup geometry
 * editted 8/11/98 K. Turner - make setting split_off hardwired in for gstar
 * editted 8/12/98 K. Turner - combine geomtype+phystype into gstar_settings
+* 10/14/98 K. Turner - put in read_default_params 
 * 
 * *******************************************************************
 * ---------available values of input parameters ---------------
@@ -105,6 +106,7 @@
    detp geometry [gstar_settings] split_off
    exec bfc_util#bfc_g2t_b4_load    [chain]
    exec load_libraries#run          [domain]
+   exec read_default_params#init 
    exec bfc_util#bfc_g2t_after_load [chain]
 
 ******** turn debugger on just for GSTAR! ******************************

@@ -138,7 +138,7 @@ C---------------
            endif
         endif
               
-        IF( (iv1.eq.iv2).and.(iv1.ne.1).and.(iv2.ne.1) ) THEN
+        IF( (iv1.eq.iv2).and.(g2t_vertex(iv1).parent_p) .ne. 0 ) THEN
          ev0_eval(i).itrue= -1*ev0_eval(i).itrue
          ev0_eval(i).x_true=g2t_vertex(iv1).ge_x(1)
          ev0_eval(i).y_true=g2t_vertex(iv1).ge_x(2)
@@ -150,7 +150,6 @@ C---------------
      +        g2t_track(g2t_vertex(iv1).parent_p).rapidity
         ev0_eval(i).pid_true = 
      +        g2t_track(g2t_vertex(iv1).parent_p).ge_pid
-
         else
       
          ev0_eval(i).x_true= 0
@@ -160,7 +159,8 @@ C---------------
          ev0_eval(i).py_true= 0
          ev0_eval(i).pz_true= 0
          ev0_eval(i).rapidity_true = 0
-        ev0_eval(i).pid_true = 0
+         ev0_eval(i).pid_true = 0
+         iv1 = 0
          endif
 
         ev0_eval(i).x = vertex(ev0out(i).id_vertex).x
@@ -181,15 +181,31 @@ C---------------
 
         if (iv1t .gt. 0) then
            ev0_eval(i).pid_neg_true = g2t_track(iv1t).ge_pid
+           if(  ev0_eval(i).pid_true .eq. 18) then
+              write(6,*) g2t_track(g2t_vertex(iv1).parent_p).ge_pid,
+     +             ev0out(i).inv_mass_la,g2t_track(iv1t).ge_pid
+           endif
+*           ev0_eval(i).pid_neg_true = iv1          
         elseif( iv1s .gt. 0) then
            ev0_eval(i).pid_neg_true = g2t_track(iv1s).ge_pid
+           if(  ev0_eval(i).pid_true .eq. 18) then
+              write(6,*) g2t_track(g2t_vertex(iv1).parent_p).ge_pid,
+     +             ev0out(i).inv_mass_la, g2t_track(iv1s).ge_pid
+           endif
+*           ev0_eval(i).pid_neg_true = iv1
         else
            ev0_eval(i).pid_neg_true  = 0
         endif
         if( iv2t .gt. 0) then
             ev0_eval(i).pid_pos_true  = g2t_track(iv2t).ge_pid
+            if(  ev0_eval(i).pid_true .eq. 18) then
+               write(6,*) g2t_track(iv2t).ge_pid
+            endif
         elseif( iv2s .gt. 0) then
            ev0_eval(i).pid_pos_true  = g2t_track(iv2s).ge_pid
+           if(  ev0_eval(i).pid_true .eq. 18) then
+           write(6,*) g2t_track(iv2s).ge_pid
+           endif
         else
            ev0_eval(i).pid_pos_true = 0
         endif          

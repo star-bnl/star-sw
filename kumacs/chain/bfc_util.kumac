@@ -138,7 +138,25 @@
 *                      dchkt - executes pams/global/kumac/dst_chk_tabl.kumac 
 *                              used to write out info from dst
 *                      dwntp - executes pams/global/kumac/dst_wr_ntup.kumac
-*                              used to write out ntuples from dst tables
+*                             used to write out ntuples from dst tables
+* 10/8/98 K. Turner - update ftpc kumacs
+* 10/8/98 K. Turner - change "dout" so that it writes out a separate
+*                     run/params file also
+* 10/9/98 K. Turner - take back out the "dout" feature that writes a
+*                     separate run/params file
+*                   - fix dchkt so that it checks if run_summary table
+*                     exists before executing finish stuff
+* 10/13/98 K. Turner - change "dout" so that it writes out full run
+*                      directory during bfc_init, not just run/params
+* 10/14/98 K. Turner - remove "dwntp" - not needed
+*                    - fix dout so it writes out whole run dir during init
+*                    - fix dstin for backwards compatibility
+*                    - default params read with read_default_params 
+*                      instead of load_libraries 
+*                    - following changes to pams/ftpc/ code & kumacs now can:
+*                       - change fpt_s,fpt_f chains to both be fpt
+*                       - change fte_s,fte_f chains to both be fte
+* 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -158,7 +176,9 @@
    detp geometry [gstar_settings] split_off
    exec bfc_util#bfc_g2t_b4_load    [chain]
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
-   exec load_libraries#run          [domain]
+   exec load_libraries#run          [domain]   
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
+   exec read_default_params#init     
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
    exec bfc_util#bfc_g2t_after_load [chain]
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
@@ -174,8 +194,6 @@
 END:
  
 return
-
-
  
 *********************************************************************
 *********************************************************************
@@ -223,16 +241,29 @@ macro bfc_init _
 	  endif
     (dstin) 
 	  exec read_table_from_file#init ind [input_file]
-	   if ($vexist(readprob).ne.0) then 
+	  if ($vexist(readprob).ne.0) then 
             message ' BFC_UTIL,init: ERROR - cannot open dstin file - quit '
             goto EOF
-	   endif
-	  exec read_table_from_file#read ind [run]
+	  endif
+* must take care of old type of dsts (before 98i) that only had
+* dst tables in first event -- if we get dst directory here, copy
+* tables to run/dst and then delete from dst
+	  exec read_table_from_file#read ind  
            if ($vexist(readprob).ne.0) then 
             message ' BFC_UTIL,init: ERROR - cannot read dstin file - quit '
             goto EOF
-	   endif  
-     (esin)
+	  endif  
+* now check if we have dst directory here:
+	  ls dst
+	  if (staf_status(2).eq.stafcv_ok) then
+	    message ' have dst directory in run directory! '
+	    cp dst/run_header  [run_dst]
+	    cp dst/run_summary [run_dst]
+	    rm dst/run_header
+	    rm dst/run_summary
+	    rmdir dst
+	  endif	  
+    (esin)
           dio/newfilestream inev [input_file] r
           cd [run]
           dio/stream/getevent inev
@@ -300,25 +331,20 @@ macro bfc_init _
          exec init_spr#init
       (ffs) 
 	    exec create_tables_ftpc#ffs_tables
-	    exec ffs_init#init
+	    exec init_ffs#init
       (fss) 
 	    exec create_tables_ftpc#fss_tables
-	    exec fss_init#init
+	    exec init_fss#init
       (fcl) 
-	    exec create_tables_ftpc#fcl_tables
-	    exec fcl_init#init
-    (fpt_f)
-	    exec create_tables_ftpc#fpt_tables
-	    exec fpt_init#init
-    (fte_f)
-	    exec create_tables_ftpc#fte_tables
-            exec fte_init#init
-    (fpt_s)
+            exec create_tables_ftpc#fcl_tables
+            exec init_fcl#read_cal
+	    exec init_fcl#init
+    (fpt)
             exec create_tables_ftpc#fpt_tables
-            exec fpt_init#init
-    (fte_s)
+            exec init_fpt#init
+    (fte)
             exec create_tables_ftpc#fte_tables
-            exec fte_init#init	    
+            exec init_fte#init	    
       (svm) 
             exec create_tables_global#svm
             exec init_svm#init
@@ -370,7 +396,6 @@ macro bfc_init _
     (dchkt)
 	    exec dst_chk_tabl#init
 	    exec dst_chk_tabl#run_header
-    (dwntp) exec dst_wr_ntup#init
     (user)  exec init_user
     (ntup)  exec write_table_to_ntuple#init_disk [nunit] [nfile]
     (fzout) user/output o [output_fzd_file]
@@ -394,7 +419,7 @@ macro bfc_init _
                 message "Cannot open dst output file"
                 goto EOF
               endif
-              exec write_table_to_file#write dstout [run_dst]         
+              exec write_table_to_file#write dstout [run]         
             endif
     (esout)
             if output_xdf_file="" then
@@ -602,13 +627,11 @@ return
 		 goto NEXT_EVENT
                endif
     (tte_e)    exec tte_run#run_tte
-      (ffs)    exec ffs_run#run 
-      (fss)    exec fss_run#run
-      (fcl)    exec fcl_run#run
-    (fpt_f)    exec fpt_run#run_fast_sim
-    (fte_f)    exec fte_run#run_fast_sim
-    (fpt_s)    exec fpt_run#run_slow_sim
-    (fte_s)    exec fte_run#run_slow_sim
+      (ffs)    exec run_ffs#run 
+      (fss)    exec run_fss#run
+      (fcl)    exec run_fcl#run
+      (fpt)    exec run_fpt#run
+      (fte)    exec run_fte#run
       (svm)    exec run_svm#run_svm
       (evr)    exec run_evr#run
       (egr)    exec run_egr#egr	
@@ -650,7 +673,6 @@ return
                exec dst_chk_tabl#event_header
                exec dst_chk_tabl#dst_tables
 *              exec dst_chk_tabl#event_summary    
-    (dwntp)    exec dst_wr_ntup#run
      (user)     exec run_user
      (ntup)     exec write_table_to_ntuple#write_event_disk [nid] [ntable]
     (evout)    if [output_xdf_file]="" then
@@ -660,9 +682,9 @@ return
               endif
     (dout)    if [output_dst_file]="" then
                  message "Empty dst output file"
-               else
+              else
 		 exec write_table_to_file#write dstout [dst]
-               endif
+              endif
     (esout)    if [output_xdf_file]="" then
                  message "Empty output file"
                else
@@ -732,9 +754,17 @@ macro bfc_finish _
      (ebye1) 
              exec finish_sca#finish
              exec run_sca#close [calib_dir] [ebye_prior_switch] _
-                                [ebye_ensemble_switch] [ebye_analysis_switch]
-    (dchkt) exec dst_chk_tabl#run_summary
-    (dwntp) exec dst_wr_ntup#finish
+	       [ebye_ensemble_switch] [ebye_analysis_switch]
+     (dchkt) 
+	  ls [run_dst]/run_summary
+            if (staf_status(2).eq.STAFCV_OK) then
+*              message ' *** BFC_FINISH: run summary table exists! '
+              rowcount [run_dst]/run_summary	    
+	      if (staf_result(1).ne.0) then
+*               message ' *** BFC_FINISH: run summary table has entries! '
+		exec dst_chk_tabl#run_summary
+	      endif
+            endif
      (user) exec finish_user
      (ntup) exec write_table_to_ntuple#close_disk [nunit] [nid]
      (evout,esout) 
@@ -833,7 +863,7 @@ macro bfc_g2t_b4_load chain
            
  test1 = [chain]
  nw1=$words([test1])
- message ' !!! bfc_g2t_b4_load ==> Number of words in chain = ',[nw1]
+ message ' bfc_util#bfc_g2t_b4_load ==> Number of words in chain = ',[nw1]
  do i=1,[nw1]
    mod1 = $word([test1],[i],1)
    CASE [mod1] in
@@ -868,7 +898,7 @@ return
 *  has to be done after loading
  test2 = [chain]
  nw2=$words([test2])
- message ' !!! bfc_g2t_after_load ==> Number of words in chain = ',[nw2]
+ message ' bfc_util#bfc_g2t_after_load ==> Number of words in chain = ',[nw2]
  do i=1,[nw2]
    mod2 = $word([test2],[i],1)
    CASE [mod2] in

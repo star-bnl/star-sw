@@ -16,6 +16,7 @@
 * 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
 * 8/10/98 - K. Turner - fixed for change to tpg_init
 * 8/26/98 - K. Turner - fix for changes to init kumacs
+* 10/14/98 K. Turner - put in read_default_params
 * 
 ************************************************************************
 ************************************************************************
@@ -79,7 +80,9 @@
  macro/global/import *
    
  exec load_libraries#run  [domain]  
-
+ 
+ exec read_default_params#init
+ 
 **************************************************************
 * OPEN FILES
 ****************************************************************
