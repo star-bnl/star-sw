@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.1 1998/11/10 17:12:23 fisyak Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.2 1999/01/15 10:59:11 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,8 +11,10 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
- * Revision 1.1  1998/11/10 17:12:23  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/15 10:59:11  lasiuk
+ * remove g2t pointer
+ * add pid member; add systemofunits; mv access fcts to .hh
+ * add ostream operator
  *
  *
  * Revision 1.3  1999/01/28 02:50:28  lasiuk
@@ -45,54 +47,38 @@
  *
  * Revision 1.1.1.1  1998/05/19 22:33:44  lasiuk
  * Initial Revision
-#include "SystemOfUnits.h"
  *
  * add pid member; add systemofunits; mv access fcts to .hh
 
-    : mPosition(0,0,0), mMomentum(0,0,0), mNumberOfElectrons(0), mSectorOfOrigin(0)
+#include "StPhysicalHelix.hh"
+
+#include "StTrsChargeSegment.hh"
+#include "StPhysicalHelix.hh"
+#include "StTpcCoordinateTransform.hh"
+#include "StTrsDeDx.hh"
+
 
 StTrsChargeSegment::StTrsChargeSegment()
     : mPosition(0,0,0), mMomentum(0,0,0)
 {
-StTrsChargeSegment::StTrsChargeSegment(StThreeVector<double>& pos, StThreeVector<double>& mom, g2t_tpc_hit* seg)
-    : mPosition(pos), mMomentum(mom), mNumberOfElectrons(0), mSectorOfOrigin(0)
-{
-//     mG2tTpcHit = new g2t_tpc_hit;
-    mG2tTpcHit = seg;
-//     cout << "seg->de " << (mG2tTpcHit->de) << "\t" << mG2tTpcHit << endl;
+    mNumberOfElectrons = -1;
+    mDE = 0;
+    mDs = 0;
+    mPid = 0;
+    mSectorOfOrigin = 0;
+    mSector12Position = mPosition;
+    //mG2tTpcHit = new g2t_tpc_hit;
+}
 
-    // this is temporary...will be unecessary when pointer to g2t structure
-    // is stored properly
-        mDE = seg->de;
-        mDs = seg->ds;
+StTrsChargeSegment::StTrsChargeSegment(StThreeVector<double>& pos,
+				       StThreeVector<double>& mom,
+				       double de,
+				       double ds,
+				       int    pid,
 				       float  ne)
     : mPosition(pos), mMomentum(mom)
-StTrsChargeSegment::~StTrsChargeSegment()
 {
-    //delete mG2tTpcHit;
-}
     mNumberOfElectrons = ne;   // default is -1
-StThreeVector<double>& StTrsChargeSegment::position()
-{
-    return mPosition;
-}
-
-StThreeVector<double>& StTrsChargeSegment::momentum()
-{
-    return mMomentum;
-}
-
-double StTrsChargeSegment::dE()
-{
-    //return mDE;
-    return mG2tTpcHit->de;
-}
-
-double StTrsChargeSegment::ds()
-{
-    //return mDs;
-    return mG2tTpcHit->ds;
-}
     mDE = de;
     mDs = ds;
     mPid = pid;                // default is -1
@@ -103,54 +89,58 @@ void StTrsChargeSegment::rotate(StTpcGeometry* geodb, StTpcSlowControl* SCdb)
 StTrsChargeSegment::~StTrsChargeSegment() {/* nopt */ }
 
 
-    cout << "mSectorOfOrigin: " << mSectorOfOrigin << endl;
-    cout << "mSector12Position: " << mSector12Position << endl;
-    cout << endl;
+void StTrsChargeSegment::rotate(StTpcGeometry* geodb, StTpcSlowControl* SCdb, StTpcElectronics* elecDb)
+{ // rotate to sector 12 ---use a coordinate transform:
     StTpcCoordinateTransform transformer(geodb, SCdb, elecDb);
 
     cout << "rotate() position= " << mPosition << endl;
-void StTrsChargeSegment::split(StTrsDeDx* gasDb, StMagneticField* magDb,
-			       int subSegments, double segmentLength,
-			       list<StTrsMiniChargeSegment>* listOfMiniSegments
-			       )
+
+    mSector12Position =
+	transformer.sector12Coordinate(mPosition, &mSectorOfOrigin);
+
     PR(mSectorOfOrigin);
-void StTrsChargeSegment::split(StTrsDeDx* gasDb, StMagneticField* magDb,
-			       int subSegments, double segmentLength,
-			       list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> >* listOfMiniSegments
-			       )
+    PR(mSector12Position);
+}
+
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
 void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 			       StMagneticField* magDb,
 			       int subSegments, 
 			       list<StTrsMiniChargeSegment>* listOfMiniSegments)
 #else
-    gasDb->setPadLength(segmentLength/centimeter);
-    //cout << "StTrsDeDx::padLength() -->        " << gasDb->padLength() << endl;
-    //cout << "StTrsChargeSegment::split() de--> " << this->dE() << endl;
-    //cout << "StTrsChargeSegment::split() ds--> " << this->ds() << endl;
-    //cout << "StTrsDeDx::W() -->                " << gasDb->W() << endl;
-    //cout << "StMagneticField:at() -->          " << (magDb->at(mSector12Position)) << endl;
+    // what is the subsegment length?
+//     PR(gasDb->W());
+    double deltaS = mDs/static_cast<double>(subSegments);
+    PR(deltaS);
+    PR(deltaS/millimeter);
+
+	// what is the subsegment length?
+    gasDb->setPadLength(deltaS*centimeter);
+    cout << "StTrsDeDx::padLength() -->        " << (gasDb->padLength()/millimeter) << " mm" << endl;
+    cout << "StTrsChargeSegment::split() de--> " << this->dE() << endl;
+    cout << "StTrsChargeSegment::split() ds--> " << this->ds() << endl;
+    cout << "StTrsDeDx::W() -->                " << gasDb->W() << endl;
+    cout << "StMagneticField:at() -->          " << (magDb->at(mSector12Position)) << endl;
+    PR(mSector12Position);
     
-    // Maximum number of electrons in complete segment
-    mNumberOfElectrons = (this->dE())/(gasDb->W()/eV);
+    // Number of electrons in complete segment
+    if (mNumberOfElectrons<0)
+	mNumberOfElectrons = (mDE)/(gasDb->W());
     PR(mNumberOfElectrons);
 //     cout << "StTrsDeDx::padLength() -->        "  << (gasDb->padLength()/millimeter) << " mm" << endl;
 //     cout << "StTrsChargeSegment::split() de--> " << (this->dE()/eV)                 << " eV" << endl;
 //     cout << "StTrsChargeSegment::split() ds--> " << (this->ds()/millimeter)         << " mm" << endl;
-    // Need track info from g2t:
-    // - momentum in current volume
-    //   (NOT total track momentum  because this is defined at the vertex)!
-    // - charge
-    // At center of g2t volume!!
+//     cout << "StTrsDeDx::W() -->                "   << (gasDb->W()/eV)                 << " eV"  << endl;
     
     int charge = 1;  // tmp only
     StPhysicalHelix
 	track(mMomentum,
 	      mSector12Position,
-	      (magDb->at(mSector12Position)).z(),
+	      (magDb->at(mSector12Position)).z()*tesla,
 	      charge);
     //
     // tmp: pion mass
-    // Must get from g2t structures
+    // Must get from pid structures
     double particleMass = .1395*GeV;
     
     double betaGamma = abs(mMomentum)/particleMass;
@@ -160,17 +150,18 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
     // number of segments to split given by command line argument (default 1):
     //  should be related to mNumberOfElectrons
 	double betaGamma = abs(mMomentum)/particleMass;
-    int    ionizationLeft = mNumberOfElectrons;
-    double deltaS         = mDs/static_cast<double>(subSegments);
+    float ionizationLeft = mNumberOfElectrons;
 //     PR(betaGamma);
     //
-    // define the new origin
+    // calculate the offset to the start position
     //
-    double newPosition = -((this->ds()) + deltaS)/2;
-
+    double newPosition = -mDs/2. + deltaS/2.;
+    PR(newPosition);
+    
     //
     // loop over all subSegments and distribute charge
     //
+	double newPosition = -mDs/2. + deltaS/2.;
 	// calculate the offset to the start position
     vector<int> ionization(StTrsDeDx::numberOfElectrons);
 	 double newPosition = -mDs/2. + deltaS/2.;
@@ -180,14 +171,16 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
     int numberOfElectronsOnMiniSegment;
 	vector<int> ionization(StTrsDeDx::numberOfElectrons);
     for(int ii=0; ii<(subSegments-1); ii++) {
-	newPosition += deltaS;
-	//PR(newPosition);
-	
+	// generate electrons
 	gasDb->electrons(ionization, betaGamma);
 
+// 	PR(ionization[StTrsDeDx::primaries]);
+// 	PR(ionization[StTrsDeDx::secondaries]);
+	PR(ionization[StTrsDeDx::total]);
+
 	if(!ionization[StTrsDeDx::total]) continue;
-	
-	//PR(ionization[StTrsDeDx::total]);
+
+	// Don't generate too much ionization
 	if(ionization[StTrsDeDx::total] > ionizationLeft) {
 	    numberOfElectronsOnMiniSegment = ionizationLeft;
 	}
@@ -195,21 +188,28 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 	    numberOfElectronsOnMiniSegment = ionization[StTrsDeDx::total];
 	}
 	    if(ionization[StTrsDeDx::total] > ionizationLeft) {
-	//PR(numberOfElectronsOnMiniSegment);
-
+	PR(numberOfElectronsOnMiniSegment);
+	PR(newPosition);
+	PR(track.at(newPosition));
+		numberOfElectronsOnMiniSegment = ionization[StTrsDeDx::total];
 	StTrsMiniChargeSegment aMiniSegment(track.at(newPosition),
 					    numberOfElectronsOnMiniSegment,
 					    deltaS);
 	listOfMiniSegments->push_back(aMiniSegment);
 // 	PR(track.at(newPosition));
 	ionizationLeft -= numberOfElectronsOnMiniSegment;
-	//PR(ionizationLeft);
+	PR(ionizationLeft);
 						numberOfElectronsOnMiniSegment,
 	if(!ionizationLeft) break;
+		newPosition += deltaS;
+	PR(newPosition);
     }
     //
-    // last subsegment
+    // last subsegment -- assign remaining ionizaiton
+    // GEANT energy is conserved by this (exactly!)
     //
+    PR(newPosition);
+    PR(track.at(newPosition));
     if(ionizationLeft) {
 	StTrsMiniChargeSegment aNewMiniSegment(track.at(newPosition),
 					       ionizationLeft,
@@ -218,6 +218,11 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
     } // if (subsegments > 1)  ---> allows us to skip the helix construction
     else {
 	StTrsMiniChargeSegment aSingleMiniSegment(mPosition,
+						  mNumberOfElectrons,
+ostream& operator<<(ostream& os, StTrsChargeSegment& seg)
+	listOfMiniSegments->push_back(aSingleMiniSegment);
+    }
+// 	PR(mNumberOfElectrons);
      }
 
 }
