@@ -1,4 +1,5 @@
 #include <string.h>
+#include "asuAlloc.h"
 #include "cfortran.h"
 
 #include "hbook.h"

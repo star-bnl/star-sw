@@ -18,6 +18,7 @@ relation database join and project operations for tables
 #include <stdlib.h>
 #include <string.h>
 #include "dstype.h"
+#include "asuAlloc.h"
 #include "emlLib.h"
 
 static int topEquijoinFields(DS_FIELD_T **srcField, size_t *srcIndex,

@@ -17,6 +17,7 @@ xdr routines for intel based OS ...
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include "asuAlloc.h"
 #define DS_PRIVATE
 #include "dsxdr.h"
 /******************************************************************************

@@ -1,3 +1,5 @@
+#ifndef ASU_ALLOC_H
+#define ASU_ALLOC_H 1
 #ifndef NULL
 	#define NULL 0
 #endif
@@ -64,11 +66,11 @@ extern CC_P void asuFree(void *p
 #define CALLOC(NOBJ,SIZE) asuCalloc(NOBJ,SIZE,__FILE__,__LINE__)
 #define MALLOC(SIZE) asuMalloc(SIZE,__FILE__,__LINE__)
 #define REALLOC(P,SIZE) asuRealloc(P,SIZE,__FILE__,__LINE__)
-#define FREE(P) { asuFree(&(P),__FILE__,__LINE__); (P) = NULL;}
+#define FREE(P) { asuFree((P),__FILE__,__LINE__); (P) = NULL;}
 #else
 #define CALLOC(NOBJ,SIZE) calloc(NOBJ,SIZE)
 #define MALLOC(SIZE) malloc(SIZE)
 #define REALLOC(P,SIZE) realloc(P,SIZE)
 #define FREE(P) { free(P); (P) = NULL;}
 #endif
-
+#endif /*ASU_ALLOC_H*/

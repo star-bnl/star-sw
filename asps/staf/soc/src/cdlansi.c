@@ -1,3 +1,4 @@
+#include "asuAlloc.h"
 #include "cdl.h"
 #include "fortranc.h"  
 #include "dlfcn.h"   /*added by VP*/

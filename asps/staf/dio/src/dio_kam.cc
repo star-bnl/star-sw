@@ -19,6 +19,7 @@
 #define KUIP
 
 #include "asuLib.h"
+#include "asuAlloc.h"
 #include "emlLib.h"
 #include "dio_macros.h"
 #include "dio_types.h"

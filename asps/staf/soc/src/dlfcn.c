@@ -26,7 +26,7 @@
 #include <a.out.h>
 #include <ldfcn.h>
 #include "dlfcn.h"
-
+#include "asuAlloc.h"
 /*
  * We simulate dlopen() et al. through a call to load. Because AIX has
  * no call to find an exported symbol we read the loader section of the

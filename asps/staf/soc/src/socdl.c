@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "asuAlloc.h"
 #include "cdl.h"
 #include "emlLib.h"
 
