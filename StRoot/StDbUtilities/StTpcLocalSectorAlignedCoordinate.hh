@@ -1,16 +1,22 @@
-//  $Id: StTpcLocalSectorAlignedCoordinate.hh,v 1.1 2004/03/05 17:22:54 fisyak Exp $
-#ifndef ST_TPC_LOCAL_ALIGNEDCOORDINATE_HH
-#define ST_TPC_LOCAL_ALIGNEDCOORDINATE_HH
+/*********************************************************************
+ *
+ * $Id: StTpcLocalSectorAlignedCoordinate.hh,v 1.2 2004/06/05 23:31:09 fisyak Exp $
+ **********************************************************************/
+#ifndef ST_TPC_LOCAL_SECTOR_ALIGNED_COORDINATE_HH
+#define ST_TPC_LOCAL_SECTOR_ALIGNED_COORDINATE_HH
 #include "StTpcLocalSectorCoordinate.hh"
-
 class StTpcLocalSectorAlignedCoordinate : public StTpcLocalSectorCoordinate {
 public:
-  StTpcLocalSectorAlignedCoordinate() : StTpcLocalSectorCoordinate() {}
-  StTpcLocalSectorAlignedCoordinate(const double x, const double y, const double z, int sector) : 
-    StTpcLocalSectorCoordinate(x,y,z,sector) {}
-  StTpcLocalSectorAlignedCoordinate(const StThreeVector<double>& xyz, int sector) : StTpcLocalSectorCoordinate(xyz,sector) {}
+  StTpcLocalSectorAlignedCoordinate() :  StTpcLocalSectorCoordinate(0,0,0,0,0) {}
+  StTpcLocalSectorAlignedCoordinate(double x, double y, double z) :
+    StTpcLocalSectorCoordinate(x,y,z,0,0) {}
+  StTpcLocalSectorAlignedCoordinate(const StThreeVector<double>& xyz) :
+    StTpcLocalSectorCoordinate(xyz,0,0) {}
+  StTpcLocalSectorAlignedCoordinate(double x, double y, double z, int sector, int row = 0) :
+    StTpcLocalSectorCoordinate(x,y,z,sector,row) {}
+  StTpcLocalSectorAlignedCoordinate(const StThreeVector<double>& xyz, int sector, int row = 0) :
+    StTpcLocalSectorCoordinate(xyz,sector,row) {}
   virtual ~StTpcLocalSectorAlignedCoordinate() {}
 };
-// Non-member
 ostream& operator<<(ostream&, const StTpcLocalSectorAlignedCoordinate&);
 #endif
