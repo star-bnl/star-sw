@@ -373,6 +373,7 @@ void StEventQAMaker::MakeHistGlob() {
   Int_t cnttrkgFE=0;
   Int_t cnttrkgFW=0;
   
+/*
   // Determine if Sti was run:
   if ((!ITTF) &&
       ((GetChain()->GetMaker("StiMaker")) ||
@@ -405,10 +406,16 @@ void StEventQAMaker::MakeHistGlob() {
   }
   StTrackType estOrGlobal = global;
   if (EST > 0) estOrGlobal = estGlobal;
+*/
 
   for (UInt_t i=0; i<theNodes.size(); i++) {
+    StTrackType estOrGlobal = estGlobal;
     StTrack *globtrk = theNodes[i]->track(estOrGlobal);
-    if (!globtrk) continue;
+    if (!globtrk) {
+      estOrGlobal = global;
+      globtrk = theNodes[i]->track(estOrGlobal);
+      if (!globtrk) continue;
+    }
     cnttrk += theNodes[i]->entries(estOrGlobal);
     hists->m_globtrk_iflag->Fill(globtrk->flag());
     const StTrackTopologyMap& map=globtrk->topologyMap();
@@ -986,9 +993,6 @@ void StEventQAMaker::MakeHistPrim() {
     hists->m_primtrk_tot->Fill(cnttrk);
     hists->m_primtrk_tot_sm->Fill(cnttrk);
 
-    StTrackType estOrGlobal = global;
-    if (EST > 0) estOrGlobal = estGlobal;
-    
     for (UInt_t i=0; i<primVtx->numberOfDaughters(); i++) {
       StTrack *primtrk = primVtx->daughter(i);
       if (!primtrk || primtrk->bad()) continue;
@@ -1006,8 +1010,11 @@ void StEventQAMaker::MakeHistPrim() {
 	StPhysicalHelixD hx = geom->helix();
 	StPhysicalHelixD ohx = outerGeom->helix();
 	
-	StTrack *gtrack = primtrk->node()->track(estOrGlobal);
-        if (!gtrack || gtrack->bad()) continue;
+	StTrack *gtrack = primtrk->node()->track(estGlobal);
+        if (!gtrack || gtrack->bad()) {
+          gtrack = primtrk->node()->track(global);
+          if (!gtrack || gtrack->bad()) continue;
+        }
 	StTrackFitTraits& gfTraits = gtrack->fitTraits();
 	Int_t nhit_prim_fit = fTraits.numberOfFitPoints();
 	Int_t nhit_glob_fit = gfTraits.numberOfFitPoints();
@@ -2197,8 +2204,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.66 2005/02/08 17:22:46 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.67 2005/02/22 19:38:05 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.67  2005/02/22 19:38:05  genevb
+// Global tracks: use estGlobal if it exists, otherwise fall back to global
+//
 // Revision 2.66  2005/02/08 17:22:46  genevb
 // PMD histo changes, handle estGlobal/ITTF tracks
 //
