@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtReactionPlaneAnalysis.cxx,v 1.3 2002/03/27 19:00:44 rcwells Exp $
+ * $Id: StHbtReactionPlaneAnalysis.cxx,v 1.4 2002/05/28 14:04:07 rcwells Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StHbtReactionPlaneAnalysis.cxx,v $
- * Revision 1.3  2002/03/27 19:00:44  rcwells
- * Corrected a test on the event plane angle
+ * Revision 1.4  2002/05/28 14:04:07  rcwells
+ * Added multiplicity binning to StHbtReactionPlaneAnalysis
  *
  * Revision 1.2  2001/07/20 20:03:53  rcwells
  * Added pT weighting and moved event angle cal. to event cut
@@ -43,7 +43,8 @@ extern void FillHbtParticleCollection(StHbtParticleCut*         partCut,
 
 
 //____________________________
-StHbtReactionPlaneAnalysis::StHbtReactionPlaneAnalysis(int PtWgt, unsigned int bins, double min, double max){
+StHbtReactionPlaneAnalysis::StHbtReactionPlaneAnalysis(int PtWgt, unsigned int binsRP, double minRP, double maxRP,
+						       unsigned int binsMult, double minMult, double maxMult){
   //  mControlSwitch     = 0;
   mEventCut          = 0;
   mFirstParticleCut  = 0;
@@ -51,13 +52,13 @@ StHbtReactionPlaneAnalysis::StHbtReactionPlaneAnalysis(int PtWgt, unsigned int b
   mPairCut           = 0;
   mCorrFctnCollection= 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
-  mReactionPlaneBins = bins;
-  mReactionPlane[0] = min;
-  mReactionPlane[1] = max;
+  mReactionPlaneBins = binsRP;
+  mReactionPlane[0] = minRP;
+  mReactionPlane[1] = maxRP;
   mUnderFlow = 0; 
   mOverFlow = 0; 
   if (mMixingBuffer) delete mMixingBuffer;
-  mPicoEventCollectionVectorHideAway = new StHbtPicoEventCollectionVectorHideAway(mReactionPlaneBins,mReactionPlane[0],mReactionPlane[1]);
+  mPicoEventCollectionVectorHideAway = new StHbtPicoEventCollectionVectorHideAway(mReactionPlaneBins,mReactionPlane[0],mReactionPlane[1],binsMult,minMult,maxMult);
   mPtWgt = PtWgt;
 };
 //____________________________
@@ -148,15 +149,17 @@ StHbtString StHbtReactionPlaneAnalysis::Report()
 void StHbtReactionPlaneAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
   cout << " StHbtReactionPlaneAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) " << endl;
   // get right mixing buffer
+  mVertexZ = hbtEvent->PrimVertPos().z();
   if (mPtWgt) mReactionPlaneAngle = hbtEvent->ReactionPlane(1);
   else mReactionPlaneAngle = hbtEvent->ReactionPlane(0);
   cout << "Reaction Plane " << mReactionPlaneAngle << endl; 
-  if (mReactionPlaneAngle<-990) { // Test for a "good" event plane angle
+  if (mReactionPlaneAngle<-990) {
     cout << "No event plane!" << endl;
     return;
   }
   if ( mReactionPlaneAngle<0.0 ) mReactionPlaneAngle+=2*pi;
-  mMixingBuffer = mPicoEventCollectionVectorHideAway->PicoEventCollection(mReactionPlaneAngle); 
+  int multiplicity = hbtEvent->UncorrectedNumberOfNegativePrimaries();
+  mMixingBuffer = mPicoEventCollectionVectorHideAway->PicoEventCollection(mReactionPlaneAngle,(double)multiplicity); 
   if (!mMixingBuffer) {
     if ( mReactionPlaneAngle < mReactionPlane[0] ) mUnderFlow++;
     if ( mReactionPlaneAngle > mReactionPlane[1] ) mOverFlow++;
@@ -164,7 +167,4 @@ void StHbtReactionPlaneAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
   }
   // call ProcessEvent() from StHbtAnalysis-bas
   StHbtAnalysis::ProcessEvent(hbtEvent);
-}
-double StHbtReactionPlaneAnalysis::ReactionPlane() {
-  return mReactionPlaneAngle;
 }
