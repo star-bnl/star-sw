@@ -1,30 +1,34 @@
+
+#include <stdlib.h>
 #include <stdio.h>
 #include "asuAlloc.h"
 
 int main()
 {
-   char *a,*b,*c,*d;
+   char *a;
+   char *b;
+   char *c;
+   char *d;
 
-   printf("\n");asuAllocStats();
-   a = (char*)asuAlloc(123);
-
-   printf("sizeof a  = %d\n",sizeof a  );
-   printf("sizeof(a) = %d\n",sizeof(a) );
-   printf("sizeof *a = %d\n",sizeof *a );
-   printf("sizeof(*a)= %d\n",sizeof(*a));
-
-   printf("\n");asuAllocStats();
-   b = (char*)asuAlloc(234);
-   printf("\n");asuAllocStats();
-   a = (char*)asuRealloc(a,444);
-   printf("\n");asuAllocStats();
-   asuFree(b);
-   printf("\n");asuAllocStats();
-   c = (char*)asuAlloc(10101);
-   printf("\n");asuAllocStats();
-   asuFree(c);
-   printf("\n");asuAllocStats();
-   asuFree(a);
-   printf("\n");asuAllocStats();
+   asuMallocInit();
+   asuMallocLevel(ASU_MALLOC_TRACE);
+   a = (char*)MALLOC(128);
+   asuMallocStats();
+   b = (char*)MALLOC(1024);
+   asuMallocLevel(ASU_MALLOC_FILL);
+   c = (char*)MALLOC(2048);
+   asuMallocStats();
+   asuMallocLevel(ASU_MALLOC_VERBOSE);
+   d = (char*)MALLOC(32);
+   asuMallocStats();
+   asuMallocLevel(ASU_MALLOC_FILL);
+   FREE(a);
+   asuMallocStats();
+   FREE(c);
+   asuMallocStats();
+   FREE(b);
+   asuMallocStats();
+   asuMallocLevel(ASU_MALLOC_VERBOSE);
+   FREE(d);
+   asuMallocStats();
 }
-
