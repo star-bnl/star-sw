@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtLocalCoordinate.hh,v 1.2 2000/02/02 23:01:38 calderon Exp $
+ * $Id: StSvtLocalCoordinate.hh,v 1.3 2000/08/21 16:16:26 calderon Exp $
  *
  * Author:  Manuel CBS Oct 1999
  *
@@ -11,6 +11,9 @@
  ************************************************************************
  *
  * $Log: StSvtLocalCoordinate.hh,v $
+ * Revision 1.3  2000/08/21 16:16:26  calderon
+ * Helen's first version of Svt Coordinate classes.
+ *
  * Revision 1.2  2000/02/02 23:01:38  calderon
  * Changes for CC5
  * Tests withs StTpcDb still going.
@@ -48,15 +51,37 @@ public:
     // access functions provided by StThreeVector
     const StThreeVector<double>& position()  const;
     StThreeVector<double>& position();
+    const int layer()       const;
+    const int ladder()      const;
+    const int wafer()       const;
+    const int hybrid()      const;
     void setPosition(const StThreeVector<double>&);
+    void setLayer(int);
+    void setLadder(int);
+    void setWafer(int);
+    void setHybrid(int);
 protected:
     StThreeVector<double> mPosition;
+    int mLayer;
+    int mLadder;
+    int mWafer;
+    int mHybrid;
 
 };
 
 inline const StThreeVector<double>& StSvtLocalCoordinate::position() const { return(mPosition); }
 inline StThreeVector<double>& StSvtLocalCoordinate::position() { return(mPosition); }
 inline void StSvtLocalCoordinate::setPosition(const StThreeVector<double>& val) { mPosition = val; }
+const inline int StSvtLocalCoordinate::layer()   const {return(mLayer);}
+const inline int StSvtLocalCoordinate::ladder()  const {return(mLadder);}
+const inline int StSvtLocalCoordinate::wafer()   const {return(mWafer);}
+const inline int StSvtLocalCoordinate::hybrid()   const {return(mHybrid);}
+
+inline void StSvtLocalCoordinate::setLayer(int l)  {mLayer  = l;}
+inline void StSvtLocalCoordinate::setLadder(int d) {mLadder = d;}
+inline void StSvtLocalCoordinate::setWafer(int w)  {mWafer  = w;}
+inline void StSvtLocalCoordinate::setHybrid(int h)  {mHybrid  = h;}
+
 
 // Non-member
 ostream& operator<<(ostream&, const StSvtLocalCoordinate&);

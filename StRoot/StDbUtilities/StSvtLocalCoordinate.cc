@@ -1,8 +1,8 @@
 /***********************************************************************
  *
- * $Id: StSvtLocalCoordinate.cc,v 1.2 2000/02/02 23:01:38 calderon Exp $
+ * $Id: StSvtLocalCoordinate.cc,v 1.3 2000/08/21 16:16:26 calderon Exp $
  *
- * Author:  Manuel CBS Oct 1999
+ * Author:  Helen C
  *
  ************************************************************************
  *
@@ -11,6 +11,9 @@
  ************************************************************************
  *
  * $Log: StSvtLocalCoordinate.cc,v $
+ * Revision 1.3  2000/08/21 16:16:26  calderon
+ * Helen's first version of Svt Coordinate classes.
+ *
  * Revision 1.2  2000/02/02 23:01:38  calderon
  * Changes for CC5
  * Tests withs StTpcDb still going.
@@ -27,7 +30,7 @@
  ***********************************************************************/
 #include "StSvtLocalCoordinate.hh"
 
-static const char rcsid[] = "$Id: StSvtLocalCoordinate.cc,v 1.2 2000/02/02 23:01:38 calderon Exp $";
+static const char rcsid[] = "$Id: StSvtLocalCoordinate.cc,v 1.3 2000/08/21 16:16:26 calderon Exp $";
 
     
 StSvtLocalCoordinate::StSvtLocalCoordinate() {/**/}

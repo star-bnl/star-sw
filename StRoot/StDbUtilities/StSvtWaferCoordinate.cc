@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtWaferCoordinate.cc,v 1.2 2000/02/02 23:01:38 calderon Exp $
+ * $Id: StSvtWaferCoordinate.cc,v 1.3 2000/08/21 16:16:26 calderon Exp $
  *
  * Author:  Manuel CBS Oct 1999
  *
@@ -11,6 +11,9 @@
  ************************************************************************
  *
  * $Log: StSvtWaferCoordinate.cc,v $
+ * Revision 1.3  2000/08/21 16:16:26  calderon
+ * Helen's first version of Svt Coordinate classes.
+ *
  * Revision 1.2  2000/02/02 23:01:38  calderon
  * Changes for CC5
  * Tests withs StTpcDb still going.
@@ -27,13 +30,13 @@
  ***********************************************************************/
 #include "StSvtWaferCoordinate.hh"
 
-static const char rcsid[] = "$Id: StSvtWaferCoordinate.cc,v 1.2 2000/02/02 23:01:38 calderon Exp $";
+static const char rcsid[] = "$Id: StSvtWaferCoordinate.cc,v 1.3 2000/08/21 16:16:26 calderon Exp $";
 
     
 StSvtWaferCoordinate::StSvtWaferCoordinate() {/**/}
 
-StSvtWaferCoordinate::StSvtWaferCoordinate(const int layer, const int ladder, const int wafer)
-    : mLayer(layer), mLadder(ladder), mWafer(wafer) {/**/}
+StSvtWaferCoordinate::StSvtWaferCoordinate(const int layer, const int ladder, const int wafer, const int hybrid, const double anode, const double timebucket)
+    : mLayer(layer), mLadder(ladder), mWafer(wafer), mHybrid(hybrid), mAnode(anode), mTimeBucket(timebucket) {/**/}
 
 StSvtWaferCoordinate::~StSvtWaferCoordinate() {/**/}
 
@@ -41,9 +44,12 @@ int
 StSvtWaferCoordinate::operator==(const StSvtWaferCoordinate& p) const
 {
 
-    return (p.mLayer     == mLayer  &&
-	    p.mLadder    == mLadder &&
-	    p.mWafer     == mWafer);
+    return (p.mLayer      == mLayer  &&
+	    p.mLadder     == mLadder &&
+	    p.mWafer      == mWafer  &&
+            p.mHybrid     == mHybrid &&
+            p.mAnode      == mAnode  &&
+            p.mTimeBucket == mTimeBucket);
 }
 
 int
@@ -58,5 +64,8 @@ ostream& operator<<(ostream& os, const StSvtWaferCoordinate& a)
     return os << "(layer= "   << a.layer()
 	      << ", ladder= " << a.ladder()
 	      << ", wafer= "  << a.wafer()
+	      << ", hybrid= "  << a.hybrid()
+	      << ", anode= "  << a.anode()
+	      << ", timebucket= "  << a.timebucket()
 	      << ")";
 }
