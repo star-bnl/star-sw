@@ -21,7 +21,7 @@
 //:<---------------------------------------------- MACROS             --
 #include "spx_macros.h"
 
-extern "C" void spx_static();		// DEBUG HACK !!!!!!!!!!!!!!!!!
+//extern "C" void spx_static();		// DEBUG HACK !!!!!!!!!!!!!!!!!
 
 //:#####################################################################
 //:=============================================== CLASS              ==
@@ -68,7 +68,7 @@ unsigned char spxDummy :: implementsInterface (const char * iface) {
 //----------------------------------
 STAFCV_T spxDummy:: null () {
    myNCalls++;
-spx_static();			// DEBUG HACK !!!!!!!!!!!!!!!!!!!!!!!!!
+//spx_static();			// DEBUG HACK !!!!!!!!!!!!!!!!!!!!!!!!!
    EML_SUCCESS(STAFCV_OK);
 }
 
