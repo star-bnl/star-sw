@@ -1,6 +1,9 @@
 // 
-// $Id: StBemcRaw.cxx,v 1.2 2004/10/19 17:53:00 suaide Exp $
+// $Id: StBemcRaw.cxx,v 1.3 2004/10/20 14:24:21 suaide Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.3  2004/10/20 14:24:21  suaide
+// small fix to crateUnknown status in old files
+//
 // Revision 1.2  2004/10/19 17:53:00  suaide
 // code clean up
 //
@@ -395,7 +398,7 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
 {    
   E=0;
     
-  if(mCrateStatus[det-1][CRATE-1]!=crateOK && !mSaveAllStEvent) return kCrate;
+  if((mCrateStatus[det-1][CRATE-1]!=crateOK || mCrateStatus[det-1][CRATE-1]!=crateUnknown) && !mSaveAllStEvent) return kCrate;
   if(ADC==0 && !mSaveAllStEvent) return kZero;
   
   Int_t STATUS;
