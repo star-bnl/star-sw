@@ -1,4 +1,4 @@
-// $Id: StGlobalFilterTest.cxx,v 1.3 2004/10/17 03:37:19 perev Exp $
+// $Id: StGlobalFilterTest.cxx,v 1.4 2004/10/19 22:35:49 perev Exp $
 #include "TError.h"
 #include "TSystem.h"
 #include "TCanvas.h"
@@ -68,11 +68,6 @@ void StGlobalFilterTest::Filter(TObjArray *eArr,int flag)
 //   Only bad tracks
     
     iSel=0;
-    double tmp;
-    tmp = th.GetFirstPoint().perp()  ;if(tmp>200) iSel|=1;
-    tmp = th.GetLastPoint ().perp()  ;if(tmp>200) iSel|=2;
-    tmp =fabs(th.GetFirstPoint().z());if(tmp>269) iSel|=4;
-    tmp =fabs(th.GetLastPoint ().z());if(tmp>269) iSel|=8;
     
 
     double curv1,curv2,dE;
@@ -119,8 +114,11 @@ void StGlobalFilterTest::Filter(TObjArray *eArr,int flag)
         double tmp = sqrt(TCL::vdot(myDist[i],myDist[i],3));
         Assert(i || tmp>2. || fabs(s[0]-s[2])< 0.1 );
       }
-      double ss = s[0]+s[1];
-      TCL::vlinco(myDist[0],s[1]/ss,myDist[1],s[0]/ss,myDist[2],3);
+      double wt0 = pow(s[0],3);
+      double wt1 = pow(s[1],3);
+      double wtn = wt0+wt1;
+      wt0/=wtn;wt1/=wtn;
+      TCL::vlinco(myDist[0],wt1,myDist[1],wt0,myDist[2],3);
       dist = sqrt(TCL::vdot(myDist[2],myDist[2],3));
       fHRes[4]->Fill(log10(dist));
       ncount[bad]++;
@@ -138,7 +136,7 @@ void StGlobalFilterTest::Filter(TObjArray *eArr,int flag)
       fPlot[0]->Fill(mom,maxRes[0]);
 
     }
-    if (maxRes[0]>2.) iSel|=64;
+    if (maxRes[0]>5.) iSel|=64;
     if (iSel) 	{nSel++;continue;}
     (*eArr)[ioj]=0;(*eArr)[ioj+1]=0;
   }
