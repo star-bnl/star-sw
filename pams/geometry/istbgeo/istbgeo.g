@@ -1,7 +1,20 @@
-* $Id: istbgeo.g,v 1.8 2005/02/08 14:34:14 potekhin Exp $
+* $Id: istbgeo.g,v 1.9 2005/02/09 15:13:01 nieuwhzs Exp $
 * $Log: istbgeo.g,v $
-* Revision 1.8  2005/02/08 14:34:14  potekhin
-* Intermediate check for Gerrit
+* Revision 1.9  2005/02/09 15:13:01  nieuwhzs
+* Added second water manifold which makes it possible to center the sensor
+* assembly in the ladder mother volume, so no need for an extra radial
+* displacement (dr) anymore.
+* Corrected the size of the AlN substrates, from 1 to 2cm width.
+* Corrected the size of the AlN thermal plate, from 2 to 3cm width.
+* Adjusted the width of the ladder mother volume and sensor assembly
+* mother volume from 6 to 7cm to accomodate the wider substrates and
+* thermal plate.
+* Corrected the position of the silicon sensors, looked like a wrong
+* calculation. Front faces of the silicon sensors are now flush with
+* the front faces of the AlN substrates.
+* Some cosmetic changes to the code layout, mainly to the coordinate
+* definitions of the placements. I don't like one-liners.
+* +++Gerrit van Nieuwenhuizen, 02/09/2005
 *
 * Revision 1.6  2005/01/26 01:13:45  potekhin
 * Whoa! Did the complete water manifold shebang.
@@ -36,9 +49,6 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
   Created  07/15/04
   Author   Maxim Potekhin
 *****************************************************************
-*  Version for Gerrit
-*****************************************************************
-
 +CDE,AGECOM,GCUNIT.
 * ---
       real    angle, anglePos, angleCorr, trueR, raddeg, dr, Rlad
@@ -66,61 +76,61 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
    EndFill
 *--------------------------------------------------------
    Fill ISBG                   ! Inner silicon tracker data
-      Layer      =  1          ! layer index
-      nLadder    =  11         ! ladder count
-      nUnit      =  7          ! sensor units per ladder
-      Length     =  28.0       ! Overal length of the detector
+      Layer      =  1          ! layer index				
+      nLadder    =  11         ! ladder count				
+      nUnit      =  7          ! sensor units per ladder		
+      Length     =  28.0       ! Overal length of the detector		
 
-      LadderWidth=  6.0        ! Ladder Width
-      LadderThk  =  0.730      ! Includes sensor assembly and the water duct
-      SensAThk  =   0.370      ! Includes two layers of Si, AlN plates and chips
+      LadderWidth=  7.0        ! Ladder Width		
+      LadderThk  =  1.0762     ! Includes sensor assembly and 2 water ducts 
+      SensAThk  =   0.3686     ! Includes two layers of Si, AlN plates and chips
 
-      Spacing    =  0.1686     ! spacing between the wafers
+      Spacing    =  0.1686     ! spacing between the wafers 		
 
-      SensorWidth=  4.0        ! Sensor Width
-      SensorLngth=  4.0        ! Sensor Length
-      SensorThk  =  0.0300     ! Sensor Thickness
+      SensorWidth=  4.0        ! Sensor Width 				
+      SensorLngth=  4.0        ! Sensor Length 				
+      SensorThk  =  0.0300     ! Sensor Thickness 			
 
-      r          =  7.0        ! 1st ladder nominal radius
+      r          =  7.0        ! 1st ladder nominal radius		
       a          =  0.0        ! 1st ladder nominal position angle
-      aOffset    =  81.0       ! Angular offset
-      pOffset    =  2.0        ! Position offset (shift)
+      aOffset    =  81.0       ! Angular offset				
+      pOffset    =  2.0        ! Position offset (shift)		
    EndFill
 
-   Fill ISBG                   ! Pixel detector data
-      Layer      =  2          ! layer index
-      nLadder    =  19         ! ladder count
-      nUnit      =  10         ! sensor units per ladder
-      Length     =  40.0       ! Overal length of the detector
+   Fill ISBG                   ! Inner silicon tracker data
+      Layer      =  2          ! layer index				
+      nLadder    =  19         ! ladder count				
+      nUnit      =  10         ! sensor units per ladder		
+      Length     =  40.0       ! Overal length of the detector		
 
-      r          =  12.0       ! 2nd ladder nominal radius
-      a          =  0.0        ! 2nd ladder nominal position angle
-      aOffset    =  81.0       ! Angular offset
-      pOffset    =  2.0        ! Position offset (shift)
+      r          =  12.0       ! 2nd ladder nominal radius		
+      a          =  0.0        ! 2nd ladder nominal position angle	
+      aOffset    =  81.0       ! Angular offset				
+      pOffset    =  2.0        ! Position offset (shift)		
    EndFill
 
-   Fill ISBG                   ! Pixel detector data
-      Layer      =  3          ! layer index
-      nLadder    =  27         ! ladder count
-      nUnit      =  13         ! sensor units per ladder
-      Length     =  52.0       ! Overal length of the detector
+   Fill ISBG                   ! Inner silicon tracker data
+      Layer      =  3          ! layer index				
+      nLadder    =  27         ! ladder count				
+      nUnit      =  13         ! sensor units per ladder		
+      Length     =  52.0       ! Overal length of the detector		
 
-      r          =  17.0       ! 2nd ladder nominal radius
-      a          =  0.0        ! 2nd ladder nominal position angle
-      aOffset    =  81.0       ! Angular offset
-      pOffset    =  2.0        ! Position offset (shift)
+      r          =  17.0       ! 2nd ladder nominal radius		
+      a          =  0.0        ! 2nd ladder nominal position angle	
+      aOffset    =  81.0       ! Angular offset				
+      pOffset    =  2.0        ! Position offset (shift)		
    EndFill
 *--------------------------------------------------------
    Fill ISAN                   ! Aluminum Nitride Thermal Plate
       Version    =   1         ! May have a few
-      Thk        =  0.0762     ! AlN Thickness
-      Length     =  2.0        ! AlN length
+      Thk        =  0.0762     ! AlN Thickness				
+      Length     =  3.0        ! AlN length			
    EndFill
 
-   Fill ISAN                   ! Aluminum Nitride Thermal Plate
+   Fill ISAN                   ! Aluminum Nitride Substrate Plates
       Version    =   2         ! May have a few
       Thk        =  0.0762     ! AlN Thickness
-      Length     =  1.0        ! AlN length
+      Length     =  2.0        ! AlN length				
    EndFill
 
 *--------------------------------------------------------
@@ -134,15 +144,15 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
 *--------------------------------------------------------
    Fill ISWG                   ! Water duct geometry
       Version    =   1         ! Version
-      dx         =   1.0       ! Width
-      dy         =   0.5       ! Height
-      WallThk    =   0.1       ! Wall Thickness
+      dx         =   1.0       ! Width					
+      dy         =   0.5       ! Height					
+      WallThk    =   0.1       ! Wall Thickness				
    EndFill
 
 *********************************************************
 *********************************************************
-      USE      ISMG
-      raddeg=3.14159265/180.0
+      USE ISMG
+      raddeg = 3.14159265/180.0
 *********************************************************
 
 
@@ -152,38 +162,47 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
 * -------------------------------------------------------
 Block IBMO is the mother of the ISTB detector
       Material  Air
-      Attribute IBMO  Seen=1  colo=6
+      Attribute IBMO  Seen=0  colo=6
 
-      Shape TUBE Rmin=ISMG_Rin Rmax=ISMG_Rout Dz=ISMG_TotalLength/2.0
+      Shape TUBE Rmin = ISMG_Rin             _
+                 Rmax = ISMG_Rout            _
+                 Dz   = ISMG_TotalLength/2.0
 
       do ly=1,3               ! a loop over layers
          USE ISBG Layer=ly    ! length and other parameters specific to the ladder
          do nl=1,ISBG_nLadder ! inner loop over ladders (which consist of sensors)
 
-           angle=(360.0/ISBG_nLadder)*nl  ! Base tilt, to be further corrected
+           angle = (360.0/ISBG_nLadder)*nl  ! Base tilt, to be further corrected
 
-* The sensor assembly is not centered inside the Ladder mother,
-* (darn water manifold won't fit), so there is extra correction to the
-* radius
-           dr=(ISBG_LadderThk-ISBG_SensAThk)/2.0
-           Rlad=ISBG_r+dr
-* Individual ladders can be individually tilted by using
-* the aOffset parameter (angular offset), and the pOffset
-* (position offset), which is the individual lateral
-* displacement.
+*          The sensor assembly is not centered inside the Ladder mother,
+*          (darn water manifold won't fit), so there is extra correction to the
+*          radius
+*          GvN Because a second water manifold was added the sensor assembly
+*          now is centered inside the ladder mother volume. So, there is no
+*          need for dr anymore
+*           dr   = (ISBG_LadderThk-ISBG_SensAThk)/2.0
+           dr = 0.0
+           Rlad = ISBG_r+dr
 
-           angleCorr= atan(ISBG_pOffset/Rlad)
+*          Individual ladders can be individually tilted by using
+*          the aOffset parameter (angular offset), and the pOffset
+*          (position offset), which is the individual lateral
+*          displacement.
 
-* The anglePos defines the POSITION of the center of the ladder
-* in space, along the lines of x=r*cos(...), y=r*sin(...)
-* have to correct and convert to radians:
+           angleCorr = atan(ISBG_pOffset/Rlad)
 
-           anglePos = angle*raddeg - angleCorr ! see above comment
+*          The anglePos defines the POSITION of the center of the ladder
+*          in space, along the lines of x=r*cos(...), y=r*sin(...)
+*          have to correct and convert to radians:
+
+           anglePos = angle*raddeg - angleCorr       ! see above comment
            trueR    = sqrt(Rlad**2+ISBG_pOffset**2)
 
-           Create and Position IBAM x=trueR*cos(anglePos) y=trueR*sin(anglePos) _
-                                    z=0.0 _
-                                    AlphaZ=angle-ISBG_aOffset
+           Create   IBAM
+           Position IBAM x = trueR*cos(anglePos) _
+                         y = trueR*sin(anglePos) _
+                         z = 0.0                 _
+                         AlphaZ = angle-ISBG_aOffset
 
          enddo
       enddo
@@ -193,51 +212,63 @@ endblock
 Block IBAM is the mother of the whole long ladder
       Attribute IBAM  Seen=0  colo=1
 
-      Shape BOX dx=ISBG_LadderWidth/2.0 dy=ISBG_LadderThk/2.0 dz=ISBG_Length/2.0
+      Shape BOX dx = ISBG_LadderWidth/2.0 _
+                dy = ISBG_LadderThk/2.0   _
+                dz = ISBG_Length/2.0
 
-*-- 
+*-- Water ducts
       Create   ISWD
-      Position ISWD x=0.5*(ISBG_LadderWidth-ISWG_dx) _
-                    y=0.5*(-ISBG_LadderThk+ISBG_SensAThk+ISAN_Thk+ISWG_dy)
+      Position ISWD x =  0.5*(ISBG_LadderWidth-ISWG_dx)                       _
+                    y =  0.5*(ISAN_Thk+ISWG_dy)
+      Position ISWD x =  0.5*(ISBG_LadderWidth-ISWG_dx)                       _
+                    y = -0.5*(ISWG_dy+ISAN_Thk)
 
-      Create   IBLM
+     Create   IBLM
       do nu=1,ISBG_nUnit      
-        Position IBLM x=0.0 y=-dr z=-ISBG_Length/2.0+ISBG_SensorWidth*(nu-0.5)
+        Position IBLM x = 0.0 _
+                      y = 0.0 _
+                      z = -ISBG_Length/2.0+ISBG_SensorWidth*(nu-0.5)
       enddo
 
 endblock
 * -----------------------------------------------------------------------------
-Block IBLM is the mother of the sensor assmebly
-      Attribute IBAM  Seen=0  colo=4
+Block IBLM is the mother of the sensor assembly
+      Attribute IBLM  Seen=0  colo=4
 
-      Shape BOX dx=ISBG_LadderWidth/2.0 dy=ISBG_SensAThk/2.0 dz=ISBG_SensorLngth/2.0
+      Shape BOX dx = ISBG_LadderWidth/2.0 _
+                dy = ISBG_SensAThk/2.0    _
+                dz = ISBG_SensorLngth/2.0
 
 * -- Silicon Sensor
       Create   IBSS
-      Position IBSS x=-0.5*(ISBG_LadderWidth-ISBG_SensorWidth) _
-                    y=-ISBG_Spacing/2.0+ISBG_SensorThk/2.0 _
-                    z=0.0
-      Position IBSS x=-0.5*(ISBG_LadderWidth-ISBG_SensorWidth) _
-                    y=+ISBG_Spacing/2.0-ISBG_SensorThk/2.0 _
-                    z=0.0 AlphaZ=180
+      Position IBSS x = -0.5*(ISBG_LadderWidth-ISBG_SensorWidth) _
+                    y =  1.5*ISAN_Thk-ISBG_SensorThk/2.0         _
+                    z =  0.0
+      Position IBSS x = -0.5*(ISBG_LadderWidth-ISBG_SensorWidth) _
+                    y = -1.5*ISAN_Thk+ISBG_SensorThk/2.0         _
+                    z =  0.0                                     _
+                    AlphaZ = 180
 
 * -- AlN plates, three of them -- central and substrate(s)
       Use ISAN Version=1
-      Create and Position ISTP x=0.5*(ISBG_LadderWidth-ISBG_SensorWidth)+ISAN_Length/2.0
+      Create ISTP
+      Position ISTP x = (ISBG_SensorWidth-ISBG_LadderWidth/2.0)+ISAN_Length/2.0
 
       Use ISAN Version=2
       Create   ISTP
-      Position ISTP x=0.5*(ISBG_LadderWidth-ISBG_SensorWidth)+ISAN_Length/2.0 y=ISAN_Thk
-      Position ISTP x=0.5*(ISBG_LadderWidth-ISBG_SensorWidth)+ISAN_Length/2.0 y=-ISAN_Thk
+      Position ISTP x = (ISBG_SensorWidth-ISBG_LadderWidth/2.0)+ISAN_Length/2.0 _
+                    y =  ISAN_Thk
+      Position ISTP x = (ISBG_SensorWidth-ISBG_LadderWidth/2.0)+ISAN_Length/2.0 _
+                    y = -ISAN_Thk
 
 * -- readout silicon chip
       Create   ISSC
-      Position ISSC x= 0.5*(ISBG_LadderWidth-ISBG_SensorWidth)+ISCG_W/2.0 _
-                    y=+0.5*ISCG_Thk+1.5*ISAN_Thk _
-                    z=0.0
-      Position ISSC x= 0.5*(ISBG_LadderWidth-ISBG_SensorWidth)+ISCG_W/2.0 _
-                    y=-0.5*ISCG_Thk-1.5*ISAN_Thk _
-                    z=0.0
+      Position ISSC x =  (ISBG_SensorWidth-ISBG_LadderWidth/2.0)+ISCG_W/2.0 _
+                    y = +0.5*ISCG_Thk+1.5*ISAN_Thk                          _
+                    z =  0.0
+      Position ISSC x =  (ISBG_SensorWidth-ISBG_LadderWidth/2.0)+ISCG_W/2.0 _
+                    y = -0.5*ISCG_Thk-1.5*ISAN_Thk                          _
+                    z =  0.0
 endblock
 *
 * -----------------------------------------------------------------------------
@@ -245,9 +276,11 @@ Block IBSS is the Silicon Sensor
       Material  Silicon
       Material  Sensitive  Isvol=1
 
-      Attribute IBSS  Seen=1  colo=5
+      Attribute IBSS  Seen=1  colo=2
 
-      Shape BOX dX=ISBG_SensorWidth/2.0 dY=ISBG_SensorThk/2.0 dz=ISBG_SensorLngth/2.0
+      Shape BOX dX = ISBG_SensorWidth/2.0 _
+                dY = ISBG_SensorThk/2.0   _
+                dz = ISBG_SensorLngth/2.0
 
       HITS    IBSS   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
                      cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
@@ -262,7 +295,9 @@ Block ISTP is the AlN Thermal Plate
       Component N    A=14  Z=7   W=1
       Mixture   AlN  Dens=3.30
 
-      Shape BOX dx=ISAN_Length/2.0 dy=ISAN_Thk/2.0 dz=ISBG_SensorLngth/2.0
+      Shape BOX dx = ISAN_Length/2.0      _
+                dy = ISAN_Thk/2.0         _
+                dz = ISBG_SensorLngth/2.0
 
 endblock
 * -----------------------------------------------------------------------------
@@ -270,7 +305,9 @@ Block ISSC is the readout Chip
       Material  Silicon  
       Attribute ISSC  Seen=1  colo=1
 
-      Shape BOX dx=ISCG_W/2.0 dy=ISCG_Thk/2.0 dz=ISBG_SensorLngth/2.0
+      Shape BOX dx = ISCG_W/2.0           _
+                dy = ISCG_Thk/2.0         _
+                dz = ISBG_SensorLngth/2.0      !just make a strip over the whole substrate
 
 endblock
 * -----------------------------------------------------------------------------
@@ -278,7 +315,9 @@ Block ISWD is the water duct made of carbon composite
       Material  Carbon
       Attribute ISWD  Seen=1  colo=1
 
-      Shape BOX dx=ISWG_dx/2.0 dy=ISWG_dy/2.0 dz=(ISBG_Length)/2.0
+      Shape BOX dx = ISWG_dx/2.0       _
+                dy = ISWG_dy/2.0       _
+                dz = (ISBG_Length)/2.0
       Create and Position ISVD
 
 endblock
@@ -291,7 +330,9 @@ Block ISVD is the water inside the carbon duct
 
       Attribute ISVD  Seen=1  colo=3
 
-      Shape BOX dx=(ISWG_dx-2.0*ISWG_WallThk)/2.0 dy=(ISWG_dy-2.0*ISWG_WallThk)/2.0 dz=ISBG_Length/2.0
+      Shape BOX dx = (ISWG_dx-2.0*ISWG_WallThk)/2.0 _
+                dy = (ISWG_dy-2.0*ISWG_WallThk)/2.0 _
+                dz = ISBG_Length/2.0
 
 endblock
 * -----------------------------------------------------------------------------
