@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMuDstReader.cxx,v 1.1 2002/03/20 19:32:24 laue Exp $
+ * $Id: StHbtMuDstReader.cxx,v 1.2 2002/03/22 14:17:49 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -54,7 +54,7 @@ ClassImp(StHbtMuDstReader)
 //-----------------------------------------------------------------------
 StHbtMuDstReader::StHbtMuDstReader(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles) : 
   mStEvent(0), mStStrangeMuDstMaker(0), mIOMaker(0),
-  mIoMode(mode), mIoNameMode(nameMode),
+  mIoMode((ioMode)mode), mIoNameMode((ioNameMode)nameMode),
   mDirName(dirName), mFileName(fileName), mFilter(filter), mMaxFiles(maxFiles),
   mTrackType(primary), mReadTracks(1), 
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
@@ -661,6 +661,9 @@ void StHbtMuDstReader::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StHbtMuDstReader.cxx,v $
+ * Revision 1.2  2002/03/22 14:17:49  laue
+ * minor changes for RH 7.2
+ *
  * Revision 1.1  2002/03/20 19:32:24  laue
  * new reader for common MuDsts
  *
