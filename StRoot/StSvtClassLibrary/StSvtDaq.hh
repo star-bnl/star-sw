@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaq.hh,v 1.1 2004/01/30 00:13:03 munhoz Exp $
+ * $Id: StSvtDaq.hh,v 1.2 2004/03/30 20:20:00 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaq.hh,v $
+ * Revision 1.2  2004/03/30 20:20:00  caines
+ * Add functions to Daq code from Petr
+ *
  * Revision 1.1  2004/01/30 00:13:03  munhoz
  * daq parameters object
  *
@@ -33,15 +36,15 @@ public:
   StSvtDaq(const StSvtDaq&);
   StSvtDaq& operator = (const StSvtDaq&);
 
-  void setClearedTimeBins(long value);   // 
-  void setSavedBlackAnodes(long value, int i);   // 
-  void setPixelsBefore(long value);
-  void setPixelsAfter(long value);
-  void setPedOffset(long value);
-  void setSeqLo(long value);
-  void setSeqHi(long value);
-  void setThreshLo(long value);
-  void setThreshHi(long value);
+  void setClearedTimeBins(long value){clearedTimeBins=value;}   // 
+  void setSavedBlackAnodes(long value, int i){savedBlackAnodes[i]=value;}   // 
+  void setPixelsBefore(long value){pixelsBefore=value;}
+  void setPixelsAfter(long value){pixelsAfter=value;}
+  void setPedOffset(long value) {pedOffset=value;}
+  void setSeqLo(long value){seqLo=value;}
+  void setSeqHi(long value){seqHi=value;}
+  void setThreshLo(long value){threshLo=value;}
+  void setThreshHi(long value){threshHi=value;}
 
   long getClearedTimeBins(){return clearedTimeBins;}   // 
   long getSavedBlackAnodes(int i){return savedBlackAnodes[i];}   // 
