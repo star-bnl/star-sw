@@ -1,0 +1,24 @@
+<pre><h3>SUBROUTINE STRINSERT(SOURCE,START,END,DEST,DPT)</h3>
+
+
+*  Inputs:
+	CHARACTER*(*) SOURCE !Source string.
+	INTEGER START,END    !Index-range in SOURCE to be copied.
+*  Outputs:
+	CHARACTER*(*) DEST   !Destination string.
+	INTEGER DPT          !Starting index in DEST -- SOURCE is copied to
+*                             to DEST starting at DEST(DPT:DPT), and continues
+*                             until the SOURCE range is exhausted or until
+*                             DEST runs out of space.  DPT is returned to be
+*                             the index of the first character in DEST
+*                             following the characters copied over from SOURCE,
+*                             unless DEST ran out of room, in which case
+*                             DPT is set to zero.
+
+*  Description:
+*	Insert characters in SOURCE (from START to END)
+*	to DEST (from DPT to .LE. LEN(DEST). Set DPT to point after
+*	the last character inserted.
+*	No null is appended.
+
+</pre>

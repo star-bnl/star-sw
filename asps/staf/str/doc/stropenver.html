@@ -1,0 +1,43 @@
+<pre><h3>LOGICAL FUNCTION STROPENVER(LUN,FILENAME,COMMANDS
+	  ,VLIMIT,VCHAR,VERSION,FILE_NAME_OUT)</h3>
+
+
+*  Inputs:
+	INTEGER LUN !Logical unit on which to open file.
+	CHARACTER*(*) FILENAME !Name of file.
+	CHARACTER*(*) COMMANDS !Command line, through which
+                               !OPEN options are selected.
+
+	INTEGER VLIMIT !Caller-specified limit to the version number.
+	               !When VERSION exceeds this, STROPENVER fails.
+
+	CHARACTER*1 VCHAR !One-character version-field delimiter, caller
+                          !specified.  eg, ";".
+
+*  Outputs:
+	INTEGER VERSION !The version number of a successfully opened file.
+
+	CHARACTER*(*) FILE_NAME_OUT !Same as FILENAME, but with a version
+	                            !number appended after an underscore.
+	                            !Returns blank if an error occurs.
+	                            !If VERSION is 0, the returned file name
+	                            !is exactly the specified file name;
+	                            !no version-field delimiter or digits
+	                            !are appended.
+
+*  Return values:
+*	.TRUE. for a successful open on: FILENAME//VCHAR//VERSION.
+*	.FALSE. for a failed open.
+
+
+*  Description:
+*	Combines the functions of STRVER and STROPEN, providing a simple
+*	way to open version-appended files in a machine-independent fashion,
+*	using the OPEN parameters specified in COMMANDS.  COMMANDS is a
+*	character string containing all the "usual" OPEN parameters, except
+*	for the UNIT=lun (FORTRAN Logical Unit) and FILE=filename, which are passed
+*	separately, and without the usual single-quotes (apostrophes) normally
+*	around literal arguments.
+
+
+</pre>

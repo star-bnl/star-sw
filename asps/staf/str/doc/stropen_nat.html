@@ -1,0 +1,46 @@
+<pre><h3>LOGICAL FUNCTION STROPEN_NAT(LUN,FILENAME
+	 ,STATUS_CARG,ACCESS_CARG,FORM_CARG
+	 ,RECL_FLAG,RECL_IARG
+	 ,CARRIAGECONTROL_FLAG,CARRIAGECONTROL_CARG
+	 ,RECORDTYPE_FLAG,RECORDTYPE_CARG
+	 ,INITIALSIZE_FLAG,INITIALSIZE_IARG
+	 ,BLOCKSIZE_FLAG,BLOCKSIZE_IARG
+	 ,MAXREC_FLAG,MAXREC_IARG
+	 ,READONLY_FLAG
+   )</h3>
+
+
+*  Inputs:
+	INTEGER LUN !Logical unit on which to open file.
+	CHARACTER*(*) FILENAME !Name of file.
+	CHARACTER*(*) STATUS_CARG !"STATUS=" character argument
+	CHARACTER*(*) ACCESS_CARG !"ACCESS=" character argument
+	CHARACTER*(*) FORM_CARG !"FORM=" character argument
+	LOGICAL RECL_FLAG !RECL specified/not flag.
+	INTEGER RECL_IARG !"RECL=" integer argument;  Record-length, bytes.
+	LOGICAL CARRIAGECONTROL_FLAG !CARRIAGECONTROL specified/not flag.
+	CHARACTER*(*) CARRIAGECONTROL_CARG !"CARRIAGECONTROL=" char. argument
+	LOGICAL RECORDTYPE_FLAG !RECORDTYPE specified/not flag.
+	CHARACTER*(*) RECORDTYPE_CARG !"RECORDTYPE=" character argument.
+	LOGICAL INITIALSIZE_FLAG !INITIALSIZE specified/not flag.
+	INTEGER INITIALSIZE_IARG !"INITIALSIZE=" integer argument -- not used.
+	LOGICAL BLOCKSIZE_FLAG !BLOCKSIZE specified/not flag -- not used.
+	INTEGER BLOCKSIZE_IARG !"BLOCKSIZE=" integer argument -- not used.
+	LOGICAL MAXREC_FLAG !MAXREC specified/not flag.
+	INTEGER MAXREC_IARG !"MAXREC=" integer argument.
+	LOGICAL READONLY_FLAG !No-op on SGI.
+
+*  Description:
+*	Provides a machine-dependent (native) OPEN routine, intended
+*	to be called only from STROPEN (qv).
+
+*  Note:
+*	The SG FORTRAN manual seems to indicate that the RECORDTYPE specifier
+*	is completely useless, ie, "If ... specified, ... must be the
+*	appropriate default value...".  In other words, specifying it
+*	may only lead to trouble, if the "appropriate default" value isn't
+*	used.  This routine now checks this, and if it's not set to VARIABLE,
+*	with FORM set to UNFORMATTED, then ACCESS is set to DIRECT;
+*	RECORDTYPE itself is not set.
+
+</pre>

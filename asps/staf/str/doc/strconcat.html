@@ -1,0 +1,20 @@
+<pre><h3>SUBROUTINE STRCONCAT(ARG,JARG,NARGS,COM)</h3>
+
+
+*  Inputs:
+	CHARACTER*(*) ARG(*) !Array of parsed-arguments.
+	INTEGER JARG         !Element of ARG with which to start.
+	INTEGER NARGS        !Number of arguments in ARG.
+*  Output:
+	CHARACTER*(*) COM    !Re-combined (concatenated) string of ARGs.
+
+*  Functional description:
+*	Recombine the arguments, previously parsed from a single line into
+*	ARG, as with STRPARSE, into a single line.  General, this is used
+*	to recombine everything but the first argument, so that an otherwise
+*	intact command string can be passed "down the line", stripped of its
+*	"routing" command.  Arguments are concatenated with intervening spaces.
+*	The intervening spaces could be tabs, but not if ARG and NARGS come
+*	from STRPARSE.
+
+</pre>

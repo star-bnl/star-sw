@@ -1,0 +1,21 @@
+<pre><h3>SUBROUTINE strterm_get_char_from_line(Long)</h3>
+
+
+*  Output argument:
+	INTEGER Long  !Integer-ASCII-equivalent of transmitted character,
+	              !or zero, if nothing is ready.
+
+*  Return value:  none
+
+*  Functional description:
+
+*	VMS version is not operational -- just for compatability's sake,
+*	this issues a call to strterm_get_char, which isn't quite the same.
+
+*  What it should do (and does on Unix):
+*	Get a character from the terminal, w/o waiting.
+*	Wait for a complete line before transmitting.
+*	Return with the null byte as the character if no
+*	character is ready at the terminal (ie, don't wait).
+
+</pre>

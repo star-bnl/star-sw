@@ -1,0 +1,17 @@
+<pre><h3>SUBROUTINE STRPUTCHR(CHR,SEL,LONG)</h3>
+
+
+*  Inputs:
+	CHARACTER*1 CHR !Contains the character-representation of the selected
+*                        byte to be inserted into LONG.
+	INTEGER SEL  !A number, 1 to 4, indicating one of LONG's 4 bytes.
+
+*  Output:
+	INTEGER LONG !Contains a long-word (4 bytes) -- the "sink".
+
+*  Description:
+*	Put a character into LONG, a 32 bit word.  The character becomes
+*	is the SELth byte of LONG, and from CHR.  The selection
+*	is made in a machine-independent fashion.
+
+</pre>

@@ -1,0 +1,18 @@
+<pre><h3>SUBROUTINE strterm_set_line</h3>
+
+
+*  No arguments
+
+*  Return value:  none
+
+*  Functional description:
+*	Set the terminal into "line" I/O mode.  ie, characters are not
+*	available until an EOT (End Of Transmission, eg, a Return, Line Feed,
+*	etc.) is sent.
+*	This is independent of whether terminal I/O is synchronous
+*	(reads wait until something is really read) or asynchronous
+*	(reads return a null byte if nothing is read).
+*	Under VMS, this is done at the actual I/O call itself.  Here,
+*	software flags are set, but no action is taken.
+
+</pre>
