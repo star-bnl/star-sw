@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 1.20 1999/04/19 20:46:41 ullrich Exp $
+% $Id: StEvent.tex,v 1.21 1999/06/07 14:57:21 ullrich Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.20  1999/04/19 20:46:41  ullrich
-% Mods to StHit (virtual)
+% Revision 1.21  1999/06/07 14:57:21  ullrich
+% Added changes in StGlobalTrack
 %
 % Revision 1.21  1999/06/07 14:57:21  ullrich
 % Added changes in StGlobalTrack
@@ -170,8 +170,8 @@
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.20 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/04/19 20:46:41 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.21 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/06/07 14:57:21 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -315,7 +315,7 @@ are not guaranteed to compile. Their only purpose is to illustrate a
 specific feature and not to provide a fully functional programming
 unit.
 
-  {\LARGE $ $Date: 1999/04/19 20:46:41 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/06/07 14:57:21 $ $}  % replaced by cvs with current revision
      \advance\leftmargin by \labelsep%
 \section{Further documentation}
 \label{sec:furtherdoc}
@@ -1772,6 +1772,20 @@ meanPtOfRelatedTracks(StEvent *event, StFtpcHit *hit)
 \item[Public\\ Constructors]
     \verb+StGlobalTrack();+\\
     Constructs an instance of \name{StGlobalTrack} with all values initialized to 0 (zero).
+
+\item[Public Member\\ Functions]
+
+    \verb+virtual int  numberOfTpcHits() const;+\\
+    Returns the number of hits associated with the track.
+    If (!) the hits are stored on the DST, i.e. the
+    hit collection is filled, this is the same as
+    returned by tpcHits().size(). Otherwise this number is
+    taken from a data member which gets defined during the 
+    setup of StEvent. 
+    
+    \verb+virtual int  numberOfSvtHits() const;+\\
+    Same as above but for the SVT hits.
+    
     \verb+virtual int  numberOfFtpcHits() const;+\\
     Same as above but for the FTPC hits.
     
