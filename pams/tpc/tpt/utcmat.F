@@ -1,7 +1,11 @@
-* $Id: utcmat.F,v 1.2 1998/01/27 00:35:54 fisyak Exp $
+* $Id: utcmat.F,v 1.3 2005/03/03 21:33:06 sakrejda Exp $
 * $Log: utcmat.F,v $
+* Revision 1.3  2005/03/03 21:33:06  sakrejda
+* *** empty log message ***
+*
 * Revision 1.2  1998/01/27 00:35:54  fisyak
 * Split sources
+*Just a comment
 *
       SUBROUTINE UTCMAT(xcir,ycir,wcir,ncir)
 C
