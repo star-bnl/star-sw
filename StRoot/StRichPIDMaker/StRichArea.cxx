@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichArea.cxx,v 2.5 2001/04/17 18:21:48 horsley Exp $
+ * $Id: StRichArea.cxx,v 2.6 2001/04/25 00:31:40 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichArea.cxx,v $
+ *  Revision 2.6  2001/04/25 00:31:40  lasiuk
+ *  HP changes.  removal of reprocessTraits()
+ *
  *  Revision 2.5  2001/04/17 18:21:48  horsley
  *  made correction to monte carlo area calculation, not used in production
  *
@@ -294,7 +297,8 @@ double StRichArea::calculateArea(double areaCut, double psiCut) {
   //
   double tempArea  = 0.0;
   double tempConstantAreaAngleCuta = mStartAngle;
-  for (int i=0;i<(mNumberOfSteps/2.0 - stopHere);i++) {
+  int i;
+  for (i=0;i<(mNumberOfSteps/2.0 - stopHere);i++) {
 
 
     //
@@ -402,7 +406,7 @@ double StRichArea::calculateArea(double areaCut, double psiCut) {
   tempArea=0;
   double tempConstantAreaAngleCutb = -mStartAngle;
   
-  for (int i=0;i<(mNumberOfSteps/2.0 - stopHere);i++) {
+  for (i=0;i<(mNumberOfSteps/2.0 - stopHere);i++) {
     StRichAreaSegment tempSegment;
     mCorrectedAreaSegment   = 0.0;
     mUnCorrectedAreaSegment = 0.0;
@@ -958,7 +962,8 @@ StRichArea::nonAdjacentGapCorrection(StThreeVectorF& ixy,  StThreeVectorF& oxy,
   // now get the next point across from the gap
   //
   oxyb=oxya;
-  for (int gapCounter=0;gapCounter<mTooManyCounts;gapCounter++) {
+  int gapCounter;
+  for (gapCounter=0;gapCounter<mTooManyCounts;gapCounter++) {
     oxyb.setX(oxyb.x() + mSmallDistance*cos(phi));
     oxyb.setY(oxyb.y() + mSmallDistance*sin(phi));
     if (!gapCheck(oxyb) && !quadCheck(oxya,oxyb)) break;
@@ -1019,7 +1024,7 @@ StRichArea::nonAdjacentGapCorrection(StThreeVectorF& ixy,  StThreeVectorF& oxy,
   // now get the next point across from the gap
   //
   ixyb=ixya;
-  for (int gapCounter=0;gapCounter<mTooManyCounts;gapCounter++) {
+  for (gapCounter=0;gapCounter<mTooManyCounts;gapCounter++) {
     ixyb.setX(ixyb.x() + mSmallDistance*cos(phi));
     ixyb.setY(ixyb.y() + mSmallDistance*sin(phi));
     if (!gapCheck(ixyb) && !quadCheck(ixya,ixyb)) break;
@@ -1551,7 +1556,8 @@ void StRichArea::getMonteCarloArea(double angleCut, TArrayD& array, int points) 
   // define bin size, conversion factor
   //
   int numberOfAreaElements = array.GetSize();
-  for (int i=0;i<numberOfAreaElements;i++) {array[i] = 0;}
+  int i;
+  for (i=0;i<numberOfAreaElements;i++) {array[i] = 0;}
   
   double binSizeInDegrees = 180.0*(1.0/((double) numberOfAreaElements));
   double conversionFactor = (180.0/M_PI)*(1.0/binSizeInDegrees);
@@ -1576,7 +1582,7 @@ void StRichArea::getMonteCarloArea(double angleCut, TArrayD& array, int points) 
   //    
 
 
-  for (int i=0;i<points;i++) {
+  for (i=0;i<points;i++) {
     
     getMonteCarloPadPlanePoint(rand);
 
@@ -1605,7 +1611,7 @@ void StRichArea::getMonteCarloArea(double angleCut, TArrayD& array, int points) 
   }
   
   double tempPoints = (double) points;
-  for (int i=0;i<array.GetSize();i++) {array[i] = array[i]*(padArea/tempPoints);}
+  for (i=0;i<array.GetSize();i++) {array[i] = array[i]*(padArea/tempPoints);}
   
   // 
   // take care of memory 
