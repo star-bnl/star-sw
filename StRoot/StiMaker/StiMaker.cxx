@@ -184,7 +184,7 @@ Int_t StiMaker::Init()
     //EvaluableTrack SeedFinder
     mtrackseedfinder = new StiEvaluableTrackSeedFinder();
     mtrackseedfinder->setFactory(mtrackfactory, mhitfactory);
-    mtrackseedfinder->setStTrackType(global);
+    mtrackseedfinder->setStTrackType(mStTrackType);
 
     //KalmanTrackSeedFinder
     mkalmanseedfinder = new StiTrackSeedFinder(mhitstore);
@@ -211,6 +211,7 @@ Int_t StiMaker::Init()
     //Drawable hits
     mdrawablehits = new StiRootDrawableHits();
     mdrawablehits->clear();
+    mdrawablehits->setMarkerSize(.2);
     mdisplay->addDrawable(mdrawablehits);
 
     //The Detector Tree
@@ -226,7 +227,7 @@ Int_t StiMaker::Init()
     //The Hit Filler
     mhitfiller = new StiHitFiller();
     mhitfiller->addDetector(kTpcId);
-    //mhitfiller->addDetector(kSvtId);
+    mhitfiller->addDetector(kSvtId);
     cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
 
     //The Tracker
@@ -252,12 +253,17 @@ Int_t StiMaker::Make()
 	//Fill hits, organize the container
 	mhitfiller->setEvent(mevent);
 	mhitfiller->fillHits(mhitstore, mhitfactory);
+	cout <<"StiMaker::Make()\tsortHits"<<endl;
 	mhitstore->sortHits();
+	cout <<"\tdone"<<endl;
 
 	//Init seed finder for start
+	cout <<"StiMaker::Make()\tinit Seed Finder"<<endl;
 	mtracker->initSeedFinderForStart();
+	cout <<"\tdone"<<endl;
 
 	//Temp patch to draw hits
+	cout <<"StiMaker::Make()\tFill Drawable hits"<<endl;
 	const hitmap& hits = mhitstore->hits();
 	for (hitmap::const_iterator it=hits.begin(); it!=hits.end(); it++) {
 	    const hitvector& tempvec = (*it).second;
@@ -266,9 +272,13 @@ Int_t StiMaker::Make()
 		mdrawablehits->push_back( (*vit) );
 	    }
 	}
+	cout <<"\tdone"<<endl;
+	cout <<"StiMaker::Make()\tfill hits for drawing"<<endl;
 	mdrawablehits->fillHitsForDrawing();
+	cout <<"\tdone"<<endl;
 
 	//Initialize the SeedFinder, loop on tracks
+	cout <<"StiMaker::Make()\tFill drawable tracks"<<endl;
 	mtrackseedfinder->setEvent(mevent);
 	while (mtrackseedfinder->hasMore()) {
 	    StiRootDrawableStiEvaluableTrack* thetrack =
@@ -277,6 +287,7 @@ Int_t StiMaker::Make()
 		thetrack->fillHitsForDrawing();
 	    }
 	}
+	cout <<"\tdone"<<endl;
 
     }
     mdisplay->draw();
