@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.41 2003/01/14 12:58:01 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.42 2003/02/08 03:45:22 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.42  2003/02/08 03:45:22  jcs
+// for dAu production ONLY: hardcode gas temperatures
+//
 // Revision 1.41  2003/01/14 12:58:01  jcs
 // use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
 // FTPC asic mapping
@@ -391,6 +394,14 @@ Int_t StFtpcClusterMaker::Make()
           gMessMgr->Info() << "Invalid value ("<<gas->getBarometricPressure()<<") from online database for barometric pressure - using previous value ("<<paramReader->normalizedNowPressure()<<")"<<endm;
       }
 
+      // FIX gasTemperatureWest AND gasTemperatureEast FOR SVT ON
+
+      cout<<"WARNING: THIS VERSION OF StFtpcClusterMaker USES FIXED GAS TEMPERATURES - IT IS ONLY VALID FOR dAu"<<endl;
+
+      paramReader->setGasTemperatureWest(26.4);
+      paramReader->setGasTemperatureEast(28.8);
+
+/*   inactivate gas temperature code for dAu production      
      // valid database reading for both  Gas temperature FTPC West and FTPC East
       if ( (gas->getGasOutWest() >= paramReader->minGasTemperature() && gas->getGasOutWest() <= paramReader->maxGasTemperature())
          && (gas->getGasOutEast() >= paramReader->minGasTemperature() && gas->getGasOutEast() <= paramReader->maxGasTemperature()) ) {
@@ -415,6 +426,10 @@ Int_t StFtpcClusterMaker::Make()
           gMessMgr->Info() <<"Invalid value ("<<gas->getGasOutWest()<<") from online database for gasTemperatureWest - set GasTemperatureWest("<<paramReader->gasTemperatureWest()<<")  = GasTemperatureEast + ("<<dbReader->temperatureDifference()<<") = "<<paramReader->gasTemperatureEast()+dbReader->temperatureDifference()<<endm;
            paramReader->setGasTemperatureWest(paramReader->gasTemperatureEast()+dbReader->temperatureDifference());
       }
+     
+     end of inactivate gas temperature code for dAu production */ 
+
+      cout<<" using normalizedNowPressure = "<<paramReader->normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader->gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader->gasTemperatureEast()<<endl; 
 
        paramReader->setAdjustedAirPressureWest(paramReader->normalizedNowPressure()*((dbReader->baseTemperature()+STP_Temperature)/(paramReader->gasTemperatureWest()+STP_Temperature)));
       gMessMgr->Info() <<" paramReader->setAdjustedAirPressureWest = "<<paramReader->adjustedAirPressureWest()<<endm;
