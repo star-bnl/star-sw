@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.19 2000/05/24 14:19:03 caines Exp $
+// $Id: St_stk_Maker.cxx,v 1.20 2000/06/01 21:10:01 caines Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.20  2000/06/01 21:10:01  caines
+// Turn off mc track filling as default
+//
 // Revision 1.19  2000/05/24 14:19:03  caines
 // Use prevertex for search not geant + find own vertex for alignment
 //
@@ -113,7 +116,7 @@ ClassImp(St_stk_Maker)
   m_mode = 2;
   m_method = 2;
   m_fill = 1;
-  m_direct = 1;
+  m_direct = 0;
   m_nlayers = 4;
   m_c1norm[0] = 3.47; m_c1norm[1] =   280.; m_c1norm[2] = -13.7 ;
   m_c2norm[0] = 45.5; m_c2norm[1] = 14200.; m_c2norm[2] = -17.5;
@@ -189,7 +192,7 @@ Int_t St_stk_Maker::Init(){
   m_azimuth   = new TH1F("StkAzimuth"     ,"Azimuthal distribution of svt tracks" ,60,0.,360.0);
   m_tan_dip   = new TH1F("StkTanDip"      ,"Distribution of the svt dip angle"    ,100,-1.5,1.5);
   m_dedx      = new TH2F("StkDedx"        ,"Svt dE/dx distribution"               ,100,0.,2.0,100,0.,0.01);
-   m_vtx_z     = new TH1F("StkSvtVert"        ,"Z SVT - Z TPC Primary vertex resolution"        ,100,-0.5,0.5);
+   m_vtx_z     = new TH1F("StkSvtVert"        ,"Z SVT - Z TPC Primary vertex resolution"        ,100,-0.1,0.1);
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -287,10 +290,7 @@ Int_t St_stk_Maker::Make()
 			 scs_spt,groups,
 			 m_pix_info,candidate_groups,stk_track);
   if (Res_sgr !=  kSTAFCV_OK) {cout << " Problem on return from SGR" << endl;}
-
-  
-  stk_stkpar_st *stk_stkpar = m_stk_stkpar->GetTable();
-  stk_stkpar->direct = 1;
+ 
   Int_t Res_stk =  stk_am(m_stk_stkpar,
 			  g2t_track,g2t_event,g2t_vertex,
 			  scs_spt,
