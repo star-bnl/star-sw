@@ -11,6 +11,18 @@ StEvtHddr::StEvtHddr(St_DataSet *parent):St_DataSet("EvtHddr",parent)
   mRunNumber=-1;mOldRunNumber=-1;mEventNumber=-1;
 }  
 //_____________________________________________________________________________
+StEvtHddr &StEvtHddr::operator=(const StEvtHddr &hddr)
+{
+  SetParent(0);
+  SetName(hddr.GetName());
+  SetTitle(hddr.GetTitle());
+  memcpy(&mRunNumber,&hddr.mRunNumber,(char*)&mEventNumber-(char*)&mRunNumber); 
+  mEventTime = hddr.mEventTime;
+  mProdTime  = hddr.mProdTime;
+  mEventType = hddr.mEventType;
+  return *this;
+}
+//_____________________________________________________________________________
   void StEvtHddr::SetGMTime(ULong_t ut)
 {  
    struct tm *tp;
