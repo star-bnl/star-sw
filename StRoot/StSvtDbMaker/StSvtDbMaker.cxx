@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.8 2003/01/28 20:19:57 munhoz Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.9 2003/04/14 15:51:39 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.9  2003/04/14 15:51:39  munhoz
+ * reading t0 from DB
+ *
  * Revision 1.8  2003/01/28 20:19:57  munhoz
  * including InitRun()
  *
@@ -60,6 +63,7 @@ St_ObjectSet *svtSetDrift;
 St_ObjectSet *svtSetPed;
 St_ObjectSet *svtSetGeom;
 St_ObjectSet *svtSetBad;
+St_ObjectSet *svtSetT0;
 
 //C and fortran routines
 
@@ -151,6 +155,7 @@ Int_t StSvtDbMaker::Init()
   setSvtGeometry();
   setSvtDriftVelocity();
   setSvtBadAnodes();
+  setSvtT0();
 
   return StMaker::Init();
 }
@@ -164,6 +169,7 @@ Int_t StSvtDbMaker::InitRun(int runumber)
   readSvtGeometry();
   readSvtDriftVelocity();
   readSvtBadAnodes();
+  readSvtT0();
 
   return kStOk;
 }
@@ -305,6 +311,22 @@ void StSvtDbMaker::readSvtBadAnodes()
     svtSetBad->SetObject((TObject*)mReader->getBadAnodes());
   else if (m_Reader)
     svtSetBad->SetObject((TObject*)m_Reader->getBadAnodes());
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::setSvtT0()
+{    
+  svtSetT0 = new St_ObjectSet("StSvtT0");
+  AddConst(svtSetT0);  
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::readSvtT0()
+{    
+  if (mReader)
+    svtSetT0->SetObject((TObject*)mReader->getT0());
+  else if (m_Reader)
+    svtSetT0->SetObject((TObject*)m_Reader->getT0());
 }
 
 //_____________________________________________________________________________

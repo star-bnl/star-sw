@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.cc,v 1.4 2002/05/06 00:42:51 munhoz Exp $
+ * $Id: St_SvtDb_Reader.cc,v 1.5 2003/04/14 15:51:53 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.cc,v $
+ * Revision 1.5  2003/04/14 15:51:53  munhoz
+ * reading t0 from DB
+ *
  * Revision 1.4  2002/05/06 00:42:51  munhoz
  * adding bad anode list reading
  *
@@ -36,6 +39,7 @@
 #include "StSvtClassLibrary/StSvtHybridBadAnodes.hh"
 #include "StSvtClassLibrary/StSvtGeometry.hh"
 #include "StSvtClassLibrary/StSvtWaferGeometry.hh"
+#include "StSvtClassLibrary/StSvtT0.hh"
 
 #include "tables/St_svtConfiguration_Table.h"
 #include "tables/St_svtDriftVelAvg_Table.h"
@@ -43,10 +47,13 @@
 #include "tables/St_svtPedestals_Table.h"
 #include "tables/St_svtWafersPosition_Table.h"
 #include "tables/St_svtDimensions_Table.h"
+#include "tables/St_svtElectronics_Table.h"
 
 #ifdef __ROOT__
 ClassImp(St_SvtDb_Reader)
 #endif
+
+svtElectronics_st *electronic = NULL;
 
 //_____________________________________________________________________________
 St_SvtDb_Reader::St_SvtDb_Reader()
@@ -352,7 +359,7 @@ StSvtGeometry* St_SvtDb_Reader::getGeometry()
 	  waferGeom->setTransverseDirection(position->transverseDirection[0],position->transverseDirection[1],position->transverseDirection[2]);
 	  waferGeom->setCenterPosition(position->centerPosition[0],position->centerPosition[1],position->centerPosition[2]);
 
-	  //cout << "index = "  << index << ", x = " << position->centerPosition[0] << endl;
+	  cout << "index = "  << index << ", x = " << position->centerPosition[0] << endl;
 
 	  svtGeom->put_at(waferGeom,index);
 
@@ -438,4 +445,43 @@ StSvtHybridCollection* St_SvtDb_Reader::getBadAnodes()
   } // end of loop over barrels
 
   return svtBadAnodes;
+}
+
+//_____________________________________________________________________________
+int St_SvtDb_Reader::getElectronics()
+{
+  // get svt electronics table
+  St_svtElectronics *electronics;
+  const int dbIndex = kCalibration;
+  if (svtDb[dbIndex]){
+    electronics = (St_svtElectronics*)svtDb[dbIndex]->Find("svtElectronics");
+    if (!(electronics && electronics->HasData()) ){
+     gMessMgr->Message("Error Finding SVT Electronics","E");
+     return kFALSE;
+    }
+  }
+  else {
+    gMessMgr->Message("Error Finding SVT Geometry Db","E");
+    return kFALSE;
+  }
+
+  electronic = electronics->GetTable();
+  return kTRUE;
+}
+
+//_____________________________________________________________________________
+StSvtT0* St_SvtDb_Reader::getT0()
+{
+  StSvtT0* svtT0 = new StSvtT0();
+
+  if (getElectronics()) {
+    for (int i=0;i<24;i++)
+      svtT0->setT0(electronic->tZero[i],i+1);
+    svtT0->setFsca(electronic->samplingFrequency);
+
+    cout << "t0 = " << svtT0->getT0(1) << ", fsca =  " << svtT0->getFsca() << endl;
+
+  }
+
+  return svtT0;
 }
