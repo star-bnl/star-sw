@@ -3,9 +3,9 @@
 * 
 *****************************************************************
       implicit none
-#include "/cern/pro/include/geant321/gcbank.inc"
-#include "/cern/pro/include/geant321/gcnum.inc"
-#include "/cern/pro/include/geant321/gclink.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcnum.inc"
+#include "geant321/gclink.inc"
       integer  g2t_volume_id
 * 
       Character*3      Csys

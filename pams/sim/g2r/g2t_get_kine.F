@@ -27,8 +27,8 @@ CC:>-----+---------+---------+---------+---------+---------+---------+---------+
       CHARACTER NAPART*24,Cvol*4,Cshap*4
       Integer   NUM(100000),ISTAT,IDPDG,MOTH(2),IDAU(2)
 
-#include       "g2t_get_kine.inc"
-#include       "geant321/gcnum.inc"
+#include "g2t_get_kine.inc"
+#include "geant321/gcnum.inc"
 
 CC:>-----+---------+---------+---------+---------+---------+---------+---------+
       G2T_GET_KINE = STAFCV_BAD
