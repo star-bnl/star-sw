@@ -152,7 +152,7 @@ long type_of_call reformat_new_
 
                	            /* first check whether this row has been found before */
                            irepeatrow=-1;
-	                   for(ij=0;ij<raw_row_out_h->nok+1;ij++){
+	                   for(ij=0;ij<raw_row_out_h->nok;ij++){
 		                  if(raw_row_out[ij].RowId==row&&raw_row_out[ij].npad!=0) irepeatrow=ij;
                             }
 
