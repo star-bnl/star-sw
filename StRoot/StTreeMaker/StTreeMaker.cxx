@@ -85,8 +85,8 @@ Int_t StTreeMaker::Open(const char*)
 
 //   
 //    	Several default branches
-    SetBranch("histBranch" ,0,"r","const");
-    SetBranch("runcoBranch",0,"r","const");
+//    SetBranch("histBranch" ,0,"r","const");
+//    SetBranch("runcoBranch",0,"r","const");
 
 //
 
@@ -116,16 +116,16 @@ Int_t StTreeMaker::Open(const char*)
       if (!fFile.IsNull()) fTree->SetBaseName(fFile);
 
 //    		Several default branches
-      if ( fTreeName=="bfcTree") { 
-        if (!Find(".branches/dstBranch"  )) SetBranch("dstBranch"  ,0,"w");
-        if (!Find(".branches/histBranch" )) SetBranch("histBranch" ,0,"w","const");
-        if (!Find(".branches/runcoBranch")) SetBranch("runcoBranch",0,"w","const");
-      }
+//VP      if ( fTreeName=="bfcTree") { 
+//VP        if (!Find(".branches/dstBranch"  )) SetBranch("dstBranch"  ,0,"w");
+//VP        if (!Find(".branches/histBranch" )) SetBranch("histBranch" ,0,"w","const");
+//VP        if (!Find(".branches/runcoBranch")) SetBranch("runcoBranch",0,"w","const");
+//VP      }
 
 //   	Set filename for runcoBranch
-    StBranch *h = (StBranch*)fTree->Find("histBranch");
-    StBranch *r = (StBranch*)fTree->Find("runcoBranch");
-    if (h && r) r->SetFile(h->GetFile(),0,1);
+//VP    StBranch *h = (StBranch*)fTree->Find("histBranch");
+//VP    StBranch *r = (StBranch*)fTree->Find("runcoBranch");
+//VP    if (h && r) r->SetFile(h->GetFile(),0,1);
       
 
     }//end of new tree
