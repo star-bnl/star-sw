@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvLikeSignCorrFctn_Minv_vs_Pt.cxx,v 1.1 2000/09/01 18:37:27 laue Exp $
+ * $Id: MinvLikeSignCorrFctn_Minv_vs_Pt.cxx,v 1.2 2001/01/23 15:12:55 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -25,35 +25,31 @@ ClassImp(MinvLikeSignCorrFctn_Minv_vs_Pt)
 #endif
 
 //____________________________
-MinvLikeSignCorrFctn_Minv_vs_Pt::MinvLikeSignCorrFctn_Minv_vs_Pt(char* title, 
+MinvLikeSignCorrFctn_Minv_vs_Pt::MinvLikeSignCorrFctn_Minv_vs_Pt(char* title1, char* title2, 
 								 const int& nxbins, const float& xLo, const float& xHi,
 								 const int& nybins, const float& yLo, const float& yHi){
 
-  char theTitle[100];
+  char theTitle1[100];
+  char theTitle2[100];
+  sprintf(theTitle2,"%s\n",title2);
   // set up numerator
-  char *TitNum = "MinvLikeSignCorrFctn_Minv_vs_Pt_Num";
-  sprintf(theTitle,"Num%s\n",title);
-  mNumerator = new StHbt2DHisto(TitNum,theTitle,nxbins,xLo,xHi,nybins,yLo,yHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctn_Minv_vs_Pt_Num_%s\n",title1);
+  mNumerator = new StHbt2DHisto(theTitle1,theTitle2,nxbins,xLo,xHi,nybins,yLo,yHi);
   // set up denominator
-  char *TitMixedEventDen= "MinvLikeSignCorrFctn_Minv_vs_Pt_MixedEventDen";
-  sprintf(theTitle,"MixedEventDen%s\n",title);
-  mMixedEventDenominator = new StHbt2DHisto(TitMixedEventDen,theTitle,nxbins,xLo,xHi,nybins,yLo,yHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctn_Minv_vs_Pt_MixedEventDen_%s\n",title1);
+  mMixedEventDenominator = new StHbt2DHisto(theTitle1,theTitle2,nxbins,xLo,xHi,nybins,yLo,yHi);
   // set up denominator
-  char *TitPositiveDen= "MinvLikeSignCorrFctn_Minv_vs_Pt_PositiveDen";
-  sprintf(theTitle,"PositiveDen%s\n",title);
-  mPositiveDenominator = new StHbt2DHisto(TitPositiveDen,theTitle,nxbins,xLo,xHi,nybins,yLo,yHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctn_Minv_vs_Pt_PositiveDen_%s\n",title1);
+  mPositiveDenominator = new StHbt2DHisto(theTitle1,theTitle2,nxbins,xLo,xHi,nybins,yLo,yHi);
   // set up denominator
-  char *TitNegativeDen= "MinvLikeSignCorrFctn_Minv_vs_Pt_NegativeDen";
-  sprintf(theTitle,"NegativeDen%s\n",title);
-  mNegativeDenominator = new StHbt2DHisto(TitNegativeDen,theTitle,nxbins,xLo,xHi,nybins,yLo,yHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctn_Minv_vs_Pt_NegativeDen_%s\n",title1);
+  mNegativeDenominator = new StHbt2DHisto(theTitle1,theTitle2,nxbins,xLo,xHi,nybins,yLo,yHi);
   // set up difference
-  char *TitMixedEventDif = "MinvLikeSignCorrFctn_Minv_vs_Pt_MixedEventDif";
-  sprintf(theTitle,"MixedEventDif%s\n",title);
-  mMixedEventDifference = new StHbt2DHisto(TitMixedEventDif,theTitle,nxbins,xLo,xHi,nybins,yLo,yHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctn_Minv_vs_Pt_MixedEventDif_%s\n",title1);
+  mMixedEventDifference = new StHbt2DHisto(theTitle1,theTitle2,nxbins,xLo,xHi,nybins,yLo,yHi);
   // set up difference
-  char *TitLikeSignDif = "MinvLikeSignCorrFctn_Minv_vs_Pt_LikeSignDif";
-  sprintf(theTitle,"LikeSignDif%s\n",title);
-  mLikeSignDifference = new StHbt2DHisto(TitLikeSignDif,theTitle,nxbins,xLo,xHi,nybins,yLo,yHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctn_Minv_vs_Pt_LikeSignDif_%s\n",title1);
+  mLikeSignDifference = new StHbt2DHisto(theTitle1,theTitle2,nxbins,xLo,xHi,nybins,yLo,yHi);
   // this next bit is unfortunately needed so that we can have many histos of same "title"
   // it is neccessary if we typedef StHbt2DHisto to TH1d (which we do)
   mNumerator->SetDirectory(0);

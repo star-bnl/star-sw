@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvLikeSignCorrFctn_Minv_vs_Phi.cxx,v 1.1 2000/09/01 18:37:27 laue Exp $
+ * $Id: MinvLikeSignCorrFctn_Minv_vs_Phi.cxx,v 1.2 2001/01/23 15:12:55 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -25,35 +25,31 @@ ClassImp(MinvLikeSignCorrFctn_Minv_vs_Phi)
 #endif
 
 //____________________________
-MinvLikeSignCorrFctn_Minv_vs_Phi::MinvLikeSignCorrFctn_Minv_vs_Phi(char* title, 
+MinvLikeSignCorrFctn_Minv_vs_Phi::MinvLikeSignCorrFctn_Minv_vs_Phi(char* title1, char* title2, 
 								 const int& nxbins, const float& xLo, const float& xHi,
 								 const int& nybins, const float& yLo, const float& yHi){
 
-  char theTitle[100];
+  char theTitle1[100];
+  char theTitle2[100];
+  sprintf(theTitle2,"%s\n",title2);
   // set up numerator
-  char *TitNum = "MinvLikeSignCorrFctn_Minv_vs_Phi_Num";
-  sprintf(theTitle,"Num%s\n",title);
-  mNumerator = new StHbt2DHisto(TitNum,theTitle,nxbins,xLo,xHi,nybins,yLo,yHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctn_Minv_vs_Phi_Num_%s\n",title1);
+  mNumerator = new StHbt2DHisto(theTitle1,theTitle2,nxbins,xLo,xHi,nybins,yLo,yHi);
   // set up denominator
-  char *TitMixedEventDen= "MinvLikeSignCorrFctn_Minv_vs_Phi_MixedEventDen";
-  sprintf(theTitle,"MixedEventDen%s\n",title);
-  mMixedEventDenominator = new StHbt2DHisto(TitMixedEventDen,theTitle,nxbins,xLo,xHi,nybins,yLo,yHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctn_Minv_vs_Phi_MixedEventDen_%s\n",title1);
+  mMixedEventDenominator = new StHbt2DHisto(theTitle1,theTitle2,nxbins,xLo,xHi,nybins,yLo,yHi);
   // set up denominator
-  char *TitPositiveDen= "MinvLikeSignCorrFctn_Minv_vs_Phi_PositiveDen";
-  sprintf(theTitle,"PositiveDen%s\n",title);
-  mPositiveDenominator = new StHbt2DHisto(TitPositiveDen,theTitle,nxbins,xLo,xHi,nybins,yLo,yHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctn_Minv_vs_Phi_PositiveDen_%s\n",title1);
+  mPositiveDenominator = new StHbt2DHisto(theTitle1,theTitle2,nxbins,xLo,xHi,nybins,yLo,yHi);
   // set up denominator
-  char *TitNegativeDen= "MinvLikeSignCorrFctn_Minv_vs_Phi_NegativeDen";
-  sprintf(theTitle,"NegativeDen%s\n",title);
-  mNegativeDenominator = new StHbt2DHisto(TitNegativeDen,theTitle,nxbins,xLo,xHi,nybins,yLo,yHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctn_Minv_vs_Phi_NegativeDen_%s\n",title1);
+  mNegativeDenominator = new StHbt2DHisto(theTitle1,theTitle2,nxbins,xLo,xHi,nybins,yLo,yHi);
   // set up difference
-  char *TitMixedEventDif = "MinvLikeSignCorrFctn_Minv_vs_Phi_MixedEventDif";
-  sprintf(theTitle,"MixedEventDif%s\n",title);
-  mMixedEventDifference = new StHbt2DHisto(TitMixedEventDif,theTitle,nxbins,xLo,xHi,nybins,yLo,yHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctn_Minv_vs_Phi_MixedEventDif_%s\n",title1);
+  mMixedEventDifference = new StHbt2DHisto(theTitle1,theTitle2,nxbins,xLo,xHi,nybins,yLo,yHi);
   // set up difference
-  char *TitLikeSignDif = "MinvLikeSignCorrFctn_Minv_vs_Phi_LikeSignDif";
-  sprintf(theTitle,"LikeSignDif%s\n",title);
-  mLikeSignDifference = new StHbt2DHisto(TitLikeSignDif,theTitle,nxbins,xLo,xHi,nybins,yLo,yHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctn_Minv_vs_Phi_LikeSignDif_%s\n",title1);
+  mLikeSignDifference = new StHbt2DHisto(theTitle1,theTitle2,nxbins,xLo,xHi,nybins,yLo,yHi);
   // this next bit is unfortunately needed so that we can have many histos of same "title"
   // it is neccessary if we typedef StHbt2DHisto to TH1d (which we do)
   mNumerator->SetDirectory(0);
@@ -100,7 +96,7 @@ void MinvLikeSignCorrFctn_Minv_vs_Phi::Finish(){
   double MixedEventDenominatorInt = mMixedEventDenominator->Integral();
   double PositiveDenominatorInt = mPositiveDenominator->Integral();
   double NegativeDenominatorInt = mNegativeDenominator->Integral();
-  mMixedEventDifference->Add(mNumerator,mMixedEventDenominator,1.0,-1*NumeratorInt/MixedEventDenominatorInt);
+  mMixedEventDifference->Add(mNumerator,mMixedEventDenominator,1.0,-1.*NumeratorInt/MixedEventDenominatorInt);
   mLikeSignDifference->Add(mNumerator,mPositiveDenominator,1.,-1.);
   mLikeSignDifference->Add(mLikeSignDifference,mNegativeDenominator,1.,-1.);
 
@@ -127,26 +123,42 @@ StHbtString MinvLikeSignCorrFctn_Minv_vs_Phi::Report(){
 //____________________________
 inline void MinvLikeSignCorrFctn_Minv_vs_Phi::AddRealPair(const StHbtPair* pair){
   //  if ( fabs(pair->mInv()-1.02)<0.01) 
-    if ( !isnan(mReactionPlaneError) && mReactionPlaneError!=0. )
-      mNumerator->Fill(pair->mInv(),pair->fourMomentumSum().vect().phi()-mReactionPlane);
+  if ( !isnan(mReactionPlaneError) && mReactionPlaneError!=0. ) {
+    double angle = pair->fourMomentumSum().vect().phi()-mReactionPlane;
+    angle = fabs(angle);
+    if (angle > M_PIl) angle = 2.*M_PIl-angle; 
+    mNumerator->Fill(pair->mInv(),angle);
+  }
 }
 //____________________________
 inline void MinvLikeSignCorrFctn_Minv_vs_Phi::AddMixedPair(const StHbtPair* pair){
   //  if ( fabs(pair->mInv()-1.02)<0.01) 
-    if ( !isnan(mReactionPlaneError) && mReactionPlaneError!=0. )
-      mMixedEventDenominator->Fill(pair->mInv(),pair->fourMomentumSum().vect().phi()-mReactionPlane);
+  if ( !isnan(mReactionPlaneError) && mReactionPlaneError!=0. ) {
+    double angle = pair->fourMomentumSum().vect().phi()-mReactionPlane;
+    angle = fabs(angle);
+    if (angle > M_PIl) angle = 2.*M_PIl-angle; 
+    mMixedEventDenominator->Fill(pair->mInv(),angle);
+  }
 }
 //____________________________
 inline void MinvLikeSignCorrFctn_Minv_vs_Phi::AddLikeSignPositivePair(const StHbtPair* pair){
   //  if ( fabs(pair->mInv()-1.02)<0.01) 
-    if ( !isnan(mReactionPlaneError) && mReactionPlaneError!=0. )
-      mPositiveDenominator->Fill(pair->mInv(),pair->fourMomentumSum().vect().phi()-mReactionPlane);
+  if ( !isnan(mReactionPlaneError) && mReactionPlaneError!=0. ) {
+    double angle = pair->fourMomentumSum().vect().phi()-mReactionPlane;
+    angle = fabs(angle);
+    if (angle > M_PIl) angle = 2.*M_PIl-angle; 
+    mPositiveDenominator->Fill(pair->mInv(),angle);
+  }
 }
 //____________________________
 inline void MinvLikeSignCorrFctn_Minv_vs_Phi::AddLikeSignNegativePair(const StHbtPair* pair){
   //  if ( fabs(pair->mInv()-1.02)<0.01) 
-    if ( !isnan(mReactionPlaneError) && mReactionPlaneError!=0. )
-      mNegativeDenominator->Fill(pair->mInv(),pair->fourMomentumSum().vect().phi()-mReactionPlane);
+  if ( !isnan(mReactionPlaneError) && mReactionPlaneError!=0. ) {
+    double angle = pair->fourMomentumSum().vect().phi()-mReactionPlane;
+    angle = fabs(angle);
+    if (angle > M_PIl) angle = 2.*M_PIl-angle; 
+    mNegativeDenominator->Fill(pair->mInv(),angle);
+  }
 }
 
 

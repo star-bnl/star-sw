@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvLikeSignCorrFctn.cxx,v 1.1 2000/09/01 18:37:27 laue Exp $
+ * $Id: MinvLikeSignCorrFctn.cxx,v 1.2 2001/01/23 15:12:55 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -25,36 +25,33 @@ ClassImp(MinvLikeSignCorrFctn)
 #endif
 
 //____________________________
-MinvLikeSignCorrFctn::MinvLikeSignCorrFctn(char* title, const int& nbins, const float& MinvLo, const float& MinvHi){
+MinvLikeSignCorrFctn::MinvLikeSignCorrFctn(char* title1, char* title2, 
+					   const int& nbins, const float& MinvLo, const float& MinvHi){
 #ifdef __ROOT__
   mTagWriter = StHbtTagWriter::Instance();  // get the singleton
 #endif
 
-  char theTitle[100];
-  // set up numerator
-  char *TitNum = "MinvLikeSignCorrFctn_Num";
-  sprintf(theTitle,"Num%s\n",title);
-  mNumerator = new StHbt1DHisto(TitNum,theTitle,nbins,MinvLo,MinvHi);
+  char theTitle1[100];
+  char theTitle2[100];
+  sprintf(theTitle2,"%s",title2);
+ // set up numerator
+  sprintf(theTitle1,"MinvLikeSignCorrFctnNum_%s",title1);
+   mNumerator = new StHbt1DHisto(theTitle1,theTitle2,nbins,MinvLo,MinvHi);
   // set up denominator
-  char *TitMixedEventDen= "MinvLikeSignCorrFctn_MixedEventDen";
-  sprintf(theTitle,"MixedEventDen%s\n",title);
-  mMixedEventDenominator = new StHbt1DHisto(TitMixedEventDen,theTitle,nbins,MinvLo,MinvHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctnMixedEventDen_%s\n",title1);
+  mMixedEventDenominator = new StHbt1DHisto(theTitle1,theTitle2,nbins,MinvLo,MinvHi);
   // set up denominator
-  char *TitPositiveDen= "MinvLikeSignCorrFctn_PositiveDen";
-  sprintf(theTitle,"PositiveDen%s\n",title);
-  mPositiveDenominator = new StHbt1DHisto(TitPositiveDen,theTitle,nbins,MinvLo,MinvHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctnPositiveDen_%s\n",title1);
+  mPositiveDenominator = new StHbt1DHisto(theTitle1,theTitle2,nbins,MinvLo,MinvHi);
   // set up denominator
-  char *TitNegativeDen= "MinvLikeSignCorrFctn_NegativeDen";
-  sprintf(theTitle,"NegativeDen%s\n",title);
-  mNegativeDenominator = new StHbt1DHisto(TitNegativeDen,theTitle,nbins,MinvLo,MinvHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctnNegativeDen_%s\n",title1);
+  mNegativeDenominator = new StHbt1DHisto(theTitle1,theTitle2,nbins,MinvLo,MinvHi);
   // set up difference
-  char *TitMixedEventDif = "MinvLikeSignCorrFctn_MixedEventDif";
-  sprintf(theTitle,"MixedEventDif%s\n",title);
-  mMixedEventDifference = new StHbt1DHisto(TitMixedEventDif,theTitle,nbins,MinvLo,MinvHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctnMixedEventDif_%s\n",title1);
+  mMixedEventDifference = new StHbt1DHisto(theTitle1,theTitle2,nbins,MinvLo,MinvHi);
   // set up difference
-  char *TitLikeSignDif = "MinvLikeSignCorrFctn_LikeSignDif";
-  sprintf(theTitle,"LikeSignDif%s\n",title);
-  mLikeSignDifference = new StHbt1DHisto(TitLikeSignDif,theTitle,nbins,MinvLo,MinvHi);
+  sprintf(theTitle1,"MinvLikeSignCorrFctnLikeSignDif_%s\n",title1);
+  mLikeSignDifference = new StHbt1DHisto(theTitle1,theTitle2,nbins,MinvLo,MinvHi);
   // this next bit is unfortunately needed so that we can have many histos of same "title"
   // it is neccessary if we typedef StHbt1DHisto to TH1d (which we do)
   mNumerator->SetDirectory(0);

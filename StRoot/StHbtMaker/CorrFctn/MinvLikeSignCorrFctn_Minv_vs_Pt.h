@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvLikeSignCorrFctn_Minv_vs_Pt.h,v 1.1 2000/09/01 18:37:27 laue Exp $
+ * $Id: MinvLikeSignCorrFctn_Minv_vs_Pt.h,v 1.2 2001/01/23 15:12:55 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -22,7 +22,7 @@
 class MinvLikeSignCorrFctn_Minv_vs_Pt : public StHbtLikeSignCorrFctn {
 public:
   MinvLikeSignCorrFctn_Minv_vs_Pt(const MinvLikeSignCorrFctn_Minv_vs_Pt& ); // copy constructor
-  MinvLikeSignCorrFctn_Minv_vs_Pt(char* title, 
+  MinvLikeSignCorrFctn_Minv_vs_Pt(char* title1, char* title2, 
 				  const int& nxbins, const float& xLo, const float& xHi,
 				  const int& nybins, const float& yLo, const float& yHi);
   virtual ~MinvLikeSignCorrFctn_Minv_vs_Pt();
