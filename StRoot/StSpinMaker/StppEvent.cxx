@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.20 2003/09/23 16:42:39 perev Exp $
+// $Id: StppEvent.cxx,v 1.21 2003/09/23 17:47:55 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.21  2003/09/23 17:47:55  akio
+// small fix for warnings
+//
 // Revision 1.20  2003/09/23 16:42:39  perev
 // {} in case added
 //
@@ -124,6 +127,7 @@ extern "C" void fillntp2003_(int*, float*,
 #include "ntp2003.h"
 
 StppEvent::StppEvent(){
+    mudst=0;
     tracks = new TClonesArray ("StMuTrack",200);  //warning hardcoded # of track limits!
     trackChoice = 0; //primary track is default
 #ifdef _Jet_
@@ -284,7 +288,7 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
     }else if(event){      
 	//getting tracks from StEvent
 	StSPtrVecTrackNode* exnode = 0;
-	StTrackType type;
+	StTrackType type = primary;
 	if (mProbabilityPidAlgorithm) delete mProbabilityPidAlgorithm;
 	StuProbabilityPidAlgorithm*  mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm(*event);
 	StMuTrack::setProbabilityPidAlgorithm(mProbabilityPidAlgorithm);
@@ -628,7 +632,11 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
     //Bridge to fortran/ntuple filling
     if(runN<4000000){
       //calling fortran pi0 finder from FPD
+<<<<<<< StppEvent.cxx
+      float result[10], rin[10], bbcdif=-999.9;
+=======
       float result[10], rin[10], bbcdif=-999999.;
+>>>>>>> 1.20
       int iin[10], ibbca[32], ibbct[32];
       for(int i=0; i<10; i++){ result[i]=0.0; }
       unsigned short east=1500, west=1500;
