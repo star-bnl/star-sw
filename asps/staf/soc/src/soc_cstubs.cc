@@ -151,10 +151,15 @@ soc_idobject(char* name, char* type)
 STAFCV_T 
 soc_list()
 {
-   char *c;
-   printf("%s",c = soc->list() );
-   FREE(c);
-   EML_SUCCESS(STAFCV_OK);
+   char *herb980615,*c;
+   c = soc->list();
+   herb980615=strtok(c,"\n");
+   while(herb980615) {
+     printf("%s\n",herb980615);    // You can't write more than BUFSIZ at
+     herb980615=strtok(NULL,"\n"); // a time without a possible crash. 
+   }                               // That is why I broke this stuff up
+   FREE(c);                        // with strtok().  BUFSIZ is defined in
+   EML_SUCCESS(STAFCV_OK);         // stdio.h.
 }
 
 STAFCV_T 
