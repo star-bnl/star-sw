@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.52 1999/01/28 17:17:40 fisyak Exp $
+# $Id: MakeDll.mk,v 1.53 1999/01/28 17:54:50 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.53  1999/01/28 17:54:50  fisyak
+# Fix more typo
+#
 # Revision 1.52  1999/01/28 17:17:40  fisyak
 # Fix typo
 #
@@ -305,7 +308,7 @@ define  COMMON_LINKDEF
 	echo "#pragma link off all globals;"    	>> $(LINKDEF);\
 	echo "#pragma link off all classes;"    	>> $(LINKDEF);\
 	echo "#pragma link off all functions;"  	>> $(LINKDEF);\
-	echo "#pragma link C++ class St_$(STEM)-;"	>> $(LINKDEF);
+	echo "#pragma link C++ class $(STEM)-;"	        >> $(LINKDEF);
 endef
 
 else
@@ -393,13 +396,18 @@ all:   RootCint Libraries  DeleteDirs
 RootCint : $(FILES_CINT_SYT) $(FILES_CINT_SYM) $(FILES_CINT_G3) $(FILES_CINT_CHAIN) $(FILES_CINT_TAB) $(FILES_CINT_MOD)
 
 $(FILES_CINT_SYT) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h 
-	$(COMMON_LINKDEF)
-	@echo "#pragma link C++ class table_head_st-!;"	>> $(LINKDEF);
-	@echo "#endif"					>> $(LINKDEF);
-	@$(CAT) $(LINKDEF);
+	@test -f $(LINKDEF) &&  $(RM) $(LINKDEF);\
+        echo "#ifdef __CINT__"                  	>  $(LINKDEF);\
+        echo "#pragma link off all globals;"    	>> $(LINKDEF);\
+        echo "#pragma link off all classes;"    	>> $(LINKDEF);\
+        echo "#pragma link off all functions;"  	>> $(LINKDEF);\
+        echo "#pragma link C++ class $(STEM)-;"         >> $(LINKDEF);\
+        echo "#pragma link C++ class table_head_st-!;"	>> $(LINKDEF);\
+        echo "#endif"					>> $(LINKDEF);\
+        $(CAT) $(LINKDEF);
 ifndef NT
 	cd $(GEN_DIR); \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
@@ -407,23 +415,23 @@ endif
 
 $(FILES_CINT_G3) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h 
 	$(COMMON_LINKDEF)
-	@echo "#pragma  link C++ global geant;"	 >> $(LINKDEF);
-	@echo "#pragma  link C++ global cquest;" >> $(LINKDEF);
-	@echo "#pragma  link C++ global clink;"	 >> $(LINKDEF);
-	@echo "#pragma  link C++ global ccuts;"	 >> $(LINKDEF);
-	@echo "#pragma  link C++ global cflag;"	 >> $(LINKDEF);
-	@echo "#pragma  link C++ global ckine;"	 >> $(LINKDEF);
-	@echo "#pragma  link C++ global cking;"	 >> $(LINKDEF);
-	@echo "#pragma  link C++ global cmate;"	 >> $(LINKDEF);
-	@echo "#pragma  link C++ global ctmed;"	 >> $(LINKDEF);
-	@echo "#pragma  link C++ global ctrak;"	 >> $(LINKDEF);
-	@echo "#pragma  link C++ global ctpol;"	 >> $(LINKDEF);
-	@echo "#pragma  link C++ global cvolu;"	 >> $(LINKDEF);
-	@echo "#pragma  link C++ global cnum;"	 >> $(LINKDEF);
-	@echo "#pragma  link C++ global csets;"	 >> $(LINKDEF);
-	@echo "#pragma  link C++ class  TGeant3;"	 >> $(LINKDEF);
-	@echo "#endif"					 >> $(LINKDEF);
-	@$(CAT) $(LINKDEF);
+	echo "#pragma  link C++ global geant;"	 >> $(LINKDEF);
+	echo "#pragma  link C++ global cquest;" >> $(LINKDEF);
+	echo "#pragma  link C++ global clink;"	 >> $(LINKDEF);
+	echo "#pragma  link C++ global ccuts;"	 >> $(LINKDEF);
+	echo "#pragma  link C++ global cflag;"	 >> $(LINKDEF);
+	echo "#pragma  link C++ global ckine;"	 >> $(LINKDEF);
+	echo "#pragma  link C++ global cking;"	 >> $(LINKDEF);
+	echo "#pragma  link C++ global cmate;"	 >> $(LINKDEF);
+	echo "#pragma  link C++ global ctmed;"	 >> $(LINKDEF);
+	echo "#pragma  link C++ global ctrak;"	 >> $(LINKDEF);
+	echo "#pragma  link C++ global ctpol;"	 >> $(LINKDEF);
+	echo "#pragma  link C++ global cvolu;"	 >> $(LINKDEF);
+	echo "#pragma  link C++ global cnum;"	 >> $(LINKDEF);
+	echo "#pragma  link C++ global csets;"	 >> $(LINKDEF);
+	echo "#pragma  link C++ class  TGeant3;"	 >> $(LINKDEF);
+	echo "#endif"					 >> $(LINKDEF);
+	$(CAT) $(LINKDEF);
 	cd $(GEN_DIR); \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT)  $(notdir $(1ST_DEPS)) \
         $(notdir $(LINKDEF))
@@ -448,7 +456,6 @@ else
 endif
 $(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h 
 	$(COMMON_LINKDEF)
-#	@echo "#pragma link C++ class St_DataSet;"       >> $(LINKDEF);
 	@echo "#pragma link C++ enum EModuleTypes;"      >> $(LINKDEF);
 	@echo "#endif"					 >> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
@@ -476,8 +483,8 @@ endif
 #$(FILES_CINT_TAB) : 
 $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h 
 	$(COMMON_LINKDEF)
-	@echo "#pragma link C++ class $(STEM)_st-!;"	>> $(LINKDEF);
-	@echo "#endif"					>> $(LINKDEF);
+	echo "#pragma link C++ class $(STEM)_st-!;"	>> $(LINKDEF);
+	echo "#endif"					>> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
 ifndef NT
 	cd $(GEN_DIR); \
@@ -490,8 +497,8 @@ endif
 #$(FILES_CINT_MOD) : 
 $(GEN_DIR)/St_%_ModuleCint.cxx : $(GEN_DIR)/St_%_Module.h 
 	$(COMMON_LINKDEF)
-	@echo "#pragma link C++ global $(STEM);"	>> $(LINKDEF);
-	@echo "#endif"					>> $(LINKDEF);
+	echo "#pragma link C++ global $(STEM);"	>> $(LINKDEF);
+	echo "#endif"					>> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
 ifndef NT
 	cd $(GEN_DIR); \
