@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.21 2003/02/27 22:47:40 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.22 2003/04/15 11:36:11 putschke Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.22  2003/04/15 11:36:11  putschke
+// Include corrections for inner cathode offset and move some parameter to database
+//
 // Revision 1.21  2003/02/27 22:47:40  jcs
 // make the temperature and pressure parameters available to the Ftpc slow simulator
 // (needed for embedding)
@@ -119,9 +122,20 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mMaxFastLoops = detTable->maxFastLoops;    
     mUnfoldLimit = detTable->unfoldLimit;      
     mUnfoldFailedLimit = detTable->unfoldFailedLimit;
+    
+    mMinTimeBin = detTable->minTimebin;
+    mMinTimeBinMed = detTable->minTimebinMed;
+    mMinTimeBinOut = detTable->minTimebinOut;
     mMaxTimeLength = detTable->maxTimelength;
     mMaxPadLength = detTable->maxPadlength;
-    mMinTimeBin = detTable->minTimebin;
+    mMaxTimeLengthMed = detTable->maxTimelengthMed;
+    mMaxPadLengthMed = detTable->maxPadlengthMed;
+    mMaxTimeLengthOut = detTable->maxTimelengthOut;
+    mMaxPadLengthOut = detTable->maxPadlengthOut;
+    mDeltaTime = detTable->deltaTime;
+    mDeltaPad = detTable->deltaPad;
+    mOffsetCathodeWest = detTable->offsetCathodeWest;
+    mOffsetCathodeEast = detTable->offsetCathodeEast;
 
   } else {
     gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
@@ -261,9 +275,20 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mMaxFastLoops = detTable->maxFastLoops;    
     mUnfoldLimit = detTable->unfoldLimit;      
     mUnfoldFailedLimit = detTable->unfoldFailedLimit;
+   
+    mMinTimeBin = detTable->minTimebin;
+    mMinTimeBinMed = detTable->minTimebinMed;
+    mMinTimeBinOut = detTable->minTimebinOut;
     mMaxTimeLength = detTable->maxTimelength;
     mMaxPadLength = detTable->maxPadlength;
-    mMinTimeBin = detTable->minTimebin;
+    mMaxTimeLengthMed = detTable->maxTimelengthMed;
+    mMaxPadLengthMed = detTable->maxPadlengthMed;
+    mMaxTimeLengthOut = detTable->maxTimelengthOut;
+    mMaxPadLengthOut = detTable->maxPadlengthOut;
+    mDeltaTime = detTable->deltaTime;
+    mDeltaPad = detTable->deltaPad;
+    mOffsetCathodeWest = detTable->offsetCathodeWest;
+    mOffsetCathodeEast = detTable->offsetCathodeEast;
 
   } else {
     gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");

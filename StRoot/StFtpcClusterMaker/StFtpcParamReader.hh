@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.21 2002/04/05 16:46:02 oldi Exp $
+// $Id: StFtpcParamReader.hh,v 1.22 2003/04/15 11:36:22 putschke Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.22  2003/04/15 11:36:22  putschke
+// Include corrections for inner cathode offset and move some parameter to database
+//
 // Revision 1.21  2002/04/05 16:46:02  oldi
 // Small code clean ups, to be sure that this part is recompiled. It relies
 // on StFtpcTracker/StFtpcPoint.* which were changed.
@@ -165,9 +168,23 @@ protected:
   Int_t mMaxFastLoops;    
   Float_t mUnfoldLimit;      
   Float_t mUnfoldFailedLimit;
-  Int_t mMaxTimeLength;
-  Int_t mMaxPadLength;
+
   Int_t mMinTimeBin;
+  Int_t mMinTimeBinMed;
+  Int_t mMinTimeBinOut;
+
+  Int_t mMaxPadLength;
+  Int_t mMaxTimeLength;
+  Int_t mMaxPadLengthMed;
+  Int_t mMaxTimeLengthMed;
+  Int_t mMaxPadLengthOut;
+  Int_t mMaxTimeLengthOut;
+
+  Int_t mDeltaTime;
+  Int_t mDeltaPad;
+
+  Float_t mOffsetCathodeWest;
+  Float_t mOffsetCathodeEast;
   
 public:
   // constructor used by StFtpcClusterMaker:
@@ -260,10 +277,21 @@ public:
   Int_t maxLoops() {return mMaxLoops;}
   Int_t maxFastLoops() {return mMaxFastLoops;}
   Float_t unfoldLimit() {return mUnfoldLimit;}
-  Float_t unfoldFailedLimit() {return mUnfoldFailedLimit;}  
+  Float_t unfoldFailedLimit() {return mUnfoldFailedLimit;} 
+  //
+  Int_t minTimeBin() {return mMinTimeBin;}
+  Int_t minTimeBinMed() {return mMinTimeBinMed;}
+  Int_t minTimeBinOut() {return mMinTimeBinOut;}
   Int_t maxTimeLength() {return mMaxTimeLength;}
   Int_t maxPadLength() {return mMaxPadLength;}
-  Int_t minTimeBin() {return mMinTimeBin;}
+  Int_t maxTimeLengthMed() {return mMaxTimeLengthMed;}
+  Int_t maxPadLengthMed() {return mMaxPadLengthMed;}
+  Int_t maxTimeLengthOut() {return mMaxTimeLengthOut;}
+  Int_t maxPadLengthOut() {return mMaxPadLengthOut;}
+  Int_t deltaTime() {return mDeltaTime;}
+  Int_t deltaPad() {return mDeltaPad;}
+  Float_t offsetCathodeWest() {return mOffsetCathodeWest;}
+  Float_t offsetCathodeEast() {return mOffsetCathodeEast;}
 
 };
 

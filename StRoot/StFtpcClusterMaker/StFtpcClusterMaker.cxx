@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.46 2003/02/27 22:56:58 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.47 2003/04/15 11:34:41 putschke Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.47  2003/04/15 11:34:41  putschke
+// Include corrections for inner cathode offset and move some parameter to database
+//
 // Revision 1.46  2003/02/27 22:56:58  jcs
 // use the ftpc body temperature readings to make temperature/pressure corrections
 //
@@ -377,6 +380,8 @@ Int_t StFtpcClusterMaker::Make()
      cout<<"          defaultTemperatureEast    = "<<dbReader->defaultTemperatureEast()<<endl;
      cout<<"          magboltzVDrift(0,0)       = "<<dbReader->magboltzVDrift(0,0)<<endl;
      cout<<"          magboltzDeflection(0,0)   = "<<dbReader->magboltzDeflection(0,0)<<endl;
+     cout<<"          offsetCathodeWest         = "<<paramReader->offsetCathodeWest()<<endl;
+     cout<<"          offsetCathodeEast         = "<<paramReader->offsetCathodeEast()<<endl;
   }
 
   St_DataSet *daqDataset;
