@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.hh,v 1.3 2001/04/25 17:19:53 perev Exp $
+ * $Id: StDbSql.hh,v 1.4 2001/10/24 04:05:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.hh,v $
+ * Revision 1.4  2001/10/24 04:05:20  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.3  2001/04/25 17:19:53  perev
  * HPcorrs
  *
@@ -93,14 +96,11 @@ protected:
   char* getFlavorQuery(const char* flavor);
   char* getProdTimeQuery(unsigned int prodTime);
   char* getElementList(int* elements, int num);
-  char* getColumnList(StDbTable* table,char* funcName=0);
+  char* getColumnList(StDbTable* table,char* tableName, char* funcName=0);
   bool  hasInstance(StDbTable* table);
   void  checkTableCatalog();
   char* checkTablePrepForQuery(StDbTable* table, bool checkIndexed=false);
 
-  bool  writeOldIndex(int nodeID, int schemaID, const char* sTime, 
-                      int elementID,const char* flavor, int dataID);
-  void  deleteOldIndex(int* dataIDs, int numRows, int nodeID);
   void  deleteRows(const char* tableName, int* rowID, int nrows);
   void  initEndTime();
 
@@ -108,6 +108,11 @@ protected:
   int   sendMess(const char* a, const char* b, StDbMessLevel m, 
                  int lineNum=0, const char* className=" ",
                  const char* methName=" ");
+
+  /* new */
+  bool  checkColumn(const char* tableName, const char* columnName);
+  bool  updateEndTime(StDbTable* table, const char* dataTable, unsigned int reqTime);
+  void  init();
 
 public:
 
@@ -170,6 +175,12 @@ inline char* StDbSql::mRetString(ostrstream& rs){
 inline int StDbSql::sendMess(const char* a, const char* b, StDbMessLevel m, int lineNum, const char* className, const char* methName){
   if(m==dbMDebug && !(mgr->IsVerbose()))return 0;
   return mgr->printInfo(a,b,m,lineNum,className,methName);
+}
+
+inline void StDbSql::init() { 
+    mretString = 0;
+    mtableCatalog=0;
+    mdefaultEndDateTime = 0;
 }
 
 inline void StDbSql::use()   { Db.setDefaultDb(mdbName); };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.10 2001/08/02 17:37:19 porter Exp $
+ * $Id: StDbSql.cc,v 1.11 2001/10/24 04:05:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.11  2001/10/24 04:05:20  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.10  2001/08/02 17:37:19  porter
  * fixed problem in fetch by where-clause used in online in StDbSql.cc.
  * also got rid of warning comparing unsigned int to int.
@@ -72,21 +75,25 @@
 
 #define __CLASS__ "StDbSql"
 
-static const char* qFailed = "Query Failed = ";
-static const char* qInfo   = " Query = ";
-static const char* qResult = " Query Result = ";
+static const char* DbQFailed = "Query Failed = ";
+static const char* DbQInfo   = " Query = ";
+static const char* DbQResult = " Query Result = ";
 
 //////////////////////////////////////////////////////////////////
 
-StDbSql::StDbSql(MysqlDb &db, StDbBuffer& buffer) : StDataBaseI(), mretString(0), mtableCatalog(0), mdefaultEndDateTime(0),Db(db), buff(buffer) { mgr=StDbManager::Instance();}
+StDbSql::StDbSql(MysqlDb &db, StDbBuffer& buffer) : StDataBaseI(),Db(db), buff(buffer) { mgr=StDbManager::Instance(); init(); }
 
 //////////////////////////////////////////////////////////////////
 
-StDbSql::StDbSql(MysqlDb &db, StDbBuffer& buffer, StDbType tpe, StDbDomain dom) : StDataBaseI(tpe, dom), mretString(0), mtableCatalog(0),mdefaultEndDateTime(0), Db(db), buff(buffer) { mgr=StDbManager::Instance();}
+StDbSql::StDbSql(MysqlDb &db, StDbBuffer& buffer, StDbType tpe, StDbDomain dom) : StDataBaseI(tpe, dom), Db(db), buff(buffer) { 
+mgr=StDbManager::Instance(); init(); 
+}
 
 //////////////////////////////////////////////////////////////////
 
-StDbSql::StDbSql(MysqlDb &db, StDbBuffer& buffer, const char* tpe, const char* dom) : StDataBaseI(tpe, dom), mretString(0), mtableCatalog(0), mdefaultEndDateTime(0),Db(db), buff(buffer){ mgr=StDbManager::Instance();}
+StDbSql::StDbSql(MysqlDb &db, StDbBuffer& buffer, const char* tpe, const char* dom) : StDataBaseI(tpe, dom), Db(db), buff(buffer){ 
+  mgr=StDbManager::Instance(); init();
+}
 
 //////////////////////////////////////////////////////////////////
 
@@ -125,12 +132,12 @@ StDbSql::QueryDb(StDbConfigNode* node) {
  Db<<" and NodeRelation.BranchID="<<branchID<<endsql;
 
  if(!Db.QueryStatus()) 
-    return sendMess(qFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+    return sendMess(DbQFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
 
  if(!Db.NbRows())
     sendMess(node->printName()," Node has no subnodes",dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
- sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+ sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
 //
 // Loop over rows in Configuration
@@ -142,7 +149,7 @@ StDbSql::QueryDb(StDbConfigNode* node) {
       ostrstream fs;
       fs<<"Found "<<curNode.printNodeType()<<" Node "<<curNode.printName();
       fs<<" of parent "<<node->printName()<<ends;
-      sendMess(qResult,fs.str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+      sendMess(DbQResult,fs.str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
       fs.freeze(0);
 
       if(strcmp(curNode.printNodeType(),"table")!=0){ // it is a ConfigNode
@@ -236,10 +243,10 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
   Db << " And elementID In("<<elementString<<")";
   Db << " Order by beginTime limit 1"<<endsql; 
     
-  sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+  sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
   if(!Db.QueryStatus())
-     return sendMess(qFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+     return sendMess(DbQFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
 
   if(Db.NbRows()==1 && Db.Output(&buff)){
     char* edTime=0; 
@@ -254,9 +261,6 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
     setDefaultEndTime(table);
   }
 
-  //  unsigned int t1=0;
-  //  unsigned int bTime=0;
-  char* flav=0;
   int eID;
 
  // --> prep for data query which can be 1 or more queries
@@ -290,10 +294,10 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
    Db <<" AND elementID In("<<elementString<<") "; 
    Db <<" Order by beginTime desc limit "<< rowsLeft <<endsql;
 
-   sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+   sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
   if(!Db.QueryStatus()){
-    sendMess(qFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+    sendMess(DbQFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
     break;
   }
   
@@ -306,17 +310,8 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
       if(!dataIDList[idMap[eID]]){
         buff.ReadScalar(dataIDList[idMap[eID]],"dataID");
         buff.ReadScalar(timeValues[idMap[eID]],"bTime");
-        buff.ReadScalar(flav,"flavor");
-     // check to see if instance is null values: if so return 0 as query result
-        if((done)=checkForNull(flav)){
-     	  retVal=0;
-          delete [] flav;
-          break;
-        }
         table->setRowNumber(idMap[eID]);
         table->dbStreamer(&buff,true); // stream data into table
-	//        if(bTime>t1)t1=bTime;
-        delete [] flav;
         numRowsFound++;
      }
      buff.Raz();
@@ -362,6 +357,8 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
     table->setRowNumber(); // reset current row to 0
   }
 
+  if(retVal) retVal=(int)updateEndTime(table,dataTable,reqTime);
+
   delete [] idMap;
   delete [] dataIDList;
   delete [] dataTable;
@@ -370,6 +367,46 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
   return retVal;
 #undef __METHOD__
 } 
+
+////////////////////////////////////////////////////////////
+bool StDbSql::checkColumn(const char* tableName, const char* columnName){
+
+  bool retVal=false;
+  Db<<"show columns from "<<tableName<<" like '"<<columnName<<"'"<<endsql;
+  if(Db.NbRows()==1)retVal=true;
+  Db.Release();
+  return retVal;
+}
+
+////////////////////////////////////////////////////////////
+bool StDbSql::updateEndTime(StDbTable* table, const char* dataTable, unsigned int requestTime){
+
+   /********************************
+     resets the table's endtime based on set endTime (if table has this column)
+     instead of the running beginTime timestamp. Returns False if endTime is
+     earlier than requestTime
+    ********************************/
+
+  bool retVal = true;
+  if(!checkColumn(dataTable,"endTime")) return retVal;
+  int nrows;
+
+  Db<<" select unix_timestamp(Min(endTime)) as mendTime from "<<dataTable;
+  Db<<" where dataID In("<<getElementList(table->getWrittenRows(nrows),nrows)<<")";
+  Db<<endsql;
+
+  if( (Db.NbRows()>0) && Db.Output(&buff)){
+    unsigned int t1 = table->getEndTime();
+    unsigned int t2;
+    buff.ReadScalar(t2,"mendTime");
+    if(t2<t1)table->setEndTime(t2);
+    if(t2<requestTime) retVal=false;
+    buff.Raz();  
+  }
+
+  Db.Release();
+  return retVal;
+}
 
 ////////////////////////////////////////////////////////////
 int
@@ -416,11 +453,6 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
    int numRowsReturned=0;
    unsigned int t1=0;
 
-   char* columnList=getColumnList(table);
-   if(!columnList){
-     sendMess(tName," has no elements?",dbMErr,__LINE__,__CLASS__,__METHOD__);
-     return retVal;
-   }
 
    table->setElementID((int*)retVal,0); // no rows to begin with
    table->setRowNumber();
@@ -429,13 +461,19 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
    int i;
    for(i=0;i<numTables;i++){
 
-     Db<<" select unix_timestamp(beginTime) as bTime,";
+    char* columnList=getColumnList(table,dataTables[i]);
+    if(!columnList){
+      sendMess(tName," has no elements?",dbMErr,__LINE__,__CLASS__,__METHOD__);
+      return retVal;
+    }
+
+     Db<<" select unix_timestamp("<<dataTables[i]<<".beginTime) as bTime,";
      Db<<" "<<columnList<<" from "<<dataTables[i]<<" "<<whereClause;
      if(numRows)Db<<" limit "<<numRows;
      Db<<endsql;
-     sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+     sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
      if(!Db.QueryStatus()){
-      sendMess(qFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+      sendMess(DbQFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
       return retVal;
      }
 
@@ -479,7 +517,7 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
        Db<<" and elementID In("<<getElementList(elements,retRows)<<")";
        Db<<" Order by beginTime desc limit 1"<<endsql;
      
-       sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+       sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
        if(Db.Output(&buff)){
          unsigned int eTime;
@@ -523,26 +561,25 @@ StDbSql::QueryDbFunction(StDbTable* table, const char* whereClause, char* funcNa
    int numTables;
    int numRowsReturned=0;
 
-   char* columnList=getColumnList(table,funcName);
-   if(!columnList)return 0;
-
    char** dataTables=getDataTables(table,numTables);
    int i;
    for(i=0;i<numTables;i++){
+
+   char* columnList=getColumnList(table,dataTables[i],funcName);
+   if(!columnList)return 0;
 
      ostrstream qs;
      Db<<" select "<<columnList<<" from "<<dataTables[i];
      Db<<" "<<whereClause<<endsql;
 
-     sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+     sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
      if(!Db.QueryStatus())
-        return sendMess(qFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+        return sendMess(DbQFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
 
      int retRows=Db.NbRows();
      if(retRows==0) continue;
      numRowsReturned+=retRows;
-     table->setRowNumber();  // reset to first row.
 
      while(Db.Output(&buff)){ table->dbStreamer(&buff,true); buff.Raz(); }
      Db.Release();
@@ -605,12 +642,17 @@ StDbSql::WriteDb(StDbTable* table, unsigned int storeTime){
   table->clearStoreInfo();
   table->setDataTable(dataTable);
 
+  char* eTime=0;
+  if( table->getEndStoreTime() && checkColumn(dataTable,"endTime"))
+      eTime=getDateTime(table->getEndStoreTime());
+
   for(int i=0;i<numRows;i++){
       clear();
       buff.WriteScalar(nodeID,"nodeID");
       buff.WriteScalar(table->getSchemaID(),"schemaID");
       buff.WriteScalar(sTime,"beginTime");
       buff.WriteScalar(elements[i],"elementID");
+      if(eTime)buff.WriteScalar(eTime,"endTime");
       if(!table->defaultFlavor())buff.WriteScalar(table->getFlavor(),"flavor");
       table->dbStreamer(&buff,false);
 
@@ -622,59 +664,13 @@ StDbSql::WriteDb(StDbTable* table, unsigned int storeTime){
 	storedData[i]=Db.GetLastInsertID();
       }
       clear();
-      if(!writeOldIndex(nodeID,table->getSchemaID(),sTime,elements[i],table->getFlavor(),storedData[i])){
-	deleteRows(dataTable,storedData,i);
-        deleteOldIndex(storedData,i,nodeID);
-        retVal=0;
-        break;
-      }
-     rowsWritten++;
+      rowsWritten++;
    }
   if(rowsWritten==numRows)table->addWrittenRows(storedData,numRows,true);
 
   delete [] storedData;
   delete [] sTime;
-
-  // same set of writes except - write null endtimes if requested 
-  if(table->getEndStoreTime()!=0 && rowsWritten==numRows){ 
-
-    sTime = getDateTime(table->getEndStoreTime());
-    storedData = new int[numRows];
-    rowsWritten=0;
-
-    for(int i=0;i<numRows;i++){
-      clear();
-      buff.WriteScalar(nodeID,"nodeID");
-      buff.WriteScalar(table->getSchemaID(),"schemaID");
-      buff.WriteScalar(sTime,"beginTime");
-      buff.WriteScalar(elements[i],"elementID");
-      buff.WriteScalar("null","flavor");
-
-      if(!Db.Input(dataTable,&buff)){
-        deleteRows(dataTable,storedData,i);
-        int numWritten;
-        deleteRows(dataTable,table->getWrittenRows(numWritten),numWritten);
-        retVal=0;
-        break;
-      } else {
-	storedData[i]=Db.GetLastInsertID();
-      }
-      clear();
-      if(!writeOldIndex(nodeID,table->getSchemaID(),sTime,elements[i],"null", storedData[i])){
-	deleteRows(dataTable,storedData,i);
-        int numWritten;
-        deleteOldIndex(table->getWrittenRows(numWritten),numWritten,nodeID);
-        retVal=0;
-        break;
-      }
-
-      rowsWritten++;
-    }
-    if(rowsWritten==numRows)
-    table->addWrittenRows(storedData,numRows,true);
-    delete [] storedData;
-    delete [] sTime;  
-  }
+  if(eTime) delete [] eTime;
 
   table->setRowNumber();
   delete [] dataTable;  
@@ -724,10 +720,10 @@ if(table->hasDescriptor())return 1;
     Db<<" AND schema.schemaID="<<requestSchemaID;
     Db<<" ORDER by schema.position"<<endsql;
 
-    sendMess(qInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+    sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
     if(!Db.QueryStatus())
-       return sendMess(qFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+       return sendMess(DbQFailed,Db.printQuery(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
 
 
     if(Db.NbRows()==0) {
@@ -795,24 +791,6 @@ StDbSql::WriteDb(StDbConfigNode* node, int parentID, int& configID){
 return nodeID;
 }
 
-////////////////////////////////////////////////////////////////////
-bool
-StDbSql::writeOldIndex(int nodeID, int schemaID, const char* sTime,int elementID,const char* flavor, int dataID){
-
-  Db<<"insert into dataIndex set nodeID="<<nodeID<<", dataID="<<dataID;
-  Db<<", schemaID="<<schemaID<<", beginTime='"<<sTime<<"', elementID=";
-  Db<<elementID<<", flavor='"<<flavor<<"'"<<endsql;
-
-  return Db.QueryStatus();
-}
-
-////////////////////////////////////////////////////////////////////
-void
-StDbSql::deleteOldIndex(int* dataIDs, int numRows, int nodeID){
-  Db<<" delete from dataIndex where nodeID="<<nodeID;
-  Db<<" and dataID In("<<getElementList(dataIDs,numRows)<<")"<<endsql;
-}
-
 ///////////////////////////////////////////////////////////////
 void
 StDbSql::deleteRows(const char* tableName, int* rowID, int nrows){
@@ -842,10 +820,6 @@ StDbSql::rollBack(StDbTable* table){
   
   Db<<"delete from "<<dataTable<<" where dataID In("<<elementList<<")"<<endsql;
   Db.Release();
-
-  //TEMPORARY
-  Db<<" delete from dataIndex where nodeID="<<table->getNodeID();
-  Db<<" AND dataID In("<<elementList<<")"<<endsql;
 
   bool retVal=Db.QueryStatus();
   Db.Release();
@@ -1281,7 +1255,7 @@ StDbSql::getElementList(int* e, int num){
 
 ////////////////////////////////////////////////
 char*
-StDbSql::getColumnList(StDbTable* table,char* funcName){
+StDbSql::getColumnList(StDbTable* table,char* tableName,char* funcName){
 
   StTableDescriptorI* desc=table->getDescriptor();
   int numElements=desc->getNumElements();
@@ -1293,7 +1267,7 @@ StDbSql::getColumnList(StDbTable* table,char* funcName){
      if(funcName && (desc->getElementLength(i)>1))continue;
      char* name=desc->getElementName(i);
      if(funcName)es<<funcName<<"(";
-     es<<name;
+     es<<tableName<<"."<<name;
      if(funcName)es<<") as "<<name;
      if(i<(numElements-1))es<<", ";
      delete [] name;

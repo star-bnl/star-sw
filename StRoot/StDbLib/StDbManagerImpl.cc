@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.8 2001/04/25 17:18:40 perev Exp $
+ * $Id: StDbManagerImpl.cc,v 1.9 2001/10/24 04:05:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.9  2001/10/24 04:05:20  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.8  2001/04/25 17:18:40  perev
  * HPcorrs
  *
@@ -241,6 +244,8 @@ addDbDomain(dbMwc,"mwc");
 addDbDomain(dbRhic,"rhic"); 
 addDbDomain(dbSsd,"ssd"); 
 addDbDomain(dbRts,"rts"); 
+addDbDomain(dbTof,"tof"); 
+addDbDomain(dbFpd,"fpd"); 
 
 }
 

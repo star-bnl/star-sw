@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlWriter.h,v 1.5 2000/01/10 20:37:55 porter Exp $
+ * $Id: StDbXmlWriter.h,v 1.6 2001/10/24 04:05:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbXmlWriter.h,v $
+ * Revision 1.6  2001/10/24 04:05:20  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.5  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -68,6 +71,7 @@ public:
   virtual void pass(char* name, unsigned short& i, int& len) ;  
   virtual void pass(char* name, unsigned int& i, int& len) ;  
   virtual void pass(char* name, unsigned long& i, int& len) ;  
+  virtual void pass(char* name, long long& i, int& len) ;  
 
   virtual void pass(char* name, float& i, int& len);
   virtual void pass(char* name, double& i, int& len);
@@ -80,6 +84,7 @@ public:
   virtual void pass(char* name, unsigned short*& i, int& len) ;  
   virtual void pass(char* name, unsigned int*& i, int& len) ;  
   virtual void pass(char* name, unsigned long*& i, int& len) ;  
+  virtual void pass(char* name, long long*& i, int& len) ;  
   virtual void pass(char* name, float*& i, int& len);
   virtual void pass(char* name, double*& i, int& len);
 

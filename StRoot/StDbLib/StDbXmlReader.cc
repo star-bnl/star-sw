@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.cc,v 1.8 2001/01/22 18:38:02 porter Exp $
+ * $Id: StDbXmlReader.cc,v 1.9 2001/10/24 04:05:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.cc,v $
+ * Revision 1.9  2001/10/24 04:05:20  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.8  2001/01/22 18:38:02  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -740,6 +743,19 @@ void
 StDbXmlReader::pass(char* name, unsigned long& i,  int& len){
  elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
  if(strcmp(e->type,"ULong")==0)i=atol((e->val).data);
+}
+
+//----------------------------------------------------
+
+void
+StDbXmlReader::pass(char* name, long long& i,  int& len){
+ elem* e = findElement(name); if(!e){ cerr<<name<<" not found"<<endl; return;}
+ if(strcmp(e->type,"LongLong")==0)i=atoll((e->val).data);
+}
+void
+StDbXmlReader::pass(char* name, long long*& i,  int& len){
+  //
+  cout<<"Not Yet Implemented"<<endl;
 }
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.17 2001/02/08 23:23:56 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.18 2001/10/24 04:05:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.18  2001/10/24 04:05:20  porter
+ * added long long type to I/O and got rid of obsolete dataIndex table
+ *
  * Revision 1.17  2001/02/08 23:23:56  porter
  * fixed initialization of schemaID in table & fixed some warnings when
  * compiled with NODEBUG
@@ -315,7 +318,8 @@ StDbTableDescriptor::fillSizeAndOffset(char* length, int elementNum){
   } else {
 
 
-    if(type==Stdouble && lastType != Stdouble && padsize < 8){
+    if( (type==Stdouble || type==Stlonglong) && 
+        (lastType != Stdouble) && (lastType != Stlonglong) && padsize < 8){
       offsetToLast4Bytes+=padsize;
       offsetToNextEmptyByte+=padsize;
     }
@@ -332,7 +336,7 @@ StDbTableDescriptor::fillSizeAndOffset(char* length, int elementNum){
 #ifdef LINUX
   lastType=Stdouble;
 #else
-  if(type==Stdouble)padsize = 0;
+  if(type==Stdouble || type==Stlonglong )padsize = 0;
   lastType=type;
 
   unsigned int onesize = getSize(mcols[i].type);
@@ -355,7 +359,7 @@ StDbTableDescriptor::getType(char* type) {
 StTypeE retVal=Stchar;
 
 //char* typenames[] = {"Stchar","Stuchar","Stshort","Stushort","Stint","Stuint","Stlong","Stulong","Stfloat","Stdouble","Stascii","Ststring"};
-const char* typenames[] = {"char","uchar","short","ushort","int","uint","long","ulong","float","double","ascii","string"};
+const char* typenames[] = {"char","uchar","short","ushort","int","uint","long","ulong","longlong","float","double","ascii","string"};
 
  for(int i=0; i<12;i++){
    if(strcmp(type,typenames[i])==0){
