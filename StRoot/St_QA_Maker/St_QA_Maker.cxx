@@ -1,8 +1,11 @@
-// $Id: St_QA_Maker.cxx,v 1.16 1999/03/11 23:14:49 fisyak Exp $
+// $Id: St_QA_Maker.cxx,v 1.17 1999/04/19 18:07:57 didenko Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.17  1999/04/19 18:07:57  didenko
+// QA_Maker for new scheme DST
+//
 // Revision 1.16  1999/03/11 23:14:49  fisyak
 // Victor scheme
-//
+// 
 // Revision 1.15  1999/03/11 21:13:13  kathy
 // update to hist limits
 //
@@ -158,6 +161,133 @@ ClassImp(St_QA_Maker)
 St_QA_Maker::St_QA_Maker(const char *name, const char *title):StMaker(name,title)
 {
 
+   // for method MakeEvSum - from table event_summary
+   m_trk_tot_gd = 0;    //! number of good global tracks divided by total
+   m_glb_trk_tot=0;
+   m_glb_trk_gd=0;    //! # tracks good from globtrk
+   m_glb_trk_plusminus=0; //! # trks pos/neg. 
+
+   m_vert_total=0;    //! total number of vertices
+   m_vert_V0=0;       //! number of V0 vertices
+/*    m_vert_La=0;       //! number of La vertices  */
+/*    m_vert_Ala=0;      //! number of Ala vertices */
+/*    m_vert_K0=0;       //! number of K0 vertices */
+   m_mean_pt=0;       //! mean pt value
+   m_mean_eta=0;      //! mean eta value 
+   m_prim_vrtx0=0;    //! primary vrtx x position
+   m_prim_vrtx1=0;    //! primary vrtx y position
+   m_prim_vrtx2=0;    //! primary vrtx z position
+   m_vrtx_chisq=0;    //! primary vrtx chisq
+
+// for method MakeGlob - from table globtrk
+   m_pT=0;            //! pT  reconstructed
+   m_pT_fr=0;            //! pT  reconstructed - full range
+   m_eta=0;           //! eta reconstructed
+   m_pT_eta_rec=0;    //! pT versus eta Spectra for reconstructed
+   m_mom_trklength=0; //! mom vs. trk length
+   m_point=0;         //! number of points on the track
+   m_fit_point=0;     //! number of track points used for fitting
+   m_length=0;        //! length of track
+   m_chisq0=0;        //! chi square [0]
+   m_chisq1=0;        //! chi square [1]
+   m_psi=0;           //! psi reconstructed
+   m_det_id=0;        //! detector id of track
+   m_npoint_length=0; //! num points vs length
+   m_fpoint_length=0; //! num fit points vs length
+   m_chisq0_mom=0;    //! chisq0 vs momentum
+   m_chisq1_mom=0;    //! chisq1 vs momentum
+
+
+// for method MakeDE - from table dst_dedx
+   m_ndedx=0;         //! number of point to find dE/dx
+   m_dedx0=0;         //! dE/dx [0]
+   m_dedx1=0;         //! dE/dx [1] 
+
+// for method MakeHistPrim - from table primtrk
+   m_prim_pT=0;          //! pT  recostructed
+   m_prim_eta=0;         //! eta recostructed
+   m_prim_pT_eta_rec=0;  //! pT versus eta Spectra for reconstructed
+   m_prim_tlength=0;     //! dst track length
+   m_prim_chi2xd=0;      //! x chisq/degf
+   m_prim_chi2yd=0;      //! y chisq/degf
+   m_prim_point=0;       //! # points on track
+   m_prim_fit_point=0;   //! # fitted points
+   m_prim_psi=0;         //! psi angle_ 
+   m_prim_det_id=0;        //!
+   m_prim_mom_trklength=0; //!
+   m_prim_npoint_length=0; //!
+   m_prim_fpoint_length=0; //!
+   m_prim_chisq0_mom=0;    //!
+   m_prim_chisq1_mom=0;    //!
+
+
+// for method MakeHistGen - from table particle
+   m_H_pT_eta_gen=0;  //! pT versus eta Spectra for generated
+   m_H_pT_gen=0;  //! pT Spectra for generated
+   m_H_eta_gen=0;  //! eta Spectra for generated
+   m_H_vtxx=0;     //! production vertex (mm)
+   m_H_vtxy=0;     //! production vertex (mm)
+   m_H_vtxz=0;     //! production vertex (mm)
+   m_H_npart=0;    //! total num particles generated
+   m_H_ncpart=0;   //! number of charged e,mu,proton,kaon,pion
+
+// for MakeHistV0 - from table dst_v0_vertex
+   m_ev0_lama_hist=0;//! Lambda mass
+   m_ev0_k0ma_hist=0;//! K0 mass
+
+// for MakeHistPID - from tables primtrk & dst_dedx 
+   m_p_dedx_rec=0;   //! dedx vs p
+
+
+// for method MakeHistVertex - from table dst_vertex
+   m_v_detid=0; //! detector id where vertex was found 
+   m_v_vtxid=0; //! vertex type
+   m_v_x=0;     //! vertex coordinates in
+   m_v_y=0;     //!  STAR reference 
+   m_v_z=0;     //!   system
+   m_v_pchi2=0; //! P(chi^2,ndf) of vertex fit
+
+   m_pv_detid=0; //! row1-detector id where vertex was found 
+   m_pv_vtxid=0; //! row1-vertex type
+   m_pv_x=0;     //! row1-vertex coordinates in
+   m_pv_y=0;     //!  STAR reference 
+   m_pv_z=0;     //!   system
+   m_pv_pchi2=0; //! row1-P(chi^2,ndf) of vertex fit
+
+// for method MakeHistTofEvt
+    m_te_ntpttrk=0;   //!no. of tpc tracks in event  
+    m_te_nttetrk=0;   //!no. of tte tracks associated with tpt tracks
+    m_te_ng2ttrk=0;   //!no. of g2t tracks associated with tpt/tte tracks
+    m_te_nctfhit=0;   //!no. hits in g2t_tof_hit
+    m_te_nexttrk=0;   //!no. decent tracks extrapolated
+    m_te_ntoftrk=0;   //!no. of these that are kept
+    m_te_ntrks=0;     //!no. decent tracks in the event
+    m_te_ntrks_hit=0; //!no. of these with ctf hit via pointers
+    m_te_ntrks_kee=0; //!no. of decent tracks extrapolated
+    m_te_ntrks_tra=0; //!no. of these extrapolated to TOFp tray
+    m_te_ntrks_mat=0; //!no. of these extrapolated to struck TOFp slat
+
+// for method MakeHistTofTrk
+    m_tt_strk=0;   //! measured total length from target to hit
+    m_tt_phitrk=0; //! phi of extrapolation of track to tof
+    m_tt_stof=0;   //! geant's total length from target to hit 
+    m_tt_phitof=0; //! phi of hit in tof from geant 
+    m_tt_tof=0;    //! actual time of flight
+    m_tt_adc=0;    //! ADC value for this slat
+
+// for method MakeHistEmsHitsBemc
+    m_ehbe_hits1=0; //! bemc # hits detector 1
+    m_ehbe_tnrg1=0; //! bemc tot energy detector 1
+    m_ehbe_hits2=0; //! bemc # hits detector 2
+    m_ehbe_tnrg2=0; //! bemc tot energy detector 2
+
+
+// for method MakeHistEmsHitsBsmd
+    m_ehbs_hits3=0; //! bemc # hits detector 3
+    m_ehbs_tnrg3=0; //! bemc tot energy detector 3
+    m_ehbs_hits4=0; //! bemc # hits detector 4
+    m_ehbs_tnrg4=0; //! bemc tot energy detector 4 
+
 
    drawinit=kFALSE;
    SetZones();
@@ -264,8 +394,11 @@ Int_t St_QA_Maker::Make(){
 
 // Call methods to fill histograms
 
-  St_DataSet *dst = GetDataSet("dst");
+  St_DataSet *dst = GetDataSet("dst/dst");
+  St_DataSet *dst1 = GetDataSet("dst");
+  if(!dst) dst = dst1;
 
+  
 // histograms from table event_summary
   MakeHistEvSum(dst);
 // histograms from table globtrk
@@ -274,8 +407,10 @@ Int_t St_QA_Maker::Make(){
   MakeHistDE(dst);
 // histograms from table primtrk
   MakeHistPrim(dst);
+
 // histograms from table particle
- MakeHistGen(dst);
+   MakeHistGen(dst1);
+
 // histograms from table dst_v0_vertex
   MakeHistV0(dst);
 // histograms from table primtrk & dst_dedx
@@ -645,53 +780,53 @@ void St_QA_Maker::MakeHistPrim(St_DataSet *dst){
 //_____________________________________________________________________________
 
 
-void St_QA_Maker::MakeHistGen(St_DataSet *dst){
-  if (Debug()) cout << " *** in St_QA_Maker - filling particle histograms " << endl;
-  St_DataSetIter dstI(dst);
-
-  St_particle   *part     = (St_particle  *) dstI["particle"];
-      if (part){
-        particle_st *p = part->GetTable();
-        Int_t nchgpart=0;
-        Int_t totpart=0;
-        for (Int_t l=0; l < part->GetNRows(); l++, p++){
-          //
-          //  select only particles which can be detected
-          //  in the STAR detector. Here we restrict us to
-	  //  the most common species.
-	  //
-	  if(l!=0){                        // first row of table is header, so skip it!
-	    if (p->isthep == 1) {            // select good status only
-            totpart++;
-            if (abs(p->idhep) == 11   ||       // electrons
-                abs(p->idhep) == 13   ||       // muon
-                abs(p->idhep) == 211  ||       // pion
-                abs(p->idhep) == 321  ||       // kaon
-                abs(p->idhep) == 2212) {       // proton
-
-              nchgpart++;	    
-	      Double_t px = p->phep[0];
-	      Double_t py = p->phep[1];
-	      Double_t pz = p->phep[2];
-	      Double_t pT    =  TMath::Sqrt(px*px+py*py);
-	      Double_t theta =  TMath::ATan2 ( pT, pz );
-	      //        Double_t theta =  atan2 ( pT, pz );
-	      Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
-	      m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
-	      m_H_pT_gen->Fill((Float_t) pT);
-	      m_H_eta_gen->Fill(eta);
-              m_H_vtxx->Fill(p->vhep[0]);
-              m_H_vtxy->Fill(p->vhep[1]);
-              m_H_vtxz->Fill(p->vhep[2]);
-	      }
-	    }
-	  }
-        }
-              m_H_npart->Fill(totpart);
-              m_H_ncpart->Fill(nchgpart);
-      }
-}
-
+//void St_QA_Maker::MakeHistGen(St_DataSet *dst){
+//  if (Debug()) cout << " *** in St_QA_Maker - filling particle histograms " << endl;
+//  St_DataSetIter dstI(dst);
+//
+//  St_particle   *part     = (St_particle  *) dstI["particle"];
+//      if (part){
+//        particle_st *p = part->GetTable();
+//        Int_t nchgpart=0;
+//        Int_t totpart=0;
+//        for (Int_t l=0; l < part->GetNRows(); l++, p++){
+//          //
+//          //  select only particles which can be detected
+//          //  in the STAR detector. Here we restrict us to/
+//	  //  the most common species.
+//	  //
+//	  if(l!=0){                        // first row of table is header, so skip it!
+//	    if (p->isthep == 1) {            // select good status only
+//            totpart++;
+//           if (abs(p->idhep) == 11   ||       // electrons
+//               abs(p->idhep) == 13   ||       // muon
+//                abs(p->idhep) == 211  ||       // pion
+//               abs(p->idhep) == 321  ||       // kaon
+//                abs(p->idhep) == 2212) {       // proton/
+//
+//              nchgpart++;	    
+//	      Double_t px = p->phep[0];
+//	      Double_t py = p->phep[1];
+//	      Double_t pz = p->phep[2];
+//	      Double_t pT    =  TMath::Sqrt(px*px+py*py);
+//	      Double_t theta =  TMath::ATan2 ( pT, pz );
+//	      //        Double_t theta =  atan2 ( pT, pz );
+//	      Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
+//	      m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
+//	      m_H_pT_gen->Fill((Float_t) pT);
+//	      m_H_eta_gen->Fill(eta);
+//             m_H_vtxx->Fill(p->vhep[0]);
+//              m_H_vtxy->Fill(p->vhep[1]);
+//              m_H_vtxz->Fill(p->vhep[2]);
+//	      }
+//	    }
+//	  }
+//       }
+//              m_H_npart->Fill(totpart);
+//             m_H_ncpart->Fill(nchgpart);
+//      }
+//}
+//
 //_____________________________________________________________________________
 
 
@@ -912,7 +1047,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.16 1999/03/11 23:14:49 fisyak Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.17 1999/04/19 18:07:57 didenko Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
