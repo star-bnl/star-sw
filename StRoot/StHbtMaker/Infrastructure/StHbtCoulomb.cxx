@@ -49,9 +49,9 @@ double StHbtCoulomb::GetRadius() {
 
 void StHbtCoulomb::SetFile(const char *readFile) {
   cout << " StHbtCoulomb::SetFile() " << endl;
-  if (mFile!=readFile) {
+  if (*mFile!=*readFile) {
     mFile = readFile;
-    // Have to create new lookup table since file has changed
+    // Create new lookup table since file has changed
     if (mRadius>0.0) {
       CreateLookupTable(mRadius);
     }
@@ -218,9 +218,29 @@ double StHbtCoulomb::CoulombCorrect(const double& Z1Z2, const double& mass1,
   return (correction);
 }
 
+
+double StHbtCoulomb::CoulombCorrect(const StHbtPair* pair, const double& charge) {
+  double mass1 = pair->track1()->FourMomentum().m();
+  double mass2 = pair->track2()->FourMomentum().m();
+  double Qinv = fabs(pair->qInv());
+  double eta2 = Eta(charge,mass1,mass2,Qinv);
+  double correction = CoulombCorrect(eta2);
+  return (correction);
+}
+
+double StHbtCoulomb::CoulombCorrect(const StHbtPair* pair, const double& charge,
+				    const double& radius) {
+  double mass1 = pair->track1()->FourMomentum().m();
+  double mass2 = pair->track2()->FourMomentum().m();
+  double Qinv = fabs(pair->qInv());
+  double eta2 = Eta(charge,mass1,mass2,Qinv);
+  double correction = CoulombCorrect(eta2,radius);
+  return (correction);
+}
+
 double StHbtCoulomb::Eta(const double& Z1Z2, const double& mass1,
 			 const double& mass2, const double& Qinv) {
   double reducedMass = mass1*mass2/(mass1+mass2);
-  double temp = Z1Z2*reducedMass*fine_structure_const/Qinv;
+  double temp = Z1Z2*reducedMass*fine_structure_const/(Qinv/2.0);
   return (temp);
 }

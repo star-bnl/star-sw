@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.4 1999/09/08 04:15:53 lisa Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.5 1999/09/09 02:59:55 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.5  1999/09/09 02:59:55  lisa
+ * fix Randys factor of 2 in CoulombCorrection AND add SetCut methods to StStandardHbtEventReader which were forgotten last commit
+ *
  * Revision 1.4  1999/09/08 04:15:53  lisa
  * persistent microDST implementation tweaked to please fickle solaris details
  *
@@ -74,5 +77,8 @@ public:
 
 inline void StStandardHbtEventReader::SetTheEventMaker(StMaker* maker){mTheEventMaker=maker;}
 inline StMaker* StStandardHbtEventReader::TheEventMaker(){return mTheEventMaker;}
+
+inline void StStandardHbtEventReader::SetEventCut(StHbtEventCut* ecut){mEventCut=ecut;}
+inline void StStandardHbtEventReader::SetParticleCut(StHbtParticleCut* pcut){mParticleCut=pcut;}
 
 #endif
