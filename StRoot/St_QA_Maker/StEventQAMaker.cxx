@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.32 2000/03/13 20:15:24 uid3118 Exp $
+// $Id: StEventQAMaker.cxx,v 1.33 2000/03/13 21:59:04 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.33  2000/03/13 21:59:04  lansdell
+// changed good global tracks to include iflag=500 for SVT+TPC histograms
+//
 // Revision 1.32  2000/03/13 20:15:24  uid3118
 // changed globtrk, primtrk det. id to come from first element of pidTraits() vector to match table output; include tracks with iflag=100 as good global tracks
 //
@@ -305,7 +308,7 @@ void StEventQAMaker::MakeHistGlob() {
 
 // now fill all TPC+SVT histograms --------------------------------------------
 
-      if (globtrk->flag()>500 && globtrk->flag()<600 ) {
+      if (globtrk->flag()>=500 && globtrk->flag()<600 ) {
 
         m_glb_xf0TS->Fill(dif.x());
         m_glb_yf0TS->Fill(dif.y());
