@@ -55,7 +55,9 @@ analysis make a different choice.
 #define EEMCSTAT_HOTJP    0x0008 // hot for JP trigger
 #define EEMCSTAT_OUTPI0   0x0010 // hot in pi0 analysis
 
-//The remaing 11 bits of 'stat' are free.
+#define EEMCSTAT_HOTSTR   0x0020 // hot esmd strip
+
+//The remaing 10 bits of 'stat' are free.
 
 /* The 'fail' 16-bits are meant as general abort of a given 
 channel. If any bit is set in
@@ -63,7 +65,7 @@ channel. If any bit is set in
 */
 
 // failure bits (short int)
-#define EEMCFAIL_GARBG  0x0001  // exclude from any anal
+#define EEMCFAIL_GARBG  0x0001  // exclude from any analysis
 #define EEMCFAIL_HVOFF  0x0002  // HV was off
 #define EEMCFAIL_NOFIB  0x0004  // signal fiber is broken
 
