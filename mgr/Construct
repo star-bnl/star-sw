@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.126 2003/02/13 22:13:15 didenko Exp $
+# $Id: Construct,v 1.127 2003/06/19 21:57:53 jeromel Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
@@ -188,7 +188,8 @@ if ( !$param::quiet ) {
 my @subdirs = ();
 
 # make Targets and install includes
-my  @items = split(" ",$SKIP_DIRS);
+my  @items;
+if ( defined($SKIP_DIRS) ){ @items = split(" ",$SKIP_DIRS);}
 
 foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
     next if !-d $dir;
