@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.42 2003/02/08 03:45:22 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.43 2003/02/19 14:52:44 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.43  2003/02/19 14:52:44  jcs
+// calculate ftpc temperature from body temperatures
+//
 // Revision 1.42  2003/02/08 03:45:22  jcs
 // for dAu production ONLY: hardcode gas temperatures
 //
@@ -394,40 +397,81 @@ Int_t StFtpcClusterMaker::Make()
           gMessMgr->Info() << "Invalid value ("<<gas->getBarometricPressure()<<") from online database for barometric pressure - using previous value ("<<paramReader->normalizedNowPressure()<<")"<<endm;
       }
 
-      // FIX gasTemperatureWest AND gasTemperatureEast FOR SVT ON
+      // Calculate FTPC gas temperature from body temperatures
 
-      cout<<"WARNING: THIS VERSION OF StFtpcClusterMaker USES FIXED GAS TEMPERATURES - IT IS ONLY VALID FOR dAu"<<endl;
 
-      paramReader->setGasTemperatureWest(26.4);
-      paramReader->setGasTemperatureEast(28.8);
+      // calculate average body temperature west
 
-/*   inactivate gas temperature code for dAu production      
-     // valid database reading for both  Gas temperature FTPC West and FTPC East
-      if ( (gas->getGasOutWest() >= paramReader->minGasTemperature() && gas->getGasOutWest() <= paramReader->maxGasTemperature())
-         && (gas->getGasOutEast() >= paramReader->minGasTemperature() && gas->getGasOutEast() <= paramReader->maxGasTemperature()) ) {
-          gMessMgr->Info() <<"Change GasTemperatureWest from "<<paramReader->gasTemperatureWest()<<" to "<<gas->getGasOutWest()<<endm;
-          paramReader->setGasTemperatureWest(gas->getGasOutWest());
-          gMessMgr->Info() <<"Change GasTemperatureEast from "<<paramReader->gasTemperatureEast()<<" to "<<gas->getGasOutEast()<<endm;
-          paramReader->setGasTemperatureEast(gas->getGasOutEast());
-      }
+         Int_t numberBodyTemperaturesWest = 0;
+         Float_t averageBodyTemperatureWest = 0.0;
+	  
+	 if (gas->getBody1West() >= paramReader->minGasTemperature() && gas->getBody1West()<= paramReader->maxGasTemperature() ) {
+		 averageBodyTemperatureWest = averageBodyTemperatureWest + gas->getBody1West();
+		 numberBodyTemperaturesWest++;
+		 cout<<"gas->getBody1West() = "<<gas->getBody1West()<<" numberBodyTemperaturesWest = "<<numberBodyTemperaturesWest<<" averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
+         }		 
+	 if (gas->getBody2West() >= paramReader->minGasTemperature() && gas->getBody2West()<= paramReader->maxGasTemperature() ) {
+		 averageBodyTemperatureWest = averageBodyTemperatureWest + gas->getBody2West();
+		 numberBodyTemperaturesWest++;
+		 cout<<"gas->getBody2West() = "<<gas->getBody2West()<<" numberBodyTemperaturesWest = "<<numberBodyTemperaturesWest<<" averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
+         }		 
+	 if (gas->getBody3West() >= paramReader->minGasTemperature() && gas->getBody3West()<= paramReader->maxGasTemperature() ) {
+		 averageBodyTemperatureWest = averageBodyTemperatureWest + gas->getBody3West();
+		 numberBodyTemperaturesWest++;
+		 cout<<"gas->getBody3West() = "<<gas->getBody3West()<<" numberBodyTemperaturesWest = "<<numberBodyTemperaturesWest<<" averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
+         }		 
+	 if (gas->getBody4West() >= paramReader->minGasTemperature() && gas->getBody4West()<= paramReader->maxGasTemperature() ) {
+		 averageBodyTemperatureWest = averageBodyTemperatureWest + gas->getBody4West();
+		 numberBodyTemperaturesWest++;
+		 cout<<"gas->getBody4West() = "<<gas->getBody4West()<<" numberBodyTemperaturesWest = "<<numberBodyTemperaturesWest<<" averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
+         }		 
+		 
+	 averageBodyTemperatureWest = averageBodyTemperatureWest/numberBodyTemperaturesWest;
+	 if (averageBodyTemperatureWest >= paramReader->minGasTemperature() && averageBodyTemperatureWest <= paramReader->maxGasTemperature()) {
+            paramReader->setGasTemperatureWest(averageBodyTemperatureWest);
+	    cout<<"Set paramReader->setGasTemperatureWest = averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
+         }
+         else {
+            paramReader->setGasTemperatureWest(dbReader->defaultTemperatureWest());
+	    cout<<"No valid body temperatures available for FTPC West; Set gasTemperatureWest to default value = "<<dbReader->defaultTemperatureWest()<<endl; 
+	 }   
 
-     // valid database reading for Gas temperature FTPC West only
-      else if (gas->getGasOutWest() >= paramReader->minGasTemperature() && gas->getGasOutWest() <= paramReader->maxGasTemperature()) {
-          gMessMgr->Info() <<"Change GasTemperatureWest from "<<paramReader->gasTemperatureWest()<<" to "<<gas->getGasOutWest()<<endm;
-          paramReader->setGasTemperatureWest(gas->getGasOutWest());
-          gMessMgr->Info() <<"Invalid value ("<<gas->getGasOutEast()<<") from online database for gasTemperatureEast - set GasTemperatureEast("<<paramReader->gasTemperatureEast()<<")  = GasTemperatureWest - ("<<dbReader->temperatureDifference()<<") = "<<paramReader->gasTemperatureWest()-dbReader->temperatureDifference()<<endm;
-           paramReader->setGasTemperatureEast(paramReader->gasTemperatureWest()-dbReader->temperatureDifference());
-      }
+      // calculate average body temperature east
 
-     // valid database reading for Gas temperature FTPC East only
-      else if (gas->getGasOutEast() >= paramReader->minGasTemperature() && gas->getGasOutEast() <= paramReader->maxGasTemperature()) {
-          gMessMgr->Info() <<"Change GasTemperatureEast from "<<paramReader->gasTemperatureEast()<<" to "<<gas->getGasOutEast()<<endm;
-          paramReader->setGasTemperatureEast(gas->getGasOutEast());
-          gMessMgr->Info() <<"Invalid value ("<<gas->getGasOutWest()<<") from online database for gasTemperatureWest - set GasTemperatureWest("<<paramReader->gasTemperatureWest()<<")  = GasTemperatureEast + ("<<dbReader->temperatureDifference()<<") = "<<paramReader->gasTemperatureEast()+dbReader->temperatureDifference()<<endm;
-           paramReader->setGasTemperatureWest(paramReader->gasTemperatureEast()+dbReader->temperatureDifference());
-      }
-     
-     end of inactivate gas temperature code for dAu production */ 
+         Int_t numberBodyTemperaturesEast = 0;
+         Float_t averageBodyTemperatureEast = 0.0;
+	  
+	 if (gas->getBody1East() >= paramReader->minGasTemperature() && gas->getBody1East()<= paramReader->maxGasTemperature() ) {
+		 averageBodyTemperatureEast = averageBodyTemperatureEast + gas->getBody1East();
+		 numberBodyTemperaturesEast++;
+		 cout<<"gas->getBody1East() = "<<gas->getBody1East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
+         }		 
+	 if (gas->getBody2East() >= paramReader->minGasTemperature() && gas->getBody2East()<= paramReader->maxGasTemperature() ) {
+		 averageBodyTemperatureEast = averageBodyTemperatureEast + gas->getBody2East();
+		 numberBodyTemperaturesEast++;
+		 cout<<"gas->getBody2East() = "<<gas->getBody2East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
+         }		 
+	 if (gas->getBody3East() >= paramReader->minGasTemperature() && gas->getBody3East()<= paramReader->maxGasTemperature() ) {
+		 averageBodyTemperatureEast = averageBodyTemperatureEast + gas->getBody3East();
+		 numberBodyTemperaturesEast++;
+		 cout<<"gas->getBody3East() = "<<gas->getBody3East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
+         }		 
+	 if (gas->getBody4East() >= paramReader->minGasTemperature() && gas->getBody4East()<= paramReader->maxGasTemperature() ) {
+		 averageBodyTemperatureEast = averageBodyTemperatureEast + gas->getBody4East();
+		 numberBodyTemperaturesEast++;
+		 cout<<"gas->getBody4East() = "<<gas->getBody4East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
+         }		 
+		 
+	 averageBodyTemperatureEast = averageBodyTemperatureEast/numberBodyTemperaturesEast;
+	 if (averageBodyTemperatureEast >= paramReader->minGasTemperature() && averageBodyTemperatureEast <= paramReader->maxGasTemperature()) {
+             paramReader->setGasTemperatureEast(averageBodyTemperatureEast);
+	     cout<<"Set paramReader->setGasTemperatureEast = averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
+         }
+         else {
+            paramReader->setGasTemperatureEast(dbReader->defaultTemperatureEast());
+	    cout<<"No valid body temperatures available for FTPC East; Set gasTemperatureEast to default value = "<<dbReader->defaultTemperatureEast()<<endl;
+         }	 
+
 
       cout<<" using normalizedNowPressure = "<<paramReader->normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader->gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader->gasTemperatureEast()<<endl; 
 
