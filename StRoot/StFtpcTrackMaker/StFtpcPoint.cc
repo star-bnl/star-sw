@@ -1,5 +1,9 @@
-// $Id: StFtpcPoint.cc,v 1.15 2003/09/16 15:27:02 jcs Exp $
+// $Id: StFtpcPoint.cc,v 1.16 2003/09/23 23:25:35 oldi Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.16  2003/09/23 23:25:35  oldi
+// SetGlobalCoord() and SetUsage() moved to the end of the constructors to avoid
+// them calling GetFlags() before mFlags is initialized.
+//
 // Revision 1.15  2003/09/16 15:27:02  jcs
 // removed inline as it would leave a few undefined reference
 //
@@ -101,9 +105,6 @@ StFtpcPoint::StFtpcPoint()
   // Default constructor.
   // Sets all pointers to zero.
   
-  SetGlobalCoord(kFALSE);
-
-  SetUsage(kFALSE);
   SetHitNumber(-1);
   SetNextHitNumber(-1);
   SetTrackNumber(-1);
@@ -131,6 +132,9 @@ StFtpcPoint::StFtpcPoint()
 
   SetResidualsToZero();
 
+  SetGlobalCoord(kFALSE);
+  SetUsage(kFALSE);
+
   return;
 }
 
@@ -142,7 +146,6 @@ StFtpcPoint::StFtpcPoint(fcl_fppoint_st *point_st)
   // to the fcl_fppoint_st(ructure) (cluster data found by the cluster finder) the 
   // constructor copies the cluster information into its data members.
 
-  SetUsage(kFALSE);
   SetHitNumber(-1);
   SetNextHitNumber(-1);
   SetTrackNumber(-1);
@@ -168,9 +171,10 @@ StFtpcPoint::StFtpcPoint(fcl_fppoint_st *point_st)
   SetSigmaR((Double_t) point_st->s_r);
   SetFlags((Long_t) point_st->flags);
 
-  SetGlobalCoord(GetGlobalFlag());
-
   SetResidualsToZero();
+
+  SetGlobalCoord(GetGlobalFlag());
+  SetUsage(kFALSE);
 
   return;
 }
@@ -194,7 +198,6 @@ StFtpcPoint::StFtpcPoint(Long_t   row,
 {
   // Constructor which fills all values found by the cluster finder directly.
 
-  SetUsage(kFALSE);
   SetHitNumber(-1);
   SetNextHitNumber(-1);
   SetTrackNumber(-1);
@@ -220,9 +223,10 @@ StFtpcPoint::StFtpcPoint(Long_t   row,
   SetSigmaR(s_r);
   SetFlags(flags);
 
-  SetGlobalCoord(GetGlobalFlag());
-
   SetResidualsToZero();
+
+  SetGlobalCoord(GetGlobalFlag());
+  SetUsage(kFALSE);
 
   return;
 }  
@@ -233,9 +237,7 @@ StFtpcPoint::StFtpcPoint(Double_t *x, Int_t row)
   // Constructor which takes the x, y, and z coodrinate and the pad row.
 
   // Hit position is set in local coordinates per default! Change flag (SetGlobalCoord(kTRUE)) if necessary.
-  SetGlobalCoord(kFALSE); // Set to local per default.
 
-  SetUsage(kFALSE);
   SetHitNumber(-1);
   SetNextHitNumber(-1);
   SetTrackNumber(-1);
@@ -262,6 +264,9 @@ StFtpcPoint::StFtpcPoint(Double_t *x, Int_t row)
   SetFlags(0);
 
   SetResidualsToZero();
+
+  SetGlobalCoord(kFALSE); // Set to local per default.
+  SetUsage(kFALSE);
 
   return;
 }
