@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.23  1998/08/28 22:46:48  perev
+#  MakeArch introduce flag NEW_ARRAY_ON for SGI,GCC and aCC
+#
 #  Revision 1.22  1998/08/28 14:56:57  fisyak
 #  Fix for hp
 #
@@ -47,7 +50,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/08/28 14:56:57 $ 
+#             Last modification $Date: 1998/08/28 22:46:48 $ 
 #. default setings
 
 RM := rm -f
@@ -181,7 +184,7 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
   LINUX :=YESS
   MOTIF :=
   CERN_LEVEL :=pgf98
-  OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX
+  OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON
   STRID    := lnx
   FC       := /usr/pgi/linux86/bin/pgf77
   LD       := $(CXX)
@@ -239,7 +242,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
 #    case "hp":
 #  ====================
   HPUX := Yess
-  OSFID := HPUX CERNLIB_HPUX CERNLIB_UNIX
+  OSFID := HPUX CERNLIB_HPUX CERNLIB_UNIX 
   STRID := hpu
   ifdef GCC
     CXXFLAGS  := $(DEBUG) -fPIC  -I/usr/include/X11R5 -Dextname -D_HPUX_SOURCE 
@@ -252,7 +255,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
   endif
 
   ifndef noACC.
-  OSFID += __ACC
+  OSFID += NEW_ARRAY_ON
     CXX     := aCC
     CC      := cc
     LD      := $(CXX)
@@ -287,7 +290,7 @@ endif
 
 ifneq (,$(findstring $(STAF_ARCH),sgi_52 sgi_53))
 #  ====================
-  OSFID := SGI IRIX CERNLIB_SGI CERNLIB_UNIX
+  OSFID := SGI IRIX CERNLIB_SGI CERNLIB_UNIX NEW_ARRAY_ON
   STRID := sgi
   FFLAGS    :=  -Nn20000 -static -trapuv  
   FEXTEND   :=  -extend_source
@@ -308,7 +311,7 @@ endif
 ifneq (,$(findstring $(STAF_ARCH),sgi_64 ))
 
   SGI64 := Yess
-  OSFID :=  irix64 sgi64 SGI64 IRIX64 CERNLIB_QMIRIX64 CERNLIB_SGI CERNLIB_UNIX
+  OSFID :=  irix64 sgi64 SGI64 IRIX64 CERNLIB_QMIRIX64 CERNLIB_SGI CERNLIB_UNIX NEW_ARRAY_ON
   STRID := sgi
   FFLAGS    :=  $(DEBUG) -n32  -static -trapuv 
   FEXTEND   :=  -extend_source
