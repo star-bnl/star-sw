@@ -1,5 +1,8 @@
-// $Id: EEmcGeomSimple.cxx,v 1.7 2003/02/20 21:47:25 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.8 2003/03/06 18:54:21 zolnie Exp $
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.8  2003/03/06 18:54:21  zolnie
+// improvements for track/tower matching
+//
 // Revision 1.7  2003/02/20 21:47:25  zolnie
 // *** empty log message ***
 //
@@ -65,8 +68,9 @@ EEmcGeomSimple::useDefaultGeometry()
   mEtaBin = new Float_t[mNumEta+1];
   for(UInt_t i=0;i<=mNumEta;i++) mEtaBin[i] = defaultEtaBin[i];
 
-  mZ1     =  270.190*centimeter; // preshower
-  mZ2     =  306.158*centimeter; // postshower
+  mZ1     =  kEEmcZPRE1; // preshower
+  mZ2     =  kEEmcZPOST; // postshower
+  mZSMD   =  kEEmcZSMD;  // 
   mPhi0   =  75.0*degree;       
   mClock  =  CounterClockwise;  
 }
@@ -117,21 +121,46 @@ EEmcGeomSimple::getR2Dist(const StThreeVectorD& point,const StEmcRawHit& hit)
   return r.mag2();
 }
 
-StThreeVectorD
-EEmcGeomSimple::getTowerCenter(const StEmcRawHit& hit) const 
+Bool_t  
+EEmcGeomSimple::pointMatch(const StThreeVectorD& pt, const StEmcRawHit& hit,
+			   Float_t deta, Float_t dphi, Float_t dz) const
 {
-  
-  Double_t  phi   = getPhiMean(hit.module(),hit.sub());
-  Double_t  eta   = getEtaMean(hit.eta());
+  StThreeVectorD tc = getTowerCenter(hit);
+
+  // check z
+  if( fabs(tc.z()  -pt.z()  ) > (1.0+dz)*getZHalfWidth() )     return kFALSE; 
+  // check phi
+  if( fabs(tc.phi()-pt.phi()) > (1.0+dphi)*getPhiHalfWidth() ) return kFALSE;
+  // finally check eta
+  if( fabs(tc.pseudoRapidity()-pt.pseudoRapidity()) > 
+      (1.0+deta)*getEtaHalfWidth(hit.eta()) ) return kFALSE;
+  return kTRUE;
+}
+
+
+
+
+inline StThreeVectorD 
+EEmcGeomSimple::getTowerCenter(const UInt_t sec, const UInt_t sub, const UInt_t etabin) const 
+{
+  Double_t  phi   = getPhiMean(sec,sub);
+  Double_t  eta   = getEtaMean(etabin);
   if(eta<0.0) return StThreeVectorD();
-  Double_t  z     = 0.5*(mZ1+mZ2);
+  Double_t  z     = getZMean();
   Double_t  rho   = z*tan(2.0*atan(exp(-1.0*eta)));  
 
   // create vector pointing toward the center of the tower
   return StThreeVectorD(rho*cos(phi),rho*sin(phi),z);
 }
 
-StThreeVectorD 
+inline StThreeVectorD 
+EEmcGeomSimple::getTowerCenter(const StEmcRawHit &hit) const
+{
+  return getTowerCenter(hit.module(),hit.sub(),hit.eta());
+}
+
+
+inline StThreeVectorD 
 EEmcGeomSimple::getTrackPoint(const StTrack& track, Double_t z) const 
 {
   StPhysicalHelixD   helix = track.geometry()->helix();
