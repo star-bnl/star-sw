@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.59 2002/06/14 14:03:11 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.60 2002/06/14 14:48:00 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.60  2002/06/14 14:48:00  jeromel
+// Last change moved after Use()
+//
 // Revision 1.59  2002/06/14 14:03:11  jeromel
 // Added warning if start=end fro date and time (i.e. 0 everywhere) for a table.
 //
@@ -434,6 +437,11 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
   fDBBroker->SetStructSize(dat->GetRowSize());
 
   // 		if descriptor filled, no need for newdat
+  void *dbstruct = fDBBroker->Use(dat->GetUniqueID(),parId);
+  val[0].Set(fDBBroker->GetBeginDate(),fDBBroker->GetBeginTime());
+  val[1].Set(fDBBroker->GetEndDate  (),fDBBroker->GetEndTime  ());
+
+  // small debug statement
   if ( fDBBroker->GetBeginDate() == 0 && fDBBroker->GetEndDate() == 0 &&
        fDBBroker->GetBeginTime() == 0 && fDBBroker->GetEndTime() == 0 ){
     Warning("UpdateTable","Table %s.%s Suspicious Ranges Date/Time %d->%d",
@@ -442,9 +450,7 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
 	    fDBBroker->GetBeginTime(),fDBBroker->GetEndTime()
 	    );
   }
-  void *dbstruct = fDBBroker->Use(dat->GetUniqueID(),parId);
-  val[0].Set(fDBBroker->GetBeginDate(),fDBBroker->GetBeginTime());
-  val[1].Set(fDBBroker->GetEndDate  (),fDBBroker->GetEndTime  ());
+
   if (!dbstruct) {
     if(Debug()>1)  Warning("UpdateTable","Table %s.%s Not FOUND",dat->GetName(),dat->GetTitle());
     return 1;
