@@ -14,13 +14,13 @@ void loadLibrairies(bool doProfile)
 	//  char * list[]={"St_base","StChain","StUtilities","StBFChain", "St_Tables","libgen_Tables",
 	// "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker",
   char * list[]={"St_base","StChain","StUtilities", "St_Tables", "StarClassLibrary",
-		 "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker",
+		 "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker","libGui",
 		 "StIOMaker","StTreeMaker", "St_db_Maker","StDbLib","StDbBroker",
 		 "StSvtDbMaker","StDbUtilities", "StTpcDb","StEvent","StEventMaker","StEmcUtil", 
 		 "StMcEvent","StMcEventMaker","StAssociationMaker","StDaqLib","StDAQMaker",
 		 "StDetectorDbMaker", "StSvtClassLibrary","StSvtDaqMaker",
 		 "StSvtSimulationMaker","StSvtCalibMaker", "StSvtSeqAdjMaker",
-		 "StSvtClusterMaker","Sti","StiGui", "StiEvaluator","libGui","StiMaker",
+		 "StSvtClusterMaker","Sti","StiGui", "StiEvaluator","StiMaker",
 		 "StiTpc","StiSvt","StiEmc","StMiniMcEvent","StMiniMcMaker","last"};
 
   int i=0;  
