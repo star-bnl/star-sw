@@ -20,8 +20,8 @@
 # set list = `ls *evts`
 # if (-z "$list") exit 0
 #
- foreach tag (NoSpace ErrLoadLib DslError CantRead CantOpen DslNode NoSpaceOnDev SegViolation done BreakBusErr SimulBreak staging-fails NoGeantHitTPC NotEnTrackSVT tfsProblem evrProblem FillDST-Problem)
-   switch ($tag)
+ foreach tag (NoSpace ErrLoadLib DslError CantRead CantOpen DslNode NoSpaceOnDev SegViolation BreakBusErr SimulBreak staging-fails done NoGeantHitTPC NotEnTrackSVT tfsProblem evrProblem FillDST-Problem)
+    switch ($tag)
     case "NoSpace":
 #=============================
     set list = `grep -l 'ASU_ALLOC:\ \*\*\*Error\*\*\*\:\ No\ more\ memory\ available'  *evts`
@@ -78,17 +78,9 @@
      if( $ltime > 3600)  mv $file ${file}_${tag}
     end
     breaksw  
-    case "done":
-#===========================
-    set list = `grep -l 'total\ CPU\/event' *evts`
-    foreach file ($list)
-    set ltime = `mod_time $file`
-     if( $ltime > 3600)  mv $file ${file}_${tag}
-    end
-    breaksw
     case "BreakBusErr"
 #===========================
-    set list = `grep -l 'grep -l '*\*\*\ Break \*\*\*\ Bus\ error' *evts_done`
+    set list = `grep -l '*\*\*\ Break \*\*\*\ Bus\ error' *evts_done`
     foreach file ($list)
     set ltime = `mod_time $file`
      if( $ltime > 3600)  mv $file ${file}_${tag}
@@ -105,6 +97,14 @@
        case "staging-fails":
 #===========================
     set list = `grep -l E-o-D *evts`
+    foreach file ($list)
+    set ltime = `mod_time $file`
+     if( $ltime > 3600)  mv $file ${file}_${tag}
+    end
+    breaksw
+    case "done":
+#===========================
+    set list = `grep -l 'total\ CPU\/event' *evts`
     foreach file ($list)
     set ltime = `mod_time $file`
      if( $ltime > 3600)  mv $file ${file}_${tag}
