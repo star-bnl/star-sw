@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.h,v 1.1 2000/12/12 21:35:09 lasiuk Exp $
+ * $Id: StRichSpectraMaker.h,v 1.2 2001/02/25 22:11:46 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRichSpectraMaker.h,v $
+ * Revision 1.2  2001/02/25 22:11:46  lasiuk
+ * quality assessment
+ *
  * Revision 1.1  2000/12/12 21:35:09  lasiuk
  * Initial Revision
  *
@@ -86,6 +89,8 @@ protected:
     void drawRichPixels(StRichCollection*) const;
     void drawRichHits(StRichCollection*)   const;
     void drawTracks()                      const;
+
+    void qualityAssessment();
     
 protected:
     StEvent*                    mEvent;//!
@@ -140,6 +145,8 @@ protected:
     TNtuple* mCorrected;   //!
 
     TNtuple* mEvt;//!
+
+    TNtuple* mCerenkov;//!
     
     int      mTupleSize;
     int      mTuple2Size;
@@ -147,7 +154,7 @@ protected:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.1 2000/12/12 21:35:09 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.2 2001/02/25 22:11:46 lasiuk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:

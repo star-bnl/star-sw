@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.1 2000/12/12 21:35:08 lasiuk Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.2 2001/02/25 22:11:46 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.2  2001/02/25 22:11:46  lasiuk
+ * quality assessment
+ *
  * Revision 1.1  2000/12/12 21:35:08  lasiuk
  * Initial Revision
  *
@@ -32,6 +35,8 @@
 using namespace units;
 #endif
 
+#define VERBOSE 0
+#define ivb if(VERBOSE)cout
 // StEvent
 #include "StEventTypes.h"
 #include "StRichPidTraits.h"
@@ -93,6 +98,8 @@ Int_t StRichSpectraMaker::Init() {
     mCorrected = new TNtuple("cphoton","pid2", "evt:vtx:p:pt:theta:res:pipsi:pig:pid:pi1sig:pi2sig:kpsi:kg:kd:k1sig:k2sig:ppsi:pg:pd:p1sig:p2sig:q:pia:pita:ka:kta:pa:pta");
 
     mEvt = new TNtuple("evt","evt1","p:pt:q:res:theta:lx:ly:lz:lp:rx:ry");
+
+    mCerenkov = new TNtuple("cer","angle","no:px:py:pz:d:sigma:phi:x:y:c");
 #endif
 
     this->initCutParameters();
@@ -169,10 +176,11 @@ Int_t StRichSpectraMaker::Make() {
 	cout << "StRichSpectraMaker::Make()\n";
 	cout << "\tWARNING!!\n";
 	cout << "\tCannot Get the StRichCollection*\n";
-// 	cout << "\tReturn to chain" << endl;
-// 	return kStWarn;
+ 	cout << "\tReturn to chain" << endl;
+ 	return kStWarn;
     }
-
+    
+    
     mMagField    = 2.49117;    
     if (mEvent->summary()) {
 	mMagField  = mEvent->summary()->magneticField();
@@ -229,6 +237,7 @@ Int_t StRichSpectraMaker::Make() {
     this->drawRichHits(mEvent->richCollection());
 #endif
 
+     this->qualityAssessment();
 
     //
     //
@@ -239,12 +248,12 @@ Int_t StRichSpectraMaker::Make() {
     cout << "Looping over " << mNumberOfPrimaries << " primary Tracks" << endl;
     for(size_t ii=0; ii<mNumberOfPrimaries; ii++) { // primaries
 
-	cout << "==> Track " << ii << "/" << (mNumberOfPrimaries-1);
+// 	cout << "==> Track " << ii << "/" << (mNumberOfPrimaries-1);
 	StTrack* track = mEvent->primaryVertex()->daughter(ii);
-	cout << " p= " << track->geometry()->momentum().mag() << endl;
+// 	cout << " p= " << track->geometry()->momentum().mag() << endl;
 
 	//if( !this->checkMomentumWindow(track) ) continue;
-	if (!this->checkTrack(track)) continue;
+// 	if (!this->checkTrack(track)) continue;
 	
 	//
 	// Get the PID traits, if there is an StrichPIDTrait:
@@ -252,10 +261,10 @@ Int_t StRichSpectraMaker::Make() {
 	const StPtrVecTrackPidTraits&
 	    theRichPidTraits = track->pidTraits(kRichId);
 
- 	cout << " (" << theRichPidTraits.size() << ") Pid Traits." << endl;
 	if(!theRichPidTraits.size()) continue;
+  	cout << " (" << theRichPidTraits.size() << ") Pid Traits.   p= ";
 
-	PR(track->geometry()->momentum().mag());
+	cout << (track->geometry()->momentum().mag()) << endl;
 
 	StRichTrack* richTrack = new StRichTrack(track,mMagField);
 	
@@ -278,7 +287,7 @@ Int_t StRichSpectraMaker::Make() {
 // 	StRichPidTraits *richPidTrait =
 // 	    dynamic_cast<StRichPidTraits*>(theRichPidTraits[0]);
 
-	cout << "theRichPidTraits.begin()" << endl;
+// 	cout << "theRichPidTraits.begin()" << endl;
 
 	StTrackPidTraits* theMostRecentTrait =
 	    theRichPidTraits[theRichPidTraits.size()-1];
@@ -620,7 +629,7 @@ bool StRichSpectraMaker::evaluateEvent(StRichTrack* richTrack, StRichPidTraits* 
 void StRichSpectraMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.1 2000/12/12 21:35:08 lasiuk Exp $\n");
+    printf("* $Id: StRichSpectraMaker.cxx,v 1.2 2001/02/25 22:11:46 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -770,6 +779,80 @@ float StRichSpectraMaker::expectedNumberOfPhotons(float p, int pid) const
 
     float fraction = (beta2*index2-1)/(beta2*(index2-1));
     return fraction;
+}
+
+void StRichSpectraMaker::qualityAssessment() {
+
+    //vertex
+    cout << "StRichSpectraMaker::qualityAssessment()" << endl;
+    PR(mVertexPos);
+    PR(mNumberOfPrimaries);
+    
+    
+    StPtrVecTrack richTracks = mEvent->richCollection()->getTracks();
+    PR(richTracks.size());
+
+    for(size_t ii=0; ii<richTracks.size(); ii++) {
+	cout << " ptr: " << richTracks[ii] << endl;
+	cout << " p:   " << richTracks[ii]->geometry()->momentum().mag() << endl;
+	
+	const StPtrVecTrackPidTraits&
+	    thePidTraits = richTracks[ii]->pidTraits(kRichId);
+
+	PR(thePidTraits.size());
+
+ 	for(size_t jj=0; jj<thePidTraits.size(); jj++) {
+	    // loop over traits
+	    StRichPidTraits* theRichPidTraits =
+		dynamic_cast<StRichPidTraits*>(thePidTraits[jj]);
+
+	    if(!theRichPidTraits) {
+		cout << "Bad pid traits" << endl;
+		continue;
+	    }
+ 	    PR(theRichPidTraits[jj].productionVersion());
+
+ 	    if(!theRichPidTraits[jj].associatedMip()) {
+ 		cout << "\tNo Associated MIP\n";
+ 		cout << "\tNo MIP Residual" << endl;
+ 	    }
+ 	    else {
+ 		PR(theRichPidTraits[jj].associatedMip()->local());
+ 		PR(theRichPidTraits[jj].mipResidual());
+ 		PR(theRichPidTraits[jj].refitResidual());
+ 	    }
+ 	    PR(theRichPidTraits[jj].signedDca2d());
+ 	    PR(theRichPidTraits[jj].signedDca3d());
+
+	    cout << " *** Try get the pids" << endl;
+ 	    const StSPtrVecRichPid& theRichPids =
+ 		theRichPidTraits[jj].getAllPids();
+
+	    PR(theRichPids.size());
+ 	    for(size_t kk=0; kk<theRichPids.size(); kk++) {
+ 		cout << "kk= " << kk << " ";
+ 		PR(theRichPids[kk]->getParticleNumber());
+		PR(theRichPids[kk]->getMipResidual());
+		
+		const StSPtrVecRichPhotonInfo& photonInfo =
+		    theRichPids[kk]->getPhotonInfo();
+		PR(photonInfo.size());
+
+		const StPtrVecRichHit& hits =
+		    theRichPids[kk]->getAssociatedRichHits();
+		PR(hits.size());
+		
+ 	    }
+	    
+ 	} // jj --> traits
+	
+
+	
+    }
+    
+    //loop over these tracks
+    cout << "StRichSpectraMaker::qualityAssessment()\n";
+    cout << "================== END ==================" << endl;
 }
 
 void StRichSpectraMaker::printCutParameters(ostream& os) const
