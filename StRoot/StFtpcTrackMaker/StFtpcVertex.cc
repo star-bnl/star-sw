@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.13 2002/11/06 13:47:59 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.14 2003/01/13 18:09:26 perev Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.14  2003/01/13 18:09:26  perev
+// remove Clear of histogram. It is TNamed method.
+//
 // Revision 1.13  2002/11/06 13:47:59  oldi
 // IFlag and Id added as data members.
 // New functionality introduced (to clean up StFtpcTrackMaker.cxx).
@@ -410,9 +413,9 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
   TH1F y_hist("y_hist", "y position of estimated vertex", 200, -10., 10.);
   TH1F z_hist("z_hist", "z position of estimated vertex", 200, -75., 75.);
 
-  x_hist.Clear();
-  y_hist.Clear();
-  z_hist.Clear();
+//VP    x_hist.Clear();
+//VP  y_hist.Clear();
+//VP  z_hist.Clear();
 
   TF1 gauss_x("gauss_x", "gaus", -10., 10.);
   TF1 gauss_y("gauss_y", "gaus", -10., 10.);
