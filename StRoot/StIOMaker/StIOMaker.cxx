@@ -96,7 +96,9 @@ Int_t StIOMaker::Make(){
   int iret;   
   if (fIOMode[0]=='r')  { //Read mode
 AGAIN:
-    iret = MakeRead();  if (fNumEvent++ > fMaxEvent) iret = kStEOF;
+    iret = MakeRead();  
+    SetNumber(++fNumEvent);
+    if (fNumEvent > fMaxEvent) iret = kStEOF;
     if (iret != kStEOF) 	return iret;
     Close();   	
     iret = Open(); 	if (iret)		return iret;
