@@ -165,11 +165,67 @@ double StDetectorDbFTPCGas::getGasOutEast(){
     return value;
 };
 
+double StDetectorDbFTPCGas::getBody1East(){
+    double value = 0;
+    if(mGasOut)
+	value = mGasOut->body1East;
+    return value;
+};
+
+double StDetectorDbFTPCGas::getBody2East(){
+    double value = 0;
+    if(mGasOut)
+	value = mGasOut->body2East;
+    return value;
+};
+
+double StDetectorDbFTPCGas::getBody3East(){
+    double value = 0;
+    if(mGasOut)
+	value = mGasOut->body3East;
+    return value;
+};
+
+double StDetectorDbFTPCGas::getBody4East(){
+    double value = 0;
+    if(mGasOut)
+	value = mGasOut->body4East;
+    return value;
+};
+
 /// Gasout West (ElementID=2)
 double StDetectorDbFTPCGas::getGasOutWest(){
     double value = 0;
     if(mGasOut)
 	value = mGasOut->gasOutWest;
+    return value;
+};
+
+double StDetectorDbFTPCGas::getBody1West(){
+    double value = 0;
+    if(mGasOut)
+	value = mGasOut->body1West;
+    return value;
+};
+
+double StDetectorDbFTPCGas::getBody2West(){
+    double value = 0;
+    if(mGasOut)
+	value = mGasOut->body2West;
+    return value;
+};
+
+double StDetectorDbFTPCGas::getBody3West(){
+    double value = 0;
+    if(mGasOut)
+	value = mGasOut->body3West;
+    return value;
+};
+
+double StDetectorDbFTPCGas::getBody4West(){
+    double value = 0;
+    if(mGasOut)
+	value = mGasOut->body4West;
     return value;
 };
 
@@ -191,7 +247,15 @@ ostream& operator<<(ostream& os, StDetectorDbFTPCGas& v){
     os << "Ext O2 PPM  = " << v.getExtO2ppm() << endl;
     os << "Ext O2 mV   = " << v.getExtO2mv() << endl;
     os << "West GasOut = " << v.getGasOutWest() << endl;
+    os << "West Body1  = " << v.getBody1West() << endl;
+    os << "West Body2  = " << v.getBody2West() << endl;
+    os << "West Body3  = " << v.getBody3West() << endl;
+    os << "West Body4  = " << v.getBody4West() << endl;
     os << "East GasOut = " << v.getGasOutEast() << endl;
+    os << "East Body1  = " << v.getBody1East() << endl;
+    os << "East Body2  = " << v.getBody2East() << endl;
+    os << "East Body3  = " << v.getBody3East() << endl;
+    os << "East Body4  = " << v.getBody4East() << endl;
     os << "BarometricPressure = " << v.getBarometricPressure() << endl;
     
     return os;
