@@ -12,13 +12,13 @@ use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
 
-# $Id: cons,v 1.41 2000/06/12 13:51:32 fisyak Exp $
+# $Id: cons,v 1.42 2000/06/12 18:22:55 fisyak Exp $
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 $ver_num = 2.0;
 $ver_rev = "";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.41 2000/06/12 13:51:32 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.42 2000/06/12 18:22:55 fisyak Exp $)'. "\n";
 
 # Cons: A Software Construction Tool.
 # Copyright (c) 1996-2000 Free Software Foundation, Inc.
@@ -154,9 +154,26 @@ Arguments can be any of the following, in any order:
    The Official cons site is: http://www.dsmit.com/cons/
 );
 
+# stash the path to cons.
+$param::conspath = $0;
+
 # Simplify program name, if it is a path.
 ($vol, $dir, $file) = File::Spec->splitpath($0);
 $0 = $file;
+
+# make it an absolute path to cons.
+if (!File::Spec->file_name_is_absolute($param::conspath)) {
+    my ($vol, $dir, $file) = File::Spec->splitpath($param::conspath);
+    my $oldcwd = Cwd::cwd();
+    my $newcwd = File::Spec->catpath($vol, $dir, undef);
+    chdir($newcwd);
+    my ($cvol, $cdir, $cfile) = File::Spec->splitpath(Cwd::cwd().$dir::SEPARATOR);
+    $param::conspath = File::Spec->catpath($cvol,$cdir,$file);
+
+    chdir($oldcwd);
+}
+# regularize path
+$param::conspath =~ s,$dir::MATCH_SEPARATOR,$dir::SEPARATOR,g;
 
 # Default parameters.
 $param::topfile = 'Construct';	# Top-level construction file.
@@ -193,6 +210,9 @@ sub showcom {
      'CXXFLAGS'     => '%CFLAGS',
      'CXXCOM'       => '%CXX %CXXFLAGS %_IFLAGS -c %< -o %>',
      'INCDIRPREFIX' => '-I',
+     'RC'           => 'rc',  # ok, so it doesn't really exist on UNIX...
+     'RCFLAGS'      => '',
+     'RCCOM'	    => '%RC %RCFLAGS %_IFLAGS -o %> %<',
      'LINK'	    => '%CXX',
      'LINKCOM'	    => '%LINK %LDFLAGS -o %> %< %_LDIRS %LIBS',
      'LINKMODULECOM'=> '%LD -r -o %> %<',
@@ -219,8 +239,23 @@ sub showcom {
 	 '.cpp'=> 'build::command::cxx',
 	 '.c++'=> 'build::command::cxx',
 	 '.C++'=> 'build::command::cxx',
+	 '.rc' => 'build::command::rc',
+	 '.RC' => 'build::command::rc',
      },
      'SUFOBJ'	    => '.o',
+     'OBJMAP'       => {
+	 '.c'  => '.o',
+	 '.s'  => '.o',
+	 '.S'  => '.o',
+	 '.C'  => '.o',
+	 '.cc' => '.o',
+	 '.cxx'=> '.o',
+	 '.cpp'=> '.o',
+	 '.c++'=> '.o',
+	 '.C++'=> '.o',
+	 '.rc' => '.res',
+	 '.RC' => '.res',
+     },
      'ENV'	    => { 'PATH' => $PATH },
 );
 
@@ -229,8 +264,13 @@ if ($main::_WIN32) {
     # Defined for VC++ 6.0 by Greg Spencer <greg_spencer@acm.org>.
     # Your mileage may vary.
     my @win = (
+	'PREFLIB'        => '',
 	'CC'             => 'cl',
+	'CXXCOM'         => '%CXX %CXXFLAGS %_IFLAGS /c %< /Fo%>',
 	'CFLAGS'         => '/nologo',
+	'RC'		=> 'rc',
+	'RCFLAGS'	=> '/l 0x409 %RCOPTFLAGS', # default language is US English
+	'RCCOM'		=> '%RC %RCFLAGS /i%>:d %_IFLAGS /fo%> %<',
 	'CCCOM'          => '%CC %CFLAGS %_IFLAGS /c %< /Fo%>',
 	'INCDIRPREFIX'   => '/I',
 	'LINK'           => 'link',
@@ -248,6 +288,19 @@ if ($main::_WIN32) {
 	'SUFLIB'         => '.lib',
 	'SUFLIBS'        => '.dll:.lib',
 	'SUFOBJ'         => '.obj',
+	'OBJMAP'       => {
+	    '.c'  => '.obj',
+	    '.s'  => '.obj',
+	    '.S'  => '.obj',
+	    '.C'  => '.obj',
+	    '.cc' => '.obj',
+	    '.cxx'=> '.obj',
+	    '.cpp'=> '.obj',
+	    '.c++'=> '.obj',
+	    '.C++'=> '.obj',
+	    '.rc' => '.res',
+	    '.RC' => '.res',
+	},
     );
     push(@param::defaults, @win);
 }
@@ -444,6 +497,10 @@ doscripts($param::topfile);
 @targets = @param::default_targets if ! @targets;
 
 $errors = 0;
+
+# Make sure the targets make sense in the current dir
+# if we specified a Construct file, or we traversed from a directory.
+@targets = dir::relocate_targets($param::start_dir, @targets) if $param::start_dir;
 
 # Build the supplied target patterns.
 for $tgt (map($dir::top->lookup($_), @targets)) {
@@ -1226,8 +1283,9 @@ sub Objects {
 # Returns corresponding object files references.
 sub _Objects {
     my($env) = shift;
-    my($suffix) = $env->{SUFOBJ};
-    map(_Object($env, $_, $_->{dir}->lookupfile($_->base . $suffix)), @_);
+#yf    my($suffix) = $env->{SUFOBJ};
+#yf    map(_Object($env, $_, $_->{dir}->lookupfile($_->base . $suffix)), @_);
+    map(_Object($env, $_, $_->{dir}->lookup($_->base . $env->{OBJMAP}{$_->suffix})), @_);
 }
 
 # Called with an object and source reference.  If no object reference
@@ -1464,6 +1522,7 @@ sub _variant {
 sub getcoms {
     my($self, $tgt) = @_;
     my(@coms);
+
     for $com (split(/\n/, $self->{com})) {
 	my(@src) = (undef, @{$tgt->{sources}});
 	my(@src1) = @src;
@@ -2508,6 +2567,9 @@ sub lookup {
 	if ($entry =~ s/^#//) {
 	    # Top-relative names begin with #.
 	    $dir = $dir::top;
+	}
+	elsif ($entry =~ s/^\!//) {
+	    $dir = $dir::cwd->srcdir;
 	}
     } else {
 	my $dirsref;
