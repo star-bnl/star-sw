@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.80 2003/02/26 04:40:29 fine Exp $
+// $Id: doEvents.C,v 1.81 2003/02/27 17:01:06 fine Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -247,7 +247,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
        //      displayMk->AddName("StEvent(All Tracks)");
        // Set the default StEvent events filter
        displayMk->AddFilter(new StFilterDef("MainFilter"));
-       displayMk->AddFilter(new StMuDstFilterHelper("MuL3Filter"));
+       displayMk->AddFilter(new StMuDstFilterHelper("MuL3Filter",kFALSE));
     }
 
     //
@@ -319,6 +319,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.81  2003/02/27 17:01:06  fine
+// the secondary filter in example has been disabled by default
+//
 // Revision 1.80  2003/02/26 04:40:29  fine
 // add one extra filter to display
 //
