@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.2 2005/03/03 01:33:04 porter Exp $
+ * $Id: StEStructHAdd.cxx,v 1.3 2005/03/08 21:56:42 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -32,14 +32,21 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* tf, int* nlist, int ntot
                      "DEtaDPhi","SEtaDPhi",
                      "PrDEtaDPhi","PrSEtaDPhi",
                      "SuDEtaDPhi","SuSEtaDPhi",
-                     "Qinv"};
+                     "Qinv","pt"};
 
   TFile* tfout=new TFile(outfile,"RECREATE");
 
   for(int i=0;i<2;i++){
     for(int j=0;j<3;j++){
-      for(int k=0;k<17;k++){
-        TString htype(base[i]);htype+=tpe[j];htype+=knd[k];
+      for(int k=0;k<18;k++){
+        TString htype;
+        if(k<17){
+         htype+=base[i];htype+=tpe[j];
+	} else if(i>0 || j>0){
+          continue;
+	}
+        htype+=knd[k];        
+	  
         TH1* outhist=0;
           for(int n=0;n<ntot;n++){
             TString fullName(htype.Data()); fullName+=nlist[n];
@@ -76,11 +83,12 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* tf, int* nlist, int ntot
   tfout->cd();
   tmp->Write();
 
+  /*
   tf->cd();
   tmp=(TH1*)tf->Get("pt");
   tfout->cd();
   tmp->Write();
-
+  */
   tfout->Close();
 };
 
@@ -95,6 +103,10 @@ void StEStructHAdd::addCuts(const char* outfile, const char* infile, int* nlist,
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.3  2005/03/08 21:56:42  porter
+ * fixed bug in StEStructHAdd.cxx and added diagnostic option in ptcorrelations to
+ * view individual terms separately
+ *
  * Revision 1.2  2005/03/03 01:33:04  porter
  * Added pt-correlations method to support and included
  * these histograms to the HAdd routine

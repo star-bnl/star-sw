@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.3 2005/03/08 20:16:34 msd Exp $
+ * $Id: StEStructSupport.cxx,v 1.4 2005/03/08 21:56:42 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -342,7 +342,7 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf){
 }
 
 //---------------------------------------------------------
-TH1** StEStructSupport::buildPtChargeTypes(const char* name){
+TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt){
 
   if(!mtf) return (TH1**)NULL;
   TH1F *hptInclusive = (TH1F *)mtf->Get("pt");
@@ -389,7 +389,28 @@ TH1** StEStructSupport::buildPtChargeTypes(const char* name){
        double mixn = hlocal[i+3]->GetBinContent(ix, iy) / _MAXEBYEBUFFER_ / nEventsSame;// mixN
        double z = 0;
        if( mixn != 0 ) {
+	 switch(opt){
+	 case 0:
+	   {
 	    z = (a - b * ptHat + n * ptHat * ptHat ) / sqrt(double(mixn));
+            break;
+	   } 
+	 case 1:
+	   {
+	    z = -1.0*(a - b * ptHat) / sqrt(double(mixn));
+            break;
+	   } 
+	 case 2:
+	   {
+	    z = ( n * ptHat * ptHat ) / sqrt(double(mixn));
+            break;
+	   } 
+	 default:
+	   {
+	    z = (a - b * ptHat + n * ptHat * ptHat ) / sqrt(double(mixn));
+            break;
+	   } 
+	 }
        }
        tmpVal[i]->SetBinContent(ix, iy, z);
         
@@ -575,6 +596,10 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.4  2005/03/08 21:56:42  porter
+ * fixed bug in StEStructHAdd.cxx and added diagnostic option in ptcorrelations to
+ * view individual terms separately
+ *
  * Revision 1.3  2005/03/08 20:16:34  msd
  * included <sstream> library
  *

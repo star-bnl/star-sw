@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.2 2005/03/03 01:33:05 porter Exp $
+ * $Id: StEStructSupport.h,v 1.3 2005/03/08 21:56:42 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -66,7 +66,7 @@ public:
   TH1** buildChargeTypeRFunctions(const char* name);
   TH1** buildChargeTypes(const char* name, int opt, float* sf=0);
 
-  TH1** buildPtChargeTypes(const char* name);
+  TH1** buildPtChargeTypes(const char* name, int opt=0);
 
   
   void scaleBackGround(TH1* sib, TH1* mix, float sf=0);
@@ -89,6 +89,10 @@ inline void StEStructSupport::setBGMode(int mode){ mbgMode=mode; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.3  2005/03/08 21:56:42  porter
+ * fixed bug in StEStructHAdd.cxx and added diagnostic option in ptcorrelations to
+ * view individual terms separately
+ *
  * Revision 1.2  2005/03/03 01:33:05  porter
  * Added pt-correlations method to support and included
  * these histograms to the HAdd routine
