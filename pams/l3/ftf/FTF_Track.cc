@@ -11,11 +11,13 @@
 #include <memory.h>
 #include <stdio.h>
 #include <math.h>
+#include "TrackerFrame.h"
 #include "FTF_Hit.h"
 #include "FTF_Track.h"
 #include "FTF_Volume.h"
 
 extern FTFinder     tracker ;
+extern TrackerFrame frame ;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //    Add hits to track
@@ -433,7 +435,7 @@ int FTF_Track::Follow ( VOLUME *volume, int way, int ir_stop ) {
       next_hit = Seek_Next_Hit ( volume, next_hit, way*para->dr_track, USE_FOLLOW ) ;
 
 #ifdef TRDEBUG
-      if ( para->track_debug && para->debug_level >= 1 ){
+      if ( para.track_debug && para->debug_level >= 1 ){
          if ( next_hit != 0 ){
             printf ( " Follow : Search succesful, hit selected %d ", next_hit->id );
 		    next_hit->Show ( para->color_track ) ;
@@ -629,8 +631,8 @@ int FTF_Track::Merge_Primary ( AREA *track_area ){
 //     Loop around selected area
 //
    track_merged = 0 ;
-   for ( ip = max(i_phi-1,1) ; ip < min(i_phi+1,para->n_phit) ; ip++ ) {
-      for ( ie = max(i_eta-1,1) ; ie < min(i_eta+1,para->n_etat) ; ie++ ) {
+   for ( ip = max(i_phi-1,1) ; ip < min(i_phi+2,para->n_phit) ; ip++ ) {
+      for ( ie = max(i_eta-1,1) ; ie < min(i_eta+2,para->n_etat) ; ie++ ) {
          tmp_index = ip * para->n_etat + ie ;
 //
 //    Loop over tracks
