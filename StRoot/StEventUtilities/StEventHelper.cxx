@@ -16,6 +16,8 @@
 #include "TError.h"
 #include "TPoints3DABC.h"
 #include "TSystem.h"
+#include "TPad.h"
+#include "TView.h"
 
 #include "StEvent.h"
 #include "StHit.h"
@@ -32,7 +34,7 @@ class StEventInspector : public TMemberInspector {
 public:
 StEventInspector(TExMap *map,Int_t &count,const char *opt="");
 virtual ~StEventInspector(){delete fSkip;};
-virtual void Inspect(TClass* cl, const char* parent, const char* name, void* addr);
+virtual void Inspect(TClass* cl, const char* parent, const char* name, const void* addr);
         void CheckIn(TObject *obj,const char *bwname="");
 
 Int_t &fCount;
@@ -51,7 +53,7 @@ StEventInspector::StEventInspector(TExMap *map,Int_t &count,const char *opt):fCo
   if (fOpt.Length()) fSkip = new TRegexp(fOpt.Data());
 }
 //______________________________________________________________________________
-void StEventInspector::Inspect(TClass* kl, const char* tit , const char* name, void* addr)
+void StEventInspector::Inspect(TClass* kl, const char* tit , const char* name, const void* addr)
 {
   if(tit && strchr(tit,'.'))	return ;
 
@@ -273,10 +275,12 @@ TObjArray *StEventHelper::SelTracks(Int_t th)
     if (!arr)		continue;
     if (!arr->size())	continue;
     StTrack *trk = (StTrack*)arr->front();
-    Assert(trk->InheritsFrom(StTrack::Class()));
     if (!trk)	continue;
+    if (trk->IsZombie()) continue;
+    Assert(trk->InheritsFrom(StTrack::Class()));
     if (th&1) {
       StTrackPoints *trp = new StTrackPoints(trk);
+      if (trp->IsZombie()) {delete trp; trk->makeZombie(); continue;}
       traks->Add(trp);
     }
 
@@ -409,6 +413,12 @@ void StTrackPoints::Init()
 {  
   if (fXYZ) return;
   float len = fTrack->length();   
+  if (len <= 0.0001) {
+    Warning("Init","Zero length %s(%p), IGNORED",fObj->ClassName(),fObj);
+    MakeZombie();
+    return;
+  }
+  
   StTrackGeometry *geo = fTrack->geometry(); 
   Assert(geo);
   double curva = fabs(geo->curvature());
@@ -427,6 +437,79 @@ void StTrackPoints::Init()
      fXYZ[i*3+2] = hel.z(ss); 
   }
 }
+//______________________________________________________________________________
+ Int_t StTrackPoints::DistancetoPrimitive(Int_t px, Int_t py)
+{
+//*-*-*-*-*-*-*Compute distance from POINT px,py to a 3-D points *-*-*-*-*-*-*
+//*-*          =====================================================
+//*-*
+//*-*  Compute the closest distance of approach from POINT px,py to each SEGMENT
+//*-*  of the polyline.
+//*-*  Returns when the distance found is below DistanceMaximum.
+//*-*  The distance is computed in pixels units.
+//*-*
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+
+   enum {inaxis = 7,mindist=10};
+   Float_t dist = 999999;
+
+   Int_t puxmin = gPad->XtoAbsPixel(gPad->GetUxmin());
+   Int_t puymin = gPad->YtoAbsPixel(gPad->GetUymin());
+   Int_t puxmax = gPad->XtoAbsPixel(gPad->GetUxmax());
+   Int_t puymax = gPad->YtoAbsPixel(gPad->GetUymax());
+
+   TView *view = 0;
+//*-*- return if POINT is not in the user area
+   if (px < puxmin - inaxis) goto END;
+   if (py > puymin + inaxis) goto END;
+   if (px > puxmax + inaxis) goto END;
+   if (py < puymax - inaxis) goto END;
+
+   view = gPad->GetView();
+   if (!view) 						goto END;
+   
+   {Int_t i;
+   Float_t dpoint,alfa;
+   Float_t xndc[3];
+   Int_t x1,y1,x0,y0;
+   Int_t pointSize = fN*3;
+   view->WCtoNDC(fXYZ, xndc);
+   x0 = gPad->XtoAbsPixel(xndc[0]);
+   y0 = gPad->YtoAbsPixel(xndc[1]);
+
+   float dif[2],difdif,cur[2],curcur,difcur;
+   for (i=3;i<pointSize;i+=3) {
+      view->WCtoNDC(fXYZ+i, xndc);
+      x1     = gPad->XtoAbsPixel(xndc[0]);
+      y1     = gPad->YtoAbsPixel(xndc[1]);
+      dif[0] = x1-x0; dif[1]=y1-y0;
+      cur[0] = x0-px; cur[1]=y0-py;
+      difdif = (dif[0]*dif[0]+dif[1]*dif[1]);
+      difcur = (dif[0]*cur[0]+dif[1]*cur[1]);
+      curcur = cur[0]*cur[0]+cur[1]*cur[1];
+      if (difdif<mindist*mindist) {
+	if ((i+3)<pointSize) 				continue;
+	dist = curcur; 					break;
+      }
+      alfa = -difcur/difdif;
+
+      if (alfa<0.) {dist =  curcur; 			break;}
+
+      x0=x1; y0=y1;
+      if (alfa > 1.) {
+	if (i+3 < pointSize) 				continue; 
+        dist = (px-x1)*(px-x1) + (py-y1)*(py-y1);	break;
+      }
+      dist = curcur+alfa*(2*difcur+difdif*alfa);
+       						      	break;
+   }}
+END:
+   dist =  TMath::Sqrt(dist);
+   if (dist <= mindist) { dist = 0; gPad->SetSelected(fObj);}
+
+   return Int_t(dist);
+}
+
   
 //______________________________________________________________________________
 ClassImp(StVertexPoints)
