@@ -2,8 +2,8 @@
 #
 #  
 #
-#     mv_jobfiles.pl - script for Web presentaion of node and Jobstatus
-#          moving jobfiles for crashed jobs from archive to jobfiles directory 
+#     mv_jobfiles.pl - script to move jobfiles for crashed jobs
+#          from archive to jobfiles directory 
 #  L.Didenko
 ###############################################################################
 
