@@ -1,5 +1,9 @@
-// $Id: St_tpt_Maker.h,v 1.12 1999/07/15 13:58:28 perev Exp $
+// $Id: St_tpt_Maker.h,v 1.13 2000/02/23 03:41:39 sakrejda Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.13  2000/02/23 03:41:39  sakrejda
+// Histograms names in EVAL changed to TptTte* by Kathy.
+// Also comments added.
+//
 // Revision 1.12  1999/07/15 13:58:28  perev
 // cleanup
 //
@@ -44,9 +48,11 @@
 // St_tpt_Maker virtual base class for Maker                            //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+
 class St_tpg_pad_plane;
 class St_tcl_tpc_index_type;
 class St_tpt_pars;
@@ -67,7 +73,7 @@ private:
   Bool_t m_mkfinal;   	//control flag for final ntuple production
   Bool_t m_tteEvalOn; 	//switch for the evaluation
   Bool_t m_tptResOn;  	//switch for the residuals calculation
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.12 1999/07/15 13:58:28 perev Exp $";
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.13 2000/02/23 03:41:39 sakrejda Exp $";
   St_tpg_pad_plane      *m_tpg_pad_plane;	//! Constants that describe TPC pad plane
   St_tcl_tpc_index_type *m_type;   		//! Table of many-to-many index 
 	                                        //! correlations for tpc evaluations
@@ -82,45 +88,45 @@ private:
   void         VertexEffResolutionFinish();// Calculate efficiency for this run
 
 protected:
+
+ TNtuple                *m_final; //! Final track-hit Ntuple
+
+// These histograms are always booked:
+//  - reconstructed track histograms from values calculated in St_tpt_Maker:
+
  TH1F *m_hits_on_track; //!number of hits assigned to a reconstructed track
  TH1F *m_hits_in_fit;   //!number of hits used in a fit
  TH1F *m_azimuth;       //!azimuthal angle
  TH1F *m_tan_dip;       //!tangent of the dip angle
  TH1F *m_r0;            //!radius for the first point
  TH1F *m_invp;          //!inverse momentum
- TNtuple                *m_final; //! Final track-hit Ntuple
 
-   TH1F *m_ptr;           //! pointer to 1d hist. of rec. pt
-   TH1F *m_vertex_x; //! pointer to 1d hist. of vertex x
-   TH1F *m_vertex_y; //! pointer to 1d hist. of vertex y
-   TH1F *m_vertex_z; //! pointer to 1d hist. of vertex z
-   TH1F *m_vertex_xy; //! pointer to 1d hist. of vertex xy
-   TH1F *m_rapidity;  //! pointer to 1dhist of rapidity(vid=1,nfst>5,nrec>0) all tracks
 
-   TH1F *m_average_ptr; //! pointer to 1dhist of average ptr 
-   TH1F *m_average_ptg; //! pointer to 1dhist of average ptg 
+// These histograms are only booked if m_tteEvalOn=kTrue (i.e. evaluation on):
+// Tables used are:  mctrk, evaltrk, g2t_vertex 
 
-   TH1F *m_average_rapidity; //! pointer to 1dhist of average pseudo_rapidity 
-   TH1F *m_average_chisqxy; //! pointer to 1dhist of average chisqxy
-   TH1F *m_average_chisqz; //! pointer to 1dhist of average chisqz
+//These are booked in VertexEffResolutionInit
+ TH1F *m_vertex_x; //! pointer to 1d hist. of vertex x
+ TH1F *m_vertex_y; //! pointer to 1d hist. of vertex y
+ TH1F *m_vertex_z; //! pointer to 1d hist. of vertex z
+ TH1F *m_vertex_xy; //! pointer to 1d hist. of vertex xy
 
-   TH1F *m_chisqxy; //! pointer to 1dhist of chisqxy
-   TH1F *m_chisqz; //! pointer to 1dhist of  chisqz
+ TH2F  *m_vertexX_vertexY; //! vertex positionY vs.  vertex X
+ TH2F  *m_vertexX_vertexZ; //! vertex positionZ vs.  vertex X
 
-   //   TH1F *m_rapidity1;  //! pointer to 1dhist of rapidity(vid=1,nfst>5) per event
-   //TH1F *m_rapidity2; //! pointer to 1dhist of rapidity(vid=1,nfst>5,nrec>0) per event
-   //TH1F *m_eff1; //! pointer to efficiency  vs. rapidity of 1 event
+ TH1F *m_average_ptr; //! pointer to 1dhist of average ptr 
+ TH1F *m_average_ptg; //! pointer to 1dhist of average ptg 
+ TH1F *m_average_rapidity; //! pointer to 1dhist of average pseudo_rapidity 
+ TH1F *m_average_chisqxy; //! pointer to 1dhist of average chisqxy
+ TH1F *m_average_chisqz; //! pointer to 1dhist of average chisqz
 
-   TH1F *m_rapidity_total1;  //! pointer to 1dhist of rapidity(vid=1,nfst>5) total events
-   TH1F *m_rapidity_total2; //! pointer to 1dhist of rapidity(vid=1,nfst>5,nrec>0) total events
-   TH1F *m_eff_total; //! pointer to efficiency  vs. rapidity total events
-   TH1F *m_averge_eff;//! pointer to efficiency  for every event
+ TH2F  *m_vertexXY_eff; //! vertex position vs.  efficiency
+ TH2F  *m_vertexZ_eff; //! vertex position vs.  efficiency
 
-   TH2F  *m_vertexX_vertexY; //! vertex positionY vs.  vertex X
-   TH2F  *m_vertexX_vertexZ; //! vertex positionZ vs.  vertex X
 
-   TH2F  *m_vertexXY_eff; //! vertex position vs.  efficiency
-   TH2F  *m_vertexZ_eff; //! vertex position vs.  efficiency
+ TH1F *m_chisqxy; //! pointer to 1dhist of chisqxy
+ TH1F *m_chisqz; //! pointer to 1dhist of  chisqz
+
 
    TH2F *m_vertexXY_average_ptr; //! vertex xy vs. average ptr 
    TH2F *m_vertexZ_average_ptr; //! vertex z vs. average ptr 
@@ -136,6 +142,11 @@ protected:
    TH2F *m_vertexXY_average_chisqz; //! vertex xy vs. average chisqz 
    TH2F *m_vertexZ_average_chisqz; //! vertex z vs. average chisqz
 
+   TH1F *m_rapidity_total1;  //! pointer to 1dhist of rapidity(vid=1,nfst>5) total events
+   TH1F *m_rapidity_total2; //! pointer to 1dhist of rapidity(vid=1,nfst>5,nrec>0) total events
+   TH1F *m_eff_total; //! pointer to efficiency  vs. rapidity total events
+   TH1F *m_averge_eff;//! pointer to efficiency  for every event
+
    TH2F *m_ptg_rapidity; // ! Ptg vs. pseudo_rapidity 
    TH2F *m_ptg_rapidity_1; // ! Ptg vs. pseudo_rapidity, nrec1>=0 
    TH2F *m_ptg_rapidity_2; // ! Ptg vs. pseudo_rapidity, nrec1>0
@@ -150,6 +161,18 @@ protected:
    TH2F  *m_dp_pg_pion; //! abs(pr-pg)/pg vs. pg for pion
    TH2F  *m_dp_pg_proton; //! abs(pr-pg)/pg vs. pg for pion
    TH2F  *m_dp_pg_kaon; //! abs(pr-pg)/pg vs. pg for pion
+
+
+//These are booked,filled & deleted in VertexEffResolutionMakeHistograms
+   TH1F *m_rapidity1;  //! pointer to 1dhist of rapidity(vid=1,nfst>5) per event
+   TH1F *m_rapidity2;  //! pointer to 1dhist of rapidity(vid=1,nfst>5,nrec>0) per event
+   TH1F *m_eff1;       //! pointer to efficiency  vs. rapidity of 1 event
+
+
+// - not used:
+// TH1F *m_ptr;        //! pointer to 1d hist. of rec. pt
+// TH1F *m_rapidity;   //! pointer to 1dhist of rapidity(vid=1,nfst>5,nrec>0) all tracks
+
 
 //init ntuple
    TNtuple *m_vertex_final; //! ntuple for efficiency, average pt, rapidity,.....
@@ -173,7 +196,7 @@ public:
   virtual Int_t  Finish();
   virtual void   Set_final(Bool_t m=kFALSE){m_mkfinal = m;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpt_Maker.h,v 1.12 1999/07/15 13:58:28 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpt_Maker.h,v 1.13 2000/02/23 03:41:39 sakrejda Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
 };
