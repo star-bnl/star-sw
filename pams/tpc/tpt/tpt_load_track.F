@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.3 1998/07/02 19:17:34 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.4 1999/04/21 23:41:45 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.4  1999/04/21 23:41:45  sakrejda
+* possible number of points on track added to the tpt_track table (Spirose's request
+*
 * Revision 1.3  1998/07/02 19:17:34  sakrejda
 * B field obtained via gufld call
 *
@@ -98,6 +101,7 @@ C     z coordinate of the point where track parameters are given
       track(ipt).cov(15) = trk(ipt).dpar(9)
 C
       track(ipt).nrec = trk(ipt).nhit
+      track(ipt).npos = 0.
 C
 C     azimuthal angle for the momentum at the first point
       sgn = sign(1.0,trk(ipt).p(2))

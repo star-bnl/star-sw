@@ -12,6 +12,7 @@
        long       ngnt;       /* # of Geant hits generated on this track */
        long       nrec1;      /* # of points on the longest segment. */
        long       nrec2;      /* # of points on the second longest segmen */
+       long       npos;       /* Number of possible points, allowed by geometry*/
        long       nseg;       /* # of segments rec from this track */
        long       pid;        /* Particle ID */
        long       recid;      /* ID of the reconstructed track. */

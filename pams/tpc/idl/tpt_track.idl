@@ -15,6 +15,7 @@
        long       ndedx;      /* Number of points used in dE/dx calc */
        long       nfit;       /* Number of points included in the fit */
        long       nrec;       /* Number of points assigned to that track */
+       long       npos;       /* Number of possible points, allowed by geometry*/
        long       q;          /* charge */
        float     chisq[2];   /* chi squared of the momentum fit */
        float     cov[15];    /* covariance matrix(psi,invp,tanl,phi,z) */
