@@ -8,13 +8,14 @@
 *  08/19/98, PN: tof is not part of year_2a                               *
 *  12/04/98, PN: rich  + upstream part + zero degree calo                 *
 *  09/26/99, E.Cains: 1H geometry added - one svt ladder at layer 3       *
+*  01/27/99, PN: rich in 1H geometry is simulated with hits is quartz & fr*
 ***************************************************************************
    Implicit   none
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
               zcal,mfld,mwc,pse,tof,t25,t1,four,ems,alpipe,
               on/.true./,off/.false./
    real       Par(1000),field,dcay(5),shift(2)
-   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),Nleft,Mleft
+   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),Nleft,Mleft,Rv
    character  Commands*4000
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
@@ -41,7 +42,7 @@ replace[;ON#{#;] with [
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
    {mwc,four,pse}=on      "MultiWire Chambers, 4th Si layer, pseudopadrows"   
    {tof,t25,t1,ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
-   field=5;  Nsi=7;                                    "defaults constants"
+   field=5;  Nsi=7;  Rv=1;                             "defaults constants"
    Commands=' '
 *
 * -------------------- select USERS configuration ------------------------
@@ -82,7 +83,7 @@ If LL>1
   on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch+RICH, no svt; 
                                   {vpdd,ecal}=off;  {rich,ems,t1}=on;  Nsi=0; }
   on YEAR_1H    { even better y1:  TPC+CTB+FTPC+caloPatch+svtLadder;  
-                                  {vpdd,ecal}=off;  {rich,ems,t1}=on;  Nsi=-3;}
+                          Rv=2;   {vpdd,ecal}=off;  {rich,ems,t1}=on;  Nsi=-3;}
   on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;  {vpdd,ecal}=off;   Nsi=0; }
   on YEAR_2A    { asymptotic STAR;                                   tof=off; }
   on HADR_ON    { all Geant Physics On;                                       }
@@ -122,12 +123,14 @@ If LL>1
    If LL>1 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 *
    if (rich) ItCKOV = 1
-   if (cave) Call cavegeo
-   If (LL>1) call AgDETP new ('PIPE')
-   if (alpipe) call AgDETP add ('pipg.BeLeng=', 0, 1)
-   if (alpipe) call AgDETP add ('pipg.S1Leng=',230,1)
-   if (pipe) Call pipegeo
-   if (upst) Call upstgeo
+   if (rich & Rv>1) call AgDETP new ('Rich')
+   if (rich & Rv>1) call AgDETP add ('Rich.Version=',Rv,1)
+   if (cave)        Call cavegeo
+   If (LL>1)        call AgDETP new ('PIPE')
+   if (alpipe)      call AgDETP add ('pipg.BeLeng=', 0, 1)
+   if (alpipe)      call AgDETP add ('pipg.S1Leng=',230,1)
+   if (pipe)        Call pipegeo
+   if (upst)        Call upstgeo
 
    Call AGSFLAG('SIMU',2)
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 

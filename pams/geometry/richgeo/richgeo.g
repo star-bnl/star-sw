@@ -79,7 +79,7 @@ created June 1, 1998 supposely
     isopt=0
     if (rich_version>1) isopt=1
 *
-*   call  AgSSTEP(RICHSTEP) 
+    call  AgSSTEP(RICHSTEP) 
 *
 *   special material definition here:
     component O    A=16.00     Z=8    W=2
@@ -211,7 +211,7 @@ endblock
     shape     BOX    dx=20.65 dy=0.2   dz=66.5
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_QUARZO,EFFIC_all,RINDEX_QUARZO)
     if (isopt>0) then
-    HITS  OQUA  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
+    HITS  OQUA x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
                Slen:.1:(0,500)   ptot:18:(0,100),
                Tof:16:(0,1.e-6)  Step:16:(0,10),
                Eloss:32:(0,0.1) 
@@ -226,12 +226,19 @@ endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     block QUAR da me scelto per labellare il quarzo
     material  quarz
-    Attribute QUAR  seen=1   colo=2
+    medium    quartz          Isvol=Isopt  
+    Attribute QUAR  seen=1    colo=2
     shape     BOX   dx=20.65  dy=0.25  dz=66.5
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_QUARZ,EFFIC_all,RINDEX_QUARZ)
 
     Create and Position BARR z=-21.7
     Create and Position BARR z=21.7
+    if (isopt>0) then
+    HITS  QUAR x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
+               Slen:.1:(0,500)   ptot:18:(0,100),
+               Tof:16:(0,1.e-6)  Step:16:(0,10),
+               Eloss:32:(0,0.1) 
+    endif  
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *     width in z  0.2/2=0.1
@@ -318,7 +325,7 @@ endblock
 * thickness 10 / 2 = 0.5
 * positioning width 433
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    block OQUF e FRAME QUARZO OPACO
+block OQUF e FRAME QUARZO OPACO
     material  opaco 
     Attribute OQUF  seen=1    colo=2
     shape     BOX   dx=20.65  dy=0.5   dz=66.5
@@ -330,7 +337,7 @@ endblock
 * 1310 /2 = 65.5
 * 413 of the frame - 2*0.5 = 403  /2 = 20.15
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    block FREO is FREON
+block FREO is FREON
     component C     A=12  Z=6  W=6
     component F     A=19  Z=9  W=14
     mixture   freon DENS=1.7   Isvol=Isopt
@@ -377,18 +384,17 @@ end
 
 
       subroutine RICHSTEP
+* discard cerenkov photon absorption hits everywhere except for CSI
 +CDE,TYPING,GCBANK,GCONST,GCUNIT,GCTMED,GCTRAK,GCKINE,GCSETS,AGCSTEP.
       character  Cmed*8
-      check ISVOL>0
+
+      check ISVOL>0 & Ipart==50
       CALL UHTOC(NATMED,4,Cmed,8)
 
-* only cerenkov photons are seen in CSI
-      check Cmed=='RICH_CSI'
-
-*     print *,' Ipart ',Ipart,' in csi '
-* this may be used to switch the hit off - or you may reset AGdEstep.
-*     if (Ipart != 50) step     = 0    
-*     if (Ipart != 50) AGdEstep = 0
+* cerenkov photons are seen in CSI only
+      check Cmed!='RICH_CSI'
+* discard hit:
+      {Step,dEstep,aStep,AdEstep} = 0; 
 *
       end
 
