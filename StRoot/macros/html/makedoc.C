@@ -122,6 +122,12 @@
      gROOT->LoadMacro("/afs/rhic/star/packages/dev/inc/table_header.h");
 
   TClass header1("table_head_st",1,"table_header.h","table_header.h");
+  // Create HTML subdirectory tree
+   const Char_t* htmlTree = "/afs/rhic/star/packages/dev/StRoot/html";
+  if (gSystem->AccessPathName(htmlTree) && !NT) {
+     gSystem->MakeDirectory(htmlTree);
+  }
+
   // Make class descriptions
   Int_t i=0;
 
