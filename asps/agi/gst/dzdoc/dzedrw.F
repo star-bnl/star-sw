@@ -1,5 +1,8 @@
-* $Id: dzedrw.F,v 1.2 2000/01/06 20:35:10 nevski Exp $
+* $Id: dzedrw.F,v 1.3 2000/01/07 00:05:29 nevski Exp $
 * $Log: dzedrw.F,v $
+* Revision 1.3  2000/01/07 00:05:29  nevski
+* cvs header record corrected
+*
 * Revision 1.2  2000/01/06 20:35:10  nevski
 * correct cvs header
 *
@@ -276,7 +279,7 @@
             WRITE(LUNSGM,'(A)')BS//'begin{document}'
             WRITE(LUNSGM,'(A)')BS//'title {ZEBRA bank documentation'
             WRITE(LUNSGM,'(A)')BS//BS//' from '//BS//BS//CHRZF
-             WRITE(LUNSGM,'(A)')BS//BS//' banks below:'
+            WRITE(LUNSGM,'(A)')BS//BS//' banks below:'
          ENDIF
          IF(LWILDC)THEN
             DO 50   I=1,IP1
@@ -328,9 +331,9 @@
       IF(IOPTL.EQ.0)THEN
         CALL DZDDTR(LUNSGM,LUNCOM,LUNMET,INTWST,ITYMET,LTOP,COPDT1//'P')
       ELSE
-         CALL DZDDTR(LUNSGM,LUNCOM,LUNMET,
-     >    INTWST,ITYMET,LTOP,COPDT1//COPDTR//'L')
-          COPDTR=' '
+        CALL DZDDTR(LUNSGM,LUNCOM,LUNMET,INTWST,ITYMET,LTOP,
+     >                                              COPDT1//COPDTR//'L')
+        COPDTR=' '
       ENDIF
       LTOP = LD1
       CALL MZGARB(2,0)

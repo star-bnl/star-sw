@@ -1,7 +1,7 @@
-* $Id: dzdwrt.F,v 1.1 2000/01/06 01:01:10 nevski Exp $
+* $Id: dzdwrt.F,v 1.2 2000/01/07 00:05:29 nevski Exp $
 * $Log: dzdwrt.F,v $
-* Revision 1.1  2000/01/06 01:01:10  nevski
-* dzdoc for agi
+* Revision 1.2  2000/01/07 00:05:29  nevski
+* cvs header record corrected
 *
 
       SUBROUTINE DZDWRT (CTEMP,N)

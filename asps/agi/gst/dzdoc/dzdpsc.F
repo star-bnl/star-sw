@@ -1,7 +1,10 @@
 *
-* $Id: dzdpsc.F,v 1.4 2000/01/06 01:01:09 nevski Exp $
+* $Id: dzdpsc.F,v 1.5 2000/01/07 00:05:29 nevski Exp $
 *
 * $Log: dzdpsc.F,v $
+* Revision 1.5  2000/01/07 00:05:29  nevski
+* cvs header record corrected
+*
 * Revision 1.4  2000/01/06 01:01:09  nevski
 * dzdoc for agi
 *
@@ -27,7 +30,8 @@
       CALL IDAWK(1)
       CALL IACWK(2)
       CALL RZCDIR('//RZDOC',' ')
-      CALL DZDDTR(ISTORE,LEV,0,0,0,2,-111,'MPR')
+*                 LUNSGM,LUNLOG,LUNMET,IWMETA,ITMETA,L,CHOPT
+      CALL DZDDTR(0,0,0,2,-111,LEV,'MPR')
       CALL IUWK(0,1)
       CALL IDAWK(2)
       CALL IACWK(1)

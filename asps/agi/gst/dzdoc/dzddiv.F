@@ -1,5 +1,8 @@
-* $Id: dzddiv.F,v 1.2 2000/01/06 23:50:56 nevski Exp $
+* $Id: dzddiv.F,v 1.3 2000/01/07 00:05:29 nevski Exp $
 * $Log: dzddiv.F,v $
+* Revision 1.3  2000/01/07 00:05:29  nevski
+* cvs header record corrected
+*
 * Revision 1.2  2000/01/06 23:50:56  nevski
 * cvs header record corrected
 *
@@ -50,7 +53,7 @@
       CHARACTER*(*) CHOPT0,RZPATH
 *
 #include "zebra/mzbits.inc"
-#include "hepdb/quest.inc"
+#include "zebra/quest.inc"
       REAL RQUEST(100)
       EQUIVALENCE (IQUEST,RQUEST)
 #include "zebra/zebq.inc"
