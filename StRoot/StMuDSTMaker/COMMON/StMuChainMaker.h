@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.h,v 1.7 2002/11/18 14:29:31 laue Exp $
+ * $Id: StMuChainMaker.h,v 1.8 2002/12/19 19:44:25 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** @class StMuChainMaker
@@ -21,6 +21,7 @@ class StMuChainMaker  {
 
   void subFilter(string filter);
   TChain* make(string dir, string file, string filter, int maxFiles=10);
+  void fromFileCatalog(string file,int maxFiles);
   void fromList(string file,int maxFiles);
   void fromFile(string file, int maxFiles);
   void fromDir(string dir, int maxFiles);
@@ -47,6 +48,9 @@ ClassDef(StMuChainMaker,0)
 /***************************************************************************
  *
  * $Log: StMuChainMaker.h,v $
+ * Revision 1.8  2002/12/19 19:44:25  laue
+ * update to read number of events from database, for files ending with .list
+ *
  * Revision 1.7  2002/11/18 14:29:31  laue
  * update for Yuri's new StProbPidTraits
  *
