@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.37 2004/10/26 06:45:37 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.37 2004/10/26 06:45:37 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.38 2004/10/26 21:52:07 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.38 2004/10/26 21:52:07 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.38  2004/10/26 21:52:07  pruneau
+ * No truncation but bad hits dropped
+ *
  * Revision 2.37  2004/10/26 06:45:37  perev
  * version V2V
  *
@@ -1017,6 +1020,22 @@ void StiKalmanTrack::reserveHits()
   runtime_error exceptions which are NOT caught here...</li>
   </ul>
 */
+bool StiKalmanTrack::extendToVertex(StiHit*vertex, const StiDetector * alternate)
+{
+  if (!alternate)
+    return extendToVertex(vertex);
+  cout << " alternate propagate =========="<<endl;
+  cout << *alternate<<endl;
+  cout << "lastNode:"<<*lastNode<<endl;
+  StiKalmanTrackNode * tNode = trackNodeFactory->getInstance();
+  if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() -E- tNode==null");
+  tNode->reset();
+  int status = tNode->propagate(lastNode,alternate);
+  cout << "propagate status:"<<status<<endl;
+  return false;
+}
+
+
 bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 {
   if (trackingDirection==kInsideOut) 

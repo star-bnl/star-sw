@@ -127,7 +127,8 @@ public:
   virtual double  getValue(int key) const;
   virtual bool isPrimary() const=0;
 
-	virtual bool extendToVertex(StiHit* vertex)=0;
+  virtual bool extendToVertex(StiHit* vertex)=0;
+  //	virtual bool extendToVertex(StiHit* vertex, const StiDetector * alternate)=0;
 
  protected:
   static StiTrackFinder * trackFinder;

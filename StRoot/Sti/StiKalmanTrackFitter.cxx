@@ -78,17 +78,19 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	      chi2 = targetNode->evaluateChi2(targetHit);
 	      targetNode->setChi2(1e52);
 	      if (chi2<_pars.getMaxChi2() ) 
-	        targetNode->setChi2(chi2);
-		status = targetNode->updateNode();
+	        {
+		  targetNode->setChi2(chi2);
+		  status = targetNode->updateNode();
+		}
 	    }
 	  if (status<0)
 	    {
 	      // truncate because the propagation to the targetNode was not successful
 	      //cout << " truncation 1 +++++++++++++++++++++++++++++" << endl;
-	      (*source).removeAllChildren();
-	      track->setLastNode(&(*source));
+	      //(*source).removeAllChildren();
+	      //track->setLastNode(&(*source));
 	      //cout << " truncation 1 completed +++++++++++++++++++++++++++++" << endl;
-	      break;
+	      //break;
 	    }
 	  source++;//cout<<"=="<<endl;
 	}
@@ -147,8 +149,10 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	      if (chi2>20)
 		status = -50.;
 	      else if (chi2 < _pars.getMaxChi2())
-	        targetNode->setChi2(chi2);
-		status = targetNode->updateNode();
+		{
+		  targetNode->setChi2(chi2);
+		  status = targetNode->updateNode();
+		}
 	    }
 	  if (status<0)
 	    {
@@ -160,7 +164,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	      // track->setFirstNode(&(*source));
 	      // (*source).setParent(0);
 	      //cout << " truncation 2 completed +++++++++++++++++++++++++++++" << endl;
-	      break;
+	      //break;
 	    }
 	  source--;//cout<<"!="<<endl;
 	}
