@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.3 1999/07/08 19:09:53 fisyak Exp $
+// $Id: StXiMaker.cxx,v 1.4 1999/07/12 01:49:39 fine Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.4  1999/07/12 01:49:39  fine
+// Clean up
+//
 // Revision 1.3  1999/07/08 19:09:53  fisyak
 // Add tabs, remove St_glb_Maker
 //
@@ -112,32 +115,22 @@ Int_t StXiMaker::Make(){
   dst_track_st *glob  = globtrk->GetTable();
   dst_track_st *glob2 = globtrk2->GetTable();
   dst_vertex_st *vrtx = vertex->GetTable();
-  if( vrtx->vtx_id != 1){
+  if( vrtx->vtx_id != 1 || vrtx->iflag != 1){
     for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
-      if( vrtx->vtx_id == 1) break;
+      if( vrtx->vtx_id == 1 && vrtx->iflag == 1 ) break;
     }
   }
-  if (vrtx->vtx_id == 1) {
-    
-    Float_t *v0 = &vrtx->x;
-    for( Int_t no_rows=0; no_rows<globtrk2->GetNRows(); no_rows++, glob++,glob2++)
-      {
-	double qwe = pow(glob2->x0-v0[0],2)+pow(glob2->y0-v0[1],2)+pow(glob2->z0-v0[2],2);
-	glob->impact = TMath::Sqrt(qwe);
-      }
-    
-    //if(Debug()) cout << " finished calling track-propagator" << endl;
-
-  Int_t xi_limit = 2*dst_v0_vertex->GetNRows();
-  if (xi_limit < 250) xi_limit=250;
-  dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",xi_limit);
-  AddData(dst_xi_vertex);
+  if (vrtx->vtx_id == 1 && vrtx->iflag == 1) {
+    Int_t xi_limit = 2*dst_v0_vertex->GetNRows();
+    if (xi_limit < 250) xi_limit=250;
+    dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",xi_limit);
+    AddData(dst_xi_vertex);
   
-  iRes = exiam(m_exipar,globtrk,vertex,dst_v0_vertex,dst_xi_vertex,m_exiaux);
+    iRes = exiam(m_exipar,globtrk,vertex,dst_v0_vertex,dst_xi_vertex,m_exiaux);
   //	 ===================================================================
   
-  if (iRes != kSTAFCV_OK) iMake = kStWarn;
-  if (iRes != kSTAFCV_OK) {cout << " Problem on return from EXI " << endl;}
+    if (iRes != kSTAFCV_OK) iMake = kStWarn;
+    if (iRes != kSTAFCV_OK) {cout << " Problem on return from EXI " << endl;}
   }
   return iMake;
 }
@@ -145,7 +138,7 @@ Int_t StXiMaker::Make(){
 //_____________________________________________________________________________
 void StXiMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StXiMaker.cxx,v 1.3 1999/07/08 19:09:53 fisyak Exp $\n");
+  printf("* $Id: StXiMaker.cxx,v 1.4 1999/07/12 01:49:39 fine Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();

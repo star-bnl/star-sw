@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.16 1999/07/08 18:40:31 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.17 1999/07/12 01:49:39 fine Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.17  1999/07/12 01:49:39  fine
+// Clean up
+//
 // Revision 1.16  1999/07/08 18:40:31  fisyak
 // Wensheng Deng global chain
 //
@@ -47,7 +50,7 @@
 #include "St_dst_summary_param_Table.h"
 #include "St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.16 1999/07/08 18:40:31 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.17 1999/07/12 01:49:39 fine Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -126,7 +129,7 @@ Int_t St_dst_Maker::Init(){
  };
 
 
-  strcpy (&run_summary.version[0],VersionTag()); // DST production software version
+  strcpy (&run_summary.version[0],GetCVS()); // DST production software version
   dst_run_summary->AddAt(&run_summary,0);
  
   // Create Histograms    
@@ -336,7 +339,7 @@ Int_t  St_dst_Maker::Filler(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_dst_Maker.cxx,v 1.16 1999/07/08 18:40:31 fisyak Exp $\n");
+  printf("* $Id: St_dst_Maker.cxx,v 1.17 1999/07/12 01:49:39 fine Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

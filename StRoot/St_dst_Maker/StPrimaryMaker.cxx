@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.4 1999/07/11 01:55:45 fisyak Exp $
+// $Id: StPrimaryMaker.cxx,v 1.5 1999/07/12 01:49:39 fine Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.5  1999/07/12 01:49:39  fine
+// Clean up
+//
 // Revision 1.4  1999/07/11 01:55:45  fisyak
 // Fix glob->impact
 //
@@ -193,12 +196,12 @@ Int_t StPrimaryMaker::Make(){
   dst_track_st *glob  = globtrk->GetTable();
   dst_track_st *glob2 = globtrk2->GetTable();
   dst_vertex_st *vrtx = vertex->GetTable();
-  if( vrtx->vtx_id != 1){
+  if( vrtx->vtx_id != 1 || vrtx->iflag != 1){
     for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
-      if( vrtx->vtx_id == 1) break;
+      if( vrtx->vtx_id == 1 && vrtx->iflag == 1 ) break;
     }
   }
-  if (vrtx->vtx_id == 1) {
+  if (vrtx->vtx_id == 1 && vrtx->iflag == 1) {
     
     Float_t *v0 = &vrtx->x;
     for( Int_t no_rows=0; no_rows<globtrk2->GetNRows() &&
@@ -236,7 +239,7 @@ Int_t StPrimaryMaker::Make(){
 //_____________________________________________________________________________
 void StPrimaryMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPrimaryMaker.cxx,v 1.4 1999/07/11 01:55:45 fisyak Exp $\n");
+  printf("* $Id: StPrimaryMaker.cxx,v 1.5 1999/07/12 01:49:39 fine Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
