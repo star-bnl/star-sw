@@ -1,5 +1,12 @@
-* $Id: geometry.g,v 1.98 2004/12/07 00:46:04 potekhin Exp $
+* $Id: geometry.g,v 1.99 2005/01/03 22:11:23 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.99  2005/01/03 22:11:23  potekhin
+* Need to update the experimental IST1 tag to better
+* refelct the needs of the new tracking group. Took
+* out the FTPC, put in the Pixel and SSD, and made
+* provisions for the latter to work w/o the SVT
+* volumes.
+*
 * Revision 1.98  2004/12/07 00:46:04  potekhin
 * We need to steer the newly added FSTD (forward tracker).
 * For now I add it to the experimental tag IST1, which is
@@ -639,7 +646,8 @@ If LL>1
 *************************************************************************************************************
   on IST1   { New IST Tracking + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
 
-                     svtt=off; "no SVT at all in this configuration"
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
@@ -650,8 +658,8 @@ If LL>1
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
                   "ecal"
-                     ecal_config=3   "both wheels"
-                     ecal_fill=3     "all sectors filled "
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
                   "beam-beam counter "
                      bbcm=on
                   "forward pion detector "
@@ -664,13 +672,13 @@ If LL>1
                      phmd=on;
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
-                     sisd=off;
-                     SisdConfig = 1;
+                     sisd=on;
+                     SisdConfig = 23;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
-                   pixl=off;    " put the pixel detector in"
-                   PixlConfig=0;
-* Inner STAR tracker barrel (new MIT detector)
+                   pixl=on;        " put the pixel detector in"
+                   PixlConfig=2;   " newer version decoupled from SVT"
+* Inner STAR tracker barrel (formerly MIT detector)
                    istb=on;  "new pixel based inner tracker"
                    IstbConfig=1;
 * Forward STAR tracker disk
@@ -1386,7 +1394,14 @@ If LL>1
 * cut, as opposed to configuration of the detector:
 
   if(sisd) then
+       sisd_level=0
        call AgDETP new ('SISD')
+
+* if no SVT, need to position in CAVE - valid for all versions
+       if(svtt) {
+         call AgDETP add ('ssdp.Placement=',1 ,1)
+       }
+
        if (SisdConfig>10) then
          sisd_level=SisdConfig/10
          SisdConfig=SisdConfig-sisd_level*10
@@ -1405,6 +1420,9 @@ If LL>1
          call AgDETP add ('ssdp.Config=',SisdConfig ,1)
          call sisdgeo
        endif
+
+       write(*,*) 'Silicon Strip Detector Config and Level: ',SisdConfig, ' ',sisd_level
+
   endif
 
 
