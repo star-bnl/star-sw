@@ -1,5 +1,9 @@
-* $Id: g2t_volume_id.g,v 1.44 2003/10/02 23:14:08 potekhin Exp $
-*  g2t_volume_id.g,v 
+* $Id: g2t_volume_id.g,v 1.45 2003/10/02 23:17:24 potekhin Exp $
+* $Log: g2t_volume_id.g,v $
+* Revision 1.45  2003/10/02 23:17:24  potekhin
+* Added a missing dollar mark which so far prevented
+* the inclusion of CVS log into the source
+*
 *
 * Revision 1.38  2002/10/16 19:12:44  kopytin
 * Volume ID for BBC elements added. this Affects StBbcSimulationMaker.
