@@ -1,6 +1,9 @@
 // 
-// $Id: StBemcRaw.cxx,v 1.8 2004/11/22 12:46:22 suaide Exp $
+// $Id: StBemcRaw.cxx,v 1.9 2004/12/14 11:32:11 suaide Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.9  2004/12/14 11:32:11  suaide
+// added histograms for status tables creation
+//
 // Revision 1.8  2004/11/22 12:46:22  suaide
 // added new flags for hit reconstruction. Status are not checked
 // dureing production anymore in order to avoid bad status loaded in
@@ -73,6 +76,7 @@ StBemcRaw::StBemcRaw():TObject()
     mControlADCtoE->OnlyCalibrated[i]=onlyCal[i];
     mControlADCtoE->CheckStatus[i]=status[i];
     mControlADCtoE->CheckCrate[i]=crate[i];
+    mBarrelQAHisto[i] = 0;
   }
 
 }
@@ -114,6 +118,15 @@ void StBemcRaw::initHisto()
   mBarrelAdcSumHist       = new TH2F("BarrelAdcSum","BarrelAdcSum",500,0.0,1000000.0,4,0.5,4.5);
   mBarrelNCratesHist      = new TH2F("BarrelNCrates","BarrelNCrates",31,0.0,31.0,4,0.5,4.5);
   mBarrelCrateStatusHist  = new TH2F("BarrelCrateStatus","BarrelCrateStatus",6,-0.5,5.5,30,0.5,30.5);
+}
+void StBemcRaw::initQAHisto()
+{
+  for(Int_t det = 1;det<=MAXDETBARREL; det++)
+  {
+    Int_t N = BTOWCH;
+    if(det>2) N= BSMDCH;  
+    mBarrelQAHisto[det-1] = new TH2F(detname[det-1].Data(),detname[det-1].Data(),N,0.5,(Float_t)N+0.5,500,-0.5,499.5);
+  }
 }
 void StBemcRaw::fillHisto()
 {
@@ -257,8 +270,10 @@ Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
 void StBemcRaw::checkHeaders(StEmcRawData* RAW)
 {
   for(Int_t det=1;det<=MAXDETBARREL; det++)
+  {
     for(Int_t crate = 1; crate<=MAXCRATES;crate++) mCrateStatus[det-1][crate-1] = crateUnknown;
-  
+    mIsCorrupted[det-1] = kFALSE;
+  }
   checkBtowCrates(RAW);
 	
   mNCRATESOK[BPRS-1]=mNCRATESOK[BSMDE-1]=mNCRATESOK[BSMDP-1]=0;
@@ -339,6 +354,8 @@ void StBemcRaw::checkBtowCrates(StEmcRawData* RAW)
     if(sum==BTOWNOTPRESENT && err == BTOWNOTPRESENT) mCrateStatus[BTOW-1][crate-1] = crateNotPresent;
     
     if(mCrateStatus[BTOW-1][crate-1]==crateOK) mNCRATESOK[BTOW-1]++;
+    
+    if(mCrateStatus[BTOW-1][crate-1]==crateHeaderCorrupt) mIsCorrupted[BTOW-1] = kTRUE;
   }
   return;
 }
@@ -522,6 +539,7 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
   Int_t m,e,s;
   geo->getBin(id,m,e,s);
   StEmcRawHit* hit=new StEmcRawHit(did,m,e,s,(UInt_t)ADC);
+  if(mBarrelQAHisto[det-1] && !isCorrupted(det)) mBarrelQAHisto[det-1]->Fill((Float_t)id,(Float_t)ADC);
   hit->setEnergy(E);
   hit->setCalibrationType(CAP);
   detector->addHit(hit);

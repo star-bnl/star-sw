@@ -1,5 +1,5 @@
 // 
-// $Id: StEmcRawMaker.cxx,v 1.7 2004/11/24 00:12:19 suaide Exp $
+// $Id: StEmcRawMaker.cxx,v 1.8 2004/12/14 11:32:11 suaide Exp $
 
 #include <math.h>
 
@@ -61,6 +61,7 @@ Int_t StEmcRawMaker::Init()
   {
     gMessMgr->Info()<<"Setting BEMC debug Mode -> save all hits into StEvent"<<endm;
     mBemcRaw->saveAllStEvent(kTRUE);
+    mBemcRaw->initQAHisto();
   }
   //................EEMC stuff ..............
   eeStDb= (StEEmcDbMaker*) GetMaker("eeDb");
@@ -280,6 +281,9 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.8  2004/12/14 11:32:11  suaide
+// added histograms for status tables creation
+//
 // Revision 1.7  2004/11/24 00:12:19  suaide
 // added check in for m_Mode&0x1==1 for bemcDebug flag in bfc
 //
