@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.30 2001/03/07 20:22:56 long Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.31 2001/03/14 23:43:39 long Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.31  2001/03/14 23:43:39  long
+ * *** empty log message ***
+ *
  * Revision 1.30  2001/03/07 20:22:56  long
  * *** empty log message ***
  *
@@ -555,9 +558,9 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	    // Take the electrons from the vector
 	    StTrsMiniChargeSegment aMiniSegment(track.at(newPosition),
 						ionizationSegments[(numberOfLevels-1)][i],
-						deltaS);
-	    listOfMiniSegments->push_back(aMiniSegment);
-	    
+					deltaS);
+            if(aMiniSegment.position().z()>0)listOfMiniSegments->push_back(aMiniSegment);  //HL,03/2001 protect against negative z.	
+	   
 	    newPosition += deltaS;
 	} // loop over subsegments
 
@@ -572,7 +575,7 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	StTrsMiniChargeSegment aBadMiniSegment(mPosition,
 					       mNumberOfElectrons,
 					       mDs);
-	if(aSingleMiniSegment.position().z()>0)listOfMiniSegments->push_back(aBadMiniSegment);  //HL,03/2001 protect against negative z.
+	
     }
 }
 
