@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.5 2001/03/19 15:53:10 jcs Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.6 2001/04/02 12:04:39 jcs Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.6  2001/04/02 12:04:39  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters from StarDb/ftpc
+//
 // Revision 1.5  2001/03/19 15:53:10  jcs
 // use ftpcDimensions from database
 //
@@ -80,7 +83,7 @@ int StFtpcSlowSimulator::simulate()
     float phi;
     float drift_time;
 
-    float aip = mParam->gasIonizationPotential()*1.0e-9;           // in GeV
+    float aip = mDb->gasIonizationPotential()*1.0e-9;           // in GeV
     float px, py, pz, pp;
     float xx, yy, zz;
     float rr;
@@ -204,7 +207,7 @@ int StFtpcSlowSimulator::simulate()
          
         // define cluster for each accepted hit point
         ++counter;
-        drift_time  = -mParam->tZero();                          
+        drift_time  = -mDb->tZero();                          
         electron    = de / aip;
 	
         rad_off     = rdout->GetPadLength() * tan(dip_ang);

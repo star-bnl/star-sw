@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.cc,v 1.5 2001/03/19 15:53:10 jcs Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.6 2001/04/02 12:04:33 jcs Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.6  2001/04/02 12:04:33  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters from StarDb/ftpc
+//
 // Revision 1.5  2001/03/19 15:53:10  jcs
 // use ftpcDimensions from database
 //
@@ -37,7 +40,7 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
   mParam=paramReader;
   mDb = dbReader;
   // inplementation of drift information from fcl_padtrahns, which is
-  // more precise than that in fss_gas (includes calculated magfield)
+  // more precise than that in ftpcSlowSimGas (includes calculated magfield)
   // there's a job to do: fuse both tables into one!
   innerRadius = mDb->sensitiveVolumeInnerRadius();
   outerRadius = mDb->sensitiveVolumeOuterRadius();
@@ -110,9 +113,9 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
   delete [] in_diffusion_y;
   delete [] in_angle_lorentz;
   
-  radTimesField = mParam->radiusTimesField();
+  radTimesField = mDb->radiusTimesField();
   nPadrowPositions = mDb->numberOfPadrowsPerSide();
-  nMagboltzBins = mParam->numberOfMagboltzBins();
+  nMagboltzBins = mDb->numberOfMagboltzBins();
   preciseEField = new float[nMagboltzBins];
   inverseDriftVelocity = new float[nMagboltzBins*nPadrowPositions];
   preciseLorentzAngle = new float[nMagboltzBins*nPadrowPositions];

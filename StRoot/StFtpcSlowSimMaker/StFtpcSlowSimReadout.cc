@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.4 2001/03/19 15:53:10 jcs Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.5 2001/04/02 12:04:37 jcs Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.5  2001/04/02 12:04:37  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters from StarDb/ftpc
+//
 // Revision 1.4  2001/03/19 15:53:10  jcs
 // use ftpcDimensions from database
 //
@@ -80,7 +83,7 @@ StFtpcSlowSimReadout::StFtpcSlowSimReadout(StFtpcParamReader *paramReader,
   // angle range in which each sector is calculated
   phiMin = mDb->phiOrigin() * degree;
   phiMax = mDb->phiEnd() * degree;    
-  mGasGain = mParam->gasGain();
+  mGasGain = mDb->gasGain();
   mMaxAdc = mParam->maxAdc();
   mGaussIntSteps = mParam->gaussIntegrationSteps();
   mInverseFinalVelocity = 1 /  field->GetVelAtReadout(); 

@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimCluster.cc,v 1.3 2001/03/19 15:53:10 jcs Exp $
+// $Id: StFtpcSlowSimCluster.cc,v 1.4 2001/04/02 12:04:31 jcs Exp $
 // $Log: StFtpcSlowSimCluster.cc,v $
+// Revision 1.4  2001/04/02 12:04:31  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters from StarDb/ftpc
+//
 // Revision 1.3  2001/03/19 15:53:10  jcs
 // use ftpcDimensions from database
 //
@@ -47,7 +50,7 @@ StFtpcSlowSimCluster::StFtpcSlowSimCluster(StFtpcParamReader *paramReader,
   // only absolute padrow in one chamber is needed for the field  
   deltaRadius = field->GetDeltaRadius();
   twoDeltaRadius = field->GetTwoDeltaRadius();
-  electronLoss = -deltaRadius * paramReader->gasAttenuation();
+  electronLoss = -deltaRadius * dbReader->gasAttenuation();
 
 }
 

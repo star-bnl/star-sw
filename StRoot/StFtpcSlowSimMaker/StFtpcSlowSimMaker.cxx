@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.4 2001/03/19 15:53:10 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.5 2001/04/02 12:04:34 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.5  2001/04/02 12:04:34  jcs
+// get FTPC calibrations,geometry from MySQL database and code parameters from StarDb/ftpc
+//
 // Revision 1.4  2001/03/19 15:53:10  jcs
 // use ftpcDimensions from database
 //
@@ -45,16 +48,16 @@ ClassImp(StFtpcSlowSimMaker)
 //_____________________________________________________________________________
 StFtpcSlowSimMaker::StFtpcSlowSimMaker(const char *name):
 StMaker(name),
-m_fss_gas(0),
-m_fss_param(0),
-m_det(0),
+m_slowsimpars(0),
 m_dimensions(0),
 m_padrow_z(0),
 m_efield(0),
 m_vdrift(0),
 m_deflection(0),
 m_dvdriftdp(0),
-m_ddeflectiondp(0)
+m_ddeflectiondp(0),
+m_gas(0),
+m_driftfield(0)
 {
 }
 //_____________________________________________________________________________
@@ -67,13 +70,13 @@ Int_t StFtpcSlowSimMaker::Init(){
   assert(ftpc);
   St_DataSetIter       local(ftpc);
 
-  m_fss_gas  = (St_fss_gas      *) local("fsspars/fss_gas");
-  m_fss_param= (St_fss_param    *) local("fsspars/fss_param");
-  m_det      = (St_fcl_det      *) local("fclpars/det");
+  m_clusterpars  = (St_ftpcClusterPars *) local("ftpcClusterPars");
+  m_slowsimgas   = (St_ftpcSlowSimGas  *) local("ftpcSlowSimGas");
+  m_slowsimpars  = (St_ftpcSlowSimPars *)local("ftpcSlowSimPars");
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
-     gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC database: Geometry"<<endm;
+     gMessMgr->Warning() << "StFtpcSlowSimMaker::Error Getting FTPC database: Geometry"<<endm;
      return kStWarn;
   }
   St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
@@ -83,7 +86,7 @@ Int_t StFtpcSlowSimMaker::Init(){
 
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
-     gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC database: Calibrations"<<endm;
+     gMessMgr->Warning() << "StFtpcSlowSimMaker::Error Getting FTPC database: Calibrations"<<endm;
      return kStWarn;
   }
   St_DataSetIter       dblocal_calibrations(ftpc_calibrations_db);
@@ -93,6 +96,8 @@ Int_t StFtpcSlowSimMaker::Init(){
   m_deflection = (St_ftpcDeflection *)dblocal_calibrations("ftpcDeflection" );
   m_dvdriftdp  = (St_ftpcdVDriftdP *)dblocal_calibrations("ftpcdVDriftdP" );
   m_ddeflectiondp = (St_ftpcdDeflectiondP *)dblocal_calibrations("ftpcdDeflectiondP" );
+  m_gas        = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
+  m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
 
   
   // Create Histograms    
@@ -130,9 +135,9 @@ Int_t StFtpcSlowSimMaker::Make(){
 						      fcl_ftpcadc);
     
     // create parameter reader
-    StFtpcParamReader *paramReader = new StFtpcParamReader(m_fss_gas,
-							   m_fss_param,
-							   m_det);
+    StFtpcParamReader *paramReader = new StFtpcParamReader(m_clusterpars,
+                                                           m_slowsimgas,
+                                                           m_slowsimpars);
  
     //create FTPC database reader
     StFtpcDbReader *dbReader = new StFtpcDbReader(paramReader,
@@ -142,7 +147,9 @@ Int_t StFtpcSlowSimMaker::Make(){
                                                   m_vdrift,
                                                   m_deflection,
                                                   m_dvdriftdp,
-                                                  m_ddeflectiondp);
+                                                  m_ddeflectiondp,
+                                                  m_gas,
+                                                  m_driftfield);
 
     StFtpcSlowSimulator *slowsim = new StFtpcSlowSimulator(geantReader,
 							   paramReader, 
