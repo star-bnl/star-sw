@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.117 2001/06/05 22:04:47 perev Exp $
+// $Id: StMaker.cxx,v 1.118 2001/08/14 16:42:48 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -43,6 +43,8 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fActive(
    SetMode();
    m_DebugLevel=0;
    m_MakeReturn=0;
+   m_Number=0;        	
+   m_LastRun=-1;        	
    m_Inputs = 0;
    if (!fgStChain) {	// it is first maker, it is chain
      fgStChain = this;
@@ -504,7 +506,7 @@ Int_t StMaker::Finish()
 Int_t StMaker::Make()
 {
 //   Loop on all makers
-   Int_t ret,run=-1;
+   Int_t ret,Ret=kStOK,run=-1,oldrun;
    TList *tl = GetMakeList();
    if (!tl) return kStOK;
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");   
@@ -513,11 +515,12 @@ Int_t StMaker::Make()
    fgFailedMaker = 0;
    while ((maker = (StMaker*)nextMaker())) {
      if (!maker->IsActive()) continue;
-     if (hd && hd->IsNewRun()) {
-       run = hd->GetOldRunNumber();  
-       if (run>-1) maker->FinishRun(run);
+     oldrun = maker->m_LastRun;
+     if (hd && hd->GetRunNumber()!=oldrun) {
+       if (oldrun>-1) maker->FinishRun(oldrun);
        run = hd->GetRunNumber();  
        maker->InitRun(run);
+       maker->m_LastRun=run;
      }
 // 		Call Maker
      maker->StartMaker();
@@ -525,11 +528,12 @@ Int_t StMaker::Make()
      assert(ret>=0 && ret<=kStFatal);     
      fgTallyMaker[ret]++;
      maker->EndMaker(ret);
-
+     
      if (Debug() || ret) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
 
      if (ret>kStWarn) { 
-       fgFailedMaker = maker; return ret;}
+       fgFailedMaker = maker;
+       return ret;}
      
    }
    return kStOK;
@@ -561,8 +565,8 @@ EDataSetPass StMaker::ClearDS (TDataSet* ds,void * )
      Int_t setSize =  table->GetTableSize();
      table->ReAllocate();
      memset((void *)table->At(table->GetNRows()),127,table->GetRowSize());
-     if (setSize && (setSize - table->GetTableSize() > 100)) {
-     // if (setSize && table->GetTableSize() == 0)
+     //if (setSize && (setSize - table->GetTableSize() > 100)) {
+      if (setSize && table->GetTableSize() == 0){
         table->Warning("ReAllocate"," Table %s has purged from %d to %d "
                ,table->GetName(),setSize,table->GetTableSize());
 	       }
@@ -1053,6 +1057,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.118  2001/08/14 16:42:48  perev
+// InitRun call improved
+//
 // Revision 1.117  2001/06/05 22:04:47  perev
 // Summary only on top
 //

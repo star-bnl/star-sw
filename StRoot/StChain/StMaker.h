@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.52 2001/06/01 02:47:31 perev Exp $
+// $Id: StMaker.h,v 1.53 2001/08/14 16:42:48 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.53  2001/08/14 16:42:48  perev
+// InitRun call improved
+//
 // Revision 1.52  2001/06/01 02:47:31  perev
 // Memory consumption measurement added
 //
@@ -177,6 +180,7 @@ protected:
    static Int_t fgTallyMaker[kStFatal+1];//!counters
    Int_t	   m_Mode;		//!Integer mode of maker
    Int_t           m_Number;        	//!Serial event number
+   Int_t           m_LastRun;        	//!Last Run number
    Int_t           m_DebugLevel;    	//!Debug level
    Int_t           m_MakeReturn;    	//!Make() return flag
    TStopwatch      m_Timer;             //!Timer object
@@ -300,7 +304,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.52 2001/06/01 02:47:31 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.53 2001/08/14 16:42:48 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
