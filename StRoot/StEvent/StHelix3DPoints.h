@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   21/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHelix3DPoints.h,v 1.2 1999/05/31 18:37:45 fine Exp $
+// $Id: StHelix3DPoints.h,v 1.3 1999/07/14 01:38:04 fine Exp $
 // $Log: StHelix3DPoints.h,v $
-// Revision 1.2  1999/05/31 18:37:45  fine
-// 3D graphics interface clean up
+// Revision 1.3  1999/07/14 01:38:04  fine
+// Previous version has been restored
+//
+// Revision 1.3  1999/07/14 01:38:04  fine
+// Previous version has been restored
 //
 // Revision 1.2  1999/05/31 18:37:45  fine
 // 3D graphics interface clean up
@@ -31,8 +34,8 @@ private:
         virtual Int_t     GetLastPosition()const;
         virtual Float_t   GetAnyPoint(Int_t idx,Int_t iAxis)  const;
         virtual Float_t   GetX(Int_t idx)  const { return GetAnyPoint(idx,0);}
+        virtual Float_t   GetY(Int_t idx)  const { return GetAnyPoint(idx,1);}
         virtual Float_t   GetZ(Int_t idx)  const { return GetAnyPoint(idx,2);}
-        virtual Float_t  *GetXYZ(Float_t *xyz,Int_t idx, Int_t num)const;
         virtual const Float_t  *GetXYZ(Int_t) {return 0;}
         virtual Float_t  *GetXYZ(Float_t *xyz,Int_t idx=0,Int_t num=1)  const;
         virtual Float_t   GetStep() const { return m_Step; }
@@ -40,7 +43,7 @@ private:
         virtual void      PaintPoints(Int_t n, Float_t *p,Option_t *option="");
         virtual Int_t     SetLastPosition(Int_t idx);
         virtual void      SetOption(Option_t *option="");
-        virtual Int_t     Size() const {  return GetLastPosition()+1; }
+        virtual Int_t     SetPoint(Int_t point, Float_t x, Float_t y, Float_t z);
         virtual Int_t     SetPoints(Int_t n, Float_t *p=0, Option_t *option="");
         virtual Float_t   SetStep(Float_t step){Float_t s = m_Step; m_Step = step; return s;} 
         virtual Int_t     Size() const {  return m_N; }

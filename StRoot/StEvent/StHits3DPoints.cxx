@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   18/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHits3DPoints.cxx,v 1.3 1999/07/13 23:32:23 fine Exp $
+// $Id: StHits3DPoints.cxx,v 1.4 1999/07/14 01:38:04 fine Exp $
 // $Log: StHits3DPoints.cxx,v $
-// Revision 1.3  1999/07/13 23:32:23  fine
-// Methods GetXYZ has been removed since it is defined by base class
+// Revision 1.4  1999/07/14 01:38:04  fine
+// Previous version has been restored
+//
+// Revision 1.4  1999/07/14 01:38:04  fine
+// Previous version has been restored
 //
 // Revision 1.3  1999/07/13 23:32:23  fine
 // Methods GetXYZ has been removed since it is defined by base class
@@ -56,7 +59,36 @@ Int_t StHits3DPoints::SetLastPosition(Int_t ){return 0;}
 //________________________________________________________________________________
 void StHits3DPoints::SetOption(Option_t *){;}
 //________________________________________________________________________________
+Int_t StHits3DPoints::SetPoint(Int_t , Float_t, Float_t , Float_t ){return 0;}
+//________________________________________________________________________________
+Int_t StHits3DPoints::SetPoints(Int_t , Float_t *, Option_t *) {return 0;}
+//______________________________________________________________________________
+Float_t *StHits3DPoints::GetXYZ(Float_t *xyz,Int_t idx,Int_t num)  const
+{
   //
+  // GetXYZ(Float_t *xyz,Int_t idx,Int_t num=1) fills the buffer supplied
+  // by the calling code with the points information.
+  //
+  //  Input parameters:
+  //  ----------------
+  //   Float_t *xyz - an external user supplied floating point array.
+  //   Int_t    num - the total number of the points to be copied
+  //                  the dimension of that array the size of the
+  //                  array is num*sizeof(Float_t) at least
+  //   Int_t    idx - The index of the first copy to be taken.
+  //
+  //  Return: The pointer to the buffer array supplied
+  //  ------
+
+  if (xyz) {
+    Int_t size = TMath::Min(idx+num,Size());
+    Int_t j=0;
+    Int_t i = 0;
+    for (i=idx;i<size;i++) {
+      xyz[j++] = GetX(i); 
+      xyz[j++] = GetY(i); 
+      xyz[j++] = GetZ(i);
+    }
   }
   return xyz;
 }
