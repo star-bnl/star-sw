@@ -590,11 +590,10 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
       free(cs); /*fix memory leak -akio*/
       EML_FAILURE(METHOD_FAILURE);
    }
-
+/* commented by Bill Love Mar 17 1998 
    printf("TDMTABLE:\tCell data = ");
    dsuPrintData(stdout,cellData._d,col.elcount,cellData.data.v);
-   printf("\n");
-
+   printf("\n"); */
    float result;
    switch( cellData._d ){
       case DS_TYPE_CHAR:
