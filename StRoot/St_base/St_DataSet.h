@@ -1,7 +1,10 @@
 //*CMZ :          13/08/98  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   13/08/98 
-// $Id: St_DataSet.h,v 1.34 1999/07/23 13:26:06 fine Exp $
+// $Id: St_DataSet.h,v 1.35 1999/08/06 15:24:35 fine Exp $
 // $Log: St_DataSet.h,v $
+// Revision 1.35  1999/08/06 15:24:35  fine
+// UnMark method has been introduced
+//
 // Revision 1.34  1999/07/23 13:26:06  fine
 // Several new methods to mark the datasets have been introduced
 //
@@ -117,6 +120,7 @@ class St_DataSet : public TNamed
     virtual void         ls(Option_t *option="")  const;      // Option "*" means print all levels
     virtual void         ls(Int_t depth)  const;              // Print the "depth" levels of this datatset
             void         Mark();                              // *MENU*
+            void         UnMark();                            // *MENU*
             void         MarkAll();                           // *MENU*
             void         UnMarkAll();                         // *MENU*
             void         InvertAllMarks();                    // *MENU*
@@ -131,6 +135,7 @@ inline void      St_DataSet::Add(St_DataSet *dataset){ AddLast(dataset); }
 inline Int_t     St_DataSet::GetListSize() const {TList *tl=GetList(); return (tl) ? tl->GetSize():0;}
 inline Bool_t    St_DataSet::IsMarked() { return TestBit(kMark); }
 inline void      St_DataSet::Mark()     { Mark(kMark,kSet); }
+inline void      St_DataSet::UnMark()   { Mark(kMark,kReset); }
 inline void      St_DataSet::Mark(UInt_t flag,EBitOpt reset){ SetBit(flag,reset); }
 
 
