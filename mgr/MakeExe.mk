@@ -68,7 +68,7 @@ FILES_O := $(addprefix $(OBJ_DIR)/,$(addsuffix .o,$(basename $(notdir $(FILES_O)
 FILES_D := $(addprefix $(DEP_DIR)/,$(addsuffix .d,$(basename $(notdir $(FILES_D)))))
 
 
-INCL  := $(INP_DIR) $(GST_DIR) $(STAF_SYS_INCS) $(CERN_ROOT)/include 
+INCL  := $(INP_DIR) $(GST_DIR) $(STAF_SYS_INCS) $(CERN_ROOT)/include /usr/include
 #                                                                    $(CERN_ROOT)/src/pawlib/paw/ntuple
 INCL  := $(addprefix -I,$(INCL))
 
