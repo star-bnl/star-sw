@@ -263,7 +263,7 @@ print "Total input files: $nInFiles\n";
  my $mpath;
  my $memFst = 0;
  my $memLst = 0;
- my $lgTime;
+ my $jobTime;
  my $mavail = "n\/a";
  my $lgTest = "test.log";
  my $startId = "Job00000_test";
@@ -337,7 +337,7 @@ print "Total input files: $nInFiles\n";
  $memFst = 0;
  $memLst = 0; 
  $EvSkip = 0;
-
+ $jobTime = 0;
 
        if ($fname =~ /evts.log/)  {       
        $fullname = $eachOutLDir."/".$fname;
@@ -348,6 +348,7 @@ print "Total input files: $nInFiles\n";
        $platf = $dirF[5]; 
        $logName = $fname; 
 
+      ($size, $mTime) = (stat($fullname))[7, 9];
      ($sec,$min,$hr,$dy,$mo,$yr) = (localtime($mTime))[0,1,2,3,4,5];
       $mo = sprintf("%2.2d", $mo+1);
       $dy = sprintf("%2.2d", $dy);
@@ -363,7 +364,7 @@ print "Total input files: $nInFiles\n";
        
         &logInfo("$fullname", "$platf");
 
-      $lgTime = $timeS;  
+      $jobTime = $timeS;  
       $mavail = 'Y';
       $myID = 100000000 + $new_id;
       $mjID = "Job". $myID ;
@@ -670,7 +671,7 @@ sub fillJSTable {
     $sql.="rootLevel='$rootL',";
     $sql.="path='$mpath',";
     $sql.="logFile='$logName',";
-    $sql.="createTime='$lgTime',";
+    $sql.="createTime='$jobTime',";
     $sql.="chainOpt='$mchain',";
     $sql.="jobStatus='$jrun',";
     $sql.="crashedCode='$crCode',";
