@@ -7,6 +7,14 @@ ClassImp(StBemcData)
 StBemcData::StBemcData(char* name):TDataSet(name)
 {
   mDecoder = NULL;
+	for(int i=0;i<30;i++)
+	{
+		TDCError[i] = 0;
+		TDCToken[i] = 0;
+		TDCTrigger[i] = 4;
+		TDCCrateId[i] = 0;
+		TDCCount[i] = 164;
+	}
 }
 StBemcData::~StBemcData()
 {
@@ -30,14 +38,26 @@ Bool_t StBemcData::getSMDStatus(Int_t c)
 } 
 Bool_t StBemcData::checkTDC(Int_t i)
 {
+	float towerTh = 200;
 	Bool_t ok = kTRUE;
   if(!mDecoder) mDecoder = new StEmcDecoder(EventDate,EventTime);
 	Int_t crate;
   if(!getTDCStatus(i)) return kTRUE;
   mDecoder->GetTowerCrateFromTDC(i,crate);
   if(TDCError[i]!=0) ok = kFALSE;
-	if(TDCCrateId[i]!=crate) ok = kFALSE;
+	if(TDCCrateId[i]!=crate && TDCCrateId[i]!=0) ok = kFALSE;
 	if(TDCCount[i]!=164) ok = kFALSE;
+	float sum =0, nt=0;
+	float avg = 0;
+	int id;
+	if(TDCTrigger[i]==4)  //physics trigger only
+	  for(int j=0;j<160;j++)
+		{
+			mDecoder->GetTowerIdFromTDC(i,j,id);
+			if(id>=1 && id<=4800) if(TowerStatus[id-1]==1) { sum+=TowerADC[i]; nt++; }
+		}
+	if(nt>0) avg = sum/nt;
+	if(avg>towerTh) ok = kFALSE;
   return ok;
 }
 void StBemcData::validateData()
@@ -48,7 +68,7 @@ void StBemcData::validateData()
 	if(TDCErrorFlag==1) ok = kFALSE;
   Int_t nbad = 0;
 	for(Int_t i=0;i<30;i++) if(!checkTDC(i)) nbad++;
-  if(nbad==0) ok = kTRUE;
+  if(nbad>0) ok = kFALSE;
 	ValidTowerEvent = ok;
 	
 	//SMD

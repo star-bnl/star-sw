@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.38 2003/02/04 18:33:19 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.39 2003/02/06 16:34:58 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.39  2003/02/06 16:34:58  suaide
+// changes on data validation
+//
 // Revision 1.38  2003/02/04 18:33:19  suaide
 // small modifications
 //
@@ -104,7 +107,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
 
   Int_t   calib[]      = {1, 0, 1, 1, 0, 0, 0, 0};
   Int_t   pedSub[]     = {1, 0, 1, 1, 0, 0, 0, 0};
-  Float_t energyCut[]  = {-1, -1, 0.1, 0.1, -1, -1, -1, -1};
+  Float_t energyCut[]  = {-1, -1, 0.07, 0.07, -1, -1, -1, -1};
   Int_t   onlyCal[]    = {0, 0, 0, 0, 0, 0, 0, 0};
   
   for(Int_t i=0; i<MAXDET; i++)
@@ -135,6 +138,8 @@ Int_t StEmcADCtoEMaker::Init()
   const Float_t xl[] = {-1.0,-1.0,-1.0,-1.0, 0.5 , 0.5, 0.5, 0.5};
   const Float_t xu[] = { 1.0, 1.0, 1.0, 1.0, 12.5,12.5,12.5,12.5};
   const Int_t   ny[] = {120, 120, 60, 900, 60, 60, 60, 60};
+	
+	mValidEvents = new TH2F("ValidEvents","Valid events for each detector (1=good, 2= bad)",4,-0.5,3.5,8,0.5,8.5);
  
   mNhit = new TH2F("EmcNHitsVsDet" ,"Number of hit with energy > 0 .vs. Detector #",1000,0.0,18000,8,0.5,8.5);
   mEtot = new TH2F("EmcEtotVsDet" ,"Total energy(log10) .vs. Detector #",500,-4.0,15.0,8,0.5,8.5);
@@ -151,15 +156,18 @@ Int_t StEmcADCtoEMaker::Init()
     TString name_e = detname[i] + "_Energy";
     TString name_a = detname[i] + "_ADC";
     TString name_a1= detname[i] + "_ADC1D";
+    TString name_e1= detname[i] + "_Energy1D";
     TString title_h= detname[i] + " Hits distribution with energy > 0";
     TString title_e= detname[i] + " Energy distribution";
     TString title_a= detname[i] + " ADC distribution";
     TString title_a1= detname[i] +" ADC distribution (log10)";
+    TString title_e1= detname[i] +" Energy distribution";
     Float_t rpi = M_PI + 0.00001; 
     mHits[i]   = new TH2F(name_h,title_h,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
     mEnergyHist[i] = new TH2F(name_e,title_e,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
     mAdc[i]    = new TH2F(name_a,title_a,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
     mAdc1d[i]  = new TH1F(name_a1,title_a1,1000,0,8);   
+    mEn1d[i]   = new TH1F(name_e1,title_e1,1000,-200,2000);   
   }
   for (Int_t i=0; i<MAXDET; i++) 
 	{
@@ -419,11 +427,13 @@ Bool_t StEmcADCtoEMaker::getEmc()
 // check if there is event from DAQ
 	mData->EventDate = GetDate();
 	mData->EventTime = GetTime();
+	mFromDaq = kFALSE;
 	
   TDataSet* TheData   = GetDataSet("StDAQReader");
   if(TheData) 
 	{
-  	StDAQReader* TheDataReader=(StDAQReader*)(TheData->GetObject());
+  	mFromDaq = kTRUE;
+		StDAQReader* TheDataReader=(StDAQReader*)(TheData->GetObject());
   	if(!TheDataReader) return kFALSE;
 		mData->RunNumber = TheDataReader->getRunNumber();
 		mData->TriggerWord = TheDataReader->getTrigWord();
@@ -560,10 +570,11 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
         Float_t c = 0;
 				if(det<2) c = emccalibst[0].AdcToE[id-1][i];
 				else      c = smdcalibst[0].AdcToE[id-1][i];
+				//if(i==0) c=0;
 				EN+=c*ADCPOWER; 
-        ADCPOWER*=fabs(ADCSUB);
+        ADCPOWER*=ADCSUB;
       }
-      if(ADCSUB<0) EN*=-1;
+      //if(ADCSUB<0) EN*=-1;
 			//correcting gain ..........
 			Float_t gain = 1;
 			if(det<2 && emcgainst) gain = emcgainst[0].Gain[id-1];
@@ -596,7 +607,7 @@ This method fills QA histograms
 */
 Bool_t StEmcADCtoEMaker::fillHistograms()
 {
-
+  
   for(Int_t det=0;det<MAXDET;det++)
 	{
 		Int_t nHits = 0;
@@ -604,6 +615,11 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 		Float_t totalADC = 0;
 		Int_t MAXCHANNEL = 18000;
 		if(det<2) MAXCHANNEL = 4800;
+		Bool_t valid = kTRUE;
+		if(det==0) valid = mData->ValidTowerEvent;
+		if(det==2) valid = mData->ValidSMDEvent;
+		if(det==3) valid = mData->ValidSMDEvent;
+		if(valid) mValidEvents->Fill(1,det+1); else mValidEvents->Fill(2,det+1);
 		for(Int_t i=0;i<MAXCHANNEL;i++)
 		{
 			Char_t status = 0;
@@ -629,6 +645,7 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 		}
 		if(nHits>0)    mNhit->Fill((Float_t)nHits,(Float_t)det+1);
 		if(totalE>0)   mEtot->Fill(log10(totalE),(Float_t)det+1);
+		if(mEn1d[det]) mEn1d[det]->Fill(totalE);
 		if(totalADC>0) mAdc1d[det]->Fill(log10(totalADC));
   	if(det==2) for(Int_t RDO=0;RDO<8;RDO++) mSmdTimeBinHist->Fill(RDO,mData->TimeBin[RDO]);
 	}
@@ -653,66 +670,69 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
   mEmc = NULL;	
 	if(event) mEmc = event->emcCollection();
 	if(mEmc) clearOldEmc();
-  
-  for(Int_t det=0;det<MAXDET;det++) if(mControlADCtoE->Calibration[det]==1)
-  {
-    Bool_t Valid = kTRUE;
-		Int_t NHITS = 0;
-    Int_t NGOOD = 0;
-	  if(det==0) Valid = mData->ValidTowerEvent;
-	  if(det==2 || det==3) Valid = mData->ValidSMDEvent;	
-		if(Valid)
-		{
-			Int_t Max = 120*mGeo[det]->NEta()*mGeo[det]->NSub();    
-    	// first check if there is at least one valid hit to save
-    	Bool_t saveDet=kFALSE;
-    	for(Int_t idh=1;idh<=Max;idh++) if(saveHit(det,idh)) { saveDet = kTRUE; break; }
+  	
+  for(Int_t det=0;det<MAXDET;det++) 
+	{
+		if(mControlADCtoE->Calibration[det]==1)
+  	{
+    	Bool_t Valid = kTRUE;
+			Int_t NHITS = 0;
+    	Int_t NGOOD = 0;
+	  	if(det==0) Valid = mData->ValidTowerEvent;
+	  	if(det==2 || det==3) Valid = mData->ValidSMDEvent;	
+			if(Valid)
+			{
+				Int_t Max = 120*mGeo[det]->NEta()*mGeo[det]->NSub();    
+    		// first check if there is at least one valid hit to save
+    		Bool_t saveDet=kFALSE;
+    		for(Int_t idh=1;idh<=Max;idh++) if(saveHit(det,idh)) { saveDet = kTRUE; break; }
 
-    	if(saveDet)
-    	{
-      	if(!mEmc) 
-				{
-					mEmc =new StEmcCollection();
-					if(event) event->setEmcCollection(mEmc);
-				}
-      	StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId);
-      	StEmcDetector* detector=mEmc->detector(id);
-				if(!detector)
-				{
-					detector = new StEmcDetector(id,120); 
-					mEmc->setDetector(detector);
-				}
+    		if(saveDet)
+    		{
+      		if(!mEmc) 
+					{
+						mEmc =new StEmcCollection();
+						if(event) event->setEmcCollection(mEmc);
+					}
+      		StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId);
+      		StEmcDetector* detector=mEmc->detector(id);
+					if(!detector)
+					{
+						detector = new StEmcDetector(id,120); 
+						mEmc->setDetector(detector);
+					}
     
-      	for(Int_t idh=1;idh<=Max;idh++)
-      	{      
-        	if(saveHit(det,idh))
-        	{
-          	Int_t ADC = 0;
-						Float_t E = 0;
-						if(det==0) { ADC = mData->TowerADC[idh-1]; E = mData->TowerEnergy[idh-1]; }
-						if(det==2) { ADC = mData->SmdeADC[idh-1]; E = mData->SmdeEnergy[idh-1]; }
-						if(det==3) { ADC = mData->SmdpADC[idh-1]; E = mData->SmdpEnergy[idh-1]; }
-          	Int_t m,e,s;
-          	mGeo[det]->getBin(idh,m,e,s);
+      		for(Int_t idh=1;idh<=Max;idh++)
+      		{      
+        		if(saveHit(det,idh))
+        		{
+          		Int_t ADC = 0;
+							Float_t E = 0;
+							if(det==0) { ADC = mData->TowerADC[idh-1]; E = mData->TowerEnergy[idh-1]; }
+							if(det==2) { ADC = mData->SmdeADC[idh-1]; E = mData->SmdeEnergy[idh-1]; }
+							if(det==3) { ADC = mData->SmdpADC[idh-1]; E = mData->SmdpEnergy[idh-1]; }
+          		Int_t m,e,s;
+          		mGeo[det]->getBin(idh,m,e,s);
           
-          	StEmcRawHit* hit=new StEmcRawHit(id,m,e,s,(UInt_t)ADC);
-          	hit->setEnergy(E);
-          	if(det==2 || det==3) 
-          	{
-            	Int_t RDO,index;
-            	mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
-            	Int_t timeBin=mData->TimeBin[RDO];
-            	hit->setCalibrationType(timeBin);
-          	}
-          	detector->addHit(hit);
-						NHITS++;
-            if(E!=0) NGOOD++;
-          }
-      	}
-    	}
-		}
-		cout <<"NHITS Saved on StEvent for detector "<<detname[det].Data()<<" = "<<NHITS<<"  GOOD = "<<NGOOD<<endl;
-  }  
+          		StEmcRawHit* hit=new StEmcRawHit(id,m,e,s,(UInt_t)ADC);
+          		hit->setEnergy(E);
+          		if(det==2 || det==3) 
+          		{
+            		Int_t RDO,index;
+            		mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
+            		Int_t timeBin=mData->TimeBin[RDO];
+            		hit->setCalibrationType(timeBin);
+          		}
+          		detector->addHit(hit);
+							NHITS++;
+            	if(E!=0) NGOOD++;
+          	} 
+      		}
+    		}
+			}
+			cout <<"NHITS Saved on StEvent for detector "<<detname[det].Data()<<" = "<<NHITS<<"  GOOD = "<<NGOOD<<endl;
+  	} 
+	} 
   // finished clean up
   
   return kTRUE;
