@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.48 2000/07/04 02:36:01 perev Exp $
+// $Id: StMaker.h,v 1.49 2001/04/10 21:38:49 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.49  2001/04/10 21:38:49  perev
+// Maki(int) --> IMake(int)
+//
 // Revision 1.48  2000/07/04 02:36:01  perev
 // AddMaker method added & gStChain removed
 //
@@ -184,7 +187,7 @@ public:
    virtual Int_t  	Init();
    virtual void   	StartMaker();
    virtual Int_t  	Make();
-   virtual Int_t  	Make(int number){SetNumber(number);return Make();};
+   virtual Int_t  	IMake(int number){SetNumber(number);return Make();};
    virtual void   	EndMaker  (int ierr);
    virtual Int_t  	Finish();
    virtual Int_t  	FinishRun(int oldrunumber);
@@ -287,7 +290,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.48 2000/07/04 02:36:01 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.49 2001/04/10 21:38:49 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };

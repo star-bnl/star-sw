@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.44 2000/11/27 13:31:23 fisyak Exp $
+// $Id: StChain.cxx,v 1.45 2001/04/10 21:38:49 perev Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.45  2001/04/10 21:38:49  perev
+// Maki(int) --> IMake(int)
+//
 // Revision 1.44  2000/11/27 13:31:23  fisyak
 // Add Production time set
 //
@@ -181,6 +184,6 @@ Int_t StChain::MakeEvent()
 {
   // Make next event from the TBrowser TContextMenu
   Clear();
-  return StMaker::Make(GetNumber()+1);
+  return StMaker::IMake(GetNumber()+1);
 }
 
