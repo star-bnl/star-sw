@@ -111,6 +111,9 @@ Int_t St_XDFFile::OpenXDF(Char_t *filename,Char_t *mode)
     CloseXDF();
     return 2;
   }
+
+  if (!fStream) fStream = (XDR*) malloc(sizeof(XDR));
+
   if (strchr(fType,'w'))  xdrstdio_create(fStream, fFile, XDR_ENCODE);   
   else xdrstdio_create(fStream, fFile, XDR_DECODE);   
 
