@@ -35,7 +35,7 @@ UPP_INP_DIR := $(subst / ,,$(dir $(INP_DIR)) )
 
 PKGNAME := $(notdir $(INP_DIR))
 ifeq (base,$(PKGNAME))
-LIBRARY := -L$(STAR)/asps/../.$(STAR_SYS)/lib -ldsl -lasu 
+#LIBRARY := -L$(STAR)/asps/../.$(STAR_SYS)/lib -ldsl -lasu 
 #                                                            $(shell cernlib)
 endif
 INC_DIRS:= $(subst /TEMP,, $(addsuffix TEMP, $(sort $(dir $(wildcard $(OUT_DIR)/.share/*/*.h  $(STAR)/.share/*/*.h)))))
