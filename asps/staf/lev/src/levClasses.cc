@@ -12,9 +12,17 @@
 #define VSIZE 40
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
+#ifndef WIN32
+# include <unistd.h>
+# include <sys/utsname.h>
+#else
+#  include <windows.h>
+#  include <process.h>
+#  include <time.h>
+#  include <winsock.h>
+typedef int pid_t;
+#endif
 #include <stdlib.h>
-#include <sys/utsname.h>
 #include <time.h>
 #include <sys/types.h>
 
@@ -143,7 +151,12 @@ STAFCV_T levFactory::update() {
   return TRUE; // HACK, meaningless return value
 }
 STAFCV_T levFactory::levRegisterEnvironment() {
-  struct utsname osys; time_t calTime; int ii,len;
+
+#ifndef WIN32
+  struct utsname osys;
+#endif /* WIN32 */ 
+
+  time_t calTime; int ii,len;
   char nameOfExe[VSIZE+2],hostname[VSIZE+2],user[VSIZE+2],*cc,startTime[152];
   PP"This is levRegisterEnvironment().\n");
   /******************  user name ****************************/
@@ -154,7 +167,9 @@ STAFCV_T levFactory::levRegisterEnvironment() {
     strncpy(hostname,"gethostname-failed-lev.c",VSIZE); 
   }
   /******************  operating system ****************************/
+#ifndef WIN32
   uname(&osys);
+#endif
   /******************  start time ****************************/
   calTime=time(NULL); strncpy(startTime,ctime(&calTime),50); 
   len=strlen(startTime);
@@ -173,6 +188,7 @@ STAFCV_T levFactory::levRegisterEnvironment() {
   if(!levRegisterEnvInfo("user",user)) EML_ERROR(TABLE_INSERTION_FAILED);
   if(!levRegisterEnvInfo("hostname",hostname))
 	EML_ERROR(TABLE_INSERTION_FAILED);
+#ifndef WIN32
   if(!levRegisterEnvInfo("sysname",osys.sysname))
 	EML_ERROR(TABLE_INSERTION_FAILED);
   if(!levRegisterEnvInfo("node",osys.nodename))
@@ -183,6 +199,18 @@ STAFCV_T levFactory::levRegisterEnvironment() {
 	EML_ERROR(TABLE_INSERTION_FAILED);
   if(!levRegisterEnvInfo("machine",osys.machine))
 	EML_ERROR(TABLE_INSERTION_FAILED);
+#else
+  if(!levRegisterEnvInfo("sysname","Windows NT"))
+	EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("node","UNKOWN"))
+	EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("release","4"))
+	EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("version","0"))
+	EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("machine","UNKOWN"))
+	EML_ERROR(TABLE_INSERTION_FAILED);
+#endif
   if(!levRegisterEnvInfo("nameOfExe",nameOfExe))
 	EML_ERROR(TABLE_INSERTION_FAILED);
   if(!levRegisterEnvInfo("startTime",startTime))
@@ -279,7 +307,7 @@ STAFCV_T levFactory:: registerVersion(const char *name,
 } /* nrow val */
 char *levFactory:: version() {
   char *c=NULL;
-  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.7 1998/03/11 21:40:07 ward Exp $";
+  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.8 1998/03/16 01:40:14 fisyak Exp $";
   c=(char*)malloc(strlen(v)+1);
   strcpy(c,v);
   return c;

@@ -146,10 +146,17 @@ STAFCV_T duiFactory:: df () {
   static long previous = -123;
   char buf1[40],buf2[40];
   long thisTime;
+#ifndef WIN32
   struct mallinfo qq;
   qq=mallinfo();
   thisTime=qq.usmblks+qq.uordblks;
   // Do we need to delete qq?
+#else
+//          int usmblks;    /* space in small blocks in use */
+//          int uordblks;   /* space in ordinary blocks in use */
+
+  thisTime = 0;
+#endif /* WIN32 */
   if(previous>=0) {
     duiSprinfWithCommas(buf1,(long)(thisTime));
     duiSprinfWithCommas(buf2,(long)(thisTime-previous));

@@ -15,7 +15,7 @@
 >GUIDANCE
 Dataset_Unix_like_Interface commands.
 .
- #(@)$Id: dui_def.cdf,v 1.7 1998/03/11 21:40:03 ward Exp $  Edited by Bill Love - 24 Feb 1998
+ #(@)$Id: dui_def.cdf,v 1.8 1998/03/16 01:38:52 fisyak Exp $  Edited by Bill Love - 24 Feb 1998
 .
 DUI is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -111,7 +111,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DUI_CD
+>ACTION kam_dui_cd_%C
 **
 ** ---------------------------------------------------------------------
 ** DUI/CP SOURCE TARGET
@@ -158,7 +158,7 @@ BUGS:
 .
    None known.
 .
->ACTION KAM_DUI_CP
+>ACTION kam_dui_cp_%C
 **
 ** ---------------------------------------------------------------------
 ** DUI/DF
@@ -195,7 +195,7 @@ BUGS:
 .
    None known.
 .
->ACTION KAM_DUI_DF
+>ACTION kam_dui_df_%C
 **
 ** ---------------------------------------------------------------------
 ** DUI/DU
@@ -236,7 +236,7 @@ BUGS:
 .
    None known.
 .
->ACTION KAM_DUI_DU
+>ACTION kam_dui_du_%C
 **
 ** ---------------------------------------------------------------------
 ** DUI/LN SOURCE TARGET
@@ -281,7 +281,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DUI_LN
+>ACTION kam_dui_ln_%C
 **
 ** ---------------------------------------------------------------------
 ** DUI/LS [ PATH ]
@@ -328,7 +328,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DUI_LS
+>ACTION kam_dui_ls_%C
 **
 ** ---------------------------------------------------------------------
 ** DUI/MKDIR PATH
@@ -368,7 +368,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DUI_MKDIR
+>ACTION kam_dui_mkdir_%C
 **
 ** ---------------------------------------------------------------------
 ** DUI/MV SOURCE TARGET
@@ -411,7 +411,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DUI_MV
+>ACTION kam_dui_mv_%C
 **
 ** ---------------------------------------------------------------------
 ** DUI/PWD
@@ -448,7 +448,7 @@ BUGS:
 .
    None known.
 .
->ACTION KAM_DUI_PWD
+>ACTION kam_dui_pwd_%C
 **
 ** ---------------------------------------------------------------------
 ** DUI/RM PATH
@@ -489,7 +489,7 @@ BUGS:
    I'm not sure it's supposed to delete datasets.  Probably RM is a 
 legal KUIP abbreviation for RMDIR.
 .
->ACTION KAM_DUI_RM
+>ACTION kam_dui_rm_%C
 **
 ** ---------------------------------------------------------------------
 ** DUI/RMDIR PATH
@@ -530,6 +530,7 @@ BUGS:
 .
    None known.
 .
->ACTION KAM_DUI_RMDIR
+>ACTION kam_dui_rmdir_%C
+=======
 **
 

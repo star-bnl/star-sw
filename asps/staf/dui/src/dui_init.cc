@@ -21,6 +21,11 @@
 #include "soc_globals.h"
 #include "tdm_globals.h"
 
+#include "fortranc.h"   /* The definition of the Fortran/C interface */
+
+#define dui_def_ F77_NAME(dui_def,DUI_DEF)
+extern "C" void type_of_call dui_def_();
+
 //:>--------------------------------------------------------------------
 //:ROUTINE:	int dui_init()
 //:DESCRIPTION:	Initialize DUI

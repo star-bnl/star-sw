@@ -53,7 +53,7 @@ is written automatically.
  * Still In Development *
  ************************
 .
->ACTION KAM_LEV_UPDATE
+>ACTION kam_lev_update_%C
 ** ---------------------------------------------------------------------
 ** LEV/REGISTER_VERSION NAME VERSION
 >COMMAND REGISTER_VERSION
@@ -81,6 +81,6 @@ change it back to @Id:@ every time you want to update the overwrite.
  * Still In Development *
  ************************
 .
->ACTION KAM_LEV_REGISTER_VERSION
+>ACTION kam_lev_register_version_%C
 
 
