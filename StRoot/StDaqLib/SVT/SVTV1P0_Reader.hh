@@ -1,8 +1,8 @@
 /***************************************************************************
  *
- * $Id: SVTV1P0_Reader.hh,v 1.1 2000/06/06 18:08:31 jml Exp $ 
+ * $Id: SVTV1P0_Reader.hh,v 1.2 2001/04/18 19:47:25 ward Exp $ 
  *
- * Author: M.J. LeVine and Marcelo Munhoz (for the SVT group)
+ * Author: M.J. LeVine, Marcelo Munhoz, J. Schambach
  ***************************************************************************
  *
  * Description: common definitions for SVT
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: SVTV1P0_Reader.hh,v $
+ * Revision 1.2  2001/04/18 19:47:25  ward
+ * StDaqLib/SVT stuff from Jo Schambach.
+ *
  * Revision 1.1  2000/06/06 18:08:31  jml
  * Initial version of SVT Readers (author: marcello munholz, helen caines)
  * 
