@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichTofMuDstMaker.cxx,v 1.2 2002/02/23 01:54:56 dunlop Exp $
+ * $Id: StRichTofMuDstMaker.cxx,v 1.3 2002/03/09 18:46:49 dunlop Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StRichTofMuDstMaker.cxx,v $
+ * Revision 1.3  2002/03/09 18:46:49  dunlop
+ * Modified logic when bad RICH event (don't try v0's, don't keep l3).
+ * Keep event even if no rich or tof tracks, for scalars in minbias.
+ *
  * Revision 1.2  2002/02/23 01:54:56  dunlop
  * Tightened cut on tof phi
  *
@@ -293,8 +297,8 @@ Int_t StRichTofMuDstMaker::Make()
 	}
     }
     if (!goodNodes.size() && nL3 ==0) {
-	cout << "StRichTofMuDstMaker::Make():  no good tracks" << endl;
-	delete event;
+	cout << "StRichTofMuDstMaker::Make():  no good tracks.  Not deleting event." << endl;
+//	delete event;
 	return kStOK;
     }
     
@@ -357,6 +361,8 @@ bool StRichTofMuDstMaker::accept(StEvent* event)
     
 // Also check if there is a rich collection
     if (event->detectorState(kRichId) && !(event->detectorState(kRichId)->good())) {
+	cout << "Bad rich event: detectorState(kRichId)->good():" << event->detectorState(kRichId)->good() << endl;
+	
 	mEventAcceptedRich = false;
     }
     if (!(event->richCollection())) mEventAcceptedRich = false;
@@ -507,6 +513,8 @@ bool StRichTofMuDstMaker::acceptL3TrackInRich(StTrack *gt)
 {
 
     bool retval = false;
+    if (!mEventAcceptedRich) return false;
+    
     if (gt->geometry()->momentum().mag()<mL3PCut) return false;
     
     const StPhysicalHelixD &gh = gt->geometry()->helix();
@@ -544,8 +552,10 @@ bool StRichTofMuDstMaker::strobeEvent(StSPtrVecTofData tofData){
 vector<StV0Vertex*> StRichTofMuDstMaker::getLambdas(StEvent* event) 
 {
 
+  vector <StV0Vertex*> ret;
+  if (!mEventAcceptedRich) return ret;
+  
     
-
     
   StStrangeMuDstMaker* strangeDst =
     (StStrangeMuDstMaker*) GetMaker("strangeMuDst");
@@ -563,7 +573,6 @@ vector<StV0Vertex*> StRichTofMuDstMaker::getLambdas(StEvent* event)
     }
   }
 
-  vector <StV0Vertex*> ret;
     
   if (!strangeDst) return ret;
     
