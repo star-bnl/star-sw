@@ -251,7 +251,7 @@ Int_t StFtpcTrackingParams::InitFromFile() {
   
    // internal FTPC rotation (East only) [has do be done before local -> global]
    mInstallationPointZ    = -235.8855 * centimeter;
-   mObservedVertexOffsetY =    0.2987 * centimeter;
+   mObservedVertexOffsetY =    0.258  * centimeter;
  
    // define rotation angle alpha=atan(y_vertex_offset cm/z_installation cm)
    Double_t alpha = TMath::ATan(mObservedVertexOffsetY / TMath::Abs(mInstallationPointZ)); // radians and > 0
