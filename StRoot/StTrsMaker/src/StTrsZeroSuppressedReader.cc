@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.cc,v 1.5 2000/03/15 18:08:56 calderon Exp $
+ * $Id: StTrsZeroSuppressedReader.cc,v 1.6 2000/03/15 23:33:55 calderon Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.cc,v $
+ * Revision 1.6  2000/03/15 23:33:55  calderon
+ * Remove extra messages
+ *
  * Revision 1.5  2000/03/15 18:08:56  calderon
  * ZSR is no longer a singleton.  Two will be needed for mixer chain.
  *
@@ -82,7 +85,6 @@ int StTrsZeroSuppressedReader::setSector(int sector)
 	    return 1;
     }
     else {
-	cerr << "**No Data in Sector " << sector << " **" << endl;
 	return 0;
     }
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIstream.cc,v 1.10 2000/02/10 01:21:50 calderon Exp $
+ * $Id: StTrsIstream.cc,v 1.11 2000/03/15 23:33:55 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsIstream.cc,v $
+ * Revision 1.11  2000/03/15 23:33:55  calderon
+ * Remove extra messages
+ *
  * Revision 1.10  2000/02/10 01:21:50  calderon
  * Switch to use StTpcDb.
  * Coordinates checked for consistency.
@@ -156,7 +159,7 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
     unsigned short currentPadNum;
 
     ifs >> currentSectorNum;
-    cout << "Reading Sector " << currentSectorNum+1 << endl;
+    //cout << "Reading Sector " << currentSectorNum+1 << endl;
     while (currentSectorNum < static_cast<unsigned short>(mSectors)) {
 	//PR(currentSectorNum);
 	StTrsDigitalSector* aDigitalSector = new StTrsDigitalSector(mGeomDb);

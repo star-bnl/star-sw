@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOstream.cc,v 1.7 2000/02/10 01:21:50 calderon Exp $
+ * $Id: StTrsOstream.cc,v 1.8 2000/03/15 23:33:55 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsOstream.cc,v $
+ * Revision 1.8  2000/03/15 23:33:55  calderon
+ * Remove extra messages
+ *
  * Revision 1.7  2000/02/10 01:21:50  calderon
  * Switch to use StTpcDb.
  * Coordinates checked for consistency.
@@ -132,12 +135,12 @@ void StTrsOstream::writeTrsEvent(StTrsRawDataEvent* EventData)
     for (iSector = 0; iSector < mSectors; iSector++) { // sector loop
 	if(EventData->mSectors[iSector]) { // Make sure the sector has data
 	    StTrsDigitalSector* aDigitalSector = EventData->mSectors[iSector];
-	    cout << "Cleanup of Sector " << iSector+1 << endl;	
+	    //cout << "Cleanup of Sector " << iSector+1 << endl;	
 	    if (aDigitalSector->cleanup())
 		cout << "Sector " << iSector+1 << " has no data. Skip it." << endl;
 	    else { // sector has data, write it out
 		ofs << static_cast<unsigned short>(iSector) << " ";
-		cout << "Writing Sector " << iSector+1 << endl;
+		//cout << "Writing Sector " << iSector+1 << endl;
 		unsigned int iRow;
 		for (iRow = 0; iRow < mRows; iRow++) { // row loop
 		    if (aDigitalSector->mData[iRow].size()>0) { //Make sure the row has data
