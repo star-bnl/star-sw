@@ -20,11 +20,11 @@ macro svm
    
   macro/global/import *
     
-  cd [data]/global/tracks
+  cd [dst]
   tdm/newtable globtrk dst_track 100000
-  maxrowcount [data]/global/tracks/globtrk 100000
+    maxrowcount [dst]/globtrk 100000
   tdm/newtable globtrk_aux dst_track_aux 100000
-  maxrowcount [data]/global/tracks/globtrk_aux 100000
+    maxrowcount [dst]/globtrk_aux 100000
    
   cd /dui
 
@@ -39,15 +39,16 @@ macro svm
     
   cd [data]/global/vertices
   tdm/newtable ev0out ev0_aux 100000
+  cd [dst]
   tdm/newtable vertex dst_vertex 100000
   
-  rowcount [data]/global/tracks/globtrk 
+  rowcount [dst]/globtrk
   if ( staf_result(1) .eq. 0 ) then
-    cd [data]/global/tracks
+    cd [dst]
     tdm/newtable globtrk dst_track 100000
   endif
   
-  cd [data]/global/tracks
+  cd [dst]
   maxrowcount globtrk
 
   tdm/newtable ev0track ev0_track  staf_result(1)
@@ -70,25 +71,7 @@ macro svm
 
  return
 * ---------------------------------------------------------------
- 
-* 6aug98 K.T. ==>
- 
-* ** this kumac is for use in $STAR/kumacs/run_ebye!!
-* it will eventually be replaced
- 
- macro sca
-   
-  macro/global/import *
 
-    cd [dst]
-    
-    tdm/newtable dstrack  dst_track 10000
-    
-    cd /dui
-
-return
-
-*------------------------------------------------------------------*
 
 
 
