@@ -20,8 +20,8 @@
 
 #include "StTrackForPool.h"
 #include "StDiagnosticTool.h"
-#include <TH1.h>
-
+#include <TH3.h>
+#include "StAngleCorrFunction.h"
 
 class StDiagnosticBackground: public StDiagnosticTool {
 public:
@@ -29,9 +29,18 @@ public:
                   ~StDiagnosticBackground();
   void        Fill(StTrackForPool* t1, StTrackForPool* t2);
   void        Write();
-  TString GetName();
-private:
-  TH1D* backgroundCut;
+  TString   GetName();
+  void        SetCorrelationFunction(StAngleCorrFunction* func);
+
+ private:
+  StAngleCorrFunction* corrFunc;
+
+  TH3D* backgroundCut1;
+  TH3D* backgroundCut2;
+  TH3D* backgroundCut3;
+  TH3D* backgroundCut4;
+  TH3D* backgroundCut5;
+
 };
 
 #endif

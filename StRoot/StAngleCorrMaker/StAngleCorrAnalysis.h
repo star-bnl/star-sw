@@ -37,6 +37,8 @@ class StAngleCorrAnalysis {
 private:
   TH1D*   signal;
   TH1D*   background;
+  
+  int FALSE,TRUE;
 
   StAngleCorrFunction*  correlationFunction;
 
@@ -65,7 +67,7 @@ private:
  
   // functions, diagnostics
   vector<StAngleCorrFunction* > functionLibrary;
-  vector<StDiagnosticTool* > diagnosticsLibrary;
+  vector<StDiagnosticTool* >       diagnosticsLibrary;
   TString name;
   TString DiagnoseEventStream,DiagnoseEventCuts;
   TString DiagnoseTracks,DiagnoseTrack1,DiagnoseTrack2;
@@ -74,7 +76,7 @@ private:
   TFile* mOutput;
 
   // private member functions,variables
-  int    fastestTrackAnalysis,ON,OFF;
+  int fastestTrackAnalysis,ON,OFF;
   Double_t fractionToConsider;
 
   void   RelativeAngle(StTrackForPool* t1, StTrackForPool* t2, TH1D* hist); 
@@ -85,7 +87,7 @@ private:
   
   // cuts
   int     EventWithinCuts(StEvent& ev);
-  int     TracksWithinCuts(StTrackForPool* t1, StTrackForPool* t2);
+  int     IdenticalTrackCheck(StTrackForPool* t1, StTrackForPool* t2);
   int     Track1WithinCuts(StTrackForPool* t1);
   int     Track2WithinCuts(StTrackForPool* t2);
   

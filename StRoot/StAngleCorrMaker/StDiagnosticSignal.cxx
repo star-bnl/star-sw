@@ -1,28 +1,60 @@
 #include "StDiagnosticSignal.h"
-#include <TH1.h>
+#include <TH3.h>
 #include "StTrackForPool.h"
-
 
 StDiagnosticSignal::StDiagnosticSignal() 
 {
-  signalCut  = new TH1D("signalCut","Signal Cuts: cut1",100,0,500);
+  Int_t NTPCBins=50;      Double_t lowerNTPCBin = 0.0;   Double_t upperNTPCBin = 50.0;
+  Int_t NChiXYBins=50;  Double_t lowerChiXYBin = 0.0;  Double_t upperChiXYBin = 10.0;
+  Int_t NChiZBins=50;    Double_t lowerChiZBin = 0.0;     Double_t upperChiZBin = 10.0;
+  Int_t NRapBins=50;     Double_t lowerRapBin = 0.0;       Double_t upperRapBin = 2.0;
+  Int_t NPBins=50;          Double_t lowerPBin = 0.0;           Double_t upperPBin = 10.0;
+  Int_t NAngleBins=50;  Double_t lowerAngleBin = 0.0;   Double_t upperAngleBin = 180.0;
+
+  signalCut1  = new TH3D("signalCut1","Signal Cuts: NTPC1 vs NTPC2 vs angle",NTPCBins,lowerNTPCBin,upperNTPCBin,NTPCBins,lowerNTPCBin,upperNTPCBin,NAngleBins,upperAngleBin,lowerAngleBin);
+  signalCut2  = new TH3D("signalCut2","Signal Cuts: chi_xy1 vs chi_xy2 vs angle",NChiXYBins,lowerChiXYBin,upperChiXYBin,NChiXYBins,lowerChiXYBin,upperChiXYBin,NAngleBins,upperAngleBin,lowerAngleBin);
+  signalCut3  = new TH3D("signalCut3","Signal Cuts: chi_z1 vs chi_z2 vs angle",NChiZBins,lowerChiZBin,upperChiZBin,NChiZBins,lowerChiZBin,upperChiZBin,NAngleBins,upperAngleBin,lowerAngleBin);
+  signalCut4  = new TH3D("signalCut4","Signal Cuts: rap1 vs rap2 vs angle",NRapBins,lowerRapBin,upperRapBin,NRapBins,lowerRapBin,upperRapBin,NAngleBins,upperAngleBin,lowerAngleBin);
+  signalCut5  = new TH3D("signalCut5","Signal Cuts: p1 vs p2 vs angle",NPBins,lowerPBin,upperPBin,NPBins,lowerPBin,upperPBin,NAngleBins,upperAngleBin,lowerAngleBin);
+  
 }
 
 StDiagnosticSignal::~StDiagnosticSignal() 
 {
+  
 }
 
 void 
 StDiagnosticSignal::Write()
 {
-   signalCut->Write();
+  // signalCut->Write();
+}
+
+void 
+StDiagnosticSignal::SetCorrelationFunction(StAngleCorrFunction* func)
+{
+  corrFunc = func;
 }
 
 void 
 StDiagnosticSignal::Fill(StTrackForPool* t1, StTrackForPool* t2) 
 {
-  // do nothing here for now
+  Double_t weight = 1.0;
+  Double_t corrValue = corrFunc->GetCorr(t1,t2);
+  Double_t rap1,rap2,p1,p2;
+  t1->GetPseudoRapidity(rap1);
+  t2->GetPseudoRapidity(rap2);
+  t1->GetMomentum(p1);
+  t2->GetMomentum(p2);
+
+  // fill histo's
+  signalCut1->Fill(t1->GetNTPCPoints(),t2->GetNTPCPoints(),corrValue,weight);
+  signalCut2->Fill(t1->GetRChiSquaredXY(),t2->GetRChiSquaredXY(),corrValue,weight);
+  signalCut3->Fill(t1->GetRChiSquaredZ(),t2->GetRChiSquaredZ(),corrValue,weight);
+  signalCut4->Fill(rap1,rap2,corrValue,weight);
+  signalCut5->Fill(p1,p2,corrValue,weight);
 }
+
 
 TString
 StDiagnosticSignal::GetName() 

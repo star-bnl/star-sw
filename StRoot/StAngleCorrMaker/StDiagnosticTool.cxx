@@ -1,6 +1,7 @@
 #include "StDiagnosticTool.h"
 #include <TNtuple.h>
 #include "StTrackForPool.h"
+#include "StAngleCorrFunction.h"
 
 StDiagnosticTool::StDiagnosticTool() {}
 StDiagnosticTool::~StDiagnosticTool() {}
@@ -26,6 +27,12 @@ void
 StDiagnosticTool::Write()
 {
 
+}
+
+void 
+StDiagnosticTool::SetCorrelationFunction(StAngleCorrFunction* func)
+{
+  corrFunc = func;
 }
 
 TString

@@ -26,12 +26,15 @@
 class StAngleCorrFunction {
 
 public:
-         StAngleCorrFunction();
-virtual  ~StAngleCorrFunction();
+                         StAngleCorrFunction();
+virtual              ~StAngleCorrFunction();
 virtual TString GetName();
-virtual void Fill(StTrackForPool* t1, StTrackForPool* t2, TH1D* hist);
+virtual void      Fill(StTrackForPool* t1, StTrackForPool* t2, TH1D* hist);
+virtual double GetCorr(StTrackForPool* t1, StTrackForPool* t2);
 
 private:
+virtual double func(StTrackForPool* t1, StTrackForPool* t2);
+
 Double_t correlation,weight;
 Double_t p1,p2;
 Double_t px1,py1,pz1;
