@@ -31,14 +31,14 @@ StTrackChair::StTrackChair(TTable *table) : TChair(table) {
 }
 
 //_____________________________________________________________________________
-StHelixD *StTrackChair::MakeHelix(Int_t i) const
+StHelixD *StTrackChair::MakeHelix(Int_t i, float bField) const
 {
  //see: StEvent/StHelixModel 
   const float pi2 = 3.1415926/2.;
   const float rad = pi2/90.;
   const void *point =  At(i);
   Float_t angle   = (*(Float_t*)GetOffset(point,mPhi0)) * rad;
-  int h = (*(Int_t *)GetOffset(point,mCharge)) > 0 ? -1 : 1;  
+  int h = (*(Int_t *)GetOffset(point,mCharge))*bField > 0 ? -1 : 1;  
   Float_t ro = *(Float_t *)GetOffset(point,mR0);
 
   StThreeVectorD vector(ro*cos(angle),ro*sin(angle),*(Float_t *)GetOffset(point,mZ0));

@@ -20,7 +20,7 @@ class StTrackChair : public TChair {
   static const Char_t *trackTableList[];
   StTrackChair(TTable *track);
  ~StTrackChair(){;}
-  StHelixD *MakeHelix(Int_t i) const ;
+  StHelixD *MakeHelix(Int_t i, float bField) const ;
   static StTrackChair *Instance(TTable *table);
   static Int_t IsTrack(TTable *table);
   Float_t R0(Int_t i)        const;
