@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.7 2000/11/30 20:44:33 caines Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.8 2001/07/11 23:29:47 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
- * Revision 1.7  2000/11/30 20:44:33  caines
- * Use database
+ * Revision 1.8  2001/07/11 23:29:47  munhoz
+ * adding capability for zero suppressed and pedestal reading
  *
  * Revision 1.6  2000/08/23 22:29:08  munhoz
  * add time to StSvtData object
@@ -36,6 +36,7 @@
 #include "TObjectSet.h"
 #include "StDAQMaker/StSVTReader.h"
 #include "StSvtDaqData.hh"
+#include "StSvtDaqPed.hh"
 #include "StSvtHybridDaqData.hh"
 #include "StSvtDaqMaker.h"
 #include "StMessMgr.h"
@@ -87,7 +88,7 @@ Int_t StSvtDaqMaker::Init()
 Int_t StSvtDaqMaker::SetSvtData()
 {
   fSvtSet = new TObjectSet("StSvtRawData");
-  AddData(fSvtSet);  
+  AddConst(fSvtSet);  
 
   St_DataSet *dataSet;
   dataSet = GetDataSet("StSvtConfig");
@@ -103,6 +104,65 @@ Int_t StSvtDaqMaker::SetSvtData()
   return kStOK;
 }
 
+//_____________________________________________________________________________
+Int_t StSvtDaqMaker::SetSvtPed()
+{
+  St_DataSet *dataSet;
+  dataSet = (TObjectSet*)GetDataSet("StSvtPedestal");
+
+  if (!dataSet) {
+    fPedSet = new TObjectSet("StSvtPedestal");
+    AddConst(fPedSet);
+
+    St_DataSet *dataSet2;
+    dataSet2 = GetDataSet("StSvtConfig");
+    
+    if (!fSvtPed) {
+      if (dataSet2)
+	fSvtPed = new StSvtDaqPed((StSvtConfig*)(dataSet->GetObject()));
+      else
+	fSvtPed = new StSvtDaqPed(fConfig);
+      fPedSet->SetObject((TObject*)fSvtPed);
+      //assert(fSvtPed);
+    }
+  }
+  else {
+    fSvtPed = (StSvtDaqPed*)(dataSet->GetObject());
+    assert(fSvtPed);
+  }
+
+  return kStOK;
+}
+
+//_____________________________________________________________________________
+Int_t StSvtDaqMaker::SetSvtRMSPed()
+{
+  St_DataSet *dataSet;
+  dataSet = (TObjectSet*)GetDataSet("StSvtRMSPedestal");
+
+  if (!dataSet) {
+    fRMSPedSet = new TObjectSet("StSvtRMSPedestal");
+    AddConst(fRMSPedSet);
+
+    St_DataSet *dataSet2;
+    dataSet2 = GetDataSet("StSvtConfig");
+    
+    if (!fSvtRMSPed) {
+      if (dataSet2)
+	fSvtRMSPed = new StSvtDaqPed((StSvtConfig*)(dataSet->GetObject()));
+      else
+	fSvtRMSPed = new StSvtDaqPed(fConfig);
+      fRMSPedSet->SetObject((TObject*)fSvtRMSPed);
+      //assert(fSvtPed);
+    }
+  }
+  else {
+    fSvtRMSPed = (StSvtDaqPed*)(dataSet->GetObject());
+    assert(fSvtRMSPed);
+  }
+
+  return kStOK;
+}
 
 //_____________________________________________________________________________
 Int_t StSvtDaqMaker::SetHybridData()
@@ -150,6 +210,52 @@ Int_t StSvtDaqMaker::GetSvtData()
     fSvtData->setTimeZero(128*40-(32*105)-(12*105)+svtReader->getTimeZero(),i); 
   }
   fSvtData->setUnixTime(daqReader->getUnixTime());
+
+  return kStOK;
+}
+
+//_____________________________________________________________________________
+Int_t StSvtDaqMaker::GetSvtPed()
+{
+
+  if(  !daqReader->SVTPresent ()){
+    gMessMgr->Error() << "SVT -No SVT Present but trying to read it" << endm;
+    return kStErr;
+  }
+  svtReader = daqReader->getSVTReader();
+  assert(svtReader);
+
+  if (!fSvtPed) {
+    fSvtPed = new StSvtDaqPed(fConfig);
+    fPedSet->SetObject((TObject*)fSvtPed);
+  }
+
+  fSvtPed->setPed(svtReader);
+
+  fSvtPed->setRunNumber(daqReader->getRunNumber()); 
+
+  return kStOK;
+}
+
+//_____________________________________________________________________________
+Int_t StSvtDaqMaker::GetSvtRMSPed()
+{
+
+  if(  !daqReader->SVTPresent ()){
+    gMessMgr->Error() << "SVT -No SVT Present but trying to read it" << endm;
+    return kStErr;
+  }
+  svtReader = daqReader->getSVTReader();
+  assert(svtReader);
+
+  if (!fSvtRMSPed) {
+    fSvtRMSPed = new StSvtDaqPed(fConfig);
+    fRMSPedSet->SetObject((TObject*)fSvtRMSPed);
+  }
+
+  fSvtRMSPed->setPed(svtReader,"RMS");
+
+  fSvtRMSPed->setRunNumber(daqReader->getRunNumber()); 
 
   return kStOK;
 }
@@ -209,6 +315,8 @@ Int_t StSvtDaqMaker::Reset()
   fSvtData = NULL;
   fSvtSet = NULL;
   fHybridSet = NULL;
+  fSvtPed = NULL;
+  fSvtSet = NULL;
   m_ConstSet->Delete();
 
   return kStOK;
@@ -228,8 +336,14 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.7 2000/11/30 20:44:33 caines Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.8 2001/07/11 23:29:47 munhoz Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
 
+//_____________________________________________________________________________
+void StSvtDaqMaker::UpdateReader()
+{
+  if (svtReader)
+    svtReader->Update();
+}
