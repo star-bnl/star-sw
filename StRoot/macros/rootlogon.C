@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.41 2004/06/25 19:28:29 jeromel Exp $
+// $Id: rootlogon.C,v 1.42 2004/08/08 21:41:54 fisyak Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -12,7 +12,7 @@
 namespace rootlogon {
   int fpe=0;const char *env=0;
 }
-  rootlogon::fpe = strstr(gSystem->Getenv("STAR"),".DEV")!=0;
+  rootlogon::fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
   rootlogon::env = gSystem->Getenv("STARFPE");
   if (rootlogon::env) {
     if (strcmp(rootlogon::env,"YES")==0) rootlogon::fpe=1;
@@ -31,9 +31,31 @@ namespace rootlogon {
     
   // 	Load StarRoot lib.
   gSystem->Load("StarRoot");
-  if (gPrompt.Index("root4star")>=0 
-   && !strstr(gSystem->GetLibraries(),"libTable")) gSystem->Load("libTable");
-
+  if (gPrompt.Index("root4star")>=0 && !strstr(gSystem->GetLibraries(),"libTable")) {
+    gSystem->Load("libGeom"); gSystem->Load("libTable");
+  }
+  //  gInterpreter->ProcessLine(".x Star2Root.C");
+{
+  gInterpreter->ProcessLine("typedef TCL              StCL;");              
+  gInterpreter->ProcessLine("typedef TDataSet         St_DataSet ;");       
+  gInterpreter->ProcessLine("typedef TDataSetIter     St_DataSetIter;");    
+  gInterpreter->ProcessLine("typedef TFileSet         St_FileSet;");        
+  gInterpreter->ProcessLine("typedef TVolume          St_Node;");           
+  gInterpreter->ProcessLine("typedef TVolumePosition  St_NodePosition;");   
+  gInterpreter->ProcessLine("typedef TVolumeView      St_NodeView;");       
+  gInterpreter->ProcessLine("typedef TVolumeViewIter  St_NodeViewIter;");   
+  gInterpreter->ProcessLine("typedef TObjectSet       St_ObjectSet;");      
+//  gInterpreter->ProcessLine("typedef TPointPosition   St_PointPosition;");  
+  gInterpreter->ProcessLine("typedef TPoints3D        St_Points3D;");       
+  gInterpreter->ProcessLine("typedef TPointsArray3D   St_PointsArray3D;");  
+  gInterpreter->ProcessLine("typedef TPolyLineShape   St_PolyLineShape;");  
+  gInterpreter->ProcessLine("typedef TTable           St_Table;");          
+  gInterpreter->ProcessLine("typedef TTable3Points    St_Table3Points;");   
+  gInterpreter->ProcessLine("typedef TTableIter       St_TableIter;");      
+  gInterpreter->ProcessLine("typedef TTablePoints     St_TablePoints;");    
+  gInterpreter->ProcessLine("typedef TTableSorter     St_TableSorter;");    
+  gInterpreter->ProcessLine("typedef TTableDescriptor St_tableDescriptor;");
+}
 //  printf("\nWelcome to the ROOT tutorials\n\n");
 //  printf("\nType \".x demos.C\" to get a toolbar from which to execute the demos\n");
 //  printf("\nType \".x demoshelp.C\" to see the help window\n\n");
@@ -61,9 +83,13 @@ namespace rootlogon {
    
   // Positioning of axes labels
   gStyle->SetTitleOffset(1.2);
-   
-  // 	Assign bif size of hashtable for STAR I/O
-  TBuffer::SetGlobalWriteParam(2003);
+  // grid
+  gStyle->SetPadGridX(1);
+  gStyle->SetPadGridY(1);
+   //  Set date/time for plot
+   gStyle->SetOptDate(1);
+   // 	Assign bif size of hashtable for STAR I/O
+   TBuffer::SetGlobalWriteParam(2003);
 
 
   // some rootd default dummy stuff
@@ -84,6 +110,6 @@ namespace rootlogon {
   // note that the above bacward support the old mode for include whenever
   // it was not in .$STAR_HOST_SYS but one level up. The bacward compatibility
   // can be removed only at the net root release ...
-  gSystem->SetIncludePath("-I. -I./.$STAR_HOST_SYS/include -I./include -I./StRoot -I$STAR/.$STAR_HOST_SYS/include -I$STAR/include -I$STAR/StRoot -I$STAF/inc -I$CERN_ROOT/include -I$ROOTSYS/include");
-  
+  gSystem->SetIncludePath("-I. -I./.$STAR_HOST_SYS/include -I./StRoot -I$STAR/.$STAR_HOST_SYS/include -I$STAR/StRoot -I/usr/include/mysql");
+   
 }
