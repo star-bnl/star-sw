@@ -56,7 +56,7 @@ class StMiniMcEvent : public TObject {
   Float_t       mMcVertexY;
   Float_t       mMcVertexZ;
     
-  Float_t       mMagField;    // in tesla
+  Float_t       mMagField;    // in kGauss
 
   Float_t       mCTB;
   Float_t       mZDCe;
@@ -90,6 +90,10 @@ class StMiniMcEvent : public TObject {
   
 //
 // $Log: StMiniMcEvent.h,v $
+// Revision 1.2  2002/06/06 15:14:13  calderon
+// the comment about the magnetic field said it is in tesla, but it is actually
+// in kGauss, so I modified the comment to reflect this
+//
 // Revision 1.1  2002/05/30 01:20:57  calderon
 // Classes for use in a general framework for extracting efficiencies
 // from both embedding and full simulations
