@@ -187,7 +187,7 @@ int StMuEmcCollection::getNSmdHits(int detector)
   if(detector==bsmde || detector==bsmdp) tca = mSmdHits[detector-bsmde];
   if(detector==esmdu || detector==esmdv) tca = mEndcapSmdHits[detector-esmdu];
   if(tca) return tca->GetEntries();
-  return 0;
+  else    return 0;
 }
 StMuEmcHit* StMuEmcCollection::getSmdHit(int hitId,int detector)
 {
@@ -210,7 +210,7 @@ int StMuEmcCollection::getNPrsHits(int detector)
   if(detector == bprs) tca = mPrsHits;
   if(detector == eprs) tca = mEndcapPrsHits;
   if(tca) return tca->GetEntries();
-  return 0;
+  else    return 0;
 }
 StMuEmcHit* StMuEmcCollection::getPrsHit(int hitId, int detector)
 {
@@ -233,8 +233,14 @@ int StMuEmcCollection::getNClusters(int detector)
   TClonesArray *tca =NULL;
   if(detector>=bemc && detector <= bsmdp) tca = mEmcClusters[detector-bemc];
   else tca = mEndcapEmcClusters[detector-eemc];
-  return tca->GetEntries();
+
+  //cout << "DEBUG :: detector bemc bsmdp " 
+  //     << detector << " " << bemc << " " << bsmdp << endl;
+
+  if (tca) return tca->GetEntries();
+  else     return 0;
 }
+
 StMuEmcCluster* StMuEmcCollection::getCluster(int clusterId,int detector)
 {
   if (!mPrsHits) return 0;
@@ -250,13 +256,15 @@ int StMuEmcCollection::getNPoints()
 {
   if (!mPrsHits) return 0;
   TClonesArray *tca =mEmcPoints;
-  return tca->GetEntries();
+  if (tca)  return tca->GetEntries();
+  else      return 0;
 }
 int StMuEmcCollection::getNEndcapPoints()
 {
   if (!mPrsHits) return 0;
   TClonesArray *tca =mEndcapEmcPoints;
-  return tca->GetEntries();
+  if (tca)  return tca->GetEntries();
+  else      return 0;
 }
 StMuEmcPoint* StMuEmcCollection::getPoint(int pointId)
 {
@@ -270,9 +278,14 @@ StMuEmcPoint* StMuEmcCollection::getEndcapPoint(int pointId)
 {
   if (!mPrsHits) return 0;
   TClonesArray *tca =mEndcapEmcPoints;
-  int counter = tca->GetEntries();
-  if(pointId<0 || pointId>counter) return NULL;
-  return (StMuEmcPoint*)tca->At(pointId);
+
+  if (tca){
+    int counter = tca->GetEntries();
+    if(pointId<0 || pointId>counter) return NULL;
+    return (StMuEmcPoint*)tca->At(pointId);
+  } else {
+    return NULL;
+  }
 }
 
 
