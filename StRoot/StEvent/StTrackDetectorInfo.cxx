@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.10 2004/08/05 19:25:03 ullrich Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.11 2004/08/05 22:23:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
+ * Revision 2.11  2004/08/05 22:23:32  ullrich
+ * Fixed bug in first argument type of setNumberOfPoints().
+ *
  * Revision 2.10  2004/08/05 19:25:03  ullrich
  * Changes to the handling of numberOfPoints() to allow ITTF more flexibility.
  *
@@ -48,7 +51,7 @@
 
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.10 2004/08/05 19:25:03 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.11 2004/08/05 22:23:32 ullrich Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0),
 					     mNumberOfPointsTpc(0),
@@ -191,7 +194,7 @@ StTrackDetectorInfo::setNumberOfPoints(unsigned short val)
 }
 
 void
-StTrackDetectorInfo::setNumberOfPoints(unsigned short val, StDetectorId det)
+StTrackDetectorInfo::setNumberOfPoints(unsigned char val, StDetectorId det)
 {
     mNumberOfPoints = 0;  // make sure old method is NOT active
     switch (det) {
@@ -209,6 +212,8 @@ StTrackDetectorInfo::setNumberOfPoints(unsigned short val, StDetectorId det)
 	break;
     case kSsdId:
 	mNumberOfPointsSsd = val;
+	break;
+    default:
 	break;
     }
 }
