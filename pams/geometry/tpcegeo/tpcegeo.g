@@ -1,5 +1,10 @@
 ****************************************************************************
-* $Id: tpcegeo.g,v 1.26 2003/11/13 00:55:54 potekhin Exp $
+* $Id: tpcegeo.g,v 1.27 2003/11/13 00:56:40 potekhin Exp $
+*
+* $Log: tpcegeo.g,v $
+* Revision 1.27  2003/11/13 00:56:40  potekhin
+* Added the Log CVS tag
+*
 *
 module   TPCEGEO  is the TPC system in GSTAR
    Author   Pavel Nevski (MEPhI) 
