@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.29 1999/10/19 00:11:30 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.30 1999/10/25 21:53:04 wdeng Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.30  1999/10/25 21:53:04  wdeng
+// Use shorter names for monitoring tables
+//
 // Revision 1.29  1999/10/19 00:11:30  fisyak
 // Remove aux tables
 //
@@ -89,7 +92,7 @@
 #include "tables/St_dst_summary_param_Table.h"
 #include "tables/St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.29 1999/10/19 00:11:30 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.30 1999/10/25 21:53:04 wdeng Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -358,20 +361,20 @@ Int_t  St_dst_Maker::Filler(){
  
   if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_monitor_soft_filler" << endm;
     
-  St_dst_monitor_soft_ftpc    *monitor_soft_ftpc   = new St_dst_monitor_soft_ftpc("monitor_soft_ftpc",1);
-  St_dst_monitor_soft_global  *monitor_soft_global = new St_dst_monitor_soft_global("monitor_soft_global",1);
-  St_dst_monitor_soft_svt     *monitor_soft_svt    = new St_dst_monitor_soft_svt("monitor_soft_svt",1);
-  St_dst_monitor_soft_tpc     *monitor_soft_tpc    = new St_dst_monitor_soft_tpc("monitor_soft_tpc",1);
-  dstI.Add(monitor_soft_ftpc);
-  dstI.Add(monitor_soft_global);
-  dstI.Add(monitor_soft_svt);
-  dstI.Add(monitor_soft_tpc);
+  St_dst_mon_soft_ftpc *mon_soft_ftpc = new St_dst_mon_soft_ftpc("mon_soft_ftpc",1);
+  St_dst_mon_soft_glob *mon_soft_glob = new St_dst_mon_soft_glob("mon_soft_glob",1);
+  St_dst_mon_soft_svt  *mon_soft_svt  = new St_dst_mon_soft_svt("mon_soft_svt",1);
+  St_dst_mon_soft_tpc  *mon_soft_tpc  = new St_dst_mon_soft_tpc("mon_soft_tpc",1);
+  dstI.Add(mon_soft_ftpc);
+  dstI.Add(mon_soft_glob);
+  dstI.Add(mon_soft_svt);
+  dstI.Add(mon_soft_tpc);
   iRes = dst_monitor_soft_filler(tpcluster, scs_cluster,
 				 tphit, scs_spt, fcl_fppoint,
 				 tptrack,stk_track,fpt_fptrack,
 				 evt_match, ctb_cor, vertex, event_summary, 
-                                 monitor_soft_ftpc, monitor_soft_global,
-                                 monitor_soft_svt, monitor_soft_tpc );
+                                 mon_soft_ftpc, mon_soft_glob,
+                                 mon_soft_svt, mon_soft_tpc );
     //     ===========================================================================
   if (iRes !=kSTAFCV_OK) {
     iMake = kStWarn;
