@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.7 2000/05/26 21:29:27 posk Exp $
+// $Id: StFlowEvent.h,v 1.8 2000/06/20 16:34:25 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.8  2000/06/20 16:34:25  snelling
+// fixed cout/streamer problem for mPhiWgt under Solaris
+//
 // Revision 1.7  2000/05/26 21:29:27  posk
 // Protected Track data members from overflow.
 //
@@ -122,7 +125,7 @@ private:
   StThreeVectorF  mVertexPos;                           // primary vertex position
   static Float_t  mEtaCuts[2][Flow::nHars][Flow::nSels];// range absolute values
   static Float_t  mPtCuts[2][Flow::nHars][Flow::nSels]; // range
-  Flow::PhiWgt_t  mPhiWgt;
+  Flow::PhiWgt_t  mPhiWgt;                              //!
   static Float_t  mPiPlusCuts[2];                       // PID cuts
   static Float_t  mPiMinusCuts[2];
   static Float_t  mProtonCuts[2];

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.11 2000/06/01 18:26:37 posk Exp $
+//  $Id: StFlowMaker.h,v 1.12 2000/06/20 16:34:26 snelling Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.12  2000/06/20 16:34:26  snelling
+//  fixed cout/streamer problem for mPhiWgt under Solaris
+//
 //  Revision 1.11  2000/06/01 18:26:37  posk
 //  Increased precision of Track integer data members.
 //
@@ -114,12 +117,12 @@ public:
   void          SetNanoEventFileName(const Char_t* name="flownanoevent.root");
   void          SetPicoEventFileName(const Char_t* name="flowpicoevent.root");
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.11 2000/06/01 18:26:37 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.12 2000/06/20 16:34:26 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
 
-  Flow::PhiWgt_t   mPhiWgt;                   // To make event plane isotropic
+  Flow::PhiWgt_t   mPhiWgt;                   //! To make event plane isotropic
 
 private:
   Char_t           mNanoEventFileName[64];    // nano-DST file name
