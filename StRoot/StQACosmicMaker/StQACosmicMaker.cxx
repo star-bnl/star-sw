@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.cxx,v 1.11 1999/11/11 16:22:38 fisyak Exp $
+ * $Id: StQACosmicMaker.cxx,v 1.12 1999/11/23 21:21:05 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking etc.)
  *
  * $Log: StQACosmicMaker.cxx,v $
+ * Revision 1.12  1999/11/23 21:21:05  snelling
+ * removed references to tphitclus table
+ *
  * Revision 1.11  1999/11/11 16:22:38  fisyak
  * Add TF1 include
  *
@@ -87,7 +90,7 @@ Int_t StQACosmicMaker::Make() {
 
   fillTablePointers();
   if (bWriteTNtupleOn && brestpt && btphit && btptrack) {fillTNtuple();}
-  if (btphitclus && btphit && btptrack) {fillClusHistograms();}
+  if (btphit && btptrack) {fillClusHistograms();}
   if (bmorph && btphit && btptrack) {fillMorphHistograms();}
   if (brestpt&& btphit && btptrack) {fillResHistograms();}
   if (btphit && btptrack) {fillChargeHistograms();}
@@ -100,7 +103,7 @@ Int_t StQACosmicMaker::Make() {
 
 void StQACosmicMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StQACosmicMaker.cxx,v 1.11 1999/11/11 16:22:38 fisyak Exp $\n");
+  printf("* $Id: StQACosmicMaker.cxx,v 1.12 1999/11/23 21:21:05 snelling Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -135,7 +138,6 @@ hdlamda:resy:resz:trknfit:trkcalcp");
 Int_t StQACosmicMaker::fillTablePointers() {
 
   /*
-  if (this->GetOption(kEval)) {
     // get pointers to raw adc xyz table
     St_DataSetIter Itpc_raw(GetDataSet("tpc_raw"));
     phtfc = 0;
@@ -144,7 +146,6 @@ Int_t StQACosmicMaker::fillTablePointers() {
     if (phtfc) {ptadcxyz = phtfc->GetTable();}
     else { cout << "Warning: adcxyz table header does not exist " << endl; return kStWarn; }
     if (!ptadcxyz) { cout << "Warning: adcxyz table does not exist " << endl; return kStWarn; }
-  }
   */
 
   St_DataSetIter Itpc_hits(GetDataSet("tpc_hits"));
@@ -157,15 +158,6 @@ Int_t StQACosmicMaker::fillTablePointers() {
   if (phtcl) {pttphit = phtcl->GetTable();}
   else { cout << "Warning: tphit table header does not exist "   << endl; btphit = kFALSE;}
   if (!pttphit) { cout << "Warning: tphit table does not exist " << endl; btphit = kFALSE;}
-
-  // Li Qun's Table
-  btphitclus = kTRUE;
-  phhcl = 0;
-  pthcl = 0;
-  phhcl = (St_tcl_hitclus *) Itpc_hits.Find("tphitclus");
-  if (phhcl) {pthcl = phhcl->GetTable();}
-  else { cout << "Warning: tphit table header does not exist "       << endl; btphitclus = kFALSE;}
-  if (!pttphit) { cout << "Warning: tphitclus table does not exist " << endl; btphitclus = kFALSE;}
 
   // Tom's Table
   bmorph = kTRUE;
@@ -248,6 +240,63 @@ Int_t StQACosmicMaker::cleanUpTableSorters() {
 
   return kStOK;
 }
+
+//-----------------------------------------------------------------------
+
+void StQACosmicMaker::setSector(const Int_t sectorNumber) {
+
+  SectorSelectionOn();
+
+  if (sectorNumber > 0 && sectorNumber <=24) {
+  SelectedSector = sectorNumber;
+  cout << "Sector: " << SelectedSector << " selected" << endl;
+  }
+  else {
+    cout << "error sector selected which does not exist" << endl;
+  }
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StQACosmicMaker::writeOutHistograms() {
+
+  TString *mHistFileName = new TString(MakerName.Data());
+  mHistFileName->Append(".hists.root");
+
+  TFile outHistFile(mHistFileName->Data(),"RECREATE"); 
+  this->GetHistList()->Write();
+  outHistFile.Close();
+
+  delete mHistFileName;
+
+  return kStOK;
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StQACosmicMaker::writeOutTNtuple() {
+
+
+  TString *mTNtupleFileName = new TString(MakerName.Data());
+  mTNtupleFileName->Append(".ntuple.root");
+
+  TFile outTNtupleFile(mTNtupleFileName->Data(),"RECREATE"); 
+  mTNtupleTPC->Write();
+  outTNtupleFile.Close();
+
+  delete mTNtupleFileName;
+  
+  return kStOK;
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StQACosmicMaker::writeOutPostscript() {
+  // not implemented yet
+
+  return kStOK;
+}
+
 //-----------------------------------------------------------------------
 
 Int_t StQACosmicMaker::fillTNtuple() {
@@ -552,21 +601,6 @@ Int_t StQACosmicMaker::calcResHistograms() {
   }
 
   return kStOK;
-}
-
-//-----------------------------------------------------------------------
-
-void StQACosmicMaker::setSector(const Int_t sectorNumber) {
-
-  SectorSelectionOn();
-
-  if (sectorNumber > 0 && sectorNumber <=24) {
-  SelectedSector = sectorNumber;
-  cout << "Sector: " << SelectedSector << " selected" << endl;
-  }
-  else {
-    cout << "error sector selected which does not exist" << endl;
-  }
 }
 
 //-----------------------------------------------------------------------
@@ -923,6 +957,7 @@ Int_t StQACosmicMaker::initClusHistograms() {
 
   return kStOK;
 }
+
 //-----------------------------------------------------------------------
 
 Int_t StQACosmicMaker::fillClusHistograms() {
@@ -947,35 +982,35 @@ Int_t StQACosmicMaker::fillClusHistograms() {
 	// inner sector
 	if (irowsector <= 13) {
 	  if (trkcalcp >= 0.3) {
-	    ClusterHists[0].mNHits->Fill((Float_t)(pthcl[i].nhits));
-	    ClusterHists[0].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
-	    ClusterHists[0].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
-	    ClusterHists[0].mNPadsPerHit->Fill((Float_t)(pthcl[i].npads_hit));
-	    ClusterHists[0].mNTimeBucketsPerHit->Fill((Float_t)(pthcl[i].ntmbk_hit));
+	    //	    ClusterHists[0].mNHits->Fill((Float_t)(pthcl[i].nhits));
+	    //	    ClusterHists[0].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
+	    //	    ClusterHists[0].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
+	    ClusterHists[0].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
+	    ClusterHists[0].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
 	  }
 	  else {
-	    ClusterHists[1].mNHits->Fill((Float_t)(pthcl[i].nhits));
-	    ClusterHists[1].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
-	    ClusterHists[1].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
-	    ClusterHists[1].mNPadsPerHit->Fill((Float_t)(pthcl[i].npads_hit));
-	    ClusterHists[1].mNTimeBucketsPerHit->Fill((Float_t)(pthcl[i].ntmbk_hit));
+	    //	    ClusterHists[1].mNHits->Fill((Float_t)(pthcl[i].nhits));
+	    //	    ClusterHists[1].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
+	    //	    ClusterHists[1].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
+	    ClusterHists[1].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
+	    ClusterHists[1].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
 	  }
 	}
 	// outer sector
 	else {
 	  if (trkcalcp >= 0.3) {
-	    ClusterHists[2].mNHits->Fill((Float_t)(pthcl[i].nhits));
-	    ClusterHists[2].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
-	    ClusterHists[2].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
-	    ClusterHists[2].mNPadsPerHit->Fill((Float_t)(pthcl[i].npads_hit));
-	    ClusterHists[2].mNTimeBucketsPerHit->Fill((Float_t)(pthcl[i].ntmbk_hit));
+	    //	    ClusterHists[2].mNHits->Fill((Float_t)(pthcl[i].nhits));
+	    //	    ClusterHists[2].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
+	    //	    ClusterHists[2].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
+	    ClusterHists[2].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
+	    ClusterHists[2].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
 	  }
 	  else {
-	    ClusterHists[3].mNHits->Fill((Float_t)(pthcl[i].nhits));
-	    ClusterHists[3].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
-	    ClusterHists[3].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
-	    ClusterHists[3].mNPadsPerHit->Fill((Float_t)(pthcl[i].npads_hit));
-	    ClusterHists[3].mNTimeBucketsPerHit->Fill((Float_t)(pthcl[i].ntmbk_hit));
+	    //	    ClusterHists[3].mNHits->Fill((Float_t)(pthcl[i].nhits));
+	    //	    ClusterHists[3].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
+	    //	    ClusterHists[3].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
+	    ClusterHists[3].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
+	    ClusterHists[3].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
 	  }
 	}
       }
@@ -985,81 +1020,41 @@ Int_t StQACosmicMaker::fillClusHistograms() {
 	  // inner sector
 	  if (irowsector <= 13) {
 	    if (trkcalcp >= 0.3) {
-	      ClusterHists[0].mNHits->Fill((Float_t)(pthcl[i].nhits));
-	      ClusterHists[0].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
-	      ClusterHists[0].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
-	      ClusterHists[0].mNPadsPerHit->Fill((Float_t)(pthcl[i].npads_hit));
-	      ClusterHists[0].mNTimeBucketsPerHit->Fill((Float_t)(pthcl[i].ntmbk_hit));
+	      //	      ClusterHists[0].mNHits->Fill((Float_t)(pthcl[i].nhits));
+	      //	      ClusterHists[0].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
+	      //	      ClusterHists[0].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
+	      ClusterHists[0].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
+	      ClusterHists[0].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
 	    }
 	    else {
-	      ClusterHists[1].mNHits->Fill((Float_t)(pthcl[i].nhits));
-	      ClusterHists[1].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
-	      ClusterHists[1].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
-	      ClusterHists[1].mNPadsPerHit->Fill((Float_t)(pthcl[i].npads_hit));
-	      ClusterHists[1].mNTimeBucketsPerHit->Fill((Float_t)(pthcl[i].ntmbk_hit));
+	      //	      ClusterHists[1].mNHits->Fill((Float_t)(pthcl[i].nhits));
+	      //	      ClusterHists[1].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
+	      //	      ClusterHists[1].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
+	      ClusterHists[1].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
+	      ClusterHists[1].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
 	    }
 	  }
 	  // outer sector
 	  else {
 	    if (trkcalcp >= 0.3) {
-	      ClusterHists[2].mNHits->Fill((Float_t)(pthcl[i].nhits));
-	      ClusterHists[2].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
-	      ClusterHists[2].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
-	      ClusterHists[2].mNPadsPerHit->Fill((Float_t)(pthcl[i].npads_hit));
-	      ClusterHists[2].mNTimeBucketsPerHit->Fill((Float_t)(pthcl[i].ntmbk_hit));
+	      //	      ClusterHists[2].mNHits->Fill((Float_t)(pthcl[i].nhits));
+	      //	      ClusterHists[2].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
+	      //	      ClusterHists[2].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
+	      ClusterHists[2].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
+	      ClusterHists[2].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
 	    }
 	    else {
-	      ClusterHists[3].mNHits->Fill((Float_t)(pthcl[i].nhits));
-	      ClusterHists[3].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
-	      ClusterHists[3].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
-	      ClusterHists[3].mNPadsPerHit->Fill((Float_t)(pthcl[i].npads_hit));
-	      ClusterHists[3].mNTimeBucketsPerHit->Fill((Float_t)(pthcl[i].ntmbk_hit));
+	      //	      ClusterHists[3].mNHits->Fill((Float_t)(pthcl[i].nhits));
+	      //	      ClusterHists[3].mNPadsPerCluster->Fill((Float_t)(pthcl[i].npads_clus));
+	      //	      ClusterHists[3].mNTimeBucketsPerCluster->Fill((Float_t)(pthcl[i].ntmbk_clus));
+	      ClusterHists[3].mNPadsPerHit->Fill((Float_t)(pttphit[i].npads));
+	      ClusterHists[3].mNTimeBucketsPerHit->Fill((Float_t)(pttphit[i].ntmbk));
 	    }
 	  }
 	}
       }
     }
   }
-
-  return kStOK;
-}
-//-----------------------------------------------------------------------
-
-Int_t StQACosmicMaker::writeOutHistograms() {
-
-  TString *mHistFileName = new TString(MakerName.Data());
-  mHistFileName->Append(".hists.root");
-
-  TFile outHistFile(mHistFileName->Data(),"RECREATE"); 
-  this->GetHistList()->Write();
-  outHistFile.Close();
-
-  delete mHistFileName;
-
-  return kStOK;
-}
-
-//-----------------------------------------------------------------------
-
-Int_t StQACosmicMaker::writeOutTNtuple() {
-
-
-  TString *mTNtupleFileName = new TString(MakerName.Data());
-  mTNtupleFileName->Append(".ntuple.root");
-
-  TFile outTNtupleFile(mTNtupleFileName->Data(),"RECREATE"); 
-  mTNtupleTPC->Write();
-  outTNtupleFile.Close();
-
-  delete mTNtupleFileName;
-  
-  return kStOK;
-}
-
-//-----------------------------------------------------------------------
-
-Int_t StQACosmicMaker::writeOutPostscript() {
-  // not implemented yet
 
   return kStOK;
 }
@@ -1102,7 +1097,7 @@ Int_t StQACosmicMaker::initMorphHistograms() {
     mHistName  = new TString("NumberOfPixels");
     mHistName->Append(*mCount);
     MorphHists[i].mNumberOfPixels =
-      new TH1F(mHistName->Data(), mHistTitle->Data(), nBins, xMin, xMax);
+      new TH1F(mHistName->Data(), mHistTitle->Data(), 41, -1., 40.);
     MorphHists[i].mNumberOfPixels->Sumw2();
     delete mHistTitle;
     delete mHistName;
@@ -1135,7 +1130,7 @@ Int_t StQACosmicMaker::initMorphHistograms() {
     mHistName  = new TString("TotalCharge");
     mHistName->Append(*mCount);
     MorphHists[i].mTotalCharge =
-      new TH1F(mHistName->Data(), mHistTitle->Data(), 2000, 0., 2000.);
+      new TH1F(mHistName->Data(), mHistTitle->Data(), 200, 0., 2000.);
     MorphHists[i].mTotalCharge->Sumw2();
     delete mHistTitle;
     delete mHistName;
@@ -1168,7 +1163,7 @@ Int_t StQACosmicMaker::initMorphHistograms() {
     mHistName  = new TString("PadSigma1");
     mHistName->Append(*mCount);
     MorphHists[i].mPadSigma1 =
-      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., 5.);
+      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., 1.);
     MorphHists[i].mPadSigma1->Sumw2();
     delete mHistTitle;
     delete mHistName;
@@ -1179,7 +1174,7 @@ Int_t StQACosmicMaker::initMorphHistograms() {
     mHistName  = new TString("TimeSigma1");
     mHistName->Append(*mCount);
     MorphHists[i].mTimeSigma1 =
-      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., 5.);
+      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., 1.);
     MorphHists[i].mTimeSigma1->Sumw2();
     delete mHistTitle;
     delete mHistName;
@@ -1190,7 +1185,7 @@ Int_t StQACosmicMaker::initMorphHistograms() {
     mHistName  = new TString("PadTimeSigma1Sq");
     mHistName->Append(*mCount);
     MorphHists[i].mPadTimeSigma1Sq =
-      new TH1F(mHistName->Data(), mHistTitle->Data(), 1000, 0., 2.);
+      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., .2);
     MorphHists[i].mPadTimeSigma1Sq->Sumw2();
     delete mHistTitle;
     delete mHistName;
@@ -1201,7 +1196,7 @@ Int_t StQACosmicMaker::initMorphHistograms() {
     mHistName  = new TString("Ecc1");
     mHistName->Append(*mCount);
     MorphHists[i].mEcc1 =
-      new TH1F(mHistName->Data(), mHistTitle->Data(), 1000, 0., 0.1);
+      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., .1);
     MorphHists[i].mEcc1->Sumw2();
     delete mHistTitle;
     delete mHistName;
@@ -1212,7 +1207,7 @@ Int_t StQACosmicMaker::initMorphHistograms() {
     mHistName  = new TString("LinEcc1");
     mHistName->Append(*mCount);
     MorphHists[i].mLinEcc1 =
-      new TH1F(mHistName->Data(), mHistTitle->Data(), 1000, 0., 0.1);
+      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., .1);
     MorphHists[i].mLinEcc1->Sumw2();
     delete mHistTitle;
     delete mHistName;
@@ -1223,7 +1218,7 @@ Int_t StQACosmicMaker::initMorphHistograms() {
     mHistName  = new TString("PadSigma2");
     mHistName->Append(*mCount);
     MorphHists[i].mPadSigma2 =
-      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., 5.);
+      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., 1.);
     MorphHists[i].mPadSigma2->Sumw2();
     delete mHistTitle;
     delete mHistName;
@@ -1234,7 +1229,7 @@ Int_t StQACosmicMaker::initMorphHistograms() {
     mHistName  = new TString("TimeSigma2");
     mHistName->Append(*mCount);
     MorphHists[i].mTimeSigma2 =
-      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., 5.);
+      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., 1.);
     MorphHists[i].mTimeSigma2->Sumw2();
     delete mHistTitle;
     delete mHistName;
@@ -1245,7 +1240,7 @@ Int_t StQACosmicMaker::initMorphHistograms() {
     mHistName  = new TString("PadTimeSigma2Sq");
     mHistName->Append(*mCount);
     MorphHists[i].mPadTimeSigma2Sq =
-      new TH1F(mHistName->Data(), mHistTitle->Data(), 1000, 0., 2.);
+      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., .2);
     MorphHists[i].mPadTimeSigma2Sq->Sumw2();
     delete mHistTitle;
     delete mHistName;
@@ -1256,7 +1251,7 @@ Int_t StQACosmicMaker::initMorphHistograms() {
     mHistName  = new TString("Ecc2");
     mHistName->Append(*mCount);
     MorphHists[i].mEcc2 =
-      new TH1F(mHistName->Data(), mHistTitle->Data(), 1000, 0., 0.1);
+      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., .1);
     MorphHists[i].mEcc2->Sumw2();
     delete mHistTitle;
     delete mHistName;
@@ -1267,7 +1262,7 @@ Int_t StQACosmicMaker::initMorphHistograms() {
     mHistName  = new TString("LinEcc2");
     mHistName->Append(*mCount);
     MorphHists[i].mLinEcc2 =
-      new TH1F(mHistName->Data(), mHistTitle->Data(), 1000, 0., 0.1);
+      new TH1F(mHistName->Data(), mHistTitle->Data(), 100, 0., .1);
     MorphHists[i].mLinEcc2->Sumw2();
     delete mHistTitle;
     delete mHistName;
@@ -1478,4 +1473,5 @@ Int_t StQACosmicMaker::fillMorphHistograms() {
 }
 
 //-----------------------------------------------------------------------
+
 

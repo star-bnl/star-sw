@@ -2,13 +2,16 @@
 #define StQACosmicMaker_HH
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.h,v 1.8 1999/09/24 01:23:21 fisyak Exp $
+ * $Id: StQACosmicMaker.h,v 1.9 1999/11/23 21:21:07 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking, 
  *               geometry etc.)
  *
  * $Log: StQACosmicMaker.h,v $
+ * Revision 1.9  1999/11/23 21:21:07  snelling
+ * removed references to tphitclus table
+ *
  * Revision 1.8  1999/09/24 01:23:21  fisyak
  * Reduced Include Path
  *
@@ -71,7 +74,7 @@ class StQACosmicMaker : public StMaker {
   virtual void   WriteHistogramsOff(){WriteHistograms();}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.8 1999/09/24 01:23:21 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.9 1999/11/23 21:21:07 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
 
@@ -104,7 +107,6 @@ class StQACosmicMaker : public StMaker {
   Int_t  cleanUpTableSorters();
 
   Bool_t btphit;
-  Bool_t btphitclus;
   Bool_t bmorph;
   Bool_t brestpt;
   Bool_t btptrack;
@@ -126,10 +128,6 @@ class StQACosmicMaker : public StMaker {
   // hit table
   St_tcl_tphit *phtcl; //!
   tcl_tphit_st *pttphit; //!
-
-  // Li Qun's table
-  St_tcl_hitclus *phhcl; //!
-  tcl_hitclus_st *pthcl; //!
 
   // Tom's morphology table
   St_tcc_morphology *phmorph; //!
