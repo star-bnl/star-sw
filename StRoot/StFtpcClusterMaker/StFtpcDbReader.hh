@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.9 2001/11/21 12:36:27 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.10 2002/01/21 22:12:53 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.10  2002/01/21 22:12:53  jcs
+// add gas temperature difference between west and east FTPC to database
+//
 // Revision 1.9  2001/11/21 12:36:27  jcs
 // make ftpcGas database table available to FTPC cluster maker
 //
@@ -94,6 +97,7 @@ protected:
   Float_t mBaseTemperature;
   Float_t mBasePressure;
   Float_t mPressureOffset;
+  Float_t mTemperatureDifference;
 
   Float_t mTZero;
   Float_t mDriftCathodeVoltage;
@@ -199,6 +203,7 @@ public:
   Float_t baseTemperature() {return mBaseTemperature;}
   Float_t basePressure() {return mBasePressure;}
   Float_t pressureOffset() {return mPressureOffset;}
+  Float_t temperatureDifference(){return mTemperatureDifference;}
 
   Float_t tZero() {return mTZero;}
   Float_t driftCathodeVoltage() {return mDriftCathodeVoltage;}
