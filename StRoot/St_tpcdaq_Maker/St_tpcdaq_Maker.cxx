@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.2  1999/02/19 16:32:21  fisyak
+// rename h-file and access name to Trs
+//
 // Revision 1.1  1999/02/18 16:56:34  ward
 // There may be bugs. = Moshno oshibki.
 //
@@ -8,10 +11,26 @@
 // St_tpcdaq_Maker class
 // Herbert Ward, started Feb 1 1999.
 //////////////////////////////////////////////////////////////////////////
-#include "St_tpcdaq_Maker.hh"
+#include "St_tpcdaq_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
+#include "StTpcRawDataEvent.hh"
+// #include "StTrsMaker/include/StTrsRawDataEvent.hh"
+// #include "StTrsMaker/include/StDacRawDataEvent.hh"
+#ifdef TRS_SIMPLE
+#include "StTrsMaker/include/StTrsSimpleMaker.h"
+#else
+#include "StTrsMaker/include/StTrsUnpacker.hh"
+#endif
+#include "StSequence.hh"
+
+#include "St_raw_sec_m_Table.h"
+#include "St_raw_row_Table.h"
+#include "St_raw_pad_Table.h"
+#include "St_raw_seq_Table.h"
+#include "St_type_shortdata_Table.h"
+
 ClassImp(St_tpcdaq_Maker)
 
 #define NSECT 24
@@ -277,7 +296,7 @@ timeOff     pad         SeqWrite SeqWrite m              0x100
 ------------------------------------------------------------------------*/
 // bbb Brian don't forget LinArray[] ("DAQ to Offline").
 Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
- St_DataSetIter trs(gStChain->DataSet("trs"));            
+ St_DataSetIter trs(gStChain->DataSet("Trs"));            
 #ifdef TRS_SIMPLE
  mEvent=NULL;
  St_ObjectSet *decoder=(St_ObjectSet*)trs("Decoder"); if(!decoder) return 22;
@@ -313,7 +332,7 @@ Int_t St_tpcdaq_Maker::Make() {
 void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
-  printf("*  \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.2 1999/02/19 16:32:21 fisyak Exp $ \n");
   // printf("* %s *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if(gStChain->Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.hh,v 1.1 1999/02/18 16:56:35 ward Exp $
-// $Log: St_tpcdaq_Maker.hh,v $
+// $Id: St_tpcdaq_Maker.h,v 1.1 1999/02/19 16:32:21 fisyak Exp $
+// $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.1  1999/02/19 16:32:21  fisyak
+// rename h-file and access name to Trs
+//
 // Revision 1.1  1999/02/18 16:56:35  ward
 // There may be bugs. = Moshno oshibki.
 //
@@ -16,22 +19,15 @@
 #include "StMaker.h"
 #endif
 
-#include "StTpcRawDataEvent.hh"
-// #include "StTrsRawDataEvent.hh"
-// #include "StDacRawDataEvent.hh"
-#ifdef TRS_SIMPLE
-#include "StTrsSimpleMaker.h"
-#else
-#include "StTrsUnpacker.hh"
-#endif
-#include "StSequence.hh"
-
-#include "St_raw_sec_m_Table.h"
-#include "St_raw_row_Table.h"
-#include "St_raw_pad_Table.h"
-#include "St_raw_seq_Table.h"
-#include "St_type_shortdata_Table.h"
-
+class St_DataSet;
+class St_raw_row;
+class St_raw_pad;
+class St_raw_seq;
+class St_type_shortdata;
+class StTpcRawDataEvent;
+class StTrsSimpleMaker;
+class StTpcUnpacker;
+class StSequence;
 class St_tpcdaq_Maker : public StMaker {
  private:
    Bool_t drawinit;
@@ -44,8 +40,8 @@ class St_tpcdaq_Maker : public StMaker {
    Int_t GetEventAndDecoder();
  protected:
  public: 
-                  St_tpcdaq_Maker(const char *name="tpcdaq", 
-                           const char *title="tpcdaq_something");
+                  St_tpcdaq_Maker(const char *name="tpc_raw", 
+                           const char *title="event/raw_data/tpc");
    int mErr;
    
    void OrderTheSequences(int nseq,StSequence *los);
