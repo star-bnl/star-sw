@@ -4,7 +4,7 @@ St_DataSet *dst;
 StChain *chain;
 TBrowser *brow=0;
 
-void bfcread(Int_t nevents=1, const char *MainFile="/disk1/star/test/SL99d/tfs_Linux/Fri/set0020_01_50evts.dst.root")
+void bfcread(Int_t nevents=1, const char *MainFile="gtrack.dst.root")
 {
 //
     gSystem->Load("St_base");
@@ -22,7 +22,8 @@ void bfcread(Int_t nevents=1, const char *MainFile="/disk1/star/test/SL99d/tfs_L
   treeMk->SetIOMode("r");
   treeMk->SetDebug();
 
-   chain->SetInput("dst","bfcTree/dstBranch/dst");
+  //  chain->SetInput("dst","bfc/dst/dst");
+   chain->SetInput("dst","bfc/dst");
    St_QA_Maker  *qa  = new St_QA_Maker;
   
   chain->Init();
