@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.2 2004/08/06 14:15:09 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.3 2004/08/10 15:41:38 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -127,6 +127,11 @@ StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name,
     mmk = .4937;
     noAbortions = false;
     simpleCal = false;
+
+    pedSubKludge = false;
+    EtPedSub = 0.0;
+    ADCPedSub = 0;
+
 
     //adcValHist = new TH1F("PerEventYeild", "ADC Value", 1024, 0.0, 1024.0);
 }
@@ -310,12 +315,20 @@ Int_t StEmcTpcFourPMaker::Make() {
 			}
 		    }
 	    }
+	if(pedSubKludge)
+	    {
+		ADCPedSub = getADCAverage(runNumber, maxHits, towerProxy, 
+					  data, muEmc, simpleCal, mDb, emcgaintbl, emccalibtbl, emcpedtbl, 
+					  EtPedSub, ADCPedSub);
+		cout << "Kludging Pedestal Subtraction: " << ADCPedSub << endl;
+	    }
+	
 	for(hitId = 1; hitId <= maxHits; hitId++) {
 	    float eta, phi, energy;
 	    bool isGood;
 	    getValuesFromHitId(hitId, runNumber, eta, phi, energy, isGood, 
 			       towerProxy, geom, data, muEmc, simpleCal, mDb, emcgaintbl, 
-			       emccalibtbl, emcpedtbl);
+			       emccalibtbl, emcpedtbl, EtPedSub, ADCPedSub);
 	    if(isGood == false)
 		continue;
 	    while(phi < 0) phi += twoPi;
@@ -534,73 +547,157 @@ Int_t StEmcTpcFourPMaker::Finish()
 }
 
 bool getValuesFromHitId(int hitId, int runNumber, float &eta, float &phi, 
-			float &energy, bool &isGood, SafetyArray *towerProxy, StEmcGeom *geom, 
-			StBemcData *data, StMuEmcCollection *muEmc, bool simpleCal, 
-			TDataSet *mDb, emcGain_st* emcgaintbl,
-			emcCalib_st* emccalibtbl, emcPed_st* emcpedtbl)
+  float &energy, bool &isGood, SafetyArray *towerProxy, StEmcGeom *geom, 
+  StBemcData *data, StMuEmcCollection *muEmc, bool simpleCal, 
+  TDataSet *mDb, emcGain_st* emcgaintbl,
+  emcCalib_st* emccalibtbl, emcPed_st* emcpedtbl, double EtPedSub, int ADCPedSub)
 {
-    isGood = true;
-    if(towerProxy->isGood(runNumber, hitId-1) == false) { 
-	isGood = false;
-	return false; }
-    geom->getEtaPhi(hitId, eta, phi);
-    if(data)
-	{
-	    if(data->TowerStatus[hitId-1] != 1) { isGood = false; return false; }
-	    if(simpleCal)
+          isGood = true;
+	  if(towerProxy->isGood(runNumber, hitId-1) == false) { 
+            isGood = false;
+	    return false; }
+	  geom->getEtaPhi(hitId, eta, phi);
+	  if(data)
+	    {
+	      if(data->TowerStatus[hitId-1] != 1) { isGood = false; return false; }
+	      if(simpleCal)
                 {
-		    double et = 0.0125*static_cast<double>(data->TowerADC[hitId-1]);
-		    energy = et/sqrt(1.0-tanh(eta)*tanh(eta));
-		}
-	    else
-                {
-		    energy = towerProxy->energyFunction(
-							runNumber, 
-							hitId-1, 
-							data->TowerADC[hitId-1], 
-							data->TowerEnergy[hitId-1]);
+                  double et = 0.0125*static_cast<double>(data->TowerADC[hitId-1]-ADCPedSub);
+                  energy = et/sqrt(1.0-tanh(eta)*tanh(eta))-EtPedSub;
                 }
-	}
-    else // Calibration!!!!  MuDst does not contain energy.
-	{
-	    float ADC = 0; 
-	    float PED = 0;
-	    if(muEmc != NULL)
-		{
-		    ADC = muEmc->getTowerADC(hitId);
-		}
-	    else
+              else
+                {
+	          energy = towerProxy->energyFunction(
+						  runNumber, 
+						  hitId-1, 
+						  data->TowerADC[hitId-1], 
+						  data->TowerEnergy[hitId-1]);
+                }
+	    }
+	  else // Calibration!!!!  MuDst does not contain energy.
+	    {
+	      float ADC = 0; 
+	      float PED = 0;
+              if(muEmc != NULL)
+              {
+	        ADC = muEmc->getTowerADC(hitId);
+              }
+              else
                 return false;
-	    if(simpleCal)
+              if(simpleCal)
                 {
-		    double et = 0.0125*ADC;
-		    energy = et/sqrt(1.0-tanh(eta)*tanh(eta));
+                  double et = 0.0125*(ADC-ADCPedSub);
+                  energy = et/sqrt(1.0-tanh(eta)*tanh(eta))-EtPedSub;
                 }
-	    else
+              else
                 {
-		    if(emccalibtbl == NULL)
-			return false;
-		    PED = static_cast<float>(emcpedtbl[0].AdcPedestal[hitId-1])
-			/100.0;
-		    //PED = static_cast<double>(static_cast<int>(PED));
-		    float ADCSUB = ADC-PED;
-		    energy = 0;
-		    float ADCPOWER = 1;
-		    for(int i = 0; i < 5; i++)
-			{
-			    float c = 0;
-			    c = emccalibtbl[0].AdcToE[hitId-1][i];
-			    energy += c*ADCPOWER;
-			    ADCPOWER *= ADCSUB;
-			}
-		    if(PED <= 0) energy = 0;
-		    float gain = 1;
-		    if(emcgaintbl != NULL)
-			gain = emcgaintbl[0].Gain[hitId-1];
-		    if(gain < .1)  // gain shouldn't have a large or negative effect
-			gain = 1;
-		    //energy *= gain;
+                  if(emccalibtbl == NULL)
+                    return false;
+	      	  PED = static_cast<float>(emcpedtbl[0].AdcPedestal[hitId-1])
+		    /100.0;
+	          //PED = static_cast<double>(static_cast<int>(PED));
+	          float ADCSUB = ADC-PED;
+	          energy = 0;
+	          float ADCPOWER = 1;
+	          for(int i = 0; i < 5; i++)
+		    {
+		      float c = 0;
+		      c = emccalibtbl[0].AdcToE[hitId-1][i];
+		      energy += c*ADCPOWER;
+		      ADCPOWER *= ADCSUB;
+		    }
+	          if(PED <= 0) energy = 0;
+	          float gain = 1;
+	          if(emcgaintbl != NULL)
+		    gain = emcgaintbl[0].Gain[hitId-1];
+	          if(gain < .1)  // gain shouldn't have a large or negative effect
+		    gain = 1;
+	          //energy *= gain;
                 }
-	}
-    return true;
+	    }
+  return true;
 }
+
+int getADCAverage(int runNumber, int topIndex, SafetyArray *towerProxy, 
+  StBemcData *data, StMuEmcCollection *muEmc, bool simpleCal, 
+  TDataSet *mDb, emcGain_st* emcgaintbl,
+  emcCalib_st* emccalibtbl, emcPed_st* emcpedtbl, double EtPedSub, int ADCPedSub)
+{
+    double ADCAverage = 0;
+    int count = 0;
+    double energy = 0;
+    double eta = 0;
+    for(int i = 1; i <= topIndex; i++)
+    {
+          bool isGood = true;
+	  if(towerProxy->isGood(runNumber, i) == false) { 
+            isGood = false;
+	    continue; }
+	  if(data)
+	    {
+	      if(data->TowerStatus[i-1] != 1) { isGood = false; continue; }
+	      count++;
+	      if(simpleCal)
+                {
+                  double et = 0.0125*static_cast<double>(data->TowerADC[i-1]-ADCPedSub);
+                  energy = et/sqrt(1.0-tanh(eta)*tanh(eta)) - EtPedSub;
+                  ADCAverage += static_cast<double>(data->TowerADC[i-1]-ADCPedSub); 
+                }
+              else
+                {
+	          energy = towerProxy->energyFunction(
+						  runNumber, 
+						  i-1, 
+						  data->TowerADC[i-1], 
+						  data->TowerEnergy[i-1]);
+                  ADCAverage += data->TowerADC[i-1];
+                }
+	    }
+	  else // Calibration!!!!  MuDst does not contain energy.
+	    {
+	      float ADC = 0; 
+	      float PED = 0;
+              if(muEmc != NULL)
+              {
+	        ADC = muEmc->getTowerADC(i);
+              }
+              else
+                return false;
+              count++;
+              if(simpleCal)
+                {
+                  double et = 0.0125*(ADC-ADCPedSub);
+                  energy = et/sqrt(1.0-tanh(eta)*tanh(eta))-EtPedSub;
+                  ADCAverage += ADC-ADCPedSub;
+                }
+              else
+                {
+                  if(emccalibtbl == NULL)
+                    continue;
+	      	  PED = static_cast<float>(emcpedtbl[0].AdcPedestal[i-1])
+		    /100.0;
+	          //PED = static_cast<double>(static_cast<int>(PED));
+	          float ADCSUB = ADC-PED;
+	          energy = 0;
+	          float ADCPOWER = 1;
+	          for(int j = 0; j < 5; j++)
+		    {
+		      float c = 0;
+		      c = emccalibtbl[0].AdcToE[i-1][j];
+		      energy += c*ADCPOWER;
+		      ADCPOWER *= ADCSUB;
+		    }
+	          if(PED <= 0) energy = 0;
+	          float gain = 1;
+	          if(emcgaintbl != NULL)
+		    gain = emcgaintbl[0].Gain[i-1];
+	          if(gain < .1)  // gain shouldn't have a large or negative effect
+		    gain = 1;
+	          //energy *= gain;
+                  ADCAverage += ADCSUB;
+                }
+	    }
+    }
+  return static_cast<int>(ADCAverage/static_cast<double>(count));
+}
+
