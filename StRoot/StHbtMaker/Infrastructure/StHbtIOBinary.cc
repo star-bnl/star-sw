@@ -8,7 +8,8 @@
 #include "StHbtMaker/Infrastructure/StHbtIOBinary.hh"
 
 
-StHbtIOBinary::StHbtIOBinary(const char* dirName, const char* fileName, const char* appendix, const char* readWrite) : mOStream(0), mIStream(0) {
+StHbtIOBinary::StHbtIOBinary(const char* dirName, const char* fileName, const char* appendix, const char* readWrite) 
+  : mDebug(0), mOStream(0), mIStream(0) {
   //cout << " StHbtIOBinary(const char* fileName, const char* readWrite " << endl;
   byteCounterTotal=0;
   byteCounterEvent=0;
@@ -77,36 +78,39 @@ const char* StHbtIOBinary::parseDirFile(const char* dir, const char* file, const
     cout << theFile.c_str() << endl;
 #endif
   }
-  cout << " StHbtIOBinary::parseDirFile() ---" << (theDir+theFile+theAppendix).c_str() << "---" <<  endl;
+  if(mDebug) cout << " StHbtIOBinary::parseDirFile() ---" << (theDir+theFile+theAppendix).c_str() << "---" <<  endl;
   return (theDir+theFile+theAppendix).c_str();
 }
 
-
+#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
+#include "SystemOfUnits.h"
 //------------------------- trackList ----------------------------------
 int StHbtIOBinary::readTrackList(StHbtEvent& ev, unsigned short trVersion){
   int iret;
   ev.TrackCollection()->clear();
   colSizeType NtracksInCollection;
   iret =  read(NtracksInCollection);
-  //#ifdef STHBTDEBUG
-  cout << " reading " << NtracksInCollection << " tracks " << endl;
+  if(mDebug) cout << " reading " << NtracksInCollection << " tracks " << endl;
   if (NtracksInCollection > 1e6) {
     for ( int i=0; i<10; i++) {
       cout << " StHbtIOBinaryReader::readTrackList(...) - unreasonable number of tracks, returning ioERR " << endl;
     }
     return(ioERR);
   }
-  //#endif
+  StHbtThreeVector rVertexPosition(ev.PrimVertPos());
+  StHbtThreeVector p;
+  double pathlength; 
   for (colSizeType itrk=0; itrk <NtracksInCollection; itrk++){
     StHbtTrack* trk = new StHbtTrack;
     iret =  read(  *trk, trVersion);
     ev.TrackCollection()->push_back(trk);  // ?ok?
-    #ifdef STHBTDEBUG
-    cout << " track read " << *trk << endl;
-    cout << " " << itrk << "/" << NtracksInCollection;
-    cout << " track pushed " << endl;
-    #endif
+    if(mDebug) {
+      cout << " track read " << *trk << endl;
+      cout << " " << itrk << "/" << NtracksInCollection;
+      cout << " track pushed " << endl;
+    }
   }
+  
   return iret;
 }
 int StHbtIOBinary::writeTrackList(const StHbtEvent& ev, unsigned short trVersion){
@@ -124,12 +128,12 @@ int StHbtIOBinary::readV0List(StHbtEvent& ev, unsigned short v0Version){
   ev.V0Collection()->clear(); 
   colSizeType NV0sInCollection;
   iret =  read( NV0sInCollection);
-  cout << " reading " << NV0sInCollection << " V0s " << endl;
+  if (mDebug) cout << " reading " << NV0sInCollection << " V0s " << endl;
   if ( !(mIStream->good()) ) {
     cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
     return ioERR;
   }
-  if (NV0sInCollection > 1e7) {
+  if (NV0sInCollection > 1e6) {
     for ( int i=0; i<10; i++) {
       cout << " StHbtIOBinaryReader::readV0List(...) - unreasonable number of V0s, returning ioERR " << endl;
     }
@@ -180,9 +184,7 @@ int StHbtIOBinary::readString(StHbtString& Message){
 
 //------------------------- StHbtEvent -----------------------------------
 int StHbtIOBinary::read(StHbtEvent& ev, unsigned short evVersion, unsigned short trVersion, unsigned short v0Version){
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::read(StHbtEvent& ev, ...) - Versions: " << evVersion << " " << trVersion << " " << v0Version << endl;
-#endif
+ if (mDebug) cout << " StHbtIOBinary::read(StHbtEvent& ev, ...) - Versions: " << evVersion << " " << trVersion << " " << v0Version << endl;
   int iret;
   byteCounterEvent = 0;
   switch ( (int)evVersion ) {
@@ -195,15 +197,13 @@ int StHbtIOBinary::read(StHbtEvent& ev, unsigned short evVersion, unsigned short
     break;
   }
   byteCounterTotal += byteCounterEvent;
-  cout << " StHbtIOBinary::read(StHbtEvent& ev, ...) - byteCounterTotal= " << byteCounterTotal << "  byteCounterEvent = " << byteCounterEvent << endl;
+ if (mDebug) cout << " StHbtIOBinary::read(StHbtEvent& ev, ...) - byteCounterTotal= " << byteCounterTotal << "  byteCounterEvent = " << byteCounterEvent << endl;
   return iret;
 } 
 
 //------------------------- StHbtEvent -----------------------------------
 int StHbtIOBinary::write( const StHbtEvent& ev, unsigned short evVersion, unsigned short trVersion, unsigned short v0Version){
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::write(StHbtEvent& ev, ...) -  Versions: " << evVersion << " " << trVersion << " " << v0Version << endl;
-#endif
+  if (mDebug) cout << " StHbtIOBinary::write(StHbtEvent& ev, ...) -  Versions: " << evVersion << " " << trVersion << " " << v0Version << endl;
   int iret;
   byteCounterEvent = 0;
   switch ( (int)evVersion ) {
@@ -216,15 +216,13 @@ int StHbtIOBinary::write( const StHbtEvent& ev, unsigned short evVersion, unsign
     break;
   }
   byteCounterTotal += byteCounterEvent;
-  cout << "  StHbtIOBinary::write(StHbtEvent& ev, ...) - byteCounterTotal= " << byteCounterTotal << "  byteCounterEvent = " << byteCounterEvent << endl;
+  if (mDebug) cout << "  StHbtIOBinary::write(StHbtEvent& ev, ...) - byteCounterTotal= " << byteCounterTotal << "  byteCounterEvent = " << byteCounterEvent << endl;
   return iret;
 } 
 
 //------------------------- StHbtTrack -----------------------------------
 int StHbtIOBinary::read( StHbtTrack& x, unsigned short version){
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::readTrack() - Version : " << version << endl;
-#endif
+  if (mDebug>1) cout << " StHbtIOBinary::readTrack() - Version : " << version << endl;
   int iret;
   switch ( (int)version ) {
   case 0: 
@@ -240,9 +238,7 @@ int StHbtIOBinary::read( StHbtTrack& x, unsigned short version){
 
 //------------------------- StHbtTrack -----------------------------------
 int StHbtIOBinary::write( const StHbtTrack& x, unsigned short version){
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::writeTrack() - Version : " << version << endl;
-#endif
+  if (mDebug>1)  cout << " StHbtIOBinary::writeTrack() - Version : " << version << endl;
   int iret;
   switch ( (int)version ) {
   case 0: 
@@ -257,9 +253,7 @@ int StHbtIOBinary::write( const StHbtTrack& x, unsigned short version){
 
 //------------------------- StHbtV0 -----------------------------------
 int StHbtIOBinary::read( StHbtV0& x, unsigned short version){
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::readV0(...) - Version : " << version << endl;
-#endif
+  if (mDebug>1)  cout << " StHbtIOBinary::readV0(...) - Version : " << version << endl;
   int iret;
   switch ( (int)version ) {
   case 0: 
@@ -276,9 +270,7 @@ int StHbtIOBinary::read( StHbtV0& x, unsigned short version){
 
 //------------------------- StHbtV0 -----------------------------------
 int StHbtIOBinary::write(const StHbtV0& x, unsigned short version){
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::writeV0(...) - Version : " << version << endl;
-#endif
+  if (mDebug>0)  cout << " StHbtIOBinary::writeV0(...) - Version : " << version << endl;
   int iret;
   switch ( (int)version ) {
   case 0: 
@@ -299,9 +291,7 @@ int StHbtIOBinary::write(const StHbtV0& x, unsigned short version){
 //------------------------- StHbtEvent Versions -----------------------------------
 //------------------------- StHbtEvent Versions -----------------------------------
 int StHbtIOBinary::read_V0(StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version ) {
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::read_V0(StHbtEvent& event, unsigned short trVersion, unsigned short v0Version )" << endl;
-#endif
+  if (mDebug)  cout << " StHbtIOBinary::read_V0(StHbtEvent& event, unsigned short trVersion, unsigned short v0Version )" << endl;
   int iret;
   int idummy = 0;
   iret =  read( ev.mEventNumber);
@@ -335,9 +325,7 @@ int StHbtIOBinary::read_V0(StHbtEvent& ev, unsigned short trVersion, unsigned sh
   return ioOK;
 };
 int StHbtIOBinary::write_V0(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version){
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::write_V0(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version) " << endl;
-#endif
+ if (mDebug)  cout << " StHbtIOBinary::write_V0(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version) " << endl;
   int iret;
   int idummy = 0;
   //event properties
@@ -360,9 +348,7 @@ int StHbtIOBinary::write_V0(const StHbtEvent& ev, unsigned short trVersion, unsi
   return ioOK;
 };
 int StHbtIOBinary::read_V1(StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version ) {
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::read_V1(StHbtEvent& event, unsigned short trVersion, unsigned short v0Version )" << endl;
-#endif
+  if (mDebug) cout << " StHbtIOBinary::read_V1(StHbtEvent& event, unsigned short trVersion, unsigned short v0Version )" << endl;
   int iret;
   iret =  read( ev.mEventNumber);
   if (mIStream->eof()) {
@@ -392,9 +378,7 @@ int StHbtIOBinary::read_V1(StHbtEvent& ev, unsigned short trVersion, unsigned sh
   return ioOK;
 };
 int StHbtIOBinary::write_V1(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version){
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::write_V1(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version) " << endl;
-#endif
+  if (mDebug)  cout << " StHbtIOBinary::write_V1(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version) " << endl;
   int iret;
   //event properties
   iret =  write( ev.mEventNumber        );
@@ -419,9 +403,7 @@ int StHbtIOBinary::write_V1(const StHbtEvent& ev, unsigned short trVersion, unsi
 //------------------------- StHbtEvent Versions -----------------------------------
 //------------------------- StHbtEvent Versions -----------------------------------
 int StHbtIOBinary::read_V2(StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version ) {
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::read_V2(StHbtEvent& event, unsigned short trVersion, unsigned short v0Version )" << endl;
-#endif
+  if (mDebug) cout << " StHbtIOBinary::read_V2(StHbtEvent& event, unsigned short trVersion, unsigned short v0Version )" << endl;
   int iret;
   iret =  read( ev.mEventNumber);
   if (mIStream->eof()) {
@@ -453,9 +435,7 @@ int StHbtIOBinary::read_V2(StHbtEvent& ev, unsigned short trVersion, unsigned sh
   return ioOK;
 };
 int StHbtIOBinary::write_V2(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version){
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::write_V2(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version)" << endl;
-#endif
+  if (mDebug)  cout << " StHbtIOBinary::write_V2(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version)" << endl;
   int iret;
   //event properties
   iret =  write( ev.mEventNumber        );
@@ -480,15 +460,11 @@ int StHbtIOBinary::write_V2(const StHbtEvent& ev, unsigned short trVersion, unsi
 //------------------------- StHbtTrack Versions -----------------------------------
 //------------------------- StHbtTrack Versions -----------------------------------
 int StHbtIOBinary::read_V1(StHbtTrack& x) {
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::read_V1(StHbtTrack&)  " << endl;
-#endif
+  if (mDebug>1) cout << " StHbtIOBinary::read_V1(StHbtTrack&)  " << endl;
   return read(x);  // works only with in root
 };
 int StHbtIOBinary::write_V1(const StHbtTrack& x){
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::write_V1(const StHbtTrack&)" << endl;
-#endif
+  if (mDebug>1) cout << " StHbtIOBinary::write_V1(const StHbtTrack&)" << endl;
   return write(x); // works only with in root
 };
 //------------------------- StHbtTrack Versions -----------------------------------
@@ -544,15 +520,11 @@ int StHbtIOBinary::write_V2(const StHbtTrack& x) {
 //------------------------- StHbtV0 Versions -----------------------------------
 //------------------------- StHbtV0 Versions -----------------------------------
 int StHbtIOBinary::read_V1(StHbtV0& x) {
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::read_V1(StHbtV0&) " << endl;
-#endif
+  if (mDebug>1) cout << " StHbtIOBinary::read_V1(StHbtV0&) " << endl;
   return read(x);  // works only with in root
 };
 int StHbtIOBinary::write_V1(const StHbtV0& x){
-#ifdef STHBTDEBUG
-  cout << " StHbtIOBinary::write_V1(const StHbtV0&) " << endl;
-#endif
+  if (mDebug>1)  cout << " StHbtIOBinary::write_V1(const StHbtV0&) " << endl;
   return write(x); // works only with in root
 };
 //------------------------- StHbtV0 Versions -----------------------------------
