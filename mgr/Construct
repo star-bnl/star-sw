@@ -1,14 +1,13 @@
 #!/usr/local/bin/perl
 use Env;
-#print "PATH=",$PATH,"\n";
-require "find.pl";
 if (defined($AFS)) {$File::Find::dont_use_nlink;}
 use File::Basename;
-
+use File::Find ();
 #use strict;
 use Sys::Hostname;
 use Cwd;
 my $DEBUG = "-g";
+@search_files   = ();
 if (defined($NODEBUG)) {$DEBUG = "-O2";}
 my $O        = "o";
 my $A        = "a";
@@ -140,64 +139,92 @@ else {
   print "Repositories = ",$DirPath," + ",$STAR,"\n";
   Repository  ($DirPath, $STAR);
 }
-#print "Repository = ",$Repository,"\n";
 $env = new cons(
-		 'CPPPATH'       => $CPPPATH,
-		 'CPPFLAGS'     => $_CPPFLAGS,
-		 'CC'	        => $CC,
-		 'CFLAGS'       => $CFLAGS,
-		 'CCCOM'        => '%CC %CFLAGS %_IFLAGS -c %< -o %>',
-		 'CXX'          => $CXX,
-		 'CXXFLAGS'     => $CXXFLAGS,
-		 'CXXCOM'       => '%CXX %CXXFLAGS %_IFLAGS -c %< -o %>',
-		 'LINK'	        => $LD,
-		 'LDFLAGS'      => $LDFLAGS,
-		 'LINKCOM'      => '%LINK %LDFLAGS -o %> %< %_LDIRS %LIBS',
-		 'SO'           => $SO,
-		 'SOFLAGS'      => $SOFLAGS, 
-		 'SoOUT'        => $SoOUT,
-		 'LINKMODULECOM'=> '%SO %SOFLAGS %SoOUT %> %<',
-		 'AR'	        => $AR,
-		 'ARFLAGS'      => $ARFLAGS,
-		 'ARCOM'        => "%AR %ARFLAGS %> %<\n%RANLIB %>",
-		 'RANLIB'       => 'ranlib',
-		 'AS'	        => 'as',
-		 'ASFLAGS'      => '',
-		 'ASCOM'        => '%AS %ASFLAGS %< -o %>',
-		 'LD'	        => 'ld',
-		 'LDFLAGS'      => '',
-		 'PREFLIB'      => 'lib',
-		 'SUFLIB'       => '.a',
-		 'SUFLIBS'      => '.so:.a',
-		 'SUFMAP'       => {
-				    '.c'  => 'build::command::cc',
-				    '.C'  => 'build::command::cxx',
-				    '.s'  => 'build::command::cc',
-				    '.S'  => 'build::command::cc',
-				    '.cc' => 'build::command::cxx',
-				    '.cxx'=> 'build::command::cxx',
-				    '.cpp'=> 'build::command::cxx'
-				   },
-		 'SUFOBJ'	=> '.o',
-		 'ENV'	        => { 'PATH' => $PATH,
+		'CPPPATH'      => $CPPPATH,
+		'CPPFLAGS'     => $_CPPFLAGS,
+		'FC'	       => $FC,
+		'FFLAGS'       => $FFLAGS,
+		'FEXTEND'      => $FEXTEND,
+		'FCCOM'        => '%FC %FFLAGS %FEXTEND %_IFLAGS -c %< -o %>',
+		'GEANT3'       => $GEANT3,
+		'GEANT3COM'    => '%GEANT3 %< -o %<.F; %FC %FFLAGS  %_IFLAGS -c %<.F -o %>',
+		'CC'	       => $CC,
+		'CFLAGS'       => $CFLAGS,
+		'CCCOM'        => '%CC %CFLAGS %CPPFLAGS %_IFLAGS -c %< -o %>',
+		'CXX'          => $CXX,
+		'CXXFLAGS'     => $CXXFLAGS,
+		'CXXCOM'       => '%CXX %CXXFLAGS %CPPFLAGS %_IFLAGS -c %< -o %>',
+		'LINK'	       => $LD,
+		'LDFLAGS'      => $LDFLAGS,
+		'LINKCOM'      => '%LINK %LDFLAGS -o %> %< %_LDIRS %LIBS',
+		'SO'           => $SO,
+		'SOFLAGS'      => $SOFLAGS, 
+		'SoOUT'        => $SoOUT,
+		'LINKMODULECOM'=> '%SO %SOFLAGS %SoOUT %> %<',
+		'AR'	       => $AR,
+		'ARFLAGS'      => $ARFLAGS,
+		'ARCOM'        => "%AR %ARFLAGS %> %<\n%RANLIB %>",
+		'RANLIB'       => 'ranlib',
+		'AS'	       => 'as',
+		'ASFLAGS'      => '',
+		'ASCOM'        => '%AS %ASFLAGS %< -o %>',
+		'LD'	       => 'ld',
+		'LDFLAGS'      => '',
+		'PREFLIB'      => 'lib',
+		'SUFLIB'       => '.a',
+		'SUFLIBS'      => '.so:.a',
+		'SUFMAP'       => {
+				   '.g'  => 'build::command::geant3',
+				   '.f'  => 'build::command::fc',
+				   '.F'  => 'build::command::fc',
+				   '.C'  => 'build::command::cxx',
+				   '.s'  => 'build::command::cc',
+				   '.S'  => 'build::command::cc',
+				   '.c'  => 'build::command::cc',
+				   '.cc' => 'build::command::cxx',
+				   '.cxx'=> 'build::command::cxx',
+				   '.cpp'=> 'build::command::cxx'
+				  },
+		'SUFOBJ'	=> '.o',
+		'ENV'	        => { 'PATH' => $PATH,
 				     'ROOTSYS' => $ROOTSYS,
-				     'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH},
-		);
+				     'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH,
+				     'PGI' => $PGI,
+				     'STAR' => $STAR,
+				     'STAR_BIN' => $STAR_BIN
+				   },
+	       );
 #Command $env 
+$MAIN    = "";
 $INCLUDE = ""; 
 $LIB     = "";
-my $Obj = $STAR_HOST_SYS . "/obj";
 $EXPORT = "#.share";
-$BUILD  = "#." . $STAR_HOST_SYS;
+my $build  = "#." . $STAR_HOST_SYS;
+if (! -d $build) {mkdir $build, 0664;}
+$BUILD  = $build;
 $LIB    = $BUILD . "/lib";
 $BIN    = $BUILD . "/bin"; 
 $OBJ    = $BUILD . "/obj";
-print "BUILD  = ", $BUILD, " EXPORT = ", $EXPORT, " OBJ = ", $OBJ, "\n";
-Export qw( env INCLUDE LIB BIN OBJ);
-print "BUILD = ",$BUILD," OBJ = ",$OBJ,"\n";
-Link $OBJ => 'StRoot';
+my $obj = $build . "/obj";
+Link $BUILD => $DirPath; print "Link $BUILD => $DirPath\n";
+#if (! -d "$obj")   {mkdir $obj, 0664;}
+my $Targets = "";
+if (-d "./StRoot") {
+  my $stroot = $build . "/StRoot";
+#  if (! -f "$stroot") {symlink $OBJ, $stroot; print "symlink $OBJ, $stroot\n";}
+  $Targets .= $stroot . "/Conscript";
+}
+if (-d "./pams") {
+  my $pams   = $build . "/pams"; 
+#  if (! -f "$pams")   {symlink $OBJ, $pams; print "symlink $OBJ, $pams \n";}
+  $Targets .= $pams . "/Conscript";
+}
+print "STAR_SYS  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ Targets = $Targets\n";
+#Link $OBJ => 'StRoot'; print "Link $OBJ => StRoot\n";
+Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
 Default qw (   .  );
-Build  ( "$OBJ/Conscript" );
+Build  ($Targets);
+#Build ( "StRoot/Conscript" );
 #________________________________________________________________________________
 # Builder for a C++ module
 package build::command::cxx;
@@ -224,29 +251,100 @@ sub includes {
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
 #________________________________________________________________________________
-package script;
-#________________________________________
-sub find_sources($) {
+#________________________________________________________________________________
+# Builder for a F77 module
+package build::command::fc;
 
+BEGIN { @ISA = qw(build::command) }
+
+#________________________________________
+sub find {
+# print "==========\tDebug:","In build::command::fc-find- parameters = ", @_, "\n";
+    $_[1]->{_fc} || do {
+	my($class, $env) = @_;
+	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
+	my($self) = find build::command($env, $env->{FCCOM});
+	$self->{scanner} = $cscanner;
+	bless $env->{_fc} = $self;
+    }
 }
 #________________________________________
-sub find_files_by_extention($) {
-  
-  (my $obj = $OBJ)  =~ s/\#//g;
-  my $FilePath = FilePath();
-  $FilePath =~ s/$obj/StRoot/g; #  print " FilePath=",$FilePath,"\n"; 
-  my @c_files = map { glob($_) } $FilePath . $_[0], $FilePath . "*/" . $_[0] ; #$tag; 
-#  print "c_files = ",@c_files,"\n";
-  my @files;
-  my $i=0;
-  foreach $file (@c_files) {
-    next if $file =~ /~/;#   print "File:",$file;
-    $files[$i] = $file; 
-    $files[$i] =~ s/$FilePath//g;#    print "\tfile:", $files[$i],"\n";  
-    $i++; 
-  } 
-  
-  return @files;
+# Invoke the associated	 C scanner to get signature of included files.
+sub includes {
+# print "==========\tDebug:","In build::command::fc-includes- parameters = ", @_, "\n";
+    my($self, $tgt) = @_;
+    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
+}
+#________________________________________________________________________________
+# Builder for a C++ module
+package build::command::geant3;
+
+BEGIN { @ISA = qw(build::command) }
+
+#________________________________________
+sub find {
+# print "==========\tDebug:","In build::command::geant3-find- parameters = ", @_, "\n";
+    $_[1]->{_geant3} || do {
+	my($class, $env) = @_;
+	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
+	my($self) = find build::command($env, $env->{GEANT3COM});
+	$self->{scanner} = $cscanner;
+	bless $env->{_geant3} = $self;
+    }
+}
+#________________________________________
+# Invoke the associated	 C scanner to get signature of included files.
+sub includes {
+# print "==========\tDebug:","In build::command::geant3-includes- parameters = ", @_, "\n";
+    my($self, $tgt) = @_;
+    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
+}
+#________________________________________________________________________________
+#________________________________________________________________________________
+package script;
+#________________________________________
+*name           = *File::Find::name;
+*prune          = *File::Find::prune;
+*dir            = *File::Find::dir;
+*topdir         = *File::Find::topdir;
+*topdev         = *File::Find::topdev;
+*topino         = *File::Find::topino;
+*topmode        = *File::Find::topmode;
+*topnlink       = *File::Find::topnlink;
+sub find_sources {
+  if (defined($AFS)) {$File::Find::dont_use_nlink;}
+  @search_files   = ();
+  &File::Find::find(\&wanted, @_);
+  for my $dir (@_) {
+    my $i = 0;
+    for ($i=0;$i<=$#search_files;$i++) {
+#      print "i = ",$i, "src =", $search_files[$i],"\n";
+      my $file = $search_files[$i];
+      $file =~ s/$dir\///g;
+      $search_files[$i] = $file;
+    }
+  }
+#  print "find_source found $#search_files + 1 files\n";
+  return @search_files;
+}
+#________________________________________
+sub find_hfiles {
+  if (defined($AFS)) {$File::Find::dont_use_nlink;}
+  @search_files   = ();
+  &File::Find::find(\&wanted_h, @_);
+  for my $dir (@_) {
+    my $i = 0;
+    for ($i=0;$i<=$#search_files;$i++) {
+#      print "i = ",$i, "src =", $search_files[$i],"\n";
+      my $file = $search_files[$i];
+      $file =~ s/$dir\///g;
+      $search_files[$i] = $file;
+    }
+  }
+#  print "find_source found $#search_files + 1 files\n";
+  return @search_files;
 }
 #________________________________________
 sub cppflags {
@@ -265,21 +363,21 @@ return $CPPFLAGS;
 }
 #________________________________________
 sub script::wanted {
-  print "wanted ",$_,"\n";
-    (
-        (($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_)) &&
-        -d _ &&
-        ! /^CVS$/ &&
-        ! /^idl$/ &&
-        ! /^exa$/ &&
-        ! /^inc$/ &&
-        ! /^doc$/ &&
-        ! /^run$/ &&
-        ! /^examples$/ &&
-        ! /^local$/ &&
-        ! /^hold$/ &&
-        ! /^wrk$/ &&
-        (
+#  print "wanted ",$_,"\n";
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  if ( -d _ &&
+        (/^CVS$/ ||
+         /^idl$/ ||
+         /^exa$/ ||
+         /^inc$/ ||
+         /^doc$/ ||
+         /^run$/ ||
+         /^examples$/ ||
+         /^local$/ ||
+         /^hold$/ ||
+         /^wrk$/)
+     ) {$prune = 1; return;}
+  if (
             /^.*\.c$/
             ||
             /^.*\.cc$/
@@ -291,6 +389,29 @@ sub script::wanted {
             /^.*\.F$/
             ||
             /^.*\.f$/
-        ) 
-    ) && print "$File::Find::name\n";
-  }
+     ) {#print "$name\n"; 
+	push @search_files, $name;}
+}
+#________________________________________
+sub script::wanted_h {
+#  print "wanted ",$_,"\n";
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  if ( -d _ &&
+        (/^CVS$/ ||
+         /^idl$/ ||
+         /^exa$/ ||
+         /^inc$/ ||
+         /^doc$/ ||
+         /^run$/ ||
+         /^examples$/ ||
+         /^local$/ ||
+         /^hold$/ ||
+         /^wrk$/)
+     ) {$prune = 1; return;}
+  if (
+            /^.*\.h$/
+            ||
+            /^.*\.hh$/
+     ) {#print "$name\n"; 
+	push @search_files, $name;}
+}

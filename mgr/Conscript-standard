@@ -1,0 +1,19 @@
+#!/usr/local/bin/perl
+#use Env;
+Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
+(my $build = $BUILD) =~ s/\#//g;  #print "BUILD = $BUILD build = $build MAIN = $MAIN\n";
+(my $Dir = DirPath '.') =~ s/$build\///g; ; 
+my $PKG  = basename($Dir); print "Run cons in $Dir for $PKG\n";
+my $SO_PKG = $PKG . ".so";
+my $CPPFLAGS = cppflags();
+my @CintFiles = ($PKG . "_Cint.cxx", $PKG . "_Cint.h", "LinkDef.h"); 
+#for my $s (@CintFiles) {print "i=",$i++," CintFiles = ",$s,"\n";}
+my @Defs = find_hfiles($Dir); #for my $s (@Defs) {print "i=",$i++," src = ",$s,"\n";}
+Command $env [@CintFiles], @Defs,  qq( RootCint.pl "%>" "%<" "$CPPFLAGS" );
+my @src  = find_sources($Dir);  #my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
+#my $sources = join(' ',@src);
+#if (!grep(/$CintFiles[0]/,$sources)) {push @src, $CintFiles[0];}
+push @src, $CintFiles[0];
+#my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
+LinkedModule $env $SO_PKG, @src;
+Install $env $LIB, $SO_PKG;
