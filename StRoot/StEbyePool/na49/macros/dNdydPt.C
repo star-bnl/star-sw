@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: dNdydPt.C,v 1.2 2001/03/06 17:32:53 posk Exp $
+// $Id: dNdydPt.C,v 1.3 2001/05/14 23:22:38 posk Exp $
 //
 // Author:       Glenn Cooper with help from Art Poskanzer, May '00
 // Description:  Calculates dNdydPt .
@@ -9,6 +9,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: dNdydPt.C,v $
+// Revision 1.3  2001/05/14 23:22:38  posk
+// Minor changes.
+//
 // Revision 1.2  2001/03/06 17:32:53  posk
 // All macros now work.
 //
@@ -21,10 +24,10 @@
 #include <stdio.h>
 
 enum Pid_t { kPionPlus, kPionMinus, kKaonPlus, kKaonMinus, kProton, kPbar };
-enum Charge_t { kPlus=0, kMinus=1 };
+enum Charge_t { kplus=0, kMinus=1 };
 Char_t *PidName[] = { "pi+", "pi-", "K+", "K-", "pr", "pbar" };
 Double_t Mass[6]  = { 0.140, 0.140, 0.494, 0.494, 0.938, 0.938 };
-Int_t Charge[6]   = { kPlus, kMinus, kPlus, kMinus, kPlus, kMinus };
+Int_t Charge[6]   = { kplus, kMinus, kplus, kMinus, kplus, kMinus };
 Double_t YMax[6]  = { 3.8, 3.8, 3.2, 3.2, 2.91, 2.91 };
 //Double_t NPart[6] = { 366, 309, 242, 178, 132, 85 };
 

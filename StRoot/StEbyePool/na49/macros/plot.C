@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.3 2001/03/06 17:32:59 posk Exp $
+// $Id: plot.C,v 1.4 2001/05/14 23:22:42 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,6 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.4  2001/05/14 23:22:42  posk
+// Minor changes.
+//
 // Revision 1.3  2001/03/06 17:32:59  posk
 // All macros now work.
 //
@@ -51,6 +54,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   if (cOld) cOld->Delete();
     
   gROOT->SetStyle("Bold");                              // set style
+  //gROOT->SetStyle("Video");                              // set style
   gROOT->ForceStyle();
 
   // names of histograms made by StFlowAnalysisMaker
@@ -112,8 +116,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_vObsPt_Sel",
     "Flow_v2D_Sel",
     "Flow_vY_Sel",
-    "Flow_vPt_Sel",
-    "Flow_q_Sel"
+    "Flow_vPt_Sel"
+    //"Flow_q_Sel"
   };
   const int nNames = sizeof(baseName) / sizeof(char*);
   const int nSingles = 31 + 1;
@@ -375,7 +379,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	if (projX) projX->Draw("H");
 	if (!singleGraph) lineZeroY->Draw();
       } else if (strstr(shortName[pageNumber],".Pt")!=0) { // 2D Pt projection
-	if (singleGrtaph) {
+	if (singleGraph) {
 	  TH1D* projY = hist2D->ProjectionY(histName->Data(), 0, 9999); 
 	} else {
 	  TH1D* projY = hist2D->ProjectionY(histName->Data(), 0, 9999, "E");
@@ -538,12 +542,14 @@ TCanvas* plotResolution(){
       graphPad->cd(padN);
       gStyle->SetOptStat(0);
       if (strstr(resName[resNumber],"_v")!=0) {
-	hist->SetMaximum(10.);
+	hist->SetMaximum(5.);
+	hist->SetMinimum(-5.);
       } else {
-	hist->SetMaximum(1.1);
+	hist->SetMaximum(0.5);
+	hist->SetMinimum(0.);
       }
       hist->Draw();
-      if (j == 0) lineZeroHar->Draw();
+      lineZeroHar->Draw();
       hist->Print("all");
       delete histName;
     }
