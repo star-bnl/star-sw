@@ -44,7 +44,7 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
 
   HN=32;  // max events used, cannot exceed 32 used in header file
   MINTRACKS=1500;
-  SCALER_ERROR = 0.0004; // by eye from hist: SCvsZDCEpW.gif
+  SCALER_ERROR = 0.0005; // by eye from hist: SCvsZDCEpW.gif (liberal)
 
   // MAXDIFFE is maximum different in sc from last ebye sc
   MAXDIFFE =   SCALER_ERROR;
@@ -509,6 +509,9 @@ void StSpaceChargeEbyEMaker::WriteTableToFile(){
   gMessMgr->Info() << "StSpaceChargeEbyEMaker: Writing new table to:\n  "
     << tabname.Data() << endm;
   TString dirname = gSystem->DirName(tabname.Data());
+  TString estr = dirname;
+  estr.Prepend("mkdir -p ");
+  gSystem->Exec(estr.Data());
   if (gSystem->OpenDirectory(dirname.Data())==0) {
     if (gSystem->mkdir(dirname.Data())) {
       gMessMgr->Warning() << "Directory creation failed for:\n  " << dirname
@@ -544,8 +547,11 @@ float StSpaceChargeEbyEMaker::FakeAutoSpaceCharge() {
   return sc;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.2 2004/07/01 01:46:04 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.3 2004/08/02 01:19:27 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.3  2004/08/02 01:19:27  genevb
+// minor fixes for getting directories correct
+//
 // Revision 1.2  2004/07/01 01:46:04  genevb
 // Slightly larger margin for full vs half field differences
 //
