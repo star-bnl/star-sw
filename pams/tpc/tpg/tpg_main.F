@@ -1,4 +1,6 @@
-      integer function tpg_main(pad_plane_h,pad_plane)
+      integer function tpg_main(pad_plane_h,pad_plane,
+     +     tpg_detector_h, tpg_detector,
+     +     tpg_pad_h, tpg_pad)
       implicit none
 
 #include "tpg_main.inc"
@@ -8,10 +10,20 @@ C     Description: In the debug mode it verifies the transformations.
 C     Input arguments:
 C     pad_plane_h - header of the pad plane table
 C     pad_plane  - pad plane table 
+c
+c added by malisa 05feb97:
+c     tpg_detector_h
+c     tpg_detector - contains drift velocity and bucket length
+c     tpg_pad_h
+c     tpg_pad - contains t0_offset (and other info) for each pad
+c
+c 
+
 
       real    dummy1, dummy2, dummy3, dummy4
       integer tgc_pad_to_x, tgc_row_to_y, tgc_x_to_pad
       integer tgc_y_to_row
+      integer tgc_time_to_z,tgc_z_to_time ! added 05feb97 - mal
       integer iret
       integer init_flag, idebug
 
@@ -31,6 +43,10 @@ CCCCCCCCCCCC
          iret=tgc_x_to_pad(1.0,1.0,dummy3,pad_plane_h,pad_plane)
          iret=tgc_y_to_row(60.0,dummy2,pad_plane_h,pad_plane)
          iret=tgc_row_par(1,1.0,dummy3,dummy4,pad_plane_h,pad_plane)
+         iret=tgc_time_to_z(1.0,1.0,1.0,1.0,dummy2,
+     +        tpg_pad_h,tpg_pad,tpg_detector_h,tpg_detector)
+         iret=tgc_z_to_time(1.0,1.0,1.0,1.0,dummy2,
+     +        TPG_PAD_H,TPG_PAD,TPG_DETECTOR_H,TPG_DETECTOR)
          init_flag=1
       endif
 CCCCC
@@ -251,19 +267,138 @@ C     y - y coordinate in the local coordinate system
       y=row_cent(int_row)+dif_row*wid
       end
 
-      integer function tgc_time_to_z(time,z)
+      integer function tgc_time_to_z(time,pad,padrow,sector,z,
+     +     TPG_PAD_H,TPG_PAD,TPG_DETECTOR_H,TPG_DETECTOR)
       implicit none
+#include "PAM.inc"
+#include "tpg_pad.inc"
+#include "tpg_detector.inc"
 
-      real time, z
+      RECORD / table_head_st /tpg_pad_h
+      RECORD / tpg_pad_st /tpg_pad(*) 
+      RECORD / table_head_st /tpg_detector_h
+      RECORD / tpg_detector_st /tpg_detector(*) 
 
-C     Description: Converts time to z in the local coordinate system
-C     Not ready yet.
+
+C     Description: Converts TIME BUCKET NUMBER to z in the local coordinates
+c     mal 05feb97
+c
 C     Input arguments:
 C     time - time bucket number
+C     pad, padrow, sector - identifies electronics channel
+C     TPG_PAD - tells t0_offset of electronics channel
+C     TPG_DETECTOR - tells drift velocity
 C     Returns:
 C     z - z coodinate in the local coordinate system
 
-      z=0.0
+      real time                 ! note this is time bucket! 1..512
+      real pad,padrow,sector
+      real z                    ! z coordinate in local system (z>0)
+                                ! z_local = 0 at padplane
+      integer iflag/1/
+      integer ipadrow,isector,ipad
+      integer jj
+      real t0_offset(1:24,1:45,1:184)
+      real vdrift,buck_length
+      integer*2 jsec,jrow,jpad
+      save
+
+	tgc_time_to_z = 1
+
+ccc
+      if (iflag.eq.1) then      ! initialize: set up t0_offset table.
+         iflag = 0
+         do jj=1,tpg_pad_h.nok
+            jsec = tpg_pad(jj).sector
+            jrow = tpg_pad(jj).padrow
+            jpad = tpg_pad(jj).pad
+            t0_offset(jsec,jrow,jpad) = tpg_pad(jj).t0
+         enddo
+         vdrift = tpg_detector(1).vdrift
+         buck_length = tpg_detector(1).bucket_length
+      endif
+ccc
+      isector = int(sector)
+      ipadrow = int(padrow)
+      ipad = int(pad)
+
+      z = vdrift*(time*buck_length - t0_offset(isector,ipadrow,ipad))
+
+      if (z.lt.0.0) then
+         write(6,*)'TGC_TIME_TO_Z - z < 0 ! setting to 0'
+         z = 0.0
+      elseif (z.gt.tpg_detector(1).drift_length) then
+         write(6,*)'TGC_TIME_TO_Z - z > drift ! setting to ',
+     +        tpg_detector(1).drift_length
+         z= tpg_detector(1).drift_length
+      endif
+
+      end
+
+      integer function tgc_z_to_time(z,pad,padrow,sector,time,
+     +     TPG_PAD_H,TPG_PAD,TPG_DETECTOR_H,TPG_DETECTOR)
+      implicit none
+#include "PAM.inc"
+#include "tpg_pad.inc"
+#include "tpg_detector.inc"
+      RECORD / table_head_st /tpg_pad_h
+      RECORD / tpg_pad_st /tpg_pad(*) 
+      RECORD / table_head_st /tpg_detector_h
+      RECORD / tpg_detector_st /tpg_detector(*) 
+
+
+C     Description: Converts z in the local coordinates to TIME BUCKET NUMBER
+c     mal 05feb97
+c
+C     Input arguments:
+C     z - z coodinate in the local coordinate system
+C     pad, padrow, sector - identifies electronics channel
+C     TPG_PAD - tells t0_offset of electronics channel
+C     TPG_DETECTOR - tells drift velocity
+C     Returns:
+C     time - time bucket number
+
+      real time                 ! note this is time bucket! 1..512
+      real pad,padrow,sector
+      real z                    ! z coordinate in local system (z>0)
+                                ! z_local = 0 at padplane
+      integer iflag/1/
+      integer ipadrow,isector,ipad
+      integer jj
+      real t0_offset(1:24,1:45,1:184)
+      real vdrift,buck_length
+      integer*2 jsec,jrow,jpad
+      save
+
+	tgc_z_to_time = 1
+
+ccc
+      if (iflag.eq.1) then      ! initialize: set up t0_offset table.
+         iflag = 0
+         do jj=1,tpg_pad_h.nok
+            jsec = tpg_pad(jj).sector
+            jrow = tpg_pad(jj).padrow
+            jpad = tpg_pad(jj).pad
+            t0_offset(jsec,jrow,jpad) = tpg_pad(jj).t0
+         enddo
+         vdrift = tpg_detector(1).vdrift
+         buck_length = tpg_detector(1).bucket_length
+      endif
+ccc
+      isector = int(sector)
+      ipadrow = int(padrow)
+      ipad = int(pad)
+
+      time = (z/vdrift + t0_offset(isector,ipadrow,ipad))/buck_length
+
+      if (time.lt.0.0) then
+         write(6,*)'Time < 0 ! setting to 0'
+         time=0.0
+      elseif (time.ge.513.0) then
+         write(6,*)'Time > 513! setting to 512.9'
+         time=0.0
+      endif
+
       end
 
       integer function tgc_local_to_global_p(isect,plocal,pglobal)
@@ -431,18 +566,6 @@ C     row - row number
          endif
       end do
 50    continue
-      end
-
-      integer function tgc_z_to_time(z,time)
-      implicit none
-      real z, time
-C     Description: Converts z (local coordinates) to time
-C     Input arguments:
-C     z - z coordinate in local coordinate system
-C     Returns:
-C     time - time bucket number
-C
-      time=0
       end
       
       integer function tgc_row_par(isect,row,a,b,pad_plane_h,pad_plane)
