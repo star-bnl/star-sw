@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- * $Id: EEmcSmdGeom.h,v 1.1 2004/01/29 15:26:10 jwebb Exp $
+ * $Id: EEmcSmdGeom.h,v 1.2 2004/02/03 22:57:54 jwebb Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -25,6 +25,9 @@
  *****************************************************************************
  *
  * $Log: EEmcSmdGeom.h,v $
+ * Revision 1.2  2004/02/03 22:57:54  jwebb
+ * Added StEEmcSmdGeom::instance(), which is sort of needed...
+ *
  * Revision 1.1  2004/01/29 15:26:10  jwebb
  * The StEEmcSmdGeom class was split into two classes.  All StRoot-independent
  * code has been moved to EEmcSmdGeom.  TVector3 replaces StThreeVectorD in
@@ -108,6 +111,7 @@ class EEmcSmdGeom : public TObject {
   bool                   mIsSectorIn[kEEmcNumSectors];    //! sector status. 
 
   void buildSmdGeom();
+
   static EEmcSmdGeom* sInstance;
 
  public:

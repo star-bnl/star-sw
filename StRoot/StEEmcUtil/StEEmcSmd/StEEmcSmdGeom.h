@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.h,v 1.7 2004/01/29 15:26:10 jwebb Exp $
+ * $Id: StEEmcSmdGeom.h,v 1.8 2004/02/03 22:57:55 jwebb Exp $
  *
  * Author: Wei-Ming Zhang
  *
@@ -27,6 +27,9 @@
  *****************************************************************
  *
  * $Log: StEEmcSmdGeom.h,v $
+ * Revision 1.8  2004/02/03 22:57:55  jwebb
+ * Added StEEmcSmdGeom::instance(), which is sort of needed...
+ *
  * Revision 1.7  2004/01/29 15:26:10  jwebb
  * The StEEmcSmdGeom class was split into two classes.  All StRoot-independent
  * code has been moved to EEmcSmdGeom.  TVector3 replaces StThreeVectorD in
@@ -67,6 +70,22 @@ class StEEmcSmdGeom : public EEmcSmdGeom {
 
  public:
 
+  // Constructor and destructor
+  StEEmcSmdGeom();
+  virtual ~StEEmcSmdGeom();
+
+ protected:
+
+  // The single allowed instance of the class
+  static StEEmcSmdGeom *sInstance;
+
+ public:
+
+  // Method(s) to return the single allowed instance of this class
+  static StEEmcSmdGeom *instance();
+  static StEEmcSmdGeom *instance(intVec sectorIdVec);
+
+
   Int_t getEEmcISec(const Int_t iPlane, const StThreeVectorD& point) const;
 
   StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, StThreeVectorD& point, Float_t* dca);
@@ -96,7 +115,8 @@ class StEEmcSmdGeom : public EEmcSmdGeom {
   void printSectorPhis(const Int_t iPlane, const Int_t iSec,ostream& os = cout);  
 
  private:
- protected:
+
+
 
   ClassDef(StEEmcSmdGeom,1);
 

@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.cxx,v 1.9 2004/01/29 15:26:10 jwebb Exp $
+ * $Id: StEEmcSmdGeom.cxx,v 1.10 2004/02/03 22:57:55 jwebb Exp $
  *
  * Author: Wei-Ming Zhang
  *
@@ -21,6 +21,39 @@
 #include "PhysicalConstants.h"
 
 ClassImp(StEEmcSmdGeom);
+
+/////////////////////////////////////////////////////////////////////////////
+StEEmcSmdGeom *StEEmcSmdGeom::sInstance = 0;
+
+StEEmcSmdGeom::StEEmcSmdGeom() : EEmcSmdGeom() {
+
+}
+
+StEEmcSmdGeom::~StEEmcSmdGeom() { 
+  delete sInstance;
+  sInstance = 0;
+}
+
+// Returns the single instance of the class
+StEEmcSmdGeom* StEEmcSmdGeom::instance() {	
+    if(!sInstance){
+        sInstance = new StEEmcSmdGeom();
+	sInstance->init();
+   }
+   return sInstance;
+}  
+
+// Returns the single instance of the class for specified sectors
+
+StEEmcSmdGeom* StEEmcSmdGeom::instance(intVec sectorIdVec) {	
+    if(!sInstance){
+        sInstance = new StEEmcSmdGeom();
+        sInstance->setSectors(sectorIdVec);    
+	sInstance->init();
+   }
+   return sInstance;
+}     
+
 
 /////////////////////////////////////////////////////////////////////////////
 
