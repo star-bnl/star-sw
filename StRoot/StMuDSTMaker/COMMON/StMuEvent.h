@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.5 2003/01/09 18:59:46 laue Exp $
+ * $Id: StMuEvent.h,v 1.6 2003/02/19 13:52:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -19,6 +19,7 @@
 #include "StEvent/StBbcTriggerDetector.h"
 #include "StEvent/StFpdCollection.h"
 #include "StEvent/StL0Trigger.h"
+#include "StEvent/StTriggerIdCollection.h"
 #include "StEvent/StDetectorState.h"
 
 #include "StStrangeMuDstMaker/StStrangeMuDst.hh"
@@ -43,6 +44,7 @@ class StMuEvent : public TObject {
   int eventNumber();
   int runId();
   int runNumber();
+  // classes taken strait from StEvent
   StRunInfo& runInfo();
   StEventInfo& eventInfo();
   StEventSummary& eventSummary();
@@ -51,6 +53,8 @@ class StMuEvent : public TObject {
   StBbcTriggerDetector& bbcTriggerDetector();
   StFpdCollection& fpdCollection(); 
   StL0Trigger& l0Trigger(); 
+  StTriggerIdCollection& triggerIdCollection();
+  // Special classes for the muDst
   StMuL3EventSummary& l3EventSummary();
 
   /// Reference multiplicity of positive particles as defined in StEventUtilities/StuRefMult.hh
@@ -84,7 +88,7 @@ class StMuEvent : public TObject {
   StBbcTriggerDetector mBbcTriggerDetector;
   StFpdCollection mFpdCollection; 
   StL0Trigger mL0Trigger; 
-
+  StTriggerIdCollection mTriggerIdCollection;
   // special classes from MuDst
   StMuL3EventSummary mL3EventSummary;
 
@@ -111,6 +115,7 @@ inline StZdcTriggerDetector& StMuEvent::zdcTriggerDetector() {return mZdcTrigger
 inline StBbcTriggerDetector& StMuEvent::bbcTriggerDetector() {return mBbcTriggerDetector;}
 inline StFpdCollection& StMuEvent::fpdCollection() {return mFpdCollection;} 
 inline StL0Trigger& StMuEvent::l0Trigger() {return mL0Trigger;} 
+inline StTriggerIdCollection& StMuEvent::triggerIdCollection(){return mTriggerIdCollection;}
 inline StMuL3EventSummary& StMuEvent::l3EventSummary() {return mL3EventSummary;}
 inline unsigned short StMuEvent::refMultPos() {return mRefMultPos;}
 inline unsigned short StMuEvent::refMultNeg() {return mRefMultNeg;}
@@ -137,6 +142,9 @@ inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.6  2003/02/19 13:52:11  laue
+ * added the StTriggerIdCollection
+ *
  * Revision 1.5  2003/01/09 18:59:46  laue
  * initial check in of new EMC classes and the changes required
  *
