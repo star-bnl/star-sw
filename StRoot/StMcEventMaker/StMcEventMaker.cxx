@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.30 2000/05/17 23:43:11 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.31 2000/05/19 17:46:56 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.31  2000/05/19 17:46:56  calderon
+ * remove requirement to find particle table
+ * remove requirement to check volume id for rich hits
+ *
  * Revision 1.30  2000/05/17 23:43:11  calderon
  * assign the parent of the tracks from the particle table at the end
  * of the track loop.
@@ -154,7 +158,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.30 2000/05/17 23:43:11 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.31 2000/05/19 17:46:56 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -276,7 +280,7 @@ Int_t StMcEventMaker::Make()
     // Now we check if we have the pointer, if we do, then we can access the tables!
   
     if (g2t_vertexTablePointer && g2t_trackTablePointer
-	&& g2t_tpc_hitTablePointer && particleTablePointer){
+	&& g2t_tpc_hitTablePointer){
 	
 	//
 	// g2t_event Table
@@ -458,7 +462,7 @@ Int_t StMcEventMaker::Make()
 	
 	long NTracks = g2t_trackTablePointer->GetNRows();
 	size_t usedTracksG2t = 0;
-	long NGeneratorTracks = particleTablePointer->GetNRows();
+	long NGeneratorTracks = (particleTablePointer) ? particleTablePointer->GetNRows() : 0;
 	size_t usedTracksEvGen = 0;
 #ifndef ST_NO_TEMPLATE_DEF_ARGS	  
 	vector<StMcTrack*> ttemp(NTracks); // Temporary array for Step 4
@@ -815,15 +819,9 @@ Int_t StMcEventMaker::Make()
 	if (g2t_rch_hitTablePointer) {
 	    long  NHits = g2t_rch_hitTablePointer->GetNRows();
 	    long  iTrkId = 0;
-	    long  nBadVolId = 0;
 	    long ihit;
 	    for(ihit=0; ihit<NHits; ihit++) {
-		if (rchHitTable[ihit].volume_id < 257 // 2^8 + 1 
-		    || rchHitTable[ihit].volume_id > 2560) { // 10*2^8
-		    nBadVolId++;
-		    continue;
-		}
-
+	
 		rh = new StMcRichHit(&rchHitTable[ihit]);
 		mCurrentMcEvent->richHitCollection()->addHit(rh); // adds hit rh to collection
 		
@@ -836,9 +834,7 @@ Int_t StMcEventMaker::Make()
 		
 	    }
 	    cout << "Filled " << mCurrentMcEvent->richHitCollection()->numberOfHits() << " RICH Hits" << endl;
-	    if (nBadVolId)
-		gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
-				    << " RICH hits, wrong Volume Id." << endm;
+	    
 	}
 	else {
 	    cout << "No RICH Hits in this file" << endl;
@@ -851,17 +847,17 @@ Int_t StMcEventMaker::Make()
 	// At this point StMcEvent should be loaded.
 		
     }
-    else {
-	gMessMgr->Warning() << "Could not find the Table(s): " << endm;
+    
+    
     if (!g2t_vertexTablePointer)
-	gMessMgr->Warning() << "g2t_vertex  Table Not found " << endm;
+	gMessMgr->Warning() << "StMcEventMaker:   g2t_vertex  Table Not found " << endm;
     if (!g2t_trackTablePointer)
-	gMessMgr->Warning() << "g2t_track   Table Not found " << endm;
+	gMessMgr->Warning() << "StMcEventMaker:   g2t_track   Table Not found " << endm;
     if (!g2t_tpc_hitTablePointer)
-	gMessMgr->Warning() << "g2t_tpc_hit Table Not found " << endm;
+	gMessMgr->Warning() << "StMcEventMaker:   g2t_tpc_hit Table Not found " << endm;
     if (!particleTablePointer)
-	gMessMgr->Warning() << "particle    Table Not found " << endm;
-    }
+	gMessMgr->Info()    << "StMcEventMaker:   particle    Table Not found " << endm;
+    
     if (doPrintEventInfo) printEventInfo();
     if (doPrintMemoryInfo) {
 	StMemoryInfo::instance()->snapshot();
