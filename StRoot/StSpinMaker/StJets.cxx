@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.5 2003/05/20 20:22:44 thenry Exp $
+// $Id: StJets.cxx,v 1.6 2003/05/20 20:46:04 thenry Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.6  2003/05/20 20:46:04  thenry
+// Accidentally left debug output line in last commit.
+//
 // Revision 1.5  2003/05/20 20:22:44  thenry
 // Moved body of jetTrackIndices to cxx.
 //
@@ -104,7 +107,6 @@ void StJets::addProtoJet(StProtoJet& pj)
 	    return;
 	}
 	int muTrackIndex = track->getIndex();
-        cout << "muTrackIndex : " << muTrackIndex << endl;
 	if (muTrackIndex >=0) {
 	    //add to trackToJetIndices
 	    int addAt = mTrackToJetIndices->GetLast()+1;
