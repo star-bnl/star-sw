@@ -42,7 +42,7 @@ double StiMath::logGamma(double x)
     throw runtime_error("logGamma(double x) -E- Invalid argument: x<0");
   if (x>=100.)
     return DBL_MAX;
-  int n = 2*x;
+  int n = int(2*x);
   return _logGamma[n];  
 }
 
@@ -53,6 +53,6 @@ double StiMath::gamma(double x)
     throw runtime_error("gamma(double x) -E- Invalid argument: x<0");
   if (x>=100.)
     return DBL_MAX;
-  int n = 2*x;
+  int n = int(2*x);
   return log(_logGamma[n]);  
 }
