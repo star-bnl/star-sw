@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.hh,v 1.5 2002/10/11 15:45:47 oldi Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.6 2002/10/31 13:42:31 oldi Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.6  2002/10/31 13:42:31  oldi
+// Everything read from database now.
+//
 // Revision 1.5  2002/10/11 15:45:47  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -28,29 +31,33 @@
 #include "StThreeVector.hh"
 #include "StMatrixD.hh"
 
+#include "tables/St_ftpcTrackingPars_Table.h"
 #include "tables/St_ftpcDimensions_Table.h"
 #include "tables/St_ftpcPadrowZ_Table.h"
+#include "tables/St_fde_fdepar_Table.h"
+#include "tables/St_ftpcCoordTrans_Table.h"
 
 #include "StDbUtilities/StMagUtilities.h"
-//#include "StTpcDb/StTpcDb.h"
+#include "StTpcDb/StTpcDb.h"
 
 class St_ftpcDimensions;
 class St_ftpcPadrowZ;
+class St_fde_fdepar;
 class StGlobalCoordinate;
 class StFtpcLocalCoordinate;
 class StTpcDb;
 
 class StFtpcTrackingParams
 {
- private:
-
+private:
+  
   static StFtpcTrackingParams* mInstance;
   
   // FTPC geometry
   Float_t  mInnerRadius;
   Float_t  mOuterRadius;
-  Int_t    mNumberOfPadRows;
-  Int_t    mNumberOfPadRowsPerSide;
+    Int_t  mNumberOfPadRows;
+    Int_t  mNumberOfPadRowsPerSide;
   Float_t *mPadRowPosZ;
 
   // Vertex position
@@ -93,58 +100,68 @@ class StFtpcTrackingParams
 
   // dE/dx
   Int_t mDebugLevel;
+  Int_t mIdMethod;
   Int_t mNoAngle;
   Int_t mMaxHit; 
   Int_t mMinHit;
+  Int_t mMaxTrack;
 
   Double_t mPadLength;
   Double_t mFracTrunc;
+  Double_t mAip;
   Double_t mALargeNumber;
 
   // transformation due to rotated and displaced TPC
-  StMatrixD mTpcToGlobalRotation; // (3X3)
-  StMatrixD mGlobalToTpcRotation; // (3X3)
+       StMatrixD mTpcToGlobalRotation; // (3X3)
+       StMatrixD mGlobalToTpcRotation; // (3X3)
   StThreeVectorD mTpcPositionInGlobal; 
 
   // internal FTPC rotation (East only)
   StMatrixD mFtpcRotation;
   StMatrixD mFtpcRotationInverse;
-  Double_t mInstallationPointZ;
-  Double_t mObservedVertexOffsetY;
+   Double_t mInstallationPointZ[2];
+   Double_t mObservedVertexOffsetY[2];
   
-  //StTpcDb*                gTpcDbPtr; // pointer to TPC database
-  StMagUtilities *mMagField;  // pointer to magnetic field table
-  Float_t mMagFieldFactor;
+  StMagUtilities *mMagField;       // pointer to magnetic field table
+         Float_t  mMagFieldFactor;
 
- protected:
+protected:
   
-  StFtpcTrackingParams(St_ftpcDimensions *dimensions = 0, 
+  StFtpcTrackingParams(St_ftpcTrackingPars *trackPars = 0,
+		       St_fde_fdepar *dEdxPars = 0,
+		       St_ftpcDimensions *dimensions = 0,
 		       St_ftpcPadrowZ *padrow_z = 0);
-
-  void PrintParams();
-  Int_t InitdEdx();
+  
+  Int_t InitTrackingParams(ftpcTrackingPars_st *trackParsTable);
+  Int_t InitdEdx(FDE_FDEPAR_ST *dEdxParsTable);
+  Int_t InitDimensions(ftpcDimensions_st* dimensionsTable);
+  Int_t InitPadRows(ftpcPadrowZ_st* padrowzTable);
+  Int_t InitCoordTransformation();
+  Int_t InitCoordTransformation(ftpcCoordTrans_st* ftpcCoordTrans);
+  Int_t InitSpaceTransformation();
   Int_t ResetMagField(TDataSet *RunLog = 0);
-
- public:
-
+  
+public:
+  
   static StFtpcTrackingParams* Instance(Bool_t debug, 
-					St_ftpcDimensions *dimensions, 
-					St_ftpcPadrowZ *padrow_z, 
-					TDataSet *RunLog);
+					St_ftpcTrackingPars *trackPars,
+					St_fde_fdepar *dEdxPars,
+					St_ftpcDimensions *dimensions,
+					St_ftpcPadrowZ *padrow_z);
   static StFtpcTrackingParams* Instance(Bool_t debug, 
+					St_ftpcCoordTrans *ftpcCoordTrans, 
 					TDataSet *RunLog);
   static StFtpcTrackingParams* Instance();
-
+  
   virtual ~StFtpcTrackingParams();
-
-  Int_t Init();
-  Int_t InitFromFile();
+  
+  void PrintParams();
   
   // FTPC geometry
   Float_t InnerRadius();
   Float_t OuterRadius();
-  Int_t NumberOfPadRows();
-  Int_t NumberOfPadRowsPerSide();
+    Int_t NumberOfPadRows();
+    Int_t NumberOfPadRowsPerSide();
   Float_t PadRowPosZ(Int_t row);
 
   // Vertex position
@@ -187,27 +204,30 @@ class StFtpcTrackingParams
 
   // dE/dx
   Int_t DebugLevel();
+  Int_t IdMethod();
   Int_t NoAngle();
   Int_t MaxHit();
   Int_t MinHit();
+  Int_t MaxTrack();
   
   Double_t PadLength();
   Double_t FracTrunc();
+  Double_t Aip();
   Double_t ALargeNumber();
 
   // transformation due to rotated and displaced TPC
-  StMatrixD TpcToGlobalRotation();
-  StMatrixD GlobalToTpcRotation();
+       StMatrixD TpcToGlobalRotation();
+       StMatrixD GlobalToTpcRotation();
   StThreeVectorD TpcPositionInGlobal(); 
 
   StMatrixD FtpcRotation();
   StMatrixD FtpcRotationInverse();
-  Double_t InstallationPointZ();
-  Double_t ObservedVertexOffsetY();
+   Double_t InstallationPointZ(Int_t i);
+   Double_t ObservedVertexOffsetY(Int_t i);
 
   // magnetic field table
   StMagUtilities *MagField();
-  Float_t MagFieldFactor();
+         Float_t  MagFieldFactor();
 
   ClassDef(StFtpcTrackingParams,0)  // Parameters for FTPC tracking
 };    
