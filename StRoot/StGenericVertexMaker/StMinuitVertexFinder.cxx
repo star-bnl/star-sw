@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.7 2004/03/23 16:15:04 lbarnby Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.8 2004/04/04 23:20:13 jeromel Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.8  2004/04/04 23:20:13  jeromel
+ * isfinite() -> finite()
+ *
  * Revision 1.7  2004/03/23 16:15:04  lbarnby
  * Extra protection for non-finite track length. User function to not use ITTF tracks
  *
@@ -367,7 +370,7 @@ StMinuitVertexFinder::accept(StTrack* track) const
 	    track->flag() >= 0 &&
 	    track->fitTraits().numberOfFitPoints() >= mMinNumberOfFitPointsOnTrack &&
 	    !track->topologyMap().trackFtpc() &&
-            isfinite(track->length()) ); //LSB another temporary check
+            finite(track->length()) ); //LSB another temporary check
 }
 
 void
