@@ -385,15 +385,15 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
 
     StThreeVectorF v0P = pos->momentum()+neg->momentum();
 
-    float eLambda=sqrt( pow(v0P.mag(),2.) + pow(M_LAMBDA,2.) );
+    float eLambda=sqrt( pow((double)v0P.mag(),2.) + pow(M_LAMBDA,2.) );
     float rapLambda = 0.5*log( (eLambda+v0P.z()) / (eLambda-v0P.z()) );
-    float tauLambda = M_LAMBDA*(hbtv0->decayLengthV0()) / sqrt( pow(v0P.mag(),2.) );
+    float tauLambda = M_LAMBDA*(hbtv0->decayLengthV0()) / sqrt( pow((double)v0P.mag(),2.) );
     hbtv0->SetrapLambda( rapLambda );
     hbtv0->SetcTauLambda( tauLambda );
 
-    float eK0Short=sqrt( pow(v0P.mag(),2.) + pow(M_KAON_0_SHORT,2.) );
+    float eK0Short=sqrt( pow((double)v0P.mag(),2.) + pow(M_KAON_0_SHORT,2.) );
     float rapK0Short = 0.5*log( (eK0Short+v0P.z()) / (eK0Short-v0P.z()) );
-    float tauK0Short = M_KAON_0_SHORT*(hbtv0->decayLengthV0()) / sqrt( pow(v0P.mag(),2.) );
+    float tauK0Short = M_KAON_0_SHORT*(hbtv0->decayLengthV0()) / sqrt( pow((double)v0P.mag(),2.) );
     hbtv0->SetrapK0Short( rapK0Short );
     hbtv0->SetcTauK0Short( tauK0Short );
 
