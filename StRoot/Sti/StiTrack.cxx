@@ -26,8 +26,7 @@ void StiTrack::reset()
   nPts = 0;
   nFitPts = 0;
   vertex = 0;
-  status = StiConstants::Ok;
-  m      = 0.139;
+  m      = -1.;
   chi2   = 0.;
 }
 

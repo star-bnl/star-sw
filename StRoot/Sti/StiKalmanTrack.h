@@ -30,6 +30,9 @@
 #include "StiKalmanTrackNode.h"
 #include "StiHitContainer.h"
 
+
+enum StiTrackingDirection {kOutsideIn=0, kInsideOut};
+
 class StiKalmanTrack : public StiTrack 
 {
 public:
@@ -164,109 +167,103 @@ public:
      */
     virtual int     getPointCount()      const;  
 
-    /*! Returns the status of the track
-      Implementation returns 0
-    */
-    virtual int     getStatus()          const;  // status of track
-  
     /// Accessor method to set the charge of this track.
     virtual void  setCharge(int v);
 
     /// Accessor method to set the chi2 of this track.
     virtual void  setChi2(double v);        
 
-    /// Accessor method to set the status of this class. 
-    virtual void  setStatus(int v);        
-
-    // Methods of this class
-
-    /// Accessor method returns the outer most node associated with the track.
-    StiKalmanTrackNode * getFirstNode()  const { return firstNode; };
-
-    ///  Accessor method to set the outer most node associated with the track.
-    void setFirstNode(StiKalmanTrackNode * first)  { firstNode = first;};
-
- 
-    /// Accessor method returns the inner most node associated with the track.
-    StiKalmanTrackNode * getLastNode()   const { return lastNode;  };
-
-    ///  Accessor method to set the outer most node associated with the track.
-    void setLastNode(StiKalmanTrackNode * last)  { lastNode = last;};
-
-    /// Depracated
-    double  getSvtDedx()         const { return svtDedx;};
-    double  getTpcDedx()         const { return tpcDedx;};
-    void   setSvtDedx(double dedx) { svtDedx = dedx; };
-    void   setTpcDedx(double dedx) { tpcDedx = dedx; };
+  // Methods of this class
   
-    /// Method used to add a hit to this track
-    /*! Method used to add an arbitrary hit to a track. A track node
-      is first obtained from the KalmantrackNode factory. The hit is added to
-      the node and the node is added to the track as a child to the last node 
-      of the track.
-    */
-    StiKalmanTrackNode * addHit(StiHit *h);
+  /// Accessor method returns the outer most node associated with the track.
+  StiKalmanTrackNode * getOuterMostNode()  const;
+  /// Accessor method returns the inner most node associated with the track.
+  StiKalmanTrackNode * getInnerMostNode()   const;
+  /// Accessor method returns the first node associated with the track.
+  StiKalmanTrackNode * getRootNode()  const { return rootNode; };
+  /// Accessor method returns the first node, e.g. rootNode associated with the track.
+  StiKalmanTrackNode * getFirstNode()  const { return rootNode; };
+  /// Accessor method returns the last node associated with the track.
+  // Assumes the track has been pruned.
+  StiKalmanTrackNode * getLastNode()   const;
 
-    /// Method to insert a hit in this track
-    StiKalmanTrackNode * insertHit(StiHit *hInserted, StiHit * targetParent);
+  /// Returns the direction (kInsideOut, kOutsideIn) used in the reconstruction, or in the most 
+  /// fit to the track.
+  StiTrackingDirection getTrackingDirection() const { return  trackingDirection;};
 
-    /// 
-    void removeHit(StiHit *h);
-
-    /// Remove all hits and nodes currently associated with this track.
-    void removeAllHits();
-
-    /// Work method used to find the node containing the given hit.
-    /*!
-      Current implementation only considers the first child of each node
-      and must therefore be revised.
-    */
-    StiKalmanTrackNode * findHit(StiHit * h);
+  /// Sets the direction (kInsideOut, kOutsideIn) used in the reconstruction, or in the most 
+  /// fit to the track.
+  void setTrackingDirection(StiTrackingDirection direction) { trackingDirection = direction;}
   
-    /// Convenience method to initialize a track based on seed information 
-    /*! Method to initialize this track based on given arguments. 
-      curvature : estimated curvature of the track
-      tanl      : tangent of the estimated pitch angle of this track
-      origin    : 3-coordinates of the origin of this track
-      hitvector : stl vector containing a series of hits to be inserted in this track
-
-      This method gets node from the node factory and inserts the given hits 
-      in those nodes in the given sequence assumed (but not checked) to be 
-      in radially decreasing order. The kalman state of each track node is set
-      on the basis of the curvature, tanl, and origin provided. The error matrix
-      of each node is set a diagonal matrix with unit value.
-    */
-    void initialize(double curvature,
-		    double tanl,
-		    const StThreeVectorD& origin,
-		    const hitvector &);
-
-    /// Work method returns the node closest to the given position.
-    /*! Work method returns the node closest to the given position. 
-      The given position is a radial distance calculated in the local
-      reference frame of the detector.
-    */
-    StiKalmanTrackNode *  getNodeNear(double x) const;
-
-    /*! Convenience method returns a point corresponding to the node
-      of this track which is the closest to the given position.
-    */
-    StThreeVector<double> getPointNear(double x) const;
-    StThreeVector<double> getGlobalPointNear(double x) const;
-    StThreeVector<double> getGlobalPointAt(double x) const;
+  /// Method used to add a hit to this track
+  /*! Method used to add an arbitrary hit to a track. A track node
+    is first obtained from the KalmantrackNode factory. The hit is added to
+    the node and the node is added to the track as a child to the last node 
+    of the track.
+  */
+  StiKalmanTrackNode * addHit(StiHit *h);
+  
+  /// Method to insert a hit in this track
+  StiKalmanTrackNode * insertHit(StiHit *hInserted, StiHit * targetParent);
+  
+  /// 
+  void removeHit(StiHit *h);
+  
+  /// Remove all hits and nodes currently associated with this track.
+  void removeAllHits();
+  
+  /// Work method used to find the node containing the given hit.
+  /*!
+    Current implementation only considers the first child of each node
+    and must therefore be revised.
+  */
+  StiKalmanTrackNode * findHit(StiHit * h);
+  
+  /// Convenience method to initialize a track based on seed information 
+  /*! Method to initialize this track based on given arguments. 
+    curvature : estimated curvature of the track
+    tanl      : tangent of the estimated pitch angle of this track
+    origin    : 3-coordinates of the origin of this track
+    hitvector : stl vector containing a series of hits to be inserted in this track
     
-    virtual StThreeVector<double> getMomentumAtOrigin() const;
-    virtual StThreeVector<double> getMomentumNear(double x);
-    virtual StThreeVector<double> getHitPositionNear(double x) const;
+    This method gets node from the node factory and inserts the given hits 
+    in those nodes in the given sequence assumed (but not checked) to be 
+    in radially decreasing order. The kalman state of each track node is set
+    on the basis of the curvature, tanl, and origin provided. The error matrix
+    of each node is set a diagonal matrix with unit value.
+  */
+  void initialize(double curvature,
+		  double tanl,
+		  const StThreeVectorD& origin,
+		  const hitvector &);
+  
+  /// Work method returns the node closest to the given position.
+  /*! Work method returns the node closest to the given position. 
+    The given position is a radial distance calculated in the local
+    reference frame of the detector.
+  */
+  StiKalmanTrackNode *  getNodeNear(double x) const;
+  
+  /*! Convenience method returns a point corresponding to the node
+    of this track which is the closest to the given position.
+  */
+  StThreeVector<double> getPointNear(double x) const;
+  StThreeVector<double> getGlobalPointNear(double x) const;
+  StThreeVector<double> getGlobalPointAt(double x) const;
+  
+  virtual StThreeVector<double> getMomentumAtOrigin() const;
+  virtual StThreeVector<double> getMomentumNear(double x);
+  virtual StThreeVector<double> getHitPositionNear(double x) const;
+  
+  // Function to reverse the node geometry of a track
+  void swap();
 
 protected:
     
-    static StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
-
-    StiKalmanTrackNode * firstNode;
-    StiKalmanTrackNode * lastNode;
-    double svtDedx;
-    double tpcDedx;
+  static StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
+  
+  StiTrackingDirection trackingDirection;
+  StiKalmanTrackNode * rootNode;
 };
 
 #endif

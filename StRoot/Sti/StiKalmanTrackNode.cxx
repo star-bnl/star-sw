@@ -37,7 +37,9 @@ double StiKalmanTrackNode::massHypothesis = 0.13957018;
 int StiKalmanTrackNode::minContiguousHitCountForNullReset = 2;
 int StiKalmanTrackNode::maxNullCount = 40;  
 int StiKalmanTrackNode::maxContiguousNullCount = 25;
-
+double StiKalmanTrackNode::minSearchWindow = 0.5;
+double StiKalmanTrackNode::maxSearchWindow = 4.;
+double StiKalmanTrackNode::searchWindowScale = 5.;
 int    StiKalmanTrackNode::shapeCode = 0;
 double StiKalmanTrackNode::x1=0;
 double StiKalmanTrackNode::x2= 0; 
@@ -768,7 +770,7 @@ StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
     r1=sqrt(1.- c1sq );
     r2=sqrt(1.- c2sq );
 
-    double xx, yy, zz, alpha, ca, sa;
+    double xx, yy, zz, ca, sa;
     double gx, gy;
     xx = x2;
     yy = fP0 + dx*cSum/(r1+r2);
@@ -780,8 +782,8 @@ StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
 	    throw runtime_error("SKTN::propagate() - fabs(dddd)==0.");
 	}
     zz = fP1 + dx*fP4*cSum/dddd;
-    ca = cos(alpha);
-    sa = sin(alpha);
+    ca = cos(fAlpha);
+    sa = sin(fAlpha);
     gx = ca*xx-sa*yy;
     gy = sa*xx+ca*yy;
     return (StThreeVector<double>(gx,gy, zz));
@@ -1127,6 +1129,60 @@ const StiDetector * StiKalmanTrackNode::getTargetDet()
     return targetDet;
 }
 
+//_____________________________________________________________________________
+double StiKalmanTrackNode::getWindowY() const
+{	 
+  double window = searchWindowScale*fC00;
+  if (window<minSearchWindow)
+    window = minSearchWindow;
+  else if (window>maxSearchWindow)
+    window = maxSearchWindow;
+  return window;
+}
+
+//_____________________________________________________________________________
+double StiKalmanTrackNode::getWindowZ() const
+{	 
+  double window = searchWindowScale*fC11;
+  if (window<minSearchWindow)
+    window = minSearchWindow;
+  else if (window>maxSearchWindow)
+    window = maxSearchWindow;
+  return window;
+}
 
 
+//_____________________________________________________________________________
+StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
+{
+  // get xx0,yy0,zz0, the center of the helix, in local coordinates...
+  double xx0,yy0,zz0;
+  
+  c1=fP3*fX - fP2;
+  c1sq = c1*c1; 
+  if (c1sq>1.) // Error
+    return (StThreeVector<double>(0.,0.,0.));
+  r1=sqrt(1.-c1sq);
+  xx0 = fP2/fP3;
+  if (fP3>0)
+    {
+      yy0 = fP0+r1/fP3;
+    }
+  else if (fP3<0)
+    {
+      yy0 = fP0-r1/fP3;
+    }
+  else // Error
+    return (StThreeVector<double>(0.,0.,0.));
+  zz0 = fP1 + fP4*asin(c1)/fP3;
+
+  // transform to global coordinates
+  double gx0,gy0,gz0,ca,sa;
+  ca = cos(fAlpha);
+  sa = sin(fAlpha);
+  gx0= ca*xx0-sa*yy0;
+  gy0= sa*xx0+ca*yy0;
+  gz0= zz0;
+  return (StThreeVector<double>(gx0,gy0,gz0));
+}
 

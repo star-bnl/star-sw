@@ -137,6 +137,9 @@ public:
     virtual void setKTFMaxSearchRadius(double) = 0;
     virtual double ktfMaxSearchRadius() const = 0;
  
+    virtual void setKTFSearchWindowScale(double) = 0;
+    virtual double ktfSearchWindowScale() const = 0;
+
     //Use helix extrapolation (defaults to line)
     virtual void setKTFUseHelixExtrapolation(bool) = 0;
     virtual bool ktfUseHelixExtrapolation() const = 0;
