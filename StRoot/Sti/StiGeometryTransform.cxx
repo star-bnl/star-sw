@@ -599,7 +599,6 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 	//Get the (x-y) center of the circle and z0 in global coordinates, that's what StiKalmanTrack needs:
 	//note, StHelix origin is the first point on the track, not the center of the circle!
 	StThreeVectorD stiGlobalOrigin( sthelix.xcenter(), sthelix.ycenter(), sthelix.origin().z());
-	cout << "ORIG:" << stiGlobalOrigin << endl;
 	double curvature = sthelix.curvature();
 	if (sthelix.h()<0) 
 		curvature=-curvature;
@@ -610,10 +609,10 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 	//Test track!
 	//cout <<"Test the track:"<<endl;
 	//for (double xLocal=hitvec.back()->x(); xLocal<=hitvec.front()->x(); xLocal+=10.) {
-	for (double xLocal=0.; xLocal<=190.; xLocal+=10.) 
-		{
-			//for (double xLocal=hitvec.front()->x(); xLocal<=hitvec.back()->x(); xLocal+=10.) {
-			StThreeVector<double> pos = sti->getGlobalPointNear(xLocal);
-			//cout <<"\tx: "<<xLocal<<"\tpos: "<<pos<<endl;
-		}
+	//for (double xLocal=0.; xLocal<=190.; xLocal+=10.) 
+	//	{
+	//for (double xLocal=hitvec.front()->x(); xLocal<=hitvec.back()->x(); xLocal+=10.) {
+	//		StThreeVector<double> pos = sti->getGlobalPointNear(xLocal);
+	//cout <<"\tx: "<<xLocal<<"\tpos: "<<pos<<endl;
+	//	}
 }

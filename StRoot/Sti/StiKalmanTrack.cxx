@@ -333,10 +333,12 @@ void StiKalmanTrack::initialize(double curvature,
       cout <<"StiKalmanTrack::initialize()\tERROR:\ttrackNodeFactory==0.  Abort"<<endl;
       return;
     }
-  StiObjectFactoryInterface<StiKalmanTrackNode> * fac = dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode> *>(trackNodeFactory);
-  if (!fac) {
+  StiObjectFactoryInterface<StiKalmanTrackNode> * fac 
+		= dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode> *>(trackNodeFactory);
+  if (!fac) 
+		{
       cout <<"StiKalmanTrack::initialize(). ERROR:\tfactory cast failed.  Seg-fault"<<endl;
-  }
+		}
   
   //StThreeVectorD stiOrigin;
   double alpha,alphaP,eta;  
@@ -385,7 +387,7 @@ void StiKalmanTrack::initialize(double curvature,
 				{
 				    StThreeVectorD temp = origin;
 						cout << "OG:" << temp << endl;
-				    temp.rotateZ(alpha);
+				    temp.rotateZ(-alpha);
 						cout << "OL:" << temp << endl;
 				    eta = curvature*temp.x();
 				}
