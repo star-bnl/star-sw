@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.76 2002/04/23 17:30:46 perev Exp $
+// $Id: doEvents.C,v 1.77 2002/11/26 02:30:29 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -191,9 +191,10 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
      IOMk->SetIOMode("r");
      IOMk->SetBranch("*",0,"0");	//deactivate all branches
      if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
-//     IOMk->SetBranch("dstBranch",0,"r");
+     IOMk->SetBranch("evtselBranch",0,"r");
+     //     IOMk->SetBranch("dstBranch",0,"r");
 //     IOMk->SetBranch("runcoBranch",0,"r");
-     IOMk->SetDebug();
+     IOMk->SetDebug(1);
 //for test only     IOMk->SetMaxEvent(2);
 
 //		DB ON
@@ -262,26 +263,8 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     // Event loop
     //
     istat=0,iEvt=1;
-    
- EventLoop: if (iEvt <= nEvents && istat!=2) {
+    istat = chain->EventLoop(1,nEvents);    
 
-     cout << endl << "=== Event " << iEvt << " start ===" << endl;
-
-     chain->Clear();
-     istat = chain->Make(iEvt);
-
-     if (istat==2) 
-         {cout << "Last  event processed. Status = " << istat << endl;}
-     if (istat==3) 
-         {cout << "Error event processed. Status = " << istat << endl;}
-
-
-     iEvt++;
-     goto EventLoop;
- }
-
-    iEvt--;
-    cout << endl << "=== Event " << iEvt << " finish ===" << endl;
 
 }
 
@@ -328,8 +311,8 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.76  2002/04/23 17:30:46  perev
-// DB loaded only with dbon flag
+// Revision 1.77  2002/11/26 02:30:29  perev
+// EventLoop added
 //
 // Revision 1.75  2002/04/14 22:27:29  perev
 // remove reading dst by default
