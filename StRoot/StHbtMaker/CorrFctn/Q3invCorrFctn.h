@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: Q3invCorrFctn.h,v 1.3 2000/05/11 21:17:30 willson Exp $
+ * $Id: Q3invCorrFctn.h,v 1.4 2000/08/08 23:39:21 laue Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: Q3invCorrFctn.h,v $
+ * Revision 1.4  2000/08/08 23:39:21  laue
+ * Updated for standalone version
+ *
  * Revision 1.3  2000/05/11 21:17:30  willson
  * Modified CorrFctn class
  *
@@ -25,7 +28,6 @@
 #define Q3invCorrFctn_hh
 
 #include "StHbtMaker/Base/StHbtCorrFctn.hh"
-//#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 
 class Q3invCorrFctn : public StHbtCorrFctn {
 public:
@@ -47,7 +49,9 @@ private:
   StHbt1DHisto* mDenominator;
   StHbt1DHisto* mRatio;
 
+#ifdef __ROOT__
   ClassDef(Q3invCorrFctn, 1)
+#endif
 
 };
 

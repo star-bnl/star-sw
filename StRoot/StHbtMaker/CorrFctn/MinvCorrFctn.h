@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.h,v 1.5 2000/03/17 17:22:40 laue Exp $
+ * $Id: MinvCorrFctn.h,v 1.6 2000/08/08 23:39:21 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.h,v $
+ * Revision 1.6  2000/08/08 23:39:21  laue
+ * Updated for standalone version
+ *
  * Revision 1.5  2000/03/17 17:22:40  laue
  * Roberts new three particle correlations implemented.
  *
@@ -41,9 +44,12 @@
 #define MinvCorrFctn_hh
 
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
-#include "StHbtMaker/Infrastructure/StHbtTagWriter.hh"
 #include "StHbtMaker/Base/StHbtCorrFctn.hh"
 #include "StHbtMaker/Cut/mikesEventCut.h"
+
+#ifdef __ROOT__
+#include "StHbtMaker/Infrastructure/StHbtTagWriter.hh"
+#endif
 
 class MinvCorrFctn : public StHbtCorrFctn {
 public:
@@ -66,9 +72,9 @@ private:
   StHbt1DHisto* mDenominator;
   StHbt1DHisto* mDifference;
 
-  StHbtTagWriter* mTagWriter;  //! <-- this is a singleton
 
 #ifdef __ROOT__
+  StHbtTagWriter* mTagWriter;  //! <-- this is a singleton
   ClassDef(MinvCorrFctn, 1)   
 #endif 
 };
@@ -79,7 +85,9 @@ inline  StHbt1DHisto* MinvCorrFctn::Denominator(){return mDenominator;}
 inline  StHbt1DHisto* MinvCorrFctn::Difference(){return mDifference;}
 inline MinvCorrFctn* MinvCorrFctn::Clone() { MinvCorrFctn* c = new MinvCorrFctn(*this); return c;}
 inline MinvCorrFctn::MinvCorrFctn(const MinvCorrFctn& fctn) :StHbtCorrFctn() {
+#ifdef __ROOT__
     mTagWriter = StHbtTagWriter::Instance();  
+#endif
     mNumerator = new StHbt1DHisto(*(fctn.mNumerator));
     mDenominator= new StHbt1DHisto(*(fctn.mDenominator));
     mDifference = new StHbt1DHisto(*(fctn.mDifference));

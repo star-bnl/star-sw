@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: Q3invCorrFctn.cxx,v 1.2 2000/04/12 01:53:28 willson Exp $
+ * $Id: Q3invCorrFctn.cxx,v 1.3 2000/08/08 23:39:21 laue Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: Q3invCorrFctn.cxx,v $
+ * Revision 1.3  2000/08/08 23:39:21  laue
+ * Updated for standalone version
+ *
  * Revision 1.2  2000/04/12 01:53:28  willson
  * Initial Installation - Comments Added
  *
@@ -21,7 +24,9 @@
 //#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 #include <cstdio>
 
+#ifdef __ROOT__
 ClassImp(Q3invCorrFctn)
+#endif
 
 //____________________________
 Q3invCorrFctn::Q3invCorrFctn(char* title, const int& nbins, const float& QinvLo, const float& QinvHi){

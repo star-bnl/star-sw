@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: GenericTripletCut.h,v 1.2 2000/04/12 01:53:35 willson Exp $
+ * $Id: GenericTripletCut.h,v 1.3 2000/08/08 23:39:31 laue Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: GenericTripletCut.h,v $
+ * Revision 1.3  2000/08/08 23:39:31  laue
+ * Updated for standalone version
+ *
  * Revision 1.2  2000/04/12 01:53:35  willson
  * Initial Installation - Comments Added
  *
@@ -19,10 +22,6 @@
 
 #ifndef GenericTripletCut_hh
 #define GenericTripletCut_hh
-
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
 
 #include "StHbtMaker/Base/StHbtTripletCut.h"
 
@@ -40,7 +39,9 @@ private:
   long mNTripletsPassed;
   long mNTripletsFailed;
 
+#ifdef __ROOT__
   ClassDef(GenericTripletCut, 1)
+#endif
 
 };
 
