@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.cc,v 2.8 2003/08/20 18:50:21 calderon Exp $
+ * $Id: StMcVertex.cc,v 2.9 2005/01/27 23:40:49 calderon Exp $
  * $Log: StMcVertex.cc,v $
+ * Revision 2.9  2005/01/27 23:40:49  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.8  2003/08/20 18:50:21  calderon
  * Addition of Tof classes and Pixel classes.  Modified track, event, and
  * container code to reflect this.
@@ -52,7 +55,9 @@ using std::find;
 #include "StMcVertex.hh"
 #include "tables/St_g2t_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StMcVertex.cc,v 2.8 2003/08/20 18:50:21 calderon Exp $";
+static const char rcsid[] = "$Id: StMcVertex.cc,v 2.9 2005/01/27 23:40:49 calderon Exp $";
+
+ClassImp(StMcVertex);
 
 StMcVertex::StMcVertex()
 {

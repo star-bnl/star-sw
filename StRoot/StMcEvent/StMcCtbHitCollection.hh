@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcCtbHitCollection.hh,v 2.1 2003/02/19 03:29:42 calderon Exp $
+ * $Id: StMcCtbHitCollection.hh,v 2.2 2005/01/27 23:40:47 calderon Exp $
  * $Log: StMcCtbHitCollection.hh,v $
+ * Revision 2.2  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.1  2003/02/19 03:29:42  calderon
  * Introduction of CTB classes to repository.
  *
@@ -12,13 +15,14 @@
 #ifndef StMcCtbHitCollection_hh
 #define StMcCtbHitCollection_hh
 #include "StMcContainers.hh"
+#include "StObject.h"
 
 class StMcCtbHit;
 
-class StMcCtbHitCollection {
+class StMcCtbHitCollection : public StObject {
 public:
     StMcCtbHitCollection();
-    ~StMcCtbHitCollection();
+    virtual ~StMcCtbHitCollection();
     // StMcCtbHitCollection(const StMcCtbHitCollection&);            use default
     // StMcCtbHitCollection& operator=(const StMcCtbHitCollection&); use default
     
@@ -30,5 +34,6 @@ public:
 
 private:
     StSPtrVecMcCtbHit mHits;
+    ClassDef(StMcCtbHitCollection,1)
 };
 #endif

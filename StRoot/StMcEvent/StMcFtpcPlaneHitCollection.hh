@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcPlaneHitCollection.hh,v 2.1 2000/03/06 18:05:21 calderon Exp $
+ * $Id: StMcFtpcPlaneHitCollection.hh,v 2.2 2005/01/27 23:40:47 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StMcFtpcPlaneHitCollection.hh,v $
+ * Revision 2.2  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.1  2000/03/06 18:05:21  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -29,10 +32,11 @@
 #define StMcFtpcPlaneHitCollection_hh
 
 #include "StMcContainers.hh"
+#include "StObject.h"
 
 class StMcFtpcHit;
 
-class StMcFtpcPlaneHitCollection
+class StMcFtpcPlaneHitCollection : public StObject
 {
 public:
     StMcFtpcPlaneHitCollection();
@@ -45,6 +49,6 @@ public:
 
 private:
     StSPtrVecMcFtpcHit mHits;
-        
+    ClassDef(StMcFtpcPlaneHitCollection,1)
 };
 #endif

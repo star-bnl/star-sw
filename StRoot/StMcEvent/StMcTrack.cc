@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.17 2004/09/14 05:00:30 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.18 2005/01/27 23:40:49 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.18  2005/01/27 23:40:49  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.17  2004/09/14 05:00:30  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -23,8 +26,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.17 2004/09/14 05:00:30 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.18 2005/01/27 23:40:49 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.18  2005/01/27 23:40:49  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.17  2004/09/14 05:00:30  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -114,7 +120,9 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.17 2004/09/14 05:00:30 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.18 2005/01/27 23:40:49 calderon Exp $";
+
+ClassImp(StMcTrack);
 
 StMcTrack::StMcTrack() 
 {

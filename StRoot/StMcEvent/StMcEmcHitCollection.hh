@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEmcHitCollection.hh,v 2.4 2001/05/31 02:45:55 perev Exp $
+ * $Id: StMcEmcHitCollection.hh,v 2.5 2005/01/27 23:40:47 calderon Exp $
  * $Log: StMcEmcHitCollection.hh,v $
+ * Revision 2.5  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.4  2001/05/31 02:45:55  perev
  * const(ing)
  *
@@ -45,6 +48,7 @@ public:
 private:
     enum {mNumberOfModules=120};
     StMcEmcModuleHitCollection mModules[mNumberOfModules];
+    ClassDef(StMcEmcHitCollection,1)
 };
 
 #endif

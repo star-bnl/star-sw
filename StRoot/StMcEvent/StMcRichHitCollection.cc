@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcRichHitCollection.cc,v 2.1 2000/03/06 18:05:21 calderon Exp $
+ * $Id: StMcRichHitCollection.cc,v 2.2 2005/01/27 23:40:47 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, March 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcRichHitCollection.cc,v $
+ * Revision 2.2  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.1  2000/03/06 18:05:21  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -21,8 +24,8 @@
 #include "StMcRichHitCollection.hh"
 #include "StMcRichHit.hh"
 
-static const char rcsid[] = "$Id: StMcRichHitCollection.cc,v 2.1 2000/03/06 18:05:21 calderon Exp $";
-
+static const char rcsid[] = "$Id: StMcRichHitCollection.cc,v 2.2 2005/01/27 23:40:47 calderon Exp $";
+ClassImp(StMcRichHitCollection);
 StMcRichHitCollection::StMcRichHitCollection()
 {
 }

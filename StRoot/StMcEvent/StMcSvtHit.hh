@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.hh,v 2.9 2000/06/06 02:58:41 calderon Exp $
+ * $Id: StMcSvtHit.hh,v 2.10 2005/01/27 23:40:48 calderon Exp $
  * $Log: StMcSvtHit.hh,v $
+ * Revision 2.10  2005/01/27 23:40:48  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.9  2000/06/06 02:58:41  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -66,10 +69,10 @@ public:
 	     StMcTrack*);
     StMcSvtHit(g2t_svt_hit_st*);
     ~StMcSvtHit();
-
+#ifdef POOL
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
-
+#endif
     unsigned long layer() const;      // layer=[1,6] with SSD [1-8]
     unsigned long ladder() const;     // ladder=[1-8] with SSD [1-20]
     unsigned long wafer() const;      // wafer=[1-7] with SSD [1-16]
@@ -77,7 +80,10 @@ public:
     unsigned long hybrid() const;
 
 protected:
+#ifdef POOL
     static StMemoryPool mPool;  //!
+#endif
+    ClassDef(StMcSvtHit,1)
 };
 
 ostream&  operator<<(ostream& os, const StMcSvtHit&);

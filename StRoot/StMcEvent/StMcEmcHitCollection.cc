@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcHitCollection.cc,v $
+ * Revision 2.4  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.3  2001/05/13 21:12:10  calderon
  * Modifications by Aleksei to the Emc Hit Collections on indexing of
  * module numbers
@@ -29,9 +32,7 @@
 
 static const char rcsid[] = "$Id ";
 
-#ifdef PERSISTENT
-ClassImp(StMcEmcHitCollection)
-#endif
+ClassImp(StMcEmcHitCollection);
 
 StMcEmcHitCollection::StMcEmcHitCollection():TDataSet("emcHits") {/* Nothing */}
 

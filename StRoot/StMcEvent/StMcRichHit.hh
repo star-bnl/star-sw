@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcRichHit.hh,v 2.5 2000/06/06 02:58:41 calderon Exp $
+ * $Id: StMcRichHit.hh,v 2.6 2005/01/27 23:40:47 calderon Exp $
  * $Log: StMcRichHit.hh,v $
+ * Revision 2.6  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.5  2000/06/06 02:58:41  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -27,8 +30,9 @@
 #define StMcRichHit_hh
 
 #include "StMcHit.hh"
+#ifdef POOL
 #include "StMemoryPool.hh"
-
+#endif
 class StMcTrack;
 class StThreeVectorF;
 class g2t_rch_hit_st;
@@ -46,13 +50,16 @@ public:
     unsigned short  pad() const;
     unsigned short  row() const;
     float           tof() const;
-    
+#ifdef POOL
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
-    
+#endif
 private:
+#ifdef POOL
     static StMemoryPool mPool; //!
+#endif
     float               mTof;
+    ClassDef(StMcRichHit,1)
 };
 
 ostream&  operator<<(ostream& os, const StMcRichHit&);

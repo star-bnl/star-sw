@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.15 2004/09/14 05:00:29 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.16 2005/01/27 23:40:47 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.16  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.15  2004/09/14 05:00:29  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -101,8 +104,9 @@
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.15 2004/09/14 05:00:29 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.15 2004/09/14 05:00:29 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.16 2005/01/27 23:40:47 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.16 2005/01/27 23:40:47 calderon Exp $";
+ClassImp(StMcEvent);
 
 void StMcEvent::initToZero()
 {
@@ -139,8 +143,9 @@ void StMcEvent::initToZero()
 
 }
 
-StMcEvent::StMcEvent()
-    :mEventGeneratorEventLabel(0),
+StMcEvent::StMcEvent()    
+    :TDataSet("StMcEvent"),
+     mEventGeneratorEventLabel(0),
      mEventNumber(0),
      mRunNumber(0),
      mType(0),
@@ -158,7 +163,8 @@ StMcEvent::StMcEvent()
 }
 
 StMcEvent::StMcEvent(g2t_event_st* evTable)
-    :mEventGeneratorEventLabel(evTable->eg_label),
+    :TDataSet("StMcEvent"),
+     mEventGeneratorEventLabel(evTable->eg_label),
      mEventNumber(evTable->n_event),
      mRunNumber(evTable->n_run),
      mType (evTable->event_type),

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.hh,v 2.7 2000/06/06 02:58:42 calderon Exp $
+ * $Id: StMcTpcHit.hh,v 2.8 2005/01/27 23:40:49 calderon Exp $
  * $Log: StMcTpcHit.hh,v $
+ * Revision 2.8  2005/01/27 23:40:49  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.7  2000/06/06 02:58:42  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -61,14 +64,22 @@ public:
     StMcTpcHit(g2t_tpc_hit_st*);
     ~StMcTpcHit();
 
+#ifdef POOL
+    void* operator new(size_t, void *p)     { return p; }
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
-    
+#endif
     unsigned long sector()     const; // 1-24
     unsigned long padrow()     const; // 1-45
 
+    unsigned long isDet()      const {return mVolumeId/100000;}
+    float         lgamma()     const {return mLgamma;}
 private:
+#ifdef POOL
     static StMemoryPool         mPool; //!
+#endif
+    float                       mLgamma; //  ALOG10(GEKin/AMass) from g2t_tpc_hit
+    ClassDef(StMcTpcHit,1)
 };
 
 ostream&  operator<<(ostream& os, const StMcTpcHit&);

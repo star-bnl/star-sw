@@ -1,6 +1,9 @@
-// $Id: StMcCalorimeterHit.hh,v 2.5 2004/01/13 21:03:34 fisyak Exp $
+// $Id: StMcCalorimeterHit.hh,v 2.6 2005/01/27 23:40:46 calderon Exp $
 //
 // $Log: StMcCalorimeterHit.hh,v $
+// Revision 2.6  2005/01/27 23:40:46  calderon
+// Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+//
 // Revision 2.5  2004/01/13 21:03:34  fisyak
 // Replace iostream by Stiostream.h (for icc)
 //
@@ -32,7 +35,7 @@
 
 class StMcTrack;
 
-class StMcCalorimeterHit {
+class StMcCalorimeterHit : public StObject {
 public:
     StMcCalorimeterHit();
     StMcCalorimeterHit(int, int, int, float);
@@ -72,6 +75,7 @@ protected:
 
   //private:
   //  static StMemoryPool mPool; //!
+    ClassDef(StMcCalorimeterHit,1)
 };
 
 ostream&  operator<<(ostream& os, const StMcCalorimeterHit&);

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTofHitCollection.cc,v 2.1 2003/08/20 18:50:21 calderon Exp $
+ * $Id: StMcTofHitCollection.cc,v 2.2 2005/01/27 23:40:48 calderon Exp $
  * $Log: StMcTofHitCollection.cc,v $
+ * Revision 2.2  2005/01/27 23:40:48  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.1  2003/08/20 18:50:21  calderon
  * Addition of Tof classes and Pixel classes.  Modified track, event, and
  * container code to reflect this.
@@ -11,8 +14,9 @@
 #include "StMcTofHitCollection.hh"
 #include "StMcTofHit.hh"
 
-static const char rcsid[] = "$Id: StMcTofHitCollection.cc,v 2.1 2003/08/20 18:50:21 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTofHitCollection.cc,v 2.2 2005/01/27 23:40:48 calderon Exp $";
 
+ClassImp(StMcTofHitCollection);
 StMcTofHitCollection::StMcTofHitCollection()
 {
 }

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSsdHit.hh,v 2.1 2004/09/14 05:00:30 calderon Exp $
+ * $Id: StMcSsdHit.hh,v 2.2 2005/01/27 23:40:47 calderon Exp $
  * $Log: StMcSsdHit.hh,v $
+ * Revision 2.2  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.1  2004/09/14 05:00:30  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -16,7 +19,9 @@
 #define StMcSsdHit_hh
 
 #include "StMcHit.hh"
+#ifdef POOL
 #include "StMemoryPool.hh"
+#endif
 
 class StMcTrack;
 class StThreeVectorF;
@@ -33,15 +38,18 @@ public:
     StMcSsdHit(g2t_ssd_hit_st*);
     ~StMcSsdHit();
 
+#ifdef POOL
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
-
+#endif
     unsigned long layer() const;  // 1 SSD layer
     unsigned long ladder() const; // 1-20 ladders
     
 private:
-
+#ifdef POOL
     static StMemoryPool mPool; //!
+#endif
+    ClassDef(StMcSsdHit,1)
 };
 
 ostream&  operator<<(ostream& os, const StMcSsdHit&);

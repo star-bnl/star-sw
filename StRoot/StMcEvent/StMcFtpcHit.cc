@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.cc,v 2.10 2003/12/02 21:22:03 calderon Exp $
+ * $Id: StMcFtpcHit.cc,v 2.11 2005/01/27 23:40:47 calderon Exp $
  * $Log: StMcFtpcHit.cc,v $
+ * Revision 2.11  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.10  2003/12/02 21:22:03  calderon
  * remove unnecessary #include "StMcTrack.hh"
  *
@@ -53,10 +56,15 @@
 #include "StMcFtpcHit.hh"
 #include "tables/St_g2t_ftp_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.10 2003/12/02 21:22:03 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.11 2005/01/27 23:40:47 calderon Exp $";
 
+ClassImp(StMcFtpcHit);
+#ifdef POOL
 StMemoryPool StMcFtpcHit::mPool(sizeof(StMcFtpcHit));
-
+#endif
+StMcFtpcHit::StMcFtpcHit() : StMcHit(StThreeVectorF(0, 0, 0),
+				     StThreeVectorF(0, 0, 0),
+				     0, 0, 0, 0, 0) {}
 StMcFtpcHit::StMcFtpcHit(const StThreeVectorF& x,const StThreeVectorF& p,
 			 const float de, const float ds, const long key,
 			 const long id,

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.hh,v 2.7 2003/10/08 20:17:55 calderon Exp $
+ * $Id: StMcFtpcHit.hh,v 2.8 2005/01/27 23:40:47 calderon Exp $
  * $Log: StMcFtpcHit.hh,v $
+ * Revision 2.8  2005/01/27 23:40:47  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.7  2003/10/08 20:17:55  calderon
  * -using <iostream>, std::cout, std::ostream.
  * -changes in FTPC volume Id.
@@ -61,16 +64,18 @@ public:
 	     const float, const float, const long, const long, StMcTrack*);
     StMcFtpcHit(g2t_ftp_hit_st*);
     ~StMcFtpcHit();
-
+#ifdef POOL
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
-
+#endif
     unsigned long plane() const; // 1-20, where 1-10 = West and 11-20 = East
     unsigned long sector() const; // 1-6
     
 private:
-
+#ifdef POOL
     static StMemoryPool mPool; //!
+#endif
+    ClassDef(StMcFtpcHit,1)
 };
 
 ostream&  operator<<(ostream& os, const StMcFtpcHit&);

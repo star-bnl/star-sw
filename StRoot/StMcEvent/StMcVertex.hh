@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.hh,v 2.10 2004/01/13 21:03:34 fisyak Exp $
+ * $Id: StMcVertex.hh,v 2.11 2005/01/27 23:40:49 calderon Exp $
  * $Log: StMcVertex.hh,v $
+ * Revision 2.11  2005/01/27 23:40:49  calderon
+ * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
+ *
  * Revision 2.10  2004/01/13 21:03:34  fisyak
  * Replace iostream by Stiostream.h (for icc)
  *
@@ -57,6 +60,7 @@
 #define StMcVertex_hh
 #include "StMcContainers.hh"
 #include "Stiostream.h"
+#include "StObject.h"
 #include <string>
 #ifndef ST_NO_NAMESPACES
 using std::string;
@@ -66,7 +70,7 @@ using std::string;
 
 class g2t_vertex_st;
 
-class StMcVertex {
+class StMcVertex : public StObject {
 public:
     StMcVertex();
     StMcVertex(g2t_vertex_st*);
@@ -110,10 +114,11 @@ protected:
     long                 mGeneratorProcess;
     long                 mKey;
     long                 mGeantMedium;
+    ClassDef(StMcVertex,1)
 };
-
+#ifndef __CINT__
 ostream&  operator<<(ostream& os, const StMcVertex&);
-
+#endif
 inline const StThreeVectorF& StMcVertex::position() const { return mPosition;}
 
 inline StPtrVecMcTrack& StMcVertex::daughters(){ return mDaughters; }       
