@@ -46,7 +46,7 @@ public:
   virtual void SetOption(Option_t *opt);
   virtual Option_t     *GetOption() const {return fOption;};
   virtual Int_t UpdateFile(const Char_t *file);
-  virtual const Char_t *GetFile() const {return (const Char_t*)fFile;};
+  virtual const Char_t *GetFile();
   virtual Int_t SetFile(const Char_t *file,const Char_t *iomode=0);
   virtual Int_t SetTFile(TFile *tfile);
   virtual TFile        *GetTFile(){return fTFile;};
@@ -122,11 +122,12 @@ ClassDef(StIOEvent,1)
 class StFile : public St_DataSet
 {
 public:
-  StFile(Int_t nbranches=1):St_DataSet("StFile"){};
+  StFile(Int_t nbranches=1);
  ~StFile(){};
  
   Int_t AddFile(const Char_t *file,const Char_t *branch=0);
   Int_t AddWild(const Char_t *file);
+  Int_t GetNBranches();
   const Char_t *NextFileName();
   const Char_t *GetBraName(){return GetAttr("branch=");}; 
   const Char_t *GetFormat() {return GetAttr("format=");};

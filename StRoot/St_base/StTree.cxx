@@ -1,3 +1,4 @@
+#include "Stypes.h"
 #include "StTree.h"
 #include "TRegexp.h"
 #include "TKey.h"
@@ -54,7 +55,7 @@ TString &StIO::MakeKey(const Char_t *name, ULong_t  ukey)
 Int_t StIO::Write(TFile *file, const Char_t *name, ULong_t  ukey, TObject  *obj)
 {
   assert(file);
-  if (!obj) return 1;  
+  if (!obj) return kStWarn;  
 
   StIOEvent event;
   event.fObj = obj; event.SetUniqueID(ukey);
@@ -162,7 +163,7 @@ IOMODE[0] = RWU[fIOMode]; return IOMODE;
 //_______________________________________________________________________________
 Int_t StBranch::SetFile(const Char_t *file,const Char_t *mode)
 { 
-  if (fTFile) { Error("SetFile","File is already opened");return 1;}
+  if (fTFile) { Error("SetFile","File is already opened");return kStWarn;}
   if (file) fFile=file; 
   if (mode) SetIOMode(mode);
   return 0;
@@ -192,7 +193,7 @@ Int_t StBranch::SetTFile(TFile *tfile)
   if (!fTFile) { fTFile=tfile; fFile = fTFile->GetName(); fTFileOwner=0; return 0;}
 
   Error("SetTFile","TFile is already attached");
-  return 1;
+  return kStWarn;
 }
 
 //_______________________________________________________________________________
@@ -203,12 +204,12 @@ void StBranch::Close(const char *)
   fTFile->Close("");
   printf("** <StBranch::Close> Branch=%s \tFile=%s \tClosed **\n"
         ,GetName(),(const char*)fFile); 
+  if (fTFileOwner) delete fTFile;
+  fTFile = 0;
 }
 //_______________________________________________________________________________
-Int_t StBranch::Open()
+const char *StBranch::GetFile()
 {
-  if (!fIOMode) return 0;
-  if (fTFile)   return 0;
   if (fFile.IsNull()) { // Construct file name
     fFile=GetName(); fFile.ReplaceAll("Branch",""); fFile+=".root";
     StTree *tree = (StTree*)GetParent();
@@ -216,8 +217,16 @@ Int_t StBranch::Open()
       const char* base = tree->GetBaseName();
       if (base) {fFile.Insert(0,"."); fFile.Insert(0,base);}}}
 
-  OpenTFile();
+   return (const char*)fFile;
+}
 
+
+//_______________________________________________________________________________
+Int_t StBranch::Open()
+{
+  if (!fIOMode) return 0;
+  if (fTFile)   return 0;
+  OpenTFile();
   return 0;
 }  
 //_______________________________________________________________________________
@@ -226,8 +235,8 @@ Int_t StBranch::WriteEvent(ULong_t ukey)
   int iret;
   if (!(fIOMode & 2)) return 0;
   SetUKey(ukey);
-  if (!fList) 		return 1;	//empty
-  if (!fList->First()) 	return 1;	//empty
+  if (!fList) 		return kStWarn;	//empty
+  if (!fList->First()) 	return kStWarn;	//empty
   Open(); fNEvents++;
   
   TList *savList = new TList;
@@ -295,28 +304,11 @@ void StBranch::SetParAll(TList *savList)
 //_______________________________________________________________________________
 void StBranch::OpenTFile()
 {
-int maxIOMode=fIOMode;
-StBranch *tree,*bran;
-
-  for (int iter=0; iter <2; iter++) {// 2 iters. 1st to find, 2nd to fill
-    tree = (StBranch*)GetParent();
-    if (tree) {	//loop all the branches
-      St_DataSetIter next(tree);
-      while((bran=(StBranch*)next())) {// 
-        if (bran == this)			continue;
-        if (!bran->fTFile) 			continue;
-        if (fFile != bran->fTFile->GetName()) 	continue;
-        if (iter==0) if (bran->fIOMode > maxIOMode) maxIOMode = bran->fIOMode;
-        else         bran->fTFile = fTFile;
-  } } 
-  if (iter) break;
-
+  if (fTFile) return;
   fTFileOwner=1; 
-  fTFile = new TFile(fFile,TFOPT[maxIOMode],GetName());
+  fTFile = new TFile(GetFile(),TFOPT[fIOMode],GetName());
   printf("** <StBranch::Open> Branch=%s \tMode=%s \tFile=%s \tOpened **\n"
-        ,GetName(),TFOPT[maxIOMode],(const char*)fFile);
-  } 
-
+        ,GetName(),TFOPT[fIOMode],(const char*)fFile);
 }
 //_______________________________________________________________________________
 void StBranch::Clear(Option_t *)
@@ -384,11 +376,22 @@ Int_t StTree::Open()
 {  
   int iret=0;
 
-  St_DataSetIter next(this);StBranch *br;
-  while ((br=(StBranch*)next())) { 
-    if (br->Open()) iret++;
+  St_DataSetIter nextA(this);StBranch *brA,*brB;
+  while ((brA=(StBranch*)nextA())) { 
+    if (brA->GetTFile()); 		continue;
+    const char *fileA = brA->GetFile();
+    St_DataSetIter nextB(this);
+    while ((brB=(StBranch*)nextB())) { 
+      TFile *tfB = brB->GetTFile();
+      if (!tfB) 				continue;
+      if (strcmp(fileA,tfB->GetName()))	continue;
+      brA->SetTFile(tfB);
+      break;
+    }
+    if (brA->GetTFile()) continue;
+    brA->Open(); iret++;
   }
-  return iret;
+  return 0;
 }
 //_______________________________________________________________________________
 Int_t StTree::UpdateFile(const Char_t *file)
@@ -401,7 +404,7 @@ Int_t StTree::UpdateFile(const Char_t *file)
 //_______________________________________________________________________________
 Int_t StTree::WriteEvent(ULong_t  ukey)
 {  
-  SetUKey(ukey);
+  SetUKey(ukey); Open();
   St_DataSetIter next(this);StBranch *br;
   while ((br=(StBranch*)next())) br->WriteEvent(fUKey);
   fNEvents++;
@@ -411,7 +414,7 @@ Int_t StTree::WriteEvent(ULong_t  ukey)
 //_______________________________________________________________________________
 Int_t StTree::ReadEvent(ULong_t  ukey)
 {  
-  SetUKey(ukey);
+  SetUKey(ukey); Open();
   St_DataSetIter next(this);StBranch *br;
   while ((br=(StBranch*)next())) br->ReadEvent(fUKey);
   return 0;
@@ -426,11 +429,14 @@ Int_t StTree::NextEvent(ULong_t  &ukey)
 //_______________________________________________________________________________
 Int_t StTree::NextEvent()
 {
+  Open();
   St_DataSetIter next(this); int num=0; StBranch *br;
   while ((br=(StBranch*)next())) {
-    if (!num++) {br->NextEvent(fUKey); if(fUKey==kUMAX) return 1; continue;}    
+    if (! br->fIOMode&1) continue;
+    if (!num++) {br->NextEvent(fUKey); if(fUKey==kUMAX) return kStEOF; continue;}    
     br->ReadEvent(fUKey);}
-  return 0;
+  
+  return (num) ?0 : kStEOF;
 }  
   
 //_______________________________________________________________________________
@@ -438,17 +444,21 @@ void StTree::Close(const char* opt)
 {  
   TString treeKey(GetName());
   Clear();
-  St_DataSetIter next(this); StBranch *br;
-  while ((br=(StBranch*)next())) {
-    if (!br->fIOMode) 				continue;
-    TFile *tfbr = br->GetTFile(); if(!tfbr) 	continue;
-    if (!tfbr->IsOpen())			continue;
-    if (br->fIOMode&2 && tfbr->IsWritable()) {
-      St_DataSet *par = GetParent(); SetParent(0);
-      StIO::Write(tfbr,(const char*)treeKey,2000,this);
-      SetParent(par);}
-    if (!(opt && strcmp(opt,"keep")==0)) br->Close();
-  }
+  for(int iter=0; iter <2; iter++) {//iter=0==Save 1=close
+
+    St_DataSetIter next(this); StBranch *br;
+    while ((br=(StBranch*)next())) { //branch loop
+      if (!br->fIOMode) 				continue;
+      TFile *tfbr = br->GetTFile(); if(!tfbr) 	continue;
+      if (!iter && br->fIOMode&2 && tfbr->IsWritable()) {
+	St_DataSet *par = GetParent(); SetParent(0);
+	StIO::Write(tfbr,(const char*)treeKey,2000,this);
+	SetParent(par);}
+
+      if (!iter || (opt && strcmp(opt,"keep")==0)) continue;
+      br->Close();
+    }// end branch loop
+  }// end iters
 }  
 
 //_______________________________________________________________________________
@@ -504,28 +514,37 @@ static int AreSimilar(const Char_t *fileA, const Char_t *fileB)
 
 //_____________________________________________________________________________
 ClassImp(StFile)
-
+ StFile::StFile(Int_t nbranches=1):St_DataSet("StFile")
+{
+  char buf[20];
+  sprintf(buf," nbranches=%d ",nbranches);
+  SetTitle(buf);
+}
 //_____________________________________________________________________________
 Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
 { 
-  TString tfile,tit;
+  TString tfile,tit,base;
   tfile = file; gSystem->ExpandPathName(tfile);
-
+  
   if (gSystem->AccessPathName(tfile)) {// file does not exist
     Warning("AddFile","*** IGNORED *** File %s does NOT exist \n",
     (const Char_t*)tfile);
-    return 1;}
+    return kStWarn;}
 
   const char* cc = strrchr(tfile,'.');
   if (!cc || !strstr(".xdf .root",cc)){// No extention
     Warning("AddFile","*** IGNORED *** File %s has wrong extention \n",
     (const Char_t *)tfile);
-    return 1;}
+    return kStWarn;}
 
-  St_DataSet *ds = new St_DataSet(file,this);
-  if (branch) {tit = "br="; tit += branch;}
+  base = gSystem->BaseName(tfile);
+  tit = tfile; tit.Replace(0,0," status=NONE file=");
+  if (branch) {tit.Replace(0,0,branch); tit.Replace(0,0," br=");}
+
+  St_DataSet *ds = new St_DataSet(base,this);
   ds->SetTitle(tit);
-  
+    
+
   printf("<%s::AddFile> Added file %s %s\n",
          ClassName(),ds->GetName(),ds->GetTitle());
          
@@ -546,7 +565,7 @@ Int_t StFile::AddWild(const Char_t *file)
   if (!dir) { 
     Warning("AddWild","*** IGNORED Directory %s does NOT exist ***\n",
     (const Char_t *)tdir);
-    return 1;}
+    return kStWarn;}
 
   while ((name = gSystem->GetDirEntry(dir))) {
 // 		skip some "special" names
@@ -579,16 +598,17 @@ const Char_t * StFile::NextFileName()
   St_DataSet *ds = First();
   if (!ds) return 0;
   TString tit(ds->GetTitle());  
-  if (strstr(tit,"status=Processed")) return 0;
-  if (strstr(tit,"status=Current")) {//move it to the end
-    tit.ReplaceAll("status=Current","status=Processed");
+  if (strstr(tit,"status=DONE")) return 0;
+  if (strstr(tit,"status=CURR")) {//move it to the end
+    tit.ReplaceAll("status=CURR","status=DONE");
     ds->SetTitle(tit);
     Remove(ds); Add(ds);
     return NextFileName();
   }
-  tit.Replace(0,0,"status=current ");
+  tit.ReplaceAll("status=NONE","status=CURR");
   ds->SetTitle(tit);
-  return ds->GetName();
+  SetInfo();
+  return strstr(ds->GetTitle(),"file=")+5;
 }
 //_____________________________________________________________________________
 void StFile::SetInfo()
@@ -601,42 +621,48 @@ void StFile::SetInfo()
   if (strstr(tit,"format=")) known += 1;
   if (strstr(tit,"branch=")) known += 2;
   if (known==3) return;  
-
-  const char *ext = strrchr(ds->GetName(),'.');
+  
+  const char *fname = strstr(ds->GetTitle(),"file=")+5;
+  const char *ext =   strrchr(fname,'.');
   assert(ext);
 
 //		.XDF
   if (strcmp(".xdf",ext)==0) {
-    tit.Replace(0,0,"format=xdf ");
-    tit.Replace(0,0,"branch=none");
+    tit.Replace(0,0," format=xdf ");
+    tit.Replace(0,0," branch=NONE");
     known = 3;
   } 
 
   if (known!=3) {
     assert (!strcmp(".root",ext));
 
-    tf = new TFile(ds->GetName(),"READ");
+    tf = new TFile(fname,"READ");
     assert(!tf->IsZombie());
     TList *kl = gFile->GetListOfKeys();
     TIter nextKey(kl);
     TKey *ky;
     while ((ky = (TKey*)nextKey())) {
       if (strcmp("StIOEvent",ky->GetClassName())==0) {	//it is post mdc2
-	if (!(known&1)) {tit.Replace(0,0," format=root ");}
-	if (!(known&2)) {tit.Replace(0,0,"branch="); tit.Replace(7,0,ky->GetName());}
+	if (!(known&1)) {tit.Replace(0,0," format=root ");known|=1;}
+	if (!(known&2)) {
+          const char *bra=ky->GetName();
+          if (strstr(bra,"tree")) 	continue;
+          if (strstr(bra,"Tree")) 	continue;
+	  tit.Replace(0,0,bra,strcspn(bra,"."));tit.Replace(0,0,"branch=");
+        }
 	known =3; break;
       }
       if (!strcmp("TTree" ,ky->GetClassName())
        && !strcmp("Output",ky->GetName()) ) {//it is mdc2
-	if (!(known&1)) tit.Replace(0,0," format=mdc2 ");
-	if (!(known&2)) tit.Replace(0,0," branch=tree ");
+	if (!(known&1)) tit.Replace(0,0," format=mdc2");
+	if (!(known&2)) tit.Replace(0,0," branch=tree");
 	known =3; break;
       }
 
       if (known==3) break;
       if (strcmp("TBranchObject",ky->GetClassName())==0) {//it is mdc2
-	if (!(known&1)) {tit.Replace(0,0," format=mdc2 ");}
-	if (!(known&2)) {tit.Replace(0,0,"branch=");tit.Replace(7,0,ky->GetName());}
+	if (!(known&1)) {tit.Replace(0,0," format=mdc2");}
+	if (!(known&2)) {tit.Replace(0,0,ky->GetName());tit.Replace(0,0," branch=");;}
 	known =3; 
       }
       if (known==3) break;
@@ -661,3 +687,13 @@ const Char_t *StFile::GetAttr(const char *att)
   brName.Replace(0,999,bn,n);
   return (const char*)brName;
 }
+//_____________________________________________________________________________
+Int_t StFile::GetNBranches() 
+{ 
+  const char *cc = strstr(GetTitle(),"nbranches=")+10;
+  return atoi(cc);
+}
+
+
+
+
