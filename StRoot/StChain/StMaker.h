@@ -188,13 +188,14 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.62 2003/07/09 19:54:44 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.63 2003/11/13 02:54:34 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
                                     const StMaker *dowMk=0) const ;
 
-
+public:
+   int Cleanup(TDataSet *ds);
 
    ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };
@@ -217,8 +218,11 @@ private:
 #endif
 
 
-// $Id: StMaker.h,v 1.62 2003/07/09 19:54:44 jeromel Exp $
+// $Id: StMaker.h,v 1.63 2003/11/13 02:54:34 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.63  2003/11/13 02:54:34  perev
+// Safe destructor of TDataSet like object added
+//
 // Revision 1.62  2003/07/09 19:54:44  jeromel
 // Added some Get methods
 //

@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.134 2003/11/05 19:56:32 perev Exp $
+// $Id: StMaker.cxx,v 1.135 2003/11/13 02:54:34 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -16,25 +16,25 @@
  * The method will be described.
  *                                                                     
  */
-#include <Stiostream.h>
 #include "Stiostream.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <TSystem.h>
-#include <TClass.h>
-#include <TROOT.h>
-#include <TError.h>
-#include <THtml.h>
-#include <TH1.h>
+#include "TSystem.h"
+#include "TClass.h"
+#include "TROOT.h"
+#include "TError.h"
+#include "THtml.h"
+#include "TH1.h"
 
-#include <TChain.h>
-#include <TTree.h>
-#include <TList.h>
-#include <TClonesArray.h>
-#include <TBrowser.h>
+#include "TChain.h"
+#include "TTree.h"
+#include "TList.h"
+#include "TClonesArray.h"
+#include "TBrowser.h"
 
 #include "StMaker.h"
+#include "TObjectSet.h"
 #include "StChain.h"
 #include "TTable.h"
 
@@ -95,9 +95,10 @@ void StMaker::AddMaker(StMaker *mk)
 //_____________________________________________________________________________
 StMaker::~StMaker()
 {
-if (fgStChain == this) fgStChain = 0;
-delete fMemStatMake;	fMemStatMake  = 0;
-delete fMemStatClear;	fMemStatClear = 0;
+  if (fgStChain == this) fgStChain = 0;
+  delete fMemStatMake;	fMemStatMake  = 0;
+  delete fMemStatClear;	fMemStatClear = 0;
+  Cleanup(this);
 }
 //______________________________________________________________________________
 void StMaker::SetNumber(Int_t number)
@@ -1100,6 +1101,44 @@ Int_t StMaker::InitRun(int runumber) {return 0;}
 Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
+int StMaker::Cleanup(TDataSet *ds) 
+{
+
+   if (!ds->TestBit(TObject::kNotDeleted))	return 0;	
+   TSeqCollection *list = ds->TDataSet::GetCollection();
+   if (!list)                        		return 0;
+   if (list->IsA()!=TList::Class() && list->IsA()!=TObjArray::Class()) {
+     Error("Cleanup","object %p Wrong fList = %p Flist ignored",ds,list);
+     						return 0;
+   }
+
+   int kount = 0;
+   TIter iter(list);
+   TDataSet *son;	
+   int num = list->Capacity();
+   for (int i=0; i<num; i++) {
+     son = (TDataSet*)iter.Next();
+     if (!son) continue;
+     if (!son->TestBit(TObject::kNotDeleted)) 	{list->Remove(son); continue;}
+     TDataSet* par = son->TDataSet::GetParent();
+     if ( par != ds)				{list->Remove(son); continue;}
+     if (!son->InheritsFrom(TDataSet::Class())) {
+       Error("Cleanup","child object %p in %p is not a TDataSet",son,ds);
+       list->Remove(son); continue;}
+     if (!son->InheritsFrom(StMaker::Class())) 	continue;//Delay cleanup
+     kount = Cleanup(son) + 1;
+   }     
+   if (!ds->InheritsFrom(TObjectSet::Class()))  return kount;
+   TObjectSet *os = (TObjectSet*)ds;
+   if (!os->IsOwner())				return kount;
+   TObject *to = os->GetObject();
+   if (!to)					return kount;
+   if (!to->TestBit(TObject::kNotDeleted))	return kount;	
+   if (!to->InheritsFrom(TDataSet::Class()))	return kount;	
+   return kount + Cleanup((TDataSet*)to);   
+}
+
+//_____________________________________________________________________________
 StMakerIter::StMakerIter(StMaker *mk,int secondary)
 {
   fState = 0;
@@ -1158,11 +1197,11 @@ AGAIN: switch (fState) {
   }
   assert(0); return 0;
 }
-
-
-
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.135  2003/11/13 02:54:34  perev
+// Safe destructor of TDataSet like object added
+//
 // Revision 1.134  2003/11/05 19:56:32  perev
 // Simple debugging class added
 //
