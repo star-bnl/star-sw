@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.9 1999/03/03 04:12:13 fisyak Exp $
+// $Id: St_mwc_Maker.cxx,v 1.10 1999/03/04 18:07:55 druss Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.10  1999/03/04 18:07:55  druss
+// If no g2t_mwc_hit table, just return (instead of return error)
+//
 // Revision 1.9  1999/03/03 04:12:13  fisyak
 // replace kStErr to kStWarn
 //
@@ -114,13 +117,12 @@ Int_t St_mwc_Maker::Make(){
      St_DataSetIter geant(gStChain->DataSet("geant"));
      St_g2t_mwc_hit *g2t_mwc_hit = (St_g2t_mwc_hit *) geant("g2t_mwc_hit");
 
-
-     if (!g2t_mwc_hit) {printf("g2t_mwc_hit does not exist\n");return kStWarn;}
+     if (!g2t_mwc_hit) {return kStOK;}
      if (!m_geom)      {printf("m_geom does not exist\n")     ;return kStWarn;}
-     if (!m_mpar)      {printf("m_mpar does not exist\n")     ;return kStWarn;} 
+     if (!m_mpar)      {printf("m_mpar does not exist\n")     ;return kStWarn;}
      if (!mevent)      {printf("mevent does not exist\n")     ;return kStWarn;}
-     if (!sector)      {printf("sector does not exist\n")     ;return kStWarn;} 
-     if (!raw)         {printf("raw does not exist\n")        ;return kStWarn;} 
+     if (!sector)      {printf("sector does not exist\n")     ;return kStWarn;}
+     if (!raw)         {printf("raw does not exist\n")        ;return kStWarn;}
 
      Int_t mwc_result = mws(
                             g2t_mwc_hit,
@@ -154,7 +156,7 @@ Int_t St_mwc_Maker::Make(){
 //_____________________________________________________________________________
 void St_mwc_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_mwc_Maker.cxx,v 1.9 1999/03/03 04:12:13 fisyak Exp $\n");
+  printf("* $Id: St_mwc_Maker.cxx,v 1.10 1999/03/04 18:07:55 druss Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
