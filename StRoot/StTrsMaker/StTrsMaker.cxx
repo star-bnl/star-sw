@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.62 2000/08/05 18:32:58 long Exp $
+// $Id: StTrsMaker.cxx,v 1.63 2000/08/11 02:24:27 long Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.63  2000/08/11 02:24:27  long
+// comment out sampleAnalogSignal();
+//
 // Revision 1.62  2000/08/05 18:32:58  long
 // add check for the No.of  input hits. if(no_tpc_hits<1)return kStOK;
 //
@@ -346,7 +349,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.62 2000/08/05 18:32:58 long Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.63 2000/08/11 02:24:27 long Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -1047,7 +1050,7 @@ Int_t StTrsMaker::Make(){
 
 	time_t sampleAnalogSignalBegin = time(0);
 	cout << "--->sampleAnalogSignal()..." << endl;
-	mAnalogSignalGenerator->sampleAnalogSignal();
+	//	mAnalogSignalGenerator->sampleAnalogSignal();
 	time_t sampleAnalogSignalEnd= time(0);
 	double sampleAnalogSignalTime = difftime(sampleAnalogSignalEnd,sampleAnalogSignalBegin);
 	cout << "Time to sample Analog Signal: " << sampleAnalogSignalTime << " sec\n\n";
@@ -1090,7 +1093,7 @@ Int_t StTrsMaker::Make(){
 	// ...and digitize it
 	time_t digitizeSignalBegin = time(0);
 	cout << "--->digitizeSignal()..." << endl;
-	mDigitalSignalGenerator->digitizeSignal();
+      	mDigitalSignalGenerator->digitizeSignal();
 	cout<<"--->digitizeSignal() Finished..." << endl;
 	time_t digitizeSignalEnd= time(0);
 	double digitizeSignalTime = difftime(digitizeSignalEnd,digitizeSignalBegin);
