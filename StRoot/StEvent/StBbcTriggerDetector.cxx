@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.cxx,v 2.1 2002/01/03 20:57:37 ullrich Exp $
+ * $Id: StBbcTriggerDetector.cxx,v 2.2 2002/09/25 14:04:17 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,13 +10,16 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.cxx,v $
+ * Revision 2.2  2002/09/25 14:04:17  akio
+ * Bug fix in the service functions, no change in data
+ *
  * Revision 2.1  2002/01/03 20:57:37  ullrich
  * Initial Revision.
  *
  **************************************************************************/
 #include "StBbcTriggerDetector.h"
 
-static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.1 2002/01/03 20:57:37 ullrich Exp $";
+static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.2 2002/09/25 14:04:17 akio Exp $";
 
 ClassImp(StBbcTriggerDetector)
 
@@ -55,7 +58,7 @@ StBbcTriggerDetector::bbcRegister(unsigned int n) const
 unsigned short
 StBbcTriggerDetector::pedestalData(unsigned int n) const
 {
-    if(n < mMaxPedData) return mScl[n];
+    if(n < mMaxPedData) return mPed[n];
     else return 9999;
 }
 
@@ -87,7 +90,7 @@ StBbcTriggerDetector::setRegister(unsigned int id, unsigned short val)
 void
 StBbcTriggerDetector::setPedestal(unsigned int id, unsigned short val)
 {
-    if(id < mMaxPedData) mReg[id] = val;
+    if(id < mMaxPedData) mPed[id] = val;
 }
 
 void
