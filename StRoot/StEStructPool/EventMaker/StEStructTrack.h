@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.h,v 1.1 2003/10/15 18:20:51 porter Exp $
+ * $Id: StEStructTrack.h,v 1.2 2004/06/28 23:23:14 chunhuih Exp $
  *
  * Author: Jeff Porter merge of work from Aya Ishihara and Jeff Reid
  *
@@ -132,28 +132,28 @@ public:
 
   // functions which do some simple calculations
   //  using information contained in data members
-  Float_t	Pt();
-  Float_t	Mt(Float_t mass);
-  Float_t	E(Float_t mass);
-  Float_t	Rapidity(Float_t mass);
+  Float_t	Pt() const;
+  Float_t	Mt(Float_t mass) const;
+  Float_t	E(Float_t mass) const;
+  Float_t	Rapidity(Float_t mass) const;
 
-  Float_t       Dca();
-  Float_t       DcaPrimary();
-  Float_t       DcaGlobal();
-  Float_t       PIDpiPlus();
-  Float_t       PIDpiMinus();
+  Float_t       Dca() const;
+  Float_t       DcaPrimary() const;
+  Float_t       DcaGlobal() const;
+  Float_t       PIDpiPlus() const;
+  Float_t       PIDpiMinus() const;
 
   // accessors to transient data ...
-  Bool_t        isComplete() { return mIsComplete; };
-  const StThreeVectorF&   NominalTpcExitPoint()        const;     
-  const StThreeVectorF&   NominalTpcEntrancePoint()    const;      
-  const StThreeVectorF&   MidTpcPoint()    const; 
-  StThreeVectorF     StartPos()                      const;
-  StLorentzVectorF& FourMomentum();
-  const StHelixD& Helix() const; 
+  Bool_t        isComplete() const { return mIsComplete; };
+  const StThreeVectorF&   NominalTpcExitPoint()        const;
+  const StThreeVectorF&   NominalTpcEntrancePoint()    const;
+  const StThreeVectorF&   MidTpcPoint()                const;
+  const StThreeVectorF&   StartPos()                   const;
+  const StLorentzVectorF& FourMomentum()               const;
+  const StHelixD& Helix()                              const;
   Float_t  Xt() const;
   Float_t  Yt() const;
-  int      getYtBin();
+  int      getYtBin() const;
 
 
   // functions used to set data members
@@ -203,16 +203,15 @@ public:
 };
 
 inline void StEStructTrack::evalPt(){ mPt=sqrt((mPx*mPx)+(mPy*mPy)); }
-inline const StThreeVectorF& StEStructTrack::NominalTpcExitPoint() const {
-  return mNominalTpcExitPoint; }
-inline  const StThreeVectorF& StEStructTrack::NominalTpcEntrancePoint() const { return mNominalTpcEntrancePoint; };     
-inline  const StThreeVectorF& StEStructTrack::MidTpcPoint() const{ return mMidTpcPoint; }; 
-inline  StThreeVectorF  StEStructTrack::StartPos() const{ return mStartPos; };
-inline  StLorentzVectorF& StEStructTrack::FourMomentum(){ return mFourMomentum;};
-inline  const StHelixD& StEStructTrack::Helix() const{ return mHelix;}; 
-inline  Float_t  StEStructTrack::Xt() const { return mXt;};
-inline  Float_t  StEStructTrack::Yt() const { return mYt;};
-inline  int      StEStructTrack::getYtBin() { return mytbin; };
+inline const StThreeVectorF& StEStructTrack::NominalTpcExitPoint() const { return mNominalTpcExitPoint; }
+inline const StThreeVectorF& StEStructTrack::NominalTpcEntrancePoint() const { return mNominalTpcEntrancePoint; };     
+inline const StThreeVectorF& StEStructTrack::MidTpcPoint() const{ return mMidTpcPoint; }; 
+inline const StThreeVectorF& StEStructTrack::StartPos() const{ return mStartPos; };
+inline const StLorentzVectorF& StEStructTrack::FourMomentum() const { return mFourMomentum;};
+inline const StHelixD& StEStructTrack::Helix() const{ return mHelix;}; 
+inline Float_t  StEStructTrack::Xt() const { return mXt;};
+inline Float_t  StEStructTrack::Yt() const { return mYt;};
+inline int      StEStructTrack::getYtBin() const { return mytbin; };
 
 #endif
 
@@ -220,6 +219,10 @@ inline  int      StEStructTrack::getYtBin() { return mytbin; };
 /***********************************************************************
  *
  * $Log: StEStructTrack.h,v $
+ * Revision 1.2  2004/06/28 23:23:14  chunhuih
+ * add 'const' specification to a set of member functions, including some of
+ * the return types, so that they can be used by a const StEStructTrack object.
+ *
  * Revision 1.1  2003/10/15 18:20:51  porter
  * initial check in of Estruct Analysis maker codes.
  *
