@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: rch.C,v 1.1 1999/02/12 23:58:47 lyons Exp $
+ * $Id: rch.C,v 1.2 1999/02/13 00:17:43 lyons Exp $
  *
  * Author: Dan Lyons
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: rch.C,v $
+ * Revision 1.2  1999/02/13 00:17:43  lyons
+ * Small clean up... untested
+ *
  * Revision 1.1  1999/02/12 23:58:47  lyons
  * UNTESTED VERSION, but should hopefully work.
  * Should execute the StRchMaker after creating a sufficient chain.
@@ -47,50 +50,14 @@ void Load(){
     gSystem->Load("St_geant_Maker");
     gSystem->Load("St_TLA_Maker");
     gSystem->Load("St_xdfin_Maker");
-    gSystem->Load(StRchMaker");
+    gSystem->Load("StRchMaker");
 }
 
-class St_geant_Maker;
-St_geant_Maker *geant=0;
-
-// *** Old copy of function from trs.C... decided to use bfc.C as prototype
-// *** instead.
-
-// void rch(const Int_t Nevents=1)
-// {
-//     // Init chain, run geant and rch maker
-//     // modified from trs.C:
-//   if (gClassTable->GetID("StChain") < 0) Load();
-//   chain = new StChain("rch");
-//   geant = new St_geant_Maker("geant","event/geant/Event");
-//   geant->SetNwGEANT(20 000 000);
-//   geant->SetIwtype(1);
-//   geant->Do("gfile p /star/u2b/lasiuk/onemuon.fz");
-//   StRchMaker *Rch = new StRchMaker("rch","event/raw_data/rch");
-//   //  chain->PrintInfo();
-//   // Init the mai chain and all its makers
-//   int iInit = chain->Init();
-//   if (iInit) chain->Fatal(iInit,"on init");
-//   gBenchmark->Start("rch");
-//   Int_t i=0;
-//   for (Int_t i =1; i <= Nevents; i++){
-//     if (chain->Make(i)) break;
-//     St_DataSet *dst = chain->DataSet("dst");
-//     if (i != Nevents) chain->Clear();
-//     printf ("===========================================\n");
-//     printf ("=========================================== Done with Event no. %d\n",i);
-//     printf ("===========================================\n");
-//   }
-//   if (Nevents > 1) {
-//     chain->Finish();
-//     gBenchmark->Print("rch");
-//   }
-//   else b = new TBrowser;
-// }
 
 void rch(const Int_t Nevents=1)
 {
     // ***modified from bfc.C:
+
     if (gClassTable->GetID("StChain") < 0) Load();
     // Create the main chain object
     if (chain) delete chain;
@@ -146,13 +113,7 @@ void rch(const Int_t Nevents=1)
     }
     if (Nevents > 1) {
  	      chain->Finish();
-	      delete xdf_in;
-	      // *** deleted xdf_out crap again.
 	      gBenchmark->Print("rch");  // string change from bfc.C
     }
-
-	  // else {if (!b)   b = new TBrowser;}
-	  // *** What's this?  looks graphical, skip for now. 
-    	
 }
 
