@@ -1,13 +1,13 @@
 /*******************************************************************
- * $Id: StRichGeometryDb.cxx,v 1.8 2000/05/15 18:03:45 lasiuk Exp $
+ * $Id: StRichGeometryDb.cxx,v 1.9 2000/05/19 15:15:08 lasiuk Exp $
  *
  * Description:
  *
  *******************************************************************
  * $Log: StRichGeometryDb.cxx,v $
- * Revision 1.8  2000/05/15 18:03:45  lasiuk
- * change survey parameter distance to pad plane.
- * Shift to .13 for t'formation routines.  (gjk)
+ * Revision 1.9  2000/05/19 15:15:08  lasiuk
+ * modification of parameters for ideal geometry for simulation
+ * normal vector and proximity gap
  *
  * Revision 1.8  2000/05/15 18:03:45  lasiuk
  * change survey parameter distance to pad plane.
@@ -156,8 +156,16 @@ void StRichGeometryDb::my_fill()
     mRadiatorDimension = StThreeVector<double>(131./2.,83.6/2.,1.)*centimeter;
     mQuartzDimension = StThreeVector<double>(131./2.,83.6/2.,.5)*centimeter;
     mPadPlaneDimension = StThreeVector<double>(131./2.,83.6/2.,0.)*centimeter;
-    mProximityGap = 8.*centimeter; 
-    mNormalVectorToPadPlane = StThreeVector<double>(-.49718, 0.86765, -0.00038);
+
+    //
+    // Change on May 19, 2000 to use ideal Geometry
+    // this will have to be switchable
+    //
+    // old values
+//     mProximityGap = 8.*centimeter; 
+//     mNormalVectorToPadPlane = StThreeVector<double>(-.49718, 0.86765, -0.00038);
+    mProximityGap = 9.65*centimeter; 
+    mNormalVectorToPadPlane = StThreeVector<double>(-sin(mInclinationAngle),cos(mInclinationAngle),0.0);
 }
 
 StRichGeometryDb* StRichGeometryDb::getDb()
