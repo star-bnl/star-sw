@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMiniDst.hh,v 1.1 1999/08/13 12:38:17 jones Exp $
+ * $Id: StXiMiniDst.hh,v 1.2 1999/08/13 14:28:20 jones Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 30-Mar-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StXiMiniDst.hh,v $
+ * Revision 1.2  1999/08/13 14:28:20  jones
+ * Added comments to explain the usage of the public member functions
+ *
  * Revision 1.1  1999/08/13 12:38:17  jones
  * Major revision to merge StV0MiniDstMaker and StXiMiniDstMaker
  *
@@ -31,37 +34,35 @@ public:
   StXiMiniDst(StXiVertex*,StV0Vertex*,StVertex*);
   void UpdateXi();
 
-  int   charge() const;
-  float decayLengthXi() const;
-  float *decayVertexXi() const;
+  int   charge() const;              // Particle charge
+  float decayLengthXi() const;       // 3-d decay distance
+  float *decayVertexXi() const;      // Coordinate of decay vertex
+  float dcaXiDaughters() const;      // DCA of xi daughters at decay vertex
+  float dcaBachelorToPrimVertex() const; // DCA of bachelor to primary vertex
+  float dcaXiToPrimVertex() const;   // DCA of xi to primary vertex
+  float *momBachelor() const;        // Momentum components of bachelor
+  int   tpcHitsBachelor() const;     // Number of TPC hits on bachelor
 
-  float dcaXiDaughters() const;
-  float dcaBachelorToPrimVertex() const;
-  float dcaXiToPrimVertex() const;
-  float *momBachelor() const;
-
-  int   tpcHitsBachelor() const;
-
-  float *momXi();
-  float alphaXi();
-  float ptArmXi();
-  float eOmega();
-  float eXi();
-  float eBachelorPion();
-  float eBachelorKaon();
-  float massOmega();
-  float massXi();
-  float rapOmega();
-  float rapXi();
-  float cTauOmega();
-  float cTauXi();
-  float ptBachelor();
-  float ptotBachelor();
-  float ptXi();
-  float ptotXi();
+  float *momXi();                    // Momentum components of Xi/Omega
+  float alphaXi();                   // Armenteros-Podolanski variable
+  float ptArmXi();                   // Armenteros-Podolanski variable
+  float eOmega();                    // Energy assuming Omega hypothesis
+  float eXi();                       // Energy assuming Xi hypothesis
+  float eBachelorPion();             // Energy of bachelor assuming pion
+  float eBachelorKaon();             // Energy of bachelor assuming kaon
+  float massOmega();                 // Mass assuming Omega hypothesis
+  float massXi();                    // Mass assuming Xi hypothesis
+  float rapOmega();                  // Rapidity assuming (anti)Omega
+  float rapXi();                     // Rapidity assuming (anti)Xi
+  float cTauOmega();                 // Lifetime (ctau) assuming (anti)Omega
+  float cTauXi();                    // Lifetime (ctau) assuming (anti)Xi
+  float ptBachelor();                // Transverse momentum of bachelor
+  float ptotBachelor();              // Total momentum of bachelor
+  float ptXi();                      // Transverse momentum of Xi/Omega
+  float ptotXi();                    // Total momentum of Xi/Omega
 
 protected:
-  int   mCharge;
+  int   mCharge;                     // Written out
   float mDecayLengthXi;
   float mDecayVertexXi[3];
 
@@ -72,12 +73,12 @@ protected:
 
   int   mTpcHitsBachelor;
 
-  float mMomXi[3];              //! Not to be written out
-  float mPtot2Bachelor;         //! Not to be written out
-  float mPtot2Xi;               //! Not to be written out 
-  float mPt2Xi;                 //! Not to be written out
-  float mMomBachelorAlongXi;    //! Not to be written out
-  float mMomV0AlongXi;          //! Not to be written out
+  float mMomXi[3];                   //! Not to be written out
+  float mPtot2Bachelor;              //! Not to be written out
+  float mPtot2Xi;                    //! Not to be written out 
+  float mPt2Xi;                      //! Not to be written out
+  float mMomBachelorAlongXi;         //! Not to be written out
+  float mMomV0AlongXi;               //! Not to be written out
 
   ClassDef(StXiMiniDst, 1)
 };
