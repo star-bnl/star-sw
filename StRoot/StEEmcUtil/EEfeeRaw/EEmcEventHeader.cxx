@@ -1,5 +1,8 @@
-// $Id: EEmcEventHeader.cxx,v 1.4 2003/05/27 20:25:21 zolnie Exp $ 
+// $Id: EEmcEventHeader.cxx,v 1.5 2003/06/03 02:40:02 zolnie Exp $ 
 // $Log: EEmcEventHeader.cxx,v $
+// Revision 1.5  2003/06/03 02:40:02  zolnie
+// added run number
+//
 // Revision 1.4  2003/05/27 20:25:21  zolnie
 // print status
 //
@@ -55,6 +58,7 @@ void EEmcEventHeader :: clear() {
   mProcessingTime  = -1;
   mCommentLen = 0;
   mStatus     = 0;
+  mRunNumber  = 0;
   if(mComment) delete [] mComment;
 }
 
