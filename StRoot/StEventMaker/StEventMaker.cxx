@@ -44,7 +44,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.70 2004/08/03 17:26:05 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.71 2004/08/13 18:45:44 ullrich Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -476,7 +476,8 @@ StEventMaker::makeEvent()
     for (i=0; i<nrows; i++) {
         if ((bad=badDstTrack(dstGlobalTracks+i))) {
 	    if (Debug()) Warning("makeEvent","global track rejected by %d",bad);
-          continue;}
+	    continue;
+	}
         gtrack = new StGlobalTrack(dstGlobalTracks[i]);
         vecGlobalTracks[dstGlobalTracks[i].id] = gtrack;
         gtrack->setGeometry(new StHelixModel(dstGlobalTracks[i]));
@@ -489,7 +490,6 @@ StEventMaker::makeEvent()
         node = new StTrackNode();
         node->addTrack(gtrack);          // node<->track association
         trackNodes.push_back(node);
-	
     }
     
     //
@@ -526,13 +526,16 @@ StEventMaker::makeEvent()
     for (i=0; i<nrows; i++) {
         if ((bad=badDstTrack(dstPrimaryTracks+i))) {
 	    if (Debug()) Warning("makeEvent","primary track rejected by %d",bad);
-	    nfailed++; continue;}
+	    nfailed++;
+	    continue;
+	}
         idvtx = dstPrimaryTracks[i].id_start_vertex ? dstPrimaryTracks[i].id_start_vertex/10 : 0;
         if (!idvtx) {
             nfailed++;
             continue;
         }
         ptrack = new StPrimaryTrack(dstPrimaryTracks[i]);
+	ptrack->fitTraits().setPrimaryVertexUsedInFit(true); // NEW-tu Aug 13, 2004
         vecPrimaryTracks[dstPrimaryTracks[i].id]   = ptrack;
         vecPrimaryVertexId[dstPrimaryTracks[i].id] = idvtx;
         ptrack->setGeometry(new StHelixModel(dstPrimaryTracks[i]));
@@ -744,6 +747,7 @@ StEventMaker::makeEvent()
         if (!node) continue;
 	
 	eptrack = new StEstPrimaryTrack(dstEstPrimaryTracks[i]);
+ 	eptrack->fitTraits().setPrimaryVertexUsedInFit(true);    // NEW-tu Aug 13, 2004
         vecEstPrimaryTracks[dstEstPrimaryTracks[i].id]   = eptrack;
         vecEstPrimaryVertexId[dstEstPrimaryTracks[i].id] = idvtx;
         eptrack->setGeometry(new StHelixModel(dstEstPrimaryTracks[i]));
@@ -1665,8 +1669,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.70 2004/08/03 17:26:05 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.71 2004/08/13 18:45:44 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.71  2004/08/13 18:45:44  ullrich
+ * Set vertex-used-in-fit flag for primary tracks.
+ *
  * Revision 2.70  2004/08/03 17:26:05  ullrich
  * Update of trigger part by Akio.
  *
