@@ -1,10 +1,13 @@
 #ifndef EEstarTrig_h
 #define EEstarTrig_h
 /*********************************************************************
- * $Id: EEstarTrig.h,v 1.5 2003/06/02 04:36:40 balewski Exp $
+ * $Id: EEstarTrig.h,v 1.6 2003/06/16 16:03:54 zolnie Exp $
  *********************************************************************
  * container for STAR trigger data
  * $Log: EEstarTrig.h,v $
+ * Revision 1.6  2003/06/16 16:03:54  zolnie
+ * updated root version number
+ *
  * Revision 1.5  2003/06/02 04:36:40  balewski
  * added check if trigID
  *
@@ -69,7 +72,7 @@ class EEstarTrig : public TObject {
   virtual ~EEstarTrig();
   void  print(int k=0, FILE *fd=stdout) const;
   void  clear();
-  ClassDef(EEstarTrig,2) 
+  ClassDef(EEstarTrig,3) 
 
 };
 #endif
