@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.166 2001/02/07 14:29:17 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.167 2001/02/10 02:43:00 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -51,7 +51,7 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
   {"doEvents"    ,""  ,"","xin,event,analysis,NoDb"                                       ,"","","",kFALSE},
-  {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb"                         ,"","","",kFALSE},
+  {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb,TableUti"                ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
   {"Cdefault"   ,"","","tpc,ftpc,rrs,rich,l0,l3,Cdst,Kalman,tags,Tree,NoHits","","","Default chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,Cdefault"                                 ,"","","Turn on chain y1a",kFALSE},
@@ -130,7 +130,8 @@ Bfc_st BFC[] = {
   {"vpd"         ,""  ,"","vpd_T",""                                                   ,"St_vpd","",kFALSE},
   {"tls"         ,""  ,"","",""                                                           ,"tls","",kFALSE},
   {"daq"         ,""  ,"","",""                         ,"StDaqLib,StDAQMakerLib","Load StDAQMaker",kFALSE},
-  {"SCL"         ,""  ,"","","","StarClassLibrary",                         "Load StarClassLibrary",kFALSE},
+  {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
+  {"TableUti"    ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -180,11 +181,16 @@ Bfc_st BFC[] = {
   {"PreVtx"     ,"","tpcChain","tpt,SCL,sim_T,tpc_T,svt_T,ftpcT,globT,ctf_T",
                                        "StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
   {"svt"         ,"svtChain","","svt_T,srs,Est"                             ,"StMaker","StChain","",kFALSE},
+  {"SvtSlowSim"  ,"SvtSlowSim","svtChain","",      "StSvtSimulationMaker","StSvtSimulationMaker","",kFALSE},
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                                             ,"","","",kFALSE},
   {"srs"         ,"svt_hits","svtChain","tls,Simu"  ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
   {"sls"      ,"","svtChain","tls,Simu"     ,"St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
   {"spa"      ,"","svtChain","tls,Simu"     ,"St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
   {"svt_daq"     ,"svt_raw","svtChain",""                       ,"StSvtDaqMaker","StSvtDaqMaker","",kFALSE},
+  {"SvtSeqAdj"   ,"SvtSeqAdj","svtChain",""               ,"StSvtSeqAdjMaker","StSvtSeqAdjMaker","",kFALSE},
+  {"SvtClu"      ,"SvtClu","svtChain",""                ,"StSvtClusterMaker","StSvtClusterMaker","",kFALSE},  
+  {"SvtCluAnal"  ,"SvtCluAnal","svtChain",""    ,"StSvtClusterAnalysisMaker","StSvtClusterMaker","",kFALSE},  
+  {"SvtHit"      ,"svt_hits","svtChain",""                  ,"StSvtHitMaker","StSvtClusterMaker","",kFALSE},  
   {"stk"         ,"svt_tracks","svtChain","tls"     ,"St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},  
   {"scf"      ,"","svtChain",""                ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
   {"scm"      ,"","svtChain",""                ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
@@ -218,7 +224,7 @@ Bfc_st BFC[] = {
   {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker" 
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"dEdx"       ,"dEdx","globalChain","globT,tpcDb","StdEdxMaker","StTableUtilities,StdEdxMaker","",kFALSE},
+  {"dEdx"       ,"dEdx","globalChain","globT,tpcDb,TableUti"        ,"StdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl"        ,"StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",
