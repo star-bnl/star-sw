@@ -1,5 +1,8 @@
-// $Id: StHbtExample.C,v 1.5 1999/09/24 00:00:34 lisa Exp $
+// $Id: StHbtExample.C,v 1.6 2000/01/19 15:52:46 kathy Exp $
 // $Log: StHbtExample.C,v $
+// Revision 1.6  2000/01/19 15:52:46  kathy
+// change default input file to be the one in /afs/rhic/star/data/samples
+//
 // Revision 1.5  1999/09/24 00:00:34  lisa
 // HBT example macro updated to use TrackCuts not ParticleCuts
 //
@@ -34,7 +37,8 @@ class MinvCorrFctn;
 MinvCorrFctn* MinvCF;
 
 void StHbtExample(Int_t nevents=1,
-		  const char *MainFile="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0353_01_35evts.dst.root")
+		  const char *MainFile=
+"/afs/rhic/star/data/samples/gstar.dst.root")
 {
 
     // Dynamically link needed shared libs
