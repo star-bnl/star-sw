@@ -25,10 +25,10 @@ class StEmcEqualSpectra : public StEmcSpectra
   protected:   
   public: 
            
-                   StEmcEqualSpectra(const char*); //!< Default constructor 
-  virtual          ~StEmcEqualSpectra(); //!< Default destructor
-           void    DrawEqualConst(); //!< Draw Equalization constants
-           Bool_t  Equalize(Int_t,Int_t,Int_t); //!< Equalize two bins
+                   StEmcEqualSpectra(const char*); ///< Default constructor 
+  virtual          ~StEmcEqualSpectra(); ///< Default destructor
+           void    DrawEqualConst(); ///< Draw Equalization constants
+           Bool_t  Equalize(Int_t,Int_t,Int_t); ///< Equalize two bins
            
 
   ClassDef(StEmcEqualSpectra,1)

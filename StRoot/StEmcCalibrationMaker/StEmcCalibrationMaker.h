@@ -146,45 +146,45 @@ class StEmcCalibrationMaker : public StMaker
            Float_t m_calibStep;
            Int_t   nTracks;
            
-           Bool_t  ReadHitsOffline(); //!< Read Hits offline
-           Bool_t  CalcZVertex(); //!< Gets zVertex. if fails try to calculate one
-           Bool_t  FillEqual(); //!< Fill equalization spectra with EMC hits
-           Bool_t  FillMipCalib();//!< Fill MIP spectra with EMC hits
-           Bool_t  FillEffPed();//!< Fill effective pedestal spectra with EMC hits
-           Bool_t  CheckTracks();//!< Check tracks on EMC and select good candidates for each calibration mode
-           Bool_t  ProjectTrack(StTrack*,double,Float_t*,Float_t*); //!< Project track on EMC surface
-           Bool_t  CheckPedestal(); //!< Check electronics pedestal and subtract them 
-           void    ClearCalibTable(); //!< Clear calibration table
-           void    SetCalibStatus(); //!< Set calibration status with good towers/strips
-           void    ClearEqualTable(); //!< Clear equalization table
-           void    ClearMipTable(); //!< Clear MIP table
-           Bool_t  FillEmcVector(); //!< Fill EMC vector from StEvent
+           Bool_t  ReadHitsStEvent(); ///< Read Hits using StEvent format
+           Bool_t  CalcZVertex(); ///< Gets zVertex. if fails try to calculate one
+           Bool_t  FillEqual(); ///< Fill equalization spectra with EMC hits
+           Bool_t  FillMipCalib();///< Fill MIP spectra with EMC hits
+           Bool_t  FillEffPed();///< Fill effective pedestal spectra with EMC hits
+           Bool_t  CheckTracks();///< Check tracks on EMC and select good candidates for each calibration mode
+           Bool_t  ProjectTrack(StTrack*,double,Float_t*,Float_t*); ///< Project track on EMC surface
+           Bool_t  CheckPedestal(); ///< Check electronics pedestal and subtract them 
+           void    ClearCalibTable(); ///< Clear calibration table
+           void    SetCalibStatus(); ///< Set calibration status with good towers/strips
+           void    ClearEqualTable(); ///< Clear equalization table
+           void    ClearMipTable(); ///< Clear MIP table
+           Bool_t  FillEmcVector(); ///< Fill EMC vector from StEvent
       
    public:
    
-                   StEmcCalibrationMaker(const char *name="EmcCalibration"); //!< Default constructor
-   virtual        ~StEmcCalibrationMaker(); //!< Default destructor
-   virtual Int_t   Init(); //!< Init method
-   virtual Int_t   Make(); //!< Make mathod - process each event
-   virtual Int_t   Finish(); //!< Finish method - save final numbers
-           void    Clear(const Option_t *option=""); //!< Clear method. It is used to erase temp variables from event to event
-           Bool_t  Equalize(); //!< Equalize the detector in eta bin
-           Bool_t  MipCalib(); //!< Do MIP calibration
-           Bool_t  MakeCalibration(); //!< Get all calibration information and calculate final calibration constants
-           Bool_t  MakeEffPed(); //!< Calculate effective pedestals
-           Bool_t  SaveTables(); //!< Save all calibration tables and spectra
-           void    LoadSpectra(char*); //!< Load spectra from disk
-           void    CalcEtaBin(Int_t,Float_t,Int_t*,Int_t*,Int_t*,Int_t*); //!< Calculates eta bin
+                   StEmcCalibrationMaker(const char *name="EmcCalibration"); ///< Default constructor
+   virtual        ~StEmcCalibrationMaker(); ///< Default destructor
+   virtual Int_t   Init(); ///< Init method
+   virtual Int_t   Make(); ///< Make mathod - process each event
+   virtual Int_t   Finish(); ///< Finish method - save final numbers
+           void    Clear(const Option_t *option=""); ///< Clear method. It is used to erase temp variables from event to event
+           Bool_t  Equalize(); ///< Equalize the detector in eta bin
+           Bool_t  MipCalib(); ///< Do MIP calibration
+           Bool_t  MakeCalibration(); ///< Get all calibration information and calculate final calibration constants
+           Bool_t  MakeEffPed(); ///< Calculate effective pedestals
+           Bool_t  SaveTables(); ///< Save all calibration tables and spectra
+           void    LoadSpectra(char*); ///< Load spectra from disk
+           void    CalcEtaBin(Int_t,Float_t,Int_t*,Int_t*,Int_t*,Int_t*); ///< Calculates eta bin
 
-           St_emcCalSummary*      SummaryTable; //!< Calibration summary table
-           St_emcCalSettings*     SettingsTable;//!< Calibration settings table
-           St_emcCalibration*     CalibTable; //!< Calibration table
-           St_emcEqualization*    EqualTable; //!< Equalization table
-           St_emcMipCalib*        MipTable; //!< MIP table
+           St_emcCalSummary*      SummaryTable; ///< Calibration summary table
+           St_emcCalSettings*     SettingsTable;///< Calibration settings table
+           St_emcCalibration*     CalibTable; ///< Calibration table
+           St_emcEqualization*    EqualTable; ///< Equalization table
+           St_emcMipCalib*        MipTable; ///< MIP table
    
-           StEmcEqualSpectra*     EqualSpec; //!< Equalization spectra
-           StEmcMipSpectra*       MipSpec; //!< Mip spectra
-           StEmcEffPedSpectra*    EffPedSpec; //!< Effective pedestal spectra
+           StEmcEqualSpectra*     EqualSpec; ///< Equalization spectra
+           StEmcMipSpectra*       MipSpec; ///< Mip spectra
+           StEmcEffPedSpectra*    EffPedSpec; ///< Effective pedestal spectra
 
 
    ClassDef(StEmcCalibrationMaker, 1)  

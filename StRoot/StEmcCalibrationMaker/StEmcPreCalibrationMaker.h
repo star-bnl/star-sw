@@ -1,5 +1,8 @@
-// $Id: StEmcPreCalibrationMaker.h,v 1.4 2001/12/28 21:31:09 suaide Exp $
+// $Id: StEmcPreCalibrationMaker.h,v 1.5 2001/12/29 20:33:51 suaide Exp $
 // $Log: StEmcPreCalibrationMaker.h,v $
+// Revision 1.5  2001/12/29 20:33:51  suaide
+// added documentation
+//
 // Revision 1.4  2001/12/28 21:31:09  suaide
 // Added documentation
 //
@@ -53,11 +56,11 @@ class StEmcPreCalibrationMaker : public StMaker
   protected:    
     
   public: 
-                 StEmcPreCalibrationMaker(const char *name="EmcPreCalibration",int daq=0);//!< Default constructor 
-    virtual       ~StEmcPreCalibrationMaker();//!< Default destructor 
-    virtual Int_t Init();//!< Init method
-    virtual Int_t Make();//!< Make method. Process each event 
-    virtual Int_t Finish();//!< Finish method
+                 StEmcPreCalibrationMaker(const char *name="EmcPreCalibration",int daq=0);///< Default constructor 
+    virtual       ~StEmcPreCalibrationMaker();///< Default destructor 
+    virtual Int_t Init();///< Init method
+    virtual Int_t Make();///< Make method. Process each event 
+    virtual Int_t Finish();///< Finish method
     //        void  Clear(Option_t *option="");
   private:
     St_DataSet*         mTheEmcData;//!

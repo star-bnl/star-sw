@@ -24,9 +24,9 @@ class StEmcEffPedSpectra : public StEmcSpectra
   protected:   
   public: 
            
-                   StEmcEffPedSpectra(const char*); //!< Default constructor
-  virtual          ~StEmcEffPedSpectra();//!< Default destructor
-  Bool_t           CalcPedestal(Int_t);//!< Calculates effective pedestal
+                   StEmcEffPedSpectra(const char*); ///< Default constructor
+  virtual          ~StEmcEffPedSpectra();///< Default destructor
+  Bool_t           CalcPedestal(Int_t);///< Calculates effective pedestal
            
 
   ClassDef(StEmcEffPedSpectra,1)
