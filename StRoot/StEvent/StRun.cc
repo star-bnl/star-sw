@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.cc,v 1.6 1999/04/30 12:33:18 wenaus Exp $
+ * $Id: StRun.cc,v 1.7 1999/04/30 13:14:12 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRun.cc,v $
+ * Revision 1.7  1999/04/30 13:14:12  wenaus
+ * mSummary was not being initialized in one constructor
+ *
  * Revision 1.6  1999/04/30 12:33:18  wenaus
  * Test mSummary before deleting it
  *
@@ -31,7 +34,7 @@
  **************************************************************************/
 #include "StEvent/StRun.hh"
 
-static const char rcsid[] = "$Id: StRun.cc,v 1.6 1999/04/30 12:33:18 wenaus Exp $";
+static const char rcsid[] = "$Id: StRun.cc,v 1.7 1999/04/30 13:14:12 wenaus Exp $";
 
 StRun::StRun()
 {
@@ -69,6 +72,7 @@ StRun::StRun(dst_run_header_st& runHdr)
     mEastZ = runHdr.east_z;
     mWestA = runHdr.west_a;
     mWestZ = runHdr.west_z;
+    mSummary = 0;
 }
 
 StRun::~StRun()
