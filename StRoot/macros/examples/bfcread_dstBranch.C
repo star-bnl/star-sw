@@ -1,5 +1,8 @@
-// $Id: bfcread_dstBranch.C,v 1.12 2000/06/01 18:13:27 kathy Exp $
+// $Id: bfcread_dstBranch.C,v 1.13 2000/06/01 18:57:03 kathy Exp $
 // $Log: bfcread_dstBranch.C,v $
+// Revision 1.13  2000/06/01 18:57:03  kathy
+// updating to separate out BfcStatus stats
+//
 // Revision 1.12  2000/06/01 18:13:27  kathy
 // update to print out info needed properly
 //
@@ -78,14 +81,18 @@ void bfcread_dstBranch(
 
   Float_t countevdstB=0.0;
   Float_t countevdst=0.0;
-  Float_t countevobj=0.0;
-  Float_t countevtab=0.0;
+  Float_t countevobjd=0.0;
+  Float_t countevtabd=0.0;
+  Float_t countevobjb=0.0;
+  Float_t countevtabb=0.0;
 
 // Event loop
 EventLoop: if (iev < nevents && !istat) {
 
-  Int_t Countevobj=0;
-  Int_t Countevtab=0;
+  Int_t Countevobjd=0;
+  Int_t Countevtabd=0;
+  Int_t Countevobjb=0;
+  Int_t Countevtabb=0;
 
     chain->Clear();
     istat = chain->Make(iev);
@@ -117,13 +124,28 @@ EventLoop: if (iev < nevents && !istat) {
 
       cout << endl << " QAInfo:   found object: " << ddb->GetName() << endl;
       fout << endl << " QAInfo:   found object: " << ddb->GetName() << endl;
-     
-      countevobj++;
-      Countevobj++;
+           
+      TString dsName =  ddb->GetName();
+
+      if (dsName == "BfcStatus") {
+        countevobjb++;
+        Countevobjb++;
+      }
+      else {
+        countevobjd++;
+        Countevobjd++;
+    }
 
       if (ddb->InheritsFrom("TTable")) { 
-	 countevtab++;
-         Countevtab++;
+        if (dsName == "BfcStatus") {	
+          countevtabb++;
+          Countevtabb++;
+        }
+        else{
+          countevtabd++;
+          Countevtabd++;
+        }
+ 
 
          tabl = (TTable *)ddb;
          cout << " QAInfo:     it's a table with #rows = " 
@@ -132,7 +154,6 @@ EventLoop: if (iev < nevents && !istat) {
                         << tabl->GetNRows() << endl;
       }
 
-      TString dsName =  ddb->GetName();
 
 // now look under dst branch
       if (dsName == "dst") {
@@ -152,15 +173,15 @@ EventLoop: if (iev < nevents && !istat) {
 	  cout << " QAInfo:     found object: " << obj->GetName() << endl;
 	  fout << " QAInfo:     found object: " << obj->GetName() << endl;
 
-          countevobj++;
-          Countevobj++;
+          countevobjd++;
+          Countevobjd++;
 
 //.. count all tables that exist:
           if (obj->InheritsFrom("TTable")) {
             tabl = (TTable *)tabiter.Find(obj->GetName());
             if (tabl) {
-	      countevtab++;
-              Countevtab++;
+	      countevtabd++;
+              Countevtabd++;
 
              cout << " QAInfo:       it's a table with #rows = " 
                         << tabl->GetNRows() << endl;
@@ -177,15 +198,19 @@ EventLoop: if (iev < nevents && !istat) {
 
     } // while dstBranch
 
-    cout << endl << " QAInfo: event # " << countev << 
-            ", # objects found = " << Countevobj << 
-            ", # tables found = " <<  Countevtab << 
-             endl << endl;
+    cout << endl << " QAInfo: ev# " << countev << 
+            ", #dst obj/tab, #Bfc obj/tab found = " << 
+              Countevobjd << "  " << 
+              Countevtabd << "  " <<
+              Countevobjb << "  " <<  
+              Countevtabb << endl << endl;
 
-    fout << endl << " QAInfo: event # " << countev << 
-            ", # objects found = " << Countevobj << 
-            ", # tables found = " <<  Countevtab << 
-             endl << endl;
+    fout << endl << " QAInfo: ev# " << countev << 
+            ", #dst obj/tab, #Bfc obj/tab found = " << 
+              Countevobjd << "  " <<  
+              Countevtabd << "  " <<
+              Countevobjb << "  " <<  
+              Countevtabb << endl << endl;
 
 
       } // if dstBranch
@@ -201,26 +226,32 @@ EventLoop: if (iev < nevents && !istat) {
 
 }  // EventLoop
      
-    countevobj /= countev;
-    countevtab /= countev;
+    countevobjd /= countev;
+    countevtabd /= countev;
+    countevobjb /= countev;
+    countevtabb /= countev;
 
   cout << endl;
-  cout << "QAInfo: End of Job " << endl; 
-  cout << "QAInfo: # times Make called = " << iev << endl;
-  cout << "QAInfo:  # events read = " << countev << endl;
-  cout << "QAInfo:   # events with dstBranch dataset = " << countevdstB << endl;
-  cout << "QAInfo:   # events with dst dataset = " <<  countevdst << endl;
-  cout << "QAInfo: avg #tables per event  = " << countevtab << endl;
-  cout << "QAInfo: avg #objects per event = " << countevobj << endl << endl;
+  cout << " QAInfo: End of Job " << endl; 
+  cout << " QAInfo: # times Make called = " << iev << endl;
+  cout << " QAInfo:  # events read = " << countev << endl;
+  cout << " QAInfo:   # events with dstBranch dataset = " << countevdstB << endl;
+  cout << " QAInfo:   # events with dst dataset = " <<  countevdst << endl;
+  cout << " QAInfo: avg # dst tables per event  = " << countevtabd << endl;
+  cout << " QAInfo: avg # dst objects per event = " << countevobjd << endl;
+  cout << " QAInfo: avg # Bfc tables per event  = " << countevtabb << endl;
+  cout << " QAInfo: avg # Bfc objects per event = " << countevobjb << endl << endl;
 
   fout << endl;
-  fout << "QAInfo: End of Job " << endl; 
-  fout << "QAInfo: # times Make called = " << iev << endl;
-  fout << "QAInfo:  # events read = " << countev << endl;
-  fout << "QAInfo:   # events with dstBranch dataset = " << countevdstB << endl;
-  fout << "QAInfo:   # events with dst dataset = " <<  countevdst << endl;
-  fout << "QAInfo: avg #tables per event  = " << countevtab << endl;
-  fout << "QAInfo: avg #objects per event = " << countevobj << endl << endl;
+  fout << " QAInfo: End of Job " << endl; 
+  fout << " QAInfo: # times Make called = " << iev << endl;
+  fout << " QAInfo:  # events read = " << countev << endl;
+  fout << " QAInfo:   # events with dstBranch dataset = " << countevdstB << endl;
+  fout << " QAInfo:   # events with dst dataset = " <<  countevdst << endl;
+  fout << " QAInfo: avg # dst tables per event  = " << countevtabd << endl;
+  fout << " QAInfo: avg # dst objects per event = " << countevobjd << endl;
+  fout << " QAInfo: avg # Bfc tables per event  = " << countevtabb << endl;
+  fout << " QAInfo: avg # Bfc objects per event = " << countevobjb << endl << endl;
 
   chain->Finish();   
 
