@@ -106,7 +106,7 @@ STAFCV_T spxdummy_time(char* name)
       EML_ERROR(KAM_METHOD_FAILURE);
    }
    printf("SPXDUMMY:\tTime = %s \n",tim);
-   ASUFREE(tim);
+   FREE(tim);
    EML_SUCCESS(STAFCV_OK);
 }
 

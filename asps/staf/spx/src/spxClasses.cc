@@ -46,10 +46,10 @@ char * spxDummy::  listing () {
    myNCalls++;
    char* c = socObject::listing();
    char* cc = NULL;
-   cc = (char*)ASUALLOC(79);
+   cc = (char*)MALLOC(79);
    memset(cc,0,79);
    sprintf(cc,"%s Calls = %d",c,nCalls());
-   ASUFREE(c);
+   FREE(c);
    return cc;
 }
 
@@ -65,7 +65,7 @@ STAFCV_T spxDummy:: getTime (char *& tim) {
    myNCalls++;
    time_t it = time(0);
    char* c=NULL;
-   c = (char*)ASUALLOC(strlen(ctime(&it)) +1);
+   c = (char*)MALLOC(strlen(ctime(&it)) +1);
    strcpy(c,ctime(&it));
    tim = (char *)c;
    EML_SUCCESS(STAFCV_OK);
@@ -111,10 +111,10 @@ short spxGrid::  width () {
 char * spxGrid::  listing () {
    char* c = socObject::listing();
    char* cc = NULL;
-   cc = (char*)ASUALLOC(79);
+   cc = (char*)MALLOC(79);
    memset(cc,0,79);
    sprintf(cc,"%s Size = (%d, %d)",c,height(),width());
-   ASUFREE(c);
+   FREE(c);
    return cc;
 }
 
@@ -238,7 +238,7 @@ STAFCV_T spxManager:: getGrid (IDREF_T id, spxGrid*& grid) {
 char * spxManager:: list () {
    char *c = socFactory::list();
 
-   char *cc = (char*)ASUALLOC(strlen(c) +1 +162);
+   char *cc = (char*)MALLOC(strlen(c) +1 +162);
 
    sprintf(cc, 
 		"\n"
@@ -248,7 +248,7 @@ char * spxManager:: list () {
                 "SPX - Service Package eXample listing"
                 " ********************\n"
                 "%s\n",c);
-   ASUFREE(c);
+   FREE(c);
    return cc;
 }
 
