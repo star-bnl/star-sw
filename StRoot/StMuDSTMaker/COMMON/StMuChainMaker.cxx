@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.3 2002/04/15 22:18:15 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.4 2002/04/17 21:04:15 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -27,7 +27,9 @@ ClassImp(StMuChainMaker)
 //-----------------------------------------------------------------------
 StMuChainMaker::StMuChainMaker(const char* name) : mTreeName(name) {
   DEBUGMESSAGE2("");
+  mChain = new TChain(mTreeName.c_str());
   mDbReader = StMuDbReader::instance();
+  mFileCounter=0;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -77,20 +79,19 @@ string StMuChainMaker::dirname(string s){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-TChain*  StMuChainMaker::make(string dir, string file, string filter, int maxFiles) {
+TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFiles) {
   DEBUGMESSAGE1("");
-  TChain* chain;
   mSubFilters = subFilter(filter);
 
   if (file!="") {
-    if (file.find(".lis")!=string::npos) chain =  fromList(file, maxFiles);
-    if (file.find(".MuDst.root")!=string::npos) chain = fromFile(file, maxFiles);
+    if (file.find(".lis")!=string::npos) fromList(file, maxFiles);
+    if (file.find(".MuDst.root")!=string::npos) fromFile(file, maxFiles);
   }
   else {
-    chain = fromDir(dir, maxFiles);
+    fromDir(dir, maxFiles);
   }
   DEBUGMESSAGE2("return");
-  return chain;
+  return mChain;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -114,15 +115,32 @@ string**  StMuChainMaker::subFilter(string filter) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-TChain* StMuChainMaker::fromDir(string dir, int maxFiles) {
+void StMuChainMaker::add(string file) {
+  DEBUGMESSAGE3("");
+  /// if no entries in db, just add file
+  if (mDbReader->entriesDb()==0) {
+    mChain->Add( file.c_str(), 0 );
+    mFileCounter++;
+  }
+  /// if db has entries, enter only the file with entries (otherwise it crashes)
+  else {
+    int entries = mDbReader->entries(file.c_str());
+    if (entries) {
+      mChain->Add( file.c_str(), entries );
+      mFileCounter++;
+    }
+  }
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuChainMaker::fromDir(string dir, int maxFiles) {
   DEBUGMESSAGE2("");
-  TChain* chain = new TChain(mTreeName.c_str());
   DEBUGVALUE(gSystem);
 
   void *pDir = gSystem->OpenDirectory(dir.c_str());
   // now find the files that end in the specified extention
   const char* fileName(0);
-  int fileCount(0);
   while((fileName = gSystem->GetDirEntry(pDir))){
     bool good = true;
     string name(fileName);
@@ -132,55 +150,45 @@ TChain* StMuChainMaker::fromDir(string dir, int maxFiles) {
     if ( pass(name,mSubFilters) ) {
       char* fullFile = gSystem->ConcatFileName(dir.c_str(),fileName);
       // add it to the chain
-      cout << fileCount << endl;
-      chain->Add( fullFile, mDbReader->entries(fullFile) );
-      fileCount++;
+      cout << mFileCounter << endl;
+      add( fullFile );
       delete fullFile;
     }
-    if(fileCount >= maxFiles) break;
+    if(mFileCounter >= maxFiles) break;
   }   
-  DEBUGVALUE2(fileCount);
-  return chain;
+  DEBUGVALUE2(mFileCounter);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-TChain* StMuChainMaker::fromList(string list, int maxFiles) {
+void StMuChainMaker::fromList(string list, int maxFiles) {
   DEBUGMESSAGE2("");
-  TChain* chain = new TChain(mTreeName.c_str());
   ifstream* inputStream = new ifstream;
   inputStream->open(list.c_str());
   if (!(inputStream)) {
     DEBUGMESSAGE("can not open list file");
-    return chain;
   }
   char* temp;
-  int fileCount=0;
   DEBUGVALUE(inputStream->good());
   for (;inputStream->good();) {
     temp = new char[200];
     inputStream->getline(temp,200);
     if ( pass(temp,mSubFilters) ) {
-      cout << temp << endl;
-      chain->Add( temp, mDbReader->entries(temp) );
-      ++fileCount;
+      add(temp);
     }
     delete temp;
-    if (fileCount>maxFiles) break;
+    if (mFileCounter>maxFiles) break;
   }   
   delete inputStream;
-  DEBUGVALUE2(fileCount);
-  return chain;
+  DEBUGVALUE2(mFileCounter);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-TChain* StMuChainMaker::fromFile(string file, int maxFiles) {
+void StMuChainMaker::fromFile(string file, int maxFiles) {
   DEBUGMESSAGE2("");
-  TChain* chain = new TChain(mTreeName.c_str());
   cout << mTreeName.c_str() << endl;
-  chain->Add( file.c_str(), mDbReader->entries(file.c_str()) );
-  return chain;
+  add( file );
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -197,6 +205,9 @@ bool StMuChainMaker::pass(string file, string**  filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.4  2002/04/17 21:04:15  laue
+ * minor updates
+ *
  * Revision 1.3  2002/04/15 22:18:15  laue
  * bug fix in reading of single file
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDbReader.h,v 1.2 2002/04/15 22:38:11 laue Exp $
+ * $Id: StMuDbReader.h,v 1.3 2002/04/17 21:04:16 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDbReader_hh
@@ -24,6 +24,7 @@ class StMuDbReader  {
   int addDb(const char* db);
   void showDb();
   void sortDb();
+  int entriesDb();
   int entries(const char* file);
  protected:
   StMuDbReader();
@@ -40,9 +41,14 @@ class StMuDbReader  {
 
 #endif
 
+inline int StMuDbReader::entriesDb() { return mDb.size(); }
+
 /***************************************************************************
  *
  * $Log: StMuDbReader.h,v $
+ * Revision 1.3  2002/04/17 21:04:16  laue
+ * minor updates
+ *
  * Revision 1.2  2002/04/15 22:38:11  laue
  * made destructors virtual
  *
