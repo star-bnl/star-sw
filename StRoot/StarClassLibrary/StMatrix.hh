@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.9 2000/02/01 16:02:59 lasiuk Exp $
+ * $Id: StMatrix.hh,v 1.10 2000/02/02 18:31:05 lasiuk Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
+ * Revision 1.10  2000/02/02 18:31:05  lasiuk
+ * restore files
+ *
  * Revision 1.9  2000/02/01 16:02:59  lasiuk
  * namespace std is different on SUN CC5 and KCC.  Redefine macros!
  *
@@ -198,12 +201,6 @@
 #include <vector>
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
-#endif
-
-#if !defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
-#if !defined(ST_NO_NAMESPACES) 
-using std::swap;
-#endif
 #endif
 
 #ifndef ST_NO_EXCEPTIONS
