@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.356 2003/09/28 01:55:56 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.357 2003/10/01 21:46:05 potekhin Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1972,7 +1972,7 @@ void StBFChain::SetGeantOptions(){
       else if (GetOption("Y2003")  ||
 	       GetOption("RY2003"))   geantMk->LoadGeometry("detp geometry year2003");
       else if (GetOption("Y2003X") ||
-	       GetOption("RY2003X"))  geantMk->LoadGeometry("detp geometry year2003x");
+	       GetOption("RY2003X"))  geantMk->LoadGeometry("detp geometry y2003x");
 
       else if (GetOption("Y2b"))      geantMk->LoadGeometry("detp geometry YEAR_2b");
       else if (GetOption("Complete")) geantMk->LoadGeometry("detp geometry complete");
