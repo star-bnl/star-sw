@@ -1,5 +1,8 @@
-// $Id: StMessTypeList.h,v 1.1 1999/06/23 15:17:45 genevb Exp $
+// $Id: StMessTypeList.h,v 1.2 1999/06/26 00:24:52 genevb Exp $
 // $Log: StMessTypeList.h,v $
+// Revision 1.2  1999/06/26 00:24:52  genevb
+// Fixed const type mismatches
+//
 // Revision 1.1  1999/06/23 15:17:45  genevb
 // Introduction of StMessageManager
 //
@@ -54,9 +57,9 @@ class StMessTypeList {
    virtual ~StMessTypeList();
    static StMessTypeList* Instance();
                     Int_t AddType(const Char_t* type, const Char_t* text);
-                    Int_t FindTypeNum(Char_t* type);
-          StMessTypePair* FindType(Char_t* type);
-            const Char_t* Text(Char_t* type);
+                    Int_t FindTypeNum(const Char_t* type);
+          StMessTypePair* FindType(const Char_t* type);
+            const Char_t* Text(const Char_t* type);
                     Int_t ListTypes();
    ClassDef(StMessTypeList,0)
 };

@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.2 1999/06/24 16:30:41 genevb Exp $
+// $Id: StMessage.cxx,v 1.3 1999/06/26 00:24:52 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.3  1999/06/26 00:24:52  genevb
+// Fixed const type mismatches
+//
 // Revision 1.2  1999/06/24 16:30:41  genevb
 // Fixed some memory leaks
 //
@@ -53,7 +56,7 @@ type(new Char_t(toupper(*ty))), messTime(new TDatime()) {
 }
 //_____________________________________________________________________________
 StMessage::~StMessage() {
-  delete messTime;
+  messTime->~TDatime();
 }
 //_____________________________________________________________________________
 Int_t StMessage::Print(Int_t nChars) {
@@ -100,7 +103,7 @@ Int_t StMessage::Print(Int_t nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.2 1999/06/24 16:30:41 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.3 1999/06/26 00:24:52 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

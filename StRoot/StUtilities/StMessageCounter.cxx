@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.cxx,v 1.3 1999/06/25 22:57:56 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.4 1999/06/26 00:24:52 genevb Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.4  1999/06/26 00:24:52  genevb
+// Fixed const type mismatches
+//
 // Revision 1.3  1999/06/25 22:57:56  genevb
 // Fixed a small bug in MSG compatibiliti
 //
@@ -104,7 +107,7 @@ void StMessageCounter::ListLimits() {
   return;
 }
 //_____________________________________________________________________________
-int StMessageCounter::CheckLimit(Char_t* mess, Char_t* type) {
+int StMessageCounter::CheckLimit(Char_t* mess, const Char_t* type) {
   int printIt = 1;
   int typeN = messTypeList->FindTypeNum(type);
   int typeNewSize = *(limitTCountList[typeN]) + 1;

@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.h,v 1.3 1999/06/25 22:57:57 genevb Exp $
+// $Id: StMessageCounter.h,v 1.4 1999/06/26 00:24:53 genevb Exp $
 // $Log: StMessageCounter.h,v $
+// Revision 1.4  1999/06/26 00:24:53  genevb
+// Fixed const type mismatches
+//
 // Revision 1.3  1999/06/25 22:57:57  genevb
 // Fixed a small bug in MSG compatibiliti
 //
@@ -55,7 +58,7 @@ class StMessageCounter {
       void SetLimit(Char_t* str, Int_t n=0);
       void ListLimits();
       void AddType();
-       int CheckLimit(Char_t* mess, Char_t* type);
+       int CheckLimit(Char_t* mess, const Char_t* type);
    Char_t* GetOutMessage() const {return outMessage;}
    ClassDef(StMessageCounter,0)
 };
