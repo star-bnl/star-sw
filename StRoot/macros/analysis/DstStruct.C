@@ -1,4 +1,4 @@
-// $Id: DstStruct.C,v 3.6 2000/08/17 00:54:16 fine Exp $
+// $Id: DstStruct.C,v 3.7 2000/08/17 01:31:26 fine Exp $
 
 #include <iomanip.h>
 class StChain;
@@ -43,8 +43,11 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-  IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch  
-//  IOMk->SetBranch("eventBranch",0,"r"); //activate dst Branch  
+  if (strstr(MainFile,".dst.")) {
+    IOMk->SetBranch("dstBranch",0,"r");    //activate dst Branch      
+  } else {  
+    IOMk->SetBranch("eventBranch",0,"r"); //activate event Branch  
+  }
 // --- now execute chain member functions
   chain->Init();
 
@@ -182,6 +185,9 @@ void DstStruct(const char *MainFile="/afs/rhic/star/data/samples/gstar.dst.root"
 //__________________________________________________________________________
 //__________________________________________________________________________
 // $Log: DstStruct.C,v $
+// Revision 3.7  2000/08/17 01:31:26  fine
+// Estimatine time for event branches if event file is provided
+//
 // Revision 3.6  2000/08/17 00:54:16  fine
 // more accurate timing
 //
