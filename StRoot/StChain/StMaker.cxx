@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.84 2000/01/07 22:31:43 perev Exp $
+// $Id: StMaker.cxx,v 1.85 2000/03/01 22:56:25 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -866,7 +866,7 @@ static void doPs(const char *who, const char *where)
       char buf[12]; sprintf(buf,"%d",gSystem->GetPid());
       if (!ps[0]) {
 #if defined(__linux)
-	ps = "ps ux $$";
+	ps = "ps up $$";
 #elif defined(__sun)
 	ps = "ps -o user -o pid -o pcpu -o pmem -o osz -o rss -o stime -o time -o comm -p $$";
 #elif defined(__hpux)
@@ -939,6 +939,9 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.85  2000/03/01 22:56:25  fisyak
+// Adjust ps for RedHat 6.1
+//
 // Revision 1.84  2000/01/07 22:31:43  perev
 // one more argument for SetOutputAll
 //
