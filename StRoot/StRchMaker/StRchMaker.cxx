@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.16 2000/05/18 11:42:20 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 1.17 2000/05/18 21:57:19 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.16  2000/05/18 11:42:20  lasiuk
- * mods for pre StEvent writing
+ * Revision 1.17  2000/05/18 21:57:19  lasiuk
+ * dev patch
+ *
+ * Revision 1.18  2000/05/23 16:49:51  lasiuk
+ * writing to StEvent/StRichCollection
  *
  * Revision 1.17  2000/05/18 21:57:19  lasiuk
  * dev patch
@@ -63,7 +66,7 @@
 #ifdef RCH_WITH_PAD_MONITOR
 #include "StRrsMaker/StRichPadMonitor.h"
 
-#include "StRichSingleHitCollection.h"
+#ifdef RICH_WITH_PAD_MONITOR
 #endif
 
 // Internal Rch
@@ -124,8 +127,8 @@ Int_t StRchMaker::Init() {
     PR(mNumberOfPads);
     mEventNumber = 0;
 
-    mSingleHitCollection = new  StRichSingleHitCollection();
-    AddConst(new St_ObjectSet("richHits",mSingleHitCollection));
+    //
+    // cluster finder
     mClusterFinder = new StRichClusterAndHitFinder();
 
     //
@@ -446,11 +449,11 @@ Int_t StRchMaker::Make() {
    
 
 #endif
-    mSingleHitCollection->mTheHits = theHits;
-    PR(mSingleHitCollection->mTheHits.size());
+    
+    //
     PR(theHits.size());
-//     for(int zz=0; zz<mSingleHitCollection->mTheHits.size(); zz++) {
-// 	PR(mSingleHitCollection->mTheHits[zz]);
+    mSimpleHitCollection->mTheHits = theHits;
+    //
 	}
 //     for(int zz=0; zz<mSimpleHitCollection->mTheHits.size(); zz++) {
 // 	PR(mSimpleHitCollection->mTheHits[zz]);
@@ -460,13 +463,13 @@ Int_t StRchMaker::Make() {
 
 	}
     AddData(new St_ObjectSet("StRichEvent", richCollection));
-  printf("* $Id: StRchMaker.cxx,v 1.16 2000/05/18 11:42:20 lasiuk Exp $\n");
+    
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.16 2000/05/18 11:42:20 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.17 2000/05/18 21:57:19 lasiuk Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.16 2000/05/18 11:42:20 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 1.17 2000/05/18 21:57:19 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
