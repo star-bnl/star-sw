@@ -1,5 +1,8 @@
-* $Id: tpt_form_segments.F,v 1.10 2000/03/19 04:20:32 sakrejda Exp $
+* $Id: tpt_form_segments.F,v 1.11 2000/03/29 03:42:08 sakrejda Exp $
 * $Log: tpt_form_segments.F,v $
+* Revision 1.11  2000/03/29 03:42:08  sakrejda
+* Assigning points to a track moved to the tpt_load_track routine
+*
 * Revision 1.10  2000/03/19 04:20:32  sakrejda
 * An option to use straigth line to fit lasers even if the field is on.
 *
@@ -193,19 +196,6 @@ C              memorize the final best segment
                      trk(ntrk).ipnt(ld) = saved_trk.ipnt(ld)
                    end do
                  endif
-                 do ld=1,trk(ntrk).nhit
-                   ient = trk(ntrk).ipnt(ld)
-                   if(ient.gt.hit_h.nok.or.ient.lt.1) then
-                     write(m132(1),*) 'TPTMAKES2-E1 WRONG POINTER*',ient
-                     call Message( m132, 1, idI2 )
-                   endif
-                   if(hit(ient).track.ne.0) then
-                     write(m132(1),*) 'TPTMAKES3-E1 hit overwritten'
-     >                                ,ient,hit(ient).track
-                     call Message( m132, 1, idI3 )
-                   endif
-                   hit(ient).track = ntrk*1000+ld
-                 end do
 c
                  if(saved) then
                    do ld=1,9
