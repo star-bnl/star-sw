@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.30 2004/04/09 22:03:47 subhasis Exp $
+ * $Id: StMuDstMaker.h,v 1.31 2004/04/15 00:26:14 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -140,7 +140,7 @@ class StMuDstMaker : public StMaker {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.30 2004/04/09 22:03:47 subhasis Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.31 2004/04/15 00:26:14 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -234,7 +234,8 @@ private:
   void fillDetectorStates(StEvent* ev);
   void fillL3AlgorithmInfo(StEvent* ev);
   void fillTof(StEvent* ev);
-
+  void fillHddr();
+  
   template <class T, class U> int addType(TClonesArray* tcaTo  , U &u, T *t);
   template <class T>          int addType(TClonesArray* tcaFrom, TClonesArray* &tcaTo ,T *t);
   template <class T>          int addType(TClonesArray* tcaTo  , T &t);
@@ -316,6 +317,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.31  2004/04/15 00:26:14  perev
+ * fillHddr() added to fill time stamp ...
+ *
  * Revision 1.30  2004/04/09 22:03:47  subhasis
  * after tof createevent fix by Xin
  *
