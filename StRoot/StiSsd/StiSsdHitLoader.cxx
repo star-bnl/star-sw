@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include "StEvent.h"
+#include "StMcEvent.hh"
 #include "StEventTypes.h"
 #include "StDbUtilities/StGlobalCoordinate.hh"
 #include "Sti/Base/Factory.h"
@@ -11,13 +12,14 @@
 #include "StiSsd/StiSsdHitLoader.h"
 
 StiSsdHitLoader::StiSsdHitLoader()
-  : StiHitLoader<StEvent,StiDetectorBuilder>("SsdHitLoader")
+  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("SsdHitLoader")
 {}
     
 StiSsdHitLoader::StiSsdHitLoader(StiHitContainer* hitContainer,
+				 StiHitContainer* mcHitContainer,
 				 Factory<StiHit>*hitFactory,
 				 StiDetectorBuilder*transform)
-  : StiHitLoader<StEvent,StiDetectorBuilder>("SsdHitLoader",hitContainer,hitFactory,transform)
+  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("SsdHitLoader",hitContainer,mcHitContainer,hitFactory,transform)
 {}
 
 StiSsdHitLoader::~StiSsdHitLoader()
@@ -71,3 +73,6 @@ void StiSsdHitLoader::operator() (const StSsdHit* ssdhit, StiHit* stiHit)
 {
   // needs an implementation
 }
+
+void StiSsdHitLoader::loadMcHits(StMcEvent* source)
+{}

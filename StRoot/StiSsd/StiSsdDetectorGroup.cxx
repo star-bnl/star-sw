@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 StiSsdDetectorGroup::StiSsdDetectorGroup(bool active)
-  : StiDetectorGroup<StEvent>("SSD",
+  : StiDetectorGroup<StEvent,StMcEvent>("SSD",
 			      active?new StiSsdHitLoader():0,
 			      new StiSsdDetectorBuilder(),0,0)
 {}
