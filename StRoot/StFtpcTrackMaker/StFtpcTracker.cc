@@ -1,5 +1,10 @@
-// $Id: StFtpcTracker.cc,v 1.23 2002/10/31 13:41:46 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.24 2002/11/06 13:47:11 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.24  2002/11/06 13:47:11  oldi
+// Vertex handling simplifed.
+// Global/primary fit handling simplified.
+// Code clean ups.
+//
 // Revision 1.23  2002/10/31 13:41:46  oldi
 // dE/dx parameters read from database, now.
 // Vertex estimation for different sectors added.
@@ -149,14 +154,14 @@ StFtpcTracker::StFtpcTracker()
   mHit    = 0;
   mTrack  = 0;
 
-  mHitsCreated = (Bool_t)false;
-  mVertexCreated = (Bool_t)false;
+  mHitsCreated = (Bool_t)kFALSE;
+  mVertexCreated = (Bool_t)kFALSE;
 
   mMaxDca = 100.;
 }
 
 
-StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[6], Bool_t bench, Double_t max_Dca)
+StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, StFtpcVertex *vertex, Bool_t bench, Double_t max_Dca)
 {
   // Usual used constructor.
   // Sets up the pointers and the cut value for the momentum fit.
@@ -167,22 +172,23 @@ StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[6],
 
   mTime = 0.;
 
-  mHitsCreated = (Bool_t)false;
+  mHitsCreated = (Bool_t)kFALSE;
   mMaxDca = max_Dca;
   mTrack = new TObjArray(2000);
 
   Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
-  if(vertexPos == 0) {
+  if(vertex == 0) {
     mVertex = new StFtpcVertex(point_st, n_clusters);
+    mVertexCreated = (Bool_t)kTRUE;
   }
   
   else {
-    mVertex = new StFtpcVertex(vertexPos);
+    mVertex = vertex;
+    mVertexCreated = (Bool_t)kFALSE;
   }
 
-  mVertexCreated = (Bool_t)true;
 
   mVertexEast = new StFtpcVertex();
   mVertexWest = new StFtpcVertex();
@@ -200,13 +206,13 @@ StFtpcTracker::StFtpcTracker(TObjArray *hits, StFtpcVertex *vertex, Bool_t bench
   mTime = 0.;
 
   mHit = hits;
-  mHitsCreated = (Bool_t)false;
+  mHitsCreated = (Bool_t)kFALSE;
 
   mMaxDca = max_Dca;
   mTrack = new TObjArray(2000);
 
   mVertex = vertex;
-  mVertexCreated = (Bool_t)false;
+  mVertexCreated = (Bool_t)kFALSE;
 }
 
 
@@ -222,8 +228,8 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TObjArray *hit, TObjArray *tr
 
   mVertex = vertex;
   mHit = hit;
-  mHitsCreated = (Bool_t) false;
-  mVertexCreated = (Bool_t) false;
+  mHitsCreated = (Bool_t) kFALSE;
+  mVertexCreated = (Bool_t) kFALSE;
   mTrack = track;
   mMaxDca = max_Dca;
 
@@ -243,14 +249,14 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, 
   mTime = 0.;
 
   mVertex = vertex;
-  mVertexCreated = (Bool_t)false;
+  mVertexCreated = (Bool_t)kFALSE;
 
   // Copy clusters into ObjArray.
   Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
   mHit = new TObjArray(n_clusters);    // create TObjArray
-  mHitsCreated = (Bool_t)true;
+  mHitsCreated = (Bool_t)kTRUE;
 
   {for (Int_t i = 0; i < n_clusters; i++) {
     mHit->AddAt(new StFtpcPoint(point_st++), i);
@@ -366,8 +372,8 @@ StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphe
 
 
 StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere,
-					   Float_t lowAngle, Float_t highAngle,
-					   Float_t lowRadius, Float_t highRadius, 
+					   Double_t lowAngle, Double_t highAngle,
+					   Double_t lowRadius, Double_t highRadius, 
 					   UChar_t iterations)
 {
   // Vertex estimation with fit tracks for different areas.
@@ -766,7 +772,7 @@ void StFtpcTracker::Sorter(Double_t *arr, Int_t *index, Int_t len)
 
 
 
-Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t id_start_vertex)
+Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_t primary_fit)
 {
   // Writes tracks to STAF table.
   // This function is no longer used. Everything is done now in FitAnddEdexAndWrite().
@@ -784,8 +790,8 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t id_sta
     
     for (Int_t i=0; i<num_tracks; i++) {
       track = (StFtpcTrack *)mTrack->At(i);
-      track->Fit(mVertex, mMaxDca, id_start_vertex);
-      track->WriteTrack(&(trackTable[i]), id_start_vertex);
+      track->Fit(mVertex, mMaxDca, primary_fit);
+      track->WriteTrack(&(trackTable[i]), mVertex);
     }
    
     trackTableWrapper->SetNRows(num_tracks);
@@ -809,7 +815,7 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t id_sta
 }
 
 
-Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t id_start_vertex)
+Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_t primary_fit)
 {
   // Calculates the momentum fit, the dE/dx, and writes the tracks to their STAF table, finally.
     
@@ -870,7 +876,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t
     for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), StFtpcTrackingParams::Instance()->MaxTrack()); itrk++) {
       all_hit = 0;       
       track = (StFtpcTrack*)mTrack->At(itrk);
-      track->Fit(mVertex, mMaxDca, id_start_vertex);
+      track->Fit(mVertex, mMaxDca, primary_fit);
 
       // we accumulate all the charges inside the sensitive volume
       for (icluster = 0; icluster < track->GetNumberOfPoints(); icluster++) {
@@ -959,7 +965,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t
       if (StFtpcTrackingParams::Instance()->IdMethod() != 1) { 
 	// calculations done, write track
 	// if id_method == 1 the calculations go on and the track is writtem later
-	track->WriteTrack(&(trackTable[itrk]), id_start_vertex);
+	track->WriteTrack(&(trackTable[itrk]), mVertex);
       }
     
       itrk_ok++;
@@ -1112,7 +1118,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t
 	//cout << track->GetdEdx() << " " << track->GetNumdEdxHits() << endl;
 
 	// write track
-	track->WriteTrack(&(trackTable[itrk]), id_start_vertex);
+	track->WriteTrack(&(trackTable[itrk]), mVertex);
       }
     
       delete[] weighted;
