@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.33 1999/03/04 02:26:04 fisyak Exp $
+// $Id: StChain.cxx,v 1.34 1999/03/10 14:26:48 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.34  1999/03/10 14:26:48  fisyak
+// Clean up for SL99c
+//
 // Revision 1.33  1999/03/04 02:26:04  fisyak
 // Add read Chain
 //
@@ -301,7 +304,7 @@ StChain::StChain()
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title):
-m_VersionCVS("$Id: StChain.cxx,v 1.33 1999/03/04 02:26:04 fisyak Exp $"),
+m_VersionCVS("$Id: StChain.cxx,v 1.34 1999/03/10 14:26:48 fisyak Exp $"),
 m_VersionTag("$Name:  $"),
 m_DateTime(),
 mProcessTime()
@@ -458,7 +461,6 @@ Int_t StChain::Init()
    while ((maker = (StMaker*)next())) {
      // save last created histogram in current Root directory
       objlast = gDirectory->GetList()->Last();
-
      // Initialise maker
       maker->StartTimer();
       St_DataSet *makerset = maker->DataSet();
@@ -468,6 +470,7 @@ Int_t StChain::Init()
         makerset = new St_DataSet(name);
         maker->SetDataSet(makerset);
       }
+      
       if ( maker->Init()) {
          maker->StopTimer();
          return kStErr;
@@ -520,7 +523,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.33 1999/03/04 02:26:04 fisyak Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.34 1999/03/10 14:26:48 fisyak Exp $    \n");
    printf("* The chain was tagged with $Name:  $                \n");
    printf("**************************************************************\n");
 //     Print info for all defined Makers

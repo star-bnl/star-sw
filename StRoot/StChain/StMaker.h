@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.13 1999/02/27 20:13:46 fine Exp $
+// $Id: StMaker.h,v 1.14 1999/03/10 14:26:49 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.14  1999/03/10 14:26:49  fisyak
+// Clean up for SL99c
+//
 // Revision 1.13  1999/02/27 20:13:46  fine
 // Total job time and relative time have been introduced
 //
@@ -94,7 +97,7 @@ public:
    virtual void   FillClone();
    virtual Int_t  IsToSave(){return m_Save;}
    virtual Int_t  Make() = 0;
-   virtual void   MakeDoc(const TString &stardir="$(afs)/rhic/star/packages/dev",const TString &outdir="$(star)/StRoot/html");
+   virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html");
    virtual TTree *MakeTree(const char* name="", const char*title="");
    virtual void   PrintInfo();
    virtual void   MakeBranch();
