@@ -33,8 +33,6 @@ sub TableH {
   print OUT "{\n";
   print OUT "protected:\n";
   print OUT "  static St_tableDescriptor *fgColDescriptors;\n";
-  print OUT "  virtual St_tableDescriptor *GetRowDescriptors() const { return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());}\n";
-  print OUT "  virtual void  SetRowDescriptors(St_tableDescriptor *list) { fgColDescriptors = list;}\n";
   print OUT "  virtual St_tableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;}\n";
   print OUT "  virtual void SetDescriptorPointer(St_tableDescriptor *list) const { fgColDescriptors = list;}\n";
   print OUT "public:\n";
