@@ -1,0 +1,1264 @@
+%!PS-Adobe-1.0 EPSF-1.0
+%%BoundingBox: 45 470 400 745  
+%%EndComments
+%%BeginProlog
+% This copyright applies to everything between here and the %%EndProlog:
+% Copyright (C) 1996 Aladdin Enterprises, Menlo Park, CA.  All rights reserved.
+mark				
+/currentglobal { false }
+%%/setglobal { pop }
+/packedarray { array astore readonly }
+/setcmykcolor
+{ 1 exch sub
+4 -1 roll 1 exch sub 1 index mul
+4 -1 roll 1 exch sub 2 index mul
+4 -2 roll exch 1 exch sub mul
+setrgbcolor
+}
+/.copydict
+{ dup 3 -1 roll { put dup } forall pop }
+/.dicttomark
+{ counttomark 2 idiv dup dict begin { def } repeat pop currentdict end }
+/.knownget
+{ 2 copy known { get true } { pop pop false } ifelse }
+counttomark 2 idiv
+{ 1 index where { pop pop pop } { bind executeonly def } ifelse
+} repeat pop
+currentglobal true setglobal
+systemdict /pdfmark known not
+{ userdict /pdfmark { cleartomark } bind put } if
+userdict /GS_PDF_ProcSet 119 dict dup begin
+/bdef { bind def } bind def
+/numargsdict 100 dict def
+/!		
+{ //numargsdict 3 index 3 -1 roll put def
+} bdef
+/~		
+{ exch cvx 1 packedarray cvx exch !
+} bdef
+/nodict 1 dict def
+nodict /self { //nodict } executeonly put
+nodict readonly pop
+/beginpage
+{ //nodict 20 dict .copydict begin graphicsbeginpage textbeginpage
+} bdef
+/endpage
+{ showpage end
+} bdef
+/graphicsbeginpage { } bdef
+/gput		
+{ exch currentdict //nodict eq { /self dup load end 5 dict begin def } if
+currentdict length currentdict maxlength ge 
+{ currentdict dup length 3 mul 2 idiv 1 add dict .copydict end begin 
+}
+if def
+} bdef
+/q_
+{ gsave //nodict begin
+} bdef
+/q /q_ load 0 !
+/Q_
+{ currentdict /self .knownget { exec //nodict eq { end grestore } if } if
+} bdef
+/Q /Q_ load 0 !
+/d /setdash 2 ~
+/i /setflat 1 ~
+/j /setlinejoin 1 ~
+/J /setlinecap 1 ~
+/M /setmiterlimit 1 ~
+/w /setlinewidth 1 ~
+/fcput		
+{ /FillColorSpace gput /FillColor gput
+} bdef
+/scput		
+{ /StrokeColorSpace gput /StrokeColor gput
+} bdef
+/csdevgray [/DeviceGray] readonly def
+/csdevrgb [/DeviceRGB] readonly def
+/csdevcmyk [/DeviceCMYK] readonly def
+/CSdict 11 dict dup begin
+/DeviceGray { 0 exch } bdef
+/DeviceRGB { [0 0 0] cvx exch } bdef
+/DeviceCMYK { [0 0 0 1] cvx exch } bdef
+/Indexed
+{ dup 1 get csset exch pop
+dup 2 index 1 get eq
+{ pop }
+{ exch 4 array copy dup 1 4 -1 roll put }
+ifelse 0 exch
+} bdef
+/setcolorrendering where
+{ pop
+/CalGray
+{ 1 get dup /Gamma .knownget
+{ dup length 1 add dict .copydict
+dup /DecodeA 4 -1 roll /exp load 2 packedarray cvx put
+}
+if /CIEBasedA exch 2 array astore 0 exch
+} bdef
+/CalRGB
+{ 1 get dup /Gamma known 1 index /Matrix known or
+{ dup length 2 add dict .copydict
+dup /Matrix .knownget { 1 index /MatrixABC 3 -1 roll put } if
+dup /Gamma .knownget
+{ [ exch { /exp load 2 packedarray cvx } forall
+] 1 index /DecodeABC 3 -1 roll put
+}
+if
+}
+if /CIEBasedABC exch 2 array astore [0 0 0] cvx exch
+} bdef
+/CalCMYK { pop //csdevcmyk csset } bdef	
+}
+{ /CalGray { pop //csdevgray csset } bdef
+/CalRGB { pop //csdevrgb csset } bdef
+/CalCMYK { pop //csdevcmyk csset } bdef
+}
+ifelse
+end def
+/csset			
+{ dup dup type /nametype ne { 0 get } if //CSdict exch get exec
+} bdef
+/g { //csdevgray fcput } 1 !
+/G { //csdevgray scput } 1 !
+/rg { 3 array astore cvx //csdevrgb fcput } 3 !
+/RG { 3 array astore cvx //csdevrgb scput } 3 !
+/k { 4 array astore cvx //csdevcmyk fcput } 4 !
+/K { 4 array astore cvx //csdevcmyk scput } 4 !
+/cs { csset fcput } 1 !
+/CS { csset scput } 1 !
+/sc1 { /FillColor gput } 1 !
+/SC1 { /StrokeColor gput } 1 !
+/sc3 { /FillColor load astore pop } 3 !
+/SC3 { /StrokeColor load astore pop } 3 !
+/sc4 { /FillColor load astore pop } 4 !
+/SC4 { /StrokeColor load astore pop } 4 !
+/setfillcolor { FillColor FillColorSpace setgcolor } def
+/setstrokecolor { StrokeColor StrokeColorSpace setgcolor } def
+/CIdict mark			
+/DeviceGray 1   /DeviceRGB 3   /DeviceCMYK 4
+/CIEBaseA 1   /CIEBaseABC 3   /CIEBasedDEF 3   /CIEBaseDEFG 4
+.dicttomark def
+/Cdict 11 dict dup begin	
+/DeviceGray { pop setgray } bdef
+/DeviceRGB { pop setrgbcolor } bdef
+/DeviceCMYK { pop setcmykcolor } bdef
+/CIEBasedA
+{ dup currentcolorspace eq { pop } { setcolorspace } ifelse setcolor } bdef
+/CIEBasedABC /CIEBasedA load def
+/CIEBasedDEF /CIEBasedA load def
+/CIEBasedDEFG /CIEBasedA load def
+/Indexed /setcolorspace where
+{ pop /CIEBasedA load }
+{ /setindexedcolor cvx }
+ifelse def
+end def
+/setindexedcolor		
+{ mark 3 -1 roll
+2 index 3 get	
+dup type /stringtype eq
+{ //CIdict 4 index 1 get 0 get get		
+dup 4 -1 roll mul exch getinterval { 255 div } forall
+}
+{ exec
+}
+ifelse
+counttomark 2 add -2 roll pop
+1 get setgcolor
+} bdef
+/setgcolor	
+{ 1 index null eq
+{ pop pop }
+{ dup 0 get //Cdict exch get exec }
+ifelse
+} bdef
+/fsexec		
+{		
+{ currentpoint } stopped
+{ $error /newerror false put   cvx exec }
+{ 3 -1 roll cvx exec moveto }
+ifelse
+} bdef
+/cmmatrix matrix def
+/cm { //cmmatrix astore concat } 6 !
+/m /moveto 2 ~
+/l /lineto 2 ~
+/c /curveto 6 ~
+/h /closepath 0 ~
+/v { currentpoint 6 2 roll curveto } 4 !
+/y { 2 copy curveto } 4 !
+/re
+{ 4 2 roll moveto  exch dup 0 rlineto  0 3 -1 roll rlineto  neg 0 rlineto
+closepath
+} 4 !
+/S_ { setstrokecolor /stroke fsexec } bdef
+/S { S_ } 0 !
+/f { setfillcolor /fill fsexec } 0 !
+/f* { setfillcolor /eofill fsexec } 0 !
+/n_ { newpath } bdef		
+/n { n_ } 0 !
+/s { closepath S_ } 0 !
+/B_ { gsave setfillcolor fill grestore S_ } bdef
+/B /B_ load 0 !
+/b { closepath B_ } 0 !
+/B*_ { gsave setfillcolor eofill grestore S_ } bdef
+/B* /B*_ load 0 !
+/b* { closepath B*_ } 0 !
+/Wdict 4 dict dup begin
+/S_ { gsave setstrokecolor stroke grestore n_ } bdef
+/f { gsave setfillcolor fill grestore n_ } 0 !
+/f* { gsave setfillcolor eofill grestore n_ } 0 !
+/n_ { end clip newpath } bdef
+end readonly def
+/W { //Wdict begin } 0 !
+/W*dict 4 dict dup begin
+/S_ { gsave setstrokecolor stroke grestore n_ } bdef
+/f { gsave setfillcolor fill grestore n_ } 0 !
+/f* { gsave setfillcolor eofill grestore n_ } 0 !
+/n_ { end eoclip newpath } bdef
+end readonly def
+/W* { //W*dict begin } 0 !
+/Is		
+{ dup /DataSource get string /readstring cvx /currentfile cvx
+3 index /FilterProc .knownget
+{ dup dup 0 get /ASCIIHexDecode eq exch length 2 eq and
+{ pop exch pop /readhexstring cvx exch }
+{ exch exec exch exec }
+ifelse
+}
+if 3 1 roll /pop cvx 4 packedarray cvx
+} bdef
+/EI { } def	
+/csimage
+{ /setcolorspace where
+{ pop dup /ColorSpace get csset setcolorspace pop image }
+{ .colorspaceimage }
+ifelse
+} def		
+/ID	
+{ Is dup 3 -1 roll dup /ImageMask get
+{ setfillcolor dup /Interpolate .knownget not { false } if
+{ dup /DataSource 4 -1 roll put /imagemask cvx exec
+}
+{  { /Width /Height /Decode /ImageMatrix }
+{ 1 index exch get exch }
+forall pop exch 0 get 0 ne exch
+5 -1 roll imagemask
+}
+ifelse
+}
+{ dup /ColorSpace get /DeviceGray eq
+1 index /BitsPerComponent get 8 le and
+1 index /Decode get dup 1 get 1 eq exch 0 get 0 eq and and
+1 index /Interpolate .knownget not { false } if not and
+{  { /Width /Height /BitsPerComponent /ImageMatrix }
+{ 1 index exch get exch }
+forall pop 5 -1 roll image
+}
+{ dup /DataSource 4 -1 roll put csimage
+}
+ifelse
+}
+ifelse
+dup type /filetype ne		
+{ dup 2 get /readhexstring eq
+{  { dup 0 get exec read pop (>) 0 get eq { exit } if } loop
+}
+if pop
+}
+{ pop
+}
+ifelse EI
+} 1 !
+/IDx	
+{ Is 1 index /DataSource 3 -1 roll put
+csimage EI
+} 1 !
+/textbeginpage
+{ /TextSpacing 0 def		
+/TextLeading 0 def		
+/TextRenderingMode 0 def	
+/TextRise 0 def		
+/WordSpacing 0 def		
+/TextHScaling 1.0 def	
+/TextFont null def
+/Show { showfirst } def
+} bdef
+/settextmatrix
+{ TextMatrix concat
+TextHScaling 1 ne { TextHScaling 1 scale } if
+TextRise 0 ne { 0 TextRise translate } if
+} bdef
+/settextstate { TextSaveMatrix setmatrix settextmatrix } bdef
+/BT
+{ currentdict /TextMatrix .knownget
+{ identmatrix pop }
+{ matrix /TextMatrix gput }
+ifelse
+currentdict /TextOrigin .knownget
+{ dup 0 0 put 1 0 put }
+{ [0 0] cvx /TextOrigin gput }
+ifelse
+{ showfirst } /Show gput
+currentdict /TextSaveMatrix .knownget not
+{ matrix dup /TextSaveMatrix gput }
+if currentmatrix pop settextmatrix 0 0 moveto
+TextFont dup null eq { pop } { setfont } ifelse
+} bind 0 !
+/ET
+{ TextSaveMatrix setmatrix
+} bind 0 !
+/Tc_ { /TextSpacing gput { showfirst } /Show gput } bdef
+/Tc { Tc_ } 1 !
+/TL { /TextLeading gput } bind 1 !
+/Tr { /TextRenderingMode gput { showfirst } /Show gput } bind 1 !
+/Ts { /TextRise gput settextstate } bind 1 !
+/Tw_ { /WordSpacing gput { showfirst } /Show gput } bdef
+/Tw { Tw_ } 1 !
+/Tz { 100 div /TextHScaling gput settextstate } bind 1 !
+/Tf		
+{ dup 1 eq { pop } { scalefont } ifelse
+dup setfont /TextFont gput
+} 2 !
+/.copyfontdict		
+{ 1 index /FID known
+1 index { 2 index /UniqueID known or 2 index /XUID known or } if
+{		
+exch dup length 1 add dict exch
+{		
+1 index /FID eq 4 index
+{ 2 index /UniqueID eq or 2 index /XUID eq or }
+if not { 3 copy put } if pop pop
+}
+forall exch
+}
+if pop
+} bdef
+/.updatefont		
+{ 2 index 4 1 roll
+dup null ne
+{ 3 -1 roll true .copyfontdict dup /Metrics 4 -1 roll put exch }
+{ pop }
+ifelse
+dup null ne 1 index 3 index /Encoding get ne and
+{ exch false .copyfontdict dup /Encoding 4 -1 roll put }
+{ pop }
+ifelse exch 1 index ne
+} bdef
+/Td_
+{ TextOrigin exch 4 -1 roll add 3 1 roll add
+2 copy /TextOrigin load astore pop moveto
+} bdef
+/Td { Td_ } 2 !
+/TD { dup neg /TextLeading gput Td_ } 2 !
+/T*_ { 0 TextLeading neg Td_ } bdef
+/T* { T*_ } 0 !
+/Tm
+{ TextMatrix astore pop settextstate
+0 0 /TextOrigin load astore pop
+0 0 moveto
+} 6 !
+/textrenderingprocs [		
+{ tf } { tS } { tB } { tn }
+4 copy
+] readonly def
+/setshowstate
+{ WordSpacing 0 eq TextSpacing 0 eq and
+{ TextRenderingMode 0 eq
+{ { setfillcolor show } }
+{ { false charpath textrenderingprocs TextRenderingMode get exec } }
+ifelse
+}
+{ TextRenderingMode 0 eq
+{ WordSpacing 0 eq
+{ { setfillcolor TextSpacing exch 0 exch ashow } }
+{ TextSpacing 0 eq
+{ { setfillcolor WordSpacing exch 0 exch 32 exch widthshow } }
+{ { setfillcolor WordSpacing exch TextSpacing exch 0 32 4 2 roll 0 exch awidthshow } }
+ifelse
+}
+ifelse
+}
+{ { WordSpacing TextSpacing 2 index
+0 1 2 index length 1 sub
+{ 2 copy 1 getinterval false charpath
+4 copy get 32 eq { add } { exch pop } ifelse 0 rmoveto
+pop
+}
+for pop pop pop pop
+textrenderingprocs TextRenderingMode get exec
+}
+}
+ifelse
+}
+ifelse /Show gput
+} bdef
+/showfirst { setshowstate Show } def
+/Tj { Show } 1 !
+/' { T*_ Show } 1 !
+/" { exch Tc_ exch Tw_ T*_ Show } 3 !
+/TJ
+{ counttomark -1 1
+{ -1 roll dup type /stringtype eq
+{ Show }
+{ neg 1000 div 0 rmoveto }
+ifelse
+}
+for pop
+} ([) cvn !
+/tf { setfillcolor currentpoint fill moveto } bdef
+/tn { currentpoint newpath moveto } bdef
+/Tmatrix matrix def
+/tS
+{ setstrokecolor
+currentpoint //Tmatrix currentmatrix TextSaveMatrix setmatrix stroke
+setmatrix moveto
+} bdef
+/tB { gsave tf grestore tS } bdef
+end readonly put		
+setglobal
+%%EndProlog
+%%Page: 1 1
+GS_PDF_ProcSet begin
+beginpage
+0 g
+0 G
+1 1 0.8 rg
+51.36 564.48 72 25.44 re
+f
+0.24 w
+1 J
+1 j
+0.6 0 0.2 RG
+51.12 564.48 72.24 25.68 re
+S
+BT
+56.88 579.6 TD
+0 0 0 rg
+/Helvetica findfont [/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/.notdef
+/space
+/exclam
+/quotedbl
+/numbersign
+/dollar
+/percent
+/ampersand
+/quotesingle
+/parenleft
+/parenright
+/asterisk
+/plus
+/comma
+/minus
+/period
+/slash
+/zero
+/one
+/two
+/three
+/four
+/five
+/six
+/seven
+/eight
+/nine
+/colon
+/semicolon
+/less
+/equal
+/greater
+/question
+/at
+/A
+/B
+/C
+/D
+/E
+/F
+/G
+/H
+/I
+/J
+/K
+/L
+/M
+/N
+/O
+/P
+/Q
+/R
+/S
+/T
+/U
+/V
+/W
+/X
+/Y
+/Z
+/bracketleft
+/backslash
+/bracketright
+/asciicircum
+/underscore
+/grave
+/a
+/b
+/c
+/d
+/e
+/f
+/g
+/h
+/i
+/j
+/k
+/l
+/m
+/n
+/o
+/p
+/q
+/r
+/s
+/t
+/u
+/v
+/w
+/x
+/y
+/z
+/braceleft
+/bar
+/braceright
+/asciitilde
+/bullet
+/bullet
+/bullet
+/quotesinglbase
+/florin
+/quotedblbase
+/ellipsis
+/dagger
+/daggerdbl
+/circumflex
+/perthousand
+/Scaron
+/guilsinglleft
+/OE
+/bullet
+/bullet
+/bullet
+/bullet
+/quoteleft
+/quoteright
+/quotedblleft
+/quotedblright
+/bullet
+/endash
+/emdash
+/tilde
+/trademark
+/scaron
+/guilsinglright
+/oe
+/bullet
+/bullet
+/Ydieresis
+/space
+/exclamdown
+/cent
+/sterling
+/currency
+/yen
+/brokenbar
+/section
+/dieresis
+/copyright
+/ordfeminine
+/guillemotleft
+/logicalnot
+/hyphen
+/registered
+/macron
+/degree
+/plusminus
+/twosuperior
+/threesuperior
+/acute
+/mu
+/paragraph
+/periodcentered
+/cedilla
+/onesuperior
+/ordmasculine
+/guillemotright
+/onequarter
+/onehalf
+/threequarters
+/questiondown
+/Agrave
+/Aacute
+/Acircumflex
+/Atilde
+/Adieresis
+/Aring
+/AE
+/Ccedilla
+/Egrave
+/Eacute
+/Ecircumflex
+/Edieresis
+/Igrave
+/Iacute
+/Icircumflex
+/Idieresis
+/Eth
+/Ntilde
+/Ograve
+/Oacute
+/Ocircumflex
+/Otilde
+/Odieresis
+/multiply
+/Oslash
+/Ugrave
+/Uacute
+/Ucircumflex
+/Udieresis
+/Yacute
+/Thorn
+/germandbls
+/agrave
+/aacute
+/acircumflex
+/atilde
+/adieresis
+/aring
+/ae
+/ccedilla
+/egrave
+/eacute
+/ecircumflex
+/edieresis
+/igrave
+/iacute
+/icircumflex
+/idieresis
+/eth
+/ntilde
+/ograve
+/oacute
+/ocircumflex
+/otilde
+/odieresis
+/divide
+/oslash
+/ugrave
+/uacute
+/ucircumflex
+/udieresis
+/yacute
+/thorn
+/ydieresis] mark /hyphen 324
+/macron 540
+/degree 405
+/plusminus 540
+/twosuperior 324
+/threesuperior 324
+/acute 324
+/mu 567
+/paragraph 540
+/periodcentered 270
+/cedilla 324
+/onesuperior 324
+/ordmasculine 378
+/guillemotright 567
+/onequarter 837
+/onehalf 837
+/threequarters 837
+/questiondown 621
+/Agrave 675
+/Aacute 675
+/Acircumflex 675
+/Atilde 675
+/Adieresis 675
+/Aring 675
+/AE 1000
+/Ccedilla 729
+/Egrave 675
+/Edieresis 675
+/Iacute 243
+/Idieresis 243
+/Odieresis 783
+/Oslash 783
+/Ugrave 729
+/Ucircumflex 729
+/Yacute 621
+/germandbls 621
+/aring 540
+/ae 891
+/egrave 540
+/Ntilde 729
+/agrave 540
+/ecircumflex 540
+/igrave 243
+/icircumflex 243
+/oacute 567
+/otilde 567
+/divide 540
+/oslash 621
+/uacute 567
+/Oacute 783
+/acircumflex 540
+/Ydieresis 594
+/eth 567
+/udieresis 567
+/thorn 567
+/.notdef 270
+/Otilde 783
+/adieresis 540
+/ograve 567
+/Ecircumflex 675
+/multiply 594
+/ccedilla 513
+/Scaron 594
+/ocircumflex 567
+/Igrave 243
+/Uacute 729
+/eacute 540
+/scaron 594
+/odieresis 567
+/Icircumflex 243
+/Udieresis 729
+/edieresis 540
+/ugrave 567
+/Eth 729
+/Thorn 675
+/iacute 243
+/ucircumflex 567
+/copyright 729
+/Ograve 783
+/aacute 540
+/trademark 594
+/idieresis 243
+/yacute 459
+/Ocircumflex 783
+/atilde 540
+/ntilde 567
+/ydieresis 459
+/Eacute 675
+/dollar 567
+/one 567
+/greater 594
+/exclamdown 297
+/L 567
+/Y 621
+/f 270
+/s 486
+/perthousand 594
+/ampersand 675
+/three 567
+/at 1027
+/oe 594
+/A 675
+/N 729
+/grave 324
+/h 567
+/u 567
+/endash 594
+/parenleft 324
+/five 567
+/backslash 270
+/emdash 594
+/C 729
+/P 675
+/daggerdbl 594
+/j 243
+/w 729
+/circumflex 594
+/asterisk 378
+/seven 567
+/asciicircum 459
+/sterling 567
+/E 675
+/R 729
+/yen 567
+/l 189
+/y 459
+/brokenbar 243
+/comma 270
+/nine 567
+/quoteleft 594
+/quotesingle 189
+/G 783
+/T 621
+/a 540
+/n 567
+/quotesinglbase 594
+/exclam 297
+/period 270
+/semicolon 270
+/bar 243
+/section 567
+/I 243
+/V 675
+/c 513
+/p 567
+/quotedblright 594
+/numbersign 567
+/zero 567
+/equal 594
+/asciitilde 594
+/guilsinglright 594
+/K 675
+/X 675
+/e 540
+/r 324
+/ellipsis 594
+/percent 891
+/two 567
+/question 567
+/cent 567
+/ordfeminine 378
+/M 837
+/Z 621
+/g 567
+/t 270
+/guillemotleft 567
+/quoteright 594
+/four 567
+/bracketleft 270
+/registered 729
+/B 675
+/O 783
+/dagger 594
+/minus 324
+/i 189
+/v 459
+/parenright 324
+/six 567
+/bracketright 270
+/florin 594
+/D 729
+/Q 783
+/tilde 594
+/k 513
+/x 459
+/logicalnot 594
+/plus 594
+/eight 567
+/underscore 567
+/currency 567
+/F 621
+/S 675
+/bullet 756
+/m 837
+/z 486
+/space 270
+/OE 594
+/colon 270
+/braceleft 324
+/quotedblleft 594
+/H 729
+/U 729
+/b 567
+/o 567
+/quotedblbase 594
+/quotedbl 351
+/slash 270
+/less 594
+/braceright 324
+/guilsinglleft 594
+/J 513
+/W 1027
+/d 567
+/q 567
+/dieresis 324
+.dicttomark userdict /_49 2 index put .updatefont { /_ exch definefont } if
+ userdict /_50 2 index put 8.88 Tf
+0.0043 Tc
+0 Tw
+(StVecPtrTpcHit) Tj
+ET
+51.12 564.48 72.24 12.24 re
+S
+51.12 564.48 72.24 7.2 re
+S
+1 1 0.8 rg
+50.64 474.96 68.16 25.44 re
+f
+50.4 474.96 68.4 25.68 re
+S
+BT
+55.68 490.08 TD
+0 0 0 rg
+0.0041 Tc
+(StVecPtrSvtHit) Tj
+ET
+50.4 474.96 68.4 12.24 re
+S
+50.4 474.96 68.4 7.2 re
+S
+1 1 0.8 rg
+50.64 522.48 73.44 25.44 re
+f
+50.4 522.48 73.68 25.68 re
+S
+BT
+55.68 537.6 TD
+0 0 0 rg
+0.0042 Tc
+(StVecPtrFtpcHit) Tj
+ET
+50.4 522.48 73.68 12.24 re
+S
+50.4 522.48 73.68 7.2 re
+S
+1 1 0.8 rg
+325.44 552.48 42.72 25.44 re
+f
+325.2 552.48 42.96 25.68 re
+S
+BT
+332.4 567.6 TD
+0 0 0 rg
+0.0048 Tc
+(StDedx) Tj
+ET
+325.2 552.48 42.96 12.24 re
+S
+325.2 552.48 42.96 7.2 re
+S
+1 1 0.8 rg
+61.44 675.84 45.12 25.44 re
+f
+61.2 675.84 45.36 25.68 re
+S
+BT
+67.2 690.96 TD
+0 0 0 rg
+0.0042 Tc
+(StVertex) Tj
+ET
+61.2 675.84 45.36 12.24 re
+S
+61.2 675.84 45.36 7.2 re
+S
+1 1 0.8 rg
+170.64 609.36 67.2 25.44 re
+f
+0 0 0 RG
+170.4 609.36 67.44 25.68 re
+S
+BT
+176.16 624.48 TD
+0 0 0 rg
+0.0043 Tc
+(StGlobalTrack) Tj
+ET
+170.4 609.36 67.44 12.24 re
+S
+170.4 609.36 67.44 7.2 re
+S
+0.6 0 0.2 RG
+145.2 600 m
+120.48 590.4 l
+S
+0 0 0 RG
+120.48 590.4 m
+129.84 590.16 l
+S
+120.48 590.4 m
+127.44 596.88 l
+S
+0.6 0 0.2 RG
+145.2 600 m
+170.16 609.6 l
+S
+170.16 609.6 m
+165.36 603.84 l
+158.16 605.04 l
+162.96 610.56 l
+170.16 609.6 l
+h
+b*
+144 555.12 m
+96 500.88 l
+S
+0 0 0 RG
+96 500.88 m
+104.4 504.96 l
+S
+96 500.88 m
+99.12 509.76 l
+S
+0.6 0 0.2 RG
+144 555.12 m
+192.24 609.12 l
+S
+192.24 609.12 m
+190.56 601.92 l
+183.6 599.52 l
+185.28 606.72 l
+192.24 609.12 l
+h
+b*
+145.2 578.88 m
+104.16 548.4 l
+S
+0 0 0 RG
+104.16 548.4 m
+113.28 550.56 l
+S
+104.16 548.4 m
+108.96 556.32 l
+S
+0.6 0 0.2 RG
+145.2 578.88 m
+186.24 609.12 l
+S
+186.24 609.12 m
+183.12 602.4 l
+175.92 601.44 l
+178.8 608.16 l
+186.24 609.12 l
+h
+b*
+280.8 591.6 m
+324.96 574.08 l
+S
+0 0 0 RG
+324.96 574.08 m
+318.48 580.56 l
+S
+324.96 574.08 m
+315.6 573.84 l
+S
+0.6 0 0.2 RG
+280.8 591.6 m
+236.64 609.12 l
+S
+1 1 1 rg
+236.64 609.12 m
+244.08 610.08 l
+248.64 604.32 l
+241.2 603.36 l
+236.64 609.12 l
+h
+b*
+280.8 591.6 m
+324.96 574.08 l
+S
+0 0 0 RG
+324.96 574.08 m
+318.48 580.56 l
+S
+324.96 574.08 m
+315.6 573.84 l
+S
+0.6 0 0.2 RG
+280.8 591.6 m
+236.64 609.12 l
+S
+236.64 609.12 m
+244.08 610.08 l
+248.64 604.32 l
+241.2 603.36 l
+236.64 609.12 l
+h
+b*
+143.76 655.68 m
+180.96 635.28 l
+S
+0 0 0 RG
+180.96 635.28 m
+174.96 642.48 l
+S
+180.96 635.28 m
+171.6 636.24 l
+S
+0.6 0 0.2 RG
+143.76 655.68 m
+106.8 676.08 l
+S
+106.8 676.08 m
+114.24 676.08 l
+118.08 669.84 l
+110.88 669.84 l
+106.8 676.08 l
+h
+b*
+1 1 0.8 rg
+320.4 675.84 73.44 25.44 re
+f
+320.16 675.84 73.68 25.68 re
+S
+BT
+326.16 690.96 TD
+0 0 0 rg
+0.0039 Tc
+(StTrackFitTraits) Tj
+ET
+320.16 675.84 73.68 12.24 re
+S
+320.16 675.84 73.68 7.2 re
+S
+1 1 0.8 rg
+181.2 714.24 43.2 25.44 re
+f
+180.96 714.24 43.44 25.68 re
+S
+BT
+187.44 729.36 TD
+0 0 0 rg
+0.0044 Tc
+(StTrack) Tj
+ET
+180.96 714.24 43.44 12.24 re
+S
+180.96 714.24 43.44 7.2 re
+S
+204 635.28 m
+202.8 714 l
+S
+1 1 1 rg
+202.8 714 m
+208.32 699.6 l
+197.76 699.6 l
+h
+b*
+143.76 708.24 m
+106.8 696.24 l
+S
+0 0 0 RG
+106.8 696.24 m
+116.16 695.52 l
+S
+106.8 696.24 m
+113.76 702.24 l
+S
+0.6 0 0.2 RG
+143.76 708.24 m
+180.72 720 l
+S
+180.72 720 m
+175.68 714.72 l
+168.48 716.16 l
+173.52 721.44 l
+180.72 720 l
+h
+b*
+143.76 708.24 m
+106.8 696.24 l
+S
+0 0 0 RG
+106.8 696.24 m
+116.16 695.52 l
+S
+106.8 696.24 m
+113.76 702.24 l
+S
+0.6 0 0.2 RG
+143.76 708.24 m
+180.72 720 l
+S
+180.72 720 m
+175.68 714.72 l
+168.48 716.16 l
+173.52 721.44 l
+180.72 720 l
+h
+b*
+272.16 709.92 m
+319.92 697.92 l
+S
+0 0 0 RG
+319.92 697.92 m
+312.48 703.68 l
+S
+319.92 697.92 m
+310.56 696.48 l
+S
+0.6 0 0.2 RG
+272.16 709.92 m
+224.64 721.68 l
+S
+0 0 0 rg
+224.64 721.68 m
+231.84 723.84 l
+237.12 718.56 l
+229.92 716.64 l
+224.64 721.68 l
+h
+b*
+1 1 0.8 rg
+318.24 711.36 72 25.44 re
+f
+318 711.36 72.24 25.68 re
+S
+BT
+324.48 726.48 TD
+0 0 0 rg
+0.004 Tc
+(StPhysicalHelix) Tj
+ET
+318 711.36 72.24 12.24 re
+S
+318 711.36 72.24 7.2 re
+S
+271.2 725.76 m
+317.76 724.8 l
+S
+0 0 0 RG
+317.76 724.8 m
+309.12 728.64 l
+S
+317.76 724.8 m
+309.12 721.44 l
+S
+0.6 0 0.2 RG
+271.2 725.76 m
+224.64 726.72 l
+S
+224.64 726.72 m
+231.12 730.08 l
+237.6 726.48 l
+231.12 722.88 l
+224.64 726.72 l
+h
+b*
+endpage
+end
+%%Trailer
+%%Pages: 1
