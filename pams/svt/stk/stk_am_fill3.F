@@ -1134,16 +1134,17 @@ c            write(889,*) ' considering track for storage:',itrack+1
                      n_groups = n_groups + 1
                      if( n_groups .gt. groups_h.maxlen) then
                         write(6,*)'Too many groups', n_groups
-                        k = 7
                         done(1)   = .true.
                         done(2)   = .true.
                         done(3)   = .true.
                         done(4)   = .true.
                         done(5)   = .true.
                         done(6)   = .true.
+                        goto 117
                      endif
                   end if
                end do
+ 117           continue
             end if
          end if 
          
