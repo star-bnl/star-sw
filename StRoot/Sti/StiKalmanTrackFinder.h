@@ -48,7 +48,6 @@ public:
   virtual void findTracks(); 
   /// Find/extend the given track, in the given direction
           bool find(StiTrack *track, int direction);
-          int  find(StiKalmanTrack *track, int direction,StiKalmanTrackNode *node,double &chi2sum);
   /// Find the next track 
   virtual StiTrack * findTrack(); 
   /// Extent all tracks to the given vertex
@@ -81,7 +80,12 @@ public:
   StiKalmanTrackFinderParameters  _pars;
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
-  
+private:
+class QAFind;
+  void find(StiKalmanTrack *track, int direction,StiKalmanTrackNode *node,QAFind &qa);
+  void nodeQA(StiKalmanTrackNode *node, int position,int active,QAFind &qa);
+  int  compQA(QAFind &qaBest,QAFind &qaTry);
+ 
  protected:
 
     void printState();
