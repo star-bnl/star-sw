@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.22 2000/06/20 01:43:36 fisyak Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.23 2000/06/24 19:13:27 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.23  2000/06/24 19:13:27  ward
+// added SetMinMaxTimeBucket(int lo,int hi) for Dave H.
+//
 // Revision 1.22  2000/06/20 01:43:36  fisyak
 // Change calibrations => Calibrations to match with MySQL Db
 //
@@ -107,6 +110,7 @@ typedef struct {
 class St_tpcdaq_Maker : public StMaker {
  private:
    Char_t            *gConfig; //!
+   char               alreadySet; //!
    char               mErr; //!
    StTpcRawDataEvent *mEvent; //!
    void MakeHistograms();
@@ -130,6 +134,7 @@ class St_tpcdaq_Maker : public StMaker {
    TH1F *m_pad_numSeq;         // Happy sailing.
    TH1F *m_pix_AdcValue;       //
  public: 
+   void SetMinMaxTimeBucket(int lo,int hi);
    St_tpcdaq_Maker(const char *name="tpc_raw",char *daqInputFile="undefined"); // If
        // the 2nd arg (daqInputFile) is NULL, then we use TRS.
    
@@ -178,7 +183,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.22 2000/06/20 01:43:36 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.23 2000/06/24 19:13:27 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };

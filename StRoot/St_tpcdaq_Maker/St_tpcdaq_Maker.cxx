@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.53  2000/06/24 19:13:27  ward
+// added SetMinMaxTimeBucket(int lo,int hi) for Dave H.
+//
 // Revision 1.52  2000/06/20 01:43:35  fisyak
 // Change calibrations => Calibrations to match with MySQL Db
 //
@@ -188,6 +191,7 @@ int gSector;
 St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),gConfig(daqOrTrs)
 {
   printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
+  alreadySet=0; // FALSE
 }
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 }
@@ -470,14 +474,25 @@ void St_tpcdaq_Maker::SetNoiseEliminationStuff() {
       noiseElim[sector].pad[i]=noise[sector].pad[i];
     }
 
-    noiseElim[sector].nbin=noise[sector].nbin;
-    assert(noise[sector].nbin<=3); // Limit (3) is in both the St_tpcdaq_Maker.h and StDb/idl/noiseElim.idl.
-    for(i=0;i<noise[sector].nbin;i++) {
-      noiseElim[sector].low[i]=noise[sector].low[i];
-      noiseElim[sector].up[i]=noise[sector].up[i];
+    if(!alreadySet) {
+      noiseElim[sector].nbin=noise[sector].nbin;
+      assert(noise[sector].nbin<=3); // Limit (3) is in both the St_tpcdaq_Maker.h and StDb/idl/noiseElim.idl.
+      for(i=0;i<noise[sector].nbin;i++) {
+        noiseElim[sector].low[i]=noise[sector].low[i];
+        noiseElim[sector].up[i]=noise[sector].up[i];
+      }
     }
 
-
+  }
+}
+void St_tpcdaq_Maker::SetMinMaxTimeBucket(int lo,int hi) {
+  int sector;
+  assert(lo<=hi);
+  alreadySet=7; // TRUE
+  for(sector=0;sector<24;sector++) {
+    noiseElim[sector].nbin=1;
+    noiseElim[sector].low[0]=lo-1;
+    noiseElim[sector].up [0]=hi+1;
   }
 }
 void St_tpcdaq_Maker::WriteStructToScreenAndExit() {
