@@ -1,3 +1,4 @@
+//#define __NOVMC__
 #include "StiVMCToolKit.h"
 #ifdef __ROOT__
 #include "StMaker.h"
