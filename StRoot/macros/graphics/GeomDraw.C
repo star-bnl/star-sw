@@ -27,7 +27,7 @@ void GeomDrawUsage() {
           printf(" To get the OpenGL view one has to\n");
           printf("    1. Turn Qt ROOT Layer on (see: http://www.rhic.bnl.gov/~fine/EventDisplay \n");
           printf("    2. Select \"OpenGL view\" from the \"View\" menu of ROOT TCanvas \n");                
-          printf("\n$Id: GeomDraw.C,v 1.5 2004/07/23 20:48:40 fine Exp $\n");
+          printf("\n$Id: GeomDraw.C,v 1.6 2004/08/06 22:11:37 fine Exp $\n");
 }                 
 //_____________________________________________________________________________________________________________
 void GeomDraw(const char *fzFile="complete")
@@ -62,18 +62,33 @@ void GeomDraw(const char *fzFile="complete")
   geant = new St_geant_Maker();
   geant->SetActive(kFALSE);
   if (! geomAccess.IsNull() ) {
+     printf("\n ----------------------------------------------------------\n");
      printf(" Draw the GEANT geometry from <%s> file\n", geomAccess.Data());
+     printf(" ----------------------------------------------------------\n\n");
      geant->SetInputFile(geomAccess.Data());
   } else {
-       printf(" Draw the GEANT generated geometry <%s> \n", geomKuipCmd.Data());
-       gSystem->Load("geometry");
-       geant->LoadGeometry(geomKuipCmd.Data());            
+     printf("\n ----------------------------------------------------------\n");
+     printf(" Draw the GEANT generated geometry <%s> \n", geomKuipCmd.Data());
+     printf(" ----------------------------------------------------------\n\n");
+     gSystem->Load("geometry");
+     geant->LoadGeometry(geomKuipCmd.Data());            
   }
   chain->Init();
   TVolume *v = (TVolume *)geant->Work();
-  new TBrowser("STAR Geometry", v);
-  v->Draw();
-  GeomDrawUsage();
-  gPad->Modified();
-  gPad->Update();
+  if (v) {
+     // Make CAVE invisible
+     TVolume *cave = (TVolume *)v->FindByName("CAVE");
+     if (cave) cave->SetVisibility(2);
+     TVolume *hall = (TVolume *)v->FindByName("HALL");
+     GeomDrawUsage();
+     if (hall) {
+        hall->SetVisibility(2);
+        new TBrowser("STAR Geometry", hall);
+        hall->Draw("4");
+    }
+    gPad->Modified();
+    gPad->Update();
+  } else {
+     fprintf(stderr,"\n\n, ** Error **, No suitable STAR geonmetry has been found. Abort !!! \n");   
+  }
 }
