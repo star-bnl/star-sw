@@ -13,9 +13,11 @@ DEFINES=
 ROOTCFLAGS    = $(shell root-config --cflags) 
 ROOTLIBS      = $(shell root-config --libs) -lNew
 #
+ifndef IN_PANITKIN
 LINK   = LinkDef.h
 DICT   = Dict_$(LIBNAME)
 SRCS  += $(DICT).cxx
+endif
 OBJS   = $(notdir $(patsubst %.cxx,%.o,$(SRCS)))
 
 #
@@ -28,8 +30,10 @@ all:	$(LIBNAME)
 #	-rm  $(LINK) $(DICT).*	
 
 $(LIBNAME): $(OBJS)
-	$(CXX) $(LDFLAGS) $^ -o lib$(LIBNAME).so
 	$(AR)  lib$(LIBNAME).a $^
+ifndef IN_PANITKIN
+	$(CXX) $(LDFLAGS) $^ -o lib$(LIBNAME).so
+endif
 
 clean:
 	-rm -f *.o $(LINK) $(DICT).* lib$(LIBNAME).* 
