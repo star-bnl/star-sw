@@ -44,8 +44,14 @@ data_node* StiDetectorTreeBuilder::build(StiObjectFactoryInterface<StiDetectorNo
     mdetfactory = detfactory;
     buildRoot();
     loopOnDetectors();
+    
+    //Now sort the tree:
     SortDaughters<data_t> mysorter;
     mysorter(mregion);
+
+    //Now index the tree to give efficient sibling traversal
+    IndexDaughters<data_t> myindexer;
+    myindexer(mregion);
     
     return mroot;
 }
@@ -67,21 +73,31 @@ void StiDetectorTreeBuilder::buildRoot()
 void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
 {
     //Where do we hang in radius?
-    StiOrderKey_t radius = layer->getPlacement()->getLayerRadius();
+    StiOrderKey radius;
+    radius.key = layer->getPlacement()->getLayerRadius();
     string radstring = "_radius";
     data_node* radialnode = hangWhere(mregion, radius, radstring);
 
     //Where do we hang in phi?
-    StiOrderKey_t refAngle = layer->getPlacement()->getCenterRefAngle();
+    StiOrderKey refAngle;
+    refAngle.key = layer->getPlacement()->getCenterRefAngle();
     string phistring = "_refAngle";
     data_node* phinode = hangWhere(radialnode, refAngle, phistring);
+
+    //Maintain the relationship between these two.
+    //It's not so elegant to have the Detector know about the node that it's stored on, but
+    //it's fast way to get from the detector to the node, and it allows the project to be
+    //generally independent of the tree-node, ie, the tracker only has to know about
+    //StiDetector objects.
+    //So, we put the extra layer of coupling in StiDetector, not Tracke, SeedFinder, etc...
     phinode->setData(layer);
+    layer->setTreeNode(phinode);
 }
 
 // Starting with the given parent, use the ordering key of the given type
 // to determine where the new detector should be hung.
 data_node* StiDetectorTreeBuilder::hangWhere(
-    data_node* parent, StiOrderKey_t order, string& keystring)
+    data_node* parent, const StiOrderKey& order, string& keystring)
 {
     SameOrderKey<data_t> mySameOrderKey;
     mySameOrderKey.morderKey = order;
@@ -90,9 +106,10 @@ data_node* StiDetectorTreeBuilder::hangWhere(
                                             mySameOrderKey);
 
     if (where == parent->end()) {
+	//cout <<"hangWhere().  Start new node"<<endl;
 	data_node* temp = mnodefactory->getObject();
 	char* tempname = new char[100];
-	sprintf(tempname,"_%f", order);
+	sprintf(tempname,"_%f", order.key);
 	keystring.append(tempname);
 	string newname = parent->getName();
 	newname.append(keystring);

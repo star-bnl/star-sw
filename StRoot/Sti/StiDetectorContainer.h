@@ -139,6 +139,8 @@ public:
     
 private:
 
+    bool setPhi(const StiOrderKey& oldOrder);
+    
     // Utility function for moveIn(), moveOut() functions
     bool setPhiIterator(double oldOrder, unsigned int oldNDaughters,
 			data_node_vec::difference_type oldDistance);

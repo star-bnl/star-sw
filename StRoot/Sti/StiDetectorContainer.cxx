@@ -12,6 +12,7 @@
 #include <algorithm>
 using std::find_if;
 using std::for_each;
+using std::binary_search;
 
 //Sti
 #include "Messenger.h"
@@ -62,7 +63,9 @@ StiDetectorContainer::~StiDetectorContainer()
 
 void StiDetectorContainer::setToDetector(double radius)
 {
-    mradial_it = gFindClosestOrderKey(mregion->begin(), mregion->end(), radius);
+    StiOrderKey theKey;
+    theKey.key = radius;
+    mradial_it = gFindClosestOrderKey(mregion->begin(), mregion->end(), theKey);
     if (mphi_it == mregion->end()) {
 	mMessenger <<"StiDetectorContainer::setToDetector(double)\tError:\t";
 	mMessenger <<"Find radius failed"<<endl;
@@ -81,8 +84,10 @@ void StiDetectorContainer::setToDetector(double radius, double angle)
     setToDetector(radius);
     
     //Now set the phi
+    StiOrderKey theKey;
+    theKey.key=angle;
     mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
-				   (*mradial_it)->end(), angle);
+				   (*mradial_it)->end(), theKey);
     if (mphi_it == (*mradial_it)->end()) {
 	mMessenger <<"StiDetectorContainer::setToDetector(double, double)\tError:\t";
 	mMessenger <<"Find Phi failed"<<endl;
@@ -97,27 +102,13 @@ void StiDetectorContainer::setToDetector(double radius, double angle)
 */
 void StiDetectorContainer::setToDetector(const StiDetector* layer)
 {
-    SameData<data_t> mySameData;
-    mySameData.thedata = layer;
 
-    data_node_vec::const_iterator where = find_if(mLeafIt->const_begin(),
-						  mLeafIt->const_end(),
-						  mySameData);
-    if (where==mLeafIt->const_end()) {
-	mMessenger <<"\t\t!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
-	mMessenger <<"StiDetectorContainer::setToDetector(StiDetector*)\tError:\t";
-	//mMessenger <<"layer not found in leaves.  Seg-fault"<<endl;
-	//mMessenger <<"\tlayer:\t"<<(*layer)<<"\n"<<endl;
-	mMessenger <<"\t\t!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"<<endl;
-	//StiDetector* dummy=0;
-	//dummy->isOn(); //This ought to cause a seg-fault!
-	
-	reset();
+    if (!layer->getTreeNode()) {
+	cout <<"StiDetectorContainer::setToDetector(StiDetector*). ERROR:\t"
+	     <<"Detector has null node pointer.  Abort"<<endl;
 	return;
     }
-    else {
-	setToLeaf(*where);
-    }
+    setToLeaf( layer->getTreeNode() );
 }
 
 /*! A call to reset simply sets the pointer to the default StiDetector object.
@@ -151,86 +142,41 @@ StiDetector* StiDetectorContainer::operator*() const
 bool StiDetectorContainer::moveIn()
 {
     if (mradial_it == mregion->begin() ) {
-	mMessenger <<"StiDetecotrContainer::moveIn()\tNowhere to go"<<endl;
+	// cout <<"StiDetectorContainer::moveIn():\t";
+	// cout <<"Nowhere to go. return false"<<endl;
 	return false;
     }
-
+    
     //remember where we started:
-    double oldOrder = (*mphi_it)->getOrderKey();
-    data_node_vec::const_iterator oldRadialIt = mradial_it;
-    data_node_vec::const_iterator oldPhiIt = mphi_it;
+    const data_node* oldPhiNode = *mphi_it;
     
-    unsigned int oldNDaughters = (*mradial_it)->getChildCount();
-    data_node_vec::difference_type oldDistance = mphi_it-(*mradial_it)->begin();
-    
-    //Only select layers that are active
-    bool go=true;
-    
-    while (mradial_it>mregion->begin() && go) {
-	--mradial_it;
-	
-	//look for active layer by first detector
-	StiDetector* temp = (*(*mradial_it)->begin())->getData();
-	if (!temp) {
-	    cout <<"StiDetectorContainer::moveIn()\tError:\t";
-	    cout <<"No detector on first phi-node.  Return false"<<endl;
-	    return false;
-	}
-	//break the loop if "isOn"
-	if (temp->isOn()) {
-	    mMessenger <<"StiDetectorContainer::moveIn().  Layer "
-		       <<temp->getName()<<" is on.  Stop here"<<endl;
-	    go=false;
-	}
-	else {
-	    mMessenger <<"StiDetectorContainer::moveIn().  Layer "
-		       <<temp->getName()<<" is off.  Continue"<<endl;
-	}
+    --mradial_it;
+    mphi_it = (*mradial_it)->begin();
+
+    if ( (*mradial_it)->getChildCount() == oldPhiNode->getParent()->getChildCount()) {
+	// cout <<"Index into array"<<endl;
+	mphi_it = (*mradial_it)->begin()+oldPhiNode->getOrderKey().index;
+	return true;
     }
-	
-    //see if we failed:
-    if (go) {
-	//cout <<"StiDetectorContainer::moveIn().  No active layer found."<<endl;
-	mMessenger <<"StiDetectorContainer::moveIn().  No active layer found."<<endl;
-	mradial_it = oldRadialIt;
-	mphi_it = oldPhiIt;
+    else {
+	// cout <<"Do linear search"<<endl;
+	return setPhi( oldPhiNode->getOrderKey() );
+    }
+}
+
+bool StiDetectorContainer::setPhi(const StiOrderKey& oldOrder)
+{
+    mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
+				   (*mradial_it)->end(), oldOrder);
+    if (mphi_it == (*mradial_it)->end()) {
+	cout <<"StiDetectorContainer::setPhiIterator()\tError:\t";
+	cout <<"Find Phi failed"<<endl;
+	reset();
 	return false;
     }
-    else {
-	return setPhiIterator(oldOrder, oldNDaughters, oldDistance);
-    }    
+    //cout <<"setPhi(): oldOrder: "<<oldOrder<<"\tnewOrder: "<<(*mphi_it)->getOrderKey()<<endl;
+    return true;
 }
-
-bool StiDetectorContainer::setPhiIterator(double oldOrder, unsigned int oldNDaughters,
-					  data_node_vec::difference_type oldDistance)
-{
-    //Check to see if this layer has the same symmetry (number of children) as the last
-    if (0) {
-	//if ( (*mradial_it)->getChildCount()==oldNDaughters) {
-	//just index into the vector
-	mMessenger <<"StiDetectorContainer::setPhiIterator()\t"
-		   <<"Index into the vector to fix phi iterator"<<endl;
-	mphi_it = (*mradial_it)->begin()+oldDistance;
-	return true;
-    }
-    else {
-	//Have to do a search
-	mMessenger <<"StiDetectorContainer::setPhiIterator()\t"
-		   <<"Do linear search to fix phi iterator"<<endl;
-	mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
-				       (*mradial_it)->end(), oldOrder);
-	if (mphi_it == (*mradial_it)->end()) {
-	    cout <<"StiDetectorContainer::setPhiIterator()\tError:\t";
-	    cout <<"Find Phi failed"<<endl;
-	    mMessenger <<"StiDetectorContainer::setPhiIterator()\tError:\t";
-	    mMessenger <<"Find Phi failed"<<endl;
-	    mphi_it = (*mradial_it)->begin();
-	    return false;
-	}
-	return true;
-    }
-}
-
 
 /*! A call to moveOut() may not always alter the StiDetector to which the
   container points.  Notably, if there is nowhere else to 'move out to', then
@@ -250,58 +196,24 @@ bool StiDetectorContainer::moveOut()
     //if there's nowher to go, get out before doing work!
     // mMessenger <<"StiDetectorContainer::moveOut()"<<endl;
     if ( (++mradial_it<mregion->end())==false) {
-	//cout <<"StiDetectorContainer::moveOut():\t";
-	//cout <<"Nowhere to go. return false"<<endl;
-	mMessenger <<"StiDetectorContainer::moveOut():\t";
-	mMessenger <<"Nowhere to go"<<endl;
+	// cout <<"StiDetectorContainer::moveOut():\t";
+	// cout <<"Nowhere to go. return false"<<endl;
 	--mradial_it;
 	return false;
     }
     
+    ++mradial_it;
     //remember where we started:
-    double oldOrder = (*mphi_it)->getOrderKey();
-    data_node_vec::const_iterator oldRadialIt = mradial_it;
-    data_node_vec::const_iterator oldPhiIt = mphi_it;
+    const data_node* oldPhiNode = *mphi_it;
     
-    unsigned int oldNDaughters = (*mradial_it)->getChildCount();
-    data_node_vec::difference_type oldDistance = mphi_it-(*mradial_it)->begin();
-
-    bool go=true;
-    
-    while ( (mradial_it<mregion->end())==true && go) {
-
-	mMessenger <<"StiDetectorContainer::moveOut(). \t"
-		   <<"entered radial search loop";
-    
-	//look for active layer by first detector
-	StiDetector* temp = (*(*mradial_it)->begin())->getData();
-	if (!temp) {
-	    cout <<"StiDetectorContainer::moveIn()\tError:\t";
-	    cout <<"No detector on first phi-node"<<endl;
-	    return false;
-	}
-	//break the loop if "isOn"
-	if (temp->isOn()) {
-	    mMessenger <<"StiDetectorContainer::moveOut().  Layer "
-		       <<temp->getName()<<" is on.  Stop here"<<endl;
-	    go=false;
-	}
-	else {
-	    mMessenger <<"StiDetectorContainer::moveOut().  Layer "
-		       <<temp->getName()<<" is off.  Continue"<<endl;
-	    ++mradial_it;
-	}
-    }
-    
-    //see if we failed:
-    if (go) {
-	mradial_it = oldRadialIt;
-	mphi_it = oldPhiIt;
-	// cout <<"StiDetectorContainer::moveOut().  Loop failed.  Return false"<<endl;
-	return false;
+    if ( (*mradial_it)->getChildCount() == oldPhiNode->getParent()->getChildCount()) {
+	// cout <<"Index into array"<<endl;
+	mphi_it = (*mradial_it)->begin()+oldPhiNode->getOrderKey().index;
+	return true;
     }
     else {
-	return setPhiIterator(oldOrder, oldNDaughters, oldDistance);
+	// cout <<"Do linear search"<<endl;
+	return setPhi( oldPhiNode->getOrderKey() );
     }
 }
 
@@ -352,7 +264,10 @@ StiDetectorContainer::buildDetectors(StiObjectFactoryInterface<StiDetectorNode>*
     }
     //Find leaves
     mLeafIt = new StiCompositeLeafIterator<data_t>(mroot);
-
+    
+    //Sort by name for O(log(n)) calls to setDetector()
+    //sort(mLeafIt->begin(), mLeafIt->end(), DataNameLessThan<data_t>() );
+    
     mregion = (*where);
     reset();
 
@@ -363,30 +278,35 @@ StiDetectorContainer::buildDetectors(StiObjectFactoryInterface<StiDetectorNode>*
 
 void StiDetectorContainer::print() const
 {
-    mMessenger <<"\nStiDetectorContainer::print()  Det"<<endl;
-    mMessenger <<"--- Leaves ----"<<endl;
+    //ok, let's look at what we have:
+    RecursiveStreamNode<data_t> myStreamer;
+    myStreamer( mroot );
 
-    for_each(mLeafIt->const_begin(), mLeafIt->const_end(), StreamNodeName<StiDetector>() );
 }
 
 //We assume that the node is a leaf in phi
-void StiDetectorContainer::setToLeaf(data_node* node)
+void StiDetectorContainer::setToLeaf(data_node* leaf)
 {
-    //mMessenger <<"StiDetectorContainer::setToLeaf()"<<endl;
-    data_node* parent_in_phi = node->getParent();
-    mphi_it = find(parent_in_phi->begin(), parent_in_phi->end(), node);
-    if (mphi_it == parent_in_phi->end() ) {
-	mMessenger <<"StiDetectorContainer::setToLeaf()\tError!\t";
-	mMessenger <<"parent in phi iterator not found"<<endl;
+    //Now we try the new index-iterator scheme:
+    mphi_it = leaf->whereInParent();
+    if (mphi_it == leaf->end()) {
+	cout <<"StiDetectorContainer::setToLeaf(data_node*). ERROR:\t"
+	     <<"Node not found in parent.  Abort"<<endl;
+	reset();
 	return;
     }
-    //Find where we are in radial ordering
-    data_node* parent_in_radius = parent_in_phi->getParent();
-    mradial_it = find(parent_in_radius->begin(), parent_in_radius->end(), parent_in_phi);
-    if (mradial_it == parent_in_radius->end() ) {
-	mMessenger <<"StiDetectorContainer::setToLeaf()\tError!\t";
-	mMessenger <<"parent in radius iterator not found"<<endl;
-	return;
-    }
-}
 
+    data_node* parentInRadius = (*mphi_it)->getParent();
+    mradial_it = parentInRadius->whereInParent();
+    if (mradial_it == parentInRadius->end()) {
+	cout <<"StiDetectorContainer::setToLeaf(data_node*). ERROR:\t"
+	     <<"Node not found in parent.  Abort"<<endl;
+	reset();
+	return;
+    }
+    
+    //cout <<"\nleaf: "<<leaf->getName()<<" "<<leaf->getOrderKey()<<endl;
+    //cout <<"*mradial_it: "<<(*mradial_it)->getName()<<" "<<(*mradial_it)->getOrderKey()<<endl;
+    //cout <<"*mphi_it: "<<(*mphi_it)->getName()<<" "<<(*mphi_it)->getOrderKey()<<endl;
+
+}
