@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.87 1999/03/03 03:52:09 perev Exp $
+# $Id: MakePam.mk,v 1.88 1999/03/04 00:18:26 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.88  1999/03/04 00:18:26  fisyak
+# Add svt library for global
+#
 # Revision 1.87  1999/03/03 03:52:09  perev
 # Add additional sort to mechanism ln -s .so
 #
@@ -469,6 +472,9 @@ $(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
 	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def 
 ifndef NT
 #$(LIB_PKG)($(notdir $(FILES_OG)): $(OBJ_DIR)/%.o:%.g $(GEN_DIR)/geant3.def
+$(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
+	$(CP) $(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
+	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
 $(LIB_PKG)(%.o):%.g $(GEN_DIR)/geant3.def
 	cp $(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o

@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.68 1999/03/03 03:53:14 perev Exp $
+# $Id: MakeDll.mk,v 1.69 1999/03/04 00:18:26 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.69  1999/03/04 00:18:26  fisyak
+# Add svt library for global
+#
 # Revision 1.68  1999/03/03 03:53:14  perev
 # Add additional sort to mechanism ln -s .so
 #
@@ -137,6 +140,9 @@ ifndef SO_LIB
     ifeq ($(SRC_DIR),$(GEN_DIR))
       SO_LIB := $(LIB_DIR)/St_$(PKG).$(SOEXT)
       LIBRARY := $(wildcard $(LIB_DIR)/lib$(PKG).a $(STAR_LIB)/lib$(PKG).a)
+      ifneq (,$(findstring $(PKG),global))
+        LIBRARY += $(wildcard $(LIB_DIR)/libsvt.a $(STAR_LIB)/libsvt.a)
+      endif
     endif
   endif
 endif

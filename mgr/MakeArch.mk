@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.63  1999/03/04 00:18:25  fisyak
+#  Add svt library for global
+#
 #  Revision 1.62  1999/02/25 22:24:39  fisyak
 #  Add ROOTCINTD flag
 #
@@ -164,7 +167,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/02/25 22:24:39 $ 
+#             Last modification $Date: 1999/03/04 00:18:25 $ 
 #. default setings
 
 MAKE  := gmake
@@ -490,6 +493,7 @@ endif
 ##FLIBS     := /opt/fortran/lib/libU77.a /opt/langtools/lib/end.o
   FLIBS     := /opt/fortran/lib/libU77.a 
   FFLAGS    := $(DEBUG) +DA1.0 +ppu +Z  +U77 -K
+#  FFLAGS    := $(DEBUG) +DA1.0 +ppu +Z  +U77
   FEXTEND   := +es
 endif
 
@@ -564,6 +568,10 @@ ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   STRID :=  sun
   CC :=  /opt/SUNWspro/bin/cc
   CXX := /opt/SUNWspro/bin/CC
+  ifneq (,$(findstring $(STAR_SYS),CC5))
+    CC :=  /opt/WS5.0/bin/cc
+    CXX := /opt/WS5.0/bin/CC
+  endif
   ifdef INSURE
     CC       :=  insure -g -Zoi "compiler_c cc"
     CXX      :=  insure -g -Zoi "compiler_cpp CC"
@@ -575,7 +583,9 @@ ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   LD  := $(CXX)
   SO  := $(CXX)
   FC  := /opt/SUNWspro/bin/f77
-
+  ifneq (,$(findstring $(STAR_SYS),CC5))
+    FC  := /opt/WS5.0/bin/f77
+  endif
   FFLAGS   :=  $(DEBUG)  -KPIC -w 
   FEXTEND  :=  -e
   CFLAGS   :=  $(DEBUG)  -KPIC 
@@ -584,6 +594,9 @@ ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   EXEFLAGS :=  $(DEBUG)  -z muldefs -Bdynamic -t 
   SOFLAGS  :=  $(DEBUG) -G
   CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
+  ifneq (,$(findstring $(STAR_SYS),CC5))
+    CLIBS    := -L/opt/WS5.0/lib -L/opt/WS5.0/SC5.0/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
+  endif
   FLIBS    := -lM77 -lF77 -lsunmath
 endif
 
