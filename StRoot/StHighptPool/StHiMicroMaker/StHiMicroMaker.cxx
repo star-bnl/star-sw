@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiMicroMaker.cxx,v 1.3 2002/04/03 00:37:41 jklay Exp $                                      
+ * $Id: StHiMicroMaker.cxx,v 1.4 2002/05/31 21:50:14 jklay Exp $                                      
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiMicroMaker.cxx,v $
+ * Revision 1.4  2002/05/31 21:50:14  jklay
+ * Fixed the way centrality is calculated, see README
+ *
  * Revision 1.3  2002/04/03 00:37:41  jklay
  * Fixed some bugs, added new version of dcaz
  *
@@ -29,20 +32,18 @@
 #include "TRandom.h"
 
 #include "StHighptPool/StHiMicroEvent/StHiMicroEvent.h"
-//#include "StHiMicroEvent/StHiMicroTrack.h"
+#include "Helper.h"
 
 #include "StIOMaker/StIOMaker.h"
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
 #include "StEventTypes.h"
 #include "StMessMgr.h"
-#include "StIOMaker/StIOMaker.h"
 #include "SystemOfUnits.h" // tesla...
 #include "StTpcDedxPidAlgorithm.h"
 #include "StuProbabilityPidAlgorithm.h"
 #include "StPhysicalHelixD.hh"
 #include "StuRefMult.hh"
-#include "Helper.h"
 #define PR(x) cout << "##### StHiMicroMaker: " << (#x) << " = " << (x) << endl;
 
 
@@ -98,28 +99,13 @@ StHiMicroMaker::Init()
 
     cout << "###StHiMicroMaker::Init():\n";
 
-    char* set = (mDebug) ? "ON" : "OFF";
+    const char* set = (mDebug) ? "ON" : "OFF";
     cout << "\tDebug is " << set << endl;
 
+   //Pretty much moved everything that was here to InitRun(int)
 
-//JLK 26-MAR-2002 - MOVED ALL OF THIS TO INITRUN(int)
-    //
-    // get the initial input file name
-    //
-//    mIOMaker = (StIOMaker*)GetMaker("IO");
-    
-//    if(mIOMaker) mInFileName = strrchr(mIOMaker->GetFile(),'/')+1;
-    
-    //
-    // new StHiMicroEvent created once
-    //
-//    if(mDebug) cout << "##Creating StHiMicroEvent..." << endl;
-//    mHiMicroEvent = new StHiMicroEvent;
+    if(mSaveAllEvents) { cout << "\t<I> Saving event info for events without a primary vertex!!" << endl; }
 
-//    Int_t stat = openFile();
-    
-//    return stat + StMaker::Init();
-    
     return StMaker::Init();
 
 }
@@ -185,40 +171,65 @@ StHiMicroMaker::Make()
   //
   // filter event - if no primary vertex, reject it
   //
-  if (!accept(event)) return kStOK;   
-  mNAcceptedEvent++;
-  
-  // 
-  // fill tracks and hits
-  //
-  Int_t nGoodEta = fillTracks(event);
+  //31.May.2002 - If we keep events without the vertex, we can use vertexZ position
+  //from ZDC timing to assess the vertex finding efficiency - but need to skip track filling and just fill event info
+  if (accept(event)) {   
 
-  //
-  // fill StHiMicroEvent
-  //
-  fillEvent(event,nGoodEta);
+    mNAcceptedEvent++;  
+    // 
+    // fill tracks and hits
+    //
+    //30.May.2002 nGoodEta is no longer used, as there is a common defintion
+    //from StEvent now...
+    Int_t nGoodEta = fillTracks(event);
+    //
+    // fill StHiMicroEvent
+    //
+    //30.May.2002 nGoodEta is no longer used, as there is a common defintion
+    //from StEvent now...
+    fillEvent(event);
+    //
+    // fill the tree
+    //
+    mDSTTree->Fill();
 
-  //
-  // fill the tree
-  //
-  mDSTTree->Fill();
+  } else {
+
+    if(mSaveAllEvents) {  //If we really want them all...
+      fillEvent(event);
+      mDSTTree->Fill();
+    }
+  }
+
   mHiMicroEvent->Clear(); // clears all the clonesarrays
-  
   return kStOK;
 }
 //____________________
 
 void
-StHiMicroMaker::fillEvent(StEvent* stEvent,Int_t nGoodEta)
+StHiMicroMaker::fillEvent(StEvent* stEvent)
 {
-  const StThreeVectorF& prVtxPos = stEvent->primaryVertex()->position();
+  //Set it to some really big value, so it will be cut out by relevant analyses
+//  const StThreeVectorF& prVtxPos(999.,999.,999.);
 
+  if (stEvent->primaryVertex()) {
+    mHiMicroEvent->SetVertexZ(stEvent->primaryVertex()->position().z());
+    mHiMicroEvent->SetVertexX(stEvent->primaryVertex()->position().x());
+    mHiMicroEvent->SetVertexY(stEvent->primaryVertex()->position().y());
+    mHiMicroEvent->SetOriginMult(stEvent->primaryVertex()->numberOfDaughters()); 
+  } else {
+    mHiMicroEvent->SetVertexZ(999.);
+    mHiMicroEvent->SetVertexX(999.);
+    mHiMicroEvent->SetVertexY(999.);
+    mHiMicroEvent->SetOriginMult(0); 
+  }
+    
   // beam stuff
   if(stEvent->runInfo()){
     mHiMicroEvent->SetCenterOfMassEnergy(stEvent->runInfo()->centerOfMassEnergy());
     mHiMicroEvent->SetMagneticField(stEvent->runInfo()->magneticField());
     mHiMicroEvent->SetBeamMassNumberEast(stEvent->runInfo()->beamMassNumber(east));
-    mHiMicroEvent->SetBeamMassNumberEast(stEvent->runInfo()->beamMassNumber(west));
+    mHiMicroEvent->SetBeamMassNumberWest(stEvent->runInfo()->beamMassNumber(west));
   }
   else{
     gMessMgr->Info() << "StHiMicroMaker: no Run Info, reverting to year 1 settings "
@@ -226,15 +237,17 @@ StHiMicroMaker::fillEvent(StEvent* stEvent,Int_t nGoodEta)
     mHiMicroEvent->SetCenterOfMassEnergy(130);
     mHiMicroEvent->SetMagneticField(4.98);
     mHiMicroEvent->SetBeamMassNumberEast(197);
-    mHiMicroEvent->SetBeamMassNumberEast(197);
+    mHiMicroEvent->SetBeamMassNumberWest(197);
   }
 
-  mHiMicroEvent->SetVertexZ(prVtxPos.z());
-  mHiMicroEvent->SetVertexX(prVtxPos.x());
-  mHiMicroEvent->SetVertexY(prVtxPos.y());
-  mHiMicroEvent->SetOriginMult(stEvent->primaryVertex()->numberOfDaughters()); 
-  mHiMicroEvent->SetCentMult(nGoodEta);
-  mHiMicroEvent->SetCentrality(nGoodEta);
+  mHiMicroEvent->SetNUncorrectedNegativePrimaries(uncorrectedNumberOfNegativePrimaries(*stEvent));
+  mHiMicroEvent->SetNUncorrectedPrimaries(uncorrectedNumberOfPrimaries(*stEvent));
+
+  //30.May.2002 - fixed this definition to match the rest of STAR
+  //same as mNuncorrectedNumberOfPrimaries
+  mHiMicroEvent->SetCentMult(mHiMicroEvent->NUncorrectedPrimaries());
+  mHiMicroEvent->SetCentrality(mHiMicroEvent->NUncorrectedPrimaries());
+
   mHiMicroEvent->SetRunId((Int_t) stEvent->runId());
   mHiMicroEvent->SetEventId((Int_t) stEvent->id());
 
@@ -285,15 +298,9 @@ StHiMicroMaker::fillEvent(StEvent* stEvent,Int_t nGoodEta)
     }
   }
   
-  // for simplicity, just loop over all the tracks again to get manuel's number.
-  mHiMicroEvent->SetNUncorrectedNegativePrimaries(uncorrectedNumberOfNegativePrimaries(*stEvent));
-
-  // for simplicity, just loop over all the tracks again to get manuel's number.
-  mHiMicroEvent->SetNUncorrectedPrimaries(uncorrectedNumberOfPrimaries(*stEvent));
-
   // taken from flow maker
   //
-  Float_t ctb  = -1., zdce = -1, zdcw = -1;
+  Float_t ctb  = -1., zdce = -1, zdcw = -1, zdcVertexZ = 999.;
 
   StTriggerDetectorCollection *triggers 
     = stEvent->triggerDetectorCollection();
@@ -309,18 +316,21 @@ StHiMicroMaker::fillEvent(StEvent* stEvent,Int_t nGoodEta)
     //get ZDCe and ZDCw        
     zdce = ZDC.adcSum(east);
     zdcw = ZDC.adcSum(west);
+    zdcVertexZ = ZDC.vertexZ();
   } 
   
   mHiMicroEvent->SetCTB(ctb);
   mHiMicroEvent->SetZDCe(zdce);
   mHiMicroEvent->SetZDCw(zdcw);
+  mHiMicroEvent->SetZDCVertexZ(zdcVertexZ);
   
   cout << "###StHiMicroMaker::fillEvent" << endl;
   cout << "\tvertex z : " << mHiMicroEvent->VertexZ() << endl;
+  cout << "\tZDC vertex z : " << mHiMicroEvent->ZDCVertexZ() << endl;
   cout << "\tmultiplicity : " << mHiMicroEvent->OriginMult() << endl;
-  cout << "\tuncorrrected h- : " << mHiMicroEvent->NUncorrectedNegativePrimaries() 
-	<< endl;	
-  cout << "\tflow centrality : " << mHiMicroEvent->Centrality() << endl;
+  cout << "\tuncorrected h- : " << mHiMicroEvent->NUncorrectedNegativePrimaries() << endl;	
+  cout << "\tuncorrected Nch : " << mHiMicroEvent->NUncorrectedPrimaries() << endl;	
+  cout << "\tNch centrality : " << mHiMicroEvent->Centrality() << endl;
 
 }
 //____________________
@@ -370,6 +380,9 @@ StHiMicroMaker::fillTracks(StEvent* stEvent)
       continue;
     }
 
+    //Okay, fill it but this is no longer used as we can get the
+    //info from Manuel's uncorrectedNumberOfPrimaries(*stEvent)
+    //30.May.2002
     if(acceptCentrality(prTrack)) nGoodTrackEta++;
 
     //
@@ -458,7 +471,7 @@ StHiMicroMaker::fillTracks(StEvent* stEvent)
     hiMicroTrack->SetDipAngleGl(glTrack->geometry()->dipAngle()); 
    
     //
-    // find the sign of the dca	--Could just get this from StEvent now - Jamie added it
+    // find the sign of the dca	--Could just get this from StPhysicalHelix now - Jamie added it
     //
     Float_t dcaXYGl = computeXY(stEvent->primaryVertex()->position(),
 				glTrack);    
@@ -787,10 +800,11 @@ bool StHiMicroMaker::accept(StTrack* track)
 //
 bool StHiMicroMaker::acceptCentrality(StTrack *track)
 {
-  return (track && track->flag() > 0 &&
+  return (track && track->flag() > 0 && track->fitTraits().numberOfFitPoints(kTpcId) >= 10 &&
 	  fabs(track->geometry()->momentum().pseudoRapidity())<.5);
 //Bum's code had 0.75, but for the newest centrality numbers from Zhangbu (Mar-2002), they use 0.5
 
+//JLK 30.May.2002 - just noticed a problem - need to cut on fitpts >= 10 to match Zhangbu's definition!!
 }
 
 //_____________________
