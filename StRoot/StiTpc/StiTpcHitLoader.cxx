@@ -34,7 +34,9 @@ StiTpcHitLoader::StiTpcHitLoader(StiHitContainer* hitContainer,
 StiTpcHitLoader::~StiTpcHitLoader()
 {}
 
-void StiTpcHitLoader::loadHits(StEvent* source)
+void StiTpcHitLoader::loadHits(StEvent* source,
+			       Filter<StiTrack> * trackFilter, 
+			       Filter<StiHit> * hitFilter)
 {
   cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Started" << endl;
   if (!_detector)
@@ -101,7 +103,10 @@ void StiTpcHitLoader::loadHits(StEvent* source)
   cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Done" << endl;
 }
 
-void StiTpcHitLoader::loadMcHits(StMcEvent* source,bool useMcAsRec)
+void StiTpcHitLoader::loadMcHits(StMcEvent* source,
+				 bool useMcAsRec,
+				 Filter<StiTrack> * trackFilter, 
+				 Filter<StiHit> * hitFilter)
 {
   cout << "StiTpcHitLoader::loadMcHits(StEvent*) -I- Started" << endl;
   if (!_detector)
@@ -137,7 +142,7 @@ void StiTpcHitLoader::loadMcHits(StMcEvent* source,bool useMcAsRec)
       mcTrack->reset();
       mcTrack->setStMcTrack( (*iter) );
       double charge = mcTrack->getCharge();
-      if (fabs(eta)<1.5 && pt<20. && pt>0.3 && nPts>30 && charge>0)
+      if (!trackFilter || trackFilter->filter(mcTrack) ) //fabs(eta)<1.5 && pt<20. && pt>0.3 && nPts>30 && charge>0)
 	{      
 	  _mcTrackContainer->add(mcTrack);
 	  nTracks++;

@@ -38,7 +38,10 @@ public:
 		       Detector*transform);
     virtual ~StiMasterHitLoader();
     void addLoader(StiHitLoader<Source1, Source2,Detector>*loader); 
-    void loadEvent(Source1 *source1, Source2 *source2);
+    void loadEvent(Source1 *source1, 
+		   Source2 *source2,
+		   Filter<StiTrack> * trackFilter, 
+		   Filter<StiHit>   * hitFilter);
     void setHitContainer(StiHitContainer* hitContainer);
     void setMcHitContainer(StiHitContainer* hitContainer);
     void setHitFactory(Factory<StiHit>*hitFactory);
@@ -78,7 +81,10 @@ void StiMasterHitLoader<Source1, Source2,Detector>::addLoader(StiHitLoader<Sourc
 }
 
 template<class Source1, class Source2,class Detector>
-void StiMasterHitLoader<Source1, Source2,Detector>::loadEvent(Source1 *source1, Source2 * source2)
+void StiMasterHitLoader<Source1, Source2,Detector>::loadEvent(Source1 *source1, 
+							      Source2 * source2,
+							      Filter<StiTrack> * trackFilter, 
+							      Filter<StiHit>   * hitFilter)
 {
   if(!_hitContainer)
     throw runtime_error("StiMasterHitLoader::loadEvent( ) -F- _hitContainer==0");
@@ -91,7 +97,7 @@ void StiMasterHitLoader<Source1, Source2,Detector>::loadEvent(Source1 *source1, 
     }
   HitLoaderConstIter iter;
   for (iter=begin();iter!=end();iter++)
-    (*iter)->loadEvent(source1,source2); 
+    (*iter)->loadEvent(source1,source2,trackFilter, hitFilter); 
   _hitContainer->sortHits();
   _hitContainer->reset();//declare all hits as unused...
   if (source2)

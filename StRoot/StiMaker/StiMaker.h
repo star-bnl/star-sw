@@ -13,6 +13,8 @@ using std::string;
 class TH1D;
 class StEvent;
 class StMcEvent;
+class StiHit;
+class StiTrack;
 class StiStEventFiller;
 class StiTrackContainer;
 class StiEvaluableTrack;
@@ -30,6 +32,8 @@ class StiTrackingPlots;
 class StiMakerParameters;
 class StiVertexFinder;
 class EventDisplay;
+template<class FILTERED> class EditableFilter;
+
 
 class StiMaker : public StMaker 
 {
@@ -45,7 +49,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.7 2003/04/10 12:10:10 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.8 2003/04/11 16:52:01 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
@@ -73,6 +77,9 @@ private:
     StiTrackingPlots*     _recPlotter;
     StiTrackingPlots*     _mcPlotter;
     EventDisplay *        _eventDisplay;
+    EditableFilter<StiTrack> * _loaderTrackFilter;
+    EditableFilter<StiHit>   * _loaderHitFilter;
+    
     ClassDef(StiMaker, 1)
 };
 

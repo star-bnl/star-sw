@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.12 2003/04/10 14:53:03 pruneau Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.13 2003/04/11 16:51:53 pruneau Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.13  2003/04/11 16:51:53  pruneau
+ * various fixes
+ *
  * Revision 2.12  2003/04/10 14:53:03  pruneau
  * removing obsolete files and classes
  *
@@ -52,6 +55,7 @@
 #include "Sti/StiDetectorFinder.h"
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiTrackSeedFinder.h"
+#include "Sti/StiLocalTrackSeedFinder.h"
 #include "Sti/StiTrackFinder.h"
 #include "Sti/StiTrackFitter.h"
 #include "Sti/StiDefaultTrackFilter.h"
@@ -63,7 +67,6 @@
 #include "Sti/StiTrackMerger.h"
 #include "Sti/StiDummyVertexFinder.h"
 #include "Sti/StiCompositeSeedFinder.h"
-#include "StiGui/StiRDLocalTrackSeedFinder.h"
 #include "Sti/StiEvaluableTrackSeedFinder.h"
 #include "Sti/StiLocalTrackMerger.h"
 #include "Sti/StiDefaultTrackFilter.h"
@@ -413,3 +416,33 @@ bool StiDefaultToolkit::isEvaluatorEnabled() const
 	return _evaluatorEnabled;
 }
 
+
+EditableFilter<StiHit>   * StiDefaultToolkit::getLoaderHitFilter()
+{
+  return _loaderHitFilter;
+}
+
+EditableFilter<StiTrack> * StiDefaultToolkit::getLoaderTrackFilter()
+{
+  return _loaderTrackFilter;
+}
+
+EditableFilter<StiTrack> * StiDefaultToolkit::getFinderTrackFilter()
+{
+  return _finderTrackFilter;
+}
+
+void StiDefaultToolkit::setLoaderHitFilter(EditableFilter<StiHit>   * loaderHitFilter)
+{
+  _loaderHitFilter = loaderHitFilter;
+}
+
+void StiDefaultToolkit::setLoaderTrackFilter(EditableFilter<StiTrack> * loaderTrackFilter)
+{
+  _loaderTrackFilter = loaderTrackFilter;
+}
+
+void StiDefaultToolkit::setFinderTrackFilter(EditableFilter<StiTrack> * finderTrackFilter)
+{
+  _finderTrackFilter = finderTrackFilter;
+}
