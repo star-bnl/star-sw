@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.400 2004/03/24 23:59:49 calderon Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.401 2004/03/25 15:19:22 calderon Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -808,7 +808,8 @@ Bfc_st BFC2[] = {
 
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
-  {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
+  {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constraint",kFALSE},
+  {"CtbMatchVtx"    ,""  ,"","",""                                       ,"","CTB Matching ON in Vertex Finding",kFALSE},
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,""  ,"","",""                                              ,"","Read/use TPC raw hits",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1417,6 +1418,10 @@ Int_t StBFChain::Instantiate()
 	      if (GetOption("beamLine")) {
 		  StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) mk;
 		  gvtxMk->UseBeamLine();
+	      }
+	      if (GetOption("CtbMatchVtx")) {
+		  StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) mk;
+		  gvtxMk->UseCTB();
 	      }
 	  }
 	  if (GetOption("ppOpt") ) {                         // pp specific stuff
