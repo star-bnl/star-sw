@@ -27,9 +27,6 @@ StiHitContainer* StiHitContainer::sinstance = 0;
 ostream& operator<<(ostream& os, const StiHit& hit);
 //Non member functions
 ostream& operator<<(ostream&, const HitMapKey&);
-ostream& operator<<(ostream&, const DetectorMapKey&);
-ostream& operator<<(ostream&, const NameMapKey&);
-
 
 StiHitContainer* StiHitContainer::instance()
 {
@@ -61,6 +58,10 @@ StiHitContainer::StiHitContainer()
 StiHitContainer::~StiHitContainer()
 {
     cout <<"StiHitContainer::~StiHitContainer()"<<endl;
+    delete mminpoint;
+    mminpoint=0;
+    delete mmaxpoint;
+    mmaxpoint=0;
 }
 
 //Null implementation
@@ -83,8 +84,7 @@ void StiHitContainer::clear()
     for (it=mmap.begin(); it!=mmap.end(); it++) {
 	(*it).second.clear();
     }
-    removeAllVertices();
-    resetVertexIterator();
+    mvertexvec.clear();
     return;
 }
 
@@ -121,23 +121,6 @@ const hitvector& StiHitContainer::hits(double refangle, double position)
     return mmap[mkey];
 }
 
-bool StiHitContainer::hasMore() const
-{
-    return (mcurrent!=mcandidatevec.end()) ? true : false;
-}
-
-//Return without incrementing
-StiHit* StiHitContainer::getCurrentHit()
-{
-    return (*mcurrent);
-}
-
-//Return and increment
-StiHit* StiHitContainer::getHit()
-{
-    return (*(mcurrent++));
-}
-
 void StiHitContainer::setRefPoint(double position, double refAngle, double y, double z)
 {
     mUtilityHit.reset();
@@ -154,33 +137,38 @@ void StiHitContainer::setRefPoint(StiHit* ref)
     
     mkey.refangle = ref->refangle();
     mkey.position = ref->position();
-    mminpoint->setY( ref->y() -mdeltad );
-    mmaxpoint->setY( ref->y() +mdeltad );
+    //mminpoint->setY( ref->y() -mdeltad );
+    //mmaxpoint->setY( ref->y() +mdeltad );
+    mminpoint->setZ( ref->z() -mdeltaz );
+    mmaxpoint->setZ( ref->z() +mdeltaz );
     
     hitvector& tempvec = mmap[mkey];
-
-    //Search first by distance along pad
-    mstart = lower_bound(tempvec.begin(), tempvec.end(), mminpoint, StidHitLessThan());
-    if (mstart!=tempvec.end()) 
-        mstop = upper_bound(tempvec.begin(), tempvec.end(), mmaxpoint, StidHitLessThan());
+    //Search first by distance along z
+    mstart = lower_bound(tempvec.begin(), tempvec.end(), mminpoint, StizHitLessThan());
+    
+    if (mstart!=tempvec.end()) {
+	mstop = upper_bound(tempvec.begin(), tempvec.end(),
+			    mmaxpoint, StizHitLessThan());
+    }
+    
     else {
-  	
-        //cout <<"mstart==tempvec.end()\tAbort"<<endl;
-  	mstart = tempvec.end();
+	//cout <<"mstart==tempvec.end()\tAbort"<<endl;
+	mstart = tempvec.end();
 	mstop = mstart;
         mcurrent = mcandidatevec.end();
 	return;
     }
+
     if (mstart==mstop) {
 	mstart=tempvec.end();
 	mstop = mstart;
 	mcurrent = mcandidatevec.end();
 	return;
     }
-
-    //Now search over z
+    
+    //Now search over distance along d
     for (hitvector::iterator cit=mstart; cit!=mstop; cit++) {
-	if (fabs( (*cit)->z() - ref->z() ) < mdeltaz) 
+	if (fabs( (*cit)->y() - ref->y() ) < mdeltad) 
 	    mcandidatevec.push_back((*cit));
     }
     mcurrent = mcandidatevec.begin();
@@ -193,122 +181,24 @@ void StiHitContainer::sortHits()
     hitmap::iterator it;
     for (it=mmap.begin(); it!=mmap.end(); it++) {
 	hitvector& tempvec = (*it).second;
-	sort(tempvec.begin(), tempvec.end(), StidHitLessThan());
+	sort(tempvec.begin(), tempvec.end(), StizHitLessThan());
     }
     return;
 } 
-	
-void StiHitContainer::print(double refangle, double position)
+
+ostream& operator<<(ostream& os, const hitvector& vec)
 {
-    //cout <<"\nStiHitContainer::print(double, double)"<<endl;
-    mkey.refangle = refangle;
-    mkey.position = position;
-    hitmap::const_iterator where = mmap.find(mkey);
-    
-    if (where==mmap.end()) {
-	//cout <<"StiHitContainer::print(double, double) !! Error. key:\t"<<mkey<<" not found"<<endl;
-	cout <<"No Hits For DetectorMapKey:\t"<<mkey<<endl;
-	return;
+    for (hitvector::const_iterator vit=vec.begin(); vit!=vec.end(); vit++) {
+	os<<*(*vit)<<endl;
     }
-    
-    const hitvector& tempvec = (*where).second;
-    if (tempvec.size()==0) {
-	cout <<"No Hits For DetectorMapKey:\t"<<mkey<<endl;
-	return;
+    return os;
+}
+
+ostream& operator<<(ostream& os, const StiHitContainer& store)
+{
+    for (hitmap::const_iterator it=store.mmap.begin(); it!=store.mmap.end(); it++) {
+	os <<endl;
+	os <<(*it).second;
     }
-    
-    for (hitvector::const_iterator it=tempvec.begin(); it!=tempvec.end(); it++)    {
-	cout <<*(*it)<<endl;
-    }
-    return;
-}
-
-void StiHitContainer::print(double refangle, double position, ofstream& myout)
-{
-    mkey.refangle = refangle;
-    mkey.position = position;
-    const hitvector& tempvec = mmap[mkey];
-    for (hitvector::const_iterator it=tempvec.begin(); it!=tempvec.end(); it++) {
-	myout <<*(*it)<<endl;
-    }
-    return;
-}
- 
-void StiHitContainer::print() const
-{
-    cout <<"\nStiHitContainer::print()"<<endl;
-    for (hitmap::const_iterator it=mmap.begin(); it!=mmap.end(); it++) {
-	cout <<(*it).first<<endl;
-	
-	const hitvector& tempvec = (*it).second;
-	for (hitvector::const_iterator vit=tempvec.begin(); vit!=tempvec.end(); vit++) {
-	    cout <<*(*vit)<<endl;
-	}
-    }
-    return;
-}
-
-// ------------------------ vertex implementation
-
-void StiHitContainer::addVertex(StiHit* val)
-{
-    mvertexvec.push_back(val);
-}
-
-void StiHitContainer::removeVertex(StiHit* val)
-{
-    hitvector::iterator where = find(mvertexvec.begin(), mvertexvec.end(), val);
-    if (where!=mvertexvec.end()) {
-	mvertexvec.erase(where);
-    }
-}
-
-void StiHitContainer::removeAllVertices()
-{
-    mvertexvec.clear();
-}
-
-unsigned int StiHitContainer::numberOfVertices() const
-{
-    return mvertexvec.size();
-}
-
-void StiHitContainer::resetVertexIterator()
-{
-    mvertexiterator = mvertexvec.begin();
-}
-
-StiHit* StiHitContainer::vertex(unsigned int i) const
-{
-    return ( i>=0 && i<mvertexvec.size() ) ? mvertexvec[i] : 0;
-}
-
-StiHit* StiHitContainer::firstVertex() const
-{
-    return (mvertexvec.size()!=0) ? mvertexvec[0] : 0;
-}
-
-StiHit* StiHitContainer::lastVertex() const
-{
-    return (mvertexvec.size()!=0) ? mvertexvec[ mvertexvec.size()-1 ] : 0;
-}
-
-StiHit* StiHitContainer::nextVertex()
-{
-    return ( (++mvertexiterator<mvertexvec.end()) && (mvertexiterator>=mvertexvec.begin() ) )
-	? (*mvertexiterator) : 0;
-}
-
-StiHit* StiHitContainer::previousVertex()
-{
-    return (--mvertexiterator>=mvertexvec.begin()) && (mvertexiterator<mvertexvec.end())
-	? (*mvertexiterator) : 0;
-}
-
-void StiHitContainer::printVertices() const
-{
-    for (hitvector::const_iterator it=mvertexvec.begin(); it!=mvertexvec.end(); ++it) {
-	cout <<(*(*it))<<endl;
-    }
-    return;
+    return os;   
 }
