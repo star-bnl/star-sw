@@ -514,6 +514,7 @@ Int_t StTree::NextEvent()
   if (Open()) return kStEOF;
   St_DataSetIter next(this); StBranch *br; UInt_t ukey = fUKey;
   while ((br=(StBranch*)next())) {
+    if (! br->fIOMode<0) continue;
     if (! br->fIOMode&1) continue;
     if (ukey==fUKey) {	//Read only 1st branch
       iret = br->NextEvent(fUKey); 
@@ -524,7 +525,7 @@ Int_t StTree::NextEvent()
     if (iret==kStErr) return iret;
   }
   
-  return (ukey!=fUKey) ? 0 : kStEOF;
+  return 0;
 }  
   
 //_______________________________________________________________________________
@@ -534,6 +535,7 @@ void StTree::Close(const char* opt)
   Clear();
   St_DataSetIter next(this); StBranch *br;
   while ((br=(StBranch*)next())) { //branch loop
+    br->fIOMode = abs(br->fIOMode);
     if (br->fIOMode&2) {  
       br->Open();
       TFile *tfbr = br->GetTFile(); if(!tfbr) 	continue;

@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.18 2000/01/10 21:59:17 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.19 2000/01/12 23:16:37 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.19  2000/01/12 23:16:37  kathy
+// add all libraries that are now needed to load for St_QA_Maker; add code for using new print methods - can't yet print from list though....
+//
 // Revision 1.18  2000/01/10 21:59:17  kathy
 // must now load St_global when running St_QA_Maker
 //
@@ -101,7 +104,9 @@ void bfcread_dst_QAhist(
     const Char_t *MainFile=
       "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.root",
     const Char_t *psFile="DSTtable_QA_hist.ps",
-    const Char_t *PageTitle="")
+    const Char_t *PageTitle="",
+    const Char_t *PrintList="",
+    const Char_t *MakerHistDir="QA")
 {
 //
   cout << "bfcread_dst_QAhist.C, num events to process " 
@@ -112,7 +117,10 @@ void bfcread_dst_QAhist(
        << psFile   << endl;
   cout << "bfcread_dst_QAhist.C, page title for histograms = " 
        << PageTitle << endl;
-
+  cout << "bfcread_dst_QAhist.C, Maker directory containing histograms =  " 
+       << MakerHistDir   << endl;
+  cout << "bfcread_dst_QAhist.C, subset list name of which histograms to draw,print = "
+       << PrintList  << endl;
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -121,6 +129,9 @@ void bfcread_dst_QAhist(
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("St_QA_Maker");
+  gSystem->Load("tls");
+  gSystem->Load("St_tpc");
+  gSystem->Load("St_svt");
   gSystem->Load("St_global");
 
 // force the directory name for histograms since this macro is 
@@ -182,9 +193,16 @@ void bfcread_dst_QAhist(
       if (PageTitle=="") PageTitle=MainFile;
     HU->SetGlobalTitle(PageTitle);
 
+    HU->SetDefaultPrintList(MakerHistDir,PrintList);
+
   Int_t numLog = 0;
   numLog = HU->ExamineLogYList();
   cout << " bfcread_dst_QAhist.C, Number hist to plot with log scale = " << numLog << endl;
+
+
+  Int_t numPrint = 0;
+  numPrint = HU->ExaminePrintList();
+  cout << " bfcread_dst_QAhist.C, Number hist to print = " << numPrint << endl;
 
   chain->Finish();
   cout <<  "bfcread_dst_QAhist.C, passed chain->Finish" << endl ; 

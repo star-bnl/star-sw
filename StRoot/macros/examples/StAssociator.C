@@ -1,5 +1,9 @@
-// $Id: StAssociator.C,v 1.11 1999/12/14 18:18:01 calderon Exp $
+// $Id: StAssociator.C,v 1.12 2000/01/12 20:23:01 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.12  2000/01/12 20:23:01  calderon
+// Changed default file to the one produced weekly by Lidia in
+// /star/rcf/test/dev/tfs_Linux/Tue/year_2a/hc_standard/
+//
 // Revision 1.11  1999/12/14 18:18:01  calderon
 // using new StMcEvent, StEvent & StAssociationMaker
 //
@@ -62,7 +66,7 @@ class StChain;
 StChain *chain=0;
 
 void StAssociator(Int_t nevents=1,
-const char *MainFile="/star/rcf/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0372_02_35evts.geant.root")
+const char *MainFile="/star/rcf/test/dev/tfs_Linux/Tue/year_2a/hc_standard/*.geant.root")
 {
 
     // Dynamically link needed shared libs

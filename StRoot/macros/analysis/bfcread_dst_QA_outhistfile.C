@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QA_outhistfile.C,v 1.4 2000/01/11 16:31:02 kathy Exp $
+// $Id: bfcread_dst_QA_outhistfile.C,v 1.5 2000/01/12 23:16:37 kathy Exp $
 // $Log: bfcread_dst_QA_outhistfile.C,v $
+// Revision 1.5  2000/01/12 23:16:37  kathy
+// add all libraries that are now needed to load for St_QA_Maker; add code for using new print methods - can't yet print from list though....
+//
 // Revision 1.4  2000/01/11 16:31:02  kathy
 // change to current input file in Root2XDF.C and bfcread_dst_EventQA*.C; load St_global library in bfcread_dst_QA_outhistfile.C which is now needed when using St_QA_Maker class
 //
@@ -77,6 +80,9 @@ void bfcread_dst_QA_outhistfile(
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("St_QA_Maker");
+  gSystem->Load("tls");
+  gSystem->Load("St_tpc");
+  gSystem->Load("St_svt");
   gSystem->Load("St_global");
   gSystem->Load("StTreeMaker");
 
