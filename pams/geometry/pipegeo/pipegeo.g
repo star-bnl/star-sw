@@ -3,9 +3,14 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
   Created  30-03-99
   Author   W.B.Christie
 
-* $Id: pipegeo.g,v 1.7 2003/12/29 17:51:59 potekhin Exp $
+* $Id: pipegeo.g,v 1.8 2004/01/19 22:51:36 potekhin Exp $
 *
 * $Log: pipegeo.g,v $
+* Revision 1.8  2004/01/19 22:51:36  potekhin
+* Will need to rework the code, because the thinner
+* mother volume for the pipe is clashing with the pixel
+* detector -- for now just checking in the dimensions
+*
 * Revision 1.7  2003/12/29 17:51:59  potekhin
 * Completely fill out the data struct for the new slim pipe
 * (as opposed to relying on the prior default values),
@@ -129,8 +134,8 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
 * Die Neue Pipe
    FILL PIPG    !  Beam Pipe data
       config   =  4     ! both material and geo params
-      BeInnR    = 1.2   ! Berillium section inner radius
-      BeOutR    = 1.276 ! Berillium section outer radius
+      BeInnR    = 1.374 ! Berillium section inner radius
+      BeOutR    = 1.450 ! Berillium section outer radius
       BeLeng    = 76.2  ! Berillium section half length
       material  ='ALUM' ! pipe main section material 
       S1InnR    = 3.875 ! first Aluminum section inner radius
