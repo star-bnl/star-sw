@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.20 1999/02/19 16:30:25 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.21 1999/02/25 03:36:05 sakrejda Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.21  1999/02/25 03:36:05  sakrejda
+// Threshold lowered, was set for the test data
+//
 // Revision 1.20  1999/02/19 16:30:25  fisyak
 // sanitary check
 //
@@ -112,14 +115,6 @@ Int_t St_tcl_Maker::Init(){
     }
     Int_t res = tpg_main(m_tpg_pad_plane,m_tpg_detector,m_tpg_pad); 
   }
-  // tss parameters ?
-  St_DataSet *tsspars = local("tpc/tsspars");
-  if (tsspars){
-    St_DataSetIter partable(tsspars);
-    m_tsspar = (St_tss_tsspar *) partable("tsspar");
-    if (!m_tsspar) 
-      printf("tpc/tsspars is not initialized. Please add run_Maker to your chain\n");
-  }
   // tcl parameters
   St_DataSet *tclpars = local("tpc/tclpars");
   if (tclpars){
@@ -132,6 +127,19 @@ Int_t St_tcl_Maker::Init(){
       SafeDelete(tclpars);
     }
   }
+   St_DataSet *tsspars = local("tpc/tsspars");
+   if (tsspars){
+       St_DataSetIter partable(tsspars);
+       m_tsspar = (St_tss_tsspar *) partable("tsspar");
+       if (!m_tsspar) {
+         cout << "TPC tss parameter tables are incomplete."<< endl;  
+         SafeDelete(tsspars);
+       }
+       else {
+	 tss_tsspar_st *tsspar = m_tsspar->GetTable();
+         tsspar->threshold=1;
+       }
+   }
   // tfs parameters
   St_DataSet *tfspars = local("tpc/tfspars");
   if (tfspars){
@@ -255,7 +263,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.20 1999/02/19 16:30:25 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.21 1999/02/25 03:36:05 sakrejda Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
