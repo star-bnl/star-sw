@@ -88,24 +88,49 @@ Int_t StEventQAMaker::Make() {
   if (event) {
     Bool_t realData = (event->info()->type() == "NONE");
     if (firstEvent) {
-      if (realData) {
-        histsSet = 1;
-      } else {
-        // process Monte Carlo events
-        histsSet = 0;
+      if (histsSet == StQA_Undef) {
+        if (realData) {
+          histsSet = StQA_AuAu;
+        } else {
+          // process Monte Carlo events
+          histsSet = StQA_MC;
+        }
       }
       BookHistTrigger();
     }
     UInt_t tword = 0;
     Bool_t doEvent = kTRUE;
-    StTrigger* l0Trig = event->l0Trigger();
     Int_t run_num = event->runId();
     Int_t run_year = run_num/1000000;         // Determine run year from run #
     allTrigs = (allTrigs || (run_year == 1)); // Don't use year 1 trigger word
-    if ((l0Trig) && (!allTrigs)) {
-      if (realData) doEvent = kFALSE;
-      tword = l0Trig->triggerWord();
-      if (tword) {
+    if (allTrigs) {
+      histsSet = StQA_pp;
+    } else {
+     StTriggerIdCollection* trigIdColl = event->triggerIdCollection();
+     const StTriggerId* trigId = ((trigIdColl) ? trigIdColl->nominal() : 0);
+     if (trigId) {
+       histsSet = StQA_dAu;
+       if (realData) doEvent = kFALSE;
+       tword = trigId->mask();
+       if ((trigId->isTrigger(2001)) ||
+           (trigId->isTrigger(2002)) ||
+           (trigId->isTrigger(2003)) ||
+           (trigId->isTrigger(2004))) {
+         mTrigWord->Fill(1.); // "MinBias"
+         doEvent = kTRUE;
+       } else if ((trigId->isTrigger(2201)) ||
+                  (trigId->isTrigger(2202))) {
+         mTrigWord->Fill(3.); // "Other Physics"
+         doEvent = kTRUE;
+       } else {
+         mTrigWord->Fill(8.); // "Other"
+       }
+     } else {  // trigId
+      StTrigger* l0Trig = event->l0Trigger();
+      if (l0Trig) {
+       if (realData) doEvent = kFALSE;
+       tword = l0Trig->triggerWord();
+       if (tword) {
         if ((tword >= 0x1000) && (tword < 0x1100)) {
           mTrigWord->Fill(1.); // "MinBias"
 	  doEvent = kTRUE;
@@ -118,26 +143,24 @@ Int_t StEventQAMaker::Make() {
         } else if ((tword >= 0x2000) && (tword < 0x3000)) {
           mTrigWord->Fill(4.); // "pp Physics"
 	  doEvent = kTRUE;
-          if ((firstEvent) && (histsSet==1)) histsSet = 2;
+          if ((firstEvent) && (histsSet==StQA_AuAu)) histsSet = StQA_pp;
         } else if (tword == 0xF200) {
           mTrigWord->Fill(7.); // "Laser"
         } else {
           mTrigWord->Fill(8.); // "Other"
         }
-        for (int bitn=0; bitn<32; bitn++) {
-          if (tword>>(bitn) & 1U)
-            mTrigBits->Fill((Float_t) bitn);
-        }
-      } else {
+       } else {  // tword
         if (realData)
           gMessMgr->Warning("StEventQAMaker::Make(): trigger word=0 !!!!!");
-      }
-    } else { // No trigger info or year 1 data!
-      if (allTrigs) {
-        histsSet = 2; // go with pp histos if allTrigs
-      } else {
-        gMessMgr->Warning("StEventQAMaker::Make(): No trigger info...processing anyhow");
-      }
+       }  // tword
+      } else {  // No trigger info or year 1 data!
+       gMessMgr->Warning("StEventQAMaker::Make(): No trigger info...processing anyhow");
+      }  // l0Trig
+     }  // trigId
+    }  // allTrigs
+    for (int bitn=0; bitn<32; bitn++) {
+      if (tword>>(bitn) & 1U)
+        mTrigBits->Fill((Float_t) bitn);
     }
     if (!doEvent) {
       gMessMgr->Message() << "StEventQAMaker::Make(): "
@@ -146,26 +169,32 @@ Int_t StEventQAMaker::Make() {
     }
     if (firstEvent) BookHist();
     // only process if a primary vertex exists !!!
-    if (event->primaryVertex()) {
-      multiplicity = event->trackNodes().size();
-      int makeStat = StQAMakerBase::Make();
-      mNullPrimVtx->Fill(1);
-      if ((histsSet == 1 && multiplicity >= 50)
-	  || histsSet == 2)
-	hists->mNullPrimVtxMult->Fill(1);
-      return makeStat;
-    } else {
-      gMessMgr->Warning("StEventQAMaker::Make(): no primary vertex found!");
-      mNullPrimVtx->Fill(-1);
-      if ((histsSet == 1 && multiplicity >= 50)
-	  || histsSet == 2)
-	hists->mNullPrimVtxMult->Fill(-1);
-      return kStOk;
+    multiplicity = event->trackNodes().size();
+    switch (histsSet) {
+      case (StQA_AuAu) : {
+        if (multiplicity < 50) eventClass = 0;
+        else if (multiplicity < 500) eventClass = 1;
+        else if (multiplicity < 2500) eventClass = 2;
+        else eventClass = 3;
+        break; }
+      default : {
+        eventClass = 1;
+      }
     }
-  } else {
-    gMessMgr->Error("StEventQAMaker::Make(): no event found!");
-    return kStErr;
+    int makeStat = kStOk;
+    float vertExists = 1.;
+    if (!(event->primaryVertex())) {
+      vertExists = -1.;
+      gMessMgr->Warning("StEventQAMaker::Make(): no primary vertex found!");
+    }
+    mNullPrimVtx->Fill(vertExists);
+    if ((eventClass) && (histsSet != StQA_MC))
+      hists->mNullPrimVtxClass->Fill(vertExists);
+    if (event->primaryVertex()) makeStat = StQAMakerBase::Make();
+    return makeStat;
   }
+  gMessMgr->Error("StEventQAMaker::Make(): no event found!");
+  return kStErr;
 }
 
 
@@ -188,8 +217,8 @@ void StEventQAMaker::MakeHistEvSum() {
       else
 	tpcChgEast += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
     }
-    m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,multClass);
-    m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[1]/ftpcMon->chrg_ftpc_tot[0],multClass);
+    m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,eventClass);
+    m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[1]/ftpcMon->chrg_ftpc_tot[0],eventClass);
   }
 }
 
@@ -1926,8 +1955,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.42 2003/02/15 22:00:52 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.43 2003/02/19 06:38:28 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.43  2003/02/19 06:38:28  genevb
+// Rework trigger and mult/event class sections
+//
 // Revision 2.42  2003/02/15 22:00:52  genevb
 // Add tpcSectors, fix ftpc east/west charge
 //

@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.19 2003/02/15 22:00:52 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.20 2003/02/19 06:38:29 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.20  2003/02/19 06:38:29  genevb
+// Rework trigger and mult/event class sections
+//
 // Revision 2.19  2003/02/15 22:00:52  genevb
 // Add tpcSectors, fix ftpc east/west charge
 //
@@ -78,8 +81,8 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
 
   hists = 0;
   histsList = new TList();
-  histsSet = 0;
-  multClass = 3;
+  histsSet = StQA_Undef;
+  eventClass = 3;
 
 //  - Set all the histogram booking constants
 
@@ -119,26 +122,14 @@ Int_t StQAMakerBase::Make(){
   if (firstEvent) BookHist();
   // See BookHist() for definitions of histsSet values,
   // which should be set during Make() of the derived QA Maker class
+  // event class also decided in derived Make()
   switch (histsSet) {
-    case (0) : {
-      multClass = 0;
-      hists = (StQABookHist*) histsList->At(0);
-      break; }
-    case (1) : {
-      if (multiplicity < 50) multClass = 0;
-      else if (multiplicity < 500) multClass = 1;
-      else if (multiplicity < 2500) multClass = 2;
-      else multClass = 3;
-
-      mMultClass->Fill(multClass);
-      if (!multClass) return kStOk;
-      hists = (StQABookHist*) histsList->At((Int_t) (--multClass));
-      break; }
-    case (2) : {
-      multClass = 0;
-      hists = (StQABookHist*) histsList->At(0);
-      break; }
-    default  : {}
+    case (StQA_AuAu) :
+      mMultClass->Fill(eventClass);
+    default : {
+      if (!eventClass) return kStOk;
+      hists = (StQABookHist*) histsList->At((Int_t) (--eventClass));
+    }
   }
 
   // Call methods to fill histograms
@@ -163,7 +154,7 @@ Int_t StQAMakerBase::Make(){
   // histograms from EMC in StEvent
   MakeHistEMC();
   // histograms from geant and reco tables 
-  if (histsSet==0) MakeHistEval();
+  if (histsSet==StQA_MC) MakeHistEval();
   // histograms from BBC in StEvent
   MakeHistBBC();
   // histograms from FPD in StEvent
@@ -183,8 +174,8 @@ void StQAMakerBase::NewQABookHist(const char* prefix) {
 //_____________________________________________________________________________
 TH2F* StQAMakerBase::MH1F(const Text_t* name, const Text_t* title,
                           Int_t nbinsx, Axis_t xlow, Axis_t xup) {
-  TH2F* h = QAH::MH1F(name,title,nbinsx,xlow,xup,(Int_t) multClass);
-  if (multClass>1) {
+  TH2F* h = QAH::MH1F(name,title,nbinsx,xlow,xup,(Int_t) eventClass);
+  if (eventClass>1) {
     h->Rebin(0,"low mult");
     h->Rebin(1,"mid mult");
     h->Rebin(2,"high mult");
@@ -200,13 +191,13 @@ void StQAMakerBase::BookHist() {
 
   switch (histsSet) {
 
-    // Generic data (e.g. Monte Carlo) with just one multiplicity class
-    case (0) : {
+    // Generic data (e.g. Monte Carlo) with just one event class
+    case (StQA_MC) : {
       NewQABookHist(QAMakerType.Data());
       break; }
 
     // Real data with three multiplicity classes (low, medium, high)
-    case (1) : {
+    case (StQA_AuAu) : {
       (temp = QAMakerType) += "LM";
       NewQABookHist(temp.Data());
       (temp = QAMakerType) += "MM";
@@ -215,15 +206,22 @@ void StQAMakerBase::BookHist() {
       NewQABookHist(temp.Data());
       break; }
 
-    // pp data with just one multiplicity class
-    case (2) : {
+    // pp data with just one event class
+    case (StQA_pp) : {
       NewQABookHist(QAMakerType.Data());
+      break; }
+
+    // Real data with event classes for different triggers
+    case (StQA_dAu) : {
+      NewQABookHist(QAMakerType.Data());    // Minbias
+      //(temp = QAMakerType) += "HP";         // HighPt trigger
+      //NewQABookHist(temp.Data());
       break; }
 
     default  : {}
   }
   
-  multClass = histsList->GetSize();
+  eventClass = histsList->GetSize();
   QAH::maker = (StMaker*) (this);
   QAH::preString = QAMakerType;
 
@@ -231,7 +229,7 @@ void StQAMakerBase::BookHist() {
   BookHistGeneral();
   BookHistEvSum();
   BookHistFcl();
-  for (Int_t i=0; i<multClass; i++)
+  for (Int_t i=0; i<eventClass; i++)
     ((StQABookHist*) (histsList->At(i)))->BookHist(histsSet);
 }
 //_____________________________________________________________________________
@@ -241,7 +239,7 @@ void StQAMakerBase::BookHistGeneral(){
   mNullPrimVtx->SetXTitle("has primary vertex? (yes = 1, no = -1)");
   mNullPrimVtx->SetYTitle("# of events");
 
-  if (histsSet == 1) {
+  if (histsSet == StQA_AuAu) {
     mMultClass = QAH::H1F("QaMultClass","event multiplicity class",5,-0.5,4.5);
     mMultClass->SetXTitle("mult class (0=?/MC, 1=LM, 2=MM, 3=HM)");
     mMultClass->SetYTitle("# of events");

@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.8 2003/02/15 22:00:52 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.9 2003/02/19 06:38:29 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.9  2003/02/19 06:38:29  genevb
+// Rework trigger and mult/event class sections
+//
 // Revision 2.8  2003/02/15 22:00:52  genevb
 // Add tpcSectors, fix ftpc east/west charge
 //
@@ -34,6 +37,14 @@
 #ifndef STAR_StQAMakerBase
 #define STAR_StQAMakerBase
 
+enum StQAHistSetType {
+  StQA_Undef = -1,
+  StQA_MC = 0,
+  StQA_AuAu = 1,
+  StQA_pp = 2,
+  StQA_dAu = 3
+};
+
 #include "StMaker.h"
 class StQABookHist;
 class TList;
@@ -49,9 +60,10 @@ class StQAMakerBase : public StMaker {
   virtual       ~StQAMakerBase();
   virtual Int_t  Init();
   virtual Int_t  Make();
+  virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.8 2003/02/15 22:00:52 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.9 2003/02/19 06:38:29 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -80,12 +92,10 @@ class StQAMakerBase : public StMaker {
 // **************** Members For Internal Use ***************************
  protected:
   TString QAMakerType;  // character string to prepend to each hist name/title
-  Int_t   multiplicity; // multiplicity class of current event,
-                        //  should be set in Make() of derived maker class
   TList* histsList;     // pointers to the histogram classes for the
   StQABookHist* hists;  //!     multiplicity-dependent histograms
   Int_t histsSet;
-  Float_t multClass;
+  Float_t eventClass;
   Bool_t firstEvent;
 
   virtual void NewQABookHist(const char* prefix);
