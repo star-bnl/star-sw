@@ -1,32 +1,27 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.28 2004/03/19 19:33:23 andrewar Exp $
+ * $Id: StiStEventFiller.cxx,v 2.27 2004/01/27 23:40:46 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
- * Revision 2.28  2004/03/19 19:33:23  andrewar
- * Restored primary filling logic. Now taking parameters at the
- * vertex for Primary tracks.
- *
  * Revision 2.27  2004/01/27 23:40:46  calderon
  * The filling of the impactParameter() for global tracks is done now
- * only after finding the vertex.  The
- * StPhysicalHelix::distance(StThreeVectorD) method is used for both globals
- * and primaries, the only difference is where the helix is obtained:
- * - globals - helix from StTrack::geometry(), which was filled from the
- *             innermost hit node, which should be a hit at the time.
- * - primaries - helix from innermost hit node, which should be the vertex
- *             at the time it is called.
+ * only after finding the vertex.  The StPhysicalHelix::distance(StThreeVectorD)
+ * method is used for both globals and primaries, the only difference is
+ * where the helix is obtained:
+ * - globals - helix from StTrack::geometry(), which was filled from the innermost
+ *   hit node, which should be a hit at the time.
+ * - primaries, helix from innermost hit node, which should be the vertex at the
+ *   time it is called.
  *
  * Revision 2.26  2003/12/11 03:44:29  calderon
  * set the length right again, it had dissappeared from the code...
  *
  * Revision 2.25  2003/11/26 04:02:53  calderon
  * track->getChi2() returns the sum of chi2 for all sti nodes.  In StEvent,
- * chi2(0) should be chi2/dof, so we need to divide by
- * dof=track->getPointCount()-5;
+ * chi2(0) should be chi2/dof, so we need to divide by dof=track->getPointCount()-5;
  *
  * Revision 2.24  2003/09/07 03:49:10  perev
  * gcc 3.2 + WarnOff
@@ -43,8 +38,7 @@
  * DCA track update logic modified.
  *
  * Revision 2.20  2003/07/01 20:25:28  calderon
- * fillGeometry() - use node->getX(), as it should have been since the
- * beginning
+ * fillGeometry() - use node->getX(), as it should have been since the beginning
  * impactParameter() - always use the innermos hit node, not just for globals
  * removed extra variables which are no longer used.
  *
@@ -54,12 +48,15 @@
  * is called, but for the review filling this info is unnecessary.
  *
  * Revision 2.18  2003/05/14 00:04:35  calderon
- * The array of 15 floats containing the covariance matrix has a different
- * order in Sti than in StEvent.  In Sti the array is counted starting from
- * the first row, column go to next column until you hit the diagonal,
- * jump to next row starting from first column. In StEvent the array is
- * counted starting from the first row, column go to the next row until you
- * hit the end, jump to next column starting from diagonal.
+ * The array of 15 floats containing the covariance matrix has a different order
+ * in Sti than in StEvent.  In Sti the array is counted
+ * starting from the first row, column
+ * go to next column until you hit the diagonal,
+ * jump to next row starting from first column.
+ * in StEvent the array is counted
+ * starting from the first row, column
+ * go to the next row until you hit the end,
+ * jump to next column starting from diagonal.
  * The filling of the fitTraits was fixed to reflect this.
  *
  * Revision 2.17  2003/05/12 21:21:39  calderon
@@ -197,24 +194,17 @@
  * Revision 1.3  2002/03/28 04:29:49  calderon
  * First test version of Filler
  * Currently fills only global tracks with the following characteristics
- * -Flag is set to 101, as most current global tracks are.  This is not
- * strictly correct, as this flag is supposed to mean a tpc only track, so
- * really need to check if the track has svt hits and then set it to the
- * appropriate flag (501 or 601).
- * -Encoded method is set with bits 15 and 1 (starting from bit 0).  Bit 1
- * means Kalman fit.
- *  Bit 15 is an as-yet unused track-finding bit, which Thomas said ITTF
- * could grab.
- * -Impact Parameter calculation is done using StHelix and the primary vertex
- * from StEvent
+ * -Flag is set to 101, as most current global tracks are.  This is not strictly correct, as
+ *  this flag is supposed to mean a tpc only track, so really need to check if the track has
+ *  svt hits and then set it to the appropriate flag (501 or 601).
+ * -Encoded method is set with bits 15 and 1 (starting from bit 0).  Bit 1 means Kalman fit.
+ *  Bit 15 is an as-yet unused track-finding bit, which Thomas said ITTF could grab.
+ * -Impact Parameter calculation is done using StHelix and the primary vertex from StEvent
  * -length is set using getTrackLength, which might still need tweaking
- * -possible points is currently set from getMaxPointCount which returns the
- *  total, and it is not
+ * -possible points is currently set from getMaxPointCount which returns the total, and it is not
  *  what we need for StEvent, so this needs to be modified
- * -inner geometry (using the innermostHitNode -> Ben's transformer ->
- *  StPhysicalHelix -> StHelixModel)
- * -outer geometry, needs inside-out pass to obtain good parameters at
- *  outermostHitNode
+ * -inner geometry (using the innermostHitNode -> Ben's transformer -> StPhysicalHelix -> StHelixModel)
+ * -outer geometry, needs inside-out pass to obtain good parameters at outermostHitNode
  * -fit traits, still missing the probability of chi2
  * -topology map, filled from StuFixTopoMap once StDetectorInfo is properly set
  *
@@ -560,9 +550,18 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
   StiKalmanTrackNode* node;
   if (outer)
     node = track->getOuterMostHitNode();
-  else
+  else{
     node = track->getInnerMostHitNode();
- 
+    //if it's a Primary, innerMostHitNode=vertex. So, to get detector info,
+    //we have to do vertexNode->getParent() 
+    if(track->isPrimary()) {
+      node = static_cast<StiKalmanTrackNode*>(node->getParent());
+    //now, we want last node with a hit, so keep backing up until a hit
+    //is found
+      while(!node->getHit()) 
+        node =static_cast<StiKalmanTrackNode*>(node->getParent());
+    }
+  }
 
 
   StThreeVectorF origin(node->getX(),node->getY(),node->getZ());

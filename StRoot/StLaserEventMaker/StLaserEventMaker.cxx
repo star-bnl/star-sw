@@ -1,8 +1,5 @@
-// $Id: StLaserEventMaker.cxx,v 1.33 2004/03/19 23:13:46 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.32 2004/03/11 21:02:37 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
-// Revision 1.33  2004/03/19 23:13:46  pfachini
-// Defining event(0) in the constructor.
-//
 // Revision 1.32  2004/03/11 21:02:37  pfachini
 // The minimum number of valid tracks (minValidTracks) for a good drift velocity
 // calculation was lowered to 450 if both east and west lasers are up and 225
@@ -126,8 +123,7 @@ ClassImp(StLaserEventMaker)
     StMaker(name),
     m_tpg_pad_plane(0),
     m_type(0),
-    m_tpt_pars(0),
-    event(0)
+    m_tpt_pars(0)
 {
   //  mHistOut   = kFALSE;
   mHistOut=kTRUE;
@@ -839,7 +835,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.33 2004/03/19 23:13:46 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.32 2004/03/11 21:02:37 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
