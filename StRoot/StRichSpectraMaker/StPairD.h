@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPairD.h,v 1.1 2001/02/25 22:11:20 lasiuk Exp $
+ * $Id: StPairD.h,v 1.2 2001/02/26 05:27:48 lasiuk Exp $
  *
  * Author:  bl Feb 21, 2001
  ***************************************************************************
@@ -10,10 +10,15 @@
  ***************************************************************************
  *
  * $Log: StPairD.h,v $
+ * Revision 1.2  2001/02/26 05:27:48  lasiuk
+ * ifdefs for multiply defined
+ *
  * Revision 1.1  2001/02/25 22:11:20  lasiuk
  * Initial Revision
  *
  **************************************************************************/
+#ifndef StPairD_h
+#define StPairD_h
 
 #include <iostream.h>
 #include <stdlib.h>
@@ -233,3 +238,4 @@ StPairD::operator-= (const StPairD& v)
     mX1 -= v.x(); mX2 -= v.y();
     return *this;
 }
+#endif
