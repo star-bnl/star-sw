@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.3 1999/01/22 23:37:50 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.4 1999/01/23 02:33:03 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.4  1999/01/23 02:33:03  lasiuk
+// sun compatible
+//
 // Revision 1.3  1999/01/22 23:37:50  lasiuk
 // root does not eat dynamic_cast<>
 //
@@ -238,7 +241,11 @@ Int_t StTrsMaker::Make(){
     // Energy deposited per centimeter:
     float dE = 2.444*keV;  // deposited per cm of Ar
     float dS = 1.*centimeter;
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<int> all[3];
+#else
+    vector<int,allocator<int> > all[3];
+#endif
 
     StThreeVector<double> position(0.,1500.*millimeter,200.*millimeter);
     StThreeVector<double> momentum(1.*GeV,0.,0.);
@@ -249,13 +256,19 @@ Int_t StTrsMaker::Make(){
 				dS);
 
     PR(aSegment);
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
     list<StTrsMiniChargeSegment> comp;
     list<StTrsMiniChargeSegment>::iterator iter;
-
+#els
+    list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> > comp;
+    list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> >::iterator iter;
+#endif
     int breakNumber = 1;
     aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
 
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
     copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
+#endif
     cout << endl;
     
     cout << "comp.size() " << (comp.size()) << endl;
@@ -309,7 +322,7 @@ Int_t StTrsMaker::Make(){
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.3 1999/01/22 23:37:50 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.4 1999/01/23 02:33:03 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
