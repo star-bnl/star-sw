@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.cc,v 1.4 2004/03/09 20:58:00 jcs Exp $
+//   $Id: StFtpcGasUtilities.cc,v 1.5 2004/03/11 22:26:26 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.cc,v $
+//   Revision 1.5  2004/03/11 22:26:26  jcs
+//   activate reading of additional body temperatures
+//
 //   Revision 1.4  2004/03/09 20:58:00  jcs
 //   undo activation of additional body temperatures - they are not getting
 //   thru from offline database to here
@@ -93,17 +96,16 @@ Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate) {
       // as of 2003-10-31 there are 2 additional body temperature sensors
       if ( dbDate >= 20031031 ) {
          if (DEBUG) cout<<"dbDate = "<<dbDate<<" >= 20031031 activate additional body temperature sensors"<<endl;
-/*
          if (mGas->getBody5West() >= mDb->minGasTemperature() && mGas->getBody5West() <= mDb->maxGasTemperature() ) {
-            averageBodyTemperatureWest = averageBodyTemperatureWest + mGas>getBody5West();	 
+            averageBodyTemperatureWest = averageBodyTemperatureWest + mGas->getBody5West();	 
 	    numberBodyTemperaturesWest++;
 	    if (DEBUG) cout<<"mGas->getBody5West() = "<<mGas->getBody5West()<<endl;
 	 }  
          if (mGas->getBody6West() >= mDb->minGasTemperature() && mGas->getBody6West() <= mDb->maxGasTemperature() ) {
-	    averageBodyTemperatureWest = averageBodyTemperatureWest + mGas>getBody6West();
+	    averageBodyTemperatureWest = averageBodyTemperatureWest + mGas->getBody6West();
 	    numberBodyTemperaturesWest++;
 	    if (DEBUG) cout<<"mGas->getBody6West() = "<<mGas->getBody6West()<<endl;
-*/
+	  }  
 	 }  
 
    // calculate average body temperature west
@@ -147,17 +149,16 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate) {
       // as of 2003-10-31 there are 2 additional body temperature sensors
       if ( dbDate >= 20031031 ) {
         if (DEBUG)  cout<<"dbDate = "<<dbDate<<" >= 20031031 activate additional body temperature sensors"<<endl;
-/*	
          if (mGas->getBody5East() >= mDb->minGasTemperature() && mGas->getBody5East() <= mDb->maxGasTemperature() ) {
-            averageBodyTemperatureEast = averageBodyTemperatureEast + mGas>getBody5East();	 
+            averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody5East();	 
 	    numberBodyTemperaturesEast++;
 	    if (DEBUG) cout<<"mGas->getBody5East() = "<<mGas->getBody5East()<<endl;
 	 }  
          if (mGas->getBody6East() >= mDb->minGasTemperature() && mGas->getBody6East() <= mDb->maxGasTemperature() ) {
-	    averageBodyTemperatureEast = averageBodyTemperatureEast + mGas>getBody6East();
+	    averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody6East();
 	    numberBodyTemperaturesEast++;
 	    if (DEBUG) cout<<"mGas->getBody6East() = "<<mGas->getBody6East()<<endl;
-*/	    
+	 } 
        }  
 
       // calculate average body temperature east
