@@ -1,3 +1,5 @@
+#ifndef sun 
+
 /*:Copyright 1995, Lawrence Berkeley Laboratory
 *:>---------------------------------------------------------------------
 *:FILE:         sutString.C
@@ -94,4 +96,6 @@ void string::operator << (ostream p)
 {
    p << myStr;
 }
+
+#endif /*sun*/
 

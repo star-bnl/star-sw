@@ -25,6 +25,7 @@ doc_all:
 doc_doc: $(BASE_NAME)_code.html
 #
 doc_clean:
+doc_clean_doc:
 	-rm -r $(DOCDIR)/html
 	-rm $(BASE_NAME)_code.html
 	-rm CTAGS $(BASE_NAME)

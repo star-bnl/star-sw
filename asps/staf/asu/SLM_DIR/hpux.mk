@@ -29,7 +29,7 @@ export CFLAGS += -g
 endif
 #
 # C++
-export CXX := CC
+export CXX := g++
 export CXXFLAGS += -w 
 ifeq ($(DEBUG),$(TRUE))
 export CXXFLAGS += -g

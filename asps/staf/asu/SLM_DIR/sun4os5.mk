@@ -15,7 +15,8 @@ endif
 # FORTRAN 77
 #
 export FC := f77
-export FFLAGS += -e -xl -sb -PIC
+#17sep96---export FFLAGS += -e -xl -sb -PIC
+export FFLAGS += -e -xl -PIC
 ifeq ($(DEBUG),$(TRUE))
 export FFLAGS += -g
 endif

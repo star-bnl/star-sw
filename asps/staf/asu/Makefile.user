@@ -1,3 +1,12 @@
 #export SHELL := csh
+ifndef INSTALL
+BASE_DIR := $(shell pwd)
+INSTALL := -ln -s
+INSTALL := cp
+endif
+#
 install_slm:
-	cp $(BASE_DIR)/SLM_DIR/* $(SLM_DIR)
+	$(INSTALL) $(BASE_DIR)/SLM_DIR/* $(SLM_DIR)
+#
+stafGen: $(SRCM_DIR)/stafGen.cc
+	$(CXX) -o $@ $^
