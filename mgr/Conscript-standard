@@ -15,8 +15,6 @@ my $ObjDir   = "#" . $obj_dir;                          # print "ObjDir = $ObjDi
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 
 @Repo   = Repository_List unless $param::noRepository;  # print "Repositories = |@Repo|\n";nv
-my $pkg = File::Basename::basename($Dir);               # print "Run cons in $Dir for $PKG\n";
-my $PKG = $pkg;
 
 my $SO_PKG  = "";
 my $SO_PKGT = "";
@@ -24,6 +22,30 @@ my $SHARE   = $EXPORT;   # *** Will remove later. For now, old version have
                          # sub-dirs with Conscript scripts expecting EXPORT
                          # variable
 
+my $pkg;
+my $PKG;
+
+if ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/ ){
+    # Added 2003. In Construct, the logic is such
+    # that the Pool directories have their sub-directories
+    # set as targets (n sub-dir => n libraries). That's
+    # fine ... apart from name clash we try to resolve
+    # here.
+    $pkg = $Dir;
+    $pkg =~ s/StRoot\///;
+    $pkg =~ s/Pool\//Pool/;
+    $PKG = $pkg;
+    print "\t[".File::Basename::basename($Dir)."] (possible name clash) changed to $pkg\n";
+
+} else {
+    $pkg = File::Basename::basename($Dir);               # print "Run cons in $Dir for $PKG\n";
+    $PKG = $pkg;
+}
+
+
+
+
+#print "Dir=$Dir => pkg = $pkg => PKG = $PKG\n";
 
 my @idlL    = script::find_idl($Dir);
 print "In Dir = $Dir idlL = @idlL\n" if $param::debug;
@@ -54,7 +76,7 @@ my $LIBPKG = "";
 
 
 if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
-    #goto Tables;
+    print "\t--- Regular case treatment (not gen not sim) ---\n" if $param::debug;
 
     if ($param::debug) {
 	$i = 0;
@@ -100,6 +122,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     $FFLAGS  = $env->{FFLAGS};
     $FEXTEND = $env->{FEXTEND};
 
+
     # Resolve Mysql right away i.e. use the Linux local installed
     # library instead of the eventually provided /opt/star one.
     if (-d "/usr/include/mysql"){
@@ -118,7 +141,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     # Extraneous flag treatment for specific makers
     # Search path depth for Makers.
     #-
-
+    print "-=-=-=-=- Will now test $pkg\n" if ($param::debug);
     if ( $pkg =~ m/^StEventDisplay/){
 	# This make requires both ROOT Qt and QT libraries
 	if ( defined($QTDIR) && -r $ENV{ROOTSYS} . "/include/TQt.h"){
@@ -204,6 +227,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
 	$CPPPATH .= $main::PATH_SEPARATOR . $env->{CPPPATH};
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
+	#$SO_PKG = $PKG . "." . $env->{SUFSOLIB};
+
+	print "-=-=-=-=-=-= SO_PKG = $SO_PKG\n";
 
 
     } elsif ( $pkg =~ m/^StDaqLib$/ ) {
@@ -433,14 +459,14 @@ if ( $#idlL > -1 ) {
         $SO_PKGT = $PKGT . "." . $env->{SUFSOLIB};
         print "SO_PKGT = $SO_PKGT\n" if $param::debug;
         my $LIBPKGT = $PKGT . "." . $env->{SUFLIB};
+
         if ( $Dir =~ /StRoot\// ) {
             $SO_PKGT = $SO_PKG;
             $LIBPKGT = $LIBPKG;
-        }
-        else {
+        } else {
             printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir,
-              $PKGT )
-              unless ($param::quiet);
+		    $PKGT )
+		unless ($param::quiet);
         }
         Install $env $INCLUDE, @idlT;  # print "Install $env $INCLUDE, @idlT\n";
 
