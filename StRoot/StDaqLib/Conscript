@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl
 #use Env;
 Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
-(my $build = $BUILD) =~ s/\#//g;  #print "BUILD = $BUILD build = $build MAIN = $MAIN\n";
+(my $build = $OBJ) =~ s/\#//g;  #print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
 (my $Dir = DirPath '.') =~ s/$build\///g;
 my $CPPPATH = "$Dir:$env->{CPPPATH}"; #print "CPPPATH = $CPPPATH\n";
 $env2 = $env->clone(
