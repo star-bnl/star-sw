@@ -1,5 +1,8 @@
-// $Id: StEmcGainMonitor.h,v 1.1 2001/12/29 20:33:51 suaide Exp $
+// $Id: StEmcGainMonitor.h,v 1.2 2002/05/22 18:50:38 jklay Exp $
 // $Log: StEmcGainMonitor.h,v $
+// Revision 1.2  2002/05/22 18:50:38  jklay
+// Fixed bug in the way emcTowerGain table is filled
+//
 // Revision 1.1  2001/12/29 20:33:51  suaide
 // added documentation
 //
@@ -27,8 +30,10 @@ class StEmcGainMonitor : public TObject
     TH2F            *m_Tower;    //!
     TH2F            *m_TowerMean;//!
     TH2F            *m_TowerRMS; //!
-    TH2F            *m_TowerRelGain;//!
-    TH2F            *m_TowerRelGainDayByDay;//!
+    TH2F            *m_TowerRelGain;//!For ADC>30/ADC>0
+    TH2F            *m_TowerRelGainDayByDay;//!For ADC>30/ADC>0
+    TH2F            *m_TowerRelGain1;//!For ADC>80/ADC>30
+    TH2F            *m_TowerRelGainDayByDay1;//!For ADC>80/ADC>30
     TH2F            *m_TowerTmp; //!
 
     St_emcTowerGain *gainTable;
