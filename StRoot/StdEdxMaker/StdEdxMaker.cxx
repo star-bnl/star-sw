@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.21 2001/09/23 18:24:54 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.22 2001/09/26 23:25:24 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -68,7 +68,7 @@ const Double_t Masses[] = {0.93827231,
 			   0.51099907e-3,
 			   1.87561339};
 
-#include "dEdxPoint.h"
+#include "dEdxTrack.h"
 TableClassImpl(St_dEdxPoint,dEdxPoint);
 class MyTableSorter : public TTableSorter {
 public: 
@@ -79,36 +79,6 @@ public:
     TTableSorter(table, colName, firstRow, numbeRows){;}
   virtual ~MyTableSorter() {;}
   void **GetSortIndex() {return fSortIndex;}
-};
-struct dEdx_t {
-  Int_t sector;
-  Int_t row;
-  Int_t pad;
-  Int_t Fee;
-  Double_t dE;
-  Double_t dEU; // before correction
-  Double_t dx;
-  Double_t dEdx; 
-  Double_t dEdxU; 
-  Double_t dEdxP; // after pulser correction only
-  Double_t dEdxL; // log of dEdx
-  Double_t dEdxLU; // log of dEdx
-  Double_t dEdxN; // normolized to BB
-  Double_t dEdxNP; // normolized to BB
-  Double_t dETot; 
-  Double_t xyz[3];
-  Double_t Prob; 
-  Double_t SigmaFee;
-  Double_t xscale;
-  Double_t dEIpad;  // total charge integrated so far in the pad
-  Double_t dEI3pad; // total charge integrated so far in the pad +/-
-  Double_t dEIrow;  // total charge integrated so far in the row
-  Double_t dETrow;  // total charge not integrated (time bucket only) in the row
-  Double_t dET3row; // total charge not integrated (+0 + 2 time buckets only) in the row
-  Double_t dET5row; // total charge not integrated (+0 + 4 time buckets only) in the row
-  Double_t zdev; 
-  Double_t dY;      // Projection on the wire
-  Double_t RMS;     // rms from volume charge
 };
 enum EFitCase {kVal, kGrad};
 enum ESector  {kTpcInner, kTpcOuter};
@@ -208,6 +178,9 @@ TH1F *corrI1w = 0, *corrO1w = 0;
 //TProfile2D *XYZ = 0, *XYZbad = 0;
 TProfile2D *Ipad = 0, *I3pad = 0, *II3padI = 0,*II3padO = 0, *Irow = 0, *Trow = 0, *T3row = 0, *T5row = 0, *dYrow = 0;
 TProfile *histB[NHYPS][2], *histBB[NHYPS][2]; 
+TH3F *FdEdxSI = 0, *FdEdxSO = 0;
+TTree *ftree = 0;
+dEdxTrack *ftrack = 0;
 ClassImp(StdEdxMaker)  
 
 //_____________________________________________________________________________
@@ -303,6 +276,10 @@ Int_t StdEdxMaker::Init(){
 			  26,0.1, 1.4, 800,-15.,25.);
       FShapeO  = new TH2F("FShapeO","(log(dEdx)-<z_{fit}>)*(dx)**0.36 versus log(dx) for Outer Sector", 
 			  36,0.6, 2.4, 800,-15.,25.);
+      FdEdxSI  = new TH3F("FdEdxSI","dEdx versus log10(beta*gamma for pion) and log(dx) for Inner Sector", 
+			   50,-.5,2.,26,0.1, 1.4,1000,0,1.e-4);
+      FdEdxSO  = new TH3F("FdEdxSO","dEdx versus log10(beta*gamma for pion) and log(dx) for Outer Sector", 
+			   50,-.5,2.,36,0.6, 2.4,1000,0,1.e-4);
       for (int hyp=0; hyp<NHYPS;hyp++) {
 	for (int sCharge = 0; sCharge < 2; sCharge++) {
 	  TString nameP = Names[hyp];
@@ -343,6 +320,16 @@ Int_t StdEdxMaker::Init(){
       FitPull= new TH2F("FitPull","(zFit - log(I(pi)))/dzFit  versus track length", 
 			150,10.,160, 200,-5.,5.);
     }
+    // Create a ROOT Tree and one superbranch
+    ftree = new TTree("dEdxT","dEdx tree");
+    ftree->SetAutoSave(1000000000);  // autosave when 1 Gbyte written
+    Int_t bufsize = 64000;
+    Int_t split = 99;
+    if (split)  bufsize /= 4;
+    ftrack = new dEdxTrack();
+    TTree::SetBranchStyle(1); //new style by default
+    TBranch *branch = ftree->Branch("dEdxTrack", "dEdxTrack", &ftrack, bufsize,split);
+    branch->SetAutoDelete(kFALSE);
   }
   gMessMgr->SetLimit("StdEdxMaker:: mismatched Sector",20);
   gMessMgr->SetLimit("StdEdxMaker:: pad/TimeBucket out of range:",20);
@@ -621,20 +608,21 @@ Int_t StdEdxMaker::Make(){
   Double_t TimeScale = 1;
   if (m_tpcTime) {TimeScale = (*m_tpcTime)[0].ScaleFactor;}
   StHelixD         *helix      = 0;
-  Int_t iprim, jprim, iglob; 
+  Int_t iprim, iglob;  // jprim, 
   Int_t nPrimaryTracks = 0;
   Double_t pTinv = 0;
   Double_t p = 0;
   Double_t Eta = 0;
   Int_t NoFitPoints = 0;
-  dst_track_st *primTrk = 0, *globTrk = 0, *primTRK = 0;
+  dst_track_st *primTrk = 0, *globTrk = 0;//, *primTRK = 0;
+  Int_t sCharge = 0;
   if (primtrk) {
     primTrk = primtrk->GetTable();
     Int_t N = primtrk->GetNRows();
     for (iprim = 0; iprim < N; iprim++, primTrk++) 
       if (primTrk->iflag > 0) nPrimaryTracks++;
   }
-  Int_t kglob = 0, kprim = 0, kpoint = 0; 
+  Int_t kglob = 0, kpoint = 0; // kprim = 0, 
   Int_t N =  globtrkS->GetNRows();
   Int_t NP = 0; if (primtrkS) NP = primtrkS->GetNRows();
   for (; kglob < N;kglob++) {
@@ -645,40 +633,17 @@ Int_t StdEdxMaker::Make(){
     if (globTrk->iflag < 0) continue;
     Int_t Id = globTrk->id;
     SafeDelete(helix);
-    if (primtrkS && kprim < NP) {
-      for (; kprim < NP; kprim++) {
-	jprim = primtrkS->GetIndex(kprim); assert(jprim >=0);
-	primTRK = primtrk->GetTable() + jprim;
-	if (primTRK->iflag < 0) continue;
-	if (primTRK->id < Id) continue;
-	if (primTRK->id > Id) break;
-	iprim = jprim;
-	primTrk = primTRK;
-	helix  = primtrkC->MakeHelix(iprim,bField);
-	NoFitPoints = primTrk->n_fit_point;
-	kprim++;
-	if (m_Mode > 0) {
-	  Double_t tanl  = primTrk->tanl;
-	  pTinv  = primtrkC->Invpt(iprim);
-	  p = 1.e6;
-	  if (pTinv > 1.e-6) p = 1./pTinv*TMath::Sqrt(1. + tanl*tanl);
-	  Double_t Theta = TMath::Pi()/2 - TMath::ATan(tanl);
-	  Eta = - TMath::Log(TMath::Tan(Theta/2.));
-	}
-	break;
-      }
-    }
-    if (!helix) {
-      helix = globtrkC->MakeHelix(iglob,bField);
-      NoFitPoints = globTrk->n_fit_point;
-      if (m_Mode > 0) {
-	Double_t tanl  = globTrk->tanl;
-	pTinv  = globtrkC->Invpt(iglob);
-	p = 1.e6;
-	if (pTinv > 1.e-6) p = 1./pTinv*TMath::Sqrt(1. + tanl*tanl);
-	Double_t Theta = TMath::Pi()/2 - TMath::ATan(tanl);
-	Eta = - TMath::Log(TMath::Tan(Theta/2.));
-      }
+    helix = globtrkC->MakeHelix(iglob,bField);
+    NoFitPoints = globTrk->n_fit_point;
+    if (m_Mode > 0) {
+      Double_t tanl  = globTrk->tanl;
+      pTinv  = globtrkC->Invpt(iglob);
+      p = 1.e6;
+      if (pTinv > 1.e-6) p = 1./pTinv*TMath::Sqrt(1. + tanl*tanl);
+      Double_t Theta = TMath::Pi()/2 - TMath::ATan(tanl);
+      Eta = - TMath::Log(TMath::Tan(Theta/2.));
+      sCharge = 0;
+      if (globtrkC->Charge(iglob) < 0) sCharge = 1;
     }
     dst_dedx_st dedx;
     NPoints = 0;
@@ -689,8 +654,6 @@ Int_t StdEdxMaker::Make(){
     Int_t NoPoints =  pointS->GetNRows();
     for (;kpoint < NoPoints;kpoint++) {
       ipoint = pointS->GetIndex(kpoint); assert (ipoint >= 0);
-//       if (pointC->TrackId(ipoint) < Id) continue;
-//       if (pointC->TrackId(ipoint) > Id) break;
       if (dEdxP[ipoint].id_track < Id) continue;
       if (dEdxP[ipoint].id_track > Id) break;
       NPoints++;
@@ -860,10 +823,9 @@ Int_t StdEdxMaker::Make(){
       dedx.dedx[1]   =  fitdZ; // 0.660001*pow(TrackLength,-0.468743);// range = [25,140] cm
       dst_dedx->AddAt(&dedx);
     }
-    if (primtrkC && iprim >= 0&& m_Mode > 0) {
+    //    if (primtrkC && iprim >= 0&& m_Mode > 0) {
+    if (m_Mode > 0) {
       Double_t Pred[NHYPS], PredBB[NHYPS];
-      Int_t sCharge = 0;
-      if (primtrkC->Charge(iprim) < 0) sCharge = 1;
       for (int l = 0; l < NHYPS; l++) {
 	Pred[l] = 1.e-6*BetheBloch::Sirrf(p/Masses[l],TrackLength,l==3); 
 	//	Pred[l] = 1.e-6*BetheBloch::Sirrf(p/Masses[l],60.,l==3); 
@@ -968,9 +930,11 @@ Int_t StdEdxMaker::Make(){
 	    Shift -= ShapeMean3[lsc][0] + dxLog*(ShapeMean3[lsc][1] + dxLog*ShapeMean3[lsc][2]);
 	    if (FdEdx[k].row <= 13) {
 	      FShapeI->Fill(dxLog,Shift);
+	      FdEdxSI->Fill(TMath::Log10(p/Masses[2]),dxLog,FdEdx[k].dEdx);
 	    }
 	    else {
 	      FShapeO->Fill(dxLog,Shift);
+	      FdEdxSO->Fill(TMath::Log10(p/Masses[2]),dxLog,FdEdx[k].dEdx);
 	    }
 	  }
 	}
@@ -995,6 +959,36 @@ Int_t StdEdxMaker::Make(){
 	Double_t date = MyDate(GetDate(),GetTime());
 	Time->Fill(date,fitZ - TMath::Log(Pred[2]));
 	FitPull->Fill(TrackLength,(fitZ - TMath::Log(Pred[2]))/fitdZ);
+      }
+      // dE/dx tree
+      if (ftrack && ftree) {
+	ftrack->Clear();
+	ftrack->sCharge = 1 - 2*sCharge;
+	ftrack->p = p;
+	ftrack->Eta = Eta;
+	ftrack->R0 = globtrkC->R0(iglob);
+	ftrack->Z0 = globtrkC->Z0(iglob);
+	ftrack->Phi0 = globtrkC->Phi0(iglob);
+	ftrack->NoFitPoints = NoFitPoints;
+	ftrack->N70 = N70;
+	ftrack->I70 = I70;
+	ftrack->TrackLength70 = TrackLength70;
+	ftrack->N60 = N60;
+	ftrack->I60 = I60;
+	ftrack->TrackLength60 = TrackLength60;
+	ftrack->NdEdx = NdEdx;
+	ftrack->chisq = chisq;
+	ftrack->fitZ = fitZ;
+	ftrack->fitdZ = fitdZ;
+	ftrack->TrackLength = TrackLength;
+	ftrack->PredP = Pred[0];
+	ftrack->PredK = Pred[1];
+	ftrack->PredPi = Pred[2];
+	ftrack->PredE = Pred[3];
+	for (k = 0; k < NdEdx; k++) {
+	  ftrack->AddPoint(FdEdx[k]);
+	}
+	ftree->Fill();
       }
     }
   }
@@ -1023,7 +1017,8 @@ void StdEdxMaker::SortdEdx(dEdx_t *dEdxS, Int_t NdEdx) {
 }
 //__________________________________________________
 Double_t StdEdxMaker::MyDate(Int_t date,Int_t time) {// combine date in time in one number startig 07/01/2000
-  Int_t md = date-20000000; // printf("md %i\n",md);
+  //  Int_t md = date-20000000; // printf("md %i\n",md);
+  Int_t md = date%10000; // printf("md %i\n",md);
   Int_t d  = md%100;        // printf("d %i\n",d);
   Int_t m  = md/100;        // printf("m %i\n",m);
   Double_t dd = d;

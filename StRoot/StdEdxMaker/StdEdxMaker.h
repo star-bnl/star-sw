@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.h,v 1.6 2001/08/07 20:22:00 fisyak Exp $
+// $Id: StdEdxMaker.h,v 1.7 2001/09/26 23:25:24 fisyak Exp $
 #ifndef STAR_StdEdxMaker
 #define STAR_StdEdxMaker
 
@@ -12,13 +12,13 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include "dEdxPoint.h"
 class St_fee_vs_pad_row;
 class St_TpcTimeGain;
 class St_TpcDriftDistCorr;
 class St_tpcBadPad;
 class StThreeVectorD;
 class St_TpcSecRowCor;
-class dEdx_t;
 class StdEdxMaker : public StMaker {
  private:
   St_TpcSecRowCor     *m_TpcSecRow;     //!
@@ -43,7 +43,7 @@ class StdEdxMaker : public StMaker {
   void DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxMaker.h,v 1.6 2001/08/07 20:22:00 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxMaker.h,v 1.7 2001/09/26 23:25:24 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
