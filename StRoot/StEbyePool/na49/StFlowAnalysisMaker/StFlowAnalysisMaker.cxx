@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.2 2001/03/16 22:42:00 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.3 2001/05/14 22:53:37 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,10 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.3  2001/05/14 22:53:37  posk
+// Can select PID for event plane particles. Protons not used for 1st harmonic
+// event plane.
+//
 // Revision 1.2  2001/03/16 22:42:00  posk
 // Removed pt weighting for odd harmonics.
 //
@@ -934,24 +938,26 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    Fill(fmod((double)dPhi, twopi / order));
 	}
 
-	// fill mean sin/cos tabels
-	histFull[k].histFullHar[j].mHistMeanCos->Fill(rapidity, pt, 
-						      cos(order * phi));
-	histFull[k].histFullHar[j].mHistMeanSin->Fill(rapidity, pt, 
-						      sin(order * phi));
-	// fill mean sin/cos after shifting
-	double meanCos = pFlowEvent->MeanCos(rapidity, pt, j);
-	double meanSin = pFlowEvent->MeanSin(rapidity, pt, j);
-	histFull[k].histFullHar[j].mHistMeanCosFlat->Fill(rapidity, pt, 
-	  cos(order * phi) - meanCos);
-	histFull[k].histFullHar[j].mHistMeanSinFlat->Fill(rapidity, pt, 
-	  sin(order * phi) - meanSin);
-	
-	//for testing
-// 	  histFull[k].histFullHar[j].mHistMeanCosFlat->Fill(rapidity, pt,
-// 							    meanCos);
-// 	  histFull[k].histFullHar[j].mHistMeanSinFlat->Fill(rapidity, pt, 
-// 							    meanSin);
+	if (pFlowSelect->Select(pFlowTrack)) {
+	  // fill mean sin/cos tabels
+	  histFull[k].histFullHar[j].mHistMeanCos->Fill(rapidity, pt, 
+							cos(order * phi));
+	  histFull[k].histFullHar[j].mHistMeanSin->Fill(rapidity, pt, 
+							sin(order * phi));
+	  // fill mean sin/cos after shifting
+	  double meanCos = pFlowEvent->MeanCos(rapidity, pt, j);
+	  double meanSin = pFlowEvent->MeanSin(rapidity, pt, j);
+	  histFull[k].histFullHar[j].mHistMeanCosFlat->Fill(rapidity, pt, 
+				cos(order * phi) - meanCos);
+	  histFull[k].histFullHar[j].mHistMeanSinFlat->Fill(rapidity, pt, 
+				sin(order * phi) - meanSin);
+	  
+	  //for testing
+	  //  histFull[k].histFullHar[j].mHistMeanCosFlat->Fill(rapidity, pt,
+	  // 							    meanCos);
+	  //  histFull[k].histFullHar[j].mHistMeanSinFlat->Fill(rapidity, pt, 
+	  // 							    meanSin);
+	}
       }
     }  
   }
@@ -1146,7 +1152,7 @@ Int_t StFlowAnalysisMaker::Finish() {
 	       (mResErr[k][j]/mRes[k][j])*(mResErr[k][j]/mRes[k][j]));
 	histFull[k].mHist_v->SetBinError(j+1, totalError);
 	cout << "##### v" << j+1 << "= (" << content << " +/- " << error << 
-	  " +/- " << totalError << ") %" << endl;
+	  " +/- " << totalError << "(with syst.)) %" << endl;
       } else {
 	cout << "##### Resolution of the " << j+1 << "th harmonic was zero."
 	     << endl;
