@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.4 2001/04/28 22:05:13 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.5 2001/05/16 20:57:03 lansdell Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.5  2001/05/16 20:57:03  lansdell
+// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
+//
 // Revision 2.4  2001/04/28 22:05:13  genevb
 // Added EMC histograms
 //
@@ -39,11 +42,11 @@ class StQABookHist : public TObject {
   StQABookHist() {}
   StQABookHist(const char *type);
   virtual       ~StQABookHist() {}
-  virtual void   BookHist();
+  virtual void   BookHist(Int_t histsSet);
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.4 2001/04/28 22:05:13 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.5 2001/05/16 20:57:03 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -108,12 +111,13 @@ class StQABookHist : public TObject {
 
   
   // for method MakeGlob - from table globtrk
-  TH1F     *m_z_hits;           //! z dist. of hits
   TH1F     *m_globtrk_fit_prob; //!
   TH1F     *m_globtrk_tot;      //! # tracks in table
-  TH1F     *m_globtrk_tot_sm;   //! # tracks in table, small range
   TH1F     *m_globtrk_good;     //! # tracks in table with iflag>0 
   TH1F     *m_globtrk_good_sm;  //! # tracks in table with iflag>0,small range
+  TH2F     *m_globtrk_good_tot; //! ratio of good to total tracks, tpc, svt
+  TH1F     *m_globtrk_goodTTS;  //! # tracks in table with iflag>0, tpc, tpc+svt
+  TH2F     *m_globtrk_goodF;    //! # tracks in table with iflag>0, ftpc
   TH1F     *m_globtrk_iflag;    //! iflag value
   TH1F     *m_det_id;           //! detector id of track
   TH2F     *m_dcaToBeamXY;      //! xy-dca to beam axis
@@ -127,47 +131,55 @@ class StQABookHist : public TObject {
 
   TH1F     *m_pointT;        //! number of points on the track - tpc
   TH1F     *m_pointTS;       //! number of points on the track - tpc+svt
+  TH2F     *m_pointF;        //! number of points on the track - ftpc
   TH1F     *m_pointFE;       //! number of points on the track - ftpc east
   TH1F     *m_pointFW;       //! number of points on the track - ftpc west
   TH1F     *m_max_pointT;    //! number of max possible track points - tpc
   TH1F     *m_max_pointTS;   //! number of max possible track points - tpc+svt
+  TH2F     *m_max_pointF;    //! number of max possible track points - ftpc
   TH1F     *m_max_pointFE;   //! number of max possible track points - ftpc east
   TH1F     *m_max_pointFW;   //! number of max possible track points - ftpc west
   TH1F     *m_fit_pointT;    //! number of track points used for fitting - tpc
   TH1F     *m_fit_pointTS;   //! number of track points used for fitting - tpc+svt
-  TH1F     *m_fit_pointFE;   //! number of track points used for fitting - ftpc east
-  TH1F     *m_fit_pointFW;   //! number of track points used for fitting - ftpc west
+  TH2F     *m_fit_pointTTS;  //! number of track points used for fitting - tpc,tpc+svt
   TH1F     *m_glb_ratioT;    //! ratio of n fit pnts over tot n pnts - tpc
   TH1F     *m_glb_ratioTS;   //! ratio of n fit pnts over tot n pnts - tpc+svt
-  TH1F     *m_glb_ratioFE;   //! ratio of n fit pnts over tot n pnts - ftpc east
-  TH1F     *m_glb_ratioFW;   //! ratio of n fit pnts over tot n pnts - ftpc west
+  TH2F     *m_glb_ratioTTS;  //! ratio of n fit pnts over tot n pnts - tpc,tpc+svt
+  TH2F     *m_glb_ratiomTTS; //! ratio of n fit pnts over max n pnts - tpc,tpc+svt
   TH1F     *m_glb_ratiomT;   //! ratio of n fit pnts over max n pnts - tpc
   TH1F     *m_glb_ratiomTS;  //! ratio of n fit pnts over max n pnts - tpc+svt
+  TH2F     *m_glb_ratiomF;   //! ratio of n fit pnts over max n pnts - ftpc
   TH1F     *m_glb_ratiomFE;  //! ratio of n fit pnts over max n pnts - ftpc east
   TH1F     *m_glb_ratiomFW;  //! ratio of n fit pnts over max n pnts - ftpc west
   TH1F     *m_glb_chargeT;   //! particle charge in units of |e| - tpc
   TH1F     *m_glb_chargeTS;  //! particle charge in units of |e| - tpc+svt
+  TH2F     *m_glb_chargeF;   //! particle charge in units of |e| - ftpc
   TH1F     *m_glb_chargeFE;  //! particle charge in units of |e| - ftpc east
   TH1F     *m_glb_chargeFW;  //! particle charge in units of |e| - ftpc west
+  TH1F     *m_glb_layerfTS;  //! layer of first point on trk, tpc+svt
   TH1F     *m_glb_r0T;       //! radius at start (cm), tpc 
   TH1F     *m_glb_r0TS;      //! radius at start (cm), tpc+svt
   TH1F     *m_glb_phi0T;     //! azimuthal angle at start (deg), tpc
   TH1F     *m_glb_phi0TS;    //! azimuthal angle at start (deg), tpc+svt
   TH1F     *m_glb_z0T;       //! z-coord at start (cm), tpc 
   TH1F     *m_glb_z0TS;      //! z-coord at start (cm), tpc+svt
-  TH1F     *m_glb_padfT;     //! y-coord. of first hit on trk, tpc
+  TH1F     *m_glb_padfT;     //! padrow of first hit on trk, tpc
+  TH2F     *m_glb_padfTEW;   //! padrow of first hit on trk, tpc east and west
   TH1F     *m_glb_curvT;     //! curvature (1/cm), tpc
   TH1F     *m_glb_curvTS;    //! curvature (1/cm), tpc+svt
   TH1F     *m_glb_xfT;       //! x-coord. of first hit on trk, tpc
   TH1F     *m_glb_xfTS;      //! x-coord. of first hit on trk, tpc+svt
+  TH2F     *m_glb_xfF;       //! x-coord. of first hit on trk, ftpc
   TH1F     *m_glb_xfFE;      //! x-coord. of first hit on trk, ftpc east
   TH1F     *m_glb_xfFW;      //! x-coord. of first hit on trk, ftpc west
   TH1F     *m_glb_yfT;       //! y-coord. of first hit on trk, tpc
   TH1F     *m_glb_yfTS;      //! y-coord. of first hit on trk, tpc+svt
+  TH2F     *m_glb_yfF;       //! y-coord. of first hit on trk, ftpc
   TH1F     *m_glb_yfFE;      //! y-coord. of first hit on trk, ftpc east
   TH1F     *m_glb_yfFW;      //! y-coord. of first hit on trk, ftpc west
   TH1F     *m_glb_zfT;       //! z-coord. of first hit on trk, tpc
   TH1F     *m_glb_zfTS;      //! z-coord. of first hit on trk, tpc+svt
+  TH2F     *m_glb_zfF;       //! z-coord. of first hit on trk, ftpc
   TH1F     *m_glb_zfFE;      //! z-coord. of first hit on trk, ftpc east
   TH1F     *m_glb_zfFW;      //! z-coord. of first hit on trk, ftpc west
   TH1F     *m_glb_xf0;       //! x-coord. of first hit - at start of helix
@@ -176,17 +188,28 @@ class StQABookHist : public TObject {
   TH1F     *m_glb_yf0TS;     //! y-coord. of first hit - at start of helix+svt
   TH1F     *m_glb_zf0;       //! z-coord. of first hit - at start of helix
   TH1F     *m_glb_zf0TS;     //! z-coord. of first hit - at start of helix+svt
+  TH2F     *m_glb_rzf0;      //! transverse & longitudinal helix center of first hit - helix hit
+  TH2F     *m_glb_rzf0TS;    //! transverse & longitudinal helix center of first hit - helix hit+svt
   TH1F     *m_glb_radfT;     //! radial (xy) coordinate of first hit, tpc
   TH1F     *m_glb_radfTS;    //! radial (xy) coordinate of first hit, tpc+svt
+  TH2F     *m_glb_phifT;     //! phi dist. of first point on trk, tpc
+  TH1F     *m_glb_phifTS;    //! phi dist. of first point on trk, tpc+svt
   TH1F     *m_lengthTS;      //! length of track, tpc+svt
   TH1F     *m_chisq0TS;      //! chi square [0], tpc+svt
   TH1F     *m_chisq1TS;      //! chi square [1], tpc+svt
-  TH1F     *m_glb_impactTS;  //! impact parameter from primary vertex, tpc+svt
+  TH1F     *m_glb_impactTS;  //! log impact parameter from primary vertex, tpc+svt
+  TH2F     *m_glb_impactTTS; //! log impact parameter from primary vertex, tpc,tpc+svt
+  TH2F     *m_glb_impactF;   //! log impact parameter from primary vertex, ftpc
   TH1F     *m_glb_impactrTS; //! impact parameter from primary vertex, tpc+svt
+  TH2F     *m_glb_impactrTTS;//! impact parameter from primary vertex, tpc,tpc+svt
+  TH2F     *m_glb_impactrF;  //! impact parameter from primary vertex, ftpc
+  TH2F     *m_glb_radfF;     //! radial (xy) coordinate of first hit, ftpc
   TH1F     *m_glb_radfFE;    //! radial (xy) coordinate of first hit, ftpc east
   TH1F     *m_glb_radfFW;    //! radial (xy) coordinate of first hit, ftpc west
   TH1F     *m_psiT;          //! psi reconstructed, tpc
   TH1F     *m_psiTS;         //! psi reconstructed, tpc+svt
+  TH2F     *m_psiTTS;        //! psi reconstructed, tpc,tpc+svt
+  TH2F     *m_psiF;          //! psi reconstructed, ftpc
   TH1F     *m_psiFE;         //! psi reconstructed, ftpc east
   TH1F     *m_psiFW;         //! psi reconstructed, ftpc west
   TH1F     *m_tanlT;         //! tan(dip) =pz/pt at start, tpc
@@ -195,25 +218,32 @@ class StQABookHist : public TObject {
   TH1F     *m_glb_thetaTS;   //! theta - tpc+svt
   TH1F     *m_etaT;          //! eta, tpc
   TH1F     *m_etaTS;         //! eta, tpc+svt
+  TH2F     *m_etaTTS;        //! eta, tpc,tpc+svt
+  TH2F     *m_etaF;          //! eta, ftpc
   TH1F     *m_etaFE;         //! eta, ftpc east
   TH1F     *m_etaFW;         //! eta, ftpc west
   TH1F     *m_momT;          //! momentum, tpc
   TH1F     *m_momTS;         //! momentum, tpc+svt
+  TH2F     *m_momF;          //! momentum, ftpc
   TH1F     *m_momFE;         //! momentum, ftpc east
   TH1F     *m_momFW;         //! momentum, ftpc west
   TH1F     *m_pTT;           //! pT, tpc
   TH1F     *m_pTTS;          //! pT, tpc+svt
+  TH2F     *m_pTTTS;         //! pT, tpc,tpc+svt
+  TH2F     *m_pTF;           //! pT, ftpc
   TH1F     *m_pTFE;          //! pT, ftpc east
   TH1F     *m_pTFW;          //! pT, ftpc west
   TH1F     *m_lengthT;       //! length of track, tpc
+  TH2F     *m_lengthF;       //! length of track, ftpc
   TH1F     *m_lengthFE;      //! length of track, ftpc east
   TH1F     *m_lengthFW;      //! length of track, ftpc west
   TH1F     *m_chisq0T;       //! chi square [0], tpc
+  TH2F     *m_chisq0TTS;     //! chi square [0], tpc,svt
+  TH2F     *m_chisq0F;       //! chi square [0], ftpc
   TH1F     *m_chisq0FE;      //! chi square [0], ftpc east
   TH1F     *m_chisq0FW;      //! chi square [0], ftpc west
   TH1F     *m_chisq1T;       //! chi square [1], tpc
-  TH1F     *m_chisq1FE;      //! chi square [1], ftpc east
-  TH1F     *m_chisq1FW;      //! chi square [1], ftpc west
+  TH2F     *m_chisq1TTS;     //! chi square [1], tpc,svt
   TH1F     *m_glb_impactT;   //! impact parameter from primary vertex, tpc
   TH1F     *m_glb_impactrT;  //! impact parameter from primary vertex, tpc
 
@@ -237,8 +267,6 @@ class StQABookHist : public TObject {
   TH2F     *m_eta_trklengthFW; //! trk length vs. eta, ftpc west
   TH2F     *m_fpoint_lengthT;  //! num fit points vs length, tpc
   TH2F     *m_fpoint_lengthTS; //! num fit points vs length, tpc+svt
-  TH2F     *m_fpoint_lengthFE; //! num fit points vs length, ftpc east
-  TH2F     *m_fpoint_lengthFW; //! num fit points vs length, ftpc west
   TH2F     *m_npoint_lengthT;  //! tot num points vs length, tpc
   TH2F     *m_npoint_lengthTS; //! tot num points vs length, tpc+svt
   TH2F     *m_npoint_lengthFE; //! tot num points vs length, ftpc east
@@ -274,45 +302,58 @@ class StQABookHist : public TObject {
   TH1F     *m_ndedxT;        //! number of point to find dE/dx, tpc
   TH1F     *m_dedx0T;        //! dE/dx [0], tpc
   TH1F     *m_dedx1T;        //! dE/dx [1], tpc
-
+  TH1F     *m_dedxTTS;       //! <dE/dx>/(Bethe-Bloch <dE/dx>), tpc,tpc+svt
+  // east and west on same plot
+  TH2F     *m_ndedxF;        //! number of point to find dE/dx, ftpc
+  TH2F     *m_dedx0F;        //! dE/dx [0], ftpc
+  // east and west on separate plots
   TH1F     *m_ndedxFE;       //! number of point to find dE/dx, ftpcE
   TH1F     *m_dedx0FE;       //! dE/dx [0], ftpcE
-  TH1F     *m_dedx1FE;       //! dE/dx [1], ftpcE
 
   TH1F     *m_ndedxFW;       //! number of point to find dE/dx, ftpcW
   TH1F     *m_dedx0FW;       //! dE/dx [0], ftpcW
-  TH1F     *m_dedx1FW;       //! dE/dx [1], ftpcW
 
 // for method MakeHistPrim - from table primtrk
   TH1F     *m_primtrk_tot;    //! # tracks in table
   TH1F     *m_primtrk_tot_sm; //! # tracks in table, small range
   TH1F     *m_primtrk_good;   //! # tracks in table with iflag>0
   TH1F     *m_primtrk_good_sm;//! # tracks in table with iflag>0, small range
+  TH1F     *m_primtrk_goodTTS;//! # tracks in table with iflag>0, tpc,svt
+  TH2F     *m_primtrk_goodF;  //! # tracks in table with iflag>0, ftpc
+  TH1F     *m_primglob_good;  //! # trks w/ iflag>0, ratio prim/glob, all detectors
+  TH1F     *m_primglob_fit;   //! # fit points ratio prim/glob, all detectors
   TH1F     *m_primtrk_iflag;  //! iflag value
   TH1F     *m_pdet_id;        //! detector id of track
+  TH2F     *m_primtrk_meanptTTS;  //! <pT>, tpc, tpc+svt
+  TH2F     *m_primtrk_meanptF;    //! <pT>, ftpc
+  TH2F     *m_primtrk_meanetaTTS; //! <eta>, tpc, tpc+svt
+  TH2F     *m_primtrk_meanetaF;   //! <eta>, ftpc
 
   TH1F     *m_ppointT;        //! number of points on the track - tpc
   TH1F     *m_ppointTS;       //! number of points on the track - tpc+svt
+  TH2F     *m_ppointF;        //! number of points on the track - ftpc
   TH1F     *m_ppointFE;       //! number of points on the track - ftpc east
   TH1F     *m_ppointFW;       //! number of points on the track - ftpc west
   TH1F     *m_pmax_pointT;    //! number of max possible track points - tpc
   TH1F     *m_pmax_pointTS;   //! number of max possible track points - tpc+svt
+  TH2F     *m_pmax_pointF;    //! number of max possible track points - ftpc
   TH1F     *m_pmax_pointFE;   //! number of max possible track points - ftpc east
   TH1F     *m_pmax_pointFW;   //! number of max possible track points - ftpc west
   TH1F     *m_pfit_pointT;    //! number of track points used for fitting - tpc
   TH1F     *m_pfit_pointTS;   //! number of track points used for fitting - tpc+svt
-  TH1F     *m_pfit_pointFE;   //! number of track points used for fitting - ftpc east
-  TH1F     *m_pfit_pointFW;   //! number of track points used for fitting - ftpc west
   TH1F     *m_prim_ratioT;    //! ratio of n fit pnts over tot n pnts - tpc
   TH1F     *m_prim_ratioTS;   //! ratio of n fit pnts over tot n pnts - tpc+svt
+  TH2F     *m_prim_ratioF;    //! ratio of n fit pnts over tot n pnts - ftpc
   TH1F     *m_prim_ratioFE;   //! ratio of n fit pnts over tot n pnts - ftpc east
   TH1F     *m_prim_ratioFW;   //! ratio of n fit pnts over tot n pnts - ftpc west
   TH1F     *m_prim_ratiomT;   //! ratio of n fit pnts over max n pnts - tpc
   TH1F     *m_prim_ratiomTS;  //! ratio of n fit pnts over max n pnts - tpc+svt
+  TH2F     *m_prim_ratiomF;   //! ratio of n fit pnts over max n pnts - ftpc
   TH1F     *m_prim_ratiomFE;  //! ratio of n fit pnts over max n pnts - ftpc east
   TH1F     *m_prim_ratiomFW;  //! ratio of n fit pnts over max n pnts - ftpc west
   TH1F     *m_prim_chargeT;   //! particle charge in units of |e| - tpc
   TH1F     *m_prim_chargeTS;  //! particle charge in units of |e| - tpc+svt
+  TH2F     *m_prim_chargeF;   //! particle charge in units of |e| - ftpc
   TH1F     *m_prim_chargeFE;  //! particle charge in units of |e| - ftpc east
   TH1F     *m_prim_chargeFW;  //! particle charge in units of |e| - ftpc west
   TH1F     *m_prim_r0T;       //! radius at start (cm), tpc 
@@ -325,14 +366,17 @@ class StQABookHist : public TObject {
   TH1F     *m_prim_curvTS;    //! curvature (1/cm), tpc+svt
   TH1F     *m_prim_xfT;       //! x-coord. of first hit on trk, tpc
   TH1F     *m_prim_xfTS;      //! x-coord. of first hit on trk, tpc+svt
+  TH2F     *m_prim_xfF;       //! x-coord. of first hit on trk, ftpc
   TH1F     *m_prim_xfFE;      //! x-coord. of first hit on trk, ftpc east
   TH1F     *m_prim_xfFW;      //! x-coord. of first hit on trk, ftpc west
   TH1F     *m_prim_yfT;       //! y-coord. of first hit on trk, tpc
   TH1F     *m_prim_yfTS;      //! y-coord. of first hit on trk, tpc+svt
+  TH2F     *m_prim_yfF;       //! y-coord. of first hit on trk, ftpc
   TH1F     *m_prim_yfFE;      //! y-coord. of first hit on trk, ftpc east
   TH1F     *m_prim_yfFW;      //! y-coord. of first hit on trk, ftpc west
   TH1F     *m_prim_zfT;       //! z-coord. of first hit on trk, tpc
   TH1F     *m_prim_zfTS;      //! z-coord. of first hit on trk, tpc+svt
+  TH2F     *m_prim_zfF;       //! z-coord. of first hit on trk, ftpc
   TH1F     *m_prim_zfFE;      //! z-coord. of first hit on trk, ftpc east
   TH1F     *m_prim_zfFW;      //! z-coord. of first hit on trk, ftpc west
   TH1F     *m_prim_xf0;       //! x-coord. of first hit - at start of helix
@@ -341,12 +385,17 @@ class StQABookHist : public TObject {
   TH1F     *m_prim_yf0TS;     //! y-coord. of first hit - at start of helix+svt
   TH1F     *m_prim_zf0;       //! z-coord. of first hit - at start of helix
   TH1F     *m_prim_zf0TS;     //! z-coord. of first hit - at start of helix+svt
+  TH2F     *m_prim_rzf0;      //! transverse & longitudinal helix center of first hit - helix hit
+  TH2F     *m_prim_rzf0TS;    //! transverse & longitudinal helix center of first hit - helix hit+svt
   TH1F     *m_prim_radfT;     //! radial (xy) coordinate of first hit, tpc
   TH1F     *m_prim_radfTS;    //! radial (xy) coordinate of first hit, tpc+svt
+  TH2F     *m_prim_radfF;     //! radial (xy) coordinate of first hit, ftpc
   TH1F     *m_prim_radfFE;    //! radial (xy) coordinate of first hit, ftpc east
   TH1F     *m_prim_radfFW;    //! radial (xy) coordinate of first hit, ftpc west
   TH1F     *m_ppsiT;          //! psi reconstructed, tpc
   TH1F     *m_ppsiTS;         //! psi reconstructed, tpc+svt
+  TH2F     *m_ppsiTTS;        //! psi reconstructed, tpc,tpc+svt
+  TH2F     *m_ppsiF;          //! psi reconstructed, ftpc
   TH1F     *m_ppsiFE;         //! psi reconstructed, ftpc east
   TH1F     *m_ppsiFW;         //! psi reconstructed, ftpc west
   TH1F     *m_ptanlT;         //! tan(dip) =pz/pt at start, tpc
@@ -355,32 +404,43 @@ class StQABookHist : public TObject {
   TH1F     *m_prim_thetaTS;   //! theta - tpc+svt
   TH1F     *m_petaT;          //! eta, tpc
   TH1F     *m_petaTS;         //! eta, tpc+svt
+  TH2F     *m_petaTTS;        //! eta, tpc,tpc+svt
+  TH2F     *m_petaF;          //! eta, ftpc
   TH1F     *m_petaFE;         //! eta, ftpc east
   TH1F     *m_petaFW;         //! eta, ftpc west
   TH1F     *m_pmomT;          //! momentum, tpc
   TH1F     *m_pmomTS;         //! momentum, tpc+svt
+  TH2F     *m_pmomF;          //! momentum, ftpc
   TH1F     *m_pmomFE;         //! momentum, ftpc east
   TH1F     *m_pmomFW;         //! momentum, ftpc west
   TH1F     *m_ppTT;           //! pT, tpc
   TH1F     *m_ppTTS;          //! pT, tpc+svt
+  TH2F     *m_ppTTTS;         //! pT, tpc,tpc+svt
+  TH2F     *m_ppTF;           //! pT, ftpc
   TH1F     *m_ppTFE;          //! pT, ftpc east
   TH1F     *m_ppTFW;          //! pT, ftpc west
   TH1F     *m_plengthT;       //! length of track, tpc
   TH1F     *m_plengthTS;      //! length of track, tpc+svt
+  TH2F     *m_plengthF;       //! length of track, ftpc
   TH1F     *m_plengthFE;      //! length of track, ftpc east
   TH1F     *m_plengthFW;      //! length of track, ftpc west
   TH1F     *m_pchisq0T;       //! chi square [0], tpc
   TH1F     *m_pchisq0TS;      //! chi square [0], tpc+svt
+  TH2F     *m_pchisq0TTS;     //! chi square [0], tpc,tpc+svt
+  TH2F     *m_pchisq0F;       //! chi square [0], ftpc
   TH1F     *m_pchisq0FE;      //! chi square [0], ftpc east
   TH1F     *m_pchisq0FW;      //! chi square [0], ftpc west
   TH1F     *m_pchisq1T;       //! chi square [1], tpc
   TH1F     *m_pchisq1TS;      //! chi square [1], tpc+svt
-  TH1F     *m_pchisq1FE;      //! chi square [1], ftpc east
-  TH1F     *m_pchisq1FW;      //! chi square [1], ftpc west
-  TH1F     *m_prim_impactT;   //! impact parameter from primary vertex, tpc
-  TH1F     *m_prim_impactTS;  //! impact parameter from primary vertex, tpc+svt
+  TH2F     *m_pchisq1TTS;     //! chi square [1], tpc,tpc+svt
+  TH1F     *m_prim_impactT;   //! log impact parameter from primary vertex, tpc
+  TH1F     *m_prim_impactTS;  //! log impact parameter from primary vertex, tpc+svt
+  TH2F     *m_prim_impactTTS; //! log impact parameter from primary vertex, tpc,tpc+svt
+  TH2F     *m_prim_impactF;   //! log impact parameter from primary vertex, ftpc
   TH1F     *m_prim_impactrT;  //! impact parameter from primary vertex, tpc
   TH1F     *m_prim_impactrTS; //! impact parameter from primary vertex, tpc+svt
+  TH2F     *m_prim_impactrTTS; //! impact parameter from primary vertex, tpc,tpc+svt
+  TH2F     *m_prim_impactrF;  //! impact parameter from primary vertex, fptc
 
   TH2F     *m_prim_f0;          //! overlayed hist of first point - helix point
   TH2F     *m_prim_f0TS;        //! overlayed hist of first point - helix point
@@ -402,8 +462,6 @@ class StQABookHist : public TObject {
   TH2F     *m_peta_trklengthFW; //! trk length vs. eta, ftpc west
   TH2F     *m_pfpoint_lengthT;  //! num fit points vs length, tpc
   TH2F     *m_pfpoint_lengthTS; //! num fit points vs length, tpc+svt
-  TH2F     *m_pfpoint_lengthFE; //! num fit points vs length, ftpc east
-  TH2F     *m_pfpoint_lengthFW; //! num fit points vs length, ftpc west
   TH2F     *m_pnpoint_lengthT;  //! tot num points vs length, tpc
   TH2F     *m_pnpoint_lengthTS; //! tot num points vs length, tpc+svt
   TH2F     *m_pnpoint_lengthFE; //! tot num points vs length, ftpc east
@@ -431,19 +489,6 @@ class StQABookHist : public TObject {
   TH2F     *m_ppsi_phiT;        //! psi vs phi, tpc
   TH2F     *m_ppsi_phiTS;       //! psi vs phi, tpc+svt
 
-// for method MakeHistGen - from table particle
-  TH2F     *m_H_pT_eta_gen; //! pT versus eta Spectra for generated
-  TH1F     *m_H_pT_gen;     //! pT Spectra for generated
-  TH1F     *m_H_pT_genT;    //! pT Spectra for generated, tpc
-  TH1F     *m_H_eta_gen;    //! eta Spectra for generated
-  TH1F     *m_H_vtxx;       //! production vertex (mm)
-  TH1F     *m_H_vtxy;       //! production vertex (mm)
-  TH1F     *m_H_vtxz;       //! production vertex (mm)
-  TH1F     *m_H_npart;      //! total num particles generated
-  TH1F     *m_H_npart_sm;   //! total num particles generated, small rnage
-  TH1F     *m_H_ncpart;     //! num chg e,mu,proton,kaon,pion
-  TH1F     *m_H_ncpart_sm;  //! num chg e,mu,proton,kaon,pion, small range
-
 // for MakeHistPID - from tables primtrk & dst_dedx 
   TH2F     *m_p_dedx_rec;   //! dedx vs p
 
@@ -461,12 +506,15 @@ class StQABookHist : public TObject {
   TH1F     *m_pv_x;     //! row1-vertex coordinates in
   TH1F     *m_pv_y;     //!  STAR reference 
   TH1F     *m_pv_z;     //!   system
+  TH2F     *m_pv_xy;    //! x versus y
   TH1F     *m_pv_pchi2; //! row1-chisq per dof of vertex fit
   TH1F     *m_pv_r;     //! radius to primary vertex
 
   TH1F     *m_vtx_z;    //! resolution of SVT vertex finder relative
                         //! to main vertex finder
-  TH1F     *m_vtx_phi_dist;  //! azimuthal distribution of V0s
+  TH1F     *m_vtx_phi_dist;  //! azimuthal distribution of V0s relative to primVtx
+  TH1F     *m_vtx_r_dist;  //! radial distribution of V0s relative to primVtx
+  TH1F     *m_vtx_z_dist;  //! z distribution of V0s relative to primVtx
 
   // from table dst_v0_vertex
   TH1F     *m_v0;            //! # v0 vertices
@@ -481,6 +529,13 @@ class StQABookHist : public TObject {
   TH1F     *m_kink_tot;   //! number of kinks
   
 // for method MakeHistPoint
+  TH1F     *m_z_hits;      //! z dist. of hits, tpc
+  TH1F     *m_pnt_zS;      //! z dist. of hits, svt
+  TH2F     *m_pnt_phiT;    //! phi dist. of hits, tpc
+  TH1F     *m_pnt_phiS;    //! phi dist. of hits, svt
+  TH2F     *m_pnt_padrowT; //! padrow dist. of hits, tpc
+  TH1F     *m_pnt_barrelS; //! barrel dist. of hits, svt
+  TH2F     *m_pnt_planeF;  //! plane dist. of hits, ftpc
   TH1F     *m_pnt_tot;     //! number of hits total
   TH1F     *m_pnt_tot_med; //! number of hits total, med range
   TH1F     *m_pnt_tot_sm;  //! number of hits total, small range
@@ -489,6 +544,7 @@ class StQABookHist : public TObject {
   TH1F     *m_pnt_tpc;   //! number of hits tpc
   TH1F     *m_pnt_svt;   //! number of hits svt
   TH1F     *m_pnt_ssd;   //! number of hits ssd
+  TH2F     *m_pnt_ftpc;    //! number of hits ftpc
   TH1F     *m_pnt_ftpcE;   //! number of hits ftpcE
   TH1F     *m_pnt_ftpcW;   //! number of hits ftpcW
     
@@ -544,7 +600,6 @@ class StQABookHist : public TObject {
   virtual void   BookHistGlob();
   virtual void   BookHistDE();
   virtual void   BookHistPrim();
-  virtual void   BookHistGen();
   virtual void   BookHistPID();
   virtual void   BookHistVertex();
   virtual void   BookHistPoint();

@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_year1.h,v 2.3 2001/04/24 22:53:50 lansdell Exp $
+// $Id: QAhlist_EventQA_year1.h,v 2.4 2001/05/16 20:57:02 lansdell Exp $
 // $Log: QAhlist_EventQA_year1.h,v $
+// Revision 2.4  2001/05/16 20:57:02  lansdell
+// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
+//
 // Revision 2.3  2001/04/24 22:53:50  lansdell
 // Removed redundant radial position of first hit histograms
 //
@@ -21,19 +24,7 @@
      "QaInnerSectorDeDx",
      "QaOuterSectorDeDx",
      "QaDedxAllSectors",
-     "StEQaEvsumTrkGoodDTotal",
-     "StEQaEvsumTrkTot",
-     "StEQaEvsumPlusMinusTrk",
      "StEQaEvsumTotChg",
-     "StEQaEvsumTrkPrim",
-     "StEQaEvsumVertTot",
-     "StEQaEvsumMeanPt",
-     "StEQaEvsumMeanEta",
-     "StEQaEvsumRmsEta",
-     "StEQaEvsumPrimVertR",
-     "StEQaEvsumPrimVertX",
-     "StEQaEvsumPrimVertY",
-     "StEQaEvsumPrimVertZ",
      "StEQaGtrkTot",
      "StEQaGtrkFlag",
      "StEQaGtrkGood",

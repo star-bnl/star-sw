@@ -1,5 +1,8 @@
-// $Id: StHistMaker.cxx,v 2.0 2000/08/25 16:02:40 genevb Exp $
+// $Id: StHistMaker.cxx,v 2.1 2001/05/16 20:57:03 lansdell Exp $
 // $Log: StHistMaker.cxx,v $
+// Revision 2.1  2001/05/16 20:57:03  lansdell
+// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
+//
 // Revision 2.0  2000/08/25 16:02:40  genevb
 // New revision: new structure, multiplicity classes
 //
@@ -54,7 +57,7 @@ Int_t StHistMaker::Make(){
 
   cout << " StHistMaker::Make  " << endl;
   cout << "This is the array " << mHArray << endl;
-  for (int i=0; i<512; i++) {
+  for (int i=0; i<1024; i++) {
     AddHist(mHArray[i]);
   }
 

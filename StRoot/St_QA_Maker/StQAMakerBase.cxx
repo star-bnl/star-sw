@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.5 2001/04/28 22:05:13 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.6 2001/05/16 20:57:03 lansdell Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.6  2001/05/16 20:57:03  lansdell
+// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
+//
 // Revision 2.5  2001/04/28 22:05:13  genevb
 // Added EMC histograms
 //
@@ -50,26 +53,9 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   mNullPrimVtx = 0; // histogram for number of events without primary vertex
   mMultClass = 0;   // histogram for number of events in mult classes
 
-// for method MakeEvSum - from table event_summary
-  m_trk_tot_gd = 0;         //! number of good global tracks divided by total
-  m_glb_trk_tot=0;          //! # tracks total from globtrk
-  m_glb_trk_tot_sm=0;       //! # tracks total from globtrk, small range
-  m_glb_trk_plusminus=0;    //! # trks pos/neg. 
-  m_glb_trk_plusminus_sm=0; //! # trks pos/neg., small range
+// for method MakeEvSum - from table software monitor
   m_glb_trk_chg=0;          //! all charge east/west, tpc
-  m_glb_trk_prim=0;         //! # trks from primaries
-  m_glb_trk_prim_sm=0;      //! # trks from primaries, small range
-  m_vert_total=0;    //! total number of vertices
-  m_vert_total_sm=0; //! total number of vertices, small range
-  m_mean_pt=0;       //! mean pt value
-  m_mean_pt_sm=0;    //! mean pt value, small range
-  m_mean_eta=0;      //! mean eta value 
-  m_rms_eta=0;       //! rms eta value 
-  m_prim_vrtr=0;     //! primary vrtx r position
-  m_prim_vrtx0=0;    //! primary vrtx x position
-  m_prim_vrtx1=0;    //! primary vrtx y position
-  m_prim_vrtx2=0;    //! primary vrtx z position
-
+  m_glb_trk_chgF=0;         //! all charge east/west, ftpc
 
 }
 //_____________________________________________________________________________
@@ -88,7 +74,6 @@ Int_t StQAMakerBase::Make(){
   gMessMgr->Info(" In StQAMakerBase::Make()");
 
   if (firstEvent) BookHist();
-
   // See BookHist() for definitions of histsSet values,
   // which should be set during Make() of the derived QA Maker class
   switch (histsSet) {
@@ -119,8 +104,6 @@ Int_t StQAMakerBase::Make(){
   MakeHistDE();
   // histograms from table primtrk
   MakeHistPrim();
-  // histograms from table particle
-  MakeHistGen();  
   // histograms from table primtrk & dst_dedx
   MakeHistPID();
   // histograms from table dst_vertex,dst_v0_vertex,dst_xi_vertex,dst_kinkVertex
@@ -132,7 +115,7 @@ Int_t StQAMakerBase::Make(){
   // histograms from EMC in StEvent
   MakeHistEMC();
   // histograms from geant and reco tables 
-  MakeHistEval();
+  if (histsSet==0) MakeHistEval();
 
   return kStOk;
 }
@@ -189,7 +172,7 @@ void StQAMakerBase::BookHist() {
   BookHistGeneral();
   BookHistEvSum();
   for (Int_t i=0; i<multClass; i++)
-    ((StQABookHist*) (histsList->At(i)))->BookHist();
+    ((StQABookHist*) (histsList->At(i)))->BookHist(histsSet);
 }
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistGeneral(){  
@@ -207,40 +190,9 @@ void StQAMakerBase::BookHistGeneral(){
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistEvSum(){  
 
-// for method MakeEvSum - from table event_summary
+// for method MakeEvSum - from software monitor
 
-  m_trk_tot_gd = MH1F("QaEvsumTrkGoodDTotal",
-    "evsum: num good global tracks over total",55,0.,1.1);
-  m_trk_tot_gd->SetXTitle("number of good/total tracks");
-  m_glb_trk_tot = MH1F("QaEvsumTrkTot",
-    "evsum: num tracks total ",ntrk,0.,12500.);
-  m_glb_trk_tot_sm = MH1F("QaEvsumTrkTotsm",
-    "evsum: num tracks total ",ntrk,0.,20.);
-  m_glb_trk_plusminus = MH1F("QaEvsumPlusMinusTrk",
-    "evsum: num pos. over neg trks",ntrk,0.8,1.4);
-  m_glb_trk_plusminus_sm = MH1F("QaEvsumPlusMinusTrksm",
-    "evsum: num pos. over neg trks",ntrk,0.,4.);
-  m_glb_trk_chg = MH1F("QaEvsumTotChg",
-    "softmon: all charge east/west,tpc",60,0,3);
-  m_glb_trk_prim = MH1F("QaEvsumTrkPrim",
-    "evsum: num good tracks from primaries ",80,0.,4000.);
-  m_glb_trk_prim_sm = MH1F("QaEvsumTrkPrimsm",
-    "evsum: num good tracks from primaries ",80,0.,20.);
-  m_vert_total = MH1F("QaEvsumVertTot",
-    "evsum: total num of vertices",80,0.,10000.);
-  m_vert_total_sm = MH1F("QaEvsumVertTotsm",
-    "evsum: total num of vertices",80,0.,20.);
-  m_mean_pt = MH1F("QaEvsumMeanPt","evsum: mean pt", nmnpt,0.,2.0);
-  m_mean_pt_sm = MH1F("QaEvsumMeanPtsm","evsum: mean pt", nmnpt,0.,0.6);
-  m_mean_eta = MH1F("QaEvsumMeanEta","evsum: mean eta", nmneta,-0.4,0.4);
-  m_rms_eta = MH1F("QaEvsumRmsEta","evsum: rms eta", nmneta,0.,2.5);
-  m_prim_vrtr = MH1F("QaEvsumPrimVertR",
-    "evsum: R of primary vertex",40,0.,1.);
-  m_prim_vrtx0 = MH1F("QaEvsumPrimVertX",
-    "evsum: X of primary vertex",40,-1.,1.);
-  m_prim_vrtx1 = MH1F("QaEvsumPrimVertY",
-    "evsum: Y of primary vertex",40,-1.,1.);
-  m_prim_vrtx2 = MH1F("QaEvsumPrimVertZ",
-    "evsum: Z of primary vertex",nxyz,-50.,50.);
+  m_glb_trk_chg = MH1F("QaEvsumTotChg","softmon: all charge east/west,tpc",60,0,3);
+  m_glb_trk_chgF = MH1F("QaEvsumTotChgF","softmon: all charge east/west,ftpc",60,0,3);
 }
 //_____________________________________________________________________________

@@ -1,5 +1,8 @@
-// $Id: QAhlist_QA_Ftpc.h,v 2.1 2000/08/25 16:04:09 genevb Exp $
+// $Id: QAhlist_QA_Ftpc.h,v 2.2 2001/05/16 20:57:02 lansdell Exp $
 // $Log: QAhlist_QA_Ftpc.h,v $
+// Revision 2.2  2001/05/16 20:57:02  lansdell
+// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
+//
 // Revision 2.1  2000/08/25 16:04:09  genevb
 // Introduction of files
 //
@@ -14,10 +17,6 @@
   "TabQaGtrkNPntFW",
   "TabQaGtrkNPntMaxFE",
   "TabQaGtrkNPntMaxFW",
-  "TabQaGtrkNPntFitFE",
-  "TabQaGtrkNPntFitFW",
-  "TabQaGtrkRnfFE",
-  "TabQaGtrkRnfFW",
   "TabQaGtrkRnmFE",
   "TabQaGtrkRnmFW",
   "TabQaGtrkChrgFE",
@@ -42,8 +41,6 @@
   "TabQaGtrkPFW",
   "TabQaGtrkChisq0FE",
   "TabQaGtrkChisq0FW",
-  "TabQaGtrkChisq1FE",
-  "TabQaGtrkChisq1FW",
   "TabQaGtrkPtVsEtaFE",
   "TabQaGtrkPtVsEtaFW",
   "TabQaGtrkXfYfFE",
@@ -52,8 +49,6 @@
   "TabQaGtrkLengthVEtaFW",
   "TabQaGtrkNPntLengthFE",
   "TabQaGtrkNPntLengthFW",
-  "TabQaGtrkFitPntLengthFE",
-  "TabQaGtrkFitPntLengthFW",
   "TabQaDedxNdedxFE",
   "TabQaDedxDedx0FE",
   "TabQaDedxDedx1FE",
