@@ -142,8 +142,16 @@ St_DataSet *St_DataSetIter::Cd(const Char_t *dirname){
 // Returns the pointer to the new "working" St_DataSet             //
 // =======   0,  if the new directory doesn't exist.               //
 //                                                                 //
+// Remark:  The name = ".." has a special meaning.                 //
+// ------   St_DataSetIter::Cd("..") returns the parent set        //
+//          But one still can not use ".." as a legal part         // 
+//          of the full path                                       //
 /////////////////////////////////////////////////////////////////////
-  St_DataSet *set =  Next(dirname);
+  St_DataSet *set = 0;
+  if (strcmp(dirname,"..")) 
+    set =  Next(dirname);
+  else
+    set = fWorkingDataSet->GetParent();
   if (set) fWorkingDataSet = set;
   return set;
 }
