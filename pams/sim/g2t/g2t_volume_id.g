@@ -160,12 +160,12 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	if(rileft<1 .or. rileft>2) then            
 	  print *,'**ERROR at g2t_volume_id: emc rl ',rileft
-	elseif(eta<1 .or. eta>CALG_NetaT)  then                 
-	  print *,'**ERROR at g2t_volume_id: emc eta ',eta
-	elseif(phi<1 .or. phi>CALG_MaxModule)  then            
-	  print *,'**ERROR at g2t_volume_id: emc phi ',phi
-	elseif(superl<1 .or. superl>CALG_NSub) then            
-	  print *,'**ERROR at g2t_volume_id: emc superl ',superl
+*	elseif(eta<1 .or. eta>CALG_NetaT)  then                 
+*	  print *,'**ERROR at g2t_volume_id: emc eta ',eta
+*	elseif(phi<1 .or. phi>CALG_MaxModule)  then            
+*	  print *,'**ERROR at g2t_volume_id: emc phi ',phi
+*	elseif(superl<1 .or. superl>CALG_NSub) then            
+*	  print *,'**ERROR at g2t_volume_id: emc superl ',superl
 	else 
 	  volume_id=10000000*rileft+100000*eta+100*phi+
      +	              +10*phi_sub+superl
@@ -199,10 +199,10 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	if(rileft<1 .or. rileft>2)  then                        
 	  print *,'**ERROR at g2t_volume_id: smd rl ',rileft
-	elseif(eta<1 .or. eta>calg_NetaSMDp) then                  
-	  print *,'**ERROR at g2t_volume_id: smd eta ',eta
-	elseif(phi<1 .or. phi>CALG_MaxModule) then            
-	  print *,'**ERROR at g2t_volume_id: smd phi ',phi
+*	elseif(eta<1 .or. eta>calg_NetaSMDp) then                  
+*	  print *,'**ERROR at g2t_volume_id: smd eta ',eta
+*	elseif(phi<1 .or. phi>CALG_MaxModule) then            
+*	  print *,'**ERROR at g2t_volume_id: smd phi ',phi
 	elseif(forw_back<1 .or. forw_back>3) then            
 	  print *,'**ERROR at g2t_volume_id: smd forw_back ',forw_back
 	elseif(strip<1) then            
