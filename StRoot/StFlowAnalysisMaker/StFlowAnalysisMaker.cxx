@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.74 2003/07/07 21:58:16 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.75 2003/07/30 22:08:25 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -130,12 +130,12 @@ Int_t StFlowAnalysisMaker::Init() {
   const float corrMultMax     = 2000.; 
   const float multOverOrigMin =    0.;
   const float multOverOrigMax =    1.; 
-  const float vertexZMin      = -150.;
-  const float vertexZMax      =  150.; 
+  const float vertexZMin      = -152.5;
+  const float vertexZMax      =  152.5; 
   const float vertexXYMin     =   -1.;
   const float vertexXYMax     =    1.; 
-  const float etaSymZMin      =  -1.1; 
-  const float etaSymZMax      =   1.1; 
+  const float etaSymZMin      =  -1.15; 
+  const float etaSymZMax      =   1.15; 
   const float etaSymMin       =   -6.; 
   const float etaSymMax       =    6.; 
   const float phiMin          =    0.;
@@ -168,9 +168,9 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nTotalMultBins    = 40,
 	 nMultOverOrigBins = 50,
 	 nMultPartBins     = 40,
-	 nVertexZBins      = 60,
+	 nVertexZBins      = 61,
 	 nVertexXYBins     = 50,
-	 nEtaSymBins       = 48,
+	 nEtaSymBins       = 45,
 	 nPhi3DBins        = 18,
 	 nPsiBins          = 36,
 	 nMultBins         = 40,
@@ -180,7 +180,7 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nMomenBins       = 200,
 	 n_qBins          =  50
   };
-  
+
   // Trigger
   mHistTrigger = new TH1F("Flow_Trigger", "Flow_Trigger",
       nTriggerBins, triggerMin, triggerMax);
@@ -330,13 +330,13 @@ Int_t StFlowAnalysisMaker::Init() {
   // EtaSym Tpc
   mHistEtaSymTpc = new TH1F("Flow_EtaSym_Tpc", "Flow_EtaSym_Tpc",
       nEtaSymBins, etaSymMin, etaSymMax);
-  mHistEtaSymTpc->SetXTitle("Eta Symmetry Ratio");
+  mHistEtaSymTpc->SetXTitle("Eta Symmetry Ratio TPC");
   mHistEtaSymTpc->SetYTitle("Counts");
     
   // EtaSym Ftpc
   mHistEtaSymFtpc = new TH1F("Flow_EtaSym_Ftpc", "Flow_EtaSym_Ftpc",
       nEtaSymBins, etaSymMin, etaSymMax);
-  mHistEtaSymFtpc->SetXTitle("Eta Symmetry Ratio");
+  mHistEtaSymFtpc->SetXTitle("Eta Symmetry Ratio FTPC");
   mHistEtaSymFtpc->SetYTitle("Counts");
     
   // EtaPtPhi
@@ -800,7 +800,6 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistPhiFtpcFarWest->SetYTitle("Counts");
       delete histTitle;
       
-
       // PhiWgt new
       // Tpc (FarEast)
       histTitle = new TString("Flow_Phi_Weight_FarEast_Sel");
@@ -1154,12 +1153,11 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV/c)");
       histFull[k].histFullHar[j].mHist_vObsPt->SetYTitle("v (%)");
       delete histTitle;
-
     }
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.74 2003/07/07 21:58:16 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.75 2003/07/30 22:08:25 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -1334,7 +1332,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   // Initialize Iterator
   StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
   StFlowTrackIterator itr;
-  
+
   for (itr = pFlowTracks->begin(); itr != pFlowTracks->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
 
@@ -1574,7 +1572,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  // Calculate weights for filling histograms
 	  float wt = 1.;
 	  if (pFlowEvent->PtWgt()) {
-	    wt *= (pt < 2.) ? pt : 2.;  // pt weighting going constant above 2 GeV/c
+	    wt *= (pt < pFlowEvent->PtWgtSaturation()) ? pt : pFlowEvent->PtWgtSaturation();  // pt weighting going constant
 	  }
 	  float etaAbs = fabs(eta);
  	  if (pFlowEvent->EtaWgt() && oddHar && etaAbs > 1.) {
@@ -1691,6 +1689,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  if (dPhi < 0.) dPhi += twopi;
 	  histFull[k].histFullHar[j].mHistPhiCorr->
 	    Fill(fmod((double)dPhi, twopi / order));
+
 	}
       }
     }  
@@ -1706,15 +1705,18 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   mHistEtaSymVerZ2DFtpc->Fill(vertexZ , etaSymFtpc);
   
   //Tpc
-  float etaSymZSlopeTpc = 0.0029;
-  etaSymTpc += (etaSymZSlopeTpc * vertexZ);                   // corrected for acceptance
+  float etaSymZInterceptTpc = 0.00023;  // new values introduced for 200 GeV
+  float etaSymZSlopeTpc = -0.00394;     // data based on full statistics
+  etaSymTpc -= (etaSymZInterceptTpc + etaSymZSlopeTpc * vertexZ);                   // corrected for acceptance
   etaSymTpc *= sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
   mHistEtaSymTpc->Fill(etaSymTpc);
 
+  
   //Ftpc
-  //float etaSymZSlopeFtpc = 0.0029;  // has to be evaluated, still, therefore ...
-  //etaSymFtpc += (etaSymZSlopeFtpc * vertexZ);                    // ... NOT correctly corrected for acceptance
-  etaSymFtpc *= sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN)); // corrected for statistics
+  float etaSymZInterceptFtpc = -0.0077; // values for the FTPC based on 200 GeV data with
+  float etaSymZSlopeFtpc = 0.0020;      // all sectors and 'bad runs' (323-325) excluded
+  etaSymFtpc -= (etaSymZInterceptFtpc + etaSymZSlopeFtpc * vertexZ); // corrected for acceptance
+  etaSymFtpc *= sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN));  // corrected for statistics
   mHistEtaSymFtpc->Fill(etaSymFtpc);
 
   // PID multiplicities
@@ -1883,7 +1885,7 @@ Int_t StFlowAnalysisMaker::Finish() {
       histFull[k].mHistRes->SetBinContent(j+1, mRes[k][j]);
       histFull[k].mHistRes->SetBinError(j+1, mResErr[k][j]);
 
-	// Creat the v 2D histogram
+	// Create the v 2D histogram
       histTitle = new TString("Flow_v2D_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -1897,7 +1899,7 @@ Int_t StFlowAnalysisMaker::Finish() {
       delete histTitle;
       AddHist(histFull[k].histFullHar[j].mHist_v2D);
 
-      // Creat the 1D v histograms
+      // Create the 1D v histograms
       histTitle = new TString("Flow_vEta_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -2071,6 +2073,11 @@ void StFlowAnalysisMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.75  2003/07/30 22:08:25  oldi
+// Several code fixes for EtaSym plots introduced (esp. the acceptance correction
+// is done now for 200 GeV data and for the FTPCs as well).
+// PtWgtSaturation parameter introduced.
+//
 // Revision 1.74  2003/07/07 21:58:16  posk
 // Made units of momentum GeV/c instead of GeV.
 //
