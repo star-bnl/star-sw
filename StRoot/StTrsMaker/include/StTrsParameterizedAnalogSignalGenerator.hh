@@ -60,11 +60,19 @@ private:
   double         mPadResponseFunctionSigma;
 const double         mPadResponseFunctionSigmaOuter;
 const double         mPadResponseFunctionSigmaInner;
-  double         mChargeFraction[4]; 
+ 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-  vector<double> mErrorFunctionTable;
+ 
+   vector<double> mChargeFractionOuter; 
+  vector<double> mChargeFractionInner;
+  vector<double> mErrorFunctionTable; 
+  vector<double> mYb;
 #else
-  vector<double, allocator<double> > mErrorFunctionTable;
+
+  vector<double, allocator<double> > mChargeFractionOuter; 
+  vector<double, allocator<double> > mChargeFractionInner;
+  vector<double, allocator<double> > mErrorFunctionTable; 
+  vector<double, allocator<double> > mYb;
 #endif
   double         mNumberOfEntriesInTable;
   double         mRangeOfTable ;
@@ -75,7 +83,7 @@ const double         mPadResponseFunctionSigmaInner;
     int            mNumberOfRows;
     int            mNumberOfInnerRows;
     double         mFrischGrid;
-    double yb1, yb2, yb3, yb4;
+ 
     double rowNormalization;
     double padWidth, padLength;
     double zoffset, wire_to_plane_coupling;
