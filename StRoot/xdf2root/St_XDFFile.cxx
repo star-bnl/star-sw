@@ -1,6 +1,10 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.12 1998/08/26 12:15:23 fisyak Exp $ 
+// $Id: St_XDFFile.cxx,v 1.13 1998/08/28 21:55:10 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.13  1998/08/28 21:55:10  fine
+// TSocket data-memebr and "socket" methods have been introduced to accept the XDF file
+// over TCP/IP
+//
 // Revision 1.12  1998/08/26 12:15:23  fisyak
 // Remove asu & dsl libraries
 //
@@ -33,6 +37,7 @@
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TClass.h"
+#include "TSocket.h"
 #include "St_XDFFile.h"
 #include "St_DataSet.h"
 #include "St_Table.h"
@@ -45,6 +50,7 @@ St_XDFFile::St_XDFFile(){
   fStream = 0;
   fFile   = 0;
   fDataSet= 0;
+  fSocket = 0;
 }
 
 //______________________________________________________________________________
@@ -63,11 +69,14 @@ St_XDFFile::St_XDFFile(const Char_t *filename,const Char_t *mode)
   fStream = 0;
   fFile   = 0;
   fDataSet= 0;
+  fSocket = 0;
   if (filename && strlen(filename)) {
      fStream = (XDR*) malloc(sizeof(XDR));
      OpenXDF(filename,mode);
+     if (fFile) CreateXDFStream();
   }
 }
+
 //______________________________________________________________________________
 St_XDFFile::~St_XDFFile(){
     if (fStream) {
@@ -75,6 +84,7 @@ St_XDFFile::~St_XDFFile(){
       free (fStream); 
       fStream = 0;
     } 
+    SafeDelete(fSocket);
     if (fName) delete [] fName;
     fName = 0;
 }
@@ -103,6 +113,35 @@ void St_XDFFile::Delete(DS_DATASET_T *ds)
      dsFreeDataset(ds); 
   }
   ds = 0;
+}
+//______________________________________________________________________________
+Int_t St_XDFFile::OpenXDF(TInetAddress address, const char *service,const Char_t *mode)
+{
+  fSocket = new TSocket(address,service);
+  fFile   = (FILE *)fSocket->GetDescriptor();
+  return  CreateXDFStream();
+}
+//______________________________________________________________________________
+Int_t St_XDFFile::OpenXDF(TInetAddress address, Int_t port,const Char_t *mode)
+{
+   fSocket = new TSocket(address,port);
+   fFile = (FILE *)fSocket->GetDescriptor();
+   return  CreateXDFStream();
+}
+
+//______________________________________________________________________________
+Int_t St_XDFFile::OpenXDF(const char *host, Int_t port,const Char_t *mode)
+{
+  fSocket = new TSocket(host,port);
+  fFile = (FILE *)fSocket->GetDescriptor();
+  return  CreateXDFStream();
+}
+//______________________________________________________________________________
+Int_t St_XDFFile::OpenXDF(Int_t descriptor,const Char_t *mode)
+{
+  fSocket = new TSocket(descriptor);
+  fFile = (FILE *)fSocket->GetDescriptor();
+  return  CreateXDFStream();
 }
 
 //______________________________________________________________________________
@@ -135,7 +174,13 @@ Int_t St_XDFFile::OpenXDF(const Char_t *filename,const Char_t *mode)
     Printf("xdf_open. Error, can not open file %s %s\n",fName,fType);
     return 2;
   }
+  return  CreateXDFStream();
+}
+//______________________________________________________________________________
+Int_t St_XDFFile::CreateXDFStream(){
 
+  if (!fFile) return 1;
+  
   if(!dsNewDataset(&fDataSet,"NEVSKI")) {  
     printf("xdf_open. Error, can not create data set for file %s %s\n",fName,fType);
     CloseXDF();
