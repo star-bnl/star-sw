@@ -70,21 +70,11 @@ CC:>------------------------------------------------------------------
       MWS = STAFCV_OK
 *--
 
-	write(6,*) 'gain:',mpar(1).gain
-	write(6,*) 't_in:',mpar(1).de_thresh_in
-	write(6,*) 't_ot:',mpar(1).de_thresh_out
-	write(6,*) 'toft:',mpar(1).tof_thresh
-	write(6,*) 'nco :',mpar(1).num_counts_out
-	write(6,*) 'nwc :',mpar(1).num_wires_count
-	write(6,*) 'enw :',mpar(1).el_noise_width
-	write(6,*) 'mini:',mpar(1).min_ion
-
       if ( First ) then
          First   = .false.
 *--
-*--     Check whether doing it counting or de sums
-*--     IF mpar.wires = 1 then do wire hit counting
-*--
+*--	The parameter mpar.wires was removed.  We ALWAYS wire count!
+*--     
         wires_set=.true.
 *-- 
 *--    Set the gain for output from MWC
@@ -342,7 +332,7 @@ CC:>------------------------------------------------------------------
                endif
            endif
          enddo
-         write (6,*) 'Number below threshold: ',num_below_thresh
+*         write (6,*) 'Number below threshold: ',num_below_thresh
 *         write (6,*) '========================================='
 *--
 *--    Define the number of slats with raw data
