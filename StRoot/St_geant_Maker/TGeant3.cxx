@@ -7,25 +7,25 @@
 //  C++ dummy interface to Geant3 basic routines    //
 //////////////////////////////////////////////////////
 #endif /* Geant3Dummy */
- 
+#include "Rtypes.h" 
 #include "TGeant3.h" 
-EXTERN common_gcbank *cbank;
-EXTERN common_quest  *cquest; 
-EXTERN common_gclink *clink; 
-EXTERN common_gccuts *ccuts; 
-EXTERN common_gcflag *cflag; 
-EXTERN common_gckine *ckine; 
-EXTERN common_gcking *cking; 
-EXTERN common_gcmate *cmate; 
-EXTERN common_gctmed *ctmed; 
-EXTERN common_gctrak *ctrak; 
-EXTERN common_gctpol *ctpol; 
-EXTERN common_gcvolu *cvolu; 
-EXTERN common_gcnum  *cnum; 
-EXTERN common_gcsets *csets; 
+R__EXTERN common_gcbank *cbank;
+R__EXTERN common_quest  *cquest; 
+R__EXTERN common_gclink *clink; 
+R__EXTERN common_gccuts *ccuts; 
+R__EXTERN common_gcflag *cflag; 
+R__EXTERN common_gckine *ckine; 
+R__EXTERN common_gcking *cking; 
+R__EXTERN common_gcmate *cmate; 
+R__EXTERN common_gctmed *ctmed; 
+R__EXTERN common_gctrak *ctrak; 
+R__EXTERN common_gctpol *ctpol; 
+R__EXTERN common_gcvolu *cvolu; 
+R__EXTERN common_gcnum  *cnum; 
+R__EXTERN common_gcsets *csets; 
 //--------------Declarations for ZEBRA--------------------- 
-EXTERN Int_t *z_iq, *z_lq; 
-EXTERN Float_t *z_q; 
+R__EXTERN Int_t *z_iq, *z_lq; 
+R__EXTERN Float_t *z_q; 
 #if 0
 common_gcbank *cbank;
 common_quest  *cquest; 
