@@ -1,6 +1,9 @@
-* $Id: gstar_input.g,v 1.34 2000/06/10 18:56:23 nevski Exp $
+* $Id: gstar_input.g,v 1.35 2000/06/10 18:58:25 nevski Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.35  2000/06/10 18:58:25  nevski
+* rqmd cwntuple read added
+*
 * Revision 1.34  2000/06/10 18:56:23  nevski
 * rqmd cwntuple read added
 *
@@ -192,9 +195,9 @@ c ---- Column-Wise-Ntuples ----
    integer           idate,itime,ievn,imult,isub,lundata,
                      ipdgtype(mnt),ilastcoll(mnt),nrcoll(mnt)
    real              RNDM,fi,b,xspace(mnt),yspace(mnt),zspace(mnt)
-   real              time(mnt),emass(mnt),Y(mnt),pt(mnt),phi(mnt)
+   real              time(mnt),rmass(mnt),Y(mnt),pt(mnt),phi(mnt)
    COMMON/RQMD_EVENT/ievn,  b
-   COMMON/RQMD_PART/ imult, ipdgtype, emass, nrcoll, ilastcoll,
+   COMMON/RQMD_PART/ imult, ipdgtype, rmass, nrcoll, ilastcoll,
                      time, xspace, yspace, zspace, Y, pt, phi, isub
 *  translate fermi to mm (? )
    real              scfermi
@@ -266,11 +269,11 @@ c ---- Column-Wise-Ntuples ----
       do i = 1, Imult
          istat   = 1
          ipdg    = ipdgtype(i)
-         mass    = emass(i)
+         mass    = rmass(i)
          Pxyz(1) = pt(i)*cos(phi(i)+fi)
          Pxyz(2) = pt(i)*sin(phi(i)+fi)
-         Pxyz(3) = sqrt(pt(i)**2+emass(i)**2)*sinh(Y(i))
-         Ener    = sqrt(pt(i)**2+emass(i)**2)*cosh(Y(i)) 
+         Pxyz(3) = sqrt(pt(i)**2+rmass(i)**2)*sinh(Y(i))
+         Ener    = sqrt(pt(i)**2+rmass(i)**2)*cosh(Y(i)) 
          Vxyz(1) = (xspace(i)*cos(fi)-yspace(i)*sin(fi))*scfermi
          Vxyz(2) = (xspace(i)*sin(fi)+yspace(i)*cos(fi))*scfermi
          Vxyz(3) = zspace(i)*scfermi
