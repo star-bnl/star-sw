@@ -3,12 +3,11 @@
 #pragma link off all classes;
 #pragma link off all functions;
 // #pragma link C++ class table_head_st-!;
-#pragma link C++ class point3_st-!;
 #pragma link C++ class St_PolyLine3D-;
 
 #pragma link C++ typedef StCL;
 #pragma link C++ typedef St_Table;
-#pragma link C++ typedef St_TableSorter!;
+#pragma link C++ typedef St_TableSorter;
 #pragma link C++ typedef St_DataSet;
 #pragma link C++ typedef St_DataSetIter;
 #pragma link C++ typedef St_FileSet;
@@ -25,7 +24,5 @@
 #pragma link C++ typedef St_PointsArray3D;
 #pragma link C++ typedef St_TablePoints;
 #pragma link C++ typedef St_Table3Points;
-#pragma link C++ typedef St_TableElementDescriptor;
 #pragma link C++ typedef St_tableDescriptor;
-#pragma link C++ typedef St_point3;
 #endif
