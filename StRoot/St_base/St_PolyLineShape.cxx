@@ -11,7 +11,9 @@
 #include <TSPHE.h>
 #include <TView.h>
 #include <TPad.h>
-
+#include <TPadView3D.h>
+#include <TPoint.h>
+#include <TPostScript.h>
 
 #define MyInputPoints TPoints3DABC
 
@@ -27,6 +29,7 @@ St_PolyLineShape::St_PolyLineShape()
    SetWidthFactor();
    m_HasDrawn = kFALSE;
    m_ShapeType = kNULL;
+   m_SizeX3D   = 0;
 }
 
 //______________________________________________________________________________
@@ -36,8 +39,9 @@ St_PolyLineShape::St_PolyLineShape(MyInputPoints  *points,Option_t* option)
    m_ShapeType   = kNULL;
    m_Smooth      = kFALSE;
    m_Connection  = 0;
-   m_Points        = points;
+   m_Points      = points;
    m_HasDrawn    = kFALSE;
+   m_SizeX3D     = 0;
    // Take in account the current node if any   
    if (!m_Points) { 
      Error("St_PolyLineShape","No polyline is defined");
@@ -51,6 +55,7 @@ St_PolyLineShape::St_PolyLineShape(MyInputPoints  *points,Option_t* option)
 St_PolyLineShape::~St_PolyLineShape()
 {
   SafeDelete(m_Shape);
+  SafeDelete(m_SizeX3D);
 }
 //______________________________________________________________________________
 void St_PolyLineShape::Axis(TVirtualPad *p, Float_t width)
@@ -111,6 +116,34 @@ void St_PolyLineShape::Create()
 }
 
 //______________________________________________________________________________
+Size3D *St_PolyLineShape::CreateX3DSize(Bool_t marker)
+{  
+  if (!m_SizeX3D) m_SizeX3D = new Size3D; 
+  m_SizeX3D->numPoints = 0;
+  m_SizeX3D->numSegs   = 0;
+  m_SizeX3D->numPolys  = 0;         //NOTE: Because of different structure, our
+  if (m_Points) {
+    Int_t size = m_Points->Size();
+    if (marker) {
+      Int_t mode;
+
+      if (size > 10000) mode = 1;         // One line marker    '-'
+      else if (size > 3000) mode = 2;     // Two lines marker   '+'
+      else mode = 3;                      // Three lines marker '*'
+ 
+      m_SizeX3D->numSegs   = size*mode;
+      m_SizeX3D->numPoints = size*mode*2;
+      m_SizeX3D->numPolys  = 0;
+    }
+    else {
+      m_SizeX3D->numSegs   = size-1;
+      m_SizeX3D->numPoints = size;
+    }
+    m_SizeX3D->numPolys  = 0;         //NOTE: Because of different structure, our
+  }
+  return m_SizeX3D;
+}
+//______________________________________________________________________________
 Int_t St_PolyLineShape::SetConnection(EShapeTypes connection)
 {
  Float_t size = 0.5*GetWidthFactor()*GetLineWidth();
@@ -148,6 +181,15 @@ void St_PolyLineShape::Draw(Option_t *opt)
 void St_PolyLineShape::ExecuteEvent(Int_t event, Int_t px, Int_t py)
 {
  if (m_Points) m_Points->ExecuteEvent(event,px, py);
+}
+
+//______________________________________________________________________________
+Color_t St_PolyLineShape::GetColorAttribute(){
+  return GetLineColor();
+}
+//______________________________________________________________________________
+Width_t St_PolyLineShape::GetSizeAttribute(){
+  return GetLineWidth();
 }
 
 //______________________________________________________________________________
@@ -244,24 +286,88 @@ void St_PolyLineShape::PaintNode(Float_t *start,Float_t *end,Option_t *option)
 void St_PolyLineShape::Paint(Option_t *opt)
 {
   if (!m_Points) return;
+
+  Bool_t rangeView = opt && opt[0] && strcmp(opt,"range")==0 ? kTRUE : kFALSE;
+  TPadView3D *view3D = 0;
+  if (!rangeView  && (view3D = gPad->GetView3D()) ) {
+     view3D->SetLineAttr(GetColorAttribute(), GetSizeAttribute());
+     view3D->PaintPoints3D(GetPoints(), "L");
+  }
   if (!strstr(opt, "x3d")) {
-     St_PolyLine3D *line =  new St_PolyLine3D(m_Points);
-     line->SetColorAttribute(GetLineColor());
-     line->SetSizeAttribute(GetLineWidth());
-     line->SetBit(kCanDelete);
-     line->Paint(opt);
-//     m_Points->Paint(opt);
+         SetMarkerColor(GetColorAttribute());
+         SetMarkerSize(GetSizeAttribute());
+         PaintPolyMarker(m_Points->Size());
   }
   else {
-     St_PolyLine3D *line =  new St_PolyLine3D(m_Points);
-     line->SetColorAttribute(GetLineColor());
-     line->SetSizeAttribute(GetLineWidth());
-     line->SetBit(kCanDelete);
-     line->Paint(opt);
-
-//     m_Points->Paint(opt);
+     CreateX3DSize(kTRUE);  PaintX3DMarker(opt);
+//      CreateX3DSize(kFALSE); PaintX3DLine(opt);
 //     Paint3d(opt);
   }
+}
+
+//______________________________________________________________________________
+void  St_PolyLineShape::PaintPoints(Int_t n, Float_t *, Option_t *)
+{
+//*-*-*-*-*-*-*-*-*Draw this 3-D polyline with new coordinates*-*-*-*-*-*-*-*-*-*
+//*-*              ===========================================
+   if (n < 2) return;
+ 
+   TAttLine::Modify();  //Change line attributes only if necessary
+ 
+//*-*- Loop on each individual line
+ 
+   for (Int_t i=1;i<n;i++) {
+      Float_t xyz[6];
+      m_Points->GetXYZ(xyz,i-1,2);
+      gPad->PaintLine3D(xyz, &xyz[3]);
+   }
+}
+
+//______________________________________________________________________________
+void St_PolyLineShape::PaintPolyMarker(Int_t n, Float_t *, Marker_t, Option_t *)
+{
+//*-*-*-*-*-*-*-*-*Paint polymarker in CurrentPad World coordinates*-*-*-*-*-*-*-*
+//*-*              ================================================
+ 
+   if (n <= 0) return;
+ 
+   //Create temorary storage
+   TPoint *pxy = new TPoint[n];
+   Float_t *x  = new Float_t[n];
+   Float_t *y  = new Float_t[n];
+   Float_t xndc[3], ptr[3];
+   
+ 
+   TView *view = gPad->GetView();      //Get current 3-D view
+   if(!view) return;                   //Check if `view` is valid
+ 
+//*-*- convert points from world to pixel coordinates
+   Int_t nin = 0;
+   for (Int_t i = 0; i < n; i++) {
+      m_Points->GetXYZ(ptr,i);
+      view->WCtoNDC(ptr, xndc);
+      if (xndc[0] < gPad->GetX1() || xndc[0] > gPad->GetX2()) continue;
+      if (xndc[1] < gPad->GetY1() || xndc[1] > gPad->GetY2()) continue;
+      x[nin] = xndc[0];
+      y[nin] = xndc[1];
+      pxy[nin].fX = gPad->XtoPixel(x[nin]);
+      pxy[nin].fY = gPad->YtoPixel(y[nin]);
+      nin++;
+   }
+ 
+   TAttMarker::Modify();  //Change marker attributes only if necessary
+ 
+//*-*- invoke the graphics subsystem
+   if (!gPad->IsBatch()) gGXW->DrawPolyMarker(nin, pxy);
+ 
+ 
+   if (gCurrentPS) {
+      gCurrentPS->DrawPolyMarker(nin, x, y);
+   }
+   delete [] x;
+   delete [] y;
+ 
+   delete [] pxy;
 }
 
 //______________________________________________________________________________
@@ -278,6 +384,125 @@ void St_PolyLineShape::Paint3d(Option_t *opt)
  for (Int_t i=0;i<size;i++) 
       PaintNode((Float_t *)(points+i+1),(Float_t *)(points+i),opt);      
  m_HasDrawn = kTRUE;
+}
+
+//______________________________________________________________________________
+void St_PolyLineShape::PaintX3DLine(Option_t *opt)
+{
+#ifndef WIN32
+   X3DBuffer *buff = new X3DBuffer;
+   if (!buff) return;
+
+   Int_t size = 0;
+   if (m_Points) size = m_Points->Size();
+   if (!size) return;
+
+   m_SizeX3D->numPoints = buff->numPoints = size;
+   m_SizeX3D->numSegs   = buff->numSegs   = size-1;
+   m_SizeX3D->numPolys  = buff->numPolys  = 0;        //NOTE: Because of different structure, our
+
+   buff->polys     = NULL;     //      St_PolyLine3D can't use polygons
+   St_Points3D x3dPoints(size);
+   buff->points    = m_Points->GetXYZ(x3dPoints.GetP(),0,size);
+ 
+//        Int_t c = (((fAttributes?fAttributes->GetColorAttribute():0) % 8) - 1) * 4;     // Basic colors: 0, 1, ... 8
+   Int_t c = ((GetColorAttribute() % 8) - 1) * 4;     // Basic colors: 0, 1, ... 8
+   if (c < 0) c = 0;
+ 
+    //*-* Allocate memory for segments *-*
+    buff->segs = new Int_t[buff->numSegs*3];
+    if (buff->segs) {
+         for (Int_t i = 0; i < buff->numSegs; i++) {
+             buff->segs[3*i  ] = c;
+             buff->segs[3*i+1] = i;
+             buff->segs[3*i+2] = i+1;
+         }
+     }
+ 
+ 
+     if (buff && buff->points && buff->segs) //If everything seems to be OK ...
+         FillX3DBuffer(buff);
+     else {                            // ... something very bad was happened
+         gSize3D.numPoints -= buff->numPoints;
+         gSize3D.numSegs   -= buff->numSegs;
+         gSize3D.numPolys  -= buff->numPolys;
+     }
+ 
+     if (buff->segs)     delete [] buff->segs;
+     if (buff->polys)    delete [] buff->polys;
+     if (buff)           delete    buff;
+#endif
+}
+//______________________________________________________________________________
+void St_PolyLineShape::PaintX3DMarker(Option_t *opt)
+{
+#ifndef WIN32
+   Int_t size = 0;
+   if (m_Points) size = m_Points->Size();
+   if (!size) return;
+   Int_t mode;
+   Int_t i, j, k, n;
+ 
+   X3DBuffer *buff = new X3DBuffer;
+   if(!buff) return;
+ 
+   if (size > 10000) mode = 1;         // One line marker    '-'
+   else if (size > 3000) mode = 2;     // Two lines marker   '+'
+   else mode = 3;                      // Three lines marker '*'
+
+   m_SizeX3D->numSegs   = buff->numSegs   = size*mode;
+   m_SizeX3D->numPoints = buff->numPoints = buff->numSegs*2;
+   m_SizeX3D->numPolys  = buff->numPolys  = 0;         //NOTE: Because of different structure, our
+
+   buff->polys     = NULL;      //      TPolyMarker3D can't use polygons
+ 
+ 
+    //*-* Allocate memory for points *-*
+   Float_t delta = 0.002;
+ 
+   buff->points = new Float_t[buff->numPoints*3];
+   if (buff->points) {
+       for (i = 0; i < size; i++) {
+           for (j = 0; j < mode; j++) {
+               for (k = 0; k < 2; k++) {
+                   delta *= -1;
+                   for (n = 0; n < 3; n++) {
+                       Float_t xyz[3];
+                       m_Points->GetXYZ(xyz,i);
+                       buff->points[mode*6*i+6*j+3*k+n] = 
+                           xyz[n] * (1 + (j == n ? delta : 0));
+                   }
+               }
+           }
+       }
+   }
+ 
+   Int_t c = ((GetColorAttribute() % 8) - 1) * 4;     // Basic colors: 0, 1, ... 8
+   if (c < 0) c = 0;
+ 
+    //*-* Allocate memory for segments *-*
+   buff->segs = new Int_t[buff->numSegs*3];
+   if (buff->segs) {
+       for (i = 0; i < buff->numSegs; i++) {
+           buff->segs[3*i  ] = c;
+           buff->segs[3*i+1] = 2*i;
+           buff->segs[3*i+2] = 2*i+1;
+       }
+   }
+ 
+   if (buff->points && buff->segs)    //If everything seems to be OK ...
+       FillX3DBuffer(buff);
+   else {                            // ... something very bad was happened
+       gSize3D.numPoints -= buff->numPoints;
+       gSize3D.numSegs   -= buff->numSegs;
+       gSize3D.numPolys  -= buff->numPolys;
+   }
+ 
+   if (buff->points)   delete [] buff->points;
+   if (buff->segs)     delete [] buff->segs;
+   if (buff->polys)    delete [] buff->polys;
+   if (buff)           delete    buff;
+#endif
 }
 
 //______________________________________________________________________________
@@ -361,5 +586,13 @@ void St_PolyLineShape::Sizeof3D() const
 {
 //*-*-*-*-*-*-*Return total X3D size of this shape with its attributes*-*-*-*-*-*
 //*-*          =======================================================
-  if (m_Points)  m_Points->Sizeof3D();
+  St_PolyLineShape *line = (St_PolyLineShape *)this;
+//  line->CreateX3DSize(kFALSE); 
+  line->CreateX3DSize(kTRUE); 
+  if (m_SizeX3D) {
+     gSize3D.numPoints += m_SizeX3D->numPoints;
+     gSize3D.numSegs   += m_SizeX3D->numSegs;
+     gSize3D.numPolys  += m_SizeX3D->numPolys;
+  }
+  else Error("Sizeof3D()","buffer size has not been defined yet");
 }
