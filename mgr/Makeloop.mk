@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.51  1999/02/10 02:19:58  fisyak
+#  put back l3 and trg
+#
 #  Revision 1.50  1999/02/09 19:14:51  fisyak
 #  Add objy
 #
@@ -229,7 +232,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/02/09 19:14:51 $ 
+#           Last modification $Date: 1999/02/10 02:19:58 $ 
 #  default setings
 # Current Working Directory
 #
@@ -277,7 +280,6 @@ ifndef SUBDIRS
   endif
   SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
   SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
-  SUBDIRS := $(filter-out l3, $(SUBDIRS)) $(filter l3, $(SUBDIRS))
   ifndef OBJY_HOME
     SUBDIRS := $(filter-out objy, $(SUBDIRS))
   endif
@@ -286,8 +288,6 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
   ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
-    SUBDIRS := $(filter-out trg, $(SUBDIRS))
-    SUBDIRS := $(filter-out l3, $(SUBDIRS))
     SUBDIRS := $(filter-out CLHEP, $(SUBDIRS)) 
   endif
   ifdef PKG
