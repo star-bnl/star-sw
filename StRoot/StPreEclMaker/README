@@ -1,0 +1,43 @@
+              
+
+                     EMC Pre ClusterMaker
+                     
+                      (StEmcPreEclMaker)
+                    ---------------------
+Maintained by ::Subhasis Chattopadhyay (WSU)
+Proposed On :: 05/04/00
+--------------------------------------------
+
+
+
+
+        This Maker replaces StEclmaker present now in the repository.
+
+   Some of the main changes made on the existing makers are,
+
+
+     (a) Because of the conflict in class name with StEmcCluster 
+   and StEmcClusterCollection currently used in StEvent, the class names
+   (and Maker name) are changed as StEmcPreCluster and StEmcPreClusterCollection   etc.
+
+     (b) After some detailed evaluation, some cleanup and initialization
+   bugs are fixed.
+
+
+     Just to remind,
+     --------------
+
+    This Maker is to take StEmcHitCollection from "emc" and perform clustering
+   for each module in each subdetectors in EMC.
+
+   These clusters are then stored as StEmcPreCluster objects in 
+   StEmcPreClusterCollection.
+
+   These classes are quite similar to StEmcCluster and StEmcClusterCollection
+   being used in StEvent, only part missing is the connection of pointers 
+   of Rawhits generating the clusters. As soon as writing in StEvent is made
+   for StEmcRawHits and StEmcClusters, we can make those connections. 
+
+
+
+         
