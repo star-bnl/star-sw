@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.9 2004/07/09 09:01:13 subhasis Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.10 2004/07/09 10:40:09 subhasis Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.10  2004/07/09 10:40:09  subhasis
+ *channel 0 ADC made to 0, numbering scheme implemented in fillStEvent, earlier it was done on StPmdHit, in stead of StPhmdHit
+ *
  *Revision 1.9  2004/07/09 09:01:13  subhasis
  *numbering convention starts from 0 everywhere for filling StEvent
  *
@@ -255,6 +258,9 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	  // 	  
           Int_t mapp= mPmdGeom->ChainMapping(Chain_No,channel,supmod,col,row,chtemp);
 	  Int_t DaqADC=adc[AddCh_Count];
+	  // zeroing zeroeth channel
+	  if(chtemp==0)DaqADC=0;
+
 	  AddCh_Count++;
 	  
 	  if(DaqADC>0 && mapp==kStOK){
@@ -280,23 +286,12 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	    //Fill StPmdHit
 	    StPmdHit *pmdhit = new StPmdHit();
 	    if(supmod>PMD_CRAMS_MAX)supmod-=PMD_CRAMS_MAX;
-	    /*
 	    pmdhit->setGsuper(Int_t(supmod));      //! filling supermodule no (1-12)
 	    pmdhit->setSubDetector(Int_t(SubDet)); //! filling subdetector (pmd=1,cpv=2)
 	    pmdhit->setRow(Int_t(row));            //! filling row
 	    pmdhit->setColumn(Int_t(col));         //! filling col
 	    pmdhit->setAdc(Int_t(DaqADC));         //! filling ADC   
 	    pmdhit->setEdep(Float_t(edep));        //! filling energy   
-	    */
-
-	    //Changed to accommodatre numbering convention
-	    pmdhit->setGsuper(Int_t(supmod-1));      //! filling supermodule no (0-11)
-	    pmdhit->setSubDetector(Int_t(SubDet-1)); //! filling subdetector (pmd=0,cpv=1)
-	    pmdhit->setRow(Int_t(row-1));            //! filling row (starts from 0)
-	    pmdhit->setColumn(Int_t(col-1));         //! filling col (starts from 0)
-	    pmdhit->setAdc(Int_t(DaqADC));         //! filling ADC   
-	    pmdhit->setEdep(Float_t(edep));        //! filling energy   
-	    /////////////////////////////////////////
 
 	    if(SubDet==2)det0->addHit(pmdhit);
 	    if(SubDet==1)det1->addHit(pmdhit);
@@ -369,13 +364,22 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det
 	    //! Filling PmdHit for StEvent
 	    
 	    StPhmdHit *phit = new StPhmdHit();
+	    /*
 	    phit->setSuperModule(Int_t(gsuper-1)); // filling supermodule no (range 0-11)
 	    phit->setSubDetector(Int_t(subdet));   // filling subdetector
 	    phit->setRow(Int_t(row));              // filling row
 	    phit->setColumn(Int_t(col));           // filling col
 	    phit->setEnergy(edep);                 // filling energy
 	    phit->setAdc(adc);                     // filling ADC
-	    
+	   */
+	    // changed to accommodate numbering scheme (i.e start from 0)
+	    phit->setSuperModule(Int_t(gsuper-1)); // filling supermodule no (range 0-11)
+	    phit->setSubDetector(Int_t(subdet-1));   // filling subdetector (pmd=0,cpv=1)
+	    phit->setRow(Int_t(row-1));              // filling row (starts from 0)
+	    phit->setColumn(Int_t(col-1));           // filling col (starts from 0)
+	    phit->setEnergy(edep);                 // filling energy
+	    phit->setAdc(adc);                     // filling ADC
+
 	    if(mPmdEvent)mPmdEvent->addHit(phit);
 	  }
 	}
