@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandPoisson.cc,v 1.1 1999/01/30 03:59:00 fisyak Exp $
+ * $Id: RandPoisson.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author: 
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: RandPoisson.cc,v $
+ * Revision 1.2  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
  * Revision 1.1  1999/01/30 03:59:00  fisyak
  * Root Version of StarClassLibrary
  *
@@ -117,9 +120,7 @@ long RandPoisson::shoot(HepDouble xm) {
 
 void RandPoisson::shootArray(const HepInt size, long* vect, HepDouble m)
 {
-   register HepInt i;
-
-   for (i=0; i<size; ++i)
+   for (int i=0; i<size; ++i)
      vect[i] = shoot(m);
 }
 
@@ -130,9 +131,7 @@ RandPoisson::shootArray(vector<long>& vec, HepDouble m)
 RandPoisson::shootArray(vector<long,allocator<long> >& vec, HepDouble m)
 #endif
 {
-    register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+   for (unsigned int i=0; i<vec.size(); ++i)
      vec[i] = shoot(m);
 }
 
@@ -212,9 +211,7 @@ RandPoisson::shootArray(HepRandomEngine* anEngine,
                              vector<long,allocator<long> >& vec, HepDouble m)
 #endif
 {
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+   for (unsigned int i=0; i<vec.size(); ++i)
      vec[i] = shoot(anEngine,m);
 }
 long RandPoisson::fire(HepDouble xm) {
@@ -289,8 +286,6 @@ RandPoisson::fireArray(vector<long>& vec, HepDouble m)
 RandPoisson::fireArray(vector<long,allocator<long> >& vec, HepDouble m)
 #endif
 {
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+   for (unsigned int i=0; i<vec.size(); ++i)
      vec[i] = fire(m);
 }

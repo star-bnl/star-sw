@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RanecuEngine.cc,v 1.1 1999/01/30 03:59:01 fisyak Exp $
+ * $Id: RanecuEngine.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author:  Gabriele Cosmo - Created - 2nd February 1996
  *          modified for SCL bl
@@ -20,8 +20,11 @@
  ***************************************************************************
  *
  * $Log: RanecuEngine.cc,v $
- * Revision 1.1  1999/01/30 03:59:01  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
+ * Revision 1.2  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
  *
  * Revision 1.1  1999/01/30 03:59:01  fisyak
  * Root Version of StarClassLibrary
@@ -195,9 +198,8 @@ RanecuEngine::flatArray(vector<HepDouble,allocator<HepDouble> >& vec)
 #endif
 {
    const HepInt index = seq;
-   register HepInt i;
    long seed1 = table[index][0];
-   for (i=0; i<vec.size(); ++i)
+   long seed2 = table[index][1];
    HepInt k1, k2;
 
    for (unsigned int i=0; i<vec.size(); ++i)

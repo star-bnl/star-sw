@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandBreitWigner.cc,v 1.1 1999/01/30 03:58:59 fisyak Exp $
+ * $Id: RandBreitWigner.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -18,8 +18,11 @@
  ***************************************************************************
  *
  * $Log: RandBreitWigner.cc,v $
- * Revision 1.1  1999/01/30 03:58:59  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
+ * Revision 1.2  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
  *
  * Revision 1.1  1999/01/30 03:58:59  fisyak
  * Root Version of StarClassLibrary
@@ -107,9 +110,7 @@ RandBreitWigner::shootArray ( vector<HepDouble>& vec,
 #else
 RandBreitWigner::shootArray ( vector<HepDouble, allocator<HepDouble> >& vec,
                                    HepDouble a, HepDouble b,
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+                                   HepDouble c )
 #endif
 {
    for (unsigned int i=0; i<vec.size(); ++i)
@@ -192,9 +193,7 @@ RandBreitWigner::shootArray ( HepRandomEngine* anEngine,
 RandBreitWigner::shootArray ( HepRandomEngine* anEngine,
                                    vector<HepDouble,allocator<HepDouble> >& vec,
                                    HepDouble a, HepDouble b,
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+                                   HepDouble c )
 #endif
 {
    for (unsigned int i=0; i<vec.size(); ++i)
@@ -269,9 +268,7 @@ RandBreitWigner::fireArray ( vector<HepDouble>& vec,
 #else
 RandBreitWigner::fireArray ( vector<HepDouble, allocator<HepDouble> >& vec,
 			     HepDouble a, HepDouble b,
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+			     HepDouble c )
 #endif
 {
    for (unsigned int i=0; i<vec.size(); ++i)
