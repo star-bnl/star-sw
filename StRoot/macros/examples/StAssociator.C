@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.29 2001/06/15 19:33:13 jeromel Exp $
+// $Id: StAssociator.C,v 1.30 2001/10/23 18:58:50 hardtke Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.30  2001/10/23 18:58:50  hardtke
+// Load StTpcDb library
+//
 // Revision 1.29  2001/06/15 19:33:13  jeromel
 // StarRoot
 //
@@ -129,6 +132,7 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
     
+  gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker"); 
   gSystem->Load("StEmcUtil"); 
