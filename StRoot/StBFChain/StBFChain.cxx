@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.360 2003/10/22 14:47:58 starlib Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.361 2003/10/25 00:14:36 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1563,7 +1563,6 @@ Int_t StBFChain::ParseString (const TString &tChain, TObjArray &Opt) {
   Ssiz_t begin, index, end, end2;
   begin = index = end = end2 = 0;
   TRegexp separator("[^ ;,\\t\\s]+");
-  TString Tag, opt, nopt;
   while ( (begin < tChain.Length()) && (index != kNPOS) ) {
     // loop over given Chain options
     index = tChain.Index(separator,&end,begin);
