@@ -10,6 +10,8 @@
  * 08-Jul-99 MJL completely change definition - RICH_Reader is independent 
  *               class which is handed a pointer at the constructor invocation
  * 22-Nov-99 MJL fixed bug in array size  unsigned short RichMatrix[][]
+ * 12-Mar-00  XZB GetNumOfChannels() returns total number of channels
+ * 21-Apr-00 xzb Add in RichEventReader for standalone data file 
  ***************************************************************************
  *  Opens Event From File, Fills Struct 
  *
@@ -20,12 +22,15 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/GENERIC/RecHeaderFormats.hh"
 #include "StDaqLib/GENERIC/swaps.hh"
+#include "StDaqLib/RICH/RichEventReader.hh"
 
 #define RICH_CRAM_BANKS 8   /* data banks lowest level */
-#define TIC_NUM_CRAMS   4
 #define RICH_NUM_CRAMS  8
 #define MAX_NUM_CRAMS   8
 #define MAX_CHANNEL_NUM 960
+#define RICH_NUM_ROWS_PER_CRAM 6
+#define RICH_PAD  MAX_CHANNEL_NUM/RICH_NUM_ROWS_PER_CRAM 
+#define RICH_ROW 2*RICH_NUM_CRAMS*RICH_NUM_ROWS_PER_CRAM
 //#define MAX_CHANNEL_NUM 575  
   
 struct offlen {
@@ -56,9 +61,10 @@ struct RICDATAD: public Bank{
 
 struct RichDATA{
   char * BankType; // Will be filled with a 9 char array (8 letters + NULL)
-  unsigned int ByteSwapped ; // Should be 0x04030302
-  unsigned int EventNumber;
-  unsigned short RichMatrix[ MAX_CHANNEL_NUM / 6 + 1] [ RICH_NUM_CRAMS * 6] ; // Matrix of ADC's in Physical Positions
+  unsigned int ByteSwapped ; // Should be 0x04030201
+  unsigned int EventNumber; //Token number
+  unsigned int NumOfChannels; //Total number of channels
+  unsigned short RichMatrix[RICH_PAD] [RICH_ROW] ; // Matrix of ADC's in Physical Positions
 };
 
 
@@ -80,12 +86,14 @@ class RICH_Reader : public StRichReaderInterface {
 public:
 
 RICH_Reader(EventReader *er, Bank_RICP *pRICP);
+RICH_Reader(RichEventReader *er, Bank_RICP *pRICP);
 
 ~RICH_Reader(){}; 
 
-    unsigned short GetADCFromCoord(int x,int y);
-    unsigned short GetADCFromCramChannel(int cramBlock,int channelNum);
-    unsigned int   GetEventNumber();
+  unsigned short GetADCFromCoord(int x,int y);
+  unsigned short GetADCFromCramChannel(int cramBlock,int channelNum);
+  unsigned int   GetEventNumber();  //Token number actaully
+  unsigned int GetNumOfChannels();
     
     const char * GetBankType();
     
@@ -99,10 +107,9 @@ protected:
     // Bank Pointers
     struct Bank_RICP *pBankRICP;
     
-    RichDATA jon;
+    RichDATA mTheRichArray;
                                                                       // in tic, each row is 96 channels
                                                                               // and it takes 6 rows to fit each cramBank
-
 };
 
 RICH_Reader *getRICHReader(EventReader *er);
