@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.76 2000/01/07 20:35:01 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.77 2000/01/08 03:27:34 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.77  2000/01/08 03:27:34  lansdell
+// fixed nfit/nmax ratio in Tab version; separated hits by detector; changed vertex histograms to allow for events with 0 vertices
+//
 // Revision 1.76  2000/01/07 20:35:01  kathy
 // make some corrections to filling hist; add point hist for each det separately
 //
@@ -530,7 +533,7 @@ void St_QA_Maker::MakeHistGlob(){
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
         Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt));
-        Float_t nfitnmax = (Float_t(trkmpnt))/(Float_t(trkpnt));
+        Float_t nfitnmax = (Float_t(trkfpnt))/(Float_t(trkmpnt));
         Float_t x0s  =  t->r0 * TMath::Cos(t->phi0*degree);
         Float_t y0s  =  t->r0 * TMath::Sin(t->phi0*degree);
         Float_t xdif =  (t->x_first[0])-x0s;
