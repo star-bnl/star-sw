@@ -104,7 +104,7 @@ sub copy {
 #______________________________________________________
 sub convert($) {
   my $new_name = $_[0];
-  $new_name =~ s|/home/starreco/reco|/star/data05/reco|g;
+  $new_name =~ s|/home/starreco/reco|/star/data18/reco|g;
   return $new_name;
 }
 #________________________________________________________________________________

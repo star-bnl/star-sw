@@ -1,8 +1,8 @@
 Electric field distortions due to the shape of the CM; R,Z and Dist Int in cm
 Source: Howard Wieman Dec 2000 - Done in MathCad on his laptop
-33 steps in R   // This file is misnamed.  It is a copy of membrane_efield.dat
-12 steps in Phi // and it is mistake.  But it must remain here for a while
-69 steps in Z   // for backwards compatibility.  6/12/2001  JT
+33 steps in R
+12 steps in Phi
+69 steps in Z
     R          Phi          Z      R Integral  Phi Integral    
   14.5           0        -280           0           0 
     17           0        -280           0           0 
