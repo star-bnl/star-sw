@@ -1,0 +1,252 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+
+<html>
+
+<head>
+<title>create and modify</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 1.1">
+</head>
+
+<body>
+<h2>Functions for creation and modification of datasets</h2>
+<p>&nbsp;</p>
+<p><a href="#dsAddTable">dsAddTable</a> - add a table to a dataset </p>
+<p><a href="#dsAllocTables">dsAllocTables</a> - allocates memory for tables </p>
+<p><a href="#dsDeleteEntry">dsDeleteEntry</a> - delete an entry from a dataset </p>
+<p><a href="#dsFreeDataset">dsFreeDataset</a> - free a dataset's dynamic memory</p>
+<p><a href="#dsInitTable">dsInitTable</a> - initializes a dataset descriptor for a table</p>
+<p><a href="#dsLink">dsLink</a> - add entry to dataset</p>
+<p><a href="#dsLinkAcyclic">dsLinkAcyclic</a> - add entry to dataset with no cycles</p>
+<p><a href="#dsNewDataset">dsNewDataset</a> - create a new dataset </p>
+<p><a href="#dsNewTable">dsNewTable</a> - create a new table </p>
+<p><a href="#dsReallocTable">dsReallocTable</a> - change the size of a dynamic table </p>
+<p><a href="#dsSetTableRowCount">dsSetTableRowCount</a> - set the row count for a table </p>
+<p><a href="#dsUnlink">dsUnlink</a> - removes an entry from a dataset. </p>
+<hr>
+<h2><a name="dsAddTable">dsAddTable</a></h2>
+<p>The <b>dsAddTable</b> function adds a table to a dataset. </p>
+<p><b>int dsAddTable(DS_DATASET_T</b> *<i>pDataset</i><b>, char *</b><i>tableName</i><b>, char *</b><i>typeSpecifier</i><b>, size_t</b> 
+<i>rowCount</i><b>, char</b><i> **ppData</i><b>);</b> </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>pDataset</i> </dt>
+<dd>Handle of dataset </dd>
+<dt><i>tableName</i> </dt>
+<dd>Name of added table </dd>
+<dt><i>typeSpecifier</i> </dt>
+<dd>Type specifier for a table row </dd>
+<dt><i>rowCount</i> </dt>
+<dd>Number of rows in the table </dd>
+<dt><i>ppData</i> </dt>
+<dd>Location of table data pointer </dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print 
+error information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<hr>
+<h2><a name="dsAllocTables">dsAllocTables</a></h2>
+<p>The <b>dsAllocTables</b> function allocates memory for tables in a dataset that have a NULL data pointer. This 
+memory must be freed by <a href="#dsFreeDataset">dsFreeDataset</a>. </p>
+<p><b>int dsAllocTables(DS_DATASET_T</b> *<i>pDataset</i><b>);</b> </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>pDataset</i> </dt>
+<dd>Handle for dataset </dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print 
+error information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<h3>Remarks</h3>
+<hr>
+<h2><a name="dsDeleteEntry">dsDeleteEntry</a></h2>
+<p>The <b>dsDeleteEntry</b> function deletes an entry from a dataset. </p>
+<p><b>int dsDeleteEntry(DS_DATASET_T</b> *<i>pEntry</i><b>, DS_DATASET_T</b> *<i>pDataset</i><b>);</b> </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>pEntry</i> </dt>
+<dd>Handle of entry to be deleted </dd>
+<dt><i>pDataset</i> </dt>
+<dd>Handle of parent dataset </dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print 
+error information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<h3>Remarks</h3>
+<p>This function has not been implemented </p>
+<hr>
+<h2><a name="dsFreeDataset">dsFreeDataset</a></h2>
+<p>The <b>dsFreeDataset</b> function frees a dataset's dynamic memory. </p>
+<p><b>int dsFreeDataset(DS_DATASET_T</b> *<i>pDataset</i><b>);</b> </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>pDataset</i> </dt>
+<dd>Handle for dataset </dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print 
+error information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<hr>
+<h2><a name="dsInitTable">dsInitTable</a></h2>
+<p>The <b>dsInitTable</b> function initializes a dataset descriptor for a table. </p>
+<p><b>int dsInitTable(DS_DATASET_T</b> *<i>table</i><b>, char *</b><i>tableName</i><b>, char *</b><i>typeSpecifier</i><b>, size_t</b> <i>rowCount</i><b>, 
+char</b><i> </i><b>*</b><i>pData</i><b>);</b> </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>table</i> </dt>
+<dd>table handle </dd>
+<dt><i>tableName</i> </dt>
+<dd>Name of added table </dd>
+<dt><i>typeSpecifier</i> </dt>
+<dd>Type specifier for a table row </dd>
+<dt><i>rowCount</i> </dt>
+<dd>Number of rows in the table </dd>
+<dt><i>pData</i> </dt>
+<dd>Location of table data </dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print 
+error information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<h3>Remarks</h3>
+<p>This purpose of this function is to initialize a dataset descriptor for a table. The memory for the table 
+descriptor is managed by the caller. </p>
+<h3>See Also</h3>
+<p><a href="#dsNewTable">dsNewTable</a></p>
+<hr>
+<h2><a name="dsLink">dsLink</a></h2>
+<p>The <b>dsLink</b> function adds an entry to a dataset. </p>
+<p><b>int dsLink(DS_DATASET_T</b> *<i>parent</i><b>, DS_DATASET_T</b><i> </i>*<i>child</i><b>);</b> </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>parent</i> </dt>
+<dd>Handle of parent dataset </dd>
+<dt><i>child</i> </dt>
+<dd>Handle of dataset or table to be added</dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print 
+error information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<h3>See Also</h3>
+<p><a href="#dsLinkAcyclic">dsLinkAcyclic</a></p>
+<hr>
+<h2><a name="dsLinkAcyclic">dsLinkAcyclic</a></h2>
+<p>The <b>dsLinkAcyclic</b> function adds an entry to a dataset but does not allow cycles. </p>
+<p><b>int dsLinkAcyclic(DS_DATASET_T</b> *<i>parent</i><b>, DS_DATASET_T</b><i> </i>*<i>child</i><b>);</b> </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>parent</i> </dt>
+<dd>Handle of parent dataset </dd>
+<dt><i>child</i> </dt>
+<dd>Handle of dataset or table to be added</dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print 
+error information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<h3>See Also</h3>
+<p><a href="#dsLink">dsLink</a></p>
+<hr>
+<h2><a name="dsNewDataset">dsNewDataset</a></h2>
+<p>The <b>dsNewDataset</b> function creates a new dataset. </p>
+<p><b>int dsNewDataset(DS_DATASET_T</b> **<i>pDataset</i><b>, char *</b><i>dsetName);</i> </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>pDataset</i> </dt>
+<dd>Location for return of dataset handle</dd>
+<dt><i>dsetName</i> </dt>
+<dd>Name of dataset </dd>
+<dt><i>dsetDim</i> </dt>
+<dd>Dimension of dataset array </dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print 
+error information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<h3>Remarks</h3>
+<p>This function creates a dataset. Memory will be allocated for the dataset descriptor and must be freed by 
+calling <a href="#dsFreeDataset">dsFreeDataset</a>.</p>
+<hr>
+<h2><a name="dsNewTable">dsNewTable</a></h2>
+<p>The <b>dsNewTable</b> function creates a new table. </p>
+<p><b>int dsNewTable(DS_DATASET_T</b> **<i>ppTable</i><b>, char *</b><i>tableName</i><b>, char *</b><i>typeSpecifier</i><b>, size_t</b> 
+<i>rowCount</i><b>, char</b><i> </i><b>*</b><i>pData</i><b>);</b> </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>ppTable</i> </dt>
+<dd>Location for return of table handle </dd>
+<dt><i>tableName</i> </dt>
+<dd>Name of added table </dd>
+<dt><i>typeSpecifier</i> </dt>
+<dd>Type specifier for a table row </dd>
+<dt><i>rowCount</i> </dt>
+<dd>Number of rows in the table </dd>
+<dt><i>pData</i> </dt>
+<dd>Location of table data </dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print 
+error information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<h3>Remarks</h3>
+<p>This function creates a dataset that is a table. Memory will be allocated for the table descriptor. If <em>pData</em> is 
+NULL, memory will be allocated for the table data. This memory must be freed by calling <a href="#dsFreeDataset">dsFreeDataset</a>.</p>
+<h3>See Also</h3>
+<p><a href="#dsAddTable">dsAddTable</a> </p>
+<hr>
+<h2><a name="dsReallocTable">dsReallocTable</a></h2>
+<p>The <b>dsReallocTable</b> function changes the size of a dynamic table. </p>
+<p><b>int dsReallocTable(DS_DATASET_T</b> *<i>pTable</i><b>, size_t</b> <i>maxRows</i><b>);</b> </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>pTable</i> </dt>
+<dd>Handle for table </dd>
+<dt><i>maxRows</i> </dt>
+<dd>New value for maximum row count </dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print 
+error information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<h3>Remarks</h3>
+<p>The location of the table's data may be moved. </p>
+<hr>
+<h2><a name="dsSetTableRowCount">dsSetTableRowCount</a></h2>
+<p>The <b>dsSetTableRowCount</b> function changes the row count of a table. </p>
+<p><b>int dsSetTableRowCount(DS_DATASET_T</b> *<i>pTable</i><b>, size_t</b> <i>rowCount</i><b>);</b> </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>pTable</i> </dt>
+<dd>Handle for table </dd>
+<dt><i>rowCount</i> </dt>
+<dd>New value for row count </dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print 
+error information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<p>&nbsp;</p>
+<hr>
+<h2><a name="dsUnlink">dsUnlink</a></h2>
+<p>The <b>dsUnlink</b> function removes an entry from a dataset. </p>
+<p><b>int dsUnlink(DS_DATASET_T</b> *<i>parent</i><b>, DS_DATASET_T</b><i> </i>*<i>child</i><b>);</b> </p>
+<h3>Parameters </h3>
+<dl>
+<dt><i>parent</i> </dt>
+<dd>Handle of parent dataset </dd>
+<dt><i>child</i> </dt>
+<dd>Handle of dataset or table to be removed</dd>
+</dl>
+<h3>Return Value</h3>
+<p>If the function succeeds, the return value is TRUE. </p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <a href="error.htm#dsErrorCode">dsErrorCode</a>. To print 
+error information call <a href="error.htm#dsPerror">dsPerror</a>. </p>
+<h3>See Also</h3>
+<p><a href="#dsLink">dsLink</a>, <a href="#dsLinkAcyclic">dsLinkAcyclic</a></p>
+</body>
+
+</html>
