@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.1 2000/01/04 20:44:40 fisyak Exp $
+// $Id: StMagFMaker.cxx,v 1.2 2000/01/07 00:42:33 fisyak Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.2  2000/01/07 00:42:33  fisyak
+// merge Make with Init
+//
 // Revision 1.1  2000/01/04 20:44:40  fisyak
 // Add StMagFMaker
 //
@@ -24,33 +27,31 @@
 ClassImp(StMagFMaker)
   
   //_____________________________________________________________________________
-StMagFMaker::StMagFMaker(const char *name):StMaker(name),fMagFactor(0),fMagF(0){}
+StMagFMaker::StMagFMaker(const char *name):StMaker(name),fMagFactor(0),fMagF(0),fScale(1){}
 //_____________________________________________________________________________
 StMagFMaker::~StMagFMaker(){}
 //_____________________________________________________________________________
 Int_t StMagFMaker::Init(){
-  fScale = 1.;
-  cout << "Initialize STAR magnetic field with scale factor " << fScale << endl;
-  if (!fMagF) {
-    if (!m_Mode) fMagF = new StMagFCM("Star Full Field",
-				       "$STAR/StDb/params/StMagF/bfp112.map",
-				       kConMesh,fScale);
-    else        fMagF = new StMagFC("Star Constant Field","Constant Field",fScale);
+  if (!fMagFactor) {
+    St_DataSet *magnet = GetDataBase("params/magnet"); assert(magnet);
+    fMagFactor = (St_MagFactor *) magnet->Find("MagFactor"); assert(fMagFactor);
   }
+  Float_t Scale = (*fMagFactor)[0].ScaleFactor;
+  if (Scale == fScale && fMagF) return kStOK;
+  fScale = Scale;
+  if (fMagF) {
+    cout << "Reset STAR magnetic field with scale factor " << fScale << endl;
+    fMagF->SetFactor(fScale);
+    return kStOK;
+  }
+  if (!m_Mode) fMagF = new StMagFCM("Star Full Field",
+				    "$STAR/StDb/params/StMagF/bfp112.map",
+				    kConMesh,fScale);
+  else         fMagF = new StMagFC("Star Constant Field","Constant Field",fScale);
+  cout << "Initialize STAR magnetic field with scale factor " << fScale << endl;
   return StMaker::Init();
 }
 //_____________________________________________________________________________
-Int_t StMagFMaker::Make(){
-  St_DataSet *magnet = GetDataBase("params/magnet"); assert(magnet);
-  fMagFactor = (St_MagFactor *) magnet->Find("MagFactor"); assert(fMagFactor);
-  Float_t Scale = (*fMagFactor)[0].ScaleFactor;
-  if (Scale != fScale) {
-    fScale = Scale;
-    cout << "Reset STAR magnetic field with scale factor " << fScale << endl;
-    fMagF->SetFactor(fScale);
-  }
-  return kStOK;
-}
 
 
 

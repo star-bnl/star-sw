@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.h,v 1.1 2000/01/04 20:44:41 fisyak Exp $
+// $Id: StMagFMaker.h,v 1.2 2000/01/07 00:42:33 fisyak Exp $
 // $Log: StMagFMaker.h,v $
+// Revision 1.2  2000/01/07 00:42:33  fisyak
+// merge Make with Init
+//
 // Revision 1.1  2000/01/04 20:44:41  fisyak
 // Add StMagFMaker
 //
@@ -27,11 +30,11 @@ class StMagFMaker : public StMaker {
  public: 
                   StMagFMaker(const char *name="MagField");
    virtual       ~StMagFMaker();
-   virtual Int_t Init();
-   virtual Int_t  Make();
+   virtual Int_t  Init();
+   virtual Int_t  Make(){return Init();}
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMagFMaker.h,v 1.1 2000/01/04 20:44:41 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMagFMaker.h,v 1.2 2000/01/07 00:42:33 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMagFMaker, 1)   //StAF chain virtual base class for Makers
 };
