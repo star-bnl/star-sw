@@ -6,14 +6,20 @@
 
 This class contains all information from one EMC event.
 */
+
+class StEmcDecoder;
+
 class StBemcData: public TDataSet
 {
+ protected:
+          StEmcDecoder *mDecoder;
+ 
  public: 
 									StBemcData(char* name="bemcData");
 					virtual	~StBemcData();
 					Bool_t  getTDCStatus(Int_t);          ///< Returns only if a given TDC channel should be active or not in this run. DOES NOT return if its data is valid or not
 					Bool_t  getSMDStatus(Int_t);          ///< Returns only if a given SMD crate should be active or not in this run. DOES NOT return if its data is valid or not
-					Bool_t  checkTDC(Int_t,Int_t);        ///< check if data for TDC channel is ok
+					Bool_t  checkTDC(Int_t);              ///< check if data for TDC channel is ok
           void    validateData();               ///< Validates EMC data. Should be used only if headers are properly filled
 					void    printTower();                 ///< Print tower data
 					void    printSMD();                   ///< Print SMD data

@@ -6,9 +6,11 @@ ClassImp(StBemcData)
  
 StBemcData::StBemcData(char* name):TDataSet(name)
 {
+  mDecoder = NULL;
 }
 StBemcData::~StBemcData()
 {
+  if(mDecoder) delete mDecoder;
 } 
 Bool_t StBemcData::getTDCStatus(Int_t c)
 {
@@ -26,9 +28,12 @@ Bool_t StBemcData::getSMDStatus(Int_t c)
 	if(c<4 && EventDate>=20020301) return kTRUE;
 	return kFALSE;
 } 
-Bool_t StBemcData::checkTDC(Int_t i,Int_t crate)
+Bool_t StBemcData::checkTDC(Int_t i)
 {
 	Bool_t ok = kTRUE;
+  if(!mDecoder) mDecoder = new StEmcDecoder(EventDate,EventTime);
+	Int_t crate;
+  mDecoder->GetTowerCrateFromTDC(i,crate);
   if(TDCError[i]!=0) ok = kFALSE;
 	if(TDCCrateId[i]!=crate) ok = kFALSE;
 	if(TDCCount[i]!=164) ok = kFALSE;
@@ -37,17 +42,12 @@ Bool_t StBemcData::checkTDC(Int_t i,Int_t crate)
 void StBemcData::validateData()
 {
 	//towers first
-	StEmcDecoder *Decoder = new StEmcDecoder(EventDate,EventTime);
 	Bool_t ok = kTRUE;
 	if(!TowerPresent) ok = kFALSE;
 	if(TDCErrorFlag==1) ok = kFALSE;
-	for(Int_t i=0;i<30;i++)
-	if(getTDCStatus(i))
-	{
-		Int_t crate;
-		Decoder->GetTowerCrateFromTDC(i,crate);
-    ok = checkTDC(i,crate);
-	}
+  Int_t nbad = 0;
+	for(Int_t i=0;i<30;i++) if(getTDCStatus(i)) if(!checkTDC(i)) nbad++;
+  if(nbad==0) ok = kTRUE;
 	ValidTowerEvent = ok;
 	
 	//SMD
@@ -55,8 +55,6 @@ void StBemcData::validateData()
 	if(!SMDPresent) ok = kFALSE;
 	if(SMDErrorFlag ==1) ok = kFALSE;
 	ValidSMDEvent = ok;
-	
-	delete Decoder;
 }
 void StBemcData::printTower()
 {
