@@ -1,7 +1,7 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
-// Revision 1.17  1999/04/07 21:15:22  ward
-// Re-init nPixelPreviousPadRow after padrow 13.
+// Revision 1.18  1999/04/07 21:41:46  ward
+// Incorporates nPixelThisPad fix from Bill Love.
 //
 // Revision 1.16  1999/04/07 19:48:40  ward
 // Fixed adc mis-cast and also mis-count of pixel offset.
@@ -248,7 +248,8 @@ int St_tpcdaq_Maker::Output() {
   int pad,sectorStatus,ipadrow,npad,ipad,seqStatus,iseq,nseq,startTimeBin,ibin;
   int prevStartTimeBin,rowR,padR,seqR;  // row counters
   int iseqSave,pixTblWhere,seqLen,timeOff,numPadsWithSignal,pixOffset;
-  int seqOffset,timeWhere,nPixelThisPadRow,nSeqThisPadRow,offsetIntoPadTable;
+  int seqOffset,timeWhere,nPixelThisPadRow;
+  int nPixelThisPad,nSeqThisPadRow,offsetIntoPadTable;
   int nPixelPreviousPadRow;
   int pixSave,pixR,offIntoPixTbl,pixTblOff; // unsigned long
   StSequence *listOfSequences;
@@ -279,7 +280,7 @@ int St_tpcdaq_Maker::Output() {
       if(ipadrow==12) { // switch to the inner part of this sector
         raw_row_gen=raw_row_in; raw_pad_gen=raw_pad_in; rowR=0; padR=0;
         raw_seq_gen=raw_seq_in; pixel_data_gen=pixel_data_in; seqR=0; 
-        pixR=0; pixTblOff=0; nPixelPreviousPadRow=0;
+        pixR=0; pixTblOff=0;
       }
       pixSave=pixR; iseqSave=seqR; nPixelThisPadRow=0; nSeqThisPadRow=0;
       offsetIntoPadTable=padR; pixTblWhere=0; numPadsWithSignal=0;
@@ -287,6 +288,7 @@ int St_tpcdaq_Maker::Output() {
       // printf("BBB isect=%d ,ipadrow=%d ,npad=%d \n",isect,ipadrow,npad);
       if(npad>0) pad=padlist[0];
       for( ipad=0 ; ipad<npad ; pad=padlist[++ipad] ) {
+        nPixelThisPad=0;
         seqStatus=mUnpacker->getSequences(ipadrow+1,pad,&nseq,&listOfSequences);
         OrderTheSequences(nseq,listOfSequences); // BBB writing on Brian's mem
         if(seqStatus<0) { PrintErr(seqStatus,'a'); mErr=__LINE__; return 7; }
@@ -309,13 +311,13 @@ int St_tpcdaq_Maker::Output() {
           pointerToAdc=listOfSequences[iseq].firstAdc;
           for(ibin=0;ibin<seqLen;ibin++) {
             PixelWrite(pixel_data_gen,pixR++,*(pointerToAdc++));
-            nPixelThisPadRow++;
+            nPixelThisPadRow++; nPixelThisPad++;
           }
           seqR++;
         } // seq loop
         if(offIntoPixTbl<0x10000) pixTblWhere++; else pixTblOff=0x10000;
         PadWrite(raw_pad_gen,padR++,pixOffset,seqOffset,nseq,timeWhere,pad);
-        seqOffset+=nseq; pixOffset+=nPixelThisPadRow;
+        seqOffset+=nseq; pixOffset+=nPixelThisPad;
       } // pad loop, don't confuse padR (table row #) with ipad (loop index)
       RowWrite(raw_row_gen,rowR++,pixSave,
           iseqSave,nPixelPreviousPadRow,nSeqThisPadRow,offsetIntoPadTable,
@@ -359,7 +361,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am the Lone Ranger. St_tpcdaq_Maker::Make().\n");
+  printf("I am the Video Ranger. St_tpcdaq_Maker::Make().\n");
   errorCode=GetEventAndDecoder();
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
@@ -380,7 +382,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.17 1999/04/07 21:15:22 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.18 1999/04/07 21:41:46 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
