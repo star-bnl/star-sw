@@ -485,25 +485,25 @@ Block CSHI is a sensiteve Ar/CO2 box
                      xx:16:SHX(-300,300)  yy:16:(-300,300)   zz:16:(-350,350),
                      px:16:(-100,100)     py:16:(-100,100)   pz:16:(-100,100),
                      Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,100),
-                     Eloss:0:Calo(0,1)
+                     Eloss:0:(0,1)
 *
       HITS   CSDA    type=2:2:       eta:0.1:(0,1)   etsp:h_eta2:(0,sh_eta2),
                      xx:16:SHX(-300,300)  yy:16:(-300,300)   zz:16:(-350,350),
                      px:16:(-100,100)     py:16:(-100,100)   pz:16:(-100,100),
                      Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,100),
-                     Eloss:0:Calo(0,1)
+                     Eloss:0:(0,1)
 *
       HITS   CSDA    type=3:2:       eta:0.1:(0,1)   etsp:h_phi1:(0,sh_phi1),
                      xx:16:SHX(-300,300)  yy:16:(-300,300)   zz:16:(-350,350),
                      px:16:(-100,100)     py:16:(-100,100)   pz:16:(-100,100),
                      Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,100),
-                     Eloss:0:Calo(0,1)
+                     Eloss:0:(0,1)
 *
       HITS   CSDA    type=4:2:       eta:0.1:(0,1)   etsp:h_phi2:(0,sh_phi2),
                      xx:16:SHX(-300,300)  yy:16:(-300,300)   zz:16:(-350,350),
                      px:16:(-100,100)     py:16:(-100,100)   pz:16:(-100,100),
                      Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,100),
-                     Eloss:0:Calo(0,1)
+                     Eloss:0:(0,1)
 *
 EndBlock
 *
