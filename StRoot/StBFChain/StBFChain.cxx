@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.447 2004/10/20 21:31:59 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.448 2004/10/28 15:22:29 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -324,6 +324,7 @@ Bfc_st BFC1[] = { // standard chains
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent"     ,""  ,"","globT,SCL,TRGDef,StBichsel",""                 ,"StEvent","Load StEvent",kFALSE},
+  {"SsdUtil"     ,""  ,"","",""                                        ,"StSsdUtil","Load SSD Util",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
@@ -342,9 +343,11 @@ Bfc_st BFC1[] = { // standard chains
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"db"          ,"db"   ,"","StDbT"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
-  {"svtDb"       ,"svtDb","","SvtCL,db" ,                          "StSvtDbMaker","StSvtDbMaker","",kFALSE},
+  {"svtDb"       ,"svtDb","","SvtCL,db" ,   "StSvtDbMaker","StSvtDbMaker","Load and run SvtDbMaker",kFALSE},
+  {"ssdDb"       ,"ssdDb","","SsdUtil,db","StSsdDbMaker","StSsdDbMaker","Load and run StSsdDbMaker",kFALSE},
   {"dbutil"      ,""     ,"","SCL"            ,"","StSvtDbMaker,StDbUtilities","Load StDbUtilities",kFALSE},
-  {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
+  {"detDb"       ,""     ,"","",
+                           "StDetectorDbMaker","StDetectorDbMaker","Load and run StDetectorDbMaker",kFALSE},
   {"eemcDb"      ,"eeDb" ,"","db",                               "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
@@ -921,8 +924,9 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"tpc_T"       ,""  ,"","",""                                  ,"libtpc_Tables","Load tpc_Tables",kFALSE},
   {"trg_T"       ,""  ,"","",""                                  ,"libtrg_Tables","Load trg_Tables",kFALSE},
   {"vpd_T"       ,""  ,"","",""                                  ,"libvpd_Tables","Load vpd_Tables",kFALSE},
-  {"SvtIT"       ,""  ,"","",""                                         ,"","ITTF: track using SVT",kFALSE},
-  {"FtpcIT"      ,""  ,"","",""                               ,"","ITTF: build and track with FTPC",kFALSE},
+  {"SvtIT"       ,""  ,"","",""                                    ,"","ITTF: track using SVT geom",kFALSE},
+  {"SsdIT"       ,""  ,"","",""                                    ,"","ITTF: track using SSD geom",kFALSE},
+  {"FtpcIT"      ,""  ,"","",""                                    ,"","ITTF: track with FTPC geom",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Utilities   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -936,6 +940,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent"     ,""  ,"","globT,SCL,TRGDef,StBichsel",""                 ,"StEvent","Load StEvent",kFALSE},
+  {"SsdUtil"     ,""  ,"","",""                                        ,"StSsdUtil","Load SSD Util",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
@@ -954,9 +959,11 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"db"          ,"db"   ,"","StDbT"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
-  {"svtDb"       ,"svtDb","","SvtCL,db" ,                          "StSvtDbMaker","StSvtDbMaker","",kFALSE},
+  {"svtDb"       ,"svtDb","","SvtCL,db" ,   "StSvtDbMaker","StSvtDbMaker","Load and run SvtDbMaker",kFALSE},
+  {"ssdDb"       ,"ssdDb","","SsdUtil,db","StSsdDbMaker","StSsdDbMaker","Load and run StSsdDbMaker",kFALSE},
   {"dbutil"      ,""     ,"","SCL"            ,"","StSvtDbMaker,StDbUtilities","Load StDbUtilities",kFALSE},
-  {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
+  {"detDb"       ,""     ,"","",
+                           "StDetectorDbMaker","StDetectorDbMaker","Load and run StDetectorDbMaker",kFALSE},
   {"eemcDb"      ,"eeDb" ,"","db",                               "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
@@ -1080,8 +1087,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"genvtx"      ,"","","",   "StGenericVertexMaker","StGenericVertexMaker","Generic Vertex Finder",kFALSE},
   {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
-  {"Sti"         ,"Sti","","SCL,StEvent,tables,McEvent","StiMaker",
-      "StSvtDbMaker,StTpcDb,libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc,StiFtpc","ITTF tracker",kFALSE},
+  {"Sti"         ,"Sti","","SCL,StEvent,tables,McEvent,TpcDb,SvtDb,ssdDb","StiMaker",
+   "libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc",                 "ITTF tracker",kFALSE},
   {"dEdxY2"      ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
@@ -1523,9 +1530,12 @@ Int_t StBFChain::Instantiate()
 	    //pars->ftpcInputFile    = "none";
 	    //pars->pixelInputFile   = "none";
 
-	    pars->useSvt=kTRUE;         // SVT used in IT but not active. ??
+	    pars->useSvt=kTRUE;         // SVT used in Sti but not active. ??
 	                                // Pre-2001 data, will build only 1 ladder?
+	    pars->useSsd=kTRUE;         // use SSD in Sti
+
 	    if (GetOption("SvtIT")) pars->activeSvt=kTRUE;
+	    if (GetOption("SsdIT")) pars->activeSsd=kTRUE;
 	    if (GetOption("FtpcIT")){
 	      pars->useFtpc=kTRUE;
 	      pars->activeFtpc=kTRUE;
@@ -1965,7 +1975,7 @@ Int_t StBFChain::kOpt (const TString *tag) const {
   }
 #endif
   (void) printf (" Option %s has not been recognized\n", Tag.Data());
-  assert(1);
+  abort(); //assert(1);
   return 0;
 }
 
@@ -2095,7 +2105,8 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	       << FDateS << endl;
 	} else {
 	  cout << " Invalid Option " << string.Data() << ". !! ABORT !! " << endl;
-	  assert(1);
+	  abort(); //assert(1);
+	  return;
 	}
       }
     } else {
