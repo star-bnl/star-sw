@@ -1,5 +1,17 @@
-* $Id: fstdgeo.g,v 1.6 2005/02/02 22:07:28 potekhin Exp $
+* $Id: fstdgeo.g,v 1.9 2005/02/11 20:26:48 nieuwhzs Exp $
 * $Log: fstdgeo.g,v $
+* Revision 1.9  2005/02/11 20:26:48  nieuwhzs
+* Moved the silicon sensors to their proper positions, i.e. flush with the
+* front faces of the hybrids.
+* Adjusted the size of the readout chip 'strip' to be more realistic.
+* Added second cooling channel on the backside of the modules and adjusted
+* mother volume size to accomodate this second cooling channel. This make the
+* modules symmetric.
+* Adjusted the size of the FST mother volume so that the 4 disks can be placed
+* in their proper position in the 'CAVE' volume. The 'center' of the disks is
+* assumed to be exactly halway between the silicon sensors.
+* +++Gerrit van Nieuwenhuizen, 01/11/05
+*
 * Revision 1.6  2005/02/02 22:07:28  potekhin
 * Changed the sensor color as per Gerrit's request
 *
@@ -64,12 +76,13 @@ Module FSTDGEO is the geometry of the forward silicon tracker pixel detector
       Rmin       =  7.0        ! inner radius of all of the detector
       Rmax       = 22.5        ! outer radius of all of the detector
 
-      Zmin       = 28.0        ! Z-start  of the barrel comprising the three pancakes
-      Zmax       = 38.0        ! Z-finish of the barrel comprising the three pancakes
+*GvN First disk is sitting at 280mm, last disk is sitting at 370mm
+      Zmin       = 27.4619     ! Z-start  of the barrel comprising the three pancakes
+      Zmax       = 37.5381     ! Z-finish of the barrel comprising the three pancakes
 
 
-      WedgeThk   =  0.730      ! Includes sensor assembly and water pipes
-      SensAThk   =  0.370      ! Sensor assembly thk: includes two layers of Si, AlN plates and chips
+      WedgeThk   =  1.0762     ! Includes sensor assembly and water pipes
+      SensAThk   =  0.3686     ! Sensor assembly thk: includes two layers of Si, AlN plates and chips
       SensorThk  =  0.030      ! Total   silicon thickness, includes passive and active
 
       Z          =  {0.0, 3.0, 6.0, 9.0} ! nominal Zs of the faces
@@ -91,8 +104,8 @@ Module FSTDGEO is the geometry of the forward silicon tracker pixel detector
 
    Fill FSCG                   ! Forward Silicon readout Chip Geometry, first approx.
       Nummer     =   1         ! We can have a few different chips
-      W          =   4.2       ! Width
-      H          =   0.5       ! Height
+      W          =   5.4       ! Width
+      H          =   0.82      ! Height, APV25 size keeps changing!
       Thk        =   0.07      ! Thickness
    EndFill
 
@@ -100,7 +113,7 @@ Module FSTDGEO is the geometry of the forward silicon tracker pixel detector
       Version    =   1         ! Version
       Rmin       =   21.0      ! Inner radius of the duct
       Rmax       =   22.0      ! Outer radius of the duct
-      Thk        =    0.5      ! Thisckness in Z
+      Thk        =    0.5      ! Thickness in Z
       Len        =    6.3      ! Length
       WallThk    =    0.1      ! Wall thickness
    EndFill
@@ -135,17 +148,20 @@ Module FSTDGEO is the geometry of the forward silicon tracker pixel detector
 
       Create   FSMO
       Position FSMO in CAVE z=+center
-      Position FSMO in CAVE z=-center ThetaZ=180
+*      Position FSMO in CAVE z=-center ThetaZ=180
 * -----------------------------------------------------------------------------
 Block FSMO is the mother of one endcap of FSTD
       Material  Air
-      Attribute FSMO  Seen=1  colo=6
+      Attribute FSMO  Seen=0  colo=6
 
-      Shape     TUBE Rmin=FSTG_Rmin Rmax=FSTG_Rmax Dz=depth/2.0
+      Shape     TUBE Rmin=FSTG_Rmin _
+                     Rmax=FSTG_Rmax _
+                     Dz=depth/2.0
 
+*     Place the 4 disks in the mother volume
       Create    FDMO
       do nl=1,4
-       Position FDMO z=FSTG_Z(nl)-depth/2.0+FSTG_WedgeThk/2.0
+       Position FDMO z=-depth/2.0+FSTG_WedgeThk/2.0+FSTG_Z(nl)
       enddo
 
 endblock
@@ -153,9 +169,11 @@ endblock
 * -----------------------------------------------------------------------------
 Block FDMO is the mother of an individual two-layer disk assembly (wafers and cooling)
       Material  Air
-      Attribute FDMO  Seen=1  colo=6
+      Attribute FDMO  Seen=0  colo=6
 
-      Shape TUBE Rmin=FSTG_Rmin Rmax=FSTG_Rmax Dz=FSTG_WedgeThk/2.0
+      Shape TUBE Rmin=FSTG_Rmin _
+                 Rmax=FSTG_Rmax _
+                 Dz=FSTG_WedgeThk/2.0
 
       Create FDMS
 endblock
@@ -169,7 +187,10 @@ Block FDMS is a division within an individual disk
 * -------------------------------------
 * sensor assembly mother
       Create   FDMW
-      Position FDMW x=WedgeOffset y=0.0 z=-0.5*(FSTG_WedgeThk-FSTG_SensAThk) ORT=YZX
+      Position FDMW x=WedgeOffset _
+                    y=0.0 _
+                    z=0.0 _
+                    ORT=YZX
 
 * -------------------------------------
 * Water manifold (duct)
@@ -177,20 +198,32 @@ Block FDMS is a division within an individual disk
 
       Position FDWD x=FDWG_Rmin+0.5*(FDWG_Rmax-FDWG_Rmin) _
                     y=0 _
-                    z=-0.5*(FSTG_WedgeThk-FSTG_SensAThk-FDWG_Thk-FSAN_Thk) ORT=YZX
+                    z=-0.5*(FDWG_Thk+FSAN_Thk) _
+                    ORT=YZX
+      Position FDWD x=FDWG_Rmin+0.5*(FDWG_Rmax-FDWG_Rmin) _
+                    y=0 _
+                    z=+0.5*(FDWG_Thk+FSAN_Thk) _
+                    ORT=YZX
 
 endblock
 * -----------------------------------------------------------------------------
 Block FDMW is the mother wedge, housing plate, sensor  and chips
       Attribute FDMW  Seen=0  colo=4
 
-      Shape TRD1 dx1=WedgeDx1 dx2=WedgeDx2 dy=FSTG_SensAThk/2.0 dz=WedgeLength/2.0
+      Shape TRD1 dx1=WedgeDx1 _
+                 dx2=WedgeDx2 _
+                 dy=FSTG_SensAThk/2.0 _
+                 dz=WedgeLength/2.0
 
 * -------------------------------------
 * The Silicon Wafer
       Create   FDSW
-      Position FDSW x=0.0 y=-FSTG_Spacing/2.0+FSTG_SensorThk/2.0 z=SensorOffset
-      Position FDSW x=0.0 y=+FSTG_Spacing/2.0-FSTG_SensorThk/2.0 z=SensorOffset AlphaZ=180
+      Position FDSW x=0.0 _
+                    y=-FSTG_Spacing/2.0-FSTG_SensorThk/2.0 _
+                    z=SensorOffset
+      Position FDSW x=0.0 _
+                    y=+FSTG_Spacing/2.0+FSTG_SensorThk/2.0 _
+                    z=SensorOffset AlphaZ=180
 
 * -------------------------------------
 * ALN thermal plate
@@ -203,8 +236,12 @@ Block FDMW is the mother wedge, housing plate, sensor  and chips
       Position FDTP z=PlateOffset
 
       Create   FDSC
-      Position FDSC x=0.0 y=+0.5*FSCG_Thk+1.5*FSAN_Thk z=(0.5*WedgeLength - FSAN_Length+FSCG_H/2.0)
-      Position FDSC x=0.0 y=-0.5*FSCG_Thk-1.5*FSAN_Thk z=(0.5*WedgeLength - FSAN_Length+FSCG_H/2.0)
+      Position FDSC x=0.0 _
+                    y=+0.5*FSCG_Thk+1.5*FSAN_Thk _
+                    z=(0.5*WedgeLength - FSAN_Length+FSCG_H/2.0)
+      Position FDSC x=0.0 _
+                    y=-0.5*FSCG_Thk-1.5*FSAN_Thk _
+                    z=(0.5*WedgeLength - FSAN_Length+FSCG_H/2.0)
 
 * -------------------------------------
 * ALN substrate
@@ -247,7 +284,10 @@ Block FDTP is the AlN Thermal Plate
       Component N    A=14  Z=7   W=1
       Mixture   AlN  Dens=3.30
 
-      Shape TRD1 dx1=PlateDx1 dx2=PlateDx2 dy=FSAN_Thk/2.0 dz=FSAN_Length/2.0
+      Shape TRD1 dx1=PlateDx1 _
+                 dx2=PlateDx2 _
+                 dy=FSAN_Thk/2.0 _
+                 dz=FSAN_Length/2.0
 
 endblock
 * -----------------------------------------------------------------------------
@@ -255,7 +295,9 @@ Block FDSC is the readout Chip
       Material  Silicon  
       Attribute FDSC  Seen=1  colo=1
 
-      Shape BOX dx=FSCG_W/2.0 dy=FSCG_Thk/2.0 dz=FSCG_H/2.0
+      Shape BOX dx=FSCG_W/2.0 _
+                dy=FSCG_Thk/2.0 _
+                dz=FSCG_H/2.0
 
 endblock
 * -----------------------------------------------------------------------------
@@ -263,7 +305,9 @@ Block FDWD is the water duct made of carbon composite
       Material  Carbon
       Attribute FDWD  Seen=1  colo=1
 
-      Shape BOX dx=FDWG_Len/2.0 dy=FDWG_Thk/2.0 dz=(FDWG_Rmax-FDWG_Rmin)/2.0
+      Shape BOX dx=FDWG_Len/2.0 _
+                dy=FDWG_Thk/2.0 _
+                dz=(FDWG_Rmax-FDWG_Rmin)/2.0
       Create and Position FDWW
 
 endblock
@@ -276,7 +320,9 @@ Block FDWW is the water inside the carbon duct
 
       Attribute FDWD  Seen=1  colo=3
 
-      Shape BOX dx=FDWG_Len/2.0 dy=(FDWG_Thk-2.0*FDWG_WallThk)/2.0 dz=(FDWG_Rmax-FDWG_Rmin-2.0*FDWG_WallThk)/2.0
+      Shape BOX dx=FDWG_Len/2.0 _
+                dy=(FDWG_Thk-2.0*FDWG_WallThk)/2.0 _
+                dz=(FDWG_Rmax-FDWG_Rmin-2.0*FDWG_WallThk)/2.0
 
 endblock
 * -----------------------------------------------------------------------------
