@@ -286,14 +286,18 @@ void StiMaker::finishEvent()
 	bool useExtendToVertex=true;
 	if (useExtendToVertex)
 		{
+			cout <<"StiMaker::finishEvent() - INFO - Get main vertex and extend tracks" << endl;
 			StiHit * vertex = toolkit->getHitFactory()->getObject();
 			const StThreeVectorF& vp = mevent->primaryVertex()->position();
 			const StThreeVectorF& ve = mevent->primaryVertex()->positionError();
 			vertex->set(0.,0.,vp.x(),vp.y(),vp.z(),ve.x(),0.,0.,ve.y(),0.,ve.z());
 			vertex->setStHit(mevent->primaryVertex());
 			tracker->extendTracksToVertex(vertex);
+			cout <<"StiMaker::finishEvent() - INFO - Tracks extension to main vertex completed" << endl;
 		}
 	clock.start();
+	
+	cout <<"StiMaker::finishEvent() - INFO - Call StEvent Filler"  << endl;
 	mevent = mStEventFiller->fillEvent(mevent, toolkit->getTrackContainer());
 	clock.stop();
 	cout <<"StiMaker::finishEvent() - Time to fill StEvent: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
@@ -355,3 +359,4 @@ StiIOBroker* StiMaker::getIOBroker()
 {
 	return toolkit->getIOBroker();
 }
+

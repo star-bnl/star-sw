@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.6 2002/04/16 13:11:30 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 1.7 2002/04/16 19:46:44 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.7  2002/04/16 19:46:44  pruneau
+ * must catch exception
+ *
  * Revision 1.6  2002/04/16 13:11:30  pruneau
  * *** empty log message ***
  *
@@ -41,6 +44,7 @@
 //std
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>
 using namespace std;
 
 // SCL
@@ -179,7 +183,20 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 		
 		// actual filling of StTrack from StiTrack
 		StGlobalTrack* gTrack = new StGlobalTrack;
-		fillTrack(gTrack,kTrack);
+		
+		try
+			{
+				fillTrack(gTrack,kTrack);
+			}
+		catch (runtime_error & rte )
+			{
+				cout << "StiStEventFiller::fillEvent() - WARNING - runtime exception while filling StEvent track. Error:"
+						 << rte.what() << endl;
+			}
+		catch (...)
+			{
+				cout << "StiStEventFiller::fillEvent() - WARNING - Unknown exception while filling StEvent track."<<endl;
+			}
 		
 		// set up relationships between objects
 		gTrack->setDetectorInfo(detInfo);
