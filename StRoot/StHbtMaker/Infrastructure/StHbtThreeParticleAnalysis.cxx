@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtThreeParticleAnalysis.cxx,v 1.2 2000/04/12 01:54:20 willson Exp $
+ * $Id: StHbtThreeParticleAnalysis.cxx,v 1.3 2000/05/11 21:18:56 willson Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHbtThreeParticleAnalysis.cxx,v $
+ * Revision 1.3  2000/05/11 21:18:56  willson
+ * Removed StHbtThreeParticleCorrFctn's...put methods in StHbtCorrFctn
+ * Some methods in derived analysis classes moved to base analysis class
+ *
  * Revision 1.2  2000/04/12 01:54:20  willson
  * Initial Installation - Comments Added
  *
@@ -46,7 +50,7 @@ StHbtThreeParticleAnalysis::StHbtThreeParticleAnalysis(){
   mThirdParticleCut  = 0;
   mTripletCut           = 0;
   mCorrFctnCollection= 0;
-  mCorrFctnCollection = new StHbtThreeParticleCorrFctnCollection;
+  mCorrFctnCollection = new StHbtCorrFctnCollection;
   mMixingBuffer = new StHbtPicoEventCollection;
 }
 
@@ -59,7 +63,7 @@ StHbtThreeParticleAnalysis::~StHbtThreeParticleAnalysis(){
   delete mThirdParticleCut ;
   delete mTripletCut           ;
   // now delete every CorrFunction in the Collection, and then the Collection itself
-  StHbtThreeParticleCorrFctnIterator iter;
+  StHbtCorrFctnIterator iter;
   for (iter=mCorrFctnCollection->begin(); iter!=mCorrFctnCollection->end();iter++){
     delete *iter;
   }
@@ -72,10 +76,10 @@ StHbtThreeParticleAnalysis::~StHbtThreeParticleAnalysis(){
   delete mMixingBuffer;
 }
 //______________________
-StHbtThreeParticleCorrFctn* StHbtThreeParticleAnalysis::CorrFctn(int n){  // return pointer to n-th correlation function
+StHbtCorrFctn* StHbtThreeParticleAnalysis::CorrFctn(int n){  // return pointer to n-th correlation function
   if ( n<0 || n > (int)mCorrFctnCollection->size() )
     return NULL;
-  StHbtThreeParticleCorrFctnIterator iter=mCorrFctnCollection->begin();
+  StHbtCorrFctnIterator iter=mCorrFctnCollection->begin();
   for (int i=0; i<n ;i++){
     iter++;
   }
@@ -97,7 +101,7 @@ StHbtString StHbtThreeParticleAnalysis::Report()
   temp += "\nTriplet Cuts:\n";
   temp += mTripletCut->Report();
   temp += "\nCorrelation Functions:\n";
-  StHbtThreeParticleCorrFctnIterator iter;
+  StHbtCorrFctnIterator iter;
   if ( mCorrFctnCollection->size()==0 ) {
     cout << "StHbtThreeParticleAnalysis-Warning : no correlations functions in this analysis " << endl;
   }
@@ -141,7 +145,7 @@ void StHbtThreeParticleAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
     StHbtParticleIterator PartIter1;
     StHbtParticleIterator PartIter2;
     StHbtParticleIterator PartIter3;
-    StHbtThreeParticleCorrFctnIterator CorrFctnIter;
+    StHbtCorrFctnIterator CorrFctnIter;
     StHbtParticleIterator StartOuterLoop = picoEvent->FirstParticleCollection()->begin();  // always
     StHbtParticleIterator EndOuterLoop   = picoEvent->FirstParticleCollection()->end();    // will be two less if identical
     StHbtParticleIterator StartMiddleLoop;
@@ -182,7 +186,7 @@ void StHbtThreeParticleAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 	  if (mTripletCut->Pass(TheTriplet)){
 	    for (CorrFctnIter=mCorrFctnCollection->begin();
 		 CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
-	      StHbtThreeParticleCorrFctn* CorrFctn = *CorrFctnIter;
+	      StHbtCorrFctn* CorrFctn = *CorrFctnIter;
 	      CorrFctn->AddRealTriplet(TheTriplet);
 	    }
 	  }  // if passed Triplet cut
@@ -229,7 +233,7 @@ void StHbtThreeParticleAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 		// testing...		cout << " TheTriplet passed TripletCut... ";
 		for (CorrFctnIter=mCorrFctnCollection->begin();
 		     CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
-		  StHbtThreeParticleCorrFctn* CorrFctn = *CorrFctnIter;
+		  StHbtCorrFctn* CorrFctn = *CorrFctnIter;
 		  CorrFctn->AddMixedTriplet(TheTriplet);
 		  // testing...cout << " TheTriplet has been added to MixedTriplet method " << endl;
 		}
@@ -257,7 +261,7 @@ void StHbtThreeParticleAnalysis::EventBegin(const StHbtEvent* ev){
   mFirstParticleCut->EventBegin(ev);
   mSecondParticleCut->EventBegin(ev);
   mThirdParticleCut->EventBegin(ev);
-  for (StHbtThreeParticleCorrFctnIterator iter=mCorrFctnCollection->begin(); iter!=mCorrFctnCollection->end();iter++){
+  for (StHbtCorrFctnIterator iter=mCorrFctnCollection->begin(); iter!=mCorrFctnCollection->end();iter++){
     (*iter)->EventBegin(ev);
   }
 }
@@ -266,13 +270,13 @@ void StHbtThreeParticleAnalysis::EventEnd(const StHbtEvent* ev){
   mFirstParticleCut->EventBegin(ev);
   mSecondParticleCut->EventBegin(ev);
   mThirdParticleCut->EventBegin(ev);
-  for (StHbtThreeParticleCorrFctnIterator iter=mCorrFctnCollection->begin(); iter!=mCorrFctnCollection->end();iter++){
+  for (StHbtCorrFctnIterator iter=mCorrFctnCollection->begin(); iter!=mCorrFctnCollection->end();iter++){
     (*iter)->EventEnd(ev);
   }
 }
 //_________________________
 void StHbtThreeParticleAnalysis::Finish(){
-  StHbtThreeParticleCorrFctnIterator iter;
+  StHbtCorrFctnIterator iter;
   for (iter=mCorrFctnCollection->begin(); iter!=mCorrFctnCollection->end();iter++){
     (*iter)->Finish();
   }
