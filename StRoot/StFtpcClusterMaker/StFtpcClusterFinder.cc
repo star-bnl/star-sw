@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.29 2002/03/05 16:51:35 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.30 2002/03/08 16:32:34 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.30  2002/03/08 16:32:34  jcs
+// initialize bSlope to prevent nan's
+//
 // Revision 1.29  2002/03/05 16:51:35  jcs
 // force data type definitions to avoid compiler warnings (this is a correct
 // but inelegant fix which must be changed)
@@ -969,7 +972,7 @@ int StFtpcClusterFinder::getSeqPeaksAndCalibAmp(TPCSequence *Sequence,
 					       TPadPeak *Peak, 
 					       int *pNumPeaks)
 {
-  int bSlope;
+  int bSlope=0;
   int iIndex, iPadIndex;
   int iWidth;
   unsigned char cLastADC, cTemp;
