@@ -268,11 +268,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
     // determine the radius for the detector's barrel
     float fBarrelRadius = fLadderRadius;
     if(iLayer < nLayers - 1){
-      if(iLayer%2==0){
-        fBarrelRadius += svgConfig.layer_radius[iLayer + 1];
-      }else{
-        fBarrelRadius += svgConfig.layer_radius[iLayer - 1];
-      }
+      fBarrelRadius += fGapRadius;
       fBarrelRadius /= 2.;
     }
 
