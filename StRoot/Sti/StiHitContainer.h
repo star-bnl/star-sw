@@ -17,6 +17,7 @@
 #include <fstream.h>
 
 #include "StiMapUtilities.h"
+#include "StiHit.h"
 
 using std::map;
 using std::vector;
@@ -63,6 +64,8 @@ public:
     
     //User Query Interface
     void setRefPoint(StiHit* ref);
+    //position- postion of detector, not x of hit.
+    void setRefPoint(double position, double refAngle, double y, double z);
     bool hasMore() const;
     StiHit* getCurrentHit(); //get current
     StiHit* getHit();  //get current hit and increment
@@ -103,6 +106,7 @@ private:
     //Used to search for points that satisfy users query
     StiHit* mminpoint;
     StiHit* mmaxpoint;
+    StiHit mUtilityHit;
     hitvector::iterator mstart;
     hitvector::iterator mstop;
 

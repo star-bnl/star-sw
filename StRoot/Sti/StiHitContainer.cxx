@@ -138,6 +138,16 @@ StiHit* StiHitContainer::getHit()
     return (*(mcurrent++));
 }
 
+void StiHitContainer::setRefPoint(double position, double refAngle, double y, double z)
+{
+    mUtilityHit.reset();
+    mUtilityHit.setPosition(position);
+    mUtilityHit.setRefangle(refAngle);
+    mUtilityHit.setY(y);
+    mUtilityHit.setZ(z);
+    setRefPoint(&mUtilityHit);
+}
+
 void StiHitContainer::setRefPoint(StiHit* ref)
 {
     mcandidatevec.clear();
