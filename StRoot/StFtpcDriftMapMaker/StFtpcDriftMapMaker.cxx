@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.1 2000/12/20 08:44:01 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.2 2001/01/09 22:52:22 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.2  2001/01/09 22:52:22  jcs
+// remove include St_fmg_Module.h - now obsolete
+//
 // Revision 1.1  2000/12/20 08:44:01  jcs
 // Replace pam/ftpc/fmg with maker
 //
@@ -27,7 +30,6 @@
 #include "tables/St_fcl_padtrans_Table.h"
 #include "tables/St_fcl_det_Table.h"
 #include "tables/St_fcl_zrow_Table.h"
-#include "ftpc/St_fmg_Module.h"
 
 #ifndef gufld
 #define gufld gufld_
