@@ -1,7 +1,7 @@
 #include <Stiostream.h>
 #include "StDetectorDbMagnet.h"
 #include "tables/St_starMagOnl_Table.h"
-
+#include <math.h>
 /*!
    This class provites and interface to the magnet status. It can provide the nominal scale factor as well as the current.
 
