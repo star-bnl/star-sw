@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.12 1999/08/13 21:30:34 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.13 1999/09/10 20:59:33 fisyak Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.13  1999/09/10 20:59:33  fisyak
+// fix declaration
+//
 // Revision 1.12  1999/08/13 21:30:34  ward
 // Gain corrections.  And bug fix for TRS mode.
 //
@@ -77,7 +80,7 @@ class St_tpcdaq_Maker : public StMaker {
    Char_t            *gConfig; //!
    StTpcRawDataEvent *mEvent; //!
    void MakeHistograms();
-   void St_tpcdaq_Maker::SetGainCorrectionStuff(int);
+   void SetGainCorrectionStuff(int);
 #ifdef GAIN_CORRECTION
    float fGain[45][182];
 #endif
@@ -140,7 +143,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.12 1999/08/13 21:30:34 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.13 1999/09/10 20:59:33 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };
