@@ -27,6 +27,7 @@ void gl3Event::addTracks ( short sector, int nTrk, type1_track* track1 ) {
         "gl3Event::addTracks: max number of merging tracks %d reached\n", 
          maxMergingTracks ) ;
 	 nMergingTracks-- ;
+         break ;
       }
    }
 }
@@ -49,6 +50,7 @@ void gl3Event::addTracks ( short sector, int nTrk, type2_track* track2 ) {
          fprintf ( stderr, 
          "gl3Event::addTracks: max number of tracks %d reached\n", maxTracks ) ;
 	 nTracks-- ;
+         break ;
       }
    }
 }
@@ -71,6 +73,7 @@ void gl3Event::addTracks ( short sector, int nTrk, type3_track* track3 ) {
         " gl3Event::addTracks: max number of tracks %d reached\n", 
          maxTracks ) ;
 	 nTracks-- ;
+         break ;
       }
    }
 }
