@@ -44,7 +44,7 @@ l1 = [list]
 l2 = [listr]
 if [list_len]>0 then
   exec load [list] [listr]  
-  ami/list
+*  ami/list
 else
   message 'Domain/package' [pam] 'does not exist nor in your privite area neither in standrad one'
 endif

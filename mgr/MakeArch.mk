@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.37  1998/11/05 20:09:23  fisyak
+#  add OBJY CPPFLAGS
+#
 #  Revision 1.36  1998/10/29 20:53:31  perev
 #  ObjectSpace added
 #
@@ -89,7 +92,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/10/29 20:53:31 $ 
+#             Last modification $Date: 1998/11/05 20:09:23 $ 
 #. default setings
 
 RM := rm -f
@@ -145,6 +148,11 @@ CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH) QUIET_ASP
 ifndef ASU_MALLOC_OFF
   CPPFLAGS += ASU_MALLOC_ON
 endif
+# for Objy
+ifdef OBJY_HOME
+  CPPFLAGS += -DOBJYBASE -I$(BFWORK)/include -I$(BFWORK)/tmp/$(BFARCH) -I$(BFDIST)/releases/$(BFCURRENT)/include -I$(OBJYBASE)/$(OBJY_ARCH)/include
+endif
+
 MKDEPFLAGS:= -MG -MM -w -nostdinc
 
 OSFID    :=
