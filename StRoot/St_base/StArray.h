@@ -59,7 +59,7 @@ class StObjArray : public TCollection
 public:
                 StObjArray(Int_t s = TCollection::kInitCapacity){fObjArr = new TObjArray(s,0);};
                 StObjArray(StObjArray& a);
-virtual        ~StObjArray(){delete fObjArr; printf("~StObjArray %p\n",this);};
+virtual        ~StObjArray(){delete fObjArr;};
 
             virtual void AddAfter(TObject* after, TObject* obj){fObjArr->AddAfter(after,obj);};
             virtual void Add(TObject* obj){fObjArr->Add(obj);};
@@ -117,12 +117,12 @@ public:
 StObjArrayIter(const StObjArray* col=0, Bool_t dir = kIterForward) :  TObjArrayIter(0, dir)
 { 
   fColl = col; if (col) { SetCollection(fColl->fObjArr); Reset();}
-  printf("StObjArrayIter=%p\n",this);};
+};
 
 StObjArrayIter(const StObjArrayIter &init) :  TObjArrayIter(0,kIterForward)
-{ *this=init; printf("StObjArrayIter2=%p %p\n",this,&init);};
+{ *this=init;};
 
-virtual       ~StObjArrayIter(){printf("~StObjArrayIter %p\n",this);}; 
+virtual       ~StObjArrayIter(){}; 
 virtual void   SetCursor(Int_t kursor);
 virtual Int_t  GetCursor() const;
 virtual void   SetDirection(Bool_t dir = kIterForward);
@@ -214,7 +214,7 @@ ClassDef(QWERTYRef,1)
 class QWERTYStr : public StStrArray
 {
 public:
-QWERTYStr(const Chat_t *name,Int_t s = TCollection::kInitCapacity):StStrArray(name,s){};
+QWERTYStr(const Chat_t *name=0,Int_t s = TCollection::kInitCapacity):StStrArray(name,s){};
 virtual        ~QWERTYStr(){printf("~QWERTYStr %p\n",this);};
 virtual QWERTY* back() const {return (QWERTY*)Back();};
 virtual QWERTY* front() const {return (QWERTY*)Front();};
@@ -255,7 +255,7 @@ class StVecPtr ## QWERTY : public StRefArray \
 { \
 public: \
 StVecPtr ## QWERTY ## (Int_t s = TCollection::kInitCapacity):StRefArray(s){}; \
-virtual        ~StVecPtr ## QWERTY ##(){printf("~StObjArray %p\n",this);}; \
+virtual        ~StVecPtr ## QWERTY ##(){}; \
 virtual St ## QWERTY ## * back() const \
 {return (St ## QWERTY ## *)Back();}; \
 virtual St ## QWERTY ## * front() const \
@@ -270,9 +270,9 @@ ClassDef(StVecPtr ## QWERTY ##,1) \
 class St ## QWERTY ## Collection : public StStrArray \
 { \
 public: \
-St ## QWERTY ## Collection(const Char_t *name,Int_t s = TCollection::kInitCapacity):StStrArray(name,s){}; \
+St ## QWERTY ## Collection(const Char_t *name=0,Int_t s = TCollection::kInitCapacity):StStrArray(name,s){}; \
 virtual        ~St ## QWERTY ## Collection()\
-{printf("~St ## QWERTY ## Collection %p\n",this);}; \
+{}; \
 virtual St ## QWERTY ## * back() const \
 {return (St ## QWERTY ## *)Back();}; \
 virtual St ## QWERTY ## * front() const \
@@ -289,12 +289,12 @@ class St ## QWERTY ## Iterator : public StObjArrayIter \
 public: \
  \
 St ## QWERTY ## Iterator(const StObjArray* col=0, Bool_t dir = kIterForward) :  StObjArrayIter(col, dir) \
-{ printf("St ## QWERTY ## Iterator=%p\n",this);}; \
+{}; \
  \
 St ## QWERTY ## Iterator(const St ## QWERTY ## Iterator &init) :  StObjArrayIter(0,kIterForward) \
-{ *this=init; printf("St ## QWERTY ## Iterator2=%p %p\n",this,&init);}; \
+{ *this=init;}; \
  \
-virtual       ~St ## QWERTY ## Iterator(){printf("~St ## QWERTY ## Iterator %p\n",this);};  \
+virtual       ~St ## QWERTY ## Iterator(){};  \
 virtual St ## QWERTY *operator*() const {return (St ## QWERTY ## *)GetObject();} \
 ClassDef(St ## QWERTY ## Iterator,1) \
 }; \
