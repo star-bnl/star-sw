@@ -14,7 +14,7 @@ C                     **                 **
 C
 C----------------------------------------------------------------------
 C
-        INTEGER FUNCTION TCL_Make_Clusters(
+        INTEGER FUNCTION tcl_make_clusters(
      +     pad_plane_h, pad_plane,
      +     tppad_h, tppad,
      +     tppixel_h, tppixel,
@@ -152,7 +152,7 @@ C----------------------------------------------------------------------
 
 C----------------------------------------------------------------------
 	DATA    IDE1 /0/
-
+           
 C----------------------------------------------------------------------
 c functions (some of which are only hypothetical):
 c
@@ -238,8 +238,9 @@ c Find pixel clusters in each row:
      1                , padptr, pad_entries_i, index)
     
                  IF ( TAS_Code .NE. STAFCV_OK ) THEN
-                    CALL Message( 'TCL_Make_Clusters-E1  Failed.',
-     1                   1, IDE1 )
+*                    CALL Message( 'TCL_Make_Clusters-E1  Failed.',
+*     1                   1, IDE1 )
+                    write(6,*) 'tcl_make_clusters failed'
                     TCL_Make_Clusters = TAS_Code
                     RETURN
                  END IF
@@ -445,8 +446,9 @@ c Load sequences on this pad row into arrays:
 
            write(6,*)'Sect + row : ',sector,row,' nrowseqs ',nrowseqs
 
-           CALL Message( 'Tcl_Clsrow-E1  Failed to load pixels'
-     1          //'for a row.', 1, IDE1 )
+*           CALL Message( 'Tcl_Clsrow-E1  Failed to load pixels'
+*     1          //'for a row.', 1, IDE1 )
+            write(6,*) 'Failed to load pixels'
 
            Tcl_Clsrow = STAFCV_BAD !General failure.
            RETURN
@@ -533,9 +535,10 @@ c look to left of seed, unless this is already the left-most unused sequence:
 		  nseq_in_cluster = nseq_in_cluster+1
                   if (nseq_in_cluster.gt.max_nseq_in_cluster) then
                      nseq_in_cluster = max_nseq_in_cluster
-                     CALL Message('TCL_Get_Row_Seq-E2 '
-     +                    //'too many connected sequences - '
-     +                    //'breaking into >1 cluster',1, IDE2 )
+*                     CALL Message('TCL_Get_Row_Seq-E2 '
+*     +                    //'too many connected sequences - '
+*     +                    //'breaking into >1 cluster',1, IDE2 )
+                  write(6,*) 'too many connected sequences'
                      goto 91
                   endif
 		  seq_in_cluster(nseq_in_cluster) = iptr
@@ -562,9 +565,10 @@ c look to right of seed, unless this is already the right-hand limit:
 		  nseq_in_cluster = nseq_in_cluster+1
                   if (nseq_in_cluster.gt.max_nseq_in_cluster) then
                      nseq_in_cluster = max_nseq_in_cluster
-                     CALL Message('TCL_Get_Row_Seq-E2 '
-     +                    //'too many connected sequences - '
-     +                    //'breaking into >1 cluster',1, IDE2 )
+*                     CALL Message('TCL_Get_Row_Seq-E2 '
+*     +                    //'too many connected sequences - '
+*     +                    //'breaking into >1 cluster',1, IDE2 )
+                      write(6,*) 'too many connected sequences'
                      goto 91
                   endif
 		  seq_in_cluster(nseq_in_cluster) = iptr
@@ -838,8 +842,9 @@ c
 c
 c Check for overrun of the local array:
                  IF ( Nseqs+1 .GT. Nseqs_max ) THEN
-                    CALL Message('TCL_Get_Row_Seq-E1  Nseqs_max is too '
-     +                   //'small.',1, IDE1 )
+*                    CALL Message('TCL_Get_Row_Seq-E1  Nseqs_max is too '
+*     +                   //'small.',1, IDE1 )
+                    write(6,*) 'Nseqs_max is too small'
                     TCL_Get_Row_Seq = .FALSE. !Fail.
                     RETURN
                  END IF
