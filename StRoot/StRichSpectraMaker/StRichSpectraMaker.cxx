@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.12 2002/02/22 18:18:13 dunlop Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.13 2002/02/22 18:20:31 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.13  2002/02/22 18:20:31  dunlop
+ * Actually, rationalize return values
+ *
  * Revision 1.12  2002/02/22 18:18:13  dunlop
  * condom to allow for 0 photons passing mean calculation without NAN.
  *
@@ -759,7 +762,7 @@ Int_t StRichSpectraMaker::Make() {
 void StRichSpectraMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.12 2002/02/22 18:18:13 dunlop Exp $\n");
+    printf("* $Id: StRichSpectraMaker.cxx,v 1.13 2002/02/22 18:20:31 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -1109,7 +1112,7 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 	//
 
 	mD[0] = FLT_MAX; mD[1]=FLT_MAX; mD[2]=FLT_MAX;
-	mNpd[0] = FLT_MAX; mNpd[1]=FLT_MAX; mNpd[2]=FLT_MAX;
+	mNpd[0] = 0; mNpd[1]=0; mNpd[2]=0;
 	for(size_t kk=0; kk<theRichPids.size(); kk++) {
 
 	    //
@@ -1165,6 +1168,10 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 		
 		meanD /= numberOfCts;
 	    }
+	    else {
+		meanD = FLT_MAX;
+	    }
+	    
 	    
 	    mD[kk] = meanD;
 	    mNpd[kk] = numberOfCts;
