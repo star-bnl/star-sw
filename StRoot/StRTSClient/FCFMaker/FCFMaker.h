@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: FCFMaker.h,v 1.2 2003/09/17 19:57:48 tonko Exp $
+ * $Id: FCFMaker.h,v 1.3 2003/11/17 18:53:00 jml Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: FCFMaker.h,v $
+ * Revision 1.3  2003/11/17 18:53:00  jml
+ * Preliminary tests look good
+ *
  * Revision 1.2  2003/09/17 19:57:48  tonko
  * Changed name of the class from DaqClf to RTSClientFCF
  *
@@ -136,10 +139,6 @@ class StRTSClientFCFMaker:public StMaker
   double lyFromRow(int row);
   double lzFromTB(double TB,int sector,int row,int pad);
 
-  double mPrfin;
-  double mTrfin;
-  double mPrfout;
-  double mTrfout;
   double mDp;
   double mDt;
   double mDperp;

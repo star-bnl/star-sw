@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.5 2003/11/12 15:59:27 tonko Exp $
+ * $Id: FCFMaker.cxx,v 1.6 2003/11/17 18:53:00 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.6  2003/11/17 18:53:00  jml
+ * Preliminary tests look good
+ *
  * Revision 1.5  2003/11/12 15:59:27  tonko
  * Arranged the default flags
  *
@@ -152,10 +155,6 @@ Int_t StRTSClientFCFMaker::Init()
   //   else mPrfin = .26;
   //
 
-  mPrfin = .26;         // hardcoded pad response functions
-  mTrfin = .825;
-  mPrfout = .48;
-  mTrfout = .90;
 
   mDp = .1;             // hardcoded errors
   mDt = .2;
@@ -174,8 +173,6 @@ Int_t StRTSClientFCFMaker::Init()
   mStEvent = NULL;
   mT_tphit = NULL;
 
-  gMessMgr->Info() << "prfin="<<mPrfin<<" prfout=" << mPrfout << endm;
-  gMessMgr->Info() << "trfin="<<mTrfin<<" trfout=" << mTrfout << endm;
   // gMessMgr->Info() << "dpad=" <<mDp<<endm;
   // gMessMgr->Info() << "dperp="<<mDperp<<endm;
   // gMessMgr->Info() << "dt="<<mDt<<endm;
@@ -218,7 +215,6 @@ Int_t StRTSClientFCFMaker::Init()
   tsspar->threshold = 1;
 
 #ifdef FCF_DEBUG_OUTPUT
-  //dataf = fopen("fcf.raw","w") ;
   ff = fopen("fcf.dta","w") ;
 #endif
 
@@ -298,9 +294,6 @@ Int_t StRTSClientFCFMaker::Make()
     mTpcHitColl = new StTpcHitCollection();
     assert(mTpcHitColl);
   }
-#ifdef FCF_DEBUG_OUTPUT 
-  fprintf(ff,"-1 0.0 0.0 0.0 1.0e-05 0 0 0 0 0\n") ;
-#endif
 
   while((sector = rawIter()) != NULL) {
 
@@ -356,6 +349,7 @@ Int_t StRTSClientFCFMaker::Make()
       // skip row 13!
       if(r==12) continue ;
 
+      //printf("s=%d r=%d\n",sectorIdx,r);
       // does both Gain & T0 corrections (depending on flags)
       getGainCorrections(sectorIdx, r);     // places corrections into fcf->gainCorr[1...lastpad]
 
@@ -435,7 +429,8 @@ Int_t StRTSClientFCFMaker::Make()
 	      int time = ii + cppRowStorage->r[pp-1][ss].start_bin;
 	      int pnt = ii + cppRowStorage->r[pp-1][ss].offset;
 	      croat_adc[pp][time] = adc[pnt];
-		//fprintf(dataf,"%d %d %d %d %d %d\n",sectorIdx,r+1,pp,time,adc[pnt],log10to8_table[adc[pnt]]) ;
+
+	      //printf("s/r/p/t/adc: %d %d %d %d %d\n",sectorIdx,r+1,pp,time,adc[pnt]) ;
 	    }
 	  }
 	}
@@ -453,6 +448,8 @@ Int_t StRTSClientFCFMaker::Make()
 	  }
 	}
 
+
+
 	u_int words = fcf->finder((u_char *)croat_adc, 
 				  (u_short *)croat_cpp, 
 				  (u_int *)res_ptr);
@@ -464,6 +461,16 @@ Int_t StRTSClientFCFMaker::Make()
 	croat_outp = res_ptr;  
 	u_int wrow = *croat_outp++;
 	nclusters = *croat_outp++;
+
+// 	printf("i=%d  ",i); for(int jjj=0;jjj<i;jjj++) printf("  ");
+// 	printf("clust: s=%d r=%d (%d/%d %d/%d %d)\n",
+// 	       sectorIdx,
+// 	       r,
+// 	       fcf->padStart,
+// 	       padfinder[r][i].minpad,
+// 	       fcf->padStop,
+// 	       padfinder[r][i].maxpad,  
+// 	       nclusters);
 
 	if(words == 1)
 	{
@@ -688,15 +695,24 @@ void StRTSClientFCFMaker::getGainCorrections(int sector, int row)
   for(pad=0;pad<tpc_rowlen[row+1];pad++) {
     double gain, t0;
 
+    double pg=0; double po=0;
+
+    if(mask->isOn(sector,tRDOFromRowAndPad[row][pad]))
+      { 
+	po=1;
+      }
+    pg = gains[sector-1].Gain[row][pad];
+	
     if(mask->isOn(sector,tRDOFromRowAndPad[row][pad]))
       gain = gains[sector-1].Gain[row][pad];
     else
       gain = 0.0;
 
-// Tonko: HACK! to eliminate gain calc. in FCF to cross-check TCL
-// but _still_ kill bad channels
-    if(!doGainCorrections) if(gain > 0.001) gain = 1.0 ;
 
+    // Tonko: HACK! to eliminate gain calc. in FCF to cross-check TCL
+    // but _still_ kill bad channels
+    if(!doGainCorrections) if(gain > 0.001) gain = 1.0 ;
+    
     // gainCorr starts from 1!
     gainCorr[pad+1] = (int)(gain*64.0 + 0.5);
 
@@ -708,10 +724,13 @@ void StRTSClientFCFMaker::getGainCorrections(int sector, int row)
     }
     else t0 = 0.0 ;
 
+
+//     printf("GAINS: %d %d %d --> %f %f %f (%f)\n",
+// 	   sector,row,pad,po,pg,gain,t0);
+
     // t0Corr starts from 1!
     t0Corr[pad+1] = (short)(gain*fabs(t0)*64.0 + 0.5) ;	// this is convoluted with the gain!
     if(t0 < 0.0) t0Corr[pad+1] *= -1 ;
-
   }
 
 }
@@ -754,20 +773,20 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   hit.id = clustercount;
   hit.row = (r+1) + sector * 100;
 
-// Tonko: move all to double.
-// BREAKS the equality with TCL but it's TCL's problem.
+  // Tonko: move all to double.
+  // BREAKS the equality with TCL but it's TCL's problem.
   double tmp_q ;
 
   tmp_q = (double)cl_c  ;
 	
 	
-//  hit.q = (float)cl_c;
+  //  hit.q = (float)cl_c;
   double gain = (r<13) ? tsspar->gain_in : tsspar->gain_out;
   double wire_coupling = (r<13) ? tsspar->wire_coupling_in : tsspar->wire_coupling_out;
 
   tmp_q *= ((double)tsspar->ave_ion_pot * (double)tsspar->scale)/(gain*wire_coupling) ;
 
-//fprintf(stderr,"%f goes to %e for row %d\n",(float)cl_c,tmp_q,r) ;
+  //fprintf(stderr,"%f goes to %e for row %d\n",(float)cl_c,tmp_q,r) ;
 
   hit.q = tmp_q;
   hit.x = global.position().x();
@@ -784,9 +803,6 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
     if((hit.z > 0) && (sector > 12))
       return;
   }
-    
-
-  hit.nseq = 5;
 
   hit.minpad = p1;
   hit.maxpad = p2;
@@ -798,54 +814,52 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
 
   hit.ntmbk = hit.maxtmbk - hit.mintmbk + 1;
 
-  hit.prf = (r>=13) ? mPrfout : mPrfin ;
-  hit.zrf = (r>=13) ? mTrfout : mTrfin ;
+  hit.nseq = hit.npads;  // at least...
 
+  // Factors adjusted to match tcl
+  hit.prf = hit.npads * ((r>=13) ? .1316 : .0636);
+  hit.zrf = hit.ntmbk * .1059;
 
 #ifdef FCF_DEBUG_OUTPUT
-if(sector==24 || sector==12 || sector==6 || sector==18) {
-fprintf(ff,"%d %f %f %f %e %d %d %d %d %d\n",
-	hit.row,hit.x,hit.y,hit.z,hit.q,hit.minpad,hit.maxpad,hit.mintmbk,hit.maxtmbk,cl_f) ;
-#ifdef AsdASD
-  fprintf(ff, 
-	  "%d %d %d %d %d "
-	  "%d %e %e %e %e "
-	  "%e %f %e %f %e "
-	  "%f %e %e %e %e "
-	  "%e %d %d %d %d "
-	  "%d %d %d %d %d\n",
-	  hit.cluster,
-	  hit.flag,
-	  hit.id,
-	  hit.id_globtrk,
-	  hit.track,
-	  hit.truncTag,
-	  hit.alpha,
-	  hit.dalpha,
-	  hit.lambda,
-	  hit.q,
-	  hit.dq,
-	  hit.x,
-	  hit.dx,
-	  hit.y,
-	  hit.dy,
-	  hit.z,
-	  hit.dz,
-	  hit.phi,
-	  hit.prf,
-	  hit.zrf,
-	  hit.dedx,
-	  hit.row/100,
-	  hit.row%100,
-	  hit.nseq,
-	  hit.npads,
-	  hit.minpad,
-	  hit.maxpad,
-	  hit.ntmbk,
-	  hit.mintmbk,
-	  hit.maxtmbk);
-#endif
-}
+  if(sector==24 || sector==12 || sector==6 || sector==18) {
+    fprintf(ff, 
+	    "%d %d %d %d %d "
+	    "%d %e %e %e %e "
+	    "%e %f %e %f %e "
+	    "%f %e %e %e %e "
+	    "%e %d %d %d %d "
+	    "%d %d %d %d %d\n",
+	    hit.cluster,
+	    hit.flag,
+	    hit.id,
+	    hit.id_globtrk,
+	    hit.track,
+	    hit.truncTag,
+	    hit.alpha,
+	    hit.dalpha,
+	    hit.lambda,
+	    hit.q,
+	    hit.dq,
+	    hit.x,
+	    hit.dx,
+	    hit.y,
+	    hit.dy,
+	    hit.z,
+	    hit.dz,
+	    hit.phi,
+	    hit.prf,
+	    hit.zrf,
+	    hit.dedx,
+	    hit.row/100,
+	    hit.row%100,
+	    hit.nseq,
+	    hit.npads,
+	    hit.minpad,
+	    hit.maxpad,
+	    hit.ntmbk,
+	    hit.mintmbk,
+	    hit.maxtmbk);
+  }
 #endif
 
   if(mFill_tphit)
