@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFpdTriggerDetector.cxx,v 2.2 2004/08/04 17:26:07 ullrich Exp $
+ * $Id: StFpdTriggerDetector.cxx,v 2.3 2004/10/05 15:48:05 fisyak Exp $
  *
  * Author: Akio Ogawa, Jul 2004
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFpdTriggerDetector.cxx,v $
+ * Revision 2.3  2004/10/05 15:48:05  fisyak
+ * typo fix
+ *
  * Revision 2.2  2004/08/04 17:26:07  ullrich
  * Fixed bug in assignement operator.
  *
@@ -23,7 +26,7 @@
 #include "tables/St_dst_TrgDet_Table.h"
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StFpdTriggerDetector.cxx,v 2.2 2004/08/04 17:26:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StFpdTriggerDetector.cxx,v 2.3 2004/10/05 15:48:05 fisyak Exp $";
 
 ClassImp(StFpdTriggerDetector)
 
@@ -69,7 +72,7 @@ StFpdTriggerDetector::StFpdTriggerDetector(const StFpdTriggerDetector& det)
     copy(det.mWPN, det.mWPN+mMaxPS, mWPN);
     copy(det.mWPS, det.mWPS+mMaxPS, mWPS);
     for (int i=0; i<2; i++)
-	for (int j; j<mMaxModule; j++) {
+	for (int j=0; j<mMaxModule; j++) {
 	    for (int k=0; k<mMaxBoard; k++) mLayer1[i][j][k] = det.mLayer1[i][j][k] ;
 	    mLayer2[i][j] = det.mLayer2[i][j];
 	}
@@ -93,7 +96,7 @@ StFpdTriggerDetector::operator=(const StFpdTriggerDetector& det)
 	copy(det.mWPN, det.mWPN+mMaxPS, mWPN);
 	copy(det.mWPS, det.mWPS+mMaxPS, mWPS);
 	for (int i=0; i<2; i++)
-	    for (int j; j<mMaxModule; j++) {
+	    for (int j=0; j<mMaxModule; j++) {
 		for (int k=0; k<mMaxBoard; k++) mLayer1[i][j][k] = det.mLayer1[i][j][k] ;
 		mLayer2[i][j] = det.mLayer2[i][j];
 	    }
