@@ -1,7 +1,6 @@
 C>---------------------------------------------------------------------
       INTEGER FUNCTION XI_RECONSTRUCT(nok,idd,trak,
      +                                exipar_h,exipar,
-     +                                privert_h,privert,
      +                                ev0out_h,ev0out,
      +                                exiout_h,exiout   )
 c--------------------------------------------------------------------- 
@@ -18,14 +17,11 @@ C<----------------------------------------------------------------------
       IMPLICIT NONE
 #include "PAM.inc"
 #include "exi_exipar.inc"
-#include "evr_privert.inc"
 #include "ev0_ev0out.inc"
 #include "exi_exiout.inc"
 C----------------------------------------------------------------------
       RECORD/ TABLE_HEAD_ST/ exipar_h
       RECORD/ EXI_EXIPAR_ST/ exipar(*)
-      RECORD/ TABLE_HEAD_ST/ privert_h
-      RECORD/ EVR_PRIVERT_ST/ privert(*)
       RECORD/ TABLE_HEAD_ST/ ev0out_h
       RECORD/ EV0_EV0OUT_ST/ ev0out(*)
       RECORD/ TABLE_HEAD_ST/ exiout_h

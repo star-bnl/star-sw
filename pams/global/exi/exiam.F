@@ -106,7 +106,6 @@ c call reconstruction program
 c
         CALL XI_RECONSTRUCT(nok,idd,trak,       !new by Ken Wilson
      +                      exipar_h,exipar,
-     +                      privert_h,privert,
      +                      ev0out_h,ev0out,
      +                      exiout_h,exiout   )
 c
