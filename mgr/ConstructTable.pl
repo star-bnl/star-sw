@@ -30,6 +30,12 @@ sub tableH ($) {
     my $stem = $_[0];
     my $vers = 2;
     my $h = '
+/*!
+ * \class  St_'.$stem.'
+ * \brief  C++ wrapper for <'.$stem.'> StAF table
+ * \author Automatic Generation
+ * \date   '.localtime().'
+ */
 class St_' . $stem . ' : public TTable
 {
  public:
