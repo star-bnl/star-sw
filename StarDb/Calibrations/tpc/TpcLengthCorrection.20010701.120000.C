@@ -1,7 +1,7 @@
 TDataSet *CreateTable() { 
   if (!gROOT->GetClass("St_tpcCorrection")) return 0;
   tpcCorrection_st row;
-  St_tpcCorrection *tableSet = new St_tpcCorrection("TpcLengthCorrection",10);
+  St_tpcCorrection *tableSet = new St_tpcCorrection("TpcLengthCorrection",11);
   memset(&row,0,tableSet->GetRowSize()); // 0
   row.npar       =      4;  // I70 TPoints70BGPHist301P02gh1 vs log(TrackLength)
   row.min        =     2.30;
@@ -93,7 +93,7 @@ TDataSet *CreateTable() {
   row.a[1]	 = -1.19036e+00;
   row.a[2]	 =  2.64383e-01;
   row.a[3]	 = -2.02259e-02;
-  tableSet->AddAt(&row);
+  tableSet->AddAt(&row); // 10
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
 }
