@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.387 2004/03/03 00:36:05 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.388 2004/03/03 02:09:01 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -474,7 +474,8 @@ Bfc_st BFC1[] = {
   {"sce"         ,"","",""                        ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker",
                                                                                 "... SSD Evaluator",kFALSE},
 
-
+  {"Kink2"       ,"kink2","","db,MuDST","StKinkMaker","StSecondaryVertexMaker",
+                                                                          "Find Kinks from StEvent",kFALSE},
   {"V02"         ,"v02","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
                                                                             "Find V0s from StEvent",kFALSE},
   {"Xi2"         ,"xi2","","db,MuDST","StXiFinderMaker","StSecondaryVertexMaker",
@@ -1012,6 +1013,8 @@ Bfc_st BFC2[] = {
                                                                                 "... SSD Evaluator",kFALSE},
 
 
+  {"Kink2"       ,"kink2","","db,MuDST","StKinkMaker","StSecondaryVertexMaker",
+                                                                          "Find Kinks from StEvent",kFALSE},
   {"V02"         ,"v02","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
                                                                             "Find V0s from StEvent",kFALSE},
   {"Xi2"         ,"xi2","","db,MuDST","StXiFinderMaker","StSecondaryVertexMaker",
