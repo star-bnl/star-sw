@@ -84,7 +84,7 @@ If LL>1
                   {IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY}=0; Iloss=2}
   on TPC_ONLY   { Minimal geometry - only TPC;
                                {pipe,svtt,ftpc,btof,vpdd,magp,calb,ecal}=off; }
-  on FIELD_ONLY { No geometry - only magnetic field;
+  on FIELD_ONLY { No geometry - only magnetic field;           NtrSubEv=0;
                   {cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal}=off;    }
   on FIELD_OFF  { no magnetic field;                field=0;                  }
   on FIELD_ON   { Standard (5 KGs) field on;        field=5;                  }
