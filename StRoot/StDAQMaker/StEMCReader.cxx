@@ -27,7 +27,6 @@ StEMCReader::StEMCReader(StDAQReader *daqr) {
    fDAQReader = daqr;
   delete fEMCImpReader;
   fEMCImpReader = ::getEMCReader(daqr->getEventReader());
-  printf("bbb this is the StEMCReader ctor.  fEMCImpReader=%p.\n",fEMCImpReader);
 
   /*
   if(fEMCImpReader){

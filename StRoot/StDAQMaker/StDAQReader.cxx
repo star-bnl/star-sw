@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.32 2003/03/24 18:12:10 ward Exp $
+ * $Id: StDAQReader.cxx,v 1.33 2003/04/22 20:12:42 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.33  2003/04/22 20:12:42  ward
+ * So the chain can run when there is no TPC data.
+ *
  * Revision 1.32  2003/03/24 18:12:10  ward
  * Full support for EEMC from Herbert Ward.
  *
@@ -217,7 +220,9 @@ int StDAQReader::readEvent()
   *fEventInfo = fEventReader->getEventInfo();
   if(fEventInfo->Token==0) return kStErr;  // Herb, July 5 2000
 
-  if (fTPCReader) { if(fTPCReader ->Update()) return kStErr; }
+  if (fTPCReader) {
+    if(fTPCReader ->Update()) return kStErr;
+  }
   if (fFTPCReader)	fFTPCReader->Update();  
   if (fTRGReader) 	fTRGReader ->Update();
   if (fSVTReader) 	fSVTReader ->Update();
@@ -302,9 +307,11 @@ void StDAQReader::setFTPCVersion(const char* vers)
 //_____________________________________________________________________________
 StTPCReader *StDAQReader::getTPCReader() 
 {
+  int updateStatus;
   if (!fTPCReader) {
     fTPCReader = new StTPCReader(this);
-    fTPCReader->Update();
+    updateStatus=fTPCReader->Update();
+    if(updateStatus) { delete fTPCReader; fTPCReader=0; return 0; } // No TPC data.  Herb Ward, Apr 22 2003.
   }
   return fTPCReader;
 }
