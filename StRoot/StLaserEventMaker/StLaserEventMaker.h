@@ -1,6 +1,6 @@
-// $Id: StLaserEventMaker.h,v 1.10 2001/12/18 20:33:35 pfachini Exp $
+// $Id: StLaserEventMaker.h,v 1.11 2001/12/18 21:50:37 pfachini Exp $
 // $Log: StLaserEventMaker.h,v $
-// Revision 1.10  2001/12/18 20:33:35  pfachini
+// Revision 1.11  2001/12/18 21:50:37  pfachini
 // Since the laserhist.*.*.root file cannot be written to the database directory (it makes the whole thing crash), I am adding the date and time stamp to Bill's tree
 //
 // Revision 1.9  2001/12/14 17:30:16  pfachini
@@ -135,7 +135,7 @@ public:
   double driftVelocityReco;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.10 2001/12/18 20:33:35 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.11 2001/12/18 21:50:37 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };
