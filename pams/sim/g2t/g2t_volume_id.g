@@ -103,6 +103,16 @@
            sub_sector = numbv(3) 
            innout     = numbv(4)
            volume_id  = 100000*rileft+1000*innout+10*sector+sub_sector   
+        elseif (btog_version==2) then
+           if (btog_choice==4) then
+              rileft     = 1
+              sector     = btog_posit1
+              sub_sector = numbv(1) 
+              innout     = numbv(2)
+              volume_id  = 100000*rileft+1000*innout+10*sector+sub_sector   
+           else
+              print *,' g2t_volume_id : choice not coded yet '
+           endif        
         elseif (btog_version==3) then
            if (btog_choice==2) then      ! Full TOF
              rileft     = numbv(1)       !     west(1)/east(2)
@@ -135,7 +145,7 @@
      +         ((innout==2).AND.(sub_sector.gt.5)).or.
      +        (section.lt.1).OR.(section.gt.9).or.
      +         ((innout.eq.2).AND.(section.ne.1)))
-     +    write(*,'5i4')' g2t_volume_id: TOF sanity check failed.',
+     +    print *,' g2t_volume_id: TOF sanity check failed.',
      +              rileft,sector,innout,sub_sector,section
 *  -------- combine 4wide and 5wide sections ---------
           if (innout==1) then
