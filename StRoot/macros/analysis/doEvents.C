@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.36 1999/11/17 14:23:40 ullrich Exp $
+// $Id: doEvents.C,v 1.37 1999/11/17 14:34:00 ullrich Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -35,8 +35,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.36  1999/11/17 14:23:40  ullrich
-// Updated for new StEvent/StEventMaker.
+// Revision 1.37  1999/11/17 14:34:00  ullrich
+// Added version with no arguments which prints usage info.
 //
 // Revision 1.37  1999/11/17 14:34:00  ullrich
 // Added version with no arguments which prints usage info.
@@ -56,6 +56,12 @@ TBrowser *b=0;
 
 const char *dstFile = 0;
 const char *xdfFile = 0;
+const char *mdcFile = 0;
+const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
+
+void doEvents()
+{
+    cout << "Usage: doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.xdf\")" << endl;
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
     cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
 }
