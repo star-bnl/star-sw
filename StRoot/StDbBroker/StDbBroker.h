@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.14 2000/04/14 14:46:41 fine Exp $
+ * $Id: StDbBroker.h,v 1.15 2000/04/25 18:27:48 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.15  2000/04/25 18:27:48  porter
+ * Added flavor and production time as query fields to pass to db-api
+ *
  * Revision 1.14  2000/04/14 14:46:41  fine
  * new method for Victor has been introduced
  *
@@ -123,6 +126,10 @@ struct oldDescriptor {
     dbNodeArray *m_Nodes;
     StDbConfigNode* m_Tree;
 
+    char*        m_flavor;
+    unsigned int m_prodTime;
+
+
     dbConfig_st*  buildConfig(int& numRows);
     int           buildNodes(StDbConfigNode* node, int pID);
 
@@ -147,6 +154,7 @@ struct oldDescriptor {
     UInt_t GetRequestTimeStamp()     {return m_requestTimeStamp; }
     UInt_t GetBeginTimeStamp()       {return m_beginTimeStamp; }
     UInt_t GetEndTimeStamp()         {return m_endTimeStamp; }
+    UInt_t GetProdTime()             {return m_prodTime;}
 
 
     StTableDescriptorI* GetTableDescriptor();
@@ -205,6 +213,9 @@ struct oldDescriptor {
     void   SetRequestTimeStamp(UInt_t utime) {m_requestTimeStamp = utime; }
     void   SetBeginTimeStamp(UInt_t utime)   {m_beginTimeStamp   = utime; }
     void   SetEndTimeStamp(UInt_t utime)     {m_endTimeStamp     = utime; }
+    void   SetProdTime(UInt_t ptime);
+    void   SetFlavor(const char* flavor);
+
 
     static int DbInit(const char *);  		//dbInit
 
