@@ -396,12 +396,12 @@ c----------------------------------------------------------------------
 *KEEP,VIDQQ.
       CHARACTER*68 VIDQQ
       DATA VIDQQ/
-     +'@(#)* Advanced Geant Inteface   1.40/05   C: 19/10/98  21.14.55
+     +'@(#)* Advanced Geant Inteface   1.40/05   C: 30/10/98  21.52.14
      +'/
 *KEEP,DATEQQ.
-      IDATQQ =   981019
+      IDATQQ =   981030
 *KEEP,TIMEQQ.
-      ITIMQQ =   2114
+      ITIMQQ =   2152
 *KEEP,VERSQQ.
       VERSQQ = ' 1.40/05'
       IVERSQ =  14005
@@ -424,3 +424,12 @@ c----------------------------------------------------------------------
      >       ' *                                                    *'/,
      >       ' ******************************************************')
       END
+*CMZ :          28/10/98  00.25.15  by  Pavel Nevski
+*-- Author :    Pavel Nevski   28/10/98
+        function ETIME(XX)
+        real  ETIME,XX(2),tt
+        call timex(tt)
+        etime=tt
+        XX(1)=tt
+        XX(2)=tt
+        end
