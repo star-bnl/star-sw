@@ -12,8 +12,7 @@ use File::Basename;
 my $Cint_cxx = shift;
 (my $Cint_h  = $Cint_cxx) =~ s/_Cint\.cxx/_Cint\.h/g;
 my $DirName = dirname($Cint_cxx);# print "DirName = $DirName\n";
-my $LinkDef = $DirName . "/" . "LinkDef.h"; 
-print "Cint Files :", $Cint_cxx, ",", $Cint_h,",",$LinkDef,"\n";
+my $LinkDef = $DirName . "/" . "LinkDef.h"; #print "Cint Files :", $Cint_cxx, ",", $Cint_h,",",$LinkDef,"\n";
 my $sources  = shift; #print "sources =", $sources,"\n";
 my $CPPFLAGS = shift; #print "CPPFLAGS = ", $CPPFLAGS, "\n";
 my %class_hfile = (); # class h-file map
@@ -25,7 +24,7 @@ my $ListOfWrittenClasses = ":";
 my $ListOfDefinedClasses = "";
 my $off = 0;
 open (Out, ">$LinkDef") or die "Can't open $LinkDef";
-for my $def  (split / /,$sources) {  print "SRC:", $def, "\n";
+for my $def  (split / /,$sources) {#  print "SRC:", $def, "\n";
   if ($def =~ /LinkDef/ && !($def =~/^$LinkDef$/) ) {
     open (In, $def) or die "Can't open $def";
     while ($line = <In>) {
