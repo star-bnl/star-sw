@@ -1,5 +1,8 @@
-* $Id: tcl.F,v 1.3 1998/06/20 16:07:35 fisyak Exp $
+* $Id: tcl.F,v 1.4 1999/03/03 17:35:07 sakrejda Exp $
 * $Log: tcl.F,v $
+* Revision 1.4  1999/03/03 17:35:07  sakrejda
+* eror message was over 132 chars - fixed
+*
 * Revision 1.3  1998/06/20 16:07:35  fisyak
 * Line width protection for msg
 *
@@ -250,8 +253,8 @@ c Look for clusters in any row with a sequence on at least one pad:
 c
              row_table = Nrows_in - row + 1     
              if (raw_row_in(row_table).RowID.ne.row) then
-                   write(m132,*) 'TCL-E2 raw_row_in table has 
-     +                            incorrect format.' 
+                   write(m132,*) 'TCL-E2 raw_row_in table has'// 
+     +                            'incorrect format.' 
                     CALL Message( m132,
      1                   1, IDE2 )
               tcl = STAFCV_BAD
