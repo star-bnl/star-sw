@@ -546,10 +546,28 @@ C-----------------------------------------------------------------------
         pad_width = 0.
         imax = lvmax(iadc,nseq)
 
-        if(imax.ge.2)then
+        if(imax.ge.2 .and. imax.lt.nseq)then
            x = iadc(imax)**2
            y = iadc(imax-1)*iadc(imax+1)
            pad_width = 1./log(x/y)
+        elseif(imax+1 .le. nseq)then
+c
+c          the peak of the pulse is on the "leftmost" edge of a pad row
+c          should use calculated pad-response width and 2-pad position
+c          estimate
+c
+           id = 0
+           call message('TPHAM-I-PRF tpc hit at leftmost pad row edge'
+     +,                 1, id)
+        elseif(imax-1 .ge. 1)then
+c
+c          the peak of the pulse is on the "rightmost" edge of a pad row
+c          should use calculated pad-response width and 2-pad position
+c          estimate
+c
+           id = 0
+           call message('TPHAM-I-PRF tpc hit at rightmost pad row edge'
+     +,                 1, id)
         else
            id = 0
            call message('TPHAM-E-PRF error in 3 pad prf calculation'
@@ -583,7 +601,7 @@ C-----------------------------------------------------------------------
         tph_calc_prf_pos = 0.
         imax = lvmax(iadc,nseq)
 
-        if(imax.ge.2)then
+        if(imax.ge.2 .and. imax.lt.nseq)then
            c1 = iadc(imax-1)
            c2 = iadc(imax)
 c          c3 = iadc(imax+1)
@@ -593,6 +611,24 @@ c          c3 = iadc(imax+1)
 c          p3 = ipad(imax+1)
 
            tph_calc_prf_pos = (p1+p2)/2.-sigma*log(c1/c2)
+        elseif(imax+1 .le. nseq)then
+c
+c          the peak of the pulse is on the "leftmost" edge of a pad row
+c          should use calculated pad-response width and 2-pad position
+c          estimate
+c
+           id = 0
+           call message('TPHAM-I-PRF tpc hit at leftmost pad row edge'
+     +,                 1, id)
+        elseif(imax-1 .ge. 1)then
+c
+c          the peak of the pulse is on the "rightmost" edge of a pad row
+c          should use calculated pad-response width and 2-pad position
+c          estimate
+c
+           id = 0
+           call message('TPHAM-I-PRF tpc hit at rightmost pad row edge'
+     +,                 1, id)
         else
            id = 0
            call message('TPHAM-E-PRF error in 3 pad prf calculation'
