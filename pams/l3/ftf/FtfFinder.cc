@@ -2,6 +2,7 @@
 //: FILE:       FtfFinder.cpp
 //: HISTORY:
 //:             28oct1996 version 1.00
+//:             06may1999 ppy  getTracks returns 1 for error
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfFinder, steers track finding
