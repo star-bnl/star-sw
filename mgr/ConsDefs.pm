@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.63 2004/01/15 00:11:53 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.64 2004/01/15 01:01:48 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -390,9 +390,10 @@
 		  $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql " ,
 		  "libmysqlclient");
  if ($STAR_HOST_SYS =~ /^rh/) { 
-   $MYSQLLIB .= " -lmystrings";
-   if (-r "/usr/lib/libssl.a"   ) {$MYSQLLIB .= " -lssl";}
-   if (-r "/usr/lib/libcrypto.a") {$MYSQLLIB .= " -lcrypto";}
+   $MYSQLLIB .= " -L/usr/lib";
+   if (-r "/usr/lib/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
+   if (-r "/usr/lib/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
+   if (-r "/usr/lib/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
    $MYSQLLIB .= " -lz";
  }
  print "Use MYSQLLIBDIR = \t$MYSQLLIBDIR and MYSQLLIB = \t$MYSQLLIB\n" if $MYSQLLIBDIR; 
