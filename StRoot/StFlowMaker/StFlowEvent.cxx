@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.41 2003/06/18 17:00:49 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.42 2003/07/15 18:34:26 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -902,7 +902,7 @@ void StFlowEvent::PrintSelectionList() {
       cout << "#    Pt Tpc cuts= " << mPtTpcCuts[0][j][k] << ", "
 	   << mPtTpcCuts[1][j][k] << endl;
       cout << "#    Pt Ftpc cuts= " << mPtFtpcCuts[0][j][k] << ", "
-	   << mPtTpcCuts[1][j][k] << endl;
+	   << mPtFtpcCuts[1][j][k] << endl;
     }
   }
   cout << "#######################################################" << endl;
@@ -912,6 +912,10 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.42  2003/07/15 18:34:26  oldi
+// Printout for upper FTPC pt cut for the event plane determination was showing
+// upper TPC pt cut always. Changed.
+//
 // Revision 1.41  2003/06/18 17:00:49  posk
 // Event plane cuts now only odd and even, instead of different for each harmonic.
 //
