@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.12 1999/11/29 21:11:31 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.13 1999/11/29 21:40:18 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.13  1999/11/29 21:40:18  kathy
+// clean up macros; change name of output files; remove unneccessary lines
+//
 // Revision 1.12  1999/11/29 21:11:31  kathy
 // removed unneccessary commented out lines
 //
@@ -77,10 +80,10 @@ class StChain;
 
 StChain *chain;
 
-void bfcread_dst_QAhist(Int_t nevents=1, 
-             const char *MainFile="/disk00000/star/test/new/tfs_Solaris/year_1b/set0352_01_35evts.dst.root",
+void bfcread_dst_QAhist(Int_t nevents=10, 
+             const char *MainFile="/star/rcf/test/dev/tfs_Solaris/Fri/year_1b/set0352_01_35evts.dst.root",
              const Char_t *MakerHist="QA",
-             const Char_t *psFile="QA_hist.ps",
+             const Char_t *psFile="DSTtable_QA_hist.ps",
              const Char_t *PageTitle="")
 {
 //
@@ -138,7 +141,6 @@ void bfcread_dst_QAhist(Int_t nevents=1,
   cout <<  " bfcread_dst_QAhist.C, passed chain->Make !!!" << endl ;
 
 // the following methods are already set to default values in St_QA_Maker::Init - now write over them
-//   QA->SetDraw(kTRUE);
 
 // Set the default canvas style to plain (so it won't print out grey!)
     gROOT->SetStyle("Plain");
@@ -151,7 +153,6 @@ void bfcread_dst_QAhist(Int_t nevents=1,
     HU->SetDefaultLogYList(MakerHist);
       if (PageTitle=="") PageTitle=MainFile;
     HU->SetGlobalTitle(PageTitle);
-
 
   Int_t numLog = 0;
   numLog = HU->ExamineLogYList();
