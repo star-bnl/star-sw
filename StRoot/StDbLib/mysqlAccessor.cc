@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.14 2000/01/19 20:20:08 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.15 2000/01/24 15:10:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.15  2000/01/24 15:10:17  porter
+ * bug fix to dbType+dbDomain info in deep tree
+ *
  * Revision 1.14  2000/01/19 20:20:08  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -115,7 +118,8 @@ int NodeID;
       delete [] tmpName;
     }
     if(!currentNode.dbName)currentNode.mstrCpy(currentNode.dbName,mdbName);
-  
+    currentNode.dbType = mdbType;
+    currentNode.dbDomain = mdbDomain; 
 
    char thisNode[100];
    ostrstream os(thisNode,100); os<<NodeID<<ends;
@@ -311,7 +315,18 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
      Db << baseString <<" AND beginTime<'"<<rTime;
      Db <<"' AND elementID="<<thisElement;
      Db << " Group by count order by beginTime DESC limit 1"<<endsql;  
-   
+
+     if(StDbManager::Instance()->IsVerbose()){
+       char qs[1024];
+       ostrstream queryS(qs,1024);
+       queryS<<"select count, beginTime as mbeginTime from dataIndex";
+       queryS<<baseString <<" AND beginTime<'"<<rTime;
+       queryS<<"' AND elementID="<<thisElement;
+       queryS<<" Group by count order by beginTime DESC limit 1"<<ends;
+       cout << " My Query :: " << endl;
+       cout << qs << endl;
+     }
+
      if(Db.Output(&buff)){
        buff.SetClientMode();
        buff.ReadScalar(bTime,"mbeginTime");
