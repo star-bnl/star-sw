@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.5 2004/08/13 22:14:15 oldi Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.6 2004/08/13 23:41:37 oldi Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -365,7 +365,7 @@ void StFtpcTrackToStEvent::FillFitTraits(StTrack* gTrack, StFtpcTrack* track){
   // StTrackFitTraits is fine, as it will get properly copied.
   StTrackFitTraits fitTraits(geantIdPidHyp, nFitPoints, chi2, covMFloat);
   fitTraits.setNumberOfFitPoints(nFitPoints, track->GetDetectorId());  // The vertex is not added as a fit point anymore.
-  fitTraits.setPrimaryVertexUsedInFit((gTrack->type() == primary) ? kTRUE : kFALSE);   // The fitTraits are flagged as primary or global.
+  fitTraits.setPrimaryVertexUsedInFit(gTrack->type() == primary);   // The fitTraits are flagged as primary or global.
   gTrack->setFitTraits(fitTraits); 
   return;
 }
