@@ -1,5 +1,13 @@
-// $Id: StFtpcTrackingParams.cc,v 1.6 2002/10/03 10:34:06 oldi Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.7 2002/10/11 15:45:43 oldi Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.7  2002/10/11 15:45:43  oldi
+// Get FTPC geometry and dimensions from database.
+// No field fit activated: Returns momentum = 0 but fits a helix.
+// Bug in TrackMaker fixed (events with z_vertex > outer_ftpc_radius were cut).
+// QA histograms corrected (0 was supressed).
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+// cout -> gMessMgr.
+//
 // Revision 1.6  2002/10/03 10:34:06  oldi
 // Usage of gufld removed.
 // Magnetic field is read by StMagUtilities, now.
@@ -21,6 +29,7 @@
 
 #include "StFtpcTrackingParams.hh"
 #include "SystemOfUnits.h"
+#include "StMessMgr.h"
 
 #include "tables/St_MagFactor_Table.h"
 
@@ -41,13 +50,14 @@ class St_fde_fdepar;
 StFtpcTrackingParams* StFtpcTrackingParams::mInstance = 0;
 
 
-StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, TDataSet *RunLog) {
-  // makes new instance or returns old on if it exists already
-
-  Bool_t created = kFALSE;
+StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, 
+						     St_ftpcDimensions *dimensions, 
+						     St_ftpcPadrowZ *padrow_z,
+						     TDataSet *RunLog) {
+  // makes new instance or returns old one if it exists already
+  
   if (!mInstance) {
-    mInstance = new StFtpcTrackingParams();
-    created = kTRUE;
+    mInstance = new StFtpcTrackingParams(dimensions, padrow_z);
   }
 
   if (RunLog) {
@@ -62,10 +72,65 @@ StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, TDataSet *Run
 }
 
 
-StFtpcTrackingParams::StFtpcTrackingParams() : mTpcToGlobalRotation(3, 3, 1), mGlobalToTpcRotation(3, 3, 1), 
-					       mFtpcRotation(3, 3, 1), mFtpcRotationInverse(3, 3, 1)
+StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, 
+						     TDataSet *RunLog) {
+  // updates magnetic field, if necessary
+
+  if (RunLog) {
+    mInstance->ResetMagField(RunLog);
+  }
+  
+  if (debug) {
+    mInstance->PrintParams();
+  }
+
+  return mInstance;
+}
+
+
+inline StFtpcTrackingParams* StFtpcTrackingParams::Instance() {
+  // return instance only
+
+  return mInstance;
+}
+
+
+StFtpcTrackingParams::StFtpcTrackingParams(St_ftpcDimensions *dimensions, 
+					   St_ftpcPadrowZ *zrow) 
+  : mTpcToGlobalRotation(3, 3, 1), mGlobalToTpcRotation(3, 3, 1), 
+    mFtpcRotation(3, 3, 1), mFtpcRotationInverse(3, 3, 1)
 {
   // default constructor
+
+  // FTPC geometry
+  ftpcDimensions_st* dimensionsTable = (ftpcDimensions_st*)dimensions->GetTable();
+  
+  if (dimensionsTable){
+    mInnerRadius = dimensionsTable->innerRadiusSensitiveVolume * centimeter;
+    mOuterRadius = dimensionsTable->outerRadiusSensitiveVolume * centimeter;
+    mNumberOfPadRows        = dimensionsTable->totalNumberOfPadrows;
+    mNumberOfPadRowsPerSide = dimensionsTable->numberOfPadrowsPerSide;
+  }
+  
+  else {
+    gMessMgr->Message("No data in table class St_ftpcDimensions","E");
+  }
+
+
+  // copy zrow table start to pointer
+  ftpcPadrowZ_st* padrowzTable = (ftpcPadrowZ_st*)zrow->GetTable();
+  
+  if (padrowzTable) {
+    mPadRowPosZ = new Float_t[mNumberOfPadRows];
+    
+    for (Int_t i = 0; i < mNumberOfPadRows; i++) {
+      mPadRowPosZ[i] = ((Float_t *)padrowzTable->z)[i];
+    }
+  } 
+
+  else {
+    gMessMgr->Message("No data in table class St_ftpcPadrowZ","E");
+  }
 
   InitFromFile();
 }
@@ -74,6 +139,7 @@ StFtpcTrackingParams::StFtpcTrackingParams() : mTpcToGlobalRotation(3, 3, 1), mG
 StFtpcTrackingParams::~StFtpcTrackingParams() {
   // delete created pointers
   
+  delete mPadRowPosZ;
   delete mMagField;
   
   mInstance = 0;
@@ -110,24 +176,6 @@ Int_t StFtpcTrackingParams::InitdEdx() {
 Int_t StFtpcTrackingParams::InitFromFile() {
   
   // Sets parameters as specified in this file.
-
-  // Pion mass
-  mM_pi = 0.13957 * GeV;
-
-  // FTPC geometry
-  mInnerRadius   =   7.73 * centimeter;
-  mOuterRadius   =  30.05 * centimeter;
-
-  mPadRowPosZ[0] = 162.75 * centimeter;
-  mPadRowPosZ[1] = 171.25 * centimeter;
-  mPadRowPosZ[2] = 184.05 * centimeter;
-  mPadRowPosZ[3] = 192.55 * centimeter;
-  mPadRowPosZ[4] = 205.35 * centimeter;
-  mPadRowPosZ[5] = 213.85 * centimeter;
-  mPadRowPosZ[6] = 226.65 * centimeter;
-  mPadRowPosZ[7] = 235.15 * centimeter;
-  mPadRowPosZ[8] = 247.95 * centimeter;
-  mPadRowPosZ[9] = 256.45 * centimeter;
 
   // Vertex position
   mMaxVertexPosZWarning =  50. * centimeter;
@@ -238,10 +286,7 @@ Int_t StFtpcTrackingParams::InitFromFile() {
     
     Double_t theta = -0.000381;
     Double_t psi   = -0.000156;
-    
-    // Debug :
-    // cout << TMath::Cos(theta) << " " << TMath::Cos(phi) << endl;
-        
+            
     mGlobalToTpcRotation(1, 1) =  TMath::Cos(theta) * TMath::Cos(phi);
     mGlobalToTpcRotation(1, 2) =  TMath::Cos(theta) * TMath::Sin(phi);
     mGlobalToTpcRotation(1, 3) = -TMath::Sin(theta);
@@ -256,9 +301,9 @@ Int_t StFtpcTrackingParams::InitFromFile() {
     mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
     
     if (ierr!=0) { 
-      cerr << "Cant invert rotation matrix" << endl;
-      cout << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endl;
-      cout << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endl;
+      gMessMgr->Message("", "E", "OST") << "Cant invert rotation matrix!" << endm;
+      gMessMgr->Message("", "E", "OST") << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endm;
+      gMessMgr->Message("", "E", "OST") << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endm;
     }
     
     //mTpcPositionInGlobal.setX(gTpcDbPtr->GlobalPosition()->TpcCenterPositionX());
@@ -268,8 +313,6 @@ Int_t StFtpcTrackingParams::InitFromFile() {
     mTpcPositionInGlobal.setY(-0.082);
     mTpcPositionInGlobal.setZ(-0.192);
     
-    // Debug :
-    // cout<<"mTpcPositionInGlobal = " << mTpcPositionInGlobal << endl;
   }
   /* 
  else {
@@ -314,9 +357,9 @@ Int_t StFtpcTrackingParams::InitFromFile() {
    mFtpcRotationInverse = mFtpcRotation.inverse(ierr);
    
    if (ierr!=0) { 
-     cerr << "Cant invert FTPC rotation matrix" << endl;
-     cout << "FTPC rotation matrix:" << mFtpcRotation << endl;
-     cout << "Inverse FTPC rotation matrix:" << mFtpcRotationInverse << endl;
+     gMessMgr->Message("", "E", "OST") << "Cant invert FTPC rotation matrix!" << endm;
+     gMessMgr->Message("", "I", "OST") << "FTPC rotation matrix:" << mFtpcRotation << endm;
+     gMessMgr->Message("", "I", "OST") << "Inverse FTPC rotation matrix:" << mFtpcRotationInverse << endm;
    }
    
    mMagFieldFactor = -9999.; // just some dumb number, will be set by ResetMagField()
@@ -333,6 +376,8 @@ Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog) {
 
   Float_t newFactor = (*fMagFactor)[0].ScaleFactor;
   if (newFactor != mMagFieldFactor) {
+    gMessMgr->Message("", "I", "OST") << "Magnetic field has changed. Reset magnetic field table and the field factor from " 
+	 << mMagFieldFactor << " to " << newFactor << "." << endm;
     mMagFieldFactor = newFactor;
     delete mMagField;
     mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);
@@ -345,152 +390,150 @@ Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog) {
 void StFtpcTrackingParams::PrintParams() {
   // prints params to sreen
 
-  cout << "Used parameters for tracking" << endl;
-  cout << "----------------------------" << endl;
-
-  cout << endl;
-  cout << "Pion mass (GeV): " << mM_pi << endl; 
-
-  cout << endl;
-  cout << "FTPC geometry" << endl;
-  cout << "Inner radius (cm): " << mInnerRadius << endl; 
-  cout << "Outer radius (cm): " << mOuterRadius << endl; 
-
-  for (Int_t i = 0; i < 10; i++) {
-    cout << "z-position of padrow " << i << ": " << mPadRowPosZ[i] << endl;
-  }
-
-  cout << endl;
-  cout << "Vertex position" << endl;
-  cout << "Max. vertex z-position to do tracking w/o warning (cm): " << mMaxVertexPosZWarning << endl; 
-  cout << "Max. vertex z-position to do tracking at all (cm): " << mMaxVertexPosZWarning << endl; 
-
-  cout << endl;
-  cout << "Vertex reconstruction (with FTPC hits)" << endl;
-  cout << "# of histogram bins: " << mHistoBins << endl; 
-  cout << "lower boundary of histogram (cm): " << mHistoMin << endl; 
-  cout << "upper boundary of histogram (cm): " << mHistoMax << endl; 
-
-  cout << endl;
-  cout << "Tracker settings" << endl;
-  cout << "# of row segments: " << mRowSegments << endl; 
-  cout << "# of phi segments: " << mPhiSegments << endl; 
-  cout << "# of eta segments: " << mEtaSegments << endl; 
-
-  cout << endl;
-  cout << "Settings for tracking" << endl;
-  cout << "Tracking method         main vtx  non vtx  no fld  laser" << endl;
-  cout << "Laser tracking switch:      " << (Int_t)mLaser[0] << "        " 
-       << (Int_t)mLaser[1] << "        " << (Int_t)mLaser[2] << "      " 
-       << (Int_t)mLaser[3] << endl; 
-  cout << "Vertex constraint:          " << (Int_t)mVertexConstraint[0] << "        " 
-       << (Int_t)mVertexConstraint[1] << "        " << (Int_t)mVertexConstraint[2] << "      " 
-       << (Int_t)mVertexConstraint[3] << endl;  
-  cout << "Max. tracklet length:       " << mMaxTrackletLength[0] << "        " 
-       << mMaxTrackletLength[1] << "       " << mMaxTrackletLength[2] << "     " 
-       << mMaxTrackletLength[3] << endl; 
-  cout << "Min. track length:          " << mMinTrackLength[0] << "        " 
-       << mMinTrackLength[1] << "        " << mMinTrackLength[2] << "      " 
-       << mMinTrackLength[3] << endl; 
-  cout << "Tracklet row scope          " << mRowScopeTracklet[0] << "        " 
-       << mRowScopeTracklet[1] << "        " << mRowScopeTracklet[2] << "      " 
-       << mRowScopeTracklet[3] << endl; 
-  cout << "Track row scope :           " << mRowScopeTrack[0] << "        " 
-       << mRowScopeTrack[1] << "        " << mRowScopeTrack[2] << "      " 
-       << mRowScopeTrack[3] << endl; 
-  cout << "Phi scope:                  " << mPhiScope[0] << "        " 
-       << mPhiScope[1] << "        " << mPhiScope[2] << "      " 
-       << mPhiScope[3] << endl; 
-  cout << "Eta scope:                  " << mEtaScope[0] << "        " 
-       << mEtaScope[1] << "        " << mEtaScope[2] << "     " 
-       << mEtaScope[3] << endl; 
-  cout << "Max. DCA:                  " << mMaxDca[0] << "       " 
-       << mMaxDca[1] << "        " << mMaxDca[2] << "      " 
-       << mMaxDca[3] << endl; 
-
-  cout << endl;
-  cout << "Cuts for tracking" << endl;
-  cout << "Tracking method           main vtx  non vtx  no fld  laser" << endl;
-  cout << "Max. tracklet angle:        " << mMaxAngleTracklet[0] << "     " 
-       << mMaxAngleTracklet[1] << "    " << mMaxAngleTracklet[2] << "   " 
-       << mMaxAngleTracklet[3] << endl; 
-  cout << "Max. track angle:           " << mMaxAngleTrack[0] << "     " 
-       << mMaxAngleTrack[1] << "    " << mMaxAngleTrack[2] << "  " 
-       << mMaxAngleTrack[3] << endl; 
-  cout << "Max. dist. in circle fit:   " << mMaxCircleDist[0] << "     " 
-       << mMaxCircleDist[1] << "     " << mMaxCircleDist[2] << "   " 
-       << mMaxCircleDist[3] << endl; 
-  cout << "Max. dist. in length fit:    " << mMaxLengthDist[0] << "       " 
-       << mMaxLengthDist[1] << "       " << mMaxLengthDist[2] << "     " 
-       << mMaxLengthDist[3] << endl; 
+  gMessMgr->Message("", "I", "OST") << "Used parameters for FTPC tracking" << endm;
+  gMessMgr->Message("", "I", "OST") << "---------------------------------" << endm;
   
-  cout << endl;
-  cout << "Settings for split track merging" << endl;
-  cout << "Max. distance (cm): " << mMaxDist << endl; 
-  cout << "Min. point ratio: " << mMinPointRatio << endl; 
-  cout << "Max. point ratio: " << mMaxPointRatio << endl; 
-
-  cout << endl;
-  cout << "Magnetic field factor: " << mMagFieldFactor << endl;
-
+  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("", "I", "OST") << "FTPC geometry" << endm;
+  gMessMgr->Message("", "I", "OST") << "Inner radius (cm):         " << mInnerRadius << endm; 
+  gMessMgr->Message("", "I", "OST") << "Outer radius (cm):         " << mOuterRadius << endm; 
+  gMessMgr->Message("", "I", "OST") << "Total number of padows:    " << mNumberOfPadRows << endm; 
+  gMessMgr->Message("", "I", "OST") << "Number of padows per FTPC: " << mNumberOfPadRowsPerSide << endm; 
+  
+  for (Int_t i = 0; i < NumberOfPadRows(); i++) {
+    gMessMgr->Message("", "I", "OST") << "z-position of padrow " << i << " (cm): " << PadRowPosZ(i) << endm;
+  }
+  
+  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("", "I", "OST") << "Vertex position" << endm;
+  gMessMgr->Message("", "I", "OST") << "Max. vertex z-position to do tracking w/o warning (cm): " << mMaxVertexPosZWarning << endm; 
+  gMessMgr->Message("", "I", "OST") << "Max. vertex z-position to do tracking at all (cm): " << mMaxVertexPosZError << endm; 
+  
+  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("", "I", "OST") << "Vertex reconstruction (with FTPC hits)" << endm;
+  gMessMgr->Message("", "I", "OST") << "# of histogram bins: " << mHistoBins << endm; 
+  gMessMgr->Message("", "I", "OST") << "lower boundary of histogram (cm): " << mHistoMin << endm; 
+  gMessMgr->Message("", "I", "OST") << "upper boundary of histogram (cm): " << mHistoMax << endm; 
+  
+  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("", "I", "OST") << "Tracker settings" << endm;
+  gMessMgr->Message("", "I", "OST") << "# of row segments: " << mRowSegments << endm; 
+  gMessMgr->Message("", "I", "OST") << "# of phi segments: " << mPhiSegments << endm; 
+  gMessMgr->Message("", "I", "OST") << "# of eta segments: " << mEtaSegments << endm; 
+  
+  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("", "I", "OST") << "Settings for tracking" << endm;
+  gMessMgr->Message("", "I", "OST") << "Tracking method         main vtx  non vtx  no fld  laser" << endm;
+  gMessMgr->Message("", "I", "OST") << "Laser tracking switch:      " << (Int_t)mLaser[0] << "        " 
+				    << (Int_t)mLaser[1] << "        " << (Int_t)mLaser[2] << "      " 
+				    << (Int_t)mLaser[3] << endm; 
+  gMessMgr->Message("", "I", "OST") << "Vertex constraint:          " << (Int_t)mVertexConstraint[0] << "        " 
+				    << (Int_t)mVertexConstraint[1] << "        " << (Int_t)mVertexConstraint[2] << "      " 
+				    << (Int_t)mVertexConstraint[3] << endm;  
+  gMessMgr->Message("", "I", "OST") << "Max. tracklet length:       " << mMaxTrackletLength[0] << "        " 
+				    << mMaxTrackletLength[1] << "       " << mMaxTrackletLength[2] << "     " 
+				    << mMaxTrackletLength[3] << endm; 
+  gMessMgr->Message("", "I", "OST") << "Min. track length:          " << mMinTrackLength[0] << "        " 
+				    << mMinTrackLength[1] << "        " << mMinTrackLength[2] << "      " 
+				    << mMinTrackLength[3] << endm; 
+  gMessMgr->Message("", "I", "OST") << "Tracklet row scope          " << mRowScopeTracklet[0] << "        " 
+				    << mRowScopeTracklet[1] << "        " << mRowScopeTracklet[2] << "      " 
+				    << mRowScopeTracklet[3] << endm; 
+  gMessMgr->Message("", "I", "OST") << "Track row scope :           " << mRowScopeTrack[0] << "        " 
+				    << mRowScopeTrack[1] << "        " << mRowScopeTrack[2] << "      " 
+				    << mRowScopeTrack[3] << endm; 
+  gMessMgr->Message("", "I", "OST") << "Phi scope:                  " << mPhiScope[0] << "        " 
+				    << mPhiScope[1] << "        " << mPhiScope[2] << "      " 
+				    << mPhiScope[3] << endm; 
+  gMessMgr->Message("", "I", "OST") << "Eta scope:                  " << mEtaScope[0] << "        " 
+				    << mEtaScope[1] << "        " << mEtaScope[2] << "     " 
+				    << mEtaScope[3] << endm; 
+  gMessMgr->Message("", "I", "OST") << "Max. DCA:                  " << mMaxDca[0] << "       " 
+				    << mMaxDca[1] << "        " << mMaxDca[2] << "      " 
+				    << mMaxDca[3] << endm; 
+  
+  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("", "I", "OST") << "Cuts for tracking" << endm;
+  gMessMgr->Message("", "I", "OST") << "Tracking method           main vtx  non vtx  no fld  laser" << endm;
+  gMessMgr->Message("", "I", "OST") << "Max. tracklet angle:        " << mMaxAngleTracklet[0] << "     " 
+				    << mMaxAngleTracklet[1] << "    " << mMaxAngleTracklet[2] << "   " 
+				    << mMaxAngleTracklet[3] << endm; 
+  gMessMgr->Message("", "I", "OST") << "Max. track angle:           " << mMaxAngleTrack[0] << "     " 
+				    << mMaxAngleTrack[1] << "    " << mMaxAngleTrack[2] << "  " 
+				    << mMaxAngleTrack[3] << endm; 
+  gMessMgr->Message("", "I", "OST") << "Max. dist. in circle fit:   " << mMaxCircleDist[0] << "     " 
+				    << mMaxCircleDist[1] << "     " << mMaxCircleDist[2] << "   " 
+				    << mMaxCircleDist[3] << endm; 
+  gMessMgr->Message("", "I", "OST") << "Max. dist. in length fit:    " << mMaxLengthDist[0] << "       " 
+				    << mMaxLengthDist[1] << "       " << mMaxLengthDist[2] << "     " 
+				    << mMaxLengthDist[3] << endm; 
+  
+  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("", "I", "OST") << "Settings for split track merging" << endm;
+  gMessMgr->Message("", "I", "OST") << "Max. distance (cm): " << mMaxDist << endm; 
+  gMessMgr->Message("", "I", "OST") << "Min. point ratio: " << mMinPointRatio << endm; 
+  gMessMgr->Message("", "I", "OST") << "Max. point ratio: " << mMaxPointRatio << endm; 
+  
+  gMessMgr->Message("", "I", "OST") << endm;
+  gMessMgr->Message("", "I", "OST") << "Magnetic field factor: " << mMagFieldFactor << endm;
+  
   return;
 }
 
-// Pion mass
-inline Float_t StFtpcTrackingParams::m_pi() { return StFtpcTrackingParams::mM_pi; }
-
 // FTPC geometry
-inline Float_t StFtpcTrackingParams::InnerRadius()         { return StFtpcTrackingParams::mInnerRadius;     }
-inline Float_t StFtpcTrackingParams::OuterRadius()         { return StFtpcTrackingParams::mOuterRadius;     }
-inline Float_t StFtpcTrackingParams::PadRowPosZ(Int_t row) { return StFtpcTrackingParams::mPadRowPosZ[row]; }
+inline Float_t StFtpcTrackingParams::InnerRadius()            { return mInnerRadius;            }
+inline Float_t StFtpcTrackingParams::OuterRadius()            { return mOuterRadius;            }
+inline   Int_t StFtpcTrackingParams::NumberOfPadRows()        { return mNumberOfPadRows;        }
+inline   Int_t StFtpcTrackingParams::NumberOfPadRowsPerSide() { return mNumberOfPadRowsPerSide; }
+inline Float_t StFtpcTrackingParams::PadRowPosZ(Int_t row)    { return mPadRowPosZ[row];        }
 
 // Vertex position
-inline Float_t StFtpcTrackingParams::MaxVertexPosZWarning() { return StFtpcTrackingParams::mMaxVertexPosZWarning; }
-inline Float_t StFtpcTrackingParams::MaxVertexPosZError()   { return StFtpcTrackingParams::mMaxVertexPosZError;   }
+inline Float_t StFtpcTrackingParams::MaxVertexPosZWarning() { return mMaxVertexPosZWarning; }
+inline Float_t StFtpcTrackingParams::MaxVertexPosZError()   { return mMaxVertexPosZError;   }
 
 // Vertex reconstruction
-inline   Int_t StFtpcTrackingParams::HistoBins()   { return StFtpcTrackingParams::mHistoBins; }
-inline Float_t StFtpcTrackingParams::HistoMin()  { return StFtpcTrackingParams::mHistoMin;  }
-inline Float_t StFtpcTrackingParams::HistoMax()  { return StFtpcTrackingParams::mHistoMax;  }
+inline   Int_t StFtpcTrackingParams::HistoBins() { return mHistoBins; }
+inline Float_t StFtpcTrackingParams::HistoMin()  { return mHistoMin;  }
+inline Float_t StFtpcTrackingParams::HistoMax()  { return mHistoMax;  }
 
 // Tracker
-inline Int_t StFtpcTrackingParams::RowSegments() { return StFtpcTrackingParams::mRowSegments; }
-inline Int_t StFtpcTrackingParams::PhiSegments() { return StFtpcTrackingParams::mPhiSegments; }
-inline Int_t StFtpcTrackingParams::EtaSegments() { return StFtpcTrackingParams::mEtaSegments; }
+inline Int_t StFtpcTrackingParams::RowSegments() { return mRowSegments; }
+inline Int_t StFtpcTrackingParams::PhiSegments() { return mPhiSegments; }
+inline Int_t StFtpcTrackingParams::EtaSegments() { return mEtaSegments; }
 
 // Tracking
-inline  Bool_t StFtpcTrackingParams::Laser(Int_t tracking_method)             { return StFtpcTrackingParams::mLaser[tracking_method];             }
-inline  Bool_t StFtpcTrackingParams::VertexConstraint(Int_t tracking_method)  { return StFtpcTrackingParams::mVertexConstraint[tracking_method];  }
-inline   Int_t StFtpcTrackingParams::MaxTrackletLength(Int_t tracking_method) { return StFtpcTrackingParams::mMaxTrackletLength[tracking_method]; }
-inline   Int_t StFtpcTrackingParams::MinTrackLength(Int_t tracking_method)    { return StFtpcTrackingParams::mMinTrackLength[tracking_method];    }
-inline   Int_t StFtpcTrackingParams::RowScopeTracklet(Int_t tracking_method)  { return StFtpcTrackingParams::mRowScopeTracklet[tracking_method];  }
-inline   Int_t StFtpcTrackingParams::RowScopeTrack(Int_t tracking_method)     { return StFtpcTrackingParams::mRowScopeTrack[tracking_method];     }
-inline   Int_t StFtpcTrackingParams::PhiScope(Int_t tracking_method)          { return StFtpcTrackingParams::mPhiScope[tracking_method];          }
-inline   Int_t StFtpcTrackingParams::EtaScope(Int_t tracking_method)          { return StFtpcTrackingParams::mEtaScope[tracking_method];          }
-inline Float_t StFtpcTrackingParams::MaxDca(Int_t tracking_method)            { return StFtpcTrackingParams::mMaxDca[tracking_method];            }
+inline  Bool_t StFtpcTrackingParams::Laser(Int_t tracking_method)             { return mLaser[tracking_method];             }
+inline  Bool_t StFtpcTrackingParams::VertexConstraint(Int_t tracking_method)  { return mVertexConstraint[tracking_method];  }
+inline   Int_t StFtpcTrackingParams::MaxTrackletLength(Int_t tracking_method) { return mMaxTrackletLength[tracking_method]; }
+inline   Int_t StFtpcTrackingParams::MinTrackLength(Int_t tracking_method)    { return mMinTrackLength[tracking_method];    }
+inline   Int_t StFtpcTrackingParams::RowScopeTracklet(Int_t tracking_method)  { return mRowScopeTracklet[tracking_method];  }
+inline   Int_t StFtpcTrackingParams::RowScopeTrack(Int_t tracking_method)     { return mRowScopeTrack[tracking_method];     }
+inline   Int_t StFtpcTrackingParams::PhiScope(Int_t tracking_method)          { return mPhiScope[tracking_method];          }
+inline   Int_t StFtpcTrackingParams::EtaScope(Int_t tracking_method)          { return mEtaScope[tracking_method];          }
+inline Float_t StFtpcTrackingParams::MaxDca(Int_t tracking_method)            { return mMaxDca[tracking_method];            }
 
 // Tracklets
-inline Float_t StFtpcTrackingParams::MaxAngleTracklet(Int_t tracking_method) { return StFtpcTrackingParams::mMaxAngleTracklet[tracking_method]; }
+inline Float_t StFtpcTrackingParams::MaxAngleTracklet(Int_t tracking_method) { return mMaxAngleTracklet[tracking_method]; }
 
 // Tracks
-inline Float_t StFtpcTrackingParams::MaxAngleTrack(Int_t tracking_method) { return StFtpcTrackingParams::mMaxAngleTrack[tracking_method]; }
-inline Float_t StFtpcTrackingParams::MaxCircleDist(Int_t tracking_method) { return StFtpcTrackingParams::mMaxCircleDist[tracking_method]; }
-inline Float_t StFtpcTrackingParams::MaxLengthDist(Int_t tracking_method) { return StFtpcTrackingParams::mMaxLengthDist[tracking_method]; }
+inline Float_t StFtpcTrackingParams::MaxAngleTrack(Int_t tracking_method) { return mMaxAngleTrack[tracking_method]; }
+inline Float_t StFtpcTrackingParams::MaxCircleDist(Int_t tracking_method) { return mMaxCircleDist[tracking_method]; }
+inline Float_t StFtpcTrackingParams::MaxLengthDist(Int_t tracking_method) { return mMaxLengthDist[tracking_method]; }
 
 // Split tracks
-inline Float_t StFtpcTrackingParams::MaxDist()       { return StFtpcTrackingParams::mMaxDist;       }
-inline Float_t StFtpcTrackingParams::MinPointRatio() { return StFtpcTrackingParams::mMinPointRatio; }
-inline Float_t StFtpcTrackingParams::MaxPointRatio() { return StFtpcTrackingParams::mMaxPointRatio; }
+inline Float_t StFtpcTrackingParams::MaxDist()       { return mMaxDist;       }
+inline Float_t StFtpcTrackingParams::MinPointRatio() { return mMinPointRatio; }
+inline Float_t StFtpcTrackingParams::MaxPointRatio() { return mMaxPointRatio; }
 
 // dE/dx
-inline Int_t StFtpcTrackingParams::DebugLevel() { return StFtpcTrackingParams::mDebugLevel;    }
-inline Int_t StFtpcTrackingParams::NoAngle()    { return StFtpcTrackingParams::mNoAngle;       }
-inline Int_t StFtpcTrackingParams::MaxHit()     { return StFtpcTrackingParams::mMaxHit;        }
-inline Int_t StFtpcTrackingParams::MinHit()     { return StFtpcTrackingParams::mMinHit;        }
+inline Int_t StFtpcTrackingParams::DebugLevel() { return mDebugLevel;    }
+inline Int_t StFtpcTrackingParams::NoAngle()    { return mNoAngle;       }
+inline Int_t StFtpcTrackingParams::MaxHit()     { return mMaxHit;        }
+inline Int_t StFtpcTrackingParams::MinHit()     { return mMinHit;        }
 
-inline Double_t StFtpcTrackingParams::PadLength()    { return StFtpcTrackingParams::mPadLength;     }
-inline Double_t StFtpcTrackingParams::FracTrunc()    { return StFtpcTrackingParams::mFracTrunc;     }
-inline Double_t StFtpcTrackingParams::ALargeNumber() { return StFtpcTrackingParams::mALargeNumber;  }
+inline Double_t StFtpcTrackingParams::PadLength()    { return mPadLength;     }
+inline Double_t StFtpcTrackingParams::FracTrunc()    { return mFracTrunc;     }
+inline Double_t StFtpcTrackingParams::ALargeNumber() { return mALargeNumber;  }
 
 // transformation due to rotated and displaced TPC
 inline      StMatrixD StFtpcTrackingParams::TpcToGlobalRotation() { return mTpcToGlobalRotation; }

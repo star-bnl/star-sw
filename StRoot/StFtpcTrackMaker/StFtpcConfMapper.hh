@@ -1,5 +1,13 @@
-// $Id: StFtpcConfMapper.hh,v 1.14 2002/09/04 13:44:22 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.15 2002/10/11 15:45:03 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.15  2002/10/11 15:45:03  oldi
+// Get FTPC geometry and dimensions from database.
+// No field fit activated: Returns momentum = 0 but fits a helix.
+// Bug in TrackMaker fixed (events with z_vertex > outer_ftpc_radius were cut).
+// QA histograms corrected (0 was supressed).
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+// cout -> gMessMgr.
+//
 // Revision 1.14  2002/09/04 13:44:22  oldi
 // Typos fixed.
 //
@@ -119,7 +127,7 @@ private:
   Int_t  mNumPhiSegment;  // number of phi segments
   Int_t  mNumEtaSegment;  // number of eta segments
   Int_t  mBounds;         // array size
-  Char_t mMaxFtpcRow;     // number of rows in one Ftpc
+  Int_t  mMaxFtpcRow;     // number of rows in one Ftpc
   Char_t mFtpc;           // current Ftpc number (either 1 ore 2)
 
   // max. eta (pseudorapidity) values
@@ -338,29 +346,6 @@ inline void StFtpcConfMapper::RemoveTrack(StFtpcTrack *track)
 }
 
 
-inline void StFtpcConfMapper::CalcEtaMinMax()
-{
-  // Calculates the min. and max. value of eta (pseudorapidity) with the given main vertex.
-  // The FTPCs are placed in a distance to the point of origin between 162.75 and 256.45 cm.
-  // Their inner radius is 8, the outer one 30 cm. This means they are seen from (0, 0, 0) 
-  // under an angle between 1.79 and 10.62 degrees which translates directly into max. eta and min. eta. 
-  // Due to the fact that the main vertex is shifted, the values of min./max. eta is calculated for each 
-  // event. To be save, 0.01 is substracted/added.
-
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
-  Double_t vertex_rad_squared = TMath::Power(mVertex->GetRadius2(), 2);
-  Double_t ftpc_inner_rad_squared = TMath::Power(params->InnerRadius(), 2);
-  Double_t ftpc_outer_rad_squared = TMath::Power(params->OuterRadius(), 2);
-  
-  mEtaMin = -TMath::Log(TMath::Tan( TMath::ASin(TMath::Sqrt(ftpc_outer_rad_squared + vertex_rad_squared)/ (params->PadRowPosZ(0) - TMath::Abs(mVertex->GetZ()) ) ) /2.) ) - 0.01;
-  mEtaMax = -TMath::Log(TMath::Tan( TMath::ASin(TMath::Sqrt(ftpc_inner_rad_squared - vertex_rad_squared)/ (params->PadRowPosZ(9) + TMath::Abs(mVertex->GetZ()) ) ) /2.) ) + 0.01;
-
-  return;
-}
-
-
 inline Int_t StFtpcConfMapper::GetRowSegm(StFtpcConfMapPoint *hit)
 {
  // Returns number of pad segment of a specific hit.
@@ -396,6 +381,7 @@ inline Double_t StFtpcConfMapper::GetPhi(Int_t segm)
 inline Int_t StFtpcConfMapper::GetEtaSegm(StFtpcConfMapPoint *hit)
 {
   // Returns number of eta segment of a specific hit.
+
 
   Double_t eta;
   Int_t eta_segm;
@@ -451,7 +437,6 @@ inline Int_t StFtpcConfMapper::GetSegm(Int_t row_segm, Int_t phi_segm, Int_t eta
 inline Int_t StFtpcConfMapper::GetRowSegm(Int_t segm)
 {
   // Returns number of pad segment of a specifiv segment.
-
   return (segm - GetEtaSegm(segm) - GetPhiSegm(segm)) / (mNumPhiSegment * mNumEtaSegment);
 }
 
@@ -459,7 +444,6 @@ inline Int_t StFtpcConfMapper::GetRowSegm(Int_t segm)
 inline Int_t StFtpcConfMapper::GetPhiSegm(Int_t segm)
 {
   // Returns number of phi segment of a specifiv segment.
-
   return (segm - GetEtaSegm(segm)) % (mNumPhiSegment * mNumEtaSegment) / (mNumEtaSegment);
 }
 

@@ -1,5 +1,13 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.38 2002/10/03 10:34:01 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.39 2002/10/11 15:45:31 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.39  2002/10/11 15:45:31  oldi
+// Get FTPC geometry and dimensions from database.
+// No field fit activated: Returns momentum = 0 but fits a helix.
+// Bug in TrackMaker fixed (events with z_vertex > outer_ftpc_radius were cut).
+// QA histograms corrected (0 was supressed).
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+// cout -> gMessMgr.
+//
 // Revision 1.38  2002/10/03 10:34:01  oldi
 // Usage of gufld removed.
 // Magnetic field is read by StMagUtilities, now.
@@ -234,19 +242,43 @@ Int_t StFtpcTrackMaker::Init()
   St_DataSetIter  gime(ftpcpars);
   m_fdepar = (St_fde_fdepar *) gime("fdepars/fdepar");
 
+  St_DataSet *geometry_db = GetDataBase("Geometry/ftpc");
+  if ( !geometry_db ){
+     gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting FTPC database: Geometry"<<endm;
+     return kStWarn;
+  }
+  St_DataSetIter geometry(geometry_db);
+ 
+  // get tracking parameters from database
+  StFtpcTrackingParams::Instance(Debug(), 
+				  (St_ftpcDimensions *)geometry("ftpcDimensions"), 
+				 (St_ftpcPadrowZ  *)geometry("ftpcPadrowZ"), 
+				 GetDataBase("RunLog"));
   // Create Histograms
-  m_vtx_pos      = new TH1F("fpt_vtx_pos"   ,"FTPC estimated vertex position"                  ,800, -400., 400.);
-  m_q            = new TH1F("fpt_q"         ,"FTPC track charge"                               ,  3,-2. ,  2.  );
-  m_theta        = new TH1F("fpt_theta"     ,"FTPC theta"                                      ,100,-5.0,  5.0 );
-  m_ndedx        = new TH1F("fde_ndedx"     ,"Number of points used in FTPC dE/dx calculation" , 10, 1. , 11.  );
-  m_found        = new TH1F("fpt_nrec"      ,"FTPC: number of points found per track"          , 10, 1. ,  11. );
-  m_track        = new TH1F("fpt_track"     ,"FTPC: number of tracks found"                    ,100, 1. ,5000. );    
-  m_nrec_track   = new TH2F("fpt_hits_mom"  ,"FTPC: points found per track vs. momentum"       , 10, 1. ,  11. , 100, 1., 20.);
+  m_vtx_pos      = new TH1F("fpt_vtx_pos"   ,"FTPC estimated vertex position"                  , 800, -400.0, 400.0);
+  m_q            = new TH1F("fpt_q"         ,"FTPC track charge"                               ,  3,   -2.0,   2.0);
+  m_theta        = new TH1F("fpt_theta"     ,"FTPC theta"                                      , 100,   -5.0,   5.0 );
+  m_ndedx        = new TH1F("fde_ndedx"     ,"Number of points used in FTPC dE/dx calculation" , 
+			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
+			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
+  m_found        = new TH1F("fpt_nrec"      ,"FTPC: number of points found per track"          , 
+			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
+			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
+  m_track        = new TH1F("fpt_track"     ,"FTPC: number of tracks found"                    , 100, 0., 5000.);    
+  m_nrec_track   = new TH2F("fpt_hits_mom"  ,"FTPC: points found per track vs. momentum"       , 
+			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
+			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5, 100, 0., 20.);
 
-  m_padvstime_West = new TH2F("fpt_padvstimeW", "FTPCW padlength vs. timelength", 12, 0.5, 12.5, 10, 0.5, 10.5);
-  m_padvstime_East = new TH2F("fpt_padvstimeE", "FTPCE padlength vs. timelength", 12, 0.5, 12.5, 10, 0.5, 10.5);
+  m_padvstime_West = new TH2F("fpt_padvstimeW", "FTPCW padlength vs. timelength", 12, 0.5, 12.5, 
+			      StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
+			      StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
+  m_padvstime_East = new TH2F("fpt_padvstimeE", "FTPCE padlength vs. timelength", 12, 0.5, 12.5, 
+			      StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
+			      StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
+
   m_maxadc_West = new TH1F("fpt_maxadcW", "FTPCW MaxAdc", 50, 0.5, 50.5);
   m_maxadc_East = new TH1F("fpt_maxadcE", "FTPCE MaxAdc", 50, 0.5, 50.5);
+
   m_charge_West = new TH1F("fpt_chargeW", "FTPCW charge", 50, 0.5, 500.5);
   m_charge_East = new TH1F("fpt_chargeE", "FTPCE charge", 50, 0.5, 500.5);
  
@@ -274,8 +306,6 @@ Int_t StFtpcTrackMaker::Make()
   // Setup and tracking.
   
   gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) started..." << endm;
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance(Debug(), 0);
   
   St_DataSet *ftpc_data = GetDataSet("ftpc_hits");
   
@@ -398,43 +428,45 @@ Int_t StFtpcTrackMaker::Make()
     Double_t z = TMath::Abs(primary_vertex_z);
     Double_t radius = TMath::Sqrt(primary_vertex_x*primary_vertex_x + primary_vertex_y*primary_vertex_y);
     
-    if (z > params->MaxVertexPosZWarning()) {
+    if (z > StFtpcTrackingParams::Instance()->MaxVertexPosZWarning()) {
       
-      if (z > params->OuterRadius()) {
+      if (z > StFtpcTrackingParams::Instance()->PadRowPosZ(0)) {
 	gMessMgr->Message("Found vertex lies inside of one Ftpc. No Ftpc tracking possible.", "E", "OTS");
 	
 	// No tracking!
 	return kStWarn;   
       }
       
-      else if (z > params->MaxVertexPosZError()) {
-	gMessMgr->Message("Found vertex is more than 100 cm off from z = 0. Ftpc tracking makes no sense.", "E", "OTS");
-	
+      else if (z > StFtpcTrackingParams::Instance()->MaxVertexPosZError()) {
+	gMessMgr->Message("", "E", "OST") << "Found vertex is more than " 
+					  << StFtpcTrackingParams::Instance()->MaxVertexPosZError() 
+					  << " cm off from z = 0. Ftpc tracking makes no sense." <<endm;
 	// No tracking!
 	return kStWarn;
       }
       
       else {
-	gMessMgr->Message("Found vertex is more than 50 cm off from z = 0 but  Ftpc tracking is still possible.", "W", "OTS");
+	gMessMgr->Message("", "W", "OST") << "Found vertex is more than " 
+					  << StFtpcTrackingParams::Instance()->MaxVertexPosZWarning() 
+					  << " cm off from z = 0 but Ftpc tracking is still possible." << endm;
 	// Do tracking.
       }
     }
     
-    if (radius >= params->InnerRadius()) {
-      gMessMgr->Message("Found vertex x-z-position is greater than 7.73 cm (inner Ftpc radius). No Ftpc tracking possible.", "E", "OTS");
-      
+    if (radius >= StFtpcTrackingParams::Instance()->InnerRadius()) {
+      gMessMgr->Message("", "E", "OST") << "Found vertex x-z-position is greater than " 
+					<< StFtpcTrackingParams::Instance()->InnerRadius()
+					<< " cm (inner Ftpc radius). No Ftpc tracking possible." << endm;
       // No tracking!
       return kStWarn; 
     }
     
-    // get magnetic field
-    Double_t mag_fld_factor = params->MagFieldFactor();
     Double_t vertexPos[6] = {primary_vertex_x,     primary_vertex_y,     primary_vertex_z, 
 			     primary_vertex_x_err, primary_vertex_y_err, primary_vertex_z_err};
     StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertexPos, kTRUE);
     
     // tracking 
-    if (mag_fld_factor == 0.) {
+    if (StFtpcTrackingParams::Instance()->MagFieldFactor() == 0.) {
       tracker->NoFieldTracking();
     }
     
@@ -475,11 +507,8 @@ Int_t StFtpcTrackMaker::Make()
     St_fpt_fptrack *fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", tracker->GetNumberOfTracks());
     m_DataSet->Add(fpt_fptrack);
 
-    if (mag_fld_factor != 0.) {
-      // momentum fit possible
-      tracker->FitAnddEdxAndWrite(fpt_fptrack, m_fdepar->GetTable(), -primary_vertex_id);
-      tracker->EstimateVertex(tracker->GetVertex(), 1);
-    }
+    tracker->FitAnddEdxAndWrite(fpt_fptrack, m_fdepar->GetTable(), -primary_vertex_id);
+    tracker->EstimateVertex(tracker->GetVertex(), 1);
     
     if (Debug()) {
       gMessMgr->Message("", "I", "OST") << "Total time consumption         " << tracker->GetTime() << " s." << endm;
@@ -599,7 +628,7 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 	m_phires->Fill(mhit->GetPhiResidual());
       }
       
-      if (mhit->GetPadRow()<=10) {
+      if (mhit->GetPadRow()<=StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
 	
 	m_maxadc_West->Fill(mhit->GetMaxADC());
 	m_charge_West->Fill(mhit->GetCharge());
@@ -632,8 +661,7 @@ Int_t StFtpcTrackMaker::Finish()
 {
   // final cleanup
 
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-  delete params;
+  delete StFtpcTrackingParams::Instance();
 
   return kStOK;
 }
@@ -645,7 +673,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.38 2002/10/03 10:34:01 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.39 2002/10/11 15:45:31 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

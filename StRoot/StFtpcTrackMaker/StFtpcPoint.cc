@@ -1,5 +1,13 @@
-// $Id: StFtpcPoint.cc,v 1.9 2002/06/04 13:34:57 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.10 2002/10/11 15:45:12 oldi Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.10  2002/10/11 15:45:12  oldi
+// Get FTPC geometry and dimensions from database.
+// No field fit activated: Returns momentum = 0 but fits a helix.
+// Bug in TrackMaker fixed (events with z_vertex > outer_ftpc_radius were cut).
+// QA histograms corrected (0 was supressed).
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+// cout -> gMessMgr.
+//
 // Revision 1.9  2002/06/04 13:34:57  oldi
 // Transformation of local FTPC coordinates in global coordinates introduced.
 // An additional flag keeps track in which coordinate system the point position
@@ -243,8 +251,6 @@ void StFtpcPoint::TransformFtpc2Global()
 
   if (!IsInGlobalCoord()) {
    
-    StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-    
     StThreeVectorD org(mCoord.X(), mCoord.Y(), mCoord.Z());
 
     // internal FTPC rotation (FTPC east only)
@@ -252,16 +258,16 @@ void StFtpcPoint::TransformFtpc2Global()
       // check if hit is in FTPC east
       
       // first tranformation to new origin (FTPC installation point)
-      org.setZ(org.z() - params->InstallationPointZ());
+      org.setZ(org.z() - StFtpcTrackingParams::Instance()->InstallationPointZ());
       
       // actual rotation
-      org = params->FtpcRotation() * org;
+      org = StFtpcTrackingParams::Instance()->FtpcRotation() * org;
       
       // set z-position back to original value
-      org.setZ(org.z() + params->InstallationPointZ());
+      org.setZ(org.z() + StFtpcTrackingParams::Instance()->InstallationPointZ());
     }
     
-    StThreeVectorD transform = params->TpcToGlobalRotation() * org + params->TpcPositionInGlobal();
+    StThreeVectorD transform = StFtpcTrackingParams::Instance()->TpcToGlobalRotation() * org + StFtpcTrackingParams::Instance()->TpcPositionInGlobal();
     
     mCoord.SetX(transform.x());
     mCoord.SetY(transform.y());
@@ -289,23 +295,21 @@ void StFtpcPoint::TransformGlobal2Ftpc()
   
   if (IsInGlobalCoord()) {
     
-    StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-    
     StThreeVectorD org(mCoord.X(), mCoord.Y(), mCoord.Z());
-    StThreeVectorD transform = params->GlobalToTpcRotation() * (org - params->TpcPositionInGlobal());
+    StThreeVectorD transform = StFtpcTrackingParams::Instance()->GlobalToTpcRotation() * (org - StFtpcTrackingParams::Instance()->TpcPositionInGlobal());
 
     // internal FTPC rotation (FTPC east only)
     if (transform.z() < 0) {
       // check if hit is in FTPC east
       
       // first tranformation to new origin (FTPC installation point)
-      transform.setZ(transform.z() - params->InstallationPointZ());
+      transform.setZ(transform.z() - StFtpcTrackingParams::Instance()->InstallationPointZ());
       
       // actual rotation
-      transform = params->FtpcRotationInverse() * transform;
+      transform = StFtpcTrackingParams::Instance()->FtpcRotationInverse() * transform;
       
       // set z-position back to original value
-      transform.setZ(transform.z() + params->InstallationPointZ());
+      transform.setZ(transform.z() + StFtpcTrackingParams::Instance()->InstallationPointZ());
     }
     
     mCoord.SetX(transform.x());

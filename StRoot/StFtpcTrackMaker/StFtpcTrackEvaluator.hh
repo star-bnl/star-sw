@@ -1,5 +1,13 @@
-// $Id: StFtpcTrackEvaluator.hh,v 1.7 2001/07/12 08:34:31 oldi Exp $
+// $Id: StFtpcTrackEvaluator.hh,v 1.8 2002/10/11 15:45:26 oldi Exp $
 // $Log: StFtpcTrackEvaluator.hh,v $
+// Revision 1.8  2002/10/11 15:45:26  oldi
+// Get FTPC geometry and dimensions from database.
+// No field fit activated: Returns momentum = 0 but fits a helix.
+// Bug in TrackMaker fixed (events with z_vertex > outer_ftpc_radius were cut).
+// QA histograms corrected (0 was supressed).
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+// cout -> gMessMgr.
+//
 // Revision 1.7  2001/07/12 08:34:31  oldi
 // Many new things were developed eg. histograms for time consumption and
 // momentum resolution.
@@ -398,7 +406,7 @@ inline Bool_t StFtpcTrackEvaluator::IsGoodTrack(StFtpcTrack* track)
 {
   // Returns true if the given track fulfills all requirements to be a "good" track.
 
-  if (track->GetPid() > 3 && track->ComesFromMainVertex() && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= 10) {
+  if (track->GetPid() > 3 && track->ComesFromMainVertex() && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
     return (Bool_t)true;
   }
 
@@ -412,7 +420,7 @@ inline Bool_t StFtpcTrackEvaluator::IsGoodMainVertexTrack(StFtpcTrack* track)
 {
   // Returns true if the given track fulfills all requirements to be a "good" track.
 
-  if (track->GetPid() > 3 && track->ComesFromMainVertex() && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= 10) {
+  if (track->GetPid() > 3 && track->ComesFromMainVertex() && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
     return (Bool_t)true;
   }
 
@@ -426,7 +434,7 @@ inline Bool_t StFtpcTrackEvaluator::IsGoodNonVertexTrack(StFtpcTrack* track)
 {
   // Returns true if the given track fulfills all requirements to be a "good" track.
 
-  if (track->GetPid() > 3 && !(track->ComesFromMainVertex()) && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= 10) {
+  if (track->GetPid() > 3 && !(track->ComesFromMainVertex()) && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
     return (Bool_t)true;
   }
 

@@ -1,5 +1,13 @@
-// $Id: StFtpcConfMapper.cc,v 1.19 2002/04/29 15:49:33 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.20 2002/10/11 15:44:58 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.20  2002/10/11 15:44:58  oldi
+// Get FTPC geometry and dimensions from database.
+// No field fit activated: Returns momentum = 0 but fits a helix.
+// Bug in TrackMaker fixed (events with z_vertex > outer_ftpc_radius were cut).
+// QA histograms corrected (0 was supressed).
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+// cout -> gMessMgr.
+//
 // Revision 1.19  2002/04/29 15:49:33  oldi
 // All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
 // In a future version the actual values should be moved to an .idl file (the
@@ -171,14 +179,11 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, Double_t vertexP
 
   mLaser = (Bool_t)false;
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
-  mNumRowSegment = params->RowSegments();
-  mNumPhiSegment = params->PhiSegments(); 
-  mNumEtaSegment = params->EtaSegments(); 
+  mNumRowSegment = StFtpcTrackingParams::Instance()->RowSegments();
+  mNumPhiSegment = StFtpcTrackingParams::Instance()->PhiSegments(); 
+  mNumEtaSegment = StFtpcTrackingParams::Instance()->EtaSegments(); 
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
-  mMaxFtpcRow = mNumRowSegment/2;
+  mMaxFtpcRow = StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide();
 
   CalcEtaMinMax();
 
@@ -236,14 +241,11 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_
 
   mLaser = (Bool_t)false;
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
-  mNumRowSegment = params->RowSegments();
-  mNumPhiSegment = params->PhiSegments();
-  mNumEtaSegment = params->EtaSegments();
+  mNumRowSegment = StFtpcTrackingParams::Instance()->RowSegments();
+  mNumPhiSegment = StFtpcTrackingParams::Instance()->PhiSegments();
+  mNumEtaSegment = StFtpcTrackingParams::Instance()->EtaSegments();
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
-  mMaxFtpcRow = mNumRowSegment/2;
+  mMaxFtpcRow = StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide();
 
   CalcEtaMinMax();
 
@@ -314,14 +316,11 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
 
   mLaser = (Bool_t)false;
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
-  mNumRowSegment = params->RowSegments();
-  mNumPhiSegment = params->PhiSegments();
-  mNumEtaSegment = params->EtaSegments();
+  mNumRowSegment = StFtpcTrackingParams::Instance()->RowSegments();
+  mNumPhiSegment = StFtpcTrackingParams::Instance()->PhiSegments();
+  mNumEtaSegment = StFtpcTrackingParams::Instance()->EtaSegments();
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
-  mMaxFtpcRow = mNumRowSegment/2;
+  mMaxFtpcRow = StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide();
 
   CalcEtaMinMax();
 
@@ -573,18 +572,15 @@ void StFtpcConfMapper::Settings(TString method) {
 void StFtpcConfMapper::Settings(Int_t method_id) {
   // Sets settings with default values by given tracking method id.
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
-  SetLaser(params->Laser(method_id));
-  SetMaxDca(params->MaxDca(method_id));
-  SetVertexConstraint(params->VertexConstraint(method_id));
-  SetTrackletLength(params->MaxTrackletLength(method_id));
-  SetRowScopeTracklet(params->RowScopeTracklet(method_id));
-  SetMinPoints(params->MinTrackLength(method_id));
-  SetRowScopeTrack(params->RowScopeTrack(method_id));
-  SetPhiScope(params->PhiScope(method_id));
-  SetEtaScope(params->EtaScope(method_id));
+  SetLaser(StFtpcTrackingParams::Instance()->Laser(method_id));
+  SetMaxDca(StFtpcTrackingParams::Instance()->MaxDca(method_id));
+  SetVertexConstraint(StFtpcTrackingParams::Instance()->VertexConstraint(method_id));
+  SetTrackletLength(StFtpcTrackingParams::Instance()->MaxTrackletLength(method_id));
+  SetRowScopeTracklet(StFtpcTrackingParams::Instance()->RowScopeTracklet(method_id));
+  SetMinPoints(StFtpcTrackingParams::Instance()->MinTrackLength(method_id));
+  SetRowScopeTrack(StFtpcTrackingParams::Instance()->RowScopeTrack(method_id));
+  SetPhiScope(StFtpcTrackingParams::Instance()->PhiScope(method_id));
+  SetEtaScope(StFtpcTrackingParams::Instance()->EtaScope(method_id));
 
   return;
 }
@@ -620,13 +616,10 @@ void StFtpcConfMapper::Cuts(TString method) {
 void StFtpcConfMapper::Cuts(Int_t method_id) {
   // Sets cuts with default values by given tracking method id.
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-
-  SetMaxAngleTracklet(params->MaxAngleTracklet(method_id));
-  SetMaxAngleTrack(params->MaxAngleTrack(method_id));
-  SetMaxCircleDistTrack(params->MaxCircleDist(method_id));
-  SetMaxLengthDistTrack(params->MaxLengthDist(method_id));
+  SetMaxAngleTracklet(StFtpcTrackingParams::Instance()->MaxAngleTracklet(method_id));
+  SetMaxAngleTrack(StFtpcTrackingParams::Instance()->MaxAngleTrack(method_id));
+  SetMaxCircleDistTrack(StFtpcTrackingParams::Instance()->MaxCircleDist(method_id));
+  SetMaxLengthDistTrack(StFtpcTrackingParams::Instance()->MaxLengthDist(method_id));
  
   return;
 }
@@ -1132,12 +1125,9 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
 void StFtpcConfMapper::HandleSplitTracks() {
   // Handle split tracks with default values.
 
-  // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
-  
-  HandleSplitTracks(params->MaxDist(), 
-		    params->MinPointRatio(), 
-		    params->MaxPointRatio());
+  HandleSplitTracks(StFtpcTrackingParams::Instance()->MaxDist(), 
+		    StFtpcTrackingParams::Instance()->MinPointRatio(), 
+		    StFtpcTrackingParams::Instance()->MaxPointRatio());
 
   return;
 }
@@ -1544,12 +1534,8 @@ StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_
   
     if (start_row > end_row) return 0;
   }
-  //if (end_row == 20) 
-  //cout << start_row << " " << end_row << endl;
   
   // loop over sub rows
-  //  for (sub_row_segm = start_row; sub_row_segm >= end_row; sub_row_segm--) {
-
   for (sub_row_segm = start_row; TestExpression(sub_row_segm, end_row, backward); LoopUpdate(&sub_row_segm, backward)) {    
 
     //  loop over sub phi segments
@@ -1781,7 +1767,7 @@ Bool_t StFtpcConfMapper::TrackExtension(StFtpcTrack *track)
 	hit = (StFtpcConfMapPoint *)trackpoint->First();
       }
       
-      Int_t padrow = hit->GetPadRow()%10;
+      Int_t padrow = hit->GetPadRow()%StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide();
 
       if ((padrow !=  1 && direction == 1) ||
 	  (padrow !=  0 && direction == 0)) {
@@ -1846,6 +1832,26 @@ Bool_t StFtpcConfMapper::TrackExtension(StFtpcTrack *track)
   else {
     return (Bool_t)false;
   } 
+}
+
+
+void StFtpcConfMapper::CalcEtaMinMax()
+{
+  // Calculates the min. and max. value of eta (pseudorapidity) with the given main vertex.
+  // The FTPCs are placed in a distance to the point of origin between 162.75 and 256.45 cm.
+  // Their inner radius is 8, the outer one 30 cm. This means they are seen from (0, 0, 0) 
+  // under an angle between 1.79 and 10.62 degrees which translates directly into max. eta and min. eta. 
+  // Due to the fact that the main vertex is shifted, the values of min./max. eta is calculated for each 
+  // event. To be save, 0.01 is substracted/added.
+
+  Double_t vertex_rad_squared = TMath::Power(mVertex->GetRadius2(), 2);
+  Double_t ftpc_inner_rad_squared = TMath::Power(StFtpcTrackingParams::Instance()->InnerRadius(), 2);
+  Double_t ftpc_outer_rad_squared = TMath::Power(StFtpcTrackingParams::Instance()->OuterRadius(), 2);
+
+  mEtaMin = -TMath::Log(TMath::Tan( TMath::ASin(TMath::Sqrt(ftpc_outer_rad_squared + vertex_rad_squared)/ (StFtpcTrackingParams::Instance()->PadRowPosZ(0) - TMath::Abs(mVertex->GetZ()) ) ) /2.) ) - 0.01;
+  mEtaMax = -TMath::Log(TMath::Tan( TMath::ASin(TMath::Sqrt(ftpc_inner_rad_squared - vertex_rad_squared)/ (StFtpcTrackingParams::Instance()->PadRowPosZ(9) + TMath::Abs(mVertex->GetZ()) ) ) /2.) ) + 0.01;
+
+  return;
 }
 
 

@@ -1,5 +1,13 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.14 2002/04/05 16:50:51 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.15 2002/10/11 15:45:22 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.15  2002/10/11 15:45:22  oldi
+// Get FTPC geometry and dimensions from database.
+// No field fit activated: Returns momentum = 0 but fits a helix.
+// Bug in TrackMaker fixed (events with z_vertex > outer_ftpc_radius were cut).
+// QA histograms corrected (0 was supressed).
+// Code cleanup (several lines of code changed due to *params -> Instance()).
+// cout -> gMessMgr.
+//
 // Revision 1.14  2002/04/05 16:50:51  oldi
 // Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
 // Each Track inherits from StHelix, now.
@@ -901,12 +909,12 @@ void StFtpcTrackEvaluator::CreateHistos()
   mNumGoodFoundPoints = new TH1F("good_pointsf", "Number of points on good found tracks", 100, 0., 40000.);
   mGoodPointRatio = new TH1F("good_point_ratio", "Ratio of good points", 100, 0., 1.);
   
-  mFHitsOnTrack = new TH1F("found_hits", "Found clusters", 10, 0.5, 10.5);
+  mFHitsOnTrack = new TH1F("found_hits", "Found clusters", StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
   mGHitsOnTrack = new TH1F("geant_hits", "Geant clusters", 50, 0.5, 50.5);
   
-  mNumParents   = new TH1F("num_parents", "Parent tracks", 10, 0.5, 10.5);
-  mNumWrongHits = new TH2F("wrong_hits", "Wrong clusters on tracks", 10, -0.5, 9.5, 10, 0.5, 10.5);
-  mNumWrongHitsAll = new TH1F("wrong_hits_all", "Wrong clusters on tracks", 10, -0.5, 9.5);  
+  mNumParents   = new TH1F("num_parents", "Parent tracks", StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
+  mNumWrongHits = new TH2F("wrong_hits", "Wrong clusters on tracks", StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), -0.5, 9.5, StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
+  mNumWrongHitsAll = new TH1F("wrong_hits_all", "Wrong clusters on tracks", StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), -0.5, 9.5);  
   
   mPtot = new TH2F("ptot", "Total momentum", 60, 0., 30., 60, 0., 30.);
   mPt = new TH2F("pt", "Transverse momentum", 50, 0., 2.5, 50, 0., 2.5);
@@ -930,8 +938,8 @@ void StFtpcTrackEvaluator::CreateHistos()
   mPRelErrqok = new TH3F("p_rel_err_q_ok", "Rel. error of p_tot (charge ok)", 48, 2., 4.4, 25, 0., 5., 50, -1., 1.);
   mPRelDiff = new TH3F("p_rel_diff", "Rel. differnce of p_tot", 48, 2., 4.4, 25, 0., 5., 50, -1., 1.);
   
-  mEtaNghits = new TH2F("eta_ghits", "Geant tracks", 10, 0.5, 10.5, 96, 2.0, 4.4);
-  mEtaNfhits = new TH2F("eta_fhits", "Found tracks", 10, 0.5, 10.5, 96, 2.0, 4.4);
+  mEtaNghits = new TH2F("eta_ghits", "Geant tracks", StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5, 96, 2.0, 4.4);
+  mEtaNfhits = new TH2F("eta_fhits", "Found tracks", StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5, 96, 2.0, 4.4);
 
   mPtEtaF = new TH2F("pt_etaf", "Found tracks", 96, 2.0, 4.4, 50, 0., 5.);
   mPtEtaFMes = new TH2F("pt_etaf_mes", "Found tracks", 96, 2.0, 4.4, 50, 0., 5.);
@@ -1381,7 +1389,7 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
 	t->CalculateNMax();
 	NumFtpcGeantTracks++;
 
-	if (ftpc_hits>10) {
+	if (ftpc_hits>StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
 	  mLongTracks++;
 	  mLongTrackClusters += ftpc_hits;
 	  
@@ -1399,7 +1407,7 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
 	  
 	  if (IsGoodTrack(t)) {
 
-	    if (ftpc_hits == 10) {
+	    if (ftpc_hits == StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
 	      mPtEta10PointTracks->Fill(TMath::Abs(t->GetEta()), t->GetPt());
 	    }
 
@@ -1449,7 +1457,7 @@ void StFtpcTrackEvaluator::ParentTrackInit()
   // Initializes the parents of all tracks.
 
   mParent->Set(mFoundTracks->GetEntriesFast());
-  mNumParentTracks->SetFill(mFoundTracks->GetEntriesFast()*10, -1);
+  mNumParentTracks->SetFill(mFoundTracks->GetEntriesFast()*StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), -1);
 
   Int_t actual_track = -1;
 
@@ -1469,7 +1477,7 @@ void StFtpcTrackEvaluator::ParentTrackInit()
         
     Int_t max_hits = hits->GetEntriesFast();
 
-    for (Int_t h_counter = 0; h_counter < 10; h_counter++) {
+    for (Int_t h_counter = 0; h_counter < StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(); h_counter++) {
 
       if (h_counter < max_hits) {
 	StFtpcPoint *hit = (StFtpcPoint *)hits->At(h_counter);
@@ -1485,16 +1493,16 @@ void StFtpcTrackEvaluator::ParentTrackInit()
     
     for (Int_t cluster1 = 0; cluster1 < max_hits; cluster1++) {
 	    
-      if (mParentTracks->At(t_counter * 10 + cluster1) != -1) {
-       	mNumParentTracks->AddAt(1, t_counter * 10 + cluster1);
+      if (mParentTracks->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + cluster1) != -1) {
+       	mNumParentTracks->AddAt(1, t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + cluster1);
 	
 	for (Int_t cluster2 = cluster1+1; cluster2 < max_hits; cluster2++) {
 	  
-	  if (mParentTracks->At(t_counter * 10 + cluster2) != -1) {
+	  if (mParentTracks->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + cluster2) != -1) {
 
-	    if (mParentTracks->At(t_counter * 10 + cluster1) == mParentTracks->At(t_counter * 10 + cluster2)) {
-	      mParentTracks->AddAt(-1, t_counter * 10 + cluster2);
-	      mNumParentTracks->AddAt(mNumParentTracks->At(t_counter * 10 + cluster1) + 1, t_counter * 10 + cluster1);
+	    if (mParentTracks->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + cluster1) == mParentTracks->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + cluster2)) {
+	      mParentTracks->AddAt(-1, t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + cluster2);
+	      mNumParentTracks->AddAt(mNumParentTracks->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + cluster1) + 1, t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + cluster1);
 	    }
 
 	    else {  // different parent tracks found
@@ -1514,11 +1522,11 @@ void StFtpcTrackEvaluator::ParentTrackInit()
     // Evaluate the most likely parent for this track.
     Int_t max = 0;
 
-    for (Int_t cluster = 0; cluster < 10; cluster++) {
+    for (Int_t cluster = 0; cluster < StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(); cluster++) {
 
-      if (mNumParentTracks->At(t_counter * 10 + cluster) >= max) {
-	max = mNumParentTracks->At(t_counter * 10 + cluster);
-	mParent->AddAt(mParentTrack->At(t_counter * 10 + cluster), t_counter);
+      if (mNumParentTracks->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + cluster) >= max) {
+	max = mNumParentTracks->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + cluster);
+	mParent->AddAt(mParentTrack->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + cluster), t_counter);
       }
     }
 
@@ -1545,7 +1553,7 @@ void StFtpcTrackEvaluator::EvaluateGoodness(Int_t t_counter)
   {for (Int_t i=0; i<points->GetEntriesFast(); i++) {
     StFtpcPoint *p = (StFtpcPoint *)points->At(i);
     
-    if (mParentTrack->At(t_counter*10+i) == mParent->At(t_counter)) {
+    if (mParentTrack->At(t_counter*StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()+i) == mParent->At(t_counter)) {
       mClusterArr->AddAt(1, p->GetHitNumber());
 
       if (i == points->GetEntriesFast()-1) {
@@ -1669,7 +1677,7 @@ void StFtpcTrackEvaluator::FillGCutHistos()
       mEtaNghits->Fill(hits->GetEntriesFast(), TMath::Abs(track->GetPseudoRapidity()));
       mPtEtaGoodG->Fill(TMath::Abs(track->GetPseudoRapidity()), track->GetPt());
 
-      for (Int_t h_counter = 2; h_counter < hits->GetEntriesFast() && h_counter < 10; h_counter++) {
+      for (Int_t h_counter = 2; h_counter < hits->GetEntriesFast() && h_counter < StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(); h_counter++) {
 
 	StFtpcConfMapPoint *hit = (StFtpcConfMapPoint *)hits->At(h_counter);
 	
@@ -2027,14 +2035,14 @@ void StFtpcTrackEvaluator::FillParentHistos()
     
     Int_t num_parents = 0;
     Int_t num_hits = 0;
-    for (Int_t h_counter = 0; h_counter < 10; h_counter++) {
+    for (Int_t h_counter = 0; h_counter < StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(); h_counter++) {
       // Loop over clusters
       
-      if (mNumParentTracks->At(t_counter * 10 + h_counter) != -1) {
+      if (mNumParentTracks->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + h_counter) != -1) {
 	num_parents++;
 	
-	if (mParentTracks->At(t_counter * 10 + h_counter) != mParent->At(t_counter)) {
-	  num_hits += mNumParentTracks->At(t_counter * 10 + h_counter);
+	if (mParentTracks->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + h_counter) != mParent->At(t_counter)) {
+	  num_hits += mNumParentTracks->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + h_counter);
 	}
       } 
     }
@@ -2054,14 +2062,14 @@ void StFtpcTrackEvaluator::FillParentHistos(Int_t t_counter)
   
   Int_t num_parents = 0;
   Int_t num_hits = 0;
-  for (Int_t h_counter = 0; h_counter < 10; h_counter++) {
+  for (Int_t h_counter = 0; h_counter < StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(); h_counter++) {
     // Loop over clusters
     
-    if (mNumParentTracks->At(t_counter * 10 + h_counter) != -1) {
+    if (mNumParentTracks->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + h_counter) != -1) {
       num_parents++;
       
-      if (mParentTracks->At(t_counter * 10 + h_counter) != mParent->At(t_counter)) {
-	num_hits += mNumParentTracks->At(t_counter * 10 + h_counter);
+      if (mParentTracks->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + h_counter) != mParent->At(t_counter)) {
+	num_hits += mNumParentTracks->At(t_counter * StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + h_counter);
       }
     } 
   }
