@@ -399,7 +399,7 @@ foreach my $dir ("StRoot","pams") {
                next;   
              }   
 	    if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) && 
-		 $subsub_dir !~ /^inc$/) {
+		 $subsub_dir !~ /^inc$/ &&  $subsub_dir !~ /^g2t$/) {
 	      # one more level for gen & sim
 	      push @subdirs, $subsub_DIR; #print "================== add $subsub_DIR\n";
 	    }
