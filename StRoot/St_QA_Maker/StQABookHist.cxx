@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.28 2000/01/31 17:23:00 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.29 2000/01/31 22:15:25 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.29  2000/01/31 22:15:25  kathy
+// added Gene's code to make mass plot for Xi's in table and StEvent versions
+//
 // Revision 1.28  2000/01/31 17:23:00  kathy
 // change scale of chisq plots for tpc,svt in globtrk,primtrk tables - change to be 5
 //
@@ -419,6 +422,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
 
   // for method MakeHistXi
     m_xi_tot=0;   //! number of vertices
+    m_xi_ma_hist=0; //! Xi Mass
   
   // for method MakeHistPoint
     m_pnt_tot=0;   //! number of tpc hits
@@ -1070,7 +1074,8 @@ void StQABookHist::BookHistVertex(){
 //_____________________________________________________________________________
 void StQABookHist::BookHistXi(){
 
-  m_xi_tot   = QAH1F("QaXiVtxTot",  "dst_xi_vertex: tot # vertices ",80,0.,800.);
+  m_xi_tot     = QAH1F("QaXiVtxTot", "dst_xi_vertex: tot # vertices ",80,0.,800.);
+  m_xi_ma_hist = QAH1F("QaXiaMass",  "dst_xi_vertex: Xi mass",50,1.2,1.4);
 
 }
 //_____________________________________________________________________________
