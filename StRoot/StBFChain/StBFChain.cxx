@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.187 2001/04/03 18:17:33 didenko Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.188 2001/04/09 19:27:01 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -40,6 +40,7 @@ Bfc_st BFC[] = {
   {"Y1h"      ,"","","db,calib","","","YEAR_1H  fantastic y1:TPC+CTB+FTPC+RICH+caloPatch+svtLadder",kFALSE},
   {"Y2000"    ,"","","db,calib"             ,"","","actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
   {"RY1h"        ,""  ,"","db,calib"                        ,"","","Real data with Year1h geometry",kFALSE},
+  {"RY2000"   ,"","","db,calib"             ,"","","actual 2000: Real data with Year2000 geometry ",kFALSE},
   {"Y2a"         ,""  ,"","db,calib"                          ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"         ,"" ,"","db,calib","","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"Y2001"       ,"","","db,calib","","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
@@ -77,7 +78,7 @@ Bfc_st BFC[] = {
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
-  {"P2000"       ,""  ,"","y2000,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
+  {"P2000"       ,""  ,"","ry2000,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -488,6 +489,9 @@ Int_t StBFChain::Instantiate()
 	}
 	// special maker options 
 	if (mk) {
+	  if ((maker == "StPrimaryMaker"  ||
+	       maker == "StPreVertexMaker") && 
+	      (GetOption("ry1h") || GetOption("ry2000"))) mk->SetMode(2);
 	  if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
 	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2); 
 	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
@@ -862,7 +866,8 @@ void StBFChain::SetGeantOptions(){
       else {if (GetOption("Y1h") || 
 		GetOption("RY1h"))    geantMk->LoadGeometry("detp geometry YEAR_1H");
       else {if (GetOption("Y1s"))     geantMk->LoadGeometry("detp geometry YEAR_1S");
-      else {if (GetOption("Y2000"))   geantMk->LoadGeometry("detp geometry year2000");
+      else {if (GetOption("Y2000") ||
+		GetOption("RY2000"))  geantMk->LoadGeometry("detp geometry year2000");
       else {if (GetOption("Y2a"))     geantMk->LoadGeometry("detp geometry YEAR_2A");
       else {if (GetOption("Y2001"))   geantMk->LoadGeometry("detp geometry year2001");
       else {if (GetOption("Y2b"))     geantMk->LoadGeometry("detp geometry YEAR_2b");
