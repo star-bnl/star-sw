@@ -113,6 +113,14 @@ TrackEntry::TrackEntry()
 {
 }
 
+void TrackEntry::clear()
+{
+    mcTrackId = mcTrackPsi = 0.;
+    globalTrackQ = 0;
+    globalTrackM = globalTrackPsi = globalTrackChi2 = globalTrackNHit = 0.;
+    stiTrackM = stiTrackPsi = stiTrackChi2 = stiTrackNHit = 0.;
+}
+
 void TrackEntry::setStiTrack(StiTrack *newtrack)
 {
     //I'd shy away from the spaces, they tend to look different in everyone's editor
@@ -129,7 +137,8 @@ void TrackEntry::setStiTrack(StiTrack *newtrack)
   stiTrackPx = mom.x();
   stiTrackPy = mom.y();
   stiTrackPz = mom.z();
- 
+  stiTrackPt = mom.perp();
+  stiTrackEta = mom.pseudoRapidity(); 
 }
 
 void TrackEntry::setMcTrack(StMcTrack *newtrack)
@@ -138,14 +147,9 @@ void TrackEntry::setMcTrack(StMcTrack *newtrack)
   mcTrackId       = newtrack->geantId();
   mcTrackE        = newtrack->energy();
   mcTrackRapidity = newtrack->rapidity();
-}
-
-void TrackEntry::clear()
-{
-    mcTrackId = mcTrackPsi = 0.;
-    globalTrackQ = 0;
-    globalTrackM = globalTrackPsi = globalTrackChi2 = globalTrackNHit = 0.;
-    stiTrackM = stiTrackPsi = stiTrackChi2 = stiTrackNHit = 0.;
+  const StThreeVectorF& momentum = newtrack->momentum();
+  mcTrackPt = momentum.perp();
+  mcTrackEta = momentum.pseudoRapidity();
 }
 
 void TrackEntry::setGlobalTrack(StTrack *newtrack)
@@ -154,6 +158,7 @@ void TrackEntry::setGlobalTrack(StTrack *newtrack)
   globalTrackPx = mom.x();
   globalTrackPy = mom.y();
   globalTrackPz = mom.z();
+  globalTrackPt = mom.perp();
   globalTrackEta  = mom.pseudoRapidity();
   globalTrackQ  = newtrack->geometry()->charge();
   globalTrackPsi = newtrack->geometry()->psi();

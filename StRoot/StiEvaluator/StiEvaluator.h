@@ -46,6 +46,8 @@ private:
     double mcTrackPx;
     double mcTrackPy;
     double mcTrackPz;
+    double mcTrackPt;
+    double mcTrackEta;
 
     //temp kinematic info : global
     short  globalTrackQ;
@@ -56,6 +58,7 @@ private:
     double globalTrackPx;
     double globalTrackPy;
     double globalTrackPz;
+    double globalTrackPt;
     double globalTrackEta;
     double globalTrackFitPoints;
 
@@ -70,6 +73,8 @@ private:
     double stiTrackPx;
     double stiTrackPy;
     double stiTrackPz;
+    double stiTrackPt;
+    double stiTrackEta;
 
 
     ClassDef(TrackEntry,1) 
