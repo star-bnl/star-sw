@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.23 2003/09/10 19:47:36 perev Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.24 2004/03/18 04:05:02 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.24  2004/03/18 04:05:02  caines
+// Remove from global scope variables used in debug mode as they shouldnt be there and caused erratic behaviour, also initialise some variables that valgrind was complaining about - didnt really need to as they are sent back from function which initialises them properly always but doesnt hurt
+//
 // Revision 1.23  2003/09/10 19:47:36  perev
 // ansi corrs
 //
@@ -134,7 +137,7 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t SetLowInvProd(int LowInvProd);// Set the low threshold based on the frequency distribution
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.23 2003/09/10 19:47:36 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.24 2004/03/18 04:05:02 caines Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
     
@@ -154,6 +157,10 @@ class StSvtSeqAdjMaker : public StMaker
   StSequence* tempSeq1;                   //!
 
   const char* mPedFile;                   //!
+
+  int* anolist;   //!
+  TFile *hfile;   //!
+  unsigned long Evt_counts;  //!
 
   TH1F* mOcupancyHisto;                   //!
   TH1F* EventOccupancy;                   //!
