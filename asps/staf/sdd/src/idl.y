@@ -69,7 +69,7 @@ char gInputTable[INPUTTAB][INPUTTABSIZE+1];
 char gIncDir[INCDIR][INCDIRS];
 char gOrigInputFile[81];
 int gNincDir,gNOutFile=0,gNoMoreComments=0;
-int  gOptionH,gOptiont,gOptioni,gOptionM,gOptionT,gOptionstatic,gOptiondynamic;
+int  gOptions,gOptionH,gOptiont,gOptioni,gOptionM,gOptionT,gOptionstatic,gOptiondynamic;
 int  gOptionr,gOptionf;
 /* An option to process files _quietly_ */
 int  gOptionq;
@@ -91,7 +91,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.19 1999/10/01 19:04:27 ward Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.20 1999/10/11 16:40:25 ward Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -1224,7 +1224,7 @@ void CheckThatAllTablesHaveBeenIncluded(void) {
     for(j=0;j<gNinputTable;j++) {
       if(!strcmp(gModuleTable[i],gInputTable[j])) { ok=7; break; }
     }
-    if(!ok && !gOptionq) {
+    if(!ok && !gOptions && !gOptionq) {
       Ose();
       PP"%cWARNING FROM STIC:  you did not include an IDL file ",7);
       PP"for table\n");
@@ -1368,6 +1368,7 @@ void Usage(void) {
   F"-i Ignore case (upper converted to lower).\n");
   F"-I Mechanism for specifying list of include directories.\n");
   F"-M Write string to stdout for use in a Makefile, no other output.\n");
+  F"-s Do not process include files in module idl files.\n");
   F"-T Write string with used tables to stdout for use in a Makefile, no other output.\n");
   F"-q Operate quietly.\n");
   F"-static  Static tables.\n");
@@ -1465,12 +1466,13 @@ void DumpOptionsAndExit(void) {
   PP"%20s %s\n","gOptioniTempFile",gOptioniTempFile);
   PP"%20s %d\n","gOptionstatic",gOptionstatic);
   PP"%20s %d\n","gOptionH",gOptionH);
+  PP"%20s %d\n","gOptions",gOptions);
   PP"%20s %d\n","gOptiont",gOptiont);
   exit(2);
 }
 void ReadOptions(int nnn,char *aaa[]) {
   int jj,filenameCount=0,ii; char die=0;
-  gOptionstatic=0; gOptiondynamic=0; gOptionM=0; gOptionT=0; gOptioni=0; gOptionH=0;
+  gOptionstatic=0; gOptiondynamic=0; gOptionM=0; gOptionT=0; gOptioni=0; gOptionH=0; gOptions=0;
   gOptiont=0; gOptionf=0; gOptionr=0;
   gOptionq = 0;
   gNincDir=0; strcpy(gIncDir[gNincDir++],".");
@@ -1484,6 +1486,7 @@ void ReadOptions(int nnn,char *aaa[]) {
       } else {  /* single-letter options may be combined (eg, -it) */
         for(jj=1;aaa[ii][jj];jj++) {
                if(aaa[ii][jj]=='H') gOptionH=7;
+               if(aaa[ii][jj]=='s') gOptions=7;
           else if(aaa[ii][jj]=='t') gOptiont=7;
           else if(aaa[ii][jj]=='M') gOptionM=7;
           else if(aaa[ii][jj]=='T') gOptionT=7;
@@ -1590,7 +1593,7 @@ void HandleOneInputFile(char *inFile) { /* maybe inFile=gInFileName */
     if (gFpH) 
       fclose(gFpH); 
   }
-  RecursiveProcessingOfIncludeFiles(buffer);
+  if(!gOptions) RecursiveProcessingOfIncludeFiles(buffer);
   if(!gOptionM&&!gOptionT&&!gOptionq) PP"----- finished with %s\n",buffer);
 } /* save inFile buffer gInFileName */
 void FixVersionInfo(void) {
