@@ -4,8 +4,11 @@
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f112/top.html 
 //
-// $Id: StCL.cxx,v 1.4 1999/09/29 02:30:48 fine Exp $
+// $Id: StCL.cxx,v 1.5 1999/10/17 20:45:55 fine Exp $
 // $Log: StCL.cxx,v $
+// Revision 1.5  1999/10/17 20:45:55  fine
+// vadd methods added
+//
 // Revision 1.4  1999/09/29 02:30:48  fine
 // Change return type from void to float/double
 //
@@ -31,8 +34,6 @@
 // double prec for float matrices was introduced
 //
 //
-#include "StCL.h"
-#include "TMath.h"
 
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 
@@ -510,6 +511,9 @@ src="gif/trpack_files/img46.gif" width=6> <BR>
 end_html 
 */
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include "StCL.h"
+#include "TMath.h"
 
 ClassImp(StCL)
 #define StCL_MXMAD(n_,a,b,c,i,j,k)                       \
@@ -1470,6 +1474,30 @@ end_html
 //___________________________________________________________________________
 //___________________________________________________________________________
 
+#define StCL_TRAAT(a, s, m, n)          \
+   /* Local variables */                \
+   int ipiv, i, j, ipivn, ia, is, iat;  \
+   double sum;                          \
+   --s;    --a;                         \
+   ia = 0;   is = 0;                    \
+   for (i = 1; i <= m; ++i) {           \
+     ipiv = ia;                         \
+     ipivn = ipiv + n;                  \
+     iat = 0;                           \
+     for (j = 1; j <= i; ++j) {         \
+       ia = ipiv;                       \
+       sum = 0.;                        \
+       do {                             \
+         ++ia;  ++iat;                  \
+         sum += a[ia] * a[iat];         \
+       } while (ia < ipivn);            \
+       ++is;                            \
+       s[is] = sum;                     \
+     }                                  \
+   }                                    \
+   s++;
+
+
 //____________________________________________________________
 float *StCL::traat(float *a, float *s, int m, int n)
 {
@@ -1479,217 +1507,240 @@ float *StCL::traat(float *a, float *s, int m, int n)
 // ORIG. 18/12/74 WH */
 // traat.F -- translated by f2c (version 19970219).
 //
-   float *res = 0;
-   /* Local variables */
-   int ipiv, i, j, ipivn, ia, is, iat;
-   double sum;
-
-   // Parameter adjustments 
-   --s;    --a;
-
-   // Function Body 
-   ia = 0;   is = 0;
-
-   for (i = 1; i <= m; ++i) {
-     ipiv = ia;
-     ipivn = ipiv + n;
-     iat = 0;
-     for (j = 1; j <= i; ++j) {
-       ia = ipiv;
-       sum = 0.;
-       do {
-         ++ia;  ++iat;
-         sum += a[ia] * a[iat]; 
-       } while (ia < ipivn);
-       ++is;
-       s[is] = sum;
-     }
-   }
-   res  = s;
-   return res;
+   StCL_TRAAT(a, s, m, n) 
+   return s;
 } /* traat_ */
+
+//____________________________________________________________
+double *StCL::traat(double *a, double *s, int m, int n)
+{
+//  Symmetric Multiplication of Rectangular Matrices 
+// CERN PROGLIB# F112    TRAAT           .VERSION KERNFOR  4.15  861204 
+// ORIG. 18/12/74 WH */
+// traat.F -- translated by f2c (version 19970219).
+//
+   StCL_TRAAT(a, s, m, n) 
+   return s;
+} /* traat_ */
+
+#undef StCL_TRAAT
+
+#define StCL_TRAL(a, u, b, m,  n)   \
+    int indu, i, j, k, ia, ib, iu;  \
+    double sum;                     \
+    --b;    --u;    --a;            \
+    ib = 1;                         \
+    for (i = 1; i <= m; ++i) {      \
+      indu = 0;                     \
+      for (j = 1; j <= n; ++j) {    \
+        indu += j;                  \
+        ia = ib;                    \
+        iu = indu;                  \
+        sum = 0.;                   \
+        for (k = j; k <= n; ++k) {  \
+  	  sum += a[ia] * u[iu];         \
+	  ++ia;                         \
+	  iu += k;                      \
+        }                           \
+        b[ib] = sum;                \
+        ++ib;                       \
+      }                             \
+    }                               \
+    b++;
 
 //____________________________________________________________
 float *StCL::tral(float *a, float *u, float *b, int m, int n)
 {
+  // Triangular - Rectangular Multiplication 
+  // CERN PROGLIB# F112    TRAL            .VERSION KERNFOR  4.15  861204 
+  // ORIG. 18/12/74 WH 
   // tral.F -- translated by f2c (version 19970219).
-
-    /* Local variables */
-     int indu, i, j, k, ia, ib, iu;
-     double sum;
-
-
-/* CERN PROGLIB# F112    TRAL            .VERSION KERNFOR  4.15  861204 */
-/* ORIG. 18/12/74 WH */
-
-
-    /* Parameter adjustments */
-    --b;    --u;    --a;
-
-    /* Function Body */
-    ib = 1;
-
-    for (i = 1; i <= m; ++i) {
-	  indu = 0;
-
-  	  for (j = 1; j <= n; ++j) {
-	    indu += j;
-	    ia = ib;
-	    iu = indu;
-	    sum = 0.;
-
-	    for (k = j; k <= n; ++k) {
-		  sum += a[ia] * u[iu];
-		  ++ia;
-		  iu += k;
-	    }
-	    b[ib] = sum;
-	    ++ib;
-	  }
-    }
-    return 0;
+    StCL_TRAL(a, u, b, m,  n)
+    return b;
 } /* tral_ */
 
 //____________________________________________________________
-// tralt.F -- translated by f2c (version 19970219).
+double *StCL::tral(double *a, double *u, double *b, int m, int n)
+{
+  // Triangular - Rectangular Multiplication 
+  // tral.F -- translated by f2c (version 19970219).
+  // CERN PROGLIB# F112    TRAL            .VERSION KERNFOR  4.15  861204 */
+  // ORIG. 18/12/74 WH */
+    StCL_TRAL(a, u, b, m,  n)
+    return b;
+} /* tral_ */
+
+#undef StCL_TRAL
+
+//____________________________________________________________
+#define StCL_TRALT(a, u, b, m, n) \
+    int indu, j, k, ia, ib, iu;   \
+    double sum;                   \
+    --b;    --u;    --a;          \
+    ib = m * n;                   \
+    indu = (n * n + n) / 2;       \
+    do {                          \
+      iu = indu;                  \
+      for (j = 1; j <= n; ++j) {  \
+ 	    ia = ib;                  \
+	    sum = 0.;                 \
+ 	    for (k = j; k <= n; ++k) {\
+          sum += a[ia] * u[iu];   \
+          --ia;   --iu;           \
+	    }                         \
+	    b[ib] = sum;              \
+	    --ib;                     \
+      }                           \
+    } while (ib > 0);             \
+    ++b;
+
+//____________________________________________________________
 float *StCL::tralt(float *a, float *u, float *b, int m, int n)
 {
-    /* System generated locals */
-
-    /* Local variables */
-     int indu, j, k, ia, ib, iu;
-     double sum;
-
-/* CERN PROGLIB# F112    TRALT           .VERSION KERNFOR  4.15  861204 */
-/* ORIG. 18/12/74 WH */
-
-    /* Parameter adjustments */
-    --b;    --u;    --a;
-
-    /* Function Body */
-    ib = m * n;
-    indu = (n * n + n) / 2;
-
-    do {
-      iu = indu;
-      for (j = 1; j <= n; ++j) {
- 	    ia = ib;
-	    sum = 0.;
-
- 	    for (k = j; k <= n; ++k) {
-          sum += a[ia] * u[iu];
-          --ia;
-          --iu;
-	    }
-	    b[ib] = sum;
-	    --ib;
-      } 
-    } while (ib > 0);
-
-    ++b; // restore b;
+// Triangular - Rectangular Multiplication 
+// CERN PROGLIB# F112    TRALT           .VERSION KERNFOR  4.15  861204 
+// ORIG. 18/12/74 WH 
+// tralt.F -- translated by f2c (version 19970219).
+    StCL_TRALT(a, u, b, m, n)
     return b;
 } /* tralt_ */
 
 //____________________________________________________________
-// tras.F -- translated by f2c (version 19970219).
+double *StCL::tralt(double *a, double *u, double *b, int m, int n)
+{
+// Triangular - Rectangular Multiplication 
+// CERN PROGLIB# F112    TRALT           .VERSION KERNFOR  4.15  861204 
+// ORIG. 18/12/74 WH 
+// tralt.F -- translated by f2c (version 19970219).
+    StCL_TRALT(a, u, b, m, n)
+    return b;
+} /* tralt_ */
 
+#undef StCL_TRALT
+
+//____________________________________________________________
+
+#define StCL_TRAS(a, s, b, m, n)      \
+    int inds, i__, j, k, ia, ib, is;  \
+    double sum;                       \
+    --b;    --s;    --a;              \
+    ib = 0; inds = 0; i__ = 0;        \
+    do {                              \
+      inds += i__;                    \
+      ia = 0;                         \
+      ib = i__ + 1;                   \
+      for (j = 1; j <= m; ++j) {      \
+	    is = inds;                    \
+	    sum = 0.;                     \
+	    k = 0;                        \
+        do {                          \
+	      if (k > i__) is += k;       \
+	      else        ++is;           \
+ 	      ++ia;                       \
+	      sum += a[ia] * s[is];       \
+	      ++k;                        \
+	    } while (k < n);              \
+	    b[ib] = sum;                  \
+	    ib += n;                      \
+      }                               \
+      ++i__;                          \
+    } while (i__ < n);                \
+    ++b;
+
+//____________________________________________________________
 float *StCL::tras(float *a, float *s, float *b, int m, int n)
 {
-    /* Local variables */
-     int inds, i__, j, k, ia, ib, is;
-     double sum;
-
-
-/* CERN PROGLIB# F112    TRAS            .VERSION KERNFOR  4.15  861204 */
-/* ORIG. 18/12/74 WH */
-
-
-    /* Parameter adjustments */
-    --b;    --s;    --a;
-
-    /* Function Body */
-    ib = 0;
-    inds = 0;
-    i__ = 0;
-
-    do {
-      inds += i__;
-      ia = 0;
-      ib = i__ + 1;
-
-      for (j = 1; j <= m; ++j) {
-	    is = inds;
-	    sum = 0.;
-	    k = 0;
-
-        do {
-	      if (k > i__) is += k;
-	      else        ++is;
- 	      ++ia;
-	      sum += a[ia] * s[is];
-	      ++k;
-	    } while (k < n);
-
-	    b[ib] = sum;
-	    ib += n;
-      }
-      ++i__;
-    } while (i__ < n);
-    ++b;
+// Symmetric - Rectangular Multiplication 
+// CERN PROGLIB# F112    TRAS            .VERSION KERNFOR  4.15  861204 */
+// ORIG. 18/12/74 WH */
+// tras.F -- translated by f2c (version 19970219).
+    StCL_TRAS(a, s, b, m, n) 
     return b;
 } /* tras_ */
 
 //____________________________________________________________
+double *StCL::tras(double *a, double *s, double *b, int m, int n)
+{
+// Symmetric - Rectangular Multiplication 
+// CERN PROGLIB# F112    TRAS            .VERSION KERNFOR  4.15  861204 */
+// ORIG. 18/12/74 WH */
+// tras.F -- translated by f2c (version 19970219).
+    StCL_TRAS(a, s, b, m, n) 
+    return b;
+} /* tras_ */
+
+#undef StCL_TRAS
+
+
+//____________________________________________________________
+#define StCL_TRASAT(a, s, r__, m, n) \
+    int imax,  k;                    \
+    int ia, mn, ir, is, iaa;         \
+    double sum;                      \
+    --r__;    --s;    --a;           \
+    imax = (m * m + m) / 2;          \
+    vzero(&r__[1], imax);            \
+    mn = m * n;                      \
+    int ind = 0;                     \
+    int i__ = 0;                     \
+    do {                             \
+      ind += i__;                    \
+      ia = 0; ir = 0;                \
+      do {                           \
+        is = ind;                    \
+        sum = 0.;   k = 0;           \
+        do {                         \
+          if (k > i__) is += k;      \
+          else         ++is;         \
+          ++ia;                      \
+          sum += s[is] * a[ia];      \
+          ++k;                       \
+        } while (k < n);             \
+        iaa = i__ + 1;               \
+        do {                         \
+          ++ir;                      \
+          r__[ir] += sum * a[iaa];   \
+          iaa += n;                  \
+        } while (iaa <= ia);         \
+      } while (ia < mn);             \
+      ++i__;                         \
+    } while (i__ < n);               \
+    ++r__;
+
+//____________________________________________________________
 float *StCL::trasat(float *a, float *s, float *r__, int m, int n)
 {
-  // trasat.F -- translated by f2c (version 19970219).
-     int imax, i__, k;
-     int ia, mn, ir, is, iaa, ind;
-     double sum;
-
-/* CERN PROGLIB# F112    TRASAT          .VERSION KERNFOR  4.15  861204 */
-/* ORIG. 18/12/74 WH */
-
-    /* Parameter adjustments */
-    --r__;    --s;    --a;
-
-    /* Function Body */
-    imax = (m * m + m) / 2;
-    vzero(&r__[1], imax);
-    mn = m * n;
-    ind = 0;
-    i__ = 0;
-
-    do {
-      ind += i__;
-      ia = 0;
-      ir = 0;
-
-      do {
-        is = ind;
-        sum = 0.;
-        k = 0;
-
-        do {
-          if (k > i__) is += k;
-          else         ++is;
-          ++ia;
-          sum += s[is] * a[ia];
-          ++k;
-        } while (k < n);
-        iaa = i__ + 1;
-        do {
-          ++ir;
-          r__[ir] += sum * a[iaa];
-          iaa += n;
-        } while (iaa <= ia);
-      } while (ia < mn);
-
-      ++i__;
-    } while (i__ < n);
-
-    return 0;
+// Transformation of Symmetric Matrix 
+// CERN PROGLIB# F112    TRASAT          .VERSION KERNFOR  4.15  861204 */
+// ORIG. 18/12/74 WH */
+// trasat.F -- translated by f2c (version 19970219).
+    StCL_TRASAT(a, s, r__, m, n)
+    return r__;
 } /* trasat_ */
+
+//____________________________________________________________
+double *StCL::trasat(double *a, double *s, double *r__, int m, int n)
+{
+// Transformation of Symmetric Matrix 
+// CERN PROGLIB# F112    TRASAT          .VERSION KERNFOR  4.15  861204 */
+// ORIG. 18/12/74 WH */
+// trasat.F -- translated by f2c (version 19970219).
+    StCL_TRASAT(a, s, r__, m, n)
+    return r__;
+} /* trasat_ */
+
+//____________________________________________________________
+float *StCL::trasat(double *a, float *s, float *r__, int m, int n)
+{
+// Transformation of Symmetric Matrix 
+// CERN PROGLIB# F112    TRASAT          .VERSION KERNFOR  4.15  861204 */
+// ORIG. 18/12/74 WH */
+// trasat.F -- translated by f2c (version 19970219).
+    StCL_TRASAT(a, s, r__, m, n)
+    return r__;
+} /* trasat_ */
+
+#undef StCL_TRASAT
 
 //____________________________________________________________
 float *StCL::trata(float *a, float *r__, int m, int n)
@@ -1723,7 +1774,8 @@ float *StCL::trata(float *a, float *r__, int m, int n)
 	    r__[ir] = sum;
 	  }
     }
-    return 0;
+    ++r__;
+    return r__;
 } /* trata_ */
 
 //____________________________________________________________
@@ -1765,7 +1817,8 @@ float *StCL::trats(float *a, float *s, float *b, int m, int n)
       }
       ++i__;
     } while (i__ < n);
-    return 0;
+    ++b;
+    return b;
 } /* trats_ */
 
 //____________________________________________________________
@@ -1819,8 +1872,8 @@ float *StCL::trats(float *a, float *s, float *b, int m, int n)
       }
       ++i__;
     } while (i__ < n);
-
-    return 0;
+    ++r__;
+    return r__;
 } /* tratsa_ */
 
 //____________________________________________________________
@@ -1877,8 +1930,8 @@ L42:
       }
 
     } while  (i__ < n);
-
-    return 0;
+    ++b;
+    return b;
 } /* trchlu_ */
 
 //____________________________________________________________
@@ -1939,7 +1992,8 @@ L42:
       --i__;
     } while  (i__ > 0);
 
-    return 0;
+    ++b;
+    return b;
 } /* trchul_ */
 
 //____________________________________________________________
@@ -1993,7 +2047,8 @@ L42:
       --i;
     } while (i > 0);
 
-    return 0;
+    ++s;
+    return s;
 } /* trinv_ */
 
 //____________________________________________________________
@@ -2033,7 +2088,8 @@ L42:
       ipiv = iu;
     } while (iu > 0);
 
-    return 0;
+    ++b;
+    return b;
 } /* trla_ */
 
 //____________________________________________________________
@@ -2080,11 +2136,12 @@ L42:
   
     } while (i__ < m);
 
-    return 0;
+    ++b;
+    return b;
 } /* trlta_ */
 
 //____________________________________________________________
-/* Subroutine */float *StCL::trpck(float *s, float *u, int n)
+float *StCL::trpck(float *s, float *u, int n)
 {
  // trpck.F -- translated by f2c (version 19970219).
  // CERN PROGLIB# F112    TRPCK           .VERSION KERNFOR  2.08  741218 */
@@ -2109,7 +2166,8 @@ L42:
       ia = ia + n - i__;
     }
 
-    return 0;
+    ++u;
+    return u;
 } /* trpck_ */
 
 //____________________________________________________________
@@ -2170,7 +2228,8 @@ float *StCL::trqsq(float *q, float *s, float *r__, int m)
       ++i__;
     } while (i__ < m);
 
-    return 0;
+    ++r__;
+    return r__;
 } /* trqsq_ */
 
 //____________________________________________________________
@@ -2213,7 +2272,8 @@ float *StCL::trsa(float *s, float *a, float *b, int m, int n)
       ++i__;
     } while (i__ < m);
 
-    return 0;
+    ++b;
+    return b;
 } /* trsa_ */
 
 //____________________________________________________________
@@ -2226,9 +2286,7 @@ float *StCL::trsa(float *s, float *a, float *b, int m, int n)
     /* Function Body */
     trchlu(g, gi, n);
     trinv(gi, gi, n);
-    trsmul(gi, gi, n);
-
-    return 0;
+    return trsmul(gi, gi, n);
 } /* trsinv_ */
 
 //____________________________________________________________
@@ -2258,8 +2316,8 @@ float *StCL::trsa(float *s, float *a, float *b, int m, int n)
 	      s[ind] = sum;
     	}
     }
-
-    return 0;
+    ++s;
+    return s;
 } /* trsmlu_ */
 
 //____________________________________________________________
@@ -2290,12 +2348,12 @@ float *StCL::trsa(float *s, float *a, float *b, int m, int n)
 	      gi[ind] = sum;
     	}
     }
-
-    return 0;
+    ++gi;
+    return gi;
 } /* trsmul_ */
 
 //____________________________________________________________
-/* Subroutine */float *StCL::trupck(float *u, float *s, int m)
+float *StCL::trupck(float *u, float *s, int m)
 {
 // trupck.F -- translated by f2c (version 19970219).
 // CERN PROGLIB# F112    TRUPCK          .VERSION KERNFOR  2.08  741218 
@@ -2337,7 +2395,8 @@ float *StCL::trsa(float *s, float *a, float *b, int m, int n)
       is = is + m + 1;
     } while (is < m2);
 
-    return 0;
+    ++s;
+    return s;
 } /* trupck_ */
 
 //____________________________________________________________
@@ -2385,236 +2444,11 @@ float *StCL::trsa(float *s, float *a, float *b, int m, int n)
       ++i__;
     } while (i__ < m);
 
-    return 0;
+    ++b;
+    return b;
 } /* trsat_ */
 
 // ------  double 
-
-//____________________________________________________________
-double *StCL::traat(double *a, double *s, int m, int n)
-{
-//
-// CERN PROGLIB# F112    TRAAT           .VERSION KERNFOR  4.15  861204 
-// ORIG. 18/12/74 WH */
-// traat.F -- translated by f2c (version 19970219).
-//
-   double *res = 0;
-   /* Local variables */
-   int ipiv, i, j, ipivn, ia, is, iat;
-   double sum;
-
-   // Parameter adjustments 
-   --s;    --a;
-
-   // Function Body 
-   ia = 0;   is = 0;
-
-   for (i = 1; i <= m; ++i) {
-     ipiv = ia;
-     ipivn = ipiv + n;
-     iat = 0;
-     for (j = 1; j <= i; ++j) {
-       ia  = ipiv;
-       sum = 0.;
-       do {
-         ++ia;  ++iat;
-         sum += a[ia] * a[iat]; 
-       } while (ia < ipivn);
-       ++is;
-       s[is] = sum;
-     }
-   }
-   res  = s;
-   return res;
-} /* traat_ */
-
-//____________________________________________________________
-double *StCL::tral(double *a, double *u, double *b, int m, int n)
-{
-  // tral.F -- translated by f2c (version 19970219).
-
-    /* Local variables */
-     int indu, i, j, k, ia, ib, iu;
-     double sum;
-
-
-/* CERN PROGLIB# F112    TRAL            .VERSION KERNFOR  4.15  861204 */
-/* ORIG. 18/12/74 WH */
-
-
-    /* Parameter adjustments */
-    --b;    --u;    --a;
-
-    /* Function Body */
-    ib = 1;
-
-    for (i = 1; i <= m; ++i) {
-	  indu = 0;
-
-	  for (j = 1; j <= n; ++j) {
-	    indu += j;
-	    ia = ib;
-	    iu = indu;
-	    sum = (double)0.;
-
-	    for (k = j; k <= n; ++k) {
-		  sum += a[ia] * u[iu];
-		  ++ia;
-		  iu += k;
-	    }
-	    b[ib] = sum;
-	    ++ib;
-	  }
-    }
-    return 0;
-} /* tral_ */
-
-//____________________________________________________________
-// tralt.F -- translated by f2c (version 19970219).
-double *StCL::tralt(double *a, double *u, double *b, int m, int n)
-{
-    /* Local variables */
-     int indu, j, k, ia, ib, iu;
-     double sum;
-
-/* CERN PROGLIB# F112    TRALT           .VERSION KERNFOR  4.15  861204 */
-/* ORIG. 18/12/74 WH */
-
-    /* Parameter adjustments */
-    --b;    --u;    --a;
-
-    /* Function Body */
-    ib = m * n;
-    indu = (n * n + n) / 2;
-
-    do {
-      iu = indu;
-      for (j = 1; j <= n; ++j) {
- 	ia = ib;
-	sum = (double)0.;
-
-	for (k = j; k <= n; ++k) {
-          sum += a[ia] * u[iu];
-          --ia;
-          --iu;
-	}
-	b[ib] = sum;
-	--ib;
-     } 
-    } while (ib > 0);
-
-    ++b; // restore b;
-    return b;
-} /* tralt_ */
-
-//____________________________________________________________
-// tras.F -- translated by f2c (version 19970219).
-
-double *StCL::tras(double *a, double *s, double *b, int m, int n)
-{
-
-    /* Local variables */
-     int inds, i__, j, k, ia, ib, is;
-     double sum;
-
-
-/* CERN PROGLIB# F112    TRAS            .VERSION KERNFOR  4.15  861204 */
-/* ORIG. 18/12/74 WH */
-
-
-    /* Parameter adjustments */
-    --b;    --s;    --a;
-
-    /* Function Body */
-    ib = 0;
-    inds = 0;
-    i__ = 0;
-
-    do {
-      inds += i__;
-      ia = 0;
-      ib = i__ + 1;
-
-      for (j = 1; j <= m; ++j) {
-	is = inds;
-	sum = 0.;
-	k = 0;
-
-L10:
-	if (k > i__) 	    goto L20;
-	++is;
-	goto L30;
-L20:
-	is += k;
-L30:
-	++ia;
-	sum += a[ia] * s[is];
-	++k;
-	if (k < n) 	    goto L10;
-
-	b[ib] = sum;
-/* L40: */
-	ib += n;
-      }
-      ++i__;
-      } while (i__ < n);
-
-    ++b;
-    return b;
-} /* tras_ */
-
-//____________________________________________________________
-// trasat.F -- translated by f2c (version 19970219).
-
-double *StCL::trasat(double *a, double *s, double *r__, int m, int n)
-{
-     int imax, i__, k;
-     int ia, mn, ir, is, iaa, ind;
-     double sum;
-
-/* CERN PROGLIB# F112    TRASAT          .VERSION KERNFOR  4.15  861204 */
-/* ORIG. 18/12/74 WH */
-
-    /* Parameter adjustments */
-    --r__;    --s;    --a;
-
-    /* Function Body */
-    imax = (m * m + m) / 2;
-    vzero(&r__[1], imax);
-    mn = m * n;
-    ind = 0;
-    i__ = 0;
-
-    do {
-      ind += i__;
-      ia = 0;
-      ir = 0;
-
-      do {
-        is = ind;
-        sum = 0.;
-        k = 0;
-
-        do {
-          if (k > i__) is += k;
-          else         ++is;
-          ++ia;
-          sum += s[is] * a[ia];
-          ++k;
-        } while (k < n);
-        iaa = i__ + 1;
-        do {
-          ++ir;
-          r__[ir] += sum * a[iaa];
-          iaa += n;
-        } while (iaa <= ia);
-      } while (ia < mn);
-
-      ++i__;
-    } while (i__ < n);
-
-    return 0;
-} /* trasat_ */
 
 //____________________________________________________________
 // trata.F -- translated by f2c (version 19970219).

@@ -5,8 +5,11 @@
 // The set of methods to work with the plain matrix / vector
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: StCL.h,v 1.3 1999/09/29 02:30:49 fine Exp $
+// $Id: StCL.h,v 1.4 1999/10/17 20:45:57 fine Exp $
 // $Log: StCL.h,v $
+// Revision 1.4  1999/10/17 20:45:57  fine
+// vadd methods added
+//
 // Revision 1.3  1999/09/29 02:30:49  fine
 // Change return type from void to float/double
 //
@@ -58,8 +61,11 @@ class StCL  {
     static float  *vzero(float *a,  int n2);
     static double *vzero(double *a, int n2);
 
-    static float  *vadd(float *b, float *c,  float *a, int n);
-    static double *vadd(double *b, double *c,  double *a, int n);
+    static float  *vadd(const float *b,  const float *c,  float *a, int n);
+    static double *vadd(const double *b, const double *c, double *a, int n);
+
+    static float  *vadd(const float *b,  const double *c, float *a, int n);
+    static double *vadd(const double *b, const float *c,  double *a, int n);
 
     static float  *vsub(float *a,   float *b,  float *x, int n);
     static double *vsub(double *a, double *b, double *x, int n);
@@ -114,6 +120,7 @@ class StCL  {
        static float *tralt(float *a, float *u, float *b, int m, int n);
        static float *tras(float *a, float *s, float *b, int m, int n);
        static float *trasat(float *a, float *s, float *r__, int m, int n);
+       static float *trasat(double *a, float *s, float *r__, int m, int n);
        static float *trata(float *a, float *r__, int m, int n);
        static float *trats(float *a, float *s, float *b, int m, int n);
        static float *tratsa(float *a, float *s, float *r__, int m, int n);
@@ -357,7 +364,7 @@ inline double *StCL::ucopy(const double *b, double *a, int n)
 { if (n <= 0) return 0; memcpy(a,b,n*sizeof(double)); return a;}
 
 //________________________________________________________
-inline float *StCL::vadd(float *b, float *c,  float *a, int n)
+inline float *StCL::vadd(const float *b, const float *c,  float *a, int n)
 { 
   if (n <= 0)  return 0;
   for (int i=0;i<n;i++) a[i] = b[i] + c[i];
@@ -365,8 +372,24 @@ inline float *StCL::vadd(float *b, float *c,  float *a, int n)
 }
 
 //________________________________________________________
-inline double *StCL::vadd(double *b, double *c,  double *a, int n)
+inline double *StCL::vadd(const double *b, const double *c,  double *a, int n)
 { 
+  if (n <= 0)  return 0;
+  for (int i=0;i<n;i++) a[i] = b[i] + c[i];
+  return a;
+}
+
+//________________________________________________________
+inline float  *StCL::vadd(const float *b, const double *c,  float *a, int n)
+{
+  if (n <= 0)  return 0;
+  for (int i=0;i<n;i++) a[i] = b[i] + c[i];
+  return a;
+}
+
+//________________________________________________________
+inline double *StCL::vadd(const double *b, const float *c,  double *a, int n)
+{
   if (n <= 0)  return 0;
   for (int i=0;i<n;i++) a[i] = b[i] + c[i];
   return a;
