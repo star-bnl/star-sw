@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.415 2004/05/11 16:22:23 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.416 2004/05/14 15:22:01 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1606,7 +1606,7 @@ Int_t StBFChain::Instantiate()
 	    if ( GetOption("onlcl") && ! GetOption("onlraw") )  DMode = DMode | 0x2;
 	    // use the TPC raw hit information
 	    if ( GetOption("onlraw")&& ! GetOption("onlcl")  )  DMode = DMode | 0x1;
-	    mk->SetMode(DMode);                               // set flag (matches tcpdaqMk->SetDAQFlag())
+	    if (DMode) mk->SetMode(DMode);                 // set flag (matches tcpdaqMk->SetDAQFlag())
 	  }
 
 	  if (maker == "StRchMaker") {
