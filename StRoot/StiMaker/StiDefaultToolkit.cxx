@@ -14,22 +14,22 @@
  * provided "as is" without express or implied warranty.             
  */
 #include "StiDefaultToolkit.h"
-#include "Sti/Filter.h"
-#include "Sti/Factory.h"
-#include "Sti/VectorizedFactory.h"
+#include "Sti/Base/Messenger.h"
+#include "Sti/Base/Filter.h"
+#include "Sti/Base/Factory.h"
+#include "Sti/Base/Parameter.h"
+#include "Sti/Base/VectorizedFactory.h"
 #include "Sti/StiMcTrack.h"
 #include "Sti/StiHit.h"
 #include "Sti/StiHitContainer.h"
-#include "Sti/StiHitFiller.h"
+#include "Sti/StiMasterDetectorBuilder.h"
 #include "Sti/StiMasterHitLoader.h"
-#include "Sti/StiTpcHitLoader.h"
-#include "Sti/StiSvtHitLoader.h"
+#include "Sti/Tpc/StiTpcHitLoader.h"
+#include "Sti/Svt/StiSvtHitLoader.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorContainer.h"
 #include "Sti/StiDetectorFinder.h"
 #include "Sti/StiTrackContainer.h"
-#include "Sti/StiGeometryTransform.h"
-#include "Sti/StiCoordinateTransform.h"
 #include "Sti/StiTrackSeedFinder.h"
 #include "Sti/StiTrackFinder.h"
 #include "Sti/StiTrackFitter.h"
@@ -45,7 +45,9 @@
 #include "Sti/StiDisplayManager.h"
 #include "Sti/StiDefaultTrackFilter.h"
 #include "Sti/StiIOBroker.h"
-#include "Sti/Parameter.h"
+#include "Sti/StiDetectorGroup.h"
+#include "Sti/StiEvaluableTrackSeedFinder.h"
+#include "Sti/StiHitErrorCalculator.h"
 #include "StiMaker/RootEditableParameter.h"
 #include "StiMaker/StiRootIOBroker.h"
 #include "StiGui/StiRootDisplayManager.h"
@@ -54,279 +56,305 @@
 #include "StiGui/StiRootDrawableHitContainer.h"
 #include "StiGui/StiRootDrawableKalmanTrack.h"
 #include "StiGui/StiRootDrawableStiEvaluableTrack.h"
-
 #include "StiEvaluator/StiEvaluator.h"
-#include "Sti/StiEvaluableTrackSeedFinder.h"
+#include "StiEvaluator/StiEventAssociator.h"
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "Sti/StiHitErrorCalculator.h"
 
+
 StiDefaultToolkit::StiDefaultToolkit()
   :
-  trackFilterFactory(0),
-  parameterFactory(0),
-  hitFactory(0),
-  trackFactory(0),
-  mcTrackFactory(0),
-  detectorFactory(0),
-  trackNodeFactory(0),
-  detectorContainer(0),
-  hitContainer(0),
-  trackContainer(0),
-  mcTrackContainer(0),
-  geometryTransform(0),
-  coordinateTransform(0),
-  detectorFinder(0),
-  trackSeedFinder(0),
-  trackFinder(0),
-  trackFitter(0),
-  trackMerger(0),
-  displayManager(0),
-  ioBroker(0),
-  hitFiller(0),
-  associationMaker(0)
-{};
+  _trackFilterFactory(0),
+  _parameterFactory(0),
+  _hitFactory(0),
+  _trackFactory(0),
+  _mcTrackFactory(0),
+  _detectorFactory(0),
+  _trackNodeFactory(0),
+  _detectorContainer(0),
+  _hitContainer(0),
+  _trackContainer(0),
+  _mcTrackContainer(0),
+  _detectorFinder(0),
+  _trackSeedFinder(0),
+  _trackFinder(0),
+  _trackFitter(0),
+  _trackMerger(0),
+  _displayManager(0),
+  _ioBroker(0),
+  _hitLoader(0),
+  _associationMaker(0),
+  _hitErrorCalculator(0)
+{
+  cout<<"StiDefaultToolkit::StiDefaultToolkit() - INFO - Started"<<endl;
+  Messenger::init(0);
+  //Messenger::setRoutingMask(0);
+  cout<<"StiDefaultToolkit::StiDefaultToolkit() - INFO - Done"<<endl;
+};
 
 StiDefaultToolkit::~StiDefaultToolkit()
 {
-  delete trackFilterFactory;
-  delete hitFactory;
-  delete hitContainer;
-  delete detectorFactory;
-  delete detectorContainer;
-  StiDetectorFinder::kill();
-  delete trackNodeFactory;
-  delete trackContainer;
-  delete mcTrackContainer;
-  StiGeometryTransform::kill();
-  StiCoordinateTransform::kill();
-  delete trackFactory;
-  delete mcTrackFactory;
-  delete parameterFactory;
-  delete trackSeedFinder;
-  delete trackFinder;
-  delete trackFitter;
-  delete trackMerger;
-  //delete displayManager;
-  //delete evaluator;
-  //delete eventAssociator;
-  delete ioBroker;
+  delete _trackFilterFactory;
+  delete _hitFactory;
+  delete _hitContainer;
+  delete _detectorFactory;
+  delete _detectorContainer;
+  StiDetectorFinder::kill(); 
+  Messenger::kill();
+  delete _trackNodeFactory;
+  delete _trackContainer;
+  delete _mcTrackContainer;
+  delete _trackFactory;
+  delete _mcTrackFactory;
+  delete _parameterFactory;
+  delete _trackSeedFinder;
+  delete _trackFinder;
+  delete _trackFitter;
+  delete _trackMerger;
+  delete _ioBroker;
 };
 
 Factory< Filter<StiTrack>   >  * StiDefaultToolkit::getTrackFilterFactory()
 {
-  if (trackFilterFactory)
-    return trackFilterFactory;
+  if (_trackFilterFactory)
+    return _trackFilterFactory;
   cout << "StiDefaultToolkit::getTrackFilterFactory() - INFO - Instantiating StiTrackFilterFactory" << endl;
-  trackFilterFactory = new VectorizedFactory<StiDefaultTrackFilter, Filter<StiTrack>  >("StiDefaultTrackFilterFactory",3,5,2);
-  return trackFilterFactory;
+  _trackFilterFactory = new VectorizedFactory<StiDefaultTrackFilter, 
+    Filter<StiTrack>  >("StiDefaultTrackFilterFactory",3,5,2);
+  return _trackFilterFactory;
 }
 
 Factory<Parameter>  * StiDefaultToolkit::getParameterFactory()
 {
-  if (parameterFactory)
-    return parameterFactory;
+  if (_parameterFactory)
+    return _parameterFactory;
   StiIOBroker * ioBroker = getIOBroker();
   if (ioBroker->useGui())
-    parameterFactory = new VectorizedFactory<RootEditableParameter,Parameter>("ParameterFactory",100,20,10);
+    _parameterFactory = new VectorizedFactory<RootEditableParameter,Parameter>("ParameterFactory",100,20,10);
   else
-    parameterFactory = new VectorizedFactory<Parameter,Parameter>("ParameterFactory",100,20,10);
-  return parameterFactory;
-}
-
-StiGeometryTransform * StiDefaultToolkit::getGeometryTransform()
-{
-  if(!geometryTransform){
-    geometryTransform = StiGeometryTransform::instance();
-  }
-  return geometryTransform;
-}
-
-StiCoordinateTransform *StiDefaultToolkit::getCoordinateTransform(){
-  if(!coordinateTransform){
-    coordinateTransform = StiCoordinateTransform::instance();
-  }
-  return coordinateTransform;
+    _parameterFactory = new VectorizedFactory<Parameter,Parameter>("ParameterFactory",100,20,10);
+  return _parameterFactory;
 }
 
 Factory<StiHit>* StiDefaultToolkit::getHitFactory()
 {
-  if (hitFactory)
-    return hitFactory;
-  hitFactory = new VectorizedFactory<StiHit,StiHit>("StiHitFactory",50000,20000,5);
-  return hitFactory;
+  if (_hitFactory)
+    return _hitFactory;
+  _hitFactory = new VectorizedFactory<StiHit,StiHit>("StiHitFactory",50000,20000,5);
+  return _hitFactory;
 }
 
 Factory<StiKalmanTrack>* StiDefaultToolkit::getTrackFactory()
 {
-  if (trackFactory)
-    return trackFactory;
+  if (_trackFactory)
+    return _trackFactory;
   StiIOBroker * ioBroker = getIOBroker();
   cout << "StiDefaultToolkit::getTrackFactory() - INFO - "; 
   if (ioBroker->useGui())
     {
       if (ioBroker->seedFinderType()==StiIOBroker::kEvaluable)
-	  trackFactory = new VectorizedFactory<StiRootDrawableStiEvaluableTrack,StiKalmanTrack>("StiRDEvaluableTrackFactory",10000,5000,10);
+	  _trackFactory = new VectorizedFactory<StiRootDrawableStiEvaluableTrack,StiKalmanTrack>("StiRDEvaluableTrackFactory",10000,5000,10);
       else //if (ioBroker->seedFinderType()==StiIOBroker::kComposite)
-	  trackFactory = new VectorizedFactory<StiRootDrawableKalmanTrack,StiKalmanTrack>("StiRDKalmanTrackFactory",10000,5000,10);
+	  _trackFactory = new VectorizedFactory<StiRootDrawableKalmanTrack,StiKalmanTrack>("StiRDKalmanTrackFactory",10000,5000,10);
     }
   else // no gui needed
     {	
       if (ioBroker->seedFinderType()==StiIOBroker::kEvaluable)
-	  trackFactory = new VectorizedFactory<StiEvaluableTrack,StiKalmanTrack>("StiEvaluableTrackFactory",10000,5000,10);
+	  _trackFactory = new VectorizedFactory<StiEvaluableTrack,StiKalmanTrack>("StiEvaluableTrackFactory",10000,5000,10);
       else //if (ioBroker->seedFinderType()==StiIOBroker::kComposite)
-	  trackFactory = new VectorizedFactory<StiKalmanTrack,StiKalmanTrack>("StiKalmanTrackFactory",10000,5000,10);
+	  _trackFactory = new VectorizedFactory<StiKalmanTrack,StiKalmanTrack>("StiKalmanTrackFactory",10000,5000,10);
     }
-  return trackFactory;
+  return _trackFactory;
 }
 
 Factory<StiMcTrack>* StiDefaultToolkit::getMcTrackFactory()
 {
-  if (mcTrackFactory)
-    return mcTrackFactory;
+  if (_mcTrackFactory)
+    return _mcTrackFactory;
   StiIOBroker * ioBroker = getIOBroker();
   cout << "StiDefaultToolkit::getMcTrackFactory() - INFO - "; 
   if (ioBroker->useGui())
-      mcTrackFactory = new VectorizedFactory<StiRootDrawableMcTrack,StiMcTrack>("StiRootDrawableMcTrackFactory",10000,5000,10);
+      _mcTrackFactory = new VectorizedFactory<StiRootDrawableMcTrack,StiMcTrack>("StiRootDrawableMcTrackFactory",10000,5000,10);
   else // no gui needed
-      mcTrackFactory = new VectorizedFactory<StiMcTrack,StiMcTrack>("StiMcTrackFactory",10000,5000,10);
-  return mcTrackFactory;
+      _mcTrackFactory = new VectorizedFactory<StiMcTrack,StiMcTrack>("StiMcTrackFactory",10000,5000,10);
+  return _mcTrackFactory;
 }
 
 Factory<StiDetector>* StiDefaultToolkit::getDetectorFactory()
 {
-  if (detectorFactory)
-    return detectorFactory;
-  cout << "StiDefaultToolkit::getDetectorFactory() - INFO - "; 
+  if (_detectorFactory)
+    return _detectorFactory;
+  cout << "StiDefaultToolkit::getDetectorFactory() - INFO - Instantiating Detector Factory"; 
   if (getIOBroker()->useGui())
-    detectorFactory = new VectorizedFactory<StiRootDrawableDetector,StiDetector>("StiRDDetectorFactory",1000,200,10);
+    _detectorFactory = new VectorizedFactory<StiRootDrawableDetector,StiDetector>("StiRDDetectorFactory",2000,500,10);
   else
-    detectorFactory = new VectorizedFactory<StiDetector,StiDetector>("StiDetectorFactory",1000,200,10);
-  return detectorFactory;
+    _detectorFactory = new VectorizedFactory<StiDetector,StiDetector>("StiDetectorFactory",2000,500,10);
+  return _detectorFactory;
 }
 
 Factory< StiCompositeTreeNode<StiDetector>  >* StiDefaultToolkit::getDetectorNodeFactory()
 {
-  if (detectorNodeFactory)
-    return detectorNodeFactory;
-  detectorNodeFactory = new VectorizedFactory< StiCompositeTreeNode<StiDetector>  , 
+  if (_detectorNodeFactory)
+    return _detectorNodeFactory;
+  _detectorNodeFactory = new VectorizedFactory< StiCompositeTreeNode<StiDetector>  , 
     StiCompositeTreeNode<StiDetector>  >(" StiCompositeTreeNode<StiDetector>Factory",1000,500,10);
-  return detectorNodeFactory;
+  return _detectorNodeFactory;
 }
 
 
 Factory<StiKalmanTrackNode>* StiDefaultToolkit::getTrackNodeFactory()
 {
-  if (trackNodeFactory)
-    return trackNodeFactory;
-  trackNodeFactory = new VectorizedFactory<StiKalmanTrackNode,StiKalmanTrackNode>("StiKalmanTrackNodeFactory",20000,20000,50);
-  StiKalmanTrack::setKalmanTrackNodeFactory(trackNodeFactory);
-  return trackNodeFactory;	
+  if (_trackNodeFactory)
+    return _trackNodeFactory;
+  _trackNodeFactory = new VectorizedFactory<StiKalmanTrackNode,StiKalmanTrackNode>("StiKalmanTrackNodeFactory",20000,20000,50);
+  StiKalmanTrack::setKalmanTrackNodeFactory(_trackNodeFactory);
+  return _trackNodeFactory;	
 }
 
 
+void StiDefaultToolkit::add(StiDetectorGroup<StEvent>* detectorGroup)
+{
+  //_detectorGroups.push_back(detectorGroup);
+  StiMasterHitLoader<StEvent,StiDetectorBuilder> * masterLoader;
+  masterLoader = static_cast<StiMasterHitLoader<StEvent,StiDetectorBuilder> *>(getHitLoader());
+  StiHitLoader<StEvent,StiDetectorBuilder> * loader = detectorGroup->getHitLoader();
+  if (loader)
+    {
+      cout << "StiDefaultToolkit::add() - INFO - Adding hit loader for detector group:"
+	   << detectorGroup->getName()<<endl;
+      masterLoader->addLoader(loader);
+    }
+  else
+    cout << "StiDefaultToolkit::add() - INFO - Not adding hit loader for detector group:"<< detectorGroup->getName()<<endl;
+
+  StiMasterDetectorBuilder * masterBuilder = getDetectorBuilder();
+  StiDetectorBuilder * builder = detectorGroup->getDetectorBuilder();
+  if (builder)
+    {
+      cout << "StiDefaultToolkit::add() - INFO - Adding builder for detector group:"<< detectorGroup->getName()<<endl;
+      masterBuilder->addBuilder(builder);
+    }
+  else
+    cout << "StiDefaultToolkit::add() - INFO - Not adding builder for detector group:"<< detectorGroup->getName()<<endl;
+}
+
+StiMasterDetectorBuilder * StiDefaultToolkit::getDetectorBuilder()
+{  
+  if (_detectorBuilder)
+    return _detectorBuilder;
+  _detectorBuilder = new StiMasterDetectorBuilder();
+  return _detectorBuilder;
+}
+
 StiDetectorContainer  * StiDefaultToolkit::getDetectorContainer()
 {
-  if (detectorContainer)
-    return detectorContainer;
-  detectorContainer = StiDetectorContainer::instance();
-  detectorContainer->buildDetectors(getDetectorNodeFactory(),getDetectorFactory());
-  detectorContainer->reset();
-  return detectorContainer;
+  if (_detectorContainer)
+    return _detectorContainer;
+  _detectorContainer = StiDetectorContainer::instance();
+  _detectorContainer->build(getDetectorBuilder());
+  _detectorContainer->reset();
+  return _detectorContainer;
 }
 
 StiHitContainer       * StiDefaultToolkit::getHitContainer()
 {
-  if (hitContainer)
-    return hitContainer;
+  if (_hitContainer)
+    return _hitContainer;
   cout << "StiDefaultToolkit::getHitContainer() - INFO - "; 
   if (getIOBroker()->useGui())
     {
-      hitContainer = new StiRootDrawableHitContainer();
+      _hitContainer = new StiRootDrawableHitContainer();
       cout << "instantiating StiRootDrawableHitContainer" << endl;
     }
   else 
     {
-      hitContainer = new StiHitContainer();			
+      _hitContainer = new StiHitContainer();			
       cout << "instantiating StiRootDrawableHitContainer" << endl;
     }
-  return hitContainer;
+  return _hitContainer;
 }
 
 StiTrackContainer     * StiDefaultToolkit::getTrackContainer()
 {	
   cout << "StiDefaultToolkit::getTrackContainer() - INFO - Starting" << endl;
-  if (trackContainer)
-    return trackContainer;
+  if (_trackContainer)
+    return _trackContainer;
   cout << "StiDefaultToolkit::getTrackContainer() - INFO - Instantiating Container" << endl;
-  trackContainer = new StiTrackContainer();
-  return trackContainer;
+  _trackContainer = new StiTrackContainer();
+  return _trackContainer;
 }
 
 StiTrackContainer     * StiDefaultToolkit::getMcTrackContainer()
 {	
   cout << "StiDefaultToolkit::getMcTrackContainer() - INFO - Starting" << endl;
-  if (mcTrackContainer)
-    return mcTrackContainer;
+  if (_mcTrackContainer)
+    return _mcTrackContainer;
   cout << "StiDefaultToolkit::getMcTrackContainer() - INFO - Instantiating Container" << endl;
-  mcTrackContainer = new StiTrackContainer();
-  return mcTrackContainer;
+  _mcTrackContainer = new StiTrackContainer();
+  return _mcTrackContainer;
 }
 
 
 StiDetectorFinder    * StiDefaultToolkit::getDetectorFinder()
 {
-  if (detectorFinder)
-    return detectorFinder;
-  detectorFinder = StiDetectorFinder::instance();
-  return detectorFinder;
+  if (_detectorFinder)
+    return _detectorFinder;
+  _detectorFinder = StiDetectorFinder::instance();
+  return _detectorFinder;
 }
 
 StiSeedFinder   * StiDefaultToolkit::getTrackSeedFinder()
 {
-  if (trackSeedFinder)
-    return trackSeedFinder;
+  if (_trackSeedFinder)
+    return _trackSeedFinder;
   cout << "StiDefaultToolkit::getTrackSeedFinder() - INFO - "; 
   StiIOBroker * ioBroker = getIOBroker();
   if (ioBroker->seedFinderType()==StiIOBroker::kEvaluable) 
     {
-      trackSeedFinder = new StiEvaluableTrackSeedFinder(getAssociationMaker(), getHitContainer());
+      _trackSeedFinder = new StiEvaluableTrackSeedFinder("EvaluableTrackSeedFinder",
+							 getTrackFactory(),
+							 getHitContainer(),
+							 getDetectorContainer(),
+							 getAssociationMaker());
       cout << "instantiating StiEvaluableTrackSeedFinder" << endl;
     }
   else //if (ioBroker->seedFinderType()==StiIOBroker::kComposite)
     {
-      trackSeedFinder = new StiCompositeSeedFinder(getTrackFactory(), getHitContainer());
+      _trackSeedFinder = new StiCompositeSeedFinder("CompositeTrackSeedFinder",
+						    getTrackFactory(),
+						    getHitContainer(),
+						    getDetectorContainer());
       cout << "instantiating StiCompositeTrackSeedFinder" << endl;
-      //trackSeedFinder->setFactory(mtrackfactory);
     }
-  return trackSeedFinder;
+  return _trackSeedFinder;
 }
 
 StiTrackFinder       * StiDefaultToolkit::getTrackFinder()
 {
-  if (trackFinder)
-    return trackFinder;
+  if (_trackFinder)
+    return _trackFinder;
   // only one track finder at this point, no option
-  trackFinder = new StiKalmanTrackFinder(this);
-  StiTrack::setTrackFinder(trackFinder);
+  _trackFinder = new StiKalmanTrackFinder(this);
+  StiTrack::setTrackFinder(_trackFinder);
   getTrackFitter();
-  return trackFinder;
+  return _trackFinder;
 }
 
 StiTrackFitter       * StiDefaultToolkit::getTrackFitter()
 {
-  if (trackFitter)
-    return trackFitter;
-  trackFitter = new StiKalmanTrackFitter();
-  StiTrack::setTrackFitter(trackFitter);
-  return trackFitter;
+  if (_trackFitter)
+    return _trackFitter;
+  _trackFitter = new StiKalmanTrackFitter();
+  StiTrack::setTrackFitter(_trackFitter);
+  return _trackFitter;
 }
 
 StiTrackMerger       * StiDefaultToolkit::getTrackMerger()
 {
-  if (trackMerger)
-    return trackMerger;
-  trackMerger = new StiLocalTrackMerger(getTrackContainer());
-  return trackMerger;
+  if (_trackMerger)
+    return _trackMerger;
+  _trackMerger = new StiLocalTrackMerger(getTrackContainer());
+  return _trackMerger;
 }
 
 StiDisplayManager    * StiDefaultToolkit::getDisplayManager()
@@ -334,52 +362,43 @@ StiDisplayManager    * StiDefaultToolkit::getDisplayManager()
   return StiRootDisplayManager::instance();
 }
 
-StiHitLoader<StEvent,StiGeometryTransform>    * StiDefaultToolkit::getHitLoader()
+StiHitLoader<StEvent,StiDetectorBuilder>    * StiDefaultToolkit::getHitLoader()
 {
-  if (hitLoader)
-    return hitLoader;
-  StiMasterHitLoader<StEvent,StiGeometryTransform> * loader = new StiMasterHitLoader<StEvent,StiGeometryTransform>(getHitContainer(),getHitFactory(),getGeometryTransform());
-  hitLoader = loader;
-  loader->addLoader(new StiTpcHitLoader(getHitContainer(),getHitFactory(),getGeometryTransform()));
-  loader->addLoader(new StiSvtHitLoader(getHitContainer(),getHitFactory(),getGeometryTransform()));
-  return hitLoader;
-}
-
-StiHitFiller    * StiDefaultToolkit::getHitFiller()
-{
-  if (hitFiller)
-    return hitFiller;
-  hitFiller = new StiHitFiller();//getHitContainer(), getHitFactory());
-  hitFiller->addDetector(kTpcId);
-  hitFiller->addDetector(kSvtId);
-  return hitFiller;
+  if (_hitLoader)
+    return _hitLoader;
+  _hitLoader = new StiMasterHitLoader<StEvent,StiDetectorBuilder>("StarHitLoader",
+								 getHitContainer(),
+								 getHitFactory(),
+								 0);
+  return _hitLoader;
 }
 
 StiIOBroker * StiDefaultToolkit::getIOBroker()
 {
-  if (!ioBroker)
-    ioBroker = new StiRootIOBroker();
-  return ioBroker;
+  if (!_ioBroker)
+    _ioBroker = new StiRootIOBroker();
+  return _ioBroker;
 }
 
 StAssociationMaker * StiDefaultToolkit::getAssociationMaker()
 {
-  if (!associationMaker)
-    cout << "StiDefaultToolkit::getAssociationMaker() - FATAL - associationMaker is NULL, stupid !!!!!!" << endl;
-  return associationMaker;
+  if (!_associationMaker)
+    throw runtime_error(" StiDefaultToolkit::getAssociationMaker() - FATAL - _associationMaker==0");
+  return _associationMaker;
 }
-
 
 void StiDefaultToolkit::setAssociationMaker(StAssociationMaker * a)
 {
-  associationMaker = a;
+  _associationMaker = a;
+  if (!_associationMaker)
+    throw runtime_error(" StiDefaultToolkit::getAssociationMaker() - FATAL - _associationMaker==0");
 }
 
 
 StiHitErrorCalculator * StiDefaultToolkit::getHitErrorCalculator()
 {
-  if (!hitErrorCalculator)
-    hitErrorCalculator = new StiHitErrorDefault();
-  return hitErrorCalculator;
+  if (!_hitErrorCalculator)
+    _hitErrorCalculator = new StiHitErrorDefault();
+  return _hitErrorCalculator;
 }
 
