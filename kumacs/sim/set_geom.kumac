@@ -51,7 +51,7 @@
  mode  g2tm geom 1
 * 
  mode  trac simu 1  
- detp  trac dcay 210 210 0.1 0.01
+ detp  trac DCAY 210 210 0.1 0.01
  detp  svtt  svtg.nlayer = 6 
  
  return
