@@ -1,5 +1,8 @@
-// $Id: StV0Controller.cxx,v 3.3 2000/08/31 21:25:34 genevb Exp $
+// $Id: StV0Controller.cxx,v 3.4 2000/09/18 19:25:19 genevb Exp $
 // $Log: StV0Controller.cxx,v $
+// Revision 3.4  2000/09/18 19:25:19  genevb
+// Additional protection for missing MC info
+//
 // Revision 3.3  2000/08/31 21:25:34  genevb
 // Adjustment for V0s used in Xis only
 //
@@ -92,13 +95,14 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
     theMcV0Map = assocMaker->mcV0Map();
     theMcTrackMap = assocMaker->mcTrackMap();
   }
+  if (!((assocMaker)&&(theMcV0Map)&&(theMcTrackMap))) return kStOk;
   StMcTrack *Pos = 0; 
   StMcTrack *Neg = 0;
   StV0Vertex* rcV0Partner = 0;
   Int_t indexRecoArray = -1;
   Int_t count = theMcV0Map->count(mcVert);
   
-  if ((assocMaker)&&(count>0)) {
+  if (count>0) {
     pair<mcV0MapIter,mcV0MapIter> mcV0Bounds = theMcV0Map->equal_range(mcVert);
     rcV0Partner = (*mcV0Bounds.first).second;
     float x, y, z, delta;
