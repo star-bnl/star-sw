@@ -63,7 +63,14 @@ public:
   bool isMcEnabled() const;
   void setEvaluatorEnabled(bool);
   bool isEvaluatorEnabled() const;
-  
+   
+  virtual EditableFilter<StiHit>   * getLoaderHitFilter();
+  virtual EditableFilter<StiTrack> * getLoaderTrackFilter();
+  virtual EditableFilter<StiTrack> * getFinderTrackFilter();
+  virtual void setLoaderHitFilter(EditableFilter<StiHit>   *);
+  virtual void setLoaderTrackFilter(EditableFilter<StiTrack> *);
+  virtual void setFinderTrackFilter(EditableFilter<StiTrack> *);
+
  protected:
   
   bool _guiEnabled;
@@ -99,6 +106,11 @@ public:
   StiVertexFinder         * _vertexFinder;
   StiHitLoader<StEvent,StMcEvent, StiDetectorBuilder> * _hitLoader;
   StAssociationMaker                       * _associationMaker; 
+
+  EditableFilter<StiHit>   * _loaderHitFilter;
+  EditableFilter<StiTrack> * _loaderTrackFilter;
+  EditableFilter<StiTrack> * _finderTrackFilter;
+
 };
 
 #endif

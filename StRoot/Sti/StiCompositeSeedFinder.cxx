@@ -19,15 +19,14 @@ using std::copy;
 #include "StiDetector.h"
 #include "StiDetectorFinder.h"
 #include "StiCompositeSeedFinder.h"
-#include "StiGui/StiRDLocalTrackSeedFinder.h"
 #include "StiMasterDetectorBuilder.h"
 
 StiCompositeSeedFinder::StiCompositeSeedFinder(const string&             name,
-																							 Factory<StiKalmanTrack> * trackFactory,
-																							 StiHitContainer         * hitContainer,
-																							 StiDetectorContainer    * detectorContainer)
+					       Factory<StiKalmanTrack> * trackFactory,
+					       StiHitContainer         * hitContainer,
+					       StiDetectorContainer    * detectorContainer)
   : StiTrackSeedFinder(name,trackFactory,hitContainer,detectorContainer)
-{ }
+{}
 
 ///Destructor 
 ///Nothing to do because the base class takes care of deleting 

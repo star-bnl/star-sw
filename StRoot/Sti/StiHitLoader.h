@@ -4,6 +4,7 @@
 #include "Sti/Base/Factory.h"
 #include "Sti/Base/Messenger.h"
 #include "Sti/Base/Named.h"
+#include "Sti/Base/Filter.h"
 #include "Sti/StiDetectorFinder.h"
 #include "Sti/StiToolkit.h"
 class StiHit;
@@ -43,9 +44,17 @@ class StiHitLoader : public Named
 	       Factory<StiHit>*hitFactory,
 	       Detector * detector);
   virtual ~StiHitLoader();
-  virtual void loadEvent(Source1 *source1, Source2 *source2);
-  virtual void loadHits(Source1 * source); 
-  virtual void loadMcHits(Source2 * source,bool useMcAsRec);
+  virtual void loadEvent(Source1 *source1, 
+			 Source2 *source2,	
+			 Filter<StiTrack> * trackFilter, 
+			 Filter<StiHit>   * hitFilter);
+  virtual void loadHits(Source1 * source,	
+			Filter<StiTrack> * trackFilter, 
+			Filter<StiHit>   * hitFilter); 
+  virtual void loadMcHits(Source2 * source,
+			  bool useMcAsRec,	
+			  Filter<StiTrack> * trackFilter, 
+			  Filter<StiHit>   * hitFilter);
   virtual void setHitContainer(StiHitContainer* hitContainer);
   virtual void setMcHitContainer(StiHitContainer* hitContainer);
   virtual void setHitFactory(Factory<StiHit>*hitFactory);
@@ -106,13 +115,16 @@ StiHitLoader<Source1, Source2,Detector>::~StiHitLoader()
 {}
 
 template<class Source1, class Source2, class Detector>
-void StiHitLoader<Source1, Source2,Detector>::loadEvent(Source1 *source1, Source2 * source2)
+void StiHitLoader<Source1, Source2,Detector>::loadEvent(Source1 *source1, 
+							Source2 * source2,
+							Filter<StiTrack> * trackFilter, 
+							Filter<StiHit> * hitFilter)
 {
   cout << "Loader "<<_name<<" loading event"<<endl;
   if (source1 && !_useMcAsRec)
-    loadHits(source1);
+    loadHits(source1,trackFilter,hitFilter);
   if (source2)
-    loadMcHits(source2,_useMcAsRec);
+    loadMcHits(source2,_useMcAsRec,trackFilter,hitFilter);
 }
 
 template<class Source1, class Source2, class Detector>
@@ -158,12 +170,17 @@ bool StiHitLoader<Source1, Source2,Detector>::useMcAsRec() const
 }
 
 template<class Source1, class Source2, class Detector>
-void StiHitLoader<Source1, Source2,Detector>::loadHits(Source1 * source)
+void StiHitLoader<Source1, Source2,Detector>::loadHits(Source1 * source,
+						       Filter<StiTrack> * trackFilter, 
+						       Filter<StiHit> * hitFilter)
 {
   cout << "StiHitLoader<Source1, Source2,Detector>::loadHits(Source1 * source) -E- Called for "<<_name<<endl;
 }
 template<class Source1, class Source2, class Detector>
-void StiHitLoader<Source1, Source2,Detector>::loadMcHits(Source2 * source,bool useMcAsRec)
+void StiHitLoader<Source1, Source2,Detector>::loadMcHits(Source2 * source,
+							 bool useMcAsRec,
+							 Filter<StiTrack> * trackFilter, 
+							 Filter<StiHit> * hitFilter)
 {
   cout << "StiHitLoader<Source1, Source2,Detector>::loadMcHits(Source1 * source) -E- Called for "<<_name<<endl;
 }

@@ -53,7 +53,7 @@ void Run(int firstEvent=0,
 	 const char * file="rcf0183_05_300evts.geant.root",
 	 
 	 bool useGui=true,
-	 bool useMcAsRec=true,
+	 bool useMcAsRec=false,
 	 bool doPlots=true,
 	 bool doSimulation=true,
 	 bool doAssociation=true,

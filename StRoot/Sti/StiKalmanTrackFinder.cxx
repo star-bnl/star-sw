@@ -75,7 +75,7 @@ void StiKalmanTrackFinder::initialize()
   _trackContainer    = _toolkit->getTrackContainer();
   _mcTrackContainer  = _toolkit->getMcTrackContainer();
   _vertexFinder      = _toolkit->getVertexFinder();
-  StiDefaultTrackFilter * trackFilter = new StiDefaultTrackFilter("RecTrackFilter","Reconstructed Track Filter");
+  StiDefaultTrackFilter * trackFilter = new StiDefaultTrackFilter("FinderTrackFilter","Reconstructed Track Filter");
   trackFilter->add( new EditableParameter("nPtsUsed","Use nPts", 1., 1., 0., 1., 1.,
 					  Parameter::Boolean, StiTrack::kPointCount) );
   trackFilter->add( new EditableParameter("nPtsMin", "Minimum nPts", 15., 15., 0., 100.,1., 
@@ -83,38 +83,7 @@ void StiKalmanTrackFinder::initialize()
   trackFilter->add( new EditableParameter("nPtsMax", "Maximum nPts", 60., 60., 0., 100.,1., 
 					  Parameter::Integer,StiTrack::kPointCount) );
   _trackFilter = trackFilter;
-
-  trackFilter = new StiDefaultTrackFilter("GuiRecTrackFilter","Reconstructed Track Filter");
-  trackFilter->add( new EditableParameter("nPtsUsed","Use nPts", 1., 1., 0., 1., 1.,
-					  Parameter::Boolean, StiTrack::kPointCount) );
-  trackFilter->add( new EditableParameter("nPtsMin", "Minimum nPts", 20., 20., 0., 100.,1., 
-					  Parameter::Integer,StiTrack::kPointCount) );
-  trackFilter->add( new EditableParameter("nPtsMax", "Maximum nPts", 60., 60., 0., 100.,1., 
-					  Parameter::Integer,StiTrack::kPointCount) );
-
-  trackFilter->add( new EditableParameter("ptUsed","Use pt",     0.,   0., 0.,   1., 1.,  Parameter::Boolean, StiTrack::kPt) );
-  trackFilter->add( new EditableParameter("ptMin", "Minimum pt", 0.,   0., 0., 100., 0.1, Parameter::Double,StiTrack::kPt) );
-  trackFilter->add( new EditableParameter("ptMax", "Maximum pt", 5.,   5., 0., 100., 0.1, Parameter::Double,StiTrack::kPt) );
-  trackFilter->add( new EditableParameter("etaUsed","Use eta",      0.,   0.,  0.,   1., 1.,  Parameter::Boolean,   StiTrack::kPseudoRapidity) );
-  trackFilter->add( new EditableParameter("etaMin", "Minimum eta", -1.5, -1.5, 0., 100., 0.1, Parameter::Double,StiTrack::kPseudoRapidity) );
-  trackFilter->add( new EditableParameter("etaMax", "Maximum eta",  1.5,  1.5, 0., 100., 0.1, Parameter::Double,StiTrack::kPseudoRapidity) );
-  _guiTrackFilter  = trackFilter;
-
-
-  trackFilter = new StiDefaultTrackFilter("GuiRecTrackFilter","Reconstructed Track Filter");
-  trackFilter->add( new EditableParameter("nPtsUsed","Use nPts", 1., 1., 0., 1., 1.,
-					  Parameter::Boolean, StiTrack::kPointCount) );
-  trackFilter->add( new EditableParameter("nPtsMin", "Minimum nPts", 10., 10., 0., 100.,1., 
-					  Parameter::Integer,StiTrack::kPointCount) );
-  trackFilter->add( new EditableParameter("nPtsMax", "Maximum nPts", 60., 60., 0., 100.,1., 
-					  Parameter::Integer,StiTrack::kPointCount) );
-  trackFilter->add( new EditableParameter("ptUsed","Use pt",     0.,   0., 0.,   1., 1.,  Parameter::Boolean, StiTrack::kPt) );
-  trackFilter->add( new EditableParameter("ptMin", "Minimum pt", 0.,   0., 0., 100., 0.1, Parameter::Double,StiTrack::kPt) );
-  trackFilter->add( new EditableParameter("ptMax", "Maximum pt", 5.,   5., 0., 100., 0.1, Parameter::Double,StiTrack::kPt) );
-  trackFilter->add( new EditableParameter("etaUsed","Use eta",      0.,   0.,  0.,   1., 1.,  Parameter::Boolean,   StiTrack::kPseudoRapidity) );
-  trackFilter->add( new EditableParameter("etaMin", "Minimum eta", -1.5, -1.5, 0., 100., 0.1, Parameter::Double,StiTrack::kPseudoRapidity) );
-  trackFilter->add( new EditableParameter("etaMax", "Maximum eta",  1.5,  1.5, 0., 100., 0.1, Parameter::Double,StiTrack::kPseudoRapidity) );
-  _guiMcTrackFilter = trackFilter;
+  _toolkit->setFinderTrackFilter(trackFilter);
   cout << "StiKalmanTrackFinder::initialize() -I- Done"<<endl;
 }
 
@@ -207,6 +176,7 @@ void StiKalmanTrackFinder::findTracks()
   _messenger<<"StiKalmanTrackFinder::findTracks() -I- Begin tracking loop"<<endl;
   _trackSeedFinder->reset();
   _trackContainer->clear();
+  if (_trackFilter) _trackFilter->reset();
   int plus = 0;
   int minus= 0;
   try
@@ -219,30 +189,14 @@ void StiKalmanTrackFinder::findTracks()
 	      track = _trackSeedFinder->next();
 	      if (!track) break;
 	      track->find();
-	      if (_trackFilter)
-		{
-		  if (_trackFilter->filter(track)) 
-		    {
-		      if (track->getCharge()>0)
-			plus++;
-		      else
-			minus++;
-		      //StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
-		      //if (t) t->update();
-		      _trackContainer->push_back(track);
-		      track->reserveHits();
-		    }
-		}
-	      else
+	      if (!_trackFilter || _trackFilter->filter(track)) 
 		{
 		  if (track->getCharge()>0)
 		    plus++;
 		  else
 		    minus++;
-		  _trackContainer->push_back(track);  
+		  _trackContainer->push_back(track);
 		  track->reserveHits();
-		  //StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
-		  //if (t) t->update();
 		}
 	    }
 	  catch (runtime_error & rte)
@@ -256,10 +210,14 @@ void StiKalmanTrackFinder::findTracks()
       cout << "StiKalmanTrackFinder::findTracks() - Run Time Error (2) :" << rte.what() << endl;
     }  
   cout << "SKTF::findTracks() -I- Track Count:"<<endl
-       << "   total:"<<plus+minus<<endl
-       << "    plus:"<<plus<<endl
-       << "   minus:"<<minus<<endl;
-  cout << "SKTF::findTracks() -I- Done"<<endl;
+       << "            total:"<<plus+minus<<endl
+       << "             plus:"<<plus<<endl
+       << "            minus:"<<minus<<endl;
+  if (_trackFilter)
+    cout << "  tracks Analyzed:"<< _trackFilter->getAnalyzedCount() << endl
+	 << "  tracks Accepted:"<< _trackFilter->getAcceptedCount() << endl;
+  else
+    cout << "SKTF::findTracks() -I- Done"<<endl;
 }
   
 /*! Fit all track produced by the track seed finder. 
@@ -386,11 +344,11 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
   bool scanningDone = true;
   sNode   = track->getLastNode(); 
   bool debug=false;
-  if (fabs(track->getPseudoRapidity())<0.2)
+  /*if (fabs(track->getPseudoRapidity())<0.2)
     {
        debug=true;
       cout << " TRACK:"<<*track<<endl;
-    }
+      }*/
   if (!sNode)
     throw logic_error("SKTF::find()\t - ERROR - track last node ==0");
   StiHit* hhh = sNode->getHit();

@@ -28,6 +28,7 @@ class   StiMcTrack;
 class   StiDetectorBuilder;
 class   StiMasterDetectorBuilder;
 template<class Factorized> class Factory;
+template<class Filtered>   class EditableFilter;
 template<class Filtered>   class Filter;
 template<class T>          class StiCompositeTreeNode;
 template<class X,class y, class z>  class StiHitLoader;
@@ -91,7 +92,14 @@ public:
   virtual bool isMcEnabled() const=0;
   virtual void setEvaluatorEnabled(bool)=0;
   virtual bool isEvaluatorEnabled() const=0;
-  
+
+  virtual EditableFilter<StiHit>   * getLoaderHitFilter()=0;
+  virtual EditableFilter<StiTrack> * getLoaderTrackFilter()=0;
+  virtual EditableFilter<StiTrack> * getFinderTrackFilter()=0;
+  virtual void setLoaderHitFilter(EditableFilter<StiHit>   *)=0;
+  virtual void setLoaderTrackFilter(EditableFilter<StiTrack> *)=0;
+  virtual void setFinderTrackFilter(EditableFilter<StiTrack> *)=0;
+
   static void setToolkit(StiToolkit*toolkit);
   static StiToolkit *instance();
   static void kill();
