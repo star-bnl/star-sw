@@ -1,7 +1,10 @@
 *
-* $Id: gcalor.F,v 1.5 2001/11/25 23:39:10 jeromel Exp $
+* $Id: gcalor.F,v 1.6 2001/11/26 00:44:22 fisyak Exp $
 *
 * $Log: gcalor.F,v $
+* Revision 1.6  2001/11/26 00:44:22  fisyak
+* Move dummy gcalor version from agsim.g to gcalor.F
+*
 * Revision 1.5  2001/11/25 23:39:10  jeromel
 * Preceeding patch undone. Works on Solaris but not on Linux :(
 *
@@ -375,6 +378,10 @@ C score kinetic energy of recoil nucleus (given in MeV)
 CZ      DESTEP = DESTEP + ERMED * 1.E-3
   170 RETURN
       END
+#else
+      SUBROUTINE GCALOR
+      print *,' No GCALOR available in this version'
+      end
 #endif
 C#if !defined(CERNLIB_GCALOR)
 C      SUBROUTINE GCALOR
