@@ -1,6 +1,6 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.12  1998/06/15 21:10:46  ward
-#  Reinstall correct MakeArch.mk
+#  Revision 1.13  1998/06/18 19:32:45  ward
+#  fix crash in sockstream, improve TABLE/DUMP
 #
 #  Revision 1.10  1998/05/19 16:36:38  perev
 #  Makefiles
@@ -23,7 +23,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/06/15 21:10:46 $ 
+#             Last modification $Date: 1998/06/18 19:32:45 $ 
 #. default setings
 
 
@@ -214,8 +214,8 @@ endif
 ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
 
   OSFID := sun SUN SOLARIS solaris Solaris
-  CC :=  /opt/SUNWspro/bin/cc
-  CXX := /opt/SUNWspro/bin/CC
+  CC :=  insure
+  CXX := insure
   LD  := $(CXX)
   SO  := $(CXX)
   FC  := /opt/SUNWspro/bin/f77
@@ -233,8 +233,8 @@ endif
 
 ifneq (,$(findstring $(STAF_ARCH),sunx86_55))
   OSFID := sun SUN SOLARIS SOLARISPC
-  CC       :=  /opt/SUNWspro/bin/cc
-  CXX      := /opt/SUNWspro/bin/CC
+  CC       :=  insure
+  CXX      := insure
   SO       := $(CXX)
   FC       := /opt/SUNWspro/bin/f77
   LD       := $(CXX)

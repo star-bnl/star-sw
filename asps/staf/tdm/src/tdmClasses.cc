@@ -395,7 +395,9 @@ STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
           }
           dd=strstr(cc,"["); if(dd) dd[0]=0;
           for(i=0;i<ncol;i++) {
-            if(!strcmp(col[i],cc)) { mask[nmask]=7; break; }
+            if( !strcmp(col[i],cc) || !strcmp(col[i],"allColumns") ) {
+              mask[nmask]=7; break;
+            }
           }
           cc=strtok(NULL,TOKENS); nmask++;
         }
