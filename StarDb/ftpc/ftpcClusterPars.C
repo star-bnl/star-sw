@@ -1,6 +1,6 @@
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
-// Top/ftpcClusterPars Allocated rows: 1  Used rows: 1  Row size: 172 bytes
+// Top/ftpcClusterPars Allocated rows: 1  Used rows: 1  Row size: 184 bytes
 //  Table: ftpcClusterPars_st[0]--> ftpcClusterPars_st[0]
 // ====================================================================
 // ------  Test whether this table share library was loaded ------
@@ -55,6 +55,9 @@ memset(&row,0,tableSet->GetRowSize());
     row.maxFastLoops              =        30;  // max loopnumber in fast unfolding
     row.unfoldLimit               =      0.01;  // accuracy of unfolding 
     row.unfoldFailedLimit         =      0.50;  // limit for failed unfolding
+    row.maxTimelength             =       100;  // max timelength of cluster
+    row.maxPadlength              =       100;  // max padlength of cluster
+    row.minTimebin                =         3;  // min timebin for cluster search
     
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
