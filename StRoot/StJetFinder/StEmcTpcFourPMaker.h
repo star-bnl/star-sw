@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.15 2003/09/24 20:54:07 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.16 2003/10/01 16:39:29 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.16  2003/10/01 16:39:29  thenry
+ * Added new getter for StProjectedTracks to StEmcTpcFourPMaker, and used
+ * in StJetOutputMaker so that StTrackStruct now contains track px, py, pz
+ *
  * Revision 1.15  2003/09/24 20:54:07  thenry
  * Fixed ANSI compatibility problems.
  *
@@ -415,7 +419,8 @@ public:
     if(empty(b))
       _binmap::insert(_binmap::value_type(b, pointVector()));
     _binmap::iterator it = _binmap::find(b);
-    (*it).second.push_back(point);        
+    pointVector &pv = (*it).second;
+    pv.push_back(point);        
     return it;
   };
 
@@ -570,6 +575,8 @@ class StEmcTpcFourPMaker : public StFourPMaker {
   EMCHitType getUseType(void) { return useType; };
   void setMaxPoints(long mPoints) { maxPoints = mPoints; };
   long getMaxPoints(void) { return maxPoints; };
+  StProjectedTrack &getTrack(StMuTrack *trk) 
+    { return binmap.moddTracks[trk]; };
 
   StEmcTpcBinMap binmap;   
  protected:
