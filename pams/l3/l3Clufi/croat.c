@@ -22,7 +22,7 @@
 #define ROWS		45
 #define PADS_PER_ROW	182 /* Max_PADS = 184 !!! */
 
-#include "trans_table.hh"
+#include "trans_table.h"
 #include "offsets.h"
 #include "padfinder.h"
 #include "daqFormats.h"

@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
-#include "trans_table.hh"
+#include "trans_table.h"
 #include "croat.h"
 #include "daqFormats.h"
 
