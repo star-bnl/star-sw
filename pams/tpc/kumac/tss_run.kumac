@@ -43,7 +43,6 @@ macro run tpc_sector_first tpc_sector_last
         [calib]/tpc/readout_map_
         [calib]/tpc/tpc_pedestal
    
-   ls [raw_data]/tpc/Sector_[j]
    
  enddo
  
