@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.24 2000/02/01 21:35:09 kathy Exp $
+// $Id: StEventQAMaker.cxx,v 1.25 2000/02/02 01:37:54 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.25  2000/02/02 01:37:54  lansdell
+// log base 10 now applied to curvature and impact parameter values
+//
 // Revision 1.24  2000/02/01 21:35:09  kathy
 // fix code for xi mass in StEvent histograms; change curvature and impact param histograms so it's log of the value, plotted in linear scale
 //
@@ -186,6 +189,9 @@ void StEventQAMaker::MakeHistGlob() {
 	                   globtrk->geometry()->origin();
       Float_t radf = globtrk->detectorInfo()->firstPoint().perp();
 
+      Float_t logImpact = TMath::Log10(globtrk->impactParameter());
+      Float_t logCurvature = TMath::Log10(globtrk->geometry()->curvature());
+
 // from Lanny on 2 Jul 1999 9:56:03
 //1. x0,y0,z0 are coordinates on the helix at the starting point, which
 //   should be close to the first TPC hit position assigned to the track.
@@ -204,7 +210,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_xf0->Fill(dif.x());
 	m_glb_yf0->Fill(dif.y());
 	m_glb_zf0->Fill(dif.z());
-	m_glb_impactT->Fill(globtrk->impactParameter());
+	m_glb_impactT->Fill(logImpact);
 
 // these are TPC & FTPC
 	m_pointT->Fill(globtrk->detectorInfo()->numberOfPoints());
@@ -215,7 +221,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_r0T->Fill(globtrk->geometry()->origin().perp());
 	m_glb_phi0T->Fill(globtrk->geometry()->origin().phi()/degree);
 	m_glb_z0T->Fill(globtrk->geometry()->origin().z());
-	m_glb_curvT->Fill(globtrk->geometry()->curvature());
+	m_glb_curvT->Fill(logCurvature);
 
 	m_glb_xfT->Fill(globtrk->detectorInfo()->firstPoint().x());
 	m_glb_yfT->Fill(globtrk->detectorInfo()->firstPoint().y());
@@ -271,7 +277,7 @@ void StEventQAMaker::MakeHistGlob() {
         m_glb_xf0TS->Fill(dif.x());
         m_glb_yf0TS->Fill(dif.y());
         m_glb_zf0TS->Fill(dif.z());
-	m_glb_impactTS->Fill(globtrk->impactParameter());
+	m_glb_impactTS->Fill(logImpact);
 
 	m_pointTS->Fill(globtrk->detectorInfo()->numberOfPoints());
 	m_max_pointTS->Fill(globtrk->numberOfPossiblePoints());
@@ -281,7 +287,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_r0TS->Fill(globtrk->geometry()->origin().perp());
 	m_glb_phi0TS->Fill(globtrk->geometry()->origin().phi()/degree);
 	m_glb_z0TS->Fill(globtrk->geometry()->origin().z());
-	m_glb_curvTS->Fill(globtrk->geometry()->curvature());
+	m_glb_curvTS->Fill(logCurvature);
 
 	m_glb_xfTS->Fill(globtrk->detectorInfo()->firstPoint().x());
 	m_glb_yfTS->Fill(globtrk->detectorInfo()->firstPoint().y());
@@ -478,6 +484,10 @@ void StEventQAMaker::MakeHistPrim() {
 	Float_t chisq1 = primtrk->fitTraits().chi2(1);
         Float_t nfitntot = (Float_t(primtrk->fitTraits().numberOfFitPoints()))/
 	                   (Float_t(primtrk->detectorInfo()->numberOfPoints()));
+
+	Float_t logImpact = TMath::Log10(primtrk->impactParameter());
+	Float_t logCurvature = TMath::Log10(primtrk->geometry()->curvature());
+
 	// need to find position on helix closest to first point on track since
 	// the primary vertex is used as the first point on helix for primary
 	// tracks -CL
@@ -508,7 +518,7 @@ void StEventQAMaker::MakeHistPrim() {
 	m_ppT->Fill(pT);
         m_pmom->Fill(gmom);
 	m_plength->Fill(primtrk->length());
-        m_prim_impact->Fill(primtrk->impactParameter());
+        m_prim_impact->Fill(logImpact);
        	m_pchisq0->Fill(chisq0);
 	m_pchisq1->Fill(chisq1);
 
