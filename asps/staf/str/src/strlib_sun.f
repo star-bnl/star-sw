@@ -4,24 +4,24 @@
 
 	SUBROUTINE STRCPU(TCPU)
 	INTEGER TCPU
-	INTEGER MCLOCK
+	INTEGER STRCPUUSER
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
 
 
-	TCPU=MCLOCK()-NATCPU_T0
+	TCPU=STRCPUUSER()-NATCPU_T0
 	
 	RETURN
 	END
 
 	SUBROUTINE STRCPUQ(TCPU) !Quad (64-bit) version.
 	INTEGER TCPU(2)
-	INTEGER MCLOCK
+	INTEGER STRCPUUSER
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
 
 
-	TCPU(1)=MCLOCK()-NATCPU_T0
+	TCPU(1)=STRCPUUSER()-NATCPU_T0
 	TCPU(2)=0
 	
 	RETURN
@@ -32,22 +32,24 @@
 	IMPLICIT NONE
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
-	INTEGER MCLOCK
-	NATCPU_T0=MCLOCK()
+	INTEGER STRCPUUSER
+	NATCPU_T0=STRCPUUSER()
 	RETURN
 	END
 
-	INTEGER FUNCTION STRCPUTPS()
-
-	IMPLICIT NONE
-
-*  Return value:
-*	Native cpu clock ticks-per-second.
-
-	STRCPUTPS=60 !On SUN, it's 60 per second (for "times", via str's "mclock").
-
-	RETURN
-	END
+*	This is now replaced with a C routine which inquires the system
+*	with the sysconf call.
+*	INTEGER FUNCTION STRCPUTPS()
+*
+*	IMPLICIT NONE
+*
+**  Return value:
+**	Native cpu clock ticks-per-second.
+*
+*	STRCPUTPS=60 !On SUN, it's 60 per second (for "times", via str's "mclock").
+*
+*	RETURN
+*	END
 
 	SUBROUTINE STRDate( Year, Month, Day )
 

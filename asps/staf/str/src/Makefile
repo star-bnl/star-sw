@@ -11,9 +11,6 @@ CCFLAGS4     = -c -O -ansi -fullwarn -prototypes -irix4
 CCFLAGS_DBG  = -c -g -ansi -fullwarn -prototypes
 FFCC_LINK_FLAGS = 
 
-hi :
-	@echo "str Makefile hi"
-
 all : libstr.a libstr_dbg.a
 
 str4 : libstr4.a
@@ -146,14 +143,14 @@ str_time_dbg.o : str_time.f
 
 
 strbyte$(ARCH_TAG).o4 : strbyte$(ARCH_TAG).c
-	echo $ARCH_TAG
+	echo $(ARCH_TAG)
 	$(CC) $(CCFLAGS4) strbyte$(ARCH_TAG).c -o strbyte$(ARCH_TAG).o4
 
 strbyte$(ARCH_TAG).o : strbyte$(ARCH_TAG).c
 	$(CC) $(CCFLAGS) strbyte$(ARCH_TAG).c
 
 strbyte$(ARCH_TAG)_dbg.o : strbyte$(ARCH_TAG).c
-	echo $ARCH_TAG
+	echo $(ARCH_TAG)
 	$(CC) $(CCFLAGS_DBG) strbyte$(ARCH_TAG).c -o strbyte$(ARCH_TAG)_dbg.o
 
 

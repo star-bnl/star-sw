@@ -8,16 +8,14 @@
 *  Output:
 	INTEGER TCPU !CPU time in "ticks" since last STRCPUT0 call.
 
-*  Brief Description:  Get current CPU usage.
-
-*  Description:
+*  Description:  Get current CPU usage.
 *	Platform-specific call to get the CPU time.
 
-	INTEGER MCLOCK
+	INTEGER STRCPUUSER
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
 
-	TCPU=MCLOCK()-NATCPU_T0
+	TCPU=STRCPUUSER()-NATCPU_T0
 	
 	RETURN
 	END
@@ -26,24 +24,22 @@
 
 
 
-	SUBROUTINE STRCPUQ(TCPU) !Quad (64-bit) version.
+	SUBROUTINE STRCPUQ(TCPU) !Quad (64-bit) version; 2nd word always 0.
 
 *  Output:
 	INTEGER TCPU(2) !CPU time in "ticks" since last STRCPU0 call.
 
-*  Brief Description:  Get current CPU usage, quad-word.
-
-*  Description:
+*  Description:  Get current CPU usage, quad-word; otherwise same as STRCPU.
 *	Platform-specific call to get the CPU time in quad-word form.
 *	This really only does the same as STRCPU at present, with
 *	TCPU being an array instead of single-element.  TCPU(2)
 *	always comes back zero.
 
-	INTEGER MCLOCK
+	INTEGER STRCPUUSER
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
 
-	TCPU(1)=MCLOCK()-NATCPU_T0
+	TCPU(1)=STRCPUUSER()-NATCPU_T0
 	TCPU(2)=0
 	
 	RETURN
@@ -57,12 +53,12 @@
 
 	IMPLICIT NONE
 
-*  Brief Description: "Initialize" CPU elapsed time counter.
+*  Description: "Initialize" CPU elapsed time counter.
 
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
-	INTEGER MCLOCK
-	NATCPU_T0=MCLOCK()
+	INTEGER STRCPUUSER
+	NATCPU_T0=STRCPUUSER()
 	RETURN
 	END
 
@@ -70,16 +66,18 @@
 
 
 
-	INTEGER FUNCTION STRCPUTPS()
-
-	IMPLICIT NONE
-
-*  Brief Description: Return native CPU clock ticks-per_second.
-
-	STRCPUTPS=100 !On SGI, it's 100 per second.
-
-	RETURN
-	END
+*	This is now replaced with a C routine which inquires the system
+*	with the sysconf call.
+*	INTEGER FUNCTION STRCPUTPS()
+*
+*	IMPLICIT NONE
+*
+**  Description: Return native CPU clock ticks-per_second.
+*
+*	STRCPUTPS=100 !On SGI, it's 100 per second.
+*
+*	RETURN
+*	END
 
 
 
@@ -92,9 +90,7 @@
 *  Outputs:
 	INTEGER Year, Month, Day !Year is 4-digit, eg, 1991.
 
-*  Brief Description: Handles a call to the SGI time routine.
-
-*  Description:
+*  Description: Handles a call to the SGI time routine.
 *	Return the integer date.
 
 	INTEGER Itime, Days, Hour, Secs
@@ -178,10 +174,10 @@
 *  Input/output:
 	INTEGER I32 !32-bit integer to be 16-bit-word "swapped".
 
-*  Description:
+*  Description: Swap half-words to make host-endian into dec-endian.
 *	Swap the two 16-bit half-words in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
-*	DEC-style.  On AIX (here), the swapping is done.
+*	DEC-style.  On SGI (here), the swapping is done.
 
 *	Compatibility routine.  See STRDEC_ENDIAN_HALF.
 
@@ -201,7 +197,7 @@
 *  Input/Output:
 	INTEGER I32
 
-*  Description:
+*  Description: Swap bytes to make host-endian into dec-endian.
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On SGI (here), the swapping is done.
@@ -241,7 +237,7 @@
 *  Input/Output:
 	INTEGER Block(*) !Block of 32-bit words in to be reordered.
 
-*  Description:
+*  Description: Swap bytes in a number of words to make host-endian into dec-endian.
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On SGI (here), the swapping is done.
@@ -284,7 +280,7 @@
 *  Input/Output:
 	INTEGER I32
 
-*  Description:
+*  Description: Swap half-words to make host-endian into dec-endian.
 *	Swap the two 16-bit half-words in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On SGI (here), the swapping is done.
@@ -308,8 +304,7 @@
 
 	INTEGER FUNCTION STRDEC_IBITS(DATA,BIT0,BITS)
 
-*  Description:
-*	Do an IBITS, but make it act like DEC.
+*  Description:  Do a FORTRAN IBITS, but make it use DEC byte-ordering.
 
 	IMPLICIT NONE
 
@@ -331,7 +326,7 @@
 *  Input argument:
 	INTEGER LUN !FORTRAN Logical Unit of device (file) to be "flushed".
 
-*  Description:
+*  Description:  Flush the output buffer to a FORTRAN LUN.
 *	Do whatever platform-dependent operations are necessary to cause all
 *	pending output for the specified LUN to be sent to the actual device
 *	or file represented by the LUN, "flushing" out that device's buffer.
@@ -350,7 +345,7 @@
 
 	SUBROUTINE STRMOVE(COUNT,SOURCE,DEST)
 
-*  Description:
+*  Description:  Platform-specific efficient-word-move;  just a DO loop on SGI.
 *	SGI interface routine to (equivalent) to LIB$MOVC3.
 *	COUNT is a 32-bit word-count, not a byte-count.
 
@@ -373,8 +368,7 @@
 
 
 	SUBROUTINE STRMSEC(MSECS)
-*  Description:
-*	Standard interface routine to return milliseconds since midnight.
+*  Description: Platform-independent routine to return milliseconds since midnight.
 	IMPLICIT NONE
 	INTEGER MSECS
 	INTEGER HOUR,MIN,SEC
@@ -390,9 +384,9 @@
 
 	LOGICAL FUNCTION STRMSEC_DELAY(MSECS)
 
-*  Description:
-*	Standard interface routine to delay the specified time in
-*	milliseconds.
+*  Description:  Delay by wasting a specified interval of real time.
+*	Platform-independent routine to delay by a specified interval of
+*	real time, given in milliseconds.
 *	Returns .TRUE. for success, .FALSE. for failure, such as
 *	would occur for an illegally long, or negative time.
 
@@ -444,7 +438,7 @@
 
 	SUBROUTINE STRNET_ENDIAN_BYTE(I32)
 
-*  Description:
+*  Description: Swap bytes to make host-endian into network-endian.
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	Network-style.  On SGI (here), nothing is done.
@@ -462,7 +456,7 @@
 
 	SUBROUTINE STRNET_ENDIAN_BYTES(Nwords,Block)
 
-*  Description:
+*  Description: Swap bytes in a number of words to make host-endian into network-endian.
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	Network-style.  On SGI (here), nothing is done.
@@ -486,7 +480,7 @@
 
 	SUBROUTINE STRNET_ENDIAN_HALF(I32)
 
-*  Description:
+*  Description: Swap half-words to make host-endian into network-endian.
 *	Swap the two 16-bit half-words in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	Network-style.  On SGI (here), nothing is done.
@@ -535,9 +529,19 @@
 	INTEGER MAXREC_IARG !"MAXREC=" integer argument.
 	LOGICAL READONLY_FLAG !No-op on SGI.
 
-*  Description:
+*  Description:  Platform-independent interface to FORTRAN OPEN.
 *	Provides a machine-dependent (native) OPEN routine, intended
-*	to be called only from STROPEN (qv).
+*	to be called only from STROPEN (qv).  Most OPEN keywords are
+*	expressed as part of one, big little, almost exactly as they
+*	would appear in a FORTRAN OPEN statement, except that no apostrophes
+*	appear around keyword values, such as "STATUS='NEW'", which appears
+*	here as "STATUS=NEW", separated by commas or spaces from other
+*	keywords and values.  Values may be specified in hex (preceed with
+*	an "x" or "X"), octal (preceed with an "o" or "O") or binary
+*	(preceed with a "b" or "B").  The filename and LUN value appear
+*	separately, as the first two argments.  No parantheses should
+*	appear in the keyword literal;  only keywords and their values,
+*	if they take values.
 
 *  Note:
 *	The SG FORTRAN manual seems to indicate that the RECORDTYPE specifier
@@ -767,8 +771,7 @@
 	SUBROUTINE STRTIME(HOUR,MIN,SEC)
 	IMPLICIT NONE
 
-*  Description:
-*	Get the time in the current time zone.
+*  Description:  Get the time in the current time zone.
 
 	INTEGER HOUR,MIN,SEC
 	INTEGER ITIME,SECS,DAYS
@@ -807,8 +810,7 @@
 
 	INTEGER Ireal !Integer-cast of an IEEE-style floating number.
 
-*  Description:
-*	No-op under SGI!
+*  Description:  Convert host-float to IEEE-float;   No-op under SGI!
 
 *	Convert Ireal, which is passed to this routine as an integer
 *	cast of a Host-style floating number, into a DEC-style floating
@@ -828,9 +830,7 @@
 
 	INTEGER Ireal !Integer-cast of a Host-style floating number.
 
-*  Description:
-*	No-op under SGI!
-
+*  Description:   Convert host-float to IEEE-float;  No-op under SGI!
 *	Convert Ireal, which is passed to this routine as an integer
 *	cast of a Host-style floating number, into an IEEE-style floating
 *	number:
@@ -871,8 +871,7 @@
 
 	INTEGER Ireal !Integer-cast of a Host-style floating number.
 
-*  Description:
-
+*  Description:   Convert host-float to VAX-float.
 *	This is the IEEE version, which works for any host using the
 *	IEEE floating-representation.
 
@@ -950,8 +949,7 @@
 
 	INTEGER Ireal !Integer-cast of a DEC-style floating number.
 
-*  Description:
-
+*  Description:   Convert VAX-float to host-float.
 *	This is the generic version, which works anywhere on 32-bit
 *	floating numbers.
 
@@ -1061,7 +1059,7 @@
 *  Input:
 	REAL Seconds !Seconds to go to sleep, then wake up.
 
-*  Description:
+*  Description:  Wait without waste for a specified real time interval.
 *	Platform-independent call to interface platform-dependent
 *	system call to wait for the specified interval in seconds
 *	and then wake up and continue, exiting this rouine
@@ -1091,8 +1089,7 @@
 	IMPLICIT NONE
 *  Output:
 	INTEGER Seconds_Since_1970
-*  Description:
-*	Get the number of seconds since 1-Jan-1970, 00:00:00 GMT.
+*  Description:  Get the number of seconds since 1-Jan-1970, 00:00:00 GMT.
 	INTEGER TIME
 	Seconds_Since_1970 = TIME() !Seconds since 1-jan-1970.
 	RETURN
