@@ -1,5 +1,8 @@
-// $Id: StEEmcDataMaker.cxx,v 1.3 2003/04/29 16:18:39 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.4 2003/05/01 02:19:19 balewski Exp $
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.4  2003/05/01 02:19:19  balewski
+// fixed empry event problem
+//
 // Revision 1.3  2003/04/29 16:18:39  balewski
 // some ideas added
 //
@@ -104,24 +107,17 @@ Int_t StEEmcDataMaker::Make(){
   
   
   StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection();
-/*  make it work
-    if(!mEmc)
-                                        {
-                                                mEmc =new StEmcCollection();
-                                                if(event) event->setEmcCollection(mEmc);
-                                        }
 
-
-*/ 
-
- 
+  if(emcC==0) { // create this collection if not existing
+    emcC=new StEmcCollection();
+    mEvent->setEmcCollection(emcC);
+    printf(" %s::Make() has added a non existing StEmcCollection()\n", GetName());
+  }
   int det = kEndcapEmcTowerId; 
   StDetectorId id = StDetectorId(det);
   StEmcDetector* d = new StEmcDetector(id,12);
-  //   emcC->setDetector(d);                           <<== CRASH IS HERE
+  emcC->setDetector(d); 
 
-  int first=1;
-  
   int nDrop=0;
   int nMap=0;
   int nOver=0;
@@ -141,11 +137,6 @@ Int_t StEEmcDataMaker::Make(){
       
       int rawAdc=steemcreader->getTowerAdc(crate,chan);
       if(rawAdc<0) continue; // there was no data for this channel
-
-      if(first) { // tmp to avoid crash if BEMC has no data
-	emcC->setDetector(d);
-	first=0;
-      }
 
       float adc=rawAdc - x->ped;
       float energy=-1.;
