@@ -1,9 +1,9 @@
-****************************************************
+***************************************************
 * TO RUN:
 *
 *  1. stardev (or whichever version you want)
 *  2. staf
-*  3. exec $STAR/kumacs/chain/run_bfc
+*  3. exec $STAR/kumacs/chain/bfc
 * 
 * if you want to change anything, copy kumac to your area and change:
 *  4. input values on macro command line
