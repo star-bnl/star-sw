@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.3 2000/01/27 16:18:50 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.4 2000/01/27 18:30:12 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.4  2000/01/27 18:30:12  kathy
+// add Curtis' new method which reads in 2 histograms and overlays them - Overlay2Hists
+//
 // Revision 1.3  2000/01/27 16:18:50  kathy
 // adding more hist names in setdefaultlogx list to make tom trainor happier
 //
@@ -104,6 +107,7 @@
 #include "TMath.h"
 #include "TString.h"
 #include "TPaveLabel.h"
+#include "TLegend.h"
 #include "TDatime.h"
 
 #include "StChain.h"
@@ -1198,8 +1202,142 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 
 //_____________________________________________________________________________
 
+// Method Overlay2Hists
+//    - takes two histograms and overlays them
+//    - only considers TH1F and TH2F histogram types
 
+Int_t StHistUtil::Overlay2Hists(Char_t *dirName,Char_t *inHist1,
+				Char_t *inHist2) {
 
+  cout << " **** Now in StHistUtil::Overlay2Hists **** " << endl;
+
+  Int_t n1dHists = 0;
+  Int_t n2dHists = 0;
+
+// get the TList pointer to the histograms
+  TList  *dirList = 0;
+  dirList = FindHists(dirName);
+
+// check that directory exists
+  if (!dirList)
+    return kStErr;
+
+  cout << "Histogram directory exists -> Find and overlay histograms" << endl;
+// Now want to loop over all histograms
+// Create an iterator
+  TIter nextObj(dirList);
+  TObject *obj = 0;
+
+// temporary holder histograms
+  TH1F *hist1f1 = new TH1F;
+  TH1F *hist1f2 = new TH1F;
+  TH2F *hist2f1 = new TH2F;
+  TH2F *hist2f2 = new TH2F;
+
+// use = here instead of ==, because we are setting obj equal to nextObj
+// and then seeing if it's T or F
+  while ((obj = nextObj())) {
+
+// now check if obj is a histogram and see if it matches input name
+    if (obj->InheritsFrom("TH1")) {
+      if (obj->GetName() == (TString)inHist1 ||
+	  obj->GetName() == (TString)inHist2) {
+	cout << " Found Histogram: Type '" << obj->ClassName() << "', Name '"
+	     << obj->GetName() << "', Title '" << obj->GetTitle() << "'"
+	     << endl;
+
+// check on type of histogram and make copies
+	if (obj->ClassName() == (TString)"TH1F") {
+	  if (obj->GetName() == (TString)inHist1) {
+	    *hist1f1 = *(TH1F *)obj;
+	    n1dHists++;
+	  }
+	  if (obj->GetName() == (TString)inHist2) {
+	    *hist1f2 = *(TH1F *)obj;
+	    n1dHists++;
+	  }
+	}
+	if (obj->ClassName() == (TString)"TH2F") {
+	  if (obj->GetName() == (TString)inHist1) {
+	    *hist2f1 = *(TH2F *)obj;
+	    n2dHists++;
+	  }
+	  if (obj->GetName() == (TString)inHist2) {
+	    *hist2f2 = *(TH2F *)obj;
+	    n2dHists++;
+	  }
+	}
+      }
+    }
+  }
+
+  if (n1dHists || n2dHists) {
+// create a new canvas and pad to write to
+    TCanvas *newCanvas = new TCanvas("c1","Combined Histogram",600,780);
+    TPad *newPad = new TPad("p1","Combined Histogram",0.02,0.02,0.98,0.98);
+    newCanvas->Draw();
+    newPad->Draw();
+    newPad->cd();
+  }
+
+// if the two histograms exist, overlay them
+  if (n1dHists == 2) {
+    hist1f1->SetLineColor(4);
+    hist1f1->SetLineStyle(1);
+    hist1f2->SetLineColor(2);
+    hist1f2->SetLineStyle(2);
+
+    hist1f1->SetStats(kFALSE);
+    hist1f2->SetStats(kFALSE);
+
+// draw the histograms
+    hist1f1->SetTitle(hist1f1->GetTitle()+(TString)" and "+hist1f2->GetTitle());
+    hist1f1->Draw();
+    hist1f2->Draw("Same");
+
+// make a legend
+    TLegend *legend = new TLegend(0.75,0.85,0.98,0.95);
+    legend->SetFillColor(0);
+    legend->SetHeader("Legend");
+    legend->SetMargin(0.25);
+    legend->AddEntry(hist1f1,inHist1,"l");
+    legend->AddEntry(hist1f2,inHist2,"l");
+    legend->Draw();
+
+    return kStOk;
+  }
+
+// not really sure a 2D overlay is necessary -CPL
+  if (n2dHists == 2) {
+    //hist2f1->SetFillColor(4);
+    //hist2f1->SetFillStyle(3006);
+    //hist2f2->SetFillColor(2);
+    //hist2f2->SetFillStyle(3007);
+
+    hist2f1->SetStats(kFALSE);
+    hist2f2->SetStats(kFALSE);
+
+// draw the histograms
+    hist2f1->SetTitle(hist2f1->GetTitle()+(TString)" and "+hist2f2->GetTitle());
+    hist2f1->Draw("Surf3Fb");
+    hist2f2->Draw("Surf3FbSame");
+
+// make a legend
+    TLegend *legend = new TLegend(0.75,0.85,0.98,0.95);
+    legend->SetFillColor(0);
+    legend->SetHeader("Legend");
+    legend->SetMargin(0.25);
+    legend->AddEntry(hist2f1,inHist1,"f");
+    legend->AddEntry(hist2f2,inHist2,"f");
+    legend->Draw();
+
+    return kStOk;
+  }
+
+  return kStErr;
+}
+
+//_____________________________________________________________________________
 
 
 
