@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.51 1998/09/16 21:52:13 fisyak Exp $
+# $Id: MakePam.mk,v 1.52 1998/09/18 13:42:15 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.52  1998/09/18 13:42:15  fisyak
+# Add dependencies for St_*Tables from base
+#
 # Revision 1.51  1998/09/16 21:52:13  fisyak
 # Add dependencies for StRoot
 #
@@ -328,7 +331,7 @@ $(GEN_TAB)/.rootrc:
 	@echo 'Rint.Logon:              ./gentable.C'>>  $(ALL_TAGS)
 	@echo 'Rint.History:             /dev/null'>>  $(ALL_TAGS)
 
-$(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
+$(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc $(STAR)/StRoot/base/*.h)
 	@echo "{" >   $(GEN_TAB)/gentable.C;
 	@echo "   gSystem->Load(\"St_base.so\");" >> $(GEN_TAB)/gentable.C;
 	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/gentable.C;
@@ -339,7 +342,7 @@ $(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
 	cd $(GEN_TAB); root.exe -b -q /dev/null > /dev/null; $(RM) gentable.C
 #$(FILES_THH) : $(GEN_TAB)/St_%_Table.h   : %.idl
 #	cp  $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -r -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
-$(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
+$(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc $(STAR)/StRoot/base/*.h)
 	@echo "{" >   $(GEN_TAB)/gentable.C;
 	@echo "   gSystem->Load(\"St_base.so\");" >> $(GEN_TAB)/gentable.C;
 	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/gentable.C;
