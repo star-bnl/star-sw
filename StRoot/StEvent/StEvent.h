@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.8 2000/04/26 20:33:26 ullrich Exp $
+ * $Id: StEvent.h,v 2.9 2000/05/15 18:35:37 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,14 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.8  2000/04/26 20:33:26  ullrich
- * Removed redundant virtual keywords.
+ * Revision 2.9  2000/05/15 18:35:37  ullrich
+ * All data member related to collections and containers are now
+ * kept by pointer. The interface (public methods) stays the same.
+ * Those methods which returns references were modified to create
+ * an empty collection in case the pointer is null.
+ *
+ * Revision 2.12  2000/06/19 01:32:15  perev
+ *  Thomas StEvent branches added
  *
  * Revision 2.11  2000/05/24 15:46:10  ullrich
  * Added setSummary() method.
@@ -145,36 +151,36 @@ public:
     void setTime(Long_t);
     void setTriggerMask(ULong_t);
     void setRichPixelCollection(StRichPixelCollection*);
-    TString                      mType;
-    Long_t                       mRunId;
-    Long_t                       mId;
-    Long_t                       mTime;
-    ULong_t                      mTriggerMask;
-    ULong_t                      mBunchCrossingNumber;
+    void setInfo(StEventInfo*);
+    void setSummary(StEventSummary*);
+    void setSoftwareMonitor(StSoftwareMonitor*);
+    void setTpcHitCollection(StTpcHitCollection*);
+    void setFtpcHitCollection(StFtpcHitCollection*);
+    void setSvtHitCollection(StSvtHitCollection*);
+    void setSsdHitCollection(StSsdHitCollection*);
+    void setEmcCollection(StEmcCollection*);
+    void setRichCollection(StRichCollection*);
+    TString                              mType;
+    Long_t                               mRunId;
+    Long_t                               mId;
+    Long_t                               mTime;
+    ULong_t                              mTriggerMask;
+    ULong_t                              mBunchCrossingNumber;
+                                             
+    StEventSummary*                      mSummary;
+    StSoftwareMonitor*                   mSoftwareMonitor;
+                                         
+    StTpcHitCollection*                  mTpcHits;
+    StRichPixelCollection*               mRichPixels;
+    StSvtHitCollection*                  mSvtHits;
+    StSsdHitCollection*                  mSsdHits;
+    StRichCollection*                    mRichCollection;
+    StEmcCollection*                     mEmcCollection;
     
-    StEventSummary*              mSummary;
-    StSoftwareMonitor*           mSoftwareMonitor;
+    StTriggerDetectorCollection*         mTriggerDetectors;
+    StL0Trigger*                         mL0Trigger;
+    StL3Trigger*                         mL3Trigger;
 
-    StTpcHitCollection*          mTpcHits;
-    StFtpcHitCollection*         mFtpcHits;
-    StSvtHitCollection*          mSvtHits;
-    StSsdHitCollection*          mSsdHits;
-    StRichPixelCollection*       mRichPixels;
-    StEmcCollection*             mEmcCollection;
-    
-    StTriggerDetectorCollection* mTriggerDetectors;
-    StL0Trigger*                 mL0Trigger;
-    StL3Trigger*                 mL3Trigger;
-
-    StSPtrVecTrackDetectorInfo   mTrackDetectorInfo;
-    StSPtrVecTrackNode           mTrackNodes;
-
-    StSPtrVecPrimaryVertex       mPrimaryVertices;
-    StSPtrVecV0Vertex            mV0Vertices;
-    StSPtrVecXiVertex            mXiVertices;
-    StSPtrVecKinkVertex          mKinkVertices;
-
-    static TString               mCvsTag;
     mutable StSPtrVecTrackDetectorInfo*  mTrackDetectorInfo;
     mutable StSPtrVecTrackNode*          mTrackNodes;
 

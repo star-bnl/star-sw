@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.10 2000/04/26 20:33:24 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.11 2000/05/15 18:35:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,14 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.10  2000/04/26 20:33:24  ullrich
- * Removed redundant virtual keywords.
+ * Revision 2.11  2000/05/15 18:35:38  ullrich
+ * All data member related to collections and containers are now
+ * kept by pointer. The interface (public methods) stays the same.
+ * Those methods which returns references were modified to create
+ * an empty collection in case the pointer is null.
+ *
+ * Revision 2.15  2000/09/06 22:34:12  ullrich
+ * Changed mBunchCrossingNumber from scalar to array to hold all 64 bits.
  *
  * Revision 2.14  2000/06/19 01:32:15  perev
  * Thomas StEvent branches added
@@ -66,8 +72,8 @@
 #include "StEventSummary.h"
 #include "StSoftwareMonitor.h"
 #include "StTpcHitCollection.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.10 2000/04/26 20:33:24 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.10 2000/04/26 20:33:24 ullrich Exp $";
+#include "StSvtHitCollection.h"
+#include "StSsdHitCollection.h"
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StRichCollection.h"
@@ -75,8 +81,8 @@ static const char rcsid[] = "$Id: StEvent.cxx,v 2.10 2000/04/26 20:33:24 ullrich
 #include "StTriggerDetectorCollection.h"
 #include "StPrimaryVertex.h"
 #include "StL0Trigger.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.10 2000/04/26 20:33:24 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.10 2000/04/26 20:33:24 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.11 2000/05/15 18:35:38 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.11 2000/05/15 18:35:38 ullrich Exp $";
 #include "tables/St_dst_event_summary_Table.h"
 #include "tables/St_dst_summary_param_Table.h"
 #include "StAutoBrowse.h"
@@ -90,6 +96,12 @@ using std::swap;
     mBunchCrossingNumber = 0;
     mSummary = 0;
     mSoftwareMonitor = 0;
+    mTpcHits = 0;
+    mFtpcHits = 0;
+    mRichPixels = 0;
+    mSsdHits = 0;
+    mEmcCollection = 0;
+    mRichCollection = 0;
     mTriggerDetectors = 0;
     mL0Trigger = 0;
     mL3Trigger = 0;
@@ -99,7 +111,7 @@ using std::swap;
     mV0Vertices = 0;
     mXiVertices = 0;
     mKinkVertices = 0;
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.10 2000/04/26 20:33:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.11 2000/05/15 18:35:38 ullrich Exp $";
 void
 StEvent::initToZero()
 
@@ -127,16 +139,22 @@ StEvent::StEvent() : St_DataSet("StEvent")
     mSummary = new StEventSummary(evtSum, sumPar);
   
 StEvent::StEvent(const event_header_st& evtHdr,
-    delete mSummary; mSummary = 0;
-    delete mSoftwareMonitor; mSoftwareMonitor = 0;
-    delete mTpcHits; mTpcHits = 0;
-    delete mFtpcHits; mFtpcHits = 0;
-    delete mSvtHits; mSvtHits = 0;
-    delete mSsdHits; mSsdHits = 0;
-    delete mRichPixels; mRichPixels = 0;
-    delete mTriggerDetectors; mTriggerDetectors = 0;
-    delete mL0Trigger; mL0Trigger = 0;
-    delete mL3Trigger; mL3Trigger = 0;
+                 const dst_event_summary_st& evtSum,
+                 const dst_summary_param_st& sumPar) :
+    St_DataSet("StEvent")
+    mContent[mSummary] = new StEventSummary(evtSum, sumPar);
+    initToZero();
+    init(evtHdr);
+    mContent.push_back(new StEventSummary(evtSum, sumPar));
+}
+
+    delete mSummary;           mSummary = 0;
+    delete mSoftwareMonitor;   mSoftwareMonitor = 0;
+    delete mTpcHits;           mTpcHits = 0;
+    delete mRichPixels;        mRichPixels = 0;
+    delete mSvtHits;           mSvtHits = 0;
+    delete mSsdHits;           mSsdHits = 0;
+    delete mRichCollection;    mRichCollection = 0;
     delete mTriggerDetectors;  mTriggerDetectors = 0;
     delete mL0Trigger;         mL0Trigger = 0;
     delete mL3Trigger;         mL3Trigger = 0;
@@ -227,25 +245,48 @@ StEvent::triggerDetectorCollection() const { return mTriggerDetectors; }
 StEvent::l0Trigger() { return mL0Trigger; }
     _lookup(trg, mContent);
     return trg;
-StEvent::trackDetectorInfo() { return mTrackDetectorInfo; }
+StEvent::l0Trigger() const { return mL0Trigger; }
+    _lookup(trg, mContent);
+    return trg;
+StEvent::l3Trigger() { return mL3Trigger; }
+    _lookup(trg, mContent);
+    return trg;
 StEvent::l3Trigger() const { return mL3Trigger; }
     _lookup(trg, mContent);
-StEvent::trackDetectorInfo() const { return mTrackDetectorInfo; }
+    return trg;
 }
 
-StEvent::trackNodes() { return mTrackNodes; }
+    if (!mTrackDetectorInfo)
+        mTrackDetectorInfo = new StSPtrVecTrackDetectorInfo;
+    return *mTrackDetectorInfo;
+}
+
+
+    if (!mContent[mTrackDetectorInfo])
+        mContent[mTrackDetectorInfo] = new StSPtrVecTrackDetectorInfo;
+    if (!mTrackDetectorInfo)
+        mTrackDetectorInfo = new StSPtrVecTrackDetectorInfo;
+    return *mTrackDetectorInfo;
     return *info;
 }
-StEvent::trackNodes() const { return mTrackNodes; }
+
+    if (!mContent[mTrackDetectorInfo])
+        mContent[mTrackDetectorInfo] = new StSPtrVecTrackDetectorInfo;
+    if (!mTrackNodes)
+        mTrackNodes = new StSPtrVecTrackNode;
+    return *mTrackNodes;
     return *info;
 }
-StEvent::numberOfPrimaryVertices() const { return mPrimaryVertices.size(); }
+
+    if (!mContent[mTrackNodes])
+        mContent[mTrackNodes] = new StSPtrVecTrackNode;
+    if (!mTrackNodes)
         mTrackNodes = new StSPtrVecTrackNode;
     return *mTrackNodes;
     return *nodes;
 }
-    if (i < mPrimaryVertices.size())
-        return mPrimaryVertices[i];
+
+    if (!mContent[mTrackNodes])
         mContent[mTrackNodes] = new StSPtrVecTrackNode;
     return mPrimaryVertices ? mPrimaryVertices->size() : 0;
     StSPtrVecTrackNode *nodes = 0;
@@ -253,29 +294,59 @@ StEvent::numberOfPrimaryVertices() const { return mPrimaryVertices.size(); }
     return *nodes;
 }
 
-    if (i < mPrimaryVertices.size())
-        return mPrimaryVertices[i];
+    if (mPrimaryVertices && i < mPrimaryVertices->size())
+        return (*mPrimaryVertices)[i];
     _lookupOrCreate(vertices, mContent);
     return vertices ? vertices->size() : 0;
 }
 
     if (mContent[mPrimaryVertices] && i < static_cast<StSPtrVecPrimaryVertex*>(mContent[mPrimaryVertices])->size())
-StEvent::v0Vertices() { return mV0Vertices; }
-}
-
-StEvent::v0Vertices() const { return mV0Vertices; }
+        return (*static_cast<StSPtrVecPrimaryVertex*>(mContent[mPrimaryVertices]))[i];
+    _lookup(vertices, mContent);
+    if (mPrimaryVertices && i < mPrimaryVertices->size())
+        return (*mPrimaryVertices)[i];
+    else
         return 0;
 }
-StEvent::xiVertices() { return mXiVertices; }
+
+    if (mContent[mPrimaryVertices] && i < static_cast<StSPtrVecPrimaryVertex*>(mContent[mPrimaryVertices])->size())
+        return (*static_cast<StSPtrVecPrimaryVertex*>(mContent[mPrimaryVertices]))[i];
+    _lookup(vertices, mContent);
+    if (!mV0Vertices)
+        mV0Vertices = new StSPtrVecV0Vertex;
+    return *mV0Vertices;
+        return 0;
+}
+
+    if (!mContent[mV0Vertices])
+        mContent[mV0Vertices] = new StSPtrVecV0Vertex;
+    if (!mV0Vertices)
+        mV0Vertices = new StSPtrVecV0Vertex;
+    return *mV0Vertices;
     return *vertices;
 }
-StEvent::xiVertices() const { return mXiVertices; }
+
+    if (!mContent[mV0Vertices])
+        mContent[mV0Vertices] = new StSPtrVecV0Vertex;
+    if (!mXiVertices)
+        mXiVertices = new StSPtrVecXiVertex;
+    return *mXiVertices;
     return *vertices;
 }
-StEvent::kinkVertices() { return mKinkVertices; }
+
+    if (!mContent[mXiVertices])
+        mContent[mXiVertices] = new StSPtrVecXiVertex;
+    if (!mXiVertices)
+        mXiVertices = new StSPtrVecXiVertex;
+    return *mXiVertices;
     return *vertices;
 }
-StEvent::kinkVertices() const { return mKinkVertices; }
+
+    if (!mContent[mXiVertices])
+        mContent[mXiVertices] = new StSPtrVecXiVertex;
+    if (!mKinkVertices)
+        mKinkVertices = new StSPtrVecKinkVertex;
+    return *mKinkVertices;
     return *vertices;
 }
 
@@ -370,16 +441,18 @@ StEvent::setRichPixelCollection(StRichPixelCollection* val)
     _lookupAndSet(val, mContent);
 }
 
-        mPrimaryVertices.push_back(vertex);
+    if (mContent[mL0Trigger]) delete mContent[mL0Trigger];
+    if (mL3Trigger) delete mL3Trigger;
+    mL3Trigger = val;
 {
     _lookupAndSet(val, mContent);
 }
 
     if (mContent[mL3Trigger]) delete mContent[mL3Trigger];
     mContent[mL3Trigger] = val;
-        for (int i=mPrimaryVertices.size()-1; i>0; i--) {
-            if (mPrimaryVertices[i]->numberOfDaughters() > mPrimaryVertices[i-1]->numberOfDaughters())
-                swap(mPrimaryVertices[i], mPrimaryVertices[i-1]);
+        if (!mPrimaryVertices)
+            mPrimaryVertices = new StSPtrVecPrimaryVertex;
+        mPrimaryVertices->push_back(vertex);
         if (!mContent[mPrimaryVertices])
             mContent[mPrimaryVertices] = new StSPtrVecPrimaryVertex;
 
