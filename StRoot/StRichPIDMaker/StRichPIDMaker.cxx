@@ -1,15 +1,18 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.7 2000/10/19 01:13:23 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.8 2000/10/19 06:12:52 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.7  2000/10/19 01:13:23  horsley
- * added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
- * added normal distance sigma cut on hits, quartz and radiator pathlengths
- * for individual photons, modified minimization routine to correct boundary
- * problems
+ * Revision 2.8  2000/10/19 06:12:52  horsley
+ * fixed pointer problem in fillPIDNtuple member function
+ *
+ * Revision 2.19  2000/11/25 12:27:12  lasiuk
+ * mean angle -> psi.  Fill the photonInfo.  take care of flag
+ * ambiguities where possible.  Remove the old commented hitFilter
+ * code.  Store the TOTAL CONSTANT AREA and TOTAL CONSTANT AREA ON
+ * ACTIVE PAD-PLANE
  *
  * Revision 2.18  2000/11/23 01:46:15  lasiuk
  * pt threshold modification
@@ -134,10 +137,10 @@ using std::max;
 //#include "StarCallf77.h"
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.7 2000/10/19 01:13:23 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.8 2000/10/19 06:12:52 horsley Exp $";
 
 	track->geometry() && 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.7 2000/10/19 01:13:23 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.8 2000/10/19 06:12:52 horsley Exp $";
 	(fabs(track->geometry()->momentum().pseudoRapidity()) < mEtaCut) &&
 Int_t StRichPIDMaker::Make() { 
   
@@ -1248,7 +1251,10 @@ StRichPIDMaker::fillPIDNtuple() {
     StRichTrack* track = mListOfStRichTracks[trackIndex];
     StRichPidTraits* pidTrait = track->getPidTrait();
 
-	    StThreeVectorF residual(track->getProjectedMIP() - track->getAssociatedMIP()->local());
+    if (pidTrait) {
+    
+      StRichPid* pionPid = 0;
+      StRichPid* kaonPid = 0;
       StRichPid* protonPid = 0;
 
       //
