@@ -16,7 +16,7 @@
 
 // needed for solaris cc5
 #if !defined(ST_NO_NAMESPACES)
-using namespace std;
+//VP using namespace std;
 #endif
 
 //
@@ -30,8 +30,12 @@ const double bFactor = 0.0029979 ;
 //
 //-->   Functions
 //
-//#define min(a,b)    ( ( (a) < (b) ) ? (a) : (b) )
-//#define max(a,b)    ( ( (a) > (b) ) ? (a) : (b) )
+#ifndef min
+#define min(a,b)    ( ( (a) < (b) ) ? (a) : (b) )
+#endif
+#ifndef max
+#define max(a,b)    ( ( (a) > (b) ) ? (a) : (b) )
+#endif
 #define seta(r,z)   (float)(3.0F * (z) / (fabs(z)+2.0F*(r)))
 #define reta(eta,r) ((2.F*(r)*eta / ( 3 - fabs(eta)) )) 
 #define sgn(a)      (float)( ( (a) > 0   ) ? (1) :(-1) )
