@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.h,v 1.8 2003/12/24 13:44:54 fisyak Exp $
+ * $Id: StMixerMaker.h,v 1.9 2004/04/01 02:37:50 jeromel Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,12 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.h,v $
+ * Revision 1.9  2004/04/01 02:37:50  jeromel
+ * Last commit forgot to advertize that writeFile() was removed but is used
+ * in embedding. Corrected.
+ * SetSequenceMerging added (matches TPCReader and tpcdaq_Maker methods). Before
+ * that FCF mebedding would NOT run properly.
+ *
  * Revision 1.8  2003/12/24 13:44:54  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -62,9 +68,9 @@ class StTrsDigitalSector;
 
 // Output Data
 class StTrsRawDataEvent;
-#if 0
+
 class StTrsOstream;
-#endif
+
 class StTpcRawDataEvent;
 class StSequence;
 
@@ -90,15 +96,18 @@ class StMixerMaker : public StMaker {
     StTrsSector               *mSector1; //!
     StTrsSector               *mSector2; //!
     StTrsDigitalSector        *mDigitalSector; //!
-#if 0
+
     // I/O streams
     char*                        mOutputFileName; //!
-    StTrsOstream*                mOutputStreamMixer; //!
+    //StTrsOstream*                mOutputStreamMixer; //!
     int                          mNumberOfEvents; //!
-#endif
+
     // Output
     StTrsRawDataEvent            *mAllTheDataMixer; //!
    
+    // to pass to tpcdaq_Maker
+    char                         mMergeSequences;
+
     int                          mFirstSector;
     int                          mLastSector;
 
@@ -117,12 +126,13 @@ class StMixerMaker : public StMaker {
     Char_t   *GetConfig2() {return gConfig2;}
     int   getSequences1(int sector,int row,int pad,int *nseq,StSequence **listOfSequences);//!
     int   getSequences2(int sector,int row,int pad,int *nseq,StSequence **listOfSequences);//!
-#if 0
-    int   writeFile(char*, int); //!
-#endif
+
+    int   writeFile(char*, int);   //!
+    char SetSequenceMerging(char); //!
+
     virtual const char *GetCVS() const
       {
-	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.8 2003/12/24 13:44:54 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.9 2004/04/01 02:37:50 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StMixerMaker, 2)  // StAF chain virtual base class for Makers
 };
