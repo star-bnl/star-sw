@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.cc,v 1.13 2004/09/17 08:55:40 jcs Exp $
+//   $Id: StFtpcGasUtilities.cc,v 1.14 2005/01/17 15:58:05 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.cc,v $
+//   Revision 1.14  2005/01/17 15:58:05  jcs
+//   use all 6 ftpc west body temperature readings for 2005 run
+//
 //   Revision 1.13  2004/09/17 08:55:40  jcs
 //   add corrections for processing 2004 pp data
 //
@@ -143,9 +146,9 @@ Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate, Int_t runNumber) 
 	 numberBodyTemperaturesWest++;
 	 cout<<mGas->getBody4West()<<" (body4West) ";
       }		 
-      // from 2003-10-31 -> 2004-01-24 there are 2 additional body temperature sensors
-      if ( dbDate >= 20031031 && dbDate <= 20040124) {
-         cout<<"(dbDate = "<<dbDate<<" >= 20031031 && <= 20040124 activate additional body temperature sensors) ";
+      // from 2003-10-31 -> 2004-01-24 and as of 2004-04-04 there are 2 additional body temperature sensors
+      if ( dbDate >= 20031031 && dbDate <= 20040124 || dbDate >= 20040404) {
+         cout<<"(dbDate = "<<dbDate<<" >= 20031031 && <= 20040124 ||  >= 20040404 activate additional body temperature sensors) ";
          if (mGas->getBody5West() >= mDb->minGasTemperature() && mGas->getBody5West() <= mDb->maxGasTemperature() ) {
             averageBodyTemperatureWest = averageBodyTemperatureWest + mGas->getBody5West();	 
 	    numberBodyTemperaturesWest++;
@@ -226,7 +229,7 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) 
 		 numberBodyTemperaturesEast++;
 	         cout<<mGas->getBody4East()<<" (body4East) ";
       }		 
-      // from 2003-10-31 -> 2004-01-24 and from 2004-04-04 there are 2 additional body temperature sensors
+      // from 2003-10-31 -> 2004-01-24 and as of 2004-04-04 there are 2 additional body temperature sensors
       if ( dbDate >= 20031031 && dbDate <= 20040124 || dbDate >= 20040404 ) {
          cout<<"(dbDate = "<<dbDate<<" >= 20031031 && <= 20040124 ||  >= 20040404 activate additional body temperature sensors) ";
          if (mGas->getBody5East() >= mDb->minGasTemperature() && mGas->getBody5East() <= mDb->maxGasTemperature() ) {
