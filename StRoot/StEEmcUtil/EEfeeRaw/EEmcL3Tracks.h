@@ -2,14 +2,11 @@
 #ifndef EEmcL3Tracks_h
 #define EEmcL3Tracks_h
 /*********************************************************************
- * $Id: EEmcL3Tracks.h,v 1.6 2003/05/30 21:07:52 zolnie Exp $
+ * $Id: EEmcL3Tracks.h,v 1.7 2003/05/31 02:17:24 zolnie Exp $
  *********************************************************************
  * $Log: EEmcL3Tracks.h,v $
- * Revision 1.6  2003/05/30 21:07:52  zolnie
- * added track length and number of points
- *
- * Revision 1.5  2003/05/30 20:37:09  zolnie
- * added L3 track flag to EEmcHelix
+ * Revision 1.7  2003/05/31 02:17:24  zolnie
+ * new fields tracks length, npoints
  *
  * Revision 1.4  2003/05/28 21:02:49  zolnie
  * added getNumberOfTracks method
@@ -38,33 +35,27 @@
 
 class EEmcHelix : public TObject {
 public:
-  EEmcHelix() { mOx=mOy=mOz=mPx=mPy=mPz=mLength=mB=0.0; mQ=mPoints=mFlag=0; };
-  EEmcHelix(Float_t x, Float_t y, Float_t z, Float_t px, Float_t py, Float_t pz,
-	    Int_t   q, Float_t B, Int_t  np, Float_t l , Int_t mFlag);
+  EEmcHelix() { mOx=mOy=mOz=mPx=mPy=mPz=0.0; mQ=0; mB=0.0; };
+  EEmcHelix(Float_t x , Float_t y ,Float_t z, Float_t px,Float_t py,Float_t pz,
+	    Int_t   q , Float_t B);
   EEmcHelix(const EEmcHelix &h);
 
-  void  setOrigin  (Float_t x ,Float_t y ,Float_t z ) { mOx=x; mOy=y; mOz=z; }
-  void  setMomentum(Float_t px,Float_t py,Float_t pz) { mPx=px;mPy=py;mPz=pz;}
+  void  setOrigin  (Float_t x ,Float_t y ,Float_t z ) { mOx=x;  mOy=y;  mOz=z; }
+  void  setMomentum(Float_t px,Float_t py,Float_t pz) { mPx=px; mPy=py; mPz=pz; }
   void  setQ       (Int_t   q )                       { mQ = q;  }
   void  setB       (Float_t B )                       { mB = B;  } 
-  void  setFlag    (Int_t   f )                       { mFlag   = f; }
-  void  setPoints  (Int_t   n )                       { mPoints = n; }
-  void  setLength  (Float_t l )                       { mLength = l; }
 
-  void  getOrigin  (Float_t &x,Float_t &y,Float_t &z) const {x=mOx;y=mOy;z=mOz;}
-  void  getMomentum(Float_t &x,Float_t &y,Float_t &z) const {x=mPx;y=mPy;z=mPz;}
+  void    getOrigin  (Float_t &x  ,Float_t &y ,Float_t &z ) const { x=mOx;  y=mOy;  z=mOz; }
+  void    getMomentum(Float_t &px ,Float_t &py,Float_t &pz) const { px=mPx; py=mPy; pz=mPz; }
 
-  Float_t Ox()     const { return mOx;  }
-  Float_t Oy()     const { return mOy;  }
-  Float_t Oz()     const { return mOz;  }
-  Float_t Px()     const { return mPx;  }
-  Float_t Py()     const { return mPy;  }
-  Float_t Pz()     const { return mPz;  }
-  Int_t   Q ()     const { return mQ;   }
-  Float_t B ()     const { return mB;   } 
-  Int_t   Points() const { return mFlag;}
-  Float_t Length() const { return mFlag;}
-  Int_t   Flag()   const { return mFlag;}
+  Float_t Ox()   const { return mOx;  }
+  Float_t Oy()   const { return mOy;  }
+  Float_t Oz()   const { return mOz;  }
+  Float_t Px()   const { return mPx;  }
+  Float_t Py()   const { return mPy;  }
+  Float_t Pz()   const { return mPz;  }
+  Int_t   Q ()   const { return mQ;   }
+  Float_t B ()   const { return mB;   } 
 
   void    print(FILE *fd) const;
   
@@ -77,28 +68,24 @@ private:
   Float_t mPz;  // z momentum at origin
   Float_t mB;   // field
   Int_t   mQ;   // charge
-  Int_t   mPoints;
-  Float_t mLength;
-  Int_t   mFlag;// 0==primary, 1==secondary
-  
 
-  ClassDef(EEmcHelix,3)   
+  ClassDef(EEmcHelix,2)   
 };
 
 class EEmcL3Tracks : public TObject {
 public:
   EEmcL3Tracks();
   virtual ~EEmcL3Tracks();
-  int     add  (EEmcHelix &h, Float_t dedx);
-  void    clear();
-  void    setVertex(float  x,float  y,float  z) {mVertX=x; mVertY=y; mVertZ=z;};
+  int  add  (EEmcHelix &h, Float_t dedx);
+  void clear();
+  void setVertex(float  x,float  y,float  z) {mVertX=x; mVertY=y; mVertZ=z;};
 
-  void    getVertex(float& x,float& y,float& z) {x=mVertX; y=mVertY; z=mVertZ;};
-  Float_t getdEdx  (int i)    {return((0<=i && i<mNTracks)?mDedx[i]:-MAXFLOAT);}
-  Int_t   getNumberOfTracks() {return mNTracks;}
+  void       getVertex(float& x,float& y,float& z) {x=mVertX; y=mVertY; z=mVertZ;};
+  Float_t    getdEdx  (int i) { return (0<=i && i<mNTracks) ?  mDedx[i] : -MAXFLOAT; }
+  Int_t      getNumberOfTracks() { return mNTracks; }
   EEmcHelix* getHelix (int i) ; 
-  
-  void       print(FILE *f = stdout) const;
+
+  void print(FILE *f = stdout) const;
 
 private:
   static const Int_t mAllocTracks;//!
