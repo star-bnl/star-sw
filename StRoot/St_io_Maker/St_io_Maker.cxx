@@ -101,7 +101,7 @@ St_io_Maker::~St_io_Maker()
   DestroyBranchList();
 
   if (m_TreeRootFile) {
-    if (m_Tree) { m_Tree = 0; g_StChain(m_Tree);}
+    if (m_Tree) { m_Tree = 0; g_Chain->SetTree(m_Tree);}
     delete m_TreeRootFile;
     m_TreeRootFile = 0;
   }
@@ -190,7 +190,7 @@ Int_t St_io_Maker::AddFilesFromFile(const Char_t *fileName)
        FILE *inputList = fopen(expandedFileName,"r");
        if (inputList) {
          while (feof(inputList)){
-           const Char_t file[512];
+           Char_t file[512];
            if(fgets(file,512,inputList)) { AddFile(file); fileCounter++; }
            else perror("St_io_Maker::AddFilesFromFile");
          }
@@ -231,7 +231,7 @@ void St_io_Maker::BuildBranchList(TTree *tree)
 
   TBranch *nextb = 0;
   TObjArray *branches = tree->GetListOfBranches();
-  if (!branches)       return 0;
+  if (!branches)   return;
   TIter next(branches);
   while (nextb = (TBranch *)next())  
   {
@@ -454,7 +454,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.11 1999/03/05 22:38:51 fine Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.12 1999/03/06 02:31:13 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
@@ -507,7 +507,7 @@ TTree *St_io_Maker::SetNextTree()
      while( (s = (TObjString *)m_FileIterator->Next()) && !m_TreeRootFile)
      {
 //       Char_t *fileName = gSystem->ExpandPathName(s->String());
-       Char_t *fileName = s->String();
+       const Char_t *fileName = s->String();
        cout << "Opening next root file :" << fileName << endl;
        m_TreeRootFile = new TFile(fileName);
        if (m_TreeRootFile->IsZombie()) { 
