@@ -25,11 +25,13 @@ cut = ' \( -type d -a ! -name CVS -a ! -name idl _
 list = ''
 if $fexist([pam])=1 then
 list = $shell('find '//[pam]//[cut]);
+message [list]
 endif
 listr = ''
 file = $STAR/[pam]
 if $fexist([file])=1 then
   listr= $shell('find $STAR/'//[pam]//[cut]);
+message [listr]
 endif
 list_len = $len([list]) + $len([listr])
 l1 = [list]
@@ -85,12 +87,12 @@ macro ld_private
   n = $words([pam],'/') 
   p = $word([pam],[n],[n],'/')
   for/call  csrmsl($quote([p]))
-  shell gmake SILENT=YES -f $STAR/mgr/MakePam.mk -C [pam]
-  slib = lib/$STAR_SYS/[p].sl
+  shell gmake NOROOT=YES SILENT=YES -f $STAR/mgr/MakePam.mk -C [pam]
+  slib = .$STAR_SYS/lib/[p].sl
   sl = $fexist([slib])
   if [sl]=1 then
     message  '================ Load private shared library:' [slib] '================'
-    call  csrmsl($quote([p]))
+    for/call  csrmsl($quote([p]))
     gexec [slib]
   endif
 return
@@ -98,8 +100,8 @@ endkumac
 **************************************************
 macro gload
 on error exitm
-call  csrmsl($quote([1]))
+for/call  csrmsl($quote([1]))
 *shell gmake [1].sl
-call  [1]
+for/call  [1]
 *gexec [1]
 exitm
