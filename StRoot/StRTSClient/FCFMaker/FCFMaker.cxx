@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.24 2004/07/12 21:04:10 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.25 2004/08/05 20:08:05 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.25  2004/08/05 20:08:05  jml
+ * added support for StEvent
+ *
  * Revision 1.24  2004/07/12 21:04:10  jml
  * moved pixel anotation to FCFMaker from saveRes() because saveRes() called more than once leading to excess entries in pixel table (for yuri)
  *
@@ -270,10 +273,6 @@ StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
   doZeroTruncation = 1; // do it, but leave 5 cm... 
   fillDeconFlag = 1;
 
-  mCreate_stevent = 0;  // Use  StEvent for ittf
-  mFill_stevent = 0;
-  mFill_tphit = 1;
-
   mStEvent = NULL;
   mT_tphit = NULL;
 
@@ -448,21 +447,6 @@ Int_t StRTSClientFCFMaker::Make()
 #endif
 
   printf("<FCFMaker::Make> Making event %d, annotation %d...\n",Event_counter,do_annot);
-
-  // Hack for now untill ittf is in more complete shape...
-  if(mCreate_stevent)
-  {
-    
-    if(mStEvent != NULL)
-    {
-      delete mStEvent;
-      mStEvent = NULL;
-    }
-
-    St_DataSetIter ods(m_DataSet);
-    mStEvent = new StEvent();
-    ods.Add(mStEvent);
-  }
   
   // Coordinate transformer
   if(!gStTpcDb)
@@ -480,21 +464,30 @@ Int_t StRTSClientFCFMaker::Make()
   mDriftVelocity = gStTpcDb->DriftVelocity();
   // gMessMgr->Info() << "The drift velocity used = " << mDriftVelocity << endm;
 
-  if(mFill_tphit)
-  {
-    // Set up tphit dataset...If exists use old one, else create it.
+
+  // Get StEvent / tphit table
+
+  mStEvent = NULL;
+  mT_tphit = NULL;
+
+  mStEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
+  if(mStEvent) {
+    printf("<FCFMaker::Make> StEvent exists.  Not filling tphit table\n");
+  }
+  else {
+    printf("<FCFMaker::Make> No StEvent yet.  Use tphit table\n");
+
     St_DataSetIter outputDataSet(m_DataSet);
-  
     mT_tphit = (St_tcl_tphit *)outputDataSet("tphit");
-    if(mT_tphit == NULL)
-    {
+    if(mT_tphit == NULL) {
       mT_tphit = new St_tcl_tphit("tphit",10);
       outputDataSet.Add(mT_tphit);
     }
   }
 
-  if(mFill_stevent)
+  if(mStEvent)
   {
+    // Need to create the hit collection
     mTpcHitColl = new StTpcHitCollection();
     assert(mTpcHitColl);
   }
@@ -657,7 +650,7 @@ Int_t StRTSClientFCFMaker::Make()
   }
 
   // Save the hit collection to StEvent...
-  if(mFill_stevent)
+  if(mStEvent)
   {
     mStEvent->setTpcHitCollection(mTpcHitColl);
     mTpcHitColl = NULL;    // I don't control the pointer anymore...
@@ -1096,12 +1089,12 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
 //   }
 #endif
 
-  if(mFill_tphit)
+  if(mT_tphit)
   {
     filltphit(&hit);
   }
 
-  if(mFill_stevent)
+  if(mStEvent)
   {
     fillStEvent(&hit);
   }
@@ -1121,12 +1114,17 @@ void StRTSClientFCFMaker::fillStEvent(tcl_tphit_st *hit)
   hw += (hit->npads   << 15);  // npads
   hw += (hit->ntmbk   << 22);  // ntmbks...
 
-  // Tonko: this didn't compile in Jun03 !?
-  //StTpcHit *tpcHit = new StTpcHit(p,e,hw,hit->q);  
-  //if(!mTpcHitColl->addHit(tpcHit))
-  //{
-  //  assert(false);
-  //}
+  StTpcHit *tpcHit = new StTpcHit(p,e,hw,hit->q);
+  tpcHit->setIdTruth(hit->id_simtrk);
+  tpcHit->setQuality(hit->id_quality);
+
+  // With simulation info, not currently there!
+  // StTpcHit *tpcHit = new StTpcHit(p,e,hw,hit->q,0,hit->id_simtrk,hit->id_quality);  
+
+  if(!mTpcHitColl->addHit(tpcHit)) {
+    assert(false);
+  }
+
 }
 
 void StRTSClientFCFMaker::filltphit(tcl_tphit_st *hit)

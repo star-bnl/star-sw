@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: FCFMaker.h,v 1.10 2004/04/21 20:30:54 tonko Exp $
+ * $Id: FCFMaker.h,v 1.11 2004/08/05 20:08:06 jml Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: FCFMaker.h,v $
+ * Revision 1.11  2004/08/05 20:08:06  jml
+ * added support for StEvent
+ *
  * Revision 1.10  2004/04/21 20:30:54  tonko
  * Added back-annotation and misc. cleanup
  *
@@ -170,9 +173,6 @@ class StRTSClientFCFMaker:public StMaker
   int doZeroTruncation;   // throw away hist beyond central membrane
   int fillDeconFlag;      // do we fill the deconvolution flag?
 
-  int mFill_tphit;
-  int mFill_stevent;
-  int mCreate_stevent;
   int clustercount;
   int hasSim;
 
