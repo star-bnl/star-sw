@@ -235,8 +235,14 @@
   long       icharge;          /* Particle charge in units of |e|        */
   long       id_start_vertex;  /* Packed variable for primary vertex     */
                                /* final fit and primary track candidates */
+  float      r0out;               /* radius at out most surface (cm). See also comments*/
+  float      phi0out;             /* azimuthal angle at r0out (deg)         */
+  float      z0out;               /* z-coord. at r0out (cm)                 */
+  float      psiout;              /* azimuthal angle of pT vector (deg)     */
+  float      tanlout;             /* tan(dip) =pz/pt at r0out               */
+  float      invptout;            /* 1/pt at r0out (GeV/c)^(-1)             */
  } ;
-/*  Last mod. for dst_track:   $Date: 2001/05/10 19:12:25 $ */
+/*  Last mod. for dst_track:   $Date: 2001/09/27 17:12:53 $ */
 
 
 

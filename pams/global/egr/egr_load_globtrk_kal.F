@@ -81,6 +81,26 @@ C     Local variables
       endif
       globtrk(iglob).tanl = gtrk(igtrk).p(4)
       globtrk(iglob).invpt = ABS(gtrk(igtrk).p(5))
+
+*yf 
+      globtrk(iglob).r0out = gtrk(igtrk).pout(6)
+      globtrk(iglob).phi0out = gtrk(igtrk).pout(1)*C_DEG_PER_RAD  ! to degrees     
+      globtrk(iglob).phi0out = AMOD(globtrk(iglob).phi0out, 360.0)
+      if( globtrk(iglob).phi0out .lt. 0) then
+         globtrk(iglob).phi0out = globtrk(iglob).phi0out +360.
+      endif
+      globtrk(iglob).z0out = gtrk(igtrk).pout(2)
+      sgn = sign(1.0,gtrk(igtrk).pout(5))
+      globtrk(iglob).psiout = gtrk(igtrk).pout(3)
+      globtrk(iglob).psiout = globtrk(iglob).psiout*C_DEG_PER_RAD  ! to degrees
+      
+      globtrk(iglob).psiout = AMOD(globtrk(iglob).psiout, 360.0)
+      if( globtrk(iglob).psiout .lt. 0) then
+         globtrk(iglob).psiout = globtrk(iglob).psiout +360.
+      endif
+      globtrk(iglob).tanlout = gtrk(igtrk).pout(4)
+      globtrk(iglob).invptout = ABS(gtrk(igtrk).pout(5))
+*yf
       globtrk(iglob).covar(1) = REAL(covar(1,1))
       globtrk(iglob).covar(2) = REAL(covar(1,2))
       globtrk(iglob).covar(3) = REAL(covar(1,3))
