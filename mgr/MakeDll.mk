@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.55 1999/01/30 20:22:31 fisyak Exp $
+# $Id: MakeDll.mk,v 1.56 1999/01/31 17:59:47 didenko Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.56  1999/01/31 17:59:47  didenko
+# Clean up
+#
 # Revision 1.55  1999/01/30 20:22:31  fisyak
 # fix double St_Module
 #
@@ -261,22 +264,27 @@ FILES_ALL  := $(filter-out %Cint.cxx,$(wildcard $(SRC_DIR)/*.cxx $(SRC_DIR)/*.cc
 FILES_H    := $(wildcard $(addprefix $(SRC_DIR)/, $(addsuffix  .h, $(basename $(notdir $(FILES_ALL)))) \
                                                   $(addsuffix .hh, $(basename $(notdir $(FILES_ALL))))))
 FILES_ST   := $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) 
+NAMES_ST   := $(basename $(notdir $(FILES_ST)))
 FILES_ALL  := $(sort $(filter-out $(FILES_ST),$(FILES_ALL)))
 FILES_ORD  := $(FILES_ALL)
 
 ifdef FILES_SYM
-  NAMES_SYM      := $(subst St_,,$(basename $(notdir $(FILES_SYM))))
-  FILES_CINT_SYM := $(addprefix $(GEN_DIR)/St_,$(addsuffix Cint.cxx,$(NAMES_SYM)))
+  NAMES_SYMM     := $(notdir $(basename $(FILES_SYM)))
+  NAMES_SYM      := $(subst St_,,$(NAMES_SYM))
+  FILES_CINT_SYM := $(addprefix $(GEN_DIR)/,$(addsuffix Cint.cxx,$(NAMES_SYMM)))
+  FILES_SYMH     := $(addprefix $(GEN_DIR)/,$(addsuffix .h,$(NAMES_SYMM)))
+  FILES_H        := $(filter-out $(FILES_SYMH),$(FILES_H))
 endif
-
 ifdef FILES_SYT
   NAMES_SYT      := $(basename $(notdir $(FILES_SYT)))
   FILES_CINT_SYT := $(addprefix $(GEN_DIR)/,$(addsuffix Cint.cxx,$(NAMES_SYT)))
+  FILES_H        := $(filter-out $(subst .cxx,.h,$(FILES_SYT)), $(FILES_H))
 endif
 
 ifdef FILES_TAB
   NAMES_TAB      := $(strip $(subst _Table,,$(subst St_,,$(basename $(notdir $(FILES_TAB))))))
   FILES_CINT_TAB := $(addprefix $(GEN_DIR)/St_,$(addsuffix _TableCint.cxx,$(NAMES_TAB)))
+  FILES_H        := $(filter-out $(subst .cxx,.h,$(FILES_TAB)), $(FILES_H))
 endif
 
 ifdef FILES_MOD
@@ -284,18 +292,21 @@ ifdef FILES_MOD
   FILES_MOD_H    := $(addprefix $(SRC_DIR)/St_,$(addsuffix _Module.h,$(NAMES_MOD)))
   FILES_CINT_MOD := $(addprefix $(GEN_DIR)/St_,$(addsuffix _ModuleCint.cxx,$(NAMES_MOD)))
   FILES_CINT_MOD :=$(GEN_DIR)/$(PKGNAME)_Cint.cxx
+  FILES_H        := $(filter-out $(FILES_MOD_H), $(FILES_H))
 endif
-
 ifdef FILES_ORD
-  NAMES_ORD    := $(basename $(notdir $(shell grep -l ClassDef $(SRC_DIR)/*.h*)))
-  NAMES_ORD    := $(filter-out St_$(NAMES_SYM) $(NAMES_SYT), $(NAMES_ORD)) 
+  NAMES_ST       := $(strip $(NAMES_SYM) $(NAMES_SYT) $(addprefix St_,$(NAMES_MOD)))
+  ifneq (,$(strip $(FILES_H)))
+    NAMES_ORD      := $(basename $(notdir $(shell grep -l ClassDef $(FILES_H))))
+  endif
   LinkDef        :=$(wildcard $(SRC_DIR)/$(PKGNAME)LinkDef.h $(SRC_DIR)/$(PKGNAME)LinkDef.hh)
   ifneq (,$(LinkDef))
     NAMES_DEF    := $(shell  grep C++ $(LinkDef) | grep class | awk '{print $$5}')
     NAMES_DEF    := $(subst ;, ,$(NAMES_DEF))    
     NAMES_DEF    := $(subst -, ,$(NAMES_DEF))   
-    NAMES_DEF    := $(filter-out St_$(NAMES_SYM) $(NAMES_SYT)), $(NAMES_DEF)) 
-    NAMES_ORD    := $(strip $(filter-out $(NAMES_DEF), $(NAMES_ORD)))
+    ifneq (,$(NAMES_DEF))
+      NAMES_ORD  := $(strip $(filter-out $(NAMES_DEF), $(NAMES_ORD)))
+    endif
     ifneq (,$(NAMES_DEF))
       FILES_CINT_DEF :=$(GEN_DIR)/$(PKGNAME)_DCint.cxx 
       FILES_DEF_H    := $(wildcard $(addprefix $(SRC_DIR)/,$(addsuffix .h,$(NAMES_DEF)) \
@@ -426,7 +437,7 @@ endif
 
 $(FILES_CINT_MOD) : $(FILES_MOD_H)
 	$(COMMON_LINKDEF)
-	@for p in $(subst St_,,$(notdir $(basename $(FILES_MOD_H)))); do echo $${p}; \
+	@for p in $(NAMES_MOD); do echo $${p}; \
                                              echo "#pragma link C++ class St_$${p}-;" >> $(LINKDEF) ; \
                                              echo "#pragma link C++ global   $${p};" >> $(LINKDEF) ; \
                                              done
@@ -434,10 +445,10 @@ $(FILES_CINT_MOD) : $(FILES_MOD_H)
 	@$(CAT) $(LINKDEF);
 ifndef NT
 	cd $(GEN_DIR); \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(FILES_MOD_H)) $(notdir $(LINKDEF))
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & )) \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(FILES_MOD_H)) $(notdir $(LINKDEF))
 endif
 
 
