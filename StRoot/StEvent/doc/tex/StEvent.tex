@@ -1,0 +1,878 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% StEvent - User Guide and Reference Manual -- LaTeX Source 
+%
+% $Id: StEvent.tex,v 1.1 1999/03/09 17:28:28 ullrich Exp $
+%
+% Author: Thomas Ullrich, March 1999
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% $Log: StEvent.tex,v $
+% Revision 1.1  1999/03/09 17:28:28  ullrich
+% Initial Revision
+%
+% Revision 1.16  1999/03/31 19:03:50  ullrich
+% Corrected typos in UML appendix
+%
+% Revision 1.15  1999/03/30 19:41:17  ullrich
+% Added Torres 'how to' tutorial. Text pasted from web.
+%
+% Revision 1.14  1999/03/30 19:11:53  genevb
+% Correct typo from last change
+%
+% Revision 1.13  1999/03/30 18:54:15  genevb
+% Add Xi documentation
+%
+% Revision 1.12  1999/03/26 08:10:29  ullrich
+% Corrected typos, text smoothed.
+%
+% Revision 1.11  1999/03/25 22:10:54  ullrich
+\usepackage{color}
+% Added brief introduction to UML (appendix A).
+%
+% Revision 1.10  1999/03/25 14:05:41  ullrich
+\usepackage{fancyheadings}
+%\usepackage{times}
+% Revision 1.9  1999/03/24 19:03:43  ullrich
+% Fixed bug in UML figure numbers.
+\usepackage{subfigure}
+%
+% Revision 1.8  1999/03/23 23:10:05  ullrich
+% Added latest changes to StEvent.
+%
+% Revision 1.7  1999/03/19 17:22:44  ullrich
+% Save current version.
+%
+% Revision 1.6  1999/03/16 00:49:23  ullrich
+% Check in current status
+%
+% Revision 1.5  1999/03/12 21:55:13  ullrich
+% Save current status.
+%
+% Revision 1.4  1999/03/11 21:10:28  ullrich
+% Update
+%
+% Revision 1.3  1999/03/11 16:11:19  ullrich
+% Snapshot of work in progress.
+%
+% Revision 1.2  1999/03/09 21:49:25  ullrich
+% Added class reference for EMC hits. New examples.
+%
+% Revision 1.1  1999/03/09 17:28:28  ullrich
+% Initial Revision
+%
+% Revision 2.33  2000/05/22 22:04:07  ullrich
+\newcommand{\name}[1]{\textsf{#1}}%  or class-, function-, package names
+\newcommand{\comp}[1]{\texttt{#1}}%  computer font
+%
+% Revision 2.45  2000/08/23 03:14:07  ullrich
+% Improved (corrected) explanation of return value
+% of chi2 methods of StVertex and StTrackFitTraits.
+\newcommand{\name}[1]{\mbox{\textsf{#1}}}%  or class-, function-, package names
+\newcommand{\comp}[1]{\mbox{\texttt{#1}}}%  computer font
+\newcommand{\args}[1]{\textit{#1}}%   command arguments
+\newcommand{\StEvent}{\textsl{$\cal{S}$tEvent}}
+% Added description of StTptTrack.
+%
+\newcommand{\StEvent}{\textsl{$\cal{S}$t$\cal{E}$vent}}
+% Fixed wrong description of StZtbTriggerDetector::adc().
+%
+% Revision 2.42  2000/07/13 12:47:07  ullrich
+% Added ZDC info provided by Clemens
+%
+% Revision 2.41  2000/06/29 18:00:37  ullrich
+% Better description of StCtbTriggerDetector.
+%
+% Revision 2.40  2000/06/22 18:18:33  ullrich
+% Fixed problem with page numbering. Increased textheight.
+%
+% Revision 2.39  2000/06/21 22:55:42  ullrich
+% Added StEventInfo to ref section. Updated StEvent.
+%
+% Revision 2.38  2000/06/07 09:44:20  ullrich
+% Modified StHit ref section.
+%
+% Revision 2.37  2000/06/01 21:36:17  ullrich
+% Added new method flag() to StHit description.
+%
+% Revision 2.36  2000/06/01 16:46:23  ullrich
+% Mods (add text) in StTrack and StTrackDetectorInfo.
+%
+% Revision 2.35  2000/05/31 14:26:26  lasiuk
+% Add RICH classes and descriptions
+%
+% Revision 2.32  2000/05/17 17:20:01  ullrich
+% Updates and improved description of StTrackTopologyMap.
+% Revision 2.31  2000/05/16 13:22:39  ullrich
+% More details on the second chi2 value in StTrackFitTraits.
+%
+% Revision 2.30  2000/05/09 11:09:30  ullrich
+% Updated section on StMwcTriggerDetector and StCtbTriggerDetector.
+%
+% Revision 2.29  2000/04/26 21:01:44  ullrich
+% Removed text for obsolete StBrowsableEvent.
+%
+% Revision 2.28  2000/04/20 13:31:25  ullrich
+% Added description of changes to StTrackDetectorInfo.
+%
+% Revision 2.27  2000/04/10 19:59:34  genevb
+  {\LARGE $ $Revision: 1.1 $ $}  \\[5mm] % replaced by cvs with current revision  
+  {\LARGE $ $Date: 1999/03/09 17:28:28 $ $}  % replaced by cvs with current revision  
+% Revision 2.26  2000/03/30 16:55:38  ullrich
+% Modified reference section for StTrack::key().
+%
+% Revision 2.25  2000/03/29 16:55:48  ullrich
+% Added reference section and emprt user guide page for StL3Trigger.
+%
+% Revision 2.24  2000/03/23 18:30:50  ullrich
+% Added new EMC classes to reference section.
+%
+% Revision 2.23  2000/03/08 14:27:45  ullrich
+% Added description of new method of StVertex.
+%
+% Revision 2.22  2000/03/02 12:40:40  ullrich
+  {\LARGE $ $Revision: 1.1 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/09 17:28:28 $ $}  % replaced by cvs with current revision
+This needs work ...
+% Added the hypperref package to add bookmarks and hyperlinks
+In the following the term \textit{method} and \textit{member function}
+is used synonymously.
+% Added RICH and EMC to the reference section. Created
+Examples are used throughout this guide but are often not complete
+and will therefore not compile. Their only purpose is to illustrate
+a specific feature and not to provide a fully functional programming unit.
+  {\LARGE $ $Revision: 1.1 $ $}  \\[5mm] % replaced by cvs with current revision
+The name StEvent is somewhat misleading since it is (i) the name of the
+package and (ii) the name of a class. 
+\section{About this document}
+best way to get started. Note, however,
+... this section needs some work
+and are not guaranteed to compile. Their only purpose is to illustrate
+    (i.e.~\comp{CVSROOT = /afs/rhic/star/packages/repository})
+
+\index{SCL} \index{StarClassLibrary}
+beginners. It is therefore divided in two parts, a user guide and a
+    \comp{cvs checkout StRoot/StarClassLibrary}
+questions and provide guidance to get started.  The reference section
+    \comp{cd StRoot/StarClassLibrary/doc/tex}
+  \item Create the PostScript document \comp{StarClassLibrary.ps}:\\
+    \comp{make}
+it.
+
+\section{Accessing \StEvent}  \index{Accessing StEvent}
+meant as a lookup when specific information is needed. Beginners
+should study the User Guide and should make themself familiar only
+and is therefore present in the actual STAR software releases.
+(sec.~\ref{sec:StGlobalTrack}), \name{StVertex}
+\section{Getting \StEvent Sources}  \index{Getting StEvent sources}
+(sec.~\ref{sec:StVertex}).  Reading and understanding the various
+examples certainly is the best way to get started. Note, however, that
+the examples shown throughout this guide are often not complete and
+are not guaranteed to compile. Their only purpose is to illustrate a
+specific feature and not to provide a fully functional programming
+  \item Obtain an \name{afs} token: \comp{klog -cell rhic}.
+  \item Make sure \comp{\$CVSROOT} is set properly:\\
+    (i.e.~\comp{CVSROOT = /afs/rhic/star/packages/repository})
+     \advance\leftmargin by \labelsep%
+    \comp{cvs checkout StRoot/StEvent}
+\label{sec:furtherdoc}
+
+\StEvent\ makes use of various classes from the StarClassLibrary (SCL).
+To obtain the SCL documentation perform the following steps:
+\begin{enumerate}
+  \item Obtain an \name{afs} token: \name{klog -cell rhic}.
+  \item Make sure \name{\$CVSROOT} is set properly:\\
+    (i.e.~\name{CVSROOT = /afs/rhic/star/packages/repository})
+  \item Check-out the SCL into your current working directory:\\
+\StEvent\ follows the STAR coding guidelines as described on the STAR web page: \\ 
+  \item Create the PostScript document \name{StarClassLibrary.ps}:\\
+All developers are encouraged to follow this small set of rules 
+in order to create a homogeneous and coherent interface style.
+Here we summarize the most relevant one concerning the programmable interface:
+\section{Coding Standards}  \index{Coding Standards}
+\item all classes, enumerations and functions start with the prefix \textbf{St}
+\section{Getting \StEvent\ Sources}  \index{Getting StEvent sources}
+\item header files have the extension \textbf{.hh},
+\section{Coding Standards}
+\index{Coding Standards}
+    \item const member functions are guaranteed to not alter data member
+    \comp{const}'ness implies a slightly higher compile time overhead but a faster execution
+
+are used as argument types. The strong C++ type checking rules ensures
+the proper use of the enumeration constants already during
+compilation.
+
+Another important set of constants should be mentioned here as well,
+... missing
+Although \StEvent\ is updated frequently it might happen that it
+lacks means of accessing some specific DST information
+since the content of the DST changes considerably in time. We expect
+a more stable situation as soon as experimental data comes in and
+the DST format gets better defined.
+\index{DST files} 
+\label{sec:conventionsNumbering}
+
+All numbering follows \emph{strictly} the C/C++ convention, i.e. the
+first element in an array has the index 0. This is valid for all
+container, collections and lists. Here it is important to remember
+that many (but not all) official STAR numbering schemes start counting
+at 1.  Examples are TPC sectors and padrows, SVT barrels, layers, ladders and
+wafers. Do not forget to subtract 1 when using this scheme for
+throughout \StEvent\.
+
+TPC, SVT and FTPC hits return their hardware address in STAR units.
+stored you must write:
+}%footnotesize
+\name{PhysicalConstants.h} which are part of the StarClassLibrary
+(see sec.~\ref{sec:furtherdoc}).
+\end{verbatim}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Known Problems} \index{known problems (\StEvent)}
+
+\StEvent\ is continuously improved. In certain cases it might happen
+that the documentation isn't up-to-date. In these cases the header
+file should be visited.
+
+gets better defined.  \index{DST files}
+  \verb+#include "StEnumerations.hh"+ \\  
+  
+  
+%
+%    Reference Manual
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{Reference Manual}
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Global Constants, Enumerations and Definitions}
+
+In addition to the constants defined in the two header files
+    
+\name{PhysicalConstants.h} which are part of the StarClassLibrary
+    
+\name{StEnumerations.hh}. The types defined therein are used
+throughout \StEvent .
+
+\subsection{Enumeration Types}
+\index{enumerations}
+\label{sec:StEnumerations}
+    \begin{center}
+    Any argument value other than \args{east} or \args{west} causes a compile
+  Global Enumeration types.
+\end{figure}
+
+\item[Synopsis]
+    
+
+typedef short          Short_t;     //Signed Short integer 2 bytes
+\item[Description]
+    \index{StBeamDirection|textbf}
+    \index{StBeamPolarizationAxis|textbf}
+    \index{StVertexType|textbf}
+    \index{StTrackSign|textbf}
+    The header file does not only define the enumerations and their values
+    but also the \textit{type} of the enumeration set. This allows the
+    checking rules ensures the proper use of the enumeration constants already
+    during compilation.
+
+\section{Collections and Iterators} \index{collection|textbf} \index{iterator}
+    \verb+enum StVertexType {undefined, primary, kink,+\\
+    \verb+                   twoBody, threeBody, nBody,+\\
+    \verb+                   pileUpPrimary, V0, Xi};+\\
+
+    \verb+enum StTrackSign {negativeTrack, positiveTrack};+\\
+
+    Please remember that C++ starts the enumeration with 0 (zero) unless
+    explicitly given otherwise. The definition of enumeration types allows
+    to define the following function:\\
+    \verb+myfunc(StBeamDirection d);+\\
+    Any argument value other than \name{east} or \name{west} causes a compile
+\comp{size()}, \comp{begin()}, \comp{end()}.  Every collection in
+\StEvent\ has also referring iterator (see table \ref{tab:stcoll})
+which is defined in the same header file as the
+standard, i.e. the Standard Template Library (STL) \index{STL}. Most
+for (int i=0; i<theHits.size(); i++) {
+
+\section{Collections and Iterators}
+\label{sec:collections}
+\label{sec:collections}
+\comp{size()}, \comp{begin()}, \comp{end()}.  Most collection in
+\index{iterator}
+\index{StEmcPreShowerHitCollection|textbf}
+\index{StEmcTowerHitCollection|textbf}
+\index{StFtpcHitCollection|textbf}
+\index{StSmdEtaHitCollection|textbf}
+\index{StSmdPhiHitCollection|textbf}
+\index{StSvtHitCollection|textbf}
+\index{StTpcHitCollection|textbf}
+\index{StTrackCollection|textbf}
+\index{StVecCtbCounter|textbf}
+Given an arbitrary \StEvent\ collection \comp{anyColl} of type \comp{StAnyColl}
+\index{StVecPtrFtpcHit|textbf}
+\comp{obj} the following code is not guaranteed to work:
+might change in future. The interface, however, will not change since
+new implementations will also follow the standard syntax.
+\index{StVertexCollection|textbf}
+\index{StVecTH1F|textbf}
+\index{StVecTH2F|textbf}
+
+\StEvent\ defines various collection classes and their referring
+    composed of the name of the objects they hold and the word.  All
+    containers of this type are listed in table \ref{tab:stcoll}.
+    The hold the essential objects as hits, tracks and vertices.
+standard, i.e.~the Standard Template Library (STL) \index{STL}. Most
+containers are actually implemented as STL containers although this
+    further down the tree.  Their naming scheme is adapted from
+    RogueWave's \name{Tools.h++} class library. Without exception the
+make sure the replacement provides methods which are compatible with those
+of the standard to maintain the integrity of existing code.
+    \comp{Collection}.  All containers of this type are listed in
+All container are guaranteed to provide at least the following member functions:
+\name{size()}, \name{begin()}, \name{end()}.  Most collection in
+\StEvent\ have a referring iterator defined (see table \ref{tab:stcoll})
+which is declared in the same header file as the
+corresponding collection.
+    
+In order to keep your code independent of the underlying container
+    \comp{operator[]} can be used safely. Their names are all prefixed
+    \comp{StVec} or \comp{StVecPtr} in case the objects are collected
+without changing the application code using them. The following
+examples demonstrates this:
+
+Given an arbitrary \StEvent\ collection \name{anyColl} of type \name{StAnyColl}
+which holds objects of type
+\name{obj} the following code is not guaranteed to work:
+\begin{verbatim}
+     for (int i=0; i<anyColl.size(); i++)
+         obj = anyColl[i];
+{}                                 & {}                       & \name{StTraclConstIterator}      & {}                     \\ \hline
+It should be replaced by:
+\begin{verbatim}
+     StAnyCollIterator iter;
+     for (iter = anyColl.begin(); iter != anyColl.end(); iter++)
+         obj = *iter;
+\end{verbatim}
+
+    \name{StVec} or \name{StVecPtr} in case the objects are collected
+    via pointers followed by the name of the object they collect. All
+\item Collections of general importance which are accessible through
+    the \name{StEvent} class itself, i.e., \name{StEvent} provides member functions
+    which return pointer or references to them.  There names are
+    composed of the name of the objects they hold and the word
+\name{StVecCtbCounter}     & \name{StCtbCounter}   & \name{--}     & \name{StVecCtbCounter.hh}  \\ \hline
+\name{StVecMwcSector}      & \name{StMwcSector}    & \name{--}     & \name{StVecMwcSector.hh}  \\ \hline
+    tracks and vertices.
+\name{StVecPtrGlobalTrack} & \name{StGlobalTrack$*$} & \name{--}     & \name{StVecPtrGlobalTrack.hh}  \\ \hline
+\item Simple collection classes which are returned or used in various classes
+    further down the tree.  Their naming scheme is different from
+\name{StVecVpdCounter}     & \name{StVpdCounter}   & \name{--}     & \name{StVecVpdCounter.hh}  \\ \hline
+\name{StVecZdcSegment}     & \name{StZdcSegment}   & \name{--}     & \name{StVecZdcSegment.hh}  \\ \hline
+    \name{operator[]} can be used safely. Their names are all prefixed
+    \name{StVec} or \name{StVecPtr} (in case the objects are collected
+    via pointers) followed by the name of the object they collect. All
+    available types are listed in table \ref{tab:stvec}
+\end{enumerate}
+
+\begin{table}[htb]
+    \begin{center}
+    \footnotesize\
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Collection Class} & \textbf{Elements} & \textbf{Iterator} & \textbf{Header File} \\ \hline
+\name{StEmcPreShowerHitCollection} & \name{StEmcPreShowerHit} & \name{StEmcPreShowerHitIterator} & \name{StEmcPreShowerHitCollection.hh}  \\ \hline
+\name{StEmcTowerHitCollection}     & \name{StEmcTowerHit}     & \name{StEmcTowerHitIterator}     & \name{StEmcTowerHitCollection.hh}  \\ \hline
+    \end{tabular}            
+\name{StSmdPhiHitCollection}       & \name{StSmdPhiHit}       & \name{StSmdPhiHitIterator}       & \name{StSmdPhiHitCollection.hh}  \\ \hline
+\name{StFtpcHitCollection}         & \name{StFtpcHit$*$}      & \name{StFtpcHitIterator}         & \name{StFtpcHitCollection.hh}  \\ \hline
+\name{StSvtHitCollection}          & \name{StSvtHit$*$}       & \name{StSvtHitIterator}          & \name{StSvtHitCollection.hh}  \\ \hline
+\name{StTpcHitCollection}          & \name{StTpcHit$*$}       & \name{StTpcHitIterator}          & \name{StTpcHitCollection.hh}  \\ \hline
+\name{StTrackCollection}           & \name{StGlobalTrack$*$}  & \name{StTrackIterator}           & \name{StTrackCollection.hh}  \\
+{}                                 & {}                       & \name{StTrackConstIterator}      & {}                     \\ \hline
+\name{StVertexCollection}          & \name{StVertex$*$}       & \name{StVertexIterator}          & \name{StVertexCollection.hh}  \\ \hline
+    \end{tabular}
+    \caption{Main collection classes.}
+    \label{tab:stcoll}
+    \end{center}
+\end{table}
+
+\begin{table}[htb]
+    \begin{center}
+Making local copies is often time- and memory-intensive.
+      
+    \label{tab:stvec}
+    \end{center}
+\end{table}
+
+Note, that some collections contain objects by value other by pointer.
+invokes the StVertex assignment operator and creates a local copy.
+called \textit{polymorphic} container since they are not restricted to
+collect objects of the base type only but of any type derived from
+it. This is especially important when dereferencing the iterator to
+access the objects in the collection.  For a \textit{by-value}
+collection:
+\begin{verbatim}
+     StEmcPreShowerHitIterator iter;
+Hint: Use pointers or references to collection elements wherever possible.
+But for a \textit{by-pointer} collection:
+\begin{verbatim}
+     StVertexIterator iter;
+     StVertexCollection* vertices = event->vertexCollection();
+     StVertex *vertex;
+     for (iter = vertices->begin(); iter != vertices->end(); iter++)
+\subsection{StCtbCounter \index{StCtbCounter|textbf}} \index {CTB}
+Hint: Use pointers or references to collection elements wherever
+\index{StCtbCounter|textbf} \index {CTB}
+For example the same code above but written as:
+\begin{verbatim}
+     StVertexIterator iter;
+     StVertexCollection* vertices = event->vertexCollection();
+    \verb+#include "StCtbCounter.hh"+
+    
+Destructors are not described.\\
+invokes the \name{StVertex} assignment operator and creates a local copy.
+This method is only useful if you intend to modify am object locally
+    StCtbCounter is a class which provides information on the
+take tables as arguments. They are for nternal use only (even if public).
+
+Destructors, assignment operators and copy constructors are not listed.
+    content of a single Central Trigger Barrel (CTB) counter.  
+    
+STAR CVS repository are described in alphabetic order.
+\texttt{StMeasuredPoint} can be used wherever positions and errors
+    corrected time.
+    stored in the \comp{dst\_TriggerDetectors.idl} table. Each counter
+\end{verbatim}
+Note that some constructors are omitted, especially the ones which
+    stored in the \name{dst\_TriggerDetectors.idl} table. Each counter
+public).
+
+    
+listed.  \name{Inline} declarations are omitted throughout the
+    The list of StCtbCounter objects (collection class StVecCtbCounter) can be obtained
+    through the StTriggerDetectorCollection.
+    \verb+#include "StTpcHitCollection.h"+\\
+    \verb+class StTpcHitCollection;+\\
+    Constructs a CTB counter with id \args{i}, number of mips \args{m}
+%
+%    Reference: StCtbCounter
+   
+    corrected time.\index{dst\_TriggerDetectors.idl}
+    The list of \name{StCtbCounter} objects (collection class \name{StVecCtbCounter}) can be obtained
+    Constructs a CTB counter with id \args{id}, number of mips \args{m}
+    and counter corrected time \args{t}.
+    The list of \name{StCtbCounter} objects (collection class \name{StVecCtbCounter}) can be obtained
+    through the \name{StTriggerDetectorCollection}.
+    \index{StVecCtbCounter}
+    \index{StTriggerDetectorCollection}
+    content of a single Central Trigger Barrel (CTB) counter.
+
+\item[Synopsis]
+    
+    \verb+class StCtbCounter;+\\
+    
+    
+    \name{StCtbCounter} represents the CTB counter information as
+    stored in the \\ \name{dst\_TriggerDetectors.idl} table. Each
+    
+    and the counter corrected time.\index{dst\_TriggerDetectors.idl}
+//  Function calculates and returns the number of
+//  mips from all CTB counter.
+    \name{StTriggerDetectorCollection::ctbCounters()} method.
+    \index{StVecCtbCounter} \index{StTriggerDetectorCollection}
+    
+\item[Persistence]
+    None
+    
+\item[Related Classes]
+    None
+
+\item[Public\\ Constructors]
+    \verb+StCtbCounter();+ \\
+    assert(i == 240);               // must be 240 counter
+
+    \verb+StCtbCounter(short id, float m, float t);+ \\
+    Constructs a CTB counter with id \name{id}, number of mips \name{m}
+    and counter corrected time \name{t}.
+    StTriggerDetectorCollection* tds = event->triggerDetectorCollection();
+    \verb+short id() const;+ \\
+    Returns the id of the counter.
+
+\subsection{StDedx \index{StDedx|textbf}} \index{dE/dx}
+    \verb+float time() const;+ \\
+}%footnotesize    
+
+    energy loss quantities (dE/dx) for a specific detector.   
+    Sets the counter id.
+
+    \verb+#include "StDedx.hh"+
+
+    \verb+void setTime(float);+ \\
+    StDedx represents the dE/dx information as
+    stored in the \comp{dst\_dedx.idl} table. Contains dE/dx and
+    number of used hits. The class is used for charged tracks in the
+    TPC, FTPC and SVT. The status word hold information on the quality
+    and status of the extracted dE/dx.
+    
+    energy loss (dE/dx) of a particle (track) in a specific detector.   
+    
+\item[Synopsis] 
+//
+    StDedx represents the dE/dx information as stored
+    in the \comp{dst\_dedx.idl} table. It contains dE/dx mean and
+    about the energy loss of self within the various detectors.
+    StVecCtbCounter &counters = tds->ctbCounters();
+    for (int i=0; i<counters.size(); i++)
+        sum += counters[i].mips();
+    assert(i == 240);               // must be 240 counters
+    return sum;
+    
+\end{verbatim}
+}%footnotesize
+\end{Entry}
+    Currently StGlobalTrack provides dE/dx information
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StDedx
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Constructs an empty instance, i.e. all values are initialized to 0 (zero).
+\index{dE/dx}
+\index{StDedx|textbf}
+\label{sec:StDedx}
+    
+\item[Summary]
+    \name{StDedx} is a class which provides information on the
+    energy loss (dE/dx) of a particle (track) in a specific detector.
+    
+\item[Synopsis]
+    \verb+#include "StDedx.hh"+\\
+    
+
+\item[Description]
+    
+    in the \name{dst\_dedx.idl} table. It contains dE/dx mean and
+    variance, number of used hits and a status word. The status word
+    holds information on the quality and status of the extracted dE/dx.
+    The class is used for charged tracks in the TPC, FTPC and SVT.
+    \index{dst\_dedx.idl}
+    
+\item[Persistence]
+    None
+    
+\item[Related Classes]
+    Every global track (StGlobalTrack) holds the information
+    
+    Currently \name{StGlobalTrack} provides dE/dx information
+    for the TPC, FTPC and the SVT.
+    
+
+\item[Public\\ Constructors]
+    \verb+StDedx();+ \\
+    Constructs an empty instance, i.e.~all values are initialized to 0 (zero).
+
+\item[Public Member\\ Functions]
+    \verb+unsigned short numberOfPointsUsed() const;+ \\
+    Returns the number of points (hits) used to derive the dE/dx value.
+
+    \verb+float mean() const;+ \\
+    Mean (most probable) dE/dx value.
+
+ 
+    Returns the variance.
+
+    \verb+unsigned long  status() const;+ \\
+    Status word.
+
+    \verb+void setNumberOfPointsUsed(unsigned short);+ \\
+    Sets the number of points used in the calculation.
+
+    \verb+void setMean(float);+ \\
+    Sets the mean dE/sx value.
+\subsection{StDstEventSummary \index{StDstEventSummary|textbf}} \index{event summary}
+     cout << "# of points used = " << dedx->numberOfPointsUsed() << endl;
+}%footnotesize    
+    Sets the status word.
+
+\item[Examples]
+{\footnotesize
+    \verb+#include "StDstEventSummary.hh"+
+//  Function prints all dE/dx information of a given
+//  track to stdout.
+//
+    StDstEventSummary is a class which provides information on the
+    current event after reconstruction (DST level). 
+    StDedx *ftpc = track.ftpcDedx();
+    StDedx *tpc  = track.tpcDedx();
+    information on the current event as stored on the DST. 
+    
+\item[Synopsis] 
+    if (tpc) printOneDedx(tpc, "TPC");
+    StDstEventSummary is meant to hold the information
+    stored in the\\ \comp{dst\_event\_summary.idl} table. However,
+void printOneDedx(StDedx *dedx, const char* name)
+
+     cout << "<dE/dx> =     " << dedx->mean() << endl;
+     cout << "var(dE/dx) =  " << dedx->variance() << endl;
+     cout << "points used = " << dedx->numberOfPointsUsed() << endl;
+     cout << "status word = " << dedx->status() << endl;
+}
+    
+\begin{Entry}
+\end{Entry}
+    from StEvent via the \comp{StEvent::summary()} method.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StDstEventSummary
+    \verb+StDedx();+ \\
+    Constructs an empty instance.
+\subsection{StDstEventSummary}
+\index{event summary}
+\index{StDstEventSummary|textbf}
+\begin{Entry}
+\subsection{StEmcHit \index{StEmcHit|textbf}} \index{EMC hit} \index{SMD hit}
+    
+
+\item[Synopsis]
+    \verb+#include "StDstEventSummary.hh"+\\
+    \verb+class StDstEventSummary;+\\
+
+    \verb+#include "StEmcHit.hh"+
+    stored in the\\ \name{dst\_event\_summary.idl} table. However,
+    the content strongly deviates from the former design draft.
+    It currently holds only lists of 1- and 2-dimensional histograms
+    which summarize certain event quantities. The class does neither
+    StEmcHit is the base class for all classes which represent EMC, EEMC and SMD hits.
+    \index{dst\_event\_summary.idl}
+
+\item[Persistence]
+    
+\item[Synopsis] 
+\item[Related Classes]
+    StEmcHit provides the basic functionality for all
+    
+\item[Public\\ Constructors]
+    \verb+StDstEventSummary();+ \\
+    Default constructor.
+
+\item[Public Member\\ Functions]
+    \verb+StVecTH1F& histograms1D();+ \\
+    Returns vector of 1-dimensional (Root) histograms of type THF1.
+
+    \verb+StVecTH2F& histograms2D();+ \\
+    Returns vector of 2-dimensional (Root) histograms of type THF2.
+\end{Entry}
+    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    The following classes are derived from StEmcHit: 
+%    Reference: StEmcHit
+%
+    The following classes are derived from \name{StEmcHit}: 
+\subsection{StEmcHit}
+\index{StEmcHit|textbf}
+\index{EMC hit}
+\index{SMD hit}
+\label{sec:StEmcHit}
+\begin{Entry}
+\item[Summary]
+    \name{StEmcHit} is the base class for all classes which represent EMC, EEMC and SMD hits.
+    Constructs an instance of StEmcHit with all values initialized to 0 (zero).
+\item[Synopsis]
+    \verb+#include "StEmcHit.hh"+\\
+    Create an instance of StEmcHit with identifier \args{i},
+    energy deposition \args{E} and position \args{phi}, \args{eta}.
+\item[Description]
+    \name{StEmcHit} provides the basic functionality for all
+    derived classes which represent EMC hits (incl. SMD and EEMC). It
+    
+    corresponding detector element (tower, preshower, shower maximum).
+    The hit position is given in eta, phi coordinates measured at the
+    center of the detector element.\\
+    
+    EMC cluster. Here the terminology is somewhat different to the
+    TPC. Tracks are related to TPC hits and EMC clusters.  EMC hits
+    
+
+\item[Persistence]
+    
+
+\item[Related Classes]
+    
+    StEmcPreShowerHit, StEmcTowerHit, StSmdEtaHit, StSmdPhiHit.
+    Current collection classes
+    
+\item[Public Operators]
+    \index{StEmcPreShowerHit}
+    
+    \index{StSmdEtaHit}
+    \index{StSmdPhiHit}
+    
+\item[Public\\ Constructors]
+    \verb+StEmcHit();+ \\
+    Prints the hit quantities of \args{h} to ostream \args{os}.
+
+    \verb+StEmcHit(int i, float E, float phi, float eta);+ \\
+    Create an instance of \name{StEmcHit} with identifier \name{i},
+   
+
+\item[Public Member\\ Functions]
+    \verb+float energy() const;+ \\
+    Deposited energy.
+
+    \verb+int   id() const;+ \\
+    Id of the corresponding detector element.
+
+    \verb+float phi() const;+ \\
+
+}%footnotesize
+    StTriggerDetectorCollection* tds = event->triggerDetectorCollection();
+
+\item[Public Member\\ Functions]
+    \verb+short id() const;+ \\
+    Unique segment ID.
+StRunSummary.hh
+StVpdCounter.hh
+
+StV0Vertex.hh
+StZdcSegment.hh
+StVertex.hh
+% classes still missing
+StTrackFitTraits.hh
+StTrackPidTraits.hh
+StTriggerDetectorCollection.hh
+StTrigger.hh
+StVpdSummary.hh
+}%footnotesize    
+};
+\end{verbatim}
+}%\footnotesize
+
+There are other forms of containment that do not have whole/part
+implications. For example, each \name{Vertex} refers back to its
+parent Track. This is not aggregation since it is not reasonable to
+consider a parent Track to be part of a child Vertex. We use the
+\emph{association} relationship to depict this.
+
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics{umlAssociation.eps}
+        \caption{Association.}
+        \label{fig:umlAssociation}
+    \end{center}
+\end{figure}
+
+Fig.~\ref{fig:umlAssociation} shows how we draw an association.  An
+association is nothing but a line drawn between the participating
+classes. In Fig.~\ref{fig:umlAssociation} the association has an
+arrowhead to denote that Track does not necessarily know anything
+about Vertex. This relationship will almost certainly be implemented
+with a pointer of some kind.
+
+What is the difference between an aggregation and an association?
+Aggregation denotes whole/part relationships whereas associations do
+not. However, there is not likely to be much difference in the way
+that the two relationships are implemented.  That is, it would be very
+difficult to look at the code and determine whether a particular
+relationship ought to be aggregation or association.  Aggregation and
+Association both correspond to the \emph{has-by-reference}
+relationship.
+
+\subsection{Dependency}
+
+Sometimes the relationship between a two classes is very weak. They
+are not implemented with member variables at all. Rather they might be
+implemented as member function arguments.
+
+Consider, for example, the fit function of a TrackFitter class.
+Suppose that this function takes an argument of type CalibrartionDB
+since it requires information from it (e.g. if the magnetic field was
+on or off) in order to perform the fit.
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics{umlDependency.eps}
+        \caption{Dependency.}
+        \label{fig:umlDependency}
+    \end{center}
+\end{figure}
+Fig.~\ref{fig:umlDependency} shows a dashed arrow between the
+TrackFitter class and the CalibrartionDB class. This is the
+\emph{dependency} relationship. This is often called a \emph{using}
+relationship.  This relationship simply means that TrackFitter somehow
+depends upon CalibrartionDB. In C++ this almost always results in a
+\#include:
+
+{\footnotesize
+\begin{verbatim}
+#include "CalibrartionDB.hh"
+class TrackFitter {
+public:
+    // ...
+    void fit(CalibrartionDB &db);
+private:
+    // ...
+};
+\end{verbatim}
+}%\footnotesize
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% The End
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\printindex
+
+\end{document}
+\bye
+% The text following after this line is not included into the text
+
+%
+%  Template for reference section
+%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: className
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{className}
+\index{className|textbf}
+\label{sec:className}
+\begin{Entry}
+\item[Summary]
+
+\item[Synopsis]
+    \verb+#include "className.hh"+\\
+    \verb+class className;+\\
+
+\item[Description]
+
+\item[Persistence]
+    None
+
+\item[Related Classes]
+
+\item[Public\\ Constructors]
+
+\item[Public Member\\ Functions]
+
+\item[Public Member\\ Operators]
+
+\item[Public Functions]
+
+\item[Public Operators]
+
+\item[Examples]
+{\footnotesize
+\begin{verbatim}
+//
+//  What the example does
+//
+
+\end{verbatim}
+}%footnotesize
+
+\end{Entry}

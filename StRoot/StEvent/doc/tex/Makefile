@@ -1,0 +1,39 @@
+TEXSRC		= StEvent
+MAKEFILE	= Makefile
+GV              = gv
+DVIPS           = dvips -Z -D 600 -tletter
+LATEX           = latex
+MKINDEX         = makeindex -s StEventIndex.sty
+PSNUP		= psnup -2 -pletter
+PSSRC		= StEventTitle.eps StarIcon.eps
+
+all:			$(TEXSRC).ps
+
+view:			$(TEXSRC).ps
+			$(GV) $(TEXSRC).ps &
+
+psnup:			$(TEXSRC).psnup
+
+index:			$(TEXSRC).idx
+			$(MKINDEX) $(TEXSRC).idx
+
+$(TEXSRC).psnup:	$(TEXSRC).ps
+			$(PSNUP) $(TEXSRC).ps > $(TEXSRC).psnup
+
+$(TEXSRC).ps:		$(TEXSRC).dvi $(MAKEFILE) $(PSSRC)
+			$(DVIPS) $(TEXSRC).dvi -o $(TEXSRC).ps
+
+$(TEXSRC).dvi:		$(TEXSRC).tex $(TEXSRC).ind $(MAKEFILE) $(PSSRC) $(STY)
+			$(LATEX) $(TEXSRC)
+
+$(TEXSRC).idx:		$(TEXSRC).tex
+			$(LATEX) $(TEXSRC)
+
+$(TEXSRC).ind:		$(TEXSRC).idx
+			$(MKINDEX) $(TEXSRC).idx
+
+clean:			
+			@rm -f $(TEXSRC).psnup $(TEXSRC).dvi \
+			$(TEXSRC).log $(TEXSRC).toc $(TEXSRC).aux \
+			$(TEXSRC).idx $(TEXSRC).ilg \
+			$(TEXSRC).ind .tex $(TEXSRC).ps
