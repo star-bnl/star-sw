@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.6 2004/10/19 01:47:57 mvl Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.7 2004/10/21 02:57:25 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -135,7 +135,7 @@ int StMuDstFilterMaker::Make(){  ///< create a StEvent from the muDst and put it
     StMuDst::fixTrackIndices( mArrays[muPrimary],mArrays[muGlobal] );
 
     // the emc collection
-    StMuEmcCollection* emc = muDst->emcCollection();
+    StMuEmcCollection* emc = muDst->muEmcCollection();
     if ( filter(emc) ) {
 	//addType( mEmcArrays[0], *emc ); this doesn't work since the StMuEmcCollection is not cloneable
     }
@@ -211,6 +211,9 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.7  2004/10/21 02:57:25  mvl
+ * Changed call to getter for StMuEmcCollection
+ *
  * Revision 1.6  2004/10/19 01:47:57  mvl
  * Changed calls to clear TClonesArray in StMuDstMaker (not tested ;-()
  *
