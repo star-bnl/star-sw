@@ -29,6 +29,16 @@ tdm/table/cell/putvalue 'ev0par[2].dcav0' 0.4
 tdm/table/cell/putvalue 'ev0par[2].dlen'  0.6
 tdm/table/cell/putvalue 'ev0par[2].dmass' 10
 
+tdm/table/cell/putvalue 'ev0par[0].fit[0]'  0.0
+tdm/table/cell/putvalue 'ev0par[0].fit[1]'  0.0
+tdm/table/cell/putvalue 'ev0par[0].fit[2]'  0.0
+tdm/table/cell/putvalue 'ev0par[1].fit[0]'  0.0
+tdm/table/cell/putvalue 'ev0par[1].fit[1]'  0.0
+tdm/table/cell/putvalue 'ev0par[1].fit[2]'  0.0
+tdm/table/cell/putvalue 'ev0par[2].fit[0]'  0.0
+tdm/table/cell/putvalue 'ev0par[2].fit[1]'  0.0
+tdm/table/cell/putvalue 'ev0par[2].fit[2]'  0.0
+
 cd [params]/global/magnetic_field
 
 tdm/newtable magf mft_control 1
