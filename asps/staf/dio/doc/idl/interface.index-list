@@ -1,0 +1,10 @@
+dioFactory_i
+dioFileStream_i
+duiDispatcher_i
+socCatalog_i
+socFactory_i
+socObject_i
+tdmDataset_i
+tdmFactory_i
+tdmObject_i
+tdmTable_i
