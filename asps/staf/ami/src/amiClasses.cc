@@ -1,4 +1,4 @@
-static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.15 1998/03/11 21:39:41 ward Exp $";
+static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.16 1998/05/05 16:12:38 ward Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -254,7 +254,7 @@ STAFCV_T amiBroker:: callInvoker (const char * name
    }
 //- Call the actual invoker object.
    STAFCV_T status = invoker->call(tables);/*fix memory leak -akio*/
-   delete tables._buffer;                  /*fix memory leak -akio*/
+   delete[] tables._buffer;                  /*fix memory leak -akio*/
    return status;                          /*fix memory leak -akio*/
 //   return invoker->call(tables);
 //   EML_SUCCESS(STAFCV_OK);

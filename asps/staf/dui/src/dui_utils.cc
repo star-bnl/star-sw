@@ -88,7 +88,19 @@ char * dui_notdirof(const char * path)
    }
    return p;
 }
-
+#define DUI_DEPTH 128
+/*
+*:>---------------------------------------------------------------------
+*:ROUTINE:      int dui_deleteable
+*:DESCRIPTION:  prevents free()ing of non-allocated memory
+*:RETURN VALUE: 7 (true) if memory is free()able, 0 otherwise
+*:<---------------------------------------------------------------------
+*/
+int dui_deleteable(int nok,char *del[],char *testMe) {
+  int ii;
+  for(ii=nok-1;ii>=0;ii--) { if(testMe==del[ii]) return 7; }
+  return 0;
+}
 /*
 *:>---------------------------------------------------------------------
 *:ROUTINE:      char * pathof
@@ -118,28 +130,30 @@ char * dui_pathof(const char* base,const char* mod)
       break;
    default:		// mod looks like a relative path
    { // These curly brackets define the scope of d[].
-      char *d[128];	// max directory depth of 128
+      char *d[DUI_DEPTH],*e[DUI_DEPTH]; // directory depth of DUI_DEPTH
       char *herb;       // 20Feb98
       int i=0;		// depth counter
       int l=0;		// string length
+      int herb2=-8;     // max index for FREE() {some of the d[i]'s are
+                        // dynamically allocated, and some are not}
       while( d[i]=strntok(base,"/",i) ){	// load absolute base
-         l += strlen(d[i]);
+         l += strlen(d[i]); 
+         e[i]=d[i]; herb2=i+1;
          i++;
       }
-      // int j=0; 
       herb=(char*)MALLOC(strlen(mod)+1); if(!herb) return NULL;
       strcpy(herb,mod);   // so we can strtok (mod is const char*)
       d[i]=strtok(herb,"/");
       for(;;) {
          if(!d[i]) break;
          if( 0 == strcmp("..",d[i]) ){
-            // hjw 20Feb98, can't free() this (const char*) FREE(d[i]);
+            if(dui_deleteable(herb2,e,d[i])) FREE(d[i]);
             i--;
             l -= strlen(d[i]);
-            // hjw 20Feb98, can't free() this (const char*) FREE(d[i]);
+            if(dui_deleteable(herb2,e,d[i])) FREE(d[i]);
          }
          else if( 0 == strcmp(".",d[i]) ){
-            // hjw 20Feb98, can't free() this (const char*) FREE(d[i]);
+            if(dui_deleteable(herb2,e,d[i])) FREE(d[i]);
          }
          else {
             l += strlen(d[i]);
@@ -152,7 +166,7 @@ char * dui_pathof(const char* base,const char* mod)
       for( int k=0;k<i;k++ ){
          strcat(ap,"/");
          strcat(ap,d[k]);
-         // hjw 20Feb98, can't free() this (const char*) FREE(d[k]);
+         if(dui_deleteable(herb2,e,d[k])) FREE(d[k]);
       }
       FREE(herb);
       return ap;

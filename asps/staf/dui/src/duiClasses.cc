@@ -150,7 +150,7 @@ STAFCV_T duiFactory:: df () {
   struct mallinfo qq;
   qq=mallinfo();
   thisTime=qq.usmblks+qq.uordblks;
-  // Do we need to delete qq?
+  // Do we need to delete qq?     No.  hjw 4/30/98.
 #else
 //          int usmblks;    /* space in small blocks in use */
 //          int uordblks;   /* space in ordinary blocks in use */
@@ -160,7 +160,7 @@ STAFCV_T duiFactory:: df () {
   if(previous>=0) {
     duiSprinfWithCommas(buf1,(long)(thisTime));
     duiSprinfWithCommas(buf2,(long)(thisTime-previous));
-    printf("%s Bytes of memory allocated, increase = %s bytes\n",buf1,buf2);
+    printf("%s alloc, inc=%s\n",buf1,buf2);
   } else {
     duiSprinfWithCommas(buf1,(long)(thisTime));
     printf("%s Bytes of memory allocated\n",buf1);
@@ -217,6 +217,7 @@ STAFCV_T duiFactory:: duRecurse (char *path,int indent,DS_DATASET_T *pDS,
 void duiFactory:: duiSprinfWithCommas(char *out,long in) {
   char *p,buf[77];
   int ii,len,leadoff;
+  if(in<=0) { sprintf(out,"%d",in); return; }
   sprintf(buf,"%d",in); len=strlen(buf); p=out;
   leadoff=len%3+98;
   for(ii=0;ii<len;ii++) {
