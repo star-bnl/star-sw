@@ -2,6 +2,7 @@ TEXSRC		= StEvent
 MAKEFILE	= Makefile
 GV              = gv
 DVIPS           = dvips -Z -D 600 -tletter
+DVIPDF          = dvipdf
 LATEX           = latex
 MKINDEX         = makeindex -s StEventIndex.sty
 PSNUP		= psnup -2 -pletter
@@ -14,11 +15,16 @@ view:			$(TEXSRC).ps
 
 psnup:			$(TEXSRC).psnup
 
+pdf:			$(TEXSRC).pdf
+
 index:			$(TEXSRC).idx
 			$(MKINDEX) $(TEXSRC).idx
 
 $(TEXSRC).psnup:	$(TEXSRC).ps
 			$(PSNUP) $(TEXSRC).ps > $(TEXSRC).psnup
+
+$(TEXSRC).pdf:		$(TEXSRC).dvi $(MAKEFILE) $(PSSRC)
+			$(DVIPDF) $(TEXSRC).dvi $(TEXSRC).pdf
 
 $(TEXSRC).ps:		$(TEXSRC).dvi $(MAKEFILE) $(PSSRC)
 			$(DVIPS) $(TEXSRC).dvi -o $(TEXSRC).ps
