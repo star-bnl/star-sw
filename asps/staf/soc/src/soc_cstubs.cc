@@ -27,14 +27,17 @@
 /*-------------------------------------------- PROTOTYPES           --*/
 
 STAFCV_T 
-soc_bind(char* aspName, char* solibName)
+soc_bind(char* pkgName, char* solibName)
 {
-   if( 0 != soc->bind(aspName) ){
-      EML_SUCCESS(STAFCV_OK);
-   }
-   else {
-      EML_FAILURE(NO_DYNAMIC_LINKING);
-   }
+  // Loading of specific shared library not yet implemented ...
+  static void *ps = &solibName;
+
+  if (0 != soc->bind(pkgName)) {
+    EML_SUCCESS(STAFCV_OK);
+  }
+  else {
+    EML_FAILURE(NO_DYNAMIC_LINKING);
+  }
 }
 
 STAFCV_T
@@ -99,7 +102,7 @@ socobject_version(long idref)
    char *t;
    printf("SOC:\tObject version = %s \n",t=p->version());
    /* delete[] t; */
-   free (t);  /* alloc_conflict -akio*/
+   FREE (t);  /* alloc_conflict -akio*/
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -107,7 +110,7 @@ STAFCV_T
 soc_count()
 {
    long i = soc->count();
-   printf("SOC:\tObject count = %d \n",i);
+   printf("SOC:\tObject count = %ld \n",i);
    float f=i; set_staf_result(f);
    EML_SUCCESS(STAFCV_OK);
 }
@@ -140,7 +143,7 @@ soc_idobject(char* name, char* type)
    if( !soc->idObject(name,type,id) ){
       EML_FAILURE(INVALID_IDREF);
    }
-   printf("SOC:\tObject idRef =  %d \n",id);
+   printf("SOC:\tObject idRef =  %ld \n",id);
    float f = id; set_staf_result(f);
    EML_SUCCESS(STAFCV_OK);
 }
@@ -234,7 +237,7 @@ socobject_oid(char* name, char* type)
    if( !soc->idObject(name,type,id) ){
       EML_FAILURE(INVALID_IDREF);
    }
-   printf("SOC:\tObject idRef =  %d \n",id);
+   printf("SOC:\tObject idRef =  %ld \n",id);
    float f = id; set_staf_result(f);
    EML_SUCCESS(STAFCV_OK);
 }
