@@ -8,9 +8,11 @@ class NavigationMenuGroup : public MenuGroup
 
   enum cmds
     {
-	_cmdNavigator=1, _cmdMoveIn, _cmdMoveOut, _cmdMovePlusPhi, _cmdMoveMinusPhi, _cmdSetLayer, _cmdSetLayerAndAngle, _cmdMoveToNextRegion, _cmdMoveToPreviousRegion
+      _cmdNavigator=1, _cmdMoveIn, _cmdMoveOut, _cmdMovePlusPhi, 
+      _cmdMoveMinusPhi, _cmdSetLayer, _cmdSetLayerAndAngle, 
+      _cmdMoveToNextRegion, _cmdMoveToPreviousRegion
     };
-
+  
   NavigationMenuGroup(const string & name, 
 		      const string & description, 
 		      EventDisplay * display, 
@@ -18,7 +20,7 @@ class NavigationMenuGroup : public MenuGroup
   ~NavigationMenuGroup();
   void create(TGMenuBar *menuBar, TGLayoutHints *itemLayout);
   void dispatch(int);
-
+  
   
  protected:
   void showCurrentDetector();
@@ -36,6 +38,7 @@ class NavigationMenuGroup : public MenuGroup
 
   bool _visibleSave;
   int  _colorSave;
+  bool _launched;
 };
 
 #endif
