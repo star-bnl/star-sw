@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.5 2004/01/19 22:07:50 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.6 2004/01/26 21:08:32 zolnie Exp $
 // doxygen info here
 /** 
     \mainpage TTM - an endcap Tower to Track Match maker
@@ -58,6 +58,8 @@
 
 #include <iostream>
 
+#include "TList.h"
+#include "TMap.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1F.h"
@@ -97,8 +99,9 @@ using std::ostream;
 #endif
 
 
-ClassImp(EETowTrackMatchMaker)
+ClassImp(EETowTrackMatchMaker);
 
+ClassImp(EEmcTower);
 
 
 const Int_t    EETowTrackMatchMaker::kDefMinTrackHits   =  5; 
@@ -156,6 +159,11 @@ EETowTrackMatchMaker::EETowTrackMatchMaker(
   mPhiFac = 1.0;
   mEtaFac = 1.0;
 
+  // 
+  mTrackList = new TList;
+  mTowerList = new TList;
+  mMatchMap  = new TMap;
+
   //
   ResetStats();
 
@@ -164,10 +172,14 @@ EETowTrackMatchMaker::EETowTrackMatchMaker(
 //_____________________________________________________________________________
 /// destructor - cleanup
 EETowTrackMatchMaker::~EETowTrackMatchMaker(){
-  if(mTree !=NULL) delete mTree;
-  if(mFile !=NULL) delete mFile;
-  if(mMatch!=NULL) delete mMatch;
-  if(mGeom !=NULL) delete mGeom;
+  if( mTree  !=NULL ) delete mTree;
+  if( mFile  !=NULL ) delete mFile;
+  if( mMatch !=NULL ) delete mMatch;
+  if( mGeom  !=NULL ) delete mGeom;
+
+  if( mMatchMap !=NULL ) delete mMatchMap;
+  if( mTrackList!=NULL ) delete mTrackList;
+  if( mTowerList!=NULL ) delete mTowerList;
 }
 
 
@@ -252,8 +264,13 @@ EETowTrackMatchMaker::Init(){
 Int_t 
 EETowTrackMatchMaker::Make(){
   mNEvents++;
+  //
+  mMatchMap->Clear();
+  mTrackList->Clear() ;
+  mTowerList->Delete();
+  //
+  mMatch->Clear()  ; 
 
-  mMatch->Clear(); 
   int &ntrack =  mMatch->numtracks = 0; // an alias
   mMatch->numz = 3;
 
@@ -267,32 +284,29 @@ EETowTrackMatchMaker::Make(){
     Warning("Make","%s aborted, muDST maker data missing",GetName());
     return kStErr;
   }
-
+  
   if(mEEmcDb->valid()<=0) {
     Warning("Make","%s aborted, missing EEMC Db records",GetName());
     return kStErr;
   }
-
   // real work begins here
   TClonesArray      *tracks = muDst->primaryTracks();   // fetch primary tracks
   if (!tracks) { 
     Info("Make","no tracks for this event");
     return kStWarn;
   }
-
+  //
   StMuEvent* muEvent = muDst->event();                     // fetch microEvent data
-   if (!muEvent) {
-     Info("Make","no MuEvent data for this event");
-     return kStWarn;
+  if (!muEvent) {
+    Info("Make","no MuEvent data for this event");
+    return kStWarn;
   }
-
-
+  //
   StMuEmcCollection *emc    = muDst->emcCollection();   // fetch endcap data
   if (!emc) {
     Info("Make","no EMC data for this event");
     return kStWarn;
   }
-  
   
   //StEventInfo             &evinfo = muEvent->eventInfo();           // event info
   StEventSummary          &evsumm = muEvent->eventSummary();        // event summary
@@ -303,7 +317,6 @@ EETowTrackMatchMaker::Make(){
 
 
   // select "good" tracks
-  TList      goodTracks;
   TIter      nextTrack(tracks);
   StMuTrack *track  = NULL;
 
@@ -322,11 +335,11 @@ EETowTrackMatchMaker::Make(){
     hTrackDCA[2] ->Fill(dca.z());
 
     if ( ! AcceptTrack(track) ) continue; 
-    goodTracks.Add(track);
+    mTrackList->Add(track);
   }
 
   // no good tracks
-  if( goodTracks.IsEmpty() ) return kStOk;  // what the ... 
+  if( mTrackList->IsEmpty() ) return kStOk;  // what the ... 
 
   // do the matching
   ntrack=0;
@@ -342,9 +355,12 @@ EETowTrackMatchMaker::Make(){
 
     adcped = float(adc) - dbi->ped; 
     edep   = (dbi->gain>0.0) ? adcped/dbi->gain : 0.0;
+    if(adcped<0.0) continue;
+    //cerr <<  sec+1 << "|" << char(sub+'A') << "|" << eta+1 << "\t=>\t" << adcped << endl;
+    EEmcTower *eemcHit = new EEmcTower(sec,sub,eta,adcped);
+    mTowerList->Add(eemcHit);
     
-    
-    TIter nextTrack(&goodTracks);
+    TIter nextTrack(mTrackList);
     while( (track=(StMuTrack *)nextTrack()) != NULL && ntrack<kNTupleTTM_MaxTracks ){
       TVector3 tc    = mGeom->getTowerCenter(sec,sub,eta);  // tower center
       double   phiHW = mGeom->getPhiHalfWidth();
@@ -371,6 +387,27 @@ EETowTrackMatchMaker::Make(){
       }
       if(!matched) continue;
 
+#define DEBUG_PRINTS
+#ifdef  DEBUG_PRINTS
+      cerr << "<ExtrapolateToZ>\n";      
+      cerr <<  sec+1 << "|" << char(sub+'A') << "|" << eta+1 << endl;
+      cerr <<  track->helix() << endl;
+      fprintf(stderr,"z=%7.3f phi=%7.3f eta=%5.3f r=(%7.3f,%7.3f,%7.3f)\n",
+	     0.0,tc.Phi()/M_PI*180.0,tc.PseudoRapidity(),tc.x(),tc.y(),tc.z()); 
+
+      zpos=mZ.begin();
+      for(unsigned int k=0; zpos!=mZ.end() ; ++zpos,k++) { 
+	double z = zpos->first;
+	matched=false;
+	if(!ExtrapolateToZ(track,z,r) ) break;   // track 'hit' at z
+	dphi = tc.Phi()            - r.Phi()           ;
+	deta = tc.PseudoRapidity() - r.PseudoRapidity();
+	if( ! MatchTrack(dphi,deta,phiHW,etaHW) ) break   ; 
+	fprintf(stderr,"z=%7.3f phi=%7.3f eta=%5.3f r=(%7.3f,%7.3f,%7.3f)  (%5.3f/%5.3f %5.3f/%5.3f)\n",
+	       z,r.Phi()/M_PI*180.0,r.PseudoRapidity(),r.x(),r.y(),r.z(),dphi,phiHW,deta,etaHW); 
+      }
+      cerr << "</ExtrapolateToZ>\n";
+#endif /* DEBUG_PRINTS */
 
       mMatch->sector[ntrack]=sec;
       mMatch->subsec[ntrack]=sub;
@@ -389,7 +426,7 @@ EETowTrackMatchMaker::Make(){
       const StTriggerId &trg =  evtrig.nominal();
       mMatch->numtrig = trg.triggerIds().size();
       for(int k=0; k<mMatch->numtrig; k++) mMatch->trigid[k]=trg.triggerIds()[k];
-
+      mMatchMap->Add(eemcHit,track);
       ntrack++;       
     }
   }
@@ -446,6 +483,7 @@ EETowTrackMatchMaker::MatchTrack(
 				 const double phihw, // tower half-widths
 				 const double etahw) 
 {
+
   if( mPhiFac*phihw < fabs(dphi) )       return kFALSE; 
   if( mEtaFac*etahw < fabs(deta) )       return kFALSE; 
   return kTRUE;
@@ -485,13 +523,13 @@ EETowTrackMatchMaker::ExtrapolateToZ(const StMuTrack *track, const double   z, T
 ostream& 
 EETowTrackMatchMaker::Summary(ostream &out ) const
 {
-  out << "<EETowTrackMatchMaker::Summary>\n";
-  out << " *** MakerName   : " << GetName() << "\n";
+  out << "<EETowTrackMatchMaker:Summary>\n";
+  out << " <Maker Name=\"" << GetName() << "\" />\n";
 
   out.setf(ios_base::fixed,ios_base::floatfield);
   out.precision(2);
 
-  out << " *** Cuts Summary:\n";
+  out << " <CutsSummary>\n";
   out << "     tracks are matched at the following depths:\n";
   map<double,TString>::const_iterator zpos; 
   int k=0;
@@ -505,24 +543,77 @@ EETowTrackMatchMaker::Summary(ostream &out ) const
 
   out << "     max. track to tower center dist.  " << mPhiFac << " x tower half-width (phi)\n";
   out << "     max. track to tower center dist.  " << mEtaFac << " x tower half-width (eta)\n";
+  out << " </CutsSummary>\n";
 
   if(mNEvents>0) { 
+    out << " <Statistics>\n";
     out << " *** Statistics:\n";
     out << "     total # of events         " << mNEvents  << "\n";
     out << "     # of matched tracks       " << mNMatched << "\n";
     out << "     # of matched tracks/event " << float(mNMatched)/mNEvents << "\n";
+    out << " </Statistics>\n";
   }
-  out << "</EETowTrackMatchMaker::Summary>\n";
+  out << "</EETowTrackMatchMaker:Summary>\n";
   out.setf(ios_base::fmtflags(0),ios_base::floatfield);
   return out;
 }
 
+// ======================================================================================================
+ostream& 
+EEmcTower::Out(ostream &out ) const
+{
+  out << "<EEmcTower ";
+  out << " SECTOR=\""    << int(sec) << "\"" ;
+  out << " SUBSECTOR=\"" << int(sub) << "\"" ;
+  out << " ETA=\""       << int(eta) << "\"" ;
+  out << " EDEP=\""      << edep     << "\"" ;
+  out << "/>\n";
+  return out;
+}
+
+// ======================================================================================================
+ostream& 
+Out(ostream &out , const StMuTrack &t)
+{
+  StPhysicalHelixD h = t.helix();
+  StThreeVectorF   o = t.firstPoint();
+  StThreeVectorF   p = t.momentum();
+  out << "<StMuTrack\n";
+  out << " O=\"" << o << "\"\n";
+  out << "HO=\"" << h.origin()      << "\"\n";
+  out << " P=\"" << p << "\"\n";
+  out << "HP=\"" << h.momentum(0.5*tesla) << "\"\n";
+  out << "/>\n";
+  return out;
+}
+ostream& 
+Out(ostream &out , const EEmcTower &t)
+{
+  return t.Out(out);
+}
+
+
+
+
+// ======================================================================================================
 
 ostream&  operator<<(ostream &out, const EETowTrackMatchMaker& ttm)  { 
   return ttm.Summary(out); 
 };
 
+ostream&  operator<<(ostream &out, const EEmcTower&           t  )  {
+  return t.Out(out);
+}
+
+ostream&  operator<<(ostream &out, const StMuTrack&           t  )  {
+  return Out(out,t);
+}
+
+
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.6  2004/01/26 21:08:32  zolnie
+// working track/tower display (before big farewell cleanup)
+//
 // Revision 1.5  2004/01/19 22:07:50  zolnie
 // toward track/tower display
 //

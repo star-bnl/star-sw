@@ -1,133 +1,243 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2004/01/19
-// $Id: EEmcTTDisplay.cxx,v 1.1 2004/01/19 22:07:49 zolnie Exp $
+// $Id: EEmcTTDisplay.cxx,v 1.2 2004/01/26 21:08:31 zolnie Exp $
 // doxygen info here
 
+#include "TList.h"
 #include "TGeoVolume.h"
 #include "TGeoCone.h"
 #include "TGeoManager.h"
 #include "TGeoMedium.h"
+#include "THelix.h"
 
+#include "StarClassLibrary/StPhysicalHelixD.hh"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
+#include "EETowTrackMatchMaker.h"
 #include "EETowDisplay.h"
 
-EETowDisplay::EETowDisplay(const char *name) : 
-  EEmcGeomSimple()
+EETowDisplay::EETowDisplay(const char *name) : EEmcGeomSimple()
 { 
-  char vname[256];
-  double eta1  = mEtaBin[0];
-  double eta2  = mEtaBin[mNumEta];
+  mEEmc=NULL;
 
-  double rmin1 = mZ1/TMath::CosH(eta1);
-  double rmax1 = mZ1/TMath::CosH(eta2);
-  double rmin2 = mZ2/TMath::CosH(eta1);
-  double rmax2 = mZ2/TMath::CosH(eta2);
+  mTrackHits=new TList;
+  mTowerHits=new TList;
 
-  double dz    = TMath::Abs(mZ2-mZ1)/2.0;
+  initGeometry(name);
 
-  //TGeoMaterial *matVac = new TGeoMaterial("Vacuum",0,0,0);
-  TGeoMedium   *medVac = new TGeoMedium  ("Vacuum",1, new TGeoMaterial("Vacuum",0,0,0) );
-  TGeoCone     *econe  = new TGeoCone(dz,rmin1,rmax1,rmin2,rmax2);
-  mEEmc                = new TGeoVolume(name,econe,medVac);
+};
 
-  TGeoConeSeg  *geosector = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/mNumSec);
-  TGeoConeSeg  *geosubsec = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/mNumSec/mNumSSec);
-  for(unsigned s=0;s<mNumSec;s++) {
-    sprintf(vname,"SEC_%02d",s+1);  
-    TGeoRotation *rots = new TGeoRotation();  
-    rots ->SetAngles(getPhiMean(s)/M_PI*180.0,0.0,0.0);
-    TGeoVolume *sector = new TGeoVolume(vname,geosector,medVac);
-    mEEmc->AddNode(sector,1,rots);
-
-    for(unsigned ss=0;ss<mNumSSec;ss++) {
-      sprintf(vname,"SUB_%1c",'A'+ss);
-      TGeoRotation *rotss  = new TGeoRotation();  
-      rotss ->SetAngles(getPhiMean(0,ss)/M_PI*180.0,0.0,0.0);
-      TGeoVolume *subsector = new TGeoVolume(vname,geosubsec,medVac); 
-      sector->AddNode(subsector,1,rotss);
-      
-      for(unsigned e=0;e<mNumEta;e++) {   
-	sprintf(vname,"%02dT%1c%02d",s+1,'A'+ss,e+1);
-	eta1  = mEtaBin[e];
-	eta2  = mEtaBin[e+1];
-	rmin1 = mZ1/TMath::CosH(eta1);
-	rmax1 = mZ1/TMath::CosH(eta2);
-	rmin2 = mZ2/TMath::CosH(eta1);
-	rmax2 = mZ2/TMath::CosH(eta2);
-	TGeoConeSeg  *geotile = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/mNumSec/mNumSSec);
-	TGeoVolume   *tile    = new TGeoVolume(vname,geotile,medVac);
-	subsector->AddNode(tile,1);
-      } 
-    }
-  }
-
-#if 0
-  for(unsigned e=0;e<mNumEta;e++) {   
-    char vname[256];
-    int   kss = mNumSSec*mNumSec;
-    eta1  = mEtaBin[e];
-    eta2  = mEtaBin[e+1];
-    rmin1 = mZ1/TMath::CosH(eta1);
-    rmax1 = mZ1/TMath::CosH(eta2);
-    rmin2 = mZ2/TMath::CosH(eta1);
-    rmax2 = mZ2/TMath::CosH(eta2);
-    TGeoCone   *etacone   = new TGeoCone  (dz,rmin1,rmax1,rmin2,rmax2);
-    sprintf(vname,"ETA%02d",e+1);
-    TGeoVolume *eta       = new TGeoVolume(vname,etacone,medVac);
-    mEEmc->AddNode(eta,1);
-
-    TGeoConeSeg  *geotile = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/kss);
-    for(unsigned s=0;s<mNumSec;s++) {
-      for(unsigned ss=0;ss<mNumSSec;ss++) {
-	sprintf(vname,"%02dT%1c%02d",s+1,'A'+ss,e+1);
-	TGeoVolume   *tile = new TGeoVolume(vname,geotile,medVac); 
-	TGeoRotation *rota = new TGeoRotation();  
-	rota ->SetAngles(getPhiMean(s,ss)/M_PI*180.0,0.0,0.0);
-	eta->AddNode(tile,1,rota);
-      }
-    }
-  }
-#endif
-
-#if 0  
-
-    eta1  = mEtaBin[e];
-    eta2  = mEtaBin[e+1];
-    rmin1 = mZ1/TMath::CosH(eta1);
-    rmax1 = mZ1/TMath::CosH(eta2);
-    rmin2 = mZ2/TMath::CosH(eta1);
-    rmax2 = mZ2/TMath::CosH(eta2);
-    char vnamE [256];
-    char vnamS [256];
-    sprintf(vnamE ,"ETA%02d",e+1);
-    sprintf(vnamS ,"SEC%02d",e+1);
-    Int_t s = mNumSec*mNumSSec;
-    eta->Divide(vnamS,2,s,0.0,360.0/s);
-    eta->SetLineColor(e+1);
-    mEEmc->AddNode(eta,e+1);
-  }
-#endif
+EETowDisplay::~EETowDisplay() 
+{ 
+  if(mEEmc)      delete mEEmc;
+  if(mTrackHits) delete mTrackHits;
+  if(mTowerHits) delete mTowerHits;
 };
 
 
+void
+EETowDisplay::initGeometry(const char *topName)
+{
+  char rotName[256];
+  if(mEEmc!=NULL) return; // already initialized;
+
+  double eta1  = mEtaBin[0];
+  double eta2  = mEtaBin[mNumEta];
+
+  double rmin1 = mZ1/TMath::SinH(eta1);
+  double rmax1 = mZ1/TMath::SinH(eta2);
+
+  double rmin2 = mZ2/TMath::SinH(eta1);
+  double rmax2 = mZ2/TMath::SinH(eta2);
+
+  cerr << rmin1 << " " << rmax1 << endl; 
+
+  double dz    = TMath::Abs(mZ2-mZ1)/2.0;
+
+  TGeoMedium   *medVac = new TGeoMedium  ("Vacuum",1, new TGeoMaterial("Vacuum",0,0,0) );
+  TGeoCone     *econe  = new TGeoCone(dz,rmin1,rmax1,rmin2,rmax2);
+  mEEmc                = new TGeoVolume(topName,econe,medVac);
+
+  TGeoConeSeg  *geosector = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/mNumSec);
+  TGeoConeSeg  *geosubsec = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/mNumSec/mNumSSec);
+  // FIXME !!!!
+  double dPhi = -15.0/180.0*M_PI;
+  for(unsigned s=0;s<mNumSec;s++) {
+    double phi = getPhiMean(s)+dPhi;
+    sprintf(rotName,"RotSec%02d",s+1);
+    TGeoRotation *rots = new TGeoRotation(rotName,phi/M_PI*180.0,0.0,0.0);
+    TGeoVolume *sector = new TGeoVolume(volumeName(s),geosector,medVac);
+    //sector->SetVisibility(kTRUE);
+    sector->SetVisibility(kFALSE);
+    mEEmc->AddNode(sector,1,rots);
+    
+    //
+    for(unsigned ss=0;ss<mNumSSec;ss++) {
+      // FIXME: assumed counter-clockwise 
+      double phi = getPhiMean(0,ss)-getPhiMean(0,mNumSSec-1);
+      sprintf(rotName,"Rot%02dT%1c",s+1,ss+'A');
+      TGeoRotation *rotss   = new TGeoRotation(rotName,phi/M_PI*180.0,0.0,0.0);
+      TGeoVolume *subsector = new TGeoVolume(volumeName(s,ss),geosubsec,medVac); 
+      subsector->SetVisibility(kFALSE);
+      sector->AddNode(subsector,1,rotss);
+      //
+      for(unsigned e=0;e<mNumEta;e++) {   
+	eta1  = mEtaBin[e];
+	eta2  = mEtaBin[e+1];
+	rmin1 = mZ1/TMath::SinH(eta1);	
+	rmax1 = mZ1/TMath::SinH(eta2);
+	rmin2 = mZ2/TMath::SinH(eta1);	
+	rmax2 = mZ2/TMath::SinH(eta2);
+
+
+	TGeoConeSeg  *geotile = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/mNumSec/mNumSSec);
+	TGeoVolume   *tile    = new TGeoVolume(volumeName(s,ss,e),geotile,medVac);
+	tile->SetVisibility(kFALSE);
+	subsector->AddNode(tile,1);
+      }
+    }
+  }
+}
+
 
 void
-EETowDisplay::towerHit(int eta) 
+EETowDisplay::DrawHits()
 {
-   char vname [256];
-   sprintf(vname ,"ETA%02d",eta);
-   TIter next(mEEmc->GetNodes());
-   TGeoNode *node;
-   while( (node=(TGeoNode *)next())!=NULL ) 
-     if(strncmp(vname,node->GetVolume()->GetName(),5)==0) break;
-   if(node!=NULL) {
-     node->GetVolume()->SetLineColor(kRed);
-     printf("node %s found\n",vname);
-   }
+  TIter nextTower(mTowerHits);
+  TIter nextTrack(mTrackHits);
+  TGeoNode *gnode;
+  TGeoVolume *vol;
+  THelix   *helix;
+
+  while( (gnode=(TGeoNode *)nextTower())!=NULL ) {
+    vol=gnode->GetVolume();
+    vol->SetLineColor(kRed);
+    vol->SetVisibility(kTRUE);
+  }
+  while( (helix=(THelix   *)nextTrack())!=NULL ) {
+    helix->SetLineColor(kBlue);
+    helix->SetLineWidth(2);
+    helix->Draw();
+  }
+}
+
+
+void
+EETowDisplay::Clear(const Option_t*)
+{
+  TIter nextTower(mTowerHits);
+  TGeoNode *gnode;
+  while( (gnode=(TGeoNode *)nextTower())!=NULL ) {
+    //printf("clearing node %s\n",gnode->GetVolume()->GetName());
+    gnode->GetVolume()->SetLineColor(kBlack);
+    gnode->GetVolume()->SetVisibility(kFALSE);
+  }
+
+  mTrackHits->Delete();
+  mTowerHits->Clear();
+}
+
+
+
+
+Bool_t
+EETowDisplay::towerHit(const char *vname)
+{
+  const int kSecLen=2;
+  const int kSubLen=4;
+  const int kEtaLen=6;
+  TGeoNode *node;
+  TIter sector(mEEmc->GetNodes());
+  while( (node=(TGeoNode *)sector())!=NULL ) {
+    if(strncmp(vname,node->GetVolume()->GetName(),kSecLen)!=0) continue;
+    TIter subsector(node->GetVolume()->GetNodes());
+    while( (node=(TGeoNode *)subsector())!=NULL ) {
+      if(strncmp(vname,node->GetVolume()->GetName(),kSubLen)!=0) continue;
+      TIter tile(node->GetVolume()->GetNodes());
+      while( (node=(TGeoNode *)tile())!=NULL ) {
+	if(strncmp(vname,node->GetVolume()->GetName(),kEtaLen)!=0) continue;
+	//printf("towerHit: node %s found\n",vname);
+	mTowerHits->Add(node);
+	return kTRUE;
+      }
+    }
+  }
+  return kFALSE;
+}
+
+Bool_t       
+EETowDisplay::towerHit(const EEmcTower& tower)
+{
+  return towerHit(volumeName(tower.sec,tower.sub,tower.eta));
+}
+
+
+Bool_t       
+EETowDisplay::trackHit(Double_t x, Double_t y, Double_t z, Double_t px, Double_t py, Double_t pz, Double_t qB)
+{
+  THelix *helix = new THelix(x,y,z,px,py,pz,qB);
+  helix->SetRange(z,mZ2);
+  mTrackHits->Add(helix);
+  return kTRUE;
+}
+
+Bool_t       
+EETowDisplay::trackHit(const StMuTrack& track)
+{
+  const double Bfield = 0.5*tesla;
+  const double cLight = 3e10*centimeter/second;
+  StPhysicalHelixD h = track.helix();
+  StThreeVectorD o   = h.origin(); 
+  StThreeVectorD p   = h.momentum(Bfield);
+  double         q   = h.charge(Bfield);
+  cerr << "<TrackHit>"<< endl;
+  cerr << o << endl;
+  cerr << p << endl;
+  cerr << q << endl;
+  cerr << "</TrackHit>"<< endl;
+  return trackHit(o.x(),o.y(),o.z(),p.x(),p.y(),p.z(),cLight*q*Bfield);
+}
+
+
+void         
+EETowDisplay::Out(ostream &out, const StMuTrack& track, const EEmcTower &tower)
+{
+  ::Out(out,tower);
+  ::Out(out,track);
+}
+
+
+// a lousy ..... lousy
+// sec [0,mNumSec)
+// sub [0,mNumSSec)
+// eta [0,mNumEta)
+char *
+EETowDisplay::volumeName (int sec, int sub, int eta)
+{
+  const  int  vnameLen=1024;
+  static char vname[vnameLen];
+  int    kCase=0x00;
+
+  memset(vname,0x00,vnameLen);
+  if( 0<=sec && sec<int(mNumSec ) ) kCase |=0x4; else kCase &=0x3; 
+  if( 0<=sub && sub<int(mNumSSec) ) kCase |=0x2; else kCase &=0x5;
+  if( 0<=eta && eta<int(mNumEta ) ) kCase |=0x1; else kCase &=0x6;
+  
+  switch(kCase) {
+  case 0x07: sprintf(vname,"%02dT%1c%02d",sec+1,sub+'A',eta+1);  break;
+  case 0x06: sprintf(vname,"%02dT%1c"    ,sec+1,sub+'A');        break;
+  case 0x04: sprintf(vname,"%02d"        ,sec+1)              ;  break;
+  default:   break;
+  }
+  //printf("'%s': 0%x %d %d %d\n",vname,kCase,sec,sub,eta);
+  return vname;
 }
 
 
 // $Log: EEmcTTDisplay.cxx,v $
+// Revision 1.2  2004/01/26 21:08:31  zolnie
+// working track/tower display (before big farewell cleanup)
+//
 // Revision 1.1  2004/01/19 22:07:49  zolnie
 // toward track/tower display
 //

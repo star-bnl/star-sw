@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EETowTrackMatchMaker
 #define STAR_EETowTrackMatchMaker
-// $Id: EEmcTTMMaker.h,v 1.5 2004/01/19 22:07:51 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.6 2004/01/26 21:08:32 zolnie Exp $
 
 /*!
  *                                                                     
@@ -37,6 +37,8 @@ class TH1F;
 class TTree;
 class TFile;
 class TString;
+class TList;
+class TMap;
 
 class StMuTrack;
 class EEmcGeomSimple;
@@ -48,6 +50,25 @@ const int       kNTupleTTM_MaxTracks  =  128;
 const int       kNTupleTTM_MaxTrigger =   32;
 const unsigned  kNTupleTTM_MaxZ       =    8;
 
+
+class EEmcTower : public TObject  {
+public:
+  EEmcTower()  { sec=sub=eta=0; edep=0.0; };
+  ~EEmcTower() {}
+  EEmcTower(int s, int ss, int e, float ene) { 
+    sec =(unsigned char)s;
+    sub =(unsigned char)ss;
+    eta =(unsigned char)e;
+    edep=ene;
+  };
+  ostream& Out ( ostream &out ) const ;  
+  unsigned char sec;
+  unsigned char sub;
+  unsigned char eta;
+  float         edep;
+
+  ClassDef(EEmcTower, 1)   // 
+};
 
 class EETowTrackMatchMaker : public StMaker {
 public: 
@@ -67,7 +88,7 @@ public:
     Int_t    subsec  [kNTupleTTM_MaxTracks]; /**<- subsector */
     Int_t    etabin  [kNTupleTTM_MaxTracks]; /**<- tower# a.k.a eta bin */
     Float_t  adc     [kNTupleTTM_MaxTracks]; /**<- pedestal subtracted adc = adc - pedestal */
-    Float_t  edep    [kNTupleTTM_MaxTracks]; /*!<- energy deposited : (adc-pedestal)/gain */
+    Float_t  edep    [kNTupleTTM_MaxTracks]; /**<- energy deposited : (adc-pedestal)/gain */
     //
     Int_t    nhits   [kNTupleTTM_MaxTracks]; /**<- number of hits/track */
     Float_t  pt      [kNTupleTTM_MaxTracks]; /**<- track transverse momentum */
@@ -137,6 +158,13 @@ public:
   /// returns number of matched tracks
   ULong_t  GetNMatched() const { return mNMatched; };
 
+  /// returns a list of good StMuTracks
+  TList *GetTracks() { return mTrackList; };
+  /// returns a list of good EEmcTower
+  TList *GetTowers() { return mTowerList; };
+  /// returns a map  of matches
+  TMap  *GetMatch()  { return mMatchMap ; }; 
+
   ostream&   Summary    ( ostream &out ) const ;
 
  protected:
@@ -150,14 +178,10 @@ public:
 
   /// resets the collected statistics 
   void     ResetStats() { mNMatched=mNEvents=0L; };  
-
   Bool_t   AcceptTrack( const StMuTrack *track);
-
   Bool_t   MatchTrack ( const double dphi,   const double deta,  const double phihw,  const double etahw); 
 
-
   static  Bool_t  ExtrapolateToZ    ( const StMuTrack *track , const double  z, TVector3 &r); 
-
 
   // control histograms for tracks
   TH1F *hTrackNHits; /**<- phi factor */
@@ -177,7 +201,7 @@ public:
   TFile          *mFile;       // output file
   TTree          *mTree;       // output tree
 
-  NTupleTTM_t    *mMatch;      // data in "compatible" format 
+  NTupleTTM_t    *mMatch;      // output data in "ntuple" format 
 
   map<double,TString> mZ;      // a map that hold z positions 
 
@@ -185,13 +209,17 @@ public:
   ULong_t         mNMatched;   // number of matched tracks
   ULong_t         mNEvents;    // total number of events 
 
+  //
+  TList          *mTrackList;
+  TList          *mTowerList;
+  TMap           *mMatchMap;
 
  public:
   //  StMaker jumbo mumbo
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.5 2004/01/19 22:07:51 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.6 2004/01/26 21:08:32 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -199,12 +227,18 @@ public:
 };
 
 /// for nice printing
+ostream&  Out(ostream &out , const StMuTrack &t);
+ostream&  Out(ostream &out , const EEmcTower &t);
 ostream&  operator<<(ostream &out, const EETowTrackMatchMaker& ttm); 
-
+ostream&  operator<<(ostream &out, const EEmcTower&            t  );
+ostream&  operator<<(ostream &out, const StMuTrack&            t  );  
 #endif
 
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.6  2004/01/26 21:08:32  zolnie
+// working track/tower display (before big farewell cleanup)
+//
 // Revision 1.5  2004/01/19 22:07:51  zolnie
 // toward track/tower display
 //
