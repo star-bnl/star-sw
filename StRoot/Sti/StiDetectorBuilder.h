@@ -200,7 +200,7 @@ inline  void StiDetectorBuilder::setDetector(unsigned int row, unsigned int sect
 inline double StiDetectorBuilder::phiForSector(unsigned int iSector, 
 					unsigned int nSectors) const
 {
-  if(iSector<0 || iSector>=2*nSectors)
+  if(iSector>=2*nSectors)
     {
       cerr << "StiDetectorBuilder::phiForSector(" << iSector << ", "
 	   << nSectors << "):  Error, invalid sector" << endl;
