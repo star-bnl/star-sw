@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.454 2005/01/03 21:13:25 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.455 2005/01/07 01:35:45 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -286,6 +286,7 @@ Bfc_st BFC1[] = { // standard chains
   {"OSpaceZ"     ,""  ,"","",""                                      ,"","Space Charge corrections",kFALSE},
   {"OSpaceZ2"    ,""  ,"","",""                                   ,"","Space Charge corrections R2",kFALSE},
   {"OShortR"     ,""  ,"","",""                                       ,"","Shorted Ring correction",kFALSE},
+  {"OGridLeak"   ,""  ,"","",""                                          ,"","Grid Leak correction",kFALSE},
   {"AlignSectors",""  ,"","",""                          ,"","Activate Sector Alignment correction",kFALSE},
 
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
@@ -458,6 +459,20 @@ Bfc_st BFC1[] = { // standard chains
   {"Est"         ,"","svtChain","globT"              ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
 
 
+  {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
+                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
+  {"emcSim"   ,"","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
+                                                                           "New simulator for BEMC",kFALSE},
+  {"emcDY2"   ,"emcRaw","emcY2",
+  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
+                                                                        "B/E EMC data common maker",kFALSE},
+  {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
+
+
+  {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
+                                                                              "EEMC fast simulator",kFALSE},
+  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
+
 
   {"global"      ,"globalChain","","globT,Match,vertex,primary,dst,SCL,dEdxY2"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
@@ -522,16 +537,6 @@ Bfc_st BFC1[] = { // standard chains
                                                                                 "... SSD Evaluator",kFALSE},
 
 
-  {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
-                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
-  {"emcSim"   ,"","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
-                                                                           "New simulator for BEMC",kFALSE},
-  {"emcDY2"   ,"emcRaw","emcY2",
-  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
-                                                                        "B/E EMC data common maker",kFALSE},
-  {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
-
-
 
   {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker",
                                                                           "Find Kinks from StEvent",kFALSE},
@@ -553,10 +558,6 @@ Bfc_st BFC1[] = { // standard chains
 
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 
-
-  {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
-                                                                              "EEMC fast simulator",kFALSE},
-  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
 
 
   {"rich"        ,"RichChain","","rch,RichPiD,RichSpectra",        "StMaker","StChain","RICH chain",kFALSE},
@@ -914,6 +915,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"OSpaceZ"     ,""  ,"","",""                                      ,"","Space Charge corrections",kFALSE},
   {"OSpaceZ2"    ,""  ,"","",""                                   ,"","Space Charge corrections R2",kFALSE},
   {"OShortR"     ,""  ,"","",""                                       ,"","Shorted Ring correction",kFALSE},
+  {"OGridLeak"   ,""  ,"","",""                                          ,"","Grid Leak correction",kFALSE},
   {"AlignSectors",""  ,"","",""                          ,"","Activate Sector Alignment correction",kFALSE},
 
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
@@ -1087,6 +1089,21 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Est"         ,"","svtChain","globT"              ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
 
 
+  {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
+                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
+  {"emcSim"   ,"","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
+                                                                           "New simulator for BEMC",kFALSE},
+  {"emcDY2"   ,"emcRaw","emcY2",
+  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
+                                                                        "B/E EMC data common maker",kFALSE},
+  {"emcAtoE"  ,"","","db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker",  "B-EMC ADC to E converter",kFALSE},
+
+
+  {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
+                                                                              "EEMC fast simulator",kFALSE},
+  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
+
+
   //  Reminder: You are within the ITTF chain definitions
   {"global"      ,"globalChain","","globT,Match,vertex,primary,dst,SCL,dEdxY2"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
@@ -1161,16 +1178,6 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                                 "... SSD Evaluator",kFALSE},
 
 
-  {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
-                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
-  {"emcSim"   ,"","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
-                                                                           "New simulator for BEMC",kFALSE},
-  {"emcDY2"   ,"emcRaw","emcY2",
-  "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
-                                                                        "B/E EMC data common maker",kFALSE},
-  {"emcAtoE"  ,"","","db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker",  "B-EMC ADC to E converter",kFALSE},
-
-
   //  Reminder: You are within the ITTF chain definitions
   {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker",
                                                                           "Find Kinks from StEvent",kFALSE},
@@ -1194,10 +1201,6 @@ Bfc_st BFC2[] = { // ITTF Chains
 
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 
-
-  {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
-                                                                              "EEMC fast simulator",kFALSE},
-  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
 
 
 
@@ -1724,6 +1727,7 @@ Int_t StBFChain::Instantiate()
 	    if( GetOption("OSpaceZ") ){	      mask |=   (kSpaceCharge   << 1); }
 	    if( GetOption("OSpaceZ2") ){      mask |=   (kSpaceChargeR2 << 1); }
 	    if( GetOption("OShortR") ){       mask |=   (kShortedRing   << 1); }
+	    if( GetOption("OGridLeak") ){     mask |=   (kGridLeak      << 1); }
 
 	    (void) printf("StBFChain:: ExB The option passed will be %d 0x%X\n",mask,mask);
 	    mk->SetMode(mask);
