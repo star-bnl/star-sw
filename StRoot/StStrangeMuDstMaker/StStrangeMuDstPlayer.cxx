@@ -166,8 +166,11 @@ void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, Char_t* output) {
 
 void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
 
-  StStrangeMuDstMaker *oldMuDstMaker, *newMuDstMakers[3];
-  StStrangeMuDstMaker *v0MuDstMaker, *xiMuDstMaker, *kinkMuDstMaker;
+  StStrangeMuDstMaker *oldMuDstMaker=0;
+  StStrangeMuDstMaker *newMuDstMakers[3];
+  StStrangeMuDstMaker *v0MuDstMaker=0;
+  StStrangeMuDstMaker *xiMuDstMaker=0;
+  StStrangeMuDstMaker *kinkMuDstMaker=0;
   Char_t *file, *dir, *outfile[3], *prefix[3], line[80];
   Int_t mNDstMakers = 0;
 
@@ -362,8 +365,11 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
 
 void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
 
-  StStrangeMuDstMaker *oldMuDstMaker, *newMuDstMakers[3];
-  StStrangeMuDstMaker *v0MuDstMaker, *xiMuDstMaker, *kinkMuDstMaker;
+  StStrangeMuDstMaker *oldMuDstMaker=0;
+  StStrangeMuDstMaker *newMuDstMakers[3];
+  StStrangeMuDstMaker *v0MuDstMaker=0;
+  StStrangeMuDstMaker *xiMuDstMaker=0;
+  StStrangeMuDstMaker *kinkMuDstMaker=0;
   StIOMaker *IOMaker;
   StEventMaker *eventMaker;
   StMcEventMaker *mcEventReader;
@@ -583,8 +589,11 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
 
 void StrangeMuDstPlayer::Copy(Int_t NEvents, StFile* input, Char_t* output) {
 
-  StStrangeMuDstMaker *oldMuDstMaker, *newMuDstMakers[3];
-  StStrangeMuDstMaker *v0MuDstMaker, *xiMuDstMaker, *kinkMuDstMaker;
+  StStrangeMuDstMaker *oldMuDstMaker=0;
+  StStrangeMuDstMaker *newMuDstMakers[3];
+  StStrangeMuDstMaker *v0MuDstMaker=0;
+  StStrangeMuDstMaker *xiMuDstMaker=0;
+  StStrangeMuDstMaker *kinkMuDstMaker=0;
   Char_t *file, *dir, *outfile[3], *prefix[3], line[80];
   Int_t mNDstMakers = 0;
 
