@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.9 2004/07/13 16:12:32 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.10 2004/08/10 19:25:13 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.10  2004/08/10 19:25:13  dongx
+ * updated to be compatible with RunII data
+ *
  * Revision 1.9  2004/07/13 16:12:32  dongx
  * continuing update for the DAQ array in Run IV
  *
@@ -315,6 +318,11 @@ Int_t StTofrMatchMaker::Make(){
   mEvent = (StEvent *) GetInputDS("StEvent");
   if (!validEvent(mEvent)){
     gMessMgr->Info("StTofrMatchMaker -- nothing to do ... bye-bye","OS");
+    return kStOK;
+  }
+
+  if (mYear2) {
+    gMessMgr->Info("StTofrMatchMaker -- no TOFr in Year2!","OS");
     return kStOK;
   }
 
@@ -993,12 +1001,19 @@ Int_t StTofrMatchMaker::getTofData(StTofCollection* tofCollection){
 
   Int_t tofsize = tofData.size();
   Int_t nTOFr = 0;
-  if(tofsize<184) {
-    gMessMgr->Warning("The size of tofData is NOT 184!","OS");
-    nTOFr = 72; // DAQ not updated
-  } else {
-    nTOFr = mNTOFR;
+  if(mYear4) {
+    if(tofsize<184) {
+      gMessMgr->Warning("The size of tofData is NOT 184!","OS");
+      nTOFr = 72; // DAQ not updated
+    } else {
+      nTOFr = mNTOFR;
+    }
+  } else if(mYear3) {
+    nTOFr = 72;
+  } else if(mYear2) {
+    nTOFr = 0;
   }
+
   for (Int_t i=0;i<nTOFr;i++){
     Int_t iAdc = mDaqMap->DaqChan2ADCChan(i);
     mTofrAdc[i] = tofData[iAdc]->adc();
