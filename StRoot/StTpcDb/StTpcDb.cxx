@@ -51,13 +51,20 @@ temp = (StDbDataSet*)mk->GetData("StarDb");
 PadPlane=0;
 WirePlane=0;
 dimensions=0;
+ for (int i=0;i<24;i++){
+   gain[i]=0;
+   t0[i]=0;
+ }
 gStTpcDb = this;
 }
+
 //_____________________________________________________________________________
 StTpcDb::~StTpcDb() {
 delete PadPlane;
 delete WirePlane;
 delete dimensions;
+delete gain;
+delete t0;
 gStTpcDb = 0;
 }
 //_____________________________________________________________________________
@@ -100,5 +107,50 @@ StTpcDimensionsI* StTpcDb::Dimensions(){
   }
  return dimensions;
 }
+
+StTpcGainI* StTpcDb::Gain(int sector){
+  if(sector<1||sector>24){
+    gMessMgr->Message("StTpcDb::Gains request for invalid sector","E");
+    return 0;
+  }
+  if(gain[sector-1]==0){
+   char dbname[25];
+   sprintf(dbname,"Sector_%.2d/tpcGainFactors",sector);
+   printf("Getting %s \n",dbname);
+   StDbDataSet* wp = (StDbDataSet*)tpc_calibrations->Find(dbname);
+   StDbTableI* table=wp->GetDbObject();
+   tpcGainFactors* tpd;
+   tpd=(tpcGainFactors*)table->GetTable(); 
+   StRTpcGain* wptemp = new StRTpcGain();
+   wptemp->AddData(tpd);
+   wptemp->SetPadPlanePointer(PadPlaneGeometry());
+   gain[sector-1] = (StTpcGainI*)wptemp;
+  }
+ return gain[sector-1];
+}
+
+StTpcT0I* StTpcDb::T0(int sector){
+  if(sector<1||sector>24){
+    gMessMgr->Message("StTpcDb::T0s request for invalid sector","E");
+    return 0;
+  }
+  if(t0[sector-1]==0){
+   char dbname[25];
+   sprintf(dbname,"Sector_%.2d/tpcTimeOffsets",sector);
+   printf("Getting %s \n",dbname);
+   StDbDataSet* wp = (StDbDataSet*)tpc_calibrations->Find(dbname);
+   StDbTableI* table=wp->GetDbObject();
+   tpcTimeOffsets* tpd;
+   tpd=(tpcTimeOffsets*)table->GetTable(); 
+   StRTpcT0* wptemp = new StRTpcT0();
+   wptemp->AddData(tpd);
+   wptemp->SetPadPlanePointer(PadPlaneGeometry());
+   t0[sector-1] = (StTpcT0I*)wptemp;
+  }
+ return t0[sector-1];
+}
+
+
+
 
 
