@@ -1,7 +1,6 @@
 #include "StHbtMaker/CorrFctn/ParityDevCorrFctn.h"
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
 #include "StHbtMaker/Cut/mikesEventCut.h"
-#include "StHbtMaker/Cut/rotationEventCut.h"
 
 #include <cstdio>
 
