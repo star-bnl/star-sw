@@ -14,6 +14,9 @@
 
 struct emc emc ;
 
+int getEemcMapmt(int r) { // Added by Herbert Ward.
+  return (int)(emc.esmd[r]);
+}
 int getEemcTower(int r) { // Added by Herbert Ward.
   return (int)(emc.etow[r]);
 }

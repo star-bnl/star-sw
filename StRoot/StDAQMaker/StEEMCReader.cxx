@@ -39,6 +39,15 @@ int StEEMCReader::close() {
   return 1;
 }
 
+int StEEMCReader::getEemcData2004(int crate,int channel) {
+  static int warn=0;
+  if(fEEMCImpReader) return fEEMCImpReader->getEemc2004(crate,channel);
+  if(!warn) {
+    printf("StEEMCReader::getTowerAdc  WARNING:   no EEMC data in this event.\n");
+    warn=1;
+  }
+  return -1;
+}
 int StEEMCReader::getTowerAdc(int crate,int channel) {
   static int warn=0;
   if(fEEMCImpReader) return fEEMCImpReader->getEemcTowerAdc(crate,channel);

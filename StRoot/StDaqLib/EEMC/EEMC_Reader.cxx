@@ -3,6 +3,20 @@
 #include <assert.h>
 #define MAX_ADC 0xFFF
 
+int EEMC_Reader::getEemc2004(int crate,int channel) { // To resolve confusion about "channel", see
+                                                      // comments in getEemcTowerAdc.
+  int index;
+  if(crate>=1&&crate<=6) { // Tower portion of EEMC.
+    index = (crate-1) + 6 * channel ;
+    return ::getEemcTower(index); // emc.etow[index]
+  } else if(crate>=84&&crate<=99) { // MAPMT portion of EEMC.
+    index = crate - 82 + 30 * channel ;
+    return ::getEemcMapmt(index); // emc.esmd[index]
+  } else {
+    return 0;
+  }
+  
+}
 int EEMC_Reader::getEemcTowerAdc(int crate,int channelJan) {
   int index,channelGerard;
 

@@ -48,6 +48,7 @@ class EEMC_Reader
                         EEMC_Reader(EventReader *er, Bank_EEMCP *pEEMCP);///<EEMC_Reader constructor
                         ~EEMC_Reader() {}; ///<EEMC_Reader destructor
 			int getEemcTowerAdc(int crate,int channel);
+			int getEemc2004(int crate,int channel);
 
   protected:
 
