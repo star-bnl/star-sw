@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client.cxx,v 1.11 2003/01/29 13:55:18 ward Exp $
+ * $Id: client.cxx,v 1.12 2003/01/29 20:08:09 geurts Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: sample top-level code sould be used as a tutorial
@@ -14,6 +14,10 @@
  *
  ***************************************************************************
  * $Log: client.cxx,v $
+ * Revision 1.12  2003/01/29 20:08:09  geurts
+ * disabled usage of TRG_Reader::PrintAllTheData() and ::PrintDataCompact().
+ * Both methods are unavailabe in TRG_Reader.
+ *
  * Revision 1.11  2003/01/29 13:55:18  ward
  * Turn off memory mapped operation in the examples, which appears to fail for 2003 daq files.
  *
@@ -175,10 +179,10 @@ int main(int argc, char *argv[])
 	assert(0);
       } 
       else printf("created TRG_Reader!!!\n");
-      fprintf(er->logfd,"\n\n================\n\nHerb's formatted TRGD dump:\n\n\n");
-      tr->pBankTRGD->PrintAllTheData(er->logfd);
-      fprintf(er->logfd,"\n\n================\n\nMike's formatted TRGD dump:\n\n\n");
-      tr->pBankTRGD->PrintDataCompact(er->logfd);
+      //fprintf(er->logfd,"\n\n================\n\nHerb's formatted TRGD dump:\n\n\n");
+      //tr->pBankTRGD->PrintAllTheData(er->logfd);
+      //fprintf(er->logfd,"\n\n================\n\nMike's formatted TRGD dump:\n\n\n");
+      //tr->pBankTRGD->PrintDataCompact(er->logfd);
 
 #ifdef DOTPC      
 
