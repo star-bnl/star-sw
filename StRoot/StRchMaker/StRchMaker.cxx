@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.22 2000/06/15 13:46:05 dunlop Exp $
+ * $Id: StRchMaker.cxx,v 1.23 2000/06/16 02:05:38 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.22  2000/06/15 13:46:05  dunlop
- * Fixed segfault when RICH not in datastream
+ * Revision 1.23  2000/06/16 02:05:38  lasiuk
+ * include paths; drawing cleanup macros
  *
  * Revision 1.23  2000/06/16 02:05:38  lasiuk
  * include paths; drawing cleanup macros
@@ -66,12 +66,13 @@
 #include "St_DataSetIter.h"
 
 #include "StGlobals.hh"
-#include "StEventTypes.h"
-// #include "StContainers.h"
-// #include "StRichCollection.h"
-// #include "StRichHit.h"
-#include "StRichPixel.h"
-#include "StRichMCPixel.h"
+#include "StThreeVectorF.hh"
+
+// StEvent
+#include "StEvent/StEvent.h"
+#include "StEvent/StContainers.h"
+#include "StEvent/StRichCollection.h"
+#include "StEvent/StRichHit.h"
 #include "StEvent/StRichMCHit.h"
 #include "StEvent/StRichPixel.h"
 #include "StEvent/StRichMCPixel.h"
@@ -308,12 +309,6 @@ Int_t StRchMaker::Make() {
 	    if(!mTheDataReader) {
 		cout << "\tStDAQReader*: not there\n";
 		cout << "\tSkip this event\n" << endl;
-	    if (!(mTheDataReader->RICHPresent())) {
-		cout << "No RICH in datastream" << endl;
-		cout << "\t Skip this event" << endl;
-		return kStWarn;
-	    }
-	    
 		clearPadMonitor();
 		return kStWarn;
 	    }
@@ -427,15 +422,21 @@ Int_t StRchMaker::Make() {
     mClusterFinder->clearAndDestroyAll();
 #ifdef RCH_WITH_PAD_MONITOR
     mClusterFinder->setBorderFlags();
-    StRichPadMonitor* thePadMonitor = StRichPadMonitor::getInstance(mGeometryDb);   
-#endif
     
-#ifdef RCH_WITH_PAD_MONITOR
-//     if(!mTheRichReader) {
-// 	for(unsigned int jj=0; jj<mPixelStore.size(); jj++) {
-// 	    thePadMonitor->drawPad(*mPixelStore[jj]);
-// 	}
-//     }
+#ifdef RICH_WITH_PAD_MONITOR
+    cout << "Try get the pad monitor" << endl;   
+    StRichPadMonitor* thePadMonitor = StRichPadMonitor::getInstance(mGeometryDb);
+    //
+    // Clears The Old Data.Must be done here and RRS maker
+    
+    thePadMonitor->clearHits();
+    thePadMonitor->clearTracks();
+    cout << "mDaq = " << mDaq << endl;
+    if(mDaq) {
+	thePadMonitor->clearPads();
+	for(unsigned int jj=0; jj<mPixelStore.size(); jj++)
+	    thePadMonitor->drawPad(*mPixelStore[jj]);
+	
 	cerr << "\n In drawing Pixels\n";
     }
     thePadMonitor->update();
@@ -724,10 +725,10 @@ void StRchMaker::fillStEvent()
     
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.22 2000/06/15 13:46:05 dunlop Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.23 2000/06/16 02:05:38 lasiuk Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.22 2000/06/15 13:46:05 dunlop Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 1.23 2000/06/16 02:05:38 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
