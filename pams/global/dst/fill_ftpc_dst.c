@@ -8,17 +8,6 @@
 #include "StVertexId.h"
 #include "math_constants.h"
 
-#define TWO4   16                    /* 2**4  */
-#define TWO10  1024                  /* 2**10 */
-#define TWO11  2048                  /* 2**11 */
-#define TWO16  65536                 /* 2**16 */
-#define TWO17  131072                /* 2**17 */
-#define TWO20  1048576               /* 2**20 */
-#define TWO21  2097152               /* 2**21 */
-#define TWO25  33554432              /* 2**25 */
-
-#define C_2_PI                        0.63661977236758134308
-
 #define MAXHITS    10        /* Maximum number of hits on an FTPC track */
 
 #define FTPC_FAC   2380.0    /* Multiplication fator to achieve 4 micron accuracy */
@@ -111,26 +100,40 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
 /* bitmask quality information */
     dst_track[dst_track_h->nok].iflag   = 0;
 
-/*  Locate first hit on current track and determine detector id  */
+
+/*  initialize map and det_id  */
+    /*   primary vertex is always used for ftpc   */
+    dst_track[dst_track_h->nok].map[0]   = 1;
+    dst_track[dst_track_h->nok].map[1]   =  pow(2,31);
+    dst_track[dst_track_h->nok].det_id   = 0;
+
+/*  Loop over all hits on track       */
      for (ihit=0; ihit<MAXHITS; ihit++) {
+printf(" fptrack[itrk].hitid[%d] = %d\n",ihit,fptrack[itrk].hitid[ihit]);
         if (fptrack[itrk].hitid[ihit] > -1){
            /* hitid array filled by FORTRAN routine, must -1 for C routine */
            iPoint =  fptrack[itrk].hitid[ihit] - 1;
-           dst_track[dst_track_h->nok].x_first[0]    = 
+           if (dst_track[dst_track_h->nok].det_id == 0 ) { 
+              /*   Save first hit on current track and determine detector id  */
+              dst_track[dst_track_h->nok].x_first[0]    = 
                            fppoint[iPoint].x;
-           dst_track[dst_track_h->nok].x_first[1]    = 
+              dst_track[dst_track_h->nok].x_first[1]    = 
                            fppoint[iPoint].y;
-           dst_track[dst_track_h->nok].x_first[2]    = 
+              dst_track[dst_track_h->nok].x_first[2]    = 
                            fppoint[iPoint].z ;
-           /*   Rows 1->10 FTPC West  det_id= kFtpcWestId  */
-           if (fppoint[iPoint].row >= 1 && fppoint[iPoint].row <= 10) {
-               dst_track[dst_track_h->nok].det_id  = kFtpcWestId;    /* West */
+              /*   Rows 1->10 FTPC West  det_id= kFtpcWestId  */
+              if (fppoint[iPoint].row >= 1 && fppoint[iPoint].row <= 10) {
+                dst_track[dst_track_h->nok].det_id  = kFtpcWestId;    /* West */
+              }
+              /*   Rows 11->20 FTPC East  det_id=kFtpcEastId  */
+              else if (fppoint[iPoint].row >= 11 && fppoint[iPoint].row <=20) {
+                 dst_track[dst_track_h->nok].det_id  = kFtpcEastId;   /* East */
+              }
            }
-           /*   Rows 11->20 FTPC East  det_id=kFtpcEastId  */
-           else if (fppoint[iPoint].row >= 11 && fppoint[iPoint].row <=20) {
-               dst_track[dst_track_h->nok].det_id  = kFtpcEastId;   /* East */
-           }
-           break;
+printf("fppoint[%d].row = %d\n",iPoint,fppoint[iPoint].row);
+            dst_track[dst_track_h->nok].map[0] = 
+                    dst_track[dst_track_h->nok].map[0] 
+                  + pow(2,fppoint[iPoint].row);
         }
       }
 
@@ -157,10 +160,6 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
 /*  Initialized to zero by FTPC dst filler module   */
     dst_track[dst_track_h->nok].id_start_vertex  = 0;
 
-
-/*  map  (currently not set for FTPC)                        */
-    dst_track[dst_track_h->nok].map[0]                = 0;
-    dst_track[dst_track_h->nok].map[1]                = 0;
 
 /*  radius at start of track (cm) */
     dst_track[dst_track_h->nok].r0   = 
@@ -192,6 +191,9 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
     dst_track[dst_track_h->nok].invpt =  
       1./sqrt(fptrack[itrk].p[1]*fptrack[itrk].p[1]
                 +fptrack[itrk].p[2]*fptrack[itrk].p[2]);
+
+/*  curvature */
+    dst_track[dst_track_h->nok].curvature =  0;
 
 /*  covariance matrix */
 /*  (currently not set for FTPC)  */
@@ -238,6 +240,35 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
 
     dst_track[dst_track_h->nok].impact  = 0;
 
+
+/*    DEBUG     JCS    */
+printf("dst_track[dst_track_h->nok].id = %d\n",dst_track[dst_track_h->nok].id);
+printf(".iflag = %x\n",dst_track[dst_track_h->nok].iflag);
+printf(".det_id = %d\n",dst_track[dst_track_h->nok].det_id);
+printf(".method = %d\n",dst_track[dst_track_h->nok].method);
+printf(".pid = %d\n",dst_track[dst_track_h->nok].pid);
+printf(".n_point = %d\n",dst_track[dst_track_h->nok].n_point);
+printf(".n_max_point = %d\n",dst_track[dst_track_h->nok].n_max_point);
+printf(".icharge = %d\n",dst_track[dst_track_h->nok].icharge);
+printf(".id_start_vertex = %ld\n",dst_track[dst_track_h->nok].id_start_vertex);
+printf(".map[0] = %lx\n",dst_track[dst_track_h->nok].map[0]);
+printf(".map[1] = %lx\n",dst_track[dst_track_h->nok].map[1]);
+printf(".r0 = %f\n",dst_track[dst_track_h->nok].r0);
+printf("phi0 = %f\n",dst_track[dst_track_h->nok].phi0);
+printf("z0 = %f\n",dst_track[dst_track_h->nok].z0);
+printf("psi = %f\n",dst_track[dst_track_h->nok].psi);
+printf("tanl = %f\n",dst_track[dst_track_h->nok].tanl);
+printf("invpt = %f\n",dst_track[dst_track_h->nok].invpt);
+printf("curvature = %f\n",dst_track[dst_track_h->nok].curvature);
+printf("x_first[0] =  %f\n",dst_track[dst_track_h->nok].x_first[0]);
+printf("x_first[1] =  %f\n",dst_track[dst_track_h->nok].x_first[1]);
+printf("x_first[2] =  %f\n",dst_track[dst_track_h->nok].x_first[2]);
+printf("x_last[0] =  %f\n",dst_track[dst_track_h->nok].x_last[0]);
+printf("x_last[1] =  %f\n",dst_track[dst_track_h->nok].x_last[1]);
+printf("x_last[2] =  %f\n",dst_track[dst_track_h->nok].x_last[2]);
+printf("length =  %f\n",dst_track[dst_track_h->nok].length);
+printf("impact  =  %f\n",dst_track[dst_track_h->nok].impact);
+
 /*  Fill dst point table for current track */
 
     for (ihit=0; ihit<MAXHITS; ihit++) {
@@ -255,10 +286,10 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
 /*                    bits 21-24  number of pads in cluster                 */
 /*                    bits 25-31  number of consecutive timebins in cluster */
          dst_point[dst_point_h->nok].hw_position = 
-                      fppoint[iPoint].n_bins*TWO25
-                    + fppoint[iPoint].n_pads*TWO21
-                    + fppoint[iPoint].sector*TWO11
-                    + fppoint[iPoint].row*TWO4
+                      fppoint[iPoint].n_bins*pow(2,25)
+                    + fppoint[iPoint].n_pads*pow(2,21)
+                    + fppoint[iPoint].sector*pow(2,11)
+                    + fppoint[iPoint].row*pow(2,4)
                     + dst_track[dst_track_h->nok].det_id;
        /*  Fill space point position coordinates  */
          if (fppoint[iPoint].x > FTPC_MIN && fppoint[iPoint].x < FTPC_MAX){
@@ -279,38 +310,38 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
          else {
            ftpcz = 0;
          } 
-         ftpcy10 = ftpcy/TWO10;
-         ftpcy11 = ftpcy - TWO10*ftpcy10;
-         dst_point[dst_point_h->nok].position[0] = ftpcx + TWO20*ftpcy11;
-         dst_point[dst_point_h->nok].position[1] = ftpcy10 + TWO10*ftpcz;
+         ftpcy10 = ftpcy/pow(2,10);
+         ftpcy11 = ftpcy - pow(2,10)*ftpcy10;
+         dst_point[dst_point_h->nok].position[0] = ftpcx + pow(2,20)*ftpcy11;
+         dst_point[dst_point_h->nok].position[1] = ftpcy10 + pow(2,10)*ftpcz;
        /*  Fill space point position errors (0.0<= error < 8.0) */
          if (fppoint[iPoint].x_err >= 0.0 && fppoint[iPoint].x_err < 8.0){
-           ftpcx = TWO17*fppoint[iPoint].x_err;
+           ftpcx = pow(2,17)*fppoint[iPoint].x_err;
          }
          else {
            ftpcx = 0;
          }
          if (fppoint[iPoint].y_err >= 0.0 && fppoint[iPoint].y_err < 8.0){
-           ftpcy = TWO17*fppoint[iPoint].y_err;
+           ftpcy = pow(2,17)*fppoint[iPoint].y_err;
          }
          else {
            ftpcy = 0;
          }
          if (fppoint[iPoint].z_err >= 0.0 && fppoint[iPoint].z_err < 8.0){
-           ftpcz = TWO17*fppoint[iPoint].z_err;
+           ftpcz = pow(2,17)*fppoint[iPoint].z_err;
          }
          else {
            ftpcz = 0;
          }
-         ftpcy10 = ftpcy/TWO10;
-         ftpcy11 = ftpcy - TWO10*ftpcy10;
-         dst_point[dst_point_h->nok].pos_err[0] = ftpcx + TWO20*ftpcy11;
-         dst_point[dst_point_h->nok].pos_err[1] = ftpcy10 + TWO10*ftpcz;
+         ftpcy10 = ftpcy/pow(2,10);
+         ftpcy11 = ftpcy - pow(2,10)*ftpcy10;
+         dst_point[dst_point_h->nok].pos_err[0] = ftpcx + pow(2,20)*ftpcy11;
+         dst_point[dst_point_h->nok].pos_err[1] = ftpcy10 + pow(2,10)*ftpcz;
        /* Fill charge and maximum ADC value contained in cluster           */
        /*              bits 0-15    charge                                 */
        /*              bits 16-31   maximum ADC value contained in cluster */
          dst_point[dst_point_h->nok].charge  =  
-                         fppoint[iPoint].max_adc*TWO16
+                         fppoint[iPoint].max_adc*pow(2,16)
                        + fppoint[iPoint].charge;
        /* Fill Foreign Key to dst_track table */
          dst_point[dst_point_h->nok].id_track    =  dst_track_h->nok + 1;
