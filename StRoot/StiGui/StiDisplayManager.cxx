@@ -15,6 +15,9 @@
 //SCL
 #include "StThreeVector.hh"
 
+//Sti
+#include "Sti/StiDetector.h"
+
 //StiGui
 #include "StiDrawable.h"
 #include "StiRootDrawable.h"
@@ -105,18 +108,6 @@ void StiDisplayManager::reset()
     
 }
 
-/*
-  void StiDisplayManager::draw(StiDrawable* val)
-  {
-  stidrawablemap::iterator where = mmap.find(val->name());
-  if (where==mmap.end()) {
-  cout <<"StiDisplayManger::draw(StiDrawable*) ERROR:\tdrawable not found"<<endl;
-  return;
-  }
-  (*where)->draw();
-  }
-*/
-
 void StiDisplayManager::update()
 {
     mcanvas->Update();
@@ -126,7 +117,15 @@ void StiDisplayManager::update()
 void StiDisplayManager::setVisible()
 {
     for (stidrawablemap::const_iterator it=mmap.begin(); it!=mmap.end(); ++it) {
-	(*it).second->setVisibility(true);
+	StiDetector* tempDet = dynamic_cast<StiDetector*>( (*it).second);
+	if (!tempDet) {
+	    //skip, there's more than just detectors in here!
+	}
+	else {
+	    if (tempDet->isOn()) {
+		(*it).second->setVisibility(true);
+	    }
+	}
     }
     return;
 }
@@ -200,7 +199,15 @@ void StiDisplayManager::setZoomSkeletonView()
 	    //now look for outermost padrow
 	    where = (*it).first.find("Padrow_1/");
 	    if ( where != (*it).first.npos ) { //it's from padrow 1	    
-		(*it).second->setVisibility(true);
+		StiDetector* tempDet = dynamic_cast<StiDetector*>( (*it).second );
+		if (!tempDet) {
+		    cout <<"StiDisplayManager::setZoomSkeletonView(). ERROR:\t"
+			 <<" cast to StiDetector failed.  Abort"<<endl;
+		    return;
+		}
+		if (tempDet->isOn()) {
+		    (*it).second->setVisibility(true);
+		}
 	    }
 	    else {
 		(*it).second->setVisibility(false);
@@ -220,7 +227,15 @@ void StiDisplayManager::setSkeletonView()
 	    //now look for outermost padrow
 	    where = (*it).first.find("Padrow_45");
 	    if ( where != (*it).first.npos ) { //it's from padrow 45	    
-		(*it).second->setVisibility(true);
+		StiDetector* tempDet = dynamic_cast<StiDetector*>( (*it).second );
+		if (!tempDet) {
+		    cout <<"StiDisplayManager::setSkeletonView(). ERROR:\t"
+			 <<" cast to StiDetector failed.  Abort"<<endl;
+		    return;
+		}
+		if (tempDet->isOn()) {
+		    (*it).second->setVisibility(true);
+		}
 	    }
 	    else {
 		(*it).second->setVisibility(false);
@@ -235,7 +250,15 @@ void StiDisplayManager::setSvtVisible()
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	string::size_type where = (*it).first.find("Svg");
 	if ( where != (*it).first.npos ) {
-	    (*it).second->setVisibility(true);
+	    StiDetector* tempDet = dynamic_cast<StiDetector*>( (*it).second );
+	    if (!tempDet) {
+		cout <<"StiDisplayManager::setSvtVisible(). ERROR:\t"
+		     <<" cast to StiDetector failed.  Abort"<<endl;
+		return;
+	    }
+	    if (tempDet->isOn()) {
+		(*it).second->setVisibility(true);
+	    }
 	}
     }
     return;
@@ -257,7 +280,15 @@ void StiDisplayManager::setIfcVisible()
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	string::size_type where = (*it).first.find("Ifc");
 	if ( where != (*it).first.npos ) {
-	    (*it).second->setVisibility(true);
+	    StiDetector* tempDet = dynamic_cast<StiDetector*>( (*it).second );
+	    if (!tempDet) {
+		cout <<"StiDisplayManager::setIfcVisible(). ERROR:\t"
+		     <<" cast to StiDetector failed.  Abort"<<endl;
+		return;
+	    }
+	    if (tempDet->isOn()) {
+		(*it).second->setVisibility(true);
+	    }
 	}
     }
     return;
@@ -279,7 +310,15 @@ void StiDisplayManager::setTpcVisible()
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	string::size_type where = (*it).first.find("Tpc");
 	if ( where != (*it).first.npos ) {
-	    (*it).second->setVisibility(true);
+	    StiDetector* tempDet = dynamic_cast<StiDetector*>( (*it).second );
+	    if (!tempDet) {
+		cout <<"StiDisplayManager::setTpcVisible(). ERROR:\t"
+		     <<" cast to StiDetector failed.  Abort"<<endl;
+		return;
+	    }
+	    if (tempDet->isOn()) {
+		(*it).second->setVisibility(true);
+	    }
 	}
     }
     return;
