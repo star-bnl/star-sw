@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.hh,v 1.4 1999/01/30 23:03:18 wenaus Exp $
+ * $Id: StVertex.hh,v 1.5 1999/02/17 11:04:52 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -15,8 +15,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.hh,v $
- * Revision 1.4  1999/01/30 23:03:18  wenaus
- * table load intfc change; include ref change
+ * Revision 1.5  1999/02/17 11:04:52  ullrich
+ * Added numberOfDaughters() and daughter(i) methods.
  *
  * Revision 1.5  1999/02/17 11:04:52  ullrich
  * Added numberOfDaughters() and daughter(i) methods.
@@ -48,6 +48,8 @@ public:
     
     int operator==(const StVertex&) const;
     int operator!=(const StVertex&) const;
+
+    StVertexType                type();
     StVecPtrGlobalTrack&        daughters();
     unsigned int                numberOfDaughters();
     StGlobalTrack*              daughter(unsigned int);
@@ -77,6 +79,13 @@ protected:
     float                  mChiSquared;                
 };
 
+inline StVertexType StVertex::type() { return mType; }
+
+inline StVecPtrGlobalTrack& StVertex::daughters(){ return mDaughters; }       
+
+inline unsigned int StVertex::numberOfDaughters() { return mDaughters.size(); }
+
+inline StGlobalTrack* StVertex::daughter(unsigned int i)
 {
     return (i < mDaughters.size() ? mDaughters[i] : 0);
 }
