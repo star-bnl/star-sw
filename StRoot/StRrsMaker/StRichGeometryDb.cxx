@@ -1,10 +1,13 @@
 /*******************************************************************
- * $Id: StRichGeometryDb.cxx,v 2.4 2001/10/04 19:37:43 dunlop Exp $
+ * $Id: StRichGeometryDb.cxx,v 2.5 2001/10/04 22:16:48 dunlop Exp $
  *
  * Description:
  *
  *******************************************************************
  * $Log: StRichGeometryDb.cxx,v $
+ * Revision 2.5  2001/10/04 22:16:48  dunlop
+ * Fixing small mistake in new euler angles
+ *
  * Revision 2.4  2001/10/04 19:37:43  dunlop
  * Modification to fill in year 2001 information.
  * Has TPC in global coordinates + small shift + mod to gap in x and y to match
@@ -299,10 +302,9 @@ void StRichGeometryDb::fill2001() {
     // Euler-like angles
     //
     // Use exact from survey
-
-    mLocalAngleX = -0.0200353123478039 * degree ;
+    mLocalAngleX = -0.0200353082209942 * degree ;
     mLocalAngleY = 0.037884454328129 * degree ;
-    mLocalAngleZ = 29.8171420962678191 * degree ;
+    mLocalAngleZ = 29.8171493344754 * degree ;
     //
     // P00hm + tpc local->global + (0.03,-0.025,0) local
     mLocalOriginAngle = -60.0233755889891 * degree ; 
