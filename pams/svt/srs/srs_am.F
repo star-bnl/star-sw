@@ -86,7 +86,7 @@ c      integer j,k,ii,jj,kk
       integer filtered,deadssd,deadsvt
       integer id_shape,get_geom_row,dead
       real gcoord(3),lcoord(3),drift_length,trans_length
-      character*132 m132(5)     ! And some message-generating space.
+      character*132 m132(5),myString     ! And some message-generating space.
       integer idI1
       data    idI1 /0/
       save    idI1
@@ -94,11 +94,11 @@ c      integer j,k,ii,jj,kk
 c------------------------------------------------------------------------------c
 c------------------------------------------------------------------------------c
 
-      WRITE(*,*) 'SRS_AM: Starting ######################################'
+      call StInfo('SRS_AM: Starting ######################################')
 c      print*,' nok svt_hit = ',svt_hit_h.nok
       if (svt_hit_h.nok.eq.0) then
          spt_h.nok=0
-         WRITE(*,*) 'SRS_AM: Stopping ######################################'
+         call StInfo('SRS_AM: Stopping ######################################')
          SRS_AM=STAFCV_OK
          RETURN
       endif
@@ -169,10 +169,15 @@ c------------------------------------------------------------------------------c
            endif
         enddo
         dead=svt_hit_h.nok-filtered
-        write(6,111)'Initial number of hits               = ',svt_hit_h.nok
-        write(6,111)'Number of hits on inactive areas     = ',dead
-        write(6,111)'Number of SVT hits on inactive areas = ',deadsvt
-        write(6,111)'Number of SSD hits on inactive areas = ',deadssd
+        write(myString,111)'Initial number of hits               = '
+     +       ,svt_hit_h.nok
+        call StInfo(myString)
+        write(myString,111)'Number of hits on inactive areas     = ',dead
+        call StInfo(myString)
+        write(myString,111)'Number of SVT hits on inactive areas = ',deadsvt
+        call StInfo(myString)
+        write(myString,111)'Number of SSD hits on inactive areas = ',deadssd
+        call StInfo(myString)
  111    format(A45,I6)
         svt_hit_h.nok=filtered
 c------------------------------------------------------------------------------c
@@ -208,7 +213,7 @@ c------------------------------------------------------------------------------c
 c------------------------------------------------------------------------------c
 c       DONE                                                                   c
 c------------------------------------------------------------------------------c
-      WRITE(*,*) 'SRS_AM: Stopping ######################################'
+      call StInfo('SRS_AM: Stopping ######################################')
       SRS_AM=STAFCV_OK
       RETURN
       END
@@ -1993,7 +1998,7 @@ c------------------------------------------------------------------------------c
 		delta=sqrt(2.0/deriv)
 		test=abs(delta-olddelta)/delta
 		if (try.gt.maxtry) then
-		    write(6,*)'Trys exceed maximum !!! (drift resolution)'
+		    call StError('Trys exceed maximum !!! (drift resolution)')
 		    dz=delta
 		    goto 302
 		endif
@@ -2359,10 +2364,12 @@ c     b)the number of data to be transfered is too big given the size of the tar
 
       if (svt_hit_h.nok.le.0) then
          spt_direct = STAFCV_BAD
-         write(6,1000)
+         write(myString,1000)
+         call StError(myString)
       else if (spt_h.maxlen.lt.svt_hit_h.nok) then
          spt_direct = STAFCV_BAD
-         write(6,1001) 
+         write(myString,1001) 
+         call StError(myString)
          return
       end if
 
@@ -2509,21 +2516,26 @@ c     b)the number of data to be transfered is too big given the size of the tar
 
       if (svt_hit_h.nok.le.0) then
          spt_direct_gs = STAFCV_BAD
-         write(6,1000)
+         write(myString,1000)
+         call stError(myString)
       else if (geom_h.nok.le.0) then
          spt_direct_gs = STAFCV_BAD
-         write(6,1003)
+         write(myString,1003)
+         call stError(myString)
       else if (spt_h.maxlen.lt.svt_hit_h.nok) then
          spt_direct_gs = STAFCV_BAD
-         write(6,1001) 
+         write(myString,1001) 
+         call stError(myString)
          return
       else if (direct_h.nok.le.0) then
-         write(6,1002)
+         write(myString,1002)
+         call stError(myString)
          direct(1).sd = 0.0020     ! 20 microns
          direct(1).st = 0.0020     ! 20 microns
          direct_h.nok = 1
       else if (direct_h.nok.eq.1) then
-         write(6,1005)
+         write(myString,1005)
+         call stError(myString)
       end if
 
 c     loop on all rows of svt_hit and transfer the global coordinates, the dedx info
@@ -2597,7 +2609,8 @@ c     map to wafer local frame coordinate, smear and map back to global frame
             spt(ispt).id_mchit = svt_hit(ihit).id ! Link to mc hits
 c            svt_hit(ihit).id_spt   = ihit
          else
-            write(6,1004) ihit 
+            write(myString,1004) ihit 
+            call stError(myString)
          end if
          
       end do
@@ -2752,7 +2765,8 @@ c     ===============
          end if
       end do
 
-      write(6,1000) wafer
+      write(myString,1000) wafer
+      call stError(myString)
       get_geom_row = -1
       
       return

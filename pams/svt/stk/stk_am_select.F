@@ -38,7 +38,7 @@ C     ===================
       integer tls_Search_Near_i
       real    chisqnew,chisqother
       logical more_hits,SCV_STATE
-      character*80 mess
+      character*132 mess,msg
 
 
 C     RETURN:
@@ -52,11 +52,12 @@ C     EXECUTABLE CODE:
 C     ================
 c     check if the svt track table is empty
 
-      WRITE(*,*) 'STK_AM_SELECT: Starting #############################'
+      call StInfo( 'STK_AM_SELECT: Starting #############################')
       
       if (track_h.nok.eq.0) then
          stk_am_select = stafcv_ok
-         write(6,1001)
+         write(mess,1001)
+         call StInfo(mess)
          return
       end if
 
@@ -69,7 +70,8 @@ c     wkw:starting from previous loop
      +    start,table_off,krows)
       if (.not. SCV_STATE( ok, 'i')) then
          call SCV_MESSAGES( ok, mess )
-         write(6,*)' in stk_select:',mess
+         write(msg,*)' in stk_select:',mess
+         call StError(msg)
       endif
 
 
@@ -279,7 +281,7 @@ C     space point as used
          
       groups_h.nok = k-1
 
-      WRITE(*,*) 'STK_AM_SELECT: Stopping #############################'
+      call StInfo('STK_AM_SELECT: Stopping #############################')
       STK_AM_SELECT=STAFCV_OK
       RETURN
       END

@@ -30,7 +30,7 @@ c     -------------------
 C     EXECUTABLE CODE:
 C     ================
 
-      WRITE(*,*) 'STK_AM_INIT: Starting ###############################'
+      call StInfo('STK_AM_INIT: Starting ###############################')
 
       mctrack_h.nok=0
       track_h.nok=0
@@ -40,7 +40,7 @@ C     ================
       groups_h.nok = 0
       stkpar(1).ngood=0
 
-      WRITE(*,*) 'STK_AM_INIT: Stopping ###############################'
+      call StInfo('STK_AM_INIT: Stopping ###############################')
       STK_AM_INIT=STAFCV_OK
       RETURN
       END

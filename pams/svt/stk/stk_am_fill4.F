@@ -84,6 +84,7 @@ C     ===================
       integer    flag, id
       integer    ilist
       save       first
+      character*132 mess
 
 
 C     RETURN:
@@ -99,11 +100,12 @@ C     =======
      &      ,i5)
  1006 format(1x,'f-stk_am_fill: no space points on layer :',i5)
  1007 format(1x,'f-stk_am_fill: too many track candidates: ',i8)
+ 1008 format(1x,a,i8)
 
 C     EXECUTABLE CODE:
 C     ================
 
-      WRITE(*,*) 'STK_AM_FILL4: Starting ###########################'
+      call StInfo('STK_AM_FILL4: Starting ###########################')
 
       stk_am_fill4 = stafcv_ok
 
@@ -167,7 +169,8 @@ c     wkw: make cthij parameters
          do iwafer2 = 1, waferntot
             ilayer2 = geom(iwafer2).layer
             if (ilayer2.lt.1.or.ilayer2.gt.7) then
-               write(6,*) 'ilayer2 error:',ilayer2
+               write(mess,1008) 'ilayer2 error:',ilayer2
+               call StError(mess)
                stop
             end if
             waferkeyn(ilayer2,0) = waferkeyn(ilayer2,0) + 1
@@ -176,9 +179,10 @@ c     wkw: make cthij parameters
          end do
 
          ilayer0 = 0
-         x(1,ilayer0) = 0.
-         x(2,ilayer0) = 0.
-         x(3,ilayer0) = 0.
+         x(1,ilayer0) = vtx(1).x(1)
+         x(2,ilayer0) = vtx(1).x(2)
+         x(3,ilayer0) = vtx(1).x(3)
+ 
 
          do iwafer1 = 1, waferntot
             ilayer1 = geom(iwafer1).layer
@@ -203,7 +207,7 @@ c     wkw: make cthij parameters
                ilist = 0
                do iwafer2 = waferi(ilayer2-1)+1, waferi(ilayer2)
                   if (ilayer2.ne.geom(iwafer2).layer) then
-                     write(6,*) ' une erreur est survenu - crash...'
+                     call StError( ' une erreur est survenu - crash...')
                      stop
                   end if
                   x(1,ilayer2) = geom(iwafer2).x(1)
@@ -244,19 +248,22 @@ c     wkw: make cthij parameters
                end do
             end do
          end do
-         write(6,*)'stk_am_fill4 : end of initialisation'
+         call StInfo('stk_am_fill4 : end of initialisation')
       end if  ! end of fast_search
          
       if (spt_h.nok.eq.0) then
-         write(6,1000)
+         write(mess,1000)
+         call StError(mess)
          stk_am_fill4 = stafcv_bad ! no svt space point
          return
       else if (vtx_h.nok.eq.0) then
-         write(6,1001)
+         write(mess,1001)
+         call StError(mess)
          stk_am_fill4 = stafcv_bad ! no svt vertex 
          return
       else if (config_h.nok.eq.0) then
-         write(6,1004)
+         write(mess,1004)
+         call StError(mess)
          return
       else if (filler_h.nok.eq.0) then 
       end if
@@ -316,10 +323,11 @@ C      do iwafer1 = 1, 400       ! zero counters
          iwafer2  = waferi(ilayer) + 
      &        (iladder-1)*config(1).n_wafer(ilayer) + iwafer1
          if (kwafer.ne.geom(iwafer2).id) then
-            write(6,*) ' fatal mis-match'
-            write(6,*) 'idw,ly,w,ld,w2,id:', 
+           call StError( ' fatal mis-match')
+            write(mess,*) 'idw,ly,w,ld,w2,id:', 
      &           kwafer,ilayer,iwafer1,iladder,
      &           iwafer2, geom(iwafer2).id
+            call StError(mess)
             return
          end if
 
@@ -1285,7 +1293,8 @@ c     consider track candidate for storage
 c            write(889,*) ' considering track for storage:',itrack+1
 
          if (itrack.ge.track_h.maxlen) then 
-            write(6,1007) itrack
+            write(mess,1007) itrack
+            call StError(mess)
             done(1)   = .true.
             done(2)   = .true.
             done(3)   = .true.
@@ -1330,7 +1339,8 @@ C     spt(ispts(k)).id_track     = itrack
                      groups(n_groups).id2 = ispts(k)
                      n_groups = n_groups + 1
                      if( n_groups .gt. groups_h.maxlen) then
-                        write(6,*)'Too many groups', n_groups
+                        write(mess,*)'Too many groups', n_groups
+                        call StError(mess)
                         done(1)   = .true.
                         done(2)   = .true.
                         done(3)   = .true.
@@ -1377,7 +1387,7 @@ c     wkw: itrack here is the sum of the previous loop and the old loops
       track_h.nok       = itrack
       groups_h.nok      = n_groups -1
       
-      WRITE(*,*) 'STK_AM_FILL4: Stopping ############################'
+      call StInfo('STK_AM_FILL4: Stopping ############################')
       STK_AM_FILL4=STAFCV_OK
       RETURN
       END

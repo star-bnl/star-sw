@@ -46,6 +46,7 @@ C     ===================
       integer mess_id(20)
       character mess*132
       common /stk_mess_com/mess_id
+ 
 
 c     EXTERNALS
 c     ---------
@@ -64,23 +65,23 @@ C     RETURN:
 C     =======
 C     FORMAT:
 C     =======
- 1000 format(1x,'stk_bs_i : beginning stk')
+
  1001 format(1x,'stk_',a,'_w : ',a,' returned with abnormal status err')
  1002 format(1x,'stk_fin_i : iteration#',i3,' th_max=',f12.4)
+ 777  format(a30,i2)
 
 C     EXECUTABLE CODE:
 C     ================
-      WRITE(*,*) 'STK_AM: Starting ##################################'
-      write(6,*)' Tracking conditions'
-      write(6,777)'mode (1=primary/2=secondary) :',stkpar(1).mode
-      write(6,777)'method (1=vtx in fit/2=no)   :',stkpar(1).method
-      write(6,777)'number of superlayers        :',stkpar(1).nlayers
- 777  format(a30,i2)
-
+      call StInfo('STK_AM: Starting ##################################')
+      call StInfo(' Tracking conditions')
+      write(mess,777)'mode (1=primary/2=secondary) :',stkpar(1).mode
+      call StInfo(mess)
+      write(mess,777)'method (1=vtx in fit/2=no)   :',stkpar(1).method
+      call StInfo(mess)
+      write(mess,777)'number of superlayers        :',stkpar(1).nlayers
+      call StInfo(mess)
+      
       stk_am = stafcv_ok
-
-      write(mess,1000) 
-      call message(mess,1,mess_id(1))
 
 c     initialization phase
       if( track_h.nok .eq. 0) then
@@ -202,15 +203,15 @@ c         th_step=(th_max-th_init)/(float(nitermax)-1.0) ! wkw
             do while (.not.done)
 
                iteration = iteration + 1
-               print 401,iteration
+               write(mess, 401)iteration
+               call StInfo(mess)
  401           format(' Doing STK iteration # ',i2,' ...')
                factor=(float(iteration)-1.0)/(float(nitermax)-1.0) 
 c wkw
 c              factor=1 when iteration=nitermax 
                th=th_init+(factor**2.0)*(th_max-th_init) ! wkw
 c               th_max = th_max + float(iteration)*th_step ! wkw
-               write(mess,1002) iteration, th
-
+                
 c               filler(1).th21  =    th
 c               filler(1).th31  =    th
 c               filler(1).th41  =  1.2 * th
@@ -350,7 +351,8 @@ c               filler(1).th87  =    th
                   write(mess,1001) 'sts','stk_am_select'
                   call message(mess,1,mess_id(8))
                end if
-               print*,'Found ',track_h.nok-oldcandidate
+               write(mess,*)'Found ',track_h.nok-oldcandidate
+               call StInfo(mess)
                if (iteration.eq.stkpar(1).nitermax) done = .true.
                if (oldcandidate.eq.track_h.nok) then
                   iternull = iternull + 1
@@ -375,7 +377,6 @@ c               filler(1).th87  =    th
 ! loop over opening up for secondaries
                do isecond=1,4 
 
-                  print 401,iteration
                   factor=(float(iteration)-1.0)/(float(nitermax)-1.0) ! wkw
 c     factor=1 when iteration=nitermax !
                   th=th_init+(factor**2.0)*(th_max-th_init) ! wkw
@@ -479,7 +480,8 @@ c     filler(1).th65  =    th
                         write(mess,1001) 'sts','stk_am_select'
                         call message(mess,1,mess_id(8))
                      end if
-                     print*,'Found ',track_h.nok-oldcandidate
+                     write(mess,*)'Found ',track_h.nok-oldcandidate
+                     call StInfo(mess)
                      if (iteration.eq.stkpar(1).nitermax) done=.true.
                      if (oldcandidate.eq.track_h.nok) then
                         iternull = iternull + 1
@@ -518,7 +520,7 @@ c     sgr may have been called
 
 
 
-      WRITE(*,*) 'STK_AM: Stopping #################################'
+      call StInfo('STK_AM: Stopping #################################')
       STK_AM=STAFCV_OK
       RETURN
       END

@@ -66,7 +66,7 @@ C     -------
 
 C     EXECUTABLE CODE:
 C     ----------------
-      WRITE(*,*) 'STK_AM_KINE: Starting ###############################'
+      call StInfo('STK_AM_KINE: Starting ###############################')
 
       stk_am_kine = stafcv_ok
 
@@ -235,7 +235,7 @@ c     update nok
 
       kine_h.nok       = ikine
 
-      WRITE(*,*) 'STK_AM_KINE: Stopping ##############################'
+      call StInfo('STK_AM_KINE: Stopping ##############################')
       STK_AM_KINE=STAFCV_OK
       RETURN
       END

@@ -59,7 +59,7 @@ C     ===================
       
 c     error/message
       
-      character msg*60
+      character msg*132
       integer   lines
       integer   msgid1,msgid2,msgid3
       logical   first
@@ -77,7 +77,7 @@ C     =======
 
 C     EXECUTABLE CODE:
 C     ================
-      WRITE(*,*) 'STK_AM_HELIX: Starting ##############################'
+      call StInfo('STK_AM_HELIX: Starting ##############################')
 
       stk_am_helix = stafcv_ok
 
@@ -144,12 +144,12 @@ c     proceed to generation as requested
          cosl   = cosd(lambda)
          sinl   = sind(lambda)
          tanl   = sinl/cosl
-         write(6,*) ' test1:cst:',cosd(lambda),sind(lambda),tand(lambda)
+*         write(6,*) ' test1:cst:',cosd(lambda),sind(lambda),tand(lambda)
          lambda =  3.1415927*lambda/180. 
-         write(6,*) ' test1:cst:',cos(lambda),sin(lambda),tan(lambda)
+*         write(6,*) ' test1:cst:',cos(lambda),sin(lambda),tan(lambda)
          lambda = 180.*lambda/3.1415927
 
-         write(6,*) ' helix: 1/p,tanl:',1/pt,tanl
+*         write(6,*) ' helix: 1/p,tanl:',1/pt,tanl
 
 c     fill g2t_track table 
 
@@ -166,14 +166,14 @@ c     helix cal
        
          r = pt/(konst*g2t_gepart(hlx(1).pid).charge*B)
          h = - g2t_gepart(hlx(1).pid).charge
-	write(6,*) ' helix: r,h:',r,h
+c	write(6,*) ' helix: r,h:',r,h
          phi0 = ph-90.*h
 
          delphi = h*hlx(1).phinc 
          dels   = delphi*r/(h*cosl)
          dels   = 3.1415927*dels/180.    ! delphi is in degrees, stupid !!!!!
 
-         write(6,*) ' helix: delphi, dels:',delphi, dels
+c         write(6,*) ' helix: delphi, dels:',delphi, dels
 
          itrack = itrack  +  1
          ctrack(itrack).id         = itrack
@@ -183,7 +183,7 @@ c     helix cal
          do ispt1 = 1, hlx(1).nspt
             phi = ispt1*delphi
             s   = ispt1*dels
-            write(6,*) ' helix: phi,s :',phi,s 
+c            write(6,*) ' helix: phi,s :',phi,s 
             ispt = ispt + 1
 
             spt(ispt).x(1) = x0(1) + r*(cosd(phi0+phi)-cosd(phi0)) 
@@ -205,7 +205,7 @@ c     update nok
       ctrack_h.nok       = itrack
       vtx_h.nok          = 1
 
-      WRITE(*,*) 'STK_AM_HELIX: Stopping ##############################'
+      call StInfo('STK_AM_HELIX: Stopping ##############################')
       STK_AM_HELIX=STAFCV_OK
       RETURN
       END

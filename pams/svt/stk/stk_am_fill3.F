@@ -80,6 +80,7 @@ C     ===================
       integer    flag, id
       integer    ilist
       save       first
+      character*132 myString
 
  
 
@@ -97,10 +98,12 @@ C     =======
      &      ,i5)
  1006 format(1x,'f-stk_am_fill: no space points on layer :',i5)
  1007 format(1x,'f-stk_am_fill: too many track candidates: ',i8)
+ 1008 format(1x,'f-stk_am_fill: ilayer2 error: ',i3)
+
 
 C     EXECUTABLE CODE:
 C     ================
-      WRITE(*,*) 'STK_AM_FILL3: Starting ###########################'
+      call StInfo('STK_AM_FILL3: Starting ###########################')
 
       stk_am_fill3 = stafcv_ok
 
@@ -151,7 +154,8 @@ clm the number of layers is hardwired because of the SSD
          do iwafer2 = 1, waferntot
             ilayer2 = geom(iwafer2).layer
             if (ilayer2.lt.1.or.ilayer2.gt.6) then
-               write(6,*) 'ilayer2 error:',ilayer2
+               write(myString,1008) ilayer2
+               call StError(myString)
                stop
             end if
             waferkeyn(ilayer2,0) = waferkeyn(ilayer2,0) + 1
@@ -187,7 +191,7 @@ clm the number of layers is hardwired because of the SSD
                ilist = 0
                do iwafer2 = waferi(ilayer2-1)+1, waferi(ilayer2)
                   if (ilayer2.ne.geom(iwafer2).layer) then
-                     write(6,*) ' une erreur est survenu - crash...'
+                     call StError(' une erreur est survenu - crash...')
                      stop
                   end if
                   x(1,ilayer2) = geom(iwafer2).x(1)
@@ -233,15 +237,18 @@ clm the number of layers is hardwired because of the SSD
       
       n_groups = groups_h.nok + 1
       if (spt_h.nok.eq.0) then
-         write(6,1000)
+         write(myString,1000)
+         call StError(myString)
          stk_am_fill3 = stafcv_bad ! no svt space point
          return
       else if (vtx_h.nok.eq.0) then
-         write(6,1001)
+         write(myString,1001)
+         call StError(myString)
          stk_am_fill3 = stafcv_bad ! no svt vertex 
          return
       else if (config_h.nok.eq.0) then
-         write(6,1004)
+         write(myString,1004)
+         call StError(myString)
          return
       else if (filler_h.nok.eq.0) then 
       end if
@@ -296,10 +303,11 @@ c     sort the space points by wafer and count them
      &           .and.config(1).n_layer.eq.7) then
 * it is ok : the SSD is in but we do not want to use the hits
             else
-               write(6,*) ' fatal mis-match'
-               write(6,*) 'idw,ly,w,ld,w2,id:', 
+               write(myString,*) ' fatal mis-match'
+               write(myString,*) 'idw,ly,w,ld,w2,id:', 
      &              kwafer,ilayer,iwafer1,iladder,
      &              iwafer2, geom(iwafer2).id
+               call StError(myString)
                return
             endif
          else
@@ -1061,7 +1069,8 @@ c     -----------------------------------------
 c     consider track candidate for storage
                               
          if (itrack.ge.track_h.maxlen) then 
-            write(6,1007) itrack
+            write(myString,1007) itrack
+            call StError(myString)
             done(1)   = .true.
             done(2)   = .true.
             done(3)   = .true.
@@ -1092,7 +1101,8 @@ c     consider track candidate for storage
                      groups(n_groups).id2 = ispts(k)
                      n_groups = n_groups + 1
                      if( n_groups .gt. groups_h.maxlen) then
-                        write(6,*)'Too many groups', n_groups
+                        write(myString,*)'Too many groups', n_groups
+                        call StError(myString)
                         done(1)   = .true.
                         done(2)   = .true.
                         done(3)   = .true.
@@ -1132,7 +1142,7 @@ c     wkw: itrack here is the sum of the previous loop and the old loops
       track_h.nok       = itrack
       groups_h.nok      = n_groups -1
       
-      WRITE(*,*) 'STK_AM_FILL3: Stopping ##############################'
+      call StMessage('STK_AM_FILL3: Stopping ##############################')
       STK_AM_FILL3=STAFCV_OK
       RETURN
       END
