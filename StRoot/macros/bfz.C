@@ -1,9 +1,9 @@
-// $Id: bfz.C,v 1.2 1999/02/22 23:28:13 fisyak Exp $
+// $Id: bfz.C,v 1.3 1999/02/23 02:10:39 fisyak Exp $
 //#define gtrack
 #define fast
 //#define trs
 //#define ftpc
-//#define emc
+#define emc
 #define ctf
 TBrowser *b = 0;
 class StChain;
@@ -66,7 +66,6 @@ void Load(){
     gSystem->Load("St_svt");
     gSystem->Load("St_srs_Maker");
     gSystem->Load("St_stk_Maker");
-    gSystem->Load("St_strange");
     gSystem->Load("St_global");
     gSystem->Load("St_dst_Maker");
     gSystem->Load("St_run_summary_Maker");
@@ -152,8 +151,6 @@ bfz(const Int_t Nevents=1,
   St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf","event/data/ctf");
   St_mwc_Maker         *mwc      = new St_mwc_Maker("mwc","event/data/mwc");
   St_trg_Maker         *trg      = new St_trg_Maker("trg","event/data/trg");
-#endif
-#ifdef ctf
   St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks","event/data/l3/tracks");
 #endif
   St_run_summary_Maker *summary = new St_run_summary_Maker("run_summary","run/dst");
