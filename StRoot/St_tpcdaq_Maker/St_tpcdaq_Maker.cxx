@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.36  1999/09/23 16:22:00  ward
+// Removed obsolete include file.
+//
 // Revision 1.35  1999/08/13 21:30:33  ward
 // Gain corrections.  And bug fix for TRS mode.
 //
@@ -132,7 +135,7 @@ ClassImp(St_tpcdaq_Maker)
 #define DEBUG_ACTIVE_ROW 33
 #define HISTOGRAMS
 
-#include "StDaqLib/GENERIC/EventReader.hh"
+// We switched to the IO maker, so this is obsolete.  #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQMaker/StDAQReader.h"
 char gDAQ; /* This is TRUE if using DAQ, FALSE if using Trs. */
 StDAQReader *victorPrelim;
