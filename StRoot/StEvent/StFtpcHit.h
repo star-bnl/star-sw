@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StFtpcHit.h,v 2.8 2003/01/08 19:43:11 perev Exp $
+ * $Id: StFtpcHit.h,v 2.9 2004/04/08 19:02:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.h,v $
+ * Revision 2.9  2004/04/08 19:02:33  ullrich
+ * Added additional data member and access methods to hold the position in
+ * pad and time units including their std deviation. Constructors updated.
+ *
  * Revision 2.8  2003/01/08 19:43:11  perev
  * CleanUp
  *
@@ -70,9 +74,35 @@ public:
     unsigned int padsInHit() const;
     unsigned int timebinsInHit() const;
 
+    double padPosition() const;
+    double timePosition() const;
+    double sigmaPadPosition() const;
+    double sigmaTimePosition() const;
+
+    void setPadPosition(float);
+    void setTimePosition(float);
+    void setSigmaPadPosition(float);
+    void setSigmaTimePosition(float);
+
 protected:
     static StMemoryPool mPool;  //!
     StObject* clone() const;
-    ClassDef(StFtpcHit,1)
+
+    Float_t    mPadPos;        // pad position of hit
+    Float_t    mTimePos;       // time position of hit
+    Float_t    mPadPosSigma;   // sigma pad position of hit
+    Float_t    mTimePosSigma;  // sigma time position of hit
+   
+    ClassDef(StFtpcHit,2)
 };
+
+inline double StFtpcHit::padPosition() const {return mPadPos;}
+inline double StFtpcHit::timePosition() const {return mTimePos;}
+inline double StFtpcHit::sigmaPadPosition() const {return mPadPosSigma;}
+inline double StFtpcHit::sigmaTimePosition() const {return mTimePosSigma;}
+inline void StFtpcHit::setPadPosition(float val) {mPadPos = val;}
+inline void StFtpcHit::setTimePosition(float val) {mTimePos = val;}
+inline void StFtpcHit::setSigmaPadPosition(float val) {mPadPosSigma = val;}
+inline void StFtpcHit::setSigmaTimePosition(float val) {mTimePosSigma = val;}
+
 #endif

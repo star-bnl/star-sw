@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.cxx,v 2.8 2001/04/05 04:00:50 ullrich Exp $
+ * $Id: StFtpcHit.cxx,v 2.9 2004/04/08 19:02:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.cxx,v $
+ * Revision 2.9  2004/04/08 19:02:33  ullrich
+ * Added additional data member and access methods to hold the position in
+ * pad and time units including their std deviation. Constructors updated.
+ *
  * Revision 2.8  2001/04/05 04:00:50  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -42,19 +46,30 @@
 #include "tables/St_dst_point_Table.h"
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.8 2001/04/05 04:00:50 ullrich Exp $";
+static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.9 2004/04/08 19:02:33 ullrich Exp $";
 
 StMemoryPool StFtpcHit::mPool(sizeof(StFtpcHit));
 
 ClassImp(StFtpcHit)
 
-StFtpcHit::StFtpcHit() { /* noop */ }
+StFtpcHit::StFtpcHit()
+{
+    mPadPos = 0;      
+    mTimePos = 0;     
+    mPadPosSigma = 0; 
+    mTimePosSigma = 0;
+}   
 
 StFtpcHit::StFtpcHit(const StThreeVectorF& p,
                      const StThreeVectorF& e,
                      unsigned int hw, float q, unsigned char c)
     : StHit(p, e, hw, q, c)
-{ /* noop */ }
+{
+    mPadPos = 0;      
+    mTimePos = 0;     
+    mPadPosSigma = 0; 
+    mTimePosSigma = 0;
+}
 
 StFtpcHit::StFtpcHit(const dst_point_st& pt)
 {
@@ -96,6 +111,11 @@ StFtpcHit::StFtpcHit(const dst_point_st& pt)
     // The hardware position stays at it is
     //
     mHardwarePosition = pt.hw_position;
+
+    mPadPos = 0;      
+    mTimePos = 0;     
+    mPadPosSigma = 0; 
+    mTimePosSigma = 0;
 }
 
 StFtpcHit::~StFtpcHit() {/* noop */}
@@ -126,3 +146,4 @@ StFtpcHit::timebinsInHit() const
 {
     return bits(25, 7);   // bits 25-31
 }
+
