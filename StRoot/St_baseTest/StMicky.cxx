@@ -6,8 +6,11 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: StMicky.cxx,v 1.2 1999/09/28 19:54:56 fine Exp $
+// $Id: StMicky.cxx,v 1.3 1999/09/30 15:50:20 fine Exp $
 // $Log: StMicky.cxx,v $
+// Revision 1.3  1999/09/30 15:50:20  fine
+// ClassDef has been introduced
+//
 // Revision 1.2  1999/09/28 19:54:56  fine
 // RMath has been renamed to StCL
 //
@@ -24,6 +27,10 @@
 
 inline double dabs(double d){ return d>0?d: -d;}
 inline int min(int n1, int n2){ return n1 < n2 ? n1 : n2;}
+
+#ifdef __ROOT__
+ClassImp(StMicky)
+#endif
 
 //___________________________________________________________________________
 StMicky::StMicky(){ Minit(); }
@@ -126,7 +133,12 @@ void StMicky::Mverif(int ntt, float *have, float *amust, int nn)
     /* Function Body */
     ntuse = ntt;
     nhave = nn;
-    if (nhave >= 201) goto L91; 
+    if (nhave >= 201) {
+      Prtest();
+      cout << endl << " VERIFF VECTOR FOR TEST" << ntuse 
+           << "  MORE THAN 200 WORDS, namely " << nhave << endl;
+      return;
+    }
 
     zeru = param_1.zerlev;
     if (param_1.ntest >= 10) StMicky::Prtest();    
@@ -137,55 +149,51 @@ void StMicky::Mverif(int ntt, float *have, float *amust, int nn)
 	diff = (r__1 = have[j] - amust[j], dabs(r__1));
 	if (diff < zeru)    continue;
 	sum = (r__1 = have[j] + amust[j], dabs(r__1));
-	if (sum < (float)2.)   goto L41;
-	if (diff * (float)2. / sum > zeru)  goto L41;
+
+	if (sum < 2. || (diff * (float)2. / sum > zeru))  goto L41;
     }
 /* ----              VERIFY OK. */
     if (param_1.nfail) {
-      StMicky::Prtest();
+      Prtest();
       param_1.nfail = 0;
     }
 L39:
     ++param_1.ntest;
     param_1.mtestv[param_1.ntest - 1] = ntuse;
     if (param_1.neachp == 0) return ;
-    StMicky::Prtest();
+    Prtest();
     return ;
 /* ----              VERIFY FAILURE */
 L41:
     jj = j;
     ++param_1.nfailt;
-    if (param_1.nfail == 0)             goto L47;
-    if (param_1.nfail < param_1.nfaipr) goto L48;
-    ++param_1.nfail;
-    goto L39;
-L47:
-    StMicky::Prtest();
-L48:
+    if (param_1.nfail == 0)                   Prtest();
+    else if (param_1.nfail > param_1.nfaipr)  ++param_1.nfail;
+
     cout << " TEST " << ntuse << " FAILED, Dump follows" << endl;
     ++param_1.nfail;
     n1 = jj;
-L51:
-/* Computing MIN */
-    n2 = min(n1 + 4,nhave);
-    cout << n1 << " MUST ";
-    for (j = n1; j <= n2; ++j) {
+    do {
+       // Computing MIN */
+       n2 = min(n1 + 4,nhave);
+       cout << n1 << " MUST ";
+       for (j = n1; j <= n2; ++j) {
 //        cout << hex << amust[j] << "     ";
-        cout <<  amust[j] << "     ";
-        if ((j-n1)%5 == 0) cout << endl;
-    }    
-    cout << endl;
+          cout <<  amust[j] << "     ";
+          if ((j-n1)%5 == 0) cout << endl;
+       }    
+       cout << endl;
 
-    cout << "          HAVE ";
-    for (j = n1; j <= n2; ++j) {
+       cout << "          HAVE ";
+       for (j = n1; j <= n2; ++j) {
 //        cout << hex << have[j] << "     ";
-        cout << have[j] << "     ";
-        if ((j-n1)%5 == 0) cout << endl;
-    }
-    cout << endl;
+          cout << have[j] << "     ";
+          if ((j-n1)%5 == 0) cout << endl;
+       }
+       cout << endl;
 
-    n1 += 5;
-    if (n1 <= nhave) goto L51;
+       n1 += 5;
+    } while  (n1 <= nhave);
 
     if (n1 - 1 != nhave) cout << endl;
 
@@ -203,42 +211,36 @@ L51:
 	test[j - 1] = test[j - 1] * (float)2. / sum;
     }
     n1 = jj;
-L60:
-/* Computing MIN */
-    n2 = min(n1 + 4,nhave);
-    cout << n1 << "  MUST ";
-    for (j = n1; j <= n2; ++j) {
+
+    do {
+      // Computing MIN 
+      n2 = min(n1 + 4,nhave);
+      cout << n1 << "  MUST ";
+      for (j = n1; j <= n2; ++j) {
         cout << amust[j] << "     ";
         if ((j-n1)%5 == 0) cout << endl;
-    }
-    cout << endl;
+      }
+      cout << endl;
 
-    cout << "          HAVE ";
-    for (j = n1; j <= n2; ++j) {
+      cout << "          HAVE ";
+      for (j = n1; j <= n2; ++j) {
         cout << have[j] << "     ";
         if ((j-n1)%5 == 0) cout << endl;
-    }
-    cout << endl;
+      }
+      cout << endl;
 
-    cout << "          TEST ";
-    for (j = n1; j <= n2; ++j) {
+      cout << "          TEST ";
+      for (j = n1; j <= n2; ++j) {
         cout << test[j - 1] << "     ";
         if ((j-n1)%5 == 0) cout << endl;
-    }
-    cout << endl;
+      }
+      cout << endl;
 
-    n1 += 5;
-    if (n1 <= nhave) goto L60;
+      n1 += 5;
+    } while (n1 <= nhave);
 
     cout << endl;
     return;
-L91:
-    StMicky::Prtest();
-    cout << endl << " VERIFF VECTOR FOR TEST" << ntuse 
-         << "  MORE THAN 200 WORDS, namely " << nhave << endl;
-    return;
-
-
 } /* mverif_ */
 
 //____________________________________________________________________________________
