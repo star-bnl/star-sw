@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.1 2000/08/25 16:04:10 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.2 2000/08/25 20:29:34 lansdell Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.2  2000/08/25 20:29:34  lansdell
+// year1 print list changed slightly; cosmetic improvement of some event summary histograms
+//
 // Revision 2.1  2000/08/25 16:04:10  genevb
 // Introduction of files
 //
@@ -207,7 +210,7 @@ void StQAMakerBase::BookHistEvSum(){
   m_glb_trk_plusminus_sm = MH1F("QaEvsumPlusMinusTrksm",
     "evsum: num pos. over neg trks",ntrk,0.,4.);
   m_glb_trk_chg = MH1F("QaEvsumTotChg",
-    "softmon: all charge east/west,tpc",60,-3,3);
+    "softmon: all charge east/west,tpc",60,0,3);
   m_glb_trk_prim = MH1F("QaEvsumTrkPrim",
     "evsum: num good tracks from primaries ",80,0.,4000.);
   m_glb_trk_prim_sm = MH1F("QaEvsumTrkPrimsm",
@@ -221,7 +224,7 @@ void StQAMakerBase::BookHistEvSum(){
   m_mean_eta = MH1F("QaEvsumMeanEta","evsum: mean eta", nmneta,-0.4,0.4);
   m_rms_eta = MH1F("QaEvsumRmsEta","evsum: rms eta", nmneta,0.,2.5);
   m_prim_vrtr = MH1F("QaEvsumPrimVertR",
-    "evsum: R of primary vertex",40,-1.,1.);
+    "evsum: R of primary vertex",40,0.,1.);
   m_prim_vrtx0 = MH1F("QaEvsumPrimVertX",
     "evsum: X of primary vertex",40,-1.,1.);
   m_prim_vrtx1 = MH1F("QaEvsumPrimVertY",
