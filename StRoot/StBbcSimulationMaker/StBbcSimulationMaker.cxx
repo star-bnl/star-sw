@@ -5,7 +5,6 @@ Mikhail Kopytine </a> on Aug 20, 2002.
 Here are
 <A HREF="http://www.star.bnl.gov/STAR/comp/pkg/dev/StRoot/St_TLA_Maker/README"> Victor Perevoztchikov's instructions on how to write an St***Maker </A>
  */
-#include "TError.h"
 #include "StBbcSimulationMaker.h"
 #include "g2t/St_g2t_bbc_Module.h"
 #include "StChain.h"
@@ -16,6 +15,7 @@ Here are
 #include "StEvent.h"
 #include "StTriggerDetectorCollection.h"
 #include "StBbcTriggerDetector.h"
+#include "TRandom.h"
 #include "StMessMgr.h"
 
 TRandom BbcRndm = TRandom(0);
@@ -322,9 +322,7 @@ Int_t StBbcSimulationMaker::Make()
 /// Make - this method is called in loop for each event
 
  TDataSet* ds= GetInputDS("geant");
- Assert(ds);
  StEvent* event = (StEvent*)GetInputDS("StEvent");
- Assert(event);
  St_g2t_ctf_hit* g2t_bbc_hit = (St_g2t_ctf_hit*)ds->Find("g2t_bbc_hit");
 
  if (g2t_bbc_hit) 
@@ -346,10 +344,6 @@ Int_t StBbcSimulationMaker::Make()
        }
 
      StTriggerDetectorCollection* myTrig = event->triggerDetectorCollection();
-     if (!myTrig) {
-       gMessMgr->Warning("StBbcSimulationMaker::Make: No StTriggerDetectorCollection\n");
-       return kStWarn;
-     }
      StBbcTriggerDetector& myBbc = myTrig->bbc();
 
 

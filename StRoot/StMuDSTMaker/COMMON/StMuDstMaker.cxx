@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.57 2004/04/26 00:13:28 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.60 2004/05/04 13:26:23 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
+#include "TRegexp.h"
 #include "Stiostream.h"
 #include "Stsstream.h"
 #include "StChain.h"
@@ -127,8 +128,64 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
 void StMuDstMaker::zeroArrays()
 {
   memset(mArrays,0,sizeof(void*)*__NALLARRAYS__);
+  memset(mStatusArrays,(char)1,sizeof(mStatusArrays) ); //default all ON
+  
 }
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+/*!
+  Selecting SetBranchStatus for particular MuDst branches
+  Special names:
+   MuEventAll - all branches related to StMuEvent
+   StrangeAll - all branches related to StrangeMuDst
+   EmcAll     - all branches related to Emc
+   PmdAll     - all branches related to Pmd
+   TofAll     - all branches related to Tof
 
+  By default all branches of MuDst are read. If user wants to read only some of
+  them, then:
+   SetStatus("*",0)           // all branches off
+   SetStatus("MuEventAll",1)  // all standard MuEvent branches ON
+   SetStatus("StrangeAll",1)  // all standard Strange branches ON
+   SetStatus("EmcAll"    ,1)  // all standard Emc     branches ON
+   SetStatus("PmdAll"    ,1)  // all standard Pmd     branches ON
+   SetStatus("TofAll"    ,1)  // all standard Tof     branches ON
+ 
+   SetStatus("XiAssoc"    ,1) // Strange branch "XiAssoc" is ON  
+
+  Names of branches look StMuArrays::arrayTypes[]
+*/
+void StMuDstMaker::SetStatus(const char *arrType,int status)
+{
+  static const char *specNames[]={"MuEventAll","StrangeAll","EmcAll","PmdAll","TofAll", 0};
+  static const int   specIndex[]={
+    0, 
+    __NARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__,
+    -1};
+
+  if (strncmp(arrType,"St",2)==0) arrType+=2;  //Ignore first "St"
+  for (int i=0;specNames[i];i++) {
+    if (strcmp(arrType,specNames[i])) continue;
+    char *sta=mStatusArrays+specIndex[i];
+    int   num=specIndex[i+1]-specIndex[i];
+    memset(sta,status,num);
+    printf("StMuDstMaker::SetStatus %d to %s\n",status,specNames[i]);
+    return;
+  }
+  
+  TRegexp re(arrType,1);
+  for (int i=0;i<__NALLARRAYS__;i++) {
+    Ssiz_t len;
+    if (!re.Index(StMuArrays::arrayTypes[i],&len))	continue;
+    printf("StMuDstMaker::SetStatus %d to %s\n",status,StMuArrays::arrayTypes[i]);
+    mStatusArrays[i]=status;
+  }
+}
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -440,6 +497,7 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
   chain->SetBranchStatus("*",0);
   TString ts;
   for ( int i=0; i<__NALLARRAYS__; i++) {
+    if (mStatusArrays[i]==0) continue;
     const char *bname=StMuArrays::arrayNames[i];
     TBranch *tb = chain->GetBranch(bname);
     if(!tb) {Warning("setBranchAddresses","Branch name %s does not exist",bname);continue;}
@@ -530,6 +588,7 @@ void StMuDstMaker::openWrite(string fileName) {
   mTTree->SetAutoSave(1000000);  // autosave when 1 Mbyte written
   DEBUGMESSAGE2("all arrays");
   for ( int i=0; i<__NALLARRAYS__; i++) {
+    if (mStatusArrays[i]==0) continue;
     branch = mTTree->Branch(StMuArrays::arrayNames[i],&mArrays[i], bufsize, mSplit);
   }
 
@@ -978,6 +1037,7 @@ void StMuDstMaker::printArrays()
 // all stuff
   TClonesArray *tcl;
   for ( int i=0; i<__NALLARRAYS__; i++) {
+    if (mStatusArrays[i]==0) continue;
     tcl = mArrays[i];
     printf(" Array %s\t = %s::%s(%d)\n",
     StMuArrays::arrayNames[i],
@@ -1019,6 +1079,34 @@ void StMuDstMaker::fillHddr()
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.60  2004/05/04 13:26:23  jeromel
+ * Oops .. Conflict resolution fixed.
+ *
+ * Revision 1.59  2004/05/04 13:17:11  jeromel
+ * Changed to the documentation in doxygen format
+ *
+ * Revision 1.58  2004/05/04 00:09:23  perev
+ *
+ * //  Selecting SetBranchStatus for particular MuDst branches
+ * //  Special names:
+ * //  MuEventAll - all branches related to StMuEvent
+ * //  StrangeAll - all branches related to StrangeMuDst
+ * //  EmcAll     - all branches related to Emc
+ * //  PmdAll     - all branches related to Pmd
+ * //  TofAll     - all branches related to Tof
+ * //  By default all branches of MuDst are read. If user wants to read only some of
+ * //  them, then:
+ * //  SetStatus("*",0)           // all branches off
+ * //  SetStatus("MuEventAll",1)  // all standard MuEvent branches ON
+ * //  SetStatus("StrangeAll",1)  // all standard Strange branches ON
+ * //  SetStatus("EmcAll"    ,1)  // all standard Emc     branches ON
+ * //  SetStatus("PmdAll"    ,1)  // all standard Pmd     branches ON
+ * //  SetStatus("TofAll"    ,1)  // all standard Tof     branches ON
+ * //
+ * //  SetStatus("XiAssoc"    ,1) // Strange branch "XiAssoc" is ON
+ * //  Names of branches look StMuArrays::arrayTypes[]
+ * //  It allows to speed up reading MuDst significantly
+ *
  * Revision 1.57  2004/04/26 00:13:28  perev
  * Cleanup+simplification
  *
