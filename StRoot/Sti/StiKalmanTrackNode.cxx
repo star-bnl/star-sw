@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.33 2004/03/17 21:01:53 andrewar Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.34 2004/03/24 22:01:07 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.34  2004/03/24 22:01:07  pruneau
+ * Removed calls to center representation and replaced by normal representation
+ *
  * Revision 2.33  2004/03/17 21:01:53  andrewar
  * Trapping for negative track error (^2) values _c00 and _c11. This should
  * be a temporary fix until the root of the problem is found. Problem seems
@@ -435,8 +438,8 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   StiShape * sh = tDet->getShape();
   planarShape = 0;
   cylinderShape = 0;
-  _refX = place->getNormalRadius();
-  position = propagate(_refX,sh->getShapeCode()); 
+  _refX = place->getLayerRadius();
+  position = propagate(place->getNormalRadius(),sh->getShapeCode()); 
   if (position<0) 
     return position;
   position = locate(place,sh);
@@ -503,7 +506,7 @@ int  StiKalmanTrackNode::propagate(double xk, int option)
       sq = ::sqrt(sq);				
       double x_p = a*(x0+y0*sq)/r0sq;
       if (x_p>0)
-	x2 = x_p;
+				x2 = x_p;
       else 
 	{
 	  double x_m = a*(x0-y0*sq)/r0sq;
@@ -650,6 +653,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   d3    = tDet->getMaterial()->getDensity();
   x0    = tDet->getMaterial()->getX0();
 
+  /*
   if (!finite(d1) ||
       !finite(x0p) ||
       !finite(d3) ||
@@ -662,6 +666,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 					 << " x0:"  <<x0<<endl;
       throw logic_error("StiKalmanTrackNode::propagate() -F- Infinite values detected");
     }
+  */
 
   if (pL2> (pL1+pL3)) 
     {
@@ -710,6 +715,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 				}
     }
   double pt = getPt();
+
   if (!finite(pt) || !finite(dxEloss) || !finite(relRadThickness))
     {
 			cout << "StiKalmanTrackNode::propagateMCS( ) -F- Infite values detected" <<endl
@@ -723,6 +729,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 					 << *getDetector()<<endl;
       throw logic_error("StiKalmanTrackNode::propagateMCS() -F- Infinite values detected");
     }
+  
   double p2=(1.+_p4*_p4)*pt*pt;
   double m=pars->massHypothesis;
   double m2=m*m;
@@ -1124,4 +1131,64 @@ StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
 void StiKalmanTrackNode::setParameters(StiKalmanTrackFinderParameters *parameters)
 {
   pars = parameters;
+}
+
+
+int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
+{
+  int position;
+  double yOff, yAbsOff, detHW, detHD,edge,innerY, outerY, innerZ, outerZ, zOff, zAbsOff;
+
+  //if (_refX<70. && _refX>57.)
+  //  cout << "_refX:"<<_refX<<" _p0:"<<_p0<<" p1:"<<_p1<<" NormalYoffset:"
+  // << place->getNormalYoffset()<<" zOff:"<< place->getZcenter() ;
+
+  yOff = _p0 - place->getNormalYoffset();
+  yAbsOff = fabs(yOff);
+  zOff = _p1 - place->getZcenter();
+  zAbsOff = fabs(zOff);
+  /*
+  switch (sh->getShapeCode())
+    {
+    case kPlanar:
+      {
+	planarShape = static_cast<StiPlanarShape *>(sh);
+	detHW = planarShape->getHalfWidth();
+	detHD = planarShape->getHalfDepth();
+	//edge  = 4.;//shape->getEdgeHalfWidth();
+	edge  = 0.1*detHW;
+	break;
+      }
+    case kCylindrical:
+      {
+	StiCylindricalShape * cylinderShape = static_cast<StiCylindricalShape *>(sh);
+	break;
+      }
+    default:
+      {
+	throw logic_error("SKTN::locate() - ERROR - Invalid detector shape code");
+      }
+      }*/
+  detHW = sh->getHalfWidth();
+  detHD = sh->getHalfDepth();
+  edge  = 2.;
+  innerY = detHW - edge;
+  outerY = innerY + 2*edge;
+  innerZ = detHD - edge;
+  outerZ = innerZ + 2*edge;
+  if (yAbsOff<innerY && zAbsOff<innerZ)
+    position = kHit; 
+  else if (yAbsOff>outerY && (yAbsOff-outerY)>(zAbsOff-outerZ))
+    // outside detector to positive or negative y (phi)
+    position = yOff>0 ? kMissPhiPlus : kMissPhiMinus;
+  else if (zAbsOff>outerZ && (zAbsOff-outerZ)>(yAbsOff-outerY))
+    // outside detector to positive or negative z (west or east)
+    position = zOff>0 ? kMissZplus : kMissZminus;
+  else if ((yAbsOff-innerY)>(zAbsOff-innerZ))
+    // positive or negative phi edge
+    position = yOff>0 ? kEdgePhiPlus : kEdgePhiMinus;
+  else
+    // positive or negative z edge
+    position = zOff>0 ? kEdgeZplus : kEdgeZminus;
+  return position;
 }
