@@ -1,8 +1,8 @@
-
-      SUBROUTINE ev0_circle_param(trk,xc,r)
+       SUBROUTINE ev0_circle_param(trk,xc,r,beta)
       IMPLICIT NONE
 C   Input arguments  :	trk(6)	!Helix parameters of track
 C			r	!radius of circle
+C                       beta    !MAg field in tesla
 C   Output arguments :	xc(2)	!coordinates of the centre of circle
 C   Functional Description : Returns the x-y coordinates and the radius
 C			     of the circle (projected-helix) on the
@@ -12,7 +12,7 @@ C   Error conditions	: None
 C   Status		: Tested
 C----------------------------------------------------------------------
       INTEGER iflag
-      REAL    trk(6),xc(2),r
+      REAL    trk(6),xc(2),r,beta
       REAL    x,y,p(3),a,yt1,yt2,xt1,xt2,rxp,test
 C--------find the radius and the (hit)x-y coordinates------------------
       IF(trk(1).eq.0.) trk(1)=0.01
@@ -20,7 +20,7 @@ C--------find the radius and the (hit)x-y coordinates------------------
       y=trk(1)*sin( trk(2))
 C--------get the momentum components-----------------------------------
       iflag=0
-      CALL ev0_track_mom(trk,r,iflag,p)
+      CALL ev0_track_mom(trk,r,iflag,p,beta)
 C--------find the two possible solutions------------------------------
       IF(p(1).eq.0.) p(1)=0.01
       a=p(2)/p(1)
@@ -103,17 +103,19 @@ C----------------------------------------------------------------------
 C******************************************************************************
 
 
-      SUBROUTINE ev0_inv_mass(p1,p2,m,psq,inv_mass,env0,e1)
+      SUBROUTINE ev0_inv_mass(p1,p2,m,psq,ppar,inv_mass,env0,e1,rap)
       IMPLICIT NONE
-C   Input arguments  :	p1,p2	!Total momenta of the two tracks
+C   Input arguments  :	p1,p2   ! Total momenta of the two tracks
 C				!at the (secondary) vertex position.
 C			m(2)	!mass hypothesis for the daughter 
 C				particles
 C                       psq	! momentum squared of reconstructed
 C				particle.
+C                       ppar    ! Parallel mtm of rec. particle
 C   Output arguments : inv_mass ! mass of rec. particle
 C                      env0     ! Energy of reconstructed particle
-C                       e1       ! Energy of positive daughter particle
+C                      e1       ! Energy of positive daughter particle
+C                      rap      ! Rapidity of rec. particle
 C   Functional Description :  	Invariant mass analysis for 
 C				particle decays into two daughter
 C				particles with a mass hypothesis
@@ -122,7 +124,7 @@ C   Error conditions : 	None
 C   Status :		Development
 C----------------------------------------------------------------------
       REAL    p1,p2,m(2),inv_mass
-      REAL    e1,e2,psq,env0
+      REAL    e1,e2,psq,env0,ppar,rap
 
          
 	e1    = sqrt(p1*p1 + m(1)*m(1))
@@ -131,6 +133,8 @@ C----calculate the invariant mass -----------------------------
 	inv_mass=( (e1+e2)**2. - psq )
         env0 = sqrt(psq+inv_mass)
         inv_mass = sqrt(inv_mass)
+C----Calculate rapidity
+        rap = 0.5*log( (env0+ppar)/(env0-ppar))
 
   999 CONTINUE
       RETURN
@@ -193,11 +197,12 @@ C-------choose the right one----------------------------------------
 C******************************************************************************
 
 
-      SUBROUTINE ev0_track_mom(trk,rc,iflag,p)
+      SUBROUTINE ev0_track_mom(trk,rc,iflag,p,beta)
       IMPLICIT NONE
 C   Input arguments  :	trk(6)	!helix parameters of the track
 C			iflag	!if =5 it is a neutral particle and
 C				!trk(6)=1./momentum of particle
+C                        beta    !field in Tesla
 C   Output arguments : 	p(3)	!momentum vector of track
 C   Functional Description :  	returns the momentum components
 C				of a track
@@ -210,7 +215,7 @@ C----------------------------------------------------------------------
       REAL    trk(6),p(3),phi,rc
       REAL    const,beta,lamda
       REAL    sph,cph,pt,ptot
-      PARAMETER (const=0.299792458,beta=5.)	!beta(field) in KGauss
+      PARAMETER (const=0.299792458)
 
 C-----Extract momentum components from helix --------------------------
 
@@ -225,7 +230,7 @@ C-------check if it is a neutral particle------------------------------
 	ptot =1./trk(6)
 	pt   =ptot*cos(lamda)
        ELSE
-	pt   =(beta*const*rc)/1000.
+	pt   =(beta*const*rc)/100.
 	ptot =sqrt(pt*pt+p(3)*p(3))
        ENDIF	!iflag.eq.5
 
@@ -256,7 +261,7 @@ C   Status	     : Tested
 C---------------------------------------------------------------------
       REAL r,xc(2),x(2),trk1(6),trk2(6)
       REAL xi,yi,dphi,ds,sinl,cosl,bphi,pi,h,dsy,dsx
-      REAL axb,arg,xii,yii,adb
+      REAL axb,arg,adb
 
       pi = acos(-1.0)
 C-----calculate the distance ds and the angle between old/new position
