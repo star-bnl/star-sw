@@ -1,9 +1,0 @@
-#include "PAM.idl"
-#include "g2t_svt_hit.idl"
-
-interface sal_getallev: amiModule {
-                                        STAFCV_T call(
-                                        in g2t_svt_hit g2t_svt_hit,
-                                        out g2t_svt_hit g2t_svtgetall,
-                                                     );
-                                        };

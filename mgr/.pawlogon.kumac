@@ -1,6 +1,0 @@
-kuip/alias/create opt  'graphics/opt'  c
-kuip/alias/create make 'exec $STAR/mgr/make' c
-kuip/alias/create call f/call c
-kuip/alias/create ls   dui/ls c
-kuip/alias/create cd   dui/cd c
-/kuip/alias/list

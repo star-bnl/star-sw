@@ -1,6 +1,0 @@
-*	Here's the simplest message call (eg, for an error);  "-1" means no fast-reference ID.
-*	This is NOT the most CPU-efficient way to call Message -- no fast-reference ID is ever set,
-*	so each call results in an ASCII string search to find the prefix in the msg index:
-*	            (This message-example has class "E", for "Error".)
-
-	CALL Message( '<Subroutine Name>-E1  This is a pedagogical error message', 1, -1 )
