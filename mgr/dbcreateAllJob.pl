@@ -132,12 +132,12 @@ my $filename;
    $rv = $dbh->do($sql) || die $dbh->errstr;
    $new_id = $dbh->{'mysql_insertid'};
 
-#	      for ($ii=0; $ii<2; $ii++)  {
-  $ii = 0;
+	      for ($ii=0; $ii<2; $ii++)  {
+#  $ii = 0;
   $JOB_LOG[$ii] =  $DISK1 . $prodPeriod . "/log/" . $chainDir[$ii];
   $JOB_DIR[$ii] =  "/star/u2e/starreco/" . $prodPeriod ."/requests/". $chainDir[$ii]; 
   $SUM_DIR[$ii] =  $DISK1 . $prodPeriod . "/sum/" . $chainDir[$ii];
-# }
+ }
 
 
  $jobIn_no = 0;
@@ -476,7 +476,7 @@ my $jbset;
      my $hpss_dst_dir  = $TOPHPSS_RECO . "/" . $Jsetd;
      my $hpss_dst_file0 = $gfile . ".dst.root";
      my $hpss_dst_file1 = $gfile . ".hist.root";
-     my $hpss_dst_file2 = $gfile . ".dst.xdf";
+     my $hpss_dst_file2 = $gfile . ".tags.root";
      my $hpss_dst_file3 = $gfile . ".runco.root";
      my $executable     = "/afs/rhic/star/packages/" . $jlibVer . "/mgr/bfc.csh";
      my $executableargs = $fchain;
