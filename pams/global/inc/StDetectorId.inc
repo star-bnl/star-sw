@@ -1,9 +1,16 @@
+      INTEGER kUnknownId,kTpcId,kSvtId,kRichId,kFtpcWestId,kFtpcEastId
+      INTEGER kTofPatchId,kCtbId,kSsdId,kBarrelEmcTowerId
+      INTEGER kBarrelEmcPreShowerId,kBarrelSmdEtaStripId
+      INTEGER kEndcapEmcTowerId,kEndcapEmcPreShowerId,kSsdId
+      INTEGER kBarrelSmdPhiStripId,kZdcWestId,kZdcEastId
+      INTEGER kEndcapSmdEtaStripId,kEndcapSmdPhiStripId,kMwpcWestId,kMwpcEastId
+      INTEGER kTpcSvtId,kTpcSsdId,kTpcSsdsvtId,kSsdSvtId 
 
 #include "StDetectorDefinitions.h"
       PARAMETER (kUnknownId = kUnknownIdentifier)
       PARAMETER (kTpcId = kTpcIdentifier)
       PARAMETER (kSvtId = kSvtIdentifier)
-      PARAMETER (RichId = kRichIdentifier)
+      PARAMETER (kRichId = kRichIdentifier)
       PARAMETER (kFtpcWestId = kFtpcWestIdentifier)
       PARAMETER (kFtpcEastId = kFtpcEastIdentifier)
       PARAMETER (kTofPatchId = kTofPatchIdentifier)
@@ -25,3 +32,11 @@
       PARAMETER (kTpcSvtId    = kTpcSvtIdentifier)
       PARAMETER (kTpcSsdSvtId = kTpcSsdSvtIdentifier)
       PARAMETER (kSsdSvtId    = kSsdSvtIdentifier)
+
+
+
+
+
+
+
+
