@@ -1,21 +1,24 @@
-/***************************************************************************  
- *  
- * $Id: Helper.h,v 1.1 2002/04/02 20:05:17 jklay Exp $  
- *  
- * Author: Bum Choi, UT Austin, Apr 2002  
- *  
- ***************************************************************************  
- *  
- * Description:  Useful utility methods for performing highpt analysis  
- *               
- *               
+/***************************************************************************
+ *
+ * $Id: Helper.h,v 1.2 2002/04/03 00:23:27 jklay Exp $                                      
+ *
+ * Author: Bum Choi, UT Austin, Apr 2002
+ *
+ ***************************************************************************
+ *
+ * Description:  This class contains methods used by StHiMicroMaker to 
+ *		 generate highpt uDST's from StEvent for highpt Analysis.
+ *
  ***************************************************************************
  *
  * $Log: Helper.h,v $
- * Revision 1.1  2002/04/02 20:05:17  jklay
- * Bums analysis tools for highpt uDSTs
+ * Revision 1.2  2002/04/03 00:23:27  jklay
+ * Fixed private member access bugs in analysis code
  *
- * 
+ * Revision 1.1  2002/04/02 20:00:41  jklay
+ * Bums highpt uDST Maker
+ *
+ *
  **************************************************************************/
 #ifndef Helper_HH
 #define Helper_HH
@@ -35,7 +38,12 @@ double dca3d(const StPhysicalHelixD&, const StThreeVectorF& point);
 double dca2d(const StPhysicalHelixD&, const StThreeVectorF& point,
 	     const StThreeVectorF* origin=0);
 
+double dcaz(const StPhysicalHelixD&, const StThreeVectorF& point, 
+	    const StTrack* track=0);
+
+/*	This was replaced by the above function - JLK 2.APR.2002
 double dcaz(const StPhysicalHelixD&, const StThreeVectorF& point);
+*/
 
 double crossingAngle(const StPhysicalHelixD& helix,
 		     const StTpcHit* hit, float bField=0);

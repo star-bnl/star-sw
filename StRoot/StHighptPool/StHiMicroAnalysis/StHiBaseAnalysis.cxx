@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiBaseAnalysis.cxx,v 1.1 2002/04/02 20:05:18 jklay Exp $                                    
+ * $Id: StHiBaseAnalysis.cxx,v 1.2 2002/04/03 00:23:27 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  * 
  * $Log: StHiBaseAnalysis.cxx,v $
+ * Revision 1.2  2002/04/03 00:23:27  jklay
+ * Fixed private member access bugs in analysis code
+ *
  * Revision 1.1  2002/04/02 20:05:18  jklay
  * Bums analysis tools for highpt uDSTs
  *
@@ -187,8 +190,8 @@ StHiBaseAnalysis::Run()
       if(iEvent%display==0){
 	cout << "--------------------- event " << iEvent 
 	     << "--------------------- " << endl;
-	cout << "\tprimary vertex z : " << mHiMicroEvent->mVertexZ << endl;
-	cout << "\tflow centrality  : " << mHiMicroEvent->mCentrality << endl;
+	cout << "\tprimary vertex z : " << mHiMicroEvent->VertexZ() << endl;
+	cout << "\tflow centrality  : " << mHiMicroEvent->Centrality() << endl;
       }
 
       fillEventHistograms();
@@ -222,7 +225,7 @@ StHiBaseAnalysis::trackLoop()
   if(mDebug)
     cout << "StHiBaseAnalysis::trackLoop()" << endl;
 
-  Int_t nTrack = mHiMicroEvent->mNTrack;
+  Int_t nTrack = mHiMicroEvent->NTrack();
   StHiMicroTrack* track;
   
   for(Int_t i=0; i<nTrack; i++){

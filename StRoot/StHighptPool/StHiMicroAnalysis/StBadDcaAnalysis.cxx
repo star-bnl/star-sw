@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBadDcaAnalysis.cxx,v 1.1 2002/04/02 20:05:18 jklay Exp $
+ * $Id: StBadDcaAnalysis.cxx,v 1.2 2002/04/03 00:23:27 jklay Exp $
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StBadDcaAnalysis.cxx,v $
+ * Revision 1.2  2002/04/03 00:23:27  jklay
+ * Fixed private member access bugs in analysis code
+ *
  * Revision 1.1  2002/04/02 20:05:18  jklay
  * Bums analysis tools for highpt uDSTs
  *
@@ -152,10 +155,10 @@ StBadDcaAnalysis::trackLoop()
   if(mDebug)
     cout << "StBadDcaAnalysis::spectraTrackLoop()" << endl;
 
-  Int_t nTrack = mHiMicroEvent->mNTrack;
+  Int_t nTrack = mHiMicroEvent->NTrack();
   StHiMicroTrack* track;
   
-  Float_t vertexZ = mHiMicroEvent->mVertexZ;
+  Float_t vertexZ = mHiMicroEvent->VertexZ();
 
   for(Int_t i=0; i<nTrack; i++){
     track =(StHiMicroTrack*) mHiMicroEvent->tracks()->At(i);
@@ -165,21 +168,21 @@ StBadDcaAnalysis::trackLoop()
     if(!CutRc::AcceptTrackHalf(track,vertexZ)) continue;
     
     //**************************************************************
-    Float_t ptPr = track->mPtPr;
-    Float_t eta = track->mEtaPr;
-    Float_t ptGl = track->mPtGl;
+    Float_t ptPr = track->PtPr();
+    Float_t eta = track->EtaPr();
+    Float_t ptGl = track->PtGl();
     
-     float fitPts = track->mFitPts;
-    float allPts = track->mAllPts;
+     float fitPts = track->FitPts();
+    float allPts = track->AllPts();
     float ratioPts = float(fitPts/allPts);
-    float firstRow = track->mFirstPadrow;
-    float lastRow = track->mLastPadrow;
+    float firstRow = track->FirstPadRow();
+    float lastRow = track->LastPadRow();
 
-    float dcaXYGl = track->mDcaXYGl;
-    float phiGlDeg = track->mPhiGl*180./M_PI;;
+    float dcaXYGl = track->DcaXYGl();
+    float phiGlDeg = track->PhiGl()*180./M_PI;;
     phiGlDeg = (phiGlDeg<-165) ? (phiGlDeg += 360) : phiGlDeg;
 
-    int ic=(track->mCharge>0) ? 0 : 1;
+    int ic=(track->Charge()>0) ? 0 : 1;
 
     if(CutRc::AcceptEta(track)){
       // dcaxy, fit pts, pt

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiBaseAnalysis.h,v 1.1 2002/04/02 20:05:18 jklay Exp $                                    
+ * $Id: StHiBaseAnalysis.h,v 1.2 2002/04/03 00:23:27 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  * 
  * $Log: StHiBaseAnalysis.h,v $
+ * Revision 1.2  2002/04/03 00:23:27  jklay
+ * Fixed private member access bugs in analysis code
+ *
  * Revision 1.1  2002/04/02 20:05:18  jklay
  * Bums analysis tools for highpt uDSTs
  *
@@ -25,7 +28,7 @@
 #include <utility>
 #include <cstdlib>
 
-#include "StHiMicroEvent/StHiMicroEvent.h"
+#include "StHighptPool/StHiMicroEvent/StHiMicroEvent.h"
 #include "Centrality.h"
 #include "Name.h"
 #include "CutRc.h"

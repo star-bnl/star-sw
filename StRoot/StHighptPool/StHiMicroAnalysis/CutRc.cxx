@@ -1,6 +1,6 @@
 /***************************************************************************  
  *  
- * $Id: CutRc.cxx,v 1.1 2002/04/02 20:05:17 jklay Exp $  
+ * $Id: CutRc.cxx,v 1.2 2002/04/03 00:23:27 jklay Exp $  
  *  
  * Author: Bum Choi, UT Austin, Apr 2002  
  *  
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: CutRc.cxx,v $
+ * Revision 1.2  2002/04/03 00:23:27  jklay
+ * Fixed private member access bugs in analysis code
+ *
  * Revision 1.1  2002/04/02 20:05:17  jklay
  * Bums analysis tools for highpt uDSTs
  *
@@ -23,13 +26,13 @@ bool
 CutRc::AcceptTrackHalf(StHiMicroTrack* track, float vtxZ)
 {
   if(VertexSkipOn() && 
-     !IsOutSide(track->mFirstZ,track->mLastZ,mVertexZSkip)) return false;
+     !IsOutSide(track->FirstZ(),track->LastZ(),mVertexZSkip)) return false;
   if(mHitAvoid &&
-     !IsOutSide(track->mFirstZ,track->mLastZ,mHitAvoid)) return false;
-  if(Half() && !IsSameSide(vtxZ,track->mFirstZ,track->mLastZ)) return false;
-  if(HitHalf() && !IsHitSameSide(track->mFirstZ,track->mLastZ)) 
+     !IsOutSide(track->FirstZ(),track->LastZ(),mHitAvoid)) return false;
+  if(Half() && !IsSameSide(vtxZ,track->FirstZ(),track->LastZ())) return false;
+  if(HitHalf() && !IsHitSameSide(track->FirstZ(),track->LastZ())) 
     return false;
-  if(GeomHalf() && !IsGeomSameSide(vtxZ,track->mDipAngleGl))
+  if(GeomHalf() && !IsGeomSameSide(vtxZ,track->DipAngleGl()))
      return false;
   
   return true;
@@ -61,16 +64,16 @@ bool
 CutRc::AcceptFlowCent(StHiMicroEvent* event)
 {
   return (
-	  event->mCentrality >= mFlowCent[0] &&
-	  event->mCentrality <= mFlowCent[1]
+	  event->Centrality() >= mFlowCent[0] &&
+	  event->Centrality() <= mFlowCent[1]
 	 );
 }
 
 bool
 CutRc::AcceptZdcCtbCent(StHiMicroEvent* event)
 {
-  float zdcSum = event->mZDCe + event->mZDCw;
-  float ctb    = event->mCTB;
+  float zdcSum = event->ZDCe() + event->ZDCw();
+  float ctb    = event->CTB();
   NchCentrality zdcCent = centrality(zdcSum,ctb);
 
   return(
@@ -82,7 +85,7 @@ CutRc::AcceptZdcCtbCent(StHiMicroEvent* event)
 bool 
 CutRc::AcceptHMinusCent(StHiMicroEvent* event)
 {
-  int nHMinus = event->mNUncorrectedNegativePrimaries;
+  int nHMinus = event->NUncorrectedNegativePrimaries();
   NchCentrality cent = centrality(nHMinus);
 
   return(
@@ -97,9 +100,9 @@ CutRc::AcceptVertexZ(StHiMicroEvent* event)
 {
 
   return(
-	 event->mVertexZ >= mVertexZ[0] &&
-	 event->mVertexZ <= mVertexZ[1] &&
-	 ( (!mVertexZSkip) ? true : fabs(event->mVertexZ)>mVertexZSkip )
+	 event->VertexZ() >= mVertexZ[0] &&
+	 event->VertexZ() <= mVertexZ[1] &&
+	 ( (!mVertexZSkip) ? true : fabs(event->VertexZ())>mVertexZSkip )
 	 );    
 }
 
@@ -128,8 +131,8 @@ bool
 CutRc::AcceptFitPts(StHiMicroTrack* track)
 {
   return(
-	 track->mFitPts >= mFitPts[0] &&
-	  track->mFitPts <= mFitPts[1] 
+	 track->FitPts() >= mFitPts[0] &&
+	  track->FitPts() <= mFitPts[1] 
 	 );
 }
 
@@ -137,8 +140,8 @@ bool
 CutRc::AcceptEta(StHiMicroTrack* track)
 {
   return(
-	 track->mEtaPr    >= mEta[0]    &&
-	 track->mEtaPr    <= mEta[1]    
+	 track->EtaPr()    >= mEta[0]    &&
+	 track->EtaPr()    <= mEta[1]    
 	 );
 }
 
@@ -146,7 +149,7 @@ bool
 CutRc::AcceptSDcaGl(StHiMicroTrack* track)
 {
   return(
-	 track->mDcaGl >= mSDcaGl[0]    &&
-	 track->mDcaGl <= mSDcaGl[1]    
+	 track->DcaGl() >= mSDcaGl[0]    &&
+	 track->DcaGl() <= mSDcaGl[1]    
 	 );
 }

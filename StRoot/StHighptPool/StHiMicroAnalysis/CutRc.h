@@ -1,6 +1,6 @@
 /***************************************************************************  
  *  
- * $Id: CutRc.h,v 1.1 2002/04/02 20:05:17 jklay Exp $  
+ * $Id: CutRc.h,v 1.2 2002/04/03 00:23:27 jklay Exp $  
  *  
  * Author: Bum Choi, UT Austin, Apr 2002  
  *  
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: CutRc.h,v $
+ * Revision 1.2  2002/04/03 00:23:27  jklay
+ * Fixed private member access bugs in analysis code
+ *
  * Revision 1.1  2002/04/02 20:05:17  jklay
  * Bums analysis tools for highpt uDSTs
  *
@@ -21,7 +24,7 @@
 #define CutRc_H
 
 #include "Cut.h"
-#include "StHiMicroEvent/StHiMicroEvent.h"
+#include "StHighptPool/StHiMicroEvent/StHiMicroEvent.h"
 
 class CutRc :public Cut {
  public:
