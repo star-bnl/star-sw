@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.304 2002/11/01 22:02:30 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.305 2002/11/06 15:14:33 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -349,7 +349,7 @@ Bfc_st BFC1[] = {
 
 
 
-  {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdxY2"
+  {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdx"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -373,10 +373,9 @@ Bfc_st BFC1[] = {
                                                  ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"FindVtxSeed" ,"FindVtxSeed","","","StVertexSeedMaker","St_global,St_dst_Maker,StPass0CalibMaker",
                                                                      "Performs vertex seed finding",kFALSE},
-  {"dEdx"        ,"dEdx","globalChain,-dEdxY2","globT,tpcDb,TbUtil", "StdEdxMaker","StdEdxMaker","",kFALSE},
+  {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil",         "StdEdxMaker","StdEdxMaker","",kFALSE},
   {"svtdEdx"     ,"svtdEdx","globalChain","globT",                "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event"       ,"","","StEvent,tpcDB"         ,"StEventMaker","StDetectorDbMaker,StEventMaker","",kFALSE},
-  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent",        "StdEdxY2Maker","StBichsel,StdEdxY2Maker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
                           
@@ -750,7 +749,7 @@ Bfc_st BFC2[] = {
                                                                                     "EMC raw chain",kFALSE},
 
 
-  {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdxY2"
+  {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdx"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -774,10 +773,8 @@ Bfc_st BFC2[] = {
                                                  ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"FindVtxSeed" ,"FindVtxSeed","","","StVertexSeedMaker","St_global,St_dst_Maker,StPass0CalibMaker",
                                                                      "Performs vertex seed finding",kFALSE},
-  {"dEdx"        ,"dEdx","globalChain,-dEdxY2","globT,tpcDb,TbUtil", "StdEdxMaker","StdEdxMaker","",kFALSE},
-  {"svtdEdx"     ,"svtdEdx","globalChain","globT",                "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
+  {"dEdx"       ,"dEdx","globalChain","globT,tpcDb,TbUtil",          "StdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event"       ,"","","StEvent,tpcDB"         ,"StEventMaker","StDetectorDbMaker,StEventMaker","",kFALSE},
-  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent",        "StdEdxY2Maker","StBichsel,StdEdxY2Maker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
                           
@@ -1134,17 +1131,20 @@ Int_t StBFChain::Instantiate()
 	    }
 	    // Other options introduced in October 2001 for distortion corrections
 	    // studies and year1 re-production. Those are OR additive to the mask.
-	    if( GetOption("OBmap") ){	      mask |=   (kBMap          < 1); }
-	    if( GetOption("OPr13") ){	      mask |=   (kPadrow13      < 1); }
-	    if( GetOption("OTwist") ){	      mask |=   (kTwist         < 1); }
-	    if( GetOption("OClock") ){	      mask |=   (kClock         < 1); }
-	    if( GetOption("OCentm") ){	      mask |=   (kMembrane      < 1); }
-	    if( GetOption("OECap") ){	      mask |=   (kEndcap        < 1); }
-	    if( GetOption("OIFC") ){	      mask |=   (kIFCShift      < 1); }
-	    if( GetOption("OSpaceZ") ){	      mask |=   (kSpaceCharge   < 1); }
-	    if( GetOption("OSpaceZ2") ){      mask |=   (kSpaceChargeR2 < 1); }
+	    //(void) printf("StBFChain:: Options list : %d %d %d %d %d %d %d %d\n",
+	    //		  kPadrow13,kTwist,kClock,kMembrane,kEndcap,
+	    //            kIFCShift,kSpaceCharge,kSpaceChargeR2);
+	    if( GetOption("OBmap") ){	      mask |=   (kBMap          << 1); }
+	    if( GetOption("OPr13") ){	      mask |=   (kPadrow13      << 1); }
+	    if( GetOption("OTwist") ){	      mask |=   (kTwist         << 1); }
+	    if( GetOption("OClock") ){	      mask |=   (kClock         << 1); }
+	    if( GetOption("OCentm") ){	      mask |=   (kMembrane      << 1); }
+	    if( GetOption("OECap") ){	      mask |=   (kEndcap        << 1); }
+	    if( GetOption("OIFC") ){	      mask |=   (kIFCShift      << 1); }
+	    if( GetOption("OSpaceZ") ){	      mask |=   (kSpaceCharge   << 1); }
+	    if( GetOption("OSpaceZ2") ){      mask |=   (kSpaceChargeR2 << 1); }
 
-	    (void) printf("StBFChain: ExB The option passed will be %d 0x%X\n",mask,mask);
+	    (void) printf("StBFChain:: ExB The option passed will be %d 0x%X\n",mask,mask);
 	    mk->SetMode(mask);
 	  }
 	  if (maker == "St_tpt_Maker" && GetOption("AlignSectors")){
@@ -1181,8 +1181,7 @@ Int_t StBFChain::Instantiate()
 	    if (GetOption("PulserSvt")) mode += 4;
 	    if (mode) mk->SetMode(mode);
 	  }
-	  if ((maker == "StdEdxMaker" || maker == "StdEdxY2Maker") &&
-	      GetOption("Simu"))  mk->SetMode(-10);
+	  if (maker == "StdEdxMaker" &&GetOption("Simu"))  mk->SetMode(-10);
 	  if (maker == "StTpcDbMaker"){  
             mk->SetMode(0);
 	    // this change may be temporary i.e. if Simulation includes
