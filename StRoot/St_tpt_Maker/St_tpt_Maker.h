@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.h,v 1.17 2000/11/25 23:22:51 fisyak Exp $
+// $Id: St_tpt_Maker.h,v 1.18 2001/02/08 20:37:16 saulys Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.18  2001/02/08 20:37:16  saulys
+// Update call to ExB
+//
 // Revision 1.17  2000/11/25 23:22:51  fisyak
 // move dEdx calculations into StdEdxMaker
 //
@@ -65,8 +68,6 @@
 #include "StMaker.h"
 #endif
 
-#include "StDbUtilities/StMagUtilities.h"
-
 class St_tpg_pad_plane;
 class St_tcl_tpc_index_type;
 class St_tpt_pars;
@@ -88,14 +89,13 @@ private:
   TString m_InputDataSetName; //! 
   TString m_InputHitName; //!
 
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.17 2000/11/25 23:22:51 fisyak Exp $";
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.18 2001/02/08 20:37:16 saulys Exp $";
   St_tpg_pad_plane      *m_tpg_pad_plane;	//! Constants that describe TPC pad plane
   St_tcl_tpc_index_type *m_type;   		//! Table of many-to-many index 
 	                                        //! correlations for tpc evaluations
   St_tpt_pars           *m_tpt_pars;  		//! Parameters for the track finding
   St_tpt_spars          *m_tpt_spars; 		//! Parameters for the track finding
   St_tte_control        *m_tte_control;		//! Control switches for the evaluation 
-  StMagUtilities            *m_mag;                 //! ExB code
   void         MakeHistograms();// Histograms for tracking
   void         VertexEffResolutionInit();// Initial function  for VertexEffResolution
   void         VertexEffResolutionMakeHistograms();// Histograms for VertexEffResolution
@@ -211,7 +211,7 @@ public:
   virtual Int_t  Finish();
   virtual void   Set_final(Bool_t m=kFALSE){m_mkfinal = m;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpt_Maker.h,v 1.17 2000/11/25 23:22:51 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpt_Maker.h,v 1.18 2001/02/08 20:37:16 saulys Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
 };
