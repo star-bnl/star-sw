@@ -34,7 +34,7 @@ void usage(char* prog);
 
 int stafArgs(int argc, char **argv)
 {
-   int i=0,j=0;
+   int i=0;
 
    static int nargs=0;
 /*   static char **argvs; */
