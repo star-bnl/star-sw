@@ -352,6 +352,7 @@ Int_t StTreeMaker::Finish()
 { 
   if (fFinished) return 0;
   fFinished = 1999;
+  if (!fTree)    return 0;
   if (fIOMode[0]!='r')  { //write  mode
     St_DataSetIter  nextBr(fTree);
     StBranch *br;
