@@ -85,6 +85,7 @@
 * sgr        - grouping SVT hits into tracks 
 * spr        - SVT dE/dX
 * tpt        - TPC track finding
+* tpt_r      - TPC track residuals
 * tte_t      - TPC tte tracker
 * tte_e      - TPC track evaluator
 * tid        - TPC dE/dx pid
