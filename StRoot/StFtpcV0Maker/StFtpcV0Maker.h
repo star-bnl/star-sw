@@ -4,17 +4,17 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_fv0_Maker                                                         //
+// StFtpcV0Maker                                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
 //class St_stk_stkpar;
-class St_fv0_Maker : public StMaker {
+class StFtpcV0Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcV0Maker.h,v 1.1 1999/04/12 22:24:54 mheffner Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcV0Maker.h,v 1.2 1999/04/13 12:43:04 mheffner Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
  
@@ -26,13 +26,16 @@ class St_fv0_Maker : public StMaker {
  TH1F  *m_antiLambdaMass;
  
  public: 
-                  St_fv0_Maker(const char *name="fv0", const char *title="fv0_something");
-   virtual       ~St_fv0_Maker();
+                  StFtpcV0Maker(const char *name="fv0", const char *title="fv0_something");
+   virtual       ~StFtpcV0Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
-   ClassDef(St_fv0_Maker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(StFtpcV0Maker, 1)   //StAF chain virtual base class for Makers
 };
 
 #endif
+
+
+
