@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.2 2004/06/25 03:11:49 porter Exp $
+ * $Id: StEStructBinning.cxx,v 1.3 2005/03/03 01:30:43 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -18,61 +18,84 @@ StEStructBinning* StEStructBinning::mInstance = 0;
 
 StEStructBinning::StEStructBinning(){
 
+  //--> Q ranges <--
+  minQ=0.;
+  maxQ=1.1;
+  nQ = ESTRUCT_Q_BINS-1;
+  dQ  = (maxQ-minQ)/(float)nQ;
+
   //--> phi ranges <--
 
   minPhi=-M_PI;
   maxPhi=M_PI;
-  nPhi  = EBYE_PHI_BINS-1;
+  nPhi  = ESTRUCT_PHI_BINS-1;
   dPhi  = (maxPhi-minPhi)/(float)nPhi;
 
   maxDPhi=maxPhi*1.5;// 2.0*maxPhi;
   minDPhi=minPhi*0.5;// 0.0; //2*minPhi;
-  nDPhi = EBYE_DPHI_BINS-1;
+  nDPhi = ESTRUCT_DPHI_BINS-1;
   dDPhi=(maxDPhi-minDPhi)/(float)nDPhi;
 
   maxSPhi=2*maxPhi;
   minSPhi=2*minPhi;
-  nSPhi = EBYE_SPHI_BINS-1;
+  nSPhi = ESTRUCT_SPHI_BINS-1;
   dSPhi=(maxSPhi-minSPhi)/(float)nSPhi;
 
   //--> eta ranges <--
 
   minEta=-1.0;
   maxEta=1.0;
-  nEta = EBYE_ETA_BINS-1;
+  nEta = ESTRUCT_ETA_BINS-1;
   dEta= (maxEta-minEta)/(float)nEta;
 
   maxDEta=2*maxEta;//2*maxEta;
   minDEta=2*minEta;//0; //2*minEta;
-  nDEta=EBYE_DETA_BINS-1;
+  nDEta=ESTRUCT_DETA_BINS-1;
   dDEta=(maxDEta-minDEta)/(float)nDEta;
 
   maxSEta=2*maxEta;
   minSEta=2*minEta;
-  nSEta = EBYE_SETA_BINS-1;
+  nSEta = ESTRUCT_SETA_BINS-1;
   dSEta=(maxSEta-minSEta)/(float)nSEta;
 
-  //--> mt (x) ranges <--
+  //--> yt (x) ranges <--
   
-  minMt=0.9; //0.15;
-  maxMt=5.0;//4.5; // 0.925;
-  nMt = EBYE_MT_BINS-1;
-  dMt = (maxMt-minMt)/(float)nMt;
+  minYt=0.9; //0.15;
+  maxYt=5.0;//4.5; // 0.925;
+  nYt = ESTRUCT_YT_BINS-1;
+  dYt = (maxYt-minYt)/(float)nYt;
 
-  maxDMt=4.;//maxMt;
-  minDMt=-4.;//-maxMt;// 0; //-maxMt;
-  nDMt= EBYE_DMT_BINS-1;
-  dDMt=(maxDMt-minDMt)/(float)nDMt; 
+  maxDYt=4.;//maxYt;
+  minDYt=-4.;//-maxYt;// 0; //-maxYt;
+  nDYt= ESTRUCT_DYT_BINS-1;
+  dDYt=(maxDYt-minDYt)/(float)nDYt; 
 
-  maxSMt=9.; //2 * maxMt + 1.0;
-  minSMt=0.9; //2 * minMt;
-  nSMt = EBYE_SMT_BINS-1;
-  dSMt=(maxSMt-minSMt)/(float)nSMt;
+  maxSYt=9.; //2 * maxYt + 1.0;
+  minSYt=0.9; //2 * minYt;
+  nSYt = ESTRUCT_SYT_BINS-1;
+  dSYt=(maxSYt-minSYt)/(float)nSYt;
 
-  maxDeltaMt=5.;//3.0;
-  minDeltaMt=0.;//0; //-3.0;
-  nDeltaMt = EBYE_DELTAMT_BINS-1;
-  dDeltaMt=(maxDeltaMt-minDeltaMt)/(float)nDeltaMt; 
+  maxDeltaYt=5.;//3.0;
+  minDeltaYt=0.;//0; //-3.0;
+  nDeltaYt = ESTRUCT_DELTAYT_BINS-1;
+  dDeltaYt=(maxDeltaYt-minDeltaYt)/(float)nDeltaYt; 
+
+  //--> pt (x) ranges <--
+  
+  minPt=0.15; //0.15;
+  maxPt=6.0;//4.5; // 0.925;
+  nPt = ESTRUCT_PT_BINS-1;
+  dPt = (maxPt-minPt)/(float)nPt;
+
+  maxDPt=5.85;//maxPt;
+  minDPt=-5.85;//-maxPt;// 0; //-maxPt;
+  nDPt= ESTRUCT_DPT_BINS-1;
+  dDPt=(maxDPt-minDPt)/(float)nDPt; 
+
+  maxSPt=12.; //2 * maxPt + 1.0;
+  minSPt=0.3; //2 * minPt;
+  nSPt = ESTRUCT_SPT_BINS-1;
+  dSPt=(maxSPt-minSPt)/(float)nSPt;
 
 };
 
@@ -80,6 +103,10 @@ StEStructBinning::StEStructBinning(){
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.3  2005/03/03 01:30:43  porter
+ * updated StEStruct2ptCorrelations to include pt-correlations and removed
+ * old version of pt-correlations from chunhuih (StEStruct2ptPtNbar)
+ *
  * Revision 1.2  2004/06/25 03:11:49  porter
  * New cut-binning implementation and modified pair-cuts for chunhui to review
  *

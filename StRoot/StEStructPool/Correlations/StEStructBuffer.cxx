@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBuffer.cxx,v 1.1 2003/10/15 18:20:46 porter Exp $
+ * $Id: StEStructBuffer.cxx,v 1.2 2005/03/03 01:30:43 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -12,8 +12,8 @@
  ***********************************************************************/
 #include "StEStructBuffer.h"
 #include "StEStructPool/EventMaker/StEStructEvent.h"
+#include "StEStructMaxB.h"
 
-#define _MAXEBYEBUFFER_ 3
 
 StEStructBuffer::StEStructBuffer(){
 
@@ -36,7 +36,7 @@ void StEStructBuffer::addEvent(StEStructEvent* event){
 
   if(!event)return;
   if(mnumEvents==_MAXEBYEBUFFER_-1){
-    if(mEvent[mnumEvents-1])delete mEvent[mnumEvents-1];
+    if(mEvent[mnumEvents])delete mEvent[mnumEvents];
   } else {
     mnumEvents++;
   }
@@ -48,6 +48,10 @@ void StEStructBuffer::addEvent(StEStructEvent* event){
 /***********************************************************************
  *
  * $Log: StEStructBuffer.cxx,v $
+ * Revision 1.2  2005/03/03 01:30:43  porter
+ * updated StEStruct2ptCorrelations to include pt-correlations and removed
+ * old version of pt-correlations from chunhuih (StEStruct2ptPtNbar)
+ *
  * Revision 1.1  2003/10/15 18:20:46  porter
  * initial check in of Estruct Analysis maker codes.
  *
