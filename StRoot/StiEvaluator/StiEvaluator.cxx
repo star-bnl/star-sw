@@ -111,7 +111,7 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 	if ( testInfo.partnerMcTrack()==0 ) {// This McTrack was not found!
 	    //Fill McTrack info:
 	    //cout <<"Track not found, fill McTrack and Return"<<endl;
-	    mEntry->setMcTrack(mcTrack, 0); //Dont incremnt the nFound counter
+	    mEntry->setMcTrack(mcTrack, 0, false); //Dont incremnt the nFound counter
 	    mTree->Fill();
 	}
 
@@ -124,8 +124,10 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 	    StiTrackPairInfo* bestStiPair=0;
 	    StTrackPairInfo* bestGlobalPair=0;
 	    unsigned int mostCommon=0;
-	    
+
+	    unsigned int nTimes=0;
 	    for (McMap::iterator it=range.first; it!=range.second; ++it) {
+		++nTimes;
 		
 		StiTrackPairInfo& info = (*it).second.second;
 		
@@ -135,14 +137,16 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 		    bestStiPair = &info;
 		}
 	    }
+	    //cout <<"\t Found this MC Track: "<<nTimes<<" times"<<endl;
 	    //End kludge
-	    
+
+	    //Fill for best match
 	    if (bestStiPair!=0) { //Finally, we can fill!
 		
 		//Fill McTrack info:
-		mEntry->setMcTrack(bestStiPair->partnerMcTrack(), 1); //incremnt the nFound counter by one
+		mEntry->setMcTrack(bestStiPair->partnerMcTrack(), 1, true); 
 
-		//Check to see fi Global assoc worked!
+		//Check to see if Global assoc worked!
 		if (bestGlobalPair!=0) {
 		    mEntry->setGlobalTrack(bestGlobalPair->partnerTrack());
 		    mEntry->setGlobalAssoc(bestGlobalPair);
@@ -152,59 +156,31 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 		mEntry->setAssociation(*bestStiPair);
 		mTree->Fill();
 	    }
+
+	    //Fill for all other matches (split tracks!!!)
+	    for (McMap::iterator it=range.first; it!=range.second; ++it) {
+		StTrackPairInfo* globalPair = (*it).second.first;
+		StiTrackPairInfo& info = (*it).second.second;
+		if (&info!=bestStiPair) { //don't repeat for bestMatch
+		    //Fill McTrack info:
+		    mEntry->setMcTrack(bestStiPair->partnerMcTrack(), 1, true);
+		    if (globalPair!=0) {
+			mEntry->setGlobalTrack(globalPair->partnerTrack());
+			mEntry->setGlobalAssoc(globalPair);
+		    }
+		    
+		    //We already know that we're safe here
+		    mEntry->setStiTrack(info.partnerTrack());
+		    mEntry->setAssociation(info);
+		    mTree->Fill();
+		}
+		
+	    }
 	}
+	
     }
     cout <<"Done Evaluating for event"<<endl;
 }
-
-//old stuff/extras
-/*
-//Temp will break if you run!
-StiTrackAssociator* associator = 0;
-//= StiTrackAssociator::instance();
-    
-for (StiTrackContainer::stitrackvec::const_iterator it=trackStore->begin();
-it!=trackStore->end(); ++it) {
-StiTrack* temp = (*it);
-	
-//Now you've got the track, do what you want with it
-StiKalmanTrack* track = dynamic_cast<StiKalmanTrack*>(temp);
-if (!track) {
-cout <<"StiEvaluator::evaluateForEvent(). ERROR:\t"
-<<"Cast to Kalman track failed.  ABORT"<<endl;
-return;
-}
-
-//Now we have an StiEvaluableTrack
-//StTrackPairInfo* associatedPair = track->stTrackPairInfo();
-
-StiTrackAssociator::AssocPair asPair = associator->associate(track);	
-StTrackPairInfo* newInfo = asPair.first;
-if (!newInfo) {
-cout <<"StiEvaluator::evaluateForEvent().  ERROR:\tnewInfo==0"<<endl;
-}
-//temp test (MLM)	
-//if (newInfo!=associatedPair) {
-//cout <<"StiEvaluator::? newInfo!=associatedPair"<<endl;
-//}
-//End temp test (MLM)
-	
-else {
-//Call some function to actually fill TTree object(s)
-mEntry->clear();
-mEntry->setMcTrack(newInfo->partnerMcTrack());
-mEntry->setGlobalTrack(newInfo->partnerTrack());
-mEntry->setGlobalAssoc(newInfo);
-mEntry->setStiTrack(track);
-mEntry->setAssociation(asPair.second); //New 11/20/01 (MLM)
-	    	    
-//Fill the hit entry
-fillHitEntry(track);
-
-mTree->Fill();
-}
-}
-*/
 
 void StiEvaluator::fillHitEntry(const StiKalmanTrackNode* node)
 {
@@ -332,7 +308,7 @@ void TrackEntry::clear()
     mArray->Clear();
     mHitCounter = 0;
 
-    mcNTimesFound = 0;
+    mcNTimesFound = bestMatch = 0;
     mcTrackId = mcTrackPsi = mcTrackRapidity = mcTrackE = 0.;
     mcTrackPx = mcTrackPy = mcTrackPz = mcTrackEta = 0.;
     mcTrackNTpcHits = mcTrackNSvtHits = mcTrackNFtpcHits = 0;
@@ -378,10 +354,11 @@ void TrackEntry::setAssociation(const StiTrackPairInfo& info)
     stiTrackNAssocSvtHits = info.commonFtpcHits();
 }
 
-void TrackEntry::setMcTrack(const StMcTrack *newtrack, unsigned int nTimesFound)
+void TrackEntry::setMcTrack(const StMcTrack *newtrack, unsigned int nTimesFound, bool best)
 {
     //cout << "Setting MC ID " << newtrack->geantId();
     mcNTimesFound += nTimesFound;
+    bestMatch = (best==true) ? 1 : 0;
     mcTrackId       = newtrack->geantId();
     mcTrackE        = newtrack->energy();
     mcTrackRapidity = newtrack->rapidity();

@@ -46,13 +46,18 @@ StiEventAssociator::~StiEventAssociator()
     mTrackAssociator = 0;
 }
 
+void StiEventAssociator::clear()
+{
+    mMcKeyMap.clear();
+    mStiKeyMap.clear();
+}
+
 void StiEventAssociator::associate(StMcEvent* mc)
 {
     cout <<"StiEventAssociator::associate()"<<endl;
     
     mMcEvent = mc;
-    mMcKeyMap.clear();
-    mStiKeyMap.clear();
+    clear();
 
     //loopOnFoundTracks
     cout <<"\tLooping on found tracks"<<endl;

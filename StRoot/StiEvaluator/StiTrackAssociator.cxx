@@ -148,7 +148,7 @@ StTrackPairInfo* StiTrackAssociator::findBestTrackPair(trackPing* ping)
     pair<mcTrackMapType::iterator, mcTrackMapType::iterator> range =
 	mcToStTrackMap->equal_range(mcTrack);
     if (range.first==range.second) {
-	cout <<"Error, range.first==range.second"<<endl;
+	cout <<"Error, range.first==range.second: GHOST-TRACK!!!"<<endl;
 	return 0;
     }
     
