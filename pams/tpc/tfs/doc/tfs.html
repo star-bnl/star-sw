@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+<title>TPC Fast Simulator</title>
+</head>
+<body bgcolor="ivory" text="black" link="#0000f0" vlink="#f00000">
+
+<font size=+3><font color="green" >TFS</font> : <font color="green" size=+3>T</font>PC <font color="green" >F</font>ast <font color="green" >S</font>imulator package </font></font>
+<p>STAR TPC detector simulation software is required to simulate
+the response of the TPC detector volume and its electronics to
+the passage of charged particles through the TPC volume, including
+those from pp, pA and AA collisions.  The STAR TPC Fast Simulator
+(TFS) has been designed to generate a large volume of event samples
+simulating the response of the TPC and the performance of the
+TPC hit reconstruction algorithm. 
+<P>
+A GEANT Monte Carlo program takes tracks from an event generator
+and propagates them through the TPC, generating hits corresponding
+to each pad-row crossing.  These GEANT hits are fed into the TFS
+as input.  TFS assigns each GEANT hit a characteristic signal
+width 
+(<img src="sigma.gif" alt="sigma"><sub><i>prf</i></sub>)
+in the transverse plane and a spatial resolution 
+(<img src="sigma.gif" alt="sigma"><sub><i>z</i></sub>)
+in the drift direction.  The parametrization of 
+<img src="sigma.gif" alt="sigma"><sub><i>prf</i></sub>
+and 
+<img src="sigma.gif" alt="sigma"><sub><i>z</i></sub>
+depend upon the
+intrinsic pad response, the drift length, track pad crossing angle,
+sense wire spacing, transverse and longitudinal diffusion of the
+TPC gas, electronics shaping time and sampling frequency.  Then
+the hits are smeared about the known GEANT hit position according
+to a gaussian distribution function whose width is given by the
+<img src="sigma.gif" alt="sigma"><sub><i>prf</i></sub>
+ parametrization. Those hits which are then found to overlap in
+both the pad plane projection and the drift direction are merged
+to form larger single hit clusters. Hits in the same pad-row are
+merged when their separation 
+<img src="Delta.gif" alt="Delta"> satisfies the condition
+<P>&nbsp;&nbsp;<img src="eq1.gif">
+<P>
+and
+<P>&nbsp;&nbsp;<img src="eq2.gif">
+<P>
+This condition places a cut-off on the deconvolution of close
+hits related to the expected performance of the hit reconstruction
+algorithm.  Merged hits whose combined spatial width is smaller
+than 10 pad widths and 20 time bins are preserved and written
+to the output along with the isolated hits. The output of TFS
+then forms the input of the STAR TPC tracking system.
+<P>
+TFS has been written with flexibility in mind.  It is controlled
+by parameter files for easy modification of the TPC running conditions.
+ TFS is  capable
+of merging events prior to and following the triggered event.
+ This is particularly important in the high-luminosity environment
+of proton-proton collisions where non-triggered events will be
+registered during the time that the TPC volume is read out.
+<P>
+<font color="green" size=+2>TFS Documentation</font>
+<UL>
+<LI><a name=Specs><a href=tfs_specs.html><strong>Module specs</strong></a></a><dd>Brief module descriptions
+<LI><a name=Data_Strucs><a href=tfs_data_structs.html><strong>Data structures</strong></a></a><dd>Data structures owned by this package
+<LI><a name=Usage><a href=tfs_usage.html><strong>Usage</strong></a></a><dd>How to use this package
+<LI><a name=Updates><a href=tfs_updates.html><strong>Updates</strong></a></a><dd>History of updates in reverse chronological order
+<LI><a name=Add_Info><a href=tfs_additional.html><strong>Additional information</strong></a></a><dd>Additional documents relevant to this package description
+</UL>
+<P>
+
+
+<P>
+Contact for this package:
+<address><a href="http://www.rhic.bnl.gov/star/starlib/doc/www/spb/hardtke.html">Dave
+Hardtke</a> &nbsp;&nbsp;
+<a href="http://www.rhic.bnl.gov/star/starlib/doc/www/spb/sakrejda.html"
+>Iwona Sakrejda</a> &nbsp;&nbsp;
+<a href="http://www.rhic.bnl.gov/star/starlib/doc/www/spb/weerasundara.html" >Dhammika Weerasundara</a></address>
+
+
+
+    <hr>
+    <address><a href="mailto:dhammika@gibbs.npl.washington.edu">Dhammika Weerasundara</a></address>
+<!-- Created: Tue Apr 21 12:02:18 PDT 1998 -->
+<!-- hhmts start -->
+Last modified: Fri Apr 24 14:16:27 PDT 1998
+<!-- hhmts end -->
+  </body>
+</html>
