@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstWafer.hh,v 1.3 2001/01/26 10:24:17 lmartin Exp $
+ * $Id: StEstWafer.hh,v 1.4 2001/02/23 14:19:11 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstWafer.hh,v $
+ * Revision 1.4  2001/02/23 14:19:11  lmartin
+ * cout replaced by gMessMgr.
+ *
  * Revision 1.3  2001/01/26 10:24:17  lmartin
  * Minor changes. Commented statement removed. Short description of the data members added.
  *
@@ -22,6 +25,7 @@
  **************************************************************************/
 #ifndef StEstWafer_hh
 #define StEstWafer_hh
+#include "StMessMgr.h"
 #include "StMaker.h"
 #include "StThreeVectorD.hh"
 
@@ -52,7 +56,7 @@ public:
     mMaxHits = mh;
     mHits = new StEstHit*[mh];
     if (!mHits)
-      cerr << "ERROR StEstWafer::StEstWafer mHits = new StEstHit*["<<mh<<"] = NULL" <<endl;
+      gMessMgr->Error()<<"StEstWafer::StEstWafer mHits = new StEstHit*["<<mh<<"] = NULL"<<endm;
     mLayer=mId/1000;
     mPreprojection = 0;
     
@@ -80,7 +84,6 @@ public:
     int i;
     for (i=0;i<8;i++) 
       this->neighbour[i]=NULL;
-    //    cout<<"Wafer_id="<<this->GetId()<<" mNHits="<<mNHits<<endl;
     delete [] mHits;
     delete x;
     delete n;
@@ -118,11 +121,11 @@ inline long StEstWafer::GetNHits() {return mNHits;};
 inline long StEstWafer::GetMaxHits() {return mMaxHits;};
 inline StEstHit* StEstWafer::GetHit(long nr) {
   if (nr<0) {
-    cerr << "ERROR StEstWafer::GetHit nr<0" << endl;
+    gMessMgr->Error()<<"StEstWafer::GetHit nr<0"<<endm;
     return NULL;
   }
   if (nr>=mNHits) {
-    cerr << "ERROR StEstWafer::GetHit nr>=mNHits" << endl;
+    gMessMgr->Error()<<"StEstWafer::GetHit nr>=mNHits"<<endm;
     return NULL;
   }
   return mHits[nr];
@@ -147,22 +150,22 @@ public:
     nzbins=nz;
 
     pWaf = new StEstWafer****[nphibins];
-    if (!pWaf) cout<<"Warning problem creating pWaf !"<<endl;
+    if (!pWaf) gMessMgr->Error()<<"Problem creating pWaf !"<<endm;
     nWaf = new int**[nphibins];
-    if (!nWaf) cout<<"Warning problem creating nWaf !"<<endl;
+    if (!nWaf) gMessMgr->Error()<<"Problem creating nWaf !"<<endm;
     for (int i=0;i<nphibins;i++) {
       pWaf[i] = new StEstWafer***[nzbins];
-      if (!pWaf[i]) cout<<"Warning problem creating pWaf[i] !"<<endl;
+      if (!pWaf[i]) gMessMgr->Error()<<"Problem creating pWaf[i] !"<<endm;
       nWaf[i] = new int*[nzbins];
-      if (!nWaf[i]) cout<<"Warning problem creating nWaf[i] !"<<endl;
+      if (!nWaf[i]) gMessMgr->Error()<<"Problem creating nWaf[i] !"<<endm;
       for (int j=0;j<nzbins;j++) {
 	pWaf[i][j] = new StEstWafer**[4];
-	if (!pWaf[i][j]) cout<<"Warning problem creating pWaf[i][j] !"<<endl;
+	if (!pWaf[i][j]) gMessMgr->Error()<<"Problem creating pWaf[i][j] !"<<endm;
 	nWaf[i][j] = new int[4];
-	if (!nWaf[i][j]) cout<<"Warning problem creating nWaf[i][j] !"<<endl;
+	if (!nWaf[i][j]) gMessMgr->Error()<<"Problem creating nWaf[i][j] !"<<endm;
 	for (int k=0;k<4;k++) {
 	  pWaf[i][j][k] = new StEstWafer*[4];
-	  if (!pWaf[i][j][k]) cout<<"Warning problem creating pWaf[i][j][k] !"<<endl;
+	  if (!pWaf[i][j][k]) gMessMgr->Error()<<"Problem creating pWaf[i][j][k] !"<<endm;
 	  nWaf[i][j][k] = 0;
 	}
       }
