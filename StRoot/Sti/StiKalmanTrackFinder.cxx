@@ -254,14 +254,14 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
   int goodCount= 0;
   int plus=0;
   int minus=0;
-  for (TrackToTrackMap::const_iterator it=_trackContainer->begin();
+  for (vector<StiTrack*>::const_iterator it=_trackContainer->begin();
        it!=_trackContainer->end();
        ++it)
     {
       try
 	{
 	  rawCount++;
-	  StiKalmanTrack * track = dynamic_cast<StiKalmanTrack*>((*it).second);
+	  StiKalmanTrack * track = dynamic_cast<StiKalmanTrack*>(*it);
 	  if (!track) continue;
 	  bool extended = false;
 	  StiKalmanTrackNode * inner = track->getInnerMostNode();
