@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.19 2004/03/11 18:00:06 posk Exp $
+// $Id: plotCen.C,v 1.20 2004/11/11 18:25:55 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -16,14 +16,15 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-
+#include <iomanip.h>
 #include <math.h>
 #include "TMath.h" 
  
 const  Int_t nCens = 10; // min bias + 9 centralities
+//const  Int_t nCens = 9; // 9 centralities
 int    runNumber   = 0;
-char   runName[6];
-char   fileName[30];
+char   runName[60];
+char   fileName[60];
 char   histTitle[30];
 TFile* histFile[nCens];
 char   tmp[10];
@@ -39,8 +40,15 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
 
   int canvasWidth = 600, canvasHeight = 780;             // portrait
   int columns = 2;
-  int rows    = nCens/columns;
-  int pads    = rows*columns;
+  int rows;
+  bool oddPads = (nCens) % 2;
+  if (oddPads) {
+    rows =  nCens/columns + 1;
+  } else {
+    rows    = nCens/columns;
+  }
+  //int pads    = rows*columns;
+  int pads    = nCens;
 
   // names of histograms made by StFlowAnalysisMaker
   // also projections of some of these histograms
@@ -262,11 +270,13 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   TLine* lineYcm   = new TLine(Ycm, -10., Ycm, 10.);
   float v;
   float err;
+  int centr;
   for (int i = 0; i < pads; i++) {
     int fileN = i;                           // file number
     int padN = fileN + 1;                    // pad number
-    sprintf(histTitle,"Centrality %d",padN-1);
-    cout << "centrality= " << padN-1 << endl;
+    centr = oddPads ? padN : padN-1;
+    sprintf(histTitle,"Centrality %d",centr);
+    cout << "centrality= " << centr << endl;
 
     // get the histogram
     bool twoD;
@@ -497,12 +507,25 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       for (int n=1; n < 4; n++) {
 	v   = hist->GetBinContent(n);                       // output v values
 	err = hist->GetBinError(n);
-	if (n==2) cout << " v2 = " << v << " +/- " << err << endl;
+	if (n==2) cout << " v2 = " << setprecision(3) << v << " +/- " << 
+		    setprecision(2) << err << endl;
 	if (TMath::IsNaN(v)) {
 	  hist->SetBinContent(n, 0.);
 	  hist->SetBinError(n, 0.);
 	}
       }
+    } else if (strstr(shortName[pageNumber],"_Res")!=0 ) {      // v 1D
+      for (int n=1; n < 4; n++) {
+	double res   = hist->GetBinContent(n);                       // output values
+	err = hist->GetBinError(n);
+	if (n==2) cout << " res = " << setprecision(3) << res << " +/- " << 
+		    setprecision(2) << err << endl;
+	if (TMath::IsNaN(v)) {
+	  hist->SetBinContent(n, 0.);
+	  hist->SetBinError(n, 0.);
+	}
+      }
+      hist->Draw(); 
     } else {                                              // all other 1D
       gStyle->SetOptStat(100110);
       hist->Draw(); 
@@ -658,6 +681,9 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.20  2004/11/11 18:25:55  posk
+// Minor updates.
+//
 // Revision 1.19  2004/03/11 18:00:06  posk
 // Added Random Subs analysis method.
 //
