@@ -93,11 +93,14 @@ void VoltCalibrator::process()
 			long soft = pmtId._softId;
       // read current voltage
       currentVolt >> pmtId>>v;
-      // current gain
-      cGain = (*i)->getGain(v);
-      // new voltage
-      newV = (*i)->getVoltage(g*cGain);
-			
+			if(g==1 || g==0) newV=v;
+			else
+			{
+      	// current gain
+      	cGain = (*i)->getGain(v);
+      	// new voltage
+      	newV = (*i)->getVoltage(g*cGain);
+			}
 			cout <<"id = "<<soft<<"  pmtId = "<<a<<"  voltage = "<<v<<"  cGain = "<<cGain<<"  new V = "<<newV<<"  correction = "<< g<<endl;
       if (a!=pmtId._serial)
 	{
