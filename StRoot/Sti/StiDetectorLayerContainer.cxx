@@ -5,6 +5,7 @@
 #include <iostream.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <string>
 
 #include "StiMapUtilities.h"
 #include "StiDetector.h"
@@ -235,9 +236,12 @@ void StiDetectorLayerContainer::buildMaterials(const char* buildDirectory){
       StiMaterial *pMaterial = new StiMaterial();
       pMaterial->build(buildfile);
 
-      // TODO: add pMaterial to some container!
+      // add to materials map by name
+      MaterialMapKey key(pMaterial->getName());
+      materialMap.insert( materialMapValType(key, pMaterial) );
 
-      printf("Built material '%s'\n", pMaterial->getName());
+      cout << "materialMap[" << key.name << "]='" 
+           << *(materialMap[key]) << "'" << endl;
     } // if is regular file
   }
 
@@ -275,7 +279,6 @@ void StiDetectorLayerContainer::build(const char* buildDirectory)
       
       layer->build(buildfile);      
       if (layer->isOn()) push_back(layer);
-      printf("Built detector '%s'\n", layer->getName());
 
     } // if is regular file
 

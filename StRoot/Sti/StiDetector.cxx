@@ -3,10 +3,13 @@
 //STD
 #include <iostream>
 #include <string>
+#include <map>
 //SCL
 #include "StGetConfigValue.hh"
 //Sti
+#include "StiDetectorLayerContainer.h"
 #include "StiDetector.h"
+#include "StiMapUtilities.h"
 
 StiDetector::StiDetector()
 {
@@ -23,15 +26,19 @@ void StiDetector::build(const char* buildfile)
     StGetConfigValue(buildfile, "continuousMedium", continuousMedium);
     StGetConfigValue(buildfile, "discreteScatterer", discreteScatterer);
     
-    string materialName;
-    StGetConfigValue(buildfile, "gas", materialName);
-    if(materialName != "(null)"){
-      //TODO: set gas by name
+    materialmap materialMap = 
+        StiDetectorLayerContainer::instance()->getMaterialMap();
+    string gasName;
+    StGetConfigValue(buildfile, "gas", gasName);
+    if(gasName != "(null)"){
+      gas = materialMap[MaterialMapKey(gasName.c_str())];
     }
+    string materialName;
     StGetConfigValue(buildfile, "material", materialName);
     if(materialName != "(null)"){
-      //TODO: set gas by name
+      material = materialMap[MaterialMapKey(materialName.c_str())];
     }
+
     int code;
     StGetConfigValue(buildfile, "shapeCode", code);
     shapeCode = static_cast<StiShapeCode>(code);
@@ -41,7 +48,7 @@ void StiDetector::build(const char* buildfile)
     StGetConfigValue(buildfile, "centerRefAngle", centerRefAngle);
     StGetConfigValue(buildfile, "orientationAngle", orientationAngle);
     StGetConfigValue(buildfile, "halfWidth", halfWidth);
-    updateCenterRep();
+    updateNormalRep();
 
     StGetConfigValue(buildfile,"activePosition",activePosition);
     StGetConfigValue(buildfile,"zCenter",zCenter);

@@ -13,9 +13,12 @@
 #include "StiMapUtilities.h"
 
 class StiDetector;
+class StiMaterial;
 
 typedef map<DetectorMapKey, StiDetector*> detectormap;
+typedef map<MaterialMapKey, StiMaterial*> materialmap;
 typedef detectormap::value_type detectorMapValType;
+typedef materialmap::value_type materialMapValType;
 
 class StiDetectorLayerContainer : public detectormap
 {
@@ -68,6 +71,8 @@ public:
     bool zStepPlus(); //positive step in z
     bool zStepMinus(); //negative step in z
     
+    materialmap getMaterialMap(){ return materialMap;}
+
 private:
 
     //Singleton Management
@@ -77,6 +82,8 @@ private:
 protected:
     bool mdraw;
     bool mdone;
+
+    materialmap materialMap;
     
     //bounds for building stetp-by-step
     int mminsector;

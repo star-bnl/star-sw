@@ -2,9 +2,9 @@
 //M.L. Miller (Yale Software)
 //04/01
 
-#include "StiMaterial.h"
 #include "StGetConfigValue.hh"
 #include <string.h>
+#include "StiMaterial.h"
 
 StiMaterial::StiMaterial(){
 } // StiMaterial()
@@ -17,7 +17,7 @@ void StiMaterial::build(const char *szFileName){
 
     string str;
     StGetConfigValue(szFileName, "name", str);
-    szName = str.c_str();
+    setName(str.c_str());
 
     StGetConfigValue(szFileName, "density", dDensity);
     StGetConfigValue(szFileName, "radLength", dRadLength);

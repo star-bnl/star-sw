@@ -158,9 +158,13 @@ void StiGeometryGenerator::buildSvg(){
       detector.setIsDiscreteScatterer(true);
 
       detector.setShapeCode(StiDetector::kPlanar);
-      
+
+      int nLadder = 2*(iLadder + 1) - nLayer%2; // formal ladder number in svt
+      if(nLayer == nLayers - 1){ nLadder = iLadder + 1; } // ssd
       detector.setCenterRep(
-          dLadderRadius, mGeometryTransform->phiForSector(iLadder+1, nLadders),
+          dLadderRadius, 
+          mGeometryTransform->phiForSector(nLadder, 
+                                           (2 - nLayer/(nLayers-1))*nLadders),
           dOrientationAngle, dWaferHalfWidth);
 
       detector.setActivePosition(0.);
@@ -168,12 +172,12 @@ void StiGeometryGenerator::buildSvg(){
       detector.setZCenter(0.);
       detector.setThickness(2.*dWaferHalfThickness);
 
-      detector.setSector(iLadder + 1);
+      detector.setSector(nLadder);
       detector.setPadrow(nLayer + 1);
 
       //Each ladder gets its own file, currently
       sprintf(szOutfile, "Svg/Layer_%i/Ladder_%i", 
-              nLayer + 1, iLadder + 1);
+              nLayer + 1, nLadder);
       detector.setName(szOutfile);
       sprintf(szOutfile, "%s/%s.txt", m_szGeomDirectory, detector.getName());
       detector.write(szOutfile);
