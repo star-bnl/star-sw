@@ -1,7 +1,10 @@
 //
-//  $Id: Stl3CounterMaker.h,v 1.1 2002/02/13 22:36:31 struck Exp $
+//  $Id: Stl3CounterMaker.h,v 1.2 2002/02/20 22:09:49 struck Exp $
 //
 //  $Log: Stl3CounterMaker.h,v $
+//  Revision 1.2  2002/02/20 22:09:49  struck
+//  added some debugging info
+//
 //  Revision 1.1  2002/02/13 22:36:31  struck
 //  major code clean-up for Stl3RawReaderMaker, first version of Stl3CounterMaker
 //
@@ -102,7 +105,7 @@ class Stl3CounterMaker : public StMaker {
    virtual Int_t Finish();
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: Stl3CounterMaker.h,v 1.2 2002/02/20 22:09:49 struck Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(Stl3CounterMaker, 1)   //StAF chain virtual base class for Makers
 };
