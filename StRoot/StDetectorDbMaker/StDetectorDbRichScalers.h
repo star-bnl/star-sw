@@ -29,6 +29,12 @@ public:
     double getL0();
     double getBBCX();
     double getBBCXCTB();
+    double getBBCWest();
+    double getBBCEast();
+    double getBBCYellowBkg();
+    double getBBCBlueBkg();
+    double getPVPDWest();
+    double getPVPDEast();
     unsigned int getRichHVStatus();
     void update(StMaker*);
     
