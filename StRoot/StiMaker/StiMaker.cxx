@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.122  2003/04/13 02:16:13  pruneau
+// *** empty log message ***
+//
 // Revision 1.121  2003/04/11 18:56:14  pruneau
 // Pulling the B field from StEventSummary
 //
@@ -99,6 +102,7 @@
 #include "Sti/StiDefaultTrackFilter.h"
 #include "Sti/Star/StiStarDetectorGroup.h"
 #include "Sti/StiKalmanTrackFinderParameters.h"
+#include "StiFtpc/StiFtpcDetectorGroup.h"
 #include "StiTpc/StiTpcDetectorGroup.h"
 #include "StiSvt/StiSvtDetectorGroup.h"
 #include "StiEmc/StiEmcDetectorGroup.h"
@@ -188,22 +192,32 @@ Int_t StiMaker::Init()
 
 Int_t StiMaker::InitDetectors()
 {
-  StiDetectorGroup<StEvent,StMcEvent> * tpc;
-  StiDetectorGroup<StEvent,StMcEvent> * svt;
-  StiDetectorGroup<StEvent,StMcEvent> * emc;
+  StiDetectorGroup<StEvent,StMcEvent> * group;
   cout<<"StiMaker::InitDetectors() -I- Adding detector group:Star"<<endl;
   _toolkit->add(new StiStarDetectorGroup());
   if (_pars->useTpc)
     {
       cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
-      _toolkit->add(tpc = new StiTpcDetectorGroup(true));
-      tpc->setGroupId(kTpcId);
+      _toolkit->add(group = new StiTpcDetectorGroup(true));
+      group->setGroupId(kTpcId);
     }
   if (_pars->useSvt)
     {
       cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
-      _toolkit->add(svt = new StiSvtDetectorGroup(true));
-      svt->setGroupId(kSvtId);
+      _toolkit->add(group = new StiSvtDetectorGroup(true));
+      group->setGroupId(kSvtId);
+    }
+  if (_pars->useFtpc)
+    {
+      cout<<"StiMaker::Init() -I- Adding detector group:FTPC"<<endl;
+      _toolkit->add(group = new StiFtpcDetectorGroup(true));
+      group->setGroupId(kFtpcWestId);
+    }
+  if (_pars->useEmc)
+    {
+      cout<<"StiMaker::Init() -I- Adding detector group:BEMC"<<endl;
+      _toolkit->add(group = new StiEmcDetectorGroup(true));
+      group->setGroupId(kBarrelEmcTowerId);
     }
   return kStOk;
 }
