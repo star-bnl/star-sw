@@ -82,11 +82,11 @@ my $CXXFLAGS = $env->{CXXFLAGS};
 my $FCCOM    = $env->{FCCOM};
 if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
 if ($STAR_SYS =~ /kcc$/)  {$LIBPATH = ""; $LIBS = "";}
-if ($STAR_SYS =~ /^sun4x_56_CC5$/) {
-  if (!$LIBPATH) {$LIBPATH  = "/opt/WS5.0/SC5.0/lib";}
-  else           {$LIBPATH .= ":/opt/WS5.0/SC5.0/lib";}
-  $LIBS    .= " -lCstd -liostream";
-}
+#if ($STAR_SYS =~ /^sun4x_56_CC5$/) {
+#  if (!$LIBPATH) {$LIBPATH  = "/opt/WS5.0/SC5.0/lib";}
+#  else           {$LIBPATH .= ":/opt/WS5.0/SC5.0/lib";}
+#  $LIBS    .= " -lCstd -liostream";
+#}
 $env2 = $env->clone('CPPPATH'      => $CPPP,
 		    'CXXFLAGS'     => $CXXFLAGS,
 		    'FCCOM'        => $FCCOM,

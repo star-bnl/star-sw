@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.10 2000/04/20 15:08:32 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.11 2000/04/22 20:07:12 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -203,7 +203,8 @@
    $CXXFLAGS  = "-KPIC -D__SunOS_5_6 -library=iostream,no_Cstd";
    $R_CPPFLAGS  = "-DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
-   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/WS5.0/SC5.0/lib -lCstd -liostream -lCrun";
+#   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/WS5.0/SC5.0/lib -lCstd -liostream -lCrun";
+   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/star/lib -lCstd -liostream -lCrun";
    $FLIBS     = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
    $XLIBS     = $ROOTSYS . "/lib/libXpm.a -L/usr/openwin/lib -lX11";
    $SYSLIBS   = "-lm -ldl -lnsl -lsocket";
@@ -213,7 +214,7 @@
    $CINTCFLAGS= $CFLAGS . " " . $R_CPPFLAGS;
    $LD        = $CXX;
 #   $EXEFLAGS  = "-library=iostream";
-   $LDFLAGS   = "-library=iostream";
+   $LDFLAGS   = "-library=iostream -Bdynamic";
    $SO        = $CXX;
    $SOFLAGS   = "-G";#
    if (defined($ARG{INSURE})){
