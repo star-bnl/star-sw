@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.9 2004/08/13 00:15:03 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.10 2004/09/20 16:07:35 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.10  2004/09/20 16:07:35  dongx
+ * correct the nsigma in StTofPidTraits
+ *
  * Revision 1.9  2004/08/13 00:15:03  dongx
  * correct the nSigmaXXX calculation
  *
@@ -654,9 +657,9 @@ Int_t StTofCalibMaker::Make()
       if(aTrack->key()!=trkId) continue;
       StTofPidTraits* pidTof = new StTofPidTraits(tofHitVec[j]->trayIndex(), tofHitVec[j]->moduleIndex(), tofHitVec[j]->cellIndex(), tofHitVec[j]->timeOfFlight(), tofHitVec[j]->pathLength(), tofHitVec[j]->beta());
       pidTof->setSigmaElectron(tofHitVec[j]->sigmaElectron());
-      pidTof->setSigmaPion(tofHitVec[j]->sigmaElectron());
-      pidTof->setSigmaKaon(tofHitVec[j]->sigmaElectron());
-      pidTof->setSigmaProton(tofHitVec[j]->sigmaElectron());
+      pidTof->setSigmaPion(tofHitVec[j]->sigmaPion());
+      pidTof->setSigmaKaon(tofHitVec[j]->sigmaKaon());
+      pidTof->setSigmaProton(tofHitVec[j]->sigmaProton());
       
       theTrack->addPidTraits(pidTof);
     }
