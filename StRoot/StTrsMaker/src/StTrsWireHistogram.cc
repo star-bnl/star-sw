@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.12 1999/04/20 20:06:04 ward Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.13 1999/07/09 03:47:04 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,9 +11,13 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
- * Revision 1.12  1999/04/20 20:06:04  ward
- * Protection against pointer error in StTrsWireHistogram::clear
+ * Revision 1.13  1999/07/09 03:47:04  lasiuk
+ * add switch for singleElectron multiplication, gaussian random
+ * number generator
  *
+ * Revision 1.13  1999/07/09 03:47:04  lasiuk
+ * add switch for singleElectron multiplication, gaussian random
+ * number generator
  *
  * Revision 1.12  1999/04/20 20:06:04  ward
  * Protection against pointer error in StTrsWireHistogram::clear
@@ -72,9 +76,10 @@
  *
  * Revision 1.1  1998/06/04 23:31:58  lasiuk
  * Initial Revision
-
+ *
  **************************************************************************/
-HepJamesRandom StTrsWireHistogram::mEngine;
+#include "SystemOfUnits.h"
+#include "StTrsWireHistogram.hh"
 #include <unistd.h> // sleep
 StTrsWireHistogram* StTrsWireHistogram::mInstance = 0; // static data member
 HepJamesRandom  StTrsWireHistogram::mEngine;
@@ -94,10 +99,11 @@ StTrsWireHistogram::StTrsWireHistogram(StTpcGeometry* geoDb, StTpcSlowControl* s
     mTotalNumberOfAnodeWires =
 	mNumberOfInnerSectorAnodeWires + mNumberOfOuterSectorAnodeWires;
     //mSectorWires.assign(mTotalNumberOfAnodeWires);
-    mDoGasGain              = true;
-    mDoGasGainFluctuations  = false;
-    mGasGainCalculationDone = false;
+    mSectorWires.resize(mTotalNumberOfAnodeWires);
+    PR(mTotalNumberOfAnodeWires);
 
+    //Gas Gain
+    mDoGasGain                      = true;
     mDoGasGainFluctuations          = false;
     mGasGainCalculationDone         = false;
     mDoSingleElectronMultiplication = false;
@@ -168,12 +174,26 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
     // Check Wire Index before doing any further calculations:
     //
     if (wireIndex >= 0 &&
-	if(mDoGasGain) {
-	    double avalancheFactor = avalanche(wireIndex);
-//  	    PR(avalancheFactor);
-	    bin.scaleNumberOfElectrons(avalancheFactor);
-	    //bin.scaleNumberOfElectrons(avalanche(wireIndex));
+	wireIndex < mTotalNumberOfAnodeWires) {
+
+// 	PR(bin.numberOfElectrons());
+	// Gas Gain
+      double avalancheFactor;
+      if(mDoGasGain) {
+	
+	if(mDoSingleElectronMultiplication) {
+	  double tmpElectrons = 0;
+	  PR(bin.numberOfElectrons());
+	  for(int ii=0; ii<static_cast<int>(bin.numberOfElectrons()); ii++) {
+	    avalancheFactor = avalanche(wireIndex);
+	    tmpElectrons += avalancheFactor;
+	  }
+	  bin.setNumberOfElectrons(tmpElectrons);
+	} // end of single electron
 	else {  // Do Gaussian scaling
+	  avalancheFactor = avalanche(wireIndex);
+	  bin.scaleNumberOfElectrons(avalancheFactor);
+	  //bin.scaleNumberOfElectrons(gaussianMultiplication(wireIndex));
 	}
 	
       }  // end of gas gain
@@ -300,13 +320,29 @@ void StTrsWireHistogram::setGasGainOuterSector(double v)
 
 double StTrsWireHistogram::avalanche(int iWire)
 {
-    
-    double gasGainFactor = (mDoGasGainFluctuations) ?
+    if(!mGasGainCalculationDone) {
+	gasGainCalculation();
+	mGasGainCalculationDone = true;
+    }
 
     double gasGainFactor;
+    if(mDoSingleElectronMultiplication) {
+      gasGainFactor = (mDoGasGainFluctuations) ?
+	exponentialFluctuations(iWire) :
+	noFluctuations(iWire);
+    }
+    else {
       gasGainFactor = (mDoGasGainFluctuations) ?
 	gaussianMultiplication(iWire) :
 	noFluctuations(iWire);
+    }
+
+    return gasGainFactor;
+}
+
+double StTrsWireHistogram::gaussianMultiplication(int wireIndex)
+{
+    return (wireIndex<mNumberOfInnerSectorAnodeWires) ?
 	mGaussianDistribution.shoot(mInnerSectorGasGain,.13*mInnerSectorGasGain) :
 	mGaussianDistribution.shoot(mOuterSectorGasGain,.13*mOuterSectorGasGain);
 }
