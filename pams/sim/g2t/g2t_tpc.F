@@ -1,5 +1,8 @@
-* $Id: g2t_tpc.F,v 1.2 2004/03/01 18:03:17 fisyak Exp $
+* $Id: g2t_tpc.F,v 1.3 2004/03/31 20:16:27 fisyak Exp $
 * $Log: g2t_tpc.F,v $
+* Revision 1.3  2004/03/31 20:16:27  fisyak
+* Add lgam =  log10(GEKin/AMass) field
+*
 * Revision 1.2  2004/03/01 18:03:17  fisyak
 * Clean up for starsim
 *
@@ -88,7 +91,8 @@
             g2t_tpc_hit(i).ds            = Step
             g2t_tpc_hit(i).track_p       = trac
             g2t_tpc_hit(i).volume_id     = volume
-*
+            g2t_tpc_hit(i).lgam          = lgam
+*     
 *                  add to track linked list 
 *
             g2t_tpc_hit(i).next_tr_hit_p = g2t_track(trac).hit_tpc_p
