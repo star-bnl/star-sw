@@ -39,7 +39,7 @@ Some commands may be marked with the following banners.
 >COMMAND UPDATE
 >PARAMETERS
 >GUIDANCE
-Updates the table of versions (config/levVersions) with respect to 
+Updates the table of versions (config/levVer) with respect to 
 recently added STAF objects [eg, physics analysis modules (PAMs), tables, 
 ASPs, etc.].
 This table of versions is written into output files.
