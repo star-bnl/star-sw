@@ -14,6 +14,11 @@
 #include "dioClasses.hh"
 #include "dio_globals.h"
 
+#include "fortranc.h"   /* The definition of the Fortran/C interface */
+
+#define dio_def_ F77_NAME(dio_def,DIO_DEF)
+extern "C" void type_of_call dio_def_();
+
 dioFactory *dio;
 
 //:>--------------------------------------------------------------------

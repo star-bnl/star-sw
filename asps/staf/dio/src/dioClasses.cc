@@ -12,12 +12,18 @@
 
 //:----------------------------------------------- INCLUDES           --
 #include <sys/types.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <sys/wait.h>
-#include <netinet/in.h>
+#ifndef  WIN32 
+# include <arpa/inet.h>
+# include <sys/socket.h>
+# include <sys/time.h>
+# include <sys/resource.h>
+# include <sys/wait.h>
+# include <netinet/in.h>
+#else
+# include <windows.h>
+# include <winsock.h>
+#endif 	/* WIN32 */
+
 #include <errno.h>
 #include <signal.h>
 

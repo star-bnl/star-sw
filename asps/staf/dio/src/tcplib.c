@@ -1,3 +1,4 @@
+#ifndef WIN32
 /* Copyright 1992, Lawrence Berkeley Laboratory */
 
 /* tcplib.c - tcp message library */
@@ -241,3 +242,4 @@ int tcpWrite(int *fd, char *buf, int len)
         }
         return len;
 }
+#endif /* WIN32 */
