@@ -1,5 +1,9 @@
-// $Id: StFtpcGlobalMaker.cxx,v 1.11 2002/11/25 12:06:29 jcs Exp $
+// $Id: StFtpcGlobalMaker.cxx,v 1.12 2002/11/28 09:42:05 oldi Exp $
 // $Log: StFtpcGlobalMaker.cxx,v $
+// Revision 1.12  2002/11/28 09:42:05  oldi
+// Code was prepared to fill momentum values at outermost points on tracks.
+// This feature is not used up to now.
+//
 // Revision 1.11  2002/11/25 12:06:29  jcs
 // set bit 0 of map[0]=0 for all ftpc global tracks (unconstrained fit)
 //
@@ -293,6 +297,47 @@ Int_t StFtpcGlobalMaker::Make(){
 
     //  curvature 
     globtrk[iglobtrk].curvature =  fptrack[itrk].curvature;
+
+    // This has to go in as soon as 
+    // r0out, phi0out, z0out, psiout, tanlout, invptout 
+    // in the dst_track table are needed.
+    /*
+    //  radius at end of track (cm) 
+    globtrk[iglobtrk].r0out   = 
+      sqrt(fptrack[itrk].l[0]*fptrack[itrk].l[0]
+	   + fptrack[itrk].l[1]*fptrack[itrk].l[1]);
+
+    //  azimuthal angle at end of track (deg)
+    globtrk[iglobtrk].phi0out = 
+      atan2(fptrack[itrk].l[1],fptrack[itrk].l[0])
+      * C_DEG_PER_RAD;
+
+    //  z-coordinate at end of track 
+    globtrk[iglobtrk].z0out = fptrack[itrk].l[2];
+
+    // For Kalman fitting 'inner' and 'outer' momenta differ.
+    // For FTPC fitting they are the same,
+    // so fill with the 'inner' values.
+
+    //  momentum angle at end 
+    globtrk[iglobtrk].psiout = 
+      atan2(fptrack[itrk].p[1],fptrack[itrk].p[0]);
+    if (globtrk[iglobtrk].psiout < 0.0) {
+      globtrk[iglobtrk].psiout = 
+	globtrk[iglobtrk].psiout + C_2PI;
+    }
+    globtrk[iglobtrk].psiout = 
+      globtrk[iglobtrk].psiout * C_DEG_PER_RAD; 
+
+    //  1/pt at end 
+    globtrk[iglobtrk].invptout =  
+      1./sqrt(fptrack[itrk].p[0]*fptrack[itrk].p[0]
+	      +fptrack[itrk].p[1]*fptrack[itrk].p[1]);
+
+    //  tan(dip) = pz/pt at end
+    globtrk[iglobtrk].tanlout  = fptrack[itrk].p[2]  
+      *  globtrk[iglobtrk].invptout;
+    */
 
     //  covariance matrix 
     //  (currently not set for FTPC) 
