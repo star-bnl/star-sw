@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackGeometry.h,v 2.4 2001/04/05 04:00:45 ullrich Exp $
+ * $Id: StTrackGeometry.h,v 2.5 2001/07/17 22:23:30 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.h,v $
+ * Revision 2.5  2001/07/17 22:23:30  ullrich
+ * Added helicity to track geometry.
+ *
  * Revision 2.4  2001/04/05 04:00:45  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -42,6 +45,7 @@ public:
 
     virtual StTrackModel           model() const = 0;
     virtual short                  charge() const = 0;
+    virtual short                  helicity() const = 0;
     virtual double                 curvature() const = 0;
     virtual double                 psi() const = 0;
     virtual double                 dipAngle() const = 0;
@@ -49,11 +53,18 @@ public:
     virtual const StThreeVectorF&  momentum() const = 0;
     virtual StPhysicalHelixD       helix() const = 0;
 
+    virtual void setCharge(short) = 0;
+    virtual void setHelicity(short) = 0;
+    virtual void setCurvature(double) = 0; 
+    virtual void setPsi(double) = 0;
+    virtual void setDipAngle(double) = 0;
+    virtual void setOrigin(const StThreeVectorF&) = 0;
+    
     virtual StTrackGeometry*       copy() const = 0;     // virtual constructor
 
 protected:
     virtual StObject*  clone() const = 0;     // virtual constructor used in StArray
-    ClassDef(StTrackGeometry,1)
+    ClassDef(StTrackGeometry,2)
 };
 
 #endif
