@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.9 2001/04/25 13:38:00 jcs Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.10 2001/04/27 13:18:19 jcs Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.10  2001/04/27 13:18:19  jcs
+// cleanup comments, use SystemOfUnits for conversion
+//
 // Revision 1.9  2001/04/25 13:38:00  jcs
 // remove obsolete comment
 //
@@ -93,7 +96,7 @@ int StFtpcSlowSimulator::simulate()
     float phi=0.;
     float drift_time;
 
-    float aip = mDb->gasIonizationPotential()*1.0e-9;         // in GeV
+    float aip = mDb->gasIonizationPotential()*eV;         // convert to GeV
     float px, py, pz, pp;
     float xx, yy, zz;
     float de;
@@ -141,6 +144,8 @@ int StFtpcSlowSimulator::simulate()
 
 	if(DEBUG)
 	  cout << "Now processing hit " << i << endl;
+
+        // Convert geant volume number into FTPC row number
 	int irow= mGeant->geantVolume(i);
 	if ( irow > 200){
 	  irow = irow - 201 + 10;
@@ -168,7 +173,7 @@ int StFtpcSlowSimulator::simulate()
                << " py = "<<py
                << " pz=" << pz << endl;
 
-	//  dip angle with respect to plane defined by z- and phi- axes.	
+	//  dip angle with respect to plane defined by z- and phi- axes	
 	dip_ang   = atan(p_perp / pz);
 
         //  cross angle with respect to plane defined by z- and r- axes
