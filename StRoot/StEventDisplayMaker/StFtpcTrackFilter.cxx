@@ -1,9 +1,12 @@
-// $Id: StFtpcTrackFilter.cxx,v 1.3 2000/09/26 17:04:48 fine Exp $
+// $Id: StFtpcTrackFilter.cxx,v 1.4 2000/11/17 22:26:47 fine Exp $
 #include "StFtpcTrackFilter.h"
 // #include "StDetectorId.h"
 #include "TH1.h"
+#include "TTableSorter.h"
 #include "St_dst_trackC.h"
 #include "tables/St_dst_track_Table.h"
+#include "tables/St_dst_point_Table.h"
+#include "StDstPointChair.h"
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -30,7 +33,31 @@ void StFtpcTrackFilter::Distribution(St_dst_track *trackT,TH1F &de)
             de.Fill(c.AbsMoment(i));
    }
 }
-
+//_____________________________________________________________________________
+Int_t StFtpcTrackFilter::SubChannel(const TTableSorter *tableObject, Int_t index,Size_t &size, Style_t &style)
+{
+  Int_t color = 0;
+  St_dst_point *hit = (St_dst_point *)tableObject->GetTable();
+  assert(hit);
+  StDstPointChair thisHit(hit);
+  Int_t idx = tableObject->GetIndex(index);
+  UShort_t detId = thisHit.DetectorId(idx);
+  if (detId == kFtpcWestId || detId == kFtpcEastId) { 
+     dst_point_st &point = *hit->GetTable(idx);
+     // Set "small" marker for the "noise" points
+     if (point.id_track == 0) {
+       // small gray points
+       style = 1;  
+       color = 18;
+     } else {
+        // "regular" circles
+        style = 4;
+        size  = 0.35;
+        color = StVirtualEventFilter::Channel(tableObject,index,size,style);
+     }
+  }
+  return color;
+}
 //_____________________________________________________________________________
 Int_t StFtpcTrackFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t &size,Style_t &style)
 {
@@ -44,6 +71,9 @@ Int_t StFtpcTrackFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_
 }
 //_____________________________________________________________________________
 // $Log: StFtpcTrackFilter.cxx,v $
+// Revision 1.4  2000/11/17 22:26:47  fine
+// packing factors for Ftpc adjusted
+//
 // Revision 1.3  2000/09/26 17:04:48  fine
 // Two separate Distribution methods introduced
 //

@@ -17,6 +17,7 @@
 class StFtpcTrackFilter : public StDefaultFilter  {
 
  protected:
+    Int_t SubChannel(const TTableSorter *tableObject, Int_t index,Size_t &size, Style_t &style);
     Int_t SubChannel(St_dst_track &track, Int_t index,Size_t &size, Style_t &style);
     virtual void  Distribution(St_dst_track *obj,TH1F &de);
  public:
@@ -25,6 +26,9 @@ class StFtpcTrackFilter : public StDefaultFilter  {
      ClassDef(StFtpcTrackFilter,0)
 };
 // $Log: StFtpcTrackFilter.h,v $
+// Revision 1.3  2000/11/17 22:26:47  fine
+// packing factors for Ftpc adjusted
+//
 // Revision 1.2  2000/09/26 17:04:48  fine
 // Two separate Distribution methods introduced
 //
