@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.9 2004/05/02 04:10:14 perev Exp $
+ * $Id: StMuEvent.h,v 1.10 2004/08/04 17:57:13 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -18,6 +18,8 @@
 #include "StEvent/StCtbTriggerDetector.h"
 #include "StEvent/StZdcTriggerDetector.h"
 #include "StEvent/StBbcTriggerDetector.h"
+#include "StEvent/StEmcTriggerDetector.h"
+#include "StEvent/StFpdTriggerDetector.h"
 #include "StEvent/StFpdCollection.h"
 #include "StEvent/StL0Trigger.h"
 #include "StEvent/StTriggerIdCollection.h"
@@ -52,6 +54,8 @@ class StMuEvent : public TObject {
   StCtbTriggerDetector& ctbTriggerDetector();
   StZdcTriggerDetector& zdcTriggerDetector();
   StBbcTriggerDetector& bbcTriggerDetector();
+  StEmcTriggerDetector& emcTriggerDetector();
+  StFpdTriggerDetector& fpdTriggerDetector();
   StFpdCollection& fpdCollection(); 
   StL0Trigger& l0Trigger(); 
   // Special classes for the muDst
@@ -93,6 +97,8 @@ class StMuEvent : public TObject {
   StCtbTriggerDetector mCtbTriggerDetector;
   StZdcTriggerDetector mZdcTriggerDetector;
   StBbcTriggerDetector mBbcTriggerDetector;
+  StEmcTriggerDetector mEmcTriggerDetector;
+  StFpdTriggerDetector mFpdTriggerDetector;
   StFpdCollection mFpdCollection; 
   StL0Trigger mL0Trigger; 
   // special classes from MuDst
@@ -109,7 +115,7 @@ class StMuEvent : public TObject {
   friend class StMuDst;
   friend class StMuDstMaker;
   friend class StMuL3EventSummary;
-  ClassDef(StMuEvent,4)
+  ClassDef(StMuEvent,5)
 };
 
 inline int StMuEvent::eventId() { return mEventInfo.id();}
@@ -122,6 +128,8 @@ inline StEventSummary& StMuEvent::eventSummary() {return mEventSummary;}
 inline StCtbTriggerDetector& StMuEvent::ctbTriggerDetector() {return mCtbTriggerDetector;}
 inline StZdcTriggerDetector& StMuEvent::zdcTriggerDetector() {return mZdcTriggerDetector;}
 inline StBbcTriggerDetector& StMuEvent::bbcTriggerDetector() {return mBbcTriggerDetector;}
+inline StEmcTriggerDetector& StMuEvent::emcTriggerDetector() {return mEmcTriggerDetector;}
+inline StFpdTriggerDetector& StMuEvent::fpdTriggerDetector() {return mFpdTriggerDetector;}
 inline StFpdCollection& StMuEvent::fpdCollection() {return mFpdCollection;} 
 inline StL0Trigger& StMuEvent::l0Trigger() {return mL0Trigger;} 
 // special classes for muDst
@@ -155,6 +163,9 @@ inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.10  2004/08/04 17:57:13  mvl
+ * Added EMC trigger information and fpd trigger (tower) information
+ *
  * Revision 1.9  2004/05/02 04:10:14  perev
  * private => protected
  *
