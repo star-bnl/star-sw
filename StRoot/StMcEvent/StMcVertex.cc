@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.cc,v 2.1 1999/11/19 19:06:34 calderon Exp $
+ * $Id: StMcVertex.cc,v 2.2 1999/12/03 00:51:53 calderon Exp $
  * $Log: StMcVertex.cc,v $
+ * Revision 2.2  1999/12/03 00:51:53  calderon
+ * Tested with new StMcEventMaker.  Added messages for
+ * diagnostics.
+ *
  * Revision 2.1  1999/11/19 19:06:34  calderon
  * Recommit after redoing the files.
  *
@@ -23,7 +27,7 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StMcVertex.cc,v 2.1 1999/11/19 19:06:34 calderon Exp $";
+static const char rcsid[] = "$Id: StMcVertex.cc,v 2.2 1999/12/03 00:51:53 calderon Exp $";
 
 StMcVertex::StMcVertex()
 {
@@ -32,16 +36,6 @@ StMcVertex::StMcVertex()
     mGeantVolume = "aaaa";
     mTof = 0;
     mGeantProcess = 0;
-}
-StMcVertex::StMcVertex(float x, float y, float z)
-{
- 
-    mParent = 0;                
-    mGeantVolume = "none";
-    mTof = 0;
-    mGeantProcess = 0;
-    
-    setPosition((x,y,z));
 }
 
 StMcVertex::StMcVertex(g2t_vertex_st* vtx)
@@ -77,6 +71,14 @@ int StMcVertex::operator!=(const StMcVertex& v) const
     return !(v == *this);
 }
 
+ostream&  operator<<(ostream& os, const StMcVertex& v)
+{
+    os << "Position      : " << v.position() << endl; 
+    os << "Geant Volume  : " << v.geantVolume().c_str() << endl;
+    os << "Time of Flight: " << v.tof() << endl;
+    os << "Geant Process : " << v.geantProcess() << endl;
+    return os;
+}
 
 
 void StMcVertex::setParent(StMcTrack* val) {  mParent = val; }         

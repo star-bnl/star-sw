@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.cc,v 2.1 1999/11/19 19:06:32 calderon Exp $
+ * $Id: StMcFtpcHit.cc,v 2.2 1999/12/03 00:51:52 calderon Exp $
  * $Log: StMcFtpcHit.cc,v $
+ * Revision 2.2  1999/12/03 00:51:52  calderon
+ * Tested with new StMcEventMaker.  Added messages for
+ * diagnostics.
+ *
  * Revision 2.1  1999/11/19 19:06:32  calderon
  * Recommit after redoing the files.
  *
@@ -20,7 +24,7 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_ftp_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.1 1999/11/19 19:06:32 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.2 1999/12/03 00:51:52 calderon Exp $";
 
 StMemoryPool StMcFtpcHit::mPool(sizeof(StMcFtpcHit));
 
@@ -41,6 +45,13 @@ StMcFtpcHit::StMcFtpcHit(g2t_ftp_hit_st* pt)
 }
 
 StMcFtpcHit::~StMcFtpcHit() {/* noop */ }
+
+ostream&  operator<<(ostream& os, const StMcFtpcHit& h)
+{
+    os << "Position      : " << h.position() << endl; 
+    os << "Plane         : " << h.plane()    << endl;
+    return os;
+}
 
 unsigned long
 StMcFtpcHit::plane() const

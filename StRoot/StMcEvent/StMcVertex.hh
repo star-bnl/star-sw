@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.hh,v 2.1 1999/11/19 19:06:34 calderon Exp $
+ * $Id: StMcVertex.hh,v 2.2 1999/12/03 00:51:53 calderon Exp $
  * $Log: StMcVertex.hh,v $
+ * Revision 2.2  1999/12/03 00:51:53  calderon
+ * Tested with new StMcEventMaker.  Added messages for
+ * diagnostics.
+ *
  * Revision 2.1  1999/11/19 19:06:34  calderon
  * Recommit after redoing the files.
  *
@@ -28,7 +32,6 @@ class g2t_vertex_st;
 class StMcVertex : public StGlobalCoordinate {
 public:
     StMcVertex();
-    StMcVertex(float x, float y, float z);
     StMcVertex(g2t_vertex_st*);
     ~StMcVertex();
     
@@ -42,9 +45,9 @@ public:
     unsigned int                numberOfDaughters();
     StMcTrack*                  daughter(unsigned int);
     const StMcTrack*            parent();
-    string                      geantVolume();
-    float                       tof();
-    long                        geantProcess();
+    string                      geantVolume() const;
+    float                       tof() const;
+    long                        geantProcess() const;
 
   // "Set" Methods
   
@@ -66,7 +69,7 @@ protected:
     long                 mGeantProcess;
 };
 
-
+ostream&  operator<<(ostream& os, const StMcVertex&);
 
 inline StPtrVecMcTrack& StMcVertex::daughters(){ return mDaughters; }       
 
@@ -79,10 +82,10 @@ inline StMcTrack* StMcVertex::daughter(unsigned int i)
 
 inline const StMcTrack* StMcVertex::parent(){ return mParent; }          
 
-inline string StMcVertex::geantVolume(){ return mGeantVolume; }   
+inline string StMcVertex::geantVolume() const { return mGeantVolume; }   
 
-inline float StMcVertex::tof(){ return mTof; }  
+inline float StMcVertex::tof() const { return mTof; }  
 
-inline long StMcVertex::geantProcess(){ return mGeantProcess; }      
+inline long StMcVertex::geantProcess() const { return mGeantProcess; }      
 
 #endif
