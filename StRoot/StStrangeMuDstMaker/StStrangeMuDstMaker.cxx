@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 2.1 2000/06/09 22:17:10 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.0 2000/07/14 12:56:49 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.0  2000/07/14 12:56:49  genevb
+// Revision 3 has event multiplicities and dedx information for vertex tracks
+//
 // Revision 2.1  2000/06/09 22:17:10  genevb
 // Allow MC data to be copied between DSTs, other small improvements
 //
@@ -228,18 +231,17 @@ Int_t StStrangeMuDstMaker::MakeCreateDst() {
     firstEvent = kFALSE;
   }  
 
-  // Get pointers to event and primary vertex
+  // Get event
   StEventMaker* evMaker = (StEventMaker *) GetMaker("events");
-  if( ! evMaker->event() ) return kStOK; 
-  StEvent& event = *(evMaker->event());
-  StPrimaryVertex *primaryVertex = event.primaryVertex();
-  if( !primaryVertex ) {
-    gMessMgr->Error("StStrangeMuDstMaker: no primary vertex");
-    return kStErr;
+  StEvent* event = evMaker->event();
+  if (!event) return kStOK; 
+  if (!(event->primaryVertex())) {
+    gMessMgr->Warning("StStrangeMuDstMaker: no primary vertex; skipping event.");
+    return kStWarn;
   }
-  new((*evClonesArray)[0]) StStrangeEvMuDst(primaryVertex);
 
-  EachController(MakeCreateDst(event));
+  new((*evClonesArray)[0]) StStrangeEvMuDst(*event);
+  EachController(MakeCreateDst(*event));
   if (doMc) MakeCreateMcDst();
   tree->Fill();
 
@@ -410,4 +412,8 @@ Int_t StStrangeMuDstMaker::CloseFile() {
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SelectEvent() {
   EachController(Select(-1));
+}
+//_____________________________________________________________________________
+void StStrangeMuDstMaker::UnselectEvent() {
+  EachController(Unselect(-1));
 }

@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StV0Mc.cc,v 2.0 2000/06/05 05:19:45 genevb Exp $
+ * $Id: StV0Mc.cc,v 3.0 2000/07/14 12:56:50 genevb Exp $
  * $Log: StV0Mc.cc,v $
+ * Revision 3.0  2000/07/14 12:56:50  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
  * Revision 2.0  2000/06/05 05:19:45  genevb
  * New version of Strangeness micro DST package
  *
@@ -38,14 +41,12 @@ StV0Mc::StV0Mc(StMcVertex* mcVertex, StMcTrack* mcPositiveTrack,
   mPositiveMomentumY = mcPositiveTrack->momentum().y();
   mPositiveMomentumZ = mcPositiveTrack->momentum().z();
   mPositiveCommonTpcHits = 0;
-  mPositiveTpcHits = 0;
   mPositiveSimTpcHits = mcPositiveTrack->tpcHits().size();
   
   mNegativeMomentumX = mcNegativeTrack->momentum().x();
   mNegativeMomentumY = mcNegativeTrack->momentum().y();
   mNegativeMomentumZ = mcNegativeTrack->momentum().z();
   mNegativeCommonTpcHits = 0;
-  mNegativeTpcHits = 0;
   mNegativeSimTpcHits = mcNegativeTrack->tpcHits().size();
   
   mPositionX = mcVertex->position().x();

@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StDecayMode.cc,v 2.1 2000/06/09 22:17:09 genevb Exp $
+ * $Id: StDecayMode.cc,v 3.0 2000/07/14 12:56:47 genevb Exp $
  * $Log: StDecayMode.cc,v $
+ * Revision 3.0  2000/07/14 12:56:47  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
  * Revision 2.1  2000/06/09 22:17:09  genevb
  * Allow MC data to be copied between DSTs, other small improvements
  *

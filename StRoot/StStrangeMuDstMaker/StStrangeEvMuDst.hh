@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.hh,v 2.1 2000/06/09 22:17:10 genevb Exp $
+ * $Id: StStrangeEvMuDst.hh,v 3.0 2000/07/14 12:56:49 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.hh,v $
+ * Revision 3.0  2000/07/14 12:56:49  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
  * Revision 2.1  2000/06/09 22:17:10  genevb
  * Allow MC data to be copied between DSTs, other small improvements
  *
@@ -33,14 +36,14 @@
 #define StStrangeEvMuDst_hh
 #include "StStrangeMuDst.hh"
 
-class StPrimaryVertex;
+class StEvent;
 
 class StStrangeEvMuDst : public StStrangeMuDst {
 public:
   StStrangeEvMuDst();
   ~StStrangeEvMuDst();
-  StStrangeEvMuDst(StPrimaryVertex*);
-  void Fill(StPrimaryVertex*);
+  StStrangeEvMuDst(StEvent&);
+  void Fill(StEvent&);
   void Clear() {}
 
   Int_t   run() const;            // Run number
@@ -48,6 +51,8 @@ public:
   Float_t primaryVertexX() const; // Primary Vertex Position coordinates
   Float_t primaryVertexY() const;
   Float_t primaryVertexZ() const;
+  Int_t   globalTracks() const;
+  Int_t   primaryTracks() const;
 
 protected:
   Int_t   mRun;                   // These are written out
@@ -55,12 +60,14 @@ protected:
   Float_t mPrimaryVertexX;
   Float_t mPrimaryVertexY;
   Float_t mPrimaryVertexZ;
+  Int_t   mGlobalTracks;
+  Int_t   mPrimaryTracks;
 
-  ClassDef(StStrangeEvMuDst, 1)
+  ClassDef(StStrangeEvMuDst,3)
 };
 
-inline         StStrangeEvMuDst::StStrangeEvMuDst(StPrimaryVertex* pv)
-               { Fill(pv); }
+inline         StStrangeEvMuDst::StStrangeEvMuDst(StEvent& event)
+               { Fill(event); }
 inline Int_t   StStrangeEvMuDst::run() const
                { return mRun; }
 inline Int_t   StStrangeEvMuDst::event() const
@@ -71,5 +78,9 @@ inline Float_t StStrangeEvMuDst::primaryVertexY() const
                { return mPrimaryVertexY; }
 inline Float_t StStrangeEvMuDst::primaryVertexZ() const 
                { return mPrimaryVertexZ; }
+inline Int_t   StStrangeEvMuDst::globalTracks() const
+               { return mGlobalTracks; }
+inline Int_t   StStrangeEvMuDst::primaryTracks() const
+               { return mPrimaryTracks; }
 
 #endif

@@ -314,6 +314,8 @@ mOmegaMinus (only loaded for Xi's)
 <pre>
 Event.run()
 Event.event()
+Event.globalTracks()
+Event.primaryTracks()
 Event.primaryVertexX()
 Event.primaryVertexY()
 Event.primaryVertexZ()
@@ -400,8 +402,10 @@ V0.chi2V0()
 V0.clV0()
 V0.chi2Pos()
 V0.clPos()
+V0.dedxPos()
 V0.chi2Neg()
 V0.clNeg()
+V0.dedxNeg()
 </pre>
 <p>
 
@@ -467,6 +471,7 @@ Xi.chi2Xi()
 Xi.clXi()
 Xi.chi2Bachelor()
 Xi.clBachelor()
+Xi.dedxBachelor()
 </pre>
 <p>
 
@@ -479,10 +484,8 @@ Xi.clBachelor()
 <li>V0Mc Formulas (only loaded if V0Mc branch present in micro-DST)
 <pre>
 V0Mc.decayMode()
-V0Mc.positiveTpcHits()
 V0Mc.positiveCommonTpcHits()
 V0Mc.positiveSimTpcHits()
-V0Mc.negativeTpcHits()
 V0Mc.negativeCommonTpcHits()
 V0Mc.negativeSimTpcHits()
 V0Mc.geantIdParent()
@@ -506,7 +509,6 @@ V0Mc.positionZ()
 <li>XiMc Formulas (only loaded if XiMc branch present in micro-DST)
 <pre>
 XiMc.decayMode()
-XiMc.tpcHits()
 XiMc.commonTpcHits()
 XiMc.simTpcHits()
 XiMc.geantIdParent()

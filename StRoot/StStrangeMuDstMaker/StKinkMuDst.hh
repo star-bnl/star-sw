@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.hh,v 2.1 2000/06/09 22:17:10 genevb Exp $
+ * $Id: StKinkMuDst.hh,v 3.0 2000/07/14 12:56:48 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.hh,v $
+ * Revision 3.0  2000/07/14 12:56:48  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
  * Revision 2.1  2000/06/09 22:17:10  genevb
  * Allow MC data to be copied between DSTs, other small improvements
  *
@@ -64,6 +67,8 @@ public:
   Float_t  clParent()     const;       // Confidence level of parent
   Float_t  chi2Daughter() const;       // Chi square of daughter
   Float_t  clDaughter()   const;       // Confidence level of daughter
+  Float_t  dedxParent() const;         // dE/dX of parent
+  Float_t  dedxDaughter() const;       // dE/dX of daughter
 
   UShort_t mParentGeantId;
   UShort_t mDaughterGeantId;
@@ -95,6 +100,8 @@ public:
   Float_t  mClParent;
   Float_t  mChi2Daughter;
   Float_t  mClDaughter;
+  Float_t  mDedxParent;
+  Float_t  mDedxDaughter;
 
 private:
   void     findMinDeltaEnergy(StKinkVertex*);
@@ -104,7 +111,7 @@ private:
   void     findTransverseMassPion();
   void     findRapidityKaon();
   void     findRapidityPion();
-  ClassDef(StKinkMuDst,2)
+  ClassDef(StKinkMuDst,3)
 };
 
 inline UShort_t StKinkMuDst::geantIdParent() const
@@ -153,4 +160,6 @@ inline Float_t StKinkMuDst::chi2Parent()   const { return mChi2Parent; }
 inline Float_t StKinkMuDst::clParent()     const { return mClParent; }
 inline Float_t StKinkMuDst::chi2Daughter() const { return mChi2Daughter; }
 inline Float_t StKinkMuDst::clDaughter()   const { return mClDaughter; }
+inline Float_t StKinkMuDst::dedxParent()   const { return mDedxParent; }
+inline Float_t StKinkMuDst::dedxDaughter() const { return mDedxDaughter; }
 #endif

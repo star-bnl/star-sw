@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMuDst.hh,v 2.0 2000/06/02 22:11:55 genevb Exp $
+ * $Id: StXiMuDst.hh,v 3.0 2000/07/14 12:56:51 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 30-Mar-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiMuDst.hh,v $
+ * Revision 3.0  2000/07/14 12:56:51  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
  * Revision 2.0  2000/06/02 22:11:55  genevb
  * New version of Strangeness micro DST package
  *
@@ -82,6 +85,7 @@ public:
   Float_t clBachelor()   const;        // Confidence level of bachelor
   Long_t  detectorIdXi();              // Detector ID for Xi vertex
   virtual Long_t detectorIdPars();     // Detector ID for pars used in Xi finder
+  Float_t dedxBachelor() const;        // dE/dX of bachelor
 
 protected:
   Int_t   mCharge;                     // Written out
@@ -112,7 +116,10 @@ protected:
   Float_t MomBachelorAlongXi();
   Float_t MomV0AlongXi();
 
-  ClassDef(StXiMuDst, 2)
+  Float_t mDedxBachelor;
+;
+
+  ClassDef(StXiMuDst,3)
 };
 
 inline StXiMuDst::StXiMuDst(StXiVertex* x1,StV0Vertex* v1,StStrangeEvMuDst* e1):
@@ -143,4 +150,5 @@ inline Float_t StXiMuDst::chi2Xi() const { return mChi2Xi; }
 inline Float_t StXiMuDst::clXi()   const { return mClXi; }
 inline Float_t StXiMuDst::chi2Bachelor() const { return mChi2Bachelor; }
 inline Float_t StXiMuDst::clBachelor()   const { return mClBachelor; }
+inline Float_t StXiMuDst::dedxBachelor() const { return mDedxBachelor; }
 #endif

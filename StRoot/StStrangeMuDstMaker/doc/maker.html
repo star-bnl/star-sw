@@ -269,11 +269,14 @@ Selections are made via the <tt>Select*()</tt> member functions:
 <dt>Vertex Selection Paradigm:
 <dd>In this model, only certain vertices from within an event are selected
 to go on the sub-micro-DST. The vertices are selected with the following
-three member functions:
+six member functions:
 <ul>
 <li><tt>SelectV0(j)</tt>
 <li><tt>SelectXi(j)</tt>
 <li><tt>SelectKink(j)</tt>
+<li><tt>UnselectV0(j)</tt>
+<li><tt>UnselectXi(j)</tt>
+<li><tt>UnselectKink(j)</tt>
 </ul>
 In these calls, <tt>j</tt> specifies the index of the vertex within that
 event to be selected. For example, one might like to select only those
@@ -299,6 +302,17 @@ select all V0 candidates in the event, but would select no other vertex
 types for copying.
 <p>
 
+Similarly, one can unselect a specific vertex that one has already selected
+using the <tt>Unselect*()</tt> member functions. This is particularly useful
+if there are only a few vertices one would not wish to select, in which case
+one would use <tt>Select*(-1)</tt> followed by a few specific uses of
+<tt>Unselect*(j)</tt>. Again, a negative input unselects the entire event.
+<p>
+
+One note of caution: <tt>Select*(j)</tt> does not check to see if a vertex
+has already been selected, so selecting one twice results in two copies.
+<p>
+
 <dt>Event Selection Paradigm:
 <dd>If one wishes to select events as a whole for a sub-micro-DST, this can
 be done with the <tt>SelectEvent()</tt> member function. This essentially
@@ -306,8 +320,7 @@ copies the entire event from the old micro-DST to the new sub-micro-DST,
 but is only true to the extent that what micro-DST components are turned
 on for the new maker (via the <tt>Do*()</tt> member functions, see
 <a href="#content">Specifying Content for Micro-DSTs</a>). Here is an
-example where the user takes all events where the user takes all events
-which have more than 10 Kinks:
+example where the user takes all events which have more than 10 Kinks:
 <pre>
   // Loop over events
   for( Int_t i=0; i &lt; Nevents; i++ ) {

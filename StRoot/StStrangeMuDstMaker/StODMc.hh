@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StODMc.hh,v 2.0 2000/06/05 05:19:40 genevb Exp $
+ * $Id: StODMc.hh,v 3.0 2000/07/14 12:56:48 genevb Exp $
  * $Log: StODMc.hh,v $
+ * Revision 3.0  2000/07/14 12:56:48  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
  * Revision 2.0  2000/06/05 05:19:40  genevb
  * New version of Strangeness micro DST package
  *
@@ -37,15 +40,13 @@ public:
   Float_t  positionY() const;
   Float_t  positionZ() const;
 
-  void SetHitInfo(Int_t hits, Int_t commonHits);
+  void SetHitInfo(Int_t commonHits);
   
-  Int_t tpcHits() const;
   Int_t simTpcHits() const;
   Int_t commonTpcHits() const;
   
-  Int_t mTpcHits;
   Int_t mSimTpcHits;
-  Int_t  mCommonTpcHits;
+  Int_t mCommonTpcHits;
   
   Int_t    mDecayMode;
   Int_t    mParentGeantId;
@@ -61,15 +62,13 @@ public:
   Float_t  mPositionZ;
 
 private:
-  ClassDef(StODMc,1)
+  ClassDef(StODMc,3)
 };
 
 inline Int_t StODMc::decayMode() const
              { return mDecayMode; }
-inline void StODMc::SetHitInfo(Int_t hits, Int_t commonHits) 
-             { mTpcHits = hits; mCommonTpcHits = commonHits; }
-inline Int_t StODMc::tpcHits() const
-             { return mTpcHits; }
+inline void StODMc::SetHitInfo(Int_t commonHits) 
+             { mCommonTpcHits = commonHits; }
 inline Int_t StODMc::commonTpcHits() const
              { return mCommonTpcHits; }
 inline Int_t StODMc::simTpcHits() const

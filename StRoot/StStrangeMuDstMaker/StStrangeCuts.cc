@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeCuts.cc,v 2.0 2000/06/05 05:19:42 genevb Exp $
+ * $Id: StStrangeCuts.cc,v 3.0 2000/07/14 12:56:49 genevb Exp $
  *
  * Author: Gene Van Buren, UCLA, 26-May-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeCuts.cc,v $
+ * Revision 3.0  2000/07/14 12:56:49  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
  * Revision 2.0  2000/06/05 05:19:42  genevb
  * New version of Strangeness micro DST package
  *
