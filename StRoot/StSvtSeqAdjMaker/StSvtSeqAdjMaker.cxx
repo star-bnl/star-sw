@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.48 2003/07/31 19:01:14 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.49 2003/09/18 18:16:44 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.49  2003/09/18 18:16:44  caines
+ * Initialise stuff for new compiler
+ *
  * Revision 1.48  2003/07/31 19:01:14  caines
  * Make changes so the slow simulator can run
  *
@@ -173,7 +176,6 @@
 #include "St_DataSetIter.h"
 #include "TObjectSet.h"
 
-
 int* anolist; 
 TFile *hfile;
 unsigned long Evt_counts=0;
@@ -189,6 +191,7 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   mHybridRawData = NULL;
   mHybridAdjData = NULL;
   mSvtPedSub = NULL;
+  mSvtPedColl = NULL;
   anolist = NULL;
   mInvProd = NULL;
   mProbValue = NULL;
@@ -960,7 +963,6 @@ int StSvtSeqAdjMaker::FindBlackAnodes(){
   //value or via first two black anodes.Have many options andoes 1&240,
   //1&2 or 2&239. IN some case one of the black anodes is bad so only 
   //subtract one.
-
   int status, length;
   int i, j, startTimeBin;
   int nSequence = 0;
