@@ -84,22 +84,25 @@ tdm/table/cell/putvalue 'egr_egrpar[0].usetpc' 1
 tdm/table/cell/putvalue 'egr_egrpar[0].usesvt' 1
 tdm/table/cell/putvalue 'egr_egrpar[0].usevert' 0
 tdm/table/cell/putvalue 'egr_egrpar[0].useglobal' 2
+tdm/table/cell/putvalue 'egr_egrpar[0].useemc'    0
+tdm/table/cell/putvalue 'egr_egrpar[0].usetof'    0
 
 
 
 cd [data]/global/vertices
 tdm/newtable evr_privert evr_privert 1
-tdm/table/rowcount [data]/global/vertices/evr_privert 1
-tdm/table/cell/putvalue 'evr_privert[0].x' 0.
-tdm/table/cell/putvalue 'evr_privert[0].y' 0.
-tdm/table/cell/putvalue 'evr_privert[0].z' 0.
-tdm/table/cell/putvalue 'evr_privert[0].id' 0        
-tdm/table/cell/putvalue 'evr_privert[0].match' 0    
-tdm/table/cell/putvalue 'evr_privert[0].ndegf' 0    
-tdm/table/cell/putvalue 'evr_privert[0].ntch' 0     
-tdm/table/cell/putvalue 'evr_privert[0].chisq' 0.    
-tdm/table/cell/putvalue 'evr_privert[0].covar' 0. 0. 0. 0. 0. 0.
-tdm/table/cell/putvalue 'evr_privert[0].ptmin' 0.
+*tdm/table/rowcount [data]/global/vertices/evr_privert 1
+*tdm/table/cell/putvalue 'evr_privert[0].x' 0.
+*tdm/table/cell/putvalue 'evr_privert[0].y' 0.
+*tdm/table/cell/putvalue 'evr_privert[0].z' 0.
+*tdm/table/cell/putvalue 'evr_privert[0].id' 0        
+*tdm/table/cell/putvalue 'evr_privert[0].match' 0    
+*tdm/table/cell/putvalue 'evr_privert[0].ndegf' 0    
+*tdm/table/cell/putvalue 'evr_privert[0].ntch' 0     
+*tdm/table/cell/putvalue 'evr_privert[0].chisq' 0.    
+*tdm/table/cell/putvalue 'evr_privert[0].covar' 0. 0. 0. 0. 0. 0.
+*tdm/table/cell/putvalue 'evr_privert[0].ptmin' 0.
+*tdm/table/cell/putvalue 'evr_privert[0].use'  'TPC'
 
 RETURN
 
