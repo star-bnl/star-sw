@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.159 2000/12/14 16:48:46 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.160 2000/12/29 14:38:40 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -660,9 +660,6 @@ void StBFChain::SetFlags(const Char_t *Chain)
   if (!GetOption("FieldOn") && !GetOption("FieldOff") && 
       !GetOption("HalfField") && !GetOption("ReverseField") &&    
       !GetOption("fzin") &&  !GetOption("gstar")) SetOption("magF"); 
-  if (!GetOption("global") && 
-      (GetOption("Match") || GetOption("Primary") || GetOption("V0") ||
-       GetOption("Xi")    || GetOption("Kink"))) SetOption("global");
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval"); 
   if (!GetOption("event")) SetOption("-analysis");
   if (GetOption("NoDb")) {SetOption("-db"); SetOption("-calib");}
