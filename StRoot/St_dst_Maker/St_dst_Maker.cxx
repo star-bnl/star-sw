@@ -1,5 +1,9 @@
-// $Id: St_dst_Maker.cxx,v 1.24 1999/09/08 00:12:21 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.25 1999/09/13 15:05:29 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.25  1999/09/13 15:05:29  caines
+// Added creation of garb(tphit) and garb(tptrack) so its possible to
+// run with TPC turned off
+//
 // Revision 1.24  1999/09/08 00:12:21  fisyak
 // Add check that no_of_points > 0
 //
@@ -73,7 +77,7 @@
 #include "St_dst_summary_param_Table.h"
 #include "St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.24 1999/09/08 00:12:21 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.25 1999/09/13 15:05:29 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -264,6 +268,10 @@ Int_t  St_dst_Maker::Filler(){
     tptrack   = (St_tpt_track  *) tpc_tracks("tptrack");
     tpc_dedx   = (St_dst_dedx  *) tpc_tracks("tpc_dedx");
   }
+  // Case tpc not there
+  if (!tptrack) {tptrack = new St_tpt_track("tptrack",1); AddGarb(tptrack);}
+  if (!tpc_dedx) {tpc_dedx = new St_dst_dedx("tpc_dedx",1); AddGarb(tpc_dedx);}
+
 
  // 			Case running est tpc -> Si space point tracking
   St_DataSet     *svtracks = GetInputDS("svt_tracks");
