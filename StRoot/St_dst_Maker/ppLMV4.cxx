@@ -1,5 +1,9 @@
-// $Id: ppLMV4.cxx,v 1.11 2003/09/02 17:59:26 perev Exp $
+// $Id: ppLMV4.cxx,v 1.12 2004/12/16 00:29:56 jeromel Exp $
 // $Log: ppLMV4.cxx,v $
+// Revision 1.12  2004/12/16 00:29:56  jeromel
+// Modifications (shall we say hack ?) to implement the ppLMV-5 cuts to
+// ppLMV4.
+//
 // Revision 1.11  2003/09/02 17:59:26  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -55,7 +59,7 @@ using namespace units;
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.11 2003/09/02 17:59:26 perev Exp $";
+//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.12 2004/12/16 00:29:56 jeromel Exp $";
 
 struct Jcyl {float eta,phi;};
 
@@ -64,10 +68,13 @@ struct Jcyl {float eta,phi;};
 //_____________________________________________________________________________
 long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vertex *vertex, Int_t mdate )
 {
+  uint  mMinMatchTr=ppLMVparI[3];
+  if(beam4ppLMV.isOn)mMinMatchTr++;
+
   //int bXing=maTrk.getTrigBXing();
   //int bXing=maTrk.getPileupBXing();
   int bXing=trigBXing;// temp
-  printf(" THIS IS ppLMV4 -START, use only tracks matched to CTB in bXing=%d\n",bXing+firstBXing);
+  printf(" THIS IS ppLMV -START, use only tracks matched to CTB in bXing=%d\n",bXing+firstBXing);
 
   if(bXing<0) 
     {printf("No tracks matched to selected bXing=%d\n",bXing); return kStOk;}
@@ -149,7 +156,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
 
     // Check that there at least are 2 tracks
     if( (*tracks).size() <= 1 ){
-      cout<<"ppLMV4: Fewer than 2 track remains. No vertex found."<<endl;
+      cout<<"ppLMV: Fewer than 2 track remains. No vertex found."<<endl;
       return kStWarn;
     }
   
@@ -252,7 +259,11 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
   double  chi2pdof = chi2/((*tracks).size()-1);
 
 
-  cout<<"ppLMV4: Primary Vertex found! Position: "<<XVertex<<", used tracks="<<(*tracks).size()<<endl;
+  cout<<"ppLMV: Primary Vertex found! Position: "<<XVertex<<", used tracks="<<(*tracks).size()<<endl;
+  if ((*tracks).size()< mMinMatchTr){
+    gMessMgr->Warning() << "ppLMV ended,  only "<<(*tracks).size()<< "tracks - too few, abort this vertex, quit ppLMV" << endm;
+     return kStWarn;
+  }
 
 
   Int_t nrows = vertex->GetNRows();
@@ -352,7 +363,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
   }  // end of histos
 
 
-  // printf("end of ppLMV4\n");
+  // printf("end of ppLMV\n");
   return kStOk;
 }
 
@@ -361,7 +372,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
 //_____________________________________________________________________________
 
 void StVertexMaker::ppLMVuse(int *parI, float *parF) {
-const  char *nameI[]={"CtbThres/ch","MinTrkPonits","i2","i3","i4","i5","i6","i7","i8","i9"};
+const  char *nameI[]={"CtbThres/ch","MinTrkPonits","beamEequivNtr","MinMatchTr","i4","i5","i6","i7","i8","i9"};
 const  char *nameF[]={"CtbThres/MeV","MaxTrkDcaRxy","MinTrkPt/GeV","CtbEtaErr","CtbPhiErr/deg","MaxTrkDcaZ","f6","f7","f8","f9"};
   printf("\nppLMV use new set of params\n    INT:  "); 
   int i;
