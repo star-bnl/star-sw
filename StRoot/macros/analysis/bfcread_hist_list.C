@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list.C,v 1.8 1999/11/19 20:13:21 kathy Exp $ 
+// $Id: bfcread_hist_list.C,v 1.9 1999/11/23 20:40:48 genevb Exp $ 
 // $Log: bfcread_hist_list.C,v $
+// Revision 1.9  1999/11/23 20:40:48  genevb
+// Re-arranged load order
+//
 // Revision 1.8  1999/11/19 20:13:21  kathy
 // cleaned up macros to remove uneccessary lines; also added info about new tables to QA* macros
 //
@@ -64,8 +67,8 @@ void bfcread_hist_list(
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
     gSystem->Load("StIOMaker");
-    gSystem->Load("St_QA_Maker");
     gSystem->Load("StarClassLibrary");
+    gSystem->Load("St_QA_Maker");
 
 // setup chain with IOMaker - can read in .dst.root, .dst.xdf files
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
