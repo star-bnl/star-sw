@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.2 2000/06/23 15:25:30 kathy Exp $
+// $Id: bfcread_hist_files_add.C,v 2.3 2000/06/23 15:52:34 kathy Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.3  2000/06/23 15:52:34  kathy
+// cleanup - only need to use IOMk, not IOMk1,2 etc
+//
 // Revision 2.2  2000/06/23 15:25:30  kathy
 // now use the new methods CopyHists & AddHists in StHistUtil
 //
@@ -19,7 +22,6 @@
 //  - adds contents of all histograms in subsequent files
 //          with the same NAME into the newHist
 //
-//  **** the file pointers IOMk1,IOMk2 are currently hardwired in code!
 //  **** currently only works with 2 input files!
 //  **** needs to be changed to work with input file list!
 //  **** needs to have new histograms written out to new file
@@ -42,10 +44,10 @@ class StChain;
 StChain *chain;
 
 class StIOMaker;
-StIOMaker *IOMk1=0;
-StIOMaker *IOMk2=0;
+StIOMaker *IOMk=0;
 
 class StHistUtil;
+
 //------------------------------------------------------------------------
 
 void bfcread_hist_files_add(
@@ -93,18 +95,19 @@ void bfcread_hist_files_add(
 // clone(copy) histograms from first file  -----------------------------
  if (ifl==1) {
 
-// 
-  StIOMaker *IOMk1 = new StIOMaker("IO","r",MainFile1,TopDirTree);
-  IOMk1->SetIOMode("r");
-  IOMk1->SetBranch("*",0,"0");                 //deactivate all branches
-  IOMk1->SetBranch("histBranch",0,"r"); //activate hist Branch
+// read in file 1:
+  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile1,TopDirTree);
+  IOMk->SetIOMode("r");
+  IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+  IOMk->SetBranch("histBranch",0,"r"); //activate hist Branch
 
 // --- each file contains only histograms (1 "event" == 1 Make call)
-  IOMk1->Init();
-  IOMk1->Clear();
-  IOMk1->Make();
+  IOMk->Init();
+  IOMk->Clear();
+  IOMk->Make();
+// - end of read
 
-  HU->SetPntrToMaker((StMaker *)IOMk1);
+  HU->SetPntrToMaker((StMaker *)IOMk);
 
 // get the TList pointer to the histograms:
   TList  *dirList = 0;
@@ -123,17 +126,17 @@ void bfcread_hist_files_add(
 
   if (ifl==2) {
 // 
-    StIOMaker *IOMk2 = new StIOMaker("IO","r",MainFile2,TopDirTree);
-    IOMk2->SetIOMode("r");
-    IOMk2->SetBranch("*",0,"0");                 //deactivate all branches
-    IOMk2->SetBranch("histBranch",0,"r"); //activate hist Branch
+    StIOMaker *IOMk = new StIOMaker("IO","r",MainFile2,TopDirTree);
+    IOMk->SetIOMode("r");
+    IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+    IOMk->SetBranch("histBranch",0,"r"); //activate hist Branch
 
 // --- each file contains only histograms (1 "event" == 1 Make call)
-    IOMk2->Init();
-    IOMk2->Clear();
-    IOMk2->Make();
+    IOMk->Init();
+    IOMk->Clear();
+    IOMk->Make();
 
-    HU->SetPntrToMaker((StMaker *)IOMk2);
+    HU->SetPntrToMaker((StMaker *)IOMk);
 
   } // if ifl=2
 
