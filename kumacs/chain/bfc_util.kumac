@@ -175,6 +175,7 @@
 * 
 * 11/10/98 K. Turner - fixes to ems,emc, jet chains for Akio
 * 11/12/98 K. Turner - fixes to dstin for rerunning desum & drsum
+* 11/18/98 K. Turner - add "rhij" chain to run hijing
 * 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -243,11 +244,13 @@ macro bfc_init _
    vec/create v[mod]
    vec/create t[mod]
    CASE [mod] in
+     (rhij) exec create_tables_gen#hijing
+            exec init_hij#init
     (oldin) user/input dummy [input_file]
     (evgin) newfile hij_in [input_file] r; 
             user/input u [evgen]/particle.staf
     (gtxin) user/input dummy [input_file]
-     (fzin)  
+    (fzin)  
             gfile p [input_file]      | PN: p is a generic format
             tables ' ' [geant_Run]
             detp g2tm dete(cdet=SFSD).onoff=0 gttc.rdir=0
@@ -534,7 +537,8 @@ return
   do i = 1, [nw]
    mod = $word([test],[i],1)
    message ' !!! bfc_util#process ==> chain process for ' [mod] 
-   CASE [mod] in 
+   CASE [mod] in
+     (rhij) exec run_hij#run
     (oldin) nextl 1
     (evgin) cd [event]; 
             getev hij_in

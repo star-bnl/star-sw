@@ -64,12 +64,15 @@
 *
 *
 * -- CHAIN VARIABLES --
+* rhij       - run hijing - uses hijev.inp in top directory as input !!!
+* mdin       - read in mini-daq data
 * evgin      - read in event generator file for running gstar
 * g2tin      - read G2T xdf file (post gstar)
 * evin       - read in simulated-data file (post gstar + more) 
 * fzin       - read in fz file (post gstar but haven't run g2t)
 * gtxin      - read in txt file for running gstar
 * dstin      - read in dst file (only dst directories on file)
+* obin       - read from objectivity database
 * calin      - find event time and read in correct calibration with cal2mem
 * rgst       - run gstar from evgin file
 * rg2t       - run g2t from rungst(gstar) stuff
@@ -102,6 +105,7 @@
 * ev0        - Strange particle reconstruction (v0's)
 * ev02       - V0 reco w/separate params for SVT&TPC trks; should replace ev0 
 * ev0_e      - v0 evaluation
+* ev0d       - creates dst_v0_vertex table - call AFTER ev02! and b4 smdst!
 * ctf   - runs cts,ctu
 * mwc   - runs mws,mwu
 * trg   - runs l3cl, ftf_tpc - not implemented yet
@@ -126,6 +130,7 @@
 * fzout - write out fz file from gstar (only works if you run gstar!)
 * evout - write event & run directories into xdf file
 * dout  - write run/dst and event/data/global/dst directories into xdf file
+* obout - write out to objectivity database
 *
 **********************************************************************
 *
