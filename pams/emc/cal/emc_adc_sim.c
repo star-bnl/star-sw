@@ -44,6 +44,7 @@ long type_of_call emc_adc_sim_(
     long iseed = 99999;
     short nmod, neta, nsub, nse;
 
+    if(emc_hits_h->nok==0) retyrn STAFCV_OK;
     nok_c=ems_control_h->nok-1;
     nok_cc=ems_cal_control_h->nok-1;
     if(ems_cal_control[nok_cc].iseed != 0) iseed=ems_cal_control[nok_cc].iseed;
