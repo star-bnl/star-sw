@@ -1,5 +1,8 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.5 2001/05/03 15:02:57 jcs Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.6 2001/05/08 22:01:31 jcs Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.6  2001/05/08 22:01:31  jcs
+// set dst_track.iflag x=8 for FTPC primary tracks
+//
 // Revision 1.5  2001/05/03 15:02:57  jcs
 // change number of refitter arguments
 //
@@ -196,7 +199,7 @@ Int_t StFtpcPrimaryMaker::Make(){
     ptrk->map[1]    = gtrk[iglobtrk].map[1];
 
     ptrk->id        =  trk->id_globtrk;
-    ptrk->iflag     =  700 + trk->flag;
+    ptrk->iflag     =  800 + trk->flag;
     ptrk->det_id    = gtrk[iglobtrk].det_id;
     ptrk->method    = gtrk[iglobtrk].method;
     ptrk->pid       = gtrk[iglobtrk].pid;
