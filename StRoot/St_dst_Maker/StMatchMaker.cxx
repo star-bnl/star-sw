@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + egr )                                     //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.43 2003/09/02 17:59:26 perev Exp $
+// $Id: StMatchMaker.cxx,v 1.44 2004/05/16 20:56:20 fisyak Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.44  2004/05/16 20:56:20  fisyak
+// Fix global and primary tracks fits for Field OFF
+//
 // Revision 1.43  2003/09/02 17:59:26  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -444,18 +447,17 @@ Int_t StMatchMaker::Make(){
        gMessMgr->Warning() << "Problem on return from EGR_FITTER" << endm;}
       gMessMgr->Debug() << " finished calling egr_fitter" << endm;
    }
-   
 
     St_stk_track* dummy_track=0;
     St_sgr_groups* dummy_groups=0;
 
     //Change params so just fit using TPC hits even if SVT there
     usetpc = egr_egrpar->usetpc;
-    egr_egrpar->usetpc = 4;
+    if (egr_egrpar->usetpc != 1) egr_egrpar->usetpc = 4;
     usesvt = egr_egrpar->usesvt;
     egr_egrpar->usesvt = 0;
     useglobal = egr_egrpar->useglobal;
-    egr_egrpar->useglobal  = 4;
+    if (egr_egrpar->useglobal != 0) egr_egrpar->useglobal  = 4;
     // Make sure it doesnt use the SVT information by not sending it in
     // need to keep the useglobal flag on though so that the indexing
     // works and id=1 for TPC only track is the same track as for TPC+SVT

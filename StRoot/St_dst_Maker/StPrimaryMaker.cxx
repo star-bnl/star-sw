@@ -127,7 +127,7 @@ Int_t StPrimaryMaker::Make(){
   St_sgr_groups     *tpc_groups = (St_sgr_groups *) matchI("tpc_groups");
   St_sgr_groups     *tpc_groupsEst = (St_sgr_groups *) matchI("tpc_groupsEst");
   if (! tpc_groups)    {tpc_groups = new St_sgr_groups("tpc_groups",1); AddGarb(tpc_groups);} 
-if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); AddGarb(tpc_groupsEst);} 
+  if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); AddGarb(tpc_groupsEst);} 
   
   St_DataSet     *svtracks = GetInputDS("est");
   St_DataSet     *svthits  = GetInputDS("svt_hits");
@@ -231,19 +231,35 @@ if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); A
 
       iRes = egr_impactcl (vertex,m_egr2_egrpar,globtrk);
       //     ============================================
-
-      if(Debug())
-        gMessMgr->Debug("Calling egr_primfit");
-      iRes = egr_primfit(vertex, m_egr2_egrpar, globtrk, primtrk);
-      //     ====================================================
+     
+      if (TMath::Abs(bval[2]) > 1.e-2) {
+	if(Debug())
+	  gMessMgr->Debug("Calling egr_primfit");
+	iRes = egr_primfit(vertex, m_egr2_egrpar, globtrk, primtrk);
+	//     ====================================================
       
-      if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-      if (iRes !=kSTAFCV_OK){
-        gMessMgr->Warning("Problem on return from egr_primfit");}
-       
-      if(Debug())
-        gMessMgr->Debug(" finished calling egr_primfit");
-
+	if (iRes !=kSTAFCV_OK) iMake = kStWarn;
+	if (iRes !=kSTAFCV_OK){
+	  gMessMgr->Warning("Problem on return from egr_primfit");}
+	
+	if(Debug())
+	  gMessMgr->Debug(" finished calling egr_primfit");
+      }
+      else {
+	if(Debug())
+	  gMessMgr->Debug() << "Calling EGR_fitter - Second time" << endm;
+	iRes = egr_fitter (tphit,    vertex,       tptrack, tpc_groups,
+			   scs_spt, m_egr2_egrpar, stk_track, svt_groups,
+			   evt_match, primtrk);
+	//          ======================================================
+	if (iRes !=kSTAFCV_OK){
+	  gMessMgr->Warning() << "Problem on return from EGR_FITTER" << endm;}
+	
+	if(Debug())
+	  gMessMgr->Debug() <<" finished calling egr_fitter - second time" << endm;
+	
+      }
+      
 
      // Fill bit map in prim trk
       
@@ -320,7 +336,6 @@ if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); A
 	
 	iRes = egr_impactcl (vertex,m_egr2_egrpar,EstGlobal);
 	//     ============================================
-	
 	if(Debug())
 	  gMessMgr->Debug("Calling egr_primfit");
 	iRes = egr_primfit(vertex, m_egr2_egrpar, EstGlobal, EstPrimary);
@@ -332,8 +347,6 @@ if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); A
 	
 	if(Debug())
 	  gMessMgr->Debug(" finished calling egr_primfit");
-	
-	
 	// Fill bit map in EstPrimary
 	
 	
@@ -525,8 +538,11 @@ if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); A
  return iMake;
   }
 //_____________________________________________________________________________
-// $Id: StPrimaryMaker.cxx,v 1.80 2003/09/02 17:59:26 perev Exp $
+// $Id: StPrimaryMaker.cxx,v 1.81 2004/05/16 20:56:20 fisyak Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.81  2004/05/16 20:56:20  fisyak
+// Fix global and primary tracks fits for Field OFF
+//
 // Revision 1.80  2003/09/02 17:59:26  perev
 // gcc 3.2 updates + WarnOff
 //
