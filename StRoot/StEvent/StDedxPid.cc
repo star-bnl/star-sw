@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPid.cc,v 1.2 1999/05/20 16:17:36 ogilvie Exp $
+ * $Id: StDedxPid.cc,v 1.3 1999/05/20 21:42:53 ogilvie Exp $
  *
  * Author: Craig Ogilvie and Thomas Ullrich, April 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPid.cc,v $
+ * Revision 1.3  1999/05/20 21:42:53  ogilvie
+ * *** empty log message ***
+ *
  * Revision 1.2  1999/05/20 16:17:36  ogilvie
  * added static dedx calibration data members, set, get functions
  *
@@ -21,6 +24,6 @@
 #include "StGlobalTrack.hh"
 
 
-StDedxPid::StDedxPid(const StGlobalTrack &t) : mTrack(t) { /* noop */ }
-StDedxPid::StDedxPid() { /* noop */ }
+StDedxPid::StDedxPid(const StGlobalTrack& t) : mTrack(t) { /* noop */ }
+
 StDedxPid::~StDedxPid() { /* noop */ }

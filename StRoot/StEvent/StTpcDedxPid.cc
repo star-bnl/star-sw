@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.cc,v 1.2 1999/05/20 16:17:37 ogilvie Exp $
+ * $Id: StTpcDedxPid.cc,v 1.3 1999/05/20 21:42:55 ogilvie Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.cc,v $
+ * Revision 1.3  1999/05/20 21:42:55  ogilvie
+ * *** empty log message ***
+ *
  * Revision 1.2  1999/05/20 16:17:37  ogilvie
  * added static dedx calibration data members, set, get functions
  *
@@ -33,12 +36,6 @@ double StTpcDedxPid::mTpcDedxRise = 776.626 ;
 StTpcDedxPid::StTpcDedxPid(const StGlobalTrack& t) : StDedxPid(t) { 
  }
 
-StTpcDedxPid::StTpcDedxPid() : StDedxPid() { 
-  cout << "in constructor, offset = " << mTpcDedxOffset << endl; 
-   mTpcDedxGain = 0.174325e-06;
-   mTpcDedxOffset = -2.71889 ;
-   mTpcDedxRise = 776.626 ;
-}
 StTpcDedxPid::~StTpcDedxPid() { /* noop */ }
 
 int StTpcDedxPid::detectorInfoAvailable() const
