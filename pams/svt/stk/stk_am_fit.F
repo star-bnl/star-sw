@@ -190,7 +190,8 @@ c     wkw: (I changed the order of the sec/nspt tests)
 
          if (track(itrack).nspt .gt. 2) then ! enough hits
 
-            if (stkpar(1).method .le. 1) then ! fit as primary (wkw)
+            if (track(itrack).nspt .gt. 3 .or.
+     +          stkpar(1).method .le. 1 ) then         ! fit circle properly
 
 
 c     Unknown and Primary Tracks
@@ -205,7 +206,10 @@ c     using conformal mapping technique
 c     vertex first - the vertex will be assumed to be exactly on the circle...
 c     the vertex is therefore not in the fitted points.
 
-               ispt       = 1
+               ispt       = 0
+
+               if( stkpar(1).method .le. 1) then ! Add in prim vtx as point
+               ispt = ispt+1
                kspt(ispt)  = -1  ! -1 indicates this is a vertex
                x(ispt)    = vtx(1).x(1)
                y(ispt)    = vtx(1).x(2)
@@ -233,10 +237,12 @@ c     &              x(ispt),y(ispt),z(ispt),sq(ispt),
 c     &              u(ispt),v(ispt),
 c     &              dx(ispt),dy(ispt),dz(ispt),du(ispt),dv(ispt)              
 
+
+               endif ! End of if want to use primary vtx in fit
 c     space points
                
                nspt = track(itrack).nspt
-c               if (nspt.gt.6) nspt=6 ! wkw
+               if (nspt.gt.max_spt) nspt=max_spt ! wkw
 
 c               write(6,*) ' nspt=',nspt
 
@@ -256,6 +262,7 @@ c               write(6,*) ' nspt=',nspt
                   call StError(mess)
                endif
 
+               
                do i = 1, nrows
 
                   ispt        = ispt + 1
@@ -319,11 +326,11 @@ c     &              x(ispt),y(ispt),z(ispt),sq(ispt),
 c     &              u(ispt),v(ispt),
 c     &              dx(ispt),dy(ispt),dz(ispt),du(ispt),dv(ispt)              
                   
-                  if ( nspt .eq. ispt) goto 11
+c                  if ( nspt .eq. ispt) goto 11
                end do
  11            continue
-               nspt = nspt + 1
-            
+
+                  
 c     2001       format('i,x,y,z,u,v,s, nspt=',i10)
 c     2002       format(i6,6f16.6)
 c     write(6,2001) nspt
@@ -334,10 +341,17 @@ c     end do
 c     fit current track candidate including vertex
 c     decouple the z-motion from the circular motion
                
-c     fit circular motion - exclude vertex
-               
-               call linfitr(u(2),v(2),du(2),dv(2),nspt-1,b,db,
-     &              cchi2,cir_res)
+c     fit circular motion - exclude vertex if fitting using prim vtx
+               if( stkpar(1).method .le. 1) then 
+                  nspt = nspt + 1
+                  
+                  call linfitr(u(2),v(2),du(2),dv(2),nspt-1,b,db,
+     &                 cchi2,cir_res)
+                  
+               else
+                  call linfitr(u(1),v(1),du(1),dv(1),nspt,b,db,
+     &                 cchi2,cir_res)
+               endif
                
  1000          format(1x,a,5f14.4)
                
@@ -389,19 +403,25 @@ c     is moving away from the beam axis - not coming back
                
 c     vector direction
 
-c              take second point (first svt point) as reference
-               phi  = atan2d(y(2)-yh,x(2)-xh)
+c              take first svt point as reference
+               if( stkpar(1).method .le. 1) then 
+                  phi  = atan2d(y(2)-yh,x(2)-xh)
+               else
+                  phi  = atan2d(y(1)-yh,x(1)-xh)
+               endif
                dtanphi = (dyh*v1x**2 + dxh*v1y**2 + 
      &              2.*v1x*v1y*dxhyh)/v1x**4
                dphi    = dtanphi*v1x**4/(v1x**2+v1y**2)**2
                
+
 c     z-motion fit from phase
                
-               nspt = track(itrack).nspt
+c               nspt = track(itrack).nspt
 	       ispt = 0 ! fix from lm 10/16/1996
-c              if (nspt.gt.6) nspt=6 ! wkw
+C Check nspt again  as I may have added 1 if fitting to prim vtx.
+              if (nspt.gt.max_spt) nspt=max_spt ! wkw
 c     do i = 1, nspt
-               do i = 1, nspt+1 ! wkw (10/3/1996)
+               do i = 1, nspt
                   
                   ispt        = ispt + 1
                   phase(ispt) = atan2((y(ispt)-yh),(x(ispt)-xh))
@@ -413,10 +433,10 @@ c                 wkw: dphase calc added
      &                 (yd**2.+xd**2.))**2. 
                   dphase(ispt) = sqrt(dphase(ispt))
                end do
-c               call linfitr(phase,z,dphase,dz,nspt,a,da,zchi2,
-c     &              lin_res)
-               call linfitr(phase,z,dphase,dz,nspt+1,a,da,zchi2,
-     &              lin_res) ! wkw (10/3/1996)
+               call linfitr(phase,z,dphase,dz,nspt,a,da,zchi2,
+     &              lin_res)
+C               call linfitr(phase,z,dphase,dz,nspt+1,a,da,zchi2,
+C     &              lin_res) ! wkw (10/3/1996)
                
 c               write(6,1000) ' a,da:', a,da,zchi2
 
@@ -498,6 +518,7 @@ c             abs(invpt)))
      1          (stkpar(1).c2norm(1)+
      2          stkpar(1).c2norm(2)*exp(stkpar(1).c2norm(3)/abs(invpt)))
 c              wkw: store residuals
+               if( nspt .gt. 10) nspt=10
                do ispt=1,nspt
                   track(itrack).cres(ispt) = cir_res(ispt) 
                   track(itrack).lres(ispt) = lin_res(ispt)
@@ -534,16 +555,17 @@ C               track(itrack).dedx(2)  = 0.    ! error on above
             else
 
 c     the particle is (or assumed to be) a secondary
-c     the main vertex is therefore not included in the fit.
+c     the main vertex is therefore not included in the fit and track as only
+C     three points .
 
 c     load space points in work arrays
                
-               ispt = 4
-               layer(1) = 0
-               layer(2) = 0
-               layer(3) = 0
+C               ispt = 4
+C               layer(1) = 0
+C               layer(2) = 0
+C               layer(3) = 0
                nspt = track(itrack).nspt
-c              if (nspt.gt.6) nspt=6 ! wkw
+              if (nspt.gt.max_spt) nspt=max_spt! wkw
  
                nrows=max_spt
                table_off(1) = 3*itrack
@@ -564,88 +586,100 @@ c              if (nspt.gt.6) nspt=6 ! wkw
 c     In order to make code similar to case where vertex
 c     is used in fit, transform to remove vertex offset 
 c     here too (wkw)
+
+                        x(i)     = spt(the_spt).x(1) - vtx(1).x(1) ! wkw
+                        y(i)     = spt(the_spt).x(2) - vtx(1).x(2) ! wkw
+                        z(i)     = spt(the_spt).x(3) - vtx(1).x(3) ! wkw
+                        dx(i)    = spt(the_spt).cov(1)
+                        dy(i)    = spt(the_spt).cov(2)
+                        dz(i)    = spt(the_spt).cov(3)
+c     wkw: set best resolution to be 10 microns
+                        if (dx(i).lt.0.001) dx(i) = 0.001
+                        if (dy(i).lt.0.001) dy(i) = 0.001
+                        if (dz(i).lt.0.001) dz(i) = 0.001
+
 c     Find out which layer hits are on and ensure that spt(1-3)
 c     are on different layers H.Caines 4.97      
-                  r2 = spt(the_spt).x(1)**2 + spt(the_spt).x(2)**2
-                  if( (30.0 .lt. r2) .and. (r2 .lt. 70.0)) then
-                     layer(1) = layer(1)+1
-                     if( layer(1) .gt. 1) then
-                        x(ispt)     = spt(the_spt).x(1) - vtx(1).x(1) ! wkw
-                        y(ispt)     = spt(the_spt).x(2) - vtx(1).x(2) ! wkw
-                        z(ispt)     = spt(the_spt).x(3) - vtx(1).x(3) ! wkw
-                        dx(ispt)    = spt(the_spt).cov(1)
-                        dy(ispt)    = spt(the_spt).cov(2)
-                        dz(ispt)    = spt(the_spt).cov(3)
+C                  r2 = spt(the_spt).x(1)**2 + spt(the_spt).x(2)**2
+C                  if( (30.0 .lt. r2) .and. (r2 .lt. 70.0)) then
+C                     layer(1) = layer(1)+1
+C                     if( layer(1) .gt. 1) then
+C                        x(ispt)     = spt(the_spt).x(1) - vtx(1).x(1) ! wkw
+C                        y(ispt)     = spt(the_spt).x(2) - vtx(1).x(2) ! wkw
+C                        z(ispt)     = spt(the_spt).x(3) - vtx(1).x(3) ! wkw
+C                        dx(ispt)    = spt(the_spt).cov(1)
+C                        dy(ispt)    = spt(the_spt).cov(2)
+C                        dz(ispt)    = spt(the_spt).cov(3)
 c     wkw: set best resolution to be 10 microns
-                        if (dx(ispt).lt.0.001) dx(ispt) = 0.001
-                        if (dy(ispt).lt.0.001) dy(ispt) = 0.001
-                        if (dz(ispt).lt.0.001) dz(ispt) = 0.001
-                        ispt = ispt + 1
-                     else
-                        x(1)   = spt(the_spt).x(1) - vtx(1).x(1) ! wkw
-                        y(1)   = spt(the_spt).x(2) - vtx(1).x(2) ! wkw
-                        z(1)   = spt(the_spt).x(3) - vtx(1).x(3) ! wkw
-                        dx(1)  = spt(the_spt).cov(1)
-                        dy(1)  = spt(the_spt).cov(2)
-                        dz(1)  = spt(the_spt).cov(3)
+C                        if (dx(ispt).lt.0.001) dx(ispt) = 0.001
+C                        if (dy(ispt).lt.0.001) dy(ispt) = 0.001
+C                        if (dz(ispt).lt.0.001) dz(ispt) = 0.001
+C                        ispt = ispt + 1
+C                     else
+C                        x(1)   = spt(the_spt).x(1) - vtx(1).x(1) ! wkw
+C                        y(1)   = spt(the_spt).x(2) - vtx(1).x(2) ! wkw
+C                        z(1)   = spt(the_spt).x(3) - vtx(1).x(3) ! wkw
+C                        dx(1)  = spt(the_spt).cov(1)
+C                        dy(1)  = spt(the_spt).cov(2)
+C                        dz(1)  = spt(the_spt).cov(3)
 c     wkw: set best resolution to be 10 microns
-                        if (dx(1).lt.0.001) dx(1) = 0.001
-                        if (dy(1).lt.0.001) dy(1) = 0.001
-                        if (dz(1).lt.0.001) dz(1) = 0.001
-                     endif
-                  elseif( (90.0 .lt. r2) .and. (r2 .lt. 150.0)) then
-                     layer(2) = layer(2)+1
-                     if( layer(2) .gt. 1) then
-                        x(ispt)     = spt(the_spt).x(1) - vtx(1).x(1) ! wkw
-                        y(ispt)     = spt(the_spt).x(2) - vtx(1).x(2) ! wkw
-                        z(ispt)     = spt(the_spt).x(3) - vtx(1).x(3) ! wkw
-                        dx(ispt)    = spt(the_spt).cov(1)
-                        dy(ispt)    = spt(the_spt).cov(2)
-                        dz(ispt)    = spt(the_spt).cov(3)
+C                        if (dx(1).lt.0.001) dx(1) = 0.001
+C                        if (dy(1).lt.0.001) dy(1) = 0.001
+C                        if (dz(1).lt.0.001) dz(1) = 0.001
+C                     endif
+C                  elseif( (90.0 .lt. r2) .and. (r2 .lt. 150.0)) then
+C                     layer(2) = layer(2)+1
+C                     if( layer(2) .gt. 1) then
+C                        x(ispt)     = spt(the_spt).x(1) - vtx(1).x(1) ! wkw
+C                        y(ispt)     = spt(the_spt).x(2) - vtx(1).x(2) ! wkw
+C                        z(ispt)     = spt(the_spt).x(3) - vtx(1).x(3) ! wkw
+C                        dx(ispt)    = spt(the_spt).cov(1)
+C                        dy(ispt)    = spt(the_spt).cov(2)
+C                        dz(ispt)    = spt(the_spt).cov(3)
 c     wkw: set best resolution to be 10 microns
-                        if (dx(ispt).lt.0.001) dx(ispt) = 0.001
-                        if (dy(ispt).lt.0.001) dy(ispt) = 0.001
-                        if (dz(ispt).lt.0.001) dz(ispt) = 0.001
-                        ispt = ispt + 1
-                     else
-                        x(2)   = spt(the_spt).x(1) - vtx(1).x(1) ! wkw
-                        y(2)   = spt(the_spt).x(2) - vtx(1).x(2) ! wkw
-                        z(2)   = spt(the_spt).x(3) - vtx(1).x(3) ! wkw
-                        dx(2)  = spt(the_spt).cov(1)
-                        dy(2)  = spt(the_spt).cov(2)
-                        dz(2)  = spt(the_spt).cov(3)
+C                        if (dx(ispt).lt.0.001) dx(ispt) = 0.001
+C                        if (dy(ispt).lt.0.001) dy(ispt) = 0.001
+C                        if (dz(ispt).lt.0.001) dz(ispt) = 0.001
+C                        ispt = ispt + 1
+C                    else
+C                       x(2)   = spt(the_spt).x(1) - vtx(1).x(1) ! wkw
+C                        y(2)   = spt(the_spt).x(2) - vtx(1).x(2) ! wkw
+C                        z(2)   = spt(the_spt).x(3) - vtx(1).x(3) ! wkw
+C                        dx(2)  = spt(the_spt).cov(1)
+C                        dy(2)  = spt(the_spt).cov(2)
+C                        dz(2)  = spt(the_spt).cov(3)
 c     wkw: set best resolution to be 10 microns
-                        if (dx(2).lt.0.001) dx(2) = 0.001
-                        if (dy(2).lt.0.001) dy(2) = 0.001
-                        if (dz(2).lt.0.001) dz(2) = 0.001
-                     endif
-                  elseif( (175.0 .lt. r2) .and. (r2 .lt. 250.0)) then
-                     layer(3) = layer(3)+1
-                     if( layer(3) .gt. 1) then
-                        x(ispt)     = spt(the_spt).x(1) - vtx(1).x(1) ! wkw
-                        y(ispt)     = spt(the_spt).x(2) - vtx(1).x(2) ! wkw
-                        z(ispt)     = spt(the_spt).x(3) - vtx(1).x(3) ! wkw
-                        dx(ispt)    = spt(the_spt).cov(1)
-                        dy(ispt)    = spt(the_spt).cov(2)
-                        dz(ispt)    = spt(the_spt).cov(3)
+C                        if (dx(2).lt.0.001) dx(2) = 0.001
+C                        if (dy(2).lt.0.001) dy(2) = 0.001
+C                        if (dz(2).lt.0.001) dz(2) = 0.001
+C                     endif
+C                  elseif( (175.0 .lt. r2) ) then
+C                     layer(3) = layer(3)+1
+C                     if( layer(3) .gt. 1) then
+C                        x(ispt)     = spt(the_spt).x(1) - vtx(1).x(1) ! wkw
+C                        y(ispt)     = spt(the_spt).x(2) - vtx(1).x(2) ! wkw
+C                        z(ispt)     = spt(the_spt).x(3) - vtx(1).x(3) ! wkw
+C                        dx(ispt)    = spt(the_spt).cov(1)
+C                        dy(ispt)    = spt(the_spt).cov(2)
+C                        dz(ispt)    = spt(the_spt).cov(3)
 c     wkw: set best resolution to be 10 microns
-                        if (dx(ispt).lt.0.001) dx(ispt) = 0.001
-                        if (dy(ispt).lt.0.001) dy(ispt) = 0.001
-                        if (dz(ispt).lt.0.001) dz(ispt) = 0.001
-                        ispt = ispt + 1
-                     else
-                        x(3)   = spt(the_spt).x(1) - vtx(1).x(1) ! wkw
-                        y(3)   = spt(the_spt).x(2) - vtx(1).x(2) ! wkw
-                        z(3)   = spt(the_spt).x(3) - vtx(1).x(3) ! wkw
-                        dx(3)  = spt(the_spt).cov(1)
-                        dy(3)  = spt(the_spt).cov(2)
-                        dz(3)   = spt(the_spt).cov(3)
+C                        if (dx(ispt).lt.0.001) dx(ispt) = 0.001
+C                        if (dy(ispt).lt.0.001) dy(ispt) = 0.001
+C                        if (dz(ispt).lt.0.001) dz(ispt) = 0.001
+C                        ispt = ispt + 1
+C                     else
+C                        x(3)   = spt(the_spt).x(1) - vtx(1).x(1) ! wkw
+C                        y(3)   = spt(the_spt).x(2) - vtx(1).x(2) ! wkw
+C                        z(3)   = spt(the_spt).x(3) - vtx(1).x(3) ! wkw
+C                        dx(3)  = spt(the_spt).cov(1)
+C                        dy(3)  = spt(the_spt).cov(2)
+C                        dz(3)   = spt(the_spt).cov(3)
 c     wkw: set best resolution to be 10 microns
-                        if (dx(3).lt.0.001) dx(3) = 0.001
-                        if (dy(3).lt.0.001) dy(3) = 0.001
-                        if (dz(3).lt.0.001) dz(3) = 0.001
-                     endif
-                  endif
+C                        if (dx(3).lt.0.001) dx(3) = 0.001
+C                        if (dy(3).lt.0.001) dy(3) = 0.001
+C                        if (dz(3).lt.0.001) dz(3) = 0.001
+C                     endif
+C                  endif
                end do
             
 c     calculate circle parameters
@@ -705,7 +739,7 @@ c                  phi  = atan2d(y(2)-yh,x(2)-xh)
 c     z-motion fit from phase
                
                   nspt = track(itrack).nspt
-                  if (nspt.gt.6) nspt=6 ! wkw
+                  if (nspt.gt.max_spt) nspt=max_spt ! wkw
                   ispt = 0
                   do i = 1, nspt
                      ispt        = ispt + 1
@@ -798,6 +832,7 @@ C                             abs(invpt)))
      &                 stkpar(1).c2norm(2)*
      &                 exp(stkpar(1).c2norm(3)/abs(invpt)))
 c                 wkw: store residuals
+                  if( nspt .gt. 10) nspt =10
                   do ispt=1,nspt
                      track(itrack).cres(ispt) = 0 ! 3 points
                      track(itrack).lres(ispt) = lin_res(ispt)
@@ -836,6 +871,7 @@ c    more than 2 points
                   track(itrack).chisq(1) = infinity ! circle fit chi-square
                   track(itrack).chisq(2) = infinity ! linear fit chi-square
 c                 wkw: store residuals
+                  if( nspt .gt. 10) nspt=10
                   do ispt=1,nspt
                      track(itrack).cres(ispt) = infinity
                      track(itrack).lres(ispt) = infinity
@@ -877,6 +913,7 @@ c     write(6,1002)
             track(itrack).chisq(1) = infinity ! circle fit chi-square
             track(itrack).chisq(2) = infinity ! linear fit chi-square
 c           wkw: store residuals
+            if( nspt .gt. 10) nspt = 10
             do ispt=1,nspt
                track(itrack).cres(ispt) = infinity
                track(itrack).lres(ispt) = infinity

@@ -39,7 +39,7 @@ C     Local Declarations:
 C     ===================
       integer status,isecond
 
-      integer iteration, oldcandidate, iternull, nitermax
+      integer iteration, oldcandidate,oldgroups, iternull, nitermax
       real    th_step, th_init, th_max, th, factor, sfactor(4)
       logical done
 
@@ -189,6 +189,7 @@ c         if (stkpar(1).nitermax.lt.0) stkpar(1).nitermax = 1 ! wkw
 
          iteration    = 0
          oldcandidate = track_h.nok
+         oldgroups = groups_h.nok
 
 c         th_max  = stkpar(1).th_init ! wkw
 c         th_step = stkpar(1).th_step ! wkw
@@ -314,6 +315,9 @@ c               filler(1).th87  =    th
                   if (status.ne.stafcv_ok) then
                      write(mess,1001) 'stf','stk_am_fill3'
                      call message(mess,1,mess_id(6))
+                     track_h.nok = oldcandidate
+                     groups_h.nok = oldgroups
+                     goto 999
                   end if
                else ! 4 layers
                   status = STK_AM_FILL4(
@@ -328,6 +332,9 @@ c               filler(1).th87  =    th
                   if (status.ne.stafcv_ok) then
                      write(mess,1001) 'stf','stk_am_fill4'
                      call message(mess,1,mess_id(6))
+                     track_h.nok = oldcandidate
+                     groups_h.nok = oldgroups
+                     goto 999
                   end if
                end if
             
@@ -362,6 +369,7 @@ c               filler(1).th87  =    th
                else
                   iternull = 0
                   oldcandidate = track_h.nok
+                  oldgroups = groups_h.nok
                end if
 
             end do 
@@ -443,6 +451,9 @@ c     filler(1).th65  =    th
                         if (status.ne.stafcv_ok) then
                            write(mess,1001) 'stf','stk_am_fill3'
                            call message(mess,1,mess_id(6))
+                           track_h.nok = oldcandidate
+                           groups_h.nok = oldgroups
+                           goto 999
                         end if
                      else       ! 4 layers
                         status = STK_AM_FILL4(
@@ -457,6 +468,9 @@ c     filler(1).th65  =    th
                         if (status.ne.stafcv_ok) then
                            write(mess,1001) 'stf','stk_am_fill4'
                            call message(mess,1,mess_id(6))
+                           track_h.nok = oldcandidate
+                           groups_h.nok = oldgroups
+                           goto 999
                         end if
                      end if
                      
@@ -491,6 +505,7 @@ c     filler(1).th65  =    th
                      else
                         iternull = 0
                         oldcandidate = track_h.nok
+                        oldgroups = groups_h.nok
                      end if
                      
                   end do        ! loop over secondary opening of th
@@ -501,6 +516,7 @@ c     filler(1).th65  =    th
             
             
          end if
+ 999     continue
 
 c     Note: need to call kine even if not filling since
 c     sgr may have been called

@@ -1077,6 +1077,7 @@ c     consider track candidate for storage
             done(4)   = .true.
             done(5)   = .true.
             done(6)   = .true.
+            stk_am_fill3 = stafcv_bad
             itrack   = track_h.maxlen
          else                   ! (itrack.le.track_h.maxlen)
             ispt = 0
@@ -1109,6 +1110,7 @@ c     consider track candidate for storage
                         done(4)   = .true.
                         done(5)   = .true.
                         done(6)   = .true.
+                        stk_am_fill3 = stafcv_bad
                         goto 117
                      endif
                   end if
@@ -1143,7 +1145,7 @@ c     wkw: itrack here is the sum of the previous loop and the old loops
       groups_h.nok      = n_groups -1
       
       call StMessage('STK_AM_FILL3: Stopping ##############################')
-      STK_AM_FILL3=STAFCV_OK
+      
       RETURN
       END
 
