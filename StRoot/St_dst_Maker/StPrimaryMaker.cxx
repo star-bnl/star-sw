@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.30 2000/02/01 17:16:21 wdeng Exp $
+// $Id: StPrimaryMaker.cxx,v 1.31 2000/02/02 14:23:47 wdeng Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.31  2000/02/02 14:23:47  wdeng
+// Add protection in case one runs StPrimaryMaker without running StPreVertexMaker beforehand
+//
 // Revision 1.30  2000/02/01 17:16:21  wdeng
 // Copy the preliminary primary vertex to the first four rows of vertex table.
 //
@@ -239,20 +242,24 @@ Int_t StPrimaryMaker::Make(){
   St_svm_evt_match *evt_match = (St_svm_evt_match *) matchI("evt_match");
   St_dst_track     *primtrk     = 0;   
 
+  St_dst_vertex *vertex = new St_dst_vertex("vertex", 4); 
+  AddData(vertex);  
+ 
   St_DataSet     *preVertex = GetDataSet("preVertex"); 
-  St_DataSetIter  preVertexI(preVertex);         
+  St_DataSetIter  preVertexI(preVertex);
   St_dst_vertex  *preVtx  = (St_dst_vertex *) preVertexI("preVertex");
 
-  Int_t numRowPreVtx = preVtx->GetNRows();
-  St_dst_vertex *vertex = new St_dst_vertex("vertex", numRowPreVtx+4); 
-  AddData(vertex);   
+  if( preVtx ) {
+    Int_t numRowPreVtx = preVtx->GetNRows();
+    vertex->ReAllocate( numRowPreVtx+4 );
+    
+    dst_vertex_st *preVtxPtr = preVtx->GetTable();
+    dst_vertex_st *vertexPtr = vertex->GetTable();
+    Int_t sizeToCopy = sizeof(dst_vertex_st) * numRowPreVtx;
+    memcpy(vertexPtr, preVtxPtr, sizeToCopy);
+    vertex->SetNRows( numRowPreVtx );
+  }
 
-  dst_vertex_st *preVtxPtr = preVtx->GetTable();
-  dst_vertex_st *vertexPtr = vertex->GetTable();
-  Int_t sizeToCopy = sizeof(dst_vertex_st) * numRowPreVtx;
-  memcpy(vertexPtr, preVtxPtr, sizeToCopy);
-  vertex->SetNRows( numRowPreVtx );
-  
   St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   St_tpt_track  *tptrack   = 0;
   St_tte_eval   *evaltrk   = 0;
