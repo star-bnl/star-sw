@@ -28,6 +28,7 @@ public:
   virtual void finish();
 
  protected:
+  int    _eventCount;
   TH1D * _h_pt_mc;
   TH1D * _h_eta_mc;
   TH1D * _h_phi_mc;
@@ -51,6 +52,11 @@ public:
   TProfile * _p_phi;
   TProfile2D * _p_ptVsEta_mc;
   TProfile2D * _p_phiVsEta_mc;
+
+  TH1D * _h_dca10;
+  TH1D * _h_dca20;
+  TH1D * _h_dca30;
+  TH1D * _h_dca40;
 
   ClassDef(EfficiencyPlots,1)
 };

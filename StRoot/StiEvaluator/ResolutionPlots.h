@@ -27,18 +27,6 @@ public:
   virtual void initialize();
   virtual void fill(StMiniMcEvent*);
   void finish();
-
-  
-  double _minMult;
-  double _maxMult;
-  int    _id;
-  double _minNHits;
-  double _minNFitHits;
-  double _maxDca;
-  double _minEta;
-  double _maxEta;
-  
-  int    _trackType;
   int    _pullType;
 
   TH1D * _h_p_mc;
@@ -55,7 +43,8 @@ public:
   TH2D * _h_dptVsP;
   TH2D * _h_dptVsPt;
   TH2D * _h_detaVsEta;
-  TH2D * _h_dphiVsPt;
+  TH2D * _h_dphiVsPt; 
+  TH2D * _h_dptByPtVsNpts;
 
   TH2D * _h_dpByPVsP;
   TH2D * _h_dptByPtVsPt;

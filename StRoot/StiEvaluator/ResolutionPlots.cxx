@@ -97,61 +97,65 @@ void ResolutionPlots::initialize()
 {
   cout << "ResolutionPlots::createHistograms " << getName()<< endl;
   
-  _h_p_mc    = book("_h_p_mc",    "momentum of mc tracks",100,0., 10.);
-  _h_pt_mc   = book("_h_pt_mc",   "transverse momentum of mc tracks", 100,0., 10.);
-  _h_eta_mc  = book("_h_eta_mc",  "eta of mc tracks", 80, -2., 2.);
-  _h_phi_mc  = book("_h_phi_mc",  "phi of mc tracks", 120, -180., 180.);
+  _h_p_mc    = book("_h_p_mc",    "momentum of mc tracks",20,0., 2.);
+  _h_pt_mc   = book("_h_pt_mc",   "transverse momentum of mc tracks", 20,0., 2.);
+  _h_eta_mc  = book("_h_eta_mc",  "eta of mc tracks", 30, -1.5, 1.5);
+  _h_phi_mc  = book("_h_phi_mc",  "phi of mc tracks", 30, -180., 180.);
   
-  _h_p_rec    = book("_h_p_rec",    "momentum of rec tracks",100,0., 10.);
-  _h_pt_rec   = book("_h_pt_rec",   "transverse momentum of rec tracks", 100,0., 10.);
-  _h_eta_rec  = book("_h_eta_rec",  "eta of rec tracks", 80, -2., 2.);
-  _h_phi_rec  = book("_h_phi_rec",  "phi of rec tracks", 120, -180., 180.);
+  _h_p_rec    = book("_h_p_rec",    "momentum of rec tracks",20,0., 2.);
+  _h_pt_rec   = book("_h_pt_rec",   "transverse momentum of rec tracks", 20,0., 2.);
+  _h_eta_rec  = book("_h_eta_rec",  "eta of rec tracks", 30, -1.5, 1.5);
+  _h_phi_rec  = book("_h_phi_rec",  "phi of rec tracks", 30, -180., 180.);
   
-  _h_dpVsP     = book("_h_dpVsP",     "p diff vs p",  100,0., 10., 100, -0.5, 0.5);
-  _h_dptVsP    = book("_h_dptVsP",    "pt diff vs p", 100,0., 10., 100, -0.5, 0.5);
-  //_h_dptVsPt   = book("_h_dptVsPt"  , "pt diff vs pt", 100,0., 10., 100, -0.5, 0.5);
-  _h_detaVsEta = book("_h_detaVsEta", "eta diff vs eta", 80, -2., 2., 100, -0.5, 0.5);
-  _h_dphiVsPt  = book("_h_dphiVsPt",  "phi diff vs pt", 100,0., 10., 100, -0.5, 0.5);
+  _h_dpVsP     = book("_h_dpVsP",     "p diff vs p",  20,0., 2., 100, -0.5, 0.5);
+  _h_dptVsP    = book("_h_dptVsP",    "pt diff vs p", 20,0., 2., 100, -0.5, 0.5);
+  //_h_dptVsPt   = book("_h_dptVsPt"  , "pt diff vs pt", 20,0., 2., 100, -0.5, 0.5);
+  _h_detaVsEta = book("_h_detaVsEta", "eta diff vs eta", 30, -1.5, 1.5, 100, -0.5, 0.5);
+  _h_dphiVsPt  = book("_h_dphiVsPt",  "phi diff vs pt", 20,0., 2., 100, -0.5, 0.5);
 
-  _h_dpByPVsP     = book("_h_dpByPVsP",    "p rel diff vs p",  100,0., 10., 100, -0.2, 0.2);
-  //_h_dptByPtVsPt  = book("_h_dptByPtVsPt", "pt rel diff vs p", 100,0., 10., 100, -0.2, 0.2);
-  _h_dptByPtVsP   = book("_h_dptByPtVsP",  "pt rel diff vs p", 100,0., 10., 100, -0.2, 0.2);
+  _h_dptByPtVsNpts    = book("_h_dptByPtVsNpts", "pt rel diff vs Npts", 50,0., 50., 100, -0.2, 0.2);
+ 
+  _h_dpByPVsP     = book("_h_dpByPVsP",    "p rel diff vs p",  20,0., 2., 100, -0.2, 0.2);
+  //_h_dptByPtVsPt  = book("_h_dptByPtVsPt", "pt rel diff vs p", 20,0., 2., 100, -0.2, 0.2);
+  _h_dptByPtVsP   = book("_h_dptByPtVsP",  "pt rel diff vs p", 20,0., 2., 100, -0.2, 0.2);
 
-  _p_dpVsP     = bookProfile("_p_dpVsP",     "p diff vs p (prof)",  100,0., 10.);
-  _p_dptVsP    = bookProfile("_p_dptVsP",    "pt diff vs p (prof)", 100,0., 10.);
-  //_p_dptVsPt   = bookProfile("_p_dptVsPt"  , "pt diff vs pt (prof)", 100,0., 10.);
-  _p_detaVsEta = bookProfile("_p_detaVsEta", "eta diff vs eta (prof)", 80, -2., 2.);
-  _p_dphiVsPt  = bookProfile("_p_dphiVsPt",  "phi diff vs pt (prof)", 100,0., 10.);
+  _p_dpVsP     = bookProfile("_p_dpVsP",     "p diff vs p (prof)",  20,0., 2.);
+  _p_dptVsP    = bookProfile("_p_dptVsP",    "pt diff vs p (prof)", 20,0., 2.);
+  //_p_dptVsPt   = bookProfile("_p_dptVsPt"  , "pt diff vs pt (prof)", 20,0., 2.);
+  _p_detaVsEta = bookProfile("_p_detaVsEta", "eta diff vs eta (prof)", 30, -1.5, 1.5);
+  _p_dphiVsPt  = bookProfile("_p_dphiVsPt",  "phi diff vs pt (prof)", 20,0., 2.);
 
-  _p_dpByPVsP     = bookProfile("_p_dpByPVsP",    "p rel diff vs p (prof)",  100,0., 10.);
-  //_p_dptByPtVsPt  = bookProfile("_p_dptByPtVsPt", "pt rel diff vs pt (prof)", 100,0., 10.);
-  _p_dptByPtVsP   = bookProfile("_p_dptByPtVsP",  "pt rel diff vs p (prof)", 100,0., 10.);
+  _p_dpByPVsP     = bookProfile("_p_dpByPVsP",    "p rel diff vs p (prof)",  20,0., 2.);
+  //_p_dptByPtVsPt  = bookProfile("_p_dptByPtVsPt", "pt rel diff vs pt (prof)", 20,0., 2.);
+  _p_dptByPtVsP   = bookProfile("_p_dptByPtVsP",  "pt rel diff vs p (prof)", 20,0., 2.);
 
-  //_p_dpByP2VsP     = bookProfile("_p_dpByP2VsP",    "(p rel diff)^2 vs p (prof)",  100,0., 10.);
-  //_p_dptByPt2VsPt  = bookProfile("_p_dptByPt2VsPt", "(pt rel diff)^2 vs pt (prof)", 100,0., 10.);
-  //_p_dptByPt2VsP   = bookProfile("_p_dptByPt2VsP",  "(pt rel diff)^2 vs p (prof)", 100,0., 10.);
-  //_p_deta2VsEta    = bookProfile("_p_deta2VsEta",   "(eta diff)^2 vs eta (prof)", 80, -2., 2.);
-  //_p_dphi2VsPt     = bookProfile("_p_dphi2VsPt",    "(phi diff)^2 vs pt (prof)", 100,0., 10.);
+  //_p_dpByP2VsP     = bookProfile("_p_dpByP2VsP",    "(p rel diff)^2 vs p (prof)",  100,0., 2.);
+  //_p_dptByPt2VsPt  = bookProfile("_p_dptByPt2VsPt", "(pt rel diff)^2 vs pt (prof)", 100,0., 2.);
+  //_p_dptByPt2VsP   = bookProfile("_p_dptByPt2VsP",  "(pt rel diff)^2 vs p (prof)", 100,0., 2.);
+  //_p_deta2VsEta    = bookProfile("_p_deta2VsEta",   "(eta diff)^2 vs eta (prof)", 80, -1.5, 1.5);
+  //_p_dphi2VsPt     = bookProfile("_p_dphi2VsPt",    "(phi diff)^2 vs pt (prof)", 100,0., 2.);
 
-  //_h_sigdpByPVsP     = book("_h_sigdpByPVsP",    "sig(p rel diff) vs p",  100,0., 10.);
-  //_h_sigdptByPtVsPt  = book("_h_sigdptByPtVsPt", "sig(pt rel diff) vs pt", 100,0., 10.);
-  //_h_sigdptByPtVsP   = book("_h_sigdptByPtVsP",  "sig(pt rel diff) vs p", 100,0., 10.);
-  //_h_sigdetaVsEta    = book("_h_sigdetaVsEta",   "sig(eta) vs eta", 80, -2., 2.);
-  //_h_sigdphiVsPt     = book("_h_sigdphiVsPt",    "sig(phi) vs pt", 100,0., 10.);
 
-  _h_curvPull = book("curvPull","Curvature Pull",           250, -5., 5.);
-  _h_ptPull   = book("ptPull",  "Transverse Momentum Pull", 250, -5., 5.);
-  _h_tanPull  = book("tanPull", "Tan(Lambda) Pull",         250, -5., 5.);
+
+  //_h_sigdpByPVsP     = book("_h_sigdpByPVsP",    "sig(p rel diff) vs p",  100,0., 2.);
+  //_h_sigdptByPtVsPt  = book("_h_sigdptByPtVsPt", "sig(pt rel diff) vs pt", 100,0., 2.);
+  //_h_sigdptByPtVsP   = book("_h_sigdptByPtVsP",  "sig(pt rel diff) vs p", 100,0., 2.);
+  //_h_sigdetaVsEta    = book("_h_sigdetaVsEta",   "sig(eta) vs eta", 80, -1.5, 1.5);
+  //_h_sigdphiVsPt     = book("_h_sigdphiVsPt",    "sig(phi) vs pt", 100,0., 2.);
+
+  _h_curvPull = book("curvPull","Curvature Pull",           100, -5., 5.);
+  _h_ptPull   = book("ptPull",  "Transverse Momentum Pull", 100, -5., 5.);
+  _h_tanPull  = book("tanPull", "Tan(Lambda) Pull",         100, -5., 5.);
   
-  _h_curvPullVsPt = book("curvPullVsPt","Curvature Pull vs Pt",           25,0., 5., 250, -5., 5.);
-  _h_ptPullVsPt   = book("ptPullVsPt",  "Transverse Momentum Pull vs Pt", 25,0., 5., 250, -5., 5.);
-  _h_tanPullVsPt  = book("tanPullVsPt", "Tan(Lambda) Pull vs Pt",         25,0., 5., 250, -5., 5.);
+  _h_curvPullVsPt = book("curvPullVsPt","Curvature Pull vs Pt",           10,0., 2., 250, -5., 5.);
+  _h_ptPullVsPt   = book("ptPullVsPt",  "Transverse Momentum Pull vs Pt", 10,0., 2., 250, -5., 5.);
+  _h_tanPullVsPt  = book("tanPullVsPt", "Tan(Lambda) Pull vs Pt",         10,0., 2., 250, -5., 5.);
 
   _h_chi2       = book("chi2","chi2",200,0., 200.);
   _h_rChi2      = book("rChi2","rChi2",200,0., 20.);
-  _h_rChi2VsPt  = book("rChi2VsPt",  "rChi2 vs pt",   25, 0., 5., 200,0., 20.);
-  _h_rChi2VsEta = book("rChi2VsEta", "rChi2 vs eta",  20, -2., 2., 200,0., 20.);
-  _h_rChi2VsNpts= book("rChi2VsNpts","rChi2 vs npts", 50, 0., 50., 200,0., 20.);
+  _h_rChi2VsPt  = book("rChi2VsPt",  "rChi2 vs pt",   25, 0., 3., 200,0., 20.);
+  _h_rChi2VsEta = book("rChi2VsEta", "rChi2 vs eta",  30, -1.5, 1.5, 200,0., 20.);
+  _h_rChi2VsNpts= book("rChi2VsNpts","rChi2 vs npts", 25, 0., 50., 200,0., 20.);
 
 
 }
@@ -160,6 +164,8 @@ void ResolutionPlots::fill(StMiniMcEvent* minimcevent)
 {
   //cout << "ResolutionPlots::fillHistograms(...) -I- Started Name:"<<getName()<<endl;
   int nMcTracks = minimcevent->nMcTrack();
+  if (nMcTracks<_minMult || nMcTracks>_maxMult) return;
+
   //cout << "No. MC Tracks " << nMcTracks <<endl;
   // mMcTracks loop
   for (int j=0; j<nMcTracks; ++j) 
@@ -279,12 +285,13 @@ void ResolutionPlots::fill(StMiniMcEvent* minimcevent)
       _h_pt_rec->Fill(pt_rec); 
       _h_eta_rec->Fill(eta_rec);  
       _h_phi_rec->Fill(phi_rec);  
-	
+
       _h_dpVsP->Fill(p_mc,       dp);   
       _h_dptVsP->Fill(p_mc,      dpt);  
       //_h_dptVsPt->Fill(pt_mc,    dpt);
       _h_detaVsEta->Fill(eta_mc, deta);  
       _h_dphiVsPt->Fill(pt_mc,   dphi);   
+
       _p_dpVsP->Fill(p_mc,dp);       
       _p_dptVsP->Fill(p_mc,dpt);      
       //_p_dptVsPt->Fill(pt_mc,dpt);     
@@ -300,6 +307,8 @@ void ResolutionPlots::fill(StMiniMcEvent* minimcevent)
 	  _p_dpByPVsP->Fill(p_mc,dp/p_mc);    
 	  //_p_dptByPtVsPt->Fill(pt_mc, dpt/pt_mc); 
 	  _p_dptByPtVsP->Fill(p_mc, dpt/pt_mc);
+	  _h_dptByPtVsNpts->Fill(nFitPts,  dpt/pt_mc);	
+      
 	
 	  //_p_dpByP2VsP->Fill(p_mc,dp*dp);    
 	  //_p_dptByPt2VsPt->Fill(pt_mc, dpt*dpt/(pt_mc*pt_mc)); 
@@ -337,6 +346,7 @@ void ResolutionPlots::fill(StMiniMcEvent* minimcevent)
 
 void ResolutionPlots::finish()
 {
+  //cout << "ResolutionPlots::finish() -I- Started"<<endl;
   //calculateSTD(_p_dpByPVsP,   _p_dpByP2VsP,    _h_sigdpByPVsP);
   //calculateSTD(_p_dptByPtVsPt,_p_dptByPt2VsPt, _h_sigdptByPtVsPt);
   //calculateSTD(_p_dptByPtVsP, _p_dptByPt2VsP,  _h_sigdptByPtVsP);
@@ -362,11 +372,20 @@ void ResolutionPlots::finish()
   slice(_h_detaVsEta,-0.1, 0.1, 0., 0.1);
   slice(_h_dphiVsPt, -1., 1., 0., 2.);
   slice(_h_dptByPtVsP, -0.05, 0.05, 0., 0.05);
-  _h_curvPull->Fit("gaus","","",-2.,2.);
-  _h_ptPull->Fit("gaus","","",-2.,2.);
-  _h_tanPull->Fit("gaus","","",-2.,2.);
+  slice(_h_dptByPtVsNpts, -0.05,0.05, 0., 0.05);
   slice(_h_curvPullVsPt, -3., 3., 0., 5.);
   slice(_h_ptPullVsPt, -3., 3., 0., 5.);
   slice(_h_tanPullVsPt, -3., 3., 0., 5.);
+  _h_curvPull->Fit("gaus","","",-2.,2.);
+  _h_ptPull->Fit("gaus","","",-2.,2.);
+  _h_tanPull->Fit("gaus","","",-2.,2.);
+
+  /*for (vector<TH1*>::iterator iter=begin();
+       iter!=end();
+       ++iter)
+    {
+      cout << " ResolutionPlots::finish() -I- plot: " << (*iter)->GetName()<<endl;
+      }*/ 
+  //cout << "ResolutionPlots::finish() -I- Started"<<endl;
 }
 

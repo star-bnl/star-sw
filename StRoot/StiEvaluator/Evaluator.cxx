@@ -2,6 +2,8 @@
 #include "TChain.h"
 #include "TBranch.h"
 #include "TCanvas.h"
+#include "TStyle.h"
+#include "TROOT.h"
 #include "Sti/Html/HistoDocument.h"
 #include "StiEvaluator/StiEvaluatorHistograms.h"
 
@@ -58,16 +60,19 @@ void Evaluator::save(const string &targetDirectory)
      }
 }
 
-void Evaluator::saveHtml(const char * inputFile)
+void Evaluator::saveHtml(const char * targetDirectory)
 {
-  string file = inputFile;
-  saveHtml(file);
+  string td = targetDirectory;
+  saveHtml(td);
 }
 
 void Evaluator::saveHtml(const string &targetDirectory)
 {
    vector<StiEvaluatorHistograms*>::iterator iter;
    TCanvas * canvas = new TCanvas();
+   gStyle->SetOptStat(0);
+   //  gROOT->ForceStyle();
+   gStyle->SetOptStat(000000);
    for (iter=_histograms.begin();iter!=_histograms.end();++iter)
      {
        HistoDocument histoDocumentRec(targetDirectory,
@@ -78,6 +83,60 @@ void Evaluator::saveHtml(const string &targetDirectory)
      }
   delete canvas;
 }
+
+void Evaluator::saveHtml(const char * targetDirectory,
+			 const char * fileName,
+			 const char * description,
+			 StiEvaluatorHistograms* hg1,
+			 StiEvaluatorHistograms* hg2)
+{
+  string td = targetDirectory;
+  string fn = fileName;
+  string des= description;
+  saveHtml(td,fn,des,hg1,hg2);
+}
+
+void Evaluator::saveHtml(const char * targetDirectory,
+			 const char * fileName,
+			 const char * description,
+			 StiEvaluatorHistograms* hg1,
+			 StiEvaluatorHistograms* hg2,
+			 StiEvaluatorHistograms* hg3)
+{
+  string td = targetDirectory;
+  string fn = fileName;
+  string des= description;
+  saveHtml(td,fn,des,hg1,hg2,hg3);
+}
+
+void Evaluator::saveHtml(const string &targetDirectory,
+			 const string &fileName,
+			 const string &description,
+			 StiEvaluatorHistograms* hg1,
+			 StiEvaluatorHistograms* hg2)
+{
+   vector<StiEvaluatorHistograms*>::iterator iter;
+   TCanvas * canvas = new TCanvas();
+   HistoDocument histoDocument(targetDirectory,fileName,description,canvas);
+   histoDocument.generateWebPage(hg1,hg2);
+   delete canvas;
+}
+
+void Evaluator::saveHtml(const string &targetDirectory,
+			 const string &fileName,
+			 const string &description,
+			 StiEvaluatorHistograms* hg1,
+			 StiEvaluatorHistograms* hg2,
+			 StiEvaluatorHistograms* hg3)
+{
+   vector<StiEvaluatorHistograms*>::iterator iter;
+   TCanvas * canvas = new TCanvas();
+   HistoDocument histoDocument(targetDirectory,fileName,description,canvas);
+   histoDocument.generateWebPage(hg1,hg2,hg3);
+   delete canvas;
+}
+
+
 
 StiEvaluatorHistograms * Evaluator::add(StiEvaluatorHistograms *h)
 {
