@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.1 1999/07/29 01:05:22 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.2 1999/07/30 01:00:29 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.2  1999/07/30 01:00:29  fisyak
+// Work around Herb's default ctor
+//
 // Revision 1.1  1999/07/29 01:05:22  fisyak
 // move bfc to StBFChain
 //
@@ -383,11 +386,11 @@ Int_t StBFChain::Load()
   }
   else {
     //  S I M U L A T I O N  or D A Q
-    if (ChainFlags[kTDAQ])  New("St_tpcdaq_Maker","tpc_raw","daq");
+    if (ChainFlags[kTDAQ])  new St_tpcdaq_Maker("tpc_raw","daq");
     else {
       if (ChainFlags[kTRS]) {//		trs
 	New("StTrsMaker");
-        New("St_tpcdaq_Maker","tpc_raw","trs");
+        new St_tpcdaq_Maker("tpc_raw","trs");
       }
       else { 
 	if (ChainFlags[kTSS]) {//		tss
