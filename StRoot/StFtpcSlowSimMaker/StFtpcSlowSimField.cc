@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.cc,v 1.6 2001/04/02 12:04:33 jcs Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.7 2001/04/24 12:54:59 oldi Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.7  2001/04/24 12:54:59  oldi
+// mParam->slowSimPressure() used instead of mParam->normalizedNowPressure().
+//
 // Revision 1.6  2001/04/02 12:04:33  jcs
 // get FTPC calibrations,geometry from MySQL database and code parameters from StarDb/ftpc
 //
@@ -120,7 +123,7 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
   inverseDriftVelocity = new float[nMagboltzBins*nPadrowPositions];
   preciseLorentzAngle = new float[nMagboltzBins*nPadrowPositions];
   
-  float deltaP = mParam->normalizedNowPressure()-mParam->standardPressure();
+  float deltaP = mParam->slowSimPressure()-mParam->standardPressure();
   for(int i=0; i<nMagboltzBins; i++)
     {
       preciseEField[i] = mDb->magboltzEField(i);
