@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.306 2002/11/06 15:24:04 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.307 2002/11/27 03:09:18 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -54,9 +54,10 @@ Bfc_st BFC1[] = {
   {"Y2001" ,"","","db,calib,detDb","","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
   {"Y2001n","","","db,calib,detDb","","",
                                      "year2001: new geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
+  {"Y2003" ,"","","db,calib,detDb","","",
+                               "year2003: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL",kFALSE},
   {"Complete","","","db,calib,detDb"      ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"NoDb"  ,""  ,"","HalfField"                                     ,"","","Take out Db from Chain",kFALSE},
-  {"NoHits",""  ,"",""                                  ,"","","Don't write hits into Event.Branch",kFALSE},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Trigger Type","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -67,13 +68,14 @@ Bfc_st BFC1[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
   {"doEvents"    ,""  ,"","xin,event,analysis,NoDb"                                       ,"","","",kFALSE},
   {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
   {"C1default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"    ,"","","Year 1 chain",kFALSE},
   {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2"
                                                                               ,"","","Year 2 chain",kFALSE},
+  {"C3default"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt,bbcsim,emcY2"
+                                                                    ,"","","Year 3 simu base chain",kFALSE},
   {"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt,emcY2"
                                                                          ,"","","Assymptotic chain",kFALSE},
   {"Cy1a"        ,""  ,"","y1a,C1default"                                ,"","","Turn on chain y1a",kFALSE},
@@ -86,13 +88,20 @@ Bfc_st BFC1[] = {
   {"Cy2b"        ,""  ,"","y2b,C2default"                                ,"","","Turn on chain y2b",kFALSE},
   {"C2000"       ,""  ,"","y2000,C1default"                            ,"","","Turn on chain Y2000",kFALSE},
   {"C2001"       ,""  ,"","y2001,C2default"                            ,"","","Turn on chain Y2001",kFALSE},
+  {"C2003"       ,""  ,"","y2003,C3default"                            ,"","","Turn on chain Y2003",kFALSE},
+
+  // MDC / Sim chain agregates
+  {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
   {"MDC4"        ,""  ,"","C2001,trs,srs,fss,rrs,big,GeantOut"      ,"","","Turn on chain for MDC4",kFALSE},
   {"MDC4New"     ,""  ,"","y2001n,C2default,trs,srs,fss,rrs,big,GeantOut","","",
                                                      "Turn on chain for MDC4 (for after September)",kFALSE},
   {"PostMDC4"    ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"     ,"","","Turn on Post MDC4 chain",kFALSE},
   {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut",
                                                                     "","","Turn on chain for ppMDC",kFALSE},
+
+  {"dAuMDC"      ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut","","","Chain for d+Au",kFALSE},
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
+
 
   // Detector combined-chains
   {"SvtD"        ,""  ,"","SvtDb,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit,SvtVtx", "", "",
@@ -138,6 +147,7 @@ Bfc_st BFC1[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"NoHits"      ,""  ,"",""                            ,"","","Don't write hits into Event.Branch",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
   {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
@@ -349,7 +359,7 @@ Bfc_st BFC1[] = {
 
 
 
-  {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdxY2"
+  {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdx"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -373,10 +383,9 @@ Bfc_st BFC1[] = {
                                                  ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"FindVtxSeed" ,"FindVtxSeed","","","StVertexSeedMaker","St_global,St_dst_Maker,StPass0CalibMaker",
                                                                      "Performs vertex seed finding",kFALSE},
-  {"dEdx"        ,"dEdx","globalChain,-dEdxY2","globT,tpcDb,TbUtil", "StdEdxMaker","StdEdxMaker","",kFALSE},
+  {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil",         "StdEdxMaker","StdEdxMaker","",kFALSE},
   {"svtdEdx"     ,"svtdEdx","globalChain","globT",                "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event"       ,"","","StEvent,tpcDB"         ,"StEventMaker","StDetectorDbMaker,StEventMaker","",kFALSE},
-  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent",        "StdEdxY2Maker","StBichsel,StdEdxY2Maker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
                           
@@ -750,7 +759,7 @@ Bfc_st BFC2[] = {
                                                                                     "EMC raw chain",kFALSE},
 
 
-  {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdxY2"
+  {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdx"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -774,10 +783,8 @@ Bfc_st BFC2[] = {
                                                  ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"FindVtxSeed" ,"FindVtxSeed","","","StVertexSeedMaker","St_global,St_dst_Maker,StPass0CalibMaker",
                                                                      "Performs vertex seed finding",kFALSE},
-  {"dEdx"        ,"dEdx","globalChain,-dEdxY2","globT,tpcDb,TbUtil", "StdEdxMaker","StdEdxMaker","",kFALSE},
-  {"svtdEdx"     ,"svtdEdx","globalChain","globT",                "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
+  {"dEdx"       ,"dEdx","globalChain","globT,tpcDb,TbUtil",          "StdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event"       ,"","","StEvent,tpcDB"         ,"StEventMaker","StDetectorDbMaker,StEventMaker","",kFALSE},
-  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent",        "StdEdxY2Maker","StBichsel,StdEdxY2Maker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
                           
@@ -1184,8 +1191,7 @@ Int_t StBFChain::Instantiate()
 	    if (GetOption("PulserSvt")) mode += 4;
 	    if (mode) mk->SetMode(mode);
 	  }
-	  if ((maker == "StdEdxMaker" || maker == "StdEdxY2Maker") &&
-	      GetOption("Simu"))  mk->SetMode(-10);
+	  if (maker == "StdEdxMaker" &&GetOption("Simu"))  mk->SetMode(-10);
 	  if (maker == "StTpcDbMaker"){  
             mk->SetMode(0);
 	    // this change may be temporary i.e. if Simulation includes
@@ -1651,50 +1657,51 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
   This method sets the Geant options that is the Geometry loading
   part. Depends on St_geant_Maker instantiated in the Instantiate()
   method.
+  Please, change SetDbOptions()
  */
 void StBFChain::SetGeantOptions(){
   if (geantMk) {
     SetInput("geant",".make/geant/.data");
-    if (!GetOption("fzin")) {
-      if (GetOption("SD97") ||
-	  GetOption("SD98") ||
-	  GetOption("Y1a")  ||
-	  GetOption("ES99") ||
-	  GetOption("ER99") ||
-	  GetOption("DC99"))          geantMk->LoadGeometry("detp geometry YEAR_1A");
-      else {if (GetOption("Y1b"))     geantMk->LoadGeometry("detp geometry YEAR_1B");
-      else {if (GetOption("Y1E"))     geantMk->LoadGeometry("detp geometry YEAR_1E");
-      else {if (GetOption("Y1h") ||
-		GetOption("RY1h"))    geantMk->LoadGeometry("detp geometry YEAR_1H");
-      else {if (GetOption("Y1s"))     geantMk->LoadGeometry("detp geometry YEAR_1S");
-      else {if (GetOption("Y2000")  ||
-		GetOption("RY2000") ||
-		GetOption("RY2000a")) geantMk->LoadGeometry("detp geometry year2000");
-      else {if (GetOption("Y2a"))     geantMk->LoadGeometry("detp geometry YEAR_2A");
-      else {if (GetOption("Y2001")  ||
-		GetOption("Y2001n") ||
-		GetOption("RY2001"))  geantMk->LoadGeometry("detp geometry year2001");
-      else {if (GetOption("Y2b"))     geantMk->LoadGeometry("detp geometry YEAR_2b");
-      //else {if (GetOption("Y2001"))   geantMk->LoadGeometry("detp geometry year2001");
-      else {if (GetOption("Complete"))geantMk->LoadGeometry("detp geometry complete");
-      else                            geantMk->LoadGeometry("detp geometry year2001");
-      }}}}}}}}
-    }
 
-    if (GetOption("gstar")) {
-	      geantMk->Do("subevent 0;");
-	      // gkine #particles partid ptrange yrange phirange vertexrange
-	      geantMk->Do("gkine 80 6 1. 1. -4. 4. 0 6.28  0. 0.;");
-	      geantMk->Do("mode g2tm prin 1;");
-	      //  geantMk->Do("next;");
-	      //  geantMk->Do("dcut cave z 1 10 10 0.03 0.03;");
-	      if (GetOption("Debug") ||GetOption("Debug2")) {
-		geantMk->Do("debug on;");
-		geantMk->Do("swit 2 3;");
-	      }
-	    }
-    }
-    else {
+    if (!GetOption("fzin")) {
+      if      (GetOption("SD97") ||
+	       GetOption("SD98") ||
+	       GetOption("Y1a")  ||
+	       GetOption("ES99") ||
+	       GetOption("ER99") ||
+	       GetOption("DC99"))     geantMk->LoadGeometry("detp geometry YEAR_1A");
+      else if (GetOption("Y1b"))      geantMk->LoadGeometry("detp geometry YEAR_1B");
+      else if (GetOption("Y1E"))      geantMk->LoadGeometry("detp geometry YEAR_1E");
+      else if (GetOption("Y1h") ||
+	       GetOption("RY1h"))     geantMk->LoadGeometry("detp geometry YEAR_1H");
+      else if (GetOption("Y1s"))      geantMk->LoadGeometry("detp geometry YEAR_1S");
+      else if (GetOption("Y2000")  ||
+	       GetOption("RY2000") ||
+	       GetOption("RY2000a"))  geantMk->LoadGeometry("detp geometry year2000");
+      else if (GetOption("Y2a"))      geantMk->LoadGeometry("detp geometry YEAR_2A");
+      else if (GetOption("Y2001")  ||
+	       GetOption("Y2001n") ||
+	       GetOption("RY2001"))   geantMk->LoadGeometry("detp geometry year2001");
+      else if (GetOption("Y2003"))    geantMk->LoadGeometry("detp geometry year2003");
+      else if (GetOption("Y2b"))      geantMk->LoadGeometry("detp geometry YEAR_2b");
+      else if (GetOption("Complete")) geantMk->LoadGeometry("detp geometry complete");
+      else                            geantMk->LoadGeometry("detp geometry year2001");
+
+
+      if (GetOption("gstar")) {
+	geantMk->Do("subevent 0;");
+	// gkine #particles partid ptrange yrange phirange vertexrange
+	geantMk->Do("gkine 80 6 1. 1. -4. 4. 0 6.28  0. 0.;");
+	geantMk->Do("mode g2tm prin 1;");
+	//  geantMk->Do("next;");
+	//  geantMk->Do("dcut cave z 1 10 10 0.03 0.03;");
+	if (GetOption("Debug") ||GetOption("Debug2")) {
+	  geantMk->Do("debug on;");
+	  geantMk->Do("swit 2 3;");
+	}
+      }
+
+    } else {
       if (fInFile) {
 	TObjArray words;
 	ParseString(*fInFile,words);
@@ -1705,12 +1712,15 @@ void StBFChain::SetGeantOptions(){
 	    printf ("File %s cannot be opened. Exit! \n",fInFile->Data());
 	    gSystem->Exit(1);
 	  }
+	} else {
+	  geantMk->Do(fInFile->Data());
 	}
-	else geantMk->Do(fInFile->Data());
       }
     }
-  }
+
+  } // geantMk
 }
+
 
 /// Treats the DbV options used for database timestamp.
 /*!
@@ -1757,25 +1767,26 @@ void StBFChain::SetDbOptions(){
 	(void) printf("QAInfo: Chain may crash if time-stamp is not validated by db interface\n");
 	db->SetDateTime(FDateS,FTimeS);
       } else {
-	if (GetOption("SD97"))  db->SetDateTime("sd97");
-	else {if (GetOption("SD98"))  db->SetDateTime("sd98");
-	else {if (GetOption("Y1a"))   db->SetDateTime("year_1a");
-	else {if (GetOption("Y1b"))   db->SetDateTime("year_1b");
-	else {if (GetOption("Y1s"))   db->SetDateTime("year_1s");
-	else {if (GetOption("ES99"))  db->SetDateTime("es99");
-	else {if (GetOption("ER99"))  db->SetDateTime("er99");
-	else {if (GetOption("DC99"))  db->SetDateTime("dc99");
-	else {if (GetOption("Y1d"))   db->SetDateTime("year_1d");
-	else {if (GetOption("Y1e"))   db->SetDateTime("year_1e");
-	else {if (GetOption("Y1h"))   db->SetDateTime("year_1h");
-	else {if (GetOption("Y2000")) db->SetDateTime("year_1h");
-	else {if (GetOption("Y2a"))   db->SetDateTime("year_2a");
-	else {if (GetOption("Y2b"))   db->SetDateTime("year_2b");
-	else {if (GetOption("Y2001")) db->SetDateTime("year_2b");
-	else {if (GetOption("Y2001n"))db->SetDateTime("year2001"); 
+	if (GetOption("SD97"))       db->SetDateTime("sd97");
+	else if (GetOption("SD98"))  db->SetDateTime("sd98");
+	else if (GetOption("Y1a"))   db->SetDateTime("year_1a");
+	else if (GetOption("Y1b"))   db->SetDateTime("year_1b");
+	else if (GetOption("Y1s"))   db->SetDateTime("year_1s");
+	else if (GetOption("ES99"))  db->SetDateTime("es99");
+	else if (GetOption("ER99"))  db->SetDateTime("er99");
+	else if (GetOption("DC99"))  db->SetDateTime("dc99");
+	else if (GetOption("Y1d"))   db->SetDateTime("year_1d");
+	else if (GetOption("Y1e"))   db->SetDateTime("year_1e");
+	else if (GetOption("Y1h"))   db->SetDateTime("year_1h");
+	else if (GetOption("Y2000")) db->SetDateTime("year_1h");
+	else if (GetOption("Y2a"))   db->SetDateTime("year_2a");
+	else if (GetOption("Y2b"))   db->SetDateTime("year_2b");
+	else if (GetOption("Y2001")) db->SetDateTime("year_2b");
 	// Year_2b ** db ** timestamp does not reflect
 	// svt shift. Small hack to make it work.
-	}}}}}}}}}}}}}}}
+	else if (GetOption("Y2001n"))db->SetDateTime("year2001"); 
+	else if (GetOption("Y2003")) db->SetDateTime("year2003"); 
+	else (void) printf("QAInfo: StBFChain::SetDbOptions() Chain has not set a time-stamp\n");
       }
     
 
