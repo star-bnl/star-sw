@@ -322,10 +322,6 @@ Int_t StStrangeMuDstMaker::MakeCreateDst() {
     gMessMgr->Warning("StStrangeMuDstMaker: T0 jitter; skipping event.");
     return kStWarn;
   }
-  if (!(event->primaryVertex())) {
-    gMessMgr->Warning("StStrangeMuDstMaker: no primary vertex; skipping event.");
-    return kStWarn;
-  }
 
   EachController(MakeCreateDst(*event));
   if (doMc) MakeCreateMcDst();
@@ -655,8 +651,11 @@ char* StStrangeMuDstMaker::GetFile() const {
 }       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.28 2003/11/13 02:57:08 perev Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.29 2003/12/07 00:49:40 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.29  2003/12/07 00:49:40  genevb
+// Include events with no primary vertex
+//
 // Revision 3.28  2003/11/13 02:57:08  perev
 // LeakOff TClonesArray::Clear() ==> Delete()
 //
