@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.22 2000/06/15 23:05:06 jml Exp $
+ * $Id: EventReader.cxx,v 1.23 2000/06/27 07:28:07 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -19,9 +19,13 @@
  * 29-Aug-99 MJL if((MMAPP = (char *) mmap(0, ...  for HP platform
  * 28-Dec-99 MJL add alternate InitEventReaders, mapped and unmapped
  * 31-Jan-00 MJL set runnum  (mapped version)
+ * 27-Jun-00 MJL change EventInfo access functions
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.23  2000/06/27 07:28:07  levine
+ * changed EventInfo access functions to fill in, print Token
+ *
  * Revision 1.22  2000/06/15 23:05:06  jml
  * I set the number of pointers in DATAP hardcoded to 10.
  * The algorithm for determinining this has been broken by the
@@ -572,6 +576,7 @@ EventInfo EventReader::getEventInfo()
   //cout << "Getting event info" << endl;
   EventInfo ei;
   Bank_DATAP *dp = (Bank_DATAP *)DATAP; 
+  ei.Token = dp->header.Token;
   ei.EventLength = dp->EventLength;
   ei.UnixTime = dp->Time;
   ei.EventSeqNo = dp->EventNumber;
@@ -601,6 +606,7 @@ void EventReader::printEventInfo()
   printf("Ev len (wds) %d\n",ei.EventLength);
   printf("Creation Time: %s \n",ts);
   printf("Trigger word 0x%X\t\tTrigger Input word 0x%X\n",ei.TrigWord,ei.TrigInputWord);
+  printf("Token: %d \n",ei.Token);
   printf("Detectors present: ");
   if (ei.TPCPresent) printf("TPC ");
   if (ei.SVTPresent) printf("SVT ");
@@ -626,6 +632,7 @@ void EventReader::printEventInfo(FILE * fd)
   fprintf(fd,"Ev len (wds) %d\n",ei.EventLength);
   fprintf(fd,"Creation Time: %s \n",ts);
   fprintf(fd,"Trigger word 0x%X\t\tTrigger Input word 0x%X\n",ei.TrigWord,ei.TrigInputWord);
+  fprintf(fd,"Token: %d \n",ei.Token);
   fprintf(fd,"Detectors present: ");
   if (ei.TPCPresent) fprintf(fd,"TPC ");
   if (ei.SVTPresent) fprintf(fd,"SVT ");
