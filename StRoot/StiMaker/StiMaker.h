@@ -7,6 +7,7 @@
 
 #include "StMaker.h"
 #include "Sti/StiFactoryTypedefs.h"
+#include "Sti/StiTrackNode.h"
 #include "StiGui/StiGuiTypedefs.h"
 
 class StEvent;
@@ -17,9 +18,11 @@ class StiDetectorContainer;
 class StiTrackContainer;
 class StiDrawableHits;
 class StiEvaluableTrackSeedFinder;
+class StiTrackSeedFinder;
 
 class StiMaker : public StMaker {
  public:
+    typedef StiObjectFactory<StiTrackNode> StiTrackNodeFactory;
     
     virtual ~StiMaker();
 
@@ -29,7 +32,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.10 2001/08/07 17:43:42 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.11 2001/08/10 20:32:40 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -44,18 +47,18 @@ public:
     void printStatistics() const;
     
     //Used for stepping to next action (via StiControlPad)
-    static void reset();
-    static bool hasMore();
-    static void doNextAction();
+    void doNextAction();
     
 protected:
     StiMaker(const char* name = "StiMaker");
+    void initSeedFinderForStart();
 
 private:
 
     StiHitContainer* mhitstore; //!
     StiHitFactory* mhitfactory; //!
     StiEvaluableTrackFactory* mtrackfactory; //!
+    StiKalmanTrackNodeFactory* mkalmantrackfactory; //!
     StiHitFiller* mhitfiller; //!
     StiDisplayManager* mdisplay; //!
     StiDetectorContainer* mdetector; //!
@@ -64,13 +67,13 @@ private:
     StiEvaluableTrackSeedFinder* mtrackseedfinder; //!
     detector_factory* mdetectorfactory; //!
     data_node_factory* mdatanodefactory; //!
-
+    StiTrackSeedFinder* mkalmanseedfinder; //!
+    StiTrackNodeFactory* mtracknodefactory; //!
+    
     char* mmaterialbuildpath; //!
     char* mdetectorbuildpath; //!
     
     static StiMaker* sinstance; //!
-    static bool mdone;
-    static int mcounter;
 
 private:
     StEvent* mevent; //!
