@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.17 1999/04/19 18:07:57 didenko Exp $
+// $Id: St_QA_Maker.cxx,v 1.18 1999/04/19 20:33:42 didenko Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.18  1999/04/19 20:33:42  didenko
+// uncommented MakeHistGen fuction
+//
 // Revision 1.17  1999/04/19 18:07:57  didenko
 // QA_Maker for new scheme DST
 //
@@ -780,53 +783,53 @@ void St_QA_Maker::MakeHistPrim(St_DataSet *dst){
 //_____________________________________________________________________________
 
 
-//void St_QA_Maker::MakeHistGen(St_DataSet *dst){
-//  if (Debug()) cout << " *** in St_QA_Maker - filling particle histograms " << endl;
-//  St_DataSetIter dstI(dst);
-//
-//  St_particle   *part     = (St_particle  *) dstI["particle"];
-//      if (part){
-//        particle_st *p = part->GetTable();
-//        Int_t nchgpart=0;
-//        Int_t totpart=0;
-//        for (Int_t l=0; l < part->GetNRows(); l++, p++){
-//          //
-//          //  select only particles which can be detected
-//          //  in the STAR detector. Here we restrict us to/
-//	  //  the most common species.
-//	  //
-//	  if(l!=0){                        // first row of table is header, so skip it!
-//	    if (p->isthep == 1) {            // select good status only
-//            totpart++;
-//           if (abs(p->idhep) == 11   ||       // electrons
-//               abs(p->idhep) == 13   ||       // muon
-//                abs(p->idhep) == 211  ||       // pion
-//               abs(p->idhep) == 321  ||       // kaon
-//                abs(p->idhep) == 2212) {       // proton/
-//
-//              nchgpart++;	    
-//	      Double_t px = p->phep[0];
-//	      Double_t py = p->phep[1];
-//	      Double_t pz = p->phep[2];
-//	      Double_t pT    =  TMath::Sqrt(px*px+py*py);
-//	      Double_t theta =  TMath::ATan2 ( pT, pz );
-//	      //        Double_t theta =  atan2 ( pT, pz );
-//	      Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
-//	      m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
-//	      m_H_pT_gen->Fill((Float_t) pT);
-//	      m_H_eta_gen->Fill(eta);
-//             m_H_vtxx->Fill(p->vhep[0]);
-//              m_H_vtxy->Fill(p->vhep[1]);
-//              m_H_vtxz->Fill(p->vhep[2]);
-//	      }
-//	    }
-//	  }
-//       }
-//              m_H_npart->Fill(totpart);
-//             m_H_ncpart->Fill(nchgpart);
-//      }
-//}
-//
+void St_QA_Maker::MakeHistGen(St_DataSet *dst){
+  if (Debug()) cout << " *** in St_QA_Maker - filling particle histograms " << endl;
+  St_DataSetIter dstI(dst);
+
+  St_particle   *part     = (St_particle  *) dstI["particle"];
+      if (part){
+        particle_st *p = part->GetTable();
+        Int_t nchgpart=0;
+        Int_t totpart=0;
+        for (Int_t l=0; l < part->GetNRows(); l++, p++){
+          //
+          //  select only particles which can be detected
+          //  in the STAR detector. Here we restrict us to/
+	  //  the most common species.
+	  //
+	  if(l!=0){                        // first row of table is header, so skip it!
+	    if (p->isthep == 1) {            // select good status only
+            totpart++;
+           if (abs(p->idhep) == 11   ||       // electrons
+               abs(p->idhep) == 13   ||       // muon
+                abs(p->idhep) == 211  ||       // pion
+               abs(p->idhep) == 321  ||       // kaon
+                abs(p->idhep) == 2212) {       // proton/
+
+              nchgpart++;	    
+	      Double_t px = p->phep[0];
+	      Double_t py = p->phep[1];
+	      Double_t pz = p->phep[2];
+	      Double_t pT    =  TMath::Sqrt(px*px+py*py);
+	      Double_t theta =  TMath::ATan2 ( pT, pz );
+	      //        Double_t theta =  atan2 ( pT, pz );
+	      Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
+	      m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
+	      m_H_pT_gen->Fill((Float_t) pT);
+	      m_H_eta_gen->Fill(eta);
+              m_H_vtxx->Fill(p->vhep[0]);
+              m_H_vtxy->Fill(p->vhep[1]);
+              m_H_vtxz->Fill(p->vhep[2]);
+	      }
+	    }
+	  }
+       }
+              m_H_npart->Fill(totpart);
+             m_H_ncpart->Fill(nchgpart);
+      }
+}
+
 //_____________________________________________________________________________
 
 
@@ -1047,7 +1050,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.17 1999/04/19 18:07:57 didenko Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.18 1999/04/19 20:33:42 didenko Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
