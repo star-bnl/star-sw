@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.29 1999/05/03 22:29:28 perev Exp $
+// $Id: StMaker.cxx,v 1.30 1999/05/05 16:23:07 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.30  1999/05/05 16:23:07  perev
+// add recreation of m_DataSet to keep old codes
+//
 // Revision 1.29  1999/05/03 22:29:28  perev
 // Bug in GetDataSet fix. Thanks to Bill Love
 //
@@ -74,7 +77,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.29 1999/05/03 22:29:28 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.30 1999/05/05 16:23:07 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -360,6 +363,10 @@ Int_t StMaker::Init()
 }
 void StMaker::StartMaker()
 {
+  if (!m_DataSet) {//Keep legacy code
+    m_DataSet = Find(".data");
+    if (!m_DataSet) {m_DataSet = new St_ObjectSet(".data"); Add(m_DataSet);}
+  }
   if (GetDebug()) printf("\n*** Call %s::Make() ***\n\n", ClassName());
   gBenchmark->Start(GetName());
 }
