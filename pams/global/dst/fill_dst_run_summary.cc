@@ -1,3 +1,4 @@
+
 /* ------- System includes -------------- */
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,6 +6,8 @@
 
 /* ------- STAF/ROOT generated includes ------- */
 #include "fill_dst_run_summary.h"
+/* prototypes  */
+#include "global_prototypes.h"
 
 #define  PI_MASS     0.139569
 #define  PHI_MIN     0.0
@@ -20,13 +23,13 @@
 
 
 long  type_of_call fill_dst_run_summary_ (
-  TABLE_HEAD_ST  *dst_summary_param_h, DST_SUMMARY_PARAM_ST  *dst_summaryparam,
-  TABLE_HEAD_ST  *run_header_h,        RUN_HEADER_ST         *dst_runheader,
-  TABLE_HEAD_ST  *event_header_h,      EVENT_HEADER_ST       *dst_eventheader,
-  TABLE_HEAD_ST  *dst_event_summary_h, DST_EVENT_SUMMARY_ST  *dst_eventsummary,
-  TABLE_HEAD_ST  *dst_track_h,         DST_TRACK_ST          *dst_track,
-  TABLE_HEAD_ST  *dst_vertex_h,        DST_VERTEX_ST         *dst_vertex,
-  TABLE_HEAD_ST  *dst_run_summary_h,   DST_RUN_SUMMARY_ST    *dst_runsummary)
+  TABLE_HEAD_ST  *dstSummaryParam_h, DST_SUMMARY_PARAM_ST  *dstSummaryParam,
+  TABLE_HEAD_ST  *dstRunHeader_h,        RUN_HEADER_ST         *dstRunHeader,
+  TABLE_HEAD_ST  *dstEventHeader_h,      EVENT_HEADER_ST       *dstEventHeader,
+  TABLE_HEAD_ST  *dstEventSummary_h, DST_EVENT_SUMMARY_ST  *dstEventSummary,
+  TABLE_HEAD_ST  *dstTrack_h,         DST_TRACK_ST          *dstTrack,
+  TABLE_HEAD_ST  *dstVertex_h,        DST_VERTEX_ST         *dstVertex,
+  TABLE_HEAD_ST  *dstRunSummary_h,   DST_RUN_SUMMARY_ST    *dstRunSummary)
 {
   
   /*
@@ -42,20 +45,20 @@ long  type_of_call fill_dst_run_summary_ (
    *: ARGUMENTS:
    *:          IN:
    *:             run_header           - run header table
-   *:             run_header_h         - Header Structure for run_header  
+   *:             dstRunHeader_h         - Header Structure for run_header  
    *:             event_header         - event header table
-   *:             event_header_h       - Header Structure for event_header
-   *:             dst_eventsummary     - DST event summary table 
-   *:             dst_event_summary_h  - Header Structure for dst_eventsummary
-   *:             dst_track            - DST tracks table       
-   *:             dst_track_h          - Header Structure for dst_track
-   *:             dst_vertex           - DST vertex table
-   *:             dst_vertex_h         - Header Structure for dst_vertex 
-   *:             dst_summaryparam     - DST summary parameter table 
-   *:             dst_summary_param_h  - Header Structure for dst_summaryparam
+   *:             dstEventHeader_h       - Header Structure for event_header
+   *:             dstEventSummary     - DST event summary table 
+   *:             dstEventSummary_h  - Header Structure for dstEventSummary
+   *:             dstTrack            - DST tracks table       
+   *:             dstTrack_h          - Header Structure for dstTrack
+   *:             dstVertex           - DST vertex table
+   *:             dstVertex_h         - Header Structure for dstVertex 
+   *:             dstSummaryParam     - DST summary parameter table 
+   *:             dstSummaryParam_h  - Header Structure for dstSummaryParam
    *:       INOUT:
-   *:             dst_runsummary       - DST run summary table 
-   *:             dst_run_summary_h    - Header Structure for dst_runsummary
+   *:             dstRunSummary       - DST run summary table 
+   *:             dstRunSummary_h    - Header Structure for dstRunSummary
    *:         OUT:
    *:             
    *:
@@ -96,39 +99,39 @@ long  type_of_call fill_dst_run_summary_ (
   
   /* Initialize dst_run_summary table at the begining of the event loop */
   if (first_event) {
-    dst_run_summary_h->nok = 1;  
-    dst_runsummary->bfc_run_id        = 0;
-    dst_runsummary->n_events_tot      = 0;
-    dst_runsummary->n_events_good     = 0;
+    dstRunSummary_h->nok = 1;  
+    dstRunSummary->bfc_run_id        = 0;
+    dstRunSummary->n_events_tot      = 0;
+    dstRunSummary->n_events_good     = 0;
     for (i=0; i<2; i++) {
-      dst_runsummary->date[i]         = 0;
-      dst_runsummary->time[i]         = 0;
+      dstRunSummary->date[i]         = 0;
+      dstRunSummary->time[i]         = 0;
     } 
-    dst_runsummary->cpu_total         = 0;
-    dst_runsummary->east_pol_L        = 0;
-    dst_runsummary->east_pol_T        = 0;
-    dst_runsummary->west_pol_L        = 0;
-    dst_runsummary->west_pol_T        = 0;
-    dst_runsummary->luminosity        = 0;
+    dstRunSummary->cpu_total         = 0;
+    dstRunSummary->east_pol_L        = 0;
+    dstRunSummary->east_pol_T        = 0;
+    dstRunSummary->west_pol_L        = 0;
+    dstRunSummary->west_pol_T        = 0;
+    dstRunSummary->luminosity        = 0;
     
     /* Obsolete in newest DSTs   */
     /*    for (i=0; i<2; i++) {                         
-          dst_runsummary->eta_bins[i]     = 0;        
-          dst_runsummary->pt_bins[i]      = 0;        
-          dst_runsummary->mt_bins[i]      = 0;        
+          dstRunSummary->eta_bins[i]     = 0;        
+          dstRunSummary->pt_bins[i]      = 0;        
+          dstRunSummary->mt_bins[i]      = 0;        
           }                                            
-          dst_runsummary->n_phi_bins        = 0; 
+          dstRunSummary->n_phi_bins        = 0; 
     */
 
     for (i=0; i<2; i++) {
-      dst_runsummary->eta[i]     = 0;
-      dst_runsummary->pt[i]      = 0;
-      dst_runsummary->num_vert[i]     = 0;
+      dstRunSummary->eta[i]     = 0;
+      dstRunSummary->pt[i]      = 0;
+      dstRunSummary->num_vert[i]     = 0;
     }
 
     for (i=0; i<30; i++) {
-      dst_runsummary->mean_mult[i] = 0;
-      dst_runsummary->rms_mult[i]   = 0;
+      dstRunSummary->mean_mult[i] = 0;
+      dstRunSummary->rms_mult[i]   = 0;
     }
 
     first_event=0;
@@ -137,11 +140,11 @@ long  type_of_call fill_dst_run_summary_ (
   /*  We are done with looping over events if n_events_good is non-zero.
       Go fill the dst_run_summary table.
   */
-  if (dst_runsummary->n_events_good)
+  if (dstRunSummary->n_events_good)
     goto FillTable;
 
   /*  Return if dst_event_summary table has no entries.  */
-  if (!dst_event_summary_h->nok){
+  if (!dstEventSummary_h->nok){
     fprintf(stderr, "Null dst_event_summary...exiting.\n");
     return STAFCV_BAD;
   }
@@ -160,15 +163,15 @@ long  type_of_call fill_dst_run_summary_ (
 
   /* Fill pt, mt, eta & phi histograms  */
   glb_trk_good = 0;
-  for (itrk=0; itrk < dst_track_h->nok; itrk++) {/* begin global track loop */
+  for (itrk=0; itrk < dstTrack_h->nok; itrk++) {/* begin global track loop */
     /*  Calculate kinematic varialbles  for good tracks only */
-    if ( dst_track[itrk].iflag < 0 )
+    if ( dstTrack[itrk].iflag < 0 )
       continue;
-    theta = piov2 - atan(dst_track[itrk].tanl);
+    theta = piov2 - atan(dstTrack[itrk].tanl);
     eta   = -log(tan(theta/2.));
-    pt    = 1./dst_track[itrk].invpt;
+    pt    = 1./dstTrack[itrk].invpt;
     mt    = sqrt(pt*pt + PI_MASS*PI_MASS)-PI_MASS;
-    phi   = dst_track[itrk].psi;
+    phi   = dstTrack[itrk].psi;
     if (phi<0) phi += 360.;
     /* Sum pt, pt^2, eta, eta^2  for all good global charged tracks*/ 
     pt_sum    += pt;
@@ -181,52 +184,52 @@ long  type_of_call fill_dst_run_summary_ (
   /* charge track multiplicity and vertices */
   nchgtrk_sum  += glb_trk_good;
   nchgtrk2_sum += pow(glb_trk_good,2);
-  nvertx_sum   += dst_vertex_h->nok;
-  nvertx2_sum  += pow(dst_vertex_h->nok,2);
+  nvertx_sum   += dstVertex_h->nok;
+  nvertx2_sum  += pow(dstVertex_h->nok,2);
   
   /*  
-      I assume here that dst_runsummary->n_events_good will only be filled at
+      I assume here that dstRunSummary->n_events_good will only be filled at
       the kumac level before we make the final call to fill_dst_run_summary
-      module to poperly fill the dst_runsummary table at the very end of the 
+      module to poperly fill the dstRunSummary table at the very end of the 
       event loop.
   */
-  if (!dst_runsummary->n_events_good)
+  if (!dstRunSummary->n_events_good)
     goto NextEvent;
 
  FillTable:
-  n_events_good = (float) dst_runsummary->n_events_good;
+  n_events_good = (float) dstRunSummary->n_events_good;
   
   /* Fill mean & stand. deviations  */
   mean   = pt_sum/nchgtrk_sum;
   stddev = pt2_sum/nchgtrk_sum - pow(mean,2);
-  dst_runsummary->pt[0]       = mean;
-  dst_runsummary->pt[1]       = sqrt(stddev);
+  dstRunSummary->pt[0]       = mean;
+  dstRunSummary->pt[1]       = sqrt(stddev);
   mean   = eta_sum/nchgtrk_sum;  
   stddev = eta2_sum/nchgtrk_sum - pow(mean,2);
-  dst_runsummary->eta[0]      = mean;
-  dst_runsummary->eta[1]      = sqrt(stddev);
+  dstRunSummary->eta[0]      = mean;
+  dstRunSummary->eta[1]      = sqrt(stddev);
   mean   = nchgtrk_sum/n_events_good;  
   stddev = nchgtrk2_sum/n_events_good - pow(mean,2);
   /* I used detector id for global =23 (temporarily), this
      has to be passed from bfc. SMargetis  */
-  dst_runsummary->mean_mult[23]  = mean; 
-  dst_runsummary->rms_mult[23]  = sqrt(stddev);
+  dstRunSummary->mean_mult[23]  = mean; 
+  dstRunSummary->rms_mult[23]  = sqrt(stddev);
   mean   = nvertx_sum/n_events_good;  
   stddev = nvertx2_sum/n_events_good - pow(mean,2);
-  dst_runsummary->num_vert[0]      = mean; 
-  dst_runsummary->num_vert[1]      = sqrt(stddev);
+  dstRunSummary->num_vert[0]      = mean; 
+  dstRunSummary->num_vert[1]      = sqrt(stddev);
   
   /* 
-     Load kinematic ranges from dst_summaryparam into dst_runsummary.
+     Load kinematic ranges from dstSummaryParam into dstRunSummary.
      DSW  Nov. 18 , 1998
    */
   /* Obsolete in newest DSTs   */
   /*  for (i=0; i<6; i++) {                         
-      dst_runsummary->eta_bins[i]     = dst_summaryparam->eta_bins[i];        
-      dst_runsummary->pt_bins[i]      = dst_summaryparam->pt_bins[i];        
-      dst_runsummary->mt_bins[i]      = dst_summaryparam->mt_bins[i];        
+      dstRunSummary->eta_bins[i]     = dstSummaryParam->eta_bins[i];        
+      dstRunSummary->pt_bins[i]      = dstSummaryParam->pt_bins[i];        
+      dstRunSummary->mt_bins[i]      = dstSummaryParam->mt_bins[i];        
       }                                            
-      dst_runsummary->n_phi_bins        = dst_summaryparam->n_phi_bins;
+      dstRunSummary->n_phi_bins        = dstSummaryParam->n_phi_bins;
   */
 
  NextEvent:

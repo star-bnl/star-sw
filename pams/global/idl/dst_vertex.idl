@@ -23,11 +23,22 @@
  *       iflag           For primary vertex this indicates the fitting
  *                       iteration and error reporting as follows (see
  *                       documentation for module evr_am.F):
- *                          = -3 for initial seed value
- *                          = -2 for first iteration
- *                          = -1 for second iteration
- *                          = 1  for third, final iteration
- *                          = -4,-5 for determinant = 0 errors in fitter
+ *                          = x1 for normal, successfully found primary vertex
+ *                              during the 3rd iteration
+ *                          = -x3 for initial seed value
+ *                          = -x2 for first iteration value
+ *                          = -x1 for second iteration value
+ *                          = -x4 for failed fit with Determinant of G = 0.0,
+ *                               occuring during any iteration.
+ *                          = -x5 for failed error covariance matrix evaluation
+ *                               during fit with Determinant of E = 0.0,
+ *                               occuring during any iteration.
+ *                             x is the event vertex number (for pileups). Zero
+ *                               means one vertex, x=1 is one extra etc.
+ *                             iflag=iflag+100   for TPC-prevertex finding
+ *                             iflag=iflag+1000  for SVT-prevertex finding
+ *                             iflag=iflag+10000 for FTPC-prevertex finding 
+ *
  *                       (Values for V0, cascade, kinks to be determined).
  * 
  *                         
@@ -74,5 +85,5 @@
   long      vtx_id;        /* vertex type ID, use StVertexDefinitions.h    */
   long      n_daughters;   /* number of charged daughter tracks (see above)*/
  } ;
-/*  Last mod. for dst_vertex:   $Date: 2000/01/05 20:19:26 $ */
+/*  Last mod. for dst_vertex:   $Date: 2000/02/01 17:09:27 $ */
 

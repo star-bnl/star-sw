@@ -1,3 +1,4 @@
+
 /* ------- System includes -------------- */
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,29 +6,27 @@
 /* ------- STAF/ROOT generated includes ------- */
 #include "fill_dst_event_summary.h"
 #include "StVertexDefinitions.h"
+/* exteranl stuff  */
+#include "global_prototypes.h"
 #define  NRANGE     10
-
 
 #ifdef DEBUG
 #undef DEBUG
 #endif
 #define DEBUG 0
 
-/* External routines*/
-#define gufld F77_NAME(gufld,GUFLD)
-extern void type_of_call gufld(float *, float *);
 /* Define global variables for defining ranges in pt, mt & eta  */
 float  pt_min, pt_max,  eta_min, eta_max;
 
 float  mt_inverse_slope(double *mt_histo,int iBegin, int iStop);
 
 long  type_of_call fill_dst_event_summary_ (
-  TABLE_HEAD_ST  *dst_summary_param_h, DST_SUMMARY_PARAM_ST  *dst_summaryparam,
-  TABLE_HEAD_ST  *run_header_h,            RUN_HEADER_ST     *dst_runheader,
-  TABLE_HEAD_ST  *event_header_h,          EVENT_HEADER_ST   *dst_eventheader,
-  TABLE_HEAD_ST  *dst_track_h,         DST_TRACK_ST          *dst_track,
-  TABLE_HEAD_ST  *dst_vertex_h,        DST_VERTEX_ST         *dst_vertex,
-  TABLE_HEAD_ST  *dst_event_summary_h, DST_EVENT_SUMMARY_ST  *dst_eventsummary)
+  TABLE_HEAD_ST  *dstSummaryParam_h, DST_SUMMARY_PARAM_ST  *dstSummaryParam,
+  TABLE_HEAD_ST  *dstRunHeader_h,    RUN_HEADER_ST     *dstRunHeader,
+  TABLE_HEAD_ST  *dstEventHeader_h,  EVENT_HEADER_ST   *dstEventHeader,
+  TABLE_HEAD_ST  *dstTrack_h,        DST_TRACK_ST      *dstTrack,
+  TABLE_HEAD_ST  *dstVertex_h,       DST_VERTEX_ST     *dstVertex,
+  TABLE_HEAD_ST  *dstEventSummary_h, DST_EVENT_SUMMARY_ST  *dstEventSummary)
 {
   /*
    *
@@ -42,20 +41,20 @@ long  type_of_call fill_dst_event_summary_ (
    *:
    *: ARGUMENTS:
    *:          IN:
-   *:             dst_runheader         - run header table
-   *:             dst_run_header_h      - Header Structure for dst_runheader  
-   *:             dst_eventheader       - event header table
-   *:             dst_event_header_h    - Header Structure for dst_eventheader
-   *:             dst_track             - DST tracks table       
-   *:             dst_track_h           - Header Structure for dst_track
-   *:             dst_vertex            - DST vertex table
-   *:             dst_vertex_h          - Header Structure for dst_vertex 
-   *:             dst_summaryparam      - DST summary parameter table 
-   *:             dst_summary_param_h   - Header Structure for dst_summaryparam
+   *:             dstRunHeader         - run header table
+   *:             dst_dstRunHeader_h      - Header Structure for dstRunHeader  
+   *:             dstEventHeader       - event header table
+   *:             dst_dstEventHeader_h    - Header Structure for dstEventHeader
+   *:             dstTrack             - DST tracks table       
+   *:             dstTrack_h           - Header Structure for dstTrack
+   *:             dstVertex            - DST vertex table
+   *:             dstVertex_h          - Header Structure for dstVertex 
+   *:             dstSummaryParam      - DST summary parameter table 
+   *:             dstSummaryParam_h   - Header Structure for dstSummaryParam
    *:       INOUT:
    *:         OUT:
-   *:             dst_eventsummary      - DST event summary table 
-   *:             dst_event_summary_h   - Header Structure for dst_eventsummary
+   *:             dstEventSummary      - DST event summary table 
+   *:             dstEventSummary_h   - Header Structure for dstEventSummary
    *:             
    *:
    *: RETURNS:    STAF Condition Value
@@ -79,7 +78,7 @@ long  type_of_call fill_dst_event_summary_ (
    *:                                       hardwired. User cannot change this.
    *:                                       #of ranges in phi (azimuth of the
    *:                                       p_T vector) is set via
-   *:                                       dst_summaryparam->n_phi_bins.
+   *:                                       dstSummaryParam->n_phi_bins.
    *:      Sep 30, 1999       Margetis S.   Converted to new DST format
    *:      Jan 06, 2000       Lee Barnby    Remove unused variables.
    *:>-------------------------------------------------------------------- 
@@ -98,42 +97,42 @@ long  type_of_call fill_dst_event_summary_ (
   
   /* ===========================  Begin Executable Code  =============== */
   
-  /* Initialize valid rows in dst_eventsummary table */
-  if (!dst_event_summary_h->nok)
-    dst_event_summary_h->nok = 1; 
+  /* Initialize valid rows in dstEventSummary table */
+  if (!dstEventSummary_h->nok)
+    dstEventSummary_h->nok = 1; 
   
-  /* Initialize dst_eventsummary table */
-  dst_eventsummary->n_event                   = 0;
-  dst_eventsummary->bfc_run_id                  = 0;         
-  dst_eventsummary->glb_trk_tot               = 0;
-  dst_eventsummary->glb_trk_good              = 0;
-  dst_eventsummary->glb_trk_prim              = 0;
-  dst_eventsummary->glb_trk_plus              = 0;
-  dst_eventsummary->glb_trk_minus             = 0;
-  dst_eventsummary->glb_trk_exotic            = 0;
-  dst_eventsummary->n_vert_total              = 0;
+  /* Initialize dstEventSummary table */
+  dstEventSummary->n_event                   = 0;
+  dstEventSummary->bfc_run_id                  = 0;         
+  dstEventSummary->glb_trk_tot               = 0;
+  dstEventSummary->glb_trk_good              = 0;
+  dstEventSummary->glb_trk_prim              = 0;
+  dstEventSummary->glb_trk_plus              = 0;
+  dstEventSummary->glb_trk_minus             = 0;
+  dstEventSummary->glb_trk_exotic            = 0;
+  dstEventSummary->n_vert_total              = 0;
   for (i=0; i<5; i++) {
-    dst_eventsummary->n_vert_type[i]          = 0;
+    dstEventSummary->n_vert_type[i]          = 0;
   }
-  dst_eventsummary->n_vert_pileup             = 0;
-  dst_eventsummary->mean_pt                   = 0;
-  dst_eventsummary->mean_pt2                  = 0;
-  dst_eventsummary->mean_eta                  = 0;
-  dst_eventsummary->rms_eta                   = 0;
+  dstEventSummary->n_vert_pileup             = 0;
+  dstEventSummary->mean_pt                   = 0;
+  dstEventSummary->mean_pt2                  = 0;
+  dstEventSummary->mean_eta                  = 0;
+  dstEventSummary->rms_eta                   = 0;
   for (irange=0; irange<NRANGE; irange++) {
-    dst_eventsummary->mult_eta[irange]        = 0;
-    dst_eventsummary->mult_pt[irange]         = 0;
-    dst_eventsummary->mult_phi[irange]        = 0;
-    dst_eventsummary->energy_emc_eta[irange]  = 0;
-    dst_eventsummary->energy_emc_phi[irange]  = 0;
+    dstEventSummary->mult_eta[irange]        = 0;
+    dstEventSummary->mult_pt[irange]         = 0;
+    dstEventSummary->mult_phi[irange]        = 0;
+    dstEventSummary->energy_emc_eta[irange]  = 0;
+    dstEventSummary->energy_emc_phi[irange]  = 0;
   }
   nphirange = (float) NRANGE ;
 
   for (i=0; i<3; i++) {
-    dst_eventsummary->prim_vrtx[i]          = 0.;
+    dstEventSummary->prim_vrtx[i]          = 0.;
   }
-  dst_eventsummary->field         = 0.;
-  if (!dst_track_h->nok){
+  dstEventSummary->field         = 0.;
+  if (!dstTrack_h->nok){
     fprintf(stderr,"FILL_DST_EVENT_SUMMARY: Zero dst tracks...exiting.\n");
     return STAFCV_BAD;
   }
@@ -144,19 +143,19 @@ long  type_of_call fill_dst_event_summary_ (
   
   xlocal[0] =  xlocal[1] = xlocal[2] = 0.;
   gufld(xlocal,bfield);
-  dst_eventsummary->field = bfield[2];      
+  dstEventSummary->field = bfield[2];      
 
 
   /* 
-     Get the min/max values for pt,eta,phi ranges from dst_summaryparam 
+     Get the min/max values for pt,eta,phi ranges from dstSummaryParam 
      table. 
      This allows user(s) to set desired min/max values for pt,eta,phi 
      multiplicity bin widths & ranges. 
   */
   pt_min  = 0.;
-  pt_max  = dst_summaryparam->pt_bins[8];
+  pt_max  = dstSummaryParam->pt_bins[8];
   eta_min = 0.;
-  eta_max = dst_summaryparam->eta_bins[8];
+  eta_max = dstSummaryParam->eta_bins[8];
 
   /* Get double precision pi */
   pi    = acos(-1.);
@@ -167,31 +166,31 @@ long  type_of_call fill_dst_event_summary_ (
   mean_pt=mean_pt2=mean_eta=rms_eta=0;
   
   /* Fill pt, eta & phi histograms  */
-  for (itrk=0; itrk < dst_track_h->nok; itrk++) {/* begin global track loop */
+  for (itrk=0; itrk < dstTrack_h->nok; itrk++) {/* begin global track loop */
     /* Calculate track multiplicities  */
-    if ( dst_track[itrk].iflag <= 0 )
+    if ( dstTrack[itrk].iflag <= 0 )
       continue;
     glb_trk_good++;       /*  good global tracks            */
-    if ( dst_track[itrk].icharge > 0 )
+    if ( dstTrack[itrk].icharge > 0 )
       glb_trk_plus++;     /*  charge = 1                    */
-    if ( dst_track[itrk].icharge < 0 )
+    if ( dstTrack[itrk].icharge < 0 )
       glb_trk_minus++;    /*  charge = -1                   */
     /*  Calculate kinematic varialbles for good tracks only */
-    theta = piov2 - atan(dst_track[itrk].tanl);
+    theta = piov2 - atan(dstTrack[itrk].tanl);
     eta   = -log(tan(theta/2.));
-    pt    = 1./dst_track[itrk].invpt;
-    phi   = dst_track[itrk].psi;
+    pt    = 1./dstTrack[itrk].invpt;
+    phi   = dstTrack[itrk].psi;
     if (phi<0) phi += 360.;
     
   
   /* Fill pt, eta  range multiplicities  */
   /* Modified to allow user to define the ranges in pt,eta,phi via       */
-  /* dst_summaryparam table                                              */
+  /* dstSummaryParam table                                              */
   /* Number of ranges(NRANGE) is fixed and hardwired. User cannot change */
   /* this.                                                               */
 
     /*    if(pt >= 0 && pt<pt
-          dst_eventsummary->mult_pt[irange]++; */
+          dstEventSummary->mult_pt[irange]++; */
 
     /* Sum pt, pt^2, eta, eta^2  for all good global charged tracks*/ 
     mean_pt  += pt;
@@ -201,32 +200,32 @@ long  type_of_call fill_dst_event_summary_ (
   }/* end of global track loop  */
   
   /*  Fill track multiplicities  */
-  dst_eventsummary->glb_trk_tot   = dst_track_h->nok;
-  dst_eventsummary->glb_trk_good  = glb_trk_good;
-  dst_eventsummary->glb_trk_plus  = glb_trk_plus;
-  dst_eventsummary->glb_trk_minus = glb_trk_minus ;
+  dstEventSummary->glb_trk_tot   = dstTrack_h->nok;
+  dstEventSummary->glb_trk_good  = glb_trk_good;
+  dstEventSummary->glb_trk_plus  = glb_trk_plus;
+  dstEventSummary->glb_trk_minus = glb_trk_minus ;
   
   /* Fill mean eta, pt, pt^2 and rms_eta */
-  dst_eventsummary->mean_pt  = mean_pt/(float)glb_trk_good;
-  dst_eventsummary->mean_pt2 = mean_pt2/(float)glb_trk_good;
-  dst_eventsummary->mean_eta = mean_eta/(float)glb_trk_good;
-  dst_eventsummary->rms_eta  = sqrt(rms_eta/(float)glb_trk_good);
+  dstEventSummary->mean_pt  = mean_pt/(float)glb_trk_good;
+  dstEventSummary->mean_pt2 = mean_pt2/(float)glb_trk_good;
+  dstEventSummary->mean_eta = mean_eta/(float)glb_trk_good;
+  dstEventSummary->rms_eta  = sqrt(rms_eta/(float)glb_trk_good);
   
 
   /* Fill total # of vertices */
-  dst_eventsummary->n_vert_total = dst_vertex_h->nok;  
+  dstEventSummary->n_vert_total = dstVertex_h->nok;  
 
   /* Count v0 candidates */
-  for (ivtx=0;  ivtx<dst_vertex_h->nok; ivtx++)  { /* begin vertex loop */
-    vtx_id = dst_vertex[ivtx].vtx_id;  /*  get vertex type */
-    iflag  = dst_vertex[ivtx].iflag;
+  for (ivtx=0;  ivtx<dstVertex_h->nok; ivtx++)  { /* begin vertex loop */
+    vtx_id = dstVertex[ivtx].vtx_id;  /*  get vertex type */
+    iflag  = dstVertex[ivtx].iflag;
 
     if(vtx_id == 1 && iflag ==1 ) {
       /* Fill Primary vertex information */
-      dst_eventsummary->prim_vrtx[0]    = dst_vertex[ivtx].x;
-      dst_eventsummary->prim_vrtx[1]    = dst_vertex[ivtx].y;
-      dst_eventsummary->prim_vrtx[2]    = dst_vertex[ivtx].z;
-      dst_eventsummary->glb_trk_prim    = dst_vertex[ivtx].n_daughters;
+      dstEventSummary->prim_vrtx[0]    = dstVertex[ivtx].x;
+      dstEventSummary->prim_vrtx[1]    = dstVertex[ivtx].y;
+      dstEventSummary->prim_vrtx[2]    = dstVertex[ivtx].z;
+      dstEventSummary->glb_trk_prim    = dstVertex[ivtx].n_daughters;
     }
     if (vtx_id != kUndefinedVertexIdentifier && 
 	vtx_id != kEventVertexIdentifier     &&
@@ -235,18 +234,18 @@ long  type_of_call fill_dst_event_summary_ (
 	vtx_id != kKinkDecayIdentifier) {
       printf ("Undefined vertex type = %d\n", vtx_id);
     }
-    else  dst_eventsummary->n_vert_type[vtx_id]++ ;
+    else  dstEventSummary->n_vert_type[vtx_id]++ ;
 
-      if(vtx_id == 5)  dst_eventsummary->n_vert_pileup++ ;
+      if(vtx_id == 5)  dstEventSummary->n_vert_pileup++ ;
       
  }  /* end of vertex loop  */
 
   
   /*  Fill event ID */
-  dst_eventsummary->n_event = dst_eventheader->n_event;
+  dstEventSummary->n_event = dstEventHeader->n_event;
   
   /* Fill DST production run ID */
-  dst_eventsummary->bfc_run_id = dst_runheader->bfc_run_id;
+  dstEventSummary->bfc_run_id = dstRunHeader->bfc_run_id;
   
   return STAFCV_OK;
 }  /*  End of fill_dst_event_summary  */

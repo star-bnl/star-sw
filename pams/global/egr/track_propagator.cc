@@ -11,14 +11,7 @@
 #include "phys_constants.h"
 
 /* External routines*/
-#define gufld F77_NAME(gufld,GUFLD)
-extern void type_of_call gufld(float *, float *);
-extern void prop_circle_param_();
-extern void ev0_project_track_();
-extern void prop_update_track_param_();
-extern void prop_track_mom_();
-extern void prop_fine_approach_();
-extern void prop_vzero_geom_();
+#include "global_prototypes.h"
 
 long type_of_call track_propagator_(
   TABLE_HEAD_ST         *gtrack_h,      DST_TRACK_ST           *gtrack ,
@@ -56,8 +49,6 @@ long type_of_call track_propagator_(
   
 
   /* get magnetic field   */
-  
-  
   xlocal[0] =  xlocal[1] = xlocal[2] = 0.;
   gufld(xlocal,bfield);
   printf("Propagator uses field of %f KG \n",bfield[2]);
@@ -211,18 +202,18 @@ long type_of_call track_propagator_(
       
       if(target->iflag == 5)
 	{
-          x0   = gtrack[i].r0*cos(gtrack[i].phi0*C_RAD_PER_DEG) ;
-          y0   = gtrack[i].r0*sin(gtrack[i].phi0*C_RAD_PER_DEG) ;
-          z0   = gtrack[i].z0;
+          x1[0]   = gtrack[i].r0*cos(gtrack[i].phi0*C_RAD_PER_DEG) ;
+          x1[1]   = gtrack[i].r0*sin(gtrack[i].phi0*C_RAD_PER_DEG) ;
+          x1[2]   = gtrack[i].z0;
 	  xv[0] = target->x[0];
 	  xv[1] = target->x[1];
 	  xv[2] = target->x[2];
           psi  = gtrack[i].psi*C_RAD_PER_DEG;
-          tanl = gtrack[i].tanl*C_RAD_PER_DEG;
+          tanl = gtrack[i].tanl;
 	  pStraight[0] = cos(psi);
 	  pStraight[1] = sin(psi);
 	  pStraight[2] = tanl;
-	  prop_fine_approach_(xv, x0, pStraight, &xx0);
+	  prop_fine_approach_(xv, x1, pStraight, &xx0);
           ptrack[i].r0   = sqrt(xx0[0]*xx0[0]+xx0[1]*xx0[1]);
           ptrack[i].phi0 = atan2(xx0[1],xx0[0]);
           if(ptrack[i].phi0 < 0. ) 

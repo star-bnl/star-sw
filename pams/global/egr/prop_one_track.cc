@@ -4,9 +4,7 @@
 #include "phys_constants.h"
 
 /* External routines*/
-extern void prop_circle_param_();
-extern void ev0_project_track_();
-extern void prop_fine_approach_();
+#include "global_prototypes.h"
 
 
 float prop_one_track( float gtrack[8] , float target[2] , float ptrack[3] )
