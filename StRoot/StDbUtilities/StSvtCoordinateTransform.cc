@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.25 2004/07/02 20:48:18 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.26 2004/07/29 01:38:06 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -25,8 +25,10 @@
 #include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClassLibrary/StSvtHybridDriftVelocity.hh"
+#include "StSvtClassLibrary/StSvtHybridDriftCurve.hh"
 #include "StSvtClassLibrary/StSvtT0.hh"
 #include <unistd.h>
+#include "TF1.h"
 #include "TString.h"
 
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
@@ -60,7 +62,26 @@ void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
   mgeom = new StSvtGeometry(param, geom, shape);
   mconfig = config;
   mDriftVelocity = driftVeloc;
-  mT0 = T0;  
+  mDriftCurve = NULL;
+  mT0 = T0;
+  mPoly9 = NULL;
+}
+//_____________________________________________________________________________
+void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
+						 svg_geom_st* geom, 
+						 svg_shape_st* shape,
+						 StSvtConfig* config,
+						 StSvtHybridCollection* driftVeloc,
+						 StSvtHybridCollection* driftCurve,
+						 StSvtT0* T0){
+
+  
+  mgeom = new StSvtGeometry(param, geom, shape);
+  mconfig = config;
+  mDriftVelocity = driftVeloc;
+  mDriftCurve = driftCurve;
+  mT0 = T0;
+  mPoly9 = new TF1("mPoly9","pol9(0)",0.0,6.0);
 }
 //_____________________________________________________________________________
 void StSvtCoordinateTransform::setVelocityScale( double deltaV){
@@ -75,7 +96,22 @@ void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
   mgeom = geom;
   mconfig = config;
   mDriftVelocity = driftVeloc;
+  mDriftCurve = NULL;
   mT0 = T0;
+  mPoly9 = NULL;
+}
+//____________________________________________________________________________
+void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
+						 StSvtConfig* config,
+						 StSvtHybridCollection* driftVeloc,
+						 StSvtHybridCollection* driftCurve,
+						 StSvtT0* T0){
+  mgeom = geom;
+  mconfig = config;
+  mDriftVelocity = driftVeloc;
+  mDriftCurve = driftCurve;
+  mT0 = T0;
+  mPoly9 = new TF1("mPoly9","pol9(0)",0.0,6.0);
 }
 
 //_____________________________________________________________________________
@@ -641,13 +677,57 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
   int hybrid = a.hybrid();
 
   float vd = -1;
+  float td = -1;
+  int anode;
   int index;
-  if (mDriftVelocity) {
-    index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
-    if (index >= 0)
-      vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
-	mDeltaDriftVelocity;
-  }
+  double Ratio = 1;
+
+  if (mDriftVelocity && mDriftCurve) 
+    {
+      index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
+      if (index >= 0)
+	{
+	  vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
+	    mDeltaDriftVelocity;
+	  td = 3.0*10e5 / vd;  // time for longest drift (3 cm)
+	  if (x<=80)
+	    anode=1;  // anode 40 fit
+	  else if (x>80 && x<=160)
+	    anode=2;  // anode 120 fit
+	  else if (x>160)
+	    anode=3;  // anode 200 fit
+	  else
+	    gMessMgr->Warning() << "Error: non-sensical anode number: " << x << endm;
+	
+	  for(Int_t j=1; j<=10; j++)
+	    {
+	      mPoly9->SetParameter(j-1,((StSvtHybridDriftCurve*)mDriftCurve->at(index))->getParameter(anode,j));
+	      //gMessMgr->Info() << "got parameter (" << j-1 << "): " << mPoly9->GetParameter(j-1) << " for index " << index <<  endm;
+	      
+	    }
+	  
+	  double NewDist= mPoly9->Eval(td); // get bench distance at datas 3cm drift
+	  Ratio = 3.0*10/(NewDist); // Richard stores in mm/Mus must fix that some time
+	  distance = mPoly9->Eval(x*Ratio*10e5/fsca)/10;
+	  //cout << " Full drift " << mPoly9->Eval(td*Ratio)/10 << " new distance " << distance << " original distance " <<  vd*x/fsca << endl;
+	  if( abs(distance-vd*x/fsca) > 0.03) {
+	    cout << "Got crazy result using data drift vel " << endl;
+	    return vd*x/fsca;
+	  }
+	  return distance;
+	}
+    }
+  else if (mDriftVelocity) 
+    {
+      //       gMessMgr->Warning() << "mDriftCurve is NULL: " << x << endm;
+      index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
+      if (index >= 0)
+	{
+	  vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
+	    mDeltaDriftVelocity;
+	}
+    
+    }
   if (vd < 0)
     vd = 675000*mDeltaDriftVelocity;
 
