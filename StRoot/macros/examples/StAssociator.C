@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.20 2000/05/11 22:14:27 calderon Exp $
+// $Id: StAssociator.C,v 1.21 2000/06/08 20:09:22 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.21  2000/06/08 20:09:22  calderon
+// load St_emc_Maker to work with new Emc Hit classes
+//
 // Revision 1.20  2000/05/11 22:14:27  calderon
 // Go back to getting the histograms from the TList.
 //
@@ -115,6 +118,7 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     
     gSystem->Load("StEvent");
     gSystem->Load("StEventMaker"); 
+    gSystem->Load("St_emc_Maker");
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
     gSystem->Load("StAssociationMaker");
