@@ -1,5 +1,8 @@
-// $Id: bfcread_eventBranch.C,v 1.3 2000/05/16 21:00:00 kathy Exp $
+// $Id: bfcread_eventBranch.C,v 1.4 2000/05/19 21:43:07 kathy Exp $
 // $Log: bfcread_eventBranch.C,v $
+// Revision 1.4  2000/05/19 21:43:07  kathy
+// change print statements so that autoQA can find events easily
+//
 // Revision 1.3  2000/05/16 21:00:00  kathy
 // clean up
 //
@@ -73,41 +76,25 @@ void bfcread_eventBranch(
 // --- now execute chain member functions
   chain->Init();
 
-  int istat=0;
-  int ijk=0;
-  int countev=0;
+ int countev=0;
 
-// Event loop
-EventLoop: if (ijk < nevents && !istat) {
+ int istat=0;
+ int ijk=1;
 
-    chain->Clear();
-    istat = chain->Make(ijk);
-    
-//  count # times Make is called
-    ijk++;
+ EventLoop: if (ijk <= nevents && istat!=2) {
+     cout << "============================ Event " << ijk
+	  << " start ============================" << endl;
 
-    cout << " Call Make # " << ijk << endl; 
-    cout << "     istat value returned from chain Make = " << istat << endl;
-
-    if (!istat) {
-
-// count # events found
-    countev++;
- 
-    cout << " QAInfo: event # " << countev  << endl << endl;
-    fout << " QAInfo: event # " << countev  << endl << endl;
-
-    }  // istat
-
-    else   // if (istat)
-      {
-      cout << "Last event processed. Status = " << istat << endl;
-    }
-
-    goto EventLoop;
-
-}  // EventLoop
-     
+     chain->Clear();
+     istat = chain->Make(ijk);
+      if (!istat)  countev++;
+      if (istat==2) 
+        {cout << "Last  event processed. Status = " << istat << endl;}
+      if (istat==3) 
+        {cout << "Error event processed. Status = " << istat << endl;}
+     ijk++;
+     goto EventLoop;
+ } 
  
   cout << endl;
   cout << "QAInfo: End of Job " << endl; 
