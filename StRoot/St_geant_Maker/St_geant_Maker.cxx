@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.4 1999/01/05 01:37:02 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.5 1999/01/10 20:37:31 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.5  1999/01/10 20:37:31  fisyak
+// Give access to Zebra
+//
 // Revision 1.4  1999/01/05 01:37:02  fisyak
 // Intermeidate version with St_Node
 //
@@ -73,6 +76,22 @@
 #include "TGTRA.h"
 #include "TCTUB.h"
 #include "TGeant3.h"
+common_gcbank *cbank;
+common_quest  *cquest; 
+common_gclink *clink; 
+common_gccuts *ccuts; 
+common_gcflag *cflag; 
+common_gckine *ckine; 
+common_gcking *cking; 
+common_gcmate *cmate; 
+common_gctmed *ctmed; 
+common_gctrak *ctrak; 
+common_gctpol *ctpol; 
+common_gcvolu *cvolu; 
+common_gcnum  *cnum; 
+common_gcsets *csets; 
+Int_t *z_iq, *z_lq; 
+Float_t *z_q; 
 
 Float_t theta1, phi1, theta2, phi2, theta3, phi3, type;
 Int_t   nlev;
@@ -88,6 +107,7 @@ extern "C" long int type_of_call csjcal_(
 addrfun *fun,           /* addres of external routine,                  */
 int  *narg,             /* number   of arguments                        */
 ...);                   /* other narg arguments                         */
+
 ClassImp(St_geant_Maker)
 
 //_____________________________________________________________________________
@@ -114,10 +134,12 @@ Int_t St_geant_Maker::Init(){
 Int_t St_geant_Maker::Make(){
 //  PrintInfo();
   gtrig();
+#if 0
   Char_t *g2t = "g2t_";
   Int_t  narg = 0;
   addrfun address  = (addrfun ) csaddr(g2t,strlen(g2t));
   if (address) csjcal(&address,&narg);
+#endif
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -129,7 +151,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.4 1999/01/05 01:37:02 fisyak Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.5 1999/01/10 20:37:31 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
@@ -158,12 +180,15 @@ void St_geant_Maker::Work()
   Char_t ss[12], ssd[12];
   int     icopy   = 0;
   Int_t   irot;
-  Int_t   mrot    = 126;
+  Int_t   mrot    = 0;
+  Int_t   nrot    = 0;
+  Int_t   jrotm   = clink->jrotm;
+  if (jrotm) {nrot = z_iq[jrotm-2];}
   float te1[700], fi1[700], te2[700], fi2[700], te3[700], fi3[700];
 
   typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,PGON,PCON,ELTU,HYPE,GTRA=28,CTUB} shapes;
 
-  for (irot=1; irot<=126; irot++) {
+  for (irot=1; irot<=nrot; irot++) {
     gfrotm_ (&irot, &theta1,&phi1, &theta2,&phi2, &theta3,&phi3);
     sprintf(ss,"rotm%i",irot);
     rotm=new TRotMatrix(ss,ss,  theta1,phi1, theta2,phi2, theta3,phi3);
@@ -236,7 +261,7 @@ void St_geant_Maker::Work()
 
       if (check == 0) {
 	icopy = icopy + 1;
-	irot = 126 + icopy;
+	irot = nrot + icopy;
 	mrot = irot;
 	te1[irot]=theta1; fi1[irot]=phi1;
 	te2[irot]=theta2; fi2[irot]=phi2;
