@@ -2,7 +2,7 @@
 %
 % StAssociationMaker - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StAssociationMaker.tex,v 1.2 1999/07/14 14:46:13 calderon Exp $
+% $Id: StAssociationMaker.tex,v 1.3 1999/07/23 00:15:38 calderon Exp $
 %
 % Authors:Michael A. Lisa
 %         Thomas S. Ullrich
@@ -23,8 +23,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StAssociationMaker.tex,v $
-% Revision 1.2  1999/07/14 14:46:13  calderon
-% Updated documentation to include macros in CVS
+% Revision 1.3  1999/07/23 00:15:38  calderon
+% Corrected documentation about macro location, and current libraries where StAssociationMaker runs
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -286,10 +286,10 @@ macro.
 \index{ROOT files}
 The procedure starting from scratch to run the provided 
 example is (Note that \StAssociationMaker\ runs at the moment
-only on Linux and in new):
+only on Linux and in SL99e, which as of this writing is starpro):
 \begin{verbatim}
     ssh coburn 
-    starnew
+    starpro
     mkdir workdir
     cd workdir
     cvs co StRoot/StMcEvent
@@ -300,13 +300,14 @@ only on Linux and in new):
     makel -C StRoot/StMcEventMaker
     makel -C StRoot/StAssociationMaker
     makel -C StRoot/StMcAnalysisMaker
+    cvs co StRoot/macros/examples/StAssociator.C
     root4star StAssociator.C
 \end{verbatim}
 
 Please note that at the moment, StMcEventMaker only runs with ROOT files.
 
-StAssociator.C can be found in \name{\$CVSROOT/StRoot/macros/examples/StAssociator.C}, %$%%%
-and it runs a 
+StAssociator.C can be found in \name{\$CVSROOT/StRoot/macros/examples/StAssociator.C}. %$%%%
+To get it you must use \verb+cvs co+\\ command as above. The macro runs a 
 chain consisting of four makers:
 \begin{description}
 \item[\name{StEventReaderMaker}:] loads StEvent
