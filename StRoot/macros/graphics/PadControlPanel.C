@@ -2,10 +2,13 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.4 1999/06/03 00:27:53 fine Exp $
+// $Id: PadControlPanel.C,v 1.5 1999/06/03 00:35:34 fine Exp $
 // $Log: PadControlPanel.C,v $
+// Revision 1.5  1999/06/03 00:35:34  fine
+// Comments clean up
+//
 // Revision 1.4  1999/06/03 00:27:53  fine
-// 4 view control has been activated
+//  4 view control has been activated
 //
 // Revision 1.3  1999/06/02 22:25:12  fine
 // 4 view command has been introduced
@@ -42,8 +45,11 @@
 //  --------------------
 //   gROOT->LoadMacro("PadControlPanel.C");
 //
+//  Afterthat one may "click" <4 views> button to get from the single "view"
+//  the expanded view as follows:
+//  begin_html  <P ALIGN=CENTER> <IMG SRC="gif/FourStarView.gif" ></P> end_html
 //  Note:  If you don't like what it does make your private copy 
-//         change it with your favorite text editor and load it right
+//  ====   change it with your favorite text editor and load it right
 //         away.
 //         NO EXTRA STEP like : compilation, linking, loading required 
 //
