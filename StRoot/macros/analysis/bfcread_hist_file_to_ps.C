@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_file_to_ps.C,v 1.1 1999/06/11 20:08:56 kathy Exp $
+// $Id: bfcread_hist_file_to_ps.C,v 1.2 1999/06/22 18:14:25 kathy Exp $
 // $Log: bfcread_hist_file_to_ps.C,v $
+// Revision 1.2  1999/06/22 18:14:25  kathy
+// change default input files and fix name of macro
+//
 // Revision 1.1  1999/06/11 20:08:56  kathy
 // new macro that reads the *.hist.root file produced from bfc.C and uses all histogram utility methods in St_QA_Maker to manipulate the histograms
 //
@@ -28,7 +31,7 @@ StTreeMaker *treeMk=0;
 //------------------------------------------------------------------------
 
 void bfcread_hist_file_to_ps(Int_t nevents=1, 
-  const Char_t *MainFile="/disk00000/star/test/dev/tfs_Solaris/Wed/year_1b/psc0050_01_40evts.hist.root",
+  const Char_t *MainFile="/disk00000/star/test/dev/tfs_Linux/Thu/year_2a/psc0208_01_40evts.hist.root",
   const Char_t *psFile="QA_hist.ps",
   const Char_t *firstHist="*",
   const Char_t *lastHist="*")
