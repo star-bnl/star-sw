@@ -103,7 +103,7 @@ Int_t StiMaker::Init()
     cout <<"Update Display"<<endl;
     mdisplay->update();
 
-    const char* buildfile = "/star/rcf/pwg/spectra/mmiller/StiGeometryParameters/Detectors/";
+    const char* buildfile = "/scr20/ittf/StiGeometryParameters/Detectors";
     mdetector = StiDetectorLayerContainer::instance();
     
     //mdetector->setSectors(0, 0);
@@ -113,6 +113,8 @@ Int_t StiMaker::Init()
     //mdetector->buildNext(buildfile);
     //}
     mdetector->reset();
+    mdetector->build(buildfile);
+    mdetector->buildMaterials("/scr20/ittf/StiGeometryParameters/Materials");
     
     mdisplay->draw();
     mdisplay->update();
