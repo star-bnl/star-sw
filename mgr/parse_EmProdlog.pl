@@ -11,8 +11,8 @@ use Sys::Hostname;
 #my $debugOn=0;
 
 my $hostname     = hostname();
-my $dir_log      = "/star/rcf/data07/reco/embedding/P00hg/log/daq";
-my $dir_sum      = "/star/rcf/data07/reco/embedding/P00hg/sum/daq";   
+my $dir_log      = "/star/rcf/data07/reco/embeddingk-/P00hg/log/daq";
+my $dir_sum      = "/star/rcf/data07/reco/embeddingk-/P00hg/sum/daq";   
 my @set ;
 my @list;
 my $nlist = 0; 
