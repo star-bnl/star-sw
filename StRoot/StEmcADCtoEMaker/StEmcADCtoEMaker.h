@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.8 2001/10/25 21:31:36 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.9 2001/10/31 15:01:07 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.9  2001/10/31 15:01:07  suaide
+// modified to discard bad EMC events
+//
 // Revision 1.8  2001/10/25 21:31:36  suaide
 // modifications to get new database tables
 //
@@ -47,6 +50,7 @@ class StEmcADCtoEMaker : public StMaker
            StEmcCollection   *m_emc;            //!
            
            Int_t             status[18000];
+           Int_t             nChannels;
            
            StEmcCollection   *GetEmcCollectionFromDaq(TDataSet* daq);           
            void              GetStatus(Int_t);

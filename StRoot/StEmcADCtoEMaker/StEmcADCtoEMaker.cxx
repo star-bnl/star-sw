@@ -1,9 +1,9 @@
 //*-- Author : Alexandre Suaide
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.16 2001/10/29 19:36:46 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.17 2001/10/31 15:01:07 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
-// Revision 1.16  2001/10/29 19:36:46  suaide
-// status DB is now working
+// Revision 1.17  2001/10/31 15:01:07  suaide
+// modified to discard bad EMC events
 //
 // Revision 1.11  2001/10/24 23:06:54  suaide
 // log messages included for easier debug
@@ -165,7 +165,8 @@ void StEmcADCtoEMaker::GetStatus(Int_t det)
 {
   cout <<"Getting status table for detector "<<detname[det].Data()<<endl;
   TString TableName=detname[det]+"Running";
-  Int_t nchannels=0,total=0;
+  Int_t total=0;
+  nChannels=0;
   
   for(Int_t i=1;i<=18000;i++) status[i-1]=0;
   Int_t d = GetDate();
@@ -185,7 +186,7 @@ void StEmcADCtoEMaker::GetStatus(Int_t det)
       {
         status[i-1]=(Int_t) runst[0].IsRunning[i-1];
         //cout <<" i = "<<i<<"  status = "<<status[i-1]<<"  "<<(char)(runst[0].IsRunning[i-1]+65)<<endl;
-        if(status[i-1]==1) nchannels++;
+        if(status[i-1]==1) nChannels++;
       }
     } 
     else  // standard status table for bemc
@@ -202,14 +203,14 @@ void StEmcADCtoEMaker::GetStatus(Int_t det)
           {
             if(d>=20011015 && d<=20011020) status[i-1]=0;
           }
-          if(status[i-1]==1) nchannels++;
+          if(status[i-1]==1) nChannels++;
 
         }
 
         status[2309-1]=0;
         status[1986-1]=0;
         status[1979-1]=0;
-        nchannels-=3;
+        nChannels-=3;
       }
     }
   }
@@ -224,11 +225,11 @@ void StEmcADCtoEMaker::GetStatus(Int_t det)
       for(Int_t i=1;i<=18000;i++) 
       {
         status[i-1]=(Int_t) runst[0].IsRunning[i-1];
-        if(status[i-1]==1) nchannels++;
+        if(status[i-1]==1) nChannels++;
       }
     }
   }
-  cout <<"Total number of channels = "<<total<<"  active = "<<nchannels<<endl;
+  cout <<"Total number of channels = "<<total<<"  active = "<<nChannels<<endl;
   return;
 
 }
@@ -256,47 +257,47 @@ StEmcCollection* StEmcADCtoEMaker::GetEmcCollectionFromDaq(TDataSet* daq)
     GetStatus(det);
     Float_t sum=0,validChannels=0;
     StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId);
-    StEmcDetector* detector = new StEmcDetector(id,120);
-
-    for(UInt_t m=1;m<=120;m++)
-      for(UInt_t e=1;e<=eta[det];e++)
-        for(UInt_t s=1;s<=sub[det];s++)
-        {
-          unsigned short ADC=0;
-          if(det==0) if(!TheEmcReader->getTowerADC((int)m,(int)e,(int)s,ADC)) goto next;
-          if(det==2) if(!TheEmcReader->getSMDE_ADC((int)m,(int)e,ADC)) goto next;
-          if(det==3) if(!TheEmcReader->getSMDP_ADC((int)m,(int)e,(int)s,ADC)) goto next;
-          Int_t idh;
-          geo[det]->getId(m,e,s,idh);
-          if(status[idh-1]==1)
-          {
-            sum+=(Float_t)ADC;
-            validChannels++;
-            if(ADC>0)
-            {
-              StEmcRawHit* hit=new StEmcRawHit(id,m,e,s,(UInt_t)ADC);
-              detector->addHit(hit);            
-            }
-          }
-          next: continue;
-        }
-    // check if the mean value is bellow threshold for bad events
-    // should change to get the valid event info from event header  
-    // for BEMC only for a while  
-    if(det==0) 
+    
+    Bool_t Ok=kFALSE;
+    
+    if(det==0) // check if data is Ok for bemc
     {
-      if(validChannels>0)
-      {
-        Float_t avg=sum/validChannels;
-        if(avg>700) 
-        {
-          cout <<"BAD BEMC event .... deleting it....\n";
-          delete detector;
-        }
-        else emcDaqUtil->setDetector(detector);
-      }
+      cout <<"EMC VALID TOWER HITS = "<<TheEmcReader->NTowerHits()<<" OFFLINE ACTIVE CHANNELS = "<<nChannels<<endl;
+      if(TheEmcReader->NTowerHits()>=nChannels) Ok=kTRUE;
     }
-    else emcDaqUtil->setDetector(detector); // fot other detectors
+    
+    if(Ok)
+    {
+      StEmcDetector* detector = new StEmcDetector(id,120);
+      for(UInt_t m=1;m<=120;m++)
+        for(UInt_t e=1;e<=eta[det];e++)
+          for(UInt_t s=1;s<=sub[det];s++)
+          {
+            unsigned short ADC=0;
+            if(det==0) if(!TheEmcReader->getTowerADC((int)m,(int)e,(int)s,ADC)) goto next;
+            if(det==2) if(!TheEmcReader->getSMDE_ADC((int)m,(int)e,ADC)) goto next;
+            if(det==3) if(!TheEmcReader->getSMDP_ADC((int)m,(int)e,(int)s,ADC)) goto next;
+            Int_t idh;
+            geo[det]->getId(m,e,s,idh);
+            if(status[idh-1]==1)
+            {
+              sum+=(Float_t)ADC;
+              validChannels++;
+              if(ADC>0)
+              {
+                StEmcRawHit* hit=new StEmcRawHit(id,m,e,s,(UInt_t)ADC);
+                detector->addHit(hit);            
+              }
+            }
+            next: continue;
+          }
+      cout <<"Total ADC sum = "<<sum<<"  validChannels = "<<validChannels<<endl;
+      emcDaqUtil->setDetector(detector); 
+    }
+    else
+    {
+      cout <<"***** BAD event for detector "<<detname[det].Data()<<endl;
+    }
   }
 
   return emcDaqUtil;
