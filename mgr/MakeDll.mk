@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.104 1999/08/20 22:59:15 fisyak Exp $
+# $Id: MakeDll.mk,v 1.105 1999/08/22 23:09:35 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.105  1999/08/22 23:09:35  fisyak
+# remove dir path from library linkage
+#
 # Revision 1.104  1999/08/20 22:59:15  fisyak
 # Fix problem with / in ROOT_DIR
 #
@@ -447,6 +450,8 @@ ifneq (,$(QWE))
   QWE  :=$(shell expr $(QWE) + 1)
   SL_NEW :=$(MY_SO).$(QWE)
 endif
+MY_SO_NOTDIR := $(notdir $(MY_SO))
+SL_NEW_NOTDIR := $(notdir $(SL_NEW))
 MY_AR  := $(addsuffix .a, $(basename $(MY_SO)))
 #
 
@@ -504,9 +509,9 @@ Libraries : $(MY_SO) $(MY_SO_CINT)
 
 
 $(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O)) $(STAR_FILES_O) $(LIBRARY)
-	cd $(OBJ_DIR);  \
-        $(SO) $(SOFLAGS) $(SoOUT) $(SL_NEW) $(ALL_DEPS) $(SL_EXTRA_LIB) ; \
-        $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
+	cd $(OBJ_DIR) && \
+        $(SO) $(SOFLAGS) $(SoOUT) $(SL_NEW) $(ALL_DEPS) $(SL_EXTRA_LIB) &&  \
+        $(RM) $(MY_SO) &&  cd $(LIB_DIR) &&  $(LN) $(SL_NEW_NOTDIR) $(MY_SO_NOTDIR) 
 	@echo "           Shared library " $(MY_SO) " has been created"   
 $(OBJ_DIR)/%.$(O) : %.c
 	$(CC)  -c $(CPPFLAGS) $(CFLAGS) $(INCLUDES) $(CINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
