@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.39 2000/02/11 21:31:59 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.40 2000/02/17 22:00:50 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.40  2000/02/17 22:00:50  kathy
+// changed ranges of histograms and labelled axes for diff geant vs reco vtx hist
+//
 // Revision 1.39  2000/02/11 21:31:59  kathy
 // adjust booking range for geant vs reco plots
 //
@@ -1204,13 +1207,15 @@ void StQABookHist::BookHistEval(){
 // these only get filled if the geant dataset is available!
 
    m_geant_reco_pvtx_x  = QAH1F("QaGRpvtxDx"," diff geant - reco prim vtx X",
-                              100, -0.255,0.25);
+                              100, -0.25,0.25);
    m_geant_reco_pvtx_y  = QAH1F("QaGRpvtxDy"," diff geant - reco prim vtx Y",
                               100, -0.25,0.25);
    m_geant_reco_pvtx_z  = QAH1F("QaGRpvtxDz"," diff geant - reco prim vtx Z",
                               100, -0.25,0.25);
    m_geant_reco_vtx_z_z = QAH2F("QaGRpvtxDzZ",
-        " reco pvtx Z vs diff geant - reco Z", 100, -0.25,0.25,100,-50.,50.);
+        " reco pvtx Z vs diff geant - reco Z", 100, -0.5,0.5,100,-50.,50.);
+     m_geant_reco_vtx_z_z->SetXTitle("z vtx resolution (cm)");
+     m_geant_reco_vtx_z_z->SetYTitle("z position of vtx (cm)");
 
 }
 
