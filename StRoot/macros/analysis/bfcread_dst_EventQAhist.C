@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.3 1999/11/29 20:25:55 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.4 1999/11/29 21:40:17 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.4  1999/11/29 21:40:17  kathy
+// clean up macros; change name of output files; remove unneccessary lines
+//
 // Revision 1.3  1999/11/29 20:25:55  kathy
 // remove call to method SetDraw - doesn't do anything
 //
@@ -34,7 +37,7 @@ TBrowser *brow=0;
 void bfcread_dst_EventQAhist(Int_t nevents=10, 
              const char *MainFile="/star/rcf/test/dev/tfs_Solaris/Tue/year_1b/set0352_01_35evts.dst.root",
              const Char_t *MakerHist="EventQA",
-             const Char_t *psFile="EventQA_hist.ps",
+             const Char_t *psFile="Event_QA_hist.ps",
              const Char_t *PageTitle="")
 {
 //
@@ -105,10 +108,9 @@ void bfcread_dst_EventQAhist(Int_t nevents=10,
 
   cout <<  " bfcread_dst_EventQAhist.C, passed chain->Make !!!" << endl ;
 
-  brow = new TBrowser("BName","BTitle");   
+//  brow = new TBrowser("BName","BTitle");   
 
 // the following methods are already set to default values in St_QA_Maker::Init - now write over them
-//   EventQA->SetDraw(kTRUE);
 
 // Set the default canvas style to plain (so it won't print out grey!)
     gROOT->SetStyle("Plain");
