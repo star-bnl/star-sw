@@ -16,8 +16,12 @@ class StTpcDeviantSpectraAnalysis : public StSpectraAnalysis {
 
  private:
 
-  TH3D* m2DSpectraDeviant;
+  TH3D* m2DSpectraDeviantWeighted;
+  TH3D* m2DSpectraDeviantCounts;
   TH2D* m2DSpectra;
+  TH2D* m2DJacobian;
+  TH2D* m2DCounts;
+
   TH1D* mPIDDeviant;  
   TH2D* mDedxvsP;
   

@@ -28,30 +28,63 @@ void StTpcDeviantSpectraAnalysis::bookHistograms() {
   } else if (mAbscissa == kPseudoRapidity && mOrdinate == kPperp) {
     hlab2DSpectra= "EtaPt";
   } 
+  //
+  // replace all this cut and paste with a a helper function
+  //
 
-  hlab2DSpectra = hlab2DSpectra + mTitle;
-  const char* h2DSpectra = hlab2DSpectra.c_str(); 
-  m2DSpectra = new TH2D(h2DSpectra,"2-D spectra",
+  string hlab2DSpectraProjected = hlab2DSpectra;
+  hlab2DSpectraProjected = hlab2DSpectraProjected + mTitle;
+  const char* h2DSpectraProjected = hlab2DSpectraProjected.c_str(); 
+  m2DSpectra = new TH2D(h2DSpectraProjected,
+			       "2D phase space inv. spectra",
 			 mnbinAbscissa, mlbinAbscissa,mubinAbscissa,
 			 mnbinOrdinate,mlbinOrdinate,mubinOrdinate);
-  m2DSpectra->Sumw2();
+  m2DSpectra->Sumw2();  
+
+  string hlab2DJacobian = hlab2DSpectra+"Jacobian";
+  hlab2DJacobian = hlab2DJacobian + mTitle;
+  const char* h2DJacobian = hlab2DJacobian.c_str(); 
+  m2DJacobian = new TH2D(h2DJacobian,
+			       "2D phase space Jacobian",
+			 mnbinAbscissa, mlbinAbscissa,mubinAbscissa,
+			 mnbinOrdinate,mlbinOrdinate,mubinOrdinate);
+  m2DJacobian->Sumw2();  
+
+  string hlab2DCounts = hlab2DSpectra+"Counts";
+  hlab2DCounts = hlab2DCounts + mTitle;
+  const char* h2DCounts = hlab2DCounts.c_str(); 
+  m2DCounts = new TH2D(h2DCounts,
+			       "2D phase space Counts",
+			 mnbinAbscissa, mlbinAbscissa,mubinAbscissa,
+			 mnbinOrdinate,mlbinOrdinate,mubinOrdinate);
+  m2DCounts->Sumw2(); 
+
+  string hlab2DSpectraDev = hlab2DSpectra+"DeviantWeighted";
+  hlab2DSpectraDev = hlab2DSpectraDev + mTitle;
+  const char* h2DSpectraDev = hlab2DSpectraDev.c_str(); 
+  m2DSpectraDeviantWeighted = new TH3D(h2DSpectraDev,
+			       "number sigma from PID band in 2D phase space bins",
+			 mnbinAbscissa, mlbinAbscissa,mubinAbscissa,
+			 mnbinOrdinate,mlbinOrdinate,mubinOrdinate,
+			 Ndevbins,ldevbin,udevbin);
+  m2DSpectraDeviantWeighted->Sumw2();  
+  
+
+  string hlab2DSpectraDevC = hlab2DSpectra+"DeviantCounts";
+  hlab2DSpectraDevC = hlab2DSpectraDevC + mTitle;
+  const char* h2DSpectraDevC = hlab2DSpectraDevC.c_str(); 
+  m2DSpectraDeviantCounts = new TH3D(h2DSpectraDevC,
+			       "number sigma from PID band in 2D phase space bins",
+			 mnbinAbscissa, mlbinAbscissa,mubinAbscissa,
+			 mnbinOrdinate,mlbinOrdinate,mubinOrdinate,
+			 Ndevbins,ldevbin,udevbin);
+  m2DSpectraDeviantCounts->Sumw2(); 
 
   string hlabDedx = "dedxvsP";
   hlabDedx = hlabDedx + mTitle;
   const char* hDedx = hlabDedx.c_str(); 
   mDedxvsP = new TH2D(hDedx,"dedx vs p",50,0.,1.,50, 0., 1.e-05);
   mDedxvsP->Sumw2();
-
-  string hlab2DSpectraDev = hlab2DSpectra+"Deviant";
-  hlab2DSpectraDev = hlab2DSpectraDev + mTitle;
-  const char* h2DSpectraDev = hlab2DSpectraDev.c_str(); 
-  m2DSpectraDeviant = new TH3D(h2DSpectraDev,
-			       "number sigma from PID band in 2D phase space bins",
-			 mnbinAbscissa, mlbinAbscissa,mubinAbscissa,
-			 mnbinOrdinate,mlbinOrdinate,mubinOrdinate,
-			 Ndevbins,ldevbin,udevbin);
-  m2DSpectraDeviant->Sumw2();  
-
 
   string hlabPID = "PIDDeviant";
   hlabPID = hlabPID + mTitle;
@@ -110,52 +143,46 @@ void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
             track->pidTraits(tpcDedxAlgorithm);
 	    double deviant = tpcDedxAlgorithm.numberOfSigma(mParticle);
 
-
-	    double effic = mEffic.efficiency(track);
-	    //  cout << effic << endl;
-	    if (effic > 0. && effic <= 1.) {
-		float weight = 1./effic;
-		double pperp = mom.perp();
-		double mt = sqrt(pperp*pperp + mMassPid*mMassPid);
-		double E = sqrt(p*p+mMassPid*mMassPid);
-		double pz = mom.z();
-		double y = 0.5*log((E+pz)/(E-pz));
-		double pseudoy = 0.5*log((p+pz)/(p-pz));
-                double xvalue=-1000.;
-		double yvalue=0.;
-		if (mAbscissa == kRapidity) {
+	    double pperp = mom.perp();
+	    double mt = sqrt(pperp*pperp + mMassPid*mMassPid);
+	    double E = sqrt(p*p+mMassPid*mMassPid);
+	    double pz = mom.z();
+	    double y = 0.5*log((E+pz)/(E-pz));
+	    double pseudoy = 0.5*log((p+pz)/(p-pz));
+            double xvalue=-1000.;
+	    double yvalue=0.;
+	    if (mAbscissa == kRapidity) {
 		  xvalue = y;
-		} else if (mAbscissa == kPseudoRapidity) {
+	    } else if (mAbscissa == kPseudoRapidity) {
 		  xvalue = pseudoy;
-		  // calc this!!!!
-		} 
-		if (mOrdinate == kPperp) {
+	    } 
+	    if (mOrdinate == kPperp) {
 		  yvalue = pperp;
-		} else if (mOrdinate == kTransverseMass) {
+	    } else if (mOrdinate == kTransverseMass) {
 		  yvalue = mt;
-		} 
-		m2DSpectraDeviant->Fill(xvalue,yvalue,deviant,weight);
-		mPIDDeviant->Fill(deviant);
 	    }
+            double effic = mEffic.efficiency(track);
+	    //  cout << effic << endl;
+	    if (effic > 0. && effic <= 1. && yvalue > 0.) {
+		float weight = 1./effic; 
+		m2DSpectraDeviantWeighted->Fill(xvalue,yvalue,deviant,weight);
+                m2DCounts->Fill(xvalue,yvalue,1);
+                m2DJacobian->Fill(xvalue,yvalue,1./yvalue);
+	        m2DSpectraDeviantCounts->Fill(xvalue,yvalue,deviant,1.);
+	    }
+	    mPIDDeviant->Fill(deviant);
        }       
-  }   
+  }
 }
 
 void StTpcDeviantSpectraAnalysis::projectHistograms() {
 
   if (mNumEvent==0) return;
   float xnorm = 1./float(mNumEvent);
-  m2DSpectraDeviant->Scale(xnorm);
-
-  // check for histograms
-  cout << m2DSpectraDeviant->GetDimension() << "-D histogram" << endl;
-  int NYbins  = m2DSpectraDeviant->GetNbinsX();
-  int NPtbins = m2DSpectraDeviant->GetNbinsY();
-
-  cout << "has "<< NYbins*NPtbins << " bins" << endl ;
+  m2DSpectraDeviantWeighted->Scale(xnorm);
  
   Stat_t stats[8];
-  m2DSpectraDeviant->GetStats(stats);
+  m2DSpectraDeviantWeighted->GetStats(stats);
   cout << "sum of weights " << stats[0] << endl;
 
 }
@@ -164,7 +191,11 @@ void StTpcDeviantSpectraAnalysis::writeHistograms(){
 
   const char* outputName = ((*this).getTitle()+".root").c_str();
   TFile* analysisOutputFile = new TFile(outputName,"RECREATE");
-  m2DSpectraDeviant->Write();
+  m2DSpectraDeviantWeighted->Write();
+  m2DSpectraDeviantCounts->Write();
+  m2DJacobian->Write();
+  m2DCounts->Write();
+  m2DSpectra->Write();
   mPIDDeviant->Write();
   delete analysisOutputFile;
 }
