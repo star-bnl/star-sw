@@ -19,9 +19,8 @@
   
 class St_FileSet : public St_DataSet
 {
- protected:
+ public: 
     St_FileSet();
- public:
     St_FileSet(const TString &dirname, const Char_t *filename=".",Bool_t expand=kTRUE);
     virtual ~St_FileSet();
     virtual Bool_t IsFolder();

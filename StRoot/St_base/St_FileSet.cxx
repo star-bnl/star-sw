@@ -14,7 +14,7 @@
 // into an instance of the St_DataSet class                             //
 //                                                                      //
 //  Example:                                                            //
-//    How to converts your home directory into the OO dataset           //
+//    How to convert your home directory into the OO dataset           //
 //                                                                      //
 //  root [0] TString home = "$HOME";                                    //
 //  root [1] St_FileSet set(home);                                      //
