@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.7 2001/05/29 23:23:05 lansdell Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.8 2001/06/27 23:57:50 lansdell Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.8  2001/06/27 23:57:50  lansdell
+// added geant-reco primvtx position histos to qa_shift list
+//
 // Revision 2.7  2001/05/29 23:23:05  lansdell
 // removed impact param plots for FTPC from qa_shift list
 //
@@ -137,6 +140,9 @@
   "StEEmcCat4_Points_Multiplicity",
   "StEEmcCat4_Track_Momenta",
   "StE Point Flag",
+  "StEQaGRpvtxDx",
+  "StEQaGRpvtxDy",
+  "StEQaGRpvtxDz",
 
   "StELMQaPointTpc",
   "StELMQaPointSvt",
@@ -245,6 +251,9 @@
   "StELMEmc_Cat4_Points_Multiplicity",
   "StELMEmcCat4_Track_Momenta",
   "StELM Point Flag",
+  "StELMQaGRpvtxDx",
+  "StELMQaGRpvtxDy",
+  "StELMQaGRpvtxDz",
 
   "StEMMQaPointTpc",
   "StEMMQaPointSvt",
@@ -353,6 +362,9 @@
   "StEMMEmc_Cat4_Points_Multiplicity",
   "StEMMEmcCat4_Track_Momenta",
   "StEMM Point Flag",
+  "StEMMQaGRpvtxDx",
+  "StEMMQaGRpvtxDy",
+  "StEMMQaGRpvtxDz",
 
   "StEHMQaPointTpc",
   "StEHMQaPointSvt",
@@ -460,4 +472,7 @@
   "StEHMEmcCat4_Delta_Phi",
   "StEHMEmc_Cat4_Points_Multiplicity",
   "StEHMEmcCat4_Track_Momenta",
-  "StEHM Point Flag"
+  "StEHM Point Flag",
+  "StEHMQaGRpvtxDx",
+  "StEHMQaGRpvtxDy",
+  "StEHMQaGRpvtxDz"
