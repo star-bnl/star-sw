@@ -1,6 +1,10 @@
 #ifndef STSVTSIMULATION_HH
 #define STSVTSIMULATION_HH
 
+/*
+#include <iostream.h>
+#include <fstream.h>
+*/
 #include <Stiostream.h>
 #include <math.h>
 #include <stdlib.h>
@@ -35,7 +39,9 @@ public:
 
   void setOptions(Bool_t backgr,int option);
   void setPointers(StSvtElectronCloud* elCloud ,StSvtAngles* svtAngles);
-  void setAnodeTime(double timBinSize, double anodeSize,double driftVelocity);
+  void setAnodeTimeBinSizes(double timBinSize, double anodeSize);
+  void setDriftVelocity(double driftVelocity);
+  void setTrappingConst(double trapConst);
   
 
   void openFiles(int k, int option);
@@ -76,6 +82,7 @@ private:
   double mTimeBinSize;
   double mAnodeSize;
   double mDriftVelocity;
+  double mTrapConst;
   int mSignalOption;
 
   double mPeakSignal;

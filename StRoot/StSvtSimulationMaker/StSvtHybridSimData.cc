@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridSimData.cc,v 1.6 2003/09/11 05:49:22 perev Exp $
+ * $Id: StSvtHybridSimData.cc,v 1.7 2003/11/13 16:24:59 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,11 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridSimData.cc,v $
- * Revision 1.6  2003/09/11 05:49:22  perev
- * ansi corrs
- *
- * Revision 1.5  2003/09/02 17:59:09  perev
- * gcc 3.2 updates + WarnOff
+ * Revision 1.7  2003/11/13 16:24:59  caines
+ * Further improvements to get simulator looking like reality
  *
  * Revision 1.4  2003/07/31 19:18:10  caines
  * Petrs improved simulation code
@@ -39,6 +36,7 @@
 #include "StSvtHybridSimData.hh"
 #include "StSequence.hh"
 #include "StSvtClassLibrary/StSvtHybridPixelsC.hh"
+#include "StMessMgr.h"
 
 ClassImp(StSvtHybridSimData)
 
@@ -51,51 +49,65 @@ StSvtHybridSimData::StSvtHybridSimData(int barrel, int ladder, int wafer, int hy
 
 int StSvtHybridSimData::setSimHybridData(StSvtHybridPixelsC* mSimDataPixels)
 {
-  int anode;
-  mPedOffset = mSimDataPixels->getPedOffset();
+  nAnodes=0;  //number of anodes with some sequences
 
-  //cout<<"mPedOffset = "<<mPedOffset<<endl;
-
-  nAnodes = 240;
-  if (!anodeList)  anodeList = new int[nAnodes];
-  if (!nSeq)  nSeq = new int[nAnodes];
-  typedef StSequence* StSequenceP;
-  if (!seq)  seq = new StSequenceP[nAnodes];
- 
-  
-  for (int ianode=0;ianode<nAnodes;ianode++) {
-    anode = ianode + 1;
-    anodeList[ianode] = anode;
-    nSeq[ianode]= 1;
-
-    if (!seq[ianode])
-      seq[ianode] = new StSequence[nSeq[ianode]];
-    
-    for (int iseq=0;iseq<nSeq[ianode];iseq++) {
-      //this causes memory leak
-      // if (!seq[ianode][iseq].firstAdc)
-      //  seq[ianode][iseq].firstAdc = new unsigned char[128];
-      /*
-      for (int i=0;i<128;i++)
-        {
-          double adc = (double)mSimDataPixels->getPixelContent(anode,i);
-          //cout<<adc<<endl;
-          if( adc >=0 && adc < 255){
-            seq[ianode][iseq].firstAdc[i] =  (unsigned char)adc;
-          }
-          else{
-            seq[ianode][iseq].firstAdc[i] = (unsigned char)255;
-      */
-      int index=mSimDataPixels->getPixelIndex(anode,0);
-      //cout<<"seting index "<<index<<endl;
-      seq[ianode][iseq].firstAdc=((unsigned char*)mSimDataPixels->fArray)+index;
-      //}
-      //}
-    
-      seq[ianode][iseq].startTimeBin = 0;
-      seq[ianode][iseq].length = 128;
-    }
+  if (mSimDataPixels==NULL){
+    gMessMgr->Info() <<"Error:StSvtHybridSimData::setSimHybridData mSimDataPixels is NULL!!"<<endm;
+    return 0;
   }
+
+  //this not optimized for minimal memory size
+  nSeq=new int[240];        
+  seq = new (StSequence*)[240];
+  anodeList=new int[240];
   
+ 
+  Char_t  *mAdcArray=mSimDataPixels->GetArray(); //// array of [128*240]
+ 
+  mPedOffset = mSimDataPixels->getPedOffset();
+ 
+  StSequence tmpSeq[128];  //buffer for sequences on one anode
+  for (int ianode=0;ianode<240;ianode++)
+    {  
+     
+      int seqCount=0; //number of sequences on current anode
+     
+      int pixCount=0; ///number of pixels in current sequence
+      for(int tim = 0; tim <= 128; tim++)
+	{//loop over time bins in one anode
+	  unsigned char adc; 
+	  if (tim==128)  adc=0; // make an artificial end of time sequence
+	  else adc= (unsigned char)mAdcArray[ianode*128 + tim];
+	  
+	  if (adc>0)
+	    {
+	      if (pixCount==0){ //starting new sequence
+		tmpSeq[seqCount].startTimeBin = tim;
+		tmpSeq[seqCount].firstAdc=(unsigned char*)(mAdcArray+ianode*128 + tim);
+	      }
+	      pixCount++;
+	    }
+	  else
+	    {
+	      if(pixCount>0){//end of sequence
+		tmpSeq[seqCount].length = pixCount;
+		seqCount++;
+		pixCount=0;
+	      }
+	    }
+	  
+	  
+	}
+   
+      if(seqCount>0)
+	{ //save seq list     
+	  anodeList[nAnodes]=ianode+1;
+	  nSeq[nAnodes]=seqCount;
+	  seq[nAnodes] = new StSequence[seqCount];
+	  for (int i=0;i<seqCount;i++) seq[nAnodes][i]=tmpSeq[i];
+	  nAnodes++;
+	}
+    }
+    
   return 0;
 }

@@ -1,6 +1,7 @@
 #ifndef STSVTSIGNAL_HH
 #define STSVTSIGNAL_HH
 
+
 #include <Stiostream.h>
 #include <string.h>
 #include <math.h>
@@ -14,7 +15,8 @@ public:
   ~StSvtSignal();
 
   void setOption(int option);
-  void setParam(double timeBinSize,double anodeSize,double driftVel);    
+  void setAnodeTimeBinSizes(double timBinSize, double anodeSize);
+  void setDriftVelocity(double driftVelocity);
   void getCloud(StSvtElectronCloud* elCloud);
   double chargeFraction(int an, double anHit);
   int timeCenterAndWidth(double anHit,double timeHit);
