@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.62 2000/02/09 20:49:46 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.63 2000/02/09 22:13:00 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.63  2000/02/09 22:13:00  fisyak
+// Dave's correction for tpcDb
+//
 // Revision 1.62  2000/02/09 20:49:46  fisyak
 // Change naming convention for Tables shared libraries
 //
@@ -331,16 +334,17 @@ BfcItem BFC[] = {
   {"geant","geant","","NoFieldSet,geomT,gen_T,sim_T"
                                          ,"St_geant_Maker","geometry,St_g2t,St_geant_Maker","GEANT",kFALSE}, 
   {"db"          ,""  ,"","StDbT,xdf2root"       ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
+  {"dbutil"      ,""  ,"","SCL"                            ,"","StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,""  ,"","xdf2root"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"magF"        ,"","","NoFieldSet,StDbT,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpc"         ,"tpc","","tpc_T,tls,db,tcl,tpt,PreVtx"               ,"StChainMaker","StChain","",kFALSE},
-  {"tpcDB"       ,"tpcDB","tpc",""                                     ,"StTpcDbMaker","StTpcDb","",kFALSE},
+  {"tpcDB"       ,"tpcDB","tpc","dbutil"                               ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"Trs"         ,"","tpc","scl"                      ,"StTrsMaker","St_tpcdaq_Maker,StTrsMaker","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpc","tpc_T"                   ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,""  ,"tpc","","",""                                    ,"use tfs (no StTrsMaker)",kFALSE},
   {"tcl"         ,"tpc_hits","tpc","tpc_T,tls"             ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
-  {"tpt"         ,"tpc_tracks","tpc","tpc_T,tls"           ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
+  {"tpt"         ,"tpc_tracks","tpc","tpc_T,tls,"           ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"laser"       ,"tpc_tracks","tpc","tdaq,tpc,-tpt"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
   {"PreVtx"      ,"","","tpt"         ,"StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -505,7 +509,7 @@ Int_t StBFChain::Instantiate()
 	    dbMk = new St_db_Maker("db",mainDB,userDB);
 	    if (GetOption("tpcDB")) {
 	      GeometryMk = new St_db_Maker("Geometry","MySQL:Geometry");
-	      //            CalibrationsMk = new St_db_Maker("Calibrations","MySQL:Calibrations");
+	      CalibrationsMk = new St_db_Maker("Calibrations","MySQL:Calibrations_tpc");
 	      //            ConditionsMk = new St_db_Maker("Conditions","MySQL:Conditions");
 	    }
 	    if (dbMk) {
@@ -829,19 +833,19 @@ void StBFChain::SetGeantOptions(){
 }
 //_____________________________________________________________________
 void StBFChain::SetDbOptions(){
-        if (GetOption("SD97")) dbMk->SetDateTime("sd97");
-  else {if (GetOption("SD98")) dbMk->SetDateTime("sd98");
-  else {if (GetOption("Y1a"))  dbMk->SetDateTime("year_1a");
-  else {if (GetOption("Y1b"))  dbMk->SetDateTime("year_1b");
-  else {if (GetOption("Y1c"))  dbMk->SetDateTime("year_1c");
-  else {if (GetOption("ES99")) dbMk->SetDateTime("es99");
-  else {if (GetOption("ER99")) dbMk->SetDateTime("er99");
-  else {if (GetOption("DC99")) dbMk->SetDateTime("dc99");
-  else {if (GetOption("Y1d"))  dbMk->SetDateTime("year_1d");
-  else {if (GetOption("Y1e"))  dbMk->SetDateTime("year_1e");
-  else {if (GetOption("Y1h"))  dbMk->SetDateTime("year_1h");
-  else {if (GetOption("Y2a"))  dbMk->SetDateTime("year_2a");
-  else {if (GetOption("gstar"))dbMk->SetDateTime("year_2a");
+        if (GetOption("SD97")) SetDataBases("sd97");
+  else {if (GetOption("SD98")) SetDataBases("sd98");
+  else {if (GetOption("Y1a"))  SetDataBases("year_1a");
+  else {if (GetOption("Y1b"))  SetDataBases("year_1b");
+  else {if (GetOption("Y1c"))  SetDataBases("year_1c");
+  else {if (GetOption("ES99")) SetDataBases("es99");
+  else {if (GetOption("ER99")) SetDataBases("er99");
+  else {if (GetOption("DC99")) SetDataBases("dc99");
+  else {if (GetOption("Y1d"))  SetDataBases("year_1d");
+  else {if (GetOption("Y1e"))  SetDataBases("year_1e");
+  else {if (GetOption("Y1h"))  SetDataBases("year_1h");
+  else {if (GetOption("Y2a"))  SetDataBases("year_2a");
+  else {if (GetOption("gstar"))SetDataBases("year_2a");
   }}}}}}}}}}}}
   gMessMgr->QAInfo() << "db Maker set time = " << dbMk->GetDateTime().GetDate() 
 		   << dbMk->GetDateTime().GetTime() << endm;
@@ -853,10 +857,10 @@ void StBFChain::SetDbOptions(){
 }
 //_____________________________________________________________________
 void StBFChain::SetDataBases(const Char_t* TimeStamp){
-  if (dbMk) dbMk->SetDateTime(TimeStamp);
-  if (GeometryMk) GeometryMk->SetDateTime(TimeStamp);
+  if (dbMk)           dbMk->SetDateTime(TimeStamp);
+  if (GeometryMk)     GeometryMk->SetDateTime(TimeStamp);
   if (CalibrationsMk) CalibrationsMk->SetDateTime(TimeStamp);
-  if (ConditionsMk) ConditionsMk->SetDateTime(TimeStamp);
+  if (ConditionsMk)   ConditionsMk->SetDateTime(TimeStamp);
 }
 //_____________________________________________________________________
 void StBFChain::SetTreeOptions()
