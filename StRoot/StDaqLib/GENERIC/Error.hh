@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: Error.hh,v 1.3 1999/07/21 21:33:08 levine Exp $
+ * $Id: Error.hh,v 1.4 1999/12/03 21:38:33 levine Exp $
  * Author: Jeff Landgraf
  *
  *  change log
@@ -10,7 +10,12 @@
  *
  ***************************************************************************
  * $Log: Error.hh,v $
+ * Revision 1.4  1999/12/03 21:38:33  levine
+ * Error message added "Info:  End of File encountered"
+ *
  * Revision 1.3  1999/07/21 21:33:08  levine
+ *
+ *
  * changes to include error logging to file.
  *
  * There are now 2 constructors for EventReader:
@@ -52,8 +57,10 @@
 #define ERR_ENDR_ENCOUNTERED 8
 #define ERR_BAD_HEADER 9
 #define INFO_MISSING_BANK 10
+#define INFO_END_FILE_ENCOUNTERED 11
 
-#define MX_MESSAGE 10
+
+#define MX_MESSAGE 11
 
 #endif
 
