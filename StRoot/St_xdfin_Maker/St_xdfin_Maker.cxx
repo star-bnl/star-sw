@@ -19,7 +19,7 @@ St_xdfin_Maker::~St_xdfin_Maker(){
   m_Init_Done = kFALSE;
 }
 //_____________________________________________________________________________
-void St_xdfin_Maker::Clear(Option_t *option){
+void St_xdfin_Maker::Finish(Option_t *option){
   m_Init_Done = kFALSE;
   SafeDelete(m_DataSet);
 }

@@ -21,7 +21,7 @@ public:
    virtual Int_t  Init();
    virtual void   Init_Done (Bool_t k=kFALSE){m_Init_Done = k;} // *MENU*
    virtual Int_t  Make();
-   virtual void   Clear(Option_t *option);
+   virtual void   Finish(Option_t *option);
    virtual void   PrintInfo();
    ClassDef(St_xdfin_Maker, 1)   //StAF chain virtual base class for Makers
 };
