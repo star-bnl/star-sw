@@ -10,6 +10,7 @@
 //:             23aug1999 ppy ClassImp added with ROOT flag
 //:             21dec1999 ppy printf replaced by fprintf(stderr,...
 //:             26jan2000 ppy malloc replaced with new, destructor function added
+//:              1feb2000 ppy track id starting at 1
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfFinder, steers track finding
@@ -155,7 +156,7 @@ int FtfFinder::getTracks ( ) {
 //
          FtfTrack *thisTrack = &track[nTracks-1];
 	 thisTrack->para     = &para ;
-	 thisTrack->id       = nTracks - 1 ;
+	 thisTrack->id       = nTracks ;
          thisTrack->firstHit = thisTrack->lastHit = thisTrack->refHit = firstHit ;
 #ifdef TRDEBUG
          thisTrack->debugNew ( ) ;
