@@ -5,7 +5,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
-#include "St_ObjectSet.h"
+#include "TObjectSet.h"
 #include "StDAQMaker.h"
 #include "StDAQReader.h"
 
@@ -31,7 +31,7 @@ delete fDAQReaderSet;
 Int_t StDAQMaker::Init()
 {
   if (fDAQReaderSet) return 0;
-  fDAQReaderSet = new St_ObjectSet("StDAQReader",0,kFALSE);
+  fDAQReaderSet = new TObjectSet("StDAQReader",0,kFALSE);
   AddConst(fDAQReaderSet); SetOutput(fDAQReaderSet);	//Declare for output
 
   fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
