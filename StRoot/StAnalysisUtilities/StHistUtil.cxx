@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.23 2004/12/13 15:52:35 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.24 2005/02/08 17:12:37 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.24  2005/02/08 17:12:37  genevb
+// Limiting range on some PMD histos
+//
 // Revision 2.23  2004/12/13 15:52:35  genevb
 // Numerous updates: PMD, primtrk, FPD, QAShift lists
 //
@@ -375,6 +378,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
               oName.EndsWith("QaRichTot") ||
               oName.EndsWith("QaV0Vtx") ||
               oName.EndsWith("QaXiVtxTot") ||
+              oName.Contains("QaPmdTotal") ||
+              oName.Contains("QaCpvTotal") ||
               oName.EndsWith("trkGoodTTS")) {
             Float_t mean = hobj->GetMean(1);
             Float_t window = hobj->GetRMS(1);
