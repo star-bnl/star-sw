@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.10 2004/01/13 21:01:32 fisyak Exp $
+ * $Id: StHit.h,v 2.11 2004/03/30 15:59:08 calderon Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.11  2004/03/30 15:59:08  calderon
+ * Added method to set mFitFlag (new chain no longer uses tables, so must set
+ * this by hand).
+ *
  * Revision 2.10  2004/01/13 21:01:32  fisyak
  * Add Truth and Quality information from simulation
  *
@@ -86,6 +90,7 @@ public:
     UShort_t        quality() const {return mQuality;}
     void setCharge(float);
     void setFlag(unsigned char);
+    void setFitFlag(unsigned char);
     void setTrackReferenceCount(unsigned char);
     void setHardwarePosition(unsigned int);
     void setPositionError(const StThreeVectorF&);

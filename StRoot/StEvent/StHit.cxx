@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.11 2004/01/13 21:01:32 fisyak Exp $
+ * $Id: StHit.cxx,v 2.12 2004/03/30 15:59:08 calderon Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.12  2004/03/30 15:59:08  calderon
+ * Added method to set mFitFlag (new chain no longer uses tables, so must set
+ * this by hand).
+ *
  * Revision 2.11  2004/01/13 21:01:32  fisyak
  * Add Truth and Quality information from simulation
  *
@@ -54,7 +58,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.11 2004/01/13 21:01:32 fisyak Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.12 2004/03/30 15:59:08 calderon Exp $";
 
 ClassImp(StHit)
 
@@ -106,6 +110,9 @@ StHit::setTrackReferenceCount(unsigned char val) { mTrackRefCount = val; }
     
 void
 StHit::setFlag(unsigned char val) { mFlag = val; }
+    
+void
+StHit::setFitFlag(unsigned char val) { mFitFlag = val; }
     
 void
 StHit::setHardwarePosition(unsigned int val) { mHardwarePosition = val; }
