@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.20 2003/09/16 22:44:17 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.21 2004/01/15 00:02:24 fisyak Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.21  2004/01/15 00:02:24  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.20  2003/09/16 22:44:17  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.19  2003/09/02 17:57:49  perev
@@ -293,7 +296,11 @@ void StDbBuffer::StrConv(char* aVal,int &s){s=atoi(aVal);};
 void StDbBuffer::StrConv(char* aVal,unsigned int &s){s=atol(aVal);};
 void StDbBuffer::StrConv(char* aVal,long &s){s=atoi(aVal);};
 void StDbBuffer::StrConv(char* aVal,unsigned long &s){s=atol(aVal);};
+#ifndef __osf__
 void StDbBuffer::StrConv(char* aVal,long long &s){s=atoll(aVal);};
+#else
+void StDbBuffer::StrConv(char* aVal,long long &s){s=atol(aVal);};
+#endif
 void StDbBuffer::StrConv(char* aVal,float &s){s=(float) atof(aVal);};
 void StDbBuffer::StrConv(char* aVal,double &s){s=atof(aVal);};
 void StDbBuffer::StrConv(char* aVal,char* &s){s=new char[strlen(aVal)+1];strcpy(s,aVal);};
@@ -332,7 +339,7 @@ genwritemem(long long);
 genwritemem(float);
 genwritemem(double);
 
-#define castcasest(typelist,casttype) case typelist: {casttype tVal; MemSwapCpy((char*)&tVal,(char*)aVal,mycsize[typelist],mycswapl[typelist],Client);ostringstream sStream;sStream.precision(10); sStream << tVal; string s2=sStream.str();char *tStr=new char[s2.length()+1];strcpy(tStr,s2.c_str());s[0]=tStr; };break
+#define castcasest(typelist,casttype) case typelist: {casttype tVal; MemSwapCpy((char*)&tVal,(char*)aVal,mycsize[typelist],mycswapl[typelist],Client);StString sStream;sStream.precision(10); sStream << tVal; string s2=sStream.str();char *tStr=new char[s2.length()+1];strcpy(tStr,s2.c_str());s[0]=tStr; };break
 
 bool StDbBuffer::WriteMem( char **s,void* aVal, myctype type) {
   bool tRetVal=true;

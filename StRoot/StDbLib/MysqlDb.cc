@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.28 2003/09/18 00:51:59 porter Exp $
+ * $Id: MysqlDb.cc,v 1.29 2004/01/15 00:02:24 fisyak Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,11 +10,14 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.29  2004/01/15 00:02:24  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.28  2003/09/18 00:51:59  porter
  * initialized mhasBinaryQuery flag
  *
  * Revision 1.27  2003/09/16 22:44:17  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.26  2003/09/02 17:57:49  perev
@@ -227,8 +230,8 @@ bool MysqlDb::reConnect(){
     connected=true;
     if(!connected){
       timeOutConnect*=2;
-      ostringstream wm;
-      wm<<" Connection Failed with MySQL on "<<mdbhost<<":"<<mdbPort<<endl;
+      StString wm;
+      wm<<" Connection Failed with MySQL on "<<mdbhost<<":"<<mdbPort<<stendl;
       wm<<" Returned error =";
       wm<<mysql_error(&mData)<<".  Will re-try with timeout set at \n==> ";
       wm<<timeOutConnect<<" seconds <==";
@@ -279,12 +282,12 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
     return (bool) StDbManager::Instance()->printInfo("Mysql Init Error=",mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__);
 
   // char *connString; 
-  ostringstream cs;
+  StString cs;
   if(reConnect()){
     //  if(mysql_real_connect(&mData,aHost,aUser,aPasswd,bDb,aPort,NULL,0)){ 
        t0=mqueryLog.wallTime()-t0;
        cs<< "Server Connecting:"; if(mdbName)cs<<" DB=" << mdbName ;
-       cs<< "  Host=" << aHost <<":"<<aPort<<endl;
+       cs<< "  Host=" << aHost <<":"<<aPort <<stendl;
        cs<< " --> Connection Time="<<t0<<" sec   ";
        if(mdbServerVersion)cs<<" MysqlVersion="<<mdbServerVersion;
       
@@ -642,7 +645,7 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
            // to the buffer. 
 
            //char commentName[1024];
-           ostringstream cn;
+           StString cn;
            cn<<mRes->mRes->fields[i].name<<".text";
 	       aBuff->WriteScalar((char*)tRow[i],(cn.str()).c_str());
 	    };
@@ -654,7 +657,7 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
     /*
        else {
 
-      ostringstream nd;
+      StString nd;
       nd<<"null data returned from table = ";
       nd<<mRes->mRes->fields[i].table<<" column="<<mRes->mRes->fields[i].name;
       StDbManager::Instance()->printInfo((nd.str()).c_str(),dbMWarn,__LINE__,"MysqlDb","Output(StDbBuffer* b)");

@@ -33,7 +33,7 @@ char* StDbDefaults::getFileName(const char* fileName){
   char* nullReturn=0;
   if(!fileName) return nullReturn;
  
-  ostringstream fn;
+  StString fn;
 
   if(strcmp(fileName,"HOME")==0){
     fn<<getenv("HOME")<<"/"<<mdbServerFile;

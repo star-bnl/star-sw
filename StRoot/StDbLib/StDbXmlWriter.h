@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlWriter.h,v 1.8 2003/09/16 22:44:18 porter Exp $
+ * $Id: StDbXmlWriter.h,v 1.9 2004/01/15 00:02:25 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbXmlWriter.h,v $
+ * Revision 1.9  2004/01/15 00:02:25  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.8  2003/09/16 22:44:18  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.7  2003/09/02 17:57:50  perev

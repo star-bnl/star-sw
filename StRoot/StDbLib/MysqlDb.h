@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.20 2003/09/16 22:44:17 porter Exp $
+ * $Id: MysqlDb.h,v 1.21 2004/01/15 00:02:24 fisyak Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.21  2004/01/15 00:02:24  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.20  2003/09/16 22:44:17  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.19  2003/09/02 17:57:49  perev
@@ -275,37 +278,37 @@ inline MysqlDb &MysqlDb::operator<<( const string s){
 }
 
 inline MysqlDb &MysqlDb::operator<<( const short aq){
-  ostringstream ts;  ts<<aq;
+  StString ts;  ts<<aq;
   return *this<<ts.str();
 }
 
 inline MysqlDb &MysqlDb::operator<<( const unsigned short aq){
-  ostringstream ts;  ts<<aq;
+  StString ts;  ts<<aq;
   return *this<<ts.str();
 }
 
 inline MysqlDb &MysqlDb::operator<<( const int aq){
-  ostringstream ts;  ts<<aq;
+  StString ts;  ts<<aq;
   return *this<<ts.str();
 }
 
 inline MysqlDb &MysqlDb::operator<<( const unsigned int aq){
-  ostringstream ts;  ts<<aq;
+  StString ts;  ts<<aq;
   return *this<<ts.str();
 }
 
 inline MysqlDb &MysqlDb::operator<<( const long long aq){
-  ostringstream ts;  ts<<aq;
+  StString ts;  ts<<aq;
   return *this<<ts.str();
 }
 
 inline MysqlDb &MysqlDb::operator<<( const float aq){
-  ostringstream ts;  ts<<aq;
+  StString ts;  ts<<aq;
   return *this<<ts.str();
 }
 
 inline MysqlDb &MysqlDb::operator<<( const double aq){
-  ostringstream ts;  ts<<aq;
+  StString ts;  ts<<aq;
   return *this<<ts.str();
 }
 

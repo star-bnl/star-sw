@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNodeImpl.cc,v 1.6 2003/09/16 22:44:17 porter Exp $
+ * $Id: StDbConfigNodeImpl.cc,v 1.7 2004/01/15 00:02:25 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNodeImpl.cc,v $
+ * Revision 1.7  2004/01/15 00:02:25  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.6  2003/09/16 22:44:17  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.5  2003/09/02 17:57:49  perev
@@ -118,7 +121,7 @@ StDbConfigNodeImpl::updateDbInfo(){
      setBranchID(0);
      char* version=StDbManager::Instance()->getExternalVersion(mdbType,mdbDomain);
      if(version && strcmp(version,mversion)){
-       ostringstream nm;
+       StString nm;
        nm<<" Overriding Key="<<mversion<<" with Environment Var Key="<<version;
        nm<<" for DataBase=";
        nm<<StDbManager::Instance()->printDbName(mdbType,mdbDomain);
@@ -387,7 +390,7 @@ StDbConfigNodeImpl::addChildren(dbEnvList* elist){
     if(id){
       id++;
       if(strcmp(id,mname) && !findChildConfigNode(id)){
-        ostringstream nm;
+        StString nm;
         nm<<" Adding DataBase="<<elist->envVar[i]<<" with KEY=";
         nm<<elist->envDef[i]<<" from Environment variable definition";
 	StDbManager::Instance()->printInfo((nm.str()).c_str(),dbMWarn,__LINE__,__CLASS__,__METHOD__);    
@@ -404,7 +407,7 @@ void
 StDbConfigNodeImpl::printTables(int depth){
 
   if(StDbManager::Instance()->IsVerbose()){
-    ostringstream os;
+    StString os;
     for(int k=0;k<depth;k++)os<<" ";
     
     string pdepth=os.str();
@@ -429,12 +432,12 @@ unsigned int numNodes, numTables, numBytes;
  numNodes=numTables=numBytes=0;
  getNumberStats(numNodes,numTables, numBytes);
  double kbs = ((double)numBytes)/1000.0;
- ostringstream cos;
- cos<<"******************** Number Stats ******************** "<<endl;
- cos<<"Total Number of Nodes        = "<<numNodes<<endl;
- cos<<"Total Number of Tables       = "<<numTables<<endl;
- cos<<"Total Size of Data in Tables = "<<kbs<<" kBytes"<<endl;
- cos<<"******************************************************"<<endl;
+ StString cos;
+ cos<<"******************** Number Stats ******************** "<<stendl;
+ cos<<"Total Number of Nodes        = "<<numNodes              <<stendl;
+ cos<<"Total Number of Tables       = "<<numTables             <<stendl;
+ cos<<"Total Size of Data in Tables = "<<kbs<<" kBytes"        <<stendl;
+ cos<<"******************************************************" <<stendl;
 
  StDbManager::Instance()->printInfo((cos.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
 //VP delete [] nstats;

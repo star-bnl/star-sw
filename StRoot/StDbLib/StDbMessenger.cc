@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbMessenger.cc,v 1.3 2003/09/16 22:44:17 porter Exp $
+ * $Id: StDbMessenger.cc,v 1.4 2004/01/15 00:02:25 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbMessenger.cc,v $
+ * Revision 1.4  2004/01/15 00:02:25  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.3  2003/09/16 22:44:17  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.2  2003/09/02 17:57:49  perev

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.h,v 1.8 2003/04/11 22:47:36 porter Exp $
+ * $Id: StDbBuffer.h,v 1.9 2004/01/15 00:02:25 fisyak Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.h,v $
+ * Revision 1.9  2004/01/15 00:02:25  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.8  2003/04/11 22:47:36  porter
  * Added a fast multi-row write model specifically needed by the daqEventTag
  * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
@@ -52,14 +55,10 @@ enum myctype{_char,_uchar,_short,_ushort,_int,_uint,_long,_ulong,_longlong,_floa
 
 const int mycsize[]={sizeof(char),sizeof(unsigned char),sizeof(short),sizeof(unsigned short),sizeof(int),sizeof(unsigned int),sizeof(long),sizeof(unsigned long),sizeof(long long),sizeof(float),sizeof(double),sizeof(char*),sizeof(char*)};
 
-#ifdef SOLARIS
-const int mycswapl[]={1,1,1,1,4,4,4,4,8,4,8,1,1};
-#else
-#ifdef hpux
-const int mycswapl[]={1,1,1,1,4,4,4,4,8,4,8,1,1};  // same swapping than Solaris
+#if defined(__sun) && !defined(__i386) || defined(__hpux) || defined(__alpha) && !defined(linux)
+const int mycswapl[]={1,1,1,1,4,4,4,4,8,4,8,1,1}; // same swapping than Solaris
 #else
 const int mycswapl[]={1,1,1,1,1,1,1,1,1,1,1,1};
-#endif
 #endif
 
 struct column {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.cc,v 1.9 2003/12/16 01:30:32 porter Exp $
+ * $Id: StDbNode.cc,v 1.10 2004/01/15 00:02:25 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,12 +10,15 @@
  ***************************************************************************
  *
  * $Log: StDbNode.cc,v $
+ * Revision 1.10  2004/01/15 00:02:25  fisyak
+ * Replace ostringstream => StString, add option for alpha
+ *
  * Revision 1.9  2003/12/16 01:30:32  porter
- * additional fixes for change from ostrstream to ostringstream that were not exposed until
+ * additional fixes for change from ostrstream to StString that were not exposed until
  * running in online
  *
  * Revision 1.8  2003/09/16 22:44:17  porter
- * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * got rid of all ostrstream objects; replaced with StString+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
  *
  * Revision 1.7  2003/09/02 17:57:49  perev
@@ -162,7 +165,7 @@ char* id1;
 char* id2;
 
 id2 = strstr(tmpName,"-");
-ostringstream sl;
+StString sl;
 
 if(id2 && ( (id && id2<id) || !id)){
   id=id2;
