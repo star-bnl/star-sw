@@ -10,6 +10,7 @@
  *
  * These will be entered into the Matched and Contamination (split, merged, background)
  * collections as Pairs, with their corresponding MC track.
+ * $Log $
 */
 
 #ifndef StTinyRcTrack_H
@@ -57,6 +58,7 @@ class StTinyRcTrack {
   void setFirstSector(Short_t val) { mFirstSector=val; }
   void setLastSector(Short_t val) { mLastSector=val; }
   void setFitPts(Short_t val) { mFitPts=val; }
+  void setDedxPts(Short_t val) { mDedxPts=val; }
   void setAllPts(Short_t val) { mAllPts=val; }
   void setCharge(Short_t val) { mCharge=val; }
   void setNAssocMc(Short_t val) { mNAssocMc=val; }
@@ -97,6 +99,7 @@ class StTinyRcTrack {
   short firstSector() const { return mFirstSector; }
   short lastSector() const { return mLastSector; }
   short fitPts() const { return mFitPts; }
+  short dedxPts() const { return mDedxPts; }
   short allPts() const { return mAllPts; }
   short charge() const { return mCharge; }
   short nAssocMc() const { return mNAssocMc; }
@@ -149,18 +152,24 @@ private:
   Short_t    mLastSector;
 
   Short_t      mFitPts;
+  Short_t      mDedxPts;
   Short_t      mAllPts;
   Short_t      mCharge;
 
   Short_t      mNAssocMc;
   Short_t      mNPossible;
 
-  ClassDef(StTinyRcTrack,1)
+  ClassDef(StTinyRcTrack,2)
 };
 
 #endif
 //
 // $Log: StTinyRcTrack.h,v $
+// Revision 1.2  2002/06/06 18:58:30  calderon
+// Added $Log$
+// Added mDedxPts data member, get and set methods, and updated ClassDef(StTinyRcTrack,1)
+// to ClassDef(StTinyRcTrack,2) because of this change for schema evolution
+//
 // Revision 1.1  2002/05/30 01:20:58  calderon
 // Classes for use in a general framework for extracting efficiencies
 // from both embedding and full simulations
