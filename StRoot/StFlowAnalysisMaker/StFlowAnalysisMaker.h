@@ -33,76 +33,77 @@
 
 class StEvent;
 
-// class StFlowTagMaker;
-
-class StFlowAnalysisMaker : public StMaker 
-{
+class StFlowAnalysisMaker : public StMaker {
 
 public:
 
   StFlowAnalysisMaker(const Char_t *name="FlowAnalysis");
   virtual ~StFlowAnalysisMaker();
+  virtual Int_t Init();
   virtual Int_t Make();
   virtual void PrintInfo();
-  virtual Int_t Init();
+  virtual Int_t Finish();
 
 protected:
 
+  //get Tags and calculated quantities
+  Int_t   getTags();
+
   // Histograms
-  Int_t makeTagHistograms();
-  void  makeFlowHistograms();
+  void makeTagHistograms();
+  void makeFlowHistograms();
 
-  // C++ way to define constants
+  // C++ way to define constants in the header
   enum {nHarmonics = 5, nSubEvents = 4};
+ 
+  // structures for histograms
+  struct histSubEventHarmonic {
+    TH1F *mHistPsiSub;
+    TH1D *mHistFlowMultSub;
+  };
 
-  // limits histograms
-  enum {nPhiBins = 100, nEtaBins = 100, nPtBins = 100}; 
-  enum {nPsiBins = 100, nSumPtBins = 100, nMultBins = 100, n_qBins = 100}; 
-
-  struct histHarmonic {
+  struct histFullEventHarmonic {
     TH1F *mHistPsi;
-    TH1F *mHistFlowTagSumPt;
-    TH1D *mHistFlowTagMult;
+    TH1F *mHistFlowMeanPt;
     TH1F *mHist_q;
   };
 
   struct histSubEvent;	
   friend struct histSubEvent;
   struct histSubEvent {
-    TProfile *mHistResolution;
-    struct histHarmonic histHarmonics[nHarmonics];
+    struct histSubEventHarmonic histSubEventHarmonics[nHarmonics];
   };
-
   struct histSubEvent histSubEvents[nSubEvents]; //!
+
+  struct histFullEvent;	
+  friend struct histFullEvent;
+  struct histFullEvent {
+    TProfile *mHistCos;
+    TProfile *mHistRes;
+    struct histFullEventHarmonic histFullEventHarmonics[nHarmonics];
+  };
+  struct histFullEvent histFullEvents[nSubEvents/2]; //!
 
 private:
 
-  FlowTag_st*   mFlowTag;        //! pointer to the tag table
+  FlowTag_st*   mFlowTag;         //! pointer to the tag table
   StEvent*      mEvent;           //! pointer to DST data
   float QxSub[nSubEvents][nHarmonics];
   float QySub[nSubEvents][nHarmonics];
   float NSub[nSubEvents][nHarmonics];
-  float sPtSub[nSubEvents][nHarmonics];
-  float psiSub[nSubEvents][nHarmonics];
+  float sumPtSub[nSubEvents][nHarmonics];
+  float PsiSub[nSubEvents][nHarmonics];
   float Qx[nSubEvents/2][nHarmonics];
   float Qy[nSubEvents/2][nHarmonics];
   float N[nSubEvents/2][nHarmonics];
-  float sPt[nSubEvents/2][nHarmonics];
+  float sumPt[nSubEvents/2][nHarmonics];
   float Q[nSubEvents/2][nHarmonics];
   float q[nSubEvents/2][nHarmonics];
-  float psi[nSubEvents/2][nHarmonics];
+  float Psi[nSubEvents/2][nHarmonics];
+  float CosDiffSubs[nSubEvents/2][nHarmonics];
   float res[nSubEvents/2][nHarmonics];
 
   ClassDef(StFlowAnalysisMaker, 1)  // macro for rootcint
 };
 
 #endif
-
-
-
-
-
-
-
-
-
