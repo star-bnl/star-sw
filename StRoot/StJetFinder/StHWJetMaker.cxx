@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHWJetMaker.cxx,v 1.1 2003/04/24 14:15:16 thenry Exp $
+ * $Id: StHWJetMaker.cxx,v 1.2 2003/05/01 19:51:43 thenry Exp $
  * 
  * Author: Thomas Henry April 2003
  ***************************************************************************
@@ -85,7 +85,7 @@ StHWJetMaker::StHWJetMaker(const Char_t *name)
 Int_t StHWJetMaker::Init()
 {
   if(muDstMaker == NULL) return kStOk;
-  StJetMaker::fourPMaker->Init();
+  //StJetMaker::fourPMaker->Init();
 
   Int_t retval = StJetMaker::Init();
   return retval;
@@ -108,10 +108,11 @@ Int_t StHWJetMaker::Make()
 Int_t StHWJetMaker::Finish()
 {
   if(muDstMaker == NULL) return kStOk;
-  fourPMaker->Finish();
+  //fourPMaker->Finish();
 
   Int_t retval = StJetMaker::Finish();
   return retval;
 }
+
 
 
