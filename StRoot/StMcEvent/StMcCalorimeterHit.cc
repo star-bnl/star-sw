@@ -1,6 +1,11 @@
-// $Id: StMcCalorimeterHit.cc,v 2.2 2000/06/06 02:58:40 calderon Exp $
+// $Id: StMcCalorimeterHit.cc,v 2.3 2003/08/20 18:50:20 calderon Exp $
 //
 // $Log: StMcCalorimeterHit.cc,v $
+// Revision 2.3  2003/08/20 18:50:20  calderon
+// Addition of Tof classes and Pixel classes.  Modified track, event, and
+// container code to reflect this.
+// Fix bug in StMcVertex and in clearing of some hit collections.
+//
 // Revision 2.2  2000/06/06 02:58:40  calderon
 // Introduction of Calorimeter classes.  Modified several classes
 // accordingly.
@@ -14,7 +19,7 @@
 #include "StMcTrack.hh"
 #include "StParticleDefinition.hh"
 
-// static const char rcsid[] = "$Id: StMcCalorimeterHit.cc,v 2.2 2000/06/06 02:58:40 calderon Exp $";
+// static const char rcsid[] = "$Id: StMcCalorimeterHit.cc,v 2.3 2003/08/20 18:50:20 calderon Exp $";
 
 //StMemoryPool StMcCalorimeterHit::mPool(sizeof(StMcCalorimeterHit));
 
@@ -75,7 +80,7 @@ ostream& operator<<(ostream& os, const StMcCalorimeterHit & h)
       StMcTrack* t=h.parentTrack();
       if(t->particleDefinition()){
         os << " | g2t key  : " << t->key();
-        os << " Name: "<<t->particleDefinition()->name().c_str();
+        os << " Name: "<<(t->particleDefinition()->name()).c_str();
       }
     }
     else os <<" Parent track undefined ";

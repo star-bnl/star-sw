@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.hh,v 2.5 2000/03/29 16:15:55 calderon Exp $
+ * $Id: StMcVertex.hh,v 2.6 2003/08/20 18:50:21 calderon Exp $
  * $Log: StMcVertex.hh,v $
+ * Revision 2.6  2003/08/20 18:50:21  calderon
+ * Addition of Tof classes and Pixel classes.  Modified track, event, and
+ * container code to reflect this.
+ * Fix bug in StMcVertex and in clearing of some hit collections.
+ *
  * Revision 2.5  2000/03/29 16:15:55  calderon
  * Added more information from g2t_vertex table
  *
@@ -59,7 +64,7 @@ public:
     unsigned int                numberOfDaughters();
     StMcTrack*                  daughter(unsigned int);
     const StMcTrack*            parent();
-    string                      geantVolume() const;
+    string const               &geantVolume() const;
     float                       tof() const;
     long                        geantProcess() const;
     long                        generatorProcess() const;
@@ -104,7 +109,7 @@ inline StMcTrack* StMcVertex::daughter(unsigned int i)
 
 inline const StMcTrack* StMcVertex::parent(){ return mParent; }          
 
-inline string StMcVertex::geantVolume() const { return mGeantVolume; }   
+inline string const &StMcVertex::geantVolume() const { return mGeantVolume; }   
 
 inline float StMcVertex::tof() const { return mTof; }  
 

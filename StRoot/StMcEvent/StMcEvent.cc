@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.12 2003/05/15 18:28:47 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.13 2003/08/20 18:50:21 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.13  2003/08/20 18:50:21  calderon
+ * Addition of Tof classes and Pixel classes.  Modified track, event, and
+ * container code to reflect this.
+ * Fix bug in StMcVertex and in clearing of some hit collections.
+ *
  * Revision 2.12  2003/05/15 18:28:47  calderon
  * Added data members from modified g2t_event table:
  * Event Generator Final State Tracks, N Binary Collisions,
@@ -68,6 +73,8 @@
 #include "StMcCtbHitCollection.hh"
 #include "StMcSvtHitCollection.hh"
 #include "StMcEmcHitCollection.hh"
+#include "StMcTofHitCollection.hh"
+#include "StMcPixelHitCollection.hh"
 #include "StMcContainers.hh" 
 #include "StMcVertex.hh"
 #include "StMcTrack.hh"
@@ -76,12 +83,14 @@
 #include "StMcRichHit.hh"
 #include "StMcSvtHit.hh"
 #include "StMcCalorimeterHit.hh"
+#include "StMcTofHit.hh"
+#include "StMcPixelHit.hh"
 #include "tables/St_g2t_event_Table.h"
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.12 2003/05/15 18:28:47 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.12 2003/05/15 18:28:47 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.13 2003/08/20 18:50:21 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.13 2003/08/20 18:50:21 calderon Exp $";
 
 void StMcEvent::initToZero()
 {
@@ -92,6 +101,8 @@ void StMcEvent::initToZero()
     mFtpcHits = 0;            
     mRichHits = 0;            
     mCtbHits = 0;
+    mTofHits = 0;
+    mPixelHits = 0;
     // Create the collections
     
     mTpcHits  = new StMcTpcHitCollection();
@@ -104,7 +115,9 @@ void StMcEvent::initToZero()
     mBprsHits  = new StMcEmcHitCollection();
     mBsmdeHits = new StMcEmcHitCollection();
     mBsmdpHits = new StMcEmcHitCollection();
-    
+    mTofHits = new StMcTofHitCollection();
+    mPixelHits = new StMcPixelHitCollection();
+
 }
 
 StMcEvent::StMcEvent()
@@ -183,6 +196,12 @@ StMcEvent::~StMcEvent()
     if (mBsmdpHits) delete mBsmdpHits;
     mBsmdpHits=0;
 
+    if (mTofHits) delete mTofHits;
+    mTofHits=0;
+
+    if (mPixelHits) delete mPixelHits;
+    mPixelHits=0;
+
     for(StMcTrackIterator it=mTracks.begin();
 	it != mTracks.end(); it++)
 	delete *it;    
@@ -192,6 +211,7 @@ StMcEvent::~StMcEvent()
 	iv != mVertices.end(); iv++)
 	delete *iv;
     mVertices.clear();
+    
 }
 
 int StMcEvent::operator==(const StMcEvent& e) const
@@ -314,3 +334,15 @@ void StMcEvent::setBsmdpHitCollection(StMcEmcHitCollection* val)
     if (mBsmdpHits && mBsmdpHits!= val) delete mBsmdpHits;
     mBsmdpHits = val;
 }              
+
+void StMcEvent::setTofHitCollection(StMcTofHitCollection* val)
+{
+    if (mTofHits && mTofHits!= val) delete mTofHits;
+    mTofHits = val;
+}
+
+void StMcEvent::setPixelHitCollection(StMcPixelHitCollection* val)
+{
+    if (mPixelHits && mPixelHits!= val) delete mPixelHits;
+    mPixelHits = val;
+}   
