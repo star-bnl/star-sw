@@ -58,12 +58,12 @@ void StiDedxCalculator::getDedx(const StiKalmanTrack* track,
   if(nPointsUsed>0.)
     {
       dEdx=sum/nPointsUsed;
-      dEdxE=DBL_MAX;
+      dEdxE=9999;
     }
   else
     {
-      dEdx=DBL_MAX;
-      dEdxE=DBL_MAX;
+      dEdx=9999;
+      dEdxE=9999;
     }
 }
 
