@@ -84,7 +84,7 @@ $STAR/pams/trg/kumac
 * tpc fast sim init
   exec tpc_fast_sim#initialize 
   
-*  exec write_table_to_ntuple#init_disk [funit] [nfile]
+  exec write_table_to_ntuple#init_disk [funit] [nfile]
 
 * read event and then process thru tpc fast sim
   do i=1,[num_events]
