@@ -1,7 +1,13 @@
 ****************************************************************************
-* $Id: tpcegeo.g,v 1.27 2003/11/13 00:56:40 potekhin Exp $
+* $Id: tpcegeo.g,v 1.28 2003/11/13 01:37:46 potekhin Exp $
 *
 * $Log: tpcegeo.g,v $
+* Revision 1.28  2003/11/13 01:37:46  potekhin
+* Added four missing lines of code
+* for the gas density correction,
+* a comment from Yuri and a diagnostic
+* print.
+*
 * Revision 1.27  2003/11/13 00:56:40  potekhin
 * Added the Log CVS tag
 *
@@ -283,6 +289,18 @@ Block  TPGV is the Gas Volume placed in TPC
       if(TPCG_gasCorr==1) then
          density=0.9*0.001782+0.1*0.000667
       else
+         print *,'Corrected GAS DENSITY'
+* Comment by Y.Fisyak:
+* The STAR TPC has been operating with P10 (90% Ar, 10% methane by volume)
+* at ~2 mbar above the ambient atmospheric pressure.
+* Temperature is regulated close to 75F, both for the hall [supposedly regulated at (75 +/-5)F]
+* dAu run (2003) average
+         T    = 298.06 "Kelvin degree"
+         P    = 1016.59 "mbar"
+         PATM = 0.001*P*750.062/760. "mbar => torr => atm"
+         rho  =(0.9*0.001782+0.1*0.000717) " g/cm**3 "
+* at STP (Standard Temperature and Pressure, 0°C and one atmosphere pressure).
+
          density=rho*(273.15/T)*PATM
       endif
 
