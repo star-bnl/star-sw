@@ -163,7 +163,7 @@ int EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken, HeadVer 
       break;
     case  headVer3:     // miniDaq2004 ezTree header 
       errFlag=9; 
-      //  ??    if(ic<6) errFlag=9; else errFlag=4;
+      if(ic<6) errFlag=4; else errFlag=9; // yes, October 2004, JB
       sick=b->isHeadValid(headToken,list[ic],trigCommand,errFlag,lenCount);
       break;
     default:
@@ -216,6 +216,9 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.21  2004/10/13 17:14:31  balewski
+ * one more header change for miniDaq
+ *
  * Revision 1.20  2004/09/07 20:32:01  balewski
  * more methods, remove questionable spin bits interpetation
  *
