@@ -112,8 +112,13 @@ public:
    virtual char * host ();
    virtual long socketNumber ();
    virtual long bufferSize ();
+   virtual unsigned char requiresHandshake ();
+   virtual void requiresHandshake (unsigned char truth);
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+    virtual STAFCV_T acknowledgeRequest();
+    virtual STAFCV_T requestAcknowledge();
+
 //:- override virtuals
    virtual STAFCV_T close ();
    virtual STAFCV_T open (DIO_MODE_T mode);
@@ -125,6 +130,7 @@ protected:
    char * myHost;
    int mySocket;		// << INTEGER, not LONG
    long myBufferSize;
+   unsigned char myRequiresHandshake;
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
    virtual int openServer();

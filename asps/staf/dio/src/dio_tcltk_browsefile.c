@@ -1,5 +1,8 @@
-
+#ifndef __sparc
 #include <strings.h>
+#else
+#include <string.h>
+#endif /* __sparc */
 #include "dio_types.h"
 
 #define NAME_D "i_changed"
