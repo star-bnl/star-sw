@@ -567,7 +567,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("geant");
     }
   }
-  if (!GetOption("geant") && !GetOption("FieldOn") && !GetOption("FieldOff") && 
+  if (!GetOption("FieldOn") && !GetOption("FieldOff") && 
       !GetOption("HalfField") && !GetOption("ReverseField") && !kMagF)   SetOption("magF"); 
   if (!GetOption("global") && 
       (GetOption("Match") || GetOption("Primary") || GetOption("V0") ||
@@ -779,8 +779,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.102 2000/06/16 23:34:16 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.103 2000/06/18 00:17:47 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.103  2000/06/18 00:17:47  fisyak
+// fix clash in mag field between geant and daq
+//
 // Revision 1.102  2000/06/16 23:34:16  fisyak
 // replace arrays in parser by TObjArrays
 //
