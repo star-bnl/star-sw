@@ -16,6 +16,8 @@
 #include "StEmcUtil/emcDetectorName.h"
 #include "StarClassLibrary/SystemOfUnits.h"
 
+#include "tables/St_emcPedestal_Table.h" 
+
 #ifndef ST_NO_NAMESPACES
 using units::tesla;
 #endif
@@ -243,13 +245,13 @@ Int_t StEmcCalibrationMaker::Init()
   {    
     Int_t nb=nbins;
 
-    //    if(EffPedSpec) delete EffPedSpec;
-    //    EffPedSpec=new StEmcEffPedSpectra(detname[detnum].Data());
-    //EffPedSpec->CalibTable=CalibTable;
-    //EffPedSpec->SettingsTable=SettingsTable;
-    //EffPedSpec->nEtaBins=Settings_st[0].NEtaBins;
-    //EffPedSpec->etaBinWidth=Settings_st[0].EtaBinWidth;
-    //EffPedSpec->Init();
+    if(EffPedSpec) delete EffPedSpec;
+    EffPedSpec=new StEmcEffPedSpectra(detname[detnum].Data());
+    EffPedSpec->CalibTable=CalibTable;
+    EffPedSpec->SettingsTable=SettingsTable;
+    EffPedSpec->nEtaBins=Settings_st[0].NEtaBins;
+    EffPedSpec->etaBinWidth=Settings_st[0].EtaBinWidth;
+    EffPedSpec->Init();
     
     PedStatus=0;
     m_pedCounter=0;
@@ -347,8 +349,7 @@ Int_t StEmcCalibrationMaker::Make()
   
   if (Settings_st[0].DoPedSubtraction == 1) 
   {
-    if(GetPedestal()) SubtractPedestal();
-    else 
+    if(!SubtractPedestal())
     {
       gMessMgr->Warning("StEmcCalibrationMaker::Make() - Could not get pedestals");
       return kStWarn;
@@ -722,13 +723,23 @@ Bool_t StEmcCalibrationMaker::ProjectTrack(StTrack* track,double radius, Float_t
   
 }
 //_____________________________________________________________________________
-Bool_t StEmcCalibrationMaker::GetPedestal()
-{
-  return kTRUE;
-}
-//_____________________________________________________________________________
 Bool_t StEmcCalibrationMaker::SubtractPedestal()
 {
+  TDataSet *emcDb=GetInputDB("Calibrations/emc");
+  if(!emcDb) return kFALSE;
+  
+  if(detnum==0) // bemc
+  {
+    St_emcPedestal *ped=(St_emcPedestal*)emcDb->Find("bemcPedestal");
+    if(!ped) return kFALSE;
+    emcPedestal_st *pedst=ped->GetTable();
+    for(Int_t i=0;i<nbins;i++)
+    {
+      emcHits[i]-=pedst[i].AdcPedestal;
+      if(emcHits[i]<pedst[i].AdcPedestalRMS) emcHits[i]=0;
+    }
+  }
+  
   return kTRUE;
 }
 //_____________________________________________________________________________
@@ -949,14 +960,14 @@ Bool_t StEmcCalibrationMaker::FillEffPed()
   Bool_t ok=kFALSE;
   Int_t nn=0;
   
-  //  for(Int_t did=1;did<=nbins;did++)
-    //    if(trackTower[did-1]==1 && EffPedSpec->GetStatus(did)==1) 
-    // {
-    //  EffPedSpec->FillSpectra(did,emcHits[did-1]);
-    //  m_EffPedOccupancy->Fill(did);
-    //  ok=kTRUE;
-    //  nn++;
-    // }
+  for(Int_t did=1;did<=nbins;did++)
+    if(trackTower[did-1]==1 && EffPedSpec->GetStatus(did)==1) 
+    {
+      EffPedSpec->FillSpectra(did,emcHits[did-1]);
+      m_EffPedOccupancy->Fill(did);
+      ok=kTRUE;
+      nn++;
+    }
   
   #ifdef StEmcCalibrationMaker_DEBUG
   if(ok)
@@ -978,7 +989,7 @@ Bool_t StEmcCalibrationMaker::FillEffPed()
 
   Float_t occ=0,x=0,y=0;
   
-  //  EffPedSpec->GetOccupancy(Settings_st[0].EffPedEventsPerBin,&x,&y,&occ);
+  EffPedSpec->GetOccupancy(Settings_st[0].EffPedEventsPerBin,&x,&y,&occ);
 
   #ifdef StEmcCalibrationMaker_DEBUG
   emclog <<"EFFPED: Avg Nevents/(Bin or EtaBin) = "<<x<<" +- "<<y<<"\n";  
@@ -1003,11 +1014,11 @@ Bool_t StEmcCalibrationMaker::MakeEffPed()
   
   for(Int_t did=1;did<=nbins;did++)
   {
-    //    if(EffPedSpec->GetStatus(did)>0 && 
-    //   EffPedSpec->GetSum(did)>=Settings_st[0].EffPedEventsPerBin) 
-    // {
-    //  EffPedSpec->CalcPedestal(did);
-    // }
+    if(EffPedSpec->GetStatus(did)>0 && 
+       EffPedSpec->GetSum(did)>=Settings_st[0].EffPedEventsPerBin) 
+    {
+      EffPedSpec->CalcPedestal(did);
+    }
   }
   
   PedStatus=2;
