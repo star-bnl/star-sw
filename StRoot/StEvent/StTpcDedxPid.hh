@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.hh,v 1.3 1999/05/20 21:42:56 ogilvie Exp $
+ * $Id: StTpcDedxPid.hh,v 1.4 1999/05/22 17:56:19 ogilvie Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.hh,v $
+ * Revision 1.4  1999/05/22 17:56:19  ogilvie
+ * made static data members public
+ *
  * Revision 1.3  1999/05/20 21:42:56  ogilvie
  * *** empty log message ***
  *
@@ -42,10 +45,10 @@ public:
     double getTpcDedxGain() ;
     double getTpcDedxOffset() ;
     double getTpcDedxRise() ;
-private:
-  static double mTpcDedxGain ;
-  static double mTpcDedxOffset ;
-  static double mTpcDedxRise ;  
+    
+    static double mTpcDedxGain ;
+    static double mTpcDedxOffset ;
+    static double mTpcDedxRise ;  
 
 };
 
