@@ -1,8 +1,8 @@
-* 9/18/98 K. Turner (for 98i)
+* 9/23/98 K. Turner (for 98i)
 * Run BFC in following manner:
 * - read in fz file with year1 data
 * - run g2t
-* - run tpc simulation
+* - run tpc & emc simulation
 * - run tpc reconstruction 
 * - run global & dst
 * - write out xdf file
@@ -13,11 +13,11 @@
    tpc_sector_first=1 _
    tpc_sector_last=1 _
    gstar_settings=' field_only' _
-   domain=' geometry g2t tpc ctf svt global ' _
-   chain=' fzin rg2t tpg insvt tfs tpt tid tte_e  drhd dehd evr egr ev0 ddedx dpnt desum dmsft drsum evout ' _
-   first=1 _
+   domain=' geometry g2t tpc emc ctf svt global ' _
+   chain=' fzin rg2t tpg insvt tfs ems tpt tid tte_e  drhd dehd evr egr ev0 ddedx dpnt desum dmsft drsum evout ' _
+   skip=0 _
    no_events=1 _
    input_data_file=/disk1/star/auau200/year1a/central/hijing/set0001/regular/gst/auau_ce_b0-2_1001_1050.fzd
-   output_file=auau_ce_b0-2_1001_1050.xdf _
+   output_file=auau_ce_b0-2_1001_1050_year1.xdf _
    log=bfc_readfz_to_dst_year1.log
 

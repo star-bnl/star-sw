@@ -114,6 +114,12 @@
 *                           - put in (ebye1) chain
 * editted 9/21/98 K. Turner - new chain variable (user)
 *                           - fix (dehd) chain
+* editted 9/23/98 K. Turner - fixing event counters
+*                              nev_total = total # events read in, including skipped events
+*                              nev_proc = total # events processed (not incl. skipped)
+*                              nev_pass = total # events passed the processing
+*                           - put in error checking in rg2t (Pavel)  
+*
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -383,7 +389,6 @@ ABEND:
   test = [chain]
   nw = $words([test])
 
-  nevdsttot = [nevdsttot]+1
 
   do i = 1, [nw]
    mod = $word([test],[i],1)
@@ -440,13 +445,15 @@ ABEND:
      (rgst) trig 1; if ($iquest(1) <>0) goto EOF	     
      (rg2t) cd [geantE]
           for/call g2t
+* try this
+          if ($iquest(100) <1 .or. $iquest(100) > 100000) goto ABEND 
           cd /dui
           tdm/table/rowcount event/geant/Event/g2t_vertex
           no_vert=$format(staf_result(1),i10)
           tdm/table/rowcount event/geant/Event/g2t_track
           no_track=$format(staf_result(1),i10)
-          string = '---<bfc>---rg2t: Event  No.vertices ='//no_vert//' No.Tracks = '//no_track
-	  fmessage $quote([string])    [log_file]
+          string = '---<bfc>---rg2t: Event  No.vertices ='//[no_vert]//' No.Tracks = '//[no_track]
+          fmessage $quote([string])    [log_file]
           message $quote([string])
       (svg)    nextl 1
       (tpg)    nextl 1
@@ -564,7 +571,7 @@ ABEND:
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
    sigma v[mod] = v[mod] + abs($cptime)
    sigma t[mod] = t[mod] + v[mod]
-   string = '---<bfc>---'//[mod]//': Event  '//$format([ievent],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)
+   string = '---<bfc>---'//[mod]//': Event  '//$format([nev_proc],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)
    fmessage $quote([string])    [log_file]
     message $quote([string]) 
    vec/inp v[mod] 0.0
@@ -572,7 +579,6 @@ ABEND:
   enddo
   asu/malloc/stats 
 
-  nevdstgood = [nevdstgood]+1
 
  ABEND:
  NEXT_EVENT:
@@ -584,9 +590,7 @@ ABEND:
  message ' BFC_UTIL,process: skip out because got to final run summary table'
  
  END:
-
- message ' BFC_UTIL,process: #events total,good = ', [nevdsttot], [nevdstgood]
-
+ 
 return
  
 **********************************************************************
@@ -652,7 +656,7 @@ macro bfc_finish _
   enddo
 
 
-  string = '---<bfc>--- total CPU to process  '//$format([nevents],i6)//'events = '//$format(totime,f12.5)
+  string = '---<bfc>--- total CPU to process  '//$format([nevents],i6)//' events = '//$format(totime,f12.5)
  fmessage $quote([string])    [log_file]
   message $quote([string]) 
   if [nevents]>0 then
@@ -677,7 +681,7 @@ return
   nw = $words([test])
   do i = 1, [nw]
     mod = $word([test],[i],1)
-   string = '---<bfc>---'//[mod]//': Event  '//$format([ievent],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)
+   string = '---<bfc>---'//[mod]//': Event  '//$format([nev_proc],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)
    fmessage $quote([string])    [log_file]
     message $quote([string]) 
   enddo

@@ -14,7 +14,6 @@
    domain=' geometry tpc ctf svt global' _
    chain='  g2tin svg tpg srs tfs tpt tid tte_e sgr drhd dehd svm evr egr ev0 ddedx dpnt desum dmsft drsum evout' _
    skip=0 _
-   first=1 _
    no_events=1 _
    input_data_file=$AFS_RHIC/star/data/samples/auau_central_hijing.xdf _
    output_file=bfc_sim_global_dst_out _

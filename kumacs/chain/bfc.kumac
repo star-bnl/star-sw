@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.59 1998/09/22 14:43:23 kathy Exp $
+* * $Id: bfc.kumac,v 1.60 1998/09/23 17:38:07 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.60  1998/09/23 17:38:07  kathy
+* fix event counters; fix output messages; Pavels fix for rg2t; remove first from input list and change all call examples for this; revise dictionary in bfc to make current
+*
 * Revision 1.59  1998/09/22 14:43:23  kathy
 * change input file name
 *
@@ -222,16 +225,23 @@
 * 
 * editted 9/21/98 K. Turner - add inputs and global macros for ebye stuff
 *                           - remove !!! for user kumacs
+* editted 9/23/98 K. Turner - fixing messages and event counters
+*                           - nev_total = total # events read in, including skipped events
+*                           - nev_proc = total # events processed (not incl. skipped)
+* - nev_pass = total # events passed the processing
+* 
 * ******************************************************************************
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
+* 
 * TOP        - top level directory to search for kumacs 
-* - change if you copy stuff to your area!
-* - files must be in standard directory structure format:
+*   - change if you copy stuff to your area!
+*   - files must be in standard directory structure format:
 *                                  ~workdir/kumacs/domain
 *                                  ~workdir/pams/domain
+* calib_dir       - for ebye analysis
 * tpc_sector_first - first sector # of tpc to simulation using tss
 * tpc_sector_last -  last sector # of tpc to simulation using tss
-* calib_dir       - for ebye analysis
+
 * ebye_prior_switch    - for ebye analysis
 * ebye_ensemble_switch - for ebye analysis
 * ebye_analysis_switch - for ebye analysis
@@ -245,7 +255,7 @@
 * domain     - list of domains to load [domain='tpc svt global]
 * chain      - list of modules to run **** HAVE TO BE IN ORDER ****
 *            - see more details below
-* first      - first event to process (should set to 1)
+* skip - number of events to skip before processing starts
 * no_events  - number of events to process
 * input_data_file   - directory + input file name
 * output_file       - output file name for use with chain=fzout or evout
@@ -359,18 +369,18 @@
 *   - run g2t
 *   - run tpc & svt & emc simulation
 *
-* 7. call_bfc_readfz_to_dst.kumac
-*   - read in fz file
+* 7. call_bfc_readfz_to_dst_year2.kumac
+*   - read in fz file with year2 simulations
 *   - run g2t
-*   - run tpc & svt simulation
+*   - run tpc & svt & emc simulation
 *   - tpc, svt reconstruction
 *   - global reconstruction
 *   - dst packages
 *
 * 8. call_bfc_readfz_to_dst_year1.kumac
-*   - read in fz file
+*   - read in fz file with year1 simulations
 *   - run g2t
-*   - run tpc  simulation
+*   - run tpc & emc simulation
 *   - tpc reconstruction
 *   - global reconstruction
 *   - dst packages
@@ -466,8 +476,7 @@ MACRO bfc _
    gstar_settings=' field_only' _
    domain=' geometry g2t tpc ctf svt global ' _
    chain=' fzin rg2t tpg svg tfs srs tpt tid tte_e sgr drhd dehd svm evr egr ev0 ddedx dpnt desum dmsft drsum dout ' _
-   skip=0 _
-   first=1 _
+   skip=2 _
    no_events=1 _
    input_data_file=/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/Gstardata/set100/set100_01_45evts.fz _
    output_file=set100_01_45evts _
@@ -482,7 +491,8 @@ MACRO bfc _
 ***********************************************************
     
  input_file = [input_data_file]
- last = [first]+[no_events]-1
+ first = [skip]+1
+ last = [skip]+[no_events]
  
   output_xdf_file = [output_file].xdf
   output_fzd_file = [output_file].fzd
@@ -493,7 +503,8 @@ MACRO bfc _
 ***********************************************************
    
  message ' *** TOP level directory     --> ' [TOP]
- message ' *** Input file              --> ' [input_file]        
+ message ' *** Input file              --> ' [input_file]
+ message ' *** Num Events to skip      --> ' [skip]
  message ' *** Num Events to process   --> ' [no_events]
  message ' *** domains to load         --> ' [domain]
  message ' *** modules to process      --> ' [chain]  
@@ -528,16 +539,20 @@ MACRO bfc _
  macro/global/create output_xdf_file  [output_xdf_file] 
  macro/global/create output_fzd_file  [output_fzd_file]
  macro/global/create output_dst_file  [output_dst_file]
+     
+ macro/global/create nev_proc 0
+ macro/global/create nev_pass 0
+ macro/global/create nev_total 0    
    
-   macro/global/create nunit  [nunit]
-   macro/global/create nfile  [nfile]
-   macro/global/create nid    [nid]
-   macro/global/create ntable [ntable]
+ macro/global/create nunit  [nunit]
+ macro/global/create nfile  [nfile]
+ macro/global/create nid    [nid]
+ macro/global/create ntable [ntable]
 	   
-  macro/global/create calib_dir            [calib_dir]
-  macro/global/create ebye_prior_switch    [ebye_prior_switch]
-  macro/global/create ebye_ensemble_switch [ebye_ensemble_switch]
-  macro/global/create ebye_analysis_switch [ebye_analysis_switch]
+ macro/global/create calib_dir            [calib_dir]
+ macro/global/create ebye_prior_switch    [ebye_prior_switch]
+ macro/global/create ebye_ensemble_switch [ebye_ensemble_switch]
+ macro/global/create ebye_analysis_switch [ebye_analysis_switch]
 
 ***********************************************************
 * BEGINNING STUFF 
@@ -558,7 +573,7 @@ MACRO bfc _
  message ' *** log_file                --> ' [log_file]
  string =   '---<bfc>-- i:'//[input_file]//' o:'//[output_file]
  fmessage $quote([string])  [log_file]
- string =   '---<bfc>-- f:'//[first]//' s:'//[skip]//' l:'//[last]
+ string =   '---<bfc>-- s:'//[skip]//' f:'//[first]//' l:'//[last]
  fmessage $quote([string])  [log_file]
  string =  '---<bfc>-- c:'//[chain]
  fmessage $quote([string])  [log_file]
@@ -580,7 +595,8 @@ MACRO bfc _
        if [mod].eq.evgin.or.[mod].eq.g2tin.or.[mod].eq.evin.or.[mod].eq.esin.or.[mod].eq.fzin.or.[mod].eq.dstin then 
            message ' SKIP EVENTS FOR ' [mod]
 	   do ievent = 1,[skip]
-	       message 'skip event # ',[ievent]
+	       nev_total = [nev_total] + 1
+	       message 'skip event # ',[nev_total]
                exec bfc_util#bfc_process chain=[mod]
                if (STAF_STATUS(1).ne. 1) goto ABEND
            enddo
@@ -595,6 +611,8 @@ MACRO bfc _
  message cpu time = $cptime
  do ievent=[first],[last]	| loop over events
    message ' =====> BFC is processing event # ' [ievent]
+   nev_total = [nev_total] + 1
+   nev_proc = [nev_proc] + 1
    tabclear [event]          | zero all tables
    exec bfc_util#bfc_process [chain]
    if (STAF_STATUS(1).ne. 1) goto ABEND
@@ -605,8 +623,12 @@ MACRO bfc _
    if ($vexist(readprob).ne.0) then
      message ' BFC: skip to bfc_finish because problem reading input file'
      goto FINISH
-   endif
+   endif   
+   nev_pass = [nev_pass] + 1
    nevents = [nevents] + 1
+   
+   message ' BFC: #events total,processed,passed = ' _
+      [nev_total] [nev_proc] [nev_pass]
  enddo
 
 *****************************************

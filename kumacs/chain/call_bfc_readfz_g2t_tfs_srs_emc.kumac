@@ -13,7 +13,7 @@
    gstar_settings=' field_only' _
    domain=' geometry g2t tpc emc svt ' _
    chain=' fzin rg2t tpg svg tfs srs ems evout' _
-   first=1 _
+   skip=0 _
    no_events=1 _
    input_data_file=/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/Gstardata/psc079_01_46evts.fza _
    output_file=psc079_01_46evts.xdf
