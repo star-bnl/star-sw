@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.111 1999/09/17 21:29:31 fisyak Exp $
+// $Id: bfc.C,v 1.112 1999/09/17 22:18:33 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -142,14 +142,14 @@ void Usage() {
   printf (" root4star 'bfc.C(1,1)'             \t// the same\n");
   printf (" root4star 'bfc.C(2,40,\"y1b fzin\")'\t// run for configuration year_1b, \n");
   printf ("                                    \t// reading /disk1/star/test/psc0050_01_40evts.fzd\n");
-  printf ("                                    \t// skipping the 1-st event for the rest 39 events\n");
+  printf ("                                    \t// skipping the 1-st event and processing the rest 39 events\n");
   printf (" root4star 'bfc.C(40,\"y1b fzin\",\"/disk1/star/test/psc0050_01_40evts.fzd\")'\n");
   printf (" root4star 'bfc.C(40,\"y1b fzin\")'\t// the same as  above\n");
   printf (" root4star 'bfc.C(2,40,\"y1b fzin -l3t\")'//the as above but remove L3T from chain\n");
   printf (" root4star 'bfc.C(40,\"y2a fzin\",\"/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fz\")'\n");
   printf (" root4star 'bfc.C(40,\"y2a fzin\")'\t// the same as  above\n");
   printf (" root4star 'bfc.C(5,10,\"y1b in xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'\n");
-  printf ("                                    \t// skipping the 4 events for the rest 6 events\n");
+  printf ("                                    \t// skipping the 4 events and processing the rest 6 events\n");
   printf (" root4star 'bfc.C(1,\"off in tpc FieldOff sd97 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"\n");
   printf (" root4star 'bfc.C(1,\"gstar y1a tfs allevent\")' \t// run gstar and write all event into file branches\n");
   printf (" root4star 'bfc.C(1,\"off in y1a l3t\",\"gtrack.tpc_hits.root\")'\t// run l3t only with prepaired file\n");
