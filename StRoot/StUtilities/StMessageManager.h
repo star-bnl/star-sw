@@ -96,6 +96,8 @@ class StMessageManager : public StMessMgr {
          const char* s3="", const char* s4="", messVec* list=0);
    virtual        void BuildMessage(const char* mess="", const char* type="",
          const char* opt=0);
+   virtual void IgnoreRepeats() { StMessage::IgnoreRepeats(); }
+   virtual void AllowRepeats() { StMessage::AllowRepeats(); }
  
  public:
    virtual ~StMessageManager();
@@ -208,8 +210,11 @@ class StMessageManager : public StMessMgr {
 
 #endif
 
-// $Id: StMessageManager.h,v 1.22 2004/01/28 00:09:14 genevb Exp $
+// $Id: StMessageManager.h,v 1.23 2004/04/02 22:17:14 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.23  2004/04/02 22:17:14  genevb
+// Added protected Ignore/AllowRepeats() for friend StBFChain class
+//
 // Revision 1.22  2004/01/28 00:09:14  genevb
 // Messages (except Debug) default to no time-date stamp
 //
