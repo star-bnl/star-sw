@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDaqClfMaker.cxx,v 1.3 2002/03/08 20:33:43 jml Exp $
+ * $Id: StDaqClfMaker.cxx,v 1.4 2002/03/20 16:41:54 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,12 @@
  ***************************************************************************
  *
  * $Log: StDaqClfMaker.cxx,v $
+ * Revision 1.4  2002/03/20 16:41:54  jml
+ * Added pad by pad t0 corrections controlled by flags
+ * 	no flag    -- full pad by pad corrections
+ * 	'nopadt0'  -- no pad by pad corrections
+ * 	'avgpadt0' -- correct according to clusters pad
+ *
  * Revision 1.3  2002/03/08 20:33:43  jml
  * Instantiate and write to StEvent if "ittf" flag is set.
  *
@@ -132,8 +138,25 @@ Int_t StDaqClfMaker::Init()
 
   x = chain->GetOptionString("splitRows");
   if(x) sscanf(x,"%d",&splitRows);
-  else splitRows = 1;
+  else  splitRows = 1;
 
+  if(chain->GetOption("avgpadt0"))
+  {
+    doPadT0Corrections = 1;
+    doFullT0Corrections = 0;
+  }
+  else
+  { 
+    doPadT0Corrections = 0;
+    doFullT0Corrections = 1;
+  }
+
+  if(chain->GetOption("nopadt0"))
+  {
+    doPadT0Corrections = 0;
+    doFullT0Corrections = 0;
+  }
+  
   // Check ittf flag...
   if(chain->GetOption("ittf"))
   {
@@ -301,6 +324,13 @@ Int_t StDaqClfMaker::Make()
     // assignment of pads to different i960's.  This task is accomplished
     // by GetCPPRow()
     for(int r=44;r>=0;r--) {
+      short t0_corrections[MAX_PADS_EVER+1];
+
+      if(doFullT0Corrections)
+	getT0Corrections(t0_corrections,sectorIdx,r+1);
+      else
+	memset(t0_corrections, 0, sizeof(t0_corrections));
+
       unsigned short *adc = ((r<13) ? adc_in : adc_out);
 
       for(int i=0;i<3;i++) {
@@ -359,7 +389,8 @@ Int_t StDaqClfMaker::Make()
 	
 	u_int words = fcf->finder((u_char *)croat_adc, 
 				  (u_short *)croat_cpp, 
-				  (u_int *)croat_out);
+				  (u_int *)croat_out,
+				  t0_corrections);
 
 	//
 	// Add results to tphit table
@@ -576,11 +607,13 @@ double StDaqClfMaker::lzFromTB(double timeBin, int sector, int row, int pad)
 		    gStTpcDb->Dimensions()->zOuterOffset() :
 		    gStTpcDb->Dimensions()->zInnerOffset());
 
-  double t0zoffset =
-    gStTpcDb->DriftVelocity()*1e-6*
-    (gStTpcDb->T0(sector)->getT0(row,pad)*tbWidth);
-  
-  // t0zoffset = 0.0;  // This isn't done in the offline cluster finder...
+  double t0zoffset=0.0;
+  if(doPadT0Corrections)   // If we are doing the full correction, this is done...
+  {
+    t0zoffset =
+      gStTpcDb->DriftVelocity()*1e-6*
+      (gStTpcDb->T0(sector)->getT0(row,pad)*tbWidth);
+  }
 
   double z = 
     gStTpcDb->DriftVelocity()*1e-6*         //cm/s->cm/us
@@ -589,6 +622,42 @@ double StDaqClfMaker::lzFromTB(double timeBin, int sector, int row, int pad)
      + (timeBin)*tbWidth ); 
 
   return(z - zoffset + t0zoffset);
+}
+
+// This gets only the pad by pad t0 corrections.
+// These are all that is passed to clf
+// The additional corrections are done in lzFromTb()
+//
+// sector/row count from 1...
+void StDaqClfMaker::getT0Corrections(short *corr, int sector, int row)
+{
+  int npads = gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
+
+  for(int i=1;i<=MAX_PADS_EVER;i++)
+  {
+    if(i > npads)
+    {
+      corr[i] = 0;
+    }
+    else
+    {
+      //      double tbWidth = (1./gStTpcDb->Electronics()->samplingFrequency());
+      //      double t0zoffset =
+      // 	gStTpcDb->DriftVelocity()*1e-6*
+      //	(gStTpcDb->T0(sector)->getT0(row,i)*tbWidth);
+
+      // Units are time buckets...
+      double t0zoffset = gStTpcDb->T0(sector)->getT0(row,i);
+
+      if(fabs(t0zoffset) > 1.0) printf("(%d %d %d): t0zoffset = %f\n",sector,row,i,t0zoffset);
+
+      int sign = (t0zoffset > 0.0) ? 1 : -1;
+      short t0z_s = (short)((fabs(t0zoffset) * 64.0) + .5);
+      t0z_s *= sign;
+
+      corr[i] = t0z_s;     
+    }
+  }
 }
 
 // Save the cluster

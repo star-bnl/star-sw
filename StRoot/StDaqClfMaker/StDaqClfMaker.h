@@ -1,6 +1,22 @@
 #ifndef StDaqClfMaker_H
 #define StDaqClfMaker_H
 
+/***************************************************************************
+ *
+ * $Id: StDaqClfMaker.h,v 1.3 2002/03/20 16:41:54 jml Exp $
+ *
+ *--------------------------------------------------------------------------
+ *
+ * $Log: StDaqClfMaker.h,v $
+ * Revision 1.3  2002/03/20 16:41:54  jml
+ * Added pad by pad t0 corrections controlled by flags
+ * 	no flag    -- full pad by pad corrections
+ * 	'nopadt0'  -- no pad by pad corrections
+ * 	'avgpadt0' -- correct according to clusters pad
+ *
+ *
+ ***************************************************************************/
+
 #include <StMaker.h>
 #include "tables/St_raw_sec_m_Table.h"
 #include "tables/St_raw_pad_Table.h"
@@ -93,6 +109,8 @@ class StDaqClfMaker:public StMaker
   void fillStEvent(tcl_tphit_st *hit);
   void filltphit(tcl_tphit_st *hit);
 
+  void getT0Corrections(short *corr, int sector, int row);
+
   // Need my own coordinate transformations, because
   // TPC provided transforms only work on ints.
   double lxFromPad(int row, double pad);
@@ -107,6 +125,8 @@ class StDaqClfMaker:public StMaker
   double mDt;
   double mDperp;
 
+  int doFullT0Corrections;
+  int doPadT0Corrections;
   int mFill_tphit;
   int mFill_stevent;
   int mCreate_stevent;
