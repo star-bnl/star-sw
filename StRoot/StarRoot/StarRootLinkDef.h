@@ -7,3 +7,4 @@
 #pragma link C++ class TTreeHelperCast-!;
 #pragma link C++ class THelixTrack-!;
 #pragma link C++ class TUnixTime;
+#pragma link C++ class TDirIter;
