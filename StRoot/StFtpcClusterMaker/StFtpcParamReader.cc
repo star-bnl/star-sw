@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.24 2003/06/10 13:11:51 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.25 2003/06/11 11:10:15 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.25  2003/06/11 11:10:15  jcs
+// remove inner cathode and cluster geometry parameters from ftpcClusterPars
+//
 // Revision 1.24  2003/06/10 13:11:51  jcs
 // min,max gas temperature and pressure limits removed from ftpcClusterPars
 //
@@ -125,23 +128,6 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mUnfoldLimit = detTable->unfoldLimit;      
     mUnfoldFailedLimit = detTable->unfoldFailedLimit;
     
-    mMinTimeBin = detTable->minTimebin;
-    mMinTimeBinMed = detTable->minTimebinMed;
-    mMinTimeBinOut = detTable->minTimebinOut;
-    mMaxTimeLength = detTable->maxTimelength;
-    mMaxPadLength = detTable->maxPadlength;
-    mMaxTimeLengthMed = detTable->maxTimelengthMed;
-    mMaxPadLengthMed = detTable->maxPadlengthMed;
-    mMaxTimeLengthOut = detTable->maxTimelengthOut;
-    mMaxPadLengthOut = detTable->maxPadlengthOut;
-    mDeltaTime = detTable->deltaTime;
-    mDeltaPad = detTable->deltaPad;
-    mOffsetCathodeWest = detTable->offsetCathodeWest;
-    mOffsetCathodeEast = detTable->offsetCathodeEast;
-    mAngleOffsetWest = detTable->angleOffsetWest;
-    mAngleOffsetEast = detTable->angleOffsetEast;
-
-    mMinChargeWindow = detTable->minChargeWindow;
 
   } else {
     gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
@@ -277,28 +263,9 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mMaxFastLoops = detTable->maxFastLoops;    
     mUnfoldLimit = detTable->unfoldLimit;      
     mUnfoldFailedLimit = detTable->unfoldFailedLimit;
-   
-    mMinTimeBin = detTable->minTimebin;
-    mMinTimeBinMed = detTable->minTimebinMed;
-    mMinTimeBinOut = detTable->minTimebinOut;
-    mMaxTimeLength = detTable->maxTimelength;
-    mMaxPadLength = detTable->maxPadlength;
-    mMaxTimeLengthMed = detTable->maxTimelengthMed;
-    mMaxPadLengthMed = detTable->maxPadlengthMed;
-    mMaxTimeLengthOut = detTable->maxTimelengthOut;
-    mMaxPadLengthOut = detTable->maxPadlengthOut;
-    mDeltaTime = detTable->deltaTime;
-    mDeltaPad = detTable->deltaPad;
-    mOffsetCathodeWest = detTable->offsetCathodeWest;
-    mOffsetCathodeEast = detTable->offsetCathodeEast;
-    mAngleOffsetWest = detTable->angleOffsetWest;
-    mAngleOffsetEast = detTable->angleOffsetEast;
-
-    mMinChargeWindow = detTable->minChargeWindow;
-
-  } else {
+ } else {
     gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
-  }
+   }
 
 //   cout << "StFtpcParamReader constructed from StFtpcSlowSimMaker tables" << endl;  
 }

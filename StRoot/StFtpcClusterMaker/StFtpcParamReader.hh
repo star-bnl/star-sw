@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.24 2003/06/10 13:11:51 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.25 2003/06/11 11:10:15 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.25  2003/06/11 11:10:15  jcs
+// remove inner cathode and cluster geometry parameters from ftpcClusterPars
+//
 // Revision 1.24  2003/06/10 13:11:51  jcs
 // min,max gas temperature and pressure limits removed from ftpcClusterPars
 //
@@ -170,25 +173,6 @@ protected:
   Int_t mMaxFastLoops;    
   Float_t mUnfoldLimit;      
   Float_t mUnfoldFailedLimit;
-  Float_t mMinChargeWindow;
-  Int_t mMinTimeBin;
-  Int_t mMinTimeBinMed;
-  Int_t mMinTimeBinOut;
-
-  Int_t mMaxPadLength;
-  Int_t mMaxTimeLength;
-  Int_t mMaxPadLengthMed;
-  Int_t mMaxTimeLengthMed;
-  Int_t mMaxPadLengthOut;
-  Int_t mMaxTimeLengthOut;
-
-  Int_t mDeltaTime;
-  Int_t mDeltaPad;
-
-  Float_t mOffsetCathodeWest;
-  Float_t mOffsetCathodeEast;
-  Float_t mAngleOffsetWest;
-  Float_t mAngleOffsetEast;
   
 public:
   // constructor used by StFtpcClusterMaker:
@@ -278,23 +262,6 @@ public:
   Int_t maxFastLoops() {return mMaxFastLoops;}
   Float_t unfoldLimit() {return mUnfoldLimit;}
   Float_t unfoldFailedLimit() {return mUnfoldFailedLimit;} 
-  //
-  Int_t minTimeBin() {return mMinTimeBin;}
-  Int_t minTimeBinMed() {return mMinTimeBinMed;}
-  Int_t minTimeBinOut() {return mMinTimeBinOut;}
-  Int_t maxTimeLength() {return mMaxTimeLength;}
-  Int_t maxPadLength() {return mMaxPadLength;}
-  Int_t maxTimeLengthMed() {return mMaxTimeLengthMed;}
-  Int_t maxPadLengthMed() {return mMaxPadLengthMed;}
-  Int_t maxTimeLengthOut() {return mMaxTimeLengthOut;}
-  Int_t maxPadLengthOut() {return mMaxPadLengthOut;}
-  Int_t deltaTime() {return mDeltaTime;}
-  Int_t deltaPad() {return mDeltaPad;}
-  Float_t offsetCathodeWest() {return mOffsetCathodeWest;}
-  Float_t offsetCathodeEast() {return mOffsetCathodeEast;}
-  Float_t angleOffsetWest() {return mAngleOffsetWest;}
-  Float_t angleOffsetEast() {return mAngleOffsetEast;}
-  Float_t minChargeWindow() {return mMinChargeWindow;}
 
 };
 
