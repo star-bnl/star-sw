@@ -1,13 +1,16 @@
 /**********************************************************
- * $Id: StRichTrack.h,v 2.2 2000/09/29 17:55:51 horsley Exp $
+ * $Id: StRichTrack.h,v 2.3 2000/10/03 19:26:02 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.h,v $
- *  Revision 2.2  2000/09/29 17:55:51  horsley
- *  fixed bug in Minimization routine, included StMagF stuff (commented out)
- *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
+ *  Revision 2.3  2000/10/03 19:26:02  horsley
+ *  fixed error in StRichTrack correct member function, now returns bool.
+ *
+ *  Revision 2.5  2000/11/01 17:43:13  lasiuk
+ *  default arguments initialization in c'tor.  Addition of init() member
+ *  function to handle generic DB initialization and removal of virtual keyword
  *
  *  Revision 2.4  2000/10/19 01:13:23  horsley
  *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
@@ -109,7 +112,6 @@ class StRichTrack {
   virtual double  getPhi();
   virtual double  getPathLength();  
   virtual double  getZVertex();
-  virtual bool    trajectoryCorrection();
   virtual double  getUnCorrectedTheta();
   virtual double  getUnCorrectedPhi( );
   virtual double  getLastHitDCA();

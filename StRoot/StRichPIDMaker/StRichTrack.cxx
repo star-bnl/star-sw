@@ -1,14 +1,17 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.2 2000/09/29 17:55:51 horsley Exp $
+ * $Id: StRichTrack.cxx,v 2.3 2000/10/03 19:26:01 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
- *  Revision 2.2  2000/09/29 17:55:51  horsley
- *  fixed bug in Minimization routine, included StMagF stuff (commented out)
- *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
+ *  Revision 2.3  2000/10/03 19:26:01  horsley
+ *  fixed error in StRichTrack correct member function, now returns bool.
  *
+ *  Revision 2.9  2000/11/25 12:27:42  lasiuk
+ *  implement algorithm for finding MIP
+ *
+ *  Revision 2.8  2000/11/21 19:46:09  lasiuk
  *  px/pz correction uncommented
  *
  *  Revision 2.7  2000/11/14 22:31:51  lasiuk
@@ -91,7 +94,6 @@ using namespace units;
   myMaterialsDb = StRichMaterialsDb::getDb();  
   coordinateTransformation = StRichCoordinateTransform::getTransform(myGeometryDb);
   momentumTransformation   = StRichMomentumTransform::getTransform(myGeometryDb);  
-  setUnCorrectedMomentum(mom);
   
   StThreeVectorF richNormal(myGeometryDb->normalVectorToPadPlane().x(),
 			    myGeometryDb->normalVectorToPadPlane().y(),
@@ -452,10 +454,10 @@ void  StRichTrack::addHit(StRichHit* hit, double dist, double sigma,
   
   else if ( (part ==  StProton::instance()) || (part == StAntiProton::instance())) {
     mProtonList.push_back(new StRichRingHit(hit,angle,dist,sigma,radPath,quaPath));  
-  setUnCorrectedTheta(getTheta());
   }
-  setUnCorrectedPhi(getPhi());
 }
+
+
 StRichTrack::~StRichTrack() {
   clearHits();
   
@@ -545,275 +547,15 @@ bool StRichTrack::correct() {
       }
     }
   }
-      setTheta(acos(normalVector.dot(tempRichLocalMomentum)/tempRichLocalMomentum.mag()));
-      setPhi(tempRichLocalMomentum.phi());
-
-  } 
-}
-
-
-
-/*
-
-float StRichTrack::func(vector<float> input) {
   
-}
 
-
-float StRichTrack::f1dim(float x) {
-  int j;
-  float f;
-  
-  vector<float> xt(ncom);
-  for (j=0;j<ncom;j++) {xt[j]=pcom[j]+x*xicom[j];}
-  return func(xt);
-}
-
-
-void StRichTrack::linmin(vector<float> p, vector<float> xi, int n, float *fret) {
-  
-  int j;
-  float xx,xmin,fx,fb,fa,bx,ax;
-
-  ncom=n;
-  
-  pcom.clear();
-  pcom.resize(n);
-  
-  xicom.clear();
-  xicom.resize(n);
-
-  for (j=0;j<n;j++) {
-    pcom[j]=p[j];
-    xicom[j]=xi[j];
   if (correctedMomentum.mag()>0) {
-
-  ax =  100.0;  // initial guess for bracketing function
-  xx = -100.0;
     // impact point on radiator
-  //  mnbrak(&ax,&xx,&bx,&fa,&fx,&fb);
-  *fret = brent(ax,xx,bx,&xmin);
-  for (j=0;j<n;j++) {
-    xi[j] *= xmin;
-    p[j] += xi[j]; 
-  }
-}
-
-
-void StRichTrack::powell(vector<float>& p , float **xi, int *iter, float *fret) {
-  int i,ibig,j;
-  float del,fp,fptt,t;
-  vector<float> pt,ptt,xit;
-  
-  pt.clear();
-  pt.resize(n);
-
-  ptt.clear();
-  ptt.resize(n);
-  
-  xit.clear();
-  xit.resize(n);
-  
-  
-   *fret = func(p);
-   for (j=0;j<n;j++) {pt[j]=p[j];}
-   for (*iter=0;;++(*iter)) {
-     fp=(*fret);
-     ibig=0;
-     del=0.0;
-     
-     
-     for (i=0;i<n;i++) {
-       for(j=0;j<n;j++) { xit[j]=xi[j][i];}
-       fptt=(*fret);
-       linmin(p,xit,n,fret);
-       if (fabs(fptt-(*fret)) > del) {
-	 del=fabs(fptt-(*fret));
-	 ibig=i;
-       }
-     }
-     
-     // are we done yet?
-     if (2.0*fabs(fp-(*fret)) <= ftol*(fabs(fp)+fabs(*fret))) {
-       return;
-     }
-     
-     if (*iter == ITMAX) {
-       cout << "exceeded maximum number of iterations!" << endl;
-       return;
-     }
-     
-     for(j=0;j<n;j++) {
-       ptt[j] = 2.0*p[j] - pt[j];
-       xit[j] = p[j] - pt[j];
-       pt[j]  = p[j]; 
-     }
-
-     fptt = func(ptt);
-     if (fptt < fp) {
-       t = 2.0*(fp-2.0*(*fret)+fptt)*sqrt(fp-(*fret)-del*sqrt(fp-fptt));
-       if (t<0) {
-	 linmin(p,xit,n,fret);
-	 for(j=0;j<n;j++) {
-	   xi[j][ibig] = xi[j][n];
-	   xi[j][n]    = xit[j];
-	 }
-       }
-     }
-   }
-}
-
-
- 
-#define SIGN(a,b) ((b) >= 0.0 ? fabs(a) : -fabs(a))
-#define ITMAX 200
-#define CGOLD 0.3819660
-#define ZEPS  1.0e-10
-#define SHFT(a,b,c,d) (a)=(b);(b)=(c);(c)=(d);
-
-
-float StRichTrack::brent(double ax, double bx, double cx,double *xmin)  {
-    int iter;
-    double tol = 2.0e-4;
-    double a,b,d,etemp,fu,fv,fw,fx,p,q,r,tol1,tol2,u,v,w,x,xm;
-    double e=0.0;
-    d=0.0;
-   
-    a=(ax < cx ? ax : cx);
-    b=(ax > cx ? ax : cx);
-    x=w=v=bx;
-    fw=fv=fx=f1dim(x);
-	
-	for (iter=1;iter<=ITMAX;iter++) {
-	        xm=0.5*(a+b);
-		tol2=2.0*(tol1=tol*fabs(x)+ZEPS);
-		if (fabs(x-xm) <= (tol2-0.5*(b-a))) {
-		        *xmin=x;
-			return fx;
-		}
-		if (fabs(e) > tol1) {
-			r=(x-w)*(fx-fv);
-			q=(x-v)*(fx-fw);
-			p=(x-v)*q-(x-w)*r;
-			q=2.0*(q-r);
-			if (q > 0.0) p = -p;
-			q=fabs(q);
-			etemp=e;
-			e=d;
-			if (fabs(p) >= fabs(0.5*q*etemp) || p <= q*(a-x) || p >= q*(b-x))
-				d=CGOLD*(e=(x >= xm ? a-x : b-x));
-			else {
-				d=p/q;
-				u=x+d;
-				if (u-a < tol2 || b-u < tol2)
-					d=SIGN(tol1,xm-x);
-			}
-		} else {
-			d=CGOLD*(e=(x >= xm ? a-x : b-x));
-		}
-		u=(fabs(d) >= tol1 ? x+d : x+SIGN(tol1,d));
-		fu=f1dim(u);
-	     
-		if (fu <= fx) {
-			if (u >= x) a=x; else b=x;
-			SHFT(v,w,x,u)
-			SHFT(fv,fw,fx,fu)
-		} else {
-			if (u < x) a=u; else b=u;
-			if (fu <= fw || w == x) {
-				v=w;
-				w=u;
-				fv=fw;
-				fw=fu;
-			} else if (fu <= fv || v == x || v == w) {
-				v=u;
-				fv=fu;
-			}
-		}
-	}
-	
-	*xmin=x;
-	return fx;
+    StPhysicalHelixD tempHelix(correctedMomentum,CTBPoint,mMagneticField*kilogauss,mStTrack->geometry()->charge());
     float path = tempHelix.pathLength(mRadiatorGlobal,mRichNormal);
   
     if (path>0 && path<10000) {
       StGlobalCoordinate globalImpactPoint(tempHelix.x(path),tempHelix.y(path),tempHelix.z(path));
-////////////////////////////////////////////
-
-#undef ITMAX
-#undef CGOLD
-#undef ZEPS
-#undef SHFT
-// (C) Copr. 1986-92 Numerical Recipes Software &1245.@1. 
-
-
-*/
-
-
-
-bool StRichTrack::trajectoryCorrection() {
-  // bad mip flag!
-  StThreeVectorF tempMip(-999,-999,-999);
-  if (mAssociatedMIP) { tempMip = mAssociatedMIP->local();}
-
-  if ((tempMip- mProjectedMIP).perp()>3.0*centimeter) { return false;}
-
-  setUnCorrectedTheta(getTheta());
-  setUnCorrectedPhi(getPhi());
-  setUnCorrectedImpactPoint(getImpactPoint());
-
-  // not really? but should work!
-  StThreeVectorD CTBNormal(myGeometryDb->normalVectorToPadPlane().x(),
-			   myGeometryDb->normalVectorToPadPlane().y(),
-			   myGeometryDb->normalVectorToPadPlane().z());
-    
-  // right now just a guess!!!
-  StRichLocalCoordinate CTBPoint_Local(0.0,0.0,240.0-214.0);
-  
-  StGlobalCoordinate CTBPoint_Global;
-  (*coordinateTransformation)(CTBPoint_Local,CTBPoint_Global);
-  StThreeVectorF CTBPointTemp_Global(CTBPoint_Global.position().x(),
-				     CTBPoint_Global.position().y(),
-				     CTBPoint_Global.position().z());
-
-  StPhysicalHelixD mHelix       = mStTrack->geometry()->helix();
-
-  float mPathLengthToCTB       = mHelix.pathLength(CTBPointTemp_Global,CTBNormal);
-
-  float padPlaneToRadiatorTop = myGeometryDb->proximityGap() 
-                               + myGeometryDb->quartzDimension().z() 
-                               + myGeometryDb->radiatorDimension().z();
-  
-  if (mPathLengthToCTB<10e10  && mPathLengthToCTB>0) {
-    
-    StGlobalCoordinate globalIntersectionPoint(mHelix.x(mPathLengthToCTB),
-					       mHelix.y(mPathLengthToCTB),
-					       mHelix.z(mPathLengthToCTB));
-        
-    StRichLocalCoordinate tempLocalIntersectionPoint(-999,-999,-999);
-    (*coordinateTransformation)(globalIntersectionPoint,tempLocalIntersectionPoint);
-  
-    StThreeVectorF localIntersectionPoint(tempLocalIntersectionPoint.position().x(),
-					  tempLocalIntersectionPoint.position().y(),
-					  tempLocalIntersectionPoint.position().z());
-    
-    StThreeVectorF straightLine = tempMip-localIntersectionPoint;
-
-    setImpactPoint(localIntersectionPoint + 
-		   straightLine*((padPlaneToRadiatorTop-localIntersectionPoint.z())/straightLine.z()));
-    
-   StThreeVectorF normalVector(0,0,-1);
-   if ( straightLine.mag()>0) {
-     setTheta(acos(normalVector.dot(straightLine)/straightLine.mag()));}
-   
-   if ( straightLine.y() == 0 && straightLine.x() == 0) {setPhi(0.0);}
-   else setPhi(straightLine.phi());  
-   return true;
-  }  
-
-  else {return false;}
-  return false; 
-}
       StRichLocalCoordinate richTransformedImpactPoint(-999,-999,-999);
       (*coordinateTransformation)(globalImpactPoint,richTransformedImpactPoint);
       

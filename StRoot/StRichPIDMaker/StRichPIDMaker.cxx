@@ -1,13 +1,16 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.5 2000/10/02 23:21:29 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.6 2000/10/03 19:26:01 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.5  2000/10/02 23:21:29  horsley
- * *** empty log message ***
+ * Revision 2.6  2000/10/03 19:26:01  horsley
+ * fixed error in StRichTrack correct member function, now returns bool.
  *
+ * Revision 2.17  2000/11/22 16:58:05  lasiuk
+ * Uniform setting of flags in two places
+ * remove dependence of dip angle on mean and sigma
  *
  * Revision 2.16  2000/11/21 19:49:13  lasiuk
  * fill the photon d in the StRichPid
@@ -125,10 +128,10 @@ using std::max;
 //#include "StarCallf77.h"
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.5 2000/10/02 23:21:29 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.6 2000/10/03 19:26:01 horsley Exp $";
 
 	track->geometry() && 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.5 2000/10/02 23:21:29 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.6 2000/10/03 19:26:01 horsley Exp $";
 	(fabs(track->geometry()->momentum().pseudoRapidity()) < mEtaCut) &&
 Int_t StRichPIDMaker::Make() { 
   
@@ -259,7 +262,7 @@ Int_t StRichPIDMaker::Make() {
   if (kWriteNtuple) this->fillMcTrackNtuple(pRichClusters);
   if (kWriteNtuple) this->fillMcPixelNtuple(pRichPixels);
   if (kWriteNtuple) this->fillMcPhotonNtuple(mEvent,pRichClusters,pRichHits);
-  if (mRefit==false) {  
+ 
     // test the correction to tracks trajectory
     richTrack = 0;
     particle  = 0;
@@ -267,6 +270,11 @@ Int_t StRichPIDMaker::Make() {
     for (size_t trackIndex=0; trackIndex<mListOfStRichTracks.size(); trackIndex++) {     
       richTrack = mListOfStRichTracks[trackIndex];
   ringCalc  = 0;
+  for (size_t trackIndex=0; trackIndex<mListOfStRichTracks.size(); trackIndex++) {     
+    richTrack = mListOfStRichTracks[trackIndex];
+      richTrack->correct();
+      
+
       cout << "Track p = " << richTrack->getMomentum() << endl;
       
       
@@ -278,7 +286,7 @@ Int_t StRichPIDMaker::Make() {
 	  this->hitFilter(pRichHits,ringCalc);
     }
     if (kWriteNtuple) this->fillCorrectedNtuple();
-  }
+ 
 #endif  
 
 
