@@ -10,7 +10,6 @@
 #include "tcl_tp_seq.idl"
 #include "tcl_tpcluster.idl"
 #include "tcl_tphit.idl"
-#include "tcl_hitclus.idl"
 
 interface tph : amiModule{
 	STAFCV_T call (
@@ -23,10 +22,9 @@ interface tph : amiModule{
 		, in tcl_tp_seq	tpseq
 		, inout tcl_tpcluster tpcluster
 		, inout tcl_tphit tphit
-		, inout tcl_hitclus tphitclus
 		);
 };
-/* last modified $Date: 1999/08/25 21:27:13 $ */
+/* last modified $Date: 1999/11/20 20:52:59 $ */
 
 		
 		

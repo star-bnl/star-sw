@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.20 1999/10/15 00:53:50 nevski Exp $
+* $Id: tph.F,v 1.21 1999/11/20 20:52:58 snelling Exp $
 * $Log: tph.F,v $
+* Revision 1.21  1999/11/20 20:52:58  snelling
+* added content to the tphit table and removed hitclus table
+*
 * Revision 1.20  1999/10/15 00:53:50  nevski
 * pgf->g77 cleanup
 *
@@ -81,8 +84,7 @@
      +,                       pixel_data_out_h,  pixel_data_out
      +,                       tpseq_h,         tpseq 
      +,                       tpcluster_h,     tpcluster 
-     +,                       tphit_h,         tphit 
-     +,                       tphitclus_h,  tphitclus) 
+     +,                       tphit_h,         tphit) 
 
       IMPLICIT NONE
 
@@ -248,162 +250,160 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 c
 c functions:
-        integer tgc_pad_to_x
-        integer tgc_row_to_y
-        integer tgc_local_to_global
-c
-C-----------------------------------------------------------------------
-
-
-C-----------------------------------------------------------------------
-        integer nclpix_max            ! Max. pixels in cluster
-        integer nrows                 ! Number of rows per TPC supersector
-c
-        parameter (nclpix_max=10000)
-        parameter (nrows=45)
-c
-        integer iadc(nclpix_max)      ! ADC's for cluster pixels
-        integer ihit                  ! Hit index
-        integer ipad(nclpix_max)      ! Pads for cluster pixels
-        integer ipad_lo, ipad_hi      ! Pad number extent for cluster
-        integer irow                  ! Row number for cluster (1-45)
-        integer isec                  ! Sector number for cluster (1-24)
-        integer itdc(nclpix_max)      ! Time buckets for cluster pixels
-        integer itrk(nclpix_max)      ! Track ID for MC data
-        integer itdc_lo, itdc_hi      ! Time bucket extent for cluster
-        integer jseq                  ! Index for tpseq
-        integer jtpcl                 ! Sequence index within cluster
-        integer nclspix               ! Number of pixels in cluster
-        integer nhits                 ! Number of hits in cluster
-        integer npads                 ! Number of pads in cluster's pad row
-	integer npix_seq(300)         ! Number of pixels in sequence on pad
-        integer nseq                  ! Number of sequences in cluster
-        integer pads_per_row(nrows)   ! Listing of number of TPC pads by row
-c+liq
-        integer nmax_max              ! maximum number of hits in one cluster liq
-        parameter (nmax_max=100)      !limit it to 100 liq
-        integer ipad_hit_lo(nmax_max) ! Pad number extent for each hit in this cluster
-        integer ipad_hit_hi(nmax_max) ! Pad number extent for each hit in this cluster
-        integer itdc_hit_lo(nmax_max) ! Time bucket extent for cluster
-        integer itdc_hit_hi(nmax_max) ! Time bucket extent for cluster
-c-liq
-        real de_scale                 ! Energy loss / charge
-	real dx_prime                 ! Uncertainty in x, global coord.
-        real filtered_noise           ! Noise from SAS chip, after shaping
-        real invec(3)                 ! Local x,y,z vector
-        real outvec(3)                ! Global x,y,z vector
-        real pad_width                ! Pad width (cm)
-	real rad                      ! Radius at hit (cm)
-        real white_noise              ! SCA and digitization noise
-
-        logical first                 ! .T. iff first call to this routine
-
-c------------ for deconvolution -----------
-        integer max_hits_in_cluster   ! Max. number of hits per cluster
-        parameter(max_hits_in_cluster=100)
-c
-        integer fflagg                ! 1 IFF >1 hit; else 0
-        integer istatus
-
-        real qq(max_hits_in_cluster)  ! Sum of ADC counts
-        real x(max_hits_in_cluster)   ! Position along row (pad units)
-        real dx(max_hits_in_cluster)  ! Uncertainty in x
-        real prf(max_hits_in_cluster) ! Width along x
-        real z(max_hits_in_cluster)   ! Position along drift (bucket units)
-        real dz(max_hits_in_cluster)  ! Uncertainty in z
-        real zrf(max_hits_in_cluster) ! Width along z
-        real phi(max_hits_in_cluster) ! Orientation of cluster
-        real track(max_hits_in_cluster)  ! MC track contributing most
-        real mu1(max_hits_in_cluster) ! 1st moment of hit (mean)
-        real mu2(max_hits_in_cluster) ! 2nd moment of hit (rms)
-        real mu3(max_hits_in_cluster) ! 3rd moment of hit (skewness)
-        real mu4(max_hits_in_cluster) ! 4th moment of hit (kurtosis)
-	real mu5(max_hits_in_cluster) ! Number of pads for hit
-C-----------------------------------------------------------------------
-        real dvel                     !drift velocity
-        real dummy1                   !it is what it says
-        integer tgc_drift_velocity    !function that returns as a first
-c                                     !argument the drift velocity
-c                                     !two next arguments dummy             
-C-----------------------------------------------------------------------
-        integer CurrentSector,istart,last_cluster_index
-        integer Nrows_in
-        parameter(Nrows_in=13)
-        save last_cluster_index
-        data last_cluster_index / 1 /
-        logical debug 
-        data    debug /.false./
-        real    tand,atand     
-C-----------------------------------------------------------------------
-        data first/.true./
-        data pads_per_row
-     &       / 88,  96, 104, 112, 118,
-     &        126, 134, 142, 150, 158,
-     &        166, 174, 182,  98, 100,
-     &        102, 104, 106, 106, 108,
-     &        110, 112, 112, 114, 116,
-     &        118, 120, 122, 122, 124,
-     &        126, 128, 128, 130, 132,
-     &        134, 136, 138, 138, 140,
-     &        142, 144, 144, 144, 144 /
-C-----------------------------------------------------------------------
-	save first
-C-----------------------------------------------------------------------
-        character*132 m132
-C-----------------------------------------------------------------------
-c
-c       set status
-c
-        tph = STAFCV_OK
-
-        if(first)then
-           first = .false.
+      integer tgc_pad_to_x
+      integer tgc_row_to_y
+      integer tgc_local_to_global
 c     
-c->         constants...
-c
-        endif
+C-----------------------------------------------------------------------
+      
+      
+C-----------------------------------------------------------------------
+      integer nclpix_max        ! Max. pixels in cluster
+      integer nrows             ! Number of rows per TPC supersector
+c     
+      parameter (nclpix_max=10000)
+      parameter (nrows=45)
+c     
+      integer iadc(nclpix_max)  ! ADC's for cluster pixels
+      integer ihit              ! Hit index
+      integer ipad(nclpix_max)  ! Pads for cluster pixels
+      integer ipad_lo, ipad_hi  ! Pad number extent for cluster
+      integer irow              ! Row number for cluster (1-45)
+      integer isec              ! Sector number for cluster (1-24)
+      integer itdc(nclpix_max)  ! Time buckets for cluster pixels
+      integer itrk(nclpix_max)  ! Track ID for MC data
+      integer itdc_lo, itdc_hi  ! Time bucket extent for cluster
+      integer jseq              ! Index for tpseq
+      integer jtpcl             ! Sequence index within cluster
+      integer nclspix           ! Number of pixels in cluster
+      integer nhits             ! Number of hits in cluster
+      integer npads             ! Number of pads in cluster's pad row
+      integer npix_seq(300)     ! Number of pixels in sequence on pad
+      integer nseq              ! Number of sequences in cluster
+      integer pads_per_row(nrows) ! Listing of number of TPC pads by row
+      integer nmax_max          ! maximum number of hits in one cluster liq
+      parameter (nmax_max=100)  !limit it to 100 liq
+      integer ipad_hit_lo(nmax_max) ! Pad number extent for each hit in this cluster
+      integer ipad_hit_hi(nmax_max) ! Pad number extent for each hit in this cluster
+      integer itdc_hit_lo(nmax_max) ! Time bucket extent for cluster
+      integer itdc_hit_hi(nmax_max) ! Time bucket extent for cluster
+      real de_scale             ! Energy loss / charge
+      real dx_prime             ! Uncertainty in x, global coord.
+      real filtered_noise       ! Noise from SAS chip, after shaping
+      real invec(3)             ! Local x,y,z vector
+      real outvec(3)            ! Global x,y,z vector
+      real pad_width            ! Pad width (cm)
+      real rad                  ! Radius at hit (cm)
+      real white_noise          ! SCA and digitization noise
+      
+      logical first             ! .T. iff first call to this routine
+      
+c------------for deconvolution -----------
+      integer max_hits_in_cluster ! Max. number of hits per cluster
+      parameter(max_hits_in_cluster=100)
+c     
+      integer fflagg            ! 1 IFF >1 hit; else 0
+      integer istatus
+      
+      real qq(max_hits_in_cluster) ! Sum of ADC counts
+      real x(max_hits_in_cluster) ! Position along row (pad units)
+      real dx(max_hits_in_cluster) ! Uncertainty in x
+      real prf(max_hits_in_cluster) ! Width along x
+      real z(max_hits_in_cluster) ! Position along drift (bucket units)
+      real dz(max_hits_in_cluster) ! Uncertainty in z
+      real zrf(max_hits_in_cluster) ! Width along z
+      real phi(max_hits_in_cluster) ! Orientation of cluster
+      real track(max_hits_in_cluster) ! MC track contributing most
+      real mu1(max_hits_in_cluster) ! 1st moment of hit (mean)
+      real mu2(max_hits_in_cluster) ! 2nd moment of hit (rms)
+      real mu3(max_hits_in_cluster) ! 3rd moment of hit (skewness)
+      real mu4(max_hits_in_cluster) ! 4th moment of hit (kurtosis)
+      real mu5(max_hits_in_cluster) ! Number of pads for hit
+C-----------------------------------------------------------------------
+      real dvel                 !drift velocity
+      real dummy1               !it is what it says
+      integer tgc_drift_velocity !function that returns as a first
+c                                !argument the drift velocity
+c                                !two next arguments dummy             
+C-----------------------------------------------------------------------
+      integer CurrentSector,istart,last_cluster_index
+      integer Nrows_in
+      parameter(Nrows_in=13)
+      save last_cluster_index
+      data last_cluster_index / 1 /
+      logical debug 
+      data    debug /.false./
+      real    tand,atand     
+C-----------------------------------------------------------------------
+      data first/.true./
+      data pads_per_row
+     &     / 88,  96, 104, 112, 118,
+     &     126, 134, 142, 150, 158,
+     &     166, 174, 182,  98, 100,
+     &     102, 104, 106, 106, 108,
+     &     110, 112, 112, 114, 116,
+     &     118, 120, 122, 122, 124,
+     &     126, 128, 128, 130, 132,
+     &     134, 136, 138, 138, 140,
+     &     142, 144, 144, 144, 144 /
+C-----------------------------------------------------------------------
+      save first
+C-----------------------------------------------------------------------
+      character*132 m132
+C-----------------------------------------------------------------------
+c     
+c     set status
+c     
+      tph = STAFCV_OK
+      
+      if(first)then
+         first = .false.
+c     
+c     ->         constants...
+c     
+      endif
+      
+c     noise in ADC counts...
+c     sca and digitization noise
+      white_noise = sqrt((tsspar(1).sca_rms/tsspar(1).scale)**2+0.5)
+c     noise that comes through shaper
+      filtered_noise = tsspar(1).white_rms/tsspar(1).scale
 
-c noise in ADC counts...
-c sca and digitization noise
-	white_noise = sqrt((tsspar(1).sca_rms/tsspar(1).scale)**2+0.5)
-c noise that comes through shaper
-        filtered_noise = tsspar(1).white_rms/tsspar(1).scale
-
-c Loop over the sequences in this cluster:
-        if (tcl_sector_index(1).CurrentSector .lt. 0) then
+c     Loop over the sequences in this cluster:
+      if (tcl_sector_index(1).CurrentSector .lt. 0) then
          CurrentSector = -tcl_sector_index(1).CurrentSector
          istart = 1
-        else 
+      else 
          CurrentSector = tcl_sector_index(1).CurrentSector
          istart = last_cluster_index
-        endif
+      endif
 
-        do jtpcl = istart, tpcluster_h.nok
-           nseq = tpcluster(jtpcl).nseq
-           jseq = tpcluster(jtpcl).jseq
-           isec = tpcluster(jtpcl).tpc_row/100
+      do jtpcl = istart, tpcluster_h.nok
+         nseq = tpcluster(jtpcl).nseq
+         jseq = tpcluster(jtpcl).jseq
+         isec = tpcluster(jtpcl).tpc_row/100
          if(isec .eq. CurrentSector) then      
-           irow = mod(tpcluster(jtpcl).tpc_row,100)
-c ??? Check index?
-           npads = pads_per_row(irow)
-           if(nseq .ge. tclpar(1).min_nseq) then
+            irow = mod(tpcluster(jtpcl).tpc_row,100)
+c     ??? Check index?
+            npads = pads_per_row(irow)
+            if(nseq .ge. tclpar(1).min_nseq) then
 
-            if (irow.gt.Nrows_in) then
-              call tph_get_cluster_data(jseq, nseq, irow, isec, npads
-     +,                             tpseq_h, tpseq 
-     +,                             pixel_data_out_h, pixel_data_out
-     +,                             nclspix, ipad, itdc, iadc, itrk
-     +,				    nclpix_max, npix_seq, ipad_lo
-     +,				    ipad_hi, itdc_lo, itdc_hi)
+               if (irow.gt.Nrows_in) then
+                 call tph_get_cluster_data(jseq, nseq, irow, isec, npads
+     +                 ,tpseq_h, tpseq 
+     +                 ,pixel_data_out_h, pixel_data_out
+     +                 ,nclspix, ipad, itdc, iadc, itrk
+     +                 ,nclpix_max, npix_seq, ipad_lo
+     +                 ,ipad_hi, itdc_lo, itdc_hi)
  
-            else
-              call tph_get_cluster_data(jseq, nseq, irow, isec, npads
-     +,                             tpseq_h, tpseq 
-     +,                             pixel_data_in_h, pixel_data_in
-     +,                             nclspix, ipad, itdc, iadc, itrk
-     +,				    nclpix_max, npix_seq, ipad_lo
-     +,				    ipad_hi, itdc_lo, itdc_hi)
-            endif
+              else
+                 call tph_get_cluster_data(jseq, nseq, irow, isec, npads
+     +                ,tpseq_h, tpseq 
+     +                ,pixel_data_in_h, pixel_data_in
+     +                ,nclspix, ipad, itdc, iadc, itrk
+     +                ,nclpix_max, npix_seq, ipad_lo
+     +                ,ipad_hi, itdc_lo, itdc_hi)
+              endif
               if(itdc_hi .gt. 511) then
                  write(m132,*) 'TPH - itdc_hi', itdc_hi
                  call StWarning(m132)
@@ -473,63 +473,58 @@ c  to cluster in TPCLUSTER table....
            else
               fflagg = 0
            end if
-
+           
            do ihit=1,nhits
+
               if (tphit_h.nok .ge. tphit_h.maxlen) then
-c ??? Direct write is forbidden
+c     ??? Direct write is forbidden
                  write(m132,*)'TPH table full - quitting at cluster: ',
      &                jtpcl
                  call StWarning(m132)
                  return
               endif
-              tphit_h.nok = tphit_h.nok+1
-	      tphit(tphit_h.nok).id = tphit_h.nok ! mal 17jan95
-              tphit(tphit_h.nok).cluster = jtpcl
-              tphit(tphit_h.nok).nseq = nseq
-              tphit(tphit_h.nok).row = 100*isec+irow ! mal 30mar95
-              tphit(tphit_h.nok).q     = qq(ihit)
-              tphit(tphit_h.nok).x     = x(ihit)
-              tphit(tphit_h.nok).dx    = dx(ihit)
-              tphit(tphit_h.nok).prf   = prf(ihit)
-              tphit(tphit_h.nok).z     = z(ihit)
-              tphit(tphit_h.nok).dz    = dz(ihit)
-              tphit(tphit_h.nok).zrf   = zrf(ihit)
-              tphit(tphit_h.nok).phi   = phi(ihit)
-              tphit(tphit_h.nok).track = track(ihit)
-              tphit(tphit_h.nok).flag  = fflagg
-              tphit(tphit_h.nok).id_globtrk=0
-              tphit(tphit_h.nok).dalpha=0
-              tphit(tphit_h.nok).dlambda=0
-              tphit(tphit_h.nok).dq=0
+
+              tphit_h.nok                   = tphit_h.nok+1
+              tphit(tphit_h.nok).cluster    = jtpcl
+              tphit(tphit_h.nok).flag       = fflagg
+	      tphit(tphit_h.nok).id         = tphit_h.nok
+              tphit(tphit_h.nok).id_globtrk = 0
+              tphit(tphit_h.nok).track      = track(ihit)
+              tphit(tphit_h.nok).dalpha     = 0.
+              tphit(tphit_h.nok).dlambda    = 0.
+              tphit(tphit_h.nok).q          = qq(ihit)
+              tphit(tphit_h.nok).dq         = 0.
+              tphit(tphit_h.nok).x          = x(ihit)
+              tphit(tphit_h.nok).dx         = dx(ihit)
+              tphit(tphit_h.nok).z          = z(ihit)
+              tphit(tphit_h.nok).dz         = dz(ihit)
+              tphit(tphit_h.nok).phi        = phi(ihit)
+              tphit(tphit_h.nok).prf        = prf(ihit)
+              tphit(tphit_h.nok).zrf        = zrf(ihit)
+              tphit(tphit_h.nok).row        = 100*isec+irow
+              tphit(tphit_h.nok).nseq       = nseq
 c     
 c     finally, transform everything to global coordinates !
 c     
 c     account for "lower-edge" binning in z coordinate
 c     
-              invec(3)=tphit(tphit_h.nok).z
-              
-c     correct (in average way) for time-offset -- (this is not beautiful)
-c     22jun95 mal
-c     the offset is shown to be (notebook2 p110, + files..) (n+1)*tau, where
-c     n is the (effective) number of stages in the amplifier, and tau is the
-c     (effective) time constant.  For STAR, n=2, and tau is set by tss.
-c             replace tsspar(1).v_drift by a call to
-c             tgc_drift_velocity call, should be figured out and properly
-c             fixed by having this call in the initialisation phase
+
+
+c transform z to global z
+              invec(3)=z(ihit)
               istatus = tgc_drift_velocity(dvel,dummy1,dummy1)
-              if (tclpar(1).tfit.eq.0) ! average value used
+              if (tclpar(1).tfit .eq. 0) 
      +             invec(3) = invec(3) - 
-c                  the following line was commented out and replaced by
-c                  one line after that
-c                  iwona sakrejda
 c     +             3.0*tsspar(1).tau*tsspar(1).v_drift
      +             3.0*tsspar(1).tau*dvel* 1.0e-6
-              
-              
+
+
+c transform row to y global coordinates invec(2)              
               istatus = tgc_row_to_y(float(irow),
      +             invec(2),pad_plane_h,pad_plane)
-              
-              istatus = tgc_pad_to_x(tphit(tphit_h.nok).x,
+
+c transform x(ihit) to global coordinates invec(1)              
+              istatus = tgc_pad_to_x(x(ihit),
      +             float(irow),invec(1),pad_plane_h,pad_plane)
               
               istatus = tgc_local_to_global(isec,invec,outvec)
@@ -537,7 +532,7 @@ c     +             3.0*tsspar(1).tau*tsspar(1).v_drift
               tphit(tphit_h.nok).x = outvec(1)
               tphit(tphit_h.nok).y = outvec(2)
               tphit(tphit_h.nok).z = outvec(3) 
-c     
+     
 c     zrf already in units of cm
 c     
 c     prf in units of pads --> cm
@@ -602,68 +597,39 @@ c             tphit(tphit_h.nok).dz+0.07
 c     also put q (magnitude of hit) into units of energy loss
               tphit(tphit_h.nok).q = tphit(tphit_h.nok).q * de_scale 
 
-c+liq
-c     begin to fill the tcl_hitclus table (tphitclus)
-              if(tclpar(1).mc .gt. 1) then
-	         if (tphitclus_h.nok .ge. tphitclus_h.maxlen) then
-c ??? Direct write is forbidden
-               	   write(m132,*)
-     &                   'TPH hitclus table full - quitting at cluster', 
-     &                   jtpcl
-                   call StWarning(m132)
-	           return		
-        	 endif	
-		
-                if(nhits .eq. 1) then
-                   ipad_hit_lo(ihit) = ipad_lo
-                   ipad_hit_hi(ihit) = ipad_hi
-                   itdc_hit_lo(ihit) = itdc_lo
-                   itdc_hit_hi(ihit) = itdc_hi
-                endif
-c fill the tphitclus table
-                tphitclus_h.nok = tphitclus_h.nok + 1
-	        tphitclus(tphitclus_h.nok).id = tphitclus_h.nok 
-                tphitclus(tphitclus_h.nok).sector=isec
-                tphitclus(tphitclus_h.nok).row=irow
-                tphitclus(tphitclus_h.nok).cluster = jtpcl
-                tphitclus(tphitclus_h.nok).nhits = nhits
-                tphitclus(tphitclus_h.nok).nth_hit = ihit
-                tphitclus(tphitclus_h.nok).npads_clus=
-     &             ipad_hi-ipad_lo+1    
-                tphitclus(tphitclus_h.nok).minpad_clus=ipad_lo     
-                tphitclus(tphitclus_h.nok).maxpad_clus=ipad_hi     
-                tphitclus(tphitclus_h.nok).ntmbk_clus=
-     &             itdc_hi-itdc_lo+1    
-                tphitclus(tphitclus_h.nok).mintmbk_clus=itdc_lo   
-                tphitclus(tphitclus_h.nok).maxtmbk_clus=itdc_hi   
-                tphitclus(tphitclus_h.nok).npads_hit=
-     &             ipad_hit_hi(ihit)-ipad_hit_lo(ihit) + 1     
-                tphitclus(tphitclus_h.nok).minpad_hit=
-     &             ipad_hit_lo(ihit)     
-                tphitclus(tphitclus_h.nok).maxpad_hit=
-     &             ipad_hit_hi(ihit)     
-                tphitclus(tphitclus_h.nok).ntmbk_hit=
-     &             itdc_hit_hi(ihit)-itdc_hit_lo(ihit) + 1         
-                tphitclus(tphitclus_h.nok).mintmbk_hit=
-     &             itdc_hit_lo(ihit)   
-                tphitclus(tphitclus_h.nok).maxtmbk_hit=
-     &             itdc_hit_hi(ihit)                      
 
-             endif              !tclpar(1).mc.gt.1
-c-liq
+c     fill array if fit-isolated cluster is called without mountainfinder		
+              if(nhits .eq. 1) then
+                 ipad_hit_lo(ihit) = ipad_lo
+                 ipad_hit_hi(ihit) = ipad_hi
+                 itdc_hit_lo(ihit) = itdc_lo
+                 itdc_hit_hi(ihit) = itdc_hi
+              endif
+c     if nhits gt 1 then this array is already filled.
+
+              tphit(tphit_h.nok).npads =
+     &             ipad_hit_hi(ihit)-ipad_hit_lo(ihit) + 1     
+              tphit(tphit_h.nok).minpad = ipad_hit_lo(ihit)
+              tphit(tphit_h.nok).maxpad = ipad_hit_hi(ihit)     
+              tphit(tphit_h.nok).ntmbk=
+     &             itdc_hit_hi(ihit)-itdc_hit_lo(ihit) + 1         
+              tphit(tphit_h.nok).mintmbk = itdc_hit_lo(ihit)
+              tphit(tphit_h.nok).maxtmbk = itdc_hit_hi(ihit)
+
           enddo
 
-          else if (isec .gt. CurrentSector) then
-           goto 555           
-          else         ! isec < Current Sector
-           continue
-          endif        ! isec  = Current Sector
+       else if (isec .gt. CurrentSector) then
+          goto 555           
+       else                     ! isec < Current Sector
+          continue
+       endif                    ! isec  = Current Sector
+       
+ 999   continue
+      enddo
 
- 999       continue
-        enddo
-c
- 555    continue
-           last_cluster_index = jtpcl 
-        return
-        end
+ 555  continue
+      last_cluster_index = jtpcl 
 
+      return
+      end
+      
