@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.236 2001/10/02 00:09:01 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.237 2001/10/05 03:06:39 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -184,6 +184,7 @@ Bfc_st BFC[] = {
   {"SvtCL"       ,""  ,"","",""                                             ,"StSvtClassLibrary","",kFALSE},
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
+  {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
   {"StEvent"     ,""  ,"","globT,SCL",""                                              ,"StEvent","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -222,8 +223,10 @@ Bfc_st BFC[] = {
   {"trg"         ,"trg","l0Chain","trg_T,globT,db"         ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
   {"ppMCTrig"    ,"ppMC_trig1","l0Chain",""
                          ,"StppTrigMaker","StppSpin","Add emulation of pp Trigger based on CTB+MWC",kFALSE},
+
   {"tpc"         ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StMaker","StChain","",kFALSE},
   {"Trs"         ,"","tpcChain","scl,tpcDB,tpc_daq,Simu"              ,"StTrsMaker","StTrsMaker","",kFALSE},
+
   {"Mixer"       ,"tpc_raw","","","StMixerMaker"  ,"StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpcChain","tpc_T"              ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
@@ -274,6 +277,8 @@ Bfc_st BFC[] = {
 
   {"emcSim" ,"emcRaw","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker", 
                                                                            "New simulator for BEMC",kFALSE},
+
+
   {"global"      ,"globalChain","","globT,Match,primary,v0,xi,kink,dst,SCL,dEdx"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
@@ -298,17 +303,24 @@ Bfc_st BFC[] = {
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",
                                          "StPreEclMaker,StEmcSimulatorMaker,St_emc,St_ems_Maker","",kFALSE},
   {"Epc"         ,"epc","PostChain","PreEcl,Match,EmcUtil"            ,"StEpcMaker","StEpcMaker","",kFALSE},
-  {"emcADCtoE"   ,"emcADCtoE","",""             ,"StEmcADCtoEMaker","StEmcUtil,StEmcADCtoEMaker","",kFALSE},  {"rich"        ,"RichChain","","rch,RichPiD",                    "StMaker","StChain","RICH chain",kFALSE},
+  {"emcADCtoE"   ,"emcADCtoE","",""             ,"StEmcADCtoEMaker","StEmcUtil,StEmcADCtoEMaker","",kFALSE},
+
+  {"rich"        ,"RichChain","","rch,RichPiD",                    "StMaker","StChain","RICH chain",kFALSE},
   {"Rrs"         ,"","RichChain","sim_T,Simu"                         ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rch"         ,"","RichChain","sim_T,globT"             ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
   {"RichPiD"     ,"","RichChain","Event"                      ,"StRichPIDMaker","StRichPIDMaker","",kFALSE},
+
+  {"tofDat"      ,"tof_raw","","db,Tofutil","StTofMaker","StEvent,StTofMaker","TOF Data base chain",kFALSE},
+
   {"l3"          ,"l3Chain","","l3cl,l3t"                                   ,"StMaker","StChain","",kFALSE},
   {"l3cl"        ,"","l3Chain","l3_T"               ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3Chain","l3_T"                       ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
-  {"l3onl"       ,"","",""                         ,"Stl3RawReaderMaker","Stl3RawReaderMaker","",kFALSE},
+  {"l3onl"       ,"","",""                            ,"Stl3RawReaderMaker","Stl3RawReaderMaker","",kFALSE},
+
   {"analysis"    ,"","","Event"          ,"StAnalysisMaker","StAnalysisMaker","Example of Analysis",kFALSE},
   {"pec"         ,"PeC","","Event"                       ,"StPeCMaker","StPeCMaker","PCollAnalysis",kFALSE},
   {"RichSpectra" ,"","",""                            ,"StRichSpectraMaker","StRichSpectraMaker","",kFALSE},
+
   {"TagsChain"   ,"TagsChain","",""                                         ,"StMaker","StChain","",kFALSE},
   {"TpcTag"      ,"","TagsChain",""                             ,"StTpcTagMaker","StTpcTagMaker","",kFALSE},
   {"Flow"        ,"","TagsChain","StEvent"         ,"StFlowMaker","StEventUtilities,StFlowMaker","",kFALSE},
@@ -321,6 +333,7 @@ Bfc_st BFC[] = {
   {"tags"        ,"","TagsChain",
                  "TagsChain,globT,Event,FlowTag,StrangeTags,SpectraTag,EbyeScaTags,TpcTag,PCollTag"    
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
+
   {"QA"          ,"QA","","globT,SCL,global"                        ,"St_QA_Maker","St_QA_Maker","",kFALSE},
   {"EventQA"     ,"EventQA","","Event"                           ,"StEventQAMaker","St_QA_Maker","",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
