@@ -23,10 +23,20 @@
 //  where the "list" may contain no object                              //
 //                                                                      //
 //  St_DataSet object has a back pointer to its "parent" St_DataSet     //
-//  object                                                              //
+//  object, the "character" *name* and "character" *title*              //
 //                                                                      //
-// St_DataSet class is a base class to implement the directory-like     //
-// data structures and maintain it via St_DataSetIter class iterator    //
+//  The service this class does provide is to help the user to build    //
+//  and manage the hierarchy of his/her data but the data itself.       //
+//  So it is useful as soon as the "real file system folder" is useful  //
+//  with no real files loaded in.                                       //
+//                                                                      //
+//  So it is not "Container" but the basement (base class) to built     //
+//  the containers.                                                     //
+//  The one may derive the custom container classes from St_DataSet     //
+//  (see for example St_ObjectSet, St_Table, St_Node, St_FileSet etc )  //                                                                    //
+//                                                                      //
+//  St_DataSet class is a base class to implement the directory-like    //
+//  data structures and maintain it via St_DataSetIter class iterator   //
 //                                                                      //
 // St_DataSet can be iterated using an iterator object (see St_DataSetIter) //
 //            or by St_DataSet::Pass method (see below)                 //
@@ -39,8 +49,8 @@
 //                            points to this object                     //
 //                                                                      //
 //           Dataset        - we will say this St_DataSet object "OWNs" //
-//            Owner           (or is an OWNER of ) another St_DataSet   //
-//                            object if the last one is its             //
+//            Owner           (or is an OWNER / PARENT of ) another     //
+//          (parent)          St_DataSet object if the last one is its  //
 //                            "Structural Member"                       //
 //                                                                      //
 //          Associated      - If some object is not "Structural member" //
@@ -60,11 +70,21 @@
 // - Any St_DataSet object may be an "Associated Member" for any number //
 //   of other St_DataSet objects if any                                 //
 //                                                                      //
-// - Each "dataset member" is in possesion of the some "alpha-numerical"//
-//   name.                                                              //
-//   The name may contain any "printable" symbols but "SLASH" - "/"     //
+// - Each "dataset member" is in possession of the some                 //
+//   "alpha-numerical" NAME.                                            //
+//   The NAME may contain any "printable" symbols but "SLASH" - "/"     //
 //   The symbol "RIGHT SLASH" - "/" can not be used as any part of the  //
-//   "DataSet Member" name                                              //
+//   "DataSet Member" NAME                                              //
+//    Any DataSet  can be found by its NAME with St_DataSetIter object  //
+//                                                                      //
+// - Each "dataset member" is in possession of the some                 //
+//   "alpha-numerical" TITLE. The meaning of the TITLE is reserved for  //
+//   the derived classes to hold there some indetification that is      //
+//   special for that derived class.                                    //
+//                                                                      //
+//   This means the user must be careful about  the "St_DataSet         //
+//   NAME and TITLE since this may cause some "side effects" of the     //
+//   particular class functions                                          //
 //                                                                      //
 // - It is NOT required those all "DataSet Members" are in possession   //
 //   of the unique names, i.e. any number of "DataSet Members"          // 
@@ -76,7 +96,7 @@
 //                                  as "Structural Member"              //
 //           of another St_DataSet object                               //
 //                                                                      //
-//   Add     One dataset can be included into aother dataset.           //
+//   Add     One dataset can be included into another dataset.          //
 //           Upon adding:                                               //
 //           -  the "Orphan dataset" becomes "Structural Member"        //
 //           - "Structural Members" of another dataset becomes the      //
@@ -156,7 +176,7 @@ St_DataSet::~St_DataSet()
 //______________________________________________________________________________
 void St_DataSet::AddLast(St_DataSet *dataset)
 {
-// 	 Add St_DataSet object at the end of the dataset list of this dataset
+// Add St_DataSet object at the end of the dataset list of this dataset
   if (!dataset) return;
  
   if (!fList) fList = new TList;
@@ -169,7 +189,7 @@ void St_DataSet::AddLast(St_DataSet *dataset)
 //______________________________________________________________________________
 void St_DataSet::AddFirst(St_DataSet *dataset)
 {
-  //  Add St_DataSet object at the beginning of the dataset list of this dataset
+ // Add St_DataSet object at the beginning of the dataset list of this dataset
   if (!dataset) return;
  
   if (!fList) 
@@ -206,14 +226,14 @@ void St_DataSet::Delete(Option_t *opt)
 // 	Delete list of the St_DataSet
   if (!fList) return;
   TIter next(fList);   
-  St_DataSet *son = 0;
-// 	Delete the sons of this St_DataSet only
+  St_DataSet *son = 0; 
+  //  Delete the "Structural Members" of this St_DataSet only
   while ((son = (St_DataSet *)next())) {
     if (this != son->GetParent()) continue;
-// 		mark the object is deleted from the St_DataSet dtor or Delete method
+    // mark the object is deleted from the St_DataSet dtor or Delete method
     son->SetBit(kCanDelete); delete son;
   }
-// 	Cleare list
+  //  Cleare list
   fList->Clear("nodelete");
   delete fList;
   fList = 0;
@@ -458,20 +478,20 @@ EDataSetPass St_DataSet::Pass(EDataSetPass ( *callback)(St_DataSet *,void*),void
 Int_t St_DataSet::Purge(Option_t *)
 {
 //
-// Purge  - deletes all "dummy" datasets those are not ended up with some
-//          dataset with data inside (those return HasData() = 0)
+// Purge  - deletes all "dummy" "Structural Members" those are not ended
+//          up with some dataset with data inside (those return HasData() = 0)
 //
-// Purge does affect only the structural links and doesn't touch refs.
+// Purge does affect only the "Structural Members" and doesn't "Associated" ones
 //
 
  if (!fList) return 0;
  TIter next(fList);   
  St_DataSet *son = 0;
-// 		Purge the sons of this St_DataSet only
+   // Purge "Structural Members" only
    TList garbage;
    while ((son = (St_DataSet *)next())) {
      if (this == son->GetParent()) continue;
-// 		mark the object is deleted from the St_DataSet dtor
+     //   mark the object is deleted from the St_DataSet dtor
      son->Purge();
      if (son->HasData() || son->GetListSize()) continue;
      delete son;
@@ -484,8 +504,11 @@ void  St_DataSet::SetLock(int lock){}
 void  St_DataSet::SetParent(St_DataSet *parent){
 //
 //  Break the "parent" relationship with the current object parent if present
-//  Set the new parent if any
-//
+//  parent != 0   Makes this object the "Structural Member" 
+//                of the "parent" dataset
+//          = 0   Makes this object the "pure Associator", i.e it makes this 
+//                object the "Structural Member" of NO other St_DataSet
+//  
    fParent = parent;                 
 }
 //______________________________________________________________________________
@@ -504,7 +527,12 @@ void St_DataSet::SetWrite()
 //______________________________________________________________________________
 void St_DataSet::Shunt(St_DataSet *dataset)
 {
-// 	Remove the object from the original and add it to dataset 
+  /
+  //  Remove the object from the original and add it to dataset 
+  //  St_DataSet dataset   != 0  -  Make this object the "Structural Member"
+  //                                of "dataset"
+  //                        = 0  -  Make this object "Orphan"
+  //
   if (fParent) fParent->Remove(this);
   SetParent(0);
   if (dataset) dataset->Add(this);
@@ -563,9 +591,9 @@ void St_DataSet::Update()
 //______________________________________________________________________________
 void St_DataSet::Sort()
 {
-St_DataSetIter next(this,0);
-St_DataSet *ds;
-TList *list;
+  St_DataSetIter next(this,0);
+  St_DataSet *ds;
+  TList *list;
   while ((ds=next())) {
     list = ds->GetList();
     if (!list) continue;
