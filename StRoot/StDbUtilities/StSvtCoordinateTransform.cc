@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.11 2001/07/24 23:41:52 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.12 2001/07/25 00:03:34 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -124,7 +124,7 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
   double t = a.timebucket() - t0;
 
   b.setPosition(StThreeVector<double>(CalcDriftLength(t),
-				      CalcTransLength(a.anode()),0.015));
+				      CalcTransLength(a.anode()),0.0));
   
   int idShape = 0;
   
