@@ -84,7 +84,8 @@ public:
 
     void operator() (const StiKalmanTrackNode*, StHelix*);  // from StiTrackNode helix params -> StHelix
 
-    void operator() (const StGlobalTrack*, StiKalmanTrack*, const StTpcHitFilter* filter=0) const;
+    void operator() (const StGlobalTrack*, StiKalmanTrack*,
+		     unsigned int maxHits=1000, const StTpcHitFilter* filter=0) const;
 
     pair<double, double> angleAndPosition(const StTpcHit*) const;
 

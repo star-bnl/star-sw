@@ -125,6 +125,7 @@ private:
     bool mBuilt;
 
     unsigned int mLowerBound;
+    unsigned int mMaxHits;
     //Association filter.
     BestCommonHits mBestCommon;
     

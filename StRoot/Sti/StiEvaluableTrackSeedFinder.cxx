@@ -42,7 +42,7 @@ ostream& operator<<(ostream&, const StiHit&);
 */
 StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* assoc)
     : mAssociationMaker(assoc), mMcEvent(0), mFactory(0), mTpcHitFilter(0),
-      mBuildPath("empty"), mBuilt(false), mLowerBound(0)
+      mBuildPath("empty"), mBuilt(false), mLowerBound(0), mMaxHits(0)
 {
     cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder()"<<endl;
     if (!assoc) {
@@ -115,6 +115,13 @@ void StiEvaluableTrackSeedFinder::build()
 	return;
     }
 
+    StGetConfigValue(mBuildPath.c_str(), "mMaxHits", mMaxHits);
+    if (mMaxHits==0) {
+	cout <<"StiEvaluableTrackSeedFinder::build(). ERROR:\t";
+	cout <<"maxHits==0 Abort"<<endl;
+	return;
+    }
+
     string hitFilterType="empty";
     StGetConfigValue(mBuildPath.c_str(), "hitFilterType", hitFilterType);
     if (hitFilterType=="empty") {
@@ -130,7 +137,8 @@ void StiEvaluableTrackSeedFinder::build()
 	return;
     }
     mTpcHitFilter->build(mBuildPath);
-    
+
+    cout <<"lowerBound:\t"<<mLowerBound<<"\tmaxHits:\t"<<mMaxHits<<endl;
     mBuilt=true;
 }
 
@@ -205,7 +213,7 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
 
     //fitlered
     StiGeometryTransform::instance()->operator()(bestPair->partnerTrack(),
-						 track, mTpcHitFilter);
+						 track, mMaxHits, mTpcHitFilter);
 
     //Set StiDetectorContainer to layer corresponding to
     //the innermost point on the track seed

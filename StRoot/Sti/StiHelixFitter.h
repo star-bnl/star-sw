@@ -72,7 +72,7 @@ public:
     ///Full internal clear.
     void reset();
 
-    bool refit(const StiHitVector&);
+    bool fit(const StiHitVector&);
 
     ///We include this to avoid compiler warnings triggered by singleton pattern.
     friend class nobody;

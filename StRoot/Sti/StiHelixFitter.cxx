@@ -26,7 +26,7 @@ double g2dPathlength(double radius, double xcenter, double ycenter,
 		     const StThreeVectorF& hit1, const StThreeVectorF& hit2);
 
 StiHelixFitter::StiHelixFitter() : mCircleFitter(), mLineFitter()
-				   //mCircleInserter(mCircleFitter),
+    //mCircleInserter(mCircleFitter),
     //mLineInserter(mCircleFitter, mLineFitter)
 {
     cout <<"StiHelixFitter::StiHelixFitter()"<<endl;
@@ -37,20 +37,20 @@ StiHelixFitter::~StiHelixFitter()
 {
 }
 
-bool StiHelixFitter::refit(const StiHitVector& hits)
+bool StiHelixFitter::fit(const StiHitVector& hits)
 {
     //cout <<"----------- New Track ------------- "<<endl;
-
+    
     mValid=false;
-
+    
     if (hits.size()<3) {
 	cout <<"StiHelixFitter::refit(). ERROR:\t";
 	cout <<"Less than 3 hits.  Abort"<<endl;
 	return false;
     }
-
+    
     reset();
-
+    
     //for_each(hits.rbegin(), hits.rend(), PtrStreamer<StiHit>());
     
     //Do circle fit in x-yOrder doesn't matter for circle fit
@@ -61,31 +61,29 @@ bool StiHelixFitter::refit(const StiHitVector& hits)
 				(*it)->globalPosition().y() );
     }
     bool circle_rc = mCircleFitter.fit();
-
+    
     if (!circle_rc) {
 	cout <<"StiHelixFitter::refit(). ERROR:\t";
 	cout <<"Circle Fit Failed.  abort"<<endl;
 	mValid=false;
 	return false;
     }
-
-    //Do line fit in s-z, where s is the 2-d pathlength along circle
-    //Order matters, must start from innermost and go out
-
-    /*
-    const StThreeVectorF& firsthit = hits.front()->position();
-
-    for (StiHitVector::const_reverse_iterator it=vec.begin(); it!=vec.end(); ++it) {
-	
-	double s2d = g2dPathlength(mcirclefitter->radius(), mcirclefitter->xcenter(),
-				   mcirclefitter->ycenter(), firsthit,
-				   (*it)->position());
-	
-	mlinefitter->addPoint(s2d, position.z(), 1.); //Use a dummy weight of 1
-    }
-
-    */
     
+    //Do line fit in s-z, where s is the 2-d pathlength along circle
+    //Order matters, must start from innermost and go out, and 
+    
+    const StThreeVectorF& firsthit = hits.back()->position();
+    
+    for (StiHitVector::const_reverse_iterator it=hits.rbegin();
+	 it!=hits.rend(); ++it) {
+	
+	double s2d = g2dPathlength(mCircleFitter.radius(), mCircleFitter.xcenter(),
+				   mCircleFitter.ycenter(), firsthit,
+				   (*it)->globalPosition());
+	
+	mLineFitter.addPoint(s2d, (*it)->globalPosition().z(), 1.); //Use a dummy weight of 1
+    }
+        
     bool line_rc = mLineFitter.fit();
     
     if (!line_rc) {
@@ -97,14 +95,14 @@ bool StiHelixFitter::refit(const StiHitVector& hits)
     
     //I'll list all of these to be explicit
     
-    //double curvature = 1./mcirclefitter->radius();
+    //double curvature = 1./mCircleFitter->radius();
     //double tanLambda = mlinefitter->slope();
     //xCenter = mCircleFitter.xCenter();
     //yCenter = mCircleFitter.yCenter();
     //z0 = mLineFitter.intercept();
-
+    
     //Now check for potential singularities
-    //mValid = (circle_rc && line_rc && (mCircleFitter.radius<=0.) );
+    mValid = (circle_rc && line_rc && (mCircleFitter.radius()>=0.) );
     
     return mValid;
 }

@@ -75,7 +75,8 @@ public:
 class StTpcPadrowHitFilter : public StTpcHitFilter
 {
 public:
-    StTpcPadrowHitFilter() : mMinPadrow(999), mMaxPadrow(999), mBuilt(false) {};
+    StTpcPadrowHitFilter()
+	: mMinPadrow(999), mMaxPadrow(999), mBuilt(false) {};
     virtual ~StTpcPadrowHitFilter() {};
     virtual bool operator()(const StTpcHit&) const;
     virtual void build(const string&);
