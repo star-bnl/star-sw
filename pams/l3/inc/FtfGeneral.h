@@ -1,3 +1,11 @@
+//:>------------------------------------------------------------------
+//: FILE:       FtfGeneral.h
+//: HISTORY:
+//:             27jan2000 ppy Start recording history
+//:             27jan2000 ppy FtfVolume added to FtfGeneral
+//:             27jan2000 ppy VOLUME, ROW and AREA classes replaced with
+//:                           FtfContainer
+//:<------------------------------------------------------------------
 #ifndef FTFGENERAL
 #define FTFGENERAL
 #include <math.h>
@@ -25,5 +33,13 @@ extern double fmod(double,double);
 extern double sqrt(double);
 extern double fabs(double);
 extern double atan2(double,double);
+
+
+class FtfContainer{
+   public:
+     void *first; 
+     void *last;  
+} ;
+
 #endif
 

@@ -4,6 +4,8 @@
 //:             28oct1996 version 1.00
 //:             23aug1999 ppy printVols and printRows deleted
 //:             26jan2000 ppy destructor added
+//:             27jan2000 ppy VOLUME, ROW and AREA classes replaced by
+//:                           FtfContainer
 //:<------------------------------------------------------------------
 
 #ifndef FTFFINDER
@@ -15,7 +17,6 @@
 #include "FtfHit.h"
 #include "FtfTrack.h"
 #include "FtfMcTrack.h"
-#include "FtfVolume.h"
 
 #ifdef SL3ROOT
 #include "Rtypes.h"
@@ -52,9 +53,9 @@ public:
    int           maxTracks  ;
    int           nMcTracks  ;
    FtfMcTrack    *mcTrack    ;
-   VOLUME        *volume     ;
-   ROW           *rowk       ;
-   AREA          *trackArea ;
+   FtfContainer  *volumeC ;
+   FtfContainer  *rowC    ;
+   FtfContainer  *trackC  ;
    double        cpuTime ;
    double        realTime ;
 private: 

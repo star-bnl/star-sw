@@ -1,3 +1,9 @@
+//:>----------------------------------------------------------------------
+//: FILE:      FtfBaseTrack.h
+//: HISTORY:
+//:           28jan2000  start writting changes
+//:                      innerMostRow and outerMostRow added
+//:>----------------------------------------------------------------------
 #ifndef  FTFBASETRACK
 #define  FTFBASETRACK
 #include "FtfGeneral.h"
@@ -33,6 +39,8 @@ public:
 	  
     int       id     ;  // primary key 
     short     flag   ;  // Primaries flag=1, Secondaries flag=0      
+    char      innerMostRow ;
+    char      outerMostRow ;
     int       nHits  ;  // Number of points assigned to that track
     short     q  ;      // charge 
     float     chi2[2];  // chi squared of the momentum fit 

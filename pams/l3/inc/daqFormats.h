@@ -276,7 +276,7 @@ struct TPCMZCLD_local {
 struct TPCADCX {
 	struct bankHeader bh ;
 	struct row {
-		UINT32 row ;
+		UINT32 roW ;
 		UINT32 offADC ;
 		UINT32 offSEQ ;
 	} lrow[MZ_MAX_ROWS] ;	/* MAX 6 padrows/hybrids in a mezzanine */
