@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.26 1999/04/22 18:50:05 sakrejda Exp $
+// $Id: St_tpt_Maker.cxx,v 1.27 1999/04/23 18:53:05 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.27  1999/04/23 18:53:05  sakrejda
+// Scope problem in Make Histograms fixed
+//
 // Revision 1.26  1999/04/22 18:50:05  sakrejda
 // a protection in case IT1 does not exist
 //
@@ -270,6 +273,7 @@ Int_t St_tpt_Maker::Make(){
   if (raw) {
     St_DataSetIter nex(raw);
     St_type_index *I1 = (St_type_index *) nex("IT1");
+     type_index_st *ii = 0;
     if(I1) type_index_st *ii = I1->GetTable();
     if(ii) evno = ii->data_row;
      }
@@ -347,7 +351,7 @@ Int_t St_tpt_Maker::Make(){
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.26 1999/04/22 18:50:05 sakrejda Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.27 1999/04/23 18:53:05 sakrejda Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
