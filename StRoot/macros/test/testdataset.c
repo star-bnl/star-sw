@@ -1,9 +1,9 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@bnl.gov)   07/04/99
-// $Id: testdataset.c,v 1.12 2000/09/29 18:15:49 fine Exp $
+// $Id: testdataset.c,v 1.13 2000/09/30 17:51:54 perev Exp $
 // $Log: testdataset.c,v $
-// Revision 1.12  2000/09/29 18:15:49  fine
-// test adjusted to new TDataSet and TDataSetIter
+// Revision 1.13  2000/09/30 17:51:54  perev
+// Evolution On/Off SetEvol.C added
 //
 // Revision 1.11  1999/12/28 23:32:02  fine
 // TDataSetIter  operator++ removed to avoid a future problem
@@ -73,10 +73,10 @@
   d.Ls("unknown");
 //  d.Pwd()->ls("unknown");
 //  cout  << endl << "------------ 2 ------------ " << endl;
-  cout  << endl << "-------- 2 test \"FindByName\" ------------ " << endl;
+  cout  << endl << "-------- 2 test \"FindObject\" ------------ " << endl;
 
   const Char_t *v3212 = "v3212";
-  TDataSet *found = d.FindByName(v3212);
+  TDataSet *found = d.FindObject(v3212);
   if (found) {
       const Char_t *t = found->Path();
       cout << "Object: " << v3212 << " found. It\'s path is " << t << endl;
