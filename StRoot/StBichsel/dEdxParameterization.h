@@ -32,7 +32,7 @@ class dEdxParameterization {
  public :
   dEdxParameterization(const Char_t *Tag="bich",
 		       const Double_t MostProbableZShift = 0,
-		       const Double_t AverageZShift       = 0,
+		       const Double_t AverageZShift      = 0,
 		       const Double_t I70Shift           = 1,
 		       const Double_t I60Shift           = 1);
   virtual ~dEdxParameterization();
@@ -63,6 +63,7 @@ class dEdxParameterization {
   }
   Double_t    GetProbability(Double_t log10bg, Double_t log2dx, Double_t z, Int_t kase=0) {
     return Interpolation(fPhi,log10bg,log2dx,z,kase);}
+  void        Print();
   ClassDef(dEdxParameterization,0)
 };
 #endif

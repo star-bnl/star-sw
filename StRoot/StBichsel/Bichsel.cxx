@@ -1,22 +1,14 @@
+#include "Riostream.h"
 #include "Bichsel.h"
-dEdxParameterization *Bichsel::m_dEdxParameterization = 0;
 ClassImp(Bichsel);
-Bichsel::Bichsel() {
+Bichsel::Bichsel(const Char_t *tag) : m_Tag(tag), m_dEdxParameterization(0) {
   if (! m_dEdxParameterization) 
-    m_dEdxParameterization = new dEdxParameterization("bich",
-						      5.07402529167365057e-01, // MostProbableZShift
-						      5.07402529167365057e-01, // AverageZShft
-						      9.16531837651389347e-01, // I70Shft
-						      9.75432754685096048e-01  // I60Shift
-						      );
+    m_dEdxParameterization = new dEdxParameterization(m_Tag.Data());
 }
 //________________________________________________________________________________
 Double_t  Bichsel::GetI70(Double_t log10bg, Double_t log2dx, Int_t kase)  {
   return m_dEdxParameterization->GetI70(log10bg,log2dx,kase)
-#ifndef P03ia
-    *TMath::Exp(-TofCorrection(log2dx))
-#endif
-    ;
+    *TMath::Exp(TofCorrection(log10bg));
 }
 //________________________________________________________________________________
 Double_t  Bichsel::TofCorrection(Double_t log10bg) {
@@ -33,4 +25,9 @@ Double_t  Bichsel::TofCorrection(Double_t log10bg) {
   Double_t value = par[0] + TMath::Log(beta2Inv)*(par[1]+par[2]*TMath::Log(beta2Inv)) + 
     TMath::Log(poverm)*(par[3] + TMath::Log(poverm)*(par[4] + TMath::Log(poverm)*par[5]));
   return value;
+}
+//________________________________________________________________________________
+void Bichsel::Print() {
+  cout << "Bichsel:: " << m_Tag << endl;
+  if (m_dEdxParameterization) m_dEdxParameterization->Print();
 }

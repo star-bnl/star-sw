@@ -10,7 +10,7 @@
 #include "TROOT.h"
 #include "TDirectory.h"
 #include "TF1.h"
-#include "TError.h"
+#include "TError.h" 
 
 #define  PrP(A)  cout << "\t" << (#A) << " = \t" << ( A )
 
@@ -31,20 +31,21 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag,
   TDirectory *dir = gDirectory;
   Char_t            *rootf = "BichselT.root";
   if (fTag == "pai") rootf = "PaiT.root";
+  else if (fTag == "p10") rootf = "P10T.root";
   static Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx:./StRoot/StBichsel:$STAR/StarDb/dEdxModel:$STAR/StarDb/global/dEdx:$STAR/StRoot/StBichsel";
   Char_t *file = gSystem->Which(path,rootf,kReadPermission);
   if (! file) Fatal("dEdxParameterization::GetFile","File %s has not been found in path %s",rootf,path);
   else        Warning("dEdxParameterization::GetFile","File %s has been found as %s",rootf,file);
   TFile       *pFile = new TFile(file);
   assert(pFile);
-  fP   = (TProfile2D *) pFile->Get(Form("%sP",fTag.Data()));   assert(fP);   fP->SetDirectory(0);
-  fA   = (TProfile2D *) pFile->Get(Form("%sA",fTag.Data()));   assert(fA);   fA->SetDirectory(0);
-  fI70 = (TProfile2D *) pFile->Get(Form("%sI70",fTag.Data())); assert(fI70); fI70->SetDirectory(0);
-  fI60 = (TProfile2D *) pFile->Get(Form("%sI60",fTag.Data())); assert(fI60); fI60->SetDirectory(0);
-  fD   = (TProfile2D *) pFile->Get(Form("%sD",fTag.Data()));   assert(fD);   fD->SetDirectory(0);
-  fRms = (TProfile2D *) pFile->Get(Form("%sRms",fTag.Data())); assert(fRms); fRms->SetDirectory(0);
-  fW   = (TProfile2D *) pFile->Get(Form("%sW",fTag.Data()));   assert(fW);   fW->SetDirectory(0);
-  fPhi = (TH3D       *) pFile->Get(Form("%sPhi",fTag.Data())); assert(fPhi); fPhi->SetDirectory(0);
+  fP   = (TProfile2D *) pFile->Get("bichP");   assert(fP);   fP->SetDirectory(0);
+  fA   = (TProfile2D *) pFile->Get("bichA");   assert(fA);   fA->SetDirectory(0);
+  fI70 = (TProfile2D *) pFile->Get("bichI70"); assert(fI70); fI70->SetDirectory(0);
+  fI60 = (TProfile2D *) pFile->Get("bichI60"); assert(fI60); fI60->SetDirectory(0);
+  fD   = (TProfile2D *) pFile->Get("bichD");   assert(fD);   fD->SetDirectory(0);
+  fRms = (TProfile2D *) pFile->Get("bichRms"); assert(fRms); fRms->SetDirectory(0);
+  fW   = (TProfile2D *) pFile->Get("bichW");   assert(fW);   fW->SetDirectory(0);
+  fPhi = (TH3D       *) pFile->Get("bichPhi"); assert(fPhi); fPhi->SetDirectory(0);
   delete pFile;  
   if (dir) dir->cd();
   for (Int_t i = 0; i<3; i++) {
@@ -58,6 +59,14 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag,
     assert(fnBins[i] !=1);
 #endif
   }
+  // set normalization factor to 2.3976 keV/cm at beta*gamma = 4;
+  static const Double_t dEdxMIP = 2.39761562607903311; // [keV/cm]
+  static const Double_t MIPBetaGamma10 = TMath::Log10(4.);
+  fMostProbableZShift = TMath::Log(dEdxMIP) - Interpolation(fP,MIPBetaGamma10,1,0);
+  fAverageZShift      = TMath::Log(dEdxMIP) - Interpolation(fA,MIPBetaGamma10,1,0);
+  fI70Shift           = dEdxMIP/Interpolation(fI70,MIPBetaGamma10,1,0);
+  fI60Shift           = dEdxMIP/Interpolation(fI60,MIPBetaGamma10,1,0);
+  
 };
 //________________________________________________________________________________
 dEdxParameterization::~dEdxParameterization() { 
@@ -180,3 +189,19 @@ Double_t   dEdxParameterization:: Interpolation(TH1 *hist, Double_t X, Int_t kas
   XYZ[0] = X;
   return Interpolation(1, hist, XYZ, kase);
 }
+//________________________________________________________________________________
+void dEdxParameterization::Print() {
+  PrP(fTag); cout << endl;
+  PrP(fP); if (fP) PrP(fP->GetTitle()); cout << endl;
+  PrP(fA); if (fA) PrP(fA->GetTitle()); cout << endl;
+  PrP(fI70); if (fI70) PrP(fI70->GetTitle()); cout << endl;
+  PrP(fI60); if (fI60) PrP(fI60->GetTitle()); cout << endl;
+  PrP(fD); if (fD) PrP(fD->GetTitle()); cout << endl;
+  PrP(fRms); if (fRms) PrP(fRms->GetTitle()); cout << endl;
+  PrP(fW); if (fW) PrP(fW->GetTitle()); cout << endl;
+  PrP(fPhi); if (fPhi) PrP(fPhi->GetTitle()); cout << endl;
+  PrP(fMostProbableZShift); cout << endl;
+  PrP(fAverageZShift); cout << endl;
+  PrP(fI70Shift); cout << endl;
+  PrP(fI60Shift); cout << endl;
+} 
