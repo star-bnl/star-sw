@@ -107,7 +107,7 @@ long type_of_call l3Clufi_(
 	}
 
     // get pointer for outgoing bank, calculate pointer to first rc bank
-    bank = &hits->data;
+    bank = (ULong_t*) &hits->data;
 
     /*printf("bank :%d  hits:%d\n",bank,&hits->data);*/
     /*printf("offset : %d\n",bank[34]);*/
