@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.12 2001/09/26 18:42:48 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.13 2001/10/19 23:31:34 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.13  2001/10/19 23:31:34  caines
+// Correct problem that if anodes were missing didnt do average common mode noise calc
+//
 // Revision 1.12  2001/09/26 18:42:48  caines
 // Fix 2 anode subtraction routines
 //
@@ -81,7 +84,7 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t GetPedOffset(){return mPedOffSet;};
   void CommonModeNoiseCalc(int iAnode);
   void CommonModeNoiseSub(int iAnode);
-  void SubtractFirstAnode(int iAnode);
+  void SubtractFirstAnode(int iAnode, int mNAnodes);
   Int_t AdjustSequences1( int iAnode, int Anode); // Find sequences  based on ASICS
   Int_t AdjustSequences2(int iAnode, int Anode); //adjust sequences base on LowInvProd
 
@@ -129,7 +132,7 @@ class StSvtSeqAdjMaker : public StMaker
   int mPedOffSet;
   int mCommonModeNoise[128];
   int mCommonModeNoiseAn[128];
-
+  int mNAnodes;
   float adcCommon[128];
 
  private:

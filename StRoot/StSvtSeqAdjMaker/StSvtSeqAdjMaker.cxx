@@ -1,6 +1,6 @@
-/***************************************************************************
+ /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.34 2001/10/05 23:36:25 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.35 2001/10/19 23:31:30 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,11 +13,8 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
- * Revision 1.34  2001/10/05 23:36:25  caines
- * Improve first anode subtraction to cope with DAQ changes
- *
- * Revision 1.33  2001/10/05 23:18:27  caines
- * Make BadAnode a cont not data so code doesnt crash
+ * Revision 1.35  2001/10/19 23:31:30  caines
+ * Correct problem that if anodes were missing didnt do average common mode noise calc
  *
  * Revision 1.32  2001/10/04 02:56:01  caines
  * Change default pedoffset and black anodes to current values
@@ -164,7 +161,7 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   mPedOffSet = 10;
   m_thresh_lo = 3+mPedOffSet;
   m_thresh_hi = 5+mPedOffSet; 
-  m_n_seq_lo  = 2;
+  m_n_seq_lo  = 1;
   m_n_seq_hi  = 0;
   m_inv_prod_lo = 0;
  
@@ -323,7 +320,8 @@ Int_t StSvtSeqAdjMaker::SetLowInvProd(int LowInvProd)
   
   return kStOK; 
 }
-//_____________________________________________________________________________
+
+////_____________________________________________________________________________
 
 Int_t StSvtSeqAdjMaker::GetBadAnodes()
 {
@@ -536,7 +534,7 @@ Int_t StSvtSeqAdjMaker::Make()
 
   StSvtBadAnode* BadAnode=NULL;
 
-
+  //  GetBadAnodes();
   if ( GetSvtRawData() ) return kStWarn; // Return if SVT not there
 
   SetSvtData();
@@ -576,7 +574,9 @@ Int_t StSvtSeqAdjMaker::Make()
 
 	  // Decide whether to do common mode noise from average timebucket value or via first two black anodes
 	  doCommon = 0;
-	  
+	  int mNAnodes=2;
+	  int adcAv=0;
+ 
 	  status= mHybridRawData->getSequences(1,nSequence,Seq);
 	  length = 0;
 
@@ -593,9 +593,11 @@ Int_t StSvtSeqAdjMaker::Make()
 	      j=0;
 	      while( j<length){
 		adcCommon[startTimeBin+j] = (float)adc[j]-mPedOffSet;
+		adcAv += (int) adc[j];
 		j++;
 	      }
 	    }
+	    if( adcAv <100) mNAnodes--;
 	  }
 	  
 	  status= mHybridRawData->getSequences(2,nSequence,Seq);
@@ -612,11 +614,10 @@ Int_t StSvtSeqAdjMaker::Make()
 	    }
 	  }
 	      
-	  
 	  if( !doCommon){
 	 
 	    // Fill in array of adc values of second anode
-	    
+	    adcAv=0;
 	    for( int nSeq=0; nSeq< nSequence ; nSeq++){
 	      
 	      adc=Seq[nSeq].firstAdc;
@@ -625,13 +626,15 @@ Int_t StSvtSeqAdjMaker::Make()
 	      j=0;
 	      while( j<length){
 		adcCommon[startTimeBin+j] += (float)adc[j]-mPedOffSet;
+		adcAv += (int)  adc[j];
 		j++;
 	      }
 	    }
+	    if( adcAv <100) mNAnodes--;
 	  }
 	
-	  if( doCommon){
-	    cout << "Doing Common mode average" << endl;
+	  if( doCommon || !mNAnodes ){
+	    cout << "Doing Common mode average for index " << index << endl;
 	    // Zero Common Mode Noise arrays
 	    for(int Timebin=0; Timebin<128; Timebin++){
 	      mCommonModeNoise[Timebin]=0;
@@ -685,7 +688,6 @@ Int_t StSvtSeqAdjMaker::Make()
 	    }
 	  }
 	
-	  //for( int iAnode= 0; iAnode<mHybridRawData->getAnodeList(anolist); iAnode++)
 	  for( int iAnode= 0; iAnode<mHybridRawData->getAnodeList(anolist); iAnode++)
             {
 	      Anode = anolist[iAnode];
@@ -699,7 +701,7 @@ Int_t StSvtSeqAdjMaker::Make()
 	      }
 
 	      if( doCommon) CommonModeNoiseSub(iAnode);
-	      else SubtractFirstAnode(iAnode);
+	      else SubtractFirstAnode(iAnode, mNAnodes);
 
 	      //Perform Asic like zero suppression
 	      AdjustSequences1(iAnode, Anode);
@@ -994,7 +996,7 @@ void StSvtSeqAdjMaker::CommonModeNoiseSub(int iAnode){
 
 //_____________________________________________________________________________
 
-void StSvtSeqAdjMaker::SubtractFirstAnode(int iAnode){
+void StSvtSeqAdjMaker::SubtractFirstAnode(int iAnode, int mNAnodes){
 
   // Calc common mode noise
 
@@ -1014,7 +1016,7 @@ void StSvtSeqAdjMaker::SubtractFirstAnode(int iAnode){
     j =0;
     while( j<length){
 
-      adcMean = (float)adcCommon[j+startTimeBin]/2.;
+      adcMean = (float)adcCommon[j+startTimeBin]/mNAnodes;
       //adcMean = (float)adcSecond[j];
 
       //cout << "iAnode = " << iAnode << ", time = " << startTimeBin + j << ", adcFirst = " << (int)adcFirst[j] << ", adcSecond = " << (int)adcSecond[j] << ", adcMean = " << adcMean << endl;
