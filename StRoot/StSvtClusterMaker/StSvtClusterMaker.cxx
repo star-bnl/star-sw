@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.cxx,v 1.6 2001/09/22 01:07:09 caines Exp $
+// $Id: StSvtClusterMaker.cxx,v 1.7 2001/10/06 00:09:00 caines Exp $
 // $Log: StSvtClusterMaker.cxx,v $
+// Revision 1.7  2001/10/06 00:09:00  caines
+// Fix deleting that was already done by clear so no longer crashes on exit
+//
 // Revision 1.6  2001/09/22 01:07:09  caines
 // Fixes now that AddData() is cleared everyevent
 //
@@ -55,9 +58,8 @@ StSvtClusterMaker::StSvtClusterMaker(const char *name) : StMaker(name)
 StSvtClusterMaker::~StSvtClusterMaker()
 {
 
- delete mHybridCluster;
- delete mClusterColl;
- delete mClusterFinder;
+  delete mHybridCluster;
+  delete mClusterFinder;
 }
 
 //_____________________________________________________________________________
@@ -98,10 +100,8 @@ Int_t StSvtClusterMaker::SetSvtCluster()
   SetOutput(mClusterSet); //Declare for output
 
   
-  // if (!mClusterColl) {
     mClusterColl = new StSvtHybridCollection(mSvtEvent->getConfiguration());
     mClusterSet->SetObject((TObject*)mClusterColl);
-    //} 
 
   return kStOK;
 }
