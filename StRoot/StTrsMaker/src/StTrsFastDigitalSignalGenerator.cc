@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.14 1999/02/28 20:19:30 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.15 1999/03/03 14:20:22 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
+ * Revision 1.15  1999/03/03 14:20:22  lasiuk
+ * set remaining time bins to zero when all full?
+ *
  * Revision 1.14  1999/02/28 20:19:30  lasiuk
  * take number of time bins from db
  * not compatible with data compression from the analogSignalGenerator
@@ -109,7 +112,7 @@ StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec
 
 void StTrsFastDigitalSignalGenerator::digitizeSignal()
 {
-//     cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
+    //cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
     // Loop over the sector
 
     tpcTimeBins currentPad;
@@ -144,7 +147,8 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 		// Conversion
 		// Must take into account the 8 <--> 10 bit conversion
 		// TRS calculates on a linear scale and then must
-		// convert to 8 bit data?
+		// convert to 8 bit data
+		//PR(*mTimeSequenceIterator);
 
 		int digitalAmplitude =
 		    mTimeSequenceIterator->amplitude()/mSimpleConversion;
@@ -202,6 +206,7 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 		    else {
 			digitalPadData.push_back(static_cast<unsigned char>(0));
 			digitalPadZeros.push_back(static_cast<unsigned char>(remainingTimeBins));
+			remainingTimeBins = 0;
 			break;
 		    }
 		} while (remainingTimeBins > 0);
