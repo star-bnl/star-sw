@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.29 1999/07/01 01:45:32 fisyak Exp $
+// $Id: St_Table.h,v 1.30 1999/08/11 00:42:33 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.30  1999/08/11 00:42:33  fine
+// new I/O via St_baseDescriptor table has been implemented
+//
 // Revision 1.29  1999/07/01 01:45:32  fisyak
 // GetRowDescritors => GetRowDescriptors
 //
@@ -66,6 +69,8 @@
 #include "St_DataSet.h"
 #include "TArray.h"
 #include "table_header.h" 
+#include "tableDescriptor.h" 
+
 
 
 #ifndef __CINT__
@@ -87,6 +92,10 @@ class St_XDFFile;
 extern "C" {
    void *ReAllocate(table_head_st *h, Int_t newsize);
 }
+
+#if 1
+class St_tableDescriptor;
+#endif
 
 class St_Table : public St_DataSet, public TArray {
    friend class St_XDFFile;
@@ -115,7 +124,7 @@ protected:
    void       SetTableType(const Char_t *type);
    void       StreamerTable(TBuffer &b);
    Int_t      StreamerTable(StBufferAbc &b);
-   TList     *GetTableDescriptors();
+//   TList     *GetTableDescriptors();
 
    Long_t    *s_MaxIndex;   // The used capacity of this array
 
@@ -142,8 +151,15 @@ public:
    virtual     TClass    *GetRowClass() const ;
    virtual     Long_t     GetNRows() const;
    virtual     Long_t     GetRowSize() const;
-   virtual     TList     *GetRowDescriptors();
    virtual     Long_t     GetTableSize() const;
+#if 0
+   virtual     TList     *GetTableDescriptors();
+   virtual     TList     *GetRowDescriptors();
+#else
+   virtual     St_tableDescriptor *GetTableDescriptors() const;
+   virtual     St_tableDescriptor *GetRowDescriptors() const;
+#endif
+
    virtual     const Char_t *GetType() const;
    virtual     Long_t     HasData() const { return 1; }
    virtual     Bool_t     IsFolder();
@@ -176,7 +192,22 @@ public:
    virtual     void       Update();
    virtual     void       Update(St_DataSet *set,UInt_t opt=0);
    virtual     void      *operator[](Int_t i);
- 
+
+ //  ----   Table descriptor service   ------
+   virtual  const Char_t *GetColumnName(Int_t columnIndex)      const;
+   virtual   UInt_t      *GetIndexArray(Int_t columnIndex)      const;
+   virtual   UInt_t       GetNumberOfColumns()                  const;
+   virtual   UInt_t       GetOffset(Int_t columnIndex)          const;
+   virtual   Int_t        GetOffset(const Char_t *columnName=0) const;
+   virtual   UInt_t       GetSize(Int_t columnIndex)            const;
+   virtual   Int_t        GetSize(const Char_t *columnName=0)   const;
+   virtual   UInt_t       GetTypeSize(Int_t columnIndex)        const;
+   virtual   Int_t        GetTypeSize(const Char_t *columnName=0) const ;
+   virtual   UInt_t       GetDimensions(Int_t columnIndex)      const;
+   virtual   Int_t        GetDimensions(const Char_t *columnName=0) const ;
+   virtual   EColumnType  GetColumnType(Int_t columnIndex)      const;
+   virtual   EColumnType  GetColumnType(const Char_t *columnName=0) const;
+
    ClassDef(St_Table,0)  // Array of the STAF structure
 };
  
@@ -190,12 +221,7 @@ inline  void   St_Table::SetHeader(table_head_st *table){s_TableHeader = table;}
 inline  void   St_Table::SetNRows(Int_t n) {SetUsedRows(n);} 
 //   ULong_t   &operator(){ return GetTable();}
 
-inline const void *St_Table::At(Int_t i) const
-{
-   if (!BoundsOk("St_Table::At", i))
-      i = 0;
-   return (const void *)(s_Table+i*(*s_Size));
-}
+
 #if 1
 inline void *St_Table::operator[](Int_t i)
 {
@@ -204,5 +230,22 @@ inline void *St_Table::operator[](Int_t i)
     return (void *)(s_Table+i*(*s_Size));
 }
 #endif
+
+#ifndef TABLE_DESCRIPTOR_LIST
+# if 0
+#  define TABLE_DESCRIPTOR_LIST                \
+    protected:                                 \
+     static TList *fgListOfColDescriptors;     \
+     virtual TList *GetRowDescriptors() { return fgListOfColDescriptors?fgListOfColDescriptors:(fgListOfColDescriptors=GetTableDescriptors());} \
+     virtual void  SetRowDescriptors(TList *list) { fgListOfColDescriptors = list;}  
+# else
+#  define TABLE_DESCRIPTOR_LIST                \
+    protected:                                 \
+     static St_tableDescriptor *fgColDescriptors;    \
+     virtual St_tableDescriptor *GetRowDescriptors() { return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());} \
+     virtual void  SetRowDescriptors(St_tableDescriptor *list) { fgColDescriptors = list;}  
+# endif
+#endif 
+
 #endif 
 
