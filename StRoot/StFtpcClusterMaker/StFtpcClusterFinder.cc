@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.5 2000/01/27 09:47:16 hummler Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.6 2000/04/13 18:08:21 fine Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.6  2000/04/13 18:08:21  fine
+// Adjusted for ROOT 2.24
+//
 // Revision 1.5  2000/01/27 09:47:16  hummler
 // implement raw data reader, remove type ambiguities that bothered kcc
 //
@@ -193,7 +196,7 @@ StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
 			  clusters ++;
 
 			  int numbuf=fcl_fppoint->GetNRows();
-			  int maxbuf=fcl_fppoint->GetHeader()->maxlen;
+			  int maxbuf=fcl_fppoint->GetTableSize();
 		
 			  // cluster processing: call hitfinder 
 			  if(!findHits(CurrentCUC, iRowBuf, iSecBuf, 
@@ -514,7 +517,7 @@ StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
 		  clusters ++;
 		  
 		  int numbuf=fcl_fppoint->GetNRows();
-		  int maxbuf=fcl_fppoint->GetHeader()->maxlen;
+		  int maxbuf=fcl_fppoint->GetTableSize();
 		  
 		  // cluster processing: call hitfinder 
 		  if(!findHits(CurrentCUC, iRowBuf, iSecBuf, 
