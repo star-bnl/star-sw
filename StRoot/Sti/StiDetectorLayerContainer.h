@@ -47,6 +47,9 @@ public:
     
     //Dereference current iterator
     const StiDetector* StiDetectorLayerContainer::operator*() const;
+
+    //Set iterator to this detector
+    bool setRefDetector(const StiDetector*); //returns false if it doesn't find it
     
     //Set iterator at outermost padrow of the sector closest to this refangle
     void setRefDetector(double refangle); //Not implemented yet
