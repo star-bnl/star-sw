@@ -1,5 +1,8 @@
-#  $Id: MakeSYS.mk,v 1.11 1998/05/05 11:56:17 fisyak Exp $
+#  $Id: MakeSYS.mk,v 1.12 1998/05/07 21:45:55 didenko Exp $
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.12  1998/05/07 21:45:55  didenko
+#  modified makefile
+#
 #  Revision 1.11  1998/05/05 11:56:17  fisyak
 #  Add -Msave for Linux
 #
@@ -56,7 +59,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/05/05 11:56:17 $ 
+#             Last modification $Date: 1998/05/07 21:45:55 $ 
 ALL_DEPS    = $^
 FIRST_DEP   = $<
 FIRSTF      = $(<D)/$(<F)
@@ -196,8 +199,7 @@ ifdef PGI
 FC         := /usr/pgi/linux86/bin/pgf77
 FFLAGS     += -Msave
 F_EXTENDED := -Mextend
-LD_LIBS    := -ldl -L/usr/X11R6/lib/ -lX11 -lXt -L/usr/local/lib/ -lF77 -lI77  -L/usr/pgi/linux86/lib/ -lpgftnrtl -lpgc 
-#                                       -lstdc++
+LD_LIBS    := -ldl -L/usr/X11R6/lib/ -lX11 -lXt -L/usr/local/lib/ -lF77 -lI77  -L/usr/pgi/linux86/lib/ -lpgftnrtl -lpgc /usr/lib/libstdc++.a
 #CC         := /usr/pgi/linux86/bin/pgcc -g77libs 
 #CXX        := /usr/pgi/linux86/bin/pgCC
 CPPFLAGS   += -DCERNLIB_QFPGF77
