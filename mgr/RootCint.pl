@@ -148,12 +148,12 @@ if (-f $hfile) {$h_files .= " Stypes.h";}
 if ($h_files) {
   $h_files .= " " . "LinkDef.h";# print "files = ",$files,"\n";
   my $local_cint = basename($Cint_cxx);#  print "files = $#files\n";
-  my $cmd  = "cd $DirName; rootcint -f $local_cint -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+  my $cmd  = "cd $DirName && rootcint -f $local_cint -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
   print "cmd = ",$cmd,"\n";
   my $flag = `$cmd`;
 }
 else {
-    my $flag = `touch $Cint_cxx $Cint_h $LinkDef`;
+#    my $flag = `touch $Cint_cxx $Cint_h $LinkDef`;
 }
 exit(0);
 # last line
