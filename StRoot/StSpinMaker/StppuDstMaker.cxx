@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.cxx,v 1.6 2003/05/14 18:00:25 akio Exp $
+ * $Id: StppuDstMaker.cxx,v 1.7 2003/08/04 19:25:10 perev Exp $
  * 
  * Author: Akio Ogawa June 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StppuDstMaker.cxx,v $
+ * Revision 1.7  2003/08/04 19:25:10  perev
+ * warnOff
+ *
  * Revision 1.6  2003/05/14 18:00:25  akio
  * New addition for 2003 data ntuple prodction
  * Also fix a problem with MuTrack creating from StEvent tracks.
@@ -198,6 +201,7 @@ Int_t StppuDstMaker::Init(const Char_t *filename)
 #ifdef _2003ntuple_
     initntp2003_(uDstFileName.Data());
 #endif
+    return 0;
 }
 
 void StppuDstMaker::Clear(Option_t *opt){  
