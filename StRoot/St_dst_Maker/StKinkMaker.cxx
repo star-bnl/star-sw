@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.8 1999/07/12 19:06:59 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.9 1999/07/13 15:34:34 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.9  1999/07/13 15:34:34  wdeng
+// Add protections in case that some tables are not there
+//
 // Revision 1.8  1999/07/12 19:06:59  wdeng
 // New primary vertex scheme. Get B from gufld(). Use math__constants.h and phys_constants.h
 //
@@ -59,7 +62,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 ClassImp(StKinkMaker)
   
   //_____________________________________________________________________________
-  StKinkMaker::StKinkMaker(const char *name):
+StKinkMaker::StKinkMaker(const char *name):
     StMaker(name),
     m_tkfpar(0),
     mKinkLocalTrack(0)
@@ -107,13 +110,28 @@ Int_t StKinkMaker::Init(){
 Int_t StKinkMaker::Make(){
   //PrintInfo();
   St_DataSet *match = GetDataSet("match"); 
+  if (!match) {
+    cout << " StKinkMaker: match is missing" << endl;
+    return kStWarn;
+  }  
   St_DataSetIter matchI(match);         
-  
   St_dst_track  *globtrk = (St_dst_track *) matchI("globtrk");
-  
+  if (!globtrk) {
+    cout << " StKinkMaker: globtrk is missing" << endl;
+    return kStWarn;
+  }
+
   St_DataSet     *primary = GetDataSet("primary"); 
+  if (!primary) {
+    cout << " StKinkMaker: primary is missing" << endl;
+    return kStWarn;
+  }
   St_DataSetIter primaryI(primary);         
   St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
+  if (!vertex) {
+    cout << " StKinkMaker: vertex is missing" << endl;
+    return kStWarn;
+  }
   
   St_dst_tkf_vertex *kinkVertex  = (St_dst_tkf_vertex *) matchI("kinkVertex");
   
@@ -125,7 +143,8 @@ Int_t StKinkMaker::Make(){
     AddData(kinkVertex);
   }
   
-  vertex->ReAllocate( vertex->GetNRows()+ tkf_limit); 
+  Int_t NoVertex = vertex->GetNRows()+ tkf_limit;
+  vertex->ReAllocate(NoVertex); 
   
   tkf_tkfpar_st *tkfpar = m_tkfpar->GetTable();
   dst_vertex_st *dstVertexStart = vertex->GetTable(); 
@@ -539,7 +558,6 @@ Int_t StKinkMaker::Make(){
 	  }
 	  //================================================================================ 
 	WRONGFILL:
-	  cout << "filling dst_vertex.iflag with 2. \n" << endl; 
 	  dstVtxRow.iflag       = 2;
 	  dstVtxRow.vtx_id      = 0;
 	  dstVtxRow.n_daughters = 0; 
@@ -558,13 +576,6 @@ Int_t StKinkMaker::Make(){
 }
 
 //_____________________________________________________________________________
-void StKinkMaker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: StKinkMaker.cxx,v 1.8 1999/07/12 19:06:59 wdeng Exp $\n");
-  //  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 
 //_____________________________________________________________________________
 Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& helix1, 
