@@ -232,7 +232,7 @@ return
 **********************************************************************
  
 macro bfc_init _
-         chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e svm egr ev0 evout' 
+    chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e svm egr ev02 ev0d evout' 
   
   macro/global/import *
     
@@ -545,7 +545,7 @@ return
 **********************************************************************
 
  macro bfc_process _
-      chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e svm egr ev0 evout'_
+   chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e svm egr ev02 ev0d evout'_
    
   macro/global/import *
 
@@ -870,7 +870,7 @@ return
 **********************************************************************
 
 macro bfc_finish _
-   chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e svm egr ev0 evout'
+   chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e svm egr ev02 ev0d evout'
   
   macro/global/import *
 

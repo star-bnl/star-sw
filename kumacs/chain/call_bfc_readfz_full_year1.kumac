@@ -1,4 +1,4 @@
-* 9/23/98 K. Turner (for 98i)
+* 12/9/98 K. Turner (for 98j)
 * Run BFC in following manner:
 * - read in fz file with year1 data
 * - run g2t
@@ -14,7 +14,7 @@
    tpc_sector_last=1 _
    gstar_settings=' field_only' _
    domain=' geometry g2t tpc ctf mwc svt global ' _
-   chain=' fzin rg2t tpg insvt tfs ctf mwc tpt tid tte_e  drhd dehd egr evr ev0 ddedx dpnt desum dmsft drsum evout ' _
+   chain=' fzin rg2t tpg insvt tfs ctf mwc tpt tid tte_e  drhd dehd egr evr ev02 ev0d ddedx dpnt desum dmsft drsum evout ' _
    skip=0 _
    no_events=1 _
    input_data_file=/disk1/star/kathy/year1a_rcf011_01_90evts.fza _
