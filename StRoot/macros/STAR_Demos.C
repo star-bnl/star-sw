@@ -7,7 +7,7 @@
    gROOT->Reset();
    bar = new TControlBar("vertical", "STAR Demos",600,400);
  
-//   bar->AddButton("Create STAF \"particle\" table",".x CallMevSaveXDF.cxx", "Click it to create a new XDF file and fill it with \"mevsim\" STAF ,module");
+   bar->AddButton("Create STAF \"particle\" table",".x CallMevSaveXDF.cxx", "Click it to create a new XDF file and fill it with \"mevsim\" STAF ,module");
    bar->AddButton("Plot histogram",   ".x  MakeHists.cxx", "Read XDF file with \"particle\" table and plot some histograms");
    bar->AddButton("Make analysis",       ".x  par_anal.cxx",     "Another example of the analysis of the \"particle\" table");
    bar->AddButton("Big Full Chain",       ".x  bfc.C",     "An example of production chain (1 event only)");
