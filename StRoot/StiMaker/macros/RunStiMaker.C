@@ -6,14 +6,16 @@ class StChain;
 StChain *chain=0;
 
 void RunStiMaker(Int_t nevents=1,
-		 
+
 		 bool simulated=true, /*!sim or data?*/
 		 
-		 bool draw=true, /*! use gui, click your way around */
-		 //bool draw=false, /*! console version, run through nevents */
+		 //bool draw=true, /*! use gui, click your way around */
+		 bool draw=false, /*! console version, run through nevents */
 		 
 		 //bool doFit=true, /*! true->fit track only */
 		 bool doFit=false, /*! false->find track only */
+
+const char* outfile = "/star/data17/ITTF/evaluation/default/Evaluation.root",
 
 //This file points to 10 events of 10 neg muons w/ pt=.9 
 //const char *MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_04_01/*.event.root")
@@ -137,6 +139,7 @@ const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.ro
 
     anaMk->setSimulation(simulated);
     anaMk->setGui(draw);
+    anaMk->setEvaluationFileName(outfile);
     
     if (simulated) {
 	anaMk->setMcEventMaker(mcEventReader);
