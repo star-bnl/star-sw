@@ -256,7 +256,7 @@
 //
 // Geant3 global pointer
 //
-extern StTGeant3 *geant3;
+#define geant3 StTGeant3::fgGeant3
 
 ClassImp(StTGeant3f77) 
  

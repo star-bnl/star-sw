@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: StTGeant3f77.h,v 1.1.1.1 2004/07/17 20:02:55 perev Exp $ */
+/* $Id: StTGeant3f77.h,v 1.2 2004/07/22 18:09:20 perev Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++/f77 interface to Geant3 basic routines    // 
