@@ -20,6 +20,8 @@
 #include "lev_macros.h"
 #include "lev_types.h"
 #include "lev_globals.h"
+extern "C" void lev_registerversion_(const char *,const char *);
+extern "C" void lev_registerversion(const char *,const char *);
 
 /*-------------------------------------------- TYPEDEFS             --*/
 /*-------------------------------------------- GLOBALS              --*/
