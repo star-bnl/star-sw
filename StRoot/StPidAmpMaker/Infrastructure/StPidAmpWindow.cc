@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpWindow.cc,v 1.3 2000/04/09 16:18:23 aihong Exp $
+ * $Id: StPidAmpWindow.cc,v 1.4 2000/04/11 15:36:20 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpWindow.cc,v $
+ * Revision 1.4  2000/04/11 15:36:20  aihong
+ * add the implementation of NScreens()
+ *
  * Revision 1.3  2000/04/09 16:18:23  aihong
  * add screen stuff
  *
@@ -371,6 +374,11 @@ double StPidAmpWindow::windowEnd(int i){
 int StPidAmpWindow::NWindows(){
      return mWindows.size();
 }
+//--------------------------
+int StPidAmpWindow::NScreens(){
+      return mScreens.size();
+}
+
 
 //--------------------------
 StPidAmpCutVector StPidAmpWindow::cutVector(){
