@@ -42,6 +42,7 @@ StEmcTowerInput::~StEmcTowerInput() {}
 Int_t StEmcTowerInput::ProcessInput() {
     cout << "TowerInput::ProcessInput()" << endl;
 
+
   // Initialize tower ADC array
 for(Int_t i=0;i<120;i++){
   for(Int_t j=0;j<20;j++){
@@ -50,6 +51,7 @@ for(Int_t i=0;i<120;i++){
       unsigned short ADC=0;
       int stat=mTheEmcReader->getTowerADC(i,j,k,ADC);
       m_TowerADC[i][j][k]=(Float_t)(ADC);
+
       if(!stat)cout<<" problem in getting tower ADC**"<<endl;
     }
   }
@@ -85,6 +87,7 @@ for(Int_t i=0;i<120;i++){
     for(Int_t k=0;k<2;k++){
       Float_t ped=0;
       int pedstat=db->GetTowerPeds(i,j,k,ped);
+//     if(pedstat==kStOK)cout<<"i "<<i<<" j "<<j<<"k "<<k<<"ADC "<<m_TowerADC[i][j][k]<<"ped  "<<ped<<endl;
       if(pedstat==kStOK)m_TowerADC[i][j][k]-=ped;
     }
   }

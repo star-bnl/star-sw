@@ -49,14 +49,14 @@ Int_t StEmcADCtoEMaker::Init() {
 Int_t StEmcADCtoEMaker::Make() {
     cout << "EreaderMaker::Make()" << endl;
 
- 
    //
     mevent=new StEvent();
+//for the time being StEvent check is disabled,
+// when it will be run in full chain, it will be enabled.
     // Get StEvent pointer
     //    mevent = (StEvent*)GetInputDS("StEvent");
-    if(!mevent)
-     {cout<<" stevent does not exist, must run after StEventMaker**"<<endl;return kStWarn;}
-
+//    if(!mevent)
+//     {cout<<" stevent does not exist, must run after StEventMaker**"<<endl;return kStWarn;}
 
 
 //if StEvent exist , then handle the inputs.
@@ -90,7 +90,7 @@ Int_t StEmcADCtoEMaker::Make() {
              cout<<" GOT DaqReader object, look for emc**"<<endl;
 	      if (!(mTheDataReader->EMCPresent())) {
 		cout << "StEreaderMaker::Maker()\n";
-		cout << "\tRICH not in datastream\n";
+		cout << "\tEMC not in datastream\n";
 		cout << "\tSkip this event\n" << endl;
 		mTheEmcReader = NULL;
 	      }
