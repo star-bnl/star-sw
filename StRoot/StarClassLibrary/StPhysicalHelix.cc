@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPhysicalHelix.cc,v 1.1 1999/01/30 03:59:04 fisyak Exp $
+ * $Id: StPhysicalHelix.cc,v 1.2 1999/02/12 01:01:04 wenaus Exp $
  *
  * Author: Brian Lasiuk, Sep 1997
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StPhysicalHelix.cc,v $
- * Revision 1.1  1999/01/30 03:59:04  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/02/12 01:01:04  wenaus
+ * Fix bug in momentum calculation
+ *
+ * Revision 1.2  1999/02/12 01:01:04  wenaus
+ * Fix bug in momentum calculation
  *
  * Revision 1.1  1999/01/30 03:59:04  fisyak
  * Root Version of StarClassLibrary
@@ -66,7 +69,7 @@ StThreeVector<double> StPhysicalHelix::momentum(double B) const
     else {
 #ifndef ST_NO_NAMESPACES
 	{
-		fabs(c_light*nanosecond/meter*B/tesla)/(fabs(mCurvature)/meter)/GeV;
+	    using namespace units;
 #endif
 	    double pt =
 		fabs(c_light*nanosecond/meter*B/tesla)/(fabs(mCurvature)*meter)/GeV;
