@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.45 2004/04/23 23:15:29 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.46 2004/10/04 16:40:42 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.46  2004/10/04 16:40:42  genevb
+// FTPC radial histos
+//
 // Revision 2.45  2004/04/23 23:15:29  genevb
 // Added signedDCA (Impact) plots for globals
 //
@@ -377,6 +380,8 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_globtrk_xf_yfTW = 0;
   m_globtrk_xf_yfFE = 0;
   m_globtrk_xf_yfFW = 0;
+  m_globtrk_padtimeFE = 0;
+  m_globtrk_padtimeFW = 0;
   m_tanl_zfT  = 0;
   m_mom_trklengthT = 0;
   m_eta_trklengthT = 0;
@@ -666,6 +671,10 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pnt_tpc=0;     //! number of hits tpc
   m_pnt_svt=0;     //! number of hits svt
   m_pnt_ssd=0;     //! number of hits ssd
+  m_pnt_xyFE=0;    //! xy dist. of hits, ftpcE
+  m_pnt_xyFW=0;    //! xy dist. of hits, ftpcW
+  m_pnt_padtimeFE=0;    //! padlength vs. timelength of hits, ftpcE
+  m_pnt_padtimeFW=0;    //! padlength vs. timelength of hits, ftpcW
   // east and west on same plot
   m_pnt_ftpc=0;    //! number of hits ftpc
   // east and west on separate plots
@@ -1230,6 +1239,14 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_xf_yfFW = QAH::H2F("QaGtrkXfYfFW","globtrk: Y vs X of first hit on trk, ftpcW", 70,-35.,35.,70,-35.,35.);
     m_globtrk_xf_yfFW->SetXTitle("x first");
     m_globtrk_xf_yfFW->SetYTitle("y first");
+  m_globtrk_padtimeFE = QAH::H2F("QaGtrkPadTimeFtpcE","globtrk: #pads vs #timebins, ftpcE",12,0.5,12.5,10,0.5,10.5);
+//  m_globtrk_padtimeFE = QAH::H2F("QaGtrkPadTimeFtpcE","globtrk: #pads vs #timebins of hits, ftpcE",12,0.5,12.5,10,0.5,10.5);
+    m_globtrk_padtimeFE->SetXTitle("#timebins");
+    m_globtrk_padtimeFE->SetYTitle("#pads");
+  m_globtrk_padtimeFW = QAH::H2F("QaGtrkPadTimeFtpcW","globtrk: #pads vs #timebins, ftpcW",12,0.5,12.5,10,0.5,10.5);
+//  m_globtrk_padtimeFW = QAH::H2F("QaGtrkPadTimeFtpcW","globtrk: #pads vs #timebins of hits, ftpcW",12,0.5,12.5,10,0.5,10.5);
+    m_globtrk_padtimeFW->SetXTitle("#timebins");
+    m_globtrk_padtimeFW->SetYTitle("#pads");
   m_eta_trklengthFE = QAH::H2F("QaGtrkLengthVEtaFE","globtrk: trk length vs eta, ftpcE",25,-4.5,-2.,30,0.,120.);
     m_eta_trklengthFE->SetXTitle("eta");
     m_eta_trklengthFE->SetYTitle("length");
@@ -1769,6 +1786,12 @@ void StQABookHist::BookHistPoint(){
   m_pnt_planeF->Rebin(1,"West");
   m_pnt_planeF->SetStats(kFALSE);
   m_pnt_planeF->SetXTitle("plane number");
+  m_pnt_padtimeFE    = QAH::H2F("QaPointPadTimeFtpcE","point: #pads vs #timebins of hits, ftpcE",12,0.5,12.5,10,0.5,10.5);
+  m_pnt_padtimeFE->SetXTitle("#timebins");
+  m_pnt_padtimeFE->SetYTitle("#pads");
+  m_pnt_padtimeFW    = QAH::H2F("QaPointPadTimeFtpcW","point: #pads vs #timebins of hits, ftpcW",12,0.5,12.5,10,0.5,10.5);
+  m_pnt_padtimeFW->SetXTitle("#timebins");
+  m_pnt_padtimeFW->SetYTitle("#pads");
 
 }
 //_____________________________________________________________________________

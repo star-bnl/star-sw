@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.21 2004/06/09 22:01:31 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.22 2004/10/04 16:40:41 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.22  2004/10/04 16:40:41  genevb
+// FTPC radial histos
+//
 // Revision 2.21  2004/06/09 22:01:31  genevb
 // Modify line parameter for FTPC hist
 //
@@ -116,6 +119,8 @@ char* possibleSuffixes[9] = {
 int sizeOfCharPtr = sizeof(Char_t*);
 int sizeOfTH1Ptr = sizeof(TH1*);
 
+TH1* hobjradialW = NULL;
+TH1* hobjradialE = NULL;
 
 ClassImp(StHistUtil)
   
@@ -403,15 +408,50 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             }
 	    hobj->SetLineWidth(2);
             if (oName.EndsWith("Mass")) hobj->Draw("e");
-	    else hobj->Draw();
-            if (!oName.CompareTo("fcl_radialW") ||
-                !oName.CompareTo("fcl_radialE")) {
-	      hobj->GetXaxis()->SetRangeUser(7.0,9.0);
-              gPad->Modified();	      
-              ruler.SetLineColor(46);
-              ruler.SetLineWidth(2);
-              ruler.DrawLine(7.8,0.,7.8,hobj->GetMaximum());
+	    else if (!oName.CompareTo("fcl_radialW") ||
+                     !oName.CompareTo("fcl_radialE")) {
+	      if (!oName.CompareTo("fcl_radialW")) hobjradialW = (TH1*) obj;
+	      if (!oName.CompareTo("fcl_radialE")) hobjradialE = (TH1*) obj;
+	      if ( hobjradialW && hobjradialE) {
+		 // go to previous pad                   
+                 graphPad->cd(--padCount);
+	         if (gPad) gPad->Update();
+		 hobjradialW->SetStats(kFALSE);     
+		 hobjradialE->SetStats(kFALSE);     
+		 if ( hobjradialW->GetMaximum() >= hobjradialE->GetMaximum()) {     
+                   hobjradialW->SetTitle((TString)"FTPCW+E cluster radial position");
+                   hobjradialE->SetTitle(hobjradialW->GetTitle());
+		   hobjradialW->Draw();
+		   hobjradialW->GetXaxis()->SetRangeUser(7.0,9.0);
+		   gPad->Modified();
+		   ruler.SetLineColor(kBlack);
+                   ruler.SetLineWidth(2);
+                   ruler.DrawLine(7.8,0.,7.8,hobjradialW->GetMaximum());
+	           hobjradialE->Draw("Same");
+	         }
+                 else {
+                   hobjradialE->SetTitle((TString)"FTPCE+W cluster radial position");
+                   hobjradialW->SetTitle(hobjradialE->GetTitle());
+                   hobjradialE->Draw();
+		   hobjradialE->GetXaxis()->SetRangeUser(7.0,9.0);
+		   gPad->Modified();
+                   hobjradialW->Draw("Same");
+		   ruler.SetLineColor(kBlack);
+                   ruler.SetLineWidth(2);
+                   ruler.DrawLine(7.8,0.,7.8,hobjradialE->GetMaximum());
+	        }		  
+
+                // make a legend
+                TLegend *legend = new TLegend(0.75,0.85,0.98,0.95);
+                legend->SetFillColor(0);
+                legend->SetHeader("Legend");
+                legend->SetMargin(0.25);
+                legend->AddEntry(hobjradialE,"FtpcEast","l");
+                legend->AddEntry(hobjradialW,"FtpcWest","l");
+                legend->Draw();
+	      }	 
             }
+	    else hobj->Draw();
 	  }
 	  if (gPad) gPad->Update();
         }
@@ -716,13 +756,14 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
 // now want to add these histograms to the copied ones:
 	Int_t imk = 0;
 	for (imk=0;imk<numHistCopy;imk++) {
-	  if (strcmp( (newHist[imk]->GetName()), (obj->GetName()) )==0) {
-	    //cout << "  ---- hist num to add --- " << imk << endl;
-	    newHist[imk]->Add((TH1 *)obj);
-	    histAddCount++;
-	    //cout << " !!! Added histograms with Name: " << newHist[imk]->GetName() <<  endl;
-
-	  } // strcmp
+          if (newHist[imk]) {		
+	     if (strcmp( (newHist[imk]->GetName()), (obj->GetName()) )==0) {
+	       //cout << "  ---- hist num to add --- " << imk << endl;
+	       newHist[imk]->Add((TH1 *)obj);
+	       histAddCount++;
+	       //cout << " !!! Added histograms with Name: " << newHist[imk]->GetName() <<  endl;
+	     } // strcmp
+	  }  // if newHist[imk] exists   
 	}  // loop over imk
       }   // if obj inherits from th1
     }    //while
