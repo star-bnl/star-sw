@@ -1,5 +1,12 @@
-// $Id: StAssociator.C,v 1.6 1999/07/29 15:08:36 calderon Exp $
+// $Id: StAssociator.C,v 1.7 1999/09/10 00:02:24 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.7  1999/09/10 00:02:24  calderon
+// Made the following changes:
+// -load StUtilities
+// -add line to print number of processed events
+// -create canvas here
+// -no longer draw # of Pings histogram
+//
 // Revision 1.6  1999/07/29 15:08:36  calderon
 // Include Mom. Resolution example (Histograms & Ntuple)
 //
@@ -43,6 +50,7 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
+    gSystem->Load("StUtilities");
     gSystem->Load("StMagF");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
@@ -89,19 +97,20 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
     int istat=0,iev=1;
     EventLoop: if (iev<=nevents && !istat) {
 	chain->Clear();
+	cout << "---------------------- Processing Event : " << iev << endl;
 	istat = chain->Make(iev); // This should call the Make() method in ALL makers
 	if (istat) {
 	    cout << "Last Event Processed. Status = " << istat << endl;
 	}
 	iev++; goto EventLoop;
     } // Event Loop
-
+    examples->mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,900,500);
     TCanvas* myCanvas = examples->mAssociationCanvas;
     myCanvas->Divide(2,2);
 
     myCanvas->cd(1);
-    gPad->SetLogy(1);
-    associator->mNumberOfPings->Draw();
+    gPad->SetLogy(0);
+    examples->mTrackNtuple->Draw("(p-prec)/prec:commHits");
 
     myCanvas->cd(2);
     gPad->SetLogy(0);
