@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: daqscan-all.pl,v 1.2 1999/09/21 12:25:36 wenaus Exp $
+# $Id: daqscan-all.pl,v 1.3 2000/01/26 15:58:24 wenaus Exp $
 #
 # $Log: daqscan-all.pl,v $
+# Revision 1.3  2000/01/26 15:58:24  wenaus
+# rhic.bnl.gov -> rcf.bnl.gov
+#
 # Revision 1.2  1999/09/21 12:25:36  wenaus
 # Update bad file list
 #
@@ -28,7 +31,7 @@ $debugOn = 0;
 
 # Data locations, and the machine from which the location should be scanned
 %dataDirs = (
-             '/disk1/star/daq' => 'rmds03.rhic.bnl.gov',
+             '/disk1/star/daq' => 'rmds03.rcf.bnl.gov',
              '/star/datapool/1/daq' => 'robinson.star.bnl.gov'
              );
 # Files which hang in StDaqLib or otherwise screw up

@@ -1,8 +1,11 @@
 #! /opt/star/bin/perl
 #
-# $Id: dbrunhpss.pl,v 1.3 1999/10/30 15:09:12 wenaus Exp $
+# $Id: dbrunhpss.pl,v 1.4 2000/01/26 15:58:25 wenaus Exp $
 #
 # $Log: dbrunhpss.pl,v $
+# Revision 1.4  2000/01/26 15:58:25  wenaus
+# rhic.bnl.gov -> rcf.bnl.gov
+#
 # Revision 1.3  1999/10/30 15:09:12  wenaus
 # Eliminate password
 #
@@ -44,7 +47,7 @@ my $debugOn=0;
 &StDbConnect();
 
 ## Find all the Daq dirs, files in HPSS
-my $hpssHost = 'rmds01.rhic.bnl.gov';
+my $hpssHost = 'rmds01.rcf.bnl.gov';
 my $netrc = $ENV{HOME}.'/.netrc';
 open(NETRC,"<$netrc");
 my $pass = '';

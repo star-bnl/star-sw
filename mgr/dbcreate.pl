@@ -1,6 +1,6 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbcreate.pl,v 1.5 1999/11/19 23:12:28 wenaus Exp $
+# $Id: dbcreate.pl,v 1.6 2000/01/26 15:58:25 wenaus Exp $
 #
 ######################################################################
 #
@@ -14,6 +14,9 @@
 # Usage:    create.pl <pwd>
 #
 # $Log: dbcreate.pl,v $
+# Revision 1.6  2000/01/26 15:58:25  wenaus
+# rhic.bnl.gov -> rcf.bnl.gov
+#
 # Revision 1.5  1999/11/19 23:12:28  wenaus
 # take out pwd
 #
@@ -49,10 +52,9 @@ for ($ii=0; $ii<@ARGV; $ii++) {
 }
 
 my @dataDisks=(
-            "/disk00000/star",
-            "/disk00001/star",
-            "/disk0/star/starreco",
-            "/disk1/star"
+            "/star/rcf/disk00001/star",
+            "/star/rcf/disk0/star/starreco",
+            "/star/rcf/disk1/star"
             );
 # Ignore some directories
 my %ignoreDirs = (
@@ -130,7 +132,7 @@ my $nHpssDirs = 0;
 my $nHpssFiles = 0;
 
 ## Find all the Reco dirs, files in HPSS
-my $hpssHost = 'rmds01.rhic.bnl.gov';
+my $hpssHost = 'rmds01.rcf.bnl.gov';
 my $netrc = $ENV{HOME}.'/.netrc';
 open(NETRC,"<$netrc");
 my $pass = '';
