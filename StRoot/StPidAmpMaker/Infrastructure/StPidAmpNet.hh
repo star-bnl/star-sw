@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNet.hh,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpNet.hh,v 1.2 2000/05/01 16:59:25 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNet.hh,v $
+ * Revision 1.2  2000/05/01 16:59:25  aihong
+ * clean up
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -32,7 +35,6 @@ using std::string;
 
 #include "TGraph.h"
 #include "TH1.h"
-#include "TH3.h"
 
 #include "StPidAmpMaker/Infrastructure/StPidParamVector.hh"
 #include "StPidAmpMaker/Infrastructure/StPidAmpChannelInfo.hh"
@@ -72,21 +74,21 @@ public:
   void adjudgeWindow();
   void setBandParams(StPidParamVector& pars);
   void fillBetaGammaNet(StPidAmpTrkVector* trks,StPidAmpChannelCollection* set); 
-  void fitPaths(StPidAmpTrkVector* trks,TH3D* histo);
+  void fitPaths(StPidAmpTrkVector* trks);
   int  getSliceIndex(StPidAmpTrk* trk);
 
   virtual double dedxAtBandCenter(double rig);
   virtual int    getSliceIndex(double x);
-  virtual void   fitBand(TH3D* histo);//fit band. put result in mBandParams.
-  virtual void   fitAmp(StPidAmpTrkVector* trks,TH3D* histo);
+  virtual void   fitBand();//fit band. put result in mBandParams.
+  virtual void   fitAmp(StPidAmpTrkVector* trks);
   virtual void   fillPathFittedSlices();
   virtual void   fitReso(); 
   virtual void   drawNetFittings();
   virtual void   setUp(); 
   virtual void   fillBand(); //fill band graph.
-  virtual void   processNet(StPidAmpTrkVector* trks=0,TH3D* histo=0);
+  virtual void   processNet(StPidAmpTrkVector* trks=0);
   virtual void   fillNetOut();//fill mNetOut. 
-  virtual void   fitAPath(StPidAmpPath& path, StPidAmpTrkVector* trks,TH3D* histo);
+  virtual void   fitAPath(StPidAmpPath& path, StPidAmpTrkVector* trks);
 
   virtual ostream& put(ostream& s) const;
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpDefaultNet.cc,v 1.2 2000/04/14 16:07:30 aihong Exp $
+ * $Id: StPidAmpDefaultNet.cc,v 1.3 2000/05/01 16:59:26 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpDefaultNet.cc,v $
+ * Revision 1.3  2000/05/01 16:59:26  aihong
+ * clean up
+ *
  * Revision 1.2  2000/04/14 16:07:30  aihong
  * change BetheBlock to BetheBloch :-)
  *
@@ -44,11 +47,10 @@ StPidAmpDefaultNet::StPidAmpDefaultNet(StPidAmpParticle def, StPidAmpChannelInfo
 }
 
 //------------------------------
-void StPidAmpDefaultNet::fitBand(TH3D* histo){
+void StPidAmpDefaultNet::fitBand(){
 
   double varyRange=0.1;
 
-  if (histo) histo->SetDirectory(0);
 
    TF1 *mBetheBlochFcn = new TF1 ("mBetheBlochFcn",funcBandPt, BandsBegin,BandsEnd,NBandParam);
   
@@ -81,16 +83,15 @@ void StPidAmpDefaultNet::fitBand(TH3D* histo){
 
 
 //------------------------------
-void StPidAmpDefaultNet::fitAPath(StPidAmpPath& path, StPidAmpTrkVector* trks,TH3D* histo){
+void StPidAmpDefaultNet::fitAPath(StPidAmpPath& path, StPidAmpTrkVector* trks){
 
      double varyRange4Height=0.35;  
      double varyRange4Center=0.2;
      double varyRange4Width=0.3;
 
-    if (histo) histo->SetDirectory(0);
 
     double totalTrks=double(trks->size());
-    int  idex=getSliceIndex(fabs(mParticleType.maxllPeakPos()));
+    int    idex=getSliceIndex(fabs(mParticleType.maxllPeakPos()));
     double gausCenter=((*sliceVector())[idex])->midBound();
 
     //use a gauss at peakPos to get the fitting limits for the right path.
@@ -126,61 +127,48 @@ void StPidAmpDefaultNet::fitAPath(StPidAmpPath& path, StPidAmpTrkVector* trks,TH
 }
 
 //------------------------------
-void StPidAmpDefaultNet::fitAmp(StPidAmpTrkVector* trks,TH3D* histo){
+void StPidAmpDefaultNet::fitAmp(StPidAmpTrkVector* trks){
 
      double totalTrks=double(trks->size());
 
      double varyRange4Height=0.35;  
      double varyRange4Center=0.3;
      double varyRange4Width=0.3;
-
-     
-
-     /*   if (histo) histo->SetDirectory(0);
-//the mParticleType.maxllRatio is not used here, but not sure need it or not 
-//when the real data come. so I's rather like to keep this block here.
-//cause we do not know how the window would be like in the real case,
-//the simple using maxPoint() to decide the heightExpected might be a question
-
-   TF1 *mMaxllBoltzFcn = new TF1 ("mMaxllBoltzFcn",funcAmpPt, BandsBegin,BandsEnd,NAmpParam);
-    
-   mMaxllBoltzFcn->SetParLimits(0,totalTrks*(mParticleType.maxllRatio())*(1.0-varyRange4Height),totalTrks*(mParticleType.maxllRatio())*(1.0+varyRange4Height));
-   mMaxllBoltzFcn->SetParLimits(1,fabs(mParticleType.maxllPeakPos())*(1.0-varyRange4Center),fabs(mParticleType.maxllPeakPos())*(1.0+varyRange4Center));
-   mMaxllBoltzFcn->SetParLimits(2,(mParticleType.maxllWidth())*(1.0-varyRange4Width),(mParticleType.maxllWidth())*(1.0+varyRange4Width));
-     */
-
-
      double heightExpected;
-
-     if (mParticleType.id()==2||mParticleType.id()==3) {
-   if (maxPoint(ampGraph(),false)<0.1) heightExpected=(maxPoint(ampGraph(),true))*0.25;
-   else heightExpected=maxPoint(ampGraph(),true);
-     }
-
-
-     if (mParticleType.id()==8||mParticleType.id()==9) heightExpected=(maxPoint(ampGraph(),true))*1.4;
-
-     if (mParticleType.id()==14||mParticleType.id()==15) heightExpected=(maxPoint(ampGraph(),true))*1.0;//1.2606;
-
-     if (mParticleType.id()==11||mParticleType.id()==12) heightExpected=(maxPoint(ampGraph(),true))*1.0;//2.0//2.475;
-
-
-     if (mParticleType.id()==45) heightExpected=totalTrks*(mParticleType.maxllRatio());
-
-     
      double centerExpected=fabs(mParticleType.maxllPeakPos());
      double widthExpected=mParticleType.maxllWidth();
 
+     if (mParticleType.id()==2||mParticleType.id()==3) {
+       if   (maxPoint(ampGraph(),false)<0.1) {
+        	 widthExpected =mParticleType.maxllWidth()*20.0;
+       }  else widthExpected =mParticleType.maxllWidth()*2.25;
+     }
 
-     if (mParticleType.id()==2||mParticleType.id()==3) centerExpected=maxPoint(ampGraph(),false);//electron's amp center has strong dependence of NHits.
+ 
+     if (mParticleType.id()==8||mParticleType.id()==9) 
+     heightExpected=(maxPoint(ampGraph(),true))*1.4;
+
+     if (mParticleType.id()==14||mParticleType.id()==15) 
+     heightExpected=(maxPoint(ampGraph(),true))*1.0;
+
+     if (mParticleType.id()==11||mParticleType.id()==12) 
+     heightExpected=(maxPoint(ampGraph(),true))*1.0;
 
 
+     if (mParticleType.id()==45) {
+     heightExpected=totalTrks*(mParticleType.maxllRatio());
+     widthExpected = widthExpected*3.5;
+     }
+     
 
 
+     if (mParticleType.id()==2||mParticleType.id()==3) 
+      centerExpected=maxPoint(ampGraph(),false);
+      //electron's amp center has strong dependence of NHits.
 
-   if (histo) histo->SetDirectory(0);
 
-   TF1 *mMaxllBoltzFcn = new TF1 ("mMaxllBoltzFcn",funcAmpPt, BandsBegin,BandsEnd,NAmpParam);
+   TF1 *mMaxllBoltzFcn = 
+   new TF1 ("mMaxllBoltzFcn",funcAmpPt, BandsBegin,BandsEnd,NAmpParam);
     
    mMaxllBoltzFcn->SetParLimits(0,heightExpected*(1.0-varyRange4Height),heightExpected*(1.0+varyRange4Height));
    mMaxllBoltzFcn->SetParLimits(1,centerExpected*(1.0-varyRange4Center),centerExpected*(1.0+varyRange4Center));
@@ -201,11 +189,14 @@ void StPidAmpDefaultNet::fitAmp(StPidAmpTrkVector* trks,TH3D* histo){
 }
 //----------------------------------
 void StPidAmpDefaultNet::fitReso(){
-    double adj=0.2;
+
 
   TF1 *mResoFcn = new TF1 ("mResoFcn",funcResoPt, BandsBegin,BandsEnd,NResoParam);
 
-  /*   switch(mParticleType.id()){
+  /* 
+        double adj=0.2;
+
+        switch(mParticleType.id()){
 
         case 2  :  mResoFcn->SetParLimits(0,0.16*(1.0-adj),0.16*(1.0+adj));
 	              break;// ePlus
@@ -251,11 +242,11 @@ ostream& StPidAmpDefaultNet::put(ostream& s) const{// for calling the right put(
   s<<endl;
   s<<name().c_str()<<endl;
  
-  for (int i=0; i<mBandParams.size(); i++) s<<mBandParams[i]<<" ";
+  for (unsigned i=0; i<mBandParams.size(); i++) s<<mBandParams[i]<<" ";
   s<<endl;
-  for (int j=0; j<mAmpParams.size(); j++) s<<mAmpParams[j]<<" ";
+  for (unsigned j=0; j<mAmpParams.size(); j++) s<<mAmpParams[j]<<" ";
   s<<endl;
-  for (int k=0; k<mResoParams.size(); k++) s<<mResoParams[k]<<" ";
+  for (unsigned k=0; k<mResoParams.size(); k++) s<<mResoParams[k]<<" ";
   s<<endl;
     
   return s;

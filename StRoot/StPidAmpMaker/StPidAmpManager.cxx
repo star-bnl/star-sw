@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpManager.cxx,v 1.3 2000/04/11 15:45:25 aihong Exp $
+ * $Id: StPidAmpManager.cxx,v 1.4 2000/05/01 16:59:49 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpManager.cxx,v $
+ * Revision 1.4  2000/05/01 16:59:49  aihong
+ * clean up
+ *
  * Revision 1.3  2000/04/11 15:45:25  aihong
  * change to adapt dividing trks by channel for faster filling
  *
@@ -360,7 +363,7 @@ void StPidAmpManager::printAllSetsNames(){
    StPidAmpChannelCollectionConstIter iter;
    StPidAmpChannelCollection*         theSet;
 
-   gMessMgr->Info()<<" ChannelCollections in store: "<<endm;
+   gMessMgr->Info()<<" ChannelCollections in Manager: "<<endm;
 
    for (iter=mChannelCollections->begin(); iter!=mChannelCollections->end(); iter++){
       theSet=*iter;
@@ -382,11 +385,11 @@ StPidAmpChannelCollectionVector* StPidAmpManager::netSets(){
 }
 //--------------------------------
 void StPidAmpManager::printNSets(){
-  gMessMgr->Info()<<" number of ChannelCollections in store is "<<mChannelCollections->size()<<endm;
+  gMessMgr->Info()<<" number of ChannelCollections in Manager is "<<mChannelCollections->size()<<endm;
 }
    
 //--------------------------------
-void StPidAmpManager::process(TH3D* histo){
+void StPidAmpManager::process(){
 
    if (mChannelCollections->size()==0) bookADefaultChannelCollection("BAR","BAR");
 
@@ -397,7 +400,7 @@ void StPidAmpManager::process(TH3D* histo){
            theSet=*iter;
 
 
-           theSet->process(histo);
+           theSet->process();
  
    }
 }

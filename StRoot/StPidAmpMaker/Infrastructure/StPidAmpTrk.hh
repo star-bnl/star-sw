@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpTrk.hh,v 1.1.1.1 2000/03/09 17:48:35 aihong Exp $
+ * $Id: StPidAmpTrk.hh,v 1.2 2000/05/01 16:59:26 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpTrk.hh,v $
+ * Revision 1.2  2000/05/01 16:59:26  aihong
+ * clean up
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:35  aihong
  * Installation of package
  *
@@ -27,7 +30,7 @@ public:
 
       StPidAmpTrk();
       StPidAmpTrk(double& rig, double& dedx, int& charge,double& pt, int& nhits, double& dca);
-      ~StPidAmpTrk();
+      virtual ~StPidAmpTrk();
 
       double    rig() const;
       double   dedx() const;

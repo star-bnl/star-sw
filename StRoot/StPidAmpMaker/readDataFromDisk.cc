@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: readDataFromDisk.cc,v 1.2 2000/04/12 20:14:29 aihong Exp $
+ * $Id: readDataFromDisk.cc,v 1.3 2000/05/01 16:59:49 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: readDataFromDisk.cc,v $
+ * Revision 1.3  2000/05/01 16:59:49  aihong
+ * clean up
+ *
  * Revision 1.2  2000/04/12 20:14:29  aihong
  * change to adapt to ROOT 2.24 and bug fixed with help from valery
  *
@@ -22,12 +25,11 @@
 
 
 #include <fstream.h>
-#include "TH3.h"
 
 #include "StPidAmpMaker/StPidAmpTrkVector.h"
 #include "StPidAmpMaker/Infrastructure/StPidAmpTrk.hh"
 
-void readDataFromDisk(StPidAmpTrkVector* trks,TH3D* histo){
+void readDataFromDisk(StPidAmpTrkVector* trks){
 
          ifstream f;
        f.open("/star/u2e/aihong/newtpcpid/80evtsTrks.dat");
@@ -48,13 +50,8 @@ void readDataFromDisk(StPidAmpTrkVector* trks,TH3D* histo){
 
        f>>rig; f>>dedx; f>>charge; f>>pt; f>>nhits; f>>dca;
 
- #if ROOT_VERSION_CODE >= ROOT_VERSION(2,24,0)
-        histo->Fill(nhits,pt,1,1);
- #else
-        histo->Fill3(nhits,pt,1,1);
- #endif
 
-  StPidAmpTrk* theAmpTrk=new StPidAmpTrk(rig, dedx, charge,pt, nhits, dca);
+    StPidAmpTrk* theAmpTrk=new StPidAmpTrk(rig, dedx, charge,pt, nhits, dca);
 
  
     trks->push_back(theAmpTrk);

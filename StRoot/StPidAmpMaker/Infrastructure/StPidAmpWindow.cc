@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpWindow.cc,v 1.4 2000/04/11 15:36:20 aihong Exp $
+ * $Id: StPidAmpWindow.cc,v 1.5 2000/05/01 16:59:26 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpWindow.cc,v $
+ * Revision 1.5  2000/05/01 16:59:26  aihong
+ * clean up
+ *
  * Revision 1.4  2000/04/11 15:36:20  aihong
  * add the implementation of NScreens()
  *
@@ -136,9 +139,8 @@ void StPidAmpWindow::removeLastScreen(){
 void StPidAmpWindow::removeWindow(int i){
 
      int j=0;
-     if (i>0 && i<mWindows.size()){ 
+     if (i>0 && i<int(mWindows.size())){ 
      StPidAmpCutIter iter;
-     StPidAmpCutIter tmpIter;
      
      for (iter=mWindows.begin(); iter!=mWindows.end(); iter++){
        if (j==i) mWindows.erase(iter);
@@ -150,9 +152,8 @@ void StPidAmpWindow::removeWindow(int i){
 void StPidAmpWindow::removeScreen(int i){
 
      int j=0;
-     if (i>0 && i<mScreens.size()){ 
+     if (i>0 && i<int(mScreens.size())){ 
      StPidAmpCutIter iter;
-     StPidAmpCutIter tmpIter;
      
      for (iter=mScreens.begin(); iter!=mScreens.end(); iter++){
        if (j==i) mScreens.erase(iter);
@@ -301,7 +302,7 @@ double StPidAmpWindow::length(int i){
     
       double length=0.0;
 
-      if (i<=mWindows.size()) length = mWindows[i-1].length();
+      if (i<=int(mWindows.size())) length = mWindows[i-1].length();
 
       return length;
 }
@@ -360,13 +361,13 @@ double StPidAmpWindow::forthWindowEnd(){
 //---------------------------
 double StPidAmpWindow::windowBegin(int i){
 
-      if (mWindows.size()>(i-1)) return mWindows[i-1].lowEdge();
+      if (int(mWindows.size())>(i-1)) return mWindows[i-1].lowEdge();
       else return 0.0;
 }
 //---------------------------
 double StPidAmpWindow::windowEnd(int i){
 
-      if (mWindows.size()>(i-1)) return mWindows[i-1].highEdge();
+      if (int(mWindows.size())>(i-1)) return mWindows[i-1].highEdge();
       else return 0.0;
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpManager.h,v 1.4 2000/04/12 20:14:29 aihong Exp $
+ * $Id: StPidAmpManager.h,v 1.5 2000/05/01 16:59:49 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpManager.h,v $
+ * Revision 1.5  2000/05/01 16:59:49  aihong
+ * clean up
+ *
  * Revision 1.4  2000/04/12 20:14:29  aihong
  * change to adapt to ROOT 2.24 and bug fixed with help from valery
  *
@@ -35,7 +38,6 @@
 
 #include "TString.h"
 #include "TH1.h"
-#include "TH3.h"
 
 #include "StPidAmpMaker/Infrastructure/StPidAmpChannelCollectionVector.hh"
 #include "StPidAmpMaker/StPidAmpTrkVector.h"
@@ -75,7 +77,7 @@ class StPidAmpManager{
      void passTrksAddress(StPidAmpTrkVector* trks); //!
      void printAllSetsNames();
      void printNSets();//print # of sets in store
-     void process(TH3D* histo); 
+     void process(); 
      void clearStore();
 
      StPidAmpChannelCollectionVector* netSets(); //!
@@ -83,15 +85,9 @@ class StPidAmpManager{
 
  private:
 
-      
-
-
-
-  
 
      StPidAmpChannelCollectionVector* mChannelCollections; //!
      StPidAmpTrkVector* mTrks; //!
-
 
      ClassDef(StPidAmpManager,1)
     

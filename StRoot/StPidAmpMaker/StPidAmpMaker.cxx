@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpMaker.cxx,v 1.5 2000/04/12 20:14:29 aihong Exp $
+ * $Id: StPidAmpMaker.cxx,v 1.6 2000/05/01 16:59:49 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpMaker.cxx,v $
+ * Revision 1.6  2000/05/01 16:59:49  aihong
+ * clean up
+ *
  * Revision 1.5  2000/04/12 20:14:29  aihong
  * change to adapt to ROOT 2.24 and bug fixed with help from valery
  *
@@ -43,8 +46,8 @@
 
 
 
-void fillStPidAmpTrks(St_dst_track* theTrackTable, St_dst_dedx* theDedxTable, St_dst_vertex* theVertexTable, StPidAmpTrkVector* trks,TH3D* histo);
-void readDataFromDisk(StPidAmpTrkVector* trks,TH3D* histo);//read trks from disk.
+void fillStPidAmpTrks(St_dst_track* theTrackTable, St_dst_dedx* theDedxTable, St_dst_vertex* theVertexTable, StPidAmpTrkVector* trks);
+void readDataFromDisk(StPidAmpTrkVector* trks);//read trks from disk.
 void writeTrks(St_dst_track* theTrackTable, St_dst_dedx* theDedxTable, St_dst_vertex* theVertexTable);//write trks to disk for quik reading.vi readDataFromDisk.
 
 ClassImp(StPidAmpMaker)
@@ -54,8 +57,6 @@ StPidAmpMaker::StPidAmpMaker(const Char_t *name) : StMaker(name)
     theManager    =new StPidAmpManager(); 
 
     ampTrks     =new StPidAmpTrkVector();
-    dependHisto =new TH3D("histo of dependencies","histo of dependencies",NBinNHits,0,NMaxHits,NBinPt,0,PtUpLimit,NBinX,0,XUpLimit);
-    //                                                                    nhits,                pt,           x.
 
     mNHits4BG=0;
     theManager->passTrksAddress(ampTrks);
@@ -83,27 +84,20 @@ StPidAmpMaker::Clear(Option_t *opt)
 Int_t
 StPidAmpMaker::Finish()
 {
-  // readDataFromDisk(ampTrks,dependHisto);
-
-  //  dependHisto->Project3D("x")->Draw();
-
-        
+    // readDataFromDisk(ampTrks);
 
     //release unused space back to memory.
-        StPidAmpTrkVector tmpVector=*ampTrks;
-         ampTrks->swap(tmpVector);
-
-
-
+    StPidAmpTrkVector tmpVector=*ampTrks;
+    ampTrks->swap(tmpVector);
 
      
     //run...
-        if (theManager->netSets()->size()==0) 
-        theManager->bookADefaultChannelCollection("BAR","B");
+    if (theManager->netSets()->size()==0) 
+    theManager->bookADefaultChannelCollection("BAR"," ");
 
 
-       theManager->process(dependHisto);
- //    dependHisto->Draw();
+    theManager->process();
+ 
 
     return kStOK;
 }
@@ -123,9 +117,10 @@ StPidAmpMaker::Make()
     // OK, we've got the tables. Pass them and process them.
 
      if (globalTable && dst_dedxTable && vertexTable) {
-    fillStPidAmpTrks(globalTable, dst_dedxTable,vertexTable, ampTrks,dependHisto);
+    fillStPidAmpTrks(globalTable, dst_dedxTable,vertexTable, ampTrks);
     //    writeTrks(globalTable, dst_dedxTable,vertexTable);
     return kStOK;
+
      } else return 0;
 
 }
@@ -140,7 +135,7 @@ StPidAmpMaker::SetNHitsFilter2LastCollection(Int_t nhits){
 void 
 StPidAmpMaker::AddDefaultChannelCollection(TString fitOpt, TString drawOpt){
     theManager->bookADefaultChannelCollection(fitOpt,drawOpt);
-    gMessMgr->Info()<<"a default ChannelCollection is registered in NetSet Store"<<endm;
+    gMessMgr->Info()<<"a default ChannelCollection is registered in Manager"<<endm;
 }
 
 
@@ -151,20 +146,20 @@ void
 StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2,TString fitOpt, TString drawOpt){
     theManager->bookADefaultChannelCollection(fitOpt,drawOpt);
     gMessMgr->Info()<<"ignored two inputs "<<x1<<" "<<x2<<endm;
-    gMessMgr->Info()<<"two inputs is for default option, the default NetSet is registered in NetSet Store"<<endm;
+    gMessMgr->Info()<<"two inputs is for default option, the default ChannelCollection is registered in the Manager"<<endm;
 }
 
 
 void 
 StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt, TString drawOpt){
     theManager->bookANHitsChannelCollection(x1,x2,x3,fitOpt,drawOpt);
-    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<") NetSet is registered in NetSet Store "<<endm;
+    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<") ChannelCollection is registered in the Manager "<<endm;
 }
 
 void 
 StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt, TString drawOpt){
     theManager->bookANHitsChannelCollection(x1,x2,x3,x4,fitOpt,drawOpt);
-    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<") NetSet is registered in NetSet Store "<<endm;
+    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<") ChannelCollection is registered in the Manager "<<endm;
 }
 
 
@@ -172,37 +167,37 @@ StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,T
 void 
 StPidAmpMaker::AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt, TString drawOpt){
     theManager->bookANHitsChannelCollection(x1,x2,x3,x4,x5,fitOpt,drawOpt);
-    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<x5<<" "<<") NetSet is registered in NetSet Store "<<endm;
+    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<x5<<" "<<") ChannelCollection is registered in the Manager"<<endm;
 }
 
 
 void 
-StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,TString fitOpt, TString drawOpt,Double_t d1, Double_t d2, Double_t d3){
+StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,TString fitOpt,Double_t d1, Double_t d2, Double_t d3, TString drawOpt){
     theManager->bookADefaultChannelCollection(fitOpt,drawOpt);
     gMessMgr->Info()<<"ignored two inputs "<<x1<<" "<<x2<<endm;
-    gMessMgr->Info()<<"two inputs is for default option, the default NetSet is registered in NetSet Store"<<endm;
+    gMessMgr->Info()<<"two inputs is for default option, the default ChannelCollection is registered in the Manager"<<endm;
 }
 
 
 void 
-StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt, TString drawOpt,Double_t d1, Double_t d2,  Double_t d3){
+StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt,Double_t d1, Double_t d2,  Double_t d3, TString drawOpt){
     theManager->bookANHitsDcaChannelCollection(x1,x2,x3,fitOpt,drawOpt,d1,d2,d3);
-    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<") dca("<<d1<<" "<<d2<<" "<<d3<<")  NetSet is registered in NetSet Store "<<endm;
+    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<") dca("<<d1<<" "<<d2<<" "<<d3<<")  ChannelCollection is registered in the Manager "<<endm;
 }
 
 void 
-StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt, TString drawOpt,Double_t d1,  Double_t d2, Double_t d3){
+StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2,Int_t x3, Int_t x4,TString fitOpt, Double_t d1,  Double_t d2, Double_t d3, TString drawOpt){
 
     theManager->bookANHitsDcaChannelCollection(x1,x2,x3,x4,fitOpt,drawOpt,d1,d2,d3);
-    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<") dca("<<d1<<" "<<d2<<" "<<d3<<") NetSet is registered in NetSet Store "<<endm;
+    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<") dca("<<d1<<" "<<d2<<" "<<d3<<") ChannelCollection is registered in the Manager "<<endm;
 }
 
 
 
 void 
-StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt, TString drawOpt, Double_t d1,  Double_t d2, Double_t  d3){
+StPidAmpMaker::AddNHitsDcaChannelCollection(Int_t x1, Int_t x2, Int_t x3, Int_t x4, Int_t x5,TString fitOpt, Double_t d1,  Double_t d2, Double_t  d3, TString drawOpt){
     theManager->bookANHitsDcaChannelCollection(x1,x2,x3,x4,x5,fitOpt,drawOpt,d1,d2,d3);
-    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<x5<<" "<<") dca("<<d1<<" "<<d2<<" "<<d3<<") NetSet is registered in NetSet Store "<<endm;
+    gMessMgr->Info()<<"a nhits("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<x5<<" "<<") dca("<<d1<<" "<<d2<<" "<<d3<<") ChannelCollection is registered in the Manager "<<endm;
 }
 
 
@@ -211,26 +206,26 @@ void
 StPidAmpMaker::AddPtChannelCollection(Double_t x1, Double_t x2,TString fitOpt, TString drawOpt){
     theManager->bookADefaultChannelCollection(fitOpt,drawOpt);
     gMessMgr->Info()<<"ignored two inputs "<<x1<<" "<<x2<<endm;
-    gMessMgr->Info()<<"two inputs is for default option, the default NetSet is registered in NetSet Store"<<endm;
+    gMessMgr->Info()<<"two inputs is for default option, the default ChannelCollection is registered in the Manager"<<endm;
 }
 
 
 void 
 StPidAmpMaker::AddPtChannelCollection(Double_t x1, Double_t x2, Double_t x3,TString fitOpt, TString drawOpt){
     theManager->bookAPtChannelCollection(x1,x2,x3,fitOpt,drawOpt);
-    gMessMgr->Info()<<"a pt("<<x1<<" "<<x2<<" "<<x3<<") NetSet is registered in NetSet Store "<<endm;
+    gMessMgr->Info()<<"a pt("<<x1<<" "<<x2<<" "<<x3<<") ChannelCollection is registered in the Manager "<<endm;
 }
 
 void 
 StPidAmpMaker::AddPtChannelCollection(Double_t x1, Double_t x2,Double_t x3, Double_t x4,TString fitOpt, TString drawOpt){
     theManager->bookAPtChannelCollection(x1,x2,x3,x4,fitOpt,drawOpt);
-    gMessMgr->Info()<<"a pt("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<") NetSet is registered in NetSet Store "<<endm;
+    gMessMgr->Info()<<"a pt("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<") ChannelCollection is registered in the Manager "<<endm;
 }
 
 void 
 StPidAmpMaker::AddPtChannelCollection(Double_t x1, Double_t x2, Double_t x3, Double_t x4, Double_t x5,TString fitOpt, TString drawOpt){
     theManager->bookAPtChannelCollection(x1,x2,x3,x4,x5,fitOpt,drawOpt);
-    gMessMgr->Info()<<"a Pt("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<x5<<" "<<") NetSet is registered in NetSet Store "<<endm;
+    gMessMgr->Info()<<"a Pt("<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<x5<<" "<<") ChannelCollection is registered in the Manager"<<endm;
 }
 
     
@@ -245,7 +240,7 @@ StPidAmpMaker::AddPtNHitsChannelCollection(Int_t n, Int_t* nhitsAry,Int_t p, Dou
     for ( j=0; j<n; j++) gMessMgr->Info()<<nhitsAry[j]<<" ";
     gMessMgr->Info()<<")&NHits( ";
     for ( j=0; j<p; j++) gMessMgr->Info()<<ptAry[j]<<" ";
-    gMessMgr->Info()<<") is registered in NetSet Store "<<endm;
+    gMessMgr->Info()<<") ChannelCollection is registered in the Manager "<<endm;
 }
 
 

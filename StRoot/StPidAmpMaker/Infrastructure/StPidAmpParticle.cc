@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpParticle.cc,v 1.2 2000/04/09 16:52:17 aihong Exp $
+ * $Id: StPidAmpParticle.cc,v 1.3 2000/05/01 16:59:26 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpParticle.cc,v $
+ * Revision 1.3  2000/05/01 16:59:26  aihong
+ * clean up
+ *
  * Revision 1.2  2000/04/09 16:52:17  aihong
  * change the start of proton/antiptoton from 0.3 to 0.2
  *
@@ -101,7 +104,7 @@ const StPidAmpParticle StPidAmpParticle::mProton("proton",     14,1, 0.93827,  1
 const StPidAmpParticle StPidAmpParticle::mAntiProton("anti_proton",     15,-1,0.93827,  1.15,   4.0,  3.552151e-05*0.7,    -0.2,  -5.0, StPidAmpWindow(-0.3,-0.9));//0.92 //width was 2.5
 
 //-------------------------------------------------name        id z  mass      peakPos mWidth mRatio     start   end  window
-const StPidAmpParticle StPidAmpParticle::mDeuteron("deuteron", 45,1, 1.8756,   2.0,   3.0,   2.775118e-06,1.0,   5.0, StPidAmpWindow(1.0,1.5));
+const StPidAmpParticle StPidAmpParticle::mDeuteron("deuteron", 45,1, 1.8756,   1.48,   3.0,   2.775118e-06,1.0,   5.0, StPidAmpWindow(1.0,1.5));
 //   the maxll* parameters for deuteron here is a pure "guess", 
 //   maxll* parameters for other types are based on experience.with simu. data.
 

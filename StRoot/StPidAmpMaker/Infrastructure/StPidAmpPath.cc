@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpPath.cc,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpPath.cc,v 1.2 2000/05/01 16:59:26 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpPath.cc,v $
+ * Revision 1.2  2000/05/01 16:59:26  aihong
+ * clean up
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -97,7 +100,7 @@ void StPidAmpPath::fillPath(StPidAmpSliceVector& slices){
 
    for (ii=1; ii<mPathHisto->GetNbinsX()+1; ii++) {
 
-     if (ii>slices.size()) break;
+     if (unsigned(ii)>slices.size()) break;
 
      mPathHisto->SetBinContent(ii,slices[(ii-1)]->slice()->GetBinContent(mIndex+1));
   //beaware of that the first in-range bin in TH1 is as "1" instead of "0"
@@ -152,7 +155,7 @@ void StPidAmpPath::fillFittedPath2Slices(StPidAmpSliceVector& slices){
    
       for (ii=1; ii<mPathFittedHisto->GetNbinsX()+1; ii++) {
 
-     if (ii>slices.size()) break;
+     if (unsigned(ii)>slices.size()) break;
 
      slices[(ii-1)]->pathFittedSlice()->SetBinContent(mIndex+1,mPathFittedHisto->GetBinContent(ii));
   //beaware of that the first in-range bin in TH1 is as "1" instead of "0"

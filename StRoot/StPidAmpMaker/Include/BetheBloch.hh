@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BetheBloch.hh,v 1.1 2000/04/14 15:52:07 aihong Exp $
+ * $Id: BetheBloch.hh,v 1.2 2000/05/01 16:59:48 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BetheBloch.hh,v $
+ * Revision 1.2  2000/05/01 16:59:48  aihong
+ * clean up
+ *
  * Revision 1.1  2000/04/14 15:52:07  aihong
  * change name from BetheBlock to BetheBloch
  *
@@ -35,7 +38,6 @@ double BetheBloch(double *rig,double *par) {
           double postfactor=par[1];
           double mFactor=par[2];
           double myValue;
-          double norm;
           double b2, gb2;
           double myDedx;
 
