@@ -60,6 +60,9 @@ C==============================================================================
 C     argument declaration
 C     ===================
 #include "stk_am_fit.inc"
+#include "phys_constants.inc"
+#include "math_constants.inc"
+
       
 C     Local Declarations:
 C     ===================
@@ -91,7 +94,7 @@ c     wkw: add in residues:
       real       a(2), b(2), da(3), db(3)
       real       cchi2, zchi2, r2
       real     v1x, v1y, v2x, v2y, ch, phi, cosl
-      real     konst, bfield, x0, y0, yd, xd
+      real      bfield, x0, y0, yd, xd
       real     infinity,xpart,ypart,sumsq
       parameter (infinity=-1.e9)
 
@@ -148,6 +151,17 @@ C      call StInfo('STK_AM_FIT: Starting ################################')
       endif
 
       stk_am_fit = stafcv_ok
+
+c     Get the field as its uniform get it at 0,0,0
+      
+      db(1) = 0.
+      db(2) = 0.
+      db(3) = 0.
+      da(1) = 0.
+      da(2) = 0.
+      da(3) = 0.
+      call gufld(db,da)
+      bfield = da(3)
 
 c     set error id 
       
@@ -359,8 +373,8 @@ c     and  the x-axis
 c     psi     : phi+90 : direction of the particle in transverse plane
 c     tanl    : slope of the particle direction in the z,s plane
 c     bfield  : magnetic filed strenght, bfield assume positive-z direction
-c     konst   : conversion factor to get the momentum from the radius of 
-c               curvature
+c     C_D_CURVATURE : conversion factor to get the momentum from the 
+c     radius of curvature
 c     units are GeV c-1 kgauss-1 cm-1
 c     
 c     Track Parameters Reconstruction
@@ -452,15 +466,13 @@ c     direction of the particle in the transverse plane
                if (psi.gt.360) psi=psi-360
                if (psi.lt.0) psi=psi+360
                
-c     assume uniform field of 0.5 tesla = 5 kgauss
+c     field of 0.5 tesla = 5 kgauss
 c     calculate an inverse momentum
+
                
-               bfield  = 5.     ! kgauss
-               konst   = 2.99792458e-4 ! GeV c-1 kgauss-1 cm-1
-               
-               invpt  = 1./(rh*konst*ch*bfield)
+               invpt  = 1./(rh*C_D_CURVATURE*ch*bfield)
                dinvpt = (dcosl*rh**2 + drh*cosl**2)/
-     &              (rh**4*(konst*bfield)**2)
+     &              (rh**4*(C_D_CURVATURE*bfield)**2)
                
 c     write(6,*) 'fit: invpt,tanl:',invpt,tanl
                
@@ -472,7 +484,7 @@ c     phi will be the parameter with no error
                x0   = xh  + rh*cosd(phi) + vtx(1).x(1)
                y0   = yh  + rh*sind(phi) + vtx(1).x(2)
 c               z0   = z(2) ! new z0 calc follows wkw
-               pha=phi*3.1415927/180.0 ! wkw
+               pha=phi*C_RAD_PER_DEG  ! wkw
                z0   = a(1)+a(2)*pha+vtx(1).x(3) ! wkw
                r0   = sqrt(x0**2+y0**2)
                phi0 = atan2d(y0,x0)
@@ -689,8 +701,8 @@ c               and  the x-axis
 c     psi     : phi+90 : direction of the particle in transverse plane
 c     tanl    : slope of the particle direction in the z,s plane
 c     bfield  : magnetic filed strenght, bfield assume positive-z direction
-c     konst   : conversion factor to get the momentum from the radius of 
-c               curvature
+c      C_D_CURVATURE  : conversion factor to get the momentum from the
+c      radius of   curvature
 c     units are GeV c-1 kgauss-1 cm-1
 c     
 c     Track Parameters Reconstruction
@@ -767,16 +779,14 @@ c     direction of the particle in the transverse plane
                   if (psi.gt.360) psi=psi-360
                   if (psi.lt.0) psi=psi+360          
 
-c     assume uniform field of 0.5 tesla = 5 kgauss
+c     field of 0.5 tesla = 5 kgauss
 c     calculate an inverse momentum
                
-                  bfield  = 5.     ! kgauss
-                  konst   = 2.99792458e-4 ! GeV c-1 kgauss-1 cm-1
                
-                  invpt  = 1./(rh*konst*ch*bfield)
+                  invpt  = 1./(rh*C_D_CURVATURE*ch*bfield)
 
                   dinvpt = (dcosl*rh**2 + drh*cosl**2)/
-     &                 (rh**4*(konst*bfield)**2)
+     &                 (rh**4*(C_D_CURVATURE*bfield)**2)
                
 c     write(6,*) 'fit: invpt,tanl:',invpt,tanl
                
@@ -788,7 +798,7 @@ c     phi will be the parameter with no error
                   x0   = xh  + rh*cosd(phi) + vtx(1).x(1)
                   y0   = yh  + rh*sind(phi) + vtx(1).x(2)
 c                  z0   = z(2) ! new z0 calc follows wkw
-                  pha=phi*3.1415927/180.0 ! wkw
+                  pha=phi*C_RAD_PER_DEG  ! wkw
                   z0   = a(1)+a(2)*pha+vtx(1).x(3) ! wkw
                   r0   = sqrt(x0**2+y0**2)
                   phi0 = atan2d(y0,x0)
