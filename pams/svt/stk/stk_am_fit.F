@@ -518,7 +518,7 @@ C               track(itrack).dedx(2)  = 0.    ! error on above
                track(itrack).cov(2)   = dphi0*dz0
                track(itrack).cov(3)   = dphi0*dtanl
                track(itrack).cov(4)   = dphi0*dpsi
-               track(itrack).cov(5)   = dphi0*pinvpt
+               track(itrack).cov(5)   = dphi0*dinvpt
                track(itrack).cov(6)   = dz0*dz0
                track(itrack).cov(7)   = dz0*dtanl
                track(itrack).cov(8)   = dz0*dpsi
@@ -819,7 +819,7 @@ c    more than 2 points
                   track(itrack).cov(2)   = dphi0*dz0
                   track(itrack).cov(3)   = dphi0*dtanl
                   track(itrack).cov(4)   = dphi0*dpsi
-                  track(itrack).cov(5)   = dphi0*pinvpt
+                  track(itrack).cov(5)   = dphi0*dinvpt
                   track(itrack).cov(6)   = dz0*dz0
                   track(itrack).cov(7)   = dz0*dtanl
                   track(itrack).cov(8)   = dz0*dpsi
