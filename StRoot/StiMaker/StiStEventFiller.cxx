@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.4 2002/04/03 16:35:03 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 1.5 2002/04/09 16:03:13 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.5  2002/04/09 16:03:13  pruneau
+ * Included explicit extension of tracks to the main vertex.
+ *
  * Revision 1.4  2002/04/03 16:35:03  calderon
  * Check if primary vertex is available in StiStEventFiller::impactParameter(),
  * if not, return DBL_MAX;
@@ -56,20 +59,20 @@ using namespace std;
 
 StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0)
 {
-    //temp, make sure we're not constructing extra copies...
-    cout <<"StiStEventFiller::StiStEventFiller()"<<endl;
+	//temp, make sure we're not constructing extra copies...
+	//cout <<"StiStEventFiller::StiStEventFiller()"<<endl;
 }
 
 StiStEventFiller::~StiStEventFiller()
 {
-    cout <<"StiStEventFiller::~StiStEventFiller()"<<endl;
+	//cout <<"StiStEventFiller::~StiStEventFiller()"<<endl;
 }
 
 //Helper functor, gotta live some place else, just a temp. test of StiTrack::stHits() method
 struct StreamStHit
 {
-    void operator()(const StHit* h) {
-	cout << "DetectorId: " << (unsigned long) h->detector();
+	void operator()(const StHit* h) {
+	 		cout << "DetectorId: " << (unsigned long) h->detector();
 	if (const StTpcHit* hit = dynamic_cast<const StTpcHit*>(h)) {
 	    cout <<hit->position() << " Sector: " << hit->sector() << " Padrow: " << hit->padrow() << endl;
 	}
@@ -137,50 +140,50 @@ struct StreamStHit
 
 StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 {
-    cout <<"StiStEventFiller::fillEvent()"<<endl;
+	//cout <<"StiStEventFiller::fillEvent()"<<endl;
 
-    if (e==0 || t==0) {
-	cout <<"StiStEventFiller::fillEvent(). ERROR:\t"
-	     <<"Null StEvent ("<<e<<") || StiTrackContainer ("<<t<<").  Exit"<<endl;
-	return 0;
-    }
-    
-    mEvent = e;
-    mTrackStore = t;
-
-    // loop
-    StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
-    StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo(); 
-    
-    for (KalmanTrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt){
-	const StiKalmanTrack* kTrack = (*trackIt).second;
-
-	// Mike's test of track->stHits();
-	//vector<StHit*> vec = kTrack->stHits();
-	//cout <<" --- Hits for next track --- "<<endl;
-	//for_each(vec.begin(), vec.end(), StreamStHit());
-
-	cout << "track " << *kTrack << endl;
+	if (e==0 || t==0) {
+		cout <<"StiStEventFiller::fillEvent(). ERROR:\t"
+				 <<"Null StEvent ("<<e<<") || StiTrackContainer ("<<t<<").  Exit"<<endl;
+		return 0;
+	}
 	
-	// detector info
-	StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
-	fillDetectorInfo(detInfo,kTrack);
-	detInfoVec.push_back(detInfo);
+	mEvent = e;
+	mTrackStore = t;
 	
-	// track node where the new StTrack will reside
-	StTrackNode* trackNode = new StTrackNode;
-	trNodeVec.push_back(trackNode);
+	// loop
+	StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
+	StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo(); 
 	
-	// actual filling of StTrack from StiTrack
-	StGlobalTrack* gTrack = new StGlobalTrack;
-	fillTrack(gTrack,kTrack);
-	
-	// set up relationships between objects
-	gTrack->setDetectorInfo(detInfo);
-	gTrack->setNode(trackNode);
-	trackNode->addTrack(gTrack);
-
-	// reuse the utility to fill the topology map
+	for (KalmanTrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt){
+		const StiKalmanTrack* kTrack = (*trackIt).second;
+		
+		// Mike's test of track->stHits();
+		//vector<StHit*> vec = kTrack->stHits();
+		//cout <<" --- Hits for next track --- "<<endl;
+		//for_each(vec.begin(), vec.end(), StreamStHit());
+		
+		//cout << "track " << *kTrack << endl;
+		
+		// detector info
+		StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
+		fillDetectorInfo(detInfo,kTrack);
+		detInfoVec.push_back(detInfo);
+		
+		// track node where the new StTrack will reside
+		StTrackNode* trackNode = new StTrackNode;
+		trNodeVec.push_back(trackNode);
+		
+		// actual filling of StTrack from StiTrack
+		StGlobalTrack* gTrack = new StGlobalTrack;
+		fillTrack(gTrack,kTrack);
+		
+		// set up relationships between objects
+		gTrack->setDetectorInfo(detInfo);
+		gTrack->setNode(trackNode);
+		trackNode->addTrack(gTrack);
+		
+		// reuse the utility to fill the topology map
 	// this has to be done at the end as it relies on
 	// having the proper track->detectorInfo() relationship
 	// and a valid StDetectorInfo object.
@@ -191,82 +194,83 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 }
 
 void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StiTrack* track) {
-    cout << "StiStEventFiller::fillDetectorInfo() " << endl;
+	//cout << "StiStEventFiller::fillDetectorInfo() " << endl;
     // use the vector of StHits to fill the detector info
     // change: currently point and fit points are the same for StiTracks,
     // if this gets modified later in ITTF, this must be changed here
     // but maybe use track->getPointCount() later?
+
     vector<StHit*> hitVec = track->stHits();
-    detInfo->setFirstPoint(hitVec.front()->position());
+		detInfo->setFirstPoint(hitVec.front()->position());
     detInfo->setLastPoint(hitVec.back()->position());
     detInfo->setNumberOfPoints(encodedStEventFitPoints(track));
     for (vector<StHit*>::iterator hi = hitVec.begin(); hi!=hitVec.end(); ++hi) detInfo->addHit(*hi);
-    
     return;
 }
 
-void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool outer){
-	cout << "StiStEventFiller::fillGeometry()" << endl;
-    if (gTrack==0 || track==0) {
-	cout << "StiStEventFiller::fillGeometry(). ERROR:\t"
-	     << "Null StGlobalTrack or null StiTrack.  Exit" <<endl;
+void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool outer)
+{
+	//cout << "StiStEventFiller::fillGeometry()" << endl;
+	if (gTrack==0 || track==0) {
+		cout << "StiStEventFiller::fillGeometry(). ERROR:\t"
+				 << "Null StGlobalTrack or null StiTrack.  Exit" <<endl;
+		return;
+	}
+	
+	// fill a new instance of StTrackGeometry (i.e. StHelixModel) selecting
+	// between inner and outermost point based on the third argument of the function call
+	const StiKalmanTrack* kTrack = dynamic_cast<const StiKalmanTrack*>(track);
+	if (!kTrack) {
+		cout << "StiStEventFiller::fillGeometry(). ERROR:\t"
+				 << "StiTrack can't be dynamic_cast'd to StiKalmanTrack.  Exit" <<endl;
+		return;	
+	}
+	StiKalmanTrackNode* node;
+	if (outer)
+		node = kTrack->getOuterMostHitNode();
+	else
+		node = kTrack->getInnerMostHitNode();
+	
+	// good ol' Ben's transformation routine,
+	// this fills StPhysicalHelix appropriately
+	StiGeometryTransform* transformer = StiGeometryTransform::instance();
+	// note, we have to create an instance of StPhysicalHelix
+	// but the default constructor is protected, so we have to
+	// call the constructor with dummy information.
+	// the transformer will call the constructor with the right
+	// values and then use the assignment operator to put them into
+	// the instance that we pass to it.
+	StThreeVector<double> dummyVec(-999,-999,-999);
+	StPhysicalHelix* helix = new StPhysicalHelix(dummyVec,dummyVec,-100.,-100);
+	transformer->operator()(node, helix);
+	const StThreeVector<double> orig = helix->origin();
+	StThreeVectorF origin(orig.x(),orig.y(),orig.z());
+	
+	double mom[3];
+	//double err[6]; // change:should not be needed, but getGlobalMomentum assumes this array is there
+	node->getGlobalMomentum(mom);
+	StThreeVectorF momF(mom[0],mom[1],mom[2]); 
+	
+	double bField = -99999;
+	// test
+	// change: the magnetic field should NEVER be hardwired, this is merely a test to
+	// make sure the chain works, must use something else ASAP!!!!
+	if (mEvent->runInfo()!=0) bField = mEvent->runInfo()->magneticField();
+	else bField =  0.5; 
+	StTrackGeometry* geometry = new StHelixModel(helix->charge(bField),
+																							 helix->phase(),
+																							 helix->curvature(),
+																							 helix->dipAngle(),
+																							 origin, momF,
+																							 helix->h());
+	
+	delete helix;
+	if (outer)
+		gTrack->setOuterGeometry(geometry);
+	else
+		gTrack->setGeometry(geometry);
+	
 	return;
-    }
-    
-    // fill a new instance of StTrackGeometry (i.e. StHelixModel) selecting
-    // between inner and outermost point based on the third argument of the function call
-    const StiKalmanTrack* kTrack = dynamic_cast<const StiKalmanTrack*>(track);
-    if (!kTrack) {
-	cout << "StiStEventFiller::fillGeometry(). ERROR:\t"
-	     << "StiTrack can't be dynamic_cast'd to StiKalmanTrack.  Exit" <<endl;
-	return;	
-    }
-    StiKalmanTrackNode* node;
-    if (outer)
-	node = kTrack->getOuterMostHitNode();
-    else
-	node = kTrack->getInnerMostHitNode();
-    
-    // good ol' Ben's transformation routine,
-    // this fills StPhysicalHelix appropriately
-    StiGeometryTransform* transformer = StiGeometryTransform::instance();
-    // note, we have to create an instance of StPhysicalHelix
-    // but the default constructor is protected, so we have to
-    // call the constructor with dummy information.
-    // the transformer will call the constructor with the right
-    // values and then use the assignment operator to put them into
-    // the instance that we pass to it.
-    StThreeVector<double> dummyVec(-999,-999,-999);
-    StPhysicalHelix* helix = new StPhysicalHelix(dummyVec,dummyVec,-100.,-100);
-    transformer->operator()(node, helix);
-    const StThreeVector<double> orig = helix->origin();
-    StThreeVectorF origin(orig.x(),orig.y(),orig.z());
-
-    double mom[3];
-    //double err[6]; // change:should not be needed, but getGlobalMomentum assumes this array is there
-    node->getGlobalMomentum(mom);
-    StThreeVectorF momF(mom[0],mom[1],mom[2]); 
-
-    double bField = -99999;
-    // test
-    // change: the magnetic field should NEVER be hardwired, this is merely a test to
-    // make sure the chain works, must use something else ASAP!!!!
-   if (mEvent->runInfo()!=0) bField = mEvent->runInfo()->magneticField();
-   else bField =  0.5; 
-    StTrackGeometry* geometry = new StHelixModel(helix->charge(bField),
-						 helix->phase(),
-						 helix->curvature(),
-						 helix->dipAngle(),
-						 origin, momF,
-						 helix->h());
-
-    delete helix;
-    if (outer)
-	gTrack->setOuterGeometry(geometry);
-    else
-	gTrack->setGeometry(geometry);
-    
-    return;
 }
 
 // void StiStEventFiller::fillTopologyMap(StTrack* gTrack, const StiTrack* track){
@@ -295,9 +299,9 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, const StiTrack* track){
     // innermost track node
     const StiKalmanTrack* kTrack = dynamic_cast<const StiKalmanTrack*>(track);
     if (!kTrack) {
-	cout << "StiStEventFiller::fillFitTraits(). ERROR:\t"
-	     << "StiTrack can't be dynamic_cast'd to StiKalmanTrack.  Exit" <<endl;
-	return;	
+			cout << "StiStEventFiller::fillFitTraits(). ERROR:\t"
+					 << "StiTrack can't be dynamic_cast'd to StiKalmanTrack.  Exit" <<endl;
+			return;	
     }
     StiKalmanTrackNode* node = kTrack->getInnerMostHitNode();
     double alpha, xRef, x[5], covM[15], dEdx, chi2node;
@@ -321,7 +325,7 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, const StiTrack* track){
 }
           
 void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track){
-    cout << "StiStEventFiller::fillTrack()" << endl;
+	//cout << "StiStEventFiller::fillTrack()" << endl;
     // data members from StTrack
     gTrack->setFlag(101); //change: make sure flag is ok
 
@@ -340,13 +344,13 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track){
     gTrack->setEncodedMethod(32770);
 
     gTrack->setImpactParameter(impactParameter(track));//gTrack->setImpactParamter(track->getDca(vertex)); // change: need to calculate impact parameter or use 
-    cout << "getTrackLength() " << endl;
+    //cout << "getTrackLength() " << endl;
     gTrack->setLength(track->getTrackLength());
     // StiTracks don't return this in the format used by StEvent,
     // change: StiTracks need methods to calculate this by detector
-    cout << "max Point Count() " << endl;
+    //cout << "max Point Count() " << endl;
     int maxPoints = track->getMaxPointCount();
-    gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(maxPoints));
+    //does not compile... -CP// gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(maxPoints));
 
     fillGeometry(gTrack, track, false); // inner geometry
     fillGeometry(gTrack, track, true);  // outer geometry
@@ -355,7 +359,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track){
     return;
 }
 unsigned short StiStEventFiller::encodedStEventFitPoints(const StiTrack* track) {
-    cout << "StiStEventFiller::encodedStEventFitPoints()" << endl;
+	//cout << "StiStEventFiller::encodedStEventFitPoints()" << endl;
     // need to write the fit points in StEvent following the convention
     // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
     vector<StHit*> hitVec = track->stHits();
@@ -388,7 +392,7 @@ unsigned short StiStEventFiller::encodedStEventFitPoints(const StiTrack* track) 
     
 }
 float StiStEventFiller::impactParameter(const StiTrack* track) {
-    cout << "StiStEventFiller::impactParameter" << endl;
+	//cout << "StiStEventFiller::impactParameter" << endl;
     if (!mEvent->primaryVertex()) {
 	return DBL_MAX;
     }
@@ -405,7 +409,7 @@ float StiStEventFiller::impactParameter(const StiTrack* track) {
     // but StEvent uses StThreeVectorF for persistency...
     const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
     StThreeVector<double> vxD(vxF.x(),vxF.y(),vxF.z());
-    cout << "primary vertex " << vxD << endl;
+    //cout << "primary vertex " << vxD << endl;
     // return distance of closest approach to primary vertex
     cout << "helix " << *helix << endl;
     float dca = static_cast<float>(helix->distance(vxD));
