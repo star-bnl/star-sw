@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.22 2000/04/18 23:17:23 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.23 2000/04/19 17:45:22 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.23  2000/04/19 17:45:22  calderon
+ * particle table and g2t_rch_hit table are now in geant branch
+ *
  * Revision 1.22  2000/04/18 23:17:23  calderon
  * delete the svt hit if it is not possible to store it
  *
@@ -127,7 +130,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.22 2000/04/18 23:17:23 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.23 2000/04/19 17:45:22 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -208,8 +211,10 @@ Int_t StMcEventMaker::Make()
 
     
     St_DataSet* dsGeant = GetDataSet("geant");
-    St_DataSet* dsDst   = GetDataSet("dst");
-    if(!dsGeant || !dsGeant->GetList()) return kStWarn;
+    if(!dsGeant || !dsGeant->GetList()) {
+	gMessMgr->Warning() << "Could not find dataset geant" << endm;
+	return kStWarn;
+    }
     // This is done only for one file, though.  I haven't put functionality for
     // multiple file handling.  If needed, it should start in the StMcEventReadMacro
     // and try to follow the doEvents.C macro to read in multiple files.
@@ -219,8 +224,7 @@ Int_t StMcEventMaker::Make()
     // Now we have the DataSet, but for some reason, we need the Iterator to navigate
     
     St_DataSetIter geantDstI(dsGeant);
-    St_DataSetIter dstDstI(dsDst);
-  
+      
     // Now the Iterator is set up, and this allows us to access the tables
     // This is done like so:
     // TableClass *instanceOfTableClassPointer = cast to TableClassPointer instanceOfDataSetIter("actual name of table in data set");
@@ -231,9 +235,11 @@ Int_t StMcEventMaker::Make()
     St_g2t_tpc_hit *g2t_tpc_hitTablePointer =  (St_g2t_tpc_hit *) geantDstI("g2t_tpc_hit");
     St_g2t_svt_hit *g2t_svt_hitTablePointer =  (St_g2t_svt_hit *) geantDstI("g2t_svt_hit");
     St_g2t_ftp_hit *g2t_ftp_hitTablePointer =  (St_g2t_ftp_hit *) geantDstI("g2t_ftp_hit");
-
-    St_g2t_rch_hit *g2t_rch_hitTablePointer =  (St_g2t_rch_hit *) dstDstI("g2t_rch_hit");
-    St_particle    *particleTablePointer    =  (St_particle    *) dstDstI("particle");
+    St_g2t_rch_hit *g2t_rch_hitTablePointer =  (St_g2t_rch_hit *) geantDstI("g2t_rch_hit");
+    St_particle    *particleTablePointer    =  (St_particle    *) geantDstI("particle");
+    
+    
+    
 
     // Now we check if we have the pointer, if we do, then we can access the tables!
   
@@ -289,7 +295,7 @@ Int_t StMcEventMaker::Make()
 	if (g2t_rch_hitTablePointer)
 	    rchHitTable = g2t_rch_hitTablePointer->GetTable();
 	else
-	    cerr << "Table g2t_rch_hit Not found in Dataset " << dstDstI.Pwd()->GetName() << endl;
+	    cerr << "Table g2t_rch_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 	
 	//
 	// particle Table
@@ -298,7 +304,7 @@ Int_t StMcEventMaker::Make()
 	if (particleTablePointer)
 	    particleTable = particleTablePointer->GetTable();
 	else
-	    cerr << "Table particle Not found in Dataset " << dstDstI.Pwd()->GetName() << endl;
+	    cerr << "Table particle Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
        
        // Before filling StMcEvent, we can check whether we can actually
        // access the tables.
@@ -411,7 +417,7 @@ Int_t StMcEventMaker::Make()
        
 	//______________________________________________________________________
 	// Step 3 - Fill Tracks - we do not fill associated hits until Step 4
-
+	
 	long NTracks = g2t_trackTablePointer->GetNRows();
 	size_t usedTracksG2t = 0;
 	long NGeneratorTracks = particleTablePointer->GetNRows();
