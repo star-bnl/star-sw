@@ -63,6 +63,14 @@
  *                       is used here, rather than the Particle Data
  *                       Group's code, in order to include deuterons,
  *                       tritons, alphas.
+ * 
+ *   n_point, 
+ *   n_fit_point,
+ *   n_max_point         (for all instances, e.g. globtrk & primtrk) are all 
+ *                       packed the same way which is
+ *                       1*TPC + 1000*SVT +10000*SSD
+ *                       The FTPC is the straight number,user should check
+ *                       det_id variable to distinguish between two cases.
  *
  *    id_start_vertex    This is always initialized to zero by global and by
  *                       FTPC tracking and FTPC DST filler modules.  It is
@@ -220,7 +228,7 @@
   float      impact;           /* impact parameter based on 3D DCA from  */
                                /* primary vertex (cm)                    */
  } ;
-/*  Last mod. for dst_track:   $Date: 1999/11/29 22:38:49 $ */
+/*  Last mod. for dst_track:   $Date: 1999/12/16 19:22:26 $ */
 
 
 
