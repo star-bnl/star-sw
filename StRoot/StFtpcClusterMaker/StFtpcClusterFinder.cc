@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.53 2003/12/09 10:48:57 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.54 2004/01/02 10:27:38 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.54  2004/01/02 10:27:38  jcs
+// remove incorrect correction to lower limit in fastlog filling loop
+//
 // Revision 1.53  2003/12/09 10:48:57  jcs
 // correct lower limit in fastlog filling loop
 //
@@ -328,7 +331,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
     }
 
   /* calculate fastlog lookup */
-  for(iIndex=0; iIndex<256; iIndex++)
+  for(iIndex=1; iIndex<256; iIndex++)
     {
       fastlog[iIndex] = ::log((double) iIndex);
     }
