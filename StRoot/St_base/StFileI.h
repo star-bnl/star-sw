@@ -3,6 +3,7 @@
 
 #include "TNamed.h"
 #include "assert.h"
+#include "string.h"
  
 const UInt_t kUMAX = (UInt_t)(-1);
 
@@ -26,6 +27,8 @@ public:
   virtual  UInt_t  GetSum() const;
   virtual  Int_t   EOK()    const { return fUrr[0]==kUMAX;}
   virtual  Int_t   IsNull() const { return !fUrr[0];}
+  virtual  Int_t   Compare(StUKey &uk2) const 
+                  { return strcmp(GetKey().Data(),uk2.GetKey().Data());}
 private:
   TString fName;
   Int_t fNUrr;
