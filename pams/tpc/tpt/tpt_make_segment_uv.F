@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment_uv.F,v 1.3 1998/03/23 18:26:02 sakrejda Exp $
+* $Id: tpt_make_segment_uv.F,v 1.4 1998/03/31 17:00:54 sakrejda Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.4  1998/03/31 17:00:54  sakrejda
+* sector boundry crossing calculation corrected-was using old sector naming convention
+*
 * Revision 1.3  1998/03/23 18:26:02  sakrejda
 * tpg_pad-plane removed from the tpt module, it was not used there anyway
 *
@@ -125,7 +128,7 @@ C           find what is the parametrisation for the row ir1 in
 C           sector isect
             iret = tgc_row_par(isect,real(ir1),as,bs,dummy,dummy)
 C           find what is the prediction for this row
-            iret = tpt_ptcrs_uv_p(as,bs,at,bt,x0,y0,xp,yp)
+            iret = tpt_ptcrs_uv_p(as,bs,-1.0,at,bt,x0,y0,xp,yp)
 C           check whether there is a crossing point
             if(iret.eq.STAFCV_OK) then
 C              find which solution is closer
@@ -140,8 +143,6 @@ C              find which solution is closer
                xglobal(3)=10.0
 C              and check whether it lies in the same sector
                iret = tgc_global_to_local(isec1,xglobal,xlocal)
-               if(isec1.gt.12) isec1=24-isec1
-               if(isec1.eq.0) isec1=12
                if(isect.eq.isec1) then
                   ns=1
                else
@@ -156,14 +157,12 @@ C              and check whether it lies in the same sector
 C              try to look into other sectors, find crossings with the 
 C	       boundaries and find which boundary is closer
                sector_change=.true.
-               isec1=isect-1
-               if(isec1.eq.0) isec1=12
-               lsec=15-isec1
+               lsec=15-isect
                if(lsec.ge.12) lsec=lsec-12
                phi=real(lsec)*cpi/6.0+cpi/12.0
                dist1=-1.0
                dist2=-1.0
-               iret = tpt_ptcrs_uv_p(tan(phi),0,at,bt,x0,y0,xp,yp)
+               iret = tpt_ptcrs_uv_p(-tan(phi),1.0,0,at,bt,x0,y0,xp,yp)
                if(iret.eq.STAFCV_OK)then
                  dist1=(xlast-xp(1))**2+(ylast-yp(1))**2
                  dist2=(xlast-xp(2))**2+(ylast-yp(2))**2
@@ -171,11 +170,8 @@ C	       boundaries and find which boundary is closer
                   dist1=dist2
                  endif 
                endif
-               isec1=isect
-               lsec=15-isec1
-               if(lsec.ge.12) lsec=lsec-12
-               phi=real(lsec)*cpi/6.0+cpi/12.0
-               iret = tpt_ptcrs_uv_p(tan(phi),0,at,bt,x0,y0,xp,yp)
+               phi=real(lsec-1)*cpi/6.0+cpi/12.0
+               iret = tpt_ptcrs_uv_p(-tan(phi),1.0,0,at,bt,x0,y0,xp,yp)
                if(iret.eq.STAFCV_OK)then
                  dist2=(xlast-xp(1))**2+(ylast-yp(1))**2
                  if(dist2.gt.(xlast-xp(2))**2+(ylast-yp(2))**2)then
