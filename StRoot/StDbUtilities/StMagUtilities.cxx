@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.14 2001/06/15 00:52:15 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.15 2001/07/24 00:20:20 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.15  2001/07/24 00:20:20  jhthomas
+ * Protect Divide by Zero in UndoBDistortion
+ *
  * Revision 1.14  2001/06/15 00:52:15  jhthomas
  * Protect discontinuity in distortions at CM
  *
@@ -305,8 +308,11 @@ void StMagUtilities::UndoBDistortion( const Float_t x[3], Float_t Xprime[3] )
       if ( i == NSTEPS ) index = 1 ;
       Xprime[2] +=  index*(ah/3) ;
       B3DField( Xprime, B ) ;                          // Work in kGauss, cm
-      Xprime[0] +=  index*(ah/3)*( Const_2*B[0] - Const_1*B[1] ) / B[2] ;
-      Xprime[1] +=  index*(ah/3)*( Const_2*B[1] + Const_1*B[0] ) / B[2] ;
+      if ( TMath::Abs(B[2]) > 0.001 )                  // Do nothing if field is less than 1 gauss
+	{
+	  Xprime[0] +=  index*(ah/3)*( Const_2*B[0] - Const_1*B[1] ) / B[2] ;
+	  Xprime[1] +=  index*(ah/3)*( Const_2*B[1] + Const_1*B[0] ) / B[2] ;
+	}
       if ( index != 4 ) index = 4; else index = 2 ;
     }    
 
