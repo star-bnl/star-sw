@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.18 2000/04/06 23:29:40 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.19 2000/04/12 21:32:36 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.19  2000/04/12 21:32:36  calderon
+ * check for eg_label in range of particle table
+ *
  * Revision 1.18  2000/04/06 23:29:40  calderon
  * The parent track is now stored for all tracks.
  *
@@ -115,7 +118,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.18 2000/04/06 23:29:40 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.19 2000/04/12 21:32:36 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -508,18 +511,24 @@ Int_t StMcEventMaker::Make()
 	    // Look in the particle table
 	    // for particles from event generator
 	    long iEventGeneratorLabel = (trackTable[itrk].eg_label) - 1;
-	    if (iEventGeneratorLabel >=0) {
-		// Track should already be loaded from the particle table
-		// i.e. t & ttempParticle[iEventGeneratorLabel] are the same tracks,
-		// obtained from different tables.
-		// We should rather keep the one in the g2t table, but we
-		// need to keep the information of its parentage.
-		nParticlesInBothTables++;
-		t->setParent(ttempParticle[iEventGeneratorLabel]->parent());
-		StMcTrackIterator trkToErase = find (mCurrentMcEvent->tracks().begin(),
-						     mCurrentMcEvent->tracks().end(),
-						     ttempParticle[iEventGeneratorLabel]);
-		mCurrentMcEvent->tracks().erase(trkToErase);
+	    if (iEventGeneratorLabel >=0 ) {
+
+		// Now make sure that this track is really from the table,
+		// When embedding, the particle got an eg_label = 99999 even
+		// though there was only one entry in the particle table.
+		if (iEventGeneratorLabel < ttempParticle.size()) {
+		    // Track should already be loaded from the particle table
+		    // i.e. t & ttempParticle[iEventGeneratorLabel] are the same tracks,
+		    // obtained from different tables.
+		    // We should rather keep the one in the g2t table, but we
+		    // need to keep the information of its parentage.
+		    nParticlesInBothTables++;
+		    t->setParent(ttempParticle[iEventGeneratorLabel]->parent());
+		    StMcTrackIterator trkToErase = find (mCurrentMcEvent->tracks().begin(),
+							 mCurrentMcEvent->tracks().end(),
+							 ttempParticle[iEventGeneratorLabel]);
+		    mCurrentMcEvent->tracks().erase(trkToErase);
+		}
 		               		    
 	    }
 	    else {
