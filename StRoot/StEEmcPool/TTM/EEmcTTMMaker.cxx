@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.15 2004/04/13 17:26:09 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.16 2004/04/14 16:20:25 zolnie Exp $
 // doxygen info here
 /** 
     \mainpage TTM - an endcap Tower to Track Match maker
@@ -117,7 +117,7 @@
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
 #define DEBUG_PRINTS 0
-#define DEBUG        1
+#define DEBUG        0
 
 #if !defined(ST_NO_NAMESPACES)
 using std::map;
@@ -674,6 +674,9 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.16  2004/04/14 16:20:25  zolnie
+// added static method Run for faster analysis under root4star
+//
 // Revision 1.15  2004/04/13 17:26:09  zolnie
 // more adaptation needed
 //

@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EEmcTTMMaker
 #define STAR_EEmcTTMMaker
-// $Id: EEmcTTMMaker.h,v 1.8 2004/04/13 17:26:09 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.9 2004/04/14 16:20:25 zolnie Exp $
 
 /*!
  *                                                                     
@@ -40,6 +40,7 @@ class TString;
 class TList;
 class TMap;
 
+class StChain;
 class StMuTrack;
 class EEmcGeomSimple;
 
@@ -169,6 +170,18 @@ public:
 
   ostream&   Summary    ( ostream &out ) const ;
 
+  /// a static method to be called from root4star 
+  /// also an example how to use TTM
+  static void Run(
+	    StChain* chain, 
+	    char* inpDir    ,
+	    char* inpFile   ,
+	    char* outFile   ,
+	    Int_t nFiles    ,
+	    Int_t nEvents   ,
+	    Int_t timeStamp );
+
+
  protected:
 
   Int_t    mMinTrackHits         ;  /**<- min hits per track required   */
@@ -221,7 +234,7 @@ public:
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.8 2004/04/13 17:26:09 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.9 2004/04/14 16:20:25 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -238,6 +251,9 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  );
 
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.9  2004/04/14 16:20:25  zolnie
+// added static method Run for faster analysis under root4star
+//
 // Revision 1.8  2004/04/13 17:26:09  zolnie
 // more adaptation needed
 //
