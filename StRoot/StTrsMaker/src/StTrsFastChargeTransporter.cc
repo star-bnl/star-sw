@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.10 1999/07/09 03:47:56 lasiuk Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.11 1999/07/13 17:46:44 lasiuk Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
+ * Revision 1.11  1999/07/13 17:46:44  lasiuk
+ * diffusion
+ *
  * Revision 1.10  1999/07/09 03:47:56  lasiuk
  * scale the centroid shift of charge distribution by the sqrt of the
  * number of electrons.  Original code was for single electrons ONLY!
@@ -55,6 +58,7 @@
  *
  **********************************************************************/
 #include "StTrsFastChargeTransporter.hh"
+#include <unistd.h>
 
 StTrsChargeTransporter* StTrsFastChargeTransporter::mInstance = 0; // static data member
 
@@ -99,23 +103,29 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
 	//continue; // Do something!!!
     }
     //
-    // Diffusion to space out charge on the wire:
+    // Diffusion to move the centroid of the charge cluster
+    // while in transport.  Must be scaled by the number
+    // of electrons in the charge cluster
     //
     double ne = sqrt(seg.charge());
     if (mTransverseDiffusion) {
-	seg.position().setX( (mGaussDistribution.shoot(seg.position().x(), (mSigmaTransverse*sqrt(driftLength)) ) )/ne );
-	seg.position().setY( (mGaussDistribution.shoot(seg.position().y(), (mSigmaTransverse*sqrt(driftLength)) ) )/ne );
-    }
+	seg.position().setX(mGaussDistribution.shoot(seg.position().x(),
+						     (mSigmaTransverse*sqrt(driftLength)/ne)));
+	seg.position().setY(mGaussDistribution.shoot(seg.position().y(),
+						     (mSigmaTransverse*sqrt(driftLength)/ne)));
+    } // else do not alter the position!
     
     if (mLongitudinalDiffusion) {
-	seg.position().setZ( (mGaussDistribution.shoot(driftLength, (mSigmaLongitudinal*sqrt(driftLength)) ) )/ne );
+	seg.position().setZ(mGaussDistribution.shoot(driftLength,
+						     (mSigmaLongitudinal*sqrt(driftLength)/ne)));
     }
     else {
+	// must alter the position to reflect the drift length.  This information is
+	// needed in order to properly treat the charge distribution onto the wire plane!
 	seg.position().setZ(driftLength);
     }
 
-//     PR(seg.position());
-
+    //PR(seg.position());
     //
     // Alter charge with:
     //     - absorption (O2)
