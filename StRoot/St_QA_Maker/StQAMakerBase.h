@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.7 2002/04/23 01:59:56 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.8 2003/02/15 22:00:52 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.8  2003/02/15 22:00:52  genevb
+// Add tpcSectors, fix ftpc east/west charge
+//
 // Revision 2.7  2002/04/23 01:59:56  genevb
 // Addition of BBC/FPD histos
 //
@@ -48,7 +51,7 @@ class StQAMakerBase : public StMaker {
   virtual Int_t  Make();
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.7 2002/04/23 01:59:56 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.8 2003/02/15 22:00:52 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -71,6 +74,8 @@ class StQAMakerBase : public StMaker {
   // for method MakeEvSum - from software monitor
   TH2F     *m_glb_trk_chg;        //! all charge east/west (TPC) 
   TH2F     *m_glb_trk_chgF;       //! all charge east/west (FTPC) 
+  // histograms for TPC hits sector by sector
+  TH2F     *mTpcSectorPlot[24];   //!
 
 // **************** Members For Internal Use ***************************
  protected:

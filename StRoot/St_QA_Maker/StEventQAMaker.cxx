@@ -189,7 +189,7 @@ void StEventQAMaker::MakeHistEvSum() {
 	tpcChgEast += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
     }
     m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,multClass);
-    m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[0]/ftpcMon->chrg_ftpc_tot[1],multClass);
+    m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[1]/ftpcMon->chrg_ftpc_tot[0],multClass);
   }
 }
 
@@ -1557,26 +1557,35 @@ void StEventQAMaker::MakeHistPoint() {
   ULong_t totalHits = 0;
   ULong_t ftpcHitsE = 0;
   ULong_t ftpcHitsW = 0;
+  StThreeVectorF tpcHitsPos;
+  Int_t rotator;
 
   if (tpcHits) {
     // z and phi dist of hits
-    for (UInt_t i=0; i<tpcHits->numberOfSectors(); i++)
-      for (UInt_t j=0; j<tpcHits->sector(i)->numberOfPadrows(); j++)
-	for (UInt_t k=0; k<tpcHits->sector(i)->padrow(j)->hits().size(); k++) {
-	  Float_t x  = tpcHits->sector(i)->padrow(j)->hits()[k]->position().x();
-	  Float_t y  = tpcHits->sector(i)->padrow(j)->hits()[k]->position().y();
-	  Float_t z  = tpcHits->sector(i)->padrow(j)->hits()[k]->position().z();
-	  Float_t phi = tpcHits->sector(i)->padrow(j)->hits()[k]->position().phi();
+    for (UInt_t i=0; i<tpcHits->numberOfSectors(); i++) {
+      StTpcSectorHitCollection* tpcHitsSector = tpcHits->sector(i);
+      for (UInt_t j=0; j<tpcHitsSector->numberOfPadrows(); j++) {
+        StSPtrVecTpcHit& tpcHitsVec = tpcHitsSector->padrow(j)->hits();
+	for (UInt_t k=0; k<tpcHitsVec.size(); k++) {
+          tpcHitsPos = tpcHitsVec[k]->position();
+	  Float_t x   = tpcHitsPos.x();
+	  Float_t y   = tpcHitsPos.y();
+	  Float_t z   = tpcHitsPos.z();
+	  Float_t phi = tpcHitsPos.phi();
 	  hists->m_z_hits->Fill(z);
-	  if (z<0) {
+          // TPC East is sectors 13-24, and z<0
+          // TPC West is sectors  1-12, and z>0
+          // In StEvent, sectors are mapped starting at 0 instead of 1
+	  if (i>11) {
+            rotator = 11-i;
 	    if (phi<0)
 	      hists->m_pnt_phiT->Fill(360+phi/degree,0.);
 	    else
 	      hists->m_pnt_phiT->Fill(phi/degree,0.);
 	    hists->m_pnt_padrowT->Fill(j+1,0.); // physical padrow numbering starts at 1
 	    hists->m_pnt_xyTE->Fill(x,y);
-	  }
-	  else {
+	  } else {
+            rotator = i-11;
 	    if (phi<0)
 	      hists->m_pnt_phiT->Fill(360+phi/degree,1.);
 	    else
@@ -1584,7 +1593,14 @@ void StEventQAMaker::MakeHistPoint() {
 	    hists->m_pnt_padrowT->Fill(j+1,1.); // physical padrow numbering starts at 1
 	    hists->m_pnt_xyTW->Fill(x,y);
 	  }
+          tpcHitsPos.rotateZ(((float) rotator)*TMath::Pi()/6.0);
+	  x   = tpcHitsPos.x();
+	  //y   = tpcHitsPos.y();
+          //mTpcSectorPlot[i]->Fill(x,y);
+          mTpcSectorPlot[i]->Fill(x,(float) (j+1));
 	}
+      }
+    }
     hists->m_pnt_tpc->Fill(tpcHits->numberOfHits());
     totalHits += tpcHits->numberOfHits();
   }
@@ -1910,8 +1926,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.41 2003/01/23 20:53:10 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.42 2003/02/15 22:00:52 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.42  2003/02/15 22:00:52  genevb
+// Add tpcSectors, fix ftpc east/west charge
+//
 // Revision 2.41  2003/01/23 20:53:10  genevb
 // Additional dAu changes
 //
