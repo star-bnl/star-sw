@@ -1,6 +1,9 @@
-* $Id: gstar_input.g,v 1.27 2000/02/10 14:44:06 nevski Exp $
+* $Id: gstar_input.g,v 1.28 2000/02/15 15:45:34 nevski Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.28  2000/02/15 15:45:34  nevski
+* Event offset: n0
+*
 * Revision 1.27  2000/02/10 14:44:06  nevski
 * event read offset introduced
 *
@@ -38,16 +41,19 @@
    Implicit         None   
    Integer          SYSTEMF,LENOCC,CSADDR,Iadr,i,J,ier,L,N,idot,Igate,
                     Irec,Lrec,InEvent,NnEvent
-   Character        ifile*(*),C*1,Table*120,CDIR*8,Zcom*256,file*256
+   Character        ifile*(*),C*1,Table*120,CDIR*8,Zcom*256,file*256,cn*8
    common /agcuser/ Irec(10),InEvent,NnEvent,Table
 *
 +CDE,AGCKINE.
 *
     file=ifile;  L=LENOCC(file);  Check L>0; 
-
+    i=Index(ifile,':'); if i>0
+    { cn=ifile(i+1:L);   read (cn,*) NnEvent 
+      File=ifile(1:i-1); L=i-1;
+    }
     If file(L-2:L)=='.gz' 
     { 
-       print *,' AgUsOpen: unzipping input file ',ifile
+       print *,' AgUsOpen: unzipping input file ',ifile(1:L)
        J=0;   Do i=1,L-1  {  if (file(i:i)='/') J=i; }
        file='/tmp/'//ifile(J+1:L-3)
        Zcom='zcat -f '//ifile(1:L)//' > '//file(1:L-J+2)
@@ -61,7 +67,7 @@
     Call CLTOU(C)
 *
     N=LENOCC(CCOMMAND)+1;  Igate=N
-    print *,' AgUsOpen: input from ',file(:L),' mode ',C 
+    print *,' AgUsOpen: input from ',file(:L),' mode ',C,' event=',NnEvent
 *
     if      C=='E'                       " egz format "
     {  Call AgzOPEN('PZ',file(:L),'EK',0,0)
@@ -78,7 +84,7 @@
        if (ier!=0)  goto :e:
     } 
     else if C=='N'                       " HEP Ntuple "
-    {  Lrec=0;     CDIR='HEPEVNT'//CHAR(48+N);    Irec(N)=0;
+    {  Lrec=4096;     CDIR='HEPEVNT'//CHAR(48+N);    Irec(N)=0;
        Call HREND (CDIR)
        Call HROPEN(21-N,CDIR,file(:L),'X',Lrec,ier);  if (ier!=0) goto :e:; 
     } 
