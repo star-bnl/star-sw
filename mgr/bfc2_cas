@@ -1,6 +1,9 @@
 #!/usr/local/bin/perl
-# $Id: bfc2_cas,v 1.12 2001/05/03 17:19:56 didenko Exp $
+# $Id: bfc2_cas,v 1.13 2001/05/04 01:38:41 didenko Exp $
 # $Log: bfc2_cas,v $
+# Revision 1.13  2001/05/04 01:38:41  didenko
+# fixed typ
+#
 # Revision 1.12  2001/05/03 17:19:56  didenko
 # next file to mixed
 #
@@ -157,7 +160,7 @@ $evts = $prt[2];
 ($Nevts,$dummy) = split /e/, $evts;
 $NofEvents = 100;
 
-my $N3 = $Nevts * abs($nSeq - 355) + 1;
+my $N3 = $Nevts * abs($nSeq - 385) + 1;
 my $N1 = $N3 + 1;
 my $N2 = $Nevts * $nSeq + 1;
 
