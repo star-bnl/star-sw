@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.25 2001/07/12 10:35:14 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.26 2001/07/26 13:53:19 oldi Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.26  2001/07/26 13:53:19  oldi
+// Check if FTPC data is available.
+//
 // Revision 1.25  2001/07/12 10:35:14  jcs
 // create and fill FTPC cluster radial position histogram
 //
@@ -211,6 +214,12 @@ Int_t StFtpcClusterMaker::Make()
       assert(daqReader);
       ftpcReader=daqReader->getFTPCReader();
       assert(ftpcReader);
+
+      if (!ftpcReader->checkForData()) {
+	gMessMgr->Message("", "W", "OST") << "No FTPC data available!" << endm;
+	return kStWarn;
+      }
+	
     }
 
   // create parameter reader
