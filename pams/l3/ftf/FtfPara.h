@@ -28,17 +28,18 @@
        short     n_phi_track;      // # Track areas in nphi 
        short     n_pass_primaries ;// # iterations looking for primaries
        short     n_pass_secondaries;// # iterations looking for secondaries
-       short     row_end;          // Row where end track search 
-       short     row_start;        // Row where start track search
-       short     sz_fit_flag;      // Switch for sz fit 
-       float     bfield      ;     // Magnetic field  
-       float     chi2_hit_cut;     // Maximum hit chi2 
-       float     chi2_hit_good;    // Chi2 to stop looking for next hit 
-       float     chi2_track_cut;   // Maximum track chi2 
-       float     deta;             // Eta search range 
-       float     dphi;             // Phi search range 
-       float     deta_merge ;      // Eta difference for track merge 
-       float     dphi_merge ;      // Phi difference for track merge
+       short     rowInnerMost;      // Row where end track search 
+       short     rowOuterMost;      // Outer most row to consider tin tracking
+       short     rowStart;          // Row where start track search
+       short     sz_fit_flag;       // Switch for sz fit 
+       float     bfield      ;      // Magnetic field  
+       float     chi2_hit_cut;      // Maximum hit chi2 
+       float     chi2_hit_good;     // Chi2 to stop looking for next hit 
+       float     chi2_track_cut;    // Maximum track chi2 
+       float     deta;              // Eta search range 
+       float     dphi;              // Phi search range 
+       float     deta_merge ;       // Eta difference for track merge 
+       float     dphi_merge ;       // Phi difference for track merge
        float     eta_min;          // Min eta to consider 
        float     eta_min_track ;   // Track min eta to consider 
        float     eta_max;          // Max eta to consider 

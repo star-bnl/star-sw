@@ -189,12 +189,12 @@ int FtfTrack::Build_Track ( FtfHit *first_hit, VOLUME *volume ) {
 //
 //    If segment build go for a real track with a fit
 //
-   int row_to_stop = para->row_end ;
+   int row_to_stop = para->rowInnerMost ;
    if ( !Follow ( volume, GO_DOWN, row_to_stop ) ) return 0 ;
 //
 //    Now to extent track the other direction if requested
 //
-   if ( para->go_backwards ) Follow ( volume, GO_UP, para->row_start ) ;
+   if ( para->go_backwards ) Follow ( volume, GO_UP, para->rowOuterMost ) ;
 
    return 1 ;
 }
@@ -730,14 +730,14 @@ FtfHit *FtfTrack::Seek_Next_Hit ( VOLUME  *volume,
 //-----------------------------------------------------------------------------*/
    int initial_ir, way ;
    if ( n_r_steps < 0 ) {
-      initial_ir = max(1, (base_hit->i_r - para->row_end)/para->mod_row);
+      initial_ir = max(1, (base_hit->i_r - para->rowInnerMost)/para->mod_row);
       n_r_steps  = min(initial_ir,-n_r_steps ) ;
-	   way        = -1 ;
+      way        = -1 ;
    }
    else {
-	   initial_ir = max(1, (base_hit->i_r - para->row_end + 2)/para->mod_row);
-	   n_r_steps  = min((para->row_start-initial_ir+1),n_r_steps) ;
-	   way = 1 ;
+      initial_ir = max(1, (base_hit->i_r - para->rowInnerMost + 2)/para->mod_row);
+      n_r_steps  = min((para->rowOuterMost-initial_ir+1),n_r_steps) ;
+      way = 1 ;
    }
 
    

@@ -51,8 +51,9 @@ void FtfPara::setDefaults (void)
    n_phi_track       = 60     ;
    n_pass_primaries  = 1      ;
    n_pass_secondaries= 0      ;
-   row_end           = 1      ;
-   row_start         = 45     ;
+   rowInnerMost      = 1      ;
+   rowOuterMost      = 1      ;
+   rowStart          = 45     ;
    segment_max_angle = 10.F/To_deg ;
    sz_fit_flag       = 1      ;
    xy_error_scale    = 1.0F   ;
