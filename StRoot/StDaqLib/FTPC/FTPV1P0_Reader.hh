@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_Reader.hh,v 1.2 2001/06/19 20:51:22 jeromel Exp $
+ * $Id: FTPV1P0_Reader.hh,v 1.3 2001/06/25 22:59:27 jcs Exp $
  * Author: Jeff Landgraf, M.J. LeVine, J.Klay, H.Huemmler
  ***************************************************************************
  * Description: common definitions for FTPC
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: FTPV1P0_Reader.hh,v $
+ * Revision 1.3  2001/06/25 22:59:27  jcs
+ * create copy of EventReader pointer
+ *
  * Revision 1.2  2001/06/19 20:51:22  jeromel
  * Commited for Janet S.
  *
@@ -85,6 +88,9 @@ public:
 
 protected:
   //  MemoryManager MemMan;
+
+  // copy of EventReader pointer
+  EventReader *ercpy;
 
   // Bank Pointers
   Bank_DATAP *pBankDATAP;
