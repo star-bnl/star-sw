@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRrsMaker.h,v 2.0 2000/08/09 16:17:06 gans Exp $
+ * $Id: StRrsMaker.h,v 2.1 2000/08/09 17:59:56 gans Exp $
  *
  * Description:
  *  StRrsMaker is the main module
@@ -15,6 +15,9 @@
  *  memory.
  ***********************************************************
  *  $Log: StRrsMaker.h,v $
+ *  Revision 2.1  2000/08/09 17:59:56  gans
+ *  Removed Int_t Clear() which was stomped in ver from 1.12->2.0
+ *
  *  Revision 2.0  2000/08/09 16:17:06  gans
  *  Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  *  for StRichDrawableT(foo)
@@ -120,7 +123,6 @@ public:
     Int_t Init(int histograms);
     Int_t Make();
     Int_t Finish();
-    Int_t Clear();
     
 public:
     void useLocalCoordinate(int);
@@ -189,7 +191,7 @@ private:
     int       mAddElectricNoise;
     
     virtual const char *GetCVS() const
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 2.0 2000/08/09 16:17:06 gans Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 2.1 2000/08/09 17:59:56 gans Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StRrsMaker, 1)            // StAF chain
 };
