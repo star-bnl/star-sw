@@ -13,6 +13,7 @@
 #ifndef ntupleTrack_hh
 #define ntupleTrack_hh
 
+#include "StHbtMaker/Infrastructure/StHbtTFile.hh"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #ifdef __ROOT__
 

@@ -13,6 +13,7 @@
 #define ntupleEvent_hh
 
 #ifdef __ROOT__
+#include "StHbtMaker/Infrastructure/StHbtTFile.hh"
 #include "StHbtMaker/Base/StHbtEventCut.h"
 
 class ntupleEvent : public StHbtEventCut {
@@ -36,7 +37,7 @@ public:
      StHbtString Report() ;
 
      // called for every event, returns in this case always true
-     bool Pass(const StHbtEvent*) ;
+     bool Pass(const StHbtEvent*);
 
      // access the tree from 
      StHbtTree* getNtupleEvent() { return mTree; } ;

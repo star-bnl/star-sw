@@ -55,6 +55,7 @@ class franksTrackCut : public StHbtTrackCut
   void SetPy(const float& lo, const float& hi);
   void SetPz(const float& lo, const float& hi);
   void SetRapidity(const float& lo, const float& hi);
+  void SetEta(const float& lo, const float& hi);
   void SetDCA(const float& lo, const float& hi);
   void SetCharge(const int&);
 
@@ -78,6 +79,7 @@ private:   // here are the quantities I want to cut on...
   float             mPy[2];
   float             mPz[2];
   float             mRapidity[2];
+  float             mEta[2];
   float             mDCA[2];
 
   long              mNTracksPassed;
@@ -109,6 +111,7 @@ inline void franksTrackCut::SetPx(const float& lo, const float& hi){mPx[0]=lo; m
 inline void franksTrackCut::SetPy(const float& lo, const float& hi){mPy[0]=lo; mPy[1]=hi;}
 inline void franksTrackCut::SetPz(const float& lo, const float& hi){mPz[0]=lo; mPz[1]=hi;}
 inline void franksTrackCut::SetRapidity(const float& lo,const float& hi){mRapidity[0]=lo; mRapidity[1]=hi;}
+inline void franksTrackCut::SetEta(const float& lo,const float& hi){mEta[0]=lo; mEta[1]=hi;}
 inline void franksTrackCut::SetDCA(const float& lo,const float& hi){mDCA[0]=lo; mDCA[1]=hi;}
 inline void franksTrackCut::SetCharge(const int& ch){mCharge = ch;}
 inline franksTrackCut* franksTrackCut::Clone() { franksTrackCut* c = new franksTrackCut(*this); return c;}
