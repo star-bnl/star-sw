@@ -1,7 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.9 2000/06/26 22:10:32 fisyak Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.10 2000/08/01 12:33:05 hummler Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
-// Revision 1.9  2000/06/26 22:10:32  fisyak
-// remove params
+// Revision 1.10  2000/08/01 12:33:05  hummler
+// Write points to TObjectArray of StFtpcPoints in ClusterFinder,
+// use fcl_fppoint table only in Maker
 //
 // Revision 1.8  2000/04/13 18:08:21  fine
 // Adjusted for ROOT 2.24
@@ -41,12 +42,13 @@
 
 #include "StFtpcClusterMaker.h"
 #include "StFtpcClusterFinder.hh"
-#include "StFtpcCluster.hh"
+#include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "StFtpcFastSimu.hh"
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TClonesArray.h"
 
 #include "tables/St_fcl_fppoint_Table.h"
 // #include "tables/St_fcl_ftpcndx_Table.h"
@@ -145,28 +147,46 @@ Int_t StFtpcClusterMaker::Make()
 
       cout << "created StFTPCReader from tables" << endl;
 
-      St_fcl_fppoint *fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",150000);
-      m_DataSet->Add(fcl_fppoint);
-      if(Debug()) cout<<"start running fcl"<<endl;
+      TClonesArray *hitarray = new TClonesArray("StFtpcPoint", 0);
+
+      if(Debug()) cout<<"start running StFtpcClusterFinder"<<endl;
             
-      StFtpcClusterFinder *fcl = new StFtpcClusterFinder();
+      StFtpcClusterFinder *fcl = new StFtpcClusterFinder(hitarray);
 
-      StFtpcCluster *clusters=fcl->search(ftpcReader,
-					  m_det->GetTable(),
-					  m_padtrans->GetTable(),
-					  m_zrow->GetTable(),
-					  m_ampoff->GetTable(),
-					  m_ampslope->GetTable(),
-					  m_timeoff->GetTable(),
-					  fcl_fppoint,
-					  m_padtrans->GetNRows(),
-					  m_ampslope->GetNRows(),
-					  m_ampoff->GetNRows(),
-					  m_timeoff->GetNRows());
-
-      if (clusters == NULL)
+      int searchresult=fcl->search(ftpcReader,
+				   m_det->GetTable(),
+				   m_padtrans->GetTable(),
+				   m_zrow->GetTable(),
+				   m_ampoff->GetTable(),
+				   m_ampslope->GetTable(),
+				   m_timeoff->GetTable(),
+				   m_padtrans->GetNRows(),
+				   m_ampslope->GetNRows(),
+				   m_ampoff->GetNRows(),
+				   m_timeoff->GetNRows());
+      
+      if (searchresult == 0)
 	{
 	  iMake=kStWarn;
+	}
+      else
+	{
+	  Int_t num_points = hitarray->GetEntriesFast();
+	  St_fcl_fppoint *fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",num_points);
+	  m_DataSet->Add(fcl_fppoint);
+
+	  fcl_fppoint_st *pointTable= fcl_fppoint->GetTable();
+
+	  StFtpcPoint *point;
+    
+	  for (Int_t i=0; i<num_points; i++) 
+	    {
+	      point = (StFtpcPoint *)hitarray->At(i);
+	      point->ToTable(&(pointTable[i]));    
+	    }
+   
+	  fcl_fppoint->SetNRows(num_points);
+	  
 	}
       delete fcl;
     }
