@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.101 2000/06/16 15:53:41 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.102 2000/07/07 05:29:23 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.102  2000/07/07 05:29:23  lansdell
+// move filling code into proper area (within vertex check) for MakeHistEval
+//
 // Revision 1.101  2000/06/16 15:53:41  kathy
 // Gene's fix --- fixes a bug that the 2ndary histograms get filled presently with primary vertices where the iflag != 1
 //
@@ -1499,24 +1502,28 @@ void St_QA_Maker::MakeHistEval(){
 
   St_dst_vertex      *vertex     = (St_dst_vertex *) dstI["vertex"];
 
+
+
   Float_t recoX, recoY, recoZ; 
   if (vertex) {
     dst_vertex_st  *t   = vertex->GetTable();
+    if (vertex->GetNRows() <= 0) {
+      cout << " St_QA_Maker::MakeHistEval - empty St_dst_vertex table\n" << endl;
+      return;
+    }
     for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
       if (t->iflag==1 && t->vtx_id==kEventVtxId){       
         recoX = t->x;
         recoY = t->y;
         recoZ = t->z;
-       }
+      }
     }
-  }
-
 // fill geant,reco comparison histograms -----------------------------------
-  m_geant_reco_pvtx_x->Fill(geantX-recoX);
-  m_geant_reco_pvtx_y->Fill(geantY-recoY);
-  m_geant_reco_pvtx_z->Fill(geantZ-recoZ);
-  m_geant_reco_vtx_z_z->Fill(geantZ-recoZ,recoZ);
-
+    m_geant_reco_pvtx_x->Fill(geantX-recoX);
+    m_geant_reco_pvtx_y->Fill(geantY-recoY);
+    m_geant_reco_pvtx_z->Fill(geantZ-recoZ);
+    m_geant_reco_vtx_z_z->Fill(geantZ-recoZ,recoZ);
+  }
 }
 
 //_____________________________________________________________________________
