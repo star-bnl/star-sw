@@ -11,7 +11,7 @@ StHbtV0::StHbtV0(const StHbtV0& v){ // copy constructor
   mDcaPosToPrimVertex = v.mDcaPosToPrimVertex;
   mDcaNegToPrimVertex = v.mDcaNegToPrimVertex;
   mMomPos = v.mMomPos;
-  mMomNeg = v.mMomPos;
+  mMomNeg = v.mMomNeg;
 
   mTrackTopologyMapPos[0] = v.mTrackTopologyMapPos[0];
   mTrackTopologyMapPos[1] = v.mTrackTopologyMapPos[1];
