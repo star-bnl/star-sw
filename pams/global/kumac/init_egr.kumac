@@ -72,16 +72,16 @@ tdm/table/rowcount egr_egrpar 1
 *            = 2 Copy unmatched tracks, refit
 
 
-tdm/table/cell/putvalue 'egr_egrpar[0].scenario' 0
+tdm/table/cell/putvalue 'egr_egrpar[0].scenario' 8
 tdm/table/cell/putvalue 'egr_egrpar[0].mxtry'    10
 tdm/table/cell/putvalue 'egr_egrpar[0].minfit'    2
 tdm/table/cell/putvalue 'egr_egrpar[0].prob'   10 20
 tdm/table/cell/putvalue 'egr_egrpar[0].debug'  1 0 0 0 0 0 0 0 0 
 tdm/table/cell/putvalue 'egr_egrpar[0].svtchicut' 0
-tdm/table/cell/putvalue 'egr_egrpar[0].usetpc' 0
-tdm/table/cell/putvalue 'egr_egrpar[0].usesvt' 0
+tdm/table/cell/putvalue 'egr_egrpar[0].usetpc' 1
+tdm/table/cell/putvalue 'egr_egrpar[0].usesvt' 1
 tdm/table/cell/putvalue 'egr_egrpar[0].usevert' 0
-tdm/table/cell/putvalue 'egr_egrpar[0].useglobal' 3
+tdm/table/cell/putvalue 'egr_egrpar[0].useglobal' 2
 
 
 tdm/newtable /dui/data/global/tracks/globtrk egr_globtrk 100000
