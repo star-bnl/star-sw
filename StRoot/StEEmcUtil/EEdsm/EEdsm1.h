@@ -1,8 +1,9 @@
 #ifndef EEdsm1_h
 #define EEdsm1_h
 /**************************************************************
- * $Id: EEdsm1.h,v 1.1 2004/11/29 20:12:59 balewski Exp $
+ * $Id: EEdsm1.h,v 1.2 2005/02/01 22:13:40 perev Exp $
  **************************************************************/
+#include <stdlib.h>
 
 class EEdsm1  {
   static const int nc=6;
@@ -28,6 +29,9 @@ class EEdsm1  {
 
 /* container for STAR trigger data
  * $Log: EEdsm1.h,v $
+ * Revision 1.2  2005/02/01 22:13:40  perev
+ * Compatibility to redhat
+ *
  * Revision 1.1  2004/11/29 20:12:59  balewski
  * first
  *

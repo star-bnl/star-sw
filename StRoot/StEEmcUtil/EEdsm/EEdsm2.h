@@ -1,8 +1,9 @@
 #ifndef EEdsm2_h
 #define EEdsm2_h
 /**************************************************************
- * $Id: EEdsm2.h,v 1.1 2004/11/29 20:12:59 balewski Exp $
+ * $Id: EEdsm2.h,v 1.2 2005/02/01 22:13:40 perev Exp $
  **************************************************************/
+typedef unsigned short ushort;
 
 class EEdsm2  {
   static const int nc=2; // # of used channels to DSM
@@ -28,6 +29,9 @@ class EEdsm2  {
 
 /* container for STAR trigger data
  * $Log: EEdsm2.h,v $
+ * Revision 1.2  2005/02/01 22:13:40  perev
+ * Compatibility to redhat
+ *
  * Revision 1.1  2004/11/29 20:12:59  balewski
  * first
  *

@@ -4,6 +4,7 @@
 // initial version 09/2004
 //
 //########################################################### 
+#include <stdlib.h>
 #include <string.h>
 
 #include "StMuEmcTowerData.h"
