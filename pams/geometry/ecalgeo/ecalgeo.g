@@ -13,7 +13,9 @@ Author    Rashid Mekhdiyev
 *               - Shower Max Detector geomerty added           23.04.97
 *               - Variable eta grid step size introduced 
 *       
-* Aug 15, PN    - delete unused Ipart,k,phi1,phi2,ysh,yph,secmax
+* 15 Aug 97, PN - delete unused Ipart,k,phi1,phi2,ysh,yph,secmax
+* 28 Mar 98, PN - materials and medium NUMBERS can not be assigned by user
+*                 direct call to GSTPAR(1..) affects ALL systems !
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
@@ -238,7 +240,7 @@ Block ESEC is a sinle EM section
       Attribute ESEC   seen=1  colo=1 
       Material Air
       Material CAir Isvol=0
-      Medium standard
+*      Medium standard
 *
       Shape     CONS  dz=secwid/2,  
                 rmn1=section*Tan_Low-dd rmn2=(section+secwid)*Tan_Low-dd,
@@ -349,7 +351,7 @@ Block ESCI  is the active scintillator (polystyren) layer
 *
       Material  POLYSTYREN
       Material  Cpolystyren   Isvol=1
-      Medium    sens_sci 
+*pn     Medium    sens_sci 
       Attribute ESCI   seen=1   colo=7  fill=1   
 *     local z goes along the radius, y is the thickness
       Shape     TRD1   dy=Emcg_Scint/2  dz=(RTop-RBot)/2-emcg_GapCel
@@ -381,7 +383,8 @@ endblock
 * ----------------------------------------------------------------------------
 Block ESHM  is the Shower Max  section
 *
-      Material  Air Isvol=0 
+      Material  Air 
+      Material  SmAir Isvol=0 
       Attribute ESHM   seen=1   colo=4
       Shape     CONS   dz=SecWid/2,
                 phi1=-180/emcg_Nsupsec phi2=+180/emcg_Nsupsec,
@@ -436,24 +439,28 @@ Block MGTN  is the G10 layer in the SMax
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block MSEC  is the Shower Max  section
-      imat = msec_mat 
-      imed = msec_med 
+
 *     SMD default gas P10: Ar/methane 9:1 by weight
       Component Ar    A=40  Z=18 W=.9
       Component C     A=12  Z=6  W=.1*12./16.
       Component H     A=1   Z=1  W=.1* 4./16.
       Mixture   P10   Dens=1.78e-3    
       Material  msec_mat {Air, P10}
-      Material  msec_med {Air isvol=0, sensitive_gas isvol=1 stemax=5}
+      Material  msec_med {SmAir isvol=0, sensitive_gas isvol=1 stemax=5}
       Attribute MSEC   seen=1   colo=7
       Shape     CONS   dz=msecwd/2,
                 phi1=-180/emcg_Nsupsec phi2=+180/emcg_Nsupsec,
                 rmn1=curr*Tan_Low-dd  rmn2=(curr+msecwd)*Tan_Low-dd,
                 rmx1=curr*Tan_Upp-dd  rmx2=(curr+msecwd)*Tan_Upp-dd
-      Call GSTPAR (imat,'CUTGAM',0.00001)
-      Call GSTPAR (imat,'CUTELE',0.00001)
-      Call GSTPAR (imat,'LOSS',1.)
-      Call GSTPAR (imat,'STRA',1.)
+
+***\   you can not do this:             imat = msec_mat 
+****>  this affects other systems:      imed = msec_med 
+***/   ag_imed should be used instead:
+
+      Call GSTPAR (ag_imed,'CUTGAM',0.00001)
+      Call GSTPAR (ag_imed,'CUTELE',0.00001)
+      Call GSTPAR (ag_imed,'LOSS',1.)
+      Call GSTPAR (ag_imed,'STRA',1.)
 
       if (J_section==2) then
 *
