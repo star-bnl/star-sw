@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 1.10 1999/06/24 17:33:00 fisyak Exp $
+ * $Id: StEvent.h,v 1.11 1999/07/17 19:10:29 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 1.10  1999/06/24 17:33:00  fisyak
- * Replace Collection by value to Collection by pointer for TBrowser
+ * Revision 1.11  1999/07/17 19:10:29  perev
+ * type() check for non print characters added
+ *
+ * Revision 1.11  1999/07/17 19:10:29  perev
+ * type() check for non print characters added
  *
  * Revision 1.10  1999/06/24 17:33:00  fisyak
  * Replace Collection by value to Collection by pointer for TBrowser
@@ -152,7 +155,7 @@ struct pairL : public TObject
 #include "StTrackDetectorInfo.h"
     Int_t operator==(const StEvent &right) const;
     Int_t operator!=(const StEvent &right) const;
-    virtual const char*      type() const {return (const char *) mType;};
+    
     void init(StRun* run=NULL);
     virtual void     Browse(TBrowser *b);
     virtual const char*      type() const ;
