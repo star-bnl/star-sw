@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsChargeTransporter.cc,v 1.5 2000/07/17 19:14:41 long Exp $
+ * $Id: StTrsChargeTransporter.cc,v 1.6 2001/12/14 20:54:36 hardtke Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsChargeTransporter.cc,v $
+ * Revision 1.6  2001/12/14 20:54:36  hardtke
+ * Fix bug such that transverse diffusion coefficient is set correctly
+ *
  * Revision 1.5  2000/07/17 19:14:41  long
  * mSigmaTransverse =
  *      	(gasdb->transverseDiffusionCoefficient())/(1+sqr(mOmegaTau));
@@ -69,9 +72,7 @@ StTrsChargeTransporter::StTrsChargeTransporter(StTpcGeometry* geodb, StTpcSlowCo
     mOmegaTau   =
 	mDriftVelocity*(mMagDb->at(StThreeVector<double>(0,0,0)).z())/(fabs(scdb->driftVoltage())/(mGeomDb->frischGrid()));
 //     PR(mOmegaTau);
-    mSigmaTransverse =
-      //	(gasdb->transverseDiffusionCoefficient())/(1+sqr(mOmegaTau));	       gasdb->transverseDiffusionCoefficient();
-//     PR(mSigmaTransverse);
+    mSigmaTransverse = gasdb->transverseDiffusionCoefficient();
     mSigmaLongitudinal = gasdb->longitudinalDiffusionCoefficient();
     mO2Concentration = 50.; // 50 ppm //mO2Concentration = scdb->oxygenInPPM();
     mGateVoltage   = -130*volt;      // scdb->gatingGridVoltage();
