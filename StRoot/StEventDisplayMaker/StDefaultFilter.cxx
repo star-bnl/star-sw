@@ -1,4 +1,4 @@
-// $Id: StDefaultFilter.cxx,v 1.9 2000/11/17 22:26:47 fine Exp $
+// $Id: StDefaultFilter.cxx,v 1.10 2002/04/14 21:58:15 perev Exp $
 #include "iostream.h"
 #include "TH1.h"
 #include "StDefaultFilter.h"
@@ -188,8 +188,10 @@ Int_t StDefaultFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t 
     trackColor = t.GetTable((*mDedx)[rowNumber-1])->dedx[0];   
   } else {    
     if (rowNumber == 0)  CreatePalette(&track);
-    St_dst_trackC chair(&track);
-    trackColor = chair.AbsMoment(rowNumber);
+    if (track[rowNumber].iflag >= 0) {
+      St_dst_trackC chair(&track);
+      trackColor = chair.AbsMoment(rowNumber);
+    }
   }
   color  =  gStyle->GetColorPalette(MakeColor(trackColor));
   return color;
@@ -267,12 +269,18 @@ void StDefaultFilter::Distribution(St_dst_track *track,TH1F &de)
   St_dst_trackC c(track);
   Int_t cEnd = c.GetNRows();
   Int_t i = 0;
-  for (i=0;i<cEnd;i++) de.Fill(c.AbsMoment(i));
+  for (i=0;i<cEnd;i++) {
+    if (track->GetTable(i)->iflag >= 0) 
+        de.Fill(c.AbsMoment(i));
+  }
 }
 //_____________________________________________________________________________
 // $Log: StDefaultFilter.cxx,v $
+// Revision 1.10  2002/04/14 21:58:15  perev
+// Increase size of hit 10 times
+//
 // Revision 1.9  2000/11/17 22:26:47  fine
-// packing factors for Ftpc adjusted
+//  packing factors for Ftpc adjusted
 //
 // Revision 1.8  2000/09/26 17:04:46  fine
 // Two separate Distribution methods introduced
