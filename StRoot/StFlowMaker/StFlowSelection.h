@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.12 2000/12/12 20:22:06 posk Exp $
+// $Id: StFlowSelection.h,v 1.13 2001/05/22 20:18:01 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -26,9 +26,6 @@ class StFlowSelection : public StObject {
           StFlowSelection();
   virtual ~StFlowSelection();
 
-  Char_t* Number();          // return selection number as a character string
-  UInt_t  Centrality() const;
-  Char_t* Pid();
   Char_t* PidPart();
   Int_t   Sel() const;
   Int_t   Har() const;
@@ -38,9 +35,6 @@ class StFlowSelection : public StObject {
   Bool_t  SelectPart(StFlowTrack*);
   Float_t PtMaxPart() const;
   void    PrintList() const;
-  void    SetNumber(const UInt_t&);
-  void    SetCentrality(const UInt_t&);
-  void    SetPid(const Char_t*);
   void    SetPidPart(const Char_t*);
   void    SetPtPart(const Float_t, const Float_t);
   void    SetPPart(const Float_t, const Float_t);
@@ -57,9 +51,6 @@ class StFlowSelection : public StObject {
   
  private:
 
-  Char_t  mNumber[3];                        // selection number
-  UInt_t  mCentrality;                       // centrality bin
-  Char_t  mPid[10];                         
   // pi-, pi+, pi, k+, k-, pbar, proton, d, dbar, e+, e-
   Char_t  mPidPart[10];                      // PID for particles wrt plane
   Float_t mPtPart[2];                        // for parts. wrt plane
@@ -79,12 +70,6 @@ class StFlowSelection : public StObject {
   ClassDef(StFlowSelection,1)               // macro for rootcint
 }; 
 
-inline Char_t* StFlowSelection::Number() { return mNumber; }
-
-inline UInt_t  StFlowSelection::Centrality() const { return mCentrality; }
-
-inline Char_t* StFlowSelection::Pid() { return mPid; }
-
 inline Char_t* StFlowSelection::PidPart() { return mPidPart; }
 
 inline Float_t StFlowSelection::PtMaxPart() const { return mPtPart[1]; }
@@ -94,16 +79,6 @@ inline Int_t StFlowSelection::Sel() const { return mSelection; }
 inline Int_t StFlowSelection::Har() const { return mHarmonic; }
 
 inline Int_t StFlowSelection::Sub() const { return mSubevent; }
-
-inline void StFlowSelection::SetNumber(const UInt_t& number) {
-  if (number < 100) { sprintf(mNumber, "%d", number); }
-  else { cout << "### Selection Number " << number << " not valid" << endl; } }
-
-inline void StFlowSelection::SetCentrality(const UInt_t& cent) {
- mCentrality = cent; }
-
-inline void StFlowSelection::SetPid(const Char_t* pid)  { 
-  strncpy(mPid, pid, 9); mPid[9] = '\0'; }
 
 inline void StFlowSelection::SetPidPart(const Char_t* pid)  { 
   strncpy(mPidPart, pid, 9); mPidPart[9] = '\0'; }
@@ -158,6 +133,9 @@ inline void StFlowSelection::SetSubevent(const Int_t& subN) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.13  2001/05/22 20:18:01  posk
+// Now can do pseudorapidity subevents.
+//
 // Revision 1.12  2000/12/12 20:22:06  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).

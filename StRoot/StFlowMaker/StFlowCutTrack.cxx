@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.22 2000/12/12 20:22:05 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.23 2001/05/22 20:17:17 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -28,8 +28,8 @@ ClassImp(StFlowCutTrack)
 //-----------------------------------------------------------------------
 
 Int_t   StFlowCutTrack::mFitPtsTpcCuts[2]  = {15, 200};
-Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2] = {5, 11};      // has to be greater than ten!
-Float_t StFlowCutTrack::mFitOverMaxCuts[2] = {0.52, 1.1};  // has to be greater than one, otherwise ... :-[
+Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2] = {5, 11};     // greater than ten!
+Float_t StFlowCutTrack::mFitOverMaxCuts[2] = {0.52, 1.1}; // greater than one!
 Float_t StFlowCutTrack::mChiSqTpcCuts[2]   = {0., 0.};
 Float_t StFlowCutTrack::mChiSqFtpcCuts[2]  = {0., 0.};
 Float_t StFlowCutTrack::mDcaTpcCuts[2]     = {0., 1.};
@@ -93,24 +93,20 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
   Int_t nMaxPoints = pTrack->numberOfPossiblePoints();
   float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
 
-  if (pTrack->topologyMap().numberOfHits(kTpcId) ||  // Tpc track or no topologyMap available
+  if (pTrack->topologyMap().numberOfHits(kTpcId) || // Tpc track, or no topologyMap
       (pTrack->topologyMap().data(0) == 0 && pTrack->topologyMap().data(1) == 0)) {
       mTpcTrackN++;
-  }
-
-  else if (pTrack->topologyMap().numberOfHits(kFtpcEastId)) {
+  } else if (pTrack->topologyMap().numberOfHits(kFtpcEastId)) {
       mFtpcTrackN++;
       mFtpcEastTrackN++;
-  }
-
-  else if (pTrack->topologyMap().numberOfHits(kFtpcWestId)) {
+  } else if (pTrack->topologyMap().numberOfHits(kFtpcWestId)) {
       mFtpcTrackN++;
       mFtpcWestTrackN++;
   }
 
   mTrackN++;
   
- if (pTrack->topologyMap().numberOfHits(kTpcId) ||  // Tpc track or no topologyMap available
+ if (pTrack->topologyMap().numberOfHits(kTpcId) || // Tpc track, or no topologyMap
       (pTrack->topologyMap().data(0) == 0 && pTrack->topologyMap().data(1) == 0)) {
 
     // dca
@@ -160,17 +156,14 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
     if (eta > 0.) { 
       mEtaSymPosTpcN++;
       mEtaSymPosN++;
-    } 
-    
-    else { 
+    } else { 
       mEtaSymNegTpcN++; 
       mEtaSymNegN++; 
     }
     
     mGoodTpcTrackN++;
-  }
-
-  else if (pTrack->topologyMap().numberOfHits(kFtpcEastId) || pTrack->topologyMap().numberOfHits(kFtpcWestId)) { // Ftpc track
+  } else if (pTrack->topologyMap().numberOfHits(kFtpcEastId) || 
+	     pTrack->topologyMap().numberOfHits(kFtpcWestId)) { // Ftpc track
       
     // dca
     if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
@@ -221,17 +214,13 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
     if (eta > 0.) {
       mEtaSymPosFtpcN++;
       mEtaSymPosN++;
-    } 
-    
-    else {
+    } else {
       mEtaSymNegFtpcN++; 
       mEtaSymNegN++; 
     }
     
     mGoodFtpcTrackN++;
-  }
-
-  else { // neither Tpc nor FTPC track
+  } else { // neither Tpc nor Ftpc track
     return kFALSE;
   }
 
@@ -254,24 +243,20 @@ Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
   Int_t nMaxPoints = gTrack->numberOfPossiblePoints();
   float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;    
 
-  if (gTrack->topologyMap().numberOfHits(kTpcId) ||  // Tpc track or no topologyMap available
+  if (gTrack->topologyMap().numberOfHits(kTpcId) || // Tpc track, or no topologyMap
       (gTrack->topologyMap().data(0) == 0 && gTrack->topologyMap().data(1) == 0)) {
       mTpcTrackN++;
-  }
-
-  else if (gTrack->topologyMap().numberOfHits(kFtpcEastId)) {
+  } else if (gTrack->topologyMap().numberOfHits(kFtpcEastId)) {
       mFtpcTrackN++;
       mFtpcEastTrackN++;
-  }
-
-  else if (gTrack->topologyMap().numberOfHits(kFtpcWestId)) {
+  } else if (gTrack->topologyMap().numberOfHits(kFtpcWestId)) {
       mFtpcTrackN++;
       mFtpcWestTrackN++;
   }
 
   mTrackN++;
     
-  if (gTrack->topologyMap().numberOfHits(kTpcId) ||  // Tpc track or no topologyMap available
+  if (gTrack->topologyMap().numberOfHits(kTpcId) || // Tpc track, or no topologyMap
       (gTrack->topologyMap().data(0) == 0 && gTrack->topologyMap().data(1) == 0)) {
       
     // dca
@@ -321,17 +306,14 @@ Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
     if (eta > 0.) {
       mEtaSymPosTpcN++;
       mEtaSymPosN++;
-    } 
-
-    else {
+    } else {
       mEtaSymNegFtpcN++; 
       mEtaSymNegN++; 
     }
       
     mGoodTpcTrackN++;
-  }
-
-  else if (gTrack->topologyMap().numberOfHits(kFtpcEastId) || gTrack->topologyMap().numberOfHits(kFtpcWestId)) { // Ftpc track
+  } else if (gTrack->topologyMap().numberOfHits(kFtpcEastId) || 
+	     gTrack->topologyMap().numberOfHits(kFtpcWestId)) { // Ftpc track
 
     // dca
     if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
@@ -382,17 +364,13 @@ Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
     if (eta > 0.) {
       mEtaSymPosFtpcN++;
       mEtaSymPosN++;
-    } 
-     
-    else {
+    } else {
       mEtaSymNegFtpcN++;
       mEtaSymNegN++;
     }
       
     mGoodFtpcTrackN++;
-  }  
-
-  else { // neither Tpc nor Ftpc track
+  } else { // neither Tpc nor Ftpc track
     return kFALSE;
   }
 
@@ -413,24 +391,20 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
   Int_t nMaxPoints = pPicoTrack->MaxPts();
   float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
 
-  if (pPicoTrack->TopologyMap().numberOfHits(kTpcId) ||  // Tpc track or no topologyMap available
+  if (pPicoTrack->TopologyMap().numberOfHits(kTpcId) || // Tpc track, or no topologyMap
       (pPicoTrack->TopologyMap().data(0) == 0 && pPicoTrack->TopologyMap().data(1) == 0)) {
       mTpcTrackN++;
-  }
-
-  else if (pPicoTrack->TopologyMap().numberOfHits(kFtpcEastId)) {
+  } else if (pPicoTrack->TopologyMap().numberOfHits(kFtpcEastId)) {
       mFtpcTrackN++;
       mFtpcEastTrackN++;
-  }
-
-  else if (pPicoTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
+  } else if (pPicoTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
       mFtpcTrackN++;
       mFtpcWestTrackN++;
   }
 
   mTrackN++;
       
-  if (pPicoTrack->TopologyMap().numberOfHits(kTpcId) ||  // Tpc track or no topologyMap available
+  if (pPicoTrack->TopologyMap().numberOfHits(kTpcId) || // Tpc track, or no topologyMap
       (pPicoTrack->TopologyMap().data(0) == 0 && pPicoTrack->TopologyMap().data(1) == 0)) {
       
     // dca
@@ -480,17 +454,14 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
     if (eta > 0.) { 
       mEtaSymPosTpcN++;
       mEtaSymPosN++;
-    } 
-      
-    else { 
+    } else { 
       mEtaSymNegTpcN++;
       mEtaSymNegN++;
     }
       
     mGoodTpcTrackN++;
-  }
-
-  else if (pPicoTrack->TopologyMap().numberOfHits(kFtpcEastId) || pPicoTrack->TopologyMap().numberOfHits(kFtpcWestId)) { // Ftpc track
+  } else if (pPicoTrack->TopologyMap().numberOfHits(kFtpcEastId) || 
+	     pPicoTrack->TopologyMap().numberOfHits(kFtpcWestId)) { // Ftpc track
       
     // dca
     if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
@@ -541,17 +512,13 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
     if (eta > 0.) { 
       mEtaSymPosFtpcN++;
       mEtaSymPosN++;
-    } 
-      
-    else { 
+    } else { 
       mEtaSymNegFtpcN++;
       mEtaSymNegN++;
     }
       
     mGoodFtpcTrackN++;
-  }
-  
-  else { // neither Tpc nor Ftpc track
+  } else { // neither Tpc nor Ftpc track
     return kFALSE;
   }
 
@@ -615,6 +582,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.23  2001/05/22 20:17:17  posk
+// Now can do pseudorapidity subevents.
+//
 // Revision 1.22  2000/12/12 20:22:05  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).

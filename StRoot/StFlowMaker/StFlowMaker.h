@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.21 2000/12/12 20:22:05 posk Exp $
+//  $Id: StFlowMaker.h,v 1.22 2001/05/22 20:17:46 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -52,7 +52,7 @@ public:
   void          SetPicoEventFileName(StFileI* fileList);
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.21 2000/12/12 20:22:05 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.22 2001/05/22 20:17:46 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -81,7 +81,6 @@ private:
   Bool_t           FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion2DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent);
-  void             WriteFlowEvent();          // write StFlowEvent
   void             CloseEventRead();          // close StEvent
   void             PrintSubeventMults();      // for testing
   StEvent*         pEvent;                    //! pointer to DST data
@@ -115,6 +114,9 @@ inline void StFlowMaker::SetPicoEventFileName(StFileI* fileList) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.22  2001/05/22 20:17:46  posk
+//  Now can do pseudorapidity subevents.
+//
 //  Revision 1.21  2000/12/12 20:22:05  posk
 //  Put log comments at end of files.
 //  Deleted persistent StFlowEvent (old micro DST).

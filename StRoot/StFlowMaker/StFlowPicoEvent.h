@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.h,v 1.7 2000/12/12 20:22:06 posk Exp $
+// $Id: StFlowPicoEvent.h,v 1.8 2001/05/22 20:17:54 posk Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -52,7 +52,7 @@ class StFlowPicoEvent : public TObject {
   void SetCentrality(const UInt_t cent) { mCentrality = cent; }
   void SetVertexPos(const Float_t x, const Float_t y, const Float_t z) { 
     mVertexX=x; mVertexY=y; mVertexZ=z; }
-  void SetCTB(const Float_t ctb)  {mCTB = ctb; }
+  void SetCTB(const Float_t ctb)   {mCTB  = ctb; }
   void SetZDCe(const Float_t zdce) {mZDCe = zdce; }
   void SetZDCw(const Float_t zdcw) {mZDCw = zdcw; }
 
@@ -84,6 +84,9 @@ class StFlowPicoEvent : public TObject {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.h,v $
+// Revision 1.8  2001/05/22 20:17:54  posk
+// Now can do pseudorapidity subevents.
+//
 // Revision 1.7  2000/12/12 20:22:06  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).

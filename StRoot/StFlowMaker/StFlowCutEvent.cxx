@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.21 2000/12/12 20:22:05 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.22 2001/05/22 20:17:13 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -209,8 +209,6 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StFlowPicoEvent* pPicoEvent) {
       (etaSym < mEtaSymCuts[0] || etaSym >= mEtaSymCuts[1])) {
     mEtaSymCutN++;
     mGoodEventN--;
-//     Int_t eventID = (Int_t)(pEvent->id());
-//     cout << "EventID= " << eventID << ", EtaSym= " << etaSym << ", VertexZ= " << vertexZ << endl;
     return kFALSE;
   }
 
@@ -251,6 +249,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.22  2001/05/22 20:17:13  posk
+// Now can do pseudorapidity subevents.
+//
 // Revision 1.21  2000/12/12 20:22:05  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).
