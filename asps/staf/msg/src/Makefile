@@ -1,4 +1,5 @@
 ARFLAGS    = vqs
+ARTS       = ar -t
 FFLAGS     = -c -O -w -extend_source
 FFLAGS4    = -c -O -w -extend_source -irix4
 FFLAGS_DBG = -c -g -w -extend_source
@@ -9,9 +10,9 @@ CCFLAGS4    = -c -O -ansi -fullwarn -prototypes -irix4
 CCFLAGS_DBG = -c -g -ansi -fullwarn -prototypes
 MSGLIB     = ../lib
 STRLIB     = ../../str/lib
-
-msgtest.o : msgtest.f
-	$(FF) $(FFLAGS) msgtest.f
+MSGLIBS    = ../lib/$(STAR_ARCH)
+STRLIBS    = ../../str/lib/$(STAR_ARCH)
+FFCC_LINK_FLAGS = -lfgl -lgl_s -lsun
 
 all : libmsg.a libmsg_dbg.a
 
@@ -27,16 +28,25 @@ doc : msglib.f msgsub.f msgc.c
 	cd ../doc; docfor ../src/msgsub.f; mv buttons.html msg_innards.html    ; cd ../src
 
 test : msgtest msgctest
+tests : msgtests msgctests
 
 msgtest : msgtest.o $(MSGLIB)/libmsg.a $(STRLIB)/libstr.a
 	$(FF) msgtest.o -L$(MSGLIB) -L$(STRLIB) -lmsg -lstr -o msgtest
 	msgtest
 
-msgtest.o : msgtest.f ../inc/msgc.h
-	$(FF) $(FFLAGS) msgtest.f -I../inc
+msgtests : msgtest.o $(MSGLIBS)/libmsg.a $(STRLIBS)/libstr.a
+	$(FF) msgtest.o -L$(MSGLIBS) -L$(STRLIBS) -lmsg -lstr -o msgtest
+	msgtest
+
+msgtest.o : msgtest.f
+	$(FF) $(FFLAGS) msgtest.f
 
 msgctest : msgctest.o $(MSGLIB)/libmsg.a $(STRLIB)/libstr.a
-	$(FF) msgctest.o -L$(MSGLIB) -L$(STRLIB) -lmsg -lstr -lfgl -lgl_s -lsun -o msgctest
+	$(FF) msgctest.o -L$(MSGLIB) -L$(STRLIB) -lmsg -lstr $(FFCC_LINK_FLAGS) -o msgctest
+	msgctest
+
+msgctests : msgctest.o $(MSGLIBS)/libmsg.a $(STRLIBS)/libstr.a
+	$(FF) msgctest.o -L$(MSGLIBS) -L$(STRLIBS) -lmsg -lstr $(FFCC_LINK_FLAGS) -o msgctest
 	msgctest
 
 msgctest.o : msgctest.c
@@ -46,6 +56,7 @@ msgctest.o : msgctest.c
 libmsg4.a : msglib.o4 msgsub.o4 msgc.o4
 	rm -f libmsg4.a
 	ar $(ARFLAGS) libmsg4.a msglib.o4 msgsub.o4 msgc.o4
+	$(ARTS) libmsg4.a
 	rm -f msglib.o4
 	rm -f msgsub.o4
 	rm -f msgc.o4
@@ -53,6 +64,7 @@ libmsg4.a : msglib.o4 msgsub.o4 msgc.o4
 libmsg.a : msglib.o msgsub.o msgc.o
 	rm -f libmsg.a
 	ar $(ARFLAGS) libmsg.a msglib.o msgsub.o msgc.o
+	$(ARTS) libmsg.a
 	rm -f msglib.o
 	rm -f msgsub.o
 	rm -f msgc.o
@@ -60,6 +72,7 @@ libmsg.a : msglib.o msgsub.o msgc.o
 libmsg_dbg.a : msglib_dbg.o msgsub_dbg.o msgc_dbg.o
 	rm -f libmsg_dbg.a
 	ar $(ARFLAGS) libmsg_dbg.a msglib_dbg.o msgsub_dbg.o msgc_dbg.o
+	$(ARTS) libmsg_dbg.a
 	rm -f msglib_dbg.o
 	rm -f msgsub_dbg.o
 	rm -f msgc_dbg.o

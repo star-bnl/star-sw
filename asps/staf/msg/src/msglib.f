@@ -65,7 +65,7 @@
 
 	INCLUDE 'msg_inc'
 
-	LOGICAL Active, Counting
+	LOGICAL Active, Counting, Alarming
 
 	INTEGER LID !Local copy of ID.
 
@@ -73,7 +73,7 @@
 
 *	Check or set the ID & flags.
 *	Enter MSG's prefix in the index if needed.
-	CALL MSG_Check( MSG, LID, Active, Counting )
+	CALL MSG_Check( MSG, LID, Active, Alarming, Counting )
 
 	IF ( Counting ) THEN !COUNTING is true only if found.
 	  CALL MSG_Incr( LID )
@@ -82,6 +82,10 @@
 	IF ( Active ) THEN !Display it:
 	  CALL Message_Out( MSG, Lines )
 	  CALL MSG_Abort_Check( LID ) !Check if abort limit is exceeded, and maybe abort.
+	END IF
+
+	IF ( Alarming ) THEN !Alarm it:
+	  CALL MSGalarm( MSG, MSG_Alarm_Level( LID ) )
 	END IF
 
 	IF (ID.EQ.0) ID=LID !Ensure it's changed only if zero.
@@ -193,8 +197,11 @@
 	  MSG_Class_Default_Counting(    ID ) = .TRUE.
 	END IF
 
+	MSG_Class_Default_Alarming(    ID ) = .FALSE.
+
 	MSG_Class_Default_Abort_Limit( ID ) = Abort_Limit
 	MSG_Class_Default_Count_Limit( ID ) = Count_Limit
+	MSG_Class_Default_Alarm_Level( ID ) = 3
 
 
 	RETURN
@@ -219,7 +226,7 @@
 
 
 	INTEGER ID,WPT,SPT
-	LOGICAL ACTIVE,COUNTING
+	LOGICAL Active, Alarming, Counting
 
 *	First check to see if there is a wildcard in the specified prefix:
 	WPT=INDEX(PREFIX,'*')
@@ -246,7 +253,7 @@
 	  ID=0 !Clear this to do a lookup-by-prefix.
 *	  Check that the message-prefix is in the index, enter it
 *	  in the index if necessary, and return its ID:
-	  CALL MSG_CHECK(PREFIX,ID,ACTIVE,COUNTING)
+	  CALL MSG_CHECK( PREFIX, ID, Active, Alarming, Counting )
 	  IF (ID.GT.0) MSG_Counting(ID)=.TRUE.
 
 	END IF !WPT.EQ.1
@@ -271,7 +278,7 @@
 	INCLUDE 'msg_inc'
 
 	INTEGER ID,WPT,SPT
-	LOGICAL ACTIVE,COUNTING
+	LOGICAL Active, Alarming, Counting
 
 *	First check to see if there is a wildcard in the specified prefix:
 	WPT=INDEX(PREFIX,'*')
@@ -298,8 +305,60 @@
 	  ID=0 !Clear this to do a lookup-by-prefix.
 *	  Check that the message-prefix is in the index, enter it
 *	  in the index if necessary, and return its ID:
-	  CALL MSG_CHECK(PREFIX,ID,ACTIVE,COUNTING)
+	  CALL MSG_CHECK( PREFIX, ID, Active, Alarming, Counting )
 	  IF (ID.GT.0) MSG_Active(ID)=.FALSE.
+
+	END IF !WPT.EQ.1
+
+	RETURN
+	END
+*
+	SUBROUTINE			MSG_DisableAlarm( PREFIX )
+
+	IMPLICIT NONE
+
+*  Input:
+	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
+
+*  Brief description:  Disable message-alarming for a specified prefix.
+
+*  Description:
+*	Disable alarming, but continue counting the message
+*	recognized by PREFIX.
+
+
+	INCLUDE 'msg_inc'
+
+	INTEGER ID,WPT,SPT
+	LOGICAL Active, Alarming, Counting
+
+*	First check to see if there is a wildcard in the specified prefix:
+	WPT=INDEX(PREFIX,'*')
+
+	IF (WPT.EQ.1) THEN !Wildcard in first position -- do them all:
+
+	  DO ID=1,MSG_Nprefixes
+	    MSG_Alarming(ID)=.FALSE.
+	  END DO
+	  MSG_ALL_Noalarm=.TRUE.
+
+	ELSE IF (WPT.GT.1) THEN !There's a wildcard.
+
+*	  Point to last character before the wildcard; protect against too-long:
+	  SPT=MIN(WPT-1,MSG_Prefix_length_P)
+	  DO ID=1,MSG_Nprefixes
+	    IF ( PREFIX(:SPT).EQ.MSG_Prefix(ID)(:SPT) ) THEN	    
+	      MSG_Alarming(ID)=.FALSE.
+	    END IF
+	  END DO !ID=1,MSG_Nprefixes
+
+	ELSE !No wildcard.
+
+	  ID=0 !Clear this to do a lookup-by-prefix.
+*	  Check that the message-prefix is in the index, enter it
+*	  in the index if necessary, and return its ID:
+	  CALL MSG_CHECK( PREFIX, ID, Active, Alarming, Counting )
+	  IF (ID.GT.0) MSG_Alarming(ID)=.FALSE.
 
 	END IF !WPT.EQ.1
 
@@ -334,7 +393,7 @@
 
 	INCLUDE 'msg_inc'
 
-	LOGICAL ACTIVE,COUNTING
+	LOGICAL Active, Alarming, Counting
 
 	INTEGER LID !Local copy of ID.
 
@@ -342,7 +401,7 @@
 
 *	Check or set the ID & flags.
 *	Enter MSG's prefix in the index if needed.
-	CALL MSG_CHECK( MSG, LID, ACTIVE, COUNTING )
+	CALL MSG_CHECK( MSG, LID, Active, Alarming, Counting )
 
 	IF (COUNTING) THEN !COUNTING is true only if found.
 	  CALL MSG_INCR(LID)
@@ -351,6 +410,10 @@
 	IF (ACTIVE) THEN !Display it:
 	  CALL MSG_DISPLAY_OUT( MSG, LINES )
 	  CALL MSG_Abort_Check( LID ) !Check if abort limit is exceeded, and maybe abort.
+	END IF
+
+	IF ( Alarming ) THEN
+	  CALL MSGalarm( MSG, MSG_Alarm_Level(LID) )
 	END IF
 
 	IF (ID.EQ.0) ID=LID !Ensure it's changed only if zero.
@@ -413,7 +476,7 @@
 
 	INCLUDE 'msg_inc'
 
-	LOGICAL ACTIVE,COUNTING
+	LOGICAL Active, Alarming, Counting
 
 	INTEGER LID !Local copy of ID.
 
@@ -421,7 +484,7 @@
 
 *	Check or set the ID & flags.
 *	Enter MSG's prefix in the index if needed.
-	CALL MSG_CHECK(MSG,LID,ACTIVE,COUNTING)
+	CALL MSG_CHECK( MSG, LID, Active, Alarming, Counting )
 
 	IF (COUNTING) THEN !COUNTING is true only if found.
 	  CALL MSG_INCR(LID)
@@ -430,6 +493,10 @@
 	IF (ACTIVE) THEN !Display it:
 	  CALL MSG_DISPLAY_AND_ECHO_OUT(MSG,LINES,LUN)
 	  CALL MSG_Abort_Check( LID ) !Check if abort limit is exceeded, and maybe abort.
+	END IF
+
+	IF ( Alarming ) THEN
+	  CALL MSGalarm( MSG, MSG_Alarm_Level(LID) )
 	END IF
 
 	IF (ID.EQ.0) ID=LID !Ensure it's changed only if zero.
@@ -478,7 +545,7 @@
 *  Brief description:  Enable message-display for a specified prefix.
 
 *  Description:
-*	Enable message-output for the STAR-standard message with
+*	Enable message-output for the message with
 *	stored prefix PREFIX.  Has no effect if message-display
 *	has not been disabled.
 
@@ -486,7 +553,7 @@
 
 
 	INTEGER ID,WPT,SPT
-	LOGICAL ACTIVE,COUNTING
+	LOGICAL Active, Alarming, Counting
 
 *	First check to see if there is a wildcard in the specified prefix:
 	WPT=INDEX(PREFIX,'*')
@@ -517,11 +584,69 @@
 	  ID=0 !Clear this to do a lookup-by-prefix.
 *	  Check that the message-prefix is in the index, enter it
 *	  in the index if necessary, and return its ID:
-	  CALL MSG_Check( Prefix, ID, Active, Counting )
+	  CALL MSG_Check( Prefix, ID, Active, Alarming, Counting )
 	  IF (ID.GT.0) THEN
 	    MSG_Active(      ID ) = .TRUE.
 	    MSG_Counting(    ID ) = .TRUE. !Active, No-Counting is an illegal state.
 	    MSG_Count_limit( ID ) = 0 !Always reset counting limit here, too.
+	  END IF
+
+	END IF !WPT.EQ.1
+
+	RETURN
+	END
+*
+	SUBROUTINE			MSG_EnableAlarm( PREFIX )
+
+	IMPLICIT NONE
+
+*  Input:
+	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
+
+*  Brief description:  Enable message-display for a specified prefix.
+
+*  Description:
+*	Enable message-alarming for the message with
+*	stored prefix PREFIX.  Has no effect if message-display
+*	has not been disabled.
+
+	INCLUDE 'msg_inc'
+
+
+	INTEGER ID,WPT,SPT
+	LOGICAL Active, Alarming, Counting
+
+*	First check to see if there is a wildcard in the specified prefix:
+	WPT=INDEX(PREFIX,'*')
+
+	IF (WPT.EQ.1) THEN !Wildcard in first position -- do them all:
+
+	  DO ID=1,MSG_Nprefixes
+	    MSG_Alarming(    ID ) = .TRUE. !Alarming, No-Counting is an illegal state.
+	    MSG_Counting(    ID ) = .TRUE. !Alarming, No-Counting is an illegal state.
+	  END DO
+	  MSG_ALL_DISABLE=.FALSE.
+
+	ELSE IF (WPT.GT.1) THEN !There's a wildcard.
+
+*	  Point to last character before the wildcard; protect against too-long:
+	  SPT=MIN(WPT-1,MSG_Prefix_length_P)
+	  DO ID=1,MSG_Nprefixes
+	    IF ( PREFIX(:SPT).EQ.MSG_Prefix(ID)(:SPT) ) THEN
+	      MSG_Alarming(    ID ) = .TRUE. !Alarming, No-Counting is an illegal state.
+	      MSG_Counting(    ID ) = .TRUE. !Alarming, No-Counting is an illegal state.
+	    END IF
+	  END DO !ID=1,MSG_Nprefixes
+
+	ELSE !No wildcard.
+
+	  ID=0 !Clear this to do a lookup-by-prefix.
+*	  Check that the message-prefix is in the index, enter it
+*	  in the index if necessary, and return its ID:
+	  CALL MSG_Check( Prefix, ID, Active, Alarming, Counting )
+	  IF (ID.GT.0) THEN
+	    MSG_Alarming(    ID ) = .TRUE. !Alarming, No-Counting is an illegal state.
+	    MSG_Counting(    ID ) = .TRUE. !Alarming, No-Counting is an illegal state.
 	  END IF
 
 	END IF !WPT.EQ.1
@@ -560,7 +685,7 @@
 
 	INCLUDE 'msg_inc'
 
-	LOGICAL ACTIVE,COUNTING
+	LOGICAL Active, Alarming, Counting
 
 	INTEGER LID !Local copy of ID.
 
@@ -569,7 +694,7 @@
 
 *	Check that the message-prefix is in the index, enter it
 *	in the index if necessary, and return its ID:
-	CALL MSG_CHECK(PREFIX,LID,ACTIVE,COUNTING)
+	CALL MSG_CHECK( PREFIX, LID, Active, Alarming, Counting)
 
 	IF (ACTIVE) THEN !Message is enabled;  return .TRUE.
 	  MSG_ENABLED=.TRUE.
@@ -627,7 +752,7 @@
 
 	INCLUDE 'msg_inc'
 
-	LOGICAL ACTIVE,COUNTING,FOUND
+	LOGICAL Active, Alarming, Counting, Found
 
 	INTEGER LID !Local copy of ID.
 
@@ -640,7 +765,7 @@
 *	defining (& enabling!) a message:
 	IF (LID.LE.0) THEN !Look up the message in the index:
 
-	  FOUND=MSG_FIND(PREFIX,LID,ACTIVE,COUNTING) !Set the LID & flags.
+	  FOUND=MSG_FIND( PREFIX, LID, Active, Alarming, Counting ) !Set the LID & flags.
 
 	  IF (.NOT.FOUND) THEN !Enter the prefix in the index:
 
@@ -660,6 +785,7 @@
 
 	ELSE !Fast lookup:
 	  ACTIVE = MSG_Active(LID)
+	  Alarming = MSG_Alarming(LID)
 	  COUNTING = MSG_Counting(LID)
 
 	END IF !LID.LE.0
@@ -742,9 +868,11 @@
 	  MSG_Nclasses        = 0
 	  MSG_Total_Lookups   = 0 !Count of all prefix (character-search) lookups.
 	  MSG_All_Count_Limit = 50 !Default for no-class messages.
+	  MSG_All_Alarm_Level = 3
 	  MSG_TimeStamp_CPU   = .FALSE. !If true, time-stamp on changed CPU time.
 	  MSG_All_Disable     = .FALSE.
 	  MSG_All_Nocount     = .FALSE.
+	  MSG_All_Noalarm     = .FALSE.
 	  MSG_Sorted          = .FALSE.
 	  CALL MSG_Journal_Off
 	  CALL MSG_Set_LUN( Terminal_LUN, Journal_LUN )
@@ -999,7 +1127,7 @@
 *	that prefix's "total CPU time" is incremented by Current CPU time, less
 *	the "Marked CPU time".  The Marked CPU time is then zeroed.
 
-	LOGICAL Active, Counting
+	LOGICAL Active, Alarming, Counting
 	INTEGER LID !Local copy of ID.
 	INTEGER CPU_Time(2)
 
@@ -1007,7 +1135,7 @@
 
 *	Check or set the ID & flags.
 *	Enter MSG's prefix in the index if needed.
-	CALL MSG_Check( Prefix, LID, Active, Counting )
+	CALL MSG_Check( Prefix, LID, Active, Alarming, Counting )
 
 	IF ( Counting ) THEN !Counting is true only if found.
 *	  Prefix was found or defined, counting is enabled for it, and LID is now valid.
@@ -1058,7 +1186,7 @@
 
 
 	INTEGER ID,WPT,SPT
-	LOGICAL ACTIVE,COUNTING
+	LOGICAL Active, Alarming, Counting
 
 *	First check to see if there is a wildcard in the specified prefix:
 	WPT=INDEX(PREFIX,'*')
@@ -1066,7 +1194,7 @@
 	IF (WPT.EQ.1) THEN !Wildcard in first position -- do them all:
 
 	  DO ID=1,MSG_Nprefixes
-	    MSG_Counting(ID)=MSG_Active(ID) !Can't "no-count" an active message!
+	    MSG_Counting(ID)=MSG_Active(ID) .OR. MSG_Alarming(ID) !Can't "no-count" an active or alarming message!
 	  END DO
 	  MSG_All_Nocount=MSG_All_Disable   !Can't "no-count" an active message!
 
@@ -1076,7 +1204,7 @@
 	  SPT=MIN(WPT-1,MSG_Prefix_length_P)
 	  DO ID=1,MSG_Nprefixes
 	    IF ( PREFIX(:SPT).EQ.MSG_Prefix(ID)(:SPT) ) THEN	    
-	      MSG_Counting(ID)=MSG_Active(ID) !Can't "no-count" an active message!
+	      MSG_Counting(ID)=MSG_Active(ID) .OR. MSG_Alarming(ID) !Can't "no-count" an active or alarming message!
 	    END IF
 	  END DO !ID=1,MSG_Nprefixes
 
@@ -1085,8 +1213,8 @@
 	  ID=0 !Clear this to do a lookup-by-prefix.
 *	  Check that the message-prefix is in the index, enter it
 *	  in the index if necessary, and return its ID:
-	  CALL MSG_CHECK(PREFIX,ID,ACTIVE,COUNTING)
-	  IF (ID.GT.0) MSG_Counting(ID)=MSG_Active(ID) !Can't "no-count" an active message!
+	  CALL MSG_CHECK( PREFIX, ID, Active, Alarming, Counting )
+	  IF (ID.GT.0) MSG_Counting(ID)=MSG_Active(ID) .OR. MSG_Alarming(ID) !Can't "no-count" an active or alarming message!
 
 	END IF !WPT.EQ.1
 
@@ -1181,7 +1309,7 @@
 
 
 	INTEGER ID,WPT,SPT
-	LOGICAL ACTIVE,COUNTING
+	LOGICAL Active, Alarming, Counting
 
 *	First check to see if there is a wildcard in the specified prefix:
 	WPT=INDEX(PREFIX,'*')
@@ -1213,10 +1341,11 @@
 	  ID=0 !Clear this to do a lookup-by-prefix.
 *	  Check that the message-prefix is in the index, enter it
 *	  in the index if necessary, and return its ID:
-	  CALL MSG_CHECK(PREFIX,ID,ACTIVE,COUNTING)
+	  CALL MSG_CHECK( PREFIX, ID, Active, Alarming, Counting )
 	  IF (ID.GT.0) THEN
 	    MSG_Abort_limit(ID)=LIMIT
 	    MSG_Count_limit(ID)=LIMIT
+	    MSG_Alarm_level(ID)=3
 	    MSG_Active  ( ID ) = .TRUE.
 	    MSG_Counting( ID ) = .TRUE.
 	  END IF
@@ -1239,6 +1368,15 @@
 *	Set the MSG package parameters on individual messages, referenced
 *	by prefix, according to arguments contained in a single character-
 *	string command contained in COM.  Commands take these forms:
+
+*	To disable specific alarms, but to continue counting their occurances and displaying messages:
+*	NOALARM prefix-1 prefix-2 ... prefix-n
+
+*	To enable specific alarms:
+*	ALARM prefix-1 prefix-2 ... prefix-n
+
+*	To sat the level on specific alarms:
+*	LEVEL prefix-1 prefix-2 ... prefix-n
 
 *	To disable specific messages, but to continue counting their occurances:
 *	DISABLE prefix-1 prefix-2 ... prefix-n
@@ -1301,7 +1439,13 @@
 	JARG=2
 	DO WHILE (JARG.LE.NARGS)
 	  ERROR=.FALSE.
-	  IF      (ARG(1).EQ.'DISABLE') THEN
+	  IF      (ARG(1).EQ.'NOALARM') THEN
+	    CALL MSG_DisableAlarm(ARG(JARG))
+	    JARG=JARG+1
+	  ELSE IF (ARG(1).EQ.'ALARM' ) THEN
+	    CALL MSG_EnableAlarm(ARG(JARG))
+	    JARG=JARG+1
+	  ELSE IF (ARG(1).EQ.'DISABLE') THEN
 	    CALL MSG_DISABLE(ARG(JARG))
 	    JARG=JARG+1
 	  ELSE IF (ARG(1).EQ.'ENABLE' ) THEN
@@ -1313,6 +1457,17 @@
 	  ELSE IF (ARG(1).EQ.'NOCOUNT') THEN
 	    CALL MSG_NOCOUNT(ARG(JARG))
 	    JARG=JARG+1
+	  ELSE IF (ARG(1).EQ.'LEVEL'  ) THEN
+	    IF (JARG+2.GT.NARGS) THEN !Not enough arguments are present.
+	      ERROR=.TRUE.
+	    ELSE IF (ARG(JARG+1).NE.'=') THEN !Wrong format.
+	      ERROR=.TRUE.
+	    ELSE IF (.NOT.VIARG(JARG+2)) THEN !Not a valid integer.
+	      ERROR=.TRUE.
+	    ELSE !All's well -- set this level:
+	      CALL MSG_Set_Level( ARG(JARG), IARG(JARG+2) )
+	    END IF
+	    JARG=JARG+3
 	  ELSE IF (ARG(1).EQ.'LIMIT'  ) THEN
 	    IF (JARG+2.GT.NARGS) THEN !Not enough arguments are present.
 	      ERROR=.TRUE.
@@ -1367,7 +1522,7 @@
      1	        'MSG_SET_BY_COMMAND-E2 zero-length command given.',1)
 	    END IF
 	    CALL MESSAGE_OUT('    Legal commands are:'//
-     1	    ' COUNT, DISABLE, ENABLE, LIMIT, NOCOUNT, ABORT, LINES, TIMESTAMP.',1)
+     1	    ' ALARM, NOALARM, LEVEL, COUNT, DISABLE, ENABLE, LIMIT, NOCOUNT, ABORT, LINES, TIMESTAMP.',1)
 	    JARG=NARGS+1 !Force loop termination.
 	  END IF
 
@@ -1417,6 +1572,59 @@
 	RETURN
 	END
 *
+	SUBROUTINE			MSG_Set_Level( Prefix, Level )
+
+	IMPLICIT NONE
+
+*  Inputs:
+	CHARACTER*(*) Prefix !A message prefix.
+	INTEGER       Level  !Alarm level for specified prefix.
+
+*  Description:  Set alarm level for a prefix.
+*	Set the alarm level for the message recognized by PREFIX;
+*	Wildcards are permitted.
+
+	INCLUDE 'msg_inc'
+
+
+	INTEGER ID,WPT,SPT
+	LOGICAL Active, Alarming, Counting
+
+*	First check to see if there is a wildcard in the specified prefix:
+	WPT=INDEX(PREFIX,'*')
+
+	IF (WPT.EQ.1) THEN !Wildcard in first position -- do all enabled ones:
+
+	  DO ID=1,MSG_Nprefixes
+	    MSG_Alarm_level( ID ) = Level
+	  END DO
+	  MSG_ALL_Alarm_Level=Level !And set the default, for new messages...
+
+	ELSE IF (WPT.GT.1) THEN !There's a wildcard -- do selected, enabled ones.
+
+*	  Point to last character before the wildcard; protect against too-long:
+	  SPT=MIN(WPT-1,MSG_Prefix_length_P)
+	  DO ID=1,MSG_Nprefixes
+	    IF ( PREFIX(:SPT).EQ.MSG_Prefix(ID)(:SPT) ) THEN	    
+	      MSG_Alarm_level( ID ) = Level
+	    END IF
+	  END DO !ID=1,MSG_Nprefixes
+
+	ELSE !No wildcard.
+
+	  ID=0 !Clear this to do a lookup-by-prefix.
+*	  Check that the message-prefix is in the index, enter it
+*	  in the index if necessary, and return its ID:
+	  CALL MSG_Check( Prefix, ID, Active, Alarming, Counting )
+	  IF (ID.GT.0) THEN
+	    MSG_Alarm_level( ID ) = Level
+	  END IF
+
+	END IF !WPT.EQ.1
+
+	RETURN
+	END
+*
 	SUBROUTINE			MSG_Set_Limit( Prefix, Limit )
 
 	IMPLICIT NONE
@@ -1436,7 +1644,7 @@
 
 
 	INTEGER ID,WPT,SPT
-	LOGICAL ACTIVE,COUNTING
+	LOGICAL Active, Alarming, Counting
 
 *	First check to see if there is a wildcard in the specified prefix:
 	WPT=INDEX(PREFIX,'*')
@@ -1477,7 +1685,7 @@
 	  ID=0 !Clear this to do a lookup-by-prefix.
 *	  Check that the message-prefix is in the index, enter it
 *	  in the index if necessary, and return its ID:
-	  CALL MSG_Check(Prefix,ID,Active,Counting)
+	  CALL MSG_Check( Prefix, ID, Active, Alarming, Counting )
 	  IF (ID.GT.0) THEN
 	    IF ( Limit .EQ. 0 ) THEN !No limit is different:
 	      MSG_Count_limit( ID ) = 0
@@ -1899,7 +2107,14 @@
 
 	  IF (State .NE. ' ') THEN !State already determined.
 	  ELSE IF ( MSG_Active( MSG_SID(ID) ) ) THEN
-	    State = '  Active'
+	    IF ( MSG_Alarming( MSG_SID(ID) ) ) THEN
+	      State = '!Active!'
+	    ELSE
+	      State = ' Active '
+	    END IF
+	    IF ( MSG_Summary_Mode_Active ) List_this_Message = .TRUE.
+	  ELSE IF ( MSG_Alarming( MSG_SID(ID) ) ) THEN
+	    State = 'Alarming'
 	    IF ( MSG_Summary_Mode_Active ) List_this_Message = .TRUE.
 	  ELSE IF ( MSG_Counting( MSG_SID(ID) ) ) THEN
 	    State = 'Counting'
@@ -2133,7 +2348,7 @@
 
 	INCLUDE 'msg_inc'
 
-	LOGICAL ACTIVE,COUNTING
+	LOGICAL Active, Alarming, Counting
 
 	INTEGER LID !Local copy of ID.
 
@@ -2141,7 +2356,7 @@
 
 *	Check or set the ID & flags.
 *	Enter MSG's prefix in the index if needed.
-	CALL MSG_CHECK(MSG,LID,ACTIVE,COUNTING)
+	CALL MSG_CHECK( MSG, LID, Active, Alarming, Counting )
 
 	IF (COUNTING) THEN !COUNTING is true only if found.
 	  CALL MSG_INCR(LID)
@@ -2150,6 +2365,10 @@
 	IF (ACTIVE) THEN !Display it on the journal file:
 	  CALL MSG_TO_JOURNAL_OUT(MSG,LINES)
 	  CALL MSG_Abort_Check( LID ) !Check if abort limit is exceeded, and maybe abort.
+	END IF
+
+	IF ( Alarming ) THEN
+	  CALL MSGalarm( MSG, MSG_Alarm_Level(LID) )
 	END IF
 
 	IF (ID.EQ.0) ID=LID !Ensure it's changed only if zero.
@@ -2216,7 +2435,7 @@
 
 	INCLUDE 'msg_inc'
 
-	LOGICAL ACTIVE,COUNTING
+	LOGICAL Active, Alarming, Counting
 
 	INTEGER LID !Local copy of ID.
 
@@ -2224,7 +2443,7 @@
 
 *	Check or set the ID & flags.
 *	Enter MSG's prefix in the index if needed.
-	CALL MSG_CHECK(MSG,LID,ACTIVE,COUNTING)
+	CALL MSG_CHECK( MSG, LID, Active, Alarming, Counting )
 
 	IF (COUNTING) THEN !COUNTING is true only if found.
 	  CALL MSG_INCR(LID)
@@ -2233,6 +2452,10 @@
 	IF (ACTIVE) THEN !Display it:
 	  CALL MSG_TO_LUN_OUT(MSG,LINES,LUN)
 	  CALL MSG_Abort_Check( LID ) !Check if abort limit is exceeded, and maybe abort.
+	END IF
+
+	IF ( Alarming ) THEN
+	  CALL MSGalarm( MSG, MSG_Alarm_Level(LID) )
 	END IF
 
 	IF (ID.EQ.0) ID=LID !Ensure it's changed only if zero.

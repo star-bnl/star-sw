@@ -76,7 +76,7 @@
 
 	CALL EXIT
 	END
-
+*
 	SUBROUTINE	MSG_TestAlarm( MSG, Level )
 
 	IMPLICIT NONE

@@ -55,11 +55,15 @@
 
 *	msg new-definition defaults:
 	LOGICAL MSG_All_Disable     !If true, newly defined messages are disabled.
+	LOGICAL MSG_All_Noalarm     !If true, newly defined messages won't alarm.
 	LOGICAL MSG_All_Nocount     !If true, newly defined messages won't count.
 	INTEGER MSG_All_Count_Limit !Newly defined messages get this count-limit.
+	INTEGER MSG_All_Alarm_Level !Newly defined messages get this alarm-level.
 	COMMON /MSG_I/ MSG_All_Disable
+	COMMON /MSG_I/ MSG_All_Noalarm
 	COMMON /MSG_I/ MSG_All_Nocount
 	COMMON /MSG_I/ MSG_All_Count_Limit
+	COMMON /MSG_I/ MSG_All_Alarm_Level
 
 *	msg count of total slow prefix-lookups (ie, character-searches):
 	INTEGER MSG_Total_Lookups
@@ -79,7 +83,9 @@
 	INTEGER MSG_CPU_Total   !"Total" CPU usage -- see MSG_Mark in msglib.f .
 	INTEGER MSG_Count_limit !Occurance-count at which each defined prefix is disabled.
 	INTEGER MSG_Abort_limit !Occurance-count at which each defined prefix causes an abort.
+	INTEGER MSG_Alarm_level !Alarm level for each defined prefix.
 	LOGICAL MSG_Active      !Whether each prefix is active (enabled -- produces a message).
+	LOGICAL MSG_Alarming    !Whether each prefix is alarming (for application-registered alarm handler).
 	LOGICAL MSG_Counting    !Whether each is counting.
 	COMMON /MSG_I/ MSG_Nprefixes
 	COMMON /MSG_I/ MSG_Nclasses
@@ -93,18 +99,24 @@
 	COMMON /MSG_I/ MSG_CPU_Total(   MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Count_limit( MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Abort_limit( MSG_Nprefixes_max_P )
+	COMMON /MSG_I/ MSG_Alarm_level( MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Active(      MSG_Nprefixes_max_P )
+	COMMON /MSG_I/ MSG_Alarming(    MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Counting(    MSG_Nprefixes_max_P )
 
 
 	LOGICAL MSG_Class_Default_Active      !Default active-state for messages of each class.
 	LOGICAL MSG_Class_Default_Counting    !Default counting-state for messages of each class.
+	LOGICAL MSG_Class_Default_Alarming    !Default alarming-state for messages of each class.
 	INTEGER MSG_Class_Default_Count_Limit !Default count limit for messages of each class.
 	INTEGER MSG_Class_Default_Abort_Limit !Default abort limit for messages of each class.
+	INTEGER MSG_Class_Default_Alarm_Level !Default alarm level.
 	COMMON /MSG_I/ MSG_Class_Default_Active(      0:MSG_Nclasses_max_P  )
 	COMMON /MSG_I/ MSG_Class_Default_Counting(    0:MSG_Nclasses_max_P  )
+	COMMON /MSG_I/ MSG_Class_Default_Alarming(    0:MSG_Nclasses_max_P  )
 	COMMON /MSG_I/ MSG_Class_Default_Count_Limit( 0:MSG_Nclasses_max_P  )
 	COMMON /MSG_I/ MSG_Class_Default_Abort_Limit( 0:MSG_Nclasses_max_P  )
+	COMMON /MSG_I/ MSG_Class_Default_Alarm_Level( 0:MSG_Nclasses_max_P  )
 
 
 *	Note:  Use a different named common here because not all machines
