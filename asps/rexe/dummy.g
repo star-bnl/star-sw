@@ -39,4 +39,8 @@ subroutine tdm_map_table;       print *,' dummy tdm_map_table called ';   end
 subroutine ami_module_register; print *,' dummy ami_module_register  ';   end
 subroutine agpawq;              print *,' dummy agpawq called ';          end
 subroutine hplopt;              print *,' dummy hplopt called ';          end
+subroutine TDM_NEW_TABLE;              print *,' dummy TDM_NEW_TABLE called ';          end
+subroutine AMI_CALL;              print *,' dummy AMI_CALL called ';          end
+subroutine dui_cdir;              print *,' dummy dui_cdir called ';          end
+subroutine agfpara;              print *,' dummy agfpara called ';          end
 
