@@ -183,7 +183,7 @@ macro bfc_init _
             exec init_ev0#init_ev0
     (ev0_e) exec create_tables_global#ev0_eval2
             exec init_ev0#ev0_eval2
-      (ctb) exec create_tables_ctf#init
+      (ctf) exec create_tables_ctf#init
             exec ctg_init#read
             exec cts_init#cts_init
       (mwc) exec mwg_init
@@ -197,9 +197,11 @@ macro bfc_init _
       (jet) exec create_tables_emc#jet
 	    exec init_jet#init
     (ddedx) exec create_tables_global#dst
+     (dpnt) exec create_tables_global#dst    
     (dmsft) exec create_tables_global#dst
     (dmhrd) exec create_tables_global#dst
     (desum) exec create_tables_global#dst
+            exec init_dst#init_dst
     (drsum) exec create_tables_global#dst   
     (fzout) user/output o [output_fzd_file]
     (evout)
@@ -337,9 +339,10 @@ ABEND:
       (jet)    exec run_jet#egrid
                exec run_jet#erj
     (ddedx)    exec run_dst#dst_dedx_filler
+     (dpnt)    exec run_dst#point_filler
     (dmsft)    exec run_dst#dst_mon_soft
     (dmhrd)    nextl 1
-    (desum)    nextl 1
+    (desum)    exec run_dst#event_summary
     (drsum)    nextl 1
     (evout)    if [output_xdf_file]="" then
                  message "Empty output file"
