@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_ZS_SR.cxx,v 1.6 2001/06/27 22:08:15 jcs Exp $
+ * $Id: FTPV1P0_ZS_SR.cxx,v 1.7 2001/06/30 02:39:47 jcs Exp $
  * Author: M.J. LeVine, H.Huemmler
  ***************************************************************************
  * Description: FTPC V1.0 Zero Suppressed Reader
@@ -11,6 +11,9 @@
  * 
  ***************************************************************************
  * $Log: FTPV1P0_ZS_SR.cxx,v $
+ * Revision 1.7  2001/06/30 02:39:47  jcs
+ * add forgotten include for assert.h
+ *
  * Revision 1.6  2001/06/27 22:08:15  jcs
  * Initialize pad_seq
  *
@@ -45,6 +48,7 @@
  *
  **************************************************************************/
 #include <iostream.h>
+#include <assert.h>
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "FTPV1P0.hh"
