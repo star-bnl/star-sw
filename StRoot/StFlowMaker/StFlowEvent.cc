@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.10 2000/01/13 22:19:18 posk Exp $
+// $Id: StFlowEvent.cc,v 1.11 2000/01/24 23:00:59 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cc,v $
+// Revision 1.11  2000/01/24 23:00:59  posk
+// Merged updates
+//
 // Revision 1.10  2000/01/13 22:19:18  posk
 // Updates and corrections.
 //
@@ -205,7 +208,7 @@ TVector2 StFlowEvent::Q(Int_t harN, Int_t selN, Int_t subN) {
     if (pFlowTrack->Select(harN, selN, subN)) {
       float mPhi = pFlowTrack->Phi();
       double phiWgt = PhiWeight(mPhi, selN, harN);
-      if (pFlowTrack->Eta() < 0 && (harN+1) % 2 == 1) phiWgt *= -1.;
+      if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
       mQx += phiWgt * cos(mPhi * order);
       mQy += phiWgt * sin(mPhi * order);
     }

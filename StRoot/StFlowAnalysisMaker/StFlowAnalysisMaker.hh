@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.hh,v 1.7 2000/01/14 01:35:52 snelling Exp $
+// $Id: StFlowAnalysisMaker.hh,v 1.8 2000/01/24 23:02:13 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.hh,v $
+// Revision 1.8  2000/01/24 23:02:13  posk
+// Merged updates
+//
 // Revision 1.7  2000/01/14 01:35:52  snelling
 // changed include path ../FlowMaker/ to FlowMaker/
 //
@@ -140,7 +143,11 @@ private:
     TH2D*     mHistYield2D;
     TH2D*     mHistSum_v2D;
     TH2F*     mHist_vObs2D;
+    TProfile* mHist_vObsEta;
+    TProfile* mHist_vObsPt;
     TH2F*     mHist_v2D;
+    TProfile* mHist_vEta;
+    TProfile* mHist_vPt;
   };
 
   // for each selection
