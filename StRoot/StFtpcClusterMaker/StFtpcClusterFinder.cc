@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.cc,v 1.31 2002/03/22 08:52:52 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.32 2002/03/22 08:58:46 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.32  2002/03/22 08:58:46  jcs
+// invert cluster pad number in FTPC East
+// convert cluster cartestian coordinates for FTPC west into STAR global coordinate system
+//
 // Revision 1.31  2002/03/22 08:52:52  jcs
 // correct memory leaks found by Insure
 //
@@ -1867,6 +1871,7 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
 			   + mDb->radiansPerBoundary())+halfpi;
 
    /* Invert pad number (== Peak->PadPosition) for FTPC East  */
+   /* (not yet understood where and why pad numbers were inverted) */
    if (iRow >= 10) {
        Peak->Phi = mDb->radiansPerBoundary() / 2 
          + (160.0 - Peak->PadPosition)* mDb->radiansPerPad()
