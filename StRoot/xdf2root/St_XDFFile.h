@@ -33,7 +33,7 @@ class St_XDFFile
     St_XDFFile(Char_t *filename,Char_t *mode="r");         // Create object and open file
     virtual ~St_XDFFile();
     Int_t    GetErrorCode(){ return fErrorCode;}
-    virtual Int_t       OpenXDF(Char_t *filename,Char_t *mode); // Open file and read create the "root" St_DataSet (it is called from ctor)
+    virtual Int_t       OpenXDF(Char_t *filename,Char_t *mode="r"); // Open file and read create the "root" St_DataSet (it is called from ctor)
     virtual St_DataSet *NextEventGet();                         // create St_DataSet and read the next event in it.
     virtual Int_t       NextEventPut(St_DataSet *dataset);      // Create DS_DATASET_T from St_DataSet and write it out in XDR format
     virtual Int_t       CloseXDF();                             // close the XDF file (it is called from dtor)
