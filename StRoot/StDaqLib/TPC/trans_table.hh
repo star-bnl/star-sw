@@ -1,3 +1,23 @@
+/***************************************************************************
+ * $Id: trans_table.hh,v 1.2 1999/07/02 04:43:25 levine Exp $
+ * Author: M.J. LeVine
+ ***************************************************************************
+ * Description: 10-bit to 8-bit translation table
+ *              and inverse (from Roy Bossingham's tables)
+ *      
+ *   change log
+ *
+ ***************************************************************************
+ * $Log: trans_table.hh,v $
+ * Revision 1.2  1999/07/02 04:43:25  levine
+ * Many changes -
+ *  navigates to head of TPCP bank independent of position.
+ *  move declarations out of loops where they were upsetting some compilers
+ *  suppress output from class libraries with run-time switch EventReader.verbose
+ *  added TPCV2P0_CPP_SR::getAsicParams()
+ *
+ *
+ **************************************************************************/
 
 /*  10-to-8-bit Translation Table, 0-1023:   */
 

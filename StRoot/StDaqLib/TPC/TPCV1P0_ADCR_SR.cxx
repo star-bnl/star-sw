@@ -1,13 +1,31 @@
+/***************************************************************************
+ * $Id: TPCV1P0_ADCR_SR.cxx,v 1.2 1999/07/02 04:43:23 levine Exp $
+ * Author: Jeff Landgraf
+ ***************************************************************************
+ * Description: TPC (v1.0) raw ADC reader 
+ *      
+ *
+ *   change log
+ * 03-Jun-99 MJL added return TRUE to TPCV1P0_ADCR_SR::initialize()
+ * 03-Jun-99 MJL added return TRUE to TPCV1P0_PRMS_SR::initialize()
+ * 03-Jun-99 MJL added return TRUE to TPCV1P0_PEDR_SR::initialize()
+ *
+ ***************************************************************************
+ * $Log: TPCV1P0_ADCR_SR.cxx,v $
+ * Revision 1.2  1999/07/02 04:43:23  levine
+ * Many changes -
+ *  navigates to head of TPCP bank independent of position.
+ *  move declarations out of loops where they were upsetting some compilers
+ *  suppress output from class libraries with run-time switch EventReader.verbose
+ *  added TPCV2P0_CPP_SR::getAsicParams()
+ *
+ *
+ **************************************************************************/
 #include <iostream>
 
-// change log
-// 03-Jun-99 MJL added return TRUE to TPCV1P0_ADCR_SR::initialize()
-// 03-Jun-99 MJL added return TRUE to TPCV1P0_PRMS_SR::initialize()
-// 03-Jun-99 MJL added return TRUE to TPCV1P0_PEDR_SR::initialize()
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "TPCV1P0.hh"
-// TPC V1.0 Zero Suppressed Reader
 
 //==================== ADC Raw  Reader =============================
 

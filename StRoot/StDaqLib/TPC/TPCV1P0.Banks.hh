@@ -1,9 +1,28 @@
-// Record Formats for Version 1.10
+/***************************************************************************
+ * $Id: TPCV1P0.Banks.hh,v 1.2 1999/07/02 04:43:23 levine Exp $
+ * Author: M.J. LeVine
+ ***************************************************************************
+ * Description:  Record Formats for Version 2.0
+ *      
+ *
+ *   change log
+ * 02-Jun-99 MJL changed HyperSector[12] to HyperSector[24]
+ *
+ ***************************************************************************
+ * $Log: TPCV1P0.Banks.hh,v $
+ * Revision 1.2  1999/07/02 04:43:23  levine
+ * Many changes -
+ *  navigates to head of TPCP bank independent of position.
+ *  move declarations out of loops where they were upsetting some compilers
+ *  suppress output from class libraries with run-time switch EventReader.verbose
+ *  added TPCV2P0_CPP_SR::getAsicParams()
+ *
+ *
+ **************************************************************************/
+
 #ifndef RECFORMATS_HH
 #define RECFORMATS_HH
 
-// change log
-// 02-Jun-99 MJL changed HyperSector[12] to HyperSector[24]
 
 #define classname(x) x ## V1P0    //embed version number in bank name
 
@@ -104,15 +123,6 @@ struct classname(Bank_TPCADCX) : public Bank  // Mezzanine Index Bank
   ADCX_entry entry[VARLENGTH];    // up to 4 repeats
 };
 
-
-struct ASIC_params 
- // these params used to emulate ASIC behavior in the reader
-{
-  unsigned char thresh_lo;
-  unsigned char thresh_hi;
-  unsigned char n_seq_lo;
-  unsigned char n_seq_hi;
-};
 
 struct CPPR_entry
 {

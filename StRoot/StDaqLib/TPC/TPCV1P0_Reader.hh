@@ -1,3 +1,23 @@
+/***************************************************************************
+ * $Id: TPCV1P0_Reader.hh,v 1.2 1999/07/02 04:43:23 levine Exp $
+ * Author: Jeff Landgraf and M.J. LeVine
+ ***************************************************************************
+ * Description: common definitions for TPC
+ *      
+ *
+ *   change log
+ *
+ ***************************************************************************
+ * $Log: TPCV1P0_Reader.hh,v $
+ * Revision 1.2  1999/07/02 04:43:23  levine
+ * Many changes -
+ *  navigates to head of TPCP bank independent of position.
+ *  move declarations out of loops where they were upsetting some compilers
+ *  suppress output from class libraries with run-time switch EventReader.verbose
+ *  added TPCV2P0_CPP_SR::getAsicParams()
+ *
+ *
+ **************************************************************************/
 #ifndef TPCV1P0_READER_HH
 #define TPCV1P0_READER_HH
 #include "StDaqLib/GENERIC/EventReader.hh"

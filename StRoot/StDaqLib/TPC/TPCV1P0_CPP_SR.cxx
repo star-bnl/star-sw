@@ -1,13 +1,31 @@
-//  MJL 5/6/99  code cloned from Jeff's ADCR_SR
-//
+/***************************************************************************
+ * $Id: TPCV1P0_CPP_SR.cxx,v 1.2 1999/07/02 04:43:23 levine Exp $
+ * Author: Jeff Landgraf and M.J. LeVine
+ ***************************************************************************
+ * Description: 
+ *      
+ *
+ *   change log
+ * 06-May-99  MJL code cloned from Jeff's ADCR_SR
+ * 03-Jun-99 MJL added return TRUE to TPCV1P0_CPP_SR::initialize()
+ *
+ ***************************************************************************
+ * $Log: TPCV1P0_CPP_SR.cxx,v $
+ * Revision 1.2  1999/07/02 04:43:23  levine
+ * Many changes -
+ *  navigates to head of TPCP bank independent of position.
+ *  move declarations out of loops where they were upsetting some compilers
+ *  suppress output from class libraries with run-time switch EventReader.verbose
+ *  added TPCV2P0_CPP_SR::getAsicParams()
+ *
+ *
+ **************************************************************************/
 
 #include <iostream>
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "TPCV1P0.hh"
 // TPC V1.0 Raw Reader
-// change log
-// 03-Jun-99 MJL added return TRUE to TPCV1P0_CPP_SR::initialize()
 
 TPCV1P0_CPP_SR::TPCV1P0_CPP_SR(int s, TPCV1P0_Reader *det)
 {

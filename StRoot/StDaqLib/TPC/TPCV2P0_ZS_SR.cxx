@@ -1,32 +1,52 @@
+/***************************************************************************
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.6 1999/07/02 04:43:24 levine Exp $
+ * Author: M.J. LeVine
+ ***************************************************************************
+ * Description: TPC V2.0 Zero Suppressed Reader
+ *      
+ *
+ *   change log
+ * 28-May-99 MJL on encountering a missing TPCSEQD bank,
+ *    tries to fill in the Pad_array structs using the RAW banks (if present)
+ * 31-May-99 MJL terminate on encountering pad 255
+ * 03-Jun-99 MJL added return TRUE to TPCV2P0_ZS_SR::initialize()
+ * 10-Jun-99 IS (Iwona Sakrejda) - The compiler we are using currently in Root
+ *   cannot contain the scope of the "for" loop index within parenthesis.
+ *   So if the next loop uses same index, it cannot be Declared again.
+ *   I made 2 for rcg  and marked them both in  the code.
+ * 20-Jun-99 MJL corrected Iwona's fix, which depends on the "leak" out of the
+ *  'for' scope to define the variable elsewhere. At the very least this makes 
+ *   gdb very confused. Now the offending rcb is defined outside the scope of
+ *   all for loops
+ * 21-Jun-99 MJL change behavior on discovering a "bit 5" error. 
+ *   Now skip sequences
+ *   until next "switch=1" sequence
+ * 23-Jun-99 MJL most output now supressed with EventReader.verbose
+
+ *
+ ***************************************************************************
+ * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.6  1999/07/02 04:43:24  levine
+ * Many changes -
+ *  navigates to head of TPCP bank independent of position.
+ *  move declarations out of loops where they were upsetting some compilers
+ *  suppress output from class libraries with run-time switch EventReader.verbose
+ *  added TPCV2P0_CPP_SR::getAsicParams()
+ *
+ *
+ **************************************************************************/
 #include <iostream>
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "TPCV2P0.hh"
 #include "fee_pin.h"
-// TPC V2.0 Zero Suppressed Reader
-// MJL 28-May-99
-// on encountering a missing TPCSEQD bank,
-// tries to fill in the Pad_array structs using the RAW banks (if present)
-
-// -------------change log ------------------------
-// 31-May-99 MJL terminate on encountering pad 255
-// 03-Jun-99 MJL added return TRUE to TPCV2P0_ZS_SR::initialize()
-// 10-Jun-99 IS (Iwona Sakrejda) - The compiler we are using currently in Root
-// cannot contain the scope of the "for" loop index within parenthesis.
-// So if the next loop uses same index, it cannot be Declared again.
-// I made 2 for rcg  and marked them both in  the code.
-// 20-Jun-99 MJL corrected Iwona's fix, which depends on the "leak" out of the
-// 'for' scope to define the variable elsewhere. At the very least this makes 
-// gdb very confused. Now the offending rcb is defined outside the scope of
-// all for loops
-// 21-Jun-99 MJL change behavior on discovering a "bit 5" error. Now skip sequences
-// until next "switch=1" sequence
+// 
 
 TPCV2P0_ZS_SR::TPCV2P0_ZS_SR(int s, TPCV2P0_Reader *det)
 {
-  cout << "Constructing TPCV2P0_ZS_SR" << endl;
   sector = s-1; // convert the sector into internal representation
   detector = det;
+  if (detector->ercpy->verbose) cout << "Constructing TPCV2P0_ZS_SR" << endl;
 
   // NULLS in banks array
   memset((char *)adcd_p, 0, sizeof(adcd_p));
@@ -50,17 +70,17 @@ int TPCV2P0_ZS_SR::initialize()
     {
       adcd_p[rcb][mz] = detector->getBankTPCADCD(sector,rcb,mz);
       if ((void *)adcd_p[rcb][mz] != NULL) {
-	printf("found ADCD RB%d MZ%d\n",rcb+1,mz+1);
+	if (detector->ercpy->verbose) printf("found ADCD RB%d MZ%d\n",rcb+1,mz+1);
 	fflush(stdout);
       }
       adcx_p[rcb][mz] = detector->getBankTPCADCX(sector,rcb,mz);
       if ((void *)adcx_p[rcb][mz] != NULL) {
-	printf("found ADCX RB%d MZ%d\n",rcb+1,mz+1);
+	if (detector->ercpy->verbose) printf("found ADCX RB%d MZ%d\n",rcb+1,mz+1);
 	fflush(stdout);
       }
       seqd_p[rcb][mz] = detector->getBankTPCSEQD(sector,rcb,mz);
       if ((void *)seqd_p[rcb][mz] != NULL) {
-	printf("found SEQD RB%d MZ%d\n",rcb+1,mz+1);
+	if (detector->ercpy->verbose) printf("found SEQD RB%d MZ%d\n",rcb+1,mz+1);
 	fflush(stdout);
       }
     }
@@ -86,7 +106,8 @@ int TPCV2P0_ZS_SR::initialize()
 	if (!cppr) return FALSE;
 
 	// go through the CPPR/ADCR banks
-	printf("reconstructing from RAW banks: SEC%d RB%d MZ%d\n",sector,rcb+1,mz+1);
+	if (detector->ercpy->verbose) 
+	  printf("reconstructing from RAW banks: SEC%d RB%d MZ%d\n",sector,rcb+1,mz+1);
 	PADK_entry ent;
 
 	for (int row=1; row<=TPC_PADROWS; row++) {
@@ -150,7 +171,8 @@ int TPCV2P0_ZS_SR::initialize()
       }
 
       else { //TPCSEQD bank exists
-	printf("TPCSEQD found sector %d  RB%d MZ%d\n",sector+1,rcb+1,mz+1);
+	if (detector->ercpy->verbose) 
+	  printf("TPCSEQD found sector %d  RB%d MZ%d\n",sector+1,rcb+1,mz+1);
 	int padrow=-1, pad=-1, lastbin=-2, oldstart=0;
 	int len = seqd_p[rcb][mz]->header.BankLength - (sizeof(Bank_Header)/4);
 	int numseq = (4*len)/sizeof(short); // find # sequences this bank
@@ -211,7 +233,7 @@ int TPCV2P0_ZS_SR::initialize()
 	      continue;
 	    }
 	    else {     // starting new pad without bit 5 set!
-	      printf("new pad detected with bit 5 clear!\n");
+	      if (detector->ercpy->verbose) printf("new pad detected with bit 5 clear!\n");
 	      fflush(stdout);
 	      // for debug only:
 	      // classname(Bank_TPCPADK) *padk = detector->getBankTPCPADK(sector, rcb, mz);
@@ -307,7 +329,7 @@ int TPCV2P0_ZS_SR::initialize()
 	    i++;
 	  }
 	  else {    // starting new pad without bit 5 set!
-	    printf("new pad detected with bit 5 clear!\n");
+	    if (detector->ercpy->verbose) printf("new pad detected with bit 5 clear!\n");
 	    fflush(stdout);
 	    while (seqd_p[rcb][mz]->sequence[i]>0 && i<numseq) i++; // skip until next "switch=1"
 	  }
@@ -320,7 +342,7 @@ int TPCV2P0_ZS_SR::initialize()
 
 TPCV2P0_ZS_SR::~TPCV2P0_ZS_SR()
 {
-  cout << "Deleting TPCV2P0_ZS_SR" << endl;
+  if (detector->ercpy->verbose) cout << "Deleting TPCV2P0_ZS_SR" << endl;
   //free memory allocated for Sequence arrays
   for (int row=0; row<TPC_PADROWS; row++) {
     for (int pad=0; pad<tpcRowLen[row-1]; pad++) {
