@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackCollection.hh,v 1.2 1999/01/15 22:54:03 wenaus Exp $
+ * $Id: StTrackCollection.hh,v 1.3 1999/01/30 23:03:16 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,23 +10,26 @@
  ***************************************************************************
  *
  * $Log: StTrackCollection.hh,v $
- * Revision 1.2  1999/01/15 22:54:03  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/01/30 23:03:16  wenaus
+ * table load intfc change; include ref change
+ *
+ * Revision 1.3  1999/01/30 23:03:16  wenaus
+ * table load intfc change; include ref change
  *
  * Revision 1.2  1999/01/15 22:54:03  wenaus
  * version with constructors for table-based loading
  *
-#include <list>
+#ifndef StTrackCollection_hh
 #define StTrackCollection_hh
 using namespace std;
 #include <vector>
-typedef list<StGlobalTrack*, allocator<StGlobalTrack*> >            StTrackCollection;
-typedef list<StGlobalTrack*, allocator<StGlobalTrack*> >::iterator  StTrackIterator;
-typedef list<StGlobalTrack*, allocator<StGlobalTrack*> >::const_iterator StTrackConstIterator;
+class StGlobalTrack;
+
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<StGlobalTrack*, allocator<StGlobalTrack*> >            StTrackCollection;
-typedef list<StGlobalTrack*>            StTrackCollection;
-typedef list<StGlobalTrack*>::iterator  StTrackIterator;
-typedef list<StGlobalTrack*>::const_iterator StTrackConstIterator;
+typedef vector<StGlobalTrack*, allocator<StGlobalTrack*> >::iterator  StTrackIterator;
+typedef vector<StGlobalTrack*, allocator<StGlobalTrack*> >::const_iterator StTrackConstIterator;
+#else
 typedef vector<StGlobalTrack*>            StTrackCollection;
 typedef vector<StGlobalTrack*>::iterator  StTrackIterator;
 typedef vector<StGlobalTrack*>::const_iterator StTrackConstIterator;

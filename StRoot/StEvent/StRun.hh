@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.hh,v 1.2 1999/01/15 22:53:50 wenaus Exp $
+ * $Id: StRun.hh,v 1.3 1999/01/30 23:03:14 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StRun.hh,v $
- * Revision 1.2  1999/01/15 22:53:50  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/01/30 23:03:14  wenaus
+ * table load intfc change; include ref change
+ *
+ * Revision 1.4  1999/02/10 21:50:32  wenaus
+ * Plug memory leaks
  *
  * Revision 1.3  1999/01/30 23:03:14  wenaus
  * table load intfc change; include ref change
@@ -22,15 +25,15 @@
 
  * version with constructors for table-based loading
  *
-#include "StTables/dst_run_header.h"
-#include "StTables/dst_run_summary.h"
+using namespace std;
+#ifndef StRun_hh
 #define StRun_hh
 
 #include "StEvent/StRunSummary.hh"
 #include "StEvent/StEnumerations.hh"
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
-    StRun(dst_run_header_st*, dst_run_summary_st*);
+#endif
 class StRun {
 public:
     StRun();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.hh,v 1.2 1999/01/15 22:53:45 wenaus Exp $
+ * $Id: StGlobalTrack.hh,v 1.3 1999/01/30 23:03:12 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.hh,v $
- * Revision 1.2  1999/01/15 22:53:45  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/01/30 23:03:12  wenaus
+ * table load intfc change; include ref change
+ *
+ * Revision 1.7  1999/02/24 12:49:06  ullrich
+ * Added argument (h) to constructor needed to instatiate helix
  *
  * Revision 1.6  1999/02/23 21:23:59  ullrich
  * Removed obsolete EMC/SMD hit information (future cluster).
@@ -30,7 +33,7 @@ using namespace std;
  * table load intfc change; include ref change
  *
  * Revision 1.2  1999/01/15 22:53:45  wenaus
-#include "StTables/dst_track.h"
+ * version with constructors for table-based loading
  *
  **************************************************************************/
 #ifndef StGlobalTrack_hh
