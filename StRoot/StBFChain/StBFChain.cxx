@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.350 2003/07/31 17:05:56 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.351 2003/08/01 15:00:45 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1304,7 +1304,7 @@ Int_t StBFChain::Instantiate()
 	  }
 
 	  if (GetOption("ppOpt") ) {                         // pp specific stuff
-	    count << "QAInfo: ppOpt (pp mode) is turned ON" << endl;
+	    cout << "QAInfo: ppOpt (pp mode) is turned ON" << endl;
 	    if (maker == "StTrsMaker") mk->SetMode(1);       // Pile-up correction
 	    if (maker == "StVertexMaker"){
 	      if( GetOption("SvtMatchVtx")) mk->SetMode(4); // Switch vertex finder to ppLMV using EST
