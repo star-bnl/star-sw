@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.hh,v 1.8 2001/01/25 15:22:34 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.9 2001/01/30 13:31:54 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.9  2001/01/30 13:31:54  oldi
+// New variable mTime introduced to count total time consumption.
+//
 // Revision 1.8  2001/01/25 15:22:34  oldi
 // Review of the complete code.
 // Fix of several bugs which caused memory leaks:
@@ -71,7 +74,8 @@ class StFtpcTracker : public TObject {
 protected:
 
               TBenchmark   *mBench;         // benchmark object (just for run-time measurements)
-
+                 Float_t    mTime;          // total time consumption
+      
             StFtpcVertex   *mVertex;        // pointer to the vertex
                TObjArray   *mHit;           // ObjArray of clusters
                TObjArray   *mTrack;         // ObjArray of tracks
@@ -112,6 +116,7 @@ public:
   Int_t   Write();                                                          // writes tracks and clusters in ROOT file
 
   // getter
+       Float_t   GetTime()              { return mTime;                    }  // returns time consumption      
   StFtpcVertex  *GetVertex()            { return mVertex;                  }  // returns the vertex
          Int_t   GetNumberOfClusters()  { return mHit->GetEntriesFast();   }  // returns the number of clusters
          Int_t   GetNumberOfTracks()    { return mTrack->GetEntriesFast(); }  // returns the number of tracks
