@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.128  2003/06/10 18:47:28  andrewar
+// Changed StiResiduaCalc calls to conform to modified class.
+//
 // Revision 1.127  2003/05/07 03:06:34  pruneau
 // *** empty log message ***
 //
@@ -183,7 +186,8 @@ Int_t StiMaker::Finish()
     {
       if (_recPlotter) _recPlotter->write("StiMakerHistograms.root");
       if (_mcPlotter)  _mcPlotter->write("StiMakerHistograms.root","UPDATE");
-      if (_residualCalculator)_residualCalculator->Write("StiMakerResiduals.root"); 
+      if (_residualCalculator)
+	_residualCalculator->write("StiMakerHistograms.root", "UPDATE"); 
     }
   return StMaker::Finish();
 }
