@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.22 2004/04/28 20:38:11 jwebb Exp $
+// $Id: StEEmcDbMaker.h,v 1.23 2004/05/14 20:55:36 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -65,7 +65,7 @@ class StEEmcDbMaker : public StMaker {
   // private:
  public:
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.22 2004/04/28 20:38:11 jwebb Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.23 2004/05/14 20:55:36 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -91,7 +91,7 @@ class StEEmcDbMaker : public StMaker {
   // local fast look-up tables
   EEmcDbItem   *byIndex; //!  assess via plain index
   EEmcDbItem   ***byCrate; //! access via crate/chan
-  EEmcDbItem   *byStrip[MaxSectors][MaxSmdPlains][MaxSmdStrips]; //! access via sec/UV/strip
+  const EEmcDbItem   *byStrip[MaxSectors][MaxSmdPlains][MaxSmdStrips]; //! access via sec/UV/strip
 
   EEmcDbCrate *mDbFiber; // maps tw & mapmt crates to DAQ fibers
   int nFiber; // # of existing crates(Tw+Mapmt)
@@ -164,7 +164,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.22 2004/04/28 20:38:11 jwebb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.23 2004/05/14 20:55:36 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -175,6 +175,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.23  2004/05/14 20:55:36  balewski
+// fix to process many runs, by Piotr
+//
 // Revision 1.22  2004/04/28 20:38:11  jwebb
 // Added StEEmcDbMaker::setAsciiDatabase().  Currently not working, since
 // tube name missing for some towers, triggereing a "clear" of all EEmcDbItems.
