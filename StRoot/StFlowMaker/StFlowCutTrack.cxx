@@ -1,81 +1,11 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.21 2000/12/10 02:01:13 oldi Exp $
+// $Id: StFlowCutTrack.cxx,v 1.22 2000/12/12 20:22:05 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
+//          FTPC added by Markus Oldenburg, MPI, Dec 2000
 //
 // Description:  Class for applying track cuts
-//
-////////////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowCutTrack.cxx,v $
-// Revision 1.21  2000/12/10 02:01:13  oldi
-// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
-// The evaluation of either a track originates from the FTPC or not is
-// unambiguous now. The evaluation itself is easily extendible for other
-// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
-// they contain TPC tracks only (backward compatibility).
-//
-// Revision 1.20  2000/12/08 17:27:51  oldi
-// New release due to cvs comments in last version.
-//
-// Revision 1.19  2000/12/08 17:03:38  oldi
-// Phi weights for both FTPCs included.
-//
-// Revision 1.18  2000/12/06 15:38:46  oldi
-// Including FTPC.
-//
-// Revision 1.17  2000/10/12 22:46:33  snelling
-// Added support for the new pDST's and the probability pid method
-//
-// Revision 1.16  2000/08/31 18:58:19  posk
-// For picoDST, added version number, runID, and multEta for centrality.
-// Added centrality cut when reading picoDST.
-// Added pt and eta selections for particles corr. wrt event plane.
-//
-// Revision 1.15  2000/08/10 23:00:20  posk
-// New centralities. pt and eta cuts.
-//
-// Revision 1.14  2000/07/20 17:25:50  posk
-// Fixed bug in readPico checkEvent.
-//
-// Revision 1.13  2000/07/12 17:54:35  posk
-// Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
-// Apply cuts when reading picoevent file.
-//
-// Revision 1.12  2000/06/30 14:48:31  posk
-// Using MessageMgr, changed Eta Symmetry cut.
-//
-// Revision 1.11  2000/06/01 18:26:34  posk
-// Increased precision of Track integer data members.
-//
-// Revision 1.10  2000/05/11 20:00:32  posk
-// Preparation for micro and nano DSTs.
-//
-// Revision 1.9  2000/03/15 23:28:49  posk
-// Added StFlowSelection.
-//
-// Revision 1.8  2000/03/02 23:02:42  posk
-// Changed extensions from .hh and .cc to .h and .cxx .
-//
-// Revision 1.7  2000/02/29 22:00:52  posk
-// Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
-//
-// Revision 1.4  1999/12/15 22:01:23  posk
-// Added StFlowConstants.hh
-//
-// Revision 1.3  1999/11/30 18:52:49  snelling
-// First modification for the new StEvent
-//
-// Revision 1.2  1999/11/24 18:17:11  posk
-// Put the methods which act on the data in with the data in StFlowEvent.
-//
-// Revision 1.1  1999/11/11 23:08:51  posk
-// Rearrangement of files.
-//
-// Revision 1.1  1999/11/05 00:06:44  posk
-// First versions of Flow cut classes.
-//
 //
 ////////////////////////////////////////////////////////////////////////////
 
@@ -681,3 +611,67 @@ void StFlowCutTrack::PrintCutList() {
   cout << "#######################################################" << endl;
 
 }
+
+////////////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowCutTrack.cxx,v $
+// Revision 1.22  2000/12/12 20:22:05  posk
+// Put log comments at end of files.
+// Deleted persistent StFlowEvent (old micro DST).
+//
+// Revision 1.21  2000/12/10 02:01:13  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
+// Revision 1.19  2000/12/08 17:03:38  oldi
+// Phi weights for both FTPCs included.
+//
+// Revision 1.18  2000/12/06 15:38:46  oldi
+// Including FTPC.
+//
+// Revision 1.17  2000/10/12 22:46:33  snelling
+// Added support for the new pDST's and the probability pid method
+//
+// Revision 1.16  2000/08/31 18:58:19  posk
+// For picoDST, added version number, runID, and multEta for centrality.
+// Added centrality cut when reading picoDST.
+// Added pt and eta selections for particles corr. wrt event plane.
+//
+// Revision 1.15  2000/08/10 23:00:20  posk
+// New centralities. pt and eta cuts.
+//
+// Revision 1.13  2000/07/12 17:54:35  posk
+// Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
+// Apply cuts when reading picoevent file.
+//
+// Revision 1.12  2000/06/30 14:48:31  posk
+// Using MessageMgr, changed Eta Symmetry cut.
+//
+// Revision 1.11  2000/06/01 18:26:34  posk
+// Increased precision of Track integer data members.
+//
+// Revision 1.9  2000/03/15 23:28:49  posk
+// Added StFlowSelection.
+//
+// Revision 1.8  2000/03/02 23:02:42  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
+// Revision 1.7  2000/02/29 22:00:52  posk
+// Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
+//
+// Revision 1.4  1999/12/15 22:01:23  posk
+// Added StFlowConstants.hh
+//
+// Revision 1.3  1999/11/30 18:52:49  snelling
+// First modification for the new StEvent
+//
+// Revision 1.2  1999/11/24 18:17:11  posk
+// Put the methods which act on the data in with the data in StFlowEvent.
+//
+// Revision 1.1  1999/11/05 00:06:44  posk
+// First versions of Flow cut classes.
+//
+////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.cxx,v 1.6 2000/09/15 22:51:31 posk Exp $
+// $Id: StFlowPicoEvent.cxx,v 1.7 2000/12/12 20:22:06 posk Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -21,31 +21,6 @@
 //   Each element of the array is an object of class StFlowTrack 
 //
 ////////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowPicoEvent.cxx,v $
-// Revision 1.6  2000/09/15 22:51:31  posk
-// Added pt weighting for event plane calcualtion.
-//
-// Revision 1.5  2000/09/05 16:11:34  snelling
-// Added global DCA, electron and positron
-//
-// Revision 1.4  2000/08/09 21:38:23  snelling
-// PID added
-//
-// Revision 1.3  2000/06/01 18:26:39  posk
-// Increased precision of Track integer data members.
-//
-// Revision 1.2  2000/05/26 21:29:31  posk
-// Protected Track data members from overflow.
-//
-// Revision 1.1  2000/05/23 20:09:48  voloshin
-// added StFlowPicoEvent, persistent FlowEvent as plain root TTree
-//
-// Revision 1.4  2000/05/16 20:59:33  posk
-// Voloshin's flowPicoevent.root added.
-//
-// 
-//////////////////////////////////////////////////////////////////////////
 
 #include "StFlowPicoEvent.h"
 
@@ -83,7 +58,35 @@ void StFlowPicoEvent::AddTrack(StFlowPicoTrack* inputTrack) {
   new(tracks[mNtrack++]) StFlowPicoTrack(inputTrack);
 }
  
-
+//////////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowPicoEvent.cxx,v $
+// Revision 1.7  2000/12/12 20:22:06  posk
+// Put log comments at end of files.
+// Deleted persistent StFlowEvent (old micro DST).
+//
+// Revision 1.6  2000/09/15 22:51:31  posk
+// Added pt weighting for event plane calcualtion.
+//
+// Revision 1.5  2000/09/05 16:11:34  snelling
+// Added global DCA, electron and positron
+//
+// Revision 1.4  2000/08/09 21:38:23  snelling
+// PID added
+//
+// Revision 1.3  2000/06/01 18:26:39  posk
+// Increased precision of Track integer data members.
+//
+// Revision 1.2  2000/05/26 21:29:31  posk
+// Protected Track data members from overflow.
+//
+// Revision 1.1  2000/05/23 20:09:48  voloshin
+// added StFlowPicoEvent, persistent FlowEvent as plain root TTree
+//
+// Revision 1.4  2000/05/16 20:59:33  posk
+// Voloshin's flowPicoevent.root added.
+//
+//////////////////////////////////////////////////////////////////////////
 
 
 

@@ -1,96 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.17 2000/12/10 02:01:13 oldi Exp $
+// $Id: StFlowTrack.h,v 1.18 2000/12/12 20:22:06 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
+//         FTPC added by Markus Oldenburg, MPI, Dec 2000
 //
 // Description: part of StFlowTrackCollection
-//
-//////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowTrack.h,v $
-// Revision 1.17  2000/12/10 02:01:13  oldi
-// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
-// The evaluation of either a track originates from the FTPC or not is
-// unambiguous now. The evaluation itself is easily extendible for other
-// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
-// they contain TPC tracks only (backward compatibility).
-//
-// Revision 1.16  2000/12/06 15:38:46  oldi
-// Including FTPC.
-//
-// Revision 1.15  2000/10/12 22:46:40  snelling
-// Added support for the new pDST's and the probability pid method
-//
-// Revision 1.14  2000/09/22 22:03:01  posk
-// Clean up.
-//
-// Revision 1.13  2000/09/16 22:20:35  snelling
-// Added selection on P and global DCA and fixed rapidity calulation
-//
-// Revision 1.12  2000/09/15 22:51:35  posk
-// Added pt weighting for event plane calcualtion.
-//
-// Revision 1.11  2000/09/15 01:20:04  snelling
-// Added methods for P and Y and added selection on Y
-//
-// Revision 1.10  2000/09/05 17:57:13  snelling
-// Solaris needs math.h for fabs
-//
-// Revision 1.9  2000/09/05 16:11:39  snelling
-// Added global DCA, electron and positron
-//
-// Revision 1.8  2000/08/09 21:38:23  snelling
-// PID added
-//
-// Revision 1.7  2000/06/01 18:26:41  posk
-// Increased precision of Track integer data members.
-//
-// Revision 1.6  2000/05/26 21:29:34  posk
-// Protected Track data members from overflow.
-//
-// Revision 1.5  2000/05/20 00:55:20  posk
-// Condensed flownanoevent.root somewhat.
-//
-// Revision 1.4  2000/05/16 20:59:35  posk
-// Voloshin's flownanoevent.root added.
-//
-// Revision 1.3  2000/05/12 22:42:05  snelling
-// Additions for persistency and minor fix
-//
-// Revision 1.1  2000/03/02 23:02:57  posk
-// Changed extensions from .hh and .cc to .h and .cxx .
-//
-// Revision 1.10  2000/02/29 22:00:56  posk
-// Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
-//
-// Revision 1.9  2000/02/18 22:49:57  posk
-// Added PID and centrality.
-//
-// Revision 1.7  1999/12/21 01:11:02  posk
-// Added more quantities to StFlowEvent.
-//
-// Revision 1.6  1999/12/16 18:05:25  posk
-// Fixed Linux compatability again.
-//
-// Revision 1.5  1999/12/15 22:01:29  posk
-// Added StFlowConstants.hh
-//
-// Revision 1.4  1999/12/04 00:10:35  posk
-// Works with the new StEvent
-//
-// Revision 1.3  1999/11/30 18:52:55  snelling
-// First modification for the new StEvent
-//
-// Revision 1.2  1999/11/24 18:17:16  posk
-// Put the methods which act on the data in with the data in StFlowEvent.
-//
-// Revision 1.1  1999/11/11 23:08:58  posk
-// Rearrangement of files.
-//
-// Revision 1.1  1999/11/04 19:02:08  snelling
-// First check in of StFlowMaker. It contains the common code from
-// StFlowTagMaker and StFlowAnalysisMaker.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -359,3 +274,79 @@ inline void StFlowTrack::SetTopologyMap(StTrackTopologyMap map) { mTopology = ma
 
 #endif
 
+//////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowTrack.h,v $
+// Revision 1.18  2000/12/12 20:22:06  posk
+// Put log comments at end of files.
+// Deleted persistent StFlowEvent (old micro DST).
+//
+// Revision 1.17  2000/12/10 02:01:13  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
+// Revision 1.16  2000/12/06 15:38:46  oldi
+// Including FTPC.
+//
+// Revision 1.15  2000/10/12 22:46:40  snelling
+// Added support for the new pDST's and the probability pid method
+//
+// Revision 1.13  2000/09/16 22:20:35  snelling
+// Added selection on P and global DCA and fixed rapidity calulation
+//
+// Revision 1.12  2000/09/15 22:51:35  posk
+// Added pt weighting for event plane calcualtion.
+//
+// Revision 1.11  2000/09/15 01:20:04  snelling
+// Added methods for P and Y and added selection on Y
+//
+// Revision 1.10  2000/09/05 17:57:13  snelling
+// Solaris needs math.h for fabs
+//
+// Revision 1.9  2000/09/05 16:11:39  snelling
+// Added global DCA, electron and positron
+//
+// Revision 1.8  2000/08/09 21:38:23  snelling
+// PID added
+//
+// Revision 1.7  2000/06/01 18:26:41  posk
+// Increased precision of Track integer data members.
+//
+// Revision 1.6  2000/05/26 21:29:34  posk
+// Protected Track data members from overflow.
+//
+// Revision 1.4  2000/05/16 20:59:35  posk
+// Voloshin's flownanoevent.root added.
+//
+// Revision 1.3  2000/05/12 22:42:05  snelling
+// Additions for persistency and minor fix
+//
+// Revision 1.1  2000/03/02 23:02:57  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
+// Revision 1.10  2000/02/29 22:00:56  posk
+// Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
+//
+// Revision 1.9  2000/02/18 22:49:57  posk
+// Added PID and centrality.
+//
+// Revision 1.5  1999/12/15 22:01:29  posk
+// Added StFlowConstants.hh
+//
+// Revision 1.4  1999/12/04 00:10:35  posk
+// Works with the new StEvent
+//
+// Revision 1.3  1999/11/30 18:52:55  snelling
+// First modification for the new StEvent
+//
+// Revision 1.2  1999/11/24 18:17:16  posk
+// Put the methods which act on the data in with the data in StFlowEvent.
+//
+// Revision 1.1  1999/11/04 19:02:08  snelling
+// First check in of StFlowMaker. It contains the common code from
+// StFlowTagMaker and StFlowAnalysisMaker.
+//
+//////////////////////////////////////////////////////////////////////
