@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeDSTMaker.cxx,v 1.4 2001/09/14 17:45:44 perev Exp $
+ * $Id: StEbyeDSTMaker.cxx,v 1.5 2002/02/10 18:37:37 perev Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -19,6 +19,9 @@
  **********************************************************************
  *
  * $Log: StEbyeDSTMaker.cxx,v $
+ * Revision 1.5  2002/02/10 18:37:37  perev
+ * Outdated SetFormat removed
+ *
  * Revision 1.4  2001/09/14 17:45:44  perev
  * Removed references to StRun.
  *
@@ -291,7 +294,7 @@ Int_t StEbyeDSTMaker::OpenCurrentFile() {
 
   // need to set the output file to "old" style
   //  so it is readable by plain ROOT!
-  mEbyeDST->SetFormat(1);
+//VP  mEbyeDST->SetFormat(1);
  
   mEbyeDST->SetCompressionLevel(comp);
   gMessMgr->Info() << "##### EbyeDSTMaker: EbyeDST file = " << filestring->Data() << endm;
