@@ -2,7 +2,7 @@
 *
 *  Table: tpcPadResponse
 *
-*       description:
+*       description: //  trs parameters for pad response functions
 */ 
 
 
@@ -18,10 +18,12 @@ struct tpcPadResponse {
    float  outerRowNormalization;   /*   unitless  */
    float  innerCouplingFunctionConstants[4];   /*   unitless  */
    float  outerCouplingFunctionConstants[4];   /*   unitless  */
-   float  chargeFractionConstants[4];   /*   unitless  */
+   float  innerChargeFractionConstants[6];   /*   unitless  */
+   float  outerChargeFractionConstants[6];   /*   unitless  */
    float  errorFunctionRange;   /*   unitless  */
    long  errorFunctionEntry;   /*   unitless  */
    float  longitudinalDiffusionConstant;   /*   cm/sqrt(cm)  */
    float  transverseDiffusionConstant;   /*   cm/sqrt(cm)  */
+   float  InnerOuterFactor;   /*   dimensionless  */
 
  };  
