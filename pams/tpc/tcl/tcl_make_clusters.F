@@ -85,8 +85,11 @@
 	    TCL_Get_Row_Pixels = .FALSE.
 	    RETURN
 	  END IF
+c-> RJM   1 April 1994; the convention for jsector adopted in tss 
+c-> RJM   starts at jsector = 1
 	  Jrow    = MOD( tppad( Jtppad ).tpc_row , 100 )
-	  Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
+c         Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
+	  Jsector =      tppad( Jtppad ).tpc_row / 100 
 	  IF      ( Jsector .GT. Sector ) THEN !Passed it.
 	    TCL_Get_Row_Pixels = .FALSE.       !Fail.
 	    RETURN
