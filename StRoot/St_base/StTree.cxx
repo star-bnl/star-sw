@@ -656,7 +656,13 @@ void StFile::SetInfo()
     tit.Replace(0,0," branch=NONE");
     known = 3;
   } 
-
+//		DAQ
+  if (strcmp(".daq",ext)==0) {
+    tit.Replace(0,0," format=daq ");
+    tit.Replace(0,0," branch=NONE");
+    known = 4;
+  } 
+  
   if (known!=3) {
     assert (!strcmp(".root",ext));
 
