@@ -1,6 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.12 1999/02/12 01:26:51 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.13 1999/02/15 03:32:09 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.13  1999/02/15 03:32:09  lasiuk
+// coordinate system for input data is global
+// deltapad(1)
+//
 // Revision 1.12  1999/02/12 01:26:51  lasiuk
 // Limit debug output
 //
@@ -18,28 +22,6 @@
 // Revision 1.7  1999/01/28 02:46:09  lasiuk
 // SUN compile with new GEANT interface
 //
-// Revision 1.6  1999/01/23 18:47:21  fisyak
-// Cleanup for SL98l
-//
-// Revision 1.5  1999/01/23 05:03:18  lasiuk
-// ready for test
-//
-// Revision 1.4  1999/01/23 02:33:03  lasiuk
-// sun compatible
-//
-// Revision 1.3  1999/01/22 23:37:50  lasiuk
-// root does not eat dynamic_cast<>
-//
-// Revision 1.2  1999/01/22 22:05:08  fisyak
-// Rename
-//
-// Revision 1.1  1999/01/22 21:31:57  lasiuk
-// name change
-//
-// Revision 1.3  1999/01/22 08:45:14  lasiuk
-// example
-//
-//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StTrsMaker class for Makers                                        //
@@ -52,7 +34,8 @@
 #include "St_ObjectSet.h"
 
 #include <iostream.h>
-#include <unistd.h>    // needed for access()
+#include <unistd.h>    // needed for access()/sleep()
+#include <fstream.h>
 
 #include <string>
 #include <vector>
@@ -103,7 +86,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.12 1999/02/12 01:26:51 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.13 1999/02/15 03:32:09 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -124,8 +107,8 @@ Int_t StTrsMaker::Init()
     //
     // Check File access
     //
-    cout << "*********************************************" << endl;
-    cout << "Try Initialize" << endl;
+    //cout << "*********************************************" << endl;
+    cout << "StTrsMaker::Init()" << endl;
     string geoFile("../run/TPCgeo.conf");
     if (access(geoFile.c_str(),R_OK)) {
 	cerr << "ERROR:\n" << geoFile.c_str() << " cannot be opened" << endl;
@@ -231,7 +214,7 @@ Int_t StTrsMaker::Init()
 	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::asymmetricGaussianApproximation);
 	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::realShaper); 
     mAnalogSignalGenerator->setDeltaRow(0);
-    mAnalogSignalGenerator->setDeltaPad(0);
+    mAnalogSignalGenerator->setDeltaPad(1);
     mAnalogSignalGenerator->setSignalThreshold(.0001*(.001*volt));
     mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
 	
@@ -258,6 +241,9 @@ void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
 }
     
 Int_t StTrsMaker::Make(){
+//     cout << "Make ofstream" << endl;
+//     ofstream ofs("/star/u2b/lasiuk/geantdebug.txt", ios::out);
+//     ofstream raw("/star/u2b/lasiuk/event.txt",ios::out);
 //  PrintInfo();
   if (!m_DataSet->GetList())  {//if DataSet is empty fill it
     //
@@ -293,10 +279,21 @@ Int_t StTrsMaker::Make(){
     //no_tpc_hits = 20;
     for (int i=1; i<=no_tpc_hits; i++){
 	cout << "--> tpc_hit:  " << i << endl;
-// 	cout << tpc_hit->id                << ' '
-// 	     << (tpc_hit->de/eV)           << ' '
-// 	     << (tpc_hit->ds/centimeter)   << ' '
-// 	     << tpc_hit->volume_id         << endl;
+// 	raw << tpc_hit->volume_id   << ' '
+// 	    << tpc_hit->de          << ' '
+// 	    << tpc_hit->ds          << ' '
+// 	    << tpc_hit->x[0]        << ' '
+// 	    << tpc_hit->x[1]        << ' '
+// 	    << tpc_hit->x[2]        << ' '
+// 	    << tpc_hit->p[0]        << ' '
+// 	    << tpc_hit->p[1]        << ' '
+// 	    << tpc_hit->p[2]        << ' '  << endl;
+
+	// DEBUG
+	//cout << i
+	//<< " x " << tpc_hit->x[0]
+	//<< " y " << tpc_hit->x[1]
+	//<< " z " << tpc_hit->x[2] << endl;
 
 
 	whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
@@ -314,6 +311,7 @@ Int_t StTrsMaker::Make(){
 	    tpc_hit++;
 	    if(i != no_tpc_hits) continue;
 	}
+	//sleep(2);
 	
 	if( (currentSectorProcessed == bsectorOfHit) &&
 	    (i                      != no_tpc_hits )) {
@@ -332,13 +330,15 @@ Int_t StTrsMaker::Make(){
 	    
 	    // Now relative to this, we get the zPosition in coordinates where :
 	    // 0 is the membrane, 208+/-dz is the wire grid
-	    double zPosition = GEANTDriftLength/2. + tpc_hit->x[2]*centimeter + GEANTOffSet;
+	    //double zPosition =
+	    //           GEANTDriftLength/2. + tpc_hit->x[2]*centimeter + GEANTOffSet;
+	    //--->double zPosition = tpc_hit->x[2]*centimeter;
 // 	    PR(tpc_hit->x[2]*centimeter);
 // 	    PR(zPosition);
 	    
 	    StThreeVector<double> hitPosition(tpc_hit->x[0]*centimeter,
 					      tpc_hit->x[1]*centimeter,
-					      zPosition); 
+					      tpc_hit->x[2]*centimeter); 
 // 	    PR(hitPosition);
 
 // 	    // Drift Length is calculated with respect to the FG!
@@ -346,30 +346,38 @@ Int_t StTrsMaker::Make(){
 // 		mGeometryDb->innerSectorFrischGridPadPlaneSeparation() :
 // 		mGeometryDb->innerSectorFrischGridPadPlaneSeparation();
 
-// 	    PR(mGeometryDb->radialDistanceAtRow(bpadrow));
-// 	    PR(mGeometryDb->radialDistanceAtRow(bpadrow)/centimeter);
-// 	    PR(mGeometryDb->frischGrid());
+	    // In GEANT Global Coordinates we have to rotate
+	    // to the sector 12 position
+	    // Should use StMatrix??? or StTpcCoordinateTransform
+	    // but it is slower
+	    // It is also in StTrsChargeSegment::rotate()
+	    // should change to this SOON!!!
+	    double beta = bsectorOfHit*M_PI/6.;  // (30 degrees)
+	    double cb   = cos(beta);
+	    double sb   = sin(beta);
+	    double xp = hitPosition.x()*cb - hitPosition.y()*sb;
+	    double yp = hitPosition.x()*sb + hitPosition.y()*cb;
 	    
 	    StThreeVector<double>
-		sector12Coordinate(tpc_hit->x[0]*centimeter,
-				   tpc_hit->x[1]*centimeter + mGeometryDb->radialDistanceAtRow(bpadrow),
-				   zPosition);
-	    //tpc_hit->x[2]*centimeter + mGeometryDb->frischGrid() + fgOffSet);
+		sector12Coordinate(xp,yp,tpc_hit->x[2]);
 	    
 	    StThreeVector<double> hitMomentum(tpc_hit->p[0]*GeV,
 					      tpc_hit->p[1]*GeV,
 					      tpc_hit->p[2]*GeV);
 
-	    // I need PID info here, otherwise it is a pion.  This is needed for the ionization splitting!
+	    // I need PID info here, otherwise it is a pion.
+	    // This is needed for the ionization splitting!
+	    // WARNING:  cannot use "abs" (not overloaded (double) for LINUX!
 	    StTrsChargeSegment aSegment(sector12Coordinate,
 					hitMomentum,
-					(fabs(tpc_hit->de*GeV)),  // cannot use abs (not overloaded for LINUX!
+					(fabs(tpc_hit->de*GeV)),
 					tpc_hit->ds*centimeter,
 					pID);
 	    
 // 	    PR(hitMomentum.mag());
-	    
-// 	    PR(aSegment);
+
+// 	    ofs << " " << aSegment << endl;
+//  	    PR(aSegment);
 	    //sleep(5);
 // 	    cout << "^^^^Segment Definition^^^^" << '\n' << endl;
 	    
@@ -393,8 +401,7 @@ Int_t StTrsMaker::Make(){
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 	    copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
 #endif
-// 	    cout << endl;
-	    
+// 	    cout << endl;	    
 // 	    cout << "Number of \"miniSegments\": " << (comp.size()) << endl;
 	    
 	    // Loop over the miniSegments
@@ -402,9 +409,6 @@ Int_t StTrsMaker::Make(){
 		iter != comp.end();
 		iter++) {
 		
-// 		cout << endl;
-// 		cout << " *iter " << (*iter) << endl;
-//  		PR(*iter);
 		//
 	        // TRANSPORT HERE
 	        //
@@ -440,6 +444,7 @@ Int_t StTrsMaker::Make(){
 	
 	cout << "\a**********End Of Current Sector***************\a\n" << endl;
 	sleep(3);
+
 	//
 	// Generate the ANALOG Signals on pads
 	//
@@ -449,6 +454,7 @@ Int_t StTrsMaker::Make(){
 	cout << "--->sampleAnalogSignal()..." << endl;
 	mAnalogSignalGenerator->sampleAnalogSignal();
 	sleep(3);
+
 	//
 	// Digitize the Signals
 	//
@@ -468,8 +474,8 @@ Int_t StTrsMaker::Make(){
 	//
 	// Fill it into the event structure...
 	// and you better check the sector number!
-	PR(currentSectorProcessed);
-	PR(mAllTheData->mSectors.size());
+// 	PR(currentSectorProcessed);
+// 	PR(mAllTheData->mSectors.size());
 	
 // 	cout << "Try add it" << endl;
 	mAllTheData->mSectors[(currentSectorProcessed-1)] = aDigitalSector;
@@ -480,13 +486,6 @@ Int_t StTrsMaker::Make(){
 	mWireHistogram->clear();
 	mSector->clear();
 	
-	// Just temporary for debugging to make sure filled properly
-// 	  pair<digitalTimeBins*, digitalTimeBins*>
-// 	      tmpPad = mAllTheData->mSectors[(currentSectorProcessed-1)]->timeBinsOfRowAndPad(theRow,thePad);
-// 	  PR(tmpPad.first->size());
-// 	  PR(tmpPad.second->size());
-// 	  break;
-
 	//
 	// Go to the next sector
 	currentSectorProcessed = bsectorOfHit;
@@ -495,7 +494,7 @@ Int_t StTrsMaker::Make(){
   } // mDataSet
   
   // The access stuff:
-  //#ifdef UNPACK_ALL
+#ifdef UNPACK_ALL
   //
   // Access it!
   // with:
@@ -503,7 +502,7 @@ Int_t StTrsMaker::Make(){
 
   //
   // Loop around the sectors: (should be from db, or size of the structure!)
-  PR(mAllTheData->mSectors.size());
+//   PR(mAllTheData->mSectors.size());
   for(int isector=1; isector<=24; isector++) {
       int getSectorStatus =
 	  mUnPacker->getSector(isector,
@@ -516,9 +515,9 @@ Int_t StTrsMaker::Make(){
       // otherwise, let's decode it
       unsigned char* padList;
       for(int irow=1; irow<=45; irow++) {
-	  PR(irow);
+//  	  PR(irow);
 	  int numberOfPads = mUnPacker->getPadList(irow, &padList);
-	  //PR(numberOfPads);
+// 	  PR(numberOfPads);
 	      
 	  if(!numberOfPads)
 	      continue;  // That is, go to the next row...
@@ -548,7 +547,7 @@ Int_t StTrsMaker::Make(){
 	  mUnPacker->clear();
       } // Loop over rows!
   } // Loop over sectors
-  //#endif
+#endif
   
   cout << "Got to the end of the maker" << endl;
   
@@ -587,7 +586,7 @@ Int_t StTrsMaker::Make(){
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.12 1999/02/12 01:26:51 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.13 1999/02/15 03:32:09 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
