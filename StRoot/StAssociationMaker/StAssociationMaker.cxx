@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.39 2004/01/13 21:04:54 fisyak Exp $
+ * $Id: StAssociationMaker.cxx,v 1.40 2004/01/24 03:31:09 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.40  2004/01/24 03:31:09  calderon
+ * Changed the code to make it backward compatible.
+ *
  * Revision 1.39  2004/01/13 21:04:54  fisyak
  * use IdTruth information for hit matching if any
  *
@@ -171,7 +174,7 @@
  *************************************************/
 
 
-#include "Stiostream.h"
+#include <iostream>
 #include <iterator>
 #include <stdlib.h>
 #include <string>
@@ -183,6 +186,8 @@ using std::string;
 using std::vector;
 using std::find_if;
 #endif
+using std::cout;
+using std::ostream;
 
 #include "StAssociationMaker.h"
 #include "StMcParameterDB.h"
@@ -199,7 +204,6 @@ using std::find_if;
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "TH2.h"
-#include "TMath.h"
 
 #include "StEventTypes.h"
 
@@ -724,10 +728,14 @@ Int_t StAssociationMaker::Make()
 	
 	StTpcHit*   rcTpcHit;
 	StMcTpcHit* mcTpcHit;
-	
+
 	// Instantiate the Tpc Hit maps
 	mRcTpcHitMap = new rcTpcHitMapType;
 	mMcTpcHitMap = new mcTpcHitMapType;
+
+	int matchedR = 0;
+
+	float tpcHitDistance = 9999;
 	if (Debug()) cout << "In Sector : ";
 	
 	for (unsigned int iSector=0;
@@ -748,41 +756,113 @@ Int_t StAssociationMaker::Make()
 		    //PR(iHit); 
 		    
 		    rcTpcHit = tpcPadRowHitColl->hits()[iHit];
-		    
-		    // Set the reference z for the comparison function
-		    // The comparison will be used to find the first Mc Hit
-		    // with a z greater than this reference, so that we don't loop
-		    // over the hits that we don't need to.
-		    
-		    tpcComp.setReferenceZ(rcTpcHit->position().z() - parDB->zCutTpc(200.));
-		    // Find the first Mc Tpc Hit that might have a meaningful association.
-		    StMcTpcHitIterator tpcHitSeed = mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().begin();
-		    Int_t matchedR = 0;
-		    for (StMcTpcHitIterator jHit = tpcHitSeed;
-			 jHit != mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end();
-			 jHit++){
-			//PR(jHit); 
-			mcTpcHit = *jHit;
-			Int_t idMc = 0;
-			if (mcTpcHit->parentTrack()) idMc = mcTpcHit->parentTrack()->key();
-			if (idMc != rcTpcHit->idTruth()) continue;
-			if (! mcTpcHit->parentTrack()->key()) { // no Id -> take one in the window 
-			  Float_t xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
-			  Float_t yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
-			  Float_t zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
-			  float mcZ = mcTpcHit->position().z(); // the z resolution now depends on z
-			  if ( zDiff > parDB->zCutTpc(mcZ) ) break; //mc hits are sorted, save time!
-			  if ( TMath::Abs(xDiff) >= parDB->xCutTpc() ||
-			       TMath::Abs(yDiff) >= parDB->yCutTpc() ||
-			       TMath::Abs(zDiff) >= parDB->zCutTpc(mcZ)) continue;
-			}
-			// Make Associations  Use maps,
-			mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
-			mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
-			rcTpcHit->SetBit(StMcHit::kMatched,1);
-			mcTpcHit->SetBit(StMcHit::kMatched,1);
-			matchedR++;
-		    } // End of Hits in Padrow loop for MC Hits
+
+		    // now we need to check if the MC truth information is there.
+		    // if it is not, then we use the usual distance cut.
+		    if (!rcTpcHit->idTruth()) {
+			//gMessMgr->Info() << "Backward compatibility mode:: distance cut association" << endm;
+			// Set the reference z for the comparison function
+			// The comparison will be used to find the first Mc Hit
+			// with a z greater than this reference, so that we don't loop
+			// over the hits that we don't need to.
+			
+			tpcComp.setReferenceZ(rcTpcHit->position().z() - parDB->zCutTpc(200.));
+			StMcHit* closestTpcHit = 0;
+			
+			// Find the first Mc Tpc Hit that might have a meaningful association.
+			StMcTpcHitIterator tpcHitSeed = find_if (mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().begin(),
+								 mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end(),
+								 tpcComp); // in case 2 we can start from begin
+			
+			bool isFirst = true;
+			float xDiff, yDiff, zDiff;
+			xDiff = yDiff = zDiff = -999;
+			for (StMcTpcHitIterator jHit = tpcHitSeed;
+			     jHit != mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end();
+			     jHit++){
+			    //PR(jHit); 
+			    mcTpcHit = *jHit;
+			    //int idMc = 0; // for case 2
+			    //if (mcTpcHit->parentTrack()) idMc = mcTpcHit->parentTrack()->key(); // case 2
+			    //if (idMc != rcTpcHit->idTruth()) continue; // case 2
+			    //if (! mcTpcHit->parentTrack()->key()) { // no Id -> take one in the window 
+			    xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
+			    yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
+			    zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
+			    float mcZ = mcTpcHit->position().z(); // the z resolution now depends on z
+			    if ( zDiff > parDB->zCutTpc(mcZ) ) break; //mc hits are sorted, save time!
+			    
+			    if (isFirst) {
+				tpcHitDistance=xDiff*xDiff+zDiff*zDiff;
+				closestTpcHit = mcTpcHit;
+				isFirst = false;
+			    }
+			    if (xDiff*xDiff+zDiff*zDiff<tpcHitDistance) {
+				tpcHitDistance = xDiff*xDiff+zDiff*zDiff;
+				closestTpcHit = mcTpcHit;
+			    }
+			    
+			    if ( fabs(xDiff)< parDB->xCutTpc() &&
+				 fabs(yDiff)< parDB->yCutTpc() &&
+				 fabs(zDiff)< parDB->zCutTpc(mcZ)) {
+				// Make Associations  Use maps,
+				mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
+				mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
+				rcTpcHit->SetBit(StMcHit::kMatched,1);
+				mcTpcHit->SetBit(StMcHit::kMatched,1);
+				++matchedR;
+			    }
+			    
+			} // End of Hits in Padrow loop for MC Hits
+			if (closestTpcHit)
+			    if (Debug()==2)
+				mTpcLocalHitResolution->Fill(closestTpcHit->position().x()-
+							     rcTpcHit->position().x(),
+							     closestTpcHit->position().z()-
+							     rcTpcHit->position().z() );			
+			
+		    } // end of backward compatibility loop
+		    else {
+			// new case, idTruth information exists
+			//gMessMgr->Info() << "Valid idTruth() mode:: MC Id truth association" << endm;
+			
+			//now we're not using the distance cut, however, we can still speed up the
+			// algorithm by looking around a z window only for the match.
+			// A 2 cm window should be enough.
+			tpcComp.setReferenceZ(rcTpcHit->position().z() - 2.); // hardwired 2 cm 
+			
+			
+			// Find the first Mc Tpc Hit that might have a meaningful association.
+			float zDiff;
+			StMcTpcHitIterator tpcHitSeed = find_if (mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().begin(),
+								 mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end(),
+								 tpcComp); // in case 2 we can start from begin
+			for (StMcTpcHitIterator jHit = tpcHitSeed;
+			     jHit != mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end();
+			     jHit++){
+			    //PR(jHit); 
+			    mcTpcHit = *jHit;
+			    zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();			    
+			    if ( zDiff > 2. ) break; //mc hits are sorted, save time! Again, hardwire the cut to 2 cm
+			    int idMc = 0; // to store the key of the parent track of this mc hit
+			    if (mcTpcHit->parentTrack()) {
+				idMc = mcTpcHit->parentTrack()->key(); 
+				if (idMc != rcTpcHit->idTruth()) continue;
+				// if we're here, that means we found a match.
+				// Make Associations  Use maps,
+				mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
+				mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
+				rcTpcHit->SetBit(StMcHit::kMatched,1);
+				mcTpcHit->SetBit(StMcHit::kMatched,1);
+				++matchedR;
+				
+			    }
+			    else {
+				gMessMgr->Warning() << "No parent track found for mcTpcHit with key " << mcTpcHit->key() << endm;
+			    }
+			//if (! mcTpcHit->parentTrack()->key()) { // no Id -> take one in the window 
+			}// End of Hits in Padrow loop for MC Hits
+		    } // end of case 2, id truth 
 		    // check for non associated hits
 		} // End of Hits in Padrow loop for Rec. Hits
 	    } // End of Padrow Loop for Rec. Hits
@@ -790,7 +870,7 @@ Int_t StAssociationMaker::Make()
 	// check non associated Mc hits 
 	if (Debug()) {
 	    cout << "\n";
-	    gMessMgr->Info() << "Number of Entries in TPC Hit Maps: " << mRcTpcHitMap->size() << endm;
+	    gMessMgr->Info() << "Number of Entries in TPC Hit Maps: " << mRcTpcHitMap->size() << " counter " << matchedR << endm;
 	}
 	if (doPrintMemoryInfo) {
 	    if (Debug()) gMessMgr->Info() << "End of TPC Hit Associations\n" << endm;
