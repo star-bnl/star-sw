@@ -26,29 +26,6 @@ static int dsProjectFields(DS_FIELD_T **srcField, size_t *srcIndex,
 	DS_TYPE_T *dstType, DS_TYPE_T **srcType, char **names, char *projectList);
 /*****************************************************************************
 *
-* dsCmpFieldType - compare two fields for project compatibility
-*
-* RETURN: zero if equal, one if not equal
-*/
-int dsCmpFieldType(DS_FIELD_T *f1, DS_FIELD_T *f2)
-{
-	int i;
-
-	if (f1->count != f2->count || dsTypeCmp(f1->type, f2->type) != 0) {
-		return 1;
-	}
-	for (i = 0; i < DS_MAX_DIMS; i++) {
-		if (f1->dim[i] != f2->dim[i]) {
-			return 1;
-		}
-		if (f1->dim[i] == 0) {
-			break;
-		}
-	}
-	return 0;
-}
-/*****************************************************************************
-*
 * dsEquijoin - construct projection of natural join
 *
 * RETURNS: TRUE if success else FALSE
@@ -57,9 +34,9 @@ int dsEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
 	DS_DATASET_T *pTableTwo, char *aliases, char *joinList, char *projectList)
 {
 	char aliasName[2][DS_NAME_DIM];
-	char *baseOne, *baseTwo, *joinBase, *names[2], *srcBase, *str;
-	size_t *first, h, hashDim, *last, *next, tmpSize;
+	char *baseOne, *baseTwo, *joinBase, *names[2], *srcBase;
 	size_t i, r1, r2, size, srcIndex[DS_MAX_JOIN];
+	DS_BUF_T bp;	
 	DS_FIELD_T *pJoinField, *srcField[DS_MAX_JOIN];
 	DS_KEY_T key;
 	DS_TYPE_T *types[4];
@@ -80,71 +57,39 @@ int dsEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
 		names[1] = pTableTwo->name;
 	}
 	else {
-		str = aliases;
+	 	DS_GET_INIT(&bp, aliases);
 		names[0] = aliasName[0];
 		names[1] = aliasName[1];
-		if (!dsParseName(names[0], str, &str) ||
-			!dsParseName(names[1], str, &str)) {
+		if (dsGetName(names[0], &bp) <= 0 ||
+			dsGetName(names[1], &bp) <= 0) {
 			DS_ERROR(DS_E_INVALID_ALIAS);
 		}       
    	}
-	if (!dsEquijoinKey(&key, &types[1], names, joinList) ||
-		!dsEquijoinFields(srcField, srcIndex, types, &key, names, projectList)) {
+	if (!dsEquijoinKey(&key, &types[1], names, joinList)) {
 		return FALSE;
 	}
-	/* compute hash for join */
-	h = pTableOne->elcount > pTableTwo->elcount ?
-		pTableOne->elcount : pTableTwo->elcount;
-	for (hashDim = 3; hashDim < h; hashDim += hashDim + 1);
-	tmpSize = sizeof(size_t)*(2*hashDim + pTableTwo->elcount);
-	if (!(first = (size_t *)dsTmpAlloc(tmpSize))) {
+	if (!dsEquijoinFields(srcField, srcIndex, types, &key, names, projectList)) {
 		return FALSE;
 	}
-	last = first + hashDim;
-	next = last + hashDim;
-	for (i = 0 ; i < hashDim; i++) {
-		first[i] = pTableTwo->elcount;
-	}
-	baseTwo = pTableTwo->p.data;
-	for (r2 = 0; r2 < pTableTwo->elcount; r2++) {
-		next[r2] = pTableTwo->elcount;
-		h = dsHashKey(&key, 1, baseTwo)%hashDim;
-/*
-		printf("h %d, first[h], %d hashDim, %d\n", h, first[h], hashDim);
-*/
-		if (first[h] == pTableTwo->elcount) {
-			first[h] = r2;
-		}
-		else {
-			next[last[h]] = r2;
-		}
-		last[h] = r2;
-		baseTwo += types[2]->size; 
-	}
-	/* use hash to do join */
 	pJoinField = DS_FIELD_PTR(types[0]);
 	baseOne = pTableOne->p.data;
 	pJoinTable->elcount = 0;
 	for (r1 = 0; r1 < pTableOne->elcount; r1++) {
 		baseTwo = pTableTwo->p.data;
-		h = dsHashKey(&key, 0, baseOne)%hashDim;
-		for (r2 = first[h]; r2 < pTableTwo->elcount; r2 = next[r2]) {
-			baseTwo = (char *)pTableTwo->p.data +r2*types[2]->size;
-			if (dsCmpKeys(&key, baseOne, baseTwo) == 0) {
+		for (r2 = 0; r2 < pTableTwo->elcount; r2++) {
+			if (dsCmpKeys(baseOne, baseTwo, &key) == 0) {
 				if (pJoinTable->elcount >= pJoinTable->maxcount) {
 					if (pJoinTable->elcount != pJoinTable->maxcount) {
-						DS_LOG_ERROR(DS_E_SYSTEM_ERROR);
-						goto fail;
+						DS_ERROR(DS_E_SYSTEM_ERROR);
 					}
 					if (DS_IS_DYNAMIC(pJoinTable)) {
 						if (!dsReallocTable(pJoinTable,
 							DS_REALLOC_COUNT(pJoinTable))) {
-							goto fail;
+							return FALSE;
 						}
 					}
 					else {
-						DS_LOG_ERROR(DS_E_JOIN_TOO_LARGE);
-						goto fail;
+						DS_ERROR(DS_E_JOIN_TOO_LARGE);
 					}
 				}
 				joinBase = (char *)pJoinTable->p.data +
@@ -157,19 +102,16 @@ int dsEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
 				}
 				pJoinTable->elcount++;
 			}
+			baseTwo += types[2]->size;
 		}
 		baseOne += types[1]->size;
 	}
-	dsTmpFree(first, tmpSize);
 	if (DS_IS_DYNAMIC(pJoinTable)) {
 		if (!dsReallocTable(pJoinTable, pJoinTable->elcount)) {
 			return FALSE;
 		}
 	}
 	return TRUE;
-fail:
-	dsTmpFree(first, tmpSize);
-	return FALSE;
 }
 /*****************************************************************************
 *
@@ -228,9 +170,10 @@ static int dsEquijoinFields(DS_FIELD_T **srcField, size_t *srcIndex,
 static int dsEquijoinKey(DS_KEY_T *key,
 	DS_TYPE_T **types, char **names, char *joinList)
 {
-	char columnName[DS_NAME_DIM], tableName[DS_NAME_DIM], *str;
+	char columnName[DS_NAME_DIM], tableName[DS_NAME_DIM];
 	int c;
 	size_t i, j, n;
+	DS_BUF_T bp;
 	DS_FIELD_T *f, *f0, *f1;
 	
 	if (joinList == NULL) {
@@ -249,8 +192,8 @@ static int dsEquijoinKey(DS_KEY_T *key,
 		}
 	}
 	else { 
-		str = joinList;
-		if (dsNonSpace(str, &str) != '{') {
+		DS_GET_INIT(&bp, joinList);
+		if (dsGetNonSpace(&bp) != '{') {
 			DS_ERROR(DS_E_INVALID_JOIN_SPECIFIER);
 		}	
 		for(key->count = 0;;) {
@@ -259,7 +202,7 @@ static int dsEquijoinKey(DS_KEY_T *key,
 			}
 			key->field[key->count][0] = key->field[key->count][1] = NULL;
 			for (i = 0; i < 2; i++) {
-				if (!dsGetColumnSpecifier(tableName, columnName, str, &str)) {
+				if (!dsGetColumnSpecifier(tableName, columnName, &bp)) {
 					DS_ERROR(DS_E_INVALID_JOIN_SPECIFIER);
 				}
 				for (j = 0; j < 2; j++) {
@@ -272,10 +215,10 @@ static int dsEquijoinKey(DS_KEY_T *key,
 						key->field[key->count][j] = f;	
 					}
 				}
-				if (!isalpha(c = dsNonSpace(str, &str))) {
+				if (!isalpha(c = dsGetNonSpace(&bp))) {
 					break;
 				}
-				str--;
+				dsUngetc(c, &bp);
 			}
 			if (key->field[key->count][0] == NULL ||
 				key->field[key->count][1] == NULL) {
@@ -302,30 +245,6 @@ static int dsEquijoinKey(DS_KEY_T *key,
 }
 /*****************************************************************************
 *
-* dsGetColumnSpecifier - return col specifier (colName or tableName.tableName)
-*
-* RETURNS:
-*/ 
-int dsGetColumnSpecifier(char *tableName, char *columnName, char *str, char **ptr)
-{	
-	if (!dsParseName(columnName, str, &str)) {
-		DS_ERROR(DS_E_INVALID_COLUMN_SPECIFIER);
-	}
-	if (*str != '.') {
-		tableName[0] = '\0';
-		*ptr = str;
-		return TRUE;
-	}
-	str++;
-	strcpy(tableName, columnName);
-	if (!isalpha(*str) || !dsParseName(columnName, str, &str)) {
-		DS_ERROR(DS_E_INVALID_COLUMN_SPECIFIER);
-	}
-	*ptr = str;
-    return TRUE;
-}
-/*****************************************************************************
-*
 * dsProjectFields - form list of source fields for project
 *
 * RETURNS: TRUE if success else FALSE
@@ -333,9 +252,10 @@ int dsGetColumnSpecifier(char *tableName, char *columnName, char *str, char **pt
 static int dsProjectFields(DS_FIELD_T **srcField, size_t *srcIndex,
 	DS_TYPE_T *dstType, DS_TYPE_T **srcType, char **names, char *projectList)
 {
-	char dstColumnName[DS_NAME_DIM], *str;
+	char dstColumnName[DS_NAME_DIM];
 	int c;
 	size_t i, index, n;
+	DS_BUF_T bp;
 	DS_FIELD_T *dstField, *f, *field;
 
 	dstField = DS_FIELD_PTR(dstType);
@@ -348,13 +268,13 @@ static int dsProjectFields(DS_FIELD_T **srcField, size_t *srcIndex,
 	if (projectList == NULL) {
 		return TRUE;
 	}
-	str = projectList;
-	if (dsNonSpace(str, &str) != '{') {
+	DS_GET_INIT(&bp, projectList);
+	if (dsGetNonSpace(&bp) != '{') {
 		DS_ERROR(DS_E_INVALID_PROJECT_SPECIFIER);
 	}
 	for (;;) {
 		if (!dsTargetField(dstColumnName, &field,
-			&index, srcType, names, str, &str)) {
+			&index, srcType, names, &bp)) {
 			return FALSE;
 		}
 		if (dsFindField(&f, dstType, dstColumnName) != 0) {
@@ -373,7 +293,7 @@ static int dsProjectFields(DS_FIELD_T **srcField, size_t *srcIndex,
 		if (srcIndex != NULL) {
 			srcIndex[i] = index;
 		}			
-		if ((c = dsNonSpace(str, &str)) == '}') {
+		if ((c = dsGetNonSpace(&bp)) == '}') {
 			break;
 		}
 		if (c != ',') {
@@ -494,113 +414,25 @@ int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc, char *projectList)
 }
 /*****************************************************************************
 *
-* dsSlowEquijoin - construct projection of natural join
-*
-* RETURNS: TRUE if success else FALSE
-*/
-int dsSlowEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
-	DS_DATASET_T *pTableTwo, char *aliases, char *joinList, char *projectList)
-{
-	char aliasName[2][DS_NAME_DIM];
-	char *baseOne, *baseTwo, *joinBase, *names[2], *srcBase, *str;
-	size_t i, r1, r2, size, srcIndex[DS_MAX_JOIN];
-	DS_FIELD_T *pJoinField, *srcField[DS_MAX_JOIN];
-	DS_KEY_T key;
-	DS_TYPE_T *types[4];
-
-	if (!DS_IS_TABLE(pJoinTable) ||
-		!DS_IS_TABLE(pTableOne)  ||
-		!DS_IS_TABLE(pTableTwo)) {
-		DS_ERROR(DS_E_INVALID_TABLE);
-	}
-	if (!dsTypePtr(&types[0], pJoinTable->tid) || 
-		!dsTypePtr(&types[1], pTableOne->tid)  ||
-		!dsTypePtr(&types[2], pTableTwo->tid)) {
-		return FALSE;
-	}
-	types[3] = NULL;
-	if (aliases == NULL) {
-		names[0] = pTableOne->name;
-		names[1] = pTableTwo->name;
-	}
-	else {
-		str = aliases;
-		names[0] = aliasName[0];
-		names[1] = aliasName[1];
-		if (!dsParseName(names[0], str, &str) ||
-			!dsParseName(names[1], str, &str)) {
-			DS_ERROR(DS_E_INVALID_ALIAS);
-		}       
-   	}
-	if (!dsEquijoinKey(&key, &types[1], names, joinList)) {
-		return FALSE;
-	}
-	if (!dsEquijoinFields(srcField, srcIndex, types, &key, names, projectList)) {
-		return FALSE;
-	}
-	pJoinField = DS_FIELD_PTR(types[0]);
-	baseOne = pTableOne->p.data;
-	pJoinTable->elcount = 0;
-	for (r1 = 0; r1 < pTableOne->elcount; r1++) {
-		baseTwo = pTableTwo->p.data;
-		for (r2 = 0; r2 < pTableTwo->elcount; r2++) {
-			if (dsCmpKeys(&key, baseOne, baseTwo) == 0) {
-				if (pJoinTable->elcount >= pJoinTable->maxcount) {
-					if (pJoinTable->elcount != pJoinTable->maxcount) {
-						DS_ERROR(DS_E_SYSTEM_ERROR);
-					}
-					if (DS_IS_DYNAMIC(pJoinTable)) {
-						if (!dsReallocTable(pJoinTable,
-							DS_REALLOC_COUNT(pJoinTable))) {
-							return FALSE;
-						}
-					}
-					else {
-						DS_ERROR(DS_E_JOIN_TOO_LARGE);
-					}
-				}
-				joinBase = (char *)pJoinTable->p.data +
-					pJoinTable->elcount *types[0]->size;
-				for (i = 0; i < types[0]->nField; i++) {
-					size = pJoinField[i].count*pJoinField[i].type->size;
-					srcBase = srcIndex[i] ? baseTwo : baseOne;
-					memcpy(joinBase + pJoinField[i].offset,
-						srcBase + srcField[i]->offset, size);
-				}
-				pJoinTable->elcount++;
-			}
-			baseTwo += types[2]->size;
-		}
-		baseOne += types[1]->size;
-	}
-	if (DS_IS_DYNAMIC(pJoinTable)) {
-		if (!dsReallocTable(pJoinTable, pJoinTable->elcount)) {
-			return FALSE;
-		}
-	}
-	return TRUE;
-}
-/*****************************************************************************
-*
 * dsTargetField - find type of target field
 *
 * RETURNS: TRUE if success else FALSE
 */
 int dsTargetField(char *dstColumnName, DS_FIELD_T **ppSrcField,
-	size_t *pSrcIndex, DS_TYPE_T **types, char **names, char *str, char **ptr)
+	size_t *pSrcIndex, DS_TYPE_T **types, char **names, DS_BUF_T *bp)
 {
 	char srcColumnName[DS_NAME_DIM], srcTableName[DS_NAME_DIM];
 	int c;
 	size_t srcIndex, i;
 	DS_FIELD_T *srcField, *f;
 
-	if (!dsGetColumnSpecifier(srcTableName, srcColumnName, str, &str)) {
+	if (!dsGetColumnSpecifier(srcTableName, srcColumnName, bp)) {
 		DS_ERROR(DS_E_INVALID_PROJECT_SPECIFIER);
 	}
-	c = dsNonSpace(str, &str);
-	str--;
+	c = dsGetNonSpace(bp);
+	dsUngetc(c, bp);
 	if (isalpha(c)) {
-		if (!dsParseName(dstColumnName, str, &str)) {
+		if (dsGetName(dstColumnName, bp) <= 0) {
 			DS_ERROR(DS_E_INVALID_PROJECT_SPECIFIER);
 		}
 	}
@@ -623,7 +455,6 @@ int dsTargetField(char *dstColumnName, DS_FIELD_T **ppSrcField,
 	}
 	*ppSrcField = srcField;
 	*pSrcIndex = srcIndex;
-	*ptr = str;
 	return TRUE;
 }
 /*****************************************************************************
@@ -632,25 +463,26 @@ int dsTargetField(char *dstColumnName, DS_FIELD_T **ppSrcField,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTargetTable(DS_DATASET_T **ppTable, char *tableName, char *typeName, 
+int dsTargetTable(DS_DATASET_T **ppTable, const char *tableName, const char *typeName, 
 	DS_DATASET_T *parentOne, DS_DATASET_T *parentTwo, 
 	char *aliases, char *projectList)
 {
-	char aliasNames[2][DS_NAME_DIM], *names[2], *str;
+	char aliasNames[2][DS_NAME_DIM], *names[2];
 	char typeSpecifier[DS_MAX_SPEC_LEN];  
 	size_t i, tidList[3];
+	DS_BUF_T bp;
 	DS_DATASET_T *tables[3];
 
 	tables[0] = parentOne;
 	tables[1] = parentTwo;
-	str = aliases;
+	DS_GET_INIT(&bp, aliases);
 	for (i = 0; i < 2 && tables[i] != NULL; i++) {
 		if (!DS_IS_TABLE(tables[i])) {
 			DS_ERROR(DS_E_INVALID_TABLE);
 		}
 		tidList[i] = tables[i]->tid; 
 		if (aliases != NULL) {
-			if (!dsParseName(aliasNames[i], str, &str)) { 
+			if (dsGetName(aliasNames[i], &bp) <= 0) { 
   		 		DS_ERROR(DS_E_INVALID_ALIAS);
   			}
   			names[i] = aliasNames[i];
@@ -675,12 +507,13 @@ int dsTargetTable(DS_DATASET_T **ppTable, char *tableName, char *typeName,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTargetTypeSpecifier(char *spec, size_t maxSize, char *typeName, 
+int dsTargetTypeSpecifier(char *str, size_t maxSize, const char *typeName, 
 	size_t *tidList, char **names, char *projectList)
 {
-	char dstName[DS_NAME_DIM], *str;
+	char dstName[DS_NAME_DIM];
 	int c;
 	size_t i, index, j, n, size;
+	DS_BUF_T bp;
 	DS_FIELD_T *f, *field, *srcField;
 	DS_TYPE_T *newType, *types[3];
 
@@ -695,9 +528,8 @@ int dsTargetTypeSpecifier(char *spec, size_t maxSize, char *typeName,
 	if ((newType = dsTypeCalloc(size)) == NULL) {
 		return FALSE;
 	}
-	newType->field = (DS_FIELD_T *)&newType[1];
 	field = DS_FIELD_PTR(newType);
-	if (!dsParseName(newType->name, typeName, NULL)) {
+	if (!dsCopyName(newType->name, typeName, NULL)) {
 		DS_LOG_ERROR(DS_E_INVALID_TYPE_NAME);
 		goto fail;
 	}
@@ -706,13 +538,13 @@ int dsTargetTypeSpecifier(char *spec, size_t maxSize, char *typeName,
 		if (names == NULL) {
 			DS_ERROR(DS_E_NULL_POINTER_ERROR);
 		}
-		str = projectList;
-		if (dsNonSpace(str, &str) != '{') {
+		DS_GET_INIT(&bp, projectList);
+		if (dsGetNonSpace(&bp) != '{') {
 			DS_LOG_ERROR(DS_E_INVALID_PROJECT_SPECIFIER);
 			goto fail;
 		}
 		for (;;) {
-			if (!dsTargetField(dstName, &f, &index, types, names, str, &str)) {
+			if (!dsTargetField(dstName, &f, &index, types, names, &bp)) {
 				goto fail;
 			}
 			if (( n = newType->nField) >= DS_MAX_JOIN) {
@@ -722,7 +554,7 @@ int dsTargetTypeSpecifier(char *spec, size_t maxSize, char *typeName,
 			memcpy(&field[n], f, sizeof(DS_FIELD_T));
 			strcpy(field[n].name, dstName);
 			newType->nField++;
-			if ((c = dsNonSpace(str, &str)) == '}') {
+			if ((c = dsGetNonSpace(&bp)) == '}') {
 				break;
 			}
 			if (c != ',') {
@@ -751,7 +583,7 @@ int dsTargetTypeSpecifier(char *spec, size_t maxSize, char *typeName,
 			}
 		}		
 	}
-	if (!dsFormatTypeSpecifier(spec, maxSize, newType)) {
+	if (!dsFormatTypeSpecifier(str, maxSize, newType)) {
 		goto fail;
 	}
 	dsTypeFree(newType, size);
