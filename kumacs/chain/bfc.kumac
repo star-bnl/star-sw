@@ -69,10 +69,10 @@
 MACRO bfc _
    TOP=.  _
    adcxyzon=0 _
-   tpc_sector_first=18 _
-   tpc_sector_last=18 _
-   domain='tpc svt global' _
-   chain='g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_ 
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   domain='tpc ' _
+   chain='g2t tpg tss tcl tpt evout'_ 
    first=1 _
    no_events=1 _
    input_data_prefix=$AFS_RHIC/star/data/samples/ _
