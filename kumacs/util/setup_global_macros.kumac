@@ -32,10 +32,7 @@ macro setup_global_macros
  /MACRO/GLOBAL/CREATE PARAMS_TRG    $AFS_RHIC/star/packages/SL98b/params/trg/
  /MACRO/GLOBAL/CREATE PAMS_TRG_KUMAC  _
                                $AFS_RHIC/star/packages/SL98b/pams/trg/kumac/
- /MACRO/GLOBAL/CREATE KUMACS_FTPC $AFS_RHIC/star/packages/SL98b/kumacs/ftpc/
- /MACRO/GLOBAL/CREATE PARAMS_FTPC $AFS_RHIC/star/packages/SL98b/params/ftpc/
- /MACRO/GLOBAL/CREATE PAMS_FTPC_KUMAC  _
-                    $AFS_RHIC/star/packages/SL98b/pams/ftpc/kumac/
+
 
  message ' *** Have set up global macros *** '
 

@@ -1,10 +1,4 @@
 #  $Log: MakePam.mk,v $
-#  Revision 1.9  1998/04/07 22:02:49  fisyak
-#  fogotten bracket
-#
-#  Revision 1.7  1998/04/07 20:57:14  fisyak
-#  Add standard library to path
-#
 #  Revision 1.6  1998/04/04 14:45:50  fisyak
 #  Fix bug with geant3.def
 #
@@ -55,7 +49,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/04/07 22:02:49 $ 
+#           Last modification $Date: 1998/04/04 14:45:50 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
 PWD       = /bin/pwd
@@ -272,7 +266,7 @@ ifndef LIBRARIES
 		LIBRARIES := $(LIB_PKG)	               
 ifneq ($(STAR_PATH),$(ROOTD))   
 ifneq ($(LIB_PKG),$(EMPTY))
-LIBRARIES += $(shell test -f $(STAR_LIB)/$(PKG_LIB) && echo  $(STAR_LIB)/$(PKG_LIB))
+		LIBRARIES += $(shell test -f $(LIB_PKG) && echo $(LIB_PKG)) -L$(STAR_LIB)
 endif                           
 endif                           
 LIBRARIES += -L$(STAR)/asps/../.$(STAR_HOST_SYS)/lib -ltls -lmsg

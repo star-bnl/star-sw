@@ -1,5 +1,8 @@
-* $Id: tpt_merge_segments.F,v 1.3 1998/04/06 19:20:01 sakrejda Exp $
+* $Id: tpt_merge_segments.F,v 1.4 1998/04/09 23:11:36 sakrejda Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.4  1998/04/09 23:11:36  sakrejda
+* changes from Joachim Nystrand added
+*
 * Revision 1.3  1998/04/06 19:20:01  sakrejda
 * quiks replaced by tls_Quick_Sort_r in merging routine
 *
@@ -50,7 +53,7 @@ C______________________________________________________________________
 C_________________________________________________________________
       INTEGER ltot,tls_Quick_Sort_r,iret
       INTEGER i,j,k,l,lxj,lxi,next,c,m,n,ipass
-      REAL id,radd,long,tracks,hits,dis,min(4),cuta,cutb
+      REAL id,radd,long,tracks,hits,dis,min(5),cuta,cutb
       INTEGER firsti,lasti,firstj,lastj
       INTEGER hipnt,lowpnt,isort,ipoint,itrack,ips,isect
       INTEGER rfifj,rfilj,rlifj,rlilj,rowdiff
@@ -59,6 +62,7 @@ C_________________________________________________________________
       REAL xfj,yfj,zfj,xlj,ylj,zlj
       REAL dfifj,dfilj,dlifj,dlilj,mindist,mindist2
       REAL radi,radj
+      REAL varb,varc,meanrad,qij
 C______________________________________________________________________
 
 c Order the good tracks according to their helix radius.
@@ -79,9 +83,10 @@ c Minimum difference values for merging tracks
 c (min(1)=rr,min(2)=average of acent & bcent, min(3)=ltan, min(4)=phi0):
 c Adjust these parameters to change the merging criteria.
       min(1)=0.1   ! radius ratio
-      min(2)=0.1  ! center average
+      min(2)=0.1   ! center average
       min(3)=0.05  ! tanl
       min(4)=0.5   ! phi0 (deactivated)
+      min(5)=10.0  ! Cut for avoiding merging parallel tracks 
 
 c Loop over track radii in order. Check if radii match. Go on if yes.
 c radd is the larger of the radii being compared.
@@ -99,8 +104,18 @@ c           Now compare the average of the differences of the
 c           centers of the helices
             cuta = abs(trk(lxi).p(3)-trk(lxj).p(3))
             cutb = abs(trk(lxi).p(4)-trk(lxj).p(4))
-            if (cuta.lt.6.0.and.cutb.lt.6.0) then
+C           >> USE Eq. 2.1.29 of Tracking Memo. Do not try to merge tracks
+C           >> with different curvature (charge). (JN 980406)
+            qij=trk(lxi).p(2)*trk(lxj).p(2)
+            meanrad=0.5*(radi+radj)
+            varb=0.5*(cuta/meanrad + cutb/meanrad)
+C            if (cuta.lt.6.0.and.cutb.lt.6.0) then
+c           come back to it! sometimes merging tracks with different signs
+c           makes some sence
+c            if ( (varb.lt.min(2)) .and. (qij.gt.0.) ) then
+            if ( (varb.lt.min(2))) then
 c               Now compare their dip angles.
+                varc=abs(abs(trk(lxi).p(7))-abs(trk(lxj).p(7)))
                 if (abs(abs(trk(lxi).p(7))-abs(trk(lxj).p(7))).lt.
      +          min(3)) then
 c                 For the tracks that survive, these two cuts, find 
@@ -218,11 +233,12 @@ c                 corresponding row difference.
                   if (dlilj.ne.0.0.and.dlilj.ne.mindist.and.
      +                    dlilj.lt.mindist2) mindist2=dlilj
 
-c                 Finally got it, now make sure the tracks are not parallel.
-                  if (mindist.lt.30.0.and.mindist2.lt.30.0.and.
+c                 Finally got it, now make sure the tracks are not parallel
+c                 >> USE PARAMETER min(5) (JN 980406)
+                  if (mindist.lt.min(5).and.mindist2.lt.min(5).and.
      +                    tpar(ipass).debug(8).eq.1)
      +                    write(6,*) '*****PARALLEL******'
-                  if (mindist.gt.30.0.or.mindist2.gt.30.0) then 
+                  if (mindist.gt.min(5).or.mindist2.gt.min(5)) then 
                         if (tpar(ipass).debug(8).eq.1) then
                            write(6,*) '**Merged ','dist= ',mindist,
      +                          'drow= ',rowdiff

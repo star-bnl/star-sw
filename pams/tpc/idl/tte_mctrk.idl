@@ -16,6 +16,7 @@
        long       pid;        /* Particle ID */
        long       recid;      /* ID of the reconstructed track. */
        long       vid;        /* vertex id */
+       long       evnum;      /* event number */
        float     ptg;        /* Generated pt */
        float     ptr;        /* Reconstructed pt */
        float     ptvg;       /* Transverse momentum generated at the ver */
