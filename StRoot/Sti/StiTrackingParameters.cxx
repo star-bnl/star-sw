@@ -1,3 +1,14 @@
+/*!
+ * $Id: StiTrackingParameters.cxx,v 2.2 2003/07/30 17:04:20 andrewar Exp $  
+ *
+ * $Log: StiTrackingParameters.cxx,v $
+ * Revision 2.2  2003/07/30 17:04:20  andrewar
+ * Added log and version id bars.
+ *
+ *
+ */
+
+
 #include "StiTrackingParameters.h"
 #include "Sti/Base/EditableParameter.h"
 

@@ -1,3 +1,13 @@
+/*!
+ * $Id: StiTrackingParameters.h,v 2.2 2003/07/30 17:04:20 andrewar Exp $  
+ *
+ * $Log: StiTrackingParameters.h,v $
+ * Revision 2.2  2003/07/30 17:04:20  andrewar
+ * Added log and version id bars.
+ *
+ *
+ */
+
 #ifndef StiTrackingParameters_H
 #define StiTrackingParameters_H 1
 
