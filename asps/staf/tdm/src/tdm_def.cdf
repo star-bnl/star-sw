@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_and_Dataset_Memory commands.
 .
- #(@)$Id: tdm_def.cdf,v 1.11 1998/06/09 22:39:28 ward Exp $
+ #(@)$Id: tdm_def.cdf,v 1.12 1998/06/09 22:54:21 ward Exp $
  Edited by Bill Love on 23-24 Feb 1998
 .
 TDM is an Analysis Service Package (ASP) for the Standard Analysis
@@ -997,15 +997,12 @@ Dumps a table to file.
 .
 The IFIRST parameter counts from zero _UNLIKE_ Fortran.
 .
-If you want all the rows, use a negative number for NROWS, and zero
+If you want all the rows, use a large number for NROWS, and zero
 for IFIRST.
 .
 The COLUMNLIST parameter is used
 to select a subset of the columns.  In the COLUMNLIST parameter, separate the 
 column names with carets (^).  See the example below.
-.
-Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
-tdmTable::dump method is pushed on the STAF_STATUS stack (see SOC).
 .
 EXAMPLE: 
 This example writes columns id, offset, and pedestal of
