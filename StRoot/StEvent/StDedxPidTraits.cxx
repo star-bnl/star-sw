@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.5 1999/11/29 17:07:24 ullrich Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.6 2000/01/05 16:04:11 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
- * Revision 2.5  1999/11/29 17:07:24  ullrich
- * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
+ * Revision 2.6  2000/01/05 16:04:11  ullrich
+ * Changed method name sigma() to errorOnMean().
  *
  * Revision 2.5  1999/11/29 17:07:24  ullrich
  * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
@@ -34,7 +34,7 @@
 
 ClassImp(StDedxPidTraits)
 
-static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.5 1999/11/29 17:07:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.6 2000/01/05 16:04:11 ullrich Exp $";
 
 StDedxPidTraits::StDedxPidTraits() :
     mNumberOfPoints(0), mDedx(0), mSigma(0), mMethod(0) { /* noop */ }
@@ -58,7 +58,7 @@ Float_t
 StDedxPidTraits::mean() const { return mDedx; }
 
 Float_t
-StDedxPidTraits::sigma() const { return mSigma; }
+StDedxPidTraits::errorOnMean() const { return mSigma; }
 
 StObject*
 StDedxPidTraits::clone() { return new StDedxPidTraits(*this); }
