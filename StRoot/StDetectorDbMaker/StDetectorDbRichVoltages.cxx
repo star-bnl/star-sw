@@ -18,7 +18,7 @@ StDetectorDbRichVoltages::StDetectorDbRichVoltages(StMaker* maker){
 	// For some reason, the maker GetDateTime is not in GMT!!!!
 	mEventTime = maker->GetDateTime().Convert() - 14400;
 		
-	TDataSet* dataSet = maker->GetDataBase("RunLog/rhic");
+	TDataSet* dataSet = maker->GetDataBase("RunLog/onl");
 	
 	if(dataSet){
 	    TTable* table = dynamic_cast<TTable*>(dataSet->Find("richvoltages"));

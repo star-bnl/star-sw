@@ -22,7 +22,7 @@ StDetectorDbRichScalers::StDetectorDbRichScalers(StMaker* maker){
     if(maker){
 	mEventTime = maker->GetDateTime().Convert() - 14400; //convert to GMT
 	
-	TDataSet* dataSet = maker->GetDataBase("RunLog/rhic");
+	TDataSet* dataSet = maker->GetDataBase("RunLog/onl");
 	
 	if(dataSet){
 	    TTable* table = dynamic_cast<TTable*>(dataSet->Find("trigDetSums"));
