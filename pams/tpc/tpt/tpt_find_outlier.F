@@ -1,5 +1,8 @@
-* $Id: tpt_find_outlier.F,v 1.5 1999/09/14 00:55:46 liq Exp $
+* $Id: tpt_find_outlier.F,v 1.6 2000/01/21 07:55:46 sakrejda Exp $
 * $Log: tpt_find_outlier.F,v $
+* Revision 1.6  2000/01/21 07:55:46  sakrejda
+* Calculation of track length along the helix improved. Makes chisq and residuals symmetric.
+*
 * Revision 1.5  1999/09/14 00:55:46  liq
 * use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
 *
@@ -59,58 +62,70 @@ C_________________________________________________________________
       INTEGER ibad, ipt, ncir, i, ibig,ipass
       REAL    xcir(*),ycir(*),zcir(*),wcir(*),wlin(*)
       REAL    zn1,resbig,restot,phi0,dz,ri,rr
-      REAL    stot,dsxy,dsz,acent,bcent,xn1,yn1
+      REAL    stot,dsxy,dsz,acent,bcent
+      REAL    refx,refy,refmod,curx,cury,curmod
       integer idI1, idI2, idI3       ! Message ID
       character*132 m132  ! And some message-generating space.
       character*132 m132by100(100)
       data idI1, idI2, idI3 /0, 0, 0/
       save idI1, idI2, idI3
+      logical chiz
+cc      real chisqz, chisqr
 C_________________________________________________________________
 c
       ibig = 0
       resbig  = 0.0 
       stot = 0.0
+cc      chisqz=0
+cc      chisqr=0
       phi0 = trk(ipt).p(5) ! angle in the helix coor. system
       rr = abs(trk(ipt).p(2))
       acent = trk(ipt).p(3)
       bcent = trk(ipt).p(4)
       zn1 = trk(ipt).p(6)
-      yn1 = ycir(1)
-      xn1 = xcir(1)
+      refx=xcir(1)-acent
+      refy=ycir(1)-bcent
+      refmod=sqrt(refx**2+refy**2)
       dz  = 0.0
+      chiz=trk(ipt).p(8)/(ncir-3).lt.trk(ipt).p(9)/(ncir-2)
       do i=1,ncir
-         ri = abs(sqrt((xcir(i)-acent)**2+(ycir(i)-bcent)**2)- rr)
-         if(abs(trk(ipt).p(7)).lt.0.0000001) then
+        if(chiz)then
+          if(abs(trk(ipt).p(7)).lt.0.0000001) then
              write(m132,*)'TPTOUT1-E1 Midrapidity track'
              call Message( m132, 1, idI1 )
              tpt_find_outlier = STAFCV_BAD
              return
-         endif
-         dsz = (zcir(i) - zn1)/trk(ipt).p(7)
-         if(dsz.ge.C_2PI*rr) then
+          endif
+          dsz = (zcir(i) - zn1)/trk(ipt).p(7)
+          if(dsz.ge.C_PI*rr) then
 *            it's a very special case
-             write (m132,*)'TPTOUT2-E1 special case in the outliers removal',dsz
+             write (m132,*)'TPTOUT2-E1 special case',dsz,rr,trk(ipt).p(7)
              call Message( m132, 1, idI2 )
              tpt_find_outlier = STAFCV_BAD
-         else
-             dsxy = 0.5*sqrt((ycir(i)-yn1)**2+(xcir(i)-xn1)**2)/rr
-             if(abs(dsxy).lt.1.0)then
-                stot = stot + asin(dsxy)*rr*2.0
-                dz = trk(ipt).p(6) + stot*trk(ipt).p(7)-zcir(i)
-                restot = dz**2*wlin(i)+ri*wcir(i)
-                if(restot.ge.resbig) then
-                  ibig=i
-                  resbig = restot
-                endif
-                zn1 = zcir(i)
-                yn1 = ycir(i)
-                xn1 = xcir(i)
-             else
-                tpt_find_outlier = STAFCV_BAD
-                return
-             endif
-         endif
+             return
+          else
+*            write(6,*) 'got HERE!!!!!'
+             curx=xcir(i)-acent
+             cury=ycir(i)-bcent
+             curmod=sqrt(curx**2+cury**2)
+             dsxy = abs(refx*cury-refy*curx)/(refmod*curmod)
+             stot = asin(dsxy)*rr
+             dz = trk(ipt).p(6) + stot*trk(ipt).p(7)-zcir(i)
+             restot=dz**2*wlin(i)
+CC             chisqz=chisqz+restot
+             zn1 = zcir(i)
+          endif
+        else
+          ri = abs(sqrt((xcir(i)-acent)**2+(ycir(i)-bcent)**2)- rr)
+          restot=ri**2*wcir(i)
+CC          chisqr=chisqr+restot
+        endif
+        if(restot.ge.resbig) then
+          ibig=i
+          resbig = restot
+        endif
       end do
+CCC      write(6,*)'chisq diff',trk(ipt).p(9),chisqz,trk(ipt).p(8),chisqr
       ibad = ibig
       if(ibad.eq.0) then
           write(m132by100(1),*)'TPTOUT3-E1',ibad, ipt, ncir, ri, dz

@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.6 1999/09/14 00:53:11 liq Exp $
+* $Id: tpt_fit_track.F,v 1.7 2000/01/21 07:55:46 sakrejda Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.7  2000/01/21 07:55:46  sakrejda
+* Calculation of track length along the helix improved. Makes chisq and residuals symmetric.
+*
 * Revision 1.6  1999/09/14 00:53:11  liq
 * add tpt_mxdim.inc, use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
 *
@@ -136,50 +139,46 @@ C           Check whether enough hits survived
 C             If yes, call the helix fit
               iret=tpt_helix_fit(ipt,trk,xcir,ycir,zcir,
      >                           wcir,wlin,ncir,tpar_h,tpar,ipass)
-C             calculate the error squared on phi0
-              r1 = (xcir(1)-trk(ipt).p(3))**2 + 
-     >             (ycir(1)-trk(ipt).p(4))**2
-              tanphi0 = (ycir(1)-trk(ipt).p(4))/
-     >                  (xcir(1)-trk(ipt).p(3))
-              trk(ipt).dpar(7) = ((xcir(1)-trk(ipt).p(3))/r1)**2 *
-     >        (hit(ient1).dy**2 + abs(trk(ipt).dpar(4)) +
-     >        tanphi0**2*(hit(ient1).dx**2 + abs(trk(ipt).dpar(1))))
               if(iret.eq.STAFCV_OK) then
-                   if((trk(ipt).p(8)/real(ncir-3).lt.
-     >                 tpar(ipass).prob(1)
-     >             .or.tpar(ipass).prob(1).lt.0.0).and.
-     >             (trk(ipt).p(9)/real(ncir-2).lt.
-     >                 tpar(ipass).prob(2)
-     >             .or.tpar(ipass).prob(2).lt.0.0)) then
-                     trk(ipt).nfit = ncir
-                     enough=.true.        ! if fit succesful quit
-                     trk(ipt).flag=ipass
-                   else
-                     if(tpar(ipass).debug(2).eq.1) then
-                         call StInfo('TPT_TRACK_FIT - Calling outliers removal')
-                     endif
-                     iret=tpt_find_outlier(ipt,trk
-     >                  ,xcir,ycir,zcir,wcir,wlin,ncir,tpar_h,tpar,
-     >                   ibad,ipass)
-                     if(tpar(ipass).debug(2).eq.1) then
-                        call StInfo('TPT_TRACK_FIT - Out from the outliers removal')
-                     endif
-                     if(iret.eq.STAFCV_OK) then
-                        good_hit(pnt(ibad))= .false.
-                        trk(ipt).flag=-3      ! too many iterations
-                        ntry = ntry+1    ! increase number of iterations
-                     else
-C                       could not identify the outlier
-                        trk(ipt).flag = -6
-                        ntry=tpar(ipass).mxtry+1
-                     endif
-                   endif
+                if((trk(ipt).p(8)/real(ncir-3).lt.tpar(ipass).prob(1)
+     >          .or.tpar(ipass).prob(1).lt.0.0).and.
+     >          (trk(ipt).p(9)/real(ncir-2).lt.tpar(ipass).prob(2)
+     >          .or.tpar(ipass).prob(2).lt.0.0)) then
+                    trk(ipt).nfit = ncir
+                    enough=.true.        ! if fit succesful quit
+                    trk(ipt).flag=ipass
+C                   calculate the error squared on phi0
+                    r1 = (xcir(1)-trk(ipt).p(3))**2 + 
+     >              (ycir(1)-trk(ipt).p(4))**2
+                    tanphi0 = (ycir(1)-trk(ipt).p(4))/(xcir(1)-trk(ipt).p(3))
+                    trk(ipt).dpar(7) = ((xcir(1)-trk(ipt).p(3))/r1)**2 *
+     >              (hit(ient1).dy**2 + abs(trk(ipt).dpar(4)) +
+     >              tanphi0**2*(hit(ient1).dx**2 + abs(trk(ipt).dpar(1))))
+                else
+                    if(tpar(ipass).debug(2).eq.1) then
+                      call StInfo('TPT_TRACK_FIT - Calling outliers removal')
+                    endif
+                    iret=tpt_find_outlier(ipt,trk
+     >              ,xcir,ycir,zcir,wcir,wlin,ncir,tpar_h,tpar,ibad,ipass)
+                    if(tpar(ipass).debug(2).eq.1) then
+                      call StInfo('TPT_TRACK_FIT - Out from the outliers removal')
+                    endif
+                    if(iret.eq.STAFCV_OK) then
+                      good_hit(pnt(ibad))= .false.
+                      trk(ipt).flag=-3      ! too many iterations
+                      ntry = ntry+1    ! increase number of iterations
+                    else
+C                     could not identify the outlier
+                      trk(ipt).flag = -6
+                      ntry=tpar(ipass).mxtry+1
+                    endif
+                endif
               else
-                   trk(ipt).flag=-4      ! too many iterations
-                   ntry = ntry+1        ! increase number of iterations
+                trk(ipt).flag=-4      ! too many iterations
+                ntry = ntry+1        ! increase number of iterations
               endif
-            end if 
-        end if
+            endif 
+        endif
       end do
 C
 C     clean up list of hits and remove outliers
@@ -190,26 +189,18 @@ C         fit wasn't succesful, reset all the points
           n_good=0    ! number of kept hits
           do i=1,trk(ipt).nhit
              if(good_hit(i)) then
-                n_good = n_good+1                  ! count good hits
-                ipnt_temp(n_good)=trk(ipt).ipnt(i) ! and memorize them
+               n_good = n_good+1                  ! count good hits
+               trk(ipt).ipnt(n_good)=trk(ipt).ipnt(i) ! and memorize them
              else
-*               forget about this hit- 
-*               The "tte_skip" variable keeps this routine from chainging
-*               the hit table when called by tte.
-                if (tte_skip.ne.-999) then 
-                 if(hit(trk(ipt).ipnt(i)).track.gt.0)
-     >           hit(trk(ipt).ipnt(i)).track=0.0
-                 endif
-                endif
+*              forget about this hit- 
+*              The "tte_skip" variable keeps this routine from chainging
+*              the hit table when called by tte.
+               if (tte_skip.ne.-999.and.hit(trk(ipt).ipnt(i)).track.gt.0)
+     >         hit(trk(ipt).ipnt(i)).track=0.0
+             endif
           end do 
 *         reload good points to the trk.ipnt
-          if(n_good.lt.trk(ipt).nhit) then
-            trk(ipt).nhit = n_good
-            do i=1,n_good
-              trk(ipt).ipnt(i)=ipnt_temp(i)
-*             and change their position on the track
-            end do
-          endif
+          trk(ipt).nhit = n_good
           TPT_FIT_TRACK = STAFCV_OK
       endif
       return
