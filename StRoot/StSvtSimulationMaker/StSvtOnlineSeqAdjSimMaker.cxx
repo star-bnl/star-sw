@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSim.cc,v 1.3 2003/11/30 20:51:48 caines Exp $
+ * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.1 2003/12/01 00:57:51 caines Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -10,7 +10,7 @@
  ***************************************************************************/
 
 
-#include "StSvtOnlineSeqAdjSim.hh"
+#include "StSvtOnlineSeqAdjSimMaker.h"
 #include "StSvtClassLibrary/StSvtHybridPixelsC.hh"
 #include "StSvtClassLibrary/StSvtHybridPixelsD.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
@@ -22,9 +22,9 @@
 #include "StMessMgr.h"
 #include "StSvtConversionTable.h"
 
-ClassImp(StSvtOnlineSeqAdjSim)
+ClassImp(StSvtOnlineSeqAdjSimMaker)
 
-StSvtOnlineSeqAdjSim::StSvtOnlineSeqAdjSim(const char* name):StMaker(name)
+StSvtOnlineSeqAdjSimMaker::StSvtOnlineSeqAdjSimMaker(const char* name):StMaker(name)
 {
   mRawData=NULL;
   m8bitPixelColl=NULL;
@@ -57,12 +57,12 @@ StSvtOnlineSeqAdjSim::StSvtOnlineSeqAdjSim(const char* name):StMaker(name)
 }
 
 //____________________________________________________________________________
-StSvtOnlineSeqAdjSim::~StSvtOnlineSeqAdjSim()
+StSvtOnlineSeqAdjSimMaker::~StSvtOnlineSeqAdjSimMaker()
 {
 }
 
 //____________________________________________________________________________
-Int_t StSvtOnlineSeqAdjSim::GetConfig()
+Int_t StSvtOnlineSeqAdjSimMaker::GetConfig()
 {
   mConfig=NULL;
   St_DataSet *dataSet = NULL;
@@ -89,7 +89,7 @@ Int_t StSvtOnlineSeqAdjSim::GetConfig()
 }
 
 //____________________________________________________________________________
-void StSvtOnlineSeqAdjSim::GetPixelData()
+void StSvtOnlineSeqAdjSimMaker::GetPixelData()
 {
   St_DataSet* dataSet=NULL;
   dataSet = GetDataSet("StSvtPixelData");
@@ -118,7 +118,7 @@ void StSvtOnlineSeqAdjSim::GetPixelData()
 }  
 
 //____________________________________________________________________________
-void StSvtOnlineSeqAdjSim::GetBadAnodes()
+void StSvtOnlineSeqAdjSimMaker::GetBadAnodes()
 {
   St_DataSet *dataSet;
   
@@ -139,7 +139,7 @@ void StSvtOnlineSeqAdjSim::GetBadAnodes()
 
 
 //____________________________________________________________________________
-void StSvtOnlineSeqAdjSim::SetRawData()
+void StSvtOnlineSeqAdjSimMaker::SetRawData()
 {  //this makes new or replaces raw data pro SvtDaqMaker
 
   St_ObjectSet* set=(St_ObjectSet*)GetDataSet("StSvtRawData");
@@ -153,7 +153,7 @@ void StSvtOnlineSeqAdjSim::SetRawData()
 }
 
 //____________________________________________________________________________
-Int_t StSvtOnlineSeqAdjSim::Init()
+Int_t StSvtOnlineSeqAdjSimMaker::Init()
 {
   // these are user settings - they should be read from database - so far here
   /*
@@ -166,30 +166,30 @@ Int_t StSvtOnlineSeqAdjSim::Init()
 }
 
 //____________________________________________________________________________
-Int_t StSvtOnlineSeqAdjSim::InitRun(int runumber)
+Int_t StSvtOnlineSeqAdjSimMaker::InitRun(int runumber)
 {
-  if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSim::InitRun"<<endm;	
+  if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSimMaker::InitRun"<<endm;	
   GetConfig();
   GetBadAnodes();
-  if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSim::InitRun...END"<<endm;	
+  if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSimMaker::InitRun...END"<<endm;	
   return  StMaker::InitRun(runumber);
 }
 
 //____________________________________________________________________________
-Int_t StSvtOnlineSeqAdjSim::Finish()
+Int_t StSvtOnlineSeqAdjSimMaker::Finish()
 {
   return kStOK;
 }
 
 //____________________________________________________________________________
-void StSvtOnlineSeqAdjSim::Clear(const char*)
+void StSvtOnlineSeqAdjSimMaker::Clear(const char*)
 {
   mRawData=NULL;
   StMaker::Clear();
 }
 
 //____________________________________________________________________________
-void StSvtOnlineSeqAdjSim::SetAdjParams(int thresh_lo,int n_seq_lo,int thresh_hi,int n_seq_hi)
+void StSvtOnlineSeqAdjSimMaker::SetAdjParams(int thresh_lo,int n_seq_lo,int thresh_hi,int n_seq_hi)
 {
 m_thresh_lo =thresh_lo;
 m_n_seq_lo =n_seq_lo;
@@ -198,9 +198,9 @@ m_n_seq_hi =n_seq_hi;
 }
 
 //____________________________________________________________________________
-Int_t  StSvtOnlineSeqAdjSim::Make()
+Int_t  StSvtOnlineSeqAdjSimMaker::Make()
 {
-  if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSim::Make"<<endm;	
+  if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSimMaker::Make"<<endm;	
   SetRawData();
   GetPixelData();
   
@@ -242,12 +242,12 @@ Int_t  StSvtOnlineSeqAdjSim::Make()
      }
    }
    
-   if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSim::Make...END"<<endm;	
+   if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSimMaker::Make...END"<<endm;	
    return kStOK;
 }
 
 //____________________________________________________________________________
-void StSvtOnlineSeqAdjSim::Conversion10to8bit()
+void StSvtOnlineSeqAdjSimMaker::Conversion10to8bit()
 {
   double *fromArray=mCurrentPixelData->GetArray();
   Char_t *toArray=mCurrent8bitPixelData->GetArray();
@@ -263,7 +263,7 @@ void StSvtOnlineSeqAdjSim::Conversion10to8bit()
 }
 
 //____________________________________________________________________________
-void StSvtOnlineSeqAdjSim::FillRawData()
+void StSvtOnlineSeqAdjSimMaker::FillRawData()
 {
   StSvtHybridData *hybridData;
   hybridData = new StSvtHybridData(mCurrentPixelData->getBarrelID(), mCurrentPixelData->getLadderID(), mCurrentPixelData->getWaferID(),mCurrentPixelData->getHybridID());
@@ -346,7 +346,7 @@ void StSvtOnlineSeqAdjSim::FillRawData()
 }
 
 //____________________________________________________________________________
-void StSvtOnlineSeqAdjSim::WriteSequence(int anode,int begins, int ends, int NumOfHigh)
+void StSvtOnlineSeqAdjSimMaker::WriteSequence(int anode,int begins, int ends, int NumOfHigh)
 {
   //check the proper size
   //cout<<"anode:"<<anode<<"start:"<<begins<<"ends:"<<ends<<"hi:"<<NumOfHigh<<endl;
@@ -364,7 +364,7 @@ void StSvtOnlineSeqAdjSim::WriteSequence(int anode,int begins, int ends, int Num
 }
 
 //____________________________________________________________________________
-void StSvtOnlineSeqAdjSim::SequenceSearch()
+void StSvtOnlineSeqAdjSimMaker::SequenceSearch()
 {
   unsigned char adc;
   int loCount;
@@ -412,7 +412,7 @@ void StSvtOnlineSeqAdjSim::SequenceSearch()
 
 
 //____________________________________________________________________________
-void  StSvtOnlineSeqAdjSim::KillBadAnodes()
+void  StSvtOnlineSeqAdjSimMaker::KillBadAnodes()
 {
 
   if (!mSvtBadAnodes){
@@ -434,7 +434,7 @@ void  StSvtOnlineSeqAdjSim::KillBadAnodes()
 
 
 //____________________________________________________________________________
-void StSvtOnlineSeqAdjSim::RawAnodes()
+void StSvtOnlineSeqAdjSimMaker::RawAnodes()
 {
   int anode;
   int tb;
@@ -454,13 +454,13 @@ void StSvtOnlineSeqAdjSim::RawAnodes()
 }
 
 //____________________________________________________________________________
-void  StSvtOnlineSeqAdjSim::ClearMask()
+void  StSvtOnlineSeqAdjSimMaker::ClearMask()
 {
   for (int  i=0;i<128*240;i++)mMask[i]=kFALSE;
 }
 
 //____________________________________________________________________________
-void  StSvtOnlineSeqAdjSim::ClearFirstTbins()
+void  StSvtOnlineSeqAdjSimMaker::ClearFirstTbins()
 {
  Char_t *mAdcArray=mCurrent8bitPixelData->GetArray(); // array of [128*240]
   
@@ -473,7 +473,7 @@ void  StSvtOnlineSeqAdjSim::ClearFirstTbins()
 }
 
 //____________________________________________________________________________
-void  StSvtOnlineSeqAdjSim::WriteMask()
+void  StSvtOnlineSeqAdjSimMaker::WriteMask()
 {
   Char_t *mAdcArray=mCurrent8bitPixelData->GetArray(); // array of [128*240]
   
