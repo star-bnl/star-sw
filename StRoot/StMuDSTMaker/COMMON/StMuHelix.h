@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuHelix.h,v 1.3 2003/01/23 21:59:50 laue Exp $
+ * $Id: StMuHelix.h,v 1.4 2003/10/28 18:57:56 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -24,10 +24,11 @@ class StMuHelix : public TObject {
  public:
   StMuHelix() { /* no-op */ }
   StMuHelix(StPhysicalHelixD hh, double field);
-  StThreeVectorF p() const;
-  StThreeVectorF origin() const;
+  const StThreeVectorF &p() const;
+  const StThreeVectorF &origin() const;
   short q() const;
   float b() const;
+  int   bad() const;
  private:
   StThreeVectorF mP;
   StThreeVectorF mOrigin;
@@ -37,8 +38,8 @@ class StMuHelix : public TObject {
 };
 
 
-inline StThreeVectorF StMuHelix::p() const { return mP; }
-inline StThreeVectorF StMuHelix::origin() const { return mOrigin; }
+inline const StThreeVectorF &StMuHelix::p() const { return mP; }
+inline const StThreeVectorF &StMuHelix::origin() const { return mOrigin; }
 inline short StMuHelix::q() const { return mQ; }
 inline float StMuHelix::b() const { return mB; }
 
@@ -47,6 +48,9 @@ inline float StMuHelix::b() const { return mB; }
 /***************************************************************************
  *
  * $Log: StMuHelix.h,v $
+ * Revision 1.4  2003/10/28 18:57:56  perev
+ * BadData protection added
+ *
  * Revision 1.3  2003/01/23 21:59:50  laue
  * Modification to compile on Solaris.
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.6 2003/02/21 14:32:47 laue Exp $
+ * $Id: StMuTrack.cxx,v 1.7 2003/10/28 18:57:56 perev Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -106,7 +106,9 @@ StThreeVectorD StMuTrack::momentumAtPrimaryVertex(const StEvent* event, const St
   return track->geometry()->helix().momentumAt(pathlength,event->runInfo()->magneticField()*kilogauss);
 }
 
-StPhysicalHelixD StMuTrack::helix() const {return StPhysicalHelixD(mHelix.p(),mHelix.origin(), mHelix.b()*kilogauss, mHelix.q());}  
+StPhysicalHelixD StMuTrack::helix() const 
+{
+  return StPhysicalHelixD(mHelix.p(),mHelix.origin(), mHelix.b()*kilogauss, mHelix.q());}  
 StPhysicalHelixD StMuTrack::outerHelix() const {return StPhysicalHelixD(mOuterHelix.p(),mOuterHelix.origin(), mOuterHelix.b()*kilogauss, mOuterHelix.q());}  
 
 double StMuTrack::length() const { 
@@ -114,6 +116,12 @@ double StMuTrack::length() const {
 double StMuTrack::lengthMeasured() const { 
   return fabs( helix().pathLength(StThreeVectorD(mLastPoint)) - helix().pathLength(StThreeVectorD(mFirstPoint)) ); }
 
+int StMuTrack::bad() const 
+{
+   if (mHelix.bad()) 		return 1;
+   if (mOuterHelix.bad())	return 2;
+   return 0;
+}
 #include "StEvent/StProbPidTraits.h"
 void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
   // get vector of traits; 
@@ -148,6 +156,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.7  2003/10/28 18:57:56  perev
+ * BadData protection added
+ *
  * Revision 1.6  2003/02/21 14:32:47  laue
  * Yuri's updates to the PID probabilities. dE/dx track length in TPC added
  *

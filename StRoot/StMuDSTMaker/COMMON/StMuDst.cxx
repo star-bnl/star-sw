@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.18 2003/10/23 04:08:29 perev Exp $
+ * $Id: StMuDst.cxx,v 1.19 2003/10/28 18:57:56 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -178,8 +178,13 @@ StEvent* StMuDst::createStEvent() {
   int nGlobals = arrays[muGlobal]->GetEntries();
   for (int i=0; i<nGlobals; i++) if(globalTracks(i)) {
     int id = globalTracks(i)->id();
+    StMuTrack *mt = globalTracks(i);
+    if (!mt) 		continue;
+    if (mt->bad())	continue;
+    StTrack *st = createStTrack(mt);
+    if (!st)		continue;
     if (nodes[id]==0) nodes[id] = new StTrackNode();
-    nodes[id]->addTrack( createStTrack(globalTracks(i)) );
+    nodes[id]->addTrack(st);
   }
 
   /// add primary tracks to tracknodes and primary vertex
@@ -241,14 +246,22 @@ StEvent* StMuDst::createStEvent() {
 StTrackGeometry* StMuDst::trackGeometry(int q, StPhysicalHelixD* h) {
   static StPhysicalHelixD nullHelix;
   StHelixModel* model=0; 
-  if  (nullHelix!=*h) 
-    model = new StHelixModel(q, h->phase()+h->h()*pi/2, h->curvature(), h->dipAngle(), h->origin(), 
+  if (nullHelix==*h) 			return 0;
+  if (fabs(h->curvature()) > 100)	return 0;
+  if (fabs(h->origin().x())>1000)	return 0;
+  if (fabs(h->origin().y())>1000)	return 0;
+  if (fabs(h->origin().z())>1000)	return 0;
+
+  model = new StHelixModel(q, h->phase()+h->h()*pi/2, h->curvature(), h->dipAngle(), h->origin(), 
 			     h->momentumAt(0,event()->runInfo().magneticField()*kilogauss), h->h());
   return model;
 }
 
 StTrack* StMuDst::createStTrack(StMuTrack* track) {
   StTrack* t=0;
+  StTrackGeometry *tg;
+  if (track->bad()) return 0;
+
   if (track->type() == primary) t = new StPrimaryTrack();
   if (track->type() == global)  t = new StGlobalTrack();
   assert(t);
@@ -256,9 +269,11 @@ StTrack* StMuDst::createStTrack(StMuTrack* track) {
 
   StPhysicalHelixD helix;
   helix = track->helix(); 
-  t->setGeometry( trackGeometry( track->charge(), &helix ) );
+  tg = trackGeometry( track->charge(), &helix );
+  if (tg) t->setGeometry( tg );
   helix = track->outerHelix();
-  t->setOuterGeometry( trackGeometry( track->charge(), &helix ) );
+  tg = trackGeometry( track->charge(), &helix );
+  if (tg) t->setOuterGeometry( tg );
 
   t->setLength(track->length());
   t->setImpactParameter((track->dca()).mag());
@@ -282,6 +297,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.19  2003/10/28 18:57:56  perev
+ * BadData protection added
+ *
  * Revision 1.18  2003/10/23 04:08:29  perev
  * use SetBranchStatus fixed
  *
