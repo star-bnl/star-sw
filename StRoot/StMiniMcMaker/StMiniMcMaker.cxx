@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.7 2002/06/27 17:30:58 jeromel Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.8 2002/06/28 22:15:12 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,29 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.8  2002/06/28 22:15:12  calderon
+ * Changes to deal with seg. faults in the file name handling:
+ * Conventions:
+ * StMiniMcMaker looks for the input file from the IO maker to figure out
+ * if the file has changed.  This is done using TString::Contains() in Make().
+ * Usually we will run one file at a time, but in order not to break Bum's scheme of being
+ * able to process several files in one go, this is left as is.  However, for
+ * embedding, the file name is not enough, in Eric's new scheme there are repeated
+ * file names.  This is resolved by adding a prefix to the output file name.  However,
+ * this prefix should not be overwritten, so the current code only replaces the
+ * string inside the output file name pertaining to the input file name, and leaves
+ * the prefix of the output file intact.  This was done for embedding looking for
+ * st_physics, and here is where the problem arose: hijing files begin with a different
+ * prefix.  To solve this problem, the input file name prefix is now an input parameter
+ * in the macro.
+ *
+ * StMiniEmbed.C and StMiniHijing.C now conform to this convention.  StMiniEmbed.C
+ * did not change its prototype, because all embedding files have st_phyics as prefix.
+ * StMiniHijing.C changed its prototype, now it takes as an input argument the prefix,
+ * but in order not to break Jenn's scripts if she was already using this macro,
+ * this parameter was added at the end and defaults to "rcf", which is appropriate
+ * for hijing files reconstructed in rcf.
+ *
  * Revision 1.7  2002/06/27 17:30:58  jeromel
  * Bug fix. NULL+1 caused a crash ...
  *
@@ -19,6 +42,29 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.8  2002/06/28 22:15:12  calderon
+ * Changes to deal with seg. faults in the file name handling:
+ * Conventions:
+ * StMiniMcMaker looks for the input file from the IO maker to figure out
+ * if the file has changed.  This is done using TString::Contains() in Make().
+ * Usually we will run one file at a time, but in order not to break Bum's scheme of being
+ * able to process several files in one go, this is left as is.  However, for
+ * embedding, the file name is not enough, in Eric's new scheme there are repeated
+ * file names.  This is resolved by adding a prefix to the output file name.  However,
+ * this prefix should not be overwritten, so the current code only replaces the
+ * string inside the output file name pertaining to the input file name, and leaves
+ * the prefix of the output file intact.  This was done for embedding looking for
+ * st_physics, and here is where the problem arose: hijing files begin with a different
+ * prefix.  To solve this problem, the input file name prefix is now an input parameter
+ * in the macro.
+ *
+ * StMiniEmbed.C and StMiniHijing.C now conform to this convention.  StMiniEmbed.C
+ * did not change its prototype, because all embedding files have st_phyics as prefix.
+ * StMiniHijing.C changed its prototype, now it takes as an input argument the prefix,
+ * but in order not to break Jenn's scripts if she was already using this macro,
+ * this parameter was added at the end and defaults to "rcf", which is appropriate
+ * for hijing files reconstructed in rcf.
+ *
  * Revision 1.7  2002/06/27 17:30:58  jeromel
  * Bug fix. NULL+1 caused a crash ...
  *
@@ -27,7 +73,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.7 2002/06/27 17:30:58 jeromel Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.8 2002/06/28 22:15:12 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -179,7 +225,7 @@ StMiniMcMaker::InitRun(int runID) {
   //
   Int_t stat = openFile();
 
-  return stat + StMaker::Init();
+  return stat + StMaker::InitRun(runID);
 
 }   
     
@@ -209,24 +255,25 @@ StMiniMcMaker::Make()
   //
   TString curFileName;
   if(mIOMaker){
-    if( ! strrchr(mIOMaker->GetFile(),'/')){
-      curFileName = mIOMaker->GetFile();
-    } else {
-      curFileName = strrchr(mIOMaker->GetFile(),'/')+1;
-    }
+      if( ! strrchr(mIOMaker->GetFile(),'/')){
+	  curFileName = mIOMaker->GetFile();
+      }
+      else {
+	  curFileName = strrchr(mIOMaker->GetFile(),'/')+1;
+      }
   }
 
   if(!mInFileName.Contains(curFileName)){
-    if(mDebug) {
-      cout << "\tNew file found : " << curFileName << endl
-	   << "\tReplacing " << mInFileName << endl;
-    }
-    closeFile();
-    int fileBeginIndex = mInFileName.Index("st_physics",0);
-    mInFileName.Remove(fileBeginIndex);
-    mInFileName.Append(curFileName);
-    stat = openFile();
-    if(!stat) return stat;
+      if(mDebug) {
+	  cout << "\tNew file found : " << curFileName << endl
+	       << "\tReplacing " << mInFileName << endl;
+      }
+      closeFile();
+      int fileBeginIndex = mInFileName.Index(mInFilePrefix,0);
+      mInFileName.Remove(fileBeginIndex);
+      mInFileName.Append(curFileName);
+      stat = openFile();
+      if(!stat) return stat;
   }
   
   //
@@ -760,7 +807,7 @@ StMiniMcMaker::openFile()
   cout << "Infilename = " << mInFileName << endl;
   TString outFileName(mInFileName);
   outFileName.ReplaceAll("geant.root","minimc.root");
-  outFileName.Prepend(mOutDir + "/");
+  outFileName.Prepend(mOutDir);
 
   mMiniMcDST = 0;
   mMiniMcDST = new TFile(outFileName.Data(),"RECREATE");

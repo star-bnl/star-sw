@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.h,v 1.4 2002/06/07 02:22:00 calderon Exp $
+ * $Id: StMiniMcMaker.h,v 1.5 2002/06/28 22:15:12 calderon Exp $
  * \file  StMiniMcMaker.h
  * \brief Filling of StMiniMcEvent classes from StMcEvent, StEvent, StAssociationMaker
  * 
@@ -12,9 +12,55 @@
  * manuel calderon de la barca's code.
  *
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.5  2002/06/28 22:15:12  calderon
+ * Changes to deal with seg. faults in the file name handling:
+ * Conventions:
+ * StMiniMcMaker looks for the input file from the IO maker to figure out
+ * if the file has changed.  This is done using TString::Contains() in Make().
+ * Usually we will run one file at a time, but in order not to break Bum's scheme of being
+ * able to process several files in one go, this is left as is.  However, for
+ * embedding, the file name is not enough, in Eric's new scheme there are repeated
+ * file names.  This is resolved by adding a prefix to the output file name.  However,
+ * this prefix should not be overwritten, so the current code only replaces the
+ * string inside the output file name pertaining to the input file name, and leaves
+ * the prefix of the output file intact.  This was done for embedding looking for
+ * st_physics, and here is where the problem arose: hijing files begin with a different
+ * prefix.  To solve this problem, the input file name prefix is now an input parameter
+ * in the macro.
+ *
+ * StMiniEmbed.C and StMiniHijing.C now conform to this convention.  StMiniEmbed.C
+ * did not change its prototype, because all embedding files have st_phyics as prefix.
+ * StMiniHijing.C changed its prototype, now it takes as an input argument the prefix,
+ * but in order not to break Jenn's scripts if she was already using this macro,
+ * this parameter was added at the end and defaults to "rcf", which is appropriate
+ * for hijing files reconstructed in rcf.
+ *
  * Revision 1.4  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
- * $Log$ and $Id$ plus header comments for the macros
+ * $Log: StMiniMcMaker.h,v $
+ * Revision 1.5  2002/06/28 22:15:12  calderon
+ * Changes to deal with seg. faults in the file name handling:
+ * Conventions:
+ * StMiniMcMaker looks for the input file from the IO maker to figure out
+ * if the file has changed.  This is done using TString::Contains() in Make().
+ * Usually we will run one file at a time, but in order not to break Bum's scheme of being
+ * able to process several files in one go, this is left as is.  However, for
+ * embedding, the file name is not enough, in Eric's new scheme there are repeated
+ * file names.  This is resolved by adding a prefix to the output file name.  However,
+ * this prefix should not be overwritten, so the current code only replaces the
+ * string inside the output file name pertaining to the input file name, and leaves
+ * the prefix of the output file intact.  This was done for embedding looking for
+ * st_physics, and here is where the problem arose: hijing files begin with a different
+ * prefix.  To solve this problem, the input file name prefix is now an input parameter
+ * in the macro.
+ *
+ * StMiniEmbed.C and StMiniHijing.C now conform to this convention.  StMiniEmbed.C
+ * did not change its prototype, because all embedding files have st_phyics as prefix.
+ * StMiniHijing.C changed its prototype, now it takes as an input argument the prefix,
+ * but in order not to break Jenn's scripts if she was already using this macro,
+ * this parameter was added at the end and defaults to "rcf", which is appropriate
+ * for hijing files reconstructed in rcf.
+ * and $Id: StMiniMcMaker.h,v 1.5 2002/06/28 22:15:12 calderon Exp $ plus header comments for the macros
  *
  */
 
@@ -96,6 +142,7 @@ class StMiniMcMaker : public StMaker{
     { mMinPt=minPt; mMaxPt=maxPt; }
   void  setBField(Float_t val=0.25) { mBField=val; }
   void  setFileName(TString& val)      { mInFileName = val; }
+  void  setFilePrefix(TString& val)      { mInFilePrefix = val; }
 
  private:
   //static const Float_t mSharedHitsCut = .5;
@@ -159,6 +206,7 @@ class StMiniMcMaker : public StMaker{
   TTree*           mMiniMcTree;   //!
   TFile*           mMiniMcDST;    //!
   TString          mInFileName;   //!
+  TString          mInFilePrefix;   //!
   TString          mOutFileName;  //!
   TString          mOutDir;       //!
   TString          mParameterFileName; //!
