@@ -6,7 +6,7 @@
  */
 
 struct pvpdStrobeDef{
-  unsigned short id;           /* pvpd tube Id */
-  unsigned short strobeTdcMin; /* lower range for pVPD strobe event */
-  unsigned short strobeTdcMax; /* upper range for pVPD strobe event */
+  long id;           /* pvpd tube Id */
+  long strobeTdcMin; /* lower range for pVPD strobe event */
+  long strobeTdcMax; /* upper range for pVPD strobe event */
 };
