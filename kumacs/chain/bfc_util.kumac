@@ -1,3 +1,4 @@
+ 
 * 2Jul98 K. Turner - tpc code now requires geometry so make it default
 *                    in domain
 * 3Jul98 K. Turner - changed tpc kumacs so that pam kumacs are called directly
@@ -145,7 +146,7 @@ macro bfc_init _
  
  do i = 1, [nw]
    mod = $word([test],[i],1)
-   message ' !!! bfc_util#init ==> chain initialization for  ' [mod]
+   message ' !!! bfc_util#init ==>  chain init for ' [mod] 
    vec/create v[mod]
    vec/create t[mod]
    CASE [mod] in
@@ -180,7 +181,7 @@ macro bfc_init _
             message ' BFC_UTIL,init: ERROR - cannot open dstin file - quit '
             goto EOF
 	   endif
-	  exec read_table_from_file#read ind [run_dst]
+	  exec read_table_from_file#read ind [run]
            if ($vexist(readprob).ne.0) then 
             message ' BFC_UTIL,init: ERROR - cannot read dstin file - quit '
             goto EOF
@@ -356,7 +357,7 @@ ABEND:
 
   do i = 1, [nw]
    mod = $word([test],[i],1)
-   message ' !!! bfc_util#process ==> chain processing for  ' [mod]
+   message ' !!! bfc_util#process ==> chain process for ' [mod] 
    CASE [mod] in 
     (oldin) nextl 1
     (evgin) cd [event]; 
@@ -383,24 +384,23 @@ ABEND:
 	        endif
               endif
             endif
-   (dstin) exec read_table_from_file#read ind [dst]
+   (dstin) exec read_table_from_file#read ind [event]/data/global
            if ($vexist(readprob).ne.0) then 
             message ' BFC_UTIL,process: ERROR - cannot read dstin file - quit '
             goto EOF
            endif
-            ls [run_dst]/run_summary
+	   ls [dst]/run_summary
             if (staf_status(2).eq.STAFCV_OK) then
-*              message ' *** BFC_PROCESS: run summary table exists! '
-              rowcount [run_dst]/run_summary	    
-	      if (staf_result(1).ne.0) then
-*                message ' *** BFC_PROCESS: run summary table has entries! '
-                tdm/table/cell/getvalue 'run/dst/run_summary[0].n_events_tot' 
-                if (staf_result(1).ne.0) then 
-	            vec/create havedstrunsum
-*	            message ' *** BFC_PROCESS: final run_summary table!'
-	            goto FINISH
-	        endif
-              endif
+* Kathy 9/14
+* - have run_summary & run_header tables in wrong directory at this
+*   point and now must delete initial ones,  move theses and then
+*   go to bfc_finish	       
+	      vec/create havedstrunsum
+	      rm [run_dst]/run_header
+	      rm [run_dst]/run_summary
+	      mv [dst]/run_header [run_dst]
+	      mv [dst]/run_summary [run_dst]
+	      goto FINISH	
             endif
      (esin) for dir in [evgen] [geantE] [raw_data] [data] [dst]
               cd [dir]; dio/stream/getevent inev 
