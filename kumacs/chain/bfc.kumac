@@ -7,9 +7,8 @@
 * 
 * if you want to change anything, copy kumac to your area and change:
 *  4. input values on macro command line
-*  5. default directory list where you pick up kumacs from 
-**************************************************
-* 
+*
+*******************************************************************
 *
 * SYNOPSIS: STAF analysis driver for running BFC which has
 *   event generation,
@@ -17,12 +16,12 @@
 *   SVT + TPC + EMC  simulation 
 *   and tracking and analysis
 *
-*
+******************************************************************
 * History:
-*          Feb 24, 97 - created by H. Caines, C. Pruneau
-*          May 1, 1998 - editted by Kathy Turner
-*          May 5, 1998 - Kathy
-*          May 22, 1998 - editted by Kathy Turner 
+*  Feb 24, 97 - created by H. Caines, C. Pruneau
+*  editted May 1, 1998 -  Kathy Turner
+*  editted May 5, 1998 - Kathy
+*  editted May 22, 1998 - editted by Kathy Turner 
 *                       - broke up tpc into simulation & tracker
 *  editted June 3, 1998 by Kathy Turner - new versions of tpc kumacs
 *  editted June 3, 1998 by Kathy Turner - new versions of svt kumacs
@@ -35,44 +34,89 @@
 *                               have different directories, new svt pams that
 *                               have separate inits and make into a chain
 * editted 6/25/98 Kathy Turner - fixing up after Yuri - get all pkgs working
+* editted 6/26/98 Kathy Turner - put in dictionary of input values &
+*                                example chains
 * 
 * ******************************************************************************
-* TOP        top level directory to search for kumacs 
-* domain     list of domains to load [domain='tpc svt global]
-* chain       list of modules to run **** IN ORDER ****  
-* gethij     read hijing xdf file
-* g2t        read G2T xdf file
-* gst        run gstar with predefined tables 
-* svg        initialize geometry for SVT
-* tpg        initialize geometry for TPC
-* srs        SVT  resolution simulator (fast)
-* sss        SVT slow simulator - not implemented yet
-* tss        TPC slow simulator 
-* tcl        TPC clustering
-* sgr        grouping SVT hits into tracks 
-* tpt        TPC track finding
-* tte_t      TPC tte tracker
-* tte_e      TPC track evaluator
-* svm        tpc and svt track matchin
-* egr        refit global tracks
-* ev0        Strange particle reconstruction
-* evout      write event into xdf file
-*               
+* DICTIONARY OF INPUTS TO BFC.KUMAC
 * 
-* example chains:
-* chain=' g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
-* chain=' g2t svg tpg srs tss tcl sgr tpt svm egr ev0 evout'_
-* chain=' g2t svg srs sgr evout'_
-* chain=' g2t tpg tss tcl tpt evout'_
-* chain=' g2t tpg tfs tpt tte_e evout'_
+* TOP        - top level directory to search for kumacs 
+*            - change if you copy stuff to your area! 
+* adcxyzon = 0,1 to turn off,on generation of adcxyz table from tss
+* tpc_sector_first - first sector # of tpc to simulation using tss
+* tpc_sector_last -  last sector # of tpc to simulation using tss
+* domain     - list of domains to load [domain='tpc svt global]
+* chain      - list of modules to run **** HAVE TO BE IN ORDER ****
+*            - see more details below
+* first      - first event to process (should set to 1)
+* no_events  - number of events to process
+* input_data_prefix - directory of where to find input file
+* input_data_file   - input file name
+* output_file       - output file name
+* 
+* 
+*  THESE are modules that go into a chain!
+* gethij     - read hijing xdf file
+* gst        - run gstar with predefined tables 
+* g2t        - read G2T xdf file
+* svg        - SVT geometry initialization
+* tpg        - TPC geometry initialization
+* srs        - SVT  resolution simulator (fast)
+* sss        - SVT slow simulator - not implemented yet
+* tss        - TPC slow simulator 
+* tcl        - TPC clustering
+* tfs        - TPC fast simulator
+* sgr        - grouping SVT hits into tracks 
+* tpt        - TPC track finding
+* tte_t      - TPC tte tracker
+* tte_e      - TPC track evaluator
+* svm        - tpc and svt track matching
+* egr        - refit global tracks
+* ev0        - Strange particle reconstruction
+* evout      - write event directory into xdf file
+
+* 
+* EXAMPLE CHAINS:
+*   1. read from geant file, svt fast sim, tpc fast sim,
+*                            sgr tracker, tpt tracker, tte track evaluator,
+*                            global tracking, global refitting, v0 finder
+*                            & write event out
+*      chain=' g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
+*
+*   2. read from geant file, svt fast sim, tpc slow sim, tpc clustering
+*                            sgr tracker, tpt tracker,
+*                            global tracking, global refitting, v0 finder
+*                            & write event out
+*      chain=' g2t svg tpg srs tss tcl sgr tpt svm egr ev0 evout'_
+*
+*   3. read from geant file, svt fast sim, sgr tracker & write event out
+*      chain=' g2t svg srs sgr evout'_
+* 
+* 4. read from geant file, tpc fast sim, tpt tracker, tte track eval, 
+*                             & write event out
+*      chain=' g2t tpg tfs tpt tte_e evout'
+* 
+* 5. read from geant file, tpc slow sim, tpc clustering, tpt tracker,
+*                             & write event out
+*      chain=' g2t tpg tss tcl tpt  evout'
+*  
+*
+*****************************************************************
+*****************************************************************
+*****************************************************************
+*****************************************************************
+* finally the kumac really starts 
+*****************************************************************
+*****************************************************************
+*****************************************************************
  
 MACRO bfc _
-   TOP=$STAR  _
+   TOP=$STAR _
    adcxyzon=0 _
-   tpc_sector_first=1 _
-   tpc_sector_last=24 _
-   domain='tpc ' _
-   chain='g2t tpg tss tcl tpt evout'_ 
+   tpc_sector_first=18 _
+   tpc_sector_last=18 _
+   domain='tpc svt global ' _
+   chain='g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0  evout'_ 
    first=1 _
    no_events=1 _
    input_data_prefix=$AFS_RHIC/star/data/samples/ _
@@ -144,3 +188,6 @@ RETURN
  
 ******************************************************************
 ****************************************************************** 
+
+
+
