@@ -51,6 +51,8 @@ void StiSvtDetectorBuilder::buildShapes()
       int nWafers = _config->getNumberOfWafers(layer/2);
       // Si wafer
       sprintf(name, "Svt/Layer_%d/Wafers", layer);
+
+      cout <<"StiSvtDetectorBuilder::buildShapes() -I- layer:"<<layer<<"thickness:"<< _geometry->getWaferThickness()<<endl;
       _waferShape[layer] = new StiPlanarShape(name,
 					      nWafers*_geometry->getWaferLength(),
 					      2.*_geometry->getWaferThickness(),
@@ -91,12 +93,12 @@ void StiSvtDetectorBuilder::buildDetectors()
       if (fLadderRadius<=0)
 	throw runtime_error("StiSvtDetectorBuilder::buildDetectors() - FATAL - fLadderRadius<=0");
       float fHalfLadderPhi = atan2(_waferShape[layer]->getHalfWidth(),fLadderRadius);
-      float fHalfGapPhi    = fDeltaPhi/2. - fHalfLadderPhi;    
+      float fHalfGapPhi    = fDeltaPhi - fHalfLadderPhi;    
       
       // then the distance from the origin to  the gap center
       // != the layer radius bc the layer width differs from the gap width,
       // i.e. not a regular polygon.
-      float fGapRadius = fLadderRadius/cos(fHalfLadderPhi)*cos(fHalfGapPhi);
+      float fGapRadius = fLadderRadius*cos(fHalfGapPhi)/cos(fHalfLadderPhi);
       //   finally half the gap distance
       float fHalfGap = fGapRadius*tan(fHalfGapPhi);
       // determine the radius for the detector (ladders + hybrids)
@@ -125,12 +127,14 @@ void StiSvtDetectorBuilder::buildDetectors()
 	  pLadder->setPlacement(pPlacement);
 	  add(layer,ladder,pLadder);
 
+	  double offset = _hybridShape[layer]->getHalfWidth() - fHalfGap;
 	  // hybrid 1
 	  pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setLayerRadius(fLayerRadius);
-	  pPlacement->setNormalRep(fLadderPhi + fDeltaPhi/2., 
-				   fGapRadius,_hybridShape[layer]->getHalfWidth() - fHalfGap);
+	  pPlacement->setNormalRep(fLadderPhi + fDeltaPhi, 
+				   fGapRadius,
+				   -offset);
 	  sprintf(name, "Svt/Layer_%d/Ladder_%d/Hybrids_1", layer, ladder);
 	  StiDetector *pHybrid1 = _detectorFactory->getInstance();
 	  pHybrid1->setName(name);
@@ -147,8 +151,9 @@ void StiSvtDetectorBuilder::buildDetectors()
 	  pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setLayerRadius(fLayerRadius);
-	  pPlacement->setNormalRep(fLadderPhi - fDeltaPhi/2., fGapRadius,
-				   fHalfGap - _hybridShape[layer]->getHalfWidth());
+	  pPlacement->setNormalRep(fLadderPhi - fDeltaPhi, 
+				   fGapRadius,
+				   offset);
 	  sprintf(name, "Svt/Layer_%d/Ladder_%d/Hybrids_2", layer, ladder);
 	  StiDetector *pHybrid2 = _detectorFactory->getInstance();
 	  pHybrid2->copy(*pHybrid1);
