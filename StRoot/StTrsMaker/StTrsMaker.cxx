@@ -1,6 +1,11 @@
-// $Id: StTrsMaker.cxx,v 1.24 1999/03/19 13:27:11 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.25 1999/03/20 03:23:57 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.25  1999/03/20 03:23:57  lasiuk
+// setMiniSegmentLength()
+// setFirstSectorToProcess()
+// setLastSectorToProcess()
+//
 // Revision 1.24  1999/03/19 13:27:11  lasiuk
 // change sectors to process 1 ONLY!
 //
@@ -130,7 +135,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.24 1999/03/19 13:27:11 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.25 1999/03/20 03:23:57 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -274,8 +279,11 @@ Int_t StTrsMaker::Init()
    //
    // Maker Initialization
    //
-   mFirstSectorToProcess = 1;
-   mLastSectorToProcess  = 1;
+//    mFirstSectorToProcess = 1;
+//    mLastSectorToProcess  = 1;
+
+   setFirstSectorToProcess(1);
+   setLastSectorToProcess(24);
 
    // This should really be a boolean
    mProcessPseudoPadRows = 0;  // 0 is no!
@@ -284,7 +292,9 @@ Int_t StTrsMaker::Init()
    return StMaker::Init();
 }
 
-
+//
+// My Member Functions
+//
 void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
 
     //cout << "StTrsMaker::whichSector()" << endl;
@@ -297,7 +307,18 @@ void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
     *padrow = volId;
 	
 }
-    
+void StTrsMaker::setMiniSegmentLength(double len)
+{// should be inline
+    mMiniSegmentLength = len;
+}
+void StTrsMaker::setFirstSectorToProcess(int first)
+{// should be inline
+    mFirstSectorToProcess = first;
+}
+void StTrsMaker::setLastSectorToProcess(int last)
+{// should be inline
+    mLastSectorToProcess = last;
+}
 Int_t StTrsMaker::Make(){
     //  PrintInfo();
 
@@ -737,7 +758,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.24 1999/03/19 13:27:11 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.25 1999/03/20 03:23:57 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
