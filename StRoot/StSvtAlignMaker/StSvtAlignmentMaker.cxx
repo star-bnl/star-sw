@@ -1,13 +1,21 @@
 /***************************************************************************
  *
- *  StSvtAlignmentMaker.cxx
+ * $Id: StSvtAlignmentMaker.cxx,v 1.2 2001/05/09 16:33:02 gaudiche Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
  *
  * Description: Interface to SVT & SSD alignment code
  *
+ ***************************************************************************
+ *
+ * $Log: StSvtAlignmentMaker.cxx,v $
+ * Revision 1.2  2001/05/09 16:33:02  gaudiche
+ * bug on Solaris fixed - cleanup
+ *
+ *
  ***************************************************************************/
+
 
 #include <stdio.h>
 #include <fstream.h>
@@ -48,16 +56,15 @@ StSvtAlignmentMaker::~StSvtAlignmentMaker()
 //____________________________________________________________________________
 Int_t StSvtAlignmentMaker::Init()
 {
-  if(Debug()) gMessMgr->Debug() << "In StSvtAlignmentMaker::Init() ..."
-				<< GetName() <<endm;
-  
   gMessMgr->Info()<<"StSvtAlignmentMaker : Init START"<<endm; 
   
-  DataType = 1;
-  NumberEvents =  30;
-  NumberOfEventsSoFar = 0;
+  //DataType = 0;
+  //NumberEvents =  2;
+  alignGroup = 0;
+  cosmicInAlignGroup = 0;
   gMessMgr->Info()<<"StSvtAlignmentMaker : Datatype = " << DataType <<endm;
-  
+  NumberOfEventsSoFar = 0;
+ 
   St_DataSet *dataSet = GetDataSet("StSvtConfig");
   if (dataSet){
     setConfig((StSvtConfig*)(dataSet->GetObject()));
@@ -92,7 +99,7 @@ Int_t StSvtAlignmentMaker::Init()
     
 
   if( DataType == 0) work->simulUnAlignment(0.020, 0.020); // =>(+/- 0.02 cm, +/-0.02 rad)
-  //  In case of private cosmic alignment, feed wafers with random alignment parameters
+  //  In case of own cosmic alignment, feed wafers with initial random alignment parameters
   
   // geant points are given for a perfect svt/ssd geometry
   // For DataType > 0, trying to feed unaligned wafer with global geant points
@@ -120,29 +127,30 @@ Int_t StSvtAlignmentMaker::Init()
 Int_t StSvtAlignmentMaker::Make()
 {
   gMessMgr->Info()<<"StSvtAlignmentMaker : Make START"<<endm; 
-  gMessMgr->Info()<<"StSvtAlignmentMaker : Make NumberEvents = "<<NumberEvents
-		  <<" NumberOfEventsSoFar = "<< NumberOfEventsSoFar+1
-		  <<" (DataType = "<<DataType<< ")" << endm; 
+  gMessMgr->Info()<<"StSvtAlignmentMaker : DataType = "<<DataType<< endm;
+  gMessMgr->Info()<<"StSvtAlignmentMaker : NumberOfEventsSoFar = "<< NumberOfEventsSoFar+1
+		  <<"/"<< NumberEvents << endm; 
   
   
   if (NumberOfEventsSoFar >= NumberEvents){
     gMessMgr->Warning("You are processing more events than required quitting");
     return kStWarn;
-  }
-  
+  };
+
+
+
+//-------------------------------------------------------------------------------  
   if( DataType == 0){
-    // If doing own simulation
-    int numberOfTracks = 10000;
-    int option = 2; // option > 0 => detectors position resolution
-    gMessMgr->Info()<<"StSvtAlignmentMaker : doing own cosmic simulation. "
-		    << numberOfTracks << " tracks for event " << NumberOfEventsSoFar << endm;
+    gMessMgr->Info()<<"StSvtAlignmentMaker : doing own cosmic simulation." << endm;
     gMessMgr->Info()<<"StSvtAlignmentMaker : hits are given taking account of a random misalignment."
 		    << endm;
-
+    int numberOfTracks = 10000;
+    int option = 2; // option > 0 => detectors position resolution
     work->simulCosmics( NumberOfEventsSoFar, numberOfTracks, option);
+    NumberOfEventsSoFar++;
   }
+//-------------------------------------------------------------------------------
   else if( DataType > 0){
-    gMessMgr->Info()<< "StSvtAlignmentMaker: take hits from the chain. Geometry is perfect in simulations"<< endm;
     St_svg_shape* SvtShape=0;
     St_svg_geom* SvtGeom=0;
     St_srs_srspar* SvtSrsPar=0;
@@ -183,10 +191,11 @@ Int_t StSvtAlignmentMaker::Make()
     Stgroups = (St_sgr_groups *)svt->Find("EstGroups");
     sgr_groups_st* Groups = Stgroups->GetTable();
     int NGroups =  Stgroups->GetNRows();
-    gMessMgr->Info()<<"StSvtAlignmentMaker : "<< NGroups << " tracks in EstGroups" << endm;
+
     // but faking needing alignment
     // Shuffle points by par real amounts so off of tracks
     // Then fill track class
+//-------------------------------------------------------------------------------
     if (DataType == 1)
       {
 	work->CreateEvent(NumberOfEventsSoFar);
@@ -202,7 +211,7 @@ Int_t StSvtAlignmentMaker::Make()
 	    int ladderId = (Spts[Groups[i].id2-1].id_wafer-barrelId*1000
 			    -waferId*100);
 	    waferId = waferId - ((Spts[Groups[i].id2-1].id_wafer/1000)-barrelId)*10;
-
+	    
 	    gP[nTrackHit].x = Spts[Groups[i].id2-1].x[0];
 	    gP[nTrackHit].y = Spts[Groups[i].id2-1].x[1];
 	    gP[nTrackHit].z = Spts[Groups[i].id2-1].x[2];
@@ -216,30 +225,70 @@ Int_t StSvtAlignmentMaker::Make()
 	  idLast = Groups[i].id1;
 	}
 	work->recordEventHits();
+	
+	NumberOfEventsSoFar++;
       }; // end if (DataType == 1)
-  }// end if (DataType > 1)
+//-------------------------------------------------------------------------------
+    if (DataType == 2) //real cosmics
+      { 
+	if (cosmicInAlignGroup == 0)
+	  work->CreateEvent(alignGroup);
+	//---------------------------------  
+	globalPoint gP[16];
+	int i=0, ilp[16];
+	int idLast = Groups[0].id1;
+	int nTrackHit, nTrackNo=0;
+	while( i< NGroups){
+	  nTrackHit = 0;
+	  while( Groups[i].id1 == idLast){
+	    int barrelId = (Spts[Groups[i].id2-1].id_wafer-1000)/2000+1;
+	    int  waferId = (Spts[Groups[i].id2-1].id_wafer-barrelId*1000)/100;
+	    int ladderId = (Spts[Groups[i].id2-1].id_wafer-barrelId*1000
+			    -waferId*100);
+	    waferId = waferId - ((Spts[Groups[i].id2-1].id_wafer/1000)-barrelId)*10;
+	    
+	    gP[nTrackHit].x = Spts[Groups[i].id2-1].x[0];
+	    gP[nTrackHit].y = Spts[Groups[i].id2-1].x[1];
+	    gP[nTrackHit].z = Spts[Groups[i].id2-1].x[2];
+	    ilp[nTrackHit] = mConfig->getHybridIndex(barrelId,ladderId,waferId,1)/2;
+	    idLast = Groups[i].id1;
+	    nTrackHit++;
+	    i++;
+	  }
+	  work->FillTrack(alignGroup, nTrackNo, nTrackHit, gP, ilp);
+	  nTrackNo++;
+	  idLast = Groups[i].id1;
+	}
+	//??? merge the two tracks from one cosmic : to be done !
+	//--------------------------------
+	if (cosmicInAlignGroup == 10000) {
+	  work->recordEventHits();
+	  cosmicInAlignGroup = 0;
+	  alignGroup++;
+	};
+	
+	NumberOfEventsSoFar++;
+      }; // end if (DataType == 2)
+//-------------------------------------------------------------------------------
+  };// end if (DataType > 1)
+  
 
-  NumberOfEventsSoFar++;
 
 
-  //************************************************************************
-  // Alignment : 
-  if( NumberOfEventsSoFar == NumberEvents){
-    
+  // Alignment :
+  //************
+  if( NumberOfEventsSoFar == NumberEvents) {
     gMessMgr->Info()<<"StSvtAlignmentMaker : Doing the alignment !"<<endm; 
-    //Put all hits into 
 
     if( DataType == 0){
       // Need to move wafers back to original position so can try and figure out what the shifts were
-      gMessMgr->Info()<<"StSvtAlignmentMaker : Own cosmics simulation mode"<<endm;
       work->simulUnAlignment(0., 0.);
     }
     else if( DataType > 0){
-      gMessMgr->Info()<<"StSvtAlignmentMaker : Datas from the chain"<<endm;
       gMessMgr->Info()<<"StSvtAlignmentMaker : hits have been generated with a perfect geometry."<< endm;
-      for (int i=0; i<NumberEvents; i++) work->findVertex(i);
+      //for (int i=0; i<NumberEvents; i++) work->findVertex(i);
       gMessMgr->Info()<<"StSvtAlignmentMaker : alignment parameters are now randomly generated." << endm;
-      work->simulUnAlignment(0.05, 0.05);
+      work->simulUnAlignment(0.02, 0.02);
       for (int i=0; i<NumberEvents; i++) work->updateGlobalPoints(i);
       for (int i=0; i<536; i++)
 	{
@@ -251,12 +300,12 @@ Int_t StSvtAlignmentMaker::Make()
 	  unalign[i][5] = work->mWafer[i].gamma();
 	};
     };
-    for (int i=0; i<NumberEvents; i++) work->findVertex(i);    
+    //for (int i=0; i<NumberEvents; i++) work->findVertex(i);    
     gMessMgr->Info()<<"StSvtAlignmentMaker : alignment START"<<endm;
     work->cosmicAlign2( 30 );
     gMessMgr->Info()<<"StSvtAlignmentMaker : alignment STOP" <<endm;
-    for (int i=0; i<NumberEvents; i++) work->findVertex(i);
-  }
+    //for (int i=0; i<NumberEvents; i++) work->findVertex(i);
+  };
 
   gMessMgr->Info()<<"StSvtAlignmentMaker : Make STOP"<<endm;
   return kStOK;
@@ -269,7 +318,7 @@ Int_t StSvtAlignmentMaker::Finish()
 				 << endm;
   
   fstream para;
-  para.open("param1.dat",ios::out);
+  para.open("param0.dat",ios::out);
   
   for (int i=0; i<536; i++)
     {
@@ -280,8 +329,6 @@ Int_t StSvtAlignmentMaker::Finish()
       para << " " << work->mWafer[i].beta();
       para << " " << work->mWafer[i].gamma() << endl;
     };
- 
- 
  for (int compt=0; compt<536; compt++)
    {
      para << " " << unalign[compt][0];
@@ -301,7 +348,7 @@ Int_t StSvtAlignmentMaker::Finish()
  alphaError   = new TH1F("ErrorAlpha","alpha reco-simu", 200, -0.05, 0.05);
  betaError   = new TH1F("ErrorBeta","beta reco-simu", 200, -0.05, 0.05);
  gammaError  = new TH1F("ErrorGamma","gamma reco-simu", 200, -0.05, 0.05);
- 
+
  for (int i=0; i<6; i++)
    hParams2d[i] = new TH2F("params2d","simu vs reco",200,-0.05, 0.05, 200,-0.05, 0.05);
  
@@ -318,7 +365,7 @@ Int_t StSvtAlignmentMaker::Finish()
        gammaError->Fill( work->mWafer[compt].param(5) - unalign[compt][5] );
      }
 
- if (DataType == 1)
+ if (DataType > 1)
    for (int compt=0; compt<216; compt++)
      {
        for (int i=0; i<6; i++)
@@ -331,8 +378,30 @@ Int_t StSvtAlignmentMaker::Finish()
        gammaError->Fill( work->mWafer[compt].param(5));
      };
 
- TFile *hFile = new TFile("align1.root","RECREATE");
+ int nVal = 9998;
+ double val[9998];
+ work->tetaDistri(nVal, val);
+ tetaDistribution = new TH1F("tetaDistribution","tetaDistribution", 100, 0, 1.7);
+ for (int i=0; i<nVal; i++) tetaDistribution->Fill( (Float_t)val[i] );
+ 
+ nVal = 9998;
+ int intval[9998];
+ work->nHitsPerTrackDistri(nVal, intval);
+ nHitsPerTrackDistribution = new TH1F("nHitsPerTrackDistribution","nHitsPerTrackDistribution", 16, 0, 16);
+ for (int i=0; i<nVal; i++) nHitsPerTrackDistribution->Fill( (Float_t)intval[i] );
+ 
+ nVal = 9998;
+ work->chi2Distri(nVal, val);
+ chi2Distribution = new TH1F("chi2Distribution","chi2Distribution", 100, 0, 0.0007);
+ for (int i=0; i<nVal; i++) chi2Distribution->Fill( (Float_t)val[i] );
+
+
+
+ TFile *hFile = new TFile("align0.root","RECREATE");
  hFile->SetFormat(1);
+ tetaDistribution->Write();
+ nHitsPerTrackDistribution->Write();
+ chi2Distribution->Write();
  for (int i=0; i<6; i++)
    hParams2d[i]->Write();
  dxError->Write();
@@ -360,8 +429,23 @@ Int_t StSvtAlignmentMaker::setConfig(StSvtConfig* config)
 
 Int_t StSvtAlignmentMaker::setConfig(const char* config)
 {
-
   gMessMgr->Message() <<"StSvtAlign:Setting configuration to "<< config << endm;
   mConfigString = config;
+  return kStOK;
+}
+
+
+
+Int_t StSvtAlignmentMaker::setDataType(int val)
+{
+  gMessMgr->Message() <<"StSvtAlign : Setting DataType to "<< val << endm;
+  DataType = val;
+  return kStOK;
+}
+
+Int_t StSvtAlignmentMaker::setNumberOfEvents(int val)
+{
+  gMessMgr->Message() <<"StSvtAlign : Setting numberOfEvents to "<< val << endm;
+  NumberEvents = val;
   return kStOK;
 }

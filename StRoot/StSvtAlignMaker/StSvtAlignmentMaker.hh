@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: StSvtAlignmentMaker.hh,v 1.2 2001/05/09 16:33:02 gaudiche Exp $
+ *
+ * Author: Helen Caines
+ ***************************************************************************
+ *
+ * Description: Interface to SVT & SSD alignment code
+ *
+ ***************************************************************************
+ *
+ * $Log: StSvtAlignmentMaker.hh,v $
+ * Revision 1.2  2001/05/09 16:33:02  gaudiche
+ * bug on Solaris fixed - cleanup
+ *
+ *
+ ***************************************************************************/
+
 #ifndef STAR_StSvtAlignmentMaker
 #define STAR_StSvtAlignmentMaker
 
@@ -28,6 +46,8 @@ class StSvtAlignmentMaker : public StMaker
 
   Int_t setConfig(const char* config);
   Int_t setConfig(StSvtConfig* config);
+  Int_t setDataType(int val);
+  Int_t setNumberOfEvents(int val);
 
 private:
  
@@ -41,6 +61,8 @@ private:
   int NumberEvents;
   int NumberOfEventsSoFar;
   int DataType;
+  int alignGroup;
+  int cosmicInAlignGroup;
 
   double unalign[536][6];  //! What align params should be
 
@@ -53,6 +75,9 @@ private:
   TH1F *alphaError;
   TH1F *betaError;
   TH1F *gammaError;
+  TH1F *tetaDistribution;
+  TH1F *nHitsPerTrackDistribution;
+  TH1F *chi2Distribution;
 
   ClassDef(StSvtAlignmentMaker,1)
 

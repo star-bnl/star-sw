@@ -1,15 +1,32 @@
-// StSsdAlign.hh
-// Ludovic Gaudichet
+/***************************************************************************
+ *
+ * $Id: StSsdAlign.hh,v 1.2 2001/05/09 16:33:02 gaudiche Exp $
+ *
+ * Author: Ludovic Gaudichet
+ ***************************************************************************
+ *
+ * Description: SVT & SSD alignment code
+ *
+ ***************************************************************************
+ *
+ * $Log: StSsdAlign.hh,v $
+ * Revision 1.2  2001/05/09 16:33:02  gaudiche
+ * bug on Solaris fixed - cleanup
+ *
+ *
+ ***************************************************************************/
 
 #ifndef  STAR_StSsdAlign_hh
 #define  STAR_StSsdAlign_hh
-
 #include "StSsdWafer.hh"
 #include "StSsdEvent.hh"
+
 
 class svg_geom_st;
 class StSvtConfig;
 class StSvtCoordinateTransform;
+
+
 class StSsdLadder
 {
 public :
@@ -20,10 +37,11 @@ const int numberOfWafers() const ;
 
 protected :
 int mWafer;
-
 };
 
 const inline int StSsdLadder::numberOfWafers() const { return mWafer; };
+
+
 //____________________________________________________________________
 
 class StSsdLayer
@@ -40,12 +58,11 @@ int mWafer;
 int mLadder;
 };
 
-
 const inline int StSsdLayer::numberOfLadders() const { return mLadder; };
 const inline int StSsdLayer::numberOfWafers() const { return mWafer; };
 
-//____________________________________________________________________
 
+//____________________________________________________________________
 
 class StSsdAlign
 {
@@ -54,20 +71,22 @@ public :
   StSsdAlign();
   ~StSsdAlign();
   
-  StSsdWafer mWafer[536]; 
-  int nbofhits[536];
   StSsdLayer* layers[7];
+
   // To use wafer object  :
   // 1) mWafer[0..535].
   // or
   // 2) layers[0..6]->ladders[]->wafers[]->
+  StSsdWafer mWafer[536]; 
+  int nbofhits[536];
+  StSsdEvent *mEvents[maxNumberOfEvents];
 
   const int layer() const;
   void init( svg_geom_st *geom, StSvtConfig* config, int NumEvents);
-  int addNewHit( const double x, const double y, const double z );
-  //  int addNewHit( StThreeVector<double> * newHit );
-  int recordEventHits();
+  void updateGeom(svg_geom_st* geom, StSvtConfig* config);
 
+  int addNewHit( const double x, const double y, const double z );
+  int recordEventHits();
 
   int areWafersCloth( int inner, int outer, float distance );
   int areWafersAligned( int inner, int middle, int outer );
@@ -96,25 +115,21 @@ public :
   double totalCosmicChi2();
   double takeCosmicDerivatives(double step);
 
-  StSsdEvent *mEvents[maxNumberOfEvents];
-
   void FillTrack(int ev, int TrackNumber, int nTrackHit, globalPoint* gP, int* ilp);
   void CreateEvent(int ev);
   void SetTransform( StSvtCoordinateTransform* Tran);
+  void tetaDistri(int &nval, double *teta);
+  void nHitsPerTrackDistri(int &nval, int *number);
+  void chi2Distri(int &nval, double *chi2);
 
 protected :
 
   int mLayer;
   int mNumberOfEvents;
-  
-  svg_geom_st *mgeom;
-  goodtrack mGoodTracks[maxNumberOfEvents][1]; //[maxNumberOfEvents][2000] in 'primary vertex' private mode
-  int mNumberOfGoodTracks[maxNumberOfEvents];
-  
   double mDerivatives[536][6];
 
+  svg_geom_st *mgeom;
   StSvtCoordinateTransform* mTransform;
-
 };
 
 const inline int StSsdAlign::layer() const { return mLayer; };
