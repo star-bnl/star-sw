@@ -1,5 +1,8 @@
-* $Id: tpt_row_sect_pnt.F,v 1.3 1998/02/11 19:32:56 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.4 1998/04/04 14:35:36 fisyak Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.4  1998/04/04 14:35:36  fisyak
+* Increase message-generating space
+*
 * Revision 1.3  1998/02/11 19:32:56  sakrejda
 * tpt protected agains overflows, tpt_find_slic.F,tpt_row_sect_pnt.F simplified (and tested)
 *
@@ -53,7 +56,7 @@ C______________________________________________________________________
       INTEGER tgc_drift_volume_length,id1
 
       REAL    dzslic, z_hit, dvl, dummy
-      character*132 m132  ! And some message-generating space.
+      character*256 m132  ! And some message-generating space.
       data id1 /0/
       save id1
 
