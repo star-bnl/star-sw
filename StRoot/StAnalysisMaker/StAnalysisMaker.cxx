@@ -1,5 +1,8 @@
-// $Id: StAnalysisMaker.cxx,v 1.10 1999/07/30 22:56:01 kathy Exp $
+// $Id: StAnalysisMaker.cxx,v 1.11 1999/08/06 20:21:51 kathy Exp $
 // $Log: StAnalysisMaker.cxx,v $
+// Revision 1.11  1999/08/06 20:21:51  kathy
+// back to old version that didn't write out QA info file, but now added QAInfo tag in front of information that QA team wants in summarizeEvent.cc - will also add a few more lines of output to summarizeEvent.cc soon
+//
 // Revision 1.10  1999/07/30 22:56:01  kathy
 // added new method and input param qaflag so that if turned on, a log file will be printed out with QA information
 //
@@ -55,12 +58,11 @@
 #include "StRun.h"
 #include "StEvent.h"
 
-static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.10 1999/07/30 22:56:01 kathy Exp $";
+static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.11 1999/08/06 20:21:51 kathy Exp $";
 #include "StMessMgr.h"
 void summarizeEvent(StEvent& event);
 //  specific analysis tasks.
 //
-void storeEvent(StEvent &,ofstream &,Int_t &);
 void summarizeEvent(StEvent& event, Int_t &nevents);
 Int_t StAnalysisMaker::Make() {
   StEvent* mEvent;
@@ -70,9 +72,8 @@ Int_t StAnalysisMaker::Make() {
 
   // OK, we've got the event. Pass it and process it.
   summarizeEvent(ev); 
-  storeEvent(ev,ofile,nEvtProc);             // Write to QA file
   long ntk = countPrimaryTracks(ev);
-  cout << "Primary tracks: " << ntk << endl;
+  cout << " StAnalysisMaker.cxx -- Primary tracks: " << ntk << endl;
 
   // Create and fill a tag
   if (theTag) delete theTag;
@@ -89,19 +90,6 @@ StAnalysisMaker::StAnalysisMaker(const Char_t *name) : StMaker(name) {
   theTag = 0;
 }
 
-StAnalysisMaker::StAnalysisMaker(const char *fname,
-                                 const Int_t nevents,
-                                 const Char_t *name) : StMaker(name) {
-  drawinit = kFALSE;
-  theTag = 0;
-  nEvtProc = 0;
-
-  ofile.open(fname,ios::out);
-  if (!ofile)
-    cerr << "  File " << fname << " cannot be opened!" << endl;
-  ofile << "StEvent data from StAnalysisMaker" << endl;
-  ofile << "# events requested: " << nevents << endl << endl;
-}
 
 StAnalysisMaker::~StAnalysisMaker() {
 }
@@ -116,10 +104,6 @@ void StAnalysisMaker::Clear(Option_t *opt) {
     tagFiller(ev,*theTag);
 
 Int_t StAnalysisMaker::Finish() {
-
-  //ofile << endl << "# events requested: " << nEvtReq << endl;
-  ofile << "# events processed: " << nEvtProc << endl << endl;
-  ofile.close();
   return kStOK;
 }
 
