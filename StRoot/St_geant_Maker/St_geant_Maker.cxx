@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.17 1999/02/18 15:44:47 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.18 1999/02/19 14:41:00 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.18  1999/02/19 14:41:00  fisyak
+// Set kIsNotOwn Bit for geometry tables
+//
 // Revision 1.17  1999/02/18 15:44:47  fisyak
 // Cleanup warinings
 //
@@ -72,6 +75,7 @@
 #include "St_geant_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
+#include "St_Table.h"
 #include <iostream.h>
 #include <stdio.h>
 #include <string.h>
@@ -339,7 +343,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.17 1999/02/18 15:44:47 fisyak Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.18 1999/02/19 14:41:00 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
@@ -759,6 +763,6 @@ void type_of_call rootmaptable_(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t
   else {
     Nchar = sprintf(cmd,"new St_%s(\"%s\",%i)",t.Data(),t.Data(),*k);
     St_Table *table = (St_Table *) gInterpreter->Calc(cmd);
-    if (table) {geom->Add(table); table->Adopt(*k,iq);}
+    if (table) {geom->Add(table); table->Adopt(*k,iq); table->SetBit(kIsNotOwn);}
   }
 }
