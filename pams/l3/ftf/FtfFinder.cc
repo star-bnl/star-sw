@@ -399,7 +399,7 @@ int FtfFinder::setPointers ( )
 -------------------------------------------------------------------------*/
       thisHit = &(hit[ihit]) ;
       localRow = thisHit->row - para.rowInnerMost ;
-      if ( fmod(localRow,para.modRow) != 0 ) continue ;
+      if ( fmod((double)localRow,(double)para.modRow) != 0 ) continue ;
 
       if ( thisHit->row < para.rowInnerMost ) continue ;
       if ( thisHit->row > para.rowOuterMost ) continue ;

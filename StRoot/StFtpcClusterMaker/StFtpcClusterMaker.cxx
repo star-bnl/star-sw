@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcClusterMaker.cxx,v 1.1 1999/11/02 09:41:28 jcs Exp $
+ * $Id: StFtpcClusterMaker.cxx,v 1.2 1999/11/09 20:35:46 fisyak Exp $
  *
  * Author:   Holm Huemmler  (hummler@mppmu.mpg.de)
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StFtpcClusterMaker.cxx,v $
+ * Revision 1.2  1999/11/09 20:35:46  fisyak
+ * add cast for HP
+ *
  * Revision 1.1  1999/11/02 09:41:28  jcs
  * add source files to empty StFtpcClusterMaker
  *
@@ -236,7 +239,7 @@ Int_t StFtpcClusterMaker::Make()
   /* calculate fastlog lookup */
   for(iIndex=1; iIndex<256; iIndex++)
     {
-      fastlog[iIndex] = log(iIndex);
+      fastlog[iIndex] = log((float)iIndex);
     }
 
   /* reset counter for found clusters */

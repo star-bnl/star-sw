@@ -950,7 +950,7 @@ int FtfTrack::segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
    }
    else deta = 0.F ;
 
-   dr    = (double)fabs(baseHit->row - candidateHit->row);
+   dr    = (double)fabs((double)(baseHit->row - candidateHit->row));
    d3    = (double)(toDeg * dr * ( dphi  + deta ) ) ;
 //
 //     If initial segment is longer than 2 store angle info in 
