@@ -2,25 +2,20 @@
 *
 *  Table: KalmanTrackFinderParameters
 *
-*       description:
+*  Description: set of control parameter used by the ITTF tracker.
+*
 */ 
 	
 
 struct KalmanTrackFinderParameters { 
-  long   useMcAsRec;
-  long   useTrackFilter;
-  long   elossCalculated;
-  long   mcsCalculated; 
-  double field; 
-  long    maxNullCount;
-  long    maxContiguousNullCount; 
-  long    minContiguousHitCountForNullReset;
-  //double minSearchWindow;
-  //double maxSearchWindow;
-  //double searchWindowScale;
-  //double maxChi2ForSelection;
-  double maxChi2Vertex;
-  double massHypothesis;
-  //double outerScaling;
-  //double innerScaling;
- };  
+  long   useMcAsRec; /**/
+  long   useTrackFilter; /*Whether a track filter should be used internally*/
+  long   elossCalculated; /*Whether the Energy loss should be calculated while propagating tracks*/
+  long   mcsCalculated; /*Whether multiple coulomb scattering should be include in erro matrices*/ 
+  double field; /*Value of the field*/ 
+  long    maxNullCount; /*Maximum number of null hits on active detector layers*/
+  long    maxContiguousNullCount; /*Maximum number of contiguous null hits*/ 
+  long    minContiguousHitCountForNullReset; /*Number of adjacent layers with hits before nullContiguous is reset to zero */
+  double  maxChi2Vertex; /*max vertex incremental chi2 value acceptable*/ 
+  double  massHypothesis; /*mass used in the tracking for mcs and eloss calculation purposes*/
+};  

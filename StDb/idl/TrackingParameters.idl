@@ -2,13 +2,14 @@
 *
 *  Table: TrackingParameters
 *
-*       description:
+*  Description: Detector specific tracking parameters
+*  There is one such a strut for each tracking detector : TPC, SVT, SSD.
 */ 
 	
 
 struct TrackingParameters { 
-	double MinSearch; /*  Minimum Search Window */
-	double MaxSearch; /*  Maximum Search Window */
-	double Scaling;   /*  Search Window Scaling */
-	double MaxChi2;   /*  Max Chi2 */
+	double minSearch; /*  Minimum Search Window */
+	double maxSearch; /*  Maximum Search Window */
+	double scaling;   /*  Search Window Scaling */
+	double maxChi2;   /*  Max Chi2 */
  };  
