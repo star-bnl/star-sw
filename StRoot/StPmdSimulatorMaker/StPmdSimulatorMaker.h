@@ -4,7 +4,7 @@
  */
 /******************************************************************
  *
- * $Id: StPmdSimulatorMaker.h,v 1.5 2003/10/15 10:40:12 subhasis Exp $
+ * $Id: StPmdSimulatorMaker.h,v 1.6 2003/11/27 12:33:37 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay 
  *
@@ -14,6 +14,9 @@
  ******************************************************************
  *
  * $Log: StPmdSimulatorMaker.h,v $
+ * Revision 1.6  2003/11/27 12:33:37  subhasis
+ * calib constant values updated
+ *
  * Revision 1.5  2003/10/15 10:40:12  subhasis
  * Changes by Dipak (eg GeV to keV
  *
@@ -43,7 +46,7 @@ private:
   Float_t mpcon0;  
   Float_t mpcon1;  
   Float_t mpcon2;
-
+    Bool_t mResFlag;
 protected:
   StPmdCollection *       mPmdCollection;   //!Pmd and CPV collections
   StPhmdCollection *      mevtPmdCollection;   //!Pmd and CPV collections for Stevent
@@ -81,22 +84,33 @@ public:
   Int_t Decode_VolId(Int_t&,Int_t&,Int_t&,Int_t&,Int_t&,Int_t&);  //! decoding
   StPmdHit* Exist(StPmdHit*,StPmdDetector*,Int_t);
 
-  void calAdc(StPmdDetector*,Int_t);
+  void FinalEdep(StPmdDetector*,Int_t);
   Float_t keV_ADC(Float_t,Float_t&);
   Float_t ADC_Readout(Float_t,Int_t&);
   void  bookHistograms();  //! Booking histograms
   void FillHistograms(StPmdDetector*,StPmdDetector*,Int_t);
   Int_t  fillStEvent(StPmdDetector*, StPmdDetector*);
+  void SetResFlag(Bool_t);  //! Readout resolution is applied when Flag = 1
+
   void  Browse(TBrowser* b); //! StEvent staf will be visible in browser
 
   ClassDef(StPmdSimulatorMaker, 1)  //! Simulation maker for PMD
 };
 
+inline void StPmdSimulatorMaker::SetResFlag(Bool_t val){mResFlag=val;}
+
 inline void StPmdSimulatorMaker::adcconstants()
 {
+/*
   mlcon0=7.12;
   mlcon1=20.7;
   mlcon2=0.029;
+*/
+
+  mlcon0=14.01;
+  mlcon1=9.015;
+  mlcon2=0.08203;
+  
   mpcon0=127.13;
   mpcon1=-0.2182;
   mpcon2=.0001159;

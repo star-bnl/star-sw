@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdSimulatorMaker.cxx,v 1.8 2003/10/23 04:25:29 perev Exp $
+ * $Id: StPmdSimulatorMaker.cxx,v 1.9 2003/11/27 12:33:41 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -8,6 +8,9 @@
  *
  ****************************************************************
  * $Log: StPmdSimulatorMaker.cxx,v $
+ * Revision 1.9  2003/11/27 12:33:41  subhasis
+ * calib constant values updated
+ *
  * Revision 1.8  2003/10/23 04:25:29  perev
  * Stiostream again
  *
@@ -255,12 +258,13 @@ Int_t StPmdSimulatorMaker::makePmdHits()
   if(det0){
     for(Int_t ii=1;ii<13;ii++)
       {
-	calAdc(det0,ii);
+	FinalEdep(det0,ii);
       }
   }
   if(det1){
-    for(Int_t ii=1;ii<13;ii++){
-      calAdc(det1,ii); 
+    for(Int_t ii=1;ii<13;ii++)
+    {
+       FinalEdep(det1,ii); 
     }
   }
   
@@ -475,7 +479,7 @@ Int_t StPmdSimulatorMaker::fillStEvent(StPmdDetector* pmd_det, StPmdDetector* cp
   return kStOK;
 }
 
-void StPmdSimulatorMaker::calAdc(StPmdDetector* pdet,Int_t id){
+void StPmdSimulatorMaker::FinalEdep(StPmdDetector* pdet,Int_t id){
   
   StPmdModule * mod=pdet->module(id);  
   Int_t nmh=pdet->module_hit(id);   
@@ -484,14 +488,17 @@ void StPmdSimulatorMaker::calAdc(StPmdDetector* pdet,Int_t id){
     StPmdHit *spmcl;  
     for(Int_t im=0; im<nmh; im++)
       {
-	Float_t rawadc=0.;
-	Int_t ADC=0;
+	Float_t rawadc=0., Edep=0.;
+        Int_t ADC=0;
 	spmcl = (StPmdHit*)next();
 	if(spmcl){
 	  Float_t rawedep=spmcl->Edep();         
 	  Float_t keVedep=rawedep;
 	  keV_ADC(keVedep,rawadc);
-	  ADC_Readout(rawadc,ADC);
+	  if(mResFlag) ADC_Readout(rawadc,ADC);
+	  else ADC = rawadc;
+	  mpmdgeom->ADC2Edep(ADC,Edep);
+	  spmcl->setEdep(Edep);
 	  spmcl->setAdc(ADC);
 	}
       }
