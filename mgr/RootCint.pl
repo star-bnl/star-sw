@@ -228,7 +228,10 @@ for my $class (@classes) {	#loop over classes
      if (! -f $hfile) {$hfile =$LinkDefDirName . "/" . $class . ".h";}	#print "2 hfile = $hfile\n";} 
      if (  -f $hfile) {$h = $hfile;} 
   }
-  if (!$h) {print "$class.h NOT FOUND\n"; next;}
+  if (!$h) {
+      print STDERR "RootCint.pl :: Warning : $class.h NOT FOUND\n"; 
+      next;
+  }
 
   my $hh = basename($h); 				#print "hh = $hh\n";
   if (!grep(/$hh/,$h_files)) {$h_files .= " " . $hh;}
