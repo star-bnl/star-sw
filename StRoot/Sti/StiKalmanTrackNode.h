@@ -82,7 +82,7 @@ public:
   double fP0;             // Y-coordinate of a track
   double fP1;             // Z-coordinate of a track
   double fP2;             // C*x0
-  double fP3;             // track curvature==C
+  double fP3;             // track curvature==C [sign=sign(-qB)]
   double fP4;             // tangent of the track momentum dip angle
   double fC00;                         // covariance
   double fC10, fC11;                   // matrix

@@ -31,8 +31,10 @@ public:
     
 protected:
     
-    double dDensity;   // g/cm^3
-    double dRadLength; // cm
+    /// g/cm^3
+    double dDensity;
+    /// cm
+    double dRadLength;
     string szName;
     
 };
