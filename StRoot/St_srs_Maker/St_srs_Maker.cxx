@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.29 2002/02/15 20:21:54 caines Exp $
+//$Id: St_srs_Maker.cxx,v 1.30 2002/12/05 23:37:42 caines Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.30  2002/12/05 23:37:42  caines
+//Remove hits if they are on a  bad anode
+//
 //Revision 1.29  2002/02/15 20:21:54  caines
 //Work with database
 //
@@ -42,6 +45,7 @@
 #include "StDbUtilities/StSvtCoordinateTransform.hh"
 #include "StDbUtilities/StSvtWaferCoordinate.hh"
 #include "StDbUtilities/StGlobalCoordinate.hh"
+#include "StSvtClassLibrary/StSvtHybridBadAnodes.hh"
 #include "StMessMgr.h"
 #include "St_srs_Maker.h"
 #include "StChain.h"
@@ -67,7 +71,9 @@ m_shape(0),
 m_srs_activea(0),
 m_srs_srspar(0),
 m_srs_direct(0)
+
 {
+  mSvtBadAnodes = NULL;
 }
 //_____________________________________________________________________________
 St_srs_Maker::~St_srs_Maker(){
@@ -116,6 +122,11 @@ Int_t St_srs_Maker::Init(){
    m_srs_srspar  = (St_srs_srspar  *) local("srspars/srs_srspar");
    m_srs_direct  = (St_srs_direct  *) local("srspars/srs_direct");
 
+
+   //   Get Bad Anodes
+
+   GetBadAnodes();
+
 // 		Create Histograms    
    m_x_vs_y = new TH2F("srs_x_vs_y","X vs Y of Si space points",
                            300,-30,30,300,-30,30);
@@ -161,10 +172,32 @@ Int_t St_srs_Maker::Init(){
 
    return StMaker::Init();
 }
+//___________________________________________________________________________
+
+Int_t St_srs_Maker::GetBadAnodes()
+{
+
+  St_DataSet *dataSet;
+  
+  dataSet = GetDataSet("StSvtBadAnodes");
+  if( !dataSet) {
+    gMessMgr->Warning() << " No Svt Bad Anodes data set" << endm;
+    return kStWarn;
+  }
+
+  mSvtBadAnodes = (StSvtHybridCollection*)(dataSet->GetObject());
+  if( !mSvtBadAnodes) {
+    gMessMgr->Warning() << " No Svt Bad Anodes data " << endm;
+    return kStWarn;
+  }
+  return kStOK;
+}
 //_____________________________________________________________________________
 Int_t St_srs_Maker::Make()
 {
   Int_t res; 
+
+  StSvtHybridBadAnodes* BadAnode = NULL;
 // 		Create output tables
   St_scs_spt    *scs_spt    = new St_scs_spt("scs_spt",25000);       m_DataSet->Add(scs_spt);
   St_srs_result *srs_result = new St_srs_result("srs_result",25000); m_DataSet->Add(srs_result);
@@ -234,7 +267,7 @@ Int_t St_srs_Maker::Make()
 	WaferCoord.setTimeBucket(WaferCoord.timebucket()+TimeBucketShift);
 	
 	if( WaferCoord.timebucket() < 0. || WaferCoord.timebucket() > MaxTimeBucket){
-	  spc->flag = -77;
+	  spc->flag = 7;
 	  gMessMgr->Warning() << " Moved hit off of wafer" << endl;
 	}
 	else{
@@ -242,7 +275,7 @@ Int_t St_srs_Maker::Make()
 	  // cout << GlobalCoord << endl;
 	  
 	  if( GlobalCoord.position().x() < -99){
-	    spc->flag = -77;
+	    spc->flag = 8;
 	    cout << " Moved hit off of wafer" << endl;
 	  }
 	}
@@ -252,7 +285,23 @@ Int_t St_srs_Maker::Make()
 					    WaferCoord.ladder(),
 					    WaferCoord.wafer(),
 					    WaferCoord.hybrid());
+
+
+
 	if( index <0) continue;
+
+	// retrieve bad anodes
+	if (mSvtBadAnodes)
+	  BadAnode = (StSvtHybridBadAnodes*)mSvtBadAnodes->at(index);
+	if(BadAnode)
+	  {
+	    if( BadAnode->isBadAnode(WaferCoord.anode())){
+	      //cout << "Found a bad anode" << endl;
+	      spc->flag = 9;
+	    }
+	  }
+	
+
 	mSvtAnalClusters = (StSvtAnalysedHybridClusters*)
 	  mSvtAnalColl->at(index);
 

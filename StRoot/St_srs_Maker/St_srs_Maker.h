@@ -33,6 +33,7 @@ class St_srs_Maker : public StMaker {
                St_srs_srspar  *m_srs_srspar; //!
                St_srs_direct  *m_srs_direct; //!
 	       StSvtConfig    *mConfig;      //!
+	       StSvtHybridCollection *mSvtBadAnodes; //!
 	       StSvtCoordinateTransform *mCoordTransform; //!
 	       TString        mConfigString;
 	       St_ObjectSet  *mSvtAnalSet; //!
@@ -54,9 +55,10 @@ class St_srs_Maker : public StMaker {
    Int_t          setConfig(StSvtConfig* config);
    Int_t          setConfig(const char* config);
    Int_t          SetSvtAnalysis();
+   Int_t          GetBadAnodes();
    Int_t          FillHist(St_scs_spt* scs_spt);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_srs_Maker.h,v 1.9 2001/11/12 22:56:38 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_srs_Maker.h,v 1.10 2002/12/05 23:37:43 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_srs_Maker, 1)   // chain virtual base class for Makers
 };
