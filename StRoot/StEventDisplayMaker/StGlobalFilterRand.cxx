@@ -1,4 +1,4 @@
-// $Id: StGlobalFilterRand.cxx,v 1.1 2004/10/17 03:37:19 perev Exp $
+// $Id: StGlobalFilterRand.cxx,v 1.2 2004/10/19 22:35:28 perev Exp $
 #include "TError.h"
 #include "TRandom.h"
 #include "TSystem.h"
@@ -41,7 +41,7 @@ void StGlobalFilterRand::Filter(TObjArray *eArr,int flag)
     to = eArr->At(ioj+1);
     if (!to) 		continue;
     kind = StEventHelper::Kind(to);
-    if (!(kind&kHRR)) 		{ eArr->AddAt(0,ioj);continue;}
+    if (!(kind&kHRR)) 		{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
     StPtrVecHit *hr = (StPtrVecHit *)to;
     int nhits = hr->size();
     if (nhits<10) 		{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
@@ -55,6 +55,7 @@ void StGlobalFilterRand::Filter(TObjArray *eArr,int flag)
     iSel  =  bad && (fMode&1);
     iSel |= !bad && (fMode&2);
     if (!iSel) 		{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
+    if (bad==21)        {(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
 //   Only selected tracks
      nSel++;
   }
