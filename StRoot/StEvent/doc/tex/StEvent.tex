@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.15 2000/01/12 10:45:31 ullrich Exp $
+% $Id: StEvent.tex,v 2.16 2000/01/27 18:38:30 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.15  2000/01/12 10:45:31  ullrich
-% Fixed error (underscore in text).
+% Revision 2.16  2000/01/27 18:38:30  ullrich
+% Fixed typo in units for curvature.
 %
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
@@ -146,8 +146,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.15 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/12 10:45:31 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.16 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/27 18:38:30 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -171,8 +171,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.15 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/12 10:45:31 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.16 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/27 18:38:30 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -180,17 +180,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.15 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/12 10:45:31 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.16 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/27 18:38:30 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.15 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/12 10:45:31 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.16 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/27 18:38:30 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.15 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/12 10:45:31 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.16 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/27 18:38:30 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -205,8 +205,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.15 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/12 10:45:31 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.16 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/27 18:38:30 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -2849,7 +2849,7 @@ definition in the header file.
 
 
 \subsection{StFunctional}
-    Curvature in m$^{-1}$.
+\index{StFunctional|textbf}
 \label{sec:StFunctional}
 \begin{Entry}
 \item[Summary]
