@@ -14,6 +14,7 @@
 * 7/11/98 - K. Turner - change to use standard setup kumacs
 * 7/14/98 - K. Turner - change to use bfc_defaults instead of bfc_star
 * 7/30/98 - K. Turner - change to use new utility kumacs
+* 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
 * *************************************************
  
  MACRO run _
@@ -167,7 +168,7 @@ ENDOFDATA:
 
 * close ntuple
   message ' close ntuple'
-  exec write_table_to_ntuple#close_disk [funit]
+  exec write_table_to_ntuple#close_disk [funit] [nid]
 
 * close input file
   message ' close input file'

@@ -2,6 +2,7 @@
 * run_l3.kumac
 * 
 * 7/31/98 K. Turner - created
+* 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
 * 
 ************************************************************************
 ************************************************************************
@@ -130,7 +131,7 @@
 
 * close ntuple
   message ' close ntuple'
-  exec write_table_to_ntuple#close_disk [funit]
+  exec write_table_to_ntuple#close_disk [funit] [nid]
 
 * close input file
   message ' close input file'

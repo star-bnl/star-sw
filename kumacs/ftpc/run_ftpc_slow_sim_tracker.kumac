@@ -9,6 +9,7 @@
 * editted July 29,1998 - K. Turner
 *                         changed some names of utility kumacs
 *                         write out [run] and [event]
+* 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk 
 ************************************************************************
 ************************************************************************
 
@@ -158,7 +159,7 @@
 
 * close ntuple
   message ' close ntuple'
-  exec write_table_to_ntuple#close_disk [funit]
+  exec write_table_to_ntuple#close_disk [funit] [nid]
 
 * close input file
   message ' close input file'
