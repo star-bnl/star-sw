@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.cxx,v 1.3 1999/06/30 16:27:41 fine Exp $
+// $Id: St_geom_Maker.cxx,v 1.4 1999/07/02 20:01:21 fine Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.4  1999/07/02 20:01:21  fine
+// The name of the maker is the geom file name
+//
 // Revision 1.3  1999/06/30 16:27:41  fine
 // Comments make up
 //
@@ -65,17 +68,31 @@ ClassImp(St_geom_Maker)
 
 //_____________________________________________________________________________
 St_geom_Maker::St_geom_Maker(const char *name):StMaker(name){
+  
 }
 //_____________________________________________________________________________
 St_geom_Maker::~St_geom_Maker(){
-  
+  if (m_ConstSet) m_ConstSet->Delete();
+}
+//_____________________________________________________________________________
+St_DataSet  *St_geom_Maker::GetDataSet (const char* logInput,const StMaker *uppMk,
+                                        const StMaker *dowMk) const 
+{
+  St_DataSet *ds = StMaker::GetDataSet(logInput,uppMk,dowMk);
+  if (!ds && strcmp(logInput,"HALL")==0) { 
+     Init();
+     ds = m_ConstSet->FindByName("HALL");
+  }
+  return ds;
 }
 //_____________________________________________________________________________
 Int_t St_geom_Maker::Init() {
 //--
 //  reading STAR GEANT geometry database
 //--
-  TWebFile f(StrDup("http://www.star.bnl.gov/~fine/star.root"));
+  TString fileName = "http://www.star.bnl.gov/~fine/";
+  fileName += GetName();
+  TWebFile f(fileName.Data());
   // read STAR geometry database remotely
   TGeometry *star = (TGeometry *)f.Get("STAR");
   if (!star) {
@@ -106,7 +123,7 @@ Int_t St_geom_Maker::Make(){
 //_____________________________________________________________________________
 void St_geom_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geom_Maker.cxx,v 1.3 1999/06/30 16:27:41 fine Exp $\n");
+  printf("* $Id: St_geom_Maker.cxx,v 1.4 1999/07/02 20:01:21 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
