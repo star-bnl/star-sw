@@ -5,6 +5,7 @@
 
 struct triggerID_st;
 struct trigPrescales_st;
+struct defaultTrgLvl_st;
 
 #ifdef sun
 #include <iostream.h>
@@ -33,6 +34,9 @@ public:
     int                        getIdxLevel(unsigned int entry = 0);
     int                        getId(unsigned int entry = 0);
     float                      getPs(unsigned int entry = 0);
+
+    unsigned int              getDefaultTriggerLevel();
+    
     friend ostream& operator<<(ostream& os, StDetectorDbTriggerID& v);
 
     // These fuction will be public
@@ -44,16 +48,20 @@ protected:
 // members of triggerID 
     virtual ~StDetectorDbTriggerID();
     StDetectorDbTriggerID();
-    triggerID_st * mTriggerID; // points to triggerID struct
+    triggerID_st* mTriggerID; // points to triggerID struct
     TTable* mIDTable; // points to table, need to re-intilize mTriggerID every event
     unsigned int mIDNumRows;
 
 // members of trigPrescales
-    trigPrescales_st * mTrigPrescales; // points to prescales struct
+    trigPrescales_st* mTrigPrescales; // points to prescales struct
     TTable* mSTable; // points to table, need to re-intilize mTrigPrescales every event
     unsigned int mSNumRows;
 
-    StMaker * mMaker; // Holds pointer to maker
+// members of trigPrescales
+    defaultTrgLvl_st* mDefaultTriggerLevel; // points to prescales struct
+    TTable* mDefTrgLvlTable; // points to table, need to re-intilize mDefaultTriggerLevel every event
+    
+    StMaker* mMaker; // Holds pointer to maker
 private:
     static StDetectorDbTriggerID* sInstance;
 };
