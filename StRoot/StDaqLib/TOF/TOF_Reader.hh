@@ -1,10 +1,13 @@
 /***************************************************************************
-* $Id: TOF_Reader.hh,v 1.1 2001/07/08 21:43:41 geurts Exp $
+* $Id: TOF_Reader.hh,v 1.2 2001/07/13 21:12:34 geurts Exp $
 * Author: Frank Geurts
 ***************************************************************************
 * Description:  TOF Event Reader
 ***************************************************************************
 * $Log: TOF_Reader.hh,v $
+* Revision 1.2  2001/07/13 21:12:34  geurts
+* changed type of A2D data in struct TofDATA to allow negative values
+*
 * Revision 1.1  2001/07/08 21:43:41  geurts
 * First release
 *
@@ -125,7 +128,7 @@ struct TofDATA {
   unsigned int EventNumber; //Token number
   unsigned short AdcData[TOFP_NUM_ADC_CHANNELS];
   unsigned short TdcData[TOFP_NUM_TDC_CHANNELS];
-  unsigned short A2dData[TOFP_NUM_A2D_CHANNELS];
+  short A2dData[TOFP_NUM_A2D_CHANNELS];
   unsigned short ScaData[TOFP_NUM_SCA_CHANNELS];
 };
 
