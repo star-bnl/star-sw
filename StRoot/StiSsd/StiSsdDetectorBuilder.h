@@ -10,10 +10,7 @@ public:
     // constructors
     StiSsdDetectorBuilder(bool active);
     virtual ~StiSsdDetectorBuilder(); 
-    virtual void buildMaterials();
-    virtual void buildShapes();
-    virtual void buildDetectors();
-    virtual void loadDb();
+    virtual void buildDetectors(StMaker&s);
 };
 
 #endif 
