@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.2 1999/02/14 23:11:43 fisyak Exp $
+ * $Id: StMatrix.hh,v 1.3 1999/02/17 11:38:54 ullrich Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,8 +18,8 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
- * Revision 1.2  1999/02/14 23:11:43  fisyak
- * Fixes for Rootcint
+ * Revision 1.3  1999/02/17 11:38:54  ullrich
+ * Removed specialization for 'long double'.
  *
  * Revision 1.4  1999/03/04 18:12:24  ullrich
  * Added namespace 'std'.
@@ -206,7 +206,6 @@ public:
 
     // Copy constructor.
 #ifndef ST_NO_MEMBER_TEMPLATES
-    StMatrix(const StMatrix<long double>&);
     template<class X>
     StMatrix(const StMatrix<X>&);
     StMatrix(const StMatrix<DataType>&);
@@ -217,7 +216,6 @@ public:
     
     // Assignment operators.
 #ifndef ST_NO_MEMBER_TEMPLATES
-    StMatrix<DataType>& operator=(const StMatrix<long double>&);
     template<class X>
     StMatrix<DataType>& operator=(const StMatrix<X>&);
     StMatrix<DataType>& operator=(const StMatrix<DataType>&);
@@ -274,15 +272,12 @@ public:
 
     // Matrix Operations
 #ifndef ST_NO_MEMBER_TEMPLATES
-    StMatrix<DataType>& operator+=(const StMatrix<long double>&);
     template<class X> StMatrix<DataType>& operator+=(const StMatrix<X>&);
     template<class X> StMatrix<DataType>& operator-=(const StMatrix<X>&);
     template<class X> StMatrix<DataType>  dot(const StMatrix<X>&);
-    StMatrix<DataType>& operator-=(const StMatrix<long double>&);
 #else
     StMatrix<DataType>& operator+=(const StMatrix<float>&);
     StMatrix<DataType>& operator+=(const StMatrix<double>&);
-    StMatrix<DataType>  dot(const StMatrix<long double>&);
     
     StMatrix<DataType>& operator-=(const StMatrix<float>&);
     StMatrix<DataType>& operator-=(const StMatrix<double>&);
@@ -431,17 +426,6 @@ StMatrix<DataType>::StMatrix(const StMatrix<double>& m1)
     : mRow(m1.numRow()), mCol(m1.numCol()), mSize(m1.numSize())
     for(int ii=0; ii<mRow; ii++)
  	for(int jj=0; jj<mCol; jj++)
-template<class DataType>
-StMatrix<DataType>::StMatrix(const StMatrix<long double>& m1)
-    : mRow(m1.numRow()), mCol(m1.numCol()), mSize(m1.numSize())
-{
-    mElement = new DataType[mSize];
-
-    for(int ii=0; ii<mRow; ii++)
- 	for(int jj=0; jj<mCol; jj++)
- 	    *(mElement+(ii)*mCol+jj) = m1(ii+1,jj+1);
-}
-
 
     for(unsigned int ii=0; ii<mRow; ii++)
  	for(unsigned int jj=0; jj<mCol; jj++)
@@ -536,28 +520,7 @@ StMatrix<DataType>& StMatrix<DataType>::operator=(const StMatrix<double>& m1)
 	
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++) {
-template<class DataType>
-StMatrix<DataType>& StMatrix<DataType>::operator=(const StMatrix<long double>& m1)
-{   
-    if ((void *)&m1 == (void *)this) {
-	return *this;
-    }
-    else {
-	delete [] mElement;
-	mSize    = m1.numRow()*m1.numCol();
-	mElement = new DataType[mSize];
 		*(mElement+(ii)*mCol+jj) = m1(ii+1,jj+1);
-	mRow = m1.numRow();
-	mCol = m1.numCol();
-	
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++) {
-		*(mElement+(ii)*mCol+jj) = m1(ii+1,jj+1);
-	    }
-    }
-    return (*this);
-
-}
 	    }
     }
     return (*this);
@@ -755,25 +718,6 @@ template<class DataType>
     else {
 #ifndef ST_NO_EXCEPTIONS
 	throw out_of_range("StMatrix<double>::operator+=(): Matrices are not same size!");
-template<class DataType>
-StMatrix<DataType>& StMatrix<DataType>::operator+=(const StMatrix<long double>& m2)
-{
-    if(mRow == m2.numRow() && mCol == m2.numCol()) {
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++)
-		*(mElement+(ii)*mCol+jj) += m2(ii+1,jj+1);
-
-	return (*this);
-    }
-    else {
-#ifndef ST_NO_EXCEPTIONS
-	throw out_of_range("StMatrix<long double>::operator+= Matrices are not same size!");
-#else
-	cerr << "StMatrix<long double>::operator+=(): Matrices are not same size!" << endl;
-#endif
-    }	
-}
-
 #else
 	cerr << "StMatrix<double>::operator+= Matrices are not same size!" << endl;
 #endif
@@ -813,25 +757,6 @@ template<class DataType>
     else {
 #ifndef ST_NO_EXCEPTIONS
 	throw out_of_range("StMatrix<double>::operator-=(): Matrices are not same size!");
-template<class DataType>
-StMatrix<DataType>& StMatrix<DataType>::operator-=(const StMatrix<long double>& m2)
-{
-    if(mRow == m2.numRow() && mCol == m2.numCol()) {
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++)
-		*(mElement+(ii)*mCol+jj) -= m2(ii+1,jj+1);
-
-	return (*this);
-    }
-    else {
-#ifndef ST_NO_EXCEPTIONS
-	throw out_of_range("StMatrix<long double>::operator-=(): Matrices are not same size!");
-#else
-	cerr << "StMatrix<long double>::operator-=(): Matrices are not same size!" << endl;
-#endif
-    }
-}
-
 #else
 	cerr << "StMatrix<double>::operator-=(): Matrices are not same size!" << endl;
 #endif
@@ -877,27 +802,6 @@ StMatrix<DataType> StMatrix<DataType>::dot(const StMatrix<double>& m2)
     else {
 #ifndef ST_NO_EXCEPTIONS
 	throw out_of_range("StMatrix<double>::dot(): Incompatible matrix sizes");
-template<class DataType>
-StMatrix<DataType> StMatrix<DataType>::dot(const StMatrix<long double>& m2)
-{
-    if(mCol == m2.numRow() ) {
-	StMatrix<DataType> mret(mRow, m2.numCol(), 0);
-	
-	for(int i=0; i<mRow; i++)
-	    for(int j=0; j<m2.numCol(); j++) {
-		for(int kk=0; kk<mCol; kk++)
-		    mret(i+1, j+1) += (*(mElement+(i)*mCol+kk))*m2(kk+1,j+1);
-	    }
-	return mret;
-    }
-    else {
-#ifndef ST_NO_EXCEPTIONS
-	throw out_of_range("StMatrix<long double>::dot(): Incompatible matrix sizes");
-#else
-	cerr << "StMatrix<long double>::dot(): Incompatible matrix sizes" << endl;
-#endif
-    }
-}
 #else
 	cerr << "StMatrix<double>::dot(): Incompatible matrix sizes" << endl;
 #endif
@@ -1688,31 +1592,6 @@ ostream& operator<<(ostream& s, const StMatrix<DataType>& q)
 	    for(unsigned int icol=1; icol<=q.numCol(); icol++)
 		{
 		    s.width(width);
-
-// #ifdef __HP_aCC
-// // Print the Matrix.  (long double)  HP does not overload long double
-//  ostream& operator<<(ostream& s, const StMatrix<long double>& q)
-// {
-//     s << "\n";
-//     // Fixed format needs 3 extra characters for field
-//     // Scientific format needs 7
-//     unsigned int width;
-//     if(s.flags()&ios::fixed)
-// 	width = s.precision()+3;
-//     else
-// 	width = s.precision()+7;
-//     for(unsigned int irow = 1; irow<= q.numRow(); irow++)
-// 	{
-// 	    for(unsigned int icol=1; icol<=q.numCol(); icol++)
-// 		{
-// 		    s.width(width);
-// 		    s << (static_cast<double>(q(irow,icol))) << " ";
-// 		}
-// 	    s<< endl;
-// 	}
-//     return s;
-// }
-// #endif
 		    s << q(irow,icol) << " ";
 		}
 	    s<< endl;

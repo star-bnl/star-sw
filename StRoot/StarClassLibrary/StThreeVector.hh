@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.2 1999/02/14 23:11:48 fisyak Exp $
+ * $Id: StThreeVector.hh,v 1.3 1999/02/17 11:42:19 ullrich Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,8 +15,8 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
- * Revision 1.2  1999/02/14 23:11:48  fisyak
- * Fixes for Rootcint
+ * Revision 1.3  1999/02/17 11:42:19  ullrich
+ * Removed specialization for 'long double'.
  *
  * Revision 1.5  1999/10/15 15:46:54  ullrich
  * Changed output format in operator<<
@@ -61,11 +61,9 @@ template<class T = double>
 class StThreeVector {
 public:    
     StThreeVector(T = 0, T = 0, T = 0);
-    StThreeVector(const StThreeVector<long double>&);
     ~StThreeVector();
 
 #ifndef ST_NO_MEMBER_TEMPLATES
-    StThreeVector<T>& operator=(const StThreeVector<long double>&);
     template<class X> StThreeVector(const StThreeVector<X>&);
     // StThreeVector<T>& operator=(const StThreeVector<T>&);  use default
 #else    
@@ -124,11 +122,7 @@ public:
     
     template<class X> bool operator == (const StThreeVector<X>& v) const;
     template<class X> bool operator != (const StThreeVector<X>& v) const;
-    
-    T                angle(const StThreeVector<long double>&) const;
-    StThreeVector<T> cross(const StThreeVector<long double>&) const;
-    T                dot  (const StThreeVector<long double>&) const;
-   
+
     template<class X> StThreeVector<T>& operator+= (const StThreeVector<X>&);
     template<class X> StThreeVector<T>& operator-= (const StThreeVector<X>&);
 #else    
@@ -138,11 +132,6 @@ public:
     
     T                angle(const StThreeVector<double>&) const;
     T                dot  (const StThreeVector<double>&) const;
-
-    bool operator == (const StThreeVector<long double>& v) const;
-    bool operator != (const StThreeVector<long double>& v) const;
-    StThreeVector<T>& operator+= (const StThreeVector<long double>&);
-    StThreeVector<T>& operator-= (const StThreeVector<long double>&);
     StThreeVector<T> cross(const StThreeVector<double>&) const;
        
     bool operator == (const StThreeVector<float>& v) const;
@@ -483,10 +472,6 @@ inline T StThreeVector<T>::angle(const StThreeVector<X>& vec) const
     return norm > 0 ? acos(this->dot(vec)/(sqrt(norm))) : 0;
 }
 
-inline StThreeVector<T>::StThreeVector(const StThreeVector<long double>& v)
-    : mX1(v.x()), mX2(v.y()), mX3(v.z()) {/* nop */}
-
-template<class T>
 #else
 
 template<class T>
@@ -503,14 +488,6 @@ StThreeVector<T>::operator=(const StThreeVector<float>& v)
 {
     mX1 = v.x();  mX2 = v.y();  mX3 = v.z();
     return *this;
-inline StThreeVector<T>&
-StThreeVector<T>::operator=(const StThreeVector<long double>& v)
-{
-    mX1 = v.x();  mX2 = v.y();  mX3 = v.z();
-    return *this;
-}
-
-template<class T>
 }
 
 template<class T>
@@ -526,13 +503,6 @@ inline bool
 StThreeVector<T>::operator== (const StThreeVector<float>& v) const
 {
     return mX1 == v.x() && mX2 == v.y() && mX3 == v.z();
-StThreeVector<T>::operator== (const StThreeVector<long double>& v) const
-{
-    return mX1 == v.x() && mX2 == v.y() && mX3 == v.z();
-}
-
-template<class T>
-inline bool
 }
 
 template<class T>
@@ -546,13 +516,6 @@ template<class T>
 inline bool
 StThreeVector<T>::operator!= (const StThreeVector<float>& v) const
 {
-inline bool
-StThreeVector<T>::operator!= (const StThreeVector<long double>& v) const
-{
-    return !(*this == v);
-}
-
-template<class T>
     return !(*this == v);
 }
 
@@ -570,14 +533,6 @@ StThreeVector<T>::operator+= (const StThreeVector<float>& v)
     mX1 += v.x(); mX2 += v.y(); mX3 += v.z();
     return *this;
 }
-StThreeVector<T>::operator+= (const StThreeVector<long double>& v)
-{
-    mX1 += v.x(); mX2 += v.y(); mX3 += v.z();
-    return *this;
-}
-
-template<class T>
-inline StThreeVector<T>&
 
 template<class T>
 inline StThreeVector<T>&
@@ -593,14 +548,6 @@ StThreeVector<T>::operator-= (const StThreeVector<float>& v)
 {
     mX1 -= v.x(); mX2 -= v.y(); mX3 -= v.z();
     return *this;
-inline StThreeVector<T>&
-StThreeVector<T>::operator-= (const StThreeVector<long double>& v)
-{
-    mX1 -= v.x(); mX2 -= v.y(); mX3 -= v.z();
-    return *this;
-}
-
-template<class T>
 }
 
 template<class T>
@@ -613,12 +560,6 @@ StThreeVector<T>::operator-= (const StThreeVector<double>& v)
 
 template<class T>
 inline T StThreeVector<T>::dot(const StThreeVector<float>& v) const
-inline T StThreeVector<T>::dot(const StThreeVector<long double>& v) const
-{
-    return mX1*v.x() + mX2*v.y() + mX3*v.z();
-}
-
-template<class T>
 {
     return mX1*v.x() + mX2*v.y() + mX3*v.z();
 }
@@ -637,15 +578,6 @@ StThreeVector<T>::cross(const StThreeVector<float>& v) const
 			    mX3*v.x() - mX1*v.z(),
 			    mX1*v.y() - mX2*v.x());
 }
-inline StThreeVector<T>
-StThreeVector<T>::cross(const StThreeVector<long double>& v) const
-{
-    return StThreeVector<T>(mX2*v.z() - mX3*v.y(),
-			    mX3*v.x() - mX1*v.z(),
-			    mX1*v.y() - mX2*v.x());
-}
-
-template<class T>
 
 template<class T>
 inline StThreeVector<T>
@@ -654,13 +586,6 @@ StThreeVector<T>::cross(const StThreeVector<double>& v) const
     return StThreeVector<T>(mX2*v.z() - mX3*v.y(),
 			    mX3*v.x() - mX1*v.z(),
 			    mX1*v.y() - mX2*v.x());
-}
-
-
-template<class T>
-inline T StThreeVector<T>::angle(const StThreeVector<long double>& v) const
-{
-    return acos(this->dot(v)/this->mag()/v.mag());
 }
 
 template<class T>
@@ -725,15 +650,6 @@ inline StThreeVector<T> operator* (double c, const StThreeVector<T>& v)
     return StThreeVector<T>(v) *= c;
 }
 
-
-// #ifdef __HP_aCC
-// #ifndef FOR_HELIX
-// ostream&  operator<<(ostream& os, const StThreeVector<long double>& v)
-// {
-//     return os << '(' << (static_cast<double>(v.x())) << ", " << (static_cast<double>(v.y())) << ", " << (static_cast<double>(v.z())) << ')';
-// }
-// #endif
-// #endif
 template<class T, class X>
 inline StThreeVector<T> operator/ (const StThreeVector<T>& v, X c)
 {
