@@ -1,4 +1,4 @@
-// $Id: makedoc.C,v 1.51 1999/12/15 22:41:24 fine Exp $
+// $Id: makedoc.C,v 1.52 1999/12/15 23:55:14 fine Exp $
 //=======================================================================
 // owner: Valery Fine
 // what it does: 
@@ -161,10 +161,10 @@
                        ,"StTrack",       "St_TableElementDescriptor"
                        ,"St_geom_Maker", "StPadDisplayMaker", "St_TLA_Maker"
                        ,"StBFChain",     "StEventDisplayMaker", "TAxis3D"
-                       ,"StVirtualEventFilter"
+                       ,"StVirtualEventFilter", "St_TableIter"
                        ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
-  Int_t nclass = 41;
+  Int_t nclass = 42;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("$STAF/inc/table_header.h");
@@ -274,6 +274,9 @@
 //___________________________________________________________________________
 //___________________________________________________________________________
 // $Log: makedoc.C,v $
+// Revision 1.52  1999/12/15 23:55:14  fine
+// St_TableIter doc included
+//
 // Revision 1.51  1999/12/15 22:41:24  fine
 // clean up
 //
