@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.21 1999/03/02 03:19:03 fine Exp $
+// $Id: St_XDFFile.h,v 1.22 1999/03/15 00:10:15 perev Exp $
 // $Log: St_XDFFile.h,v $
+// Revision 1.22  1999/03/15 00:10:15  perev
+// For new Maker schema
+//
 // Revision 1.21  1999/03/02 03:19:03  fine
 // re-commit, the obsolte version was in use
 //
@@ -71,7 +74,7 @@ class St_XDFFile : public TObject
     TSocket             *fSocket;       // Socket to XDF I/O
     Int_t                fRecordCount;  // No. of records read/written
     St_DataSet          *fBrowsable;    // The pointer to the record selected with ROOT Browser
-
+    Int_t                fDebug;        // Debug Level
   protected:
     static St_DataSet   *MakeDataSet(DS_DATASET_T *ds);    // DS_DATASET_T -> St_DataSet. Create St_DataSet object from DS_DATASET_T C-structure
     static DS_DATASET_T *MakeDataSet(St_DataSet *dataset); // St_DataSet -> DS_DATASET_T. Create DS_DATASET_T C-structure from St_DataSet object
@@ -93,12 +96,18 @@ class St_XDFFile : public TObject
     virtual Int_t       OpenXDF(const char *host, Int_t port,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(Int_t descriptor,const Char_t *mode="r");       // Create object and open file
     virtual Bool_t    IsFolder(){ return fFile?kTRUE:kFALSE;}
-    virtual St_DataSet *NextEventGet();                                         // create St_DataSet and read the next event in it.
+    virtual St_DataSet *ReadEvent();                                         // create St_DataSet and read the next event in it.
+    virtual St_DataSet *NextEventGet(){return ReadEvent();};                                         // create St_DataSet and read the next event in it.
     virtual St_DataSet *NextEventList();
-    virtual Int_t       NextEventPut(St_DataSet *dataset);                      // create DS_DATASET_T from St_DataSet and write it out in XDR format
+    virtual Int_t       WriteEvent(St_DataSet *dataset);                      // create DS_DATASET_T from St_DataSet and write it out in XDR format
+    virtual Int_t       NextEventPut(St_DataSet *dataset){return WriteEvent(dataset);};                      // create DS_DATASET_T from St_DataSet and write it out in XDR format
     virtual Int_t       GetCount(){return fRecordCount;}
+    virtual Int_t       GetDebug(){return fDebug;};
+    virtual Int_t       Debug(){return GetDebug();};
+    virtual void        SetDebug(Int_t dbl=1){fDebug=dbl;};
     static  void        GetXdFile(const Char_t *filename, St_DataSet *dataset); // open, read and close file file
     static  St_DataSet *GetXdFile(const Char_t *filename);                      // open, read and close file file
+
     ClassDef(St_XDFFile,0)
 
 };
