@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtLikeSignAnalysis.cxx,v 1.2 2001/06/21 19:15:46 laue Exp $
+ * $Id: StHbtLikeSignAnalysis.cxx,v 1.3 2002/04/22 14:47:54 laue Exp $
  *
  * Author: Frank Laue, Ohio State, Laue@mps.ohio-state.edu
  ***************************************************************************
@@ -107,6 +107,11 @@ void StHbtLikeSignAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 	picoEvent->FirstParticleCollection()->size() << " " <<
 	picoEvent->SecondParticleCollection()->size() << endl;
       
+      if (picoEvent->SecondParticleCollection()->size()*picoEvent->FirstParticleCollection()->size()==0) {
+	delete picoEvent;
+	cout << "StHbtLikeSignAnalysis - picoEvent deleted due to empty collection " <<endl; 
+	return;
+      }
       // OK, pico event is built
       // make real pairs...
       
