@@ -132,7 +132,7 @@
 * 7. to read from an xdf file that already has raw data simulated on it
 *    and then doing tpc clustering and tracking and write out results:
 *    domain=' tpc '
-*    chain=' evin tcl tpt'
+*    chain=' evin tpg tcl tpt'
 *****************************************************************
 *****************************************************************
 *****************************************************************
