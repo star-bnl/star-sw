@@ -1,0 +1,20 @@
+//
+// $Id: PCollTag.idl,v 1.1 1999/02/08 14:48:57 wenaus Exp $
+//
+// Peripheral collections group tag
+//
+// $Log: PCollTag.idl,v $
+// Revision 1.1  1999/02/08 14:48:57  wenaus
+// New tag tables
+//
+
+struct HighPtTag {
+    long         chargedMultiplicity;
+    long         numberOfPhotonClusters;
+    long         numberOfElectronsInEmc;
+    long         numberOfMwpcHits;
+    float        vectorSumOfPt;
+    float        primaryVertex[3];      // could be an StThreeVector
+    float        zdc1Energy;
+    float        zdc2Energy;
+};
