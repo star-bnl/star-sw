@@ -35,10 +35,21 @@
             if(k.gt.50)then
                write(*,*)
      1           '***find_parent_b: too many parent vertices!! ',k,itrk
-            end if
+            endif
             goto 100
          else
             write(*,*)'***find_parent_b: Lost vertex outside of BEMC' 
          endif
-      end if
- 
+        endif
+       END 
+
+
+
+
+
+
+
+
+
+
+
