@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.52 2004/04/09 03:36:14 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.53 2004/04/09 22:03:50 subhasis Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -48,9 +48,9 @@
 #include "StMuEmcUtil.h"
 #include "StMuPmdCollection.h"
 #include "StMuPmdUtil.h"
-//#include "StMuTofHit.h"
-//#include "StMuTofHitCollection.h"
-//#include "StMuTofUtil.h"
+#include "StMuTofHit.h"
+#include "StMuTofHitCollection.h"
+#include "StMuTofUtil.h"
 
 #include "StMuDstMaker.h"
 #include "StMuDst.h"
@@ -106,8 +106,8 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
   mPmdUtil = new StMuPmdUtil();
-  //mTofUtil = new StMuTofUtil();
-  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil ) //|| ! mTofUtil )
+  mTofUtil = new StMuTofUtil();
+  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil  || ! mTofUtil )
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
 
@@ -131,7 +131,7 @@ void StMuDstMaker::zeroArrays()
   for (  i=0; i < __NSTRANGEARRAYS__; i++) { strangeArrays[i] = 0;  mStrangeArrays[i] = 0; }
   for (  i=0; i < __NEMCARRAYS__; i++){      emcArrays[i] = 0;      mEmcArrays[i] = 0;     }
   for (  i=0; i < __NPMDARRAYS__; i++){      pmdArrays[i] = 0;      mPmdArrays[i] = 0;     }
-  //for (  i=0; i < __NTOFARRAYS__; i++){      tofArrays[i] = 0;      mTofArrays[i] = 0;     }
+  for (  i=0; i < __NTOFARRAYS__; i++){      tofArrays[i] = 0;      mTofArrays[i] = 0;     }
 }
 
 //-----------------------------------------------------------------------
@@ -227,11 +227,12 @@ void StMuDstMaker::createArrays() {
     mPmdArrays[i]= clonesArray(pmdArrays[i],StMuArrays::pmdArrayTypes[i],StMuArrays::pmdArraySizes[i],StMuArrays::pmdArrayCounters[i]);
   }
   // from Tof group
-  //for ( int i=0; i<__NTOFARRAYS__; i++) {
-  //  mTofArrays[i]= clonesArray(tofArrays[i],StMuArrays::tofArrayTypes[i],StMuArrays::tofArraySizes[i],StMuArrays::tofArrayCounters[i]);
-  //}
-  //mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
-  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    mTofArrays[i]= clonesArray(tofArrays[i],StMuArrays::tofArrayTypes[i],StMuArrays::tofArraySizes[i],StMuArrays::tofArrayCounters[i]);
+  }
+  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
+  // commecnted to include tof again (subhasis) 
+  // mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -253,9 +254,9 @@ void StMuDstMaker::clear(int del){
   for ( int i=0; i<__NPMDARRAYS__; i++) {
     clear(mPmdArrays[i],StMuArrays::pmdArrayCounters[i]		,dell);
   }
-  //for ( int i=0; i<__NTOFARRAYS__; i++) {
-  //  clear(mTofArrays[i],StMuArrays::tofArrayCounters[i],         dell);
-  //}
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    clear(mTofArrays[i],StMuArrays::tofArrayCounters[i],         dell);
+  }
   DEBUGMESSAGE2("out");
 }
 //-----------------------------------------------------------------------
@@ -502,11 +503,11 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
     }
 
     // tof stuff
-    //for ( int i=0; i<__NTOFARRAYS__; i++) {
-    //  chain->SetBranchAddress(StMuArrays::tofArrayNames[i],&mTofArrays[i]);
-    //  ts = StMuArrays::tofArrayNames[i]; ts +="*";
-    //  chain->SetBranchStatus (ts,1);
-    //}
+    for ( int i=0; i<__NTOFARRAYS__; i++) {
+      chain->SetBranchAddress(StMuArrays::tofArrayNames[i],&mTofArrays[i]);
+      ts = StMuArrays::tofArrayNames[i]; ts +="*";
+      chain->SetBranchStatus (ts,1);
+    }
 
     mTTree = mChain->GetTree();
   }
@@ -616,11 +617,11 @@ void StMuDstMaker::openWrite(string fileName) {
   }
 
   // tof stuff
-  //DEBUGMESSAGE2("tof arrays");
-  //for ( int i=0; i<__NTOFARRAYS__; i++) {
-  //  DEBUGVALUE2(i);
-  //  branch = mTTree->Branch(StMuArrays::tofArrayNames[i],&mTofArrays[i], bufsize, mSplit);
-  //}
+  DEBUGMESSAGE2("tof arrays");
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    DEBUGVALUE2(i);
+    branch = mTTree->Branch(StMuArrays::tofArrayNames[i],&mTofArrays[i], bufsize, mSplit);
+  }
 
   mCurrentFileName = fileName;
 }
@@ -744,31 +745,31 @@ void StMuDstMaker::fillPmd(StEvent* ev) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 
-//void StMuDstMaker::fillTof(StEvent* ev) {
-//  DEBUGMESSAGE2("");
-//  StTofCollection *tofcol = ev->tofCollection();
-//  if( !ev || !tofcol || !tofcol->dataPresent() )
-//    return;  //throw StMuExceptionNullPointer("no StTofDataCollection",__PRETTYF__);
-//  StTimer timer;
-//  timer.start();
-//
-//  // fill tofHit
-//  StMuTofHitCollection muTofHitColl;
-//  mTofUtil->fillMuTofHit(&muTofHitColl, tofcol);
-//  for(size_t i=0; i < muTofHitColl.size(); i++) {
-//    StMuTofHit* tofMuHit = (StMuTofHit *)muTofHitColl.getHit(i);
-//    addType( mTofArrays[muTofHit], *tofMuHit );
-//  }
-//
-//  // fill tofData
-//  StSPtrVecTofData &tofData = tofcol->tofData();
-//  for(size_t i=0; i < tofData.size(); i++) {
-//    addType( mTofArrays[muTofData], *tofData[i] );
-//  }
-//
-//  timer.stop();
-//  DEBUGVALUE2(timer.elapsedTime());
-//}
+void StMuDstMaker::fillTof(StEvent* ev) {
+  DEBUGMESSAGE2("");
+  StTofCollection *tofcol = ev->tofCollection();
+  if( !ev || !tofcol || !tofcol->dataPresent() )
+    return;  //throw StMuExceptionNullPointer("no StTofDataCollection",__PRETTYF__);
+  StTimer timer;
+  timer.start();
+
+  // fill tofHit
+  StMuTofHitCollection muTofHitColl;
+  mTofUtil->fillMuTofHit(&muTofHitColl, tofcol);
+  for(size_t i=0; i < muTofHitColl.size(); i++) {
+    StMuTofHit* tofMuHit = (StMuTofHit *)muTofHitColl.getHit(i);
+    addType( mTofArrays[muTofHit], *tofMuHit );
+  }
+
+  // fill tofData
+  StSPtrVecTofData &tofData = tofcol->tofData();
+  for(size_t i=0; i < tofData.size(); i++) {
+    addType( mTofArrays[muTofData], *tofData[i] );
+  }
+
+  timer.stop();
+  DEBUGVALUE2(timer.elapsedTime());
+}
 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1062,6 +1063,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.53  2004/04/09 22:03:50  subhasis
+ * after tof createevent fix by Xin
+ *
  * Revision 1.52  2004/04/09 03:36:14  jeromel
  * Removed TOF support entirely for now as we need a working version ... Will
  * revisit later.

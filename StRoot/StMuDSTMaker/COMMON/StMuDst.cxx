@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.24 2004/04/09 03:36:14 jeromel Exp $
+ * $Id: StMuDst.cxx,v 1.25 2004/04/09 22:04:55 subhasis Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -28,7 +28,7 @@ TClonesArray* StMuDst::arrays[__NARRAYS__] = {0,0,0,0,0,0,0,0,0};
 TClonesArray* StMuDst::strangeArrays[__NSTRANGEARRAYS__] = {0,0,0,0,0,0,0,0,0,0,0,0};
 TClonesArray* StMuDst::emcArrays[__NEMCARRAYS__] = {0};
 TClonesArray* StMuDst::pmdArrays[__NPMDARRAYS__] = {0};
-//TClonesArray* StMuDst::tofArrays[__NTOFARRAYS__] = {0, 0};
+TClonesArray* StMuDst::tofArrays[__NTOFARRAYS__] = {0, 0};
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
@@ -52,9 +52,9 @@ void StMuDst::unset() {
   for ( int i=0; i<__NPMDARRAYS__; i++) {
     pmdArrays[i] = 0;
   }
-  //for ( int i=0; i<__NTOFARRAYS__; i++) {
-  //  tofArrays[i] = 0;
-  //}
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    tofArrays[i] = 0;
+  }
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -74,9 +74,9 @@ void StMuDst::set(StMuDstMaker* maker) {
   for ( int i=0; i<__NPMDARRAYS__; i++) {
     pmdArrays[i] = maker->mPmdArrays[i];
   }
-  //for ( int i=0; i<__NTOFARRAYS__; i++) {
-  //  tofArrays[i] = maker->mTofArrays[i];
-  //}
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    tofArrays[i] = maker->mTofArrays[i];
+  }
 
   StStrangeEvMuDst* ev = strangeEvent();
   int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
@@ -90,8 +90,8 @@ void StMuDst::set(StMuDstMaker* maker) {
 void StMuDst::set(TClonesArray** theArrays, 
 		  TClonesArray** theStrangeArrays, 
 		  TClonesArray** theEmcArrays,
-		  TClonesArray** thePmdArrays)
-  //TClonesArray** theTofArrays) 
+		  TClonesArray** thePmdArrays,
+                  TClonesArray** theTofArrays) 
 {
   DEBUGMESSAGE2("");
   for ( int i=0; i<__NARRAYS__; i++) {
@@ -110,11 +110,11 @@ void StMuDst::set(TClonesArray** theArrays,
       pmdArrays[i] = thePmdArrays[i];
     }
   }
-  //if (theTofArrays) {
-  //  for ( int i=0; i<__NTOFARRAYS__; i++) {
-  //    tofArrays[i] = theTofArrays[i];
-  //  }
-  //}
+  if (theTofArrays) {
+    for ( int i=0; i<__NTOFARRAYS__; i++) {
+      tofArrays[i] = theTofArrays[i];
+    }
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -259,15 +259,26 @@ StEvent* StMuDst::createStEvent() {
     StPhmdCollection *PMD = mPmdUtil->getPmd(pmd);
     if(PMD) ev->setPhmdCollection(PMD);
   }
-  // now get the TOF stuff and put it in the StEvent
-  //StTofCollection *tofcoll = new StTofCollection();
-  //if (tofcoll){
-  //  int nTofData = tofArrays[muTofData]->GetEntries();
-  //  for(int i=0;i<nTofData;i++) {
-  //    tofcoll->addData(tofData(i));
-  //  }
-  //  ev->setTofCollection(tofcoll);
-  //}
+
+// now get tof (after fix from Xin)
+  StTofCollection *tofcoll = new StTofCollection();
+    ev->setTofCollection(tofcoll);
+    int nTofData = tofArrays[muTofData]->GetEntries();
+     for(int i=0;i<nTofData;i++) {
+       StTofData *aData;
+        if(tofData(i)) {
+          unsigned short id = tofData(i)->dataIndex();
+          unsigned short adc = tofData(i)->adc();
+          unsigned short tdc = tofData(i)->tdc();
+          short tc = tofData(i)->tc();
+          unsigned short sc = tofData(i)->sc();
+         aData = new StTofData(id, adc, tdc, tc, sc);
+        } else {
+      aData = new StTofData(0, 0, 0, 0, 0);
+          }
+  tofcoll->addData(aData);
+	      }
+	  cout << " TOF data stored " << nTofData << " entries ! " << endl;
 
   // now create, fill and add new StTriggerIdCollection to the StEvent
   StTriggerIdCollection* triggerIdCollection = new StTriggerIdCollection();
@@ -344,6 +355,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.25  2004/04/09 22:04:55  subhasis
+ * after tof createevent fix by Xin
+ *
  * Revision 1.24  2004/04/09 03:36:14  jeromel
  * Removed TOF support entirely for now as we need a working version ... Will
  * revisit later.

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.8 2004/04/09 03:36:14 jeromel Exp $
+ * $Id: StMuArrays.cxx,v 1.9 2004/04/09 22:06:39 subhasis Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -13,10 +13,10 @@ int StMuArrays::pmdArraySizes[__NPMDARRAYS__]    = {1};
 int StMuArrays::pmdArrayCounters[__NPMDARRAYS__] = {0};
 
 // Tofr
-//char* StMuArrays::tofArrayNames[__NTOFARRAYS__]  = {"TofHit","TofData"};
-//char* StMuArrays::tofArrayTypes[__NTOFARRAYS__]  = {"StMuTofHit","StTofData"};
-//int StMuArrays::tofArraySizes[__NTOFARRAYS__]    = {100, 200};
-//int StMuArrays::tofArrayCounters[__NTOFARRAYS__] = {0, 0};
+char* StMuArrays::tofArrayNames[__NTOFARRAYS__]  = {"TofHit","TofData"};
+char* StMuArrays::tofArrayTypes[__NTOFARRAYS__]  = {"StMuTofHit","StTofData"};
+int StMuArrays::tofArraySizes[__NTOFARRAYS__]    = {100, 200};
+int StMuArrays::tofArrayCounters[__NTOFARRAYS__] = {0, 0};
 
 //**************************************************************************
 char* StMuArrays::emcArrayNames[__NEMCARRAYS__]  = {"EmcCollection"};
@@ -49,6 +49,9 @@ int StMuArrays::arrayCounters[__NARRAYS__]    = {0,0,0,0,0,0,0,0,0};
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
+ * Revision 1.9  2004/04/09 22:06:39  subhasis
+ * after tof createevent fix by Xin
+ *
  * Revision 1.8  2004/04/09 03:36:14  jeromel
  * Removed TOF support entirely for now as we need a working version ... Will
  * revisit later.

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.15 2004/04/09 03:36:14 jeromel Exp $
+ * $Id: StMuDst.h,v 1.16 2004/04/09 22:04:52 subhasis Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -34,8 +34,8 @@ class StEvent;
 class StTrack;
 class StTrackGeometry;
 
-//class StMuTofHit;
-//class StTofData;
+class StMuTofHit;
+class StTofData;
 
 class StPhysicalHelixD;
 
@@ -65,8 +65,9 @@ public:
   /// set the pointers to the TClonesArrays
   void set(StMuDstMaker* maker);
   /// set the pointers to the TClonesArrays
-  //void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0, TClonesArray** pmd=0, TClonesArray** tof=0);
-  void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0, TClonesArray** pmd=0);
+  void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0, TClonesArray** pmd=0, TClonesArray** tof=0);
+  // subhasis: commented to include tof again
+  // void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0, TClonesArray** pmd=0);
 
   /// resets the pointers to the TClonesArrays to 0
   void unset();
@@ -91,7 +92,7 @@ public:
   /// array of TClonesArrays for the stuff inherited from the Pmd 
   static TClonesArray* pmdArrays[__NPMDARRAYS__];
   /// array of TClonesArrays for the stuff inherited from the TOF
-  //static TClonesArray* tofArrays[__NTOFARRAYS__];
+  static TClonesArray* tofArrays[__NTOFARRAYS__];
 
 public:
   /// returns pointer to the n-th TClonesArray 
@@ -103,7 +104,7 @@ public:
   /// returns pointer to the n-th TClonesArray from the pmd arrays
   static TClonesArray* pmdArray(int type) { return pmdArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the tof arrays
-  //static TClonesArray* tofArray(int type) { return tofArrays[type]; }
+  static TClonesArray* tofArray(int type) { return tofArrays[type]; }
 
   /// returns pointer to the primary tracks list
   static TClonesArray* primaryTracks() { return arrays[muPrimary]; }
@@ -166,9 +167,9 @@ public:
   static StMuPmdCollection* pmdCollection() { return (StMuPmdCollection*)pmdArrays[muPmd]->UncheckedAt(0); }
 
   /// returns pointer to the i-th muTofHit
-  //static StMuTofHit* tofHit(int i) { return (StMuTofHit*)tofArrays[muTofHit]->UncheckedAt(i); }
+  static StMuTofHit* tofHit(int i) { return (StMuTofHit*)tofArrays[muTofHit]->UncheckedAt(i); }
   /// returns pointer to the i-th tofData
-  //static StTofData* tofData(int i) { return (StTofData*)tofArrays[muTofData]->UncheckedAt(i); }
+  static StTofData* tofData(int i) { return (StTofData*)tofArrays[muTofData]->UncheckedAt(i); }
 
   static unsigned int numberOfPrimaryTracks()  { return arrays[muPrimary]->GetEntries(); }
   static unsigned int numberOfGlobalTracks()   { return arrays[muGlobal]->GetEntries(); }
@@ -184,8 +185,8 @@ public:
   static unsigned int numberOfStrangeCuts()    { return strangeArrays[smuCut]->GetEntries(); }
 
   // tofr
-  //static unsigned int numberOfTofHit()        { return tofArrays[muTofHit]->GetEntries(); }
-  //static unsigned int numberOfTofData()       { return tofArrays[muTofData]->GetEntries(); }
+  static unsigned int numberOfTofHit()        { return tofArrays[muTofHit]->GetEntries(); }
+  static unsigned int numberOfTofData()       { return tofArrays[muTofData]->GetEntries(); }
 
   static unsigned int GetNPrimaryTrack()    { return numberOfPrimaryTracks(); }  
   static unsigned int GetNGlobalTrack()     { return numberOfGlobalTracks(); }   
@@ -200,8 +201,8 @@ public:
   static unsigned int GetNKink()            { return numberOfKinks(); }          
   static unsigned int GetNStrangeCut()      { return numberOfStrangeCuts(); }    
 
-  //static unsigned int GetNTofHit()          { return numberOfTofHit(); }
-  //static unsigned int GetNTofData()         { return numberOfTofData(); }
+  static unsigned int GetNTofHit()          { return numberOfTofHit(); }
+  static unsigned int GetNTofData()         { return numberOfTofData(); }
 
   ClassDef(StMuDst,2)
 };
@@ -211,6 +212,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.16  2004/04/09 22:04:52  subhasis
+ * after tof createevent fix by Xin
+ *
  * Revision 1.15  2004/04/09 03:36:14  jeromel
  * Removed TOF support entirely for now as we need a working version ... Will
  * revisit later.
