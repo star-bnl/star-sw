@@ -81,28 +81,37 @@ bool StiKalmanTrackFinder::hasMore()
 
 void StiKalmanTrackFinder::doNextAction()
 {
-    StiKalmanTrack* track = 0;
-    if (trackSeedFinder->hasMore())
-      {
-	track = trackSeedFinder->next();
-	if (!track) {
-	    cout <<"StiKalmanTrackFinder::doNextAction()\t Track==0. return "<<endl;
-	    return;
-	}
-	else 
-	  {
-	    cout <<"StiKalmanTrackFinder::doNextAction()\t Got Valid track"<<endl;
-	    
-	    track->update(); //append to display if drawable
-	    
-	    fitInward(track->getFirstNode());
-	}
-	
-    }
-    else {
-	cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
-    }
-    return;
+	try 
+		{
+			StiKalmanTrack* track = 0;
+			if (trackSeedFinder->hasMore())
+				{
+					track = trackSeedFinder->next();
+					if (!track) 
+						{
+							cout <<"StiKalmanTrackFinder::doNextAction()\t Track==0. return "
+									 <<endl;
+						return;
+						}
+					else 
+						{
+							cout <<"StiKalmanTrackFinder::doNextAction()\t Got Valid track"
+									 <<endl;							
+							track->update(); //append to display if drawable							
+							fitInward(track->getFirstNode());
+						}
+					
+				}
+			else 
+				{
+					cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
+				}
+		}
+	catch (Exception & e)
+		{
+			cout << "StiKalmanTrackFinder::doNextAction() - Exception: " 
+					 << e << endl;
+		}
 }
 
 void StiKalmanTrackFinder::findTracks()
@@ -301,19 +310,28 @@ void StiKalmanTrackFinder::fitInward(StiKalmanTrackNode * node) throw (Exception
   StiDetector * cDet;  // child detector
   //double chi2;
   
+	cout << "StiKalmanTrackFinder::fitInward()" << endl;
+
   pNode = node;
   pDet  = pNode->getDetector();
+	cout << "StiKalmanTrackFinder::fitInward()" << endl
+			 << "FIRST NODE::" << endl
+			 << *pNode << endl;
   while (pNode->getChildCount()>0)
     {
       cNode = dynamic_cast<StiKalmanTrackNode *>(pNode->getFirstChild());
       cDet  = cNode->getHit()->detector();
-      cNode->setState(pNode);     // copy state from pNode
-      cNode->propagate(cDet);	// evolve state from pDet to cDet
+      cout << "CH:" <<  *cNode;
+      cNode->setState(pNode);   // copy state from pNode
+      cout << "CHsetState:" <<  *cNode << endl;
+      cNode->propagate(cDet);	  // evolve state from pDet to cDet
+      cout << "CH propagated:" <<  *cNode;
       cNode->evaluateChi2();
+      cout << "Chi2: " <<  *cNode;
       cNode->updateNode();
+      cout << "UPDATED: " <<  *cNode;
       pNode = cNode;
       pDet  = cDet;
-      cout << pNode;
     }
 }
 

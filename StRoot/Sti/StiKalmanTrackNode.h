@@ -73,6 +73,8 @@ class StiKalmanTrackNode : public StiTrackNode
   static bool StiKalmanTrackNode::getMCSCalculated();  
   friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
 
+	static bool  recurse;
+
  protected:   
   
   static double kField;
