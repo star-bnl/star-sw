@@ -26,6 +26,9 @@
  * map -> getRangeU( sector, subsector, etabin, uMin, uMax); // all arguements
  * map -> getRangeV( sector, subsector, etabin, vMin, vMax); // indexed from 0
  *
+ * Int_t iuv;
+ * map -> getRange( sector, subsector, etabin, iuv, vMin, vMax); // indexed from 0
+ *
  * Limitations:
  *
  * 1. Strip ranges are approximate and should not be trusted to more
@@ -105,6 +108,20 @@ class EEmcSmdMap
     vMin = mSmdMap[sector][subsector][etabin].vMin;
     vMax = mSmdMap[sector][subsector][etabin].vMax;
 
+  }
+  // Min and max returned via reference.
+  //
+  void getRange ( Int_t sector,  
+		  Int_t subsector,  
+		  Int_t etabin,  
+		  Int_t iuv,
+		  Int_t &Min,
+		  Int_t &Max ) {
+    switch(iuv) {
+    case 0: return getRangeU( sector, subsector, etabin, Min, Max);
+    case 1: return getRangeV( sector, subsector, etabin, Min, Max);
+    default: {assert(2==3);} 
+    }
   }
   //
   //////////////////////////////////////////////////
