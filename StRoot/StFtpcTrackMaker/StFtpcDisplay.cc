@@ -1,5 +1,8 @@
-// $Id: StFtpcDisplay.cc,v 1.14 2002/10/11 15:45:07 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.15 2002/11/06 13:45:14 oldi Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.15  2002/11/06 13:45:14  oldi
+// Code clean ups.
+//
 // Revision 1.14  2002/10/11 15:45:07  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -503,7 +506,7 @@ void StFtpcDisplay::TrackInfo()
   StFtpcTrack *track;
  
 
- while (true) {
+ while (kTRUE) {
     
     cout << "Mode: ";
     cin >> mode;
@@ -807,7 +810,7 @@ void StFtpcDisplay::Info()
   Float_t y[track_anz][10];
   Float_t z[track_anz][10];
 
-  Bool_t non_stop = false; 
+  Bool_t non_stop = kFALSE; 
   Int_t hitcounter = 0;
   
   //track_canvas->cd(1);
@@ -877,10 +880,10 @@ void StFtpcDisplay::Info()
     //eta_track->Draw("same");
     //gPad->Update();
     
-    if (non_stop == false){
+    if (non_stop == kFALSE){
       Char_t var;
       cin >> var;
-      if (var == '!') non_stop = true;
+      if (var == '!') non_stop = kTRUE;
     }
 
     for (Int_t here = 0; here < trackcluster; here++) {
@@ -1348,18 +1351,18 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
 
   Char_t a;
   
-  Bool_t geant =      (Bool_t) false;
-  Bool_t found =      (Bool_t) true;
-  Bool_t electrons =  (Bool_t) true;
-  Bool_t non_vtx =    (Bool_t) true;
-  Bool_t geant_hits = (Bool_t) true;
-  Bool_t good_geant = (Bool_t) true;
-  Bool_t good_found = (Bool_t) true;
-  Bool_t split =      (Bool_t) true;
-  Bool_t unclean =    (Bool_t) true;
-  Bool_t st =         (Bool_t) false;
-  Bool_t found_hits = (Bool_t) true;
-  Bool_t blue =       (Bool_t) false;
+  Bool_t geant =      (Bool_t) kFALSE;
+  Bool_t found =      (Bool_t) kTRUE;
+  Bool_t electrons =  (Bool_t) kTRUE;
+  Bool_t non_vtx =    (Bool_t) kTRUE;
+  Bool_t geant_hits = (Bool_t) kTRUE;
+  Bool_t good_geant = (Bool_t) kTRUE;
+  Bool_t good_found = (Bool_t) kTRUE;
+  Bool_t split =      (Bool_t) kTRUE;
+  Bool_t unclean =    (Bool_t) kTRUE;
+  Bool_t st =         (Bool_t) kFALSE;
+  Bool_t found_hits = (Bool_t) kTRUE;
+  Bool_t blue =       (Bool_t) kFALSE;
 
   Float_t eta_low_geant = 2.0;
   Float_t eta_up_geant  = 4.4;
@@ -1655,25 +1658,25 @@ void StFtpcDisplay::FillFound(Bool_t good_found, Bool_t st, MIntArray *split, MI
    StFtpcTrack *track = (StFtpcTrack *)mTrack->At(good_counter);
    
    if (TMath::Abs(track->GetEta()) < eta_low || TMath::Abs(track->GetEta()) > eta_up || track->GetPt() < pt_low || track->GetPt() > pt_up) {
-     good_track_to_show[good_counter] = (Bool_t) false;
+     good_track_to_show[good_counter] = (Bool_t) kFALSE;
    }
    
    else {
-     good_track_to_show[good_counter] = (Bool_t) true;
+     good_track_to_show[good_counter] = (Bool_t) kTRUE;
    }
   }
 
   if (unclean) {
 
     for (Int_t unclean_counter = 0; unclean_counter < unclean->GetSize(); unclean_counter++) {
-      good_track_to_show[unclean->At(unclean_counter)] = (Bool_t) false;
+      good_track_to_show[unclean->At(unclean_counter)] = (Bool_t) kFALSE;
     }
   }
     
   if (split) {
     
     for (Int_t split_counter = 0; split_counter < split->GetSize(); split_counter++) {
-      good_track_to_show[split->At(split_counter)] = (Bool_t) false;
+      good_track_to_show[split->At(split_counter)] = (Bool_t) kFALSE;
     }
   }
 
