@@ -5,8 +5,11 @@
 //                                                                      //
 // StPrimaryMaker virtual base class for Maker                          //
 //                                                                      //
-// $Id: StPrimaryMaker.h,v 1.12 2001/11/28 23:02:58 balewski Exp $
+// $Id: StPrimaryMaker.h,v 1.13 2001/11/28 23:51:45 balewski Exp $
 // $Log: StPrimaryMaker.h,v $
+// Revision 1.13  2001/11/28 23:51:45  balewski
+// *** empty log message ***
+//
 // Revision 1.12  2001/11/28 23:02:58  balewski
 // ppLMV uses only tracks matched to CTB slats
 //
@@ -104,10 +107,9 @@ class StPrimaryMaker : public StMaker {
   Int_t GetFixedSize() { return m_fixedArrayX.GetSize(); }
   Int_t GetMatchedSize() { return m_fixedArrayE.GetSize(); }
   void ppLMVuse(int *parI, float *parF);
-  //  void ppLMVuse(float z)
-  //  { zCutppLMV=z; printf("ppLMVuse(z=%f cm) called\n", zCutppLMV=z);}
+  void ppLMVuse(float z); // obsolete JB
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.12 2001/11/28 23:02:58 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.13 2001/11/28 23:51:45 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPrimaryMaker, 0)   //StAF chain virtual base class for Makers
     };
