@@ -10,10 +10,11 @@ void staf_warning(FILE* stream);
 #define BXPOS 8
 #define BYPOS 5
 
+/*"||          Welcome to the STAR Analysis Framework.           ||"*/
    char *banner=
 "+--------------------------------------------------------------+"
 "|+------------------------------------------------------------+|"
-"||          Welcome to the STAR Analysis Framework.           ||"
+"||  Welcome to the Scientific Table-based Analysis Framework. ||"
 "||                                                            ||"
 "||    .oooooo..o ooooooooooooo       .o.       oooooooooooo   ||"
 "||   d8P'    `Y8 8'   888   `8      .888.      `888'     `8   ||"
