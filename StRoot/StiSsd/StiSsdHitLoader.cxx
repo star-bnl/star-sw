@@ -32,7 +32,7 @@ void StiSsdHitLoader::loadHits(StEvent* source,
 			       Filter<StiTrack> * trackFilter, 
 			       Filter<StiHit> * hitFilter)
 {
-  _messenger <<"StiSsdHitLoader::loadHits() - Started"<<endl;
+  cout <<"StiSsdHitLoader::loadHits() - Started"<<endl;
   if (!source)
     throw runtime_error("StiSsdHitLoader::loadHits() - FATAL - source==0 ");
   StSsdHitCollection* ssdhits = source->ssdHitCollection();
@@ -56,9 +56,9 @@ void StiSsdHitLoader::loadHits(StEvent* source,
 
       for (unsigned int wafer = 0; wafer< ladderhits->numberOfWafers(); ++wafer) 
 	{
-	  _messenger <<"Ladder "<<ladder<<"\twafer "<<wafer<<endl;
+	  cout <<"Ladder "<<ladder<<"\twafer "<<wafer<<endl;
 	  StSsdWaferHitCollection* waferhits = ladderhits->wafer(wafer);
-	  _messenger <<" StSsdWaferHitCollection retrieved" << endl;
+	  cout <<" StSsdWaferHitCollection retrieved" << endl;
 	  if (!waferhits) break;
 	  const StSPtrVecSsdHit& hits = waferhits->hits(); 
 	  const_StSsdHitIterator it;
@@ -68,14 +68,14 @@ void StiSsdHitLoader::loadHits(StEvent* source,
 	    {
 	      if (!*it) 
 		{
-		  _messenger <<"StiSsdHitLoader::loadHits() - WARNING - *it==0"<<endl;
+		  cout <<"StiSsdHitLoader::loadHits() - WARNING - *it==0"<<endl;
 		  break;
 		}
 
 	      hit = static_cast<StSsdHit*>(*it);
 	      if (!hit) 
 		{	  
-		  _messenger <<"StiSsdHitLoader::loadHits() - WARNING - hit==0"<<endl;
+		  cout <<"StiSsdHitLoader::loadHits() - WARNING - hit==0"<<endl;
 		  break;
 		}
 	      int layer = 1;
@@ -131,8 +131,8 @@ void StiSsdHitLoader::loadHits(StEvent* source,
 	    }
 	}
     }
-  _messenger <<"StiSsdHitLoader::loadHits() - INFO - Done"<<endl;
-  cout<< " Number of SSD Hits = " <<compt<<endl; 
+  cout <<"StiSsdHitLoader::loadHits() - INFO - Done"<<endl;
+  cout << " Number of SSD Hits = " <<compt<<endl; 
  
 }
 	
