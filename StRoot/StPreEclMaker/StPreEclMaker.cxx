@@ -1,8 +1,8 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.15 2001/07/13 23:41:14 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.16 2001/07/13 23:47:07 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
-// Revision 1.15  2001/07/13 23:41:14  suaide
+// Revision 1.16  2001/07/13 23:47:07  suaide
 // small modification
 //
 // Revision 1.14  2001/05/02 15:28:19  suaide
@@ -259,21 +259,24 @@ Int_t StPreEclMaker::Make()
     cout <<"***** Doing clustering on detector "<<detname[i].Data()<<"\n";
     StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
     StEmcDetector* mDet=ecmpreecl->detector(id); // getting detector pointer
-    StEmcPreClusterCollection* cc=new StEmcPreClusterCollection(detname[i].Data(),mDet);
-    if(Debug()>=2) AddData(cc);  // 17-apr-2001 by PAI
-    if(cc->IsOk())
+    if(mDet)
     {
-      cc->setSizeMax(Int_t(parTable[i].sizeMax));
-      cc->setEnergySeed(Float_t(parTable[i].energySeed));
-      cc->setEnergyAdd(Float_t(parTable[i].energyAdd));
-      cc->setEnergyThresholdAll(Float_t(parTable[i].energyThreshold));
-      cc->setCheckClusters(kCheckClustersOkConf[i]);
+      StEmcPreClusterCollection* cc=new StEmcPreClusterCollection(detname[i].Data(),mDet);
+      if(Debug()>=2) AddData(cc);  // 17-apr-2001 by PAI
+      if(cc->IsOk())
+      {
+        cc->setSizeMax(Int_t(parTable[i].sizeMax));
+        cc->setEnergySeed(Float_t(parTable[i].energySeed));
+        cc->setEnergyAdd(Float_t(parTable[i].energyAdd));
+        cc->setEnergyThresholdAll(Float_t(parTable[i].energyThreshold));
+        cc->setCheckClusters(kCheckClustersOkConf[i]);
 //      cc->printConf();
-  	  if(cc->findClusters()!= kStOK) cout<<"***** ERR: StEmcClusterCollection: No hits\n";
-      MakeHistograms(i,cc); // Fill QA histgrams
-      fillStEvent(i,cc);
-    }      
-    if(Debug()<2) delete cc;  
+  	    if(cc->findClusters()!= kStOK) cout<<"***** ERR: StEmcClusterCollection: No hits\n";
+        MakeHistograms(i,cc); // Fill QA histgrams
+        fillStEvent(i,cc);
+      }      
+      if(Debug()<2) delete cc;
+    }  
   }
   
   AddData(new St_ObjectSet("PreEclEmcCollection",ecmpreecl));  // for what ??
@@ -449,7 +452,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.15 2001/07/13 23:41:14 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.16 2001/07/13 23:47:07 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
