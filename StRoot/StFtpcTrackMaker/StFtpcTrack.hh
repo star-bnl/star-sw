@@ -1,5 +1,10 @@
-// $Id: StFtpcTrack.hh,v 1.20 2004/02/12 19:37:10 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.21 2004/08/05 23:46:30 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.21  2004/08/05 23:46:30  oldi
+// The number of points and number of possible points is set by giving the
+// appropriate detectorId.
+// A new (inline) function was added to StFtpcTrack, which returns the detectorId.
+//
 // Revision 1.20  2004/02/12 19:37:10  oldi
 // *** empty log message ***
 //
@@ -121,6 +126,7 @@
 
 #include "StPhysicalHelix.hh"
 #include "StThreeVector.hh"
+#include "StDetectorId.h"
 
 #include "MIntArray.h"
 #include "StFtpcPoint.hh"
@@ -234,6 +240,7 @@ public:
   Double_t    GetRapidity() const;
   Int_t       GetHemisphere() const;
   Int_t       GetSector() const;
+  StDetectorId GetDetectorId() const { return (GetHemisphere() == 1.) ? kFtpcWestId : kFtpcEastId; }
 
   // Note that the counting for the final track is reversed:
   // The first point is the one closest to the interaction point.
