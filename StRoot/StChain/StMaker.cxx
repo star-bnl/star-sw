@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.18 1999/02/27 19:09:40 fine Exp $
+// $Id: StMaker.cxx,v 1.19 1999/03/01 19:24:47 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.19  1999/03/01 19:24:47  fine
+// StMaker::Clear() wasted statistic has been added
+//
 // Revision 1.18  1999/02/27 19:09:40  fine
 // St_Maker::MakeDoc() name of the directory has been adjusted from base to St_base
 //
@@ -41,6 +44,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
+#include <iomanip.h>
 #include "TSystem.h"
 #include "TClass.h"
 #include "TROOT.h"
@@ -54,6 +58,7 @@
 
 #include "StMaker.h"
 #include "StChain.h"
+#include "St_Table.h"
 
 static StMaker *thisMakers[100];
 static Int_t     thisMakerIndx=0;
@@ -133,8 +138,59 @@ void StMaker::Browse(TBrowser *b)
 }
 
 //_____________________________________________________________________________
-void StMaker::Clear(Option_t *option)
+void StMaker::Clear(Option_t *opt)
 {
+ // print some statistics
+ const Float_t percent = 15.0;
+ if (m_DataSet) {
+   St_DataSetIter nextSet(m_DataSet,0);
+   St_DataSet *set = 0;
+   Int_t nTotalAlloc = 0;
+   Int_t nTotalUsed  = 0;
+   Int_t isPrinted   = kFALSE;
+   while (set =  (St_DataSet *)nextSet()) {
+     if (!set->InheritsFrom("St_Table")) continue;
+     St_Table *tab = (St_Table *)set;
+     Int_t nAlloc  =  tab->GetTableSize();
+     Int_t nUsed   =  tab->GetNRows();
+     Int_t nSize   =  tab->GetRowSize();
+     nTotalAlloc  += nAlloc*nSize;
+     nTotalUsed   += nUsed*nSize;
+     Float_t wastePercent = 0;
+     if (nAlloc > 0) wastePercent = 100*(1.0-Float_t(nUsed)/Float_t(nAlloc));
+     if ( wastePercent > percent) {
+        if (!isPrinted) {
+            isPrinted = kTRUE;
+            const Char_t *n = GetName();
+//            printf(" --------  Statistics of tables \"wasted\" more then %d %% of the allocated by maker < %s >------------\n"
+//            ,percent,n);
+            cout << " --------  Statistics of tables \"wasted\" > " 
+                 <<  percent << "% of the allocated by maker < " << n << " > ------------"
+                 << endl;
+        }
+//          printf("Table: %-10s: Allocated = %6d rows : Used = %6d rows : Wasted: %6.1 %% space\n"
+//                                                    ,tab->GetName(),nAlloc,nUsed,wastePercent);     
+        cout << "Table: "<< setw(25) << tab->GetName()
+                                    << ": Allocated = "  << setw(6) << nAlloc 
+                                    << " rows : Used = " << setw(6) << nUsed << " rows : Wasted: " 
+                                    << wastePercent << "% space"
+                                    << endl;
+
+     }
+   }
+   if (nTotalAlloc > 0 && isPrinted) {
+      Float_t totalWastePercent = 100*(1-Float_t(nTotalUsed)/Float_t(nTotalAlloc));
+//         printf("Maker: %-10s: Allocated = %8d bytes : Used = %8d bytes : Wasted: %5.1 %% space\n"
+//                ,GetName(),nTotalAlloc,nTotalUsed,totalWastePercent);
+      if ( totalWastePercent  >  percent )
+        cout << "Maker: "      << setw(10) << GetName()   << " : " 
+            << "Allocated = " << setw(8)  << nTotalAlloc << " bytes : " 
+            << "Used = "      << setw(8)  << nTotalUsed  << " bytes : " 
+            << "Wasted: " << totalWastePercent << "% of the space"
+            << endl
+            << " -----------------------" << endl << endl;
+   }     
+ }
  SafeDelete(m_DataSet);
 }
 
@@ -315,9 +371,9 @@ TTree *StMaker::MakeTree(const char* name, const char*title)
    TTree *tree = Tree();
   // Fill the maker's owned tree if any
    if (!tree) {
-     TString name = GetName();
-     name += "_Tree";
-     tree = new TTree(name.Data(),GetTitle());
+     TString treeName = GetName();
+     treeName += "_Tree";
+     tree = new TTree(treeName.Data(),GetTitle());
 //     thisMakers[thisMakerIndx]=this;     
 //     tree->Branch(m_DataSet->GetName(),m_DataSet->IsA()->GetName(),&m_DataSet,0);
 //     name.ReplaceAll("Tree","Branch");
