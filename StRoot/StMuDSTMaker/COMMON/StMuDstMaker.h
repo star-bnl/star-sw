@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.25 2003/10/30 20:08:13 perev Exp $
+ * $Id: StMuDstMaker.h,v 1.26 2003/11/09 01:02:59 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -126,7 +126,7 @@ class StMuDstMaker : public StMaker {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.25 2003/10/30 20:08:13 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.26 2003/11/09 01:02:59 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -200,8 +200,8 @@ private:
 
   void setBranchAddresses(TChain*);
 
-  void clear(TClonesArray* t, int& counter,int del=1);
-  void clear();
+  void clear(TClonesArray* &t, int& counter,int del=1);
+  void clear(int del=0);
   
   void zeroArrays();
   void createArrays();
@@ -292,6 +292,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.26  2003/11/09 01:02:59  perev
+ * more sofisticated clear() to fix leaks
+ *
  * Revision 1.25  2003/10/30 20:08:13  perev
  * Check of quality added
  *
