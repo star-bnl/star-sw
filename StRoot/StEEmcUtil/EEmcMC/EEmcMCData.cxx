@@ -1,5 +1,8 @@
-// $Id: EEmcMCData.cxx,v 1.8 2003/09/11 19:41:08 zolnie Exp $
+// $Id: EEmcMCData.cxx,v 1.9 2003/09/17 22:05:36 zolnie Exp $
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.9  2003/09/17 22:05:36  zolnie
+// delete mumbo-jumbo
+//
 // Revision 1.8  2003/09/11 19:41:08  zolnie
 // updates for gcc3.2
 //
@@ -157,7 +160,7 @@ EEmcMCData::EEmcMCData( EEmcMCData &e )
 //-------------------------------------------------------------------------
 EEmcMCData::~EEmcMCData() {
   mSize  = 0;
-  delete [] mHit;
+  if(mHit) delete [] mHit;
 }
 
 

@@ -1,5 +1,8 @@
-// $Id: EEmcGeomSimple.cxx,v 1.16 2003/09/11 19:41:06 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.17 2003/09/17 22:05:33 zolnie Exp $
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.17  2003/09/17 22:05:33  zolnie
+// delete mumbo-jumbo
+//
 // Revision 1.16  2003/09/11 19:41:06  zolnie
 // updates for gcc3.2
 //
@@ -104,7 +107,7 @@ EEmcGeomSimple::useDefaultGeometry()
   mNumSSec = kEEmcNumSubSectors;
   mNumEta  = kEEmcNumEtas;
 
-  if(mEtaBin) delete mEtaBin;
+  if(mEtaBin) delete [] mEtaBin;
   mEtaBin = new Float_t[mNumEta+1];
   for(UInt_t i=0;i<=mNumEta;i++) mEtaBin[i] = defaultEtaBin[i];
 
