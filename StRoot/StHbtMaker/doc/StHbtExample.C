@@ -11,25 +11,27 @@ class MinvCorrFctn;
 MinvCorrFctn* MinvCF;
 
 void StHbtExample(Int_t nevents=1,
-		  const char *MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.dst.root")
+		  //    const char *MainFile="/disk00000/star/test/dev/tfs_Solaris/year_2a/psc0210_01_40evts.dst.root")
+		  const char *MainFile="/disk00000/star/test/dev/tfs_Solaris/Mon/year_2a/psc0208_01_40evts.dst.root")
 {
 
     // Dynamically link needed shared libs
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
+    gSystem->Load("StUtilities");  // new addition 22jul99
     gSystem->Load("StMagF");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
-    gSystem->Load("StEventReaderMaker");
-    //gSystem->Load("StEventMaker");
+    //    gSystem->Load("StEventReaderMaker");
+    gSystem->Load("StEventMaker");
     gSystem->Load("StHbtMaker");
 
     cout << "Dynamic loading done" << endl;
 
     chain = new StChain("StChain"); 
-    chain->SetDebug();
+    //    chain->SetDebug();
    
 
     // Now we add Makers to the chain...
@@ -43,9 +45,10 @@ void StHbtExample(Int_t nevents=1,
     ioMaker->SetBranch("dstBranch",0,"r"); //activate EventBranch
 
 
-    StEventReaderMaker* eventMaker = new StEventReaderMaker("events","title");
+    StEventMaker* eventMaker = new StEventMaker("events","title");
 
     cout << "Just instantiated StEventMaker... lets go StHbtMaker!" << endl;
+
 
     StHbtMaker* hbtMaker = new StHbtMaker("HBT","title");
     cout << "StHbtMaker instantiated"<<endl;
@@ -155,6 +158,7 @@ void StHbtExample(Int_t nevents=1,
 
 
 
+
     /* ------------------ end of setting up hbt stuff ------------------ */
 
 
@@ -163,14 +167,19 @@ void StHbtExample(Int_t nevents=1,
   chain->Init(); // This should call the Init() method in ALL makers
   chain->PrintInfo();
 
-  for (Int_t iev=0;iev<nevents; iev++) {
-    cout << "StHbtExample -- Working on eventNumber " << iev << endl;
+  for (Int_t iev=1;iev<=nevents; iev++) {
+    cout << "StHbtExample -- Working on eventNumber " << iev << " of " << nevents << endl;
     chain->Clear();
     int iret = chain->Make(iev); // This should call the Make() method in ALL makers
-    if (iret) break;
-    
-    
+    if (iret) {
+      cout << "StHbtExample.C -- chain returned nonzero value " << iret 
+	   << " on event " << iev << endl;
+      break;
+    }
     
   } // Event Loop
+
+  cout << "StHbtExample -- Done with event loop" << endl;
+
   chain->Finish(); // This should call the Finish() method in ALL makers
 }
