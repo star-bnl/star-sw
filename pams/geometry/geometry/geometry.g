@@ -1,5 +1,14 @@
-* $Id: geometry.g,v 1.75 2003/11/20 02:58:10 potekhin Exp $
+* $Id: geometry.g,v 1.76 2003/12/03 19:53:04 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.76  2003/12/03 19:53:04  potekhin
+* a) Corrected a small but annoying bug in
+* propagating the geo tag to reco:
+* one of the characters was copied twice
+* because of the indexing error
+*
+* b) Added the "shift" angle for the second half
+* barrel in Y2004
+*
 * Revision 1.75  2003/11/20 02:58:10  potekhin
 * Changed the correction number scheme, such that it
 * allows for a new layout of the SVT to be implemented --
@@ -664,7 +673,7 @@ If LL>1
                      btofconfig=5;
                   "calb" 
                      ems=on
-                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+                     nmod={60,30}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
                   "ecal"
                      ecal_config=1   " one ecal patch, west "
                      ecal_fill=3     " all sectors filled "
@@ -744,7 +753,7 @@ If LL>1
 
    Fill GDAT                     ! GEANT run data
       mfscale=field/5.0          ! magnetic field scale (nominal)
-      gtag={geom(1:4),geom(4:8)} ! geometry tag 
+      gtag={geom(1:4),geom(5:8)} ! geometry tag 
    EndFill
 
 * -------------------- setup selected configuration ------------------------
