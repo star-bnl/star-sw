@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TowerSanityMaker.cxx,v 1.6 2003/10/01 16:39:29 thenry Exp $
+ * $Id: TowerSanityMaker.cxx,v 1.7 2003/11/07 17:38:10 thenry Exp $
  * 
  * Author: Thomas Henry August 2003
  ***************************************************************************
@@ -133,7 +133,7 @@ bool TowerSanityMaker::isGood(unsigned int runNumber, long index)
   geom->getBin(static_cast<const Int_t>(index), module, eta, s);
   if(badModules.count(module) > 0) 
     {
-      cout << "Bad module #: " << module << endl;
+      //cout << "Bad module #: " << module << endl;
       return false;
     }
   return true;

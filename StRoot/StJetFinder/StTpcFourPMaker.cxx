@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcFourPMaker.cxx,v 1.9 2003/09/24 20:54:08 thenry Exp $
+ * $Id: StTpcFourPMaker.cxx,v 1.10 2003/11/07 17:38:09 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -53,6 +53,9 @@ Int_t StTpcFourPMaker::Make() {
     if(t->flag()<=0) continue;
     if(t->eta() < GetEtaLow()) continue;
     if(t->eta() > GetEtaHigh()) continue;
+    if(static_cast<double>(t->nHits())
+       /static_cast<double>(t->nHitsPoss()) < .51)
+      continue;
     StThreeVectorF mom = t->momentum();
     float mommag2 = mom.mag2();
     float ee = ::sqrt(me*me + mommag2);

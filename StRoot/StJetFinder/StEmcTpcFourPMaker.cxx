@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.18 2003/10/01 16:39:29 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.19 2003/11/07 17:38:10 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -153,6 +153,9 @@ Int_t StEmcTpcFourPMaker::Make() {
     double pt = track->pt();
     double R = pt/(0.3*mField);
     if(R < HSMDR) // just forget the track if it doesn't get to EMC radius. 
+      continue;
+    if(static_cast<double>(track->nHits())
+       /static_cast<double>(track->nHitsPoss()) < .51)
       continue;
     sumPtTracks += pt;
     binmap.insertTrack(track, i);
@@ -376,6 +379,7 @@ Int_t StEmcTpcFourPMaker::Make() {
   }
 
   numberPoints = 0;
+  double maxPointValue = 0;
   for(pointMap::iterator point = binmap.moddPoints.begin(); 
       point != binmap.moddPoints.end(); ++point)
     {
@@ -383,9 +387,20 @@ Int_t StEmcTpcFourPMaker::Make() {
       StCorrectedEmcPoint &cPoint = point_val.second;
       if(cPoint.P().e() > minPointThreshold)
 	numberPoints++;
+      if(cPoint.P().e() > maxPointValue)
+	maxPointValue = cPoint.P().e();
     }
   if(numberPoints > maxPoints)  // If there are too many points
     return kStOK; // don't try to analyze this event
+  const StTriggerId &trigger = uEvent->triggerIdCollection().nominal();
+  // If it is a hightower trigger event, but somehow the high tower
+  // is missing from the points, skip the event to avoid weird emc biases.
+  if(trigger.isTrigger(1101))
+    if(maxPointValue < 2.5)
+      return kStOK;
+  if(trigger.isTrigger(1102))
+    if(maxPointValue < 3.5)
+      return kStOK;
 
   // Add TPC tracks
   long index = 0;
