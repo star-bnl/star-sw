@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.15 2002/03/25 21:02:51 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.16 2002/03/26 23:10:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.16  2002/03/26 23:10:09  ullrich
+ * Changed instantiaton of BetheBloch.
+ *
  * Revision 2.15  2002/03/25 21:02:51  ullrich
  * Made BetheBloch a static global variable.
  *
@@ -77,8 +80,8 @@
 #include "StTrackGeometry.h"
 #include "BetheBloch.h"
 
-static BetheBloch theBetheBloch;
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.15 2002/03/25 21:02:51 ullrich Exp $";
+static BetheBloch *theBetheBloch = 0;
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.16 2002/03/26 23:10:09 ullrich Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -92,6 +95,11 @@ StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     mParticles.push_back(StKaonMinus::instance());
     mParticles.push_back(StKaonPlus::instance());
     mParticles.push_back(StProton::instance());
+}
+
+StTpcDedxPidAlgorithm::~StTpcDedxPidAlgorithm()
+{
+    delete theBetheBloch;
 }
 
 StParticleDefinition*
@@ -168,7 +176,8 @@ StTpcDedxPidAlgorithm::meanPidFunction(const StParticleDefinition* particle) con
     if (!mTrack) return 0;
 
     double momentum  = abs(mTrack->geometry()->momentum());
-    return theBetheBloch(momentum/particle->mass());
+    if (!theBetheBloch) theBetheBloch = new BetheBloch;
+    return (*theBetheBloch)(momentum/particle->mass());
 }
 
 double
