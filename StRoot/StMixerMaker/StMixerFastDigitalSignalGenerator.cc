@@ -12,8 +12,8 @@
  *
  **************************************************************************/
 #include <unistd.h>
-
 #include <utility>
+#include "StDaqLib/TPC/trans_table.hh"
 #include "StMixerFastDigitalSignalGenerator.hh"
 
 StTrsDigitalSignalGenerator* StMixerFastDigitalSignalGenerator::mInstance = 0; // static member
@@ -46,20 +46,21 @@ StMixerFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* s
     if(!mInstance) {
 	mInstance = new StMixerFastDigitalSignalGenerator(el, sec);
     }
-    // else  do nothing
+    // else do nothing
     
     return mInstance;
 }
 
 
-//unsigned char StMixerFastDigitalSignalGenerator::do10to8Translation(int index)const
-//{   
+unsigned char StMixerFastDigitalSignalGenerator::do10to8Translation(int index)const
+{   
    
-//     if(index<-1.0e-30)index=0;
-//     if(index>1023)index=1023;
+     if(index<-1.0e-30)index=0;
+     if(index>1023)index=1023;
          
-//     return log10to8_table[index];
-//}            
+     return log10to8_table[index];
+}
+            
 void StMixerFastDigitalSignalGenerator::digitizeSignal()
 {
    
@@ -118,8 +119,20 @@ void StMixerFastDigitalSignalGenerator::digitizeSignal()
 	        
 		int temporary_digitalAmplitude =
 		    static_cast<int>(mTimeSequenceIterator->amplitude());
-		unsigned char digitalAmplitude = temporary_digitalAmplitude;
-		//PR(temporary_digitalAmplitude);
+
+		// here we have a 10 bit number!
+		// Find in Mike Levine's array from:
+		// StDaqLib/TPC/trans_table.hh
+		// what the appropriate 8 bit number is!
+		
+		
+		// Conversion
+                // Must take into account the 8 <--> 10 bit conversion
+		// TRS calculates on a linear scale and then must
+		// convert to 8 bit data
+		
+		unsigned char digitalAmplitude = 
+                  do10to8Translation(temporary_digitalAmplitude); // 8 bit
 		
 		timeBinIndex = static_cast<int>(mTimeSequenceIterator->time());
 		// Normal processing without shift
