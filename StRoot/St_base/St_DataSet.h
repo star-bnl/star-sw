@@ -85,36 +85,46 @@ inline Int_t     St_DataSet::GetListSize() const { return fList ? fList->GetSize
  
 class St_DataSetIter : public TObject{
 private:
-   TIter      *fNext;            // "standard" ROOT iterator for containers
-   St_DataSet *fRootDataSet;     // Pointer to the ROOT DataSet
-   St_DataSet *fWorkingDataSet;  // Pointer to the working DataSet
+   TIter           *fNext;            // "standard" ROOT iterator for containers
+//   TList          *fNextSet;        // the list of the TList iterators to bypass the whole dataset
+   TIter           *fNextSet[100];    // the list of the TList iterators to bypass the whole dataset
+   Int_t            fDepth;           // the current depth of the passing
+   Int_t            fMaxDepth;        // the max depth of the passing (=1 by default)
+   
+   const St_DataSet *fDataSet;        // Pointer to the last selected St_DataSet
+   St_DataSet       *fRootDataSet;    // Pointer to the root St_DataSet
+   St_DataSet       *fWorkingDataSet; // Pointer to the working St_DataSet
  
 public:
-  St_DataSetIter(St_DataSet *l=0, Bool_t dir = kIterForward);
-  virtual         ~St_DataSetIter() {if (fNext) delete fNext; fNext = 0;}
+  St_DataSetIter(St_DataSet *l=0, Int_t depth=1, Bool_t dir=kIterForward);
+  St_DataSetIter(St_DataSet *l, Bool_t dir);
+  virtual         ~St_DataSetIter();
  
   virtual St_DataSet    *Add(St_DataSet *set){return Add(set,(St_DataSet *)0);}
   virtual St_DataSet    *Add(St_DataSet *set, const Char_t *path);
   virtual St_DataSet    *Add(St_DataSet *set, St_DataSet *dataset);
  
   virtual St_DataSet    *Cd(const Char_t *dirname);
-  virtual St_DataSet    *operator()() { return  (St_DataSet *)(fNext?fNext->Next():0);}
+  virtual St_DataSet    *operator()() {return  Next();}
   virtual St_DataSet    *operator()(const Char_t *path) { return Next(path); }
+  virtual Int_t          GetDepth() const {return fDepth;}
   virtual St_DataSet    *Dir(Char_t *dirname);
   virtual St_DataSet    *Ls(const Char_t *dirname="",Option_t *opt="");
   virtual St_DataSet    *Ls(const Char_t *dirname,Int_t depth);
   virtual St_DataSet    *ls(const Char_t *dirname="",Option_t *opt=""){return Ls(dirname,opt);}
   virtual St_DataSet    *ls(const Char_t *dirname,Int_t depth){return Ls(dirname,depth);}
   virtual St_DataSet    *Mkdir(const Char_t *dirname);
-  virtual St_DataSet    *Md(Char_t *dirname){return Mkdir(dirname);}
-  virtual St_DataSet    *Pwd(){return fWorkingDataSet;}
+  virtual St_DataSet    *Md(const Char_t *dirname){return Mkdir(dirname);}
+  virtual TString        Path(const Char_t *path) {St_DataSet *set = Next(path); return set ? TString (""):set->Path();}
+  virtual TString        Path() {return fWorkingDataSet ? TString ("") : fWorkingDataSet->Path();}
+  virtual St_DataSet    *Pwd() const {return fWorkingDataSet;}
   virtual Int_t          Rmdir(St_DataSet *dataset,Option_t *option="");
-  virtual Int_t          Rmdir(Char_t *dirname,Option_t *option=""){return Rmdir(Next(dirname),option);}
-  virtual Int_t          Rd(Char_t *dirname,Option_t *option=""){return Rmdir(Next(dirname),option);}
-  virtual St_DataSet    *Next(){ return (St_DataSet *) (fNext ? fNext->Next():0);}
+  virtual Int_t          Rmdir(const Char_t *dirname,Option_t *option=""){return Rmdir(Next(dirname),option);}
+  virtual Int_t          Rd(const Char_t *dirname,Option_t *option=""){return Rmdir(Next(dirname),option);}
+  virtual St_DataSet    *Next();
   virtual St_DataSet    *Next(const Char_t *path, St_DataSet *rootset=0,Bool_t mkdir=kFALSE);
   const Option_t *GetOption() const { return fNext ? fNext->GetOption():0; }
-  virtual void           Reset(St_DataSet *l=0);
+  virtual void           Reset(St_DataSet *l=0,Int_t depth=0);
   ClassDef(St_DataSetIter,0)
 };
  

@@ -34,10 +34,40 @@ ClassImp(St_DataSetIter)
  
 //______________________________________________________________________________
  St_DataSetIter::St_DataSetIter(St_DataSet *l, Bool_t dir)
- : fRootDataSet(l), fWorkingDataSet(l),
-   fNext(l ? new TIter(l->fList,dir):0)
+ : fRootDataSet(l), fWorkingDataSet(l),fDepth(1),fMaxDepth(1)
+  ,fDataSet(0)
+  ,fNext(l ? new TIter(l->fList,dir):0)
 { }
  
+//______________________________________________________________________________
+ St_DataSetIter::St_DataSetIter(St_DataSet *l, Int_t depth, Bool_t dir)
+ : fRootDataSet(l), fWorkingDataSet(l), fMaxDepth(depth),fDepth(1)
+  ,fDataSet(0)
+  ,fNext(l ? new TIter(l->fList,dir):0)
+{ 
+  // Create a DataSet iterator to pass all nodes of the 
+  //     "depth"  levels
+  //  of  St_DataSet *l  
+
+  if (fMaxDepth != 1) {
+     fNextSet[fDepth-1]= fNext;
+     if (fMaxDepth > 100) fMaxDepth = 100;
+  }
+}
+
+//______________________________________________________________________________
+St_DataSetIter::~St_DataSetIter()
+{
+  if (fMaxDepth != 1) {
+   for (int i = fDepth-1;i>=0;i--) {
+     TIter *s = fNextSet[i];
+     if (s) delete s;
+   }
+  }
+  fDepth = 1;
+
+  SafeDelete(fNext);
+}
 //______________________________________________________________________________
 St_DataSet *St_DataSetIter::Add(St_DataSet *set, St_DataSet *dataset)
 {
@@ -123,9 +153,9 @@ St_DataSet *St_DataSetIter::Dir(Char_t *dirname)
 {
 //
 // Print the names of the St_DataSet objects for the datatset named with "dirname"
-// apart of TDatSet::Ls()  this method prints one level only
+// apart of St_DataSet::Ls()  this method prints one level only
 //
-  St_DataSet *set = fWorkingDataSet;
+  St_DataSet *set = (St_DataSet *)fWorkingDataSet;
   if (dirname) set = Next(dirname);
   if (set) set->ls();
   return set;
@@ -174,6 +204,9 @@ St_DataSet *St_DataSetIter::Mkdir(const Char_t *dirname){
  
 //______________________________________________________________________________
 Int_t St_DataSetIter::Rmdir(St_DataSet *dataset,Option_t *option){
+//
+//  Remove the St_DataSet *dataset from the current dataset
+//
   St_DataSet *set = dataset;
   if (set) {
     delete set;
@@ -183,24 +216,52 @@ Int_t St_DataSetIter::Rmdir(St_DataSet *dataset,Option_t *option){
   return (Int_t)dataset;
 }
  
-#if 0
 //______________________________________________________________________________
 St_DataSet *St_DataSetIter::Next()
 {
-  fDataSetIter  = 0
-  fListIter     = 0
-  St_DataSet *dataset = 0;
-  if (fDataSetIter) {
-    dataset = fDataSetIter->Next();
-    if (!dataset) SafeDelete(fDataSet);    
-  }
+ //
+ // returns the pointer the "next" St_DataSet object
+ //         = 0 if all objects have been returned.
+ //
+
+  if (fMaxDepth==1) fDataSet = fNext ? (St_DataSet *)fNext->Next():0;
   else {
-    dataset = fListIter->Next();
-    if (dataset && fDepth) fDataSetIter = new St_DataSetIter(dataset);
+
+    // Check the whether the next level does exist 
+    if (fDataSet && (fDepth < fMaxDepth || fMaxDepth ==0) ) 
+    {
+      // create the next level iterator, go deeper
+      TList *list = fDataSet->GetListOfDataset();
+      // Look for the next level
+      if (list && list->GetSize() ) {
+         fDepth++;
+         if (fDepth >= 100) 
+            Error("Next()"
+                  ," to many nested levels of your St_DataSet has been detected");
+         fNextSet[fDepth-1] = new TIter(list);
+      }
+    }
+
+    // Pick the next object of the current level
+    TIter *next = fNextSet[fDepth-1];
+    if (next) {
+      fDataSet = (St_DataSet *)next->Next();
+
+      // Go upstair if the current one has been escaped
+      if (!fDataSet) {
+        // go backwards direction
+        while (!fDataSet && fDepth) {
+          fDepth--;
+          delete next;
+          next = fNextSet[fDepth-1];
+          if (next) 
+             fDataSet = (St_DataSet *)next->Next();
+        }
+      }
+    }
   }
-  return dataset;
+  return (St_DataSet *)fDataSet;
 }
-#endif
 
 //______________________________________________________________________________
 St_DataSet *St_DataSetIter::Next(const Char_t *path, St_DataSet *rootset,
@@ -219,6 +280,8 @@ St_DataSet *St_DataSetIter::Next(const Char_t *path, St_DataSet *rootset,
  // "absolute path": the search is done against of fRootDataSet    data mem    //
  // "empty path"   : no search is done just next St_DataSet is returned if any //
  //                                                                            //
+ //  Remark: This version can not treat any "special name" like "..", ".", etc //
+ //  ------                                                                    //
  ////////////////////////////////////////////////////////////////////////////////
  
    if (!path || !strlen(path)) return rootset;
@@ -309,12 +372,28 @@ Bool_t St_DataSet::IsThisDir(const Char_t *dirname) const
 }
  
 //______________________________________________________________________________
-void St_DataSetIter::Reset(St_DataSet *l)
+void St_DataSetIter::Reset(St_DataSet *l, int depth)
 {
+  //
+  // St_DataSet *l != 0 means the new start pointer
+  //    depth      != 0 means the new value for the depth 
+  //                    otherwise the privious one is used;
+  //
+  fDataSet = 0;
+  if (fMaxDepth != 1) {
+  // clean all interators
+    for (int i = fDepth-1;i>=0;i--) {
+      TIter *s = fNextSet[i];
+      if (s) delete s;
+    }
+    fNext = 0; // this iterator has been deleted in the loop above
+  }
+  fDepth = 1;
+
   if (l) {
     fRootDataSet    = l;
     fWorkingDataSet = l;
-    if (fNext) delete fNext; fNext = 0;
+    SafeDelete(fNext);
     if (fRootDataSet->fList)
              fNext = new TIter(fRootDataSet->fList);
   }
@@ -324,6 +403,8 @@ void St_DataSetIter::Reset(St_DataSet *l)
     else if (fRootDataSet->fList)
         fNext = new TIter(fRootDataSet->fList);
   }
+  // set the new value of the maximum depth to bypass
+  if (depth) fMaxDepth = depth;
 }
 //______________________________________________________________________________
 //______________________________________________________________________________
