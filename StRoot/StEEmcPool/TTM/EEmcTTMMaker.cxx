@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.14 2004/04/13 16:34:17 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.15 2004/04/13 17:26:09 zolnie Exp $
 // doxygen info here
 /** 
     \mainpage TTM - an endcap Tower to Track Match maker
@@ -229,6 +229,7 @@ EEmcTTMMaker::Init(){
   (void)mTree->Branch("eta"     , mMatch->etabin,"eta[numtracks]/I");
   (void)mTree->Branch("adc"     , mMatch->adc   ,"adc[numtracks]/F");
   (void)mTree->Branch("edep"    , mMatch->edep  ,"edep[numtracks]/F");
+  (void)mTree->Branch("track"   , mMatch->ntrack,"track[numtracks]/I");
 
   (void)mTree->Branch("pt"      , mMatch->pt    ,"pt[numtracks]/F");
   (void)mTree->Branch("ptot"    , mMatch->ptot  ,"ptot[numtracks]/F");
@@ -262,9 +263,10 @@ EEmcTTMMaker::Init(){
   }
 
   (void)mTree->Branch("ntrig"  ,&(mMatch->numtrig),"numtrig/I");
-  (void)mTree->Branch("trigid"  , mMatch->trigid  ,"trigid[numtrig]/I");
+  (void)mTree->Branch("trigid" , mMatch->trigid   ,"trigid[numtrig]/I");
   (void)mTree->Branch("daqbits",&(mMatch->daqbits),"daqbits/i");
-
+  (void)mTree->Branch("ctbsum" ,&(mMatch->ctbsum ),"ctbsum/I");
+ 
 
   mFile->mkdir("histos");
   mFile->cd("histos");
@@ -411,7 +413,9 @@ EEmcTTMMaker::Make(){
     //cerr <<  sec+1 << "|" << char(sub+'A') << "|" << eta+1 << "\t=>\t" << adcped << endl;
     EEmcTower *eemcHit = new EEmcTower(sec,sub,eta,adcped);
     mTowerList->Add(eemcHit);
-    
+
+    int nPrevTracks  = ntrack; // [FIXME]
+    int nMatchThisHit= 0;      // [FIXME]
     TIter nextTrack(mTrackList);
     while( (track=(StMuTrack *)nextTrack()) != NULL && ntrack<kNTupleTTM_MaxTracks ){
       TVector3 tc    = mGeom->getTowerCenter(sec,sub,eta);  // tower center
@@ -466,6 +470,7 @@ EEmcTTMMaker::Make(){
       mMatch->etabin[ntrack]=eta;
       mMatch->adc   [ntrack]=adcped;
       mMatch->edep  [ntrack]=edep;
+      mMatch->ntrack[ntrack]=0;
   
       mMatch->nhits[ntrack]  = track->nHitsFit();
       mMatch->pt[ntrack]     = track->pt();
@@ -478,9 +483,14 @@ EEmcTTMMaker::Make(){
       const StTriggerId &trg =  evtrig.nominal();
       mMatch->numtrig = trg.triggerIds().size();
       for(int k=0; k<mMatch->numtrig; k++) mMatch->trigid[k]=trg.triggerIds()[k];
+      mMatch->ctbsum  = (Int_t)muEvent->ctbMultiplicity();
+
       mMatchMap->Add(eemcHit,track);
       ntrack++;       
+      nMatchThisHit++;
     }
+    // [FIXME] a kluge to tag multiple tracks hitting the same tower
+    for(int k=nPrevTracks;k<ntrack;k++) mMatch->ntrack[k]=nMatchThisHit;
   }
 
 #if     DEBUG 
@@ -664,6 +674,9 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.15  2004/04/13 17:26:09  zolnie
+// more adaptation needed
+//
 // Revision 1.14  2004/04/13 16:34:17  zolnie
 // *** empty log message ***
 //

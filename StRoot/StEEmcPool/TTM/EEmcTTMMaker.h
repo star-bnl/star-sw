@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EEmcTTMMaker
 #define STAR_EEmcTTMMaker
-// $Id: EEmcTTMMaker.h,v 1.7 2004/01/26 21:51:54 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.8 2004/04/13 17:26:09 zolnie Exp $
 
 /*!
  *                                                                     
@@ -89,6 +89,7 @@ public:
     Int_t    etabin  [kNTupleTTM_MaxTracks]; /**<- tower# a.k.a eta bin */
     Float_t  adc     [kNTupleTTM_MaxTracks]; /**<- pedestal subtracted adc = adc - pedestal */
     Float_t  edep    [kNTupleTTM_MaxTracks]; /**<- energy deposited : (adc-pedestal)/gain */
+    Int_t    ntrack  [kNTupleTTM_MaxTracks]; /**<- number of tracks in an event that hit a tower */
     //
     Int_t    nhits   [kNTupleTTM_MaxTracks]; /**<- number of hits/track */
     Float_t  pt      [kNTupleTTM_MaxTracks]; /**<- track transverse momentum */
@@ -102,9 +103,10 @@ public:
     Float_t  dphi[kNTupleTTM_MaxZ][kNTupleTTM_MaxTracks]; /**<- distance in eta between track hit and the tower center */
     
     // for Trigger Info 
-    Int_t    numtrig;                        /**< - number of trigger present */
-    Int_t    trigid[kNTupleTTM_MaxTrigger];  /**< - a list of trigger id's    */
-    Int_t    daqbits;                        /**< - DAQ trigger bits          */
+    Int_t    numtrig;                        /**<- number of trigger present */
+    Int_t    trigid[kNTupleTTM_MaxTrigger];  /**<- a list of trigger id's    */
+    Int_t    daqbits;                        /**<- DAQ trigger bits          */
+    Int_t    ctbsum;                         /**<- CTB sum                   */
 
     /// zeroes the structure
     inline void Clear() { memset(this,0x00,sizeof(*this)); }
@@ -219,7 +221,7 @@ public:
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.7 2004/01/26 21:51:54 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.8 2004/04/13 17:26:09 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -236,6 +238,9 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  );
 
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.8  2004/04/13 17:26:09  zolnie
+// more adaptation needed
+//
 // Revision 1.7  2004/01/26 21:51:54  zolnie
 // shorter names
 //
