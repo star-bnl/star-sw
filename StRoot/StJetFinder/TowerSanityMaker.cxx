@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TowerSanityMaker.cxx,v 1.5 2003/09/24 20:54:08 thenry Exp $
+ * $Id: TowerSanityMaker.cxx,v 1.6 2003/10/01 16:39:29 thenry Exp $
  * 
  * Author: Thomas Henry August 2003
  ***************************************************************************
@@ -59,6 +59,7 @@ TowerSanityMaker::TowerSanityMaker(const char* name,
 
 Int_t TowerSanityMaker::Make()
 {
+  return kStOK;
   if(dbUse == toRead)
     return kStOK;
   StMuDst* uDst = muDstMkr->muDst();
@@ -85,6 +86,7 @@ Int_t TowerSanityMaker::Make()
 
 Int_t TowerSanityMaker::Init()
 {
+  return kStOK;
   if((dbUse == toRead) || (dbUse == toMerge))
     {
       ifstream is(dbName);
@@ -95,6 +97,7 @@ Int_t TowerSanityMaker::Init()
 
 Int_t TowerSanityMaker::Finish()
 {
+  return kStOK;
   if((dbUse == toWrite) || (dbUse == toMerge))
     {
       ofstream os(dbName, ofstream::out | ofstream::trunc);
@@ -133,6 +136,7 @@ bool TowerSanityMaker::isGood(unsigned int runNumber, long index)
       cout << "Bad module #: " << module << endl;
       return false;
     }
+  return true;
   if(runAverageEnergyPerTower(runNumber) > runThreshold)
     {
       cout << "runAverageEnergyPerTower(runNumber)=" <<

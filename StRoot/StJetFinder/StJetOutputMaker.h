@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.h,v 1.8 2003/09/24 20:54:08 thenry Exp $
+ * $Id: StJetOutputMaker.h,v 1.9 2003/10/01 16:39:29 thenry Exp $
  * $Log: StJetOutputMaker.h,v $
+ * Revision 1.9  2003/10/01 16:39:29  thenry
+ * Added new getter for StProjectedTracks to StEmcTpcFourPMaker, and used
+ * in StJetOutputMaker so that StTrackStruct now contains track px, py, pz
+ *
  * Revision 1.8  2003/09/24 20:54:08  thenry
  * Fixed ANSI compatibility problems.
  *
@@ -158,7 +162,8 @@ class EventStruct {
 class TrackStruct {
  public:
   TrackStruct() {};
-  TrackStruct(const TrackStruct &copy) : trackE(copy.trackE), 
+  TrackStruct(const TrackStruct &copy) : trackE(copy.trackE),
+    trackPx(copy.trackPx), trackPy(copy.trackPy), trackPz(copy.trackPz),
     trackPhi(copy.trackPhi), trackEta(copy.trackEta), 
     isTpcTrack(copy.isTpcTrack) {};
   void clear(void) {};  
@@ -166,6 +171,9 @@ class TrackStruct {
     {
       os << "TrackStruct:" << endl;
       os << "TrackE: " << trackE << endl;
+      os << "TrackPx: " << trackPx << endl;
+      os << "TrackPy: " << trackPy << endl;
+      os << "TrackPz: " << trackPz << endl;
       os << "TrackPhi: " << trackPhi << endl;
       os << "TrackEta: " << trackEta << endl;
       if(isTpcTrack) os << "Track is from TPC" << endl;
@@ -174,6 +182,9 @@ class TrackStruct {
     }
   
   double trackE;
+  double trackPx;
+  double trackPy;
+  double trackPz;
   double trackPhi;
   double trackEta;
   bool isTpcTrack;

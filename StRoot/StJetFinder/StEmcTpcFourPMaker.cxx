@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.17 2003/09/24 20:54:07 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.18 2003/10/01 16:39:29 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -316,8 +316,7 @@ Int_t StEmcTpcFourPMaker::Make() {
 		gain = emcgaintbl[0].Gain[hitId-1];
 	      if(gain < .1)  // gain shouldn't have a large or negative effect
 		gain = 1;
-	      energy *= gain;
-	      //cout << "Energy calibrated: " << energy << endl;
+	      //energy *= gain;
 	    }
 
 	  sumEMC += energy;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.cxx,v 1.6 2003/09/24 20:54:07 thenry Exp $
+ * $Id: StJetOutputMaker.cxx,v 1.7 2003/10/01 16:39:29 thenry Exp $
  * 
  * Author: Thomas Henry May 2003
  ***************************************************************************
@@ -149,6 +149,9 @@ Int_t StJetOutputMaker::doMake() {
 	  oJetEvent.jet.jet.numCharges = muDstJets->nCell(i);
 	  oJetEvent.jet.jet.charge = muDstJets->charge(i);
 	  double jet_energy = 0.0;
+	  double jet_px = 0.0;
+	  double jet_py = 0.0;
+	  double jet_pz = 0.0;
 	  for(vector<int>::iterator trackit = trackIndices.begin();
 	      trackit != trackIndices.end(); ++trackit)
 	    {
@@ -162,6 +165,12 @@ Int_t StJetOutputMaker::doMake() {
 		        moddPoints[&muPoint];
 		      oJetEvent.track.trackE = point.E();
 		      jet_energy += oJetEvent.track.trackE;
+		      oJetEvent.track.trackPx = point.P().x();
+		      jet_px += oJetEvent.track.trackPx;
+		      oJetEvent.track.trackPy = point.P().y();
+		      jet_py += oJetEvent.track.trackPy;
+		      oJetEvent.track.trackPz = point.P().z();
+		      jet_pz += oJetEvent.track.trackPz;
 		      oJetEvent.track.trackPhi = point.Phi();
 		      oJetEvent.track.trackEta = point.Eta();
 		      oJetEvent.track.isTpcTrack = false;
@@ -171,8 +180,25 @@ Int_t StJetOutputMaker::doMake() {
 		  continue;
 		}
 	      StMuTrack* muTrack = muDst->primaryTracks(*trackit);
-              oJetEvent.track.trackE = muTrack->p().mag();
+	      if(fourPMaker)
+		{
+		  StProjectedTrack &track = fourPMaker->getTrack(muTrack);
+		  oJetEvent.track.trackE = track.E();
+		  oJetEvent.track.trackPx = track.P().x();
+		  oJetEvent.track.trackPy = track.P().y();
+		  oJetEvent.track.trackPz = track.P().z();
+		}
+	      else
+		{
+		  oJetEvent.track.trackE = muTrack->p().mag();
+		  oJetEvent.track.trackPx = muTrack->p().x();
+		  oJetEvent.track.trackPy = muTrack->p().y();
+		  oJetEvent.track.trackPz = muTrack->p().z();
+		}
 	      jet_energy += oJetEvent.track.trackE;
+	      jet_px += oJetEvent.track.trackPx;
+	      jet_py += oJetEvent.track.trackPy;
+	      jet_pz += oJetEvent.track.trackPz;
 	      oJetEvent.track.trackPhi = muTrack->phi();
 	      oJetEvent.track.trackEta = muTrack->eta();
 	      oJetEvent.track.isTpcTrack = true;
@@ -180,6 +206,8 @@ Int_t StJetOutputMaker::doMake() {
 	    }
 	  cout << "Jet Energy from track sum: " 
 	       << jet_energy << endl;
+	  cout << "Jet Pt from track sum: " << 
+	    sqrt(jet_px*jet_px + jet_py*jet_py) << endl;
 	  oJetEvent.push_jet();
 	}
     }
