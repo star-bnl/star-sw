@@ -46,7 +46,7 @@ Float_t *z_q;
 #endif 
 //--------------------------------------------------------- 
  
-TGeant3 *geant = 0; 
+TGeant3 *TGeant3::fgGeant = 0; 
  
 ClassImp(TGeant3) 
  
@@ -59,6 +59,8 @@ TGeant3::TGeant3()
 TGeant3::TGeant3(const char *name, const char *title, Int_t nwgeant, Int_t nwpaw, Int_t iwtype) 
        :TNamed(name,title) 
 { 
+fgGeant = this;
+
 #ifndef Geant3Dummy
   //   gzebra(nwgeant); 
   //   hlimit(-nwpaw); 
@@ -690,7 +692,7 @@ Int_t TGeant3::Gsvolu(const char *name, const char *shape, Int_t nmed,
 Int_t TGeant3::Glvolu(const Int_t Nlev, Int_t *Lnam, Int_t *Lnum)
 { 
    Int_t Ierr = 0; 
-   glvolu(&Nlev, Lnam, Lnum, &Ierr);
+   glvolu((Int_t*)&Nlev, Lnam, Lnum, &Ierr);
    return Ierr; 
 } 
 //___________________________________________ 
