@@ -1,0 +1,40 @@
+* $Id: guphad.age,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Log: guphad.age,v $
+* Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
+* Revision 1.3  2003/10/17 11:31:29  nevski
+* protect hadronic packages from non-standard particle codes
+*
+* Revision 1.2  2003/10/13 16:08:32  nevski
+* protect against non-GEANT Ipart
+*
+* Revision 1.1  2001/02/27 10:14:53  nevski
+*  first working release
+*
+****************************************************************************
+                SUBROUTINE GUPHAD
+* Description:  initialase selected hadronic package                       *
+****************************************************************************
+#include "commons/typing.inc"
+#include "geant321/gcflag.inc"
+#include "geant321/gckine.inc"
+#include "geant321/gcphys.inc"
+      integer CsADDR,idevt0/-1/,address/0/
+*
+      If (Idevt0 != Idevt) then
+         Idevt0  = Idevt
+         address = CsADDR ('AGUPHAD')
+      endif
+*
+      if (Ipart<48) then
+         IF       IHADR<=3 {"geisha"       CALL GPGHEI  }
+         ELSE IF  IHADR==4 {"fluka"        CALL FLDIST  }
+         ELSE IF  IHADR==5 {"fluka+Mikap"  CALL GFMDIS  }
+         ELSE IF  IHADR==6 {"gcalor"       CALL CALSIG  }
+      endif
+*
+      if (address!=0) CALL CsJCAL (address,0, 0,0,0,0,0, 0,0,0,0,0)
+*
+      END
+
+
