@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.h,v 1.3 2000/01/25 17:34:45 laue Exp $
+ * $Id: MinvCorrFctn.h,v 1.4 2000/03/16 01:56:36 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.h,v $
+ * Revision 1.4  2000/03/16 01:56:36  laue
+ * Copy constructor added to some correlation functions
+ *
  * Revision 1.3  2000/01/25 17:34:45  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -35,6 +38,7 @@
 #define MinvCorrFctn_hh
 
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
+#include "StHbtMaker/Infrastructure/StHbtTagWriter.hh"
 #include "StHbtMaker/Base/StHbtCorrFctn.hh"
 #include "StHbtMaker/Cut/mikesEventCut.h"
 
@@ -59,6 +63,8 @@ private:
   StHbt1DHisto* mDenominator;
   StHbt1DHisto* mDifference;
 
+  StHbtTagWriter* mTagWriter;  //! <-- this is a singleton
+
 #ifdef __ROOT__
   ClassDef(MinvCorrFctn, 1)   
 #endif 
@@ -68,6 +74,11 @@ private:
 inline  StHbt1DHisto* MinvCorrFctn::Numerator(){return mNumerator;}
 inline  StHbt1DHisto* MinvCorrFctn::Denominator(){return mDenominator;}
 inline  StHbt1DHisto* MinvCorrFctn::Difference(){return mDifference;}
+inline MinvCorrFctn::MinvCorrFctn(const MinvCorrFctn& fctn) :StHbtCorrFctn() {
+  mNumerator = new StHbt1DHisto(*(fctn.mNumerator));
+  mDenominator= new StHbt1DHisto(*(fctn.mDenominator));
+  mDifference = new StHbt1DHisto(*(fctn.mDifference));
+}
 
 
 #endif

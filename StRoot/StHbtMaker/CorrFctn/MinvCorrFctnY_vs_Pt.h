@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctnY_vs_Pt.h,v 1.1 2000/02/28 14:39:31 laue Exp $
+ * $Id: MinvCorrFctnY_vs_Pt.h,v 1.2 2000/03/16 01:56:36 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctnY_vs_Pt.h,v $
+ * Revision 1.2  2000/03/16 01:56:36  laue
+ * Copy constructor added to some correlation functions
+ *
  * Revision 1.1  2000/02/28 14:39:31  laue
  * Correlation function to fill phasespace rapidity vs pt
  *
@@ -34,6 +37,7 @@ public:
   MinvCorrFctnY_vs_Pt(char* title, 
 		      const int& nbins1, const float& MinvLo1, const float& MinvHi1,
 		      const int& nbins2, const float& MinvLo2, const float& MinvHi2);
+  MinvCorrFctnY_vs_Pt(const MinvCorrFctnY_vs_Pt&);
   virtual ~MinvCorrFctnY_vs_Pt();
 
   virtual StHbtString Report();
@@ -60,6 +64,11 @@ private:
 inline  StHbt2DHisto* MinvCorrFctnY_vs_Pt::Numerator(){return mNumerator;}
 inline  StHbt2DHisto* MinvCorrFctnY_vs_Pt::Denominator(){return mDenominator;}
 inline  StHbt2DHisto* MinvCorrFctnY_vs_Pt::Difference(){return mDifference;}
+inline MinvCorrFctnY_vs_Pt::MinvCorrFctnY_vs_Pt(const MinvCorrFctnY_vs_Pt& fctn) :StHbtCorrFctn() {
+  mNumerator =  new StHbt2DHisto(*(fctn.mNumerator));
+  mDenominator= new StHbt2DHisto(*(fctn.mDenominator));
+  mDifference = new StHbt2DHisto(*(fctn.mDifference));
+}
 
 #endif
 
