@@ -1,4 +1,4 @@
-// $Id: bfc_tss.C,v 1.13 1999/03/04 01:57:34 fisyak Exp $
+// $Id: bfc_tss.C,v 1.14 1999/03/04 19:45:23 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -14,7 +14,9 @@ void Load(){
     gSystem->Load("libtls");
     gSystem->Load("St_params_Maker");
     gSystem->Load("St_calib_Maker");
-    gSystem->Load("St_g2r");
+    //    gSystem->Load("geometry");
+    gSystem->Load("StMagF");
+    gSystem->Load("St_g2r"); 
     gSystem->Load("St_geant_Maker");
     gSystem->Load("St_tpc");
     //    gSystem->Load("St_ftpc");
@@ -93,7 +95,7 @@ bfc_tss (const Int_t Nevents=1000000,
   St_tss_Maker         *tpc_raw = new St_tss_Maker("tpc_raw","event/raw_data/tpc");
   // Set parameters
   //  tpc_raw->adcxyzon();
-  //  St_ems_Maker         *emc_raw = new St_ems_Maker("emc_raw","event/raw_data/emc");
+  St_ems_Maker         *emc_raw = new St_ems_Maker("emc_raw","event/raw_data/emc");
   //  St_emc_Maker         *emc_hits = new St_emc_Maker("emc_hits","event/data/emc/hits");
   St_tcl_Maker         *tpc_hits = new St_tcl_Maker("tpc_hits","event/data/tpc/hits");
   //  St_srs_Maker         *svt_hits = new St_srs_Maker("svt_hits","event/data/svt/hits");
@@ -141,10 +143,9 @@ bfc_tss (const Int_t Nevents=1000000,
       St_DataSet *dstSet = chain.DataSet("dst");
       if (dstSet) {xdf_out->NextEventPut(dstSet);}
      }// xdf output
+    gSystem->Exec("ps ux");
     if (i != NoEvents) chain->Clear();
-    printf ("===========================================\n");
     printf ("=========================================== Done with Event no. %d\n",i);
-    printf ("===========================================\n");
     gObjectTable->Print();
   }
 
