@@ -216,6 +216,14 @@ void RunGui(int firstEvent = 0,
 	doProfile);
 } 
 
+void Run(int nEvents,
+	 int IuseSvt,
+	 int IactiveSvt,
+	 const char *ifile){    
+  Run(0,nEvents,IuseSvt,IactiveSvt,ifile);
+}
+
+
 void Run(int firstEvent,
 	 int nEvents,
 	 int IuseSvt,
