@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.2 2003/04/24 14:15:15 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.3 2003/04/25 22:52:28 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -37,8 +37,6 @@
 
 ClassImp(StEmcTpcFourPMaker)
   
-struct tms time_struct;
-
 StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name, StMuDstMaker* uDstMaker,
   long pBins, long thBins, double pRad, double thRad, double rsqr) 
   : StFourPMaker(name, uDstMaker), radiussqr(rsqr), binmap(pBins, thBins, pRad, thRad){
@@ -47,9 +45,6 @@ StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name, StMuDstMaker* uDstMaker
 
 Int_t StEmcTpcFourPMaker::Make() {
   cout <<" Start StEmcTpcFourPMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;   
-  clock_t start, end;
-  times(&time_struct);
-  start = time_struct.tms_stime;
   binmap.clearall();
 
   // Construct tracks out of (primary) tracks and EMC points. 
@@ -59,6 +54,7 @@ Int_t StEmcTpcFourPMaker::Make() {
   double mField = uEvent->magneticField()/10.0;
   cout << "mField: " << mField << endl;
   StThreeVectorF vertex = uEvent->primaryVertexPosition();
+  binmap.setVertex(vertex);
   double SMDR = 2.2625;
   double etaShift = atan2(vertex.z()/100.0, SMDR);
   cout << "zVertex: " << vertex.z()/100.0 << endl;
@@ -108,38 +104,32 @@ Int_t StEmcTpcFourPMaker::Make() {
 
   // Veto the guess of Tpc particle identification using the 
   // Point correlations
-  for(trackMap::iterator track = binmap.moddTracks.begin(); 
-      track != binmap.moddTracks.end(); ++track)
+  for(trackToPoints::iterator trackit = binmap.t2p.begin(); 
+      trackit != binmap.t2p.end(); ++trackit)
   {
-    trackMap::value_type &track_val = *track;
-    pointerMap::iterator beg = binmap.findbegin(track_val);
-    pointerMap::iterator ed = binmap.findend(track_val);
-    bool foundPoint = false;
-    for(pointerMap::iterator point = beg;
-        point != ed; ++point)
+    // If the energy of the point is close to the energy of the track,
+    // then it is most likely an electron:
+    StMuTrack* track= (*trackit).first;
+    StProjectedTrack &pTrack = binmap.moddTracks[track];
+    StMuEmcPoint* point = (*trackit).second;
+    double trackE = pTrack.E();
+    double pointE = binmap.moddPoints[point].E();
+    double ediff = fabs(trackE - pointE);
+    if(ediff < 0.2*pointE)
+      pTrack.probEIsOne();
+    if(trackE < 0.5*pointE)
+      pTrack.probEIsZero();
+    break;
+  }
+
+  // It can't be an electron if there is no point:
+  for(trackMap::iterator trackit = binmap.moddTracks.begin();
+      trackit != binmap.moddTracks.end(); ++trackit)
+  {
+    trackToPoints::iterator foundPoint = binmap.t2p.find((*trackit).first);
+    if(foundPoint == binmap.t2p.end())
     {
-      // In this version of the code, there will never be more than one
-      // point in this loop.
-      pointerMap::value_type &point_val = *point;
-      if(point_val.second.second != NULL) 
-      {
-        foundPoint = true;
-        // If the energy of the point is close to the energy of the track,
-        // then it is most likely an electron:
-        double trackE = track_val.second.E();
-        double pointE = binmap.correctedEmcPoint(point_val).E();
-        double ediff = fabs(trackE - pointE);
-        if(ediff < 0.2*pointE)
-          track_val.second.probEIsOne();
-        if(trackE < 0.5*pointE)
-          track_val.second.probEIsZero();
-        break;
-      }
-    }
-    // It can't be an electron if there is no point:
-    if(!foundPoint)
-    {
-      track_val.second.probEIsZero();
+      binmap.moddTracks[(*trackit).first].probEIsZero();
       continue;
     }
   }
@@ -157,25 +147,18 @@ Int_t StEmcTpcFourPMaker::Make() {
   }  
 
   // Now subtract the energy deposited by the tracks:
-  for(pointMap::iterator point = binmap.moddPoints.begin(); 
-      point != binmap.moddPoints.end(); ++point)
+  for(pointToTracks::iterator pointit = binmap.p2t.begin(); 
+      pointit != binmap.p2t.end(); ++pointit)
   {
-    pointMap::value_type &point_val = *point;
-    pointerMap::iterator beg = binmap.findbegin(point_val);
-    pointerMap::iterator ed = binmap.findend(point_val);
-    for(pointerMap::iterator track = beg;
-        track != ed; ++track)
-    {
-      // Make sure not to dereference the std point which has no track:
-      pointerMap::value_type &track_val = *track;
-      if(track_val.second.second == NULL) continue;
-      point_val.second.SubE(binmap.projectedTrack(track_val).depE());
-    }
+    StCorrectedEmcPoint &point = binmap.moddPoints[(*pointit).first];
+    StProjectedTrack &track = binmap.moddTracks[(*pointit).second];
+    point.SubE(track.depE());
   }  
 
   // Add neutral pion and eta tracks using the remaining energy in the 
   // reducedPointEnergies array - not coded
 
+  //start = clock();
   // Add photon tracks using the remainder of the energy in the
   // reducedPointEnergies array 
   for(pointMap::iterator point = binmap.moddPoints.begin(); 
@@ -187,11 +170,10 @@ Int_t StEmcTpcFourPMaker::Make() {
     newTrack.Init(NULL, cPoint.P(), index++);
     tracks.push_back(&newTrack);  
   }  
-
-  times(&time_struct);
-  end = time_struct.tms_stime;
-  seconds += ((double)(end - start)); //((double)sysconf(_SC_CLK_TCK));
-  cout << "Seconds elapsed for binmap.clearall(): " << seconds << endl;
+  //stop = clock();
+  //timeLengths[timeindex] += static_cast<double>(stop-start)
+  ///static_cast<double>(CLOCKS_PER_SEC);
+  //cout << "Time to add points for jet finding: " << timeLengths[timeindex++] << endl;
 
   return kStOk;
 }
