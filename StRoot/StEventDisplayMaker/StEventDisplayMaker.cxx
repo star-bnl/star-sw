@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.51 2000/01/24 22:56:46 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.52 2000/01/30 02:00:31 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -440,6 +440,7 @@ Int_t StEventDisplayMaker::Make()
        m_ShortView->Add(m_EventsView);
      }
      printf(" updating view of %d objects\n",totalCounter);
+     m_PadBrowserCanvas->Modified();
      m_PadBrowserCanvas->Update();
    }
    return kStOK;
@@ -831,16 +832,16 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
        if (filter->IsOff() ) break;                                                     //
        // ----------------------------------------------------------------------------- //
        if (hitColor > 0 && keyPositions[0]) {
-           St_Table3Points *hitsPoints = 0;
-           if (packed)  
-               hitsPoints = new St_Table3PackedPoints(track2Line,
-                                                nextKeyIndx,
-                                                keyPositions[0]);
-           else if (keyPositions[1] && keyPositions[2])
-               hitsPoints = new St_Table3Points(track2Line,
-                                                nextKeyIndx,
-                                                keyPositions[0],keyPositions[1],keyPositions[2]);
-           else { hitColor = -1; break; }
+         St_Table3Points *hitsPoints = 0;
+         if (packed)  
+             hitsPoints = new St_Table3PackedPoints(track2Line,
+                                              nextKeyIndx,
+                                              keyPositions[0]);
+         else if (keyPositions[1] && keyPositions[2])
+             hitsPoints = new St_Table3Points(track2Line,
+                                              nextKeyIndx,
+                                              keyPositions[0],keyPositions[1],keyPositions[2]);
+         else { hitColor = -1; break; }
          if (hitsPoints) {
            m_HitCollector->Add(hitsPoints);    // Collect to remove  
            St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
@@ -970,6 +971,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.52  2000/01/30 02:00:31  fine
+// Some adjustment to new ROOT (2.23/11
+//
 // Revision 1.51  2000/01/24 22:56:46  fine
 // new packing schema for ssd introduced
 //
