@@ -197,7 +197,7 @@ cWJL ---- can use located vertex from evr now!!!!   30-08-96
 cWJL
             xp(1) = 0.0
             xp(2) = 0.0
-            call ev0_circle_param(trak,xc1,r1)
+            call ev0_circle_param_r(trak,xc1,r1)
             call ev0_project_track(xc1,r1,xp,xn1)
             call ev0_update_track_param(xc1,r1,xn1,trak,trk1) 
 
