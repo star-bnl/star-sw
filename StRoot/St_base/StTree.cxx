@@ -242,7 +242,7 @@ void StBranch::Close(const char *)
   printf("** <StBranch::Close> Branch=%s \tFile=%s \tClosed **\n"
         ,GetName(),(const char*)fFile); 
   delete tf;
-  if (fIOMode&2) return;
+  if (!(fIOMode&2)) return;
   ts = GetFile();
   ts.Replace(0,0,".none ");
   SetFile((const char*)ts);
@@ -298,7 +298,7 @@ Int_t StBranch::GetEvent(Int_t mode)
   if (mode) { obj = StIO::ReadNext(fTFile,GetName(),fUKey);
   } else    { obj = StIO::Read    (fTFile,GetName(),fUKey);}
 
-  if (obj == 0) 		return kStWarn;
+  if (obj == 0) 		return kStEOF;
   if (obj == (TObject*)(-1))	return kStErr;
   fList = (TList*)obj;
 
@@ -471,14 +471,15 @@ Int_t StTree::WriteEvent(ULong_t  ukey)
 //_______________________________________________________________________________
 Int_t StTree::ReadEvent(ULong_t  ukey)
 {  
-  Int_t iret=0;
+  Int_t iret=0,num=0;
   SetUKey(ukey); Open();
   St_DataSetIter next(this);StBranch *br;
   while ((br=(StBranch*)next())) {	//Read all branches 
     iret=br->ReadEvent(fUKey); 
+    if (!iret) num++;
     if(iret==kStErr) return kStErr;
   }
-  return 0;
+  return (num)? 0:kStEOF;
 }  
   
 //_______________________________________________________________________________
@@ -504,7 +505,7 @@ Int_t StTree::NextEvent()
     if (iret==kStErr) return iret;
   }
   
-  return (num) ?0 : kStEOF;
+  return (num) ? 0 : kStEOF;
 }  
   
 //_______________________________________________________________________________
@@ -583,7 +584,7 @@ static int AreSimilar(const Char_t *fileA, const Char_t *fileB)
 
 //_____________________________________________________________________________
 ClassImp(StFile)
- StFile::StFile(const char** fileList):St_DataSet("StFile")
+ StFile::StFile(const char** fileList):St_ObjectSet("StFile")
 {
   SetTitle(" nbranches=1 ");
   AddFile(fileList);
@@ -593,7 +594,7 @@ Int_t StFile::AddFile(const Char_t **fileList)
 { 
   const Char_t *file;
   if (!fileList) return 0;
-  for(int i=0; file = fileList[i];i++) AddFile(file);
+  for(int i=0; (file = fileList[i]);i++) AddFile(file);
   return 0;
 }
 //_____________________________________________________________________________
@@ -694,11 +695,8 @@ Int_t StFile::AddWild(const Char_t *file)
 const Char_t * StFile::NextFileName()
 {
   St_DataSet *ds;
-  while ((ds = First())){
-    TString ts(ds->GetTitle());
-    if (ts.Index("status=USED")>=0) {delete ds; continue;}
-    ts.Replace(0,0," status=USED "); ds->SetTitle(ts); break;}
-  if (!ds) return 0;
+  ds = First(); if (!ds) return 0;
+  delete fObj; fObj=ds; Remove(ds);
   SetInfo();
   return strstr(ds->GetTitle(),"file=")+5;
 }
@@ -706,7 +704,7 @@ const Char_t * StFile::NextFileName()
 void StFile::SetInfo()
 {
   TFile *tf=0;
-  St_DataSet *ds = First();
+  St_DataSet *ds = (St_DataSet*)fObj;
   if (!ds) return;
   TString tit(ds->GetTitle());  
   Int_t known = 0;
@@ -775,7 +773,7 @@ void StFile::SetInfo()
 const Char_t *StFile::GetAttr(const char *att) 
 {
   static TString brName;
-  St_DataSet *ds = First();
+  St_DataSet *ds = (St_DataSet*)fObj;
   if (!ds) return 0;
   SetInfo();
   const char *bn = strstr(ds->GetTitle(),att);
@@ -788,8 +786,7 @@ const Char_t *StFile::GetAttr(const char *att)
 //_____________________________________________________________________________
 Int_t StFile::GetNBranches() 
 { 
-  const char *cc = strstr(GetTitle(),"nbranches=")+10;
-  return atoi(cc);
+return 1;
 }
 
 
