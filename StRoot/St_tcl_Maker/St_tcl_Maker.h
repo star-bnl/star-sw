@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.20 2000/08/22 00:17:55 hardtke Exp $
+// $Id: St_tcl_Maker.h,v 1.21 2001/05/22 22:32:50 hardtke Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.21  2001/05/22 22:32:50  hardtke
+// Add option for returning hits in global coordinates
+//
 // Revision 1.20  2000/08/22 00:17:55  hardtke
 // Add ability to turn off either half of TPC:  new functions EastOff(), WestOff(), AllOn()
 //
@@ -121,6 +124,8 @@ class St_tcl_Maker : public StMaker {
   virtual void   tclPixTransOff(){tclPixTrans();} 
   virtual void   WriteTNtupleOn() {WriteTNtuple(kTRUE);}
   virtual void   WriteTNtupleOff(){WriteTNtuple();}
+  virtual void   HitsInGlobalCoordinates(){UseGlobal(kTRUE);}
+  virtual void   HitsInTpcLocalCoordinates(){UseGlobal();}
   void   EastOff();  // turn off east half of tpc
   void   WestOff();  // turn off west half of tpc
   void   AllOn();    // turn on all of tpc
@@ -130,7 +135,7 @@ class St_tcl_Maker : public StMaker {
   virtual Int_t  Finish();
   virtual void   PrintInfo();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.20 2000/08/22 00:17:55 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.21 2001/05/22 22:32:50 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
  private:
 
@@ -142,6 +147,7 @@ class St_tcl_Maker : public StMaker {
   Bool_t                 m_raw_data_tpc;        // bool used to check if there is pixel data
   Bool_t                 m_EastOff;              //no East half
   Bool_t                 m_WestOff;              //no West half
+  Bool_t                 m_GlobalHits;           //use global coordinates for hits
 
   // define the tables used
   St_tpg_detector*       m_tpg_detector;  	//! TPC geometry parameters 
@@ -169,6 +175,7 @@ class St_tcl_Maker : public StMaker {
   void   tclPixTrans(Bool_t flag=kFALSE){m_tclPixTransOn=flag;}
   void   tclMorph(Bool_t flag=kFALSE){m_tclMorphOn=flag;}
   void   WriteTNtuple(Bool_t flag=kFALSE){bWriteTNtupleOn=flag;}
+  void   UseGlobal(Bool_t flag=kFALSE){m_GlobalHits=flag;}
   void   MakeHistograms(); 
   void   InitHistograms(); 
 
