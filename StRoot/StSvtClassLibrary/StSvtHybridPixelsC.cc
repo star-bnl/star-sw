@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtHybridPixelsC.cc,v 1.1 2001/08/16 21:02:04 munhoz Exp $
+ * $Id: StSvtHybridPixelsC.cc,v 1.2 2002/02/12 23:09:50 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridPixelsC.cc,v $
+ * Revision 1.2  2002/02/12 23:09:50  munhoz
+ * fixing problems for new compiler
+ *
  * Revision 1.1  2001/08/16 21:02:04  munhoz
  * changing StObjArray to StStrArray. StSvtConfig reestructured. New classes for geometry DB
  *
@@ -76,7 +79,7 @@ StSvtHybridPixelsC& StSvtHybridPixelsC::operator = (StSvtHybridPixelsC& h)
 
   for (int i=0;i<mTotalNumberOfPixels;i++) {
     x = h.At(i);
-    AddAt(x,i);
+    AddAt((char)x,i);
   }
   return *this;
 }
@@ -86,11 +89,11 @@ StSvtHybridPixelsC& StSvtHybridPixelsC::operator + (StSvtHybridPixelsC& h)
   float x1, x2;
 
   for (int i=0;i<mTotalNumberOfPixels;i++) {
-    x1 = At(i);
-    x2 = h.At(i);
+    x1 = (float)At(i);
+    x2 = (float)h.At(i);
 
     if ((x1+x2) < 255)
-      AddAt(x1+x2,i);
+      AddAt((char)(x1+x2),i);
     else
       AddAt(255,i);      
   }
