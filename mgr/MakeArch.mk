@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.17  1998/08/02 19:07:16  perev
+#  New Pavel makefile and bug in MakeArch
+#
 #  Revision 1.16  1998/07/20 20:15:24  perev
 #  *.mk small impovement
 #
@@ -29,7 +32,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/07/20 20:15:24 $ 
+#             Last modification $Date: 1998/08/02 19:07:16 $ 
 #. default setings
 
 RM := rm -f
@@ -303,7 +306,6 @@ endif
 
 
 ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
-  CERN_LEVEL := old
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
   OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SUN
   STRID :=  sun
