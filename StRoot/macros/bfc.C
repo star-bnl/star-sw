@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.45 1999/05/08 03:16:51 fisyak Exp $
+// $Id: bfc.C,v 1.46 1999/05/09 02:12:53 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.46  1999/05/09 02:12:53  fisyak
+// Add to Loac Chain as a parameter
+//
 // Revision 1.45  1999/05/08 03:16:51  fisyak
 // Merged version of bfc
 //
@@ -220,7 +223,8 @@ void SetFlags(const Char_t *Chain="gtrack"){// parse Chain request
   //  gSystem->Exit(1);
 }
 //_____________________________________________________________________
-void Load(){
+void Load(const Char_t *Chain="tfs"){
+  SetFlags(Chain);
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("xdf2root");
@@ -294,12 +298,15 @@ void Load(){
 void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
   // define input file
   if (!infile) {
-    if (ChainFlags[kMINIDAQ]) infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"; // laser data
+    if (ChainFlags[kMINIDAQ]) 
+      infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"; // laser data
     else {
-      if (ChainFlags[kFZIN])  infile ="/disk1/star/test/psc0049_08_40evts.fzd";                     // zebra file
+      if (ChainFlags[kFZIN])  
+	infile ="/disk1/star/test/psc0049_08_40evts.fzd";                     // zebra file
       //                 infile = "/afs/rhic/star/tpc/data/trs_muon_10cmdrift_good.fzd";
       else 
-	if (!ChainFlags[kGSTAR]) infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";	       // g2t xdf file
+	if (!ChainFlags[kGSTAR]) 
+	  infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";	       // g2t xdf file
     }
     if (infile) {
       InFile = new TString(infile);
@@ -351,11 +358,10 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, 
   // Chain = "" || "xdf" run STANDARD chain using xd-files as an input
   // Chain = "minidaq" read miniDAQ xdf file and process 
   NoEvents = Nevents;
-  SetFlags(Chain);
-  Set_IO_Files(infile,outfile);
   // Create the main chain object
   // Dynamically link some shared libs
-  if (gClassTable->GetID("StChain") < 0) Load();
+  if (gClassTable->GetID("StChain") < 0) Load(Chain);
+  Set_IO_Files(infile,outfile);
   if (!chain) delete chain;
   chain = new StChain("bfc");
   chain->SetDebug();
