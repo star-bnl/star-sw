@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.30 2001/02/10 20:31:09 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.31 2001/03/08 20:35:12 perev Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -239,11 +239,11 @@
    $EXTRA_CFLAGS = " -D__CC5__";
    $R_CPPFLAGS  = "-DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
-   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
+   $CLIBS     = "-lmalloc -lm -ltermcap -ldl -lnsl -lsocket -lgen -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
    $FLIBS     = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
    $XLIBS     = "-L" . $ROOTSYS . "/lib -lXpm -L/usr/openwin/lib -lX11";
 #   $XLIBS     = "-L/usr/local/lib -lXpm -L/usr/openwin/lib -lX11";
-   $SYSLIBS   = "-lm -ldl -lnsl -lsocket -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
+   $SYSLIBS   = "-lmalloc -lm -ldl -lnsl -lsocket -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
    $FFLAGS    = "-KPIC -w";
    $FEXTEND   = "-e";
    $CFLAGS    = "-KPIC";
