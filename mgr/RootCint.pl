@@ -1,4 +1,4 @@
-#! /opt/star/bin/perl
+#!/usr/bin/env perl
 #
 # Script to run rootcint : 
 #              Input     : list of h-files

@@ -1,4 +1,4 @@
-#! /opt/star/bin/perl
+#!/usr/bin/env perl
 use File::Basename;
 my $input = shift;
 my $file = shift;

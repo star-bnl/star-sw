@@ -1,4 +1,4 @@
-#!/opt/star/bin/perl
+#!/usr/bin/env perl
 use Env; 
 use File::Basename;
 use File::Find;
@@ -11,12 +11,12 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.35 2000/05/01 21:08:57 fisyak Exp $
+# $Id: cons,v 1.36 2000/05/15 21:25:50 fisyak Exp $
 
 $ver_num = 1.8;
 $ver_rev = "-dev";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.35 2000/05/01 21:08:57 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.36 2000/05/15 21:25:50 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 

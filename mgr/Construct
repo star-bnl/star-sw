@@ -1,5 +1,5 @@
-#!/opt/star/bin/perl
-# $Id: Construct,v 1.92 2000/04/18 14:52:51 fisyak Exp $
+#!/usr/bin/env perl
+# $Id: Construct,v 1.93 2000/05/15 21:25:49 fisyak Exp $
 use Env;
 #use lib qw($STAR . "/mgr"); # Modify perl include path
 use lib $STAR . "/mgr"; # Modify perl include path

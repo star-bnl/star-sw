@@ -1,4 +1,4 @@
-#! /opt/star/bin/perl
+#!/usr/bin/env perl
 use File::Basename;
 use Cwd;
 use File::Copy;
