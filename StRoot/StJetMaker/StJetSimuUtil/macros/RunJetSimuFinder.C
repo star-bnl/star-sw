@@ -87,19 +87,19 @@ void RunJetSimuFinder(int nevents = 10,
   
     //get BEMC calibration
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
-  
-    //Instantiate Maker with Pythia event record etc for simulation
+
+    //Instantiate Maker with Pythia event record etc for simulation (this guy doesn't break chain, MLM)
     StJetSimuWeightMaker *weight= new StJetSimuWeightMaker("SimuWeight");
     weight->setPrintOption(0);
   
-    //Instantiate Tree Maker for simulation
+    //Instantiate Tree Maker for simulation (this guy doesn't break chain, MLM)
     StJetSimuTreeMaker *stree= new StJetSimuTreeMaker("SimuTree",soutfile);
     stree->setPrintOption(0);
   
     //Instantiate the StEmcTpcFourPMaker
     StEmcTpcFourPMaker* emcFourPMaker = new StEmcTpcFourPMaker("EmcTpcFourPMaker", muDstMaker, 30, 30, .3, .3, .003, adc);
     emcFourPMaker->setUseType(StEmcTpcFourPMaker::Hits);//if don't have this line then default is 0 (which is hits)
-  
+
     //Instantiate the JetMaker
     StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", muDstMaker, outfile);
   
