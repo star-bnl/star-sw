@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRunInfo.h,v 2.6 2004/01/22 23:14:07 ullrich Exp $
+ * $Id: StRunInfo.h,v 2.7 2004/07/06 23:05:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2001
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRunInfo.h,v $
+ * Revision 2.7  2004/07/06 23:05:26  ullrich
+ * Added SVT drift velocity scaler.
+ *
  * Revision 2.6  2004/01/22 23:14:07  ullrich
  * Added Rhic scaler methods (BBC).
  *
@@ -60,7 +63,8 @@ public:
     float    beamFillNumber(StBeamDirection) const;
     double   magneticField() const;
     double   tpcDriftVelocity(StBeamDirection) const;
-
+    double   svtDriftVelocityScaler() const;
+    
     double   zdcWestRate() const;
     double   zdcEastRate() const;
     double   zdcCoincidenceRate() const;
@@ -84,6 +88,7 @@ public:
     void     setBeamFillNumber(StBeamDirection, float);
     void     setMagneticField(double);                  
     void     setTpcDriftVelocity(StBeamDirection, double);
+    void     setSvtDriftVelocityScaler(float);
 
     void     setZdcWestRate(double);
     void     setZdcEastRate(double);
@@ -108,6 +113,7 @@ protected:
     
     Double_t    mMagneticFieldZ;
     Float_t     mTpcDriftVelocity[2];
+    Float_t     mSvtDriftVelocityScaler;
 
     Double_t    mZdcEastRate;
     Double_t    mZdcWestRate;
@@ -126,6 +132,6 @@ protected:
     Double_t    mBbcBlueBackgroundRate;
     Double_t    mBbcYellowBackgroundRate;
     
-    ClassDef(StRunInfo,5)
+    ClassDef(StRunInfo,6)
 };
 #endif
