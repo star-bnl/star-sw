@@ -1,7 +1,16 @@
 /*****************************************
  *
- * $Id: StMcParameterDB.h,v 1.3 1999/10/01 14:08:59 calderon Exp $
+ * $Id: StMcParameterDB.h,v 1.4 1999/12/08 00:00:25 calderon Exp $
  * $Log: StMcParameterDB.h,v $
+ * Revision 1.4  1999/12/08 00:00:25  calderon
+ * New version of StAssociationMaker.
+ * -Uses new StEvent / StMcEvent
+ * -Includes maps using reconstructed and monte carlo objects as keys for:
+ *   TPC Hits
+ *   SVT Hits
+ *   FTPC Hits
+ *   Tracks (using all 3 hit multimaps)
+ *
  * Revision 1.3  1999/10/01 14:08:59  calderon
  * Added Local Hit resolution Histogram. It is made by default
  * without any requirement of association, to serve
@@ -26,48 +35,87 @@
 #include "StMaker.h"
 #endif
 
-
-
 class StMcParameterDB {
 public:
     static StMcParameterDB* instance(); // *MENU*
-    
-    float xCut() const; // *MENU*
-    float zCut() const; // *MENU*
-    unsigned int reqCommonHits() const; // *MENU*
-    
-    void setXCut(float); // *MENU*
-    void setZCut(float); // *MENU*
-    void setReqCommonHits(unsigned int); // *MENU*
 
+    virtual ~StMcParameterDB();  //!
+    
+    float xCutTpc() const; // *MENU*
+    float zCutTpc() const; // *MENU*
+    unsigned int reqCommonHitsTpc() const; // *MENU*
+
+    float xCutSvt() const; // *MENU*
+    float yCutSvt() const; // *MENU*
+    float zCutSvt() const; // *MENU*
+    unsigned int reqCommonHitsSvt() const; // *MENU*
+
+    float rCutFtpc() const; // *MENU*
+    float phiCutFtpc() const; // *MENU*
+    unsigned int reqCommonHitsFtpc() const; // *MENU*
+    
+    void setXCutTpc(float); // *MENU*
+    void setZCutTpc(float); // *MENU*
+    void setReqCommonHitsTpc(unsigned int); // *MENU*
+
+    void setXCutSvt(float); // *MENU*
+    void setYCutSvt(float); // *MENU*
+    void setZCutSvt(float); // *MENU*
+    void setReqCommonHitsSvt(unsigned int); // *MENU*
+    
+    void setRCutFtpc(float); // *MENU*
+    void setPhiCutFtpc(float); // *MENU*
+    void setReqCommonHitsFtpc(unsigned int); // *MENU*
+    
 private:
     static StMcParameterDB *mParamDB;   
     StMcParameterDB();
-    // also copy constructor
     StMcParameterDB(const StMcParameterDB&);
-    // also assignment operator
     StMcParameterDB& operator= (const StMcParameterDB&);
     
-    float mXCut;
-    float mZCut;
-    unsigned int mReqCommonHits;
+    float mXCutTpc;
+    float mZCutTpc;
+    unsigned int mReqCommonHitsTpc;
+
+    float mXCutSvt;
+    float mYCutSvt;
+    float mZCutSvt;
+    unsigned int mReqCommonHitsSvt;
+
+    float mRCutFtpc;
+    float mPhiCutFtpc;
+    unsigned int mReqCommonHitsFtpc;
 
     ClassDef(StMcParameterDB, 1)
     
 };
 ostream& operator<<(ostream &, const StMcParameterDB&);
 
-inline float StMcParameterDB::xCut() const { return mXCut; }
+inline float StMcParameterDB::xCutTpc() const { return mXCutTpc; }
 
-inline float StMcParameterDB::zCut() const { return mZCut; }
+inline float StMcParameterDB::zCutTpc() const { return mZCutTpc; }
 
-inline unsigned int StMcParameterDB::reqCommonHits() const { return mReqCommonHits; }
+inline unsigned int StMcParameterDB::reqCommonHitsTpc() const { return mReqCommonHitsTpc; }
+
+inline float StMcParameterDB::xCutSvt() const { return mXCutSvt; }
+
+inline float StMcParameterDB::yCutSvt() const { return mYCutSvt; }
+
+inline float StMcParameterDB::zCutSvt() const { return mZCutSvt; }
+
+inline unsigned int StMcParameterDB::reqCommonHitsSvt() const { return mReqCommonHitsSvt; }
+
+inline float StMcParameterDB::rCutFtpc() const { return mRCutFtpc; }
+
+inline float StMcParameterDB::phiCutFtpc() const { return mPhiCutFtpc; }
+
+inline unsigned int StMcParameterDB::reqCommonHitsFtpc() const { return mReqCommonHitsFtpc; }
 
 #endif
 
 //
-//  StMcParameterDB::instance()->xCut()
+//  StMcParameterDB::instance()->xCutTpc()
 //  or
 //  StMcParameterDB* mydb =  StMcParameterDB::instance();
-//  mydb->xCut();
+//  mydb->xCutTpc();
 //
