@@ -26,9 +26,9 @@
 #include "SystemOfUnits.h"
 
 //Stuff to get correct Bfield
-#include "StarCallf77.h"   
+/*#include "StarCallf77.h"   
  extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}   
- #define gufld F77_NAME(gufld,GUFLD) 
+ #define gufld F77_NAME(gufld,GUFLD) */
 
 
 #define MAXTRACKS 10000
@@ -41,7 +41,7 @@ static StTrack* STATtrk[MAXTRACKS];
 static unsigned short STATptrk[MAXSTRACK];
 static unsigned short STATntrk[MAXSTRACK];
 static short STAThits[MAXTRACKS];
-static short STATdetId[MAXTRACKS];
+static int  STATdetId[MAXTRACKS];
 static double STATpt[MAXTRACKS];
 static double STATptot[MAXTRACKS];
 static StPhysicalHelixD STATheli[MAXTRACKS];
@@ -217,13 +217,13 @@ Int_t StV0FinderMaker::Init()
 
 //____________________________________________________________________________
 
-Int_t StV0FinderMaker::InitRun( int RunNumber){
+/*Int_t StV0FinderMaker::InitRun( int RunNumber){
 	  float gufldX[3]= {0,0,0};
 	  float gufldB[3];
 	  gufld(gufldX,gufldB);
 	  Bfield = gufldB[2]*kilogauss;
           return 0;
-}
+}*/
 
 
 
@@ -321,6 +321,15 @@ Int_t StV0FinderMaker::Prepare() {
                      map.numberOfHits(kSvtId) +
                      map.numberOfHits(kSsdId);
 
+        if (!trks)
+           {StThreeVectorD p1 = triGeom->momentum();
+            StThreeVectorD p2 = heli[trks].momentum(Bfield);
+            if (p2.x() != 0) Bfield *= p1.x()/p2.x();
+               else Bfield *= p1.y()/p2.y();
+            if (triGeom->charge()*triGeom->helicity() > 0) Bfield = -fabs(Bfield);
+               else Bfield = fabs(Bfield);
+            }
+	
         if (triGeom->charge() > 0) ptrk[ptrks++] = trks;
         else if (triGeom->charge() < 0) ntrk[ntrks++] = trks;
         trks++;
@@ -745,8 +754,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.13 2003/09/17 12:00:31 faivre Exp $
+// $Id: StV0FinderMaker.cxx,v 1.14 2003/11/08 18:25:54 faivre Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.14  2003/11/08 18:25:54  faivre
+// Bfield + consistency int/short
+//
 // Revision 1.13  2003/09/17 12:00:31  faivre
 // RH8 : initialize everything in constructor.
 //
