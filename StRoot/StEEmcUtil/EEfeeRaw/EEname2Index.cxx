@@ -110,7 +110,7 @@ int  EEname2Index(const char *name){
   } break;
   
   default:
-    printf("EEname2Index('%s')  Logical Error3: invalid index=%d\n",name,index);
+    printf("EEname2Index(%s)  Logical Error3: invalid index=%d\n",name,index);
     exit(-1);
   }
 

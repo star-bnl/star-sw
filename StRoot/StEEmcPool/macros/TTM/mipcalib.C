@@ -125,7 +125,6 @@ mipcalib(
   int   subsec[MaxTracks];
   int   etabin[MaxTracks];
   float adcval[MaxTracks];
-  int   ntrack[MaxTracks];
   //
   int   nhits [MaxTracks];
   float pt    [MaxTracks];
@@ -139,8 +138,6 @@ mipcalib(
   // trigger Info
   int   numtrig;
   int   trigid[MaxTrigger];
-  int   daqbits;
-  int   ctbsum;
 
   // histogram list
   TH1*   hadc[MaxHist];   for(int i=0; i<MaxHist; i++) hadc[i]=NULL;
@@ -171,7 +168,6 @@ mipcalib(
     chain->SetBranchAddress("ssec"    , subsec  );
     chain->SetBranchAddress("eta"     , etabin  );
     chain->SetBranchAddress("adc"     , adcval  );
-    chain->SetBranchAddress("track"   , ntrack  );
     
     chain->SetBranchAddress("pt"      , pt      );
     chain->SetBranchAddress("ptot"    , ptot    );
@@ -184,8 +180,6 @@ mipcalib(
     
     chain->SetBranchAddress("ntrig"   ,&numtrig );
     chain->SetBranchAddress("trigid"  , trigid  );
-    chain->SetBranchAddress("daqbits" ,&daqbits );
-    chain->SetBranchAddress("ctbsum"  ,&ctbsum  );
   } else {
     cout << histName << " fitting " << fitFunc  << endl;
   }
@@ -244,7 +238,6 @@ mipcalib(
 
       for(int t=0;t<numtracks; t++) {
 	// select the tracks 
-	if(ntrack[t]        > 1       ) continue; // reject multiple tracks
 	if(pt[t]            < MinPt   ) continue;
 	if(fabs(detasmd[t]) > MaxDEta ) continue;
 	if(fabs(dphismd[t]) > MaxDPhi ) continue;

@@ -388,9 +388,11 @@ Bool_t StXiFinderMaker::UseV0() {
       if (charge*bachGeom->charge() < 0) continue;
       //Check that ITTF and TPT tracks/V0's are not combined together.
       if (GetTrackerUsage() == kTrackerUseBOTH)
-         {if ((v0Vertex->dcaDaughters() <= 0) && (trk[k]->fittingMethod() == TPTflag)) continue;
-          if ((v0Vertex->dcaDaughters() >= 0) && (trk[k]->fittingMethod() == ITTFflag)) continue;
-          }
+         {
+	   //if ((v0Vertex->dcaDaughters() <= 0) && (trk[k]->fittingMethod() == TPTflag)) continue;
+	   if ((v0Vertex->dcaDaughters() <= 0) && (trk[k]->fittingMethod() != ITTFflag)) continue;
+	   if ((v0Vertex->dcaDaughters() >= 0) && (trk[k]->fittingMethod() == ITTFflag)) continue;
+	 }
       //Check that the bachelor is not one of the V0's daughters.
       if (trkID[k] == negKey) continue;
       if (trkID[k] == posKey) continue;
@@ -697,8 +699,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.20 2004/04/02 08:57:34 faivre Exp $
+// $Id: StXiFinderMaker.cxx,v 1.21 2004/04/15 20:15:53 jeromel Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.21  2004/04/15 20:15:53  jeromel
+// Forgot one of them
+//
 // Revision 1.20  2004/04/02 08:57:34  faivre
 // Use actual TPT flag rather than "not ITTF" for TPT tracks.
 //

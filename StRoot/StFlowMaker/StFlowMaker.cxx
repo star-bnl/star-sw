@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.88 2004/04/09 15:49:01 aihong Exp $
+// $Id: StFlowMaker.cxx,v 1.87 2003/12/12 02:33:04 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -221,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.88 2004/04/09 15:49:01 aihong Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.87 2003/12/12 02:33:04 oldi Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -971,8 +971,6 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
   
   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion4DST()" << endm;
 
-  StuProbabilityPidAlgorithm uPid;
-
   pFlowEvent->SetEventID(pPicoEvent->EventID());
   UInt_t origMult = pPicoEvent->OrigMult();
   pFlowEvent->SetOrigMult(origMult);
@@ -1024,38 +1022,6 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
 					       pPicoTrack->DcaGlobalY(),
 					       pPicoTrack->DcaGlobalZ()) );
       pFlowTrack->SetTrackLength(pPicoTrack->TrackLength());
-
-      if (StuProbabilityPidAlgorithm::isPIDTableRead()) {
-
-  uPid.processPIDAsFunction(uPid.getCentrality(pPicoEvent->UncorrNegMult()),
-                    pPicoTrack->DcaGlobal(),
-                    pPicoTrack->Charge(),
-  fabs((pPicoTrack->Pt()/sqrt(1-(tanh(pPicoTrack->Eta())*tanh(pPicoTrack->Eta()))))/float(pPicoTrack->Charge())),
-                    pPicoTrack->Eta(),
-                    pPicoTrack->NdedxPts(),
-                    pPicoTrack->Dedx() );
-
-      pFlowTrack->SetMostLikelihoodPID(uPid.mostLikelihoodParticleGeantID());
-      pFlowTrack->SetMostLikelihoodProb(uPid.mostLikelihoodProbability());   
-      pFlowTrack->SetExtrapTag(int(uPid.isExtrap()));                        
-
-      pFlowTrack->SetElectronPositronProb( (pPicoTrack->Charge()>0) ?   
-                                           float(uPid.beingPositronProb()) :
-                                           float(uPid.beingElectronProb()) );
-
-      pFlowTrack->SetPionPlusMinusProb( (pPicoTrack->Charge()>0) ?  
-                                        float(uPid.beingPionPlusProb()) :
-                                        float(uPid.beingPionMinusProb()) );
-
-      pFlowTrack->SetKaonPlusMinusProb( (pPicoTrack->Charge()>0) ? 
-                                        float(uPid.beingKaonPlusProb()) :
-                                        float(uPid.beingKaonMinusProb()) );
-
-      pFlowTrack->SetProtonPbarProb( (pPicoTrack->Charge()>0) ? 
-                                     float(uPid.beingProtonProb()) :
-                                     float(uPid.beingAntiProtonProb()) );
-
-      } else {
       pFlowTrack->SetMostLikelihoodPID(pPicoTrack->MostLikelihoodPID()); 
       pFlowTrack->SetMostLikelihoodProb(pPicoTrack->MostLikelihoodProb());
       pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
@@ -1063,8 +1029,6 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPionPlusMinusProb(pPicoTrack->PionPlusMinusProb()); 
       pFlowTrack->SetKaonPlusMinusProb(pPicoTrack->KaonPlusMinusProb()); 
       pFlowTrack->SetProtonPbarProb(pPicoTrack->ProtonPbarProb()); 
-      }
-
       if (pPicoTrack->Charge() < 0) {
 	pFlowTrack->SetPidPiMinus(pPicoTrack->PidPion());
 	pFlowTrack->SetPidAntiProton(pPicoTrack->PidProton());
@@ -1099,8 +1063,6 @@ Bool_t StFlowMaker::FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent) {
   // Make StFlowEvent from StFlowPicoEvent
   
   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion5DST()" << endm;
-
-  StuProbabilityPidAlgorithm uPid;
 
   pFlowEvent->SetEventID(pPicoEvent->EventID());
   UInt_t origMult = pPicoEvent->OrigMult();
@@ -1156,38 +1118,6 @@ Bool_t StFlowMaker::FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent) {
 					       pPicoTrack->DcaGlobalY(),
 					       pPicoTrack->DcaGlobalZ()) );
       pFlowTrack->SetTrackLength(pPicoTrack->TrackLength());
-
-      if (StuProbabilityPidAlgorithm::isPIDTableRead()) {
-
-  uPid.processPIDAsFunction(uPid.getCentrality(pPicoEvent->UncorrNegMult()),
-                    pPicoTrack->DcaGlobal(),
-                    pPicoTrack->Charge(),
-  fabs((pPicoTrack->Pt()/sqrt(1-(tanh(pPicoTrack->Eta())*tanh(pPicoTrack->Eta()))))/float(pPicoTrack->Charge())),
-                    pPicoTrack->Eta(),
-                    pPicoTrack->NdedxPts(),
-                    pPicoTrack->Dedx() );
-
-      pFlowTrack->SetMostLikelihoodPID(uPid.mostLikelihoodParticleGeantID());
-      pFlowTrack->SetMostLikelihoodProb(uPid.mostLikelihoodProbability());   
-      pFlowTrack->SetExtrapTag(int(uPid.isExtrap()));                        
-
-      pFlowTrack->SetElectronPositronProb( (pPicoTrack->Charge()>0) ?   
-                                           float(uPid.beingPositronProb()) :
-                                           float(uPid.beingElectronProb()) );
-
-      pFlowTrack->SetPionPlusMinusProb( (pPicoTrack->Charge()>0) ?  
-                                        float(uPid.beingPionPlusProb()) :
-                                        float(uPid.beingPionMinusProb()) );
-
-      pFlowTrack->SetKaonPlusMinusProb( (pPicoTrack->Charge()>0) ? 
-                                        float(uPid.beingKaonPlusProb()) :
-                                        float(uPid.beingKaonMinusProb()) );
-
-      pFlowTrack->SetProtonPbarProb( (pPicoTrack->Charge()>0) ? 
-                                     float(uPid.beingProtonProb()) :
-                                     float(uPid.beingAntiProtonProb()) );
-
-      } else {
       pFlowTrack->SetMostLikelihoodPID(pPicoTrack->MostLikelihoodPID()); 
       pFlowTrack->SetMostLikelihoodProb(pPicoTrack->MostLikelihoodProb());
       pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
@@ -1195,8 +1125,6 @@ Bool_t StFlowMaker::FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPionPlusMinusProb(pPicoTrack->PionPlusMinusProb()); 
       pFlowTrack->SetKaonPlusMinusProb(pPicoTrack->KaonPlusMinusProb()); 
       pFlowTrack->SetProtonPbarProb(pPicoTrack->ProtonPbarProb()); 
-      }
-
       if (pPicoTrack->Charge() < 0) {
 	pFlowTrack->SetPidPiMinus(pPicoTrack->PidPion());
 	pFlowTrack->SetPidAntiProton(pPicoTrack->PidProton());
@@ -1229,8 +1157,6 @@ Bool_t StFlowMaker::FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent) {
 
 Bool_t StFlowMaker::FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent) {
   // Make StFlowEvent from StFlowPicoEvent
-
-  StuProbabilityPidAlgorithm uPid;
   
   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion6DST()" << endm;
 
@@ -1291,38 +1217,6 @@ Bool_t StFlowMaker::FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent) {
 					       pPicoTrack->DcaGlobalY(),
 					       pPicoTrack->DcaGlobalZ()) );
       pFlowTrack->SetTrackLength(pPicoTrack->TrackLength());
-
-      if (StuProbabilityPidAlgorithm::isPIDTableRead()) {
-
-  uPid.processPIDAsFunction(uPid.getCentrality(pPicoEvent->UncorrNegMult()),
-                    pPicoTrack->DcaGlobal(),
-                    pPicoTrack->Charge(),
-  fabs((pPicoTrack->Pt()/sqrt(1-(tanh(pPicoTrack->Eta())*tanh(pPicoTrack->Eta()))))/float(pPicoTrack->Charge())),
-                    pPicoTrack->Eta(),
-                    pPicoTrack->NdedxPts(),
-                    pPicoTrack->Dedx() );
-
-      pFlowTrack->SetMostLikelihoodPID(uPid.mostLikelihoodParticleGeantID());
-      pFlowTrack->SetMostLikelihoodProb(uPid.mostLikelihoodProbability());   
-      pFlowTrack->SetExtrapTag(int(uPid.isExtrap()));                        
-
-      pFlowTrack->SetElectronPositronProb( (pPicoTrack->Charge()>0) ?   
-                                           float(uPid.beingPositronProb()) :
-                                           float(uPid.beingElectronProb()) );
-
-      pFlowTrack->SetPionPlusMinusProb( (pPicoTrack->Charge()>0) ?  
-                                        float(uPid.beingPionPlusProb()) :
-                                        float(uPid.beingPionMinusProb()) );
-
-      pFlowTrack->SetKaonPlusMinusProb( (pPicoTrack->Charge()>0) ? 
-                                        float(uPid.beingKaonPlusProb()) :
-                                        float(uPid.beingKaonMinusProb()) );
-
-      pFlowTrack->SetProtonPbarProb( (pPicoTrack->Charge()>0) ? 
-                                     float(uPid.beingProtonProb()) :
-                                     float(uPid.beingAntiProtonProb()) );
-
-      } else {
       pFlowTrack->SetMostLikelihoodPID(pPicoTrack->MostLikelihoodPID()); 
       pFlowTrack->SetMostLikelihoodProb(pPicoTrack->MostLikelihoodProb());
       pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
@@ -1330,8 +1224,6 @@ Bool_t StFlowMaker::FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPionPlusMinusProb(pPicoTrack->PionPlusMinusProb()); 
       pFlowTrack->SetKaonPlusMinusProb(pPicoTrack->KaonPlusMinusProb()); 
       pFlowTrack->SetProtonPbarProb(pPicoTrack->ProtonPbarProb()); 
-      }
-
       if (pPicoTrack->Charge() < 0) {
 	pFlowTrack->SetPidPiMinus(pPicoTrack->PidPion());
 	pFlowTrack->SetPidAntiProton(pPicoTrack->PidProton());
@@ -1436,8 +1328,6 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
   
   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST()" << endm;
 
-  StuProbabilityPidAlgorithm uPid;
-
   pFlowEvent->SetEventID(pMuEvent->eventId());
   pFlowEvent->SetVertexPos(pMuEvent->primaryVertexPosition());
   pFlowEvent->SetRunID(pMuEvent->runId());
@@ -1491,46 +1381,28 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
       pFlowTrack->SetDcaGlobal3(pMuTrack->dcaGlobal());
       pFlowTrack->SetTrackLength(pMuTrack->helix().pathLength(pMuEvent->primaryVertexPosition())); //???
 
-      if (StuProbabilityPidAlgorithm::isPIDTableRead()) {
-
-  uPid.processPIDAsFunction(uPid.getCentrality(pMuEvent->refMultNeg()),
-		    pMuTrack->dcaGlobal().mag(),
-		    pMuTrack->charge(),
-                    fabs((pMuTrack->p().mag())/float(pMuTrack->charge())),
-		    pMuTrack->eta(),
-		    pMuTrack->nHitsDedx(),
-		    pMuTrack->dEdx() );
-
-      pFlowTrack->SetMostLikelihoodPID(uPid.mostLikelihoodParticleGeantID());
-      pFlowTrack->SetMostLikelihoodProb(uPid.mostLikelihoodProbability());   
-      pFlowTrack->SetExtrapTag(int(uPid.isExtrap()));                        
-
-      pFlowTrack->SetElectronPositronProb( (pMuTrack->charge()>0) ?   
-                                           float(uPid.beingPositronProb()) :
-                                           float(uPid.beingElectronProb()) );
-
-      pFlowTrack->SetPionPlusMinusProb( (pMuTrack->charge()>0) ?  
-                                        float(uPid.beingPionPlusProb()) :
-                                        float(uPid.beingPionMinusProb()) );
-
-      pFlowTrack->SetKaonPlusMinusProb( (pMuTrack->charge()>0) ? 
-                                        float(uPid.beingKaonPlusProb()) :
-                                        float(uPid.beingKaonMinusProb()) );
-
-      pFlowTrack->SetProtonPbarProb( (pMuTrack->charge()>0) ? 
-                                     float(uPid.beingProtonProb()) :
-                                     float(uPid.beingAntiProtonProb()) );
-
-      } else {
-
       pFlowTrack->SetElectronPositronProb(pMuTrack->pidProbElectron()); 
       pFlowTrack->SetPionPlusMinusProb(pMuTrack->pidProbPion()); 
       pFlowTrack->SetKaonPlusMinusProb(pMuTrack->pidProbKaon()); 
       pFlowTrack->SetProtonPbarProb(pMuTrack->pidProbProton()); 
       pFlowTrack->SetProtonPbarProb(pMuTrack->pidProbProton()); 
 
-      // pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
 
+      if (pMuTrack->charge() < 0) {
+        pFlowTrack->SetPidPiMinus(pMuTrack->nSigmaPion()); 
+        pFlowTrack->SetPidAntiProton(pMuTrack->nSigmaProton());
+        pFlowTrack->SetPidKaonMinus(pMuTrack->nSigmaKaon());
+	pFlowTrack->SetPidAntiDeuteron( 999.0 );
+        pFlowTrack->SetPidElectron(pMuTrack->nSigmaElectron());
+      } else {
+        pFlowTrack->SetPidPiPlus(pMuTrack->nSigmaPion()); 
+        pFlowTrack->SetPidProton(pMuTrack->nSigmaProton()); 
+        pFlowTrack->SetPidKaonPlus(pMuTrack->nSigmaKaon()); 
+	pFlowTrack->SetPidDeuteron( 999.0 );
+        pFlowTrack->SetPidPositron(pMuTrack->nSigmaElectron());
+      }
+
+      // pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
           
       int mostLikelihoodPid=0;
       double mostLikelihoodPidProbability=0;
@@ -1565,28 +1437,7 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
       
       pFlowTrack->SetMostLikelihoodPID(mostLikelihoodPid); 
       pFlowTrack->SetMostLikelihoodProb(mostLikelihoodPidProbability);
-
-      }    
-
-
-      if (pMuTrack->charge() < 0) {
-        pFlowTrack->SetPidPiMinus(pMuTrack->nSigmaPion()); 
-        pFlowTrack->SetPidAntiProton(pMuTrack->nSigmaProton());
-        pFlowTrack->SetPidKaonMinus(pMuTrack->nSigmaKaon());
-	pFlowTrack->SetPidAntiDeuteron( 999.0 );
-        pFlowTrack->SetPidElectron(pMuTrack->nSigmaElectron());
-      } else {
-        pFlowTrack->SetPidPiPlus(pMuTrack->nSigmaPion()); 
-        pFlowTrack->SetPidProton(pMuTrack->nSigmaProton()); 
-        pFlowTrack->SetPidKaonPlus(pMuTrack->nSigmaKaon()); 
-	pFlowTrack->SetPidDeuteron( 999.0 );
-        pFlowTrack->SetPidPositron(pMuTrack->nSigmaElectron());
-      }
-
-
-
-
-
+    
       pFlowTrack->SetTopologyMap(pMuTrack->topologyMap());
     
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
@@ -1799,9 +1650,6 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
-// Revision 1.88  2004/04/09 15:49:01  aihong
-// make changes to support getting PID on fly for picodst and MuDst.
-//
 // Revision 1.87  2003/12/12 02:33:04  oldi
 // Read from PicoDST version 4 enabled again (some simulations are in this format).
 //

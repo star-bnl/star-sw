@@ -13,7 +13,7 @@ void dispEEmc()
 
   TGeoManager     *gm    = new TGeoManager("eemc", "eemc tower display");
   TGeoVolume      *top   = gm->MakeBox("star",0, 200., 200., 350.);
-  TGeoVolume      *smbox = gm->MakeBox("smbox",0, 1., 2., 3.); // small box at zero 
+  TGeoVolume      *smbox = gm->MakeBox("smbox",0, 10., 20., 30.); // small box at zero 
 
   eemc  = new EEmcTTDisplay(); // global 
 
@@ -57,10 +57,10 @@ shoot(unsigned int nevents, unsigned int maxTower)
       unsigned e  = gRandom->Integer(12);
       sprintf(name,"%02dT%1c%02d",s+1,ss+'A',e+1);
       cerr << name << ",";
-      eemc->AddTower(s,ss,e);
+      eemc->towerHit(s,ss,e);
     }
     cerr << endl;
-    eemc->Draw();
+    eemc->DrawHits();
   }
   gSystem->Sleep(1000);
   gPad->Update();

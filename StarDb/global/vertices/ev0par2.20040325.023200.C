@@ -22,36 +22,36 @@ TDataSet *CreateTable() {
 //
 // TPC-only cuts
   memset(&row,0,size);
-  row.dca	 =        1.2; // cut on dca between the two tracks ;
-  row.dcav0	 =        5.0; // cut on dca(impact param) of V0 from event vertex ;
-  row.dlen	 =        1.7; // cut on dist. of decay from prim. vertex ;
+  row.dca	 =        0.8; // cut on dca between the two tracks ;
+  row.dcav0	 =        2.5; // cut on dca(impact param) of V0 from event vertex ;
+  row.dlen	 =          2; // cut on dist. of decay from prim. vertex ;
   row.alpha_max	 =        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
   row.ptarm_max	 =        0.3; // Max. value of arm. pt allowed, only first entry used;
-  row.dcapnmin	 =        0.0; // Min. value of tracks at interaction ;
+  row.dcapnmin	 =        0.4; // Min. value of tracks at interaction ;
   row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
   row.n_point	 =         11; // Min. number of points on track ;
   tableSet->AddAt(&row);
 //
 // SVT-only cuts
   memset(&row,0,size);
-  row.dca	 =        1.2; // cut on dca between the two tracks ;
-  row.dcav0	 =      10000; // cut on dca(impact param) of V0 from event vertex ;
+  row.dca	 =        0.8; // cut on dca between the two tracks ;
+  row.dcav0	 =        2.5; // cut on dca(impact param) of V0 from event vertex ;
   row.dlen	 =      10000; // cut on dist. of decay from prim. vertex ;
   row.alpha_max	 =        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
   row.ptarm_max	 =        0.3; // Max. value of arm. pt allowed, only first entry used;
-  row.dcapnmin	 =        0.0; // Min. value of tracks at interaction ;
+  row.dcapnmin	 =        100; // Min. value of tracks at interaction ;
   row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
   row.n_point	 =          1; // Min. number of points on track ;
   tableSet->AddAt(&row);
 //
 // SVT+TPC cuts
   memset(&row,0,size);
-  row.dca	 =        1.2; // cut on dca between the two tracks ;
-  row.dcav0	 =        5.0; // cut on dca(impact param) of V0 from event vertex ;
-  row.dlen	 =        0.6; // cut on dist. of decay from prim. vertex ;
+  row.dca	 =        0.8; // cut on dca between the two tracks ;
+  row.dcav0	 =        2.5; // cut on dca(impact param) of V0 from event vertex ;
+  row.dlen	 =        1.0; // cut on dist. of decay from prim. vertex ;
   row.alpha_max	 =        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
   row.ptarm_max	 =        0.3; // Max. value of arm. pt allowed, only first entry used;
-  row.dcapnmin	 =        0.0; // Min. value of tracks at interaction ;
+  row.dcapnmin	 =        0.4; // Min. value of tracks at interaction ;
   row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
   row.n_point	 =         11; // Min. number of points on track ;
   tableSet->AddAt(&row);
@@ -60,36 +60,36 @@ TDataSet *CreateTable() {
 //
 // TPC-only cuts
   memset(&row,0,size);
-  row.dca	 =        1.2; // cut on dca between the two tracks ;
-  row.dcav0	 =        1.2; // cut on dca(impact param) of V0 from event vertex ;
-  row.dlen	 =        1.7; // cut on dist. of decay from prim. vertex ;
+  row.dca	 =        0.8; // cut on dca between the two tracks ;
+  row.dcav0	 =        0.8; // cut on dca(impact param) of V0 from event vertex ;
+  row.dlen	 =          2; // cut on dist. of decay from prim. vertex ;
   row.alpha_max	 =        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
   row.ptarm_max	 =        0.3; // Max. value of arm. pt allowed, only first entry used;
-  row.dcapnmin	 =        0.0; // Min. value of tracks at interaction ;
+  row.dcapnmin	 =        0.7; // Min. value of tracks at interaction ;
   row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
   row.n_point	 =         11; // Min. number of points on track ;
   tableSet->AddAt(&row);
 //
 // SVT-only cuts
   memset(&row,0,size);
-  row.dca	 =        1.2; // cut on dca between the two tracks ;
-  row.dcav0	 =      10000; // cut on dca(impact param) of V0 from event vertex ;
+  row.dca	 =        0.8; // cut on dca between the two tracks ;
+  row.dcav0	 =        1.5; // cut on dca(impact param) of V0 from event vertex ;
   row.dlen	 =      10000; // cut on dist. of decay from prim. vertex ;
   row.alpha_max	 =        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
   row.ptarm_max	 =        0.3; // Max. value of arm. pt allowed, only first entry used;
-  row.dcapnmin	 =        0.0; // Min. value of tracks at interaction ;
+  row.dcapnmin	 =        100; // Min. value of tracks at interaction ;
   row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
   row.n_point	 =          1; // Min. number of points on track ;
   tableSet->AddAt(&row);
 //
 // SVT+TPC cuts
   memset(&row,0,size);
-  row.dca	 =        1.2; // cut on dca between the two tracks ;
-  row.dcav0	 =        1.2; // cut on dca(impact param) of V0 from event vertex ;
-  row.dlen	 =        0.6; // cut on dist. of decay from prim. vertex ;
+  row.dca	 =        0.8; // cut on dca between the two tracks ;
+  row.dcav0	 =        0.8; // cut on dca(impact param) of V0 from event vertex ;
+  row.dlen	 =        1.0; // cut on dist. of decay from prim. vertex ;
   row.alpha_max	 =        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
   row.ptarm_max	 =        0.3; // Max. value of arm. pt allowed, only first entry used;
-  row.dcapnmin	 =        0.0; // Min. value of tracks at interaction ;
+  row.dcapnmin	 =        0.5; // Min. value of tracks at interaction ;
   row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
   row.n_point	 =         11; // Min. number of points on track ;
   tableSet->AddAt(&row);

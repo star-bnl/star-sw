@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.21 2004/04/12 16:19:52 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.19 2004/04/08 16:28:06 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -48,9 +48,7 @@ class kretDbBlobS_st;
 
 class  EEmcDbItem;
 class  EEmcDbCrate;
-#include "StEEmcUtil/EEfeeRaw/EEdims.h"
-
-
+class  StEEmcDbIndexItem1;//old, drop it
 
 class DbFlavor {
  public:
@@ -63,19 +61,27 @@ class DbFlavor {
 
 class StEEmcDbMaker : public StMaker {
  private:
+  enum {mxAdcCrate=119, mxAdcChan=192,
+	minTwCrateID=1,maxTwCrateID=6, 
+	minMapmtCrateID=64, maxMapmtCrateID=119,
+        maxTwCrateCh=128, maxMapmtCrateCh=192};
   
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.21 2004/04/12 16:19:52 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.19 2004/04/08 16:28:06 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
   int myTimeStampDay;
   unsigned int myTimeStampUnix;
-  void  clearItemArray();
-  void mRequestDataBase(); ///< reads tables from STAR-DB
+  void  clear();
+  void mReloadDb(); ///< reads data from STAR-DB
   void mOptimizeMapping(int isec);
   void mOptimizeOthers(int isec);
   void mOptimizeFibers(); ///< decodes crates -->fiber map
 
+  //........... old
+  void mOptimizeDb(); ///< creates local fast look-up tables
+  void mPrintItems();///< utility
+  // ........... end
   
   // pointers to Db tables for each sector
   int *mDbsectorID; //!
@@ -88,58 +94,60 @@ class StEEmcDbMaker : public StMaker {
   kretDbBlobS_st  *mDbFiberConfBlob; //!
   
   // local fast look-up tables
+  //old,.........................  to be revised,jb
+  StEEmcDbIndexItem1   *mDbItem1; //!  assess via logical name (sec/sub/eta)
+  StEEmcDbIndexItem1   ***mLookup; //! access via crate/chan
+
+  // new, jb
+  // local fast look-up tables
   EEmcDbItem   *byIndex; //!  assess via plain index
   EEmcDbItem   ***byCrate; //! access via crate/chan
-  EEmcDbItem   *byStrip[MaxSectors][MaxSmdPlains][MaxSmdStrips]; //! access via sec/UV/strip
-
   EEmcDbCrate *mDbFiber; // maps tw & mapmt crates to DAQ fibers
   int nFiber; // # of existing crates(Tw+Mapmt)
-  
+
+
+ 
   float KsigOverPed; // defines threshold
   int nFound;
   TString dbName; //name of the DB used 
   DbFlavor dbFlavor; // used if flavor is requested
   
   template <class St_T, class T_st> void getTable(TDataSet *eedb, int secID, TString tabName, TString mask, T_st **outTab);
-
-  const EEmcDbItem* getStrip(int sec, char uv, int strip);  //ranges: sec=1-12, uv=U,V ,strip=1-288; slow method
+  
 
  protected:
  public:  
-  
+
+
   void setSectors(int ,int); ///< limit the range of sectors for speed
   void setThreshold(float x);// defines threshold for ADCs
 
   const EEmcDbCrate * getFiber(int icr);
   const  int getNFiber(){return nFiber;}
-  const  EEmcDbItem* getByIndex(int ikey); ///< returns full DB info for one pixel
+  const  EEmcDbItem* getByIndex1(int ikey); ///< returns full DB info for one pixel
   void exportAscii(char *fname="eemcDbDump.dat") const; 
   void print() {exportAscii();}
 
-  const  EEmcDbItem*  getByCrate(int crateID, int channel); // full DB info, crateID counts from 1, channel from 0  
-
-  const  EEmcDbItem*  getByStrip0(int isec, int iuv, int istrip);  //ranges: isec=0-11, iuv=0,1 ,istrip=0-287; fast method
-
-  const  EEmcDbItem*  getByStrip(int sec, char uv, int strip) //ranges: sec=1-12, uv=U,V ,strip=1-288; fast method
-    {return getByStrip0(sec-1,uv-'U',strip-1);}
-
-  const EEmcDbItem* getTail(int sec,char sub, int eta, char type); //ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
-
-  const EEmcDbItem* getT(int sec, char sub, int eta){return getTail(sec,sub,eta,'T');}
+ const  EEmcDbItem*  getByCrate(int crateID, int channel); // full DB info, crateID counts from 1, channel from 0  
 
 
-
-  const EEmcDbItem* getP(int sec, char sub, int eta){return getTail(sec,sub,eta,'P');}
-  const EEmcDbItem* getQ(int sec, char sub, int eta){return getTail(sec,sub,eta,'Q');}
-  const EEmcDbItem* getR(int sec, char sub, int eta){return getTail(sec,sub,eta,'R');}
-  const EEmcDbItem* getU(int sec, int strip){return getStrip(sec,strip,'U');}
-  const EEmcDbItem* getV(int sec, int strip){return getStrip(sec,strip,'V');}
-
-
+  //.......................  OLD ............... DB access, drop it
   //
   // Methods to acces DB info for T=tower, P=preshower-1, Q=preshower-2,
   // R=postshower, U=SMD-U strip, V=SMD-V strip
   //
+  const  StEEmcDbIndexItem1* getT(int sec, char sub, int eta); ///< returns full DB info for one Tower channel
+  const  StEEmcDbIndexItem1* getP(int sec, char sub, int eta); ///< returns full DB info for one preshower-1 channel
+  const  StEEmcDbIndexItem1* getQ(int sec, char sub, int eta); ///< returns full DB info for one preshower-2 channel
+  const  StEEmcDbIndexItem1* getR(int sec, char sub, int eta); ///< returns full DB info for one postshower  channel
+  const  StEEmcDbIndexItem1* getU(int sec, int strip ); ///< returns full DB info for one SMD strip/channel, U plane
+  const  StEEmcDbIndexItem1* getV(int sec, int strip ); ///< returns full DB info ...                      , V plane
+
+
+  const  StEEmcDbIndexItem1* getByIndex(int i); ///< returns full DB info for one any channel
+  const  StEEmcDbIndexItem1* get(int crate, int channel); ///< returns full DB info for any ADC channel
+
+  //.......................  OLD ............... end
 
   void setTimeStampDay( int ); ///< to fix  time stamp for all events, default =not fixed 
   void setPreferedFlavor(const char *flavor, const char *tableNameMask);
@@ -157,7 +165,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.21 2004/04/12 16:19:52 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.19 2004/04/08 16:28:06 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -168,12 +176,6 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
-// Revision 1.21  2004/04/12 16:19:52  balewski
-// DB cleanup & update
-//
-// Revision 1.20  2004/04/09 18:38:11  balewski
-// more access methods, not important for 63GeV production
-//
 // Revision 1.19  2004/04/08 16:28:06  balewski
 // *** empty log message ***
 //

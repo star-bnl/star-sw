@@ -318,7 +318,11 @@ Int_t StV0FinderMaker::Prepare() {
       ///End Betty
 
       //Cut: track type
-      if ((tri->fittingMethod() == TPTflag && (GetTrackerUsage() == kTrackerUseITTF)) ||
+      //cout << "i,j" << i << "," << j << " fittingMethod = " << tri->fittingMethod() << endl;
+
+      if (
+	  //(tri->fittingMethod() == TPTflag && (GetTrackerUsage() == kTrackerUseITTF)) ||
+	  (tri->fittingMethod() != ITTFflag && (GetTrackerUsage() == kTrackerUseITTF)) ||
           (tri->fittingMethod() == ITTFflag && (GetTrackerUsage() == kTrackerUseTPT))) continue;
 
       //Cut: track flag
@@ -453,9 +457,12 @@ Int_t StV0FinderMaker::Make() {
       j = ntrk[jj];
 
       if (GetTrackerUsage() == kTrackerUseBOTH)
-         {if ((trk[i]->fittingMethod() == ITTFflag) && (trk[j]->fittingMethod() == TPTflag)) continue;
-          if ((trk[i]->fittingMethod() == TPTflag) && (trk[j]->fittingMethod() == ITTFflag)) continue;
-          }
+         {
+	   //if ((trk[i]->fittingMethod() == ITTFflag) && (trk[j]->fittingMethod() == TPTflag)) continue;
+	   if ((trk[i]->fittingMethod() == ITTFflag) && (trk[j]->fittingMethod() != ITTFflag)) continue;
+	   //if ((trk[i]->fittingMethod() == TPTflag) && (trk[j]->fittingMethod() == ITTFflag)) continue;
+	   if ((trk[i]->fittingMethod() != ITTFflag) && (trk[j]->fittingMethod() == ITTFflag)) continue;
+	 }
 
       // Determine detector id of V0 for pars
       det_id_v0 = TMath::Max(detId[i],detId[j]);
@@ -813,8 +820,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.21 2004/04/13 19:50:38 caines Exp $
+// $Id: StV0FinderMaker.cxx,v 1.22 2004/04/15 19:41:35 jeromel Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.22  2004/04/15 19:41:35  jeromel
+// Mainly undo recent patch which is logically right (but over-estimate actual coding standards)
+//
 // Revision 1.21  2004/04/13 19:50:38  caines
 // Remove cut on v0 being before hit as thsi hurts vos from xi in svt
 //

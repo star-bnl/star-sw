@@ -1,45 +1,33 @@
 // example macro to use  EEmcTTMMaker
 // Author: Piotr A. Zolnierczuk
-
 class StChain;
+class StMuDstMaker;
+class EEmcTTMMaker;
+
 StChain      *chain     =0;
-
-
-void RunTTM(StChain* chain, 
-	    char* inpDir   ,
-	    char* inpFile  ,
-	    char* outFile  ,
-	    Int_t nFiles   ,
-	    Int_t nEvents  ,
-	    Int_t timeStamp);
-
+StMuDstMaker *muDstMaker=0;
+EEmcTTMMaker *ttm       =0;
  
-void 
-loadSharedLibraries()
-{
-  // Dynamically link needed shared libs
-  gSystem->Load("libTable");
-  gSystem->Load("libPhysics");
-  gSystem->Load("St_base");
-  gSystem->Load("StChain");
-  gSystem->Load("St_Tables");
-  gSystem->Load("StUtilities");        // new addition 22jul99
-  gSystem->Load("StTreeMaker");
-  gSystem->Load("StIOMaker");
-  gSystem->Load("StarClassLibrary");
-  gSystem->Load("StTriggerDataMaker"); // new starting from April 2003
-  gSystem->Load("StBichsel");
-  gSystem->Load("StEvent");
-  gSystem->Load("StEventUtilities");
-  gSystem->Load("StEmcUtil");
-  gSystem->Load("StTofUtil");
-  gSystem->Load("StPmdUtil");
-  gSystem->Load("StPreEclMaker");
-  gSystem->Load("StStrangeMuDstMaker");
-  gSystem->Load("StMuDSTMaker");  
+void loadSharedLibraries();
+
+void
+ttm
+(
+ char* inpDir  = "/star/2003/mudst/",                    // MuDST directory
+ char* inpFile = "",                                     // MuDST file(s)
+ char* outFile = "R4145010.root",
+ Int_t nFiles  = 40,                                     // # of MuDST file(s)
+ Int_t nEvents = 50000
+ )
+{ 
+  gErrorIgnoreLevel=1999;
+  cerr << "<xml>" << endl;
+
+  // load root/root4star libraries
+  gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  loadSharedLibraries();
 
   // load more libraries :)
-  gSystem->Load("libmysqlclient");
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
@@ -49,27 +37,49 @@ loadSharedLibraries()
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcPoolTTM");
 
-  cout << " loading of shared libraries done" << endl;
-
-}
-
-void ttm(
- char* inpDir    = "",            // MuDST directory
- char* inpFile   = "ttm.lis",     // MuDST file(s)
- char* outFile   = "ttm.root",
- Int_t nFiles    = 50,            // # of MuDST file(s)
- Int_t nEvents   = -1,
- Int_t timeStamp = 20040331)
-{ 
-  //gErrorIgnoreLevel=1999;
-  std::cerr << "<xml version=\"1.0\" >" << std::endl;
-  
-  loadSharedLibraries();
-
   // create the chain    
   chain = new StChain("StChain"); 
-
-  EEmcTTMMaker::Run(chain,inpDir,inpFile,outFile,nFiles,nEvents,timeStamp);
   
-  std::cerr << "</xml>" << endl;
+  // now we add Makers to the chain...  some of that is black magic :) 
+  muDstMaker  = new StMuDstMaker(0,0,inpDir,inpFile,"MuDst.root",nFiles);  // muDST main chain
+  StMuDbReader   *db         = StMuDbReader::instance();                   // need the database
+  StEEmcDbMaker  *eemcDbMaker=new StEEmcDbMaker("eemcDb");                 // need EEMC database  
+  St_db_Maker    *dbMk       = new St_db_Maker("StarDb", "MySQL:StarDb");  // need the database (???)
+
+  // now comment in/out/change the below if you want it your way
+  eemcDbMaker->setSectors(5,8);            // request EEMC DB for sectors you need (dafault:1-12)
+  eemcDbMaker->setTimeStampDay(20030514);  // format: yyyymmdd
+  // eemcDbMaker->setDBname("TestScheme/eemc");               // use alternative database   (if needed)
+  // eemcDbMaker->setPreferedFlavor("set430","eemcPMTcal");   // request alternative flavor (   -//-  )
+
+  // finally after so many lines we arrive at the good stuff
+  ttm = new  EEmcTTMMaker ("TTM",muDstMaker,eemcDbMaker);
+  ttm->SetFileName(outFile);
+  ttm->Summary(cerr);    // 
+
+  StMuDebug::setLevel(0);
+
+  chain->Init();
+  chain->ls(3);
+
+  int stat=0;
+  int counter=0;
+  //---------------------------------------------------
+  while(nEvents<0 || counter<nEvents ) {
+    if( (stat = chain->Make()) != 0 ) break;
+
+    // just for fun
+    switch(counter%4) {
+    case  0: cout << "\\\r"; break; 
+    case  1: cout << "|\r"; break; 
+    case  2: cout << "-\r"; break; 
+    case  3: cout << "/\r"; break; 
+    default: cout << ".\r"; break; 
+    }
+    if(++counter%100==0) cout << "analyzed " << counter << " events" << endl;
+    cout.flush();
+  }
+  ttm->Summary(cerr);    // 
+  ttm->Finish();
+  cerr << "</xml>" << endl;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtReactionPlaneAnalysis.h,v 1.4 2004/04/12 14:05:46 magestro Exp $
+ * $Id: StHbtReactionPlaneAnalysis.h,v 1.3 2002/11/03 16:37:43 magestro Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StHbtReactionPlaneAnalysis.h,v $
- * Revision 1.4  2004/04/12 14:05:46  magestro
- * Added Vz dimension to event-mixing
+ * Revision 1.3  2002/11/03 16:37:43  magestro
+ * Moved StHbtPicoEventCollectionVectorHideAway object to StHbtAnalysis for circular event-mixing
  *
  * Revision 1.2  2002/05/28 14:04:07  rcwells
  * Added multiplicity binning to StHbtReactionPlaneAnalysis
@@ -29,15 +29,13 @@
 #define StHbtReactionPlaneAnalysis_hh
 
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"        // base analysis class
-class StHbtPicoEventCollectionVectorHideAway;
 
 class StHbtReactionPlaneAnalysis : public StHbtAnalysis {
 
 public:
 
   StHbtReactionPlaneAnalysis(int pTSwitch=1, unsigned int nBinPhi=1, double phiLo=-100., double phiHi=+100.,
-			     unsigned int nBinsMult=1, double multLo=0, double multHi=999999,
-           unsigned int nBinsVert=1, double vertLo=-1000, double vertHi=1000);
+			     unsigned int nBinsMult=1, double multLo=0, double multHi=999999);
   StHbtReactionPlaneAnalysis(const StHbtReactionPlaneAnalysis&);  // copy constructor
   virtual void ProcessEvent(const StHbtEvent*);
   virtual ~StHbtReactionPlaneAnalysis();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.11 2004/04/09 21:55:50 perev Exp $
+ * $Id: TMemStat.cxx,v 1.10 2004/04/08 21:36:45 perev Exp $
  *
  ***************************************************************************
  *
@@ -81,7 +81,7 @@ void TMemStat::Summary()
 {
 #define NUMTICKS (40+4*12+5)
 
-  Double_t dmin=1.e+33,daver=0,dmax=-1.e+33,drms=0,dtally=0,dmp;
+  Double_t dmin=1.e+33,daver=0,dmed=0,dmax=-1.e+33,drms=0,dtally=0,dmp;
   int i;
 
   if(!fgList) return;

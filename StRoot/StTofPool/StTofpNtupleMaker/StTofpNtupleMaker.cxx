@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpNtupleMaker.cxx,v 1.5 2004/04/10 04:36:25 dongx Exp $
+ * $Id: StTofpNtupleMaker.cxx,v 1.3 2004/04/01 19:19:00 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,12 +10,6 @@
  ***************************************************************************
  *
  * $Log: StTofpNtupleMaker.cxx,v $
- * Revision 1.5  2004/04/10 04:36:25  dongx
- * additional update for AdcLoRes in ntuple
- *
- * Revision 1.4  2004/04/09 19:26:25  dongx
- * Add some missing updates for year4, add AdcLoRes in ntuple
- *
  * Revision 1.3  2004/04/01 19:19:00  dongx
  * update for year4 run
  *
@@ -190,7 +184,7 @@ Int_t StTofpNtupleMaker::Make(){
   // build pVPD ntuple
   if (!(mTupleFileName=="")){
     int k(0);
-    float tuple[31];
+    float tuple[25];
     tuple[k++] = event->runId();    // the run number
     tuple[k++] = event->id();       // the event number
     tuple[k++] = triggerWord;
@@ -206,7 +200,6 @@ Int_t StTofpNtupleMaker::Make(){
     tuple[k++] = nTdcTofp;          // TOFp hits
     for (int i=0;i<NPVPD;i++) tuple[k++] = mPvpdTdc[i];
     for (int i=0;i<NPVPD;i++) tuple[k++] = mPvpdAdc[i];
-    for (int i=0;i<NPVPD;i++) tuple[k++] = mPvpdAdcLoRes[i];
 
     cout << " pVPD update ..." << endl;
     mPvpdTuple->Fill(tuple);
@@ -278,7 +271,7 @@ Int_t StTofpNtupleMaker::Make(){
       mSlatData.te1 = (int)mPvpdTdc[0]; mSlatData.te2 = (int)mPvpdTdc[1];
       mSlatData.te3 = (int)mPvpdTdc[2]; mSlatData.tw1 = (int)mPvpdTdc[3];
       mSlatData.tw2 = (int)mPvpdTdc[4]; mSlatData.tw3 = (int)mPvpdTdc[5];
-      if (mYear3||mYear4) {
+      if (mYear3) {
 	mSlatData.ae1 = (int)mPvpdAdcLoRes[0]; mSlatData.ae2 = (int)mPvpdAdcLoRes[1];
 	mSlatData.ae3 = (int)mPvpdAdcLoRes[2]; mSlatData.aw1 = (int)mPvpdAdcLoRes[3];
 	mSlatData.aw2 = (int)mPvpdAdcLoRes[4]; mSlatData.aw3 = (int)mPvpdAdcLoRes[5];
@@ -359,7 +352,7 @@ Int_t StTofpNtupleMaker::getTofData(StTofCollection* tofCollection){
     mTofpTdc[i] = tofData[i]->tdc();
   }
 
-  if (mYear2){
+  if (!mYear3){
     // swap ADC channels 3 and 4 ... this should move to the DAQreader!
     float tmp   = mTofpAdc[3];
     mTofpAdc[3] = mTofpAdc[2];
@@ -388,8 +381,7 @@ void StTofpNtupleMaker::bookNtuples(){
   // pVPD timing
   string varList = "run:evt:trgwrd:magfield:zvtx:zvtxchi2:ctbsum"
                    ":zdceast:zdcwest:refmult:nprimary:tofpsum" 
-                   ":ntofp:te1:te2:te3:tw1:tw2:tw3:ael1:ael2:ael3"
-                   ":awl1:awl1:awl3:ae1:ae2:ae3:aw1:aw2:aw3";
+                   ":ntofp:te1:te2:te3:tw1:tw2:tw3:ae1:ae2:ae3:aw1:aw2:aw3";
   mPvpdTuple = new TNtuple("pvpd","tofp timing",varList.c_str());
 
   // TOFp calibration ntuple
