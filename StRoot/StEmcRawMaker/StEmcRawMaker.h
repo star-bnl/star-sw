@@ -1,5 +1,8 @@
-// $Id: StEmcRawMaker.h,v 1.1 2004/10/18 18:20:07 suaide Exp $
+// $Id: StEmcRawMaker.h,v 1.2 2004/10/19 17:53:00 suaide Exp $
 // $Log: StEmcRawMaker.h,v $
+// Revision 1.2  2004/10/19 17:53:00  suaide
+// code clean up
+//
 // Revision 1.1  2004/10/18 18:20:07  suaide
 // New Maker. Will replace StEmcADCtoEMaker in production.
 // It reads only DAQ structures. Output is StEvent.
@@ -50,15 +53,12 @@ class StEmcRawMaker : public StMaker
    StBemcRaw*               mBemcRaw;
    
    Bool_t                   mPrint;
-   Int_t                    mRun;
-   Int_t                    mDBRun;
-   Int_t                    mDate;
-   Int_t                    mTime;
                       
  public:                  
                             StEmcRawMaker(const char *name="EmcRaw"); ///< StEmcRawMaker constructor
   virtual                   ~StEmcRawMaker(); ///< StEmcRawMaker destructor
   virtual Int_t             Init(); ///< Init function. This method initializes the histograms
+  virtual Int_t             InitRun(Int_t); ///< InitRun function
   virtual Int_t             Make(); ///< Process each event
   virtual Int_t             Finish(); ///< Finish function. 
   virtual void              fillHistograms();///<Fill QA histograms
@@ -69,7 +69,7 @@ class StEmcRawMaker : public StMaker
   StBemcRaw*                getBemcRaw()       { return mBemcRaw;} ///< Return the StBemcRaw pointer
   void                      setPrint(Bool_t a) { mPrint = a; mBemcRaw->setPrint(a);} ///< Set it to kFALSE if you do not want to print messages
     
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.1 2004/10/18 18:20:07 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.2 2004/10/19 17:53:00 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcRawMaker, 1)  
 };

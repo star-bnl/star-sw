@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcRawMaker.cxx,v 1.1 2004/10/18 18:20:07 suaide Exp $
+// $Id: StEmcRawMaker.cxx,v 1.2 2004/10/19 17:53:00 suaide Exp $
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.2  2004/10/19 17:53:00  suaide
+// code clean up
+//
 // Revision 1.1  2004/10/18 18:20:07  suaide
 // New Maker. Will replace StEmcADCtoEMaker in production.
 // It reads only DAQ structures. Output is StEvent.
@@ -19,10 +22,8 @@
 #include "StDaqLib/EMC/EMC_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
 #include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StMessMgr.h"
 
-#define STATUS_OK 1
-#define CAP1 124
-#define CAP2 125
 
 ClassImp(StEmcRawMaker)
 
@@ -33,8 +34,6 @@ ClassImp(StEmcRawMaker)
 StEmcRawMaker::StEmcRawMaker(const char *name):StMaker(name)
 {
   mPrint = kTRUE;
-  mRun = 0;
-  mDBRun = -1;
   mEvent = 0;
   mBemcRaw = new StBemcRaw();  
 }
@@ -60,6 +59,15 @@ Int_t StEmcRawMaker::Init()
   
   return StMaker::Init();
 }
+Int_t StEmcRawMaker::InitRun(Int_t run)
+{         
+  // Load DB and create decoder for the BEMC
+  if(mPrint) gMessMgr->Info() <<"Getting database tables for the BEMC detector "<<endm;
+  mBemcRaw->createDecoder(GetDate(),GetTime());  	
+  mBemcRaw->getTables()->loadTables((StMaker*)this);
+  
+  return StMaker::InitRun(run);
+}
 //_____________________________________________________________________________
 /*!
   This method creates mean ADC and RMS histograms. It runs only in the end of the job
@@ -76,13 +84,13 @@ Int_t StEmcRawMaker::Make()
 {    
   TStopwatch clock;
   clock.Start();
-  if(mPrint) cout <<"\n\nStEmcRawMaker::Make()******************************************************************\n";  
-  prepareEnvironment();    
-  makeBemc();
+  if(mPrint) gMessMgr->Info() <<"StEmcRawMaker::Make()******************************************************************"<<endm;  
+  if(!prepareEnvironment()) if(mPrint) gMessMgr->Warning()<<"Could not prepare the environment to process the event "<<endm;    
+  if(!makeBemc()) if(mPrint) gMessMgr->Warning()<<"Could not process BEMC information properly "<<endm;
   fillHistograms();
   clock.Stop();
-  if(mPrint) cout <<"Time to run StEmcRawMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<" \n";
-  if(mPrint) cout <<"*******************************************************************************************\n\n\n";
+  if(mPrint) gMessMgr->Info() <<"Time to run StEmcRawMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<endm;
+  if(mPrint) gMessMgr->Info() <<"*******************************************************************************************"<<endm;
 
   return kStOK;
 }
@@ -92,17 +100,15 @@ Int_t StEmcRawMaker::Make()
 */
 Bool_t StEmcRawMaker::prepareEnvironment()
 {
-  mDate = GetDate();
-  mTime = GetTime();
   mEvent = 0;
 
-  if(mPrint) cout <<"Get StEvent pointer and make it ready for filling"<<endl;
+  if(mPrint) gMessMgr->Info() <<"Get StEvent pointer and make it ready for filling"<<endm;
   ////////////////////////////////////////////////////////////
   // Get StEvent pointer and make it ready for filling
   //
   mEvent = (StEvent*)GetInputDS("StEvent");
   StEmcCollection *emc = NULL;
-  
+
   if(mEvent) emc = mEvent->emcCollection();
   else
   {
@@ -124,13 +130,6 @@ Bool_t StEmcRawMaker::prepareEnvironment()
   //
   ////////////////////////////////////////////////////////////
   
-  if(mRun==mDBRun) return kTRUE;
-  
-  if(mPrint) cout <<"Getting database tables for the BEMC detector \n";
-  mDBRun = mRun;
-  mBemcRaw->createDecoder(mDate,mTime);  	
-  mBemcRaw->getTables()->loadTables((StMaker*)this);
-
   return kTRUE;  
 }
 
@@ -140,16 +139,14 @@ Bool_t StEmcRawMaker::prepareEnvironment()
 */
 Bool_t StEmcRawMaker::makeBemc()
 {
-  if(mPrint) cout <<"Copying EMC information from DAQ structure "<<endl;
+  if(mPrint) gMessMgr->Info() <<"Copying EMC information from DAQ structure "<<endm;
   TDataSet* TheData   = GetDataSet("StDAQReader");
   if(!TheData)
   {
-    if(mPrint) cout <<"Could not find DAQ Reader "<<endl;
+    if(mPrint) gMessMgr->Warning() <<"Could not find DAQ Reader "<<endm;
     return kFALSE;
   }    
-  StDAQReader* TheDataReader=(StDAQReader*)(TheData->GetObject());
-  if(TheDataReader) mRun = TheDataReader->getRunNumber();
-  mBemcRaw->setDate(mDate);
+  mBemcRaw->setDate(GetDate());
   return mBemcRaw->make(TheData,mEvent);
 }
 //_____________________________________________________________________________
@@ -167,9 +164,9 @@ void StEmcRawMaker::fillHistograms()
       mBarrelAdcSumHist->Fill(mBemcRaw->getTotalADC(det),det);
       mBarrelNCratesHist->Fill(mBemcRaw->getNCratesOK(det),det);
     }
-    for(Int_t crate = 1;crate<=30; crate++)
+    for(Int_t crate = 1;crate<=MAXCRATES; crate++)
     {
-      mBarrelCrateStatusHist->Fill(mBemcRaw->getCrateStatus(1,crate),crate);
+      mBarrelCrateStatusHist->Fill(mBemcRaw->getCrateStatus(BTOW,crate),crate);
     }
   }
 }

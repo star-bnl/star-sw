@@ -1,6 +1,9 @@
 // 
-// $Id: StBemcTables.cxx,v 1.1 2004/10/18 18:20:07 suaide Exp $
+// $Id: StBemcTables.cxx,v 1.2 2004/10/19 17:53:00 suaide Exp $
 // $Log: StBemcTables.cxx,v $
+// Revision 1.2  2004/10/19 17:53:00  suaide
+// code clean up
+//
 // Revision 1.1  2004/10/18 18:20:07  suaide
 // New Maker. Will replace StEmcADCtoEMaker in production.
 // It reads only DAQ structures. Output is StEvent.
@@ -9,10 +12,6 @@
 #include "Stiostream.h"
 #include "StEmcUtil/others/emcDetectorName.h"
 #include "TString.h"
-
-#define STATUS_OK 1
-#define CAP1 124
-#define CAP2 125
 
 ClassImp(StBemcTables)
 
@@ -52,22 +51,22 @@ StBemcTables::~StBemcTables()
 */
 void StBemcTables::loadTables(Int_t det, TDataSet *DB)
 {  
-  if(det==1)      { mBtowP = NULL; mBtowS = NULL; mBtowC = NULL; mBtowG = NULL; }
-  else if(det==2) { mBprsP = NULL; mBprsS = NULL; mBprsC = NULL; mBprsG = NULL; }
-  else if(det==2) { mSmdeP = NULL; mSmdeS = NULL; mSmdeC = NULL; mSmdeG = NULL; }
-  else if(det==2) { mSmdpP = NULL; mSmdpS = NULL; mSmdpC = NULL; mSmdpG = NULL; }
+  if(det==BTOW)       { mBtowP = NULL; mBtowS = NULL; mBtowC = NULL; mBtowG = NULL; }
+  else if(det==BPRS)  { mBprsP = NULL; mBprsS = NULL; mBprsC = NULL; mBprsG = NULL; }
+  else if(det==BSMDE) { mSmdeP = NULL; mSmdeS = NULL; mSmdeC = NULL; mSmdeG = NULL; }
+  else if(det==BSMDP) { mSmdpP = NULL; mSmdpS = NULL; mSmdpC = NULL; mSmdpG = NULL; }
   
   TString TableName;
   if(DB)
   {
     /////////////////////////////////////////////////
     TableName = detname[det-1]+"Ped";
-    if(det<=2)
+    if(det==BTOW || det==BPRS)
     {
       St_emcPed* ped=(St_emcPed*)DB->Find(TableName.Data());
       if(ped)
       {
-        if(det==1) mBtowP = ped->GetTable();
+        if(det==BTOW) mBtowP = ped->GetTable();
         else       mBprsP = ped->GetTable();
       } 
     }
@@ -76,19 +75,19 @@ void StBemcTables::loadTables(Int_t det, TDataSet *DB)
       St_smdPed* ped=(St_smdPed*)DB->Find(TableName.Data());
       if(ped)
       {
-        if(det==3) mSmdeP = ped->GetTable();
+        if(det==BSMDE) mSmdeP = ped->GetTable();
         else       mSmdpP = ped->GetTable();
       }
     }
      
     /////////////////////////////////////////////////
     TableName = detname[det-1]+"Status";
-    if(det<=2)
+    if(det==BTOW || det==BPRS)
     {
       St_emcStatus* status=(St_emcStatus*)DB->Find(TableName.Data());
       if(status)
       {
-        if(det==1) mBtowS = status->GetTable();
+        if(det==BTOW) mBtowS = status->GetTable();
         else       mBprsS = status->GetTable();
       }
     }
@@ -97,19 +96,19 @@ void StBemcTables::loadTables(Int_t det, TDataSet *DB)
       St_smdStatus* status=(St_smdStatus*)DB->Find(TableName.Data());
       if(status)
       {
-        if(det==3) mSmdeS = status->GetTable();
+        if(det==BSMDE) mSmdeS = status->GetTable();
         else       mSmdpS = status->GetTable();
       }
     }
       
     /////////////////////////////////////////////////
     TableName = detname[det-1]+"Calib";
-    if(det<=2)
+    if(det==BTOW || det==BPRS)
     {
       St_emcCalib* calib=(St_emcCalib*)DB->Find(TableName.Data());
       if(calib)
       {
-        if(det==1) mBtowC = calib->GetTable();
+        if(det==BTOW) mBtowC = calib->GetTable();
         else       mBprsC = calib->GetTable();
       }
     }
@@ -118,19 +117,19 @@ void StBemcTables::loadTables(Int_t det, TDataSet *DB)
       St_smdCalib* calib=(St_smdCalib*)DB->Find(TableName.Data());
       if(calib)
       {
-        if(det==3) mSmdeC = calib->GetTable();
+        if(det==BSMDE) mSmdeC = calib->GetTable();
         else       mSmdpC = calib->GetTable();
       }
     }
       
     /////////////////////////////////////////////////
     TableName = detname[det-1]+"Gain";
-    if(det<=2)
+    if(det==BTOW || det==BPRS)
     {
       St_emcGain* gain=(St_emcGain*)DB->Find(TableName.Data());
       if(gain)
       {
-        if(det==1) mBtowG = gain->GetTable();
+        if(det==BTOW) mBtowG = gain->GetTable();
         else       mBprsG = gain->GetTable();
       }
     }
@@ -139,7 +138,7 @@ void StBemcTables::loadTables(Int_t det, TDataSet *DB)
       St_smdGain* gain=(St_smdGain*)DB->Find(TableName.Data());
       if(gain)
       {
-        if(det==3) mSmdeG = gain->GetTable();
+        if(det==BSMDE) mSmdeG = gain->GetTable();
         else       mSmdpG = gain->GetTable();
       }
     }
@@ -167,19 +166,19 @@ void StBemcTables::getPedestal(Int_t det, Int_t id, Int_t CAP,Float_t& P, Float_
 {
   P = 0;
   R = 0;
-  if(det==1 && mBtowP) 
+  if(det==BTOW && mBtowP) 
   {
     P = ((Float_t)mBtowP[0].AdcPedestal[id-1])/100;
     R = ((Float_t)mBtowP[0].AdcPedestalRMS[id-1])/100;
     return;
   }
-  if(det==2 && mBprsP) 
+  if(det==BPRS && mBprsP) 
   {
     P = ((Float_t)mBprsP[0].AdcPedestal[id-1])/100;
     R = ((Float_t)mBprsP[0].AdcPedestalRMS[id-1])/100;
     return;
   }
-  if(det==3 && mSmdeP) 
+  if(det==BSMDE && mSmdeP) 
   {
     Int_t C = 0;
     if(CAP==CAP1) C = 1;
@@ -188,7 +187,7 @@ void StBemcTables::getPedestal(Int_t det, Int_t id, Int_t CAP,Float_t& P, Float_
     R = ((Float_t)mSmdeP[0].AdcPedestalRMS[id-1][C])/100;
     return;
   }
-  if(det==4 && mSmdpP) 
+  if(det==BSMDP && mSmdpP) 
   {
     Int_t C = 0;
     if(CAP==CAP1) C = 1;
@@ -206,10 +205,10 @@ void StBemcTables::getPedestal(Int_t det, Int_t id, Int_t CAP,Float_t& P, Float_
 void StBemcTables::getStatus(Int_t det, Int_t id, Int_t& S)
 {
   S = STATUS_OK;
-  if(det==1 && mBtowS) { S = (Int_t)mBtowS[0].Status[id-1];return;}
-  if(det==2 && mBprsS) { S = (Int_t)mBprsS[0].Status[id-1];return;}
-  if(det==3 && mSmdeS) { S = (Int_t)mSmdeS[0].Status[id-1];return;}
-  if(det==4 && mSmdpS) { S = (Int_t)mSmdpS[0].Status[id-1];return;}
+  if(det==BTOW && mBtowS) { S = (Int_t)mBtowS[0].Status[id-1];return;}
+  if(det==BPRS && mBprsS) { S = (Int_t)mBprsS[0].Status[id-1];return;}
+  if(det==BSMDE && mSmdeS) { S = (Int_t)mSmdeS[0].Status[id-1];return;}
+  if(det==BSMDP && mSmdpS) { S = (Int_t)mSmdpS[0].Status[id-1];return;}
   return;  
 }
 //_____________________________________________________________________________
@@ -219,10 +218,10 @@ void StBemcTables::getStatus(Int_t det, Int_t id, Int_t& S)
 void StBemcTables::getGain(Int_t det, Int_t id, Float_t& G)
 {
   G = 1;
-  if(det==1 && mBtowG) { G = (Float_t)mBtowG[0].Gain[id-1];return;}
-  if(det==2 && mBprsG) { G = (Float_t)mBprsG[0].Gain[id-1];return;}
-  if(det==3 && mSmdeG) { G = (Float_t)mSmdeG[0].Gain[id-1];return;}
-  if(det==4 && mSmdpG) { G = (Float_t)mSmdpG[0].Gain[id-1];return;}
+  if(det==BTOW && mBtowG) { G = (Float_t)mBtowG[0].Gain[id-1];return;}
+  if(det==BPRS && mBprsG) { G = (Float_t)mBprsG[0].Gain[id-1];return;}
+  if(det==BSMDE && mSmdeG) { G = (Float_t)mSmdeG[0].Gain[id-1];return;}
+  if(det==BSMDP && mSmdpG) { G = (Float_t)mSmdpG[0].Gain[id-1];return;}
   return;  
 }
 //_____________________________________________________________________________
@@ -232,9 +231,9 @@ void StBemcTables::getGain(Int_t det, Int_t id, Float_t& G)
 void StBemcTables::getCalib(Int_t det, Int_t id, Int_t power, Float_t& C)
 {
   C = 0;
-  if(det==1 && mBtowC) { C = (Float_t)mBtowC[0].AdcToE[id-1][power];return;}
-  if(det==2 && mBprsC) { C = (Float_t)mBprsC[0].AdcToE[id-1][power];return;}
-  if(det==3 && mSmdeC) { C = (Float_t)mSmdeC[0].AdcToE[id-1][power];return;}
-  if(det==4 && mSmdpC) { C = (Float_t)mSmdpC[0].AdcToE[id-1][power];return;}
+  if(det==BTOW && mBtowC) { C = (Float_t)mBtowC[0].AdcToE[id-1][power];return;}
+  if(det==BPRS && mBprsC) { C = (Float_t)mBprsC[0].AdcToE[id-1][power];return;}
+  if(det==BSMDE && mSmdeC) { C = (Float_t)mSmdeC[0].AdcToE[id-1][power];return;}
+  if(det==BSMDP && mSmdpC) { C = (Float_t)mSmdpC[0].AdcToE[id-1][power];return;}
   return;  
 }
