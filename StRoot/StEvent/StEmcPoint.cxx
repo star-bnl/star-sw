@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcPoint.cxx,v 2.7 2004/02/17 21:43:41 ullrich Exp $
+ * $Id: StEmcPoint.cxx,v 2.6 2003/09/02 17:58:05 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.cxx,v $
- * Revision 2.7  2004/02/17 21:43:41  ullrich
- * Added code to the constructor (was empty).
- *
  * Revision 2.6  2003/09/02 17:58:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -36,20 +33,11 @@
 #include "StEmcPoint.h"
 #include <Stiostream.h>
 
-static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.7 2004/02/17 21:43:41 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.6 2003/09/02 17:58:05 perev Exp $";
 
 ClassImp(StEmcPoint)
 
-StEmcPoint::StEmcPoint() { 
-    mEnergy = 0;
-    mChiSquare = 0;
-    for(int i=0;i<4;i++) {
-	mEnergyInDetector[i]=0;
-	mSizeAtDetector[i]=0;
-    }
-    mDelta[0]=0;
-    mDelta[1]=0;
-}
+StEmcPoint::StEmcPoint() { /* noop */ }
 
 StEmcPoint::StEmcPoint(const StThreeVectorF& p,
                        const StThreeVectorF& e,

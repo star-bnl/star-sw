@@ -38,7 +38,8 @@ void StMkDeb::Cancel(StMaker *mk)
   if (id<0) return;
   ((TObject*)mk)->TObject::SetUniqueID(0);
   TObject *to = fgArr->At(id);
-  if (to != mk)  delete to;
+  TObject *tmk= (TObject *) mk;
+  if (to != tmk)  delete to;
   fgArr->AddAt(0,id);
 } 
 //_____________________________________________________________________________

@@ -6,6 +6,7 @@ $build =~ s/\\/\//g;
 (my $Dir = $obj_dir) =~ s/$build\///g;
 my $ObjDir = "#" . $obj_dir; 
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
+my $OPTSTAR  = $env->{ENV}->{OPTSTAR};
 my $pkg  = "root4star";
 my $pkgN = $pkg . "N";
 my $ROOTLIBS = $env->{ROOTLIBS};
@@ -36,22 +37,21 @@ if ($LD eq 'gcc' or $LD eq 'g++' or $LD eq 'icc'){
 }
 if ($PGI) {
   if ($STAR_SYS =~ /^i386/) {
-    if ( -e "$PGI/linux86/lib/lpgftnrtl.a"){
-      $PGILIBS = " $PGI/linux86/lib/lpgftnrtl.a ";
-    } else {
-      $PGILIBS = " -L$PGI/linux86/lib -lpgftnrtl ";
-    }
-    if ( -e "$PGI/linux86/lib/libpgc.a"){
-      $PGILIBS .= " $PGI/linux86/lib/libpgc.a ";
-    } else {
-      $PGILIBS .= " -L$PGI/linux86/lib -lpgc";
-    }
-    
     if( -e "$OPTSTAR/lib/libpgf77S.so"){
       $PGILIBS .= " -L" . $OPTSTAR . "/lib -lpgf77S";
       if( -e "$OPTSTAR/lib/libpgf77A.a"){
 	$PGILIBS .= " -lpgf77A";
       }
+    }
+    if ( -e "$PGI/linux86/lib/libpgftnrtl.a"){
+      $PGILIBS .= " $PGI/linux86/lib/libpgftnrtl.a ";
+    } else {
+      $PGILIBS .= " -L$PGI/linux86/lib -lpgftnrtl ";
+    }
+    if ( -e "$PGI/linux86/lib/libpgc.a"){
+      $PGILIBS .= " $PGI/linux86/lib/libpgc.a ";
+    } else {
+      $PGILIBS .= " -L$PGI/linux86/lib -lpgc";
     }
   }
   else {
