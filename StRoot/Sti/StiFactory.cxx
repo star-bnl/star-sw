@@ -26,20 +26,15 @@
  * factories but should otherwise have no other apriori attribute.        *
  *                                                                        *
  **************************************************************************/
+#include <iostream.h>
 #include "StiFactory.h"
 
-ClassImp(StiFactory) 
-
-
-StiFactory::StiFactory(const char * newName)
+StiFactory::StiFactory(const char * newName) : name(newName)
 {
-  name = 0;
-  setName(newName);
 }
 
 StiFactory::~StiFactory()
 {
-  delete name;
 }
 
 const char * StiFactory::getName()
@@ -47,13 +42,3 @@ const char * StiFactory::getName()
   return name;
 }
  
-
-void  StiFactory::setName(const char * newName)
-{
-  if (name!=0 && name!=newName)
-    delete name;
-  int size = 1+strlen(newName);
-  name = malloc(size);
-  strcpy(newName,name);
-}
-

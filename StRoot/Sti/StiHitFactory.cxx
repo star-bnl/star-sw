@@ -84,32 +84,43 @@
  **************************************************************************/
 #include "StiHitFactory.h"
 
-ClassImp(StiHitFactory) 
-
-StiHitFactory::StiHitFactory(int originalSize,
-				 int incrementalSize,
-				 int maxIncrementCount)
-  : StiObjectFactory("HitFactory",originalSize,incrementalSize,maxIncrementCount)
+StiHitFactory::StiHitFactory(int original,
+				 int incremental,
+				 int maxIncrement)
+  : StiObjectFactory("HitFactory",original,incremental,maxIncrement)
 {
+    createObjects(originalSize);
+    currentSize = container.size();
 }
 
 StiHitFactory::~StiHitFactory()
-{  
-  for (int i=0;i<getCurrentSize();i++)
-    {
-      delete (*container)[i];
+{
+    for (tobject_vector::iterator it=container.begin(); it!=container.end(); ++it) {
+	delete (*it);
+	(*it) = 0;
     }
 }
 
 StiHit * StiHitFactory::getHit()
 {
-  return (StiHit *) getObject();
+    return dynamic_cast<StiHit*>( getObject() );
 }
   
 void StiHitFactory::createObjects(int n)
 {
-  for (int i=0;i<n;i++)
-    {
-      container->Add(new StiHit());
+    //cout <<"StiHitFactory::createObjects() creating "<<n<<" objects"<<endl;
+    for (int i=0;i<n; ++i) {
+	container.push_back( new StiHit() );
     }
+}
+
+void StiHitFactory::print() const
+{
+    cout <<"StiHitFactory::print()"<<endl;
+    for (tobject_vector::const_iterator it=container.begin(); it!=container.end(); ++it) {
+	StiHit* temp = dynamic_cast<StiHit*>(*it);
+	if (!temp) cout <<"StiHitFactory::print() Error! TObject* -> StiHit* cast failed!!"<<endl;
+	else cout <<*temp<<endl;
+    }
+    return;
 }
