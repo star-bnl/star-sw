@@ -1,4 +1,4 @@
-// $Id: StMuEEmcCrateTimingMaker.h,v 1.3 2005/01/31 16:21:23 jwebb Exp $
+// $Id: StMuEEmcCrateTimingMaker.h,v 1.4 2005/02/01 23:35:46 jwebb Exp $
 
 /*
  * \class StMuEEmcCrateTimingMaker
@@ -80,11 +80,15 @@ class StMuEEmcCrateTimingMaker : public StMaker {
   /// Minimum number of counts
   Int_t mMinCounts;
                 
+  /// Timing, integrals, errors and explicitly save
+  /// crate and channel IDs in the TTree
   Float_t mTimeDelay;
   Float_t totalIntegral[MxMapmtFeeCh];
   Float_t totalError[MxMapmtFeeCh];
-  Int_t kludge;
-  TH2F* cratehist;
+  Int_t   channelIds[MxMapmtFeeCh];
+  Int_t   crateIds[MxMapmtFeeCh];
+  Int_t   kludge;
+  TH2F* cratehist;  /// MxMapmtFeeCh x ADC
 
  public: 
   
