@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.4 2001/03/15 23:47:20 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.5 2001/03/22 21:50:35 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.5  2001/03/22 21:50:35  pavlinov
+ * Clean up for mdc4
+ *
  * Revision 1.4  2001/03/15 23:47:20  pavlinov
  * Fixed error on SUN compiler
  *
@@ -110,6 +113,8 @@ protected:
   TArrayF mPhi;       // Array of phi coordinates (system of single module)
   TArrayF mPhiModule; // Angle of center of module in STAR system
 
+  Int_t   mMaxAdc;    // Range of ADC for each detector
+
 public: 
   StEmcGeom(const Int_t );
   StEmcGeom(const Char_t*);
@@ -164,6 +169,8 @@ public:
   Int_t    getPhi(const Int_t, const Int_t, Float_t &);
   Int_t    getEtaPhi(const Int_t, Float_t &,  Float_t &);
   Int_t    getPhiModule(const Int_t, Float_t &);
+
+  Int_t    getMaxAdc() {return mMaxAdc;}
 
   void     initGeom(const Int_t);
   void     initBEMCorBPRS();
@@ -328,17 +335,22 @@ inline Int_t StEmcGeom::getTheta(const Int_t m, const Int_t  e, Float_t &theta)
 // _____________________________________________________________________
 inline Int_t StEmcGeom::getPhi(const Int_t m, const Int_t  s, Float_t &phi)
 {
+  //
+  // -pi <= phi < pi
+  //
   Int_t iphi, im;
   if(!checkModule(m) && !checkSub(s)){
-    Float_t phiW;       // phi in system of module
+    Double_t phiW;       // phi in system of module
 
-    if(m <= mNModule/2) {phiW = mPhi[s-1]; im = 0; iphi=m-1;} // West part of EMC
+    if(m <= mNModule/2) {phiW = mPhi[s-1]; im = 0; iphi=m-1;}  // West part of EMC
     else {phiW = -mPhi[s-1]; im = 1; iphi=m-mNModule/2-1;}     // East part of EMC    
     
     phiW += mPhiOffset[im] + mPhiStep[im]*iphi;
 
-    while(phiW >=  C_PI) phiW -= C_2PI;  // Range for phi
-    while(phiW <  -C_PI) phiW += C_2PI;  // from -pi to pi;
+    while(phiW >= C_PI) phiW -= C_2PI;
+    while(phiW < -C_PI) phiW += C_2PI;
+    if(phiW > (C_PI-0.0001)) phiW = -C_PI; // -pi<=phi<phi
+
     phi = phiW;
     return 0;
   }
@@ -386,10 +398,13 @@ inline Int_t
 StEmcGeom::getId(const Int_t m, const Int_t e, const Int_t s,Int_t &rid)
 {
   if(!checkModule(m) && !checkEta(e) && !checkSub(s)){
-    rid = 40*(m-1) + 20*(s-1) + (21-e);
+    rid = 40*(m-1) + 20*(s-1) + (21-e); // only for bemc and bprs
     return 0;
   }
-  else return 1;
+  else {
+    printf("<W> Det %i bad index m %i e %i s %i \n", mDetector, m, e, s); 
+    return 1;
+  }
 }
 
 #endif
