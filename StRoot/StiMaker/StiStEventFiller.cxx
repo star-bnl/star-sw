@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.31 2004/03/31 00:27:29 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.32 2004/04/21 21:36:24 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.32  2004/04/21 21:36:24  calderon
+ * Correction in the comments about the encoded method.
+ *
  * Revision 2.31  2004/03/31 00:27:29  calderon
  * Modifications for setting the fit points based on the chi2<chi2Max algorithm.
  * -Distinguish between points and fit points, so I added a function for each.
@@ -293,7 +296,7 @@ StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
   //mResMaker.setLimits(-1.5,1.5,-1.5,1.5,-10,10,-10,10);
   //mResMaker.setDetector(kSvtId);
 
-  // encoded method = 16 bits = 12 fitting and 4 finding, Refer
+  // encoded method = 16 bits = 12 finding and 4 fitting, Refer
   // to StTrackMethod.h and StTrackDefinitions.h in pams/global/inc/
   // and StEvent/StEnumerations.h
   // For the IT tracks use:
