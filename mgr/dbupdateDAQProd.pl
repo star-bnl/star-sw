@@ -327,7 +327,7 @@ my $ndir = 0;
           $mEvType = ($$eachOnFile)->evType; 
   	 if (($mFile eq $dbFile) and ($mNevts > 0)) {
 
-    print "File, EvtType, Nevent, FirstEv, LastEv: ", $mFile," % ",$mEvType," % ",$mNevts," % ", $mNevtLo," % ", $mNevtHi, "\n";
+    print "File, Nevent, FirstEv, LastEv: ", $mFile," % ",$mNevts," % ", $mNevtLo," % ", $mNevtHi, "\n";
 
   &updateDAQTable();
 
@@ -592,7 +592,7 @@ my $daqType = 0;
         
     if ( $mfName =~ /$dfile/) {
 
- print "File Name :", $mpath, " % ", $mfName, " % ", "Num Events, EvType: first, last, done :", $mNevtLo," % ", $mNevtHi," % ",$mNevts," % ",$mevtType, "\n";     
+ print "File Name :", $mpath, " % ", $mfName, " % ", "Num Events :", $mNevts, "\n";     
     print "updating FileCatalogT table\n";
  
     &fillDbTable();   
