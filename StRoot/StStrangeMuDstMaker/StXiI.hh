@@ -234,14 +234,14 @@ inline Float_t StXiI::decayDistanceV0() const {
 
 inline Float_t StXiI::decayLengthV0() const {
   return ::sqrt(::pow(decayVertexV0X() - decayVertexXiX(),2) +
-              ::pow(decayVertexV0Y() - decayVertexXiY(),2) +
-              ::pow(decayVertexV0Z() - decayVertexXiZ(),2));
+                ::pow(decayVertexV0Y() - decayVertexXiY(),2) +
+                ::pow(decayVertexV0Z() - decayVertexXiZ(),2));
 }
 
 inline Float_t StXiI::decayLengthXi() const {
   return ::sqrt(::pow(decayVertexXiX() - mEvent->primaryVertexX(),2) +
-              ::pow(decayVertexXiY() - mEvent->primaryVertexY(),2) +
-              ::pow(decayVertexXiZ() - mEvent->primaryVertexZ(),2));
+                ::pow(decayVertexXiY() - mEvent->primaryVertexY(),2) +
+                ::pow(decayVertexXiZ() - mEvent->primaryVertexZ(),2));
 }
 
 inline TVector3 StXiI::momBachelor() {
@@ -256,7 +256,8 @@ inline Float_t StXiI::alphaXi() {
 }
 
 inline Float_t StXiI::ptArmXi() {
-  return ::sqrt(Ptot2V0() - ::pow(MomV0AlongXi(),2));
+  Float_t ptarmsq = Ptot2V0() - ::pow(MomV0AlongXi(),2);
+  return ((ptarmsq > 0.) ? ::sqrt(ptarmsq) : 0.);
 }
 
 inline Float_t StXiI::eOmega() {
@@ -284,7 +285,8 @@ inline Float_t StXiI::eBachelorKaon() {
 }
 
 inline Float_t StXiI::massHypXi(Float_t massV0, Float_t massBachelor) {
-  return ::sqrt(::pow(eHypV0(massV0)+eBachelorHyp(massBachelor),2)-Ptot2Xi());
+  Float_t msq = ::pow(eHypV0(massV0)+eBachelorHyp(massBachelor),2)-Ptot2Xi();
+  return ((msq > 0.) ? ::sqrt(msq) : 0.);
 }
 
 inline Float_t StXiI::massOmega() {
@@ -460,8 +462,11 @@ inline TVector3 StXiI::momXiFrame(Float_t m1, Float_t m2, StXiDaughter type) {
 
 
 /***********************************************************************
- * $Id: StXiI.hh,v 3.11 2003/09/07 03:49:05 perev Exp $
+ * $Id: StXiI.hh,v 3.12 2003/10/26 06:06:01 genevb Exp $
  * $Log: StXiI.hh,v $
+ * Revision 3.12  2003/10/26 06:06:01  genevb
+ * Added checks for sqrt of neg. numbers
+ *
  * Revision 3.11  2003/09/07 03:49:05  perev
  * gcc 3.2 + WarnOff
  *

@@ -292,8 +292,8 @@ inline StStrangeEvMuDst *StV0I::event() {
 inline Float_t StV0I::decayLengthV0() const {
      if (mEvent)
        return ::sqrt(::pow(decayVertexV0X() - mEvent->primaryVertexX(),2) +
-                   ::pow(decayVertexV0Y() - mEvent->primaryVertexY(),2) +
-                   ::pow(decayVertexV0Z() - mEvent->primaryVertexZ(),2));
+                     ::pow(decayVertexV0Y() - mEvent->primaryVertexY(),2) +
+                     ::pow(decayVertexV0Z() - mEvent->primaryVertexZ(),2));
      return 0.;
 }
 
@@ -351,7 +351,8 @@ inline Float_t StV0I::alphaV0() {
 }
 
 inline Float_t StV0I::ptArmV0() {
-  return ::sqrt(Ptot2Pos() - ::pow(MomPosAlongV0(),2));
+  Float_t ptarmsq = Ptot2Pos() - ::pow(MomPosAlongV0(),2);
+  return ((ptarmsq > 0.) ? ::sqrt(ptarmsq) : 0.);
 }
 
 inline Float_t StV0I::eHypV0(Float_t mass) {
@@ -391,7 +392,8 @@ inline Float_t StV0I::eNegPion() {
 }
 
 inline Float_t StV0I::massHypV0(Float_t massPos, Float_t massNeg) {
-  return ::sqrt(::pow(ePosHyp(massPos)+eNegHyp(massNeg),2)-Ptot2V0());
+  Float_t msq = ::pow(ePosHyp(massPos)+eNegHyp(massNeg),2)-Ptot2V0();
+  return ((msq > 0.) ? ::sqrt(msq) : 0.);
 }
 
 inline Float_t StV0I::massLambda() {
@@ -592,8 +594,11 @@ inline void StV0I::Clear() {
 
 
 /***********************************************************************
- * $Id: StV0I.hh,v 3.10 2003/09/02 17:59:04 perev Exp $
+ * $Id: StV0I.hh,v 3.11 2003/10/26 06:06:01 genevb Exp $
  * $Log: StV0I.hh,v $
+ * Revision 3.11  2003/10/26 06:06:01  genevb
+ * Added checks for sqrt of neg. numbers
+ *
  * Revision 3.10  2003/09/02 17:59:04  perev
  * gcc 3.2 updates + WarnOff
  *
