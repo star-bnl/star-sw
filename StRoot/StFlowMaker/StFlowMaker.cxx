@@ -1,10 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.101 2005/02/08 20:57:36 psoren Exp $
+// $Id: StFlowMaker.cxx,v 1.102 2005/02/10 17:39:40 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
+//          ZDCSMD added by Aihong Tang, Dec 2004
 //
 //////////////////////////////////////////////////////////////////////
 //
@@ -59,7 +60,8 @@ ClassImp(StFlowMaker)
 
 StFlowMaker::StFlowMaker(const Char_t* name): 
   StMaker(name), 
-  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), mMuEventRead(kFALSE), pEvent(NULL) {
+  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), mMuEventRead(kFALSE),
+  mMuEventReadGC(kFALSE), pEvent(NULL) {
   pFlowSelect = new StFlowSelection();
   SetPicoEventDir("./");
   StMuTrack::Class()->IgnoreTObjectStreamer();
@@ -69,7 +71,8 @@ StFlowMaker::StFlowMaker(const Char_t* name):
 StFlowMaker::StFlowMaker(const Char_t* name,
 			 const StFlowSelection& flowSelect) :
   StMaker(name), 
-  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), mMuEventRead(kFALSE), pEvent(NULL) {
+  mPicoEventWrite(kFALSE), mPicoEventRead(kFALSE), mMuEventRead(kFALSE),
+  mMuEventReadGC(kFALSE), pEvent(NULL) {
   pFlowSelect = new StFlowSelection(flowSelect); //copy constructor
   SetPicoEventDir("./");
   StMuTrack::Class()->IgnoreTObjectStreamer();
@@ -117,30 +120,42 @@ Int_t StFlowMaker::Make() {
     }
   }
 
-  
-  // Get a pointer to StEvent
+  // Get a pointer to the event
   if (!mPicoEventRead && !mMuEventRead) {
-    pEvent = dynamic_cast<StEvent*>(GetInputDS("StEvent"));
-    if (!pEvent) {
-      if (Debug()) { 
-	gMessMgr->Info() << "FlowMaker: no StEvent " << endm;
-      }
-      return kStOK; // If no event, we're done
-    }
-
-    // Check the event cuts and fill StFlowEvent
-    if (StFlowCutEvent::CheckEvent(pEvent)) {
-      // Instantiate a new StFlowEvent
+    if (mMuEventReadGC) { // StMuEvent Grid Collector
       pFlowEvent = new StFlowEvent;
       if (!pFlowEvent) return kStOK;
-      FillFlowEvent();
-      if (!pFlowEvent) return kStOK;  // could have been deleted
-      if (mPicoEventWrite) FillPicoEvent();
-    } else {
-      Long_t eventID = pEvent->id();
-      gMessMgr->Info() << "##### FlowMaker: event " << eventID 
-		       << " cut" << endm;
-      return kStOK; // to prevent seg. fault when no event survives
+      StMuDst* pMu = dynamic_cast<StMuDst*>(GetInputDS("MuDst"));
+      pMuEvent = pMu->event();
+      pMuTracks = pMu->primaryTracks();
+      pMuGlobalTracks = pMu->globalTracks();
+      if (!FillFromMuDST()) return kStEOF; // false if EOF
+      if (!pFlowEvent) return kStOK; // could have been deleted
+      if (!pMuEvent) {
+	if (Debug()) { gMessMgr->Info() << "FlowMaker: no StMuEvent " << endm; }
+	return kStOK; // If no event, we're done
+      }
+    } else { // StEvent
+      pEvent = dynamic_cast<StEvent*>(GetInputDS("StEvent"));
+      if (!pEvent) {
+	if (Debug()) { gMessMgr->Info() << "FlowMaker: no StEvent " << endm; }
+	return kStOK; // If no event, we're done
+      }
+      
+      // Check the event cuts and fill StFlowEvent
+      if (StFlowCutEvent::CheckEvent(pEvent)) {
+	// Instantiate a new StFlowEvent
+	pFlowEvent = new StFlowEvent;
+	if (!pFlowEvent) return kStOK;
+	FillFlowEvent();
+	if (!pFlowEvent) return kStOK;  // could have been deleted
+	if (mPicoEventWrite) FillPicoEvent();
+      } else {
+	Long_t eventID = pEvent->id();
+	gMessMgr->Info() << "##### FlowMaker: event " << eventID 
+			 << " cut" << endm;
+	return kStOK; // to prevent seg. fault when event does not survive
+      }
     }
 
   } else if (mPicoEventRead) {
@@ -149,6 +164,7 @@ Int_t StFlowMaker::Make() {
     if (!pFlowEvent) return kStOK;
     if (!FillFromPicoDST(pPicoEvent)) return kStEOF; // false if EOF
     if (!pFlowEvent) return kStOK; // could have been deleted
+
   } else if (mMuEventRead) {
     pFlowEvent = new StFlowEvent;
     if (!pFlowEvent) return kStOK;
@@ -173,7 +189,6 @@ Int_t StFlowMaker::Make() {
     if (mPicoEventWrite) FillPicoEvent();
   }
   if (Debug()) PrintSubeventMults();
-
   
   UInt_t flowEventMult;
   if (!pFlowEvent) { flowEventMult = 0; }
@@ -190,33 +205,42 @@ Int_t StFlowMaker::Make() {
 	beamEnergy << " GeV/A " << beamMassE << "+" << beamMassW << 
 	", B= " << magneticField << endm;
       mRunID = runID;
-      if(pFlowEvent->UseZDCSMD()) {
+      if (pFlowEvent->UseZDCSMD()) {
 	Float_t RawZDCSMD[2][2][8];
 	Float_t ex,ey,wx,wy;
 	for (int strip=1;strip<9;strip++) {
-	  RawZDCSMD[0][1][strip-1] = (pFlowEvent->ZDCSMD(0,1,strip))*Flow::zdcsmdGainFac[0][1][strip-1] + mZDCSMDPed[0][1][strip-1];
-	  RawZDCSMD[0][0][strip-1] = (pFlowEvent->ZDCSMD(0,0,strip))*Flow::zdcsmdGainFac[0][0][strip-1] + mZDCSMDPed[0][0][strip-1];
-          RawZDCSMD[1][1][strip-1] = (pFlowEvent->ZDCSMD(1,1,strip))*Flow::zdcsmdGainFac[1][1][strip-1] + mZDCSMDPed[1][1][strip-1];
-          RawZDCSMD[1][0][strip-1] = (pFlowEvent->ZDCSMD(1,0,strip))*Flow::zdcsmdGainFac[1][0][strip-1] + mZDCSMDPed[1][0][strip-1];
+	  RawZDCSMD[0][1][strip-1] = (pFlowEvent->ZDCSMD(0,1,strip))*
+	    Flow::zdcsmdGainFac[0][1][strip-1] + mZDCSMDPed[0][1][strip-1];
+	  RawZDCSMD[0][0][strip-1] = (pFlowEvent->ZDCSMD(0,0,strip))*
+	    Flow::zdcsmdGainFac[0][0][strip-1] + mZDCSMDPed[0][0][strip-1];
+          RawZDCSMD[1][1][strip-1] = (pFlowEvent->ZDCSMD(1,1,strip))*
+	    Flow::zdcsmdGainFac[1][1][strip-1] + mZDCSMDPed[1][1][strip-1];
+          RawZDCSMD[1][0][strip-1] = (pFlowEvent->ZDCSMD(1,0,strip))*
+	    Flow::zdcsmdGainFac[1][0][strip-1] + mZDCSMDPed[1][0][strip-1];
         }
 	ReadZDCSMDFile();
 	for (int strip=1;strip<9;strip++) {
-	  ey = (RawZDCSMD[0][1][strip-1] - mZDCSMDPed[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
-	  ex = (RawZDCSMD[0][0][strip-1] - mZDCSMDPed[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
-	  wy = (RawZDCSMD[1][1][strip-1] - mZDCSMDPed[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
-          wx = (RawZDCSMD[1][0][strip-1] - mZDCSMDPed[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
-	  if(!mPicoEventRead) {
+	  ey = (RawZDCSMD[0][1][strip-1] - mZDCSMDPed[0][1][strip-1])/
+	    Flow::zdcsmdGainFac[0][1][strip-1];
+	  ex = (RawZDCSMD[0][0][strip-1] - mZDCSMDPed[0][0][strip-1])/
+	    Flow::zdcsmdGainFac[0][0][strip-1];
+	  wy = (RawZDCSMD[1][1][strip-1] - mZDCSMDPed[1][1][strip-1])/
+	    Flow::zdcsmdGainFac[1][1][strip-1];
+          wx = (RawZDCSMD[1][0][strip-1] - mZDCSMDPed[1][0][strip-1])/
+	    Flow::zdcsmdGainFac[1][0][strip-1];
+	  if (!mPicoEventRead) {
             pFlowEvent->SetZDCSMD(0,1,strip,ey);
             pFlowEvent->SetZDCSMD(0,0,strip,ex);
             pFlowEvent->SetZDCSMD(1,0,strip,wx);
             pFlowEvent->SetZDCSMD(1,1,strip,wy);
 	  }
         }
-	pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx,mZDCSMDCenterEy,mZDCSMDCenterWx,mZDCSMDCenterWy);
+	pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx,mZDCSMDCenterEy,
+					 mZDCSMDCenterWx,mZDCSMDCenterWy);
 	if (mPicoEventWrite) 
   	  for (int i=0; i<2; i++) for (int j=0; j<2; j++) for (int k=1; k<9; k++)
         	pPicoEvent->SetZDCSMD(i,j,k,pFlowEvent->ZDCSMD(i,j,k));
-      } //if(pFlowEvent->UseZDCSMD())
+      } // if (pFlowEvent->UseZDCSMD())
     }
   }
 
@@ -228,6 +252,12 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::Init() {
+
+  // init message manager
+  gMessMgr->MemoryOn();
+  gMessMgr->SetLimit("##### FlowMaker", 5);
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.102 2005/02/10 17:39:40 posk Exp $");
+
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
   // Open PhiWgt file
@@ -246,9 +276,6 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventWrite) kRETURN += InitPicoEventWrite();
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
   if (mMuEventRead)    kRETURN += InitMuEventRead();
-
-  gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.101 2005/02/08 20:57:36 psoren Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -427,44 +454,45 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
       delete histTitleFtpcFarWest;
     }
   }
-  //ZDCSMD psi Wgt
+
+  // ZDCSMD psi Wgt
   if (pPhiWgtFile->IsOpen()) {
     TH1* mZDCSMDPsiWest = (TH1 *)pPhiWgtFile->Get("Flow_ZDCSMDPsiWgtWest");
     TH1* mZDCSMDPsiEast = (TH1 *)pPhiWgtFile->Get("Flow_ZDCSMDPsiWgtEast");
     TH1* mZDCSMDPsiFull = (TH1 *)pPhiWgtFile->Get("Flow_ZDCSMDPsiWgtFull");
-    if(mZDCSMDPsiWest && mZDCSMDPsiEast) { //Weight histograms exist
+    if (mZDCSMDPsiWest && mZDCSMDPsiEast) { //Weight histograms exist
       Float_t mZDCSMDPsiWest_mean = (mZDCSMDPsiWest->Integral())/(mZDCSMDPsiWest->GetNbinsX());
       Float_t mZDCSMDPsiEast_mean = (mZDCSMDPsiEast->Integral())/(mZDCSMDPsiEast->GetNbinsX());
-      for(int n = 0; n < Flow::zdcsmd_nPsiBins; n++) {
+      for (int n = 0; n < Flow::zdcsmd_nPsiBins; n++) {
             mZDCSMD_PsiWgtWest[n] = ((mZDCSMDPsiWest->GetBinContent(n+1))>0.) ?
               mZDCSMDPsiWest_mean/(mZDCSMDPsiWest->GetBinContent(n+1)):1.;
             mZDCSMD_PsiWgtEast[n] = ((mZDCSMDPsiEast->GetBinContent(n+1))>0.) ?
               mZDCSMDPsiEast_mean/(mZDCSMDPsiEast->GetBinContent(n+1)):1.;
-      }//zdcsmd_nPsiBins
-      if(mZDCSMDPsiFull) {
+      } // zdcsmd_nPsiBins
+      if (mZDCSMDPsiFull) {
         Float_t mZDCSMDPsiFull_mean = (mZDCSMDPsiFull->Integral())/(mZDCSMDPsiFull->GetNbinsX());
-        for(int n = 0; n < Flow::zdcsmd_nPsiBins; n++) {
+        for (int n = 0; n < Flow::zdcsmd_nPsiBins; n++) {
               mZDCSMD_PsiWgtFull[n] = ((mZDCSMDPsiFull->GetBinContent(n+1))>0.) ?
                 mZDCSMDPsiFull_mean/(mZDCSMDPsiFull->GetBinContent(n+1)):1.;
         }
-      } else{//mZDCSMDPsiFull doesn't exist
-          for(int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
+      } else{ // mZDCSMDPsiFull doesn't exist
+          for (int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
               mZDCSMD_PsiWgtFull[n] = 1.;
           }
         }
-    } else { //Weight histograms don't exist
-          for(int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
+    } else { // Weight histograms don't exist
+          for (int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
             mZDCSMD_PsiWgtWest[n] = 1.;
             mZDCSMD_PsiWgtEast[n] = 1.;
             mZDCSMD_PsiWgtFull[n] = 1.;
-          }//zdcsmd_nPsiBins
-      }//else
+          } // zdcsmd_nPsiBins
+      } // else
   } else { // no pPhiWgtFile
-        for(int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
+        for (int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
           mZDCSMD_PsiWgtWest[n] = 1.;
           mZDCSMD_PsiWgtEast[n] = 1.;
           mZDCSMD_PsiWgtFull[n] = 1.;
-        }//zdcsmd_nPsiBins
+        } // zdcsmd_nPsiBins
     } 
   // Close PhiWgt file
   if (pPhiWgtFile->IsOpen()) pPhiWgtFile->Close();
@@ -472,6 +500,7 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 }
 
 //-----------------------------------------------------------------------
+
 Int_t StFlowMaker::ReadZDCSMDFile() {
   // Read the ZDCSMD constants root file
 
@@ -481,19 +510,19 @@ Int_t StFlowMaker::ReadZDCSMDFile() {
   TFile* pZDCSMDConstFile = new TFile("zdcsmdConstants.root", "READ");
   if (!pZDCSMDConstFile->IsOpen()) {
     gMessMgr->Info("##### FlowMaker: No ZDCSMD constant file. Will use default.");
-  } else { gMessMgr->Info("##### FlowMaker: ZDCSMD constant file read.");	}
+  } else { gMessMgr->Info("##### FlowMaker: ZDCSMD constant file read."); }
   gDirectory = dirSave;
     int mRealRunID = mRunID;
     Double_t HistTest = 0.;
   if (pZDCSMDConstFile->IsOpen()) {
     TH2* mZDCSMDBeamCenter2D = (TH2D *)pZDCSMDConstFile->Get("ZDCSMDBeamCenter");
-    while(HistTest < 1.) {
+    while (HistTest < 1.) {
       HistTest = mZDCSMDBeamCenter2D->GetBinContent(1,mRealRunID-5050000);
-      if(HistTest > 1.) break;
+      if (HistTest > 1.) break;
       mRealRunID -= 1;
-      if(mRealRunID < 5050000) break;
+      if (mRealRunID < 5050000) break;
     }
-    if(mRealRunID < 5050000) {
+    if (mRealRunID < 5050000) {
         mZDCSMDCenterEx = Flow::zdcsmd_ex0;
         mZDCSMDCenterEy = Flow::zdcsmd_ey0;
         mZDCSMDCenterWx = Flow::zdcsmd_wx0;
@@ -513,35 +542,37 @@ Int_t StFlowMaker::ReadZDCSMDFile() {
   if (pZDCSMDConstFile->IsOpen()) {
     mRealRunID = mRunID;
     HistTest = 0.;
-    TH2* mZDCSMDPed2D = (TH2D *)pZDCSMDConstFile->Get("ZDCSMDPedestal");
+    TH2* mZDCSMDPed2D = (TH2D*)pZDCSMDConstFile->Get("ZDCSMDPedestal");
     while(HistTest < .1) {
       HistTest = mZDCSMDPed2D->GetBinContent(1,mRealRunID-5050000);
-      if(HistTest > .1) break;
+      if (HistTest > .1) break;
       mRealRunID -= 1;
-      if(mRealRunID < 5050000) break;
+      if (mRealRunID < 5050000) break;
     }
-    if(mRealRunID < 5050000) {
-      for(int i=0;i<2;i++) {for(int j=0;j<2;j++){for(int k=0;k<8;k++){
+    if (mRealRunID < 5050000) {
+      for (int i=0;i<2;i++) {for (int j=0;j<2;j++){for (int k=0;k<8;k++) {
         mZDCSMDPed[i][j][k] = Flow::zdcsmdPedstal[i][j][k];
-       }}}//for
+       }}} // for
     } else {
-        int zdcsmd_map[2][2][8] ={
+        int zdcsmd_map[2][2][8] = {
         { { 7, 6, 5, 4, 3, 2, 1, 11} ,
           { 0,15,14,13,12,8,10, 9} } ,
         { {23,22,21,20,19,18,17,24} ,
           {16,31,30,29,28,27,26,25} }
         };
-        for(int i=0;i<2;i++) {for(int j=0;j<2;j++){for(int k=0;k<8;k++){
-          mZDCSMDPed[i][j][k] = mZDCSMDPed2D->GetBinContent(zdcsmd_map[i][j][k]+1,mRealRunID-5050000);
-        }}}//for
+        for (int i=0;i<2;i++) {for (int j=0;j<2;j++){for (int k=0;k<8;k++) {
+          mZDCSMDPed[i][j][k] = mZDCSMDPed2D->GetBinContent(zdcsmd_map[i][j][k]+1,
+							    mRealRunID-5050000);
+        }}} // for
       }
   } else {
-     for(int i=0;i<2;i++) {for(int j=0;j<2;j++){for(int k=0;k<8;k++){
+     for (int i=0;i<2;i++) {for (int j=0;j<2;j++){for (int k=0;k<8;k++) {
        mZDCSMDPed[i][j][k] = Flow::zdcsmdPedstal[i][j][k];
-     }}}//for
-    }//else
+     }}} // for
+    } // else
   // Close ZDCSMD constants file
   if (pZDCSMDConstFile->IsOpen()) pZDCSMDConstFile->Close();
+
   return kStOK;
 }
 
@@ -566,7 +597,8 @@ void StFlowMaker::FillFlowEvent() {
   pFlowEvent->SetZDCSMD_PsiWeightWest(mZDCSMD_PsiWgtWest);
   pFlowEvent->SetZDCSMD_PsiWeightEast(mZDCSMD_PsiWgtEast);
   pFlowEvent->SetZDCSMD_PsiWeightFull(mZDCSMD_PsiWgtFull);
-  pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx,mZDCSMDCenterEy,mZDCSMDCenterWx,mZDCSMDCenterWy);
+  pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx,mZDCSMDCenterEy,mZDCSMDCenterWx,
+				   mZDCSMDCenterWy);
   // Get event id 
   pFlowEvent->SetEventID((Int_t)(pEvent->id()));
   pFlowEvent->SetRunID((Int_t)(pEvent->runId()));
@@ -620,22 +652,22 @@ void StFlowMaker::FillFlowEvent() {
     zdcw = ZDC.adcSum(west);
     // get ZDCSMD pedstal-subtracted and gain-corrected
     for (int strip=1;strip<9;strip++) {
-        if(ZDC.zdcSmd(east,1,strip)) {
+        if (ZDC.zdcSmd(east,1,strip)) {
           zdcsmdEastHorizontal = (ZDC.zdcSmd(east,1,strip)
                 -mZDCSMDPed[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
           pFlowEvent->SetZDCSMD(0,1,strip,zdcsmdEastHorizontal);
         }
-        if(ZDC.zdcSmd(east,0,strip)) {
+        if (ZDC.zdcSmd(east,0,strip)) {
           zdcsmdEastVertical = (ZDC.zdcSmd(east,0,strip)
                 -mZDCSMDPed[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
           pFlowEvent->SetZDCSMD(0,0,strip,zdcsmdEastVertical);
         }
-        if(ZDC.zdcSmd(west,1,strip)) {
+        if (ZDC.zdcSmd(west,1,strip)) {
           zdcsmdWestHorizontal = (ZDC.zdcSmd(west,1,strip)
                 -mZDCSMDPed[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
           pFlowEvent->SetZDCSMD(1,1,strip,zdcsmdWestHorizontal);
         }
-        if(ZDC.zdcSmd(west,0,strip)) {
+        if (ZDC.zdcSmd(west,0,strip)) {
           zdcsmdWestVertical = (ZDC.zdcSmd(west,0,strip)
                 -mZDCSMDPed[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
           pFlowEvent->SetZDCSMD(1,0,strip,zdcsmdWestVertical);
@@ -1691,16 +1723,28 @@ Bool_t StFlowMaker::FillFromMuDST() {
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromMuDST()" << endm;
   
-  pMuEvents->Clear();
-  pMuTracks->Clear();
-  pMuGlobalTracks->Clear();
-      
-  if (!pMuChain->GetEntry(mEventCounter++)) {
-    cout << "##### FlowMaker: no more events" << endl; 
-    return kFALSE; 
+  if (!mMuEventReadGC) {
+    pMuEvents->Clear();
+    pMuTracks->Clear();
+    pMuGlobalTracks->Clear();
+    
+    if (!pMuChain->GetEntry(mEventCounter++)) {
+      cout << "##### FlowMaker: no more events" << endl; 
+      return kFALSE; 
+    }
+    
+    pMuEvent=(StMuEvent*)pMuEvents->UncheckedAt(0);
   }
 
-  pMuEvent=(StMuEvent*)pMuEvents->UncheckedAt(0);
+  // Check event cuts
+  if (!StFlowCutEvent::CheckEvent(pMuEvent)) {  
+    Int_t eventID = pMuEvent->eventId();
+    gMessMgr->Info() << "##### FlowMaker: MuEvent " << eventID 
+                     << " cut" << endm;
+    delete pFlowEvent;             // delete this event
+    pFlowEvent = NULL;
+    return kTRUE;
+  }
 
   // Set phi weights
   if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
@@ -1717,15 +1761,6 @@ Bool_t StFlowMaker::FillFromMuDST() {
   pFlowEvent->SetZDCSMD_PsiWeightEast(mZDCSMD_PsiWgtEast);
   pFlowEvent->SetZDCSMD_PsiWeightFull(mZDCSMD_PsiWgtFull);
   pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx,mZDCSMDCenterEy,mZDCSMDCenterWx,mZDCSMDCenterWy);
-  // Check event cuts
-  if (!StFlowCutEvent::CheckEvent(pMuEvent)) {  
-    Int_t eventID = pMuEvent->eventId();
-    gMessMgr->Info() << "##### FlowMaker: MuEvent " << eventID 
-                     << " cut" << endm;
-    delete pFlowEvent;             // delete this event
-    pFlowEvent = NULL;
-    return kTRUE;
-  }
 
   FillFromMuVersion0DST();
 
@@ -1782,22 +1817,22 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
   Float_t zdcsmdWestVertical = -1.;
   StZdcTriggerDetector &ZDC = pMuEvent->zdcTriggerDetector();
   for (int strip=1;strip<9;strip++) {
-        if(ZDC.zdcSmd(east,1,strip)) {
+        if (ZDC.zdcSmd(east,1,strip)) {
           zdcsmdEastHorizontal = (ZDC.zdcSmd(east,1,strip)
                 -mZDCSMDPed[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
           pFlowEvent->SetZDCSMD(0,1,strip,zdcsmdEastHorizontal);
         }
-        if(ZDC.zdcSmd(east,0,strip)) {
+        if (ZDC.zdcSmd(east,0,strip)) {
           zdcsmdEastVertical = (ZDC.zdcSmd(east,0,strip)
                 -mZDCSMDPed[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
           pFlowEvent->SetZDCSMD(0,0,strip,zdcsmdEastVertical);
         }
-        if(ZDC.zdcSmd(west,1,strip)) {
+        if (ZDC.zdcSmd(west,1,strip)) {
           zdcsmdWestHorizontal = (ZDC.zdcSmd(west,1,strip)
                 -mZDCSMDPed[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
           pFlowEvent->SetZDCSMD(1,1,strip,zdcsmdWestHorizontal);
         }
-        if(ZDC.zdcSmd(west,0,strip)) {
+        if (ZDC.zdcSmd(west,0,strip)) {
           zdcsmdWestVertical = (ZDC.zdcSmd(west,0,strip)
                 -mZDCSMDPed[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
           pFlowEvent->SetZDCSMD(1,0,strip,zdcsmdWestVertical);
@@ -1826,7 +1861,7 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
       }
       StMuTrack* pMuGlobalTrack = (StMuTrack*)pMuGlobalTracks->
 	At(pMuTrack->index2Global());
-      if(!pMuGlobalTrack) {
+      if (!pMuGlobalTrack) {
         gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST(): WARNING! primary track has no reference to global track (pMuGlobalTrack = 0)" << endl;
         continue;
       }
@@ -1894,81 +1929,80 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
 	}
       }
       
-      if (StuProbabilityPidAlgorithm::isPIDTableRead()) {
+      if (!mMuEventReadGC && StuProbabilityPidAlgorithm::isPIDTableRead()) { // temporary workaround
+	PR(StuProbabilityPidAlgorithm::isPIDTableRead());
 	uPid.processPIDAsFunction(uPid.getCentrality(pMuEvent->refMultNeg()),
-		    pMuTrack->dcaGlobal().mag(),
-		    pMuTrack->charge(),
-                    fabs((pMuTrack->p().mag())/float(pMuTrack->charge())),
-		    pMuTrack->eta(),
-		    pMuTrack->nHitsDedx(),
-		    pMuTrack->dEdx() );
-
-      pFlowTrack->SetMostLikelihoodPID(uPid.mostLikelihoodParticleGeantID());
-      pFlowTrack->SetMostLikelihoodProb(uPid.mostLikelihoodProbability());   
-      pFlowTrack->SetExtrapTag(int(uPid.isExtrap()));                        
-
-      pFlowTrack->SetElectronPositronProb( (pMuTrack->charge()>0) ?   
-                                           float(uPid.beingPositronProb()) :
-                                           float(uPid.beingElectronProb()) );
-
-      pFlowTrack->SetPionPlusMinusProb( (pMuTrack->charge()>0) ?  
-                                        float(uPid.beingPionPlusProb()) :
-                                        float(uPid.beingPionMinusProb()) );
-
-      pFlowTrack->SetKaonPlusMinusProb( (pMuTrack->charge()>0) ? 
-                                        float(uPid.beingKaonPlusProb()) :
-                                        float(uPid.beingKaonMinusProb()) );
-
-      pFlowTrack->SetProtonPbarProb( (pMuTrack->charge()>0) ? 
-                                     float(uPid.beingProtonProb()) :
-                                     float(uPid.beingAntiProtonProb()) );
-
-      } else {
-
-      pFlowTrack->SetElectronPositronProb(pMuTrack->pidProbElectron()); 
-      pFlowTrack->SetPionPlusMinusProb(pMuTrack->pidProbPion()); 
-      pFlowTrack->SetKaonPlusMinusProb(pMuTrack->pidProbKaon()); 
-      pFlowTrack->SetProtonPbarProb(pMuTrack->pidProbProton()); 
-      pFlowTrack->SetProtonPbarProb(pMuTrack->pidProbProton()); 
-
-      // pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
-          
-      int mostLikelihoodPid=0;
-      double mostLikelihoodPidProbability=0;
-      if (pFlowTrack->ElectronPositronProb()>mostLikelihoodPidProbability) {
-        mostLikelihoodPidProbability=pFlowTrack->ElectronPositronProb();
-        if (pMuTrack->charge() < 0) 
-          mostLikelihoodPid=3;
-        else
-          mostLikelihoodPid=2;
-      }
-      if (pFlowTrack->PionPlusMinusProb()>mostLikelihoodPidProbability) {
-        mostLikelihoodPidProbability=pFlowTrack->PionPlusMinusProb();
-        if (pMuTrack->charge() < 0) 
-          mostLikelihoodPid=9;
-        else
-          mostLikelihoodPid=8;
-      }
-      if (pFlowTrack->KaonPlusMinusProb()>mostLikelihoodPidProbability) {
-        mostLikelihoodPidProbability=pFlowTrack->KaonPlusMinusProb();
-        if (pMuTrack->charge() < 0) 
-          mostLikelihoodPid=12;
-        else
-          mostLikelihoodPid=11;
-      }
-      if (pFlowTrack->ProtonPbarProb()>mostLikelihoodPidProbability) {
-        mostLikelihoodPidProbability=pFlowTrack->ProtonPbarProb();
-        if (pMuTrack->charge() < 0) 
-          mostLikelihoodPid=15;
-        else
-          mostLikelihoodPid=14;
-      }
-      
-      pFlowTrack->SetMostLikelihoodPID(mostLikelihoodPid); 
-      pFlowTrack->SetMostLikelihoodProb(mostLikelihoodPidProbability);
-
+				  pMuTrack->dcaGlobal().mag(),
+				  pMuTrack->charge(),
+				  fabs((pMuTrack->p().mag())/float(pMuTrack->charge())),
+				  pMuTrack->eta(),
+				  pMuTrack->nHitsDedx(),
+				  pMuTrack->dEdx() );
+	
+	pFlowTrack->SetMostLikelihoodPID(uPid.mostLikelihoodParticleGeantID());
+	pFlowTrack->SetMostLikelihoodProb(uPid.mostLikelihoodProbability());   
+	pFlowTrack->SetExtrapTag(int(uPid.isExtrap()));                        
+	
+	pFlowTrack->SetElectronPositronProb( (pMuTrack->charge()>0) ?   
+					     float(uPid.beingPositronProb()) :
+					     float(uPid.beingElectronProb()) );
+	
+	pFlowTrack->SetPionPlusMinusProb( (pMuTrack->charge()>0) ?  
+					  float(uPid.beingPionPlusProb()) :
+					  float(uPid.beingPionMinusProb()) );
+	
+	pFlowTrack->SetKaonPlusMinusProb( (pMuTrack->charge()>0) ? 
+					  float(uPid.beingKaonPlusProb()) :
+					  float(uPid.beingKaonMinusProb()) );
+	
+	pFlowTrack->SetProtonPbarProb( (pMuTrack->charge()>0) ? 
+				       float(uPid.beingProtonProb()) :
+				       float(uPid.beingAntiProtonProb()) );	
+      } else {	
+	pFlowTrack->SetElectronPositronProb(pMuTrack->pidProbElectron()); 
+	pFlowTrack->SetPionPlusMinusProb(pMuTrack->pidProbPion()); 
+	pFlowTrack->SetKaonPlusMinusProb(pMuTrack->pidProbKaon()); 
+	pFlowTrack->SetProtonPbarProb(pMuTrack->pidProbProton()); 
+	pFlowTrack->SetProtonPbarProb(pMuTrack->pidProbProton()); 
+	
+	// pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
+	
+	int mostLikelihoodPid=0;
+	double mostLikelihoodPidProbability=0;
+	if (pFlowTrack->ElectronPositronProb()>mostLikelihoodPidProbability) {
+	  mostLikelihoodPidProbability=pFlowTrack->ElectronPositronProb();
+	  if (pMuTrack->charge() < 0) 
+	    mostLikelihoodPid=3;
+	  else
+	    mostLikelihoodPid=2;
+	}
+	if (pFlowTrack->PionPlusMinusProb()>mostLikelihoodPidProbability) {
+	  mostLikelihoodPidProbability=pFlowTrack->PionPlusMinusProb();
+	  if (pMuTrack->charge() < 0) 
+	    mostLikelihoodPid=9;
+	  else
+	    mostLikelihoodPid=8;
+	}
+	if (pFlowTrack->KaonPlusMinusProb()>mostLikelihoodPidProbability) {
+	  mostLikelihoodPidProbability=pFlowTrack->KaonPlusMinusProb();
+	  if (pMuTrack->charge() < 0) 
+	    mostLikelihoodPid=12;
+	  else
+	    mostLikelihoodPid=11;
+	}
+	if (pFlowTrack->ProtonPbarProb()>mostLikelihoodPidProbability) {
+	  mostLikelihoodPidProbability=pFlowTrack->ProtonPbarProb();
+	  if (pMuTrack->charge() < 0) 
+	    mostLikelihoodPid=15;
+	  else
+	    mostLikelihoodPid=14;
+	}
+	
+	pFlowTrack->SetMostLikelihoodPID(mostLikelihoodPid); 
+	pFlowTrack->SetMostLikelihoodProb(mostLikelihoodPidProbability);
+	
       }    
-
+      
       if (pMuTrack->charge() < 0) {
         pFlowTrack->SetPidPiMinus(pMuTrack->nSigmaPion()); 
         pFlowTrack->SetPidAntiProton(pMuTrack->nSigmaProton());
@@ -2233,6 +2267,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.102  2005/02/10 17:39:40  posk
+// Now also works with the Grid Collector.
+//
 // Revision 1.101  2005/02/08 20:57:36  psoren
 // trigger and centrality selections were updated for all runs after run 4 to be compatible with trigger collections. Added TriggersFound() and GetFlowTriggerBitMap() functions.
 //
