@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPIDTraits.cxx,v 2.0 2000/08/09 16:26:19 gans Exp $
+ * $Id: StRichPIDTraits.cxx,v 2.1 2001/03/27 03:33:04 perev Exp $
  *
  * Author: Matt Horsley, March 30, 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPIDTraits.cxx,v $
+ * Revision 2.1  2001/03/27 03:33:04  perev
+ * clone += static
+ *
  * Revision 2.0  2000/08/09 16:26:19  gans
  * Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
@@ -26,7 +29,7 @@
 
 ClassImp(StRichPIDTraits)
 
-static const char rcsid[] = "$Id: StRichPIDTraits.cxx,v 2.0 2000/08/09 16:26:19 gans Exp $";
+static const char rcsid[] = "$Id: StRichPIDTraits.cxx,v 2.1 2001/03/27 03:33:04 perev Exp $";
 
 StRichPIDTraits::StRichPIDTraits() { }
 
@@ -144,4 +147,4 @@ StParticleDefinition*
 StRichPIDTraits::particle() const { return mParticle; }
 
 StObject*
-StRichPIDTraits::clone() { return new StRichPIDTraits(*this); }
+StRichPIDTraits::clone() const { return new StRichPIDTraits(*this); }

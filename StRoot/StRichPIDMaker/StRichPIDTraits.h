@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPIDTraits.h,v 2.0 2000/08/09 16:26:19 gans Exp $
+ * $Id: StRichPIDTraits.h,v 2.1 2001/03/27 03:33:05 perev Exp $
  *
  * Author: Matt Horsley, March 29, 2000
  ***************************************************************************
@@ -48,7 +48,7 @@ protected:
   double mCut;
   double mNewRingArea;
 
-  StObject* clone();
+  StObject* clone() const;
   ClassDef(StRichPIDTraits,1)
 };
 #endif
