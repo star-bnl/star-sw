@@ -151,7 +151,7 @@ STAFCV_T socobject_name(long idref)
    }
 
    socObject* p;
-   if( !soc->getObject(idref,p) ){
+   if( !(NULL != (p=soc->getObject(idref))) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
 
@@ -185,7 +185,7 @@ STAFCV_T socobject_type(long idref)
    }
 
    socObject* p;
-   if( !soc->getObject(idref,p) ){
+   if( !(NULL != (p=soc->getObject(idref))) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
 
@@ -219,7 +219,7 @@ STAFCV_T socobject_version(long idref)
    }
 
    socObject* p;
-   if( !soc->getObject(idref,p) ){
+   if( !(NULL != (p=soc->getObject(idref))) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
 

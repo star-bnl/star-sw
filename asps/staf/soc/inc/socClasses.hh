@@ -120,15 +120,15 @@ public:
 
    virtual STAFCV_T deleteObject (const char * name, const char * type);
 
-   virtual STAFCV_T findObject (const char * name, const char * type
-		, socObject*& obj);
+   virtual socObject* findObject (const char * name
+		, const char * type);
 
-   virtual STAFCV_T getObject (IDREF_T id, socObject*& obj);
+   virtual socObject* getObject (IDREF_T id);
 
    virtual STAFCV_T idObject (const char * name
 		, const char * type, IDREF_T& id);
 
-   virtual STAFCV_T newObject (const char * name);
+   virtual socObject* newObject (const char * name);
 
    virtual STAFCV_T signIn (socObject* obj, IDREF_T& id);
 

@@ -260,7 +260,7 @@ socCatalog:: ~socCatalog() {
 
 //:----------------------------------------------- ATTRIBUTES         --
 char * socCatalog:: version() {
-	char * myVersion="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/soc/src/Attic/socClasses.cc,v 1.8 1996/11/15 01:04:45 tull Exp $";
+	char * myVersion="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/soc/src/Attic/socClasses.cc,v 1.9 1997/01/21 20:35:24 tull Exp $";
 	char *c=(char*)ASUALLOC(strlen(myVersion) +1);
 	strcpy(c,myVersion);
 	return c;
@@ -295,30 +295,28 @@ STAFCV_T socCatalog:: deleteObject (
 }
 
 //----------------------------------
-STAFCV_T socCatalog:: findObject (
-		const char * name, const char * type
-		, socObject*& obj) {
+socObject* socCatalog:: findObject (
+		const char * name, const char * type) {
+   socObject *obj=NULL;
    IDREF_T id;
    idObject(name,type,id);
    if( !VALID_IDREF(id) ){
       obj = NULL;
-      return FALSE; //BUG-TOO VERBOSE      EML_ERROR(INVALID_IDREF);
+      return NULL; //BUG-TOO VERBOSE      EML_ERROR(INVALID_IDREF);
    }
-//BUG???   if(myObjs[id]->lock()){
-//BUG???      EML_ERROR(OBJECT_LOCKED);
-//BUG???   }
    obj = myObjs[id];
-   EML_SUCCESS(STAFCV_OK);
+   return obj;
 }
 
 //----------------------------------
-STAFCV_T socCatalog:: getObject (IDREF_T id, socObject*& obj) {
+socObject* socCatalog:: getObject (IDREF_T id) {
+   socObject *obj=NULL;
    if( !VALID_IDREF(id) ){
       obj = NULL;
-      EML_ERROR(INVALID_IDREF);
+      return NULL;
    }
    obj = myObjs[id];
-   EML_SUCCESS(STAFCV_OK);
+   return obj;
 }
 
 //----------------------------------
@@ -388,10 +386,10 @@ char * socCatalog :: list () {
 }
 
 //----------------------------------
-STAFCV_T socCatalog:: newObject (const char * name) {
+socObject* socCatalog:: newObject (const char * name) {
    static socObject* p;
    p = new socObject(name,"socObject");
-   EML_SUCCESS(STAFCV_OK);
+   return p;
 }
 
 //----------------------------------
