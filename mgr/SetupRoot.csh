@@ -9,6 +9,7 @@ switch ( $STAR_HOST_SYS)
 	setenv ARCH solarisCC5
     breaksw
     case sun4x_56:
+    case sun4x_58:
 	setenv ARCH solaris
     breaksw
     case hp_ux102:
@@ -57,3 +58,6 @@ switch ( $STAR_HOST_SYS)
     --with-afs=/usr/awsfs/lib \
     --with-pythia6=/cern/pro/lib/libpythia.a
 endsw
+
+
+
