@@ -130,9 +130,11 @@ StiGeometryTransform::StiGeometryTransform()
     }
 
     cout <<"\nPadrow\tRadius"<<endl;
-    for (padrow_radius_map::const_iterator it=mpadrowradiusmap.begin(); it!=mpadrowradiusmap.end(); ++it) {
-	cout <<(*it).first<<"\t"<<(*it).second<<endl;
-    }
+    
+    //for (padrow_radius_map::const_iterator it=mpadrowradiusmap.begin();
+    // it!=mpadrowradiusmap.end(); ++it) {
+    //cout <<(*it).first<<"\t"<<(*it).second<<endl;
+    //}
 
     sinstance = this;
     //cout <<"\tLeaving StiGeometryTransform::StiGeometryTransform()"<<endl;
