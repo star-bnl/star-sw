@@ -175,9 +175,12 @@ If LL>1
    { Call ggclos
      If IDEBUG>0 { CALL ICLRWK(0,1); Call GDRAWC('CAVE',1,.2,10.,10.,.03,.03)}
    }
+   if (IDEBUG+IPRIN==0) Open (99,File='/dev/null')
    IDEBUG = IPRIN
    ITEST  = min(IPRIN,1)
-   call agphysi
+   Call AGPHYSCOR
+   Call agphysi
+   close (99)
 *                      automatic subevent size selection
    If NtrSubev > 0
    { Call MZNEED(IXDIV,1000,'G')
