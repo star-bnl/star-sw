@@ -15,7 +15,7 @@
 >GUIDANCE
 Dataset_Unix_like_Interface commands.
 .
- #(@)$Id: dui_def.cdf,v 1.6 1998/01/24 19:04:29 ward Exp $
+ #(@)$Id: dui_def.cdf,v 1.7 1998/03/11 21:40:03 ward Exp $  Edited by Bill Love - 24 Feb 1998
 .
 DUI is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -25,8 +25,7 @@ interface layer.
 Each ASP is comprised of an object factory interface (eg. duiFactory)
 and zero or more worker object interfaces.
 .
-DUI worker objects include:
-   DUI HAS NO WORKER OBJECTS.
+DUI has no worker objects.
 .
 The DUI package has only one interface class defined, the duiFactory.
 .
@@ -35,7 +34,7 @@ Thus any object factory implementing the duiFactory interface can and
 should assume the role of the tdmFactory in creating and managing in
 memory tables and datasets.
 .
-The Dataset Unix-like Interface of DUI provides a convienient and
+The Dataset Unix-like Interface of DUI provides a convenient and
 familiar user interface for the navigation, creation, and manipulation
 of dataset objects and table objects.
 .
@@ -80,18 +79,17 @@ as you would expect a Unix command to behave.
 +
 PATH    'Unix-like dataset path' C D='/dui'
 >GUIDANCE
-More guidance needed here.
+CD moves through the dataset heirarchy to change the "current dataset"
 .
 DESCRIPTION: 
 .
-CD is a member function of the duiFactory interface.
-.
-More guidance needed here.
+CD is a member function of the duiFactory interface.  It is 
+used to change the current working dataset.  
 .
 ARGUMENTS: 
 .
-   PATH - Unix-like dataset path
-   - More guidance needed here.
+   PATH - Unix-like dataset path, either absolute, starting from the 
+   /dui root or relative, starting from the current working dataset.
 .
 RETURN:
 .
@@ -101,7 +99,7 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. To return to the root (/dui) directory
 .
    StAF> DUI/CD
 .
@@ -122,21 +120,22 @@ SEE ALSO:
 SOURCE  'Source table name' C
 TARGET  'Target table/dataset name' C
 >GUIDANCE
-More guidance needed here.
+Make a copy of a table - put it in a specified dataset.
 .
 DESCRIPTION: 
 .
-CP is a member function of the duiFactory interface.
-.
-More guidance needed here.
+CP is a member function of the duiFactory interface which creates 
+a copy of an existing table with a new name.  Can be in the same
+or another dataset.  The content of the new table will be the same
+as the source.
 .
 ARGUMENTS: 
 .
-   SOURCE - Source table name.
-   - More guidance needed here.
+   SOURCE - Source table name.  The name of an existing table.
 .
-   TARGET - Target table/dataset name.
-   - More guidance needed here.
+   TARGET - Target table/dataset name.  The name of a new table or 
+of a dataset where the table will be placed.  If a dataset is given
+without a table name the new table will have the same name as the source.
 .
 RETURN:
 .
@@ -146,17 +145,18 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Copy table tsspar into dataset bob.
 .
-   StAF> DUI/CP
+   StAF> DUI/CP tsspar bob
 .
 EXCEPTIONS: 
+.
+ SRC_NOT_FOUND - The source table doesn't exist.
+ TGT_ALREADY_EXISTS - cannot copy a table over an existing table.
 .
 BUGS: 
 .
    None known.
-.
-SEE ALSO: 
 .
 >ACTION KAM_DUI_CP
 **
@@ -165,13 +165,12 @@ SEE ALSO:
 >COMMAND DF
 >PARAMETERS
 >GUIDANCE
-More guidance needed here.
+Print the memory usage of the dataset structures. 
 .
 DESCRIPTION: 
 .
-DF is a member function of the duiFactory interface.
-.
-More guidance needed here.
+DF is a member function of the duiFactory interface which prints
+the total memory in use.
 .
 ARGUMENTS: 
 .
@@ -185,9 +184,10 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Use the command.
 .
-   StAF> DUI/DF
+ staf++ > dui/df
+ 92,157,884 Bytes of memory allocated
 .
 EXCEPTIONS: 
 .
@@ -195,33 +195,23 @@ BUGS:
 .
    None known.
 .
-SEE ALSO: 
-.
 >ACTION KAM_DUI_DF
 **
 ** ---------------------------------------------------------------------
-** DUI/DU [ PATH MINSIZE ]
+** DUI/DU
 >COMMAND DU
 >PARAMETERS
-+
-PATH    'Unix-like dataset path' C D='.'
-MINSIZE 'Minimum size of reported tables' I D=0
 >GUIDANCE
-More guidance needed here.
+This command is useful for finding memory-hog tables.
+It lists all the tables and directories.  For the tables, the
+amount of allocated memory in bytes is shown (ie, maxrow x row_size).
 .
 DESCRIPTION: 
 .
 DU is a member function of the duiFactory interface.
 .
-More guidance needed here.
-.
 ARGUMENTS: 
-.
-   PATH - Unix-like dataset path.
-   - More guidance needed here.
-.
-   MINSIZE - Minimum size of reported tables.
-   - More guidance needed here.
+NONE
 .
 RETURN:
 .
@@ -231,17 +221,20 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Dump the table space in use.  Do you see the hog?
 .
-   StAF> DUI/DU
-.
-EXCEPTIONS: 
+ staf > dui/du
+ /dui/BEGIN_RUN/TimeStamp ------------------ 28 bytes       1 rows
+ /dui/BEGIN_RUN/BeginRunInfo                256 bytes       1 rows
+ /dui/BEGIN_RUN/SCReadout                   864 bytes       6 rows
+   etc., etc., etc.
+ /dui/ProducedData/Pixels/adcxyz --  48,000,000 bytes  1000000 rows
+   etc., etc., etc.
+                        Total bytes  51,610,073
 .
 BUGS: 
 .
    None known.
-.
-SEE ALSO: 
 .
 >ACTION KAM_DUI_DU
 **
@@ -297,30 +290,35 @@ SEE ALSO:
 +
 PATH    'Unix-like dataset path' C D='.'
 >GUIDANCE
-More guidance needed here.
+List the contents of the specified dataset.  
 .
 DESCRIPTION: 
 .
-LS is a member function of the duiFactory interface.
-.
-More guidance needed here.
+LS is a member function of the duiFactory interface.  Datasets
+have the name and number of members listed.  Tables have maxrowcount,
+rowcount and rowsize in bytes.
 .
 ARGUMENTS: 
 .
-   PATH - Unix-like dataset path.
-   - More guidance needed here.
+   PATH - Unix-like dataset path, absolute (from /dui) or relative.
+If left blank the current working dataset is listed.
 .
 RETURN:
 .
    Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
-   duiFactory::LS
-   method is pushed onto the STAF_STATUS stack (see SOC).
+   duiFactory::LS method is pushed onto the STAF_STATUS stack (see SOC).
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. List current working dataset.
 .
-   StAF> DUI/LS
+ staf++ > ls
+ DUI:    Listing = ...
+  Name             * Type             * Used     * Alloc'd  * Size    
+ D         Switches *                  *        4 *       -1 *       -1
+ D             Maps *                  *        2 *       -1 *       -1
+ D   PedestalsGains *                  *        3 *       -1 *       -1
+ .... etc., etc., etc.
 .
 EXCEPTIONS: 
 .
@@ -338,18 +336,17 @@ SEE ALSO:
 >PARAMETERS
 PATH    'Unix-like dataset path' C
 >GUIDANCE
-More guidance needed here.
+Make a new empty dataset at the specified path.
 .
 DESCRIPTION: 
 .
-MKDIR is a member function of the duiFactory interface.
-.
-More guidance needed here.
+MKDIR is a member function of the duiFactory interface.  It creates a 
+dataset object.  The working dataset is not changed.
 .
 ARGUMENTS: 
 .
-   PATH - Unix-like dataset path.
-   - More guidance needed here.
+   PATH - Unix-like dataset path.  Absolute or relative.  See DUI/CD.
+
 .
 RETURN:
 .
@@ -359,9 +356,9 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Make a new dataset  named "bob" in the current working dataset.
 .
-   StAF> DUI/MKDIR
+   StAF> DUI/MKDIR bob
 .
 EXCEPTIONS: 
 .
@@ -378,23 +375,20 @@ SEE ALSO:
 >COMMAND MV
 >PARAMETERS
 SOURCE  'Source table name' C
-TARGET  'Target table/dataset name' C
+TARGET  'Target dataset name' C
 >GUIDANCE
-More guidance needed here.
+Move a table to a different dataset.
 .
 DESCRIPTION: 
 .
-MV is a member function of the duiFactory interface.
-.
-More guidance needed here.
+MV is a member function of the duiFactory interface.  It changes the
+directory (dataset) but not the name of a table.
 .
 ARGUMENTS: 
 .
-   SOURCE - Source table name.
-   - More guidance needed here.
+   SOURCE - Source table name.  The name of the table to move.
 .
-   TARGET - Target table/dataset name.
-   - More guidance needed here.
+   TARGET - Target dataset name.  The new dataset to contain the table.
 .
 RETURN:
 .
@@ -404,11 +398,12 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Move the fmtpar table to dataset bob.
 .
-   StAF> DUI/MV
+ staf++ > mv fmtpar bob  
 .
 EXCEPTIONS: 
+ SECOND_PARAM_MUST_BE_DIR  - attempt to change the name of the table fails.
 .
 BUGS: 
 .
@@ -423,13 +418,12 @@ SEE ALSO:
 >COMMAND PWD
 >PARAMETERS
 >GUIDANCE
-More guidance needed here.
+Print the name of the current working Directory (Dataset).
 .
 DESCRIPTION: 
 .
-PWD is a member function of the duiFactory interface.
-.
-More guidance needed here.
+PWD is a member function of the duiFactory interface.  It prints the
+name of the current working dataset.
 .
 ARGUMENTS: 
 .
@@ -443,17 +437,16 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Show the current dataset.
 .
-   StAF> DUI/PWD
+ staf++ > dui/pwd
+ DUI:    Current Working Directory = (/dui/Switches) 
 .
 EXCEPTIONS: 
 .
 BUGS: 
 .
    None known.
-.
-SEE ALSO: 
 .
 >ACTION KAM_DUI_PWD
 **
@@ -463,18 +456,17 @@ SEE ALSO:
 >PARAMETERS
 PATH    'Unix-like table path' C
 >GUIDANCE
-More guidance needed here.
+Delete a table. DUI/RM will also delete a Dataset. 
 .
 DESCRIPTION: 
 .
-RM is a member function of the duiFactory interface.
-.
-More guidance needed here.
+RM is a member function of the duiFactory interface.  It
+removes (deletes) the table or Dataset named.
 .
 ARGUMENTS: 
 .
-   PATH - Unix-like table path.
-   - More guidance needed here.
+   PATH - Unix-like table path.  A relative or absolute path to an existing 
+Table or Dataset.
 .
 RETURN:
 .
@@ -484,17 +476,18 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Delete the tclpar table from dataset bob.
 .
-   StAF> DUI/RM
+   StAF> dui/rm bob/tclpar
 .
 EXCEPTIONS: 
 .
+ REMOVAL_FAILED - generally if the object named does not exist.
+.
 BUGS: 
 .
-   None known.
-.
-SEE ALSO: 
+   I'm not sure it's supposed to delete datasets.  Probably RM is a 
+legal KUIP abbreviation for RMDIR.
 .
 >ACTION KAM_DUI_RM
 **
@@ -504,18 +497,17 @@ SEE ALSO:
 >PARAMETERS
 PATH    'Unix-like dataset path' C
 >GUIDANCE
-More guidance needed here.
+Remove the named dataset and all its tables.
 .
 DESCRIPTION: 
 .
-RMDIR is a member function of the duiFactory interface.
-.
-More guidance needed here.
+RMDIR is a member function of the duiFactory interface.  It deletes a 
+dataset and any tables contained therein.
 .
 ARGUMENTS: 
 .
-   PATH - Unix-like dataset path.
-   - More guidance needed here.
+   PATH - Unix-like dataset path.  A relative or absolute path to an existing 
+Dataset.
 .
 RETURN:
 .
@@ -525,17 +517,19 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Delete the "bob" dataset.
 .
-   StAF> DUI/RMDIR
+   StAF> DUI/RMDIR bob
 .
-EXCEPTIONS: 
-.
+EXCEPTIONS:
+. 
+ DIR_NOT_FOUND - the named dataset was not found.
+
+ USE_RM_FOR_TABLES_NOT_RMDIR - attempt to remove a table with dui/rmdir
 BUGS: 
 .
    None known.
 .
-SEE ALSO: 
-.
 >ACTION KAM_DUI_RMDIR
 **
+

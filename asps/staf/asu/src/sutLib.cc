@@ -89,9 +89,14 @@ int sutMatchReg(char *pattern,char* string)
    char *newcursor=NULL;
    char *name=NULL;
 
+   return FALSE;
+   /* -----------------------------------------------------------
+   hjw 8Mar98, ret has not been set , name is freed without a malloc()
+
    rexp = (char*)MALLOC(strlen(pattern) +5);
    sprintf(rexp,"(%s)$0",pattern);fflush(0);
 
+      isMatch=FALSE;
    if( 0 == strcmp(ret0[0],string) ){
       isMatch=TRUE;
    }
@@ -101,6 +106,8 @@ int sutMatchReg(char *pattern,char* string)
    FREE(name);
    FREE(rexp);
    return isMatch;
+
+   ----------------------------------------------------------- */
 }
 
 /*

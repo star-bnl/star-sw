@@ -15,7 +15,7 @@
 >GUIDANCE
 Dataset_Input_and_Output commands.
 .
- #(@)$Id: dio_def.cdf,v 1.4 1998/01/24 19:03:51 ward Exp $
+ #(@)$Id: dio_def.cdf,v 1.5 1998/03/11 21:39:53 ward Exp $  Edited by Bill Love 25 Feb 98
 .
 DIO is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -25,7 +25,6 @@ interface layer.
 Each ASP is comprised of an object factory interface (eg. dioFactory)
 and zero or more worker object interfaces.
 .
-DIO worker objects include:
 DIO worker objects include:
    dioStream - See DIO/STREAM
       - A generic data stream object. Abstract base class for all dio
@@ -121,10 +120,19 @@ DESCRIPTION:
 COUNT is a readonly long attribute which reflects the number of DIO
 worker objects currently registered with the DIO object factory.
 Constructing a new DIO worker object increments COUNT by 1,
-destructing an existing DIO worker object decrements COUNT by 1.
+destroying an existing DIO worker object decrements COUNT by 1.
 .
 DIO worker objects include:
-   More guidance needed here.
+   dioStream - See DIO/STREAM
+      - A generic data stream object. Abstract base class for all dio
+        stream objects.
+   dioFileStream - See DIO/FILESTREAM
+      - A data stream object associated with a disk file.
+   dioSockStream - See DIO/SOCKSTREAM
+      - A data stream object associated with a TCP/IP socket.
+   dioTapeStream - See DIO/TAPESTREAM
+      - A data stream object associated with a magnetic tape device.
+      - NOTICE -- dioTapeStream is not yet implemented.
 .
 ARGUMENTS: 
 .
@@ -187,10 +195,8 @@ of that object's listing method. The typical content of this listing is:
 	   An object type is synonymous with an object class.
 	4> DESCRIPTION
 	   A class-specific description of the object.
-	   More guidance needed here.
-.
-DIO worker objects include:
-   More guidance needed here.
+	   For Filestreams this is the name of the file with indicators 
+           whether it is read/write and whether it is open/closed.
 .
 ARGUMENTS: 
 .
@@ -206,13 +212,16 @@ EXAMPLES:
 .
 EG1. List all currently registered DIO worker objects.
 .
-   StAF> DIO/LIST
-   +-------------------------------------------------------------------
-   |*********************** DIO - Not a valid DIO listing *************
-   +-------+-----------------+-----------------+-----------------------
-   | OID   | NAME:OBJECT     | TYPE:CLASS      | DESCRIPTION
-   +-------+-----------------+-----------------+-----------------------
-   +-------+-----------------+-----------------+-----------------------
+ staf++ > dio/list
+ 
+ +------------------------------------------------------------------------
+ |********************* DIO - Dataset Input/Output listing ***************
+ +-------+-----------------+-----------------+----------------------------
+ | IDREF | NAME:OBJECT     | TYPE:CLASS      | DESCRIPTION   		  
+ +-------+-----------------+-----------------+----------------------------
+ |    41 | GeoTables       | dioFileStream   | (R,C) /afs/rhic/star/starli 
+ |    69 | raw_data        | dioFileStream   | (R,O) /star/mds/data/SD97/c  
+ +-------+-----------------+-----------------+----------------------------
 .
 EXCEPTIONS: 
 .
@@ -246,7 +255,6 @@ ARGUMENTS:
    NAME - Case-sensitive alphanumeric name for new dioFilestream object.
    - Use this name as part of SOREF (see SOC) to specify this particular
      dioFilestream object in subsequent commands.
-   - More guidance needed here.
 .
    FILE - File name of XDF data file.
    - Unix file name.
@@ -263,12 +271,14 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Open an output file
+.
+ STAF> DIO/NEWFILESTREAM DST /star/sol/users/love/data/dst1.xdf W
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_CREATED - The object creation failed. See error stack for
-      detailed explaination of failure.
+      detailed explanation of failure.
 .
 BUGS: 
 .
@@ -329,7 +339,7 @@ EG1. More guidance needed here.
 EXCEPTIONS: 
 .
    OBJECT_NOT_CREATED - The object creation failed. See error stack for
-      detailed explaination of failure.
+      detailed explanation of failure.
 .
 BUGS: 
 .
@@ -380,7 +390,10 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1.
+.
+ staf++ > dio/filestream/filename DST
+ DIO:    File name = (/star/sol/users/love/data/dst1.xdf) 
 .
 EXCEPTIONS: 
 .
@@ -602,7 +615,7 @@ MODE is a readonly attribute which determines whether dioStream object
 SOREF reads from, or writes to its associated data stream.
 Readonly attributes cannot be changed from the user interface.
 .
-The valid valuse of MODE are:
+The valid values of MODE are:
 .
    READONLY - Read Only
    WRITEONLY - Write Only
@@ -615,15 +628,15 @@ ARGUMENTS:
 RETURN:
 .
    The current value of MODE is pushed onto the STAF_RESULT stack
-   (see SOC).
+   (see SOC) and a message is printed to stdout.
 .
 EXAMPLES: 
 .
 EG1. Show the current value of the MODE attribute of
-    dioStream "bob".
+    dioStream "DST".
 .
-   StAF> DIO/STREAM/MODE bob
-   More guidance needed here.
+ staf++ > dio/stream/mode DST        
+ DIO:    Stream mode = (WRITEONLY) 
 .
 EXCEPTIONS: 
 .
@@ -670,15 +683,15 @@ ARGUMENTS:
 RETURN:
 .
    The current value of STATE is pushed onto the STAF_RESULT stack
-   (see SOC).
+   (see SOC) and a message is printed to stdout.
 .
 EXAMPLES: 
 .
 EG1. Show the current value of the STATE attribute of
-    dioStream "bob".
+    dioStream "DST".
 .
-   StAF> DIO/STREAM/STATE bob
-   More guidance needed here.
+ staf++ > dio/stream/state DST
+ DIO:    Stream state = (OPENED) 
 .
 EXCEPTIONS: 
 .
@@ -701,7 +714,8 @@ SEE ALSO:
 >PARAMETERS
 SOREF 'dioStream object SORef' C
 >GUIDANCE
-Terminate communication with associated data stream.
+Terminate communication with associated data stream.  The state attribute
+of the stream becomes "CLOSED".
 .
 DESCRIPTION: 
 .
@@ -726,7 +740,10 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Close the "DST" Filestream.
+ staf++ > dio/stream/close DST
+ staf++ > dio/stream/state DST
+ DIO:    Stream state = (CLOSED) 
 .
 EXCEPTIONS: 
 .
@@ -768,8 +785,10 @@ ARGUMENTS:
    SOREF - Stringified Object REFerence (see SOC).
    - denoting an object implementing the dioStream interface.
 .
-   DATASET - In memory dataset name
-   - More guidance needed here.
+   DATASET - Optional in-memory dataset name.  If not given, the
+   dataset name found on the file will be used.  If the dataset exists,
+   it will be replaced with the dataset from the stream, if not it will
+   be created.  The stream must be open and in READ mode.
 .
 RETURN:
 .
@@ -779,7 +798,9 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Read in an event from the stream "raw_data"
+.
+ staf++ > dio/stream/getevent raw_data
 .
 EXCEPTIONS: 
 .
@@ -787,6 +808,8 @@ EXCEPTIONS:
       implements the dioStream interface.
       (See SOC/BIND to dynamically bind the proper resources, or
       rebuild executable with the proper resources statically linked.)
+   BAD_MODE_OR_STATE - Attempt to read from a writeonly stream or a closed
+stream.
 .
 BUGS: 
 .
@@ -804,7 +827,8 @@ SOREF 'dioStream object SORef' C
 +
 MODE    'Read/write mode' C D='R' R='R,W'
 >GUIDANCE
-Initiate communication with associated data stream.
+Initiate communication with a data stream.  I.e. set the state to 
+OPENED.
 .
 DESCRIPTION: 
 .
@@ -822,7 +846,7 @@ ARGUMENTS:
    - denoting an object implementing the dioStream interface.
 .
    MODE - Read/write mode
-   - More guidance needed here.
+   - Options are READING and WRITING
 .
 RETURN:
 .
@@ -832,14 +856,17 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Change the state of the "DST" datastream to OPENED.  Set
+the mode to Write-only.
+.
+ staf++ > dio/stream/open DST W
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the dioStream interface.
-      (See SOC/BIND to dynamically bind the proper resources, or
-      rebuild executable with the proper resources statically linked.)
+implements the dioStream interface.
+(See SOC/BIND to dynamically bind the proper resources, or
+rebuild executable with the proper resources statically linked.)
 .
 BUGS: 
 .
@@ -867,16 +894,17 @@ interface, including:
    dioFileStream - See DIO/FILESTREAM
       - A data stream object associated with a disk file.
    dioSockStream - See DIO/SOCKSTREAM
-      - A data stream object associated with a TCP/IP socket.
-.
-More guidance needed here.
+      - A data stream object associated with a TCP/IP socket. 
+      The stream must be open and in WRITE mode.
+   Dataset contents ( typically tables and other datasets ) are written
+ from memory to an output stream.
 .
 ARGUMENTS: 
 .
    SOREF - Stringified Object REFerence (see SOC).
    - denoting an object implementing the dioStream interface.
 .
-   DATASET - In memory dataset name
+   DATASET - Path to an in-memory dataset name.
 .
 RETURN:
 .
@@ -886,7 +914,14 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Write the dataset Tracks contained in the dataset ProducedData
+to the filestream DST.
+.
+ staf++ > dio/stream/putevent DST ProducedData/Tracks
+.
+EG2. Write the entire ProducedData dataset to the filestream DST.
+.
+ staf++ > dio/stream/putevent DST ProducedData
 .
 EXCEPTIONS: 
 .
@@ -894,6 +929,8 @@ EXCEPTIONS:
       implements the dioStream interface.
       (See SOC/BIND to dynamically bind the proper resources, or
       rebuild executable with the proper resources statically linked.)
+   BAD_MODE_OR_STATE - Attempt to write to a readonly stream or a closed
+      stream.
 .
 BUGS: 
 .
@@ -903,3 +940,7 @@ SEE ALSO:
 .
 >ACTION KAM_DIOSTREAM_PUTEVENT
 **
+
+
+
+

@@ -279,7 +279,7 @@ STAFCV_T levFactory:: registerVersion(const char *name,
 } /* nrow val */
 char *levFactory:: version() {
   char *c=NULL;
-  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.6 1998/03/05 22:40:13 fisyak Exp $";
+  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.7 1998/03/11 21:40:07 ward Exp $";
   c=(char*)malloc(strlen(v)+1);
   strcpy(c,v);
   return c;

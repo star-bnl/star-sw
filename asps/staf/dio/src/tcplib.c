@@ -143,6 +143,9 @@ int *pSocket;
 /**********************************************************************
 *
 */
+#ifdef sun4os5
+int tcpRead(void *herb, char *buf, int len)
+#else
 #ifdef							__sgi
 int tcpRead(void *herb, void *buf, u_int len)
 #else							/*__sgi*/
@@ -152,7 +155,11 @@ int tcpRead(void *herb, char *buf, int len)
 int tcpRead(int *fd, char *buf, int len)
 #endif							/*s5x86*/
 #endif							/*__sgi*/
+#endif							/*sun4os5*/
 {
+#ifdef sun4os5
+        int *fd=herb;  /* To compile on intel Solaris.  */
+#endif
 #ifdef s5x86
         int *fd=herb;  /* To compile on intel Solaris.  */
 #endif
@@ -195,6 +202,9 @@ int tcpRead(int *fd, char *buf, int len)
 *
 *
 */
+#ifdef sun4os5
+int tcpWrite(void *herb, char *buf, int len)
+#else
 #ifdef							__sgi
 int tcpWrite(void *herb, void *buf, u_int len)
 #else							/*__sgi*/
@@ -204,17 +214,24 @@ int tcpWrite(void *herb, char *buf, int len)
 int tcpWrite(int *fd, char *buf, int len)
 #endif							/*s5x86*/
 #endif							/*__sgi*/
+#endif							/*sun4os5*/
 {
         int i, cnt;
+#ifdef sun4os5
+        int *fd=herb;   /* to compile on irix */
+#endif
 #ifdef s5x86
         int *fd=herb;   /* to compile on irix */
 #endif
 #ifdef __sgi
         int *fd=herb;   /* to compile on irix */
+        char *herb2;     
+        herb2=buf;
 #endif
 
 #ifdef __sgi
-        for (cnt = len; cnt > 0; cnt -= i, ((char*)buf) += i) {
+        for (cnt = len; cnt > 0; cnt -= i, herb2 += i) {
+		buf=herb2;
 #else
         for (cnt = len; cnt > 0; cnt -= i, buf += i) {
 #endif

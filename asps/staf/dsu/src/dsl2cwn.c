@@ -167,7 +167,7 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
 	 if( !dsColumnName(&cname, pTable, ic)
 	 ||  !dsColumnTypeCode(&ctype, pTable, ic)
 	 ||  !dsColumnDimCount(&cdims, pTable, ic)
-	 ||  !dsColumnDimensions(&cdim, pTable, ic) ) {
+	 ||  !dsColumnDimensions(cdim, pTable, ic) ) {
 	    dsPerror("dsl2cwn.E5- bad column ");
 	 } else {
 	    if( LAST_BTYPE(nb) != block_type(ctype) ) {
@@ -351,7 +351,7 @@ char* col2spec(char *name,DS_TYPE_CODE_T type,size_t dims,size_t *dim)
 */
 char* block_name(char *name,long n)
 {
-   static char *bname[16];
+   static char bname[16];
    char numb[4];
 
    strncpy(bname,"",8); 

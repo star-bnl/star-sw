@@ -15,7 +15,7 @@
 >GUIDANCE
 Analysis_Module_Invoker commands.
 .
- #(@)$Id: ami_def.cdf,v 1.5 1998/02/20 22:26:13 love Exp $
+ #(@)$Id: ami_def.cdf,v 1.6 1998/03/11 21:39:42 ward Exp $
 .
 AMI is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -86,8 +86,7 @@ List all currently registered AMI worker objects.
 DESCRIPTION: 
 .
 Show a one-line description for each AMI worker object currently
-registered with the AMI object factory in a table for quick,
-simple perusal.
+registered with the AMI object factory in a table format.
 .
 The one-line description for each object is the result of an invokation
 of that object's listing method. The typical content of this listing is:
@@ -111,7 +110,7 @@ of that object's listing method. The typical content of this listing is:
 	   An object type is synonymous with an object class.
 	4> DESCRIPTION
 	   A class-specific description of the object.
-	   More guidance needed here.
+	   For AMI objects the number of table arguments is listed.
 .
 AMI worker objects include:
    amiInvoker - See AMI/MODULE
@@ -129,20 +128,29 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. List all currently instantiated AMI worker objects.
+EG1. List all current AMI worker objects.
 .
-   Kuip> AMI/LIST
-   +-------------------------------------------------------------------
-   |****************** AMI - Analysis Module Interface listing ********
-   +-------+-----------------+-----------------+-----------------------
-   | IDREF | NAME:OBJECT     | TYPE:CLASS      | DESCRIPTION
-   +-------+-----------------+-----------------+-----------------------
-   |     7 | pamc            | amiInvoker      | 2 arg.s
-   |     8 | pamcc           | amiInvoker      | 2 arg.s
-   |     9 | pamf            | amiInvoker      | 2 arg.s
-   |    16 | tfs_filt        | amiInvoker      | 1 arg.s
-   |    17 | tfs_g2t         | amiInvoker      | 8 arg.s
-   +-------+-----------------+-----------------+-----------------------
+ staf++ > ami/list
+
+ +---------------------------------------------------------------------
+ |****************** AMI - Analysis Module Interface listing **********
+ +-------+-----------------+-----------------+-------------------------
+ | IDREF | NAME:OBJECT     | TYPE:CLASS      | DESCRIPTION             
+ +-------+-----------------+-----------------+-------------------------
+ |     9 | tcl_mak~lusters | amiInvoker      | 6 arg.s                 
+ |    10 | tpeam           | amiInvoker      | 13 arg.s                
+ |    11 | tpham           | amiInvoker      | 10 arg.s                
+ |    12 | reformat        | amiInvoker      | 13 arg.s                
+ |    13 | tfc_calc_delta  | amiInvoker      | 2 arg.s                 
+ |    14 | tfc_stability   | amiInvoker      | 4 arg.s                 
+ |    15 | tstam           | amiInvoker      | 8 arg.s                 
+ |    16 | tstgain         | amiInvoker      | 5 arg.s                 
+ |    17 | xyz             | amiInvoker      | 5 arg.s                 
+ |    18 | tpg_main        | amiInvoker      | 3 arg.s                 
+ |    19 | tpt             | amiInvoker      | 4 arg.s                 
+ |    20 | tpt_sts         | amiInvoker      | 6 arg.s                 
+ +-------+-----------------+-----------------+-------------------------
+                                                                     
 .
 EXCEPTIONS: 
 .
@@ -192,7 +200,7 @@ called a type 1 PAM
 >PARAMETERS
 SOREF 'amiModule object SORef' C
 >GUIDANCE
-Get the RANK attribute of the amiModule SOREF.
+Get the RANK of a Module.  I.e. the number of call arguments in its Module definition .idl file. 
 .
 DESCRIPTION: 
 .

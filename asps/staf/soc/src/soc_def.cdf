@@ -15,11 +15,11 @@
 >GUIDANCE
 Service_and_Object_Catalog commands.
 .
- #(@)$Id: soc_def.cdf,v 1.5 1998/01/24 19:05:36 ward Exp $
+ #(@)$Id: soc_def.cdf,v 1.6 1998/03/11 21:40:18 ward Exp $
 .
 SOC is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
-into the software bus archictecture of StAF in a CORBA compliant
+into the software bus architecture of StAF in a CORBA compliant
 interface layer.
 .
 Each ASP is comprised of an object factory interface (eg. socFactory)
@@ -48,7 +48,7 @@ SOREF - Stringafied Object REFerence
 .
 The Stringafied Object REFerence to an object in StAF is a character
 string used to identify and/or locate an object registered with the
-socCatalog. An SOREF has the form:
+socCatalog. A SOREF has the form:
 .
 (N.B. - The current implementation of SOREF only properly handles
 the  NAME format for all cases. The full functionality of this list
@@ -103,8 +103,8 @@ DESCRIPTION:
 .
 COUNT is a readonly long attribute which reflects the number of all
 objects currently registered with the SOC object catalog.
-Constructing a new object increments COUNT by 1,
-destructing an existing SOC worker object decrements COUNT by 1.
+Constructing a new object increments COUNT by 1.  
+Destroying an existing SOC worker object decrements COUNT by 1.
 .
 ARGUMENTS: 
 .
@@ -142,10 +142,9 @@ List all currently registered SOC worker objects.
 DESCRIPTION: 
 .
 Show a one-line description for each SOC worker object currently
-registered with the SOC object factory in a table for quick,
-simple perusal.
+registered with the SOC object factory in a table.
 .
-The one-line description for each object is the result of an invokation
+The one-line description for each object is the result of an invocation
 of that object's listing method. The typical content of this listing is:
 	0> OID
 	   The object's OID attribute (see SOC) presented as "%5d".
@@ -157,17 +156,20 @@ of that object's listing method. The typical content of this listing is:
 	   LOCK attribute is FALSE (can be deleted) uses "|" character.
 	2> NAME:OBJECT
 	   The object's NAME attribute (see SOC) presented as "%-15s".
-	   Object names longer than 15 characters are abreviated with a
+	   Object names longer than 15 characters are abbreviated with a
 	   "~" character at midpoint.
 	   An object name is synonymous with an object instance.
 	3> TYPE:CLASS
 	   The object's TYPE attribute (see SOC) presented as "%-15s".
-	   Object types longer than 15 characters are abreviated with a
+	   Object types longer than 15 characters are abbreviated with a
 	   "~" character at midpoint. 
 	   An object type is synonymous with an object class.
 	4> DESCRIPTION
-	   A class-specific description of the object.
-	   More guidance needed here.
+	   A class-specific description of the object.  For example, for
+           a table, the number of rows allocated/used and the size of a
+           row.  For a dataset the number of entries.  For a filestream,
+           the mode, state and associated filename, etc.  
+          
 .
 Unlike the LIST command of other object factories, the SOC/LIST command
 lists all registered objects whether directly instantiated by the
@@ -245,7 +247,8 @@ ARGUMENTS:
    NAME - Case-sensitive alphanumeric name for new socObject object.
    - Use this name as part of SOREF (see SOC) to specify this particular
      socObject object in subsequent commands.
-   - More guidance needed here.
+   - More guidance needed here, most definitely, as to just what an 
+     undifferentiated socObject is good for.
 .
 RETURN:
 .
@@ -262,7 +265,7 @@ EG1. Create a new socObject with NAME "bob"
 EXCEPTIONS: 
 .
    OBJECT_NOT_CREATED - The object creation failed. See error stack for
-      detailed explaination of failure.
+      detailed explanation of failure.
 .
 BUGS: 
 .
@@ -386,7 +389,8 @@ invoke that object's Destructor method.
 ARGUMENTS: 
 .
    OID - Object ID
-   - More guidance needed here.
+  Each object registered with SOC has a unique integer ID which is
+listed by the soc/list command or returned by the SOC/IDOBJECT command. 
 .
 RETURN:
 .
@@ -420,8 +424,7 @@ OID     'Object ID' I
 Obsolete command.
 .
 DESCRIPTION: 
-This command still functions but is obsolete. It will go away in a
-future release. Please use SOC/DELETEOID instead.
+This command is obsolete.  Please use SOC/DELETEOID instead.
 .
 SEE ALSO: 
    SOC/DELETEOID
@@ -436,10 +439,11 @@ NAME    'Registered object name' C
 +
 TYPE    'Registered interface name' C D='-'
 >GUIDANCE
-Delete a registered object.
+Obsolete Command.
 .
 DESCRIPTION: 
-.
+This command is obsolete.  Please use SOC/OBJECT/DELETE instead.
+..
 DELETEOBJECT is a member function of the socCatalog interface.
 .
 DELETEOBJECT will locate a registered object with the specified NAME
@@ -509,10 +513,10 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Identify an object of TYPE == grid and NAME == chess.
+EG1. Identify an object of TYPE dioFilestream and NAME DST.
 .
-   StAF> SOC/IDOBJECT chess grid
-   SOC:    Object idRef =  15
+ staf++ > soc/idobject DST dioFileStream
+ SOC:    Object idRef =  101 
 .
 EXCEPTIONS: 
 .
@@ -521,6 +525,7 @@ BUGS:
    None known.
 .
 SEE ALSO: 
+ SOC/OBJECT/OID
 .
 >ACTION KAM_SOC_IDOBJECT
 **
@@ -627,11 +632,11 @@ EG1. Show the current value of the LOCK attribute of socObject
 .
 EG2. Lock socObject object with OID == 14.
 .
-   StAF> SOC/OBJECT/LOCK 14 F
+   StAF> SOC/OBJECT/LOCK 14 T
 .
 EG3. Unlock socObject object with OID == 14.
 .
-   StAF> SOC/OBJECT/LOCK 14 T
+   StAF> SOC/OBJECT/LOCK 14 F
 .
 EXCEPTIONS: 
 .
@@ -642,7 +647,8 @@ EXCEPTIONS:
 .
 BUGS: 
 .
-   SOC/OBJECT/LOCK ought to use SOREF instead of OID.
+   SOC/OBJECT/LOCK ought to use SOREF instead of OID.  Doesn't actually
+return OBJECT_NOT_FOUND but KAM_INVALID_IDREF.
 .
 SEE ALSO: 
 .
@@ -677,10 +683,10 @@ RETURN:
 EXAMPLES: 
 .
 EG1. Show the current value of the NAME attribute of
-    socObject "bob".
+    socObject 99.
 .
-   StAF> SOC/OBJECT/NAME 14
-   SOC:    Object name = chess
+ staf++ > soc/object/name 99 
+ SOC:    Object name = /dui/BEGIN_RUN/GN6 
 .
 EXCEPTIONS: 
 .
@@ -692,7 +698,9 @@ EXCEPTIONS:
 BUGS: 
 .
    SOC/OBJECT/NAME ought to use SOREF instead of OID.
-   - The value of OID can be determined by using SOC/IDOBJECT.
+   - The value of OID can be determined by using SOC/OBJECT/OID.
+   Doesn't actually return OBJECT_NOT_FOUND but KAM_INVALID_IDREF.
+.
 .
 SEE ALSO: 
 .
@@ -778,10 +786,10 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Show the current value of the TYPE attribute of object OID == 14;
+EG1. Show the current value of the TYPE attribute of the object with OID 99;
 .
-   StAF> SOC/OBJECT/TYPE 13
-   SOC:    Object type = spxGrid
+ staf++ > soc/object/type 99 
+ SOC:    Object type = tdmTable 
 .
 EXCEPTIONS: 
 .
@@ -793,7 +801,7 @@ EXCEPTIONS:
 BUGS: 
 .
    SOC/OBJECT/TYPE ought to use SOREF instead of OID.
-   - The value of OID can be determined by using SOC/IDOBJECT.
+   - The value of OID can be determined by using SOC/OBJECT/OID.
 .
 SEE ALSO: 
 .
@@ -832,7 +840,6 @@ EG1. Show the current value of the VERSION attribute of
 .
    StAF> SOC/OBJECT/VERSION 14
    SOC:    Object version = dev
-    socObject "bob".
 .
 EXCEPTIONS: 
 .
@@ -844,7 +851,7 @@ EXCEPTIONS:
 BUGS: 
 .
    SOC/OBJECT/VERSION ought to use SOREF instead of OID.
-   - The value of OID can be determined by using SOC/IDOBJECT.
+   - The value of OID can be determined by using SOC/OBJECT/OID.
 .
 SEE ALSO: 
 .
@@ -893,6 +900,15 @@ EXCEPTIONS:
 .
 BUGS: 
 .
+  Fails to delete stream objects?
+ staf++ > soc/object/delete bob dioFileStream
+ 
+ *** Break *** Segmentation violation
+ Interrupt trace routine not available 
+ 
+ *** Break *** Simulated break
+
+
    SOC/OBJECT/DELETE ought to use SOREF instead of NAME & TYPE.
    Objects must have a LOCK attribute == FALSE to be deleted.
 .
@@ -962,7 +978,7 @@ EXCEPTIONS:
 BUGS: 
 .
    SOC/OBJECT/IMPLEMENTS ought to use SOREF instead of OID.
-   - The value of OID can be determined by using SOC/IDOBJECT.
+   - The value of OID can be determined by using SOC/OBJECT/OID
 .
 SEE ALSO: 
 .

@@ -15,7 +15,7 @@
 >GUIDANCE
 Analysis_Service_Utilities commands.
 .
- #(@)$Id: asu_def.cdf,v 1.4 1998/01/24 19:03:21 ward Exp $
+ #(@)$Id: asu_def.cdf,v 1.5 1998/03/11 21:39:47 ward Exp $
 .
 ASU is utility package which contains several useful functions and
 user-interface commands.
@@ -24,6 +24,9 @@ ASU does not contain any component objects in the StAF sense. All user
 interface commands under ASU can be considered to invoke conventional
 C functions.
 .
+** ---------------------------------------------------------------------
+** ---------------------------------------------------------------------
+** ASU/TIME
 ** ---------------------------------------------------------------------
 ** ASU/HELLO MESSAGE
 >COMMAND HELLO
@@ -189,9 +192,145 @@ SEE ALSO:
 .
 >ACTION KAM_ASU_FFLUSH
 **
+>MENU EML
+** ASU/EML/PRETTY_FORMATTING [TRUE/FALSE/SHOW]
+>COMMAND PRETTY_FORMATTING
+>PARAMETERS
++
+PRETTY 'Either TRUE, FALSE, or SHOW.' C D='SHOW'
+>GUIDANCE
+SHOW reports the current value.
+The other possible values are self-explanatory.
+.
+DESCRIPTION: 
+.
+You can type ON/OFF instead of TRUE/FALSE.
+.
+Prettification formats error messages for readability.
+It does not remove any information.
+.
+Pretty error messages are ON when Staf starts.
+If you suspect a bug in the prettification mechanism, you
+can try turning it off.
+.
+ARGUMENTS: 
+.
+   PRETTY - Either ON, OFF, or SHOW.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   asu_pretty
+   function is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+   Kuip> ASU/EML/PRETTY_FORMATTING
+   ASU:    Error messaging prettification is ON.
+   Kuip> ASU/EML/PRETTY_FORMATTING OFF
+   Kuip> ASU/EML/PRETTY_FORMATTING 
+   ASU:    Error messaging prettification is OFF.
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None.
+.
+SEE ALSO: 
+.
+>ACTION KAM_ASU_PRETTY
+**
+** ASU/EML/BEEP_ON_ERROR [TRUE/FALSE/SHOW]
+>COMMAND BEEP_ON_ERROR
+>PARAMETERS
++
+BEEP 'Either TRUE, FALSE, or SHOW.' C D='SHOW'
+>GUIDANCE
+You can type ON/OFF instead of TRUE/FALSE.
+.
+SHOW reports the current value.
+The other possible values are self-explanatory.
+.
+DESCRIPTION: 
+.
+Self-explanatory.
+.
+Beeping is ON by default when Staf starts.
+.
+ARGUMENTS: 
+.
+   BEEP - Either ON, OFF, or SHOW.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   asu_beep
+   function is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+   Kuip> ASU/EML/BEEP_ON_ERROR ON
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None.
+.
+SEE ALSO: 
+.
+>ACTION KAM_ASU_BEEP
+**
+** ASU/EML/DEMAND_ERROR_ACKNOWLEDGEMENT [TRUE/FALSE/SHOW]
+>COMMAND DEMAND_ERROR_ACKNOWLEDGEMENT
+>PARAMETERS
++
+DEMAND 'Either TRUE, FALSE, or SHOW.' C D='SHOW'
+>GUIDANCE
+You can type ON/OFF instead of TRUE/FALSE.
+.
+SHOW reports the current value.
+The other possible values are self-explanatory.
+.
+DESCRIPTION: 
+.
+The idea is to keep error messages from scrolling off
+the top of your screen unnoticed.
+.
+However, if you have many benign errors, you will probably
+want to turn DEMAND_ERROR_ACKNOWLEDGEMENT off.
+.
+This feature is OFF by default when Staf starts, for
+backward compatibility.
+.
+ARGUMENTS: 
+.
+   DEMAND - Either ON, OFF, or SHOW.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   asu_demand_ack
+   function is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+   Kuip> ASU/EML/DEMAND_ERROR_ACKNOWLEDGEMENT OFF
+.
+EXCEPTIONS: 
+.
+BUGS: 
+.
+   None.
+.
+SEE ALSO: 
+.
+>ACTION KAM_ASU_DEMAND_ACK
+**
 ************************************************************************
 ** ASU/MALLOC
->MENU MALLOC
+>MENU \MALLOC
 >GUIDANCE
 Commands controlling "asuAlloc.h" functions.
 .
@@ -204,7 +343,10 @@ memory leaks.
 >COMMAND LEVEL
 >PARAMETERS
 +
-NEW_VALUE 'Memory allocation debug level' I D=0
+NEW_VALUE 'Memory allocation debug level' I D=0 R='0,2'
+*            * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+*            * restricted range 0-2, hjw 19Feb98, 3 makes seg fault  *
+*            * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 >GUIDANCE
 Get or set the "asuAlloc.h" debug level.
 .
