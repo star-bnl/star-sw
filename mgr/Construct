@@ -440,13 +440,19 @@ foreach my $dir ("StRoot","pams") {
 	    if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) && 
 		$subsub_dir !~ /^g2t$/) {
 	      # one more level for gen & sim
-	      if ($SKIP_DIRS && $SKIP_DIRS =~ $sub_dir) {next;}
+	      if ($SKIP_DIRS && $SKIP_DIRS =~ $subsub_dir) {
+		print "skip dir: $subsub_dir \t=> $SKIP_DIRS\n";
+		next;
+	      }
 	      push @subdirs, $subsub_DIR; #print "================== add $subsub_DIR\n";
 	    }
 	  }
 	}
 	if ($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) {next;} 
-	if ($SKIP_DIRS && $SKIP_DIRS =~ $sub_dir) {next;}
+	if ($SKIP_DIRS && $SKIP_DIRS =~ $sub_dir) {
+	  print "skip dir: $sub_dir \t=> $SKIP_DIRS\n";
+	  next;
+	}
 	if ($STAR_HOST_SYS =~ /^hp_ux102$/ &&  $sub_dir =~ /StHbtMaker/) {next;}
 	push @subdirs, $sub_DIR;# print "================== add $sub_DIR\n";
       }
