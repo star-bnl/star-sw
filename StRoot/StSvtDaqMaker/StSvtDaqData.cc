@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqData.cc,v 1.5 2001/10/24 16:49:42 munhoz Exp $
+ * $Id: StSvtDaqData.cc,v 1.6 2002/05/06 00:35:31 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqData.cc,v $
+ * Revision 1.6  2002/05/06 00:35:31  munhoz
+ * correct hybrid swapping
+ *
  * Revision 1.5  2001/10/24 16:49:42  munhoz
  * adding capability to retrieve t0 and first SCA
  *
@@ -70,26 +73,43 @@ StSvtDaqData::StSvtDaqData(StSvtConfig* config, StSVTReader* reader, char* optio
 
 int StSvtDaqData::setData(StSVTReader* reader, char* option)
 {
-  int status;
+  int status, index;
 
   for (int barrel = 1;barrel <= getNumberOfBarrels();barrel++) {
     for (int ladder = 1;ladder <= getNumberOfLadders(barrel);ladder++) {
       for (int wafer = 1;wafer <= getNumberOfWafers(barrel);wafer++) {
 	for (int hybrid = 1;hybrid <= getNumberOfHybrids();hybrid++) {
 
-	  if (getHybridIndex(barrel,ladder,wafer,hybrid) < 0) continue;
+	  index = getHybridIndex(barrel,ladder,wafer,hybrid);
+	  if (index < 0) continue;
 	  
 	  //printf("StSvtDaqMaker::barrel = %d, ladder = %d, wafer = %d, hybrid = %d\n",barrel,ladder,wafer,hybrid);
 
 	  // have to swap the hybrids in collection due to hardware swapping for Y1
 	  if ( !strncmp(getConfiguration(), "Y1L", strlen("Y1L")) ) {
 	    if (hybrid == 1)
-	      mData = (StSvtHybridDaqData*)at(getHybridIndex(barrel, ladder, wafer, 2));
+	      index = getHybridIndex(barrel, ladder, wafer, 2);
 	    else if (hybrid == 2)
-	      mData = (StSvtHybridDaqData*)at(getHybridIndex(barrel, ladder, wafer, 1));
+	      index = getHybridIndex(barrel, ladder, wafer, 1);
 	  }
-	  else
-	    mData = (StSvtHybridDaqData*)at(getHybridIndex(barrel, ladder, wafer, hybrid));
+	  else {
+	    if( (barrel == 2) && (ladder == 1) && (wafer > 3)){
+	      if( hybrid ==1) index++;
+	      if( hybrid ==2) index --;
+	    }
+	    else if( (barrel == 2) && (ladder == 8) && (wafer < 4)){
+	      if( hybrid ==1) index++;
+	      if( hybrid ==2) index --;
+	    }
+	    else if( (barrel == 3) && (ladder == 16) && (wafer > 4)){
+	      index -= 14;
+	    }
+	    else if( (barrel == 3) && (ladder == 15) && (wafer > 4)){
+	      index += 14;
+	    }
+	  }
+
+	  mData = (StSvtHybridDaqData*)at(index);
 
 	  if (mData) {
 	    delete mData;
@@ -111,14 +131,7 @@ int StSvtDaqData::setData(StSVTReader* reader, char* option)
 	  }
 
 	  if (status >= 0) {
-
-	    // have to swap the hybrids in collection due to hardware swapping for Y1
-	    if ( !strncmp(getConfiguration(), "Y1L", strlen("Y1L")) ) {
-	      if (hybrid == 1 || hybrid == 2 )
-		put_at(mData, getHybridIndex(barrel,ladder,wafer,3-hybrid));	  
-	    }
-	    else
-	      put_at(mData, getHybridIndex(barrel,ladder,wafer,hybrid));	  
+	    put_at(mData, index);	  
 	  }
 	  else
 	    delete mData;
