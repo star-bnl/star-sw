@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.2 2004/03/19 19:07:43 chunhuih Exp $
+ * $Id: StEStructPairCuts.h,v 1.3 2004/06/16 20:00:43 chunhuih Exp $
  *
  * Author: Jeff Porter 
  *
@@ -298,24 +298,24 @@ inline int StEStructPairCuts::cutMidTpcSepLS(){
     double x1=mMidTpcSeparationLS=MidTpcSeparation();
     double x2=NominalTpcEntranceSeparation();
     double x3=NominalTpcExitSeparation();
-    if( x1<x2 && x1<x3 && x1<mMidTpcSepLS[0]) return msplitLSCounter[mType]++;
+    if( x1<x2 && x1<x3 && x1<mMidTpcSepLS[0]) return ++(msplitLSCounter[mType]);
   }
   return 0;
 }
 
 
 inline int StEStructPairCuts::cutExitSep(){
-   if( mExitSepCut && 
-       ( (mExitSeparation=NominalTpcExitSeparation()) <mExitSep[0]
-        || mExitSeparation>mExitSep[1] )
-       ) return ++(mExitSepCounter[mType]);
-   return 0;
+  if( mExitSepCut && 
+      ( (mExitSeparation=NominalTpcExitSeparation()) <mExitSep[0]
+	|| mExitSeparation>mExitSep[1] )
+      ) return ++(mExitSepCounter[mType]);
+  return 0;
 }
 
 inline int StEStructPairCuts::cutQuality(){
   if( mQualityCut && 
       ( (mQualityVal=quality()) <mQuality[0]
-       || mQualityVal>mQuality[1] )
+	|| mQualityVal>mQuality[1] )
       ) return ++(mQualityCounter[mType]);
   return 0;
 }
@@ -394,7 +394,11 @@ inline int StEStructPairCuts::cutQualityH(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.3  2004/06/16 20:00:43  chunhuih
+ * changed one more post-increment operator to pre-increment operator.
+ *
  * Revision 1.2  2004/03/19 19:07:43  chunhuih
+ *
  * Use pre-increment instead of post-increment operators for the return values
  * of a set of cut methods. This returns the correct cut value for the first
  * time the counting array is incremented.
