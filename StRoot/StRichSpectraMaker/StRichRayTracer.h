@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichRayTracer.h,v 1.4 2002/01/12 00:10:23 lasiuk Exp $
+ * $Id: StRichRayTracer.h,v 1.5 2002/05/21 22:07:13 lasiuk Exp $
  *
  * Author:  bl Feb 21, 2001
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.h,v $
+ * Revision 1.5  2002/05/21 22:07:13  lasiuk
+ * revision of index of refraction
+ * and ray tracing
+ *
  * Revision 1.4  2002/01/12 00:10:23  lasiuk
  * debin addition; quartz cerenkov angle, tuple modification, shift
  * to 183 nm for ray tracing, no temperature effect yet
@@ -47,8 +51,8 @@ class StRichRayTracer {
 
 public:
     StRichRayTracer();
-    StRichRayTracer(double);
-    StRichRayTracer(double, StThreeVectorF&, StThreeVectorF&, StThreeVectorF&);
+    StRichRayTracer(double, double);
+    StRichRayTracer(double, StThreeVectorF&, StThreeVectorF&, StThreeVectorF&, double);
     ~StRichRayTracer();
 
     //StRichRayTracer(const StRichRayTracer&) {/* use default */}
@@ -56,7 +60,7 @@ public:
 
     void setFreonRadiationPlane(StThreeVectorF&);
     void setQuartzRadiationPlane(StThreeVectorF&);
-    void setTrack(StThreeVectorF&, StThreeVectorF&, StThreeVectorF&);
+    void setTrack(StThreeVectorF&, StThreeVectorF&, StThreeVectorF&,double);
     void setPhotonPosition(StThreeVectorF&);
     bool initialPropagator();
 
@@ -97,7 +101,7 @@ public:
 
 protected:    
 
-    void init(double);
+    void init(double, double);
     void calculateGeometry();
     void calculateTrackAngle();
 

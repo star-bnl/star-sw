@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.13 2002/02/22 18:20:31 dunlop Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.14 2002/05/21 22:07:13 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -15,6 +15,10 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.14  2002/05/21 22:07:13  lasiuk
+ * revision of index of refraction
+ * and ray tracing
+ *
  * Revision 1.13  2002/02/22 18:20:31  dunlop
  * Actually, rationalize return values
  *
@@ -197,9 +201,7 @@ Int_t StRichSpectraMaker::Init() {
     cout << "StRichSpectraMaker::init()" << endl;
     
 #ifdef RICH_SPECTRA_HISTOGRAM
-    mFile = new TFile("/star/rcf/scratch/lasiuk/theta/SpectraTest.root","RECREATE","Pid Ntuples");
-    //mFile = new TFile("/star/rcf/scratch/lasiuk/2000/Spectra01hi_geom.root","RECREATE","Pid Ntuples");
-    mFile->SetFormat(1);
+    mFile = new TFile("/star/rcf/scratch/lasiuk/theta/S02_b0_bFull_129039outer_tc_down2mm.root","RECREATE","Pid Ntuples");
 
     
     //
@@ -248,7 +250,7 @@ Int_t StRichSpectraMaker::Init() {
     PR(mAverageRadiationPlanePoint);
     PR(mAverageQuartzRadiationPlanePoint);
     PR(mGlobalRichNormal);
-
+    
     mTopRadiator = StThreeVectorF(0.,
 				  0.,
 				  (mGeometryDb->proximityGap() +
@@ -266,6 +268,8 @@ Int_t StRichSpectraMaker::Init() {
 	(mGeometryDb->proximityGap() +
 	 mGeometryDb->quartzDimension().z() +
 	 mGeometryDb->radiatorDimension().z()/2.) << endl;
+
+    mYExtreme = mGeometryDb->radiatorDimension().y();
     
     //
     // Coordinate and Momentum Transformation Routines
@@ -280,17 +284,20 @@ Int_t StRichSpectraMaker::Init() {
     mKaon = StKaonMinus::instance();
     mProton = StAntiProton::instance();
 
-//     mMeanWavelength = 171.*nanometer;
-//     mMeanWavelength = 183.*nanometer;
     mMeanWavelength = 176.*nanometer;
-    //mMeanWavelength = 183.*nanometer;
     PR(mMeanWavelength/nanometer);
     
     StRichMaterialsDb* materialsDb = StRichMaterialsDb::getDb();
-    //mIndex = materialsDb->indexOfRefractionOfC6F14At(mMeanWavelength);
-    mIndex = 1.285;
-    PR(mIndex);
+    mIndex = materialsDb->indexOfRefractionOfC6F14At(mMeanWavelength);
 
+    mIndex = 1.29039;
+
+    mAlpha = 5.e-4;
+    mTemperatureGradient = 7./mYExtreme;
+    PR(mTemperatureGradient);
+    
+    cerr << "Freon Index in maker " << mIndex << endl;
+    
     ////////////////////////////////////////////////////////////////////////
     double ii;
     for(ii=160.*nanometer; ii<220.*nanometer; ii+=1.*nanometer)
@@ -314,12 +321,12 @@ Int_t StRichSpectraMaker::Init() {
     
     this->printCutParameters();
 
-    mTracer = new StRichRayTracer(mMeanWavelength);
+    mTracer = new StRichRayTracer(mMeanWavelength,mIndex);
     mTracer->setFreonRadiationPlane(mAverageRadiationPlanePoint);
     mTracer->setQuartzRadiationPlane(mAverageQuartzRadiationPlanePoint);
 
     mHistogram = new StRichCerenkovHistogram();
-
+    mHistogram->doPhiCut(mDoPhiCut);
     
     return StMaker::Init();
 }
@@ -329,22 +336,24 @@ void StRichSpectraMaker::initCutParameters() {
     //
     // Event Level
     //
-    mVertexWindow = 200.*centimeter;
+    mVertexWindow = 30.*centimeter;
     
     //
     // Track Level
     //
     mPtCut = 0.*GeV; // GeV/c
     mEtaCut = 0.5; 
-    mLastHitCut = 100.0*centimeter;
+    mLastHitCut = 160.0*centimeter;
     mDcaCut = 3.0*centimeter;
     mFitPointsCut = 20;
     mPathCut = 500*centimeter;
-    mPadPlaneCut = 1.0*centimeter;
-    mRadiatorCut = 1.0*centimeter;
+    mPadPlaneCut = 2.0*centimeter;
+    mRadiatorCut = 2.0*centimeter;
 
     mMomentumThreshold = .5*GeV;
     mMomentumLimit = 7.*GeV;
+
+    mDoPhiCut = false;
 }
 
 //-----------------------------------------------------------------
@@ -473,7 +482,7 @@ Int_t StRichSpectraMaker::Make() {
     }
     
     
-    mMagField    = .249117*tesla;    
+    //mMagField    = .249117*tesla;    
     if (mEvent->summary()) {
 	mMagField  = mEvent->summary()->magneticField()*kilogauss;
 	PR(mMagField);
@@ -677,11 +686,8 @@ Int_t StRichSpectraMaker::Make() {
 
 	trackTuple[20] = mUniqueRingHits;
 	
-// 	double beta = 1./(mIndex*cos(cerenkovAngle));
-// 	double gamma = 1./(sqrt(1-sqr(beta)));
-// 	PR(abs(trackMomentum));
 
-	double mass2 = sqr(abs(trackMomentum))*(sqr(mIndex*cos(cerenkovAngle))-1);
+	double mass2 = sqr(abs(trackMomentum))*(sqr(mTheIndex*cos(cerenkovAngle))-1);
 	PR(mass2);
 	trackTuple[21] =  mass2;
 	
@@ -726,33 +732,33 @@ Int_t StRichSpectraMaker::Make() {
 	// Add in the StEvent Value
 	// for production.  The integer could
 	// be used as a coded number
-	dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setProbability(mass2);
-	dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setId(mHistogram->numberOfPhotons());
+	// dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setProbability(mass2);
+// 	dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setId(mHistogram->numberOfPhotons());
 
-	StRichSpectra *spectraInfo =
-	    new StRichSpectra(mAssociatedMip.x(), mAssociatedMip.y(),
-			      mMipResidual.x(), mMipResidual.y(),
-			      mCalculatedResidual.x(), mCalculatedResidual.y(), 
-			      cerenkovAngle,
-			      mHistogram->cerenkovSigma()/degree,
-			      mHistogram->numberOfPhotons(),
-			      peakAngle/degree, numberOfPhotons, mUniqueRingHits,
-			      mass2, lineIntegralRatio, totalPath,
-			      mTracer->trackAngle()/degree, iflag, dEdx,
-			      mD[0], mD[1], mD[2],
-			      int(mNpd[0]), int(mNpd[1]), int(mNpd[2]));
-	//
-	// default Production
-	//
-	spectraInfo->setVersion(-999);  
-	dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setRichSpectra(spectraInfo);
-	//
+// 	StRichSpectra *spectraInfo =
+// 	    new StRichSpectra(mAssociatedMip.x(), mAssociatedMip.y(),
+// 			      mMipResidual.x(), mMipResidual.y(),
+// 			      mCalculatedResidual.x(), mCalculatedResidual.y(), 
+// 			      cerenkovAngle,
+// 			      mHistogram->cerenkovSigma()/degree,
+// 			      mHistogram->numberOfPhotons(),
+// 			      peakAngle/degree, numberOfPhotons, mUniqueRingHits,
+// 			      mass2, lineIntegralRatio, totalPath,
+// 			      mTracer->trackAngle()/degree, iflag, dEdx,
+// 			      mD[0], mD[1], mD[2],
+// 			      int(mNpd[0]), int(mNpd[1]), int(mNpd[2]));
+// 	//
+// 	// default Production
+// 	//
+// 	spectraInfo->setVersion(-999);  
+// 	dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setRichSpectra(spectraInfo);
+// 	//
 	//////////////////////////////////////////////////
 #endif	
     } // loop over the tracks
 
-    cout << "try clear data from histogram" << endl;
-    mHistogram->clearData();
+      cout << "try clear data from histogram" << endl;
+      mHistogram->clearData();
     
     return kStOk;
 }
@@ -762,7 +768,7 @@ Int_t StRichSpectraMaker::Make() {
 void StRichSpectraMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.13 2002/02/22 18:20:31 dunlop Exp $\n");
+    printf("* $Id: StRichSpectraMaker.cxx,v 1.14 2002/05/21 22:07:13 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -1111,7 +1117,7 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 	// 2) checks the photon Information
 	//
 
-	mD[0] = FLT_MAX; mD[1]=FLT_MAX; mD[2]=FLT_MAX;
+	mD[0] = -100.; mD[1]=-100.; mD[2]=-100.;
 	mNpd[0] = 0; mNpd[1]=0; mNpd[2]=0;
 	for(size_t kk=0; kk<theRichPids.size(); kk++) {
 
@@ -1121,17 +1127,9 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 	    // of a single particle type
 	    //
 	    
-// 	    PR(theRichPids[kk]->getConstantAreaCut()/degree);
-
-	    double currentPhiCut =
-		static_cast<double>(theRichPids[kk]->getConstantAreaCut());
-// 	    PR(currentPhiCut);
 	    
-	    mHistogram->setPhiCut(max(currentPhiCut, mHistogram->phiCut()));
-
-// 	    cout << "Histogram Phi Cut:\nConstant Area Cut: " <<
-// 		(theRichPids[kk]->getConstantAreaCut()/degree) << "\nPhi: " <<
-// 		mHistogram->phiCut()/degree << endl;
+	    mHistogram->setPhiCut(135.*degree);
+	    //PR(mHistogram->currentPhiCut());
 
 	    //
 	    // photon info and hits
@@ -1158,6 +1156,10 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
  	    for(size_t ll=0; ll<hits.size(); ll++) {
  		double normalizedD = photonInfo[ll]->d();
    		if(normalizedD>-1 && normalizedD<3) {
+
+// 		    if(kk==0&&normalizedD>1) continue; // pion
+// 		    if(kk==1&&p>2.8&&normalizedD>1.5) continue; // kaon
+		    
 		    meanD += normalizedD;
 		    numberOfCts+=1.;
  		    theRingHits.push_back(hits[ll]);
@@ -1169,7 +1171,7 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 		meanD /= numberOfCts;
 	    }
 	    else {
-		meanD = FLT_MAX;
+		meanD = -100.;
 	    }
 	    
 	    
@@ -1220,15 +1222,19 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
     // calculate the radiation point and compare with the residuals
     // written on the DST to that calculated from StEvent info
     //
+    StThreeVectorF calculatedQuartzRadiationPoint =
+	this->calculateRadiationPoint(track, mAverageQuartzRadiationPlanePoint);
+    mQuartzRadPoint = calculatedQuartzRadiationPoint;
     
     StThreeVectorF calculatedRadiationPoint =
 	this->calculateRadiationPoint(track, mAverageRadiationPlanePoint);
     mRadPoint = calculatedRadiationPoint;
+
+    this->calculateIndex(mRadPoint.y());
+    
+    
 //     PR(mRadPoint);
     
-    StThreeVectorF calculatedQuartzRadiationPoint =
-	this->calculateRadiationPoint(track, mAverageQuartzRadiationPlanePoint);
-    mQuartzRadPoint = calculatedQuartzRadiationPoint;
 //     PR(mQuartzRadPoint);
 //     PR(trackLocalMomentum/GeV);
 //     PR(impactPoint);
@@ -1245,7 +1251,10 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 //     PR(calculatedRadiationPoint);
 //     PR(mAverageRadiationPlanePoint);
 //     PR(mAverageQuartzRadiationPlanePoint);
-    mTracer->setTrack(trackLocalMomentum, calculatedRadiationPoint, calculatedQuartzRadiationPoint);
+    mTracer->setTrack(trackLocalMomentum,
+		      calculatedRadiationPoint,
+		      calculatedQuartzRadiationPoint,
+		      mTheIndex);
     tuple[4] = (mTracer->trackAngle()/degree);
 //     PR(mTracer->trackAngle()/degree);
 #ifdef RICH_WITH_PAD_MONITOR
@@ -1300,7 +1309,7 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 	//
 	// remove photons if they are larger than physically allowable
 	//
-// 	if(mTracer->cerenkovAngle()/degree > 41) continue;
+ 	if(mTracer->cerenkovAngle()/degree > 40.5) continue;
 //  	PR(mTracer->cerenkovAngle()/degree);
  	tuple[7] = (mTracer->epsilon());
  	tuple[8] = (mTracer->azimuth()/degree);
@@ -1349,7 +1358,7 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 void StRichSpectraMaker::calculateResidual(StTrack* track)
 {
     cout << "StRichSpectraMaker::calculateResidual()" << endl;
-
+    abort();
     StRichTrack mattTrack(track,mMagField);
     PR(mattTrack.getImpactPoint());
     PR(mattTrack.getProjectedMIP());
@@ -1365,7 +1374,8 @@ void StRichSpectraMaker::calculateResidual(StTrack* track)
 			     gMip.position().y(),
 			     gMip.position().z());
     PR(globalMip);
-    
+
+    // note we use INNER helix here...
     StPhysicalHelixD theHelix = track->geometry()->helix();
     PR(theHelix);
     double sP = theHelix.pathLength(globalMip,mGlobalRichNormal);
@@ -1388,6 +1398,20 @@ void StRichSpectraMaker::calculateResidual(StTrack* track)
     
     mCalculatedResidual = localProjected - mAssociatedMip;
     PR(mCalculatedResidual);
+}
+
+// ----------------------------------------------------
+void StRichSpectraMaker::calculateIndex(double y)
+{
+    cout << "StRichSpectraMaker::calculateIndex()" << endl;
+    PR(y);
+    
+    double ypos = (y<0) ? (y+mYExtreme) : y;
+    double deltaT    = mTemperatureGradient*ypos;
+    
+    mTheIndex = (mIndex*(1-mAlpha*deltaT));
+    PR(mTheIndex);
+    
 }
 
 // ----------------------------------------------------
@@ -1445,10 +1469,10 @@ StThreeVectorF StRichSpectraMaker::calculateRadiationPoint(StTrack* track, StThr
     // by hand to take into account
     // the residual distribution
     //
-    //double eta = track->geometry()->momentum().pseudoRapidity();
+    double eta = track->geometry()->momentum().pseudoRapidity();
 //     PR(eta);
-    StThreeVectorD localCorrectedRadPoint(localRadPoint.x(), //-.8*eta,
-					  localRadPoint.y(),//+.05*sign(localRadPoint.x()),
+    StThreeVectorD localCorrectedRadPoint(localRadPoint.x()-.32*eta,
+					  localRadPoint.y()+.046*sign(localRadPoint.x()),
 					  localRadPoint.z());
 //     PR(localCorrectedRadPoint);
     StRichLocalCoordinate lCorrectedRadPt(localCorrectedRadPoint.x(),
@@ -1549,7 +1573,8 @@ void StRichSpectraMaker::printCutParameters(ostream& os) const
     os << "\tUpper Mom =     " << (mMomentumLimit/GeV)    << " GeV/c" << endl;
     os << "----------------------------------------------" << endl;
     os << "----------------------------------------------" << endl;
-
+    os << "==============================================" << endl;
+    os << "\tmDoPhiCut=      " << (mDoPhiCut)              << endl;
 
 }
 
