@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.4 1999/12/02 19:38:50 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.5 1999/12/06 22:25:05 kathy Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.5  1999/12/06 22:25:05  kathy
+// split apart the tpc and ftpc (east & west) histograms for the globtrk table; had to add characters to end of each histogram pointer to differentiate the different ones; updated the default list of hist to be plotted with logy scale
+//
 // Revision 1.4  1999/12/02 19:38:50  lansdell
 // some more histograms are filled now, but still more to go!
 //
@@ -144,59 +147,60 @@ void StEventQAMaker::MakeHistGlob() {
 //   The latter, different quantity is in x_first[3].
 
 // from Helen on 14 Jul 1999 - she now fills chisq0,1 with chisq/dof
-// so it doesn't need to be calculated here (juts plotted)
+// so it doesn't need to be calculated here 
 
       for (UInt_t k=0; k<globtrk->pidTraits().size(); k++)
 	m_det_id->Fill(globtrk->pidTraits()[k]->detector());
-      m_point->Fill(globtrk->detectorInfo()->numberOfPoints());
-      m_max_point->Fill(globtrk->numberOfPossiblePoints());
-      m_fit_point->Fill(globtrk->fitTraits().numberOfFitPoints());
-      m_glb_charge->Fill(globtrk->geometry()->charge());
-      m_glb_xf->Fill(globtrk->detectorInfo()->firstPoint().x());
-      m_glb_yf->Fill(globtrk->detectorInfo()->firstPoint().y());
-      m_glb_zf->Fill(globtrk->detectorInfo()->firstPoint().z());
+
+      m_pointT->Fill(globtrk->detectorInfo()->numberOfPoints());
+      m_max_pointT->Fill(globtrk->numberOfPossiblePoints());
+      m_fit_pointT->Fill(globtrk->fitTraits().numberOfFitPoints());
+      m_glb_chargeT->Fill(globtrk->geometry()->charge());
+      m_glb_xfT->Fill(globtrk->detectorInfo()->firstPoint().x());
+      m_glb_yfT->Fill(globtrk->detectorInfo()->firstPoint().y());
+      m_glb_zfT->Fill(globtrk->detectorInfo()->firstPoint().z());
       m_glb_xf0->Fill(xdif);
       m_glb_yf0->Fill(ydif);
       m_glb_zf0->Fill(zdif);
-      m_glb_radf->Fill(radf);
-      m_glb_ratio->Fill(nfitntot);
+      m_glb_radfT->Fill(radf);
+      m_glb_ratioT->Fill(nfitntot);
         
       //originally t->psi... but psi()=t->psi*degree in StEvent -CL
-      m_psi->Fill(globtrk->geometry()->psi());
+      m_psiT->Fill(globtrk->geometry()->psi());
 
       //originally was t->tanl -CL
-      m_tanl->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
-      m_glb_theta->Fill(theta);
-      m_eta->Fill(eta);
-      m_pT->Fill(pT);
-      m_mom->Fill(gmom);
-      m_length->Fill(globtrk->length());
-      m_glb_impact->Fill(globtrk->impactParameter());
+      m_tanlT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
+      m_glb_thetaT->Fill(theta);
+      m_etaT->Fill(eta);
+      m_pTT->Fill(pT);
+      m_momT->Fill(gmom);
+      m_lengthT->Fill(globtrk->length());
+      m_glb_impactT->Fill(globtrk->impactParameter());
 
-      m_chisq0->Fill(chisq0);
-      m_chisq1->Fill(chisq1);
+      m_chisq0T->Fill(chisq0);
+      m_chisq1T->Fill(chisq1);
 
-      m_pT_eta_rec->Fill(eta,lmevpt);
-      m_globtrk_xf_yf->Fill(globtrk->detectorInfo()->firstPoint().x(),
+      m_pT_eta_recT->Fill(eta,lmevpt);
+      m_globtrk_xf_yfT->Fill(globtrk->detectorInfo()->firstPoint().x(),
 			    globtrk->detectorInfo()->firstPoint().y());
-      m_tanl_zf->Fill(globtrk->detectorInfo()->firstPoint().z(),
+      m_tanl_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),
 		      Float_t(TMath::Tan(globtrk->geometry()->dipAngle())));
-      m_mom_trklength->Fill(globtrk->length(),lmevmom);
-      m_eta_trklength->Fill(eta,globtrk->length());
-      m_npoint_length->Fill(globtrk->length(),
+      m_mom_trklengthT->Fill(globtrk->length(),lmevmom);
+      m_eta_trklengthT->Fill(eta,globtrk->length());
+      m_npoint_lengthT->Fill(globtrk->length(),
 			    Float_t(globtrk->detectorInfo()->numberOfPoints()));
-      m_fpoint_length->Fill(globtrk->length(),
+      m_fpoint_lengthT->Fill(globtrk->length(),
 			    Float_t(globtrk->fitTraits().numberOfFitPoints()));
-      m_chisq0_mom->Fill(lmevmom,chisq0);
-      m_chisq1_mom->Fill(lmevmom,chisq1);
-      m_chisq0_eta->Fill(eta,chisq0);
-      m_chisq1_eta->Fill(eta,chisq1);
-      m_chisq0_dip->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq0);
-      m_chisq1_dip->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq1);
-      m_chisq0_zf->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq0);
-      m_chisq1_zf->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq1);
-      m_nfptonpt_mom->Fill(lmevmom,nfitntot);
-      m_nfptonpt_eta->Fill(eta,nfitntot);
+      m_chisq0_momT->Fill(lmevmom,chisq0);
+      m_chisq1_momT->Fill(lmevmom,chisq1);
+      m_chisq0_etaT->Fill(eta,chisq0);
+      m_chisq1_etaT->Fill(eta,chisq1);
+      m_chisq0_dipT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq0);
+      m_chisq1_dipT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq1);
+      m_chisq0_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq0);
+      m_chisq1_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq1);
+      m_nfptonpt_momT->Fill(lmevmom,nfitntot);
+      m_nfptonpt_etaT->Fill(eta,nfitntot);
     }
   }
   m_globtrk_tot->Fill(cnttrk);
