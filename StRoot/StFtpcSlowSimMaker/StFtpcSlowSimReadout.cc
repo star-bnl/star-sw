@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.8 2002/04/19 22:24:13 perev Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.9 2002/06/07 10:32:55 fsimon Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.9  2002/06/07 10:32:55  fsimon
+// Correct treatment of clusters on sector boundaries
+// Correct assignment of pad numbers in WhichPad
+//
 // Revision 1.8  2002/04/19 22:24:13  perev
 // fixes for ROOT/3.02.07
 //
@@ -131,7 +135,7 @@ void  StFtpcSlowSimReadout::PadResponse(const StFtpcSlowSimCluster *cl)
     pad_off = cl->GetPadOff();
       
     if(DEBUG)
-      cout << "pad_off=" << pad_off <<  "sig_phi=" << sig_phi << endl;
+      cout << "StFtpcSlowSimReadout::PadResponse: pad_off=" << pad_off <<  "sig_phi=" << sig_phi << endl;
     sigma_pad =  sqrt(sig_phi*sig_phi + prf*prf ); 
 }
 
@@ -145,6 +149,8 @@ void StFtpcSlowSimReadout::ShaperResponse(const StFtpcSlowSimCluster *cl)
   // convert the radial width to nsec
   float sig_time = sig_rad * mInverseFinalVelocity;
   time_off = 10000*rad_off * mInverseFinalVelocity;
+  
+  //cout << "ShaperResponse...\n";
   if(DEBUG)
     cout << "time_off=" << time_off <<  "sig_rad=" << sig_rad << endl;
   sigma_tim = sqrt( sig_time*sig_time + srf*srf) ;
@@ -153,7 +159,7 @@ void StFtpcSlowSimReadout::ShaperResponse(const StFtpcSlowSimCluster *cl)
 void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int irow)
 {
   float n_sigmas_to_calc  = 5.0;        
-  
+  // cout <<" StFtpcSlowSimReadout::Digitize...\n";
   // get the readout position in radial direction
   float time_slice = mDb->microsecondsPerTimebin()*1000;// into nsec
   float time       = cl->GetDriftTime()*1000.;       // into nsec
@@ -165,10 +171,14 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
   int isec, jsec, nsecs;
   int     ipad       = WhichPad(phi,isec);
   
+  if (DEBUG) {  
+    cout << "Digitize using parameters: mDb->radiansPerBoundary() = "<<mDb->radiansPerBoundary()<<" mDb->radiansPerPad() = "<<mDb->radiansPerPad()<<endl;
+    cout << " phiMin = "<< phiMin << " phiMax = " << phiMax <<endl;
+  }
+
   // big if() loop
-  if ( itim > 2 && itim < (mDb->numberOfTimebins()-3) &&
-       ipad > 2 && ipad < (mDb->numberOfPads()-3) ) 
-    {      
+  if ( itim > 2 && itim < (mDb->numberOfTimebins()-3)) 
+    {
       // and calculate the pad distribution
       
       float sigmaPadCentimeters   = sigma_pad *0.0001;  // into cm 
@@ -180,8 +190,8 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
       float mid_phi = phi;
       float mid_time = time;
       float hypo = sqrt((pad_off/pad_pitch)*(pad_off/pad_pitch)
-			+(time_off/(double)mDb->microsecondsPerTimebin()*1000)*
-			(time_off/(double)mDb->microsecondsPerTimebin()*1000));
+			+(time_off/((double)mDb->microsecondsPerTimebin()*1000))*
+			(time_off/((double)mDb->microsecondsPerTimebin()*1000)));
       int n_sub_hits = (int) (2*hypo);
       int current_sub_hit;
       
@@ -197,15 +207,17 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	      //note: mOuterRadius is the radius of the Frisch grid, not the padplane,
 	      // but for this purpose it is good enough
 	    }
-	  if(DEBUG)
-	    cout << current_sub_hit << "th subhit at time " << time << " phi " << phi << " => padpos " << mOuterRadius*phi << endl;
+	  
 	  ipad       = WhichPad(phi,isec);
+	  if(DEBUG)
+	    cout << current_sub_hit << "th subhit at time " << time << " phi " << phi << " => padpos " << mOuterRadius*phi <<" ipad = "<<ipad <<endl;
 	  int isec_min;
 	  int isec_max;
 	  int pad_max_save=0;
 	  int npad;
 	  int pad_min = WhichPad(phi-width_phi+twopi,isec_min);
 	  int pad_max = WhichPad(phi+width_phi,isec_max);
+
 	  if ( isec_min > isec_max )
 	    nsecs = mDb->numberOfSectors() - isec_min + isec_max + 1;
 	  else
@@ -224,7 +236,6 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	    int i;
 	    
 	    float dphi = fmod(phi-phiMin+twopi,twopi);
-	    isec = (int)(dphi/(phiMax-phiMin));
 	    dphi = dphi - isec*(phiMax-phiMin);
 	    
 	    for (i=0; i<npad; ++i ) {
@@ -269,6 +280,9 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	      for (j=0; j<ntim; ++j) {
 		int k = irow*mDb->numberOfSectors()*mDb->numberOfPads()*mDb->numberOfTimebins()+isec*mDb->numberOfPads()*mDb->numberOfTimebins()+(i+pad_min)*mDb->numberOfTimebins() + (j+tim_min) ;
 		mADCArray[k] += (float)(mFinalElectrons * pad[i] * sca[j])/(2*n_sub_hits+1);
+		if(DEBUG)	
+		  cout << "Writing " <<  mADCArray[k] <<" to pad "<< (i+pad_min)<<endl;
+
 	      }
 	    
 	    // recycle sca[] and pad[]
@@ -281,7 +295,8 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	      isec = 0;
 	  }  // end of loop over sectors for multisector cluster
 	} // end of loop over subhits
-    } // end big if() loop
+       } // end big if() loop
+  
 }
 
 
@@ -296,7 +311,7 @@ void StFtpcSlowSimReadout::OutputADC() const
 	  int i=bin+mDb->numberOfTimebins()*pad+mDb->numberOfTimebins()*mDb->numberOfPads()*sec+mDb->numberOfTimebins()*mDb->numberOfPads()*mDb->numberOfSectors()*row;
 	  
 	  mADCArray[i] =(mADCArray[i] / mParam->adcConversion());
-
+	  // mADCArray[i] =(mADCArray[i] / 2); // Scale ADC Values to match real data
 	  if(DEBUG)
 	    num_pixels[(int) (bin/30)]++;
 	  
@@ -335,13 +350,14 @@ int StFtpcSlowSimReadout::WhichPad(const float phi, int &isec)
     float dphi = fmod(phi-phiMin+twopi,twopi);
     isec = (int)(dphi/(phiMax-phiMin));
     dphi = dphi - isec*(phiMax-phiMin)- mDb->radiansPerBoundary()/2;
-    int ipad = (int) (dphi/mDb->radiansPerPad() +0.5) ;
+    int ipad = (int) (dphi/mDb->radiansPerPad());  // no +0.5 since pad 0 really starts at 0 and ends at 1
     if (ipad < 0)  {
         ipad = 0;
     }
     if (ipad > mDb->numberOfPads() - 1) {
         ipad = mDb->numberOfPads() - 1;
     }
+    
     return ipad;
 }
 
@@ -364,20 +380,22 @@ float StFtpcSlowSimReadout::TimeOfSlice(const int sslice)
 
 void StFtpcSlowSimReadout::Print() const 
 {
-    cout << " Number of pad rows = " 
-         << mDb->numberOfPadrows() << endl;
-    cout << " Number of pad per row = " 
-         << mDb->numberOfPads() << endl;
-    cout << " Pad length = " 
-         << pad_length 
-         << " pitch = " 
-         << pad_pitch << " [cm]" << endl;
-    cout << " Shaping time = " 
-         << shaper_time << " [ns]" << endl;
-    cout << " Time slice = " 
-         << mDb->microsecondsPerTimebin()*1000 << " [ns]" << endl;
-    cout << " Pad response sigma = " 
-         << sigma_prf << " [um]" << endl;
+    
+  cout << "StFtpcSlowSimReadout::Print \n";
+  cout << " Number of pad rows = " 
+       << mDb->numberOfPadrows() << endl;
+  cout << " Number of pad per row = " 
+       << mDb->numberOfPads() << endl;
+  cout << " Pad length = " 
+       << pad_length 
+       << " pitch = " 
+       << pad_pitch << " [cm]" << endl;
+  cout << " Shaping time = " 
+       << shaper_time << " [ns]" << endl;
+  cout << " Time slice = " 
+       << mDb->microsecondsPerTimebin()*1000 << " [ns]" << endl;
+  cout << " Pad response sigma = " 
+       << sigma_prf << " [um]" << endl;
                           
 }
 
