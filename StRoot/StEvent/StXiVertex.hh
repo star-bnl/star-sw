@@ -1,16 +1,19 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.hh,v 1.2 1999/02/23 13:50:59 genevb Exp $
+ * $Id: StXiVertex.hh,v 1.3 1999/02/23 16:13:26 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
  ***************************************************************************
  *
- * Description: Vertex class for cascades
+ * Description: vertex class for cascades
  *
  ***************************************************************************
  *
  * $Log: StXiVertex.hh,v $
+ * Revision 1.3  1999/02/23 16:13:26  genevb
+ * Add v0 pointers for xi's outside constructor
+ *
  * Revision 1.2  1999/02/23 13:50:59  genevb
  * Fixed some typos
  *
@@ -32,7 +35,7 @@ class StXiVertex : public StVertex {
 public:
     StXiVertex();
     ~StXiVertex();
-    StXiVertex(dst_xi_vertex_st*,dst_vertex_st*,StV0Vertex*);
+    StXiVertex(dst_xi_vertex_st*,dst_vertex_st*);
     // StXiVertex(const StXiVertex&);        use default
     // const StXiVertex & operator=(const StXiVertex&);
 
