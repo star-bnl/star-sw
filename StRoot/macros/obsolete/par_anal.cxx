@@ -1,4 +1,4 @@
-// void par_anal(Char_t *xdffilename) 
+void par_anal(Char_t *xdffilename="/afs/rhic/star/packages/dev/StRoot/macros/data/test.xdf") 
 {
   //  gROOT->Reset();
 
@@ -15,7 +15,7 @@
     if (gSystem.Load("St_Tables.so"))    printf(" Loading DLL \"St_Tables.so\" failed \n");
   }
   //  Char_t *xdffilename="/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_1_200.xdf";
-   Char_t *xdffilename="/star/sol/users/fisyak/auau_ce_b0-2_4801_5000.xdf";
+//   Char_t *xdffilename="/star/sol/users/fisyak/auau_ce_b0-2_4801_5000.xdf";
 //   Read XDF file
    printf(" File: \"%s\" \n", xdffilename);
    St_XDFFile  xdf;
@@ -56,7 +56,6 @@
    gBenchmark->Start("hsum");
    while (event = xdf.NextEventGet() ) 
    {  
-     event = xdf.NextEventGet(); 
      St_DataSetIter root(event);
      St_DataSet *set = root.Cd("/evgen/particle");
      if (set) { 
@@ -121,16 +120,16 @@
      }
    }
 
-     // End of Event. Now we can delet it
+     // End of Event. Now we can delete it
      if (event) delete event;
      event = 0;
  }
   c1->Modified();
   c2->Modified();
-  c2->Modified();
+  c3->Modified();
+  printf("\n");
   gBenchmark->Show("hsum");
   printf(" This is a finish \n");
-  printf(" You may pick up this example from
-  /afs/rhic/star/packages/dev/StRoot/macros/par_anal.cxx\n");
+  printf(" You may pick up this example from /afs/rhic/star/packages/dev/StRoot/macros/par_anal.cxx\n");
 }
 

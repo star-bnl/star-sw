@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.13 1998/08/28 21:55:10 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.14 1998/09/15 20:55:37 fisyak Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.14  1998/09/15 20:55:37  fisyak
+// Split St_DataSet -> St_DataSet + St_DataSetIter
+//
 // Revision 1.13  1998/08/28 21:55:10  fine
 // TSocket data-memebr and "socket" methods have been introduced to accept the XDF file
 // over TCP/IP
@@ -39,6 +42,7 @@
 #include "TClass.h"
 #include "TSocket.h"
 #include "St_XDFFile.h"
+#include "St_DataSetIter.h"
 #include "St_DataSet.h"
 #include "St_Table.h"
 

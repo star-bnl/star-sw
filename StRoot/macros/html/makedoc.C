@@ -2,7 +2,8 @@
   gROOT.Reset();
   Char_t *libs[] = {"St_base","xdf2root","St_Tables", 
   "libmsg","libtls","tpc.sl","St_tpc","svt.sl","St_svt","StChain"};
-  Char_t *suffix=0;
+
+ Char_t *suffix=0;
   Int_t nlist = 10;
   Bool_t NT=kFALSE;
   if (strcmp(gSystem.GetName(),"WinNT") == 0 ) {
@@ -14,11 +15,33 @@
      suffix =".so";
 
    Char_t buffer[256];
-   for(Int_t i=0;i<nlist;i++) {
-      strcpy(buffer,libs[i]);
-      if (!strchr(libs[i],'.')) strcat(buffer,suffix);
-      if (gSystem.Load(buffer))  printf(" Loading DLL \"%s\" failed \n",buffer);
+   if (NT) {
+    for(Int_t i=0;i<nlist;i++) {
+       strcpy(buffer,libs[i]);
+       if (!strchr(libs[i],'.')) strcat(buffer,suffix);
+       if (gSystem.Load(buffer))  printf(" Loading DLL \"%s\" failed \n",buffer);
+    }
+    
+    }
+   else {
+     gSystem->Load("St_base.so");
+     gSystem->Load("xdf2root.so");
+     gSystem->Load("St_Tables.so");
+  
+     gSystem->Load("libmsg.so");
+     gSystem->Load("libtls.so");
+     gSystem->Load("tpc.sl");
+     gSystem->Load("St_tpc.so");
+     gSystem->Load("svt.sl");
+     gSystem->Load("St_svt.so");
+     gSystem->Load("global.sl");
+     gSystem->Load("St_global.so");
+     gSystem->Load("ftpc.sl");
+     gSystem->Load("St_ftpc.so");
+     gSystem->Load("StChain.so");
    }
+   
+   
   //Create the object of the THtml class
   THtml *html = new THtml();
 
@@ -50,9 +73,10 @@
                        ,"table_head_st"
                        ,"St_srs_Maker","St_tpt_Maker","St_xdfin_Maker"
                        ,"St_evg_Maker","St_tcl_Maker","St_tss_Maker"
-                       ,"St_ebye_Maker","St_laser_Maker"
+                       ,"St_ebye_Maker","St_laser_Maker","St_run_Maker"
+                       ,"St_tpctest_Maker"
                         };
-  Int_t nclass = 18;
+  Int_t nclass = 20;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
@@ -80,8 +104,7 @@
   html.Convert("./bfc.C","An example of the \"Big Full Chain\" production chain");
   html.Convert("./bfcx.C","An example of the \"Big Full Chain\" production chain");
   html.Convert("./ebye.C","An example of\"Event by Event\" production chain");
-  html.Convert("./laser.C","An example of the analysis of laser events equivalent to Iwona's old tst.kumac");
-  html.Convert("./tst.kumac","An example of  Iwona's old tst.kumac of the analysis of laser events");
+  html.Convert("./STAR_Demos.C","The source of the STAR_demos macro");
   html.Convert("./StarView.C","How to Draw the local STAR 3D geometry");
   html.Convert("./StarWebView.C","How to Draw the remote STAR 3D geometry");
   if (NT) {
@@ -94,6 +117,10 @@
     html.Convert("./par_anal.cxx","How to pick the XDF file up with ROOT");
     html.Convert("./MakeHists.cxx","How to read the event from XDF file and build some histograms with ROOT");
   }
+
+  html.Convert("./laser.C","An example of the analysis of laser events equivalent to Iwona's old tst.kumac");
+  html.Convert("./tst.kumac","An example of  Iwona's old tst.kumac of the analysis of laser events");
+  html.Convert("./tpctest.C","ROOT based TPC test analysis");
 
 //  html.MakeClass("EModuleTypes");
 //  html.MakeIndex();

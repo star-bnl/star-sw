@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.7 1998/08/26 12:15:10 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.8 1998/09/15 20:55:27 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.8  1998/09/15 20:55:27  fisyak
+// Split St_DataSet -> St_DataSet + St_DataSetIter
+//
 // Revision 1.7  1998/08/26 12:15:10  fisyak
 // Remove asu & dsl libraries
 //
@@ -30,7 +33,7 @@
 #include <stdlib.h>
 #include "St_tcl_Maker.h"
 #include "StChain.h"
-#include "St_DataSet.h"
+#include "St_DataSetIter.h"
 #include "St_XDFFile.h"
 #include "tpc/St_tpg_main_Module.h"
 #include "tpc/St_tcl_Module.h"
@@ -217,7 +220,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.7 1998/08/26 12:15:10 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.8 1998/09/15 20:55:27 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

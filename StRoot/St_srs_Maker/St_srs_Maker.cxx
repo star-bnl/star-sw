@@ -6,7 +6,7 @@
 
 #include "St_srs_Maker.h"
 #include "StChain.h"
-#include "St_DataSet.h"
+#include "St_DataSetIter.h"
 #include "svt/St_svg_am_Module.h"
 #include "svt/St_srs_am_Module.h"
 ClassImp(St_srs_Maker)
@@ -57,8 +57,11 @@ Int_t St_srs_Maker::Make(){
      St_DataSetIter geant(gStChain->GetGeant());
      St_DataSetIter g2t(geant("Event"));
      St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("Event/g2t_svt_hit");
-     Int_t res =  srs_am (srs_result,g2t_svt_hit,scs_spt,
+     if (g2t_svt_hit ) {
+
+       Int_t res =  srs_am (srs_result,g2t_svt_hit,scs_spt,
                           m_geom,m_config,m_shape,m_srs_srspar,m_srs_direct,m_srs_activea);
+     }
    }
    if (gStChain->Debug()) m_DataSet->ls("*");
   //  PrintInfo();
@@ -67,7 +70,7 @@ Int_t St_srs_Maker::Make(){
 //_____________________________________________________________________________
 void St_srs_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_srs_Maker.cxx,v 1.8 1998/08/18 14:05:03 fisyak Exp $\n");
+  printf("* $Id: St_srs_Maker.cxx,v 1.9 1998/09/15 20:55:25 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

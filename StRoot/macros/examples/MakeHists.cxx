@@ -1,12 +1,9 @@
 //*-- Author :    Valery Fine   21/07/98  (E-mail:fine@bnl.gov)
 // #include "St_mevsim_Module.h"
-void MakeHists(Char_t *xdffilename="/star/sol/users/fisyak/auau_ce_b0-2_4801_5000.xdf")
-//"$AFS_RHIC/star/data/samples/auau_central_hijing.xdf")
-// /star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_4801_5000.xdf"
+void MakeHists(Char_t *xdffilename="/afs/rhic/star/packages/dev/StRoot/macros/data/test.xdf")
 {
 
   gROOT->Reset();
-  Char_t *xdffilename="/star/sol/users/fisyak/auau_ce_b0-2_4801_5000.xdf";
   Bool_t NT = kFALSE;
   if (strcmp(gSystem.GetName(),"WinNT")==0){
     NT = kTRUE;
@@ -20,7 +17,6 @@ void MakeHists(Char_t *xdffilename="/star/sol/users/fisyak/auau_ce_b0-2_4801_500
   }
 
 //   Read XDF file
-  // St_XDFFile  xdf("auau_ce_b0-2_4801_5000.xdf");
    St_XDFFile  xdf(xdffilename);
    St_DataSet *event = xdf.NextEventGet();
    if (!event) { printf(" NO events \n"); return;}
