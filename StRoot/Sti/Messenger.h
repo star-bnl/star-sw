@@ -8,6 +8,7 @@
 
 #include <iostream.h>
 #include <map>
+#include <fstream.h>
 
 #include "MessengerBuf.h"
 
@@ -19,12 +20,13 @@ static const unsigned int kHitMessage   = 1;
 static const unsigned int kTrackMessage = 2; 
 static const unsigned int kNodeMessage  = 4;
 static const unsigned int kDetectorMessage = 8;
+static const unsigned int kGeometryMessage = 16;
 
 /// Number of message types
-static const int g_nMessageTypes = 4;
+static const int g_nMessageTypes = 5;
 /// Output streams corresponding to the message types
 static ostream *g_apMessageOstreams[g_nMessageTypes] = 
-{ &cout, &cout, &cout, &cout };
+{ &cout, &cout, &cout, &cout, new ofstream("GeometryMessageFile")};
 
 /// Typedefs for containers
 typedef map<unsigned int, Messenger*> messengerMap;
@@ -42,13 +44,32 @@ public:
     /// Set the global routing mask which tells which messages are actually
     /// delivered to a given stream.  This mask is AND-ed with the routing
     /// code of a given Messenger to determine if a message should be
-    /// printed.
-    static void setRoutingMask(unsigned int routing){
-      MessengerBuf::setRoutingMask(routing);
+    /// printed.  Returns the original routing mask.
+    static unsigned int setRoutingMask(unsigned int routing){
+      return MessengerBuf::setRoutingMask(routing);
     }
     /// Returns the global routing mask
     static unsigned int getRoutingMask(){
       return MessengerBuf::getRoutingMask();
+    }
+    /// Sets only the given bits in the global routing mask.
+    /// Returns the original state of the bits.
+    static unsigned int setRoutingBits(unsigned int messages){
+      unsigned int oldRouting = MessengerBuf::getRoutingMask();
+      MessengerBuf::setRoutingMask(oldRouting | messages);
+      return oldRouting & messages;
+    }
+    /// Clears only the given bits in the global routing mask.
+    /// Returns the original state of the bits.
+    static unsigned int clearRoutingBits(unsigned int messages){
+      unsigned int oldRouting = MessengerBuf::getRoutingMask();
+      MessengerBuf::setRoutingMask(oldRouting & (~messages));
+      return oldRouting & messages;
+    }
+    /// Returns the given bits in the global routing mask.
+    static unsigned int getRoutingBits(unsigned int messages){
+      unsigned int oldRouting = MessengerBuf::getRoutingMask();
+      return oldRouting & messages;
     }
 
     /// Initialize the output streams for the message maps.  This must be

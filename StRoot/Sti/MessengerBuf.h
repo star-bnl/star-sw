@@ -29,8 +29,12 @@ public:
     // (streamsize was recently added to ANSI C++, not portable yet.)
     //virutal streamsize xsputn (char* text, streamsize n);
     
-    /// Set the global routing mask
-    static void setRoutingMask(unsigned int routing){ s_routing = routing; }
+    /// Set the global routing mask, returns old mask
+    static unsigned int setRoutingMask(unsigned int routing){
+      unsigned int oldRouting = s_routing;
+      s_routing = routing; 
+      return oldRouting;
+    }
     /// Returns the global routing mask
     static unsigned int getRoutingMask(){ return s_routing; }
     
