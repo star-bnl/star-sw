@@ -280,7 +280,7 @@ class StEmcFilter: public TObject
     void        		setMcEtaMax(Float_t a)            { mMcEtaMax = a; }           ///< maximum eta of the McTrack (momentum). Default is +10000.
     
 
-    ClassDef(StEmcFilter,1)
+    ClassDef(StEmcFilter,0)
 
 };
 #endif
