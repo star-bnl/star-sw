@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.16 2002/01/29 11:08:20 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.17 2002/02/14 22:05:12 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.17  2002/02/14 22:05:12  oldi
+// Typo removed.
+//
 // Revision 1.16  2002/01/29 11:08:20  oldi
 // Write() renamed to WriteCluster() resp. WriteTrack() to avoid compiler warnings.
 // As a result the functions TObject::Write() are available again (directly).
@@ -659,7 +662,7 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t id_sta
     }
    
     trackTableWrapper->SetNRows(num_tracks);
-    gMessMgr->Message("", "I", "OST") << "Writing " << num_tracks << " found tracks.";
+    gMessMgr->Message("", "I", "OST") << "Writing " << num_tracks << " found track";
     
     if (num_tracks == 1) {
       *gMessMgr << "." << endm;
