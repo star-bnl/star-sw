@@ -172,11 +172,20 @@ void StMaker::MakeBranch()
 //_____________________________________________________________________________
 void StMaker::SetChainAddress(TChain *chain)
 {
-//   Set branch address in a chain of files
+//   Set Chain address
 
    if (chain == 0) return;
 
    chain->SetBranchAddress(m_BranchName.Data(), &m_Fruits);
+}
+//_____________________________________________________________________________
+void StMaker::SetDataSet(St_DataSet *set)
+{
+//   Set m_DataSet
+  if (m_DataSet != set) {
+    if (m_DataSet) delete m_DataSet;
+    m_DataSet = set;
+  }  
 }
 
 //______________________________________________________________________________

@@ -44,9 +44,12 @@ private:
    St_DataSetIter     *m_RunIter;           //The parameters
    St_DataSetIter     *m_CalibIter;         //The calibration       
    St_DataSetIter     *m_EventIter;         //The Event (fruits)
+   St_DataSetIter     *m_raw_dataIter;      //The raw data
+   St_DataSetIter     *m_dataIter;          //The data
    TTree              *m_Tree;              //Pointer to the Root tree
    TList              *m_Makers;            //List of Makers
    St_XDFFile         *m_File;              //!Pointer to input file 
+   St_XDFFile         *m_FileOut;           //!Pointer to output file 
 
 public:
                       StChain();
@@ -64,8 +67,13 @@ public:
    virtual void       FillXDF(St_XDFFile &file);
    virtual void       Finish();
    virtual void       GetEvent(Int_t event=1);  // *MENU*
-   St_DataSetIter    *GetRunIter() {return m_RunIter;}
-   St_DataSetIter    *GetCalibIter() {return m_CalibIter;}
+   St_DataSet        *GetRun(); 
+   St_DataSet        *GetCalib();
+   St_DataSet        *GetGeant();
+   St_DataSet        *GetGeometry();
+   St_DataSet        *GetParams();
+   St_DataSet        *GetData();
+   St_DataSet        *GetRawData();
    virtual void       Init();
    Bool_t             IsFolder() {return kTRUE;}
    virtual Int_t      Make(Int_t i=0);
@@ -74,6 +82,7 @@ public:
    void               SetDebug(EDebugLevel debug){m_DebugLevel = debug;}
    virtual void       SetDefaultParameters();
    virtual void       SetInputXDFile(St_XDFFile *file) {m_File = file;}
+   virtual void       SetOutputXDFile(St_XDFFile *file) {m_FileOut = file;}
    void               SetRunIter(St_DataSetIter *run) {m_RunIter = run;}
    void               SetCalibIter(St_DataSetIter *calib) {m_CalibIter = calib;}
 

@@ -53,8 +53,10 @@
 //   St_XDFFile xdffile_out("StChain.xdf","w");     // Open XDF file to write event
 //   
 //   StChain chain("StChain");     // create main object to run StChain
-//   St_xdfin_Maker xdfin("Xdfin","test"); // create xdfin object to run in StChain
+//   St_xdfin_Maker xdfin("XdfIn","test"); // create xdfin object to run in StChain
+//   St_xdfout_Maker xdfout("XdfOut","test"); // create xdfin object to run in StChain
 //   chain.SetInputXDFile(&xdffile_in);      // pass file to xdfin
+//   chain.SetOutputXDFile(&xdffile_out);    // pass file to xdfout
 //
 //   User user;           // create an object of the User class defined in user.C
 //
@@ -203,7 +205,7 @@ StChain::StChain(const char *name, const char *title)
    
    SetDefaultParameters();
 
-   gROOT->GetListOfBrowsables()->Add(this,"StChain");
+   gROOT->GetListOfBrowsables()->Add(this,GetName());
 
 // create the support list for the various lists of StChain objects
    m_Makers  = new TList();
@@ -218,6 +220,69 @@ StChain::~StChain()
 }
 
 
+//______________________________________________________________________________
+St_DataSet *StChain::GetRun(){
+//  Return pointer to run. If run does exist then it will be creates
+  St_DataSetIter local(m_DataSet);
+  local.Cd(GetName());
+  St_DataSet *run = local("run");
+  if (run == 0) {local.Mkdir("run"); run = local("run");}
+  return run;
+}
+//______________________________________________________________________________
+St_DataSet *StChain::GetParams(){
+//  Return pointer to params. If run/params does exist then it will be creates
+  St_DataSetIter local(m_DataSet);
+  local.Cd(GetName());
+  St_DataSet *run = local("run/params");
+  if (run == 0) {local.Mkdir("run/params"); run = local("run/params");}
+  return run;
+}
+//______________________________________________________________________________
+St_DataSet *StChain::GetGeometry(){
+//  Return pointer to params. If run/params does exist then it will be creates
+  St_DataSetIter local(m_DataSet);
+  local.Cd(GetName());
+  St_DataSet *run = local("run/params");
+  if (run == 0) {local.Mkdir("run/params"); run = local("run/params");}
+  return run;
+}
+//______________________________________________________________________________
+St_DataSet *StChain::GetCalib(){
+//  Return pointer to calib. If run/calib does exist then it will be creates
+  St_DataSetIter local(m_DataSet);
+  local.Cd(GetName());
+  St_DataSet *run = local("run/calib");
+  if (run == 0) {local.Mkdir("run/calib"); run = local("run/calib");}
+  return run;
+}
+//______________________________________________________________________________
+St_DataSet *StChain::GetRawData(){
+//  Return pointer to raw data. If event/raw_data does exist then it will be creates
+  St_DataSetIter local(m_DataSet);
+  local.Cd(GetName());
+  St_DataSet *run = local("event/raw_data");
+  if (run == 0) {local.Mkdir("event/raw_data"); run = local("event/raw_data");}
+  return run;
+}
+//______________________________________________________________________________
+St_DataSet *StChain::GetData(){
+//  Return pointer to raw data. If event/data does exist then it will be creates
+  St_DataSetIter local(m_DataSet);
+  local.Cd(GetName());
+  St_DataSet *run = local("event/data");
+  if (run == 0) {local.Mkdir("event/data"); run = local("event/data");}
+  return run;
+}
+//______________________________________________________________________________
+St_DataSet *StChain::GetGeant(){
+//  Return pointer to GEANT data. If event/geant does exist then it will be creates
+  St_DataSetIter local(m_DataSet);
+  local.Cd(GetName());
+  St_DataSet *run = local("event/geant");
+  if (run == 0) {local.Mkdir("event/geant"); run = local("event/geant");}
+  return run;
+}
 //______________________________________________________________________________
 void StChain::Browse(TBrowser *b)
 {
@@ -311,7 +376,8 @@ void StChain::Init()
    if (m_File) {
      St_DataSet *set = m_File->NextEventGet(); // Get Run parameters
      if (set) {
-       if (strcmp(set->GetName(),"run")==0){
+       if (strcmp(set->GetName(),"run")==0 || 
+           strcmp(set->GetName(),"Run")==0){
           m_DataSet->Add(set); 
           if (m_RunIter) m_RunIter->Reset(set);
           else           m_RunIter = new St_DataSetIter (set);
@@ -346,6 +412,14 @@ void StChain::Init()
        if (makertype && strlen(makertype))
           next.Mkdir(maker->GetTitle());
      }
+   }
+   // Save Run to XDF Output file if any
+   if (m_FileOut) {
+     St_DataSetIter next(m_DataSet);
+     next.Cd(GetName());
+     St_DataSet *set = next("run");
+     if (set) set = next("Run");
+     if (set) m_FileOut->NextEventPut(set);
    }
 }
 
@@ -443,32 +517,35 @@ Int_t StChain::Make(Int_t i)
    TIter next(m_Makers);
    StMaker *maker;
    while ((maker = (StMaker*)next())) {
-      ret = maker->Make();
-      if (gStChain->Debug()) printf("%s %i\n",maker->GetName(),ret);
-      if (ret < 0) return ret;
+     const Char_t *makertype = maker->GetTitle();
+  // Call Maker
+     ret = maker->Make();
+     if (gStChain->Debug()) printf("%s %i\n",maker->GetName(),ret);
+     if (ret < 0) return ret;
 
-      if (m_DataSet) {
-        St_DataSetIter nextset(m_DataSet);
+     if (m_DataSet) {
+       St_DataSetIter nextset(m_DataSet);
         
-        // Add the result of the maker into the "its" branch of the main dataset
-        nextset.Cd(GetName());
+       // Add the result of the maker into the "its" branch of the main dataset
+       nextset.Cd(GetName());
 
-        // The name of the sub dataset is defined via the maker title
-        const Char_t *makertype = maker->GetTitle();
-        // Test the special case
-        if (makertype && strlen(makertype)) {
-           St_DataSet *set=nextset(makertype); 
-           if (set) set->Add(maker->DataSet());
-           else 
-              Error("Make","There is directory to collect the maker \"%s\" (type \"%s\") results"
-                          ,maker->GetName(),makertype);
+       // Test the special case
+       if (makertype && strlen(makertype)) {
+          St_DataSet *set=nextset(makertype); 
+          if (set) {
+            St_DataSet *parent = set->GetParent();
+            if (!parent) set->Add(maker->DataSet());
+	  }
+          else 
+             Error("Make","There is no directory to collect the maker \"%s\" (type \"%s\") results"
+                         ,maker->GetName(),makertype);
         }
         else { 
           // special case:
           //   replace the root dataset if any
           St_DataSet *topset = maker->DataSet();        // Get the maker top dataset
           if (topset) {
-            const Char_t *topsetname   = topset->GetName();   // Poll its name up
+            const Char_t *topsetname   = topset->GetTitle();   // Poll its name up
             St_DataSet *chainset = nextset(topsetname); // Look up the dataset with the same name
             if (chainset) 
                  delete chainset;                       // Delete the obsolete dataset            
