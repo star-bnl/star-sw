@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.19 1999/12/23 16:38:48 caines Exp $
+//$Id: St_srs_Maker.cxx,v 1.20 2000/02/17 23:23:03 caines Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.20  2000/02/17 23:23:03  caines
+//Adjust for using new geom files using hardware ids
+//
 //Revision 1.19  1999/12/23 16:38:48  caines
 //Added cvs ID strings
 //
@@ -59,32 +62,32 @@ Int_t St_srs_Maker::Init(){
    m_x_vs_y->SetXTitle("x cm");
 
    m_waf_no1 = new TH2F("si_layer1"," Si z vs ladder no.",
-                           100,-25.,25.,100,0.5,4.5);
+                           100,-25.,25.,20,0.5,8.5);
    m_waf_no1->SetYTitle("ladder no");
    m_waf_no1->SetXTitle("Z cm");
 
    m_waf_no2 = new TH2F("si_layer2"," Si z vs ladder no.",
-			100,-25.,25.,100,0.5,4.5);
+			100,-25.,25.,20,0.5,8.5);
    m_waf_no2->SetYTitle("ladder no");
    m_waf_no2->SetXTitle("Z cm");
 
    m_waf_no3 = new TH2F("si_layer3"," Si z vs ladder no.",
-			100,-25.,25.,100,0.5,6.5);
+			100,-25.,25.,20,0.5,12.5);
    m_waf_no3->SetYTitle("ladder no");
    m_waf_no3->SetXTitle("Z cm");
 
    m_waf_no4 = new TH2F("si_layer4"," Si z vs ladder no.",
-			100,-25.,25.,100,0.5,6.5);
+			100,-25.,25.,20,0.5,12.5);
    m_waf_no4->SetYTitle("ladder no");
    m_waf_no4->SetXTitle("Z cm");
 
    m_waf_no5 = new TH2F("si_layer5"," Si z vs ladder no.",
-			100,-25.,25.,100,0.5,7.5);
+			100,-25.,25.,20,0.5,16.5);
    m_waf_no5->SetYTitle("ladder no");
    m_waf_no5->SetXTitle("Z cm");
 
    m_waf_no6 = new TH2F("si_layer6"," Si z vs ladder no.",
-			100,-25.,25.,100,0.5,7.5);
+			100,-25.,25.,20,0.5,16.5);
    m_waf_no6->SetYTitle("ladder no");
    m_waf_no6->SetXTitle("Z cm");
 
@@ -122,7 +125,6 @@ Int_t St_srs_Maker::Make()
 
     scs_spt_st  *spc   = scs_spt->GetTable();
     for (Int_t i = 0; i < scs_spt->GetNRows(); i++,spc++){
-      m_x_vs_y->Fill(spc->x[0],spc->x[1]);
 
       int lader = spc->id_wafer -((int)spc->id_wafer/1000)*1000;
       lader = lader -(int)(lader/100)*100;
@@ -150,6 +152,10 @@ Int_t St_srs_Maker::Make()
 	m_waf_no7->Fill(spc->x[2],ladder);
       }
 
+      if( ladder < 2){
+      m_x_vs_y->Fill(spc->x[0],spc->x[1]);
+      }
+	     
 
     }
   }

@@ -316,13 +316,26 @@ C      do iwafer1 = 1, 400       ! zero counters
 
       do ispt = 1, spt_h.nok   ! count
          kwafer       = spt(ispt).id_wafer
-         ilayer       = kwafer/1000
-         if (ilayer.eq.8) ilayer=7
-         iwafer1      = (kwafer-ilayer*1000)/100
-         iladder      =  kwafer-ilayer*1000-iwafer1*100
-         iwafer2  = waferi(ilayer) + 
-     &        (iladder-1)*config(1).n_wafer(ilayer) + iwafer1
-         if (kwafer.ne.geom(iwafer2).id) then
+C         ilayer       = kwafer/1000
+C         if (ilayer.eq.8) ilayer=7
+C         iwafer1      = (kwafer-ilayer*1000)/100
+C         iladder      =  kwafer-ilayer*1000-iwafer1*100
+C         if( ilayer .lt. 7) then  ! Map to correct entry in geom table
+C            iladder      = (iladder-1)/2 + 1
+C         endif
+C         iwafer2  = config(1).n_wafer(ilayer)+1-waferi(ilayer) + 
+C     &        (iladder-1)*config(1).n_wafer(ilayer) + iwafer1
+
+         iwafer2 = 0
+         do iwafer1= 1, geom_h.nok
+            if( geom(iwafer1).id .eq. kwafer) then
+               iwafer2 = iwafer1
+               iwafer1 = geom_h.nok+1
+            endif
+         enddo
+
+         if (iwafer2 .eq. 0 ) then
+
            call StError( ' fatal mis-match')
             write(mess,*) 'idw,ly,w,ld,w2,id:', 
      &           kwafer,ilayer,iwafer1,iladder,

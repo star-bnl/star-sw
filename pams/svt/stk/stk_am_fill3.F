@@ -296,11 +296,22 @@ c     sort the space points by wafer and count them
          kwafer       = spt(i_spt).id_wafer
          ilayer       = kwafer/1000
          if (ilayer.eq.8) ilayer=7
-         iwafer1      = (kwafer-ilayer*1000)/100
-         iladder      =  kwafer-ilayer*1000-iwafer1*100
-         iwafer2  = waferi(ilayer) + 
-     &        (iladder-1)*config(1).n_wafer(ilayer) + iwafer1
-         if (kwafer.ne.geom(iwafer2).id) then
+C         iwafer1      = (kwafer-ilayer*1000)/100
+C         iladder      =  kwafer-ilayer*1000-iwafer1*100
+C         iladder      = (iladder-1)/2 + 1
+C         iwafer2  =  config(1).n_wafer(ilayer)+1waferi(ilayer) + 
+C     &        (iladder-1)*config(1).n_wafer(ilayer) + iwafer1
+
+         iwafer2 = 0
+         if( kwafer .lt. 7000) then
+            do iwafer1= 1, geom_h.nok
+               if( geom(iwafer1).id .eq. kwafer) then
+                  iwafer2 = iwafer1
+                  iwafer1 = geom_h.nok+1
+               endif
+            enddo
+         endif
+         if (iwafer2 .eq. 0 ) then
             if (kwafer.gt.7000.and.kwafer.lt.9000
      &           .and.config(1).n_layer.eq.7) then
 * it is ok : the SSD is in but we do not want to use the hits
