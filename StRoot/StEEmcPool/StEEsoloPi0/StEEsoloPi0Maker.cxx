@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsoloPi0Maker.cxx,v 1.3 2004/04/29 04:16:43 perev Exp $
+// $Id: StEEsoloPi0Maker.cxx,v 1.4 2004/05/07 21:38:38 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -90,7 +90,9 @@ Int_t StEEsoloPi0Maker::Make(){
   n3++;
 
   // print();
-  doEEsoloPi0();
+
+  findTowerClust();
+  findTowerPi0();
 
 #if 0  
 
@@ -252,6 +254,9 @@ float StEEsoloPi0Maker::getCtbSum(){
 }
 
 // $Log: StEEsoloPi0Maker.cxx,v $
+// Revision 1.4  2004/05/07 21:38:38  balewski
+// gamma finder with SMD
+//
 // Revision 1.3  2004/04/29 04:16:43  perev
 // typo fixed. getTile not getTail
 //

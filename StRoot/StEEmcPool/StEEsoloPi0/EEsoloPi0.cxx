@@ -1,4 +1,4 @@
-// $Id: EEsoloPi0.cxx,v 1.2 2004/05/05 04:39:45 balewski Exp $
+// $Id: EEsoloPi0.cxx,v 1.3 2004/05/07 21:38:38 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -46,6 +46,7 @@ EEsoloPi0::EEsoloPi0(){
   float XshapeLimit=.7;
   float XmassLo=0.07, XmassHi=0.22;
   set(XscaleFactor, XseedEnergy,XshapeLimit,XmassLo,XmassHi);
+  memset(soloMipDb,0,sizeof(soloMipDb));
 
 }
 
@@ -216,7 +217,7 @@ void EEsoloPi0::print(){
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
-int EEsoloPi0::sort(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eHead, int ctbMin, int ctbMax ){
+int EEsoloPi0::getTowerAdc(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eHead, int ctbMin, int ctbMax ){
   static int time0=-1;
   if(time0<0) time0=eHead->getTimeStamp();
   timeSec=eHead->getTimeStamp()-time0;
@@ -290,6 +291,7 @@ int EEsoloPi0::sort(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eH
       float recoEner=value/x->gain/scaleFactor; // ideal
       totEner+=recoEner;
       soloMip[ii].e= recoEner;
+      if (soloMipDb[ii]==0) soloMipDb[ii]=x;
 
       float etaCenter=geom->getEtaMean(x->eta-1);
       hA[0]->Fill(recoEner);
@@ -299,11 +301,8 @@ int EEsoloPi0::sort(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eH
     }
   }
   
-  //  printf(" n1=%d, n2=%d\n",n1,n2);
+  printf(" n1=%d, n2=%d\n",n1,n2);
   hA[1]->Fill(totEner);
-
-  doEEsoloPi0(); // just to speed up the algo
-  //finish();
   return 1;
 
 }
@@ -312,7 +311,7 @@ int EEsoloPi0::sort(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eH
 
 //---------------------------------------------------
 //---------------------------------------------------
-void EEsoloPi0::doEEsoloPi0() {
+int  EEsoloPi0:: findTowerClust() {
   assert(seedEnergy>0);  // makes no sense to set it lower
   //............  search for hight towers
   while(1) {
@@ -342,7 +341,7 @@ void EEsoloPi0::doEEsoloPi0() {
   int nClustG=0;
   int ic;
   for(ic=0;ic<nClust;ic++) {
-    sumCluster(ic);
+    sumTwClusterEnergy(ic);
     float rat=clust[ic].eH/clust[ic].eC;
     // printf(" sum energy ic=%d eH=%f eC=%f rat=%f\n",ic,clust[ic].eH,clust[ic].eC,rat);
     if(rat<shapeLimit)  continue;
@@ -350,8 +349,8 @@ void EEsoloPi0::doEEsoloPi0() {
     hA[3]->Fill(rat);    
     clustG[nClustG++]=clust[ic];
   }
-  //  printf(" nClustG=%d\n",nClustG);
-  if(nClustG<2) return ;
+
+  printf(" nClustG=%d\n",nClustG);
 
   //.....  copy only good clusters
   for(ic=0;ic<nClustG;ic++) {
@@ -361,7 +360,17 @@ void EEsoloPi0::doEEsoloPi0() {
   nClust=nClustG;
     
   hA[4]->Fill(nClust);
- 
+  printf("doneE nCl=%d %f %d\n",nClust,clust[0].eC,clust[0].k1);
+  return nClust;
+}
+
+
+
+//---------------------------------------------------
+//---------------------------------------------------
+void EEsoloPi0::findTowerPi0() {
+  if(nClust<2) return ;
+
   //..................  scan pairs of clusters
   int i,j;
   for(i=0;i<nClust;i++) 
@@ -399,7 +408,7 @@ void EEsoloPi0::doEEsoloPi0() {
       totXPi0+=findInvM(cl1,cl2,hM);
       
     }
-  // printf("doneE nCl=%d %f %d\n",nClust,clust[0].eC,clust[0].k1);
+
 
 }
 
@@ -430,7 +439,7 @@ void EEsoloPi0:: tagCluster(int k0,int d){
 
 //---------------------------------------------------
 //---------------------------------------------------
-void EEsoloPi0:: sumCluster(int ic,int d){ 
+void EEsoloPi0:: sumTwClusterEnergy(int ic,int d){ 
   
   int k0=clust[ic].k1;
   int ieta=k0%12;
@@ -466,6 +475,36 @@ void EEsoloPi0:: sumCluster(int ic,int d){
   clust[ic].fphi=sumj/sum;
   //printf("  feta=%f   fphi=%f\n",clust[ic].feta,   clust[ic].fphi);
 
+}
+
+//---------------------------------------------------
+//---------------------------------------------------
+float EEsoloPi0::sumPatchEnergy(int k0,int d,EEsoloMipA *soloMipX, float *maxVal){ 
+  
+  int ieta=k0%12;
+  int iphi=k0/12; 
+ 
+  int i,j;
+  double sum=0;
+  double max=0;
+  for(i=ieta-d; i<=ieta+d;i++){
+    if( i>=MxTwEta || i<0) continue;
+    for(j=iphi-d;j<=iphi+d;j++){
+      int jj=j;
+      if( jj<0 ) jj+=MxTwPhi;
+      if( jj>=MxTwPhi ) jj-=MxTwPhi;
+      assert( jj>=0 && jj<MxTwPhi );
+      int k1=i + MxTwEta*jj;
+      if(soloMipX[k1].e<=0) continue;
+      sum+=soloMipX[k1 ].e;
+      if(max<soloMipX[k1 ].e) max=soloMipX[k1 ].e;
+    }
+  }
+
+  if(maxVal) *maxVal=max;
+
+  printf("sumPatchEnergy(k0=%d, d=%d)=%f ,max=%f\n",k0, d,sum,max);
+  return sum;
 }
 
 
