@@ -122,8 +122,10 @@
 * 
 * editted 9/24/98 K. Turner - implement following chain variables:
 *                               chain:  module:   
-*                                ev0j   ams/global - joins ev0out & vertex tables
-*
+*                                ev0j   pams/global - joins ev0out & vertex tables
+*                                emc    pams/emc - Akio's em calib adc to energy
+*                                calin    - Akio's read correct calibration constants in
+*                           - changed chain for "ems" - Akio's changes
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -312,9 +314,10 @@ macro bfc_init _
 	    exec l3t_init
 	    exec create_tables_l3
       (ems) exec create_tables_emc#ems
-	    exec init_ems#init
+*	    exec init_ems#init
+      (emc) exec create_tables_emc#cal
       (jet) exec create_tables_emc#jet
-	    exec init_jet#init
+*	    exec init_jet#init
     (ddedx) exec create_tables_global#dst_dedx_filler
      (dpnt) exec create_tables_global#dst_point_filler
     (dmsft) exec create_tables_global#dst_monitor_soft_filler
@@ -448,6 +451,7 @@ ABEND:
             endfor
      (fzin) trig 1; if ($iquest(1) <>0) goto EOF	     
             vec/input staf_status(1) STAFCV_OK
+    (calin) call cal2mem(946702800) 
      (rgst) trig 1; if ($iquest(1) <>0) goto EOF	     
             vec/input staf_status(1) STAFCV_OK
      (rg2t) cd [geantE]
@@ -532,7 +536,10 @@ ABEND:
 	       exec mwu_run
       (trg)    exec l3cl_run
 	       exec ftf_run
-      (ems)    exec run_ems#ems_interface2  
+      (ems)    exec run_ems#ems_interface2
+	       exec run_ems#dep_e_toadc
+	       exec run_cal#energy_to_adc
+      (emc)    exec run_cal#adc_to_energy
       (jet)    exec run_jet#egrid
                exec run_jet#erj
      (dehd)    exec run_dst#dst_ehead
