@@ -35,15 +35,15 @@
 #include <stdio.h>
 #include <string.h>
 
+#define TRUE -1
+#define FALSE 0
+
 
 	void	strend_( char *, int *, size_t );
 
 /*	Define file-wide-global pointers fpr and fpw and function-pointer fopen,  type FILE, defined in stdio.h:     */
 
 FILE *fpr, *fpw;
-
-/*#define TRUE -1*/
-#define FALSE 0
 
 
 
