@@ -61,7 +61,13 @@ void StDetectorDbTpcRDOMasks::update(StMaker* maker){
 		}
 	    }
 	}
+	
+	if( dataSet == 0 || mTable == 0 || mMaskVector == 0)
+	    cout << "StDetectorDbTpcRDOMasks: No RDO Table For This Run";
     }
+    else
+	cout << "StDetectorDbTpcRDOMasks: No RDO Table For This Run";
+    
 };
 
 /// Default constructor
