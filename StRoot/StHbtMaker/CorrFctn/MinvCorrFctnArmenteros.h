@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctnArmenteros.h,v 1.2 2000/03/16 01:56:36 laue Exp $
+ * $Id: MinvCorrFctnArmenteros.h,v 1.3 2000/03/23 22:56:59 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctnArmenteros.h,v $
+ * Revision 1.3  2000/03/23 22:56:59  laue
+ * event by event correlation function with tag writer. NEW
+ *
  * Revision 1.2  2000/03/16 01:56:36  laue
  * Copy constructor added to some correlation functions
  *
@@ -47,6 +50,7 @@ public:
   virtual void Finish();
 
   void SetMassWindow( double, double );
+  MinvCorrFctnArmenteros* Clone();
   
   StHbt2DHisto* Numerator();
   StHbt2DHisto* Denominator();
@@ -72,6 +76,7 @@ inline MinvCorrFctnArmenteros::MinvCorrFctnArmenteros(const MinvCorrFctnArmenter
   mDenominator= new StHbt2DHisto(*(fctn.mDenominator));
   mDifference = new StHbt2DHisto(*(fctn.mDifference));
 }
+inline MinvCorrFctnArmenteros* MinvCorrFctnArmenteros::Clone() { MinvCorrFctnArmenteros* c = new MinvCorrFctnArmenteros(*this); return c;}
 
 #endif
 
