@@ -4,6 +4,8 @@
 **:             20-jan-99  Created by OGAWA, AKio
 **:             10-feb-99  Corr. by Pavlinov, Aleksei
 **:<------------------------------------------------------------------*/
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "emc_def.h"
 #include "samplefrac_def.h"
