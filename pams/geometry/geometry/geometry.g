@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.48 2001/09/10 17:39:34 nevski Exp $
+* $Id: geometry.g,v 1.49 2002/10/28 15:42:29 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.49  2002/10/28 15:42:29  nevski
+* introducing 2002 version
+*
 * Revision 1.48  2001/09/10 17:39:34  nevski
 * do not set MFLD datacards without a DETP GEOM
 *
@@ -53,12 +56,15 @@
 *  22.05.01, PN: starting with tag y2000 field is version 3 (direct map)  *
 ***************************************************************************
    Implicit   none
+* system list 
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
-              zcal,mfld,mwc,pse,tof,t25,t1,four,ems,alpipe,svtw,
+              zcal,mfld,bbcm
+* Qualifiers:  TPC        TOF         etc
+   Logical    mwc,pse, tof,t25,t1, ems,alpipe,svtw,kusok,
               on/.true./,off/.false./
    real       Par(1000),field,dcay(5),shift(2),wdm
    Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nonf(3),
-              Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf
+              Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,fieldbug,argonbug
    character  Commands*4000,Geom*8
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
@@ -73,19 +79,24 @@ replace[;ON#{#;] with [
     Commands(j:l)=' ';  <W>; (' #1: #2');
 ]
 *
+* If geometry was already built, the local DB will be dropped completely now
+* but the request for the next geometry should be saved in a temp. par arrray
    call ASLGETBA ('GEOM','DETP',1000,LL,Par)
    If (JVOLUM>0) call AGDROP ('*')
+
+* -------------------- set GSTAR absolute default ------------------------
+
+* before parsing the request, set some default values:
    IPRIN    = IDEBUG
    NtrSubEv = 1000     " automatic !"
 *
-* -------------------- set GSTAR absolute default ------------------------
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
 * If an empty or no DETP GEOM was issued, geometry is defined externally.
 *
    field=5                                             "defaults constants"
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
-   {mwc,four,pse}=on      "MultiWire Chambers, 4th Si layer, pseudopadrows"   
+   {mwc,pse}=on          " MultiWire Chambers, pseudopadrows"   
    {tof,t25,t1,ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
    Nsi=7; Wfr=0;  Wdm=0; " SVT+SSD, wafer number and width as in code     "
    svtw=on               " water+water manifold in svt, off for Y2000 only"
@@ -94,9 +105,13 @@ replace[;ON#{#;] with [
    Rv=2                  " add non-sensetive hits to RICH system          "
    Rp=2                  " real RICH position and spectra inst.of nominal "
    nonf={1,2,2}          " ecal on right side, FPD parts on left side     "
+   kusok=off             " define a patch of Ecal                         "
    mf=2                  " default field - simetrical, as fitted by Bill  "
+   ArgonBug=0            " in the future tsettting bug to 1 should introiduce "
+   Fieldbug=0            "  old bugs in these places "
    Commands=' '; Geom=' '
-*
+
+
 * -------------------- select USERS configuration ------------------------
 * On a non-empty DETP GEOM every keyword makes an action and is erased.
 * Actions consist here of selecting the appropriate parameteres and flags.
@@ -105,6 +120,7 @@ replace[;ON#{#;] with [
 * 
 If LL>1   
 { Call AGSFLAG  ('GEOM',1)
+* convert input line into a string of upprecase characters
   CALL UHTOC(PAR(2),4,Commands,LL*4-4);  Call CLTOU(Commands);
 
   * set geant processes and cuts only if any detp geometry was issued:
@@ -161,7 +177,30 @@ If LL>1
 
   on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
                   {rich,ems,t1}=on;  nmod={24,0}; shift={21,0};  
-                  nonf={0,2,2};  Itof=2;  Rv=2;  Mf=3;                 Nsi=6; }
+                  "nonf={0,2,2};" Kusok=on;  Itof=2;  Rv=2;  Mf=3;     Nsi=6; }
+
+  on YEAR2002   { draft 2002 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD?;
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbring is in the code   ";
+                     wdm=0  " width is in the code      ";
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " vyzyvat' btofgeo2            ";
+                     t1=on  " one slab is TOF how many in 2002 ? ;
+                  "calb" 
+                     nmod={24,0}; shift={21,0}; " 24 sectora na east side .." 
+                  "ecal 
+                     ems=on   " est endcap " 
+                     " obsolete :    nonf={0,2,2}; "
+                     kusok=on   " odin kusok na west "
+                  "beam-beam counter "
+                     bbcm=on
+                  " versia polia "
+                     Mf=3;      " tabulirovannoe pole "
+                }
 
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
@@ -176,6 +215,7 @@ If LL>1
       {cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,rich,upst,zcal}=off; }
   on FIELD_OFF  { no magnetic field;                field=0;                  }
   on FIELD_ON   { Standard (5 KGs) field on;        field=5;                  }
+
   i=Index(Commands,'FIELD=')
   if i>0        { j=i/4+3; field=Par(1+j);  Commands(i:j*4)=' ';
                   <W> field; (' Modified field value =',F6.2,' KGS');         }
@@ -187,6 +227,7 @@ If LL>1
   on DEBUG_ON   { verbose mode, some graphics; Idebug=max(Idebug,1); Itest=1; }
   on DEBUG_OFF  { standard debug mode;         {Idebug,Itest}=0;              }
   }
+
 * sanity check - if something left in commands (unknown keyword), we stop!
   l=LENOCC(commands); if l>0
   {  print *,' Unknown command left => ', commands(1:l), ' <= ',l
@@ -209,6 +250,7 @@ If LL>1
    if (alpipe)      call AgDETP add ('pipg.S1Leng=',230,1)
    if (pipe)        Call pipegeo
    if (upst)        Call upstgeo
+   if (bbcm)        Call bbcmgeo
 
    Call AGSFLAG('SIMU',2)
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
@@ -268,7 +310,10 @@ If LL>1
 *  - endcap calorimeter may be controled here
    If (LL>1 & ecal) then
       call AgDETP new ('ECAL')
-      call AgDETP add ('emcg.OnOff=',Nonf,3)
+      if (kusok)  
+      {  call AgDETP add ('emcg.OnOff=',1,1)
+         call AgDETP add ('emcg.FillMode=',1,1)
+      }
    endif
    if (ecal) Call ecalgeo
    if (zcal) Call zcalgeo
