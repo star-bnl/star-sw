@@ -85,7 +85,7 @@ STAFCV_T levRegisterEnvInfo(char *name,char *value) {
   int column; char *colName,*val,*v;
   tdmTable* tab; long ncol,nrow;
   if(!tdm->findTable(LEV_ENV_TABLE,tab)) {
-     PP"findTable failed\n"); EML_ERROR(ENV_TBL_NOT_FOUND);
+     EML_ERROR(ENV_TBL_NOT_FOUND);
   }
   nrow=(long)tab->rowCount();
   if(nrow>=LEV_ENV_MAX_ROWS) EML_ERROR(TOO_MANY_ROWS);
@@ -99,7 +99,7 @@ STAFCV_T levRegisterEnvInfo(char *name,char *value) {
       if(strlen(val)>255) EML_ERROR(INFO_VALUE_TOO_BIG);
     }
     if(!tab->findColumn(col,colName)) {
-      PP"findColumn failed\n"); EML_ERROR(FIND_COL_FAILED);
+      EML_ERROR(FIND_COL_FAILED);
     }
     ncol = (int)(col.nCol); tcode = col.code; cellData._d = tcode;
     cellData.data.v = (void*)ASUALLOC(sizeof(double)); // BUG? FIXED?
@@ -209,7 +209,7 @@ int levCellAlreadyIn(const char *table,const char *value,long col) {
   tdmTable* tab;
   TDM_CELLDATA_T cellData;
   if(!tdm->findTable(table,tab)) {
-     PP"findTable failed\n"); EML_ERROR(TABLE_NOT_FOUND);
+     EML_ERROR(TABLE_NOT_FOUND);
   }
   nrow=tab->rowCount();
   for(i=nrow-1;i>=0;i--) {
@@ -226,7 +226,7 @@ STAFCV_T levFactory:: registerVersion(const char *name,
   tdmTable* tab; long ncol,nrow;
   /*------------------------------------------- */
   if(!tdm->findTable(LEV_VER_TABLE,tab)) {
-     PP"findTable failed\n"); EML_ERROR(TABLE_NOT_FOUND);
+     EML_ERROR(TABLE_NOT_FOUND);
   }
   nrow=(long)tab->rowCount();
   if(nrow>=LEV_ENV_MAX_ROWS) EML_ERROR(TOO_MANY_ROWS);
@@ -235,7 +235,7 @@ STAFCV_T levFactory:: registerVersion(const char *name,
   if(colAlreadyIn0&&colAlreadyIn1) {
     PP"Already registered: '%s', '%s'\n",name,type); return TRUE;
   } else {
-    PP"Registering:        '%s', '%s'\n",name,type);
+    PP"Registering:        '%s', '%s', '%s'\n",name,type,version);
   }
   tab->rowCount((long)(1+nrow));
   for(column=0;column<3;column++) {
@@ -248,7 +248,7 @@ STAFCV_T levFactory:: registerVersion(const char *name,
       if(strlen(val)>255) EML_ERROR(VALUE_TO_LONG);
     }
     if(!tab->findColumn(col,colName)) {
-      PP"findColumn failed\n"); EML_ERROR(FIND_COL_FAILED);
+      EML_ERROR(FIND_COL_FAILED);
     }
     ncol = (int)(col.nCol); tcode = col.code; cellData._d = tcode;
     cellData.data.v = (void*)ASUALLOC(1000);  // BUG? does this mem get used?
@@ -264,7 +264,7 @@ STAFCV_T levFactory:: registerVersion(const char *name,
 } /* nrow val */
 char *levFactory:: version() {
   char *c=NULL;
-  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.2 1997/03/25 18:04:13 ward Exp $";
+  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.3 1997/03/28 20:50:11 ward Exp $";
   c=(char*)malloc(strlen(v)+1);
   strcpy(c,v);
   return c;
