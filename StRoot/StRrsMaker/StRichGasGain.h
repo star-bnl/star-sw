@@ -1,9 +1,9 @@
-/***************************************************************
- * $Id: StRichGasGain.h,v 1.2 2000/01/25 22:02:20 lasiuk Exp $
+/*******************************************************************
+ * $Id: StRichGasGain.h,v 1.3 2000/02/08 16:24:10 lasiuk Exp $
  *
  * Description:
- *   StRichGasGain is a function object containing the charge amplification
- *   algotithm. 
+ *   StRichGasGain is a function object containing the charge
+ *   amplification algotithm. 
  *   
  *   StRichGasGain is used like a normal function,
  *   i.e. StRichGasGain( GHit,wire position );  
@@ -27,8 +27,8 @@
  *
  *******************************************************************
  * $Log: StRichGasGain.h,v $
- * Revision 1.2  2000/01/25 22:02:20  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:24:10  lasiuk
+ * use of dbs
  *
  * Revision 1.3  2000/02/08 16:24:10  lasiuk
  * use of dbs
@@ -41,13 +41,12 @@
  *
  *   revision history:
  *     - 7/21/1999 created the class, Alexandre Nevski.
- *************************************************************v.0.2**/
-
+ *     - 8/17/1999 added RnPolia,     Alexandre Nevski.
  *     - 8/25/1999 added feedbackPhoton Caroline Peter.
  *
  *******************************************************************/
 #ifndef ST_RICH_GAS_GAIN_H
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+#define ST_RICH_GAS_GAIN_H
 
 #include <functional>
 #ifndef ST_NO_NAMESPACES
@@ -57,16 +56,32 @@ using std::binary_function;
 
 #ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
+#endif
+#include "StRichRrsMacros.h"
+#include "StRichGHit.h"
+#include "StRichGeometryDb.h"
+#include "StRichPhysicsDb.h"
+#include "StRichOtherAlgorithms.h"
 
-    class StRichGasGain : public binary_function<StRichGHit,double,double> {
-    public:
-	
-	double operator()(StRichGHit&, double );
+class StRichGasGain : public binary_function<StRichGHit,double,double> {
+public:
+    StRichGasGain();
+    ~StRichGasGain();
+    
+    //StRichGasGain(const StRichGasGain&) { /* use default */ }
+    //StRichGasGain& operator=(const StRichGasGain&) {/* use default */}
 
-    private:
-	
-	void feedbackPhoton( const StRichGHit&, double ) const;
-    };
+    double operator()(StRichGHit&, double );
+    
+private:	
+    void feedbackPhoton( const StRichGHit&, double ) const;
+
+private:
+    StRichGeometryDb* mGeometryDb;
+    StRichPhysicsDb*  mPhysicsDb;
+    Randoms           mRandom;
+
+    double            mAnodePadPlaneSeparation;
     double            mPhotonFeedback;
     double            mPhotoConversion;
 };
