@@ -546,7 +546,7 @@ void FtfBaseTrack::Print ( int level )
    else printf ( "\n " ) ;
 
    
-   if ( fmod(level,10) > 0 ) {
+   if ( fmod((double)level,10.) > 0 ) {
       printf ( " \n *** Clusters in this track *** " ) ;
       firstHit->print ( 10 ) ;
       for ( startLoop() ; done() ; nextHit()  ) { 

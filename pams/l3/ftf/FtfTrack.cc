@@ -517,14 +517,14 @@ int FtfTrack::followHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
 //           Check delta eta 
 //
 //   if ( baseHit->dz < 1000. && candidateHit->dz < 1000 ){
-      deta = fabs((baseHit->eta)-(candidateHit->eta)) ;
+      deta = fabs((double) ((baseHit->eta)-(candidateHit->eta))) ;
       if ( deta > para->deta ) return 0 ; 
 //   }
 //   else deta = 0.F ;
 //
 //           Check delta phi
 //
-  dphi = fabs((baseHit->phi)-(candidateHit->phi)) ;
+  dphi = fabs((double)((baseHit->phi)-(candidateHit->phi))) ;
   if ( dphi > para->dphi && dphi < twoPi-para->dphi ) return 0 ;
 //
 //      If looking for secondaries calculate conformal coordinates
@@ -927,19 +927,19 @@ int FtfTrack::segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
 //   select hit with the
 //   the smallest value of d3 (defined below)
 //
-   dphi  = (double)fabs((baseHit->phi) - (candidateHit->phi)) ; 
+   dphi  = (double)fabs((double)((baseHit->phi) - (candidateHit->phi))) ; 
    if ( dphi > pi ) dphi = (double)fabs( twoPi - dphi ) ;
    if ( dphi > para->dphi && dphi < twoPi -para->dphi ) return 0 ;
 //
 //    Make sure we want to look at the difference in eta
 //
    if ( baseHit->dz < 1000. && candidateHit->dz < 1000. ){
-        deta  = (double)fabs((baseHit->eta) - (candidateHit->eta)) ; 
+        deta  = (double)fabs((double)((baseHit->eta) - (candidateHit->eta))) ; 
         if ( deta > para->deta ) return 0 ;
    }
    else deta = 0.F ;
 
-   dr    = (double)fabs(baseHit->row - candidateHit->row);
+   dr    = (double)fabs((double)(baseHit->row - candidateHit->row));
    d3    = (double)(toDeg * dr * ( dphi  + deta ) ) ;
 //
 //     If initial segment is longer than 2 store angle info in 
@@ -976,7 +976,7 @@ int FtfTrack::segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
          dy     = candidateHit->y - baseHit->y ;
          angle  = (double)atan2 ( dy, dx ) ;
          if ( angle < 0  ) angle = angle + twoPi ;
-	    dangle = (double)fabs ( lastXyAngle - angle );
+	    dangle = (double)fabs ((double)( lastXyAngle - angle ));
 	    lastXyAngle = angle ;
          if ( dangle > para->segmentMaxAngle ) return 0 ;
       }
@@ -1153,10 +1153,10 @@ void FtfTrack::debugInVolume ( FtfHit *baseHit, FtfHit *candidateHit )
          candidateHit->Show ( 0 );
       }
       else {
-         double dphi  = (double)fabs(baseHit->phi - candidateHit->phi) ;
+         double dphi  = (double)fabs((double(baseHit->phi - candidateHit->phi)) ;
          double deta ;
          if ( baseHit->dz < 1000 && candidateHit->dz < 1000 )
-            deta  = (double)fabs(baseHit->eta - candidateHit->eta) ;
+            deta  = (double)fabs((double(baseHit->eta - candidateHit->eta)) ;
          else
             deta  = 0.F ;
 

@@ -206,8 +206,8 @@ void CalculateMomentsUnfold(PClusterUCList NewCluster)
 				{
 				  /* the catchlimit for matching peaks is 1 timebins difference */
 					if (!used[compareinner] &&
-						(fabs(sequencepeaks[old_peakstore][compareinner].index - 
-						     sequencepeaks[new_peakstore][compareouter].index) <= 2))	/*ds a limit of 2 fits much better! */
+						(fabs((double)(sequencepeaks[old_peakstore][compareinner].index - 
+						     sequencepeaks[new_peakstore][compareouter].index)) <= 2))	/*ds a limit of 2 fits much better! */
 					{
 					        /* found fitting sequence */
 					        /* mark as used */
