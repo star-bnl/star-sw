@@ -81,6 +81,7 @@ if (/^i386_/) {
   $EXEFLAGS = $CXXFLAGS . " -Wl,-Bdynamic";
   $SOFLAGS  = "-shared";  
   if (/^i386_redhat51egcs$/ || /^i386_redhat60egcs$/) {
+    $DEBUG    = "-g -O0";
     $CLIBS    = "-L/usr/X11R6/lib  -lXt -lXpm -lX11 -lm -ldl  -rdynamic";
     $FC       = "g77";
     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
@@ -129,6 +130,7 @@ elsif (/^hp_ux102/) {
 #  $FFLAGS    = "+DA1.0 +ppu +B +Z -K";
   $FFLAGS    = "-WF,-P +ppu +Z +B -K";
   $FEXTEND   = "+es";
+  print "SHLIB_PATH = $SHLIB_PATH\n";
 }
 elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $ROOTCINTD = "-DSOLARIS";
@@ -228,16 +230,8 @@ if (! $param::quiet) {
 my $ROOTLIBS;
 my $RINTLIBS;
 my $ROOTGLIBS;
-if ($ROOT_LEVEL =~ /\.23/) {
-  $ROOTLIBS    = " -L$ROOTSYS/lib -lNew -lCore -lCint -lHist -lGraf -lGraf3d -lTree";
-  $RINTLIBS    = " -lRint ";
-}
-else {
-  $ROOTLIBS    = " -L$ROOTSYS/lib -lRint -lNew -lBase -lCint -lClib -lCont -lFunc";
-  $ROOTLIBS   .= " -lGraf -lGraf3d -lHist -lHtml -lMatrix -lMeta -lMinuit -lNet -lPhysics";
-  $ROOTLIBS   .= " -lPostscript -lProof -lTree -lUnix -lZip";
-  $ROOTGLIBS   = " -lGpad -lGui -lGX11 -lX3d -lXpm";
-}
+$ROOTLIBS    = " -L$ROOTSYS/lib -lNew -lCore -lCint -lHist -lGraf -lGraf3d -lTree";
+$RINTLIBS    = " -lRint ";
 my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
 $CPPPATH = $INCLUDE . ":#StRoot:" .  $ROOTSRC . ":" . $CERN_ROOT . "/include:". $STAF . "/inc:/opt/star/include";
 $FCPPPATH ="";
@@ -356,6 +350,7 @@ $env = new cons(
 				     'ROOTSYS' => $ROOTSYS,
 				     'ROOTSRC' => $ROOTSRC,
 				     'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH,
+				     'SHLIB_PATH' => $SHLIB_PATH,
 				     'LIB'   => $LIB,
 				     'PGI' => $PGI,
 				     'STAR' => $STAR,
