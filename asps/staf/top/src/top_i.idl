@@ -1,0 +1,104 @@
+/*:Copyright 1996, Lawrence Berkeley National Laboratory
+**:>--------------------------------------------------------------------
+**:FILE:        top_i.idl
+**:DESCRIPTION: TOP-Table OPerator interface definition
+**:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
+**:BUGS:        -- STILL IN DEVELOPMENT --
+**:HISTORY:     23oct96-v001a-cet- make it work
+**:HISTORY:     17jul96-v000a-cet- creation
+**:<--------------------------------------------------------------------
+*/
+
+//:----------------------------------------------- INCLUDES           --
+#include "tdm_i.idl"
+
+//:----------------------------------------------- TYPEDEFS           --
+
+//:#####################################################################
+//:=============================================== INTERFACE          ==
+interface topProject_i : socObject_i {
+
+//:----------------------------------------------- ATTRIBUTES         --
+attribute string selectionSpecification;
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T project(in tdmTable_i table1, inout tdmTable_i table2);
+STAFCV_T reset();
+
+};	/* topProject_i */
+
+//:#####################################################################
+//:=============================================== INTERFACE          ==
+interface topJoin_i : socProject_i {
+
+//:----------------------------------------------- ATTRIBUTES         --
+attribute string whereClause;
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T join(in tdmTable_i table1, in tdmTable_i table2
+	, inout tdmTable_i table3);
+
+};	/* topWhere_i */
+
+//:#####################################################################
+//:=============================================== INTERFACE          ==
+interface topMask_i : socObject_i {
+
+//:----------------------------------------------- ATTRIBUTES         --
+attribute string cutFunction;
+attribute boolean static;
+readonly attribute long pass;
+readonly attribute long fail;
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T filter(in tdmTable table1, inout tdmTable table2);
+STAFCV_T cut(inout tdmTable table1);
+STAFCV_T mask(inout tdmTable table1);
+STAFCV_T unmask(inout tdmTable table1);
+STAFCV_T fill(in tdmTable table1);
+STAFCV_T reset(in tdmTable table1);
+
+};	/* topMask_i */
+
+//:#####################################################################
+//:=============================================== INTERFACE          ==
+interface topSort_i : socObject_i {
+
+//:----------------------------------------------- ATTRIBUTES         --
+attribute string keyFunction;
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T sort(in tdmTable table1, inout tdmTable table2);
+
+};	/* topMask_i */
+
+//:#####################################################################
+//:=============================================== INTERFACE          ==
+interface topFactory_i : socFactory_i {
+
+//:----------------------------------------------- ATTRIBUTES         --
+// *** NONE ***
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T deleteProject(in string name);
+STAFCV_T findProject(in string name, out topProject_i project);
+STAFCV_T getProject(in IDREF_T id, out topProject_i project);
+STAFCV_T newProject(in string name, in string spec);
+
+STAFCV_T deleteJoin(in string name);
+STAFCV_T findJoin(in string name, out topJoin_i join);
+STAFCV_T getJoin(in IDREF_T id, out topJoin_i join);
+STAFCV_T newJoin(in string name, in string spec, in string clause);
+
+STAFCV_T deleteMask(in string name);
+STAFCV_T findMask(in string name, out topMask_i mask);
+STAFCV_T getMask(in IDREF_T id, out topMask_i mask);
+STAFCV_T newMask(in string name, in string cut);
+
+STAFCV_T deleteSort(in string name);
+STAFCV_T findSort(in string name, out topSort_i sort);
+STAFCV_T getSort(in IDREF_T id, out topMask_i sort);
+STAFCV_T newSort(in string name, in string key);
+
+};	/* topFactory_i */
+
