@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.3 2001/09/24 13:34:13 suaide Exp $
+// $Id: StBemcTrigger.cxx,v 1.4 2001/10/12 23:13:55 suaide Exp $
 //
 //    
 
@@ -9,12 +9,53 @@
 #include "StEmcUtil/StEmcGeom.h"
   
 ClassImp(StBemcTrigger);
+// these vectors are for tower decoding ////////////////////////////////
+int sh =160;
+int Init_Crate[]={4660+sh,2420+sh,2580+sh,2740+sh,2900+sh,3060+sh,3220+sh,3380+sh,3540+sh,3700+sh,
+                  3860+sh,4020+sh,4180+sh,4340+sh,4500+sh,
+                  2180,2020,1860,1700,1540,1380,1220,1060,900,740,
+                  580,420,260,100,2340};
+
+int TDC_Crate[]= {18,17,16,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,19,20,21,
+                  22,23,24,25,26,27,28,29,30};
+
+int Crate_TDC[30];
+////////////////////////////////////////////////////////////////////////
+int Getjose_tower(int start,int crate_seq)
+{
+  int card=crate_seq/32;
+  int card_seq=31-(crate_seq%32);
+  int channel_seq=card_seq/4;
+  int channel=card_seq-(channel_seq*4)+1;
+  int jose_tower=start+channel_seq*20+card*4+(5-channel);
+  if(jose_tower>2400)jose_tower-=2400;
+  return jose_tower;
+}
+int GetTowerIdFromCrate(int Crate,int crate_sequency,
+                                             int& id)
+{
+  {
+    int start=Init_Crate[Crate-1];
+    id=Getjose_tower(start,crate_sequency);
+    //cout <<"  Crate = "<<Crate<<"  seq = "<<crate_sequency<<"  id = "<<id<<endl;
+    return 1;
+  }
+  return 0;
+}
+/////////////////////////////////////////////////////////////////////////
+
 
 StEmcGeom* geo;
 
 //-------------------------------------------------------------------
 StBemcTrigger::StBemcTrigger():StEmcTrigger()
 {   
+
+
+  for (int i=0;i<30;i++) Crate_TDC[TDC_Crate[i]-1]=i;
+
+
+
   EmcTrigger=new St_emcTrigger("BemcTrigger",1);
   EmcTrigger->SetNRows(1);
   
@@ -44,8 +85,8 @@ void StBemcTrigger::MakeTrigger()
   if(!det) return;
   if(det->numberOfHits()==0) return;
   
-  Float_t e8bits[4800];
-  for(Int_t i=0;i<4800;i++) {e8bits[i]=0;}
+  Float_t e8bits[4800],adc12bits[4800];
+  for(Int_t i=0;i<4800;i++) {e8bits[i]=0; adc12bits[i]=0;}
     
   for(Int_t i=1;i<121;i++)
   {
@@ -63,6 +104,7 @@ void StBemcTrigger::MakeTrigger()
         Int_t adc8bits=(Int_t)(hits[j]->adc()/16); // convert 12 bits to 8 bits adc
         Float_t scalefactor=16.*hits[j]->energy()/(Float_t)hits[j]->adc();
         e8bits[id-1]=(Float_t)adc8bits*scalefactor; //convert to energy
+        adc12bits[id-1]=hits[j]->adc();
         //cout <<hits[j]->adc()<<"   "<<e8bits[id-1]<<"   "<<scalefactor<<endl;
       }
     }
@@ -95,23 +137,29 @@ void StBemcTrigger::MakeTrigger()
   {   
     Float_t etah=GetEtaPatch(patch);        
     Float_t theta = atan(exp(-etah))*2.;
-    Int_t mi,ei;    
-    GetModuleEtaPatch(patch,&mi,&ei);
+    Int_t crate,subpatch;    
+    GetCrateEtaPatch(patch,&crate,&subpatch);
     
-    for(Int_t m=mi;m<mi+2;m++)
-      for(Int_t e=ei;e<ei+4;e++)
-        for(Int_t s=1;s<3;s++)
-        {
-          Int_t id;
-          geo->getId(m,e,s,id);        
-          if(e8bits[id-1]>=HT[patch-1]) 
-          {
-            HT[patch-1]=e8bits[id-1]; 
-            HTId[patch-1]=id;
-          }
-          Patch[patch-1]+=e8bits[id-1];
-        }
-        
+    Int_t ti=0;
+    patchRows[patch-1].PatchAdcSum12bits=0;
+    
+    for(Int_t k=0;k<16;k++)
+    {
+       Int_t positionInCrate=k+subpatch;
+       Int_t id;
+       GetTowerIdFromCrate(crate,positionInCrate,id);        
+       patchRows[patch-1].TowerId[ti]=id;
+       ti++;
+       if(e8bits[id-1]>=HT[patch-1]) 
+       {
+         HT[patch-1]=e8bits[id-1]; 
+         HTId[patch-1]=id;
+       }
+       Patch[patch-1]+=e8bits[id-1];
+       patchRows[patch-1].PatchAdcSum12bits+=(Int_t)adc12bits[id-1];
+    }
+    patchRows[patch-1].HighTowerAdc12bits=(Int_t)HT[patch-1];
+    
     HT[patch-1]*=sin(theta);   // et
     Patch[patch-1]*=sin(theta);// et
     
@@ -129,7 +177,7 @@ void StBemcTrigger::MakeTrigger()
 
 //    cout <<" after  conv "<<HT[patch-1]<<"  "<<Patch[patch-1]<<endl<<endl;
 
-    Int_t jet=GetJetId(mi);
+    Int_t jet=GetJetId(crate);
     if(jet>0) Jet[jet-1]+=Patch[patch-1];
     totalEt+=Patch[patch-1];
     
@@ -165,8 +213,6 @@ void StBemcTrigger::MakeTrigger()
             
 // filling Patch information   
     patchRows[patch-1].PatchNumber=patch;
-    patchRows[patch-1].FirstModule=mi;
-    patchRows[patch-1].FirstEta=ei;
     patchRows[patch-1].PatchEt6bits=Patch[patch-1];
     patchRows[patch-1].HighTowerEt6bits=HT[patch-1];
     patchRows[patch-1].HighTowerId=HTId[patch-1];
@@ -214,7 +260,6 @@ void StBemcTrigger::MakeTrigger()
       else jetRows[jet-1].JetBits[i]=0;
     
     jetRows[jet-1].JetPatchNumber=jet;
-    jetRows[jet-1].FirstModule=GetModuleId(jet);
     jetRows[jet-1].JetEt6bits=Jet[jet-1];
   }
   
@@ -226,59 +271,38 @@ void StBemcTrigger::MakeTrigger()
   return;
 }
 //----------------------------------------------------    
-void StBemcTrigger::GetModuleEtaPatch(Int_t patch,Int_t* mi,Int_t* ei)
+void StBemcTrigger::GetCrateEtaPatch(Int_t patch,Int_t* mi,Int_t* ei)
 {
-  Int_t module=2*((patch-1)/5)+1;
-  Int_t eta=17-4*((patch-1)%5);
-  
-  *mi=module;
-  *ei=eta;
-}
-//----------------------------------------------------    
-Int_t StBemcTrigger::GetPatchId(Int_t m,Int_t e)
-{
-  Int_t id;
-  geo->getId(m,e,1,id);
-  Int_t emcrow=(id-1)/20;
-  Int_t emccol=(id-1)%20;
-  Int_t patchrow=emcrow/4;
-  Int_t patchcol=emccol/4;
-  Int_t patch=patchrow*5+patchcol+1;
-  return patch; 
+
+  Int_t crate=(patch-1)/10+1; // crate number
+  Int_t subpatch=(patch-1)%10*16;
+    
+  *mi=crate;
+  *ei=subpatch;
 }
 //----------------------------------------------------    
 Float_t StBemcTrigger::GetEtaPatch(Int_t patch)
 {
-  Int_t mi,ei;
-  GetModuleEtaPatch(patch,&mi,&ei);
+  Int_t crate,subpatch;
+  GetCrateEtaPatch(patch,&crate,&subpatch);
   Float_t eta=0,x=0;
-  for(Int_t m=mi;m<mi+2;m++)
-    for(Int_t e=ei;e<ei+4;e++)
-    {
-      Float_t temp;
-      geo->getEta(m,e,temp);
-      eta+=temp;
-      x++;
-    }
+  for(Int_t k=0;k<16;k++)
+  {
+     Int_t positionInCrate=k+subpatch;
+     Int_t id;
+     GetTowerIdFromCrate(crate,positionInCrate,id);        
+     Int_t m,e,s;
+     geo->getBin(id,m,e,s);
+     Float_t temp;
+     geo->getEta(m,e,temp);
+     eta+=temp;
+     x++;
+  }
   return eta/x;
 }
 //----------------------------------------------------    
-Int_t StBemcTrigger::GetJetId(Int_t m)
+Int_t StBemcTrigger::GetJetId(Int_t crate)
 {
-  for(Int_t i=0;i<14;i++) 
-  {
-    Int_t mi=i*8+1;
-    if(i>=7) mi=(i-7)*8+61;
-    Int_t mf=mi+8;
-    if(m>=mi && m<mf) return i+1;
-  }
+  if(crate!=15 && crate!=30) return (crate-1)/2+1;
   return 0;
-}
-//----------------------------------------------------    
-Int_t StBemcTrigger::GetModuleId(Int_t jet)
-{
-  Int_t i=jet-1;
-  Int_t mi=i*8+1;
-  if(i>=7) mi=(i-7)*8+61;
-  return mi;
 }
