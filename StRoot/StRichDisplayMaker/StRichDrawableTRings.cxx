@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichDrawableTRings.cxx,v 2.2 2000/11/01 16:55:26 lasiuk Exp $
+ * $Id: StRichDrawableTRings.cxx,v 2.3 2001/05/04 02:14:53 perev Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichDrawableTRings.cxx,v $
+ *  Revision 2.3  2001/05/04 02:14:53  perev
+ *  HP Corrs
+ *
  *  Revision 2.2  2000/11/01 16:55:26  lasiuk
  *  add hilite() members which utilize the flags defined in
  *  StEvent.  draw() member also added.  Hits are hilited only
@@ -93,7 +96,7 @@ StRichDrawableTRings::StRichDrawableTRings(StRichRings& ring) {
   //
   // loop over inner ring points
   //
-  for (unsigned int hh=0;hh<in.size();hh++) {
+  {for (unsigned int hh=0;hh<in.size();hh++) {
       // grab X and Y
       tempX = in[hh].x();
       tempY = in[hh].y();
@@ -110,7 +113,7 @@ StRichDrawableTRings::StRichDrawableTRings(StRichRings& ring) {
 	  iy[innerSize] = tempY;
 	  innerSize++;       
       }
-  }
+  }}
 
   // size counter fro Outer Ring
   int outerSize = 0;
@@ -118,7 +121,7 @@ StRichDrawableTRings::StRichDrawableTRings(StRichRings& ring) {
   //
   // same as above for Outer Ring
   //
-  for (unsigned int hh=0;hh<out.size();hh++) {
+  {for (unsigned int hh=0;hh<out.size();hh++) {
       tempX = out[hh].x();
       tempY = out[hh].y();
       
@@ -128,7 +131,7 @@ StRichDrawableTRings::StRichDrawableTRings(StRichRings& ring) {
 	  outerSize++;
       }
 	  
-  }
+  }}
   
   mInnerRing = new TPolyLine(innerSize,ix,iy); // Make T drawable Ring
   mOuterRing = new TPolyLine(outerSize,ox,oy); // Only use valid points
@@ -202,23 +205,23 @@ void StRichDrawableTRings::clear() {
     delete mInnerRing;
     delete mOuterRing;
     
-    for (unsigned int i=0;i<mHits.size();i++)
-	tempHits.push_back(new StRichDrawableTHit(*mHits[i]));
+    {for (unsigned int i=0;i<mHits.size();i++)
+	tempHits.push_back(new StRichDrawableTHit(*mHits[i]));}
 
     int size = mHits.size();
-    for (int i=0;i<size;i++)
-	delete mHits[i];
+    {for (int i=0;i<size;i++)
+	delete mHits[i];}
 	
     
     mHits.clear();
     mHits.resize(0);
     
-    for (unsigned int i=0;i<tempHits.size();i++)
-	mHits.push_back(new StRichDrawableTHit(*tempHits[i]));
+    {for (unsigned int i=0;i<tempHits.size();i++)
+	mHits.push_back(new StRichDrawableTHit(*tempHits[i]));}
 
     size = tempHits.size();
-    for (int i=0;i<size;i++)
-	delete tempHits[i];
+    {for (int i=0;i<size;i++)
+	delete tempHits[i];}
 	
     tempHits.clear();
     tempHits.resize(0);
