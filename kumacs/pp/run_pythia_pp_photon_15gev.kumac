@@ -12,7 +12,7 @@
 * ************************************************************************
  
  macro run__
-   nevent=10 file=/star/data/akio/pythia_pp_minbias.xdf
+   nevent=10 file=/star/data/akio/pythia_pp_photon_15gev.xdf
     
   DEFAULT = _
 ./kumacs/util,_
@@ -40,9 +40,13 @@ pyth  'cms' 'p  ' 'p  ' 200.
 temp1
 
 application data temp2
-CKIN(3)=-1.0    !pt min
+CKIN(3)=15.0    !pt min
 CKIN(4)=-1.0    !pt max
-MSEL=2
+MSEL=0
+msub(14)=1      ! qq~to g+gam
+msub(29)=1      ! qg to q+gam
+msub(114)=1     ! gg to gam+gam
+msub(115)=1     ! gg to g+gam
 END
 temp2
 
