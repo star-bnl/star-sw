@@ -1,0 +1,27 @@
+/*  dst_tof.idl           */
+/*  Table: dst_tof        */
+
+/*  Commetns:   Each row in this table corresponds to a reconstructed 
+ *              track-TOF slat crossing.  More than one track may hit 
+ *              a single scintillator and one track may hit one or more 
+ *              scintillators.
+ */
+
+ struct dst_tof  {
+  long      iflag;         /* quality flag                          */
+  long      det_id;        /* detector element id                   */ 
+  float     x;             /*                                       */
+  float     y;             /*                                       */
+  float     z;             /*                                       */
+  float     pathl;         /* tracklength from target to hit        */
+  float     charge;        /* normalized charge of hit              */
+  float     tof;           /* tof  from target to hit               */
+  float     sig_tof;       /* sigma of tof                          */
+  float     beta;          /* pathl/tof (/c)                        */
+  float     sig_beta;      /* sigma of beta                         */
+  float     mass2;         /* squared mass                          */
+  float     sig_mass2;     /* sigma of mass**2                      */ 
+  long      id_track;      /* F.key to dst_track associated with    */
+                           /* this tof entry                        */
+ } ;
+/*  Last mod. for dst_tof:   $Date: 1998/06/03 13:52:02 $ */
