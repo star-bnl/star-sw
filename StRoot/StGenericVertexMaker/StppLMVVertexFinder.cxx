@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.10 2004/08/25 15:20:30 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.11 2004/09/01 18:45:01 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -51,7 +51,7 @@ StppLMVVertexFinder::StppLMVVertexFinder() {
     mBLequivNtr=20; // equivalent # of tracks for BeamLine
     mMatchCtbMax_eta=mCtbEtaSeg/2.+0.02;
     mMatchCtbMax_phi=mCtbPhiSeg/2.+C_PI*0./180.;
-
+    ppLMV4swith=false;
 }
 
 //==========================================================
@@ -314,9 +314,13 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
 
   // ppLMV face-lift : attenuated weights 
   float pmomM=pmom.mag();
-  if (pmomM >4 )pmomM=4; //inhibit domination of high pT tracks
+  if(!ppLMV4swith && pmomM >4 )pmomM=4; //inhibit domination of high pT tracks
   float spathL=fabs(spath); // reduce advantage of SVT matched tracks
-  if(spathL<40) spathL=40;
+  if(ppLMV4swith) { // ignore SVT contribution , ~aproximately
+    if( spathL<60) spathL=60;
+  } else {
+    if( spathL<40) spathL=40;
+  }
   float strag=0.0136/beta/pmomM*spathL; 
   if(fabs(mBfield)<0.01) strag=0.0136*spathL; // no field case, pT makes no sense
 
@@ -381,6 +385,7 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
 //==========================================================
 bool  StppLMVVertexFinder::ppLMV5() { 
   //  ----------  D O   F I N D    V E R T E X
+  if(ppLMV4swith)gMessMgr->Warning()<<"ppLMV4 cuts have been activated"<<endm; 
 
   int totTr=mPrimCand.size();
   uint minTr=mMinMatchTr;
@@ -565,13 +570,30 @@ void  StppLMVVertexFinder::changeCuts(){
   default: break; // do nothing
 
   }
+}
 
+//==========================================================
+//==========================================================
+void  StppLMVVertexFinder::forceppLMV4(){ 
+  gMessMgr->Warning()<<"abandon ppLMV5, the  ppLMV4 cuts have been activated"<<endm; 
+  ppLMV4swith=true;
+  mMaxTrkDcaRxy=3.9;
+  mMinTrkPt=0.2;
+  mMinNumberOfFitPointsOnTrack = 10;
+  mMaxZrange=250; // for tracks
+  mDVtxMax=4.0;  // max sigma multipl between tracks and current vertex, used for tracks rejection
+  mMinMatchTr=1; // minimal # of tracks matched to CTB 
+  mBLequivNtr=100; // equivalent # of tracks for BeamLine
+  mMatchCtbMax_eta=mCtbEtaSeg/2.+0.02;
+  mMatchCtbMax_phi=mCtbPhiSeg/2.+C_PI*1./180.;
   
-
 }
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.11  2004/09/01 18:45:01  balewski
+ * ppLMV5/4 switch added
+ *
  * Revision 1.10  2004/08/25 15:20:30  balewski
  * Z-vertex range increased to +/- 150 cm
  *
