@@ -26,6 +26,13 @@
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiMasterDetectorBuilder.h"
 
+
+#include "Sti/StiHitToHitMap.h"
+#include "Sti/StiDefaultHitAssociationFilter.h"
+#include "Sti/StiHitToTrackMap.h"
+#include "Sti/StiTrackToIntMap.h"
+#include "Sti/StiTrackToObjMap.h"
+
 EventDisplay::EventDisplay(const string& name, const string & description, StiToolkit * toolkit, const TGWindow *p, UInt_t w, UInt_t h)
   : Named(name),
     Described(description), 
@@ -187,7 +194,9 @@ void EventDisplay::draw()
 
   if (_options->getDetectorVisible())_node->Draw();
   if (_options->getHitVisible())    draw(_hitContainer,  _hitFilter,  _hitDrawingPolicy, _usedHits,_unusedHits);
-  if (_options->getMcHitVisible())  draw(_mcHitContainer,_mcHitFilter,_mcHitDrawingPolicy,_mcUsedHits,_mcUnusedHits);
+  if (_options->getMcHitVisible())  
+    //draw(_trackContainer, _mcTrackContainer, _hitContainer, _mcHitContainer, _mcTrackFilter);
+    draw(_mcHitContainer,_mcHitFilter,_mcHitDrawingPolicy,_mcUsedHits,_mcUnusedHits);
   if (_options->getMcTrackVisible())draw(_mcTrackContainer,_mcTrackFilter,_mcTrackDrawingPolicy);
   if (_options->getTrackVisible())  draw(_trackContainer,  _trackFilter,  _trackDrawingPolicy); 
   if (view)
@@ -317,6 +326,135 @@ void EventDisplay::draw(StiHitContainer * container,
   unusedHits.setStyle(7);
   //_unusedHits.setSize(5.);
   unusedHits.draw();
+  //cout << "EventDisplay::draw() -I- Done" << endl;
+}
+
+void EventDisplay::draw(StiTrackContainer * recTrackContainer,
+			StiTrackContainer * mcTrackContainer,
+			StiHitContainer * recHitContainer,
+			StiHitContainer * mcHitContainer,
+			Filter<StiTrack>  * trackFilter) 
+{  
+  _goodMatchHits.reset();
+  _badMatchHits.reset();
+  _noMatchHits.reset();
+
+  //StiHitContainer * recHitContainer = getToolkit()->getHitContainer();
+  //StiHitContainer * mcHitContainer = getToolkit()->getMcHitContainer();
+
+  cout << "  recHitContainer size:" << recHitContainer->size()<< endl;
+  cout << "   mcHitContainer size:" << mcHitContainer->size()<< endl;
+
+  StiHitToHitMap mcHitToRecHitMap;
+  //StiHitToHitMap recHitToMcHitMap;
+  StiDefaultHitAssociationFilter hitAssocFilter;
+  mcHitToRecHitMap.build(mcHitContainer,recHitContainer,&hitAssocFilter);
+  cout << "   mcHitToRecHitMap.size():" <<  mcHitToRecHitMap.size() << endl;
+  mcHitToRecHitMap.analyze();
+  //recHitToMcHitMap.build(recHitContainer,mcHitContainer,&hitAssocFilter);
+  StiHitToTrackMap recHitToTrackMap;
+  recHitToTrackMap.build(recTrackContainer);
+  cout << " recHitToTrackMap.size():" << recHitToTrackMap.size()<<endl;
+  
+  StiTrackToObjMap map;
+  map.build(mcTrackContainer, &mcHitToRecHitMap, &recHitToTrackMap);
+  cout << " track to track map has size:"<<map.size()<<endl;
+  map.analyze(getMcTrackFilter());
+
+  StiRootDrawableTrack * mcT;
+  //StiRootDrawableTrack * recT;
+
+  // loop on mc tracks in the map
+  for(StiTrackToObjMap::iterator  iter=map.begin();iter!=map.end(); ++iter)
+    {
+      StiTrack * mcTrack = iter->first;
+      if (trackFilter->filter(mcTrack))
+	{  
+	  StiTrackToIntMap * trackToIntMap = iter->second;
+	  if (trackToIntMap)
+	    {
+	      StiTrack * recTrack = trackToIntMap->getBestTrack();
+	      int nMatch = trackToIntMap->getBestTrackHitCount();
+	      if (recTrack && nMatch>5)
+		{
+		  // matched
+		  mcT= dynamic_cast<StiRootDrawableTrack *>(mcTrack);
+		  if (!mcT) continue; // cast failed...
+		  mcT->setColor(2);
+		  mcT->setStyle(1);
+		  mcT->setSize(1.);
+		  mcT->draw(); 
+		  const HitVectorType & mcHits = mcTrack->getHits();
+		  for(HitVectorType::const_iterator hitIter = mcHits.begin();hitIter!=mcHits.end();++hitIter)
+		    { 
+		      StiHit * mcHit = * hitIter;
+		      StiHit * recHit;
+		      HitToHitMap::const_iterator hitToHitMapIterator;
+		      hitToHitMapIterator=mcHitToRecHitMap.find(mcHit);
+		      if(hitToHitMapIterator != mcHitToRecHitMap.end())
+			{
+			  // mc hit is matched by rec hit
+			  recHit = hitToHitMapIterator->second; 
+			  HitToTrackMap::iterator hitToTrackMapIter;
+			  hitToTrackMapIter = recHitToTrackMap.find(recHit);
+			  if(hitToTrackMapIter != recHitToTrackMap.end())
+			    {
+			      // matching rec hit is on a track
+			      StiTrack * theTrack = hitToTrackMapIter->second;
+			      if (theTrack==recTrack)
+				{
+				  //matching rec hit is on the matching track
+				  //yellow
+				  _goodMatchHits.add(recHit->x_g(), recHit->y_g(), recHit->z_g() );
+				}
+			      else
+				{
+				  //matching rec hit is NOT on the matching track
+				  //red
+				  _badMatchHits.add(recHit->x_g(), recHit->y_g(), recHit->z_g() );
+				}
+			    }
+			}
+		      else
+			{
+			  // mc hit is not matched
+			  // purple
+			  _noMatchHits.add(recHit->x_g(), recHit->y_g(), recHit->z_g() );
+			}
+		    }
+		}
+	      else
+		{
+		  // not matched
+		  mcT= dynamic_cast<StiRootDrawableTrack *>(mcTrack);
+		  if (!mcT) continue; // cast failed...
+		  mcT->setColor(4);
+		  mcT->setStyle(1);
+		  mcT->setSize(2.);
+		  mcT->draw(); 
+		  const HitVectorType & theHits = mcTrack->getHits();
+		  for(HitVectorType::const_iterator mcHitIter = theHits.begin();mcHitIter!=theHits.end();++mcHitIter)
+		    {
+		      StiHit * theHit = *mcHitIter;
+		      _noMatchHits.add(theHit->x_g(), theHit->y_g(), theHit->z_g() );
+		    }
+		}	      
+	    }
+	}
+    }
+  recHitToTrackMap.clear();
+  mcHitToRecHitMap.clear();
+  map.clear();
+  _goodMatchHits.setColor(5);
+  _goodMatchHits.setStyle(8);
+  _goodMatchHits.draw();
+  _badMatchHits.setColor(6);
+  _badMatchHits.setStyle(7);
+  _badMatchHits.draw();
+  _noMatchHits.setColor(4);
+  _noMatchHits.setStyle(7);
+  _noMatchHits.draw();
+
   //cout << "EventDisplay::draw() -I- Done" << endl;
 }
 

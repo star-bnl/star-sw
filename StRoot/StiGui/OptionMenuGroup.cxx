@@ -1,6 +1,7 @@
 #include "Sti/Base/EditableParameters.h"
 #include "Sti/StiTrackSeedFinder.h"
 #include "Sti/StiKalmanTrackFinder.h"
+#include "Sti/StiKalmanTrackFitter.h"
 #include "StiGui/OptionMenuGroup.h"
 #include "StiGui/EventDisplay.h"
 #include "StiGui/EventDisplayParameters.h"
@@ -27,6 +28,7 @@ void OptionMenuGroup::create(TGMenuBar *menuBar, TGLayoutHints *itemLayout)
   menu->AddEntry("Messenger",            _offset+_cmdMessengerOptions);
   menu->AddEntry("Seed Finder",          _offset+_cmdSeedFinderOptions);
   menu->AddEntry("Kalman Finder",        _offset+_cmdTrackFinderOptions);
+  menu->AddEntry("Kalman Fitter",        _offset+_cmdTrackFitterOptions);
   menu->AddEntry("Hit Filter",           _offset+_cmdHitFilterOptions);
   menu->AddEntry("MC Hit Filter",        _offset+_cmdMcHitFilterOptions);
   menu->AddEntry("McLoader Track Filter",_offset+_cmdMcTrackLoaderFilterOptions);
@@ -47,6 +49,7 @@ void OptionMenuGroup::dispatch(int option)
     case _cmdMessengerOptions           : setMessengerOptions();     break;
     case _cmdSeedFinderOptions          : setSeedFinderOptions();    break;
     case _cmdTrackFinderOptions         : setTrackFinderOptions();   break;
+    case _cmdTrackFitterOptions         : setTrackFitterOptions();   break;
     case _cmdMcHitFilterOptions         : setMcHitFilterOptions();   break;
     case _cmdHitFilterOptions           : setHitFilterOptions();     break;
     case _cmdMcTrackLoaderFilterOptions : setMcTrackLoaderFilterOptions();   break;
@@ -103,6 +106,17 @@ void OptionMenuGroup::setTrackFinderOptions()
   else
     cout << "OptionMenuGroup::setTrackFinderOptions() -E- Kalman Finder options not available"<<endl;
   cout << "OptionMenuGroup::setTrackFinderOptions() -I- Done" <<endl;
+}
+
+void OptionMenuGroup::setTrackFitterOptions()
+{
+  cout << "OptionMenuGroup::setTrackFitterOptions() -I- Started" <<endl;
+  EditableParameters * pars = dynamic_cast<EditableParameters *>(getToolkit()->getTrackFitter()->getParameters() );
+  if (pars)
+    new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
+  else
+    cout << "OptionMenuGroup::setTrackFitterOptions() -E- Kalman Fitter options not available"<<endl;
+  cout << "OptionMenuGroup::setTrackFitterOptions() -I- Done" <<endl;
 }
 
 void OptionMenuGroup::setHitFilterOptions()

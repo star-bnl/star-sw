@@ -123,7 +123,10 @@ void StiRootDrawableDetector::makeShape()
     }
   //cout << "StiRootDrawableDetector::makeShape() - INFO - Set color"<<endl; 
   
-  mshape->SetLineColor(1);
+  if (isActive())
+    mshape->SetLineColor(3);
+  else
+    mshape->SetLineColor(5);
   
   //Hang shape on a drawable node in local coordinates of shape
   //cout <<"Make Local Volume"<<endl;
