@@ -8,4 +8,5 @@
        float     p[3];       /* local momentum */
        float     tof;        /* time of flight */
        float     x[3];       /* coordinate (Cartesian) */
+       float     lgam;       /* ALOG10(GEKin/AMass) */
 };
