@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.14 2004/02/03 21:47:27 perev Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.15 2004/02/04 16:14:23 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.15  2004/02/04 16:14:23  munhoz
+ * fix few problems with pedestal reading
+ *
  * Revision 1.14  2004/02/03 21:47:27  perev
  * Error ==>Warning
  *
@@ -73,6 +76,11 @@ ClassImp(StSvtDaqMaker)
 
   fSvtSet = NULL;
   fHybridSet = NULL;
+
+  fPedSet = NULL;
+  fSvtPed = NULL;
+  fRMSPedSet = NULL;
+  fSvtRMSPed = NULL;
 
   daqReader = NULL;
   svtReader = NULL;
@@ -262,10 +270,7 @@ Int_t StSvtDaqMaker::GetSvtPed()
   svtReader = daqReader->getSVTReader();
   assert(svtReader);
 
-  if (!fSvtPed) {
-    fSvtPed = new StSvtDaqPed(fConfig);
-    fPedSet->SetObject((TObject*)fSvtPed);
-  }
+  if (!fSvtPed) SetSvtPed();
 
   fSvtPed->setPed(svtReader);
 
@@ -286,10 +291,7 @@ Int_t StSvtDaqMaker::GetSvtRMSPed()
   svtReader = daqReader->getSVTReader();
   assert(svtReader);
 
-  if (!fSvtRMSPed) {
-    fSvtRMSPed = new StSvtDaqPed(fConfig);
-    fRMSPedSet->SetObject((TObject*)fSvtRMSPed);
-  }
+  if (!fSvtRMSPed) SetSvtRMSPed();
 
   fSvtRMSPed->setPed(svtReader,"RMS");
 
@@ -376,7 +378,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.14 2004/02/03 21:47:27 perev Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.15 2004/02/04 16:14:23 munhoz Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

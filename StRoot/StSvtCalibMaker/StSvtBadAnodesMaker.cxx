@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtBadAnodesMaker.cxx,v 1.1 2004/02/03 20:06:28 munhoz Exp $
+ * $Id: StSvtBadAnodesMaker.cxx,v 1.2 2004/02/04 16:13:56 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtBadAnodesMaker.cxx,v $
+ * Revision 1.2  2004/02/04 16:13:56  munhoz
+ * fix few problems with pedestal reading
+ *
  * Revision 1.1  2004/02/03 20:06:28  munhoz
  * first version of bad anode maker
  *
@@ -45,10 +48,12 @@ StSvtBadAnodesMaker::StSvtBadAnodesMaker(const char *name):StMaker(name)
   mHybridData = NULL;
   mSvtBadAnodes = NULL;
   mHybridBadAnodes = NULL;
+  mSvtPed = NULL;
+  mSvtRMSPed = NULL;
 
   mBadAnodesSet = NULL;
   
-  mRmsScaleFactor = 1;
+  mRmsScaleFactor = 16;
 
   NULL_ADC = 0;                      //
   OVERLOADED_ADC = 255;              // 
@@ -90,6 +95,8 @@ Int_t StSvtBadAnodesMaker::Init()
   mEvents = 0;
 
   setSvtData();
+  setPedestal();
+  setRMSPedestal();
 
   setSvtBadAnodes();
 
@@ -100,6 +107,22 @@ Int_t StSvtBadAnodesMaker::Init()
   */
 
   if (Debug()) bookHistograms();
+
+  gMessMgr->Info() << "NULL_ADC = "  << NULL_ADC << endm;               
+  gMessMgr->Info() << "OVERLOADED_ADC = " << OVERLOADED_ADC << endm;
+
+  gMessMgr->Info() << "THRESHOLD NULL_ADC (fraction of time bins) = " << NULL_ADC_THRESHOLD << endm; 
+  gMessMgr->Info() << "THRESHOLD OVERLOADED_ADC (fraction of time bins) = " << OVERLOADED_ADC_THRESHOLD << endm;
+  gMessMgr->Info() << "THRESHOLD OCCUP (fraction of time bins) = " << OCCUP_THRESHOLD << endm;
+  
+  gMessMgr->Info() << "FREQUENCY OVERLOADED_ADC (fraction of events) = " << FREQ_OVERLOADED_ADC << endm;
+  gMessMgr->Info() << "FREQUENCY NULL_ADC (fraction of events) = " << FREQ_NULL_ADC << endm;
+  gMessMgr->Info() << "FREQUENCY OCCUP (fraction of events) = " << FREQ_OCCUP << endm; 
+
+  gMessMgr->Info() << "BAD MEAN PED_MIN = " << BAD_MEAN_PED_MIN << endm;
+  gMessMgr->Info() << "BAD MEAN PED_MAX = " << BAD_MEAN_PED_MAX << endm;
+  gMessMgr->Info() << "BAD MEAN RMS_MIN = " << BAD_MEAN_RMS_MIN << endm;
+  gMessMgr->Info() << "BAD MEAN RMS_MAX = " << BAD_MEAN_RMS_MAX << endm;
 
   return StMaker::Init();
 }
@@ -231,11 +254,9 @@ Int_t StSvtBadAnodesMaker::Make()
 
   mEvents++;
 
-  cout << NULL_ADC_THRESHOLD << " "<<  OVERLOADED_ADC_THRESHOLD << " "<< OCCUP_THRESHOLD << " "<< RMS_THRESHOLD << endl;;
-
   // scan through the data
   if (mSvtData) {
-    for (int barrel = 1;barrel <= mSvtData->getNumberOfBarrels();barrel++) {
+  for (int barrel = 1;barrel <= mSvtData->getNumberOfBarrels();barrel++) {
       for (int ladder = 1;ladder <= mSvtData->getNumberOfLadders(barrel);ladder++) {
 	for (int wafer = 1;wafer <= mSvtData->getNumberOfWafers(barrel);wafer++) {
 	  for (int hybrid = 1;hybrid <= mSvtData->getNumberOfHybrids();hybrid++) {
@@ -246,16 +267,6 @@ Int_t StSvtBadAnodesMaker::Make()
 	    mHybridData = (StSvtHybridData*)mSvtData->at(index);
 	    
 	    if (!mHybridData) continue;
-	    
-	    if (mSvtPed)
-	      mHybridPed = (StSvtHybridPed*)mSvtPed->at(index);
-	    else 
-	      mHybridPed = NULL;
-	    
-	    if (mSvtRMSPed)
-	      mHybridRMSPed = (StSvtHybridPed*)mSvtRMSPed->at(index);
-	    else 
-	      mHybridRMSPed = NULL;
 	    
 	    mHybridBadAnodes = (StSvtHybridBadAnodes*)mSvtBadAnodes->at(index);
 	    if (!mHybridBadAnodes)
@@ -313,7 +324,7 @@ Int_t StSvtBadAnodesMaker::Make()
 	    }
 	    
 	    mSvtBadAnodes->put_at((TObject*)mHybridBadAnodes,index);
-	  }
+ }
 	}
       }
     }
@@ -326,28 +337,28 @@ Int_t StSvtBadAnodesMaker::Make()
 	for (int wafer = 1;wafer <= mSvtPed->getNumberOfWafers(barrel);wafer++) {
 	  for (int hybrid = 1;hybrid <= mSvtPed->getNumberOfHybrids();hybrid++) {
 	    
-	    index = mSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid);
+            index = mSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid);
 	    if (index < 0) continue;
 
 	    mHybridPed = (StSvtHybridPed*)mSvtPed->at(index);
 
+	    if (!mHybridPed) continue;
+
 	    mHybridBadAnodes = (StSvtHybridBadAnodes*)mSvtBadAnodes->at(index);
 	    if (!mHybridBadAnodes)
 	      mHybridBadAnodes = new StSvtHybridBadAnodes(barrel, ladder, wafer, hybrid);
-
+	    
 	    for (int anode=1;anode<=240;anode++) { // loop over anodes
-	      meanPed=0;
+              meanPed=0;
 	      for (time=4; time<127; time++) {
 		
-		// check pedestal
-		if (mHybridPed) {
-		  ped = mHybridPed->At(mHybridPed->getPixelIndex(anode, time));		
-		  meanPed += ped;
-		}
-	      }
+                 // check pedestal
+                 ped = mHybridPed->At(mHybridPed->getPixelIndex(anode, time));		
+		 meanPed += ped;
+              }
 	      
 	      meanPed /= 123;
-	      
+
 	      if ((meanPed < BAD_MEAN_PED_MIN) || (meanPed > BAD_MEAN_PED_MAX))
 		mHybridBadAnodes->setBadAnode(anode);
 	    }
@@ -370,7 +381,9 @@ Int_t StSvtBadAnodesMaker::Make()
 	    if (index < 0) continue;
 
 	    mHybridRMSPed = (StSvtHybridPed*)mSvtRMSPed->at(index);
-	    
+	
+ 	    if (!mHybridRMSPed) continue;
+   
 	    mHybridBadAnodes = (StSvtHybridBadAnodes*)mSvtBadAnodes->at(index);
 	    if (!mHybridBadAnodes)
 	      mHybridBadAnodes = new StSvtHybridBadAnodes(barrel, ladder, wafer, hybrid);
@@ -380,18 +393,16 @@ Int_t StSvtBadAnodesMaker::Make()
 	      for (time=4; time<127; time++) {
 		
 		// check pedestal RMS
-		if (mHybridRMSPed) {
-		  rms = (mHybridRMSPed->At(mHybridRMSPed->getPixelIndex(anode, time)))/mRmsScaleFactor;		
-		  meanRms += rms;		
-		  if (rms > BAD_RMS)
-		    badRMS++;
-		}
+                rms = (mHybridRMSPed->At(mHybridRMSPed->getPixelIndex(anode, time)))/mRmsScaleFactor;		
+		meanRms += rms;		
+		//if (rms > BAD_RMS)
+		//badRMS++;		
 	      }
 	    
 	      meanRms /= 123;
 	      
-	      if (badRMS >= RMS_THRESHOLD)
-		mHybridBadAnodes->setBadAnode(anode);
+	      //if (badRMS >= RMS_THRESHOLD)
+	      //mHybridBadAnodes->setBadAnode(anode);
 	      if ((meanRms < BAD_MEAN_RMS_MIN) || (meanRms > BAD_MEAN_RMS_MAX))
 		mHybridBadAnodes->setBadAnode(anode);
 	    }
