@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.cxx,v 1.4 2000/02/01 00:31:27 laue Exp $
+ * $Id: helensV0Cut.cxx,v 1.5 2000/02/11 18:02:26 laue Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: helensV0Cut.cxx,v $
+ * Revision 1.5  2000/02/11 18:02:26  laue
+ * Debug output removed
+ *
  * Revision 1.4  2000/02/01 00:31:27  laue
  * *** empty log message ***
  *
@@ -53,8 +56,9 @@ helensV0Cut::helensV0Cut(){
 bool helensV0Cut::Pass(const StHbtV0* V0){
   int inMassRange;
 
+#ifdef HBTDEBUG  
     cout << endl;
-    //    cout << "#V0 " << V0Count++;
+    cout << "#V0 " << V0Count++;
     cout << " * dcaV0Daughters " << V0->dcaV0Daughters();
     cout << " * dcaV0ToPrimVertex " << V0->dcaV0ToPrimVertex();
     cout << " * decayLengthV0 " << V0->decayLengthV0();
@@ -64,7 +68,7 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
     cout << " * dcaNegToPrimVertex " << V0->dcaNegToPrimVertex();
     cout << " * ptArmV0 " << V0->ptArmV0();
     cout << " * alphaV0 " << V0->alphaV0();
-
+#endif
 
 
   inMassRange=0;
@@ -115,7 +119,7 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
 
 
     
-    /*
+#ifdef HBTDEBUG  
       cout << " * Pt " << Pt;
       cout << " * mPt[0] " << mPt[0];
       cout << " * mPt[1] " << mPt[1];
@@ -125,7 +129,7 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
       cout << " * Pt " << (Pt > mPt[0]) && (Pt < mPt[1]);
       cout << " * y " << (TRapidity > mRapidity[0]) && (TRapidity < mRapidity[1]);
       cout << endl;
-    */
+#endif
 
     bool goodV0=
       ((Pt             > mPt[0]) &&
