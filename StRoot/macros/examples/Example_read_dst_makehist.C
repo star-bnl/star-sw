@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_makehist.C,v 1.8 2000/04/18 20:37:24 kathy Exp $
+// $Id: Example_read_dst_makehist.C,v 1.9 2000/06/05 16:35:35 kathy Exp $
 // $Log: Example_read_dst_makehist.C,v $
+// Revision 1.9  2000/06/05 16:35:35  kathy
+// remove use of member function GetHeader since it is no longer available - now use memb functions of TTable
+//
 // Revision 1.8  2000/04/18 20:37:24  kathy
 // St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
 //
@@ -103,12 +106,15 @@ void Example_read_dst_makehist(
 // data on it. After this record is passed, the while loop ends
   if (!vert)  continue;
 
-// get the table header data using member function of TTable
-  table_head_st *tdt_h = vert->GetHeader();
-   cout << " header name   = " << tdt_h->name << endl;
-   cout << " header type   = " << tdt_h->type << endl;
-   cout << " header maxlen = " << tdt_h->maxlen << endl;
-   cout << " header nok    = " << tdt_h->nok << endl;
+
+// get the table header data using member functions of TTable
+   cout << " table header info:  name = " << vert->GetName() << endl;
+   cout << " table header info:  type = " << vert->GetType() << endl;
+   cout << " table header info:  #rows used = " << vert->GetNRows() << endl;
+   cout << " table header info:  #rows allocated = " << vert->GetTableSize() << endl;
+   cout << " table header info:  row size (bytes) = " << vert->GetRowSize() << endl;
+   cout << " table header info:  #columns = " << vert->GetNumberOfColumns() << endl;
+
 
   vert->ls();
 
