@@ -1,5 +1,10 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.19 2002/09/20 19:35:25 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.20 2003/01/21 01:27:44 jeromel Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.20  2003/01/21 01:27:44  jeromel
+// hfile->write(0 while NULL caused spurious crash.
+// Took the oportunity to add GetCVS()
+// Some maniaco-compulsive //! alignement fixes ...
+//
 // Revision 1.19  2002/09/20 19:35:25  caines
 // Change building of file name
 //
@@ -119,13 +124,17 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t SetPedestalFile(const char* PedFile);
   Int_t SetLowInvProd(int LowInvProd);// Set the low threshold based on the frequency distribution
 
+  virtual const char *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.20 2003/01/21 01:27:44 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    return cvs;
+  }
     
  protected:
-  St_ObjectSet* mSvtDataSet;             //!
-  StSvtData* mSvtRawData;            //!
-  StSvtData* mSvtAdjData;    //!
+  St_ObjectSet* mSvtDataSet;              //!
+  StSvtData* mSvtRawData;                 //!
+  StSvtData* mSvtAdjData;                 //!
   StSvtHybridData* mHybridRawData ;       //!
-  StSvtHybridData* mHybridAdjData ;   //!
+  StSvtHybridData* mHybridAdjData ;       //!
 
   StSvtHybridCollection* mSvtBadAnodes;   //!
   StSvtHybridCollection* mSvtPedColl;     //!
@@ -135,17 +144,17 @@ class StSvtSeqAdjMaker : public StMaker
   StSvtProbValues* mProbValue;            //!
   StSequence* tempSeq1;                   //!
 
-  const char* mPedFile;   //!
+  const char* mPedFile;                   //!
 
-  TH1F* mOcupancyHisto; //!
-  TH1F* EventOccupancy; //!
-  TH1D** mInvProdSeqAdj;  //!
-  TH1F** mRawAdc;  //!
-  TH1F** mAdcAfter;  //!
-  TH1F* mCommonModePitch; //!
-  TH1F* mCommonModeCount; //!
-  TH2F** mTimeAn; //!
-  TH1F** mRawPixel; //!
+  TH1F* mOcupancyHisto;                   //!
+  TH1F* EventOccupancy;                   //!
+  TH1D** mInvProdSeqAdj;                  //!
+  TH1F** mRawAdc;                         //!
+  TH1F** mAdcAfter;                       //!
+  TH1F* mCommonModePitch;                 //!
+  TH1F* mCommonModeCount;                 //!
+  TH2F** mTimeAn;                         //!
+  TH1F** mRawPixel;                       //!
   int mNumOfSeq;
   int m_n_seq_lo;
   int m_n_seq_hi;
