@@ -8,35 +8,34 @@ StiHitToHitMap::StiHitToHitMap()
 StiHitToHitMap::~StiHitToHitMap()
 {}
 
-void StiHitToHitMap::build(StiHitContainer * firstContainer,
-			   StiHitContainer * secondContainer,
-			   AssociationFilter<StiHit> * associationFilter)
+void StiHitToHitMap::build(StiHitContainer & firstContainer,
+			   StiHitContainer & secondContainer,
+			   AssociationFilter<StiHit> & associationFilter)
 {
   StiHit * bestHit;
   StiHit * hit;
   double quality;
   double bestQuality;
   StiHit * firstHit;
-  const HitVectorType & hits  = firstContainer->getAllHits();
-  for (HitVectorType::const_iterator iter=hits.begin();iter!=hits.end();iter++)
+  const vector<StiHit*> & hits1  = firstContainer.getHits();
+  for (vector<StiHit*>::const_iterator iter1=hits1.begin();iter1!=hits1.end();iter1++)
     {
-      firstHit = *iter;
+      firstHit = *iter1;
       bestHit     = 0;
       bestQuality = 0;
-      secondContainer->setRefPoint(firstHit->position(),
-				   firstHit->refangle(),
-				   firstHit->y(),
-				   firstHit->z(),
-				   true);
       
-      secondContainer->setDeltaD(10.);
-      secondContainer->setDeltaZ(10.);
-      while (secondContainer->hasMore())
+      const vector<StiHit*> & hits2  = secondContainer.getHits(firstHit->position(),
+							       firstHit->refangle(),
+							       firstHit->y(),
+							       firstHit->z(),
+							       10.,10.,
+							       true);
+      for (vector<StiHit*>::const_iterator iter2=hits2.begin();iter2!=hits2.end();iter2++)
 	{
-	  hit = secondContainer->getHit();
-	  if (associationFilter->filter(firstHit,hit))
+	  hit = *iter2;
+	  if (associationFilter.filter(firstHit,hit))
 	    {
-	      quality = associationFilter->getQuality();
+	      quality = associationFilter.getQuality();
 	      if (quality>bestQuality)
 		{
 		  bestHit     = hit;

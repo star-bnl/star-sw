@@ -14,9 +14,9 @@ class StiHitToHitMap : public HitToHitMap
 
   StiHitToHitMap();
   virtual ~StiHitToHitMap();
-  void build(StiHitContainer * firstContainer,
-	     StiHitContainer * secondContainer,
-	     AssociationFilter<StiHit> * associationFilter);
+  void build(StiHitContainer & firstContainer,
+	     StiHitContainer & secondContainer,
+	     AssociationFilter<StiHit> & associationFilter);
   void analyze();
 };
 

@@ -25,8 +25,8 @@ void StiTrackToTrackMap::build(StiTrackContainer * firstTrackContainer,
     {
       association = _associationFactory->getInstance();
       insert( TrackToTrackAssociationMapType::value_type(firstTrackIter->first, association) );
-      const HitVectorType & hits = firstTrackIter->first->getHits();
-      for (HitVectorType::const_iterator firstHitIter=hits.begin();
+      const vector<StiHit*> & hits = firstTrackIter->first->getHits();
+      for (vector<StiHit*>::const_iterator firstHitIter=hits.begin();
 	   firstHitIter!=hits.end();
 	   ++firstHitIter)
 	{

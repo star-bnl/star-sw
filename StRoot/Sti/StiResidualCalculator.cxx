@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.9 2004/01/27 02:55:11 perev Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.10 2004/02/21 18:27:41 pruneau Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.10  2004/02/21 18:27:41  pruneau
+ * Updates to comply with changes made in abstract interfaces.
+ *
  * Revision 2.9  2004/01/27 02:55:11  perev
  * WarnOff
  *
@@ -365,7 +368,7 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
 	  int histVecOffset = find(candidates.begin(), 
 				   candidates.end(),
 				   iNode.getDetector())-candidates.begin();
-	  HitVectorType hitVec = candidateHits->hits(iNode.getDetector());
+	  vector<StiHit*> hitVec = candidateHits->getHits(iNode.getDetector());
 	  NodeResidue(iNode, hitVec, histVecOffset);
 
 	  
@@ -389,7 +392,7 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
 }
 
 void StiResidualCalculator::NodeResidue(StiKalmanTrackNode iNode,
-					HitVectorType hitVec,
+					vector<StiHit*> hitVec,
 					int histVecOffset)
 {
   //get node values
@@ -409,7 +412,7 @@ void StiResidualCalculator::NodeResidue(StiKalmanTrackNode iNode,
   if(nodeZE>0) nodeYE=::sqrt(nodeZE);
   else nodeZE=1.;
 
-  HitVectorType::iterator iH = hitVec.begin();
+  vector<StiHit*>::iterator iH = hitVec.begin();
   StiHit* hit;
 
   while(iH!=hitVec.end())
@@ -434,12 +437,12 @@ void StiResidualCalculator::NodeResidue(StiKalmanTrackNode iNode,
 }
 
 void StiResidualCalculator::ResidualBackground(StiKalmanTrackNode iNode,
-					       HitVectorType hitVec)
+					       vector<StiHit*> hitVec)
 {
 
   StiHit* nearest=0;
   StiHit* hit;
-  HitVectorType::iterator iH = hitVec.begin();
+  vector<StiHit*>::iterator iH = hitVec.begin();
 
   double z = iNode.getZ();
   double y = iNode.getY();
