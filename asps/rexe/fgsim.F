@@ -1,4 +1,5 @@
-*CMZ :          27/05/98  23.06.11  by  Pavel Nevski
+*CMZ :          28/09/98  01.03.58  by  Pavel Nevski
+*CMZ :  1.40/05 24/08/98  22.02.41  by  Pavel Nevski
 *CMZ :  1.30/00 29/04/97  23.40.13  by  Pavel Nevski
 *-- Author :    Pavel Nevski   29/03/97
 c***********************************************************************
@@ -49,6 +50,8 @@ C
       COMMON /AgCKINO/ Ioutp,IoutpOld
       Character*20     CoptKine,CoptBack,CoptOutp
       COMMON /AgCKINC/ CoptKine,CoptBack,CoptOutp
+      Character*20     StrmKine,StrmBack,StrmOutp
+      COMMON /AgCKINS/ StrmKine,StrmBack,StrmOutp
       Character*20     CrunType
       COMMON /AgCKINR/ CrunType
       Integer          Ncommand
@@ -173,7 +176,7 @@ c***  Get command and number of parameters passed
             If (input .ge. 4) then
                 input = input - 4
                 write(6,*)'*** input: EGZ(FZ) file ',string1(1:length1)
-                Call AgZOPEN ('PZ',string1(1:length1),'E',0,0)
+                Call AgZOPEN ('P',string1(1:length1),'E',Ier)
                 Call AGZREAD ('P',ier)
                 IKINE = -3
                 If (Ier.ne.0) go to 490
@@ -198,7 +201,7 @@ c***  Get command and number of parameters passed
                 endif
 *               Comis pass whole words only (both start and length !)
                 L1    = 4*((Length1+3)/4)
-                call CSJCAL(Iadr,2,string1(1:L1))
+                call CSJCAL1S(Iadr,string1(1:L1))
                 IKINE = -4
             endif
 *
@@ -220,11 +223,12 @@ c***  Get command and number of parameters passed
               call KUGETS ( string1, length1 )
               write(6,*) ' GXUSER: opening output file ',
      >                              string1(1:length1)
-              Call AgZOPEN  ('OZ',string1(1:length1),'GEKHD',0,0)
-              Call AGZWRITE ('O',ier)
+              Call AgZOPEN  ('O',string1(1:length1),'GEKHD',Ier)
+*             PN,03.09.98 - spool output until the first trig
+*             Call AGZWRITE ('O',ier)
  
           else                                          !  close output
-              Call AgZOPEN('O',' ',' ',0,0)
+              Call AgZOPEN('O',' ',' ',Ier)
           endif
 *
       else if (command.eq.'PHASESPACE'.or.command.eq.'MOMENTUMBIN') then
@@ -376,3 +380,56 @@ c----------------------------------------------------------------------
        end
  
  
+*CMZ :          07/09/98  17.34.19  by  Pavel Nevski
+*CMZ :  1.40/05 26/08/98  20.16.56  by  Pavel Nevski
+*CMZ :  1.40/05 26/08/98  19.34.12  by  Pavel Nevski
+*CMZ :  2.06/13 01/02/95  09.38.53  by  O.Couet
+*-- Author :    Fons Rademakers   20/11/93
+      SUBROUTINE PALOGO
+*
+*     Print STAF version identification
+*
+      CHARACTER  CHPAW*8, VERSQQ*8, MONTH(12)*12
+      DATA MONTH/'January','February','March','April','May','June',
+     > 'July','August','September','October','November','December'/
+ 
+*KEEP,VIDQQ.
+      CHARACTER*68 VIDQQ
+      DATA VIDQQ/
+     +'@(#)* Advanced Geant Inteface   1.40/05   C: 02/01/99  22.12.20
+     +'/
+*KEEP,DATEQQ.
+      IDATQQ =   990102
+*KEEP,TIMEQQ.
+      ITIMQQ =   2212
+*KEEP,VERSQQ.
+      VERSQQ = ' 1.40/05'
+      IVERSQ =  14005
+*KEND.
+      CHPAW  = 'S T A F'
+      IDAY   = mod(IDATQQ,100)
+      IMONTH = mod(IDATQQ/100,100)
+      IYEAR  = IDATQQ/10000
+      NCM    = LENOCC(MONTH(IMONTH))
+      IF(IYEAR.LT.90) MILLE=2000+IYEAR
+      IF(IYEAR.GE.90) MILLE=1900+IYEAR
+ 
+      PRINT 3000,CHPAW,VERSQQ,IDAY,MONTH(IMONTH)(1:NCM),
+     >           MILLE,MONTH(IMONTH)(NCM+1:)
+ 3000 FORMAT(' ******************************************************'/,
+     >       ' *                                                    *'/,
+     >       ' *            W E L C O M E    to   ', A7,'           *'/,
+     >       ' *                                                    *'/,
+     >       ' *        Version ',A8,4X,I2,1X,A,1X,I4,A,4X,        '*'/,
+     >       ' *                                                    *'/,
+     >       ' ******************************************************')
+      END
+*CMZ :          28/10/98  00.25.15  by  Pavel Nevski
+*-- Author :    Pavel Nevski   28/10/98
+        function ETIME(XX)
+        real  ETIME,XX(2),tt
+        call timex(tt)
+        etime=tt
+        XX(1)=tt
+        XX(2)=tt
+        end
