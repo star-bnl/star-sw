@@ -106,6 +106,8 @@ virtual Int_t DistancetoPrimitive(Int_t px, Int_t py);
 
 private:
   void Init() ;
+  StTrackPoints (const StTrackPoints &);
+  void operator=(const StTrackPoints &);
 
 // data members                  
 private:  
@@ -120,6 +122,8 @@ public:
    StVertexPoints(StVertex *sv,const char *name="",const char *title="");
   ~StVertexPoints(){};
 private:
+   StVertexPoints(const StVertexPoints&);
+   void operator=(const StVertexPoints&);
 // data members                  
 private:  
  StVertex *&fVertex;     
