@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StuFtpcRefMult.hh,v 1.2 2003/04/29 13:20:18 putschke Exp $
+ * $Id: StuFtpcRefMult.hh,v 1.3 2003/12/04 03:55:08 perev Exp $
  ***************************************************************************
  *
  * Description:
@@ -32,6 +32,9 @@
  *
  **************************************************************************
  * $Log: StuFtpcRefMult.hh,v $
+ * Revision 1.3  2003/12/04 03:55:08  perev
+ * Simplify code for compiler
+ *
  * Revision 1.2  2003/04/29 13:20:18  putschke
  * use now dca of global track
  *
@@ -85,7 +88,8 @@ uncorrectedNumberOfFtpcEastPrimaries(const StEvent& evt)
    // check pt
    if (track->geometry()->momentum().perp()>=3) continue; 
    // finally, check dca, if a track satisfies gets inside the if, count it.
-   if (track->node()->track(global)->geometry()->helix().distance(primVtx->position())<3) ++countedTracks;
+   StTrack *glt = track->node()->track(global);
+   if (glt->geometry()->helix().distance(primVtx->position())<3) ++countedTracks;
     }
     return countedTracks;
 }
