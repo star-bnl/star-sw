@@ -1,5 +1,8 @@
-//$Id: MemoryUsage.C,v 1.1 2000/01/19 03:23:32 kathy Exp $
+//$Id: MemoryUsage.C,v 1.2 2000/01/19 14:33:48 kathy Exp $
 //$Log: MemoryUsage.C,v $
+//Revision 1.2  2000/01/19 14:33:48  kathy
+//pick up input file from samples directory
+//
 //Revision 1.1  2000/01/19 03:23:32  kathy
 //macro to make hist of memory usage vs event number - to be used by auto QA system
 //
@@ -13,8 +16,9 @@
 ////////////////////////////////////////////////////////////
 
 void MemoryUsage(    
-       const Char_t *InFile="mem_dev_tfs_lin_fri_y2a_hc_lowdensity.txt",
-       const Char_t *OutFile="mem_dev_tfs_lin_fri_y2a_hc_lowdensity.ps")
+       const Char_t *InFile=
+ "/afs/rhic/star/data/samples/mem_usage_dev_tfs_lin_fri_y2a_hc_lowdensity.txt",
+       const Char_t *OutFile="mem_usage_dev_tfs_lin_fri_y2a_hc_lowdensity.ps")
 {
 //   example of macro to read data from an ascii file and
 //   create a root file with an histogram and an ntuple.
