@@ -44,7 +44,10 @@ void RunStiMaker(Int_t nevents=1,
     
     cout <<"Loading Sti"<<endl;
     gSystem->Load("Sti");
-    
+
+    cout <<"Loading StiGui"<<endl;
+    gSystem->Load("StiGui");
+
     cout <<"Loading StiMaker"<<endl;
     gSystem->Load("StiMaker");
     
