@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.11 2004/07/09 12:23:03 subhasis Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.12 2004/07/12 14:45:08 subhasis Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.12  2004/07/12 14:45:08  subhasis
+ *QA hist added
+ *
  *Revision 1.11  2004/07/09 12:23:03  subhasis
  *numbering scheme adopted on CPV
  *
@@ -115,7 +118,8 @@ StPmdReadMaker::~StPmdReadMaker() {
 
 Int_t StPmdReadMaker::Init() {
   if(mPmdPrint)gMessMgr->Info("StPmdReadMaker::Init()");
-  
+  bookHist();
+
   return StMaker::Init();
 }
 //-----------------------------------------------------------------
@@ -267,7 +271,9 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	  AddCh_Count++;
 	  
 	  if(DaqADC>0 && mapp==kStOK){
-	    
+	 //Fill chain-channel QA
+		  m_chain_channel->Fill(channel,Chain_No-1);
+
 	  // Apply uniformity calibration here
 	  //
 	    if(mCalibFlag){
@@ -333,6 +339,8 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det
     mPmdEvent = mEvtPmdCollection->detector(StDetectorId(kPhmdId)); 
     mCpvEvent = mEvtPmdCollection->detector(StDetectorId(kPhmdCpvId));
   }
+    Int_t tothit_pmd=0;
+    Int_t tothit_cpv=0;
   
   //  if(!mEvtPmdCollection){
   //  cout<<"No PMDCOLLECTION **, Creating one"<<endl;
@@ -382,7 +390,7 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det
 	    phit->setColumn(Int_t(col-1));           // filling col (starts from 0)
 	    phit->setEnergy(edep);                 // filling energy
 	    phit->setAdc(adc);                     // filling ADC
-
+	tothit_pmd++;
 	    if(mPmdEvent)mPmdEvent->addHit(phit);
 	  }
 	}
@@ -425,11 +433,18 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det
 	    phit->setEnergy(edep);                 // filling energy
 	    phit->setAdc(adc);                     // filling ADC
 	    
+	tothit_cpv++;
 	    if(mCpvEvent)mCpvEvent->addHit(phit);
 	  }
 	}
     }
   }
+  StEventInfo* eventInfo = currevent->info();
+  Int_t Nevent=eventInfo->id();
+  m_event_tothit_pmd->Fill(Nevent,tothit_pmd);
+  m_event_tothit_cpv->Fill(Nevent,tothit_cpv);
+
+
   return kStOK;
 }
 //------------------------------------------------------------------
@@ -477,3 +492,10 @@ Int_t StPmdReadMaker::GetCalib(int supmod,int row,int col,float& calib){
    
 return kStOK;    
 }
+void StPmdReadMaker::bookHist(){
+	m_event_tothit_pmd = new TH1F("pmd_tothit","tothit vs eventNo (PMD)",10000,0,100000);
+	m_event_tothit_cpv = new TH1F("cpv_tothit","tothit vs eventNo (CPV)",10000,0,100000);
+
+	m_chain_channel = new TH2F("chain_chan","channel vs chain No ",1728,-0.5,1727.5,48,-0.5,47.5);
+}
+

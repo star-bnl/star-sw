@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.h,v 1.4 2004/03/23 08:52:03 subhasis Exp $
+ *$Id: StPmdReadMaker.h,v 1.5 2004/07/12 14:45:16 subhasis Exp $
  *
  *  StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Pmd Data Reader to store hits in StEvent
  ***************************************************************************
  * $Log: StPmdReadMaker.h,v $
+ * Revision 1.5  2004/07/12 14:45:16  subhasis
+ * QA hist added
+ *
  * Revision 1.4  2004/03/23 08:52:03  subhasis
  * several changes (Board Detail by hand etc) for first production
  *
@@ -47,6 +50,11 @@ using std::vector;
 #include "tables/St_pmdBrdMipCalib_Table.h"
 #include "tables/St_pmdCalSummary_Table.h"
 
+#include  <TH1.h>
+#include  <TH2.h>
+
+
+
 class StDAQReader;
 class StPMDReader;
 //SP
@@ -68,15 +76,18 @@ class StPmdReadMaker : public StMaker {
   void SetPmdPrint(Bool_t);			   //Set print flag
   void SetCalibFlag(Bool_t);			   //Set calib flag
   void SetChainThreshold(Float_t);		   //Set ADC Threshold
-  
+  void bookHist();
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPmdReadMaker.h,v 1.4 2004/03/23 08:52:03 subhasis Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StPmdReadMaker.h,v 1.5 2004/07/12 14:45:16 subhasis Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
   
  protected:
-  
+ TH1F * m_event_tothit_pmd;
+ TH1F * m_event_tothit_cpv;
+ TH2F* m_chain_channel;
+
  private:
   StDAQReader*           mTheDataReader;//!
   StPMDReader* mThePmdReader;//!
