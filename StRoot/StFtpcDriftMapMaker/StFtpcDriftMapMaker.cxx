@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.12 2001/10/22 09:40:18 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.13 2001/10/23 07:27:48 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.13  2001/10/23 07:27:48  jcs
+// implement new StFtpcDbReader constructor
+//
 // Revision 1.12  2001/10/22 09:40:18  jcs
 // remove obsolete include  StFtpcParamReader.hh
 //
@@ -76,7 +79,8 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
     m_dvdriftdp(0),
     m_ddeflectiondp(0),
     m_gas(0),
-    m_driftfield(0)
+    m_driftfield(0),
+    m_electronics(0)
 {
 // Create tables
 
@@ -164,7 +168,8 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
                                                 m_dvdriftdp,
                                                 m_ddeflectiondp,
                                                 m_gas,
-                                                m_driftfield);
+                                                m_driftfield,
+                                                m_electronics);
   
   // create magboltz
   StFtpcMagboltz1 *magboltz = new StFtpcMagboltz1();
