@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.37 2000/08/31 18:50:29 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.38 2000/09/05 16:12:12 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.38  2000/09/05 16:12:12  snelling
+// Added the new particles to the pid histogram
+//
 // Revision 1.37  2000/08/31 18:50:29  posk
 // Added plotCen.C to plot from a series of files with different centralities.
 //
@@ -463,8 +466,8 @@ Int_t StFlowAnalysisMaker::Init() {
 
   // PID multiplicities
   mHistPidMult = new TProfile("Flow_PidMult", "Flow_PidMult",
-    8, 0.5, 8.5, 0., 10000., "");
-  mHistPidMult->SetXTitle("All, Pi+, Pi-, Proton, Pbar, K+, K-, d");
+    11, 0.5, 11.5, 0., 10000., "");
+  mHistPidMult->SetXTitle("All, Pi+, Pi-, Proton, Pbar, K+, K-, d, dbar, e-, e+");
   mHistPidMult->SetYTitle("Multiplicity");
     
   // Centrality
@@ -765,7 +768,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.37 2000/08/31 18:50:29 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.38 2000/09/05 16:12:12 snelling Exp $");
 
   return StMaker::Init();
 }
@@ -926,6 +929,9 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   float kMinusN    = 0.;
   float kPlusN     = 0.;
   float deuteronN  = 0.;
+  float dbarN      = 0.;
+  float electronN  = 0.;
+  float positronN  = 0.;
 
   // Initialize Iterator
   StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
@@ -1030,7 +1036,10 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     if (strcmp(pid, "pbar") == 0)     pbarN++;
     if (strcmp(pid, "k+") == 0)       kPlusN++;
     if (strcmp(pid, "k-") == 0)       kMinusN++;
-    if (strcmp(pid, "deuteron") == 0) deuteronN++;
+    if (strcmp(pid, "d") == 0)        deuteronN++;
+    if (strcmp(pid, "dbar") == 0)     dbarN++;
+    if (strcmp(pid, "e-") == 0)       electronN++;
+    if (strcmp(pid, "e+") == 0)       positronN++;
 
     for (int k = 0; k < Flow::nSels; k++) {
       pFlowSelect->SetSelection(k);
@@ -1113,6 +1122,9 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   mHistPidMult->Fill(6., kPlusN);
   mHistPidMult->Fill(7., kMinusN);
   mHistPidMult->Fill(8., deuteronN);
+  mHistPidMult->Fill(9., dbarN);
+  mHistPidMult->Fill(10., electronN);
+  mHistPidMult->Fill(11., positronN);
 
   // Multiplicity of particles correlated with the event planes
   corrMultN = corrMultN / (float)(Flow::nHars * Flow::nSels);
