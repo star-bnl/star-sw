@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.2 2002/01/17 02:06:13 akio Exp $
+// $Id: StppEvent.cxx,v 1.3 2002/01/24 17:38:33 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.3  2002/01/24 17:38:33  akio
+// add L3 info, zdc info & fix phi/psi confusion
+//
 // Revision 1.2  2002/01/17 02:06:13  akio
 // fixed bug in L3 weighted phi
 //
@@ -82,22 +85,11 @@ void StppEvent::clear(){
   weightedPhiL3=0.0;
 #endif
 
-  bbcAdcSum = 0;
-  bbcNHit=0;
-  zVertexBbc=0.0;
-
-  fpdAdcSumNorth  = 0;
-  fpdAdcSumSouth  = 0;
-  fpdAdcSumTop    = 0;
-  fpdAdcSumBottom = 0;
-  fpdAdcSumPres1  = 0;
-  fpdAdcSumPres2  = 0;
-  fpdAdcSumSmdX   = 0;
-  fpdAdcSumSmdY   = 0;
-  fpdSouthVeto    = 0;
-
   ctbAdcSum = 0.0;
   ctbNHit=0;
+  zdcEast = 0;
+  zdcWest=0;
+
   svtNHit=0;
   emcHighTower = 0.0;  
 }
@@ -122,17 +114,25 @@ Int_t StppEvent::fill(StEvent *event){
   weightedEta = 0.0;
   weightedPhi = 0.0;
   for( Int_t in=0; in<nnode; in++ ) {
+#ifdef _take_global_tracks_
+    UInt_t nprim = exnode[in]->entries(global);
+#else
     UInt_t nprim = exnode[in]->entries(primary);
+#endif
     if(nprim==1){
+#ifdef _take_global_tracks_
+      StppTrack *t = new((*pTracks)[nPrimTrack]) StppTrack(exnode[in]->track(global));
+#else
       StppTrack *t = new((*pTracks)[nPrimTrack]) StppTrack(exnode[in]->track(primary));
+#endif
       if(t->flag>0 && t->nHits>20 && t->pt>0.2 && fabs(t->eta)<1.4){
 	if(t->pt > maxpt){
 	  maxpt = t->pt;
 	  LCP = nPrimTrack;
 	}
 	sumPt+=t->pt;
-	sumPx+=t->pt * cos(t->phi0);
-	sumPy+=t->pt * sin(t->phi0);
+	sumPx+=t->pt * cos(t->psi);
+	sumPy+=t->pt * sin(t->psi);
 	weightedEta += t->pt * t->eta;
 	nGoodTrack++;
       }
@@ -171,10 +171,10 @@ Int_t StppEvent::fill(StEvent *event){
   }
 #endif
 
-#ifdef _L3_tracks_
   // Get tracks from L3
   StL3Trigger* l3 = event->l3Trigger();
   if(l3 != 0){
+#ifdef _L3_tracks_
     nPrimTrackL3 = 0; 
     nGoodTrackL3 = 0; 
     sumPtL3=0.0;
@@ -197,8 +197,8 @@ Int_t StppEvent::fill(StEvent *event){
 	    LCPL3 = nPrimTrackL3;
 	  }
 	  sumPtL3 += t->pt;
-	  sumPxL3+=t->pt * cos(t->phi0);
-	  sumPyL3+=t->pt * sin(t->phi0);
+	  sumPxL3+=t->pt * cos(t->psi);
+	  sumPyL3+=t->pt * sin(t->psi);
 	  weightedEtaL3 += t->pt * t->eta;
 	  nGoodTrackL3++;
 	}
@@ -235,17 +235,44 @@ Int_t StppEvent::fill(StEvent *event){
 	cout<<"StppEvent: There was no L3 vertex"<<endl;
       } 
     }
-  }
+
 #endif
+
+#ifdef _L3_Info_
+    StL3EventSummary * l3sum=l3->l3EventSummary();
+    if(l3sum != 0){
+      StSPtrVecL3AlgorithmInfo &l3Algo=l3sum->algorithms();
+      if (infoLevel > 1){
+	cout << "StppEvent :  No. of L3 algo switched ON = " 
+	     <<  l3sum->numberOfAlgorithms() << endl;
+      }
+      for (unsigned int k=0; k< l3Algo.size(); k++) {
+	int n = l3Algo[k]->dataSize();	
+	if(infoLevel>2){
+	  printf("k=%d, algo ID=%d on=%d accept=%d, nData=%d\n"
+		 ,k,l3Algo[k]->id(),l3Algo[k]->accept(),l3Algo[k]->accept(),n);
+	  for(int j=0;j<n;j++) printf("data[%d]=%f\n", j,l3Algo[k]->data(j));
+	}
+	if(l3Algo[k]->id()==9){
+	  if (infoLevel > 1){cout << "StppEvent :  Found Jan's pileup filter " << endl;}
+	  L3PileupFilterOn = l3Algo[k]->on();
+	  L3PileupFilterAcc = l3Algo[k]->accept();
+	  if(n>10){
+	    cout << "L3 Algorithm info data exceed limit size 10." << endl;
+	    n=10;
+	  }
+	  for(int j=0; j<n; j++){
+	    L3PileupFilterData[j] = l3Algo[k]->data(j);
+	  }
+	}
+      }
+    }
+#endif
+  }
 
   StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
   if(trg){
-    StBbcTriggerDetector* bbc = &(trg->bbc());
-    if(bbc){
-      bbcAdcSum = bbc->adcSumAll();
-      bbcNHit = bbc->nHitAll();
-      zVertexBbc = bbc->zVertex();
-    }
+
     StCtbTriggerDetector& ctb = trg->ctb();
     ctbAdcSum = 0.0;
     ctbNHit = 0;
@@ -255,20 +282,10 @@ Int_t StppEvent::fill(StEvent *event){
 	if(ctb.mips(i,j)>0) ctbNHit++;
       }
     }
-  }
-  
-  StFpdCollection* fpd = event->fpdCollection();
-  if(fpd){
-    token = fpd->token();
-    fpdAdcSumNorth  = fpd->sumAdcNorth();
-    fpdAdcSumSouth  = fpd->sumAdcSouth();
-    fpdAdcSumTop    = fpd->sumAdcTop();
-    fpdAdcSumBottom = fpd->sumAdcBottom();
-    fpdAdcSumPres1  = fpd->sumAdcPreShower1();
-    fpdAdcSumPres2  = fpd->sumAdcPreShower2();
-    fpdAdcSumSmdX   = fpd->sumAdcSmdX();
-    fpdAdcSumSmdY   = fpd->sumAdcSmdY();
-    fpdSouthVeto    = fpd->southVeto();
+
+    StZdcTriggerDetector& zdc = trg->zdc();
+    zdcEast = zdc.adcSum(east);
+    zdcWest = zdc.adcSum(west);
   }
   
   StL0Trigger* l0=event->l0Trigger();
