@@ -1,21 +1,24 @@
-//  
-//  
+// $Id: StEventQAMaker.cxx,v 1.3 1999/11/23 19:00:50 lansdell Exp $
+// $Log: StEventQAMaker.cxx,v $
+// Revision 1.3  1999/11/23 19:00:50  lansdell
+// Reorganized Make() and include files (Gene)
 //
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// StEventQAMaker class  - reads from StEvent and fills histograms           //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
+//
+///////////////////////////////////////////////////////////////////////////
+//                                                                       //
+//  StEventQAMaker class for QA Histograms using StEvent                 //
+//     adapted from St_QA_Maker                                          //
+//                                                                       //
+///////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
-#include <stdlib.h>
-#include <string.h>
 #include "PhysicalConstants.h"
 #include <math.h>
 #include "TMath.h"
 #include "SystemOfUnits.h"
+#include "TH1.h"
+#include "TH2.h"
 #include "StEventQAMaker.h"
-#include "StChain.h"
 #include "StEventTypes.h"
 
 ClassImp(StEventQAMaker)
@@ -46,46 +49,19 @@ Int_t StEventQAMaker::Init() {
 
 //_____________________________________________________________________________
 Int_t StEventQAMaker::Make() {
-
 // StEventQAMaker - Make; fill histograms
   
- // Call methods to fill histograms
-  StEvent *event = (StEvent *)GetInputDS("StEvent");
-  
-  // histograms from table event_summary
-  MakeHistEvSum(event);
-  // histograms from table globtrk
-  MakeHistGlob(event);
-  // histograms from table dst_dedx
-  MakeHistDE(event);
-  // histograms from table primtrk
-  MakeHistPrim(event);
-  // histograms from table particle
-  MakeHistGen(event);  
-  // histograms from table dst_v0_vertex
-  MakeHistV0(event);
-  // histograms from table primtrk & dst_dedx
-  MakeHistPID(event);
-  // histograms from table dst_vertex
-  MakeHistVertex(event);
-  // histograms from table dst_xi_vertex
-  MakeHistXi(event);
-  // histograms from table point
-  MakeHistPoint(event);
-  // histograms from table kinkVertex
-  MakeHistKink(event);
-  // histograms from table l3Track
-  MakeHistL3(event);
-  // histograms from table ev0_eval
-  MakeHistV0Eval(event);
-  // histograms from table g2t_rch_hit
-  MakeHistRich(event);
-  
-  return kStOK;
+  event = (StEvent *)GetInputDS("StEvent");
+  if (event) {
+    return StQABookHist::Make();
+  } else {
+    cout << "Error in StEventQAMaker::Make(): no event found!" << endl;
+    return kStErr;
+  }
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistEvSum(StEvent *event) {
+void StEventQAMaker::MakeHistEvSum() {
   //  PrintInfo();
   // Fill histograms for event summary
 
@@ -122,7 +98,7 @@ void StEventQAMaker::MakeHistEvSum(StEvent *event) {
 }
 
 //-----------------------------------------------------------------
-void StEventQAMaker::MakeHistGlob(StEvent *event) {
+void StEventQAMaker::MakeHistGlob() {
 
   StSPtrVecTrackNode &theNodes = event->trackNodes();
   Int_t cnttrk=0;
@@ -225,7 +201,7 @@ void StEventQAMaker::MakeHistGlob(StEvent *event) {
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistDE(StEvent *event) {
+void StEventQAMaker::MakeHistDE() {
   // Fill histograms for dE/dx
 /*
   St_DataSetIter dstI(dst);
@@ -249,7 +225,7 @@ void StEventQAMaker::MakeHistDE(StEvent *event) {
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistPrim(StEvent *event) {
+void StEventQAMaker::MakeHistPrim() {
 
   StPrimaryVertex *primVtx = event->primaryVertex();
 
@@ -346,7 +322,7 @@ void StEventQAMaker::MakeHistPrim(StEvent *event) {
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistGen(StEvent *event) {
+void StEventQAMaker::MakeHistGen() {
 
 /*
   if (Debug()) cout << " *** in StEventQAMaker - filling particle histograms " << endl;
@@ -400,7 +376,7 @@ void StEventQAMaker::MakeHistGen(StEvent *event) {
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistV0(StEvent *event) {
+void StEventQAMaker::MakeHistV0() {
 
   if (Debug()) cout << " *** in StEventQAMaker - filling dst_v0_vertex histograms " << endl;
 
@@ -436,7 +412,7 @@ void StEventQAMaker::MakeHistV0(StEvent *event) {
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistPID(StEvent *event) {
+void StEventQAMaker::MakeHistPID() {
 /*
   if (Debug()) cout << " *** in StEventQAMaker - filling PID histograms " << endl;
   
@@ -479,7 +455,7 @@ void StEventQAMaker::MakeHistPID(StEvent *event) {
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistVertex(StEvent *event) {
+void StEventQAMaker::MakeHistVertex() {
 /*
   if (Debug()) cout << " *** in StEventQAMaker - filling vertex histograms " << endl;
 
@@ -518,7 +494,7 @@ void StEventQAMaker::MakeHistVertex(StEvent *event) {
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistXi(StEvent *event) {
+void StEventQAMaker::MakeHistXi() {
 
   if (Debug()) cout << " *** in StEventQAMaker - filling dst_xi_vertex histograms " << endl;
 
@@ -531,7 +507,7 @@ void StEventQAMaker::MakeHistXi(StEvent *event) {
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistPoint(StEvent *event) {
+void StEventQAMaker::MakeHistPoint() {
 /*
   if (Debug()) cout << " *** in StEventQAMaker - filling point histograms " << endl;
 
@@ -549,7 +525,7 @@ void StEventQAMaker::MakeHistPoint(StEvent *event) {
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistKink(StEvent *event) {
+void StEventQAMaker::MakeHistKink() {
 
   if (Debug()) cout << " *** in StEventQAMaker - filling kink histograms " << endl;
 
@@ -562,7 +538,7 @@ void StEventQAMaker::MakeHistKink(StEvent *event) {
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistL3(StEvent *event) {
+void StEventQAMaker::MakeHistL3() {
 /*
   if (Debug()) cout << " *** in StEventQAMaker - filling L3 histograms " << endl;
 
@@ -580,7 +556,7 @@ void StEventQAMaker::MakeHistL3(StEvent *event) {
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistV0Eval(StEvent *event) {
+void StEventQAMaker::MakeHistV0Eval() {
 /*
   if (Debug()) cout << " *** in StEventQAMaker - filling ev0_eval histograms " << endl;
 
@@ -599,7 +575,7 @@ void StEventQAMaker::MakeHistV0Eval(StEvent *event) {
 }
 
 //_____________________________________________________________________________
-void StEventQAMaker::MakeHistRich(StEvent *event) {
+void StEventQAMaker::MakeHistRich() {
 /*
   if (Debug()) cout << " *** in StEventQAMaker - filling Rich histograms " << endl;
 

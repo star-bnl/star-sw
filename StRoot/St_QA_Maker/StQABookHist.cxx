@@ -1,31 +1,24 @@
-// $Id: StQABookHist.cxx,v 1.2 1999/11/22 22:46:41 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 1.3 1999/11/23 19:00:51 lansdell Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.3  1999/11/23 19:00:51  lansdell
+// Reorganized Make() and include files (Gene)
+//
 // Revision 1.2  1999/11/22 22:46:41  lansdell
 // update to identify histogram method used (StEvent or DST tables) by Gene; StEventQAMaker code partially completed (run bfcread_dst_EventQAhist.C)
 //
 // Revision 1.1  1999/11/19 22:44:42  kathy
 // took histogram booking out of St_QA_Maker as per Thomas' request and put it into separate class StQABookHist which can now be used also by Curtis' class to book histograms - thanks for your help Gene!
 // 
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// StQABookHist.cxx   
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+//                                                                       //
+//  StQABookHist abstract base class for QA Histogram Makers             //
+//                                                                       //
+///////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
-#include <stdlib.h>
-#include <string.h>
-#include "TStyle.h"
-#include "TString.h"
-#include "TCanvas.h"
-#include "TObjString.h"
-#include "TPostScript.h"
-#include "PhysicalConstants.h"
-#include <math.h>
-#include "TMath.h"
-#include "SystemOfUnits.h"
-
-#include "St_QA_Maker/StQABookHist.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "StQABookHist.h"
 
 
 const Int_t   StQABookHist::nxpT = 50;
@@ -92,7 +85,6 @@ ClassImp(StQABookHist)
 //_____________________________________________________________________________
 StQABookHist::StQABookHist(const char *name, const char *title, const char* type)
      : StMaker(name,title), QAHistType(type) {
-
 
 //  - zero all pointers defined in the header file
 
@@ -264,12 +256,12 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   
   // for method MakeHistRich
     m_rich_tot=0;   //! number of rich hits
-  
+
 }
 //_____________________________________________________________________________
 Int_t StQABookHist::Init(){
  
-   cout << "NOW BOOK HISTS! " << endl;
+  cout << "NOW BOOK HISTS! " << endl;
 
 //book histograms --------------
   BookHistEvSum();
@@ -291,43 +283,78 @@ Int_t StQABookHist::Init(){
 
 }
 //_____________________________________________________________________________
+Int_t StQABookHist::Make(){
 
+  // Call methods to fill histograms
+  
+  // histograms from table event_summary
+  MakeHistEvSum();
+  // histograms from table globtrk
+  MakeHistGlob();
+  // histograms from table dst_dedx
+  MakeHistDE();
+  // histograms from table primtrk
+  MakeHistPrim();
+  // histograms from table particle
+  MakeHistGen();  
+  // histograms from table dst_v0_vertex
+  MakeHistV0();
+  // histograms from table primtrk & dst_dedx
+  MakeHistPID();
+  // histograms from table dst_vertex
+  MakeHistVertex();
+  // histograms from table dst_xi_vertex
+  MakeHistXi();
+  // histograms from table point
+  MakeHistPoint();
+  // histograms from table kinkVertex
+  MakeHistKink();
+  // histograms from table l3Track
+  MakeHistL3();
+  // histograms from table ev0_eval
+  MakeHistV0Eval();
+  // histograms from table g2t_rch_hit
+  MakeHistRich();
+
+  return kStOK;
+
+}
+//_____________________________________________________________________________
 StQABookHist::~StQABookHist(){
 
 }
-
 //_____________________________________________________________________________
-
 const char* StQABookHist::NameIt(const char* name) {
+
   return ((QAHistName=QAHistType) += name).Data();
+
 }
-
 //_____________________________________________________________________________
-
 const char* StQABookHist::TitleIt(const char* name) {
+
   return (((QAHistTitle=QAHistType) += " ") += name).Data();
+
 }
-
 //_____________________________________________________________________________
-
 TH1F* StQABookHist::QAH1F(const Text_t* name, const Text_t* title,
    Int_t nbinsx, Axis_t xlow, Axis_t xup) {
+
   return (new TH1F(NameIt(name),TitleIt(title),nbinsx,xlow,xup));
+
 }
-
 //_____________________________________________________________________________
-
 TH2F* StQABookHist::QAH2F(const Text_t* name, const Text_t* title,
    Int_t nbinsx, Axis_t xlow, Axis_t xup,
    Int_t nbinsy, Axis_t ylow, Axis_t yup) {
-  return (new TH2F(NameIt(name),TitleIt(title),nbinsx,xlow,xup,nbinsy,ylow,yup));
-}
 
+  return (new TH2F(NameIt(name),TitleIt(title),nbinsx,xlow,xup,nbinsy,ylow,yup));
+
+}
 //_____________________________________________________________________________
 
 void StQABookHist::BookHistEvSum(){
   
- // for method MakeEvSum - from table event_summary
+// for method MakeEvSum - from table event_summary
   //  m_trk_tot_gd    = QAH1F(   TString::TString("QaEvsumTrkGoodDTotal").Prepend(QAHistType).Data(),"evsum: num good track over total",  50,0.,1.0);
 
   m_trk_tot_gd    = QAH1F("QaEvsumTrkGoodDTotal",
@@ -354,7 +381,6 @@ void StQABookHist::BookHistEvSum(){
   //  m_vrtx_chisq = QAH1F("QaEvsumVrtxChisq","evsum: chisq of primary vertex",nchisq, 0., 10.); 
   
 }
-
 //_____________________________________________________________________________
 void StQABookHist::BookHistGlob(){
   
@@ -390,7 +416,6 @@ void StQABookHist::BookHistGlob(){
   m_glb_impact = QAH1F("QaGlobtrkImpact",  "globtrk: impact param from prim vtx ", 50,0.,500.);
 
 
-
 // 2D
   m_pT_eta_rec = QAH2F("QaGlobtrkPtVsEta","globtrk: log pT versus eta", 20,-2.,2.,40,1.,4.);
     m_pT_eta_rec->SetXTitle("eta");
@@ -404,7 +429,6 @@ void StQABookHist::BookHistGlob(){
     m_tanl_zf->SetXTitle("zfirst");
     m_tanl_zf->SetYTitle("tanl");
 
-
   m_mom_trklength = QAH2F("QaGlobtrkPVsTrkLength","globtrk: log mom vs trk length",
 			     50,0.,250.,40,1.,4.);
     m_mom_trklength->SetXTitle("trk length");  
@@ -414,7 +438,6 @@ void StQABookHist::BookHistGlob(){
 			     20,-2.,2.,50,0.,250.);
     m_eta_trklength->SetXTitle("eta");
     m_eta_trklength->SetYTitle("length");
-
 
   m_npoint_length = QAH2F("QaGlobtrkNPntLength","globtrk: N points on trk vs trk length",
 			     25,0.,250.,25,0.,50.);
@@ -434,7 +457,6 @@ void StQABookHist::BookHistGlob(){
     m_chisq1_mom->SetXTitle("log P (MeV)");
     m_chisq1_mom->SetYTitle("chisq1");
 
-
   m_chisq0_eta = QAH2F("QaGlobtrkChi0Eta","globtrk: Chisq0 vs eta",20,-2.,2.,20,0.,5.);
     m_chisq0_eta->SetXTitle("eta");
     m_chisq0_eta->SetYTitle("chisq0");
@@ -442,7 +464,6 @@ void StQABookHist::BookHistGlob(){
   m_chisq1_eta = QAH2F("QaGlobtrkChi1Eta","globtrk: Chisq1 vs eta",20,-2.,2.,20,0.,5.);
     m_chisq1_eta->SetXTitle("eta");
     m_chisq1_eta->SetYTitle("chisq1");
-
 
   m_chisq0_dip = QAH2F("QaGlobtrkChi0Tanl","globtrk: Chisq0 vs tanl(dip)",20,-5.,5.,20,0.,5.);
     m_chisq0_dip->SetXTitle("dip angle");
@@ -468,10 +489,7 @@ void StQABookHist::BookHistGlob(){
      m_nfptonpt_eta->SetXTitle("eta");
      m_nfptonpt_eta->SetYTitle("Ratio Nfitpnt/Npnt");
 
-
 }
-
-
 //____________________________________________________
 void StQABookHist::BookHistPrim(){
 
@@ -505,7 +523,6 @@ void StQABookHist::BookHistPrim(){
   m_pchisq1     = QAH1F("QaPrimtrkChisq1",  "primtrk: chisq1 - z", 50, 0.,5.);
   m_plength     = QAH1F("QaPrimtrkLength",  "primtrk: track length", 50,0.,300.);
   m_prim_impact = QAH1F("QaPrimtrkImpact",  "primtrk: impact param from prim vtx ", 50,0.,5.);
-
 
 
 // 2D
@@ -586,7 +603,6 @@ void StQABookHist::BookHistPrim(){
      m_pnfptonpt_eta->SetYTitle("Ratio Nfitpnt/Npnt");
 
 }
- 
 //_____________________________________________________________________________
 void StQABookHist::BookHistDE(){
   
@@ -597,9 +613,9 @@ void StQABookHist::BookHistDE(){
   m_dedx1   = QAH1F("QaDedxDedx1","dedx: dE/dx[1]", ndedx, mindedx, maxdedx);
   
 }
-
 //_____________________________________________________________________________
 void StQABookHist::BookHistGen(){
+
   // for MakeHistGen - from table particle
   m_H_npart   = QAH1F("QaParticleNumPart","particle:total num particles (generated)",100,0.,30000.);
   m_H_ncpart  = QAH1F("QaParticleNumChgPart","particle:num chg (e,mu,pi,K,p) part (generated)",100,0.,20000.);
@@ -612,8 +628,8 @@ void StQABookHist::BookHistGen(){
   m_H_vtxx    = QAH1F("QaParticleVtxX","particle: Generator prod vertex x (mm)",50,-10.,10.);
   m_H_vtxy    = QAH1F("QaParticleVtxY","particle: Generator prod vertex y (mm)",50,-10.,10.);
   m_H_vtxz    = QAH1F("QaParticleVtxZ","particle: Generator prod vertex z (mm)",50,-50.,50.);
-}
 
+}
 //_____________________________________________________________________________
 void StQABookHist::BookHistV0(){
   
@@ -623,7 +639,6 @@ void StQABookHist::BookHistV0(){
   m_ev0_k0ma_hist  = QAH1F("QaV0K0Mass","dst_v0_vertex: k0 mass",50,.4,.6);
   
 }
-
 //_____________________________________________________________________________
 void StQABookHist::BookHistPID(){
   
@@ -636,7 +651,6 @@ void StQABookHist::BookHistPID(){
   m_p_dedx_rec->SetXTitle("p (GeV)");
   
 }
-
 //_____________________________________________________________________________
 void StQABookHist::BookHistVertex(){
   // for MakeHistVertex - from table dst_vertex
@@ -662,42 +676,36 @@ void StQABookHist::BookHistVertex(){
 void StQABookHist::BookHistXi(){
 
   m_xi_tot   = QAH1F("QaXiVertexTot",  "dst_xi_vertex: tot # vertices ",50,0.,2500.);
-  
-}
 
+}
 //_____________________________________________________________________________
 void StQABookHist::BookHistPoint(){
-  
-  m_pnt_tot   = QAH1F("QaPointTot",  "point: # tpc hits ",50,200000.,250000.);
-}
 
+  m_pnt_tot   = QAH1F("QaPointTot",  "point: # tpc hits ",50,200000.,250000.);
+
+}
 //_____________________________________________________________________________
 void StQABookHist::BookHistKink(){
-  
+
   m_kink_tot   = QAH1F("QaKinkTot",  "kinkVertex: # kinks ",25,0.,25.);
 
 }
-
 //_____________________________________________________________________________
 void StQABookHist::BookHistL3(){
-  
+
   m_l3_tot   = QAH1F("QaL3Tot",  "l3Track: # tracks ",50,0.,10000.);
 
 }
-
 //_____________________________________________________________________________
 void StQABookHist::BookHistV0Eval(){
-  
+
   m_v0eval_tot   = QAH1F("QaV0EvalTot",  "ev0_eval: # vertices ",50,0.,5000.);
 
 }
-
 //_____________________________________________________________________________
 void StQABookHist::BookHistRich(){
-  
+
   m_rich_tot   = QAH1F("QaRichTot",  "g2t_rch_hit: # vertices ",50,0.,2000.);
 
 }
-
 //_____________________________________________________________________________
-
