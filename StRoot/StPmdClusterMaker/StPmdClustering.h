@@ -4,7 +4,7 @@
  */
 /******************************************************
  *
- * $Id: StPmdClustering.h,v 1.6 2004/07/19 13:23:27 subhasis Exp $
+ * $Id: StPmdClustering.h,v 1.7 2004/09/07 23:02:43 fisyak Exp $
  *
  * Author: Dr. S.C. Phatak
  *         Dipak Mishra
@@ -13,6 +13,9 @@
  * Description: Base class for PMD clusters
  *
  * $Log: StPmdClustering.h,v $
+ * Revision 1.7  2004/09/07 23:02:43  fisyak
+ * Add missing default ctors
+ *
  * Revision 1.6  2004/07/19 13:23:27  subhasis
  * checks applied on clust_cell dimension
  *
@@ -46,9 +49,7 @@ class StPmdClustering:public StPmdAbsClustering
    public:
   // functions for clustering
 //!constructor 
-  StPmdClustering(StPmdDetector *, StPmdDetector*);
-  //!constructor
-  StPmdClustering();                             
+  StPmdClustering(StPmdDetector *pmd_det = 0, StPmdDetector* cpv_det = 0);
   //!destructor
   virtual ~StPmdClustering();
 
