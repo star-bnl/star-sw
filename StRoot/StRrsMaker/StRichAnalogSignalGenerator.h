@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StRichAnalogSignalGenerator.h,v 1.4 2000/03/12 23:56:33 lasiuk Exp $
+ * $Id: StRichAnalogSignalGenerator.h,v 1.5 2000/03/17 14:54:15 lasiuk Exp $
  *
  * Description:
  *   StRichAnalogSignalGenerator is a function object containing the 
@@ -15,9 +15,8 @@
  *
  ***************************************************************************
  * $Log: StRichAnalogSignalGenerator.h,v $
- * Revision 1.4  2000/03/12 23:56:33  lasiuk
- * new coordinate system
- * exchange MyRound with inline templated funtion
+ * Revision 1.5  2000/03/17 14:54:15  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.4  2000/03/12 23:56:33  lasiuk
  * new coordinate system
@@ -41,42 +40,46 @@
 #ifndef ST_RICH_ANALOG_SIGNAL_GENERATOR_H
 #define ST_RICH_ANALOG_SIGNAL_GENERATOR_H
 
-#include <functional>
 #include <utility>
 
 #ifndef ST_NO_NAMESPACES
-using std::binary_function;
 using std::pair;
 #endif
 
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData {
-#endif
 #include "StRichRrsMacros.h"
-#include "StRichGeometryDb.h"
+
 #include "StRichWriter.h"
 #include "StRichGHit.h"
+#include "StRichMiniHit.h"
 #include "StRichCoordinates.h"
-#include "StRichCoordinateTransform.h"
+class StRichGeometryDb;
+class StRichCoordinateTransform;
+class StRichWriter;
 
-class StRichAnalogSignalGenerator : public binary_function<StRichGHit,double,void> {
+class StRichAnalogSignalGenerator {
 public:
-    StRichAnalogSignalGenerator();
+    static StRichAnalogSignalGenerator* getInstance(StRichWriter*);
+    
     ~StRichAnalogSignalGenerator();
 
     //StRichAnalogSignalGenerator(const StRichAnalogSignalGenerator&) {/* use default */}
     //StRichAnalogSignalGenerator& operator=(const StRichAnalogSignalGenerator&) {/*use default*/}
-    void operator()( const StRichGHit& , double ) const;
+
+    void induceSignal(const StRichMiniHit* , double );
     
     pair<int, int> calculatePadLimits(const StRichRawCoordinate&) const;
     pair<int, int> calculateRowLimits(const StRichRawCoordinate&) const;
+
+protected:
+    StRichAnalogSignalGenerator();
+    StRichAnalogSignalGenerator(StRichWriter*);
 
 private:
     double induceTension(double, double) const;
 
 private:
-    StRichCoordinateTransform* mTransform;
     StRichGeometryDb*          mGeomDb;
+    StRichCoordinateTransform* mTransform;
     StRichWriter*              mOutput;
     
     int             mNumberOfPadsInRowQ;
@@ -86,6 +89,8 @@ private:
     double          mPadWidth;
 
     double          mAnodePadPlaneSpacing;
+
+    static StRichAnalogSignalGenerator* mInstance;
 };
 
 #ifndef ST_NO_NAMESPACES

@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: StRichSelectWire.h,v 1.3 2000/02/08 16:31:56 lasiuk Exp $
+ * $Id: StRichSelectWire.h,v 1.4 2000/03/17 14:55:10 lasiuk Exp $
  *
  * Description:
  *   StRichSelectWire is a function object containing the algorithm that
@@ -18,8 +18,8 @@
  *
  ********************************************************************
  * $Log: StRichSelectWire.h,v $
- * Revision 1.3  2000/02/08 16:31:56  lasiuk
- * use dbs
+ * Revision 1.4  2000/03/17 14:55:10  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.3  2000/02/08 16:31:56  lasiuk
  * use dbs
@@ -33,26 +33,25 @@
 #ifndef ST_RICH_SELECTWIRE_H
 #define ST_RICH_SELECTWIRE_H
 
-#include <functional>
-
-#ifndef ST_NO_NAMESPACES
-using std::unary_function;
-#endif
-
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData {
-#endif
 #include "StRichRrsMacros.h"
-#include "StRichGHit.h"
+#include "StRichMiniHit.h"
 
-typedef double wirePosition;
 
-struct StRichSelectWire : public unary_function<StRichGHit,wirePosition> {
-    wirePosition operator()(const StRichGHit&) const;
+class StRichSelectWire {
+public:
+    StRichSelectWire();
+    ~StRichSelectWire();
+
+    //StRichSelectWire(const StRichSelectWire&) {/* use def */};
+    //StRichSelectWire& operator=(const StRichSelectWire&) {/* use def */};
+
+    double whichWire(const StRichMiniHit*) const;
+
+private:
+    double mWirePitch;
+    double mFirstWirePositionInYTop;
+    double mFirstWirePositionInYBottom;
+    int    mNumberOfWires;
 };
-    
-#ifndef ST_NO_NAMESPACES
-//} 
-#endif
 
 #endif

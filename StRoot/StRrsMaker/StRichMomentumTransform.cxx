@@ -1,5 +1,5 @@
 /***********************************************************************
- * $Id: StRichMomentumTransform.cxx,v 1.1 2000/03/12 22:19:26 lasiuk Exp $
+ * $Id: StRichMomentumTransform.cxx,v 1.2 2000/03/17 14:54:51 lasiuk Exp $
  *
  * Author: brian made this on Jan 27, 2000
  *
@@ -9,8 +9,8 @@
  ***********************************************************************
  *
  * $Log: StRichMomentumTransform.cxx,v $
- * Revision 1.1  2000/03/12 22:19:26  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/03/17 14:54:51  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.1  2000/03/12 22:19:26  lasiuk
  * Initial Revision
@@ -54,7 +54,9 @@ StRichMomentumTransform::StRichMomentumTransform(StRichGeometryDbInterface* geo)
 }
 
 StRichMomentumTransform::~StRichMomentumTransform()
-{/*nopt*/}
+{
+    delete mInstance;
+}
 
 void StRichMomentumTransform::globalMomentum(const StThreeVector<double>& a, StThreeVector<double>& b) const
 {   

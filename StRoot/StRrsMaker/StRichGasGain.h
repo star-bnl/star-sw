@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StRichGasGain.h,v 1.3 2000/02/08 16:24:10 lasiuk Exp $
+ * $Id: StRichGasGain.h,v 1.4 2000/03/17 14:54:36 lasiuk Exp $
  *
  * Description:
  *   StRichGasGain is a function object containing the charge
@@ -27,8 +27,8 @@
  *
  *******************************************************************
  * $Log: StRichGasGain.h,v $
- * Revision 1.3  2000/02/08 16:24:10  lasiuk
- * use of dbs
+ * Revision 1.4  2000/03/17 14:54:36  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.3  2000/02/08 16:24:10  lasiuk
  * use of dbs
@@ -39,31 +39,21 @@
  * Revision 1.1  2000/01/18 21:32:01  lasiuk
  * Initial Revision
  *
- *   revision history:
- *     - 7/21/1999 created the class, Alexandre Nevski.
- *     - 8/17/1999 added RnPolia,     Alexandre Nevski.
- *     - 8/25/1999 added feedbackPhoton Caroline Peter.
- *
  *******************************************************************/
 #ifndef ST_RICH_GAS_GAIN_H
 #define ST_RICH_GAS_GAIN_H
 
-#include <functional>
+#include <list>
 #ifndef ST_NO_NAMESPACES
-using std::binary_function;
+using std::list;
 #endif
 
-
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData {
-#endif
 #include "StRichRrsMacros.h"
 #include "StRichGHit.h"
-#include "StRichGeometryDb.h"
-#include "StRichPhysicsDb.h"
+#include "StRichMiniHit.h"
 #include "StRichOtherAlgorithms.h"
 
-class StRichGasGain : public binary_function<StRichGHit,double,double> {
+class StRichGasGain {
 public:
     StRichGasGain();
     ~StRichGasGain();
@@ -71,23 +61,19 @@ public:
     //StRichGasGain(const StRichGasGain&) { /* use default */ }
     //StRichGasGain& operator=(const StRichGasGain&) {/* use default */}
 
-    double operator()(StRichGHit&, double );
-    
+    double avalanche(StRichMiniHit*, double wirePos, list<StRichMiniHit*>&);
+
 private:	
-    void feedbackPhoton( const StRichGHit&, double ) const;
+    void feedbackPhoton(StRichMiniHit* hit, double q, list<StRichMiniHit*>&);
 
 private:
-    StRichGeometryDb* mGeometryDb;
-    StRichPhysicsDb*  mPhysicsDb;
     Randoms           mRandom;
 
     double            mAnodePadPlaneSeparation;
     double            mPhotonFeedback;
     double            mPhotoConversion;
+    double            mGasGainAmplification;
+    double            mPolia;
 };
 
-#ifndef ST_NO_NAMESPACES
-//}
-#endif
-    
 #endif // ST_RICH_GAS_GAIN

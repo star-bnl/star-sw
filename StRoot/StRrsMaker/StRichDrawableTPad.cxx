@@ -1,12 +1,12 @@
 /***************************************************************
- * $Id: StRichDrawableTPad.cxx,v 1.1 2000/02/29 18:18:59 lasiuk Exp $
+ * $Id: StRichDrawableTPad.cxx,v 1.2 2000/03/17 14:54:21 lasiuk Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTPad.cxx,v $
- * Revision 1.1  2000/02/29 18:18:59  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/03/17 14:54:21  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.2  2000/03/17 14:54:21  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -54,7 +54,8 @@ void StRichDrawableTPad::ExecuteEvent(int event, int px, int py)
 
     if (!gPad) return;
     if (!gPad->IsEditable() && event != kMouseEnter) return;
-    case kButton1Down:
+
+    switch(event) {
 
 	//case kButton1Down:
     case kMouseEnter:

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StRichCoordinateTransform.h,v 1.3 2000/03/12 22:20:24 lasiuk Exp $
+ * $Id: StRichCoordinateTransform.h,v 1.4 2000/03/17 14:54:19 lasiuk Exp $
  *
  * Author: brian made this on Jan 27, 2000
  *
@@ -16,9 +16,8 @@
  ***********************************************************************
  *
  * $Log: StRichCoordinateTransform.h,v $
- * Revision 1.3  2000/03/12 22:20:24  lasiuk
- * make into a singleton class
- * incliniation angle stored as data members
+ * Revision 1.4  2000/03/17 14:54:19  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.3  2000/03/12 22:20:24  lasiuk
  * make into a singleton class
@@ -54,7 +53,7 @@ public:
     static StRichCoordinateTransform* getTransform(StRichGeometryDbInterface*);
     static StRichCoordinateTransform* getTransform(); // do not call!
 
-    ~StRichCoordinateTransform();
+    virtual ~StRichCoordinateTransform();
     //StRichCoordinateTransform(const StRichCoordinateTransform&);
     //StRichCoordinateTransform& operator=(const StRichCoordinateTransform&);
     

@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StRichAnalogSignalGenerator.cxx,v 1.6 2000/03/12 23:56:33 lasiuk Exp $
+ * $Id: StRichAnalogSignalGenerator.cxx,v 1.7 2000/03/17 14:54:12 lasiuk Exp $
  *
  * Description:
  *  StRichAnalogSignalGenerator generates signals on pads
@@ -32,9 +32,8 @@
  * 
  *************************************************************************
  * $Log: StRichAnalogSignalGenerator.cxx,v $
- * Revision 1.6  2000/03/12 23:56:33  lasiuk
- * new coordinate system
- * exchange MyRound with inline templated funtion
+ * Revision 1.7  2000/03/17 14:54:12  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.7  2000/03/17 14:54:12  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -66,21 +65,33 @@
 
 #ifndef ST_NO_NAMESPACES
 using std::min;
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData { 
+using std::max;
 #endif
-#include "StRichCoordinateTransform.h"
+
 #include "StRichAnalogSignalGenerator.h"
+#include "StRichGeometryDb.h"
+#include "StRichCoordinateTransform.h"
 #include "StRichWriter.h"
 #include "StRichOtherAlgorithms.h"
 
-#include "StRichOtherAlgorithms.h"
 #ifdef RICH_WITH_VIEWER
-StRichAnalogSignalGenerator::StRichAnalogSignalGenerator()
+#include "StRichViewer.h"
+#endif
+
+StRichAnalogSignalGenerator* StRichAnalogSignalGenerator::mInstance = 0;
+
+StRichAnalogSignalGenerator*
+StRichAnalogSignalGenerator::getInstance(StRichWriter* aWriter)
+{
+    if(!mInstance)
+	mInstance = new StRichAnalogSignalGenerator(aWriter);
+    return mInstance;
+}
+
 StRichAnalogSignalGenerator::StRichAnalogSignalGenerator() {/* never called*/}
 
 StRichAnalogSignalGenerator::StRichAnalogSignalGenerator(StRichWriter* theWriter)
-    mOutput    = StRichWriter::getInstance();
+{
     mGeomDb    = StRichGeometryDb::getDb();
     mTransform = StRichCoordinateTransform::getTransform(mGeomDb);
     mOutput    = theWriter;
@@ -89,12 +100,15 @@ StRichAnalogSignalGenerator::StRichAnalogSignalGenerator(StRichWriter* theWriter
     mNumberOfRowsInColumnQ = mGeomDb->numberOfRowsInAQuadrantColumn(); //n_pad_y;
     mPadLength             = mGeomDb->padLength(); //pad_side_y;
     mPadWidth              = mGeomDb->padWidth(); //pad_side_x;
-StRichAnalogSignalGenerator::~StRichAnalogSignalGenerator() { /* nopt */ }
-{
-void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) const
+    mAnodePadPlaneSpacing  = mGeomDb->anodeToPadSpacing(); //height;
 }
 
-	cout << "StRichAnalogSignalGenerator::operator() --> q= " << q << endl;
+StRichAnalogSignalGenerator::~StRichAnalogSignalGenerator()
+{
+    delete mInstance;
+}
+
+void StRichAnalogSignalGenerator::induceSignal(const StRichMiniHit* hit, double q )
 {
     if(RRS_DEBUG)
 	cout << "StRichAnalogSignalGenerator::induceSignal() --> q= " << q << endl;
@@ -102,7 +116,7 @@ void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) 
     double x, y, q00, q10, q01, q11,s;
 
     //
-    StRichLocalCoordinate local(hit.position());
+    // find which pad ( row and col )
 
     StRichRawCoordinate raw;
     StRichLocalCoordinate local(hit->position());
@@ -132,14 +146,14 @@ void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) 
 	    tmpRaw.setPad(j);
 
 	    (*mTransform)(tmpRaw,tmpLoc);
-	    q00 = induceTension (( (hit.position().y()-y) - mPadLength/2)/mAnodePadPlaneSpacing,   
-				 ( (hit.position().x()-x) - mPadWidth/2 )/mAnodePadPlaneSpacing);    
-	    q10 = induceTension (( (hit.position().y()-y) + mPadLength/2)/mAnodePadPlaneSpacing,   
-				 ( (hit.position().x()-x) - mPadWidth/2 )/mAnodePadPlaneSpacing);    
-	    q01 = induceTension (( (hit.position().y()-y) - mPadLength/2)/mAnodePadPlaneSpacing,     
-				 ( (hit.position().x()-x) + mPadWidth/2 )/mAnodePadPlaneSpacing);     
-	    q11 = induceTension (( (hit.position().y()-y) + mPadLength/2)/mAnodePadPlaneSpacing,    
-				 ( (hit.position().x()-x) + mPadWidth/2 )/mAnodePadPlaneSpacing);   
+	    x = tmpLoc.position().x();
+	    y = tmpLoc.position().y();
+	    
+	    q00 = induceTension (( (hit->position().y()-y) - mPadLength/2)/mAnodePadPlaneSpacing,   
+				 ( (hit->position().x()-x) - mPadWidth/2 )/mAnodePadPlaneSpacing);    
+	    q10 = induceTension (( (hit->position().y()-y) + mPadLength/2)/mAnodePadPlaneSpacing,   
+				 ( (hit->position().x()-x) - mPadWidth/2 )/mAnodePadPlaneSpacing);    
+	    q01 = induceTension (( (hit->position().y()-y) - mPadLength/2)/mAnodePadPlaneSpacing,     
 				 ( (hit->position().x()-x) + mPadWidth/2 )/mAnodePadPlaneSpacing);     
 	    q11 = induceTension (( (hit->position().y()-y) + mPadLength/2)/mAnodePadPlaneSpacing,    
 				 ( (hit->position().x()-x) + mPadWidth/2 )/mAnodePadPlaneSpacing);   
@@ -147,7 +161,7 @@ void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) 
 	    s =  q * (q00-q10-q01+q11);
 	    sum += s;
 	    if(RRS_DEBUG)
-	    mOutput->putSignal(i,j,s,hit.id(),hit.trackp());
+		cout << "s/sum " << s << '/' << sum << endl;
 	    
 	    // save signal on pad
 	    mOutput->putSignal(i,j,s,hit->id(),hit->trackp());
