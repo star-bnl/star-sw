@@ -98,7 +98,7 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 	//Call some function to actually fill TTree object(s)
 	mEntry->setMcTrack(associatedPair->partnerMcTrack());
 	mEntry->setGlobalTrack(associatedPair->partnerTrack());
-	//mEntry->setStiTrack(track);
+	mEntry->setStiTrack(track);
 	mTree->Fill();
 
     }
@@ -115,6 +115,8 @@ TrackEntry::TrackEntry()
 
 void TrackEntry::setStiTrack(StiTrack *newtrack)
 {
+    //I'd shy away from the spaces, they tend to look different in everyone's editor
+    
   stiTrackQ          = newtrack->getCharge();
   stiTrackPsi        = newtrack->getPhi();
   stiTrackM          = newtrack->getMass();
@@ -122,6 +124,11 @@ void TrackEntry::setStiTrack(StiTrack *newtrack)
   stiTrackNHit       = newtrack->getFitPointCount();
   stiTrackY          = newtrack->getRapidity();
   stiTrackTanL       = newtrack->getTanL();
+
+  StThreeVector<double> mom = newtrack->getMomentumAtOrigin();
+  stiTrackPx = mom.x();
+  stiTrackPy = mom.y();
+  stiTrackPz = mom.z();
  
 }
 
@@ -150,6 +157,8 @@ void TrackEntry::setGlobalTrack(StTrack *newtrack)
   globalTrackEta  = mom.pseudoRapidity();
   globalTrackQ  = newtrack->geometry()->charge();
   globalTrackPsi = newtrack->geometry()->psi();
-  //globalTrackFitPoints = (double)newtrack->fitTraits()->numberOfFitPoints;
+  //we can go from c casts (double) (x) to c++cast static_cast<double>(x).  Easier to read, safer
+  globalTrackFitPoints = static_cast<double>(newtrack->fitTraits().numberOfFitPoints());
+  globalTrackChi2 = newtrack->fitTraits().chi2();
   
 }
