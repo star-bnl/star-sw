@@ -128,7 +128,6 @@ void StiEvaluableTrackSeedFinder::operator() (const StTrack* st, StiKalmanTrack*
     
     double curvature = sthelix.curvature();
     //cout <<"curvature: "<<curvature<<endl;
-    //double curvature = sthelix.curvature()*static_cast<double>(sthelix.h());
     double tanLambda = tan(sthelix.dipAngle());
     //cout <<"tanLambda: "<<tanLambda<<endl;
     double eta = curvature*originD.x();
