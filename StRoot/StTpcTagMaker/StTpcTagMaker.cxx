@@ -1,7 +1,10 @@
 //*-- Author : Iwona Sakrejda
 // 
-// $Id: StTpcTagMaker.cxx,v 1.2 2000/05/24 00:25:50 sakrejda Exp $
+// $Id: StTpcTagMaker.cxx,v 1.3 2000/05/24 04:41:00 sakrejda Exp $
 // $Log: StTpcTagMaker.cxx,v $
+// Revision 1.3  2000/05/24 04:41:00  sakrejda
+// Body of the Make() method written
+//
 // Revision 1.2  2000/05/24 00:25:50  sakrejda
 // Body of the Maker and the header cleaned up, comments added.
 //
@@ -17,6 +20,8 @@
 
 #include "StTpcTagMaker.h"
 #include "StChain.h"
+#include "St_TpcTag_Table.h"
+#include "tables/St_dst_mon_soft_tpc_Table.h"
 
 
 ClassImp(StTpcTagMaker)
@@ -43,6 +48,17 @@ Int_t StTpcTagMaker::Make(){
  //
  //  Make - this methoid is called in loop for each event
  //
+ // Find dst_mon_soft_tpc
+
+  St_DataSet *global =  GetInputDS("dst");
+  if (!global) return 0;
+  St_DataSetIter gime(global);
+  St_dst_mon_soft_tpc *tpc_mon_data =(St_dst_mon_soft_tpc *) gime("mon_soft_tpc");
+
+  // Create a data set and add the table to it.
+  St_TpcTag *tagtab= new St_TpcTag("TpcTag",1); m_DataSet->Add(tagtab);
+  
+ 
  return kStOK;
 }
 
