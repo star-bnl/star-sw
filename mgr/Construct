@@ -1,16 +1,25 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.127 2003/06/19 21:57:53 jeromel Exp $
+# $Id: Construct,v 1.128 2003/06/26 19:00:39 jeromel Exp $
 use Env;
-use lib $STAR . "/mgr";    # Modify perl include path
+use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
 
+my $xx=$ENV{ConstructLocation};
+print "Path used for ConsDefs is $xx\n" unless ($param::quiet);
 
-$param::defaultConscript =
-  $STAR . "/mgr/Conscript-standard";    # Default construction file.
+if ( -e "mgr/Conscript-standard"){
+    $xx = " local";
+    $param::defaultConscript =
+	"mgr/Conscript-standard";          # Local construction file.
+} else {
+    $xx = " default";
+    $param::defaultConscript =
+	$STAR . "/mgr/Conscript-standard"; # Default construction file.
+}   
 
 
 print "Path used is $STAR\n" unless ($param::quiet);
-print "Use default Conscript from $param::defaultConscript \n"
+print "Use$xx Conscript from $param::defaultConscript \n"
   unless ($param::quiet);
 print "Install includes\n" unless ($param::quiet);
 
