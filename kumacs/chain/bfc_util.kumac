@@ -56,7 +56,9 @@
 * editted 8/25/98 K. Turner - in (evin), right after reading in tables,
 *                             rmdir event/dst - mismatch between old & new 
 *                             directory structure
-*
+* 
+* editted 8/26/98 K. Turner - in (evin), rm run/params/svt tables that
+*                             are in wrong place and not needed
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -120,7 +122,15 @@ macro bfc_init _
             endif
      (evin)
           exec read_table_from_file#init inev [input_file]
-          exec read_table_from_file#read inev 
+          exec read_table_from_file#read inev
+* 8/26/98 - now read in run/params using db,par2mem and these tables
+*          were in the wrong place in an old version
+	  rm run/params/svt/config
+	  rm run/params/svt/shape
+	  rm run/params/svt/geom
+	  rm run/params/svt/srs_activea
+	  rm run/params/svt/srs_srspar
+	  rm run/params/svt/srs_direct
      (esin)
           dio/newfilestream inev [input_file] r
           cd [run]
@@ -128,53 +138,62 @@ macro bfc_init _
      (rgst) 
      (rg2t) 
      (svg) 
-* exec init_svg#read
+*          exec init_svg#read
            exec init_svg#svg_am
       (tpg) 
-* exec tpg_init#read
+*          exec tpg_init#read
+           exec tpg_init#init
            exec tpg_init#tpg_main
       (sss)
 * 	   exec init_sss
-* exec init_ssf
+*          exec init_ssf
       (srs) 
             exec create_tables_svt#srs
-* exec init_srs		| SVT initialization - fast simulation
+*        exec init_srs		| SVT initialization - fast simulation
       (tfs) 
-            exec create_tables_tpc#tcl_fast
-* exec tcl_init#init
-* exec tfs_init#init
+         exec create_tables_tpc#tcl_fast
+         exec tcl_init#init
+	 exec tfs_init#init
+*        exec tcl_init#read
+*        exec tfs_init#read
       (tss) 
-	    exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
-            exec tss_init#init [tpc_sector_first] [tpc_sector_last]
-      (tfc) exec create_tables_tpc#tfc
+	 exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
+         exec tss_init#init [tpc_sector_first] [tpc_sector_last]
+      (tfc) 
+	 exec create_tables_tpc#tfc
       (tcl)
-            exec create_tables_tpc#tcl_slow
-* exec tcl_init#init
+         exec create_tables_tpc#tcl_slow
+*        exec tcl_init#read
+	 exec tcl_init#init
       (tpt)
-	    exec create_tables_tpc#tpt
-* exec tpt_init#init
+	 exec create_tables_tpc#tpt
+*        exec tpt_init#read
+	 exec tpt_init#init
     (tte_t) 
-	    exec create_tables_tpc#tpt
-* exec tpt_init#init            
+	 exec create_tables_tpc#tpt
+*        exec tpt_init#read 
+	 exec tpt_init#init
     (tte_e)
-            exec create_tables_tpc#tte
-* exec tte_init#init
+         exec create_tables_tpc#tte
+*        exec tte_init#read
+	 exec tte_init#init
       (tid) 
-* exec tid_init#init
+*        exec tid_init#read
+         exec tid_init#init
       (stk)
-	    exec create_tables_svt#sgr
-            exec create_tables_svt#stk
-* exec init_sgr
-* exec init_stk#init
-	    exec init_stk#vtx
+	 exec create_tables_svt#sgr
+         exec create_tables_svt#stk
+*        exec init_sgr
+*        exec init_stk#init
+         exec init_stk#vtx
       (sgr) 
-	    exec create_tables_svt#sgr
-            exec create_tables_svt#stk
-* exec init_sgr
-* exec init_stk#init
-	    exec init_stk#vtx
+	 exec create_tables_svt#sgr
+         exec create_tables_svt#stk
+*        exec init_sgr
+*        exec init_stk#init
+         exec init_stk#vtx
       (spr) 
-* exec init_spr
+*        exec init_spr
       (ffs) 
 	    exec create_tables_ftpc#ffs_tables
 	    exec ffs_init#init
@@ -274,7 +293,7 @@ ABEND:
   
   do i = 1, [nw]
    mod = $word([test],[i],1)
-   message ' !!! bfc_util ==> chain processing for  ' [mod]
+   message ' !!! bfc_util ==> process event for chain value: ' [mod]
    CASE [mod] in 
     (oldin) nextl 1
     (evgin) cd [event]; 
@@ -285,7 +304,7 @@ ABEND:
      (evin) exec read_table_from_file#read inev
             if (staf_status(1).ne.STAFCV_OK) goto EOF
 * 8/25/98 K.Turner - because of mismatch between old and new structure:
-*            rmdir event/dst
+            rmdir event/dst
      (esin) for dir in [evgen] [geantE] [raw_data] [data] [dst]
               cd [dir]; dio/stream/getevent inev 
               if (staf_status(1).ne.STAFCV_OK) goto EOF
