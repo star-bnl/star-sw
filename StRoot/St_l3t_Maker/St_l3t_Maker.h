@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.h,v 1.6 1999/12/23 18:09:08 yepes Exp $
+// $Id: St_l3t_Maker.h,v 1.7 2000/03/28 22:29:29 yepes Exp $
 // $Log: St_l3t_Maker.h,v $
+// Revision 1.7  2000/03/28 22:29:29  yepes
+// overflow problems solve for now
+//
 // Revision 1.6  1999/12/23 18:09:08  yepes
 // Double interface to read DAQ format or tpchit_st from tpc
 //
@@ -48,15 +51,20 @@ class St_l3t_Maker : public StMaker {
     TH1F *m_l3_nTracksSector; //!nTracks per sector
     TH1F *m_l3_cpuTimeSector; //!cpu  Time spend per sector
     TH1F *m_l3_realTimeSector;//!real Time spend per sector
+
+  TString m_InputHitDataSetName; //! 
+  TString m_InputHitName; //!
+
  public: 
-   St_l3t_Maker(const char *name="l3Tracks");
+  void SetInputHits( const Char_t*,  const Char_t*);
+  St_l3t_Maker(const char *name="l3Tracks");
    virtual       ~St_l3t_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
    virtual Int_t  MakeOnLine();
    virtual Int_t  MakeOffLine();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_l3t_Maker.h,v 1.6 1999/12/23 18:09:08 yepes Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_l3t_Maker.h,v 1.7 2000/03/28 22:29:29 yepes Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_l3t_Maker, 1)   //StAF chain virtual base class for Makers
 };
