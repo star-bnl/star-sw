@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.15 2000/04/12 18:39:21 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.16 2000/05/12 20:32:46 fisyak Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.16  2000/05/12 20:32:46  fisyak
+// Add ClassImp, new rootcint requires them
+//
 // Revision 1.15  2000/04/12 18:39:21  flierl
 // check whether enough memory is allocated for the clusters ( for the tables and the buffers )
 //
@@ -94,6 +97,8 @@
 extern TStopwatch i960[18];
 
 ClassImp(St_l3Clufi_Maker)
+ClassImp(St_l3_xyz_Coordinate)
+ClassImp(St_l3_ptrs_Coordinate)
   //_____________________________________________________________________________
   St_l3Clufi_Maker::St_l3Clufi_Maker(const char *name):StMaker(name){
   //  l3Clufi constructor
