@@ -1,5 +1,10 @@
-// $Id: St_l3Clufi_Maker.h,v 1.2 1999/12/07 23:13:53 flierl Exp $
+// $Id: St_l3Clufi_Maker.h,v 1.3 2000/02/24 01:55:25 flierl Exp $
 // $Log: St_l3Clufi_Maker.h,v $
+// Revision 1.3  2000/02/24 01:55:25  flierl
+// i960 timing built in.
+// output just with debug option.
+// pixelarray has now space for 512 timebuckets.
+//
 // Revision 1.2  1999/12/07 23:13:53  flierl
 // histogramms created and filled
 //
@@ -55,7 +60,7 @@
 //class St_stk_stkpar;
 class St_l3Clufi_Maker : public StMaker {
  private:
-    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.2 1999/12/07 23:13:53 flierl Exp $";
+    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.3 2000/02/24 01:55:25 flierl Exp $";
      
     //
     // l3 clusterfinding variables
@@ -63,8 +68,8 @@ class St_l3Clufi_Maker : public StMaker {
     St_DataSet *raw_data_tpc;  //! Raw data from tpc packed according to SN325
     St_DataSet *sector; //! Raw data of sector xx
     Int_t Max_number_of_rows;    //!  45
-    Int_t Max_number_of_pads;    //! 182
-    Int_t Max_number_of_buckets; //! 350
+    Int_t Max_number_of_pads;    //! 184
+    Int_t Max_number_of_buckets; //! 512
     St_pixelarray* Stpixel; //!
     pixelarray_st* pixelst; //!
     St_hitarray* St_hit_bank_this; //!
@@ -77,6 +82,10 @@ class St_l3Clufi_Maker : public StMaker {
     TH1F* y_dis; 
     TH1F* z_dis; 
     TH1F* charge_dis;
+    TH1D* i960_time;
+    
+    // some constants
+    
 
  protected:
  public: 
@@ -93,7 +102,7 @@ class St_l3Clufi_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.2 1999/12/07 23:13:53 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.3 2000/02/24 01:55:25 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_l3Clufi_Maker, 1)   //StAF chain virtual base class for Makers
 };
