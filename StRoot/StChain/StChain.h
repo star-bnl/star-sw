@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.15 1998/11/19 01:23:56 fine Exp $
+// $Id: StChain.h,v 1.16 1998/11/22 18:28:06 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.16  1998/11/22 18:28:06  fisyak
+// Add name of tag
+//
 // Revision 1.15  1998/11/19 01:23:56  fine
 // StChain::MakeDoc has been introduced, StChain::MakeDoc has been fixed (see macros/bfc_doc.C macro
 //
@@ -78,12 +81,12 @@
 class TBrowser;
 class TChain;
 class St_XDFFile; 
-//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.15 1998/11/19 01:23:56 fine Exp $";//StChain header CVS version
-
 class StChain : public StMaker {
 public:
 typedef  enum {kNormal, kDebug} EDebugLevel;
 private:
+   const Char_t        *m_VersionCVS;       //StChain header CVS version
+   const Char_t        *m_VersionTag;       //StChain tag
    Int_t               m_Version;           //StChain version number
    Int_t               m_VersionDate;       //StChain version date
    Int_t               m_Run;               //Run number 

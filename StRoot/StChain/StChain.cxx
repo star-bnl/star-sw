@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.19 1998/11/19 01:23:56 fine Exp $
+// $Id: StChain.cxx,v 1.20 1998/11/22 18:28:05 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.20  1998/11/22 18:28:05  fisyak
+// Add name of tag
+//
 // Revision 1.19  1998/11/19 01:23:56  fine
 // StChain::MakeDoc has been introduced, StChain::MakeDoc has been fixed (see macros/bfc_doc.C macro
 //
@@ -251,18 +254,20 @@ StChain::StChain()
 }
 
 //_____________________________________________________________________________
-StChain::StChain(const char *name, const char *title)
+StChain::StChain(const char *name, const char *title):
+m_VersionCVS("$Id: StChain.cxx,v 1.20 1998/11/22 18:28:05 fisyak Exp $"),
+m_VersionTag("$Name:  $")
 {
    SetName(name);
    SetTitle(title);
    gStChain      = this;
    m_Version     = 100;       //StChain  version number and release date
    m_VersionDate = 180698;
+   
    m_Tree        = 0;
    m_Mode        = 0;
 //   m_Display     = 0;
    m_DataSet       = 0;
-   
    SetDefaultParameters();
 
    gROOT->GetListOfBrowsables()->Add(this,GetName());
@@ -433,7 +438,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.19 1998/11/19 01:23:56 fine Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.20 1998/11/22 18:28:05 fisyak Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
