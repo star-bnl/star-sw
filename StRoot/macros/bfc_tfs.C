@@ -1,5 +1,8 @@
-// $Id: bfc_tfs.C,v 1.14 1999/05/01 01:47:30 fisyak Exp $
+// $Id: bfc_tfs.C,v 1.15 1999/05/01 02:12:40 fisyak Exp $
 // $Log: bfc_tfs.C,v $
+// Revision 1.15  1999/05/01 02:12:40  fisyak
+// change default no. of Events
+//
 // Revision 1.14  1999/05/01 01:47:30  fisyak
 // Add new set of bfc s'
 //
@@ -150,7 +153,7 @@ void Load(){
 #endif /* GLOBAL */
 }
 
-void bfc_tfs (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
+void bfc_tfs (const Int_t Nevents=10000,Char_t *infile=0, Char_t *outfile=0)
 {
   Int_t NoEvents = Nevents;
   // define input file
