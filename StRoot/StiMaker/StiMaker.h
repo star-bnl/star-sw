@@ -10,7 +10,6 @@ using std::string;
 
 #include "StMaker.h"
 #include "StEvent/StEnumerations.h"
-#include "Sti/StiCompositeTreeNode.h" //For typedefs
 #include "Sti/StiObjectFactoryInterface.h"
 #include "Sti/StiFactoryTypes.h"
 #include "Sti/StiKalmanTrackFinder.h"
@@ -41,7 +40,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.34 2001/11/07 21:51:08 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.35 2001/11/14 20:59:10 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 

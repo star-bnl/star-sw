@@ -1,4 +1,4 @@
-//  StiMaker.cxx
+//StiMaker.cxx
 // M.L. Miller
 // 5/00
 
