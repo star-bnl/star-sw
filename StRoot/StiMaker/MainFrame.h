@@ -10,6 +10,9 @@ using std::vector;
 #include <utility>
 using std::pair;
 
+#include <string>
+using std::string;
+
 #include "TObject.h"
 
 #include <TROOT.h>
@@ -61,7 +64,8 @@ enum ETestCommandIdentifiers {
     M_DetNavigate_MoveMinusPhi,
     M_DetNavigate_SetLayer,
     M_DetNavigate_SetLayerAndAngle,
-    
+
+    M_DetView_ManualView,
     M_DetView_SkeletonView,
     M_DetView_ZoomSkeletonView,
     M_DetView_AllVisible,
@@ -72,6 +76,8 @@ enum ETestCommandIdentifiers {
     M_DetView_SvtInvisible,
     M_DetView_IfcVisible,
     M_DetView_IfcInvisible,
+
+    M_DetOnOff,
     
     M_Messenger,
     M_Message_Hit,
@@ -96,6 +102,33 @@ enum ETestCommandIdentifiers {
     M_HELP_ABOUT
 };
 
+//Define some simple classes for controlling the "view" that we're in
+class StiView
+{
+public:
+    virtual void setToDefault() = 0;
+};
+
+//Padrow 45, svt, ssd
+class StiSkeletonView : public StiView
+{
+public:
+    virtual void setToDefault();
+};
+
+//Padrow 1, svt, ssd
+class StiZoomSkeletonView : public StiView
+{
+public:
+    virtual void setToDefault();
+};
+
+//Only those detectors which satisfy isOn()==true
+class StiManualView : public StiView
+{
+public:
+    virtual void setToDefault();
+};
 
 class TileFrame;
 
@@ -119,15 +152,22 @@ public:
     void setStChain(StChain* val) {mchain=val;}
     void setIoMaker(StIOMaker* val) {mIoMaker=val;}
 
-    static void moveIn();
-    static void moveOut();    
-    static void movePlusPhi();
-    static void moveMinusPhi();
+    //Access to the most recently created instance (should be only one, but not guarunteed)
+    static MainFrame* instance() {return s_instance;}
+        
+    void moveIn();
+    void moveOut();    
+    void movePlusPhi();
+    void moveMinusPhi();
 
-    static void setCurrentDetectorToDefault();
-    static void showCurrentDetector(); 
+    void setCurrentDetectorToDefault();
+    void showCurrentDetector();
+
+    void setView(StiView* view);
     
 private:
+
+    static MainFrame* s_instance;
     
     virtual void CloseWindow();
     
@@ -171,6 +211,7 @@ private:
     void printVertices();
     
     //call StiDisplayManager::makeSkeletonView
+    void setManualView();
     void setSkeletonView();
     void setZoomSkeletonView();
     
@@ -219,6 +260,8 @@ private:
     TGTextButton* fFinishEventButton;
     TGTextButton* fResetEventButton;
     TGTextButton* fNextEventButton;
+
+    StiView* mView;
     
     ClassDef(MainFrame,1)
 	};
@@ -236,18 +279,6 @@ public:
     Bool_t HandleButton(Event_t *event);
 };
 
-
-#ifndef __CINT__
-typedef pair<const unsigned int, TGCheckButton*> MessengerPair;
-#else
-class MessengerPair;
-#endif
-
-#ifndef __CINT__
-typedef vector<MessengerPair> MsgPairVec;
-#else
-class MsgPairVec;
-#endif
 
 class Navigator : public TGTransientFrame
 {
@@ -277,6 +308,18 @@ public:
 };
 
 
+#ifndef __CINT__
+typedef pair<const unsigned int, TGCheckButton*> MessengerPair;
+#else
+class MessengerPair;
+#endif
+
+#ifndef __CINT__
+typedef vector<MessengerPair> MsgPairVec;
+#else
+class MsgPairVec;
+#endif
+
 class TestMsgBox : public TGTransientFrame
 {
 private:
@@ -300,6 +343,45 @@ public:
     virtual void CloseWindow();
     virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2);
 };
+
+#ifndef __CINT__
+typedef pair<string, TGCheckButton*> DetectorActivatePair;
+#else
+class DetectorActivatePair;
+#endif
+
+#ifndef __CINT__
+typedef vector<DetectorActivatePair> DetActivatePairVec;
+#else
+class DetActivatePairVec;
+#endif
+
+class DetectorActivator : public TGTransientFrame
+{
+private:
+    
+    TGCompositeFrame     *f1, *f2, *f3;
+
+    TGButton             *fTestButton, *fCloseButton;
+    
+    DetActivatePairVec fC;
+    
+    TGGroupFrame         *fG1;
+    TGLayoutHints        *fL1, *fL2, *fL3, *fL4, *fL42, *fL21;
+    TGGC                  fRedTextGC;
+
+    void updateDetectors();
+    
+public:
+    DetectorActivator(const TGWindow *p, const TGWindow *main, UInt_t w, UInt_t h,
+	       UInt_t options = kVerticalFrame);
+    virtual ~DetectorActivator();
+    
+    virtual void CloseWindow();
+    virtual void activateLayer(const string& name, bool on);
+    virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2);
+};
+
 
 class EntryTestDlg : public TGTransientFrame {
     
