@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrgMaker.cxx,v 1.5 2001/12/22 20:10:04 ward Exp $
+ * $Id: StTrgMaker.cxx,v 1.6 2001/12/25 20:01:19 ward Exp $
  *
  * Author: Herbert Ward April 2001
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTrgMaker.cxx,v $
+ * Revision 1.6  2001/12/25 20:01:19  ward
+ * Outputs error (closeness to edge) of track extension subsector selection.
+ *
  * Revision 1.5  2001/12/22 20:10:04  ward
  * New code for MWC.
  *
@@ -219,39 +222,57 @@ void StTrgMaker::CalcCenterOfCircleDefinedByTrack(int q,double radius,double psi
 }
 // bbb You might want to assert a positive mag field in DoOneTrackMwc.
 #define MWC_LOCATION 200 // z location, centimeters bbb
-void StTrgMaker::Location2Sector(double tanl,double xAtMwc,double yAtMwc,int *sector,int *subsector) {
-  double rad,angleInDegrees;
+// comment 62a: This line has || instead of &&.
+void StTrgMaker::Location2Sector(double tanl,double xAtMwc,
+      double yAtMwc,int *sect,int *subsect,double *errDistPhi,double *errDistRad) {
+  double errPhi,angleDiff,rad,ang,mid,rmid,radDiff;
 
-  *subsector=-123; *sector=-123;
+  *subsect=-123; *sect=-123;
 
-  angleInDegrees=atan2(yAtMwc,xAtMwc)/RPD;
-  while(angleInDegrees<-180) angleInDegrees+=360;
-  while(angleInDegrees> 180) angleInDegrees-=360;
-  /**/ if(  -15 <= angleInDegrees && angleInDegrees <=   15 ) *sector =  3;
-  else if(   15 <= angleInDegrees && angleInDegrees <=   45 ) *sector =  2;
-  else if(   45 <= angleInDegrees && angleInDegrees <=   75 ) *sector =  1;
-  else if(   75 <= angleInDegrees && angleInDegrees <=  105 ) *sector = 12;
-  else if(  105 <= angleInDegrees && angleInDegrees <=  135 ) *sector = 11;
-  else if(  135 <= angleInDegrees && angleInDegrees <=  165 ) *sector = 10;
-  else if(  165 <= angleInDegrees || angleInDegrees <= -165 ) *sector =  9; // This line has || instead of &&.
-  else if( -165 <= angleInDegrees && angleInDegrees <= -135 ) *sector =  8;
-  else if( -135 <= angleInDegrees && angleInDegrees <= -105 ) *sector =  7;
-  else if( -105 <= angleInDegrees && angleInDegrees <=  -75 ) *sector =  6;
-  else if(  -75 <= angleInDegrees && angleInDegrees <=  -45 ) *sector =  5;
-  else if(  -45 <= angleInDegrees && angleInDegrees <=  -15 ) *sector =  4;
+  ang=atan2(yAtMwc,xAtMwc)/RPD;
+  while(ang<-180) ang+=360;
+  while(ang> 180) ang-=360;
+  /**/ if( -15<=ang && ang<=  15) { *sect= 3; mid=   0; }
+  else if(  15<=ang && ang<=  45) { *sect= 2; mid=  30; }
+  else if(  45<=ang && ang<=  75) { *sect= 1; mid=  60; }
+  else if(  75<=ang && ang<= 105) { *sect=12; mid=  90; }
+  else if( 105<=ang && ang<= 135) { *sect=11; mid= 120; }
+  else if( 135<=ang && ang<= 165) { *sect=10; mid= 150; }
+  else if( 165<=ang || ang<=-165) { *sect= 9; if(ang>0) mid=180; else mid=-180; } // See comment 62a
+  else if(-165<=ang && ang<=-135) { *sect= 8; mid=-150; }
+  else if(-135<=ang && ang<=-105) { *sect= 7; mid=-120; }
+  else if(-105<=ang && ang<= -75) { *sect= 6; mid= -90; }
+  else if( -75<=ang && ang<= -45) { *sect= 5; mid= -60; }
+  else if( -45<=ang && ang<= -15) { *sect= 4; mid= -30; }
   else assert(0);
 
   rad=sqrt(xAtMwc*xAtMwc+yAtMwc*yAtMwc);
-  if(rad >=  53.000 && rad <  85.000 ) *subsector=1;
-  if(rad >=  85.000 && rad < 117.000 ) *subsector=2;
-  if(rad >= 125.395 && rad < 157.395 ) *subsector=3;
-  if(rad >= 157.395 && rad < 189.395 ) *subsector=4;
+  if(rad >=  53.000 && rad <  85.000 ) { *subsect=1; rmid=( 53.000+ 85.000)/2.0; }
+  if(rad >=  85.000 && rad < 117.000 ) { *subsect=2; rmid=( 85.000+117.000)/2.0; }
+  if(rad >= 125.395 && rad < 157.395 ) { *subsect=3; rmid=(125.395+157.395)/2.0; }
+  if(rad >= 157.395 && rad < 189.395 ) { *subsect=4; rmid=(157.395+189.395)/2.0; }
 
-  if(*sector>0&&*subsector>0&&tanl<0) {
-    if(*sector==12) *sector=24; else *sector=24-*sector;
+  if(*subsect>0&&*sect>0) {
+
+    angleDiff=ang-mid;
+    if(angleDiff>0) errPhi=15-angleDiff; else errPhi=15+angleDiff; // Width of subsectors = 30 degrees
+    *errDistPhi=RPD*errPhi*rad;
+    assert(*errDistPhi>0.0);
+
+    radDiff=rad-rmid;
+    if(radDiff>0) *errDistRad=16-radDiff; else *errDistRad=16+radDiff; // Radial len of subsectors = 32cm
+    assert(*errDistRad>0.0);
+
+  } else {
+    *errDistPhi=-1.0;
+    *errDistRad=-1.0;
   }
-  assert(*sector<=24);
-  assert(*subsector<=4);
+
+  if(*sect>0&&*subsect>0&&tanl<0) {
+    if(*sect==12) *sect=24; else *sect=24-*sect;
+  }
+  assert(*sect<=24);
+  assert(*subsect<=4);
 }
 void StTrgMaker::DoOneTrackMwc(FILE *oo,long q,double curvatureCircle2,double phi0Circle1,   // www
          double psi,double r0Circle1,double tanl,double z0) {
@@ -261,13 +282,13 @@ void StTrgMaker::DoOneTrackMwc(FILE *oo,long q,double curvatureCircle2,double ph
   // radiusCircle2, radiansAtStartCircle2,radiansInFlightCircle2, and radiansAtMwcCircle2.
   int sector,subsector;
   double xstart,ystart,xCenterCircle2,ycenterCircle2,dist,radiusCircle2,radiansInFlightCircle2;
-  double xAtMwc,yAtMwc,radiansAtStartCircle2,radiansAtMwcCircle2;
+  double xAtMwc,yAtMwc,radiansAtStartCircle2,radiansAtMwcCircle2,errDistPhi,errDistRad;
   assert(curvatureCircle2>=0); // Not physical, just a convention for the code below.
   if(tanl>0) dist=MWC_LOCATION-z0; else dist=-MWC_LOCATION-z0;
   radiusCircle2=1/curvatureCircle2;
   radiansInFlightCircle2=dist/(radiusCircle2*tanl);
   assert(radiansInFlightCircle2>=0); // May become neg below.
-  if(radiansInFlightCircle2>PI) { fprintf(oo,"M-1:-1\n"); return; } // Hard to extend such a shallow trk.
+  if(radiansInFlightCircle2>PI) { fprintf(oo,"M-1:-1\nR999\nN999\n"); return; } // don't extend so shallow a trk
   if(q<0) radiansInFlightCircle2*=-1;
   CalcCenterOfCircleDefinedByTrack(q,radiusCircle2,psi,r0Circle1,phi0Circle1,&xCenterCircle2,&ycenterCircle2);
   xstart=r0Circle1*cos(RPD*phi0Circle1); ystart=r0Circle1*sin(RPD*phi0Circle1);
@@ -275,8 +296,10 @@ void StTrgMaker::DoOneTrackMwc(FILE *oo,long q,double curvatureCircle2,double ph
   radiansAtMwcCircle2=radiansAtStartCircle2+radiansInFlightCircle2;
   xAtMwc=xCenterCircle2+radiusCircle2*cos(radiansAtMwcCircle2);
   yAtMwc=ycenterCircle2+radiusCircle2*sin(radiansAtMwcCircle2);
-  Location2Sector(tanl,xAtMwc,yAtMwc,&sector,&subsector);
+  Location2Sector(tanl,xAtMwc,yAtMwc,&sector,&subsector,&errDistPhi,&errDistRad);
   OO"M%d:%d\n",sector,subsector);
+  OO"R%4.2f\n",errDistRad); // dist from edge of MWC subsector in radial direction, cm
+  OO"N%4.2f\n",errDistPhi); // dist from edge of MWC subsector in phi    direction, cm
 }
 void StTrgMaker::DoOneTrackCtb(FILE *oo,long q,double curvature,double phi0,
          double psi,double r0,double tanl,double z0) {
