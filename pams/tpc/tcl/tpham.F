@@ -235,9 +235,8 @@ c
 c
 c          finally, transform everything to global coordinates !
 c
-c          tval = (tphit(tphith.nok).z*time_bin)
-c          invec(3)=dble(detector(1).drift_length
-c    +                 -tval*time_bucket/time_bin)
+c          account for "lower-edge" binning in z coordinate
+c
            invec(3)=dble(tphit(tphith.nok).z*time_bucket)
            invec(2)=tpg_row_to_y(irow,isec)
            invec(1)=tpg_pad_to_x(tphit(tphith.nok).x,irow,isec)
@@ -364,7 +363,7 @@ c
 
            tdc_lo = iand(idatum(2),botmask)
            tdc_hi = ibits(idatum(2),14,2)*'100'X
-           itdc(iclspix) = real(tdc_lo + tdc_hi)
+           itdc(iclspix) = real(tdc_lo + tdc_hi) 
 
            ipad(iclspix) = real(tpseq(kseq).secpad-id_pad(irow))
 
@@ -374,7 +373,7 @@ c
               iclspix = iclspix + 1
               ldatum = tppixel(jpix+indx-1).datum
               iadc(iclspix) = real(idatum(1))
-              itdc(iclspix) = real(itdc(iclspix-1)+1)
+              itdc(iclspix) = real(itdc(iclspix-1)+1.)
               ipad(iclspix) = real(ipad(iclspix-1))
 c
 c             for MC data!
@@ -420,11 +419,14 @@ C-----------------------------------------------------------------------
       RECORD/ tphit_row_st/ tphit(*)
 
 C-----------------------------------------------------------------------
+        real vmax
+
         real iadc(*),itdc(*),ipad(*)
         integer nclspix
 C-----------------------------------------------------------------------
         integer ipix
         real    sum,tdc,pad,tdc2,pad2
+        real    max_adc
 C-----------------------------------------------------------------------
         sum = 0.
         tdc = 0.
@@ -440,7 +442,10 @@ C-----------------------------------------------------------------------
         pad = pad/sum
         tdc = tdc/sum
 
-        tphit(tphith.nok).q = sum
+c       tphit(tphith.nok).q = sum
+        max_adc = vmax(iadc,nclspix)
+        tphit(tphith.nok).q = max_adc
+
         tphit(tphith.nok).x = pad
         tphit(tphith.nok).z = tdc
 
