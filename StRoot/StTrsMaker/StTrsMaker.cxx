@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.43 1999/10/11 23:54:31 calderon Exp $
+// $Id: StTrsMaker.cxx,v 1.44 1999/10/12 22:51:17 long Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.44  1999/10/12 22:51:17  long
+// fix a bug in switching from sector to sector
+//
 // Revision 1.43  1999/10/11 23:54:31  calderon
 // Version with Database Access and persistent file.
 // Not fully tested due to problems with cons, it
@@ -237,7 +240,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.43 1999/10/11 23:54:31 calderon Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.44 1999/10/12 22:51:17 long Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -632,12 +635,12 @@ Int_t StTrsMaker::Make(){
 	if((inRange)  &&                                 //HL
 	   (bsectorOfHit != currentSectorProcessed&&start==false) &&//HL
 	   (i            <= no_tpc_hits           )) {//HL
-	  currentSectorProcessed=bsectorOfHit;//HL
+      
           
           tpc_hit--;
           i--;
 	}  //HL    ,continue to another sector....
-		if((inRange)  &&
+	   else	if((inRange)  &&
 	 (bsectorOfHit == currentSectorProcessed||start==true) &&
 	(i            <= no_tpc_hits           )) {
                   currentSectorProcessed=bsectorOfHit;//HL
@@ -835,7 +838,7 @@ Int_t StTrsMaker::Make(){
 	
 	//
 	// Go to the next sector --> should be identical to a simple increment
-	//	currentSectorProcessed = bsectorOfHit;
+	currentSectorProcessed = bsectorOfHit;
         numberOfProcessedPointsInCurrentSector = 0;
 // you can skip out here if you only want to process a single sector...
 // 	if(currentSectorProcessed>3)
