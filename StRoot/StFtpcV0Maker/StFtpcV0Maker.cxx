@@ -22,7 +22,7 @@
 // Star Module and Table stuff
 #include "ftpc/St_fpt_Module.h"
 #include "ftpc/St_fte_Module.h"
-#include "St_fv0_vertex_Table.h"
+#include "tables/St_fv0_vertex_Table.h"
 
 #include "StFtpcV0Maker.h"
 #include "StChain.h"
