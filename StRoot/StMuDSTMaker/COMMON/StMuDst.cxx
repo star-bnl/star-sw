@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.22 2004/04/06 00:25:35 jeromel Exp $
+ * $Id: StMuDst.cxx,v 1.23 2004/04/08 23:58:07 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -261,11 +261,13 @@ StEvent* StMuDst::createStEvent() {
   }
   // now get the TOF stuff and put it in the StEvent
   StTofCollection *tofcoll = new StTofCollection();
-  int nTofData = tofArrays[muTofData]->GetEntries();
-  for(int i=0;i<nTofData;i++) {
-    tofcoll->addData(tofData(i));
+  if (tofcoll){
+    int nTofData = tofArrays[muTofData]->GetEntries();
+    for(int i=0;i<nTofData;i++) {
+      tofcoll->addData(tofData(i));
+    }
+    ev->setTofCollection(tofcoll);
   }
-  ev->setTofCollection(tofcoll);
 
   // now create, fill and add new StTriggerIdCollection to the StEvent
   StTriggerIdCollection* triggerIdCollection = new StTriggerIdCollection();
@@ -342,6 +344,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.23  2004/04/08 23:58:07  jeromel
+ * Small protection on tofcoll
+ *
  * Revision 1.22  2004/04/06 00:25:35  jeromel
  * Missing TofCollection addition
  *
