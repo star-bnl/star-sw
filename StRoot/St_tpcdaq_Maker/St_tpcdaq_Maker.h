@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.3 1999/04/07 19:48:41 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.4 1999/04/28 19:46:13 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.4  1999/04/28 19:46:13  ward
+// QA histograms.
+//
 // Revision 1.3  1999/04/07 19:48:41  ward
 // Fixed adc mis-cast and also mis-count of pixel offset.
 //
@@ -34,9 +37,11 @@ class StTpcRawDataEvent;
 class StTrsSimpleMaker;
 class StTpcUnpacker;
 class StSequence;
+class TH1F;
 class St_tpcdaq_Maker : public StMaker {
  private:
    StTpcRawDataEvent *mEvent; //!
+   void MakeHistograms();
 #ifdef TRS_SIMPLE
    StTrsSimpleMaker *mUnpacker; //!
 #else
@@ -44,6 +49,12 @@ class St_tpcdaq_Maker : public StMaker {
 #endif
    Int_t GetEventAndDecoder();
  protected:
+   TH1F *m_seq_startTimeBin;   // These names are more or less self-
+   TH1F *m_seq_sequnceLength;  // explanatory.  For example, the first one
+   TH1F *m_seq_padNumber;      // means "vertical axis is number of sequences,
+   TH1F *m_seq_padRowNumber;   // and the horizontal axis is startTimeBin".
+   TH1F *m_pad_numSeq;         // Happy sailing.
+   TH1F *m_pix_AdcValue;       //
  public: 
                   St_tpcdaq_Maker(const char *name="tpc_raw");
    int mErr;
