@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.139 2004/01/28 04:37:26 perev Exp $
+// $Id: StMaker.cxx,v 1.140 2004/02/17 19:53:14 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -99,6 +99,7 @@ StMaker::~StMaker()
   delete fMemStatMake;	fMemStatMake  = 0;
   delete fMemStatClear;	fMemStatClear = 0;
   Cleanup(this);
+  StMkDeb::Cancel(this);
 }
 //______________________________________________________________________________
 void StMaker::SetNumber(Int_t number)
@@ -502,7 +503,7 @@ void StMaker::StartMaker()
     m_DataSet = Find(".data");
     if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
   }
-  if (GetNumber()>3) fMemStatMake->Start();
+  /*if (GetNumber()>3)*/ fMemStatMake->Start();
   
 
   StartTimer();
@@ -517,7 +518,7 @@ void StMaker::EndMaker(int ierr)
   if (m_GarbSet) m_GarbSet->Delete();
   ::doPs(GetName(),"EndMaker");
   
-  if (GetNumber()>3) fMemStatMake->Stop();
+  /*if (GetNumber()>3)*/ fMemStatMake->Stop();
   StopTimer();
 }
 
@@ -1217,6 +1218,9 @@ AGAIN: switch (fState) {
 }
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.140  2004/02/17 19:53:14  perev
+// Make more robust
+//
 // Revision 1.139  2004/01/28 04:37:26  perev
 // Print of new Run added
 //
