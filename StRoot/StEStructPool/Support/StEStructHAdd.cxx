@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.1 2004/07/01 00:37:13 porter Exp $
+ * $Id: StEStructHAdd.cxx,v 1.2 2005/03/03 01:33:04 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -24,16 +24,21 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* tf, int* nlist, int ntot
 
   const char* base[]={"Sib","Mix"};
   const char* tpe[]={"pp","pm","mm"};
-  const char* knd[]={"MtMt","EtaEta","PhiPhi","PtPt",
-                     "SMtDMt","SEtaDEta","SPhiDPhi","SPtDPt",
-                     "DMtDPhi","DEtaDMt","DEtaDPhi","IM",
-                     "SMtSPhi","SEtaSMt","SEtaSPhi"};
+  const char* knd[]={"YtYt","PtPt",
+                     "EtaEta","PhiPhi",
+                     "PrEtaEta","PrPhiPhi",
+                     "SuEtaEta","SuPhiPhi",
+                     "SYtDYt","SPtDPt",
+                     "DEtaDPhi","SEtaDPhi",
+                     "PrDEtaDPhi","PrSEtaDPhi",
+                     "SuDEtaDPhi","SuSEtaDPhi",
+                     "Qinv"};
 
   TFile* tfout=new TFile(outfile,"RECREATE");
 
   for(int i=0;i<2;i++){
     for(int j=0;j<3;j++){
-      for(int k=0;k<15;k++){
+      for(int k=0;k<17;k++){
         TString htype(base[i]);htype+=tpe[j];htype+=knd[k];
         TH1* outhist=0;
           for(int n=0;n<ntot;n++){
@@ -61,6 +66,21 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* tf, int* nlist, int ntot
     }
   }
 
+  tf->cd();
+  TH1* tmp=(TH1*)tf->Get("NEventsSame");
+  tfout->cd();
+  tmp->Write();
+
+  tf->cd();
+  tmp=(TH1*)tf->Get("NEventsMixed");
+  tfout->cd();
+  tmp->Write();
+
+  tf->cd();
+  tmp=(TH1*)tf->Get("pt");
+  tfout->cd();
+  tmp->Write();
+
   tfout->Close();
 };
 
@@ -75,6 +95,10 @@ void StEStructHAdd::addCuts(const char* outfile, const char* infile, int* nlist,
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.2  2005/03/03 01:33:04  porter
+ * Added pt-correlations method to support and included
+ * these histograms to the HAdd routine
+ *
  * Revision 1.1  2004/07/01 00:37:13  porter
  * new code previously my StEStructHelper. Takes hists from correltation
  * pass and builds final ressults.  Also the StEStructHAdd.h is a simple

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.1 2004/07/01 00:37:17 porter Exp $
+ * $Id: StEStructSupport.h,v 1.2 2005/03/03 01:33:05 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -27,6 +27,7 @@ class StEStructSupport : public TObject {
 
   TFile* mtf;
   float mNbar;
+  float* mnpairs; //! for normalization comparing different cuts 
   int   mbgMode;
   char* mtmpString;
 
@@ -41,7 +42,7 @@ class StEStructSupport : public TObject {
 
 public:
 
-  StEStructSupport(TFile* tf, int bgmode, float nbar=1.);
+  StEStructSupport(TFile* tf, int bgmode, float* npairs=0, float nbar=1.);
   virtual ~StEStructSupport();
   void setTFile(TFile* tf);
   void setNBar(float nbar);
@@ -50,6 +51,8 @@ public:
   TH1** getHists(const char* name);
   float* getNorms(TH1** histArray);
   TH1** getLocalClones(const char* name);
+  TH1** getPtHists(const char* name);
+  TH1** getPtClones(const char* name);
 
   // ++, +-, --, ++ - --
   TH1** buildCommonRatios(const char* name);
@@ -61,14 +64,17 @@ public:
   TH1** buildChargeTypeRatios(const char* name);
   TH1** buildChargeTypeCFunctions(const char* name);
   TH1** buildChargeTypeRFunctions(const char* name);
-  TH1** buildChargeTypes(const char* name, int opt=0);
+  TH1** buildChargeTypes(const char* name, int opt, float* sf=0);
+
+  TH1** buildPtChargeTypes(const char* name);
+
   
-  void scaleBackGround(TH1* sib, TH1* mix);
+  void scaleBackGround(TH1* sib, TH1* mix, float sf=0);
   TH1* getSqrt(TH1* h);
   void fixDEta(TH2** h, int numHists); // correct triangle in hists with DEta
 
   // helper for writing ascii dump of set a of histograms to file=fname
-  void writeAscii(TH1** h, int numHists, const char* fname);
+  void writeAscii(TH1** h, int numHists, const char* fname, int optErrors);
 
   ClassDef(StEStructSupport,1)
 };
@@ -83,6 +89,10 @@ inline void StEStructSupport::setBGMode(int mode){ mbgMode=mode; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.2  2005/03/03 01:33:05  porter
+ * Added pt-correlations method to support and included
+ * these histograms to the HAdd routine
+ *
  * Revision 1.1  2004/07/01 00:37:17  porter
  * new code previously my StEStructHelper. Takes hists from correltation
  * pass and builds final ressults.  Also the StEStructHAdd.h is a simple

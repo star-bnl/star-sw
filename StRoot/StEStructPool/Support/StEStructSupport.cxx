@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.1 2004/07/01 00:37:17 porter Exp $
+ * $Id: StEStructSupport.cxx,v 1.2 2005/03/03 01:33:05 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -12,6 +12,7 @@
  *
  ***********************************************************************/
 #include "StEStructSupport.h"
+#include "StEStructPool/Correlations/StEStructMaxB.h"
 #include "Stiostream.h"
 #include "Stsstream.h"
 #include "TFile.h"
@@ -21,6 +22,7 @@
 
 const char* _pair_typename[] = {"Sib","Mix"};
 const char* _pair_chargename[]   = {"pp","pm","mm"};
+const char* _pair_ptweight[]   = {"Pr","Su"};
 int _pair_typemax=2;
 int _pair_chargemax=3;
 int _pair_totalmax=_pair_typemax*_pair_chargemax;
@@ -75,7 +77,20 @@ const char* StEStructSupport::getChargeSignName(int ics){
 //
 //---------------------------------------------------------
 
-StEStructSupport::StEStructSupport(TFile* tf, int bgmode, float nbar): mtf(tf), mNbar(nbar), mbgMode(bgmode), mtmpString(NULL){}
+StEStructSupport::StEStructSupport(TFile* tf, int bgmode, float* npairs, float nbar): mtf(tf), mNbar(nbar), mbgMode(bgmode), mtmpString(NULL){
+
+  //
+  // npairs is a normalization for when one cuts on say two (many) different 
+  // ytyt slices and wants to compare the amplitudes, the generic normalization
+  // of sum of rho = 1. isn't sufficient
+  //
+
+  if(npairs){
+    mnpairs = new float[6];
+    for(int i=0;i<6;i++)mnpairs[i]=npairs[i];
+  }
+
+}
 
 StEStructSupport::~StEStructSupport(){ if(mtmpString) delete [] mtmpString; };
 
@@ -127,6 +142,43 @@ TH1** StEStructSupport::getLocalClones(const char* name){
 }
 
 //---------------------------------------------------------
+TH1** StEStructSupport::getPtHists(const char* name){
+
+  TH1** retVal=NULL;
+  if(!goodName(name)) return retVal;
+  
+  retVal=new TH1*[18];
+
+  for(int i=0;i<_pair_totalmax;i++){
+    TString hname(getFrontName(i)),hprname(getFrontName(i)),hsuname(getFrontName(i));
+    hname+=name;
+    hprname+="Pr"; hprname+=name;
+    hsuname+="Su"; hsuname+=name;
+    retVal[i] = (TH1*)mtf->Get(hname.Data());
+    retVal[i+6] = (TH1*)mtf->Get(hprname.Data());
+    retVal[i+12] = (TH1*)mtf->Get(hsuname.Data());
+  }
+
+  return retVal;
+}
+
+//---------------------------------------------------------------
+TH1** StEStructSupport::getPtClones(const char* name){
+
+  TH1** hset=getPtHists(name);
+  if(!hset) return (TH1**)NULL;
+
+  // make local clones
+  TH1** hlocal=new TH1*[_pair_totalmax*3];
+  for(int i=0;i<_pair_totalmax*3;i++) {
+    hlocal[i]=(TH1*)hset[i]->Clone();
+    hlocal[i]->Sumw2();  // trigger error propogation
+  }
+
+  return hlocal;
+}
+
+//---------------------------------------------------------
 TH1** StEStructSupport::buildCommonRatios(const char* name){
   return buildCommon(name,0);
 }
@@ -151,23 +203,25 @@ TH1** StEStructSupport::buildCommon(const char* name, int opt){
 
   // four returned hists
   TH1** retVal= new TH1*[4]; // 0=++ 1=+- 2=-- 3=++ - --
+  const char* nm[4]={"PP","US","MM","CS"};
+  const char* tit[4]={"PP : ++ + --","US : +- + -+","MM: ++ + -- - +- - -+","CS : ++ - --"};
   for(int i=0;i<4;i++){
     retVal[i]=(TH1*)hlocal[0]->Clone();// just get correct dimensions & names
-    retVal[i]->SetName(swapIn(hlocal[i]->GetName(),"Sib",(const char*)NULL));
-    retVal[i]->SetTitle(swapIn(hlocal[i]->GetTitle(),"Sibling",(const char*)NULL));
+    retVal[i]->SetName(swapIn(hlocal[0]->GetName(),"Sibpp",nm[i]));
+    retVal[i]->SetTitle(swapIn(hlocal[0]->GetTitle(),"Sibling : +.+",tit[i])); 
     retVal[i]->Scale(0.); // zero the hists
   }
-
-  retVal[3]->SetName(swapIn(retVal[0]->GetName(),"pp","df"));
-  retVal[3]->SetTitle(swapIn(retVal[0]->GetTitle(),"+.+","+.+ - -.-"));
 
 // normalize by integral
   for(int i=0;i<6;i++)hlocal[i]->Scale(1.0/hlocal[i]->Integral());
 
 // if requested, scale bg to require correlations>=0 where statistics are large
+
+  float sf=1.0; // sf used in buildChargeTypes... here it is set to 1.
   if(1==mbgMode){
-   scaleBackGround(hlocal[0],hlocal[3]);
-   scaleBackGround(hlocal[1],hlocal[4]);
+   scaleBackGround(hlocal[0],hlocal[3],sf);
+   scaleBackGround(hlocal[1],hlocal[4],sf);
+   scaleBackGround(hlocal[2],hlocal[5],sf);
   }
 
   for(int i=0;i<3;i++){
@@ -182,24 +236,7 @@ TH1** StEStructSupport::buildCommon(const char* name, int opt){
 
   }
 
-  //-- now do "++ - --" ...right now implement quickly ... but correct?
-  hlocal[0]->Add(hlocal[2],-1.0);   // ++ - -- Sib
-  hlocal[0]->Scale(1.0/hlocal[0]->Integral());
-  hlocal[3]->Add(hlocal[5],-1.0);   // ++ - -- Mix
-  hlocal[3]->Scale(1.0/hlocal[3]->Integral());
-
-  if(1==mbgMode)scaleBackGround(hlocal[0],hlocal[3]);
-
-  retVal[3]->Add(hlocal[0],hlocal[3],1.0,-1.0);  // delta-rho
-
-  if(0==opt){ 
-    retVal[3]->Divide(hlocal[3]);  // delta-rho/rho_mix
-
-  } else if(2==opt){
-    TH1* tmp=getSqrt(hlocal[3]);   // delta-rho/sqrt(rho_mix)
-    retVal[3]->Divide(tmp);
-  }
-
+  retVal[3]->Add(retVal[0],retVal[2],1.0,-1.0);  // delta-rho
   if(mNbar!=1.0)for(int i=0;i<4;i++) retVal[i]->Scale(mNbar); // Nbar scaling
 
   return retVal;
@@ -219,7 +256,7 @@ TH1** StEStructSupport::buildChargeTypeRFunctions(const char* name){
 }
 
 //---------------------------------------------------------
-TH1** StEStructSupport::buildChargeTypes(const char* name, int opt){
+TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf){
 
   // build hist types = LS, US, CD, CI
 
@@ -235,7 +272,7 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt){
   const char* tit[4]={"LS : ++ + --","US : +- + -+","CD: ++ + -- - +- - -+","CI : ++ + -- + +- + -+"};
 
   for(int i=0;i<4;i++){
-    retVal[i]=(TH1*)new TH2F(*(TH2F*)hlocal[0]);// hlocal[0]->Clone();// just get correct dimensions & Names
+    retVal[i]=(TH1*)hlocal[0]->Clone();
     retVal[i]->SetName(swapIn(hlocal[0]->GetName(),"Sibpp",nm[i]));
     retVal[i]->SetTitle(swapIn(hlocal[0]->GetTitle(),"Sibling : +.+",tit[i])); 
     retVal[i]->Scale(0.); // zero the hists
@@ -244,33 +281,57 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt){
   hlocal[0]->Add(hlocal[2]);  // ++ + -- Sib
   hlocal[3]->Add(hlocal[5]);  // ++ + -- Mix
 
-// normalize by integral
-  for(int i=0;i<6;i++)hlocal[i]->Scale(1.0/hlocal[i]->Integral());
+  // At this point I no longer need -- hists; hlocal[2] and hlocal[5] 
+  // So I want to reuse these for alternative calculation of CD=LS-US.
+
+  // 1st get the LS-US;
+  hlocal[2]->Scale(0.);
+  hlocal[5]->Scale(0.);
+  hlocal[2]->Add(hlocal[0]);
+  hlocal[5]->Add(hlocal[3]);
+
+  if(strstr(name,"DEta") || strstr(name,"SEta"))fixDEta((TH2**)hlocal,6);
+  if(mnpairs){
+    for(int i=0;i<6;i++) hlocal[i]->Scale(1.0/mnpairs[i]);
+  } else {
+     for(int i=0;i<6;i++) hlocal[i]->Scale(1.0/hlocal[i]->Integral());
+  }
+
+
+  hlocal[2]->Add(hlocal[1],-1.0);
+  hlocal[5]->Add(hlocal[4],-1.0);
+
+  float scf1=0.;
+  float scf2=0.;
+    if(sf){
+      scf1=sf[0];
+      scf2=sf[1];
+    }      
 
 // if requested, scale bg to require correlations>=0 where statistics are large
   if(1==mbgMode){
-   scaleBackGround(hlocal[0],hlocal[3]);
-   scaleBackGround(hlocal[1],hlocal[4]);
+   scaleBackGround(hlocal[0],hlocal[3],scf1);
+   scaleBackGround(hlocal[1],hlocal[4],scf2);
+   if(opt==3)scaleBackGround(hlocal[2],hlocal[5]);
   }
 
-  if(strstr(name,"DEta"))fixDEta((TH2**)hlocal,6);
-  
   retVal[0]->Add(hlocal[0]);
   retVal[1]->Add(hlocal[1]);
+  retVal[2]->Add(hlocal[2]);
   
-  for(int i=0;i<2;i++){
+  int ilim=2;  
+  if(opt==3)ilim=3;
+  for(int i=0;i<ilim;i++){
     retVal[i]->Add(hlocal[i+3],-1.0);  // delta-rho : if opt =1, we're done
-
     if(0==opt) {
       retVal[i]->Divide(hlocal[i+3]);  // delta-rho/rho_mix
-
-    } else if(2==opt){                 // delta-rho/sqrt(rho_mix)
+    } else if(opt>=2){                 // delta-rho/sqrt(rho_mix)
       TH1* tmp=getSqrt(hlocal[i+3]);
       retVal[i]->Divide(tmp);
     } // else opt==2                     
   }
-  
-  retVal[2]->Add(retVal[0],retVal[1],1.,-1.);  // CD
+ 
+  if(opt<3)retVal[2]->Add(retVal[0],retVal[1],1.,-1.);  // CD
   retVal[3]->Add(retVal[0],retVal[1],1.,1.);   // CI
 
   // scale with nbar if requested 
@@ -280,17 +341,91 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt){
 }
 
 //---------------------------------------------------------
-void StEStructSupport::scaleBackGround(TH1* sib, TH1* mix){
+TH1** StEStructSupport::buildPtChargeTypes(const char* name){
+
+  if(!mtf) return (TH1**)NULL;
+  TH1F *hptInclusive = (TH1F *)mtf->Get("pt");
+  double ptHat = hptInclusive->GetMean();
+  TH1F *hNEventsSame = (TH1F *)mtf->Get("NEventsSame");
+  double nEventsSame = hNEventsSame->GetEntries();
+  cout <<"ptHat = " << ptHat << '\t'<<"nEventsSame = " << nEventsSame << endl;
+
+  // -- here we get 18 hists: 
+  //    3 groups of 6 (Sibpp,Sibpm,Sibmm,Mixpp,Mixpm,Mixmm) 
+  //    1st 6 are number, 2nd 6 are pt1*pt2 ,3rd are pt1+pt2
+
+  TH1** hlocal=getPtClones(name);
+
+  // four returned hists
+  TH1** retVal= new TH1*[4]; // 0=LS 1=US 2=CD=LS-US 3=CI=LS+US
+  const char* nm[4]={"LS","US","CD","CI"};
+  const char* tit[4]={"LS : ++ + --","US : +- + -+","CD: ++ + -- - +- - -+","CI : ++ + -- + +- + -+"};
+
+  for(int i=0;i<4;i++){
+    retVal[i]=(TH1*)hlocal[0]->Clone();
+    retVal[i]->SetName(swapIn(hlocal[0]->GetName(),"Sibpp",nm[i]));
+    retVal[i]->SetTitle(swapIn(hlocal[0]->GetTitle(),"Sibling : +.+",tit[i])); 
+    retVal[i]->Scale(0.); // zero the hists
+  }
+
+  const char* tmp[3]={"PP","PM","MM"};  
+  TH1* tmpVal[3]; // ++,+-,--
+  for(int i=0;i<3;i++){
+    tmpVal[i]=(TH1*)hlocal[0]->Clone();
+    tmpVal[i]->SetName(swapIn(hlocal[0]->GetName(),"Sibpp",tmp[i]));
+    tmpVal[i]->SetTitle(swapIn(hlocal[0]->GetTitle(),"Sibling : +.+",tmp[i])); 
+    tmpVal[i]->Scale(0.); // zero the hists 
+  }
+
+  if(strstr(name,"DEta") || strstr(name,"SEta"))fixDEta((TH2**)hlocal,18);
+
+  for(int i=0;i<3;i++){
+    for(int ix=0;ix<=tmpVal[i]->GetNbinsX();ix++){
+     for(int iy=0;iy<=tmpVal[i]->GetNbinsY();iy++){
+       double n = hlocal[i]->GetBinContent(ix, iy) / nEventsSame; // number
+       double a = hlocal[i+6]->GetBinContent(ix, iy) / nEventsSame; // ptxpt
+       double b = hlocal[i+12]->GetBinContent(ix, iy) / nEventsSame; // pt+pt
+       double mixn = hlocal[i+3]->GetBinContent(ix, iy) / _MAXEBYEBUFFER_ / nEventsSame;// mixN
+       double z = 0;
+       if( mixn != 0 ) {
+	    z = (a - b * ptHat + n * ptHat * ptHat ) / sqrt(double(mixn));
+       }
+       tmpVal[i]->SetBinContent(ix, iy, z);
+        
+     }
+    }
+  }
+
+  retVal[0]->Add(tmpVal[0],tmpVal[2]);
+  retVal[1]->Add(tmpVal[1]);
+  retVal[2]->Add(retVal[0],retVal[1],1.0,-1.0);
+  retVal[3]->Add(retVal[0],retVal[1],1.0,1.0);
+
+  return retVal;
+
+}
+
+
+//---------------------------------------------------------
+void StEStructSupport::scaleBackGround(TH1* sib, TH1* mix, float sf){
 
   float alpha=1.0;
-  float hmax=sib->GetMaximum();
  
+  if(sf!=0.){
+    alpha=sf;
+  } else {
+     
+  float hmax=mix->GetMaximum();
   for(int ix=1;ix<=mix->GetNbinsX();ix++){
     for(int iy=1;iy<=mix->GetNbinsY();iy++){
       float mval=mix->GetBinContent(ix,iy);
       if(mval>0.){
 	float sval=sib->GetBinContent(ix,iy);
-        if(sval/hmax>0.5){
+        if(sval==0.)continue;
+        float eval=sib->GetBinError(ix,iy)/sval;
+	float dval=fabs(sval-mval)/sval;
+	if(sval<mval && dval>3.0*eval && mval/hmax>0.45){
+	  //       if(sval/hmax>0.5){
 	  float rval=sval/mval;
           if(rval<alpha) alpha=rval;
 	}
@@ -298,6 +433,7 @@ void StEStructSupport::scaleBackGround(TH1* sib, TH1* mix){
     }
   }
 
+  }
   mix->Scale(alpha);
   cout<<"Scaling "<<mix->GetName()<<" by "<<alpha<<endl;
 
@@ -331,30 +467,16 @@ void StEStructSupport::fixDEta(TH2** h, int numHists){
 
   double dx=(double)(atmp->GetBinLowEdge(2)-atmp->GetBinLowEdge(1));
   double r2=sqrt(2.0);
-  double xf=2.0*dx*r2;
+  double dx2=dx*dx;
+  double amax=2.0*r2*dx-1.5*dx2;
 
   for(int ix=1;ix<=atmp->GetNbinsX();ix++){
-
-    double dx1=(double)atmp->GetBinLowEdge(ix);
-    double dx2=dx1+dx;
-    double a1=xf*(1.0-0.5*fabs(dx1));
-    double a2=xf*(1.0-0.5*fabs(dx2));
-    double aval;
-
-    if(a1==a2){
-      aval=a1+0.5*(xf-a1);
-    } else {
-      aval=a1+0.5*(a2-a1);
-    }
-
-    if(aval>0.){ 
-       aval=xf/aval;
-    } else {
-      aval=0;
-    }
-    atmp->SetBinContent(ix,aval);
+    double dx1=(double)atmp->GetBinLowEdge(ix)+0.5*dx;
+    double aval=amax;
+    if(dx1!=0.)aval=r2*(2.0-fabs(dx1))*dx;
+    double rval=amax/aval;
+    atmp->SetBinContent(ix,rval);
   }
-
 
   for(int i=0;i<numHists;i++){
     for(int ix=1;ix<=h[i]->GetNbinsX();ix++){
@@ -372,27 +494,40 @@ void StEStructSupport::fixDEta(TH2** h, int numHists){
 }
 
 //---------------------------------------------------------
-void StEStructSupport::writeAscii(TH1** h, int numHists, const char* fname){
+void StEStructSupport::writeAscii(TH1** h, int numHists, const char* fname, int optErrors){
 
   ofstream of(fname);
   for(int n=0;n<numHists;n++){
    int xbins=h[n]->GetNbinsX();
-   int ybins=h[n]->GetNbinsY();
    TAxis * xa= h[n]->GetXaxis();
-   TAxis * ya= h[n]->GetYaxis();
    of<<"# Histogram Name = "<<h[n]->GetName()<<endl;
    of<<"# X-axis: min="<<xa->GetBinLowEdge(1)<<" max="<<xa->GetBinUpEdge(xbins)<<" nbins="<<xbins<<endl;
  
-   of<<"# Y-axis: min="<<ya->GetBinLowEdge(1)<<" max="<<ya->GetBinUpEdge(ybins)<<" nbins="<<ybins<<endl;
- 
-   of<<"# ix  iy  Value "<<endl; 
-   for(int i=1;i<=xbins;i++){
-     for(int j=1;j<=ybins;j++){
-       of<<i<<"   "<<j<<"   "<<h[n]->GetBinContent(i,j)<<endl;
+   int ybins=h[n]->GetNbinsY();
+   TAxis * ya= h[n]->GetYaxis();
+   if(ybins>1){
+     of<<"# Y-axis: min="<<ya->GetBinLowEdge(1)<<" max="<<ya->GetBinUpEdge(ybins)<<" nbins="<<ybins<<endl;
+     of<<"# ix  iy  Value "<<endl; 
+     for(int i=1;i<=xbins;i++){
+       for(int j=1;j<=ybins;j++){
+         of<<i<<"   "<<j<<"   "<<h[n]->GetBinContent(i,j);
+         if(optErrors>0)of<<"  "<<h[n]->GetBinError(i,j);
+         of<<endl;
+       }
      }
+     of<<endl;
+   } else {
+     of<<"# ix Value "<<endl;
+     for(int i=1;i<=xbins;i++){
+         of<<i<<"   "<<h[n]->GetBinContent(i);
+         if(optErrors>0)of<<"  "<<h[n]->GetBinError(i);
+         of<<endl;
+     }
+     of<<endl;
    }
-  of<<endl;
+
   }
+
   of.close();
 }
 
@@ -439,6 +574,10 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.2  2005/03/03 01:33:05  porter
+ * Added pt-correlations method to support and included
+ * these histograms to the HAdd routine
+ *
  * Revision 1.1  2004/07/01 00:37:17  porter
  * new code previously my StEStructHelper. Takes hists from correltation
  * pass and builds final ressults.  Also the StEStructHAdd.h is a simple
