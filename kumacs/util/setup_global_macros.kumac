@@ -1,6 +1,7 @@
 ************************************************************************
 
 macro setup_global_macros
+macro/global/import *
 
  /MACRO/GLOBAL/CREATE DATA_SAMPLES  $AFS_RHIC/star/data/samples/ 
  /MACRO/GLOBAL/CREATE KUMACS_UTIL   $STAR/kumacs/util/

@@ -2,6 +2,7 @@
 ***************************************************************************
 
 macro init_memory nid table 
+macro/global/import *
 
   message 'write_table_to_ntuple,init_memory - does nothing! '
 
@@ -10,6 +11,7 @@ return
 ***************************************************************************
 
 macro write_event_memory nid table
+macro/global/import *
 
 
  if $hexist([nid]).eq.0 then
@@ -28,6 +30,7 @@ return
 ***********************************************************************
 
 macro init_disk funit nfile 
+macro/global/import *
   
  message ' Open ntuple file  ' [nfile] ' on unit ' [funit]
   
@@ -39,6 +42,7 @@ return
 ***********************************************************************
 
 macro write_event_disk nid table
+macro/global/import *
 
 
   if $hexist([nid]).eq.0 then
@@ -55,6 +59,7 @@ return
 ********************************************************************
 
 macro close_disk funit
+macro/global/import *
 
  message ' close ntuple and file unit ' [funit]
 

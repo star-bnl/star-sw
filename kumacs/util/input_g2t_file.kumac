@@ -1,6 +1,7 @@
 **************************************************************************
 
  MACRO init input_g2t_file
+macro/global/import *
    
  
 *** make place to keep the input
@@ -18,7 +19,7 @@
  
 *** read first "non-information" event (from G2T)
 *  this record has /dui/Run  on it
- stream/getevent G2Tfile /dui/geant
+ stream/getevent G2Tfile [geant]
   
    if (STAF_STATUS(1).ne. 1) then
     message ' INPUT_G2T_FILE#INIT ERROR reading Run info!!'
@@ -31,11 +32,12 @@ return
 ****************************************************************
 
 MACRO read 
+macro/global/import *
 
  cd /dui
  
 * ** records with /dui/Event
- stream/getevent G2Tfile /dui/geant
+ stream/getevent G2Tfile [geant]
  
  if (STAF_STATUS(1).ne. 1) then
    message ' INPUT_G2T_FILE#READ ERROR reading Event info!!'
@@ -46,6 +48,7 @@ return
 *******************************************************************
 
 MACRO close
+macro/global/import *
 
   cd /dui
 
