@@ -42,6 +42,8 @@ protected:
   Double_t mDe;
   Double_t mRadc;
   Int_t    mAdc;
+  
+  Bool_t   mPrint;
 
   void  checkAdc();
 
@@ -68,6 +70,7 @@ public:
   virtual Int_t    getAdc(const Double_t de, const Double_t eta);
   virtual Float_t  getEnergy();
   virtual void    print();
+  void            setPrint(Bool_t a) { mPrint = a;}
 
   Double_t getSinTheta(Double_t eta);
 
@@ -75,8 +78,11 @@ public:
 };
 #endif
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcSimpleSimulator.h,v 1.2 2002/06/04 16:09:36 pavlinov Exp $
+//  $Id: StEmcSimpleSimulator.h,v 1.3 2003/09/23 15:19:51 suaide Exp $
 //  $Log: StEmcSimpleSimulator.h,v $
+//  Revision 1.3  2003/09/23 15:19:51  suaide
+//  fixed bugs and modifications for embedding
+//
 //  Revision 1.2  2002/06/04 16:09:36  pavlinov
 //  added option with DB(pedestal ans calibration  coefficients
 //

@@ -5,7 +5,7 @@
 ClassImp(StEmcPmtSimulator)
 
 StEmcPmtSimulator::StEmcPmtSimulator(UInt_t det=1):StEmcSimpleSimulator(det)
-{ setControlDefault(det); }
+{ setControlDefault(det); mPrint = kTRUE; }
 
 Bool_t StEmcPmtSimulator::setControlDefault(UInt_t det=1)
 {
@@ -106,7 +106,7 @@ Int_t StEmcPmtSimulator::getAdc(const Double_t de, const Double_t eta)
         mRadc = (Float_t)mPmtSignal.getAdc(nphe, mVer);
      }
      checkAdc();
-  } else gMessMgr->Warning()<<"StEmcSimulatorMaker => StEmcPmtSimulator::getAdc => mode is wrong "
+  } else if(mPrint) gMessMgr->Warning()<<"StEmcSimulatorMaker => StEmcPmtSimulator::getAdc => mode is wrong "
 			  <<mMode<<endm;
 
   return mAdc;
@@ -128,8 +128,11 @@ void  StEmcPmtSimulator::setParameters
 
 
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcPmtSimulator.cxx,v 1.4 2003/01/23 03:09:02 jeromel Exp $
+//  $Id: StEmcPmtSimulator.cxx,v 1.5 2003/09/23 15:19:43 suaide Exp $
 //  $Log: StEmcPmtSimulator.cxx,v $
+//  Revision 1.5  2003/09/23 15:19:43  suaide
+//  fixed bugs and modifications for embedding
+//
 //  Revision 1.4  2003/01/23 03:09:02  jeromel
 //  Include modif
 //

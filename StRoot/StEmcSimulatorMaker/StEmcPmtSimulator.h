@@ -43,6 +43,8 @@ protected:
   Double_t mC2;  // Number of PHE on one Gev
   Double_t mC3;
   Int_t    mVer; 
+  
+  Bool_t mPrint;
 
 public: 
   StEmcPmtSimulator(UInt_t det);
@@ -54,14 +56,18 @@ public:
   virtual Int_t   getAdc(const Double_t de, const Double_t eta);
   virtual Float_t getEnergy();
   virtual void    print();
+  void            setPrint(Bool_t a) { mPrint = a;}
 
   ClassDef(StEmcPmtSimulator, 1) // Emc simulator with accounting primary and secondary photostatistics
 };
 #endif
 
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcPmtSimulator.h,v 1.2 2002/06/04 16:09:35 pavlinov Exp $
+//  $Id: StEmcPmtSimulator.h,v 1.3 2003/09/23 15:19:46 suaide Exp $
 //  $Log: StEmcPmtSimulator.h,v $
+//  Revision 1.3  2003/09/23 15:19:46  suaide
+//  fixed bugs and modifications for embedding
+//
 //  Revision 1.2  2002/06/04 16:09:35  pavlinov
 //  added option with DB(pedestal ans calibration  coefficients
 //
