@@ -17,7 +17,7 @@
 #include "mysql.h"
 #include "mysql_com.h"
 
-#include "endian.h"
+#include "DbEndian.h"
 
 #include "StDbBroker.h"
 
