@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_CPP_SR.cxx,v 1.1 2000/01/18 18:01:19 levine Exp $
+ * $Id: FTPV1P0_CPP_SR.cxx,v 1.2 2001/06/25 22:58:54 jcs Exp $
  * Author: Jeff Landgraf, M.J. LeVine, J.Klay, H.Huemmler
  ***************************************************************************
  * Description: 
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: FTPV1P0_CPP_SR.cxx,v $
+ * Revision 1.2  2001/06/25 22:58:54  jcs
+ * cleanup code
+ *
  * Revision 1.1  2000/01/18 18:01:19  levine
  * Hummler's implementaiton of FTPC reader. Note that method
  *
@@ -49,7 +52,7 @@ int FTPV1P0_CPP_SR::initialize()
   // store pointers to the CPP banks
   bank = detector->getBankFTPCPPR(sector);
   classname(Bank_FTPCPPR) *cpp = bank;
-  if (cpp)
+  if (cpp && detector->ercpy->verbose)
   {    printf("ASIC params sec %d: TH_LO %d, TH_HI %d, NSEQ_LO %d, NSEQ_HI %d\n",sector, 
 	     cpp->asic_params.thresh_lo,
 	     cpp->asic_params.thresh_hi,

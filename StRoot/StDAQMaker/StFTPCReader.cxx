@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFTPCReader.cxx,v 1.3 2001/06/19 21:12:07 jeromel Exp $
+ * $Id: StFTPCReader.cxx,v 1.4 2001/06/25 22:55:35 jcs Exp $
  *
  * Author: Holm Huemmler
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFTPCReader.cxx,v $
+ * Revision 1.4  2001/06/25 22:55:35  jcs
+ * cleanup code
+ *
  * Revision 1.3  2001/06/19 21:12:07  jeromel
  * Code update (Janet S.)
  *
@@ -187,8 +190,7 @@ int StFTPCReader::getSequences(int Sector, int PadRow, int Pad, int *nSeq,
     }
   else
     {
-      if (!fZeroSuppressedReader) 
-	return -1;
+      if (!fZeroSuppressedReader) return -1;
       iret = fZeroSuppressedReader->getSequences(PadRow,Pad,nSeq,&seq);
     }
   assert (sizeof(TPCSequence)==sizeof(Sequence));
