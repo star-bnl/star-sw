@@ -1,6 +1,12 @@
-// $Id: StFtpcFastSimu.cc,v 1.9 2000/02/02 15:40:05 hummler Exp $
+// $Id: StFtpcFastSimu.cc,v 1.10 2000/02/04 13:49:40 hummler Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.10  2000/02/04 13:49:40  hummler
+// upgrade ffs:
+// -remove unused fspar table
+// -make hit smearing gaussian with decent parameters and static rand engine
+// -separate hit smearing from cluster width calculation
+//
 // Revision 1.9  2000/02/02 15:40:05  hummler
 // make hit smearing gaussian instead of box-shaped
 //
@@ -22,21 +28,22 @@
 //
 
 #include "StFtpcFastSimu.hh"
+#include "math_constants.h"
 #include <iostream.h>
 #include <stdlib.h>
 #include <cmath>
-#include "math_constants.h"
-// random number engines from StarClassLibrary
 #include "Random.h"
-#include "JamesRandom.h"
-#include "RandFlat.h"
+#include "RanluxEngine.h"
+// random number engines from StarClassLibrary
 #include "RandGauss.h"
+
+static RanluxEngine engine;
+
 StFtpcFastSimu::StFtpcFastSimu(G2T_FTP_HIT_ST* g2t_ftp_hit,
 			       int *g2t_ftp_hit_nok,
 			       G2T_TRACK_ST* g2t_track,
 			       int *g2t_track_nok,
 			       G2T_VERTEX_ST* g2t_vertex,
-			       FFS_FSPAR_ST* ffs_fspar,
 			       FFS_GASPAR_ST* ffs_gaspar,
 			       FFS_GEPOINT_ST* ffs_gepoint,
 			       int *ffs_gepoint_nok,
@@ -58,7 +65,7 @@ StFtpcFastSimu::StFtpcFastSimu(G2T_FTP_HIT_ST* g2t_ftp_hit,
   else
     {
       //  Read paramenter tables and inititialize  
-      ffs_ini(ffs_fspar, ffs_gaspar, fcl_det);
+      ffs_ini(ffs_gaspar, fcl_det);
       
       // hh Transfer the usable g2t_ftp_hit-data into fppoint and gepoint
       ffs_hit_rd(g2t_ftp_hit_nok, g2t_ftp_hit, g2t_track_nok,
@@ -100,8 +107,8 @@ int StFtpcFastSimu::ffs_gen_padres(int *g2t_ftp_hit_nok,
     // Local Variables:
     float check1, check2;
     float xi, yi, zi, phi, Rh, Vh, Timeb;
-    float sigTimeb, sigPhi, sigma_tr, sigma_tr_hit;
-    float sigma_l_hit, sigma_z, sec_width;
+    float sigTimeb, sigPhi, sigma_tr;
+    float sigma_l, sigma_z;
     float alpha, lambda;
     float r, pt; 
     float twist_cosine, twist, theta, cross_ang;
@@ -117,12 +124,12 @@ int StFtpcFastSimu::ffs_gen_padres(int *g2t_ftp_hit_nok,
     //------------------------------------------------------------------------
     // Parameters
 
-    const float l=2.0, n_0=92.0, n_eff=11.0;
+    const float l=2.0;
 
     //-----------------------------------------------------------------------
 
 
-    HepJamesRandom engine;
+//     HepJamesRandom engine;
     RandGauss quasiRandom(engine);
 
 
@@ -194,20 +201,20 @@ int StFtpcFastSimu::ffs_gen_padres(int *g2t_ftp_hit_nok,
 
 	    // dip-angle:
             theta = C_DEG_PER_RAD*
-atan2((double) (pt*cos(twist*C_RAD_PER_DEG)),
-				       (double) ((g2t_ftp_hit[k].x[2]
-					 /fabs(g2t_ftp_hit[k].x[2]))*
-					g2t_ftp_hit[k].p[2]));
-
+	      atan2((double) (pt*cos(twist*C_RAD_PER_DEG)),
+		    (double) ((g2t_ftp_hit[k].x[2]
+			       /fabs(g2t_ftp_hit[k].x[2]))*
+			      g2t_ftp_hit[k].p[2]));
+	    
 	    // crossing-angle: 
             cross_ang = C_DEG_PER_RAD*
 	      atan2((double) (pt*cos(fabs(90.-twist)*C_RAD_PER_DEG)),   
-(double) ((g2t_ftp_hit[k].x[2]/fabs(g2t_ftp_hit[k].x[2]))*
-		    g2t_ftp_hit[k].p[2]));
+		    (double) ((g2t_ftp_hit[k].x[2]/fabs(g2t_ftp_hit[k].x[2]))*
+			      g2t_ftp_hit[k].p[2]));
 	    alpha  = fabs(cross_ang*C_RAD_PER_DEG);
             if(alpha>(C_PI_2))
 	      alpha=C_PI-alpha;
-
+	    
 	    lambda = fabs(theta*C_RAD_PER_DEG);
             if(lambda>(C_PI_2)) 
 	      lambda=C_PI-lambda;
@@ -216,59 +223,27 @@ atan2((double) (pt*cos(twist*C_RAD_PER_DEG)),
 
 	//>>>>>>>>>>>>>>> AZIMUTHAL Direction>>>>>>>>>>>>>>>>>>>>>>
 
-	//   Standard deviation in azimuthal-direc. (microns)
-	sigPhi = s_azi[0]+s_azi[1]*Rh+s_azi[2]*sqr(Rh)+s_azi[3]*sqr(Rh)*Rh;
+	//   error sigma in azimuthal-direc. (microns)
+	sigPhi = err_azi[0]+err_azi[1]*Rh+err_azi[2]*sqr(Rh)+err_azi[3]*sqr(Rh)*Rh;
 
-	//   Sigma_tr response; including PRF
-	sigma_tr = sqrt(sqr(prf_wid)/(l*n_0)
-			+sqr(sigPhi)/(l*n_0*sqr(cos(alpha)))
-			+(sqr(l*tan(alpha)))/(12.*n_eff));
-
-	//   Reprojection to the point of Origin (=Hitpoint)
-	sigma_tr_hit = sigma_tr * (Rh/ra);
+	//   Sigma_tr response
+	sigma_tr = sqrt(sqr(sigPhi)+(sqr(l*tan(alpha))));
 
 	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	//>>>>>>>>>>>>>>> RADIAL Direction>>>>>>>>>>>>>>>>>>>>>>>>>
 
-	//       Standard deviation in r-direc. (microns)
-	sigTimeb = s_rad[0] + s_rad[1]*Rh + s_rad[2]*sqr(Rh) + 
-	  s_rad[3]*sqr(Rh)*Rh;
+	//       error sigma in r-direc. (microns)
+	sigTimeb = err_rad[0] + err_rad[1]*Rh + err_rad[2]*sqr(Rh) + 
+	  err_rad[3]*sqr(Rh)*Rh;
 
 	//mk Sigma longitudinal at anode [micron] 
-	//mk Include Shaper-width
-	sigTimeb = sqrt(sqr(shaper_wid)/(l*n_0) 
-			+sqr(sigTimeb)/(l*n_0*sqr(cos(lambda)))      
-			+sqr(l*tan(lambda))/(12.*n_eff));
-
-	//   Sigma longitudinal at hit [cm] 
-  
-	if (slong>=0.)
-	  {
-	    //  assume fix longitudinal resolution, about 700 microns,  
-	    //  as for the TPC
-	    cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
-	    cout << " WARNING! " << endl;
-	    cout << " Longitudinal Resolution assumed with fixed value!" << endl;
-	    cout << " WARNING!" << endl;
-	    cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX " << endl;
-	    sigma_l_hit = slong;
-	  }
-	else
-	  {
-	    sigma_l_hit = sigTimeb; 
-	  }
-
-	//mk Reprojection to the point of Origin (=Hitpoint)
-	sigma_l_hit = sigma_l_hit*(Vh/Va); 
+	sigma_l = sqrt(sqr(sigTimeb)+sqr(l*tan(lambda)));
 
 	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	//>>>>>>>>>>>>>>> Z Direction>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	//   Sector width
-	sec_width = anode_width;
-	//   Sigma z
-	//                sigma_z = sec_width / sqrt(12.) 
 	sigma_z = 0.;
 
 	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -279,7 +254,7 @@ atan2((double) (pt*cos(twist*C_RAD_PER_DEG)),
 	//-> Smearing
 
 	ffs_hit_smear( phi, xi, yi, zi, &xo, &yo, &zo,
-		       sigma_l_hit, sigma_tr_hit,&sigma_z,&sigma_x,&sigma_y,
+		       sigma_l, sigma_tr,&sigma_z,&sigma_x,&sigma_y,
 		       &quasiRandom);
 
 	fcl_fppoint[k].x = xo;
@@ -444,8 +419,7 @@ int StFtpcFastSimu::ffs_hit_smear(float phi,
     return TRUE;
   }
 
-int StFtpcFastSimu::ffs_ini(FFS_FSPAR_ST *ffs_fspar,   
-			    FFS_GASPAR_ST *ffs_gaspar,
+int StFtpcFastSimu::ffs_ini(FFS_GASPAR_ST *ffs_gaspar,
 			    FCL_DET_ST* fcl_det)
   {
     //------   TEMPORARY:  put in parameter table   ------------------
@@ -457,11 +431,6 @@ int StFtpcFastSimu::ffs_ini(FFS_FSPAR_ST *ffs_fspar,
     ri = fcl_det->r_in+0.25;
     ra = fcl_det->r_out-0.25;
     padrows = fcl_det->n_rows/2;
-    // mk
-    //     pad response function (prf)
-	
-    prf_wid = ffs_fspar[0].sprf_0[0];
-    shaper_wid = ffs_fspar[0].sprf_0[1];
 
     //mk Drift-Velocity:
     Vhm[0]  = ffs_gaspar[0].vdrift[0];
@@ -475,17 +444,35 @@ int StFtpcFastSimu::ffs_ini(FFS_FSPAR_ST *ffs_fspar,
     Tbm[2] = ffs_gaspar[0].tdrift[2];
     Tbm[3] = ffs_gaspar[0].tdrift[3];
     
+    // upper entries of sig_arrays temporarily used to store error parameters
+
     //mk Radial Sigma
     s_rad[0] = ffs_gaspar[0].sig_rad[0];
     s_rad[1] = ffs_gaspar[0].sig_rad[1];
-    s_rad[2] = ffs_gaspar[0].sig_rad[2];
-    s_rad[3] = ffs_gaspar[0].sig_rad[3];
+//     s_rad[2] = ffs_gaspar[0].sig_rad[2];
+//     s_rad[3] = ffs_gaspar[0].sig_rad[3];
+    s_rad[2] = 0;
+    s_rad[3] = 0;
 
     //mk Azimuthal Sigma
     s_azi[0] = ffs_gaspar[0].sig_azi[0];
     s_azi[1] = ffs_gaspar[0].sig_azi[1];
-    s_azi[2] = ffs_gaspar[0].sig_azi[2];
-    s_azi[3] = ffs_gaspar[0].sig_azi[3];
+//     s_azi[2] = ffs_gaspar[0].sig_azi[2];
+//     s_azi[3] = ffs_gaspar[0].sig_azi[3];
+    s_azi[2] = 0;
+    s_azi[3] = 0;
+    
+    //Radial Error
+    err_rad[0] = ffs_gaspar[0].sig_rad[2];
+    err_rad[1] = ffs_gaspar[0].sig_rad[3];
+    err_rad[2] = 0;
+    err_rad[3] = 0;
+
+    //Azimuthal Error
+    err_azi[0] = ffs_gaspar[0].sig_azi[2];
+    err_azi[1] = ffs_gaspar[0].sig_azi[3];
+    err_azi[2] = 0;
+    err_azi[3] = 0;
     
     cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
     cout << "Parametrization for vd, Td, sig_rad and sig_azi:" << endl;
@@ -501,8 +488,7 @@ int StFtpcFastSimu::ffs_ini(FFS_FSPAR_ST *ffs_fspar,
     
     // if slong <0, use built-in longitudinal resolution from radial diffusion 
     // if slong >=0, longintudinal resolution is constant and equal to slong
-    slong  = ffs_fspar[0].sprf_ta[1];
-    anode_width = ffs_fspar[0].padwid[1];
+    slong  = -1;
 
     // Drift velocity at anode (Ranode = ra from/ftpc_params/ ) [cm/microsec]
     Va = Vhm[0] + Vhm[1]*ra + Vhm[2]*sqr(ra) + Vhm[3]*ra*sqr(ra);
@@ -559,7 +545,7 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
 	
 	sig_azi_1 = s_azi[0] + s_azi[1]*r1[i] + 
 	  s_azi[2]*sqr(r1[i]) + s_azi[3]*sqr(r1[i])*r1[i];
-	fcl_fppoint[i].s_phi = sig_azi_1/10000;
+	fcl_fppoint[i].s_phi = sig_azi_1/10000*(r1[i]/ra);
 
 	sig_azi_1 = (2.5*sig_azi_1)/10000; // micron -> cm
 	sigazi[i] = sig_azi_1*(r1[i]/ra);
@@ -570,7 +556,7 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
 	sig_rad_1 = s_rad[0] + s_rad[1]*r1[i] +  
 	  s_rad[2]*sqr(r1[i]) + s_rad[3]*sqr(r1[i])*r1[i];
 
-	fcl_fppoint[i].s_r = sig_rad_1/10000;
+	fcl_fppoint[i].s_r = sig_rad_1/10000*(v1/Va);
 
 	sig_rad_1 = (2.5*sig_rad_1)/10000; // micron -> cm
 	sigrad[i] = sig_rad_1*(v1/Va);

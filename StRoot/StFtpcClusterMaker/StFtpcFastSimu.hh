@@ -1,6 +1,12 @@
-// $Id: StFtpcFastSimu.hh,v 1.5 2000/02/02 15:40:08 hummler Exp $
+// $Id: StFtpcFastSimu.hh,v 1.6 2000/02/04 13:49:42 hummler Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
+// Revision 1.6  2000/02/04 13:49:42  hummler
+// upgrade ffs:
+// -remove unused fspar table
+// -make hit smearing gaussian with decent parameters and static rand engine
+// -separate hit smearing from cluster width calculation
+//
 // Revision 1.5  2000/02/02 15:40:08  hummler
 // make hit smearing gaussian instead of box-shaped
 //
@@ -17,7 +23,6 @@
 #include "g2t_ftp_hit.h"
 #include "g2t_track.h"
 #include "g2t_vertex.h"
-#include "ffs_fspar.h"
 #include "ffs_gaspar.h"
 #include "ffs_gepoint.h"
 #include "fcl_fppoint.h"
@@ -28,7 +33,6 @@
 #define MXMROW 150000
 #define SIZE 20
 // #define sqr(x) ((x)*(x))
-
 class RandGauss;
 
 class StFtpcFastSimu
@@ -39,10 +43,9 @@ class StFtpcFastSimu
   float Tbm[4];
   float s_rad[4];
   float s_azi[4];
+  float err_rad[4];
+  float err_azi[4];
   float slong;
-  float anode_width;
-  float prf_wid;
-  float shaper_wid;
   float ri;
   float ra;
   float padrows;
@@ -64,7 +67,6 @@ class StFtpcFastSimu
 		 G2T_TRACK_ST* g2t_track,
 		 int *g2t_track_nok,
 		 G2T_VERTEX_ST* g2t_vertex,
-		 FFS_FSPAR_ST* ffs_fspar,
 		 FFS_GASPAR_ST* ffs_gaspar,
 		 FFS_GEPOINT_ST* ffs_gepoint,
 		 int *ffs_gepoint_nok,
@@ -106,8 +108,7 @@ class StFtpcFastSimu
 		    float *st_dev_x,
 		    float *st_dev_y,  
 		    RandGauss *quasiRandom);
-  int ffs_ini(FFS_FSPAR_ST *ffs_fspar,   
-	      FFS_GASPAR_ST *ffs_gaspar,
+  int ffs_ini(FFS_GASPAR_ST *ffs_gaspar,
 	      FCL_DET_ST* fcl_det);
   int ffs_merge_tagger(int *ffs_gepoint_nok,
 		       int ffs_gepoint_maxlen,
