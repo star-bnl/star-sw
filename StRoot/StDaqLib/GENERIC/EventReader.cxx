@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.16 1999/12/07 23:10:30 levine Exp $
+ * $Id: EventReader.cxx,v 1.17 2000/01/04 20:54:46 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -17,9 +17,19 @@
  * 20-Jul-99 MJL add alternate getEventReader with name of logfile
  * 20-Jul-99 MJL add overloaded printEventInfo(FILE *)
  * 29-Aug-99 MJL if((MMAPP = (char *) mmap(0, ...  for HP platform
+ * 28-Dec-99 MJL add alternate InitEventReaders, mapped and unmapped
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.17  2000/01/04 20:54:46  levine
+ * Implemented memory-mapped file access in EventReader.cxx. Old method
+ * (via seeks) is still possible by setting mmapp=0 in
+ *
+ * 	getEventReader(fd,offset,(const char *)logfile,mmapp);
+ *
+ *
+ * but memory-mapped access is much more effective.
+ *
  * Revision 1.16  1999/12/07 23:10:30  levine
  * changes to silence the gcc compiler warnings
  *
@@ -72,7 +82,6 @@
  * Revision 1.5  1999/07/02 04:37:41  levine
  * Many changes - see change logs in individual programs
  *
- *
  **************************************************************************/
 
 #include <sys/types.h>
@@ -89,14 +98,27 @@
 EventReader *getEventReader(int fd, long offset, int MMap)
 {
   EventReader *er = new EventReader();
-  er->InitEventReader(fd, offset, MMap);
-  if(er->errorNo()) 
-  {
-    cout << er->errstr() << endl;
-    cout << er->err_string[er->errorNo()-1] << endl;
-    delete er;
-    return NULL;
+  if (MMap) {
+    er->InitEventReader(fd, offset, MMap); // invoke the mapped version
+    if(er->errorNo()) 
+      {
+	cout << er->errstr() << endl;
+	cout << er->err_string[er->errorNo()-1] << endl;
+	delete er;
+	return NULL;
+      }
   }
+  else {
+    er->InitEventReader(fd, offset); // invoke the unmapped version
+    if(er->errorNo()) 
+      {
+	cout << er->errstr() << endl;
+	cout << er->err_string[er->errorNo()-1] << endl;
+	delete er;
+	return NULL;
+      }
+  }
+
   
   return er;
 }
@@ -104,7 +126,12 @@ EventReader *getEventReader(int fd, long offset, int MMap)
 EventReader *getEventReader(int fd, long offset, const char *logfile, int MMap)
 {
   EventReader *er = new EventReader(logfile);
-  er->InitEventReader(fd, offset, MMap);
+  if (MMap) {
+    er->InitEventReader(fd, offset, MMap);
+  }
+  else {
+    er->InitEventReader(fd, offset);
+  }
   if(er->errorNo()) 
   {
     cout << er->errstr() << endl;
@@ -157,14 +184,143 @@ EventReader::EventReader(const char *logfile) //pass a string with name of logfi
   verbose = 0;
   logfd = fopen(logfile,"a");
   if (logfd==NULL) {
+    perror("EventReader::EventReader() logfile failure");
     printf("ERR: failed to open log file %s !!!!!!!\n",logfile);
     exit(-1);
   }
   fprintf(logfd,"opening logfile...\n");
 }
 
-// Here lies the event reader code
+//Memory mapped version
 void EventReader::InitEventReader(int fdes, long offset, int MMap)
+{//InitER
+#define MX_MAP_SIZE 0x20000000
+
+  off_t FileLength;
+
+  if (verbose) cout << "Initializing EventReader with a MAPPED file" << endl;
+  
+  //initialize the error strings
+  strcpy(err_string[0],"ERROR: FILE");
+  strcpy(err_string[1],"ERROR: CRC");
+  strcpy(err_string[2],"ERROR: SWAP");
+  strcpy(err_string[3],"ERROR: BANK");
+  strcpy(err_string[4],"ERROR: MEM");
+  strcpy(err_string[5],"ERROR: NOT DATA BANK");
+  strcpy(err_string[6],"ERROR: BAD ARG");
+  strcpy(err_string[7],"ERROR: ENDR ENCOUNTERED");
+  strcpy(err_string[8],"ERROR: BAD HEADER");
+  strcpy(err_string[9],"INFO: MISSING BANK");
+  strcpy(err_string[10],"INFO: END OF FILE");
+
+
+  fd = fdes;
+  struct stat buf;
+
+  if (fstat(fd,&buf)<0){
+   perror("error in DaqOpenTag");
+   ERROR(ERR_FILE);
+  }
+  FileLength = buf.st_size;
+
+  next_event_offset = 0;
+  Logical_Record lr;
+
+  // Calculate the mmap offset - must be aligned to pagesize
+  long pagesize = sysconf(_SC_PAGESIZE);
+  if (verbose) printf( "pagesize = %d\n",(int)pagesize);
+  int mmap_offset = (offset/pagesize)*pagesize;
+
+  if(mmap_offset < 0) ERROR(ERR_FILE);
+
+  int mapsize = buf.st_size - offset + pagesize;
+                    //round up to the next page boundary
+  if (mapsize<=0) {// <0 means previous event size exceeded file length
+    if (verbose) printf("end of file encountered\n");
+    ERROR(INFO_END_FILE) ;
+  }
+  if (mapsize>MX_MAP_SIZE)    mapsize =  MX_MAP_SIZE;
+  event_size = mapsize ; //needed for munmap() in destructor
+
+  DATAP = NULL;
+  // map to a file
+  if((MMAPP = (char *)mmap(0, mapsize, PROT_READ | PROT_WRITE,
+			   MAP_PRIVATE, fd, mmap_offset)) == (caddr_t) -1) { 
+    char myerr[100];
+    sprintf(myerr,"mapping file request 0x%x bytes",mapsize);
+    perror(myerr); 
+    ERROR(ERR_MEM);
+  }
+
+  // Set DATAP to the real value
+  DATAP = MMAPP + (offset-mmap_offset);
+  
+  if (offset>=buf.st_size) {
+    ERROR(ERR_FILE) ;
+  }
+
+  while (strncmp(DATAP,"LRHD", 4) == 0) {
+    // copy the logical record into local struct lr
+    if (memcpy(&lr,DATAP,sizeof(lr))<0) perror("error in memcpy");
+    // check the CRC
+    if (!lr.test_CRC()) ERROR(ERR_CRC);
+    // swap bytes
+    if (lr.swap() < 0) ERROR(ERR_SWAP);
+    // zero CRC
+    lr.header.CRC = 0; 
+
+    char lcopy[10];
+
+    strncpy(lcopy,lr.RecordType,8);
+    lcopy[8] = 0;
+    if (verbose) printf("lr.RecordType: %s\n",lcopy);
+
+    if(strncmp(lr.RecordType, "DATA", 4) != 0) { //not DATA
+      //skip over this record 
+      next_event_offset += 4 * lr.RecordLength;
+      if (verbose) printf("....skipping %d bytes\n",
+			  (unsigned int)next_event_offset);
+      DATAP += next_event_offset;
+
+      //DATAP now points to beginning of next RECORD
+    }
+    else { // DATA record. Skip LR
+      
+      DATAP += sizeof(lr);
+      next_event_offset += sizeof(lr);
+      break; //no need to loop any further
+    }
+  } // while (strncmp(DATAP,"LRHD", 4) == 0)
+
+    // We should now be positioned at DATAP
+
+  if(strncmp(DATAP,"DATAP", 5) != 0)
+  {
+    if (verbose) printf("failed to find DATAP at offset 0x%x\n",
+			(unsigned int)next_event_offset);
+    ERROR(ERR_BANK);
+  }
+    
+  // read the datap bank 
+  Bank_DATAP *datap = (Bank_DATAP *)DATAP;
+
+  // check CRC, swap
+  if (!datap->test_CRC()) ERROR(ERR_CRC);
+  if (datap->swap() < 0) ERROR(ERR_SWAP);
+
+  if (offset + 4*datap->EventLength > buf.st_size) {
+    printf("event #%d continues beyond file boundary\n",datap->EventNumber);
+    ERROR(ERR_FILE) ;
+  }
+
+  //  printf("======= Event number: %d ============\n",datap.EventNumber);
+  next_event_offset += 4*datap->EventLength; // needed for nextEventOffset()
+  next_event_offset += offset; // now consistent with unmapped behavior
+                               // 29-Dec-99 MJL
+}
+
+// unmapped version
+void EventReader::InitEventReader(int fdes, long offset)
 {//InitER
   long c_offset = offset;
   if (verbose) cout << "Initializing EventReader with a file" << endl;
@@ -224,7 +380,6 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
     runnum = lr.header.RunNumber;
     
     // Check version (someday)
-
 
     // Check record type
 //     printf("%s::%d  c_offset=0x%x \n",__FILE__,__LINE__,c_offset);
@@ -313,37 +468,17 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
   //  assert(!(datap.EventLength > (statbuf.st_size - offset)/4)); // ERROR(ERR_FILE);
   //if(datap.EventLength > (statbuf.st_size - offset)/4)  ERROR(ERR_FILE);
   // mmap or read the file
-  if(MMap == 0)              // Read the file into a buffer
-  {
-    MMAPP = NULL;
-    DATAP = (char *)malloc(datap.EventLength * 4);
-    if(!DATAP) ERROR(ERR_MEM);
 
-    ret = read(fd, DATAP, datap.EventLength*4);
-    if(ret < 0) ERROR(ERR_FILE);
+  DATAP = (char *)malloc(datap.EventLength * 4);
+  if(!DATAP) ERROR(ERR_MEM);
+  
+  ret = read(fd, DATAP, datap.EventLength*4);
+  if(ret < 0) ERROR(ERR_FILE);
   // check CRC, swap
-    if (!((Bank_DATAP *)DATAP)->test_CRC()) ERROR(ERR_CRC);
-    if (((Bank_DATAP *)DATAP)->swap() < 0) ERROR(ERR_SWAP);
-
-  }
-  else if(MMap == 1)
-  {
-    // Calculate the mmap offset - must be aligned to pagesize
-    long pagesize = sysconf(_SC_PAGESIZE);
-    if (verbose) cout << "pagesize = " << pagesize << endl;
-    int mmap_offset = (offset/pagesize)*pagesize;
-
-    if(ret < 0) ERROR(ERR_FILE);
-
-    DATAP = NULL;
-    if((MMAPP = (char *)mmap(0, datap.EventLength * 4, PROT_READ | PROT_WRITE,
-		      MAP_PRIVATE, fd, mmap_offset)) == (caddr_t) -1)
-      ERROR(ERR_MEM);
+  if (!((Bank_DATAP *)DATAP)->test_CRC()) ERROR(ERR_CRC);
+  if (((Bank_DATAP *)DATAP)->swap() < 0) ERROR(ERR_SWAP);
     
-    // Set DATAP to the real value
-    DATAP = MMAPP + (offset-mmap_offset);
-    fd = -1;
-  } 
+ 
   datap.EventLength = DATAPEVENTLENGTH;   // hack!
   
   event_size = datap.EventLength;
@@ -399,13 +534,14 @@ EventReader::~EventReader()
   else if(MMAPP != NULL)    // Memory Mapped file
   {
     // Unmap memory
-    munmap(MMAPP,event_size);
+    munmap(MMAPP,event_size); //unmap 
   }
   else                      // file buffer
   {
     // free my malloc
     free(DATAP);
   }
+  if (logfd!=NULL) fclose(logfd);
 }
 
 EventInfo EventReader::getEventInfo()

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV1P0_ADCR_SR.cxx,v 1.3 1999/09/02 21:47:10 fisyak Exp $
+ * $Id: TPCV1P0_ADCR_SR.cxx,v 1.4 2000/01/04 20:55:04 levine Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description: TPC (v1.0) raw ADC reader 
@@ -9,9 +9,19 @@
  * 03-Jun-99 MJL added return TRUE to TPCV1P0_ADCR_SR::initialize()
  * 03-Jun-99 MJL added return TRUE to TPCV1P0_PRMS_SR::initialize()
  * 03-Jun-99 MJL added return TRUE to TPCV1P0_PEDR_SR::initialize()
+ * 29-Aug-99 MJL #include <iostream.h> for HP platform
  *
  ***************************************************************************
  * $Log: TPCV1P0_ADCR_SR.cxx,v $
+ * Revision 1.4  2000/01/04 20:55:04  levine
+ * Implemented memory-mapped file access in EventReader.cxx. Old method
+ * (via seeks) is still possible by setting mmapp=0 in
+ *
+ * 	getEventReader(fd,offset,(const char *)logfile,mmapp);
+ *
+ *
+ * but memory-mapped access is much more effective.
+ *
  * Revision 1.3  1999/09/02 21:47:10  fisyak
  * HP corrections
  *
