@@ -1,14 +1,17 @@
 // Hey Emacs this is really -*-c++-*- ! 
 // \author Piotr A. Zolnierczuk    Aug 26, 2002
-#ifndef EEmcDefs_h
-#define EEmcDefs_h
+#ifndef EEmcMC_EEmcDefs_h
+#define EEmcMC_EEmcDefs_h
 /*********************************************************************
- * $Id: EEmcDefs.h,v 1.1 2003/02/20 05:14:07 balewski Exp $
+ * $Id: EEmcDefs.h,v 1.2 2003/02/20 21:27:06 zolnie Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Definitions (temp file)
  *********************************************************************
  * $Log: EEmcDefs.h,v $
+ * Revision 1.2  2003/02/20 21:27:06  zolnie
+ * added simple geometry class
+ *
  * Revision 1.1  2003/02/20 05:14:07  balewski
  * reorganization
  *
@@ -48,6 +51,7 @@
  *
  *********************************************************************/
 
+#if 0
 enum EEmcVolId {
   // for Tower
   kEEmcTowerHalfId =  100000,
@@ -62,15 +66,14 @@ enum EEmcVolId {
   kEEmcSmdStripId  =        1
 };
 
-
-
-
 const int kEEmcNumDepths     =  5;
 const int kEEmcNumSectors    = 12;
 const int kEEmcNumSubSectors =  5;
 const int kEEmcNumEtas       = 12;
 const int kEEmcNumStrips     =288;
-
+#else 
+#error "do not use this file"
+#endif
 
 
 #endif

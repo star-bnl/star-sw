@@ -1,5 +1,8 @@
-// $Id: EEmcGeomSimple.cxx,v 1.5 2003/02/20 21:15:17 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.6 2003/02/20 21:26:58 zolnie Exp $
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.6  2003/02/20 21:26:58  zolnie
+// added simple geometry class
+//
 // Revision 1.5  2003/02/20 21:15:17  zolnie
 // *** empty log message ***
 //
@@ -22,8 +25,8 @@
 #include "StTrackGeometry.h"
 #include "StTrack.h"
 
-#include "StEEmcUtil/EEmcGeom/EEmcDefs.h"
-#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
+#include "EEmcGeomDefs.h"
+#include "EEmcGeomSimple.h"
 
 
 // ######################################################################

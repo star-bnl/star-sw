@@ -1,5 +1,8 @@
-// $Id: EEmcMCData.cxx,v 1.2 2003/02/20 20:13:20 balewski Exp $
+// $Id: EEmcMCData.cxx,v 1.3 2003/02/20 21:27:06 zolnie Exp $
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.3  2003/02/20 21:27:06  zolnie
+// added simple geometry class
+//
 // Revision 1.2  2003/02/20 20:13:20  balewski
 // fixxy
 // xy
@@ -97,10 +100,10 @@
 //
 #include "StBFChain.h"
 //
-#include "EEmcDefs.h"
 #include "EEmcException.h"
 #include "EEmcMCData.h"
 
+#include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 #include "StEEmcUtil/EEevent/EEeventDst.h"
 #include "StEEmcUtil/EEevent/EEsectorDst.h"
 
