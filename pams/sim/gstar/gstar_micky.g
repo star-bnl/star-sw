@@ -1,3 +1,10 @@
+    subroutine gstar_micky
+      print *,' ****  GSTAR mickey-mouse event generator loaded.  ****'
+      print *,' ***   Use   "USER/INPUT U mickey.mouse"  command   ***'
+      print *,' ****  to generate a pseudo-physics event with it  ****'
+      call micky
+    end
+*
 **********************************************************************
 module  micky is the pseudo physics event generator
 author  Pavel Nevski
@@ -44,7 +51,7 @@ Created August,14 1997
     end
 *
 *
-    subroutine agukine
+    subroutine Mickine
 +CDE,GCONST,GCUNIT,GCFLAG.
     structure MIKY { version, np, code(10), mult(10), slope(10), dy(10) }
     Integer   LENOCC,Ip,Ivert,I,Ipart,Mult,Ier,Nu,ItrTyp,Itr,Iprin
@@ -83,8 +90,4 @@ Created August,14 1997
 * 
 END
 *
-*
-subroutine gstar_micky
-    print *,' *** GSTAR mickey-mouse event generator activated ***'
-    call micky
-end
+
