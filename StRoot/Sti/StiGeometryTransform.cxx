@@ -591,9 +591,7 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 {
     Messenger& mess = *(Messenger::instance(MessageType::kGeometryMessage));
     
-#ifdef DEBUG
     mess <<"\n\n\nmaxHits:\t"<<maxHits<<"\tfilter"<<filter<<endl;
-#endif
     
     //now get hits
     StPtrVecHit hits = st->detectorInfo()->hits(kTpcId);
@@ -604,10 +602,8 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 	 it!=hits.end() && hitvec.size()<=maxHits; ++it) {
 	StTpcHit* hit = dynamic_cast<StTpcHit*>(*it);
 	if (!hit) {
-#ifdef DEBUG
 	    mess <<"StiGeometryTransform::operator(GlobalTrack->KalmanTrack). Error:\t";
 	    mess <<"StHit->StTpcHit cast failed.  Skip this point."<<endl;
-#endif
 	}
 	else  {
 	    //Find StiHit for this StHit
@@ -643,9 +639,7 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 		const hitvector& stiHits = StiHitContainer::instance()->hits(layer);
 
 		if (stiHits.size()==0) 	{
-#ifdef DEBUG
 		    mess <<"Error, no StiHits for this sector, padrow"<<endl;
-#endif
 		    sti=0;
 		    return;
 		}
@@ -654,9 +648,7 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 		hitvector::const_iterator where = find_if(stiHits.begin(), stiHits.end(),
 							  mySameStHit);
 		if (where==stiHits.end()) {
-#ifdef DEBUG
 		    mess <<"Error, no StiHit with this StHit was found"<<endl;
-#endif
 		    sti=0;
 		    return;
 		}
@@ -686,10 +678,8 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
     double tanLambda = tan(sthelix.dipAngle());
 	    
     if (hitvec.size()<3) {
-#ifdef DEBUG
 	mess << " Track Transform Error:\t"
 	      <<" hitvec.size()<3.  Abort"<<endl;
-#endif
 	return;
     }
     sti->initialize(curvature, tanLambda, stiGlobalOrigin, hitvec);

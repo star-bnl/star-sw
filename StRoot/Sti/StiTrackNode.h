@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "StiDefaultMutableTreeNode.h"
+#include "Messenger.h"
 
 class StiHit;
 class StiDetector;
@@ -33,11 +34,17 @@ public:
 protected:   
     
     //StiTrackNode(): hit(NULL), detector(NULL){}
-    StiTrackNode(): hit(0), detector(0){}
+    StiTrackNode(): hit(0), detector(0){
+      if(s_pMessenger==NULL){ 
+        s_pMessenger = Messenger::instance(MessageType::kNodeMessage);
+      }
+    }
     
     double        dedx;
     StiHit      * hit;  
     const StiDetector * detector; // used if not hit for node
+
+    static Messenger *s_pMessenger;
 };
 
 #endif

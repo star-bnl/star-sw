@@ -45,25 +45,19 @@ StiCompositeSeedFinder::~StiCompositeSeedFinder()
 
 bool StiCompositeSeedFinder::hasMore()
 {
-#ifdef DEBUG
     mMessenger <<"StiCompositeSeedFinder::hasMore()"<<endl;
-#endif
     
     bool val =  mCurrent>=mSeedVec.begin() && mCurrent<mSeedVec.end()
 	&& (*mCurrent)->hasMore();
     
-#ifdef DEBUG
     mMessenger <<"\t  returning "<<val<<endl;
-#endif
     
     return val;
 }
 
 StiKalmanTrack* StiCompositeSeedFinder::next()
 {
-#ifdef DEBUG
     mMessenger <<"StiCompositeSeedFinder::next()"<<endl;
-#endif
     
     StiKalmanTrack* track=0;
     //while ((*mCurrent)->hasMore() && track==0) {
@@ -75,9 +69,7 @@ StiKalmanTrack* StiCompositeSeedFinder::next()
 	++mCurrent;
     }
     
-#ifdef DEBUG 
     mMessenger <<"\t leaving StiCompositeSeedFinder::next()"<<endl;
-#endif
     
     return track;
 }
@@ -85,9 +77,7 @@ StiKalmanTrack* StiCompositeSeedFinder::next()
 void StiCompositeSeedFinder::reset()
 {
     
-#ifdef DEBUG
     mMessenger <<"StiCompositeSeedFinder::reset()"<<endl;
-#endif
     
     //reset all!
     for (SeedFinderVec::iterator it=mSeedVec.begin(); it!=mSeedVec.end(); ++it) {
@@ -95,9 +85,7 @@ void StiCompositeSeedFinder::reset()
     }
     mCurrent=mSeedVec.begin();
     
-#ifdef DEBUG
     mMessenger <<"\t leaving StiCompositeSeedFinder::reset()"<<endl;
-#endif
     
     return;
 }
