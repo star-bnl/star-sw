@@ -25,7 +25,7 @@
                               mode    = { 70809, 107,  809 }
 
 *    group rho-pi and pi-pi-pi together (in practice indistinguishable)
-  Particle phi       code=151 TrkTyp=3 mass=1019.4 charge=0  tlife=1.482e-22,
+  Particle phi       code=151 TrkTyp=3 mass=1.0194 charge=0  tlife=1.482e-22,
                      pdg=333  bratio = { .491, .343, .154, .0128, .00131 },
                               mode   = { 1112, 1016, 70809, 1701,   701  }
  
