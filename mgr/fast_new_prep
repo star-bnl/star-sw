@@ -1,7 +1,7 @@
 #!/usr/local/bin/tcsh
-#  $Id: fast,v 1.10 1998/05/17 16:18:10 fisyak Exp $
-#  $Log: fast,v $
-#  Revision 1.10  1998/05/17 16:18:10  fisyak
+#  $Id: fast_new_prep,v 1.1 1998/05/17 16:18:11 fisyak Exp $
+#  $Log: fast_new_prep,v $
+#  Revision 1.1  1998/05/17 16:18:11  fisyak
 #  New fast
 #
 #  Revision 1.9  1998/05/15 22:02:08  fisyak
@@ -59,7 +59,7 @@ echo Starting job execution at `date`
 set part      = 0001_0010
 set nevent    = 10
 set inp_dir   = /star/mds/data/SD98/auau200/g2t/central/hijing/set0001/regular
-set out_dir   = /star/mds/data/SD98/auau200/fast/central/hijing/set0001/regular
+set out_dir   = /star/mds/data/SD98/auau200/fast_new/central/hijing/set0001/regular
 set home_dir  = /star/u2d/fisyak/sol/SL98c
 while ( $#argv > 0 )
         switch ($1)
@@ -77,13 +77,16 @@ while ( $#argv > 0 )
         shift
 end
 if ( -d $out_dir) mkdir -p $out_dir
-set log  = `hostname`_fast_${part}_`date +"%d_%h_%Y"`
+set log  = `hostname`_fast_new_${part}_`date +"%d_%h_%Y"`
 #
 cd ${SCRATCH}
-if ( -d log/fast/${part} == 0) mkdir -p log/fast/${part}
-cd log/fast
+if ( -d log/fast_new/${part} == 0) mkdir -p log/fast_new/${part}
+cd log/fast_new
 if ( -e ${log}) rm ${log}
 cd ${part}
+ln -s /star/u2d/fisyak/sol/SL98c/kumacs .
+ln -s /star/u2d/fisyak/sol/SL98c/pams .
+ln -s /star/u2d/fisyak/sol/SL98c/lib .
 if ( -e  batch_${part}.kumac ) rm  batch_${part}.kumac 
 cat > batch_${part}.kumac <<EOF
 trace on full
@@ -96,8 +99,9 @@ out_file=auau_ce_b0-2_${part}.xdf
 *svt_simul=sss
 exit
 EOF
+more batch_${part}.kumac
 # ============================================
-time staf -w 0 -g 0 -b batch_${part}.kumac  > ${SCRATCH}/log/fast/${log}
+#time staf -w 0 -g 0 -b batch_${part}.kumac  > ${SCRATCH}/log/fast_new/${log}
 #
 # Clean files/links not needed anymore...
 echo
