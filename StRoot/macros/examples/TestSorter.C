@@ -1,5 +1,8 @@
-// $Id: TestSorter.C,v 1.7 2000/01/12 02:20:19 fine Exp $
+// $Id: TestSorter.C,v 1.8 2000/01/19 21:00:40 kathy Exp $
 // $Log: TestSorter.C,v $
+// Revision 1.8  2000/01/19 21:00:40  kathy
+// update macros to use standard default xdf files in /afs/rhic/star/data/samples
+//
 // Revision 1.7  2000/01/12 02:20:19  fine
 // test check new St_TableSorter ctors
 //
@@ -72,7 +75,7 @@ void TestSorter(Char_t *xdffilename="/afs/rhic/star/data/samples/test.xdf",const
   //  second sample:
   //   /afs/rhic/star/data/samples/set0027_03_49evts_dst.xdf
     cout << " Second pass " << endl;
-    St_XDFFile  xd("/afs/rhic/star/data/samples/set0027_03_49evts_dst.xdf");
+    St_XDFFile  xd("/afs/rhic/star/data/samples/gstar.dst.xdf");
     event = xd.NextEventGet();
     if (event) {
       St_dst_vertex *table=0;

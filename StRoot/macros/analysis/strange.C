@@ -1,5 +1,8 @@
-// $Id: strange.C,v 1.8 2000/01/19 16:58:32 genevb Exp $
+// $Id: strange.C,v 1.9 2000/01/19 21:00:33 kathy Exp $
 // $Log: strange.C,v $
+// Revision 1.9  2000/01/19 21:00:33  kathy
+// update macros to use standard default xdf files in /afs/rhic/star/data/samples
+//
 // Revision 1.8  2000/01/19 16:58:32  genevb
 // New input file
 //
@@ -50,7 +53,7 @@ StChain *chain=0;
 TBrowser *b=0;
 
 const char *dstFile ="/afs/rhic/star/data/smaple/gstar.dst.root";
-const char *xdfFile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
+const char *xdfFile ="/afs/rhic/star/data/samples/gstar.dst.xdf";
 const char *mdcFile ="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0081_07_40evts.root";
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 

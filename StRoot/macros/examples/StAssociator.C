@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.13 2000/01/19 19:38:12 calderon Exp $
+// $Id: StAssociator.C,v 1.14 2000/01/19 21:00:40 kathy Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.14  2000/01/19 21:00:40  kathy
+// update macros to use standard default xdf files in /afs/rhic/star/data/samples
+//
 // Revision 1.13  2000/01/19 19:38:12  calderon
 // activate runco branch
 //
@@ -69,7 +72,7 @@ class StChain;
 StChain *chain=0;
 
 void StAssociator(Int_t nevents=1,
-const char *MainFile="/star/rcf/test/dev/tfs_Linux/Tue/year_2a/hc_standard/*.geant.root")
+const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
 {
 
     // Dynamically link needed shared libs

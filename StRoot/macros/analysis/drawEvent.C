@@ -1,6 +1,9 @@
 //*-- Author :  Valeri Fine (fine@bnl.gov)
-// $Id: drawEvent.C,v 1.7 2000/01/19 16:29:51 kathy Exp $
+// $Id: drawEvent.C,v 1.8 2000/01/19 21:00:32 kathy Exp $
 // $Log: drawEvent.C,v $
+// Revision 1.8  2000/01/19 21:00:32  kathy
+// update macros to use standard default xdf files in /afs/rhic/star/data/samples
+//
 // Revision 1.7  2000/01/19 16:29:51  kathy
 // update macros to use default input files in /afs/rhic/star/data/samples
 //
@@ -63,7 +66,7 @@ StEventDisplayMaker *disp=0;
 
 TBrowser *b=0;
 const char *dstFile ="/disk00001/star/auau200/two_photon/starlight/twogam/year_1b/hadronic_on/tfs/ric0022_01_14552evts.dst.root";
-const char *xdfFile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
+const char *xdfFile ="/afs/rhic/star/data/samples/gstar.dst.xdf";
 const char *mdcFile ="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0081_07_40evts.root";
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 
@@ -165,7 +168,7 @@ void doEventsQQ(const Int_t nevents=999,
 }
 void drawEvent(const Int_t nevents=2,
               const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf")
+              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.xdf")
 {
   const char *fileListQQ[]={0,0};
   if (path[0]=='-') {

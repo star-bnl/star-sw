@@ -1,5 +1,8 @@
-// $Id: Example_read_xdf_makehist.C,v 1.3 2000/01/06 19:35:48 kathy Exp $
+// $Id: Example_read_xdf_makehist.C,v 1.4 2000/01/19 21:00:40 kathy Exp $
 // $Log: Example_read_xdf_makehist.C,v $
+// Revision 1.4  2000/01/19 21:00:40  kathy
+// update macros to use standard default xdf files in /afs/rhic/star/data/samples
+//
 // Revision 1.3  2000/01/06 19:35:48  kathy
 // change to use available xdf file as input
 //
@@ -20,8 +23,9 @@
 //=======================================================================
 
 
-void Example_read_xdf_makehist(const Char_t *InputXdfFile=
-"/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.xdf")
+void Example_read_xdf_makehist(
+  const Char_t *InputXdfFile=
+  "/afs/rhic/star/data/samples/gstar.dst.xdf")
 {
  // load libraries 
  gSystem.Load("St_base");
