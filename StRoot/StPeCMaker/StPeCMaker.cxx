@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.1 1999/04/06 20:47:27 akio Exp $
+// $Id: StPeCMaker.cxx,v 1.2 1999/04/08 16:37:15 nystrand Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.2  1999/04/08 16:37:15  nystrand
+// MakeBranch,SetBranch removed
+//
 // Revision 1.1  1999/04/06 20:47:27  akio
 // The first version
 //
@@ -29,13 +32,14 @@
 #include "StEvent/StRun.hh"
 #include "StEvent/StEvent.hh"
 #include "StEvent/StL0Trigger.hh"
+#include "StEvent/StGlobalTrack.hh"
 #include "TH1.h"
 #include "SystemOfUnits.h"
 #include "/afs/rhic/star/packages/SL99b/pams/global/inc/phys_constants.h"
 #include <vector>
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.1 1999/04/06 20:47:27 akio Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.2 1999/04/08 16:37:15 nystrand Exp $";
 
 double minv(double m1, double px1, double py1, double pz1, double m2, double px2, double py2, double pz2);
 void tagFiller(StEvent& event, HighPtTag_st& hptTag);
@@ -285,13 +289,9 @@ Int_t StPeCMaker::Init() {
   return StMaker::Init();
 }
 
-void StPeCMaker::MakeBranch() {
-  StMaker::MakeBranch();
-}
-
 void StPeCMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StPeCMaker.cxx,v 1.1 1999/04/06 20:47:27 akio Exp $\n");
+  printf("* $Id: StPeCMaker.cxx,v 1.2 1999/04/08 16:37:15 nystrand Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
@@ -302,10 +302,6 @@ void StPeCMaker::Clear(Option_t *opt) {
     theTag = 0;
   }
   SafeDelete(m_DataSet);
-}
-
-void StPeCMaker::SetBranch() {
-  StMaker::SetBranch();
 }
 
 Int_t StPeCMaker::Finish() {
