@@ -359,12 +359,12 @@ foreach my $dir ("StRoot","pams") {
     foreach my $sub_dir (@subdirS) {
       # skip unwanted directories
       if ($sub_dir =~ /^macros$/     ||
-	  $sub_dir =~ /^StAssociationMaker$/    ||
-	  $sub_dir =~ /^StMcAnalysisMaker$/    ||
-	  $sub_dir =~ /^StHbt/    ||
-	  $sub_dir =~ /^St_baseTest$/    ||
+#	  $sub_dir =~ /^StAssociationMaker$/    ||
+#	  $sub_dir =~ /^StMcAnalysisMaker$/    ||
+#	  $sub_dir =~ /^StHbt/    ||
+#	  $sub_dir =~ /^St_baseTest$/    ||
 	  $sub_dir =~ /^StTpcDb$/    ||
-	  $sub_dir =~ /^StDbMaker$/    ||
+#	  $sub_dir =~ /^StDbMaker$/    ||
           $sub_dir =~ /^test$/)  {next;}
       if ($STAR_HOST_SYS =~ /^hp_ux102/ && 
 	  ($sub_dir =~ /^StDbLib$/ ||
