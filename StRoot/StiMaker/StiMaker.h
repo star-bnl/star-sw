@@ -7,6 +7,7 @@
 
 #include "StMaker.h"
 #include "Sti/StiFactoryTypedefs.h"
+#include "StiGui/StiGuiTypedefs.h"
 
 class StEvent;
 class StiHitContainer;
@@ -15,6 +16,7 @@ class StiDisplayManager;
 class StiDetectorContainer;
 class StiTrackContainer;
 class StiDrawableHits;
+class StiEvaluableTrackSeedFinder;
 
 class StiMaker : public StMaker {
  public:
@@ -27,7 +29,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.7 2001/07/05 21:05:03 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.8 2001/07/06 18:18:37 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -58,11 +60,14 @@ private:
 
     StiHitContainer* mhitstore; //!
     StiHitFactory* mhitfactory; //!
+    StiEvaluableTrackFactory* mtrackfactory; //!
     StiHitFiller* mhitfiller; //!
     StiDisplayManager* mdisplay; //!
     StiDetectorContainer* mdetector; //!
     StiTrackContainer* mtrackstore; //!
     StiDrawableHits* mdrawablehits; //!
+    StiEvaluableTrackSeedFinder* mtrackseedfinder; //!
+    StiRDEvaluableTrackFactory* md_trackfactory; //!
 
     char* mmaterialbuildpath; //!
     char* mdetectorbuildpath; //!
