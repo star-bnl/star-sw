@@ -1,0 +1,22 @@
+#include "PAM.idl"
+#include "spr_sprpar.idl"
+#include "stk_kine.idl"
+#include "svg_geom.idl"
+#include "sgr_groups.idl"
+#include "stk_track.idl"
+#include "scs_spt.idl"
+#include "egr_globtrk.idl"
+#include "epi_hypo_pid.idl"
+
+interface spr_svt : amiModule {
+    STAFCV_T call
+	( inout   spr_sprpar   sprpar
+ 	  , in    stk_kine     mkine
+ 	  , in    svg_geom     svt_geom
+ 	  , in    scs_spt      svt_spt
+ 	  , in    sgr_groups   svt_groups
+ 	  , inout stk_track    svt_track
+ 	  , inout egr_globtrk  globtrk
+ 	  , inout epi_hypo_pid hypo_pid
+ 	  );
+ };

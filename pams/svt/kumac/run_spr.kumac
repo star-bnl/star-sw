@@ -10,7 +10,6 @@
         [geant_Event]/g2t_track _
         [data]/svt/tracks/stk_kine _
         [params]/svt/svgpars/geom _
-
         [geant_Event]/g2t_event _
         [geant_Event]/g2t_vertex _
         [data]/svt/hits/scs_spt _
