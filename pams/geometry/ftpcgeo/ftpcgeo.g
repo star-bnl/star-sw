@@ -392,12 +392,10 @@ Block FSEC is a sensitive gas sector
 *
       Shape     division Iaxis=2  Ndiv=6 C0=30 
 *
-*  may be: ... cx:0.01: cy:0.01: cz:0.01: ptot:16:(-100,100) instead of px,py,pz
-*
       HITS    FSEC   X:.0003:S  Y:.0003:  Z:.0003:  cx:10:  cy:10:  cz:10:,
                      Ptot:18:(0,100)     Sleng:.1:(0,500),
                      ToF:16:(0,1.e-6)    LGAM:16:(-2,2),    
-                     Step:11:(0,10)      Elos:20:(0,0.1) 
+                     Step:11:(0,10)      Elos:21:(0,.01) 
 
 *     HITS    FSEC   xx:16:SHX(-50,50)   yy:16:(-50,50)     zz:32:(-370,370),
 *                    px:16:(-100,100)    py:16:(-100,100)   pz:16:(-100,100),
