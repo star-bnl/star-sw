@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.cxx,v 2.3 1999/11/09 15:44:08 ullrich Exp $
+ * $Id: StPrimaryTrack.cxx,v 2.4 2000/04/03 15:12:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.cxx,v $
- * Revision 2.3  1999/11/09 15:44:08  ullrich
- * Removed method unlink() and all calls to it.
+ * Revision 2.4  2000/04/03 15:12:50  ullrich
+ * Fixed bug in vertex(). Always returned 0 instead of
+ * data member mVertex.
  *
  * Revision 2.3  1999/11/09 15:44:08  ullrich
  * Removed method unlink() and all calls to it.
@@ -29,7 +30,7 @@
 
 ClassImp(StPrimaryTrack)
 
-static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.3 1999/11/09 15:44:08 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.4 2000/04/03 15:12:50 ullrich Exp $";
 
 StPrimaryTrack::StPrimaryTrack() : mVertex(0) {/* noop */}
 
@@ -61,7 +62,7 @@ StTrackType
 StPrimaryTrack::type() const { return primary; }
 
 const StVertex*
-StPrimaryTrack::vertex() const { return 0; }
+StPrimaryTrack::vertex() const { return mVertex; }
 
 void
 StPrimaryTrack::setVertex(StVertex* val)
