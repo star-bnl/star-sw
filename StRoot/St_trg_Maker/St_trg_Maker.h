@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.h,v 1.5 2000/02/04 18:57:18 ward Exp $
+// $Id: St_trg_Maker.h,v 1.6 2000/03/28 20:40:42 fine Exp $
 // $Log: St_trg_Maker.h,v $
+// Revision 1.6  2000/03/28 20:40:42  fine
+// Adjuested to ROOT 2.24
+//
 // Revision 1.5  2000/02/04 18:57:18  ward
 // Added dst_L1_Trigger and dst_L2_Trigger to output.
 //
@@ -44,6 +47,9 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+
+#include "St_DataSet.h"
+
 class St_dst_L0_Trigger;
 class St_dst_L1_Trigger;
 class St_dst_L2_Trigger;
@@ -56,7 +62,7 @@ class St_trg_Maker : public StMaker {
    Bool_t drawinit;
    StDAQReader *fVictorPrelim; //!
    StTRGReader *fVictor;       //!
-// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.5 2000/02/04 18:57:18 ward Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.6 2000/03/28 20:40:42 fine Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
    void dumpDataToScreenAndExit();
@@ -80,7 +86,7 @@ class St_trg_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.5 2000/02/04 18:57:18 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.6 2000/03/28 20:40:42 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_trg_Maker, 1)   //StAF chain virtual base class for Makers
 };
