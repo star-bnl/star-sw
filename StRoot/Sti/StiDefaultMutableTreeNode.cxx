@@ -1044,13 +1044,16 @@ StiDefaultMutableTreeNode::appendChildrenToVector(
 						  StiDefaultMutableTreeNodeVector *v)
 {
   StiDefaultMutableTreeNodeIterator it;
-  if (node->getChildCount()==0)
+  if (node->getChildCount()>0)
     {
       // insert children
+			//cout << "appendChildrenToVector : node has child count:" << node->getChildCount() << endl;
       for (it=node->children.begin();it!=node->children.end();it++)
-	v->push_back(*it);
+				v->push_back(*it);
       // insert children of children
       for (it=node->children.begin();it!=node->children.end();it++)
-	appendChildrenToVector(*it,v);
+				appendChildrenToVector(*it,v);
     }
+	//else
+	//cout << "appendChildrenToVector : node has no children " << endl;
 }

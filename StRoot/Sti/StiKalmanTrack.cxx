@@ -248,7 +248,7 @@ void StiKalmanTrack::removeHit(StiHit *h)
   else
     {
       // the hit does not belong to this track
-      cout << "StiKalmanTrack::removeHit() - Error - Given hit doe not belong to this track" << endl; 
+      cout << "StiKalmanTrack::removeHit() - Error - Given hit does not belong to this track" << endl; 
     }
 }
 
@@ -359,7 +359,7 @@ void StiKalmanTrack::initialize(double curvature,
   //cout <<"\tAdd Hits"<<endl;
   for (it=v.begin(); it!=v.end(); ++it)
     {
-			cout <<"===========Adding Hit: "<<(*(*it))<<endl;
+			//cout <<"===========Adding Hit: "<<(*(*it))<<endl;
       StiDetector* layer = (*it)->detector();
       if (!layer) {
 				cout <<"StiKalmanTrack::initialize() ERROR:\tHit has null detector.  Seg-fault"<<endl;
@@ -391,19 +391,19 @@ void StiKalmanTrack::initialize(double curvature,
       else
 				{
 					pNode->add(node);
-					cout << " just added a node" << endl;
 				}
       pNode = node;
       i++;
     }
   lastNode = node;
-	cout << *firstNode;
 }
 
 StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
 {
   if (firstNode==0)  // no node in this track, return a null state and error
       return 0;
+	//cout << "StiKalmanTrack::getNodeNear(" << x << ") called" << endl;
+	//cout << *firstNode << endl;
   StiDefaultMutableTreeNodeVector* nodes  = firstNode->breadthFirstEnumeration();
   double minDist  = 1.E10;
   double xx, diff;
@@ -414,7 +414,7 @@ StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
       StiKalmanTrackNode * node = dynamic_cast<StiKalmanTrackNode *>(*it);
 			xx = node->fX;
       diff = xx-x; if (diff<0) diff = -diff;
-      cout << "===> x/diff:" << xx << "\t" << diff << endl;
+      //cout << "===> x/diff:" << xx << "\t" << diff << endl;
       if (diff<minDist) 
 				{
 					minDist = diff;

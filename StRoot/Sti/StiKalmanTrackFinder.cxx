@@ -175,6 +175,7 @@ void StiKalmanTrackFinder::followTrackAtNode(StiKalmanTrackNode * node)  throw (
   // Source node is the given node
   sNode = node;
   tNode = nodeFactory->getObject();
+	tNode->reset();
 
   //const
   StiDetector * sDet = sNode->getHit()->detector();
@@ -465,6 +466,7 @@ void StiKalmanTrackFinder::exploreNode(StiKalmanTrackNode * sNode,
 		{
 		// add hit as sub node to current node, and follow new node down
 		  node = f->getObject();
+			node->reset();
 		  node->setHit(hit);
 		  node->setState(tNode);
 		  updateNode(node, chi2);
@@ -550,6 +552,7 @@ double StiKalmanTrackFinder::evaluateChi2(const StiKalmanTrackNode * node,
 
 
   StiKalmanTrackNode * nNode = f->getObject();
+	nNode->reset();
   if (!nNode)
     {
       cout << "StiKalmanTrackFinder::updateTrackAtNode(...) - Severe Error " << endl
