@@ -1,4 +1,4 @@
-// $Id: EEmcDbCrate.cxx,v 1.3 2004/03/30 04:44:57 balewski Exp $
+// $Id: EEmcDbCrate.cxx,v 1.4 2004/04/03 06:32:48 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
@@ -32,7 +32,7 @@ void EEmcDbCrate::print() const{
     return;
   }
 
-  printf("%s crID=%d crIDswitch=%d fiber=%d nCh=%d nHead=%d type=%c\n",name, crID, crIDswitch,fiber,nCh,nHead,type);
+  printf("%s crID=%3d crIDswitch=%3d fiber=%d nCh=%d nHead=%d type=%c useIt=%d\n",name, crID, crIDswitch,fiber,nCh,nHead,type,useIt);
 }
 
 //--------------------------------------------------
@@ -45,6 +45,7 @@ void EEmcDbCrate::clear() {
   nCh=-4;
   nHead=-5;
   type='X';
+  useIt=0;
 }
 
 
@@ -58,9 +59,9 @@ void EEmcDbCrate::setName(char *text) {
 //--------------------------------------------------
 void EEmcDbCrate::setAll(char *buf   ) {
   //printf("buf='%s'\n",buf);
-  int ret=sscanf(buf,"%s %d %d %d %d %d %c",name,&crID,&crIDswitch,&fiber,&nCh,&nHead,&type);
+  int ret=sscanf(buf,"%s %d %d %d %d %d %c %d",name,&crID,&crIDswitch,&fiber,&nCh,&nHead,&type,&useIt);
   //  printf("ret=%d\n",ret);
-  assert(ret==7);
+  assert(ret==8);
 }
 
 
@@ -128,6 +129,9 @@ int EEmcDbCrate::importAscii(FILE *fd){
 
 
 // $Log: EEmcDbCrate.cxx,v $
+// Revision 1.4  2004/04/03 06:32:48  balewski
+// *** empty log message ***
+//
 // Revision 1.3  2004/03/30 04:44:57  balewski
 // *** empty log message ***
 //

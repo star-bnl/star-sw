@@ -13,7 +13,8 @@ class EEmcDbCrate {
   int fiber ;///<  position of the crate in the .daq data stream, couting from 0
   int nCh ;///< no. of valid channels for the crate
   int nHead ;///< no. of header words
-  char type; ///< use 'T' for towers & 'S' for MAPMT
+  char type; ///< is 'T' for towers & 'S' for MAPMT
+  int useIt; ///< flag to ignore data from misconfig/broken crate/box
 
   EEmcDbCrate();
   void clear();
