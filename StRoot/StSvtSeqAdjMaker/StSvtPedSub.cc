@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedSub.cc,v 1.2 2000/07/03 02:07:56 perev Exp $
+ * $Id: StSvtPedSub.cc,v 1.3 2000/07/16 22:32:23 caines Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedSub.cc,v $
+ * Revision 1.3  2000/07/16 22:32:23  caines
+ * Now also saves RAW data
+ *
  * Revision 1.2  2000/07/03 02:07:56  perev
  * StEvent: vector<TObject*>
  *
@@ -89,7 +92,7 @@ int StSvtPedSub::SubtractPed( StSvtHybridData* fData, int Index, int PedOffset)
   anodeList = NULL;
 
   nAnodes = fData->getAnodeList(anodeList);
-
+  mPed = (StSvtHybridPed *) mSvtPed->at(Index);
   
   for (int ianode=0;ianode<nAnodes;ianode++) {
     
@@ -98,7 +101,6 @@ int StSvtPedSub::SubtractPed( StSvtHybridData* fData, int Index, int PedOffset)
     nSeq = 0;
     
     status = fData->getSequences(anodeID,nSeq,Seq);
-    mPed = (StSvtHybridPed *) mSvtPed->at(Index);
     for (iseq=0;iseq<nSeq;iseq++) {	  	  
       for (time=Seq[iseq].startTimeBin; time<Seq[iseq].startTimeBin+Seq[iseq].length; time++) {
 	
