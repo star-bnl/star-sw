@@ -102,8 +102,8 @@ bool StDetectorDbTpcRDOMasks::isOn(unsigned int sector,unsigned int rdo){
 /// higher order bit is higher mask
 unsigned int StDetectorDbTpcRDOMasks::getSectorMask(unsigned int sector){
 
-  //unsigned int mask = 0x0000; // default is to mask it out
-    unsigned int mask = 0xFFFF; // change to  ON by default
+    unsigned int mask = 0x0000; // default is to mask it out
+    //unsigned int mask = 0xFFFF; // change to  ON by default ** THIS WAS A HACK
     
     if(sector < 1 || sector > 24 || mNumEntries == 0){
       cout << "StDetectorDbTpcRDOMasks::getSectorMask : return default mask for " 
