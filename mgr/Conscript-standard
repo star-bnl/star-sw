@@ -7,11 +7,12 @@ $build =~ s/\\/\//g;# print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
 $ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
 (my $obj_dir = $ObjDir) =~ s/^\#//g;# print "obj_dir = $obj_dir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
-my @Repo = Repository_List; #print "Repositories = |@Repo|\n";
+my @Repo = ();
+@Repo = Repository_List unless $param::noRepository; #print "Repositories = |@Repo|\n";
 my $pkg  = basename($Dir);# print "Run cons in $Dir for $PKG\n";
 my $PKG = $pkg;
 my @idlML    = find_idlM($Dir);   #  $i = 0; for my $s (@idlM) {print "i=",$i++," idlM = ",$s,"\n";}
-my @srcL     = find_sources($Dir);#  my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
+my @srcL     = find_sources($Dir);#  my $i=0; for my $s (@srcL) {print "i=",$i++," src = ",$s,"\n";}
 my @h_filesL = find_hfiles($Dir);   #$i = 0; for my $s (@h_files) {print "i=",$i++," h_files = ",$s,"\n";}
 opendir (DIR, $Dir) or die "Can't open $Dir\n";
 my @dirEntries = readdir DIR;
@@ -19,9 +20,9 @@ closedir DIR; #print "dirEntries = @dirEntries\n";
 foreach my $Rep (@Repo) {
   my $RepDir = $Rep . "/" . $Dir;# print "RepDir = $RepDir\n";
   if (-d $RepDir) {
-    my @srcR = find_sources($RepDir);
+    my @srcR = find_sources($RepDir);# my $i=0; for my $s (@srcR) {print "i=",$i++," src = ",$s,"\n";}
     foreach my $i (@srcR) {push @srcL,  $i;}
-    my @idlMR = find_idlM($RepDir);
+    my @idlMR = find_idlM($RepDir); 
     foreach my $i (@idlMR) {push @idlML, $i;}
     my @h_filesR = find_hfiles($RepDir);
     foreach my $i (@h_filesR) {push @h_filesL, $i;}
@@ -48,13 +49,13 @@ if ($pkg =~ /^pyth$/){
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g;# print "new share $share\n" if $param::debug;
 $share =~ s/\/StRoot//g;
 $share =~ s/\/(sim|gen)//g; 
-my $CPPP =":#" . $Dir . ":" .  $env->{CPPPATH};
+my $CPPP = $env->{CPPPATH};
 if ($pkg =~ /^StTrsMaker$/) {
   $CPPP = ":#" . $Dir . ":#" . $Dir . "/include:" . $env->{CPPPATH};#  print "CPPP = $CPPP\n";
 }
+if ($pkg =~ /^StDaqLib$/) {$CPPP = ":#" . $Dir . ":" . $env->{CPPPATH};}#  print "CPPP = $CPPP\n";}
 if ($Dir =~ /pams\//) {
   $CPPP = ":" . $INCLUDE . "/" . $pkg . ":" . $env->{CPPPATH}; print "CPPP = $CPPP\n" if $param::debug;
-#  my $CPPP = ":" . $INCLUDE . "/" . $pkg . ":#" . $Dir . ":" . $env->{CPPPATH};# print "CPPP = $CPPP\n" if $param::debug;
 }
 my $LIBPKG = "";
 my @srco = @src;
@@ -76,7 +77,7 @@ $CPPP .= ":/usr/local/include";
 }
 my $CXXFLAGS = $env->{CXXFLAGS};
 my $FCCOM    = $env->{FCCOM};
-if ($STAR_SYS =~ /^sun4x_5/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
+if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
 $env2 = $env->clone('CPPPATH'      => $CPPP,
 		    'CXXFLAGS'     => $CXXFLAGS,
 		    'FCCOM'        => $FCCOM,
@@ -87,7 +88,7 @@ my $CPPPATH = $cscanner->iflags;#  print "CPPPATH = $CPPPATH\n" if $param::debug
 my $STIC_CPPPATH = $CPPPATH;
 my @cpps = split /:/,$env2->{CPPPATH};# print "@cpps\n" if $param::debug;
 my $ROOTCINT_CPP ="";
-foreach my $cpp (@cpps) {
+foreach my $cpp ($Dir,@cpps) {
   if ($cpp =~ /cern/ ||
       $cpp eq "/usr/include"
      )  {next;}
@@ -154,7 +155,6 @@ else {
 if ($#Defs > -1) {
   my @CintFiles = 
   ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h");#, $share . "/"  . "LinkDef.h"); 
-  Install $env2 $share, @Defs;
   my @defs = ();
   foreach my $def (@Defs) {
     push @defs, $share . "/" . basename($def);
