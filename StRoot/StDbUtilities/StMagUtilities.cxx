@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.9 2001/05/21 17:03:55 didenko Exp $
+ * $Id: StMagUtilities.cxx,v 1.10 2001/05/22 00:06:43 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,10 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.10  2001/05/22 00:06:43  jhthomas
+ * Update XTWIST and YTWIST Parameters.  Also allow Search function to start at
+ * the previous pointer in the table.
+ *
  * Revision 1.9  2001/05/21 17:03:55  didenko
  * commit back right version
  *
@@ -72,8 +76,8 @@ extern   "C" { void gufld(Float_t *, Float_t *) ; }
 #define  GAP13_14      1.595            // Width of the gap between the grids at row 13 and row 14 (cm)
 #define  GAPRADIUS     121.8            // Radius of gap between rows 13 & 14 at phi = zero degrees (cm)
 #define  GG           -127.5            // Gating Grid voltage (volts)
-#define  XTWIST       -0.071            // X Displacement of West end of TPC (cm) wrt TPC_Z0
-#define  YTWIST        0.019            // Y Displacement of West end of TPC (cm) wrt TPC_Z0
+#define  XTWIST       -0.079            // X Displacement of West end of TPC (cm) wrt TPC_Z0
+#define  YTWIST        0.032            // Y Displacement of West end of TPC (cm) wrt TPC_Z0
 #define  EASTCLOCKERROR  0.0            // Phi rotation of East end of TPC in milli-radians
 #define  WESTCLOCKERROR -0.43           // Phi rotation of West end of TPC in milli-radians
 
@@ -323,7 +327,7 @@ void StMagUtilities::UndoTwistDistortion( const Float_t x[3], Float_t Xprime[3] 
 {
 
   static Int_t    Flag = 0 ;                  // Do once
-  static Float_t  Const_3, Const_4, OmegaTau ;
+  static Float_t  Const_1, Const_2, OmegaTau ;
   Float_t         Zdrift, B[3] ;
   Int_t           sign ;
 
@@ -331,8 +335,8 @@ void StMagUtilities::UndoTwistDistortion( const Float_t x[3], Float_t Xprime[3] 
     {
       BField( x, B ) ;                        // Work in kGauss, cm and assume Bz dominates
       OmegaTau   =  -0.4 * B[2] ;             // B in kGauss, note that the sign of B is important here
-      Const_3    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
-      Const_4    =  1.0 / ( 1. + pow( OmegaTau, 2 ) ) ;    
+      Const_1    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
+      Const_2    =  pow( OmegaTau, 2 ) / ( 1. + pow( OmegaTau, 2 ) ) ;
       Flag = 1 ;
     }
   
@@ -340,8 +344,8 @@ void StMagUtilities::UndoTwistDistortion( const Float_t x[3], Float_t Xprime[3] 
   else               sign = -1 ;                       // (TPC East)  
 
   Zdrift = sign * ( TPC_Z0 - TMath::Abs(x[2]) ) ;
-  Xprime[0] = x[0] + ( -1* Const_3 * YTWIST/TPC_Z0 + Const_4 * XTWIST/TPC_Z0 ) * Zdrift ;
-  Xprime[1] = x[1] + (     Const_3 * XTWIST/TPC_Z0 + Const_4 * YTWIST/TPC_Z0 ) * Zdrift ;
+  Xprime[0] = x[0] + ( -1* Const_1 * YTWIST/TPC_Z0 + Const_2 * XTWIST/TPC_Z0 ) * Zdrift ;
+  Xprime[1] = x[1] + (     Const_1 * XTWIST/TPC_Z0 + Const_2 * YTWIST/TPC_Z0 ) * Zdrift ;
   Xprime[2] = x[2] ;                          // Add (above) to undo the distortion 
 
 }
@@ -548,12 +552,12 @@ void StMagUtilities::InterpolateBfield( const Float_t r, const Float_t z, Float_
   fscale = 0.001*gFactor*gRescale ;               // Scale STAR maps to work in kGauss, cm
 
   const   Int_t ORDER = 2  ;                      // Quadratic interpolation          
-  Int_t   jlow, klow ;                            
+  static  Int_t jlow, klow ;                            
   Float_t save_Br[ORDER+1] ;
   Float_t save_Bz[ORDER+1] ;
 
-  jlow = Search( nZ,   ZList,   z   ) ;
-  klow = Search( nR,   Radius,  r   ) ;
+  Search ( nZ, ZList,  z, jlow ) ;
+  Search ( nR, Radius, r, klow ) ;
   if ( jlow < 0 ) jlow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
   if ( klow < 0 ) klow = 0 ;
   if ( jlow + ORDER  >=    nZ - 1 ) jlow =   nZ - 1 - ORDER ;
@@ -577,20 +581,20 @@ void StMagUtilities::InterpolateEdistortion( const Float_t r, const Float_t phi,
 {
 
   const   Int_t ORDER = 2 ;                      // Quadratic interpolation          
-  Int_t   ilow, jlow, klow ;
+  static  Int_t ilow, jlow, klow ;
   Float_t save_Er[ORDER+1],   saved_Er[ORDER+1] ;
   Float_t save_Ephi[ORDER+1], saved_Ephi[ORDER+1] ;
 
-  ilow = Search( neZ,   eZList,   z   ) ;
-  jlow = Search( nePhi, ePhiList, phi ) ;
-  klow = Search( neR,   eRadius,  r   ) ;
+  Search( neZ,   eZList,   z,   ilow   ) ;
+  Search( nePhi, ePhiList, phi, jlow   ) ;
+  Search( neR,   eRadius,  r,   klow   ) ;
   if ( ilow < 0 ) ilow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
   if ( jlow < 0 ) jlow = 0 ;
   if ( klow < 0 ) klow = 0 ;
 
-  if ( ilow + ORDER  >=    nZ - 1 ) ilow =   nZ - 1 - ORDER ;
-  if ( jlow + ORDER  >=  nPhi - 1 ) jlow = nPhi - 1 - ORDER ;
-  if ( klow + ORDER  >=    nR - 1 ) klow =   nR - 1 - ORDER ;
+  if ( ilow + ORDER  >=    neZ - 1 ) ilow =   neZ - 1 - ORDER ;
+  if ( jlow + ORDER  >=  nePhi - 1 ) jlow = nePhi - 1 - ORDER ;
+  if ( klow + ORDER  >=    neR - 1 ) klow =   neR - 1 - ORDER ;
 
   for ( Int_t i = ilow ; i < ilow + ORDER + 1 ; i++ )
     {
@@ -630,13 +634,12 @@ Float_t StMagUtilities::QuadInterp( const Float_t Xarray[], const Float_t Yarray
 //________________________________________
 
 
-Int_t StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x )
+void StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
 
 {
 
   // Search an ordered table by starting at the most recently used point
 
-  static Int_t low = 0 ;
   Long_t middle, high ;
   Int_t  ascend = 0, increment = 1 ;
 
@@ -648,7 +651,7 @@ Int_t StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x )
     {
       if ( (Int_t)( x >= Xarray[low] ) == ascend ) 
 	{
-	  if ( low == N-1 ) return(low) ;          
+	  if ( low == N-1 ) return ;          
 	  high = low + 1 ;
 	  while ( (Int_t)( x >= Xarray[high] ) == ascend )  
 	    {
@@ -660,7 +663,7 @@ Int_t StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x )
 	}
       else
 	{
-	  if ( low == 0 )  {  low = -1 ;  return(low) ;  }
+	  if ( low == 0 )  {  low = -1 ;  return ;  }
 	  high = low - 1 ;
 	  while ( (Int_t)( x < Xarray[low] ) == ascend )
 	    {
@@ -684,7 +687,7 @@ Int_t StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x )
   if ( x == Xarray[N-1] ) low = N-2 ;
   if ( x == Xarray[0]   ) low = 0 ;
 
-  return(low) ;
+  return ;
        
 }
 

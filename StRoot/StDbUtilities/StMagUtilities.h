@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.9 2001/05/21 17:03:55 didenko Exp $
+ * $Id: StMagUtilities.h,v 1.10 2001/05/22 00:06:44 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,10 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.10  2001/05/22 00:06:44  jhthomas
+ * Update XTWIST and YTWIST Parameters.  Also allow Search function to start at
+ * the previous pointer in the table.
+ *
  * Revision 1.9  2001/05/21 17:03:55  didenko
  * commit back right version
  *
@@ -52,7 +56,7 @@ class StMagUtilities {
  private:
 
   virtual void    ReadField ( ) ;
-  virtual Int_t   Search ( Int_t N, Float_t Xarray[], Float_t x ) ;
+  virtual void    Search ( Int_t N, Float_t Xarray[], Float_t x, Int_t &low ) ;
   virtual Float_t QuadInterp ( const Float_t Xarray[], const Float_t Yarray[], 
 			       const Float_t x ) ;
   virtual void    InterpolateBfield ( const Float_t r, const Float_t z, 
