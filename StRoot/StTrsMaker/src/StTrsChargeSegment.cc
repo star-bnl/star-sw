@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.8 1999/02/28 20:15:17 lasiuk Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.9 1999/03/02 17:51:45 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,8 +12,11 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
- * Revision 1.8  1999/02/28 20:15:17  lasiuk
- * splitting test/add muon to pid
+ * Revision 1.9  1999/03/02 17:51:45  lasiuk
+ * geant PID
+ *
+ * Revision 1.9  1999/03/02 17:51:45  lasiuk
+ * geant PID
  *
  * Revision 1.8  1999/02/28 20:15:17  lasiuk
  * splitting test/add muon to pid
@@ -129,38 +132,66 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 //     cout << "StMagneticField:at() -->          " << (magDb->at(mSector12Position))    << " T"  <<endl;
 // 	 cout << "StTrsChargeSegment::split() ds--> " << (this->ds()/millimeter)         << " mm" << endl;
 // 	 cout << "StTrsDeDx::W() -->                "   << (gasDb->W()/eV)                 << " eV"  << endl;
-    //To decompose track use the helix parameterization.
-    //StPhysicalHelix(p,x,B,+/-)
-    // Need some track info from pid:
+	//
+	// PID are GEANT3 Conventions
+	// Must get from pid structures
+	double particleMass;
+	int    charge;
+	switch (mPid) {
+	case 2:    // e+
+	    particleMass = .00051099906*GeV;
+	    charge = 1;
+	    break;
+	case 3:    // e-
+	    particleMass = .00051099906*GeV;
+	    charge = -1;	      
+	    break;
+	case 5:    // muon+
+	    particleMass = .105658389*GeV;
+	    charge = 1;
+	    break;
+	case 6:    // muon-
+	    particleMass = .105658389*GeV;
+	    charge = -1;
+	    break;
+	case 8:    // pion+
+	    particleMass = .1395700*GeV;
+	    charge = 1;
+	    break;
+	case 9:    // pion-
+	    particleMass = .1395700*GeV;
+	    charge = -1;
+	    break;
+	case 11:    // kaon+
+	    particleMass = .493677*GeV;
+	    charge = 1;
+	    break;
+	case 12:    // kaon-
+	    particleMass = .493677*GeV;
+	    charge = -1;
+	    break;
+	case 14:    // proton
+	    particleMass = .93827231*GeV;
+	    charge = 1;
+	    break;
+	case 15:    // anti-proton
+	    particleMass = .93827231*GeV;
+	    charge = -1;
+	    break;
+	default: // Probably uncharged, but DO NOT BREAK IT!
+	    subSegments = 1;
+	}
 
-	int charge = 1;  // tmp only
+	//To decompose track use the helix parameterization.
+	//StPhysicalHelix(p,x,B,+/-)
+	// Need some track info from pid:
+
 	StPhysicalHelix
 	    track(mMomentum,
 		  mSector12Position,
 		  (magDb->at(mSector12Position)).z()*tesla,
 		  charge);
-	//
-	// tmp: pion mass
-	// Must get from pid structures
-	double particleMass;
-	switch (mPid) {
-	case 1:    // pion
-	    particleMass = .1395*GeV;
-	    break;
-	case 2:    // kaon
-	    particleMass = .493*GeV;
-	    break;
-	case 3:    // proton
-	    particleMass = .939*GeV;
-	    break;
-	case 4:    // muon
-	    particleMass = .106*GeV;
-	    break;
-	default:  // a pion is default
-	    particleMass = .1395*GeV;
-	    break;
-	}
-	
+		   mSector12Position,
 	double betaGamma = abs(mMomentum)/particleMass;
 // 	PR(particleMass/GeV);
 		   charge);
