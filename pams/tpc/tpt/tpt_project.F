@@ -1,5 +1,8 @@
-* $Id: tpt_project.F,v 1.15 2000/02/23 05:05:01 sakrejda Exp $
+* $Id: tpt_project.F,v 1.16 2000/02/23 21:05:53 hardtke Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.16  2000/02/23 21:05:53  hardtke
+* replace tpg functions with tpc functions
+*
 * Revision 1.15  2000/02/23 05:05:01  sakrejda
 * Skip extension part if track spans across all the padrows
 *
@@ -109,7 +112,7 @@ C     Local variables
       INTEGER tpt_load_track
       INTEGER islic,is_pnt,ipass,tte_skip
       INTEGER tpt_find_slic, irets,save_flag
-      INTEGER tgc_sec24_to_sec12
+      INTEGER tpc_sec24_to_sec12
       INTEGER longrow, irow_last
 
       LOGICAL more, repeat
@@ -134,13 +137,13 @@ C
       longrow = hit(ip_in).row
       row_in = mod(longrow,100)
       isect_full = hit(ip_in).row/100
-      iret       = tgc_sec24_to_sec12(isect_full,isect)
+      iret       = tpc_sec24_to_sec12(isect_full,isect)
       is(1)=isect
       ip_out = trk(itrk).ipnt(1)
       longrow = hit(ip_out).row
       row_out =  mod(longrow,100)
       isect_full = hit(ip_out).row/100
-      iret       = tgc_sec24_to_sec12(isect_full,isect)
+      iret       = tpc_sec24_to_sec12(isect_full,isect)
       is(2)=isect
       row_start(1) = row_in-1
       row_start(2) = row_out+1
@@ -265,3 +268,11 @@ C              a hit found
          tpt_project = STAFCV_BAD
       endif
       end
+
+
+
+
+
+
+
+

@@ -1,5 +1,8 @@
-* $Id: tpt_row_sect_pnt.F,v 1.18 2000/02/15 02:51:59 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.19 2000/02/23 21:05:53 hardtke Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.19  2000/02/23 21:05:53  hardtke
+* replace tpg functions with tpc functions
+*
 * Revision 1.18  2000/02/15 02:51:59  sakrejda
 * Remove elimination of hits with bad flags, will be handled differently
 *
@@ -114,9 +117,9 @@ c     allocate memory following Victor's suggestion
 C             sort hits in the TPC table according to row/sec field
       real    xglobal(3)
 
-      INTEGER tgc_global_to_sector
-      INTEGER tgc_sec24_to_sec12
-      INTEGER tgc_drift_volume_length
+      INTEGER tpc_global_to_sector
+      INTEGER tpc_sec24_to_sec12
+      INTEGER tpc_drift_volume_length
       INTEGER id1,idI1
       REAL    dzslic, z_hit, dvl, dummy
       character*256 m132  ! And some message-generating space.
@@ -138,7 +141,7 @@ C        clean up sector assignement.
             rhit(i)=hit(i).row
          else
             isec3=int(hit(i).row/100)
-            iret=tgc_sec24_to_sec12(isec3,isect)
+            iret=tpc_sec24_to_sec12(isec3,isect)
             longrow = hit(i).row
             rhit(i) = isect*100+mod(longrow,100)
          endif
@@ -176,7 +179,7 @@ C     set up information about the slices
 *
 *     estimate size of a z slice
 *     first get the TPC drift volume length
-      iret=tgc_drift_volume_length(dvl,dummy,dummy)
+      iret=tpc_drift_volume_length(dvl)
       ntmp = tpar(ipass).nzslic/2
       dzslic =dvl/real(ntmp)
       nhalf=ntmp*2

@@ -1,5 +1,8 @@
-* $Id: tpt_cross_fact.F,v 1.7 1999/12/16 16:06:16 sakrejda Exp $
+* $Id: tpt_cross_fact.F,v 1.8 2000/02/23 21:05:52 hardtke Exp $
 * $Log: tpt_cross_fact.F,v $
+* Revision 1.8  2000/02/23 21:05:52  hardtke
+* replace tpg functions with tpc functions
+*
 * Revision 1.7  1999/12/16 16:06:16  sakrejda
 * Argument that passes tphit.row word of the tohit table changed to INTEGER*2
 * (idet) to catch up with Raymond's changes of tphit.row to short from long.
@@ -52,14 +55,14 @@ C______________________________________________________________________
       real    vlocal(3),vglobal(3)
       integer iret, isect
 
-      INTEGER tgc_sec24_to_sec12, tgc_global_to_local_p
+      INTEGER tpc_sec24_to_sec12, tgc_global_to_local_p
       real    atand
 C_____________________________________________________________________
 
       if(cf.lt.0) then 
          cf=1.0
       else
-         iret      = tgc_sec24_to_sec12(idet/100,isect)
+         iret      = tpc_sec24_to_sec12(idet/100,isect)
          vglobal(1)= xnew-xold
          vglobal(2)= ynew-yold
          vglobal(3)= 0.0

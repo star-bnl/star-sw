@@ -1,5 +1,8 @@
-* $Id: tpt_find_slic.F,v 1.4 1998/03/29 05:03:01 sakrejda Exp $
+* $Id: tpt_find_slic.F,v 1.5 2000/02/23 21:05:52 hardtke Exp $
 * $Log: tpt_find_slic.F,v $
+* Revision 1.5  2000/02/23 21:05:52  hardtke
+* replace tpg functions with tpc functions
+*
 * Revision 1.4  1998/03/29 05:03:01  sakrejda
 * setup done on the first call
 *
@@ -22,7 +25,7 @@ C
       integer islic                    ! slice number for z
       integer ntmp,itim,nhalf,iret
       integer ifirst                   ! initialisation flag
-      integer tgc_drift_volume_length  ! function returns drift length
+      integer tpc_drift_volume_length  ! function returns drift length
       real    z,dzslic,zreal,zint,dz,dvl,dummy
       real    z_local
       data ifirst /0/
@@ -31,7 +34,7 @@ C
 c     calculate all the necessary numbers only the first time around
       if(ifirst.eq.0) then
          ifirst=1
-         iret=tgc_drift_volume_length(dvl,dummy,dummy)
+         iret=tpc_drift_volume_length(dvl)
          ntmp=nzslic/2
          dzslic=dvl/real(ntmp)
          nhalf=ntmp*2

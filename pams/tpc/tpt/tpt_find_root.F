@@ -1,5 +1,8 @@
-* $Id: tpt_find_root.F,v 1.12 2000/02/14 00:57:37 sakrejda Exp $
+* $Id: tpt_find_root.F,v 1.13 2000/02/23 21:05:52 hardtke Exp $
 * $Log: tpt_find_root.F,v $
+* Revision 1.13  2000/02/23 21:05:52  hardtke
+* replace tpg functions with tpc functions
+*
 * Revision 1.12  2000/02/14 00:57:37  sakrejda
 * iVertex constrain removed from the root formation.
 *
@@ -79,11 +82,11 @@ C     Local variables
       INTEGER gap_2                        !gap counter between ir3 and ir2
       INTEGER nh1,nh2
       INTEGER tol23,i,j,iret,tol12,itest,ilc,jlc,ipass
-      INTEGER tgc_row_par                  !function that returns row parametrisation
+      INTEGER tpc_row_par                  !function that returns row parametrisation
       INTEGER tpt_ptcrs                    !function calculating a crossing point of 2 lines
       INTEGER islic,is_pnt,js_pnt
       INTEGER tpt_find_slic, irets
-      INTEGER tgc_sec24_to_sec12
+      INTEGER tpc_sec24_to_sec12
       INTEGER longrow
       REAL    zp3
       REAL    zorigl,r3,r2,delr23,zp2,delz2p,dely23
@@ -102,7 +105,7 @@ C_____________________________________________________________________
 
 C     get information about the seed
       isect = int(hit(k).row/100)
-      iret  = tgc_sec24_to_sec12(isect,isect_trunc)
+      iret  = tpc_sec24_to_sec12(isect,isect_trunc)
       longrow =hit(k).row 
       ir3   = mod(longrow,100)
       zp3   = hit(k).z
@@ -207,8 +210,7 @@ c               squared distance between the prediction and the track (r-z proje
 c                   we have a candidate for the second point
 C                   calculate prediction for the row ir1
 c                   get the row parametrisation
-                    iret = tgc_row_par(isect,real(ir1),as,bs,dummy,
-     >              dummy)
+                    iret = tpc_row_par(isect,real(ir1),as,bs)
 c                   calculate the track parametrisation as an*x+bn*y=1
                     det_local=(hit(i).x*hit(k).y-hit(k).x*hit(i).y)
                     if(abs(det_local).gt.0.0000001) then
