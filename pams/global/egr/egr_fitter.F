@@ -466,7 +466,7 @@ C     Now find first point on track.
                   globtrk(iglob).x_first(3) = tphit(ifirst).z
 
 
-C     Now find last point on track and calculate track length.
+C     Now find last point on track 
                   if (tptrack(itrk).id.gt.0.and.
      +                 tptrack(itrk).id.le.mxtrack) then
                      lasthit = gtrk(tptrack(itrk).id).ipnt(1)
@@ -487,20 +487,6 @@ C     Now find last point on track and calculate track length.
                   globtrk(iglob).x_last(1) = tphit(lasthit).x
                   globtrk(iglob).x_last(2) = tphit(lasthit).y
                   globtrk(iglob).x_last(3) = tphit(lasthit).z
-C----->>>>  new calculation of .length   S.Margetis
-                  gseed = sqrt((globtrk(iglob).x_last(1) 
-     +                - globtrk(iglob).x_first(1))**2 +
-     +                 (globtrk(iglob).x_last(2) 
-     +                - globtrk(iglob).x_first(2))**2)
-
-                  gtanl = globtrk(iglob).tanl
-                  ginvpt= globtrk(iglob).invpt
-            call egr_trk_length(gseed,gtanl,ginvpt,bfield(3),glength)
-                  globtrk(iglob).length=glength
-C---<<<<<<<
-                  if (globtrk(iglob).length.gt.99999.9) then
-                     globtrk(iglob).length=99999.9
-                  endif
 
                   globtrk(iglob).length = tptrack(itrk).length
 CSM               
