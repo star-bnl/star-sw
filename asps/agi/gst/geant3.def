@@ -266,14 +266,14 @@ C_geant3_UNIX_compiler..v....3....v....4....v....5....v....6....v....7....v....8
  REPLACE ['']         WITH [[EMIT']] ;
  
 " some C-like constructions "
- REPLACE[;#-=#;]      WITH [;#1=#1-#2;]                  ;
- REPLACE[;#*=#;]      WITH [;#1=#1*#2;]                  ;
- REPLACE[;#+=#;]      WITH [;#1=#1+#2;]                  ;
- REPLACE[;#/=#;]      WITH [;#1=#1/#2;]                  ;
- REPLACE[;IF(#)#-=#;] WITH [;IF(#1) #2=#2-#3;]      ;
- REPLACE[;IF(#)#+=#;] WITH [;IF(#1) #2=#2+#3;]      ;
- REPLACE[;IF(#)#*=#;] WITH [;IF(#1) #2=#2*#3;]      ;
- REPLACE[;IF(#)#/=#;] WITH [;IF(#1) #2=#2/#3;]      ;
+ REPLACE[;[5SYS]#-=#;] WITH [;[EMIT[P1]]#1=#1-#2;]   ;
+ REPLACE[;[5SYS]#*=#;] WITH [;[EMIT[P1]]#1=#1*#2;]   ;
+ REPLACE[;[5SYS]#+=#;] WITH [;[EMIT[P1]]#2=#2+#3;]   ;
+ REPLACE[;[5SYS]#/=#;] WITH [;[EMIT[P1]]#1=#1/#2;]   ;
+ REPLACE[;IF(#)#-=#;]  WITH [;IF(#1) #2=#2-#3;]      ;
+ REPLACE[;IF(#)#+=#;]  WITH [;IF(#1) #2=#2+#3;]      ;
+ REPLACE[;IF(#)#*=#;]  WITH [;IF(#1) #2=#2*#3;]      ;
+ REPLACE[;IF(#)#/=#;]  WITH [;IF(#1) #2=#2/#3;]      ;
  REPLACE[{#,#}=#;] WITH [{IF}[EXIST 1]{;[P1]=[P3]; ;{[P2],}=[P3]};]
  REPLACE [-1+1)] WITH [)];
  REPLACE [;[GENAME]={#,#}]   WITH
@@ -284,6 +284,12 @@ C_geant3_UNIX_compiler..v....3....v....4....v....5....v....6....v....7....v....8
  REPLACE [;[GENAME]={#(#:#)}] WITH [; DO $i=#3,#4 {  #1($i-#3+1)=#2($i); };]
  REPLACE [;[GENAME]={#(#:#,#:#)}] WITH [;  DO $j=#5,#6 { DO $i=#3,#4
                                       { #1($i-#3+1,$j-#5+1)=#2($i,$j); } };]
+"PN, 28.08.98: c-like for(;;)"
+ REPLACE [;[5SYS]FOR(#;] WITH [;" For-Loop "[EMIT[P1]]#2;while(]
+ REPLACE [while(#;]      WITH [ while(#1)( ]
+ REPLACE [while(#)(#)#;] WITH [;{IF}[EXIST 1]{WHILE(#1)}{ELSE}{LOOP}{#3;#2;}]
+ REPLACE [while(#)(#){]  WITH [;[MCUR+] @MSX @Q0 GO TO @LC03;"*"; @LC01 #2;
+                                @LC03 {IF}[EXIST 1]{IF(~(#1)) GO TO @LC02};]
 ;
      !UPLOW; !DEFAULT 4; !BLACK;
 ;
