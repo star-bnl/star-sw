@@ -7,26 +7,30 @@
 using std::cout;
 using std::endl;
 
-//StiMaker
-#include "StiMaker/StiRootIOBroker.h"
-
 //Sti
 #include "StiIOBroker.h"
+//StiMaker
+#include "StiMaker/StiRootIOBroker.h"
 
 StiIOBroker* StiIOBroker::sInstance=0;
 
 StiIOBroker::StiIOBroker()
 {
-    cout <<"StiIOBroker::StiIOBroker()"<<endl;
-    sInstance=this;
+	cout <<"StiIOBroker::StiIOBroker()"<<endl;
 }
 
 StiIOBroker::~StiIOBroker()
 {
-    cout <<"StiIOBroker::~StiIOBroker()"<<endl;
+	cout <<"StiIOBroker::~StiIOBroker()"<<endl;
 }
 
 StiIOBroker* StiIOBroker::instance()
 {
     return (sInstance) ? sInstance : new StiRootIOBroker();
+}
+
+void StiIOBroker::kill()
+{
+	delete sInstance;
+	sInstance = 0;
 }

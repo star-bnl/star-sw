@@ -56,7 +56,8 @@ void* StiKalmanTrackFactory::makeNewObject() const
 //StiEvaluableTrack Factory
 
 StiEvaluableTrackFactory::StiEvaluableTrackFactory(const string& newName,int original, int incremental, int maxInc)
-    : StiObjectFactoryInterface<StiKalmanTrack>(newName, original, incremental,maxInc)
+	: StiKalmanTrackFactory(newName, original, incremental,maxInc)
+	//: StiObjectFactoryInterface<StiKalmanTrack>(newName, original, incremental,maxInc)
 {
     initialize();
 }
@@ -84,7 +85,8 @@ StiDetectorFactory::~StiDetectorFactory()
 
 void* StiDetectorFactory::makeNewObject() const
 {
-    return new StiDetector();
+	//cout << "StiDetectorFactory::makeNewObject() called - making StiDetector" << endl;
+	return new StiDetector();
 }
 
 //StiKalmanTrackNode Factory

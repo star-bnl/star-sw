@@ -24,6 +24,7 @@ public:
 
     //enum StiIOBrokerType {kUndefined=0, kRootIO=1, kMySql=2};
     static StiIOBroker* instance();
+		static void kill();
 
 public:
 
@@ -188,12 +189,13 @@ public:
     
     virtual void setFilterPrimaryDcaMax(double) = 0;
     virtual double filterPrimaryDcaMax() const = 0;
+
+    virtual ~StiIOBroker();
     
 protected:
     
     //singleton management
     StiIOBroker();
-    virtual ~StiIOBroker();
     static StiIOBroker* sInstance;
 
     friend ostream& operator<<(ostream&, const StiIOBroker&);

@@ -532,61 +532,91 @@ double  StiKalmanTrack::getDca3(StiTrack *t)   const
     return 0;
 }
 
+//int StiKalmanTrack::getPointCount(StiTrackType type) const
+int StiKalmanTrack::getPointCount() const
+{
+	return calculatePointCount();
+}
+
+//int StiKalmanTrack::getMaxPointCount(StiTrackType type) const
+int StiKalmanTrack::getMaxPointCount() const
+{
+	return calculateMaxPointCount();
+}
+
+int StiKalmanTrack::calculatePointCount() const
+{
+	int nPts = 0;
+	if (firstNode)
+		{
+			StiKTNBidirectionalIterator it;
+			for (it=begin();it!=end();it++)
+				{
+					if ((*it).getDetector()->isActive() && (*it).getHit())
+						nPts++;
+				}
+		}
+	return nPts;
+}
+
+int StiKalmanTrack::calculateMaxPointCount() const
+{
+	int nPts = 0;
+	if (firstNode)
+		{
+			StiKTNBidirectionalIterator it;
+			for (it=begin();it!=end();it++)
+				{
+					if ((*it).getDetector()->isActive() && 
+							(*it).getDetector()->isOn())   // (y,z) should be used here...
+						nPts++;
+				}
+		}
+	return nPts;
+}
 
 int    StiKalmanTrack::getGapCount()    const  
 {
-  /*
-  int gaps = 0;
+	int gaps = 0;
   if (firstNode)
     {
-      StiKTNBidirectionalIterator it(getLastNode());
+			StiKTNBidirectionalIterator it;
       bool inGap = false;
-      while(it!=it.end())
-	{
-	  StiKalmanTrackNode * node = it;
-	  if (node->getDetector()->isActive())
-	    {
-	      if (node->getHit())
-		{
-		  inGap = false;
+			for (it=begin();it!=end();it++)
+				{
+					if ((*it).getDetector()->isActive())
+						{
+							if ((*it).getHit())
+								{
+									if (inGap) 
+										inGap = false;
+								}
+							else
+								{
+									if (!inGap)
+										{
+											inGap = true;
+											gaps++;
+										}										
+								}
+						}
+				}
 		}
-	      else
-		{
-		  if (!inGap)
-		    {
-		      gaps++;
-		      inGap = true;
-		    }
-		  
-		}
-	    }
-	  it++;
-	}
-      return gaps;
-    }
-    else*/
-    return 0;
+	return gaps;
 }
-
 
 int    StiKalmanTrack::getFitPointCount()    const  
 {
-  /*  if (firstNode)
-    {
-      StiKTNBidirectionalIterator it(getLastNode());
-      int nPts = 0;
-      while(it!=it.end())
-	{
-	  StiKalmanTrackNode * node = it;
-	  if (node->getDetector()->isActive() && node->getHit())
-		nPts++;
-	  it++;
-	}
-      return nPts;
-    }
-    else*/
-    return 0;
+	// currently no difference is made between points on the track and 
+	// fit points on the track. 
+	return getPointCount();
 }
+
+double StiKalmanTrack::getTrackLength() const
+{
+	return calculateTrackLength();
+}
+
 
 StiKTNBidirectionalIterator StiKalmanTrack::begin() const 
 {
@@ -598,17 +628,62 @@ StiKTNBidirectionalIterator StiKalmanTrack::end() const
 	return StiKTNBidirectionalIterator(lastNode);
 }
 
-int    StiKalmanTrack::getPointCount() const
+
+double StiKalmanTrack::calculateTrackLength() const
 {
-	StiKTNBidirectionalIterator it;
-	int nPts = 0;
-	for (it=begin();it!=end();it++)
+	double length = 0;
+	if (firstNode)
 		{
-			if ((*it).getDetector()->isActive() && (*it).getHit())
-				nPts++;
-			}
-	return nPts;
+			StiKalmanTrackNode * cnode;
+			StiKalmanTrackNode * pnode;
+			pnode = firstNode;
+			cnode = static_cast<StiKalmanTrackNode *>(pnode->getFirstChild());
+			while (cnode)
+				{
+					length += calculateTrackSegmentLength(pnode,cnode);
+					pnode = cnode;
+					cnode = static_cast<StiKalmanTrackNode *>(pnode->getFirstChild() );
+				}
+		}
+	return length;
 }
+
+double StiKalmanTrack::calculateTrackSegmentLength(StiKalmanTrackNode *p1, StiKalmanTrackNode *p2) const
+{
+	double dx, dy, dz, s, c, tanl;
+	double cos1, cos2;
+	c = fabs(p1->fP3);// curvature
+	if (c<1e-12)
+		{
+			// straight track case
+			dx = p1->fX  - p2->fX;
+			dy = p1->fP0 - p2->fP0;
+			dz = p1->fP1 - p2->fP1;
+			s = sqrt(dx*dx+dy*dy+dz*dz);
+		}
+	else
+		{
+			// helix case
+			tanl=p1->fP4;
+			cos1 = p1->fP3*p1->fX - p1->fP2;
+			cos2 = p2->fP3*p2->fX - p2->fP2;
+			if (fabs(cos1)>1. || fabs(cos2)>1.)
+				{
+					// straight track case
+					dx = p1->fX  + p2->fX;
+					dy = p1->fP0 + p2->fP0;
+					dz = p1->fP1 + p2->fP1;
+					s = sqrt(dx*dx+dy*dy+dz*dz);
+				}
+			else
+				{
+					// "normal" helix case
+					s = fabs(acos(cos1)-acos(cos2))*sqrt(1+tanl*tanl)/c;
+				}
+		}
+	return s;
+}
+
 
 double StiKalmanTrack::getPrimaryDca() const
 {
@@ -687,8 +762,27 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 
 bool  StiKalmanTrack::isPrimary() const
 {
-  return true; // for now - this must be fixed!!!!!!!!!
+  return false;
 }
+
+/**
+void swap()
+{
+StiKalmanTrackNode * node;
+StiKalmanTrackNode * pnode;
+StiKalmanTrackNode * cnode;
+
+do while (node)
+{
+	cnode = node->getFirstChild();
+	pnode = node->getParent();
+	node->setParent(cnode);
+	node->add(pnode);
+	node = cnode;
+}
+
+}
+*/
 
 ///return hits;
 vector<StHit*> StiKalmanTrack::stHits() const

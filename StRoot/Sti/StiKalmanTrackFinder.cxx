@@ -32,6 +32,7 @@
 using namespace std;
 
 //Sti
+#include "StiToolkit.h"
 #include "StiKTNIterator.h"
 #include "StiIOBroker.h"
 #include "StiHit.h"
@@ -59,25 +60,18 @@ ostream& operator<<(ostream&, const StiTrack&);
 
 
 
-StiKalmanTrackFinder::StiKalmanTrackFinder()
-    : StiTrackFinder(),trackMes(*Messenger::instance(MessageType::kTrackMessage)),
-      mSubject(StiIOBroker::instance())
-    
+
+StiKalmanTrackFinder::StiKalmanTrackFinder(StiToolkit * userToolkit)
+  : StiTrackFinder(userToolkit),trackMes(*Messenger::instance(MessageType::kTrackMessage)),
+    mSubject(StiIOBroker::instance())
 {
     //Turn off by default
     Messenger::instance()->clearRoutingBits(MessageType::kTrackMessage);
-    
-    //cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Begins"<<endl;
-    StiTrack::setTrackFitter(new StiKalmanTrackFitter());
-    reset();
-
+		reset();
     // set parameters used by this finder.
     setParameters(new StiKalmanTrackFinderParameters());
-	
-	
     mSubject->attach(this);
     getNewState();
-    
     //cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
 }
 
@@ -91,13 +85,13 @@ StiKalmanTrackFinder::~StiKalmanTrackFinder()
 
 void StiKalmanTrackFinder::getNewState()
 {
-    StiIOBroker *  broker = StiIOBroker::instance();
-    //cout <<"StiKalmanTrackFinder::getNewState()"<<endl;
-    pars->setMCSCalculated(broker->ktfMcsCalculated()); //check
-    pars->setElossCalculated(broker->ktfElossCalculated()); //check
-    pars->setMaxChi2ForSelection(broker->ktfMaxChi2ForSelection());//check
-    pars->setField(broker->ktfBField()); //check
-    pars->setMassHypothesis(broker->ktfMassHypothesis()); //check
+  StiIOBroker *  broker = toolkit->getIOBroker();
+  //cout <<"StiKalmanTrackFinder::getNewState()"<<endl;
+  pars->setMCSCalculated(broker->ktfMcsCalculated()); //check
+  pars->setElossCalculated(broker->ktfElossCalculated()); //check
+  pars->setMaxChi2ForSelection(broker->ktfMaxChi2ForSelection());//check
+  pars->setField(broker->ktfBField()); //check
+  pars->setMassHypothesis(broker->ktfMassHypothesis()); //check
   
     pars->setMinContiguousHitCount(broker->ktfMinContiguousHitCount());  //check
     pars->setMaxNullCount(broker->ktfMaxNullCount()); //check
@@ -117,13 +111,12 @@ void StiKalmanTrackFinder::getNewState()
 
 void StiKalmanTrackFinder::reset()
 {
-    //progFlowMes <<"StiKalmanTrackFinder::reset()"<<endl;
-    singleNodeDescent    = true;
-    singleNodeFrom       = 20;
-    mcsCalculated        = false;
-    elossCalculated      = false;
-    maxChi2ForSelection  = 50.;
-    
+  //progFlowMes <<"StiKalmanTrackFinder::reset()"<<endl;
+  //singleNodeDescent    = true;
+  //singleNodeFrom       = 20;
+  //mcsCalculated        = false;
+  //elossCalculated      = false;
+  //maxChi2ForSelection  = 50.;
     track = 0;
     trackDone = true;
     scanningDone = true;
@@ -314,10 +307,10 @@ void StiKalmanTrackFinder::findTracks()
     { 
       t = trackSeedFinder->next(); // obtain a pointer to the next track candidate/seed
       if (!t) 
-	{
-	  trackMes << "NO MORE TRACK SEEDS - EVENT COMPLETED" << endl;
-	  return;
-	}
+				{
+					trackMes << "NO MORE TRACK SEEDS - EVENT COMPLETED" << endl;
+					return;
+				}
       findTrack(t);
 			if (pars->useTrackFilter)
 				{
@@ -331,6 +324,12 @@ void StiKalmanTrackFinder::findTracks()
 				}
     }
 }
+
+void StiKalmanTrackFinder::fitTracks(){}
+void StiKalmanTrackFinder::extendTracksToVertex(){}
+void StiKalmanTrackFinder::findNextTrack(){}
+void StiKalmanTrackFinder::fitNextTrack(){}
+void StiKalmanTrackFinder::findNextTrackSegment(){}
 
 //careful, it will throw an excpetion
 void StiKalmanTrackFinder::findTrack(StiTrack * t) 
@@ -552,7 +551,7 @@ void StiKalmanTrackFinder::doNextDetector()
 	      tNode->setHit(hitContainer->getHit());
 	      chi2 = tNode->evaluateChi2();
 	      trackMes << "SKTF::followTrackAt()\t chi2:" << chi2  << endl;
-	      if (chi2<maxChi2ForSelection && chi2 < bestChi2)
+	      if (chi2<pars->maxChi2ForSelection && chi2 < bestChi2)
 		{
 		  trackMes << "SKTF::followTrackAt()\t selected hit - chi2:" << chi2 << endl;
 		  hasHit = true;

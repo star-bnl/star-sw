@@ -329,6 +329,7 @@ void StiKalmanTrackNode::getGlobalMomentum(double p[3], double e[6]) const
     p[1] = a10*px + a11*py + a12*pz;
     p[2] = a20*px + a21*py + a22*pz;
     
+		if (e==0) return;
     // original error matrix
     double b00=e[0], b01=e[1], b02=e[2];
     double b10=e[1], b11=e[3], b12=e[4];

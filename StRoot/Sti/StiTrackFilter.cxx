@@ -9,14 +9,6 @@ StiTrackFilter::StiTrackFilter()
   reset();
 }
   
-void StiTrackFilter::setDefaults()
-{
-  //----------------------------------------------------------
-  // Whatever must be done to initialize the filter, must be done
-  // in the derived class which implements this function.
-  //----------------------------------------------------------
-}
-
 void StiTrackFilter::reset()
 {
   //----------------------------------------------------------

@@ -77,7 +77,8 @@ private:
 
 class StiEvaluableTrack;
 
-class StiEvaluableTrackFactory : public StiObjectFactoryInterface<StiKalmanTrack>
+//class StiEvaluableTrackFactory : public StiObjectFactoryInterface<StiKalmanTrack>
+class StiEvaluableTrackFactory : public StiKalmanTrackFactory
 {
 public:
     ///Thi is the only constructor available.

@@ -47,7 +47,7 @@ public:
 
     StiTrackFilter();
   
-    virtual void setDefaults();
+    //virtual void setDefaults();
     virtual bool accept(StiTrack * track)
     {
 	return true;

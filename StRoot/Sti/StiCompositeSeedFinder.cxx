@@ -16,6 +16,7 @@ using std::copy;
 #include "StiGui/StiRDLocalTrackSeedFinder.h"
 
 //Sti
+#include "StiToolkit.h"
 #include "StiIOBroker.h"
 #include "StiHitContainer.h"
 #include "StiDetectorContainer.h"
@@ -99,12 +100,12 @@ void StiCompositeSeedFinder::build()
     //Build each SeedFinder
     
     StiTrackSeedFinder* sf=0;
-    if (StiIOBroker::instance()->useGui()==true) {
-	sf = new StiRDLocalTrackSeedFinder( StiDetectorContainer::instance(),
+    if (StiToolkit::instance()->getIOBroker()->useGui()==true) {
+	sf = new StiRDLocalTrackSeedFinder( StiToolkit::instance()->getDetectorContainer(),
 					    mHitStore);
     }
     else {
-	sf = new StiLocalTrackSeedFinder( StiDetectorContainer::instance(),
+	sf = new StiLocalTrackSeedFinder( StiToolkit::instance()->getDetectorContainer(),
 					  mHitStore);
     }
     
@@ -119,7 +120,7 @@ void StiCompositeSeedFinder::build()
     //sf->getNewValues();
 
     //Now add detectors to the container
-    const StiIOBroker* broker = StiIOBroker::instance();
+    const StiIOBroker* broker = StiToolkit::instance()->getIOBroker();
     
     const vector<unsigned int>& thePadrows = broker->ltsfPadrows();
     const vector<unsigned int>& theSectors = broker->ltsfSectors();
@@ -130,7 +131,7 @@ void StiCompositeSeedFinder::build()
 	    char szBuf[100];
 	    sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d",
 		    static_cast<int>(*padrow), static_cast<int>(*sector));
-	    StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);
+	    StiDetector* layer = StiToolkit::instance()->getDetectorFinder()->findDetector(szBuf);
 	    if (!layer) {
 		cout <<"gTrackSeedFinderBuilder(). ERROR:\t";
 		cout <<"No layer: "<<szBuf<<endl;
