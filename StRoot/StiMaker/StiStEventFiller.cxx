@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.53 2005/02/17 23:19:03 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.54 2005/02/25 17:43:15 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.54  2005/02/25 17:43:15  perev
+ * StTrack::setKey(...StiTrack::getId()) now
+ *
  * Revision 2.53  2005/02/17 23:19:03  perev
  * NormalRefangle + Error reseting
  *
@@ -516,7 +519,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	  detInfoVec.push_back(detInfo);
 	  gTrack->setDetectorInfo(detInfo);
 	  //cout <<"Setting key: "<<(unsigned short)(trNodeVec.size())<<endl;
-	  gTrack->setKey((unsigned short)(trNodeVec.size()));
+	  gTrack->setKey((unsigned short)kTrack->getId());
 	  trackNode->addTrack(gTrack);
 	  trNodeVec.push_back(trackNode);
 	  // reuse the utility to fill the topology map
@@ -620,6 +623,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
       // after the vertex is found, such as dca.  Here we can fill them.
       // 
       StGlobalTrack* currentGlobalTrack = static_cast<StGlobalTrack*>(currentTrackNode->track(global));
+      assert(currentGlobalTrack->key()==kTrack->getId());
       float globalDca = impactParameter(currentGlobalTrack);
       currentGlobalTrack->setImpactParameter(globalDca);
       kTrack->setGlobalDca(globalDca);
@@ -633,6 +637,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	  StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
 	  fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
 	  StPrimaryTrack* pTrack = new StPrimaryTrack;
+	  pTrack->setKey( currentGlobalTrack->key());
 	  try
 	    {  
 	      if (testing)
@@ -705,7 +710,6 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	      detInfoVec.push_back(detInfo);
 	      pTrack->setDetectorInfo(detInfo);
 	     
-	      pTrack->setKey( currentGlobalTrack->key());
 	      currentTrackNode->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
 	      vertex->addDaughter(pTrack);
 	      StuFixTopoMap(pTrack);
@@ -1098,7 +1102,7 @@ float StiStEventFiller::impactParameter(StiKalmanTrack* track)
     }
   StiKalmanTrackNode*	node;
 
-  node = track->getInnerMostHitNode(2); // changed to InnerMostHitNode()...
+  node = track->getInnerMostNode(); // ...
 
   const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
 
