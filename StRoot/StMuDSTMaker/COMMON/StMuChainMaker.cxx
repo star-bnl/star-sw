@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.7 2002/08/27 21:20:07 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.8 2002/10/01 23:46:13 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -137,6 +137,7 @@ TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFile
 string**  StMuChainMaker::subFilter(string filter) {
   DEBUGMESSAGE2("");
   string** subFilter = new string*[100];
+  for ( int i=0; i<100; i++) subFilter[i]=0;
   string tmp(filter);
   int n=0;
   size_t pos=0;
@@ -252,6 +253,9 @@ bool StMuChainMaker::pass(string file, string**  filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.8  2002/10/01 23:46:13  laue
+ * setting all unused subFilters explicitly to NULL
+ *
  * Revision 1.7  2002/08/27 21:20:07  laue
  * Fei Du's request
  * fileCouter>maxFiles changed to fileCounter>=maxFiles
