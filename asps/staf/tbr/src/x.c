@@ -1,5 +1,3 @@
-/* To do:
-*/
 /* Motif (gui) part of the STAR browser.  Begun April 22 1995, Herb Ward. */
 /***********************************************************  INCLUDES  **/
 #include <stdio.h>
@@ -192,6 +190,7 @@ void Progress(int x,int max,char *label,char *label2) {
     XtPopdown(gProgressPopup); return;
   }
   val=(100.0*x)/max+0.5;
+  /* PP"val=%d.  x=%d, max=%d.\n",val,x,max); */
   XmScaleSetValue(gProgressScale,val);
   XmUpdateDisplay(gProgressPopup);
 }
@@ -680,6 +679,14 @@ void RunAverage(size_t row) {
     Say("Table has unsupported data type"); gBreakRowsLoop=TRUE;
   }
 }
+void ConvertToHex(char *out,float val) {
+  /* Is this the only function in the world that translates floats to hex? */
+  int ii,hh; char buf[WIDE+15];
+  hh=val; if(hh<0) Err(559); if(hh>255) Err(558);
+  sprintf(out,"0x%02x",hh);
+  for(ii=WIDE+14;ii>=0;ii--) buf[ii]=' ';
+  buf[WIDE-4]='\0'; strcat(buf,out); strcpy(out,buf);
+}
 void RunValue(size_t row) {
   int fo=0,tt,hlLstIx,lnfhl,irow=row; float val;
   char tt2[60],format[22],tmp[100],buf[422];
@@ -700,7 +707,7 @@ void RunValue(size_t row) {
       Say("Table has unsupported data type"); gBreakRowsLoop=TRUE; break;
     }
     sprintf(format,"%%%ds",WIDE);
-    if(gStrValueWrapper) {
+    if(gVWType==VWSTRING) {
       if(gTruncateStrings) {
         gStr[WIDE-1]='\0';
         for(tt=WIDE-2;tt>=0;tt--) { if(gStr[tt]!=' ') break; gStr[tt]='\0'; }
@@ -710,8 +717,10 @@ void RunValue(size_t row) {
         strcat(gStr," ");
       }
       sprintf(tt2,format,gStr);
-    } else {
+    } else if(gVWType==VWNUMBER) {
       Format(WIDE-1,tmp,val); sprintf(tt2,format,tmp);
+    } else if(gVWType==VWHEX) {
+      ConvertToHex(tt2,val);
     }
     strcat(buf,tt2);
   }
@@ -783,8 +792,8 @@ void OneLnAllRowsCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
     fo++; gRunTotal=0; gRunNRowsDone=0; gRunWhichHilitedLine=lnfhl;
     if(firstTime) { firstTime=FALSE; RunTheRows(FALSE,whWin,runFunc); }
     else RunTheRows(TRUE,whWin,runFunc);
-    if(gStrValueWrapper) { /* we don't do this in OneLnPerRowCB() */
-      Say("You can't do that with strings."); return;
+    if(gVWType!=VWNUMBER) {
+      Say("You can't do that with octet or strings."); return;
     } else {
       if(gRunNRowsDone>0) {
         switch(whAct) {
@@ -797,7 +806,7 @@ void OneLnAllRowsCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
       } else if(gDone2<10) { /* User did not cancel. */
         Write("\"ROW SELECTION\" selected zero rows.\n",whWin); break;
       } else break; /* User may have canceled in cuts dialog. */
-    }	/* if/else gStrValueWrapper */
+    }
   }	/* loop hlLstIx */
   if(gMax==gMin) { gMax=gMin+0.1*fabs(gMin); gMin=gMin-0.1*fabs(gMin); }
   if(gMax==gMin) { gMax+=1; gMin-=1; }
@@ -957,16 +966,22 @@ void HelpCutsCB(Widget w,caddr_t cld,caddr_t cad) {
 void HelpBugRptCB(Widget w,caddr_t cld,caddr_t cad) {
   Say("Email ward@physics.utexas.edu");
 }
+#ifdef STANDALONE
+#define QUITSTRING "Quit"
+#else
+#define QUITSTRING "Close all browser windows"
+#endif
 void CreateMenuItems(Widget mbar,int type) {
   register int nn; Arg args[19]; Widget mpane;
   mpane=XmCreatePulldownMenu(mbar,"a2",args,0);
-  if(type!=WIN_TYPE_PRIMARY) {
+  if(type==WIN_TYPE_PRIMARY) {
+    MakeMenuItem(NOTUSED,mpane,QUITSTRING,(XtCP)QuitCB);
+  } else {
     MakeMenuItem(NOTUSED,mpane,"Close this window",(XtCP)CloseThisWindowCB);
   }
   if(type==WIN_TYPE_TABLE) {
     MakeMenuItem(NOTUSED,mpane,"Dump this window to .txt file",(XtCP)WrBotCB);
   }
-  MakeMenuItem(NOTUSED,mpane,"Quit",(XtCP)QuitCB);
   FinishThisMenu(mbar,mpane,"File ");
   if(type==WIN_TYPE_PRIMARY) {
     mpane=XmCreatePulldownMenu(mbar,"a2",args,0);

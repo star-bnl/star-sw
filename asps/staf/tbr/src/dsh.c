@@ -101,9 +101,9 @@ myBool Array(
   else *off=0;
   return TRUE;
 }
-myBool TableValue(int *dataType,char *cptr,float *fv,long *iv,size_t row,
+myBool TableValue(int *dType,char *cptr,float *fv,long *iv,size_t row,
   size_t colNum,DS_DATASET_T *tp,int subscript) {
-  /* Either fv or iv is filled in.  Caller knows which from dataType.  This
+  /* Either fv or iv is filled in.  Caller knows which from dType.  This
   ** function is the workhorse for getting numbers from the current table. */
   int off; size_t rowSize;
   char *pData,*tn;
@@ -114,24 +114,34 @@ myBool TableValue(int *dataType,char *cptr,float *fv,long *iv,size_t row,
     Err( 22); return FALSE;
   }
   if(!strcmp(tn,  "long")) {
-    *iv=*((  long*)(pData+off*sizeof(long))); *dataType=INTEGER;
+    *iv=*((  long*)(pData+off*sizeof(long))); *dType=INTEGER;
+
+  } else if(!strcmp(tn,   "short")) {
+    *iv=*((   short*)(pData+off*sizeof(short))); *dType=INTEGER;
+  } else if(!strcmp(tn,   "unsigned short")) {
+    *iv=*((unsigned short*)(pData+off*sizeof(unsigned short))); *dType=INTEGER;
+  } else if(!strcmp(tn,   "unsigned long")) {
+    *iv=*((unsigned long*)(pData+off*sizeof(unsigned long))); *dType=INTEGER;
+  } else if(!strcmp(tn,"octet")) {
+    *iv=*((unsigned char*)(pData+off)); *dType=HEX;
+
   } else if(!strcmp(tn,   "int")) {
-    *iv=*((   int*)(pData+off*sizeof(int))); *dataType=INTEGER;
+    *iv=*((   int*)(pData+off*sizeof(int))); *dType=INTEGER;
   } else if(!strcmp(tn, "float")) {
-    *fv=*(( float*)(pData+off*sizeof(float))); *dataType=FLOAT;
+    *fv=*(( float*)(pData+off*sizeof(float))); *dType=FLOAT;
   } else if(!strcmp(tn,"double")) {
-    *fv=*((double*)(pData+off*sizeof(double))); *dataType=FLOAT;
+    *fv=*((double*)(pData+off*sizeof(double))); *dType=FLOAT;
   } else if(!strcmp(tn,"char")) {
     if(!dsTableRowSize(&rowSize,tp)) Err(223);
     /* use row size for char strings, but sizeof() for others July 25 1995 */
     /* gStr[100] */ strncpy(cptr,(char*)(pData+off*rowSize),98);
-    *dataType=STRING;
+    *dType=STRING;
   } else {
     PP"This table contains a data type (%s)\n",tn);
     PP"which the browser does not currently support.  Fatal error.\n");
-    gDone=7; return FALSE;
+    return FALSE;
   }
-  /* PP"tABLEvALUE rets iflt=%d fv=%f, iv=%d\n",*dataType,*fv,*iv); */
+  /* PP"tABLEvALUE rets iflt=%d fv=%f, iv=%d\n",*dType,*fv,*iv); */
   return TRUE;
 }
 static float Value(int *dt,DS_DATASET_T *tp,size_t colNum,int row,int ss) {
@@ -143,13 +153,17 @@ static float Value(int *dt,DS_DATASET_T *tp,size_t colNum,int row,int ss) {
   if(dataType==FLOAT)   return fv;
   else if(dataType==INTEGER) { fv=iv; return fv; }
   else if(dataType==STRING)  return 0;
+  else if(dataType==HEX) { fv=iv; return fv; }
   else Err( 43);
 }
 float ValueWrapper(int wh_gDs,size_t colNum,int row,int subscript) {
-  int dataType; float rv;
-  rv=Value(&dataType,gDs[wh_gDs]->dsPtr,colNum,row,subscript);
-  if(dataType==STRING) { gStrValueWrapper=7; return 0.0; }
-  else { gStrValueWrapper=0; return rv; }
+  int dt;  /* dt = Data Type */
+  float rv;
+  rv=Value(&dt,gDs[wh_gDs]->dsPtr,colNum,row,subscript);
+  if(dt==STRING)                  { gVWType=VWSTRING; return 0.0; }
+  else if(dt==INTEGER||dt==FLOAT) { gVWType=VWNUMBER; return rv; }
+  else if(dt==HEX)                { gVWType=VWHEX; return rv; }
+  else Err(552);
 }
 myBool DoCutsWrapper(int max8,char *ba,char *cuts,int wh_gDs) {
   if(dsuDoCuts(max8,ba,cuts,gDs[wh_gDs]->dsPtr)) return TRUE;
@@ -252,12 +266,11 @@ float MinMax(int control,DS_DATASET_T *pp,size_t whichCol,int subscript) {
   if(control==0) rv=+1e28; else rv=-1e28;
   for(rowInt=nRowInt-1;rowInt>=0;rowInt--) {
     cv=Value(&dataType,pp,whichCol,rowInt,subscript);
-    if(dataType==STRING) {
-      gStrMinMaxAve=7; rv=0.0;
-    } else {
-      gStrMinMaxAve=0;
+    gDataType=dataType;
+    if(dataType==STRING||dataType==HEX) rv=0.0;
+    else {
       if(gTableValueError) {
-        Say("Error 90t: This table has\nunsupported data types."); return 0;
+        Say("Error 91t: This table has\nunsupported data types."); return 0;
       }
       if(control==0) { if(rv>cv) rv=cv; }
       else           { if(rv<cv) rv=cv; }
@@ -270,22 +283,20 @@ float Ave(float *stdDev,DS_DATASET_T *pp,size_t whichCol,int subscript) {
   if(!dsTableRowCount(&nRow_size_t,pp)) Err( 24);
   nRowInt=nRow_size_t;
   ave=0.0;
-  gStrMinMaxAve=0;
   for(rowInt=nRowInt-1;rowInt>=0;rowInt--) {
     ave+=Value(&dataType,pp,whichCol,rowInt,subscript);
-    if(dataType==STRING) {
-      *stdDev=0; gStrMinMaxAve=7; return 0.0;
-    }
+    gDataType=dataType;
+    if(dataType==STRING||dataType==HEX) { *stdDev=0; return 0.0; }
     if(gTableValueError) {
-      Say("Error 90t: This table has\nunsupported data types."); return 0;
+      Say("Error 92t: This table has\nunsupported data types."); return 0;
     }
   } ave/=nRowInt;
   sum2=0;
   for(rowInt=nRowInt-1;rowInt>=0;rowInt--) {
     cv=Value(&dataType,pp,whichCol,rowInt,subscript);
-    if(dataType==STRING) Err(999);
+    if(dataType==STRING||dataType==HEX) Err(999);
     if(gTableValueError) {
-      Say("Error 90t: This table has\nunsupported data types."); return 0;
+      Say("Error 93t: This table has\nunsupported data types."); return 0;
     }
     sum2+=(ave-cv)*(ave-cv);
   } *stdDev=sqrt(sum2/nRowInt);
@@ -306,13 +317,20 @@ void Format(int width,char *x,float y) {
   }
 }
 /* #define FAST_UP */
+void MakeAbbreviations(char *out,const char *in) {
+  *out=0;
+  if(!strcmp(in,"unsigned short")) strcpy(out,"ushort");
+  if(!strcmp(in,"unsigned long")) strcpy(out,"ulong");
+  if(*out==0) strcpy(out,in);
+  if(strlen(out)>7) out[7]='\0';
+}
 void ColumnList(char *header,
   int wh_gDs,int *tot,int *tlm,int ml,char *xx,int max,
   int *subscript) {
-  int arraySizeInt,jj,rr,lineCnt=0,ii; char gg[25],ss[20],*dd,*cc,bf2[100];
+  int asi,jj,rr,lineCnt=0,ii; char gg[25],ss[20],*dd,*cc,bf2[100];
   size_t whichCol,rr_size_t,dimensionality,arraySize;
   float minFloat,maxFloat,aveFloat,stdFloat;
-  char totalName[100];
+  char typeA[100],totalName[100];
   char minString[FORMAT],maxString[FORMAT],aveString[FORMAT],stdString[FORMAT];
   DS_DATASET_T *pp; int progNow=0,progTot=0;
   *xx='\0';
@@ -334,15 +352,17 @@ void ColumnList(char *header,
       if(dimensionality>1) Err( 57);
       if(!dsColumnDimensions(&arraySize,pp,whichCol)) Err( 58);
       if(dimensionality==0) arraySize=1;
-      arraySizeInt=arraySize;
-      for(jj=1;jj<=arraySizeInt;jj++) {
+      asi=arraySize;
+      for(jj=1;jj<=asi;jj++) {
         progTot++;
-        if(jj==1) MinMax(0,pp,whichCol,jj-1); /* to set gStrMinMaxAve */
-        if(gStrMinMaxAve) break;
+        if(jj==1) MinMax(0,pp,whichCol,jj-1); /* to set gDataType */
+        if(gDataType==STRING) break; /* See comment 66d. */
       }
+      if(gTableValueError) break;
     }
   }
   for(ii=0;ii<rr;ii++) { /* 2nd pass, loop over columns */
+    if(gTableValueError) break;
     whichCol=ii;
     if(!dsColumnDimCount(&dimensionality,pp,whichCol)) Err( 39);
     if(dimensionality>1) Err( 40);
@@ -350,14 +370,15 @@ void ColumnList(char *header,
     if(dimensionality==0) arraySize=1;
     if(!dsColumnName(&cc,pp,whichCol)) Err( 27);
     if(!dsColumnTypeName(&dd,pp,whichCol)) Err( 28);
-    arraySizeInt=arraySize;
-    for(jj=1;jj<=arraySizeInt;jj++) { /* loop over array members */
+    MakeAbbreviations(typeA,dd);
+    asi=arraySize;
+    for(jj=1;jj<=asi;jj++) { /* loop over array members */
       if(gCalculateAverages) {
         Progress(progNow++,progTot,NULL,NULL);
         minFloat=MinMax(0,pp,whichCol,jj-1); if(gTableValueError) break;
         maxFloat=MinMax(1,pp,whichCol,jj-1); if(gTableValueError) break;
         aveFloat=Ave(&stdFloat,pp,whichCol,jj-1); if(gTableValueError) break;
-        if(gStrMinMaxAve) {
+        if(gDataType==STRING||gDataType==HEX) {
           strcpy(minString,"-----"); strcpy(maxString,"-----");
           strcpy(stdString,"-----"); strcpy(aveString,"-----");
         } else {
@@ -366,11 +387,11 @@ void ColumnList(char *header,
         }
       }
       strcpy(totalName,cc);
-      if(!gStrMinMaxAve&&dimensionality==1) sprintf(ss,"(%2d)",jj);
-      else *ss='\0'; /* arraySizeInt is len of string if(gStrMinMaxAve) */
+      if(gDataType!=STRING&&dimensionality==1) sprintf(ss,"(%d",jj);
+      else *ss='\0'; /* asi is len of string if(gDataType==STRING) */
       /* PP"minString=%s, ss=%s.\n",minString,ss); */
       strcat(totalName,ss);
-      if(strcmp(dd,"char")) strcpy(gg,dd); else strcpy(gg,"string");
+      if(strcmp(typeA,"char")) strcpy(gg,typeA); else strcpy(gg,"string");
       sprintf(bf2,COLUMN_LIST_FORMAT,totalName,gg,minString,maxString,
       aveString,stdString);
       if(strlen(xx)+strlen(bf2)>max-SLACK) Err( 16); strcat(xx,bf2);
@@ -382,7 +403,7 @@ void ColumnList(char *header,
       subscript[lineCnt]=jj-1;
       strcat(xx,"\n"); /* using the SLACK */
       lineCnt++;
-      if(gStrMinMaxAve) break;
+      if(gDataType==STRING) break; /* asi is len of string 66d */
     }           /* loop over array members */
     if(gTableValueError) break;
   }	/* loop over columns */

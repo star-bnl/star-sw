@@ -1,6 +1,6 @@
 int gNDs,gIndent;
 #define FORMAT 15
-#define COLUMN_LIST_FORMAT "%10s %6s %9s %9s %9s %9s"
+#define COLUMN_LIST_FORMAT "%11s %6s %9s %9s %9s %9s"
 #define TABLE_LIST_FORMAT "%11s %4s %7s %7s"
 #define TYPE_DS_DATASETS 0
 #define TYPE_DS_DATASET  1
