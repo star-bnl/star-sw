@@ -36,9 +36,9 @@ StiSvtDetectorBuilder::~StiSvtDetectorBuilder()
 void StiSvtDetectorBuilder::buildMaterials()
 {
   _messenger << "StiSvtDetectorBuilder::buildMaterials() - INFO - Started" << endl;
-  _gasMat    = add(new StiMaterial("Air", 6.,12.,12850., 0.00156, 5.));
-  _siMat     = add(new StiMaterial("Si",6.,12.,625.,0.064,5.));
-  _hybridMat = add(new StiMaterial("Hybrid",6.,12.,625.,0.064,5.));
+  _gasMat    = add(new StiMaterial("Air",     0.49919,  1.,       0.001205, 30420.*0.001205, 5.) );
+  _siMat     = add(new StiMaterial("Si",     14.,      28.0855,   2.33,     21.82,           5.) );
+  _hybridMat = add(new StiMaterial("Hybrid", 14.,      28.0855,   2.33,     21.82,           5.) );
   _messenger << "StiSvtDetectorBuilder::buildMaterials() - INFO - Done" << endl;
 }
 
