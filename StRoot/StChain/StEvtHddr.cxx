@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "StEvtHddr.h"
 #include "StarRoot/TUnixTime.h"
+#include "StMessMgr.h"
 
 ClassImp(StEvtHddr)
 //_____________________________________________________________________________
@@ -63,11 +64,19 @@ void StEvtHddr::FillTag(EvtHddr_st *tag)
 //_____________________________________________________________________________
   void StEvtHddr::Print(Option_t *option) const
 {
-  printf("\n *********** Event Info **********************\n");
-  printf("\tRun: \t%5d  Event %5d  TimeStamp %8d.%6d  Bunch %d:%d\n"
+   LOG_INFO << Form 
+  /* printf*/ ("*********** Event Info **********************")
+         << endm;
+   LOG_INFO << Form 
+  /* printf*/ ("\tRun: \t%5d  Event %5d  TimeStamp %8d.%6d  Bunch %d:%d"
          ,mRunNumber,mEventNumber,mEventTime.GetDate(),mEventTime.GetTime()
-         ,mBunchCrossingNumber[0],mBunchCrossingNumber[1]);
-  printf("\t EvtSize: %d \tInpTrig: %4x OutTrig: %4x  \n"
-         ,mEventSize,mInputTriggerMask,mTriggerMask);
-  printf("\n *********************************************\n\n");
+         ,mBunchCrossingNumber[0],mBunchCrossingNumber[1])
+         << endm;
+  LOG_INFO << Form 
+  /* printf*/ ("\t EvtSize: %d \tInpTrig: %4x OutTrig: %4x"
+         ,mEventSize,mInputTriggerMask,mTriggerMask)
+        << endm;
+  LOG_INFO << Form 
+  /* printf*/  ("*********************************************")
+        << endm;
 }
