@@ -20,7 +20,9 @@ endif #DOC_MK
 ifndef DOC_MAK
 DOC_MAK += DONE
 #
-doc_all: $(BASE_NAME)_code.html
+# REMOVE DEFAULT ACTION
+doc_all:
+doc_doc: $(BASE_NAME)_code.html
 #
 doc_clean:
 	-rm -r $(DOCDIR)/html
