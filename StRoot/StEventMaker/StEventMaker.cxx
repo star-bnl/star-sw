@@ -43,7 +43,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.58 2003/07/16 19:58:32 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.59 2003/10/13 04:38:35 perev Exp $";
 
 ClassImp(StEventMaker)
   
@@ -194,13 +194,17 @@ StEventMaker::fillOuterTrackGeometry(StTrack* track, const dst_track_st& t)
     double dip = atan(t.tanlout);
 
     // New momentum
-    double pt = 1./t.invptout;
+    double invptout = t.invptout;
+    double tanlout  = t.tanlout;
+//	bad idea, but what to do? Waiting ittf (VP)
+    if (fabs(invptout)<1.e-10) {invptout = t.invpt;tanlout=t.tanl;}
+    double pt = 1./invptout;
     double pz = pt*t.tanlout;
     StThreeVectorF p(pt*cos(psi), pt*sin(psi), pz);
     
     // New curvature
     double c = track->geometry()->curvature()*
-	track->geometry()->momentum().perp()*t.invptout;
+	track->geometry()->momentum().perp()*invptout;
 	
     // Assign to track
     track->setOuterGeometry(new StHelixModel(q, psi, c, dip, o, p, h));
@@ -401,10 +405,12 @@ StEventMaker::makeEvent()
     StGlobalTrack *gtrack = 0;
     dst_track_st *dstGlobalTracks = mEventManager->returnTable_dst_globtrk(nrows);
     if (!dstGlobalTracks) nrows = 0;
-    int maxId = dstGlobalTracks && nrows>0 ? max((long)dstGlobalTracks[nrows-1].id, nrows) : 0;
+    int maxId=0,mxId=0;
+    maxId = dstGlobalTracks && nrows>0 ? max((long)dstGlobalTracks[nrows-1].id, nrows) : 0;
     StVector(StGlobalTrack*) vecGlobalTracks(maxId+1, gtrack);
     
     for (i=0; i<nrows; i++) {
+        if (dstGlobalTracks[i].iflag <0) continue;
         gtrack = new StGlobalTrack(dstGlobalTracks[i]);
         vecGlobalTracks[dstGlobalTracks[i].id] = gtrack;
         gtrack->setGeometry(new StHelixModel(dstGlobalTracks[i]));
@@ -444,12 +450,14 @@ StEventMaker::makeEvent()
     StPrimaryTrack *ptrack = 0;
     dst_track_st *dstPrimaryTracks = mEventManager->returnTable_dst_primtrk(nrows);
     if (!dstPrimaryTracks) nrows = 0;
-    maxId = dstPrimaryTracks && nrows>0 ? max((long) dstPrimaryTracks[nrows-1].id, nrows) : 0;
+    mxId = dstPrimaryTracks && nrows>0 ? max((long) dstPrimaryTracks[nrows-1].id, nrows) : 0;
+    if(mxId>maxId) maxId=mxId;
     StVector(StPrimaryTrack*) vecPrimaryTracks(maxId+1, ptrack);
     StVector(unsigned int)    vecPrimaryVertexId(maxId+1, 0U);
     nfailed = 0;
     
     for (i=0; i<nrows; i++) {
+        if (dstPrimaryTracks[i].iflag <0) {nfailed++; continue;}
         idvtx = dstPrimaryTracks[i].id_start_vertex ? dstPrimaryTracks[i].id_start_vertex/10 : 0;
         if (!idvtx) {
             nfailed++;
@@ -503,10 +511,12 @@ StEventMaker::makeEvent()
     if (doLoadTptTracks) 
 	dstTptTracks = mEventManager->returnTable_CpyTrk(nrows);
     if (!dstTptTracks) nrows = 0;
-    maxId = dstTptTracks && nrows>0 ? max((long) dstTptTracks[nrows-1].id, nrows) : 0;
+    mxId = dstTptTracks && nrows>0 ? max((long) dstTptTracks[nrows-1].id, nrows) : 0;
+    if (mxId>maxId) maxId = mxId;
     StVector(StTptTrack*) vecTptTracks(maxId+1, ttrack);
 	
     for (i=0; i<nrows; i++) {
+        if (dstTptTracks[i].iflag <0) {nfailed++; continue;}
 	ttrack = new StTptTrack(dstTptTracks[i]);
 	vecTptTracks[dstTptTracks[i].id] = ttrack;
 	ttrack->setGeometry(new StHelixModel(dstTptTracks[i]));
@@ -561,12 +571,14 @@ StEventMaker::makeEvent()
     if (doLoadEstTracks) 
 	dstEstGlobalTracks = mEventManager->returnTable_EstGlobal(nrows);
     if (!dstEstGlobalTracks) nrows = 0;
-    maxId = dstEstGlobalTracks && nrows>0 ? max((long) dstEstGlobalTracks[nrows-1].id, nrows) : 0;
+    mxId = dstEstGlobalTracks && nrows>0 ? max((long) dstEstGlobalTracks[nrows-1].id, nrows) : 0;
+    if (mxId>maxId) maxId = mxId;
     StVector(StEstGlobalTrack*) vecEstGlobalTracks(maxId+1, egtrack);	
     nfailed = 0;
     nfailed2 = 0;
     
     for (i=0; i<nrows; i++) {
+        if (dstEstGlobalTracks[i].iflag <0) {nfailed++; continue;}
 	//
 	//   For each EST global track there must be already a node
 	//   since EST doesn't create new tracks.
@@ -621,7 +633,8 @@ StEventMaker::makeEvent()
     if (doLoadEstTracks) 
       dstEstPrimaryTracks = mEventManager->returnTable_EstPrimary(nrows);
     if (!dstEstPrimaryTracks) nrows = 0;
-    maxId = dstEstPrimaryTracks && nrows>0 ? max((long) dstEstPrimaryTracks[nrows-1].id, nrows) : 0;
+    mxId = dstEstPrimaryTracks && nrows>0 ? max((long) dstEstPrimaryTracks[nrows-1].id, nrows) : 0;
+    if (mxId>maxId) maxId = mxId;
     StVector(StEstPrimaryTrack*) vecEstPrimaryTracks(maxId+1, eptrack);
     StVector(unsigned int)       vecEstPrimaryVertexId(maxId+1, 0U);
     nfailed = 0;
@@ -880,17 +893,21 @@ StEventMaker::makeEvent()
 	//  for each track ID. Heavy use of STL here.
 	//
 	StSPtrVecTrackNode& allNodes = mCurrentEvent->trackNodes();
-	vector<vector<StTrackDetectorInfo*> > infomap(allNodes.size()+1);
-	for (k=0; k<vecTptTracks.size(); k++)
-	    if (vecTptTracks[k]) infomap[k].push_back(vecTptTracks[k]->detectorInfo());
-	for (k=0; k<vecGlobalTracks.size(); k++)
-	    if (vecGlobalTracks[k]) infomap[k].push_back(vecGlobalTracks[k]->detectorInfo());
-	for (k=0; k<vecEstGlobalTracks.size(); k++)
-	    if (vecEstGlobalTracks[k]) infomap[k].push_back(vecEstGlobalTracks[k]->detectorInfo());
-	for (k=0; k<vecEstPrimaryTracks.size(); k++)
-	    if (vecEstPrimaryTracks[k]) infomap[k].push_back(vecEstPrimaryTracks[k]->detectorInfo());
-	for (k=0; k<vecPrimaryTracks.size(); k++)
-	    if (vecPrimaryTracks[k]) infomap[k].push_back(vecPrimaryTracks[k]->detectorInfo());
+        mxId = allNodes.size();
+        if (mxId>maxId) maxId = mxId;
+	vector<vector<StTrackDetectorInfo*> > infomap(maxId+1);
+	for (k=0; k<=(int)maxId; k++) {
+           if (k<vecTptTracks.size()        && vecTptTracks[k]           ) 
+              infomap[k].push_back(vecTptTracks[k]->detectorInfo()       );
+           if (k<vecGlobalTracks.size()     && vecGlobalTracks[k]        )
+              infomap[k].push_back(vecGlobalTracks[k]->detectorInfo()    );
+           if (k<vecEstGlobalTracks.size()  && vecEstGlobalTracks[k]     )
+              infomap[k].push_back(vecEstGlobalTracks[k]->detectorInfo() );
+           if (k<vecEstPrimaryTracks.size() && vecEstPrimaryTracks[k]    ) 
+              infomap[k].push_back(vecEstPrimaryTracks[k]->detectorInfo());
+           if (k<vecPrimaryTracks.size()    && vecPrimaryTracks[k]       )
+              infomap[k].push_back(vecPrimaryTracks[k]->detectorInfo()   );
+        }
 
 	vector<StTrackDetectorInfo*>::iterator iter;
 	for (k=0; k<infomap.size(); k++) {
@@ -1503,8 +1520,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.58 2003/07/16 19:58:32 perev Exp $
+ * $Id: StEventMaker.cxx,v 2.59 2003/10/13 04:38:35 perev Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.59  2003/10/13 04:38:35  perev
+ * Bug with different collection lenth fixed
+ *
  * Revision 2.58  2003/07/16 19:58:32  perev
  * Cleanup of StTriggerData2003 at all
  *
