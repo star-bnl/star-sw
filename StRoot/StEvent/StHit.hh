@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.hh,v 1.4 1999/03/23 21:51:47 ullrich Exp $
+ * $Id: StHit.hh,v 1.5 1999/04/19 20:46:06 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHit.hh,v $
+ * Revision 1.5  1999/04/19 20:46:06  ullrich
+ * Made virtual class
+ *
  * Revision 1.4  1999/03/23 21:51:47  ullrich
  * Removed table-based constructor.
  *
@@ -37,20 +40,20 @@ public:
 	  float, unsigned char = 0);
     // StHit(const StSvtHit&);                  use default
     // const StHit & operator=(const StHit&);   use default
-    ~StHit();
+    virtual ~StHit();
     
     int operator==(const StHit&) const;
     int operator!=(const StHit&) const;
     
-    const StThreeVector<float>& position() const;
-    const StThreeVector<float>& positionError() const;
-    float                       charge() const;
-    unsigned char               trackReferenceCount() const;	
+    virtual const StThreeVector<float>& position() const;
+    virtual const StThreeVector<float>& positionError() const;
+    virtual float                       charge() const;
+    virtual unsigned char               trackReferenceCount() const;	
 
-    void setPosition(const StThreeVector<float>&);
-    void setPositionError(const StThreeVector<float>&);
-    void setCharge(float);
-    void setTrackReferenceCount(unsigned char);
+    virtual void setPosition(const StThreeVector<float>&);
+    virtual void setPositionError(const StThreeVector<float>&);
+    virtual void setCharge(float);
+    virtual void setTrackReferenceCount(unsigned char);
     
 protected:
     StThreeVector<float> mPosition;
