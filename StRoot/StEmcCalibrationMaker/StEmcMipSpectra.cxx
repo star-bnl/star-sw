@@ -57,9 +57,6 @@ void StEmcMipSpectra::DrawEtaBin(Int_t etabin)
 
   if (mip[etabin-1].Status==1)
   {
-    Int_t fitmin=mip[etabin-1].MipFitAdcMin;
-    Int_t fitmax=mip[etabin-1].MipFitAdcMax;
-    
     TH1F* fit=new TH1F("fit","",nadcMax,0,(Float_t)nadcMax-1);
     TH1F* fitpeak=new TH1F("fitpeak","",nadcMax,0,(Float_t)nadcMax-1);
     TH1F* fitback=new TH1F("fitback","",nadcMax,0,(Float_t)nadcMax-1);

@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide 
 // 
-// $Id: StEmcPreCalibrationMaker.cxx,v 1.5 2001/11/07 17:54:10 suaide Exp $
+// $Id: StEmcPreCalibrationMaker.cxx,v 1.6 2001/11/07 17:57:40 suaide Exp $
 // $Log: StEmcPreCalibrationMaker.cxx,v $
+// Revision 1.6  2001/11/07 17:57:40  suaide
+// warnings removed
+//
 // Revision 1.5  2001/11/07 17:54:10  suaide
 // some modifications for real data
 //
@@ -63,6 +66,7 @@ Int_t StEmcPreCalibrationMaker::Init()
 Int_t StEmcPreCalibrationMaker::Finish()
 {
   cout <<"Finishing EmcPreCalibration maker ++++++++++++++++++++++++\n";
+  return kStOk;
 }
 //_____________________________________________________________________________
 Int_t StEmcPreCalibrationMaker::Make()
