@@ -54,7 +54,6 @@ using namespace std;
 #include "StiGui/StiRootDrawableMcTrack.h"
 #include "StiKalmanTrackFinder.h"
 #include "StiMaterialInteraction.h"
-#include "StiDynamicTrackFilter.h"
 #include "StiTrackContainer.h"
 #include "StiHitErrorCalculator.h"
 #include "StiDrawableTrack.h"

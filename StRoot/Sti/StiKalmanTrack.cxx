@@ -6,17 +6,14 @@
 #include "StHit.h"
 
 //Sti
-#include "StiKTNIterator.h"
 #include "StiHit.h"
 #include "StiDefaultMutableTreeNode.h"
 #include "StiKalmanTrackNode.h"
 #include "StiKalmanTrack.h"
+#include "StiKTNIterator.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
-#include "StiKTNIterator.h"
 #include "StiGeometryTransform.h"
-#include "StiToolkit.h"
-#include "StiMaker/StiDefaultToolkit.h"
 
 ostream& operator<<(ostream&, const StiHit&);
 
@@ -717,7 +714,6 @@ int StiKalmanTrack::getFitPointCount()    const
 */
 double StiKalmanTrack::getTrackLength() const
 {
-  double length = 0;
   StiKalmanTrackNode * inNode = getInnerMostHitNode();
   const StThreeVectorF &in  = inNode->getHit()->globalPosition();
   const StThreeVectorF &out = getOuterMostHitNode()->getHit()->globalPosition();
@@ -726,8 +722,7 @@ double StiKalmanTrack::getTrackLength() const
   double dz=out.z()-in.z();
   double curvature = inNode->getCurvature();
   double s = 2*asin(sqrt(dx*dx+dy*dy)*curvature/2.)/curvature;
-  double len=sqrt(dz*dz+s*s);
-  return length;
+  return sqrt(dz*dz+s*s);
 }
 
 /*! Return the inner most hit associated with this track.
