@@ -19,7 +19,7 @@ public:
   virtual ~StUKey(){}
   virtual  StUKey &operator=( const StUKey &from);
   virtual  StUKey &operator=( UInt_t from);
-  virtual  StUKey &operator=( Int_t from){return *this=(UInt_t)from; return *this;}
+  virtual  StUKey &operator=( Int_t from){return *this=(UInt_t)from;}
   virtual  StUKey &operator=( const char *from);
   virtual  void    Update(const StUKey &from,const char *name=0);
   virtual  void    SetName(const char *name){fName=name;} 
