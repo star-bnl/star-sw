@@ -18,13 +18,14 @@
 #include "X3DBuffer.h"
 #include "St_AttributesABC.h"
 
+class TPoints3DABC;
 
 class St_PolyLine3D : public St_Points3D, public TAttLine, public TAttMarker { //  public St_AttributesABC {
 protected:        
         St_AttributesABC   *fAttributes; //!
 
 public:
-        St_PolyLine3D(St_Points3DABC *points=0);
+        St_PolyLine3D(TPoints3DABC *points=0);
         St_PolyLine3D(Int_t n, Option_t *option="");
         St_PolyLine3D(Int_t n, Float_t *p, Option_t *option="");
         St_PolyLine3D(Int_t n, Float_t *x, Float_t *y, Float_t *z, Option_t *option="");

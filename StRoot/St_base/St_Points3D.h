@@ -11,25 +11,25 @@
 #ifndef ROOT_St_Points3D
 #define ROOT_St_Points3D
 
-#ifndef ROOT_St_Points3DABC
-#include "St_Points3DABC.h"
+#ifndef ROOT_TPoints3DABC
+#include "TPoints3DABC.h"
 #endif
 
 
-class St_Points3D : public St_Points3DABC {
+class St_Points3D : public TPoints3DABC {
 
 protected:
          enum EOwnerBits {
            kIsOwner         = BIT(23)
          };
 
-        St_Points3DABC *fPoints;
+        TPoints3DABC *fPoints;
 
         Bool_t IsOwner() const {return TestBit(kIsOwner);}
         Bool_t DoOwner(Bool_t done=kTRUE);
 
 public:
-        St_Points3D(St_Points3DABC *points=0);
+        St_Points3D(TPoints3DABC *points=0);
         St_Points3D(Int_t n, Option_t *option="");
         St_Points3D(Int_t n, Float_t *p, Option_t *option="");
         St_Points3D(Int_t n, Float_t *x, Float_t *y, Float_t *z, Option_t *option="");

@@ -11,7 +11,7 @@
 #ifndef ROOT_St_PointsArray3D
 #define ROOT_St_PointsArray3D
 
-#include "St_Points3DABC.h"
+#include "TPoints3DABC.h"
 
 #ifndef ROOT_TString
 //*KEEP,TSTRING.
@@ -20,7 +20,7 @@
 #endif
 
 
-class St_PointsArray3D : public St_Points3DABC {
+class St_PointsArray3D : public TPoints3DABC {
 
 protected:
         Int_t        fN;            // Number of points
