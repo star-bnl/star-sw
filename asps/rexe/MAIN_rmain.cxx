@@ -29,6 +29,12 @@
 #include "TROOT.h"
 //*KEEP,TRint.
 #include "TRint.h"
+#ifdef __CC5__
+#include <iostream>
+#include <string>
+using namespace std;
+static string dummyName = "This is CC5 !";
+#endif
 //*KEND.
 int        __argc_save=0;       // Pgf77
 char **    __argv_save=NULL;    //
@@ -48,6 +54,9 @@ TROOT root("Rint","The ROOT Interactive Interface", initfuncs);
 //______________________________________________________________________________
 int main(int argc, char **argv)
 {
+#ifdef __CC5__
+  cout << dummyName << endl;
+#endif
 #ifndef WIN32
    char appname[] = "Rint";
 #else
