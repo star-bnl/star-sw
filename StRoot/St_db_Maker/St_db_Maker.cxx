@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.68 2003/09/13 00:42:32 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.69 2003/09/23 01:04:55 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.69  2003/09/23 01:04:55  jeromel
+// READ_BAD_INDEX fixed
+//
 // Revision 1.68  2003/09/13 00:42:32  perev
 // XDF obsolete + small fixes
 //
@@ -83,7 +86,7 @@ static const int   dates[]=  {
 static const int   times[]=  {
        0,        0,        0,        0,        0,
        0,   120000,    80000,        0,        0,
-  175430,        0,        0,        0,        0, 
+  175430,        0,        0,        0,        0,        0,
        0
 };
 
