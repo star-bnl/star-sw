@@ -1,7 +1,10 @@
 //
-// $Id: StEpcMaker.h,v 1.3 2001/04/24 22:50:37 subhasis Exp $
+// $Id: StEpcMaker.h,v 1.4 2001/10/15 01:41:41 pavlinov Exp $
 //
 // $Log: StEpcMaker.h,v $
+// Revision 1.4  2001/10/15 01:41:41  pavlinov
+// Added Clear method
+//
 // Revision 1.3  2001/04/24 22:50:37  subhasis
 // clusters attached to Points, QA hists are made for all category separately
 //
@@ -86,12 +89,14 @@ public:
   virtual ~StEpcMaker();
   virtual Int_t Init();
   virtual Int_t Make();
+  virtual void   Clear(Option_t *option="");
   virtual Int_t Finish();
+
   virtual Int_t fillStEvent();
 
   
   virtual const char *GetCVS()
-  {static const char cvs[]="Tag $Name:  $ $Id: StEpcMaker.h,v 1.3 2001/04/24 22:50:37 subhasis Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
+  {static const char cvs[]="Tag $Name:  $ $Id: StEpcMaker.h,v 1.4 2001/10/15 01:41:41 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
 
   ClassDef(StEpcMaker, 1)// EMC-Track match maker
 };

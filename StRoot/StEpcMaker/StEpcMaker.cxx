@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.11 2001/10/03 17:27:37 pavlinov Exp $
+// $Id: StEpcMaker.cxx,v 1.12 2001/10/15 01:41:41 pavlinov Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.12  2001/10/15 01:41:41  pavlinov
+// Added Clear method
+//
 // Revision 1.11  2001/10/03 17:27:37  pavlinov
 // clean up for production
 //
@@ -400,3 +403,8 @@ bool StEpcMaker::accept(StTrack* track)
     return track && track->flag() >= 0;
 }
    
+void 
+StEpcMaker::Clear(Option_t *option)
+{// 14-oct-2001
+  if(option){};
+}
