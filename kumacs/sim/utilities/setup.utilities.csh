@@ -7,9 +7,22 @@
 #--------------------------------------------------------
 
 # alias gstar to execute setup.kumac upon startup
+
 unalias gstar
 
-if ( $HOST == "mcurie" ) then
+if ( $?GSTAR_EXECUTABLE ) then
+
+   if ( -x $GSTAR_EXECUTABLE ) then
+
+      alias gstar "$GSTAR_EXECUTABLE -l $GSTAR_UTIL_DIR/setup.kumac"
+
+   else
+
+      echo "File $GSTAR_EXECUTABLE is not an executable..."
+
+   endif
+
+else if ( $HOST == "mcurie" ) then
 
    alias gstar "~nevski/gstar/bin/gstar -l $GSTAR_UTIL_DIR/setup.kumac"
 
