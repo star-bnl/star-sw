@@ -1,6 +1,6 @@
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
-// Top/ftpcClusterPars Allocated rows: 1  Used rows: 1  Row size: 184 bytes
+// Top/ftpcClusterPars Allocated rows: 1  Used rows: 1  Row size: 156 bytes
 //  Table: ftpcClusterPars_st[0]--> ftpcClusterPars_st[0]
 // ====================================================================
 // ------  Test whether this table share library was loaded ------
