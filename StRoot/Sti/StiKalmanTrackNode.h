@@ -363,7 +363,7 @@ inline double StiKalmanTrackNode::getPt() const
   if (curvature<1e-12) 
     return 0.003e12*fabs(pars->field);
   else
-    return 1.0025*0.003*fabs(pars->field/curvature);
+    return 0.003*fabs(pars->field/curvature);
 }
 
 /*! Calculate/return the track momentum
