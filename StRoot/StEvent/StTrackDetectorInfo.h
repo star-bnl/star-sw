@@ -4,16 +4,36 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.h,v 2.10 2004/08/05 19:25:03 ullrich Exp $
+ * $Id: StTrackDetectorInfo.h,v 2.11 2004/08/05 22:23:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
  *
  * Description:
  *
+ * Note the following: with the arrival of ITTF it is now possible to
+ * store the numberOfPoints for every detector individually. Before
+ * that and because of the way the tables were defined TPC and FTPC were
+ * one and the same. This caused confusion. However, since we have to
+ * stay backwards compatible the "old way" is still working.
+ * If
+ * a) mNumberOfPoints == 0 the new encoding is the one to use, i.e.,
+ *    mNumberOfPointsTpc
+ *    mNumberOfPointsFtpcWest 
+ *    mNumberOfPointsFtpcEast 
+ *    mNumberOfPointsSvt 
+ *    mNumberOfPointsSsd 
+ *    are the ones that count
+ * b) mNumberOfPoints != 0 then we still loaded the info from
+ *    the tables and all is as it was before, i.e., we do not distinguish
+ *    between FTPC and TPC.
+ *
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.h,v $
+ * Revision 2.11  2004/08/05 22:23:32  ullrich
+ * Fixed bug in first argument type of setNumberOfPoints().
+ *
  * Revision 2.10  2004/08/05 19:25:03  ullrich
  * Changes to the handling of numberOfPoints() to allow ITTF more flexibility.
  *
@@ -81,7 +101,7 @@ public:
 
     void setFirstPoint(const StThreeVectorF&);
     void setLastPoint(const StThreeVectorF&);
-    void setNumberOfPoints(unsigned short, StDetectorId);
+    void setNumberOfPoints(unsigned char, StDetectorId);
     void addHit(StHit*);
     void removeHit(StHit*&);
     int  bad() const;
