@@ -203,7 +203,7 @@ StStrArray::StStrArray(const StStrArray &from){ *this = from;}
   int n,i;
   
   n = fV.size();
-  for (i=0; i<n; i++){delete fV[i];}
+  for (i=0; i<n; i++){delete fV[i]; fV[i]=0;}
   fV.clear();
 } 
 StStrArray::~StStrArray()
