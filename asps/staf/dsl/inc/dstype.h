@@ -28,6 +28,7 @@ definitions for types and datasets
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "dscodes.h"
 /******************************************************************************
 *
 * macros for return values and types
