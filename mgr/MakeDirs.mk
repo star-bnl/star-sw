@@ -1,5 +1,8 @@
-# $Id: MakeDirs.mk,v 1.2 1999/02/12 02:50:29 fisyak Exp $
+# $Id: MakeDirs.mk,v 1.3 1999/02/12 22:12:20 fisyak Exp $
 # $Log: MakeDirs.mk,v $
+# Revision 1.3  1999/02/12 22:12:20  fisyak
+# Fix STAR_OBJ_DIR for nondebug version
+#
 # Revision 1.2  1999/02/12 02:50:29  fisyak
 # Fix St_Tables, single module
 #
@@ -24,10 +27,12 @@ ifeq (,$(findstring $(LEVEL),0 1))
       LIB_DIR := $(SYS_DIR)/lib
       DEP_DIR := $(SYS_DIR)/dep/$(DOMAIN)
       OBJ_DIR := $(SYS_DIR)/obj/$(DOMAIN)
+      STAR_OBJ_DIR := $(STAR)/.$(STAR_HOST_SYS)/obj/$(PKG)
   else
       LIB_DIR := $(SYS_DIR)/LIB
       DEP_DIR := $(SYS_DIR)/DEP/$(DOMAIN)
       OBJ_DIR := $(SYS_DIR)/OBJ/$(DOMAIN)
+      STAR_OBJ_DIR := $(STAR)/.$(STAR_HOST_SYS)/OBJ/$(PKG)
   endif
   ifndef NT
       TMP_DIR := $(SYS_DIR)/tmp

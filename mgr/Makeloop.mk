@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.54  1999/02/12 22:12:21  fisyak
+#  Fix STAR_OBJ_DIR for nondebug version
+#
 #  Revision 1.53  1999/02/12 02:50:33  fisyak
 #  Fix St_Tables, single module
 #
@@ -238,7 +241,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/02/12 02:50:33 $ 
+#           Last modification $Date: 1999/02/12 22:12:21 $ 
 #  default setings
 # Current Working Directory
 #
@@ -296,6 +299,7 @@ ifndef SUBDIRS
   ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
     SUBDIRS := $(filter-out CLHEP, $(SUBDIRS)) 
     SUBDIRS := $(filter-out l3, $(SUBDIRS)) 
+    SUBDIRS := $(filter-out StAnalysisMaker, $(SUBDIRS)) 
   endif
   ifdef PKG
     SUBDIRS:=
@@ -304,7 +308,7 @@ endif
 include $(STAR_MAKE_HOME)/MakeDirs.mk
 #          I have subdrs
 .PHONY               :  all $(BASE)  $(St_TABLES) test clean clean_lib clean_share clean_obj
-all:    $(BASE) $(addsuffix _loop, $(SUBDIRS)) $(addsuffix _$(branch),$(PKG))
+all:    $(BASE) $(addsuffix _loop, $(SUBDIRS)) $(addsuffix _$(branch),$(PKG)) $(St_TABLES)
 	@echo $(TARGETS)
 $(BASE):
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/$(BASE)
