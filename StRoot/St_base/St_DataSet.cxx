@@ -29,6 +29,7 @@
 // data structures and maintain it via St_DataSetIter class iterator    //
 //                                                                      //
 // St_DataSet can be iterated using an iterator object (see St_DataSetIter) //
+//            or by St_DataSet::Pass method (see below)                 //
 //                                                                      //
 //  Terms:    Dataset       - any object from the list above            //
 //  =====     Member          is called "DataSet Member"                //

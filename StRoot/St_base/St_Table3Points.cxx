@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_Table3Points.cxx,v 1.2 1999/05/24 01:54:02 fine Exp $
+// $Id: St_Table3Points.cxx,v 1.3 1999/06/01 01:27:53 fine Exp $
 // $Log: St_Table3Points.cxx,v $
+// Revision 1.3  1999/06/01 01:27:53  fine
+// Comments clean ups
+//
 // Revision 1.2  1999/05/24 01:54:02  fine
 // clean up
 //
@@ -11,6 +14,81 @@
 #include  "St_Table3Points.h"
 #include  "St_TableElementDescriptor.h"
 
+///////////////////////////////////////////////////////////////////////////////////
+//
+//   St_Table3Points class is to create 3D view of any 3 columns of the St_Table objects
+//   with one the same "key column value".
+//
+//   For example all values of the column "x[0]" "x[1]" "x[2]" of the begin_html <a href="http://www.rhic.bnl.gov/STAR/html/comp_l/root/html/g2t_tpc_hit_st.html"> g2t_tpc_hit </a> end_html table
+//   from the rows with one and same "track_id" column value will be regarded
+//   as an image of one and the same "track".
+//   The last means all those points will be painted with one and the same 3D
+//   attributes like "color", "size", "style", "light","markers", "connections"  etc.
+//
+//   The original St_Table object must be pre-sorted by "key column" via St_TableSorter
+//   class 
+//
+// void   CreatePoints(St_g2t_tpc_hit *points)
+// {
+//   g2t_tpc_hit_st *p = points->GetTable();
+//
+//  St_Table3Points *track = 0;
+//  TString tr;
+//  tr = "track_p";
+//  St_Table &ttt = *((St_Table *)points);
+//  // Track2Line MUST be on heap othwise 3D view will crash just code leaves this
+//  // subroutine
+//  We will assemble all points by its "track_p" field.
+//
+//  St_TableSorter *Track2Line = new St_TableSorter (ttt,"track_p");
+//
+//  Int_t i = 0;
+//  Char_t buffer[10];
+//  Int_t ntracks = 0;
+//  const Int_t maxtracks = 5;
+////---------------------------- Fill tracks -------------------
+//  long currentId = -1;
+//  long newId =  0;
+//  g2t_tpc_hit_st *hitPoint = 0;
+//  St_Node *thisTrack[7] = {0,0,0,0,0,0,0}; // seven noded for 7 different colors
+//  Int_t  MaxRowtoCount = 5000; // 5000;
+//  Int_t  MaxTracks = Track2Line->CountKeys();
+//  MaxTracks = 100;
+//  for (i=0;i<Track2Line->GetNRows() && ntracks <  MaxTracks ;i++) 
+//  {
+//   hitPoint = p + Track2Line->GetIndex(i);
+//   newId =  hitPoint->track_p;
+//   if (newId != currentId)  { // The hit for the new track has been found
+//      
+//     const Char_t *xName = "x[0]";
+//     const Char_t *yName = "x[1]";
+//     const Char_t *zName = "x[2]";
+//
+//     track =  new St_Table3Points(Track2Line,(const void *)&newId,xName,yName,zName);
+//
+//     // Create a shape for this node
+//     St_PolyLineShape *trackShape  =  new St_PolyLineShape(track);
+//     trackShape->SetVisibility(1);
+//     Int_t colorIndx = ntracks%7;
+//     trackShape->SetColorAttribute(colorIndx+kGreen);
+//     trackShape->SetLineStyle(1);
+//     trackShape->SetSizeAttribute(2);
+//     // Create a node to hold it
+//     if (!thisTrack[colorIndx])  {
+//         thisTrack[colorIndx] = new St_Node("hits","hits",trackShape);
+//         thisTrack[colorIndx]->Mark();
+//         thisTrack[colorIndx]->SetVisibility();
+//         St_NodePosition *pp = hall->Add(thisTrack[colorIndx]);
+//         if (!pp) printf(" no position %d\n",ntrack);
+//     }
+//     else 
+//       thisTrack[colorIndx]->Add(trackShape);
+//     currentId = newId;
+//     ntracks++;
+//   }  
+// }
+//
+///////////////////////////////////////////////////////////////////////////////////
 ClassImp(St_Table3Points)
 
 //________________________________________________________________________________
