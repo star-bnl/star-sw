@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.3 1999/07/29 15:08:33 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.4 1999/07/30 16:19:19 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.4  1999/07/30 16:19:19  calderon
+ * Use value_type typedef for inserting pairs in multimaps, Victor corrected iterators on HP in SL99h, Improved use of const for HP compilation
+ *
  * Revision 1.3  1999/07/29 15:08:33  calderon
  * Include Mom. Resolution example (Histograms & Ntuple)
  *
@@ -261,27 +264,29 @@ Int_t StMcAnalysisMaker::Make()
 	if ((*tIter).second->commonHits()<10) continue;
 	mcTrack = (*tIter).second->partnerMcTrack();
 
+	pmc = mcTrack->momentum();
+	for (int k=0; k<3; k++) values[k] = pmc[k];
+	values[3]=pmc.mag();
 	s = recTrack->helix().pathLength(recTrack->startVertex()->position());
 	p = recTrack->helix().momentumAt(s, B);
 	for (int j=0; j<3; j++) values[j+4] = p[j];
 	values[7]=p.mag();
-	pmc = mcTrack->momentum();
-	for (int j=0; j<3; j++) values[j] = pmc[j];
-	values[3]=pmc.mag();
+	values[8]=(*tIter).second->commonHits();
+	// Fill 1d Mom. resolution Histogram
 	diff = (p.mag() - pmc.mag())/p.mag();
 	mMomResolution->Fill(diff,1.);
-	values[8]=(*tIter).second->commonHits();
+
 	// Loop to get Mean hit position diff.
 	StThreeVectorF rHitPos(0,0,0);
 	StThreeVectorF mHitPos(0,0,0);
 	
-	for (unsigned int hi=0; hi<recTrack->tpcHits().size(); hi++) {
+	for (StTpcHitIterator hi=recTrack->tpcHits().begin(); hi!=recTrack->tpcHits().end(); hi++) {
 
-	    StTpcHit* rHit = recTrack->tpcHits()[hi];
+	    StTpcHit* rHit = *hi;
 	    
 	    pair<tpcHitMapIter,tpcHitMapIter> rBounds = theHitMap->equal_range(rHit);
 	    for (tpcHitMapIter hIter=rBounds.first; hIter!=rBounds.second; hIter++) {
-		StMcTpcHit* mHit = (*hIter).second;
+		const StMcTpcHit* mHit = (*hIter).second;
 		if (mHit->parentTrack() != mcTrack) continue;
 		rHitPos += rHit->position();
 		mHitPos += mHit->position();
@@ -291,7 +296,7 @@ Int_t StMcAnalysisMaker::Make()
 	
 	rHitPos /=(float) (*tIter).second->commonHits();
 	mHitPos /=(float) (*tIter).second->commonHits();
-	for (int j=0; j<3; j++) values[9+j] = rHitPos[j] - mHitPos[j];
+	for (int jj=0; jj<3; jj++) values[9+jj] = rHitPos[jj] - mHitPos[jj];
 	mTrackNtuple->Fill(values);
 
     } // Tracks in Map Loop
@@ -320,22 +325,20 @@ Int_t StMcAnalysisMaker::Make()
     coordMcPartner->SetXTitle("X (cm)");
     coordMcPartner->SetYTitle("Y (cm)");
 
-    //    StVecPtrTpcHitIterator rcHitIt;
+    StTpcHitIterator rcHitIt;
     StMcTpcHitIterator mcHitIt;
     const StVecPtrTpcHit& theHits = firstTrack->tpcHits();
-    // Again run into the problem that StVecPtrTpcHitConstIterator doesn't exist yet.
-    for (unsigned int i =0; i<theHits.size(); i++) coordRec->Fill(theHits[i]->position().x(),theHits[i]->position().y());
-//     for (rcHitIt  = firstTrack->tpcHits().begin();
-// 	     rcHitIt != firstTrack->tpcHits().end();
-// 	     rcHitIt++) coordRec->Fill((*rcHitIt)->position().x(),(*rcHitIt)->position().y());
+    for (rcHitIt  = theHits.begin();
+	 rcHitIt != theHits.end();
+	 rcHitIt++) coordRec->Fill((*rcHitIt)->position().x(),(*rcHitIt)->position().y());
     for (mcHitIt  = partner->tpcHits()->begin();
-	     mcHitIt != partner->tpcHits()->end();
-	     mcHitIt++) coordMcPartner->Fill((*mcHitIt)->position().x(),(*mcHitIt)->position().y());
+	 mcHitIt != partner->tpcHits()->end();
+	 mcHitIt++) coordMcPartner->Fill((*mcHitIt)->position().x(),(*mcHitIt)->position().y());
     
 
     
     
-    mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms");
+    mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,900,500);
 
     return kStOK;
 }

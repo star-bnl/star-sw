@@ -14,11 +14,11 @@ public:
   StTpcLocalHit_recon(const StTpcHit* hit, float xLocal, float zGlobal);
   ~StTpcLocalHit_recon();
 
-  StTpcHit* globalHitPtr(){return mHit;};
+  const StTpcHit* globalHitPtr(){return mHit;};
 
 
 private:
-   StTpcHit* mHit;   // points to the hit in the StTpcHit collection
+  const StTpcHit* mHit;   // points to the hit in the StTpcHit collection
 };
 ostream& operator<<(ostream&, const StTpcLocalHit_recon&);
 

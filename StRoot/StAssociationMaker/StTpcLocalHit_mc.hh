@@ -11,13 +11,13 @@ class StMcTpcHit;
 class StTpcLocalHit_mc : public StLocalHit {
 
 public:
-  StTpcLocalHit_mc(const StMcTpcHit*, float, float);
-  ~StTpcLocalHit_mc();
+    StTpcLocalHit_mc(const StMcTpcHit*, float, float);
+    ~StTpcLocalHit_mc();
 
-  StMcTpcHit* globalHitPtr(){return mHit;};
+    const StMcTpcHit* globalHitPtr(){return mHit;};
 
 private:
-  StMcTpcHit* mHit;   // points to the hit in the StMcTpcHit collection
+    const StMcTpcHit* mHit;   // points to the hit in the StMcTpcHit collection
 };
 ostream& operator<<(ostream&, const StTpcLocalHit_mc&);
 

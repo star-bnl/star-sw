@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.5 1999/07/28 20:27:26 calderon Exp $
+ * $Id: StAssociationMaker.h,v 1.6 1999/07/30 16:19:14 calderon Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.6  1999/07/30 16:19:14  calderon
+ * Use value_type typedef for inserting pairs in multimaps, Victor corrected iterators on HP in SL99h, Improved use of const for HP compilation
+ *
  * Revision 1.5  1999/07/28 20:27:26  calderon
  * Version with SL99f libraries
  *
@@ -49,26 +52,25 @@ using namespace std;
 #include <utility>
 // Need to define the maps & Iterators, typedef them so we don't write the whole thing out every time
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef  multimap<StTpcHit*, StMcTpcHit*, compHit> tpcHitMapType;//!
-typedef  tpcHitMapType::iterator tpcHitMapIter;//!
+typedef  multimap<const StTpcHit*, const StMcTpcHit*, compHit> tpcHitMapType;//!
 
 typedef  multimap<StGlobalTrack*, StTrackPairInfo*, compTrack> trackMapType;//!
-typedef  trackMapType::iterator trackMapIter;//!
-typedef  trackMapType::const_iterator trackMapConstIter;//!
 #else
-typedef  multimap<StTpcHit*, StMcTpcHit*, compHit, allocator< pair<const StTpcHit*, StMcTpcHit*> > > tpcHitMapType;//!
-typedef  tpcHitMapType::iterator tpcHitMapIter;//!
+typedef  multimap<const StTpcHit*, const StMcTpcHit*, compHit, allocator< pair<const StTpcHit*, const StMcTpcHit*> > > tpcHitMapType;//!
 
 typedef  multimap<StGlobalTrack*, StTrackPairInfo*, compTrack, allocator< pair<const StGlobalTrack*, StTrackPairInfo*> > > trackMapType;//!
+#endif
+typedef  tpcHitMapType::iterator tpcHitMapIter;//!
+typedef  tpcHitMapType::value_type tpcHitMapValType; //!
 typedef  trackMapType::iterator trackMapIter;//!
 typedef  trackMapType::const_iterator trackMapConstIter;//!
-#endif
-
+typedef  trackMapType::value_type trackMapValType; //!
 #else
 class tpcHitMapType; //!
 class tpcHitMapIter; //!
-
+class tpcHitMapValType; //!
 class trackMapType; //!
+class trackMapValType; //!
 class trackMapIter; //!
 class trackMapConstIter; //!
 
@@ -113,7 +115,7 @@ private:
     Bool_t drawinit;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.5 1999/07/28 20:27:26 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.6 1999/07/30 16:19:14 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker, 1)
 

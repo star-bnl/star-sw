@@ -1,9 +1,12 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.4 1999/07/28 20:27:23 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.5 1999/07/30 16:19:13 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
- * Revision 1.4  1999/07/28 20:27:23  calderon
- * Version with SL99f libraries
+ * Revision 1.5  1999/07/30 16:19:13  calderon
+ * Use value_type typedef for inserting pairs in multimaps, Victor corrected iterators on HP in SL99h, Improved use of const for HP compilation
+ *
+ * Revision 1.5  1999/07/30 16:19:13  calderon
+ * Use value_type typedef for inserting pairs in multimaps, Victor corrected iterators on HP in SL99h, Improved use of const for HP compilation
  *
  * Revision 1.4  1999/07/28 20:27:23  calderon
  * Version with SL99f libraries
@@ -92,7 +95,6 @@ bool compMcFtpcHit::operator()(const StMcFtpcHit* h1, const StMcFtpcHit* h2) con
 
 bool compTrack::operator()(const StGlobalTrack* t1, const StGlobalTrack* t2) const {
 // Print out a pair
-//template <class First, class Second>
 }
 
 // Print out Track pairs
@@ -197,8 +199,8 @@ Int_t StAssociationMaker::Finish()
     
     StTpcHitCollection* rTpcHits = rEvent->tpcHitCollection();
     cout << "Got " << rTpcHits->size() << " rec. Tpc Hits in this event" << endl;
-    StTpcHitIterator riter;
     StTpcHit* rHit;
+    StTpcHitIterator riter;
     for (riter=rTpcHits->begin(); riter!=rTpcHits->end(); riter++){
 	rHit = *riter;
 	rTpcLocal->addHit(rHit);
@@ -230,9 +232,6 @@ Int_t StAssociationMaker::Finish()
     
     // Get the pointer to the parameter DB,
     // the definitions of the cuts
-//     parDB->setXCut(.1); // 1 mm
-//     parDB->setZCut(.2); // 2 mm
-//     parDB->setReqCommonHits(3); // Require 3 hits in common for tracks to be associated
     cout << " X Cut : " << parDB->xCut()/millimeter << " mm" << endl;
     cout << " Z Cut : " << parDB->zCut()/millimeter << " mm" << endl;
     cout << " Required Hits for Associating Tracks: " << parDB->reqCommonHits() << endl;
@@ -244,7 +243,6 @@ Int_t StAssociationMaker::Finish()
     StTpcLocalHit_mc*     mcHit;
     
     // Instantiate the map
-    //mTpcHitMap = new multimap<StTpcHit*, StMcTpcHit*, compHit>;
     mTpcHitMap = new tpcHitMapType;
     for (unsigned int iSector=0; iSector<rTpcLocal->numOfDevices(); iSector++) {
     
@@ -264,14 +262,13 @@ Int_t StAssociationMaker::Finish()
 		    
 		    if ( (StLocalHit) *recHit == (StLocalHit) *mcHit) {
 			// Make Associations  Use map,
-					
-			//mTpcHitMap->insert(make_pair(recHit->globalHitPtr(), mcHit->globalHitPtr()));
-			mTpcHitMap->insert(pair<StTpcHit* const, StMcTpcHit*>(recHit->globalHitPtr(), mcHit->globalHitPtr()) );
-			//const pair<StTpcHit *const,StMcTpcHit *>
+						
+			mTpcHitMap->insert(tpcHitMapValType (recHit->globalHitPtr(), mcHit->globalHitPtr()) );
+			
 			// Make Associations  Use maps,
 			mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
-		} // End of Hit loop for MC Hits
-	    } // End of Hit loop for Rec. Hits
+			mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
+						 rcTpcHit->position().x(),
 						 closestTpcHit->position().z()-
 						 rcTpcHit->position().z() );
 	    } // End of Hits in Padrow loop for Rec. Hits
@@ -283,18 +280,12 @@ Int_t StAssociationMaker::Finish()
     }
     const StMcTpcHit* mcValueTpcHit;
     StTrackCollection* recTracks = rEvent->trackCollection();
-    StTrackIterator recTrackIter;
     StGlobalTrack* recTrack;
-#ifdef USING_PERSISTENT
-    typedef StTpcHitIterator StVecPtrTpcHitIterator;// needed because dev version was lacking it!! Yuri is fixing it
-#endif
-    
-
 
     StTpcHit*  keyHit;    // key on the reconstructed Tpc Hit
     pair<tpcHitMapIter,tpcHitMapIter> bounds;
 
-    StMcTpcHit* monteCarloHit;
+    const StMcTpcHit* monteCarloHit;
     const StMcSvtHit* mcValueSvtHit;
     const StMcFtpcHit* mcValueFtpcHit;
     initializedTrackPing.nPingsSvt = 0;
@@ -302,12 +293,6 @@ Int_t StAssociationMaker::Finish()
     
     vector<trackPing, allocator<trackPing> > candidates(1000);
     vector<trackPing> candidates(100, initializedTrackPing);
-// #ifndef ST_NO_TEMPLATE_DEF_ARGS
-//     vector<StTrackPairInfo*> candidates(1000);
-// #else
-//     vector<StTrackPairInfo*, allocator<StTrackPairInfo*> > candidates(1000);
-// #endif
-
     vector<trackPing, allocator<trackPing> > candidates(100, initializedTrackPing);
     mTrackMap = new trackMapType;
 
@@ -323,40 +308,28 @@ Int_t StAssociationMaker::Finish()
     // Instantiate the Track map
     mRcTrackMap = new rcTrackMapType;
 
-    
+    StTrackIterator recTrackIter;
     for (recTrackIter  = recTracks->begin(); recTrackIter != recTracks->end(); recTrackIter++){
 	// Loop over tracks in StEvent
 	
 	recTrack = *recTrackIter; // For a by-pointer collection we need to dereference once
 
-	// if (mTrackMap->count(recTrack) > 0) {
-// 	    cout << "The track " << recTrack << " was here before!!! Partners: " << mTrackMap->count(recTrack) << endl;
-// 	}
-// 	else { cout << "Track not in Map yet" << endl;}
-
 	// print out the map
         // cout << "The map is now" << endl << *mTrackMap << endl;
-
 	rcTrack = dynamic_cast<StGlobalTrack*>(trkNode->track(global));
 	if (!rcTrack || !(rcTrack->detectorInfo()->hits().size()))
 
 	// Clear the candidate vector
 	candidates.clear();
 	const StVecPtrTpcHit& recTpcHits = recTrack->tpcHits();
-// 	StVecPtrTpcHitIterator recHitIter;
-
-	for (int i=0; i<recTpcHits.size(); i++) { // Had to put this in here because we don't have 
-	  keyHit = recTpcHits[i];                 // a const iterator for the hits of a track.  HP complains
-// 	for (recHitIter  = recTpcHits.begin();
-// 	     recHitIter != recTpcHits.end();
-// 	     recHitIter++) { // Loop over the hits of the track
+        StTpcHitIterator recHitIter;
+	for (recHitIter  = recTpcHits.begin();
+	     recHitIter != recTpcHits.end();
+	     recHitIter++) { // Loop over the hits of the track
 	// Loop over the East FTPC hits of the track
-// 	    keyHit = *recHitIter;
+	    keyHit = *recHitIter;
 	    bounds = mTpcHitMap->equal_range(keyHit);
 		
-	    
-	    
-	    
 	    for (tpcHitMapIter hmIter=bounds.first; hmIter!=bounds.second; ++hmIter) {
 
 		monteCarloHit = (*hmIter).second;
@@ -407,10 +380,9 @@ Int_t StAssociationMaker::Finish()
 	  if (candidates[iCandidate].nPingsTpc  >= parDB->reqCommonHitsTpc() ||
 	      candidates[iCandidate].nPingsSvt  >= parDB->reqCommonHitsSvt() ||
 	      candidates[iCandidate].nPingsFtpc >= parDB->reqCommonHitsFtpc()){
-	    // mTrackMap->insert(make_pair(recTrack, candidates[iCandidate].mcTrack));
 	    trkPair = new StTrackPairInfo(candidates[iCandidate].mcTrack, candidates[iCandidate].nPings);
 	    //mTrackMap->insert(make_pair(recTrack, trkPair));
-	    mTrackMap->insert(pair<StGlobalTrack* const, StTrackPairInfo*>(recTrack, trkPair));
+	    mTrackMap->insert(trackMapValType (recTrack, trkPair));
 	    
 	    // print out the map
 	    //cout << "The map is now" << endl << *mRcTrackMap << endl;
