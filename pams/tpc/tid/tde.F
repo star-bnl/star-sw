@@ -1,7 +1,9 @@
-* $Id: tde.F,v 1.9 2000/03/24 02:57:19 ogilvie Exp $
+* $Id: tde.F,v 1.10 2000/03/27 02:23:54 sakrejda Exp $
 * $Log: tde.F,v $
-* Revision 1.9  2000/03/24 02:57:19  ogilvie
-* for zero-field, calc path length pad/(cos(dipangle)*cos(crossing))
+* Revision 1.10  2000/03/27 02:23:54  sakrejda
+* This is really version 1.8 as something is wrong with 1.9 (kills tracks)
+* and Craig is not around. This is an emergency, when Craig is back, it will
+* be cleaned up.
 *
 * Revision 1.8  2000/03/05 23:56:52  sakrejda
 * Changed limit for "no field' from 0.00001 to 0.00002.
@@ -135,9 +137,6 @@ C-----------------------------------------------------------------------
       real z(10),erf(10),frachalf(10),zcut,nontrunc,slope
       real average,sigma,dedx_upper,rndm,mean_scaled,sigma_scaled
       INTEGER iseed, nde_old, ipos,nzero,kk
-      logical zerofield
-      integer tpc_global_to_local_p
-      real p_global(3), p_local(3), alpha, px,py,coscross
 
       real ascale, bscale, scale, meanscale, arms, brms, rms 
 
@@ -169,7 +168,7 @@ c            /0.75,0.8,0.85,0.9,0.95,1.0,1.05,1.15,1.20,1.25/
       data erf /0.168,0.223,0.276,0.329,0.379,0.428,0.475,0.521,0.563,0.604/
 c            /0.7116,0.7420,0.7707,0.7969,0.8209,0.8427,0.8624,0.8802,0.8961,.9103/
 
-      EXTERNAL landau2,tpc_global_to_local_p
+      EXTERNAL landau2
 C-----------------------------------------------------------------------
 
 
@@ -211,11 +210,7 @@ C Abort if there are too many TPC tracks to work with
       endif
 
       call gufld(xlocal,bfield)
-      if(abs(bfield(3)).lt.0.0002) then
-         zerofield = .true.
-      else
-         zerofield = .false.
-      endif 
+      if(abs(bfield(3)).lt.0.00002) return 
       
 c
 c  this only once on initialisation-
@@ -381,30 +376,28 @@ c                 and the outer part
                   bo=0.0
                endif
 c
-               if (.not.zerofield) then
-                 flag  = 0
-
-                 iret1 = cros(flag,xc,yc,radius,ai,bi,hit
+               flag  = 0
+               iret1 = cros(flag,xc,yc,radius,ai,bi,hit
      >                (loc_hit(l)).x,
      >                 hit(loc_hit(l)).y,xa,ya)
-                 iret2 = cros(flag,xc,yc,radius,ao,bo,hit
+               iret2 = cros(flag,xc,yc,radius,ao,bo,hit
      >                (loc_hit(l)).x,
      >                 hit(loc_hit(l)).y,xb,yb)
 c
 c  (xa,ya) (xb,yb) are the coordinates of the pad-row where the transverse
 c  circle enters and leaves the pad-raow
 c
-                 if(iret1.lt.0.and.iret2.eq.0) then
+               if(iret1.lt.0.and.iret2.eq.0) then
                   flag = 1
                   iret1= cros(flag,xc,yc,radius,ao,bo,hit
      >                  (loc_hit(l)).x,
      >                   hit(loc_hit(l)).y,xa,ya)
-                 else if(iret2.lt.0.and.iret1.eq.0) then
+               else if(iret2.lt.0.and.iret1.eq.0) then
                   flag = 1
                   iret2= cros(flag,xc,yc,radius,ai,bi,hit
      >                  (loc_hit(l)).x,
      >                   hit(loc_hit(l)).y,xb,yb)
-                 endif
+               endif
 c
 c To calculate the arc-length across the pad-row first
 c the angle subtended by the entrance (xa,ya) and exit points (xb,yb)
@@ -413,75 +406,58 @@ c The arc-length across the pad is is calculated from half of this
 c angle and the radius of the transverse circle. The path-length of the track
 c then includes the dip angle factor, cosl
 c               
-                 if(iret1.eq.0.and.iret2.eq.0) then
-                   ds=radius*2.0*
-     >             asin(0.5*sqrt((xa-xb)**2+(ya-yb)**2)
-     >                  /radius)*cosl
-                 endif
-              else
+               if(iret1.eq.0.and.iret2.eq.0) then
+                  ds=radius*2.0*
+     >            asin(0.5*sqrt((xa-xb)**2+(ya-yb)**2)
+     >            /radius)*cosl
+                  hit(loc_hit(l)).dq=ds
 c
-c zero field case
+c check on quality of hit before including it into dedx
 c
-c first find crossing angl, ignore scale of pt
-c
-                 px = cos(track(j).psi*C_RAD_PER_DEG)
-                 py = sin(track(j).psi*C_RAD_PER_DEG)
-                 p_global(1) = px
-                 p_global(2) = py
-                 p_global(3) = 0.
-                 iret = tpc_global_to_local_p(isect,p_global,p_local)
-                 if (abs(p_local(2).gt.0.0001)) then
-                    alpha = atan(p_local(1)/p_local(2))
-                 else
-                    alpha = C_PI_2
-                 endif
-                 coscross = cos(alpha)
-                 if (abs(coscross*cosl).gt.0.0001) then
-                   ds = 2.*half_pad/abs(coscross*cosl)
-                 else
-                   ds = 2.*half_pad
-                 endif
-              endif
-
-              hit(loc_hit(l)).dq=ds
- 
-              if (((hit(loc_hit(l)).flag.eq.0).or.(tdpar(1).usemerge.ne.0))
-     >                 .and.nde.lt.ndemax) then
-                 if (hit(loc_hit(l)).flag.ne.0) then
-                        write(m132,*)'flag',hit(loc_hit(l)).flag ,ds
-                        call StInfo(m132)
-                 endif  
-                 nde=nde+1
-                 dedx(nde).length=ds
-                 dedx(nde).charge=hit(loc_hit(l)).q
-                 dedx(nde).adedx=dedx(nde).charge/ds
-                 dedx(nde).row=irow
-                 if (tdpar(1).averaging_method.eq.4) then
+c             if (hit(loc_hit(l)).flag.ne.0) then
+c                write(m132,*)'flag',hit(loc_hit(l)).flag ,ds
+c                call StInfo(m132)
+c              endif   
+            if (((hit(loc_hit(l)).flag.eq.0).or.(tdpar(1).usemerge.ne.0))
+     >       .and.nde.lt.ndemax) then
+               if (hit(loc_hit(l)).flag.ne.0) then
+                 write(m132,*)'flag',hit(loc_hit(l)).flag ,ds
+                 call StInfo(m132)
+               endif  
+                    nde=nde+1
+                    dedx(nde).length=ds
+                    dedx(nde).charge=hit(loc_hit(l)).q
+                    dedx(nde).adedx=dedx(nde).charge/ds
+                    dedx(nde).row=irow
+                    if (tdpar(1).averaging_method.eq.4) then
 c
 c first scale the dedx by path-length dependence
 c    dedx = a(1-b/dx) 
 c     
-                     if (irow.lt.13) then
+                       if (irow.lt.13) then
                           ascale= 0.636 
                           bscale = 0.34 
                           arms = 0.195
                           brms = 0.050
-                     else   
+                       else   
                           ascale = 0.632 
                           bscale = 0.26
                           arms = 0.170
                           brms = 0.053  
-                     endif
-                     meanscale = 0.632*(1-0.26/2.2)
-                     scale = ascale*(1-bscale/ds)/meanscale
-                     rms = arms + brms/sqrt(ds)
-                     weight = 1./rms
-c                    weight = sqrt(ds)                       
-                     dedx(nde).sorta_dedx = dedx(nde).adedx*weight/scale
-                  else
-                     dedx(nde).sorta_dedx = dedx(nde).adedx
-                  endif  
-
+                       endif
+                       meanscale = 0.632*(1-0.26/2.2)
+                       scale = ascale*(1-bscale/ds)/meanscale
+                       rms = arms + brms/sqrt(ds)
+                       weight = 1./rms
+c                      weight = sqrt(ds)                       
+                       dedx(nde).sorta_dedx = dedx(nde).adedx*weight/scale
+                    else
+                      dedx(nde).sorta_dedx = dedx(nde).adedx
+                    endif  
+                  endif
+c               else if((xc-hit(loc_hit(l)).x)**2+
+c     >            (yc-hit(loc_hit(l)).y)**2
+c     >            .gt.radius**2) then
 c  include the flag cuts for the merged tracks. 
 c  Because after merged, some hits from other recid can't 
 c  fit this circle parameter, so cause the track.flag=-1 or -999  
@@ -496,7 +472,7 @@ c  liqun 10/08/98
                   hit(loc_hit(l)).dq=-999.0
                   track(j).flag=-999
                endif
-            endif   ! if row.lt.minrow
+            endif
             l=l-1
 c
 c  CO flag to aviod l=0 crash in top while statement
