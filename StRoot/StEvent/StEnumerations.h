@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.0 1999/10/12 18:41:45 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.1 1999/11/15 18:48:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 2.0  1999/10/12 18:41:45  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/11/15 18:48:16  ullrich
+ * Adapted new enums for dedx and track reco methods.
  *
  * Revision 2.3  2000/08/17 00:12:18  ullrich
  * Added tpt to enum StTrackType
@@ -28,10 +28,16 @@
  * Revision 2.6  2000/08/28 16:28:45  ullrich
  * Added enum tpt and removed CINT pragmas.
  *
+ * Revision 2.5  2000/08/28 17:08:58  didenko
+#ifdef __CINT__
+#pragma link C++ enum StBeamDirection;
+#pragma link C++ enum StBeamPolarizationAxis;
 #pragma link C++ enum StTrackFindingMethod;
 #pragma link C++ enum StTrackQualityScheme;
 #pragma link C++ enum StDetectorId;
 #pragma link C++ enum StVertexId;
+#pragma link C++ enum StTrackType;
+#pragma link C++ enum StTrackModel;
 #pragma link C++ enum StDedxMethod;
 #pragma link C++ enum StTrackFinderMethod;
 #pragma link C++ enum StTrackFittingMethod;
