@@ -1,62 +1,55 @@
 //StiEvaluator.h
-// A.Rose (WSU)]
-//8/01
+// $Id: StiEvaluator.h,v 1.22 2002/11/27 00:08:55 calderon Exp $
+//
+// Evaluation histograms for STAR Integrated Tracker
+// Manuel Calderon de la Barca Sanchez
+// Oct 2002
+//
+// $Log: StiEvaluator.h,v $
+// Revision 1.22  2002/11/27 00:08:55  calderon
+// New version of evaluator using the minimctrees
+//
 
 #ifndef StiEvaluator_HH
 #define StiEvaluator_HH
+#include <vector>
 
-//std
-#include <string>
-using std::string;
-
-//ROOT
 #include "TObject.h"
 
-//StiEvaluator
-#include "TreeEntryClasses.h"
+#include "EfficiencyAnalysis.h"
 
-//forward declarations (must #include these in the source file)
-class StiTrackContainer;
-class TFile;
-class TNtuple;
-class TTree;
-class StMcTrack;
-class StTrack;
-class StiTrack;
-class StTrackPairInfo;
-class StiKalmanTrack;
-class StiHit;
-class StiKalmanTrackNode;
-class trackPing;
+class TH2D;
+class TChain;
+class StMiniMcEvent;
+class StMiniMcPair;
 
-class StiEvaluator
-{
+class StiEvaluator {
 public:
-    static StiEvaluator* instance(const string val="empty");
-    static void kill();
-    
-    friend class nobody;
-    
-    void evaluate(const StiTrackContainer*);
-    
-    StiEvaluator(); //Not implemented
-    StiEvaluator(const string&); //Must pass file-name
-    virtual ~StiEvaluator(); 
-    static StiEvaluator* sinstance;
+    StiEvaluator();
+    StiEvaluator(const StiEvaluator&);
+    virtual ~StiEvaluator();
+    void setChain(TChain* ch);
+    void setFitPtsLimit(double);
+    void setDcaLimit(double);
+    void setGeantId(int);
+    void setFileName(char*);
+
+    size_t getIndex(size_t);
+    int initialize();
+    void resethistograms();
+    void makehistograms();
+    void writehistograms();
     
 private:
-    void build();
-    
-    void fillTree(StiTrack*, StTrackPairInfo*);
-    void fillHitEntry(const StiKalmanTrackNode*);
-    void fillHitEntry(const StiHit*);
-    void fillHitEntry(const StiKalmanTrack*);
-      
-    string mFileName;
-    TFile* mFile;
-    TTree* mTree;
-    TrackEntry* mEntry;
-    StiHitEntry mStiHitEntry;
-};
+    StMiniMcEvent* minimcevent; //!
+    double mFitPtsLimit; //!
+    double mDcaLimit; //!
+    int mGeantId;     //!
+    char* mFileName;  //!
+    TChain* mChain;      //! 
 
+    vector<EfficiencyAnalysis> mEfficiencyAnalysisVector; //!
+    
+    ClassDef(StiEvaluator,1)	
+};
 #endif

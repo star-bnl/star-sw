@@ -1,310 +1,217 @@
-//StiEvaluator.cxx
+// $Id StiEvaluator.cxx$
 // A. Rose (WSU)
-//8/01
+// M. Calderon de la Barca (BNL)
+// 8/01
+// Modifications Sep 2002
+// Use EfficiencyAnalysis class based on usage of StMiniMcTree
+// do only 3 multiplicity classes, but will need to run for 3 particle id's
+// and both charge signs
+// 
+// $Log: StiEvaluator.cxx,v $
+// Revision 1.33  2002/11/27 00:08:55  calderon
+// New version of evaluator using the minimctrees
+//
 
-//ROOT
-#include "TFile.h"
-#include "TTree.h"
-#include "TNtuple.h"
-#include "TClonesArray.h"
-
-//STD
-#include <stdexcept>
-#include <math.h>
-#include <iostream.h>
-using namespace std;
-
-//StEvent
-#include "StEventTypes.h"
-
-//StMcEvent
-#include "StMcEventTypes.hh"
-
-//Association
-#include "StAssociationMaker/StTrackPairInfo.hh"
-
-//Sti includes
-#include "Sti/StiTrackContainer.h"
-#include "Sti/StiEvaluableTrack.h"
-#include "Sti/StiTrack.h"
-#include "Sti/StiKalmanTrack.h"
-#include "Sti/StiHit.h"
-#include "Sti/StiKalmanTrackNode.h"
-
-//StiEvaluator includes
-#include "StiEventAssociator.h"
-#include "StiTrackPairInfo.h"
+#include <iostream>
+#include <string>
 #include "StiEvaluator.h"
+#include "TChain.h"
+#include "TBranch.h"
+#include "StMiniMcEvent/StMiniMcEvent.h"
 
-StiEvaluator* StiEvaluator::sinstance = 0;
-
-static unsigned int commonHitCut=5;
-
-StiEvaluator::StiEvaluator(const string& fname)
-    : mFileName(fname), mFile(0), mTree(0), mEntry(0)
+ClassImp(StiEvaluator)
+    
+StiEvaluator::StiEvaluator() :
+    // These values should be given in the macro, so set
+    // the default values to something unusable, following the golden
+    // rule: setting default values to something sensible is akin to sabotage.
+    mFitPtsLimit(99),
+    mDcaLimit(99),
+    mGeantId(9999),
+    mFileName(0),
+    mChain(0)
 {
-    cout <<"StiEvaluator::StiEvaluator()"<<endl;
-    if (mFileName=="empty") {
-	cout <<"StiEvaluator::StiEvaluator() ERROR:\t";
-	cout <<"No file name specified for output file.";
-	cout <<"Abort witout building!"<<endl;
-    }
-    else {
-	build();
-    }
-    sinstance = this;
+}
+StiEvaluator::StiEvaluator(const StiEvaluator& e) :
+    mFitPtsLimit(e.mFitPtsLimit),
+    mDcaLimit(e.mDcaLimit),
+    mGeantId(e.mGeantId),
+    mFileName(e.mFileName),
+    mChain(e.mChain)
+{
 }
 
-StiEvaluator::~StiEvaluator()
-{
-    cout <<"StiEvaluator::~StiEvaluator()"<<endl;
-    mFile->Write();
-    mFile->Close();
+StiEvaluator::~StiEvaluator() {
 }
 
-StiEvaluator* StiEvaluator::instance(const string val)
-{
-    return (sinstance) ? sinstance : new StiEvaluator(val);
-}
+int StiEvaluator::initialize() {
+    cout << "StiEvaluator::initialize()" << endl;
+    EfficiencyAnalysis AnalysisPiPlHi;
 
-void StiEvaluator::kill()
-{
-    if (sinstance) {
-	delete sinstance;
-	sinstance = 0;
-    }
-}
+    AnalysisPiPlHi.setFitPtsLimit(mFitPtsLimit); //cut is >=
+    AnalysisPiPlHi.setDcaLimit(mDcaLimit);
+    AnalysisPiPlHi.setGeantId(8);   
+    AnalysisPiPlHi.setFileName(mFileName); // should already be figured out in the macro
 
-void StiEvaluator::build()
-{
-    cout <<"StiEvaluator::build()"<<endl;
+    // copy construct so that the track cuts, and file name are identical
+    cout << "made efficiency analysis, now make its copies and set their geant id's" << endl;
+    EfficiencyAnalysis AnalysisPiPlMe(AnalysisPiPlHi);
+    EfficiencyAnalysis AnalysisPiPlLo(AnalysisPiPlHi);
+
+    //
+    // same for pi-
+    //
+    EfficiencyAnalysis AnalysisPiMiHi(AnalysisPiPlHi);
+    AnalysisPiMiHi.setGeantId(9);
+    EfficiencyAnalysis AnalysisPiMiMe(AnalysisPiMiHi);
+    EfficiencyAnalysis AnalysisPiMiLo(AnalysisPiMiHi);
+
+    //
+    // same for k+, k-
+    //
+    EfficiencyAnalysis AnalysisKaPlHi(AnalysisPiPlHi);
+    AnalysisKaPlHi.setGeantId(11);
+    EfficiencyAnalysis AnalysisKaPlMe(AnalysisKaPlHi);
+    EfficiencyAnalysis AnalysisKaPlLo(AnalysisKaPlHi);
+
+    EfficiencyAnalysis AnalysisKaMiHi(AnalysisPiPlHi);
+    AnalysisKaMiHi.setGeantId(12);
+    EfficiencyAnalysis AnalysisKaMiMe(AnalysisKaMiHi);
+    EfficiencyAnalysis AnalysisKaMiLo(AnalysisKaMiHi);
+
+    //
+    // same for p, pbar
+    //
+    EfficiencyAnalysis AnalysisPrPlHi(AnalysisPiPlHi);
+    AnalysisPrPlHi.setGeantId(14);
+    EfficiencyAnalysis AnalysisPrPlMe(AnalysisPrPlHi);
+    EfficiencyAnalysis AnalysisPrPlLo(AnalysisPrPlHi);
+
+    EfficiencyAnalysis AnalysisPrMiHi(AnalysisPiPlHi);
+    AnalysisPrMiHi.setGeantId(15);
+    EfficiencyAnalysis AnalysisPrMiMe(AnalysisPrMiHi);
+    EfficiencyAnalysis AnalysisPrMiLo(AnalysisPrMiHi);
+
     
-    //Must open TFile first if you want ntuple to disk
-    cout <<"Opening ROOT file: "<<mFileName<<endl;
-    mFile = new TFile(mFileName.c_str(),"RECREATE");
-
-    mEntry = new TrackEntry();
-    mTree = new TTree("TestTree","The Test Tree");
-
-    Int_t buffsize = 64000;
-    Int_t splitlevel = 1;
-    mTree->Branch("TestBranch","TrackEntry",&mEntry, buffsize, splitlevel);
-
-    cout <<"\tdone"<<endl;
     
-}
+    mEfficiencyAnalysisVector.push_back(AnalysisPiPlHi); // index 0
+    mEfficiencyAnalysisVector.push_back(AnalysisPiPlMe); // index 1
+    mEfficiencyAnalysisVector.push_back(AnalysisPiPlLo); // index 2
+    mEfficiencyAnalysisVector.push_back(AnalysisPiMiHi); // index 3
+    mEfficiencyAnalysisVector.push_back(AnalysisPiMiMe); // index 4
+    mEfficiencyAnalysisVector.push_back(AnalysisPiMiLo); // index 5
+    mEfficiencyAnalysisVector.push_back(AnalysisKaPlHi); // index 6
+    mEfficiencyAnalysisVector.push_back(AnalysisKaPlMe); // index 7
+    mEfficiencyAnalysisVector.push_back(AnalysisKaPlLo); // index 8
+    mEfficiencyAnalysisVector.push_back(AnalysisKaMiHi); // index 9
+    mEfficiencyAnalysisVector.push_back(AnalysisKaMiMe); // index 10
+    mEfficiencyAnalysisVector.push_back(AnalysisKaMiLo); // index 11
+    mEfficiencyAnalysisVector.push_back(AnalysisPrPlHi); // index 12
+    mEfficiencyAnalysisVector.push_back(AnalysisPrPlMe); // index 13
+    mEfficiencyAnalysisVector.push_back(AnalysisPrPlLo); // index 14
+    mEfficiencyAnalysisVector.push_back(AnalysisPrMiHi); // index 15
+    mEfficiencyAnalysisVector.push_back(AnalysisPrMiMe); // index 16
+    mEfficiencyAnalysisVector.push_back(AnalysisPrMiLo); // index 17
 
-void StiEvaluator::evaluate(const StiTrackContainer* trackStore)
-{
-    cout <<"\nStiEvaluator::evaluate() - INFO - Beginning event evaluation"<<endl;
-    cout <<"\tNumber of StiTracks:\t"<<trackStore->size()<<endl;
-
-    typedef StiEventAssociator::McToInfoPairMap McMap;
-    typedef StiEventAssociator::InfoPair StiInfoPair;
-
-    McMap& myMap = StiEventAssociator::instance()->mcToInfoPairMap();
-    cout <<"\tNumber of StMcTracks:\t"<<myMap.size()<<endl;
-
-    unsigned int iMcTrack=0;
-    //cout <<"\tLoop on McToInfoPairMap"<<endl;
-    for (McMap::iterator outer_it=myMap.begin(); outer_it!=myMap.end(); ++outer_it) 
-      {
-	if (fmod(static_cast<double>(iMcTrack++),5000)==0) 
-	  cout <<"\tEvaluating track#\t"<<iMcTrack<<endl;
-	mEntry->clear();
-	StMcTrack* mcTrack = (*outer_it).first;
-	if (mcTrack==0)
-	  {
-	    cout << "evaluate() - 0 ptr - abort" << endl;
-	    continue;
-	  }
-	else
-	  cout << "evaluate() - Track OK" << endl;
-	StiTrackPairInfo& testInfo = (*outer_it).second.second;
-	if ( testInfo.partnerMcTrack()==0 ) 
-	  {
-	    // This McTrack was not found!
-	    //Fill McTrack info:
-	    cout <<"---------Track not found, fill McTrack and Return"<<endl;
-	    mEntry->clear();
-	    mEntry->setMcTrack(mcTrack, 0, false); //Dont incremnt the nFound counter
-	    mTree->Fill();
-	  }
-	else 
-	  {
-	    cout <<"Track found, find best match and fill"<<endl;
-	    //we have to choose the best ITTF trackf or this Mc Track (best common hits)
-	    //Start kludge here (should be an algorithm call)
-	    pair< McMap::iterator, McMap::iterator > range = myMap.equal_range(mcTrack);
-	    StiTrackPairInfo* bestStiPair=0;
-	    StTrackPairInfo* bestGlobalPair=0;
-	    unsigned int mostCommon=0;
-	    unsigned int nTimes=0;
-	    for (McMap::iterator it=range.first; it!=range.second; ++it) 
-	      {
-		cout << " nTimes:" << ++nTimes;
-		StiTrackPairInfo& info = (*it).second.second;
-		if (info.commonTpcHits()>mostCommon && info.commonTpcHits()>commonHitCut) { //update, remember
-		    mostCommon = info.commonTpcHits();
-		    bestGlobalPair = (*it).second.first;
-		    bestStiPair = &info;
-		}
-	      }
-	    cout <<"\t Found this MC Track: "<<nTimes<<" times"<<endl;
-	    //End kludge
-
-	    //Fill for best match
-	    if (bestStiPair!=0) 
-	      {
-		cout << "Finally, we can fill!"<<endl;
-		//Fill McTrack info:
-		mEntry->clear();
-		mEntry->setMcTrack(bestStiPair->partnerMcTrack(), 1, true);
-
-		//Check to see if Global assoc worked!
-		if (bestGlobalPair!=0) {
-		    mEntry->setGlobalTrack(bestGlobalPair->partnerTrack());
-		    mEntry->setGlobalAssoc(bestGlobalPair);
-		}
-		//We already know that we're safe here
-		mEntry->setStiTrack(bestStiPair->partnerTrack());
-		mEntry->setAssociation(*bestStiPair);
-		cout <<" ---------  we are here ---------"<<endl;
-		const StiKalmanTrack* tkt =
-		    dynamic_cast<const StiKalmanTrack*>(bestStiPair->partnerTrack());
-		if (!tkt) 
-		  {
-		    cout <<"StiEvaluator::evaluateForEvent(). ERROR:\t"
-			 <<"cast to kalman track failed."<<endl;
-		  }
-		else 
-		  {
-		    //fillHitEntry(tkt);
-		  }
-		mTree->Fill();
-	      }
-	    cout <<" ---------  we are at 2  --------" <<endl;
-	    //Fill for all other matches (split tracks!!!)
-	    for (McMap::iterator it=range.first; it!=range.second; ++it) 
-	      {
-		StTrackPairInfo* globalPair = (*it).second.first;
-		StiTrackPairInfo& info = (*it).second.second;
-		if (&info!=bestStiPair && info.commonTpcHits()>commonHitCut) 
-		  { //don't repeat for bestMatch
-		    //Fill McTrack info:
-		    cout << " <<<<<<<>>>>>>>>"<<endl;
-		    mEntry->clear();
-		    mEntry->setMcTrack(bestStiPair->partnerMcTrack(), 1, false);
-		    if (globalPair!=0) {
-		      mEntry->setGlobalTrack(globalPair->partnerTrack());
-		      mEntry->setGlobalAssoc(globalPair);
-		    }
-		    
-		    //We already know that we're safe here
-		    mEntry->setStiTrack(info.partnerTrack());
-		    const StiKalmanTrack* tkt =
-		      dynamic_cast<const StiKalmanTrack*>(info.partnerTrack());
-		    if (!tkt) {
-		      cout <<"StiEvaluator::evaluateForEvent(). ERROR:\t"
-			   <<"cast to kalman track failed."<<endl;
-		    }
-		    else {
-		      //fillHitEntry(tkt);
-		    }
-		    mEntry->setAssociation(info);
-		    mTree->Fill();
-		  }
-		
-	      }
-	  }
-    }
-    cout <<"StiEvaluator::evaluate() - INFO - Completed"<<endl;
-}
-
-void StiEvaluator::fillHitEntry(const StiKalmanTrackNode* node)
-{
-    //Reset the entry:
-    mStiHitEntry.reset();
-    
-    //Fill node-wise quantities:
-    mStiHitEntry.nodeAlpha = node->fAlpha;
-    mStiHitEntry.nodeLocalX = node->fX;
-    mStiHitEntry.nodeLocalY = node->fP0;
-    mStiHitEntry.nodeLocalZ = node->fP1;
-    mStiHitEntry.nodeLocalEta = node->fP2;
-    mStiHitEntry.nodeLocalCurvature = node->fP3;
-    mStiHitEntry.nodeLocalTanLambda = node->fP4;
-    mStiHitEntry.nodeLocalChi2 = node->fChi2;    
-    
-    //Fill hit-wise quantities, if there's a hit for this node:
-    const StiHit* hit = node->getHit();
-    if (hit) {
-	fillHitEntry(hit);
-	mStiHitEntry.nodeHasHit = 1;
-    }
-
-    //Add to the track entry
-    mEntry->addStiHitEntry(mStiHitEntry);
-
-}
-
-void StiEvaluator::fillHitEntry(const StiHit* hit)
-{
-    mStiHitEntry.hitTimesUsed = hit->timesUsed();
-    
-    mStiHitEntry.hitPosition = hit->position();
-    mStiHitEntry.hitRefAngle = hit->refangle();
-    mStiHitEntry.hitLocalX = hit->x();
-    mStiHitEntry.hitLocalY = hit->y();
-    mStiHitEntry.hitLocalZ = hit->z();
-
-    mStiHitEntry.hitLocalSxx = hit->sxx();
-    mStiHitEntry.hitLocalSyy = hit->syy();
-    mStiHitEntry.hitLocalSzz = hit->szz();
-    
-    mStiHitEntry.hitLocalSxy = hit->sxy();
-    mStiHitEntry.hitLocalSxz = hit->sxz();
-    mStiHitEntry.hitLocalSyz = hit->syz();
-    
-    const StThreeVectorF& pos = hit->globalPosition();
-    mStiHitEntry.hitGlobalX = pos.x();
-    mStiHitEntry.hitGlobalY = pos.y();
-    mStiHitEntry.hitGlobalZ = pos.z();
-    /*
-      cout <<"\tGlobal Pos:\t"
-      <<mStiHitEntry.hitGlobalX<<"\t"
-      <<mStiHitEntry.hitGlobalY<<"\t"
-      <<mStiHitEntry.hitGlobalZ<<endl;
-    */
-}
-
-void StiEvaluator::fillHitEntry(const StiKalmanTrack* track)
-{
-    //Start at the last node on the track, work upwards until you find the root of the tree:
-    
-    StiKalmanTrackNode* node = track->getLastNode(); //start at innermost
-    unsigned int nodes=0;
-    bool go=true;
-    while (go) {
-	++nodes;
-	fillHitEntry(node);
-	//now check for parent:
-	if (node->isRoot()) { //this means that it's the root, no where else to go
-	    go=false;
+    // the name of output histogram should be different though
+    cout << "Figure out output names " << endl;
+    string suffixes[3] = {"Hi", "Me", "Lo"};
+    int geantIds[6] = {8,9,11,12,14,15};
+    char gid[3]= "xx";
+    string suffix;
+    for (int g=0; g<6; ++g) 
+	for (int s=0; s<3; ++s) {
+	    sprintf(gid,"%02i",geantIds[g]);
+	    suffix = suffixes[s] + gid;
+	    mEfficiencyAnalysisVector[g*3+s].setSuffix(suffix);
 	}
-	else {
-	    node = dynamic_cast<StiKalmanTrackNode*>(node->getParent());
-	    if (!node) {
-		cout <<"StiEvaluator::fillHitEntry(const StiKalmanTrack&) ERROR:\t"
-		     <<"Cast to StiKalmanTrackNodeFailed.  Abort"<<endl;
-		return;
-	    }
+    cout << "booking histos" << mGeantId << endl;
+    for (size_t i=0; i<mEfficiencyAnalysisVector.size(); ++i) {
+	cout << mEfficiencyAnalysisVector[i].suffix() << endl;
+	mEfficiencyAnalysisVector[i].createHistograms();
+    }
+
+    return 0;
+}
+
+
+size_t StiEvaluator::getIndex(size_t mult) {
+    //
+    // return an index into the vector of multipliticy classes
+    // based on some multiplicity.
+    // For StiEvaluation, use the MC multiplicity
+    // in order to compare old and new trackers using the same 
+    // number
+
+    if (mult >= 4000) return 0;
+    else if (mult >= 2000) return 1;
+    else return 2;
+}
+
+void StiEvaluator::resethistograms() {
+    cout << "StiEvaluator::resethistograms()" << endl;
+    for (size_t i=0; i<mEfficiencyAnalysisVector.size(); ++i) {
+	mEfficiencyAnalysisVector[i].resetHistograms();
+    }
+}
+
+void StiEvaluator::makehistograms() {
+    // makehistograms() method
+    cout << "StiEvaluator::makehistograms" << endl;
+    resethistograms();
+    
+    mChain->SetBranchAddress("StMiniMcEvent",&minimcevent);
+    
+    // now make a pointer to the branch, in this case a simple data member,
+    // where the raw negative multiplicity is stored
+    // and also make a pointer to the full event in our tree structure...
+    TBranch* btree        = mChain->GetBranch("StMiniMcEvent");
+//     TBranch* bNUncNegPrim = mChain->GetBranch("mNUncorrectedNegativePrimaries");
+//     TBranch* bZVertex     = mChain->GetBranch("mVertexZ");
+
+    int nEvents = (int) mChain->GetEntries();
+    cout << "# events " << nEvents << endl;
+    for (int i=0; i<nEvents; ++i) {
+	// event loop
+	// read the multiplicity and zvertex branches only first
+
+	//bNUncNegPrim->GetEntry(i);
+	//bZVertex->GetEntry(i);
+	btree->GetEntry(i);
+	size_t mcMultiplicity = (size_t) minimcevent->mNMcTrack;
+	
+	if (-25. < minimcevent->mVertexZ && minimcevent->mVertexZ < 25.) {
+
+  	    cout << "Getting Event " << i << ", z vertex " << minimcevent->mVertexZ << ", mc mult " << mcMultiplicity << endl;
+ 	    
+	    size_t index = getIndex(mcMultiplicity);
+	    mEfficiencyAnalysisVector[index].fillHistograms(minimcevent);
+	    mEfficiencyAnalysisVector[index+3].fillHistograms(minimcevent);
+	    mEfficiencyAnalysisVector[index+6].fillHistograms(minimcevent);
+	    mEfficiencyAnalysisVector[index+9].fillHistograms(minimcevent);
+	    mEfficiencyAnalysisVector[index+12].fillHistograms(minimcevent);
+	    mEfficiencyAnalysisVector[index+15].fillHistograms(minimcevent);
 	}
     }
-    // cout <<"StiEvaluator::fillHitEntry(StiKalmanTrack)\t"
-    // <<nodes<<" nodes processed for track"<<endl;
+    return;
 }
 
+void StiEvaluator::writehistograms() {
+    // write all histograms to appropriate file
+    cout << "Writing  " << mFileName << endl;
+    for (size_t i=0; i<mEfficiencyAnalysisVector.size();++i)
+	mEfficiencyAnalysisVector[i].writeHistograms();
+    return;
+}
 
-//Temp, to be moved to own file
+void StiEvaluator::setChain(TChain* val) { mChain = val;}
+
+void StiEvaluator::setFitPtsLimit(double val) { mFitPtsLimit = val;}
+
+void StiEvaluator::setDcaLimit(double val) { mDcaLimit = val;}
+
+void StiEvaluator::setGeantId(int val) { mGeantId = val;}
+
+void StiEvaluator::setFileName(char* val) { mFileName = val;}
+
 
