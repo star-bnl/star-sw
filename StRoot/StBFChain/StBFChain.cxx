@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.189 2001/04/10 22:33:01 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.190 2001/04/17 21:08:06 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -517,6 +517,7 @@ Int_t StBFChain::Instantiate()
 	    if (GetOption("LaserTest")) mode += 2;
 	    if (mode) mk->SetMode(mode);
 	  }
+	  if (maker == "StdEdxMaker" &&GetOption("Simu"))  mk->SetMode(-10);
 	  if (GetOption("dst") && GetOption("NoHits") && maker == "StEventMaker") {
 	    StEventMaker *EvMk = (StEventMaker *) mk;
 	    EvMk->doLoadTpcHits  = kFALSE;

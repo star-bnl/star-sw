@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.10 2001/03/23 20:00:28 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.11 2001/04/17 21:08:08 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -137,27 +137,30 @@ Int_t StdEdxMaker::Init(){
       sector*2.*M_PI/(static_cast<double>(NoSector)/2.);
     mNormal[sector-1] = new StThreeVectorD(sin(beta), cos(beta), 0.);
   }
-  TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc"); assert(tpc_calib);
-  m_tpcTime = (St_TpcTimeGain *) tpc_calib->Find("TpcTimeGain"); 
-  TDataSet *tpc_daq  = GetDataBase("tpc/daq"); assert(tpc_daq);
-  m_fee_vs_pad_row = (St_fee_vs_pad_row *) tpc_daq->Find("fee_vs_pad_row");
-  if (!m_tpcTime) {
-    cout << "TpcTimeGain is missing <=========== switch off time dependent calibration" << endl;
-    assert(m_tpcTime); 
+  if (m_Mode <= -1) {
+    gMessMgr->Warning() << "StdEdxMaker::" <<
+      " Calibration is switched OFF ==============" << endm;
   }
-  m_drift = (St_TpcDriftDistCorr *) tpc_calib->Find("TpcDriftDistCorr"); 
-  if (!m_drift) {
-    cout << "TpcDriftDistCorr is missing <=========== switch off dirft dependent calibration" << endl;
-    assert(m_drift); 
-  }
-  m_badpads = (St_tpcBadPad *) tpc_calib->Find("BadPad");
-  if (!m_badpads) cout << "=== List of bad pads is missing ===" << endl;
-  m_TpcSecRow = (St_TpcSecRowCor *) tpc_calib->Find("TpcSecRow"); assert(m_TpcSecRow); 
-  if (m_Mode > 0) {// calibration mode
-    StMaker *tpcdaq = GetMaker("tpc_raw");
-    if (!tpcdaq) {
-      m_tpcGain = (St_tpcGain *) tpc_calib->Find("tpcGain"); assert(m_tpcGain); 
+  else {
+    TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc"); assert(tpc_calib);
+    m_tpcTime = (St_TpcTimeGain *) tpc_calib->Find("TpcTimeGain"); 
+    TDataSet *tpc_daq  = GetDataBase("tpc/daq"); assert(tpc_daq);
+    m_fee_vs_pad_row = (St_fee_vs_pad_row *) tpc_daq->Find("fee_vs_pad_row");
+    if (!m_tpcTime) {
+      cout << "TpcTimeGain is missing <=========== switch off time dependent calibration" << endl;
+      assert(m_tpcTime); 
     }
+    m_drift = (St_TpcDriftDistCorr *) tpc_calib->Find("TpcDriftDistCorr"); 
+    if (!m_drift) {
+      cout << "TpcDriftDistCorr is missing <=========== switch off dirft dependent calibration" << endl;
+      assert(m_drift); 
+    }
+    m_badpads = (St_tpcBadPad *) tpc_calib->Find("BadPad");
+    if (!m_badpads) cout << "=== List of bad pads is missing ===" << endl;
+    m_TpcSecRow = (St_TpcSecRowCor *) tpc_calib->Find("TpcSecRow"); assert(m_TpcSecRow); 
+  }
+  if (m_Mode > 0) {// calibration mode
+    
     TFile *f = (TFile *) ((StBFChain *)GetChain())->GetTFile();
     if (f) {
       f->cd();
@@ -396,7 +399,7 @@ Int_t StdEdxMaker::Make(){
 	  " Sector = " << PadOnPlane.sector() << "/"  << "/" << Pad.sector() << "/" << sector <<
 	  " Row = " << PadOnPlane.row() << "/" << Pad.row() << "/" << row << 
 	  " Pad = " << PadOnPlane.pad() << "/" << Pad.pad() <<
-	  " from Helix  is not matched with point/" << endm;;
+	  " from Helix  is not matched with point/" << endm;
 	gMessMgr->Warning() << "StdEdxMaker:: Coordinates " << 
 	  " x: " << xyzOnPlane.x() << "/" << pointX <<
 	  " y: " << xyzOnPlane.y() << "/" << pointY <<
