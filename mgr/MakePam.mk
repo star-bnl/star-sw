@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.98 1999/06/29 17:53:27 fisyak Exp $
+# $Id: MakePam.mk,v 1.99 1999/06/29 22:51:08 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.99  1999/06/29 22:51:08  fisyak
+# Add Objectspace for pams
+#
 # Revision 1.98  1999/06/29 17:53:27  fisyak
 # Fix Table streamer
 #
@@ -241,7 +244,7 @@ IDL_DIRS:= $(addprefix $(OUT_DIR)/pams/, $(SUBDIR1)) $(addprefix $(STAR)/pams/, 
 SUBDIR1 := $(subst $(OUT_DIR)/pams/,, $(wildcard $(OUT_DIR)/pams/*/inc))
 SUBDIR2 := $(filter-out $(SUBDIR1), $(subst $(STAR)/pams/,, $(wildcard $(STAR)/pams/*/inc)))
 INC_DIRS:= $(addprefix $(OUT_DIR)/pams/, $(SUBDIR1)) $(addprefix $(STAR)/pams/, $(SUBDIR2)) 
-
+INC_DIRS+= $(STAF_UTILS_INCS)
 #INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
 VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
 ifneq (,$(FILES_IDM))
