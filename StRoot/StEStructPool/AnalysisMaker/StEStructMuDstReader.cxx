@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.1 2003/10/15 18:20:32 porter Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.2 2004/06/25 03:10:29 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -157,7 +157,9 @@ bool StEStructMuDstReader::fillTracks(StEStructEvent* estructEvent) {
     useTrack = (mTCuts->goodChi2(track->chi2()) && useTrack);
     useTrack = (mTCuts->goodPhi(track->phi()) && useTrack);
 
-    /*    int pid=0;
+    /*    comment out any general dedx-pid for now
+
+    int pid=0;
     int pidMask=15;
 
     if( mTCuts->goodElectron(track->nSigmaElectron()) )pid=1<<0;
@@ -167,10 +169,17 @@ bool StEStructMuDstReader::fillTracks(StEStructEvent* estructEvent) {
 
     useTrack = ( useTrack && (pid & pidMask) ); // any good PID we keep
     */
-    //quick addition of electron removal...
 
-    //  float p=(track->p()).mag();
-    // if(p>0.18&&p<0.45&&abs(track->nSigmaElectron())<1.5)useTrack=false;
+
+
+    //--> But add a quick electron removal... for selected pt ranges
+
+    if(mTCuts->goodElectron( fabs(track->nSigmaElectron()) ) ){      
+       float p=(track->p()).mag();
+       if( (p>0.2 && p<0.45) || (p>0.7 && p<0.8) ) useTrack=false;
+    }
+
+    //--> end of electron pid
 
     if(useTrack)mrefMult++;
 
@@ -245,6 +254,9 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.2  2004/06/25 03:10:29  porter
+ * added a new common statistics output and added electron cut with momentum slices
+ *
  * Revision 1.1  2003/10/15 18:20:32  porter
  * initial check in of Estruct Analysis maker codes.
  *
