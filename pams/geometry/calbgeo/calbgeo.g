@@ -260,7 +260,7 @@ Block CSCI a scintillator layer.
       Call GSTPAR (ag_imed,'BIRK2',RKB2sc)
       Call GSTPAR (ag_imed,'BIRK3',RKB3sc)
 *
-      HITS   CSUB  eta:0.05:(0,1)        y:1:(-13,13),
+      HITS   CSUP  eta:0.05:(0,1)        y:1:(-13,13),
                    xx:16:H(-300,300)     yy:16:(-300,300)   zz:16:(-350,350),
                    px:16:(-100,100)      py:16:(-100,100)   pz:16:(-100,100),
                    Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,100),
