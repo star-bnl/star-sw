@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.61 2001/08/01 00:55:36 jeromel Exp $
+// $Id: St_tpt_Maker.cxx,v 1.62 2001/08/03 16:22:41 jeromel Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.62  2001/08/03 16:22:41  jeromel
+// Enabled option for StMagUtilities()
+//
 // Revision 1.61  2001/08/01 00:55:36  jeromel
 // Code modification (incomplete) for Jim's requested option at StMagUtilities() constructor level
 //
@@ -386,13 +389,12 @@ Int_t St_tpt_Maker::Make(){
     if(m_Mode & 1)
       {
 	Float_t x[3], xprime[3] ;
+	Int_t   option = (m_Mode & 2) >> 1;
 	// request from Jim Thomas to have 2 (or more)
 	// method in StMagUtilities. We then use the
-	// option as a mask. J.Lauret July 2001. The
-	// next line needs to be un-commented only AFTER
-	// Jim's commit ...
-	//if ( m_ExB == 0 ) m_ExB = new StMagUtilities(m_Mode & 2) ;
-	if ( m_ExB == 0 ) m_ExB = new StMagUtilities() ;
+	// option as a mask. J.Lauret July 2001. 
+	if ( m_ExB == 0 ) m_ExB = new StMagUtilities( option ) ;
+	//if ( m_ExB == 0 ) m_ExB = new StMagUtilities() ;
 	tcl_tphit_st *spc = tphit -> GetTable() ;
 	for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ )
 	  {
