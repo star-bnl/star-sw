@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.58 2000/04/22 22:53:25 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.59 2000/04/26 05:07:35 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -174,7 +174,7 @@ Int_t StEventDisplayMaker::BuildGeometry()
     }
   }
   m_Hall->SetVisibility(TVolume::kBothVisible);
-  m_ShortView = new TVolumeView(*m_Hall,0,kMarked); 
+  m_ShortView = new TVolumeView(*m_Hall,2); 
 //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/HitsDrawFullView.gif"> </P> End_Html // 
 //    if (strcmp(tpssNode->GetName(),"TPGV") && strcmp(tpssNode->GetName(),"TPSS")) continue;
   return 0;
@@ -918,8 +918,11 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.59  2000/04/26 05:07:35  fine
+// buildgeometry method adjusted to new version of TVolumeView ctor
+//
 // Revision 1.58  2000/04/22 22:53:25  fine
-// new schema to build  the detector geometry based on new ROOT 2.24
+//  new schema to build  the detector geometry based on new ROOT 2.24
 //
 // Revision 1.57  2000/04/22 20:01:17  fine
 // replace St_Table with TTable
