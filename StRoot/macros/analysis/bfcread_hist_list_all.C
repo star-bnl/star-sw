@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list_all.C,v 1.5 1999/11/03 21:35:35 kathy Exp $ 
+// $Id: bfcread_hist_list_all.C,v 1.6 1999/11/19 20:13:22 kathy Exp $ 
 // $Log: bfcread_hist_list_all.C,v $
+// Revision 1.6  1999/11/19 20:13:22  kathy
+// cleaned up macros to remove uneccessary lines; also added info about new tables to QA* macros
+//
 // Revision 1.5  1999/11/03 21:35:35  kathy
 // small fixes for use of StIOMaker - had it wrong before
 //
@@ -29,10 +32,8 @@ class St_DataSet;
 StChain *chain;
 St_DataSet *Event;
 
-TBrowser *brow=0;
-
 void bfcread_hist_list_all(const char
-*MainFile="/disk00000/star/test/new/tfs_Solaris/year_1b/set0352_01_35evts.hist.root")
+*MainFile="/star/rcf/test/dev/tfs_Linux/Wed/year_1b/set0352_01_35evts.hist.root")
 
 {
 //
