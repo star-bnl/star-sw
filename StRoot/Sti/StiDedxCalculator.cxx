@@ -34,8 +34,8 @@ void StiDedxCalculator::getDedx(const StiKalmanTrack* track,
   if(nodes.size()==0)
     {
       nPointsUsed=0.;
-      dEdx=DBL_MAX;
-      dEdxE=DBL_MAX;
+      dEdx=9997;
+      dEdxE=9997;
       return;
     }
   
@@ -77,7 +77,7 @@ void StiDedxCalculator::getDedx(const StiKalmanTrack* track,
 double NodeDedxCalculator::operator()(const StiKalmanTrackNode *mNode)
 {
   double dedx = mNode->getDedx();
-  if(false && dedx<0.)
+  if(dedx<0.)
     {
       cout <<"Eloss: " << mNode->getHit()->getEloss()<<endl;
       cout <<"sinCrossAngle: "<<mNode->sinCrossAngle()<<endl;
@@ -88,6 +88,8 @@ double NodeDedxCalculator::operator()(const StiKalmanTrackNode *mNode)
       cout <<"Detector is active:"
 	   <<mNode->getHit()->detector()->isActive()
 	   <<endl;
+
+      dedx=9999;
     }
   return dedx;
 }
