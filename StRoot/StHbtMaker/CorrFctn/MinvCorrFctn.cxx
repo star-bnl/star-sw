@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.cxx,v 1.9 2000/08/08 23:39:21 laue Exp $
+ * $Id: MinvCorrFctn.cxx,v 1.10 2003/01/31 19:59:21 magestro Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.cxx,v $
+ * Revision 1.10  2003/01/31 19:59:21  magestro
+ * Removed irrelevant include statement
+ *
  * Revision 1.9  2000/08/08 23:39:21  laue
  * Updated for standalone version
  *
@@ -56,7 +59,6 @@
 
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
 #include "StHbtMaker/Cut/mikesEventCut.h"
-#include "StHbtMaker/Cut/rotationEventCut.h"
 
 #include <cstdio>
 
