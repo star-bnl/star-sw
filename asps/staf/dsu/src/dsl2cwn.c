@@ -348,24 +348,18 @@ char* col2spec(char *name,DS_TYPE_CODE_T type,size_t dims,size_t *dim)
 char* block_name(char *name,long n)
 {
    static char bname[16];
-   char numb[4];
-
-   strncpy(bname,"",8); 
-   strncpy(numb,"",3);  /* hjw 19Feb98 */
-   if(n < 1 || n > 99) {
-      strncpy(bname,name,8); 
-      bname[8]=0; /* hjw 19Feb98 */
-   } else {
-      sprintf(numb,"%d",n);
-      if(n < 10) {
-	 strncpy(bname,name,7); 
-	 bname[7]=0; /* hjw 19Feb98 */
-      } else if(n < 100) {
-	 strncpy(bname,name,6); 
-	 bname[6]=0; /* hjw 19Feb98 */
-      }
-	 strcat(bname,numb);
+   int lname,i,ii;
+   lname = strlen(name); if (lname > 8) lname =8;
+   memset(bname,' ',15); bname[15] = '\0';
+   strncpy(bname,name,lname);
+   
+   if (n > 0 && n <100) {
+     sprintf(bname+7,"%d",n);
+     if (n < 10) bname[6] = ' ';
    }
+   ii = 0;
+   for (i=0; bname[i]; i++) { if (bname[i] != ' ') bname[ii++] = bname[i];};
+   bname[ii] = '\0';
    return bname;
 }
 

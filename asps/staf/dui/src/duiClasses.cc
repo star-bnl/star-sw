@@ -535,7 +535,7 @@ STAFCV_T duiFactory:: rmdir (const char * dirPath) { // www
     }
     if(isDir) {
       if(!dsDatasetName(&theName,dsp)) EML_ERROR(DATASET_NOT_FOUND);
-      newPath=(char*)malloc((size_t)(strlen(fullpath)+strlen(theName)+2));
+      newPath=(char*)MALLOC((size_t)(strlen(fullpath)+strlen(theName)+2));
       if(!newPath) {
  	FREE(fullpath);  
  	EML_ERROR(MEM_ALLOC_FAILED);
@@ -545,7 +545,7 @@ STAFCV_T duiFactory:: rmdir (const char * dirPath) { // www
       free(newPath);
     } else {
       if(!dsTableName(&theName,dsp)) EML_ERROR(DATASET_NOT_FOUND);
-      newPath=(char*)malloc((size_t)(strlen(fullpath)+strlen(theName)+2));
+      newPath=(char*)MALLOC((size_t)(strlen(fullpath)+strlen(theName)+2));
       if(!newPath) {
  	FREE(fullpath);
  	EML_ERROR(MEM_ALLOC_FAILED);

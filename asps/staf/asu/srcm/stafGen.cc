@@ -128,10 +128,18 @@ int main(int argc, char **argv)
 "%s"						/* ami_load_proto() */
 "extern CC_P void unknown(); \n"
 "extern CC_P int stafArgs(int argc, char **argv); \n"
+"#ifdef DIO \n"
+"#ifdef TNT \n"
+"extern void staf_geant_paw_init();\n"
+"#else \n"
+"extern void staf_geant_init(); \n"
+"#endif\n"
+"#else \n"
 "#ifdef TNT \n"
 "extern CC_P void staf_paw_init_();  \n"
 "#else \n"
 "extern CC_P void staf_kuip_init_();  \n"
+"#endif \n"
 "#endif \n"
 "extern CC_P void staf_banner(FILE* stream); \n"
 " \n"
@@ -139,10 +147,18 @@ int main(int argc, char **argv)
 "int main(int argc, char** argv) \n"
 "{ \n"
 "   stafArgs(argc,argv); \n"
+"#ifdef DIO \n"
+"#ifdef TNT \n"
+"   staf_geant_paw_init();\n"
+"#else \n"
+"   staf_geant_init(); \n"
+"#endif\n"
+"#else \n"
 "#ifdef TNT \n"
 "   staf_paw_init_();  \n"
 "#else \n"
 "   staf_kuip_init_();  \n"
+"#endif \n"
 "#endif \n"
 " \n"
 "/*------------------ START -------*/ \n"
@@ -204,13 +220,13 @@ char* asp_includes()
 {
    int i;
    char *s=(char*)malloc(1024);
-   s[0]=NULL;
+   s[0] = 0;
    for( i=nasp-1;i>=0;i-- ){
       sprintf(s+strlen(s),
 "#include \"%sLib.h\" \n"
       ,asp[i]);
    }
-   s[strlen(s)]=NULL;
+   s[strlen(s)] = 0;
    return s;
 }
 /*--------------------------------------------------------------------*/
@@ -218,13 +234,13 @@ char* pam_includes()
 {
    int i;
    char *s=(char*)malloc(1024);
-   s[0]=NULL;
+   s[0] = 0;
    for( i=0;i<npam;i++ ){
       sprintf(s+strlen(s),
 "extern \"C\" int %s_init(), %s_start(), %s_stop(); \n"
       ,pam[i] ,pam[i] ,pam[i]);
    }
-   s[strlen(s)]=NULL;
+   s[strlen(s)] = 0;
    return s;
 }
 
@@ -244,7 +260,7 @@ char* asp_starts()
 {
    int i;
    char *s=(char*)malloc(1024);
-   s[0]=NULL;
+   s[0] = 0;
    for( i=nasp-1;i>=0;i-- ){
       sprintf(s+strlen(s),
 "#ifdef %s \n"
@@ -253,7 +269,7 @@ char* asp_starts()
 " \n"
       ,ASP[i],asp[i],asp[i],ASP[i]);
    }
-   s[strlen(s)]=NULL;
+   s[strlen(s)] = 0;
    return s;
 }
 
@@ -262,7 +278,7 @@ char* asp_stops()
 {
    int i;
    char *s=(char*)malloc(1024);
-   s[0]=NULL;
+   s[0] = 0;
    for( i=0;i<nasp;i++ ){
       sprintf(s+strlen(s),
 "#ifdef %s \n"
@@ -271,7 +287,7 @@ char* asp_stops()
 " \n"
       ,ASP[i],asp[i],ASP[i]);
    }
-   s[strlen(s)]=NULL;
+   s[strlen(s)] = 0;
    return s;
 }
 
@@ -281,7 +297,7 @@ char* ami_load_func()
    int i;
    char *s=(char*)malloc(1024);
    if(!ami)return "//- ami ASP not included \n";
-   s[0]=NULL;
+   s[0] = 0;
    sprintf(s,
 "int ami_load(amiBroker *broker) \n"
 "{ \n"
@@ -296,7 +312,7 @@ char* ami_load_func()
 "   return TRUE; \n"
 "} \n"
    );
-   s[strlen(s)]=NULL;
+   s[strlen(s)] = 0;
    return s;
 }
 
@@ -312,7 +328,7 @@ char* locase(char *s)
 	 ss[i] = s[i];
       }
    }
-   ss[strlen(s)]=NULL;
+   ss[strlen(s)] = 0;
    return ss;
 }
 
@@ -328,7 +344,7 @@ char* hicase(char *s)
 	 ss[i] = s[i];
       }
    }
-   ss[strlen(s)]=NULL;
+   ss[strlen(s)] = 0;
    return ss;
 }
 

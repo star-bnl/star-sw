@@ -571,14 +571,14 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
 #**/
    
    if( NULL == (table = tdm->findTable((tname))) ){
-      free(cs); /*fix memory leak -akio*/
+      FREE(cs); /*fix memory leak -akio*/
       EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",tname);
       EML_FAILURE(OBJECT_NOT_FOUND);
    }
 
    TDM_COLUMN_T col;
    if( !table->findColumn(col,cname) ){
-      free(cs); /*fix memory leak -akio*/
+      FREE(cs); /*fix memory leak -akio*/
       EML_CONTEXT("ERROR: Are you sure you have a column named '%s'?\n",cname);
       EML_FAILURE(METHOD_FAILURE);
    }
@@ -587,7 +587,7 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
 	
    TDM_CELLDATA_T cellData;
    if( !table->getCell(cellData,nrow,ncol) ){
-      free(cs); /*fix memory leak -akio*/
+      FREE(cs); /*fix memory leak -akio*/
       EML_FAILURE(METHOD_FAILURE);
    }
 /* commented by Bill Love Mar 17 1998 
@@ -625,7 +625,7 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
 	 set_staf_result(result);
          FREE(col.name); /*fix memory leak -akio*/
          FREE(col.type); /*fix memory leak -akio*/
-         free(cs); /*fix memory leak -akio*/
+         FREE(cs); /*fix memory leak -akio*/
 	 EML_FAILURE(NOT_YET_IMPLEMENTED);
 	 break;
       default:
@@ -638,7 +638,7 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
 	 ,DS_TYPE_STRUCT);
          FREE(col.name); /*fix memory leak -akio*/
          FREE(col.type); /*fix memory leak -akio*/
-         free(cs); /*fix memory leak -akio*/
+         FREE(cs); /*fix memory leak -akio*/
 	 EML_FAILURE(INVALID_TYPE);
 	 break;
    }
@@ -646,7 +646,7 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
 
    FREE(col.name); /*fix memory leak -akio/phenix*/
    FREE(col.type); /*fix memory leak -akio/phenix*/
-   free(cs); /*fix memory leak -akio/phenix*/
+   FREE(cs); /*fix memory leak -akio/phenix*/
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -685,13 +685,13 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
    char *cname = strtok(NULL,"[].");
    
    if( NULL == (table = tdm->findTable((tname))) ){
-      free(cs); /*fix memory leak -akio*/
+      FREE(cs); /*fix memory leak -akio*/
       EML_FAILURE(OBJECT_NOT_FOUND);
    }
 
    TDM_COLUMN_T col;
    if( !table->findColumn(col,cname) ){
-      free(cs); /*fix memory leak -akio*/
+      FREE(cs); /*fix memory leak -akio*/
       EML_CONTEXT("ERROR: Are you sure you have a column named '%s'?\n",cname);
       EML_FAILURE(METHOD_FAILURE);
    }

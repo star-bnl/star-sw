@@ -162,7 +162,7 @@ tntCWNtuple::tntCWNtuple(long id, tdmTable *table)
       chforms[iBlock] = (char *) REALLOC(chforms[iBlock], newlen); 
       strcat(chforms[iBlock], ",");
       strcat(chforms[iBlock], cp);
-      free(cp);
+      FREE(cp);
     }
     offset += tntLongwordifyColumnSize(table, i);
   }
@@ -172,7 +172,7 @@ tntCWNtuple::tntCWNtuple(long id, tdmTable *table)
   // OK, book the CWN and describe the blocks
   char *c; /*fix memory leak -akio*/
   hbkCWNbook(hid(), c=table->dslName());
-  free(c); /*fix memory leak -akio*/
+  FREE(c); /*fix memory leak -akio*/
   for (i = 0; i < numBlocks; i++) {
     if (isCharBlock(i)) {
       hbkCWNcharBlock(hid(),_blockName[i],_blockPtr[i],chforms[i]);
@@ -196,14 +196,14 @@ tntCWNtuple::tntCWNtuple(long hid)
 //:---------------------------------
 tntCWNtuple::~tntCWNtuple() { 
   int i;
-  free(dslSpec);
-  free(_blockPtr);
-  free(_blockType);
+  FREE(dslSpec);
+  FREE(_blockPtr);
+  FREE(_blockType);
   for (i = 0; i < numBlocks; i++) {
-    free(_blockName[i]); /*fix memory leak -akio*/
-    free(chforms[i]);
+    FREE(_blockName[i]); /*fix memory leak -akio*/
+    FREE(chforms[i]);
   }
-  free(_blockName); /*fix memory leak -akio/phenix*/
+  FREE(_blockName); /*fix memory leak -akio/phenix*/
 };
 
 //:----------------------------------------------- ATTRIBUTES         --
@@ -489,7 +489,7 @@ tntFactory::list () {
       sprintf(cc,"%-79s\n",l);
       if(l) FREE(l); /*fix free un-init ptr -akio*/
     }
-    if(s) free(s); /*fix memory leak -akio*/
+    if(s) FREE(s); /*fix memory leak -akio*/
   }
 
   return c;
@@ -519,12 +519,12 @@ tntFactory::findCWNtuple (long hid) {
   obj = soc->findObject(name,"tntCWNtuple");
   if (obj == NULL) {
     CWNtuple = NULL;
-    free(name); /*fix memory leak -akio*/
+    FREE(name); /*fix memory leak -akio*/
     EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
     EML_ERROR(OBJECT_NOT_FOUND);
   }
   CWNtuple = TNTCWNTUPLE(obj);
-  free(name); /*fix memory leak -akio*/
+  FREE(name); /*fix memory leak -akio*/
   return CWNtuple;
 }
 
@@ -563,10 +563,10 @@ tntFactory::newCWNtuple (long hid) {
   p = new tntCWNtuple(hid);
   name = id2name("tntCWNtuple",hid);
   if (!soc->idObject(name, "tntCWNtuple", id)) {
-    free(name);
+    FREE(name);
     EML_ERROR(OBJECT_NOT_FOUND);
   }
-  free(name);
+  FREE(name);
   addEntry(id);
   
   return p;
@@ -588,7 +588,7 @@ tntFactory::createCWNtuple (long hid, tdmTable *table) {
    if( !soc->idObject(name,"tntCWNtuple",id) ){
       EML_ERROR(OBJECT_NOT_FOUND);
    }
-   free(name);
+   FREE(name);
    addEntry(id);
 
    return p;
