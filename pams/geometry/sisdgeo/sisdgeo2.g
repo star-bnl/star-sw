@@ -1,5 +1,9 @@
-* $Id: sisdgeo2.g,v 1.3 2005/01/03 22:09:57 potekhin Exp $
+* $Id: sisdgeo2.g,v 1.4 2005/03/25 02:08:59 potekhin Exp $
 * $Log: sisdgeo2.g,v $
+* Revision 1.4  2005/03/25 02:08:59  potekhin
+* Small cosmetic change in the output
+* (easier to catch config in the log)
+*
 * Revision 1.3  2005/01/03 22:09:57  potekhin
 * Need to optionally position the Strip Detector in
 * the CAVE, when the SVT is missing form the configuration
@@ -349,10 +353,10 @@ Module  SISDGEO2  is the Silicon Strip Detector
 
       write(*,*) 'Level 2 of the SSD geometry'
       if(ssdp_Placement==1) then
-         write(*,*) 'Positioining the Silicon Strip Detector in SVT'
+         write(*,*) '*** Positioining the Silicon Strip Detector in SVT'
          Create and Position SFMO in SVTT
       else
-         write(*,*) 'Positioining the Silicon Strip Detector in CAVE'
+         write(*,*) '*** Positioining the Silicon Strip Detector in CAVE'
          Create and Position SFMO in CAVE
       endif
 *******************************************************************************
