@@ -15,6 +15,7 @@
 #pragma link C++ class StV0Vertex-;
 #pragma link C++ enum StVertexId;
 #pragma link C++ enum StTrackModel;
+#pragma link C++ enum StTrackType;
 #pragma link C++ enum StPidParticle;
 #pragma link C++ class StTriggerData+;
 #pragma link C++ class StTriggerData2003+;
