@@ -11,7 +11,7 @@ char IOMODE[] = "0";
 
 static inline Int_t IntOMode(char ciomode)
 {
-char *c=strchr(RWU,tolower(ciomode));
+char *c=(char *)strchr(RWU,tolower(ciomode));
 return (c) ? (c-RWU)&3 : 0;
 }
 //		Local functions
