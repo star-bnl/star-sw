@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.10 2000/09/16 22:20:34 snelling Exp $
+// $Id: StFlowSelection.h,v 1.11 2000/09/22 22:03:01 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.11  2000/09/22 22:03:01  posk
+// Clean up.
+//
 // Revision 1.10  2000/09/16 22:20:34  snelling
 // Added selection on P and global DCA and fixed rapidity calulation
 //
@@ -95,8 +98,8 @@ class StFlowSelection : public StObject {
 
   Char_t  mNumber[3];                        // selection number
   UInt_t  mCentrality;                       // centrality bin
-  Char_t  mPid[10];                          // pi-, pi+, pi, k+, k-, 
-                                             // pbar, proton, d, dbar, e+, e-
+  Char_t  mPid[10];                         
+  // pi-, pi+, pi, k+, k-, pbar, proton, d, dbar, e+, e-
   Char_t  mPidPart[10];                      // PID for particles wrt plane
   Float_t mPtPart[2];                        // for parts. wrt plane
   Float_t mPPart[2];                         // for parts. wrt plane

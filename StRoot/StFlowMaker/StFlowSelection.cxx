@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.10 2000/09/16 22:20:32 snelling Exp $
+// $Id: StFlowSelection.cxx,v 1.11 2000/09/22 22:03:00 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.11  2000/09/22 22:03:00  posk
+// Clean up.
+//
 // Revision 1.10  2000/09/16 22:20:32  snelling
 // Added selection on P and global DCA and fixed rapidity calulation
 //
@@ -214,5 +217,3 @@ void StFlowSelection::PrintList() const {
        << endl;
 
 }
-
-//-----------------------------------------------------------------------

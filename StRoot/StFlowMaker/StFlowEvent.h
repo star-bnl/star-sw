@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.16 2000/09/15 22:51:30 posk Exp $
+// $Id: StFlowEvent.h,v 1.17 2000/09/22 22:02:59 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.17  2000/09/22 22:02:59  posk
+// Clean up.
+//
 // Revision 1.16  2000/09/15 22:51:30  posk
 // Added pt weighting for event plane calcualtion.
 //
@@ -283,10 +286,3 @@ inline void  StFlowEvent::SetZDCw(const Float_t zdcw) { mZDCw = zdcw; }
 inline void  StFlowEvent::SetPtWgt() { mPtWgt = kTRUE; }
 
 #endif
-
-
-
-
-
-
-
