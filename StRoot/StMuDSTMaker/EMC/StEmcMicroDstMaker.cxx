@@ -6,6 +6,8 @@
 #include "StEmcUtil/StEmcFilter.h"
 #include "StEmcMicroUtil.h"
 #include "StChain/StEvtHddr.h"
+#include "StTreeMaker/StTreeMaker.h"
+#include "StTree.h"
 
 ClassImp(StEmcMicroDstMaker);
 /*! Default constructor
@@ -117,10 +119,20 @@ Int_t StEmcMicroDstMaker::Make()
     if(IO) mEventFile=strrchr(IO->GetFile(),'/')+1;
     else
     {
-      if(mAccEv%100==0) mFileCounter++;
-      char f[100];
-      sprintf(f,"EmcEvent.file%04d",mFileCounter);
-      mEventFile = f;
+      //try to get from StTreeMaker
+      StTreeMaker *tree=(StTreeMaker*)GetMaker("outputStream");
+      if(tree)
+      {
+        StTree *t = tree->fTree;
+        mEventFile=t->GetBaseName();
+      }
+      else
+      {
+        if(mAccEv%100==0) mFileCounter++;
+        char f[100];
+        sprintf(f,"EmcEvent.file%04d",mFileCounter);
+        mEventFile = f;
+      }
     }
     
     // if the input event file has changed, close the Micro dst file and creates another one
@@ -138,6 +150,7 @@ Int_t StEmcMicroDstMaker::Make()
       initMicroEventFile();
       mEventFileOld=mEventFile;
     }
+    else cout <<"Filename being written: "<<mEventFile.Data()<<endl;
     mMicroEvent= mMicroUtil->getMicroEvent(mStEvent);;
     mEmcTree->Fill();
   }
