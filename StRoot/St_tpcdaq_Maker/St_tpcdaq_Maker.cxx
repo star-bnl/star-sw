@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.73  2003/05/13 03:31:35  jeromel
+// Minor message modif (by by Perry Mason)
+//
 // Revision 1.72  2003/04/22 20:12:44  ward
 // So the chain can run when there is no TPC data.
 //
@@ -975,7 +978,7 @@ void St_tpcdaq_Maker::DAQ100clOutput(const unsigned int *pTPCP) {
 //________________________________________________________________________________
 Int_t St_tpcdaq_Maker::Make() {
   int errorCode; const char *pTPCP;
-  printf("I am Perry Mason. (Oct 12 2002).  St_tpcdaq_Maker::Make().\n"); 
+  printf("St_tpcdaq_Maker::Make() method called\n"); 
 #ifdef DEVELOPMENT
   char junk[10];
   PP("\007St_tpcdaq_Maker::Make: Please input a value for daq_flag: ");
@@ -985,7 +988,12 @@ Int_t St_tpcdaq_Maker::Make() {
   errorCode=GetEventAndDecoder();
   if(m_Mode != 1) {
     victor=victorPrelim->getTPCReader();
-    if(!victor) return kStOk; // No TPC data,  Jerome says chain should continue.  Herb Ward Apr 22 2003
+    if(!victor){
+      PP("  getTPCReader() did not return any data. Continuing anyway\n");
+      return kStOk; 
+      // No TPC data,  Jerome says chain should continue.  
+      // Herb Ward Apr 22 2003
+    }
   }
   // printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
