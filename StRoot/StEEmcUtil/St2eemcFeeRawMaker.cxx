@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: St2eemcFeeRawMaker.cxx,v 1.1 2003/01/28 23:15:25 balewski Exp $
+// $Id: St2eemcFeeRawMaker.cxx,v 1.2 2003/02/17 18:45:40 balewski Exp $
 // $Log: St2eemcFeeRawMaker.cxx,v $
+// Revision 1.2  2003/02/17 18:45:40  balewski
+// change names
+//
 // Revision 1.1  2003/01/28 23:15:25  balewski
 // start
 //
@@ -66,12 +69,14 @@ Int_t St2eemcFeeRawMaker::Init(){
   mcrateData=new EEfeeDataBlock[mNFeeCrate];
 
   // assigne eveTT with output TTree
-  moutTTree->Branch("eventMC","EEfeeRawEvent",&meveTT,16000,99);
+  // assigne runTT with output TTree
+
+  moutTTree->Branch("desc","EEfeeRunDescr",&mrunTT,16000,99);
+  //printf("aa runDescr Brunch added \n");
+
+  moutTTree->Branch("evt","EEfeeRawEvent",&meveTT,16000,99);
   //  printf("aa eve-Tbranch added \n");
 
-  // assigne runTT with output TTree
-  moutTTree->Branch("RunDescription","EEfeeRunDescr",&mrunTT,16000,99);
-  //printf("aa runDescr Brunch added \n");
 
    return StMaker::Init();
 }
