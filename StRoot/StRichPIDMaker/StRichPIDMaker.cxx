@@ -1,13 +1,16 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.3 2000/09/29 17:55:51 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.4 2000/10/02 23:06:33 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.3  2000/09/29 17:55:51  horsley
- * fixed bug in Minimization routine, included StMagF stuff (commented out)
- * changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
+ * Revision 2.4  2000/10/02 23:06:33  horsley
+ * *** empty log message ***
+ *
+ * remove parameterized dip angle dependence
+ * of the mean/sigma d.  Setting of hitflags
+ * in fillPidTraits
  *
  * Revision 2.15  2000/11/21 16:24:22  horsley
  * Major overhaul of StRichArea, introduced monte carlo integration cross check,
@@ -31,7 +34,7 @@
  *
  * Revision 2.9  2000/10/19 15:41:57  horsley
  * added set format option to TFile, file->SetFormat(1);
-#define myrICH_WITH_NTUPLE 1
+#define myRICH_WITH_NTUPLE 1
  * Revision 2.8  2000/10/19 06:12:52  horsley
  *
 #define myrICH_WITH_NTUPLE 1
@@ -119,10 +122,10 @@ using std::max;
 //#include "StarCallf77.h"
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.3 2000/09/29 17:55:51 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.4 2000/10/02 23:06:33 horsley Exp $";
 
 	track->geometry() && 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.3 2000/09/29 17:55:51 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.4 2000/10/02 23:06:33 horsley Exp $";
 	(fabs(track->geometry()->momentum().pseudoRapidity()) < mEtaCut) &&
 Int_t StRichPIDMaker::Make() { 
   
@@ -633,7 +636,7 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
       for (size_t i=0;i<hits.size();i++) {   
 	if (hits[i]->getNSigma() < 2) {
 	  totalHits++;
-      cout << "tot hits = " << totalHits << "const hits = " << constantHits << endl << endl << endl;
+	  if (fabs(hits[i]->getAngle())>ringCalc->getConstantAreaAngle()) { constantHits++;}  
       if (part==kaon && constantHits>2 && fabs(mVertexPosition.z())<30) {
 	//printThisEvent=true;
       }
@@ -1687,6 +1690,9 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
   mListOfStRichTracks.clear();
   mListOfStRichTracks.resize(0);
   double magField    = 2.49117;
+
+  cout << "StRichPIDMaker::fillTrackList()  " << endl;
+
   if (tempEvent->summary()) {
     magField  = tempEvent->summary()->magneticField();
     cout << "!!!!!!!!!!!!!!!!!!!!!!!!     mag field = " << magField << endl;
@@ -1694,8 +1700,10 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
   else {
     cout << "hard coded (!!!!!!!!!!)  mag field = " << magField << endl;
   } 
+  // -------------------> oh NO!
+  // this is terrible !!!!!!!!!!!!!!!!!!!
  
-  // not yet in use, will implement soon
+
   //  Float_t x[3] = {0,0,0};
   //  Float_t b[3] = {0,0,0};
   //  gufld(x,b);
@@ -1828,7 +1836,18 @@ Int_t StRichPIDMaker::Init() {
   mMaterialDb = StRichMaterialsDb::getDb();
   mGeometryDb = StRichGeometryDb::getDb(); 
   
-  mMaterialDb->setWavelengthRange(mShortWave,mLongWave);
+  mCoordinateTransformation = StRichCoordinateTransform::getTransform(mGeometryDb);
+  mMomentumTransformation = StRichMomentumTransform::getTransform(mGeometryDb);
+  mPadMonitor = 0;
+
+  //
+  // hard coded values for now!
+  // this->setWaveLenght(small,large)
+  // can be used to change wavelenghts
+  //
+  mDefaultShortWave = 160.0e-7;
+  mDefaultLongWave  = 200.0e-7;
+ 
   if (mDefaultShortWave != mShortWave && mDefaultLongWave != mLongWave) {
 
 
@@ -2007,9 +2026,12 @@ bool StRichPIDMaker::makeTrackAssociations(StMcEvent* temp_mEvent, const StSPtrV
 	}
        
 
-  cout << "writing file to tape" << endl;
+
+Int_t StRichPIDMaker::Finish() {
   
 #ifdef  myRICH_WITH_NTUPLE 
+  file->Close();
+  delete file;
   file = 0;
 #endif
 
@@ -2084,9 +2106,11 @@ void StRichPIDMaker::DefineSaveDirectory(char* directory) {
 
 void StRichPIDMaker::setFileName(char * name){
     fileName = name;
-void StRichPIDMaker::setWavelengthRange(double shortest, double longest) {
+}
 
 
+void StRichPIDMaker::setWavelengthRange(double shortest , double longest) {
+  mShortWave = shortest;
   mLongWave  = longest;
   mMaterialDb = StRichMaterialsDb::getDb();
   mMaterialDb->setWavelengthRange(mShortWave,mLongWave);
