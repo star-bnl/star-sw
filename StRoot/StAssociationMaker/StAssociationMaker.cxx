@@ -1,13 +1,16 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.12 1999/10/18 16:11:50 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.13 1999/11/03 22:40:50 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.13  1999/11/03 22:40:50  calderon
+ * Fix bug in Clear() : check pointers before deleting maps.
+ *
+ * Revision 1.13  1999/11/03 22:40:50  calderon
+ * Fix bug in Clear() : check pointers before deleting maps.
+ *
  * Revision 1.12  1999/10/18 16:11:50  calderon
  * Frank found 2 leaks that these changes will correct:
  * -Delete the TrackPairInfos in the Clear() method
- * -Correct the sub detector destructors to delete all
- *  instances to StLocalHit.
- *
  * -Correct the sub detector destructors to delete all
  *  instances to StLocalHit.
  *
@@ -182,11 +185,13 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
 
 //_________________________________________________
 StAssociationMaker::~StAssociationMaker()
-
+    if (mTpcHitMap) {
     // Delete TpcHitMap 
     mTpcHitMap->clear();
     SafeDelete(mTpcHitMap);
     cout << "Deleted Hit Map" << endl;
+    }
+    if (mTrackMap) {
     // Delete the TrackPairInfos
     for (trackMapIter i=mTrackMap->begin(); i!=mTrackMap->end(); i++){
 	delete (*i).second;
@@ -195,7 +200,7 @@ StAssociationMaker::~StAssociationMaker()
     mTrackMap->clear();
     SafeDelete(mTrackMap);
     cout << "Deleted Track Map" << endl;
-    //SafeDelete(mLocalHitResolution);
+	mMcFtpcHitMap->clear();
 	SafeDelete(mMcXiMap);
 	cout << "Deleted M.C. Xi Map" << endl;
     }
@@ -203,24 +208,25 @@ StAssociationMaker::~StAssociationMaker()
 
 //_____________________________________________________________________________
 
-    cout << "StAssociationMaker::Clear *** " << endl;
 void StAssociationMaker::Clear(const char*)
 {
-    mTpcHitMap->clear();
-    //    SafeDelete(mTpcHitMap);
-    delete mTpcHitMap;
-    mTpcHitMap = 0;
-    cout << "Deleted Hit Map" << endl;
-
-    // Delete the TrackPairInfos
-    for (trackMapIter i=mTrackMap->begin(); i!=mTrackMap->end(); i++){
-	delete (*i).second;
+    if (mTpcHitMap) {
+	mTpcHitMap->clear();
+	delete mTpcHitMap;
+	mTpcHitMap = 0;
+	cout << "Deleted Hit Map" << endl;
+	mMcFtpcHitMap->clear();
+    if (mTrackMap) {
     }
-    // Delete the TrackMap
-    mTrackMap->clear();
-    delete mTrackMap;
-    mTrackMap = 0;
-    cout << "Deleted Track Map" << endl;
+	for (trackMapIter i=mTrackMap->begin(); i!=mTrackMap->end(); i++){
+	// Delete the TrackPairInfos
+	// Careful, only delete them once!
+	// Delete the TrackMap
+	mTrackMap->clear();
+	delete mTrackMap;
+	mTrackMap = 0;
+	cout << "Deleted Track Map" << endl;
+    }
 	SafeDelete(mMcXiMap);
 	cout << "Deleted M.C. Xi Map" << endl;
     }
