@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.18 2003/05/01 20:46:47 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.19 2003/05/03 14:37:22 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.19  2003/05/03 14:37:22  pruneau
+ * *** empty log message ***
+ *
  * Revision 2.18  2003/05/01 20:46:47  pruneau
  * changed error parametrization
  *
@@ -573,7 +576,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
  
   double relRadThickness;
   // Half path length in previous node
-  double r1,r2,r3,pL1,pL2,pL3,d1,d2,d3,dxEloss;
+  double pL1,pL2,pL3,d1,d2,d3,dxEloss;
   pL1=fabs(previousNode->pathlength())/2.;
   // Half path length in this node
   pL3=fabs(pathlength())/2.;
@@ -657,17 +660,18 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   double dE=0;
   double sign;
   if (dx>0)
-    sign = 1.;
-  else
     sign = -1.;
+  else
+    sign = 1.;
   double eloss = _elossCalculator->calculate(1.,0.5,m, beta2,5.);
   dE = sign*dxEloss*eloss;
-  /* cout << "MCS: _x:"<<_x<<" dx:"<<dx<<" dxEloss:"<<dxEloss
-       <<" pt:"<<pt<<" p:"<<sqrt(p2)<<" E="<<sqrt(e2)<<" beta="
-       << sqrt(beta2)<<endl
-       << "     eloss:"<<eloss<<" dE:"<<dE<<" dE/E="<<dE/sqrt(e2)
-       << " correction:"<<(1.- sqrt(e2)*dE/p2)<<endl; */
-  if (fabs(dE)>0)
+  /*if (getP()<0.2)
+   cout << "MCS: _x:"<<_x<<" dx:"<<dx<<" dxEloss:"<<dxEloss
+       <<" pt:"<<pt<<" p:"<<sqrt(p2)<<" E="<<sqrt(e2)<<" b="
+	<< sqrt(beta2)<<endl
+       << " eloss:"<<eloss<<" dE:"<<dE<<" dE/E="<<dE/sqrt(e2)
+       << " correction:"<<(1.- sqrt(e2)*dE/p2)<<endl;*/
+   if (fabs(dE)>0)
     {
       double cc=_p3;
       _p3 = _p3 *(1.- sqrt(e2)*dE/p2);
@@ -886,7 +890,7 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
     }
   else
     _cosCA = sqrt(1.- _sinCA*_sinCA);
-  double y0=_p0 + _cosCA/_p3;
+  //double y0=_p0 + _cosCA/_p3;
   ////if ((_p0-y0)*_p3 >= 0.) throw runtime_error("SKTN::rotate() - Error - Rotation failed!\n");
   //f = F - 1
   double f00=ca-1;
