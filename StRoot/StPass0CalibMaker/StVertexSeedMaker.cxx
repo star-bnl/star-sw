@@ -1,5 +1,8 @@
-// $Id: StVertexSeedMaker.cxx,v 1.2 2002/01/27 01:56:14 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.3 2002/01/28 22:16:33 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.3  2002/01/28 22:16:33  genevb
+// Some revisions to output date/time stamps
+//
 // Revision 1.2  2002/01/27 01:56:14  genevb
 // Write db files with date/time for fill
 //
@@ -116,7 +119,7 @@ StVertexSeedMaker::StVertexSeedMaker(const char *name):StMaker(name){
   r2VertexMax = 15.0;
   nsize = 0;
   setArraySize(512);
-  UseFillDateTime(); // By default, use the data & time from the start of the fill
+  UseEventDateTime(); // By default, use the data & time from the first event
 }
 //_____________________________________________________________________________
 StVertexSeedMaker::~StVertexSeedMaker(){
@@ -139,11 +142,11 @@ Int_t StVertexSeedMaker::Init(){
   AddHist(yerr);
   date = 0;
   time = 0;
-  x0_assumed   = -888.0;
-  //x0_assumed   = 0.0;
-  dxdz_assumed = 0.0;
-  y0_assumed   = 0.0;
-  dydz_assumed = 0.0;
+  a[0]   = -888.0;
+  //a[0]   = 0.0;
+  a[1] = 0.0;
+  a[2]   = 0.0;
+  a[3] = 0.0;
   chi = 0.0;
   weight = 0.0;
   return StMaker::Init();
@@ -161,7 +164,8 @@ Int_t StVertexSeedMaker::Make(){
   if (date==0) FillDateTime();
 
   // Currently only finds database values for first event
-  if (x0_assumed == -888) {
+  if (a[0] == -888) {
+    gMessMgr->Info("StVertexSeedMaker: reading db values at the start...");
     Int_t status = FillAssumed();
     if (status != kStOk) return status;
   }
@@ -194,8 +198,8 @@ Int_t StVertexSeedMaker::Make(){
   }
 
   // Calculate guessed vertex x & y from assumed params and measured z
-  xguess = x0_assumed + (dxdz_assumed * zvertex);
-  yguess = y0_assumed + (dydz_assumed * zvertex);
+  xguess = a[0] + (a[1] * zvertex);
+  yguess = a[2] + (a[3] * zvertex);
   gMessMgr->Info() << "StVertexSeedMaker::x guess = " << xguess << endm; 
   gMessMgr->Info() << "StVertexSeedMaker::y guess = " << yguess << endm; 
 
@@ -217,39 +221,53 @@ Int_t StVertexSeedMaker::Make(){
 }
 //_____________________________________________________________________________
 Int_t StVertexSeedMaker::Finish() {
+  Bool_t writeIt = kFALSE;
   if (nverts >= minEntries){
     fitData();
     if (ep[0] > maxX0Err){
       gMessMgr->Error() << "StVertexSeedMaker::x unstable. x0 error = " <<
-        ep[0] << " cm. No table will be written" << endm;
+        ep[0] << " cm." << endm;
     }
     if (ep[2] > maxY0Err){
       gMessMgr->Error() << "StVertexSeedMaker::y unstable. y0 error = " <<
-        ep[2] << " cm. No table will be written" << endm;
+        ep[2] << " cm." << endm;
     }
     if ((ep[0] <= maxX0Err) && (ep[2] <= maxY0Err)) {
-      WriteTableToFile();
+      // Do comparison of this data with data from database to see if
+      // values have changed or improved.
+      gMessMgr->Info("StVertexSeedMaker: reading db values at the end...");
+      Int_t status = FillAssumed();
+      if (status == kStOk) {
+        if (ChangedValues() || BetterErrors()) writeIt = kTRUE;
+        else gMessMgr->Info("StVertexSeedMaker: values have not changed/improved.");
+      } else {
+        gMessMgr->Warning("StVertexSeedMaker: could not get db values.");
+        writeIt = kTRUE;
+      }
     }
   } else {
-    gMessMgr->Error() << "StVertexSeedMaker::Insufficient statistics for " <<
-     "mean vertex determination.  Only " << nverts <<
-     " entries. No table will be written" << endm;
+    gMessMgr->Error() << "StVertexSeedMaker:Insufficient statistics for " <<
+     "mean vertex determination.  Only " << nverts << " entries." << endm;
   }
-  if (mHistOut){
-    WriteHistFile();
-  }  
+
+  if (writeIt) WriteTableToFile();
+  else gMessMgr->Warning("StVertexSeedMaker: not writing table!!!!!");
+
+  if (mHistOut) WriteHistFile();
+ 
   return StMaker::Finish();
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.2 2002/01/27 01:56:14 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.3 2002/01/28 22:16:33 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::WriteTableToFile(){
+  gMessMgr->Info("StVertexSeedMaker: Writing new table.");
   char filename[80]; 
   sprintf(filename,"./StarDb/Calibrations/rhic/vertexSeed.%08d.%06d.C",date,time);
   TString dirname = gSystem->DirName(filename);
@@ -305,16 +323,39 @@ Int_t StVertexSeedMaker::FillAssumed(){
     return kStErr;
   }
   vertexSeed_st* dbTable = dbTableC->GetTable();
-  x0_assumed   = dbTable->x0;
-  dxdz_assumed = dbTable->dxdz;
-  y0_assumed   = dbTable->y0;
-  dydz_assumed = dbTable->dydz;
+  a[0] = dbTable->x0;
+  a[1] = dbTable->dxdz;
+  a[2] = dbTable->y0;
+  a[3] = dbTable->dydz;
+  ea[0] = dbTable->err_x0;
+  ea[1] = dbTable->err_dxdz;
+  ea[2] = dbTable->err_y0;
+  ea[3] = dbTable->err_dydz;
   gMessMgr->Info() << "StVertexSeedMaker: assumed values:"
-    << "\n     x0 assumed = " << x0_assumed
-    << "\n   dxdz assumed = " << dxdz_assumed 
-    << "\n     y0 assumed = " << y0_assumed
-    << "\n   dydz assumed = " << dydz_assumed << endm;
+    << "\n     x0 assumed = " << a[0] << " +/- " << ea[0]
+    << "\n   dxdz assumed = " << a[1] << " +/- " << ea[1]
+    << "\n     y0 assumed = " << a[2] << " +/- " << ea[2]
+    << "\n   dydz assumed = " << a[3] << " +/- " << ea[3]
+    << endm;
   return kStOk;
+}
+//_____________________________________________________________________________
+Bool_t StVertexSeedMaker::BetterErrors(){
+  Bool_t better = kFALSE;
+  if ((ep[0] < ea[0]) || (ep[1] < ea[1]) ||
+      (ep[2] < ea[2]) || (ep[3] < ea[3])) better = kTRUE;
+  if (better) gMessMgr->Info("StVertexSeedMaker: values have improved");
+  return better;
+}
+//_____________________________________________________________________________
+Bool_t StVertexSeedMaker::ChangedValues(){
+  Bool_t changed = kFALSE;
+  for (int i = 0; i<4; i++) {
+    double diff = TMath::Abs(p[i] - a[i]);
+    if ((diff >= ep[i]) || (diff >= ea[i])) changed = kTRUE;
+  }
+  if (changed) gMessMgr->Info("StVertexSeedMaker: values have changed");
+  return changed;
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::FillDateTime(){
@@ -339,7 +380,8 @@ void StVertexSeedMaker::FillDateTime(){
       const int maxc = 128;
       char inbuf[maxc];
       inbuf[2] = ' ';
-      while ((in.getline(inbuf,maxc)) && (inbuf[2] != ' ')) {}  // loop until line with 5th char a space
+      // loop until line with 5th char a space
+      while ((in.getline(inbuf,maxc)) && (inbuf[2] != ' ')) {}
       if (inbuf[2] == ' ') {
           gMessMgr->Error("StVertexMaker: format of date/time file incorrect. Uh-oh....");
       }
@@ -405,9 +447,7 @@ void StVertexSeedMaker::fitData(){
      << ", chisq/dof = " << chi << endm;
    
    char pname[10];
-   minuit->GetParameter(0, pname, p[0], ep[0], plow[0], phigh[0]);
-   minuit->GetParameter(1, pname, p[1], ep[1], plow[1], phigh[1]);
-   minuit->GetParameter(2, pname, p[2], ep[2], plow[2], phigh[2]);
-   minuit->GetParameter(3, pname, p[3], ep[3], plow[3], phigh[3]);
+   for (int i=0; i<4; i++)
+     minuit->GetParameter(i, pname, p[i], ep[i], plow[i], phigh[i]);
 }
 
