@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.h,v 1.10 1999/07/15 13:58:22 perev Exp $
+// $Id: St_stk_Maker.h,v 1.11 1999/07/20 04:59:03 caines Exp $
 // $Log: St_stk_Maker.h,v $
+// Revision 1.11  1999/07/20 04:59:03  caines
+// Temporary fix using geant vtx for tracking
+//
 // Revision 1.10  1999/07/15 13:58:22  perev
 // cleanup
 //
@@ -60,7 +63,7 @@ class TH2F;
 
 class St_stk_Maker : public StMaker {
 protected:
-// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.10 1999/07/15 13:58:22 perev Exp $";
+// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.11 1999/07/20 04:59:03 caines Exp $";
    Int_t  m_mode;      // mode 1 = primaries;
 	               // mode 2 = secondaries;
 	               // mode 3 = primaries to secondaries 
@@ -95,7 +98,7 @@ protected:
    Int_t   m_nitermax; // maximum number of iterations
    Int_t   m_niternull;// maximum number of iterations allowed to find no tracks
    Float_t m_sec_factor;//factor for cone angle for secondaries
-   Bool_t  m_ifstk;    // flag to switch on stk and sgr
+
 
 // 		parameter tables
 
@@ -125,12 +128,8 @@ public:
    virtual Int_t Init();
    virtual Int_t  Make();
 
-   virtual void   TrackSwitch(Bool_t flag=kFALSE){m_ifstk=flag;} // *MENU*
-   virtual void   TrackSwitchon() {TrackSwitch(kTRUE);} 
-   virtual void   TrackSwitchoff(){TrackSwitch();}
-
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_stk_Maker.h,v 1.10 1999/07/15 13:58:22 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_stk_Maker.h,v 1.11 1999/07/20 04:59:03 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(St_stk_Maker, 1)   //STAR chain virtual base class for Makers
 };
 
