@@ -88,18 +88,23 @@ $env2 = $env->clone('CPPPATH'      => $CPPP,
                     'LIBS'         => $LIBS);
 my $cscanner= find scan::cpp($env2->{_cwd}, $env2->{CPPPATH});
 my $CPPPATH = $cscanner->iflags;  print "CPPPATH = $CPPPATH\n" if $param::debug;
-my $STIC_CPPPATH = $CPPPATH;
 my @cpps = split /:/,$env2->{CPPPATH}; print "@cpps\n" if $param::debug;
 my $ROOTCINT_CPP ="";
+my $STIC_CPP = "";
 foreach my $cpp ($Dir,@cpps) {
   if ($cpp =~ /cern/ ||
-      $cpp eq "/usr/include"
+      $cpp eq "/usr/include" ||
+      $cpp =~ /ospace/
      )  {next;}
   if ($ROOTCINT_CPP) {$ROOTCINT_CPP .= ":" . $cpp;}
   else               {$ROOTCINT_CPP .= $cpp;}
+  if ($cpp =~ /ROOT/) {next};
+  $STIC_CPP .= ":" . $cpp;
 }
 $cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP); print "ROOTCINT_CPP = $ROOTCINT_CPP\n" if $param::debug;
 my $ROOTCINT_CPPPATH = $cscanner->iflags; print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
+$cscanner= find scan::cpp($env2->{_cwd}, $STIC_CPP);
+my $STIC_CPPPATH = $cscanner->iflags;
 my $DIR = cwd(); print "DIR = $DIR\n" if $param::debug;
 my $line;
 my @Defs = ();
