@@ -62,7 +62,7 @@ void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, Char_t* output) {
   StMcEventMaker *mcEventReader;
   StAssociationMaker *associator;
   StRandyTopMapMaker *topoMapFixer;
-  Char_t *file, *dir, *outfile[3], *prefix[3];
+  Char_t *file, *dir, *outfile[3], *prefix[3], line[80];
   Int_t mNDstMakers = 0;
 
   // Create a chain
@@ -154,7 +154,8 @@ void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, Char_t* output) {
     if( istatus == 2 ) break;
     
     if( i != NEvents) chain.Clear();
-    printf("*** Finished processing event %d\n",i);
+    sprintf(line,"*** Finished processing event %d",i);
+    gMessMgr->Info(line);
   }
   
   // Finish
@@ -167,7 +168,7 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
 
   StStrangeMuDstMaker *oldMuDstMaker, *newMuDstMakers[3];
   StStrangeMuDstMaker *v0MuDstMaker, *xiMuDstMaker, *kinkMuDstMaker;
-  Char_t *file, *dir, *outfile[3], *prefix[3];
+  Char_t *file, *dir, *outfile[3], *prefix[3], line[80];
   Int_t mNDstMakers = 0;
 
   // Create a chain
@@ -349,7 +350,8 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
     } // prim vertex Z and prim Tracks cut
   
     if( i != NEvents) chain.Clear();
-    printf("*** Finished processing event %d\n",i);
+    sprintf(line,"*** Finished processing event %d",i);
+    gMessMgr->Info(line);
   }
   
   // Finish
@@ -367,7 +369,7 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
   StMcEventMaker *mcEventReader;
   StAssociationMaker *associator;
   StRandyTopMapMaker *topoMapFixer;
-  Char_t *file, *dir, *outfile[3], *prefix[3];
+  Char_t *file, *dir, *outfile[3], *prefix[3], line[80];
   Int_t mNDstMakers = 0;
 
   // Create a chain
@@ -569,7 +571,8 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
     } // prim vertex Z and prim Tracks cut
   
     if( i != NEvents) chain.Clear();
-    printf("*** Finished processing event %d\n",i);
+    sprintf(line,"*** Finished processing event %d",i);
+    gMessMgr->Info(line);
   }
   
   // Finish
@@ -577,3 +580,121 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
     chain.Finish();
   }
 }
+
+void StrangeMuDstPlayer::Copy(Int_t NEvents, StFile* input, Char_t* output) {
+
+  StStrangeMuDstMaker *oldMuDstMaker, *newMuDstMakers[3];
+  StStrangeMuDstMaker *v0MuDstMaker, *xiMuDstMaker, *kinkMuDstMaker;
+  Char_t *file, *dir, *outfile[3], *prefix[3], line[80];
+  Int_t mNDstMakers = 0;
+
+  // Create a chain
+  StChain chain("myChain");
+
+  // Create Makers
+
+  // The maker for the new micro DST must be constructed _before_ the 
+  // maker to read the old micro DST. This is because the copying is
+  // done during chain.Clear(), and the new maker's Clear() must be
+  // called to do the copying before the old maker's Clear() is called,
+  // erasing the event.
+  
+  if( doFileSplit ) {
+    if( doV0 ) {
+      v0MuDstMaker = new StStrangeMuDstMaker("v0MuDstMaker");
+      v0MuDstMaker->DoV0();      // Selects V0 vertices for new micro-DST
+      newMuDstMakers[mNDstMakers] = v0MuDstMaker;
+      prefix[mNDstMakers] = "v0_";
+      mNDstMakers++;
+    }
+    if( doXi ) {
+      xiMuDstMaker = new StStrangeMuDstMaker("xiMuDstMaker");
+      xiMuDstMaker->DoXi();      // Selects Xi vertices for new micro-DST
+      newMuDstMakers[mNDstMakers] = xiMuDstMaker;
+      prefix[mNDstMakers] = "xi_";
+      mNDstMakers++;
+    }
+    if( doKink ) {
+      kinkMuDstMaker = new StStrangeMuDstMaker("kinkMuDstMaker");
+      kinkMuDstMaker->DoKink();  // Selects Kink vertices for new micro-DST
+      newMuDstMakers[mNDstMakers] = kinkMuDstMaker;
+      prefix[mNDstMakers] = "kink_";
+      mNDstMakers++;
+    }
+    ParseFileName(output, &file, &dir);
+    for(Int_t i=0; i<mNDstMakers; i++) {
+      //      outfile[i] = strdup(dir);    // doesn't work - too short ?
+      outfile[i] = new char[strlen(output)+5];
+      strcpy(outfile[i],dir);
+      strcat(outfile[i],prefix[i]);
+      strcat(outfile[i],file);
+      newMuDstMakers[i]->SetWrite(outfile[i]);
+      if( doT0Abort ) 
+	newMuDstMakers[i]->DoT0JitterAbort();
+      if( doMC )
+	newMuDstMakers[i]->DoMc();   // Keep MC info if it is available
+    }
+  } else {
+    mNDstMakers = 1;
+    newMuDstMakers[0] = new StStrangeMuDstMaker("newMuDstMaker");
+    if( doV0 ) newMuDstMakers[0]->DoV0();    // Selects V0s for new micro-DST
+    if( doXi ) newMuDstMakers[0]->DoXi();    // Selects Xis for new micro-DST
+    if( doKink ) newMuDstMakers[0]->DoKink();// Selects Kinks for new micro-DST
+    newMuDstMakers[0]->SetWrite(output);
+    if( doT0Abort ) 
+      newMuDstMakers[0]->DoT0JitterAbort();
+    if( doMC ) 
+      newMuDstMakers[0]->DoMc();  // Keep MC info if it is available
+    // Duplicate pointer to maker: access by name or generically
+    v0MuDstMaker = newMuDstMakers[0];
+    xiMuDstMaker = newMuDstMakers[0];
+    kinkMuDstMaker = newMuDstMakers[0];
+  }
+  
+  oldMuDstMaker = new StStrangeMuDstMaker("oldMuDstMaker");
+  oldMuDstMaker->SetRead(input); // Selects READ mode
+  // DoV0() and DoMc() are automatically called for the old maker by the new.
+  {for( Int_t i=0; i<mNDstMakers; i++ )
+    newMuDstMakers[i]->SubDst(oldMuDstMaker);}
+
+  // Do init
+  Int_t istatus = chain.Init();
+  if( istatus ) { chain.FatalErr(istatus,"on init"); return; }
+
+  // Loop over events
+  for( Int_t i=0; i<NEvents; i++ ) {
+    switch (istatus = chain.Make(i)) {
+      case 0: break;
+      case 2: { gMessMgr->Info("Last event from input."); break; }
+      case 3: { gMessMgr->Error() << "Event " << i << " had error " <<
+        istatus << ". Ending."; gMessMgr->Print(); break; }
+      default: { gMessMgr->Warning() << "Event " << i << " returned status " <<
+        istatus << ". Ending."; gMessMgr->Print(); }
+    }
+
+    if( istatus ) break;
+
+    if( doV0 )
+      // Copy the V0s
+      for( Int_t j=0; j<oldMuDstMaker->GetNV0(); j++ )
+	v0MuDstMaker->SelectV0(j);
+    if( doXi ) 
+      // Copy the Xis
+      for( Int_t j=0; j<oldMuDstMaker->GetNXi(); j++ )
+	xiMuDstMaker->SelectXi(j);
+    if( doKink ) 
+      // Copy the kinks
+      for( Int_t j=0; j<oldMuDstMaker->GetNKink(); j++ )
+	kinkMuDstMaker->SelectKink(j);
+    
+    if( i != NEvents) chain.Clear();
+    sprintf(line,"*** Finished processing event %d",i);
+    gMessMgr->Info(line);
+  }
+  
+  // Finish
+  if( NEvents >= 1 ) {
+    chain.Finish();
+  }
+}
+
