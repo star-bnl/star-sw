@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.22 2005/01/17 03:59:27 pruneau Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.23 2005/01/21 03:15:05 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.23  2005/01/21 03:15:05  pruneau
+ * commented out offending cout
+ *
  * Revision 2.22  2005/01/17 03:59:27  pruneau
  * change track container to vector
  *
@@ -292,7 +295,7 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
        trackIt!=mTrackStore->end();
        ++trackIt)
     {
-      cout << " t " << endl;
+      //cout << " t " << endl;
       track = *trackIt;
       kTrack = dynamic_cast<const StiKalmanTrack *>(track);
       if( !track || !kTrack ) continue;
@@ -327,10 +330,10 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
 	  globalAccepted = true;
 	  if (primary) primaryAccepted = true;
 	}
-      cout << " loop" << endl;
+      //cout << " loop" << endl;
       for (int i=0;i<NPLOTS-1; ++i)
 	{
-	  cout << " t:" << i << endl;
+	  //cout << " t:" << i << endl;
 	  if (i==0 && !good)     continue;
 	  if (i==1 && !primary)  continue;
 	  if (i==2 && !globalAccepted)  continue;
@@ -370,7 +373,7 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
 	  _pcaxy[i]->Fill(pcax,pcay);
 	  _pcazt[i]->Fill(pcaz,sqrt(pcax*pcax+pcay*pcay));
 
-	  cout << " F" << endl;
+	  //cout << " F" << endl;
 	  /* 3D temporarily disabled...
 	     mGDcavNptsvEtaA->Fill(dca,mPts,eta);
 	     mGDcavNptsvPtA->Fill(dca,mPts, pt);
@@ -403,7 +406,7 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
 	  StiKTNForwardIterator end = it.end();
 	  while (it!=end) 
 	    {
-	      cout << "+";
+	      //cout << "+";
 	      StiKalmanTrackNode& node = *it;
 	      const StiHit * theHit = node.getHit();
 	      const StiDetector * theDetector = node.getDetector();
@@ -423,10 +426,10 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
 		      key=key1;
 		      svtNnodes++;
 		    }
-		  cout << " id:"<<id<<" key1:"<<key1<<" key2:"<<key2<<" key:"<<key<<endl;
+		  //cout << " id:"<<id<<" key1:"<<key1<<" key2:"<<key2<<" key:"<<key<<endl;
 		  if (theHit && key>=0 && key<51)
 		    {
-		      cout << "=";
+		      //cout << "=";
 		      double dx = theHit->x() - node.getX();
 		      double dy = theHit->y() - node.getY();
 		      double dz = theHit->z() - node.getZ();
@@ -435,7 +438,7 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
 		      double tanCA = node.getSin()/node.getCos();
 		      double tanL  = node.getTanL();
 		      if (key>50 || key<0) continue;
-		      cout << "OK";
+		      //cout << "OK";
 		      if (id==2) 
 			{
 			  svtNhits++;
@@ -460,7 +463,7 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
 			      _dzVsZ[i][key][key2]->Fill(node.getZ(),dz);
 			    }
 			}
-		      cout << "D"<<endl;
+		      //cout << "D"<<endl;
 		    } //theHit
 		} //theDetector
 	      ++it;
