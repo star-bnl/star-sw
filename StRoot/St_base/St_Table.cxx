@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.35 1999/01/27 15:30:36 fine Exp $ 
+// $Id: St_Table.cxx,v 1.36 1999/01/29 19:20:55 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.36  1999/01/29 19:20:55  fine
+// St_Table::SavePrimitive The protection against of undefined table has been introduced
+//
 // Revision 1.35  1999/01/27 15:30:36  fine
 // ArrayIndex is renamed to ArrayLayout to reflect its function
 //
@@ -807,6 +810,8 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
                          << classPtr->GetName()<<"["<<rowNumber-1 <<"]" 
       << endl
       << "// ====================================================================" << endl
+      << "// ------  Test whether this table share library was loaded ------"      << endl
+      << "  if (!gROOT->GetClass(\"" << classPtr->GetName() << "\")) return 0;"    << endl
       <<    classPtr->GetName() << " " << rowId << ";" << endl
       <<  "St_" <<  GetTitle() << " *" << tableId << " = new " 
                                << "St_" << GetTitle()

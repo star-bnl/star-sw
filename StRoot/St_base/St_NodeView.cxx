@@ -43,7 +43,7 @@ St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,ED
 
   //  cout << "ctor for " << GetName() << " - " << GetTitle() << endl;
   SetTitle(pattern.GetTitle());
-
+  
   St_NodePosition *position = 0;
   TIter next(pattern.GetListOfPositions());
   Bool_t optsel = (iopt == kStruct);
