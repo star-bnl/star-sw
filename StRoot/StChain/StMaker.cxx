@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.132 2003/09/28 21:12:45 jeromel Exp $
+// $Id: StMaker.cxx,v 1.133 2003/10/07 00:22:30 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -673,8 +673,7 @@ EDataSetPass StMaker::ClearDS (TDataSet* ds,void * )
 void StMaker::PrintInfo() 
 {
    const char *cvs = GetCVS();
-   const char *built = strstr(cvs,"built");
-   printf("QAInfo:%-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs);
+   printf("QAInfo:%-20s %s \n",ClassName(),cvs);
 //     Print info for all defined Makers
    TIter next(GetMakeList());
    StMaker *maker;
@@ -1159,6 +1158,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.133  2003/10/07 00:22:30  perev
+// PrintInfo simplified
+//
 // Revision 1.132  2003/09/28 21:12:45  jeromel
 // Unused var NT removed/commented
 //
