@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.53 1998/09/16 16:08:54 kathy Exp $
+* $Id: bfc.kumac,v 1.54 1998/09/16 18:51:01 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.54  1998/09/16 18:51:01  kathy
+* put in new dictionary items and example list
+*
 * Revision 1.53  1998/09/16 16:08:54  kathy
 * new chain variable ntup to write ntuple in bfc
 *
@@ -220,19 +223,26 @@
 * no_events  - number of events to process
 * input_data_file   - directory + input file name
 * output_file       - output file name for use with chain=fzout or evout
+* funit   - output ntuple file unit #
+* nfile   - output ntuple file name
+* nid     - output ntuple i.d.
+* table   - output ntuple table - starts from event/data/ (i.e. list your
+*           table from under this directory)
+* 
 * 
 * --DOMAINS --
 *   geometry
 *   sim/gstar
 *   sim/g2t
 *   tpc
+*   ctf
 *   svt
 *   global
 * !! In order to run tpc code, you must load BOTH geometry and tpc 
 *     e.g. domain='geometry tpc'
 * !! In order to run global code, you must load svt,tpc & global
 *     e.g. domain='tpc svt global'
-* 
+* !! In order to run some DST packages, you must load ctf 
 * 
 * -- CHAINS --
 * evgin      - read in event generator file for running gstar
@@ -283,79 +293,100 @@
 * drsum - dst run summary
 * dehd  - dst event header
 * drhd  - dst run header
+* ntup  - create output ntuple file
 * fzout - write out fz file from gstar (only works if you run gstar!)
 * evout - write event & run directories into xdf file
 * dout  - write run/dst and event/data/global/dst directories into xdf file
 *
 * 
-* 
 * -- EXAMPLE CHAINS --
 * Use the kumacs listed below as examples - they are in $STAR/kumacs/chain
-*
-*
-* 1.  call_bfc_tpc_svt_sim_global.kumac 
-* - read in g2t file
-* - run svt & tpc fast sim 
-* - run svt & tpc tracking
-* - run global packages
-* - write xdf file containing full directories
-*
-* 2. call_bfc_tpc_slow_sim_tracker.kumac
-* - read in g2t file
-* - run tpc slow sim & clustering
-* - run tpc tracking
-* - write xdf file containing full directories
-*
-* 3. call_bfc_tpc_fast_sim_tracker.kumac
-* - read in g2t file
-* - run tpc fast sim 
-* - run tpc tracking
-* - write xdf file containing full directories
-*
-* 4. call_bfc_svt_fast_sim_tracker.kumac
-* - read in g2t file
-* - run svt sim
-* - run svt tracking
-* - write xdf file containing full directories
 * 
-* 5. call_bfc_readfz_g2t_sim.kumac
-* - read in fz file
-* - run g2t
-* - run tpc (tss) & svt (srs) simulation
-* - write out xdf file
+* 1. call_bfc_gstar_g2t.kumac
+*   - read in event generator file (e.g. from hijing)
+*   - run gstar
+*   - run g2t
+* 
+* 2. call_bfc_read_dst.kumac 
+* 
+* 3. call_bfc_readfz_g2t_sim.kumac
+*   - read in fz file
+*   - run g2t
+*   - run tpc (tss) & svt (srs) simulation
+*   - write out xdf file containing full directories
+* 
+* 4. call_bfc_readfz_g2t_tfs_srs_emc.kumac
+* 
+* 5. call_bfc_readfz_to_dst.kumac
+* 
 *
 * 6. call_bfc_reco.kumac                  
-* - read in simulated data file (thru tss & srs)
-* - run tpc & svt clustering
-* - run tpc & svt tracking
-* - run global packages
-* - run dst packages
-* - write xdf file containing full directories
-*
-* 7. call_bfc_reco_trk.kumac              
-* - read in simulated data file (thru tss & srs)
-* - run tpc & svt clustering
-* - run tpc & svt tracking
-* - write xdf file containing full directories
-*
-* 8. call_bfc_reco_global.kumac           
-* - read in data file that has simulation and tracking on it (thru tpt & sgr)
-* - run global packages
-* - run dst packages
-* - write output file containing full directories
-*
-* 9. call_bfc_gstar_g2t.kumac
-* - read in event generator file (e.g. from hijing)
-* - run gstar
-* - run g2t
-* - write xdf file containing full directories
-*
-* 10. call_bfc_txt_gstar_g2t.kumac
-* - read in text file
-* - run gstar
-* - run g2t
-* - write xdf file containing full directories
-*
+*  - read in simulated data file (thru tss & srs)
+*  - run tpc & svt clustering
+*  - run tpc & svt tracking
+*  - run global packages
+*  - run dst packages
+*  - write xdf file containing full directories
+* 
+* 7. call_bfc_reco_global.kumac           
+*  - read in data file that has simulation and tracking on it (thru tpt & sgr)
+*  - run global packages
+*  - run dst packages
+*  - write output file containing full directories
+* 
+* 8. call_bfc_reco_trk.kumac              
+*  - read in simulated data file (thru tss & srs)
+*  - run tpc & svt clustering
+*  - run tpc & svt tracking
+*  - write xdf file containing full directories
+* 
+* 9. call_bfc_reco_trk_ftpc.kumac              
+*  - read in simulated data file (thru tss & srs)
+*  - run tpc & svt clustering
+*  - run tpc & svt tracking
+*  - run ftpc slow sim, clustering, tracking
+*  - write xdf file containing full directories
+*  
+* 10. call_bfc_svt_fast_sim_tracker.kumac
+*   - read in g2t file
+*   - run svt sim
+*   - run svt tracking
+*   - write xdf file containing full directories
+* 
+* 11. call_bfc_tfs_global_dst_testv0.kumac
+* 
+* 12. call_bfc_tpc_fast_sim_tracker.kumac
+*   - read in g2t file
+*   - run tpc fast sim 
+*   - run tpc tracking
+*   - write xdf file containing full directories
+* 
+* 13. call_bfc_tpc_slow_sim_tracker.kumac
+*   - read in g2t file
+*   - run tpc slow sim & clustering
+*   - run tpc tracking
+*   - write xdf file containing full directories
+* 
+* 14.  call_bfc_tpc_svt_sim_global.kumac 
+*   - read in g2t file
+*   - run svt & tpc fast sim 
+*   - run svt & tpc tracking
+*   - run global packages
+*   - write xdf file containing full directories
+* 
+* 15.  call_bfc_tpc_svt_sim_global_dst.kumac 
+*   - read in g2t file
+*   - run svt & tpc fast sim 
+*   - run svt & tpc tracking
+*   - run global packages
+*   - write xdf file containing full directories
+* 
+* 16. call_bfc_txt_gstar_g2t.kumac
+*   - read in text file
+*   - run gstar
+*   - run g2t
+*   - write xdf file containing full directories
+* 
 *****************************************************************
 *****************************************************************
 *****************************************************************
