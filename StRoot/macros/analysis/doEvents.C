@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.87 2004/02/01 19:11:26 jeromel Exp $
+// $Id: doEvents.C,v 1.88 2004/02/02 03:02:41 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -92,6 +92,7 @@ void doEvents(const Int_t nEvents,
 void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const Char_t *qaflag)
 {
 
+  if (!qaflag) qaflag = "";
   nEvents = nEventsQQ;
   TString tflag = qaflag; tflag.ToLower();
   int eventDisplay = tflag.Contains("disp");
@@ -296,6 +297,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
 
 void doEvents(const Int_t startEvent, const Int_t nEvents, const Char_t *file, const Char_t *qaflag)
 {
+    if (!qaflag) qaflag="";
     printf("*file = %s\n",file);
     const char *fileListQQ[]={0,0};
     if (strncmp(file,"GC",2)==0) {
@@ -309,6 +311,7 @@ void doEvents(const Int_t startEvent, const Int_t nEvents, const Char_t *file, c
 //--------------------------------------------------------------------------
 void doEvents(const Int_t nEvents, const Char_t *file, const Char_t *qaflag)
 {
+  if (!qaflag) qaflag="";
   cout << "Calling (1,nEvents,file,qaflag)" << endl;
   doEvents(1,nEvents,file,qaflag);
 }
@@ -316,6 +319,7 @@ void doEvents(const Int_t nEvents, const Char_t *file, const Char_t *qaflag)
 //--------------------------------------------------------------------------
 void doEvents(const Int_t nEvents, const Char_t *path,const Char_t *file, const Char_t *qaflag, int flag)
 {
+  if (!qaflag) qaflag="";
   TString F;
   if (path && path[0] && path[0]!='-') F = path;
   if (file && file[0] && file[0]!='-') {
@@ -339,6 +343,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.88  2004/02/02 03:02:41  perev
+// Defence against qaflag==0
+//
 // Revision 1.87  2004/02/01 19:11:26  jeromel
 // indent + printing
 //
