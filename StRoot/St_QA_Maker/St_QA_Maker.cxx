@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.0 2000/08/25 16:02:41 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.1 2000/09/01 16:59:03 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.1  2000/09/01 16:59:03  genevb
+// Change for V0 plots
+//
 // Revision 2.0  2000/08/25 16:02:41  genevb
 // New revision: new structure, multiplicity classes
 //
@@ -1120,6 +1123,7 @@ void St_QA_Maker::MakeHistVertex(){
     hists->m_v0->Fill(dst_v0_vertex->GetNRows());
 
     for (Int_t k=0; k<dst_v0_vertex->GetNRows(); k++, v0++){
+      if (v0->dcav0 < 0.) continue;
       Float_t e1a = v0->pos_px*v0->pos_px +  v0->pos_py*v0->pos_py
 	+ v0->pos_pz*v0->pos_pz;
       Float_t e2 = v0->neg_px*v0->neg_px +  v0->neg_py*v0->neg_py

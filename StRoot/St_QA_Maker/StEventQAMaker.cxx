@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.0 2000/08/25 16:02:39 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.1 2000/09/01 16:59:02 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.1  2000/09/01 16:59:02  genevb
+// Change for V0 plots
+//
 // Revision 2.0  2000/08/25 16:02:39  genevb
 // New revision: new structure, multiplicity classes
 //
@@ -950,7 +953,7 @@ void StEventQAMaker::MakeHistVertex() {
 
   for (UInt_t k=0; k<v0Vtx.size(); k++) {
     StV0Vertex *v0 = v0Vtx[k];
-    if (v0) {
+    if ((v0) && (v0->dcaParentToPrimaryVertex() >= 0.)) {
       Float_t e1a = pow(abs(v0->momentumOfDaughter(positive)),2);
       Float_t e2 = pow(abs(v0->momentumOfDaughter(negative)),2);
       Float_t e1 = e1a + m_prmass2;
