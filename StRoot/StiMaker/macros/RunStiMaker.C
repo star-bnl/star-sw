@@ -34,6 +34,7 @@ void RunStiMaker(Int_t nevents=1,
     //const char* MainFile="/star/rcf/test/dev/trs_redhat61/Tue/year_2001/hc_lowdensity/*.event.root")
 		 
 {
+    //bool optimized = true;
     bool optimized = false;
     
     // Dynamically link needed shared libs
@@ -158,6 +159,16 @@ void RunStiMaker(Int_t nevents=1,
 
     stiIO->setDoTrackFit(doFit);
 
+    //Set Kalman Track Finder (KTF) run-time values:
+    stiIO->setKTFMcsCalculated(false);
+    stiIO->setKTFElossCalculated(false);
+    stiIO->setKTFMaxChi2ForSelection(50);
+    stiIO->setKTFBField(.5); //Tesla
+    stiIO->setKTFMassHypothesis(.1395); //GeV
+    stiIO->setKTFMinContiguousHitCount(2);
+    stiIO->setKTFMaxNullCount(40);
+    stiIO->setKTFMaxContiguousNullCount(25);
+	
     //Set Local Track Seed Finder (LTSF) run-time values
     stiIO->setLTSFZWindow(5.);
     stiIO->setLTSFYWindow(2.);

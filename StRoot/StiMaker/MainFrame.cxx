@@ -209,6 +209,7 @@ ClassImp(MainFrame)
     mOptionsMenu->AddEntry("MC Track Colors", M_ShowRootColors);
     mOptionsMenu->AddEntry("Evaluable Seed Finder Options", M_SeedFinderOptions);
     mOptionsMenu->AddEntry("Local Seed Finder Options", M_LocalSeedFinderOptions);
+    mOptionsMenu->AddEntry("Kalman Track Finder Options", M_TrackFinderOptions);
 
     fMenuHelp = new TGPopupMenu(fClient->GetRoot());
     fMenuHelp->AddEntry("&Contents", M_HELP_CONTENTS);
@@ -491,6 +492,10 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 
 	    case M_SeedFinderOptions:
 		new SeedFinderIO(fClient->GetRoot(), this);
+		break;
+
+	    case M_TrackFinderOptions:
+		new KalmanTrackFinderIO(fClient->GetRoot(), this);
 		break;
 
 	    case M_LocalSeedFinderOptions:
@@ -2349,10 +2354,300 @@ Bool_t LocalSeedFinderIO::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
     return kTRUE;
 }
 
-//Extras
 
-//Extras
+//Kalman Track Finder IO:
 
-/*
-  
-*/
+KalmanTrackFinderIO::KalmanTrackFinderIO(const TGWindow * p, const TGWindow * main)
+    : TGTransientFrame(p, main, 10, 10, kHorizontalFrame)
+{
+    // build widgets
+    fF1 = new TGVerticalFrame(this, 200, 300);
+    fL1 = new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 2, 2, 2);
+    AddFrame(fF1, fL1);
+
+    fL2 = new TGLayoutHints(kLHintsCenterY | kLHintsRight, 2, 2, 2, 2);
+
+    makeNumberEntries();
+    
+    fF2 = new TGVerticalFrame(this, 200, 500);
+    fL3 = new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 2, 2, 2);
+    AddFrame(fF2, fL3);
+    
+    fSetButton = new TGTextButton(fF2, " Apply ", 2);
+    fSetButton->Associate(this);
+    fF2->AddFrame(fSetButton, fL3);
+    
+    fExitButton = new TGTextButton(fF2, " Close ", 1);
+    fExitButton->Associate(this);
+    fF2->AddFrame(fExitButton, fL3);
+    
+    // set dialog box title
+    SetWindowName("Kalman Track Finder Options");
+    SetIconName("Kalman Track Finder Options");
+    SetClassHints("KalmanTrackFinderOptions", "KalmanTrackFinderOptions");
+    // resize & move to center
+    MapSubwindows();
+    UInt_t width = GetDefaultWidth();
+    UInt_t height = GetDefaultHeight();
+    Resize(width, height);
+
+    Int_t ax;
+    Int_t ay;
+    if (main) {
+	Window_t wdum;
+	gVirtualX->TranslateCoordinates(main->GetId(), GetParent()->GetId(),
+					(((TGFrame *) main)->GetWidth() -
+					 fWidth) >> 1,
+					(((TGFrame *) main)->GetHeight() -
+					 fHeight) >> 1, ax, ay, wdum);
+	;    } else {
+	    UInt_t root_w, root_h;
+	    gVirtualX->GetWindowSize(fClient->GetRoot()->GetId(), ax, ay,
+				     root_w, root_h);
+	    ax = (root_w - fWidth) >> 1;
+	    ay = (root_h - fHeight) >> 1;
+	}
+    Move(ax, ay);
+    SetWMPosition(ax, ay);
+    // make the message box non-resizable
+    SetWMSize(width, height);
+    SetWMSizeHints(width, height, width, height, 0, 0);
+    SetMWMHints(kMWMDecorAll | kMWMDecorResizeH | kMWMDecorMaximize |
+		kMWMDecorMinimize | kMWMDecorMenu,
+		kMWMFuncAll | kMWMFuncResize | kMWMFuncMaximize |
+		kMWMFuncMinimize, kMWMInputModeless);
+    
+    MapWindow();
+    
+    //fClient->WaitFor(this);
+}
+
+void KalmanTrackFinderIO::makeNumberEntries()
+{
+    StiIOBroker* broker = StiIOBroker::instance();
+
+    //Max Chi2 for selection
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("MaxChi2ForSelection",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ktfMaxChi2ForSelection() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealOne, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0., 50.);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Max Chi2 for Selection") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //B-Field
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("BField",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ktfBField() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealTwo);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, -2., 2.);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Magnetic Field (Tesla)") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Max Chi2 for selection
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("MassHypothesis",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ktfMassHypothesis() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealFour, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0., 1.);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Kalman Mass Hypothesis(GeV)") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Min ContiguousHitCount
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("MinContHitCount",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ktfMinContiguousHitCount() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 60);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Min. Contiguous Hit Count") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Max Null Count
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("MaxNullCount",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ktfMaxNullCount() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 60);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Max. Null Count") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Max Contiguous Null Count
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("MaxContNullCount",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ktfMaxContiguousNullCount() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 60);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Max. Contiguous Null Count") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Toggle for Mcs Calculation
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    TGCheckButton* tempButton = new TGCheckButton(fF.back(), new TGHotString("MCS Calculated"), -1);
+    if ( broker->ktfMcsCalculated()==true) {
+	tempButton->SetState(kButtonDown);
+    }
+    DetectorActivatePair tempPair("McsCalculated", tempButton);
+    fC.push_back(tempPair);
+    fF.back()->AddFrame(tempButton, fL2);
+    
+    //Toggle for Eloss Calculation
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    TGCheckButton* tempButton2 = new TGCheckButton(fF.back(), new TGHotString("E-Loss Calculated"), -1);
+    if ( broker->ktfElossCalculated()==true) {
+	tempButton2->SetState(kButtonDown);
+    }
+    DetectorActivatePair tempPair2("ELossCalculated", tempButton2);
+    fC.push_back(tempPair2);
+    fF.back()->AddFrame(tempButton, fL2);
+
+}
+
+KalmanTrackFinderIO::~KalmanTrackFinderIO()
+{
+    if (fNumericEntries.size()!=fLabel.size() || fLabel.size()!=fF.size()) {
+	cout <<"KalmanTrackFinderIO::~KalmanTrackFinderIO. ERROR:\t"
+	     <<"Mismatch in cleanup vector size"<<endl;
+    }
+    for (unsigned int i=0; i<fNumericEntries.size(); ++i) {
+	delete fNumericEntries[i].second;
+	fNumericEntries[i].second=0;
+    }
+
+    for (unsigned int i=0; i<fC.size(); ++i) {
+	delete fC[i].second;
+	fC[i].second=0;
+    }
+    
+    for (unsigned int i=0; i<fLabel.size(); ++i ) {	
+	delete fLabel[i];
+	fLabel[i]=0;
+    }
+
+    for (unsigned int i=0; i<fF.size(); ++i) {
+	delete fF[i];
+	fF[i]=0;
+    }
+
+    delete fSetButton;
+    delete fExitButton;
+    delete fF1;
+    delete fF2;
+    delete fL1;
+    delete fL2;
+    delete fL3;
+}
+
+void KalmanTrackFinderIO::CloseWindow()
+{
+    delete this;
+}
+
+void KalmanTrackFinderIO::SetLimits()
+{
+    StiIOBroker* broker = StiIOBroker::instance();
+
+    for (NumberEntryVec::const_iterator it=fNumericEntries.begin();
+	 it!=fNumericEntries.end(); ++it) {
+	//cout <<"Number Entry\t"<<(*it).first<<" has value:\t"<<(*it).second->GetNumber()<<endl;
+	const string& name = (*it).first;
+    
+	if (name=="MaxChi2ForSelection") {
+	    broker->setKTFMaxChi2ForSelection( (*it).second->GetNumber() );
+	}
+	else if (name=="BField") {
+	    broker->setKTFBField( (*it).second->GetNumber() );
+	}
+	else if (name=="MassHypothesis") {
+	    broker->setKTFMassHypothesis( (*it).second->GetNumber() );
+	}
+	else if (name=="MinContHitCount") {
+	    broker->setKTFMinContiguousHitCount( (*it).second->GetNumber() );
+	}
+	else if (name=="MaxNullCount") {
+	    broker->setKTFMaxNullCount( (*it).second->GetNumber() );
+	}
+	else if (name=="MaxContNullCount") {
+	    broker->setKTFMaxContiguousNullCount( (*it).second->GetNumber() );
+	}
+	else {
+	    cout <<"KalmanTrackFinderIO::SetLimits(). ERROR:\t"
+		 <<"Unknown name for NumberEntry:\t"<<name
+		 <<"\tYou had a compile time error"<<endl;
+	}
+    }
+
+    //Now take care of toggle buttons
+    for (unsigned int j=0; j<fC.size(); ++j) {
+	const string& tag = fC[j].first;
+
+	if (tag=="McsCalculated") {
+	    broker->setKTFMcsCalculated( fC[j].second->GetState()==kButtonDown );
+	}
+	else if (tag=="ELossCalculated") {
+	    broker->setKTFElossCalculated( fC[j].second->GetState()==kButtonDown );
+	}
+	else {
+	    cout <<"KalmanTrackFinderIO::ProcessMessage. ERROR:\t"
+		 <<"Tag:\t"<<tag<<" is unkown type.  You had a compile time error."<<endl;
+	}
+    }
+
+}
+
+Bool_t KalmanTrackFinderIO::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
+{
+    switch (GET_MSG(msg)) {
+    case kC_COMMAND:
+	{
+	    switch (GET_SUBMSG(msg)) {
+	    case kCM_BUTTON:
+		{
+		    switch (parm1) {
+			// exit button
+		    case 1:
+			{
+			    CloseWindow();
+			    break;
+			}
+			// set button
+		    case 2:
+			{
+			    SetLimits();
+			    break;
+			}
+		    }
+		    break;
+		}
+	    }
+	    break;
+	}
+    }
+    return kTRUE;
+}
+

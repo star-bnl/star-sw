@@ -25,8 +25,12 @@
   collaboration. i.e. code reproduced with autorization. 
 */
 
+//Std
 #include <stdexcept>
+#include <math.h>
+
 //Sti
+#include "StiIOBroker.h"
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
@@ -49,7 +53,8 @@
 ostream& operator<<(ostream&, const StiTrack&);
 
 StiKalmanTrackFinder::StiKalmanTrackFinder()
-    : StiTrackFinder(),trackMes(*Messenger::instance(MessageType::kTrackMessage))
+    : StiTrackFinder(),trackMes(*Messenger::instance(MessageType::kTrackMessage)),
+      mSubject(StiIOBroker::instance())
     
 {
     //Turn off by default
@@ -58,12 +63,24 @@ StiKalmanTrackFinder::StiKalmanTrackFinder()
     trackMes << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Begins"<<endl;
     StiTrack::setTrackFitter(new StiKalmanTrackFitter());
     reset();
+
+    mSubject->attach(this);
+    getNewState();
+    
     trackMes << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
 }
 
 StiKalmanTrackFinder::~StiKalmanTrackFinder()
 {
     //progFlowMes <<"StiKalmanTrackFinder::~StiKalmanTrackFinder() - Begin/End"<<endl;
+    if (mSubject) {
+	mSubject->detach(this);
+    }
+}
+
+void StiKalmanTrackFinder::getNewState()
+{
+    cout <<"StiKalmanTrackFinder::getNewState()"<<endl;
 }
 
 void StiKalmanTrackFinder::reset()
@@ -449,11 +466,11 @@ void StiKalmanTrackFinder::doNextDetector()
 		    hitContainer->setDeltaZ(10.); //zWindow);
 		    //void setRefPoint(double position, double refAngle, double y, double z);
 		    double a = tNode->fAlpha;
-		    //trackMes << "Ref Angle:" << (a*180./3.1415927) << endl;
+		    //trackMes << "Ref Angle:" << (a*180./M_PI) << endl;
 
-		    //if (a<0) a+=2.*3.1415927; 
+		    //if (a<0) a+=2.*M_PI; 
 
-		    //trackMes << "Corrected Ref Angle:" << (a*180./3.1415927) << endl;
+		    //trackMes << "Corrected Ref Angle:" << (a*180./M_PI) << endl;
 
 		    hitContainer->setRefPoint(tNode->fX,a,tNode->fP0,tNode->fP1);
 		    while (hitContainer->hasMore())	

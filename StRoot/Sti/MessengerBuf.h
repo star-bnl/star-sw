@@ -8,9 +8,10 @@
 
 #include <strstream.h>
 
-// #ifdef __CINT__
-// class streamsize;
-// #endif
+//! #ifdef __CINT__
+//!  class streamsize;
+//!  #endif
+//!
 
 class MessengerBuf: public streambuf{
 public:

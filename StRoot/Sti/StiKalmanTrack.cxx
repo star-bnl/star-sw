@@ -1,5 +1,7 @@
+//Std
 #include <stdexcept>
-#include <iostream.h>
+#include <math.h>
+
 //Sti
 #include "StiHit.h"
 #include "StiDefaultMutableTreeNode.h"
@@ -88,7 +90,7 @@ double  StiKalmanTrack::getPseudoRapidity() const
     // Return pseudo rapidity of the particle at the inner most node held by this track
     // which may (or not) be the primary vertex. 
     // this will need to be refined...
-    return -log(tan(3.1415927/4.-(lastNode->getTanL()/2.)));
+    return -log(tan(M_PI/4.-(lastNode->getTanL()/2.)));
 }
 
 double  StiKalmanTrack::getPhi()            const 

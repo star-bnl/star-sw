@@ -42,7 +42,7 @@ ostream& operator<<(ostream& os, const StiDetector& d){
 
     os << d.getName()
        <<"\tR:"<<d.getPlacement()->getCenterRadius()<<"cm\tA:"
-       <<(180./3.1415927)*d.getPlacement()->getCenterRefAngle()<< " degs";
+       <<(180./M_PI)*d.getPlacement()->getCenterRefAngle()<< " degs";
     return os;
     
 } // operator<<

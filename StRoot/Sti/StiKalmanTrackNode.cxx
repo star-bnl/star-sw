@@ -1,6 +1,9 @@
+//std
 #include <stdexcept>
 #include <iostream>
 #include <math.h>
+
+//Sti
 #include "StiDebug.h"
 #include "Messenger.h"
 #include "StiHit.h"
@@ -101,8 +104,8 @@ void StiKalmanTrackNode::set(int   depth,
 {
   StiTrackNode::set(depth, hit);
   fAlpha  = alpha;
-  if (fAlpha < -3.1415927) fAlpha += 2*3.1415927;
-  if (fAlpha >= 3.1415927) fAlpha -= 2*3.1415927;
+  if (fAlpha < -M_PI) fAlpha += 2*M_PI;
+  if (fAlpha >= M_PI) fAlpha -= 2*M_PI;
   fX      = xRef;
   fdEdx   = dEdx;
   fChi2   = chi2;
@@ -132,8 +135,8 @@ void StiKalmanTrackNode::set(int   depth,
 void StiKalmanTrackNode::setState(const StiKalmanTrackNode * node)
 {
 	fAlpha = node->fAlpha;
-  if (fAlpha < -3.1415927) fAlpha += 2*3.1415927;
-  if (fAlpha >= 3.1415927) fAlpha -= 2*3.1415927;
+  if (fAlpha < -M_PI) fAlpha += 2*M_PI;
+  if (fAlpha >= M_PI) fAlpha -= 2*M_PI;
   fX   = node->fX;
   // state matrix
   fP0  = node->fP0;
@@ -166,8 +169,8 @@ void StiKalmanTrackNode::setAsCopyOf(const StiKalmanTrackNode * node)
   StiTrackNode::setAsCopyOf(node);
   fX    = node->fX;
   fAlpha= node->fAlpha;
-  if (fAlpha < -3.1415927) fAlpha += 2*3.1415927;
-  if (fAlpha >= 3.1415927) fAlpha -= 2*3.1415927;
+  if (fAlpha < -M_PI) fAlpha += 2*M_PI;
+  if (fAlpha >= M_PI) fAlpha -= 2*M_PI;
   fChi2  = node->fChi2;
   fP0   = node->fP0;
   fP1   = node->fP1;
@@ -439,8 +442,8 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 	setState(pNode);
   StiPlacement * tPlace = tDet->getPlacement();
   double tAlpha = tPlace->getNormalRefAngle();
-  if (tAlpha < -3.1415927) tAlpha += 2*3.1415927;
-  if (tAlpha >= 3.1415927) tAlpha -= 2*3.1415927;
+  if (tAlpha < -M_PI) tAlpha += 2*M_PI;
+  if (tAlpha >= M_PI) tAlpha -= 2*M_PI;
 
   double dAlpha = tAlpha - fAlpha;
   if (fabs(dAlpha)>1e-4)   // perform rotation if needed
@@ -729,10 +732,10 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
   // held by this node.
   //-----------------------------------------------------------------
   fAlpha += alpha;
-  if (fAlpha < -3.1415927) fAlpha += 2*3.1415927;
-  if (fAlpha >= 3.1415927) fAlpha -= 2*3.1415927;
+  if (fAlpha < -M_PI) fAlpha += 2*M_PI;
+  if (fAlpha >= M_PI) fAlpha -= 2*M_PI;
   *(Messenger::instance(MessageType::kNodeMessage))  
-		<< "rotate() - new fAlpha:" << alpha*180/3.1415927 
+		<< "rotate() - new fAlpha:" << alpha*180/M_PI 
 		<< " degs" << endl;
   double x1=fX;
   double y1=fP0;
@@ -876,7 +879,7 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 	int nChildren = n.getChildCount();
   os << "Level: " << n.mDepth << "\t"
 		 << " x:" << n.fX  <<"\t"
-		 << "alpha:" << 180*n.fAlpha/3.1415927<<" degs\t"
+		 << "alpha:" << 180*n.fAlpha/M_PI<<" degs\t"
 		 << "dedx:" << n.fdEdx <<"\t"
 		 << "chi2:" << n.fChi2 << endl
 		 << "P0/1/2/3/4:" << n.fP0 << " " 
