@@ -2,8 +2,11 @@
 //  This class is to provide "micky" test for RMath.h methods
 //  derived from CERNLIB 
 //  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
-// $Id: StMicky.h,v 1.3 1999/09/26 23:37:22 fine Exp $
+// $Id: StMicky.h,v 1.4 1999/09/27 00:13:46 fine Exp $
 // $Log: StMicky.h,v $
+// Revision 1.4  1999/09/27 00:13:46  fine
+// test F112 has been fixed for Sun
+//
 // Revision 1.3  1999/09/26 23:37:22  fine
 // test F112 package has been introduced
 //
@@ -34,8 +37,8 @@ typedef struct {
 
  class StMicky {
    private:
-      struct PARAM param_1;
-      struct BLNK  _BLNK__1;
+      PARAM param_1;
+      BLNK  _BLNK__1;
       int *ia; int *ib;
    public:
      StMicky();
@@ -47,8 +50,9 @@ typedef struct {
      PARAM &Param() { return *(&param_1);}
      void Timing(int *) const; 
      void Timed(float *)  const; 
-//--  tests
-     void StMicky::Tmxm(); // F110
+//--  tests:
+//--  test F110
+     void StMicky::Tmxm();
 //--  test F112
       int ttrinv();
       int ttrla();
