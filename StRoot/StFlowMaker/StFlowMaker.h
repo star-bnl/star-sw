@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.16 2000/08/26 21:37:02 snelling Exp $
+//  $Id: StFlowMaker.h,v 1.17 2000/08/31 18:58:24 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -13,6 +13,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.17  2000/08/31 18:58:24  posk
+//  For picoDST, added version number, runID, and multEta for centrality.
+//  Added centrality cut when reading picoDST.
+//  Added pt and eta selections for particles corr. wrt event plane.
+//
 //  Revision 1.16  2000/08/26 21:37:02  snelling
 //  Removed flownanoevent, Added multiple input for pico, fixed IO bug
 //
@@ -127,11 +132,11 @@ public:
   void          PicoEventRead(Bool_t flag=kFALSE);
   void          FlowEventWrite(Bool_t flag=kFALSE);
   void          FlowEventRead(Bool_t flag=kFALSE);
-  void          SetPicoEventFileName(const Char_t* name="flowpicoevent.root");
+  void          SetPicoEventDir(const Char_t* name="./");
   void          SetPicoEventFileName(StFileI* fileList);
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.16 2000/08/26 21:37:02 snelling Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.17 2000/08/31 18:58:24 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -141,7 +146,7 @@ protected:
 private:
   TString          mEventFileName;            //! IO Maker file name
   TString          mEventFileNameOld;         //! IO Maker Old file name
-  Char_t           mPicoEventFileName[64];    // Pico-DST file name
+  Char_t           mPicoEventDir[64];         // Pico-DST directory name
   StFileI*         pPicoFileList;             //! Pico File List
   Bool_t           mPicoEventWrite;           // switch for pico-DST
   Bool_t           mPicoEventRead;            // switch for pico-DST
@@ -190,8 +195,8 @@ inline void StFlowMaker::PicoEventRead(Bool_t flag)
 { mPicoEventRead=flag; if (flag) { mPicoEventWrite=kFALSE;
  mFlowEventRead=kFALSE; }}
 
-inline void StFlowMaker::SetPicoEventFileName(const Char_t* name) {
-  strncpy(mPicoEventFileName, name, 63); mPicoEventFileName[63] = '\0'; }
+inline void StFlowMaker::SetPicoEventDir(const Char_t* name) {
+  strncpy(mPicoEventDir, name, 63); mPicoEventDir[63] = '\0'; }
 
 inline void StFlowMaker::SetPicoEventFileName(StFileI* fileList) {
   pPicoFileList = fileList;

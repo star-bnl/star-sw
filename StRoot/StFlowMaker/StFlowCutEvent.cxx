@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.17 2000/08/10 23:00:19 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.18 2000/08/31 18:58:17 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,11 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.18  2000/08/31 18:58:17  posk
+// For picoDST, added version number, runID, and multEta for centrality.
+// Added centrality cut when reading picoDST.
+// Added pt and eta selections for particles corr. wrt event plane.
+//
 // Revision 1.17  2000/08/10 23:00:19  posk
 // New centralities. pt and eta cuts.
 //
@@ -75,17 +80,19 @@ ClassImp(StFlowCutEvent)
 
 //-----------------------------------------------------------------------
 
+Int_t    StFlowCutEvent::mCentCuts[2]    = {0, 0};
 Int_t    StFlowCutEvent::mMultCuts[2]    = {10, 10000};
 Float_t  StFlowCutEvent::mVertexXCuts[2] = {-1., 1.};
 Float_t  StFlowCutEvent::mVertexYCuts[2] = {-1., 1.};
 Float_t  StFlowCutEvent::mVertexZCuts[2] = {-75., 75.};
 UInt_t   StFlowCutEvent::mEventN         = 0;     
 UInt_t   StFlowCutEvent::mGoodEventN     = 0;
+UInt_t   StFlowCutEvent::mCentCut        = 0;
 UInt_t   StFlowCutEvent::mMultCut        = 0;
 UInt_t   StFlowCutEvent::mVertexXCut     = 0;
 UInt_t   StFlowCutEvent::mVertexYCut     = 0;
 UInt_t   StFlowCutEvent::mVertexZCut     = 0;
-Float_t  StFlowCutEvent::mEtaSymCuts[2]  = {0., 0.};
+Float_t  StFlowCutEvent::mEtaSymCuts[2]  = {-3., 3.};
 UInt_t   StFlowCutEvent::mEtaSymCutN     = 0;     
 
 //-----------------------------------------------------------------------
@@ -158,6 +165,14 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
   
   if (!pPicoEvent) return kFALSE;
 
+  // Centrality
+  UInt_t cent = pPicoEvent->Centrality();
+  if (mCentCuts[0] && mCentCuts[1] >= mCentCuts[0] && 
+      (cent < mCentCuts[0] || cent > mCentCuts[1])) {
+    mCentCut++;
+    return kFALSE;
+  }
+  
   mEventN++;
 
   // Multiplicity
@@ -263,6 +278,8 @@ void StFlowCutEvent::PrintCutList() {
   cout << "#######################################################" << endl;
   cout << "# Primary Vertex Events= " << mEventN << endl;
   cout << "# Event Cut List:" << endl;
+  cout << "#   Centrality cuts= " << mCentCuts[0] << ", " << mCentCuts[1]
+       << " :\t Events Cut= " << mCentCut << endl;
   cout << "#   Mult cuts= " << mMultCuts[0] << ", " << mMultCuts[1]
        << " :\t Events Cut= " << mMultCut << "\t (" <<  setprecision(3) << 
     (float)mMultCut/(float)mEventN/perCent << "% cut)" << endl;

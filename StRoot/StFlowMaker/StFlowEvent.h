@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.13 2000/08/09 21:38:23 snelling Exp $
+// $Id: StFlowEvent.h,v 1.14 2000/08/31 18:58:22 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,11 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.14  2000/08/31 18:58:22  posk
+// For picoDST, added version number, runID, and multEta for centrality.
+// Added centrality cut when reading picoDST.
+// Added pt and eta selections for particles corr. wrt event plane.
+//
 // Revision 1.13  2000/08/09 21:38:23  snelling
 // PID added
 //
@@ -106,9 +111,9 @@ public:
 
   Double_t       PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const;
   Int_t          EventID() const;
+  Int_t          RunID() const;
   UInt_t         OrigMult() const;
-  UInt_t         MultEta1() const;
-  UInt_t         MultEta2() const;
+  UInt_t         MultEta() const;
   UInt_t         FlowEventMult() const;
   UInt_t         Centrality() const;
   StThreeVectorF VertexPos() const;
@@ -127,9 +132,9 @@ public:
   void PrintSelectionList();
   void MakeSubEvents();
   void SetEventID(const Int_t&);
+  void SetRunID(const Int_t&);
   void SetOrigMult(const UInt_t&);
-  void SetMultEta1(const UInt_t&);
-  void SetMultEta2(const UInt_t&);
+  void SetMultEta(const UInt_t&);
   void SetCentrality(const UInt_t&);
   void SetVertexPos(const StThreeVectorF&);
 #ifndef __CINT__		
@@ -150,9 +155,9 @@ public:
 private:
 
   Int_t           mEventID;                             // ID of the event
+  Int_t           mRunID;                               // ID of the run
   UInt_t          mOrigMult;                            // number of tracks
-  UInt_t          mMultEta1; // number of tracks with positive flag in 1 unit of eta
-  UInt_t          mMultEta2; // number of tracks with positive flag in 2 units of eta
+  UInt_t          mMultEta; // number of tracks with positive flag in 1.5 unit of eta
   UInt_t          mCentrality;                          // centrality bin
   StThreeVectorF  mVertexPos;                           // primary vertex position
   static Float_t  mEtaCuts[2][Flow::nHars][Flow::nSels];// range absolute values
@@ -178,11 +183,11 @@ inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {
 
 inline Int_t StFlowEvent::EventID() const { return mEventID; }
 
+inline Int_t StFlowEvent::RunID() const { return mRunID; }
+
 inline UInt_t StFlowEvent::OrigMult() const { return mOrigMult; }
 
-inline UInt_t StFlowEvent::MultEta1() const { return mMultEta1; }
-
-inline UInt_t StFlowEvent::MultEta2() const { return mMultEta2; }
+inline UInt_t StFlowEvent::MultEta() const { return mMultEta; }
 
 inline UInt_t StFlowEvent::FlowEventMult() const { return pTrackCollection->size(); }
 
@@ -210,14 +215,14 @@ inline void StFlowEvent::SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN
 inline void StFlowEvent::SetEventID(const Int_t& id) {
   mEventID = id; }
 
+inline void StFlowEvent::SetRunID(const Int_t& id) {
+  mRunID = id; }
+
 inline void StFlowEvent::SetOrigMult(const UInt_t& tracks) {
   mOrigMult = tracks; }
 
-inline void StFlowEvent::SetMultEta1(const UInt_t& goodtracks1) {
-  mMultEta1 = goodtracks1; }
-
-inline void StFlowEvent::SetMultEta2(const UInt_t& goodtracks2) {
-  mMultEta2 = goodtracks2; }
+inline void StFlowEvent::SetMultEta(const UInt_t& goodtracks) {
+  mMultEta = goodtracks; }
 
 inline void StFlowEvent::SetVertexPos(const StThreeVectorF& vertexPos) {
   mVertexPos = vertexPos; }
