@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.51 2000/08/07 14:39:41 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.52 2000/08/31 03:44:45 lbarnby Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.52  2000/08/31 03:44:45  lbarnby
+// A more useful time stored in the event header now
+//
 // Revision 1.51  2000/08/07 14:39:41  caines
 // Add to dst a copy of tpc and svt tracks called CpyTrk
 //
@@ -129,6 +132,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 #include "TClass.h"
 #include "TMath.h"
 
@@ -157,7 +161,7 @@
 #include "tables/St_dst_mon_soft_rich_Table.h"
 #include "tables/St_sgr_groups_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.51 2000/08/07 14:39:41 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.52 2000/08/31 03:44:45 lbarnby Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -321,7 +325,8 @@ Int_t  St_dst_Maker::Filler(){
   if (GetEventType()) strcpy (&event.event_type[0],GetEventType());
   event.n_event    = GetEventNumber();
   event.exp_run_id = GetRunNumber();
-  event.time       = GetTime();
+  time_t tt  =  GetDateTime().Convert()-timezone; // UTC -> local uncorrected for daylight saving time
+  event.time = localtime(&tt)->tm_isdst ? tt+3600 : tt; // assign and correct for summer time
   event_header->AddAt(&event,0);
   St_dst_event_summary *event_summary = new St_dst_event_summary("event_summary",1);
   dstI.Add(event_summary);
