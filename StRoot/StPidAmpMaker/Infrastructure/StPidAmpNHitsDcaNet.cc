@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNHitsDcaNet.cc,v 1.2 2000/04/11 15:34:23 aihong Exp $
+ * $Id: StPidAmpNHitsDcaNet.cc,v 1.3 2000/04/12 23:39:06 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNHitsDcaNet.cc,v $
+ * Revision 1.3  2000/04/12 23:39:06  aihong
+ * change heightExpected for deuteron
+ *
  * Revision 1.2  2000/04/11 15:34:23  aihong
  * change to adapt dividing trks by channel for faster filling
  *
@@ -207,7 +210,7 @@ void StPidAmpNHitsDcaNet::fitAmp(StPidAmpTrkVector* trks,TH3D* histo){
      heightExpected=(maxPoint(ampGraph(),true))*1.0;//2.0//2.475;
 
      if (mParticleType.id()==45) 
-     heightExpected=totalTrks*(mParticleType.maxllRatio());
+     heightExpected=(maxPoint(ampGraph(),true))*1.0;
 
      
      double centerExpected=fabs(mParticleType.maxllPeakPos());
