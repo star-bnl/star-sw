@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.32 2003/09/02 17:59:26 perev Exp $
+// $Id: StKinkMaker.cxx,v 1.33 2003/11/05 19:28:20 perev Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.33  2003/11/05 19:28:20  perev
+// Leak fixed, TObjArray::SetOwner() added
+//
 // Revision 1.32  2003/09/02 17:59:26  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -225,6 +228,7 @@ Int_t StKinkMaker::Make(){
 
   StKinkLocalTrack* tempTrack;
   TObjArray trackArray(MAXNUMOFTRACKS);
+  trackArray.SetOwner();
   
   Float_t x[3] = {0,0,0};
   Float_t b[3];
