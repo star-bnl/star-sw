@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.cxx,v 1.7 2000/06/09 14:21:21 laue Exp $
+ * $Id: MinvCorrFctn.cxx,v 1.8 2000/06/15 18:52:42 willson Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.cxx,v $
+ * Revision 1.8  2000/06/15 18:52:42  willson
+ * HbtAnalysis() method must be cast to specific analysis
+ * rotateEventCut installed
+ *
  * Revision 1.7  2000/06/09 14:21:21  laue
  * check of specific analysis type added
  *
@@ -49,7 +53,7 @@
 
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
 #include "StHbtMaker/Cut/mikesEventCut.h"
-#include "StHbtMaker/Cut/rotateToReactionPlaneEventCut.h"
+#include "StHbtMaker/Cut/rotationEventCut.h"
 
 #include <cstdio>
 
@@ -99,10 +103,10 @@ MinvCorrFctn::~MinvCorrFctn(){
 void MinvCorrFctn::Finish(){
   long NEvents = 1;
   if (   dynamic_cast<StHbtAnalysis*>( HbtAnalysis() )   ) {
-    if (   dynamic_cast<mikesEventCut*>( HbtAnalysis()->EventCut() )   )
-      NEvents = ((mikesEventCut*)HbtAnalysis()->EventCut())->NEventsPassed();
-    if (   dynamic_cast<rotateToReactionPlaneEventCut*>( HbtAnalysis()->EventCut() )   )
-      NEvents = ((rotateToReactionPlaneEventCut*)HbtAnalysis()->EventCut())->NEventsPassed();
+    if (   dynamic_cast<mikesEventCut*>( ((StHbtAnalysis*)HbtAnalysis())->EventCut() )   )
+      NEvents = ((mikesEventCut*)((StHbtAnalysis*)HbtAnalysis())->EventCut())->NEventsPassed();
+    if (   dynamic_cast<rotationEventCut*>( ((StHbtAnalysis*)HbtAnalysis())->EventCut() )   )
+      NEvents = ((rotationEventCut*)((StHbtAnalysis*)HbtAnalysis())->EventCut())->NEventsPassed();
   }
 
   mNumerator->Scale(1./NEvents);
