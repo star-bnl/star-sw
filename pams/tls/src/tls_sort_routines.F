@@ -1,3 +1,50 @@
+C================Zero all elements in row a table.===========================
+      INTEGER FUNCTION tls_Zero_Row( el1, el2 )
+C
+      IMPLICIT NONE
+C
+#include "tls_ecvalues.inc"
+C
+C        Inputs
+      INTEGER el1(*)    ! Element of first row to create index for.
+      INTEGER el2       ! Element in second row.
+                        ! we use Fortran 90.)
+ 
+C        Outputs
+C     None; memory starting at el1 going to el2 is zeroed.
+ 
+C        Return Values
+C           tls_sort_normal_cv (S):      Successful.
+C           tls_sort_id_short_cv (E):    el2 before el1 in memory.
+ 
+C        Comments: Normal call would look something like:
+C                  CALL tls_Zero_Row( Table(i), Table(i+1) )
+
+C                  This will set all elements of row i to zero.
+C                  The current implementation assumes the row is a mutiple
+C                  of 4 bytes long. This could be easily changed to
+C                  multiples of 2 bytes, at the possible cost of execution
+C                  speed.
+C
+C
+      INTEGER tls_loc ! Function to get memory location of variable.
+      INTEGER rc      ! Return code.
+      INTEGER nel     ! Number of elements in row of table
+      INTEGER i       ! Do loop index
+C
+C Loop through table filling index.
+      rc = tls_sort_normal_cv
+      nel = (tls_loc(el2) - tls_loc(el1(1)))/4
+      IF (nel .LE. 0) THEN
+          tls_Zero_Row = tls_sort_id_short_cv
+          RETURN
+          END IF
+      DO i = 1,nel
+         el1(i) = 0
+         END DO
+      tls_Zero_Row = rc
+      RETURN
+      END
 C================Create Index list for a table.===========================
       INTEGER FUNCTION tls_Id_Offsets( nrows, el1, el2, index, isize )
 C

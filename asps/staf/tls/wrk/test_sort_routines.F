@@ -9,7 +9,7 @@ C This program generates a few arrays of random numbers and then
 C sorts them in various ways. We should be able to make sure there
 C are no grevious errors in the tls sort routines.
 C
-      INTEGER tls_Index_Sort_r, tls_Index_Sort_i
+      INTEGER tls_Zero_Row, tls_Index_Sort_r, tls_Index_Sort_i
       INTEGER tls_Quick_Sort_r, tls_Quick_Sort_i
       INTEGER tls_Search_r, tls_Search_i
       INTEGER tls_Search_Index_r, tls_Search_Index_i
@@ -18,10 +18,12 @@ C
 C
       INTEGER size
       PARAMETER (size=10000)
-      INTEGER iseed, i, j, ok, index(size)
+      INTEGER iseed, i, j, k, ok, index(size)
       INTEGER pass1, pass2, pass3, krows, j_table_off(10), irandom
       INTEGER j_index_off(10)
       REAL    RAN, random
+      REAL    save_first
+      INTEGER save_last
 C
       REAL    ETIME, times(2), tstart, tend, del_time
 C
@@ -667,7 +669,7 @@ C
         END IF
 C
 C***************************************************************
-C The fifth and final set of checks is for Search_Near_Index.
+C The fifth set of checks is for Search_Near_Index.
 C***************************************************************
 C
 C We simply generate some random numbers and search table.r1 for them.
@@ -755,8 +757,7 @@ C  and the case where we are wrong about the starting position.
      +              '<<<<< '
         END IF
 C
-C Last test is to do an index sort and search using index to see
-C if it is faster than quicksort plus normal search.
+C We do a little timing test comparing sorting methods here.
       pass1 = 0
       pass2 = 0
       pass3 = 0
@@ -849,4 +850,69 @@ C if it is faster than quicksort plus normal search.
      +              '<<<<< '
         END IF
 
+C
+C***************************************************************
+C The sixth set of checks is for Zero_Row
+C***************************************************************
+C
+C Assume table has some random values.
+C Generate random index into table and zero that row.
+C We chack that all elements in row are in fact zeroed and the last
+C element of previous row and first element of next row are unchanged.
+C Do this 1000 times, just for kicks.
+      pass1 = 0
+      DO i = 1,size
+         j = size * RAN(iseed) + 1
+         IF (j.NE.1) THEN
+            save_first = table(j-1).dummy(6)
+            END IF
+         IF (j.NE.size) THEN
+            save_last  = table(j+1).i1
+            END IF
+         ok = tls_Zero_Row( table(j), table(j+1) )
+         IF (ok.EQ.tls_sort_id_short_cv) THEN
+             WRITE(6,*)' tls_Zero_Row thinks table(j+1) is before',
+     +                 ' table(j); j = ',j
+             pass1 = pass1 + 1
+             END IF
+C
+C Now tediously check element by element that row is 0.
+          IF (table(j).i1.NE.0) THEN
+             pass1 = pass1 + 1
+             END IF
+          IF (table(j).r1.NE.0.0) THEN
+             pass1 = pass1 + 1
+             END IF
+          IF (table(j).r2.NE.0.0) THEN
+             pass1 = pass1 + 1
+             END IF
+          IF (table(j).i2.NE.0) THEN
+             pass1 = pass1 + 1
+             END IF
+          DO k = 1,6
+             IF (table(j).dummy(k).NE.0.0) THEN
+                pass1 = pass1 + 1
+                END IF
+             END DO
+C
+C Also check pre and post-cursors.
+         IF (j.NE.1) THEN
+            IF (save_first .NE. table(j-1).dummy(6)) THEN
+               pass1 = pass1 + 1
+               END IF
+            END IF
+         IF (j.NE.size) THEN
+            IF (save_last  .NE. table(j+1).i1) THEN
+               pass1 = pass1 + 1
+               END IF
+            END IF
+         END DO
+      IF (pass1.EQ.0) THEN
+          WRITE(6,*)' ********************************************** '
+          WRITE(6,*)' tls_Zero_Row passed validation  '
+          WRITE(6,*)' ********************************************** '
+        ELSE
+          WRITE(6,*)' >>>>>tls_Zero_Row FAILED validation',
+     +              '<<<<< '
+        END IF
       END
