@@ -9,7 +9,7 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.17 1999/10/17 19:11:43 fine Exp $
+# $Id: cons,v 1.18 1999/10/19 21:32:12 fisyak Exp $
 $cons_history =
   q(
     Modification History:
@@ -44,7 +44,7 @@ $cons_history =
 $ver_num = 1.6;
 $ver_rev = "b1";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.17 1999/10/17 19:11:43 fine Exp $)'. "\n";
+	    '($Id: cons,v 1.18 1999/10/19 21:32:12 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -2220,6 +2220,7 @@ sub iflags {
     my($self) = @_;
     my($iflags);
     my($rflags);
+    my($oflags);
     my($dpath);
     # Recognize /I style include directive on Win32
     # <schwarze@isa.de> 1998-05-13
@@ -2228,7 +2229,7 @@ sub iflags {
     my($flagprefix) = " ${main::FLAG_CHARACTER}I";
     my $PWD = `pwd`; chomp($PWD);
     for $dpath (map($_->path, @{$self->{path}})) {
-      if ($dpath =~ /^$dir::MATCH_SEPARATOR/) {$iflags .= $flagprefix . $dpath; next;} 
+      if ($dpath =~ /^$dir::MATCH_SEPARATOR/) {$oflags .= $flagprefix . $dpath; next;} 
       $iflags .= $flagprefix . $PWD . "/" . $dpath;
 	if (@param::rpath) {
 	    my($suffix);
@@ -2241,7 +2242,7 @@ sub iflags {
 	    }
 	}
     }
-    $iflags . $rflags
+    $iflags . $rflags . $oflags
 }
 
 # Directory and file handling. Files/dirs are represented by objects.
