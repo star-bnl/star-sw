@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cxx,v 1.7 1999/06/16 10:50:16 ullrich Exp $
+ * $Id: StGlobalTrack.cxx,v 1.8 1999/07/16 12:34:49 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,11 +13,14 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cxx,v $
+ * Revision 1.8  1999/07/16 12:34:49  fisyak
+ * Fix PidTraits
+ *
+ * Revision 1.8  1999/07/16 12:34:49  fisyak
+ * Fix PidTraits
+ *
  * Revision 1.7  1999/06/16 10:50:16  ullrich
  * Added members to hold the number of hits in case
- * the hits are not stored on the DST. Sync changes in
- * StEvent with StRootEvent.
- *
  * the hits are not stored on the DST. Sync changes in
  * StEvent with StRootEvent.
  *
@@ -60,10 +63,10 @@
  * Revision 1.2  1999/01/15 22:53:44  wenaus
  * version with constructors for table-based loading
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.7 1999/06/16 10:50:16 ullrich Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.8 1999/07/16 12:34:49 fisyak Exp $";
  * Completely Revised for New Version
 #include "StGlobalTrack.h"
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.7 1999/06/16 10:50:16 ullrich Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.8 1999/07/16 12:34:49 fisyak Exp $";
  
 #include "tables/dst_track.h"
 #include "StVertex.h"
@@ -73,7 +76,7 @@ StGlobalTrack::StGlobalTrack()
     mTpcHits = 0;
     mSvtHits = 0;
     mFtpcHits = 0;
-    mPidTraits = 0;
+    mTpcDedx = 0; 
     mFtpcDedx = 0;
     mSvtDedx = 0; 
     mPidTraits = new StTrackPidTraits(this);
@@ -93,7 +96,7 @@ StGlobalTrack::StGlobalTrack(dst_track_st* trk,
     mTpcHits = 0;
     mSvtHits = 0;
     mFtpcHits = 0;
-    mPidTraits = 0;
+    mTpcDedx = 0; 
     mFtpcDedx = 0;
     mSvtDedx = 0; 
     mPidTraits = new StTrackPidTraits(this);
@@ -101,7 +104,7 @@ StGlobalTrack::StGlobalTrack(dst_track_st* trk,
     mNumberOfSvtHits = 0;
     mNumberOfFtpcHits = 0; 
 }
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.7 1999/06/16 10:50:16 ullrich Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.8 1999/07/16 12:34:49 fisyak Exp $";
 StGlobalTrack::~StGlobalTrack() {
     //
     //   If a track gets deleted make sure
@@ -111,6 +114,7 @@ StGlobalTrack::~StGlobalTrack() {
     //   here since they are too slow.
     //
     SafeDelete(mTpcHits);
+    SafeDelete(mSvtHits);
     SafeDelete(mFtpcHits);
     SafeDelete(mTpcDedx);
     SafeDelete(mPidTraits);
