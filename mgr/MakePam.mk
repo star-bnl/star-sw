@@ -1,52 +1,69 @@
-include $(STAR)/mgr/MakeEnv.mk
-include $(STAR)/mgr/MakeSYS.mk
+ifndef STAF_MAKE_HOME
+  STAF_MAKE_HOME := $(STAR)/mgr
+endif
+
+include $(STAF_MAKE_HOME)/MakeEnv.mk
+include $(STAF_MAKE_HOME)/MakeArch.mk
+
 ifdef SILENT
-.SILENT:
+  .SILENT:
 endif
+#	INPUT DIR
 ifndef INP_DIR
-INP_DIR := $(CWD)
+  INP_DIR := $(CWD)
 endif
+ifeq (,$(strip $(filter /%,$(INP_DIR))))
+  override INP_DIR := $(CWD)/$(INP_DIR)
+endif
+
+
+
 LEVEL   := $(words  $(subst /, ,$(subst $(word 1, $(subst /pams, ,$(INP_DIR))),, $(INP_DIR))))
 ifeq (,$(findstring $(LEVEL),0 1))
-ifndef OUT_DIR
-OUT_DIR := $(word 1, $(subst /pams, ,$(INP_DIR)))
-endif
-PKG     := $(notdir $(INP_DIR))
-D       := $(subst /, ,$(subst $(OUT_DIR),,$(INP_DIR)))
-DOMAIN  := $(word 2, $(D))
-ifeq ($(DOMAIN),gen)
-DOMAIN  := $(word 3, $(D))
-endif
-ifeq ($(DOMAIN),sim)
-DOMAIN  := $(word 3, $(D))
-endif
-ifneq (,$(DOMAIN)$(PKG)) 
-SRC_DIR := $(INP_DIR)
-SYS_DIR := $(OUT_DIR)/.$(STAR_HOST_SYS)
-LIB_DIR := $(SYS_DIR)/lib
-OBJ_DIR := $(SYS_DIR)/obj/$(DOMAIN)
-DEP_DIR := $(SYS_DIR)/dep/$(DOMAIN)
-DIR_GEN := $(OUT_DIR)/.share
-GEN_TMP := $(DIR_GEN)/tmp
-GEN_TAB := $(DIR_GEN)/tables
-GEN_DIR := $(DIR_GEN)/$(DOMAIN)
-DOM_DIRS:= $(filter-out CVS, $(shell cd $(OUT_DIR)/pams/; ls))
+  ifndef OUT_DIR
+    OUT_DIR := $(word 1, $(subst /pams, ,$(INP_DIR)))
+  endif
+  ifeq (,$(strip $(filter /%,$(OUT_DIR))))
+    override OUT_DIR := $(CWD)/$(OUT_DIR)
+  endif
+
+
+  PKG     := $(notdir $(INP_DIR))
+  D       := $(subst /, ,$(subst $(OUT_DIR),,$(INP_DIR)))
+  DOMAIN  := $(word 2, $(D))
+  ifeq ($(DOMAIN),gen)
+    DOMAIN  := $(word 3, $(D))
+  endif
+  ifeq ($(DOMAIN),sim)
+    DOMAIN  := $(word 3, $(D))
+  endif
+  ifneq (,$(DOMAIN)$(PKG)) 
+    SRC_DIR := $(INP_DIR)
+    SYS_DIR := $(OUT_DIR)/.$(STAR_HOST_SYS)
+    LIB_DIR := $(SYS_DIR)/lib
+    OBJ_DIR := $(SYS_DIR)/obj/$(DOMAIN)
+    DEP_DIR := $(SYS_DIR)/dep/$(DOMAIN)
+    DIR_GEN := $(OUT_DIR)/.share
+    GEN_TMP := $(DIR_GEN)/tmp
+    GEN_TAB := $(DIR_GEN)/tables
+    GEN_DIR := $(DIR_GEN)/$(DOMAIN)
+    DOM_DIRS:= $(filter-out CVS, $(shell cd $(OUT_DIR)/pams/; ls))
 #.
-check_out   := $(shell test -d $(OUT_DIR) || mkdir -p $(OUT_DIR)) 
-check_sys   := $(shell test -d $(SYS_DIR) || mkdir -p $(SYS_DIR)) 
-check_lib   := $(shell test -d $(LIB_DIR) || mkdir -p $(LIB_DIR))
-check_obj   := $(shell test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR))
-check_dep   := $(shell test -d $(DEP_DIR) || mkdir -p $(DEP_DIR))
-check_gen   := $(shell test -d $(DIR_GEN) || mkdir -p $(DIR_GEN))
-check_gen   := $(shell test -d $(GEN_TMP) || mkdir -p $(GEN_TMP))
-check_neg   := $(shell test -d $(GEN_DIR) || mkdir -p $(GEN_DIR))
-check_tab   := $(shell test -d $(GEN_TAB) || mkdir -p $(GEN_TAB))
-check_tmp   := $(shell test -d $(GEN_TMP) || mkdir -p $(GEN_TMP))
-IDLS    := $(wildcard $(SRC_DIR)/*.idl $(SRC_DIR)/*/*.idl)
-ifneq (,$(IDLS))       
-FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(IDLS))
-FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
-endif
+    check_out   := $(shell test -d $(OUT_DIR) || mkdir -p $(OUT_DIR)) 
+    check_sys   := $(shell test -d $(SYS_DIR) || mkdir -p $(SYS_DIR)) 
+    check_lib   := $(shell test -d $(LIB_DIR) || mkdir -p $(LIB_DIR))
+    check_obj   := $(shell test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR))
+    check_dep   := $(shell test -d $(DEP_DIR) || mkdir -p $(DEP_DIR))
+    check_gen   := $(shell test -d $(DIR_GEN) || mkdir -p $(DIR_GEN))
+    check_gen   := $(shell test -d $(GEN_TMP) || mkdir -p $(GEN_TMP))
+    check_neg   := $(shell test -d $(GEN_DIR) || mkdir -p $(GEN_DIR))
+    check_tab   := $(shell test -d $(GEN_TAB) || mkdir -p $(GEN_TAB))
+    check_tmp   := $(shell test -d $(GEN_TMP) || mkdir -p $(GEN_TMP))
+    IDLS    := $(wildcard $(SRC_DIR)/*.idl $(SRC_DIR)/*/*.idl)
+    ifneq (,$(IDLS))       
+      FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(IDLS))
+      FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
+    endif
 #_________________________________________________________________________
 SUFFIXES := .c .cc .C .cxx .f .F .g .h .hpp .inc .idl
 sources := $(strip $(sort $(dir $(foreach s, $(SUFFIXES), $(wildcard $(SRC_DIR)/*$(s) $(SRC_DIR)/*/*$(s) $(SRC_DIR)/*/*/*$(s))))))
@@ -156,19 +173,19 @@ FILES_SL  += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $
 endif                          
 ifeq (,$(findstring $(STAR_HOST_SYS),hp_ux102 hp_ux102_aCC))
 ifndef CERN_LIBS               
-    CERN_LIBS := $(shell cernlib mathlib kernlib)
+    CERN_LIBS := $(shell cernlib mathlib packlib kernlib)
 endif
 else
     CERN_LIBS :=
 endif                          
 ifndef LIBRARIES
-		LIBRARIES := $(LIB_PKG)	               
+  LIBRARIES := $(LIB_PKG)	               
 ifneq ($(STAR_PATH),$(OUT_DIR))   
-ifneq ($(LIB_PKG),)
-LIBRARIES += $(wildcard  $(STAR_LIB)/lib$(PKG).a)
+  ifneq ($(LIB_PKG),)
+    LIBRARIES += $(wildcard  $(STAR_LIB)/lib$(PKG).a)
+  endif                           
 endif                           
-endif                           
-LIBRARIES += -L$(STAR)/asps/../.$(STAR_HOST_SYS)/lib -ltls -lmsg
+####LIBRARIES += -L$(STAR)/asps/../.$(STAR_HOST_SYS)/lib -ltls -lmsg
 endif                          
 ifeq (,$(strip $(LIB_PKG) $(SL_PKG)))
 all:
@@ -188,8 +205,8 @@ $(LIB_PKG):$(OBJS)
 endif                          
 ifneq ($(strip $(FILES_SL) $(FILES_OG) $(FILES_init)),)   
 $(SL_PKG): $(FILES_SL) $(FILES_OG) $(FILES_init) $(LIB_PKG)
-	$(LD) $(LDFLAGS) $(FILES_SL) $(FILES_OG)  $(FILES_init)  -o $(SL_PKG) \
-        $(LIBRARIES) $(CERN_LIBS) $(FLIBS) $(CLIBS) 
+	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG)  $(FILES_init)  -o $(SL_PKG) \
+        $(LIBRARIES)  
 	@echo "           Shared library " $(SL_PKG) " has been created"   
 #--------- module --------- 
 ifneq ($(NAMES_IDM),)           
@@ -383,7 +400,7 @@ test_mk:
 	@echo "CPP      =" $(CPP)"	; CPPFLAGS 	="	$(CPPFLAGS)
 	@echo "FC       =" $(FC)"	; FFLAGS 	="	$(FFLAGS)
 	@echo FEXTEND= $(FEXTEND)
-	@echo "LD       =" $(LD)"	; LDFLAGS	="	$(LDFLAGS)
+	@echo "SO       =" $(SO)"	; SOFLAGS	="	$(SOFLAGS)
 	@echo "FLIBS  =" $(FLIBS)" ; CLIBS	="	$(CLIBS)
 	@echo "LDS      =" $(LDS)"     ; LDS_FLAGS   	="     $(LDS_FLAGS)
 	@echo RM        = $(RM)

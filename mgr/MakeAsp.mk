@@ -176,7 +176,7 @@ ASPS := $(notdir $(subst / , ,$(dir $(wildcard $(UPP_INP_DIR)/*/src)) ))
 
 
 FILES_A := $(wildcard $(LIB_DIR)/lib*.a)
-FILES_S := $(addprefix $(LIB_DIR)/lib,$(addsuffix .$(SOEXT),$(ASPS)))
+FILES_S := $(addprefix $(LIB_DIR)/lib,$(addsuffix .$(So),$(ASPS)))
 
 #
 #	List of all libs
@@ -195,7 +195,8 @@ endif
 L_DIR_ANA  :=$(addprefix -L,$(sort $(subst / , ,$(dir $(STAF_ANA_LIBS)) )))
 LIB_DIRS := $(filter-out -L, $(L_DIR_THIS) $(L_DIR_ANA) $(L_DIR_ANA))
 
-ALL_LIBS := $(subst lib,-l,$(basename $(notdir $(ALL_LIBS))))  $(FLIBS) $(CLIBS)
+ALL_LIBS := $(subst lib,-l,$(basename $(notdir $(ALL_LIBS))))  
+ALL_LIBS := -ltdm -lspx -lsoc -lasu -ltop -ltnt -lami -ldio -ldui -ldsl -ldsu
 ifndef SYSTEM_DOMAIN
 ALL_LIBS := $(ALL_LIBS) $(STAF_CERN_LIBS) $(FLIBS) $(CLIBS)
 else
@@ -227,7 +228,7 @@ FILES_O := $(addprefix $(OBJ_DIR)/,$(addsuffix .o, $(notdir $(basename $(FILES_O
 FILES_DIDLM :=$(addsuffix .didlm, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_IDLM)))))
 
 MY_LIB := $(LIB_DIR)/lib$(PKGNAME).a 
-MY_SO  := $(LIB_DIR)/lib$(PKGNAME).$(SOEXT)
+MY_SO  := $(LIB_DIR)/lib$(PKGNAME).$(So)
 
 #	for SDD only
 ifdef PKG_SDD
@@ -297,15 +298,15 @@ CDFtoC: $(FILES_C_CDF)
 
 IdlToH: $(FILES_IDH)
 
-lib : CDFtoC IdlToH $(MY_LIB)
-#lib : CDFtoC IdlToH $(MY_LIB) $(MY_SO)
+#lib : CDFtoC IdlToH $(MY_LIB)
+lib : CDFtoC IdlToH $(MY_LIB) $(MY_SO)
 
 $(MY_LIB) : $(FILES_O)
 	$(AR) $(ARFLAGS) $(MY_LIB) $(FILES_O)
 	touch $(MY_LIB)
 
 $(MY_SO) : $(FILES_O)
-	$(SO) $(SOFLAGS) -o $(LIB_DIR)/lib$(PKGNAME).$(SOEXT) $(FILES_O)
+	$(SO) $(SOFLAGS) -o $(LIB_DIR)/lib$(PKGNAME).$(So) $(FILES_O)
 
 $(SRC_GEN_DIR)/%.c : %.cdf
 	kuipc -c $(ALL_DEPS) $(SRC_GEN_DIR)/$(STEM).c
@@ -394,7 +395,7 @@ show:
 	@echo STAF_MAKE_HOME   	:= $(STAF_MAKE_HOME)
 	@echo SUFF_IDM    	:= $(SUFF_IDM) 
 	@echo SUFF_IDL    	:= $(SUFF_IDL) 
-	@echo SOEXT    		:= $(SOEXT) 
+	@echo So    		:= $(So) 
 	@echo INP_DIR     	:= $(INP_DIR) 
 	@echo OUT_DIR     	:= $(OUT_DIR) 
 	@echo PKGNAME     	:= $(PKGNAME) 

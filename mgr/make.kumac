@@ -1,4 +1,6 @@
 macro make 
+on error exitm
+
 if [#]>0 then
 for pam in [*]
   t = $word([pam],1,1,'/')
@@ -12,13 +14,14 @@ for pam in [*]
   exec makes pam=[p]
 endfor
 else
-for pam in geometry  mwc sim/gstar sim/g2t svt vpd ctf ftpc magnet tpc emc global
+for pam in geometry  mwc sim/g2t sim/gstar svt vpd ctf ftpc magnet tpc emc global
    exec makes pam=pams/[pam]
 endfor
 endif
 return
 **************************************************
 macro makes pam=pams/tpc makefile=$STAR/mgr/Makefile
+on error exitm
 cut = ' \( -type d -a ! -name CVS -a ! -name idl _
                    -a ! -name exa -a ! -name inc _
                    -a ! -name "src/*" _

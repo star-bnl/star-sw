@@ -47,61 +47,15 @@ endif
 
 UNAMES := $(shell uname -s)
 UNAMER := $(shell uname -r)
-UNAMEP := $(shell uname -p)
-UNAMESRP := $(UNAMES)_$(UNAMER)_$(UNAMEP)
-#
-# Determine TULL_ARCH variable.
-#
-TULL_ARCH := unknown
-ifeq (intel_wnt,$(UNAMES))
-  TULL_ARCH := WIN32
-endif        
-
-ifeq (AIX,$(UNAMES))
-  TULL_ARCH := aix
-endif        
-
-ifeq (HP-UX,$(UNAMES))
-  TULL_ARCH := hpux
-endif        
-
-ifeq (IRIX_4,$(findstring IRIX_4,$(UNAMESRP)))
-  TULL_ARCH := irix
-endif        
-
-ifeq (IRIX_5,$(findstring IRIX_5,$(UNAMESRP)))
-  TULL_ARCH := irix
-endif        
-
-ifeq (IRIX64,$(UNAMES))
-  TULL_ARCH := irix64
-endif        
-
-ifeq (Linux,$(UNAMES))
-  TULL_ARCH := linux
-endif        
-
-ifeq (OSF1,$(UNAMES))
-  TULL_ARCH := osf1
-endif        
-
-ifeq (SunOS_4,$(findstring SunOS_4,$(UNAMESRP)))
-  TULL_ARCH := sun4
-endif        
-
-ifeq (SunOS_5,$(findstring SunOS_5,$(UNAMESRP)))
-  ifeq (86,$(findstring 86,$(UNAMEP))) 
-    TULL_ARCH := sun4os5pc
-  else
-    TULL_ARCH := sun4os5
-  endif        
-endif        
 
 #
 # Determine STAF_ARCH variable.
 #
-STAF_ARCH := $(shell sys)
-
+ifdef STAR_SYS
+  STAF_ARCH := $(STAR_SYS)
+else
+  STAF_ARCH := $(shell sys)
+endif
 #
 # Determine Experiment variable.
 #
