@@ -27,22 +27,23 @@ if ($term eq "") {
 } else {
 	$term = $term. ".rhic.bnl.gov";
 }
-
+my $ssh = "ssh";
+if (-e "/usr/local/bin/ssh1") {$ssh = "ssh1";} 
 if (! $color) {
 	$color = " -bg black -fg white  -sb -sl 4000 -geometry 132x64";
 }
 
 if (($comp =~ /^rsgi/) || ($comp =~ /^ribm/) || ($comp =~ /^rnfs/) || 
     ($comp =~ /^rmds0[12]/) || ($comp =~ /^rdev/) || ($comp =~ /^rls/)) {
-	$com = "ssh " . $comp . ".rhic.bnl.gov xterm" . $color . " -title " . $comp . " -n " . $comp . "&";
+	$com = $ssh . " "  . $comp . ".rhic.bnl.gov xterm" . $color . " -title " . $comp . " -n " . $comp . "&";
 } elsif (($comp =~ /^ru/) || ($comp =~ /^rsun/) || ($comp =~ /^rcf/) || 
          ($comp =~ /^rmds00/) || ($comp =~ /^rmds03/)) {
-        $com = "ssh " . $comp . ".rhic.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
+        $com = $ssh . " "  . $comp . ".rhic.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif (($comp =~ /^rcas/) || ($comp =~ /^rcrs/) || ($comp =~ /^rlnx/) ) {
-	$com = "ssh " . $comp . ".rcf.bnl.local xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
+	$com = $ssh . " "  . $comp . ".rcf.bnl.local xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif (($comp =~ /^sol/) || ($comp =~ /^flynn/) || ($comp =~ /^elvis/) || 
          ($comp =~ /^robinson/) || ($comp =~ /^pickford/))
-{        $com = "ssh " . $comp . ".star.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
+{        $com = $ssh . " "  . $comp . ".star.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif ($comp eq "-v") {
 	print ("\nXterminal utility program, version 1.0, by Alex Lenderman, RCF\n");
 } elsif (($comp eq "-h") || ($comp eq "")) {
