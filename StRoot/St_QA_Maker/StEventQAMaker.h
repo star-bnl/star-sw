@@ -24,6 +24,7 @@ class StEventQAMaker : public StQAMakerBase {
   Int_t n_prim_good;
   Int_t n_glob_good;
   Bool_t allTrigs;
+  Int_t   multiplicity; // multiplicity of current event
  
 //------------------------------------------------------------------------
   
@@ -55,15 +56,18 @@ class StEventQAMaker : public StQAMakerBase {
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.8 2003/01/17 15:15:47 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.9 2003/02/19 06:38:28 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
     };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.8 2003/01/17 15:15:47 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.9 2003/02/19 06:38:28 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.9  2003/02/19 06:38:28  genevb
+// Rework trigger and mult/event class sections
+//
 // Revision 2.8  2003/01/17 15:15:47  genevb
 // Add AllTriggers() function to ignore trigger words
 //

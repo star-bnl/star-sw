@@ -70,9 +70,9 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
 
   my $hh = $h;
 
-  if (!-f $hh) {($hh = $h) =~ s/.*.share/StRoot/;}
-  if (!-f $hh) {($hh = $h) =~ s/.*.share/asps/;} 
-  if (!-f $hh) {($hh = $h) =~ s/.*.share//;} 
+  if (!-f $hh) {($hh = $h) =~ s/.*\.share/StRoot/;}
+  if (!-f $hh) {($hh = $h) =~ s/.*\.share/asps/;} 
+  if (!-f $hh) {($hh = $h) =~ s/.*\.share//;} 
 
   if ($h != $hh ){
       print "=== RootCint-Info :: massaging h = hh = $h --> hh = $hh\n";

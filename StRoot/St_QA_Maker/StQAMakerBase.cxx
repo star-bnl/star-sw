@@ -1,5 +1,17 @@
-// $Id: StQAMakerBase.cxx,v 2.19 2003/02/15 22:00:52 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.23 2003/02/28 16:01:09 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.23  2003/02/28 16:01:09  genevb
+// Further improvements for previous check-in
+//
+// Revision 2.22  2003/02/28 06:17:56  genevb
+// Allow StQAMakerBase::Make to be called for all events
+//
+// Revision 2.21  2003/02/20 20:09:54  genevb
+// Several changes for new trigger scheme, dAu data
+//
+// Revision 2.20  2003/02/19 06:38:29  genevb
+// Rework trigger and mult/event class sections
+//
 // Revision 2.19  2003/02/15 22:00:52  genevb
 // Add tpcSectors, fix ftpc east/west charge
 //
@@ -77,9 +89,9 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
  StMaker(name,title), QAMakerType(type) {
 
   hists = 0;
-  histsList = new TList();
-  histsSet = 0;
-  multClass = 3;
+  histsList.Expand(32);
+  histsSet = StQA_Undef;
+  eventClass = 3;
 
 //  - Set all the histogram booking constants
 
@@ -99,19 +111,30 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   m_glb_trk_chg=0;          //! all charge east/west, tpc
   m_glb_trk_chgF=0;         //! all charge east/west, ftpc
 
+// FTPC histograms
+  m_ftpc_chargestepW=0; //! Chargestep from ftpc west
+  m_ftpc_chargestepE=0; //! Chargestep from ftpc east
+  m_ftpc_fcl_radialW=0;  //! ftpc west cluster radial position
+  m_ftpc_fcl_radialE=0;  //! ftpc east cluster radial position
+
 }
 //_____________________________________________________________________________
 StQAMakerBase::~StQAMakerBase() {
-  delete histsList;
 }
 //_____________________________________________________________________________
-Int_t StQAMakerBase::Init(){
+Int_t StQAMakerBase::Init() {
 // Histogram booking must wait until first event Make() to determine event type
   firstEvent = kTRUE;
+  firstEventClass = kTRUE;
   return StMaker::Init();
 }
 //_____________________________________________________________________________
-Int_t StQAMakerBase::Make(){
+void StQAMakerBase::Clear(Option_t* opt) {
+  firstEventClass = kTRUE;
+  StMaker::Clear(opt);
+}
+//_____________________________________________________________________________
+Int_t StQAMakerBase::Make() {
 
   if (Debug())
     gMessMgr->Info(" In StQAMakerBase::Make()");
@@ -119,33 +142,32 @@ Int_t StQAMakerBase::Make(){
   if (firstEvent) BookHist();
   // See BookHist() for definitions of histsSet values,
   // which should be set during Make() of the derived QA Maker class
+  // event class also decided in derived Make()
   switch (histsSet) {
-    case (0) : {
-      multClass = 0;
-      hists = (StQABookHist*) histsList->At(0);
-      break; }
-    case (1) : {
-      if (multiplicity < 50) multClass = 0;
-      else if (multiplicity < 500) multClass = 1;
-      else if (multiplicity < 2500) multClass = 2;
-      else multClass = 3;
-
-      mMultClass->Fill(multClass);
-      if (!multClass) return kStOk;
-      hists = (StQABookHist*) histsList->At((Int_t) (--multClass));
-      break; }
-    case (2) : {
-      multClass = 0;
-      hists = (StQABookHist*) histsList->At(0);
-      break; }
-    default  : {}
+    case (StQA_AuAu) :
+      mMultClass->Fill((float) eventClass);
+    default : {
+      if (!eventClass) { hists=0; return kStOk; }
+      hists = (StQABookHist*) histsList.At((--eventClass));
+    }
   }
 
+  if (!hists) NewQABookHist();
+    
+
+  if (!fillHists) return kStOk;
   // Call methods to fill histograms
 
 
-  // histograms from table event_summary
-  MakeHistEvSum();
+  // Those not divided by event class:
+  if (firstEventClass) {
+    // histograms from table event_summary
+    MakeHistEvSum();
+    
+    firstEventClass = kFALSE;
+  }
+
+  // Those divided by event class:
   // histograms from table globtrk
   MakeHistGlob();
   // histograms from table primtrk - must be done after global tracks
@@ -163,7 +185,7 @@ Int_t StQAMakerBase::Make(){
   // histograms from EMC in StEvent
   MakeHistEMC();
   // histograms from geant and reco tables 
-  if (histsSet==0) MakeHistEval();
+  if (histsSet==StQA_MC) MakeHistEval();
   // histograms from BBC in StEvent
   MakeHistBBC();
   // histograms from FPD in StEvent
@@ -172,19 +194,22 @@ Int_t StQAMakerBase::Make(){
   return kStOk;
 }
 //_____________________________________________________________________________
-void StQAMakerBase::NewQABookHist(const char* prefix) {  
-
+void StQAMakerBase::NewQABookHist() {
+  const char* pre = prefix[eventClass].Data();
   if (Debug())
     gMessMgr->Info() <<
-      "StQAMakerBase: booking histograms with prefix: " << prefix << endm;
-  hists = new StQABookHist(prefix);
-  histsList->Add(hists);
+      "StQAMakerBase: booking histograms with prefix: " <<
+      pre << endm;
+  QAH::maker = (StMaker*) (this);
+  hists = new StQABookHist(pre);
+  histsList.AddAt(hists,eventClass);
+  hists->BookHist(histsSet);
 }
 //_____________________________________________________________________________
 TH2F* StQAMakerBase::MH1F(const Text_t* name, const Text_t* title,
                           Int_t nbinsx, Axis_t xlow, Axis_t xup) {
-  TH2F* h = QAH::MH1F(name,title,nbinsx,xlow,xup,(Int_t) multClass);
-  if (multClass>1) {
+  TH2F* h = QAH::MH1F(name,title,nbinsx,xlow,xup,eventClass);
+  if (eventClass>1) {
     h->Rebin(0,"low mult");
     h->Rebin(1,"mid mult");
     h->Rebin(2,"high mult");
@@ -196,34 +221,40 @@ void StQAMakerBase::BookHist() {
 // book histograms
 
   firstEvent = kFALSE;
-  TString temp;
+  Int_t tempClass = eventClass;
 
   switch (histsSet) {
 
-    // Generic data (e.g. Monte Carlo) with just one multiplicity class
-    case (0) : {
-      NewQABookHist(QAMakerType.Data());
-      break; }
-
     // Real data with three multiplicity classes (low, medium, high)
-    case (1) : {
-      (temp = QAMakerType) += "LM";
-      NewQABookHist(temp.Data());
-      (temp = QAMakerType) += "MM";
-      NewQABookHist(temp.Data());
-      (temp = QAMakerType) += "HM";
-      NewQABookHist(temp.Data());
+    case (StQA_AuAu) : {
+      (prefix[0] = QAMakerType) += "LM";
+      (prefix[1] = QAMakerType) += "MM";
+      (prefix[2] = QAMakerType) += "HM";
+      eventClass = 3;
       break; }
 
-    // pp data with just one multiplicity class
-    case (2) : {
-      NewQABookHist(QAMakerType.Data());
+    // Real data with event classes for different triggers
+    case (StQA_dAu) : {
+      prefix[0] = QAMakerType;  // Minbias
+      (prefix[1] = QAMakerType) += "HP";
+      (prefix[2] = QAMakerType) += "XX";
+      eventClass = 3;
       break; }
 
-    default  : {}
+ // the following data sets use the defaults
+ 
+    // Generic data (e.g. Monte Carlo) with just one event class
+    case (StQA_MC) :
+
+    // pp data with just one event class
+    case (StQA_pp) :
+
+    default  : {
+      prefix[0] = QAMakerType;
+      eventClass = 1;
+    }
   }
   
-  multClass = histsList->GetSize();
   QAH::maker = (StMaker*) (this);
   QAH::preString = QAMakerType;
 
@@ -231,8 +262,17 @@ void StQAMakerBase::BookHist() {
   BookHistGeneral();
   BookHistEvSum();
   BookHistFcl();
-  for (Int_t i=0; i<multClass; i++)
-    ((StQABookHist*) (histsList->At(i)))->BookHist(histsSet);
+
+  Int_t tempClass2 = eventClass;
+  // Must book the histograms with no special prefix now
+  for (eventClass=0; eventClass<tempClass2; eventClass++) {
+    if (!(QAMakerType.CompareTo(prefix[eventClass]))) {
+      NewQABookHist();
+      break;
+    }
+  }
+  eventClass = tempClass;
+  
 }
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistGeneral(){  
@@ -241,7 +281,7 @@ void StQAMakerBase::BookHistGeneral(){
   mNullPrimVtx->SetXTitle("has primary vertex? (yes = 1, no = -1)");
   mNullPrimVtx->SetYTitle("# of events");
 
-  if (histsSet == 1) {
+  if (histsSet == StQA_AuAu) {
     mMultClass = QAH::H1F("QaMultClass","event multiplicity class",5,-0.5,4.5);
     mMultClass->SetXTitle("mult class (0=?/MC, 1=LM, 2=MM, 3=HM)");
     mMultClass->SetYTitle("# of events");
@@ -278,21 +318,21 @@ void StQAMakerBase::BookHistEvSum(){
   m_glb_trk_chgF = MH1F("QaEvsumTotChgF","softmon: all charge east/west,ftpc",60,0,3);
 }
 //_____________________________________________________________________________
-void StQAMakerBase::BookHistFcl(){  
+void StQAMakerBase::BookHistFcl(){
 
   // Get fcl histograms from FTPC makers
-  if (!(hists->m_ftpc_chargestepW)) {
+  if (!(m_ftpc_chargestepW)) {
     // First try to get histograms from StFtpcClusterMaker named "ftpc_hits"
     StMaker* fhMaker = GetMaker("ftpc_hits");
     if (fhMaker) {
-      hists->m_ftpc_chargestepW = (TH1F*) (fhMaker->GetHist("fcl_chargestepW"));
-      AddHist(hists->m_ftpc_chargestepW);
-      hists->m_ftpc_chargestepE = (TH1F*) (fhMaker->GetHist("fcl_chargestepE"));
-      AddHist(hists->m_ftpc_chargestepE);
-      hists->m_ftpc_fcl_radialW = (TH1F*) (fhMaker->GetHist("fcl_radialW"));
-      AddHist(hists->m_ftpc_fcl_radialW);
-      hists->m_ftpc_fcl_radialE = (TH1F*) (fhMaker->GetHist("fcl_radialE"));
-      AddHist(hists->m_ftpc_fcl_radialE);
+      m_ftpc_chargestepW = (TH1F*) (fhMaker->GetHist("fcl_chargestepW"));
+      AddHist(m_ftpc_chargestepW);
+      m_ftpc_chargestepE = (TH1F*) (fhMaker->GetHist("fcl_chargestepE"));
+      AddHist(m_ftpc_chargestepE);
+      m_ftpc_fcl_radialW = (TH1F*) (fhMaker->GetHist("fcl_radialW"));
+      AddHist(m_ftpc_fcl_radialW);
+      m_ftpc_fcl_radialE = (TH1F*) (fhMaker->GetHist("fcl_radialE"));
+      AddHist(m_ftpc_fcl_radialE);
     } else {
       // "ftpc_hits" maker doesn't exist, so look in hist branch
       // *** Currently isn't working for bfcread_event_QAhist.C ***
@@ -301,18 +341,18 @@ void StQAMakerBase::BookHistFcl(){
         // hDS->ls(9);
         St_DataSet* fhDS = hDS->Find("ftpc_hitsHist");
         if (fhDS) {
-          hists->m_ftpc_chargestepW =
+          m_ftpc_chargestepW =
 	    (TH1F*) (fhDS->FindObject("fcl_chargestepW"));
-          AddHist(hists->m_ftpc_chargestepW);
-          hists->m_ftpc_chargestepE =
+          AddHist(m_ftpc_chargestepW);
+          m_ftpc_chargestepE =
 	    (TH1F*) (fhDS->FindObject("fcl_chargestepE"));
-          AddHist(hists->m_ftpc_chargestepE);
-          hists->m_ftpc_fcl_radialW =
+          AddHist(m_ftpc_chargestepE);
+          m_ftpc_fcl_radialW =
 	    (TH1F*) (fhDS->FindObject("fcl_radialW"));
-          AddHist(hists->m_ftpc_fcl_radialW);
-          hists->m_ftpc_fcl_radialE =
+          AddHist(m_ftpc_fcl_radialW);
+          m_ftpc_fcl_radialE =
 	    (TH1F*) (fhDS->FindObject("fcl_radialE"));
-          AddHist(hists->m_ftpc_fcl_radialE);
+          AddHist(m_ftpc_fcl_radialE);
         }
       }
     }

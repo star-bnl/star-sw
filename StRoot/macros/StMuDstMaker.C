@@ -125,6 +125,7 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   ioMaker->SetDebug();
   ioMaker->SetBranch("*",0,"0");           //deactivate all branches
   ioMaker->SetBranch("eventBranch",0,"r"); //activate evt.root Branch
+  ioMaker->SetBranch("emcBranch",0,"r");   //activate evt.root Branch
   ioMaker->SetBranch("runcoBranch",0,"r"); //activate runcoBranch
 
 
@@ -145,7 +146,9 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   }
 
   StMuDstMaker* maker = new StMuDstMaker(1,1,dirName);
-  maker->setProbabilityPidFile("/afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
+  // You can change the PIDTable map using the above method.
+  //maker->setProbabilityPidFile("Path/PIDTable.root");
+  maker->setProbabilityPidFile();
 
   StMuL3Filter* l3Filter = new StMuL3Filter(); maker->setL3TrackFilter(l3Filter);
   StMuFilter* filter = new StMuFilter();       maker->setTrackFilter(filter);

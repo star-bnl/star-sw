@@ -1,5 +1,17 @@
-// $Id: St_QA_Maker.cxx,v 2.11 2002/05/29 13:54:30 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.15 2003/02/28 16:01:09 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.15  2003/02/28 16:01:09  genevb
+// Further improvements for previous check-in
+//
+// Revision 2.14  2003/02/28 06:17:56  genevb
+// Allow StQAMakerBase::Make to be called for all events
+//
+// Revision 2.13  2003/02/20 20:09:54  genevb
+// Several changes for new trigger scheme, dAu data
+//
+// Revision 2.12  2003/02/19 06:38:29  genevb
+// Rework trigger and mult/event class sections
+//
 // Revision 2.11  2002/05/29 13:54:30  genevb
 // Some changes to FTPC chisq histos
 //
@@ -118,10 +130,10 @@ Int_t St_QA_Maker::Make(){
         event_header_st* evh = evHeader->GetTable();
         if (evh) {
           if (!strcmp(evh->event_type,"NONE")) {
-            histsSet = 1;
+            histsSet = StQA_AuAu;
           } else {
             // process Monte Carlo events
-            histsSet = 0;
+            histsSet = StQA_MC;
           }
         }
       }
@@ -135,22 +147,33 @@ Int_t St_QA_Maker::Make(){
 	if (tt->iflag==1 && tt->vtx_id==kEventVtxId) {
 	  St_dst_track* gtracks = (St_dst_track*) dstI["globtrk"];
 	  multiplicity = gtracks->GetNRows();
+          if (histsSet == StQA_AuAu) {
+            if (multiplicity < 50) eventClass = 0;
+            else if (multiplicity < 500) eventClass = 1;
+            else if (multiplicity < 2500) eventClass = 2;
+            else eventClass = 3;
+          } else {
+            eventClass = 1;
+          }
+          fillHists = kTRUE;
 	  int makeStat = StQAMakerBase::Make();
 	  foundPrimVtx = kTRUE;
 	  mNullPrimVtx->Fill(1);
-	  if (histsSet == 1)
-	    hists->mNullPrimVtxMult->Fill(1);
-	  return makeStat;
-	}
+          if ((histsSet == StQA_AuAu) && (hists))
+            hists->mNullPrimVtxClass->Fill(1);
+          return makeStat;
+        }
       }
     }
   }
   if (foundPrimVtx == kFALSE) {
     cout << "Error in St_QA_Maker::Make(): no primary vertex found!" << endl;
     mNullPrimVtx->Fill(-1);
-    if (histsSet == 1)
-      hists->mNullPrimVtxMult->Fill(-1);
-    return kStOk;
+    fillHists = kFALSE;
+    int makeStat = StQAMakerBase::Make();
+    if ((histsSet == StQA_AuAu) && (hists))
+      hists->mNullPrimVtxClass->Fill(-1);
+    return makeStat;
   }
   else {
     cout << "Error in St_QA_Maker::Make(): no dst dataset found!" << endl;
@@ -175,7 +198,7 @@ void St_QA_Maker::MakeHistEvSum(){
       else
 	tpcChgEast += t->chrg_tpc_in[i]+t->chrg_tpc_out[i];
     }
-    m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,multClass);
+    m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,(float) eventClass);
   }
 }
 

@@ -21,6 +21,8 @@ int Bank_TRGD::HerbSwap2003(char *ptr) {
 
   assert(header.ByteOrder==0x01020304||header.ByteOrder==0x04030201);
   if(header.ByteOrder==0x04030201) return 0;
+  returnValue=header.swap();
+  assert(header.ByteOrder==0x04030201);
 
   swapHerb2bytes(&(gs2003->EvtDesc.TCUdataBytes),1);
   swapHerb4bytes(&(gs2003->EvtDesc.bunchXing_hi),1);
@@ -60,8 +62,17 @@ int Bank_TRGD::HerbSwap2003(char *ptr) {
   swapHerb2bytes(&(gs2003->TrgSum.L2SumHeader),1);
   swapHerb4bytes(&(gs2003->TrgSum.L2Result[0]),32);
   
+  // Herb, Mar 28 2003.  There is a bug, from which the npre/npost numbers in the 
+  // trigger data (5/5) sometimes do not agree with the bank len in the TRGD header, which causes a seg vio
+  // in the for() loop below.  Here I check for the bug, and if it's present, I override npre and npost.
+  if( 4*header.BankLength < (1+gs2003->EvtDesc.npre+gs2003->EvtDesc.npost) * sizeof(RawTrgDet) ) {
+    gs2003->EvtDesc.npre=0; gs2003->EvtDesc.npost=0;
+  }
+
   numToSwap=1+gs2003->EvtDesc.npost+gs2003->EvtDesc.npre; assert(numToSwap<50&&numToSwap>0);
   assert(numToSwap>=0&&numToSwap<=PREPOST);
+
+
   for(i=0;i<numToSwap;i++) { // loop over NPRE, NPOST as well
     swapHerb2bytes(&(gs2003->RAW[i].RawDetBytes),1);
     swapHerb2bytes(&(gs2003->RAW[i].CTBdataBytes),1);
@@ -85,8 +96,6 @@ int Bank_TRGD::HerbSwap2003(char *ptr) {
     swapHerb2bytes(&(gs2003->RAW[i].ZDClayer1[0]),8);
   }
 
-  returnValue=header.swap();
-  assert(header.ByteOrder==0x04030201);
   return returnValue;
 }
 

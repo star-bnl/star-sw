@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.5 2003/01/09 18:59:46 laue Exp $
+ * $Id: StMuEvent.h,v 1.7 2003/02/20 15:29:42 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -10,6 +10,7 @@
 #include "TObject.h"
 #include "StMuL3EventSummary.h"
 #include "StMuEmcCollection.h"
+#include "StMuTriggerIdCollection.h"
 
 #include "StEvent/StEventInfo.h"
 #include "StEvent/StRunInfo.h"
@@ -19,6 +20,7 @@
 #include "StEvent/StBbcTriggerDetector.h"
 #include "StEvent/StFpdCollection.h"
 #include "StEvent/StL0Trigger.h"
+#include "StEvent/StTriggerIdCollection.h"
 #include "StEvent/StDetectorState.h"
 
 #include "StStrangeMuDstMaker/StStrangeMuDst.hh"
@@ -43,6 +45,7 @@ class StMuEvent : public TObject {
   int eventNumber();
   int runId();
   int runNumber();
+  // classes taken strait from StEvent
   StRunInfo& runInfo();
   StEventInfo& eventInfo();
   StEventSummary& eventSummary();
@@ -51,7 +54,9 @@ class StMuEvent : public TObject {
   StBbcTriggerDetector& bbcTriggerDetector();
   StFpdCollection& fpdCollection(); 
   StL0Trigger& l0Trigger(); 
+  // Special classes for the muDst
   StMuL3EventSummary& l3EventSummary();
+  StMuTriggerIdCollection& triggerIdCollection();
 
   /// Reference multiplicity of positive particles as defined in StEventUtilities/StuRefMult.hh
   unsigned short refMultPos();
@@ -84,9 +89,9 @@ class StMuEvent : public TObject {
   StBbcTriggerDetector mBbcTriggerDetector;
   StFpdCollection mFpdCollection; 
   StL0Trigger mL0Trigger; 
-
   // special classes from MuDst
   StMuL3EventSummary mL3EventSummary;
+  StMuTriggerIdCollection mTriggerIdCollection;
 
   UShort_t mRefMultPos;
   UShort_t mRefMultNeg;
@@ -96,7 +101,7 @@ class StMuEvent : public TObject {
   friend class StMuDst;
   friend class StMuDstMaker;
   friend class StMuL3EventSummary;
-  ClassDef(StMuEvent,2)
+  ClassDef(StMuEvent,3)
 };
 
 inline int StMuEvent::eventId() { return mEventInfo.id();}
@@ -111,7 +116,9 @@ inline StZdcTriggerDetector& StMuEvent::zdcTriggerDetector() {return mZdcTrigger
 inline StBbcTriggerDetector& StMuEvent::bbcTriggerDetector() {return mBbcTriggerDetector;}
 inline StFpdCollection& StMuEvent::fpdCollection() {return mFpdCollection;} 
 inline StL0Trigger& StMuEvent::l0Trigger() {return mL0Trigger;} 
+// special classes for muDst
 inline StMuL3EventSummary& StMuEvent::l3EventSummary() {return mL3EventSummary;}
+inline StMuTriggerIdCollection& StMuEvent::triggerIdCollection(){return mTriggerIdCollection;}
 inline unsigned short StMuEvent::refMultPos() {return mRefMultPos;}
 inline unsigned short StMuEvent::refMultNeg() {return mRefMultNeg;}
 inline unsigned short StMuEvent::refMult() {return refMultPos()+refMultNeg();}
@@ -137,6 +144,12 @@ inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.7  2003/02/20 15:29:42  laue
+ * StMuTriggerIdCollection added
+ *
+ * Revision 1.6  2003/02/19 13:52:11  laue
+ * added the StTriggerIdCollection
+ *
  * Revision 1.5  2003/01/09 18:59:46  laue
  * initial check in of new EMC classes and the changes required
  *

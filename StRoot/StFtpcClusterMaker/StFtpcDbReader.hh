@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.12 2003/01/14 12:58:01 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.13 2003/02/19 14:50:39 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.13  2003/02/19 14:50:39  jcs
+// get default temperatures from database
+//
 // Revision 1.12  2003/01/14 12:58:01  jcs
 // use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
 // FTPC asic mapping
@@ -113,6 +116,8 @@ protected:
   Float_t mBasePressure;
   Float_t mPressureOffset;
   Float_t mTemperatureDifference;
+  Float_t mDefaultTemperatureWest;
+  Float_t mDefaultTemperatureEast;
 
   Float_t mTZero;
   Float_t mDriftCathodeVoltage;
@@ -227,6 +232,8 @@ public:
   Float_t basePressure() {return mBasePressure;}
   Float_t pressureOffset() {return mPressureOffset;}
   Float_t temperatureDifference(){return mTemperatureDifference;}
+  Float_t defaultTemperatureWest(){return mDefaultTemperatureWest;}
+  Float_t defaultTemperatureEast(){return mDefaultTemperatureEast;}
 
   Float_t tZero() {return mTZero;}
   Float_t driftCathodeVoltage() {return mDriftCathodeVoltage;}
