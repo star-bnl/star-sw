@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.36 1999/06/07 22:56:45 fisyak Exp $
+// $Id: makedoc.C,v 1.37 1999/06/11 21:41:19 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.37  1999/06/11 21:41:19  fine
+// StarClassLibary share lib is to be loaded
+//
 // Revision 1.36  1999/06/07 22:56:45  fisyak
 // Add EventRead
 //
@@ -64,9 +67,11 @@
 //     gSystem->Load("St_global");
      gSystem->Load("StChain");
    
+     gSystem->Load("St_TLA_Maker.so");
      gSystem->Load("St_io_Maker.so");
      gSystem->Load("St_xdfin_Maker");
      gSystem->Load("St_evg_Maker");
+     gSystem->Load("StarClassLibrary");
      gSystem->Load("StRootEvent");
 
 //     gSystem->Load("St_ebye_Maker");
@@ -95,6 +100,9 @@
     sourcedir += ":";
     sourcedir += STAR;
     sourcedir += "/StRoot/StRootEvent";
+    sourcedir += ":";
+    sourcedir += STAR;
+    sourcedir += "/StRoot/StarClassLibrary";
   }
 
   TString lookup ;
@@ -117,6 +125,9 @@
     lookup += "/StRoot/St_io_Maker:";
     lookup += STAR;
     lookup += "/StRoot/StRootEvent";
+    lookup += ":";
+    lookup += STAR;
+    lookup += "/StRoot/StarClassLibrary";
   }
 
     
@@ -140,9 +151,10 @@
                        ,"St_io_Maker",   "StHelix3DPoints", "StHits3DPoints"
                        ,"StObjArray",    "StHit",            "StHelixD"
                        ,"StTrack",       "St_TableElementDescriptor"
+                       ,"St_TLA_Maker"
                        ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
-  Int_t nclass = 32;
+  Int_t nclass = 33;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
@@ -178,6 +190,8 @@
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
   cout << " Makeing HTML's for macros" << endl;
+  html.Convert("./basic3dPrimitives.C","An example of the basic 3D STAR object");
+  html.Convert("./EventPanel.C","An example of the ToolBar to control an applications");
   html.Convert("./DrawTpcHits.C","How to draw 3D view for hits and");
   html.Convert("./DrawTrackTpcHits.C","How to draw 3D view for hits and tracks");
   html.Convert("./PadControlPanel.C","How to manipulate with 3D pad images");
