@@ -41,6 +41,18 @@ static float ftpcPadrowZPos[20] = {162.75,171.25,184.05,192.55,205.35,
 
 ClassImp(StEventQAMaker)
 
+Bool_t isTriggerInSubRange(const StTriggerId* tr, UInt_t lo, UInt_t hi) {
+// Only the last three digits matter...
+// ...according to Jeff Landgraf's triggerID scheme
+  vector<unsigned int> idVec = tr->triggerIds();
+  for (UInt_t i=lo; i<=hi; i++) {
+    UInt_t j = i - ((i/1000)*1000);
+    for (UInt_t k=0; k<idVec.size(); k++)
+      if (idVec[k] > 2000 &&
+          j == (idVec[k] - ((idVec[k]/1000)*1000))) return kTRUE;
+  }
+  return kFALSE;
+}
 Bool_t isTriggerInRange(const StTriggerId* tr, UInt_t lo, UInt_t hi) {
   for (UInt_t i=lo; i<=hi; i++)
     if (tr->isTrigger(i)) return kTRUE;
@@ -205,21 +217,24 @@ Int_t StEventQAMaker::Make() {
 
  // AuAu
 
-       if (isTriggerInRange(trigId,15007,15099)) {
+       if (isTriggerInSubRange(trigId,0,99)) {
+       //if (isTriggerInRange(trigId,15007,15099)) {
          mTrigWord->Fill(1.); // "MinBias"
          doEvent = kTRUE;
 	 evClasses[nEvClasses] = 1;
 	 nEvClasses++;
          histsSet = StQA_AuAu;
        }
-       if (isTriggerInRange(trigId,15105,15199)) {
+       if (isTriggerInSubRange(trigId,100,199)) {
+       //if (isTriggerInRange(trigId,15105,15199)) {
          mTrigWord->Fill(2.); // "Central"
          doEvent = kTRUE;
 	 evClasses[nEvClasses] = 2;
 	 nEvClasses++;
          histsSet = StQA_AuAu;
        }
-       if (isTriggerInRange(trigId,15202,15299)) {
+       if (isTriggerInSubRange(trigId,200,299)) {
+       //if (isTriggerInRange(trigId,15202,15299)) {
          mTrigWord->Fill(5.); // "High Tower"
          doEvent = kTRUE;
 	 evClasses[nEvClasses] = 3;
@@ -2091,8 +2106,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.56 2004/02/12 05:03:05 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.57 2004/03/03 01:19:29 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.57  2004/03/03 01:19:29  genevb
+// Updated triggerIDs for Jeff Landgraf's scheme
+//
 // Revision 2.56  2004/02/12 05:03:05  genevb
 // Year 4 AuAu changes. New SVT histos.
 //
