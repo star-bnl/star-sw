@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.10 1999/12/10 18:11:18 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.11 1999/12/10 22:28:19 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.11  1999/12/10 22:28:19  kathy
+// fix limits of evsum histogram
+//
 // Revision 1.10  1999/12/10 18:11:18  kathy
 // changed limits of some histograms so we can at least see all the data; changed booking order for globtrk histograms
 //
@@ -435,7 +438,7 @@ void StQABookHist::BookHistEvSum(){
 // for method MakeEvSum - from table event_summary
 
   m_trk_tot_gd    = QAH1F("QaEvsumTrkGoodDTotal",
-    "evsum: num good track over total",  50,0.,1.0);
+    "evsum: num good track over total",  55,0.,1.1);
     m_trk_tot_gd->SetXTitle("number of good/total tracks");
 
   m_glb_trk_tot   = QAH1F("QaEvsumTrkTot","evsum: num tracks total ",
