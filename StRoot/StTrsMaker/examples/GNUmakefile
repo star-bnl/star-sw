@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile,v 1.4 1999/01/26 20:41:17 lasiuk Exp $
+# $Id: GNUmakefile,v 1.5 1999/02/28 20:11:23 lasiuk Exp $
 #
 # Author: Brian, October 1998
 # --------------------------------------------------------------------------
@@ -8,8 +8,8 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile,v $
-# Revision 1.4  1999/01/26 20:41:17  lasiuk
-# examples on SUN
+# Revision 1.5  1999/02/28 20:11:23  lasiuk
+# add programs
 #
 # Revision 1.4  1999/01/26 20:41:17  lasiuk
 # examples on SUN
@@ -26,7 +26,7 @@ TRS_HOME  = ..
 CPPFLAGS  +=	-I$(SCL_HOME)/include \
 		-I$(TRS_HOME)/include
 
-LIB_PATH  :=	-L$(SCL_HOME)/$(STAR_SYS)/lib \
+LIB_PATH  :=	-L$(SCL_HOME)/lib/$(STAR_SYS) \
 			-L$(shell pwd)/$(TRS_HOME)/$(STAR_SYS)
 
 LIBS      :=	-lscl -lpacklib -lStTrs 
@@ -36,6 +36,8 @@ LIBS      :=	-lscl -lpacklib -lStTrs
 ifeq ($(STAR_SYS),hp_ux102)
 	CPPFLAGS      := -DRWSTD_BOUNDS_CHECKING -DST_NO_EXCEPTIONS \
 			 -I/opt/aCC/include/SC \
+			-I$(SCL_HOME)/include \
+			-I$(TRS_HOME)/include
 	LIB_PATH      += -L/cern/pro/lib
 	LDFLAGS       := -Wl,+vnocompatwarnings +p
 endif
@@ -74,7 +76,9 @@ endif
 
 #all:	trsSector
 #all:	trsExample
-all:	trsDataBase
+#all:	trsDataBase
+all:	maker
+#all:	trsCoordinate
 
 %:	%.cc GNUmakefile
 	@echo Compliling...
@@ -82,4 +86,4 @@ all:	trsDataBase
 #	$(CXX) $(CXXFLAGS)  $(CPPFLAGS) $< -o $@ $(LDFLAGS) $(LIB_PATH) $(LIBS)
 
 clean:
-	@rm -rf trsSector trsExample trsDataBase core *.o
+	@rm -rf trsSector trsExample trsDataBase maker trsCoordinate core *.o
