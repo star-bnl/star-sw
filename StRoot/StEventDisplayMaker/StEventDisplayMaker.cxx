@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.28 1999/11/07 05:27:12 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.29 1999/11/08 17:47:54 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.29  1999/11/08 17:47:54  fine
+// The bug for tpt_track filtering was fixed
+//
 // Revision 1.28  1999/11/07 05:27:12  fine
 // Take in account new data-member of tpt_track table: length
 //
@@ -817,7 +820,7 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
         if (filter) trackColor =  filter->Filter(tptTrack,i,trackSize,trackStyle);  //
         // ------------------------------------------------------------------------ //
         if (trackColor > 0) {
-           tpt_track_st &t = *track++;
+           tpt_track_st &t = *(track+i);
            const float rad = 3.1415926/180.;
            float angle =  t.phi0 * rad;
            StThreeVectorD vector(t.r0*cos(angle),t.r0*sin(angle),t.z0);
