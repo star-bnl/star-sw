@@ -48,7 +48,7 @@ void StDetectorDbTpcVoltages::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbTpcVoltages::StDetectorDbTpcVoltages(){
-    ~gMess << "StDetectorDbTpcVoltages::StDetectorDbTpcVoltages" << endm;
+    ~(*gMessMgr) << "StDetectorDbTpcVoltages::StDetectorDbTpcVoltages" << endm;
     mTpcVoltages = 0;
     mTable = 0;
 };

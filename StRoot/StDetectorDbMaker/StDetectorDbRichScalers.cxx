@@ -9,9 +9,9 @@
 
   #include "StDetectorDbMaker/StDetectorDbRichScalers.h"
   StDetectorRichScalers * scalers = StDetectorRichScalers::intstance();
-  ~gMess << *scalers << endm;
-  ~gMess << scalers->getZDCWest() << endm;
-  ~gMess << scalers->getRichHVStatus() << endm;
+  ~(*gMessMgr) << *scalers << endm;
+  ~(*gMessMgr) << scalers->getZDCWest() << endm;
+  ~(*gMessMgr) << scalers->getRichHVStatus() << endm;
   
   or any other access methods.
   
@@ -37,7 +37,7 @@ StDetectorDbRichScalers* StDetectorDbRichScalers::instance()
 
 /// Default constructor
 StDetectorDbRichScalers::StDetectorDbRichScalers(){
-    ~gMess << "StDetectorDbRichScalers::StDetectorDbRichScalers" << endm;
+    ~(*gMessMgr) << "StDetectorDbRichScalers::StDetectorDbRichScalers" << endm;
     mScalers = 0;
     mVolts = 0;
     mY1Mults = 0;

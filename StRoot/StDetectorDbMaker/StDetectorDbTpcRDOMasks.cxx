@@ -9,8 +9,8 @@ It is a singleton which requires manual updating, usually taken care of in StDet
 
   #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
   StDetectorDbTpcRDOMasks * masks = StDetectorDbTpcRDOMasks::intstance();
-  ~gMess << *masks << endm;
-  ~gMess << masks->isOn(sector,rdo) << endm;
+  ~(*gMessMgr) << *masks << endm;
+  ~(*gMessMgr) << masks->isOn(sector,rdo) << endm;
  
 */
 
@@ -63,16 +63,16 @@ void StDetectorDbTpcRDOMasks::update(StMaker* maker){
 	}
 	
 	if( dataSet == 0 || mTable == 0 || mNumEntries == 0)
-	    ~gMess << "StDetectorDbTpcRDOMasks: No RDO Table For This Run";
+	    ~(*gMessMgr) << "StDetectorDbTpcRDOMasks: No RDO Table For This Run";
     }
     else
-	~gMess << "StDetectorDbTpcRDOMasks: No RDO Table For This Run";
+	~(*gMessMgr) << "StDetectorDbTpcRDOMasks: No RDO Table For This Run";
     
 };
 
 /// Default constructor
 StDetectorDbTpcRDOMasks::StDetectorDbTpcRDOMasks(){
-    ~gMess << "StDetectorDbTpcRDOMasks::StDetectorDbTpcRDOMasks" << endm;
+    ~(*gMessMgr) << "StDetectorDbTpcRDOMasks::StDetectorDbTpcRDOMasks" << endm;
     mNumEntries = 0;
     mMaskVector = 0;
     mTable = 0;
@@ -106,7 +106,7 @@ unsigned int StDetectorDbTpcRDOMasks::getSectorMask(unsigned int sector){
     //unsigned int mask = 0xFFFF; // change to  ON by default ** THIS WAS A HACK
     
     if(sector < 1 || sector > 24 || mNumEntries == 0){
-      ~gMess << "StDetectorDbTpcRDOMasks::getSectorMask : return default mask for " 
+      ~(*gMessMgr) << "StDetectorDbTpcRDOMasks::getSectorMask : return default mask for " 
 	   << "sector= " << sector << " mNumEntries=" << mNumEntries << endm;
       return mask;
     }
