@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.cc,v 1.7 2004/01/29 17:24:39 perev Exp $
+ * $Id: St_SvtDb_Reader.cc,v 1.8 2004/01/30 07:22:07 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.cc,v $
+ * Revision 1.8  2004/01/30 07:22:07  munhoz
+ * adding rms and daq parameters reading
+ *
  * Revision 1.7  2004/01/29 17:24:39  perev
  * Replace assert to delete
  *
@@ -46,14 +49,17 @@
 #include "StSvtClassLibrary/StSvtGeometry.hh"
 #include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 #include "StSvtClassLibrary/StSvtT0.hh"
+#include "StSvtClassLibrary/StSvtDaq.hh"
 
 #include "tables/St_svtConfiguration_Table.h"
 #include "tables/St_svtDriftVelAvg_Table.h"
 #include "tables/St_svtBadAnodes_Table.h"
 #include "tables/St_svtPedestals_Table.h"
+#include "tables/St_svtRms_Table.h"
 #include "tables/St_svtWafersPosition_Table.h"
 #include "tables/St_svtDimensions_Table.h"
 #include "tables/St_svtElectronics_Table.h"
+#include "tables/St_svtDaq_Table.h"
 
 #ifdef __ROOT__
 ClassImp(St_SvtDb_Reader)
@@ -64,16 +70,36 @@ svtElectronics_st *electronic = NULL;
 //_____________________________________________________________________________
 St_SvtDb_Reader::St_SvtDb_Reader()
 {
-  mSvtDriftVeloc=0;
-  mSvtConfig = 0;
   memset(svtDb,0,sizeof(svtDb));
+  mSvtConfig = NULL;      
+  mSvtDriftVeloc = NULL;
+  mSvtPed = NULL; 
+  mSvtRms = NULL; 
+  mSvtGeom = NULL;        
+  mSvtBadAnodes = NULL; 
+  mSvtT0 = NULL;                
+  mSvtDaq = NULL;
 }
 
 //_____________________________________________________________________________
 St_SvtDb_Reader::~St_SvtDb_Reader()
 {
-  delete mSvtDriftVeloc;
-  delete mSvtConfig;
+  if (mSvtDriftVeloc)
+    delete mSvtDriftVeloc;
+  if (mSvtConfig)
+    delete mSvtConfig;
+  if (mSvtPed)
+    delete mSvtPed; 
+  if (mSvtRms)
+    delete mSvtRms; 
+  if (mSvtGeom)
+    delete mSvtGeom;        
+  if (mSvtBadAnodes)
+    delete mSvtBadAnodes; 
+  if (mSvtT0)
+    delete mSvtT0;                
+  if (mSvtDaq)
+    delete mSvtDaq;
 }
 
 //_____________________________________________________________________________
@@ -88,7 +114,7 @@ void St_SvtDb_Reader::setDataBase(St_DataSet* input, dbSvtType type)
 //_____________________________________________________________________________
 StSvtConfig* St_SvtDb_Reader::getConfiguration()
 {
-  cout << "St_SvtDb_Reader::getConfiguration" << endl;
+  gMessMgr->Info() << "St_SvtDb_Reader::getConfiguration" << endm;
 
   St_svtConfiguration *configuration;
   const int dbIndex = kGeometry;
@@ -106,20 +132,21 @@ StSvtConfig* St_SvtDb_Reader::getConfiguration()
 
   svtConfiguration_st* config = configuration->GetTable();
 
-  cout << "numberOfBarrels = " << config->numberOfBarrels << endl;
-  cout << "numberOfLadders = "  << config->numberOfLadders << endl;
-  cout << "numberOfWafers = "  << config->numberOfWafers << endl;
-  cout << "numberOfHybrids = "  << config->numberOfHybrids << endl;
+  gMessMgr->Info() << "numberOfBarrels = " << config->numberOfBarrels << endm;
+  gMessMgr->Info() << "numberOfLadders = "  << config->numberOfLadders << endm;
+  gMessMgr->Info() << "numberOfWafers = "  << config->numberOfWafers << endm;
+  gMessMgr->Info() << "numberOfHybrids = "  << config->numberOfHybrids << endm;
   
-  cout << "numberOfLaddersPerBarrel[0] = "  << config->numberOfLaddersPerBarrel[0] << endl;
-  cout << "numberOfLaddersPerBarrel[1] = "  << config->numberOfLaddersPerBarrel[1] << endl;
-  cout << "numberOfLaddersPerBarrel[2] = "  << config->numberOfLaddersPerBarrel[2] << endl;
-  cout << "numberOfWafersPerLadder[0] = "  << config->numberOfWafersPerLadder[0] << endl;
-  cout << "numberOfWafersPerLadder[1] = "  << config->numberOfWafersPerLadder[1] << endl;
-  cout << "numberOfWafersPerLadder[2] = "  << config->numberOfWafersPerLadder[2] << endl;
-  cout << "numberOfHybridsPerWafer = "  << config->numberOfHybridsPerWafer << endl;
+  gMessMgr->Info() << "numberOfLaddersPerBarrel[0] = "  << config->numberOfLaddersPerBarrel[0] << endm;
+  gMessMgr->Info() << "numberOfLaddersPerBarrel[1] = "  << config->numberOfLaddersPerBarrel[1] << endm;
+  gMessMgr->Info() << "numberOfLaddersPerBarrel[2] = "  << config->numberOfLaddersPerBarrel[2] << endm;
+  gMessMgr->Info() << "numberOfWafersPerLadder[0] = "  << config->numberOfWafersPerLadder[0] << endm;
+  gMessMgr->Info() << "numberOfWafersPerLadder[1] = "  << config->numberOfWafersPerLadder[1] << endm;
+  gMessMgr->Info() << "numberOfWafersPerLadder[2] = "  << config->numberOfWafersPerLadder[2] << endm;
+  gMessMgr->Info() << "numberOfHybridsPerWafer = "  << config->numberOfHybridsPerWafer << endm;
 
-  mSvtConfig = new StSvtConfig();
+  if (!mSvtConfig)
+    mSvtConfig = new StSvtConfig();
 
   mSvtConfig->setNumberOfBarrels(config->numberOfBarrels);
 
@@ -142,10 +169,11 @@ StSvtConfig* St_SvtDb_Reader::getConfiguration()
 //_____________________________________________________________________________
 StSvtHybridCollection* St_SvtDb_Reader::getDriftVelocity()
 {
-  cout << "St_SvtDb_Reader::getDriftVelocity" << endl;
-//  assert(!mSvtDriftVeloc);
-  delete mSvtDriftVeloc;
-  mSvtDriftVeloc = new StSvtHybridCollection(mSvtConfig);
+  //  gMessMgr->Info() << "St_SvtDb_Reader::getDriftVelocity" << endm;
+
+  if(!mSvtDriftVeloc)
+    mSvtDriftVeloc = new StSvtHybridCollection(mSvtConfig);
+
   getDriftVelocityAverage(mSvtDriftVeloc);
 
   return mSvtDriftVeloc;
@@ -154,7 +182,7 @@ StSvtHybridCollection* St_SvtDb_Reader::getDriftVelocity()
 //_____________________________________________________________________________
 void St_SvtDb_Reader::getDriftVelocityAverage(StSvtHybridCollection* svtDriftVeloc)
 {
-  cout << "St_SvtDb_Reader::getDriftVelocityAverage" << endl;
+  gMessMgr->Info() << "St_SvtDb_Reader::getDriftVelocityAverage" << endm;
 
   St_svtDriftVelAvg *driftVelocity;
   const int dbIndex = kCalibration;
@@ -192,8 +220,6 @@ void St_SvtDb_Reader::getDriftVelocityAverage(StSvtHybridCollection* svtDriftVel
 	    break;
 	  }
 
-	  //cout << path << endl;
-
 	  // get wafers position table
 	  if (svtDb[dbIndex]){
 	    driftVelocity = (St_svtDriftVelAvg*)svtDb[dbIndex]->Find(path);
@@ -218,9 +244,10 @@ void St_SvtDb_Reader::getDriftVelocityAverage(StSvtHybridCollection* svtDriftVel
 	    hybridDriftVeloc->setV3(driftVeloc->averageDriftVelocity,anode);
 	  }
 
-	  cout << "index = " << index << ", averageDriftVelocity = " << driftVeloc->averageDriftVelocity << endl;
+	  if ((index==0) || (index==431)) 
+	    gMessMgr->Info() << "index = " << index << ", averageDriftVelocity = " << driftVeloc->averageDriftVelocity << endm;
 
-	  svtDriftVeloc->put_at(hybridDriftVeloc,index);
+	  mSvtDriftVeloc->put_at(hybridDriftVeloc,index);
 
 	} // end of loop over hybrids
       } // end of loop over wafers
@@ -232,7 +259,7 @@ void St_SvtDb_Reader::getDriftVelocityAverage(StSvtHybridCollection* svtDriftVel
 //_____________________________________________________________________________
 StSvtHybridCollection* St_SvtDb_Reader::getPedestals()
 {
-  cout << "St_SvtDb_Reader::getPedestals" << endl;
+  gMessMgr->Info() << "St_SvtDb_Reader::getPedestals" << endm;
 
   St_svtPedestals *pedestals;
   const int dbIndex = kCalibration;
@@ -251,7 +278,8 @@ StSvtHybridCollection* St_SvtDb_Reader::getPedestals()
   svtPedestals_st *pedestal = pedestals->GetTable();
 
   // Create all pedestal objects
-  StSvtHybridCollection* svtPed = new StSvtHybridCollection(mSvtConfig);
+  if (!mSvtPed)
+    mSvtPed = new StSvtHybridCollection(mSvtConfig);
   StSvtHybridPed* hybridPed;
   int index;
 
@@ -264,29 +292,92 @@ StSvtHybridCollection* St_SvtDb_Reader::getPedestals()
 
 	  if (index < 0) continue;
 
-	  hybridPed = new StSvtHybridPed(barrel,ladder,wafer,hybrid);
+	  hybridPed = (StSvtHybridPed*)mSvtPed->at(index);
+	  if (!hybridPed)
+	    hybridPed = new StSvtHybridPed(barrel,ladder,wafer,hybrid);
 	  hybridPed->reset();
 
 	  // loop over anodes
 	  for (int anode = 1; anode <= mSvtConfig->getNumberOfAnodes(); anode++)
 	    for (int time = 0; time < mSvtConfig->getNumberOfTimeBins(); time++) {
 	      hybridPed->addToPixel(anode,time,pedestal[index].pedestal[anode-1][time]);
-	      cout << anode << "  " << time << "  " << pedestal[index].pedestal[anode-1][time] << endl;
+	      //gMessMgr->Info() << anode << "  " << time << "  " << pedestal[index].pedestal[anode-1][time] << endm;
 	    }
 
-	  svtPed->put_at(hybridPed,index);
+	  mSvtPed->put_at(hybridPed,index);
 
 	} // end of loop over hybrids
       } // end of loop over wafers
     } // end of loop over ladders
   } // end of loop over barrels
 
-  return svtPed;
+  return mSvtPed;
+}
+
+
+//_____________________________________________________________________________
+StSvtHybridCollection* St_SvtDb_Reader::getRms()
+{
+  gMessMgr->Info() << "St_SvtDb_Reader::getRms" << endm;
+
+  St_svtRms *st_rms;
+  const int dbIndex = kCalibration;
+  if (svtDb[dbIndex]){
+    st_rms = (St_svtRms*)svtDb[dbIndex]->Find("svtRms");
+    if (!(st_rms && st_rms->HasData()) ){
+     gMessMgr->Message("Error Finding SVT RMS","E");
+     return 0;
+    }
+  }
+  else {
+    gMessMgr->Message("Error Finding SVT Calibration Db","E");
+    return 0;
+  }
+
+  svtRms_st *rms = st_rms->GetTable();
+
+  // Create all pedestal objects
+  if (!mSvtRms)
+    mSvtRms = new StSvtHybridCollection(mSvtConfig);
+  StSvtHybridPixels* hybridRms;
+  int index;
+
+  for (int barrel = 1;barrel <= mSvtConfig->getNumberOfBarrels();barrel++) {
+    for (int ladder = 1;ladder <= mSvtConfig->getNumberOfLadders(barrel);ladder++) {
+      for (int wafer = 1;wafer <= mSvtConfig->getNumberOfWafers(barrel);wafer++) {
+	for (int hybrid = 1;hybrid <= mSvtConfig->getNumberOfHybrids();hybrid++) {
+
+	  index = mSvtConfig->getHybridIndex(barrel,ladder,wafer,hybrid);
+
+	  if (index < 0) continue;
+
+	  hybridRms = (StSvtHybridPixels*)mSvtRms->at(index);
+	  if (!hybridRms)
+	    hybridRms = new StSvtHybridPixels(barrel,ladder,wafer,hybrid);
+	  hybridRms->reset();
+
+	  // loop over anodes
+	  for (int anode = 1; anode <= mSvtConfig->getNumberOfAnodes(); anode++)
+	    for (int time = 0; time < mSvtConfig->getNumberOfTimeBins(); time++) {
+	      hybridRms->addToPixel(anode,time,rms[index].rms[anode-1][time]);
+	      //gMessMgr->Info() << anode << "  " << time << "  " << rms[index].rms[anode-1][time] << endm;
+	    }
+
+	  mSvtRms->put_at(hybridRms,index);
+
+	} // end of loop over hybrids
+      } // end of loop over wafers
+    } // end of loop over ladders
+  } // end of loop over barrels
+
+  return mSvtRms;
 }
 
 //_____________________________________________________________________________
 StSvtGeometry* St_SvtDb_Reader::getGeometry()
 {
+  gMessMgr->Info() << "St_SvtDb_Reader::getGeometry" << endm;
+
   // get svt dimensions table
   St_svtDimensions *dimensions;
   const int dbIndex = kGeometry;
@@ -305,29 +396,30 @@ StSvtGeometry* St_SvtDb_Reader::getGeometry()
   svtDimensions_st *dimension = dimensions->GetTable();
 
   // Create all pedestal objects
-  StSvtGeometry* svtGeom = new StSvtGeometry(mSvtConfig);
+  if (!mSvtGeom)  
+    mSvtGeom = new StSvtGeometry(mSvtConfig);
   StSvtWaferGeometry* waferGeom;
   int index;
 
-  svtGeom->setBarrelRadius(dimension->barrelRadius);
-  svtGeom->setWaferLength(dimension->waferLength);
-  svtGeom->setWaferThickness(dimension->waferThickness);
-  svtGeom->setWaferWidth(dimension->waferWidth);
-  //svtGeom->setAnodePitch(dimension->anodePitch);
-  svtGeom->setAnodePitch(0.025);
-  svtGeom->setFocusRegionLength(dimension->focusRegionLength);
-  svtGeom->setDistanceInjector(dimension->distanceInjector);
-  svtGeom->setLaserPosition(dimension->laserPosition);
+  mSvtGeom->setBarrelRadius(dimension->barrelRadius);
+  mSvtGeom->setWaferLength(dimension->waferLength);
+  mSvtGeom->setWaferThickness(dimension->waferThickness);
+  mSvtGeom->setWaferWidth(dimension->waferWidth);
+  //mSvtGeom->setAnodePitch(dimension->anodePitch);
+  mSvtGeom->setAnodePitch(0.025);
+  mSvtGeom->setFocusRegionLength(dimension->focusRegionLength);
+  mSvtGeom->setDistanceInjector(dimension->distanceInjector);
+  mSvtGeom->setLaserPosition(dimension->laserPosition);
 
   char path[100];
   St_svtWafersPosition *positions;
   svtWafersPosition_st *position;
 
-  for (int barrel = 1;barrel <= svtGeom->getNumberOfBarrels();barrel++) {
-    for (int ladder = 1;ladder <= svtGeom->getNumberOfLadders(barrel);ladder++) {
-      for (int wafer = 1;wafer <= svtGeom->getNumberOfWafers(barrel);wafer++) {
+  for (int barrel = 1;barrel <= mSvtGeom->getNumberOfBarrels();barrel++) {
+    for (int ladder = 1;ladder <= mSvtGeom->getNumberOfLadders(barrel);ladder++) {
+      for (int wafer = 1;wafer <= mSvtGeom->getNumberOfWafers(barrel);wafer++) {
 
-	  index = svtGeom->getWaferIndex(barrel,ladder,wafer);
+	  index = mSvtGeom->getWaferIndex(barrel,ladder,wafer);
 
 	  if (index < 0) continue;
 
@@ -365,34 +457,40 @@ StSvtGeometry* St_SvtDb_Reader::getGeometry()
 	  position = positions->GetTable();
 
 	  // fill StSvtGeometry object
-	  waferGeom = new StSvtWaferGeometry(barrel,ladder,wafer);
+	  waferGeom = (StSvtWaferGeometry*)mSvtGeom->at(index);
+	  if (!waferGeom)
+	    waferGeom = new StSvtWaferGeometry(barrel,ladder,wafer);
 
 	  waferGeom->setDriftDirection(position->driftDirection[0],position->driftDirection[1],position->driftDirection[2]);
 	  waferGeom->setNormalDirection(position->normalDirection[0],position->normalDirection[1],position->normalDirection[2]);
 	  waferGeom->setTransverseDirection(position->transverseDirection[0],position->transverseDirection[1],position->transverseDirection[2]);
 	  waferGeom->setCenterPosition(position->centerPosition[0],position->centerPosition[1],position->centerPosition[2]);
 
-	  cout << "index = "  << index << ", x = " << position->centerPosition[0] << endl;
+	  if ((index<4) || (index>208)) 
+	    gMessMgr->Info() << "index = "  << index << ", x = " << position->centerPosition[0] << endm;
 
-	  svtGeom->put_at(waferGeom,index);
+	  mSvtGeom->put_at(waferGeom,index);
 
       } // end of loop over wafers
     } // end of loop over ladders
   } // end of loop over barrels
 
-  return svtGeom;
+  return mSvtGeom;
 }
 
 //_____________________________________________________________________________
 StSvtHybridCollection* St_SvtDb_Reader::getBadAnodes()
 {
+  gMessMgr->Info() << "St_SvtDb_Reader::getBadAnodes" << endm;
+
   // get svt dimensions table
   St_svtBadAnodes *badAnodes;
   svtBadAnodes_st *badAnode;
   const int dbIndex = kCalibration;
 
   // Create all pedestal objects
-  StSvtHybridCollection* svtBadAnodes = new StSvtHybridCollection(mSvtConfig);
+  if (!mSvtBadAnodes)
+    mSvtBadAnodes = new StSvtHybridCollection(mSvtConfig);
   StSvtHybridBadAnodes* hybridBadAnodes;
 
   char path[100];
@@ -440,24 +538,26 @@ StSvtHybridCollection* St_SvtDb_Reader::getBadAnodes()
 
 	  badAnode = badAnodes->GetTable();
 
-	  hybridBadAnodes = new StSvtHybridBadAnodes(barrel,ladder,wafer,hybrid);
+	  hybridBadAnodes = (StSvtHybridBadAnodes*)mSvtBadAnodes->at(index);
+	  if (!hybridBadAnodes)
+	    hybridBadAnodes = new StSvtHybridBadAnodes(barrel,ladder,wafer,hybrid);
 	  
 	  // loop over anodes
 	  for (int anode=1;anode<=mSvtConfig->getNumberOfAnodes();anode++) {
 	    if (badAnode->isBadAnode[anode-1]) {
 	      hybridBadAnodes->setBadAnode(anode);
-	      //cout << "hybrid = "<< index << ", anode = " << anode << endl;
+	      //gMessMgr->Info() << "hybrid = "<< index << ", anode = " << anode << endm;
 	    }
 	  }
 
-	  svtBadAnodes->put_at(hybridBadAnodes,index);
+	  mSvtBadAnodes->put_at(hybridBadAnodes,index);
 
 	} // end of loop over hybrids
       } // end of loop over wafers
     } // end of loop over ladders
   } // end of loop over barrels
 
-  return svtBadAnodes;
+  return mSvtBadAnodes;
 }
 
 //_____________________________________________________________________________
@@ -485,16 +585,67 @@ int St_SvtDb_Reader::getElectronics()
 //_____________________________________________________________________________
 StSvtT0* St_SvtDb_Reader::getT0()
 {
-  StSvtT0* svtT0 = new StSvtT0();
+  if (!mSvtT0)
+    mSvtT0 = new StSvtT0();
 
   if (getElectronics()) {
     for (int i=0;i<24;i++)
-      svtT0->setT0(electronic->tZero[i],i+1);
-    svtT0->setFsca(electronic->samplingFrequency);
+      mSvtT0->setT0(electronic->tZero[i],i+1);
+    mSvtT0->setFsca(electronic->samplingFrequency);
 
-    cout << "t0 = " << svtT0->getT0(1) << ", fsca =  " << svtT0->getFsca() << endl;
+    gMessMgr->Info() << "t0 = " << mSvtT0->getT0(1) << ", fsca =  " << mSvtT0->getFsca() << endm;
 
   }
 
-  return svtT0;
+  return mSvtT0;
+}
+
+
+//_____________________________________________________________________________
+StSvtDaq* St_SvtDb_Reader::getDaqParameters()
+{
+  gMessMgr->Info() << "St_SvtDb_Reader::getDaqParameters" << endm;
+
+  St_svtDaq *daq;
+  const int dbIndex = kGeometry;
+  if (svtDb[dbIndex]){
+    daq = (St_svtDaq*)svtDb[dbIndex]->Find("svtDaq");
+    if (!(daq && daq->HasData()) ){
+     gMessMgr->Message("Error Finding SVT Daq","E");
+     return 0;
+    }
+  }
+  else {
+    gMessMgr->Message("Error Finding SVT Geometry Db","E");
+    return 0;
+  }
+
+  svtDaq_st* daqParam = daq->GetTable();
+
+  gMessMgr->Info() << "clearedTimeBins = " << daqParam->clearedTimeBins<< endm;
+  gMessMgr->Info() << "pixelsBefore = " << daqParam->pixelsBefore << endm;
+  gMessMgr->Info() << "pixelsAfter = " << daqParam->pixelsAfter << endm;
+  gMessMgr->Info() << "pedOffset = " << daqParam->pedOffset << endm;
+  gMessMgr->Info() << "seqLo = " << daqParam->seqLo << endm;
+  gMessMgr->Info() << "seqHi = " << daqParam->seqHi << endm;
+  gMessMgr->Info() << "threshLo = " << daqParam->threshLo << endm;
+  gMessMgr->Info() << "threshHi = " << daqParam->threshHi << endm;
+
+  if(!mSvtDaq)
+    mSvtDaq = new StSvtDaq();
+
+  mSvtDaq->setClearedTimeBins(daqParam->clearedTimeBins);
+  mSvtDaq->setSavedBlackAnodes(daqParam->savedBlackAnodes[0],0);
+  mSvtDaq->setSavedBlackAnodes(daqParam->savedBlackAnodes[1],1);
+  mSvtDaq->setSavedBlackAnodes(daqParam->savedBlackAnodes[2],2);
+  mSvtDaq->setSavedBlackAnodes(daqParam->savedBlackAnodes[2],3);
+  mSvtDaq->setPixelsBefore(daqParam->pixelsBefore);
+  mSvtDaq->setPixelsAfter(daqParam->pixelsAfter);
+  mSvtDaq->setPedOffset(daqParam->pedOffset);
+  mSvtDaq->setSeqLo(daqParam->seqLo);
+  mSvtDaq->setSeqHi(daqParam->seqHi);
+  mSvtDaq->setThreshLo(daqParam->threshLo);
+  mSvtDaq->setThreshHi(daqParam->threshHi);
+
+  return mSvtDaq;
 }

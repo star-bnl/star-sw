@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbWriter.cc,v 1.2 2001/11/07 16:49:48 caines Exp $
+ * $Id: StSvtDbWriter.cc,v 1.3 2004/01/30 07:22:07 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StSvtDbWriter.cc,v $
+ * Revision 1.3  2004/01/30 07:22:07  munhoz
+ * adding rms and daq parameters reading
+ *
  * Revision 1.2  2001/11/07 16:49:48  caines
- * Add _st s added by stic for our comfort and convenience
+ *  Add _st s added by stic for our comfort and convenience
  *
  * Revision 1.1  2001/10/29 18:53:14  munhoz
  * starting SVT Data base
@@ -31,6 +34,7 @@
 
 #include "svtDriftVelocity.h"
 #include "svtPedestals.h"
+#include "svtRms.h"
 #include "svtConfiguration.h"
 
 #define N_INJECTOR_LINES 4
@@ -221,6 +225,70 @@ void  StSvtDbWriter::addPedestals(StSvtHybridCollection* svtColl)
   // put the data on memory to database serever.
   //
   mDbMgr->storeDbTable(svtPedTable);  
+}
+
+//_____________________________________________________________________________
+void  StSvtDbWriter::addRms(StSvtHybridCollection* svtColl)
+{
+  cout << "StSvtDbWriter::WriteToDb" << endl;
+  //-> add a table to the container with descriptor given by Database
+  //
+  StDbTable* svtRmsTable = mConfigCalib -> addDbTable("svtRms");
+  if (svtRmsTable == 0 )
+   {
+     cout << " No Table : svtRms  " << endl;
+     return;
+   };
+  
+  // Fill the c-struct somehow
+  //
+  const int numberOfHybrids = svtColl->getTotalNumberOfHybrids();
+  int* indexHybrid = new int[numberOfHybrids];
+  int nHybrids=0;
+
+  svtRms_st *rms = new svtRms_st[numberOfHybrids];
+  StSvtHybridPixels* hybridRms;
+
+  // Loop over barrels, ladders, wafers and hybrids
+  for (int barrel = 1;barrel <= svtColl->getNumberOfBarrels();barrel++) {
+    for (int ladder = 1;ladder <= svtColl->getNumberOfLadders(barrel);ladder++) {
+      for (int wafer = 1;wafer <= svtColl->getNumberOfWafers(barrel);wafer++) {
+	for (int hybrid = 1;hybrid <= svtColl->getNumberOfHybrids();hybrid++) {
+
+  	  indexHybrid[nHybrids] = svtColl->getHybridIndex(barrel, ladder, wafer, hybrid); 
+
+  	  if (indexHybrid[nHybrids] < 0) continue;
+
+	  hybridRms = (StSvtHybridPixels*)svtColl->at(indexHybrid[nHybrids]);
+	  
+	  cout << "nHybrids = " << nHybrids << ", indexHybrid[nHybrids] = " << indexHybrid[nHybrids] << ", hybridRms = " << hybridRms << endl;
+
+	  if (!hybridRms) {
+	    nHybrids++;
+	    continue;
+	  }
+	  
+	  //for (int anode = 1; anode <= hybridRms->getSvtConfig()->getNumberOfAnodes(); anode++) 
+	  //  for (int time = 0; time < hybridRms->getSvtConfig()->getNumberOfTimeBins(); time++) 
+	  for (int anode=1;anode<=240;anode++) 
+	    for (int time=0;time<128;time++) {
+	      rms[indexHybrid[nHybrids]].rms[anode-1][time] = hybridRms->getPixelContent(anode,time);
+	      if ((anode == 180) && (time == 64))
+		cout << anode << "  " << time << "  " << rms[indexHybrid[nHybrids]].rms[anode-1][time] << endl;
+	    }
+
+	  nHybrids++;
+	  
+	}  // end of loop over hybrids
+      }  // end of loop over wafers
+    }  // end of loop over ladders
+  }  // end of loop over barrels
+
+  svtRmsTable->SetTable((char*)rms,nHybrids,indexHybrid);   // put data in local table on memory
+
+  // put the data on memory to database serever.
+  //
+  mDbMgr->storeDbTable(svtRmsTable);  
 }
 
 void  StSvtDbWriter::addConfiguration()

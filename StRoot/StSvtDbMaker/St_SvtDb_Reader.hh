@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.hh,v 1.4 2004/01/27 02:39:14 perev Exp $
+ * $Id: St_SvtDb_Reader.hh,v 1.5 2004/01/30 07:22:07 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.hh,v $
+ * Revision 1.5  2004/01/30 07:22:07  munhoz
+ * adding rms and daq parameters reading
+ *
  * Revision 1.4  2004/01/27 02:39:14  perev
  * ClassVers=0 nonpersistent
  *
@@ -42,13 +45,20 @@ class StSvtHybridDriftVelocity;
 class StSvtConfig;
 class StSvtGeometry;
 class StSvtT0;
+class StSvtDaq;
 
 class St_SvtDb_Reader 
 {
  private:
   St_DataSet* svtDb[3];        //!
-  StSvtHybridCollection *mSvtDriftVeloc;
   StSvtConfig* mSvtConfig;      //!
+  StSvtHybridCollection *mSvtDriftVeloc;
+  StSvtHybridCollection* mSvtPed; //!
+  StSvtHybridCollection* mSvtRms; //!
+  StSvtGeometry* mSvtGeom;        //!
+  StSvtHybridCollection* mSvtBadAnodes; //!
+  StSvtT0* mSvtT0;                //!
+  StSvtDaq* mSvtDaq;              //!
 
  protected:
 
@@ -64,10 +74,12 @@ class St_SvtDb_Reader
   StSvtHybridDriftVelocity* getDriftVelocity(int barrel, int ladder, int wafer, int hybrid);
   void getDriftVelocityAverage(StSvtHybridCollection* svtColl);
   StSvtHybridCollection* getPedestals();
+  StSvtHybridCollection* getRms();
   StSvtGeometry* getGeometry();
   StSvtHybridCollection* getBadAnodes();
   int getElectronics();
   StSvtT0* getT0();
+  StSvtDaq* getDaqParameters();
 
 #ifdef __ROOT__
   ClassDef(St_SvtDb_Reader, 0)   //StAF chain virtual base class for Makers

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbReader.hh,v 1.3 2003/04/14 15:51:49 munhoz Exp $
+ * $Id: StSvtDbReader.hh,v 1.4 2004/01/30 07:22:07 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbReader.hh,v $
+ * Revision 1.4  2004/01/30 07:22:07  munhoz
+ * adding rms and daq parameters reading
+ *
  * Revision 1.3  2003/04/14 15:51:49  munhoz
  * reading t0 from DB
  *
@@ -68,6 +71,7 @@ class StSvtDbReader
   StSvtConfig* getConfiguration();
   StSvtHybridCollection* getDriftVelocity();
   StSvtHybridCollection* getPedestals();
+  StSvtHybridCollection* getRms();
   StSvtHybridCollection* getBadAnodes();
   StSvtGeometry* getGeometry();
   StSvtT0* getT0(){return 0;}

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.h,v 1.7 2003/09/10 19:47:36 perev Exp $
+ * $Id: StSvtDbMaker.h,v 1.8 2004/01/30 07:22:07 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.h,v $
+ * Revision 1.8  2004/01/30 07:22:07  munhoz
+ * adding rms and daq parameters reading
+ *
  * Revision 1.7  2003/09/10 19:47:36  perev
  * ansi corrs
  *
@@ -94,6 +97,8 @@ class StSvtDbMaker : public StMaker {
   void readSvtDriftVelocity();
   void setSvtPedestals();
   void readSvtPedestals();
+  void setSvtRms();
+  void readSvtRms();
   void setSvtGeometry();
   void readSvtGeometry();
   void setSvtBadAnodes();
@@ -103,13 +108,14 @@ class StSvtDbMaker : public StMaker {
 
   void writeSvtDriftVelocity(StSvtHybridCollection* driftVeloc=0);
   void writeSvtPedestals(StSvtHybridCollection* pedestals=0);
+  void writeSvtRms(StSvtHybridCollection* rms=0);
 
   St_SvtDb_Reader* get_SvtDb_Reader(){return m_Reader;}
   StSvtDbReader* getSvtDbReader(){return mReader;}
   StSvtDbWriter* getSvtDbWriter(){return mWriter;}  
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.7 2003/09/10 19:47:36 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.8 2004/01/30 07:22:07 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSvtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbWriter.hh,v 1.1 2001/10/29 18:53:14 munhoz Exp $
+ * $Id: StSvtDbWriter.hh,v 1.2 2004/01/30 07:22:07 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbWriter.hh,v $
+ * Revision 1.2  2004/01/30 07:22:07  munhoz
+ * adding rms and daq parameters reading
+ *
  * Revision 1.1  2001/10/29 18:53:14  munhoz
  * starting SVT Data base
  *
@@ -56,6 +59,7 @@ class StSvtDbWriter
 
   void addDriftVelocity(StSvtHybridCollection* svtDriftVeloc);
   void addPedestals(StSvtHybridCollection* svtPed);
+  void addRms(StSvtHybridCollection* svtRms);
   void addConfiguration();
 
 #ifdef __ROOT__

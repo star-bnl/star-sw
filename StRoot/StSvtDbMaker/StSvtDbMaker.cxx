@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.9 2003/04/14 15:51:39 munhoz Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.10 2004/01/30 07:22:06 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.10  2004/01/30 07:22:06  munhoz
+ * adding rms and daq parameters reading
+ *
  * Revision 1.9  2003/04/14 15:51:39  munhoz
  * reading t0 from DB
  *
@@ -61,6 +64,7 @@ StSvtDbMaker* gStSvtDbMaker=NULL;
 St_ObjectSet *svtSetConfig;
 St_ObjectSet *svtSetDrift;
 St_ObjectSet *svtSetPed;
+St_ObjectSet *svtSetRms;
 St_ObjectSet *svtSetGeom;
 St_ObjectSet *svtSetBad;
 St_ObjectSet *svtSetT0;
@@ -157,6 +161,12 @@ Int_t StSvtDbMaker::Init()
   setSvtBadAnodes();
   setSvtT0();
 
+  if( m_Mode == 1) {
+    gMessMgr->Message() << 
+      "StSvtDbMaker::Init setting WaferPostions to simu" << endm;
+    SetFlavor("simu","svtWafersPosition");   
+  }
+
   return StMaker::Init();
 }
 
@@ -164,7 +174,6 @@ Int_t StSvtDbMaker::Init()
 Int_t StSvtDbMaker::InitRun(int runumber)
 {
   if (Debug()) gMessMgr->Debug() << "StSvtDbMaker::InitRun" << endm;
-  cout << "StSvtDbMaker::InitRun" << endl;
 
   readSvtGeometry();
   readSvtDriftVelocity();
@@ -282,6 +291,22 @@ void StSvtDbMaker::readSvtPedestals()
 }
 
 //_____________________________________________________________________________
+void StSvtDbMaker::setSvtRms()
+{
+  svtSetRms = new St_ObjectSet("StSvtRmsPedestal");
+  AddConst(svtSetRms);  
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::readSvtRms()
+{
+  if (mReader)
+    svtSetRms->SetObject((TObject*)mReader->getRms());
+  else if (m_Reader)
+    svtSetRms->SetObject((TObject*)m_Reader->getRms());
+}
+
+//_____________________________________________________________________________
 void StSvtDbMaker::setSvtGeometry()
 {
   svtSetGeom = new St_ObjectSet("StSvtGeometry");
@@ -353,10 +378,22 @@ void StSvtDbMaker::writeSvtPedestals(StSvtHybridCollection* pedestals)
     assert(pedestals);
   }
   
-  cout << "pedestals = " << pedestals << endl;
-
   if (mWriter)
     mWriter->addPedestals(pedestals);
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::writeSvtRms(StSvtHybridCollection* rms)
+{
+  if (!rms) {
+    St_DataSet *dataSet = GetDataSet("StSvtRMSPedestal");
+    assert(dataSet);
+    rms = (StSvtHybridCollection*)(dataSet->GetObject());
+    assert(rms);
+  }
+  
+  if (mWriter)
+    mWriter->addRms(rms);
 }
 
 //_____________________________________________________________________________
