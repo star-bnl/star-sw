@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.cxx,v 1.7 2000/09/11 16:31:12 struck Exp $
+ * $Id: L3_Reader.cxx,v 1.8 2000/09/30 16:13:46 fisyak Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: L3_Reader.cxx,v $
+ * Revision 1.8  2000/09/30 16:13:46  fisyak
+ * take out derivative and result from Streamer
+ *
  * Revision 1.7  2000/09/11 16:31:12  struck
  * removed memory leak in L3_Reader
  *
@@ -396,14 +399,14 @@ int I960ClusterReader::initialize (int sec)
     unsigned short flags;
     unsigned short q;
   };
-
   // is this sector already initialized?
   if (sector!=sec) {
         // set sector number
         sector = sec;
 	nCluster = 0;
 	// get number of clusters
-	for (int rb=1; rb<=12; rb++) {
+	int rb;
+	for (rb=1; rb<=12; rb++) {
 	      for (int mz=1; mz<=3; mz++) {
 		    //pointer to TPCMZCLD bank
 		    pBankTPCMZCLD[rb-1][mz-1] = l3->getTPCMZCLD(sector, rb, mz); 
@@ -436,7 +439,7 @@ int I960ClusterReader::initialize (int sec)
 	l3_cluster *pcluster;
 	pcluster = cluster;
 
-	for ( int rb=1; rb<=12; rb++) {
+	for ( rb=1; rb<=12; rb++) {
 	      for (int mz=1; mz<=3; mz++) {
 		    cld = pBankTPCMZCLD[rb-1][mz-1];  // pointer to TPCMZCLD bank
 		    if (!cld) continue;
