@@ -1,0 +1,69 @@
+#!/opt/star/bin/perl
+#use Env;
+Import qw ( env INCLUDE LIB BIN BUILD OBJ);
+(my $build = $OBJ) =~ s/\#//g;
+#my @GDIRS = ("agsim","gbase","gcons","gdraw","geocad","ggeom","gheisha","ghits",
+#	     "ghrout","ghutils","giface","giopa","gkine","gparal",
+#	     "gphys","gscan","gstrag","gtrak","matx55","miface","miguti",
+#	     "neutron","peanut","fiface","cgpack","fluka","block","comad");
+my @GDIRS = qw( block cdf cgpack erdecks erpremc fiface fluka gbase gcons gdraw 
+		geocad ggeom gheisha ghits ghrout ghutils giface 
+		giopa gkine gphys gscan gstrag gtrak guser matx55 gxint 
+		miface miguti neutron peanut );
+
+$build =~ s/\\/\//g;# print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
+(my $ObjDir = DirPath '.') =~ s/\\/\//g;# print "ObjDir = $ObjDir\n";
+(my $Dir = $ObjDir) =~ s/$build\///g; #print "Dir = $Dir\n";
+$ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
+my $STAR_SYS = $env->{ENV}->{STAR_SYS};
+my $PKG  = $pkg . $env->{SUFEXE};
+my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};
+my $LIBPKG = $PKG . "." . $env->{SUFLIB};
+my @h_files = script::find_hfiles($Dir);
+my $FCPATH = $env->{FCPATH};
+my $FFLAGS = $env->{FFLAGS};
+my $FPPFLAGS = $env->{FPPFLAGS};
+my $CPPFLAGS = $env->{CPPFLAGS};
+my $pkg  = geant321; 
+my $PKG = $pkg;     print "Run cons in $Dir for $PKG\n";
+my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};# print "SO_PKG = $SO_PKG\n";
+my $LIBPKG = $PKG . "." . $env->{SUFLIB};
+$FCPATH  = "#asps/Simulation/starsim/include" . $main::PATH_SEPARATOR . $Dir . "/include";# . $main::PATH_SEPARATOR . "#asps/agi/gst" . $main::PATH_SEPARATOR . $env->{FCPATH};
+$FPPFLAGS = "-D__ROOT__ -DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB_DZDOC -DCERNLIB_SHL -DCERNLIB_NONEWL -DCERNLIB_HIGZ -DCERNLIB_CG  -DCERNLIB_HADRON";# -DCERNLIB_GCALOR";
+if ($env->{ENV}->{PGI} && $STAR_SYS =~ /^rh/) { 
+  $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
+  $FFLAGS   = $env->{G77FLAGS}; 
+  $FEXTEND  = $env->{G77EXTEND};
+  $FPPFLAGS .= " -DCERNLIB_LINUX -DCERNLIB_LNX -DCERNLIB_QMGLIBC -DCERNLIB_BLDLIB";# -DCERNLIB_MYSQL";
+  $FPPFLAGS .= " -DCPP_DATE=0 -DCPP_TIME=0 -DCPP_VERS=\"''\" -DCPP_TITLE_CH=\"''\"";
+  $CPPFLAGS .= " -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
+}
+$env2 = $env->clone('FC'           => $FC,
+		    'FPPFLAGS'     => $FPPFLAGS,
+		    'FFLAGS'       => $FFLAGS,
+		    'FCPATH'       => $FCPATH,
+		    'FEXTEND'      => $FEXTEND,
+		    'CPPFLAGS'     => $CPPFLAGS,
+		    'LIBPATH'      => $LIBPATH,
+		    'LIBS'         => $LIBS,
+		    'ObjDir'       => $obj_dir,
+		    'Libraries'    => $Libraries
+		   );
+my @sources = ();
+foreach my $d (@GDIRS){
+  my $dir = $Dir . "/" . $d;    #  print "dir = $dir\n";
+  my @src  = find_sources($dir);#  my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
+  foreach my $s (@src) { 
+    next if $s =~ /\.cdf$/;
+    my $ss = $d . "/" . $s;# print "ss = $s  =>  $ss\n";
+    push @sources, $ss; 
+  }
+}
+if ($#sources > -1) {
+#  if ($STAR_SYS =~ /^intel_wnt$/) {
+    Library      $env2 $LIBPKG, @sources;  
+    Install $env2 $LIB, $LIBPKG;
+#  }
+#  LinkedModule $env2 $SO_PKG, @sources;
+#  Install $env2 $LIB, $SO_PKG;
+}  
