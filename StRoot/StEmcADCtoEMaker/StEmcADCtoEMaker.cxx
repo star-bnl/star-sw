@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.19 2001/10/31 22:24:17 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.20 2001/11/05 17:09:11 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.20  2001/11/05 17:09:11  suaide
+// small changes
+//
 // Revision 1.19  2001/10/31 22:24:17  suaide
 // modified Finish() method
 //
@@ -254,48 +257,51 @@ StEmcCollection* StEmcADCtoEMaker::GetEmcCollectionFromDaq(TDataSet* daq)
   for(Int_t det=0;det<4;det++) if(kCalib[det]) 
   {
     GetStatus(det);
-    Float_t sum=0,validChannels=0;
-    StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId);
-    
-    Bool_t Ok=kFALSE;
-    
-    if(det==0) // check if data is Ok for bemc
+    if(nChannels>0) // check if there are valid channels.
     {
-      cout <<"EMC VALID TOWER HITS = "<<TheEmcReader->NTowerHits()<<" OFFLINE ACTIVE CHANNELS = "<<nChannels<<endl;
-      if(TheEmcReader->NTowerHits()>=nChannels) Ok=kTRUE;
-    }
+      Float_t sum=0,validChannels=0;
+      StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId);
     
-    if(Ok)
-    {
-      StEmcDetector* detector = new StEmcDetector(id,120);
-      for(UInt_t m=1;m<=120;m++)
-        for(UInt_t e=1;e<=eta[det];e++)
-          for(UInt_t s=1;s<=sub[det];s++)
-          {
-            unsigned short ADC=0;
-            if(det==0) if(!TheEmcReader->getTowerADC((int)m,(int)e,(int)s,ADC)) goto next;
-            if(det==2) if(!TheEmcReader->getSMDE_ADC((int)m,(int)e,ADC)) goto next;
-            if(det==3) if(!TheEmcReader->getSMDP_ADC((int)m,(int)e,(int)s,ADC)) goto next;
-            Int_t idh;
-            geo[det]->getId(m,e,s,idh);
-            if(status[idh-1]==1)
+      Bool_t Ok=kFALSE;
+    
+      if(det==0) // check if data is Ok for bemc
+      {
+        cout <<"EMC VALID TOWER HITS = "<<TheEmcReader->NTowerHits()<<" OFFLINE ACTIVE CHANNELS = "<<nChannels<<endl;
+        if(TheEmcReader->NTowerHits()>=nChannels) Ok=kTRUE;
+      }
+    
+      if(Ok)
+      {
+        StEmcDetector* detector = new StEmcDetector(id,120);
+        for(UInt_t m=1;m<=120;m++)
+          for(UInt_t e=1;e<=eta[det];e++)
+            for(UInt_t s=1;s<=sub[det];s++)
             {
-              sum+=(Float_t)ADC;
-              validChannels++;
-              if(ADC>0)
+              unsigned short ADC=0;
+              if(det==0) if(!TheEmcReader->getTowerADC((int)m,(int)e,(int)s,ADC)) goto next;
+              if(det==2) if(!TheEmcReader->getSMDE_ADC((int)m,(int)e,ADC)) goto next;
+              if(det==3) if(!TheEmcReader->getSMDP_ADC((int)m,(int)e,(int)s,ADC)) goto next;
+              Int_t idh;
+              geo[det]->getId(m,e,s,idh);
+              if(status[idh-1]==1)
               {
-                StEmcRawHit* hit=new StEmcRawHit(id,m,e,s,(UInt_t)ADC);
-                detector->addHit(hit);            
+                sum+=(Float_t)ADC;
+                validChannels++;
+                if(ADC>0)
+                {
+                  StEmcRawHit* hit=new StEmcRawHit(id,m,e,s,(UInt_t)ADC);
+                  detector->addHit(hit);            
+                }
               }
+              next: continue;
             }
-            next: continue;
-          }
-      cout <<"Total ADC sum = "<<sum<<"  validChannels = "<<validChannels<<endl;
-      emcDaqUtil->setDetector(detector); 
-    }
-    else
-    {
-      cout <<"***** BAD event for detector "<<detname[det].Data()<<endl;
+        cout <<"Total ADC sum = "<<sum<<"  validChannels = "<<validChannels<<endl;
+        emcDaqUtil->setDetector(detector); 
+      }
+      else
+      {
+        cout <<"***** BAD event for detector "<<detname[det].Data()<<endl;
+      }
     }
   }
 
