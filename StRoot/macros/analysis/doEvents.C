@@ -1,5 +1,8 @@
-// $Id: doEvents.C,v 1.15 1999/05/22 19:39:09 perev Exp $
+// $Id: doEvents.C,v 1.16 1999/05/23 03:20:20 perev Exp $
 // $Log: doEvents.C,v $
+// Revision 1.16  1999/05/23 03:20:20  perev
+// SetMaxEvent(2) removed
+//
 // Revision 1.15  1999/05/22 19:39:09  perev
 // Big changes for all fmts(xdf,mdc2,root)
 //
@@ -133,7 +136,6 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
   
   // St_geom)Maker is to supply the GEANT/GEOM dataset, that will be provided by
   IOMk->SetDebug();
-  IOMk->SetMaxEvent(2);
   //  St_geom_Maker *geom = new St_geom_Maker; // this maker open its own TFile !!!
 // 		Maker to read events from file or database into StEvent
   StEventReaderMaker readerMaker("events","title");
