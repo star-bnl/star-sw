@@ -74,18 +74,30 @@ const int   MaxSec  = 12;
 const int   MaxSSec =  5;
 const int   MaxEta  = 12;
 
-const int   FirstSec= 5-1;
-const int   LastSec = 8-1;
-const int   MinEta  = 5-1;
+const int   FirstSec= 0;
+const int   LastSec =11;
+const int   MinEta  = 4;
 
+//const float MaxCTB  = 1000;
+float MaxCTB = 1000.0;
 const float MinPt   = 0.500;
-const float MaxDEta = 0.020;
-const float MaxDPhi = 0.026;
+const float MaxDEta = 0.035; //0.020;
+const float MaxDPhi = 0.028; //0.026;
+
+
+// PHIHW     0.0873/2.0
+// ETAHW 12: 0.0992/2.0
+//       10: 0.0897/2.0 
+//        8: 0.0810/2.0
+//        6: 0.0731/2.0
+//        4: 0.0661/2.0
+//        1: 0.0567/2.0
 
 
 
 void mystat(TH1 *h, Double_t x1, Double_t x2,
-            Double_t& xmean, Double_t& emean, Double_t& dint);
+            Double_t& xmean, Double_t& emean, Double_t& dint, 
+	    Double_t& xmax , Double_t& xlo  , Double_t& xhi);
 int  miptower( TH1   **hadc, 
 	       const int   MinEta,
 	       const int   MaxEta,
@@ -127,14 +139,19 @@ mipcalib(
   float adcval[MaxTracks];
   int   ntrack[MaxTracks];
   //
-  int   nhits [MaxTracks];
   float pt    [MaxTracks];
   float ptot  [MaxTracks];
-  float length[MaxTracks];
-  float dedx  [MaxTracks];
+  //float length[MaxTracks];
+  //float dedx  [MaxTracks];
+  //int   nhits [MaxTracks];
+  float  etatrk[MaxTracks];
   //
-  float detasmd[MaxTracks];
-  float dphismd[MaxTracks];
+  float detasmd [MaxTracks];
+  float dphismd [MaxTracks];
+  float detapres[MaxTracks];
+  float dphipres[MaxTracks];
+  float detapost[MaxTracks];
+  float dphipost[MaxTracks];
 
   // trigger Info
   int   numtrig;
@@ -163,6 +180,7 @@ mipcalib(
       fName = "attached files";
     }
     cout << "sorting " << fName   << " (trigger=" << trig << ") to " << histName << endl;
+    cout << "MaxCTB: " << MaxCTB  << endl;
     nentries =  (int)chain->GetEntries();
 
     chain->SetBranchAddress("ntracks" ,&numtracks);
@@ -175,13 +193,20 @@ mipcalib(
     
     chain->SetBranchAddress("pt"      , pt      );
     chain->SetBranchAddress("ptot"    , ptot    );
-    chain->SetBranchAddress("nhits"   , nhits   );
-    chain->SetBranchAddress("length"  , length  );
-    chain->SetBranchAddress("dedx"    , dedx    );
+    //chain->SetBranchAddress("nhits"   , nhits   );
+    //chain->SetBranchAddress("length"  , length  );
+    //chain->SetBranchAddress("dedx"    , dedx    );
+    //chain->SetBranchAddress("etatrk"    , etatrk  );
     
     chain->SetBranchAddress("detasmd" , detasmd );
     chain->SetBranchAddress("dphismd" , dphismd );
-    
+  
+    chain->SetBranchAddress("detapres", detapres );
+    chain->SetBranchAddress("dphipres", dphipres );
+
+    chain->SetBranchAddress("detapost", detapost );
+    chain->SetBranchAddress("dphipost", dphipost );
+  
     chain->SetBranchAddress("ntrig"   ,&numtrig );
     chain->SetBranchAddress("trigid"  , trigid  );
     chain->SetBranchAddress("daqbits" ,&daqbits );
@@ -210,7 +235,7 @@ mipcalib(
 	sprintf(name,"%02dT%1c%02d"     ,sec+1,ssec+'A',eta+1);
 	int hidx=(sec*MaxSSec+ssec)*MaxEta+eta;
 	if(hidx<0 || MaxHist<=hidx) continue;
-	if(doSort) hadc[hidx] = new TH1F(name,titl,60,0.0,120.0);
+	if(doSort) hadc[hidx] = new TH1F(name,titl,40,0.0,120.0);
 	else 	   hadc[hidx] = (TH1F *)gDirectory->Get(name);
 
       }
@@ -235,6 +260,7 @@ mipcalib(
       ntracks += numtracks;
       chain->GetEntry(ie);
       if(ie%100==0)fprintf(stdout ,"Entry %d/%d (%.2f%%)\r",ie,nentries,(ie*100.0)/nentries);
+      if(ctbsum>MaxCTB) continue;
       if(trig>0) {
 	int  it=0;
 	int *trigword=trigid;
@@ -244,11 +270,14 @@ mipcalib(
 
       for(int t=0;t<numtracks; t++) {
 	// select the tracks 
-	if(ntrack[t]        > 1       ) continue; // reject multiple tracks
-	if(pt[t]            < MinPt   ) continue;
-	if(fabs(detasmd[t]) > MaxDEta ) continue;
-	if(fabs(dphismd[t]) > MaxDPhi ) continue;
-
+	if(ntrack[t]         > 1       ) continue; // reject multiple tracks
+	if(pt[t]             < MinPt   ) continue;
+	if(fabs(detapres[t]) > MaxDEta ) continue;
+	if(fabs(dphipres[t]) > MaxDPhi ) continue;
+	if(fabs(detasmd[t])  > MaxDEta ) continue;
+	if(fabs(dphismd[t])  > MaxDPhi ) continue;
+	if(fabs(detapost[t]) > MaxDEta ) continue;
+	if(fabs(dphipost[t]) > MaxDPhi ) continue;
 	
 	int sec  = sector[t];
 	int ssec = subsec[t];
@@ -335,8 +364,8 @@ miptower( TH1 **hadc,
 	  const float xMax ,
 	  FILE  *outfd)
 {
-  const Double_t MinCounts = 50.0; // King's constants or the cuts
-  const Double_t MinPeakV  = 10.0;
+  const Double_t MinCounts = 30.0; // King's constants or the cuts
+  const Double_t MinPeakV  =  8.0;
   const Double_t MaxPeakV  = 30.0;
   const Double_t MaxPeakE  = 6.0 ;
   const Double_t MinChi2   = 0.0 ;
@@ -382,19 +411,31 @@ miptower( TH1 **hadc,
     sprintf(name,"%s%02d",dir,eta+1);
 
     if(hadc[eta]==NULL) continue;
+
+    double xlim1, xlim2;
+    mystat(hadc[eta],xMin,xMax,xmean,xmnerr,xint,xpeak,xlim1,xlim2);
     
     // set initial parameter values
-    par[0] = par[2] = par[3] = par[4]= 0.0;
-    par[1] = 20.0;
+    par[0] = hadc[eta]->GetMaximum();
+    par[1] = xpeak;
+    par[2] = xmnerr;
     //
 
     TF1 *fit1 = new TF1("fit1" ,func ,0.0,120.0); //xmin+0.0,xmax);
     fit1->SetParameters(par); 
     fit1->SetLineWidth(2);    
     fit1->SetLineColor(kRed); 
-    hadc[eta]->Fit("fit1","Q0","",xMin,xMax);
 
-    mystat(hadc[eta],xMin,xMax,xmean,xmnerr,xint);
+    // FIXME hack
+    if(strncmp(func,"gaus",4)==0) {
+      //cerr << xpeak << " (" << xlim1 << "," << xlim2 << ")" << endl;
+      hadc[eta]->Fit("fit1","Q0","",xlim1,xlim2);
+    } else {
+      hadc[eta]->Fit("fit1","Q0","",xMin,xMax);
+    }
+
+
+
 
     xpeak   = fit1->GetParameter(1);
     xpkerr  = fit1->GetParError(1);
@@ -427,7 +468,7 @@ miptower( TH1 **hadc,
     // plot 
     gpad->cd(++pad);
     Double_t hmax = hadc[eta]->GetMaximum();
-    hadc[eta]->SetMaximum( (hmax>40.0) ? 1.2*hmax : 50.0 );
+    hadc[eta]->SetMaximum( (hmax>10.0) ? 1.2*hmax : 12.0 );
     hadc[eta]->GetXaxis()->SetTitle("ADC");
     hadc[eta]->Draw("E");
     fit1->Draw("SAME");
@@ -455,26 +496,54 @@ miptower( TH1 **hadc,
 // returns mean, its error and the integral between x1 and x2
 // ===========================================================================
 void 
-mystat(TH1 *h, 
-      Double_t x1, Double_t x2, 
-      Double_t& xmean, Double_t& emean, Double_t& dint)
+mystat(TH1 *h,
+       Double_t  x1   , Double_t  x2,
+       Double_t& xmean, Double_t& emean, Double_t& dint,
+       Double_t& xmax , Double_t& xlo  , Double_t& xhi)
 {
   TAxis* xax  = h->GetXaxis();
   Int_t  i1 = xax->FindBin(x1);
   Int_t  i2 = xax->FindBin(x2);
   
-  Float_t sw=0.0,sw2=0.0,swx=0.0,swx2=0.0;
+  Float_t sw=0.0,sw2=0.0,swx=0.0,swx2=0.0,wmax=0.0;
   Int_t   n=0;
-  xmean=emean=0.0;
+  Int_t   imax=0;
+  xmean=emean=xmax=0.0;
   for(Int_t i=i1;i<=i2;i++) {
     Double_t x = h->GetBinCenter(i);
     Double_t w = h->GetBinContent(i);
+    if(w>wmax) { xmax=x; wmax=w; imax=i; }
     sw  += w;
     sw2 += w*w;
     swx += w*x;
     swx2+= w*x*x;
     n++;
   }
+  
+  xlo = h->GetBinCenter(i1);
+  xhi = h->GetBinCenter(i2);
+ 
+  //cerr << "MAX " << imax << " (" << i1 << "," << i2 << ") " << wmax << endl;
+  //cerr << "LO" << endl;
+  wmax *= 0.4;
+  for(Int_t i=imax;i>=i1;i--) {
+    Double_t w = h->GetBinContent(i);
+    //cerr << i << "," << w << endl;
+    if(w<wmax) { 
+      xlo = h->GetBinCenter(i);
+      break;
+    }
+  }
+  //cerr << "HI" << endl;
+  for(Int_t i=imax;i<=i2;i++) {
+    Double_t w = h->GetBinContent(i);
+    //cerr << i << "," << w << endl;
+    if(w<wmax) { 
+      xhi = h->GetBinCenter(i);
+      break;
+    }
+  }
+  
   dint  = sw;
   xmean = (sw>0.0)    ?  swx/sw                  : 0.0 ;
   emean = (sw>0.0)    ? (swx2/sw - xmean*xmean ) : 0.0 ;
@@ -514,8 +583,14 @@ main(int argc, char **argv)
   extern char *optarg;
   extern int   optind;
   char         optchar;
+  cerr << "#===============================================\n";
+  cerr << "#         ******* WARNING *******               \n";
+  cerr << "# A LOUSY PROGRAM THAT GREW OUT OF A ROOT MACRO \n";
+  cerr << "#  needs to be rewritten                        \n";
+  cerr << "#===============================================\n" << endl;
 
-  while((optchar = getopt(argc, argv, "s:t:o:LGx:X:bqnlh")) != EOF) {
+
+  while((optchar = getopt(argc, argv, "s:t:o:LGx:X:c:bqnlh")) != EOF) {
     switch(optchar) {
     case 's': sector  = atoi(optarg);  break;
     case 'o': outname = optarg ;       break;
@@ -524,6 +599,7 @@ main(int argc, char **argv)
     case 'G': fitfunc = "gaus"  ;      break;
     case 'x': xmin    = atof(optarg);  break;
     case 'X': xmax    = atof(optarg);  break;
+    case 'c': MaxCTB  = atof(optarg);  break;
     case 'b': gROOT->SetBatch(kTRUE);  // fall down
     case 'q':                          // pass
     case 'n':                          // pass
@@ -534,8 +610,11 @@ main(int argc, char **argv)
     }
   }
 
+
   // attach root files from the in the list
-  for(int k=optind;k<argc; k++) new TFile(argv[k],"");  argc=optind;
+  for(int k=optind;k<argc; k++) new TFile(argv[k],"");  
+  argc=optind;
+
 
   TApplication *myApp;
   if(gROOT->IsBatch()) 
