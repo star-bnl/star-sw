@@ -16,8 +16,8 @@ set OUT = $cwd
 # define where all Make*.mk are. Here the place is the same as input area
 
 if ( ! $?STAF_MAKE_HOME )  then
-  if ( -e $cwd/MakeArch.mk ) then
-    setenv STAF_MAKE_HOME $cwd
+  if ( -e $cwd/mgr/MakeArch.mk ) then
+    setenv STAF_MAKE_HOME $cwd/mgr
   else
     setenv STAF_MAKE_HOME ${STAR}/mgr
   endif

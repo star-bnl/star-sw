@@ -1,6 +1,6 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.13  1998/07/13 23:08:00  perev
-#  small modif in mgr
+#  Revision 1.14  1998/07/14 00:23:21  perev
+#  things
 #
 #  Revision 1.10  1998/05/19 16:36:38  perev
 #  Makefiles
@@ -23,7 +23,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/07/13 23:08:00 $ 
+#             Last modification $Date: 1998/07/14 00:23:21 $ 
 #. default setings
 
 RM := rm -f
@@ -228,6 +228,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
     CXXFLAGS  := $(DEBUG) -z +Z  -Dextname  
     CFLAGS   := $(DEBUG) -Ae -z +Z -Dextname  
     LDFLAGS   := $(DEBUG)  -z -Wl,+s -Wl,-E 
+    STAF_ARCHIVE_LIBS := ON
     SOFLAGS   := $(DEBUG)  -b -z  
     CLIBS   :=   -lXm -lXt -lX11 -lm -lPW -ldld
 
