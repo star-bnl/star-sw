@@ -32,6 +32,9 @@ public:
 char* selectionSpecification();
 void selectionSpecification(const char* spec);
 
+//- OVERRIDE VIRTUAL
+virtual char * listing();
+
 //:----------------------------------------------- INTERFACE METHODS  --
 STAFCV_T project(tdmTable * table1, tdmTable *& table2);
 tdmTable * pTarget(tdmTable * table1, const char * name);
@@ -65,6 +68,9 @@ public:
 char* whereClause();
 void whereClause(const char* clause);
 
+//- OVERRIDE VIRTUAL
+virtual char * listing();
+
 //:----------------------------------------------- INTERFACE METHODS  --
 STAFCV_T join(tdmTable * table1, tdmTable * table2, tdmTable *& table3);
 tdmTable * jTarget(tdmTable * table1, tdmTable * table2
@@ -97,6 +103,9 @@ public:
 //:----------------------------------------------- ATTRIBUTES         --
 char* cutFunction();
 
+//- OVERRIDE VIRTUAL
+virtual char * listing();
+
 //:----------------------------------------------- INTERFACE METHODS  --
 STAFCV_T filter(tdmTable * table1, tdmTable * table2);
 STAFCV_T cut(tdmTable * table1);
@@ -114,8 +123,8 @@ private:
 //:----------------------------------------------- PRIV FUNCTIONS     --
 STAFCV_T DoCutTable(tdmTable *tbl,char *func,long *irig,
      long *percentPass);
-STAFCV_T DoFilterTable(tdmTable *src,tdmTable *tgt,char *func,long *irig,
-     long *percentPass);
+STAFCV_T DoFilterTable(tdmTable *src,tdmTable *tgt,char *func
+	, long *irig, long *percentPass);
 };
 
 //:#####################################################################

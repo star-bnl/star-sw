@@ -133,7 +133,7 @@ STAFCV_T topproject_selectspec(char* agent, char* select)
    case '-':
       printf("TOP:\tSelection Specification = (%s) \n"
 		,s=proj->selectionSpecification());
-      ASUFREE(s);
+      FREE(s);
       break;
    default:
       proj->selectionSpecification(select);
@@ -163,7 +163,7 @@ STAFCV_T topproject_project(char* agent, char* table1, char* table2
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    tdmTable* tbl1=NULL;
-   if( !tdm->findTable(table1, tbl1) ){
+   if( NULL == (tbl1 = tdm->findTable(table1)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
 //- Handle Optional Selection Specification
@@ -176,7 +176,7 @@ STAFCV_T topproject_project(char* agent, char* table1, char* table2
    }
 //- Find or Create Optional Output Object
    tdmTable* tbl2=NULL;
-   if( !tdm->findTable(table2, tbl2) ){
+   if( NULL == (tbl2 = tdm->findTable(table2)) ){
       tbl2 = proj->pTarget(tbl1, table2);
    }
 //- Project table
@@ -227,7 +227,7 @@ STAFCV_T topjoin_selectspec(char* agent, char* select)
    case '-':
       printf("TOP:\tSelection Specification = (%s) \n"
                 ,s=join->selectionSpecification());
-      ASUFREE(s);
+      FREE(s);
       break;
    default:
       join->selectionSpecification(select);
@@ -256,7 +256,7 @@ STAFCV_T topjoin_whereclause(char* agent, char* where)
    case '-':
       printf("TOP:\tWhere Clause = (%s) \n"
                 ,s=join->whereClause());
-      ASUFREE(s);
+      FREE(s);
       break;
    default:
       join->whereClause(where);
@@ -288,11 +288,11 @@ STAFCV_T topjoin_join(char* agent, char* table1, char* table2
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    tdmTable* tbl1=NULL;
-   if( !tdm->findTable(table1, tbl1) ){
+   if( NULL == (tbl1 = tdm->findTable(table1)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    tdmTable* tbl2=NULL;
-   if( !tdm->findTable(table2, tbl2) ){
+   if( NULL == (tbl2 = tdm->findTable(table2)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
 //- Handle Optional Selection Specification
@@ -313,7 +313,7 @@ STAFCV_T topjoin_join(char* agent, char* table1, char* table2
    }
 //- Find or Create Optional Output Object
    tdmTable* tbl3=NULL;
-   if( !tdm->findTable(table3, tbl3) ){
+   if( NULL == (tbl3 = tdm->findTable(table3)) ){
       tbl3 = join->jTarget(tbl1, tbl2, table3);
    }
 //- Join tables
@@ -384,21 +384,21 @@ STAFCV_T topcut_filter(char* agent, char* table1, char* table2
       }
    }
    tdmTable* tbl1=NULL;
-   if( !tdm->findTable(table1, tbl1) ){
+   if( NULL == (tbl1 = tdm->findTable(table1)) ){
       printf("I can't find table '%s'.\n",table1);
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    char *spec1 = tbl1->typeSpecifier();
    tdmTable* tbl2=NULL;
    if( !tdm->newTable(table2,spec1,0) ) {
-      if( !tdm->findTable(table2, tbl2) ){
-         free(spec1);
+      if( NULL == (tbl2 = tdm->findTable(table2)) ){
+         FREE(spec1);
          printf("Could not create new table '%s' with spec '%s'.\n",
          table2,spec1);
          EML_ERROR(KAM_CREATE_FAILED);
       } else {
-         if( !tdm->findTable(table2,tbl2) ) {
-	   free(spec1);
+         if( NULL == (tbl2 = tdm->findTable(table2)) ) {
+	   FREE(spec1);
 	   EML_ERROR(KAM_OBJECT_NOT_FOUND);
          }
       }
@@ -424,7 +424,6 @@ void kam_topcut_cut_()
    char *agent = ku_gets(); /* name of cut agent */
    char *table1 = ku_gets(); /* first input table */
    char *func = ku_gets(); /* cut function */
-
   
         STAFCV_T status = topcut_cut(agent, table1, func);
 }
@@ -442,7 +441,7 @@ STAFCV_T topcut_cut(char* agent, char* table1,
       }
    }
    tdmTable* tbl1=NULL;
-   if( !tdm->findTable(table1, tbl1) ){
+   if( NULL == (tbl1 = tdm->findTable(table1)) ){
       printf("I can't find table '%s'.\n",table1);
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }

@@ -57,7 +57,6 @@ int top_stop()
    delete top;
 unecessary -- soc will do it. -*/
 
-   /* CET said delete this dsDatasetAllocStats(); show allocation stats */
    return TRUE;
 }
 
