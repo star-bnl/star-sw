@@ -124,7 +124,7 @@ STAFCV_T duiFactory:: cd (const char * dirPath) {
    ||  !dsIsDataset(&result,pDS)
    ||  !result
    ){
-      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",dirPath);
+      EML_CONTEXT("ERROR: '%s' is not a existent _directory_.\n",dirPath);
       EML_ERROR(OBJECT_NOT_FOUND);
    }
 
@@ -695,10 +695,12 @@ tdmTable* duiFactory:: newTable (const char * name
 //:----------------------------------------------- PRIV FUNCTIONS     --
 STAFCV_T duiFactory:: findNode_ds (const char * path
 		, DS_DATASET_T*& pNode) {
-   char* fullPath;
-   if( !(fullPath = cvtRelAbs(path))
-   ||  !duiFindDS(pNode,pDSroot,fullPath)
-   ){
+   char* fullPath=NULL,thereIsAnError=0;
+   if( !(fullPath = cvtRelAbs(path)) ) thereIsAnError=7;
+   if( !thereIsAnError ) {
+      if( !duiFindDS(pNode,pDSroot,fullPath) ) thereIsAnError=7;
+   }
+   if( thereIsAnError ){
       FREE(fullPath);
       EML_CONTEXT("ERROR: I can't find '%s'.\n",path);
       EML_ERROR(OBJECT_NOT_FOUND);
