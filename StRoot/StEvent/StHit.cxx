@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.1 1999/10/28 22:25:47 ullrich Exp $
+ * $Id: StHit.cxx,v 2.2 2000/05/19 18:33:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
- * Revision 2.1  1999/10/28 22:25:47  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  2000/05/19 18:33:14  ullrich
+ * Minor changes (add const) to cope with modified StArray.
  *
  * Revision 2.3  2000/06/01 21:38:53  ullrich
  * Added member mFlag and access member flag() and setFlag().
@@ -31,7 +31,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.1 1999/10/28 22:25:47 ullrich Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.2 2000/05/19 18:33:14 ullrich Exp $";
 
 ClassImp(StHit)
 StHit::StHit()
@@ -161,7 +161,7 @@ StHit::covariantMatrix() const
 
 StPtrVecTrack
 StHit::relatedTracks(const StSPtrVecTrackNode& nodes, StTrackType type)
-        StTrackNode *node = nodes[i];
+{
     StPtrVecTrack vec;
     StPtrVecHit hvec; 
     StDetectorId id = this->detector();
