@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.29 2000/10/10 20:09:43 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.30 2000/10/11 19:24:42 genevb Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.30  2000/10/11 19:24:42  genevb
+// Different handling of trackArray
+//
 // Revision 1.29  2000/10/10 20:09:43  wdeng
 // TObjArray instances deleted. I am not sure if this is related to the problem Akio reported.
 //
@@ -215,7 +218,7 @@ Int_t StKinkMaker::Make(){
   dst_track_st  *dstTrackStart  = globtrk->GetTable();
 
   StKinkLocalTrack* tempTrack;
-  TObjArray* trackArray = new TObjArray(MAXNUMOFTRACKS);
+  TObjArray trackArray(MAXNUMOFTRACKS);
   
   Float_t x[3] = {0,0,0};
   Float_t b[3];
@@ -258,21 +261,21 @@ Int_t StKinkMaker::Make(){
 					     origin*centimeter,
 					     h);
 	
-	    trackArray->Add(tempTrack);
+	    trackArray.Add(tempTrack);
 	  }
       }
   }
   
-  trackArray->Sort();
+  trackArray.Sort();
   
   dstVtxIndex  = vertex->GetNRows();
   kinkVtxIndex = 0;  
 
   Int_t   kinkCandidate=0;
   
-  for( i = 0; i < trackArray->GetLast(); i++)
+  for( i = 0; i < trackArray.GetLast(); i++)
     {
-      myTrack1 = (StKinkLocalTrack*)trackArray->At(i);
+      myTrack1 = (StKinkLocalTrack*)trackArray.At(i);
 
       //if(fabs( myTrack1->helix().dipAngle()) > tkfpar->parentDipAngleMax ) continue;  
       if( myTrack1->pt() < tkfpar->parentPtMin ) continue;     
@@ -280,9 +283,9 @@ Int_t StKinkMaker::Make(){
       parentImpact = myTrack1->helix().distance(eventVertex);
       if( parentImpact > tkfpar->impactCut ) continue;
       
-      for( j = i+1; j <= trackArray->GetLast(); j++)
+      for( j = i+1; j <= trackArray.GetLast(); j++)
 	{
-	  myTrack2 = (StKinkLocalTrack*)trackArray->At(j);
+	  myTrack2 = (StKinkLocalTrack*)trackArray.At(j);
 
 	  if( myTrack1->charge() != myTrack2->charge() ) continue;
 	  if( myTrack2->startRadius2D() < tkfpar->vertexRMin2D ) continue;
@@ -402,8 +405,6 @@ Int_t StKinkMaker::Make(){
 	  dstVtxIndex++;
 	}
     }
-  trackArray->Delete();
-  delete trackArray;
 
   gMessMgr->Info() << " Found " << kinkCandidate << " kink candidates " << endm;
 
