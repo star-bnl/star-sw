@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.17 2000/02/18 22:01:56 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.18 2000/02/26 19:06:12 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,11 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.18  2000/02/26 19:06:12  laue
+ * Some unnecessary includes removed.
+ * StThreeVectorD replace by StHbtThreeVector.
+ * StHbtBinaryReader now can derive output filename from StIOMaker
+ *
  * Revision 1.17  2000/02/18 22:01:56  laue
  * Implementation of a collections of StHbtEventWriters.
  * We now can write multiple microDsts at a time.
@@ -113,7 +118,7 @@
 #include "StParticleTypes.hh"
 #include "StTpcDedxPidAlgorithm.h"
 
-#include <typeinfo>
+//#include <typeinfo>
 #include <math.h>
 
 

@@ -13,7 +13,7 @@
 #include "StMcEventMaker/StMcEventMaker.h"
 
 // c++ stuff
-#include <typeinfo>
+//#include <typeinfo>
 #include <cmath>
 
 // hbt stuff

@@ -25,6 +25,12 @@
 
 #include "StHbtMaker/Infrastructure/StHbtIOBinary.hh"
 
+#ifdef __ROOT__
+#include "StMaker.h"
+#include "StIOMaker/StIOMaker.h"
+#include "StIOInterFace.h"
+#endif
+
 class StHbtBinaryReader : public StHbtEventReader{
 
 private:
@@ -32,12 +38,21 @@ private:
 
   ifstream* mInputStream;              //!
   ofstream* mOutputStream;             //! 
+#ifdef __ROOT__
+  StIOMaker* mIOMaker;                 //!
+#endif
   const char* mFileName;               //!
-  const char* mInFileName;             //!
+  int mReaderStatus;                   //!
+
+  StHbtString mTheMessage;
+  StHbtString mCurrentFile;
 
 public:
   StHbtBinaryReader();
-  StHbtBinaryReader(char* FileName);
+  StHbtBinaryReader(char*);
+#ifdef __ROOT__
+  StHbtBinaryReader(StIOMaker*);
+#endif
   ~StHbtBinaryReader();
 
   // generic StHbtEventReader methods

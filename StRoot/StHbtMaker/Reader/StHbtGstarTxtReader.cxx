@@ -20,7 +20,6 @@
 #include "SystemOfUnits.h"   // has "tesla" in it
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
-#include "StThreeVector.hh"
 #include "phys_constants.h"
 #include "StPhysicalHelix.hh"
 
