@@ -22,12 +22,9 @@
   
    if (STAF_STATUS(1).ne. 1) then
     message ' INPUT_G2T_FILE#INIT ERROR reading Run info!!'
-    goto EOF
    endif
   
-cd /dui
  
-EOF:
  
 return 
 
@@ -40,13 +37,10 @@ MACRO read
 * ** records with /dui/Event
  stream/getevent G2Tfile /dui/geant
  
-     
-   if (STAF_STATUS(1).ne. 1) then
-    message ' INPUT_G2T_FILE#READ ERROR reading Event info!!'
-    goto EOF
-  endif
+ if (STAF_STATUS(1).ne. 1) then
+   message ' INPUT_G2T_FILE#READ ERROR reading Event info!!'
+ endif
   
- cd /dui
 
 return
 *******************************************************************
