@@ -19,7 +19,7 @@ class  TTree;
 class St_io_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.1 1999/01/16 01:01:52 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.2 1999/01/19 04:58:51 fine Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
    TObjArray     *m_ListOfBranches; //!
 
@@ -40,6 +40,7 @@ class St_io_Maker : public StMaker {
    Int_t   NextEventPut();
    Int_t   NextEventGet(Int_t nevent);
    virtual void   PrintInfo();
+   virtual Int_t  SetActive();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
    ClassDef(St_io_Maker, 1)   //StAF chain virtual base class for Makers
 };
