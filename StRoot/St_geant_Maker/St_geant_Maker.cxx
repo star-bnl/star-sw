@@ -1,5 +1,9 @@
-// $Id: St_geant_Maker.cxx,v 1.84 2003/10/02 00:13:03 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.85 2003/10/31 23:12:13 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.85  2003/10/31 23:12:13  potekhin
+// Added a piece of code to handle the pixel detector hits.
+// Reformatted a few lines and changed some comments.
+//
 // Revision 1.84  2003/10/02 00:13:03  potekhin
 // Added the handling of the gdat structure, for now being
 // written into runco are. may want to later augment this
@@ -269,7 +273,7 @@
 #include "StChain.h"
 #include "TDataSetIter.h"
 #include "TTable.h"
-#include <Stiostream.h>
+#include "Stiostream.h"
 #include <stdio.h>
 #include <string.h>
 #include "TSystem.h"
@@ -315,6 +319,7 @@
 #include "g2t/St_g2t_get_kine_Module.h"
 #include "g2t/St_g2t_particle_Module.h"
 #include "g2t/St_g2t_svt_Module.h"
+#include "g2t/St_g2t_pix_Module.h"
 #include "g2t/St_g2t_tpc_Module.h"
 #include "g2t/St_g2t_mwc_Module.h"
 #include "g2t/St_g2t_ftp_Module.h"
@@ -448,14 +453,12 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
   if (!fVolume) ((St_geant_Maker *)this)->Work();
 
   if (fVolume) { 
-    //--
-    // Remove hall from the list of ROOT nodes
-    // to make it free of ROOT control
-    //--
     TList *listOfVolume = gGeometry->GetListOfNodes();
+
     // Remove hall from the list of ROOT nodes to make it free of ROOT control
     listOfVolume->Remove(fVolume);
     listOfVolume->Remove(fVolume);
+
     // Add "hall" into ".const" area of this maker
     ((St_geant_Maker *)this)->AddConst(fVolume);
     if (Debug()) fVolume->ls(3);
@@ -464,16 +467,15 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
-  // Create Histograms    
+
   if (m_Mode != 1) { // Mixer mode == 1 - do not modify EvtHddr
     fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
-    if (!fEvtHddr) {// Stand alone run
+    if (!fEvtHddr) {                            // Standalone run
       fEvtHddr = new StEvtHddr(m_ConstSet);
-      SetOutput(fEvtHddr);	//Declare this "EvtHddr" for output
+      SetOutput(fEvtHddr);	                //Declare this "EvtHddr" for output
     }
   }
-  BookHist();
-
+  BookHist();   // Create Histograms    
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -491,12 +493,15 @@ Int_t St_geant_Maker::Make()
     Int_t Nwhead,Ihead[100];
     Int_t Nwbuf;
     Float_t Ubuf[100];
-    // empty g2t_event
+
+    // prepare an empty g2t_event
     St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
     m_DataSet->Add(g2t_event);
+
     Char_t   cgnam[21] = "                   \0";                               
     Agnzgete(link,ide,npart,irun,ievt,cgnam,vert,iwtfl,weigh);
     geant3->Gfhead(Nwhead,Ihead,Nwbuf,Ubuf);
+
     if (fEvtHddr) {
       if (clink->jhead) {
 	if (fEvtHddr->GetRunNumber() != *(z_iq+clink->jhead+1)) 
@@ -505,8 +510,7 @@ Int_t St_geant_Maker::Make()
       }
       if (fInputFile != "") fEvtHddr->SetEventType(TString(gSystem->BaseName(fInputFile.Data()),7));
     }
-    if (npart>0) 
-    {  
+    if (npart>0) {  
       St_particle  *particle   = new St_particle("particle",npart);
       m_DataSet->Add(particle);  iRes = g2t_particle(particle);
 //    =======================
@@ -515,12 +519,11 @@ Int_t St_geant_Maker::Make()
 
       // 20030508 --max-- found a bug: 9999999
       // "istat==10" on the following line, changing to >=11
-      // This "if should now work with both "old" and "new"
-      // ntuple conventions
+      // This "if should now work with both "old" and "new" ntuple conventions
 
       if ( (p->isthep == 10 && p->idhep  == 9999999 && fEvtHddr) ||
-           (p->isthep >= 11 && p->idhep  == 999998  && fEvtHddr))
-      {
+           (p->isthep >= 11 && p->idhep  == 999998  && fEvtHddr)) {
+
 	fEvtHddr->SetBImpact  (p->phep[0]);
 	fEvtHddr->SetPhImpact (p->phep[1]);
 	fEvtHddr->SetCenterOfMassEnergy(p->phep[2]);
@@ -532,12 +535,15 @@ Int_t St_geant_Maker::Make()
 	// 	fEvtHddr->SetAWest(west);
 	// 	fEvtHddr->SetAEast(east);
 
-	if (fEvtHddr->GetRunNumber() != p->vhep[0])
-	  fEvtHddr->SetRunNumber((int)p->vhep[0]);
+	// Update the run number, if necessary
+	if (fEvtHddr->GetRunNumber()!=p->vhep[0]) fEvtHddr->SetRunNumber((int)p->vhep[0]);
+
 	fEvtHddr->SetEventNumber((int)p->vhep[1]);
 	fEvtHddr->SetProdDateTime();
+
         Int_t id = p->jdahep[0];
         Int_t it = p->jdahep[1];
+
         if (id <=        0) id = 19991231;
 	if (id <= 19000000) id +=19000000;
         if (id >= 20500000) id = 19991231;
@@ -546,6 +552,7 @@ Int_t St_geant_Maker::Make()
 	fEvtHddr->SetDateTime(id,it);
       }
     }
+
     if (!cnum->nvertx || !cnum->ntrack) return kStErr;
     St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",cnum->nvertx);
     m_DataSet->Add(g2t_vertex);
@@ -555,7 +562,8 @@ Int_t St_geant_Maker::Make()
     iRes = g2t_get_kine(g2t_vertex,g2t_track);
     iRes = g2t_get_event(g2t_event);
 
-    // --max-- addition due to the new coding:
+    // --max--
+    // Filling the event header, addition due to the new coding
     if(fEvtHddr) {
       fEvtHddr->SetAEast((*g2t_event)[0].n_wounded_east);
       fEvtHddr->SetAWest((*g2t_event)[0].n_wounded_west);
@@ -573,6 +581,16 @@ Int_t St_geant_Maker::Make()
 //	     ===============================
     }
 
+    geant3->Gfnhit("PIXH","PLAC", nhits);
+
+    cout<<"**************************************** Pixel hits: "<<nhits<<endl;
+    if (nhits>0) { 
+      St_g2t_pix_hit *g2t_pix_hit = new St_g2t_pix_hit("g2t_pix_hit",nhits);
+      m_DataSet->Add(g2t_pix_hit);
+
+      iRes = g2t_pix(g2t_track,g2t_pix_hit);
+//
+    }
 
     geant3->Gfnhit("TPCH","TPAD", nhits);
     if (nhits>0){ 
