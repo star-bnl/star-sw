@@ -1,4 +1,4 @@
-// $Id: St_geant_Maker.h,v 1.5 1999/01/26 16:01:44 nevski Exp $
+// $Id: St_geant_Maker.h,v 1.6 1999/02/12 04:09:34 nevski Exp $
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
@@ -39,6 +39,7 @@ class St_geant_Maker : public StMaker {
    virtual void   SetIwtype  (Int_t n=      0) {iwtype  = n;} // *MENU
 
    virtual void   Work();
+   virtual void   Call(const Char_t *name); // *MENU 
    virtual TRotMatrix *GetMatrix(float theta1, float phi1,
                                  float theta2, float phi2,
                                  float theta3, float phi3);
