@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.8 1999/07/21 21:15:41 levine Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.9 1999/07/27 23:08:08 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -24,10 +24,15 @@
  * 23-Jun-99 MJL most output now supressed with EventReader.verbose
  * 07-Jul-99 MJL if no banks found for a given rcb,mz just skip it. 
  *           No longer return FALSE
+ * 27-Jul-99 MJL init RowSpacePts = 0 to make destructor robust
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.9  1999/07/27 23:08:08  levine
+ * bug fix: initialize RowSpacePts[] =0 to make destructor robust
+ *
  * Revision 1.8  1999/07/21 21:15:41  levine
+ *
  * TPCV2P0_ZS_SR.cxx changed to include the TPCV2P0_ZS_SR::getSpacePts()
  * (cluster-finder reader). TPCV1P0_ZS_SR.cxx changed to include empty
  * version of the same method.
@@ -61,6 +66,9 @@ TPCV2P0_ZS_SR::TPCV2P0_ZS_SR(int s, TPCV2P0_Reader *det)
   memset((char *)adcd_p, 0, sizeof(adcd_p));
   memset((char *)adcx_p, 0, sizeof(adcx_p));
   memset((char *)seqd_p, 0, sizeof(seqd_p));
+
+  for(int ii=TPC_PADROWS-1;ii>=0;ii--) RowSpacePts[ii]=0;   
+
 }
 
 int TPCV2P0_ZS_SR::initialize()
