@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.h,v 2.8 2002/02/19 04:24:03 lasiuk Exp $
+ * $Id: StRichPidTraits.h,v 2.9 2002/02/19 16:54:33 ullrich Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.h,v $
+ * Revision 2.9  2002/02/19 16:54:33  ullrich
+ * Minor changes - code not altered.
+ *
  * Revision 2.8  2002/02/19 04:24:03  lasiuk
  * addition of StRichSpectra information for uDST purposes
  *
@@ -40,11 +43,8 @@
 #define StRichPidTraits_hh
 
 #include <iostream.h>
-
 #include "StTrackPidTraits.h"
-
 #include "StParticleDefinition.hh"
-
 #include "StContainers.h"
 #include "StRichPid.h"
 #include "StRichSpectra.h"

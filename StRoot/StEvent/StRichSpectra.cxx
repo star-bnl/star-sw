@@ -1,37 +1,39 @@
 /***************************************************************************
  *
- * $Id: StRichSpectra.cxx,v 2.1 2002/02/19 04:24:02 lasiuk Exp $
+ * $Id: StRichSpectra.cxx,v 2.2 2002/02/19 16:54:33 ullrich Exp $
  *
- * Author: bl
- *         Dec 14, 2002
+ * Author: Brian Lasiuk, Dec 14, 2002
  ***************************************************************************
  *
  * Description: Output from StRichSpectraMaker for uDST storage
  *
  ***************************************************************************
  * $Log: StRichSpectra.cxx,v $
+ * Revision 2.2  2002/02/19 16:54:33  ullrich
+ * Minor changes - code not altered.
+ *
  * Revision 2.1  2002/02/19 04:24:02  lasiuk
  * addition of StRichSpectra information for uDST purposes
  *
  **************************************************************************/
 #include "StRichSpectra.h"
 
-static const char rcsid[] = "$Id: StRichSpectra.cxx,v 2.1 2002/02/19 04:24:02 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichSpectra.cxx,v 2.2 2002/02/19 16:54:33 ullrich Exp $";
 
 ClassImp(StRichSpectra)
     
-StRichSpectra::StRichSpectra(Int_t v) {/*nopt*/}
+StRichSpectra::StRichSpectra(int v) : mVersion(v) {/*nopt*/}
 
 StRichSpectra::~StRichSpectra() {/*nopt*/}
 
-StRichSpectra::StRichSpectra(Float_t x,   Float_t y,   Float_t dx,    Float_t dy,
-			     Float_t cdx, Float_t cdy, Float_t theta, Float_t sigma,
-			     Int_t nopho, Float_t pan, Int_t ppho,    Int_t totphotons,
-			     Float_t mas, Float_t lir, Float_t li,    Float_t alpha,
-			     Int_t flag,  Float_t reserved,
-			     Float_t dpi, Float_t dk, Float_t dp,
-			     Int_t ndpi, Int_t ndk, Int_t ndp,
-			     Int_t version)
+StRichSpectra::StRichSpectra(float x,   float y,   float dx,    float dy,
+			     float cdx, float cdy, float theta, float sigma,
+			     int nopho, float pan, int ppho,    int totphotons,
+			     float mas, float lir, float li,    float alpha,
+			     int flag,  float reserved,
+			     float dpi, float dk, float dp,
+			     int ndpi, int ndk, int ndp,
+			     int version)
     : mExtrapolatedX(x) ,mExtrapolatedY(y), mDx(dx), mDy(dy), mCdx(cdx), mCdy(cdy),
       mCherenkovAngle(theta), mCherenkovAngleSigma(sigma), mNumberOfPhotons(nopho),
       mPeakAngle(pan), mPeakPhotons(ppho), mTotalPhotons(totphotons),
