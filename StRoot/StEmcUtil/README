@@ -14,5 +14,9 @@ Corrected getBin and getId for Jose's scheme (15-march)
 
 Created "functor" class StEmcMath (march 2001)
 
+Added  function for transition 
+from STAR detector Id    (see $STAR/include/StDetectorId.h )
+to local Emc detector Id (see $STAR/StRoot/StEmcUtil/emcInternalDef.h).
+
 Originally Aleksei Pavlinov moved StEmcGeom from St_emc_make
 (June 2000).

@@ -1,6 +1,7 @@
 #include "StEmcMath.h"
 #include "StEvent/StMeasuredPoint.h"
 #include "StarClassLibrary/StThreeVectorF.hh"
+#include "StEmcUtil/emcInternalDef.h"
 
 ClassImp(StEmcMath)
 
@@ -43,4 +44,21 @@ StEmcMath::phi(StMeasuredPoint* point,StMeasuredPoint* vertex)
   else return -9999.;
 }
 
+UInt_t 
+StEmcMath::detectorId(const StDetectorId stId)
+{
+  // Transition from STAR numeration to internal EMC numeration
+  Int_t id = stId - kBarrelEmcTowerIdentifier;
+  if(id<BEMC || id> ESMDP) return 0; // Wrong value of stId
+  else                     return UInt_t(id);
+}
 
+StDetectorId
+StEmcMath::detectorId(const UInt_t id)
+{
+  // Transition from internal EMC numeration numeration to STAR
+  StDetectorId stId = StDetectorId(id + kBarrelEmcTowerIdentifier);
+  if(stId<kBarrelEmcTowerIdentifier || stId >kEndcapSmdVStripIdentifier) 
+  return kUnknownId;
+  else return stId; 
+}
