@@ -8,11 +8,14 @@
 
 #include "StMessMgr.h"
 #include "StSvtdEdxMaker.h"
-#include "tables/St_svg_geom_Table.h"
+#include "StSvtClassLibrary/StSvtGeometry.hh"
+#include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 #include "tables/St_scs_spt_Table.h"
 #include "tables/St_stk_track_Table.h" 
 #include "tables/St_sgr_groups_Table.h" 
+#include "tables/St_dst_dedx_Table.h"
 
+#include "StDetectorId.h"
 #include "TH2.h"
 
 ClassImp(StSvtdEdxMaker)
@@ -35,9 +38,8 @@ Int_t StSvtdEdxMaker::Init()
   if(Debug()) gMessMgr->Debug() << "In StSvtdEdxMaker::Init() ... "
                                << GetName() << endm; 
 
-  
-  St_DataSetIter  svtpars(GetInputDB("svt"));
-  mGeom       = (St_svg_geom    *) svtpars("svgpars/geom");
+  if( GetSvtGeometry() != kStOK) return kStWarn;
+
 
   mSvtdEdx = new TH2F("SvtdEdx"," Svt dEdx",100,0.,2.,100,0.,0.03);
   mSvtdEdx->SetYTitle("dEdx");
@@ -54,6 +56,10 @@ Int_t StSvtdEdxMaker::Make()
 
   if (Debug()) gMessMgr->Debug() << " In StSvtdEdxMaker::Make()" << GetName() << endm;
 
+  
+  if( !mGeom){
+    gMessMgr->Warning() <<" Things are wrong with the SVT database!!!!!!!!!" << endm;
+  }
 
   St_DataSet     *svtracks = GetInputDS("est");
   St_DataSet     *svthits  = GetInputDS("svt_hits");
@@ -72,8 +78,12 @@ Int_t StSvtdEdxMaker::Make()
     Hits     = (St_scs_spt    *)  svthits->Find("scs_spt");
   }
   
-
-  svg_geom_st* svtGeometry = mGeom->GetTable();
+  St_DataSet *Dst = GetDataSet("dst"); assert(Dst);
+  St_DataSet *dst = Dst->Find(".data/dst");
+  if (!dst) dst = Dst;
+  // Get dedx table
+  St_dst_dedx *dst_dedx     = (St_dst_dedx *) dst->Find("dst_dedx");
+  if (! dst_dedx) {dst_dedx = new St_dst_dedx("dst_dedx",20000); dst->Add(dst_dedx);}
 
    //
     // define counter variables
@@ -86,14 +96,14 @@ Int_t StSvtdEdxMaker::Make()
     float u_ab_x, u_ab_y, u_ab_z;
     float norm, cos_theta;
     int wafer_no;
-    
+    StSvtWaferGeometry* waferGeom;
    
     //
     // Check to make sure there are tracks
     //
 
-    cout<< "***Found "  << Tracks->GetNRows()   << " svt tracks"<< endl;
-    cout << "*Found " << Groups->GetNRows() << " svt groups " << endl;
+    // cout<< "***Found "  << Tracks->GetNRows()   << " svt tracks"<< endl;
+    // cout << "*Found " << Groups->GetNRows() << " svt groups " << endl;
 
 
    if ( Tracks->GetNRows()== 0) {
@@ -120,7 +130,7 @@ Int_t StSvtdEdxMaker::Make()
      svtTrack[ii].dedx[0] = 0.;
      svtTrack[ii].dedx[1] = 0.;
      if ( svtTrack[ii].flag > 0 ){
-       cout<< ii << " # of points on track " << (svtTrack[ii].nspt) << endl;
+       //  cout<< ii << " # of points on track " << (svtTrack[ii].nspt) << endl;
        int numberOfPointsOnTrack = svtTrack[ii].nspt;
        int trackId=(svtTrack[ii].id);  // needed as an index
        
@@ -149,6 +159,7 @@ Int_t StSvtdEdxMaker::Make()
        //
        
        int index = 0;
+       dst_dedx_st dedxTable;
        
        for (jj=0; jj<(Groups->GetNRows()); jj++) {
 	  
@@ -185,13 +196,14 @@ Int_t StSvtdEdxMaker::Make()
 	  // Path length correction
 	  
 	  
-	  for ( wafer_no=0; wafer_no<mGeom->GetNRows(); wafer_no++){
-	    if( svtCluster[spacePoints[jj]].id_wafer == 
-		svtGeometry[wafer_no].id) break;
-	  }
-	  cos_theta = u_ab_x*svtGeometry[wafer_no].n[0] +
-	    u_ab_y*svtGeometry[wafer_no].n[1] +
-	    u_ab_z*svtGeometry[wafer_no].n[2] ;
+	  wafer_no = mGeom->getWaferIndex(
+				 svtCluster[spacePoints[jj]].id_wafer);
+	  waferGeom = (StSvtWaferGeometry*)mGeom->at(wafer_no);
+	
+
+	  cos_theta = u_ab_x*waferGeom->n(0) +
+	              u_ab_y*waferGeom->n(1) +
+	              u_ab_z*waferGeom->n(2) ;
 	  
 	  
 	  pathLength[index]        = fabs(0.03/cos_theta);
@@ -224,7 +236,6 @@ Int_t StSvtdEdxMaker::Make()
 	float dEdxError=0;
 	for (jj=0; jj<numberOfPointsOnTrack; jj++) {
 	  dEdx      += log(spacePointsCharge[jj]);
-	  dEdx  += spacePointsCharge[jj];
 	  dEdxError += log(spacePointsCharge[jj]);
 	}
 	
@@ -243,6 +254,19 @@ Int_t StSvtdEdxMaker::Make()
 	dEdxError = exp(dEdxError) - (dEdx * dEdx);
 	svtTrack[ii].dedx[0] = dEdx;
 	svtTrack[ii].dedx[1] = dEdxError;
+
+
+	// Fill in dedx table
+
+	dedxTable.id_track  =  svtTrack[ii].id_globtrk;
+	dedxTable.det_id    =  kSvtId;    // SVT track
+	dedxTable.method    =  0;
+	dedxTable.ndedx     =  0;
+	dedxTable.dedx[0]   =  svtTrack[ii].dedx[0];
+	dedxTable.dedx[1]   =  svtTrack[ii].dedx[1];
+	dst_dedx->AddAt(&dedxTable);
+	
+	// Fill in histo info.
 	double p= (svtTrack[ii].tanl/svtTrack[ii].invpt)*
 	  (svtTrack[ii].tanl/svtTrack[ii].invpt);
 	p += 1/(svtTrack[ii].invpt*svtTrack[ii].invpt);
@@ -264,3 +288,21 @@ void StSvtdEdxMaker::FillHistograms(double dEdx, double p)
 
   mSvtdEdx->Fill(p,dEdx);
 }
+//___________________________________________________________________________
+Int_t StSvtdEdxMaker::GetSvtGeometry()
+{
+  mGeom = 0;
+  St_DataSet* dataSet;
+  dataSet = GetDataSet("StSvtGeometry");
+  if(!dataSet) {
+    gMessMgr->Error("Failure to get SVT geometry - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
+    
+    return kStOK;
+  }
+
+  mGeom = (StSvtGeometry*)dataSet->GetObject();
+  
+  return kStOK;
+
+}
+//__________________________________________________________________________
