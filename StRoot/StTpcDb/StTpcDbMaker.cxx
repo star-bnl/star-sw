@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.14 2000/04/11 16:06:26 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.15 2000/05/31 19:50:16 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.15  2000/05/31 19:50:16  hardtke
+ * speed up tpc_time_to_z and tpc_z_to_time by factor of 5
+ *
  * Revision 1.14  2000/04/11 16:06:26  hardtke
  * improve speed of tpc_row_par and tpc_global_to_sector
  *
@@ -121,24 +124,59 @@ int type_of_call tpc_local_to_global_(int *isect,float *xlocal, float* xglobal){
   return 1; 
 }
 int type_of_call tpc_time_to_z_(int *time,int *padin, int* row, int* sector,float *z){
-StTpcPadCoordinate pad(*sector,*row,*padin,*time);
-StTpcLocalSectorCoordinate localSector;
-StTpcCoordinateTransform transform(gStTpcDb);
-transform(pad,localSector);
-*z = localSector.position().z();
+  static StTpcCoordinateTransform* trans = new StTpcCoordinateTransform(gStTpcDb); 
+  double zoff;
+//    double tbwidth = gStTpcDb->Electronics()->samplingFrequency();
+//         double timeBin = (double)*time;
+//         double zztop = 
+//           gStTpcDb->DriftVelocity()*1e-6*         //cm/s->cm/us
+//  	 (gStTpcDb->triggerTimeOffset()*1e6 +  // units are s
+//  	  gStTpcDb->Electronics()->tZero() +   // units are us 
+//  	  //	  gStTpcDb->Electronics()->shapingTime()*1e-3 + //units are ns
+//            (
+//            gStTpcDb->T0(*sector)->getT0(*row,*padin)+
+//            timeBin)/
+//            (tbwidth)
+//           ); 
+  double zztop = trans->zFromTB(*time);
+       if (*row<14){ 
+	 zoff = gStTpcDb->Dimensions()->zInnerOffset(); 
+       }
+       else { 
+	 zoff = gStTpcDb->Dimensions()->zOuterOffset(); 
+       }
+       *z = zztop - zoff;
+
+//    StTpcPadCoordinate pad(*sector,*row,*padin,*time);
+//    StTpcLocalSectorCoordinate localSector;
+//    StTpcCoordinateTransform transform(gStTpcDb);
+//    transform(pad,localSector);
+//    *z = localSector.position().z();
 //tph_fit_isolated_cluster wants return=1:
 return 1;
 }
 int type_of_call tpc_z_to_time_(float* z, int* padin, int* padrow, int* sector, int* time){
-  int temp[1];
-  *temp = 100;
-  StTpcPadCoordinate pad(*sector,*padrow,*padin,*temp);
-  StTpcLocalSectorCoordinate localSector;
-  StTpcCoordinateTransform transform(gStTpcDb);
-  transform(pad,localSector);
-  StTpcLocalSectorCoordinate localSector2(localSector.position().x(),localSector.position().y(),(double)*z,localSector.fromSector());
-  transform(localSector2,pad);
-  *time = pad.timeBucket();
+  static StTpcCoordinateTransform* trans = new StTpcCoordinateTransform(gStTpcDb); 
+  double zoff;
+  double zin;
+       if (*padrow<14){ 
+	 zoff = gStTpcDb->Dimensions()->zInnerOffset(); 
+       }
+       else { 
+	 zoff = gStTpcDb->Dimensions()->zOuterOffset(); 
+       }
+       zin = *z + zoff;
+       *time = trans->tBFromZ(zin);
+
+//    int temp[1];
+//    *temp = 100;
+//    StTpcPadCoordinate pad(*sector,*padrow,*padin,*temp);
+//    StTpcLocalSectorCoordinate localSector;
+//    StTpcCoordinateTransform transform(gStTpcDb);
+//    transform(pad,localSector);
+//    StTpcLocalSectorCoordinate localSector2(localSector.position().x(),localSector.position().y(),(double)*z,localSector.fromSector());
+//    transform(localSector2,pad);
+//    *time = pad.timeBucket();
   return 1;
 }
 int type_of_call tpc_drift_velocity_(float *dvel){
