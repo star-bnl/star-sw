@@ -16,7 +16,8 @@ C                     **                 **
 C
 C----------------------------------------------------------------------
 C
-      INTEGER FUNCTION TPHAM( tsspar_h, tsspar
+      INTEGER FUNCTION TPHAM( tclpar_h, tclpar
+     +,			      tsspar_h, tsspar
      +,                       detector_h, detector
      +,                       sector_h, sector
      +,                       pad_plane_h, pad_plane
@@ -65,7 +66,7 @@ C       tucod_exit     !Force program termination.
 C       tucod_unkmode  !Unknown mode in call to TAE_USER.
 C     
 C   Functional Description : 
-C    This module reconstructs hits given cluster data in tpseq/tpcluster
+C   This module reconstructs hits given cluster data in tpseq/tpcluster
 C
 C   Moved into TAS 12-Apr-1994   Richard Morse
 C   Copyright 1994    Lawrence Berkeley Laboratory
@@ -82,14 +83,17 @@ C     -	Restructured algorithm of extracting spatial information,
 C	simplifying it, and using more realistic parametrization of
 C	the pulse in time.  Now, for each cluster, this routine just
 C	calls two routines, TPH_GET_CLS_DATA and TPH_FIT_CLUSTER.
-C	The first fills user arrays ipad,itdc,iadc,npix_pad with information
+C	The first fills user arrays ipad,itdc,iadc,npix_pad with
+C	information
 C	about sequences in the cluster, and the second extracts spatial
 C	information from these arrays.  The old (obsolete) routines
-C	originally used are stored at the end of this file (search for ****).
+C	originally used are stored at the end of this file (search for
+C	 ****).
 C     -	New variable added to TPHIT table and filled below, TPHIT.PHI,
 C	which indicates the "orientation" of the hit with respect to
 C	the padplane.  (it is atan(delta_time/delta_pad)).  It is hoped
-C	that this variable, along with prf and zrf, will give information
+C	that this variable, along with prf and zrf, will give
+C	information
 C	about the crossing and dip angles, alpha and lambda.
 C
 C    13 Dec 1994 - MA Lisa
@@ -98,32 +102,42 @@ C	Now I do the job of the tpg routine tpg_pad_to_x here, since
 C	now that routine demands integer pad#
 C
 C    17,19 Jan 1995 - malisa
-C     -	Now fill id and row entries in a way consistent with fast simulator
+C     -	Now fill id and row entries in a way consistent with fast
+C	simulator
 C	(row = 100*((SECTOR+1)/2)+ROW)
 C
 C    13 Mar 1995
 C     -	Fill dx and dy according to reasonable prescription.
 C
 C    30 Mar 1995
-C     - Also fill new entry in tphit table, nseq=nseq of contributing cluster
-C     -	now using consistent convention of sector=1..24, row=1..45 for all
+C     - Also fill new entry in tphit table, nseq=nseq of contributing
+C	cluster
+C     -	now using consistent convention of sector=1..24, row=1..45 for
+C	all
 C       tables from tpseq,tpcluster on
 C
 C    21 Apr 1995
-C     -	uncertainty in position along pad row for hits fit w/ 3-point gaussian
+C     -	uncertainty in position along pad row for hits fit w/ 3-point
+C	gaussian
 C	now caculated in a non-ad-hoc fashion, depends on signal:noise
 C
 C    June 1995
 C     - npix_pad is now called npix_seq, since it just
-C       indicates where in the ipad,iadc,itdc arrays the pad number (ipad)
+C       indicates where in the ipad,iadc,itdc arrays the pad number
+C	(ipad)
 C       changes.  This just makes things faster later on.
-C     - itrk is now an *array* passed back from tph_get_cls_data, telling
-C       which MC track contributed most to a pixel-- that way, the track
-C       associated with a given *hit* can be assessed after deconvolution
-C     - also, no reason to keep iadc,itdc,ipad arrays as reals... put them
+C     - itrk is now an *array* passed back from tph_get_cls_data,
+C	telling
+C       which MC track contributed most to a pixel-- that way, the
+C	track
+C       associated with a given *hit* can be assessed after
+C	deconvolution
+C     - also, no reason to keep iadc,itdc,ipad arrays as reals... put
+C	them
 C       integer -- that should also speed things up
 C     - tph_fit_cluster now first figures out how many hits are in
-C       the cluster, then parses the fitting job out to fit_isolated_cluster
+C       the cluster, then parses the fitting job out to
+C	fit_isolated_cluster
 C       (now existing) if isolated or deconvolute_cluster (will exist)
 C     - the field tphit.lambda is now filled, using a vertex ansatz
 C       (lambda=atan(z/radius_of_row)
@@ -151,6 +165,8 @@ C-----------------------------------------------------------------------
 #include "tss_tpmcpix_pars.inc"
 #include "tss_tpmcpix_st.inc"
 
+#include "tcl_tclpar_pars.inc"
+#include "tcl_tclpar_st.inc"
 #include "tcl_tpseq_pars.inc"
 #include "tcl_tpseq_st.inc"
 #include "tcl_tpcluster_pars.inc"
@@ -176,6 +192,9 @@ C-----------------------------------------------------------------------
       RECORD/ table_head_st/ tpmcpix_h
       RECORD/ tpmcpix_row_st/ tpmcpix(*)
 
+
+      RECORD/ table_head_st/ tclpar_h
+      RECORD/ tclpar_row_st/ tclpar(*)
       RECORD/ table_head_st/ tpseqh
       RECORD/ tpseq_row_st/ tpseq(*)
       RECORD/ table_head_st/ tpclusterh
@@ -206,7 +225,7 @@ C-----------------------------------------------------------------------
         integer itrk(nclpix_max)
 	integer npix_seq(300)
 
-        integer isec,irow,krow,nhits
+        integer isec,irow,krow,nhits,ihit
 
         integer jtpcl, nclspix
 
@@ -220,16 +239,31 @@ C-----------------------------------------------------------------------
         real rstat
 	real rad,dx_prime
 
-	integer min_hit_seq/2/	! this could go into switch table
-
         double precision invec(3),outvec(3)
 
         logical first, lstat
+
+
+c------------ for deconvolution -----------
+        integer max_hits_in_cluster
+        parameter(max_hits_in_cluster=30)
+        real q(max_hits_in_cluster)
+        real x(max_hits_in_cluster)
+        real dx(max_hits_in_cluster)
+        real prf(max_hits_in_cluster)
+        real z(max_hits_in_cluster)
+        real dz(max_hits_in_cluster)
+        real zrf(max_hits_in_cluster)
+        real phi(max_hits_in_cluster)
+        real track(max_hits_in_cluster)
+        integer fflagg
+
+
 C-----------------------------------------------------------------------
         data first/.true./
 C-----------------------------------------------------------------------
 	integer ichek	! mal -** temp
-        integer iisec,iirow
+        integer iisec,iirow,jjsec
 
 c
 c       set status
@@ -271,7 +305,7 @@ c           else
 c              krow = irow
 c           endif
            krow=irow
-           if(nseq.ge.min_hit_seq)then
+           if(nseq.ge.tclpar(1).min_nseq)then
 
               call tph_get_cls_data(jseq, nseq, id_pad, krow
      +,                             tpseqh, tpseq 
@@ -282,18 +316,12 @@ c           endif
      +,				    npix_seq)
  
 
-              tphith.nok = tphith.nok + 1
-	      tphit(tphith.nok).id = tphith.nok		! mal 17jan95
-              tphit(tphith.nok).cluster = jtpcl
-              tphit(tphith.nok).nseq = nseq
-c              tphit(tphith.nok).row = krow
-c              tphit(tphith.nok).row = 100*((isec+1)/2)+krow	! mal 19jan95
-              tphit(tphith.nok).row = 100*isec+krow     	! mal 30mar95
-c              tphit(tphith.nok).track = itrk   ! for now this is MC info
 
-	      call tph_fit_cluster(nseq, nclspix, npix_seq,
-     +				   ipad, itdc, iadc, itrk, tphith, tphit,
-     +				   rms_noise,nhits)
+	      call tph_fit_cluster(tclpar,nseq, nclspix, npix_seq,
+     +             ipad, itdc, iadc, itrk,
+     +             rms_noise, nhits,
+     +             max_hits_in_cluster,
+     +             q,x,dx,prf,z,dz,zrf,phi,track)
 
            else
 c
@@ -302,15 +330,6 @@ c
               goto 999
            endif
 
-c store (nothing else for now) the estimated number of hits contributing 
-c  to cluster in TPCLUSTER table.... (however, we still treat one cluster
-c  as one hit in TPHIT table for now)
-           tpcluster(jtpcl).nhits  = nhits
-c
-c          finally, transform everything to global coordinates !
-c
-c          account for "lower-edge" binning in z coordinate
-c
 
 c now I have to deal with tpg convention....
 c it wants sector=1..48, row=1..13 for inner, 1..32 for outer sector
@@ -322,43 +341,6 @@ c mal 30mar95
               iisec=isec*2-1
               iirow=irow
            endif
-
-           invec(3)=dble(tphit(tphith.nok).z*time_bucket)
-
-c correct (in average way) for time-offset -- (this is not beautiful)
-c  22jun95 mal
-           invec(3) = invec(3) - 0.88
-
-           invec(2)=tpg_row_to_y(iirow,iisec)
-
-
-c
-c mal 13dec94 - tpg_pad_to_x wants pad passed as integer which screws me
-c  		up, so I just do tpg's job explicitly...
-c           invec(1)=tpg_pad_to_x(tphit(tphith.nok).x,irow,isec)  
-	   invec(1) = sector(iisec).xrow(iirow) + 
-     +		  (tphit(tphith.nok).x-1.0)*sector(iisec).pad_x_space
-
-           lstat=tpg_local_to_global(iisec,invec,outvec)
-
-
-           tphit(tphith.nok).x = real(outvec(1))
-           tphit(tphith.nok).y = real(outvec(2))
-           tphit(tphith.nok).z = real(outvec(3))
-
-
-c while we have these numbers, fill the lambda field of tphit,
-c  with the ansatz that the track comes from (0,0,0)
-           tphit(tphith.nok).lambda = sngl(datand(outvec(3)/invec(2)))
-
-c
-c          zrf in units of time bins --> cm
-c
-           tphit(tphith.nok).zrf 
-     +                         = (tphit(tphith.nok).zrf)*time_bucket
-c
-c          prf in units of pads --> cm
-c
 c
 c          perhaps consistency with simulation demands use of pad_sep_in/out ???
 c	   yes, I think so - mal
@@ -368,40 +350,110 @@ c
            else
               pad_width = pad_plane(1).pad_sep_in
            endif
-           tphit(tphith.nok).prf 
-     +                         = (tphit(tphith.nok).prf) * pad_width
-
-c	also, calculate "orientation" of hit in terms of spatial quantities
-
-           tphit(tphith.nok).phi = atand(
-     +          tphit(tphith.nok).phi *
-     +          time_bucket / pad_width )
-
-c must also rotate dx,dy into global coordinates...
-	tphit(tphith.nok).dz = time_bucket*tphit(tphith.nok).dz
-	dx_prime = pad_width*tphit(tphith.nok).dx
-c for explanation of what follows, see bottom of notebook p95
-	rad = sqrt((tphit(tphith.nok).x)**2+
-     +		(tphit(tphith.nok).y)**2)
-	tphit(tphith.nok).dx = dx_prime *
-     +		abs(tphit(tphith.nok).y)/rad
-	tphit(tphith.nok).dy = dx_prime *
-     +		abs(tphit(tphith.nok).x)/rad
 
 
-c here, at the very end, I make up for the sins of Bob Hackenburg, who
-c  spurns convention, and makes the fast and slow simulator routes have
-c  different conventions for sector numbering... best if this becomes
-c  unneccesary!!!!!!!!!! 26may95 mal
-	isec=tphit(tphith.nok).row
-	isec=(isec-irow)/100
-	if (isec.le.12) then
-           isec=isec+12
-        else
-           isec=isec-12
-        endif
-        tphit(tphith.nok).row=isec*100+irow
+c store (nothing else for now) the estimated number of hits contributing 
+c  to cluster in TPCLUSTER table....
+           tpcluster(jtpcl).nhits  = nhits
+
+
+           fflagg=0
+           if (nhits.gt.1) fflagg=1
+           DO ihit=1,nhits
+              tphith.nok = tphith.nok+1
+	      tphit(tphith.nok).id = tphith.nok		! mal 17jan95
+              tphit(tphith.nok).cluster = jtpcl
+              tphit(tphith.nok).nseq = nseq
+              tphit(tphith.nok).row = 100*isec+krow     	! mal 30mar95
+              tphit(tphith.nok).q     = q(ihit)
+              tphit(tphith.nok).x     = x(ihit)
+              tphit(tphith.nok).dx    = dx(ihit)
+              tphit(tphith.nok).prf   = prf(ihit)
+              tphit(tphith.nok).z     = z(ihit)
+              tphit(tphith.nok).dz    = dz(ihit)
+              tphit(tphith.nok).zrf   = zrf(ihit)
+              tphit(tphith.nok).phi   = phi(ihit)
+              tphit(tphith.nok).track = track(ihit)
+              tphit(tphith.nok).flag  = fflagg
+
+c     
+c     finally, transform everything to global coordinates !
+c     
+c     account for "lower-edge" binning in z coordinate
+c     
+              invec(3)=dble(tphit(tphith.nok).z*time_bucket)
+              
+c     correct (in average way) for time-offset -- (this is not beautiful)
+c     22jun95 mal
+              invec(3) = invec(3) - 0.88
+              
+              invec(2)=tpg_row_to_y(iirow,iisec)
+              
+              
+c     
+c     mal 13dec94 - tpg_pad_to_x wants pad passed as integer which screws me
+c     up, so I just do tpg's job explicitly...
+c     invec(1)=tpg_pad_to_x(tphit(tphith.nok).x,irow,isec)  
+              invec(1) = sector(iisec).xrow(iirow) + 
+     +             (tphit(tphith.nok).x-1.0)*sector(iisec).pad_x_space
+              
+              lstat=tpg_local_to_global(iisec,invec,outvec)
+              
+              
+              tphit(tphith.nok).x = real(outvec(1))
+              tphit(tphith.nok).y = real(outvec(2))
+              tphit(tphith.nok).z = real(outvec(3))
+              
+              
+c     while we have these numbers, fill the lambda field of tphit,
+c     with the ansatz that the track comes from (0,0,0)
+              tphit(tphith.nok).lambda=sngl(datand(outvec(3)/invec(2)))
+              
+c     
+c     zrf in units of time bins --> cm
+c     
+              tphit(tphith.nok).zrf 
+     +             = (tphit(tphith.nok).zrf)*time_bucket
+c     
+c     prf in units of pads --> cm
+c     
+              tphit(tphith.nok).prf 
+     +             = (tphit(tphith.nok).prf) * pad_width
+              
+c     also, calculate "orientation" of hit in terms of spatial quantities
+              
+              tphit(tphith.nok).phi = atand(
+     +             tphit(tphith.nok).phi *
+     +             time_bucket / pad_width )
+              
+c     must also rotate dx,dy into global coordinates...
+              tphit(tphith.nok).dz = time_bucket*tphit(tphith.nok).dz
+              dx_prime = pad_width*tphit(tphith.nok).dx
+c     for explanation of what follows, see bottom of notebook p95
+              rad = sqrt((tphit(tphith.nok).x)**2+
+     +             (tphit(tphith.nok).y)**2)
+              tphit(tphith.nok).dx = dx_prime *
+     +             abs(tphit(tphith.nok).y)/rad
+              tphit(tphith.nok).dy = dx_prime *
+     +             abs(tphit(tphith.nok).x)/rad
+              
+              
+c     here, at the very end, I make up for the sins of Bob Hackenburg, who
+c     spurns convention, and makes the fast and slow simulator routes have
+c     different conventions for sector numbering... best if this becomes
+c     unneccesary!!!!!!!!!! 26may95 mal
+              jjsec=tphit(tphith.nok).row
+              jjsec=(jjsec-irow)/100
+              if (jjsec.le.12) then
+                 jjsec=jjsec+12
+              else
+                 jjsec=jjsec-12
+              endif
+              tphit(tphith.nok).row=jjsec*100+irow
 ccccccccc
+              
+           ENDDO
+
 
  999       continue
         enddo
@@ -632,15 +684,18 @@ c	write(13,*)'ntrk,iclspix for this cluster.....',ntrk,iclspix	! mal -** temp
 
 
 C-----------------------------------------------------------------------
-	Subroutine tph_fit_cluster(nseq, nclspix, npix_seq,
-     +				ipad, itdc, iadc, itrk,
-     +				tphith, tphit,rms_noise,nhits)
+      Subroutine tph_fit_cluster(tclpar, nseq, nclspix, npix_seq,
+     +     ipad, itdc, iadc, itrk,
+     +     rms_noise, nhits,
+     +     max_hits_in_cluster,
+     +     q,x,dx,prf,z,dz,zrf,phi,track)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
 
 C   Input arguments  (One to a line with definition after ! ) 
 C
+C     tclpar:   tcl switch table
 C     nseq:	number of sequences in cluster
 C     nclspix:	number of pixels in cluster
 C     npix_seq: number of pixels in each sequence in cluster
@@ -649,20 +704,10 @@ C     itdc:	for each pixel, what is bucket #
 C     iadc:	for each pixel, what is adc value
 C     itrk:     for each pixel, what MC track contributed most
 C     rms_noise: rms noise on adc values
+C     max_hits_in_cluster: max # hits allowed in an overlapping pattern
 C
 C   Output arguments : 
 C
-C     tphith:	
-C     tphit:	tpc hit table.. this fills (in local coordinates):
-C			x     - position in pad direction
-C			z     - position in time direction
-C			dx,dz - uncertainties
-C			q     - sum of occupied pixels
-C			dq    - ??? not filled - how to do it???
-C			prf   - width of gaussian in pad direction
-C			zrf   - width in time direction
-C			phi   - orientation of the hit w.r.t. padplane
-C                       track - dominant MC track contributing to hit's pixels
 C     nhits - estimated number of hits in this cluster
 C
 C  Returns:
@@ -685,68 +730,328 @@ C
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
+
 #include "tas_structures.inc"
-#include "tas_user_codes.inc"
+#include "tcl_tclpar_pars.inc"
+#include "tcl_tclpar_st.inc"
+      RECORD/ tclpar_row_st/ tclpar(*)
 
-#include "tcl_tphit_pars.inc"
-#include "tcl_tphit_st.inc"
+      integer nseq,nclspix
+      integer ipad(*),itdc(*),iadc(*),itrk(*)
+      integer npix_seq(*),nhits
 
-	RECORD / table_head_st/ tphith
-	RECORD / tphit_row_st/  tphit(*)
+      real rms_noise
 
-C-----------------------------------------------------------------------
-	integer nseq,nclspix
-	integer ipad(*),itdc(*),iadc(*),itrk(*)
-	integer npix_seq(*),nhits
-
-        real rms_noise
-
-	integer nhits_nnet      ! neural net estimator function
+      integer nhits_nnet        ! neural net estimator function
                                 ! of #hits in cluster
 
 
-        integer max_hits_in_cluster
-        parameter(max_hits_in_cluster=10)
-        real q(max_hits_in_cluster)
-        real x(max_hits_in_cluster)
-        real dx(max_hits_in_cluster)
-        real prf(max_hits_in_cluster)
-        real z(max_hits_in_cluster)
-        real dz(max_hits_in_cluster)
-        real zrf(max_hits_in_cluster)
-        real phi(max_hits_in_cluster)
-        real track(max_hits_in_cluster)
+      integer max_hits_in_cluster
+c        parameter(max_hits_in_cluster=30)
+      real q(max_hits_in_cluster)
+      real x(max_hits_in_cluster)
+      real dx(max_hits_in_cluster)
+      real prf(max_hits_in_cluster)
+      real z(max_hits_in_cluster)
+      real dz(max_hits_in_cluster)
+      real zrf(max_hits_in_cluster)
+      real phi(max_hits_in_cluster)
+      real track(max_hits_in_cluster)
+      
 c----------------------------------------------------------------
 
 c*** skip the neural net for now..... mal 21jun95
-***        nhits = nhits_nnet(nseq,nclspix,npix_seq,ipad,itdc,iadc) ! this is experimental
-        nhits=1
+***        nhits = nhits_nnet(nseq,nclspix,npix_seq,ipad,itdc,iadc)
+	! this is experimental
 
-        if (nhits.eq.1) then
-           call tph_fit_isolated_cluster(nseq, nclspix, npix_seq,
-     +				ipad, itdc, iadc, itrk,
-     +				rms_noise,
-     +                          q,x,dx,prf,z,dz,zrf,phi,track)
-           tphit(tphith.nok).q     = q(1)
-           tphit(tphith.nok).x     = x(1)
-           tphit(tphith.nok).dx    = dx(1)
-           tphit(tphith.nok).prf   = prf(1)
-           tphit(tphith.nok).z     = z(1)
-           tphit(tphith.nok).dz    = dz(1)
-           tphit(tphith.nok).zrf   = zrf(1)
-           tphit(tphith.nok).phi   = phi(1)
-           tphit(tphith.nok).track = track(1)
-        endif
+      if (tclpar(1).decon.ne.0) then
+         call mountain_finder(tclpar, nseq, nclspix, npix_seq,
+     +        ipad, itdc, iadc, itrk,
+     +        rms_noise,
+     +        nhits,
+     +        q,x,dx,prf,z,dz,zrf,phi,track)
+         if (nhits.eq.0) then
+            call tph_fit_isolated_cluster(tclpar, nclspix,
+     +           ipad, itdc, iadc, itrk,
+     +           rms_noise,
+     +           q,x,dx,prf,z,dz,zrf,phi,track)
+            nhits=1
+         endif
+      else
+         call tph_fit_isolated_cluster(tclpar, nclspix,
+     +        ipad, itdc, iadc, itrk,
+     +        rms_noise,
+     +        q,x,dx,prf,z,dz,zrf,phi,track)
+         nhits=1
+      endif
+      
+      return
+      end
 
-        return
-        end
+
+C-----------------------------------------------------------------------
+      Subroutine mountain_finder(tclpar, nseq, nclspix, npix_seq,
+     +     ipad, itdc, iadc, itrk,
+     +     rms_noise,
+     +     nhits,
+     +     q,x,dx,prf,z,dz,zrf,phi,track)
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     tclpar:   switch table for tcl
+C     nseq:	number of sequences in cluster
+C     nclspix:	number of pixels in cluster
+C     npix_seq: number of pixels in each sequence in cluster
+C     ipad:	for each pixel, what is pad #
+C     itdc:	for each pixel, what is bucket #
+C     iadc:	for each pixel, what is adc value
+C     itrk:     for each pixel, what MC track contributed most
+C     rms_noise: rms noise on adc values
+C
+C   Output arguments : 
+C
+C     nhits     - number of peaks found
+C     q         - "integrated charge" (sum of adc counts)
+C     x,dx,prf  - position, uncertainty, and width along row (units=pads)
+C     z,dz,zrf  - position, uncertainty, and width along time (units=buckets)
+C     phi       - "orientation" of cluster
+C     track     - MC track contributing the most pixels
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C-----------------------------------------------------------------------
+c passed inputs
+
+#include "tas_structures.inc"
+#include "tcl_tclpar_pars.inc"
+#include "tcl_tclpar_st.inc"
+      RECORD/ tclpar_row_st/ tclpar(*)
+
+      integer nseq,nclspix
+      integer ipad(*),itdc(*),iadc(*),itrk(*)
+      integer npix_seq(*),nhits
+      real rms_noise
+c passed outputs
+      real q(*)
+      real x(*)
+      real dx(*)
+      real prf(*)
+      real z(*)
+      real dz(*)
+      real zrf(*)
+      real phi(*)
+      real track(*)
+c local variables
+      integer maxpad,maxbuck
+      parameter (maxpad=184,maxbuck=512)
+      integer height(1:maxpad,1:maxbuck)
+      integer track_pix(1:maxpad,1:maxbuck)
+      logical allowed(0:maxpad+1,0:maxbuck+1) ! go 1 beyond to avoid overwrite
+                                              ! memory when laying waste
+      data allowed/95604*.true./
+      integer jpad,jtdc,jpix
+      integer kpad,ktdc
+      integer index_list(10000),indx
+      integer previous_height,nmax,imax
+      integer nmax_max          ! maximum number of local maxima
+      parameter(nmax_max=50)
+      integer max_pos(2,nmax_max) ! position (pad,tdc) of local maxima
+      integer max_height(nmax_max)
+      integer j_maxpad,j_minpad,j_maxtdc,j_mintdc
+      integer itemp,maxize,minize
+      integer iclosest_pad,iclosest_tdc,i_minimum_height
+
+c the following arrays are for passing to fit_isolated_clusters for
+c  each found mountain top
+      real qtemp(1),xtemp(1),dxtemp(1),prftemp(1)
+      real ztemp(1),dztemp(1),zrftemp(1),phitemp(1),tracktemp(1)
+      integer nclspix_temp
+      integer ipad_temp(30),itdc_temp(30),iadc_temp(30),itrk_temp(30)
+
+      integer dpad,dtdc,valley
+      real slope,peak_to_valley
+
+C-----------------------------------------------------------------------
+
+c fill the reference 2-d arrays...
+      call vzero(track_pix,maxpad*maxbuck)
+      call vzero(height,maxpad*maxbuck)
+      do jpix=1,nclspix
+         height(ipad(jpix),itdc(jpix))=iadc(jpix)
+         track_pix(ipad(jpix),itdc(jpix))=itrk(jpix)
+      enddo
+
+c list pixels in descending order of adc occupancy...
+      call sortzv(iadc,index_list,nclspix,-1,10,0)
+
+      iclosest_pad=tclpar(1).mf_cpad
+      iclosest_tdc=tclpar(1).mf_ctim
+      i_minimum_height=tclpar(1).mf_min
 
 
+c find maxima...
+c here, index_list are the indices into ipad,itdc,iadc, in decending
+c     order, of the pixels with maximum occupancy.  So, for each pixel
+c     that comes up, just check to see if that pixel is allowed.
+c     If so, then it is a mountain-top.
+c Each pixel that comes up on my ordered list should "lay waste" to
+c     surrounding territory, so
+c     that if I get a pixel in my ordered list which is allowed, then
+c     it is a probably a local maximum-- the only way it is not is
+c     when there is a pleteau of equal adc values.  Then, there may
+c     be >1 maximum assigned to it.  Also, a true local max adjacent to a
+c     plateau may give rise to "fake" local maxima on the plateau.
+c
+
+      nmax=0
+      do jpix=1,nclspix
+         indx=index_list(jpix)
+         jpad=ipad(indx)
+         jtdc=itdc(indx)
+         if (height(jpad,jtdc).lt.i_minimum_height) goto 20 ! done
+         if (allowed(jpad,jtdc)) then ! possible local max
+c before storing, we check peak:valley for pixels along lines which
+c  connect this local max to the bigger (previous) ones... note that
+c  this check does not attempt to kill the biggest (first) max found.
+c if peak:valley test fails, we do not store and just jump to line 19
+            if (tclpar(1).mf_pv.gt.1.0) then ! (if not, then do not even 
+                                             !  check - peak is ALWAYS > vall)
+               do imax=1,nmax
+                  dpad=max_pos(1,imax)-jpad
+                  dtdc=max_pos(2,imax)-jtdc
+                  if (dpad.ne.0) then ! walk along line connecting peaks
+                     slope = float(dtdc)/float(dpad)
+                     valley = height(jpad,jtdc)
+                     if (iabs(dpad).gt.iabs(dtdc)) then ! loop over pad
+                                                        ! tdc depends
+                                                        ! on pad
+                        do kpad=min(jpad,max_pos(1,imax))+1,
+     +                       max(jpad,max_pos(1,imax))-1
+                           ktdc=jtdc+nint(slope*float(kpad-jpad))
+                           valley = min(valley,height(kpad,ktdc))
+                        enddo
+                     else                   ! loop over tdc
+                                            ! pad depends on tdc
+                        do ktdc=min(jtdc,max_pos(2,imax))+1,
+     +                       max(jtdc,max_pos(2,imax))-1
+                           kpad=jpad+nint(float(ktdc-jtdc)/slope)
+                           valley = min(valley,height(kpad,ktdc))
+                        enddo
+                     endif
+                  else          ! peaks on same pad.. walk in time only
+                     valley = height(jpad,jtdc)
+                     do ktdc=min(jtdc,max_pos(2,imax))+1,
+     +                    max(jtdc,max_pos(2,imax))-1
+                        valley=min(valley,height(jpad,ktdc))
+                     enddo
+                  endif
+                  if (valley.ne.0) then
+                     peak_to_valley = 
+     +                    float(height(jpad,jtdc))/float(valley)
+                     if (peak_to_valley.lt.tclpar(1).mf_pv)
+     +                    goto 19 ! FAILED
+                  endif
+               enddo
+            endif
+c ok, passed peak:valley test... store this peak
+            nmax=nmax+1
+            max_pos(1,nmax)=jpad
+            max_pos(2,nmax)=jtdc
+            max_height(nmax)=iadc(indx)
+ 19         continue
+c lay waste to adjacent area (may be large)...
+            do kpad=max(jpad-(iclosest_pad-1),1),
+     +           min(jpad+(iclosest_pad-1),maxpad)
+               do ktdc=max(jtdc-(iclosest_tdc-1),1)
+     +              ,min(jtdc+(iclosest_tdc-1),maxbuck)
+                  allowed(kpad,ktdc) = .false.
+               enddo
+            enddo
+         else
+c lay waste to some adjacent area even if not a peak......
+            allowed(jpad+1,jtdc-1)=.false.
+            allowed(jpad+1,jtdc)  =.false.
+            allowed(jpad+1,jtdc+1)=.false.
+            allowed(jpad  ,jtdc-1)=.false.
+            allowed(jpad  ,jtdc  )=.false.
+            allowed(jpad  ,jtdc+1)=.false.
+            allowed(jpad-1,jtdc-1)=.false.
+            allowed(jpad-1,jtdc)  =.false.
+            allowed(jpad-1,jtdc+1)=.false.
+         endif
+      enddo
+
+ 20   continue
+
+c calculate "positions"...
+      nhits=nmax
+      if (nmax.eq.1) then       ! use whole cluster in fitting
+         call tph_fit_isolated_cluster(tclpar, nclspix,
+     +        ipad,itdc,iadc,itrk,
+     +        rms_noise,
+     +        q,x,dx,prf,z,dz,zrf,phi,track)
+      else                      ! just use pixels around local maximum
+         do imax=1,nmax
+            jpad=max_pos(1,imax)
+            jtdc=max_pos(2,imax)
+            nclspix_temp = 0
+            do kpad=max(jpad-(iclosest_pad-1),1),
+     +           min(jpad+(iclosest_pad-1),maxpad)
+               do ktdc=max(jtdc-(iclosest_tdc-1),1),
+     +              min(jtdc+(iclosest_tdc-1),maxbuck)
+                  if (height(kpad,ktdc).ne.0) then
+                     nclspix_temp=nclspix_temp+1
+                     ipad_temp(nclspix_temp)=kpad
+                     itdc_temp(nclspix_temp)=ktdc
+                     iadc_temp(nclspix_temp)=height(kpad,ktdc)
+                     itrk_temp(nclspix_temp)=track_pix(kpad,ktdc)
+                  endif
+               enddo
+            enddo
+            call tph_fit_isolated_cluster(tclpar, nclspix_temp,
+     +           ipad_temp,itdc_temp,iadc_temp,itrk_temp,
+     +           rms_noise,
+     +           qtemp,xtemp,dxtemp,prftemp,ztemp,dztemp,zrftemp,
+     +           phitemp,tracktemp)
+            q(imax)     = qtemp(1)
+            x(imax)     = xtemp(1)
+            dx(imax)    = dxtemp(1)
+            prf(imax)   = prftemp(1)
+            z(imax)     = ztemp(1)
+            dz(imax)    = dztemp(1)
+            zrf(imax)   = zrftemp(1)
+            phi(imax)   = phitemp(1)
+            track(imax) = tracktemp(1)
+         enddo
+      endif
+
+c finally, put back array allowed the way you found it.
+      itemp=maxize(ipad(1),nclspix)
+      j_maxpad=min(ipad(itemp)+iclosest_pad,maxpad)
+      itemp=minize(ipad(1),nclspix)
+      j_minpad=max(ipad(itemp)-iclosest_pad,1)
+
+      itemp=maxize(itdc(1),nclspix)
+      j_maxtdc=min(itdc(itemp)+iclosest_tdc,maxbuck)
+      itemp=minize(itdc(1),nclspix)
+      j_mintdc=max(itdc(itemp)-iclosest_tdc,1)
+      do jpad=j_minpad,j_maxpad
+         do jtdc=j_mintdc,j_maxtdc
+            allowed(jpad,jtdc) = .true.
+         enddo
+      enddo
+      return
+      end
 
 
 
 C-----------------------------------------------------------------------
-	Subroutine tph_fit_isolated_cluster(nseq, nclspix, npix_seq,
+      Subroutine tph_fit_isolated_cluster(tclpar, nclspix,
      +				ipad, itdc, iadc, itrk,
      +				rms_noise,
      +                          q,x,dx,prf,z,dz,zrf,phi,track)
@@ -756,9 +1061,8 @@ C-----------------------------------------------------------------------
 
 C   Input arguments  (One to a line with definition after ! ) 
 C
-C     nseq:	number of sequences in cluster
+C     tclpar:   switch table for tcl
 C     nclspix:	number of pixels in cluster
-C     npix_seq: number of pixels in each sequence in cluster
 C     ipad:	for each pixel, what is pad #
 C     itdc:	for each pixel, what is bucket #
 C     iadc:	for each pixel, what is adc value
@@ -796,9 +1100,14 @@ C-----------------------------------------------------------------------
 
 
 c passed inputs
-	integer nseq,nclspix
+#include "tas_structures.inc"
+#include "tcl_tclpar_pars.inc"
+#include "tcl_tclpar_st.inc"
+      RECORD/ tclpar_row_st/ tclpar(*)
+
+	integer nclspix
 	integer ipad(*),itdc(*),iadc(*),itrk(*)
-	integer npix_seq(*),nhits
+	integer nhits
 
 c passed outputs
         real q(*)
@@ -834,6 +1143,8 @@ C-----------------------------------------------------------------------
 
         integer imax,lvsimx
         integer id,indx
+
+        logical lookat_mc
 C-----------------------------------------------------------------------
 
 c set up the identity vector
@@ -842,6 +1153,7 @@ c set up the identity vector
            do indx=1,nbuck_max
               identity_vector(indx) = float(indx)
            enddo
+           lookat_mc = (tclpar(1).mc.eq.1)
         endif
 
 
@@ -852,37 +1164,17 @@ c 3) project onto time axis (will fit projection to find z,dz,zrf)
 c 4) get time average for each pad (fit each and obtain orientation)
 c 5) sum up adc contribs from all MC tracks (will check to see who gave most)
 
-        call vzero(imc_track,nmc_tracks_max)
-        call vzero(nocc_track,nmc_tracks_max)
         call vzero(pad_proj,npads_max)
         call vzero(time_proj,nbuck_max)
         call vzero(tdc_x_adc,npads_max)
         adc_sum = 0
-        nmc_tracks = 0
         do ipix=1,nclspix
            adc_sum = adc_sum+iadc(ipix)
            pad_proj(ipad(ipix)) = pad_proj(ipad(ipix))+iadc(ipix)
            time_proj(itdc(ipix)) = time_proj(itdc(ipix))+iadc(ipix)
            tdc_x_adc(ipad(ipix)) = tdc_x_adc(ipad(ipix))+
      +          itdc(ipix)*iadc(ipix)
-c this following is only useful for MC data-- could turn it off with 
-c  a switch if interested in real data (or real data performance)
-           ktrk=itrk(ipix)
-           mtrk=iucomp(ktrk,imc_track,nmc_tracks)
-           if (mtrk.eq.0) then
-              if (nmc_tracks.lt.nmc_tracks_max) then
-                 nmc_tracks=nmc_tracks+1
-                 imc_track(nmc_tracks) = ktrk
-                 nocc_track(nmc_tracks) = 1
-              else              ! too many contributing tracks... forget it
-                 id=0
-                 call message('TPHAM-I-2MANY, ntrk.gt.max',1,id)
-              endif
-           else
-              nocc_track(mtrk) = nocc_track(mtrk)+1
-           endif
         enddo
-
 c q:
         q(1) = adc_sum
 
@@ -927,8 +1219,31 @@ c orientation phi:
 
 
 c track: - who contributed the most pixels (MC data)
-        imax = lvsimx(nocc_track,nmc_tracks,1)
-        track(1) = imc_track(imax)
+c this following is only useful for MC data-- turn it off with 
+c  switch if interested in real data (or real data performance)
+        if (lookat_mc) then
+           call vzero(imc_track,nmc_tracks_max)
+           call vzero(nocc_track,nmc_tracks_max)
+           nmc_tracks = 0
+           do ipix=1,nclspix
+              ktrk=itrk(ipix)
+              mtrk=iucomp(ktrk,imc_track,nmc_tracks)
+              if (mtrk.eq.0) then
+                 if (nmc_tracks.lt.nmc_tracks_max) then
+                    nmc_tracks=nmc_tracks+1
+                    imc_track(nmc_tracks) = ktrk
+                    nocc_track(nmc_tracks) = 1
+                 else           ! too many contributing tracks... forget it
+                    id=0
+                    call message('TPHAM-I-2MANY, ntrk.gt.max',1,id)
+                 endif
+              else
+                 nocc_track(mtrk) = nocc_track(mtrk)+1
+              endif
+           enddo
+           imax = lvsimx(nocc_track,nmc_tracks,1)
+           track(1) = imc_track(imax)
+        endif
 
         return
         end

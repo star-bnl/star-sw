@@ -145,12 +145,17 @@ c
          common/quest/iquest
          integer iquest(100)
 
-         integer nquota,nvar,icycle,nvar2,nvar3
-         character*4 chtags(9),chtags2(18),chtags3(5)
+         
+         integer nquota,nvar,icycle,nvar2,nvar3,nvar4,nvar5,nvar6
+         parameter (nvar=9,nvar2=18,nvar3=5,nvar4=5,nvar5=5,nvar6=4)
+         character*4 chtags(nvar),chtags2(nvar2)
+         character*4 chtags3(nvar3),chtags4(nvar4),chtags5(nvar5)
+         character*4 chtags6(nvar6)
 C-----------------------------------------------------------------------
          logical lstat,first
 
          real vec(18)
+         real vec2(4)
 
          integer istat
          integer indx
@@ -176,8 +181,6 @@ c         real tphit_q(mxhits),mchit_q(mxhits) ****
 
          integer numpix_factor/'100000'X/
          integer tdc_factor/'400'X/
-         integer nvar4
-         character*4 chtags4(17)
          integer khit,kclus,nseq_hit,ktpc_row,kseq_count
          integer ksector,krow,kseq,kpix,kdatum,kpad,ksector_hack
          integer numpix_seq,kadc,ktdc,kpix_count
@@ -233,15 +236,17 @@ c	has changed..
 	 character*80  mess
 
 C-----------------------------------------------------------------------
-         data nvar/9/,nvar2/18/,nvar3/5/,nvar4/17/
          data chtags/'itrk','itcl','nrow','x','y','z','prf','zrf','q'/
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
      +,              'delx','dely','delz','nrow', 'clus','nseq',
      +                'dx','dy','dz','mhit','nmc'/
          data chtags3/'prec','mce','tpe','rde','pre2'/
-	 data chtags4/'hit ','clus','sect','row ','pad ',
-     +		      'tdc ','adc ','mcid','xpix','ypix','zpix',
-     +		      'xloc','yloc','zloc','xh_l','yh_l','zh_l'/
+*	 data chtags4/'hit ','clus','sect','row ','pad ',
+*     +		      'tdc ','adc ','mcid','xpix','ypix','zpix',
+*     +		      'xloc','yloc','zloc','xh_l','yh_l','zh_l'/
+	 data chtags4/'xloc','zloc','adc ','clus','row '/
+         data chtags5/'xh_l','zh_l','hit ','clus','row '/
+         data chtags6/'xh_l','zh_l','mtrk','row '/
          data first/.true./,ihisto/0/
 C-----------------------------------------------------------------------
 
@@ -253,6 +258,16 @@ c  given cluster... added 23jun95 mal
          parameter (nmc_found_max=10)
          integer mc_found(1:nmc_found_max)
 
+cc for cleanup -- try to match up ghost and lost hits...
+         integer n_maybe_ghost(1080),n_maybe_lost(1080)
+         integer maybe_ghost(200,1080),maybe_lost(200,1080)
+         integer i_maybe_lost,i_maybe_ghost
+         logical lost_is_found(200),ghost_is_saved(200)
+         integer ptr_lost,ptr_ghost
+
+         real max_sep_same_mcid/3.0/ ! these are used as maximum seperation
+         real max_sep_diff_mcid/2.0/ ! cuts for associating mc and
+                                     ! recon hits with same/diff mc track id
 
 c
 c        set status
@@ -302,8 +317,7 @@ c               iquest(10)=nquota
 c               call hrfile(23,'NTUP','NQ')
 c            endif
 
-          call hropen(23,'NTUP',outfile,'N',5120,ISTAT)
-	  if(status.ne.0)write(*,*)' no rz file'
+
 C
 
 c things needed for the ntuple 500+ihisto...
@@ -317,9 +331,19 @@ c things needed for the ntuple 500+ihisto...
 
          endif
 
-c         call hcdir('//NTUP',' ')
 
          ihisto = ihisto+1
+
+         if (ihisto.eq.1) then
+            call hropen(23,'NTUP',outfile,'N',5120,ISTAT)
+         else
+            call hropen(23,'NTUP',outfile,'U',5120,ISTAT)
+         endif
+         if(status.ne.0)write(*,*)' no rz file'
+
+
+c         call hcdir('//NTUP',' ')
+
 c ntuple 200 as defined has no more information than the hits table...
 *         call hbookn(200+ihisto,'Hit Info',nvar,'NTUP',8000,
 *     +           chtags)
@@ -327,35 +351,12 @@ c ntuple 200 as defined has no more information than the hits table...
      +              chtags2)
          call hbookn(400+ihisto,'Track Info',nvar3,'NTUP',4000,
      +              chtags3)
-         call hbookn(500+ihisto,'Hit Pixel Info',nvar4,'NTUP',17000,
+         call hbookn(500+ihisto,'Hit Pixel Info',nvar4,'NTUP',5000,
      +              chtags4)
-c        
-c        proceed with evaluation...
-c
-*         do indx = 1, tphith.nok
-c     
-*            vec(1)=real(tphit(indx).track)
-*            vec(2)=real(tphit(indx).cluster)
-*            vec(3)=real(tphit(indx).row)
-*            vec(4)=tphit(indx).x
-*            vec(5)=tphit(indx).y
-*            vec(6)=tphit(indx).z
-*            vec(7)=tphit(indx).prf
-*            vec(8)=tphit(indx).zrf
-*            vec(9)=tphit(indx).q
-
-*            call hfn(200+ihisto,vec)
-*         enddo
-c     
-c->      close ntuple file...
-c
-*         call hrout(200+ihisto,icycle,' ')
-c        call hrend('ntup')
-c        close(23)
-c
-c        the following works only for sparse events!
-c        more efficient and flexible would sort primary 
-c        keys on itrk, etc...
+         call hbookn(600+ihisto,'LOCAL Hit Info',nvar5,'NTUP',5000,
+     +              chtags5)
+         call hbookn(650+ihisto,'LOCAL MC Hit Info',nvar6,'NTUP',4000,
+     +              chtags6)
 c
 c ok now we try the above suggestion....
 c
@@ -381,6 +382,15 @@ c (these are "ghost" or "noise" hits mal 22jun95)
  19      ihit_recon=ihit_recon-1
 c
          ihit_mc =0
+
+         do isect=1,24
+            do irow=1,45
+               idummy=(isect-1)*45+irow
+               n_maybe_lost(idummy)=0
+               n_maybe_ghost(idummy)=0
+            enddo
+         enddo
+
          do itrk = 1, mkineh.nok
 c            write(6,*)'working on track ',itrk
             nhitrk = 0
@@ -431,21 +441,6 @@ c     mcptr((irow-1)*numbv_row_max+iwire) = ihit_mc
             endif
  2          continue
             
-c     do ihit = 1, mhits_tpch.nok
-c     if(mhits_tpc(ihit).itrk.eq.itrk)then
-c     nmctrk = nmctrk + 1
-c     numbv = mhits_tpc(ihit).numbv
-c note that iwire no longer refers to wire# - it is subvolume over row.
-c     iwire = numbv/10000
-c     isect = (numbv-10000*iwire)/100
-c     irow = (numbv-10000*iwire-100*isect)
-            
-c     mcptr((irow-1)*numbv_row_max+iwire) = ihit
-c     endif
-c     enddo
-c     write(6,*)' ',nmctrk,' mchits on itrk = ',itrk
-c     
-            
 c     
 c     build pointers to reconstructed hits on itrk
 c     
@@ -481,25 +476,8 @@ c     tphit_q(nhitrk)=tphit(ihit_recon).q
             endif
  4          continue
             
-c     do ihit = 1, tphith.nok
-c     if(tphit(ihit).track.eq.itrk)then
-c     nhitrk = nhitrk + 1
-c     if(tphit(ihit).row.ge.40)then
-c     nhitrk2 = nhitrk2 + 1
-c     endif
-c     c
-c     c     stupidity for HPUX compiler
-c     c     
-c     c     dtptr(tphit(ihit).row) = ihit
-c     kdummy = tphit(ihit).row
-c     kdummy = mod(kdummy,100) ! now row=100*SECTOR+ROW mal 1mar95
-c     dtptr(kdummy) = ihit
-c     tphit_q(nhitrk)=tphit(ihit).q
-c     endif
-c     enddo
-c     write(6,*)' ',nhitrk,' tphits on itrk = ',itrk
             
-            if (nmctrk.eq.0) goto 99
+cccc            if (nmctrk.eq.0) goto 99
             
 c     collect comparison statistics for all mc/rec hits on itrk
 c     
@@ -531,65 +509,45 @@ c     endif
                      if (nmchit .ne. oldmchit)then
                         oldmchit = nmchit
                         
-                        vec(11) = real(irow)
+                        vec(11) = real(irow)+100*real(isect)
                         vec(1) = real(itrk)
-                        vec(2) = 0.
-                        vec(3) = 0.
-                        vec(4) = 0.
 C     we now only look at mc hit on *center* wire over a padrow
 C	--> no need to average
-C       over wire positions as is done in commented-out section below
-C---------------------
-C     wire_hits = 0
-Cc      a philosophical point: could weight the x,y,z averages
-Cc      by dE.  To do this, remove the *'s
-C     desum = 0.0
-C     do kwir=1,numbv_row(irow)
-C     if(mcptr((irow-1)*numbv_row_max+kwir).ne.0)then
-C     vec(2)=vec(2)
-C     +                            +mhits_tpc(mcptr((irow-1)*
-C     + 			   numbv_row_max+kwir)).x(1)
-C     *     +              *mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
-C     vec(3)=vec(3)
-C     +                            +mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).x(2)
-C     *     +              *mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
-C     vec(4)=vec(4)
-C     +                            +mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).x(3)
-C     *     +              *mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
-C     mchit_q(nmchit)=mchit_q(nmchit)
-C     +                            +1.0e06*mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
-C     wire_hits = wire_hits + 1
-C     desum = desum + 
-C     +                            mhits_tpc(mcptr((irow-1)*numbv_row_max+kwir)).de
-C     endif
-C     enddo
-C     *     if(desum.gt.0.0)then
-C     if(wire_hits.gt.0)then
-C     vec(2)=vec(2)/float(wire_hits)
-C     vec(3)=vec(3)/float(wire_hits)
-C     vec(4)=vec(4)/float(wire_hits)
-C     *     vec(2)=vec(2)/desum
-C     *     vec(3)=vec(3)/desum
-C     *     vec(4)=vec(4)/desum
-C     endif
-C---------------------
                         idummy=(isect-1)*mxrow+irow
                         vec(2)=mhits_tpc(mcptr(idummy,i_incidence)).x(1)
                         vec(3)=mhits_tpc(mcptr(idummy,i_incidence)).x(2)
                         vec(4)=mhits_tpc(mcptr(idummy,i_incidence)).x(3)
+
+c for filling ntuple with LOCAL MC hit info...
+c----------------------------------------------------------------
+c this row/sector definition shit is going to drive me INSANE!!!!!!
+                        if (isect.gt.12) then
+                           ksectortemp = isect-12
+                        else
+                           ksectortemp = isect+12
+                        endif
+                        if (irow.gt.pad_plane(1).nrow_in) then
+                           krowtemp = irow-pad_plane(1).nrow_in
+                           ksectortemp = ksectortemp*2
+                        else
+                           krowtemp = irow
+                           ksectortemp = ksectortemp*2 - 1
+                        endif
+ccc                        invec(2)=tpg_row_to_y(krowtemp,ksectortemp)
+                        invec(1)=dble(vec(2))
+                        invec(2)=dble(vec(3))
+                        invec(3)=dble(vec(4))
+                        kstatus=tpg_global_to_local(ksectortemp,invec,outvec)
+                        vec2(1)=real(outvec(1))
+                        vec2(2)=real(outvec(3))
+                        vec2(3)=mhits_tpc(mcptr(idummy,i_incidence)).itrk
+                        vec2(4)=real(100*isect+irow)
+                        call hfn(650+ihisto,vec2)
+c----------------------------------------------------------------
+
                         vec(17)=real(
      +			  mhits_tpc(mcptr(idummy,i_incidence)).id)
                         
-c     if(irow .le. pad_plane(1).nrow_in)then
-c     if(irow .le. 13)then
-c     mchit_q(nmchit)=mchit_q(nmchit)*tsspar(1).gain_in
-c     else
-c     mchit_q(nmchit)=mchit_q(nmchit)*tsspar(1).gain_out
-c     endif
-c     
-c     correct for integral
-c     
-c     mchit_q(nmchit) = 8.*mchit_q(nmchit)
                         
 c     now must find the reconstructed hit on this row and sector associated with this track
 c     that is *closest* to the generated mc hit (but it must be *somewhat* close - i.e.
@@ -606,9 +564,9 @@ c     within 2 cm.)
                               jdummy=kdummy
                            endif
                         enddo
-c     if closest>2.0) then there is no nearby reconstructed hit
+c     if closest>2.0) then there is no nearby reconstructed hit with same MCID
                         
-                        if(closest.lt.2.0)then
+                        if(closest.lt.max_sep_same_mcid)then
                            used_recon_hit(jdummy)=.true.
                            vec(5) = tphit(dtptr(idummy,jdummy)).x
                            vec(6) = tphit(dtptr(idummy,jdummy)).y
@@ -628,7 +586,7 @@ c  to its cluster???
                            iclstr=tphit(dtptr(idummy,jdummy)).cluster
                            isqu=tpcluster(iclstr).jseq
  32                        ipx_first=tpseq(isqu).jpix
-                           idat=tppixel(ipx).datum
+                           idat=tppixel(ipx_first).datum
                            npx=idat/numpix_factor
                            do ipx=ipx_first,ipx_first+npx-1
                               jmc=tpmcpix(ipx).mcid
@@ -648,74 +606,93 @@ c  to its cluster???
                            if (isqu.ne.0) goto 32
  34                        continue ! ok, done searching cluster...
                            vec(18) = real(nmc_found)
+                           call hfn(300+ihisto,vec)
                         else
-                           vec(5) = 0.
-                           vec(6) = 0.
-                           vec(7) = 0.
-                           vec(8) = 0.
-                           vec(9) = 0.
-                           vec(10) = 0.
-                           vec(12) = 0.
-                           vec(13) = 0.
-                           vec(14) = 0.
-                           vec(15) = 0.
-                           vec(16) = 0.
-                           vec(18) = 0.
+c now, instead of declaring such a hit lost, we save it for the
+c  clean-up stage which follows, which tries to link up "lost" and "ghost"
+c  hits...
+                           n_maybe_lost(idummy) = n_maybe_lost(idummy)+1
+                           if (n_maybe_lost(idummy).gt.200) then
+                              write(6,*)'Increase Possible Lost Array!!!'
+                              goto 99
+                           endif
+                           maybe_lost(n_maybe_lost(idummy),idummy)=
+     +                          mcptr(idummy,i_incidence)
+c d                          vec(5) = 0.
+c  o                          vec(6) = 0.
+c                            vec(7) = 0.
+c    n                       vec(8) = 0.
+c     o                       vec(9) = 0.
+c      t                      vec(10) = 0.
+c                            vec(12) = 0.
+c        s                   vec(13) = 0.
+c         t                   vec(14) = 0.
+c          o                 vec(15) = 0.
+c           r                vec(16) = 0.
+c            e               vec(18) = 0.
                         endif
-                        call hfn(300+ihisto,vec)
                         
                      endif      ! if(nmchit .ne. oldmchit)
                   enddo         ! do i_incidence=1,n_incidence
 c ok, that's the end of this track on this sector/row, so any hit who claims
 c  to belong to the current track, but has not been associated with a mc hit,
-c  is a "ghost" hit... fill the ntuple with these guys now.
+c  MAY BE a "ghost" hit... fill the ntuple with these guys AFTER CLEAN-UP
                   idummy=mxhits*(isect-1)+irow
                   do i_incidence=1,dtptr(idummy,0)
                      if (.not.used_recon_hit(i_incidence)) then
-                        vec(1) = real(itrk)
-                        vec(2) = 0.           ! mcx
-                        vec(3) = 0.           ! mcy
-                        vec(4) = 0.           ! mcz
-                        vec(5) = tphit(dtptr(idummy,i_incidence)).x
-                        vec(6) = tphit(dtptr(idummy,i_incidence)).y
-                        vec(7) = tphit(dtptr(idummy,i_incidence)).z
-                        vec(8) = 0.           ! delx
-                        vec(9) = 0.           ! dely
-                        vec(10)= 0.           ! delz
-                        vec(11)= real(irow)
-                        vec(12)= real(
-     +			  tphit(dtptr(idummy,i_incidence)).cluster)
-                        vec(13)= real(tpcluster(int(vec(12))).nseq)
-                        vec(14)= tphit(dtptr(idummy,i_incidence)).dx
-                        vec(15)= tphit(dtptr(idummy,i_incidence)).dy
-                        vec(16)= tphit(dtptr(idummy,i_incidence)).dz
-                        vec(17)= 0.           ! mc hit id
+                        n_maybe_ghost(idummy)=n_maybe_ghost(idummy)+1
+                        if (n_maybe_ghost(idummy).gt.200) then
+                           write(6,*)'Increase Possible Ghost Array!!!'
+                           goto 99
+                        endif
+                        maybe_ghost(n_maybe_ghost(idummy),idummy)=
+     +                       dtptr(idummy,i_incidence)
+c so now we store it as a POSSIBLE ghost (of type 2) and fill in
+c  a ghost entry (if appropriate) in ntuple 300+ihisto after clean-up
+c                        vec(1) = real(itrk)
+c                        vec(2) = 0.           ! mcx
+c                        vec(3) = 0.           ! mcy
+c                        vec(4) = 0.           ! mcz
+c                        vec(5) = tphit(dtptr(idummy,i_incidence)).x
+c                        vec(6) = tphit(dtptr(idummy,i_incidence)).y
+c                        vec(7) = tphit(dtptr(idummy,i_incidence)).z
+c                        vec(8) = 0.           ! delx
+c                        vec(9) = 0.           ! dely
+c                        vec(10)= 0.           ! delz
+c                        vec(11)= real(irow)+100.0*real(isect)
+c                        vec(12)= real(
+c     +			  tphit(dtptr(idummy,i_incidence)).cluster)
+c                        vec(13)= real(tpcluster(int(vec(12))).nseq)
+c                        vec(14)= tphit(dtptr(idummy,i_incidence)).dx
+c                        vec(15)= tphit(dtptr(idummy,i_incidence)).dy
+c                        vec(16)= tphit(dtptr(idummy,i_incidence)).dz
+c                        vec(17)= 0.           ! mc hit id
 c find out how many mc tracks contributed to this hit's cluster...
-                        nmc_found=0
-                        iclstr=tphit(dtptr(idummy,i_incidence)).cluster
-                        isqu=tpcluster(iclstr).jseq
- 42                     ipx_first=tpseq(isqu).jpix
-                        idat=tppixel(ipx).datum
-                        npx=idat/numpix_factor
-                        do ipx=ipx_first,ipx_first+npx-1
-                           jmc=tpmcpix(ipx).mcid
-                           if (jmc.eq.0) goto 43
-                           do imc_found=1,nmc_found
-                              if (jmc.eq.mc_found(imc_found)) goto 43
-                           enddo
-                           nmc_found=nmc_found+1
-                           if (nmc_found.gt.nmc_found_max) then
-                              nmc_found=nmc_found_max
-                              goto 44 ! done searching for this cluster
-                           endif
-                           mc_found(nmc_found)=jmc
- 43                        continue ! already found that one
-                        enddo
-                        isqu=tpseq(isqu).next
-                        if (isqu.ne.0) goto 42
- 44                     continue ! ok, done searching cluster...
-                        vec(18) = real(nmc_found)
-                        call hfn(300+ihisto,vec)
+c                        nmc_found=0
+c                        iclstr=tphit(dtptr(idummy,i_incidence)).cluster
+c                        isqu=tpcluster(iclstr).jseq
+c 42                     ipx_first=tpseq(isqu).jpix
+c                        idat=tppixel(ipx_first).datum
+c                        npx=idat/numpix_factor
+c                        do ipx=ipx_first,ipx_first+npx-1
+c                           jmc=tpmcpix(ipx).mcid
+c                           if (jmc.eq.0) goto 43
+c                           do imc_found=1,nmc_found
+c                              if (jmc.eq.mc_found(imc_found)) goto 43
+c                           enddo
+c                           nmc_found=nmc_found+1
+c                           if (nmc_found.gt.nmc_found_max) then
+c                              nmc_found=nmc_found_max
+c                              goto 44 ! done searching for this cluster
+c                           endif
+c                           mc_found(nmc_found)=jmc
+c 43                        continue ! already found that one
+c                        enddo
+c                        isqu=tpseq(isqu).next
+c                        if (isqu.ne.0) goto 42
+c 44                     continue ! ok, done searching cluster...
+c                        vec(18) = real(nmc_found)
+c                        call hfn(300+ihisto,vec)
                      endif
                   enddo
 c
@@ -758,12 +735,247 @@ c     vec(4) = (vec(2)-vec(3))/vec(2)
          enddo                  ! do itrk = 1, mkineh.nok
          
          call hrout(400+ihisto,icycle,' ')
+         call hrout(650+ihisto,icycle,' ')
+
+c now, run through a clean-up stage, where match-up between maybe "lost" or 
+c  "ghost" hits is attempted; (hits that should be associated with each other
+c  may wind up as "lost"+"ghost" if the  MCID for the reconstructed hit is
+c  incorrectly assigned, which is easy enough)
+
+         do isect=1,24
+            do irow=1,45
+               idummy=(isect-1)*mxrow+irow
+               do i_maybe_lost=1,n_maybe_lost(idummy)
+                  lost_is_found(i_maybe_lost)=.false.
+               enddo
+               do i_maybe_ghost=1,n_maybe_ghost(idummy)
+                  ghost_is_saved(i_maybe_ghost)=.false.
+               enddo
+               vec(11) = 100*isect+irow
+c if a ghost and lost hit are within 1 cm of each other, they get associated
+               do i_maybe_lost=1,n_maybe_lost(idummy)
+                  ptr_lost=maybe_lost(i_maybe_lost,idummy)
+                  vec(1) = mhits_tpc(ptr_lost).itrk
+                  vec(2) = mhits_tpc(ptr_lost).x(1)
+                  vec(3) = mhits_tpc(ptr_lost).x(2)
+                  vec(4) = mhits_tpc(ptr_lost).x(3)
+                  vec(17) = mhits_tpc(ptr_lost).id
+                  closest=100.0
+                  do i_maybe_ghost=1,n_maybe_ghost(idummy)
+                     if (.not.ghost_is_saved(i_maybe_ghost)) then
+                        ptr_ghost=maybe_ghost(i_maybe_ghost,idummy)
+                        distance=sqrt(
+     +                       (vec(2)-tphit(ptr_ghost).x)**2 +
+     +                       (vec(3)-tphit(ptr_ghost).y)**2 +
+     +                       (vec(4)-tphit(ptr_ghost).z)**2)
+                        if (distance.lt.closest) then
+                           closest=distance
+                           jdummy=i_maybe_ghost
+                        endif
+                     endif
+                  enddo
+                  if (closest.lt.max_sep_diff_mcid) then ! not lost after all..
+                     ghost_is_saved(jdummy)=.true.
+                     lost_is_found(i_maybe_lost)=.true.
+                     ptr_ghost=maybe_ghost(jdummy,idummy)
+                     vec(5)=tphit(ptr_ghost).x
+                     vec(6)=tphit(ptr_ghost).y
+                     vec(7)=tphit(ptr_ghost).z
+                     vec(8)=vec(2)-vec(5)
+                     vec(9)=vec(3)-vec(6)
+                     vec(10)=vec(4)-vec(7)
+                     vec(12)=tphit(ptr_ghost).cluster
+                     vec(13)=tpcluster(int(vec(12))).nseq
+                     vec(14)=tphit(ptr_ghost).dx
+                     vec(15)=tphit(ptr_ghost).dy
+                     vec(16)=tphit(ptr_ghost).dz
+c find out how many mc tracks contributed to this hit's cluster...
+                     nmc_found=0
+                     iclstr=tphit(ptr_ghost).cluster
+                     isqu=tpcluster(iclstr).jseq
+ 42                  ipx_first=tpseq(isqu).jpix
+                     idat=tppixel(ipx_first).datum
+                     npx=idat/numpix_factor
+                     do ipx=ipx_first,ipx_first+npx-1
+                        jmc=tpmcpix(ipx).mcid
+                        if (jmc.eq.0) goto 43
+                        do imc_found=1,nmc_found
+                           if (jmc.eq.mc_found(imc_found)) goto 43
+                        enddo
+                        nmc_found=nmc_found+1
+                        if (nmc_found.gt.nmc_found_max) then
+                           nmc_found=nmc_found_max
+                           goto 44 ! done searching for this cluster
+                        endif
+                        mc_found(nmc_found)=jmc
+ 43                     continue ! already found that one
+                     enddo
+                     isqu=tpseq(isqu).next
+                     if (isqu.ne.0) goto 42
+ 44                  continue   ! ok, done searching cluster...
+                     vec(18) = real(nmc_found)
+                  else          ! it really is lost...
+                     vec(5)=0.0
+                     vec(6)=0.0
+                     vec(7)=0.0
+                     vec(8)=0.0
+                     vec(9)=0.0
+                     vec(10)=0.0
+                     vec(12)=0.0
+                     vec(13)=0.0
+                     vec(14)=0.0
+                     vec(15)=0.0
+                     vec(16)=0.0
+                     vec(18)=0.0
+                  endif
+                  call hfn(300+ihisto,vec)
+               enddo            ! i_maybe_lost
+c ok, any reconstructed maybe-ghost hit left on this sector/row that
+c  has no dancing partner NOW is out of luck.
+c
+               do i_maybe_ghost=1,n_maybe_ghost(idummy)
+                  if (.not.ghost_is_saved(i_maybe_ghost)) then
+                     ptr_ghost=maybe_ghost(i_maybe_ghost,idummy)
+                     vec(1)=tphit(ptr_ghost).track
+                     vec(2)=0.0
+                     vec(3)=0.0
+                     vec(4)=0.0
+                     vec(5)=tphit(ptr_ghost).x
+                     vec(6)=tphit(ptr_ghost).y
+                     vec(7)=tphit(ptr_ghost).z
+                     vec(8)=0.0
+                     vec(9)=0.0
+                     vec(10)=0.0
+                     vec(12)=tphit(ptr_ghost).cluster
+                     vec(13)=tpcluster(int(vec(12))).nseq
+                     vec(14)=tphit(ptr_ghost).dx
+                     vec(15)=tphit(ptr_ghost).dy
+                     vec(16)=tphit(ptr_ghost).dz
+                     vec(17)=0.0
+c find out how many mc tracks contributed to this hit's cluster...
+                     nmc_found=0
+                     iclstr=tphit(ptr_ghost).cluster
+                     isqu=tpcluster(iclstr).jseq
+ 52                  ipx_first=tpseq(isqu).jpix
+                     idat=tppixel(ipx_first).datum
+                     npx=idat/numpix_factor
+                     do ipx=ipx_first,ipx_first+npx-1
+                        jmc=tpmcpix(ipx).mcid
+                        if (jmc.eq.0) goto 53
+                        do imc_found=1,nmc_found
+                           if (jmc.eq.mc_found(imc_found)) goto 53
+                        enddo
+                        nmc_found=nmc_found+1
+                        if (nmc_found.gt.nmc_found_max) then
+                           nmc_found=nmc_found_max
+                           goto 54 ! done searching for this cluster
+                        endif
+                        mc_found(nmc_found)=jmc
+ 53                     continue ! already found that one
+                     enddo
+                     isqu=tpseq(isqu).next
+                     if (isqu.ne.0) goto 52
+ 54                  continue   ! ok, done searching cluster...
+                     vec(18) = real(nmc_found)
+                     call hfn(300+ihisto,vec)
+                  endif
+               enddo            ! i_maybe_ghost
+            enddo               ! irow
+         enddo                  ! isect
+
          call hrout(300+ihisto,icycle,' ')
+
 
 c now fill pixel data for each hit - added 28nov94 mal
 c	goto 119
 
-	do khit=1,tphith.nok
+c actually, fill pixel data for each CLUSTER in ntuple 500+ihisto...
+c  mal 12jul95
+         do kclus=1,tpclusterh.nok
+            vec(4)=kclus
+            nseq_hit=tpcluster(kclus).nseq
+            ktpc_row=tpcluster(kclus).tpc_row
+            ksector = ktpc_row/100
+            krow = ktpc_row - ksector*100
+* this bullshit with the row number definitions has got to stop!
+            if (ksector.gt.12) then
+               ksector_hack=ksector-12
+            else
+               ksector_hack=ksector+12
+            endif
+            if (krow.gt.pad_plane(1).nrow_in) then
+               krowtemp = krow-pad_plane(1).nrow_in
+               ksectortemp = ksector_hack*2
+            else
+               krowtemp = krow
+               ksectortemp=ksector_hack*2 - 1
+            endif
+            vec(5) = 100*ksector_hack + krow
+            kseq = tpcluster(kclus).jseq
+*
+            do kseq_count=1,nseq_hit
+               kpad = tpseq(kseq).secpad - id_pad(krow)
+               invec(1)=tpg_pad_to_x(kpad,krowtemp,ksectortemp)
+               vec(1) = real(invec(1))
+               kpix = tpseq(kseq).jpix
+               kdatum=tppixel(kpix).datum
+               numpix_seq=kdatum/numpix_factor ! 24mar95 malisa
+               do kpix_count=1,numpix_seq
+                  kdatum=tppixel(kpix).datum
+                  ktdc = (kdatum - numpix_factor*numpix_seq)/tdc_factor
+                  kadc = kdatum - numpix_factor*numpix_seq - tdc_factor*ktdc
+                  kmcid = tpmcpix(kpix).mcid
+                  vec(3)=kadc
+                  invec(3) = dble(ktdc*time_bucket)
+                  vec(2) = real(invec(3))
+                  call hfn(500+ihisto,vec)
+                  kpix=kpix+1
+               enddo
+               kseq = tpseq(kseq).next
+            enddo
+         enddo
+         call hrout(500+ihisto,icycle,' ')
+
+c now fill another ntuple (600+ihisto) with "LOCAL" hit coordinates
+
+         do khit=1,tphith.nok
+            vec(3) = tphit(khit).id
+            kclus = tphit(khit).cluster
+            vec(4) = kclus
+            invec(1) = dble(tphit(khit).x)
+            invec(2) = dble(tphit(khit).y)
+            invec(3) = dble(tphit(khit).z)
+            ktpc_row = tpcluster(kclus).tpc_row
+	    vec(5) = tphit(khit).row
+            ksector = ktpc_row/100
+c     DAMN the STUPID conventions in tpg!!!! Now I must "undo" the
+c     **correction** I do at the end of TPH!!!
+            krow = ktpc_row - ksector*100
+c     if (ksector.gt.12) then
+c     ksector_hack=ksector-12
+c     else
+c     ksector_hack=ksector+12
+c     endif
+            ksector_hack = ksector
+c     invec(3)=-invec(3)
+            if (krow.gt.pad_plane(1).nrow_in) then
+               krowtemp = krow-pad_plane(1).nrow_in
+               ksectortemp = ksector_hack*2
+            else
+               krowtemp = krow
+               ksectortemp=ksector_hack*2 - 1
+            endif
+            kstatus=tpg_global_to_local(ksectortemp,invec,outvec)
+            vec(1) = real(outvec(1))
+            vec(2) = real(outvec(3))
+            call hfn(600+ihisto,vec)
+         enddo
+         call hrout(600+ihisto,icycle,' ')
+
+         goto 989
+
+
+        do khit=1,tphith.nok
 	  kclus = tphit(khit).cluster
 	  invec(1)=dble(tphit(khit).x)
 	  invec(2)=dble(tphit(khit).y)
@@ -837,6 +1049,8 @@ c	      ktdc = ibits(kdatum,0,8) + 256*ibits(kdatum,14,2)
 
          call hrout(500+ihisto,icycle,' ')
 
+
+ 989     continue
 
 c        if( mctrl(1).nevt .eq. mctrl(1).mxevt)then
 c           call hrend('ntup')
