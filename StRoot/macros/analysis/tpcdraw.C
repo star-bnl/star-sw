@@ -1,3 +1,9 @@
+//
+//////////////////////////////////////////////////////////////////////////
+//                                                                      //
+// Macro for plotting hits and pixels in combination with bfc.C         //
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////
 void draw_sector(TPad &padname, Float_t theta, Float_t phi){
   /* 
    * -----------------------------------------------------------------
@@ -30,11 +36,12 @@ void draw_sector(TPad &padname, Float_t theta, Float_t phi){
   padname.Update();
 }
 //______________________________________________________________________
-void draw_event(TPad &padname, Int_t nslice){
+int draw_event(TPad &padname, Int_t nslice){
   /*-----------------------------------------------------------------------
    * Plot hits and tracks in the TPC */
   
   char slstring[10], tkstring[10];
+  int value; 
 
   // seven slices for the full laser event - These for the 97 test data.
   Float_t zsep[8] = {-210.0,15.0,45.0,75.0,105.0,140.0,170.0,210.0};
@@ -71,60 +78,72 @@ void draw_event(TPad &padname, Int_t nslice){
   Float_t p[6];
   Float_t pts[7500],tkpts[75][150]; //allow for 75, 50 hit tracks
   Int_t ntkpt[75];                  // and 75 track hit counters 
-  int value; 
   
   view->SetRange(rmin,rmax);
   view->SetLongitude(15.0);
   view->SetLatitude(90.0);
 
+
   // Create iterators for the two datasets
   St_DataSetIter tpc_data(chain->DataSet("tpc_hits"));
-  St_DataSetIter tpc_tracks(chain->DataSet("tpc_tracks"));
-  St_tpt_track *track = (St_tpt_track *) tpc_tracks["tptrack"];
-  St_tcl_tphit  *hits = (St_tcl_tphit *) tpc_data["tphit"];
-  St_TableSorter sortrk(*hits,"track");
-  tcl_tphit_st *hit1 = hits->GetTable(); 
+  St_tcl_tphit  *hits = 0;
+  tcl_tphit_st *hit1 = 0; 
+  hits = (St_tcl_tphit *) tpc_data.Find("tphit");
+  if (hits) {hit1 = hits->GetTable();}
+  else { cout << "Error: tphit table header does not exist " << endl; return kStWarn; }
+  if (!hit1) { cout << "Error: tphit table does not exist " << endl; return kStWarn; }
   Int_t nhits = hits->GetNRows();
-  tpt_track_st *track1 = track->GetTable();
+  if (nhits == 0) {cout << "error: tphit table contains zero rows " << endl; return kStWarn;}
+  St_TableSorter sortrk(*hits,"track",0,nhits-1);
+
+  St_DataSetIter tpc_tracks(chain->DataSet("tpc_tracks"));
+  St_tpt_track *track = 0;
+  tpt_track_st *track1 = 0;
+  track = (St_tpt_track *) tpc_tracks.Find("tptrack");
+  if (track) {track1 = track->GetTable();}
+  else { cout << "Error: tptrack table header does not exist " << endl; return kStWarn; }
+  if (!track1) { cout << "Error: tptrack table does not exist " << endl; return kStWarn; }
   Int_t ntracks = track->GetNRows();
-  
-  // Show the tpctest event in z slices.
-  for(int islice=first_slice;islice<last_slice;islice++){
+
+  // Show the tpc event in z slices.
+  for (int islice=first_slice;islice<last_slice;islice++) {
     Float_t  zmin=zsep[islice];
     Float_t  zmax=zsep[islice+1];
     cout << " slice "<< islice <<" z limits  "<< zmin <<" to "<< zmax << endl;
-    // cin >>  value ;  // this is a pause just before plotting each slice.
-    //  Now draw the hits - mark those assigned to tracks.
-    tcl_tphit_st *h = hit1;
-    for(int mm=0;mm<75;mm++)ntkpt[mm] = 0;
+    //    tcl_tphit_st *h = hit1;
+    for (int mm=0;mm<75;mm++) ntkpt[mm] = 0;
     Int_t k=0, savnum[75]; 
     Int_t oldie=0, itkno =0;
-    for (i = 0;i<nhits;i++){
-      h= hit1[sortrk->GetIndex(i)];
-      if(h->z > zmin && h->z < zmax){
-	pts[3*k]=h->x; pts[3*k+1]=h->y; pts[3*k+2]=h->z;
+
+    for (i = 0; i < hits->GetNRows(); i++) {
+      //      h = hit1[sortrk->GetIndex(i)];
+      if (hit1[i]->z > zmin && hit1[i]->z < zmax) {
+	pts[3*k]=hit1[i]->x; pts[3*k+1]=hit1[i]->y; pts[3*k+2]=hit1[i]->z;
 	k++;
-        if(h->track !=0){
-          int newtk = h->track/1000;
+        if(hit1[i].track !=0){
+          Int_t newtk = hit1[i]->track / 1000;
           if( newtk != oldie){
             oldie= newtk;
             itkno++;
             savnum[itkno]=oldie;
           }
-          tkpts[itkno][3*ntkpt[itkno]]=h->x;
-          tkpts[itkno][3*ntkpt[itkno]+1]=h->y;
-          tkpts[itkno][3*ntkpt[itkno]+2]=h->z;
+          tkpts[itkno][3*ntkpt[itkno]]=hit1[i]->x;
+          tkpts[itkno][3*ntkpt[itkno]+1]=hit1[i]->y;
+          tkpts[itkno][3*ntkpt[itkno]+2]=hit1[i]->z;
           ntkpt[itkno]++;
         }
       }
-    } 
-    TPolyMarker3D *thit[75];
+    }
+
     cout << "total hits " << k << endl; 
+
     TPolyMarker3D *hit = new TPolyMarker3D(k,pts,2);
     hit->SetMarkerColor(1);
-    hit->Draw(); 
+    hit->Draw();
+
     //Now plot the tracks hits in color ;
-    for(int m=0;m<75;m++){
+    TPolyMarker3D *thit[75];
+    for(int m=0; m < 75; m++){
       if(ntkpt[m] !=0){
 	//    
 	cout <<" Track #" << savnum[m] << " "<< ntkpt[m] <<" hits" << endl;
@@ -148,6 +167,7 @@ void draw_event(TPad &padname, Int_t nslice){
     Int_t tin=0;
     Int_t tid[75];
     tpt_track_st *t = track1;
+
     for( i=0;i<ntracks;i++){
       //    cout << "track flag " << i <<", " << t->nfit <<", " << t->flag <<endl;
       //skip any fake tracks (negative flag?)
@@ -221,106 +241,113 @@ void draw_event(TPad &padname, Int_t nslice){
   }
 }
 
-void draw_pixels(Text_t* varexp, Text_t* selection, Text_t* options){
+//-----------------------------------------------------------------------
+
+int draw_pixels(Text_t* varexp, Text_t* selection, Text_t* options){
   /* 
    * -----------------------------------------------------------------
    *	draw TPC pixels
    * -----------------------------------------------------------------*/
 
   St_DataSetIter Itpc_raw(chain->DataSet("tpc_raw"));
-  St_tfc_adcxyz *pytfc = (St_tfc_adcxyz *) Itpc_raw.Find("adcxyz");
-  tfc_adcxyz_st *ptadcxyz = pytfc->GetTable();
-  //  St_TableNtuple adcxyz(*pytfc);
-  St_TableNtuple *adcxyz = new St_TableNtuple(*pytfc);
-  adcxyz.Fill(*pytfc);
+  //  St_DataSetIter Itpc_raw(GetDataSet("tpc_raw"));
+  St_tfc_adcxyz *phtfc = 0;
+  tfc_adcxyz_st *ptadcxyz = 0;
+  phtfc = (St_tfc_adcxyz *) Itpc_raw.Find("adcxyz");
+
+  if (phtfc) {ptadcxyz = phtfc->GetTable();}
+  else { cout << "Warning: adcxyz table header does not exist " << endl; return kStWarn; }
+  if (!ptadcxyz) { cout << "Warning: adcxyz table does not exist " << endl; return kStWarn; }
+
+  St_TableNtuple *adcxyz = new St_TableNtuple(*phtfc);
+  adcxyz.Fill(*phtfc);
   // define plot options
   adcxyz.SetMarkerStyle(26);
   adcxyz.SetMarkerColor(4);
-  //  adcxyz.Draw("y:x","adc>1");
   adcxyz.Draw(varexp,selection,options);
-}
-//______________________________________________________________________
 
-void draw_hits(Text_t* varexp, Text_t* selection, Text_t* options){
+  return 0;
+}
+
+//-----------------------------------------------------------------------
+
+int draw_hits(Text_t* varexp, Text_t* selection, Text_t* options){
   /* 
    * -----------------------------------------------------------------
    *	draw TPC hits
    * -----------------------------------------------------------------*/
 
+  // get pointers to tpc hit table
   St_DataSetIter Itpc_hits(chain->DataSet("tpc_hits"));
-  St_tcl_tphit *pytcl = (St_tcl_tphit *) Itpc_hits.Find("tphit");
-  tcl_tphit_st *pttphit = pytcl->GetTable();
-  St_TableNtuple tphit(*pytcl);
-  tphit.Fill(*pytcl);
+  St_tcl_tphit *phtcl = 0;
+  tcl_tphit_st *pttphit = 0;
+  phtcl = (St_tcl_tphit *) Itpc_hits.Find("tphit");
+  if (phtcl) {pttphit = phtcl->GetTable();}
+  else { cout << "Error: tphit table header does not exist " << endl; return kStWarn; }
+  if (!pttphit) { cout << "Error: tphit table does not exist " << endl; return kStWarn; }
+
+  St_TableNtuple *tphit = new St_TableNtuple(*phtcl);
+  tphit.Fill(*phtcl);
   // define plot options
   tphit.SetMarkerStyle(20);
   tphit.SetMarkerColor(2);
-  //  tphit.Draw("y:x","","same");
   tphit.Draw(varexp,selection,options);
-}
-//______________________________________________________________________
 
-void draw_geant_hits(Text_t* varexp, Text_t* selection, Text_t* options){
+  return 0;
+}
+
+//-----------------------------------------------------------------------
+
+int draw_geant_hits(Text_t* varexp, Text_t* selection, Text_t* options){
   /* 
    * -----------------------------------------------------------------
    *	draw TPC geant hits
    * -----------------------------------------------------------------*/
 
   St_DataSetIter Igeant_g2t(chain->DataSet("g2t_tpc_hit"));
-  St_g2t_tpc_hit *pyg2t = (St_g2t_tpc_hit *) Igeant_g2t.Find("g2t_tpc_hit");
-  g2t_tpc_hit_st *ptg2t_tpc_hit = pyg2t->GetTable();
-  St_TableNtuple g2t_tpc_hit(*pyg2t);
-  g2t_tpc_hit.Fill(*pyg2t);
+  St_g2t_tpc_hit *phg2t = 0;
+  g2t_tpc_hit_st *ptg2t_tpc_hit = 0;
+  phg2t = (St_g2t_tpc_hit *) Igeant_g2t.Find("g2t_tpc_hit");
+  if (phg2t) {ptg2t_tpc_hit = phg2t->GetTable();}
+  else { cout << "Warning: g2t tpc hit table header does not exist " << endl; return kStWarn; }
+  if (!ptg2t_tpc_hit) { cout << "Warning: g2t tpc hit table does not exist " << endl; return kStWarn; }
+
+  St_TableNtuple *g2t_tpc_hit = new St_TableNtuple(*phg2t);
+  g2t_tpc_hit.Fill(*phg2t);
   // define plot options
   g2t_tpc_hit.SetMarkerStyle(24);
   g2t_tpc_hit.SetMarkerColor(5);
   g2t_tpc_hit.Draw(varexp,selection,options);
+
+  return 0;
 }
-//______________________________________________________________________
+
+//-----------------------------------------------------------------------
 
 void tpcdraw(){
   /* 
    * -----------------------------------------------------------------
-   *	draw TPC 
+   *	draw TPC sectors with some options 
    * -----------------------------------------------------------------*/
 
-//#define GTRACK
-//#define FZIN
-#define MINIDAQ
-#define TPC
-  //#define TRS
-  //#define TSS
-  //#define FTPC
-  //#define FSS
-  //#define SVT
-  //#define EMC
-  //#define CTF
-#ifndef GTRACK
-//#define StMagF
-#endif
-  //#define XDFOUT
-  //#define GLOBAL
 
+  if (ChainFlags[kMINIDAQ]) {// defined for ChainFlags[kMINIDAQ]
+    chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
+    chain->SetInput("ChainFlags[kTPC]_DATA",".make/xdfin/.data/ChainFlags[kTPC]_DATA");
+  }
 
-
-#ifdef MINIDAQ
   // defined for MINIDAQ
-  chain->SetInput("TPC_DATA",".make/xdfin/.data/TPC_DATA");
-  chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
-#endif
+  //  chain->SetInput("TPC_DATA",".make/xdfin/.data/TPC_DATA");
+  //  chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
 
-#ifndef FZIN
-#ifndef GTRACK
-  chain->SetInput("g2t_tpc_hit",".make/xdfin/.data/event/geant/Event/g2t_tpc_hit");
-#endif
-#endif
+  //#ifndef FZIN
+  //#ifndef GTRACK
+  //  chain->SetInput("g2t_tpc_hit",".make/xdfin/.data/event/geant/Event/g2t_tpc_hit");
+  //#endif
+  //#endif
 
   gStyle->SetCanvasColor(10);              // white
   gStyle->SetPadColor(10);                 // white
-  // gStyle->SetFillColor(0);                 // clear (no-fill)
-  // gStyle->SetTitleColor(0);                // clear (no-fill)
-  // gStyle->SetStatColor(0);                 // clear (no-fill)
-  // gStyle->SetHistFillColor(0);             // clear (no-fill)
   gStyle->SetFrameFillColor(10);           // white
   gStyle->SetOptFit(1);
 
@@ -328,9 +355,6 @@ void tpcdraw(){
   c1->SetFillColor(0);
   c1->SetBorderMode(0);
   c1->SetBorderSize(0);
-  //c1->GetFrame()->SetFillColor(21);
-  //c1->GetFrame()->SetBorderMode(-1);
-  //c1->GetFrame()->SetBorderSize(5);
 
   TPaveText *title = new TPaveText(.2,0.96,.8,.995);
   title->SetFillColor(33);
@@ -363,34 +387,24 @@ void tpcdraw(){
   pad4->Draw();
 
   pad1->cd();
-#ifdef TSS
-  draw_pixels("y:x","adc>2","");
-#endif
-#ifdef TRS
-  draw_pixels("y:x","adc>2","");
-#endif
-#ifdef MINIDAQ
-  draw_pixels("y:x","adc>2","");
-#endif
-  draw_hits("y:x","","same");
-#ifndef MINIDAQ
-  draw_geant_hits("x1:x0","","same");
-#endif
-  
+  if (ChainFlags[kTSS] || ChainFlags[kTRS] || ChainFlags[kMINIDAQ]) {
+    draw_pixels("y:x","adc>2","");
+  }
+  if (draw_pixels == 0) { draw_hits("y:x","","same"); }
+  else { draw_hits("y:x","",""); }
+  if (!ChainFlags[kMINIDAQ]) {
+    draw_geant_hits("x1:x0","","same");
+  }  
+
   pad2->cd();
-#ifdef TSS
-  draw_pixels("z:x","adc>2","");
-#endif
-#ifdef TRS
-  draw_pixels("z:x","adc>2","");
-#endif
-#ifdef MINIDAQ
-  draw_pixels("z:x","adc>2","");
-#endif
-  draw_hits("z:x","","same");
-#ifndef MINIDAQ
-  draw_geant_hits("x2:x0","","same");
-#endif
+  if (ChainFlags[kTSS] || ChainFlags[kTRS] || ChainFlags[kMINIDAQ]) {
+    draw_pixels("z:x","adc>2","");
+  }
+  if (draw_pixels == 0) { draw_hits("z:x","","same"); }
+  else { draw_hits("z:x","",""); }
+  if (!ChainFlags[kMINIDAQ]) {
+    draw_geant_hits("x2:x0","","same");
+  }
   
   pad3->cd();
   draw_sector(*pad3,90.0,0.0);
@@ -400,3 +414,20 @@ void tpcdraw(){
   draw_sector(*pad4,0.0,0.0);
   draw_event(*pad4,-7);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
