@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.10 2001/04/19 19:52:48 hardtke Exp $
+ * $Id: StTpcDbMaker.h,v 1.11 2001/06/21 16:27:52 perev Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.11  2001/06/21 16:27:52  perev
+ * two error matrix transformation methods added
+ *
  * Revision 1.10  2001/04/19 19:52:48  hardtke
  * add tpc_pad_time_offset function and add ifdef for static arrays
  *
@@ -55,6 +58,8 @@
 #define tpc_pad_to_x_ F77_NAME(tpc_pad_to_x,TPC_PAD_TO_X)
 #define tpc_x_to_pad_ F77_NAME(tpc_x_to_pad,TPC_X_TO_PAD)
 #define tpc_local_to_global_ F77_NAME(tpc_local_to_global,TPC_LOCAL_TO_GLOBAL)
+#define tpc_local_to_global_err_ F77_NAME(tpc_local_to_global_err,TPC_LOCAL_TO_GLOBAL_ERR)
+#define tpc_local_to_global_emx_ F77_NAME(tpc_local_to_global_emx,TPC_LOCAL_TO_GLOBAL_EMX)
 #define tpc_global_to_local_ F77_NAME(tpc_global_to_local,TPC_GLOBAL_TO_LOCAL)
 #define tpc_global_to_local_p_ F77_NAME(tpc_global_to_local_p,TPC_GLOBAL_TO_LOCAL_P)
 #define tpc_drift_velocity_ F77_NAME(tpc_drift_velocity,TPC_DRIFT_VELOCITY)
@@ -79,7 +84,13 @@ extern "C" {
 R__EXTERN int type_of_call tpc_x_to_pad_(float *,float *,float *);
 }
 extern "C" {
-R__EXTERN int type_of_call tpc_local_to_global_(int *,float *,float *);
+R__EXTERN int type_of_call tpc_local_to_global_err_(int &,const float *,float *);
+}
+extern "C" {
+R__EXTERN int type_of_call tpc_local_to_global_emx_(int &,const float *,float *);
+}
+extern "C" {
+R__EXTERN int type_of_call tpc_local_to_global_(int *,const float *,float *);
 }
 extern "C" {
 R__EXTERN int type_of_call tpc_global_to_local_(int *,float *,float *);
@@ -139,7 +150,7 @@ class StTpcDbMaker : public StMaker {
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.10 2001/04/19 19:52:48 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.11 2001/06/21 16:27:52 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker, 1)   //StAF chain virtual base class for Makers
 };
