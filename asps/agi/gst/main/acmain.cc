@@ -1,7 +1,10 @@
 /*
- * $Id: acmain.cc,v 1.6 1998/07/09 23:01:43 perev Exp $
+ * $Id: acmain.cc,v 1.7 1998/07/20 20:17:31 perev Exp $
  *
  * $Log: acmain.cc,v $
+ * Revision 1.7  1998/07/20 20:17:31  perev
+ * Mods for exe SGI64 and HP rubber Zebra
+ *
  * Revision 1.6  1998/07/09 23:01:43  perev
  * replace fgsim.f -> fgsim.F
  *
@@ -36,7 +39,8 @@
 #include <math.h>
 int        __argc_save=0;	// Pgf77
 char **    __argv_save=NULL;	//
-
+char       __ftn_32in64_[4];	// Pgf77
+int        pawc_[10000];
 int xargc=0;			// g77
 char **xargv=NULL;		// g77
 
