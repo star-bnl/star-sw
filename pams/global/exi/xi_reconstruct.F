@@ -1,13 +1,13 @@
 C
-      INTEGER FUNCTION V0_RECONSTRUCT(nok,idd,trak,
+      INTEGER FUNCTION XI_RECONSTRUCT(nok,idd,trak,
      +                                ev0par_h,ev0par,
      +                                mvertex_h,mvertex,
-     +                                ev0out_h,ev0out   )
+     +                                ev0out_h,ev0out,
+     +                                exiout_h,exiout   )
  
-
       IMPLICIT NONE
-C   Functional Description : Search for secondary vertices. 
-C			     K_0_short and Lambda particles
+C   Functional Description : Search for secondaries 
+C                            X and Omega particles and
 C			     and anti-particles are 
 C			     considered. Only charged decay modes.
 C   Created  MARCH-1994	  S. Margetis 
@@ -22,6 +22,8 @@ C----------------------------------------------------------------------
 #include "evr_privert_st.inc"
 #include "ev0_ev0out_pars.inc"
 #include "ev0_ev0out_st.inc"
+#include "exi_exiout_pars.inc"
+#include "exi_exiout_st.inc"
 C----------------------------------------------------------------------
       RECORD/ table_head_st/ ev0par_h
       RECORD/ ev0par_row_st/ ev0par(*)
@@ -29,6 +31,8 @@ C----------------------------------------------------------------------
       RECORD/ privert_row_st/ mvertex(*)
       RECORD/ table_head_st/ ev0out_h
       RECORD/ ev0out_row_st/ ev0out(*)
+      RECORD/ table_head_st/ exiout_h
+      RECORD/ exiout_row_st/ exiout(*)
 
 C---for testing purposes only
       STRUCTURE/local_track/
