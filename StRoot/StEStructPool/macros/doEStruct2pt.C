@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: doEStruct2pt.C,v 1.5 2004/06/26 16:28:42 porter Exp $
+ * $Id: doEStruct2pt.C,v 1.6 2004/08/23 19:12:46 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -28,6 +28,8 @@ void doEStruct2pt(const char* fileListFile, const char* outputDir, const char* c
   ************************************************************************/
 
   // in this example, all cuts (event, track, pair) are in same file
+  // cutFile can also refer to an entry in the cut DB 
+  //    (see StEStructPool/AnalysisMaker/StEStructCuts.cxx for pre-compiled cuts)
   const char* evtCutFile=cutFile;
 
   const char* trackCutFile=evtCutFile;
@@ -132,6 +134,9 @@ void doEStruct2pt(const char* fileListFile, const char* outputDir, const char* c
 /**********************************************************************
  *
  * $Log: doEStruct2pt.C,v $
+ * Revision 1.6  2004/08/23 19:12:46  msd
+ * Added note about usage for pre-compiled cut database
+ *
  * Revision 1.5  2004/06/26 16:28:42  porter
  * fixed typo in getDirNames.C
  *
