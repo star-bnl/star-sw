@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcPixel.cxx,v 2.1 1999/10/13 19:45:32 ullrich Exp $
+ * $Id: StTpcPixel.cxx,v 2.2 1999/12/13 20:16:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcPixel.cxx,v $
- * Revision 2.1  1999/10/13 19:45:32  ullrich
- * Initial Revision
+ * Revision 2.2  1999/12/13 20:16:31  ullrich
+ * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
  * Revision 2.1  1999/10/13 19:45:32  ullrich
  * Initial Revision
@@ -19,7 +19,7 @@
  **************************************************************************/
 #include "StTpcPixel.h"
 
-static const char rcsid[] = "$Id: StTpcPixel.cxx,v 2.1 1999/10/13 19:45:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcPixel.cxx,v 2.2 1999/12/13 20:16:31 ullrich Exp $";
 
 ClassImp(StTpcPixel)
 
@@ -61,7 +61,7 @@ StTpcPixel::sector() const
 }
 
 UShort_t
-StTpcPixel::row() const
+StTpcPixel::padrow() const
 {
     return (mDetectorSectorRow>>9) & ~(~0U<<6);   // bits 9-14
 }

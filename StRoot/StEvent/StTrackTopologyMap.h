@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.h,v 2.1 1999/10/13 19:44:17 ullrich Exp $
+ * $Id: StTrackTopologyMap.h,v 2.2 1999/12/13 20:16:39 ullrich Exp $
  *
  * Author: Thomas Ullrich, AUg 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.h,v $
- * Revision 2.1  1999/10/13 19:44:17  ullrich
- * Initial Revision
+ * Revision 2.2  1999/12/13 20:16:39  ullrich
+ * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
  * Revision 2.2  1999/12/13 20:16:39  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
@@ -34,8 +34,8 @@ public:
     // StTrackTopologyMap(const StTrackTopologyMap&);            use default
     // StTrackTopologyMap& operator=(const StTrackTopologyMap&); use default
     ~StTrackTopologyMap();
-    Bool_t   hasHitInRow(StDetectorId, UInt_t) const; // first row = 0
-    Bool_t   hasHitInSvtLayer(UInt_t) const;          // first layer = 0
+
+    Bool_t   primaryVertexUsed() const;
     UInt_t   numberOfHits(StDetectorId) const;
     Bool_t   hasHitInRow(StDetectorId, UInt_t) const; // first row = 1
     Bool_t   hasHitInSvtLayer(UInt_t) const;          // first layer = 1

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.2 1999/10/28 22:27:55 ullrich Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.3 1999/12/13 20:16:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
- * Revision 2.2  1999/10/28 22:27:55  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/12/13 20:16:36  ullrich
+ * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
  * Revision 2.5  2000/03/29 00:16:30  ullrich
  * Fixed off-by-one error.
@@ -28,10 +28,10 @@
  * Revision 2.1  1999/10/13 19:45:46  ullrich
  * Initial Revision
  *
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.2 1999/10/28 22:27:55 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.3 1999/12/13 20:16:36 ullrich Exp $";
 #include "StTrackTopologyMap.h"
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.2 1999/10/28 22:27:55 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.3 1999/12/13 20:16:36 ullrich Exp $";
 
 ClassImp(StTrackTopologyMap)
     mMap[0] = mMap[1] = 0;
@@ -76,7 +76,7 @@ StTrackTopologyMap::data(UInt_t i) const
 Bool_t
 StTrackTopologyMap::primaryVertexUsed() const { return bit(0); }
 
-        return bit(layer+1);
+Bool_t
 StTrackTopologyMap::turnAroundFlag() const { return bit(62); }
 
 Bool_t
@@ -110,7 +110,7 @@ StTrackTopologyMap::hasHitInRow(StDetectorId id, UInt_t row) const
 UInt_t
 StTrackTopologyMap::numberOfHits(StDetectorId id) const
 {
-        for (i=0; i<6; i++)
+    if (ftpcFormat() &&
         !(id == kFtpcWestId || id == kFtpcEastId))
         return 0;
     

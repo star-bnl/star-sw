@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 2.4 1999/11/11 11:03:57 ullrich Exp $
+ * $Id: StSvtHit.h,v 2.5 1999/12/13 20:16:22 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
- * Revision 2.4  1999/11/11 11:03:57  ullrich
- * Inlined layer(), sector() and ladder().
+ * Revision 2.5  1999/12/13 20:16:22  ullrich
+ * Changed numbering scheme for hw_position unpack methods (STAR conventions).
  *
  * Revision 2.4  1999/11/11 11:03:57  ullrich
  * Inlined layer(), sector() and ladder().
@@ -50,10 +50,10 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
 
-    ULong_t layer() const;      // layer=[0,5]
-    ULong_t ladder() const;     // ladder=[0-7]
-    ULong_t wafer() const;      // wafer=[0-6]
-    ULong_t barrel() const;     // barrel=[0-2]
+    ULong_t layer() const;      // layer=[1,6]
+    ULong_t ladder() const;     // ladder=[1-8]
+    ULong_t wafer() const;      // wafer=[1-7]
+    ULong_t barrel() const;     // barrel=[1-3]
     ULong_t hybrid() const;
 
 protected:
@@ -66,21 +66,21 @@ inline ULong_t
 StSvtHit::layer() const
 {
     // bits 4-31: 1000*layer + 100*wafer + ladder (Helen, Sep 99)
-    return (mHardwarePosition>>4)/1000 - 1;
+    return (mHardwarePosition>>4)/1000;
 }
 
 inline ULong_t
 StSvtHit::ladder() const
 {
     // bits 4-31: 1000*layer + 100*wafer + ladder (Helen, Sep 99)
-    return (mHardwarePosition>>4)%100 - 1;
+    return (mHardwarePosition>>4)%100;
 }
 
 inline ULong_t
 StSvtHit::wafer() const
 {
     // bits 4-31: 1000*layer + 100*wafer + ladder (Helen, Sep 99)
-    return ((mHardwarePosition>>4)%1000)/100 - 1;
+    return ((mHardwarePosition>>4)%1000)/100;
 }
 
 #endif
