@@ -1,4 +1,4 @@
-/* $Id: StarVolume.cxx,v 1.2 2004/07/16 22:52:35 potekhin Exp $ */
+/* $Id: StarVolume.cxx,v 1.3 2004/09/02 23:27:01 potekhin Exp $ */
 
 #include <TVirtualMC.h>
 #include <iostream.h>
@@ -13,10 +13,16 @@ Int_t StarVolume::_nVolumes(0);
 TList StarVolume::_volumes;
 
 //_______________________________________________________________________
-StarVolume::StarVolume() {}
+StarVolume::StarVolume() {
+  _lkp=new THashTable();
+}
 StarVolume::StarVolume(const StarVolume& v_) {}
-StarVolume::StarVolume(const char* name_, const char *title_): TNamed(name_,title_) {}
-StarVolume::~StarVolume() {}
+StarVolume::StarVolume(const char* name_, const char *title_): TNamed(name_,title_) {
+  _lkp=new THashTable();
+}
+StarVolume::~StarVolume() {
+  delete _lkp;
+}
 
 //-------------------------------------------------------------------------
 StarVolume* StarVolume::FindVolume(const char* name_) {
