@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.67 2005/03/18 17:13:07 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.68 2005/03/18 17:35:38 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.68  2005/03/18 17:35:38  perev
+ * some asserts removed
+ *
  * Revision 2.67  2005/03/18 17:13:07  perev
  * assert in rotate fix
  *
@@ -821,7 +824,7 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
   _x       = x2;
   _sinCA   = sinCA2;
   _cosCA   = cosCA2;
-  assert(fabs(_sinCA-sin(_eta))<1e-5);
+//??  assert(fabs(_sinCA-sin(_eta))<1e-5);
   assert(fabs(_x )<1.e+10);
   assert(fabs(_y)<1.e+10);
   assert(fabs(_sinCA)<1.0001);
@@ -866,7 +869,7 @@ int StiKalmanTrackNode::nudge(StiHit *hit)
   dl   += deltaL;
 
 
-  assert(fabs(_sinCA-sin(_eta))<1e-5);
+//??  assert(fabs(_sinCA-sin(_eta))<1e-5);
   assert(fabs(_sinCA) < 1.);
   assert(fabs(_cosCA) < 1.);
   _state = kTNNudEnd;
@@ -1513,7 +1516,7 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
 #ifdef STI_ERROR_TEST
   testError(&_cXX,1); 
 #endif // STI_ERROR_TEST
-  assert(fabs(_sinCA-sin(_eta))<1e-5);
+//??  assert(fabs(_sinCA-sin(_eta))<1e-5);
   _state = kTNRotEnd;
   return 0;
 }
