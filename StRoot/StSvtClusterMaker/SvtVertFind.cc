@@ -90,7 +90,7 @@ int sft_process_event ( long Nspt,  scs_spt_st    *staf_spt,
  
    for (jspt = 0; jspt < Nspt; jspt++)
    {
-     if (staf_spt[jspt].id_wafer < 7000) {
+     if (staf_spt[jspt].id_wafer < 7000 && staf_spt[jspt].flag<4) {
 
 	 spt[ispt].x[0]  = (double)staf_spt[jspt].x[0];
 	 spt[ispt].x[1]  = (double)staf_spt[jspt].x[1];
