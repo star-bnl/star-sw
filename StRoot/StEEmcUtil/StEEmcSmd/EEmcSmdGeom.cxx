@@ -2,7 +2,7 @@
 
 /*****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.2 2004/01/29 16:37:25 jwebb Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.3 2004/02/06 22:33:08 jwebb Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -27,6 +27,9 @@
  *****************************************************************************
  *
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.3  2004/02/06 22:33:08  jwebb
+ * Moved statement to fix warning.
+ *
  * Revision 1.2  2004/01/29 16:37:25  jwebb
  * Removed dependence on StMaker.h and PhysicalConstants.h.  Should be fully
  * decoupled from Star environment now.
@@ -377,33 +380,37 @@ StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
     StructEEmcStrip* stripPtr;
     stripPtr = new StructEEmcStrip;
     int iStrip = -1;
-    int iUV;
+    //$$$    int iUV;
     float x1,y1,x2,y2,mu,d;
     EEmcStripPtrVec stripPtrVec;  
     EEmcStripPtrVecIter p;  
 
-//    int iSec = getEEmcISec(iPlane, point);
+    
+    Int_t iUV = kEEmcSmdMapUV[iPlane][iSec]; // jcw 2/6/04 moved here from $$$
+                                             // iUV may be used uninitialized
+                                             // below, otherwise...
+//  int iSec = getEEmcISec(iPlane, point);
     if(iSec >= 0 && IsSectorIn(iSec)) {
-       iUV = kEEmcSmdMapUV[iPlane][iSec];
-         stripPtrVec =  getEEmcSector(iUV,iSec).stripPtrVec;
-         p =  stripPtrVec.begin();
-         while(p != stripPtrVec.end()) {
-           x1 = (*p)->end1.x();
-           y1 = (*p)->end1.y();
-           x2 = (*p)->end2.x();
-           y2 = (*p)->end2.y();
-	   mu = -1.0/::sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1)) *
-		                 ((x2*y1-x1*y2)/fabs(x2*y1-x1*y2));
+      //$$$iUV = kEEmcSmdMapUV[iPlane][iSec];
+      stripPtrVec =  getEEmcSector(iUV,iSec).stripPtrVec;
+      p =  stripPtrVec.begin();
+      while(p != stripPtrVec.end()) {
+	x1 = (*p)->end1.x();
+	y1 = (*p)->end1.y();
+	x2 = (*p)->end2.x();
+	y2 = (*p)->end2.y();
+	mu = -1.0/::sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1)) *
+	  ((x2*y1-x1*y2)/fabs(x2*y1-x1*y2));
 // distance d carries a sign
-	   d = ((y2-y1)*point.x() + (x1-x2)*point.y() + (x2*y1-x1*y2))*mu;
-
-	   if(fabs(d) < fabs(*dca)) {
-	     *dca = d;
-	     iStrip = (*p)->stripStructId.stripId - 1;
-           }
-	   if(d < 0) break;
-	   p++;
-         }
+	d = ((y2-y1)*point.x() + (x1-x2)*point.y() + (x2*y1-x1*y2))*mu;
+	
+	if(fabs(d) < fabs(*dca)) {
+	  *dca = d;
+	  iStrip = (*p)->stripStructId.stripId - 1;
+	}
+	if(d < 0) break;
+	p++;
+      }
     }
     if(iStrip >=0) {
       stripPtr = getStripPtr(iStrip,iUV,iSec);
