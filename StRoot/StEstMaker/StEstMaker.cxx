@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.3 2001/01/31 15:05:58 caines Exp $
+ * $Id: StEstMaker.cxx,v 1.4 2001/01/31 16:52:19 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.4  2001/01/31 16:52:19  lmartin
+ * mParams[]->debug replaced by mDebug.
+ * phi and z params for StEstIndexGeom remove from StEstParams.
+ *
  * Revision 1.3  2001/01/31 15:05:58  caines
  * Added check to BFChain evaluation option to decide wehter to set Idealtracking on
  *
@@ -119,9 +123,6 @@ Int_t StEstMaker::Init(){
 
   // default settings, may be overridden by SetParams:
   for (i=0;i<mNPass;i++) {
-    mParams[i]->debug = 2;
-   // Cant have ideal without MC info
-    if( mIdealTracking &&  mParams[i]->debug <2 ) mParams[i]->debug = 2;
     for (j=0;j<4;j++) {
       mParams[i]->nneighbours[j] = 2;
       mParams[i]->ntotbranch[j] = 6;
@@ -140,15 +141,6 @@ Int_t StEstMaker::Init(){
     mParams[i]->maxsvthits=8;    
     mParams[i]->maxbranches=100;     
 
-//     mParams[i]->phibin = 5;
-//     mParams[i]->zbin = 2;
-//     mParams[i]->nphibins = 72;
-//     mParams[i]->nzbins = 36;
-    mParams[i]->phibin = 10;
-    mParams[i]->zbin = 4;
-    mParams[i]->nphibins = 36;
-    mParams[i]->nzbins = 18;
-    
     mParams[i]->lrad[0][0] = 6.125;
     mParams[i]->lrad[0][1] = 7.185;
     mParams[i]->lrad[1][0] = 10.185;
@@ -352,19 +344,6 @@ void StEstMaker::PrintSettings() {
   cout<<"\t|"<<endl;
   cout<<"max number of branches";
   for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->maxbranches;
-  cout<<"\t|"<<endl;
-  cout<<"-----------------------------------------------------------------"<<endl;
-  cout<<"phi bin size\t";
-  for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->phibin;
-  cout<<"\t|"<<endl;
-  cout<<"z bin size\t";
-  for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->zbin;
-  cout<<"\t|"<<endl;
-  cout<<"number of phi bins";
-  for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->nphibins;
-  cout<<"\t|"<<endl;
-  cout<<"number of z bins";
-  for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->nzbins;
   cout<<"\t|"<<endl;
   cout<<"-----------------------------------------------------------------"<<endl;
   cout<<endl;
