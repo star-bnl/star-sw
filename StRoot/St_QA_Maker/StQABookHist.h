@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.17 2004/02/12 05:03:12 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.18 2004/04/23 23:15:30 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.18  2004/04/23 23:15:30  genevb
+// Added signedDCA (Impact) plots for globals
+//
 // Revision 2.17  2004/02/12 05:03:12  genevb
 // Year 4 AuAu changes. New SVT histos.
 //
@@ -84,7 +87,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.17 2004/02/12 05:03:12 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.18 2004/04/23 23:15:30 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -241,7 +244,8 @@ class StQABookHist : public TObject {
   TH1F     *m_lengthTS;      //! length of track, tpc+svt
   TH1F     *m_chisq0TS;      //! chi square [0], tpc+svt
   TH1F     *m_chisq1TS;      //! chi square [1], tpc+svt
-  TH1F     *m_glb_impactTS;  //! log impact parameter from primary vertex, tpc+svt
+  TH2F     *m_glb_impactTS;  //! log impact parameter from primary vertex, tpc+svt
+  TH2F     *m_glb_simpactTS; //! signed impact parameter from primary vertex, tpc+svt
   TH2F     *m_glb_impactTTS; //! log impact parameter from primary vertex, tpc,tpc+svt
   TH2F     *m_glb_impactF;   //! log impact parameter from primary vertex, ftpc
   TH1F     *m_glb_impactrTS; //! impact parameter from primary vertex, tpc+svt
@@ -291,7 +295,8 @@ class StQABookHist : public TObject {
   TH1F     *m_chisq1FW;      //! chi square [1], ftpc west
   TH1F     *m_chisq1T;       //! chi square [1], tpc
   TH2F     *m_chisq1TTS;     //! chi square [1], tpc,svt
-  TH2F     *m_glb_impactT;   //! impact parameter from primary vertex, tpc
+  TH2F     *m_glb_impactT;   //! log impact parameter from primary vertex, tpc
+  TH2F     *m_glb_simpactT;  //! signed impact parameter from primary vertex, tpc
   TH1F     *m_glb_impactrT;  //! impact parameter from primary vertex, tpc
 
   TH2F     *m_glb_f0;          //! overlayed hist of first point - helix point

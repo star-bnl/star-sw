@@ -346,6 +346,8 @@ void StEventQAMaker::MakeHistGlob() {
     gMessMgr->Info(" *** in StEventQAMaker - filling global track histograms ");
 
   StSPtrVecTrackNode &theNodes = event->trackNodes();
+  StThreeVectorF pvert;
+  if (event->primaryVertex()) pvert = event->primaryVertex()->position();
   Int_t cnttrk=0;
   Int_t cnttrkT=0;
   Int_t cnttrkTS=0;
@@ -388,16 +390,17 @@ void StEventQAMaker::MakeHistGlob() {
       const StThreeVectorF& firstPoint = detInfo->firstPoint();
       const StThreeVectorF& lastPoint = detInfo->lastPoint();
       const StThreeVectorF& origin = geom->origin();
+      StPhysicalHelixD hx = geom->helix();
       // get the helix position closest to the first point on track
-      double sFirst = geom->helix().pathLength(firstPoint);
+      double sFirst = hx.pathLength(firstPoint);
       // get the helix position closest to the last point on track
-      double sLast = geom->helix().pathLength(lastPoint);
+      double sLast = hx.pathLength(lastPoint);
 
-      StThreeVectorF dif = firstPoint - geom->helix().at(sFirst);
-      StThreeVectorF difl = lastPoint - geom->helix().at(sLast);
-      Float_t xcenter = geom->helix().xcenter();
-      Float_t ycenter = geom->helix().ycenter();
-      Float_t rcircle = 1./geom->helix().curvature();
+      StThreeVectorF dif = firstPoint - hx.at(sFirst);
+      StThreeVectorF difl = lastPoint - hx.at(sLast);
+      Float_t xcenter = hx.xcenter();
+      Float_t ycenter = hx.ycenter();
+      Float_t rcircle = 1./hx.curvature();
       Float_t centerOfCircleToFP = ::sqrt(::pow(xcenter-firstPoint.x(),2) +
 					::pow(ycenter-firstPoint.y(),2));
       Float_t centerOfCircleToLP = ::sqrt(::pow(xcenter-lastPoint.x(),2) +
@@ -409,12 +412,13 @@ void StEventQAMaker::MakeHistGlob() {
       Float_t radf = firstPoint.perp();
 
       Float_t logImpact = TMath::Log10(globtrk->impactParameter());
+      Float_t sImpact = hx.geometricSignedDistance(pvert.x(),pvert.y());
       Float_t logCurvature = TMath::Log10(geom->curvature());
 
       // pathLength(double x,double y) should return path length at
       // DCA in the xy-plane to a given point
-      double S = geom->helix().pathLength(0,0);
-      StThreeVectorD dcaToBeam = geom->helix().at(S);
+      double S = hx.pathLength(0,0);
+      StThreeVectorD dcaToBeam = hx.at(S);
 
       // from Lanny on 2 Jul 1999 9:56:03
       //1. x0,y0,z0 are coordinates on the helix at the starting point, which
@@ -495,10 +499,15 @@ void StEventQAMaker::MakeHistGlob() {
 	hists->m_glb_rzl0->Fill(azimdifl,0.);
         hists->m_glb_rzl0->Fill(difl.z(),1.);
         hists->m_glb_impactT->Fill(logImpact,2.);
-        if ((firstPoint.z() < 0) && (lastPoint.z() < 0))  // east-only
+        hists->m_glb_simpactT->Fill(sImpact,2.);
+        if ((firstPoint.z() < 0) && (lastPoint.z() < 0)) { // east-only
           hists->m_glb_impactT->Fill(logImpact,0.);
-        if ((firstPoint.z() > 0) && (lastPoint.z() > 0))  // west-only
+          hists->m_glb_simpactT->Fill(sImpact,0.);
+        }
+        if ((firstPoint.z() > 0) && (lastPoint.z() > 0)) { // west-only
           hists->m_glb_impactT->Fill(logImpact,1.);
+          hists->m_glb_simpactT->Fill(sImpact,1.);
+        }
         hists->m_glb_impactrT->Fill(globtrk->impactParameter());
         hists->m_glb_impactTTS->Fill(logImpact,1.);
         hists->m_glb_impactrTTS->Fill(globtrk->impactParameter(),1.);
@@ -579,13 +588,12 @@ void StEventQAMaker::MakeHistGlob() {
 
         hists->m_pT_eta_recT->Fill(eta,lmevpt);
 	if (event->primaryVertex() && fabs(rcircle)>0.) {
-          double qwe = ::pow(firstPoint.x()-event->primaryVertex()->position().x(),2)
-		     + ::pow(firstPoint.y()-event->primaryVertex()->position().y(),2);
+          double qwe = ::pow(firstPoint.x()-pvert.x(),2)
+		     + ::pow(firstPoint.y()-pvert.y(),2);
           qwe = ::sqrt(qwe)/(2*rcircle);
 	  if (qwe>0.9999) qwe = 0.999;
 	  Float_t denom = 2*rcircle*(::asin(qwe));
-	  hists->m_tanl_zfT->Fill((firstPoint.z() -
-				   event->primaryVertex()->position().z())/denom,
+	  hists->m_tanl_zfT->Fill((firstPoint.z()-pvert.z())/denom,
 				  Float_t(TMath::Tan(geom->dipAngle())));
 	}
         hists->m_mom_trklengthT->Fill(globtrk->length(),lmevmom);
@@ -634,7 +642,16 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_rzf0TS->Fill(dif.z(),1.);
 	hists->m_glb_rzl0TS->Fill(azimdifl,0.);
         hists->m_glb_rzl0TS->Fill(difl.z(),1.);
-        hists->m_glb_impactTS->Fill(logImpact);
+        hists->m_glb_impactTS->Fill(logImpact,2.);
+        hists->m_glb_simpactTS->Fill(sImpact,2.);
+        if ((firstPoint.z() < 0) && (lastPoint.z() < 0)) { // east-only
+          hists->m_glb_impactTS->Fill(logImpact,0.);
+          hists->m_glb_simpactTS->Fill(sImpact,0.);
+        }
+        if ((firstPoint.z() > 0) && (lastPoint.z() > 0)) { // west-only
+          hists->m_glb_impactTS->Fill(logImpact,1.);
+          hists->m_glb_simpactTS->Fill(sImpact,1.);
+        }
         hists->m_glb_impactrTS->Fill(globtrk->impactParameter());
         hists->m_glb_impactTTS->Fill(logImpact,0.);
         hists->m_glb_impactrTTS->Fill(globtrk->impactParameter(),0.);
@@ -702,19 +719,17 @@ void StEventQAMaker::MakeHistGlob() {
 
         hists->m_pT_eta_recTS->Fill(eta,lmevpt);
 	if (event->primaryVertex()) {
-          double qwe = ::pow(firstPoint.x()-event->primaryVertex()->position().x(),2)
-		     + ::pow(firstPoint.y()-event->primaryVertex()->position().y(),2);
+          double qwe = ::pow(firstPoint.x()-pvert.x(),2)
+		     + ::pow(firstPoint.y()-pvert.y(),2);
           qwe = ::sqrt(qwe)/(2*rcircle);
 	  if (qwe>0.9999) qwe = 0.999;
 	  Float_t denom = 2*rcircle*(::asin(qwe));
 	  if (radf>40) {
-	    hists->m_tanl_zfT->Fill((firstPoint.z() -
-				     event->primaryVertex()->position().z())/denom,
+	    hists->m_tanl_zfT->Fill((firstPoint.z()-pvert.z())/denom,
 				    Float_t(TMath::Tan(geom->dipAngle())));
 	  }
 	  if (radf<40) {
-	    hists->m_tanl_zfTS->Fill((firstPoint.z() -
-				     event->primaryVertex()->position().z())/denom,
+	    hists->m_tanl_zfTS->Fill((firstPoint.z()-pvert.z())/denom,
 				     Float_t(TMath::Tan(geom->dipAngle())));
 	  }
 	}
@@ -934,7 +949,9 @@ void StEventQAMaker::MakeHistPrim() {
   StPrimaryVertex *primVtx = event->primaryVertex();
   UInt_t daughters=0;
   UInt_t currentNumber=0;
+  StThreeVectorF pvert;
   if (primVtx) {
+    pvert = primVtx->position();
     for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
       currentNumber = event->primaryVertex(v)->numberOfDaughters();
       if (currentNumber > daughters) {
@@ -963,6 +980,8 @@ void StEventQAMaker::MakeHistPrim() {
         StTrackFitTraits& fTraits = primtrk->fitTraits();
         StTrackDetectorInfo* detInfo = primtrk->detectorInfo();
         const StTrackTopologyMap& map=primtrk->topologyMap();
+	StPhysicalHelixD hx = geom->helix();
+	StPhysicalHelixD ohx = outerGeom->helix();
 
 	StTrack *gtrack = primtrk->node()->track(global);
         if (!gtrack || gtrack->bad()) continue;
@@ -998,16 +1017,16 @@ void StEventQAMaker::MakeHistPrim() {
 	// need to find position on helix closest to first point on track since
 	// the primary vertex is used as the first point on helix for primary
 	// tracks -CPL
-	double sFirst = geom->helix().pathLength(firstPoint);
+	double sFirst = hx.pathLength(firstPoint);
 	// get the helix position closest to the last point on track
-	double sLast = geom->helix().pathLength(lastPoint);
+	double sLast = hx.pathLength(lastPoint);
 
-	StThreeVectorF dif = firstPoint - geom->helix().at(sFirst);
-	StThreeVectorF difl = lastPoint - geom->helix().at(sLast);
+	StThreeVectorF dif = firstPoint - hx.at(sFirst);
+	StThreeVectorF difl = lastPoint - hx.at(sLast);
 
-	Float_t xcenter = geom->helix().xcenter();
-	Float_t ycenter = geom->helix().ycenter();
-	Float_t rcircle = 1./geom->helix().curvature();
+	Float_t xcenter = hx.xcenter();
+	Float_t ycenter = hx.ycenter();
+	Float_t rcircle = 1./hx.curvature();
 	Float_t centerOfCircleToFP = ::sqrt(::pow(xcenter-firstPoint.x(),2) +
 					    ::pow(ycenter-firstPoint.y(),2));
 	Float_t centerOfCircleToLP = ::sqrt(::pow(xcenter-lastPoint.x(),2) +
@@ -1020,13 +1039,13 @@ void StEventQAMaker::MakeHistPrim() {
 	// get the same information as above but from the outerGeometry()
 	// ... this is so we can look at the hit residuals using the helix
 	// parameters at the last point on a track
-	double sFirstOuter = outerGeom->helix().pathLength(firstPoint);
-	double sLastOuter = outerGeom->helix().pathLength(lastPoint);
-	StThreeVectorF outerDif = firstPoint - outerGeom->helix().at(sFirstOuter);
-	StThreeVectorF outerDifl = lastPoint - outerGeom->helix().at(sLastOuter);
-	Float_t outerXcenter = outerGeom->helix().xcenter();
-	Float_t outerYcenter = outerGeom->helix().ycenter();
-	Float_t outerRcircle = 1./(outerGeom->helix().curvature()+1.e-10);
+	double sFirstOuter = ohx.pathLength(firstPoint);
+	double sLastOuter = ohx.pathLength(lastPoint);
+	StThreeVectorF outerDif = firstPoint - ohx.at(sFirstOuter);
+	StThreeVectorF outerDifl = lastPoint - ohx.at(sLastOuter);
+	Float_t outerXcenter = ohx.xcenter();
+	Float_t outerYcenter = ohx.ycenter();
+	Float_t outerRcircle = 1./(ohx.curvature()+1.e-10);
 	Float_t outerCenterOfCircleToFP = ::sqrt(::pow(outerXcenter-firstPoint.x(),2) +
 					       ::pow(outerYcenter-firstPoint.y(),2));
 	Float_t outerCenterOfCircleToLP = ::sqrt(::pow(outerXcenter-lastPoint.x(),2) +
@@ -1149,13 +1168,12 @@ void StEventQAMaker::MakeHistPrim() {
 
 // these are TPC only
 	  hists->m_ppT_eta_recT->Fill(eta,lmevpt);
-          double qwe = ::pow(firstPoint.x()-event->primaryVertex()->position().x(),2)
-		     + ::pow(firstPoint.y()-event->primaryVertex()->position().y(),2);
+          double qwe = ::pow(firstPoint.x()-pvert.x(),2)
+		     + ::pow(firstPoint.y()-pvert.y(),2);
           qwe = ::sqrt(qwe)/(2*rcircle);
 	  if (qwe>0.9999) qwe = 0.999;
 	  Float_t denom = 2*rcircle*(::asin(qwe));
-	  hists->m_ptanl_zfT->Fill((firstPoint.z() -
-				    event->primaryVertex()->position().z())/denom,
+	  hists->m_ptanl_zfT->Fill((firstPoint.z()-pvert.z())/denom,
 				   Float_t(TMath::Tan(geom->dipAngle())));
 	  hists->m_pmom_trklengthT->Fill(primtrk->length(),lmevmom);
 	  hists->m_pchisq0_momT->Fill(lmevmom,chisq0);
@@ -1248,16 +1266,16 @@ void StEventQAMaker::MakeHistPrim() {
 					   Float_t(fTraits.numberOfFitPoints()));
 
 	  hists->m_ppT_eta_recTS->Fill(eta,lmevpt);
-          double qwe = ::pow(firstPoint.x()-event->primaryVertex()->position().x(),2)
-		     + ::pow(firstPoint.y()-event->primaryVertex()->position().y(),2);
+          double qwe = ::pow(firstPoint.x()-pvert.x(),2)
+		     + ::pow(firstPoint.y()-pvert.y(),2);
           qwe = ::sqrt(qwe)/(2*rcircle);
 	  if (qwe>0.9999) qwe = 0.999;
 	  Float_t denom = 2*rcircle*(::asin(qwe));
 	  if (radf>40) hists->m_ptanl_zfT->
-			 Fill((firstPoint.z() - event->primaryVertex()->position().z())/denom,
+			 Fill((firstPoint.z() - pvert.z())/denom,
 			      Float_t(TMath::Tan(geom->dipAngle())));
 	  if (radf<40) hists->m_ptanl_zfTS->
-			 Fill((firstPoint.z() - event->primaryVertex()->position().z())/denom,
+			 Fill((firstPoint.z() - pvert.z())/denom,
 			      Float_t(TMath::Tan(geom->dipAngle())));
 	  hists->m_pmom_trklengthTS->Fill(primtrk->length(),lmevmom);
 	  hists->m_pchisq0_momTS->Fill(lmevmom,chisq0);
@@ -1499,9 +1517,11 @@ void StEventQAMaker::MakeHistVertex() {
   StPrimaryVertex *primVtx = event->primaryVertex();
   UInt_t daughters=0;
   UInt_t currentNumber=0;
+  StThreeVectorF pvert;
 
   if (primVtx) {
 
+    pvert = primVtx->position();
     // Decide true primary vertex by most daughters
     for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
       currentNumber = event->primaryVertex(v)->numberOfDaughters();
@@ -1516,28 +1536,29 @@ void StEventQAMaker::MakeHistVertex() {
 
       if (aPrimVtx == primVtx) {
         hists->m_pv_vtxid->Fill(primVtx->type());
-	if (!isnan(double(primVtx->position().x())))
-	  hists->m_pv_x->Fill(primVtx->position().x());
-	if (!isnan(double(primVtx->position().y())))
-	  hists->m_pv_y->Fill(primVtx->position().y());
-	if (!isnan(double(primVtx->position().z())))
-	  hists->m_pv_z->Fill(primVtx->position().z());
+	if (!isnan(double(pvert.x())))
+	  hists->m_pv_x->Fill(pvert.x());
+	if (!isnan(double(pvert.y())))
+	  hists->m_pv_y->Fill(pvert.y());
+	if (!isnan(double(pvert.z())))
+	  hists->m_pv_z->Fill(pvert.z());
         hists->m_pv_pchi2->Fill(primVtx->chiSquared());
-        hists->m_pv_r->Fill(primVtx->position().x()*primVtx->position().x() +
-		     primVtx->position().y()*primVtx->position().y());
-	hists->m_pv_xy->Fill(primVtx->position().x(),primVtx->position().y());
+        hists->m_pv_r->Fill(pvert.x()*pvert.x() +
+		     pvert.y()*pvert.y());
+	hists->m_pv_xy->Fill(pvert.x(),pvert.y());
       }
       else {
+        StThreeVectorF apvert = aPrimVtx->position();
         hists->m_v_vtxid->Fill(aPrimVtx->type());
-	if (!isnan(double(aPrimVtx->position().x())))
-	  hists->m_v_x->Fill(aPrimVtx->position().x());     
-	if (!isnan(double(aPrimVtx->position().y())))
-	  hists->m_v_y->Fill(aPrimVtx->position().y());     
-	if (!isnan(double(aPrimVtx->position().z())))
-	  hists->m_v_z->Fill(aPrimVtx->position().z());     
+	if (!isnan(double(apvert.x())))
+	  hists->m_v_x->Fill(apvert.x());     
+	if (!isnan(double(apvert.y())))
+	  hists->m_v_y->Fill(apvert.y());     
+	if (!isnan(double(apvert.z())))
+	  hists->m_v_z->Fill(apvert.z());     
         hists->m_v_pchi2->Fill(aPrimVtx->chiSquared());
-        hists->m_v_r->Fill(aPrimVtx->position().x()*aPrimVtx->position().x() +
-		    aPrimVtx->position().y()*aPrimVtx->position().y());
+        hists->m_v_r->Fill(apvert.x()*apvert.x() +
+		    apvert.y()*apvert.y());
       }
     }
   }
@@ -1598,14 +1619,14 @@ void StEventQAMaker::MakeHistVertex() {
 
       if (!(isnan(double(v0->position().x())) ||
             isnan(double(v0->position().y())))) {
-        Float_t phi = atan2(v0->position().y() - primVtx->position().y(),
-	                    v0->position().x() - primVtx->position().x())
+        Float_t phi = atan2(v0->position().y() - pvert.y(),
+	                    v0->position().x() - pvert.x())
                        * 180./M_PI;
         if (phi<0.) phi += 360.;
         hists->m_vtx_phi_dist->Fill(phi);
-	hists->m_vtx_z_dist->Fill(v0->position().z() - primVtx->position().z());
-	Float_t r_dist = ::sqrt(::pow(v0->position().x()-primVtx->position().x(),2)+
-			      ::pow(v0->position().y()-primVtx->position().y(),2));
+	hists->m_vtx_z_dist->Fill(v0->position().z() - pvert.z());
+	Float_t r_dist = ::sqrt(::pow(v0->position().x()-pvert.x(),2)+
+			      ::pow(v0->position().y()-pvert.y(),2));
 	hists->m_vtx_r_dist->Fill(r_dist);
 	//        v0PhiHist.Fill(phi);
 	//        if (phi<180.) phi += 360.;
@@ -2107,8 +2128,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.59 2004/03/25 21:11:10 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.60 2004/04/23 23:15:29 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.60  2004/04/23 23:15:29  genevb
+// Added signedDCA (Impact) plots for globals
+//
 // Revision 2.59  2004/03/25 21:11:10  genevb
 // Fixed filling of eventClass=1 null vertex hist (generally minbias)
 //
