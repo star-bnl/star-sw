@@ -15,7 +15,6 @@
 *     filter out large chisqs -------> stkpar.chi_filter=1
 *     mark used space points --------> stkpar.spt_mark=1
 *     remove redundent short tracks -> stkpar.long_tracks=1 
-*     do not fill globtrk table -----> stkpar.globfil=0 
 *-------------------------------------------------------------------------
 
 
@@ -49,10 +48,6 @@ tdm/table/cell/putvalue 'stk_stkpar[0].direct' 1
 * nlayers = 4 four layer svt
 tdm/table/cell/putvalue 'stk_stkpar[0].nlayers' 3
 
-* globfil = 0 do not fill globtrk table by-passing evr module 
-* globfil = 1 fill globtrk table with perfect tracks by-passing evr module 
-* globfil = 2 fill globtrk table with real tracks by-passing evr module 
-tdm/table/cell/putvalue 'stk_stkpar[0].globfil' 0
 
 * normalization factor for chi: chi --> chi/[norm(1)+norm(2)*exp(norm(3)*pt)]
 * The idea here is to take the transverse

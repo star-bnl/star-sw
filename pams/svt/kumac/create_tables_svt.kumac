@@ -37,7 +37,6 @@ macro stk
   tdm/newtable stk_kine stk_kine 6000
   tdm/newtable stk_mctrack stk_track 6000
   tdm/newtable stk_mckine stk_kine 6000
-  tdm/newtable /dui/data/global/tracks/globtrk egr_globtrk 10000
 
   *-------------------------------------------------------------------------
   *  This section creates and initializes the vtx_direct table
