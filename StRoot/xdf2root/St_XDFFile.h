@@ -1,6 +1,10 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.12 1998/10/01 17:09:51 fine Exp $
+// $Id: St_XDFFile.h,v 1.13 1998/10/05 21:21:23 fine Exp $
 // $Log: St_XDFFile.h,v $
+// Revision 1.13  1998/10/05 21:21:23  fine
+// #include <errno.h>
+// fErrorCode data-member has been activated
+//
 // Revision 1.12  1998/10/01 17:09:51  fine
 // St_XDFFile::GetName() method has been introduced
 //
@@ -57,6 +61,7 @@ class St_XDFFile
     St_XDFFile();                                          // Default ctor
     St_XDFFile(const Char_t *filename,const Char_t *mode="r");      // Create object and open file
     virtual ~St_XDFFile();
+    virtual Int_t       CloseXDF();                                 // close the XDF file (it is called from dtor)
             Int_t       GetErrorCode(){ return fErrorCode;}
     virtual const Char_t *GetName(){ return fName;}
     virtual Int_t       OpenXDF(const Char_t *filename,const Char_t *mode="r"); // Open file and read create the "root" St_DataSet (it is called from ctor)
@@ -66,7 +71,6 @@ class St_XDFFile
     virtual Int_t       OpenXDF(Int_t descriptor,const Char_t *mode="r");      // Create object and open file
     virtual St_DataSet *NextEventGet();                             // create St_DataSet and read the next event in it.
     virtual Int_t       NextEventPut(St_DataSet *dataset);          // create DS_DATASET_T from St_DataSet and write it out in XDR format
-    virtual Int_t       CloseXDF();                                 // close the XDF file (it is called from dtor)
     static  void        GetXdFile(const Char_t *filename, St_DataSet *dataset); // open, read and close file file
     static  St_DataSet *GetXdFile(const Char_t *filename);          // open, read and close file file
     ClassDef(St_XDFFile,0)

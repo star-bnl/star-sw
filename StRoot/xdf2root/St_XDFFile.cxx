@@ -1,6 +1,10 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.16 1998/09/21 23:50:47 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.17 1998/10/05 21:21:22 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.17  1998/10/05 21:21:22  fine
+// #include <errno.h>
+// fErrorCode data-member has been activated
+//
 // Revision 1.16  1998/09/21 23:50:47  fine
 // Some cosmetic improvements
 //
@@ -41,6 +45,8 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <stdlib.h>
+#include <errno.h>
+
 #include "table_header.h"
 #include "dsxdr.h"
 #include "TROOT.h"
@@ -61,6 +67,7 @@ St_XDFFile::St_XDFFile(){
   fFile   = 0;
   fDataSet= 0;
   fSocket = 0;
+  fErrorCode=0;
 }
 
 //______________________________________________________________________________
@@ -80,6 +87,7 @@ St_XDFFile::St_XDFFile(const Char_t *filename,const Char_t *mode)
   fFile   = 0;
   fDataSet= 0;
   fSocket = 0;
+  fErrorCode=0;
   if (filename && strlen(filename)) {
      fStream = (XDR*) malloc(sizeof(XDR));
      OpenXDF(filename,mode);
@@ -178,9 +186,11 @@ Int_t St_XDFFile::OpenXDF(const Char_t *filename,const Char_t *mode)
   if (mode && mode[0] && mode[0]!=' ') strcpy(fType,mode);
   strcat(fType,"b");
 
+  fErrorCode=0;
   fFile = fopen(fName,fType);
   
   if(!fFile) {                    // open error 
+    fErrorCode=errno;
     Printf("xdf_open. Error, can not open file %s %s\n",fName,fType);
     return 2;
   }
