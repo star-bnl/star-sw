@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.4 2002/03/26 19:33:15 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.5 2002/03/27 00:50:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -31,12 +31,13 @@ class StL3AlgorithmInfo;
 class StuProbabilityPidAlgorithm;
 
 class StIOMaker;
+class StTreeMaker;
 
 /// strangeness group stuff
 class StStrangeEvMuDst;
 class StStrangeMuDstMaker;
 class StV0MuDst;
-class StV0Mc;
+class StV0Mc; 
 class StXiMuDst;
 class StXiMc;
 class StKinkMuDst;
@@ -54,10 +55,10 @@ class TClonesArray;
 enum ioMode {ioRead, ioWrite};
 enum ioNameMode {ioFix, ioAuto};
 
-class StMuDstMaker : public StMaker{
+class StMuDstMaker : public StMaker {
  public:
   StMuDstMaker(const char* name="MuDst");
-  StMuDstMaker(ioMode mode, ioNameMode nameMode, const char* dirName="./", const char* fileName="test.event.root", const char* filter=".", int maxfiles=10 );
+  StMuDstMaker(ioMode mode, ioNameMode nameMode, const char* dirName="./", const char* fileName="", const char* filter=".", int maxfiles=10 );
   ~StMuDstMaker();
   
   int Init();
@@ -74,7 +75,7 @@ class StMuDstMaker : public StMaker{
   TTree* tree();
 
   void setSplit(int=99);
-  void StMuDstMaker::setCompression(int comp=9);
+  void setCompression(int comp=9);
 
 private:
   StMuDst* mStMuDst;
@@ -82,6 +83,7 @@ private:
   StEvent* mStEvent;
   StStrangeMuDstMaker* mStStrangeMuDstMaker;
   StIOMaker* mIOMaker;
+  StTreeMaker* mTreeMaker;
 
   ioMode mIoMode;
   ioNameMode mIoNameMode;
@@ -116,21 +118,23 @@ private:
 
   //! protected:
   
-  string buildFileName(string dir, string fileName, string extention);
   void openWrite(string fileName);
   void write();
   void closeWrite();
 
+  void streamerOff();
   void makeChain(const char* dir, const char* filter, int maxFiles=10);
+
   void openRead();
   void read();
   void closeRead();
 
   void clear(TClonesArray* t, int& counter);
   void clear();
+
+  void createArrays();
   TClonesArray* clonesArray(TClonesArray* p, const char* type, int size, int& counter);
 
-  void streamerOff();
   void fill();
   void fillTrees(StEvent* ev, StMuCut* cut=0);
   void fillEvent(StEvent* ev, StMuCut* cut=0);
@@ -144,9 +148,6 @@ private:
   template <class T, class U> int addType(TClonesArray* tcaTo , U u, T t);
   void addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut, TClonesArray* gTCA=0, TClonesArray* pTCA=0, TClonesArray* oTCA=0, bool l3=false);
   int addTrack(TClonesArray* tca, const StEvent* event, const StTrack* track, StMuCut* cut, int index2Global, bool l3=false);
-/*   int addRichSpectra(const StRichSpectra* rich); */
-/*   int addDetectorState(const StDetectorState* states); */
-/*   int addL3AlgorithmInfo(TClonesArray* tca, StL3AlgorithmInfo* alg); */
 
   StRichSpectra* richSpectra(const StTrack* track);
 
@@ -167,6 +168,8 @@ private:
   void setReadKinks(bool);
 
   string basename(string);
+  string dirname(string);
+  string buildFileName(string dir, string fileName, string extention);
  
   friend class StMuDst;
 
@@ -206,6 +209,9 @@ inline void StMuDstMaker::setCompression(int comp) { mCompression = comp;}
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.5  2002/03/27 00:50:11  laue
+ * bux fix from earlier check in
+ *
  * Revision 1.4  2002/03/26 19:33:15  laue
  * minor updates
  *
