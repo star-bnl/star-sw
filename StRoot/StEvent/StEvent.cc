@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cc,v 1.12 1999/03/09 22:31:18 wenaus Exp $
+ * $Id: StEvent.cc,v 1.13 1999/03/23 21:58:03 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.cc,v $
- * Revision 1.12  1999/03/09 22:31:18  wenaus
- * new Sun hack needed even though C++ 4.2 is supposed to be same as before
+ * Revision 1.13  1999/03/23 21:58:03  ullrich
+ * StGlobalTrack header file added.
  *
  * Revision 1.12  1999/03/09 22:31:18  wenaus
  * new Sun hack needed even though C++ 4.2 is supposed to be same as before
@@ -52,13 +52,14 @@
  *
  **************************************************************************/
 #include "StEvent/StEvent.hh"
+#include "StEvent/StGlobalTrack.hh"
 #include "StThreeVector.hh"
 #include <string>
-#if !defined(ST_NO_NAMESPACES)
+#if !defined(ST_NO_NAMESPACES) 
 using namespace std;
 #endif
 
-static const char rcsid[] = "$Id: StEvent.cc,v 1.12 1999/03/09 22:31:18 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.13 1999/03/23 21:58:03 ullrich Exp $";
 
 StEvent::StEvent()
 {
