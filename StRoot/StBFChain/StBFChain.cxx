@@ -69,7 +69,7 @@ BfcItem BFC[] = {
   {"FieldOff"    ,""  ,"","NoFieldSet"                       ,"StMagFC","StMagF" ,"No Field option",kFALSE},
   {"HalfField"   ,""  ,"","NoFieldSet"                      ,"StMagFC","StMagF","Half Field option",kFALSE},
   {"ReverseField",""  ,"","NoFieldSet"                   ,"StMagFC","StMagF","Reverse Field option",kFALSE},
-  {"NoCintDb"    ,""  ,"",""                                            ,"","","Switch off Cint Db",kFALSE},
+  {"NoCintDb"    ,""  ,"",""                                   ,"","","Switch off standard Cint Db",kFALSE},
   {"NoCintCalDb" ,""  ,"",""                                      ,"","","Switch off Cint Calib Db",kFALSE},
   {"NoMySQLDb"   ,""  ,"",""                                           ,"","","Switch off MySQL Db",kFALSE},
   {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
@@ -297,11 +297,27 @@ Int_t StBFChain::Instantiate()
 	if (maker == "St_db_Maker"){
 	  St_db_Maker *mk = 0;
 	  if (Key.CompareTo("calib",TString::kIgnoreCase) == 0) {
-	    if (!calibMk) calibMk = new St_db_Maker(fBFC[i].Name,"$STAR_ROOT/calib","$PWD/calib");
+	    if (!calibMk) {
+	      if (!GetOption("NoCintCalDb"))
+		calibMk = new St_db_Maker(fBFC[i].Name,"$STAR_ROOT/calib","$PWD/calib");
+	      else
+		calibMk = new St_db_Maker(fBFC[i].Name,"$PWD/calib");
+	    }
 	    mk = calibMk;
 	  }
 	  if (Key.CompareTo("db",TString::kIgnoreCase) == 0) {
+	    if (!GetOption("NoMySQLDb") && !GetOption("NoCintDb"))
 	    dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
+	    else {
+	      if (GetOption("NoMySQLDb") && GetOption("NoCintDb"))
+		dbMk = new St_db_Maker(fBFC[i].Name,"$PWD/StarDb");
+	      else {
+		if (GetOption("NoMySQLDb")) 
+		    dbMk = new St_db_Maker(fBFC[i].Name,"$STAR/StarDb","$PWD/StarDb");
+		if (GetOption("NoCintDb"))
+		  dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$PWD/StarDb");
+	      }
+	    }
 	    mk = dbMk;
 	  }
 	  if (!mk) status = kStErr;
@@ -743,5 +759,5 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.113 2000/07/04 16:06:38 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.114 2000/07/13 00:50:06 fisyak Exp $
 //_____________________________________________________________________
