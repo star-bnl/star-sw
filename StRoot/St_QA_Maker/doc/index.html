@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>Current Available Macros</title>
-<!-- Changed by: Kathleen R. Turner,  5-Nov-1999 -->
+<!-- Changed by: Kathleen R. Turner, 29-Nov-1999 -->
 </head>
 <body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
 <basefont face="verdana,arial,helvetica,sans-serif">
@@ -59,7 +59,9 @@
       Methods in these classes -  <a href="#doc2"> Go </A> 
       <ul>
         <li> St_QA_Maker - description of methods -  <a href="#doc2a"> Go </A> 
-        <li> StHistUtil - description and details on usage of methods -  <a href="#doc2b"> Go </A> 
+        <li> StEventQAMaker - description of methods -  <a href="#doc2b"> Go </A> 
+        <li> StQABookHist - description of methods -  <a href="#doc2c"> Go </A> 
+        <li> StHistUtil - description and details on usage of methods -  <a href="#doc2d"> Go </A> 
       </ul>
    <li>
       Standard Maker Names in BFC -  <a href="#doc3"> Go </A> 
@@ -75,25 +77,37 @@
   
 <p>
 <a name="doc1">
-<font  size ="+1" color="blue"> The 3 classes in the St_QA_Maker directory are: <font  size ="+1" color="black"> 
+<font  size ="+1" color="blue"> The 4 classes in the St_QA_Maker directory are: <font  size ="+1" color="black"> 
     <ul>
       <li> <font  size ="+1" color="red"> St_QA_Maker <font  size ="+1" color="black"> 
              <ul>
                <li>
-                 books and fills histograms from tables which are on the DST 
+                 books (using StQABookHist methods) and contains filling methods for
+                  histograms from StEvent data structures
                <li>
-                 this is the main histogramming package for Quality Assurance of Offline production
+                 inherits from StQABookHist
               </ul>
+      <li> <font  size ="+1" color="red"> StEventQAMaker <font  size ="+1" color="black"> 
+             <ul>
+               <li>
+                 books (using StQABookHist methods) and contains filling methods for
+                  histograms from StEvent data structures
+                <li>
+                 inherits from StQABookHist
+             </ul>
        <li> <font  size ="+1" color="red"> StHistUtil <font  size ="+1" color="black">
               <ul>
                 <li> provides histogram utilities to find,list,print histograms 
                 <li> this class is NOT a Maker
-                <li> NOTE! Methods can be used by all Makers to find,list,print,draw histograms!
+                <li> NOTE! Methods in this class can be used by ANY Makers to find,list,print,draw histograms!
               </ul>
-      <li> <font  size ="+1" color="red"> St_QATestTables_Maker <font  size ="+1" color="black">
+      <li> <font  size ="+1" color="red"> StQABookHist <font  size ="+1" color="black">
               <ul>
-               <li> calculates some QA quantities 
-               <li> this Maker is an example and is not used at this point
+               <li> contains methods for booking histograms for St_QA_Maker & StEventQAMaker classes
+                    and also method (Init) to call booking methods
+               <li> contains method (Make) to call all filling methods
+               <li> inherits from St_Maker
+               <li> this is an abstract class 
               </ul>
     </ul>
   
@@ -105,27 +119,11 @@
 <a name="doc2a">
       <li><font  size ="+1" color="green">  St_QA_Maker - methods  <font  size ="+1" color="black"> 
          <ul>
-            <li> Init - runs the following methods to book histograms for each DST table:
-  <h4>
-  <pre>
-    BookHistEvSum();  - table event_summary
-    BookHistGlob();   - table globtrk
-    BookHistPrim();   - table dst_dedx
-    BookHistDE();     - table primtrk
-    BookHistGen();    - table particle
-    BookHistV0();     - table dst_v0_vertex
-    BookHistPID();    - table primtrk & dst_dedx
-    BookHistVertex(); - table dst_vertex
-    BookHistXi();     - table dst_xi_vertex
-    BookHistPoint();  - table point
-    BookHistKink();   - table kinkVertex
-    BookHistL3();     - table l3Track
-    BookHistV0Eval(); - table ev0_eval
-    BookHistRich();   - table g2t_rch_hit
-  </pre>
-  </h4>
-             <li>Make - runs the following methods to fill  histograms for each DST table:
+            <li> Init - runs the ::Init method from StQABookHist class
 
+             <li>Make - runs the ::Make method from StQABookHist class
+
+             <li> histogram filling methods:
   <h4>
   <pre>
     MakeHistEvSum();  - table event_summary
@@ -151,7 +149,44 @@
 
  <p>
  <p>
-<a name="doc2b">
+<a name="doc2c">
+      <li> <font  size ="+1" color="green"> StQABookHist - methods <font  size ="+1" color="black"> 
+
+         <ul>
+
+  <li> NameIt
+  <li> TitleIt
+  <li> QAH1F
+  <li> QAH2F
+
+  <li> Init - calls all histogram booking methods
+
+  <li> histogram booking methods:
+  <h4>
+  <pre>
+    BookHistEvSum();  - table event_summary
+    BookHistGlob();   - table globtrk
+    BookHistPrim();   - table dst_dedx
+    BookHistDE();     - table primtrk
+    BookHistGen();    - table particle
+    BookHistV0();     - table dst_v0_vertex
+    BookHistPID();    - table primtrk & dst_dedx
+    BookHistVertex(); - table dst_vertex
+    BookHistXi();     - table dst_xi_vertex
+    BookHistPoint();  - table point
+    BookHistKink();   - table kinkVertex
+    BookHistL3();     - table l3Track
+    BookHistV0Eval(); - table ev0_eval
+    BookHistRich();   - table g2t_rch_hit
+  </pre>
+   </h4>
+
+  <li> Make - calls all histogram filling methods MakeHist* from St_QA_Maker class (see above)
+
+         </ul>
+
+ <p>
+<a name="doc2d">
       <li> <font  size ="+1" color="green"> StHistUtil - methods <font  size ="+1" color="black"> 
 
          <ul>
@@ -292,7 +327,13 @@
     <li>  <font  size ="+1" color="red">bfcread_dst_QAhist.C <font  size ="+1" color="black"> <br>
           &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
           &nbsp   - creates chain and then runs the St_QA_Maker for Nevents <br>
-          &nbsp   -  lists,draws,prints histograms from QA-Maker   <br>                  
+          &nbsp   -  lists,draws,prints histograms from "QA"   <br>                  
+          &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists methods
+    <li>  <font  size ="+1" color="red">bfcread_dst_EventQAhist.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
+          &nbsp   - creates chain and then runs the StEventMaker and StEventQAMaker for Nevents <br>
+          &nbsp   -  lists,draws,prints histograms from "EventQA"   <br>                  
           &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
                  &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists methods
    </ul>
