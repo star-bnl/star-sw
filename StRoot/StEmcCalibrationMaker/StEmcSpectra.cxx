@@ -202,7 +202,7 @@ Bool_t StEmcSpectra::GetLogMeanAndRms(Int_t position,Float_t amin,Float_t amax,
     for(Int_t j=bin0;j<bin1;j++)
     {
       Float_t w = tmp->GetBinContent(j);
-			if(w==1) w=2;
+			if(w==1) w=1.5;
 		  if(w>0) w = log(w);
 		  Float_t x = tmp->GetBinCenter(j);
       mean += w*x;

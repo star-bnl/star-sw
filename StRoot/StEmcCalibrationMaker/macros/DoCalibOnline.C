@@ -23,11 +23,11 @@ Bool_t debug = kFALSE;
 TTimer time(delaytime);
 time.Stop();
 
-void Fake() 																			{ if(calib) calib->SetFakeRun(kTRUE);  if(smdPed) smdPed->SetFakeRun(kTRUE);}
-void Real() 																			{ if(calib) calib->SetFakeRun(kFALSE); if(smdPed) smdPed->SetFakeRun(kFALSE);}
-void SetField(float field)  											{ if(emcIo) emcIo->setField(field);}
-void Start(int miliseconds = 1) 									{ time.Start(miliseconds,kFALSE); delaytime = miliseconds; ntries=0; }
-void Stop() 																			{ time.Stop(); }
+void Fake() 																			{ cout <<"Set Fake Mode\n"; if(calib) calib->SetFakeRun(kTRUE);  if(smdPed) smdPed->SetFakeRun(kTRUE);}
+void Real() 																			{ cout <<"Set Real Mode\n"; if(calib) calib->SetFakeRun(kFALSE); if(smdPed) smdPed->SetFakeRun(kFALSE);}
+void SetField(float field)  											{ cout <<"Field Set to "<<field<<" Tesla\n"; if(emcIo) emcIo->setField(field);}
+void Start(int miliseconds = 1) 									{ cout <<"Calibration started\n"; time.Start(miliseconds,kFALSE); delaytime = miliseconds; ntries=0; }
+void Stop() 																			{ cout <<"Calibration stopped\n";time.Stop(); }
 void NextEvent()  																{ int istat = ProcessEvent(); time.Start(delay,kFALSE); }
 void ProcessNewFile(char* file,char* dir = "/evp"){ realOnline = kFALSE; if(emcIo) { emcIo->createEvPool(file,dir); Start(delaytime); } }
 void SetDebug(Bool_t d)                           { debug = d; }
@@ -118,23 +118,18 @@ void Reset(char* file = "", char* dir = "/evp", Int_t nevents = 0)
     calib->SetEtaBinSize(2);         
 		
 		calib->SetDir("~/EmcOnline/Calibration/");
+    calib->SetSavePedToDB(kTRUE);
+    calib->SetSaveCalibToDB(kFALSE);
     
     // options for SMD pedestal calculator
     if(smdPed)
     {
       smdPed->SetPedInterval(12); //in hours
       smdPed->SetMinEvents(5000);
-    }
-    // options fto save information on OFFLINE DATABASE
-    
-    calib->SetSavePedToDB(kTRUE);
-    calib->SetSaveCalibToDB(kFALSE);
-    
-    if(smdPed) 
-    {
       smdPed->SetSavePedToDB(kTRUE);
       smdPed->SetFakeRun(isFake);
     }
+        
     // initializing chain
     Int_t initStat = chain->Init(); 
     if (initStat) chain->Fatal(initStat, "during Init()");
@@ -258,6 +253,17 @@ void DoCalibOnline(char* file = "", char* dir = "/evp", Int_t nevents = 0)
     
 ///////////////////////////////////////////////////////////////
     MaxEvents = nevents;
+		
+		if(realOnline)
+		{
+			cout <<"\n\n***********************************************************\n";
+			cout <<"***********************************************************\n";
+			cout <<"***********************************************************\n";
+			cout <<"Enter Magnetic field (Tesla) \n(0.5 is full field, -0.5 is reversed full field) -> ";
+			float bf;
+			cin >> bf;
+			SetField(bf);
+		}
     
     time.SetCommand("NextEvent()");
     time.Start(delaytime,kFALSE);
