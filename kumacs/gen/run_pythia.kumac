@@ -111,7 +111,7 @@ f/call py_init(4)
 shell rm fort.4
 * -------------------------------------------------------------------------
 * -------------------------------------------------------------------------
- cd /dui/evgen
+ cd /dui/event/evgen
  tdm/newtable particle particle 4000
  
  exec write_table_to_file#init pyfile [file]
@@ -124,9 +124,9 @@ shell rm fort.4
    exec run_pyth#run
    if [i]=1 then
     call pylist(2)
-    tdm/table/print /dui/evgen/particle
+    tdm/table/print /dui/event/evgen/particle
    endif
-   exec write_table_to_file#write pyfile /dui/evgen
+   exec write_table_to_file#write pyfile /dui/event/evgen
  enddo
  
  

@@ -47,9 +47,9 @@ DO i=1,[Nevents]
   message ' processing event ' [i]
   exec run_mev#run
   if [i].eq.1 then
-    table/print  /dui/evgen/particle
+    table/print  /dui/event/evgen/particle
   endif
-  exec write_table_to_file#write ofile /dui/evgen
+  exec write_table_to_file#write ofile /dui/event/evgen
 ENDDO
  
  
@@ -59,7 +59,7 @@ ENDDO
 
  return
  
-* ***********************************************************
+***********************************************************
 
 
 
