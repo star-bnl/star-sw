@@ -17,6 +17,9 @@ class St_svg_geom;
 class St_srs_activea;
 class St_srs_srspar;
 class St_srs_direct;
+class StSvtConfig;
+class StSvtCoordinateTransform;
+class TString;
 
 class St_srs_Maker : public StMaker {
  private:
@@ -26,6 +29,9 @@ class St_srs_Maker : public StMaker {
                St_srs_activea *m_srs_activea; //!
                St_srs_srspar  *m_srs_srspar; //!
                St_srs_direct  *m_srs_direct; //!
+	       StSvtConfig    *mConfig;      //!
+	       StSvtCoordinateTransform *mCoordTransform; //!
+	       TString        mConfigString;
  protected:
 	       TH2F     *m_x_vs_y;  //! x vs y of Si points
                TH2F     *m_waf_no1;  //! ladder no vs z of Si hit
@@ -40,10 +46,12 @@ class St_srs_Maker : public StMaker {
    virtual       ~St_srs_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
+   Int_t          setConfig(StSvtConfig* config);
+   Int_t          setConfig(const char* config);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_srs_Maker.h,v 1.7 1999/08/08 19:47:42 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_srs_Maker.h,v 1.8 2001/04/20 14:36:22 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(St_srs_Maker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(St_srs_Maker, 1)   // chain virtual base class for Makers
 };
 
 #endif
