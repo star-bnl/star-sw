@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.11 1999/12/10 22:28:19 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.12 1999/12/12 17:17:24 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.12  1999/12/12 17:17:24  kathy
+// fixed limits on ftpc  histograms
+//
 // Revision 1.11  1999/12/10 22:28:19  kathy
 // fix limits of evsum histogram
 //
@@ -601,9 +604,9 @@ void StQABookHist::BookHistGlob(){
   m_glb_zfFW     = QAH1F("QaGtrkZfFW",      "globtrk: z of first hit on trk, ftpc west", 50,-300.,300.);
   m_glb_radfFE   = QAH1F("QaGtrkRFE",       "globtrk: radial position of first hit, ftpc east", 40,0.,40.);
   m_glb_radfFW   = QAH1F("QaGtrkRFW",       "globtrk: radial position of first hit, ftpc west", 40,0.,40.);
-  m_lengthFE     = QAH1F("QaGtrkLengthFE",  "globtrk: track length, ftpc east", 30,0.,30.);
-  m_lengthFW     = QAH1F("QaGtrkLengthFW",  "globtrk: track length, ftpc west", 30,0.,30.);
-  m_psiFE        = QAH1F("QaGtrkPsiFE",     "globtrk: psi, ftpc east", 36, -360.,0.);
+  m_lengthFE     = QAH1F("QaGtrkLengthFE",  "globtrk: track length, ftpc east", 60,0.,120.);
+  m_lengthFW     = QAH1F("QaGtrkLengthFW",  "globtrk: track length, ftpc west", 60,0.,120.);
+  m_psiFE        = QAH1F("QaGtrkPsiFE",     "globtrk: psi, ftpc east", 36, 0.,360.);
   m_psiFW        = QAH1F("QaGtrkPsiFW",     "globtrk: psi, ftpc west", 36, 0.,360.);
   m_tanlFE       = QAH1F("QaGtrkTanlFE",    "globtrk: tanl, ftpc east",30,-60.,60.);
   m_tanlFW       = QAH1F("QaGtrkTanlFW",    "globtrk: tanl, ftpc west",30,-60.,60.);
@@ -615,8 +618,8 @@ void StQABookHist::BookHistGlob(){
   m_pTFW         = QAH1F("QaGtrkPtFW",      "globtrk: pT, ftpc west",50,0.,5.);
   m_momFE        = QAH1F("QaGtrkPFE",       "globtrk: momentum, ftpc east ",50,0.,5.);
   m_momFW        = QAH1F("QaGtrkPFW",       "globtrk: momentum, ftpc west ",50,0.,5.);
-  m_chisq0FE     = QAH1F("QaGtrkChisq0FE",  "globtrk: chisq0 - xy, ftpc east", 50, 0.,500.);
-  m_chisq0FW     = QAH1F("QaGtrkChisq0FW",  "globtrk: chisq0 - xy, ftpc west", 50, 0.,500.);
+  m_chisq0FE     = QAH1F("QaGtrkChisq0FE",  "globtrk: chisq0 - xy, ftpc east", 50, 0.,5000.);
+  m_chisq0FW     = QAH1F("QaGtrkChisq0FW",  "globtrk: chisq0 - xy, ftpc west", 50, 0.,5000.);
   m_chisq1FE     = QAH1F("QaGtrkChisq1FE",  "globtrk: chisq1 - z, ftpc east", 50, 0.,500.);
   m_chisq1FW     = QAH1F("QaGtrkChisq1FW",  "globtrk: chisq1 - z, ftpc west", 50, 0.,500.);
 
