@@ -86,7 +86,7 @@ if (/^i386_/) {
     $FC       = "g77";
     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
 #    $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66  -Wl,--whole-archive -lg2c -Wl,--no-whole-archive";
-    $FFLAGS   = "-w %DEBUG -fno-second-underscore";
+    $FFLAGS   = "-w %DEBUG -fno-second-underscore -fno-automatic";
     $FCCOM    = "%FC -E -P %CPPFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %< %Fout%>.g &&"; 
     $FCCOM   .= "%GEANT3 -v 1 -i %>.g %Fout%>.f &&"; 
     $FCCOM   .= "%FC %FFLAGS -c %>.f %Fout%>";
