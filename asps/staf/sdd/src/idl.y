@@ -91,7 +91,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.21 1999/10/12 23:37:50 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.22 1999/10/18 14:53:10 fisyak Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -864,7 +864,7 @@ ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
   FF"};\n");
   FF"\n");
   FF"\n");
-  FF"EXTERN St_%s &%s; \n",sifn,sifn);
+  FF"R__EXTERN St_%s &%s; \n",sifn,sifn);
   FF"\n");
   FF"#endif\n");
 
