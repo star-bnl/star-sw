@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.55  1999/01/20 02:16:47  fisyak
+#  Active STAR_HOST_SYS for egcs
+#
 #  Revision 1.54  1999/01/14 13:56:39  fisyak
 #  Add Victors MakeFun.mk, Add StMagF
 #
@@ -140,7 +143,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/01/14 13:56:39 $ 
+#             Last modification $Date: 1999/01/20 02:16:47 $ 
 #. default setings
 
 MAKE  := gmake
@@ -379,8 +382,10 @@ else
 #   	EGCS compiler
 
 #  EGCS := /afs/rhic/asis/i386_linux2/usr.local/egcs
-   CC  := /usr/local/egcs/bin/gcc 
-   CXX := /usr/local/egcs/bin/g++ 
+#   CC  := /usr/local/egcs/bin/gcc 
+#   CXX := /usr/local/egcs/bin/g++ 
+  CC  := /opt/star/egcs/bin/gcc 
+  CXX := /opt/star/egcs/bin/g++ 
 
   MOTIF :=
   LINUX :=YESS
@@ -398,9 +403,10 @@ else
   EXEFLAGS := $(DEBUG) -Wl,-Bdynamic    
   SOFLAGS  := $(DEBUG) -shared  
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lpgc -lm -ldl -rdynamic
-  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic
+  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/local/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic
 ##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
-  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -lg2c
+  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A 
+  FLIBS    += -L/opt/rhic/lib/gcc-lib/i686-pc-linux-gnu/2.8.1 -lg2c
   FFLAGS   := -DPGI  $(DEBUG)
   FEXTEND  := -Mextend
   YACC     := bison -y
@@ -410,7 +416,7 @@ else
 endif
 endif
 
-ifneq (,$(findstring $(STAR_SYS),i386_redhat51))
+ifneq (,$(findstring $(STAR_SYS),i386_redhat51 i386_redhat52))
 #    case linux but gcc is EGCS
 #  ====================
   LINUX :=YESS
@@ -617,7 +623,7 @@ ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   FFLAGS   :=  $(DEBUG)  -KPIC -w 
   FEXTEND  :=  -e
   CFLAGS   :=  $(DEBUG)  -KPIC 
-  CXXFLAGS :=  $(DEBUG)  -KPIC 
+  CXXFLAGS :=  $(DEBUG)  -KPIC -features=castop +w
   LDFLAGS  :=  $(DEBUG)  -Bstatic 
   EXEFLAGS :=  $(DEBUG)  -z muldefs -Bdynamic -t 
   SOFLAGS  :=  $(DEBUG) -G
@@ -649,6 +655,26 @@ endif
 
 CPPFLAGS := $(filter-out HP-UX,$(CPPFLAGS) $(OSFID))
 CPPFLAGS := $(sort $(addprefix -D,$(CPPFLAGS)))
+
+# add root working directory to include path
+CWD := $(shell $(PWD))
+ifndef INPDIR
+  override INPDIR := $(CWD)
+endif
+ifeq (,$(strip $(filter /%,$(INPDIR))))
+  override INPDIR := $(CWD)/$(INPDIR)
+endif
+#	ROOT DIR (Not a Rene ROOT)
+PAMS    := $(findstring /pams,$(INPDIR))
+ifndef PAMS
+  PAMS    := $(findstring /StRoot,$(INPDIR))
+endif
+ifndef PAMS
+  PAMS    := $(findstring /.share,$(INPDIR))
+endif
+ROOTDIR:= $(word 1,$(subst $(PAMS), ,$(INPDIR)))
+CPPFLAGS += -I$(ROOTDIR)
+
 # for Objy
 ifdef OBJY_HOME
 OBJY_HOME := $(subst /.,,$(wildcard $(OBJY_HOME)/.))

@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.74 1998/12/29 20:06:56 didenko Exp $
+# $Id: MakePam.mk,v 1.75 1999/01/20 02:16:51 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.75  1999/01/20 02:16:51  fisyak
+# Active STAR_HOST_SYS for egcs
+#
 # Revision 1.74  1998/12/29 20:06:56  didenko
 # take back .didl
 #
@@ -155,6 +158,7 @@ ifeq (,$(findstring $(LEVEL),0 1))
       DEP_DIR := $(SYS_DIR)/DEP/$(DOMAIN)
       OBJ_DIR := $(SYS_DIR)/OBJ/$(DOMAIN)
     endif
+    export LIB_DIR	#especially for .rootrc
     DIR_GEN := $(OUT_DIR)/.share
     GEN_TMP := $(DIR_GEN)/tmp
     GEN_TAB := $(DIR_GEN)/tables
@@ -403,11 +407,10 @@ ifndef NOROOT
 $(GEN_TAB)/.rootrc:
 	@echo '# ROOT Environment settings are handled via the class TEnv. To see' > $(ALL_TAGS)
 	@echo '# which values are active do: gEnv->Print(). '>>  $(ALL_TAGS)
- 
 	@echo '# Path used by dynamic loader to find shared libraries and macros '>>  $(ALL_TAGS)
 	@echo '# Paths are different for Unix and Windows. The example shows the defaults'>>  $(ALL_TAGS)
 	@echo '# for all ROOT applications for either Unix or Windows.'>>  $(ALL_TAGS)
-	@echo 'Unix.*.Root.DynamicPath:    .:.$$(STAR_SYS)/lib:$$(STAR)/lib:$$(STAF_LIB)'>>  $(ALL_TAGS)
+	@echo 'Unix.*.Root.DynamicPath:    .:$$(LIB_DIR):.$$(STAR_HOST_SYS)/lib:$$(STAR_LIB):$$(STAF_LIB)'>>  $(ALL_TAGS)
 	@echo 'Unix.*.Root.MacroPath:      .:./StRoot/macros:$$(STAR)/StRoot/macros:$$(STAR)/StRoot/test:$$(STAR)/.share/tables:$$(ROOTSYS)/macros'>>  $(ALL_TAGS)
 	@echo 'WinNT.*.Root.DynamicPath:   ./;$$(ROOTSYS)/star/bin;$(AFS_RHIC)/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS);$$(ROOTSYS)/bin;$$(PATH)'>>  $(ALL_TAGS)
 	@echo 'WinNT.*.Root.MacroPath:     ./;$$(home)/root/macros;$$(ROOTSYS)/tutorials;$$(ROOTSYS)/star/macros;$(AFS_RHIC)/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS)/macros'>>  $(ALL_TAGS)
@@ -646,7 +649,7 @@ test_files:
 #	@echo "OBJS     =" $(OBJS)
 test_mk:
 	@echo "STAR_HOST_SYS= "$(STAR_HOST_SYS)" ; OPSYS = "$(OPSYS)
-	@echo "HOST      =" $(HOST)"  ; STAR_SYS = "$(STAR_SYS)
+	@echo "HOST      =" $(HOST)"  ; STAR_HOST_SYS = "$(STAR_HOST_SYS)
 	@echo MAKE      = $(MAKE)  
 	@echo VPATH     = $(VPATH) 
 	@echo SHELL     = $(SHELL) 

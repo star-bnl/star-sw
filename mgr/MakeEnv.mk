@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.7 1998/12/02 20:41:59 perev Exp $
+# $Id: MakeEnv.mk,v 1.8 1999/01/20 02:16:49 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.8  1999/01/20 02:16:49  fisyak
+# Active STAR_HOST_SYS for egcs
+#
 # Revision 1.7  1998/12/02 20:41:59  perev
 # cleanup
 #
@@ -99,7 +102,7 @@ endif
 # Determine STAF_ARCH variable.
 #
 ifdef STAR_SYS
-  STAF_ARCH := $(STAR_SYS)
+  STAF_ARCH := $(STAR_HOST_SYS)
 else
 ifndef NT
   STAF_ARCH := $(shell $(SYS))

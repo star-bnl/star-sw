@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.42  1999/01/20 02:16:52  fisyak
+#  Active STAR_HOST_SYS for egcs
+#
 #  Revision 1.41  1999/01/14 13:56:41  fisyak
 #  Add Victors MakeFun.mk, Add StMagF
 #
@@ -202,7 +205,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/01/14 13:56:41 $ 
+#           Last modification $Date: 1999/01/20 02:16:52 $ 
 #  default setings
 # Current Working Directory
 #
@@ -384,24 +387,26 @@ all:  $(BASE) $(XDF2ROOT)  $(TARGETS) $(StRoot)
 ifndef NOROOT
 ROOT:      St_base xdf2root St_Makers StChain St_Tables StDisplay
 St_base:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base     SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/St_base.$(So)
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base     SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_base.$(So)
 xdf2root:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/xdf2root.$(So) 
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/xdf2root.$(So) 
 StDisplay:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StDisplay SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/StDisplay.$(So) 
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StDisplay SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StDisplay.$(So) 
 St_Makers: $(Makers)
 StChain:   
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/StChain.$(So)
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain  SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StChain.$(So)
 St_Tables:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables   SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=YES
-ifneq ($(EMPTY),$(findstring $(STAR_LEVEL),dev))
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables   SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=YES
 StMagF: 
-	$(MAKE) -f $(MakeFun) fun=StMagF -C $(ROOT_DIR)/StRoot/StMagF   SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/StMagF.$(So)
+	$(MAKE) -f $(MakeFun) fun=StMagF -C $(ROOT_DIR)/StRoot/StMagF   SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StMagF.$(So)
+StRootEvent: 
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StRootEvent  SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StRootEvent.$(So)
+ifneq ($(EMPTY),$(findstring $(STAR_LEVEL),dev))
 St_TablesDoc: 
 	root.exe -b -q MakeHtmlTables.cxx
 endif
 St%Maker: 
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St$(STEM)Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/St$(STEM)Maker.$(So)
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St$(STEM)Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St$(STEM)Maker.$(So)
 endif
 %_all:  $(BASE)
 	$(MAKE)  -f $(Makeloop) -C $(STEM) $(MAKEFLG) 
