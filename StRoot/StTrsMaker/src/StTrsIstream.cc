@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIstream.cc,v 1.2 1999/10/12 00:07:25 calderon Exp $
+ * $Id: StTrsIstream.cc,v 1.3 1999/10/12 01:39:55 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsIstream.cc,v $
+ * Revision 1.3  1999/10/12 01:39:55  calderon
+ * The <algorithm> header wasn't missing, it
+ * was the STL distance() function in ObjectSpace
+ * that had a different call than in Linux and HP
+ * (as usual).  It only has the version that
+ * takes 3 arguments, not 2.
+ *
  * Revision 1.2  1999/10/12 00:07:25  calderon
  * Add missing <algorithm> include.
  *
@@ -24,7 +31,6 @@
  *
  **************************************************************************/
 #include <utility>
-#include <algorithm>
 #include "StTrsIstream.hh"
 #include "StTrsRawDataEvent.hh"
 #include "StTrsDigitalSector.hh"
@@ -141,9 +147,12 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
 		    while (rangeBegin!=inputData.end() && currentPos != digitalPadData.end()){
 			digitalTimeBins::iterator rangeEnd = find(rangeBegin,dataEnd,static_cast<unsigned char>(0));
 			copy(rangeBegin,rangeEnd,currentPos);
-			currentPos+=distance(rangeBegin,rangeEnd);
+			unsigned int dummy = 0;
+			distance(rangeBegin,rangeEnd,dummy);
+			currentPos+=dummy;
 			if (*rangeEnd == static_cast<unsigned char>(0)) {
-			    unsigned int index = distance(dataBegin, rangeEnd);
+			    unsigned int index = 0;
+			    distance(dataBegin, rangeEnd, index);
 			    *currentPos++ = static_cast<unsigned char>(0);
 			    digitalPadZeros[index] = *currentPos;
 			    currentPos++;
