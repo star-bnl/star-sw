@@ -76,7 +76,7 @@ C---- Initialize nok counter and variable arrays
       neta(3)=ems_control(1).bemc_eta_nbin
 
 C*- Load EMC energy to neutral energy
-      if(ems_control(1).bemc_on) then
+      if(ems_control(1).bemc_on.eq.1) then
          if(ems_hits_bemc_h.nok. ge. emc_energy_h.maxlen)then
             write(*,*) 'EMC_GRID:Need more memory:EMC_ENERGY'
             EMC_EGRID=STAFCV_BAD
@@ -103,7 +103,7 @@ C*- Load EMC energy to neutral energy
          enddo
       endif
 c*- and for Endcap
-      if(ems_control(1).eemc_on) then
+      if(ems_control(1).eemc_on.eq.1) then
          if(nout+ems_hits_eemc_h.nok .ge. emc_energy_h.maxlen)then
             write(*,*) 'EMC_GRID:Need more memory:EMC_ENERGY'
             EMC_EGRID=STAFCV_BAD
@@ -158,7 +158,7 @@ c*-Flag for track which go through
 c*-barrel=1, endcap=2, non=0
             i_flag=0  
 c*-Barrel
-            if(ems_control(1).bemc_on)then
+            if(ems_control(1).bemc_on.eq.1)then
                rval  = ems_control(1).bemc_inner_r
                zval  = ems_control(1).bemc_max_z
                call eut_extra_rad(p_input,zval,trkchar,ang_int,
@@ -170,7 +170,7 @@ c*-Barrel
                endif
             endif
 c*-Endcap
-            if(ems_control(1).eemc_on .and. i_flag.eq.0)then
+            if(ems_control(1).eemc_on.eq.1 .and. i_flag.eq.0)then
                rval1 = ems_control(1).eemc_inner_r
                rval2 = ems_control(1).eemc_outer_r
                sign  = pz/abs(pz)
