@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtClassImp.cxx,v 1.1 2000/05/24 21:13:37 laue Exp $
+ * $Id: StHbtClassImp.cxx,v 1.2 2000/05/25 20:53:32 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtClassImp.cxx,v $
+ * Revision 1.2  2000/05/25 20:53:32  laue
+ * StHbtBaseAnalysis added
+ *
  * Revision 1.1  2000/05/24 21:13:37  laue
  * Since new rootcint (2.24.04 and higher) each ClassDef has to have matched
  * ClassImp otherwise you will have missing Dictionary symbol in a shared
@@ -22,6 +25,7 @@
  *
  **************************************************************************/
 
+#include "StHbtMaker/Base/StHbtBaseAnalysis.h"
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #include "StHbtMaker/Base/StHbtPairCut.h"
 #include "StHbtMaker/Base/StHbtParticleCut.h"
@@ -30,6 +34,7 @@
 #include "StHbtMaker/Base/StHbtV0Cut.h"
 
 #ifdef __ROOT__
+  ClassImp(StHbtBaseAnalysis)
   ClassImp(StHbtEventCut)
   ClassImp(StHbtPairCut)
   ClassImp(StHbtParticleCut)
