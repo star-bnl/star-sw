@@ -275,7 +275,7 @@ St_DataSet *St_io_Maker::DataSet(const Char_t *set)
 
    if (!m_ListOfBranches) return 0;
    Int_t nevent = g_Chain->Event()-1;
-   cout << "DataSet:  " << nevent << " : " << m_OffSet << " : " << m_Entries << endl;
+//    cout << "DataSet:  " << nevent << " : " << m_OffSet << " : " << m_Entries << endl;
    if (  IsNewTree( nevent ) ) {
        DestroyBranchList();
        // Let's create it from the TTree if any
@@ -377,7 +377,7 @@ Int_t St_io_Maker::NextEventGet(Int_t nEvent)
   if (!tree)   return 0;
 #endif
   Int_t nevent = nEvent-1;
-  cout << "NextEventGet:  " << nevent << " : " << m_OffSet << " : " << m_Entries << endl;
+//  cout << "NextEventGet:  " << nevent << " : " << m_OffSet << " : " << m_Entries << endl;
 
   if (  IsNewTree( nevent ) ) DestroyBranchList();
 
@@ -470,7 +470,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.14 1999/03/07 16:38:07 fine Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.15 1999/03/08 17:21:28 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
@@ -512,38 +512,42 @@ TTree *St_io_Maker::SetNextTree()
   // Switches this maker to readin next TFile if any.
   if (m_ListOfFiles) 
   {
+    Bool_t treeFound = kFALSE;
     if (!m_FileIterator) m_FileIterator = new TIter(m_ListOfFiles);
-     TObjString *s = 0;
-     if (m_TreeRootFile) {
-       // destroy the list of the branches of this file if any
-       DestroyBranchList();
-       delete m_TreeRootFile;
-       m_TreeRootFile = 0;
-     }
-     m_Tree = 0; // This object is deleted by deleting the ROOT file above
-     while( (s = (TObjString *)m_FileIterator->Next()) && !m_TreeRootFile)
-     {
-//       Char_t *fileName = gSystem->ExpandPathName(s->String());
-       const Char_t *fileName = s->String();
-       cout << "Opening next root file :" << fileName << endl;
-       m_TreeRootFile = new TFile(fileName);
-       if (m_TreeRootFile->IsZombie()) { 
-            SafeDelete(m_TreeRootFile); 
-            cout << " BAD file: " << fileName << endl;
+    while (!treeFound) {
+      treeFound = kTRUE;
+      TObjString *s = 0;
+      if (m_TreeRootFile) {
+        // destroy the list of the branches of this file if any
+        DestroyBranchList();
+        delete m_TreeRootFile;
+        m_TreeRootFile = 0;
+      }
+      m_Tree = 0; // This object is deleted by deleting the ROOT file above
+      while( (s = (TObjString *)m_FileIterator->Next()) && !m_TreeRootFile)
+      {
+         const Char_t *fileName = s->String();
+         cout << "Opening next root file :" << fileName << endl;
+         m_TreeRootFile = new TFile(fileName);
+         if (m_TreeRootFile->IsZombie()) { 
+           SafeDelete(m_TreeRootFile); 
+           cout << " BAD file: " << fileName << endl;
+         }
        }
-//      if (fileName) delete [] fileName;
-     }
-     if (m_TreeRootFile) {
-       m_Tree =  (TTree *) m_TreeRootFile->Get("Output");
-       if (m_Tree) {
-         m_Tree->Print();
-         // Calclulate next and current offset
-         m_OffSet += TMath::Min(m_Entries,GetMaxEvent());
-//         m_Entries = m_Tree->GetEntries();
-         m_Entries = -1;         
-       }
-       else 
+       if (m_TreeRootFile) {
+         m_Tree =  (TTree *) m_TreeRootFile->Get("Output");
+         if (m_Tree) {
+            m_Tree->Print();
+            // Calclulate next and current offset
+            m_OffSet += TMath::Min(m_Entries,GetMaxEvent());
+            m_Entries = -1;         
+         }
+         else {
             cout << "there is no tree in this file " << endl;
+            // Try the next file if any
+            treeFound = kFALSE;
+         }
+       }
      }
      g_Chain->SetTree(m_Tree);
   }  
