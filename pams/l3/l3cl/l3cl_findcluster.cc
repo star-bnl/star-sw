@@ -20,11 +20,11 @@ extern "C" {
 
 /* globals */
 short row_sizes[45] = { 
-                        88,96,104,112,118,126,134,142,150,158,166,174,182,
-			98,100,102,104,106,106,108,110,112,112,114,116,
-			118,120,122,122,124,126,128,128,130,132,134,136,
-			138,138,140,142,144,144,144,144
-                      };
+       88,96,104,112,118,126,134,142,150,158,166,174,182,
+       98,100,102,104,106,106,108,110,112,112,114,116,
+       118,120,122,122,124,126,128,128,130,132,134,136,
+       138,138,140,142,144,144,144,144
+};
 
 
 
@@ -62,75 +62,75 @@ struct DATA_RAM *phys_data_ram;
 */
 void FindClusters()
 {
-	/* variables */
-	int            iPadRow, iPad;
-	PSequence      pSequence1, pSequence2, pSequence1End, pSequence2End;
-	PSequence      pSequence2Initial;
-	PClusterUCList pClusterUCTemp, pClusterUCNew, pClusterUCEnd;
-	PClusterUCList pLastInsert, pTempNow;
-	PClusterUCNode pSequenceListTracer;
+/* variables */
+   int            iPadRow, iPad;
+   PSequence      pSequence1, pSequence2, pSequence1End, pSequence2End;
+   PSequence      pSequence2Initial;
+   PClusterUCList pClusterUCTemp, pClusterUCNew, pClusterUCEnd, pClusterUCMax;
+   PClusterUCList pLastInsert, pTempNow;
+   PClusterUCNode pSequenceListTracer;
 
-	/* reset the 'found clusters' counter */
-	clusters = 0;
+/* reset the 'found clusters' counter */
+   clusters = 0;
  
-	/* loop over all padrows */
-	for (iPadRow = 0; iPadRow < NPADROWS; iPadRow++)
-	{
+/* loop over all padrows */
+   for (iPadRow = 0; iPadRow < NPADROWS; iPadRow++)
+   {
+ //printf("clusters: %d\n", clusters);
+/* initialize the end of cluster-under-construction list
+	at this point there are no clusters under construction, so the end is the beginning */
+      pClusterUCEnd = pClustersUnderConstruction;
+      pClusterUCMax = &(pClustersUnderConstruction[MAX_CLUSTERSUC]); 
 
-  //printf("clusters: %d\n", clusters);
-		/* initialize the end of cluster-under-construction list
-				at this point there are no clusters under construction, so the end is the beginning */
-		pClusterUCEnd = pClustersUnderConstruction;
-
-		/* initialize sequence pointers to the first and second pad in this padrow */
-		/* ds980414: major bug!
-		   // index to n_cluster had to be the total number of the pad */
-		pSequence1 = NewPad(padlist[iPadRow][iFirstPad[iPadRow]]);
-                /* pSequence1End = pSequence1 + *(n_cluster[iFirstPad[iPadRow]]); */
-		pSequence1End = pSequence1 + *(n_cluster[padlist[iPadRow][iFirstPad[iPadRow]]]);
-		pSequence2Initial = pSequence2 = NewPad(padlist[iPadRow][iFirstPad[iPadRow] + 1]);
-                /* pSequence2End = pSequence2 + *(n_cluster[iFirstPad[iPadRow] + 1]); */
-		pSequence2End = pSequence2 + *(n_cluster[padlist[iPadRow][iFirstPad[iPadRow] + 1]]);
+/* initialize sequence pointers to the first and second pad in this padrow */
+/* ds980414: major bug!
+// index to n_cluster had to be the total number of the pad */
+      pSequence1 = NewPad(padlist[iPadRow][iFirstPad[iPadRow]]);
+/* pSequence1End = pSequence1 + *(n_cluster[iFirstPad[iPadRow]]); */
+      pSequence1End = pSequence1 + *(n_cluster[padlist[iPadRow][iFirstPad[iPadRow]]]);
+      pSequence2Initial = pSequence2 = NewPad(padlist[iPadRow][iFirstPad[iPadRow] + 1]);
+/* pSequence2End = pSequence2 + *(n_cluster[iFirstPad[iPadRow] + 1]); */
+      pSequence2End = pSequence2 + *(n_cluster[padlist[iPadRow][iFirstPad[iPadRow] + 1]]);
   //printf("pSeq1-> %x, pSeq2-> %x\n", pSequence1, pSequence2 );
   //printf("seq1: %d -> %d; seq2: %d -> %d\n", pSequence1->Part.Begin, pSequence1->Part.End, pSequence2->Part.Begin, pSequence2->Part.End );
   //printf("iPadRow: %d, padlist[iPadRow][iFirstPad[iPadRow]]= %d\n", iPadRow, padlist[iPadRow][iFirstPad[iPadRow]] );
-		/* loop over all but the last pads in this padrow */
-		for (iPad = iFirstPad[iPadRow]; iPad < iLastPad[iPadRow]-1; iPad++)
-		{
-			/* loop over all hit-sequences in this pad */
-			/* to increase efficiency, we loop over all clusters in the cluster-under-construction-list
-			   and match them with sequences beginning at sequence 0
-			   setup a pointer to the beginning of the cluster under construction 'list' */
-			pClusterUCTemp = pClustersUnderConstruction;
-			/* here comes the place, where new clusters under construction are to be temporarily 
-				stored, before sorting them in ascending order */
-			pClusterUCNew = pClusterUCEnd;
-			/* the loop starts now */
-			for ( ; pClusterUCTemp < pClusterUCEnd; pClusterUCTemp++)
-			{
-				/* try to find a matching sequence (we compare end-of-sequence1-sequence with 
-						begin-of-cluster-under-construction-sequence) 
-						NOTE:
-							EVERY cluster under construction MUST have a match! 
-							so, we don't need to test the pSequence1 position */
-				while (pSequence1->Part.End < pClusterUCTemp->Sequence.Part.Begin)
-				{
-					/* did NOT match; this could be the start of a new cluster! */
-					/* start of a new cluster means: there is also a matching cluster in the
-						next pad. so, look into the next pad to find a match 
-						NOTE:
-							at this point need NOT be any matches. so, we must test pSequence2 position */
-					while ((pSequence2 < pSequence2End) && (pSequence2->Part.End < pSequence1->Part.Begin))
-						pSequence2++;
-					/* did we find a match? */
-					if ((pSequence2 < pSequence2End) && 
-						(pSequence2->Part.Begin < pSequence1->Part.End) &&
-						(pSequence2->Part.End > pSequence1->Part.Begin))
-					{
-						/* yes ! */
-						/* start a new cluster. that is: append the sequence-begin-end for both sequences (sequence1, sequence2)
-							at the tail of the cluster-under-construction-list (start/stop is for the last sequence(2)) */
-						pClusterUCNew->Sequence.Complete = pSequence2->Complete;
+/* loop over all but the last pads in this padrow */
+      for (iPad = iFirstPad[iPadRow]; iPad < iLastPad[iPadRow]-1; iPad++)
+      {
+/* loop over all hit-sequences in this pad */
+/* to increase efficiency, we loop over all clusters in the cluster-under-construction-list
+   and match them with sequences beginning at sequence 0
+   setup a pointer to the beginning of the cluster under construction 'list' */
+	    pClusterUCTemp = pClustersUnderConstruction;
+/* here comes the place, where new clusters under construction are to be temporarily 
+    stored, before sorting them in ascending order */
+	    pClusterUCNew = pClusterUCEnd;
+	/* the loop starts now */
+	    for ( ; pClusterUCTemp < pClusterUCEnd; pClusterUCTemp++)
+	    {
+/* try to find a matching sequence (we compare end-of-sequence1-sequence with 
+		begin-of-cluster-under-construction-sequence) 
+	NOTE:
+      	EVERY cluster under construction MUST have a match! 
+	      so, we don't need to test the pSequence1 position */
+               while (pSequence1->Part.End < pClusterUCTemp->Sequence.Part.Begin)
+               {
+/* did NOT match; this could be the start of a new cluster! */
+/* start of a new cluster means: there is also a matching cluster in the
+	next pad. so, look into the next pad to find a match 
+	NOTE:
+	at this point need NOT be any matches. so, we must test pSequence2 position */
+                  while ((pSequence2 < pSequence2End) && (pSequence2->Part.End < pSequence1->Part.Begin))
+                     pSequence2++;
+/* did we find a match? */
+                  if ((pSequence2 < pSequence2End) && 
+                      (pSequence2->Part.Begin < pSequence1->Part.End) &&
+                      (pSequence2->Part.End > pSequence1->Part.Begin))
+                  {
+/* yes ! */
+/* start a new cluster. that is: append the sequence-begin-end for both sequences (sequence1, sequence2)
+	at the tail of the cluster-under-construction-list (start/stop is for the last sequence(2)) */
+			pClusterUCNew->Sequence.Complete = pSequence2->Complete;
 						/* store padrow and startpad */
 						pClusterUCNew->PadRow = iPadRow;
 						pClusterUCNew->StartPad = iPad;
@@ -144,7 +144,12 @@ void FindClusters()
 						pClusterUCNew->pList->Sequence[pClusterUCNew->pList->Filling++].Complete = pSequence2->Complete;
 
 						/* increment cluster-under-construction pointer to next free location */
-						pClusterUCNew++;
+					pClusterUCNew++;
+                                        if ( pClusterUCNew >= pClusterUCMax ) {
+                                           printf ( " \n Maximum number of clusters under construction reached " ) ;
+                                           pClusterUCNew-- ;
+                                         }
+
 					}
 					/* increment sequence2; we have just used it! */
 					pSequence2++;
@@ -209,6 +214,10 @@ void FindClusters()
 					CalculateMoments(pClusterUCTemp);
 	  
 					clusters++;
+                                        if ( clusters >= MAXCLUSTERS ) {
+                                           printf ( " \n l3cl: Too many clusters " ) ;
+                                           clusters--;
+                                        }  
 	  
 					/* mark as unused */
 					pClusterUCTemp->Sequence.Complete = -1; 
@@ -265,6 +274,10 @@ void FindClusters()
 
 					/* increment cluster-under-construction pointer to next free location */
 					pClusterUCNew++;
+                              if ( pClusterUCNew >= pClusterUCMax ) {
+                                  printf ( " \n Maximum number of clusters under construction reached " ) ;
+                                  pClusterUCNew-- ;
+                              }
 				}
 				/* next sequence1 sequence */
 				/* increment sequence2; we have just used it */

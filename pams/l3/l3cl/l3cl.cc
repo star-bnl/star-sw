@@ -51,10 +51,11 @@ extern "C" long l3cl_(
   init_phys_map();
   init_pointers();
   init_table();
+  init_other();
 
 
   while( pad_pointer <= &(pad[(pad_h->nok)-1]) )  {
-      init_other() ;
+      reset_other() ;
       sector = pad_pointer->tpc_row /100 ;
 //
 //    If sector wanted get clusters
