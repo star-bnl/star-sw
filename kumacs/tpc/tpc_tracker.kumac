@@ -1,103 +1,12 @@
 *** editted 5/22/98 - Kathy Turner
 *                   - kumac now does tpc tracking only and
 *                     assumes you have tpc hits from simulation or 
-*                     from data as input!
+*                      from data as input!
+* editted May 27, 1998 - Kathy Turner
+*                      - has macros to do tracking only
+*                      - use run_tpc_tracker to run!
 ************************************************************************
 ************************************************************************
-
-macro tpc_tracker__
-          input_file= track.xdf _
-          num_events=1 _
-          tracker=tpt _
-          funit=21 _
-          nfile=mctrk.ntup _
-          nid=111 _
-          table=/dui/data/tpc/tracks/mctrk
-          
-
-*  
-* --> to run
-*    - change the inputs above as desired
-*    - run staf
-*    -   make tpc   
-*    -   exec tpc_tracker
-*         
-*
-*
-
-message ' *** Input file -->                   ' [input_file]
-message ' *** Num Events to process -->        ' [num_events]
-message ' *** tracker (set to tpt or tte) -->  ' [tracker]
-message ' *** ntup file unit -->               ' [funit]
-message ' *** output Ntuple filename  -->      ' [nfile]
-message ' *** Ntuple ID # -->                  ' [nid]
-message ' *** Table to write to ntup -->       ' [table]
- 
-* SETUP DIRECTORIES TO FIND KUMACS:
- 
- 
- DEFAULT = _
-./kumacs/util,_
-./kumacs/chain,_
-./pams/emc/kumac,_
-./pams/global/kumac,_
-./pams/svt/kumac,_
-./pams/tpc/kumac,_
-$STAR/kumacs/util,_
-$STAR/kumacs/chain,_
-$STAR/kumacs/tpc,_
-$STAR/pams/ctf/kumac,_
-$STAR/pams/emc/kumac,_
-$STAR/pams/ftpc/kumac,_
-$STAR/pams/gen/kumac,_
-$STAR/pams/global/kumac,_
-$STAR/pams/mwc/kumac,_
-$STAR/pams/svt/kumac,_
-$STAR/pams/tpc/kumac,_
-$STAR/pams/trg/kumac
- 
- def [DEFAULT]
- message 'Define default kumac search path as' def
- 
-  exec input_table_from_file#init indat [input_file]
-
-
-* init to write table from tpc fast sim to ntuple
-   exec write_table_to_ntuple#init_disk _
-       [funit] [nfile] [nid] [table]
-
-* read event and then process thru tpc fast sim
-  do i=1,[num_events]
-    message ' processing event ' [i]
-    exec read_table_from_file#read indat /dui/data/tpc
-      if STAF_STATUS(1).eq.0 goto ENDOFDATA
-    if [tracker]=tpt then
-      exec run_tracker_tpt [i] 
-    elseif [tracker]=tte then
-      exec run_tracker_tte [i] 
-    endif
-* write table from tpc fast sim to ntuple
-    if [num_events]=1 then
-      exec write_table_to_ntuple#write_event_disk [nid] [table]
-    endif
-  enddo
-
- 
-  ENDOFDATA:
-    if [i].lt.[num_events] then
-    message ' End of input file'
-  endif  
-
-* close ntuple
-  message ' close ntuple'
-  exec write_table_to_ntuple#close_disk [funit]
-
-* close input file
-  message ' close input file'
-  exec read_table_from_file#close indat
-
-return
-
 ************************************************************************
 ************************************************************************
 ************************************************************************
@@ -114,7 +23,8 @@ macro initialize
     exec create_tables_tpc_tracker#tpt
     exec create_tables_tpc_tracker#tte
 
-*   initialization for tpc tracker
+* initialization for tpc tracker
+    exec tcl_init#init
     exec tpt_init#init
     exec tid_init#init
     exec tte_init#init
@@ -124,7 +34,7 @@ macro initialize
 
 *------------------------------------------------------------------------
 
-macro tpt   nev
+macro process_event_tpt   nev
 
 
    message ' TPC tpt tracker: Processing Event # ' [nev]
@@ -133,7 +43,7 @@ macro tpt   nev
 * call tpt
   message ' calling tpt_run'
   exec tpt_run#run
-
+  mess ' finished tpt run'
 * call tde_new
   message ' calling tid_run'
   exec tid_run#run_tde_new
@@ -147,7 +57,7 @@ return
 
 *------------------------------------------------------------------------
 
-macro tte   nev
+macro process_event_tte   nev
 
    message ' TPC tte tracker: Processing Event # ' [nev]
 
