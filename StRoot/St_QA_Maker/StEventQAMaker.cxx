@@ -26,8 +26,8 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StarClassLibrary/StTimer.hh"
 #include "StMessMgr.h"
-#include "StEmcUtil/StEmcGeom.h"
-#include "StEmcUtil/StEmcMath.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/others/StEmcMath.h"
 #include "StarClassLibrary/BetheBloch.h"
 
 static StEmcGeom* emcGeom[4];
@@ -1907,8 +1907,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.39 2003/01/17 15:15:47 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.40 2003/01/23 04:08:22 jeromel Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.40  2003/01/23 04:08:22  jeromel
+// Include fixed
+//
 // Revision 2.39  2003/01/17 15:15:47  genevb
 // Add AllTriggers() function to ignore trigger words
 //
