@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.h,v 1.10 2003/09/10 19:47:18 perev Exp $
+// $Id: StFtpcTrackMaker.h,v 1.11 2004/03/22 16:02:04 oldi Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.11  2004/03/22 16:02:04  oldi
+// Moved destruction of the instance of StFtpcTrackingParams from Finish() to FinishRun().
+//
 // Revision 1.10  2003/09/10 19:47:18  perev
 // ansi corrs
 //
@@ -104,9 +107,10 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  InitRun(Int_t run);                               // Initialisation per run
    virtual Int_t  Init();                                           // Initialisation 
    virtual Int_t  Make();                                           // actual program
-           Int_t  Finish();                                         // final cleanup
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.10 2003/09/10 19:47:18 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   virtual Int_t  Finish();                                         // final cleanup
+   virtual Int_t  FinishRun(Int_t run);                             // cleanup after every run
+   virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.11 2004/03/22 16:02:04 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
 
