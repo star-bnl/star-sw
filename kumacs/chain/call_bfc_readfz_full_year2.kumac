@@ -13,7 +13,7 @@
    tpc_sector_last=1 _
    gstar_settings=' field_only' _
    domain=' geometry g2t ftpc tpc emc ctf mwc svt global ' _
-   chain=' fzin calin rg2t tpg svg tss tcl tcl_e srs ems ctf mwc fss fcl fpt fte tpt tid tte_e sgr spr drhd dehd svm egr evr ev0 ddedx dpnt desum dmsft drsum evout ' _
+   chain=' fzin calin rg2t tpg svg tss tcl tcl_e srs ems emc ctf mwc fss fcl fpt fte tpt tid tte_e sgr spr drhd dehd svm egr evr ev0 ddedx dpnt desum dmsft drsum evout ' _
    skip=0 _
    no_events=1 _
  input_data_file=/disk1/star/kathy/year2a_psc079_01_46evts.fza _
