@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.h,v 1.11 2001/02/02 22:07:47 pavlinov Exp $ 
+// $Id: St_ems_Maker.h,v 1.12 2001/03/13 00:04:51 akio Exp $ 
 // $Log: St_ems_Maker.h,v $
+// Revision 1.12  2001/03/13 00:04:51  akio
+// change due to StEmcGeom
+//
 // Revision 1.11  2001/02/02 22:07:47  pavlinov
 // added method for getting pointer to StEmcCollection directly
 //
@@ -64,7 +67,7 @@
 #include "TH2.h"
 #include "TH1.h"
 #include "emc_def.h"
-#include "St_emc_Maker/StEmcGeom.h"
+#include "StEmcGeom.h"
 #include "tables/St_emc_hits_Table.h"
 
 class St_ems_control;
@@ -96,7 +99,7 @@ public:
   void   setEEMC(Short_t key){mEEMC = key; if (Debug()) printmEEMC();}
   void   setHistControl(Short_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_ems_Maker.h,v 1.11 2001/02/02 22:07:47 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_ems_Maker.h,v 1.12 2001/03/13 00:04:51 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   StEmcCollection*      getEmcCollection() {return  mEmcCollection;} //! 02-feb-2001 for backward capability
 
 protected:
