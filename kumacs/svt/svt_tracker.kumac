@@ -25,7 +25,7 @@ macro process_event_stk
   macro/global/import *
     
          
- message ' !!! svt_tracker: vertex not found,  filled from MC ***'
+ message ' !!! svt_tracker stk: vertex not found,  filled from MC ***'
  
   cd [data]/global/vertices
   tdm/newtable stk_vtx stk_vtx 1
@@ -46,10 +46,10 @@ return
  
 * ***********************************************************
 
-macro process_event_sgr nev
+macro process_event_sgr 
  macro/global/import *
          
- message ' !!! svt_tracker: vertex not found,  filled from MC ***'
+ message ' !!! svt_tracker sgr: vertex not found,  filled from MC ***'
  
   cd [data]/global/vertices
   tdm/newtable stk_vtx stk_vtx 1
@@ -72,6 +72,9 @@ macro process_event_sgr nev
 return
  
 ********************************************************
+
+
+
 
 
 
