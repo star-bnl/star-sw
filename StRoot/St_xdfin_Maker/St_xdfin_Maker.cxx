@@ -13,20 +13,40 @@
 ClassImp(St_xdfin_Maker)
 
 //_____________________________________________________________________________
-St_xdfin_Maker::St_xdfin_Maker(const char *name, const char *inputFile):StMaker(name)
-{fFileName = inputFile;m_InitDone=0;}
+St_xdfin_Maker::St_xdfin_Maker(const char *name, const char *inputFile)
+:StIOInterFace(name)
+{
+  if (inputFile && inputFile[0]) SetFile(inputFile);
+  m_InitDone=0;
+}
 //_____________________________________________________________________________
 St_xdfin_Maker::~St_xdfin_Maker(){
 }
 //_____________________________________________________________________________
-Int_t St_xdfin_Maker::Init(){
-// Get run parameters from input file
-  
-  printf("*** St_xdfin_Maker::Init:  Open Input file %s ***\n",(const char*)fFileName);
-  fXdfin.OpenXDF(fFileName,"r");
-  Int_t res = kStOK;
-  while (! m_InitDone) res = St_xdfin_Maker::Make();
-  return res;
+Int_t St_xdfin_Maker::Init()
+{
+// 		Get run parameters from input file
+  return Open();  
+}
+//_____________________________________________________________________________
+Int_t St_xdfin_Maker::Open(const char*)
+{
+  if (m_InitDone) return 0;
+  int iret = 0;
+  m_InitDone=0;
+  printf("*** St_xdfin_Maker::Init:  Open Input file %s ***\n",GetFile());
+  iret = fXdfin.OpenXDF(GetFile(),"r");
+  if (iret) return iret;
+  while (!m_InitDone && !iret) iret = Make();
+  return iret;
+}
+//_____________________________________________________________________________
+void St_xdfin_Maker::Close(Option_t *)
+{
+  Clear();
+  m_ConstSet->Delete();
+  m_InitDone=0;
+  fXdfin.CloseXDF();
 }
 //_____________________________________________________________________________
 Int_t St_xdfin_Maker::Make(){
@@ -55,8 +75,14 @@ Int_t St_xdfin_Maker::Make(){
     mkdir = 0;
     CONST = kFALSE;
     if (!strcmp("dst",dsname)) {
-      if (!m_InitDone) {mkdir = "run";  CONST = kTRUE;}
-      else              mkdir = "event/data/global";
+      if (!m_InitDone) 
+      {
+        mkdir = "run";  CONST = kTRUE;
+      }else {
+        mkdir = "event/data/global"; 
+        SetOutput("dst",".data/event/data/global/dst");
+        SetOutput("DST",".data/event/data/global/dst");
+      }  
     }
     if (!strcmp("run",dsname)) 		{                     CONST = kTRUE;}
     if (!strcmp("Run",dsname)) 		{mkdir = "run/geant"; CONST = kTRUE;}
