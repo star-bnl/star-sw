@@ -45,6 +45,11 @@
 *                                     fpt - ftpc tracking
 *                                     fte - ftpc track evaluator
 *                                    
+* editted 8/24/98 K. Turner - put in changes from Lanny:
+*                               ==> chain name/module
+*                                   dpnt  - dst point filler
+*                                   desum - dst event summary - now works
+* 
 * editted 8/24/98 K. Turner - new/changed modules in chain
 *                               ==> chain name/module
 *                                     fpt_s - ftpc tracking - slow sim
@@ -70,6 +75,18 @@
 *                              global init kumacs
 *                             
 * editted 8/28/98 K. Turner - changed names of macros in init_dst
+* editted 8/31/98 K. Turner - changes:
+*                           ==> chain name/module
+*                           - added new module into chain:
+*                                     dehd - dst event header table (dummy)
+*                           - got module working:
+*                                     drsum - fill_dst_run_summary
+*                           - modified recently:
+*                                     dmsft - dst_monitor_soft_filler
+*                                     desum - fill_dst_event_summary
+* editted 8/31/98 K. Turner - write out run directories at finish
+*
+*
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -78,12 +95,6 @@
    domain='geometry tpc svt global' _
    chain=' ' _
    gstar_settings=' ' 
-
-* SETUP LOCAL VARIABLES 
-* alias/create STAFCV_OK  1
-* alias/create STAFCV_BAD 0
-* vec/input STAF_STATUS(1)  1
-
 
 * import global macros
    macro/global/import *
@@ -259,9 +270,7 @@ macro bfc_init _
             exec create_tables_ctf#init
     (dmhrd) 
     (desum) exec create_tables_global#fill_dst_event_summary
-            exec init_dst#init_ehead
     (drsum) exec create_tables_global#fill_dst_run_summary
-            exec create_tables_global#fill_dst_tof
 	    exec init_dst#init_rhead
     (fzout) user/output o [output_fzd_file]
     (evout)
@@ -407,12 +416,13 @@ ABEND:
       (emc)    exec run_ems#ems_interface2  
       (jet)    exec run_jet#egrid
                exec run_jet#erj
+     (dehd)    exec init_dst#init_ehead
     (ddedx)    exec run_dst#dst_dedx_filler
      (dpnt)    exec run_dst#point_filler
     (dmsft)    exec run_dst#dst_mon_soft
     (dmhrd)    nextl 1
     (desum)    exec run_dst#event_summary
-    (drsum)    nextl 1
+    (drsum)    exec run_dst#dst_run_summary
     (evout)    if [output_xdf_file]="" then
                  message "Empty output file"
                else
@@ -466,6 +476,7 @@ macro bfc_finish _
             if [output_xdf_file]="" then
                  message "Empty output file"
             else
+              exec write_table_to_file#write outfile [run]
               exec write_table_to_file#close outfile;
             endif
       (*) message " !!! bfc_util#bfc_finish No final stage for package " [mod]
