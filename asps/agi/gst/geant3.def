@@ -266,10 +266,10 @@ C_geant3_UNIX_compiler..v....3....v....4....v....5....v....6....v....7....v....8
  REPLACE ['']         WITH [[EMIT']] ;
  
 " some C-like constructions "
- REPLACE[;[5SYS]#-=#;] WITH [;[EMIT[P1]]#1=#1-#2;]   ;
- REPLACE[;[5SYS]#*=#;] WITH [;[EMIT[P1]]#1=#1*#2;]   ;
+ REPLACE[;[5SYS]#-=#;] WITH [;[EMIT[P1]]#2=#2-#3;]   ;
+ REPLACE[;[5SYS]#*=#;] WITH [;[EMIT[P1]]#2=#2*#3;]   ;
  REPLACE[;[5SYS]#+=#;] WITH [;[EMIT[P1]]#2=#2+#3;]   ;
- REPLACE[;[5SYS]#/=#;] WITH [;[EMIT[P1]]#1=#1/#2;]   ;
+ REPLACE[;[5SYS]#/=#;] WITH [;[EMIT[P1]]#2=#2/#3;]   ;
  REPLACE[;IF(#)#-=#;]  WITH [;IF(#1) #2=#2-#3;]      ;
  REPLACE[;IF(#)#+=#;]  WITH [;IF(#1) #2=#2+#3;]      ;
  REPLACE[;IF(#)#*=#;]  WITH [;IF(#1) #2=#2*#3;]      ;
