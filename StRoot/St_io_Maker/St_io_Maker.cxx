@@ -15,8 +15,10 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "TSystem.h"
+#include "TObjString.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TBranch.h"
 #include "TClass.h"
 
 class StIOHeader : public TObject 
@@ -74,11 +76,35 @@ St_io_Maker::St_io_Maker(const char *name, const char *title,Bool_t split,TTree 
    m_ListOfBranches = 0;
    SetTree(tree);
    drawinit=kFALSE;
+   m_FileIterator = 0;
+   m_ListOfFiles  = 0;
+   m_TreeRootFile = 0;
+   m_OffSet       = 0;       // Event offset for multi-volumes tree's
+   m_Entries      = 0;       // Number of the events of the current tree.
+   SetMaxEvent();
 }
 //_____________________________________________________________________________
-St_io_Maker::~St_io_Maker(){
-  m_ListOfBranches->Delete();
-  SafeDelete(m_ListOfBranches);
+St_io_Maker::~St_io_Maker()
+{
+ 
+  if (m_FileIterator) { 
+    delete m_FileIterator;
+    m_FileIterator = 0;
+  }
+
+  if (m_ListOfFiles) { 
+    m_ListOfFiles->Delete();
+    delete m_ListOfFiles;
+    m_ListOfFiles = 0;
+  }
+
+  DestroyBranchList();
+
+  if (m_TreeRootFile) {
+    if (m_Tree) { m_Tree = 0; g_StChain(m_Tree);}
+    delete m_TreeRootFile;
+    m_TreeRootFile = 0;
+  }
 }
 //_____________________________________________________________________________
 void St_io_Maker::Add(const Char_t *dataName, const Char_t *fileName)
@@ -138,32 +164,110 @@ void St_io_Maker::Add(TString &dataName,const Char_t *fileName)
   Add(dataName.Data(),fileName);
 }
 //_____________________________________________________________________________
+void St_io_Maker::AddFile(const Char_t *fileName)
+{
+  // Create  the list of the ROOT file with TTree object to read from
+  if (fileName && strlen(fileName)) {
+    if (!m_ListOfFiles) m_ListOfFiles = new TObjArray;
+    TObjString *obj = new TObjString(fileName);
+    cout << " File:" << obj->String() << endl;
+    m_ListOfFiles->Add(new TObjString(fileName));
+  }
+}
+//_____________________________________________________________________________
+Int_t St_io_Maker::AddFilesFromFile(const Char_t *fileName)
+{
+  //
+  // Create the list of input files supplied from the plain text file.
+  // Format: one line == one file name (using env variable is allowed)
+  //
+  // Return: the number of the files available.
+  // 
+  char *expandedFileName = gSystem->ExpandPathName(fileName);
+  Int_t fileCounter = 0;
+  if (expandedFileName) {
+    if (gSystem->AccessPathName(expandedFileName) == kFALSE) {
+       FILE *inputList = fopen(expandedFileName,"r");
+       if (inputList) {
+         while (feof(inputList)){
+           const Char_t file[512];
+           if(fgets(file,512,inputList)) { AddFile(file); fileCounter++; }
+           else perror("St_io_Maker::AddFilesFromFile");
+         }
+       }     
+    }
+    delete [] expandedFileName;
+  }
+  return fileCounter;
+  
+}
+//_____________________________________________________________________________
 void St_io_Maker::Clear(Option_t *option)
 {
   TTree *tree = GetTree();
   if (tree) {
     TFile *file =  tree->GetCurrentFile();
     if (file && file->IsWritable()) {
-       tree->AutoSave();
-       file->Flush();     
-       // Flush all separate file
-       if (fSplit) {
-         TBranch *nextb = 0;
-         TObjArray *branches = tree->GetListOfBranches();
-         if (branches) {
-           TIter next(branches);
-           while (nextb = (TBranch *)next())  
-                  if(nextb->GetFile()) nextb->GetFile()->Flush();
-         }
-       }
+      tree->AutoSave();
+      file->Flush();     
+      // Flush all separate file
+      if (fSplit) {
+        TBranch *nextb = 0;
+        TObjArray *branches = tree->GetListOfBranches();
+        if (branches) {
+          TIter next(branches);
+          while (nextb = (TBranch *)next())  
+                 if(nextb->GetFile()) nextb->GetFile()->Flush();
+        }
+      }
     }
   }
   StMaker::Clear();
 }
 //_____________________________________________________________________________
+void St_io_Maker::BuildBranchList(TTree *tree)
+{
+  if (!tree) return;
+
+  TBranch *nextb = 0;
+  TObjArray *branches = tree->GetListOfBranches();
+  if (!branches)       return 0;
+  TIter next(branches);
+  while (nextb = (TBranch *)next())  
+  {
+     const Char_t *treePathName   = gSystem->DirName(tree->GetCurrentFile()->GetName());
+     const Char_t *branchFileName = gSystem->BaseName(nextb->GetFileName());
+     Char_t *fileForThisBranch    = gSystem->ConcatFileName(treePathName,branchFileName);
+     Add(nextb,"",fileForThisBranch);
+     delete [] fileForThisBranch;
+     printf(" St_io_Maker::NextEventGet ----> %s from %s \n", nextb->GetName(),nextb->GetFileName());
+  }
+}
+//_____________________________________________________________________________
+static Int_t GetEntries(StIOHeader *obj)
+{
+  if (obj) {
+    TBranch *b = obj->GetBranch();
+    if (b) return b->GetEntries();
+  }
+  return 0;
+}
+
+//_____________________________________________________________________________
 St_DataSet *St_io_Maker::DataSet(const Char_t *set) 
 {
    if (!m_ListOfBranches) return 0;
+   Int_t nevent = g_Chain->Event()-1;
+   cout << "DataSet:  " << nevent << " : " << m_OffSet << " : " << m_Entries << endl;
+   if (  ( m_Entries != -1)
+         &&  m_ListOfFiles 
+         && ( nevent-m_OffSet == TMath::Min(GetMaxEvent(),m_Entries) ) 
+      )
+   {
+       DestroyBranchList();
+       // Let's create it from the TTree if any
+       BuildBranchList(SetNextTree());
+   }
    TIter next(m_ListOfBranches);
    StIOHeader *obj = 0;
    while(obj = (StIOHeader *)next())  
@@ -174,9 +278,23 @@ St_DataSet *St_io_Maker::DataSet(const Char_t *set)
       if (strcmp(name.Data(),set)==0) break;
    }
 
-   if (obj && obj->GetEvent(g_Chain->Event())) 
+   if (obj){
+    if (m_Entries = -1) m_Entries = GetEntries(obj);
+    if (obj->GetEvent(nevent-m_OffSet)) {
          return (St_DataSet *)(obj->ShuntData());
+    }
+   }
+   
    return  0;
+}
+//_____________________________________________________________________________
+void St_io_Maker::DestroyBranchList()
+{
+  if (m_ListOfBranches) {
+      m_ListOfBranches->Delete();
+      delete m_ListOfBranches;
+      m_ListOfBranches = 0;
+  }
 }
 
 //_____________________________________________________________________________
@@ -225,7 +343,7 @@ Int_t St_io_Maker::Make()
 
 }
 //_____________________________________________________________________________
-Int_t St_io_Maker::NextEventGet(Int_t nevent)
+Int_t St_io_Maker::NextEventGet(Int_t nEvent)
 {
  // - Prepares the list of branches to be read when called for the first time
  //
@@ -240,32 +358,26 @@ Int_t St_io_Maker::NextEventGet(Int_t nevent)
   TTree *tree = GetTree();
   if (!tree)   return 0;
 #endif
+  Int_t nevent = nEvent-1;
+  cout << "NextEventGet:  " << nevent << " : " << m_OffSet << " : " << m_Entries << endl;
+
+//  if (m_ListOfFiles && m_Entries != -1 && nevent == m_OffSet+m_Entries-1) DestroyBranchList();
+   if (  ( m_Entries != -1)
+         &&  m_ListOfFiles 
+         && ( nevent-m_OffSet == TMath::Min(GetMaxEvent(),m_Entries) ) 
+      )  DestroyBranchList();
 
   if (!m_ListOfBranches) {
-#ifndef tree
-    TTree *tree = GetTree();
-    if (!tree)   return 0;
-#endif
     // Let's create it from the TTree if any
-    TBranch *nextb = 0;
-    TObjArray *branches = tree->GetListOfBranches();
-    if (!branches)       return 0;
-    TIter next(branches);
-    while (nextb = (TBranch *)next())  
-    {
-       const Char_t *treePathName   = gSystem->DirName(tree->GetCurrentFile()->GetName());
-       const Char_t *branchFileName = gSystem->BaseName(nextb->GetFileName());
-       Char_t *fileForThisBranch    = gSystem->ConcatFileName(treePathName,branchFileName);
-       Add(nextb,"",fileForThisBranch);
-       delete [] fileForThisBranch;
-       printf(" St_io_Maker::NextEventGet ----> %s from %s \n", nextb->GetName(),nextb->GetFileName());
-    }
+    BuildBranchList(SetNextTree());
+    TTree *tree = GetTree();
+    if (!tree) return 0;
   }
   Int_t counter = 0;
 #ifdef tree
   if (SetActive()) 
   {
-    counter = tree->GetEvent(nevent);
+    counter = tree->GetEvent(nevent-m_OffSet);
 #else
   {
 #endif
@@ -282,7 +394,8 @@ Int_t St_io_Maker::NextEventGet(Int_t nevent)
         if (maker) {
 #ifndef tree
            if (counter == -1) counter = 0;
-           counter += obj->GetEvent(nevent);
+           if (m_Entries = -1) m_Entries = GetEntries(obj);
+           counter += obj->GetEvent(nevent-m_OffSet);
 #endif
            maker->SetDataSet((St_DataSet *)obj->ShuntData());
         }
@@ -341,7 +454,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.10 1999/03/03 04:09:55 fisyak Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.11 1999/03/05 22:38:51 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
@@ -377,6 +490,48 @@ Int_t St_io_Maker::SetActive()
   return numberActive;
 }
 
+//_____________________________________________________________________________
+TTree *St_io_Maker::SetNextTree()
+{
+  if (m_ListOfFiles) 
+  {
+    if (!m_FileIterator) m_FileIterator = new TIter(m_ListOfFiles);
+     TObjString *s = 0;
+     if (m_TreeRootFile) {
+       // destroy the list of the branches of this file if any
+       DestroyBranchList();
+       delete m_TreeRootFile;
+       m_TreeRootFile = 0;
+     }
+     m_Tree = 0; // This object is deleted by deleting the ROOT file above
+     while( (s = (TObjString *)m_FileIterator->Next()) && !m_TreeRootFile)
+     {
+//       Char_t *fileName = gSystem->ExpandPathName(s->String());
+       Char_t *fileName = s->String();
+       cout << "Opening next root file :" << fileName << endl;
+       m_TreeRootFile = new TFile(fileName);
+       if (m_TreeRootFile->IsZombie()) { 
+            SafeDelete(m_TreeRootFile); 
+            cout << " BAD file: " << fileName << endl;
+       }
+//      if (fileName) delete [] fileName;
+     }
+     if (m_TreeRootFile) {
+       m_Tree =  (TTree *) m_TreeRootFile->Get("Output");
+       if (m_Tree) {
+         m_Tree->Print();
+         // Calclulate next and current offset
+         m_OffSet += TMath::Min(m_Entries,GetMaxEvent());
+//         m_Entries = m_Tree->GetEntries();
+         m_Entries = -1;
+         g_Chain->SetTree(m_Tree);
+       }
+       else 
+            cout << "there is no tree in tthis file " << endl;
+     }
+  }  
+  return GetTree();
+}
 #if 0
 //_____________________________________________________________________________
 Bool_t St_io_Maker::SetFile(const Char_t *rootFileName)
