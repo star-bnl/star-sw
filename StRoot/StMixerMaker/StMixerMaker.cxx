@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.cxx,v 1.5 2000/03/15 22:16:32 pfachini Exp $
+ * $Id: StMixerMaker.cxx,v 1.6 2000/03/15 22:23:53 pfachini Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.cxx,v $
+ * Revision 1.6  2000/03/15 22:23:53  pfachini
+ * Now using only TPC_DB parameters
+ *
  * Revision 1.5  2000/03/15 22:16:32  pfachini
  * *** empty log message ***
  *
@@ -546,6 +549,7 @@ Int_t StMixerMaker::Make() {
     }// if loop
     
     mEmbedding->doEmbedding();
+    cout << "StMixerEmbedding::doEmbedding() - Sector = " << ' ' << isector << endl;
     
     // Digitize the Signals
     //
@@ -558,9 +562,9 @@ Int_t StMixerMaker::Make() {
     
     //cout << "sector" << ' ' << isector+1 << endl;
     // ...and digitize it
-    cout << "--->digitizeSignal()..." << endl;
+    //cout << "--->digitizeSignal()..." << endl;
     mDigitalSignalGenerator->digitizeSignal();
-    cout<<"--->digitizeSignal() Finished..." << endl;
+    //cout<<"--->digitizeSignal() Finished..." << endl;
     
     // Fill it into the event structure...
     // and you better check the sector number!
