@@ -149,9 +149,9 @@ St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t fir
 
 //_____________________________________________________________________________
 St_TableSorter::St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_t firstRow
-                               ,Int_t numberRows,const St_Table &table)
+                               ,Int_t numberRows)
                                :m_simpleArray((const Char_t*)simpleArray)
-                               ,m_ParentTable(table)
+                               ,m_ParentTable(*((const St_Table *)0))
 {
   //
   // St_TableSorter ctor sort the input "simpleArray" 
@@ -182,9 +182,9 @@ St_TableSorter::St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_
 }
 //_____________________________________________________________________________
 St_TableSorter::St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int_t firstRow
-                               ,Int_t numberRows,const St_Table &table)
+                               ,Int_t numberRows)
                                :m_simpleArray((const Char_t*)simpleArray)
-                               ,m_ParentTable(table)
+                               ,m_ParentTable(*((const St_Table *)0))
 {
   //
   // St_TableSorter ctor sort the input "simpleArray" 
@@ -215,9 +215,9 @@ St_TableSorter::St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int
 }
 //_____________________________________________________________________________
 St_TableSorter::St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t firstRow
-                               ,Int_t numberRows,const St_Table &table)
+                               ,Int_t numberRows)
                                :m_simpleArray((const Char_t*)simpleArray)
-                               ,m_ParentTable(table)
+                               ,m_ParentTable(*((const St_Table *)0))
 {
   //
   // St_TableSorter ctor sort the input "simpleArray" 
