@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.hh,v 1.6 1999/12/21 01:10:59 posk Exp $
+// $Id: StFlowEvent.hh,v 1.7 2000/01/31 22:16:59 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.hh,v $
+// Revision 1.7  2000/01/31 22:16:59  posk
+// CC5 compliant.
+//
 // Revision 1.6  1999/12/21 01:10:59  posk
 // Added more quantities to StFlowEvent.
 //
@@ -45,6 +48,10 @@
 #include "Rtypes.h"
 #include "SystemOfUnits.h"
 class TVector2;
+
+#if !defined(ST_NO_NAMESPACES)
+using std::random_shuffle;
+#endif
 
 class StFlowEvent{
 
