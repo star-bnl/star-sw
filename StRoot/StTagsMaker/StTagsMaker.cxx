@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.12 2004/07/30 20:15:10 fisyak Exp $
+// $Id: StTagsMaker.cxx,v 1.13 2004/07/30 20:31:38 fisyak Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.13  2004/07/30 20:31:38  fisyak
+// Remove second i++
+//
 // Revision 1.12  2004/07/30 20:15:10  fisyak
 // Synchronize Pcoll and Global Tags, remove TpcTags fro chain
 //
@@ -113,7 +116,7 @@ Int_t StTagsMaker::Make(){
       vector<unsigned int> nominalVec = nominal->triggerIds();
       Int_t i = 0;
       for (vector<unsigned int>::iterator viter = nominalVec.begin();
-	   viter != nominalVec.end(); ++viter, i++) {
+	   viter != nominalVec.end(); ++viter) {
 	row.TriggerId[i++] = (*viter); //    Trigger Id's satisfied by an event
       }
     }
