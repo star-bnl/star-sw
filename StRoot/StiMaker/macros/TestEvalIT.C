@@ -1,8 +1,25 @@
 //
-// $Id: TestEvalIT.C,v 1.1 2002/05/29 19:18:23 calderon Exp $
+// $Id: TestEvalIT.C,v 1.2 2002/06/04 18:13:26 andrewar Exp $
 //
 //
 // $Log: TestEvalIT.C,v $
+// Revision 1.2  2002/06/04 18:13:26  andrewar
+// ----------------------------------------------------------------------
+//
+// Committing in StRoot/StiMaker/macros
+//
+//  Modified Files:
+//  	TestEvalIT.C
+//
+//
+// 	Corrected TestEvalIT.C to work with current
+// 	repository software.
+//
+// 	A. Rose, M. Calderon
+//
+//
+//  ----------------------------------------------------------------------
+//
 // Revision 1.1  2002/05/29 19:18:23  calderon
 // First version to test primary tracks from IT.
 // This writes the StMiniMcEvent tree from Bum and Manuel,
@@ -39,13 +56,16 @@ void Help()
 void TestEvalIT(Int_t, const Char_t **, const Char_t *qaflag = "");
 //const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
 
-void TestEvalIT(Int_t nevents=1,
+void TestEvalIT(Int_t nevents=10,
                   //const Char_t *path="/star/data13/reco/dev/2002/01/",
-                  const Char_t *path = "/star/data22/ITTF/data/simple_geant/DEV_10_8_01/",
+		  //const Char_t *path = "/star/data22/ITTF/data/simple_geant/DEV_10_8_01/",
                   //const Char_t *path = "data/simple_geant/DEV_10_8_01/",
-		     
+		const Char_t *path= "/star/data17/reco/auau200/hijing/b0_20/standard/year2001/hadronic_on/trs_gl/",
+
+		const Char_t *file="rcf0183_20_300evts.geant.root",
+
                   //const Char_t *file="*3007007*.event.root",
-                  const Char_t *file= "muon_10_neg.event.root",
+		  //const Char_t *file= "muon_10_neg.event.root",
 		      
 		      const Char_t *qaflag = "off",
 		      const Int_t wrStEOut = 0);
@@ -374,11 +394,12 @@ void TestEvalIT(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, co
 	assocMakerIt->SetDebug();
     }
 
-    StItTestMaker* ittest = new StItTestMaker();
+    //StItTestMaker* ittest = new StItTestMaker();
     
     StMiniMcMaker* minimcMaker = new StMiniMcMaker;
     minimcMaker->setDebug();
     minimcMaker->setOutDir(".");
+    minimcMaker->setFileName("testEval.root");
     
     /*
       dbaseMk->Init();
