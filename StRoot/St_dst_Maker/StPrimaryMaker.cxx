@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.66 2001/12/05 21:57:56 balewski Exp $
+// $Id: StPrimaryMaker.cxx,v 1.67 2002/01/02 21:49:49 balewski Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.67  2002/01/02 21:49:49  balewski
+// Zdca for ppLMV changed from 90 -->180 cm
+//
 // Revision 1.66  2001/12/05 21:57:56  balewski
 // *** empty log message ***
 //
@@ -444,7 +447,7 @@ Int_t StPrimaryMaker::Init(){
 
   if(m_Mode==15) { // initialize ppLMV
     int   ppLMVparIdef[10]={2, 10, 0, 0, 0, 0, 0, 0, 0, 9999};
-    float ppLMVparFdef[10]={1., 3.9, 0.20, .02, 1., 90., 0, 0, 0, 8888};
+    float ppLMVparFdef[10]={1., 3.9, 0.20, .02, 1.,180., 0, 0, 0, 8888};
     ppLMVuse(ppLMVparIdef,ppLMVparFdef);
   }
 
