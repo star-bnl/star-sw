@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.4 2000/03/23 22:24:06 akio Exp $
+ * $Id: StContainers.cxx,v 2.5 2000/05/22 21:42:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
- * Revision 2.4  2000/03/23 22:24:06  akio
- * Initial version of Emc Point, and Inclusion of track pointers
+ * Revision 2.5  2000/05/22 21:42:41  ullrich
+ * Add RICH related classes.
  *
  * Revision 2.6  2000/06/19 01:32:15  perev
  *  Thomas StEvent branches added
@@ -31,6 +31,10 @@
  * Revision 2.1  1999/10/28 22:06:16  ullrich
  * Initial Revision
  *
+ **************************************************************************/
+#include "StContainers.h"
+#include "StSvtHit.h"
+#include "StSsdHit.h"
 #include "StTpcHit.h"
 #include "StRichHit.h"
 #include "StRichPixel.h"
@@ -50,6 +54,10 @@
 
 StCollectionImp(Object)
 StCollectionImp(Hit)
+StCollectionImp(PrimaryTrack)
+StCollectionImp(PrimaryVertex)
+StCollectionImp(SvtHit)
+StCollectionImp(SsdHit)
 StCollectionImp(TpcHit)
 StCollectionImp(FtpcHit)
 StCollectionImp(RichCluster)
@@ -60,9 +68,6 @@ StCollectionImp(EmcRawHit)
 StCollectionImp(EmcCluster)
 StCollectionImp(EmcPoint)
 StCollectionImp(Track)
-
-
-
 StCollectionImp(TrackNode)
 StCollectionImp(TrackPidTraits)
 StCollectionImp(TrackDetectorInfo)
