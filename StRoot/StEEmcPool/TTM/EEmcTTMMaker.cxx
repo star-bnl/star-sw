@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.12 2004/04/13 14:53:39 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.13 2004/04/13 15:48:11 zolnie Exp $
 // doxygen info here
 /** 
     \mainpage TTM - an endcap Tower to Track Match maker
@@ -113,7 +113,7 @@
 #include "StEEmcUtil/StEEmcSmd/StEEmcSmdGeom.h"
 
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcDbMaker/StEEmcDbIndexItem1.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
 #define DEBUG_PRINTS 0
@@ -394,8 +394,15 @@ EEmcTTMMaker::Make(){
     emc->getEndcapTowerADC(i,adc,sec,sub,eta); 
     if (adc<=0) continue;          // how about zero suppression :))
     
-    const EEmcDbItem *dbi = mEEmcDb->getT(sec+1,sub+'A',eta+1); // fortran scheiss .... 
+    //const EEmcDbItem *dbi = mEEmcDb->getT(sec+1,sub+'A',eta+1); // fortran scheiss .... 
+    const StEEmcDbIndexItem1 *dbi = mEEmcDb->getT(sec,sub+'@',eta); 
+    // some idiot changed indexing scheme and function implementation
+    // in the middle of the run 
     if(dbi==NULL) continue;
+    // now because of that idiot I have to do this scheiss
+    sec--;
+    sub--;
+    eta--;
 
     adcped = float(adc) - dbi->ped; 
     edep   = (dbi->gain>0.0) ? adcped/dbi->gain : 0.0;
@@ -657,6 +664,10 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.13  2004/04/13 15:48:11  zolnie
+// fixes for some idiot changed indexing scheme and implementation
+// of some vital functions in the middle of the run
+//
 // Revision 1.12  2004/04/13 14:53:39  zolnie
 // *** empty log message ***
 //
