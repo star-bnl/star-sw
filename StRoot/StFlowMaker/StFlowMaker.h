@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.29 2002/02/01 23:06:53 snelling Exp $
+//  $Id: StFlowMaker.h,v 1.30 2002/03/12 02:33:34 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -46,7 +46,7 @@ public:
   virtual       ~StFlowMaker();
 
   Int_t         Init();
-  Int_t         InitRun();
+  Int_t         InitRun(int runumber);
   Int_t         Make();
   Int_t         Finish();
   StFlowEvent*  FlowEventPointer() const;
@@ -58,7 +58,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.29 2002/02/01 23:06:53 snelling Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.30 2002/03/12 02:33:34 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -134,6 +134,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.30  2002/03/12 02:33:34  posk
+//  Now makes pico files in SL02c.
+//
 //  Revision 1.29  2002/02/01 23:06:53  snelling
 //  Added entries for header information in flowPico (not everthing is available yet)
 //
