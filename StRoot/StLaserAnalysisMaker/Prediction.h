@@ -1,7 +1,7 @@
 // 
 // $Log: Prediction.h,v $
-// Revision 1.2  2000/01/31 15:14:52  fisyak
-// Try to find out memory leak
+// Revision 1.3  2000/01/31 23:50:10  fisyak
+// Clean up
 //
 // Revision 1.1.1.1  2000/01/29 16:23:06  fisyak
 // First release of StLaserAnalysisMaker
@@ -177,7 +177,7 @@ class LEvent : public TObject {
   LEvent();
   virtual ~LEvent() { }
   virtual void Clear(Option_t *Option);
-  virtual void SetPred(Prediction *pred=0) {if (pred) fPred = *pred;}
+  virtual void SetPred(const Prediction *pred=0) {if (pred) fPred = *pred;}
   virtual void SetLTrack(const LaserTrack &laser) {fLTrack = laser;}
   virtual void SetAverage(Float_t ADC = 0, Float_t ADC3x3 = 0, Float_t ratio = 0,
 			  Int_t nY1 = 0,Int_t nY2 = 0,Int_t nZ1 = 0,Int_t nZ2 = 0,

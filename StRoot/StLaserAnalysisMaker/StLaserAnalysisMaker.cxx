@@ -1,5 +1,8 @@
-// $Id: StLaserAnalysisMaker.cxx,v 1.2 2000/01/31 15:14:52 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.3 2000/01/31 23:50:11 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.3  2000/01/31 23:50:11  fisyak
+// Clean up
+//
 // Revision 1.2  2000/01/31 15:14:52  fisyak
 // Try to find out memory leak
 //
@@ -38,7 +41,8 @@ ClassImp(StLaserAnalysisMaker)
   
 LaserTrack LaserTracks[] = {
   //#include "Yuri.table"
-#include "Y2k.table"
+  //#include "Y2k.table"
+#include "Y2kchop.table"
   {  24,   7,   1,       0,  127.358,  0.439,  -0.0222,  0.0009,   -2.260,  0.114,  197.376,  0.088,  -33.480,  0.170 }
 };
 Int_t NoLaserTracks = sizeof (LaserTracks)/sizeof (LaserTrack);
@@ -75,6 +79,7 @@ Int_t StLaserAnalysisMaker::Init(){
   // Create tables
   //   St_DataSetIter       local(GetDataBase("params"));
   // Create Histograms    
+  Int_t i,j;
   geant3 = TGeant3::Geant3();
   if (geant3) {
     cquest = (Quest_t  *) geant3->Quest();
@@ -148,7 +153,7 @@ Int_t StLaserAnalysisMaker::Init(){
     //Loop over tracks
     Int_t Id = 0;
     Int_t No = NoLaserTracks;
-    for(Int_t i=0; i < No; i++){
+    for(i=0; i < No; i++){
       if (! LaserTracks[i].NoTracks) continue;
       pt = 1000;
       p1[0] = pt*TMath::Cos(degrad*LaserTracks[i].psi);
@@ -270,9 +275,8 @@ Int_t StLaserAnalysisMaker::Init(){
       if (Debug()) gMessMgr->Info() << "Done with track no." << i << endm;
     }
     gMessMgr->Info() << "Tracks loop is over with " << Id << "/" << fNPrediction << " predictions" << endm;
-    TObjArrayIter next(fPredictions);
+    TObjArrayIter next(fPredictions);  
     Prediction *pred, *pred2;
-    Int_t i,j;
     //    while ((pred = (Prediction *) next())) {
     for (i=0;i<fNPrediction-1; i++){
       pred = (Prediction *) fPredictions->UncheckedAt(i);
@@ -311,10 +315,10 @@ Int_t StLaserAnalysisMaker::Init(){
     //    fTree->SetAutoSave(10000000);
     fTree->Branch("LEvent", "LEvent",&fevent);
   }
-#if 0
   fADC      = new TH1F("ADC","ADC sum",500,0,10000.);
   fADC3x3   = new TH1F("ADC3x3","ADC sum 3x3",500,0,10000.);
   fRatio    = new TH1F("Ratio","Ratio ADC3x3/ADC",100,0.,1.0);
+#if 0
   fPadI     = new TH2F("PadI","space distribution for inner sectors",10*NYT,-NY-0.5,NY+0.5,100,0.,1.);  
   fPadO     = new TH2F("PadO","space distribution for outer sectors",10*NYT,-NY-0.5,NY+0.5,100,0.,1.);  
   fTimeI    = new TH2F("TimeI","time distribution for inner sectors",10*NZT,-NZ-0.5,NZ+0.5,100,0.,1.);  
@@ -343,143 +347,144 @@ Int_t StLaserAnalysisMaker::Make(){
 #if 0
   StMemoryInfo::instance()->snapshot();
 #endif
-  for (l=0;l<fNPrediction-1; l++){
-    pred = (Prediction *) fPredictions->UncheckedAt(l);
-    if (pred->GetId() <= 0) continue;
-    fevent->Clear(Option);
-    Int_t noLT         = pred->GetLT();
-    fevent->SetPred(pred);
-    fevent->SetLTrack(LaserTracks[noLT]);
-    Int_t sectorNumber =  pred->GetSector();
-    Int_t padRowNumber =  pred->GetPadrow();
-    Int_t padNumber    =  pred->GetPadNo();
-    Int_t timeBin      =  pred->GetTimeBin();
-    Float_t Y          =  pred->GetY();
-    Float_t Z          =  pred->GetZ();
-    //    Float_t tY         =  pred->GettY();
-    //    Float_t tZ         =  pred->GettZ();
-    Float_t ADC        = 0;
-    Float_t ADC3x3     = 0; 
-    Int_t   overflow   = 0;
-    u_char  *padlist; 
-    //    if (TMath::Abs(tY) > 0.05 || TMath::Abs(tZ) > 0.1) continue;
-    memset (adc, 0, sizeof(adc));
-    int count = fTPCReader->getPadList(sectorNumber,padRowNumber, padlist);
-     if (!count) continue; // any pads with data?
-    for (int padnum = 0; padnum<count && !overflow; padnum++) {
-      int pad = padlist[padnum];
-      if (!pad) continue;
-      Int_t iY = pad - padNumber + NY;
-      if (iY < 0 || iY >= NYT) continue;
-      Int_t    nSeq;
-      TPCSequence *Seq;
-      fTPCReader->getSequences(sectorNumber,padRowNumber, pad, nSeq, Seq);
-      for (int seq=0; seq<nSeq; seq++){
-	Int_t start = Seq[seq].startTimeBin;
-	int len   = Seq[seq].Length;
-	UChar_t *p = Seq[seq].FirstAdc;
-	for (int j=0; j<len; j++) {
-	  Int_t iT = start + j - timeBin + NZ;
-	  if (iT < 0 || iT >= NZT) continue;
-	  adc[iT][iY] += log8to10_table[*(p++)];
-	  if (adc[iT][iY] == 920) {overflow = 1; break;}
-	  ADC += adc[iT][iY];
-          if (TMath::Abs(iT - NZ) < 2 && TMath::Abs(iY - NY) < 2) ADC3x3 += adc[iT][iY];
-	}
-      }
-    }
-    //    continue;
-    if (overflow) continue;
-    Float_t ratio = 0;
-    if (ADC > 0) {
-      //      fADC->Fill(ADC);
-      //      fADC3x3->Fill(ADC3x3);
-      ratio = ADC3x3/ADC;
-      //      fRatio->Fill(ratio);
-      int i,j;
-      if (ratio < 0.4) continue;
-      if (ADC < 200 || ADC > 10000) continue;
-      Float_t Yadc[NYT];
-      Float_t Zadc[NZT];
-      memset (Yadc, 0, sizeof(Yadc));
-      memset (Zadc, 0, sizeof(Zadc));
-      Int_t nY1 = NY;
-      Int_t nY2 = -NY;
-      Int_t nZ1 = NZ;
-      Int_t nZ2 = -NZ;
-      Float_t Yav = 0;
-      Float_t Zav = 0;
-      Float_t DYY = 0;
-      Float_t CYZ = 0; 
-      Float_t DZZ = 0;
-      Float_t y,z;
-      Int_t   yy,zz;
-      for (i=0;i<NYT;i++) {
-	yy = i - NY;
-	y  = yy - Y;
-	for (j=0;j<NZT;j++) {
-	  zz = j - NZ;
-	  z  = zz - Z;
-	  adc[j][i] /=ADC;
-	  Yadc[i] += adc[j][i];
-          Zadc[j] += adc[j][i];
-	  if (adc[j][i] > 0) {
-	    if (yy < nY1) nY1 = yy;
-	    if (zz < nZ1) nZ1 = zz;
-	    if (yy > nY2) nY2 = yy;
-	    if (zz > nZ2) nZ2 = zz;
-	    Yav += adc[j][i]*yy;
-	    Zav += adc[j][i]*zz;
-	    DYY += adc[j][i]*yy*yy;
-	    CYZ += adc[j][i]*yy*zz;
-	    DZZ += adc[j][i]*zz*zz;
-	    fevent->AddAdc(y,z,adc[j][i]);
+  for (Int_t Sector=1;Sector<=24;Sector++){
+    for (l=0;l<fNPrediction-1; l++){
+      pred = (Prediction *) fPredictions->UncheckedAt(l);
+      if (pred->GetId() <= 0) continue;
+      fevent->Clear(Option);
+      Int_t noLT         = pred->GetLT();
+      fevent->SetPred(pred);
+      fevent->SetLTrack(LaserTracks[noLT]);
+      Int_t sectorNumber =  pred->GetSector();
+      if (sectorNumber != Sector) continue;
+      Int_t padRowNumber =  pred->GetPadrow();
+      Int_t padNumber    =  pred->GetPadNo();
+      Int_t timeBin      =  pred->GetTimeBin();
+      Float_t Y          =  pred->GetY();
+      Float_t Z          =  pred->GetZ();
+      //    Float_t tY         =  pred->GettY();
+      //    Float_t tZ         =  pred->GettZ();
+      Float_t ADC        = 0;
+      Float_t ADC3x3     = 0; 
+      Int_t   overflow   = 0;
+      u_char  *padlist; 
+      //    if (TMath::Abs(tY) > 0.05 || TMath::Abs(tZ) > 0.1) continue;
+      memset (adc, 0, sizeof(adc));
+      int count = fTPCReader->getPadList(sectorNumber,padRowNumber, padlist);
+      if (!count) continue; // any pads with data?
+      for (int padnum = 0; padnum<count && !overflow; padnum++) {
+	int pad = padlist[padnum];
+	if (!pad) continue;
+	Int_t iY = pad - padNumber + NY;
+	if (iY < 0 || iY >= NYT) continue;
+	Int_t    nSeq;
+	TPCSequence *Seq;
+	fTPCReader->getSequences(sectorNumber,padRowNumber, pad, nSeq, Seq);
+	for (int seq=0; seq<nSeq; seq++){
+	  Int_t start = Seq[seq].startTimeBin;
+	  int len   = Seq[seq].Length;
+	  UChar_t *p = Seq[seq].FirstAdc;
+	  for (int j=0; j<len; j++) {
+	    Int_t iT = start + j - timeBin + NZ;
+	    if (iT < 0 || iT >= NZT) continue;
+	    adc[iT][iY] += log8to10_table[*(p++)];
+	    if (adc[iT][iY] == 920) {overflow = 1; break;}
+	    ADC += adc[iT][iY];
+	    if (TMath::Abs(iT - NZ) < 2 && TMath::Abs(iY - NY) < 2) ADC3x3 += adc[iT][iY];
 	  }
 	}
       }
-      DYY -= Yav*Yav;
-      CYZ -= Yav*Zav;
-      DZZ -= Zav*Zav;
-#if 0
-      fevent->SetAverage(ADC,ADC3x3,ratio,nY1,nY2,nZ1,nZ2,Yav,Zav,DYY,CYZ,DZZ);
-      TH2F *hPad  = fPadO;
-      TH2F *hTime = fTimeO;
-      if (padRowNumber <= 13) {hPad  = fPadI; hTime = fTimeI;}
-#endif
-      for (i=0; i<NYT; i++) {
-	yy = i - NY;
-	y  = yy - Y;
-	//	if (Yadc[i] > 0) {
-	//	  hPad->Fill(y,Yadc[i]);
-	fevent->AddYProf(y,Yadc[i]);
+      //    continue;
+      if (overflow) continue;
+      Float_t ratio = 0;
+      if (ADC > 0) {
+	fADC->Fill(ADC);
+	fADC3x3->Fill(ADC3x3);
+	ratio = ADC3x3/ADC;
+	fRatio->Fill(ratio);
+	int i,j;
+	if (ratio < 0.4) continue;
+	if (ADC < 200 || ADC > 10000) continue;
+	Float_t Yadc[NYT];
+	Float_t Zadc[NZT];
+	memset (Yadc, 0, sizeof(Yadc));
+	memset (Zadc, 0, sizeof(Zadc));
+	Int_t nY1 = NY;
+	Int_t nY2 = -NY;
+	Int_t nZ1 = NZ;
+	Int_t nZ2 = -NZ;
+	Float_t Yav = 0;
+	Float_t Zav = 0;
+	Float_t DYY = 0;
+	Float_t CYZ = 0; 
+	Float_t DZZ = 0;
+	Float_t y,z;
+	Int_t   yy,zz;
+	for (i=0;i<NYT;i++) {
+	  yy = i - NY;
+	  y  = yy - Y;
+	  for (j=0;j<NZT;j++) {
+	    zz = j - NZ;
+	    z  = zz - Z;
+	    adc[j][i] /=ADC;
+	    Yadc[i] += adc[j][i];
+	    Zadc[j] += adc[j][i];
+	    if (adc[j][i] > 0) {
+	      if (yy < nY1) nY1 = yy;
+	      if (zz < nZ1) nZ1 = zz;
+	      if (yy > nY2) nY2 = yy;
+	      if (zz > nZ2) nZ2 = zz;
+	      Yav += adc[j][i]*yy;
+	      Zav += adc[j][i]*zz;
+	      DYY += adc[j][i]*yy*yy;
+	      CYZ += adc[j][i]*yy*zz;
+	      DZZ += adc[j][i]*zz*zz;
+	      fevent->AddAdc(y,z,adc[j][i]);
+	    }
+	  }
+	}
+	DYY -= Yav*Yav;
+	CYZ -= Yav*Zav;
+	DZZ -= Zav*Zav;
+	fevent->SetAverage(ADC,ADC3x3,ratio,nY1,nY2,nZ1,nZ2,Yav,Zav,DYY,CYZ,DZZ);
+	TH2F *hPad  = fPadO;
+	TH2F *hTime = fTimeO;
+	if (padRowNumber <= 13) {hPad  = fPadI; hTime = fTimeI;}
+	for (i=0; i<NYT; i++) {
+	  yy = i - NY;
+	  y  = yy - Y;
+	  //	if (Yadc[i] > 0) {
+	  //	  hPad->Fill(y,Yadc[i]);
+	  fevent->AddYProf(y,Yadc[i]);
 	  //	}
-      }
-      for (j=0; j<NZT; j++) {
-	zz = j - NZ;
-	z  = zz - Z;
-	//	if (Zadc[j] > 0) {
-	//	hTime->Fill(j-NZ-Z,Zadc[j]);
-	fevent->AddZProf(Z,Zadc[j]);
+	}
+	for (j=0; j<NZT; j++) {
+	  zz = j - NZ;
+	  z  = zz - Z;
+	  //	if (Zadc[j] > 0) {
+	  //	hTime->Fill(j-NZ-Z,Zadc[j]);
+	  fevent->AddZProf(Z,Zadc[j]);
 	  //	}
-      }
+	}
 #if 0
-      printf ("===================================\n");
-      printf ("Total ADC %f ADC3x3 %f ratio: %f Sector %i padRow %i pad %i Time %i Y/Z tY/tZ %f %f %f %f\n",
-	      ADC,ADC3x3,ratio,sectorNumber,padRowNumber,padNumber,timeBin,Y,Z,tY,tZ);
-      printf ("Y/ dY \t:%f  \tZ/ dZ \t:%f\n",Y,Yav-Y,Z,Zav-Z);
-      printf ("|\tidx");
-      for (j=0;j<NZT;j++) printf("|\t%5i",j-NZ);  printf ("\n");
-      for (i=0;i<NYT;i++){
-	printf ("%i",i-NY);
-	for (j=0;j<NZT;j++) printf ("|\t%5.0f",1000*adc[j][i]);
-	printf ("|\t%5.0f",1000*Yadc[i]); 
-	if (i == NZ) printf("<=== Y %f dY %f" ,Y, Yav-Y);
-	printf("\n");
-      }
-      for (j=0;j<NZT;j++) printf("|\t%5.0f",1000*Zadc[j]);  printf ("\n");
+	printf ("===================================\n");
+	printf ("Total ADC %f ADC3x3 %f ratio: %f Sector %i padRow %i pad %i Time %i Y/Z tY/tZ %f %f %f %f\n",
+		ADC,ADC3x3,ratio,sectorNumber,padRowNumber,padNumber,timeBin,Y,Z,tY,tZ);
+	printf ("Y/ dY \t:%f  \tZ/ dZ \t:%f\n",Y,Yav-Y,Z,Zav-Z);
+	printf ("|\tidx");
+	for (j=0;j<NZT;j++) printf("|\t%5i",j-NZ);  printf ("\n");
+	for (i=0;i<NYT;i++){
+	  printf ("%i",i-NY);
+	  for (j=0;j<NZT;j++) printf ("|\t%5.0f",1000*adc[j][i]);
+	  printf ("|\t%5.0f",1000*Yadc[i]); 
+	  if (i == NZ) printf("<=== Y %f dY %f" ,Y, Yav-Y);
+	  printf("\n");
+	}
+	for (j=0;j<NZT;j++) printf("|\t%5.0f",1000*Zadc[j]);  printf ("\n");
 #endif
-      ////      if (fevent->GetNoY() > 0 && TMath::Abs(Yav - Y) < 0.1)     fTree->Fill();
-    //    else                           fevent->Print();
+	if (fevent->GetNoY() > 0 && TMath::Abs(Yav - Y) < 0.5)     fTree->Fill();
+	//    else                           fevent->Print();
+      }
     }
   }
   //  fTree->AutoSave();
