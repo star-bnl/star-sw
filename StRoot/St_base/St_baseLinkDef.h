@@ -2,6 +2,10 @@
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
+#pragma link C++ class St_Module-;
+#pragma link C++ enum EModuleTypes;
+#pragma link C++ class St_Table-;
+#pragma link C++ class table_head_st-!;
 #pragma link C++ class StTree;
 #pragma link C++ class StBranch;
 #pragma link C++ class StFile;
