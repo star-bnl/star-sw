@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.3 1999/12/08 18:22:59 love Exp $
+// $Id: StLaserEventMaker.cxx,v 1.4 2000/02/15 21:00:59 love Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.4  2000/02/15 21:00:59  love
+// Added invp and nfit track variables to Hit structure
+//
 // Revision 1.3  1999/12/08 18:22:59  love
 // fix code to remove Linux compiler warning - Bill Love
 //
@@ -65,10 +68,11 @@ Int_t StLaserEventMaker::Init(){
   St_DataSetIter       gime(tpcpars);
   
 // 		TPG parameters
-  m_tpg_pad_plane = (St_tpg_pad_plane *) gime("tpgpar/tpg_pad_plane");
-  if (!(m_tpg_pad_plane)) Error("Init","tpc/tpgpar is not initialized. \n");
-  assert(m_tpg_pad_plane);
-  
+   m_tpg_pad_plane = (St_tpg_pad_plane *) gime("tpgpar/tpg_pad_plane");
+   if (!(m_tpg_pad_plane)) Error("Init","tpc/tpgpar is not initialized. \n");
+   assert(m_tpg_pad_plane);
+    
+
 // 		TCL parameters
   m_type = (St_tcl_tpc_index_type *) gime("tclpars/type");
   if (!m_type) Error("Init"," Clustering parameters have not been initialized");
@@ -107,7 +111,7 @@ Int_t StLaserEventMaker::Make(){
 
 //			call TPT tracker 
     if (Debug()) cout << " start tpt run " << endl;
-    Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack);
+      Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack);
 //                      ==============================
     
     if (Res_tpt != kSTAFCV_OK) {
@@ -127,10 +131,10 @@ Int_t StLaserEventMaker::Make(){
    Float_t C_RAD_PER_DEG = 0.017453292;
    if (m_mklaser) {
     
-     evno = GetEventNumber();
-     m_runno = GetRunNumber();
+      evno = GetEventNumber();
+      m_runno = GetRunNumber();
 
-     // Fill the event header.  Run number and date passed in from macro.
+     // Fill the event header.
      event->SetHeader(evno, m_runno, m_date);
      cout << "Event "<< evno << " Run " << m_runno << endl;
 
@@ -166,6 +170,7 @@ Int_t StLaserEventMaker::Make(){
        for (int i = 0;i<n_hit->GetNRows();i++,h++){
 	 // got a hit - calculate some missing properties.
          Int_t tof = h->track/1000; // get the track number
+         if(tof){
          tpt_track_st *te = n_track->GetTable();
          for(int itrk=0;itrk<ntks;itrk++,te++){//find the right track
          if(te->id == tof){
@@ -182,11 +187,15 @@ Int_t StLaserEventMaker::Make(){
                         sqrt((h->x-x1)*(h->x-x1) + (h->y-y1)*(h->y-y1));
 
           event->AddHit(h->q,h->x,h->y,h->z,h->row,h->track, h->flag,
-       sector[itrk],zl[itrk],te->psi,
+       sector[itrk],zl[itrk],te->psi,te->invp,te->nfit,
        resy,resz,h->alpha,h->lambda,h->prf,h->zrf);
 	 }       }}
-       cout << n_hit->GetNRows() << " hits, " ; 
-     }
+     else
+       event->AddHit(h->q,h->x,h->y,h->z,h->row,h->track, h->flag,
+       0,0,0,0,0,0,0,h->alpha,h->lambda,h->prf,h->zrf);
+       }
+     cout << n_hit->GetNRows() << " hits, " ; 
+       }
         tpt_track_st *t = n_track->GetTable();
      Int_t ngtk=0;         
      for(int itrk=0;itrk<ntks;itrk++,t++){
@@ -215,7 +224,7 @@ Int_t StLaserEventMaker::Make(){
          tfc_adcxyz_st *p = n_adc->GetTable();
          cout << n_adc->GetNRows() << " pixels in adcxyz table, " ;
          for(int iadc=0;iadc<n_adc->GetNRows();iadc++,p++){
-	   if(p->row >=m_rowmin && p->row<=m_rowmax && p->z<-15.0){
+	   if(p->row >=m_rowmin && p->row<=m_rowmax){
 	     event->AddPixel(100*p->sector+p->row,p->pad,p->bucket,
                    p->adc,p->x,p->y,p->z);
 	     npixwrit++;
@@ -247,9 +256,13 @@ Int_t StLaserEventMaker::Make(){
                {96.718,-100.277,-197.018,-96.708,100.282,197.027},
                {96.341,-101.054,-197.440,-96.322,101.066,197.397},
                {96.729,-100.653,-197.399,-96.649,100.681,197.387}};
-    Float_t x, y;
+    Float_t x, y, disxy;
     Int_t iz;
-    for (iz=0;iz<6;iz++) if(z0<zcut[iz])break;
+    for (iz=0;iz<6;iz++) if(z0<zcut[iz])break; 
+
+   *sector = 99;  *xl = 0.0; *yl = 0.0; *zl = 0.0;
+    if(iz>5)return;
+
   //
     Float_t ang = 0.017453292 * phi0;
     Float_t x0 = r0 * cos(ang);
@@ -260,21 +273,21 @@ Int_t StLaserEventMaker::Make(){
     Float_t xc = x0 + q*py/curvature;
     Float_t yc = y0 - q*px/curvature;
     Float_t test = 200.0; // cutoff the source match at 10 X 10 cm
-    *sector = 99;  *xl = 0.0; *yl = 0.0; *zl = 0.0;
-       for (int i=0;i<6;i++){
-    Float_t xp = xpt[iz][i]; Float_t yp= ypt[iz][i];
-    Float_t d = xc - xp; Float_t a = yc - yp;
-    Float_t c = d/a;  
-    Float_t dy = 1./sqrt(1. + c*c)/curvature;
-    Float_t dx = c*dy;
-    if(a<0) { x = xc + dx;  y = yc + dy;}
-    else    { x = xc - dx;  y = yc - dy;}
-    Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
+    for (int i=0;i<6;i++){
+      Float_t xp = xpt[iz][i]; Float_t yp= ypt[iz][i];
+      Float_t d = xc - xp; Float_t a = yc - yp;
+      Float_t c = d/a;  
+      Float_t dy = 1./sqrt(1. + c*c)/curvature;
+      Float_t dx = c*dy;
+      if(a<0) { x = xc + dx;  y = yc + dy;}
+      else    { x = xc - dx;  y = yc - dy;}
+      Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
       if (disq<test) {test=disq; 
-                    *xl=x; *yl=y;  *sector = 2*i+14;
-		    Float_t sign =1.0; // account for direction to origin
-         if((*xl*px+*yl*py)<0) sign=-1.0;
-                  *zl = z0 + sign*tanl*sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));}
+            *xl=x; *yl=y;  *sector = 2*i+14;
+    	    Float_t sign =1.0; // account for direction to origin
+            if((*xl*px+*yl*py)<0) sign=-1.0;
+            Float_t disxy = sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0)); 
+            *zl = z0 + sign*tanl*disxy;}
        }
   }
 //______________________________________________________________________________
