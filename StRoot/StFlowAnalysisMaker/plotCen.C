@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.1 2000/08/31 18:50:33 posk Exp $
+// $Id: plotCen.C,v 1.2 2000/09/07 16:42:09 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -17,6 +17,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.2  2000/09/07 16:42:09  posk
+// Updated list of histograms.
+//
 // Revision 1.1  2000/08/31 18:50:33  posk
 // Added plotCen.C to plot from a series of files with different centralities.
 //
@@ -102,7 +105,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
 			     "Flow_vEta_Sel",
 			     "Flow_vPt_Sel"};
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 26 + 1;
+  const int nSingles = 30 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
