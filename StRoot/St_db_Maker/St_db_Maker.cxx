@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.53 2002/01/17 23:45:32 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.54 2002/01/18 16:18:03 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.54  2002/01/18 16:18:03  perev
+// TimeStamp for absent table fix
+//
 // Revision 1.53  2002/01/17 23:45:32  perev
 // TimeStamp for nonexisting table fixed
 //
@@ -404,8 +407,10 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
 
 // 		if descriptor filled, no need for newdat
   void *dbstruct = fDBBroker->Use(dat->GetUniqueID(),parId);
+  val[0].Set(fDBBroker->GetBeginDate(),fDBBroker->GetBeginTime());
+  val[1].Set(fDBBroker->GetEndDate  (),fDBBroker->GetEndTime  ());
   if (!dbstruct) {
-    Warning("UpdateTable","Table %s.%s Not FOUND",dat->GetName(),dat->GetTitle());
+  if(Debug()>1)  Warning("UpdateTable","Table %s.%s Not FOUND",dat->GetName(),dat->GetTitle());
     return 1;
   }
 
@@ -413,8 +418,6 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
 //		Adopt DB data in the new TTable
   dat->Adopt(nRows,dbstruct);
 //  dat->Print(0,1);
-  val[0].Set(fDBBroker->GetBeginDate(),fDBBroker->GetBeginTime());
-  val[1].Set(fDBBroker->GetEndDate  (),fDBBroker->GetEndTime  ());
 
 //  printf("BegVal=%s\n",val[0].AsString());
 //  printf("EndVal=%s\n",val[1].AsString());
