@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.22 1998/03/16 01:51:29 fisyak Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.23 1998/05/05 16:12:45 ward Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <sys/types.h>
@@ -88,6 +88,8 @@ socObject:: socObject(long n, const char* type) {
 
 //----------------------------------
 socObject:: ~socObject() {
+  delete myName; // hjw 980502
+  delete myType; // hjw 980502
 }
 
 //:----------------------------------------------- ATTRIBUTES         --

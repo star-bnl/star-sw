@@ -667,7 +667,7 @@ void kam_tdmtable_cell_putvalue_()
       values[np] = ku_gets();
    }
    STAFCV_T status = tdmtable_cell_putvalue(cellSpec,npars-1,values);
-   delete values; /*fix memory leak -akio*/
+   delete[] values; /*fix memory leak -akio*/
 }
 STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
 {

@@ -265,7 +265,7 @@ STAFCV_T topCut:: DoFilterTable(tdmTable *src,
     long *percentPass) {
   size_t numBytesToTransfer,bytesPerRow,nbytes; long startRow,row;
   char *beginOfSrcTbl,*bottomNewTbl,*copyThis;
-  long numberPass=0,colCnt; void *mask;
+  long numberPass=0,colCnt; void *mask; int numMsg=0;
   DS_DATASET_T *dsPtr,*tgtPtr;
   colCnt=src->columnCount();
   *orig=src->rowCount();
@@ -298,7 +298,15 @@ STAFCV_T topCut:: DoFilterTable(tdmTable *src,
   for(row=0;row<(*orig)+1;row++) { /* The <x+1 is deliberate, to invoke the
                                    ** else clause during ending of the loop. */
     if(row<(*orig)&&dsuRowPassedCuts((char*)mask,row)) {
-      if(row%1557==0) printf("Phase II: %d %% complete.\n",(row*100)/(*orig));
+      if(numMsg<5) {
+        if(row%1557==0) {
+          printf("Phase II: %d %% complete.\n",(row*100)/(*orig)); numMsg++;
+        }
+      } else {
+        if(row%55570==0) {
+          printf("Phase II: %d %% complete.\n",(row*100)/(*orig)); numMsg++;
+        }
+      }
       if(startRow<0) startRow=row;
     } else {
       if(startRow>=0) {

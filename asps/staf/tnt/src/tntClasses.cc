@@ -259,6 +259,7 @@ tntCWNtuple::import (tdmTable* table) {
 STAFCV_T 
 tntCWNtuple::append (tdmTable* table) {
   int i, j, k;
+  register long colcnt;
   long *bufferPtr, *lPtr;
   char *c1Ptr, *c2Ptr;
   short *sPtr;
@@ -274,21 +275,21 @@ tntCWNtuple::append (tdmTable* table) {
     EML_ERROR(WRONG_TABLE_TYPE);	// compatable??? done
   }
   
+  colcnt=table->columnCount();
   // Loop over the rows of the table ...
   for (i = 0; i < table->rowCount(); i++) {
 
     bufferPtr = (long *)rowBuffer;
 
     // ... and loop over the columns of each row
-    for (j = 0; j < columnCount(); j++) {
+    for (j = 0; j < colcnt; j++) {
 
       // Figure out the longword aligned size
       colSize = tntLongwordifyColumnSize(table,j);
       elementSize = colSize / table->columnElcount(j);
       memset((void *)bufferPtr, ' ', colSize);
 
-      table->getCell(data,i,j);
-
+      if(table->getCell(data,i,j)!=STAFCV_OK) printf("getCell failed.\n");
       switch (table->columnTypeCode(j)) {
       case DS_TYPE_CHAR:
 	// For `char'-like variables, make a one-for-one copy from the

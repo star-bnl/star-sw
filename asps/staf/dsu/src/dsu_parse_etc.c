@@ -369,7 +369,7 @@ int dsuDoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
   for(ii=nBytes-1;ii>=0;ii--) ba[ii]=0;
   dsu_gTableError=FALSE;
   for(ii=0;ii<numRows;ii++) {
-    if(ii%150==0) dsu_Progress(ii,(int)numRows,NULL,NULL);
+    if(ii%30000==0) dsu_Progress(ii,(int)numRows,NULL,NULL);
     if(dsu_gTableError) { Say1("Error 66d in dsuDoCuts()."); return FALSE; }
     switch(PassCuts(pTable,ii,copy)) {
       case TRUE: SetThisRow(ii,ba); break;
