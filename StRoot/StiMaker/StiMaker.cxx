@@ -304,6 +304,8 @@ Int_t StiMaker::Init()
 
 Int_t StiMaker::Make()
 {
+    //cout <<" \n\n ------------ You have entered StiMaker::Make() ----------- \n\n"<<endl;
+    
     StEvent* rEvent = 0;
     rEvent = (StEvent*) GetInputDS("StEvent");
     if (mSimulation && !mMcEventMaker) {
