@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.23 2000/05/22 21:53:41 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.24 2000/05/24 15:48:15 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,9 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.23  2000/05/22 21:53:41  ullrich
- * No more copying of RICH tables. RICH now writes directly
- * to StEvent. printEventInfo() and makeEvent() modified.
+ * Revision 2.24  2000/05/24 15:48:15  ullrich
+ * Instance of StEvent now also created if no DST dataset
+ * is available.
  *
  * Revision 2.28  2000/08/17 00:38:48  ullrich
  * Allow loading of tpt tracks.
@@ -133,12 +133,13 @@ using std::pair;
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.23 2000/05/22 21:53:41 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.24 2000/05/24 15:48:15 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.23 2000/05/22 21:53:41 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.24 2000/05/24 15:48:15 ullrich Exp $";
 
 ClassImp(StEventMaker)
+  
     doPrintEventInfo  = kFALSE;
 {
     if(title) SetTitle(title);
@@ -174,6 +175,19 @@ StEvent*
 StEventMaker::event() { return mCurrentEvent;};
 
 StRun*
+StEventMaker::run() {return mCurrentRun;};
+
+void
+StEventMaker::setEventManager(StEventManager* mgr)
+{
+    mEventManager = mgr;
+}
+
+Int_t
+StEventMaker::Init()
+{
+    return StMaker::Init();
+}
 
 Int_t
 StEventMaker::Make()
@@ -185,11 +199,16 @@ StEventMaker::Make()
     // makeEvent()    creates StEvent and all its dependent classes
     //
     // Since this Maker should also work without any 'dst' dataset
+    // we create *always* an instance of StEvent, even if it is empty.
+    //
+
     //
     //  Init timing and memory snapshots
-        gMessMgr->Warning() << "StEventMaker::Make(): cannot open 'dstBranch'." << endm;
-        return kStWarn;
+    //
+    StTimer timer;
     if (doPrintCpuInfo) timer.start();
+    if (doPrintMemoryInfo) StMemoryInfo::instance()->snapshot();
+    //  The current event is deleted automatically before every
     //  new event. It is added by using AddData().
     //  The current run is kept until a new one is created. It
     //  is stored in the .runcontrol area using AddRunCont().
@@ -214,12 +233,13 @@ StEventMaker::Make()
     //
     if (!mCreateEmptyInstance && isNewRun()) {
         status = makeRun();
-        gMessMgr->Warning() << "StEventMaker::Make(): no StEvent object created." << endm;
+        if (status == kStOK)
             AddRunCont(mCurrentRun);
         else
             gMessMgr->Warning() << "StEventMaker::Make(): no StRun object created." << endm;
 
-    //  Print out some checks and info if requested
+        status = loadRunConstants();
+        if (status != kStOK)
             gMessMgr->Warning() << "StEventMaker::Make(): cannot load run constants." << endm;
     }
     
@@ -320,29 +340,46 @@ StEventMaker::makeRun()
     
     run_header_st* dstRunHeader = mEventManager->returnTable_run_header(nrows);
     if (!dstRunHeader) {
+        mCurrentRun = 0;
+        return kStWarn;
+    }
+
+    dst_run_summary_st* dstRunSummary = mEventManager->returnTable_dst_run_summary(nrows);
+
+    if (dstRunSummary)
+        mCurrentRun = new StRun(*dstRunHeader, *dstRunSummary);
+    else
+        mCurrentRun = new StRun(*dstRunHeader);
+
+    return kStOK;
+}
+
+Int_t
 StEventMaker::makeEvent()
 {
     //
-    //  Setup StEvent itself.
-    //        If we do not get the event header we better stop
-    //  right away. If we cannot get the event summary
-    //  we continue.
+    //  In case there's nothing to fill (no DST dataset) we
     //  create an empty instance only. This is OK in this
     //  case and therefore we do not return a warning or an
+    //  error message.
     //
-    if (!dstEventHeader) {
-        mCurrentEvent = 0;
+    if (mCreateEmptyInstance) {
         mCurrentEvent = new StEvent;
-                            << "no StEvent object created." << endm;
-        return kStWarn;
-    }
+        gMessMgr->Info() << "StEventMaker::makeEvent(): created empty instance of StEvent." << endm;
 	return kStOK;
+    }
+
+    //
+    //  Create AND setup/fill StEvent.
+    //
+    long nrows;
+
+    //
+    //  Event header and event summary
+    //
+    event_header_st* dstEventHeader = mEventManager->returnTable_event_header(nrows);
     dst_event_summary_st* dstEventSummary = mEventManager->returnTable_dst_event_summary(nrows);
 
-    if (!dstEventSummary || !mDstSummaryParam)
-
-    dst_event_summary_st* dstEventSummary = mEventManager->returnTable_dst_event_summary(nrows);
-        mCurrentEvent = new StEvent(*dstEventHeader, *dstEventSummary, *mDstSummaryParam);
     if (!dstEventHeader) 
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot load dst_event_header_st, "
                             << "will create incomplete instance of StEvent." << endm;
