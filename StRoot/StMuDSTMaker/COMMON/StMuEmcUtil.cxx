@@ -68,38 +68,43 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
               Float_t energy = rawHit[k]->energy();
               Int_t cal = rawHit[k]->calibrationType();              
               Int_t rid;
-              if (d<4) // for the barrel
+              bool save = true;
+              if(d<4 && cal>127) save = false;
+              if(save)
               {
-                mGeo[d]->getId(m,e,s,rid);
-              }
-              else
-              {
-                getEndcapId(EmcDet,m,e,s,rid);
-              }
-              HitsId[rid-1] = HitIndex;
-              HitIndex++;
+                if (d<4) // for the barrel
+                {
+                  mGeo[d]->getId(m,e,s,rid);
+                }
+                else
+                {
+                  getEndcapId(EmcDet,m,e,s,rid);
+                }
+                HitsId[rid-1] = HitIndex;
+                HitIndex++;
               
-              if(EmcDet == 1 || EmcDet == 5  ) // towers save only ADC
-              {
-                muEmc->setTowerADC(rid,adc,EmcDet);
-              }              
-              if(EmcDet==2 || EmcDet == 6) //pre shower
-              {
-                muEmc->addPrsHit(EmcDet);
-                StMuEmcHit* muHit = muEmc->getPrsHit(muEmc->getNPrsHits(EmcDet)-1,EmcDet); 
-                muHit->setId(rid);
-                muHit->setAdc(adc);
-                muHit->setEnergy(energy);
-                muHit->setCalType(cal);      
-              }
-              if(EmcDet==3 || EmcDet==4 || EmcDet==7 || EmcDet==8)
-              {
-                muEmc->addSmdHit(EmcDet);
-                StMuEmcHit* muHit = muEmc->getSmdHit(muEmc->getNSmdHits(EmcDet)-1,EmcDet);          
-                muHit->setId(rid);
-                muHit->setAdc(adc);
-                muHit->setEnergy(energy);
-                muHit->setCalType(cal);      
+                if(EmcDet == 1 || EmcDet == 5  ) // towers save only ADC
+                {
+                  muEmc->setTowerADC(rid,adc,EmcDet);
+                }              
+                if(EmcDet==2 || EmcDet == 6) //pre shower
+                {
+                  muEmc->addPrsHit(EmcDet);
+                  StMuEmcHit* muHit = muEmc->getPrsHit(muEmc->getNPrsHits(EmcDet)-1,EmcDet); 
+                  muHit->setId(rid);
+                  muHit->setAdc(adc);
+                  muHit->setEnergy(energy);
+                  muHit->setCalType(cal);      
+                }
+                if(EmcDet==3 || EmcDet==4 || EmcDet==7 || EmcDet==8)
+                {
+                  muEmc->addSmdHit(EmcDet);
+                  StMuEmcHit* muHit = muEmc->getSmdHit(muEmc->getNSmdHits(EmcDet)-1,EmcDet);          
+                  muHit->setId(rid);
+                  muHit->setAdc(adc);
+                  muHit->setEnergy(energy);
+                  muHit->setCalType(cal);
+                }      
               }
             }
           }      

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.12 2003/09/10 22:33:41 perev Exp $
+ * $Id: StMuDst.h,v 1.13 2003/10/08 21:17:15 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -140,9 +140,9 @@ public:
   /// returns pointer to the i-th v0
   static StV0MuDst* v0s(int i) { return (StV0MuDst*)strangeArrays[smuV0]->UncheckedAt(i); }
   /// returns pointer to the i-th xi
-  static StXiMuDst* xis(int i) { return (StXiMuDst*)strangeArrays[smuXi]->UncheckedAt(i); }
+  static StXiMuDst* xis(int i) { return (StXiMuDst*)(void*)strangeArrays[smuXi]->UncheckedAt(i); }
   /// returns pointer to the i-th kink
-  static StKinkMuDst* kinks(int i) { return (StKinkMuDst*)strangeArrays[smuKink]->UncheckedAt(i); }
+  static StKinkMuDst* kinks(int i) { return (StKinkMuDst*)(void*)strangeArrays[smuKink]->UncheckedAt(i); }
   /// returns pointer to the i-th stranneCut (of type TCut)
   static TCut* strangeCuts(int i) { return (TCut*)strangeArrays[smuCut]->UncheckedAt(i); }
 
@@ -185,6 +185,12 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.13  2003/10/08 21:17:15  laue
+ * StMuEmcUtil updates from Alex Suaide
+ * StMuDst and StMuDstMaker fixes to take the double inheritance of the
+ * StKinkMuDsts into account. A void* had to be introduced when casting
+ * TObject* to StKinkMuDst*.
+ *
  * Revision 1.12  2003/09/10 22:33:41  perev
  * Grid for MuDst corrections
  *
