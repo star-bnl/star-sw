@@ -9,11 +9,14 @@
 #PAMS := pam
 #
 # Specify special user libraries against which to link.
-#USER_LIBS := -ldsu -ldsl -lasu
+USER_LIBS := -ldsl
 #
 # Choose flags controlling make.
 DEBUG := TRUE
-#SHARE := TRUE
+IRIX := IRIX
+ifneq ($(IRIX),$(shell uname))
+SHARE := FALSE
+endif
 #MOTIF := TRUE
 #
 # Specify which CERN libraries against which to link.
