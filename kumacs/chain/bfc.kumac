@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.58 1998/09/21 20:26:34 kathy Exp $
+* * $Id: bfc.kumac,v 1.59 1998/09/22 14:43:23 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.59  1998/09/22 14:43:23  kathy
+* change input file name
+*
 * Revision 1.58  1998/09/21 20:26:34  kathy
 * example to see how to implement user code in call_bfc_read_dst_user.kumac; updated documentation in bfc.kumac
 *
@@ -466,7 +469,7 @@ MACRO bfc _
    skip=0 _
    first=1 _
    no_events=1 _
-   input_data_file=/net/rmds03/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/Gstardata/set100/set100_01_45evts.fz _
+   input_data_file=/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/Gstardata/set100/set100_01_45evts.fz _
    output_file=set100_01_45evts _
    log=bfc.log _
    nunit=21 _
