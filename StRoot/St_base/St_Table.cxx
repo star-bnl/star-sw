@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.73 1999/08/26 04:35:46 fine Exp $ 
+// $Id: St_Table.cxx,v 1.74 1999/08/28 01:23:12 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.74  1999/08/28 01:23:12  fine
+// St_Table::Draw work well under. With no bytecode works under Linux as well
+//
 // Revision 1.73  1999/08/26 04:35:46  fine
 // St_Table::Draw() works somehow for Sun but still fail for Linux
 //
@@ -220,6 +223,14 @@
 #include "TProfile.h"
 #include "TPad.h"
 #include "TEventList.h"
+#include "TPolyMarker.h"
+#include "TView.h"
+#include "TPolyMarker3D.h"
+
+static   Int_t         fNbins[4] = {100,100,100,100};     //Number of bins per dimension
+static   Float_t       fVmin[4]  = {0,0,0,0};             //Minima of varexp columns
+static   Float_t       fVmax[4]  = {20,20,20,20};         //Maxima of varexp columns
+static  TH1 *gCurrentHist = 0;
 //______________________________________________________________________________
 void *ReAllocate(table_head_st *header, Int_t newsize) 
 {
@@ -545,10 +556,11 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
       if (!gROOT->GetMakeDefCanvas()) return;
       (gROOT->GetMakeDefCanvas())();
    }
+#if 0
    Int_t         fNbins[4] = {100,100,100,100};     //Number of bins per dimension
    Float_t       fVmin[4]  = {0,0,0,0};             //Minima of varexp columns
    Float_t       fVmax[4]  = {20,20,20,20};         //Maxima of varexp columns
-
+#endif
 //*-*- 1-D distribution
    if (dimension == 1) {
       action = 1;
@@ -706,6 +718,35 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
   if (exprFileName) delete [] exprFileName;
   if (hkeep) delete [] varexp;
 }
+//______________________________________________________________________________
+static void FindGoodLimits(Int_t nbins, Int_t &newbins, Float_t &xmin, Float_t &xmax)
+{
+//*-*-*-*-*-*-*-*-*Find reasonable bin values*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+//*-*              ==========================
+//*-*  This mathod is a stright copy of void TTree::FindGoodLimits method
+//*-*
+
+   static TGaxis gaxis_tree;
+   Float_t binlow,binhigh,binwidth;
+   Int_t n;
+   Float_t dx = 0.1*(xmax-xmin);
+   Float_t umin = xmin - dx;
+   Float_t umax = xmax + dx;
+   if (umin < 0 && xmin >= 0) umin = 0;
+   if (umax > 0 && xmax <= 0) umax = 0;
+ 
+   gaxis_tree.Optimize(umin,umax,nbins,binlow,binhigh,n,binwidth);
+ 
+   if (binwidth <= 0 || binwidth > 1.e+39) {
+      xmin = -1;
+      xmax = 1;
+   } else {
+      xmin    = binlow;
+      xmax    = binhigh;
+   }
+ 
+   newbins = nbins;
+}
  
 //______________________________________________________________________________
 Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *obj
@@ -717,7 +758,18 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
  // Cc: <rootdev@hpsalo.cern.ch>
  // Sent: 13-th august 1999 year  23:01
  //
+ //  action =  1  Fill 1-D histogram obj
+ //         =  2  Fill 2-D histogram obj
+ //         =  3  Fill 3-D histogram obj
+ //         =  4  Fill Profile histogram obj
+ //         =  5  Fill a TEventlist
+ //         = 11  Estimate Limits
+ //         = 12  Fill 2-D PolyMarker obj
+ //         = 13  Fill 3-D PolyMarker obj
+ //  action < 0   Evaluate Limits for case abs(action)
+ //
  //  Load file
+  Float_t rmin[3],rmax[3];
   printf(" Enter loop\n");
   switch(G__loadfile((Char_t *)exprFileName)) {
   case G__LOADFILE_SUCCESS:
@@ -731,6 +783,8 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
 
   // Float_t  Selection(Float_t *results[], void *address[])
   const Char_t *funcName = "SelectionQWERTY";  
+#define BYTECODE
+#ifdef BYTECODE
   const Char_t *argtypes = "Float_t *,void **";
   long offset;
   G__ClassInfo globals;
@@ -743,39 +797,197 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
     G__unloadfile((Char_t *)exprFileName);
     return kFALSE; // can not get bytecode
   }
-
+#endif
   // Prepare callfunc object
   int i;
-  G__CallFunc callfunc;
-  callfunc.SetBytecode(pbc);
   St_tableDescriptor  *tabsDsc   = GetRowDescriptors();
   tableDescriptor_st  *descTable = tabsDsc->GetTable();
   Float_t  results[]    = {1990,1991,1992,1993,1994};
   Char_t **addressArray = (Char_t **)new ULong_t[tabsDsc->GetNRows()];
   Char_t *thisTable     = (Char_t *)GetArray();
+#ifdef BYTECODE
+  G__CallFunc callfunc;
+  callfunc.SetBytecode(pbc);
  
   callfunc.SetArg((long)(&results[0]));   // give 'Float_t *results[5]' as 1st argument
   callfunc.SetArg((long)(addressArray));  // give 'void    *addressArray[]' as 2nd argument
+#else
+  char buf[200];
+  sprintf(buf,"%s((Float_t*)(%ld),(void**)(%ld))",funcName,results,addressArray);
+#endif
   
   // Call bytecode in loop
   printf("first = %d; n =  %d  NRows = %d \n", firstentry, nentries, GetNRows());
+
+#ifdef BYTECODE
+#  define CALLMETHOD callfunc.Exec(0);
+#else
+#  define CALLMETHOD G__calc(buf);
+#endif
+
+#define TAKEACTION_BEGIN                                                                    \
+            descTable = tabsDsc->GetTable();                                                \
+            for (i=0; i < tabsDsc->GetNRows(); i++,descTable++ )                            \
+               addressArray[i] = thisTable + descTable->m_Offset + GetRowSize()*firstentry; \
+            for(i=firstentry;i<lastEntry;i++) {                                            \
+            CALLMETHOD
+
+#define TAKEACTION_END  for (int j=0; j < tabsDsc->GetNRows(); j++ ) addressArray[j] += GetRowSize(); }                                                                     \
+
+
   if (firstentry < GetNRows() ) {
     Int_t lastEntry = TMath::Min(UInt_t(firstentry+nentries),UInt_t(GetNRows()));
-    for (i=0; i < tabsDsc->GetNRows(); i++,descTable++ ) 
-       addressArray[i] = thisTable + descTable->m_Offset + GetRowSize()*firstentry;
-    for(i=firstentry;i<lastEntry;i++) {
-      callfunc.Exec(0);
-      // Fill this histograms;
-      if (results[1]) {
-         ((TH1*)obj)->Fill(Axis_t(results[0]),Stat_t(results[1]));
-//       ((TH1*)obj)->Fill(results[1],results[2],results[0]);
+      if (action < 0) {
+        fVmin[0] = fVmin[1] = fVmin[2] = 1e30;
+        fVmax[0] = fVmax[1] = fVmax[2] = -fVmin[0];
       }
-      // preparing next loop
-      for (int j=0; j < tabsDsc->GetNRows(); j++ ) 
-         addressArray[j] += GetRowSize();   
-    }
+      Int_t nchans = 0;
+      switch ( action ) {
+        case -1: {
+             TAKEACTION_BEGIN
+                if (fVmin[0] > results[0]) fVmin[0] = results[0];
+                if (fVmax[0] < results[0]) fVmax[0] = results[0];
+             TAKEACTION_END
+ 
+             nchans = fNbins[0];
+             if (fVmin[0] >= fVmax[0]) { fVmin[0] -= 1; fVmax[0] += 1;}
+             FindGoodLimits(nchans,fNbins[0],fVmin[0],fVmax[0]);
+             ((TH1 *)obj)->SetBins(fNbins[0],fVmin[0],fVmax[0]);
+           }
+        case  1:
+            if (action > 0) TH1 *h1 = (TH1*)obj;
+            TAKEACTION_BEGIN
+               if (results[1]) ((TH1 *)obj)->Fill(Axis_t(results[0]),Stat_t(results[1]));
+            TAKEACTION_END
+            gCurrentHist = ((TH1 *)obj);
+            break;
+        case  -2:
+            TAKEACTION_BEGIN
+              if (fVmin[0] > results[1]) fVmin[0] = results[1];
+              if (fVmax[0] < results[1]) fVmax[0] = results[1];
+              if (fVmin[1] > results[0]) fVmin[1] = results[0];
+              if (fVmax[1] < results[0]) fVmax[1] = results[0];
+            TAKEACTION_END
+            nchans = fNbins[0];
+            if (fVmin[0] >= fVmax[0]) { fVmin[0] -= 1; fVmax[0] += 1;}
+            FindGoodLimits(nchans,fNbins[0],fVmin[0],fVmax[0]);
+            if (fVmin[1] >= fVmax[1]) { fVmin[1] -= 1; fVmax[1] += 1;}
+            FindGoodLimits(nchans,fNbins[1],fVmin[1],fVmax[1]);
+            ((TH1*)obj)->SetBins(fNbins[1],fVmin[1],fVmax[1],fNbins[0],fVmin[0],fVmax[0]);
+        case   2:
+              if (obj->IsA() == TH2F::Class()) {
+                 TAKEACTION_BEGIN
+                   if (results[2]) ((TH2F*)obj)->Fill(Axis_t(results[0]),Axis_t(results[1]),Stat_t(results[2]));
+                 TAKEACTION_END
+              }
+              else if (obj->IsA() == TH2S::Class()) {
+                 TAKEACTION_BEGIN
+                  if (results[2]) ((TH2S*)obj)->Fill(Axis_t(results[0]),Axis_t(results[1]),Stat_t(results[2]));
+                 TAKEACTION_END
+              }
+              else if (obj->IsA() == TH2C::Class()) {
+                 TAKEACTION_BEGIN
+                   if (results[2]) ((TH2C*)obj)->Fill(Axis_t(results[0]),Axis_t(results[1]),Stat_t(results[2]));
+                 TAKEACTION_END
+              }
+              else if (obj->IsA() == TH2D::Class()) {
+                 TAKEACTION_BEGIN
+                   if (results[2]) ((TH2D*)obj)->Fill(Axis_t(results[0]),Axis_t(results[1]),Stat_t(results[2]));
+                 TAKEACTION_END
+              }
+            gCurrentHist =  ((TH1 *)obj);
+            break;
+        case -4:
+            TAKEACTION_BEGIN
+              if (fVmin[0] > results[1]) fVmin[0] = results[1];
+              if (fVmax[0] < results[1]) fVmax[0] = results[1];
+              if (fVmin[1] > results[0]) fVmin[1] = results[0];
+              if (fVmax[1] < results[0]) fVmax[1] = results[0];
+            TAKEACTION_END
+            nchans = fNbins[1];
+            if (fVmin[1] >= fVmax[1]) { fVmin[1] -= 1; fVmax[1] += 1;}
+            FindGoodLimits(nchans,fNbins[1],fVmin[1],fVmax[1]);
+            ((TProfile*)obj)->SetBins(fNbins[1],fVmin[1],fVmax[1]);
+        case  4:
+            TAKEACTION_BEGIN
+               if (results[2]) ((TProfile*)obj)->Fill(Axis_t(results[0]),Axis_t(results[0]),Stat_t(results[2]));
+            TAKEACTION_END
+            break;
+        case -12:
+            TAKEACTION_BEGIN
+              if (fVmin[0] > results[1]) fVmin[0] = results[1];
+              if (fVmax[0] < results[1]) fVmax[0] = results[1];
+              if (fVmin[1] > results[0]) fVmin[1] = results[0];
+              if (fVmax[1] < results[0]) fVmax[1] = results[0];
+            TAKEACTION_END
+            nchans = fNbins[0];
+            if (fVmin[0] >= fVmax[0]) { fVmin[0] -= 1; fVmax[0] += 1;}
+            FindGoodLimits(nchans,fNbins[0],fVmin[0],fVmax[0]);
+            if (fVmin[1] >= fVmax[1]) { fVmin[1] -= 1; fVmax[1] += 1;}
+            FindGoodLimits(nchans,fNbins[1],fVmin[1],fVmax[1]);
+            ((TH2F*)obj)->SetBins(fNbins[1],fVmin[1],fVmax[1],fNbins[0],fVmin[0],fVmax[0]);
+        case  12: {             
+            if (!strstr(option,"same") && !strstr(option,"goff")) {
+              ((TH2F*)obj)->DrawCopy(option);
+              gPad->Update();
+            }
+            TPolyMarker *pm = new TPolyMarker(lastEntry-firstentry);
+//            pm->SetMarkerStyle(GetMarkerStyle());
+//            pm->SetMarkerColor(GetMarkerColor());
+//            pm->SetMarkerSize(GetMarkerSize());
+            Float_t *x = pm->GetX();
+            Float_t *y = pm->GetY();
+            Float_t u, v;
+            Float_t umin = gPad->GetUxmin();
+            Float_t umax = gPad->GetUxmax();
+            Float_t vmin = gPad->GetUymin();
+            Float_t vmax = gPad->GetUymax();
+            TAKEACTION_BEGIN
+              u = gPad->XtoPad(results[0]);
+              v = gPad->YtoPad(results[1]);
+              if (u < umin) u = umin;
+              if (u > umax) u = umax;
+              if (v < vmin) v = vmin;
+              if (v > vmax) v = vmax;
+              x[i] = u;
+              y[i] = v;
+            TAKEACTION_END
+            if (!strstr(option,"goff")) pm->Draw();
+            if (!((TH2F*)obj)->TestBit(kCanDelete)) 
+            for(i=firstentry;i<lastEntry;i++) ((TH2F*)obj)->Fill(x[i], y[i]);
+            gCurrentHist = ((TH1*)obj);         
+          }
+          break; 
+        case -13:
+            TAKEACTION_BEGIN
+              if (fVmin[0] > results[2]) fVmin[0] = results[2];
+              if (fVmax[0] < results[2]) fVmax[0] = results[2];
+              if (fVmin[1] > results[1]) fVmin[1] = results[1];
+              if (fVmax[1] < results[1]) fVmax[1] = results[1];
+              if (fVmin[2] > results[0]) fVmin[2] = results[0];
+              if (fVmax[2] < results[0]) fVmax[2] = results[0];
+            TAKEACTION_END
+            rmin[0] = fVmin[2]; rmin[1] = fVmin[1]; rmin[2] = fVmin[0];
+            rmax[0] = fVmax[2]; rmax[1] = fVmax[1]; rmax[2] = fVmax[0];
+            gPad->Clear();
+            gPad->Range(-1,-1,1,1);
+            new TView(rmin,rmax,1);
+        case 13: {
+            TPolyMarker3D *pm3d = new TPolyMarker3D(lastEntry-firstentry);
+//            pm3d->SetMarkerStyle(GetMarkerStyle());
+//            pm3d->SetMarkerColor(GetMarkerColor());
+//            pm3d->SetMarkerSize(GetMarkerSize());
+            TAKEACTION_BEGIN
+                pm3d->SetPoint(i,results[0],results[1],results[2]);
+            TAKEACTION_END
+            pm3d->Draw();
+          }  
+            break;
+        default:
+          Error("EntryLoop","unknown action \"%d\" for table <%s>", action, GetName());
+          break;
+      };
   }
-
   G__unloadfile((Char_t *)exprFileName);
   delete [] addressArray;
   return kTRUE;
@@ -1713,7 +1925,8 @@ Char_t *St_Table::MakeExpression(const Char_t *expressions[],Int_t nExpressions)
    str << "void SelectionQWERTY(float *"<<resID<<", void **address)"   << endl;
    str << "{"                                                        << endl;
 //print   str << " printf(\" Selection  : " << GetName() <<":  %x %f \\n\","<<resID<<",*"<<resID<<");" << endl; 
-   str << "void *topr = 0;" << endl;
+   str << "void *topr = address[0];" << endl;
+//print   str << "printf(\" First address: Ox%x \\n\",topr);" << endl;
    int i = 0;
    for (i=0; i < dsc->GetNRows(); i++,descTable++ ) {
     // First check whether we do need this column
