@@ -1,0 +1,103 @@
+//:Copyright 1995, Lawrence Berkeley National Laboratory
+//:>--------------------------------------------------------------------
+//:FILE:        dio_i.idl
+//:DESCRIPTION: Dataset Input/Output Interface Orbix-objects
+//:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:        -- STILL IN DEVELOPMENT --
+//:HISTORY:     12dec95-v002a-cet- Addapt to new working STAF.
+//:HISTORY:     10jul95-v001a-cet- added testStream (from TDM).
+//:HISTORY:     ??jul95-v000a-cet- creation
+//:<--------------------------------------------------------------------
+
+//:----------------------------------------------- INCLUDES           --
+#include "tdm_i.idl"
+
+//:----------------------------------------------- TYPEDEFS           --
+enum DIO_MODE_T {
+    DIO_READ_MODE,
+    DIO_WRITE_MODE,
+    DIO_UPDATE_MODE,
+    DIO_UNKNOWN_MODE
+};
+
+enum DIO_STATE_T {
+    DIO_OPEN_STATE,
+    DIO_CLOSE_STATE,
+    DIO_READ_STATE,
+    DIO_WRITE_STATE,
+    DIO_UNKNOWN_STATE
+};
+
+//:=============================================== INTERFACE          ==
+interface dioStream_i : socObject_i {
+
+//:----------------------------------------------- ATTRIBUTES         --
+readonly attribute DIO_MODE_T mode;
+readonly attribute DIO_STATE_T state;
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T open(in DIO_MODE_T mode);
+STAFCV_T close();
+STAFCV_T getEvent(in tdmDataset_i destination);
+STAFCV_T putEvent(in tdmDataset_i source);
+};
+
+//:=============================================== INTERFACE          ==
+interface dioFileStream_i : dioStream_i {
+//:----------------------------------------------- ATTRIBUTES         --
+readonly attribute string fileName;
+
+//:----------------------------------------------- FUNCTIONS          --
+};
+
+//:=============================================== INTERFACE          ==
+interface dioTapeStream_i : dioStream_i {
+//:----------------------------------------------- ATTRIBUTES         --
+readonly attribute string tapeName;
+attribute long bufferSize;
+
+//:----------------------------------------------- FUNCTIONS          --
+};
+
+//:=============================================== INTERFACE          ==
+interface dioSockStream_i : dioStream_i {
+//:----------------------------------------------- ATTRIBUTES         --
+readonly attribute long port;
+readonly attribute string host;
+readonly attribute long socket;
+readonly attribute long bufferSize; //- readwrite???
+attribute long maxHandshakes;
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T acknowledgeRequest();
+STAFCV_T requestAcknowledge();
+};
+
+//:=============================================== INTERFACE          ==
+interface dioFactory_i : socFactory_i {
+
+//:----------------------------------------------- ATTRIBUTES         --
+//-BUG-readonly attribute long count;
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T deleteStream(in string name);
+STAFCV_T findStream(in string name, out dioStream_i stream);
+STAFCV_T getStream(in IDREF_T id, out dioStream_i stream);
+
+STAFCV_T deleteFileStream(in string name);
+STAFCV_T findFileStream(in string name, out dioFileStream_i fStream);
+STAFCV_T getFileStream(in IDREF_T id, out dioFileStream_i fStream);
+STAFCV_T newFileStream(in string name, in string fileName);
+
+STAFCV_T deleteTapeStream(in string name);
+STAFCV_T findTapeStream(in string name, out dioTapeStream_i tStream);
+STAFCV_T getTapeStream(in IDREF_T id, out dioTapeStream_i tStream);
+STAFCV_T newTapeStream(in string name, in string tapeName);
+
+STAFCV_T deleteSockStream(in string name);
+STAFCV_T findSockStream(in string name, out dioSockStream_i sStream);
+STAFCV_T getSockStream(in IDREF_T id, out dioSockStream_i sStream);
+STAFCV_T newSockStream(in string name, in string hostName, in long port);
+
+};
+

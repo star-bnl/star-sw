@@ -1,0 +1,71 @@
+//:Copyright 1995, Lawrence Berkeley Laboratory
+//:>--------------------------------------------------------------------
+//:FILE:        soc_i.idl
+//:DESCRIPTION: Service & Objcect Catalog interface definition
+//:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:        -- NONE KNOWN : STILL IN DEVELOPMENT --
+//:HISTORY:     13nov95-v001a-cet- update to _i convention for
+//:HISTORY:		interface, not implementation
+//:HISTORY:     21jul95-v000a-cet- creation
+//:<--------------------------------------------------------------------
+
+//:----------------------------------------------- INCLUDES           --
+#include "asu_i.idl"
+
+//:----------------------------------------------- TYPEDEFS           --
+#include "soc_types.idl"
+
+//:=============================================== INTERFACE          ==
+interface socObject_i {
+
+//:----------------------------------------------- ATTRIBUTES         --
+readonly attribute IDREF_T idRef;
+readonly attribute string name;
+readonly attribute string type;
+readonly attribute string version;
+readonly attribute SOC_PTR_T ptr;
+readonly attribute string soRef;
+attribute boolean locked;
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T attach();
+STAFCV_T release();
+//--TODO--boolean implementsInterface(in string iface);
+
+};
+
+//:=============================================== INTERFACE          ==
+interface socFactory_i : socObject_i {
+
+//:----------------------------------------------- ATTRIBUTES         --
+readonly attribute long count;
+readonly attribute long maxCount;
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T addEntry(in IDREF_T idRef);
+STAFCV_T deleteEntry(in IDREF_T idRef);
+string list();
+IDREF_T entry(in long n);
+};
+
+//:=============================================== INTERFACE          ==
+interface socCatalog_i : socFactory_i {
+
+//:----------------------------------------------- ATTRIBUTES         --
+
+//:----------------------------------------------- FUNCTIONS          --
+STAFCV_T deleteID(in IDREF_T id);
+STAFCV_T deleteObject(in string name, in string type);
+STAFCV_T findObject(in string name, in string type, 
+		out socObject_i obj);
+STAFCV_T getObject(in IDREF_T id,
+		out socObject_i obj);
+STAFCV_T idObject(in string name, in string type, 
+		out IDREF_T id);
+STAFCV_T newObject(in string name);
+STAFCV_T signIn(in socObject_i obj, 
+		out IDREF_T id);
+STAFCV_T signOut(in IDREF_T idRef);
+
+};
+
