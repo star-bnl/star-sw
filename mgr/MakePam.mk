@@ -205,7 +205,8 @@ $(LIB_PKG):$(OBJS)
 endif                          
 ifneq ($(strip $(FILES_SL) $(FILES_OG) $(FILES_init)),)   
 $(SL_PKG): $(FILES_SL) $(FILES_OG) $(FILES_init) $(LIB_PKG)
-	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG)  $(FILES_init)  -o $(SL_PKG) \
+#	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG)  $(FILES_init)  -o $(SL_PKG) \
+	$(LD) $(LDFLAGS) $(FILES_SL) $(FILES_OG)  $(FILES_init)  -o $(SL_PKG) \
         $(LIBRARIES) $(CERN_LIBS)  $(FLIBS) $(CLIBS)
 	@echo "           Shared library " $(SL_PKG) " has been created"   
 #--------- module --------- 
