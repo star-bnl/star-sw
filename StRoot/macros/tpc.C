@@ -9,6 +9,10 @@
 #define GTRACK
 //#define FZIN
 //#define MINIDAQ
+#ifdef MINIDAQ
+#define CTEST
+#endif   
+//#define CTEST
 #define TPC
 //#define TRS
 #define TSS
@@ -182,15 +186,18 @@ void tpc (const Int_t Nevents=1,
   St_db_Maker *dbMk = new St_db_Maker("db",mainDB);
   chain->SetInput("params","db:StDb/params");
   dbMk->SetDebug();  
-#ifdef TRS
-  // Additional DB for trs
-  cout<<"creating DB for trs"<<endl;
-  const char *trsDB = "/afs/rhic/star/tpc/base/StDb";
-  // or
-  //  const char *trsDB = "/afs/rhic/star/tpc/base/StDb";
-  //
-  St_db_Maker *dbMktrs = new St_db_Maker("trsdb",trsDB);
-  dbMktrs->SetDebug();
+#ifdef CTEST
+  // TPC test Data Base
+  cout<<"creating DB for TPC test"<<endl;
+  const char *tpcDB = "/afs/rhic/star/tpc/ctest/StDb";
+  St_db_Maker *dbMktpc = new St_db_Maker("tpcdb",tpcDB);
+  dbMktpc->SetDebug();
+#else
+  // TPC Data Base
+  cout<<"creating DB for TPC"<<endl;
+  const char *tpcDB = "/afs/rhic/star/tpc/base/StDb";
+  St_db_Maker *dbMktpc = new St_db_Maker("tpcdb",tpcDB);
+  dbMktpc->SetDebug();
 #endif
 
 
@@ -217,6 +224,8 @@ void tpc (const Int_t Nevents=1,
 #ifdef MINIDAQ
   StMinidaqMaker *tpc_raw = new StMinidaqMaker("tpc_raw");
   geant->LoadGeometry("detp geometry field_only field_off");
+  cout<<"initializing input for the tpc DB"<<endl;
+  tpc_raw->SetInput("params","tpcdb:StDb/params"); 
 #endif
 
 #ifdef GTRACK
@@ -246,14 +255,16 @@ void tpc (const Int_t Nevents=1,
 //		trs
   StTrsMaker   *trs = new StTrsMaker;
   cout<<"initializing input for the trs DB"<<endl;
-  trs->SetInput("params","trsdb:StDb/params");
+  trs->SetInput("params","tpcdb:StDb/params");
 
   St_tpcdaq_Maker *tpc_raw = new St_tpcdaq_Maker;
 #else
 #ifdef TSS
 //		tss
   St_tss_Maker *tssMk 	= new St_tss_Maker("tpc_raw");
-  tssMk->SetDebug();
+  cout<<"initializing input for the tpc DB"<<endl;
+  tssMk->SetInput("params","tpcdb:StDb/params"); 
+  //  tssMk->SetDebug();
 #endif
 #endif
 
@@ -268,6 +279,9 @@ void tpc (const Int_t Nevents=1,
 #ifdef TPC
 //		tcl
   St_tcl_Maker *tclMk = new St_tcl_Maker("tpc_hits");
+  cout<<"initializing input for the tpc DB"<<endl;
+  tclMk->SetInput("params","tpcdb:StDb/params");  
+  tclMk->SetDebug();
   tclMk->SetDebug();
   tclMk->tclPixTransOn();  
 #endif
