@@ -30,12 +30,17 @@ enum StDetectorId {
   kPhmdCpvId   = kPhmdCpvIdentifier,
   kPhmdId      = kPhmdIdentifier
 };
+// maximal sizes of tracking part of STAR in cm
+enum StarMaxSize { kStarMaxR=200, kStarMaxZ=269 };
 #endif
 
 
-// $Id: StDetectorId.h,v 2.1 2004/04/26 16:35:19 fisyak Exp $
+// $Id: StDetectorId.h,v 2.2 2004/10/17 03:29:33 perev Exp $
 //
 // $Log: StDetectorId.h,v $
+// Revision 2.2  2004/10/17 03:29:33  perev
+// enum StarMaxSize added
+//
 // Revision 2.1  2004/04/26 16:35:19  fisyak
 // Move enumerations from pams/global/inc => StEvent
 //
