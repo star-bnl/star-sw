@@ -9,12 +9,13 @@ StIOInterFace::StIOInterFace(const char *name,const char *iomode)
   if (iomode) SetIOMode(iomode);
 }  
 //_____________________________________________________________________________
-void StIOInterFace::SetBranch(const Char_t *brName,const Char_t *file,const Char_t *mode)
+void StIOInterFace::SetBranch(const Char_t *brName,const Char_t *file,const Char_t *mode,Option_t *opt)
 {
   TString ts("SetBranch:");
 
   if (file) { ts += " file="; ts += file;}
   if (mode) { ts += " mode="; ts += mode;}
+  if (opt ) { ts += "  opt="; ts += opt ;}
   IntoBranch(brName,ts);  
 }
 //_____________________________________________________________________________

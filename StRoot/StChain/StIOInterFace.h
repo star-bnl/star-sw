@@ -38,7 +38,7 @@ public:
    virtual const char *GetFile()     const   {return (const char*)fFile;};
    virtual const char *GetFileName() const   {return GetFile();};
 
-   virtual void SetBranch (const Char_t *brName,const Char_t *file=0,const Char_t *iomode="w");
+   virtual void SetBranch (const Char_t *brName,const Char_t *file=0,const Char_t *iomode="w",Option_t *opt=0);
    virtual void IntoBranch(const Char_t *brName,const Char_t *logNames);
 
    ClassDef(StIOInterFace, 1)   //StAR chain virtual base class for Makers
