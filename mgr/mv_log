@@ -20,7 +20,7 @@
 # set list = `ls *evts`
 # if (-z "$list") exit 0
 #
- foreach tag (NoSpace ErrLoadLib DslError CantRead CantOpen DslNode NoSpaceOnDev SegViolation BreakBusErr SimulBreak staging-fails done NoGeantHitTPC NotEnTrackSVT tfsProblem evrProblem FillDST-Problem)
+ foreach tag (NoSpace ErrLoadLib CantRead CantOpen NoSpaceOnDev staging_failed staging_problem SegViolation BreakBusErr SimulBreak done NoGeantHitTPC NotEnTrackSVT tfsProblem evrProblem)
     switch ($tag)
     case "NoSpace":
 #=============================
@@ -33,14 +33,6 @@
      case "ErrLoadLib":
 #============================
      set list = `grep -l 'error\ in\ loading\ shared' *evts.err`
-    foreach file ($list)
-    set ltime = `mod_time $file`
-     if( $ltime > 3600)  mv $file ${file}_${tag}
-    end
-    breaksw
-    case "DslError":
-#============================
-     set list = `grep -l 'DS_E_XDR_IO_ERROR' *evts.err`
     foreach file ($list)
     set ltime = `mod_time $file`
      if( $ltime > 3600)  mv $file ${file}_${tag}
@@ -64,12 +56,27 @@
     breaksw
     case "NoSpaceOnDev":
 #============================
-     set list = `grep -l 'No\ space\ left\ on\ device' *evts.err`
+    set list = `grep -l 'No\ space\ left\ on\ device' *evts.err`
     foreach file ($list)
-     set ltime = `mod_time $file`
-     if( $ltime > 3600)  mv $file ${file}_${tag}
+    set ltime = `mod_time $file`
+    if( $ltime > 3600)  mv $file ${file}_${tag}
     end
     breaksw 
+    case "staging-failed":
+#===========================
+    set list = `grep -l 'error\ in\ CFOPEN' *evts.err`
+    foreach file ($list)
+    set ltime = `mod_time $file`
+    if( $ltime > 3600)  mv $file ${file}_${tag}
+    end
+    breaksw
+    case "staging-problem":
+#===========================
+    set list = `grep -l E-o-D *evts`
+    foreach file ($list)
+    set ltime = `mod_time $file`
+     if( $ltime > 3600)  mv $file ${file}_${tag}
+    end
     case "SegViolation":
 #===========================
     set list = `grep -l '*\*\*\ Break \*\*\*\ Segmentation\ violation' *evts`
@@ -80,7 +87,7 @@
     breaksw  
     case "BreakBusErr"
 #===========================
-    set list = `grep -l '*\*\*\ Break \*\*\*\ Bus\ error' *evts_done`
+    set list = `grep -l '*\*\*\ Break \*\*\*\ Bus\ error' *evts`
     foreach file ($list)
     set ltime = `mod_time $file`
      if( $ltime > 3600)  mv $file ${file}_${tag}
@@ -88,20 +95,12 @@
     breaksw
        case "SimulBreak"
 #===========================
-    set list = `grep -l '*\*\*\ Break \*\*\*\ Simulated\ break' *evts_done`
+    set list = `grep -l '*\*\*\ Break \*\*\*\ Simulated\ break' *evts`
     foreach file ($list)
     set ltime = `mod_time $file`
      if( $ltime > 3600)  mv $file ${file}_${tag}
     end
     breaksw 
-       case "staging-fails":
-#===========================
-    set list = `grep -l E-o-D *evts`
-    foreach file ($list)
-    set ltime = `mod_time $file`
-     if( $ltime > 3600)  mv $file ${file}_${tag}
-    end
-    breaksw
     case "done":
 #===========================
     set list = `grep -l 'total\ CPU\/event' *evts`
@@ -142,14 +141,6 @@
      if( $ltime > 3600)  mv $file ${file}_${tag}
     end
     breaksw 
-     case "FillDST-Problem":
-#===========================
-    set list = `grep -l 'Problem\ on\ return\ from\ FILL_DST_RUN_SUMMARY' *evts`
-    foreach file ($list)
-     set ltime = `mod_time $file`
-     if( $ltime > 3600)  mv $file ${file}_${tag}
-    end
-    breaksw     
     default:
 #  ====================
     breaksw
