@@ -2,11 +2,9 @@
 
 #include <fstream.h>
 
-#include "/afs/rhic/star/packages/SL01l/StRoot/StEventUtilities/BetheBlochFunction.hh"
+#include "/afs/rhic/star/replicas/DEV/StRoot/StEventUtilities/BetheBlochFunction.hh"
 
-
-//#include "/star/u2e/aihong/spectrawork2/fitDataFromFlowDST/MaxllBoltz.hh"
-#include "/star/u2e/aihong/spectrawork2/fitDataFromFlowDST/StRoot/filler/StPidProbabilityConst.hh"
+#include "/afs/rhic/star/replicas/DEV/StRoot/StPidAmpMaker/StPidProbabilityConst.hh"
 
 
 void WriteOutPIDTableMacro( char* myOutputName){

@@ -1,4 +1,4 @@
-#include "/star/data02/scratch/aihong/PIDFitter/StRoot/StEventUtilities/BetheBlochFunction.hh"
+#include "/afs/rhic/star/replicas/DEV/StRoot/StEventUtilities/BetheBlochFunction.hh"
 
 void checkPIDInFlowPicoDST(){
 
