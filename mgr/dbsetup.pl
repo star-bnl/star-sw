@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl -w
 #
-# $Id: dbsetup.pl,v 1.4 1999/07/25 16:12:43 wenaus Exp $
+# $Id: dbsetup.pl,v 1.5 1999/07/25 16:25:54 wenaus Exp $
 #
 # $Log: dbsetup.pl,v $
+# Revision 1.5  1999/07/25 16:25:54  wenaus
+# Add dbhost
+#
 # Revision 1.4  1999/07/25 16:12:43  wenaus
 # Allow for remote DB access
 #
@@ -67,13 +70,14 @@ if ( $systype eq 'sun4' ) {
 $LD_LIBRARY_PATH.=":/usr/ccs/lib:/opt/star/lib";
 
 ## Database setup
+$dbhost="duvall.star.bnl.gov";
 $dbuser="root";
 $dbpass="";
 $dbname="";
 if ($dbuser eq 'root') {
-    $dbname="system_data:duvall.star.bnl.gov";
+    $dbname="system_data:$dbhost";
 } else {
-    $dbname="".$dbuser."_data:duvall.star.bnl.gov";
+    $dbname="".$dbuser."_data:$dbhost";
 }
 
 # DAQ format info:
