@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.hh,v 1.2 2000/11/27 14:08:04 hummler Exp $
+// $Id: StFtpcSlowSimField.hh,v 1.3 2001/03/06 23:36:05 jcs Exp $
 // $Log: StFtpcSlowSimField.hh,v $
+// Revision 1.3  2001/03/06 23:36:05  jcs
+// use database instead of params
+//
 // Revision 1.2  2000/11/27 14:08:04  hummler
 // inplement tzero and lorentz angle correction factor
 //
@@ -17,6 +20,7 @@
 
 class Inparam;
 class StFtpcParamReader;
+class StFtpcDbReader;
 extern  int Locate(const int npt, const float* x, const float xx);
 
 //
@@ -26,7 +30,8 @@ extern  int Locate(const int npt, const float* x, const float xx);
 class StFtpcSlowSimField
 {
 public:
-  StFtpcSlowSimField(StFtpcParamReader *paramReader);
+  StFtpcSlowSimField(StFtpcParamReader *paramReader,
+                     StFtpcDbReader    *dbReader);
   ~StFtpcSlowSimField();
   float Interpolate(const int npt, const float* x, 
 		    const float* y,const int ich, 
@@ -70,6 +75,7 @@ public:
   
 private:
   StFtpcParamReader *mParam;
+  StFtpcDbReader *mDb;
   // variable declarations
   float del_r;             // radial grid size
   float inverseDeltaRadius; // 1/del_r

@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.2 2001/01/11 18:28:47 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.3 2001/03/06 23:36:09 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.3  2001/03/06 23:36:09  jcs
+// use database instead of params
+//
 // Revision 1.2  2001/01/11 18:28:47  jcs
 // use PhysicalConstants.h instead of math.h, remove print statement
 //
@@ -19,8 +22,10 @@
 #include "StFtpcSlowSimulator.hh"
 #include "StFtpcRawWriter.hh"
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
+#include "StFtpcClusterMaker/StFtpcDbReader.hh"
 #include "StFtpcClusterMaker/StFtpcGeantReader.hh"
 
+#include "StMessMgr.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "TH1.h"
@@ -28,13 +33,9 @@
 
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_ftp_hit_Table.h"
-#include "tables/St_fss_param_Table.h"
-#include "tables/St_fss_gas_Table.h"
-#include "tables/St_fcl_padtrans_Table.h"
 #include "tables/St_fcl_ftpcndx_Table.h" 
 #include "tables/St_fcl_ftpcsqndx_Table.h" 
 #include "tables/St_fcl_ftpcadc_Table.h" 
-#include "tables/St_fcl_det_Table.h"
 
 ClassImp(StFtpcSlowSimMaker)
 
@@ -43,8 +44,13 @@ StFtpcSlowSimMaker::StFtpcSlowSimMaker(const char *name):
 StMaker(name),
 m_fss_gas(0),
 m_fss_param(0),
-m_padtrans(0),
-m_det(0)
+m_det(0),
+m_padrow_z(0),
+m_efield(0),
+m_vdrift(0),
+m_deflection(0),
+m_dvdriftdp(0),
+m_ddeflectiondp(0)
 {
 }
 //_____________________________________________________________________________
@@ -59,9 +65,29 @@ Int_t StFtpcSlowSimMaker::Init(){
 
   m_fss_gas  = (St_fss_gas      *) local("fsspars/fss_gas");
   m_fss_param= (St_fss_param    *) local("fsspars/fss_param");
-  m_padtrans = (St_fcl_padtrans *) local("fclpars/padtrans");
   m_det      = (St_fcl_det      *) local("fclpars/det");
-  m_zrow     = (St_fcl_zrow     *) local("fclpars/zrow");
+
+  St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
+  if ( !ftpc_geometry_db ){
+     gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC database: Geometry"<<endm;
+     return kStWarn;
+  }
+  St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
+
+  m_padrow_z   = (St_ftpcPadrowZ  *)dblocal_geometry("ftpcPadrowZ" );
+
+  St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
+  if ( !ftpc_calibrations_db ){
+     gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC database: Calibrations"<<endm;
+     return kStWarn;
+  }
+  St_DataSetIter       dblocal_calibrations(ftpc_calibrations_db);
+
+  m_efield     = (St_ftpcEField *)dblocal_calibrations("ftpcEField" );
+  m_vdrift     = (St_ftpcVDrift *)dblocal_calibrations("ftpcVDrift" );
+  m_deflection = (St_ftpcDeflection *)dblocal_calibrations("ftpcDeflection" );
+  m_dvdriftdp  = (St_ftpcdVDriftdP *)dblocal_calibrations("ftpcdVDriftdP" );
+  m_ddeflectiondp = (St_ftpcdDeflectiondP *)dblocal_calibrations("ftpcdDeflectiondP" );
 
   
   // Create Histograms    
@@ -101,12 +127,20 @@ Int_t StFtpcSlowSimMaker::Make(){
     // create parameter reader
     StFtpcParamReader *paramReader = new StFtpcParamReader(m_fss_gas,
 							   m_fss_param,
-							   m_padtrans,
-							   m_det,
-							   m_zrow);
-  
+							   m_det);
+ 
+    //create FTPC database reader
+    StFtpcDbReader *dbReader = new StFtpcDbReader(paramReader,
+                                                  m_padrow_z,
+                                                  m_efield,
+                                                  m_vdrift,
+                                                  m_deflection,
+                                                  m_dvdriftdp,
+                                                  m_ddeflectiondp);
+
     StFtpcSlowSimulator *slowsim = new StFtpcSlowSimulator(geantReader,
 							   paramReader, 
+                                                           dbReader,
 							   dataWriter);
  
     cout<< " start StFtpcSlowSimulator "<<endl;
@@ -114,6 +148,7 @@ Int_t StFtpcSlowSimMaker::Make(){
 
     delete slowsim;
     delete paramReader;
+    delete dbReader;
     delete dataWriter;
     delete geantReader;
 

@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.17 2001/01/25 15:25:35 oldi Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.18 2001/03/06 23:33:51 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.18  2001/03/06 23:33:51  jcs
+// use database instead of params
+//
 // Revision 1.17  2001/01/25 15:25:35  oldi
 // Fix of several bugs which caused memory leaks:
 //  - Some arrays were not allocated and/or deleted properly.
@@ -62,8 +65,10 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQMaker/StFTPCReader.h"
 
+#include "StMessMgr.h"
 #include "StFtpcClusterMaker.h"
 #include "StFtpcParamReader.hh"
+#include "StFtpcDbReader.hh"
 #include "StFtpcGeantReader.hh"
 #include "StFtpcChargeStep.hh"
 #include "StFtpcClusterFinder.hh"
@@ -80,16 +85,9 @@
 #include "tables/St_fcl_ftpcsqndx_Table.h"
 #include "tables/St_fcl_ftpcadc_Table.h"
 
-#include "tables/St_fcl_padtrans_Table.h"
-#include "tables/St_fcl_ampslope_Table.h"
-#include "tables/St_fcl_ampoff_Table.h"
-#include "tables/St_fcl_timeoff_Table.h"
-#include "tables/St_fcl_det_Table.h"
-#include "tables/St_fcl_zrow_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_ftp_hit_Table.h"
-#include "tables/St_ffs_gaspar_Table.h"
 #include "tables/St_ffs_gepoint_Table.h"
 
 ClassImp(StFtpcClusterMaker)
@@ -97,13 +95,17 @@ ClassImp(StFtpcClusterMaker)
   //_____________________________________________________________________________
 StFtpcClusterMaker::StFtpcClusterMaker(const char *name):
 StMaker(name),
-    m_ampoff(0),
-    m_ampslope(0),
-    m_timeoff(0),
-    m_padtrans(0),
     m_det(0),
-    m_zrow(0),
-    m_gaspar(0)
+    m_gaspar(0),
+    m_padrow_z(0),
+    m_efield(0),
+    m_vdrift(0),
+    m_deflection(0),
+    m_dvdriftdp(0),
+    m_ddeflectiondp(0),
+    m_ampslope(0),
+    m_ampoffset(0),
+    m_timeoffset(0)
 {
   drawinit=kFALSE;
 }
@@ -117,13 +119,33 @@ Int_t StFtpcClusterMaker::Init(){
   assert(ftpc);
   St_DataSetIter       local(ftpc);
 
-  m_ampoff     = (St_fcl_ampoff   *)local("fclpars/ampoff"  );
-  m_ampslope   = (St_fcl_ampslope *)local("fclpars/ampslope");
-  m_timeoff    = (St_fcl_timeoff  *)local("fclpars/timeoff" );
-  m_padtrans   = (St_fcl_padtrans *)local("fclpars/padtrans");
   m_det        = (St_fcl_det      *)local("fclpars/det"     );
-  m_zrow       = (St_fcl_zrow     *)local("fclpars/zrow"    );
   m_gaspar     = (St_ffs_gaspar   *)local("ffspars/gaspar"  );
+
+  St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
+  if ( !ftpc_geometry_db ){
+     gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC database: Geometry"<<endm;
+     return kStWarn;
+  }
+  St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
+ 
+  m_padrow_z   = (St_ftpcPadrowZ  *)dblocal_geometry("ftpcPadrowZ" );
+
+  St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
+  if ( !ftpc_calibrations_db ){
+     gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC database: Calibrations"<<endm;
+     return kStWarn;
+  }
+  St_DataSetIter       dblocal_calibrations(ftpc_calibrations_db);
+
+  m_efield     = (St_ftpcEField *)dblocal_calibrations("ftpcEField" );
+  m_vdrift     = (St_ftpcVDrift *)dblocal_calibrations("ftpcVDrift" );
+  m_deflection = (St_ftpcDeflection *)dblocal_calibrations("ftpcDeflection" );
+  m_dvdriftdp     = (St_ftpcdVDriftdP *)dblocal_calibrations("ftpcdVDriftdP" );
+  m_ddeflectiondp = (St_ftpcdDeflectiondP *)dblocal_calibrations("ftpcdDeflectiondP" );
+  m_ampslope = (St_ftpcAmpSlope *)dblocal_calibrations("ftpcAmpSlope" );
+  m_ampoffset = (St_ftpcAmpOffset *)dblocal_calibrations("ftpcAmpOffset");
+  m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
 
 // 		Create Histograms
 m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
@@ -156,14 +178,22 @@ Int_t StFtpcClusterMaker::Make()
     }
 
   // create parameter reader
-  StFtpcParamReader *paramReader = new StFtpcParamReader(m_ampoff,
-							 m_ampslope,
-							 m_timeoff,
-							 m_padtrans,
-							 m_det,
-							 m_zrow,
+  StFtpcParamReader *paramReader = new StFtpcParamReader(m_det,
 							 m_gaspar);
   
+ 
+  // create FTPC data base reader
+  StFtpcDbReader *dbReader = new StFtpcDbReader(paramReader,
+                                                m_padrow_z,
+                                                m_efield,
+                                                m_vdrift,
+                                                m_deflection,
+                                                m_dvdriftdp,
+                                                m_ddeflectiondp,
+                                                m_ampslope,
+                                                m_ampoffset,
+                                                m_timeoffset);
+
   TObjArray *hitarray = new TObjArray(10000);  
 
   // ghitarray will only be used if fast simulator is active
@@ -197,7 +227,8 @@ Int_t StFtpcClusterMaker::Make()
   if(ftpcReader) {
     StFtpcChargeStep *step = new StFtpcChargeStep(m_csteps,
 						  ftpcReader, 
-						  paramReader);
+						  paramReader, 
+                                                  dbReader);
     // uncomment to recalculate normalized pressure from charge step:
     step->histogram(1);
     // uncomment to fill charge step histogram only:
@@ -207,6 +238,7 @@ Int_t StFtpcClusterMaker::Make()
     
     StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 
 						       paramReader, 
+                                                       dbReader,
 						       hitarray);
     
     int searchresult=fcl->search();
@@ -287,6 +319,7 @@ Int_t StFtpcClusterMaker::Make()
   hitarray->Delete();
   delete hitarray;
   delete paramReader;
+  delete dbReader;
 // Deactivate histograms for MDC3
 //MakeHistograms(); // FTPC cluster finder histograms
   return iMake;

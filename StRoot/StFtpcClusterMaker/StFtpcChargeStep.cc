@@ -1,6 +1,9 @@
-// $Id: StFtpcChargeStep.cc,v 1.4 2001/01/25 15:25:09 oldi Exp $
+// $Id: StFtpcChargeStep.cc,v 1.5 2001/03/06 23:33:27 jcs Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.5  2001/03/06 23:33:27  jcs
+// use database instead of params
+//
 // Revision 1.4  2001/01/25 15:25:09  oldi
 // Fix of several bugs which caused memory leaks:
 //  - Some arrays were not allocated and/or deleted properly.
@@ -26,23 +29,27 @@
 
 StFtpcChargeStep::StFtpcChargeStep(TH2F *histo,
 				   StFTPCReader *reader,  
-				   StFtpcParamReader *paramReader)
+				   StFtpcParamReader *paramReader,
+                                   StFtpcDbReader *dbReader)
 {
   //   cout << "StFtpcChargeStep constructed" << endl;  
   mHisto=histo;
   mClear=0;
   mReader = reader;
   mParam = paramReader; 
+  mDb    = dbReader;
 }
 
 StFtpcChargeStep::StFtpcChargeStep(StFTPCReader *reader,  
-				   StFtpcParamReader *paramReader)
+				   StFtpcParamReader *paramReader,
+                                   StFtpcDbReader *dbReader)
 {
   //   cout << "StFtpcChargeStep constructed" << endl;
   mHisto= new TH2F("chargestepinternal"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
   mClear=1;
   mReader = reader;
   mParam = paramReader; 
+  mDb    = dbReader;
 }
 
 StFtpcChargeStep::~StFtpcChargeStep()
@@ -58,7 +65,7 @@ int StFtpcChargeStep::histogram(int setPressure)
 {
   printf("in histogram!\n");
   /* is magboltz database loaded, if not exit */
-  if(mParam->numberOfPadtransBins()<1)
+  if(mParam->numberOfMagboltzBins()<1)
     {
       printf("Couldn't find magboltz data table, exiting!\n");
       return 0;
@@ -207,8 +214,8 @@ int StFtpcChargeStep::histogram(int setPressure)
   float newPressure=
     mParam->normalizedNowPressure()
     +((aimTime/TimeCoordinate-1)/
-     (mParam->padtransdVDriftdP(mParam->numberOfPadtransBins()/2, 0)
-      /mParam->padtransVDrift(mParam->numberOfPadtransBins()/2, 0)));
+     (mDb->magboltzdVDriftdP(mParam->numberOfMagboltzBins()/2, 0)
+      /mDb->magboltzVDrift(mParam->numberOfMagboltzBins()/2, 0)));
   
   if(setPressure)
     {
@@ -225,8 +232,8 @@ int StFtpcChargeStep::histogram(int setPressure)
       newPressure=
 	mParam->normalizedNowPressure()
 	+((aimTime/TimeCoordinate-1)/
-	  (mParam->padtransdVDriftdP(mParam->numberOfPadtransBins()/2, 0)
-	   /mParam->padtransVDrift(mParam->numberOfPadtransBins()/2, 0)));
+	  (mDb->magboltzdVDriftdP(mParam->numberOfMagboltzBins()/2, 0)
+	   /mDb->magboltzVDrift(mParam->numberOfMagboltzBins()/2, 0)));
       mParam->setNormalizedNowPressure(newPressure);
 
       // reiterate again to get even better precision (error<10E^-4)
@@ -240,8 +247,8 @@ int StFtpcChargeStep::histogram(int setPressure)
       newPressure=
 	mParam->normalizedNowPressure()
 	+((aimTime/TimeCoordinate-1)/
-	  (mParam->padtransdVDriftdP(mParam->numberOfPadtransBins()/2, 0)
-	   /mParam->padtransVDrift(mParam->numberOfPadtransBins()/2, 0)));
+	  (mDb->magboltzdVDriftdP(mParam->numberOfMagboltzBins()/2, 0)
+	   /mDb->magboltzVDrift(mParam->numberOfMagboltzBins()/2, 0)));
       mParam->setNormalizedNowPressure(newPressure);
       cout << "StFtpcChargeStep set normalized pressure to " << newPressure << endl;
     }      
@@ -274,31 +281,31 @@ int StFtpcChargeStep::calcpadtrans(double *pRadius)
       r_last=mParam->sensitiveVolumeOuterRadius();
       pRadius[padrow]=mParam->sensitiveVolumeOuterRadius();
       e_now = mParam->radiusTimesField() / (0.5*r_last);
-      for(j=v_buf; j<mParam->numberOfPadtransBins() 
-	    && mParam->padtransEField(j) < e_now; j++);
-      if(j<1 || j>=mParam->numberOfPadtransBins())
+      for(j=v_buf; j<mParam->numberOfMagboltzBins() 
+	    && mDb->magboltzEField(j) < e_now; j++);
+      if(j<1 || j>=mParam->numberOfMagboltzBins())
 	{
 	  printf("Error 1: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", 
-		 j, v_buf, mParam->padtransEField(j), e_now);
+		 j, v_buf, mDb->magboltzEField(j), e_now);
 	  return FALSE;
 	}
       v_buf=j-1;
-      v_now=((mParam->padtransVDrift(v_buf, padrow)
-	      +deltap*mParam->padtransdVDriftdP(v_buf, padrow))
-	     *(mParam->padtransEField(j)-e_now)
-	     +(mParam->padtransVDrift(j, padrow)
-	       +deltap*mParam->padtransdVDriftdP(j, padrow))
-	     *(e_now-mParam->padtransEField(v_buf)))
-	/(mParam->padtransEField(j)-mParam->padtransEField(v_buf));
-      psi_now=((mParam->padtransDeflection(v_buf,padrow)
-		+deltap*mParam->padtransdDeflectiondP(v_buf,padrow))
-	       *(mParam->padtransEField(j)-e_now)
-	       +(mParam->padtransDeflection(j,padrow)
-		 +deltap*mParam->padtransdDeflectiondP(j,padrow))
-	       *(e_now-mParam->padtransEField(v_buf)))
-	/(mParam->padtransEField(j)-mParam->padtransEField(v_buf));
+      v_now=((mDb->magboltzVDrift(v_buf, padrow)
+	      +deltap*mDb->magboltzdVDriftdP(v_buf, padrow))
+	     *(mDb->magboltzEField(j)-e_now)
+	     +(mDb->magboltzVDrift(j, padrow)
+	       +deltap*mDb->magboltzdVDriftdP(j, padrow))
+	     *(e_now-mDb->magboltzEField(v_buf)))
+	/(mDb->magboltzEField(j)-mDb->magboltzEField(v_buf));
+      psi_now=((mDb->magboltzDeflection(v_buf,padrow)
+		+deltap*mDb->magboltzdDeflectiondP(v_buf,padrow))
+	       *(mDb->magboltzEField(j)-e_now)
+	       +(mDb->magboltzDeflection(j,padrow)
+		 +deltap*mDb->magboltzdDeflectiondP(j,padrow))
+	       *(e_now-mDb->magboltzEField(v_buf)))
+	/(mDb->magboltzEField(j)-mDb->magboltzEField(v_buf));
       for (i=0; i<mParam->numberOfDriftSteps() 
-	     && e_now < mParam->padtransEField(mParam->numberOfPadtransBins()-2)
+	     && e_now < mDb->magboltzEField(mParam->numberOfMagboltzBins()-2)
 	     ; i++) 
 	{
 	  t_next = t_last + step_size;
@@ -306,31 +313,31 @@ int StFtpcChargeStep::calcpadtrans(double *pRadius)
 	  r_next = r_last - v_now * step_size * mParam->microsecondsPerTimebin();
 	  e_now = mParam->radiusTimesField() / (0.5*(r_last+r_next));
 	  
-	  for(j=v_buf; mParam->padtransEField(j) < e_now 
-		       && j<mParam->numberOfPadtransBins(); j++);
+	  for(j=v_buf; mDb->magboltzEField(j) < e_now 
+		       && j<mParam->numberOfMagboltzBins(); j++);
 	  
-	  if(j<1 || j>=mParam->numberOfPadtransBins())
+	  if(j<1 || j>=mParam->numberOfMagboltzBins())
 	    {
 	      printf("Error 2: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", 
-		     j, v_buf, mParam->padtransEField(j), e_now);
+		     j, v_buf, mDb->magboltzEField(j), e_now);
 	      return FALSE;
 	    }
 	  
 	  v_buf=j-1;
-	  v_now=((mParam->padtransVDrift(v_buf, padrow)
-		  +deltap*mParam->padtransdVDriftdP(v_buf, padrow))
-		 *(mParam->padtransEField(j)-e_now)
-		 +(mParam->padtransVDrift(j, padrow)
-		   +deltap*mParam->padtransdVDriftdP(j, padrow))
-		 *(e_now-mParam->padtransEField(v_buf)))
-	  /(mParam->padtransEField(j)-mParam->padtransEField(v_buf));
-	  psi_now=((mParam->padtransDeflection(v_buf,padrow)
-		    +deltap*mParam->padtransdDeflectiondP(v_buf,padrow))
-		   *(mParam->padtransEField(j)-e_now)
-		   +(mParam->padtransDeflection(j,padrow)
-		     +deltap*mParam->padtransdDeflectiondP(j,padrow))
-		   *(e_now-mParam->padtransEField(v_buf)))
-	  /(mParam->padtransEField(j)-mParam->padtransEField(v_buf));
+	  v_now=((mDb->magboltzVDrift(v_buf, padrow)
+		  +deltap*mDb->magboltzdVDriftdP(v_buf, padrow))
+		 *(mDb->magboltzEField(j)-e_now)
+		 +(mDb->magboltzVDrift(j, padrow)
+		   +deltap*mDb->magboltzdVDriftdP(j, padrow))
+		 *(e_now-mDb->magboltzEField(v_buf)))
+	  /(mDb->magboltzEField(j)-mDb->magboltzEField(v_buf));
+	  psi_now=((mDb->magboltzDeflection(v_buf,padrow)
+		    +deltap*mDb->magboltzdDeflectiondP(v_buf,padrow))
+		   *(mDb->magboltzEField(j)-e_now)
+		   +(mDb->magboltzDeflection(j,padrow)
+		     +deltap*mDb->magboltzdDeflectiondP(j,padrow))
+		   *(e_now-mDb->magboltzEField(v_buf)))
+	  /(mDb->magboltzEField(j)-mDb->magboltzEField(v_buf));
 	  
 	  /* correct r_next: */
 	  r_next = r_last - v_now * step_size *mParam->microsecondsPerTimebin();

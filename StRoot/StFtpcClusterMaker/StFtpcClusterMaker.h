@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.7 2000/11/20 11:39:16 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.8 2001/03/06 23:33:56 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.8  2001/03/06 23:33:56  jcs
+// use database instead of params
+//
 // Revision 1.7  2000/11/20 11:39:16  jcs
 // remove remaining traces of fspar table
 //
@@ -39,26 +42,34 @@
 class TH1F;
 class TH2F;
 
-class St_fcl_ampoff;
-class St_fcl_ampslope;
-class St_fcl_timeoff;
-class St_fcl_padtrans;
 class St_fcl_det;
-class St_fcl_zrow;
 class St_ffs_gaspar;
 class DetectorReader;
+class St_ftpcPadrowZ;
+class St_ftpcEField;
+class St_ftpcVDrift;
+class St_ftpcDeflection;
+class St_ftpcdVDriftdP;
+class St_ftpcdDeflectiondP;
+class St_ftpcAmpSlope;
+class St_ftpcAmpOffset;
+class St_ftpcTimeOffset;
 
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.7 2000/11/20 11:39:16 jcs Exp $";
-   St_fcl_ampoff   *m_ampoff;    //!
-   St_fcl_ampslope *m_ampslope;  //!
-   St_fcl_timeoff  *m_timeoff;   //!
-   St_fcl_padtrans *m_padtrans;  //!
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.8 2001/03/06 23:33:56 jcs Exp $";
    St_fcl_det      *m_det;       //!
-   St_fcl_zrow     *m_zrow;      //!
    St_ffs_gaspar   *m_gaspar;   //!
+   St_ftpcPadrowZ       *m_padrow_z;      //!
+   St_ftpcEField        *m_efield;        //!
+   St_ftpcVDrift        *m_vdrift;        //!
+   St_ftpcDeflection    *m_deflection;    //!
+   St_ftpcdVDriftdP     *m_dvdriftdp;     //!
+   St_ftpcdDeflectiondP *m_ddeflectiondp; //!
+   St_ftpcAmpSlope      *m_ampslope;      //!
+   St_ftpcAmpOffset     *m_ampoffset;     //!
+   St_ftpcTimeOffset     *m_timeoffset;   //!
    void             MakeHistograms();// Histograms for FTPC cluster finder
  
  protected:
@@ -77,7 +88,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.7 2000/11/20 11:39:16 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.8 2001/03/06 23:33:56 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };
