@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.22 1999/02/22 02:21:49 fisyak Exp $
+// $Id: StChain.h,v 1.23 1999/03/04 00:01:14 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.23  1999/03/04 00:01:14  fisyak
+// Add access to Chain Version
+//
 // Revision 1.22  1999/02/22 02:21:49  fisyak
 // Add GetGeometry
 //
@@ -197,6 +200,8 @@ public:
    Int_t             ProcessTime() {return mProcessTime.GetTime();}
    ULong_t           Awest(){return mAwest;}
    ULong_t           Aeast() {return mAeast;}
+   const Char_t     *VersionCVS() {return m_VersionCVS;}
+   const Char_t     *VersionTag() {return m_VersionTag;}
 //    Setters for flags and switches
 
    virtual void   SetBranches();
