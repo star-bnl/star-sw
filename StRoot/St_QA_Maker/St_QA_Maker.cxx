@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.53 1999/09/23 18:54:09 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.54 1999/09/23 20:08:37 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.54  1999/09/23 20:08:37  kathy
+// fix some histogram limits
+//
 // Revision 1.53  1999/09/23 18:54:09  kathy
 // fix some histogram limits, add about 10 histograms - just so we know number rows in each table - had to include some more tables to do this
 //
@@ -880,7 +883,7 @@ void St_QA_Maker::BookHistVertex(){
 //_____________________________________________________________________________
 void St_QA_Maker::BookHistXi(){
 
-  m_xi_tot   = new TH1F("QaXiVertexTot",  "dst_xi_vertex: tot # vertices ",50,2000.,3000.);
+  m_xi_tot   = new TH1F("QaXiVertexTot",  "dst_xi_vertex: tot # vertices ",50,0.,2500.);
   
 }
 
@@ -893,7 +896,7 @@ void St_QA_Maker::BookHistPoint(){
 //_____________________________________________________________________________
 void St_QA_Maker::BookHistKink(){
   
-  m_kink_tot   = new TH1F("QaKinkTot",  "kinkVertex: # kinks ",20,0.,20.);
+  m_kink_tot   = new TH1F("QaKinkTot",  "kinkVertex: # kinks ",25,0.,25.);
 
 }
 
