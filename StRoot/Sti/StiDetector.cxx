@@ -1,12 +1,14 @@
 //StiDetector.cxx
 
 //STD
+#include <math.h>
 #include <iostream>
 #include <string>
 #include <map>
 //SCL
 #include "StGetConfigValue.hh"
 //Sti
+#include "StiMaterial.h"
 #include "StiDetectorContainer.h"
 #include "StiDetector.h"
 #include "StiMapUtilities.h"
@@ -17,6 +19,57 @@ StiDetector::StiDetector() : gas(0), material(0)
 
 StiDetector::~StiDetector()
 {
+}
+
+void StiDetector::setCenterRep(double cRadius, double cRefAngle, double oAngle, double hWidth)
+{
+    centerRadius = cRadius;
+    centerRefAngle = cRefAngle;
+    orientationAngle = oAngle;
+    halfWidth = hWidth;
+    updateNormalRep();
+}
+
+
+void StiDetector::setNormalRep(double nRadius, double nRefAngle,double minY, double maxY)
+{
+    normalRadius = nRadius;
+    normalRefAngle = nRefAngle;
+    yMin = minY;
+    yMax = maxY;
+    updateCenterRep();
+}
+
+void StiDetector::updateNormalRep()
+{
+    if(shapeCode == kPlanar){
+        normalRadius = centerRadius*sin(orientationAngle);
+        normalRefAngle = centerRefAngle - orientationAngle;
+        yMin = centerRadius*cos(orientationAngle);
+        yMax = yMin + 2.*halfWidth;
+    }
+    else if(shapeCode == kCylindrical){
+        normalRadius = centerRadius;
+        normalRefAngle = centerRefAngle;
+        yMin = -halfWidth;
+        yMax = halfWidth;
+    }
+}
+
+void StiDetector::updateCenterRep()
+{
+    if(shapeCode == kPlanar){
+        halfWidth = (yMax - yMin)/2.;
+        orientationAngle = - atan( (yMin + yMax)/2./normalRadius );
+        centerRefAngle = normalRefAngle + orientationAngle;
+        centerRadius = normalRadius/sin(orientationAngle);
+    }
+    else if(shapeCode == kCylindrical){
+        halfWidth = yMax;
+        orientationAngle = 0;
+        centerRefAngle = normalRefAngle;
+        centerRadius = normalRadius;
+    }
 }
 
 void StiDetector::build(const char* buildfile)

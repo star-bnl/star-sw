@@ -10,7 +10,7 @@
 #include "StiDetector.h"
 #include "StiDetPolygon.h"
 
-ClassImp(StiDetPolygon)
+//ClassImp(StiDetPolygon)
     
 StiDetPolygon::StiDetPolygon()
 {
@@ -23,6 +23,7 @@ StiDetPolygon::StiDetPolygon(unsigned int nsides, double phi0, double r)
 
 StiDetPolygon::~StiDetPolygon()
 {
+    clearAndDestroy();
 }
 
 unsigned int StiDetPolygon::numberOfDetectors() const
@@ -33,6 +34,20 @@ unsigned int StiDetPolygon::numberOfDetectors() const
 bool StiDetPolygon::isValid() const
 {
     return (numberOfDetectors() == numberOfSides() );
+}
+
+void StiDetPolygon::clear()
+{
+    msidemap.clear();
+}
+
+void StiDetPolygon::clearAndDestroy()
+{
+    for (det_polygon_map::iterator it=msidemap.begin(); it!=msidemap.end(); ++it) {
+	delete (*it).second;
+	(*it).second = 0;
+    }
+    return;
 }
 
 void StiDetPolygon::push_back(StiDetector* layer)

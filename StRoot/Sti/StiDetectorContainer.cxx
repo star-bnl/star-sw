@@ -3,6 +3,7 @@
 //02/02/01
 
 #include <iostream.h>
+#include <stdio.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <string>
@@ -40,12 +41,26 @@ StiDetectorContainer::StiDetectorContainer() : mdraw(true)
 StiDetectorContainer::~StiDetectorContainer()
 {
     cout <<"StiDetectorContainer::~StiDetectorContainer()"<<endl;
-    //clearAndDestroy();
+    clearAndDestroy();
 }
 
 void StiDetectorContainer::push_back(StiDetPolygon* poly)
 {
     insert( detectorMapValType( poly->radius(), poly ) );
+    return;
+}
+
+void StiDetectorContainer::clearAndDestroy()
+{
+    for (detectormap::iterator it=begin(); it!=end(); ++it) {
+	delete (*it).second;
+	(*it).second = 0;
+    }
+
+    for (materialmap::iterator it=mmaterialmap.begin(); it!=mmaterialmap.end(); ++it) {
+	delete (*it).second;
+	(*it).second = 0;
+    }
     return;
 }
 
