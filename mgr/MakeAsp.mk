@@ -1,8 +1,5 @@
-# $Id: MakeAsp.mk,v 1.21 2002/05/23 17:46:29 perev Exp $
+# $Id: MakeAsp.mk,v 1.20 2001/04/04 15:25:06 jeromel Exp $
 # $Log: MakeAsp.mk,v $
-# Revision 1.21  2002/05/23 17:46:29  perev
-# new root
-#
 # Revision 1.20  2001/04/04 15:25:06  jeromel
 # lex adjustment (broke)
 #
@@ -341,7 +338,6 @@ $(MY_LIB) : $(FILES_O)
 	touch $(MY_LIB)
 
 $(MY_SO) : $(FILES_O)
-	echo BOT OHO;\
 	$(CD) $(LIB_DIR);\
 	$(SO) $(SOFLAGS) -o $(NEW_MY_SO) $(addprefix $(OBJ_DIR)/,$(FILES_O))
 	$(RM) $(MY_SO)

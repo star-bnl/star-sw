@@ -1,7 +1,4 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.93  2002/05/23 17:46:28  perev
-#  new root
-#
 #  Revision 1.92  2001/04/04 18:04:16  didenko
 #  adjust for .sun4x_58
 #
@@ -257,7 +254,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 2002/05/23 17:46:28 $ 
+#             Last modification $Date: 2001/04/04 18:04:16 $ 
 #. default setings
 
 MAKE  := gmake
@@ -335,6 +332,9 @@ CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH) QUIET_ASP DS_ADVANCED
 STIC       := $(STAF_BIN)/stic
 GEANT3     := $(STAF_BIN)/geant3
 
+ifndef ASU_MALLOC_OFF
+  CPPFLAGS += ASU_MALLOC_ON
+endif
 ifneq ($(STAR_SYS),hp_ux102)   
 CPPFLAGS += $(UNAMES)
 endif
@@ -461,7 +461,7 @@ ifneq (,$(findstring $(STAR_SYS),rs_aix31 rs_aix32 rs_aix41))
   FEXTEND := -e
 endif 
 
-ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_linux24 i386_linux22 i386_redhat50 i386_redhat51 i386_redhat52 i386_redhat60 i386_redhat61))
+ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_redhat52 i386_redhat60 i386_redhat61))
 #    case linux but gcc is EGCS
 #  ====================
   LINUX :=YESS
@@ -472,20 +472,23 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_linux24 i386_linux22 i386_redh
   FOREXE      := g77 -fno-automatic -fno-second-underscore -fugly-complex
   LD       := $(CXX)
   SO	   := $(CXX)
-  CXXFLAGS := $(DEBUG) -fPIC -Wall 
+  CXXFLAGS := $(DEBUG) -fPIC -Wall -I/usr/include/g++
+ifeq (,$(findstring 2.22,$(ROOT_LEVEL)))
+  CXXFLAGS += -fno-rtti -fno-exceptions -fno-for-scope
+endif
 #                                             -fpipe
-  CFLAGS   := $(DEBUG) -fPIC -Wall -I/usr/X11R6/LessTif/Motif2.1/include
+  CFLAGS   := $(DEBUG) -fPIC -Wall
   CPPFLAGS += f2cFortran
   LDFLAGS  := $(DEBUG) -Wl,-Bstatic
   EXEFLAGS := $(DEBUG) -Wl,-Bdynamic   
   SOFLAGS  := $(DEBUG) -shared  
   CLIBS    := -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lm -ldl  -rdynamic 
-  FLIBS    := -L$(PGI)/linux86/lib -lpgftnrtl -lpgc -L$(OPTSTAR)/lib -lpgf77S  -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c -lc
-#  FLIBS    := -L$(OPTSTAR)/lib -lpgf77S  -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c
+  FLIBS    := -L$(PGI)/linux86/lib -lpgftnrtl -lpgc -L$(OPTSTAR)/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c -lc
+#  FLIBS    := -L$(OPTSTAR)/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c
 ifneq (,$(findstring $(STAR_SYS),i386_linux2))
   FLIBS   += -lI77 -lF77
 endif
-  FFLAGS   := -DPGI  -Mbackslash $(DEBUG)
+  FFLAGS   := -DPGI  $(DEBUG)
   FEXTEND  := -Mextend
   YACC     := bison -y
   YACCLIB  := 

@@ -1,10 +1,7 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.7 2002/05/16 21:55:05 akio Exp $
+// $Id: StppEvent.cxx,v 1.6 2002/02/15 14:50:13 jeromel Exp $
 // $Log: StppEvent.cxx,v $
-// Revision 1.7  2002/05/16 21:55:05  akio
-// bug fixed for unpol bunch spin bit
-//
 // Revision 1.6  2002/02/15 14:50:13  jeromel
 // Re-enabled changes. StEvent commited as well.
 //
@@ -378,7 +375,7 @@ Int_t StppEvent::fill(StEvent *event){
     bunchId7bit = l0->bunchCrossingId7bit(runN);
     doubleSpinIndex = l0->spinBits();
     // unpol bunch xing now will get spin index==15
-    if(runN >= 3020032 && doubleSpinIndex==0 && bunchId7bit%2==1){doubleSpinIndex=15;}
+    if(runN >= 3020032 && doubleSpinIndex==0 && bunchId%2==0){doubleSpinIndex=15;}
     // checking bunch ids
     if(BunchIdDifference==-999){
       BunchIdDifference = bunchId - bunchId7bit;

@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.45 2002/05/21 00:37:23 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.44 2002/03/12 23:31:43 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -300,14 +300,12 @@
         $OSFID .= " SUN Solaris sun sun4os5 " . $STAR_SYS;
         $EXTRA_CPPPATH = $main::PATH_SEPARATOR . "/usr/openwin/include";
 	$SUNWS = $ENV{'SUNWS'};
-	$SUNOPT= $ENV{'SUNOPT'};
 	if( ! defined($SUNWS) ){ $SUNWS = "WS5.0";}
-	if( ! defined($SUNOPT)){ $SUNOPT= "/opt";}
-        $CC     = "$SUNOPT/$SUNWS/bin/cc";
-        $CXX    = "$SUNOPT/$SUNWS/bin/CC";
+        $CC     = "/opt/$SUNWS/bin/cc";
+        $CXX    = "/opt/$SUNWS/bin/CC";
         $CXXCOM =
 "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS -I%<:d -ptr%ObjDir %_IFLAGS -c %CXXinp%< %Cout%>";
-        $FC             = "$SUNOPT/$SUNWS/bin/f77";
+        $FC             = "/opt/$SUNWS/bin/f77";
         $CXXFLAGS       = "-KPIC";                # -library=iostream,no%%Cstd";
         $EXTRA_CXXFLAGS = " -D__CC5__";
         $EXTRA_CFLAGS   = " -D__CC5__";
@@ -315,11 +313,11 @@
 " -DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
         $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
         $CLIBS        =
-          "-lmalloc -lm -ltermcap -ldl -lnsl -lsocket -lgen $SUNOPT/$SUNWS/lib/libCrun.so";
+          "-lmalloc -lm -ltermcap -ldl -lnsl -lsocket -lgen /opt/$SUNWS/lib/libCrun.so";
           # Brute force required for CC WS6.0 (?). Links all others but that one
 	  # (libCrun however isa softlink unlike the others).
           # -L" . $OPTSTAR  . "/lib -lCstd -liostream -lCrun";
-        $FLIBS = "-L$SUNOPT/$SUNWS/lib -lM77 -lF77 -lsunmath";
+        $FLIBS = "-L/opt/$SUNWS/lib -lM77 -lF77 -lsunmath";
         $XLIBS = "-L" . $ROOTSYS . "/lib -lXpm -L/usr/openwin/lib -lX11";
 
         #   $XLIBS     = "-L/usr/local/lib -lXpm -L/usr/openwin/lib -lX11";
