@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.36 2003/11/04 17:23:30 jeromel Exp $
+// $Id: rootlogon.C,v 1.37 2004/01/27 18:43:26 perev Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -8,9 +8,16 @@
 {
 
 #pragma optimize 0
+  //  set FloatPointException trap
+  if (strstr(gSystem->Getenv("STAR"),".DEV")
+  ||         gSystem->Getenv("STARFPE")) {
+    gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
+    printf("*** Float Point Exception is ON ***");
+  }
+
   // 	Load StarRoot lib.
   gSystem->Load("StarRoot");
-
+  if (!strstr(gSystem->GetLibraries(),"libTable")) gSystem->Load("libTable");
 
   //    G__loadfile("iostream.h");
   TString gPrompt =  gSystem->BaseName(gROOT->GetApplication()->Argv(0));
