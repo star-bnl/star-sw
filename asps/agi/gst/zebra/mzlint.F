@@ -1,7 +1,10 @@
 *
-* $Id: mzlint.F,v 1.4 1998/06/05 20:55:36 perev Exp $
+* $Id: mzlint.F,v 1.5 1999/10/18 16:46:01 nevski Exp $
 *
 * $Log: mzlint.F,v $
+* Revision 1.5  1999/10/18 16:46:01  nevski
+* pgf->g77
+*
 * Revision 1.4  1998/06/05 20:55:36  perev
 * AGI commit
 *
@@ -25,7 +28,7 @@ C--------------    End CDE                             --------------
       CHARACTER    *(*) CHNAME
 #if (defined(CERNLIB_QTRHOLL))&&(!defined(CERNLIB_A6M))
       DIMENSION    NAMESR(2)
-      DATA  NAMESR / 4HMZLI, 4HNT   /
+      DATA  NAMESR / 4HMZLI, 4HNT . /
 #endif
 #if (defined(CERNLIB_QTRHOLL))&&(defined(CERNLIB_A6M))
       DATA  NAMESR / 6HMZLINT /
