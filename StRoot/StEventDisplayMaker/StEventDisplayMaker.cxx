@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.86 2003/01/17 01:36:16 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.87 2003/01/17 01:49:41 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -90,7 +90,7 @@
 #include "tables/St_dst_event_summary_Table.h"
 
 #include "StEventControlPanel.h"
-#include "PadControlPanel.h"
+#include "StPadControlPanel.h"
 
 #include "StTrackChair.h"
 
@@ -1107,6 +1107,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.87  2003/01/17 01:49:41  fine
+// add right  named class StPadControlPanel
+//
 // Revision 1.86  2003/01/17 01:36:16  fine
 // working version of Qt-based StEventDisplayMaker class
 //
