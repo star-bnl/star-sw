@@ -1,10 +1,10 @@
-* $Id: tpt_fit_track_line.F,v 1.3 2000/04/11 18:21:45 sakrejda Exp $
+* $Id: tpt_fit_track_line.F,v 1.4 2000/12/19 16:01:53 love Exp $
 *
       INTEGER FUNCTION TPT_FIT_TRACK_LINE(ipt,trk,hit_h,hit,
      >                               tpar_h,tpar,ipass)
 C>---------------------------------------------------------------------
 C
-C TPT_FIT_TRACK - straigth track fitting routine
+C TPT_FIT_TRACK - straight track fitting routine
 C DESCRIPTION:
 C INPUT ARGUMENTS:
 C OUTPUT ARGUMENTS:
@@ -44,7 +44,8 @@ C#include "tpt_pointers.inc"
 
       RECORD /tpt_track_pointers_st/ trk(*)
 
-      INTEGER i, ipt, ipass, ntry, ient, ient1, nfit, ier, lswlf
+      INTEGER i, ipt, ipass, ntry, nfit, ient, ient1, ier, lswlf
+
       INTEGER iret, tpt_cross_fact
       REAL xfit(mxpnt), yfit(mxpnt), zfit(mxpnt), wxy(mxpnt), wz(mxpnt)
       REAL sfit(mxpnt), pnt(mxpnt)
@@ -67,7 +68,7 @@ C
         cf = -1.0
         do i=trk(ipt).nhit,1,-1
 C        load the working arrays for the fitting subroutines
-C        omitt points that were marked as outliers
+C        omit points that were marked as outliers
          if(good_hit(i)) then
 	   nfit = nfit+1
            ient = trk(ipt).ipnt(i)

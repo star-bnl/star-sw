@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.22 2000/07/26 01:03:49 sakrejda Exp $
+* $Id: tpt.F,v 1.23 2000/12/19 16:01:52 love Exp $
 * $Log: tpt.F,v $
+* Revision 1.23  2000/12/19 16:01:52  love
+* fixed asymmetry bug in tpt_row_sect_pnt
+*
 * Revision 1.22  2000/07/26 01:03:49  sakrejda
 * Vertex info added
 *
@@ -283,7 +286,7 @@ C       merge pieces of tracks together
         time_all = time_all + time_now
         time_merge = time_now
         if(iret.eq.STAFCV_BAD) then
-          write(132,*) 'TPTI2-E1 problems in segment merging'
+          write(m132,*) 'TPTI2-E1 problems in segment merging'
           call message(m132, 1, idI2)
           tpt=STAFCV_BAD
         endif

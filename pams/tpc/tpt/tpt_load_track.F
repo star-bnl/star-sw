@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.25 2000/11/29 16:18:02 genevb Exp $
+* $Id: tpt_load_track.F,v 1.26 2000/12/19 16:01:53 love Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.26  2000/12/19 16:01:53  love
+* fixed asymmetry bug in tpt_row_sect_pnt
+*
 * Revision 1.25  2000/11/29 16:18:02  genevb
 * Return if too many tracks
 *
@@ -224,7 +227,7 @@ c
          ient=trk(ipt).ipnt(ld)
          if(ient.gt.hit_h.nok.or.ient.lt.1) then
            write(m132,*) 'TPTLOAD-E2 WRONG POINTER*',ient
-           call Message( m132, 1, idI2 )
+           call Message( m132, 1, id2 )
          endif
          hit(ient).track=ipt*1000+ld
       end do
