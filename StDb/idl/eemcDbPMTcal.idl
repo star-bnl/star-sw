@@ -2,7 +2,7 @@
 *
 *  Table: eemcDbPMTcal
 *
-*       description:  *    EEMC Tower Box  calibration for one sector, ver2
+*       description:  *    EEMC Tower Box  calibration for one sector
 */ 
 
 
@@ -10,7 +10,7 @@ struct eemcDbPMTcal {
 
    char  name[960];   /*      PMT ID  sector/box/tower  */
    float  gain[60];   /*   pmt effective gain of the tower  */
-   float  egain[60];   /*   error of gains  */
+   float  egain[60];   /*   error of the gain  */
    float  hv[60];   /*   pmt actual HV (V), dac=HV/HVmax*1023  */
    char  comment[160];   /*   */
 
