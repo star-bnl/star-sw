@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.68 1999/06/21 20:06:12 fisyak Exp $
+// $Id: bfc.C,v 1.69 1999/06/22 14:23:50 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.69  1999/06/22 14:23:50  fisyak
+// Add StDaqLib to St_tpcdaq_Maker
+//
 // Revision 1.68  1999/06/21 20:06:12  fisyak
 // Add StDaqLib for for TDAQ
 //
@@ -415,12 +418,13 @@ void Load(const Char_t *Chain="gstar tfs"){
     gSystem->Load("St_tcl_Maker");
     gSystem->Load("St_tpt_Maker");
     if (ChainFlags[kTDAQ]) {
-      gSystem->Load("St_tpcdaq_Maker");
       gSystem->Load("StDaqLib");
+      gSystem->Load("St_tpcdaq_Maker");
     }
     else {
       if (ChainFlags[kTRS]) {
 	gSystem->Load("StTrsMaker"); 
+	gSystem->Load("StDaqLib");
 	gSystem->Load("St_tpcdaq_Maker");
       }
       else {if  (ChainFlags[kTSS])gSystem->Load("St_tss_Maker");}
