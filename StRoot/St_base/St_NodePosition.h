@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
-// $Id: St_NodePosition.h,v 1.9 1999/04/02 23:36:04 fine Exp $
+// $Id: St_NodePosition.h,v 1.10 1999/04/05 03:18:27 fine Exp $
 // $Log: St_NodePosition.h,v $
+// Revision 1.10  1999/04/05 03:18:27  fine
+// St_Node family steps
+//
 // Revision 1.9  1999/04/02 23:36:04  fine
 // Collapsed geometry structures has been implemeted
 //
@@ -80,10 +83,14 @@ class St_NodePosition  : public TObject /*, public St_DefineSet */ {
         virtual void        Paint(Option_t *option="");
         virtual void        Print(Option_t *option="");
         virtual void        UpdatePosition(Option_t *option="");
+        virtual St_NodePosition *Reset(St_Node *node=0,Double_t x=0, Double_t y=0, Double_t z=0, TRotMatrix *matrix=0);
         virtual void        SavePrimitive(ofstream &out, Option_t *option);
 
         virtual void        SetMatrix(TRotMatrix *matrix=0) {fMatrix = matrix;}
         virtual void        SetPosition( Double_t x=0, Double_t y=0, Double_t z=0) {fX=x; fY=y; fZ=z;}
+        virtual void        SetX(Double_t x){ fX = x;}
+        virtual void        SetY(Double_t y){ fY = y;}
+        virtual void        SetZ(Double_t z){ fZ = z;}
 //        virtual void        UpdateMatrix();
 //        virtual void        UpdateTempMatrix(Double_t *dx1,Double_t *rmat1
 //                             , Double_t x, Double_t y, Double_t z, Double_t *matrix

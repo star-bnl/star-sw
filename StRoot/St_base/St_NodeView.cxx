@@ -43,8 +43,12 @@ St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
        if (nextView->IsMarked()) {
          St_NodePosition tempPos = next[0];
          St_NodePosition *position = new St_NodePosition(tempPos);
+         printf("AAAA!!! %s \n",GetName());
+         if (!position->GetNode()) {
+             printf("uuuuuuuuuu !!! %s \n",GetName());
+         }
          Add(new St_NodeView(nextView,position));
-         mode = kPrune;
+//         mode = kPrune;
        }
     }
   }
@@ -69,7 +73,7 @@ St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,ED
 
   //  cout << "ctor for " << GetName() << " - " << GetTitle() << endl;
   SetTitle(pattern.GetTitle());
-  
+  if ( pattern.IsMarked() ) Mark(); 
   St_NodePosition *position = 0;
   TIter next(pattern.GetListOfPositions());
   Bool_t optsel = (iopt == kStruct);
@@ -82,6 +86,9 @@ St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,ED
        if ( optall || (optsel && parent == (St_DataSet *)&pattern) )
                                   Add(new St_NodeView(*node,position));
      }
+     else 
+       Error("St_NodeView ctor","Position with NO node attached has been supplied");
+     
   }
 }
 //_____________________________________________________________________________
@@ -108,6 +115,8 @@ Int_t St_NodeView::DistancetoPrimitive(Int_t px, Int_t py)
    const Int_t big = 9999;
    const Int_t inaxis = 7;
    const Int_t maxdist = 5;
+
+   Int_t dist = big;
  
    Int_t puxmin = gPad->XtoAbsPixel(gPad->GetUxmin());
    Int_t puymin = gPad->YtoAbsPixel(gPad->GetUymin());
@@ -123,41 +132,34 @@ Int_t St_NodeView::DistancetoPrimitive(Int_t px, Int_t py)
    TView *view =gPad->GetView();
    if (!view) return big;
  
-   St_Node *thisNode  = GetNode();
-   static St_NodePosition nullPosition;
-   St_NodePosition *position = &nullPosition;
-   TShape  *shape = 0;
-   if (thisNode) {
-     shape    = thisNode->GetShape();
-     position = GetPosition();
-     position->UpdatePosition();      
-   } 
-//*-*- Paint Referenced shape
-   Int_t dist = big;
-   if (thisNode) {
-     if (thisNode->GetVisibility() && shape->GetVisibility()) {
-//         gNode = this;
-        dist = shape->DistancetoPrimitive(px,py);
-        if (dist < maxdist) {
-           gPad->SetSelected(this);
-           return 0;
-        }
+   St_NodePosition *position = GetPosition();
+   St_Node *thisNode  = 0;
+   TShape  *thisShape = 0;
+   if (position) {
+     thisNode = position->GetNode();     
+     position->UpdatePosition(); 
+     if (thisNode) {     
+        thisShape    = thisNode->GetShape();
+        if (thisNode->GetVisibility() && thisShape && thisShape->GetVisibility()) {
+          dist = thisShape->DistancetoPrimitive(px,py);
+          if (dist < maxdist) {
+             gPad->SetSelected(this);
+             return 0;
+          }
+       }
      }
-////      if ( TestBit(kSonsInvisible) ) return dist;
    }
+//   if ( TestBit(kSonsInvisible) ) return dist;
  
 //*-*- Loop on all sons
-   Int_t nsons = 0;
    TList *fNodes =  GetList();
-   if (fNodes) nsons = fNodes->GetSize();
+   Int_t nsons = fNodes?fNodes->GetSize():0;
    Int_t dnode = dist;
    if (nsons) {
       gGeometry->PushLevel();
       St_Node *node;
-      TObject *obj;
       TIter  next(fNodes);
-      while ((obj = next())) {
-         node = (St_Node*)obj;
+      while ((node  = (St_Node *)next())) {
          dnode = node->DistancetoPrimitive(px,py);
          if (dnode <= 0)  break;
          if (dnode < dist) dist = dnode;

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/01/99  
-// $Id: St_NodeViewIter.cxx,v 1.4 1999/04/02 23:36:05 fine Exp $
+// $Id: St_NodeViewIter.cxx,v 1.5 1999/04/05 03:18:28 fine Exp $
 // $Log: St_NodeViewIter.cxx,v $
+// Revision 1.5  1999/04/05 03:18:28  fine
+// St_Node family steps
+//
 // Revision 1.4  1999/04/02 23:36:05  fine
 // Collapsed geometry structures has been implemeted
 //
@@ -9,7 +12,8 @@
 //
 
 #include "St_NodeViewIter.h"
-#include "TClonesArray.h"
+// #include "TClonesArray.h"
+#include "TObjArray.h"
 #include "St_NodeView.h"
 #include "St_DataSetIter.h"
 #include "TGeometry.h"
@@ -28,11 +32,12 @@ St_NodeViewIter::~St_NodeViewIter()
 //______________________________________________________________________________
 St_NodePosition *St_NodeViewIter::GetPosition(Int_t level)
 {
-  Int_t thisLevel = level;
-  if (!thisLevel) thisLevel = fDepth;
   St_NodePosition *pos = 0;
-  if (m_Positions) 
-     pos=(St_NodePosition *)m_Positions->At(thisLevel);
+  if (m_Positions) {
+    Int_t thisLevel = level;
+    if (!thisLevel) thisLevel = fDepth;
+    pos=(St_NodePosition *)m_Positions->At(thisLevel);
+  }
   return pos;
 }
 
@@ -44,7 +49,10 @@ St_NodePosition St_NodeViewIter::operator[](Int_t level)
   St_NodePosition *pos = GetPosition(thisLevel);
   St_NodePosition  null;
   if (pos) return *pos;
-  else     return null;
+  else {
+     printf(" GetPostion: %d \n", thisLevel);
+     return null;
+  }
 }
 
 //______________________________________________________________________________
@@ -52,9 +60,7 @@ void St_NodeViewIter::Notify(St_DataSet *set)
 {
   St_NodeView     *view         = (St_NodeView *) set;
   St_NodePosition *position     = view->GetPosition();
-  if (!m_Positions) m_Positions = new TClonesArray("St_NodePosition",100);
   St_NodePosition *newPosition=UpdateTempMatrix(position);
-//  m_Positions->AddAtAndExpand(newPosition,fDepth);
 }
 
 //______________________________________________________________________________
@@ -67,7 +73,7 @@ St_NodePosition *St_NodeViewIter::UpdateTempMatrix(St_NodePosition *curPosition)
   if (fDepth-1) {
     St_NodePosition *oldPosition = 0;
     TRotMatrix *oldMatrix = 0;
-    oldPosition = (St_NodePosition *)m_Positions->At(fDepth-1);
+    oldPosition = m_Positions ? (St_NodePosition *)m_Positions->At(fDepth-1):0;
     Double_t oldTranslation[] = { 0, 0, 0 };
     if (oldPosition) 
     {
@@ -93,19 +99,19 @@ St_NodePosition *St_NodeViewIter::UpdateTempMatrix(St_NodePosition *curPosition)
       Int_t num = gGeometry->GetListOfMatrices()->GetSize();
       Char_t anum[100];
       sprintf(anum,"%d",num+1);
-      newPosition = new ((*m_Positions)[fDepth]) St_NodePosition(curNode
-                                   ,newTranslation[0],newTranslation[1],newTranslation[2]
-                                   ,new TRotMatrix(anum,"NodeView",newMatrix));
+      newPosition = SetPositionAt(curNode
+                                ,newTranslation[0],newTranslation[1],newTranslation[2]
+                                ,new TRotMatrix(anum,"NodeView",newMatrix));
     }
     else {
        newTranslation[0] = oldTranslation[0] + curPosition->GetX();
        newTranslation[1] = oldTranslation[1] + curPosition->GetY();
        newTranslation[2] = oldTranslation[2] + curPosition->GetZ();
-       newPosition = new ((*m_Positions)[fDepth])  St_NodePosition(curNode,newTranslation[0],newTranslation[1],newTranslation[2]);
+       newPosition = SetPositionAt(curNode,newTranslation[0],newTranslation[1],newTranslation[2]);
     }
   }
-  else 
-      newPosition = new ((*m_Positions)[fDepth]) St_NodePosition(curNode);
+  else
+       newPosition =  SetPositionAt(curNode);
   return newPosition;
 }
 
@@ -118,10 +124,32 @@ void St_NodeViewIter::ResetPosition(Int_t level, St_NodePosition *newPosition)
   if (thisPosition) delete thisPosition;
   thisPosition = 0;
   if (newPosition) 
-     thisPosition =  new ((*m_Positions)[thisLevel]) St_NodePosition(*newPosition);
+     thisPosition =  
+#ifdef Clone
+                new ((*m_Positions)[thisLevel]) St_NodePosition(*newPosition);
+#else
+//               delete (*m_Positions)[thisLevel]
+                   new  St_NodePosition(*newPosition);
+#endif
 }
 //______________________________________________________________________________
 void St_NodeViewIter::Reset(St_DataSet *l,Int_t depth)
 {
   St_DataSetIter::Reset(l,depth);
 }
+
+//______________________________________________________________________________
+St_NodePosition *St_NodeViewIter::SetPositionAt(St_Node *node,Double_t x, Double_t y, Double_t z, TRotMatrix *matrix)
+{
+   if (!m_Positions)  m_Positions = new TObjArray(100);
+   St_NodePosition *position =  (St_NodePosition *) m_Positions->At(fDepth);
+   if (position) position->Reset(node,x,y,z,matrix);
+   else {
+      position = new St_NodePosition(node,x,y,z,matrix);
+      m_Positions->AddAtAndExpand(position,fDepth);
+    }
+   return position;
+}
+
+
+
