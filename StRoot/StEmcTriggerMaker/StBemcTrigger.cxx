@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.8 2001/10/17 20:46:27 suaide Exp $
+// $Id: StBemcTrigger.cxx,v 1.9 2001/10/18 19:25:34 suaide Exp $
 //
 //    
 
@@ -95,8 +95,8 @@ void StBemcTrigger::MakeTrigger()
   if(!det) return;
   if(det->numberOfHits()==0) return;
   
-  Float_t e8bits[4800],adc12bits[4800];
-  for(Int_t i=0;i<4800;i++) {e8bits[i]=0; adc12bits[i]=0;}
+  Float_t e8bits[4800],adc8bits[4800];
+  for(Int_t i=0;i<4800;i++) {e8bits[i]=0; adc8bits[i]=0;}
     
   for(Int_t i=1;i<121;i++)
   {
@@ -111,10 +111,10 @@ void StBemcTrigger::MakeTrigger()
         UInt_t sub=abs(hits[j]->sub());
         Int_t id;
         geo->getId(module,eta,sub,id);
-        Int_t adc8bits=(Int_t)(hits[j]->adc()/16); // convert 12 bits to 8 bits adc
+        Int_t adc8=(Int_t)(hits[j]->adc()/16); // convert 12 bits to 8 bits adc
         Float_t scalefactor=16.*hits[j]->energy()/(Float_t)hits[j]->adc();
-        e8bits[id-1]=(Float_t)adc8bits*scalefactor; //convert to energy
-        adc12bits[id-1]=hits[j]->adc();
+        e8bits[id-1]=(Float_t)adc8*scalefactor; //convert to energy
+        adc8bits[id-1]=(Float_t)adc8;
         //cout <<hits[j]->adc()<<"   "<<e8bits[id-1]<<"   "<<scalefactor<<endl;
       }
     }
@@ -151,9 +151,9 @@ void StBemcTrigger::MakeTrigger()
     GetCrateEtaPatch(patch,&crate,&subpatch);
     
     Int_t ti=0;
-    patchRows[patch-1].PatchAdcSum12bits=0;
+    patchRows[patch-1].PatchAdcSum6bits=0;
     
-    Float_t eta=0,phi=0,eta1=0,phi1=0;
+    Float_t eta=0,phi=0,eta1=0,phi1=0,patchtemp=0;
     Int_t HTTemp=0;
     for(Int_t k=0;k<16;k++)
     {
@@ -164,22 +164,24 @@ void StBemcTrigger::MakeTrigger()
        patchRows[patch-1].TowerId[ti]=id;
        ti++;
        //if(e8bits[id-1]>=HT[patch-1])   
-       if((Int_t)adc12bits[id-1]>=HTTemp) 
+       if((Int_t)adc8bits[id-1]>=HTTemp) 
        {
          HT[patch-1]=e8bits[id-1]; 
          HTId[patch-1]=id;
-         HTTemp=(Int_t)adc12bits[id-1];
+         HTTemp=(Int_t)adc8bits[id-1];
        }
        Patch[patch-1]+=e8bits[id-1];
-       patchRows[patch-1].PatchAdcSum12bits+=(Int_t)adc12bits[id-1];
+       patchtemp+=(Int_t)adc8bits[id-1];
        geo->getEtaPhi(id,eta1,phi1);
        eta+=eta1;
        phi+=phi1;
     }
+    Int_t patchtemp1=(Int_t)patchtemp/64;  // linear transformation. should replace for lookup table
+    patchRows[patch-1].PatchAdcSum6bits+=patchtemp1;
     patchRows[patch-1].Eta=eta/16;
     patchRows[patch-1].Phi=phi/16;
     
-    patchRows[patch-1].HighTowerAdc12bits=(Int_t)adc12bits[HTId[patch-1]-1];
+    patchRows[patch-1].HighTowerAdc6bits=(Int_t)(adc8bits[HTId[patch-1]-1]/4);
     
     HT[patch-1]*=sin(theta);   // et
     Patch[patch-1]*=sin(theta);// et
