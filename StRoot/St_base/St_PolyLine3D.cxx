@@ -286,7 +286,6 @@ Int_t   St_PolyLine3D::SetNumberOfAttributes(Int_t n)
 //______________________________________________________________________________
 void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
 {
-#if 1
    TVirtualPad *pad = p;
    TVirtualPad *savpad = 0;
    if (pad && pad != gPad) {
@@ -319,8 +318,8 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
       const Float_t arrowLegth = arrowLegthFactor*axisFactor*(max[0]-min[0]);
       const Float_t arrWidth   = arrowWidthFactor*arrowLegth;
       for (i=0;i<3;i++) {
-//       origin[i] = TMath::Min(TMath::Max(0.0f,min[i]),max[i]);
-       origin[i] = 0.5*(max[i]+min[i]);
+       origin[i] = TMath::Min(TMath::Max(0.0f,min[i]),max[i]);
+//       origin[i] = 0.5*(max[i]+min[i]);
 //       printf(" %f %f min=%f max=%f \n", arrowLegth, origin[i],min[i],max[i]);
       }
       //___________  X axis ____________
@@ -347,7 +346,7 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
       lx->SetColorAttribute(6);
       lx->SetSizeAttribute(2);
       lx->SetWidthFactor(width);
-//      lx->Draw();
+      lx->Draw();
 
       //___________  Y axis ____________
       indx++;
@@ -355,25 +354,25 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
         x = origin[0];
         y = origin[1];
         z = origin[2];
-      lx->SetNextPoint(x,y,z);               // initial point
+      ly->SetNextPoint(x,y,z);               // initial point
         y = origin[indx] + axisFactor*(max[indx]-min[indx]);
-      lx->SetNextPoint(x,y,z);               //     --------
+      ly->SetNextPoint(x,y,z);               //     --------
       //____________ y_head ____________
         y -= arrowLegth;
         x += arrWidth;                       //            
-      lx->SetNextPoint(x,y,z);               //     --------
+      ly->SetNextPoint(x,y,z);               //     --------
         x = origin[0];
         y = origin[indx] + axisFactor*(max[indx]-min[indx]);
-      lx->SetNextPoint(x,y,z);               // go back
+      ly->SetNextPoint(x,y,z);               // go back
         y -= arrowLegth;
         x -= arrWidth;                       //            
-      lx->SetNextPoint(x,y,z);               //     --------> finish it
+      ly->SetNextPoint(x,y,z);               //     --------> finish it
                                              //            
       ly->SetColorAttribute(4);
       ly->SetSizeAttribute(2);
       ly->SetBit(kCanDelete);
       ly->SetWidthFactor(width);
-//      ly->Draw();
+      ly->Draw();
 
       //___________  Z axis ____________
       indx++;
@@ -381,19 +380,19 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
         x = origin[0];
         y = origin[1];
         z = origin[2];
-      lx->SetNextPoint(x,y,z);               // initial point
+      lz->SetNextPoint(x,y,z);               // initial point
         z = origin[indx] + axisFactor*(max[indx]-min[indx]);
-      lx->SetNextPoint(x,y,z);               //     --------
+      lz->SetNextPoint(x,y,z);               //     --------
       //____________ z_head ____________
         z -= arrowLegth;
         x += arrWidth;                       //            
-      lx->SetNextPoint(x,y,z);               //     --------
+      lz->SetNextPoint(x,y,z);               //     --------
         x = origin[0];
         z = origin[indx] + axisFactor*(max[indx]-min[indx]);
-      lx->SetNextPoint(x,y,z);               // go back
+      lz->SetNextPoint(x,y,z);               // go back
         z -= arrowLegth;
         x -= arrWidth;                       //            
-      lx->SetNextPoint(x,y,z);               //     --------> finish it
+      lz->SetNextPoint(x,y,z);               //     --------> finish it
 
 
       lz->SetBit(kCanDelete);
@@ -403,6 +402,5 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
       lz->Draw();
    }
    if (savpad) savpad->cd();
-#endif
- }   
+}   
 
