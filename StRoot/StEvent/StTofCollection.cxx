@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofCollection.cxx,v 2.5 2003/05/23 16:10:59 ullrich Exp $
+ * $Id: StTofCollection.cxx,v 2.6 2003/05/23 20:06:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.cxx,v $
+ * Revision 2.6  2003/05/23 20:06:12  ullrich
+ * Restore plural for data members.
+ *
  * Revision 2.5  2003/05/23 16:10:59  ullrich
  * Changed name of access functions.
  *
@@ -32,7 +35,7 @@
  **************************************************************************/
 #include "StTofCollection.h"
 
-static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.5 2003/05/23 16:10:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.6 2003/05/23 20:06:12 ullrich Exp $";
 
 ClassImp(StTofCollection)
     
@@ -43,25 +46,25 @@ StTofCollection::~StTofCollection() { /* noop */ }
 const StSPtrVecTofCell&
 StTofCollection::tofCells() const
 {
-    return mTofCell;
+    return mTofCells;
 }
 
 StSPtrVecTofCell&
 StTofCollection::tofCells()
 {
-    return mTofCell;
+    return mTofCells;
 }
 
 const StSPtrVecTofSlat&
 StTofCollection::tofSlats() const
 {
-    return mTofSlat;
+    return mTofSlats;
 }
 
 StSPtrVecTofSlat&
 StTofCollection::tofSlats()
 {
-    return mTofSlat;
+    return mTofSlats;
 }
 
 const StSPtrVecTofHit&
@@ -98,13 +101,13 @@ StTofCollection::tofData()
 void
 StTofCollection::addCell(const StTofCell* aCell)  
 {
-    if (aCell) mTofCell.push_back(aCell);
+    if (aCell) mTofCells.push_back(aCell);
 }
 
 void
 StTofCollection::addSlat(const StTofSlat* aSlat)  
 {
-    if (aSlat) mTofSlat.push_back(aSlat);
+    if (aSlat) mTofSlats.push_back(aSlat);
 }
 
 void
@@ -123,13 +126,13 @@ StTofCollection::addData(const StTofData* aData)
 bool
 StTofCollection::cellsPresent() const
 {
-    return mTofCell.size();
+    return mTofCells.size();
 }
 
 bool
 StTofCollection::slatsPresent() const
 {
-    return mTofSlat.size();
+    return mTofSlats.size();
 }
 
 bool
