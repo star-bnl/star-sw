@@ -1,5 +1,8 @@
-// $Id: MakeHtmlTables.cxx,v 1.9 1999/09/14 15:30:39 fine Exp $
+// $Id: MakeHtmlTables.cxx,v 1.10 1999/11/19 21:20:23 fine Exp $
 // $Log: MakeHtmlTables.cxx,v $
+// Revision 1.10  1999/11/19 21:20:23  fine
+// Extra path to /afs/rhic/star/packages/SL99i include dirictory was added
+//
 // Revision 1.9  1999/09/14 15:30:39  fine
 // makedocs adjusted to the new source tree
 //
@@ -55,8 +58,10 @@
     lookup += "$STAR:";
     lookup += sourcedir;
     lookup += ":";
-    lookup += "$STAR/.share/tables:";
+    lookup += "$STAR/include:";
+    lookup += "$STAR/include/tables:";
     lookup += "$STAR/StRoot/St_base";
+    lookup += "$STAR/.share/tables:";
   }
 
   html->SetSourceDir(lookup.Data());
@@ -93,5 +98,5 @@
    }
    gSystem->FreeDirectory(dirhandle);
    // Make html for itself
-   html->Convert("./MakeHtmlTables.cxx","How to create the HTML doc for the STAF table wrappers");
+   html->Convert("$STAR/StRoot/htm/MakeHtmlTables.cxx","How to create the HTML doc for the STAF table wrappers");
 }
