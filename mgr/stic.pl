@@ -9,10 +9,10 @@ while (my $par = shift) {
   if ($par =~ /Root|ROOT|ObjectSpace/) {next;} 
   push @pars, $par;
 }
-my $file = basename($target); 
-my $dir = dirname($target);   
+my $file = basename($target); #print "file = $file\n";
+my $dir = dirname($target);   #print "dir = $dir\n";
 my $Dir = cwd();
-my $idl = pop @pars;
+my $idl = pop @pars;# print "get $idl\n";
 if ($idl !~ /^\//) {$idl = $Dir . "/" . $idl;}# print "Full name $idl\n";
 my $tmpdir = "/tmp/" . $$;# print "tmpdir = $tmpdir \n";
 if (! -d $dir    && !mkdir ($dir,    0755)) {die "$0:Can't create directory $dir\n";};

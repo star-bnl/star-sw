@@ -1,8 +1,8 @@
-#!/opt/star/bin/perl -w
-# $Id: bfc,v 1.6 1999/11/19 19:37:29 didenko Exp $
+#!/usr/local/bin/perl
+# $Id: bfc,v 1.7 2000/01/21 20:21:10 didenko Exp $
 # $Log: bfc,v $
-# Revision 1.6  1999/11/19 19:37:29  didenko
-# fixed perl
+# Revision 1.7  2000/01/21 20:21:10  didenko
+# add links of StDb/calibration/tpc for cosmic run
 #
 # Revision 1.5  1999/10/12 16:01:13  didenko
 # fixed disk names
@@ -20,9 +20,13 @@ use Env;
 use File::Basename;
 system 'echo "Starting job execution at" `date` " on " $HOSTNAME';
 print "STAR_LEVEL = $STAR_LEVEL\n";
-die "No input Chain defined" if ! defined($ARGV[0]);
 my $Chain = "";
-
+my $noise1 = "noiseElim.19991216.000000.tpcdaq";
+my $noise2 = "noiseElim.19991217.000000.tpcdaq";
+`rm $noise` if -e $noise;
+symlink $STAR . "/StDb/calibrations/tpc/" . $noise1, $noise1;
+symlink $STAR . "/StDb/calibrations/tpc/" . $noise2, $noise2;
+die "No input Chain defined" if ! defined($ARGV[0]);
 for (my $i = 0;$i<=$#ARGV;$i++){
   if ($ARGV[$i] && ! ($ARGV[$i] =~ /\./)) {$Chain .= " " .  $ARGV[$i];}
 }
@@ -96,7 +100,7 @@ else {
   }
 }
 die "No input file has been defined" if ! $input_file;
-my $NofEvents = 999;
+my $NofEvents = 15000;
 if ($input_file =~ /evts/){
   my $dummy,  $evts, $ev;
   ($dummy, $dummy, $evts)  = split /_/, $input_file;
@@ -112,7 +116,11 @@ exit 0;
 #______________________________________________________
 sub convert($) {
   my $new_name = @_[0];
-  $new_name =~ s'/home/starreco/reco'/star/rcf/disk00001/star'g;
+  $new_name =~ s'/home/starreco/reco'/star/rcf'g;
   return $new_name;
 }
 #END
+
+
+
+

@@ -34,7 +34,7 @@ float prop_one_track( float gtrack[8] , float target[2] , float ptrack[3] )
   
   long  iflag;
   float xpr[2], curvf, gseed;
-  float psi, pt, tanl, x0, y0, z0, xp[2], xout[2],  xv[3], xx0[3];
+  float psi, pt, tanl, x0[3], xp[2], xout[2],  xv[3], xx0[3];
   float trk[7], r1, xc[2];
   float pStraight[3];
   
@@ -90,9 +90,9 @@ float prop_one_track( float gtrack[8] , float target[2] , float ptrack[3] )
     }
   else
     {
-      x0   = gtrack[0];
-      y0   = gtrack[1];
-      z0   = gtrack[2];
+      x0[0] = gtrack[0];
+      x0[1] = gtrack[1];
+      x0[2] = gtrack[2];
       xv[0] = target[0];
       xv[1] = target[1];
       xv[2] = 0.;

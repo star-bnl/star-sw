@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.16 1999/12/10 17:20:26 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.17 2000/01/27 01:33:53 caines Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.17  2000/01/27 01:33:53  caines
+// Now only runs ev0eval if geant there
+//
 // Revision 1.16  1999/12/10 17:20:26  genevb
 // No need to set 4 primary vertices, changed formula for table allocation
 //
@@ -199,13 +202,15 @@ Int_t StV0Maker::Make(){
       gMessMgr->Warning() << " Problem on return from EV0 " << endm;
     if(m_ev0EvalOn){   
       //ev0_eval2
-      if (tptrack && evaltrk) {
-	if (! stk_track)    {stk_track = new St_stk_track("stk_track",1); AddGarb(stk_track);}
-	ev0_eval = new St_ev0_eval("ev0_eval",20000);
-	AddData(ev0_eval);
 	St_DataSetIter geant(GetInputDS("geant"));
 	St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("g2t_track");
 	St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *) geant("g2t_vertex");
+
+      if (tptrack && evaltrk && g2t_track && g2t_vertex) {
+	if (! stk_track)    {stk_track = new St_stk_track("stk_track",1); AddGarb(stk_track);}
+	ev0_eval = new St_ev0_eval("ev0_eval",20000);
+	AddData(ev0_eval);
+	
 	if(Debug()) gMessMgr->Info() << " Calling ev0_eval2.." << endm;
 	Int_t Res_ev0_eval = kSTAFCV_BAD;
 	Res_ev0_eval = ev0_eval2(stk_track,tptrack,evaltrk,
