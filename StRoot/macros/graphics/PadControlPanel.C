@@ -2,8 +2,11 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.6 1999/06/10 03:40:53 fine Exp $
+// $Id: PadControlPanel.C,v 1.7 1999/06/10 19:44:16 fine Exp $
 // $Log: PadControlPanel.C,v $
+// Revision 1.7  1999/06/10 19:44:16  fine
+// AdjustScale button jas been introduced
+//
 // Revision 1.6  1999/06/10 03:40:53  fine
 // New button to draw 3D axice added
 //
@@ -89,13 +92,13 @@ static TControlBar *PadControlPanel(TControlBar *bar=0){
    bar->AddButton("Black background", "StPadControlPanel::SetBackround(kBlack);", "Change the backgroung color to black");
    bar->AddButton("White background", "StPadControlPanel::SetBackround(kWhite);", "Change the backgroung color to white");
 //   bar->AddButton("Set background", "StPadControlPanel::SetBackroundStyle();", "Change the backgroung color to white");
+   bar->AddButton("Adjust scales","StPadControlPanel::AdjustScales();","Adjust the scales of all three axice");
    bar->AddButton("Centered","StPadControlPanel::Centered3DImages();","Place (0,0,0) into the center of the view port");
    bar->AddButton("Scale +","StPadControlPanel::Inscrease3DScale();","Change the scale of the image");
    bar->AddButton("Scale -","StPadControlPanel::Decrease3DScale();","Change the scale of the image");
    bar->AddButton("Top View","StPadControlPanel::TopView();","Show the top view");
    bar->AddButton("Side View","StPadControlPanel::SideView();","Show the side view");
    bar->AddButton("Front View","StPadControlPanel::FrontView();","Show the front view");
-   bar->AddButton("Add Axice","St_PolyLine3D::Axis();","Add 3D axice to the cuurent TPad view");
    bar->AddButton("4 views","StPadControlPanel::MakeFourView();","4 view");
 
    bar->Show();
@@ -152,6 +155,25 @@ static void TopView(TVirtualPad *pad=0){
 //_______________________________________________________________________________________
 static void SideView(TVirtualPad *pad=0){
   RotateView(90.0,0.0,pad);
+}
+//_______________________________________________________________________________________
+static void AdjustScales()
+{
+  TVirtualPad *thisPad = gPad;
+  if (thisPad) {
+    TView *view = thisPad->GetView(); 
+    Float_t min[3],max[3];
+    view->GetRange(min,max);
+    int i;
+    Float_t maxSide = 0;
+    // Find the largest side
+    for (i=0;i<3; i++) maxSide = TMath::Max(maxSide,max[i]-min[i]);
+    //Adjust scales:
+    for (i=0;i<3; i++) max[i] += maxSide - (max[i]-min[i]);
+    view->SetRange(min,max);
+    thisPad->Modified();
+    thisPad->Update();
+ }
 }
 //_______________________________________________________________________________________
 static void Centered3DImages()
