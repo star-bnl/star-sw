@@ -3,6 +3,10 @@ CC: FILE:       xyz.F
 CC: HISTORY:
 CC:             00jan96-v000a-hpl- Created by stic Version
 CC:		26nov96 - First coding by Nathan Stone
+cc:		31aug97 - malisa
+cc:			added mapping_arrays_inverted.inc to give
+cc:			fee#,chip# for a given padrow,pad.  This
+cc:			information is then put into the adcxyz table.
 CC:<--------------------------------------------------------------------
 
       INTEGER*4 FUNCTION XYZ(
@@ -14,6 +18,7 @@ CC:<--------------------------------------------------------------------
      6            adcxyz_h,            adcxyz ) 
       IMPLICIT NONE
 #include "xyz.inc"
+#include "mapping_arrays_inverted.inc"
 CC:>--------------------------------------------------------------------
 CC: ROUTINE:    XYZ
 CC: DESCRIPTION:
@@ -131,6 +136,10 @@ c -----	Extract the encoded information
 	      adcxyz(inok).sector = tppad(i).tpc_row / 100
 	      adcxyz(inok).row = tppad(i).tpc_row - (100*adcxyz(inok).sector)
 	      adcxyz(inok).pad = tppad(i).secpad
+
+c mal 31aug97
+              adcxyz(inok).fee  = fee_pad(adcxyz(inok).row,adcxyz(inok).pad)
+              adcxyz(inok).chip = chip_pad(adcxyz(inok).row,adcxyz(inok).pad)
 
 	      idatum = tppixel(tppad(i).jpix+offset).datum - nbuck*seq_fact
 	      adcxyz(inok).bucket = idatum / buck_fact
