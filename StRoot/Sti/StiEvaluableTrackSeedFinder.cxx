@@ -206,7 +206,7 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
 
     //Set StiDetectorContainer to layer corresponding to
     //the innermost point on the track seed
-    StiKalmanTrackNode* node = track->getLastNode(); //Should return innermost
+    StiKalmanTrackNode* node = track->getInnerMostNode(); //Should return innermost
     if (!node) {
 	mMessenger <<"StiEvaluableTrackSeedFinder::makeTrack(). ERROR:\t";
 	mMessenger <<"node==0.  return;"<<endl;

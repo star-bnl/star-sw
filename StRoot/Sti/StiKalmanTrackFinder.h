@@ -40,11 +40,17 @@ public:
     virtual void setMCSCalculated(bool option);
     void   setMassHypothesis(double m);
     double getMassHypothesis();
-		void   setField(double f);
-		void   setMinContiguousHitCount(int count);
-		void   setMaxNullCount(int count);
-		void   setMaxContiguousNullCount(int count);
-		void   setMaxChi2ForSelection(double chi);
+    void   setField(double f);
+    void   setMinContiguousHitCount(int count);
+    void   setMaxNullCount(int count);
+    void   setMaxContiguousNullCount(int count);
+    void   setMaxChi2ForSelection(double chi);
+    void   setMinSearchWindow(double val);
+    void   setMaxSearchWindow(double val);
+    void   setSearchWindowScale(double val);
+    double getMinSearchWindow();
+    double getMaxSearchWindow();
+    double getSearchWindowScale();
 
     //Local
     virtual void findTrack(StiTrack * t); //throw ( Exception);

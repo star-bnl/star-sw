@@ -55,399 +55,404 @@ using namespace std;
 
 ostream& operator<<(ostream&, const StiTrack&);
 
+
+
+
 StiKalmanTrackFinder::StiKalmanTrackFinder()
-    : StiTrackFinder(),trackMes(*Messenger::instance(MessageType::kTrackMessage)),
-      mSubject(StiIOBroker::instance())
+  : StiTrackFinder(),trackMes(*Messenger::instance(MessageType::kTrackMessage)),
+    mSubject(StiIOBroker::instance())
     
 {
-    //Turn off by default
-    Messenger::instance()->clearRoutingBits(MessageType::kTrackMessage);
+  //Turn off by default
+  Messenger::instance()->clearRoutingBits(MessageType::kTrackMessage);
     
-    cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Begins"<<endl;
-    StiTrack::setTrackFitter(new StiKalmanTrackFitter());
-    reset();
+  cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Begins"<<endl;
+  StiTrack::setTrackFitter(new StiKalmanTrackFitter());
+  reset();
     
-    mSubject->attach(this);
-    getNewState();
+  mSubject->attach(this);
+  getNewState();
     
-    cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
+  cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
 }
 
 StiKalmanTrackFinder::~StiKalmanTrackFinder()
 {
-    //progFlowMes <<"StiKalmanTrackFinder::~StiKalmanTrackFinder() - Begin/End"<<endl;
-    if (mSubject) {
-	mSubject->detach(this);
-    }
+  //progFlowMes <<"StiKalmanTrackFinder::~StiKalmanTrackFinder() - Begin/End"<<endl;
+  if (mSubject) {
+    mSubject->detach(this);
+  }
 }
 
 void StiKalmanTrackFinder::getNewState()
 {
-    StiIOBroker *  broker = StiIOBroker::instance();
-    //cout <<"StiKalmanTrackFinder::getNewState()"<<endl;
-    setMCSCalculated(broker->ktfMcsCalculated());
-    setElossCalculated(broker->ktfElossCalculated());
-    setMaxChi2ForSelection(broker->ktfMaxChi2ForSelection());
-    setField(broker->ktfBField());
-    setMassHypothesis(broker->ktfMassHypothesis());
-    setMinContiguousHitCount(broker->ktfMinContiguousHitCount());
-    setMaxNullCount(broker->ktfMaxNullCount());
-    setMaxContiguousNullCount(broker->ktfMaxContiguousNullCount());
-    //setMinSearchRadius(broker->ktfMinSearchRadius());
-    //setMaxSearchRadius(broker->ktfMaxSearchRadius());
-    if (broker->ktfUseHelixExtrapolation()==true) 
-	{
-	    //cout <<"Using helix extrapolation"<<endl;
-	    StiMaterialInteraction::setExtrapolationType(kHelixExtrapolation);
-	}
-    else 
-	{
-	    StiMaterialInteraction::setExtrapolationType(kLinearExtrapolation);
-	}
+  StiIOBroker *  broker = StiIOBroker::instance();
+  //cout <<"StiKalmanTrackFinder::getNewState()"<<endl;
+  setMCSCalculated(broker->ktfMcsCalculated());
+  setElossCalculated(broker->ktfElossCalculated());
+  setMaxChi2ForSelection(broker->ktfMaxChi2ForSelection());
+  setField(broker->ktfBField());
+  setMassHypothesis(broker->ktfMassHypothesis());
+  setMinContiguousHitCount(broker->ktfMinContiguousHitCount());
+  setMaxNullCount(broker->ktfMaxNullCount());
+  setMaxContiguousNullCount(broker->ktfMaxContiguousNullCount());
+  setMinSearchWindow(broker->ktfMinSearchRadius());
+  setMaxSearchWindow(broker->ktfMaxSearchRadius());
+  setSearchWindowScale(broker->ktfSearchWindowScale());
+
+  if (broker->ktfUseHelixExtrapolation()==true) 
+    {
+      //cout <<"Using helix extrapolation"<<endl;
+      StiMaterialInteraction::setExtrapolationType(kHelixExtrapolation);
+    }
+  else 
+    {
+      StiMaterialInteraction::setExtrapolationType(kLinearExtrapolation);
+    }
 }
 
 void StiKalmanTrackFinder::reset()
 {
-    //progFlowMes <<"StiKalmanTrackFinder::reset()"<<endl;
-    singleNodeDescent    = true;
-    singleNodeFrom       = 20;
-    mcsCalculated        = false;
-    elossCalculated      = false;
-    maxChi2ForSelection  = 50.;
+  //progFlowMes <<"StiKalmanTrackFinder::reset()"<<endl;
+  singleNodeDescent    = true;
+  singleNodeFrom       = 20;
+  mcsCalculated        = false;
+  elossCalculated      = false;
+  maxChi2ForSelection  = 50.;
     
-    track = 0;
-    trackDone = true;
-    scanningDone = true;
-    state = 0;
-    mode=StepByLayer;
+  track = 0;
+  trackDone = true;
+  scanningDone = true;
+  state = 0;
+  mode=StepByLayer;
 }
 
 bool StiKalmanTrackFinder::isValid(bool debug) const
 {
-    return StiTrackFinder::isValid(debug);
+  return StiTrackFinder::isValid(debug);
 }
 
 //Temporary patch, to test seed finder (MLM, 8/20/01)
 
 bool StiKalmanTrackFinder::hasMore()
 {
-    return trackSeedFinder->hasMore();
+  return trackSeedFinder->hasMore();
 }
 
 void StiKalmanTrackFinder::doNextTrackStep()
 {
-    try
+  try
+    {
+      if (mode==StepByLayer)
 	{
-	    if (mode==StepByLayer)
+	  trackMes << "StepByLayer" << endl;
+	  switch (state)
+	    {
+	    case 0:
+	      trackMes<< "InitTrackSearch()"<< endl;
+       
+	      doInitTrackSearch(); 
+	      state++; 
+	      break;
+	    case 1: 
+	      doInitLayer();
+	      doScanLayer();
+	      doFinishLayer();
+	      if (trackDone)
 		{
-		    trackMes << "StepByLayer" << endl;
-		    switch (state)
-			{
-			case 0:
-			    trackMes<< "InitTrackSearch()"<< endl;
-			    
-			    doInitTrackSearch(); 
-			    state++; 
-			    break;
-			case 1: 
-			    doInitLayer();
-			    doScanLayer();
-			    doFinishLayer();
-			    if (trackDone)
-				{
-				    doFinishTrackSearch(); 
-				    state=0;
-				}
-			    break;
-			}
+		  doFinishTrackSearch(); 
+		  state=0;
 		}
-	    else if (mode==StepByDetector)
+	      break;
+	    }
+	}
+      else if (mode==StepByDetector)
+	{
+      
+	  trackMes << "StepByDetector" << endl;
+      
+	  switch (state)
+	    {
+	    case 0:
+	      trackMes<< "InitTrackSearch()"<<endl;
+	      doInitTrackSearch(); 
+	      state++; 
+	      break;
+	    case 1:
+	      trackMes<< "InitLayer()" << endl;
+	      doInitLayer();
+	      state++;
+	      break;
+	    case 2:
+	      trackMes<< "doNextDetector()" << endl;
+	      doNextDetector();
+	      if (scanningDone)
 		{
-		    
-		    trackMes << "StepByDetector" << endl;
-		    
-		    switch (state)
-			{
-			case 0:
-			    trackMes<< "InitTrackSearch()"<<endl;
-			    doInitTrackSearch(); 
-			    state++; 
-			    break;
-			case 1:
-			    trackMes<< "InitLayer()" << endl;
-			    doInitLayer();
-			    state++;
-			    break;
-			case 2:
-			    trackMes<< "doNextDetector()" << endl;
-			    doNextDetector();
-			    if (scanningDone)
-				{
-				    doFinishLayer();
-				    state = 1;
-				    if(trackDone)
-					{
-					    doFinishTrackSearch(); 
-					    state=0;
-					}
-				    break;
-				}
-			}
+		  doFinishLayer();
+		  state = 1;
+		  if(trackDone)
+		    {
+		      doFinishTrackSearch(); 
+		      state=0;
+		    }
+		  break;
 		}
-	    trackMes << "STATE:" << state << endl;
-	    track->update();
+	    }
 	}
-    catch (runtime_error & rte)
-	{
-	    cout << "RunTime Error Exception: " << rte.what();
-	}
-    catch (exception & e)
-	{
-	    cout << "Exception: " << e.what();
-	}
+      trackMes << "STATE:" << state << endl;
+      track->update();
+    }
+  catch (runtime_error & rte)
+    {
+      cout << "RunTime Error Exception: " << rte.what();
+    }
+  catch (exception & e)
+    {
+      cout << "Exception: " << e.what();
+    }
 }
 
 void StiKalmanTrackFinder::doTrackFit()
 {
-    //progFlowMess <<"StiKalmanTrackFinder::doTrackFit()"<<endl;
-    try 
-	{
-	    track = 0;
-	    if (trackSeedFinder->hasMore())	
-		{ //Redundant check, but it protectes against naive calls
-		    track = trackSeedFinder->next();
-		    if (!track) 	    
-			{
-			    trackMes <<"StiKalmanTrackFinder::doTrackFit()\t Track==0. Abort" <<endl;
-			    return;
-			}
-		    else 	    
-			{
-			    trackMes <<"StiKalmanTrackFinder::doTrackFit()\t Got Valid track"<<endl;
-			    track->fit();
-			    trackContainer->push_back(track);
-			    track->update();  //This updates the track on the display
-			    trackMes << "track parameters:";
-			    trackMes << *track<<endl;
-			}
-		}
-	    else 
-		{
-		    trackMes <<"\ttrackSeedFinder->hasMore()==false"<<endl;
-		}
+  //progFlowMess <<"StiKalmanTrackFinder::doTrackFit()"<<endl;
+  try 
+    {
+      track = 0;
+      if (trackSeedFinder->hasMore()) 
+	{ //Redundant check, but it protectes against naive calls
+	  track = trackSeedFinder->next();
+	  if (!track)      
+	    {
+	      trackMes <<"StiKalmanTrackFinder::doTrackFit()\t Track==0. Abort" <<endl;
+	      return;
+	    }
+	  else      
+	    {
+	      trackMes <<"StiKalmanTrackFinder::doTrackFit()\t Got Valid track"<<endl;
+	      track->fit();
+	      trackContainer->push_back(track);
+	      track->update();  //This updates the track on the display
+	      trackMes << "track parameters:";
+	      trackMes << *track<<endl;
+	    }
 	}
-    catch (exception & e) {
-	trackMes << "StiKalmanTrackFinder::doTrackFit() - Internal Error :" << e.what() << endl;
+      else 
+	{
+	  trackMes <<"\ttrackSeedFinder->hasMore()==false"<<endl;
+	}
     }
+  catch (exception & e) {
+    trackMes << "StiKalmanTrackFinder::doTrackFit() - Internal Error :" << e.what() << endl;
+  }
 }
 
 void StiKalmanTrackFinder::doTrackFind()
 {
-    trackDone = true;
-    scanningDone = true;
-    state = 0;
-    track = 0;
-    if (trackSeedFinder->hasMore())	
-	{ //Redundant check, but it protectes against naive calls
-	    track = trackSeedFinder->next();
-	    if (!track) 
-		{
-		    trackMes << "\tNO MORE TRACK SEEDS - EVENT COMPLETED" << endl;
-		    return;
-		}
-	    trackMes <<"StiKalmanTrackFinder::doTrackFind()\t Got Valid track"<<endl;
-
-	    findTrack(track);
-	    trackMes << " SKTFinder::doTrackFind() - Track Parameters" << endl << *track;
-	    reserveHits(track->getLastNode());
-            trackContainer->push_back(track);
-            track->update();  //This updates the track on the display
-	    trackDone = false;  // ready for a new track
-	}
-    else 
+  trackDone = true;
+  scanningDone = true;
+  state = 0;
+  track = 0;
+  if (trackSeedFinder->hasMore()) 
+    { //Redundant check, but it protectes against naive calls
+      track = trackSeedFinder->next();
+      if (!track) 
 	{
-	    trackMes << "\tNO MORE TRACK SEEDS - EVENT COMPLETED" << endl;
+	  trackMes << "\tNO MORE TRACK SEEDS - EVENT COMPLETED" << endl;
+	  return;
 	}
+      trackMes <<"StiKalmanTrackFinder::doTrackFind()\t Got Valid track"<<endl;
+
+      findTrack(track);
+      trackMes << " SKTFinder::doTrackFind() - Track Parameters" << endl << *track;
+      reserveHits(track->getLastNode());
+      trackContainer->push_back(track);
+      track->update();  //This updates the track on the display
+      trackDone = false;  // ready for a new track
+    }
+  else 
+    {
+      trackMes << "\tNO MORE TRACK SEEDS - EVENT COMPLETED" << endl;
+    }
 }
 
 void StiKalmanTrackFinder::findTracks()
 {
-    //-----------------------------------------------------------------
-    // Find all possible tracks in the given set of hits/points.
-    // 
-    // Note: The following objects must be set
-    // trackSeedFinder  : a helper class object used to find track seeds
-    // trackFilter      : a helper class object used to filter tracks 
-    //                    before they are added to the track store.
-    // trackContainer   : track container
-    //-----------------------------------------------------------------
-    StiKalmanTrack * t;
-    while (trackSeedFinder->hasMore())
-	{	
-	    t = trackSeedFinder->next(); // obtain a pointer to the next track candidate/seed
-	    if (!t) 
-		{
-		    trackMes << "NO MORE TRACK SEEDS - EVENT COMPLETED" << endl;
-		    return;
-		}
-	    findTrack(t);
-	    if (trackFilter->accept(t)) 
-		trackContainer->push_back(t);
+<<<<<<< StiKalmanTrackFinder.cxx
+  //-----------------------------------------------------------------
+  // Find all possible tracks in the given set of hits/points.
+  // 
+  // Note: The following objects must be set
+  // trackSeedFinder  : a helper class object used to find track seeds
+  // trackFilter      : a helper class object used to filter tracks 
+  //                    before they are added to the track store.
+  // trackContainer   : track container
+  //-----------------------------------------------------------------
+  StiTrack * t;
+  while (trackSeedFinder->hasMore())
+    { 
+      t = trackSeedFinder->next(); // obtain a pointer to the next track candidate/seed
+      if (!t) 
+	{
+	  trackMes << "NO MORE TRACK SEEDS - EVENT COMPLETED" << endl;
+	  return;
 	}
+      findTrack(t);
+      if (trackFilter->accept(t)) 
+	trackContainer->push_back(t);
+    }
 }
 
 void StiKalmanTrackFinder::findTrack(StiTrack * t) 
 {
-    //-----------------------------------------------------------------
-    // Find extension (track) to the given track seed
-    // Return Ok      if operation was successful
-    // Return Error   if given seed "t" is invalid
-    //                or if input data are invalid or if some other 
-    //                internal error has occured.
-    //-----------------------------------------------------------------
-    //trackMes << "SKTF::findTrack(StiTrack * t) - Beginning" << endl;
-    track = dynamic_cast<StiKalmanTrack *> (t);
-    if (!track) 
-	{
-	    throw logic_error("SKTF::findTrack()\t - ERROR - dynamic_cast<StiKalmanTrack *>  returned 0");
-	}
-    StiKalmanTrackNode * lastNode = track->getLastNode();
-    try
-	{
-	    lastNode = followTrackAt(lastNode);
-	}
-    catch (exception & e)
-	{
-	    cout << "SKTF::findTrack() exception: " << e.what();
-	}
-    pruneNodes(lastNode);
-    reserveHits(track->getLastNode());
-    track->setLastNode(lastNode);
-    track->setChi2(lastNode->fChi2);
-    using namespace std;
-    if (lastNode->fP3*StiKalmanTrackNode::getFieldConstant()>0)
-	track->setCharge(-1);
-    else
-	track->setCharge(1);
-    //extendToMainVertex(lastNode);
+  //-----------------------------------------------------------------
+  // Find extension (track) to the given track seed
+  // Return Ok      if operation was successful
+  // Return Error   if given seed "t" is invalid
+  //                or if input data are invalid or if some other 
+  //                internal error has occured.
+  //-----------------------------------------------------------------
+  //trackMes << "SKTF::findTrack(StiTrack * t) - Beginning" << endl;
+  track = dynamic_cast<StiKalmanTrack *> (t);
+  if (!track) 
+    {
+      throw logic_error("SKTF::findTrack()\t - ERROR - dynamic_cast<StiKalmanTrack *>  returned 0");
+    }
+  StiKalmanTrackNode * lastNode = track->getLastNode();
+  try
+    {
+      lastNode = followTrackAt(lastNode);
+    }
+  catch (exception & e)
+    {
+      cout << "SKTF::findTrack() exception: " << e.what();
+    }
+  pruneNodes(lastNode);
+  reserveHits(lastNode);
+  track->setChi2(lastNode->fChi2);
+  using namespace std;
+  if (lastNode->fP3*StiKalmanTrackNode::getFieldConstant()>0)
+    track->setCharge(-1);
+  else
+    track->setCharge(1);
+  //extendToMainVertex(lastNode);
 }
 
 void StiKalmanTrackFinder::doInitTrackSearch()
 {
-    //    trackMes<<"SKTF::doInitTrackSearch() - called"<<endl;
-    if (!trackDone) return;   // must finish 
-    if (!scanningDone) return;
-    //    trackMes<<"SKTF::doInitTrackSearch() - begins"<<endl;
-    track = 0;
-    if (trackSeedFinder->hasMore())	
-	{ 
-	    //Redundant check, but it protectes against naive calls
-	    track = trackSeedFinder->next();
-	    if (!track) 
-		{
-		    trackMes << "NO MORE TRACK SEEDS - EVENT COMPLETED" << endl;
-		    return;
-		}
-	    //throw logic_error("SKTF::doInitTrackSearch() - Error - trackSeedFinder->next() returned 0 while trackSeedFinder->hasMore() returned thrue");
-	    //trackMes <<"SKTF::doTrackFind()\t Got Valid track"<<endl;
-	    StiKalmanTrackNode * lastNode = track->getLastNode();
-	    if (!lastNode) 
-		throw logic_error("SKTF::findTrack()\t - ERROR - track->getLastNode() returned 0");
-	    initSearch(lastNode);
-	}
-    else 
+  //    trackMes<<"SKTF::doInitTrackSearch() - called"<<endl;
+  if (!trackDone) return;   // must finish 
+  if (!scanningDone) return;
+  //    trackMes<<"SKTF::doInitTrackSearch() - begins"<<endl;
+  track = 0;
+  if (trackSeedFinder->hasMore()) 
+    { 
+      //Redundant check, but it protectes against naive calls
+      track = trackSeedFinder->next();
+      if (!track) 
 	{
-	    trackMes <<"\ttrackSeedFinder->hasMore()==false"<<endl;
+	  trackMes << "NO MORE TRACK SEEDS - EVENT COMPLETED" << endl;
+	  return;
 	}
+      //throw logic_error("SKTF::doInitTrackSearch() - Error - trackSeedFinder->next() returned 0 while trackSeedFinder->hasMore() returned thrue");
+      //trackMes <<"SKTF::doTrackFind()\t Got Valid track"<<endl;
+      StiKalmanTrackNode * lastNode = track->getLastNode();
+      if (!lastNode) 
+	throw logic_error("SKTF::findTrack()\t - ERROR - track->getLastNode() returned 0");
+      initSearch(lastNode);
+    }
+  else 
+    {
+      trackMes <<"\ttrackSeedFinder->hasMore()==false"<<endl;
+    }
 }
 
 void StiKalmanTrackFinder::doFinishTrackSearch()
-{	
-    //trackMes<<"SKTF::doFinishTrackSearch() - called"<<endl;
-    if (!trackDone) return;   // must finish 
-    if (!scanningDone) return;
-    //trackMes<<"SKTF::doFinishTrackSearch() - begins"<<endl;
-    trackContainer->push_back(track);
-    track->update();  //This updates the track on the display
+{ 
+  //trackMes<<"SKTF::doFinishTrackSearch() - called"<<endl;
+  if (!trackDone) return;   // must finish 
+  if (!scanningDone) return;
+  //trackMes<<"SKTF::doFinishTrackSearch() - begins"<<endl;
+  trackContainer->push_back(track);
+  track->update();  //This updates the track on the display
 }
 
 StiKalmanTrackNode * StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node)
-    //throw (Exception)
+  //throw (Exception)
 {
-    initSearch(node);
-    search();
-    return sNode;
+  initSearch(node);
+  search();
+  return sNode;
 }
 
 
 void StiKalmanTrackFinder::initSearch(StiKalmanTrackNode * node)
 {
-    if (!trackDone) return;
-    if (detectorContainer==0) 
-	throw logic_error("SKTF::initSearch() - Error - detectorContainer==0");
-    sNode = node; // source node
-    tNode  = 0;    // target node
-    leadDet = 0;
-    trackDone = false;
-    scanningDone = true;
-    sDet  = sNode->getHit()->detector();
-    if (sDet==0) 
-	throw logic_error("SKTF::initSearch() - Error - sDet==0");
-    tDet=0;
-    leadDet = sDet;
-    //    printState();
+  if (!trackDone) return;
+  if (detectorContainer==0) 
+    throw logic_error("SKTF::initSearch() - Error - detectorContainer==0");
+  sNode = node; // source node
+  tNode  = 0;    // target node
+  leadDet = 0;
+  trackDone = false;
+  scanningDone = true;
+  sDet  = sNode->getHit()->detector();
+  if (sDet==0) 
+    throw logic_error("SKTF::initSearch() - Error - sDet==0");
+  tDet=0;
+  leadDet = sDet;
+  //    printState();
 }
 
 void StiKalmanTrackFinder::search()
 {
-    while (!trackDone) 
-	{
-	    doInitLayer(); 
-	    doScanLayer();
-	    doFinishLayer();
-	}
+  while (!trackDone) 
+    {
+      doInitLayer(); 
+      doScanLayer();
+      doFinishLayer();
+    }
 }
 
 void StiKalmanTrackFinder::doInitLayer()
 {
-    //trackMes << "SKTF::doInitLayer - called" << endl;
-    if (trackDone) return;    // nothing to do
-    if (!scanningDone) return; // nothing to do
-    //trackMes << "SKTF::doInitLayer - begins" << endl;
-    detectorContainer->setToDetector(leadDet);
-    StiDetector * currentDet = **detectorContainer;
-    detectorContainer->moveIn();
-    tDet = **detectorContainer;
-    leadDet = tDet;
-    //trackMes << "TDET:" << *tDet<<endl;
-    if (tDet==0) 
-	throw logic_error("SKTF::doInitLayer() ERROR - tDet==0");
-    else if (tDet==currentDet)	
-	{
-	    //trackMes << "SKTF::doInitLayer() - TrackDone==true - moveIn >> tDet==sDet"  << endl;
-	    trackDone = true;
-	    return;
-	}
-    //sHit = sNode->getHit();	//yWindow = getYWindow(sNode, sHit);	//zWindow = getZWindow(sNode, sHit);
-    position    = 0;
-    lastMove  = 0;
-    hasDet = false;
-    hasHit = false;
-    scanningDone = false;
-    bestChi2  = 1e50;
-    bestNode = 0;  
-    //printState();
+  //trackMes << "SKTF::doInitLayer - called" << endl;
+  if (trackDone) return;    // nothing to do
+  if (!scanningDone) return; // nothing to do
+  //trackMes << "SKTF::doInitLayer - begins" << endl;
+  detectorContainer->setToDetector(leadDet);
+  StiDetector * currentDet = **detectorContainer;
+  detectorContainer->moveIn();
+  tDet = **detectorContainer;
+  leadDet = tDet;
+  //trackMes << "TDET:" << *tDet<<endl;
+  if (tDet==0) 
+    throw logic_error("SKTF::doInitLayer() ERROR - tDet==0");
+  else if (tDet==currentDet) 
+    {
+      //trackMes << "SKTF::doInitLayer() - TrackDone==true - moveIn >> tDet==sDet"  << endl;
+      trackDone = true;
+      return;
+    }
+  //sHit = sNode->getHit(); //yWindow = getYWindow(sNode, sHit); //zWindow = getZWindow(sNode, sHit);
+  position    = 0;
+  lastMove  = 0;
+  hasDet = false;
+  hasHit = false;
+  scanningDone = false;
+  bestChi2  = 1e50;
+  bestNode = 0;  
+  //printState();
 }
 
 void StiKalmanTrackFinder::doScanLayer()
 {
-    //trackMes << " StiKalmanTrackFinder::doScanLayer() called" << endl;
-    if (trackDone) return;
-    //trackMes << " StiKalmanTrackFinder::doScanLayer() begins" << endl;
-    while (!scanningDone)
-	{
-	    doNextDetector();
-	}
+  //trackMes << " StiKalmanTrackFinder::doScanLayer() called" << endl;
+  if (trackDone) return;
+  //trackMes << " StiKalmanTrackFinder::doScanLayer() begins" << endl;
+  while (!scanningDone)
+    {
+      doNextDetector();
+    }
 }
 
 void StiKalmanTrackFinder::doNextDetector()
@@ -483,11 +488,12 @@ void StiKalmanTrackFinder::doNextDetector()
 	{ // active vol, look for hits
 	  if (position==kHit)
 	    scanningDone = true;
-	  hitContainer->setDeltaD(4.); //yWindow);
-	  hitContainer->setDeltaZ(4.); //zWindow);
+	  //cout <<"dy,dz:"<< 3.*tNode->fC00 << "\t" << tNode->fC11 << endl;
+	  hitContainer->setDeltaD(tNode->getWindowY());
+	  hitContainer->setDeltaZ(tNode->getWindowZ());
 	  hitContainer->setRefPoint(tNode->fX,tDet->getPlacement()->getCenterRefAngle(),tNode->fP0,tNode->fP1);
 	  bool hasMore = hitContainer->hasMore();
-	  while (hasMore)	
+	  while (hasMore) 
 	    {
 	      tNode->setHit(hitContainer->getHit());
 	      chi2 = tNode->evaluateChi2();
@@ -505,7 +511,7 @@ void StiKalmanTrackFinder::doNextDetector()
 		  StiKalmanTrackNode * newNode = trackNodeFactory->getObject();
 		  if (newNode==0) 
 		    throw logic_error("SKTF::followTrackAt()\t- ERROR - newNode==null");
-		  newNode->reset();			
+		  newNode->reset();   
 		  newNode->setState(tNode); // get everything from tNode
 		  newNode->setDetector(tDet); // set the local pointer to tDet
 		  tNode = newNode;  // not a memory leak because the factory handles the objects.... ;-)
@@ -533,9 +539,9 @@ void StiKalmanTrackFinder::doNextDetector()
 	  if (lastMove>=0 )
 	    {
 	      trackMes << "SKTF::followTrackAt()\t- movePlusPhi()" << endl;
-	      detectorContainer->movePlusPhi();			
+	      detectorContainer->movePlusPhi();   
 	      nextDet = **detectorContainer;
-	      if (nextDet==0 || tDet==nextDet)	
+	      if (nextDet==0 || tDet==nextDet) 
 		{
 		  //trackMes << "SKTF::followTrackAt) - ERROR - movePlusPhi() >> tDet==sDet"  << endl;
 		  scanningDone = true;
@@ -548,7 +554,7 @@ void StiKalmanTrackFinder::doNextDetector()
 	      scanningDone = true;
 	      trackMes << "SKTF::followTrackAt()\t-position==kEdgePhiPlus||kMissPhiPlus - but no PlusPhi done" << endl;
 	    }
-		    
+      
 	}
       else if (position==kEdgePhiMinus || position==kMissPhiMinus)
 	{
@@ -557,7 +563,7 @@ void StiKalmanTrackFinder::doNextDetector()
 	      trackMes << "SKTF::followTrackAt()\t- moveMinusPhi()" << endl;
 	      detectorContainer->moveMinusPhi();
 	      nextDet = **detectorContainer;
-	      if (nextDet==0 || tDet==nextDet)	
+	      if (nextDet==0 || tDet==nextDet) 
 		{
 		  //trackMes << "SKTF::followTrackAt() - ERROR  -  moveMinusPhi() >> tDet==sDet"  << endl;
 		  scanningDone = true;
@@ -597,84 +603,88 @@ void StiKalmanTrackFinder::printState()
 //_____________________________________________________________________________
 void StiKalmanTrackFinder::doFinishLayer()
 {
-    if (trackDone) return;         // don't do this when the track is done
-    if (!scanningDone) return;  // don't do this until scanning of layer is completed. 
-    if (hasDet)
-	{
-	    if (hasHit)
-		{	
-		    bestNode->updateNode();
-		    sNode->add(bestNode);
-		    sNode = bestNode;  
-		    leadDet = bestNode->getDetector();
-		    //trackMes << "SKTF::doFinishLayer() - Adding node with hit in det:" 
-		    //<< *leadDet << endl;
-		}
-	    else // no hit found
-		{
-		    //trackMes << "===============================leadNode   is at:" 
-		    //<< leadNode << endl;
-		    leadDet = leadNode->getDetector();
-		    if (leadDet==0)
-			trackMes << "SKTF::doFinishLayer() - Fatal Error - leadDet==0" << endl;
-		    //else
-		    //trackMes << "SKTF::doFinishLayer() - Adding node WITHOUT hit in det:"  
-		    //<< *leadDet << endl;
-		    sNode->add(leadNode);
-		    sNode = leadNode;
-		    trackMes << "SKTF::doFinishLayer() "
-			     << "               nullCount:" << leadNode->nullCount << endl
-			     << "    contiguousNullCount :" << leadNode->contiguousNullCount << endl;
-		    if (leadNode->nullCount>StiKalmanTrackNode::maxNullCount ||
-			leadNode->contiguousNullCount>StiKalmanTrackNode::maxContiguousNullCount)
-			trackDone = true;				
-		}
+  if (trackDone) return;         // don't do this when the track is done
+  if (!scanningDone) return;  // don't do this until scanning of layer is completed. 
+  if (hasDet)
+    {
+      if (hasHit)
+	{ 
+	  bestNode->updateNode();
+	  //StiHit * myHit = bestNode->getHit();
+	  //cout << "HIT:" << myHit->x() << "\t" << myHit->y() << "\t" << myHit->z();
+	  //cout << "CENTER:"<<  bestNode->getHelixCenter() << endl;
+	  //cout << "EXTRA: "<<  bestNode->getPointAt(myHit->x()+1.) << endl;
+	  sNode->add(bestNode);
+	  sNode = bestNode;  
+	  leadDet = bestNode->getDetector();
+	  //trackMes << "SKTF::doFinishLayer() - Adding node with hit in det:" 
+	  //<< *leadDet << endl;
 	}
-    else // no det crossing found
+      else // no hit found
 	{
-	    trackMes << "SKTF::doFinishLayer() - Layer Completed with no node added" << endl;
-	    //if (nullCount>maxNullCount ||contiguousNullCount>maxContiguousNullCount)
-	    //	trackDone = true;
+	  //trackMes << "===============================leadNode   is at:" 
+	  //<< leadNode << endl;
+	  leadDet = leadNode->getDetector();
+	  if (leadDet==0)
+	    trackMes << "SKTF::doFinishLayer() - Fatal Error - leadDet==0" << endl;
+	  //else
+	  //trackMes << "SKTF::doFinishLayer() - Adding node WITHOUT hit in det:"  
+	  //<< *leadDet << endl;
+	  sNode->add(leadNode);
+	  sNode = leadNode;
+	  trackMes << "SKTF::doFinishLayer() "
+		   << "               nullCount:" << leadNode->nullCount << endl
+		   << "    contiguousNullCount :" << leadNode->contiguousNullCount << endl;
+	  if (leadNode->nullCount>StiKalmanTrackNode::maxNullCount ||
+	      leadNode->contiguousNullCount>StiKalmanTrackNode::maxContiguousNullCount)
+	    trackDone = true;    
 	}
-    //printState();
+    }
+  else // no det crossing found
+    {
+      trackMes << "SKTF::doFinishLayer() - Layer Completed with no node added" << endl;
+      //if (nullCount>maxNullCount ||contiguousNullCount>maxContiguousNullCount)
+      // trackDone = true;
+    }
+  //printState();
 }
 
 //_____________________________________________________________________________
 void StiKalmanTrackFinder::removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track)
 {
-    // Remove given node from given track. 
-    // not implemented
+  // Remove given node from given track. 
+  // not implemented
 }
 
 void StiKalmanTrackFinder::pruneNodes(StiKalmanTrackNode * node)
 {
-    // Prune unnecessary nodes on the track starting at given node. 
-    // All siblings of the given node, are removed, and iteratively
-    // all siblings of its parent are removed from the parent of the
-    // parent, etc.
-    //trackMes <<"SKTF::pruneNodes(StiKalmanTrackNode * node) - Beginning"<<endl;
-    StiKalmanTrackNode * parent = static_cast<StiKalmanTrackNode *>(node->getParent());
-    while (parent)
-	{
-	    //if (StiDebug::isReq(StiDebug::Finding)) 
-	    //trackMes << "SKTF::pruneNodes(StiKalmanTrackNode * node) -"
-	    //			 << "node has childCount:" << parent->getChildCount() << endl;
-	    parent->removeAllChildrenBut(node);
-	    node = parent;
-	    parent = static_cast<StiKalmanTrackNode *>(node->getParent());
-	}
+  // Prune unnecessary nodes on the track starting at given node. 
+  // All siblings of the given node, are removed, and iteratively
+  // all siblings of its parent are removed from the parent of the
+  // parent, etc.
+  //trackMes <<"SKTF::pruneNodes(StiKalmanTrackNode * node) - Beginning"<<endl;
+  StiKalmanTrackNode * parent = static_cast<StiKalmanTrackNode *>(node->getParent());
+  while (parent)
+    {
+      //if (StiDebug::isReq(StiDebug::Finding)) 
+      //trackMes << "SKTF::pruneNodes(StiKalmanTrackNode * node) -"
+      //    << "node has childCount:" << parent->getChildCount() << endl;
+      parent->removeAllChildrenBut(node);
+      node = parent;
+      parent = static_cast<StiKalmanTrackNode *>(node->getParent());
+    }
 }
 
 void StiKalmanTrackFinder::reserveHits(StiKalmanTrackNode * node)
 {
-    // Declare hits on the track ending at "node"
-    // as used. This method starts with the last node and seeks the
-    // parent of each node recursively. The hit associated with each
-    // (when there is a hit) is set to "used".
+  // Declare hits on the track ending at "node"
+  // as used. This method starts with the last node and seeks the
+  // parent of each node recursively. The hit associated with each
+  // (when there is a hit) is set to "used".
     
-    //trackMes <<"SKTF::reserveHits(StiKalmanTrackNode * node) - Beginning"<<endl;
-    StiKTNForwardIterator it(node);
-    for_each( it, it.end(), SetHitUsed() );
+  //trackMes <<"SKTF::reserveHits(StiKalmanTrackNode * node) - Beginning"<<endl;
+  StiKTNForwardIterator it(node);
+  for_each( it, it.end(), SetHitUsed() );
 }
 
 /*
@@ -708,53 +718,83 @@ double StiKalmanTrackFinder::getZWindow(StiKalmanTrackNode * n, StiHit * h) cons
 
 void StiKalmanTrackFinder::setElossCalculated(bool option)
 {
-    elossCalculated = option;
-    StiKalmanTrackNode::setElossCalculated(option);
+  elossCalculated = option;
+  StiKalmanTrackNode::setElossCalculated(option);
 }
 
 void StiKalmanTrackFinder::setMCSCalculated(bool option)
 {
-    mcsCalculated = option;
-    StiKalmanTrackNode::setMCSCalculated(option);
+  mcsCalculated = option;
+  StiKalmanTrackNode::setMCSCalculated(option);
 }
 
 void   StiKalmanTrackFinder::setMassHypothesis(double m) 
 {
-    StiKalmanTrackNode::setMassHypothesis(m);
+  StiKalmanTrackNode::setMassHypothesis(m);
 };
 
 double StiKalmanTrackFinder::getMassHypothesis()
 { 
-    return StiKalmanTrackNode::getMassHypothesis();
+  return StiKalmanTrackNode::getMassHypothesis();
 };
 
 
 void   StiKalmanTrackFinder::setField(double f)
 {
-    //cout << "Field set to : " << f << endl;
-    StiKalmanTrackNode::setFieldConstant(f);
+  //cout << "Field set to : " << f << endl;
+  StiKalmanTrackNode::setFieldConstant(f);
 }
 
 void   StiKalmanTrackFinder::setMinContiguousHitCount(int count)
 {
-    //cout << "minContiguousHitCount set to : " << count << endl;
-    StiKalmanTrackNode::minContiguousHitCountForNullReset = count;
+  //cout << "minContiguousHitCount set to : " << count << endl;
+  StiKalmanTrackNode::minContiguousHitCountForNullReset = count;
 }
 
 void   StiKalmanTrackFinder::setMaxNullCount(int count)
 {
-    //cout << "maxNullCount set to : " << count << endl;
-    StiKalmanTrackNode::maxNullCount = count;
+  //cout << "maxNullCount set to : " << count << endl;
+  StiKalmanTrackNode::maxNullCount = count;
 }
 
 void   StiKalmanTrackFinder::setMaxContiguousNullCount(int count)
 {
-    //cout << "maxContiguousNullCount set to : " << count << endl;
-    StiKalmanTrackNode::maxContiguousNullCount = count;
+  //cout << "maxContiguousNullCount set to : " << count << endl;
+  StiKalmanTrackNode::maxContiguousNullCount = count;
 }
 
 void   StiKalmanTrackFinder::setMaxChi2ForSelection(double chi)
 {
-    //cout << "	maxChi2ForSelection set to :" << chi << endl;
-    maxChi2ForSelection = chi;
+  //cout << " maxChi2ForSelection set to :" << chi << endl;
+  maxChi2ForSelection = chi;
+}
+
+void   StiKalmanTrackFinder::setMinSearchWindow(double val)
+{
+  StiKalmanTrackNode::minSearchWindow = val;
+}
+
+void   StiKalmanTrackFinder::setMaxSearchWindow(double val)
+{
+  StiKalmanTrackNode::maxSearchWindow = val;
+}
+
+void   StiKalmanTrackFinder::setSearchWindowScale(double val)
+{
+  StiKalmanTrackNode::searchWindowScale = val;
+}
+
+double   StiKalmanTrackFinder::getMinSearchWindow()
+{
+  return StiKalmanTrackNode::minSearchWindow;
+}
+
+double   StiKalmanTrackFinder::getMaxSearchWindow()
+{
+  return StiKalmanTrackNode::maxSearchWindow;
+}
+
+double   StiKalmanTrackFinder::getSearchWindowScale()
+{
+  return StiKalmanTrackNode::searchWindowScale;
 }

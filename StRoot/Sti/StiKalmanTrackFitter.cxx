@@ -82,15 +82,9 @@ void StiKalmanTrackFitter::fitInward(StiKalmanTrackNode * node) //throw (Excepti
     
     pNode = node;
     pDet  = pNode->getDetector();
-    if (StiDebug::isReq(StiDebug::Flow))
-	cout << "StiKalmanTrackFitter::fitInward()" << endl
-	     << "FIRST NODE::" << endl
-	     << *pNode << endl;
     int pos;
     while (pNode->getChildCount()>0)      {
 	cNode = dynamic_cast<StiKalmanTrackNode *>(pNode->getFirstChild());
-	if (StiDebug::isReq(StiDebug::Node))
-	    cout << "CHILD: " <<  *cNode;
 	cDet  = cNode->getHit()->detector();
 	
 	pos = cNode->propagate(pNode,cDet);	  // evolve state from pDet to cDet

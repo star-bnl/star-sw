@@ -60,7 +60,6 @@ public:
     // number of total number of points 
     // currently assigned to the track
     virtual int    getPointCount()      const=0;  
-    virtual int    getStatus()          const=0;  // status of track
     
     StiHit * getVertex() const;  // return pointer to vertex associated with this track if any. 
     
@@ -68,7 +67,6 @@ public:
     void  setChi2(double v)        ;  // chi2 of fit
     void  setFitPointCount(int v) ;  // number of points used in fit
     void  setPointCount(int v)    ;  // number of points currently assigned to the track;
-    void  setStatus(int v)      ;  // status of track
     void  setVertex(StiHit *v);
   
     
@@ -81,7 +79,6 @@ protected:
     int    nPts;       // number of points on the track
     int    nFitPts;    // number of points included in the fit of the track
     StiHit * vertex; // parent vertex of this track
-    int    status;     // status code associated with this track
     double  m;          // mass hypothesis
     double  chi2;
 };
