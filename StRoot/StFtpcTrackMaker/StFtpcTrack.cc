@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.5 2000/07/03 12:42:57 jcs Exp $
+// $Id: StFtpcTrack.cc,v 1.6 2000/07/12 11:58:40 jcs Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.6  2000/07/12 11:58:40  jcs
+// calculate and save FTPC track parameters for unconstrained fit
+//
 // Revision 1.5  2000/07/03 12:42:57  jcs
 // save (pre)Vertex id and unconstrained fit results
 //
@@ -64,6 +67,10 @@ StFtpcTrack::StFtpcTrack()
   mP.setY(0.);
   mP.setZ(0.);
 
+  mV.setX(0.);
+  mV.setY(0.);
+  mV.setZ(0.);
+ 
   mQ = 0;
   mChiSq[0] = 0.;
   mChiSq[1] = 0.;
@@ -97,6 +104,10 @@ StFtpcTrack::StFtpcTrack(fpt_fptrack_st *track_st, TClonesArray *hits)
   mP.setX(track_st->p[0]);
   mP.setY(track_st->p[1]);
   mP.setZ(track_st->p[2]);
+
+  mV.setX(track_st->v[0]);
+  mV.setY(track_st->v[1]);
+  mV.setZ(track_st->v[2]);
 
   mQ = track_st->q;
   mChiSq[0] = track_st->chisq[0];
@@ -331,6 +342,12 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
 
   if (id_start_vertex < 0 ) {
     mP = looseFit->momentum();
+    StThreeVector<double> firstPoint(Hit[0].x(),Hit[0].y(),Hit[0].z());
+    pl = looseFit->pathLength(firstPoint,nv);
+    mV.setX(looseFit->x(pl));
+    mV.setY(looseFit->y(pl));
+    mV.setZ(looseFit->z(pl));
+    mtrackLength = looseFit->pathLength(Hit[numHits-1],nv);
     mChiSq[0] = looseFit->chi2Rad();
     mChiSq[1] = looseFit->chi2Lin();
     mQ = looseFit->usedCharge();
@@ -346,6 +363,12 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
   else {
      if (mDca > max_Dca) {
        mP = looseFit->momentum();
+       StThreeVector<double> firstPoint(Hit[0].x(),Hit[0].y(),Hit[0].z());
+       pl = looseFit->pathLength(firstPoint,nv);
+       mV.setX(looseFit->x(pl));
+       mV.setY(looseFit->y(pl));
+       mV.setZ(looseFit->z(pl));
+       mtrackLength = looseFit->pathLength(Hit[numHits-1],nv);
        mFromMainVertex = (Bool_t)false;
        mChiSq[0] = looseFit->chi2Rad();
        mChiSq[1] = looseFit->chi2Lin();
@@ -410,7 +433,10 @@ Int_t StFtpcTrack::Write(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex)
   trackTableEntry->p[0] = mP.x();
   trackTableEntry->p[1] = mP.y();
   trackTableEntry->p[2] = mP.z();
-
+  trackTableEntry->v[0] = mV.x();
+  trackTableEntry->v[1] = mV.y();
+  trackTableEntry->v[2] = mV.z();
+  trackTableEntry->length = mtrackLength;
   trackTableEntry->theta = mTheta;
   trackTableEntry->curvature = 1/mRadius;
   trackTableEntry->impact = mDca;
