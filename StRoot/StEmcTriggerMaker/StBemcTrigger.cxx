@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.7 2001/10/17 20:35:03 suaide Exp $
+// $Id: StBemcTrigger.cxx,v 1.8 2001/10/17 20:46:27 suaide Exp $
 //
 //    
 
@@ -163,7 +163,7 @@ void StBemcTrigger::MakeTrigger()
        //cout <<"  crate = "<<crate<<"  position = "<<positionInCrate<<"  id = "<<id<<endl;       
        patchRows[patch-1].TowerId[ti]=id;
        ti++;
-       //if(e8bits[id-1]>=HT[patch-1]) 
+       //if(e8bits[id-1]>=HT[patch-1])   
        if((Int_t)adc12bits[id-1]>=HTTemp) 
        {
          HT[patch-1]=e8bits[id-1]; 
@@ -179,7 +179,7 @@ void StBemcTrigger::MakeTrigger()
     patchRows[patch-1].Eta=eta/16;
     patchRows[patch-1].Phi=phi/16;
     
-    patchRows[patch-1].HighTowerAdc12bits=(Int_t)HT[patch-1];
+    patchRows[patch-1].HighTowerAdc12bits=(Int_t)adc12bits[HTId[patch-1]-1];
     
     HT[patch-1]*=sin(theta);   // et
     Patch[patch-1]*=sin(theta);// et
