@@ -39,7 +39,7 @@ BfcItem BFC[] = {
   {"C H A I N S ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
-  {"doEvents"    ,""  ,"","xin,event,analysis,FieldOn"                                    ,"","","",kFALSE},
+  {"doEvents"    ,""  ,"","xin,event,analysis"                                    ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
   {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l0,l3,Cdst,Kalman,tags,Tree"    ,"","","Default chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,Cdefault"                                 ,"","","Turn on chain y1a",kFALSE},
@@ -168,6 +168,9 @@ BfcItem BFC[] = {
   {"Fcl"         ,"ftpc_hits","ftpcChain","SCL"
                           ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,St_ftpc,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpcChain","SCL" ,"StFtpcTrackMaker","St_ftpc,StFtpcTrackMaker","",kFALSE},
+  {"emc"    ,"emcChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"      ,"StMaker","StChain","",kFALSE},
+  {"ems"    ,"emc_raw","emcChain","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
+  {"emh"    ,"emc_hits","emcChain","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
   {"global"      ,"globalChain","","globT,Match,primary,v0,xi,kink,dst,SCL"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
@@ -180,17 +183,16 @@ BfcItem BFC[] = {
   {"dst"         ,"dst","globalChain","SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker" 
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
-  {"emc"    ,"emcChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"      ,"StMaker","StChain","",kFALSE},
-  {"ems"    ,"emc_raw","emcChain","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
-  {"emh"    ,"emc_hits","emcChain","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
-  {"Epc"         ,"epc","emcChain","PreEcl,Match"                     ,"StEpcMaker","StEpcMaker","",kFALSE},
-  {"PreEcl"      ,"preecl","emcChain","emh"                     ,"StPreEclMaker","StPreEclMaker","",kFALSE},
+  {"PostEmc"   ,"PostChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"  ,"StMaker","StChain","",kFALSE},
+  {"Epc"         ,"epc","PostChain","PreEcl,Match"                    ,"StEpcMaker","StEpcMaker","",kFALSE},
+  {"PreEcl"      ,"preecl","PostChain","emh"                    ,"StPreEclMaker","StPreEclMaker","",kFALSE},
   {"Rrs"         ,"","","sim_T,Simu"                                  ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rich"        ,"","","sim_T,globT"                      ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
   {"l3"          ,"l3Chain","","l3cl,l3t"                                   ,"StMaker","StChain","",kFALSE},
   {"l3cl"        ,"","l3Chain","l3_T"               ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3Chain","l3_T"                       ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"analysis"    ,"","","Event"           ,"StAnalysisMaker","StAnalysisMaker","Exampe of Analysis",kFALSE},
+  {"pec"         ,"PeC","","Event"                       ,"StPeCMaker","StPeCMaker","PCollAnalysis",kFALSE},
   {"TagsChain"   ,"TagsChain","",""                                         ,"StMaker","StChain","",kFALSE},
   {"TpcTag"      ,"","TagsChain",""                             ,"StTpcTagMaker","StTpcTagMaker","",kFALSE},
   {"Flow"        ,"","TagsChain","Event"                            ,"StFlowMaker","StFlowMaker","",kFALSE},
@@ -731,26 +733,6 @@ void StBFChain::SetGeantOptions(){
 }
 //_____________________________________________________________________
 void StBFChain::SetDbOptions(){
-        if (GetOption("SD97")) SetDataBases("sd97");
-  else {if (GetOption("SD98")) SetDataBases("sd98");
-  else {if (GetOption("Y1a"))  SetDataBases("year_1a");
-  else {if (GetOption("Y1b"))  SetDataBases("year_1b");
-  else {if (GetOption("Y1c"))  SetDataBases("year_1c");
-  else {if (GetOption("ES99")) SetDataBases("es99");
-  else {if (GetOption("ER99")) SetDataBases("er99");
-  else {if (GetOption("DC99")) SetDataBases("dc99");
-  else {if (GetOption("Y1d"))  SetDataBases("year_1d");
-  else {if (GetOption("Y1e"))  SetDataBases("year_1e");
-  else {if (GetOption("Y1h"))  SetDataBases("year_1h");
-  else {if (GetOption("Y2a"))  SetDataBases("year_2a");
-  else {if (GetOption("gstar"))SetDataBases("year_2a");
-  }}}}}}}}}}}}
-  gMessMgr->QAInfo() << "db Maker set time = " << dbMk->GetDateTime().GetDate() 
-		   << dbMk->GetDateTime().GetTime() << endm;
-  gMessMgr->QAInfo()  << endm;
-}
-//_____________________________________________________________________
-void StBFChain::SetDataBases(const Char_t* TimeStamp){
   Int_t i;
   Int_t Idate=0, Itime=0;
   for (i = 1; i< NoChainOptions; i++) {// Load Libraries if any
@@ -762,9 +744,24 @@ void StBFChain::SetDataBases(const Char_t* TimeStamp){
   while ((maker = nextMaker.NextMaker())) { 
     if (!strcmp(maker->ClassName(),"St_db_Maker")) {
       St_db_Maker *db = (St_db_Maker *) maker;
-      db->SetDateTime(TimeStamp); 
-      cout << "\tSet time stamp = " << TimeStamp 
-	   << " for St_db_Maker(\"" << db->GetName() <<"\")" << endl;
+        if (GetOption("SD97")) db->SetDateTime("sd97");
+  else {if (GetOption("SD98")) db->SetDateTime("sd98");
+  else {if (GetOption("Y1a"))  db->SetDateTime("year_1a");
+  else {if (GetOption("Y1b"))  db->SetDateTime("year_1b");
+  else {if (GetOption("Y1c"))  db->SetDateTime("year_1c");
+  else {if (GetOption("ES99")) db->SetDateTime("es99");
+  else {if (GetOption("ER99")) db->SetDateTime("er99");
+  else {if (GetOption("DC99")) db->SetDateTime("dc99");
+  else {if (GetOption("Y1d"))  db->SetDateTime("year_1d");
+  else {if (GetOption("Y1e"))  db->SetDateTime("year_1e");
+  else {if (GetOption("Y1h"))  db->SetDateTime("year_1h");
+  else {if (GetOption("Y2a"))  db->SetDateTime("year_2a");
+  else {if (GetOption("gstar"))db->SetDateTime("year_2a");
+  }}}}}}}}}}}}
+	gMessMgr->QAInfo() << db->GetName() 
+			   << " Maker set time = " 
+			   << db->GetDateTime().GetDate() 
+			   << db->GetDateTime().GetTime() << endm;
       if (Idate) {
 	db->SetMaxEntryTime(Idate,Itime);
 	cout << "\tSet DataBase max entry time " << Idate << "/" << Itime 
@@ -804,5 +801,5 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.121 2000/07/21 17:00:23 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.122 2000/07/26 14:09:02 fisyak Exp $
 //_____________________________________________________________________
