@@ -48,6 +48,7 @@ StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name)
   eval = kFALSE;
   nEvTotal=nEvGood=0;
   externalFindUse=kTRUE; ///Default means that no finding actually done
+  use_ITTF=kTRUE;
 }
 //_____________________________________________________________________________
 StGenericVertexMaker::~StGenericVertexMaker()
