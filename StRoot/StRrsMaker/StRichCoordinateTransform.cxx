@@ -1,5 +1,5 @@
 /***********************************************************************
- * $Id: StRichCoordinateTransform.cxx,v 1.1 2000/02/08 16:34:03 lasiuk Exp $
+ * $Id: StRichCoordinateTransform.cxx,v 1.2 2000/02/08 23:49:18 lasiuk Exp $
  *
  * Author: brian made this on Jan 27, 2000
  *
@@ -9,9 +9,12 @@
  ***********************************************************************
  *
  * $Log: StRichCoordinateTransform.cxx,v $
- * Revision 1.1  2000/02/08 16:34:03  lasiuk
- * Initial Revision:  eventually for StUtilities
+ * Revision 1.2  2000/02/08 23:49:18  lasiuk
+ * rm fpad from routine which is not returned
  *
+ *
+ * Revision 1.3  2000/02/24 18:44:14  lasiuk
+ * coerce quadrant bounds limits
  *
  * Revision 1.2  2000/02/08 23:49:18  lasiuk
  * rm fpad from routine which is not returned
@@ -357,7 +360,7 @@ int
 StRichCoordinateTransform::quadZ2Pad(double qz, int quad) const
 }
     int padOffset = 0;
-    double fpad =  padOffset + ((qz/mPadPitch - .5) + mNumberOfPadsInAQuadrantRow/2.) ;
+double
 StRichCoordinateTransform::quadX2Pad(double qz, int quad) const
     }
     
