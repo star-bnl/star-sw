@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.68 2001/09/14 22:24:30 ullrich Exp $
+// $Id: doEvents.C,v 1.69 2001/09/17 00:13:14 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -113,10 +113,11 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     gSystem->Load("StTreeMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
+    gSystem->Load("StEventUtilities");
     gSystem->Load("StMagF");
-    gSystem->Load("StTpcDb");
     gSystem->Load("StEventMaker");
     gSystem->Load("StAnalysisMaker");
+    gSystem->Load("StTpcDb");
 
 //   		Special libraries for EventDisplay
     if (eventDisplay) {//EventDisplay on
@@ -293,8 +294,8 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.68  2001/09/14 22:24:30  ullrich
-// Added shared lib StTpcDb.
+// Revision 1.69  2001/09/17 00:13:14  perev
+// Load StEventUtilities
 //
 // Revision 1.67  2001/09/07 18:32:28  perev
 // help restored
