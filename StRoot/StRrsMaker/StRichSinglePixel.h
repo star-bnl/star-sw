@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSinglePixel.h,v 1.1 2000/02/29 18:14:10 lasiuk Exp $
+ * $Id: StRichSinglePixel.h,v 1.2 2000/02/29 18:26:17 lasiuk Exp $
  *
  * Description:
  *  Definition of a single pixel object
@@ -8,8 +8,11 @@
  ****************************************************************
  *
  * $Log: StRichSinglePixel.h,v $
- * Revision 1.1  2000/02/29 18:14:10  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/02/29 18:26:17  lasiuk
+ * unsigned long in cluster number changed to int
+ *
+ * Revision 1.3  2000/04/05 16:05:34  lasiuk
+ * add operator==
  *
  * Revision 1.2  2000/02/29 18:26:17  lasiuk
  * unsigned long in cluster number changed to int
@@ -50,7 +53,7 @@ public:
     bool isSet(StRichSinglePixelFlag f)      const;
 private:
     void unSetBit(StRichSinglePixelFlag f);    
-    unsigned long mClusterNumber;
+
     double        mAmplitude;
     int           mPad;
     int           mRow;
