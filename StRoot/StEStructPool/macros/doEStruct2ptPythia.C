@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: doEStruct2ptPythia.C,v 1.3 2004/06/25 03:14:56 porter Exp $
+ * $Id: doEStruct2ptPythia.C,v 1.4 2004/07/01 00:39:24 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -52,12 +52,12 @@ void doEStruct2ptPythia(const char* fileListFile, const char* outputDir, const c
   // For data one can use multiplicity, but this is not set in
   // the reader code.
   StEStructCentrality* cent=StEStructCentrality::Instance();
-  const double temp[4]={0,4,7,50};
+  const double temp[4]={2,5,9,99};
   cent->setCentralities(temp,4);
 
   // choose the mode for the binning
   StEStructCutBin* cb=StEStructCutBin::Instance();
-  cb->setMode(0);
+  cb->setMode(3);
   
   // create the generic EStructAnalysisMaker
   StEStructAnalysisMaker *estructMaker = new StEStructAnalysisMaker("EStruct2Pythia");
@@ -67,7 +67,7 @@ void doEStruct2ptPythia(const char* fileListFile, const char* outputDir, const c
   StEStructEventCuts** ecuts           = new StEStructEventCuts*[nset];
   StEStructTrackCuts** tcuts           = new StEStructTrackCuts*[nset];
   StEStruct2ptCorrelations**  analysis = new StEStruct2ptCorrelations*[nset];
-  StEStructPythia** readers       = new StEStructPythia*[nset];
+  StEStructPythia** readers            = new StEStructPythia*[nset];
 
   // only 1 reader actually reads the event, the others just pull from mem.
   // this 'skipMake' ensures this to be the case
@@ -82,7 +82,7 @@ void doEStruct2ptPythia(const char* fileListFile, const char* outputDir, const c
   for(int i=0;i<nset;i++){
 
      outputFile[i]=getOutFileName(outputDir,jobName,datadirs[i]);
-     analysis[i]=new StEStruct2ptCorrelations(1);
+     analysis[i]=new StEStruct2ptCorrelations();
      analysis[i]->setCutFile(pairCutFile);
      analysis[i]->setOutputFileName(outputFile[i]);
 
@@ -142,6 +142,13 @@ void doEStruct2ptPythia(const char* fileListFile, const char* outputDir, const c
 /**********************************************************************
  *
  * $Log: doEStruct2ptPythia.C,v $
+ * Revision 1.4  2004/07/01 00:39:24  porter
+ * added 'libPhysics.so' to load2ptLibs.C which allows our codes to run
+ * in root.exe instead of root4star. Thus we can use TPythia6.
+ *
+ * added a rewritten version of my makePlots.C with example.
+ * Also, 'selectASNS.C' is an example for using the StEStructSupport code.
+ *
  * Revision 1.3  2004/06/25 03:14:56  porter
  * modified basic macro to take only 1 cutfile and moved some common
  * features into a new macro=support.C.....   this cleaned up the
