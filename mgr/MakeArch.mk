@@ -1,7 +1,4 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.78  1999/06/21 12:48:44  fisyak
-#  Fix ROOT_LEVEL for dev
-#
 #  Revision 1.77  1999/06/21 12:46:04  fisyak
 #  Fix rtti and exceptions for ROOT_LEVEL < 2.22
 #
@@ -212,7 +209,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/06/21 12:48:44 $ 
+#             Last modification $Date: 1999/06/21 12:46:04 $ 
 #. default setings
 
 MAKE  := gmake
@@ -644,11 +641,11 @@ endif
     OSFID += ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES ASU_MALLOC_OFF GNU_GCC
     CC       := /usr/local/bin/gcc
     CXX      := /usr/local/bin/g++
-    CXXFLAGS := -g -fPIC -Wall
-    CFLAGS   := -g -fPIC -Wall
-    LDFLAGS  := -g -Wl,-Bstatic
-    EXEFLAGS := -g -Wl,-Bdynamic   
-    SOFLAGS  := -g -shared  
+    CXXFLAGS := -gstabs -fPIC -Wall
+    CFLAGS   := -gstabs -fPIC -Wall
+    LDFLAGS  := -gstabs -Wl,-Bstatic
+    EXEFLAGS := -gstabs -Wl,-Bdynamic   
+    SOFLAGS  := -gstabs -shared  
   else
     STDHOME := /afs/rhic/star/packages/ObjectSpace/2.0m
     STAF_UTILS_INCS += $(STDHOME) $(STDHOME)/ospace/std  $(STDHOME)/ospace

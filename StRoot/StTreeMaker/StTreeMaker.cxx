@@ -7,7 +7,6 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StTreeMaker.h"
-#include "TInterpreter.h"
 #include "St_particle_Table.h"
 
 ClassImp(StTreeMaker)
@@ -122,7 +121,6 @@ Int_t StTreeMaker::MakeRead(){
    }
    SetOutputAll(br);
   }
-  gInterpreter->ProcessLine("if (gROOT->GetClass(\"StRegistry\"))StRegistry::Init();");
   return iret;
 }    
 //_____________________________________________________________________________
