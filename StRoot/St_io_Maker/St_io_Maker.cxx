@@ -409,19 +409,21 @@ Int_t St_io_Maker::NextEventGet(Int_t nEvent)
 //VP           maker->SetDataSet((St_DataSet *)obj->ShuntData());
 //VP        }
 
-     St_DataSet *getDs,*psPar,*par,*son;
+     St_DataSet *getDs,*psPar,*par,*son=0;
      getDs = (St_DataSet *)obj->ShuntData();
 //		Fix of very weird BUG in written structure
-     son = getDs->First();
-     if (son){
-       psPar = son->GetParent();
-       if (psPar!=getDs) {
-       TObject ** to=  (TObject **)((int*)getDs+8);
-       if (*to && strcmp((*to)->GetName(),"TList")==0){ *to=0; delete getDs;}
-       getDs=psPar;}}
+     if (getDs) {
+       son = getDs->First();
+       if (son){
+         psPar = son->GetParent();
+         if (psPar!=getDs) {
+         TObject ** to=  (TObject **)((int*)getDs+8);
+         if (*to && strcmp((*to)->GetName(),"TList")==0){ *to=0; delete getDs;}
+         getDs=psPar;}}
       
-         AddData(getDs);
-   }
+         AddData(getDs);     
+      }
+    }
   }
   return counter;
 }
@@ -464,7 +466,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.17 1999/03/19 23:54:12 fine Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.18 1999/03/20 22:46:12 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
