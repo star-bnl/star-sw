@@ -81,9 +81,11 @@ macro svm
   cd [dst]
   tdm/newtable dst_dedx dst_dedx 100000
   
-  tdm/newtable event_summary dst_event_summary 100
+  tdm/newtable event_summary dst_event_summary 1
   
-  tdm/newtable monitor_soft  dst_monitor_soft  100
+  tdm/newtable run_summary   dst_run_summary   1
+  
+  tdm/newtable monitor_soft  dst_monitor_soft  1
   
   cd /dui
 
