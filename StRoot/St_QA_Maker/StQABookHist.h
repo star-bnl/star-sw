@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.6 2001/05/23 00:14:53 lansdell Exp $ 
+// $Id: StQABookHist.h,v 2.7 2001/05/24 01:48:14 lansdell Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.7  2001/05/24 01:48:14  lansdell
+// qa_shift histograms updated
+//
 // Revision 2.6  2001/05/23 00:14:53  lansdell
 // more changes for qa_shift histograms
 //
@@ -49,7 +52,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.6 2001/05/23 00:14:53 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.7 2001/05/24 01:48:14 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -185,6 +188,7 @@ class StQABookHist : public TObject {
   TH2F     *m_glb_zfF;       //! z-coord. of first hit on trk, ftpc
   TH1F     *m_glb_zfFE;      //! z-coord. of first hit on trk, ftpc east
   TH1F     *m_glb_zfFW;      //! z-coord. of first hit on trk, ftpc west
+  TH2F     *m_glb_planefF;   //! plane of first hit on trk, ftpc
   TH1F     *m_glb_xf0;       //! x-coord. of first hit - at start of helix
   TH1F     *m_glb_xf0TS;     //! x-coord. of first hit - at start of helix+svt
   TH1F     *m_glb_yf0;       //! y-coord. of first hit - at start of helix
