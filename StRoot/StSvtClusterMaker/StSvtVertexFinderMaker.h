@@ -29,6 +29,7 @@ class StSvtVertexFinderMaker : public StMaker
  protected:
 
   TH1F* mVtxZ;   //! Vertex resolution compared to TPC
+  TH1F* mVtxZGe;   //! Vertex resolution compared to GEANT
 
   ClassDef(StSvtVertexFinderMaker,1)   //virtual base class for Makers
 

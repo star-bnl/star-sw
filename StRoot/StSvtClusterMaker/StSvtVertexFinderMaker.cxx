@@ -10,6 +10,7 @@
 
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_scs_spt_Table.h"
+#include "tables/St_g2t_vertex_Table.h"
 long sft_main( St_scs_spt *scs_spt, St_dst_vertex *vertex);
 
 ClassImp(StSvtVertexFinderMaker)
@@ -31,6 +32,7 @@ Int_t StSvtVertexFinderMaker::Init()
   if (Debug()) gMessMgr->Debug() << "In StSvtVertexFinderMaker::Init() ..."  << endm;
 
   mVtxZ     = new TH1F("StkSvtVert"        ,"Z SVT - Z TPC Primary vertex resolution"        ,100,-0.1,0.1);
+  mVtxZGe     = new TH1F("StkSvtVertGe"        ,"Z SVT - Z Geant Primary vertex resolution"        ,100,-0.1,0.1);
   
   return  StMaker::Init();
   
@@ -102,6 +104,18 @@ Int_t StSvtVertexFinderMaker::MakeHistograms( St_dst_vertex*  vtx){
       }
     }
     mVtxZ->Fill(z_tpc-z_svt);
+    
+    // Compare to Geant
+    // Geantiterator
+    St_DataSetIter Geant(GetInputDS("geant"));
+    St_g2t_vertex *GeantVert = (St_g2t_vertex *) Geant("g2t_vertex");
+    
+    if( GeantVert){
+      g2t_vertex_st *VtxGe = GeantVert->GetTable();
+      
+      mVtxZGe->Fill(VtxGe->ge_x[2]-z_svt);
+      
+    }
   }
   
 }
