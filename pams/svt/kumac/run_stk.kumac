@@ -41,8 +41,7 @@ ami/mod/call stk_am _
         /dui/data/svt/tracks/stk_mckine _
         /dui/constants/svt/params/stk_filler _
         /dui/constants/svt/geometry/config _
-        /dui/constants/svt/geometry/geom _
-        /dui/data/global/tracks/globtrk
+        /dui/constants/svt/geometry/geom 
 
         if (staf_status(1).ne.stafcv_ok) then
                 message 'Problem on return from STK_AM'
