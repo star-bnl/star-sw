@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.28 2003/01/10 16:41:53 oldi Exp $
+// $Id: StFlowCutEvent.cxx,v 1.29 2003/02/25 19:28:38 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -171,6 +171,7 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
   }
 
   // Centrality
+  // Centrality=0 is not retievable
   Int_t cent = pPicoEvent->CalcCentrality();
   if (mCentCuts[0] && mCentCuts[1] >= mCentCuts[0] && 
       (cent < mCentCuts[0] || cent > mCentCuts[1])) {
@@ -260,6 +261,7 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
   }
 
   // Centrality
+  // Centrality=0 is not retievable
   Int_t* cent;
   Int_t centrality;
 
@@ -500,6 +502,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.29  2003/02/25 19:28:38  posk
+// Changed a few unimportant default cuts.
+//
 // Revision 1.28  2003/01/10 16:41:53  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.

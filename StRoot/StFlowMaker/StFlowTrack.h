@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.24 2003/01/08 19:26:52 posk Exp $
+// $Id: StFlowTrack.h,v 1.25 2003/02/25 19:28:41 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //         FTPC added by Markus Oldenburg, MPI, Dec 2000
 //
 // Description: part of StFlowTrackCollection
 //
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
 #ifndef StFlowTrack_h
 #define StFlowTrack_h
@@ -348,6 +348,9 @@ inline void StFlowTrack::SetTopologyMap(StTrackTopologyMap map) { mTopology = ma
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.25  2003/02/25 19:28:41  posk
+// Changed a few unimportant default cuts.
+//
 // Revision 1.24  2003/01/08 19:26:52  posk
 // PhiWgt hists sorted on sign of z of first and last points.
 // Version 6 of pico file.

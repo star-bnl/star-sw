@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.37 2003/01/14 14:14:09 oldi Exp $
+// $Id: StFlowCutTrack.cxx,v 1.38 2003/02/25 19:28:39 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -31,10 +31,10 @@ ClassImp(StFlowCutTrack)
 //-----------------------------------------------------------------------
 
 Bool_t  StFlowCutTrack::mTpcTrackCut          = kFALSE;
-Int_t   StFlowCutTrack::mFitPtsTpcCuts[2]     = {15, 200};
-Float_t StFlowCutTrack::mFitOverMaxCuts[2]    = {0.52, 1.1}; // greater than one!
+Int_t   StFlowCutTrack::mFitPtsTpcCuts[2]     = {15, 50};
+Float_t StFlowCutTrack::mFitOverMaxCuts[2]    = {0.52, 1.05}; // greater than one!
 Float_t StFlowCutTrack::mChiSqTpcCuts[2]      = {0., 0.};
-Float_t StFlowCutTrack::mPtTpcCuts[2]         = {0.1, 8.};
+Float_t StFlowCutTrack::mPtTpcCuts[2]         = {0.1, 12.};
 Float_t StFlowCutTrack::mEtaTpcCuts[2]        = {-1.3, 1.3};
 Int_t   StFlowCutTrack::mChgTpcCuts[2]        = {0, 0};
 
@@ -703,6 +703,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.38  2003/02/25 19:28:39  posk
+// Changed a few unimportant default cuts.
+//
 // Revision 1.37  2003/01/14 14:14:09  oldi
 // Possibility to exclude TPC tracks completely (= FTPC only).
 //
