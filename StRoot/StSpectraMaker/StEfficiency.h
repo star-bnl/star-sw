@@ -42,6 +42,7 @@ class StEfficiency {
   //
   void setParticle(string particle);
   double efficiency(StTrack* track);
+  double efficiency(StV0Vertex* v0);
 
   StSpectraOrdinate getOrdinate();
   StSpectraAbscissa getAbscissa();
