@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCerenkovHistogram.cxx,v 1.5 2002/02/01 17:45:56 lasiuk Exp $
+ * $Id: StRichCerenkovHistogram.cxx,v 1.6 2002/02/19 04:26:49 lasiuk Exp $
  *
  * Author:  bl Mar 2, 2001
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichCerenkovHistogram.cxx,v $
+ * Revision 1.6  2002/02/19 04:26:49  lasiuk
+ * addition of filling StEvent for inclusion in chain
+ *
  * Revision 1.5  2002/02/01 17:45:56  lasiuk
  * Mods for gcc(7.2)
  * outer helix usage
@@ -147,12 +150,15 @@ bool StRichCerenkovHistogram::checkHypothesis() {
     // second is the fraction
     //
 
-    for(size_t ii=0; ii<mCerenkovQuantities.size(); ii++) {
-	double angle = mCerenkovQuantities[ii].first;
-	cout << ii << "\tangle="
-	     << angle/degree << "\tfraction="
-	     << mCerenkovQuantities[ii].second <<endl;
-    }
+    //
+    // Printing out the "expected values"
+    //
+//     for(size_t ii=0; ii<mCerenkovQuantities.size(); ii++) {
+// 	double angle = mCerenkovQuantities[ii].first;
+// 	cout << ii << "\tangle="
+// 	     << angle/degree << "\tfraction="
+// 	     << mCerenkovQuantities[ii].second <<endl;
+//     }
 
     return true;
 }
@@ -235,8 +241,8 @@ StRichCerenkovHistogram::calculateBinStatistics(double lowerBound, double upperB
 // ----------------------------------------------------
 void StRichCerenkovHistogram::calculateSlidingWindowHistogram() {
 
-    cout << "StRichCerenkovHistogram::calculateSlidingWindowHistogram()" << endl;
-    PR(mWindowSize/milliradian);
+//     cout << "StRichCerenkovHistogram::calculateSlidingWindowHistogram()" << endl;
+//     PR(mWindowSize/milliradian);
     
     double lowerBound = mSmallestTheta;
     mResults.setWindowSize(mWindowSize);
@@ -338,7 +344,7 @@ void StRichCerenkovHistogram::evaluate() {
     //
 
     mIteration1.process();
-    mIteration1.status();
+//     mIteration1.status();
     
     double deltaTheta = 2.*degree;
     double maxAngle = 41.*degree;
@@ -392,7 +398,7 @@ void StRichCerenkovHistogram::findPeakAngle() {
 //     cout << "StRichCherenkovHistogram::findPeakAngle()" << endl;
 
     mResults.process();
-    mResults.status();
+//     mResults.status();
 
 //     cout << "Peak angle is: " << endl;
     int numberOfPhotons = 0;
