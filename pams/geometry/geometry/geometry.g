@@ -147,7 +147,7 @@ If LL>1
    if (vpdd) Call vpddgeo
 
 *  - barrel calorimeter may be a patch of 12 modules at the left side
-   nmod={12,0};  shift={51,0}
+   nmod={12,0};  shift={87,0}
    If (LL>1) call AgDETP new ('CALB')
    if (ems)  call AgDETP add ('calg.nmodule=',Nmod,2)
    if (ems)  call AgDETP add ('calg.shift=',shift,2)
