@@ -1,7 +1,9 @@
 /*  dst_track.idl              */
 /*  Table: dst_track           */
 
-/* September 28, 1999. Changed x0,y0 to r0,phi0 variables (Spiros)
+/* November 99. Methods variable defined
+ *
+ * September 28, 1999. Changed x0,y0 to r0,phi0 variables (Spiros)
  *
  * August 20, 1999 Lanny
  *
@@ -49,33 +51,13 @@
  *
  *       method          Track finding and track fitting methods in a
  *                       packed format. This is defined in 
- *                       $STAR/pams/global/inc/StTrackMethDefinitions.h
+ *                       $STAR/pams/global/inc/StTrackDefinitions.h
  *                       This is used  to indicate the track finding 
- *                       methods, track finding, pass numbers 
+ *                       methods, pass numbers 
  *                       and track fitting methods used to 
  *                       generate the global tracks:
- *                       method=finder+10*quality+100*fitting method
- *                       Track finding methods (examples):
- *                            (1) SVT - grouper
- *                            (2) SVT-SSD - stk, "follow your nose"
- *                            (3) SVT-SSD - other low pt method
- *                            (4) TPC - standard tpt
- *                            (5) TPC - template matching or others
- *                            (6) SVT-SSD-TPC - vector-vector matcher (svm)
- *                            (7) SVT-SSD-TPC - TPC track->SVT-SSD point (est)
- *                            (8) FTPC - standard ftp
- *                       Track finding quality measures (examples):
- *                            (1) SVT stk pass number
- *                            (2) SVT-SSD-TPC - svm pass number
- *                            (3) SVT-SSD-TPC - est pass number
- *                       Track fitting methods for global tracks (examples):
- *                            (1) Two-step helix fit
- *                            (2) Full 3D helix fit
- *                            (3) Kalman fit (local helix)
- *                            (4) Analytic energy loss model fit
- *                            (5) Break point fit
- *                            (6) Straight line fits
- *                            (7) Primary and/or secondary vertex constraints
+ *                       method=finder+10*quality+100*fitting method+
+ *                              1000(if vertex constraint was used in fit).
  *
  *       pid             Geant particle ID number for mass hypothesis
  *                       used in the tracking.  This is included for the
@@ -240,7 +222,7 @@
   float      impact;           /* impact parameter based on 3D DCA from  */
                                /* primary vertex (cm)                    */
  } ;
-/*  Last mod. for dst_track:   $Date: 1999/11/15 19:22:35 $ */
+/*  Last mod. for dst_track:   $Date: 1999/11/15 19:26:45 $ */
 
 
 
