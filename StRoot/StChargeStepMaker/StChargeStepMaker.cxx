@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.5 2000/08/04 21:03:40 perev Exp $
+// $Id: StChargeStepMaker.cxx,v 1.6 2000/08/09 16:06:48 fisyak Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.6  2000/08/09 16:06:48  fisyak
+// put tpcDriftVelocity into ./StarDb/Calibrations/tpc
+//
 // Revision 1.5  2000/08/04 21:03:40  perev
 // Leaks + Clear() cleanup
 //
@@ -33,6 +36,7 @@
 #include "tables/St_type_shortdata_Table.h"
 #include "tables/St_tpcDriftVelocity_Table.h"
 #include "tpc/St_xyz_newtab_Module.h"
+#include "TSystem.h"
 #include "TH1.h"
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcDbMaker.h"
@@ -310,7 +314,7 @@ Int_t StChargeStepMaker::Make() {
 
 void StChargeStepMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.5 2000/08/04 21:03:40 perev Exp $\n");
+  printf("* $Id: StChargeStepMaker.cxx,v 1.6 2000/08/09 16:06:48 fisyak Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -440,21 +444,14 @@ St_tpcDriftVelocity* StChargeStepMaker::driftTable(){
 
 void StChargeStepMaker::WriteTableToFile(){
   char filename[80]; 
-  sprintf(filename,"tpcDriftVelocity.%08d.%06d.C",date,time);
+  sprintf(filename,"./StarDb/Calibrations/tpc/tpcDriftVelocity.%08d.%06d.C",date,time);
+  TString dirname = gSystem->DirName(filename);
+  if (!gSystem->OpenDirectory(dirname.Data())) { 
+    if (gSystem->mkdir(dirname.Data())) {
+      cout << "Directoty " << dirname << " creation failed" << endl;
+    }
+  }
   ofstream *out = new ofstream(filename);
   driftTable()->SavePrimitive(*out,"");
   return;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
