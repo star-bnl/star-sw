@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.h,v 1.5 2001/04/02 12:06:36 jcs Exp $
+// $Id: StFtpcDriftMapMaker.h,v 1.6 2001/05/17 20:45:19 jcs Exp $
 // $Log: StFtpcDriftMapMaker.h,v $
+// Revision 1.6  2001/05/17 20:45:19  jcs
+// change to use Jim Thomas StMagUtilities
+//
 // Revision 1.5  2001/04/02 12:06:36  jcs
 // get FTPC calibrations,geometry from MySQL database
 //
@@ -28,6 +31,8 @@
 #include "StMaker.h"
 #endif
 
+#include "StDbUtilities/StMagUtilities.h"
+
 class St_ftpcClusterPars;
 class St_ftpcSlowSimGas;
 class St_ftpcSlowSimPars;
@@ -48,7 +53,7 @@ class StFtpcDriftMapMaker : public StMaker {
  private:
    char*   fTableName;      // c-structure name that is same as table in database
    char*   fOutputFileName; // file name for output
-  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.5 2001/04/02 12:06:36 jcs Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.6 2001/05/17 20:45:19 jcs Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
    St_ftpcClusterPars   *m_clusterpars;   //!
    St_ftpcSlowSimGas    *m_slowsimgas;    //!
@@ -66,13 +71,12 @@ class StFtpcDriftMapMaker : public StMaker {
   
  protected:
  public: 
-  StFtpcDriftMapMaker(const char *name="ftpc_raw");
+  StFtpcDriftMapMaker(const EBField map, const Float_t factor);
   virtual       ~StFtpcDriftMapMaker();
-  virtual Int_t Init();
-  virtual Int_t  Make();
+
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.5 2001/04/02 12:06:36 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.6 2001/05/17 20:45:19 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StFtpcDriftMapMaker, 1)  
 };
