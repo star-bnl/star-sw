@@ -1,13 +1,7 @@
-rdEz2SmdCal(  char *runL=" R5107005",
-	    char *outname="tmp"
-	    ) {
-
-  TString iPath="/star/data04/sim/balewski/daq/ezTree/pp200/pp2/";
-  int mxEve=1000000;
-  int nDot=8;
+rdEz2SmdCal(  char *run="R5107008",  int mxEve=1000 ) {
+  TString out="outX/";
   int firstSec=5;
-  int lastSec=8;
-  int oflTrigId=0;;
+  int lastSec=5;
   char *libL[]={
     "StRoot/StDbLib/StDbLib.so",  
     "StRoot/StEEmcDbMaker/libEEmcDbMaker.so", 
@@ -19,8 +13,7 @@ rdEz2SmdCal(  char *runL=" R5107005",
     "EEmcDb/libEEmcDb.so",
     "libPhysics"
   };
- 
-  
+   
   gStyle->SetPalette(1,0);
   int i;
   for(i=0;i<sizeof(libL)/sizeof(char*);i++) {
@@ -33,6 +26,7 @@ rdEz2SmdCal(  char *runL=" R5107005",
 
   TChain *chain = new TChain("ezstar");
 
+#if 0
   char *run=strtok(runL," "); // init 'strtok'
   int i=0;
   do {
@@ -40,11 +34,26 @@ rdEz2SmdCal(  char *runL=" R5107005",
     TString fullName=iPath+run+".ez.root";  
     chain->Add(fullName);
   } while(run=strtok(0," "));  // advance by one nam
-  
+#endif
+
+  TString runList="ezList/"; runList+=run; 
+  FILE *fd=fopen(runList.Data(),"r"); assert(fd);
+  printf("aa=%s=\n",runList.Data());
+  int i=0;
+  while(1) {
+    char text[500];
+    int ret= fscanf(fd,"%s",text);
+    if(ret<=0) break;
+    i++;
+    chain->Add(text);    
+    printf("%d =%s=\n",i,text);
+  }
+
+
   int nEntries = (Int_t)chain->GetEntries();
   printf("Sort %d  of total Events %d\n",mxEve, nEntries);
   int nEve=0;
-
+  //  return;  
 
   Int_t nEntries = (Int_t)chain->GetEntries();
   if(nEntries<=0) {
@@ -62,7 +71,6 @@ rdEz2SmdCal(  char *runL=" R5107005",
   chain->GetEntry(0);// read first event
 
   long timeStamp=eHead->getTimeStamp();
-
   printf("run   timeStamp=%d=%s\n" ,timeStamp,ctime((const time_t *)&timeStamp));
 
  //............  DB-reader .................
@@ -72,41 +80,43 @@ rdEz2SmdCal(  char *runL=" R5107005",
 
   // set all DB flags before DB request
   db->requestDataBase(timeStamp,firstSec,lastSec); // range of sectors
-  // db->changeGains("setG1.dat");
-  db->changeMask("setM1.dat");
+  db->changeGains("janbCalib2/towgains.dat");
+  db->changeGains("janbCalib2/PQR_gains1.dat");
+  db->changeGains("janbCalib2/gains05U.dat5");
+  db->changeGains("janbCalib2/gains05V.dat5");
+
+  db->changeMask("janbCalib2/mask05.dat4");
   
   TObjArray  HList;
   //........... sorters ..........
-  float thrMipSmdE=0.1;
-  int emptyStripCount=nDot;
-  float twMipRelEneLow=0.4, twMipRelEneHigh=2.5;
-  float presMipElow=0.3, presMipEhigh=3.;
+  float thrMipSmdE=0.3/1000.;
+  int emptyStripCount=6;
+  float offCenter=0.8; // fiducial area of tower =offCenter^2
+  float twMipRelEneLow=0.3, twMipRelEneHigh=3.;
 
-  const int mSect=4;
-  EzEEsmdCal *sorterA[mSect];
+  int mSect=lastSec-firstSec+1;
+  EzEEsmdCal **sorterA=new  EzEEsmdCal *[mSect];
 
   int j;
   for(j=0;j<mSect;j++) {
-    sorterA[j]=new  EzEEsmdCal(5+j); // sectID
-    sorterA[j]->set(&HList,db,eFee,eHead,eTrig);
-    sorterA[j]->setTwCuts( presMipElow,presMipEhigh );
+    sorterA[j]=new  EzEEsmdCal(firstSec+j); // sectID
+    sorterA[j]->set(&HList,db,eFee,eHead);
+    sorterA[j]->setTwCuts(twMipRelEneLow, twMipRelEneHigh,offCenter);
     sorterA[j]->setSmdCuts(thrMipSmdE,emptyStripCount);
-    sorterA[j]->setPQRCuts(presMipElow,presMipEhigh);
     sorterA[j]->init();
     sorterA[j]->initRun(eHead->getRunNumber());
   }
   // dump current DB content
-  //db->exportAscii("dbDump2.dat"); return;
-  
+  // db->exportAscii("dbDump2.dat"); return;
    
-  printf("Sort %d  of total Events %d, use trigId=%d\n",mxEve, nEntries,oflTrigId);
+  printf("Sort %d  of total Events %d\n",mxEve, nEntries);
 
   int nEve=0,nAcc=0,nOK=0;
   int t1=time(0);  
   for(nEve=0; nEve<nEntries && nEve<mxEve; nEve++) {
     chain->GetEntry(nEve);
    if(nEve%2000==0)printf("in %d, acc %d  ok=%d\n",nEve,nAcc,nOK);
-   //   printf("%d %d %d\n",  eTrig->isTrigID(10), eTrig->isTrigID(45010), eTrig->isTrigID(45020));
+   // printf("%d %d %d\n",  eTrig->isTrigID(10), eTrig->isTrigID(45010), eTrig->isTrigID(45020));
 
    if(! eTrig->isTrigID(10) &&
       ! eTrig->isTrigID(45010) &&
@@ -114,8 +124,13 @@ rdEz2SmdCal(  char *runL=" R5107005",
    // this is for sure minB events
     nAcc++;
     // verify data block consistency
-    int nCr=eFee->maskWrongCrates(timeStamp,eHead->getToken(),EEfeeRawEvent::headVer1);
-    if(nCr!=22) continue;
+    eFee->maskWrongCrates(timeStamp,eHead->getToken(),EEfeeRawEvent::headVer1);
+    eFee-> maskBEMC(); 
+    int nCr=eFee->getNGoodBlock();
+    //printf("nCr=%d\n",nCr);
+
+    //eFee->print(0); break;
+    if(nCr!=22 ) continue; // zero tolarance for corruption
     // use only 100% healthy events
     nOK++;
     for(int j=0;j<mSect;j++) {
@@ -128,19 +143,13 @@ rdEz2SmdCal(  char *runL=" R5107005",
   float rate=1.*nEve/(t2-t1);
   printf("sorting done, nEve=%d, acc=%d CPU event rate=%.1f Hz, total time %.1f minute(s) \n",nEve,nAcc,rate,tMnt);
 
-
+  //  sorterA[0]->finish(1);
   for(int j=0;j<mSect;j++) {
     sorterA[j]->finish();
   }
 
   // save output histograms
-
-  //out+="_";
-  //out+=nDot;
-
-  
-  TString out="outX/";
-  out+=outname;
+  out+=run;
   out+=".hist.root";
   TFile f( out,"recreate");
   assert(f.IsOpen());
