@@ -55,11 +55,11 @@ void StPeCTrack::set ( Int_t _primary, StTrack* trk) {
      }
      if ( dedxPid ){
        dedx = dedxPid->mean(); 
-       dedxZel       = getZdEdx(mElectron);
-       dedxZmu       = getZdEdx(mMuon);
-       dedxZpi       = getZdEdx(mPion);
-       dedxZk        = getZdEdx(mKaon);
-       dedxZp        = getZdEdx(mProton);
+       dedxZel       = getZdEdx(mMassElectron);
+       dedxZmu       = getZdEdx(mMassMuon);
+       dedxZpi       = getZdEdx(mMassPion);
+       dedxZk        = getZdEdx(mMassKaon);
+       dedxZp        = getZdEdx(mMassProton);
 	
      }
      nHits = trk->detectorInfo()->numberOfPoints() ;
