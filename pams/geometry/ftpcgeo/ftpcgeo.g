@@ -20,7 +20,7 @@ Module   FTPCGEO  is the geometry of the Forward TPC in STAR
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
-	Content FTPC, FIAL, FMPT, FOAL, FDUM, FGAS, FSEN, FSEC,
+	Content FTPC, FIAL, FMPT, FOAL, FGAS, FSEN, FSEC,
 		FIFR, FKWI, FFSL, FFCE, FROS, FROM, FROB, 
 		FROE, FROL, FROP, FROT, FREL, FRCC, FRCE,
 		FSER, FSRA, FSRB, FSPG, FSPI, FSSM, FSRI, FSBA,
@@ -219,7 +219,7 @@ Block FTPC is the Forward TPC mother (needed for standalong test only)
       Create and position FMPT 
       Create and position FOAL
       Create and position FPAD 
-      Create and position FDUM
+      Create and position FGAS
       Create and position FIFR z=(ftpg_totLen/2)-(ftpg_DzIFR/2)-ftpg_DzKapton
                position FIFR z=-((ftpg_totLen/2)-(ftpg_DzIFR/2)-ftpg_DzKapton)
       Create and position FKWI z=(ftpg_totLen/2)-ftpg_DzKapton/2
@@ -291,17 +291,6 @@ Block FOAL is the Al drift-electrode
 	shape   TUBE Rmin=ftpg_RinnerMs+ftpg_DrInAlL1+ftpg_DrInIsoL,
                      Rmax=temp1,
 		     Dz=(ftpg_totLen/2)-ftpg_DzIFR-ftpg_DzKapton
-Endblock
-* ----------------------------------------------------------------------------
-Block FDUM is a dummy volume to provide the correct hitplane-numbering
-      Material  Argon_gas
-      attribute FDUM   seen=0  colo=7
-      temp1=ftpg_RinnerMs+ftpg_DrInAlL1+ _
-              ftpg_DrInIsoL+ftpg_DrInAlL2
-      Shape     TUBE   Rmin=temp1,
-                       Rmax=ftpg_RGasOut,
-                       Dz=ftpg_totLen/2-ftpg_DzKapton
-      Create and position FGAS  konly='ONLY'
 Endblock
 * ----------------------------------------------------------------------------
 Block FGAS is the FTPC gas volume
