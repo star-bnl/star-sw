@@ -171,6 +171,54 @@ double StDetectorDbRichScalers::getBBCXCTB(){
     return value;
 };
 
+/// BBC West
+double StDetectorDbRichScalers::getBBCWest(){
+    double value = 0;
+    if(mScalers)
+	value = mScalers->bbcWest;
+    return value;
+};
+
+/// BBC East
+double StDetectorDbRichScalers::getBBCEast(){
+    double value = 0;
+    if(mScalers)
+	value = mScalers->bbcEast;
+    return value;
+};
+
+/// BBC Yellow Background 
+double StDetectorDbRichScalers::getBBCYellowBkg(){
+    double value = 0;
+    if(mScalers)
+	value = mScalers->bbcYellowBkg;
+    return value;
+};
+
+/// BBC Blue Background 
+double StDetectorDbRichScalers::getBBCBlueBkg(){
+    double value = 0;
+    if(mScalers)
+	value = mScalers->bbcBlueBkg;
+    return value;
+};
+
+/// PVPD West
+double StDetectorDbRichScalers::getPVPDWest(){
+    double value = 0;
+    if(mScalers)
+	value = mScalers->pvpdWest;
+    return value;
+};
+
+/// PVPD East
+double StDetectorDbRichScalers::getPVPDEast(){
+    double value = 0;
+    if(mScalers)
+	value = mScalers->pvpdEast;
+    return value;
+};
+
 /// Rich High Voltage status (1 is good, 0 is bad)
 unsigned int StDetectorDbRichScalers::getRichHVStatus(){
     unsigned int value = 999;
@@ -193,6 +241,12 @@ ostream& operator<<(ostream& os, StDetectorDbRichScalers& v){
     os << "L0              = " << v.getL0() << endl;
     os << "BBC And         = " << v.getBBCX() << endl;
     os << "BBC*(CTB+TOFp)  = " << v.getBBCXCTB() << endl;
+    os << "BBC West        = " << v.getBBCWest() << endl;
+    os << "BBC East        = " << v.getBBCEast() << endl;
+    os << "BBC Yellow Bkg  = " << v.getBBCYellowBkg() << endl;
+    os << "BBC Blue   Bkg  = " << v.getBBCBlueBkg() << endl;
+    os << "pVPD West       = " << v.getPVPDWest() << endl;
+    os << "pVPD East       = " << v.getPVPDEast() << endl;
     
     os << "Rich HV  = " << v.getRichHVStatus() << endl;
         
