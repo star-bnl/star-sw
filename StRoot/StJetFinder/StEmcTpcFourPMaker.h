@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.2 2003/04/24 14:15:15 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.3 2003/04/25 22:52:29 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.3  2003/04/25 22:52:29  thenry
+ * Better speed-- before took 5 seconds PER EVENT, now takes 1/7 the time
+ * that reading from the MuDst does.  Fast enough.  Promiscuity with respect
+ * to all towers (hot or not) still needs to be fixed.
+ *
  * Revision 1.2  2003/04/24 14:15:15  thenry
  * These changes are really the first working version of the StFourPMakers
  * and teh StJetMakers.  This is all c++ stl implementation, and by virtue of
@@ -39,6 +44,12 @@ using namespace std;
 
 #define M_PI 3.14159265358979323846
 
+class BadPathLengthException : public string
+{
+ public:
+  BadPathLengthException() : string("Failed to solve PathLength.") {};
+};
+
 class StCorrectedEmcPoint
 {
 public:
@@ -67,6 +78,17 @@ public:
 
     virtual ~StCorrectedEmcPoint() {};
 
+    inline bool init(StMuEmcPoint* p, StThreeVectorD vertex)
+      {
+	init(p, vertex.z());
+      };
+    bool init(StMuEmcPoint* p, double zv)
+      {
+	mPoint = p;
+        if(p)
+	  correctedE = p->getEnergy();
+        etaShift = atan2(zv/100.0, SMDR);
+      };
     inline double pEta(void) { return Eta(); };
     inline double Eta(void) { 
       if(!mPoint) return 0.0; 
@@ -120,6 +142,7 @@ class StProjectedTrack
       fourP = StLorentzVectorD(sqrt(masssqr() + mom().mag2()), mom());
       StPhysicalHelixD helix = mTrack->outerHelix();
       pairD s = helix.pathLength(SMDR);
+      if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
       double path = ((s.first < 0) || (s.second < 0)) ? max(s.first, s.second) : min(s.first, s.second);
       projection = helix.at(path);
     };
@@ -128,6 +151,7 @@ class StProjectedTrack
       fourP = StLorentzVectorD(sqrt(masssqr() + mom().mag2()), mom());
       StPhysicalHelixD helix = mTrack->outerHelix();
       pairD s = helix.pathLength(SMDR);
+      if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
       double path = ((s.first < 0) || (s.second < 0)) ? max(s.first, s.second) : min(s.first, s.second);
       projection = helix.at(path) - vertex;
     };
@@ -142,6 +166,17 @@ class StProjectedTrack
     };
     virtual ~StProjectedTrack() {};
 
+    bool init(StMuTrack *t, StThreeVectorD vertex)
+      {
+	mTrack = t;
+	fourP = StLorentzVectorD(sqrt(masssqr() + mom().mag2()), mom());
+	StPhysicalHelixD helix = mTrack->outerHelix();
+	pairD s = helix.pathLength(SMDR);
+        if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
+	double path = ((s.first < 0) || (s.second < 0)) 
+	  ? max(s.first, s.second) : min(s.first, s.second);
+	projection = helix.at(path) - vertex;
+      };
     inline double Eta(void) { return fourP.pseudoRapidity(); };
     inline double Phi(void) { return fourP.phi(); };
     inline double depE(void) { return (probElectron*ElectronAveDepRatio +
@@ -206,7 +241,24 @@ typedef multimap<pointerPair, pointerPair, pointerPairLessThan> pointerMap;
 class binCircleList : public multimap<long, long, less<long> >
 {
 public:
+  //Searching via init_circle takes too long, so we switch to just
+  //Theta 
   void init(long phiR, long thetaR)
+  {
+    init_theta(phiR, thetaR);
+  };
+  void init_theta(long phiR, long thetaR)
+  {
+    double thetaRsqr = (double) thetaR*thetaR;
+    for(long thetaBin = -thetaR; thetaBin <= thetaR; thetaBin++)
+    {
+      double thetaBinsqr = (double) thetaBin*thetaBin;
+      double radiussqr = thetaBinsqr/thetaRsqr;
+      if(radiussqr <= 1.0)
+        insert(pair<long, long>(thetaBin, 0));
+    } 
+  };
+  void init_circle(long phiR, long thetaR)
   {
     double phiRsqr = (double) phiR*phiR;
     double thetaRsqr = (double) thetaR*thetaR;
@@ -224,8 +276,14 @@ public:
 
 static const pointerPair pointsBegin(((StMuTrack*)NULL), ((StMuEmcPoint*)1)); 
 
-typedef map<long, pointerMap, less<long> > _binmap;
-//typedef pair<pointerMap::iterator, pointerMap::iterator> pMapIteratorPair;
+typedef multimap<StMuEmcPoint*, StMuTrack*, less<StMuEmcPoint*> > pointToTracks;
+typedef multimap<StMuTrack*, StMuEmcPoint*, less<StMuTrack*> > trackToPoints;
+
+typedef map<long, double, less<long> > timesMap;
+
+typedef vector<StMuEmcPoint*> pointVector;
+
+typedef map<long, pointVector, less<long> > _binmap;
 
 class StEmcTpcBinMap : public _binmap
 {
@@ -238,6 +296,8 @@ public:
   // Except for these two objects, the whole structure is nothing but pointers.
   trackMap moddTracks;
   pointMap moddPoints;
+  pointToTracks p2t;
+  trackToPoints t2p;
 
 protected:
   StThreeVectorD mVertex;
@@ -248,43 +308,48 @@ public:
   StEmcTpcBinMap(long pBins, long tBins, double pR, double tR)
    : phiBins(pBins), thetaBins(tBins), phiRadius(pR), thetaRadius(tR) 
   {
-    binchecklist.init(phiBin(phiRadius), thetaBin(thetaRadius)); 
+    binchecklist.init(phiBin(phiRadius) - phiBin(0), thetaBin(thetaRadius) - thetaBin(0));
   };
 
-  _binmap::iterator insert(pointerPair& pPair)
+  _binmap::iterator insert(StMuEmcPoint* point)
   {
-    long b = bin(pPair);
+    long b = bin(point);
     if(empty(b))
-      _binmap::insert(pair<long, pointerMap>(b, pointerMap()));
+      _binmap::insert(_binmap::value_type(b, pointVector()));
     _binmap::iterator it = _binmap::find(b);
-    _binmap::value_type &val = *it;
-    val.second.insert(pair<pointerPair,pointerPair>(pPair,pPair));        
+    (*it).second.push_back(point);        
     return it;
   };
 
-  inline void clearall(void) { clear(); moddTracks.clear(); moddPoints.clear(); };
+  inline void clearall(void) {
+    //for(_binmap::iterator binit = begin(); binit != end(); ++binit)
+    //(*binit).second.clear();
+    clear();
+    p2t.clear();
+    t2p.clear();
+    moddTracks.clear(); 
+    moddPoints.clear(); 
+  };
   inline void setVertex(StThreeVectorD &vertex) { mVertex = vertex; };
+  inline void setVertex(StThreeVectorF &vertex) 
+    { 
+      mVertex = StThreeVectorD(vertex); 
+    };
 
-  inline _binmap::iterator insertTrack(StMuTrack* track)
+  inline void insertTrack(StMuTrack* track)
   {
-    moddTracks[track] = StProjectedTrack(track, mVertex);
-    pointerPair pp = pointerPair(track, NULL);
-    return insert(pp);
+    try{
+      moddTracks[track] = StProjectedTrack(track, mVertex);
+    } catch (BadPathLengthException &b) { }; 
+    return;
   };
   inline _binmap::iterator insertPoint(StMuEmcPoint* point)
   {
     moddPoints[point] = StCorrectedEmcPoint(point, mVertex);
-    pointerPair pp = pointerPair(NULL, point);
-    return insert(pp);
+    return insert(point);
   };
-  inline long bin(pointerPair& pPair) 
-  { 
-    if(pPair.first)
-      return bin(moddTracks[pPair.first]);
-    if(pPair.second)
-      return bin(moddPoints[pPair.second]);
-    return 0;
-  };
+  inline long bin(StMuEmcPoint* point) { return bin(moddPoints[point]); };
+  inline long bin(StMuTrack* track) { return bin(moddTracks[track]); };
   inline long bin(StProjectedTrack &p) { return bin(p.pPhi(), p.pTheta()); };
   inline long bin(StCorrectedEmcPoint &p) { return bin(p.pPhi(), p.pTheta()); };
   inline long bin(double pPhi, double pTheta) 
@@ -297,165 +362,74 @@ public:
   {
     while(phiB < 0) { phiB += phiBins; };
     while(phiB >= phiBins) { phiB -= phiBins; }; 
-    return phiB + phiBins*thetaB;    
+    //The full two dimensions is too slow, so collapse into 1D:theta
+    //return phiB + phiBins*thetaB;    
+    return thetaB;
   };
-  inline long bin(pointerPair &track, binCircleList::value_type &relative)
-  { return bin(track.first, relative); };
   inline long bin(StMuTrack* track, binCircleList::value_type &relative)
+    {
+      return bin(moddTracks[track], relative);
+    };
+  inline long bin(StProjectedTrack &track, binCircleList::value_type &relative)
   {
     return bin(
-      thetaBin(moddTracks[track].pTheta())+relative.first,
-      phiBin(moddTracks[track].pPhi())+relative.second);
+      thetaBin(track.pTheta())+relative.first,
+      phiBin(track.pPhi())+relative.second);
   };
-  long bin(pointerMap::value_type &track, binCircleList::value_type &relative)
-  {  return bin((pointerPair &) track.first, relative); };
-  pointerMap::iterator beginTrack(value_type &bin) 
-  {  return bin.second.begin(); };
-  pointerMap::iterator endTrack(value_type &bin) 
-  {  return bin.second.lower_bound(pointsBegin); };
-  inline pointerMap::iterator beginPoint(value_type &bin) 
-  {  return bin.second.lower_bound(pointsBegin); };
-  inline pointerMap::iterator endPoint(value_type &bin) 
-  {  return bin.second.end(); };
-  pointerMap::iterator beginTrack(
-    pointerMap::value_type &track, binCircleList::value_type &relative) 
-  {  return getPointerMap(track, relative).begin(); };
-  pointerMap::iterator endTrack(
-    pointerMap::value_type &track, binCircleList::value_type &relative) 
-  {  return getPointerMap(track, relative).lower_bound(pointsBegin); };
-  pointerMap::iterator beginPoint(
-    pointerMap::value_type &track, binCircleList::value_type &relative) 
-  {  return getPointerMap(track, relative).lower_bound(pointsBegin); };
-  pointerMap::iterator endPoint(
-    pointerMap::value_type &track, binCircleList::value_type &relative) 
-  {  return getPointerMap(track, relative).end(); };
-  pointerMap &getPointerMap(
-    pointerMap::value_type &track, binCircleList::value_type &relative)
-  {  return getPointerMap(bin(track, relative)); };
-  pointerMap &getPointerMap(long b)
-  {  _binmap::value_type &val = *(_binmap::find(b)); return val.second; };
+  pointVector &getPoints(long b)
+  {  return (*(_binmap::find(b))).second; };
   inline bool empty(long bin)
   {  return _binmap::find(bin) == end(); };
-  inline bool empty(pointerMap::value_type &track, binCircleList::value_type &relative)
+  inline bool exists(long bin)
+  {  return empty(bin) == false; };
+  inline bool empty(StMuTrack *track, binCircleList::value_type &relative)
   {  return empty(bin(track, relative)); };
-  inline bool exists(pointerMap::value_type &track, binCircleList::value_type &relative)
+  inline bool exists(StMuTrack *track, binCircleList::value_type &relative)
   {  return empty(track, relative) == false; };
 
+  // Loop through the tracks, and if the track bins into a bin with points
+  // in it, then loop over the points and check to see if the point-track
+  // distance is small enough to call this a pair.  If so, add the pair
+  // to the pair lists.
   void correlate(double realradiussqr)
-  // That is, look in each bin, find all tracks without corresponding points,
-  // look at all the bins which are "close", and if we find a point without a 
-  // corresponding track, we found a pair, so add the pair in both the local
-  // and the foreign bin.
   {
-    for(iterator binit = begin(); binit != end(); ++binit)
-      for(pointerMap::iterator track = beginTrack(*binit); 
-          track != endTrack(*binit); ++track)
+    for(trackMap::iterator track = moddTracks.begin(); 
+	track != moddTracks.end(); ++track)
       {
-	pointerMap::value_type &track_val = *track;
-	_binmap::value_type &bin_val = *binit;
-        if(track_val.second.second == 0)
-          for(binCircleList::iterator relative = binchecklist.begin();
-              relative != binchecklist.end(); relative++)
-           if(exists(track_val, *relative))
-            for(pointerMap::iterator point = beginPoint(track_val, *relative);
-                point != endPoint(track_val, *relative); ++point)
-	    {
-	      pointerMap::value_type &point_val = *point;
-              if(point_val.second.first == 0)
-              {
-                double dphi = moddTracks[track_val.first.first].pPhi()
-                            - moddPoints[point_val.first.second].pPhi();
-                double deta = moddTracks[track_val.first.first].pEta()
-                            - moddPoints[point_val.first.second].pEta();
-                if(dphi*dphi + deta*deta > realradiussqr) continue;
-                bin_val.second.insert(pointerMap::value_type(track_val.first, 
-                    pointerPair( track_val.first.first, 
-                                 point_val.first.second ) ) );
-                getPointerMap(track_val, *relative).insert(
-                  pointerMap::value_type( track_val.first, 
-                    pointerPair( track_val.first.first, 
-                                 point_val.first.second ) ) );
-              }
-            }
+	bool found = false;
+	for(binCircleList::iterator relative = binchecklist.begin();
+	    relative != binchecklist.end(); ++relative)
+	  {
+	    long binval = bin((*track).second, *relative);
+	    if(exists(binval))
+	      {
+		pointVector points = getPoints(binval);
+		for(pointVector::iterator point = points.begin(); 
+		    point != points.end(); ++point)
+		  {
+		    StCorrectedEmcPoint &cPoint = moddPoints[*point];
+		    double dphi = (*track).second.pPhi() - cPoint.pPhi();
+		    double deta = (*track).second.pEta() - cPoint.pEta();
+		    if(dphi*dphi + deta*deta > realradiussqr) continue;
+		    p2t.insert(pointToTracks::value_type
+			       (*point, (*track).first));
+		    t2p.insert(trackToPoints::value_type
+			       ((*track).first, *point));
+		    found = true;
+		    break;
+		  }
+	      }
+	    if(found) break;
+	  }
       }
   };
-
-  pointerMap::iterator findbegin(trackMap::value_type &track)
-  {  
-    long b = bin(track.second); 
-    if(empty(b)) { stringstream ss; ss << "Bin " << b << " is empty!"; throw ss.str(); }
-    _binmap::value_type &bin_val = *(_binmap::find(b));
-    pointerMap::iterator beg = bin_val.second.lower_bound(
-      pointerPair(track.first,0) );
-    return beg;  
-  };  
-
-  pointerMap::iterator findend(trackMap::value_type &track)
-  {  
-    long b = bin(track.second); 
-    if(empty(b)) { stringstream ss; ss << "Bin " << b << " is empty!"; throw ss.str(); }
-    _binmap::value_type &bin_val = *(_binmap::find(b));
-    pointerMap::iterator ed = bin_val.second.upper_bound(
-      pointerPair(track.first,0) );
-    return ed;  
-  };  
-
-  pointerMap::iterator findbegin(pointMap::value_type &point)
-  {  
-    long b = bin(point.second); 
-    if(empty(b)) { stringstream ss; ss << "Bin " << b << " is empty!"; throw ss.str(); }
-    _binmap::value_type &bin_val = *(_binmap::find(b));
-    pointerMap::iterator beg = bin_val.second.lower_bound(
-      pointerPair(0, point.first) );
-    return beg;  
-  };
-
-  pointerMap::iterator findend(pointMap::value_type &point)
-  {  
-    long b = bin(point.second); 
-    if(empty(b)) { stringstream ss; ss << "Bin " << b << " is empty!"; throw ss.str(); }
-    _binmap::value_type &bin_val = *(_binmap::find(b));
-    pointerMap::iterator ed = bin_val.second.upper_bound(
-      pointerPair(0, point.first) );
-    return ed;  
-  };
-
-  /*
-  pMapIteratorPair find(trackMap::value_type track)
-  {  
-    long b = bin(track.second); 
-    if(empty(b)) { stringstream ss; ss << "Bin " << b << " is empty!"; throw ss.str(); }
-    _binmap::value_type &bin_val = *(_binmap::find(b));
-    pointerMap::iterator beg = bin_val.second.lower_bound(
-      pointerPair(track.first,0) );
-    pointerMap::iterator ed = bin_val.second.upper_bound(
-      pointerPair(track.first,0) );
-    return pMapIteratorPair(beg, ed);  
-  };  
-
-  pMapIteratorPair find(pointMap::value_type point)
-  {  
-    long b = bin(point.second); 
-    if(empty(b)) { stringstream ss; ss << "Bin " << b << " is empty!"; throw ss.str(); }
-    _binmap::value_type &bin_val = *(_binmap::find(b));
-    pointerMap::iterator beg = bin_val.second.lower_bound(
-      pointerPair(0, point.first) );
-    pointerMap::iterator ed = bin_val.second.upper_bound(
-      pointerPair(0, point.first) );
-    return pMapIteratorPair(beg, ed);  
-  };
-  */
-
-  inline StProjectedTrack &projectedTrack(pointerMap::value_type &it)
-  {  return moddTracks[it.second.first]; };
-  inline StCorrectedEmcPoint &correctedEmcPoint(pointerMap::value_type &it)
-  {  return moddPoints[it.second.second]; };
 };
 
 class StEmcTpcFourPMaker : public StFourPMaker {
 public: 
     const double radiussqr;
     double seconds;
+    timesMap timeLengths;
     
 public:
     StEmcTpcFourPMaker(const char* name, StMuDstMaker *pevent, 
