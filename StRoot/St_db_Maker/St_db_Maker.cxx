@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.37 2000/07/14 02:39:21 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.38 2000/09/16 02:45:09 didenko Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.38  2000/09/16 02:45:09  didenko
+// commit Victor's changes
+//
 // Revision 1.37  2000/07/14 02:39:21  perev
 // SetMaxEntryTime method added
 //
@@ -98,9 +101,12 @@ public:
    TDatime fTimeMin;
    TDatime fTimeMax;
    TDataSet *fDat;
+   Int_t  fMod;
    St_ValiSet(const char *name,TDataSet *parent);
    virtual ~St_ValiSet(){};
    virtual void ls(Int_t lev=1);
+           void Modified(int m=1){fMod=m;}
+          Int_t IsModified(){return fMod;}
 };
 
 //_____________________________________________________________________________
