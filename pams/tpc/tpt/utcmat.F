@@ -1,11 +1,13 @@
-* $Id: utcmat.F,v 1.4 2005/03/03 21:45:07 sakrejda Exp $
+* $Id: utcmat.F,v 1.5 2005/03/04 19:06:20 sakrejda Exp $
 * $Log: utcmat.F,v $
+* Revision 1.5  2005/03/04 19:06:20  sakrejda
+* *** empty log message ***
+*
 * Revision 1.4  2005/03/03 21:45:07  sakrejda
 * *** empty log message ***
 *
 * Revision 1.3  2005/03/03 21:33:06  sakrejda
 * *** empty log message ***
-*
 * Revision 1.2  1998/01/27 00:35:54  fisyak
 * Split sources
 *
