@@ -1,7 +1,10 @@
 *
-* $Id: dzdwtr.F,v 1.3 1998/04/16 17:00:28 fisyak Exp $
+* $Id: dzdwtr.F,v 1.4 2000/01/06 01:01:10 nevski Exp $
 *
 * $Log: dzdwtr.F,v $
+* Revision 1.4  2000/01/06 01:01:10  nevski
+* dzdoc for agi
+*
 * Revision 1.3  1998/04/16 17:00:28  fisyak
 * 2nd pass with gstar
 *
@@ -49,9 +52,9 @@
          LRET = LD1
          GOTO 90
       ENDIF
- 
+
 *     look if its part of linear structure
- 
+
       LN = LQ(KQS+LIN)
       IF(LN .NE. 0)THEN
          LUP = LN
@@ -59,10 +62,10 @@
          LRET = LN
          GOTO 90
       ENDIF
- 
+
 *     look if it is end of a linear structure
 *     i.e. origin and up link are in different banks
- 
+
    50 CONTINUE
       LUP = LQ(KQS+LIN+1)
       LORIG = LQ(KQS+LIN+2)

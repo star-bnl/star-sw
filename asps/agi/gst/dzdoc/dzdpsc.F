@@ -1,7 +1,10 @@
 *
-* $Id: dzdpsc.F,v 1.3 1998/04/16 17:00:28 fisyak Exp $
+* $Id: dzdpsc.F,v 1.4 2000/01/06 01:01:09 nevski Exp $
 *
 * $Log: dzdpsc.F,v $
+* Revision 1.4  2000/01/06 01:01:09  nevski
+* dzdoc for agi
+*
 * Revision 1.3  1998/04/16 17:00:28  fisyak
 * 2nd pass with gstar
 *
@@ -30,4 +33,4 @@
       CALL IACWK(1)
       CALL ICLWK(2)
       END
- 
+

@@ -1,7 +1,10 @@
 *
-* $Id: dzdhtm.F,v 1.3 1998/04/16 17:00:27 fisyak Exp $
+* $Id: dzdhtm.F,v 1.4 2000/01/06 01:01:09 nevski Exp $
 *
 * $Log: dzdhtm.F,v $
+* Revision 1.4  2000/01/06 01:01:09  nevski
+* dzdoc for agi
+*
 * Revision 1.3  1998/04/16 17:00:27  fisyak
 * 2nd pass with gstar
 *
@@ -87,7 +90,7 @@ C++SEQ,DZDOCC.
             WRITE(*,'(A,A4)')'No doc for bank ',KEYVEC(1)
          ELSE
             IP0=KQSP+LQBKD+1
- 
+
             CALL DZDGGI(IQ(IP0),'CL',' ',CGET,IFC,ILC)
             WRITE(ANCHOR,'(I8.8)')LRET
             IF(INDEX(CFLAG,'P').EQ. 0)
@@ -113,7 +116,7 @@ C++SEQ,DZDOCC.
             IOFFBS = - (NIO + NL + 8 + 1)
             CALL DZDIOC(IQ(KQS+LRET+IOFFBS),CGET,ILC)
             IF(ILC.GT.0)WRITE(LUN,'(A,A,A)')'IO-Char   ',CGET(1:ILC)
- 
+
             WRITE(LUN,'(A)')'----------  System links ----------'
             CALL UHTOC(KEYVEC(2),4,CLINK,4)
             IF(CLINK.NE.'NONE')THEN
@@ -129,7 +132,7 @@ C++SEQ,DZDOCC.
                      WRITE(LUN,'(A,A)')'Up-Link   '//
      +               '<a href="#L'//ANCHOR//'"><b>'//
      +               CLINK//'</b></a>'
- 
+
                   ENDIF
                ELSE
                   WRITE(LUN,'(A,A)')'Up-Link   '//CLINK
@@ -195,5 +198,5 @@ C++SEQ,DZDOCC.
   999 CONTINUE
       RETURN
       END
- 
- 
+
+

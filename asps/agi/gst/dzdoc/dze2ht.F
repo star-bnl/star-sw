@@ -1,7 +1,10 @@
 *
-* $Id: dze2ht.F,v 1.3 1998/04/16 17:00:29 fisyak Exp $
+* $Id: dze2ht.F,v 1.4 2000/01/06 01:01:10 nevski Exp $
 *
 * $Log: dze2ht.F,v $
+* Revision 1.4  2000/01/06 01:01:10  nevski
+* dzdoc for agi
+*
 * Revision 1.3  1998/04/16 17:00:29  fisyak
 * 2nd pass with gstar
 *
@@ -30,7 +33,7 @@
 *                                                                      *
 ************************************************************************
       IMPLICIT NONE
- 
+
       INTEGER       LUNIN,LUNUSE
       CHARACTER*80  CFOUT
       CHARACTER*4   UPUP1
@@ -58,7 +61,7 @@
       NBANKS=0
       NFILES=0
       LUNOUT=0
- 
+
 *     Run through files and find all banks
       IPBKID=0
       IPUP=0
@@ -87,12 +90,12 @@
          IPBKID=0
       ENDIF
       GOTO 10
- 
+
  50   CONTINUE
- 
+
       REWIND(LUNIN)
 *     LOOP ON BANKS
- 
+
       IPSTAC=0
  100  CONTINUE
       IP=0
@@ -315,7 +318,7 @@
 *     DO THE LAST BANK
       CL(2:9)='Bank IDH'
       GOTO 115
- 
+
 900   CONTINUE
       WRITE(LUNOUT,'(A)')'</pre>'
       WRITE(LUNOUT,'(A)')'</body>'
@@ -323,7 +326,7 @@
       CLOSE(LUNIN)
       CLOSE(LUNOUT)
 999   END
- 
+
       CHARACTER*(*) FUNCTION DZE2US(CH)
       CHARACTER*(*) CH
       DO I=1,LEN(CH)

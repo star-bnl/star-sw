@@ -1,7 +1,10 @@
 *
-* $Id: dzddoc.F,v 1.3 1998/04/16 17:00:26 fisyak Exp $
+* $Id: dzddoc.F,v 1.4 2000/01/06 01:01:08 nevski Exp $
 *
 * $Log: dzddoc.F,v $
+* Revision 1.4  2000/01/06 01:01:08  nevski
+* dzdoc for agi
+*
 * Revision 1.3  1998/04/16 17:00:26  fisyak
 * 2nd pass with gstar
 *
@@ -70,7 +73,7 @@
       CHARACTER*1 CHARIO,CHARIS
       CHARACTER*7 CHARIA
       CHARACTER*32 CVARNM
- 
+
 *     for returning values
       INTEGER IENTRY,ITYYY
       INTEGER VVAR(100), NVAL,ITY, MAXVAL
@@ -90,12 +93,9 @@
 *
 #include "dzdoc/bkwrp.inc"
 #include "dzdoc/tapes.inc"
-*         From DZEBRA
 #include "zebra/zbcdk.inc"
 #include "zebra/zunit.inc"
-#if defined(INCLUDE_DZDPRM)
 #include "dzdprm.inc"
-#endif
 #include "dzdoc/linout.inc"
 #include "dzdoc/docparq.inc"
       CHARACTER CQSTAK*13,CQINFO*40
@@ -144,7 +144,7 @@
       REPATH=.FALSE.
       MAXVAL=0
       GOTO 2
- 
+
       ENTRY DZDGVA(IXSTOR, L, CHOPT,CVREQ,NVAL,VVAR,ITYYY)
       IENTRY = 2
       ITY    = 0
@@ -173,7 +173,7 @@
       ELSE
          CALL UCTOH('NONE',KEYVEC(2),4,4)
       ENDIF
- 
+
 2     LUNINT = LUNINV
       LUNSAV = IQPRNT
       IDENTF=0
@@ -186,7 +186,7 @@
          POINT(I)  = -1
          CPOINT(I) = ' '
 5        NPOINT(I) = -1
- 
+
 *      IREPC=-2
       IPRKEE=0
       NLSKIP=0
@@ -230,7 +230,7 @@
          ENDIF
          NDATA = 0
       ELSE
- 
+
          IF(ICYCLE.LT.0)WRITE(LUC,'(A)')
      &  ' **** Requested version not found ****'
          IPDATA = IQ(KQS+LQBKD1+MBHEAQ) + IQ(KQS+LQBKD1+MBGENQ)
@@ -257,7 +257,7 @@
          IPSAVE=IP
          NDATA = IQ(KQS+LQBKD1+MBDATQ)
       ENDIF
- 
+
       IF(INDEX(CHOPT,'Q').EQ.0 .AND.
      &   INDEX(CHOPT,'V').EQ.0 .AND.
      &  .NOT.KEEPSQ)THEN
@@ -270,7 +270,7 @@
      &   '  Checking data of Bank/UpBank: ',CHBANK(1:4),'/',CHBANK(5:8)
          ENDIF
       ENDIF
- 
+
       IF(NDATA.GT.0)THEN
           IC9 = 10
       ELSE
@@ -286,7 +286,7 @@
       ENDIF
       LDATUM = IP + NDATA
       IWDOC = 0
- 
+
 *      IF(.NOT.KEEPSQ) WRITE(LUC,*)' '
 *
 *     IF11,IL11 first, last word to be doc'td
@@ -309,8 +309,8 @@
 *     IPFORM  pointer to a key descriptor format (see RZ)
 *     LOOPC1  or LOOPC2)loop counters in rep section
 *
- 
- 
+
+
    10 CONTINUE
       IF(IP .GE. LDATUM)THEN
           IF(.NOT.KEEPSQ)THEN
@@ -328,9 +328,9 @@
          WRITE(LUC,'(A,2I9)')' Illegal NW at IPDATA ',NW,IPDATA
          GOTO 990
       ENDIF
- 
+
 *     start hollerith sector
- 
+
       IF(IT .EQ. 5)THEN
 *         WRITE(*,*)' IDENTF= ',IDENTF
 *        try to get rep count name and range
@@ -355,31 +355,31 @@
             ENDIF
          ENDIF
          IF(IDENTF .NE. ITGENQ) GOTO 80
- 
+
 *        rep count = 0 calc from data word
 *         IF(IREPC .EQ. 0)GOTO 80
- 
+
          IF(      IWORD+1 .NE. IWDOC
      +      .AND. IP1+IP2 .EQ. 0
      +      .AND. IWDOC   .NE. IWDOCO )THEN
               IWDOCO = -1
          ENDIF
- 
+
 *        rep section ended already?
- 
+
          IF(REPEND)GOTO 80
- 
+
 *        look if more words documented then announced
- 
+
          IF(NEXTRA.LT.0 .AND. LRECOV)THEN
             IF(IWDOC.GT.ABS(NEXTRA))THEN
                GOTO 80
             ENDIF
          ENDIF
- 
+
 *        is it not continuation card for same item
 *        or not a start of rep section
- 
+
          NEWVAL = .FALSE.
 *         WRITE(*,*)'IWDOCO ,IWDOC, IWORD', IWDOCO ,IWDOC, IWORD
          IF(IWDOCO .NE. IWDOC .OR. IWDOCO .LE. 0 .OR. NEWPNT)THEN
@@ -389,12 +389,12 @@
          ENDIF
 *        remember possible repetition count
          IVALLW = IQ(KQS+L+IWORD)
- 
+
          IF(IWORD .GT. IL11)GOTO 990
          IF(IWORD .LT. IF11)GOTO 80
- 
+
 *         look if all words are hollerith
- 
+
          IF(IOCH .LT. 0)THEN
             NIO = JBYT(IQ(KQS+L),19,4)
             NL =  IQ(KQS+L-3)
@@ -410,9 +410,9 @@
                NEWVAL = .TRUE.
             ENDIF
          ENDIF
- 
+
 *        loop here if all words are hollerith
- 
+
    20    CONTINUE
 *        empty text buffer at end
           IF(IWORD .GT. IL11)THEN
@@ -423,7 +423,7 @@
             ENDIF
             GOTO 990
          ENDIF
- 
+
 *        get the printed value from CQLINE of DZSHOW  (Quiet option)
          IF(NEWVAL     .AND.
      &     .NOT.KEEPSQ .OR.
@@ -461,9 +461,9 @@
                CVAL = ' '
             ENDIF
          ELSE
- 
+
 *        output other then pure text, empty text buffer
- 
+
              IF(IPLINE .GT. 1)THEN
                 IF(.NOT.KEEPSQ .AND.INDEX(CHOPT,'V').EQ.0)
      &          WRITE(LUC,'(14X,A)')CLINE(1:IPLINE-1)
@@ -471,11 +471,11 @@
              ENDIF
              INHOLL = .FALSE.
          ENDIF
- 
+
          CALL UHTOC(IQ(IP+1),4,CVAR,8)
- 
+
 *        return value?
- 
+
          IF(INDEX(CHOPT,'V').NE.0)THEN
             IF(CVAR.EQ.CVREQ)THEN
 *              find data type
@@ -517,12 +517,12 @@
                GOTO 80
             ENDIF
          ENDIF
- 
+
          CVAR1 = CVAR
          CALL CLTOU(CVAR1)
- 
+
 *        conVert it by ZITOH?
- 
+
          IF     (CVAR1(1:2).EQ.'Z:')THEN
             CALL ZITOH(IQ(KQS+L+IWORD),IWHOLL,1)
             CVAL=' '
@@ -568,9 +568,9 @@
              CVAL(7:7)='/'
          ENDIF
 *     pointer stuff
- 
+
 *     look if a label is reached
- 
+
       IF(NEWPNT .OR. .NOT. NEWVAL)THEN
         NEWPNT=.FALSE.
       ELSE
@@ -592,7 +592,7 @@
                CALL UHTOC(IQ(IPP+1),4,CVARP,8)
                CALL CLTOU(CVARP)
                IF(CVARP(1:2).NE.'L:')GOTO 21
- 
+
                IF(CVARP(3:).EQ.CPOINT(I)(3:))THEN
 *                 remember for later in case identical lines are skipped
                   WRITE(CLINDE,'(2A4,13X,14A4)')
@@ -621,7 +621,7 @@
          ENDIF
        ENDIF
       ENDIF
- 
+
 *     is the pointer bit coded in cont card?
       IF(INDEX(CVALSA,'.').NE.0)THEN
          IF(Q(KQS+L+IWORD).GT.0. .AND. Q(KQS+L+IWORD).LT.1000000.)THEN
@@ -659,11 +659,11 @@
             CVAR1(3:8)=CTEMP
          ENDIF
       ENDIF
- 
+
 24    CONTINUE
- 
+
 *     if it is a pointer or rep count of it, remember its value
- 
+
       IF(CVAR1(1:2).EQ.'P:' .OR. CVAR1(1:2).EQ.'N:')THEN
 *        already there?
          IF(IPOINT.GT.0)THEN
@@ -722,11 +722,11 @@
          ENDIF
 25       CONTINUE
       ENDIF
- 
+
 26    CONTINUE
- 
+
 *     pointer stuff end
- 
+
 *       if cont line then look if its mask, bitvalue or choice
          LENMSK=0
          IF(.NOT.NEWVAL)THEN
@@ -773,7 +773,7 @@
 *                  all matched, does it still fit on line?
                    NCH=(NW-2)*4
                    IF(NCH+LALILE-LENMSK.GT.80)GOTO 50
- 
+
                    CLINE=' '
                    CALL UHTOC(IQ(IP+3),4,CLINE,NCH)
                    NCH=LENOCC(CLINE)
@@ -783,7 +783,7 @@
                    GOTO 80
                 ENDIF
             ENDIF
- 
+
 *            choice
              IF(CVAR(1:6) .EQ. 'BITVAL')THEN
                  IF(KEEPSQ)GOTO 80
@@ -1138,7 +1138,7 @@
                 ENDIF
                 CLINE=' '
                 WRITE(CLINE,'(1X,I5)')IWORD
- 
+
                 CLINE(9:9+NCLOOP-1)=CLOOP(1:NCLOOP)
                 CLINE(9+NCLOOP:9+NCLOOP+10)=CVAL
                 MC=(MC-2)*4
@@ -1177,18 +1177,18 @@
          ENDIF
          GOTO 80
       ENDIF
- 
+
 *     end of hollerith sector
- 
+
       IF(IT .NE. 2)THEN
          WRITE(LUC,'(/A,2I9)')' Unexpected IT,NW ',IT,NW
          WRITE(LUC,'(1X,100Z8)')(IQ(IP+K),K=1,NW)
          GOTO 80
       ENDIF
- 
+
 *     start of integer sector
 *     i.e. word # documented or rep level change
- 
+
 *     WRITE(*,'(1X,Z8,100I8)')(IQ(IP+K),K=1,NW)
       ICHOIC = IQ(IP+1)
 *      IBIT13 = JBYT(ICHOIC,1,3)
@@ -1202,7 +1202,7 @@
             ENDIF
          ENDIF
       ENDIF
- 
+
       IREPL=JBYT(ICHOIC,16,3)
 *      IESEQ  = JBYT(ICHOIC,19,1)
 *      WRITE(*,*)' IBIT13, IDENTF, IREPL, IESEQ',
@@ -1216,9 +1216,9 @@
          IWDOC = IQ(IP+2)
          GOTO 80
       ENDIF
- 
+
 *     repetition level
- 
+
       IF(IDENTF .EQ. ITGREQ)THEN
           IF(REPEND)THEN
              REPEND=.FALSE.
@@ -1226,7 +1226,7 @@
              IF(KEEPSQ)IWORDR=0
           ENDIF
 *         end of infinite rep loop (IFREPL=1), check if doc is uptodate
- 
+
           IF(IFREPL.NE.0 .AND. NEXTRA.EQ.0 .AND. LRECOV
      &     .AND. IMBED2.EQ.0 .AND. NW.EQ.1 .AND. IREPL.EQ.0)THEN
              NTRIAL=0
@@ -1285,14 +1285,14 @@
 *            force new retrieval of formatted values
              IC9=10
           ENDIF
- 
+
 *
 76        IWDOC = -1
- 
+
 *     end of rep level
- 
+
           IF(NW .EQ. 1)THEN
- 
+
              IF(IREPL .EQ. 1)THEN
 *               end rep lev 2
                 IF(REPATH)THEN
@@ -1361,13 +1361,13 @@
                 ENDIF
              ENDIF
           ENDIF
- 
+
 * start of rep
- 
+
           IREPC = IQ(IP+2)
- 
+
 *         return path?
- 
+
           IF(REPATH)THEN
              NVAL=NVAL+1
 *            offset from previous to start of rep
@@ -1386,7 +1386,7 @@
           ELSE
              MGEVAL=0
           ENDIF
- 
+
           IF(IREPC.LT.0 .AND. .NOT. KEEPSQ)THEN
 *            was it given in previous data word?
              ITP = MOD(IQ(IP+NW+1),16)
@@ -1417,9 +1417,9 @@
                    ENDDO
                 ENDIF
              ENDIF
- 
+
 *            try to get rep count from variable
- 
+
              IF(REPATH)THEN
                 CALL DZDGRC(IQ(IP+NW+1),0,IVALLW,IREPC,NEXTRA,
      &          VVAR(NVAL+1),MGEVAL,NGEVAL)
@@ -1433,20 +1433,20 @@
                 CALL DZDGRC(IQ(IP+NW+1),0,IVALLW,IREPC,NEXTRA,
      &          IDUMMY,0,NDUMMY)
              ENDIF
- 
+
              IF(NEXTRA.LT.0 .AND.INDEX(CHOPT,'Q').EQ.0 .AND. LRECOV)
      &       CALL DZDPRW(LUC,NEXTRA)
              IF(NEXTRA.GT.0 .AND. LRECOV)THEN
                 IF(INDEX(CHOPT,'Q').EQ.0)WRITE(*,*)
      &          ' WARNING: Assume EXTRA',NEXTRA,' words not documented'
              ENDIF
- 
+
              IF(IREPC.EQ.0)THEN
                 REPEND=.TRUE.
              ENDIF
           ENDIF
 77        CONTINUE
- 
+
           IF(REPATH)THEN
              NVAL=NVAL+1
              IF(IREPL.EQ.1)THEN
@@ -1455,7 +1455,7 @@
                 IPRL2=NVAL
              ENDIF
           ENDIF
- 
+
           IF(IREPL.EQ.1)THEN
              IP1 = 0
              LOOPC1=1
@@ -1502,7 +1502,7 @@
              ENDIF
           ENDIF
       ENDIF
- 
+
    80 CONTINUE
       IP = IP+NW+1
       IF(IWORD.LT.IL11 .OR. IP.LT.LDATUM)THEN
@@ -1510,7 +1510,7 @@
       ELSE
           GOTO 990
       ENDIF
- 
+
    90 CONTINUE
       IF(NLSKIP.GT.0)THEN
          WRITE(LUC,'(/A,I5,A)')'       ---',NLSKIP,
@@ -1528,7 +1528,7 @@
           WRITE(LUC,'(A11)')CVAL
       ENDIF
   100 CONTINUE
- 
+
   990 CONTINUE
       IF( .NOT. KEEPSQ)THEN
          IF(NLSKIP.GT.0)THEN
@@ -1554,4 +1554,4 @@
       IQPRNT =LUNSAV
       IF (IENTRY.EQ.2) ITYYY=ITY
       END
- 
+
