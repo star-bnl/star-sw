@@ -15,7 +15,7 @@ OBJS   = $(notdir $(patsubst %.cxx,%.o,$(SRCS)))
 
 #
 CFLAGS   = -Wall $(DEBUG) $(DEFINES) -fPIC $(ROOTCFLAGS)
-CXXFLAGS = $(CFLAGS) 
+CXXFLAGS = $(CFLAGS) $(INCLUDES)
 #-I$(STAR)/include
 LDFLAGS  = -shared 
 
