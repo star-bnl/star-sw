@@ -29,6 +29,8 @@ StEmcCalibMaker::StEmcCalibMaker(const char *name):StMaker(name)
 	mZDCMax =  1000000;
 	mCTBMin = -1000000;
 	mCTBMax =  1000000;
+  mSpecName = "mSpec";
+  mAcceptName = "mAccept";
 	setFile("spec.root");
 }
 //_____________________________________________________________________________
@@ -38,8 +40,8 @@ StEmcCalibMaker::~StEmcCalibMaker()
 //_____________________________________________________________________________
 Int_t StEmcCalibMaker::Init()
 {
-  mSpec = new TH2F("mSpec","Equal Spectra",mNChannel,+0.5,(float)mNChannel+0.5,(int)mRange,-0.5,mRange-0.5);
-  mAccept = new TH1F("mAcept","Accepted events",20,-0.5,19.5);
+  mSpec = new TH2F(mSpecName.Data(),"Equal Spectra",mNChannel,+0.5,(float)mNChannel+0.5,(int)mRange,-0.5,mRange-0.5);
+  mAccept = new TH1F(mAcceptName.Data(),"Accepted events",20,-0.5,19.5);
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -108,7 +110,9 @@ void StEmcCalibMaker::saveHist(char* file)
 void StEmcCalibMaker::loadHist(char* file)
 {
 	TFile *f = new TFile(file);
-  TH2F *h = (TH2F*)f->Get("mSpec;1");
+  TString N = mSpec->GetName();
+  N+=";1";
+  TH2F *h = (TH2F*)f->Get(N.Data());
   if(h){ mSpec->Reset(); mSpec->Add(h,1);}
   f->Close();
   delete f;
@@ -118,7 +122,9 @@ void StEmcCalibMaker::loadHist(char* file)
 void StEmcCalibMaker::addHist(char* file)
 {
   TFile *f = new TFile(file);
-  TH2F *h = (TH2F*)f->Get("mSpec;1");
+  TString N = mSpec->GetName();
+  N+=";1";
+  TH2F *h = (TH2F*)f->Get(N.Data());
   if(h){ mSpec->Add(h,1);}
   f->Close();
   delete f;

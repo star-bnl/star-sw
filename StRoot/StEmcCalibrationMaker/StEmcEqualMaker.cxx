@@ -35,6 +35,9 @@ Int_t StEmcEqualMaker::Init()
   mSlopes = new TH1F("mSlopes","",getNChannel(),0.5,getNChannel()+0.5);
   mAmps = new TH1F("mAmps","",getNChannel(),0.5,getNChannel()+0.5);
   mSlopesTheta = new TH2F("mSlopesTheta","",40,45*pi/180,135*pi/180,100,0,100);
+
+  mSpecName ="mSpecEqual";
+  mAcceptName = "mAcceptEqual";
   return StEmcCalibMaker::Init();
 }
 //_____________________________________________________________________________

@@ -38,6 +38,8 @@ class StEmcCalibMaker : public StMaker
     float                       mRange;
         
     TString                     mFileName;        
+    TString                     mSpecName;        
+    TString                     mAcceptName;        
 		
 		bool                        mAutoSaveDB;          
 		bool                        mDebug;          

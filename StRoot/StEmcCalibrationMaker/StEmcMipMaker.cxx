@@ -63,6 +63,9 @@ Int_t StEmcMipMaker::Init()
   mGainDistr = new TH1F("mGainDistr","",100,0,0.1);
   mChi2 = new TH1F("mChi2","",getNChannel(),0.5,getNChannel()+0.5);
   mIntegral = new TH1F("mIntegral","",getNChannel(),0.5,getNChannel()+0.5); 
+
+  mSpecName="mSpecMip";
+  mAcceptName = "mAcceptMip";
   
   return StEmcCalibMaker::Init();
 }
@@ -74,19 +77,25 @@ void StEmcMipMaker::Clear(Option_t *option)
 Int_t StEmcMipMaker::Make()
 {  
   if(!accept()) return kStOk;
-    
+
+  cout <<"Number of tracks = "<<getCalib()->getNTracks()<<endl;      
   for(int i=0;i<getCalib()->getNTracks();i++)
   {
     int id   = getCalib()->getTrackTower(i);
     int id2  = getCalib()->getTrackTowerExit(i);
     float p  = getCalib()->getTrackP(i); 
     //int np   = mCalib->getTrackNPoints(i);
+    float adc = (float) getCalib()->getADCPedSub(1,id);
+    //cout <<"candidate. p = "<<p<<" Tower id = "<<id<<"  ADC = "<<adc<<endl;
     if(p>mPmin && id!=0 && id2==id /*&& mCalib->isIsolatedTower(id)*/) 
     {
       int nt  = getCalib()->getNTracksInTower(id); 
       float rms = getCalib()->getPedRms(1,id);
-      float adc = (float) getCalib()->getADCPedSub(1,id);
-      if(adc!=0 && adc>2*rms && nt==1) fill(id,adc);
+      if(adc!=0 && adc>2*rms && nt==1) 
+      {
+        cout <<"Found MIP. p = "<<p<<" Tower id = "<<id<<"  ADC = "<<adc<<endl;
+        fill(id,adc);
+      }
     }
   }
   
@@ -295,7 +304,7 @@ float StEmcMipMaker::findGain(int id,bool print)
   float MipE = EoverMIP*(1.+0.056*eta*eta)/sin(theta);
   float gain = MipE/mip;
   float chi  = getChi2(id);
-  if(chi<0.001 || chi>3) gain = 0;
+  if(chi<0.001 || chi>30) gain = 0;
   if(gain <0 || gain > 10000) gain = 0;
   if(gain==0) mNFailed[4]++;
   mGain->Fill(id,gain);
