@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.cxx,v 1.2 1999/07/06 22:33:19 lisa Exp $
+ * $Id: MinvCorrFctn.cxx,v 1.3 1999/07/29 02:47:08 lisa Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.cxx,v $
+ * Revision 1.3  1999/07/29 02:47:08  lisa
+ * 1) add OpeningAngle correlation function 2) add StHbtMcEventReader 3) make histos in CorrFctns do errors correctly
+ *
  * Revision 1.2  1999/07/06 22:33:19  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -45,6 +48,12 @@ MinvCorrFctn::MinvCorrFctn(char* title, const int& nbins, const float& MinvLo, c
   //mNumerator->SetDirectory(0);
   //mDenominator->SetDirectory(0);
   //mRatio->SetDirectory(0);
+
+  // to enable error bar calculation...
+  mNumerator->Sumw2();
+  mDenominator->Sumw2();
+  mDifference->Sumw2();
+
 }
 
 //____________________________
