@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiMicroEvent.h,v 1.2 2002/04/02 23:34:52 jklay Exp $                                                         
+ * $Id: StHiMicroEvent.h,v 1.3 2002/05/31 21:54:00 jklay Exp $                                                         
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StHiMicroEvent.h,v $
+ * Revision 1.3  2002/05/31 21:54:00  jklay
+ * Added ZDC Vertex z position
+ *
  * Revision 1.2  2002/04/02 23:34:52  jklay
  * Added L3RichTrigger information
  *
@@ -75,6 +78,7 @@ class StHiMicroEvent : public TObject {
   Float_t  CTB()				const { return mCTB; }
   Float_t  ZDCe()				const { return mZDCe; }
   Float_t  ZDCw()				const { return mZDCw; }
+  Float_t  ZDCVertexZ()				const { return mZDCVertexZ; }
   Int_t    NHit()				const { return mNHit; }
 
   void SetCentrality(Int_t);
@@ -107,6 +111,7 @@ class StHiMicroEvent : public TObject {
   void SetCTB(Float_t val)				{ mCTB=val; }	
   void SetZDCe(Float_t val)				{ mZDCe=val; }	
   void SetZDCw(Float_t val)				{ mZDCw=val; }
+  void SetZDCVertexZ(Float_t val)			{ mZDCVertexZ=val; }
   void SetNHit(Int_t val)				{ mNHit=val; }
   
   private:
@@ -143,6 +148,7 @@ class StHiMicroEvent : public TObject {
   Float_t   mCTB;        
   Float_t   mZDCe;
   Float_t   mZDCw;
+  Float_t   mZDCVertexZ;  //Info from ZDC timing can be used to assess vertex efficiency
   Int_t     mNHit;       //number of hist in the hit branch
 
 //These were always private
