@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.h,v 2.1 2002/01/03 20:57:37 ullrich Exp $
+ * $Id: StBbcTriggerDetector.h,v 2.2 2002/01/28 19:28:10 jeromel Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.h,v $
+ * Revision 2.2  2002/01/28 19:28:10  jeromel
+ * Wrong format of an enum list corrected. Solaris picked this up.
+ *
  * Revision 2.1  2002/01/03 20:57:37  ullrich
  * Initial Revision.
  *
@@ -58,10 +61,11 @@ public:
     void  dump();
     
 protected:
-    enum {mMaxPMTs = 32,
-	  mMaxRegisters = 2,
-	  mMaxPedData = 128,
-	  mMaxScalars = 32,
+    enum {
+      mMaxPMTs = 32,
+      mMaxRegisters = 2,
+      mMaxPedData = 128,
+      mMaxScalars = 32
     };
     UShort_t mAdc[mMaxPMTs];
     UShort_t mTdc[mMaxPMTs];
