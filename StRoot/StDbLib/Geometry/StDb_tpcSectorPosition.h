@@ -16,6 +16,7 @@ public:
 
   StDb_tpcSectorPosition(const char* name): StDbTableComponent(name),mstruct(0) {}; 
   StDb_tpcSectorPosition(StDb_tpcSectorPosition& c) : StDbTableComponent(c) {
+                                     mstruct=0;
                                      tpcSectorPosition *a = c.getTable();
                                      if(a)mstruct=new tpcSectorPosition(*a);};
 
