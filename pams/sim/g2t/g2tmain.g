@@ -15,6 +15,7 @@ created   22 april 98
 #include "g2t_vertex.inc"
 #include "g2t_track.inc"
 #include "g2t_hits.inc"
++cde,quest.
 *
       structure GTTC { int version, int nsys , char edir(3), char rdir(3) }
       structure dete { onoff, char ctab, char spec, char csys, char cdet }
@@ -28,7 +29,8 @@ created   22 april 98
 *
  entry  g2t 
  entry  g2t_start
- begin  
+ begin 
+ G2T_MAIN=0 
  if JVOLUM<=0 { print *,' G2T: no geometry loaded YET'; return; }
 *
  If (First) Then
@@ -111,30 +113,30 @@ created   22 april 98
      csys  = 'FTPC'       ! Geant Subsystem
      cdet  = 'FSEN'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 13           ! system number
+     onoff = 14           ! system number
      ctab  = 'ftp'        ! table name
      spec  = 'ftp'        ! specification type
      csys  = 'FTPC'       ! Geant Subsystem
      cdet  = 'FSEC'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 14           ! system number
+     onoff = 15           ! system number
      ctab  = 'vpd'        ! table name
      spec  = 'vpd'        ! specification type
      csys  = 'VPDD'       ! Geant Subsystem
      cdet  = 'VRAD'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 15           ! system number
+     onoff = 16           ! system number
      ctab  = 'psc'        ! table name
      spec  = '   '        ! specification type
      csys  = 'PMDD'       ! Geant Subsystem
      cdet  = 'VRAD'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 16           ! system number
+     onoff = 17           ! system number
      ctab  = 'pgc'        ! table name
    endfill
 *
  endif
-*
+*   
       G2T_MAIN = 0
       Use GTTC
 *     map detm family banks:
@@ -147,7 +149,8 @@ created   22 april 98
       Ld=0; Do i=1,12 { if (Cdir(i:i)==' '|Cdir(i:i)==o) Break; Ld=i; }
       edir = Cdir(1:ld)//o;  Call TDM_CLEAR_ALL(edir)
 
-      check NVERTX>0
+      IQUEST(1)=IEOTRI
+      check NVERTX>0 & IEOTRI==0
 *     map ghea_* headers and  hepe_* particle tables:
       call agstrut('/evnt/@HEPE',Edir)
       call agstrut('/evnt/@GHEA',Edir)
@@ -159,7 +162,7 @@ created   22 april 98
 
       names(1)='g2t_vertex'//o
       names(2)='g2t_track'//o
-      print *,' calling g2t_get_kine ',iprin
+
       i = AMI_MODULE_CALL ('g2t_get_kine'//o,2,names)
       prin5 i; (' g2tmain: get_kine done with i=',i6)
 
@@ -195,7 +198,7 @@ created   22 april 98
       subroutine G2T_NEW_TABLE(name,spec,L)
       character  o*1
 
-#include "PAM.inc"
+*include "PAM.inc"
 #include "g2t_hits.inc"
 #include "g2t_svt_hit.inc"
 #include "g2t_tpc_hit.inc"
