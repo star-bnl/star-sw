@@ -13,16 +13,31 @@ my $pkg  = basename($Dir);# print "Run cons in $Dir for $PKG\n";
 my $PKG = $pkg;
 my @idlML    = find_idlM($Dir);   #  $i = 0; for my $s (@idlM) {print "i=",$i++," idlM = ",$s,"\n";}
 my @srcL     = find_sources($Dir);#  my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
-my @h_filesL = find_hfiles($Dir);   #$i = 0; for my $s (@h_files) {print "i=",$i++," h_files = ",$s,"\n";}
+#my @h_filesL = find_hfiles($Dir);   #$i = 0; for my $s (@h_files) {print "i=",$i++," h_files = ",$s,"\n";}
+opendir (DIR, $Dir) or die "Can't open $Dir\n";
+my @dirEntries = readdir DIR;
+closedir DIR; #print "dirEntries = @dirEntries\n";
+my @h_filesL = ();
+foreach my $entry (@dirEntries) {
+  next if $entry !~ /\.[h|hh]$/;
+  push @h_filesL, $entry;
+}
 foreach my $Rep (@Repo) {
   my $RepDir = $Rep . "/" . $Dir;# print "RepDir = $RepDir\n";
   if (-d $RepDir) {
     my @srcR = find_sources($RepDir);
     foreach my $i (@srcR) {push @srcL,  $i;}
-    my @h_filesR = find_hfiles($RepDir);
-    foreach my $i (@h_filesR) {push @h_filesL, $i;}
     my @idlMR = find_idlM($RepDir);
     foreach my $i (@idlMR) {push @idlML, $i;}
+#    my @h_filesR = find_hfiles($RepDir);
+#    foreach my $i (@h_filesR) {push @h_filesL, $i;}
+    opendir (DIR, $RepDir) or die "Can't open $RepDir\n";
+    my @dirEntries = readdir DIR;
+    closedir DIR; #print "dirEntries = @dirEntries\n";
+    foreach my $entry (@dirEntries) {
+      next if $entry !~ /\.[h|hh]$/;
+      push @h_filesL, $entry;
+    }
   }
 }
 my @src     = sortu (@srcL);# print "@src\n";
@@ -47,10 +62,8 @@ if ($pkg =~ /^pyth$/){
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g;# print "new share $share\n";
 $share =~ s/\/StRoot//g;
 $share =~ s/\/(sim|gen)//g; 
-my $CPPP = "$env->{CPPPATH}:$Dir";# print "CPPP = $CPPP\n";
+my $CPPP =  $INCLUDE . "/" . $pkg . ":" . $env->{CPPPATH}; #$Dir";# print "CPPP = $CPPP\n";
 my $CPP  = "";
-if ($PKG eq "StHbtMaker") {$CPP = ":#$Dir/Base:#$Dir/CorrFctn:#$Dir/Cut:#$Dir/Fit:#$Dir/Infrastructure:#$Dir/Reader";}
-if ($PKG eq "StTrsMaker") {$CPP = ":#$Dir/include";}
 $CPPP .= $CPP;#  print " --- $CPPP\n";
 my $include = $INCLUDE . "/" . $pkg;
 my $LIBPKG = "";
@@ -63,10 +76,6 @@ if ($Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/) {
     next if !-e "$_lib";
     $LIBS .= " " . $_lib;#     print "LIBS    = $LIBS\n"
   }
-}
-if ($Dir =~ /pams\//) {
-  my $new_cpp = $include . ":" . $CPPP; 
-  $CPPP = $new_cpp;# print "new CPPP = $CPPP\n";
 }
 my $CXXFLAGS = $env->{CXXFLAGS};
 if ($STAR_SYS =~ /^sun4x_5/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
@@ -156,7 +165,7 @@ if ($#Defs > -1) {
   ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h", $share . "/"  . "LinkDef.h"); 
 #  Depends $env2, [@CintFiles], [@St_base];
   Command $env2 [@CintFiles], @Defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
-#  my $linkdef = pop @CintFiles;# print "ObjDir and Cints: $ObjDir => @CintFiles\n";
+  my $linkdef = pop @CintFiles;# print "ObjDir and Cints: $ObjDir => @CintFiles\n";
   Install $env2 $ObjDir, @CintFiles;
   (my $cint =  $CintFiles[0]) =~ s/$share/$obj/g;
   push @src, $cint;# print "+==========add $cint\n"; 

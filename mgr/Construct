@@ -421,8 +421,7 @@ foreach my $dir ("StRoot","pams") {
 	    $sub_dir =~ /^StMcEvent$/ ||
 	    $sub_dir =~ /^StMagF$/ ||
 	    $sub_dir =~ /^StAnalysisUtilities$/ ||
-	    $sub_dir =~ /^StDbBroker$/ ||
-	    $sub_dir =~ /^StDbLib$/) {
+	    $sub_dir =~ /^StDbBroker$/){
 	  opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
 	  my @incs = readdir DIR; 
 	  closedir DIR; #print "incs = @incs\n";
