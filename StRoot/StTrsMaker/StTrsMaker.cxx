@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.19 1999/02/24 16:59:24 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.20 1999/03/02 17:50:39 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.20  1999/03/02 17:50:39  lasiuk
+// for testing/defaults/geantPID
+//
 // Revision 1.19  1999/02/24 16:59:24  lasiuk
 // turn off histos
 //
@@ -46,7 +49,9 @@
 //                                                                      //
 // StTrsMaker class for Makers                                          //
 //                                                                      //
-#define hISTOGRAMS 1
+#define hISTOGRAM 1
+#define uNPACK_ALL 1
+#define vERBOSITY 1
 //////////////////////////////////////////////////////////////////////////
 
 #include "StTrsMaker.h"
@@ -67,7 +72,7 @@
 // SCL
 #include "StGlobals.hh"
 #include "Randomize.h"
-#ifdef HISTOGRAMS
+#ifdef HISTOGRAM
 #include "StHbook.hh"
 #endif
 
@@ -110,7 +115,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.19 1999/02/24 16:59:24 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.20 1999/03/02 17:50:39 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -169,15 +174,18 @@ Int_t StTrsMaker::Init()
 
    mSlowControlDb =
        StTpcSimpleSlowControl::instance(scFile.c_str());
-
+   //mSlowControlDb->print();
+   
    mMagneticFieldDb =
        StSimpleMagneticField::instance(magFile.c_str());
 
    mElectronicsDb =
        StTpcSimpleElectronics::instance(electronicsFile.c_str());
+   mElectronicsDb->print();
 
    string gas =("Ar");
    mGasDb = new StTrsDeDx(gas);
+   double miniSegmentLength = 4.*millimeter;
    //mGasDb->print();
 
    //
@@ -187,9 +195,9 @@ Int_t StTrsMaker::Init()
    // A Wire Plane
    mWireHistogram =
        StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb);
-   mWireHistogram->setDoGasGain(true);  // True by default
+   mWireHistogram->setDoGasGain(true);             // True by default
    mWireHistogram->setDoGasGainFluctuations(false);
-   mWireHistogram->setGasGainInnerSector(4000);  // True by default
+   mWireHistogram->setGasGainInnerSector(2000);
    mWireHistogram->setGasGainOuterSector(1000);
    mWireHistogram->setDoTimeDelay(false);
 
@@ -204,10 +212,10 @@ Int_t StTrsMaker::Init()
    mChargeTransporter =
        StTrsFastChargeTransporter::instance(mGeometryDb, mSlowControlDb, mGasDb, mMagneticFieldDb);
    // set status:
-   mChargeTransporter->setChargeAttachment(true);
+   mChargeTransporter->setChargeAttachment(false);
    mChargeTransporter->setGatingGridTransparency(false);
-   mChargeTransporter->setTransverseDiffusion(true);
-   mChargeTransporter->setLongitudinalDiffusion(true);
+   mChargeTransporter->setTransverseDiffusion(false);
+   mChargeTransporter->setLongitudinalDiffusion(false);
    mChargeTransporter->setExB(false);
 
 
@@ -218,8 +226,8 @@ Int_t StTrsMaker::Init()
    // -->StTrsSlowAnalogSignalGenerator::endo
    //-->StTrsSlowAnalogSignalGenerator::gatti
    //-->StTrsSlowAnalogSignalGenerator::dipole
-    //dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
-    //setChargeDistribution(StTrsSlowAnalogSignalGenerator::endo);
+   static_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
+       setChargeDistribution(StTrsSlowAnalogSignalGenerator::endo);
    //
    // Set the function for the Analog Electronics signal shape
    //-->StTrsSlowAnalogSignalGenerator::delta
@@ -227,12 +235,15 @@ Int_t StTrsMaker::Init()
    //-->StTrsSlowAnalogSignalGenerator::symmetricGaussianExact
    //-->asymmetricGaussianApproximation
    //-->StTrsSlowAnalogSignalGenerator::realShaper
-     //dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
-     //setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
+     static_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
+	 setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
    mAnalogSignalGenerator->setDeltaRow(0);
    mAnalogSignalGenerator->setDeltaPad(1);
-   mAnalogSignalGenerator->setSignalThreshold(.0001*(.001*volt));
+   mAnalogSignalGenerator->setSignalThreshold(1.*(.001*volt));
    mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
+   mAnalogSignalGenerator->addNoise(false);
+   mAnalogSignalGenerator->generateNoiseUnderSignalOnly(false);
+   mAnalogSignalGenerator->setNoiseRMS(900);  // set in  #e
 	
 
    mDigitalSignalGenerator =
@@ -266,8 +277,16 @@ void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
     
 Int_t StTrsMaker::Make(){
     //  PrintInfo();
-#ifdef HISTOGRAMS
+#ifdef HISTOGRAM
     cout << "Histogram" << endl;
+
+    //
+    StTpcCoordinateTransform transformer(mGeometryDb,
+					 mSlowControlDb,
+					 mElectronicsDb);
+    StTpcPadCoordinate raw;
+    StTpcLocalCoordinate local;
+    //
     
     //
     //  Open histogram file and book tuple
@@ -276,17 +295,27 @@ Int_t StTrsMaker::Make(){
     StHbookFile *hbookFile =
 	new StHbookFile(fname.c_str());
 
-    const int tupleSize2 = 10;
+    //
+    // Unpacker Data
+    const int tupleSize1 = 8;
+    float tuple[tupleSize1];
+    StHbookTuple *theTuple  =
+	new StHbookTuple("data", tupleSize1);
+    *theTuple << "sec"  << "row" << "pad"
+	      << "x"   << "y"   << "z"
+	      << "amp" << "t" << book;
+
+    //
+    const int tupleSize2 = 8;
     float tuple2[tupleSize2];
-
     StHbookTuple *secTuple  =
-	new StHbookTuple("coord", tupleSize2);
+	new StHbookTuple("raw_data", tupleSize2);
 
-    *secTuple << "sec"
-	      << "x" << "y" << "z"
-	      << "xp" << "yp" << "zp"
-	      << "xg" << "yg" << "zg" << book;
+    *secTuple << "sec" << "row"
+	      << "x"  << "y"  << "z"
+	      << "xr" << "yr" << "zr" << book;
 #endif
+
     //
     // Set Range for Processing
     const int firstSectorToProcess = 1;
@@ -316,8 +345,11 @@ Int_t StTrsMaker::Make(){
     int no_tpc_hits         =  g2t_tpc_hit->GetNRows();
     g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
 
-    //StTpcCoordinateTransform transformer(mGeometryDb, mSlowControlDb);
+    St_g2t_track *g2t_track = (St_g2t_track *) geant("g2t_track");
+    g2t_track_st *tpc_track = g2t_track->GetTable();
 
+    //int geantPID = tpc_track->ge_pid;
+    //PR(geantPID);
 
     int bisdet, bsectorOfHit, bpadrow;
 
@@ -338,7 +370,6 @@ Int_t StTrsMaker::Make(){
 //  	    << tpc_hit->p[0]        << ' '
 //  	    << tpc_hit->p[1]        << ' '
 //  	    << tpc_hit->p[2]        << ' '  << endl;
-
 
 	whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
 	
@@ -363,8 +394,6 @@ Int_t StTrsMaker::Make(){
 	
 	if( (currentSectorProcessed == bsectorOfHit        ) &&
 	    (i                      != no_tpc_hits         )) {
-
-	    int pID = 1;  // I need to know the PID for ionization calculations
 
 	    // I can't believe this.  After such careful design of the coordinate
 	    // transformation, I am reduced to this because I am fixed to GEANT
@@ -413,31 +442,33 @@ Int_t StTrsMaker::Make(){
 	    if(bsectorOfHit>12) {
 		sector12Coordinate.setX(-xp);
 	    }
-#ifdef HISTOGRAMS
-	    tuple2[0] = static_cast<float>(bsectorOfHit);
-	    tuple2[1] = static_cast<float>(hitPosition.x());
-	    tuple2[2] = static_cast<float>(hitPosition.y());
-	    tuple2[3] = static_cast<float>(hitPosition.z());
-	    tuple2[4] = static_cast<float>(sector12Coordinate.x());
-	    tuple2[5] = static_cast<float>(sector12Coordinate.y());
-	    tuple2[6] = static_cast<float>(sector12Coordinate.z());
-	    tuple2[7] = static_cast<float>(tpc_hit->x[0]);
-	    tuple2[8] = static_cast<float>(tpc_hit->x[1]);
-	    tuple2[9] = static_cast<float>(tpc_hit->x[2]);
-	    secTuple->fill(tuple2);
-#endif
+
 	    StThreeVector<double> hitMomentum(tpc_hit->p[0]*GeV,
 					      tpc_hit->p[1]*GeV,
 					      tpc_hit->p[2]*GeV);
 
 	    // I need PID info here, otherwise it is a pion.
 	    // This is needed for the ionization splitting!
+	    int geantPID = tpc_track[tpc_hit->track_p].ge_pid;
+	    //cout << "gentPID " << gentPID << " " << tpc_hit->de << endl;
 	    // WARNING:  cannot use "abs" (not overloaded (double) for LINUX!
 	    StTrsChargeSegment aSegment(sector12Coordinate,
 					hitMomentum,
 					(fabs(tpc_hit->de*GeV)),
 					tpc_hit->ds*centimeter,
-					pID);
+					geantPID);
+
+#ifdef HISTOGRAM
+	    tuple2[0] = static_cast<float>(bsectorOfHit);
+	    tuple2[1] = static_cast<float>(bpadrow);
+	    tuple2[2] = static_cast<float>(tpc_hit->x[0]);
+	    tuple2[3] = static_cast<float>(tpc_hit->x[1]);
+	    tuple2[4] = static_cast<float>(tpc_hit->x[2]);
+	    tuple2[5] = static_cast<float>(sector12Coordinate.x());
+	    tuple2[6] = static_cast<float>(sector12Coordinate.y());
+	    tuple2[7] = static_cast<float>(sector12Coordinate.z());
+	    secTuple->fill(tuple2);
+#endif
 // 	    PR(hitPosition);
 // 	    PR(sector12Coordinate);
 // 	    PR(hitMomentum.mag());
@@ -459,10 +490,11 @@ Int_t StTrsMaker::Make(){
 	    list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> >::iterator iter;
 #endif
 	    //
-	    // Better be smarter and  split the segment differnetly
-	    // on the inner and outer part of the sectors...
+	    // Break the segment for diffusion reproduction.
+	    // Fast Simulation can use breakNumber = 1
 	    //
 	    int breakNumber = 1;
+	    //int breakNumber = aSegment.ds()/miniSegmentLength;
 	    aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
@@ -601,9 +633,27 @@ Int_t StTrsMaker::Make(){
 		for(int kk=0; kk<nseq; kk++) {
 		    //PR(listOfSequences[kk].length);
 		    for(int zz=0; zz<listOfSequences[kk].length; zz++) {
+#ifdef VERBOSITY
 			cout << " " << kk
 			     << " " << zz << '\t'
-			     << '\t' << static_cast<int>(*(listOfSequences[kk].firstAdc)) << endl;
+			     << static_cast<int>(*(listOfSequences[kk].firstAdc)) << endl;
+#endif
+#ifdef HISTOGRAM
+			tuple[0] = static_cast<float>(isector);
+			tuple[1] = static_cast<float>(irow);
+			tuple[2] = static_cast<float>(padList[ipad]);
+			raw.setSector(isector);
+			raw.setRow(irow);
+			raw.setPad(padList[ipad]);
+			raw.setTimeBucket(listOfSequences[kk].startTimeBin+zz);
+			transformer(raw,local);
+			tuple[3] = static_cast<float>(local.pos().x());
+			tuple[4] = static_cast<float>(local.pos().y());
+			tuple[5] = static_cast<float>(local.pos().z());
+			tuple[6] = static_cast<float>(static_cast<int>(*(listOfSequences[kk].firstAdc)));
+			tuple[7] = static_cast<float>(listOfSequences[kk].startTimeBin+zz);
+ 		      theTuple->fill(tuple);
+#endif
 			listOfSequences[kk].firstAdc++;
 		    } // zz
 
@@ -619,7 +669,7 @@ Int_t StTrsMaker::Make(){
 #endif
   
     cout << "Got to the end of the maker" << endl;
-#ifdef HISTOGRAMS
+#ifdef HISTOGRAM
     cout << "Save and close " << endl;
     hbookFile->saveAndClose();
 #endif    
@@ -638,14 +688,14 @@ Int_t StTrsMaker::Make(){
 // Make sure the return type is proper!
 //
 // void StTrsMaker::Finish()
-//{
-// Clean up all the pointers that were initialized in StTrsMaker::Init()
+// {
+//     //Clean up all the pointers that were initialized in StTrsMaker::Init()
 //     delete mGeometryDb;
 //     delete mSlowControlDb;
 //     delete mMagneticFieldDb;
 //     delete mElectronicsDb;
 //     delete mGasDb;
-
+    
 //     delete mWireHistogram;
 //     delete mSector;
 //     delete mUnPacker;
@@ -654,11 +704,11 @@ Int_t StTrsMaker::Make(){
 //     delete mChargeTransporter;
 //     delete mAnalogSignalGenerator;
 //     delete mDigitalSignalGenerator;
-//}
+// }
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.19 1999/02/24 16:59:24 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.20 1999/03/02 17:50:39 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
