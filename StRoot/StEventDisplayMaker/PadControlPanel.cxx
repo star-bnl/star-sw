@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.cxx,v 1.2 2002/12/19 01:21:32 fine Exp $
+// $Id: PadControlPanel.cxx,v 1.3 2002/12/24 21:21:36 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -63,6 +63,7 @@
 #include "TH2.h"
 #include "TCanvas.h"
 #include "TAxis3D.h" 
+#include "StEventDisplayMaker.h"
 
 #include <qbuttongroup.h>
 #include <qvbuttongroup.h>
@@ -105,6 +106,7 @@ void  StPadControlPanel::Build()
    fBar->setCaption("Pad Control Panel");
    mainBar=fBar;
    for (int i=0;fills[i];i+=2) {AddButt(fills[i],fills[i+1]);}
+   connect(fBar,SIGNAL(clicked(int)),this,SLOT(Clicked(int)));
    printf("  ---- >>> %d \n",fBar->count());
    fBar->show();
 }
@@ -114,9 +116,31 @@ StPadControlPanel::~StPadControlPanel(){ delete fBar; }
 QButtonGroup *StPadControlPanel::Bar() const { return fBar;}  
 
 //_______________________________________________________________________________________
-void StPadControlPanel::Clicked(int id) {
+/* public slot: */ 
+void StPadControlPanel::Clicked(int id) { 
   QButton *b = fBar->find(id);
-  if (b) gROOT->ProcessLine(b->name());  
+  if (b) {
+     switch(id) {
+        case 0: StPadControlPanel::SetBackround(kBlack); break;
+        case 1: StPadControlPanel::SetBackround    (19); break;
+        case 2: StPadControlPanel::AdjustScales    (); break;
+        case 3: StPadControlPanel::Centered3DImages(); break;
+        case 4: StPadControlPanel::Inscrease3DScale(); break;
+        case 5: StPadControlPanel::Decrease3DScale (); break;
+        case 6: StPadControlPanel::TopView     (); break;
+        case 7: StPadControlPanel::SideView    (); break;
+        case 8: StPadControlPanel::FrontView   (); break;
+        case 9: StPadControlPanel::MakeFourView(); break;
+        case 10: StPadControlPanel::AddAxes     (); break;
+        case 11: StPadControlPanel::ToggleRulers(); break;
+        case 12: StPadControlPanel::ToggleZoom  (); break;
+        case 13: StEventDisplayMaker::MakeLoop(1); break;
+        case 14: StEventDisplayMaker::MakeLoop(2); break;
+        case 15: StEventDisplayMaker::MakeLoop(3); break;
+        default:  break;
+     }
+//     gROOT->ProcessLine(b->name());   // CDictionary doesn't contain any StPadControlPanel ???
+  }
 }  
 //_______________________________________________________________________________________
 void StPadControlPanel::SetBackround(Color_t color, TVirtualPad *pad)
@@ -129,7 +153,6 @@ void StPadControlPanel::SetBackround(Color_t color, TVirtualPad *pad)
     thisPad->Update();
   }
 }
-
 //_______________________________________________________________________________________
 void StPadControlPanel::SetBackroundStyle(TVirtualPad *pad)
 {
