@@ -1,5 +1,8 @@
-// $Id: estimateVertexZ.cc,v 1.4 2000/08/04 21:04:02 perev Exp $
+// $Id: estimateVertexZ.cc,v 1.5 2000/08/08 20:28:54 wdeng Exp $
 // $Log: estimateVertexZ.cc,v $
+// Revision 1.5  2000/08/08 20:28:54  wdeng
+// Correct a mistake with constructing table iterator.
+//
 // Revision 1.4  2000/08/04 21:04:02  perev
 // Leaks + Clear() cleanup
 //
@@ -40,7 +43,7 @@ void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHei
   for(Int_t sector=1; sector<=24; sector++) {
     
     for(Int_t padrow=45; padrow>17; padrow-=2) {
-      Int_t sectorPadrow = sector*100 + padrow;
+      Short_t sectorPadrow = sector*100 + padrow;
       TTableIter nextOuterHit(tphitSorter,sectorPadrow);
       
       while( (rowNumOuterHit=nextOuterHit())>=0 ) {
@@ -51,7 +54,7 @@ void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHei
 	Float_t outerR = sqrt( outerX * outerX + outerY * outerY );
         
         for(Int_t nextPadrow=padrow-3; nextPadrow>=14; nextPadrow-=2) {
-          Int_t sectorNextPadrow = sector*100 + nextPadrow;
+          Short_t sectorNextPadrow = sector*100 + nextPadrow;
           TTableIter nextInnerHit(tphitSorter,sectorNextPadrow);
           
           while( (rowNumInnerHit=nextInnerHit())>=0) {
