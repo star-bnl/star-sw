@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.12 2003/10/08 18:50:48 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.13 2004/10/26 17:34:16 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -134,6 +134,8 @@ void StEventControlPanel::Build()
          "All Used Hits"  		,"StEvent(All Used Hits)"  	,
          "All Unused Hits"		,"StEvent(All Unused Hits)"	, 
 
+         " " 		,"StEvent(Global Tracks)"	   ,
+         "Global"	,"StEvent(Global Track Hits)", 
          " " 		,"StEvent(Primary Tracks)"	   ,
          "Primary"	,"StEvent(Primary Track Hits)", 
          " "    		,"StEvent(Kink Tracks)"		   ,
