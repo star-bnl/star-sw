@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
- 
- 
+// $Id: St_Table.cxx,v 1.8 1998/07/23 21:09:14 fisyak Exp $ 
+// $Log: St_Table.cxx,v $
+// Revision 1.8  1998/07/23 21:09:14  fisyak
+// Adjust for ROOT 2.09
+// 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_Table                                                             //
@@ -270,19 +273,6 @@ void St_Table::ls(Option_t *option)
   DecreaseDirLevel();
 }
 //______________________________________________________________________________
-void St_Table::ls(Int_t deep)
-{
-  St_DataSet::ls(deep);
-  IncreaseDirLevel();
-  IndentLevel();
-  cout       <<"Allocated rows: "<<fN
-       <<'\t'<<"Used rows: "     <<*s_MaxIndex
-       <<'\t'<<"Row size: "      <<*s_Size
-       <<endl;
-  Print();
-  DecreaseDirLevel();
-}
-//______________________________________________________________________________
 Char_t *St_Table::Print(Char_t *strbuf,Int_t lenbuf) const 
 {
   Char_t buffer[100];
@@ -341,9 +331,10 @@ Char_t *St_Table::Print(Char_t *strbuf,Int_t lenbuf) const
     }
     if (lenbuf>0) 
 //        out << "; " << data.Title();
-          iOut += sprintf(strbuf+iOut, "; %s", data.Title());
+//          iOut += sprintf(strbuf+iOut, "; %s", data.Title());
+          iOut += sprintf(strbuf+iOut, ";");
     else 
-        cout << ";" << endl;
+        cout << ";\t//" <<  data.Title() << endl;
   }
   IndentLevel();
   if (lenbuf>0) {
