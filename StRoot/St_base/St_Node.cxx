@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.16 1999/03/29 19:25:23 fine Exp $
+// $Id: St_Node.cxx,v 1.17 1999/03/30 22:30:13 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.17  1999/03/30 22:30:13  fine
+// Visibility test has been added for Paint method
+//
 // Revision 1.16  1999/03/29 19:25:23  fine
 // Visibility flag have been activated. Some working correction
 //
@@ -635,7 +638,7 @@ void St_Node::PaintNodePosition(Option_t *option,St_NodePosition *pos)
 // restrict the levels for "range" option
   Int_t level = gGeometry->GeomLevel();
 //  if (option && option[0]=='r' && level > 3 && strcmp(option,"range") == 0) return;
-  if (option && option[0]=='r' && level > 4 ) return;
+  if (GetVisibility() && option && option[0]=='r' && level > 3 ) return;
 
   TPadView3D *view3D=gPad->GetView3D();
 
