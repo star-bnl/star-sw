@@ -58,42 +58,72 @@ Int_t St_trg_Maker::SWITCH(SanityCheck)() {
 }
 ///////////////////////////// Here begins the stuff from Jennifer Klay.  Oct 16 2001.
 #ifdef LATER_THAN_YEAR_2000  // Year 2000 trgStructures.h does not have BEMC.
-#define NUML0DSM 3      //As more EMC is intrumented, this will go up
-#define TRIGTYPES 2     //Two types: highTower, trigPatch
-#define TRIGPERDSM 10   //10 per type handled by each DSM board
+#define NUMDSM 5      //AuAu2001 = 5, -- As more EMC is intrumented, this will go up
+//#define NUMDSM 7      //pp01-02 = 7 -- As more EMC is intrumented, this will go up
 #define BYTESPERDSM 16  //The number of output bytes the 20 signals are packed into
-#define PATCHTOT NUML0DSM*TRIGPERDSM
 typedef unsigned char byte;
+
+int tower_map[10] = {4,3,2,1,0,9,8,7,6,5};
+int swapByteOrder[16] = {7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8};
+
+int dsm_to_patch[5] = {0,0,15,16,17};	//Au+Au 2001: First 2 are L2,L1, others are L0
+//int dsm_to_patch[7] = {0,0,15,28,16,29,17};  //pp 2001-02: (After 1-Dec-2001)
+	//dsm_to_patch follows the numbering scheme in the offline software, since
+	//it fills a table that is used in offline.  The numbers correspond to the 
+	//numbering of the EMC Crates with respect to the Tower ID's from Jose
+	//Riso, which seems to count backward.  i.e. Patch 1 contains Tower 4800,
+	//while Patch 300 contains Tower 1.		J.L. Klay 18-Feb-2002
+
 void St_trg_Maker::SWITCH(Emc)(St_dst_TrgDet *dst1) {
   dst_TrgDet_st *tt = dst1->GetTable();
   
-  byte preOrderedDSM[NUML0DSM][BYTESPERDSM];
-  byte orderedDSM[NUML0DSM][BYTESPERDSM];
-  byte trgSignals[NUML0DSM][TRIGPERDSM*TRIGTYPES];
-  byte highTower[PATCHTOT];
-  byte trigPatch[PATCHTOT];
-    
-  for (int i=0; i<NUML0DSM ; i++) {		//Loop through Patch rows
-    for (int j=0; j < BYTESPERDSM; j++) {
-      int index = 32 + (i*16) + j;		//Offset by 32 bytes to get to L0 DSM
-      preOrderedDSM[i][j] = SWITCH(gs)->RAW[0].BEMC[index];
+  byte dsmval[NUMDSM][BYTESPERDSM];
+  byte val[BYTESPERDSM];
+  byte hi_tower,tower_sum;
+  int i,j,k,index,nt,patch,sort;
+
+  for (i=0; i<NUMDSM ; i++) {		//Fill dsm info, including L1 & L2
+    for (j=0; j < BYTESPERDSM; j++) {
+      index = (i*16) + j;
+      dsmval[i][j] = SWITCH(gs)->RAW[0].BEMC[index];
+//      if (SWITCH(gs)->RAW[0].BEMC[index]!=0)
+//	printf("dsmval[%2d][%2d]= %2d",i,j,dsmval[i][j]);
     }
+  }
 
-    //Convert the DSM output byte ordering to EMC output ordering
-    swapByteOrder( preOrderedDSM[i], orderedDSM[i] );
+  for (i=2; i<NUMDSM; i++) {  //Loop through L0 DSMs, skipping L1 and L2
+    //Convert the DSM output byte ordering to EMC software ordering
+    patch = dsm_to_patch[i];
+    for (j=0; j<BYTESPERDSM; j++) {
+      k = swapByteOrder[j];
+      val[k] = dsmval[i][j];
+    }
+    nt = 0;  //tower counter withing DSM - 10 max
+    //Unpack the bits into 20 signals and store in table
+    for (index=0; index<5; index++) {
+      k=index*3;
 
-    //Unpack the 20 trigger signals from the 16 byte DSM board data
-    unpack6bits( orderedDSM[i], trgSignals[i] );
+      hi_tower = (val[k] & 0x3f);
+      tower_sum = ((val[k]>>6) & 0x3) + ((val[k+1] & 0xF)<<2);
 
-    //Display the unpacked 6-bit trigger signals as 8-bit unsigned chars (leading zeros)
-    for (int j = 0; j < TRIGPERDSM; j++) { 
-      int i1= j*2;    
-      int i2= j*2+1;
-      int sort = i*TRIGPERDSM+j;    
-
+      sort = tower_map[nt] + 10*patch;
       assert(sort>=0&&sort<300); // The limit 300 is in the idl file for dst_TrgDet.
-      tt->emcHiTower[sort] = trgSignals[i][i1];
-      tt->emcTrigPatch[sort] = trgSignals[i][i2];
+      tt->emcHiTower[sort] = hi_tower;
+      tt->emcTrigPatch[sort] = tower_sum;
+      //printf("emcHiTower[%2d] = %2d, ",sort,hi_tower);
+      //printf("emcTowerSum[%2d] = %2d\n",sort,tower_sum);
+      nt += 1;
+
+      hi_tower = ((val[k+1]>>4) & 0xF) + ((val[k+2] & 0x3)<<4);
+      tower_sum = ((val[k+2]>>2) & 0x3F);
+
+      sort = tower_map[nt] + 10*patch;
+      assert(sort>=0&&sort<300);
+      tt->emcHiTower[sort] = hi_tower;   
+      tt->emcTrigPatch[sort] = tower_sum;
+      nt += 1;
+      //printf("emcHiTower[%2d] = %2d, ",sort,hi_tower);
+      //printf("emcTowerSum[%2d] = %2d\n",sort,tower_sum);
     }
   }
 }
