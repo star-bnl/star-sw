@@ -59,7 +59,7 @@ class ThBPCorrFctn :  public virtual StHbtThCorrFctn {
   Int_t addedHistos;
 
 #ifdef __ROOT__
-ClassDef(ThBPCorrFctn, 1)
+ClassDef(ThBPCorrFctn, 0)
 #endif
 };
 
