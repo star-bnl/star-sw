@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.20 1999/08/16 16:28:09 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.21 1999/10/09 18:17:10 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.21  1999/10/09 18:17:10  fine
+// Some correction to draw tptrack table
+//
 // Revision 1.20  1999/08/16 16:28:09  fine
 // StVirtualEventFilter has been moved to St_base
 //
@@ -398,7 +401,13 @@ Int_t StEventDisplayMaker::Make()
   if (m_ShortView){
     if (!m_ListDataSetNames) {
         m_Event  = (StEvent *) GetDataSet("StEvent");
-        totalCounter = MakeEvent();
+        if (m_Event) totalCounter = MakeEvent();
+        else {
+          St_DataSet *dshits = GetDataSet("tphit");
+          if (dshits)   { printf(" tphit found !!!\n");   }
+          St_DataSet *dstracks = GetDataSet("tptrack");
+          if (dstracks) { printf(" tptrack found !!!\n"); }
+        }
     } else {
       TIter nextNames(m_ListDataSetNames);
       TObjString *eventName = 0;
