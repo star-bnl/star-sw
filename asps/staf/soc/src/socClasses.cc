@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.10 1997/01/22 01:22:58 tull Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.11 1997/01/22 02:34:33 tull Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <stream.h>
@@ -131,8 +131,9 @@ unsigned char socObject::  lock () {
 char * socObject:: listing () {
    char *c = NULL; 
    c = (char*)ASUALLOC(79);
-   sprintf(c,"| %5d | %-15s | %-15s | %-33s"
-   		, idRef(), name(), type(), "---");
+   memset(c,0,79);
+   sprintf(c,"| %5d | %-15s | %-15s |"
+   		, idRef(), name(), type());
    return c;
 }
 
@@ -369,15 +370,16 @@ char * socCatalog :: list () {
 
    char *c = socFactory::list();
 
-   char *cc = (char*)ASUALLOC(strlen(c) +1 +160);
+   char *cc = (char*)ASUALLOC(strlen(c) +1 +162);
 
    sprintf(cc, 
+		"\n"
 		"+-------------------------------------------"
 		"-----------------------------------\n"
 		"|******************* "
 		"SOC - Service & Object Catalog listing"
 		" *******************\n"
-		"%s",c);
+		"%s\n",c);
    ASUFREE(c);
    return cc;
 }
