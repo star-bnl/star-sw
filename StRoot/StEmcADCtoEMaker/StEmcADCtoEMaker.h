@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.17 2002/02/24 21:19:21 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.18 2002/05/15 15:05:28 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.18  2002/05/15 15:05:28  suaide
+// bugs fixed to recalibrate EMC after production
+//
 // Revision 1.17  2002/02/24 21:19:21  suaide
 // clean up and modifications on the settings that allow to save only hits
 // above a given threshold that can be defined for each sub detector.
@@ -122,6 +125,7 @@ class StEmcADCtoEMaker : public StMaker
            Bool_t            fillHistograms(Int_t,Int_t,Float_t); ///< This method fills QA histograms
            Bool_t            fillStEvent(); ///< This method makes a clean up of StEvent
            Bool_t            saveHit(Int_t,Int_t);///< Decide if a hit should be saved or not
+           Bool_t            clearOldEmc(); ///< Clear old emc collection
   protected:    
     
   public: 
