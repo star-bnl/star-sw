@@ -1,8 +1,8 @@
-* 9/14/98 K. Turner (for 98h)
+* 9/23/98 K. Turner (for 98i)
 * Run BFC in following manner:
 * - read in fz file
 * - run g2t
-* - run tpc (tss) & svt (srs) simulation
+* - run tpc (tss) & svt (srs) & emc (ems) simulation
 * - write out xdf file
 *  
 * 
@@ -11,11 +11,11 @@
    tpc_sector_first=1 _
    tpc_sector_last=24 _
    gstar_settings=' field_only' _
-   domain=' geometry g2t tpc ctf svt global ' _
-   chain=' fzin rg2t tpg svg tfs srs tpt tid tte_e sgr drhd dehd svm evr egr ev0 ddedx dpnt desum dmsft drsum dout ' _
-   first=1 _
+   domain=' geometry g2t tpc emc ctf svt global ' _
+   chain=' fzin rg2t tpg svg tfs srs ems tpt tid tte_e sgr drhd dehd svm evr egr ev0 ddedx dpnt desum dmsft drsum dout ' _
+   skip=0 _
    no_events=1 _
  input_data_file=/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/Gstardata/psc079_01_46evts.fza _
-   output_file=psc079_01_46evts.xdf
-   log=bfc_readfz_to_dst.log
+   output_file=psc079_01_46evts_year2.xdf
+   log=bfc_readfz_to_dst_year2.log
 

@@ -13,7 +13,6 @@
    domain=' svt' _
    chain='  g2tin svg srs sgr evout' _
    skip=0 _
-   first=1 _
    no_events=1 _
    input_data_file=$AFS_RHIC/star/data/samples/auau_central_hijing.xdf _
    output_file=bfc_svt_fast_sim_out _

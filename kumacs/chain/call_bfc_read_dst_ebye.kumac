@@ -16,6 +16,7 @@
    gstar_settings=' field_only' _
    domain=' ebye  ' _
    chain=' dstin ebye1 ntup evout' _
+   skip=0 _
    no_events=1 _
    input_data_file=/star/data/kathy/set100_01_2ev_dst_dst.xdf _
    output_file=set100_01_2ev_dst _

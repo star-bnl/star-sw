@@ -17,7 +17,6 @@
    domain='  ' _
    chain=' dstin user ntup evout' _
    skip=0 _
-   first=1 _
    no_events=1 _
    input_data_file=/star/data/kathy/set100_01_2ev_dst_dst.xdf _
    output_file=set100_01_2ev _
