@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.4 2004/03/16 22:30:49 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.5 2004/04/01 20:08:54 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.5  2004/04/01 20:08:54  dongx
+ * fix a bug about the hit position stored in TofCell
+ *
  * Revision 1.4  2004/03/16 22:30:49  dongx
  * fix the warning message when compiling
  *
@@ -445,7 +448,8 @@ Int_t StTofrMatchMaker::Make(){
                   mTofrGeom->GetGeomSensor(imodule,itray);
             sensor->Master2Local(&global[0],&local[0]);
             icell = sensor->FindCellIndex(local);
-	    StThreeVectorD glo=sensor->GetCenterPosition();
+	    //	    StThreeVectorD glo=sensor->GetCenterPosition();
+	    StThreeVectorD glo(global[0], global[1], global[2]);
 	    StThreeVectorD hitPos(local[0], local[1], local[2]);
 	    delete sensor;
 	    if (local[2]<=3.4&&local[2]>=-2.7) {
