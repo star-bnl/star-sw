@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.71  2004/07/18 14:15:08  jcs
+// include runNumber in call to StFtpcGasUtilities
+//
 // Revision 1.70  2004/06/18 12:06:18  jcs
 // replace #ifdef...#elif...#endif conditional compiler directives with #ifdef...#endif #ifdef...#endif
 //
@@ -312,7 +315,7 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
 
   mDbMaker     = (St_db_Maker*)GetMaker("db");
   Int_t dbDate = mDbMaker->GetDateTime().GetDate();
-  cout<<"StFtpcClusterMaker: dbDate = "<<dbDate<<endl;
+  cout<<"StFtpcClusterMaker: dbDate = "<<dbDate<<" Run Number = "<<GetRunNumber()<<endl;
   
   gMessMgr->Info() << "StFtpcClusterMaker::InitRun("<<runnumber<<") - 'flavor' FTPC drift maps for gFactor = "<<gFactor<<endm;
   
@@ -492,6 +495,8 @@ Int_t StFtpcClusterMaker::Make()
      cout<<"          temperatureDifference     = "<<dbReader->temperatureDifference()<<endl;
      cout<<"          defaultTemperatureWest    = "<<dbReader->defaultTemperatureWest()<<endl;
      cout<<"          defaultTemperatureEast    = "<<dbReader->defaultTemperatureEast()<<endl;
+     cout<<"          adjustAverageWest         = "<<dbReader->adjustAverageWest()<<endl;
+     cout<<"          adjustAverageEast         = "<<dbReader->adjustAverageEast()<<endl;
      cout<<"          magboltzVDrift(0,0)       = "<<dbReader->magboltzVDrift(0,0)<<endl;
      cout<<"          magboltzDeflection(0,0)   = "<<dbReader->magboltzDeflection(0,0)<<endl;
      cout<<"          offsetCathodeWest         = "<<dbReader->offsetCathodeWest()<<endl;
@@ -548,7 +553,7 @@ Int_t StFtpcClusterMaker::Make()
 
       // For FTPC West
       
-      returnCode = gasUtils->averageTemperatureWest(dbDate);
+      returnCode = gasUtils->averageTemperatureWest(dbDate,GetRunNumber());
       
       // test if averageBodyTemperature for FTPC West found for first event
       if (paramReader->gasTemperatureWest() == 0) {
@@ -563,7 +568,7 @@ Int_t StFtpcClusterMaker::Make()
 
       // For FTPC East
       
-      returnCode = gasUtils->averageTemperatureEast(dbDate);
+      returnCode = gasUtils->averageTemperatureEast(dbDate,GetRunNumber());
       
       // test if averageBodyTemperature for FTPC East found for first event
       if (paramReader->gasTemperatureEast() == 0 ) {
