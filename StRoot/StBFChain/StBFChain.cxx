@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.439 2004/09/01 01:05:13 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.440 2004/09/01 14:15:19 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -36,7 +36,9 @@
 #include "StGenericVertexMaker/StGenericVertexMaker.h"
 #include "StAssociationMaker/StAssociationMaker.h"
 //_____________________________________________________________________
-Bfc_st BFC1[] = {
+// PLease, preserve the comment after = { . It is used for documentation formatting
+//
+Bfc_st BFC1[] = { // standard chains 
   {"Key"         ,"Name"       ,"Chain"      ,"Opts"                      ,"Maker","Libs","Comment",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"TIME STAMPS ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -609,8 +611,10 @@ Bfc_st BFC1[] = {
 
 
 // ITTF Chain will be put here. Option list starting from minimalistic requirements
-// and may not initially work.
-Bfc_st BFC2[] = {
+// and may not initially work. 
+// Please, preserve the comment after = { . It is used for documentation formatting
+//
+Bfc_st BFC2[] = { // ITTF Chains
   {"Key"         ,"Name"       ,"Chain"      ,"Opts"                      ,"Maker","Libs","Comment",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"TIME STAMPS ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -747,15 +751,15 @@ Bfc_st BFC2[] = {
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
   {"dau2003"     ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,ToF,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
                  ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
-  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,ToF,emcDY2,fpd,svt_daq,SvtD,ftpc,trgs","",""
+  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,ToF,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
            ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
   {"pp2003"      ,"" ,"",  "B2003,Corr2,ppOpt,-PreVtx,l3onl,ToF,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
            ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
   {"Idst"        ,""  ,"",
-         "l0,dst,event,dEdxY2,genvtx,Kink2,xi2,svtdEdx,CMuDst,analysis,compend,EventQA"   ,"","","",kFALSE},
-  {"B2003I"      ,"","","ry2003,in,tpc_daq,tpcI,fcf,Physics,Idst,tags,Tree,evout"
+            "dst,event,dEdxY2,genvtx,Kink2,xi2,svtdEdx,CMuDst,analysis,compend,EventQA"   ,"","","",kFALSE},
+  {"B2003I"      ,"","","ry2003,in,tpc_daq,tpcI,fcf,Physics,Idst,l0,tags,Tree,evout"
                                                                   ,"","","Base chain for 2003 ITTF",kFALSE},
   {"dau2003i"    ,""  ,"",  "B2003I,CtbMatchVtx,Corr2,ppOpt,l3onl,ToF,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd",
                                    "","","Production chain for winter 2003 data dau2003a with ITTF",kFALSE},
@@ -774,7 +778,7 @@ Bfc_st BFC2[] = {
   // *** ITTF chains *** Year4 drops standard chains and support ITTF chains only
   //     Main change tpc -> tpcI and Cdst -> Idst
   // 
-  {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,tags,Tree,evout","",""
+  {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2004 ITTF (tpc+svt)",kFALSE},
 
   // Notes:
@@ -1223,7 +1227,7 @@ Bfc_st BFC2[] = {
 };
 
 
-
+// NoChainOptions -> Number of chain options auto-calculated
 Int_t NoChainOptions;
 Int_t NoChainOptions1 = sizeof (BFC1)/sizeof (Bfc_st);
 Int_t NoChainOptions2 = sizeof (BFC2)/sizeof (Bfc_st);
@@ -1262,7 +1266,7 @@ StBFChain::StBFChain(const char *name, const Bool_t UseOwnHeader):
  * This was primarily set to make possible the transition between the regular
  * chain and the ITTF chain options.
  */
-StBFChain::StBFChain(Int_t mode, const char *name="bfc"):
+StBFChain::StBFChain(Int_t mode, const char *name):
   StChain(name,kFALSE),fXdfOut(0),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
 
   if(mode == 2){
@@ -2051,11 +2055,15 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	// messages NOW !!!
 	if( ! strncmp( string.Data() ,"dbv",3) && strlen(string.Data()) == 11){
 	  (void) sscanf(string.Data(),"dbv%d",&FDate);
-	  cout << " ... but still will be considered as a dynamic timestamp (MaxEntryTime)" << FDate << endl;
-	}
-	if( ! strncmp( string.Data() ,"sdt",3) && strlen(string.Data()) == 11){
+	  cout << " ... but still will be considered as a dynamic timestamp (MaxEntryTime) " 
+	       << FDate  << endl;
+	} else if( ! strncmp( string.Data() ,"sdt",3) && strlen(string.Data()) == 11){
 	  (void) sscanf(string.Data(),"sdt%d",&FDateS);
-	  cout << " ... but still will be considered as a dynamic timestamp (DateTime))" << FDateS << endl;
+	  cout << " ... but still will be considered as a dynamic timestamp (DateTime)     " 
+	       << FDateS << endl;
+	} else {
+	  cout << " Invalid Option " << string.Data() << ". !! ABORT !! " << endl;
+	  assert(1);
 	}
       }
     } else {
