@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.3 2000/01/14 13:48:52 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.4 2000/02/17 18:13:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
- * Revision 2.3  2000/01/14 13:48:52  ullrich
- * Added RICH pixel collection.
+ * Revision 2.4  2000/02/17 18:13:09  ullrich
+ * Changed the SVT hit storage model. Hits are now stored according
+ * to barrel/ladder/wafer not by layer/ladder/wafer.
  *
  * Revision 2.8  2000/05/22 21:43:06  ullrich
  * Add RICH related containers.
@@ -64,7 +65,7 @@
 #include "StL3Trigger.h"
 #include "StL3SoftwareMonitor.h"
 #include "StMeasuredPoint.h"
-#include "StSvtLayerHitCollection.h"
+#include "StRichMCHit.h"
 #include "StRichPixelCollection.h"
 #include "StRichMCInfo.h"
 #include "StRichMCPixel.h"

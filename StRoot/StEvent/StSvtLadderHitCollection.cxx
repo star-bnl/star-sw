@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtLadderHitCollection.cxx,v 2.2 1999/10/28 22:26:50 ullrich Exp $
+ * $Id: StSvtLadderHitCollection.cxx,v 2.3 2000/02/17 18:13:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtLadderHitCollection.cxx,v $
- * Revision 2.2  1999/10/28 22:26:50  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  2000/02/17 18:13:16  ullrich
+ * Changed the SVT hit storage model. Hits are now stored according
+ * to barrel/ladder/wafer not by layer/ladder/wafer.
  *
  * Revision 2.2  1999/10/28 22:26:50  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -22,37 +23,34 @@
  **************************************************************************/
 #include "StSvtLadderHitCollection.h"
 
-static const char rcsid[] = "$Id: StSvtLadderHitCollection.cxx,v 2.2 1999/10/28 22:26:50 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtLadderHitCollection.cxx,v 2.3 2000/02/17 18:13:16 ullrich Exp $";
 
 ClassImp(StSvtLadderHitCollection)
 
 StSvtLadderHitCollection::StSvtLadderHitCollection()
 {
-    mLayerNumber = -1;
+    mBarrelNumber = -1;
 }
 
 StSvtLadderHitCollection::~StSvtLadderHitCollection() { /* noop */ }
 
 void
-StSvtLadderHitCollection::setLayerNumber(Int_t i)
+StSvtLadderHitCollection::setBarrelNumber(Int_t i)
 {
-    if (mLayerNumber == -1) mLayerNumber = i;
+    if (mBarrelNumber == -1) mBarrelNumber = i;
 }
     
 UInt_t
 StSvtLadderHitCollection::numberOfWafers() const
 {
-    switch (mLayerNumber) {
+    switch (mBarrelNumber) {
     case 0:
-    case 1:
         return 4;
         break;
-    case 2:
-    case 3:
+    case 1:
         return 6;
         break;
-    case 4:
-    case 5:
+    case 2:
         return 7;
         break;
     default:

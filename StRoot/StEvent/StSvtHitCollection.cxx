@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitCollection.cxx,v 2.3 1999/12/13 20:16:24 ullrich Exp $
+ * $Id: StSvtHitCollection.cxx,v 2.4 2000/02/17 18:13:11 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitCollection.cxx,v $
- * Revision 2.3  1999/12/13 20:16:24  ullrich
- * Changed numbering scheme for hw_position unpack methods (STAR conventions).
+ * Revision 2.4  2000/02/17 18:13:11  ullrich
+ * Changed the SVT hit storage model. Hits are now stored according
+ * to barrel/ladder/wafer not by layer/ladder/wafer.
  *
  * Revision 2.3  1999/12/13 20:16:24  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
@@ -26,38 +27,38 @@
 #include "StSvtHitCollection.h"
 #include "StSvtHit.h"
 
-static const char rcsid[] = "$Id: StSvtHitCollection.cxx,v 2.3 1999/12/13 20:16:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHitCollection.cxx,v 2.4 2000/02/17 18:13:11 ullrich Exp $";
 
 ClassImp(StSvtHitCollection)
 
 StSvtHitCollection::StSvtHitCollection()
 {
     //
-    //  Layer and ladder collections have to know
-    //  their layer number in order to return the
+    //  Barrel and ladder collections have to know
+    //  their barrel number in order to return the
     //  proper numberOfLadders() and numberOfWafers().
     //
-    for (int i=0; i<mNumberOfLayers; i++) {
-        mLayers[i].setLayerNumber(i);
-        for (unsigned int j=0; j<mLayers[i].numberOfLadders(); j++)
-            mLayers[i].ladder(j)->setLayerNumber(i);
+    for (int i=0; i<mNumberOfBarrels; i++) {
+        mBarrels[i].setBarrelNumber(i);
+        for (unsigned int j=0; j<mBarrels[i].numberOfLadders(); j++)
+            mBarrels[i].ladder(j)->setBarrelNumber(i);
     }
 }
 
 StSvtHitCollection::~StSvtHitCollection() { /* noop */ }
     
 UInt_t
-StSvtHitCollection::numberOfLayers() const { return mNumberOfLayers; }
+StSvtHitCollection::numberOfBarrels() const { return mNumberOfBarrels; }
 
 Bool_t
 StSvtHitCollection::addHit(StSvtHit* hit)
 {
     unsigned int l, d, w;
     if (hit &&
-        (l = hit->layer()-1) < mNumberOfLayers &&
-        (d = hit->ladder()-1) < mLayers[l].numberOfLadders() &&
-        (w = hit->wafer()-1) < mLayers[l].ladder(d)->numberOfWafers()) {
-        mLayers[l].ladder(d)->wafer(w)->hits().push_back(hit);
+        (l = hit->barrel()-1) < mNumberOfBarrels &&
+        (d = hit->ladder()-1) < mBarrels[l].numberOfLadders() &&
+        (w = hit->wafer()-1) < mBarrels[l].ladder(d)->numberOfWafers()) {
+        mBarrels[l].ladder(d)->wafer(w)->hits().push_back(hit);
         return kTRUE;
     }
     else
@@ -68,27 +69,27 @@ ULong_t
 StSvtHitCollection::numberOfHits() const
 {
     ULong_t sum = 0;
-    for (int i=0; i<mNumberOfLayers; i++)
-        for (unsigned int j=0; j<mLayers[i].numberOfLadders(); j++)
-            for (unsigned int k=0; k<mLayers[i].ladder(j)->numberOfWafers(); k++)
-                sum += mLayers[i].ladder(j)->wafer(k)->hits().size();
+    for (int i=0; i<mNumberOfBarrels; i++)
+        for (unsigned int j=0; j<mBarrels[i].numberOfLadders(); j++)
+            for (unsigned int k=0; k<mBarrels[i].ladder(j)->numberOfWafers(); k++)
+                sum += mBarrels[i].ladder(j)->wafer(k)->hits().size();
     return sum;
 }
 
-StSvtLayerHitCollection*
-StSvtHitCollection::layer(UInt_t i)
+StSvtBarrelHitCollection*
+StSvtHitCollection::barrel(UInt_t i)
 {
-    if (i < mNumberOfLayers)
-        return &(mLayers[i]);
+    if (i < mNumberOfBarrels)
+        return &(mBarrels[i]);
     else
         return 0;
 }
 
-const StSvtLayerHitCollection*
-StSvtHitCollection::layer(UInt_t i) const
+const StSvtBarrelHitCollection*
+StSvtHitCollection::barrel(UInt_t i) const
 {
-    if (i < mNumberOfLayers)
-        return &(mLayers[i]);
+    if (i < mNumberOfBarrels)
+        return &(mBarrels[i]);
     else
         return 0;
 }

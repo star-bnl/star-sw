@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitCollection.h,v 2.1 1999/10/13 19:43:44 ullrich Exp $
+ * $Id: StSvtHitCollection.h,v 2.2 2000/02/17 18:13:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitCollection.h,v $
- * Revision 2.1  1999/10/13 19:43:44  ullrich
- * Initial Revision
+ * Revision 2.2  2000/02/17 18:13:14  ullrich
+ * Changed the SVT hit storage model. Hits are now stored according
+ * to barrel/ladder/wafer not by layer/ladder/wafer.
  *
  * Revision 2.1  1999/10/13 19:43:44  ullrich
  * Initial Revision
@@ -21,7 +22,7 @@
 #define StSvtHitCollection_hh
 
 #include "StObject.h"
-#include "StSvtLayerHitCollection.h"
+#include "StSvtBarrelHitCollection.h"
 class StSvtHit;
 
 class StSvtHitCollection : public StObject {
@@ -33,14 +34,14 @@ public:
     
     Bool_t  addHit(StSvtHit*);
     ULong_t numberOfHits() const;
-    UInt_t  numberOfLayers() const;
+    UInt_t  numberOfBarrels() const;
     
-    StSvtLayerHitCollection*       layer(UInt_t);
-    const StSvtLayerHitCollection* layer(UInt_t) const;
+    StSvtBarrelHitCollection*       barrel(UInt_t);
+    const StSvtBarrelHitCollection* barrel(UInt_t) const;
 
 private:
-    enum { mNumberOfLayers = 6 };
-    StSvtLayerHitCollection mLayers[mNumberOfLayers];
+    enum { mNumberOfBarrels = 3 };
+    StSvtBarrelHitCollection mBarrels[mNumberOfBarrels];
     
     ClassDef(StSvtHitCollection,1)
 };
