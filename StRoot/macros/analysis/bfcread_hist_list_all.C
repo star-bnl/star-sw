@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list_all.C,v 1.11 2000/04/12 15:06:52 kathy Exp $ 
+// $Id: bfcread_hist_list_all.C,v 1.12 2000/04/18 20:44:53 kathy Exp $ 
 // $Log: bfcread_hist_list_all.C,v $
+// Revision 1.12  2000/04/18 20:44:53  kathy
+// St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
+//
 // Revision 1.11  2000/04/12 15:06:52  kathy
 // changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
 //
@@ -49,10 +52,10 @@
 //=======================================================================
 
 class StChain;
-class St_DataSet;
+class TDataSet;
 
 StChain *chain;
-St_DataSet *Event;
+TDataSet *Event;
 
 void bfcread_hist_list_all(
   const Char_t *MainFile=
@@ -92,7 +95,7 @@ void bfcread_hist_list_all(
           Event->ls(9); 
       }
 
-   St_DataSetIter nextHistList(Event);
+   TDataSetIter nextHistList(Event);
    St_ObjectSet *histContainer = 0;
    TList *dirList = 0;
    while (histContainer = (St_ObjectSet *)nextHistList()) {
