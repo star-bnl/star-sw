@@ -47,7 +47,10 @@ StHbtManager.o \
 StHbtAsciiReader.o \
 StHbtBinaryReader.o \
 franks1HistoD.o \
-franks2HistoD.o 
+franks2HistoD.o \
+franks2Histo.o \
+#franks1Histo.o \
+
 
 STARCLASSOBJ        := \
 StMatrixF.o \
