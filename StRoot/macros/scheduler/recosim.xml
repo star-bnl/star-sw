@@ -125,10 +125,16 @@
        globus-url-copy -p 25  ${finalNode}${INPUTFILE0}  file:$SCRATCH/${ZEBRAINPUT}
        echo "globus-url-copy -p 25  ${finalNode}${INPUTFILE0}  file:$SCRATCH/${ZEBRAINPUT}" >>${localLogFile} 
        echo "globus-url-copy -p 25  ${finalNode}${INPUTFILE0}  file:$SCRATCH/${ZEBRAINPUT}"
-       if (! -s $SCRATCH/${ZEBRAINPUT} ) then;
-         echo " GRID copy   failed $status "  >>${localLogFile} 
-         echo " GRID copy   failed $status "         
+       set STS=$status
+       if ("$STS" != "0") then;
+          rm -rf $SCRATCH/${ZEBRAINPUT}
+          exit $STS
        endif
+    endif
+    if (! -s $SCRATCH/${ZEBRAINPUT} ) then;
+       echo " GRID copy   failed $status "  >>${localLogFile} 
+       echo " GRID copy   failed $status "
+       exit 1;
     endif
  
     ls -l  $SCRATCH/${ZEBRAINPUT}  >>${localLogFile}
@@ -151,6 +157,12 @@
 #    -------------------------------
     echo root4star -b -l -q \'bfc.C\(${nSimulatedEvents},\"trs,srs,fss,y2004,tpc,ftpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,est,-xi,-v0,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin\",\"${ZEBRAINPUT}\"\)\'  >>${localLogFile}
     root4star -b -l -q bfc.C\(${nSimulatedEvents},\"trs,srs,fss,y2004,tpc,ftpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,est,-xi,-v0,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin\",\"${ZEBRAINPUT}\"\)
+    set STS=$status
+    if ("$STS" != "0") then;
+       rm -rf $SCRATCH/${ZEBRAINPUT}
+       exit $STS
+    endif
+
     # --- check output
     #  we should see 4 files with non-zero length
     if (! -s ${JOBFILEBASENAME}.tags.root) then;
