@@ -1,8 +1,13 @@
-// $Id: StFtpcClusterFinder.cc,v 1.37 2002/08/02 11:26:33 oldi Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.38 2002/08/02 13:03:55 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.38  2002/08/02 13:03:55  oldi
+// Wrong pad ordering was corrected in previous version already
+// (see code changes there).
+//
 // Revision 1.37  2002/08/02 11:26:33  oldi
 // Chargestep corrected (it was looping over the sequences twice).
+// Pad ordering corrected in this version already.
 //
 // Revision 1.36  2002/07/15 13:30:35  jcs
 // incorporate charge step histos into cluster finder and remove StFtpcChargeStep
