@@ -26,7 +26,7 @@ C*** z position of padplane
 C***  Rotate track so its sector pads are normal to y-axis
 C***  Watch out. This is not as trivial as it seems.
       sav2 = trk(2)
-      IF(amod(trk(2),0.5236).gt.15) THEN
+      IF(amod(trk(2),0.5236).gt.0.2618) THEN  !0.2618 = 15 degrees
          trk(2)=amod(trk(2),0.5236)+1.0472 !only 60 degrees
       ELSE
          trk(2)=amod(trk(2),0.5236)+1.5708 ! 0.5236 = 30 degrees
@@ -69,8 +69,8 @@ C***  Second pair
             
             IF(y(k+1).le.60.) y(k+1)=0.
             IF(y(k+2).le.60.) y(k+2)=0.
-            IF(y(k+1).ge.189.2) y(k+1)=0.
-            IF(y(k+2).ge.189.2) y(k+2)=0.
+            IF(y(k+1).ge.189.5) y(k+1)=0.
+            IF(y(k+2).ge.189.5) y(k+2)=0.
             
             k = k + 2
             
@@ -103,14 +103,36 @@ C***  Second pair
 
  30      CONTINUE
          
+C***  Deal with spirals contained within a sector
+
+         IF( (k.eq.0).and.(l.eq.2) ) THEN
+            hit(1)=xc(2)-rr
+            hit(2)=xc(2)+rr
+            IF(hit(1).le.123) THEN ! inner sector
+               IF(hit(2).le.123) THEN
+                  nmax = int(abs(hit(2)-hit(1))/4.95)
+               ELSE             ! some inner, some outer
+                  nmax = int(abs(123.-hit(1))/4.95) + 1
+                  nmax = nmax + int(abs(127.2-hit(2))/2.) + 1
+               ENDIF
+            ELSE                ! outer sector
+               nmax = nmax + int(abs(hit(2)-hit(1))/2.)
+            ENDIF   
+            nmax = 2*nmax - 2     ! spiral loops around
+            GOTO 90
+         ENDIF
+
+
 C***  Arrange possible solutions in increasing y-order
          
          DO 45 i=1,8
             hit(i)=0.
             IF( (trk(5).ne.0.).and.
-     +(y(i).gt.(abs(trk(1)*sin(trk(2)))+(zpl-abs(trk(3)))/abs(trk(5))))
+     +    (y(i).gt.(abs(trk(1)*sin(trk(2)))+
+     +    (zpl-abs(trk(3)))/abs(trk(5))))
      +        ) THEN
-      hit(i) = abs(trk(1)*sin(trk(2)))+(zpl-abs(trk(3)))/abs(trk(5))
+      hit(i) = abs(trk(1)*sin(trk(2)))+
+     +    (zpl-abs(trk(3)))/abs(trk(5))
             ELSE
                hit(i) = y(i)
             ENDIF
@@ -127,9 +149,9 @@ C***  Calculate padrow crossings
             IF(hit(i).gt.190.) goto 75 ! jump out, no solutions
             IF(hit(i).le.123) THEN ! inner sector
                IF(hit(i+1).le.123) THEN
-                  nmax = nmax + int(abs(hit(i+1)-hit(i))/5.2)
+                  nmax = nmax + int(abs(hit(i+1)-hit(i))/4.95)  !average spacing in inner sector
                ELSE             ! some inner, some outer
-                  nmax = nmax + int(abs(123.-hit(i))/5.2) + 1
+                  nmax = nmax + int(abs(123.-hit(i))/4.95) + 1
                   nmax = nmax + int(abs(127.2-hit(i+1))/2.) + 1
                ENDIF
             ELSE                ! outer sector
@@ -139,7 +161,7 @@ C***  Calculate padrow crossings
          
          
  75   CONTINUE                  ! over three sectors
-      RETURN
+ 90   RETURN
       END
 C=======================================================================
 
