@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.6 1999/12/07 23:39:15 snelling Exp $
+// $Id: StFlowTagMaker.cxx,v 1.7 1999/12/15 21:56:21 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 // Description:  Maker to fill the Flow EbyE Tag database
@@ -8,6 +8,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.7  1999/12/15 21:56:21  posk
+// Increased number of harmonics from 4 to 6.
+//
 // Revision 1.6  1999/12/07 23:39:15  snelling
 // Fixed Linux warnings
 //
@@ -62,15 +65,16 @@ StFlowTagMaker::~StFlowTagMaker()
 Int_t StFlowTagMaker::Make() 
 {
   // Create a new tag
-  pFlowTag = 0;
-  pFlowTag = new FlowTag_st;
+  pFlowEvent = 0;
+  pFlowTag   = 0;
+  pFlowTag   = new FlowTag_st;
 
   // print pointer to flowtag 
-  cout << "TagPointer: " << pFlowTag << endl;
+  //cout << "TagPointer: " << pFlowTag << endl;
 
   // fill the Flow Tags 
-  StFlowMaker* flowMaker = (StFlowMaker*)GetMaker("Flow");
-  pFlowEvent = flowMaker->FlowEventPointer();
+  StFlowMaker* pFlowMaker = (StFlowMaker*)GetMaker("Flow");
+  if (pFlowMaker) pFlowEvent = pFlowMaker->FlowEventPointer();
   if (pFlowEvent && pFlowTag) {
     fillFlowTag();    // fill the tag database
   } else {
@@ -78,9 +82,9 @@ Int_t StFlowTagMaker::Make()
     return kStOK;     // no StFlowEvent or no Tag pointer
   }
 
-  printTag();
+  //printTag();
 
-  // fill histograms from Flow Tag
+  // fill histograms from the Flow Tags
   fillHistograms();
 
   return kStOK;
@@ -90,7 +94,7 @@ Int_t StFlowTagMaker::Make()
 
 void StFlowTagMaker::PrintInfo() 
 {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.6 1999/12/07 23:39:15 snelling Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.7 1999/12/15 21:56:21 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -98,7 +102,7 @@ void StFlowTagMaker::PrintInfo()
 
 void StFlowTagMaker::printTag(ostream& os) 
 {
-  os << "--- Event-by-Event Flow Tag Table ---" << endl; 
+  os << "##### Event-by-Event Flow Tag Table ---" << endl; 
   if (!pFlowTag) 
     os << "(empty FlowTag)" << endl;
   else {
@@ -113,22 +117,31 @@ void StFlowTagMaker::printTag(ostream& os)
 
 Int_t StFlowTagMaker::Finish() {
 
-  return kStOK;
+  return StMaker::Finish();
 }
 
 //-------------------------------------------------------------
 
 Int_t StFlowTagMaker::Init()
 {
+  static const int& nHars = Flow::nHars;
+  static const int& nSels = Flow::nSels;
+  static const int& nSubs = Flow::nSubs;
 
-  const Float_t PsiMin   =  0.;
-  const Float_t PsiMax   =  twopi; 
+  // Book histograms
+  enum { nPsiBins    = 100,
+	 nMeanPtBins = 100,
+	 nMultBins   = 100,
+	 n_qBins     = 100 }; 
+
+  const Float_t PsiMin    =  0.;
+  const Float_t PsiMax    =  twopi; 
   const Float_t MeanPtMin =  0.;
   const Float_t MeanPtMax =  1.;
-  const Float_t MultMin  =  0.;
-  const Float_t MultMax  =  1000.;
-  const Float_t qMin     =  0.;
-  const Float_t qMax     =  2.;
+  const Float_t MultMin   =  0.;
+  const Float_t MultMax   =  1000.;
+  const Float_t qMin      =  0.;
+  const Float_t qMax      =  2.;
 
   for (int i = 0; i < nSels+nSubs; i++) {
     TString *mHistTitle;
@@ -187,18 +200,22 @@ Int_t StFlowTagMaker::Init()
     }
   }
 
-  return kStOK;
+  return StMaker::Init();
 }
 
 //-------------------------------------------------------------
 
 void StFlowTagMaker::fillFlowTag() {  
+  // Fill Tag table
+
+  static const int& nHars = Flow::nHars;
   TVector2 Q;
   int selN, subN;
+
   for (int j = 0; j < nHars ; j++) {
 
     // fill sub1 tags
-    selN = 0, subN = 0+1;
+    selN = 0, subN = 0;
     Q = pFlowEvent->Q(j, selN, subN);
     pFlowTag->qxa[j]  = Q.X();
     pFlowTag->qya[j]  = Q.Y();
@@ -206,7 +223,7 @@ void StFlowTagMaker::fillFlowTag() {
     pFlowTag->spta[j] = pFlowEvent->MeanPt(j, selN, subN);
 
     // fill sub2 tags
-    selN = 0, subN = 1+1;
+    selN = 0, subN = 1;
     Q = pFlowEvent->Q(j, selN, subN);
     pFlowTag->qxb[j]  = Q.X();
     pFlowTag->qyb[j]  = Q.Y();
@@ -214,7 +231,7 @@ void StFlowTagMaker::fillFlowTag() {
     pFlowTag->sptb[j] = pFlowEvent->MeanPt(j, selN, subN);
 
     // fill sub3 tags
-    selN = 1, subN = 0+1;
+    selN = 1, subN = 0;
     Q = pFlowEvent->Q(j, selN, subN);
     pFlowTag->qxc[j]  = Q.X();
     pFlowTag->qyc[j]  = Q.Y();
@@ -222,7 +239,7 @@ void StFlowTagMaker::fillFlowTag() {
     pFlowTag->sptc[j] = pFlowEvent->MeanPt(j, selN, subN);
 
     // fill sub4 tags
-    selN = 1, subN = 1+1;
+    selN = 1, subN = 1;
     Q = pFlowEvent->Q(j, selN, subN);
     pFlowTag->qxd[j]  = Q.X();
     pFlowTag->qyd[j]  = Q.Y();
@@ -236,8 +253,12 @@ void StFlowTagMaker::fillFlowTag() {
 
 Int_t StFlowTagMaker::fillHistograms()
 {
+  // Fill histograms from Tag table
+
+  static const int& nHars = Flow::nHars;
+
   for (int j = 0; j < nHars; j++) {
-    float order  = (float)(j+1);
+    float order = (float)(j+1);
 
     histSubEvents[0].histHarmonics[j].mHistMeanPt->
       Fill(pFlowTag->spta[j]);
@@ -264,16 +285,16 @@ Int_t StFlowTagMaker::fillHistograms()
       Fill(sqrt(pFlowTag->qxd[j]*pFlowTag->qxd[j] +
         pFlowTag->qyd[j]*pFlowTag->qyd[j]) / sqrt(pFlowTag->nd[j]));
 
-    Float_t EventPlaneAngle1 = atan2(pFlowTag->qya[j], pFlowTag->qxa[j]) / order;
+    float EventPlaneAngle1 = atan2(pFlowTag->qya[j], pFlowTag->qxa[j]) / order;
     if (EventPlaneAngle1 < 0.) {EventPlaneAngle1 += twopi / order;}
     histSubEvents[0].histHarmonics[j].mHistPsi->Fill(EventPlaneAngle1);
-    Float_t EventPlaneAngle2 = atan2(pFlowTag->qyb[j], pFlowTag->qxb[j]) / order;
+    float EventPlaneAngle2 = atan2(pFlowTag->qyb[j], pFlowTag->qxb[j]) / order;
     if (EventPlaneAngle2 < 0.) {EventPlaneAngle2 += twopi / order;}
     histSubEvents[1].histHarmonics[j].mHistPsi->Fill(EventPlaneAngle2);
-    Float_t EventPlaneAngle3 = atan2(pFlowTag->qyc[j], pFlowTag->qxc[j]) / order;
+    float EventPlaneAngle3 = atan2(pFlowTag->qyc[j], pFlowTag->qxc[j]) / order;
     if (EventPlaneAngle3 < 0.) {EventPlaneAngle3 += twopi / order;}
     histSubEvents[2].histHarmonics[j].mHistPsi->Fill(EventPlaneAngle3);
-    Float_t EventPlaneAngle4 = atan2(pFlowTag->qyd[j], pFlowTag->qxd[j]) / order;
+    float EventPlaneAngle4 = atan2(pFlowTag->qyd[j], pFlowTag->qxd[j]) / order;
     if (EventPlaneAngle4 < 0.) {EventPlaneAngle4 += twopi / order;}
     histSubEvents[3].histHarmonics[j].mHistPsi->Fill(EventPlaneAngle4);
   }
