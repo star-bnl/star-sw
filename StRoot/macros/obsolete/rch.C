@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: rch.C,v 1.1 1999/07/13 01:05:45 kathy Exp $
+ * $Id: rch.C,v 1.2 2000/01/25 16:06:38 fisyak Exp $
  * $Log: rch.C,v $
+ * Revision 1.2  2000/01/25 16:06:38  fisyak
+ * g2r -> g2t
+ *
  * Revision 1.1  1999/07/13 01:05:45  kathy
  * this is obsolete
  *
@@ -57,8 +60,7 @@ void Load(){
  
     gSystem->Load("St_params_Maker");
     gSystem->Load("geometry");
-    gSystem->Load("g2r");
-    gSystem->Load("St_g2r");
+    gSystem->Load("St_g2t");
 
     gSystem->Load("St_geant_Maker");
     gSystem->Load("St_TLA_Maker");

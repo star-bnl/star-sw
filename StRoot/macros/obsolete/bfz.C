@@ -23,7 +23,7 @@ void Load(){
 ///    gSystem->Load("St_xdfin_Maker");
 
     gSystem->Load("geometry");
-    gSystem->Load("St_g2r");
+    gSystem->Load("St_g2t");
     gSystem->Load("St_geant_Maker");
 
 //    gSystem->Load("tpc");

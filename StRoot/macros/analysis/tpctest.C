@@ -1,5 +1,8 @@
-// $Id: tpctest.C,v 1.8 2000/01/11 22:08:55 love Exp $
+// $Id: tpctest.C,v 1.9 2000/01/25 16:06:37 fisyak Exp $
 // $Log: tpctest.C,v $
+// Revision 1.9  2000/01/25 16:06:37  fisyak
+// g2r -> g2t
+//
 // Revision 1.8  2000/01/11 22:08:55  love
 // Macro works again - can no longer skip first record or you lose BEGIN_RUN
 //
@@ -55,7 +58,7 @@ void Load(){
   gSystem->Load("St_xdfin_Maker");
 #if 0
   gSystem->Load("geometry");
-  gSystem->Load("St_g2r");
+  gSystem->Load("St_g2t");
   gSystem->Load("St_geant_Maker");
 #endif
   gSystem->Load("St_tpc");
