@@ -8,6 +8,10 @@
 //:<--------------------------------------------------------------------
 
 #include "topLib.h"
+#include "fortranc.h"   /* The definition of the Fortran/C interface */
+
+#define top_def_ F77_NAME(top_def,TOP_DEF)
+extern "C" void type_of_call top_def_();
 
 topFactory *top;
 

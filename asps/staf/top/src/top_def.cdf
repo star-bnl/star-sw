@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_OPerators commands.
 .
- #(@)$Id: top_def.cdf,v 1.10 1998/03/11 21:40:40 ward Exp $
+ #(@)$Id: top_def.cdf,v 1.11 1998/03/16 02:23:58 fisyak Exp $
 .
 TOP is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -83,7 +83,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TOP_COUNT
+>ACTION kam_top_count_%C
 **
 ** ---------------------------------------------------------------------
 ** TOP/LIST
@@ -168,7 +168,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TOP_LIST
+>ACTION kam_top_list_%C
 **
 ** ---------------------------------------------------------------------
 ** TOP/NEWCUT NAME CUTFUNC
@@ -228,7 +228,7 @@ SEE ALSO:
 .
    TOP/CUT_AGENT
 .
->ACTION KAM_TOP_NEWCUT
+>ACTION kam_top_newcut_%C
 **
 ** ---------------------------------------------------------------------
 ** TOP/NEWJOIN NAME [ SELECT WHERE ]
@@ -290,7 +290,7 @@ SEE ALSO:
 .
    TOP/JOIN_AGENT
 .
->ACTION KAM_TOP_NEWJOIN
+>ACTION kam_top_newjoin_%C
 **
 ** ---------------------------------------------------------------------
 ** TOP/NEWPROJECT NAME [ SELECT ]
@@ -343,7 +343,7 @@ SEE ALSO:
 .
    TOP/PROJECT
 .
->ACTION KAM_TOP_NEWPROJECT
+>ACTION kam_top_newproject_%C
 **
 ** ---------------------------------------------------------------------
 ** TOP/NEWSORT NAME COLUMN
@@ -393,7 +393,7 @@ SEE ALSO:
 .
    TOP/SORT_AGENT
 .
->ACTION KAM_TOP_NEWSORT
+>ACTION kam_top_newsort_%C
 **
 ************************************************************************
 ** TOP/CUT_AGENT
@@ -458,7 +458,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TOPCUT_AGENT_FUNCTION
+>ACTION kam_topcut_agent_function_%C
 **
 ** ---------------------------------------------------------------------
 ** TOP/CUT_AGENT/CUT SOREF TABLE [ CUTFUNC ]
@@ -520,7 +520,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TOPCUT_AGENT_CUT
+>ACTION kam_topcut_agent_cut_%C
 **
 ** ---------------------------------------------------------------------
 ** TOP/CUT_AGENT/FILTER SOREF TABLE1 TABLE2 [ CUTFUNC ]
@@ -587,7 +587,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TOPCUT_AGENT_FILTER
+>ACTION kam_topcut_agent_filter_%C
 **
 ************************************************************************
 ** TOP/JOIN_AGENT
@@ -691,7 +691,7 @@ BUGS:
 SEE ALSO: 
    TOP/PROJECT
 .
->ACTION KAM_TOPJOIN_AGENT_SELECTSPEC
+>ACTION kam_topjoin_agent_selectspec_%C
 **
 ** ---------------------------------------------------------------------
 ** TOP/JOIN_AGENT/WHERECLAUSE SOREF
@@ -742,7 +742,7 @@ BUGS:
 SEE ALSO: 
    TOP/JOIN
 .
->ACTION KAM_TOPJOIN_AGENT_WHERECLAUSE
+>ACTION kam_topjoin_agent_whereclause_%C
 **
 ** ---------------------------------------------------------------------
 ** TOP/JOIN_AGENT/FASTJOIN SOREF TABLE1 TABLE2 TABLE3 [ SELECT WHERE ]
@@ -838,7 +838,7 @@ SEE ALSO:
    TOP/PROJECT_AGENT
    TOP/JOIN_AGENT/JOIN
 .
->ACTION KAM_TOPJOIN_AGENT_FASTJOIN
+>ACTION kam_topjoin_agent_fastjoin_%C
 **
 ** ---------------------------------------------------------------------
 ** TOP/JOIN_AGENT/JOIN SOREF TABLE1 TABLE2 TABLE3 [ SELECT WHERE ]
@@ -916,7 +916,7 @@ SEE ALSO:
    TOP/PROJECT
    TOP/JOIN
 .
->ACTION KAM_TOPJOIN_AGENT_JOIN
+>ACTION kam_topjoin_agent_join_%C
 **
 ************************************************************************
 ** TOP/PROJECT_AGENT
@@ -1015,7 +1015,7 @@ BUGS:
 SEE ALSO: 
    TOP/PROJECT
 .
->ACTION KAM_TOPPROJECT_AGENT_SELECTSPEC
+>ACTION kam_topproject_agent_selectspec_%C
 **
 ** ---------------------------------------------------------------------
 ** TOP/PROJECT_AGENT/PROJECT SOREF TABLE1 TABLE2 [ SELECT ]
@@ -1075,7 +1075,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TOPPROJECT_AGENT_PROJECT
+>ACTION kam_topproject_agent_project_%C
 **
 ************************************************************************
 ** TOP/SORT_AGENT
@@ -1133,7 +1133,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TOPSORT_AGENT_COLUMN
+>ACTION kam_topsort_agent_column_%C
 **
 ** ---------------------------------------------------------------------
 ** TOP/SORT_AGENT/SORT SOREF TABLE
@@ -1183,5 +1183,5 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TOPSORT_AGENT_SORT
+>ACTION kam_topsort_agent_sort_%C
 **
