@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.hh,v 1.3 1999/09/30 02:06:14 porter Exp $
+ * $Id: mysqlAccessor.hh,v 1.4 1999/10/19 14:30:41 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.hh,v $
+ * Revision 1.4  1999/10/19 14:30:41  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
  * Revision 1.3  1999/09/30 02:06:14  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -33,10 +37,11 @@ class mysqlAccessor : public tableQuery {
 
 MysqlDb Db;
 StDbBuffer buff;
+unsigned int theEndTime;
 
 public:
 
-  mysqlAccessor() {};
+  mysqlAccessor():theEndTime(2145934799){ };
    ~mysqlAccessor(){};
     
   virtual void initDbQuery(const char* dbname, const char* serverName, const char* host, const int portNumber){ Db.Connect(host,"","",dbname,portNumber);};
@@ -67,6 +72,8 @@ protected:
   virtual bool  isBaseLine(const char* baseline);
   virtual char* getBoolString(bool baseline);
   virtual char* getNextID(char*& currentElement);
+  virtual char* getEndDateTime() {return getDateTime(theEndTime);};
+  virtual unsigned int getEndTime(){return theEndTime; };
 
 };
 

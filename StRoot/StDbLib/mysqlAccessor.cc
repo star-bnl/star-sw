@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.8 1999/09/30 02:06:14 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.9 1999/10/19 14:30:41 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.9  1999/10/19 14:30:41  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
  * Revision 1.8  1999/09/30 02:06:14  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -96,9 +100,7 @@ mysqlAccessor::QueryDb(StDbConfigNode* node){
 
    //   cout << ConfigName << endl;
     if(isConfig(nodeType)){ // it is a configKey
-      //      cout << "is config " << ConfigName << endl;
-      //      char* nodeName = getNodeName(ConfigName);
-      //     delete [] ConfigName;
+
       if(!buff.ReadScalar(configName,"KeyName"))cout << "Config err reading version" << endl; 
       newNode = new StDbConfigNode(node,nodeName,configName);
       delete [] nodeName;
@@ -150,131 +152,235 @@ return QueryDb(table,rTime);
 int
 mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
 
+  //
+  //  Using name & version informataion in StDbTable + request timestamp
+  //  fill data from the database into the StDbTable pointer.
+  //
 
+  // --> get table name &, if needed, get the descriptor
   char* tableName = table->getTableName();
-
+  char* cstructName=0; 
   if(!table->hasDescriptor())QueryDescriptor(table);
 
-  int tableID = table->getStructID(); // structID=tableName index 
-                                      // that comes from QueryDescriptor
-  char* version = table->getVersion();
+  // --> find ID for this table Name & check if storage is binary
+    Db<<"SELECT structure.IsBinary, namedRef.ID, structure.name"; 
+    Db<<" from structure";
+    Db<<" left join namedRef on structure.ID=namedRef.structID";
+    Db<<" WHERE namedRef.name='";
+    Db<< tableName <<"'"<<endsql;
+   
+    char* isbin=0;
+    int nameID=0; // name reference into c-struct
+    Db.Output(&buff);
+    buff.SetClientMode();
+    if(!buff.ReadScalar(isbin,"IsBinary")){
+      //      cerr <<"QueryDb::Table: No storage specified for structure = "<< tableName<< endl;
+    isbin = 0;
+    }
+    if(!buff.ReadScalar(cstructName,"name")){
+      cerr<<"QueryDb::Table no cstruct for requested Name "<<tableName<< endl;
+      return 0;
+    }
+    buff.ReadScalar(nameID,"ID");
+    bool IsBinary=false;
+    if(isbin && strstr(isbin,"Y"))IsBinary=true;
+    Db.Release(); buff.Raz();
 
-  char* rTime=getDateTime(reqTime);
+// --> get the "version" & requestTime information
+
+   char* version = table->getVersion();
+   char* rTime=getDateTime(reqTime);
   
-  int countRows = 0;
-  table->setRowNumber();  // initialize counter to 0
+   table->setRowNumber();  // initialize counter to 0
 
-  //  table->StreamAccessor(&buff,true);
-
+// begin preparing queries
   char baseString[256];
   ostrstream os(baseString,256);
-  os<<" Where structID="<<tableID;
-  os<<" AND version='"<<version<<"'"<<ends;
+  os<<" Where nameID="<<nameID;
+  os<<" AND version='"<<version<<"' "<<ends;
 
   int numRows=table->GetNRows();
   int* elementID = table->getElementID();
 
+  // loop over numRows to get minimum endTime in 1 query
   char elementString[1024];
   ostrstream es(elementString,1024);
-  es << " (";
-  for(int i=0;i<numRows-1;i++){
-   es<<"elementID="<<elementID[i]<<" OR ";
+
+  int i;
+
+  if(elementID){
+   es << " AND (";
+   for(i=0;i<numRows-1;i++){
+    es<<"elementID="<<elementID[i]<<" OR ";
+   }
+    es<<"elementID="<<elementID[numRows-1]<<")"<<ends;
+  } else {
+    // don't worry 'bout it
+    es<<" "<<ends;
   }
-   es<<"elementID="<<elementID[numRows-1]<<")"<<ends;
 
   char* bTime=0;  
   char* eTime=0;
+  int numberOfRows=0;
 
   Db << " select beginTime as mendTime from dataIndex";
-  Db << baseString <<" AND beginTime>'"<<rTime <<"' AND "<<elementString; 
+  Db << baseString <<" AND beginTime>'"<<rTime <<"'"<<elementString; 
   Db << "Order by beginTime limit 1"<<endsql;
 
-
   if(Db.Output(&buff)){
-   buff.SetClientMode();
-   buff.ReadScalar(eTime,"mendTime");
-   buff.SetStorageMode();
-   Db.Release();
-   buff.Raz();
-  
-  table->setEndTime(eTime);
-  table->setEndTime(getUnixTime(eTime));
+    buff.SetClientMode();
+    buff.ReadScalar(eTime,"mendTime");
+    buff.SetStorageMode();
+    Db.Release(); buff.Raz();
+    table->setEndTime(eTime);
+    table->setEndTime(getUnixTime(eTime));
   } else {
-  unsigned int itmp = 0;
-  table->setEndTime(itmp);
-  table->setEndTime(getDateTime(itmp));
+    table->setEndTime(getEndTime()); // simply use dec-31st 2037, 11:59:59
+    table->setEndTime(getEndDateTime()); // simply use dec-31st 2037, 11:59:59
   }
-
 
   unsigned int t1,t2;
   int indexID;
-
   t1=t2=0;
+  int countRows = 0;
+  int eID;
 
-  for(i=0;i<numRows;i++){
+  if(!IsBinary){ // each dataID -> points to data row with as a table row
 
-   char thisElement[100];
-   ostrstream tes(thisElement,100); tes<<elementID[i]<<ends;
+    if(!elementID){ // get all rows that satisfy version + timestamp
 
-  Db << " select count, beginTime as mbeginTime from dataIndex";
-  Db << baseString <<" AND beginTime<'"<<rTime;
-  Db <<"' AND elementID="<<thisElement;
-  Db << " Group by count order by beginTime DESC limit 1"<<endsql;  
+     Db << " select DISTINCT elementID from dataIndex";
+     Db << baseString <<" order by elementID"<< endsql;
 
+     numRows=0; int nmax = 500;
+     int swapSize;
+     int* storeIt = new int[nmax];
+     int* swapIt=0;
+     while(Db.Output(&buff)){
+      buff.ReadScalar(eID,"elementID");
+      if(numRows==nmax){
+        swapSize = 2*nmax; 
+        swapIt = new int[swapSize];
+        memcpy(swapIt,storeIt,4*nmax);
+        delete [] storeIt; storeIt = swapIt; swapIt = 0;
+        nmax = swapSize;
+      }
+      storeIt[numRows]=eID;
+      numRows++;
+     }
 
+     elementID = new int[numRows];
+     memcpy(elementID,storeIt,4*numRows);              
+     delete [] storeIt;
+     table->setElementID(elementID,numRows);
+
+    }
+
+   // loop over rows in 'elementID'
+    for(i=0;i<numRows;i++){
+
+     char thisElement[100];
+     ostrstream tes(thisElement,100); tes<<elementID[i]<<ends;
+
+     // query Index to retrieve pointer to data
+     Db << " select count, beginTime as mbeginTime from dataIndex";
+     Db << baseString <<" AND beginTime<'"<<rTime;
+     Db <<"' AND elementID="<<thisElement;
+     Db << " Group by count order by beginTime DESC limit 1"<<endsql;  
    
-  if(Db.Output(&buff)){
-   buff.SetClientMode();
-   buff.ReadScalar(bTime,"mbeginTime");
-   buff.ReadScalar(indexID,"count");
-   buff.SetStorageMode();
-   Db.Release();
-   buff.Raz();
-   t1 = getUnixTime(bTime);
-  } else {
-    cerr<<"QueryDb::Table no valid row for this query" << endl;
-    return 0;
-  }
+     if(Db.Output(&buff)){
+       buff.SetClientMode();
+       buff.ReadScalar(bTime,"mbeginTime");
+       buff.ReadScalar(indexID,"count");
+       buff.SetStorageMode();
+       Db.Release(); buff.Raz();
+       t1 = getUnixTime(bTime);
+     } else {
+       cerr<<"QueryDb::Table no valid row for this query" << endl;
+       return 0;
+     }
 
-   char thisIndex[100];
-   ostrstream inds(thisIndex,100); inds<<indexID<<ends;
+     char thisIndex[100];
+     ostrstream inds(thisIndex,100); inds<<indexID<<ends;
 
-  Db<< "Select * from " << tableName <<" LEFT JOIN dataIndex on ";
-  Db<< "dataIndex.dataID="<<tableName<<".dataID ";
-  Db<< "where dataIndex.count="<<thisIndex<<endsql;
+    // get data for this Index pointer
 
-  if(Db.Output(&buff)){
-//    table->StreamAccessor(&buff,true);
-    table->dbStreamer(&buff,true);
-    countRows++;
-    buff.Raz();
-  }
+     Db<< "Select * from " << cstructName <<" LEFT JOIN dataIndex on ";
+     Db<< "dataIndex.dataID="<<cstructName<<".dataID ";
+     Db<< "where dataIndex.count="<<thisIndex<<endsql; 
 
-   if(!t2){
-     t2=t1;
-   } else {
-     if(t1>t2)t2=t1;
-   }
+     // send data into the table
+     if(Db.Output(&buff)){
+        table->dbStreamer(&buff,true);
+        countRows++;
+        buff.Raz();
+      }
 
-  }
+      // keep track of maximum beginTime & minimum 'endTime'
+      if(!t2){
+       t2=t1;
+      } else {
+      if(t1>t2)t2=t1;
+      }
 
-   if(bTime)delete [] bTime;
-   bTime = getDateTime(t2);
-   table->setBeginTime(bTime);
-   table->setBeginTime(t2);
+     }// end loop over rows
 
+  } else {  
+    // many rows in a binary Blob in 1 table row
+
+   // query Index to retrieve pointer to data
+    Db << " select count, numRows, beginTime as mbeginTime from dataIndex";
+    Db << baseString <<" AND beginTime<'"<<rTime;
+    Db << "' Group by count order by beginTime DESC limit 1"<<endsql;  
+ 
+    if(Db.Output(&buff)){
+      buff.SetClientMode();
+      buff.ReadScalar(bTime,"mbeginTime");
+      buff.ReadScalar(indexID,"count");
+      buff.ReadScalar(numberOfRows,"numRows");
+      buff.SetStorageMode();
+      Db.Release(); buff.Raz();
+      t2 = getUnixTime(bTime);
+    } else {
+      cerr<<"QueryDb::Table no valid row for this query" << endl;
+      return 0;
+    }
+
+    char thisIndex[100];
+    ostrstream inds(thisIndex,100); inds<<indexID<<ends;
+
+   // get data for this Index pointer
+  
+    Db<< "Select * from bytes LEFT JOIN dataIndex on ";
+    Db<< "dataIndex.dataID=bytes.dataID ";
+    Db<< "where dataIndex.count="<<thisIndex<<endsql; 
+  
+   // send data into the table
+    table->SetNRows(numberOfRows);
+    if(Db.Output(&buff)){
+       table->dbTableStreamer(&buff,"bytes",true);
+       countRows+=numberOfRows;
+       buff.Raz();
+    }
+
+  } //End binary stream
+
+  //store max-beginTime & min-EndTime
+    if(bTime)delete [] bTime;
+    bTime = getDateTime(t2);
+    table->setBeginTime(bTime);
+    table->setBeginTime(t2);
+   
    // reset row number to 0 for future dbStreaming
-
-   table->setRowNumber();
-
+  table->setRowNumber();
   if(countRows != table->GetNRows()){
-    cerr <<"Query::Table: Mismatch between NRows Requested & Delivered"<<endl;
-    cerr <<" NRows Requested = "<<table->GetNRows() << "  ";
-    cerr <<" NRows Delivered = "<<countRows<<endl;
+     cerr <<"Query::Table: Mismatch between NRows Requested & Delivered"<<endl;
+     cerr <<" NRows Requested = "<<table->GetNRows() << "  ";
+     cerr <<" NRows Delivered = "<<countRows<<endl;
   }
-
 
   if(tableName)delete [] tableName;
+  if(cstructName) delete [] cstructName;
   if(version)delete [] version;
   if(bTime)delete [] bTime;
   if(eTime)delete [] eTime;
@@ -302,44 +408,99 @@ int
 mysqlAccessor::WriteDb(StDbTable* table, const char* storeTime){
   
   char* tableName = table->getTableName();
-  int tableID = table->getStructID(); // c-struct ID
+  char* cstructName=0;
+
+    Db<<"SELECT structure.IsBinary, namedRef.ID, structure.name"; 
+    Db<<" from structure";
+    Db<<" left join namedRef on structure.ID=namedRef.structID";
+    Db<<" WHERE namedRef.name='";
+    Db<< tableName <<"'"<<endsql;
+
+    //    Db<<"SELECT IsBinary, ID from structure WHERE structure.name='";
+    //    Db<< tableName <<"'"<<endsql;
+   
+    char* isbin=0;
+    int nameID=0; // c-struct ID
+    Db.Output(&buff);
+    buff.SetClientMode();
+    if(!buff.ReadScalar(isbin,"IsBinary")){
+      cerr <<"QueryDb::Table: No storage specified for structure = "<< tableName<< endl;
+    isbin = 0;
+    }
+    if(!buff.ReadScalar(cstructName,"name")){
+      cerr<<"WriteDb::Table no cstruct for requested Name "<<tableName<< endl;
+      return 0;
+    }
+    buff.ReadScalar(nameID,"ID");
+    bool IsBinary=false;
+    if(isbin && strstr(isbin,"Y"))IsBinary=true;
+    Db.Release(); buff.Raz();
+
 
   table->setRowNumber(); // set to 0
   int nrows = table->GetNRows(); // get number of rows to write out
   int* elements = table->getElementID();
+  if(!elements){
+    elements = new int[nrows];
+    for(int k=0;k<nrows;k++)elements[k]=k;
+  }
+  int dataID;
 
-  int eID;
-  for(int i=0; i<nrows; i++){
+  if(IsBinary){
+    table->dbTableStreamer(&buff,"bytes",false);
+    Db.Input("bytes",&buff);
+    dataID = Db.GetLastInsertID();
+    Db.Release(); buff.Raz();
 
-   
-   table->dbStreamer(&buff,false);
-   Db.Input(tableName,&buff); // input to database
- 
-   int dataID = Db.GetLastInsertID(); // get auto-generated row-id
-   Db.Release();
-   buff.Raz();
-
-   eID=elements[i];
-   //   table->StreamAccessor(&buff,false); // write address to buffer
-   buff.WriteScalar(table->getSchemaID(),"schemaID");
-   buff.WriteScalar(storeTime,"beginTime");
-   buff.WriteScalar(table->getVersion(),"version");
-   buff.WriteScalar(eID,"elementID");
-   //   buff.WriteScalar(elements[i],"elementID");
-   buff.WriteScalar(dataID,"dataID");  
-   buff.WriteScalar(tableID,"structID");
-
-   if(!Db.Input("dataIndex",&buff)){ // write row address or delete data
+    // now write to index
+    buff.WriteScalar(table->getSchemaID(),"schemaID");
+    buff.WriteScalar(storeTime,"beginTime");
+    buff.WriteScalar(table->getVersion(),"version");
+    buff.WriteScalar(dataID,"dataID");  
+    buff.WriteScalar(nameID,"nameID");
+    buff.WriteScalar(nrows,"numRows");
+    if(!Db.Input("dataIndex",&buff)){ // write to index or delete the data
       Db.Release();
       char dID[7]; ostrstream ds(dID,7); ds<<dataID<<ends;
-      Db<<"delete from "<<tableName;
+      Db<<"delete from bytes";
       Db<<" where dataID="<<dID<<" limit 1"<<endsql;
-   }
+    }
+      
+  } else {
 
-   Db.Release();
-   buff.Raz();
+   int eID;
+   for(int i=0; i<nrows; i++){
+  
+     table->dbStreamer(&buff,false);
+     Db.Input(cstructName,&buff); // input to database
+ 
+     dataID = Db.GetLastInsertID(); // get auto-generated row-id
+     Db.Release(); buff.Raz();
 
-  } // element loop
+     eID=elements[i];
+
+     buff.WriteScalar(table->getSchemaID(),"schemaID");
+     buff.WriteScalar(storeTime,"beginTime");
+     buff.WriteScalar(table->getVersion(),"version");
+     buff.WriteScalar(eID,"elementID");
+     buff.WriteScalar(dataID,"dataID");  
+     buff.WriteScalar(nameID,"nameID");
+
+     if(!Db.Input("dataIndex",&buff)){ // write row address or delete data
+       Db.Release();
+       char dID[7]; ostrstream ds(dID,7); ds<<dataID<<ends;
+       Db<<"delete from "<<cstructName;
+       Db<<" where dataID="<<dID<<" limit 1"<<endsql;
+     }
+
+     Db.Release();
+     buff.Raz();
+
+    } // element loop
+  }
+
+  if(tableName) delete [] tableName;
+  if(cstructName) delete [] cstructName;
 
   table->setRowNumber(); // reset row number to 0 for future dbStreaming
 return 1;
@@ -356,40 +517,35 @@ mysqlAccessor::QueryDescriptor(StDbTable* table){
 
   if(!table->hasDescriptor()){
 
+    Db.Release();
+    buff.Raz();
+
     char* tableName=table->getTableName();
-    //cout << "Getting Descriptor for table = " << tableName << endl;  
-    /*
-    Db<< "SELECT structure.lastSchemaID, structure.ID FROM structure WHERE structure.name='";
-    Db<<tableName<<"'"<<endsql;
+    char* cstructName;
+    Db<<"SELECT structure.name from structure";
+    Db<<" left join namedRef on structure.ID=namedRef.structID";
+    Db<<" WHERE namedRef.name='";
+    Db<< tableName <<"'"<<endsql;
+
     Db.Output(&buff);
-    int tableID, schemaID;
- 
     buff.SetClientMode();
-    if(!buff.ReadScalar(tableID,"ID")){
-      cerr <<"QueryDb::Table: No structure = "<< tableName<< " found " << endl;
+    if(!buff.ReadScalar(cstructName,"name")){
+      cerr<<"QueryDb::Table no cstruct for requested Name "<<tableName<< endl;
       return 0;
     }
-    if(!buff.ReadScalar(schemaID,"lastSchemaID"))cerr<<"QueryDb::Descriptor: No schemaID found"<<endl;
-
-    Db.Release();
-    buff.Raz();
-    */
+    Db.Release(); buff.Raz();
     
-    Db.Release();
-    buff.Raz();
-
     int tableID, schemaID;
     Db<<"SELECT structure.lastSchemaID, structure.ID, schema.name, ";
     Db<<"schema.mask, schema.type, schema.length, ";
-    Db<<"relation.position FROM structure LEFT JOIN relation ON ";
-    Db<<"structure.ID=relation.structID LEFT JOIN schema ON ";
-    Db<<"relation.memberID=schema.ID WHERE structure.name='";
-    Db<< tableName <<"' ORDER BY relation.position"<<endsql;
+    Db<<"schema.position FROM structure LEFT JOIN schema ON ";
+    Db<<"structure.ID=schema.structID WHERE structure.name='";
+    Db<< cstructName <<"' ORDER BY schema.position"<<endsql;
     
     Db.Output(&buff);
     buff.SetClientMode();
     if(!buff.ReadScalar(tableID,"ID")){
-      cerr <<"QueryDb::Table: No structure = "<< tableName<< " found " << endl;
+      // cerr <<"QueryDb::Table: No structure = "<< tableName<< " found " << endl;
       return 0;
     }
     if(!buff.ReadScalar(schemaID,"lastSchemaID")){
@@ -422,7 +578,9 @@ mysqlAccessor::QueryDescriptor(StDbTable* table){
     }
     Db.Release();
     delete [] tableName;
+    delete [] cstructName;
   }
+
 
 return 1;
 
@@ -434,12 +592,7 @@ return 1;
 bool
 mysqlAccessor::isConfig(const char* name){
  bool retVal = false;
- // cout << "isConfig:: " << name << endl;
  if(name && !strcmp(name,"table")==0)retVal=true;
- // char* teststr = strstr(name,"Keys");
- // cout << " isCongif:: teststr" << teststr << endl;
- // if(teststr)retVal=true;
-
  return retVal;
 }
 
@@ -533,15 +686,69 @@ int * retVal = 0;
 char* id=strstr(nodeName,"None");
 if(id)return retVal;
 
+// On the to-do list:
+//   now we expect list in the form 1,2,3,4, ... 
+//   but we may want to also allow 1-800 and/or 1,2,6-12,15,19
+//   so I should remake string so that 1-800 = 1,2,3,4,...,799,800
+//
+
+id = strstr(nodeName,"-");
+char* tmpName = new char[strlen(nodeName)+1];
+strcpy(tmpName,nodeName);
+id = strstr(tmpName,"-");
+
+  while(id){
+
+   char *ip1,*ip2=0;
+   int n1,n2;
+
+   ip1=strstr(tmpName,",");
+
+   while(ip1){
+     n1=id-ip1;
+     ip2=ip1;
+     if(n1>0){
+       ip1=strstr(ip2,",");
+     } else {
+       ip1=0;
+     }
+   }
+
+   if(ip2)ip2++;  // ip2 either is 0 for 1st part of string or points to ","
+   *id='\0';
+   n1 = atoi(ip2);
+   id++;
+   ip1=strstr(id,",");
+   if(ip1)*ip1='\0';
+   n2 = atoi(id);  
+
+   char myNodeName[2048];
+   ostrstream mnn(myNodeName,2048);
+
+   mnn << tmpName;
+   for(int k=n1+1;k<=n2;k++)mnn<<","<<k;
+   if(ip1){
+     ip1++;
+     mnn << ip1;  
+   }
+
+   mnn << ends;
+   delete [] tmpName;
+   tmpName = new char[strlen(myNodeName)+1];
+   strcpy(tmpName, myNodeName);
+   id = strstr(tmpName,"-");
+  }
+
+
 int numElements = 1;
-id = strstr(nodeName,",");
+id = strstr(tmpName,",");
  while(id){
    numElements++;
    id=strstr(id,",");
  }
 
  retVal = new int[numElements];
- char* p1=&nodeName[0];
+ char* p1=&tmpName[0];
  char* anID;
 
  int num=0;
@@ -553,8 +760,9 @@ id = strstr(nodeName,",");
  }
 
 numRows=numElements;
-
+delete [] tmpName;
 return retVal;
+
 }
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.3 1999/09/30 02:06:00 porter Exp $
+ * $Id: MysqlDb.h,v 1.4 1999/10/19 14:30:37 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.4  1999/10/19 14:30:37  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
  * Revision 1.3  1999/09/30 02:06:00  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -119,6 +123,8 @@ protected:
   //virtual void Print() {cout << mQueryMess << "|" <<mQueryLast <<endl;};  // debug
   //virtual void Out();  //debug
   //virtual MysqlResult* Result() { return mRes;}; //debug
+
+  //ClassDef(MysqlDb,0)
 
 };  
 

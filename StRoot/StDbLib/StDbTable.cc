@@ -1,3 +1,26 @@
+/***************************************************************************
+ *
+ * $Id: StDbTable.cc,v 1.6 1999/10/19 14:30:39 porter Exp $
+ *
+ * Author: R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description:   Class that holds data, descriptor, & db-address 
+ *                & performs streamer of db-data into data-memory
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbTable.cc,v $
+ * Revision 1.6  1999/10/19 14:30:39  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
+ * Revision 1.5  1999/09/30 02:06:10  porter
+ * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
+ * allow multiple rows (StDbTable), & Added the comment sections at top of
+ * each header and src file
+ *
+ **************************************************************************/
 #include "StDbTable.h"
 #include "StDbBuffer.h"
 #include <string.h>
@@ -12,8 +35,7 @@ maccessor.endTime = -1;
 maccessor.version=0;
 mrows=1;
 mrowNumber=0;
-maccessor.elementID = new int;
-*(maccessor.elementID) = 0;
+maccessor.elementID = 0;
 
 }
 
@@ -26,8 +48,7 @@ maccessor.version=0;
 maccessor.schemaID=schemaID;
 mrows=1;
 mrowNumber=0;
-maccessor.elementID = new int;
-*(maccessor.elementID) = 0;
+maccessor.elementID = 0;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -80,6 +101,18 @@ StDbTable::setDescriptor(StTableDescriptorI* descriptor){
 
 char* 
 StDbTable::GetTable() { if(!mdata)createMemory(); return mdata;};
+
+void* 
+StDbTable::GetTableCpy() { 
+
+if(!mdata)return (void*)GetTable();
+
+int len = mrows*getTableSize();
+char* c = new char[len];
+memcpy(c,mdata,len);
+
+return (void*)c;
+};
 
 /////////////////////////////////////////////////////////////////////
 
@@ -156,7 +189,7 @@ bool retVal = true;
      mdata=new char[len];
   } else {
     if(!mtableName){mtableName=new char[8]; strcpy(mtableName,"Unknown");}
-    cerr << "Table [ "<<mtableName<<" ] has no description to fill memory" << endl;
+    //    cerr << "Table [ "<<mtableName<<" ] has no description to fill memory" << endl;
     retVal = false;
   }
 return retVal;
@@ -221,6 +254,10 @@ StDbTable::StreamAccessor(typeAcceptor* accept){
    if(maccessor.version)len=strlen(maccessor.version);
    accept->pass("version",maccessor.version,len);
    //  cout << "stream eID " << endl;
+   if(!maccessor.elementID){
+     maccessor.elementID = new int[mrows];
+     for(int i=0;i<mrows;i++)maccessor.elementID[i]=i;
+   }
    accept->pass("elementID",maccessor.elementID, mrows);
 
 }
@@ -236,6 +273,11 @@ StDbTable::StreamAccessor(StDbBufferI* buff, bool isReading){
   if(!(ClientMode=buff->IsClientMode()))buff->SetClientMode();
 
   int rowID;
+
+   if(!maccessor.elementID){
+     maccessor.elementID = new int[mrows];
+     for(int i=0;i<mrows;i++)maccessor.elementID[i]=i;
+   }
 
   if(isReading){
     buff->ReadScalar(rowID,"elementID");
@@ -320,6 +362,41 @@ char* ptr;
 
  } else {
    cerr << "dbStreamer:: more rows delivered than allocated " << endl;
+ }
+
+
+ if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
+}
+
+///////////////////////////////////////////////////////////////////////
+
+void
+StDbTable::dbTableStreamer(StDbBufferI* buff, const char* name, bool isReading){
+
+int max = mdescriptor->getNumElements();
+int size = mdescriptor->getTotalSizeInBytes();
+StTypeE type = mdescriptor->getElementType(0);
+unsigned int length = (unsigned int) mrows*max;
+
+char* ptr;
+
+  bool ClientMode;
+  if(!(ClientMode=buff->IsClientMode()))buff->SetClientMode();
+
+ if(createMemory() && mrowNumber < mrows){
+
+   ptr = &mdata[0];
+   //    getElementSpecs(i,ptr,name,length,type);
+   if(isReading){
+     ReadElement(ptr,name,length,type,(StDbBuffer*)buff);
+     } else {
+     WriteElement(ptr,name,length,type,(StDbBuffer*)buff);
+    }       
+ mrowNumber=mrows;
+
+ } else {
+   cerr << "dbTableStreamer:: more rows delivered than allocated " << endl;
+   cerr << " #of rows= "<<mrows<< " current row= "<<mrowNumber << endl;
  }
 
 

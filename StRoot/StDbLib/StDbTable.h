@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.5 1999/09/30 02:06:10 porter Exp $
+ * $Id: StDbTable.h,v 1.6 1999/10/19 14:30:39 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.6  1999/10/19 14:30:39  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
  * Revision 1.5  1999/09/30 02:06:10  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -114,11 +118,14 @@ public:
 
   virtual StDbTableI* Clone();
   virtual char* GetTable(); 
+  virtual void* GetTableCpy();
   virtual void SetTable(char* data, int nrows);
   virtual void AddRows(char* data, int nrows);
   virtual int  GetNRows() const;
+  virtual void SetNRows(int nrows){ mrows = nrows; }; 
   virtual void setRowNumber(int row=0);
-
+  
+ 
   // methods for reading & writing to Db & to file
 
   virtual void StreamAccessor(typeAcceptor* accept);
@@ -126,6 +133,7 @@ public:
 
   virtual void StreamAccessor(StDbBufferI* buff, bool isReading);
   virtual void dbStreamer(StDbBufferI* buff, bool isReading);
+  virtual void dbTableStreamer(StDbBufferI* buff, const char* name, bool isReading);
 
   //ClassDef(StDbTable,1)
 };

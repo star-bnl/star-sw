@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTypeEnum.h,v 1.2 1999/09/30 02:06:13 porter Exp $
+ * $Id: StTypeEnum.h,v 1.3 1999/10/19 14:30:40 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StTypeEnum.h,v $
+ * Revision 1.3  1999/10/19 14:30:40  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
  * Revision 1.2  1999/09/30 02:06:13  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -25,3 +29,5 @@ const int StTypeSize[]={sizeof(char),sizeof(unsigned char),sizeof(short),sizeof(
 
 
 #endif
+
+

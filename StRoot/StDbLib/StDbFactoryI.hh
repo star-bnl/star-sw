@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbFactoryI.hh,v 1.3 1999/09/30 02:06:05 porter Exp $
+ * $Id: StDbFactoryI.hh,v 1.4 1999/10/19 14:30:38 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbFactoryI.hh,v $
+ * Revision 1.4  1999/10/19 14:30:38  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
  * Revision 1.3  1999/09/30 02:06:05  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -58,7 +62,8 @@ public:
 
 inline void
 StDbFactoryI::initIDList() {
- cerr<< "StDbFactoryI:: Has No default Tables in Base Class"<< endl;
+isloaded=true;
+// cerr<< "StDbFactoryI:: Has No default Tables in Base Class"<< endl;
 }
 
 

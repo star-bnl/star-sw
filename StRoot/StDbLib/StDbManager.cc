@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.cc,v 1.8 1999/09/30 02:06:07 porter Exp $
+ * $Id: StDbManager.cc,v 1.9 1999/10/19 14:30:39 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.9  1999/10/19 14:30:39  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
  * Revision 1.8  1999/09/30 02:06:07  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -717,6 +721,30 @@ return retString;
 
 ////////////////////////////////////////////////////////////////
 
+bool
+StDbManager::getDataBaseInfo(const char* dbName, char*& type, char*& domain){
+
+bool retVal = false;
+
+char* id = strstr(dbName,"/");
+if(!id) {
+type = new char[strlen(dbName)+1];
+strcpy(type,dbName);
+domain = new char[strlen("Star")+1];
+strcpy(domain,"Star");
+return true;
+}
+
+*id='\0';
+type = new char[strlen(dbName)+1];
+strcpy(type,dbName);
+id++;
+domain = new char[strlen(id)+1];
+strcpy(domain,id);
+retVal = true;
+
+return retVal;
+}
 
 
 
