@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.15 2003/10/30 20:06:46 perev Exp $
+ * $Id: StHelixD.cc,v 1.16 2003/12/18 17:27:02 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
+ * Revision 1.16  2003/12/18 17:27:02  perev
+ * Small bug fix in number of iters. i++ ==> i--
+ *
  * Revision 1.15  2003/10/30 20:06:46  perev
  * Check of quality added
  *
@@ -430,7 +433,7 @@ double StHelixD::pathLength(const StThreeVectorD& r,
 		  n.y()*cos(a)*t +
 		  n.z()*mCurvature*mSinDipAngle;
             if ( fabs(fp)*deltas <= fabs(f) ) { //too big step
-               i++;if ((maxSteps--)<0) return NoSolution;
+               i--;if ((maxSteps--)<0) return NoSolution;
                int sgn = 1;
                if (fp<0.) sgn = -sgn;
                if (f <0.) sgn = -sgn;
