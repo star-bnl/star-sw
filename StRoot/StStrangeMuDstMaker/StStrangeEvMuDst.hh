@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.hh,v 2.0 2000/06/02 22:11:54 genevb Exp $
+ * $Id: StStrangeEvMuDst.hh,v 2.1 2000/06/09 22:17:10 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.hh,v $
+ * Revision 2.1  2000/06/09 22:17:10  genevb
+ * Allow MC data to be copied between DSTs, other small improvements
+ *
  * Revision 2.0  2000/06/02 22:11:54  genevb
  * New version of Strangeness micro DST package
  *
@@ -28,11 +31,11 @@
  ***********************************************************************/
 #ifndef StStrangeEvMuDst_hh
 #define StStrangeEvMuDst_hh
-#include "TObject.h"
+#include "StStrangeMuDst.hh"
 
 class StPrimaryVertex;
 
-class StStrangeEvMuDst : public TObject {
+class StStrangeEvMuDst : public StStrangeMuDst {
 public:
   StStrangeEvMuDst();
   ~StStrangeEvMuDst();

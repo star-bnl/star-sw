@@ -1,5 +1,8 @@
-// $Id: StXiController.cxx,v 2.0 2000/06/05 05:19:46 genevb Exp $
+// $Id: StXiController.cxx,v 2.1 2000/06/09 22:17:11 genevb Exp $
 // $Log: StXiController.cxx,v $
+// Revision 2.1  2000/06/09 22:17:11  genevb
+// Allow MC data to be copied between DSTs, other small improvements
+//
 // Revision 2.0  2000/06/05 05:19:46  genevb
 // New version of Strangeness micro DST package
 //
@@ -96,7 +99,7 @@ Int_t StXiController::MakeCreateMcDst(StMcVertex* mcVert) {
 		      mcXiMapIt != mcXiBounds.second; ++mcXiMapIt) {
         rcXiPartner = (*mcXiMapIt).second;
         // stupid way
-        for(Int_t i = 0; i <= dataArray->GetLast(); i++) {
+        for(Int_t i = 0; i <= GetN(); i++) {
           StXiMuDst* tmpXi = (StXiMuDst*) dataArray->At(i);
           if( fabs(rcXiPartner->position().x()-tmpXi->decayVertexXiX()) < 0.00001 &&
               fabs(rcXiPartner->position().y()-tmpXi->decayVertexXiY()) < 0.00001 &&
@@ -129,28 +132,6 @@ Int_t StXiController::MakeCreateMcDst(StMcVertex* mcVert) {
     }
     break;
   }
-  
-  return kStOK;
-}
-//_____________________________________________________________________________
-Int_t StXiController::MakeCreateSubDst() {
-
-  // If no entries to copy, skip event
-  if (!entries) return kStOK;
-
-  // Event info copied directly from dstMaker.
-  if ((*selections)[0] < 0) {  // Copy all from the event
-    tree->SetBranchAddress(GetName(),&tempArray);
-  } else if (entries) {        // Copy selected from the event
-    Int_t asize = dataArray->GetSize();
-    if (entries > asize) dataArray->Expand(entries+increment);
-    for (Int_t k=0; k<entries; k++) {
-      new((*dataArray)[k]) StXiMuDst(*((StXiMuDst*)
-            (GetDstController()->Get((*selections)[k]))));
-    }
-  }
-  PrintNumCand("copying",entries);
-  nEntries += entries;
   
   return kStOK;
 }

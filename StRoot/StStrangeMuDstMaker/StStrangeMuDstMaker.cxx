@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 2.0 2000/06/02 22:11:54 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 2.1 2000/06/09 22:17:10 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 2.1  2000/06/09 22:17:10  genevb
+// Allow MC data to be copied between DSTs, other small improvements
+//
 // Revision 2.0  2000/06/02 22:11:54  genevb
 // New version of Strangeness micro DST package
 //
@@ -46,7 +49,6 @@
 #include "StMcEventTypes.hh"
 #include "StParticleDefinition.hh"
 #include "StMessMgr.h"
-#include "StStrangeControllerInclude.h"
 
 #define EachController(proc) \
   if (doV0) v0->proc; \
@@ -99,9 +101,9 @@ Int_t StStrangeMuDstMaker::Init() {
     evClonesArray = new TClonesArray("StStrangeEvMuDst",1);
   }
   StStrangeControllerBase::currentMaker = this;
-  if (doV0) v0 = new StV0Controller();
-  if (doXi) xi = new StXiController();
-  if (doKink) kink = new StKinkController();
+  if (doV0) v0 = StStrangeControllerBase::Instantiate("V0");
+  if (doXi) xi = StStrangeControllerBase::Instantiate("Xi");
+  if (doKink) kink = StStrangeControllerBase::Instantiate("Kink");
 
   if (rw == StrangeRead) {            // READING  the Micro Dst
     InitReadDst();
@@ -151,9 +153,9 @@ void StStrangeMuDstMaker::InitCreateDst() {
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::InitCreateSubDst() {
 
-  Int_t split=1;
-  Int_t bsize=64000;
   evClonesArray = dstMaker->GetEvClonesArray();
+  Int_t split=2;
+  Int_t bsize=64000;
   TBranch* branch = tree->Branch("Event",&evClonesArray,bsize,split);
   branch->SetFile(evFile);
   EachController(InitCreateSubDst());

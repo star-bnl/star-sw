@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StDecayMode.cc,v 2.0 2000/06/05 05:19:37 genevb Exp $
+ * $Id: StDecayMode.cc,v 2.1 2000/06/09 22:17:09 genevb Exp $
  * $Log: StDecayMode.cc,v $
+ * Revision 2.1  2000/06/09 22:17:09  genevb
+ * Allow MC data to be copied between DSTs, other small improvements
+ *
  * Revision 2.0  2000/06/05 05:19:37  genevb
  * New version of Strangeness micro DST package
  *
@@ -65,110 +68,121 @@ Int_t StDecayMode::Process(StMcVertex* mcVertex)
   if (!mcVertex->numberOfDaughters()) return kWrongDecay;
   const StMcTrack* parent = mcVertex->parent();	
 
-  if (parent)
-   {
+  if (parent) {
     Int_t parentId = parent->geantId();
     StSPtrVecMcTrack& Daughters = mcVertex->daughters();
-    StMcTrackIterator DTrackIt; 
 
-    for (DTrackIt = Daughters.begin(); DTrackIt != Daughters.end(); DTrackIt++)
-      { ID+=(*DTrackIt)->geantId(); ID2*=(*DTrackIt)->geantId();}
-	
-
-    if (parentId==11) { return KPlusProcess(ID);}
-    if (parentId==12) { return KMinusProcess(ID);}
-    if (parentId==16) { return KShortProcess(ID);}
-    if (parentId==18) { return LambdaProcess(ID);}
-    if (parentId==26) { return AntiLambdaProcess(ID);}
-
-    if (parentId==23) { return XiProcess(ID);}
-    if (parentId==31) { return AntiXiProcess(ID);}
-    if (parentId==24) { return OmegaProcess(ID2);}
-    if (parentId==32) { return AntiOmegaProcess(ID2);}
+    for (StMcTrackIterator DTrackIt = Daughters.begin();
+                           DTrackIt != Daughters.end(); DTrackIt++) {
+      Int_t daughterId = (*DTrackIt)->geantId();
+      ID  += daughterId;
+      ID2 *= daughterId;
+    }
     
-   }	
+    switch (parentId) {
+      case (11) : return KPlusProcess(ID);
+      case (12) : return KMinusProcess(ID);
+      case (16) : return KShortProcess(ID);
+      case (18) : return LambdaProcess(ID);
+      case (26) : return AntiLambdaProcess(ID);
+      case (23) : return XiProcess(ID);
+      case (31) : return AntiXiProcess(ID);
+      case (24) : return OmegaProcess(ID2);
+      case (32) : return AntiOmegaProcess(ID2);
+    }
+  }	
   return kWrongDecay;
 }
 //_____________________________________________________________________  
 Int_t StDecayMode::KPlusProcess(Int_t ID) 
 {
-  if (ID == 9) return kKPlus2MuNu;
-  if (ID == 15) return kKPlus2PiPlusPiZero;
-  if (ID == 25) return kKPlus2PiPlusPiPlusPiMinus;
-  if (ID == 13) return kKPlus2ENuPiZero;
-  if (ID == 16) return kKPlus2MuNuPiZero;
-  if (ID == 22) return kKPlus2PiPlusPiZeroPiZero;
-  return kWrongDecay;
+  switch (ID) {
+    case (9)  : return kKPlus2MuNu;
+    case (15) : return kKPlus2PiPlusPiZero;
+    case (25) : return kKPlus2PiPlusPiPlusPiMinus;
+    case (13) : return kKPlus2ENuPiZero;
+    case (16) : return kKPlus2MuNuPiZero;
+    case (22) : return kKPlus2PiPlusPiZeroPiZero;
+    default   : return kWrongDecay;
+  }
 }
 
 //_____________________________________________________________________
 Int_t StDecayMode::KMinusProcess(Int_t ID)  
 {
-  if (ID == 10) return kKMinus2MuNu;
-  if (ID == 16) return kKMinus2PiMinusPiZero;
-  if (ID == 26) return kKMinus2PiPlusPiMinusPiMinus;
-  if (ID == 14) return kKMinus2ENuPiZero;
-  if (ID == 17) return kKMinus2MuNuPiZero;
-  if (ID == 23) return kKMinus2PiMinusPiZeroPiZero;
-  return kWrongDecay;
+  switch (ID) {
+    case (10) : return kKMinus2MuNu;
+    case (16) : return kKMinus2PiMinusPiZero;
+    case (26) : return kKMinus2PiPlusPiMinusPiMinus;
+    case (14) : return kKMinus2ENuPiZero;
+    case (17) : return kKMinus2MuNuPiZero;
+    case (23) : return kKMinus2PiMinusPiZeroPiZero;
+    default   : return kWrongDecay;
+  }
 }
 
 //____________________________________________________________________
 Int_t StDecayMode::KShortProcess(Int_t ID)
 {
   //  Int_t test =  kWrongDecay;
-  if (ID == 17)  return  kKShort2PiPlusPiMinus;
-  if (ID == 14) return kKShort2PiZeroPiZero;
-  return kWrongDecay;
+  switch (ID) {
+    case (17) : return kKShort2PiPlusPiMinus;
+    case (14) : return kKShort2PiZeroPiZero;
+    default   : return kWrongDecay;
+  }
 }
-
 //____________________________________________________________________
 Int_t StDecayMode::LambdaProcess(Int_t ID) 
 {
-
-  if (ID == 23) return kLambda2ProtonPiMinus;
-  if (ID == 20) return kLambda2NeutronPiZero;
-  return kWrongDecay;
-
+  switch (ID) {
+    case (23) : return kLambda2ProtonPiMinus;
+    case (20) : return kLambda2NeutronPiZero;
+    default   : return kWrongDecay;
+  }
 }
 //____________________________________________________________________
 Int_t StDecayMode::AntiLambdaProcess(Int_t ID) 
 {
-  if (ID == 23) return kAntiLambda2AntiProtonPiPlus;
-  if (ID == 32) return kAntiLambda2AntiNeutronPiZero;
-  return kWrongDecay;
-
+  switch (ID) {
+    case (23) : return kAntiLambda2AntiProtonPiPlus;
+    case (32) : return kAntiLambda2AntiNeutronPiZero;
+    default   : return kWrongDecay;
+  }
 }
 
 //____________________________________________________________________
 Int_t StDecayMode::XiProcess(Int_t ID) 
 {
-  if (ID == 27) return kCascade2LambdaPiMinus;
-  return kWrongDecay;
-
+  switch (ID) {
+    case (27) : return kCascade2LambdaPiMinus;
+    default   : return kWrongDecay;
+  }
 }
 //____________________________________________________________________
 Int_t StDecayMode::AntiXiProcess(Int_t ID) 
 {
-  if (ID == 34) return kAntiCascade2AntiLambdaPiPlus;
-  return kWrongDecay;
-
+  switch (ID) {
+    case (34) : return kAntiCascade2AntiLambdaPiPlus;
+    default   : return kWrongDecay;
+  }
 }
 //____________________________________________________________________
 Int_t StDecayMode::OmegaProcess(Int_t ID) 
 {
-  if (ID == 216) return kOmega2LambdaKMinus;
-  if (ID == 198) return kOmega2CascadePiMinus;
-  if (ID == 161) return kOmega2CascadePiZero;
-   
-  return kWrongDecay;
+  switch (ID) {
+    case (216) : return kOmega2LambdaKMinus;
+    case (198) : return kOmega2CascadePiMinus;
+    case (161) : return kOmega2CascadePiZero;
+    default    : return kWrongDecay;
+  }
 }
 //____________________________________________________________________
 Int_t StDecayMode::AntiOmegaProcess(Int_t ID) 
 {
-  if (ID == 286) return kAntiOmega2AntiLambdaKPlus;
-  if (ID == 240) return kAntiOmega2AntiCascadePiPlus;
-  if (ID == 217) return kAntiOmega2AntiCascadePiZero;
-
-  return kWrongDecay;
+  switch (ID) {
+    case (286) : return kAntiOmega2AntiLambdaKPlus;
+    case (240) : return kAntiOmega2AntiCascadePiPlus;
+    case (217) : return kAntiOmega2AntiCascadePiZero;
+    default    : return kWrongDecay;
+  }
 }

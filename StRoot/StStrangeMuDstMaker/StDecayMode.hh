@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StDecayMode.hh,v 2.0 2000/06/05 05:19:38 genevb Exp $
+ * $Id: StDecayMode.hh,v 2.1 2000/06/09 22:17:09 genevb Exp $
  * $Log: StDecayMode.hh,v $
+ * Revision 2.1  2000/06/09 22:17:09  genevb
+ * Allow MC data to be copied between DSTs, other small improvements
+ *
  * Revision 2.0  2000/06/05 05:19:38  genevb
  * New version of Strangeness micro DST package
  *
@@ -13,7 +16,6 @@
  ***********************************************************************/
 #ifndef  STAR_StDecayMode
 #define  STAR_StDecayMode
-#include "TObject.h"
 #include "StMcVertex.hh"
 #include "StMcTrack.hh"
 
@@ -51,12 +53,12 @@ enum decayModeType {
 };
 
 
-class StDecayMode : public TObject {
+class StDecayMode {
 public:
 
 
   StDecayMode();
-  ~StDecayMode();
+  virtual ~StDecayMode();
   static StDecayMode* Instance();
   Int_t Process(StMcVertex* mcVertex);
   Int_t KPlusProcess(Int_t ID); 

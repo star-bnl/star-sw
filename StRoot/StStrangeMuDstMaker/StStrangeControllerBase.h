@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.h,v 2.0 2000/06/05 05:19:41 genevb Exp $
+// $Id: StStrangeControllerBase.h,v 2.1 2000/06/09 22:17:10 genevb Exp $
 // $Log: StStrangeControllerBase.h,v $
+// Revision 2.1  2000/06/09 22:17:10  genevb
+// Allow MC data to be copied between DSTs, other small improvements
+//
 // Revision 2.0  2000/06/05 05:19:41  genevb
 // New version of Strangeness micro DST package
 //
@@ -13,7 +16,6 @@
 //////////////////////////////////////////////////////////////////////////
 #include "TNamed.h"
 #include "TClonesArray.h"
-#include "StMcContainers.hh"
 
 class TTree;
 class TArrayI;
@@ -23,11 +25,14 @@ class StAssociationMaker;
 class StStrangeMuDst;
 class StStrangeAssoc;
 class StStrangeMuDstMaker;
+class TBranch;
+class TClass;
 
 class StStrangeControllerBase : public TNamed {
  public: 
   StStrangeControllerBase(const char* name);
   virtual ~StStrangeControllerBase();
+  static StStrangeControllerBase* Instantiate(const char* name);
 
   TClonesArray* GetDataArray();
   TClonesArray* GetMcArray();   
@@ -48,19 +53,22 @@ class StStrangeControllerBase : public TNamed {
   virtual void Select(Int_t i=-1);     // use i<0 to specify whole event
   
   virtual void InitReadDst();
-  virtual void InitCreateDst(const char* file);
+  virtual void InitCreateDst(const char* filename);
   virtual void InitCreateSubDst();
   virtual Int_t MakeReadDst() = 0;
   virtual Int_t MakeCreateDst(StEvent& event) = 0;
   virtual Int_t MakeCreateMcDst(StMcVertex* mcVert) = 0;
-  virtual Int_t MakeCreateSubDst() = 0;
+  virtual Int_t MakeCreateSubDst();
 
-  virtual void PrintNumMc();
+  void PrintNumMc();
+  const char* GetMcName() const;
+  const char* GetAssocName() const;
   static StStrangeMuDstMaker* currentMaker;
     
  protected:
   StStrangeControllerBase* GetDstController();
   void PrintNumCand(const char* text, Int_t num);
+  TBranch* AssignBranch(const char* name, TClonesArray** address);
 
   Bool_t doMc;
 
@@ -71,10 +79,12 @@ class StStrangeControllerBase : public TNamed {
 
   StStrangeMuDstMaker* masterMaker; //!
   StStrangeMuDstMaker* dstMaker;    //!
-  StAssociationMaker *assocMaker;   //!
+  StAssociationMaker* assocMaker;   //!
 
   TTree* tree;                      //!
-  
+  char* file;                       //!
+  TClass* dataClass;                //!
+
   // Array of muDst indices to copy
   TArrayI* selections;              //!
 
@@ -88,6 +98,8 @@ class StStrangeControllerBase : public TNamed {
   
   Int_t increment;
   Int_t max;
+  TString mcName;
+  TString assocName;
   
  private:
   ClassDef(StStrangeControllerBase,1)
@@ -113,5 +125,10 @@ inline StStrangeMuDst* StStrangeControllerBase::GetMc(Int_t i)
             { return (mcArray ? (StStrangeMuDst*) (*mcArray)[i] : 0); }
 inline StStrangeAssoc* StStrangeControllerBase::GetAssoc(Int_t i)
             { return (assocArray ? (StStrangeAssoc*) (*assocArray)[i] : 0); }
+
+inline const char* StStrangeControllerBase::GetMcName() const
+            { return mcName.Data(); }
+inline const char* StStrangeControllerBase::GetAssocName() const
+            { return assocName.Data(); }
 
 #endif
