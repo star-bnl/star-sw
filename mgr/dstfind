@@ -2,13 +2,12 @@
 # Find all DST files on disk and create kumac to load new ones
 # into DB
 # T. Wenaus
-$topPrefix="/disk1/star/";
+$topPrefix="/disk00001/star/";
 #$topLevel="auau200";
 #$topLevel="tfs_dst";
 $topLevel = shift(@ARGV) || "auau200";
 if ( open(SCRIPT,"> newdst2db.kumac") ) {
     print "newdst2db.kumac created to load DST files into DB\n";
-    print "To be used with \$STAR_DB/StafObjy/newdst2db.csh\n";
 } else {
     print "Unable to create DB loader kumac; cannot write locally\n";
 }

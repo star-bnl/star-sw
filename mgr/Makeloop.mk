@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.61  1999/03/10 20:56:52  fisyak
+#  Cleanup for SL99c tag
+#
 #  Revision 1.60  1999/02/25 22:24:40  fisyak
 #  Add ROOTCINTD flag
 #
@@ -259,7 +262,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/02/25 22:24:40 $ 
+#           Last modification $Date: 1999/03/10 20:56:52 $ 
 #  default setings
 # Current Working Directory
 #
@@ -313,12 +316,17 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
+ifneq ($(USER),wenaus)
 #  SUBDIRS := $(filter-out StAnalysisMaker, $(SUBDIRS))
-  SUBDIRS := $(filter-out StEbyeScaTagsMaker, $(SUBDIRS))
+#  SUBDIRS := $(filter-out StEbyeScaTagsMaker, $(SUBDIRS))
+#  SUBDIRS := $(filter-out StSpectraTagsMaker, $(SUBDIRS))
+#  SUBDIRS := $(filter-out StStrangeTagsMaker, $(SUBDIRS))
+#  SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker, $(SUBDIRS)) 
+#  SUBDIRS := $(filter-out objy, $(SUBDIRS))
+endif
 #  SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
   SUBDIRS := $(filter-out vpd par crs egz fri g2x mev, $(SUBDIRS))
 #  ifndef OBJY_HOME
-    SUBDIRS := $(filter-out objy, $(SUBDIRS))
 #  endif
   ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
     SUBDIRS := $(filter-out CLHEP, $(SUBDIRS)) 
