@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.23 2003/05/07 15:10:26 putschke Exp $
+// $Id: StFtpcParamReader.cc,v 1.24 2003/06/10 13:11:51 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.24  2003/06/10 13:11:51  jcs
+// min,max gas temperature and pressure limits removed from ftpcClusterPars
+//
 // Revision 1.23  2003/05/07 15:10:26  putschke
 // improvements for cathode offset corretions
 //
@@ -111,12 +114,8 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mNormalizedNowPressure = detTable->normalizedNowPressure;
     mAdjustedAirPressureWest = detTable->adjustedAirPressureWest;
     mAdjustedAirPressureEast = detTable->adjustedAirPressureEast;
-    mMinPressure = detTable->minPressure;
-    mMaxPressure = detTable->maxPressure;
     mGasTemperatureWest = detTable->gasTemperatureWest;
     mGasTemperatureEast = detTable->gasTemperatureEast;
-    mMinGasTemperature = detTable->minGasTemperature;
-    mMaxGasTemperature = detTable->maxGasTemperature;
     mMaxNumSequences = detTable->maxNumSequences ; 
     mMaxNumSeqPeaks = detTable->maxNumSeqPeaks;
     mMaxNumPeaks = detTable->maxNumPeaks;          
@@ -268,12 +267,8 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mNormalizedNowPressure = detTable->normalizedNowPressure;
     mAdjustedAirPressureWest = detTable->adjustedAirPressureWest;
     mAdjustedAirPressureEast = detTable->adjustedAirPressureEast;
-    mMinPressure = detTable->minPressure;
-    mMaxPressure = detTable->maxPressure;
     mGasTemperatureWest = detTable->gasTemperatureWest;
     mGasTemperatureEast = detTable->gasTemperatureEast;
-    mMinGasTemperature = detTable->minGasTemperature;
-    mMaxGasTemperature = detTable->maxGasTemperature;
     mMaxNumSequences = detTable->maxNumSequences ; 
     mMaxNumSeqPeaks = detTable->maxNumSeqPeaks;
     mMaxNumPeaks = detTable->maxNumPeaks;          

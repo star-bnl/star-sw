@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.23 2003/05/07 15:10:46 putschke Exp $
+// $Id: StFtpcParamReader.hh,v 1.24 2003/06/10 13:11:51 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.24  2003/06/10 13:11:51  jcs
+// min,max gas temperature and pressure limits removed from ftpcClusterPars
+//
 // Revision 1.23  2003/05/07 15:10:46  putschke
 // improvements for cathode offset corretions
 //
@@ -100,12 +103,8 @@ protected:
   Float_t mNormalizedNowPressure;
   Float_t mAdjustedAirPressureWest;
   Float_t mAdjustedAirPressureEast;
-  Float_t mMinPressure;
-  Float_t mMaxPressure;
   Float_t mGasTemperatureWest;
   Float_t mGasTemperatureEast;
-  Float_t mMinGasTemperature; 
-  Float_t mMaxGasTemperature;
   Float_t mLorentzAngleFactor;
   Int_t mOrderOfDiffusionErrors;
   Float_t *mPadDiffusionErrors;
@@ -230,12 +229,8 @@ public:
   Float_t normalizedNowPressure() {return mNormalizedNowPressure;}
   Float_t adjustedAirPressureWest() {return mAdjustedAirPressureWest;}
   Float_t adjustedAirPressureEast() {return mAdjustedAirPressureEast;}
-  Float_t minPressure() {return mMinPressure;}
-  Float_t maxPressure() {return mMaxPressure;}
   Float_t gasTemperatureEast() {return mGasTemperatureEast;}
   Float_t gasTemperatureWest() {return mGasTemperatureWest;}
-  Float_t minGasTemperature() {return mMinGasTemperature;}
-  Float_t maxGasTemperature() {return mMaxGasTemperature;}
   Float_t lorentzAngleFactor() {return mLorentzAngleFactor;}
   Float_t padBadFitError() {return mPadBadFitError;}
   Float_t timeBadFitError() {return mTimeBadFitError;}
