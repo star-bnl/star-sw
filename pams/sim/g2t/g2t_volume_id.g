@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.48 2004/03/19 01:32:22 geurts Exp $
+* $Id: g2t_volume_id.g,v 1.49 2004/09/13 23:14:00 potekhin Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.49  2004/09/13 23:14:00  potekhin
+* New material to support SSD, by Kai
+*
 * Revision 1.48  2004/03/19 01:32:22  geurts
 * TOFp/r changes for y2004: accomodate choice=7 (see geometry/btofgeo/btofgeo2.g)
 *
@@ -137,6 +140,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       nv        = nvb(1)  ! number of real volume levels in NUMBV
 *
 *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
       If    (Csys=='svt') then
 *1*                                          Ken Wilson
 ** Helen altered SVT volume IDs so agrees with hardware defs.
@@ -187,6 +191,9 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         else If (Cd=='SFSD') then
            volume_id =  7000+100*numbv(2)+numbv(1)
         endif
+        
+      else If (Csys=='ssd') then
+        volume_id = 100*numbv(2)+numbv(1)
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       else If (Csys=='tpc') then
 *2*                                        Peter M. Jacobs
