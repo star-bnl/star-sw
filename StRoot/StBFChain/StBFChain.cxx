@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.275 2002/02/21 18:20:50 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.276 2002/02/22 00:34:05 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -425,9 +425,10 @@ ClassImp(StBFChain)
 //_____________________________________________________________________________
 /// Default Constructor
 StBFChain::StBFChain(const char *name):
-StChain(name),fXdfOut(0),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
-   fBFC = new Bfc_st[NoChainOptions];
-   memcpy (fBFC, &BFC, sizeof (BFC));
+  StChain(name),fXdfOut(0),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
+  fBFC = new Bfc_st[NoChainOptions];
+  memcpy (fBFC, &BFC, sizeof (BFC));
+  FDate = FTime = 0;
 }
 //_____________________________________________________________________________
 /// Destructor
@@ -739,6 +740,8 @@ Int_t StBFChain::Finish()
   }
   else return kStOK;
 }
+
+
 //_____________________________________________________________________
 Int_t StBFChain::AddAB (const Char_t *mkname,const StMaker *maker,const Int_t Opt) {
   if (! maker || strlen(mkname) == 0) return kStErr;
@@ -754,6 +757,7 @@ Int_t StBFChain::AddAB (const Char_t *mkname,const StMaker *maker,const Int_t Op
   else         list->AddBefore(mk,(StMaker*)maker);
   return kStOk;
 }
+
 //_____________________________________________________________________
 Int_t StBFChain::ParseString (const TString &tChain, TObjArray &Opt) {
   Int_t nParsed = -1;
@@ -779,7 +783,15 @@ Int_t StBFChain::kOpt (const Char_t *tag) const {
   delete Tag;
   return kO;
 }
+
 //_____________________________________________________________________
+/// Check option if defined.
+/*!
+  This method checks if the options are valid by comparing them
+  to the list of declared options. This is called for each option
+  passed as argument. The real sorting of all options is done in
+  SetFlags().
+ */
 Int_t StBFChain::kOpt (const TString *tag) const {
   TString Tag = *tag;
   Tag.ToLower();
@@ -797,10 +809,14 @@ Int_t StBFChain::kOpt (const TString *tag) const {
     if       (Tag ==  opt) {return  i;}
     else {if (Tag == nopt) {return -i;}}
   }
-  printf ("Option %s has not been recognized\n", Tag.Data());
+  (void) printf (" Option %s has not been recognized\n", Tag.Data());
   return 0;
-}//_____________________________________________________________________
-void StBFChain::SetOption(const Int_t k) {// set all off
+}
+
+//_____________________________________________________________________
+/// Enable/disable valid command line options
+void StBFChain::SetOption(const Int_t k) { 
+  // set all off
   if (k > 0 && !fBFC[k].Flag) {
     //    printf ("SetOption: %s %i",fBFC[k].Key,k);
     if (strlen(fBFC[k].Opts) > 0) {
@@ -813,14 +829,15 @@ void StBFChain::SetOption(const Int_t k) {// set all off
     }
     fBFC[k].Flag = kTRUE;
     printf (" Switch On  %s\n", fBFC[k].Key);
-  }
-  else {
+  } else {
     if (k < 0 && fBFC[-k].Flag) {
       //      printf ("SetOption: %s %i",fBFC[-k].Key,k);
       fBFC[-k].Flag = kFALSE;
       printf (" Switch Off %s\n", fBFC[-k].Key);
+    } else {
+      // 0
+      return;
     }
-    else return;
   }
 }
 //_____________________________________________________________________
@@ -829,6 +846,7 @@ Bool_t StBFChain::GetOption(const Int_t k) const
   return (k>0 && k <NoChainOptions) ? fBFC[k].Flag : kFALSE;
 }
 //_____________________________________________________________________________
+/// Scan all flags, check if they are correct
 void StBFChain::SetFlags(const Char_t *Chain)
 {
   Int_t k;
@@ -854,11 +872,24 @@ void StBFChain::SetFlags(const Char_t *Chain)
     Int_t in = string.Index("=");
     Int_t kgo;
     if (in <= 0) {
-      string.ToLower(); //printf ("Chain %s\n",tChain.Data());
+      string.ToLower(); 
+      // printf ("Chain %s\n",tChain.Data());
       kgo = kOpt(string.Data());
-      if (kgo != 0) SetOption(kgo);
-    }
-    else {// string with  "="
+      if (kgo != 0){
+	SetOption(kgo);
+      } else {
+	// it is 0 i.e. was not recognized. Check if it is a dbvXXXXXXXX
+	// with a 8 digit long time stamp. We can do all of that in the
+	// SetDbOptions() only (removing the fBFC[i].Flag check) but the
+	// goal here is to avoid user's histeria by displaying extra 
+	// messages NOW !!!
+	if( ! strncmp( string.Data() ,"dbv",3) && strlen(string.Data()) == 11){
+	  (void) sscanf(string.Data(),"dbv%d",&FDate);
+	  cout << " ... but still ill be considered as a floating timestamp " << FDate << endl;
+	}
+      }
+    } else {
+      // string with  "="
       TString substring(string.Data(),in);
       substring.ToLower(); //printf ("Chain %s\n",tChain.Data());
       kgo = kOpt(substring.Data());
@@ -1109,13 +1140,31 @@ void StBFChain::SetGeantOptions(){
 }
 //_____________________________________________________________________
 /// This method treats the DbV options used for database timestamp.
+/*!
+  Re-scan all options and search for dbv options. The order matters
+  since a later option would overwrite an earlier one. The mechanism
+  introduced for a floating (i.e. not pre-defined) timestamp is that
+  it will be used ONLY if there are no other timestamp options. 
+  Be aware of this precedence ...
+ */
 void StBFChain::SetDbOptions(){
   Int_t i;
-  Int_t Idate=0, Itime=0;
-  for (i = 1; i< NoChainOptions; i++) {// Load Libraries if any
-    if (fBFC[i].Flag && !strncmp(fBFC[i].Key ,"DbV",3))
-      sscanf(fBFC[i].Comment,"%d/%d",&Idate,&Itime);
+  Int_t Idate=0,Itime=0;
+
+  for (i = 1; i < NoChainOptions; i++) {
+    if (fBFC[i].Flag && !strncmp(fBFC[i].Key ,"DbV",3)){
+      (void) printf("QAInfo: Found time-stamp %s [%s]\n",fBFC[i].Key,fBFC[i].Comment);
+      (void) sscanf(fBFC[i].Comment,"%d/%d",&Idate,&Itime);
+    }
   }
+
+  if( ! Idate && FDate){
+    (void) printf("QAInfo: Switching to user chosen floating time-stamp %d %d\n",FDate,FTime);
+    (void) printf("QAInfo: Chain may crash if time-stamp is not validated by db interface\n");
+    Idate = FDate;
+    Itime = FTime;
+  }
+
   StMakerIter nextMaker(this);
   StMaker *maker;
   while ((maker = nextMaker.NextMaker())) {
