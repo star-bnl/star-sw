@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.54 1998/09/18 22:35:24 fisyak Exp $
+# $Id: MakePam.mk,v 1.55 1998/09/26 02:26:06 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.55  1998/09/26 02:26:06  fisyak
+# Fix NOROOT option
+#
 # Revision 1.54  1998/09/18 22:35:24  fisyak
 # correct dependencies
 #
@@ -384,38 +387,58 @@ $(LIB_PKG)(%.o): %.cdf
 #___________dependencies_________________________________
 ifneq (,$(FILES_IDM))
 $(FILES_ICC) : $(GEN_DIR)/%_i.cc : %.idl
-	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);\
-        $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
-        cp $(STEM)_i.cc  $(STEM).h $(STEM).inc St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/; $(RM) *.*;
+	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
+	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
+	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
+ifndef NOROOT
+	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
+endif
+	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         $(RM) *.h *.inc *.template;
 $(FILES_IH)  : $(GEN_DIR)/%.h    : %.idl
-	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);\
-        $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
-        cp $(STEM)_i.cc  $(STEM).h $(STEM).inc St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/; $(RM) *.*;
-#       cp $(STEM).h $(GEN_DIR)/; $(RM) *.*;
+	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
+	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
+	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
+ifndef NOROOT
+	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
+endif
+	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         $(RM) *.h *.inc *.template;
 $(FILES_INC) : $(GEN_DIR)/%.inc  : %.idl
-	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);\
-        $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
-        cp $(STEM)_i.cc  $(STEM).h $(STEM).inc St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/; $(RM) *.*;
-#       cp $(STEM).inc $(GEN_DIR)/; $(RM) *.*;
+	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
+	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
+	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
+ifndef NOROOT
+	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
+endif
+	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         $(RM) *.h *.inc *.template;
 $(FILES_MHH) : $(GEN_DIR)/St_%_Module.h  : %.idl
-	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);\
-        $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
-        cp $(STEM)_i.cc  $(STEM).h $(STEM).inc St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/; $(RM) *.*;
-#       cp St_$(STEM)_Module.h $(GEN_DIR)/; $(RM) *.*;
+	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
+	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
+	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
+ifndef NOROOT
+	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
+endif
+	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         $(RM) *.h *.inc *.template;
 $(FILES_MOD) : $(GEN_DIR)/St_%_Module.cxx : %.idl
-	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);\
-        $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
-        cp $(STEM)_i.cc  $(STEM).h $(STEM).inc St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/; $(RM) *.*;
-#       cp St_$(STEM)_Module.cxx $(GEN_DIR)/; $(RM) *.*;
+	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
+	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
+	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
+ifndef NOROOT
+	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
+endif
+	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         $(RM) *.h *.inc *.template;
 $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
 	$(RM)  $(GEN_DIR)/$(STEM)_i.cc
-	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);\
-        $(STIC) -q $(STICFLAGS) $(1ST_DEPS); \
-        $(GCC)  $(MKDEPFLAGS)  -x c $(STICFLAGS) $(1ST_DEPS) | \
+	cp  $(1ST_DEPS) $(GEN_TMP)/ ;
+	cd $(GEN_TMP); $(STIC) -q $(STICFLAGS) $(1ST_DEPS); 
+	$(GCC)  $(MKDEPFLAGS)  -x c $(STICFLAGS) $(1ST_DEPS) | \
         sed -e 's/$(STEM)\.idl\.o/$(subst .,\., $(subst /,\/, $(GEN_DIR)))\/$(STEM)\.didl/g' \
-        > $(GEN_DIR)/$(STEM).didl; \
-        $(STIC) -q $(STICFLAGS) $(1ST_DEPS) >>  $(GEN_DIR)/$(STEM).didl;
-#        cp $(STEM)_i.cc $(STEM).h $(STEM).inc $(GEN_DIR); $(RM) *.*; 
+        > $(GEN_DIR)/$(STEM).didl; 
+	cd $(GEN_TMP); $(STIC) -q $(STICFLAGS) $(1ST_DEPS) >>  $(GEN_DIR)/$(STEM).didl; 
+	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
+ifndef NOROOT
+	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
+endif
+	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         $(RM) *.h *.inc *.template;
 endif #IDM
 $(DEP_DIR)/%.d:%.cc 
 	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(1ST_DEPS) | sed -e \
