@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.cxx,v 1.6 2000/12/08 17:03:39 oldi Exp $
+// $Id: StFlowTrack.cxx,v 1.7 2000/12/08 17:27:51 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.cxx,v $
+// Revision 1.7  2000/12/08 17:27:51  oldi
+// New release due to cvs comments in last version.
+//
 // Revision 1.6  2000/12/08 17:03:39  oldi
 // Phi weights for both FTPCs included.
 //
@@ -45,8 +48,6 @@ StFlowTrack::StFlowTrack() : mSelection(0) {
 
 StFlowTrack::~StFlowTrack() {
 }
-<<<<<<< StFlowTrack.cxx
-
 
 void StFlowTrack::SetDetId(Float_t eta) {
     // Sets the detector Id depending on pseudorapidity.
@@ -61,20 +62,3 @@ void StFlowTrack::SetDetId(Float_t eta) {
 
     return;
 }
-=======
-
-
-void StFlowTrack::SetDetId(Float_t eta) {
-    // Sets the detector Id depending on the pseudorapidity eta.
-
-    if (TMath::Abs(eta) < 2.) {
-	SetDetId(kTpcId);
-    }
-
-    else if (TMath::Abs(eta) < 4.5) {
-	eta > 0. ? SetDetId(kFtpcWestId) :SetDetId(kFtpcEastId);
-    } 
-
-    return;
-}
->>>>>>> 1.5
