@@ -3,7 +3,7 @@ enum StDedxMethod {
   kUndefinedMethodId         = kUndefinedMethodIdentifier,
   kTruncatedMeanId           = kTruncatedMeanIdentifier,
   kEnsembleTruncatedMeanId   = kEnsembleTruncatedMeanIdentifier,
-  kLikelihoodFitId           = LikelihoodFitIdentifier,
+  kLikelihoodFitId           = kLikelihoodFitIdentifier,
   kWeightedTruncatedMeanId   = kWeightedTruncatedMeanIdentifier,
   kOtherMethodId             = kOtherMethodIdentifier
 };
