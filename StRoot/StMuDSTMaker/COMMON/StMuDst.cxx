@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.23 2004/04/08 23:58:07 jeromel Exp $
+ * $Id: StMuDst.cxx,v 1.24 2004/04/09 03:36:14 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -28,7 +28,7 @@ TClonesArray* StMuDst::arrays[__NARRAYS__] = {0,0,0,0,0,0,0,0,0};
 TClonesArray* StMuDst::strangeArrays[__NSTRANGEARRAYS__] = {0,0,0,0,0,0,0,0,0,0,0,0};
 TClonesArray* StMuDst::emcArrays[__NEMCARRAYS__] = {0};
 TClonesArray* StMuDst::pmdArrays[__NPMDARRAYS__] = {0};
-TClonesArray* StMuDst::tofArrays[__NTOFARRAYS__] = {0};
+//TClonesArray* StMuDst::tofArrays[__NTOFARRAYS__] = {0, 0};
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
@@ -52,9 +52,9 @@ void StMuDst::unset() {
   for ( int i=0; i<__NPMDARRAYS__; i++) {
     pmdArrays[i] = 0;
   }
-  for ( int i=0; i<__NTOFARRAYS__; i++) {
-    tofArrays[i] = 0;
-  }
+  //for ( int i=0; i<__NTOFARRAYS__; i++) {
+  //  tofArrays[i] = 0;
+  //}
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -74,9 +74,9 @@ void StMuDst::set(StMuDstMaker* maker) {
   for ( int i=0; i<__NPMDARRAYS__; i++) {
     pmdArrays[i] = maker->mPmdArrays[i];
   }
-  for ( int i=0; i<__NTOFARRAYS__; i++) {
-    tofArrays[i] = maker->mTofArrays[i];
-  }
+  //for ( int i=0; i<__NTOFARRAYS__; i++) {
+  //  tofArrays[i] = maker->mTofArrays[i];
+  //}
 
   StStrangeEvMuDst* ev = strangeEvent();
   int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
@@ -90,8 +90,8 @@ void StMuDst::set(StMuDstMaker* maker) {
 void StMuDst::set(TClonesArray** theArrays, 
 		  TClonesArray** theStrangeArrays, 
 		  TClonesArray** theEmcArrays,
-		  TClonesArray** thePmdArrays,
-		  TClonesArray** theTofArrays) 
+		  TClonesArray** thePmdArrays)
+  //TClonesArray** theTofArrays) 
 {
   DEBUGMESSAGE2("");
   for ( int i=0; i<__NARRAYS__; i++) {
@@ -110,11 +110,11 @@ void StMuDst::set(TClonesArray** theArrays,
       pmdArrays[i] = thePmdArrays[i];
     }
   }
-  if (theTofArrays) {
-    for ( int i=0; i<__NTOFARRAYS__; i++) {
-      tofArrays[i] = theTofArrays[i];
-    }
-  }
+  //if (theTofArrays) {
+  //  for ( int i=0; i<__NTOFARRAYS__; i++) {
+  //    tofArrays[i] = theTofArrays[i];
+  //  }
+  //}
 }
 
 //-----------------------------------------------------------------------
@@ -260,14 +260,14 @@ StEvent* StMuDst::createStEvent() {
     if(PMD) ev->setPhmdCollection(PMD);
   }
   // now get the TOF stuff and put it in the StEvent
-  StTofCollection *tofcoll = new StTofCollection();
-  if (tofcoll){
-    int nTofData = tofArrays[muTofData]->GetEntries();
-    for(int i=0;i<nTofData;i++) {
-      tofcoll->addData(tofData(i));
-    }
-    ev->setTofCollection(tofcoll);
-  }
+  //StTofCollection *tofcoll = new StTofCollection();
+  //if (tofcoll){
+  //  int nTofData = tofArrays[muTofData]->GetEntries();
+  //  for(int i=0;i<nTofData;i++) {
+  //    tofcoll->addData(tofData(i));
+  //  }
+  //  ev->setTofCollection(tofcoll);
+  //}
 
   // now create, fill and add new StTriggerIdCollection to the StEvent
   StTriggerIdCollection* triggerIdCollection = new StTriggerIdCollection();
@@ -344,6 +344,10 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.24  2004/04/09 03:36:14  jeromel
+ * Removed TOF support entirely for now as we need a working version ... Will
+ * revisit later.
+ *
  * Revision 1.23  2004/04/08 23:58:07  jeromel
  * Small protection on tofcoll
  *

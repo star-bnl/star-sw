@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.28 2004/04/02 03:24:54 jeromel Exp $
+ * $Id: StMuDstMaker.h,v 1.29 2004/04/09 03:36:15 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -61,11 +61,11 @@ class StMuEmcUtil;
 class StMuPmdUtil;
 
 // tof stuff
-class StMuTofHit;
-class StMuTofHitCollection;
-class StTofCollection;
-class StTofDataCollection;
-class StMuTofUtil;
+//class StMuTofHit;
+//class StMuTofHitCollection;
+//class StTofCollection;
+//class StTofDataCollection;
+//class StMuTofUtil;
 
 class TFile;
 class TTree;
@@ -140,7 +140,7 @@ class StMuDstMaker : public StMaker {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.28 2004/04/02 03:24:54 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.29 2004/04/09 03:36:15 jeromel Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -165,7 +165,7 @@ private:
   StTreeMaker* mTreeMaker;
   StMuEmcUtil* mEmcUtil;
   StMuPmdUtil* mPmdUtil;
-  StMuTofUtil* mTofUtil;
+  //StMuTofUtil* mTofUtil;
 
   int mIoMode;
   int mIoNameMode;
@@ -233,7 +233,7 @@ private:
   void fillTracks(StEvent* ev, StMuCut* cut=0);
   void fillDetectorStates(StEvent* ev);
   void fillL3AlgorithmInfo(StEvent* ev);
-  void fillTof(StEvent* ev);
+  //void fillTof(StEvent* ev);
 
   template <class T, class U> int addType(TClonesArray* tcaTo  , U &u, T *t);
   template <class T>          int addType(TClonesArray* tcaFrom, TClonesArray* &tcaTo ,T *t);
@@ -279,8 +279,8 @@ private:
   TClonesArray* pmdArrays[__NPMDARRAYS__];//->
   TClonesArray* mPmdArrays[__NPMDARRAYS__];//->
 
-  TClonesArray* tofArrays[__NTOFARRAYS__];//->
-  TClonesArray* mTofArrays[__NTOFARRAYS__];//->
+  //TClonesArray* tofArrays[__NTOFARRAYS__];//->
+  //TClonesArray* mTofArrays[__NTOFARRAYS__];//->
 
   ClassDef(StMuDstMaker, 2)
 }; 
@@ -316,6 +316,10 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.29  2004/04/09 03:36:15  jeromel
+ * Removed TOF support entirely for now as we need a working version ... Will
+ * revisit later.
+ *
  * Revision 1.28  2004/04/02 03:24:54  jeromel
  * Changes implements PMD and TOF.  TOF is clearly incomplete.
  *
