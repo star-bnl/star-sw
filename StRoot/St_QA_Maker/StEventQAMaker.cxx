@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.39 2000/06/02 19:59:58 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.40 2000/06/13 00:32:38 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.40  2000/06/13 00:32:38  lansdell
+// added SVT,TPC vertex resolution check; check that pidTraits()[0] exists
+//
 // Revision 1.39  2000/06/02 19:59:58  lansdell
 // added null pointer check for MakeHistRich
 //
@@ -262,7 +265,8 @@ void StEventQAMaker::MakeHistGlob() {
 // so it doesn't need to be calculated here 
 
       // read the det id for the first element of the pidTraits vector -CPL
-      m_det_id->Fill(globtrk->pidTraits()[0]->detector());
+      if (globtrk->pidTraits()[0])
+	m_det_id->Fill(globtrk->pidTraits()[0]->detector());
 
 // now fill all TPC histograms ------------------------------------------------
       if (globtrk->flag()>=100 && globtrk->flag()<200) {
@@ -600,7 +604,8 @@ void StEventQAMaker::MakeHistPrim() {
         Float_t radf = primtrk->detectorInfo()->firstPoint().perp();
 
 	// read the det id for the first element of the pidTraits vector -CPL
-	m_pdet_id->Fill(primtrk->pidTraits()[0]->detector());
+	if (primtrk->pidTraits()[0])
+	  m_pdet_id->Fill(primtrk->pidTraits()[0]->detector());
 
 // now fill all TPC histograms ------------------------------------------------
 	if (primtrk->flag()>=300 && primtrk->flag()<400) {
@@ -889,8 +894,14 @@ void StEventQAMaker::MakeHistVertex() {
       }
     }
 
+    float z_svt = 999.;
+    float z_tpc = -999.;
     for (UInt_t j=0; j<event->numberOfPrimaryVertices(); j++) {
       StPrimaryVertex *aPrimVtx = event->primaryVertex(j);
+
+      if (aPrimVtx->flag() == 201) z_svt = aPrimVtx->position().z();
+      if (aPrimVtx->flag() == 101) z_tpc = aPrimVtx->position().z();
+      cout << " aPrimVtx->flag() : " << aPrimVtx->flag() << endl;
       if (aPrimVtx == primVtx) {
 	m_pv_vtxid->Fill(primVtx->type());
 	if (!isnan(double(primVtx->position().x())))
@@ -916,6 +927,7 @@ void StEventQAMaker::MakeHistVertex() {
 		    aPrimVtx->position().y()*aPrimVtx->position().y());
       }
     }
+    m_vtx_z->Fill(z_tpc-z_svt);
   }
 
   // V0 vertices

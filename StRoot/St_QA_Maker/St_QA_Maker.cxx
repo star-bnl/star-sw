@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.99 2000/06/02 20:07:11 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 1.100 2000/06/13 00:32:38 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.100  2000/06/13 00:32:38  lansdell
+// added SVT,TPC vertex resolution check; check that pidTraits()[0] exists
+//
 // Revision 1.99  2000/06/02 20:07:11  lansdell
 // removed RICH code (now written directly to StEvent)
 //
@@ -1276,11 +1279,17 @@ void St_QA_Maker::MakeHistVertex(){
   St_dst_vertex      *vertex     = (St_dst_vertex *) dstI["vertex"];
   
   if (vertex) {
+    float z_svt = 999.;
+    float z_tpc = -999.;
+
     m_v_num->Fill(vertex->GetNRows());
     m_v_num_sm->Fill(vertex->GetNRows());
     dst_vertex_st  *t   = vertex->GetTable();
 
     for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
+      if (t->iflag == 201) z_svt = t->z;
+      if (t->iflag == 101) z_tpc = t->z;
+
       if (t->iflag==1 && t->vtx_id==kEventVtxId){      // plot of primary vertex only
 	m_pv_vtxid->Fill(t->vtx_id);
 	if (!isnan(double(t->x))) m_pv_x->Fill(t->x);     
@@ -1290,14 +1299,15 @@ void St_QA_Maker::MakeHistVertex(){
 	m_pv_r->Fill(t->x*t->x + t->y*t->y);
       }
       else {                                           // plot of 2ndary vertices only
-      m_v_vtxid->Fill(t->vtx_id);
-      if (!isnan(double(t->x))) m_v_x->Fill(t->x);     
-      if (!isnan(double(t->y))) m_v_y->Fill(t->y);     
-      if (!isnan(double(t->z))) m_v_z->Fill(t->z);     
-      m_v_pchi2->Fill(t->chisq[0]); 
-      m_v_r->Fill(t->x*t->x + t->y*t->y);
+	m_v_vtxid->Fill(t->vtx_id);
+	if (!isnan(double(t->x))) m_v_x->Fill(t->x);     
+	if (!isnan(double(t->y))) m_v_y->Fill(t->y);     
+	if (!isnan(double(t->z))) m_v_z->Fill(t->z);     
+	m_v_pchi2->Fill(t->chisq[0]); 
+	m_v_r->Fill(t->x*t->x + t->y*t->y);
       }
     }
+    m_vtx_z->Fill(z_tpc-z_svt);
   }
 
   // V0 vertices

@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.43 2000/06/02 01:11:52 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 1.44 2000/06/13 00:32:38 lansdell Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.44  2000/06/13 00:32:38  lansdell
+// added SVT,TPC vertex resolution check; check that pidTraits()[0] exists
+//
 // Revision 1.43  2000/06/02 01:11:52  lansdell
 // added several x,y,z-dca to beam axis histograms
 //
@@ -578,6 +581,8 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_pv_z=0;     //!   system
   m_pv_pchi2=0; //! row1-chisq per dof of vertex fit
   m_pv_r=0;     //! radius to primary vertex
+
+  m_vtx_z=0;    //! SVT vertex finder resolution relative to main finder
 
   m_v0           =0; //! # v0 vertices
   m_ev0_lama_hist=0; //! Lambda mass
@@ -1447,6 +1452,8 @@ void StQABookHist::BookHistVertex(){
   m_pv_z     = QAH1F("QaVtxPrZ",    " vertex,prim: z ",50,-50.,50.);
   m_pv_pchi2 = QAH1F("QaVtxPrChisq"," vertex,prim: chisq/dof ",40,0.,20.);
   m_pv_r     = QAH1F("QaVtxPrR",    " vertex,prim: r ",100,0,0.1);
+
+  m_vtx_z    = QAH1F("QaVtxZres"," vertex: z(tpc)-z(svt), resolution check",100,-.1,.1);
   
   m_v0             = QAH1F("QaV0Vtx","dst_v0_vertex: Number V0 found ",50,0.,2000.);
   m_ev0_lama_hist  = QAH1F("QaV0LambdaMass","dst_v0_vertex: Lambda mass",50,1.05,1.15);
