@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StL3AlgorithmInfo.h,v 2.3 2002/02/22 22:56:48 jeromel Exp $
+ * $Id: StL3AlgorithmInfo.h,v 2.4 2003/05/23 20:40:44 ullrich Exp $
  *
  * Author: Christof Struck, July 2001
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StL3AlgorithmInfo.h,v $
+ * Revision 2.4  2003/05/23 20:40:44  ullrich
+ * Removed dependcies on DAQ lib in header file.
+ *
  * Revision 2.3  2002/02/22 22:56:48  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -29,10 +32,10 @@
 #define StL3AlgorithmInfo_hh
 
 #include "StObject.h"
-#include "StDaqLib/L3/L3_Banks.hh"
 #include "TArrayF.h"
 #include "TArrayI.h"
 
+class Algorithm_Data;
 
 class StL3AlgorithmInfo : public StObject
 {
