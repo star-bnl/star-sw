@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.51 2004/01/27 02:44:16 perev Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.52 2004/02/11 00:42:17 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.52  2004/02/11 00:42:17  caines
+ * Put common mode back
+ *
  * Revision 1.51  2004/01/27 02:44:16  perev
  * LeakOff
  *
@@ -527,58 +530,57 @@ Int_t StSvtSeqAdjMaker::Make()
 	  mHybridAdjData->setTimeZero(mHybridRawData->getTimeZero());
 	  mHybridAdjData->setSCAZero(mHybridRawData->getSCAZero());
 
-	  doCommon = 0;
+	  doCommon = 1;
 	  mNAnodes = FindBlackAnodes();
-	  // Switch off common mode noise calc even if no black Anodes
-	  // as this is no longer a problem
-// 	  if( doCommon || !mNAnodes ){
-// 	    if (Debug())   gMessMgr->Debug() << "Doing Common mode average for index " << index << endl;
 
-// 	    // Zero Common Mode Noise arrays
-// 	    for(int Timebin=0; Timebin<128; Timebin++){
-// 	      mCommonModeNoise[Timebin]=0;
-// 	      mCommonModeNoiseAn[Timebin]=0;	
-// 	    } 
-// 	  }
-// 	  for( int iAnode= 0; iAnode< mHybridRawData->getAnodeList(anolist); iAnode++)
-// 	   {
-// 	     Anode = anolist[iAnode];  
+	  if( doCommon || !mNAnodes ){
+	    if (Debug())   gMessMgr->Debug() << "Doing Common mode average for index " << index << endl;
 
-// 	  // here anode is real anode number (1-240)
-// 	  //if (Debug())MakeHistogramsAdc(mHybridRawData,index,Anode,1);
-// 	  if( doCommon)  CommonModeNoiseCalc(iAnode);
-// 	   }
+	    // Zero Common Mode Noise arrays
+	    for(int Timebin=0; Timebin<128; Timebin++){
+	      mCommonModeNoise[Timebin]=0;
+	      mCommonModeNoiseAn[Timebin]=0;	
+	    } 
+	  }
+	  for( int iAnode= 0; iAnode< mHybridRawData->getAnodeList(anolist); iAnode++)
+	   {
+	     Anode = anolist[iAnode];  
+
+	  // here anode is real anode number (1-240)
+	  //if (Debug())MakeHistogramsAdc(mHybridRawData,index,Anode,1);
+	     if( doCommon)  CommonModeNoiseCalc(iAnode);
+	   }
 	 
-// 	  if( doCommon){
-// 	    int TimeLast, TimeAv, TimeSum, TimeAvSav;
-// 	    TimeLast = 0;
-// 	    TimeSum = 0;
-// 	    TimeAv=0;
-// 	    TimeAvSav = 0;
-// 	    for( int TimeBin=0; TimeBin<128; TimeBin++){
-// 	      if(mCommonModeNoiseAn[TimeBin] > 20)
-// 		mCommonModeNoise[TimeBin] /= mCommonModeNoiseAn[TimeBin];
-// 	      else  mCommonModeNoise[TimeBin] =0;
+	  if( doCommon){
+	    int TimeLast, TimeAv, TimeSum, TimeAvSav;
+	    TimeLast = 0;
+	    TimeSum = 0;
+	    TimeAv=0;
+	    TimeAvSav = 0;
+	    for( int TimeBin=0; TimeBin<128; TimeBin++){
+	      if(mCommonModeNoiseAn[TimeBin] > 30)
+		mCommonModeNoise[TimeBin] /= mCommonModeNoiseAn[TimeBin];
+	      else  mCommonModeNoise[TimeBin] =0;
 	      
-// 	      if( Debug()){
-// 		if( index < 4 && mCommonModeNoiseAn[TimeBin] > 20){
-// 		  if( TimeLast < TimeBin-3 && TimeSum > 0){
+	      if( Debug()){
+		if( index < 4 && mCommonModeNoiseAn[TimeBin] > 20){
+		  if( TimeLast < TimeBin-3 && TimeSum > 0){
 		    
-// 		    TimeAv /= TimeSum;
-// 		    TimeLast = TimeBin;
-// 		    TimeAvSav = TimeAv;
-// 		    TimeAv = 0;
-// 		    TimeSum=0;
-// 		  }
-// 		  else{
-// 		    TimeAv +=TimeBin;
-// 		    TimeSum++;
-// 		    TimeLast = TimeBin;
-// 		  }
-// 		}
-// 	      } // End of if If(Debug)
-// 	    }
-// 	  } // End of If(Common)
+		    TimeAv /= TimeSum;
+		    TimeLast = TimeBin;
+		    TimeAvSav = TimeAv;
+		    TimeAv = 0;
+		    TimeSum=0;
+		  }
+		  else{
+		    TimeAv +=TimeBin;
+		    TimeSum++;
+		    TimeLast = TimeBin;
+		  }
+		}
+	      } // End of if If(Debug)
+	    }
+	  } // End of If(Common)
 	
 	  for( int iAnode= 0; iAnode<mHybridRawData->getAnodeList(anolist); iAnode++)
             {
@@ -591,7 +593,7 @@ Int_t StSvtSeqAdjMaker::Make()
 		  continue;
 		}
 	      }
-	      // if( doCommon) CommonModeNoiseSub(iAnode);
+	      if( doCommon) CommonModeNoiseSub(iAnode);
 	      else SubtractFirstAnode(iAnode);
 	      //if (Debug() && !doCommon)MakeHistogramsAdc(mHybridRawData,index,Anode,1);
 	      //Perform Asic like zero suppression
