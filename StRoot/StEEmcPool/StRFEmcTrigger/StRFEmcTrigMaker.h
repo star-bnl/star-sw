@@ -1,6 +1,6 @@
 // *-- Author : Renee Fatemi
 // 
-// $Id: StRFEmcTrigMaker.h,v 1.3 2004/08/18 14:56:35 balewski Exp $
+// $Id: StRFEmcTrigMaker.h,v 1.4 2004/08/18 19:52:49 balewski Exp $
 
 
 #ifndef STAR_StRFEmcTrigMaker
@@ -20,34 +20,25 @@
 #include "TrigDims.h"
 #endif
 
-class StChain;
+
 class TH1F;
-class TH2F;
 class StMuDst;
 class StMuEmcCollection;
-class StMuDstMaker;
 class StEmcGeom;
 class StEvent;
-class StEventMaker;
 class StMuEvent;
 class StBbcTriggerDetector;
-class StMuEmcPoint;
-class StMuTrack;
-class StEventInfo;
 class StEmcCollection;
-class StEmcDetector;
 
 class StRFEmcTrigMaker : public StMaker {
 
  private:
- StMuDstMaker *muDstMaker;   
- StMuEmcCollection *muEmcCol;
  StEmcGeom *emcGeom; 
  StMuEvent *muEvent;
- StEventMaker *eventMaker;
- StEvent *event;
- StEmcCollection *EmcCol;
- StEmcDetector *EmcDet;
+ StEvent *stEvent;
+ StEmcCollection *stEmcCol;
+ StMuEmcCollection *muEmcCol;
+ StBbcTriggerDetector *bbcCol;
 
  int DataMode;//0 for MuDst, 1 for StEvent
  int det;//detector number =1 for BTOW
@@ -81,11 +72,18 @@ class StRFEmcTrigMaker : public StMaker {
  int jpE_hit_num[EemcJP];//Holds number of hits per JP
  int tpEsum[EemcTP];// Holds Trigger Patch energy sum
  int tpEmax[EemcTP];// Holds Trigger Patch HT 
+ 
+ TH1F *ha[8];
+ void  initHisto();
+ void  fillHisto();
 
  void Sum(int *,int *);
  void Max(int *,int *);
+ void unpackEmcFromMu();
+ void unpackEmcFromSt();
+ void unpackBBC();
 
- bool activeBBC,acceptAll;
+ bool activeBBC;
  
  protected:
  
@@ -112,10 +110,10 @@ class StRFEmcTrigMaker : public StMaker {
   Int_t getEEMC_JP_ADC();
   Int_t getEEMC_TOT_ADC();
 
-  void requireBBC(){ activeBBC=true; acceptAll=false;}
+  void requireBBC(){ activeBBC=true;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StRFEmcTrigMaker.h,v 1.3 2004/08/18 14:56:35 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StRFEmcTrigMaker.h,v 1.4 2004/08/18 19:52:49 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -126,6 +124,9 @@ class StRFEmcTrigMaker : public StMaker {
 
 
 // $Log: StRFEmcTrigMaker.h,v $
+// Revision 1.4  2004/08/18 19:52:49  balewski
+// works for BBC
+//
 // Revision 1.3  2004/08/18 14:56:35  balewski
 // trying to get BBC working
 //
