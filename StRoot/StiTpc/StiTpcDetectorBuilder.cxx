@@ -278,6 +278,8 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
 	  else
 	    pDetector->setHitErrorCalculator(&_outerCalc);
 	  pDetector->setElossCalculator(gasElossCalculator);
+	  pDetector->setKey(1,row);
+	  pDetector->setKey(2,sector);
 	  add(row,sector,pDetector);
 	}// for sector
     }// for row
