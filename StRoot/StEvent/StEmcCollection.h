@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcCollection.h,v 2.4 2002/02/22 22:56:47 jeromel Exp $
+ * $Id: StEmcCollection.h,v 2.5 2004/03/26 21:54:15 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCollection.h,v $
+ * Revision 2.5  2004/03/26 21:54:15  ullrich
+ * Added StEmcRawData to collection.
+ *
  * Revision 2.4  2002/02/22 22:56:47  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -35,6 +38,7 @@
 #include "StContainers.h"
 #include "StEnumerations.h"
 #include "StEmcPoint.h"
+#include "StEmcRawData.h"
 
 class StEmcDetector;
 
@@ -51,10 +55,17 @@ public:
     StSPtrVecEmcPoint&        endcapPoints();
     const StSPtrVecEmcPoint&  endcapPoints() const;
     
+    StEmcRawData*             bemcRawData();
+    StEmcRawData*             eemcRawData();
+    
     void addBarrelPoint(const StEmcPoint*);
     void addEndcapPoint(const StEmcPoint*);
   
     void setDetector(StEmcDetector*);
+    
+    void setBemcRawData(StEmcRawData*);
+    void setEemcRawData(StEmcRawData*);
+    
 
 private:
     StEmcCollection(const StEmcCollection&);
@@ -64,8 +75,10 @@ private:
     StEmcDetector*            mDetector[8];
     StSPtrVecEmcPoint         mBarrel;
     StSPtrVecEmcPoint         mEndcap;
+    StEmcRawData*             mBemcRawData;
+    StEmcRawData*             mEemcRawData;
 
-    ClassDef(StEmcCollection,1)
+    ClassDef(StEmcCollection,2)
 };
 #endif
 
