@@ -98,8 +98,12 @@
 #define nPadsSector 5692	/* # of pads per sector */
 #define nPadsTotal  nSectors*nPadsSector
 #define nChansTotal nSectors*nRDOs*nGroups*nChans
+#ifndef TRUE
 #define TRUE  1   		/* Defined for code legibility */
+#endif
+#ifndef FALSE
 #define FALSE 0   		/* Defined for code legibility */
+#endif
 
 /* Some pixel-packing parameters */
 #define Bfact  1024
