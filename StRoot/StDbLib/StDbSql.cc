@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.1 2001/01/22 18:37:59 porter Exp $
+ * $Id: StDbSql.cc,v 1.2 2001/01/23 14:38:16 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.2  2001/01/23 14:38:16  porter
+ * fixed bug in parsing flavor string where string contains a list of flavors.
+ *
  * Revision 1.1  2001/01/22 18:37:59  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -1220,8 +1223,8 @@ StDbSql::getFlavorQuery(const char* flavor){
  ostrstream fs;
  fs<<" flavor In(";
  while(( (id2)=strstr(id3,"+")) ){
-    *id2='0';
-    fs<<"'"<<id3<<"'";
+    *id2='\0';
+    fs<<"'"<<id3<<"',";
     *id2='+';
     id2++;
     id3=id2;
@@ -1229,7 +1232,8 @@ StDbSql::getFlavorQuery(const char* flavor){
  fs<<"'"<<id3<<"')"<<ends;
  delete [] id1;
 
-return mretString=fs.str();
+ mretString=fs.str();
+return mretString;
 }
 
 ///////////////////////////////////////////////
