@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.53 2001/08/14 16:42:48 perev Exp $
+// $Id: StMaker.h,v 1.54 2001/10/13 20:23:45 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.54  2001/10/13 20:23:45  perev
+// SetFlavor  working before and after Init()
+//
 // Revision 1.53  2001/08/14 16:42:48  perev
 // InitRun call improved
 //
@@ -165,6 +168,10 @@ class StMaker : public TDataSet{
 public:
    typedef  enum {kNormal, kDebug} EDebugLevel;
    enum {kSTAFCV_BAD, kSTAFCV_OK, kSTAFCV_ERR=2, kSTAFCV_FATAL=3} EModule_return_Status;
+   enum {kInitBeg = BIT(1), kInitEnd = BIT(2)
+        ,kMakeBeg = BIT(3), kCleaBeg = BIT(4)
+        ,kFiniBeg = BIT(5), kFiniEnd = BIT(6)
+        ,kActive  = BIT(7)};
 
 protected:
 
@@ -186,7 +193,6 @@ protected:
    TStopwatch      m_Timer;             //!Timer object
    TMemStat       *fMemStatMake;	//!TMemStat for Make
    TMemStat       *fMemStatClear;	//!TMemStat for Clear
-   Bool_t          fActive;             // true if active
 
 public:
 
@@ -255,7 +261,6 @@ public:
    virtual TDataSet  *GetInputDB (const char* logInput)
                           {return GetDataBase(logInput);};
    virtual Int_t   GetValidity(const TTable *tb, TDatime *val) const;
-   virtual TDataSet*  UpdateDB(TDataSet* ds){if (ds){};return 0;};
 
 
    virtual Int_t 	GetDebug() const {return m_DebugLevel;}
@@ -268,15 +273,16 @@ public:
    virtual TList       *GetMakeList() const ;
    virtual StMaker     *GetParentMaker () const;
    virtual StMaker     *GetMaker (const char *mkname);
-   virtual Bool_t       IsActive() {return fActive;}
+   virtual Bool_t       IsActive() {return TestBit(kActive);}
    virtual StMaker     *Maker (const char *mkname){return GetMaker (mkname);};
 
 
 //    Setters for flags and switches
 
+   virtual void         SetActive(Bool_t k=kTRUE) {if(k) {SetBit(kActive);} else {ResetBit(kActive);}} 
    virtual void        	SetDebug(Int_t l=1){m_DebugLevel = l;}   // *MENU*
    virtual void        	SetDEBUG(Int_t l=1);                     // *MENU*
-   virtual void         SetActive(Bool_t k=kTRUE){fActive = k;}  // *MENU*
+   virtual void         SetFlavor(const char *flav,const char *tabname);  //Set DB Flavor
    virtual void         SetMakeReturn(Int_t ret){m_MakeReturn=ret;}  
    virtual void       	SetAlias(const char* log,const char* act,const char* dir=".aliases");
    virtual void       	AddAlias(const char* log,const char* act,const char* dir=".aliases");
@@ -304,7 +310,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.53 2001/08/14 16:42:48 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.54 2001/10/13 20:23:45 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
