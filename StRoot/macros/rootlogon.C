@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.38 2004/01/29 17:50:12 perev Exp $
+// $Id: rootlogon.C,v 1.39 2004/02/21 03:04:36 perev Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -20,9 +20,9 @@ namespace rootlogon {
   }
   if (rootlogon::fpe) {
     gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
-    printf("*** Float Point Exception is ON ***");
+    printf("*** Float Point Exception is ON ***\n");
   } else {
-    printf("*** Float Point Exception is OFF ***");
+    printf("*** Float Point Exception is OFF ***\n");
   }
   // 	Load StarRoot lib.
   gSystem->Load("StarRoot");
