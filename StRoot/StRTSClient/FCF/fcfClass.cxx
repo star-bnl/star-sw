@@ -1,4 +1,6 @@
 /*
+	Version 5.12	Added track ID
+	Version 5.11	Production for FY04
 	Version 5.00	07/11/2003	Many small fixes
 	Version 4.31	11/19/2002	Still fixing on I960s...
 	Version 4.30	11/13/2002	Re-implemented Gain & T0
@@ -22,7 +24,9 @@
 #include <stdarg.h>
 
 
-#define FCF_VERSION	"5.11"	
+#define FCF_VERSION	"5.12"	
+
+
 
 #define FCF_EXTENTS
 
@@ -36,9 +40,11 @@
 
 #endif
 
+#ifdef __unix
+#define FCF_SIM_ON	1	// enable simulation track IDs if under unix
+#endif
 
 
-//#define FCF_TEST
 
 
 
@@ -75,11 +81,14 @@ struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 	u_short	 t1, t2, p1, p2 ;	
 #endif
 
-#ifdef FCF_TEST
+#ifdef FCF_SIM_ON
 	// new - test only...
-	u_int pix ;		// unused?
-	u_int adc_max ;
-	u_int id ;
+	u_int pix ;		// pixel count
+	u_int adc_max ;		// maximum adc
+
+	short quality ;		// sim. quality
+	short id ;		// sim. id
+	
 #endif
 
 } ;
@@ -89,17 +98,9 @@ struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 #pragma align 0
 #endif
 
-#ifdef FCF_TEST
-void mergeTest(struct fcfResx *nw, struct fcfResx *old);
-
-struct testADC {
-	u_short adc ;
-	u_short id ;
-} testADC[256][512] ;
-
-#endif
 
 #ifdef __unix
+
 
 #define FCF_MAX_RES_COU_FAST	8
 
@@ -111,6 +112,10 @@ struct testADC {
 #define FCF_960_R11
 #define FCF_960_R13
 
+// simulation global
+#ifdef FCF_SIM_ON
+u_int *simout ;
+#endif
 
 extern __inline volatile void mstore(struct fcfResx *rr, int av, int ch, u_int mean, u_int flags)
 {
@@ -201,7 +206,24 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 	*cl_found_pointer = 0 ;
 	*row_pointer = row ;
+#ifdef FCF_SIM_ON
+	u_int *sim_found_ptr, *sim_row_ptr ;
+	short *simin ;
 
+	simin = simIn ;	// copy the originals
+	simout = simOut ;
+
+	if(simin && simout) {
+		sim_row_ptr = simout++ ;
+		sim_found_ptr = simout++ ;
+
+		*sim_found_ptr = 0 ;
+		*sim_row_ptr = row ;
+	}
+	else {
+		simout = 0 ;
+	}
+#endif
 
 	new_res_ix = 0 ;
 	new_res_cou = old_res_cou = 0 ;
@@ -215,10 +237,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 
 
-#ifdef FCF_TEST
-	memset(testADC,0,sizeof(testADC)) ;
-	int globalId = 1 ;
-#endif
+
 
 	for(pad=padStart;pad<=padStop;pad++) {
 		u_int GC ;	// gain correction
@@ -311,7 +330,15 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 		u_char *val = (u_char *)((u_int)adcin + adcOff[pad]) ;
 #endif
 
-
+#ifdef FCF_SIM_ON
+		u_short *simval ;
+		if(simout) {
+			simval = (u_short *)((u_int)simin + adcOff[pad]) ;
+		}
+		else {
+			simval = 0 ;
+		}
+#endif
 
 		if((next_pad != pad) && new_res_cou) {	// we skipped a pad and there
 							// was some stuff remaining!
@@ -320,7 +347,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 			// check for space!
 			if((*cl_found_pointer + new_res_cou) >= maxClusters) {
-				LOG(TERR,"Too many clusters in pad %d - breaking!",pad,0,0,0,0) ;
+				LOG(ERR,"Too many clusters in pad %d - breaking!",pad,0,0,0,0) ;
 				return outres - row_pointer ;
 			}
 
@@ -331,6 +358,11 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 			outres += wrote*2 ;	// occupies 8 bytes (2 words)
 			*cl_found_pointer += wrote ;
 
+#ifdef FCF_SIM_ON
+			if(simout) {
+				*sim_found_ptr += wrote ;
+			}
+#endif
 			// since we skipped a pad and stored the old results we must zap the old results, V4.01
 			new_res_cou = 0 ;
 		}
@@ -409,6 +441,22 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 			register u_char *adc_end = val + stop + 1;
 #endif
 
+#ifdef FCF_SIM_ON
+			u_short *sim_p  ;
+			u_short sim_id  ;
+
+			if(simout) {
+				sim_p = simval + start ;
+				sim_id = *sim_p++ ;
+			}
+			else {
+				sim_p = 0 ;
+				sim_id = 0 ;
+			}
+
+			short sim_quality = 100 ;	// assume 100%
+#endif
+
 			register int flags = FCF_ONEPAD | start_flags ; 
 			register int adc = *adc_p++ ;
 
@@ -429,6 +477,11 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				register int av FCF_960_R8 = 0 ;
 
 				register int last_a = 0 ;
+
+#ifdef FCF_SIM_ON
+				int max_sim  = sim_id ;
+#endif
+
 #ifdef FCF_EXTENTS
 				stop = start ;	// take this out when running!
 #endif
@@ -437,6 +490,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				do {
 
 					register int a ;
+
 
 					if(unlikely(last_falling)) {
 						if(unlikely(adc > (last_a + min_adc))) {	// mostly false
@@ -452,6 +506,9 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 						else {
 							if(unlikely(adc >= max_a)) {	// find the maximum and keep it...
 								max_a = adc ;
+#ifdef FCF_SIM_ON
+								max_sim = sim_id ;
+#endif
 								mean = start ;	// this is not the 
 
 							}
@@ -475,9 +532,11 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 					last_a = adc ;
 
 
-#ifdef FCF_TEST
-					testADC[pad][start].adc = adc ;
-					testADC[pad][start].id = globalId ;
+
+#ifdef FCF_SIM_ON
+					if(max_sim != sim_id) {
+						sim_quality = 2 ;
+					}
 #endif
 
 
@@ -488,6 +547,11 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 					//LOG(WARN,"Pad %d, start %d, adc %d, charge %d",pad,start,adc,charge,0) ;
 
 					adc = *adc_p++ ;	// advance here!
+#ifdef FCF_SIM_ON
+					if(simout) {
+						sim_id = *sim_p++ ;
+					}
+#endif
 
 					//LOG(DBG,"... adc_p 0x%08X (end 0x%08X)",(u_int)adc_p,(u_int)adc_end,0,0,0) ;
 
@@ -504,13 +568,12 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				av = GC * av + T0C * charge ;	
 
 
-
 				charge *= GC ;	// charge is now 64 times larger!
 
 
 #ifdef __unix
 				if(charge > 0x7FFFFFFF) {
-					LOG(TERR,"Whoa charge 0x%08X, %d GC",charge,GC,0,0,0) ;
+					LOG(ERR,"Whoa charge 0x%08X, %d GC",charge,GC,0,0,0) ;
 				}
 #endif
 				//delta[2] += mzFastTimerDelta(mark) -delta[1];
@@ -533,11 +596,11 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 #endif
 				//LOG(WARN,"Pad %d, stored max at %d, t1 %d, t2 %d",pad,mean,rn->t1,rn->t2,0) ;
 				
-#ifdef FCF_TEST
+#ifdef FCF_SIM_ON
 				rn->pix = start-stop ;
-				rn->adc_max = adc8to10[max_a] ;
-				rn->id = globalId ;
-				globalId++ ;
+				rn->adc_max = max_a ;
+				rn->id = max_sim ;
+				rn->quality = sim_quality ;
 #endif				
 
 				//if(((u_int)adc_p & 0xF)==0) preburst4(adc_p) ;
@@ -624,11 +687,11 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 
 							// the old guy gets half of the previous less
-//#ifdef __unix
+
 							if(unlikely(sc_tmp > rr->charge)) {
 								LOG(WARN,"oops - going negative 0x%08X - 0x%08X",rr->charge,sc_tmp,0,0,0) ;
 							}
-//#endif
+
 
 							rr->charge -= sc_tmp ;
 							rr->pad -= sc_p_tmp ;
@@ -673,16 +736,26 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 					// I'm not sure this is good!
 
 #ifdef FCF_EXTENTS
-//					nresx->p2 = pad ;	// the new guy had the larger pad
 					nresx->p1 = rr->p1 ;	// the old guy has the smaller pad
 					if(rr->t1 < nresx->t1) nresx->t1 = rr->t1 ;
 					if(rr->t2 > nresx->t2) nresx->t2 = rr->t2 ; 
 #endif
 
-#ifdef FCF_TEST
+#ifdef FCF_SIM_ON
 					nresx->pix += rr->pix ;
-					if(rr->adc_max > nresx->adc_max) nresx->adc_max = rr->adc_max ;
-					//mergeTest(nresx, rr) ;
+
+					if(nresx->id != rr->id) {
+						nresx->quality = 1 ;	// differ, thus dirty
+					}
+					else if((nresx->quality != 100) || (rr->quality != 100)) {
+						nresx->quality = 50 ;
+					}
+
+					if(rr->adc_max > nresx->adc_max) {
+						nresx->adc_max = rr->adc_max ;
+						
+						nresx->id = rr->id ;
+					}
 #endif
 					new_start = j + 1 ;
 
@@ -702,7 +775,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 				// check for space!
 				if((*cl_found_pointer + 1) >= maxClusters) {
-					LOG(TERR,"Too many clusters in pad %d - breaking!",pad,0,0,0,0) ;
+					LOG(ERR,"Too many clusters in pad %d - breaking!",pad,0,0,0,0) ;
 					return outres - row_pointer ;
 				}
 
@@ -713,6 +786,11 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				wrote = saveRes(&rr, 1, outres) ;
 				outres += wrote*2 ;	// occupies 8 bytes
 				*cl_found_pointer += wrote ;
+#ifdef FCF_SIM_ON
+				if(simout) {
+					*sim_found_ptr += wrote ;
+				}
+#endif
 			}
 
 		}
@@ -727,8 +805,8 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 		// check for space!
 
 		if((*cl_found_pointer + new_res_cou) >= maxClusters) {
-			printf("FCF:Too many clusters!\n") ;
-			LOG(TERR,"Too many clusters in pad %d - breaking!",pad,0,0,0,0) ;
+			//printf("FCF:Too many clusters!\n") ;
+			LOG(ERR,"Too many clusters in pad %d - breaking!",pad,0,0,0,0) ;
 			return outres - row_pointer ;
 		}
 
@@ -737,6 +815,11 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 		wrote = saveRes(new_res, new_res_cou, outres) ;
 		outres += wrote*2 ;	// occupies 8 bytes
 		*cl_found_pointer += wrote ;
+#ifdef FCF_SIM_ON
+		if(simout) {
+			*sim_found_ptr += wrote ;
+		}
+#endif
 	}
 
 	//if(row == 14) printf("Row %d: length %d\n",row,outres-row_pointer) ;
@@ -756,11 +839,13 @@ fcfClass::fcfClass(int det, u_short *table)
 
 #ifdef __unix
 	a8to10 = adc8to10_storage ;
-
 #else	// I960
 	a8to10 = fastMem->adc8to10 ;
 #endif
 
+
+	simIn = 0 ;		// assume no simulation unless explicitly overriden later
+	simOut = 0 ;
 
 	if(table == NULL) {
 		noADCconversion = 1 ;
@@ -907,12 +992,12 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 			else if((rr->t2-rr->t1) <= 3) continue ;
 		}
 
-//#ifdef __unix
+
 		if((cha == 0) || (cha > 0x7FFFFFFF)) {
-			LOG(TERR,"Bad charge: pad 0x%08X, time 0x%08X, charge 0x%08X, flags 0x%04X",rr->pad,rr->t,rr->charge,fla,0) ;
+			//LOG(WARN,"Bad charge: pad 0x%08X, time 0x%08X, charge 0x%08X, flags 0x%04X",rr->pad,rr->t,rr->charge,fla,0) ;
 			continue ;
 		}
-//#endif
+
 
 		pad_c = rr->pad ;
 		time_c = rr->t ;
@@ -927,7 +1012,7 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 				pad_c = ((pad_c + cha/2) / cha) << 6 ;
 			}
 
-//			LOG(WARN,"Precision lost: orig pad %u, orig cha %u, t_cha %u, pad_c %u",rr->pad,cha,t_cha,pad_c,0) ;
+			//LOG(WARN,"Precision lost: orig pad %u, orig cha %u, t_cha %u, pad_c %u",rr->pad,cha,t_cha,pad_c,0) ;
 		}
 		else {
 			// increased resolution
@@ -961,9 +1046,7 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 		}
 
 		if(cha > 0xFFFF) {
-//#ifdef __unix
 			//LOG(WARN,"Charge too big 0x%08X - setting to 0xffff (pad 0x%08X, time 0x%08X)...",cha,rr->pad,rr->t,0,0) ;
-//#endif
 			cha = 0xFFFF ;
 			fla |= FCF_DOUBLE_T | FCF_DOUBLE_PAD ;	// mark it somehow!
 		}
@@ -974,7 +1057,7 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 
 		// thse bits should never be set!!! - will use them for flags!
 		if((pad_c & 0xc000) || (time_c & 0x8000)) {
-			LOG(TERR,"Strange pad 0x%04X, time 0x%04X...",pad_c,time_c,0,0,0) ;
+			LOG(ERR,"Strange pad 0x%04X, time 0x%04X...",pad_c,time_c,0,0,0) ;
 			continue ;
 		}
 
@@ -1027,16 +1110,28 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 		if(fla & FCF_ROW_EDGE) fl |= 0x8000 ;
 		if(fla & FCF_BROKEN_EDGE) fl |= 0x4000 ;
 
-		fla = fl ;
+//		fla = fl ;
 #endif	
 
 
 		// watchout for ordering!
 		*output++ = (time_c << 16) | pad_c ;
-		*output++ = (cha << 16) | fla ;
+		*output++ = (cha << 16) | fl ;
 
+#ifdef FCF_SIM_ON
+		if(simout) {
+			struct FcfSimOutput *s = (struct FcfSimOutput *) simout ;
+
+			s->id_simtrk = rr->id ;
+			s->id_quality = rr->quality ;
+
+			s->reserved = time_c ;	// put something for test...
+
+			simout += sizeof(struct FcfSimOutput)/4 ;	// advance here
+		}
+#endif
 		//LOG(WARN,"time 0x%02X, pad 0x%02X, cha 0x%02X, fla 0x%02X",
-		//   time_c, pad_c, cha, fla,0) ;
+		//   time_c, pad_c, cha, fl,0) ;
 
 		saved++ ;
 
@@ -1046,22 +1141,4 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 	//LOG(DBG,"saveRes saved %d clusters...",saved,0,0,0,0) ;
 	return saved ;
 }
-
-#ifdef FCF_TEST
-
-void mergeTest(struct fcfResx *nw, struct fcfResx *old)
-{
-	int i, j ;
-
-	for(i=0;i<256;i++) {
-		for(j=0;j<512;j++) {
-			if(testADC[i][j].id == old->id) {
-				testADC[i][j].id = nw->id ;
-			}
-		}
-	}
-
-	return ;
-}
-#endif
 

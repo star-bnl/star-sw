@@ -27,17 +27,18 @@
 #define FCF_GAIN_FACTOR		(1<<FCF_GAIN_SHIFT)	// 64!!!
 
 
-#ifdef FCF_EXTENSION
-#define FCF_WORDS_PER_CLUSTER	3
-#else
 #define FCF_WORDS_PER_CLUSTER	2
-#endif
 
-#if defined(unix) || defined(__ROOT__)
+
+#if defined(__unix) || defined(__ROOT__)
 	typedef unsigned int u_int;
 	typedef unsigned short u_short;
 	typedef unsigned char u_char;  
 #endif
+
+
+
+
 
 struct FcfSimOutput {   // this is just the payload definition.
   short id_simtrk;
@@ -117,6 +118,55 @@ private:
 
 	u_int chargeMinCorrect ;
 } ;
+
+
+// Tonko: merged fcfAfterburner.hh into here
+
+struct fcfHit {
+	u_short pad ;
+	u_short tm ;
+	u_short f ;
+	u_short c ;
+	u_short p1,p2,t1,t2 ;
+        short id_simtrk;
+        short id_quality;
+} ;
+
+
+class fcfAfterburner {
+   enum {kMax_fcfHit = 200};
+public:
+        fcfAfterburner();
+	~fcfAfterburner() { ; } ;
+
+        int burn(u_int *ptr_res[3], u_int *ptr_simu_res[3] = NULL) ;
+	int next(fcfHit *out) ;
+	int compare(u_int *p1[3], u_int *p2[3]) ;
+
+	void decode(u_int *data, fcfHit *h, u_int *sim = 0) ;	// utility: from FCF to local
+	void print_hit(char *, fcfHit *hit) ;	// utility
+
+	u_int do_swap ;		// 0=no, 1=yes => set by "burn"
+	u_int do_merge ;	// merge broken rows
+	u_int do_cuts ;		// apply additional cuts
+	u_int row ;		// picked up from the data...
+	
+        void setVerbose(bool v) { verbose = v; };
+private :
+        bool verbose;
+
+	u_int last_n, last_i, last_count, last_stage ;
+	u_int **ptr ;	// storage for the burn arg...
+	u_int **ptr_simu ;	// storage for the simulation ptr. 2nd burn argument
+
+	u_int edge[4] ;
+	struct fcfHit broken[4][kMax_fcfHit] ;
+	u_int cou_broken[4] ;
+
+	int output(fcfHit *l) ;	// the cut function; return TRUE if accepted
+	int check_merge(fcfHit *l, fcfHit *r) ;	// merges r into l and returns TRUE 
+} ;
+
 
 
 #endif

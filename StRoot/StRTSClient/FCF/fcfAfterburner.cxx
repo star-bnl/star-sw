@@ -15,43 +15,63 @@
 #include <fcfClass.hh>
 #include <rts.h>
 #include <TPC/padfinder.h>
-#include <fcfAfterburner.hh>
+//#include <fcfAfterburner.hh>
 
 
 // Version: 1.0; 17Sep2003; Tonko
 //
-void *lastAfter=0;
-int myNext = 0;
+
+// Tonko: what is this? You can't make these global - someone can step on them
+// by using common names in their code!
+
+//void *lastAfter=0;
+//int myNext = 0;
+
+
+
 fcfAfterburner::fcfAfterburner() 
 { 
 	last_n = last_count = last_i = last_stage = 0; 
-	do_merge = do_cuts = 1 ; verbose = true; 
-    	lastAfter=this;
-};
+	
+	do_merge = do_cuts = 1 ; 
+	
+	verbose = true; 
+
+//    	lastAfter=this;
+}
+
+/*
+	This is a small helper function which prints the
+	hit data in "h" to stdout.
+	If "str" is non-NULL it prepends it to the line
+	as a label.
+*/
 void fcfAfterburner::print_hit(char *str, struct fcfHit *h)
 {
         if(str) {
-                fprintf(stdout,"%s: row %d: %f %f %d %d %d %d %d %d\n",
-                        str,row,(double)h->pad/64.0+0.5,(double)h->tm/64.0+0.5,h->c,h->f,
-                        h->p1,h->p2,h->t1,h->t2) ;
+                fprintf(stdout,"%s: ",str) ; 
         }
-        else {
-                fprintf(stdout,"%d %f %f %d %d %d %d %d %d\n",
-                        row,(double)h->pad/64.0+0.5,(double)h->tm/64.0+0.5,h->c,h->f,
-                        h->p1,h->p2,h->t1,h->t2) ;
 
-        }
+	fprintf(stdout,"%d %f %f %d %d %d %d %d %d %d %d\n",
+		row,(double)h->pad/64.0+0.5,(double)h->tm/64.0+0.5,h->c,h->f,
+		h->p1,h->p2,h->t1,h->t2,h->id_simtrk,h->id_quality) ;
+
 	return  ;
 }
 
-int fcfAfterburner::output(struct fcfHit *hit, char *anystruct)
+
+/*
+	The function returns TRUE of the hit in "hit"
+	satisfies the post-burner cuts.
+*/
+int fcfAfterburner::output(struct fcfHit *hit)
 {	
 	int ret ;
 
-	// CUTS!
+	// CUTS - NEVER TOUCH THESE VALUES!
 	if(do_cuts) {
 		if(hit->f & (FCF_ONEPAD | FCF_ROW_EDGE | FCF_DEAD_EDGE)) ret = 0 ;	// bad flag
-		else if((hit->t2 - hit->t1) <= 3) ret = 0 ;	// short in timebin
+		else if((hit->t2 - hit->t1) <= 3) ret = 0 ;	// too short in timebin
 		else if(hit->t1 == 0) ret = 0 ;			// touches timebin 0
 		else if(hit->c < 40) ret = 0 ;			// small charge
 		else ret = 1 ;					// OK!
@@ -71,7 +91,14 @@ int fcfAfterburner::output(struct fcfHit *hit, char *anystruct)
 
 }
 
-void fcfAfterburner::decode(u_int *ptr, struct fcfHit *hit)
+/*
+	The function decodes the FCF-packed data in "ptr" into
+	the local structure "hit".
+	It also uses the FCF-packed simulation data from "sim" (if it
+	exists) and adds it to "hit". "sim" defaults to "NULL" in
+	the function declaration.
+*/
+void fcfAfterburner::decode(u_int *ptr, struct fcfHit *hit, u_int *sim)
 {
 	u_int pt, cf ;
 	u_short flags, fl ;
@@ -80,9 +107,26 @@ void fcfAfterburner::decode(u_int *ptr, struct fcfHit *hit)
 	u_short charge ;
 
 
+
+	if(sim) {
+		struct FcfSimOutput *s = (struct FcfSimOutput *) sim ;
+
+		// note that sim is always done on the local machine so
+		// there is no need to check for endianess...
+		hit->id_simtrk = s->id_simtrk ;
+		hit->id_quality = s->id_quality ;
+	}
+	else {
+		// these are the defaults which FCF will also use - don't change!
+		hit->id_simtrk = 0 ;
+		hit->id_quality = 100 ;
+	}
+
+
 	pt = *ptr++ ;
 	cf = *ptr++ ;
 
+	
 	if(do_swap) {	// bytes swapping...
 		pt = swap32(pt) ;
 		cf = swap32(cf) ;
@@ -125,7 +169,11 @@ void fcfAfterburner::decode(u_int *ptr, struct fcfHit *hit)
 	return ;
 }
 
-
+/*
+	Checks for mergability between the 2 hits and makes
+	a merge by merging into "hit_l" while marking the
+	charge of "hit_r" as 0.
+*/
 int fcfAfterburner::check_merge(struct fcfHit *hit_l, struct fcfHit *hit_r) 
 {
 	u_int charge ;
@@ -143,6 +191,25 @@ int fcfAfterburner::check_merge(struct fcfHit *hit_l, struct fcfHit *hit_r)
 			LOG(ERR,"Merge: charge too big %d %d",hit_r->c, hit_l->c,0,0,0) ;
 			hit_l->c = hit_r->c = 0 ;
 			return 0 ;
+		}
+
+		// adjust track ids 
+		if(hit_r->id_simtrk != hit_l->id_simtrk) {
+
+			// choose the ID with the larger charge
+			if(hit_r->c > hit_l->c) {
+				hit_l->id_simtrk = hit_r->id_simtrk ;
+			}
+
+			// mark the quality as non-100
+			hit_l->id_quality = 99 ;	// 99 is a marker 
+		}
+		else {
+			// if any of the hits has a non-100 quality, the merged hit
+			// must also have a non-100 quality
+			if((hit_l->id_quality != 100) || (hit_r->id_quality != 100)) {
+				hit_l->id_quality = 98 ;	// 98 is a marker
+			}
 		}
 
 		hit_l->tm = (short)((tm[0]*(double)hit_l->c + tm[1]*(double)hit_r->c)/(double)charge) ;
@@ -164,6 +231,7 @@ int fcfAfterburner::check_merge(struct fcfHit *hit_l, struct fcfHit *hit_r)
 		if(hit_r->t2 > hit_l->t2) hit_l->t2 = hit_r->t2 ;
 		if(hit_r->t1 < hit_l->t1) hit_l->t1 = hit_r->t1 ;
 
+			
 		//print_hit("Merged",hit_l) ;
 		return 1 ;	// done
 	}
@@ -180,6 +248,7 @@ int fcfAfterburner::burn(u_int *ptr_res[3], u_int *ptr_simu_res[3])
 	last_i = last_n = last_count = last_stage = 0 ;	// wrap to the beginning!
 	
 	ptr = ptr_res ;	// store arg in member...
+	ptr_simu = ptr_simu_res ;
 
 	for(i=0;i<3;i++) {
 		if(ptr_res[i]) {
@@ -229,6 +298,7 @@ int fcfAfterburner::next(fcfHit *h)
 	// and find and tag broken clusters
 	// and output the others at the same time...
 	u_int *res ;
+	u_int *res_sim ;
 
 	if(row == 0) {	// no data to begin with in "burn"
 		return 0 ;
@@ -256,6 +326,13 @@ int fcfAfterburner::next(fcfHit *h)
 	}
 
 	res = ptr[last_n] ;
+	if(ptr_simu) {
+		res_sim = ptr_simu[last_n] ;
+	}
+	else {
+		res_sim = 0 ;
+	}
+
 	if(res == 0) {
 		last_n++ ;
 		last_i = 0 ;
@@ -266,6 +343,9 @@ int fcfAfterburner::next(fcfHit *h)
 		u_int irow = *res++ ;
 		last_count = *res++ ;
 
+		// need to advance the sim guy as well...
+		if(res_sim) res_sim += 2 ;
+
 		if(do_swap) {	
 			irow = swap32(irow) ;
 			last_count = swap32(last_count) ;
@@ -275,14 +355,19 @@ int fcfAfterburner::next(fcfHit *h)
 	}
 	else {
 		res += 2 + 2*last_i ;
+		if(res_sim) res_sim += 2 + (sizeof(struct FcfSimOutput)/4)*last_i ;
 	}
 
 	while(last_i < last_count) {
 
 		fcfHit hit ;
-		decode(res,&hit) ;
+		decode(res,&hit,res_sim) ;
 
-		res += 2 ;
+		res += 2 ;	// skip to next
+		if(res_sim) {
+			res_sim += (sizeof(struct FcfSimOutput)/4) ;
+		}
+
 		last_i++ ;
 
 		if(do_merge && (hit.f & FCF_BROKEN_EDGE)) {
@@ -307,7 +392,7 @@ int fcfAfterburner::next(fcfHit *h)
 			}
 		}
 		else {
-			if(output(&hit,NULL)) {
+			if(output(&hit)) {
 				memcpy(h,&hit,sizeof(hit)) ;
 				return 1 ;
 			}
@@ -351,7 +436,7 @@ int fcfAfterburner::next(fcfHit *h)
  
 	if(last_n >= 4) return 0 ;	// done
 	while(last_i<cou_broken[last_n]) {
-		if(output(&broken[last_n][last_i],NULL)) {
+		if(output(&broken[last_n][last_i])) {
 			memcpy(h,&broken[last_n][last_i],sizeof(fcfHit)) ;
 			last_i++ ;
 			return 1 ;
@@ -468,3 +553,4 @@ int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
 	do_merge = save_merge ;
 	return ret ;
 }
+
