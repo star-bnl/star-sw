@@ -202,7 +202,7 @@ bool StppJetAnalyzer::acceptJet(StProtoJet &pj)
 	    (pj.pt() > mJetPtMin)
 	    && (fabs(pj.eta()) < mJetEtaMax)
 	    && (fabs(pj.eta()) > mJetEtaMin)
-            && (pj.numberOfParticles() >= mJetNmin)
+            && ((int)pj.numberOfParticles() >= mJetNmin)
 	    );
 }
 
