@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.20 2000/06/01 21:10:40 dunlop Exp $
+ * $Id: StRchMaker.cxx,v 1.21 2000/06/13 18:13:59 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.20  2000/06/01 21:10:40  dunlop
- * filled cluster piece not in ctor
+ * Revision 1.21  2000/06/13 18:13:59  dunlop
+ * Commented out verbosity under real conditions
+ *
+ * Revision 1.21  2000/06/13 18:13:59  dunlop
+ * Commented out verbosity under real conditions
  *
  * Revision 1.20  2000/06/01 21:10:40  dunlop
  * filled cluster piece not in ctor
@@ -598,7 +601,7 @@ void StRchMaker::fillStEvent()
 							      static_cast<unsigned short>(mcInfo[jj].mSignalType)));
 		}
 
- 		cout << " ::fillStEvent() -> plain pixel" << endl;
+		richCollection->addPixel(persistentPixel);
 	    }
  	    else {
  		//cout << " ::fillStEvent() -> plain pixel" << endl;
@@ -712,10 +715,10 @@ void StRchMaker::fillStEvent()
     
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.20 2000/06/01 21:10:40 dunlop Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.21 2000/06/13 18:13:59 dunlop Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.20 2000/06/01 21:10:40 dunlop Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 1.21 2000/06/13 18:13:59 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
