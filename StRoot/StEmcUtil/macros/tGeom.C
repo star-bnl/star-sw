@@ -8,28 +8,33 @@
 #include "StEmcUtil/StEmcGeom.h"
 #endif
 
-void  tGeom(const Int_t det=1);
+void  tgeom(const Int_t det=1);
 Int_t tg1(const Int_t id);
 Int_t tg2(const Int_t det=1, const Int_t id=0);
-Int_t tg3();
+void  tg3();
+void  tg4(const Int_t det=1, const Int_t m1=1,const Int_t m2=120);
+//void  tg4(const Int_t det, const Int_t m) {tg4(det,m,m);}
 
 class StEmcGeom; StEmcGeom *geom = 0;
 Int_t m,e,s;
 
 void 
-tGeom(const Int_t det)
+tgeom(const Int_t det)
 {
-   if(strlen(gSystem->GetLibraries("*StEmcUtil.so","D")) == 0){
+  if(strlen(gSystem->GetLibraries("*StEmcUtil.so","D")) == 0){
     gROOT->ProcessLine(".x Load.C");
     gSystem->Load("StEmcUtil.so");
   }
-  if(det>=1&&det<=4) geom = new StEmcGeom(det);
+  if(det>=1&&det<=4) { 
+    //  if(geom) delete geom;
+    geom = new StEmcGeom(det);
+  }
 }
 
 Int_t 
 tg1(const Int_t id)
 {
-  tGeom();
+  tgeom();
 
   Int_t ret;
   ret =  geom->getBin(id,m,e,s);
@@ -45,9 +50,10 @@ Int_t
 tg2(const Int_t det, const Int_t id)
 {
   // Cross checking for getBin and getId
-  tGeom(det);
+  tgeom(det);
 
-  Int_t m,e,s, idW, id1, id2, det=geom->Detector();
+  Int_t m,e,s, idW, id1, id2; 
+  //  det=geom->Detector();
 
   id1 = id; id2=id; // Default
   if(id == 0) {
@@ -83,11 +89,11 @@ tg2(const Int_t det, const Int_t id)
   return 10;
 }
 
-Int_t 
+void 
 tg3()
 {
   // 
-  tGeom(0);
+  tgeom(0);
   Int_t det, id=1;
   for(det=1; det<=4; det++){
     geom = new StEmcGeom(det);
@@ -96,3 +102,37 @@ tg3()
     det,id, m,e,s);
   }
 }
+
+void 
+tg4(const Int_t det,const Int_t m1, const Int_t m2)
+{
+  //
+  // For checking getBin(phi,eta,m,e,s) - 26-jul-2001
+  // 
+  tgeom(det);
+  Float_t phi,eta;
+  Int_t mw, ew, sw, ier1=0, ier2=0;
+  
+  for(Int_t m=m1; m<=m2; m++){
+    for(Int_t e=1; e<=geom->NEta(); e++){
+      for(Int_t s=1; s<=geom->NSub(); s++){
+        if(geom->getEta(m,e,eta)==0&&geom->getPhi(m,s,phi)==0){
+           geom->getBin(phi,eta, mw,ew,sw);
+           if(m!=mw || e!=ew || s!=sw) {
+             ier2++;
+             printf("<E> %5i | m %i=>%i e %i=>%i s %i=>%i phi %f eta %f \n",
+             ier2,  m,mw, e,ew, s,sw, phi,eta);
+           }
+        }
+        else {
+          ier1++;
+          printf("<E> %5i | something wrong m %i e %i s %i\n", ier1, m,e,s);
+        }
+      }
+    }
+  }
+  printf(" For Detector %i ",det);
+  if(ier1==0 && ier2==0) printf(" => No Errors \n");
+  else printf(" #Error1 %i #Error2 %i\n", ier1, ier2); 
+}
+

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.11 2001/05/30 18:01:22 perev Exp $
+ * $Id: StEmcGeom.cxx,v 1.12 2001/07/30 00:16:07 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.12  2001/07/30 00:16:07  pavlinov
+ * Correct numbering scheme for BSMDE
+ *
  * Revision 1.11  2001/05/30 18:01:22  perev
  * stdlib.h added
  *
@@ -305,21 +308,28 @@ StEmcGeom::initBEMCorBPRS()
   mYlocal.Set(mNSub);  mPhi.Set(mNSub); 
   
   // Eta variable ( Z direction)
-  TArrayF etaw(mNEta+1); Int_t i;
+  mEtaB.Set(mNEta+1); Int_t i;
 
-  for(i=0; i<mNEta; i++) {etaw[i] = 0.05*i;} etaw[mNEta]=mEtaMax;;
+  for(i=0; i<mNEta; i++) {mEtaB[i] = 0.05*i;} mEtaB[mNEta]=mEtaMax;;
 
   for(i=0; i< mNEta; i++){
-    mEta[i]    = (etaw[i+1] + etaw[i])/2.;
+    mEta[i]    = (mEtaB[i+1] + mEtaB[i])/2.;
     mZlocal[i] = mRadius * sinh(mEta[i]);  // z=r/tan(theta) => 1./tan(theta) = sinh(eta)
   }
 
   // Phi variable ( Y direction)
+  // mYlocal, mPhi, mYB and mPhiB - have the same sign ( 29-jul-2001) !!!
   mYlocal.Set(mNSub);  
-  mYlocal[0] =   mYWidth/2.;    mYlocal[1] = - mYlocal[0];  
+  mYlocal[0] =  -mYWidth/2.;    mYlocal[1] = mYWidth/2.;  
 
   mPhi.Set(mNSub); 
-  mPhi[0] =  atan2(mYWidth/2.,mRadius);    mPhi[1] = -mPhi[0];
+  for(Int_t i=0;i<mNSub; i++) mPhi[i] =  atan2(mYlocal[i],mRadius);
+
+  mYB.Set(mNSub+1);   mPhiB.Set(mNSub+1);   // 28-jul-2001
+  mYB[0] = -mYWidth;
+  mYB[1] = 0.0;
+  mYB[2] = +mYWidth;
+  for(Int_t i=0; i<mNSub+1; i++) mPhiB[i] =  atan2(mYB[i],mRadius);
 
 }
 // _____________________________________________________________________
@@ -345,7 +355,9 @@ void StEmcGeom::initBSMDE(){
   mNes      = mNEta * mNSub;
   mNRaw     = mNes  * mNModule;
   mZlocal.Set(mNEta);  mEta.Set(mNEta); 
-  mYlocal.Set(mNSub);  mPhi.Set(mNSub); 
+  mYlocal.Set(mNSub);  mPhi.Set(mNSub);
+  mEtaB.Set(mNEta+1);  // Eta boundaries 27-jul-2001
+  TArrayF zb(mNEta+1); // z   boundaries
   
   // Eta variable ( Z direction)
   Int_t i; 
@@ -354,20 +366,29 @@ void StEmcGeom::initBSMDE(){
   //shift1 = (1.18-0.032/2-0.573/2)*2.54;   // From drawing of SMD
   shift2 = shift1 + (seta1wdh+seta12wdh)*2*74 + (seta1wdh+seta12wdh)
                   + (seta2wdh+seta12wdh); // The center of 76h eta strip
-
+  zb[0] = 2.*smetawdh;
   for(i=0; i<mNEta; i++) {
-    if(i<mNEta/2) mZlocal[i] = shift1 + (seta1wdh+seta12wdh)*2*i;
-    else mZlocal[i] = shift2 + (seta2wdh+seta12wdh)*2*(i-75);
-    mEta[i] = -log(tan(atan2(mRadius,mZlocal[i])/2.0));
+    if(i<mNEta/2) {
+      mZlocal[i] = shift1 + (seta1wdh+seta12wdh)*2*i;
+      zb[i+1]    = zb[i]  + (seta1wdh+seta12wdh)*2;
+    }
+    else {
+      mZlocal[i] = shift2 + (seta2wdh+seta12wdh)*2*(i-75);
+      zb[i+1]    = zb[i]  + (seta2wdh+seta12wdh)*2;
+    }
+    mEta[i]  = -log(tan(atan2(mRadius,mZlocal[i])/2.0));
+    mEtaB[i] = -log(tan(atan2(mRadius,zb[i])/2.0));
   }
+  mEtaB[mNEta] = -log(tan(atan2(mRadius,zb[mNEta])/2.0));
 
   // Phi variable ( Y direction)
   mYlocal.Set(mNSub); mYlocal[0] = 0.0;
+  mPhi.Set(mNSub);    mPhi[0]    = 0.0;
 
-  mPhi.Set(mNSub); mPhi[0] =  0.0;
-
-  //  cout<<" (BSMDE) shift1 "<<shift1<<endl;
-  //cout<<" (BSMDE) shift2 "<<shift2<<endl;
+  mYB.Set(mNSub+1);   mPhiB.Set(mNSub+1); // 29-jul-2009
+  mYB[0] = -mYWidth/2.;
+  mYB[1] =  mYWidth/2.;
+  for(Int_t i=0; i<mNSub+1; i++) mPhiB[i] =  atan2(mYB[i],mRadius);
 }
 // _____________________________________________________________________
 void StEmcGeom::initBSMDP()
@@ -389,7 +410,7 @@ void StEmcGeom::initBSMDP()
     sphidwdh  = 0.07874;  // half distance between strips in phi
     smdgaswdh = 0.295;    // smd gas box volume half width
   }
-  shift = mYWidth/2. - smdgaswdh - sphiwdh; // The position of center first phi strip
+  shift = - mYWidth/2. + smdgaswdh + sphiwdh; // The position of center first phi strip
 
   mNes      = mNEta * mNSub;
   mNRaw     = mNes  * mNModule;
@@ -397,21 +418,23 @@ void StEmcGeom::initBSMDP()
   mYlocal.Set(mNSub);  mPhi.Set(mNSub); 
   
   // Eta variable ( Z direction)
-  TArrayF etaw(mNEta+1); Int_t i;
+  mEtaB.Set(mNEta+1); Int_t i;
 
-  for(i=0; i<mNEta; i++) {etaw[i] = 0.1*i;} 
-  etaw[mNEta]=mEtaMax;
+  for(i=0; i<mNEta; i++) {mEtaB[i] = 0.1*i;} 
+  mEtaB[mNEta]=mEtaMax;
 
   for(i=0; i< mNEta; i++){
-    mEta[i]    = (etaw[i+1] + etaw[i])/2.;
+    mEta[i]    = (mEtaB[i+1] + mEtaB[i])/2.;
     mZlocal[i] = mRadius * sinh(mEta[i]);  // z=r/tan(theta) => 1./tan(theta) = sinh(eta)
   }
 
   // Phi variable ( Y direction)
 
   mYlocal.Set(mNSub); mPhi.Set(mNSub);
+  mYB.Set(mNSub+1);   mPhiB.Set(mNSub+1); // 27-jul-2001
+  mYB[0] = -mYWidth/2. + smdgaswdh;
 
-  if(mMode.CompareTo("geant") == 0){ // For odd numbers ( default 15)
+  if(mMode.CompareTo("geant") == 0){ // For odd numbers ( default 15) ?? must check
     Int_t n2=mNSub/2;
     mYlocal[n2] = 0.0;
     for(i=n2+1; i<mNSub; i++){
@@ -424,10 +447,13 @@ void StEmcGeom::initBSMDP()
   }
   else{
     for(i=0; i<mNSub; i++){
-      mYlocal[i] = shift - (sphiwdh+sphidwdh)*2*i;
-      if(mDetector==4) mYlocal[i] = - mYlocal[i];    // 26-oct-1999 => !!! ?? 
-      mPhi[i] = atan2(mYlocal[i], mRadius);
+      mYlocal[i] =  shift  + (sphiwdh+sphidwdh)*2*i;
+      mPhi[i]    =  atan2(mYlocal[i], mRadius);
+      if(i==0 || i==(mNSub-1)) mYB[i+1] = mYB[i] + sphiwdh*2. + sphidwdh;
+      else                     mYB[i+1] = mYB[i] + (sphiwdh + sphidwdh)*2.;
+      mPhiB[i] =  atan2(mYB[i], mRadius);
     }
+    mPhiB[mNSub] = atan2(mYB[mNSub], mRadius);
   }
 }
 // _____________________________________________________________________
@@ -547,7 +573,8 @@ Int_t &sub, Int_t &detector)
     else if(t==3){
       detector = BSMDP;
       eta  = abs(eta);
-      sub  = strip;
+      //      sub  = strip;
+      sub  = 16 - strip; // 28-jul-2001
     }
     else {
       printf("<E> getVolIdBsmd: Type mismatch %i \n",t);
@@ -588,12 +615,12 @@ void StEmcGeom::initEEMCorEPRS()  //wrong need to update
   mYlocal.Set(mNSub);  mPhi.Set(mNSub); 
   
   // Eta variable ( Z direction)
-  TArrayF etaw(mNEta+1); Int_t i;
+  mEtaB.Set(mNEta+1); Int_t i;
 
-  for(i=0; i<mNEta; i++) {etaw[i] = 0.05*i;} etaw[mNEta]=0.99;
+  for(i=0; i<mNEta; i++) {mEtaB[i] = 0.05*i;} mEtaB[mNEta]=0.99;
 
   for(i=0; i< mNEta; i++){
-    mEta[i]    = (etaw[i+1] + etaw[i])/2.;
+    mEta[i]    = (mEtaB[i+1] + mEtaB[i])/2.;
     mZlocal[i] = mRadius * sinh(mEta[i]);  // z=r/tan(theta) => 1./tan(theta) = sinh(eta)
   }
 
@@ -656,13 +683,13 @@ void StEmcGeom::initESMDP()  //wrong Need to update
   mYlocal.Set(mNSub);  mPhi.Set(mNSub); 
   
   // Eta variable ( Z direction)
-  TArrayF etaw(mNEta+1); Int_t i;
+  mEtaB.Set(mNEta+1); Int_t i;
 
-  for(i=0; i<mNEta; i++) {etaw[i] = 0.1*i;} 
-  etaw[mNEta]=0.99;
+  for(i=0; i<mNEta; i++) {mEtaB[i] = 0.1*i;} 
+  mEtaB[mNEta]=0.99;
 
   for(i=0; i< mNEta; i++){
-    mEta[i]    = (etaw[i+1] + etaw[i])/2.;
+    mEta[i]    = (mEtaB[i+1] + mEtaB[i])/2.;
     mZlocal[i] = mRadius * sinh(mEta[i]);  // z=r/tan(theta) => 1./tan(theta) = sinh(eta)
   }
 
@@ -700,12 +727,18 @@ void  StEmcGeom::printGeom()
 
   Int_t i;
   cout<<"\n Z grid and Eta grid "<<endl;
+  cout<<" mEtaB[0] "<<mEtaB[0]<<endl;
   for(i=0; i<mNEta; i++){
-    cout<<" i "<<i<<" Zl "<<mZlocal[i]<<" Eta "<<mEta[i]<<endl; 
+    printf(" i %3i  Zl %7.3f Eta %8.5f mEtaB %7.5f\n" 
+    , i, mZlocal[i], mEta[i], mEtaB[i+1]); 
   }
+
   cout<<"\n Y grid and Phi grid "<<endl;
+  //  cout<<"mYB[0] "<<mYB[0]<<" mPhiB[0] "<<mPhiB[0]<<endl;
+  printf(" mYB %7.3f mPhiB %9.5f \n", mYB[0], mPhiB[0]);
   for(i=0; i<mNSub; i++){
-    cout<<" i "<<i<<" Yl "<<mYlocal[i]<<" Phi "<<mPhi[i]<<endl;
+    printf(" i %2i Yl %7.3f Phi %9.5f ", i, mYlocal[i], mPhi[i]);
+    printf(" mYB %7.3f mPhiB %9.5f \n", mYB[i+1], mPhiB[i+1]);
   }
   cout<<"\n   Phi grid of center of modules in STAR system\n";
   cout<<"   =============================================\n";

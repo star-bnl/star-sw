@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.8 2001/07/13 18:35:20 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.9 2001/07/30 00:16:22 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.9  2001/07/30 00:16:22  pavlinov
+ * Correct numbering scheme for BSMDE
+ *
  * Revision 1.8  2001/07/13 18:35:20  pavlinov
  * New version of methods getBin and getId for BSMDE and BSMDP
  *
@@ -99,6 +102,7 @@ private:
   void    defineCommonConstants();
   void    defineModuleGridOnPhi();
   Float_t relativeError(Float_t, Float_t);
+  static Int_t   getIndex(const Float_t x, TArrayF &arr);
 
 protected:
   TString mMode;     // Empty, "geant" or "db"
@@ -118,9 +122,12 @@ protected:
   
   TArrayF mZlocal;    // Array of z   coordinates (system of single module) 
   TArrayF mYlocal;    // Array of y   coordinates (system of single module) 
-  TArrayF mEta;       // Array of eta coordinates (system of single module)
+  TArrayF mEta;       // Array of eta coordinates of center modules
+  TArrayF mEtaB;      // Array of eta boundaries
   TArrayF mPhi;       // Array of phi coordinates (system of single module)
   TArrayF mPhiModule; // Angle of center of module in STAR system
+  TArrayF mYB;      //  25-jul-2001 
+  TArrayF mPhiB;    // 
 
   Int_t   mMaxAdc;    // Range of ADC for each detector
 
@@ -259,23 +266,29 @@ inline Int_t StEmcGeom::getBin(const Float_t phi, const Float_t eta, Int_t &m, I
 
   Float_t phiw, sw;
   if(0.0<=eta && eta<=mEtaMax) {      // First Barrel
-    e    = int(mNEta*eta) + 1;
+    e    = getIndex(eta, mEtaB); 
     phiw = mPhiBound[0] - phi;
     if(phiw<0.0) phiw = phiw + C_2PI; // 0<phiw<=2.*pi =>must be
     if(phiw<0.0 || phiw>C_2PI) printf(" phi %f eta %f \n",phi,eta); // For testing 
     m  = int(-phiw/mPhiStep[0]) + 1;
-    sw = fmod(phiw, -mPhiStep[0]);
-    if(sw<mPhiStepHalf) s=1; else s = 2;
+
+    sw   = fmod(phiw, fabs(mPhiStep[0]));
+    sw   = sw - mPhiStepHalf;
+    s    = getIndex(sw, mPhiB);
+
     return 0;
   }
   else if(-mEtaMax<=eta && eta<0.0) { // Second Barrel
-    e = int(-mNEta*eta) + 1;
+    e    = getIndex(fabs(eta), mEtaB); 
     phiw = mPhiBound[1] - phi;
     if(phiw<0.0) phiw = phiw + C_2PI; // 0<phiw<=2.pi =>must be
     if(phiw<0.0 || phiw>C_2PI) printf(" phi %f eta %f \n",phi,eta); // For testing 
-    m  = 120 - int(phiw/mPhiStep[1]);
-    sw = fmod(phiw, mPhiStep[1]);
-    if(sw<mPhiStepHalf) s = 2; else s = 1;
+    m  = 120 - int(phiw/fabs(mPhiStep[1]));
+
+    sw  = fmod(phiw, fabs(mPhiStep[0]));
+    sw  = -(sw - mPhiStepHalf);
+    s   = getIndex(sw, mPhiB);
+
     return 0;
   }
   else return 1;                      // Out of Bemc
@@ -352,8 +365,9 @@ inline Int_t StEmcGeom::getPhi(const Int_t m, const Int_t  s, Float_t &phi)
   if(!checkModule(m) && !checkSub(s)){
     Double_t phiW;       // phi in system of module
 
-    if(m <= mNModule/2) {phiW = mPhi[s-1]; im = 0; iphi=m-1;}  // West part of EMC
-    else {phiW = -mPhi[s-1]; im = 1; iphi=m-mNModule/2-1;}     // East part of EMC    
+    // change sign befor -mPhi
+    if(m <= mNModule/2) {phiW = -mPhi[s-1]; im = 0; iphi=m-1;}  // West part of EMC
+    else {phiW = mPhi[s-1]; im = 1; iphi=m-mNModule/2-1;}       // East part of EMC    
     
     phiW += mPhiOffset[im] + mPhiStep[im]*iphi;
 
@@ -433,6 +447,16 @@ StEmcGeom::getId(const Int_t m, const Int_t e, const Int_t s,Int_t &rid)
     printf("<W> Det %i bad index m %i e %i s %i \n", mDetector, m, e, s); 
     return 1;
   }
+}
+
+inline Int_t 
+StEmcGeom::getIndex(const Float_t x, TArrayF &arr)
+{
+  // Arr is array of boundaries
+  for(Int_t i=1; i<arr.GetSize(); i++){
+    if(x>=arr[i-1] && x<arr[i]) return i; // x is in i cell
+  }
+  return -1;
 }
 
 #endif
