@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.18 1999/02/19 14:41:00 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.19 1999/02/20 18:49:24 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.19  1999/02/20 18:49:24  fisyak
+// Add event/run information
+//
 // Revision 1.18  1999/02/19 14:41:00  fisyak
 // Set kIsNotOwn Bit for geometry tables
 //
@@ -213,126 +216,143 @@ Int_t St_geant_Maker::Init(){
   return StMaker::Init();
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::Make()
-{ if (!m_DataSet->GetList()) 
- {
-     
-
-  Int_t    nhits,nhit1,nhit2,link=1,ide=1,npart,irun,ievt,iwtfl;
-  Float_t  vert[4],weigh;
-  Char_t   cgnam[20];
-  St_DataSet *geom = gStChain->DataSet("geom");
-  if (geom && !geom->GetList()) {agstroot_();}
-  gtrig();
-  // empty g2t_event
-  St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
-  m_DataSet->Add(g2t_event);
-  agnzgete_(&link,&ide,&npart,&irun,&ievt,cgnam,vert,&iwtfl,&weigh);
-
-  if (npart>0)
-  {  St_particle  *particle   = new St_particle("particle",npart);
-     Int_t Res_part = g2t_particle(particle);
-     m_DataSet->Add(particle);
-  }
-  St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",cnum->nvertx);
-  m_DataSet->Add(g2t_vertex);
-  St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
-  m_DataSet->Add(g2t_track);
-  Int_t Res_kine = g2t_get_kine(g2t_vertex,g2t_track);
-
-
-  //---------------------- inner part -------------------------//
-  gfnhit_ ("SVTH","SVTD", &nhits, 4,4);
-  if (nhits>0) 
-  { St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
-    m_DataSet->Add(g2t_svt_hit);
-    Int_t Res_svt = g2t_svt(g2t_track,g2t_svt_hit);
-  }
-  gfnhit_ ("TPCH","TPAD", &nhits, 4,4);
-  if (nhits>0)
-  { St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
-    m_DataSet->Add(g2t_tpc_hit);
-    Int_t Res_tpc = g2t_tpc(g2t_track,g2t_tpc_hit);
-  }
-  gfnhit_ ("TPCH","TMSE", &nhits, 4,4);
-  if (nhits>0)
-  { St_g2t_mwc_hit *g2t_mwc_hit = new St_g2t_mwc_hit("g2t_mwc_hit",nhits);
-    m_DataSet->Add(g2t_mwc_hit);
-    Int_t Res_mwc = g2t_mwc(g2t_track,g2t_mwc_hit);
-  }
-  gfnhit_ ("FTPH","FSEC", &nhits, 4,4);
-  if (nhits>0)
-  { St_g2t_ftp_hit *g2t_ftp_hit = new St_g2t_ftp_hit("g2t_ftp_hit",nhits);
-    m_DataSet->Add(g2t_ftp_hit);
-    Int_t Res_ftp = g2t_ftp(g2t_track,g2t_ftp_hit);
-  }
-  gfnhit_ ("BTOH","BCSB", &nhits, 4,4);
-  if (nhits>0) 
-  { St_g2t_ctf_hit *g2t_ctb_hit = new St_g2t_ctf_hit("g2t_ctb_hit",nhits);
-    m_DataSet->Add(g2t_ctb_hit);
-    Int_t Res_ctb = g2t_ctb(g2t_track,g2t_ctb_hit);
-  }
-  gfnhit_ ("BTOH","BXSA", &nhits, 4,4);
-  if (nhits>0) 
-  { St_g2t_ctf_hit *g2t_tof_hit = new St_g2t_ctf_hit("g2t_tof_hit",nhits);
-    m_DataSet->Add(g2t_tof_hit);
-    Int_t Res_tof = g2t_tof(g2t_track,g2t_tof_hit);
-  }
-  gfnhit_ ("RICH","RGAP", &nhit1, 4,4);
-  gfnhit_ ("RICH","RCSI", &nhit2, 4,4);
-  nhits=nhit1+nhit2;
-  if (nhits>0) 
-  { St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
-    m_DataSet->Add(g2t_rch_hit);
-    Int_t Res_rch = g2t_rch(g2t_track,g2t_rch_hit);
-  }
-
-  //---------------------- calorimeters -------------------------//
-  gfnhit_ ("CALH","CSUP", &nhits, 4,4);
-  if (nhits>0) 
-  { St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
-    m_DataSet->Add(g2t_emc_hit);
-    Int_t Res_emc = g2t_emc(g2t_track,g2t_emc_hit);
-  }
-  gfnhit_ ("CALH","CSDA", &nhits, 4,4);
-  if (nhits>0) 
-  { St_g2t_emc_hit *g2t_smd_hit = new St_g2t_emc_hit("g2t_smd_hit",nhits);
-    m_DataSet->Add(g2t_smd_hit);
-    Int_t Res_smd = g2t_smd(g2t_track,g2t_smd_hit);
-  }
-  gfnhit_ ("ECAH","ESCI", &nhits, 4,4);
-  if (nhits>0) 
-  { St_g2t_emc_hit *g2t_eem_hit = new St_g2t_emc_hit("g2t_eem_hit",nhits);
-    m_DataSet->Add(g2t_eem_hit);
-    Int_t Res_eem = g2t_eem(g2t_track,g2t_eem_hit);
-  }
-  gfnhit_ ("ECAH","MSEC", &nhits, 4,4);
-  if (nhits>0) 
-  { St_g2t_emc_hit *g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",nhits);
-    m_DataSet->Add(g2t_esm_hit);
-    Int_t Res_esm = g2t_esm(g2t_track,g2t_esm_hit);
-  }
-  gfnhit_ ("VPDH","VRAD", &nhits, 4,4);
-  if (nhits>0) 
-  { St_g2t_vpd_hit *g2t_vpd_hit = new St_g2t_vpd_hit("g2t_vpd_hit",nhits);
-    m_DataSet->Add(g2t_vpd_hit);
-    Int_t Res_vpd = g2t_vpd(g2t_track,g2t_vpd_hit);
-  }
-  gfnhit_ ("ZCAH","QSCI", &nhits, 4,4);
-  if (nhits>0) 
-  { St_g2t_emc_hit *g2t_zdc_hit = new St_g2t_emc_hit("g2t_zdc_hit",nhits);
-    m_DataSet->Add(g2t_zdc_hit);
-    Int_t Res_zdc = g2t_zdc(g2t_track,g2t_zdc_hit);
-  }
-  //------------------------all bloody detectors done--------------------//
+Int_t St_geant_Maker::Make(){
+  if (!m_DataSet->GetList()){ 
+    Int_t    nhits,nhit1,nhit2,link=1,ide=1,npart,irun,ievt,iwtfl;
+    Float_t  vert[4],weigh;
+    Char_t   cgnam[20];
+    St_DataSet *geom = gStChain->DataSet("geom");
+    if (geom && !geom->GetList()) {agstroot_();}
+    gtrig();
+    // empty g2t_event
+    St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
+    m_DataSet->Add(g2t_event);
+    agnzgete_(&link,&ide,&npart,&irun,&ievt,cgnam,vert,&iwtfl,&weigh);
+    gStChain->SetRun(irun);
+    gStChain->SetEvent(ievt);
+    TString EvenType(cgnam);
+    gStChain->SetEvenType(EvenType.Data());
+    if (npart>0){
+      St_particle  *particle   = new St_particle("particle",npart);
+      Int_t Res_part = g2t_particle(particle);
+      m_DataSet->Add(particle);
+      particle_st *p = particle->GetTable();
+      if (p->isthep == 10 && p->idhep  == 9999999) {
+	gStChain->SetBImpact(p->phep[0]);
+	gStChain->SetPhImpact(p->phep[1]);
+	gStChain->SetMode(p->phep[2]);
+	gStChain->SetCenterOfMassEnergy(p->phep[3]);
+	Int_t west = p->phep[4];
+	Int_t east = (1000*p->phep[4]-1000*west)/1000;
+	gStChain->SetAwest(west);
+	gStChain->SetAeast(east);
+	gStChain->SetRun(p->vhep[0]);
+	gStChain->SetEvent(p->vhep[1]);
+	ULong_t  t = p->jdahep[1];
+	if (t > 99999) t = 999999;
+	gStChain->SetDateTime(p->jdahep[0],t);
+	gStChain->SetProcessDateTime();
+      }
+    }
+    St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",cnum->nvertx);
+    m_DataSet->Add(g2t_vertex);
+    St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
+    m_DataSet->Add(g2t_track);
+    Int_t Res_kine = g2t_get_kine(g2t_vertex,g2t_track);
+    
+    
+    //---------------------- inner part -------------------------//
+    gfnhit_ ("SVTH","SVTD", &nhits, 4,4);
+    if (nhits>0) 
+      { St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
+      m_DataSet->Add(g2t_svt_hit);
+      Int_t Res_svt = g2t_svt(g2t_track,g2t_svt_hit);
+      }
+    gfnhit_ ("TPCH","TPAD", &nhits, 4,4);
+    if (nhits>0)
+      { St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
+      m_DataSet->Add(g2t_tpc_hit);
+      Int_t Res_tpc = g2t_tpc(g2t_track,g2t_tpc_hit);
+      }
+    gfnhit_ ("TPCH","TMSE", &nhits, 4,4);
+    if (nhits>0)
+      { St_g2t_mwc_hit *g2t_mwc_hit = new St_g2t_mwc_hit("g2t_mwc_hit",nhits);
+      m_DataSet->Add(g2t_mwc_hit);
+      Int_t Res_mwc = g2t_mwc(g2t_track,g2t_mwc_hit);
+      }
+    gfnhit_ ("FTPH","FSEC", &nhits, 4,4);
+    if (nhits>0)
+      { St_g2t_ftp_hit *g2t_ftp_hit = new St_g2t_ftp_hit("g2t_ftp_hit",nhits);
+      m_DataSet->Add(g2t_ftp_hit);
+      Int_t Res_ftp = g2t_ftp(g2t_track,g2t_ftp_hit);
+      }
+    gfnhit_ ("BTOH","BCSB", &nhits, 4,4);
+    if (nhits>0) 
+      { St_g2t_ctf_hit *g2t_ctb_hit = new St_g2t_ctf_hit("g2t_ctb_hit",nhits);
+      m_DataSet->Add(g2t_ctb_hit);
+      Int_t Res_ctb = g2t_ctb(g2t_track,g2t_ctb_hit);
+      }
+    gfnhit_ ("BTOH","BXSA", &nhits, 4,4);
+    if (nhits>0) 
+      { St_g2t_ctf_hit *g2t_tof_hit = new St_g2t_ctf_hit("g2t_tof_hit",nhits);
+      m_DataSet->Add(g2t_tof_hit);
+      Int_t Res_tof = g2t_tof(g2t_track,g2t_tof_hit);
+      }
+    gfnhit_ ("RICH","RGAP", &nhit1, 4,4);
+    gfnhit_ ("RICH","RCSI", &nhit2, 4,4);
+    nhits=nhit1+nhit2;
+    if (nhits>0) 
+      { St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
+      m_DataSet->Add(g2t_rch_hit);
+      Int_t Res_rch = g2t_rch(g2t_track,g2t_rch_hit);
+      }
+    
+    //---------------------- calorimeters -------------------------//
+    gfnhit_ ("CALH","CSUP", &nhits, 4,4);
+    if (nhits>0) 
+      { St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
+      m_DataSet->Add(g2t_emc_hit);
+      Int_t Res_emc = g2t_emc(g2t_track,g2t_emc_hit);
+      }
+    gfnhit_ ("CALH","CSDA", &nhits, 4,4);
+    if (nhits>0) 
+      { St_g2t_emc_hit *g2t_smd_hit = new St_g2t_emc_hit("g2t_smd_hit",nhits);
+      m_DataSet->Add(g2t_smd_hit);
+      Int_t Res_smd = g2t_smd(g2t_track,g2t_smd_hit);
+      }
+    gfnhit_ ("ECAH","ESCI", &nhits, 4,4);
+    if (nhits>0) 
+      { St_g2t_emc_hit *g2t_eem_hit = new St_g2t_emc_hit("g2t_eem_hit",nhits);
+      m_DataSet->Add(g2t_eem_hit);
+      Int_t Res_eem = g2t_eem(g2t_track,g2t_eem_hit);
+      }
+    gfnhit_ ("ECAH","MSEC", &nhits, 4,4);
+    if (nhits>0) 
+      { St_g2t_emc_hit *g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",nhits);
+      m_DataSet->Add(g2t_esm_hit);
+      Int_t Res_esm = g2t_esm(g2t_track,g2t_esm_hit);
+      }
+    gfnhit_ ("VPDH","VRAD", &nhits, 4,4);
+    if (nhits>0) 
+      { St_g2t_vpd_hit *g2t_vpd_hit = new St_g2t_vpd_hit("g2t_vpd_hit",nhits);
+      m_DataSet->Add(g2t_vpd_hit);
+      Int_t Res_vpd = g2t_vpd(g2t_track,g2t_vpd_hit);
+      }
+    gfnhit_ ("ZCAH","QSCI", &nhits, 4,4);
+    if (nhits>0) 
+      { St_g2t_emc_hit *g2t_zdc_hit = new St_g2t_emc_hit("g2t_zdc_hit",nhits);
+      m_DataSet->Add(g2t_zdc_hit);
+      Int_t Res_zdc = g2t_zdc(g2t_track,g2t_zdc_hit);
+      }
+    //------------------------all bloody detectors done--------------------//
 #if 0
-  Char_t *g2t = "g2t_";
-  Int_t  narg = 0;
-  addrfun address  = (addrfun ) csaddr(g2t,strlen(g2t));
-  if (address) csjcal(&address,&narg);
+    Char_t *g2t = "g2t_";
+    Int_t  narg = 0;
+    addrfun address  = (addrfun ) csaddr(g2t,strlen(g2t));
+    if (address) csjcal(&address,&narg);
 #endif
- }
- return kStOK;
+  }
+  return kStOK;
 }
 //_____________________________________________________________________________
 void St_geant_Maker::LoadGeometry(Char_t *option){
@@ -343,7 +363,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.18 1999/02/19 14:41:00 fisyak Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.19 1999/02/20 18:49:24 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
@@ -374,9 +394,9 @@ void St_geant_Maker::G2root()
   Int_t   mrot    = 0;
   Int_t   jmate   = clink->jmate;
   Int_t   nmate   = 0;   if (jmate)  nmate  = z_iq[jmate-2];
-
+  
   if (! gGeometry) gGeometry = new TGeometry("STAR","STAR GEANT3 to ROOT geometry");
-//-----------List of Materials and Mixtures--------------
+  //-----------List of Materials and Mixtures--------------
   TMaterial *newmat = 0;
   TMixture *newmixt = 0;
   for (Int_t imat=1; imat<= nmate; imat++){
@@ -410,7 +430,7 @@ void St_geant_Maker::G2root()
       }
     }
   }
-//-----------List of Rotation matrices--------------
+  //-----------List of Rotation matrices--------------
   Int_t   jrotm   = clink->jrotm; 
   Int_t   nrotm   = 0;   if (jrotm)  nrotm  = z_iq[jrotm-2]; 
   for (irot=1; irot<=nrotm; irot++) {
@@ -418,10 +438,10 @@ void St_geant_Maker::G2root()
     if (! jr) continue;
     sprintf(astring,"rotm%i",irot);
     rotm = new TRotMatrix(astring,astring,z_q[jr+11],z_q[jr+12],
-			                  z_q[jr+13],z_q[jr+14],
-			                  z_q[jr+15],z_q[jr+16]);
+			  z_q[jr+13],z_q[jr+14],
+			  z_q[jr+15],z_q[jr+16]);
   }
-//---------- Shapes ---------------------
+  //---------- Shapes ---------------------
   Int_t   jvolum  = clink->jvolum;
   Int_t   nvolum  = 0;   if (jvolum) nvolum = z_iq[jvolum-2];
   Int_t   jtmed   = clink->jtmed;
@@ -434,7 +454,7 @@ void St_geant_Maker::G2root()
     t = (TShape *) gGeometry->GetListOfShapes()->FindObject(name.Data());
     if (!t) {t = MakeShape(&name,ivo);}
   }
-//----------- Nodes -------------------  
+  //----------- Nodes -------------------  
   Int_t Nlevel = 0;
   Int_t Names[15];
   Int_t Numbers[15];

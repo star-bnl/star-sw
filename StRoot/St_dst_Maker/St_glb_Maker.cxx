@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.33 1999/02/20 00:24:51 kathy Exp $
+// $Id: St_glb_Maker.cxx,v 1.34 1999/02/20 18:49:16 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.34  1999/02/20 18:49:16  fisyak
+// Add event/run information
+//
 // Revision 1.33  1999/02/20 00:24:51  kathy
 // fixed some of the histograms
 //
@@ -389,6 +392,10 @@ Int_t St_glb_Maker::Make(){
   dst_event_header_st  event =   {"Collision", //event_type
 				  {0,0},       // n_event[2]
 				  0, 0, 0, 0}; // n_run,time,trig_mask,bunch_cross
+  strcpy (&event.event_type[0],gStChain->EvenType());
+  event.n_event[0] = gStChain->Event();
+  event.n_run      = gStChain->Run();
+  event.time       = 1000000*gStChain->Date() + gStChain->Time();
   event_header->AddAt(&event,0);
   if (! event_summary) {
     event_summary = new St_dst_event_summary("event_summary",1);
@@ -446,11 +453,9 @@ Int_t St_glb_Maker::Make(){
   St_est_match   *est_match    = 0;
   
   // Case silicon not there
-  if (!svtracks && !svthits) {
-    stk_track = new St_stk_track("stk_track",1); temp->Add(stk_track);
-    groups = new St_sgr_groups("groups",1); temp->Add(groups);
-    scs_spt = new St_scs_spt("scs_spt",1); temp->Add(scs_spt);
-  }
+  if (!stk_track) {stk_track = new St_stk_track("stk_track",1); temp->Add(stk_track);}
+  if (!groups)    {groups = new St_sgr_groups("groups",1); temp->Add(groups);}
+  if (!scs_spt)   {scs_spt = new St_scs_spt("scs_spt",1); temp->Add(scs_spt);}
   // Case running est tpc -> Si space point tracking
   else if ( !svtracks && svthits){
     
@@ -680,12 +685,26 @@ Int_t St_glb_Maker::Make(){
       cout << " run_dst: finished calling dst_monitor_soft_filler" << endl;
     }      
     St_DataSet *run_summary = gStChain->DataSet("run_summary");
+    St_dst_run_header *run_header = 0;
+    St_dst_summary_param *summary_param = 0;
     if (run_summary) {
-      cout << " run_dst: Calling fill_dst_event_summary" << endl;
       St_DataSetIter summary(run_summary);
-      St_dst_run_header *run_header = (St_dst_run_header *) summary("run_header");
-      St_dst_summary_param *summary_param = (St_dst_summary_param *) summary("summary_param");
-      
+      run_header = (St_dst_run_header *) summary("run_header");
+      summary_param = (St_dst_summary_param *) summary("summary_param");
+    }
+    if (!run_header) {
+      run_header = new St_dst_run_header("run_header",1);
+      m_DataSet->Add(run_header);
+      dst_run_header_st *run = run_header->GetTable();
+      run->run_id = gStChain->Run();
+      strcpy (run->event_type,gStChain->EvenType());
+      run->sqrt_s = gStChain->CenterOfMassEnergy();
+      run->east_a = gStChain->Aeast();
+      run->west_a = gStChain->Awest();
+   }
+    if (summary_param && run_header) {
+      cout << " run_dst: Calling fill_dst_event_summary" << endl;
+    
       Int_t Res_fill_dst_event_summary = fill_dst_event_summary(summary_param,run_header,event_header,
 								globtrk,vertex,event_summary);
     
@@ -830,7 +849,7 @@ void St_glb_Maker::Histograms(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.33 1999/02/20 00:24:51 kathy Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.34 1999/02/20 18:49:16 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
