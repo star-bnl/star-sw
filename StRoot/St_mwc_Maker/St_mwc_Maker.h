@@ -1,5 +1,9 @@
-// $Id: St_mwc_Maker.h,v 1.2 1999/02/08 16:51:58 fisyak Exp $
+// $Id: St_mwc_Maker.h,v 1.3 1999/02/19 18:22:58 druss Exp $
 // $Log: St_mwc_Maker.h,v $
+// Revision 1.3  1999/02/19 18:22:58  druss
+// init routine now uses parameter files from StRoot/params
+// included a few histograms
+//
 // Revision 1.2  1999/02/08 16:51:58  fisyak
 // Fix to parameters
 //
@@ -39,11 +43,13 @@
 class St_mwc_geo;
 class St_mwc_cal;
 class St_mwc_mpar;
+class TH1F;
+class TH2F;
 
 class St_mwc_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.2 1999/02/08 16:51:58 fisyak Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.3 1999/02/19 18:22:58 druss Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
    St_mwc_geo  *m_geom; //!
@@ -51,6 +57,10 @@ class St_mwc_Maker : public StMaker {
    St_mwc_mpar *m_mpar; //!
  
  protected:
+   TH2F   *m_xy;  //!
+   TH2F   *m_pxy; //!
+   TH1F   *m_pz;  //!
+  
  public: 
                   St_mwc_Maker(const char *name="mwc", const char *title="mwc");
    virtual       ~St_mwc_Maker();
