@@ -1,5 +1,5 @@
 -*- mode:outline -*-
-Time-stamp: <00/08/24 12:41:19 calderon>
+Time-stamp: <02/04/22 23:14:05 ullrich>
 
 * StEventUtitites
   This repository contains small to moderate sized
@@ -239,6 +239,65 @@ to give a reference centrality bin.
         10                 0.05                  675
  
 <next entry comes here>
+
+** StuPostScript: PostScript Event Display
+------------------------------------------
+Files:       StuPostScript.h, StuPostScript.cc 
+Author:      Thomas Ullrich
+Date:        April 2002
+Description: PostScript Event Display
+             The class has only one public static methods write()
+             which produces an encapsulated PostScript (EPS) file.
+             There are various options available.
+
+Syntax:
+#include "StuPostScript.h"
+
+bool StuPostScript::write(const char* filename, const StEvent* event);
+bool StuPostScript::write(const char* filename, const StEvent* event,
+                          const char* options);
+bool StuPostScript::write(const char* filename, const StEvent* event,
+                          const char* options,
+                          vector<StTrack*>* userTracks);
+
+filename:   the name of the PostScript file. The extension should
+            be always '.eps'.
+event:      pointer to an event.
+options:    character string with options (see below).
+userTracks: optional vector of pointers to tracks.
+            If present only those tracks stored in the vector
+            are plotted. Note that 'event' is still needed.
+            This option allows to select and print only certain
+            tracks.
+Return Code: StuPostScript::write() return 'true' if successful
+             otherwise 'false'.
+
+Options (case sensitive):                                          
+b     Black background, white frame.                               
+      Otherwise the frame is dran in black and the                 
+      background is white.                                         
+p     Draw beampipe.                                               
+c     Use many colors for tracks (colored according to pt).        
+      red pt>1, green 0.5<pt<1, blue<0.5                           
+C     Use many colors for tracks (colored according to pt).        
+      Blue lowest, red highest.                                    
+f     Track drawn with fewer points (factor 4 less).               
+      Helix becomes slightly more chiseled                         
+      and files are considerable smaller.                          
+      Still good for small scale eps.                              
+t     Add text (event, run number, trigger etc.) to the plot.      
+a     Plot all global tracks.                                      
+      Without this option short tracks                             
+      (<10 points) get suppressed.                                 
+s     Plot sideview (zy)                                           
+      Default is front view (xy)                                   
+
+StuPostScript writes PS without dictionary. This makes the produced
+files slightly bigger but the code easier to maintain.
+
+Known Problems: The side view and text are not compatible. It works
+                bit doesn't look nice. 
+
 
 
 * Template
