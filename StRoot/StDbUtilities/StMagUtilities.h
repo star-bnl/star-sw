@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.24 2004/03/01 17:23:36 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.25 2004/03/16 20:45:32 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.25  2004/03/16 20:45:32  jhthomas
+ * Add new (faster) BField shape distortion routine.  See comments for chain flags.
+ *
  * Revision 1.24  2004/03/01 17:23:36  jhthomas
  * Add function to get shorted ring parameters.
  *
@@ -100,7 +103,8 @@ enum   DistortSelect
   kIFCShift          = 0x200,    // Bit 10
   kSpaceCharge       = 0x400,    // Bit 11
   kSpaceChargeR2     = 0x800,    // Bit 12
-  kShortedRing       = 0x1000    // Bit 13
+  kShortedRing       = 0x1000,   // Bit 13
+  kFast2DBMap        = 0x2000    // Bit 14
 } ;
 
 // DO NOT change the numbering of these constants. StBFChain depends
@@ -178,6 +182,7 @@ class StMagUtilities {
   Float_t  spaceEr[neZ][neR] ;
   Float_t  spaceR2Er[neZ][neR] ;
   Float_t  shortEr[neZ][neR] ;
+  Float_t  tiltEr[neZ][neR] ;
   Float_t  eRadius[neR], ePhiList[nePhi], eZList[neZ]  ;         
 
  public:
@@ -195,7 +200,9 @@ class StMagUtilities {
   virtual void    DoDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoBDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    Undo2DBDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    FastUndoBDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    FastUndo2DBDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoPad13Distortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoTwistDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoClockDistortion ( const Float_t x[], Float_t Xprime[] ) ;
@@ -205,6 +212,7 @@ class StMagUtilities {
   virtual void    UndoSpaceChargeR2Distortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoIFCShiftDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoShortedRingDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoTiltDistortion ( const Float_t x[], Float_t Xprime[] ) ;
 
   virtual void    FixSpaceChargeDistortion ( const Int_t Charge, const Float_t x[3], const Float_t p[3], 
 					const Prime PrimaryOrGlobal, Float_t x_new[3], Float_t p_new[3],
