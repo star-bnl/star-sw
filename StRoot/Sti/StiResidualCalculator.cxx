@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.10 2004/02/21 18:27:41 pruneau Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.11 2004/04/05 21:51:45 andrewar Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.11  2004/04/05 21:51:45  andrewar
+ * Added hist for dz vs. dy plot
+ *
  * Revision 2.10  2004/02/21 18:27:41  pruneau
  * Updates to comply with changes made in abstract interfaces.
  *
@@ -193,10 +196,10 @@ void StiResidualCalculator::initDetector(StiDetectorBuilder *detBuilder)
 					   "Residual in Y vs. Cross, Dip", 
 					   60, -1, 1, 60, -1, 1, 
 					   75, -1.5,1.5));
-	  baseName= "t_y_z_";
+	  baseName= "y_z_";
 	  baseName=baseName+detName;
-	  mResidualZY.push_back(book( baseName,"",100,0,200.,20,-2.,2.,
-				    20,-2.,2.));
+	  mResidualZY.push_back(book( baseName,"",20,-.5,.5,
+				    20,-.5,.5));
 
 
 	  mDetectorHist->Fill(i,j);
@@ -535,9 +538,10 @@ void StiResidualCalculator::FillHist(int offset, double z, double y,
   if(hist) hist->Fill(cross, dip, diff);
   else check=-1;  
 
-  iH = mResidualZY.begin();
-  hist = *(iH+offset);
-  if(hist) hist->Fill(z, y, diff); 
+  
+  vector<TH2D*>::iterator iH2 = mResidualZY.begin();
+  TH2D* hist2 = *(iH2+offset);
+  if(hist2) hist2->Fill(dz, dy); 
   else check=-1;
 
   if (check==-1) cout <<"Error in hist finding..."<<endl;

@@ -1,11 +1,14 @@
 //StiResidualMaker.h
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.h,v 2.6 2004/02/21 18:27:42 pruneau Exp $
+ * $Id: StiResidualCalculator.h,v 2.7 2004/04/05 21:51:58 andrewar Exp $
  *
  * Author: Andrew Rose, Wayne State University, October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.h,v $
+ * Revision 2.7  2004/04/05 21:51:58  andrewar
+ * Added hist for dz vs. dy plot
+ *
  * Revision 2.6  2004/02/21 18:27:42  pruneau
  * Updates to comply with changes made in abstract interfaces.
  *
@@ -100,7 +103,7 @@ class StiResidualCalculator: public StiResiduals, public HistogramGroup
      vector<TH3D*> mZDResidualCrossZ;
      vector<TH3D*> mZDResidualDipZ;
      vector<TH3D*> mResidualCrossDip;
-     vector<TH3D*> mResidualZY;
+     vector<TH2D*> mResidualZY;
 
      //Track Hists
      TH1D *mCross;
