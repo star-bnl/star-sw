@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNet.cc,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpNet.cc,v 1.2 2000/03/22 14:08:25 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNet.cc,v $
+ * Revision 1.2  2000/03/22 14:08:25  aihong
+ * reduce unnecessary bound checking for faster run
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -630,22 +633,21 @@ void StPidAmpNet::pushATrk(StPidAmpTrk* theTrack,StPidAmpChannelCollection* set)
     if (!set){
  double rg =fabs(theTrack->rig());
  dedx=fabs(theTrack->dedx());
- idx=getSliceIndex(theTrack);//int((rg-fabs(mParticleType.start()))/SliceWidth); // get the idex for slice
+ idx=getSliceIndex(theTrack);// get the idex for slice.
 
-  if (idx<mSliceCollect->size() && idx>=0 ) {
 
-   if ( (rg>((*mSliceCollect)[idx])->leftEdge()) && (rg <((*mSliceCollect)[idx])->rightEdge()) ) { //slice bound checking
+ //  if ( (rg>((*mSliceCollect)[idx])->leftEdge()) && (rg <((*mSliceCollect)[idx])->rightEdge()) ) { //slice bound checking needed for debugging.
+ //to reduce run time, comment it out in the code released.
      ((*mSliceCollect)[idx])->fill(theTrack,(dedx-(dedxAtBandCenter(rg)-dedxAtBandCenter((*mSliceCollect)[idx]->meanRig())))); //transform to pixel 
      //following the slope of BetheBlock curve, and do filling
-   }
-  }
+ //  }
   
  } else if (set) {
 
    if (theTrack->nhits()>set->nhits4BGNet()){
 
        //fill mBGNet
-   if ( mParticleType.id()==9 || mParticleType.id()==8 ) mNetWindow.addWindow(2.5,4.5); //for pi relative rising
+
        push2BGNet(*(set->bgNet()), theTrack);
    
  
@@ -669,7 +671,6 @@ void StPidAmpNet::pushATrk(StPidAmpTrk* theTrack,StPidAmpChannelCollection* set)
 
       } 
 
-   if ( mParticleType.id()==9 || mParticleType.id()==8 ) mNetWindow.removeLastWindow(); //for pi relative rising
 
    }
    }
@@ -709,16 +710,23 @@ void StPidAmpNet::fillSlices(StPidAmpTrkVector* trks,StPidAmpChannelCollection* 
  StPidAmpTrkIter iter;
  StPidAmpTrk* thisTrack;
 
- for (iter=trks->begin(); iter!=trks->end(); iter++){
-  
- thisTrack=*iter;
+ if( ( mParticleType.id()==9 || mParticleType.id()==8 ) && set )
+ mNetWindow.addWindow(2.5,4.5); //for pi relative rising
 
+
+ for (iter=trks->begin(); iter!=trks->end(); iter++){
+   thisTrack=*iter;
    if (mParticleType.id()==2||mParticleType.id()==3){ //e+/- filling
                      pushATrk(thisTrack,set);
  } else { if (thisTrack->dca()<VetexCut) pushATrk(thisTrack,set);}//need dca()
                                                          //to filter e+/- out.
- 
  }//for
+
+
+ if ( ( mParticleType.id()==9 || mParticleType.id()==8 ) && set)
+   mNetWindow.removeLastWindow(); //for pi relative rising
+
+
 }
 //----------------------------------
 void StPidAmpNet::fillPaths(){
@@ -768,20 +776,10 @@ void StPidAmpNet::push2BGNet(StPidAmpNet& net, StPidAmpTrk* trk){
 
    if (mNetWindow.isInWindow(fabs(trk->rig()))) {
 
-
-
-    if (idx<net.sliceVector()->size() && idx>=0 ) {
-
-     if ( (betaGamma>((*(net.sliceVector()))[idx])->leftEdge()) && (betaGamma <((*(net.sliceVector()))[idx])->rightEdge()) ) { //slice bound checking
+  // if ( (betaGamma>((*(net.sliceVector()))[idx])->leftEdge()) && (betaGamma <((*(net.sliceVector()))[idx])->rightEdge()) ) { //slice bound checking needed 
+       //for debugging.to reduce run time, comment it out in the code released.
     (((*(net.sliceVector()))[idx])->slice())->Fill((dedx-(net.dedxAtBandCenter(betaGamma)-net.dedxAtBandCenter((*(net.sliceVector()))[idx]->meanRig()))));
-
-
-
-
-     }
-
-    }
-
+ //  }
    }//if (mNetWindow.isInWindow(fabs(trk->rig()))) {
 
   } else if (mParticleType.id()==2 || mParticleType.id()==3){
@@ -790,14 +788,10 @@ void StPidAmpNet::push2BGNet(StPidAmpNet& net, StPidAmpTrk* trk){
 
    if (mNetWindow.isInWindow(fabs(trk->rig()))) {
 
-    if (idx<net.sliceVector()->size() && idx>=0 ) {
-
-
-     if ( (betaGamma>((*(net.sliceVector()))[idx])->leftEdge()) && (betaGamma <((*(net.sliceVector()))[idx])->rightEdge()) ) { //slice bound checking
+   // if ( (betaGamma>((*(net.sliceVector()))[idx])->leftEdge()) && (betaGamma <((*(net.sliceVector()))[idx])->rightEdge()) ) { //slice bound checking needed 
+       //for debugging.to reduce run time, comment it out in the code released.
     (((*(net.sliceVector()))[idx])->slice())->Fill((dedx-(net.dedxAtBandCenter(betaGamma)-net.dedxAtBandCenter((*(net.sliceVector()))[idx]->meanRig()))));
-     }
-
-    }
+  //  }
 
    }//if (mNetWindow.isInWindow(fabs(trk->rig()))) {
 
@@ -808,15 +802,13 @@ void StPidAmpNet::push2BGNet(StPidAmpNet& net, StPidAmpTrk* trk){
      //just fill first window here. coz for nhits<15, the second window 
      //for e+/- is suzzy.
 
-    if (idx<net.sliceVector()->size() && idx>=0 ) {
-
-
-     if ( (betaGamma>((*(net.sliceVector()))[idx])->leftEdge()) && (betaGamma <((*(net.sliceVector()))[idx])->rightEdge()) ) { //slice bound checking
+   //if ( (betaGamma>((*(net.sliceVector()))[idx])->leftEdge()) && (betaGamma <((*(net.sliceVector()))[idx])->rightEdge()) ) { //slice bound checking needed 
+       //for debugging.to reduce run time, comment it out in the code released
 
     (((*(net.sliceVector()))[idx])->slice())->Fill((dedx-(net.dedxAtBandCenter(betaGamma)-net.dedxAtBandCenter((*(net.sliceVector()))[idx]->meanRig()))));
-     }
+  // }
 
-    }
+   
 
    }//if (mNetWindow.isInWindow(fabs(trk->rig()))) {
 
