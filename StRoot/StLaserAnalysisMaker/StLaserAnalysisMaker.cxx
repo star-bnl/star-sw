@@ -1,5 +1,8 @@
-// $Id: StLaserAnalysisMaker.cxx,v 1.3 2000/01/31 23:50:11 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.4 2000/02/09 21:38:14 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.4  2000/02/09 21:38:14  fisyak
+// Increase cluster size
+//
 // Revision 1.3  2000/01/31 23:50:11  fisyak
 // Clean up
 //
@@ -57,8 +60,8 @@ Ertrio_t *certrio;
 Eropts_t *ceropts;
 Int_t *z_iq, *z_lq; 
 Float_t *z_q; 
-const Int_t NY = 5;
-const Int_t NZ = 5;
+const Int_t NY = 7;
+const Int_t NZ = 7;
 const Int_t NYT = 2*NY + 1;
 const Int_t NZT = 2*NZ + 1;
 TH1F *fRatio;
@@ -439,7 +442,7 @@ Int_t StLaserAnalysisMaker::Make(){
 	      DYY += adc[j][i]*yy*yy;
 	      CYZ += adc[j][i]*yy*zz;
 	      DZZ += adc[j][i]*zz*zz;
-	      fevent->AddAdc(y,z,adc[j][i]);
+	      //yf	      fevent->AddAdc(y,z,adc[j][i]);
 	    }
 	  }
 	}
@@ -482,7 +485,7 @@ Int_t StLaserAnalysisMaker::Make(){
 	}
 	for (j=0;j<NZT;j++) printf("|\t%5.0f",1000*Zadc[j]);  printf ("\n");
 #endif
-	if (fevent->GetNoY() > 0 && TMath::Abs(Yav - Y) < 0.5)     fTree->Fill();
+	if (fevent->GetNoY() > 0 && TMath::Abs(Yav - Y) < 2.5)     fTree->Fill();
 	//    else                           fevent->Print();
       }
     }
