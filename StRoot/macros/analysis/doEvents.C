@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.29 1999/07/23 22:41:21 perev Exp $
+// $Id: doEvents.C,v 1.30 1999/07/26 16:14:25 perev Exp $
 // $Log: doEvents.C,v $
-// Revision 1.29  1999/07/23 22:41:21  perev
-// Simplify for CINT
+// Revision 1.30  1999/07/26 16:14:25  perev
+// Fix printing of event number
+//
+// Revision 1.30  1999/07/26 16:14:25  perev
+// Fix printing of event number
 //
 // Revision 1.29  1999/07/23 22:41:21  perev
 // Simplify for CINT
@@ -194,12 +197,12 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
   Int_t iInit = chain->Init();
   if (iInit) chain->Fatal(iInit,"on init");
   chain->PrintInfo();
-EventLoop: if (i++ <= nevents && !istat) {
+
   // Event loop
   int istat=0,i=1;
 EventLoop: if (i <= nevents && !istat) {
     cout << "============================ Event " << i << " start" << endl;
-    goto EventLoop;
+    i++; goto EventLoop;
     if (istat) {cout << "Last event processed. Status = " << istat << endl;}
     i++;
 }
