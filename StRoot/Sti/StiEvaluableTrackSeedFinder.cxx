@@ -30,6 +30,7 @@ using std::for_each;
 #include "StiStTrackFilter.h"
 #include "StiGeometryTransform.h"
 #include "StiKalmanTrack.h"
+#include "StiKalmanTrackNode.h"
 #include "StiEvaluableTrackSeedFinder.h"
 
 ostream& operator<<(ostream&, const StiHit&);
@@ -124,6 +125,15 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     track->setStTrackPairInfo(bestPair);
     //ATTENTION CLAUDE: Uncomment the following to seed KalmanTrack and investigate problems!
     StiGeometryTransform::instance()->operator()(bestPair->partnerTrack(), track);
+    //Set StiDetectorContainer to layer corresponding to the innermost point on the track seed
+    StiKalmanTrackNode* node = track->getLastNode(); //Should return innermost
+    if (!node) {
+	cout <<"StiEvaluableTrackSeedFinder::makeTrack(). ERROR!\tnode==0.  return;"<<endl;
+    }
+    else {
+	StiDetector* layer = node->getHit()->detector();
+	StiDetectorContainer::instance()->setToDetector(layer);
+    }
     
     return track;
 }
