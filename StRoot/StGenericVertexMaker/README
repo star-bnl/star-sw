@@ -1,0 +1,18 @@
+StMinuitVertexMaker:
+
+Minuit based vertex finder.  See StVertexFinder.h for details
+
+Inputs:
+StEvent
+
+Switches:  
+UseVertexConstraint(x0,y0,dxdz,dydz,weight) -- Swithces vertex finder to 1D mode for pp
+
+CTBforSeed() -- require CTB match for tracks used to find vertex seed
+
+use_ITTF  --  use ITTF tracks (checks encoded method)
+
+
+Output:
+
+No output, but fit results can be accessed from StVertexFinder.result()
