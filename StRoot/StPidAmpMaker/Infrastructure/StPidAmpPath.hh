@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpPath.hh,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpPath.hh,v 1.2 2000/04/11 15:35:21 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpPath.hh,v $
+ * Revision 1.2  2000/04/11 15:35:21  aihong
+ * add pathFittedHisto() implementation
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -92,5 +95,7 @@ inline int                   StPidAmpPath::index(){return mIndex;}
 inline TGraph*               StPidAmpPath::pathGraph() { return mPathGraph;}
 inline StPidParamVector* StPidAmpPath::pathParams() {return mPathParams;}
 inline string                StPidAmpPath::name() const {return mName;}
+inline TH1D*                 StPidAmpPath::pathFittedHisto() {return mPathFittedHisto;}
+
 
 #endif
