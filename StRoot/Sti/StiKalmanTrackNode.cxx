@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.20 2003/05/07 03:01:39 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.21 2003/05/08 18:49:09 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.21  2003/05/08 18:49:09  pruneau
+ * fudge=1
+ *
  * Revision 2.20  2003/05/07 03:01:39  pruneau
  * *** empty log message ***
  *
@@ -667,7 +670,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   else
     sign = -1.;
   double eloss = _elossCalculator->calculate(1.,0.5,m, beta2,5.);
-  double fudge = 0.7;
+  double fudge = 1.;
   dE = fudge*sign*dxEloss*eloss;
   /*if (fabs(getP())<0.2)
     cout << "MCS: _x:"<<_x<<" dx:"<<dx<<" dxEloss:"<<dxEloss
