@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.17 2000/06/15 14:41:53 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.18 2000/06/27 20:38:45 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -356,7 +356,7 @@
  if ($STAR_SYS ne $STAR_HOST_SYS) {$OSFID .= " " . $STAR_HOST_SYS;}
  my $FLAGS = $OSFID . " CERNLIB_TYPE" . " __ROOT__";
  $CPPFLAGS .= " -D" . join (" -D", split (" ",$FLAGS));
- if (defined($ARG{NODEBUG}))  {$DEBUG = "-O2"              ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
+ if (defined($ARG{NODEBUG}) or $NODEBUG)  {$DEBUG = "-O1 -g"              ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
  if (defined($ARG{DEBUG}))    {$DEBUG = $ARG{DEBUG}        ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
  if (defined($ARG{CPPFLAGS})) {$CPPFLAGS = $ARG{CPPFLAGS}  ; print "set CPPFLAGS = $CPPFLAGS\n" unless ($param::quiet);}
  if (defined($ARG{EXTRA_CPPFLAGS})) {$EXTRA_CPPFLAGS = $ARG{EXTRA_CPPFLAGS}  ; print "set EXTRA_CPPFLAGS = $EXTRA_CPPFLAGS\n" unless ($param::quiet);}
