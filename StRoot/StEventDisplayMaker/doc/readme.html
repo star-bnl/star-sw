@@ -28,14 +28,16 @@
             StEventDisplayMaker</a> has been included into <A href="readme1.html">doEvents.C 
             and bfc.C </A>
       STAR macros
-      <P>Since the new version of the maker calls a <a href="http://root.bnl.gov">Qt-based 
-            version of ROOT</a> to try it one has to do (temporary):
+      <P>Since the maker uses  the <a href="http://root.bnl.gov">Qt-layer  
+            of ROOT GUI</a> to turn it <b>ON</b> one needs a custom <a href="rootrc"><code> <b>.rootrc</b><code></a> 
+            ROOT resource file in his/her working directory:
          <OL>
             <LI>
-               Set that ROOT version with the shell command <small><code>
+               Copy the the custom version of <a href="rootrc">".rootrc"</a> file into your working directory <small><code>
                      <pre>
-      stardev 
-      setup ROOT 3.03.09.qt
+      Gui.Backend:                qt
+      Gui.Factory:                qtgui
+      Plugin.TGuiFactory: qtgui   TQtGUIFactory  QtGui  "TQtGUIFactory()"
                         </pre></small>
             </CODE>
             <LI>
