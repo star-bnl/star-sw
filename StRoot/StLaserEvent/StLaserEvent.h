@@ -1,6 +1,9 @@
-//$Id: StLaserEvent.h,v 1.6 2001/07/17 17:16:41 love Exp $
+//$Id: StLaserEvent.h,v 1.7 2001/12/12 20:49:35 love Exp $
 // Header file for TPC Laser event - Bill Love
 //$Log: StLaserEvent.h,v $
+//Revision 1.7  2001/12/12 20:49:35  love
+//Added //-> to clones array declarations
+//
 //Revision 1.6  2001/07/17 17:16:41  love
 //Add phi to laser track def
 //
@@ -82,9 +85,9 @@ private:
    Int_t          fNvertex;
    UInt_t         fFlag;
    EventHeader    fEvtHdr;
-   TClonesArray  *fTracks;
-   TClonesArray  *fHits;
-   TClonesArray  *fPixels;
+   TClonesArray  *fTracks; //->
+   TClonesArray  *fHits;   //->
+   TClonesArray  *fPixels;  //->
 
    static TClonesArray *fgTracks;
    static TClonesArray *fgHits;
