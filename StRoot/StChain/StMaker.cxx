@@ -1,5 +1,20 @@
-// $Id: StMaker.cxx,v 1.47 1999/06/11 23:45:31 perev Exp $
+// $Id: StMaker.cxx,v 1.52 1999/07/11 21:04:06 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.52  1999/07/11 21:04:06  fisyak
+// Clash resolion
+//
+// Revision 1.51  1999/07/11 20:40:35  perev
+// Move Clear from StChain to StMaker
+//
+// Revision 1.50  1999/07/11 01:59:04  perev
+// add GetCVSTag again
+//
+// Revision 1.49  1999/07/11 01:33:33  fine
+// makedoc some corrections for MakeDoc
+//
+// Revision 1.48  1999/07/09 22:00:22  perev
+// GetCVS into StMaker
+//
 // Revision 1.47  1999/06/11 23:45:31  perev
 // cleanup
 //
@@ -130,7 +145,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.47 1999/06/11 23:45:31 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.52 1999/07/11 21:04:06 fisyak Exp $";
 return cvs;};
 static void doPs(const char *who,const char *where);
 
@@ -420,6 +435,14 @@ void StMaker::Clear(Option_t *option)
 {
   if(option){};
   if (m_DataSet) m_DataSet->Delete();
+//    Reset lists of event objects
+   
+   TIter next(GetMakeList());
+   StMaker *maker;
+   while ((maker = (StMaker*)next())) {
+      maker->Clear(option);
+   }
+   return;
 
 }
 //_____________________________________________________________________________
@@ -433,6 +456,7 @@ Int_t StMaker::Init()
    StMaker *maker;
 
    while ((maker = (StMaker*)nextMaker())) {
+
      // save last created histogram in current Root directory
       gROOT->cd();
       objLast = gDirectory->GetList()->Last();
@@ -562,7 +586,7 @@ void StMaker::Fatal(int Ierr, const char *com)
 StMaker *StMaker::GetMaker(const St_DataSet *ds) 
 { 
   const St_DataSet *par = ds;
-  while (par && (par = par->GetParent()) && strcmp(".maker",par->GetTitle())) {}
+  while (par && (par = par->GetParent()) && strncmp(".maker",par->GetTitle(),6)) {}
   return (StMaker*)par;
 }
 //_____________________________________________________________________________
@@ -655,6 +679,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
  //            $(stardir) + "StRoot/StChain"
  //            $(stardir) + "StRoot/xdf2root"
  //            $(stardir) + ".share/tables"
+ //            $(stardir) + "StRoot/StUtilities"
  //            $(stardir) + "inc",
  //            $(stardir) + "StRoot/<this class name>",
  //
@@ -681,16 +706,21 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   if (!gHtml) gHtml = new THtml;
 
   // Define the set of the subdirectories with the STAR class sources
-  //                       | --------------  | ----------  | ------------------ |
-  //                       | Directory name    Class name    Share library name |
-  //                       | --------------  | ----------  | ------------------ |
-  const Char_t *source[] = {"StRoot/St_base" ,"St_DataSet",     "St_base"
-                           ,"StRoot/StChain" ,"StMaker"   ,     "StChain"
-                           ,"StRoot/xdf2root","St_XDFFile",     "xdf2root"
-                           ,".share/tables"  , ""         ,     ""
-                           ,"inc"            , ""         ,     ""
+  //                       | ----------------------  | ------------  | ------------------ |
+  //                       | Directory name            Class name      Share library name |
+  //                       | ----------------------  | ------------  | ------------------ |
+  const Char_t *source[] = {"StRoot/St_base"         , "St_DataSet"  ,    "St_base"
+                           ,"StRoot/StChain"         , "StMaker"     ,    "StChain"
+                           ,"StRoot/xdf2root"        , "St_XDFFile"  ,    "xdf2root"
+//                           ,"StRoot/StUtilities"     , "StMessage"   ,    "StUtilities"
+                           ,"StRoot/StarClassLibrary", ""            ,    ""
+                           ,"StRoot/StEvent"         , "StEvent"     ,    "StEvent"
+                           ,"StRoot/St_TLA_Maker"    , "St_TLA_Maker",    "St_TLA_Maker"
+                           ,".share/tables"          , ""            ,     ""
+                           ,"inc"                    , ""            ,     ""
                            };
-  const Int_t lsource = sizeof(source)/4;
+
+  const Int_t lsource = sizeof(source)/sizeof(const Char_t *);
  
   TString lookup = STAR;
   lookup += "/StRoot/";
@@ -746,7 +776,12 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   TClass header1("table_head_st",1,"table_header.h","table_header.h");
 
   // Update the docs of the base classes
-  if (baseClasses) for (i=0;i<nclass;i++) gHtml->MakeClass(classes[i]);
+  static Bool_t makeAllAtOnce = kTRUE;
+  if (makeAllAtOnce && baseClasses) { 
+     makeAllAtOnce = kFALSE;
+     gHtml->MakeAll(); 
+     for (i=0;i<nclass;i++) gHtml->MakeClass(classes[i]);
+  }
 
   // Create the doc for this class
   printf(" Making html for <%s>\n",c);

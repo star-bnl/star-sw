@@ -1,5 +1,14 @@
-// $Id: StMaker.h,v 1.23 1999/06/27 23:09:22 fisyak Exp $
+// $Id: StMaker.h,v 1.26 1999/07/11 02:02:05 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.26  1999/07/11 02:02:05  perev
+// clash inside GetCVS resolved
+//
+// Revision 1.25  1999/07/11 01:59:04  perev
+// add GetCVSTag again
+//
+// Revision 1.24  1999/07/09 22:00:22  perev
+// GetCVS into StMaker
+//
 // Revision 1.23  1999/06/27 23:09:22  fisyak
 // Add __DATE__ & __TIME__ to tag
 //
@@ -133,7 +142,6 @@ public:
    virtual Int_t     	GetDate()  const ;
    virtual Int_t     	GetTime()  const ;
    virtual const Char_t *GetEventType() const ;
-   static  const Char_t *VersionTag() {return GetCVSTag();};
 
 
 //		Get
@@ -189,15 +197,16 @@ public:
    static const char   *GetCVSIdC();
 
 //		must be in here in .h
-   static const char   *GetCVSIdH() 
-    {static const char cvs[]="$Id: StMaker.h,v 1.23 1999/06/27 23:09:22 fisyak Exp $";
-     return cvs;};
-   static const char   *GetCVSTag()
-     {static const char cvs[]="Tag $Name:  $ built "__DATE__" "__TIME__; return cvs;};
 
-protected:
+
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
+
+
+  virtual const char *GetCVS()
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.26 1999/07/11 02:02:05 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
+  virtual const char *GetCVSTag(){return  GetCVS();};
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };
 
