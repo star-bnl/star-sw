@@ -1,5 +1,11 @@
-// $Id: StFtpcConfMapPoint.cc,v 1.5 2001/04/19 11:29:39 oldi Exp $
+// $Id: StFtpcConfMapPoint.cc,v 1.6 2003/01/20 13:16:22 oldi Exp $
 // $Log: StFtpcConfMapPoint.cc,v $
+// Revision 1.6  2003/01/20 13:16:22  oldi
+// Additional volume segment added as garbage container. Hits which give a
+// segment index which is out of range (esp. those ones sitting exactly on the
+// beam line) are put in here.
+// Handling of function GetSegm() simplified.
+//
 // Revision 1.5  2001/04/19 11:29:39  oldi
 // Text of warning in SetAngles() changend.
 //
@@ -248,8 +254,8 @@ void StFtpcConfMapPoint::SetAngles()
   Double_t r2dim = TMath::Sqrt(mXv*mXv + mYv*mYv);
 
   if (r2dim == 0.) {
-  // If r2dim == 0 the pseudorapidity eta cannot be calculated (division by zero)!
-  // This can only happen if the point is lying on the z-axis and this should never be possible.
+    // If r2dim == 0 the pseudorapidity eta cannot be calculated (division by zero)!
+    // This can only happen if the point is lying on the z-axis and this should never be possible.
     gMessMgr->Message("The pseudorapidity cannot be calculated! (2-dim radius is zero and set to 1.e-10.)", "W", "OST");
     r2dim = 1.e-10;
   }

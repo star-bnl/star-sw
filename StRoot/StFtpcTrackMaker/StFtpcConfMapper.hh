@@ -1,5 +1,11 @@
-// $Id: StFtpcConfMapper.hh,v 1.16 2002/11/06 13:44:53 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.17 2003/01/20 13:16:23 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.17  2003/01/20 13:16:23  oldi
+// Additional volume segment added as garbage container. Hits which give a
+// segment index which is out of range (esp. those ones sitting exactly on the
+// beam line) are put in here.
+// Handling of function GetSegm() simplified.
+//
 // Revision 1.16  2002/11/06 13:44:53  oldi
 // Vertex handling simplifed.
 // Flag for clusters not to be used for tracking introduced.
@@ -263,6 +269,7 @@ public:
      Int_t  GetRowSegm(StFtpcConfMapPoint *hit);                      // returns number of pad segment of a specific hit
      Int_t  GetPhiSegm(StFtpcConfMapPoint *hit);                      // returns number of phi segment of a specific hit
      Int_t  GetEtaSegm(StFtpcConfMapPoint *hit);                      // returns number of eta segment of a specific hit
+     Int_t  GetSegm(StFtpcConfMapPoint *hit);                         // returns number of segment of a specific hit
      Int_t  GetRowSegm(Int_t segm);                                   // returns number of pad segment of a specific segment
      Int_t  GetPhiSegm(Int_t segm);                                   // returns number of phi segment of a specific segment
      Int_t  GetEtaSegm(Int_t segm);                                   // returns number of eta segment of a specific segment
@@ -426,15 +433,23 @@ inline Double_t StFtpcConfMapper::GetEta(Int_t segm)
 }
 
 
+inline Int_t StFtpcConfMapper::GetSegm(StFtpcConfMapPoint *h)
+{
+  // Calculates segment of a given hit.
+
+  return GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h));
+}
+
+
 inline Int_t StFtpcConfMapper::GetSegm(Int_t row_segm, Int_t phi_segm, Int_t eta_segm)
 {
   // Calculates the volume segment number from the segmented volumes (segm = segm(pad,phi,eta)).
 
   Int_t segm = row_segm * (mNumPhiSegment * mNumEtaSegment) + phi_segm * (mNumEtaSegment) + eta_segm;
 
-  if (segm >= mBounds) {
-    gMessMgr->Message("", "W", "OST") << "Segment calculation out of bounds (row = " << GetRow(row_segm) << ", phi = " << GetPhi(phi_segm) << ", eta = " << GetEta(eta_segm) << ")!" << endm;
-    return mBounds-1;
+  if (segm < 0 || segm >= mBounds) {
+    gMessMgr->Message("", "W", "OST") << "Segment calculation out of bounds (row = " << GetRow(row_segm) << ", phi = " << GetPhi(phi_segm) << ", eta = " << GetEta(eta_segm) << ")! Garbage segment returned." << endm;
+    return mBounds;
   }
 
   else return segm;

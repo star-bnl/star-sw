@@ -1,5 +1,11 @@
-// $Id: StFtpcConfMapper.cc,v 1.22 2002/11/06 14:05:35 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.23 2003/01/20 13:16:23 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.23  2003/01/20 13:16:23  oldi
+// Additional volume segment added as garbage container. Hits which give a
+// segment index which is out of range (esp. those ones sitting exactly on the
+// beam line) are put in here.
+// Handling of function GetSegm() simplified.
+//
 // Revision 1.22  2002/11/06 14:05:35  oldi
 // Minor (minimal) clean up.
 //
@@ -218,9 +224,9 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, StFtpcVertex *ve
     if (hit->GetUnusableForTrackingFlag()) mBadClusters++;
   }}
 
-  mVolume = new TObjArray(mBounds);  // create ObjArray for volume cells (of size bounds)
+  mVolume = new TObjArray(mBounds+1);  // create ObjArray for volume cells (of size mBounds + one cell for garbage)
 
-  {for (Int_t i = 0; i < mBounds; i++) {
+  {for (Int_t i = 0; i <= mBounds; i++) {
     mVolume->AddAt(new TObjArray(0), i);     // Fill ObjArray with empty ObjArrays
   }}
 
@@ -229,7 +235,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, StFtpcVertex *ve
   {for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
     h = (StFtpcConfMapPoint *)mHit->At(i);   
     h->Setup(mVertex);
-    ((TObjArray *)mVolume->At(GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h))))->AddLast(h);
+    ((TObjArray *)mVolume->At(GetSegm(h)))->AddLast(h);
   }}
 
   if (mBench) {
@@ -294,9 +300,9 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_
     }
   }}
 
-  mVolume = new TObjArray(mBounds);  // create ObjArray for volume cells (of size bounds)
+  mVolume = new TObjArray(mBounds+1);  // create ObjArray for volume cells (of size mBounds + one cell for garbage)
 
-  {for (Int_t i = 0; i < mBounds; i++) {
+  {for (Int_t i = 0; i <= mBounds; i++) {
     mVolume->AddAt(new TObjArray(0), i);     // Fill ObjArray with empty ObjArrays
   }}
 
@@ -305,7 +311,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_
   {for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
     h = (StFtpcConfMapPoint *)mHit->At(i);   
     h->Setup(mVertex);
-    ((TObjArray *)mVolume->At(GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h))))->AddLast(h);
+    ((TObjArray *)mVolume->At(GetSegm(h)))->AddLast(h);
   }}
 
   if (mBench) {
@@ -349,9 +355,9 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
   mClustersUnused = mHit->GetEntriesFast();
   mBadClusters = 0;
 
-  mVolume = new TObjArray(mBounds);  // create ObjArray for volume cells (of size bounds)
+  mVolume = new TObjArray(mBounds+1);  // create ObjArray for volume cells (of size mBounds + one cell for garbage)
 
-  {for (Int_t i = 0; i < mBounds; i++) {
+  {for (Int_t i = 0; i <= mBounds; i++) {
     mVolume->AddAt(new TObjArray(0), i);     // Fill ObjArray with empty ObjArrays
   }}
 
@@ -360,7 +366,7 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
   {for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
     h = (StFtpcConfMapPoint *)mHit->At(i);
     if (h->GetUnusableForTrackingFlag()) mBadClusters++;
-    ((TObjArray *)mVolume->At(GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h))))->AddLast(h);
+    ((TObjArray *)mVolume->At(GetSegm(h)))->AddLast(h);
   }}
 
   if (mBench) {
