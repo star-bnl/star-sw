@@ -1,4 +1,4 @@
-* $Id: g2t_volume_id.g,v 1.43 2003/10/02 22:38:27 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.44 2003/10/02 23:14:08 potekhin Exp $
 *  g2t_volume_id.g,v 
 *
 * Revision 1.38  2002/10/16 19:12:44  kopytin
@@ -65,7 +65,7 @@
 
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
-      Integer          endcap,zslice,innour,lnumber,wafer,lsub,phi_30d
+      Integer          ftpv,padrow,ftpc_sector,innour,lnumber,wafer,lsub,phi_30d
       Integer          section,tpgv,tpss,tpad,isdet,ladder,is,nladder
       Integer          module,layer
       Integer          nEndcap,nFpd,depth,shift,nv
@@ -484,10 +484,14 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
       else If (Csys=='ftp') then
 *10*
-        endcap    = numbv(1)
-        zslice    = numbv(2)
-        volume_id = 100*endcap+zslice
-*
+* ftpv=1 for west, 2 for east part of the FTPC
+* ftpc_sector is the phi division of the gas layer
+* the numbering scheme below designed by Janet Seyboth --max--
+        ftpv       = numbv(1)
+        padrow     = numbv(2)
+	ftpc_sector= numbv(3)
+        volume_id  = (100*ftpv+padrow)*10 + ftpc_sector
+*   ---------------------
       else If (Csys=='vpd') then
 *11*    Vertex position detector - Frank Geurts <geurts@rice.edu>
 
