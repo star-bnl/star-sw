@@ -3,6 +3,7 @@
 
 #include "Sti/StiHitLoader.h"
 class StEvent;
+class StMcEvent;
 class StiDetectorBuilder;
 
 /*! \class StiFtpcHitLoader
@@ -10,22 +11,21 @@ class StiDetectorBuilder;
   interface. It is used to load hits from Star StEvent into the StiHitContainer
   for Sti tracking. StEvent hits from the FTPC are converted using the 
   StiDetectorBuilder class.
-  <p>
-  This class is essentially morphed from the class StiHitFiller 
-  originally written by Mike Miller.
 
   \author Claude A Pruneau (Wayne State Univ) 
  */
-class StiFtpcHitLoader : public StiHitLoader<StEvent,StiDetectorBuilder>
+class StiFtpcHitLoader : public StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>
 {
 public:
 
     StiFtpcHitLoader();
     StiFtpcHitLoader(StiHitContainer * hitContainer,
+		     StiHitContainer * mcHitContainer,
 		     Factory<StiHit> * hitFactory,
 		     StiDetectorBuilder * transform);
     virtual ~StiFtpcHitLoader();
     virtual void loadHits(StEvent* source);
+    virtual void loadMcHits(StMcEvent* source);
 };
 
 
