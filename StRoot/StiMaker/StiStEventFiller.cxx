@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.44 2004/10/27 03:25:54 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.45 2004/11/08 15:34:16 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.45  2004/11/08 15:34:16  pruneau
+ * fix of the chi2 calculation
+ *
  * Revision 2.44  2004/10/27 03:25:54  perev
  * Version V3V
  *
@@ -548,10 +551,20 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
   // loop over StiKalmanTracks
   cout << "StiStEventFiller::fillEventPrimaries() -I- Tracks in container:" << mTrackStore->size() << endl;
   int mTrackN=0;
+  int noPipe=0;
+  int ifcOK=0;
   StiKalmanTrack* kTrack;
 
   int fillTrackCount1=0;
   int fillTrackCount2=0;
+  int svtHit;
+  int svtNode;
+  int matrix[10][10];
+  for (int i=0;i<10;++i)
+    {
+      for (int j=0;j<10;++j)
+	matrix[i][j]=0;
+    }
 
   for (TrackToTrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) 
     {
@@ -567,6 +580,8 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
       StGlobalTrack* currentGlobalTrack = static_cast<StGlobalTrack*>(currentTrackNode->track(global));
       float globalDca = impactParameter(currentGlobalTrack);
       currentGlobalTrack->setImpactParameter(globalDca);
+      svtNode = 0;
+      svtHit = 0;
       if (kTrack->isPrimary())
 	{
 	  fillTrackCount1++;
@@ -579,7 +594,81 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	  fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
 	  StPrimaryTrack* pTrack = new StPrimaryTrack;
 	  try
-	    {
+	    {  // test begin ==============
+	      StiKalmanTrackNode* leaf = kTrack->getLastNode();
+	      StiKTNForwardIterator it(leaf);
+	      StiKTNForwardIterator end = it.end();
+	      bool weird = false;
+	      int bad = 0;
+	      bool piped = false;
+	      bool ifced = false;
+	      bool out = false;
+	      while (it!=end) 
+		{
+		  const StiKalmanTrackNode& node = *it;
+		  if (node._x>2. && node._x<4.5)
+		    {
+		      //cout << "Beam Pipe:"<<node<<endl;
+		      piped = true;
+		    }
+		  if (node._x>40. && node._x<50.)
+		    {
+		      //cout << "Beam Pipe:"<<node<<endl;
+		      ifced = true;
+		    }
+		  else if (node._x>5. && node._x< 20.)
+		    {
+		      //svt land...
+		      if (node.getDetector()->isActive())
+			{
+			  svtNode++;
+			  if (node.getHit())
+			    svtHit++;
+			}
+		    }
+		  double x_g = node.x_g();
+		  double y_g = node.y_g();
+		  double z_g = node.z_g();
+		  double rt_g = sqrt(x_g*x_g+y_g*y_g);
+		  StiHit * theHit = node.getHit();
+		  if (theHit)
+		    {
+		      double dx = fabs(theHit->x() - node._x);
+		      double dy = fabs(theHit->y() - node._p0);
+		      double dz = fabs(theHit->z() - node._p1);
+		      if (dx>3 || dy>5 || dz>5)
+			bad++;
+		    }
+		  if (rt_g>200. || fabs(z_g)>200.)
+		    weird = true;
+		  ++it;
+		}
+	      if (!piped) noPipe++;
+	      if (ifced)  ifcOK++;
+	      if (weird || !piped || bad>4 || !ifced)
+		{
+		  cout << "  ===========";
+		  if (weird) cout << "WEIRD/";
+		  if (!piped)cout << "NO-PIPE/";
+		  if (bad>4) cout << "BAD>4 ("<<bad<<")/";
+		  if (!ifced) cout << "no-ifc/";
+		  cout << "==========================="<<endl;
+
+		  StiKTNForwardIterator it2(leaf);
+		  StiKTNForwardIterator end2 = it2.end();
+		  while (it2!=end2) 
+		    {
+		      const StiKalmanTrackNode& node2 = *it2;
+		      double x_g = node2.x_g();
+		      double y_g = node2.y_g();
+		      double z_g = node2.z_g();
+		      double rt_g2 = sqrt(x_g*x_g+y_g*y_g);
+		      cout << ">>>>>>>>>rt=" << rt_g2 << ">>>>>>>>>>" << node2 << endl;
+		      ++it2;
+		    }
+		}
+				// test end ===============
+
 	      fillTrack(pTrack,kTrack);
 	      // set up relationships between objects
 	      detInfoVec.push_back(detInfo);
@@ -605,11 +694,20 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	      delete pTrack;
 	    }
 	}//end if primary
+      matrix[svtNode][svtHit]++;
     } // kalman track loop
   if (skippedCount>0) cout << "StiStEventFiller::fillEventPrimaries() -I- A total of "<<skippedCount<<" StiKalmanTracks were skipped"<<endl;
   mTrkNodeMap.clear();  // need to reset for the next event
   cout <<"StiStEventFiller::fillEventPrimaries() -I- Number of tracks filled as primaries(1):"<< fillTrackCount1<<endl;
-  cout <<"StiStEventFiller::fillEventPrimaries() -I- Number of tracks filled as primaries:(2)"<< fillTrackCount2<<endl;
+  cout <<"StiStEventFiller::fillEventPrimaries() -I- Number of tracks filled as primaries:(2)"<< fillTrackCount2<<endl;  
+  cout <<"StiStEventFiller::fillEventPrimaries() -I- Number of tracks filled as primaries but without a beam pipe node:"<<noPipe<<endl;
+  cout <<"StiStEventFiller::fillEventPrimaries() -I- Number of tracks filled as primaries with ifc OK:"<<ifcOK<<endl;
+  for (int iNode=0;iNode<6;++iNode)
+    {
+      cout << "iNode";
+      for (int iHit=0;iHit<6;++iHit)
+	cout << "   " << matrix[iNode][iHit] << endl;
+    }
   return mEvent;
 }
 
@@ -713,13 +811,11 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   // chi square and covariance matrix, plus other stuff from the
   // innermost track node
   StiKalmanTrackNode* node = track->getInnerMostHitNode(2);
-  double alpha, xRef, x[5], covM[15], chi2node;
+  double alpha,xRef,x[5],covM[15],chi2node;
   node->get(alpha,xRef,x,covM,chi2node);
   float chi2[2];
-  if (track->getPointCount()>5) 
-      chi2[0] = track->getChi2()/(track->getPointCount()-5.); // changed again!  chi2() was not divided by N.D. of F. changed 12/May/03: using track->getChi2() instead of chi2node, want sum of chi2 for all nodes
-  else
-      chi2[0] = -9999;
+  //get chi2/dof
+  chi2[0] = track->getChi2();  
   chi2[1] = -9999; // change: here goes an actual probability, need to calculate?
     
 
