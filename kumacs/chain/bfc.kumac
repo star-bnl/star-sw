@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.32 1998/08/12 23:08:39 kathy Exp $
+* $Id: bfc.kumac,v 1.33 1998/08/13 20:33:26 fisyak Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.33  1998/08/13 20:33:26  fisyak
+* Add log_file as parameters for fmessage
+*
 * Revision 1.32  1998/08/12 23:08:39  kathy
 * now have all ftpc modules in bfc
 *
@@ -268,7 +271,7 @@
 MACRO bfc _
    TOP=$STAR _
    tpc_sector_first=1 _
-   tpc_sector_last=1 _
+   tpc_sector_last=24 _
    gstar_settings=' field_only' _
    domain=' geometry tpc svt global ' _
    chain='  g2tin svg tpg srs tfs sgr tpt tte_e tid svm egr ev0 evout' _
@@ -276,7 +279,8 @@ MACRO bfc _
    no_events=1 _
    input_data_prefix=$AFS_RHIC/star/data/samples/ _
    input_data_file=auau_central_hijing.xdf _
-   output_file=bfc_output
+   output_file=bfc_output _
+   log =''
     
 ***********************************************************
 * CALCULATE STUFF FROM MACRO INPUTS 
@@ -324,11 +328,12 @@ MACRO bfc _
  exec $STAR/kumacs/util/setup_defaults 
    
  exec setup#setup
- 
  exec bfc_util#bfc_start _
    domain=[domain] chain=[chain] gstar_settings=[gstar_settings]
  
  macro/global/import *
+ log_file = [log] 
+ message ' *** log_file                --> ' [log_file]
    
  if $iquest(1)<>0 goto ABEND
  exec bfc_util#bfc_init chain=[chain]
