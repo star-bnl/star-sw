@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_ZS_SR.cxx,v 1.2 2000/01/19 20:31:25 levine Exp $
+ * $Id: FTPV1P0_ZS_SR.cxx,v 1.3 2000/08/18 15:38:58 ward Exp $
  * Author: M.J. LeVine, H.Huemmler
  ***************************************************************************
  * Description: FTPC V1.0 Zero Suppressed Reader
@@ -7,9 +7,18 @@
  *
  * -------------change log ------------------------
  * 18-01-00 MJL 
+ * 11-07-00 JLK Added fee_pin_FTPC.h include for ZS Reader
  * 
  ***************************************************************************
  * $Log: FTPV1P0_ZS_SR.cxx,v $
+ * Revision 1.3  2000/08/18 15:38:58  ward
+ * New FTPC stuff from JKlay and Hummler.
+ *
+ * Revision 1.3  2000/07/11 14:44:06  jklay
+ * Geometry file included, so call to 
+ * FTPV1P0_ZS_SR::getFeeSequences(int Fee, int Pin, int *nSeq,Sequence **SeqData)
+ * can now be properly implemented
+ *
  * Revision 1.2  2000/01/19 20:31:25  levine
  * changed exit() to return -1 in
  * FTPV1P0_ZS_SR::getFeeSequences(int Fee, int Pin, int *nSeq,Sequence **SeqData)
@@ -30,13 +39,12 @@
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "FTPV1P0.hh"
-#include "TPC/fee_pin.h"
-
+#include "StDaqLib/FTPC/fee_pin_FTPC.h"
 
 
 FTPV1P0_ZS_SR::FTPV1P0_ZS_SR(int s, FTPV1P0_Reader *det)
 {
-  cout << "Constructing FTPV1P0_ZS_SR" << endl;
+//   cout << "Constructing FTPV1P0_ZS_SR" << endl;
   sector = s;
   detector = det;
 
@@ -71,15 +79,17 @@ int FTPV1P0_ZS_SR::initialize()
   }
   adcx_p = detector->getBankFTPADCX(sector);
   if ((void *)adcx_p != NULL) {
-    printf("found ADCX\n");
+    printf("found ADCX, sector %d\n", sector);
     fflush(stdout);
   }
   seqd_p = detector->getBankFTPSEQD(sector);
   if ((void *)seqd_p != NULL) {
-    printf("found SEQD\n");
+    printf("found SEQD, sector %d\n", sector);
     fflush(stdout);
   }
-   
+  else
+    // if there is no sequence bank, return to avoid crash of table builder
+    return FALSE;
 
   // search through the  SEQD banks to build our tables of what's where
 
@@ -195,7 +205,7 @@ int FTPV1P0_ZS_SR::initialize()
 
 FTPV1P0_ZS_SR::~FTPV1P0_ZS_SR()
 {
-  cout << "Deleting FTPV1P0_ZS_SR" << endl;
+//   cout << "Deleting FTPV1P0_ZS_SR" << endl;
   //free memory allocated for Sequence arrays
   for (int row=0; row<FTP_PADROWS; row++) {
     for (int pad=0; pad<FTP_MAXPADS; pad++) {
@@ -228,22 +238,27 @@ int FTPV1P0_ZS_SR::getSequences(int PadRow, int Pad, int *nSeq,
 {
   *nSeq = Pad_array[PadRow-1][Pad-1].nseq;   // number of sequences this pad
   *SeqData = Pad_array[PadRow-1][Pad-1].seq;  // pass back pointer to Sequence array 
-  return 0;
+
+  if (&nSeq) {
+    return 1;           // If there are sequences, return 1.
+  } else {              //This matches better with the ADCRawReader
+    return 0;           //which returns 1 if raw ADC data exists.
+  }
 }
 
 int FTPV1P0_ZS_SR::getFeeSequences(int Fee, int Pin, int *nSeq, 
 				   Sequence **SeqData)
 {
-#ifdef REAL_FEE_PIN_FOR_FTPC
-  unsigned short PadRow = row_vs_fee[Fee][Pin];
-  unsigned short Pad = pad_vs_fee[Fee][Pin];
+//#ifdef REAL_FEE_PIN_FOR_FTPC
+  unsigned short PadRow = row_vs_fee_FTPC[Fee][Pin];
+  unsigned short Pad = pad_vs_fee_FTPC[Fee][Pin];
   *nSeq = Pad_array[PadRow-1][Pad-1].nseq;   // number of sequences this pad
   *SeqData = Pad_array[PadRow-1][Pad-1].seq;  // pass back pointer to Sequence array 
   return 0;
-#else
-  printf("There is no table of FEE connections --- I quit\n");
-  return -1;
-#endif
+//#else
+//  printf("There is no table of FEE connections --- I quit\n");
+//  return -1;
+//#endif
 }
  
 // Read the clusters (space points) found in the mezzanine cluster-finder
