@@ -1,13 +1,16 @@
 #ifndef STAR_StFtpcGlobalMaker
 #define STAR_StFtpcGlobalMaker
 
+// $Id: StFtpcGlobalMaker.h,v 1.2 2001/03/30 13:30:12 jcs Exp $
+// $Log: StFtpcGlobalMaker.h,v $
+// Revision 1.2  2001/03/30 13:30:12  jcs
+// correct Id and Log
+//
+//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StFtpcGlobalMaker virtual base class for Maker                    //
+// StFtpcGlobalMaker virtual base class for Maker                       //
 //                                                                      //
-//  
-// 
-//
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -45,7 +48,7 @@ class StFtpcGlobalMaker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcGlobalMaker.h,v 1.1 2000/09/09 18:09:21 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcGlobalMaker.h,v 1.2 2001/03/30 13:30:12 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StFtpcGlobalMaker, 1)   //StAF chain virtual base class for Makers
     };

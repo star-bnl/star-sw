@@ -1,10 +1,13 @@
+// $Id: StFtpcGlobalMaker.cxx,v 1.2 2001/03/30 13:30:11 jcs Exp $
+// $Log: StFtpcGlobalMaker.cxx,v $
+// Revision 1.2  2001/03/30 13:30:11  jcs
+// correct Id and Log
+//
+//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StFtpcGlobalMaker class                                            //
+// StFtpcGlobalMaker class                                              //
 //                                                                      //
-//  
-// 
-//
 //////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
