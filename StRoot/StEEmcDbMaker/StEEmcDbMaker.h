@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.2 2003/02/18 19:55:53 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.3 2003/02/18 22:01:40 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -40,12 +40,13 @@ www.star.bnl.gov/STAR/eemc -->How To
 class eemcDbADCconf_st;
 class eemcDbPMTconf_st;
 class eemcDbPMTcal_st;
+class eemcDbPMTped_st;
 
 class  StEEmcDbIndexItem1;
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.2 2003/02/18 19:55:53 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.3 2003/02/18 22:01:40 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -59,6 +60,7 @@ class StEEmcDbMaker : public StMaker {
   eemcDbADCconf_st **mDbADCconf; //!
   eemcDbPMTconf_st **mDbPMTconf; //!
   eemcDbPMTcal_st  **mDbPMTcal ; //!
+  eemcDbPMTped_st  **mDbPMTped ; //!
 
   // local fast look-up tables
   StEEmcDbIndexItem1   *mDbItem1; //!
@@ -84,7 +86,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.2 2003/02/18 19:55:53 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.3 2003/02/18 22:01:40 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
