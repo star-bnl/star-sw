@@ -1,11 +1,14 @@
 ***************************************************************************
 *
-*$Id: ensemble.F,v 1.1 2000/06/14 15:17:21 aihong Exp $
+*$Id: ensemble.F,v 1.2 2000/06/15 18:54:54 aihong Exp $
 *
 *Author: Aihong Tang & Richard Witt. Kent State U.
 *
 ***************************************************************************
 *$Log: ensemble.F,v $
+*Revision 1.2  2000/06/15 18:54:54  aihong
+*add warning for zero magnetic field
+*
 *Revision 1.1  2000/06/14 15:17:21  aihong
 *split tde.F & and new module for ensemble truncation
 *
@@ -74,6 +77,9 @@ C-----------------------------------------------------------------------
       INTEGER imsg1, imsg2, imsg3,truncopt_recover
       REAL    tuncPoint
       REAL    dedx1recover, dedx2recover
+      REAL    xlocal(3), bfield(3)
+
+      data xlocal /3*0/
 
 C     function
       INTEGER calcuaverage
@@ -135,6 +141,16 @@ C Information write out
            call StInfo('ENSEMBLE - using merged hits!!!')
       endif
 
+C send warning for zero magnetic field
+      call gufld(xlocal,bfield)
+
+      if(abs(bfield(3)).lt.0.00002) then 
+        call message('ENSEMBLE-W: zero field.'// 
+     >                 'ENSEMBLE aborted.',1,imsg3)
+         ensemble=STAFCV_BAD
+         return
+      endif
+      
 C Establish pointers to tracks
       do i=1,track_h.nok
        loc_track(track(i).id)=i
