@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 // Regular C++ 
-#include <iostream>
+#include <iostream.h>
 
 // StarClassLibrary
 #include "StThreeVector.hh"
@@ -195,7 +195,7 @@ Int_t StFtpcV0Maker::Make(){
 //_____________________________________________________________________________
 void StFtpcV0Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StFtpcV0Maker.cxx,v 1.2 1999/04/13 12:43:02 mheffner Exp $\n");
+  printf("* $Id: StFtpcV0Maker.cxx,v 1.3 1999/04/13 15:20:36 mheffner Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
