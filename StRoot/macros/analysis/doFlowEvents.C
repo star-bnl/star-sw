@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.24 2000/09/16 22:21:15 snelling Exp $
+// $Id: doFlowEvents.C,v 1.25 2000/11/09 17:39:14 snelling Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -44,6 +44,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.25  2000/11/09 17:39:14  snelling
+// Added switch for probability pid
+//
 // Revision 1.24  2000/09/16 22:21:15  snelling
 // Added lines to set selection on P and global DCA
 //
@@ -332,7 +335,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //StFlowEvent::SetEtaCut(0.05, 1., 2, 0); // harmonic 3, selection 1
 
   // Use a Pt weight in the event plane calcualtion
-  //StFlowEvent::SetPtWgt();
+  //  StFlowEvent::SetPtWgt();
+  // Use Aihong's probability PID method
+  //  StFlowEvent::SetProbPid();
 
   // Set the PID windows
 //   StFlowEvent::SetPiPlusCut(-3., 3.);
