@@ -9,7 +9,8 @@
 
 #include "StiRootDrawableLine.h"
 
-class StiRootDrawableStiEvaluableTrack : public StiEvaluableTrack, public StiRootDrawableLine
+class StiRootDrawableStiEvaluableTrack :
+    public StiEvaluableTrack, public StiRootDrawableLine
 {
 public:
     StiRootDrawableStiEvaluableTrack();
@@ -22,6 +23,8 @@ public:
 protected:
 
 private:
+    void setLineInfo();
+
     
 };
 

@@ -23,6 +23,7 @@ public:
     virtual void setVisibility(bool val);
     virtual void setMarkerStyle(unsigned int val);
     virtual void setMarkerSize(double);
+    virtual void setLineStyle(unsigned int val);
 
 protected:
     StiTPolyLine3D* mline;
