@@ -1,3 +1,6 @@
+/*!
+ * \class StFileI
+ */
 #ifndef ROOT_StFileI
 #define ROOT_StFileI
 
@@ -29,6 +32,8 @@ public:
   virtual  Int_t   IsNull() const { return !fUrr[0];}
   virtual  Int_t   Compare(StUKey &uk2) const 
                   { return strcmp(GetKey().Data(),uk2.GetKey().Data());}
+  virtual  Int_t GetRunId() const { return fUrr[0]; }
+  virtual  Int_t GetEventId() const { return fUrr[1]; }
 private:
   TString fName;
   Int_t fNUrr;
