@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.16 2001/12/21 22:47:33 porter Exp $
+ * $Id: StDbSql.cc,v 1.17 2002/01/30 15:40:48 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.17  2002/01/30 15:40:48  porter
+ * changed limits on flavor tag & made defaults retrieving more readable
+ *
  * Revision 1.16  2001/12/21 22:47:33  porter
  * added DbRelease for new endtime checks - this caused problems with tpcGas
  *
@@ -237,7 +240,7 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
    ostrstream bs;
    bs<<" Where nodeID="<<nodeID;
  // prepare "flavor" part of query 
-   bs<<" AND "<<getFlavorQuery(table->getFlavor());
+   bs<<" AND "<<getFlavorQuery(table->printFlavor());
  // prepare for production time
    bs<<" AND "<<getProdTimeQuery(table->getProdTime()); 
  // terminate the baseString
@@ -674,7 +677,7 @@ StDbSql::WriteDb(StDbTable* table, unsigned int storeTime){
       buff.WriteScalar(sTime,"beginTime");
       buff.WriteScalar(elements[i],"elementID");
       if(eTime)buff.WriteScalar(eTime,"endTime");
-      if(!table->defaultFlavor())buff.WriteScalar(table->getFlavor(),"flavor");
+      if(!table->defaultFlavor())buff.WriteScalar(table->printFlavor(),"flavor");
       table->dbStreamer(&buff,false);
 
       if(!Db.Input(dataTable,&buff)){
@@ -1210,6 +1213,7 @@ unsigned int
 StDbSql::getUnixTime(const char* time){
 
   unsigned int retVal = 0;
+  clear();
   Db<<"select unix_timestamp('"<<time<<"') as requestTime"<<endsql;
   if(Db.Output(&buff)) buff.ReadScalar(retVal,"requestTime");
   clear();
@@ -1225,9 +1229,9 @@ StDbSql::getDateTime(unsigned int time){
 // note the " + 0" part formats result without delimiters 
 // e.g. 1999-01-01 00:12:20 becomes 19990101001220
 
+  clear();
   Db<<"select from_unixtime("<<time<<") + 0 as requestTime"<<endsql;
   if(Db.Output(&buff)) buff.ReadScalar(retVal,"requestTime");
-
   clear();
 
 return retVal;
@@ -1429,7 +1433,7 @@ StDbSql::hasInstance(StDbTable* table){
  for(int i=0; i<numTables;i++){
 
    Db<<" select * from "<<dataTables[i];
-   Db<<" where "<<getFlavorQuery(table->getFlavor());
+   Db<<" where "<<getFlavorQuery(table->printFlavor());
    Db<<" AND "<<getProdTimeQuery(table->getProdTime())<<endsql;
 
    if(Db.NbRows() !=0 ){

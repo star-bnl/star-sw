@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.10 2001/12/21 04:54:45 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.11 2002/01/30 15:40:47 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.11  2002/01/30 15:40:47  porter
+ * changed limits on flavor tag & made defaults retrieving more readable
+ *
  * Revision 1.10  2001/12/21 04:54:45  porter
  * sped up table definition for emc and changed some ostrstream usage for
  * insure tests
@@ -395,69 +398,43 @@ StDbManagerImpl::deleteTypes(){
 }
 
 ////////////////////////////////////////////////////////////////
-
-void
-StDbManagerImpl::lookUpServers(){
+void StDbManagerImpl::lookUpServers(){
 #define __METHOD__ "lookUpServer()"
 
-int it=1;
- char* xmlfile1 = StDbDefaults::Instance()->getServerFileName(serverEnvVar);
- char* xmlfile2 = StDbDefaults::Instance()->getServerFileName(userHome);
- char* xmlfile3 = StDbDefaults::Instance()->getServerFileName(starDefault);
- //char* xmlfile1 = getFileName("HOME");
- //char* xmlfile2 = getFileName("STDB_SERVERS");
- //char* xmlfile3 = getFileName("STAR","/StDb/servers");
+ char* xmlFile[3]={NULL,NULL,NULL};
+ dbFindServerMode mode[3]={userHome,serverEnvVar,starDefault};
+
  ostrstream cos;
-
  cos<<endl<<"******** Order of Files searched for dbServers ********* "<<endl;
-if(xmlfile1){
- ifstream is1(xmlfile1);
 
- if(is1){
-   cos<<"  "<<it<<". "<< xmlfile1 <<endl;
-   findServersXml(is1);
-   it++;
-   is1.close();
+ for(int i=0;i<3; i++){
+   xmlFile[i]=StDbDefaults::Instance()->getServerFileName(mode[i]);
+   if(xmlFile[i]){
+     ifstream is(xmlFile[i]);
+     if(is){
+       cos<<"  "<<i+1<<". "<< xmlFile[i] <<endl;
+       findServersXml(is);
+       is.close();
+     }
+     delete [] xmlFile[i];
+     xmlFile[i]=NULL;
+   }
  }
- delete [] xmlfile1;
-}
 
-if(xmlfile2){
- ifstream is2(xmlfile2);
- if(is2){
-   cos<<" "<<it<<". "<<xmlfile2 <<endl;
-   findServersXml(is2);
-   it++;
-   is2.close();
- }
- delete [] xmlfile2;
-}
-
-if(xmlfile3){
- ifstream is3(xmlfile3);
- if(is3){
-   cos<<"  "<<it<<". "<<xmlfile3 <<endl;
-   findServersXml(is3);
-   is3.close();
- }
- delete [] xmlfile3;
-}
  cos <<"********************************************************" << endl<<ends;
 
  printInfo(cos.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
  cos.freeze(0);
 
-mhasServerList = true;
+ mhasServerList = true;
 
 #undef __METHOD__
 }
 
 ////////////////////////////////////////////////////////////////
+void StDbManagerImpl::findServersXml(ifstream& is){
 
-void
-StDbManagerImpl::findServersXml(ifstream& is){
-
-  char* stardatabase=0;
+  char* stardatabase=NULL;
 
   while(!is.eof()){
 
@@ -496,7 +473,8 @@ StDbManagerImpl::findServersXml(ifstream& is){
 
   } else {
 
-    char* p1 = &dbNames[0];
+    //    char* p1 = &dbNames[0];
+    char* p1 = dbNames;
     char* aname;
     StDbType type; StDbDomain domain;
     while(p1 && (aname=getNextName(p1))){
@@ -505,22 +483,22 @@ StDbManagerImpl::findServersXml(ifstream& is){
     }
    if(dbNames)delete [] dbNames;
   }
-  if(stardatabase)delete [] stardatabase;
-  stardatabase=0;
+    if(stardatabase){
+      delete [] stardatabase;
+      stardatabase=0;
+    }
   }
 }
 
 ////////////////////////////////////////////////////////////////
-char*
-StDbManagerImpl::findServerString(ifstream& is){
+char* StDbManagerImpl::findServerString(ifstream& is){
 
-  //char* line = new char[10240];
 char tmpline[256];
 bool done = false;
 bool started = false;
 char* id;
 
- char* line=0;
+ char* line=NULL;
  ostrstream os;
 
 while(!done){
@@ -550,16 +528,15 @@ while(!done){
    } // eof check 
  } // while loop
 
- line= new char[strlen(os.str())+1];
- strcpy(line,os.str());
+ char* tmpString=os.str();
+ line= new char[strlen(tmpString)+1];
+ strcpy(line,tmpString);
  os.freeze(0);
-
 return line;
 }
 
 ////////////////////////////////////////////////////////////////
-char*
-StDbManagerImpl::getNextName(char*& names){
+char* StDbManagerImpl::getNextName(char*& names){
 
 char* nextName = 0;
 if(!names)return nextName;
@@ -586,8 +563,7 @@ return nextName;
 //  public methods
 //
 ///////////////////////////////////////////////////////////////
-void 
-StDbManagerImpl::turnOffTimeLogging(){
+void  StDbManagerImpl::turnOffTimeLogging(){
   StDbManager::turnOffTimeLogging();
   if(!mhasServerList)lookUpServers();
   for(ServerList::iterator itr = mservers.begin();
@@ -596,23 +572,19 @@ StDbManagerImpl::turnOffTimeLogging(){
 }    
 ///////////////////////////////////////////////////////////////
 
-StDataBaseI*
-StDbManagerImpl::findDb(StDbType type, StDbDomain domain){
+StDataBaseI* StDbManagerImpl::findDb(StDbType type, StDbDomain domain){
   return findServer(type,domain)->useDb();
 }
 
-StDataBaseI*
-StDbManagerImpl::findDb(const char* dbType, const char* dbDomain){
+StDataBaseI* StDbManagerImpl::findDb(const char* dbType, const char* dbDomain){
   return findServer(dbType,dbDomain)->useDb();
 }
 
-StDataBaseI*
-StDbManagerImpl::findDb(const char* databaseName){
+StDataBaseI* StDbManagerImpl::findDb(const char* databaseName){
   return findServer(databaseName)->useDb();
 }
 
-StDbServer*
-StDbManagerImpl::findServer(StDbType type, StDbDomain domain){
+StDbServer* StDbManagerImpl::findServer(StDbType type, StDbDomain domain){
 #define __METHOD__
 
  if(!mhasServerList)lookUpServers();
@@ -638,22 +610,19 @@ return server;
 
 ////////////////////////////////////////////////////////////////
 
-StDbServer*
-StDbManagerImpl::findServer(StDbNode* node){
+StDbServer* StDbManagerImpl::findServer(StDbNode* node){
 return findServer(node->getDbType(),node->getDbDomain());
 }
 
 ////////////////////////////////////////////////////////////////
 
-StDbServer*
-StDbManagerImpl::findServer(const char* typeName, const char* domainName){
+StDbServer* StDbManagerImpl::findServer(const char* typeName, const char* domainName){
 return findServer(getDbType(typeName),getDbDomain(domainName));
 }
 
 ////////////////////////////////////////////////////////////////
 
-StDbServer*
-StDbManagerImpl::findServer(const char* databaseName){
+StDbServer* StDbManagerImpl::findServer(const char* databaseName){
 
   // if databaseName contains "_" then = 'dbTypeName_dbDomainName'
   // else = 'dbTypeName' and dbDomainName="Star"
@@ -683,8 +652,7 @@ return server;
 
 ////////////////////////////////////////////////////////////////
 
-StDbServer*
-StDbManagerImpl::findDefaultServer(){
+StDbServer* StDbManagerImpl::findDefaultServer(){
 
  if(!mhasServerList)lookUpServers();
  StDbServer* server = 0;
@@ -701,8 +669,7 @@ return server;
 
 ////////////////////////////////////////////////////////////////
 
-char*
-StDbManagerImpl::getDbTypeName(StDbType type){
+char* StDbManagerImpl::getDbTypeName(StDbType type){
 #define __METHOD__ "getDbTypeName(StDbType)"
 
 char* name=0;
@@ -723,8 +690,7 @@ char* name=0;
 
 ////////////////////////////////////////////////////////////////
 
-char*
-StDbManagerImpl::getDbDomainName(StDbDomain domain){
+char* StDbManagerImpl::getDbDomainName(StDbDomain domain){
 #define __METHOD__ "getDbDomainName(StDbDomain)"
 
 if(domain==dbDomainUnknown)return mstringDup("Star");
@@ -747,8 +713,7 @@ char* name=0;
 
 ////////////////////////////////////////////////////////////////
 
-StDbType
-StDbManagerImpl::getDbType(const char* typeName){
+StDbType StDbManagerImpl::getDbType(const char* typeName){
 #define __METHOD__ "getDbType(typeName)"
   StDbType retType=dbStDb;
   bool found=false;
@@ -771,8 +736,7 @@ StDbManagerImpl::getDbType(const char* typeName){
 
 ////////////////////////////////////////////////////////////////
 
-StDbDomain
-StDbManagerImpl::getDbDomain(const char* domainName){
+StDbDomain StDbManagerImpl::getDbDomain(const char* domainName){
 #define __METHOD__ "getDbDomain(domainName)"
 
   StDbDomain retType=dbDomainUnknown;
@@ -793,24 +757,21 @@ return newDbDomain(domainName);
 }     
 
 ////////////////////////////////////////////////////////////////
-char*
-StDbManagerImpl::printDbName(StDbType type, StDbDomain domain){
+char* StDbManagerImpl::printDbName(StDbType type, StDbDomain domain){
   StDataBaseI* db=findServer(type,domain)->useDb();
   if(db) return db->printDbName();
   return (char*)"Unknown DataBase";
 }
 
 ////////////////////////////////////////////////////////////////
-StDbConfigNode*
-StDbManagerImpl::initConfig(const char* dbName){
+StDbConfigNode* StDbManagerImpl::initConfig(const char* dbName){
  StDbType type; StDbDomain domain;
  getDataBaseInfo(dbName,type,domain);
  return initConfig(type,domain);
 }
 
 ////////////////////////////////////////////////////////////////
-StDbConfigNode*
-StDbManagerImpl::initConfig(const char* dbName, const char* configName, int opt){
+StDbConfigNode* StDbManagerImpl::initConfig(const char* dbName, const char* configName, int opt){
 #define __METHOD__ "initConfig(dbName,configName,opt)"
  StDbType type; StDbDomain domain;
  getDataBaseInfo(dbName,type,domain);
@@ -819,8 +780,7 @@ return initConfig(type,domain,configName,opt);
 }
 
 ////////////////////////////////////////////////////////////////
-StDbConfigNode*
-StDbManagerImpl::initConfig(StDbType type, StDbDomain domain){
+StDbConfigNode* StDbManagerImpl::initConfig(StDbType type, StDbDomain domain){
   // create Config node with appropriate name for db type & domain 
   char* name = getConfigNodeName(type,domain);
   StDbConfigNode* configNode = new StDbConfigNodeImpl(type,domain,name);
@@ -830,8 +790,7 @@ StDbManagerImpl::initConfig(StDbType type, StDbDomain domain){
 }
 
 ////////////////////////////////////////////////////////////////
-StDbConfigNode*
-StDbManagerImpl::initConfig(StDbType type, StDbDomain domain, const char* configName, int opt){
+StDbConfigNode* StDbManagerImpl::initConfig(StDbType type, StDbDomain domain, const char* configName, int opt){
 
   if(misTimeLogged)mnodeLog.start();
   StDbConfigNode* configNode=initConfig(type,domain);
@@ -843,8 +802,7 @@ StDbManagerImpl::initConfig(StDbType type, StDbDomain domain, const char* config
 }
 
 ////////////////////////////////////////////////////////////////
-StDbConfigNode*
-StDbManagerImpl::initConfig(StDbType type, StDbDomain domain, unsigned int requestTime, int opt){
+StDbConfigNode* StDbManagerImpl::initConfig(StDbType type, StDbDomain domain, unsigned int requestTime, int opt){
 #define __METHOD__ "initConfig(type,domain,time)"
 
  StDbConfigNode* configNode=0;
@@ -867,16 +825,14 @@ StDbManagerImpl::initConfig(StDbType type, StDbDomain domain, unsigned int reque
 }
 
 ////////////////////////////////////////////////////////////////
-StDbConfigNode*
-StDbManagerImpl::initConfig(const char* dbName, unsigned int requestTime, int opt){
+StDbConfigNode* StDbManagerImpl::initConfig(const char* dbName, unsigned int requestTime, int opt){
  StDbType type;  StDbDomain domain;
  getDataBaseInfo(dbName,type,domain);  // fill type & domain strings via dbName
 return initConfig(type,domain,requestTime,opt);
 }
 
 ////////////////////////////////////////////////////////////////
-char* 
-StDbManagerImpl::getConfigNodeName(StDbType type, StDbDomain domain){
+char*  StDbManagerImpl::getConfigNodeName(StDbType type, StDbDomain domain){
   // config node name is based on type IF domain is "dbStar", 
   // else it is based on the domain
  if(domain == dbStar) return getDbTypeName(type);
@@ -884,14 +840,12 @@ StDbManagerImpl::getConfigNodeName(StDbType type, StDbDomain domain){
 }
 
 ////////////////////////////////////////////////////////////////
-char* 
-StDbManagerImpl::getExternalVersion(StDbType type, StDbDomain domain){
+char* StDbManagerImpl::getExternalVersion(StDbType type, StDbDomain domain){
   return getenv(printDbName(type,domain));
 }
   
 ////////////////////////////////////////////////////////////////
-dbEnvList* 
-StDbManagerImpl::getEnvList(const char* name){
+dbEnvList*  StDbManagerImpl::getEnvList(const char* name){
 
   dbEnvList* retVal=new dbEnvList;
 
@@ -922,50 +876,43 @@ StDbManagerImpl::getEnvList(const char* name){
 }
 
 ////////////////////////////////////////////////////////////////
-StDbTable*
-StDbManagerImpl::newDbTable(const char* dbName, const char* tabName){
+StDbTable* StDbManagerImpl::newDbTable(const char* dbName, const char* tabName){
   return mfactory->newDbTable(dbName,tabName);
 }
 
 ////////////////////////////////////////////////////////////////
-StDbTable*
-StDbManagerImpl::newDbTable(StDbNode* node){
+StDbTable* StDbManagerImpl::newDbTable(StDbNode* node){
   StDbTable* table=mfactory->newDbTable(node->printDbName(),node->printName());
   if(table)table->setNodeInfo(node);
   return table;
 }
 
 ////////////////////////////////////////////////////////////////
-void
-StDbManagerImpl::setRequestTime(unsigned int time){
+void StDbManagerImpl::setRequestTime(unsigned int time){
  mcheckTime.munixTime = time;
  updateDateTime(mcheckTime);
 }
 
 ////////////////////////////////////////////////////////////////
-void
-StDbManagerImpl::setRequestTime(const char* time){
+void StDbManagerImpl::setRequestTime(const char* time){
  mcheckTime.setDateTime(time);
  updateUnixTime(mcheckTime);
 }
 
 ////////////////////////////////////////////////////////////////
-void
-StDbManagerImpl::setStoreTime(unsigned int time){
+void StDbManagerImpl::setStoreTime(unsigned int time){
  mstoreTime.munixTime = time;
  updateDateTime(mstoreTime);
 }
 
 ////////////////////////////////////////////////////////////////
-void
-StDbManagerImpl::setStoreTime(const char* time){
+void StDbManagerImpl::setStoreTime(const char* time){
  mstoreTime.setDateTime(time);
  updateUnixTime(mstoreTime);
 }
 
 ////////////////////////////////////////////////////////////////
-void
-StDbManagerImpl::updateDateTime(StDbTime& t){
+void StDbManagerImpl::updateDateTime(StDbTime& t){
 #define __METHOD__ "updateDateTime(StDbTime)"
   StDbServer* server=findDefaultServer();
   StDataBaseI* db=server->useDb();
@@ -978,34 +925,24 @@ StDbManagerImpl::updateDateTime(StDbTime& t){
 }
 
 ////////////////////////////////////////////////////////////////
-void
-StDbManagerImpl::updateUnixTime(StDbTime& t){
+void StDbManagerImpl::updateUnixTime(StDbTime& t){
   StDbServer* server = findDefaultServer();
   StDataBaseI* db=server->useDb();
   if(db)t.setUnixTime(db->getUnixTime(t.mdateTime));
 }
 
 ////////////////////////////////////////////////////////////////
-unsigned int
-StDbManagerImpl::getUnixCheckTime()  { return mcheckTime.munixTime; }
-unsigned int
-StDbManagerImpl::getUnixRequestTime(){ return mcheckTime.munixTime; }
+unsigned int StDbManagerImpl::getUnixCheckTime(){ return mcheckTime.munixTime;}
+unsigned int StDbManagerImpl::getUnixRequestTime(){return mcheckTime.munixTime;}
+char* StDbManagerImpl::getDateCheckTime()  { return mcheckTime.mdateTime; }
+char* StDbManagerImpl::getDateRequestTime(){ return mcheckTime.mdateTime; }
 
 ////////////////////////////////////////////////////////////////
-char* 
-StDbManagerImpl::getDateCheckTime()  { return mcheckTime.mdateTime; }
-char* 
-StDbManagerImpl::getDateRequestTime(){ return mcheckTime.mdateTime; }
+unsigned int StDbManagerImpl::getUnixStoreTime(){ return mstoreTime.munixTime; }
+char* StDbManagerImpl::getDateStoreTime(){ return mstoreTime.mdateTime; }
 
 ////////////////////////////////////////////////////////////////
-unsigned int
-StDbManagerImpl::getUnixStoreTime(){ return mstoreTime.munixTime; }
-char* 
-StDbManagerImpl::getDateStoreTime(){ return mstoreTime.mdateTime; }
-
-////////////////////////////////////////////////////////////////
-bool
-StDbManagerImpl::IsValid(StDbTable* table){
+bool StDbManagerImpl::IsValid(StDbTable* table){
  bool retVal = false;
  if(table) {
   unsigned int time = mcheckTime.munixTime;
@@ -1015,21 +952,21 @@ StDbManagerImpl::IsValid(StDbTable* table){
 }
 
 ////////////////////////////////////////////////////////////////
-bool
-StDbManagerImpl::fetchDbTable(StDbTable* table){
-bool retVal = false;
+bool StDbManagerImpl::fetchDbTable(StDbTable* table){
+
+ bool retVal = false;
+ if(!table) return false;
+ StDataBaseI* db=findDb(table->getDbType(),table->getDbDomain());
+ if(!db) return false; 
 
  if(misTimeLogged)mdataLog.start();
- if(table) {
-  StDataBaseI* db=findDb(table->getDbType(),table->getDbDomain());
-  if(db && db->QueryDb(table,mcheckTime.munixTime))retVal=true;
- }
+ if(db->QueryDb(table,mcheckTime.munixTime))retVal=true;
  if(misTimeLogged)mdataLog.end();
+
  return retVal;
 }
 
-bool
-StDbManagerImpl::fetchDbTable(StDbTable* table, char* whereClause){
+bool StDbManagerImpl::fetchDbTable(StDbTable* table, char* whereClause){
 
  if(!table) return false;
  StDataBaseI* db=findDb(table->getDbType(),table->getDbDomain());
@@ -1041,8 +978,7 @@ StDbManagerImpl::fetchDbTable(StDbTable* table, char* whereClause){
 }
 
 ////////////////////////////////////////////////////////////////
-bool
-StDbManagerImpl::fetchAllTables(StDbConfigNode* node){
+bool StDbManagerImpl::fetchAllTables(StDbConfigNode* node){
 
 bool tables=true;
 bool children = true;
@@ -1065,8 +1001,7 @@ return (tables && children && siblings);
 }   
 
 ////////////////////////////////////////////////////////////////
-bool
-StDbManagerImpl::storeDbTable(StDbTable* table, bool commitWhenDone){
+bool StDbManagerImpl::storeDbTable(StDbTable* table, bool commitWhenDone){
 #define __METHOD__ "storeDbTable(StDbTable*)"
 
 if(!table) return (bool) printInfo("Cannot store Null Table",dbMErr,__LINE__,__CLASS__,__METHOD__);
@@ -1082,8 +1017,7 @@ return retVal;
 }
 
 ////////////////////////////////////////////////////////////////
-bool
-StDbManagerImpl::storeAllTables(StDbConfigNode* node, bool commitWhenDone){
+bool StDbManagerImpl::storeAllTables(StDbConfigNode* node, bool commitWhenDone){
 #define __METHOD__ "storeAllTable(StDbConfigNode*)"
 
 if(!node)  return (bool) printInfo("Cannot store Null Node",dbMErr,__LINE__,__CLASS__,__METHOD__);
@@ -1427,3 +1361,8 @@ StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
 }
 
 #undef __CLASS__
+
+
+
+
+

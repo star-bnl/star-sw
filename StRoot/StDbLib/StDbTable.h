@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.18 2001/12/21 04:54:46 porter Exp $
+ * $Id: StDbTable.h,v 1.19 2002/01/30 15:40:48 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.19  2002/01/30 15:40:48  porter
+ * changed limits on flavor tag & made defaults retrieving more readable
+ *
  * Revision 1.18  2001/12/21 04:54:46  porter
  * sped up table definition for emc and changed some ostrstream usage for
  * insure tests
@@ -120,7 +123,7 @@ class StDbTable : public StDbNode {
 
 protected:
 
-char mflavor[16];
+char* mflavor;
 bool mdefaultFlavor;
 unsigned int mprodTime;
 
@@ -179,6 +182,7 @@ public:
                                 if(mstructName) delete []  mstructName;
                                 if(melementName) delete [] melementName;
                                 if(mtimeVals) delete [] mtimeVals;
+                                if(mflavor) delete [] mflavor;
                        };
 
   virtual bool         IsTable() const;
@@ -291,7 +295,6 @@ return 0;
 }
 inline char* StDbTable::printCstructName() { return mstructName; }
 inline char* StDbTable::printDataTable() { return mdataTable; }
-inline char* StDbTable::getFlavor() { return mflavor; }
 inline char* StDbTable::printFlavor() { return mflavor; }
 inline bool StDbTable::defaultFlavor() const {return mdefaultFlavor;}
 inline void StDbTable::setProdTime(unsigned int ptime) { mprodTime=ptime; }

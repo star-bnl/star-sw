@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.hh,v 1.4 2001/10/24 04:05:20 porter Exp $
+ * $Id: StDbSql.hh,v 1.5 2002/01/30 15:40:48 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.hh,v $
+ * Revision 1.5  2002/01/30 15:40:48  porter
+ * changed limits on flavor tag & made defaults retrieving more readable
+ *
  * Revision 1.4  2001/10/24 04:05:20  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -188,3 +191,8 @@ inline void StDbSql::close() { Db.Close(); };
 inline void StDbSql::clear() { Db.Release(); buff.Raz(); };
 
 #endif
+
+
+
+
+

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.18 2001/12/21 04:54:33 porter Exp $
+ * $Id: MysqlDb.cc,v 1.19 2002/01/30 15:40:47 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.19  2002/01/30 15:40:47  porter
+ * changed limits on flavor tag & made defaults retrieving more readable
+ *
  * Revision 1.18  2001/12/21 04:54:33  porter
  * sped up table definition for emc and changed some ostrstream usage for
  * insure tests
@@ -151,7 +154,6 @@ MysqlDb::MysqlDb(): mdbhost(0), mdbName(0), mdbuser(0), mdbpw(0), mdbPort(0),mlo
 mhasConnected=false;
 mQuery=0;
 mQueryLast=0;
-RazQuery();
 mRes= new MysqlResult;
 }
 //////////////////////////////////////////////////////////////////////
@@ -162,11 +164,10 @@ if(mQueryLast) delete [] mQueryLast;
 Release();
 if(mRes) delete mRes;
 if(mhasConnected)mysql_close(&mData);
-
 if(mdbhost) delete [] mdbhost;
 if(mdbuser) delete [] mdbuser;
 if(mdbpw)   delete [] mdbpw;
-if(mdbName) delete [] mdbName;
+if(mdbName)  delete [] mdbName;
 
 }
 
@@ -202,10 +203,15 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
   }
   mdbPort  = aPort;
 
-  if(mdbName) delete [] mdbName;
-  mdbName  = new char[strlen(aDb)+1];     strcpy(mdbName,aDb);
-  char* bDb=(char*)aDb;
-  if(strcmp(aDb," ")==0)bDb=0;
+  if(mdbName) {
+    delete [] mdbName;
+    mdbName=0;
+  }
+  char* bDb=0;
+  if(aDb){
+    mdbName  = new char[strlen(aDb)+1];     strcpy(mdbName,aDb);
+    if(strcmp(aDb," ")!=0)bDb=(char*)aDb;
+  }
 
   bool tRetVal = false;
   double t0=mqueryLog.wallTime();
@@ -247,18 +253,25 @@ char* MysqlDb::printQuery(){ return mQueryLast; };
 ////////////////////////////////////////////////////////////////////////
 void MysqlDb::RazQuery() {
   
-  if (mQueryLast)delete [] mQueryLast;
+  if (mQueryLast){
+    delete [] mQueryLast;
+    mQueryLast=0;
+  }
   if(mhasBinaryQuery){
      mQueryLast = new char[strlen(binaryMessage)+1];
      strcpy(mQueryLast,binaryMessage);
      if(mQuery)delete [] mQuery;
   } else {
-     mQueryLast=mQuery;
+     if(mQuery){
+       mQueryLast=new char[strlen(mQuery)+1];
+       strcpy(mQueryLast,mQuery);
+       delete [] mQuery;
+     }
   }
 
-  mQuery = new char[1];
+  mQuery = 0;//new char[1];
   mQueryLen=0;
-  strcpy(mQuery,"");
+  //  strcpy(mQuery,"");
 
   mhasBinaryQuery=false;
 }
@@ -329,17 +342,22 @@ MysqlDb &MysqlDb::operator<<( const char *aQuery){
     RazQuery();
   } else {
 
-    char* tQuery = new char[strlen(mQuery)+1];
-    strcpy(tQuery,mQuery);    
-    delete [] mQuery;
-  
-    mQuery = new char[mQueryLen+strlen(aQuery)+1];
-    memcpy(mQuery,tQuery,mQueryLen);
-    strcpy(&mQuery[mQueryLen],aQuery);    
-    delete [] tQuery;
-    mQueryLen=mQueryLen+strlen(aQuery);
+    if(!mQuery){
+      mQueryLen=strlen(aQuery);
+      mQuery = new char[mQueryLen+1];
+      strcpy(mQuery,aQuery);
+    } else {
+     char* tQuery = new char[strlen(mQuery)+1];
+     strcpy(tQuery,mQuery);    
+     delete [] mQuery;
+     mQuery = new char[mQueryLen+strlen(aQuery)+1];
+     memcpy(mQuery,tQuery,mQueryLen);
+     strcpy(&mQuery[mQueryLen],aQuery);    
+     delete [] tQuery;
+     mQueryLen=mQueryLen+strlen(aQuery);
+    }
 
-  };
+  }
 
   return *this;
 }
@@ -352,11 +370,11 @@ MysqlDb &MysqlDb::operator<<( const MysqlBin *aBin ){
 
   char *tQuery = new char[mQueryLen+aBin->mLen+1];
   memcpy(tQuery,mQuery,mQueryLen);
-  memcpy(&tQuery[mQueryLen],aBin->mBinData,aBin->mLen);
-  tQuery[mQueryLen+aBin->mLen]='\0';
+  memcpy(&tQuery[mQueryLen],aBin->mBinData,aBin->mLen+1); // mBinData included null terminator
+  //  tQuery[mQueryLen+aBin->mLen]='\0';
   if(mQuery)delete [] mQuery;
   mQuery=tQuery;
-  mQueryLen=mQueryLen+aBin->mLen;
+  mQueryLen=mQueryLen+aBin->mLen;  // always not include null terminator
  
   return *this;
 };
@@ -500,14 +518,14 @@ char** MysqlDb::DecodeStrArray(char* strinput , int &aLen){
     //   cout<< "null input string from mysql " << endl;
     char** tmparr = new char*[1];
     aLen = 1;
-    tmparr[0] = new char[2];
-    strcpy(tmparr[0],"0");
+    *tmparr = new char[2];
+    strcpy(*tmparr,"0");
     return tmparr;
   }
 
   char* tPnt=strinput; 
   aLen=0;
-  while (tPnt&&aLen<100) {
+  while (tPnt&&aLen<100) { // 100 is a limit on # comma separated values
     tPnt=strpbrk( tPnt,"\\,");
     if (tPnt!=0){
       if (*tPnt==',') {
@@ -596,6 +614,7 @@ char* MysqlDb::CodeStrArray(char** strarr , int aLen){
 bool
 MysqlDb::setDefaultDb(const char* dbName){
 
+  if(!dbName || strlen(dbName)==0)return false;
 if(mdbName) delete [] mdbName;
 mdbName=new char[strlen(dbName)+1];
 strcpy(mdbName,dbName);
