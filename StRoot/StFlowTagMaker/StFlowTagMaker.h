@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.h,v 1.11 2000/05/12 22:39:28 snelling Exp $
+// $Id: StFlowTagMaker.h,v 1.12 2000/05/20 00:57:03 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -16,6 +16,9 @@
 //
 // History:
 // $Log: StFlowTagMaker.h,v $
+// Revision 1.12  2000/05/20 00:57:03  posk
+// Minor update.
+//
 // Revision 1.11  2000/05/12 22:39:28  snelling
 // Fixed warning
 //
@@ -34,20 +37,11 @@
 // Revision 1.9  2000/02/23 22:14:11  posk
 // Renamed histograms to contain "Flow".
 //
-// Revision 1.8  2000/02/18 22:47:36  posk
-// Minor updates.
-//
 // Revision 1.7  2000/01/14 05:44:35  snelling
 // Added St_FlowTag Table to .data
 //
 // Revision 1.6  2000/01/14 01:36:03  snelling
 // changed include path ../FlowMaker/ to FlowMaker/
-//
-// Revision 1.5  2000/01/13 21:49:16  posk
-// Updates and corrections.
-//
-// Revision 1.4  1999/12/21 21:28:34  posk
-// Updated the README file.
 //
 // Revision 1.3  1999/12/15 21:56:23  posk
 // Increased number of harmonics from 4 to 6.
@@ -96,7 +90,7 @@ public:
   Int_t        Finish();
   FlowTag_st*  TagPointer() const;         // returns pointer to the tag table
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFlowTagMaker.h,v 1.11 2000/05/12 22:39:28 snelling Exp $ built "__DATE__" "__TIME__ ;
+    {static const char cvs[]="Tag $Name:  $ $Id: StFlowTagMaker.h,v 1.12 2000/05/20 00:57:03 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:

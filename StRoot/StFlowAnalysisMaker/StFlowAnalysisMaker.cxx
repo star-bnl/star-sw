@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.28 2000/05/03 16:38:33 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.29 2000/05/20 00:56:22 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.29  2000/05/20 00:56:22  posk
+// Minor update.
+//
 // Revision 1.28  2000/05/03 16:38:33  posk
 // Compatable with ROOT 2.24/02.
 //
@@ -165,7 +168,6 @@ Int_t StFlowAnalysisMaker::Make() {
   pFlowMaker = (StFlowMaker*)GetMaker(makerName->Data());
   delete makerName;
   if (pFlowMaker) pFlowEvent = pFlowMaker->FlowEventPointer();
-
   if (pFlowSelect->Select(pFlowEvent)) {     // event selected
 
     // Event quantities
@@ -180,7 +182,6 @@ Int_t StFlowAnalysisMaker::Make() {
       cout << "$$$$$ null FlowEvent and FlowTag pointers" << endl;
       return kStOK;
     }
-    
     // Particle quantities
     if (pFlowEvent) FillParticleHistograms(); // fill particle histograms
     
@@ -194,10 +195,10 @@ Int_t StFlowAnalysisMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowAnalysisMaker::PrintInfo() {
-  cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.28 2000/05/03 16:38:33 posk Exp $"
+  cout << "******************************************************************" << endl;
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.29 2000/05/20 00:56:22 posk Exp $"
        << endl;
-  cout << "*************************************************************" << endl;
+  cout << "******************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
