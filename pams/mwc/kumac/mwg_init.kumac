@@ -9,7 +9,7 @@
    macro/global/import *
      
 
-cd [params]/mwcpars
+cd [params]/mwc/mwcpars
 
 newtable geom mwc_geo 1         
 newtable cal  mwc_cal 384       
@@ -40,7 +40,7 @@ cd /dui
  macro mwg
    macro/global/import *
      
-     ami/module/call mwg [params]/mwcpars/geom [params]/mwcpars/cal 
+     ami/module/call mwg [params]/mwc/mwcpars/geom [params]/mwc/mwcpars/cal 
  return
 
 * **********************************************************
