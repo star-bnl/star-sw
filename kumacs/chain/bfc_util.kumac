@@ -140,6 +140,9 @@
 *                      dwntp - executes pams/global/kumac/dst_wr_ntup.kumac
 *                             used to write out ntuples from dst tables
 * 10/8/98 K. Turner - update ftpc kumacs
+* 10/8/98 K. Turner - change "dout" so that it writes out a separate
+*                     run/params file also
+* 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -391,11 +394,13 @@ macro bfc_init _
             if output_dst_file="" then
               message "empty dst output file"
             else
+	      exec write_table_to_file#init dstrp  runpar_[output_dst_file]
 	      exec write_table_to_file#init dstout [output_dst_file]
               if (STAF_STATUS(1).ne. STAFCV_OK) then
                 message "Cannot open dst output file"
                 goto EOF
               endif
+	      exec write_table_to_file#write dstrp  [params]
               exec write_table_to_file#write dstout [run_dst]         
             endif
     (esout)
