@@ -13,14 +13,14 @@
 # Regression tests keep the code honest by checking for warnings
 # and "use strict" failures.
 
-# $Id: cons,v 1.1.1.22 2000/12/10 18:14:28 fisyak Exp $
+# $Id: cons,v 1.1.1.23 2000/12/18 13:59:28 fisyak Exp $
 
 use vars qw( $ver_num $ver_rev $version );
 
 $ver_num = "2.3";
 $ver_rev = ".0";
 $version = sprintf "This is Cons %s%s " .
-	    '($Id: cons,v 1.1.1.22 2000/12/10 18:14:28 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.1.1.23 2000/12/18 13:59:28 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -140,7 +140,9 @@ Arguments can be any of the following, in any order:
   -pa		Show construction products and associated actions.
   -pw		Show products and where they are defined.
 
-  -q		Be quiet about Installing and Removing targets.
+  -q		Be quiet; multiple -q flags increase quietness level:
+		1: quiet about Installing and Removing targets
+		2: quiet about build commands, up-to-date targets
 
   -r		Remove construction products associated with <targets>
 
@@ -204,7 +206,7 @@ $indent = '';
 # Display a command while executing or otherwise. This
 # should be called by command builder action methods.
 sub showcom {
-    print($indent . $_[0] . "\n");
+    print($indent . $_[0] . "\n") if ($param::quiet < 2);
 }
 
 # Default environment.
@@ -312,7 +314,7 @@ sub option {
 		    'pw' =>   sub { $param::pflag = 1;
 				    $param::wflag = 1;
 				    $param::build = 0; },
-		    'q' =>    sub { $param::quiet = 1; },
+		    'q' =>    sub { $param::quiet++; },
 		    'r' =>    sub { $param::rflag = 1;
 				    $param::build = 0; },
 		    't' =>    sub { $param::traverse = 1; },
@@ -332,26 +334,33 @@ sub option {
 	&{$opt{$_}}();
 	return;
     }
-    $_  =~ m/(.)(.*)/;
-    if (defined $opt_arg{$1}) {
-	if (! $2) {
-	    $_ = shift @ARGV;
-	    die("$0: -$1 option requires an argument.\n") if ! $_;
+    while ($_) {
+	$_  =~ m/(.)(.*)/;
+	if (defined $opt{$1}) {
+	    &{$opt{$1}}();
+	    $_ = $2;
+	    next;
 	}
-	&{$opt_arg{$1}}($2 || $_);
-	return;
-    }
-    $_  =~ m/(..)(.*)/;
-    if (defined $opt_arg{$1}) {
-	if (! $2) {
-	    $_ = shift @ARGV;
-	    die("$0: -$1 option requires an argument.\n") if ! $_;
+	if (defined $opt_arg{$1}) {
+	    if (! $2) {
+		$_ = shift @ARGV;
+		die("$0: -$1 option requires an argument.\n") if ! $_;
+	    }
+	    &{$opt_arg{$1}}($2 || $_);
+	    return;
 	}
-	&{$opt_arg{$1}}($2 || $_);
-	return;
-    }
-    if ($_) {
-	die qq($0: unrecognized option "-$_".  Use -x for a usage message.\n);
+	$_  =~ m/(..)(.*)/;
+	if (defined $opt_arg{$1}) {
+	    if (! $2) {
+		$_ = shift @ARGV;
+		die("$0: -$1 option requires an argument.\n") if ! $_;
+	    }
+	    &{$opt_arg{$1}}($2 || $_);
+	    return;
+	}
+	if ($_) {
+	    die qq($0: unrecognized option "-$_".  Use -x for a usage message.\n);
+	}
     }
 }
 
@@ -503,7 +512,7 @@ sub buildtoptarget {
 	    print qq($0: "$path" not remade because of errors.\n);
 	    $errors++;
 	} elsif ($status eq "handled") {
-	    print qq($0: "$path" is up-to-date.\n);
+	    print qq($0: "$path" is up-to-date.\n) if ($param::quiet < 2);
 	} elsif ($status eq "unknown") {
 	    # cons error already reported.
 	    $errors++;
@@ -512,10 +521,11 @@ sub buildtoptarget {
 	    my @linked = dir::linked_targets($tgt) if $target_top;
 	    if (@linked) {
 		my @names = map($_->path, @linked);
-		print "Linked targets: @names\n" unless ($param::quiet);
+		print "Linked targets: @names\n" if ($param::quiet < 1);
 		map(buildtoptarget($_), @linked);
 	    } else {
-		print qq($0: nothing to be built in "$path".\n) if $param::build;
+		print qq($0: nothing to be built in "$path".\n)
+		      if $param::build && ($param::quiet < 2);
 	    }
 	} else {
 	    print qq($0: don\'t know how to construct "$path".\n); #'
@@ -575,7 +585,7 @@ sub buildtarget {
 	my($path) = $tgt->path;
 	if (-f $path) {
 	    if (unlink($path)) {
-		print("Removed $path\n") unless ($param::quiet);
+		print("Removed $path\n") if ($param::quiet < 1);
 	    } else {
 		warn("$0: couldn't remove $path\n");
 	    }
@@ -1272,7 +1282,7 @@ sub action {
     my($self, $tgt) = @_;
     my($src) = $tgt->{sources}[0];
     main::showcom("Install ${\$src->rpath} as ${\$tgt->path}")
-	if ($param::install && !$param::quiet);
+	if ($param::install && $param::quiet < 1);
     return unless $param::build;
     futil::install($src->rpath, $tgt);
     return 1;
@@ -1309,7 +1319,7 @@ sub cachin {
 	    map { if (! s/^\@\s*//) { main::showcom($_) } } $self->getcoms($tgt);
 	} else {
 	    printf("Retrieved %s from cache\n", $tgt->path)
-		unless ($param::quiet);
+		if ($param::quiet < 1);
 	}
 	return 1;
     }
@@ -5600,7 +5610,13 @@ Show products and where they are defined. No build is attempted.
 
 =item C<-q>
 
-Don't be verbose about Installing and Removing targets.
+Make the build quiet.  Multiple C<-q> options may be specified.
+
+A single C<-q> options suppress messages about Installing and Removing
+targets.
+
+Two C<-q> options suppress build command lines and target up-to-date
+messages.
 
 =item C<-r>
 
@@ -5614,9 +5630,19 @@ searched in the order specified.
 
 =item C<-t>
 
-Traverse up the directory hierarchy looking for a F<Construct> file, if
-none exists in the current directory.  Targets will be modified to be
-relative to the F<Construct> file.
+Traverse up the directory hierarchy looking for a F<Construct> file,
+if none exists in the current directory.  Targets will be modified to
+be relative to the F<Construct> file.
+
+Internally, C<cons> will change its working directory to the directory
+which contains the top-level F<Construct> file and report:
+
+  cons: Entering directory `top-level-directory'
+
+This message indicates to an invoking editor (such as emacs) or build
+environment that Cons will now report all file names relative to the
+top-level directory.  This message can not be suppressed with the C<-q>
+option.
 
 =item C<-v>
 

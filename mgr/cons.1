@@ -1,8 +1,8 @@
 .rn '' }`
-''' $RCSfile: cons.1,v $$Revision: 1.1.1.9 $$Date: 2000/12/10 18:14:27 $
+''' $RCSfile: cons.1,v $$Revision: 1.1.1.10 $$Date: 2000/12/18 13:59:27 $
 '''
 ''' $Log: cons.1,v $
-''' Revision 1.1.1.9  2000/12/10 18:14:27  fisyak
+''' Revision 1.1.1.10  2000/12/18 13:59:27  fisyak
 ''' *** empty log message ***
 '''
 '''
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH CONS 1 "2.3.0" "10/Dec/100" "Cons - Software Construction System"
+.TH CONS 1 "2.3.0" "16/Dec/2000" "Cons - Software Construction System"
 .UC
 .if n .hy 0
 .if n .na
@@ -1773,7 +1773,7 @@ the following suffixes to select a portion of the expanded path name:
 \&  :s    the file name suffix
 \&  :F    the file name stripped of any suffix
 .Ve
-Continuing with the above example, C<%<:f> would expand to \f(CWfoo bar baz\fR,
+Continuing with the above example, \f(CW%<:f\fR would expand to \f(CWfoo bar baz\fR,
 and \f(CW%\fR:d> would expand to \f(CWtest\fR.
 .PP
 There are additional \f(CW%\fR elements which affect the command \fIline\fR\|(s):
@@ -2303,7 +2303,13 @@ Show construction products and associated actions. No build is attempted.
 .Ip "\f(CW-pw\fR" 10
 Show products and where they are defined. No build is attempted.
 .Ip "\f(CW-q\fR" 10
-Don't be verbose about Installing and Removing targets.
+Make the build quiet.  Multiple \f(CW-q\fR options may be specified.
+.Sp
+A single \f(CW-q\fR options suppress messages about Installing and Removing
+targets.
+.Sp
+Two \f(CW-q\fR options suppress build command lines and target up-to-date
+messages.
 .Ip "\f(CW-r\fR" 10
 Remove construction products associated with <targets>. No build is
 attempted.
@@ -2311,9 +2317,20 @@ attempted.
 Search for files in \fIrepos\fR.  Multiple \fB\-R\fR \fIrepos\fR directories are
 searched in the order specified.
 .Ip "\f(CW-t\fR" 10
-Traverse up the directory hierarchy looking for a \fIConstruct\fR file, if
-none exists in the current directory.  Targets will be modified to be
-relative to the \fIConstruct\fR file.
+Traverse up the directory hierarchy looking for a \fIConstruct\fR file,
+if none exists in the current directory.  Targets will be modified to
+be relative to the \fIConstruct\fR file.
+.Sp
+Internally, \f(CWcons\fR will change its working directory to the directory
+which contains the top-level \fIConstruct\fR file and report:
+.Sp
+.Vb 1
+\&  cons: Entering directory `top-level-directory'
+.Ve
+This message indicates to an invoking editor (such as emacs) or build
+environment that Cons will now report all file names relative to the
+top-level directory.  This message can not be suppressed with the \f(CW-q\fR
+option.
 .Ip "\f(CW-v\fR" 10
 Show \f(CWcons\fR version and continue processing.
 .Ip "\f(CW-V\fR" 10

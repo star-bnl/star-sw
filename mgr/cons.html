@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <TITLE>Cons - Software Construction System</TITLE>
-<LINK REV="made" HREF="mailto:root@porky.devel.redhat.com">
+<LINK REV="made" HREF="mailto:lionel.cons@cern.ch">
 </HEAD>
 
 <BODY>
@@ -2628,7 +2628,13 @@ Show products and where they are defined. No build is attempted.
 
 <DT><STRONG><A NAME="item__q">-q</A></STRONG><DD>
 <P>
-Don't be verbose about Installing and Removing targets.
+Make the build quiet. Multiple <CODE>-q</CODE> options may be specified.
+
+<P>
+A single <CODE>-q</CODE> options suppress messages about Installing and Removing targets.
+
+<P>
+Two <CODE>-q</CODE> options suppress build command lines and target up-to-date messages.
 
 <DT><STRONG><A NAME="item__r">-r</A></STRONG><DD>
 <P>
@@ -2643,6 +2649,19 @@ Search for files in <EM>repos</EM>. Multiple <STRONG>-R</STRONG>  <EM>repos</EM>
 <P>
 Traverse up the directory hierarchy looking for a <EM>Construct</EM> file, if none exists in the current directory. Targets will be modified to
 be relative to the <EM>Construct</EM> file.
+
+<P>
+Internally, <CODE>cons</CODE> will change its working directory to the directory which contains the
+top-level <EM>Construct</EM> file and report:
+
+<P>
+<PRE>  cons: Entering directory `top-level-directory'
+</PRE>
+<P>
+This message indicates to an invoking editor (such as emacs) or build
+environment that Cons will now report all file names relative to the
+top-level directory. This message can not be suppressed with the <CODE>-q</CODE>
+option.
 
 <DT><STRONG><A NAME="item__v">-v</A></STRONG><DD>
 <P>
