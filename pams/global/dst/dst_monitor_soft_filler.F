@@ -588,10 +588,6 @@ CC:        Accumulate residual, drift direction for FTPC West and East
      2                                fpt_fptrack(i).chisq(2)
 
          end do 
-      print *,' res_pad_ftpc = ',dms_ftpc(1).res_pad_ftpc(1),
-     1            dms_ftpc(1).res_pad_ftpc(2)
-      print *,' res_drf_ftpc = ',dms_ftpc(1).res_drf_ftpc(1),
-     1            dms_ftpc(1).res_drf_ftpc(2)
  
 CC:      Compute fraction of space points used in FTPC West and East
 
