@@ -29,7 +29,7 @@ void RunStiEvaluation(
 		      const char* evalFName="Evaluation.root",
 		      const char* histFName="EvalHists.root",
 		      const char* postFName="EvalHists.ps",
-		      Int_t debug = 1000)
+		      Int_t debug = 10000)
 {
   //File stuff - input/output files open and setup
   //test for existence of file

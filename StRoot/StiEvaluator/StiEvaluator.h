@@ -83,7 +83,7 @@ public:
     TrackEntry();
     virtual ~TrackEntry() {};
     
-    void setMcTrack(const StMcTrack*, unsigned int nTimesFound);
+    void setMcTrack(const StMcTrack*, unsigned int nTimesFound, bool best);
     void setGlobalTrack(const StTrack*);
     void setStiTrack(const StiTrack*);
     void setGlobalAssoc(const StTrackPairInfo*);
@@ -112,6 +112,8 @@ private:
     
     //temp kinematic info : MC
     unsigned int mcNTimesFound; //Number of times found by ITTF
+    unsigned int bestMatch; //1=yes, 0=no
+    
     double mcTrackId;
     double mcTrackPsi;
     double mcTrackRapidity;
