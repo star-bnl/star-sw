@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.248 2001/11/17 00:58:08 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.249 2001/11/27 00:03:02 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -65,10 +65,8 @@ Bfc_st BFC[] = {
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
   {"C1default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"    ,"","","Year 1 chain",kFALSE},
   {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2"
-  //{"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt"
                                                                               ,"","","Year 2 chain",kFALSE},
   {"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt,emcY2"
-   //{"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt"
                                                                          ,"","","Assymptotic chain",kFALSE},
   {"Cy1a"        ,""  ,"","y1a,C1default"                                ,"","","Turn on chain y1a",kFALSE},
   {"Cy1b"        ,""  ,"","y1b,C1default"                                ,"","","Turn on chain y1b",kFALSE},
@@ -95,13 +93,14 @@ Bfc_st BFC[] = {
   {"B2000"       ,""  ,"","ry2000a,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                   ,"Base chain for 2001 (tpc+rhic)",kFALSE},
   {"P2000a"      ,""  ,"",
-   "B2001,AlignSectors,ExB,OBmap,OClock,OPr13","",""       ,"Production chain for summer 2000 data",kFALSE},
+   "B2000,AlignSectors,ExB,OBmap,OClock,OPr13","",""       ,"Production chain for summer 2000 data",kFALSE},
 
 
   {"SvtD"        ,""  ,"","SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit,SvtVtx", "", "","SVT makers for Data",kFALSE},
 
 
-  // Year 2 chains. B2001 is a base-chain for 2001 (with tpc+rhic). SVT not in 2001 but can be added
+  // Year 2 chains. 
+  // B2001 is a base-chain for 2001 (with tpc+rhic). SVT not in 2001 but can be added
   // as an extra option. 2001a is currently used by FastOffline and is the "experimental" chain.
   {"B2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                   ,"Base chain for 2001 (tpc+rhic)",kFALSE},
@@ -115,11 +114,15 @@ Bfc_st BFC[] = {
   // emcDY2 in the first week of Nov 2001.
   {"P2001a"      ,""  ,"",
    "B2001,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13","",""
-                                ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof emc)",kFALSE},
+                               ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
   {"P2001b"      ,""  ,"",
-   "B2001,ftpc,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13","",""
-                                ,"P2001a -svt ",kFALSE},
+   "B2001,ftpc,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13","",""       ,"P2001a -svt ",kFALSE},
 
+  {"pp2001"      ,""  ,"","pp,B2001,-PreVtx","","",                                       "pp 2001",kFALSE},
+
+
+  // Other chains
+  {"LaserCal",""  ,"","db,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","", "Laser Calibration Chain",kFALSE},
 
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -265,7 +268,7 @@ Bfc_st BFC[] = {
   {"ChargeStep","","","tpc_T,globT,tls,db,tpcDB,tpc_daq","StChargeStepMaker","StChargeStepMaker","",kFALSE},
   {"laser"       ,"tpc_tracks","LaserTest,tpcChain","tdaq,tpc,-tpt,-PreVtx"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},
-  {"PreVtx"     ,"","tpcChain","tpt,SCL,sim_T,tpc_T,svt_T,ftpcT,globT,ctf_T",
+  {"PreVtx"      ,"","tpcChain","tpt,SCL,sim_T,tpc_T,svt_T,ftpcT,globT,ctf_T",
                                        "StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
   {"svt"         ,"svtChain","","svt_T,SvtCL,Est,SvtVtx"                    ,"StMaker","StChain","",kFALSE},
   {"sss"         ,"","","SvtSlowSim"                              ,"","","Short cut for SvtSlowSim",kFALSE},
@@ -293,15 +296,12 @@ Bfc_st BFC[] = {
                                   ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpcChain","SCL"         ,"StFtpcTrackMaker","StFtpcTrackMaker","",kFALSE},
 
-  //{"emc"    ,"emcChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"      ,"StMaker","StChain","",kFALSE},
-  //{"ems","emc_raw","emcChain","geant,emc_T,StEvent,EmcUtil","St_ems_Maker","St_emc,St_ems_Maker","",kFALSE},
-  //{"emh" ,"emc_hits","emcChain","geant,emc_T,tpc_T,EmcUtil","St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
-
   {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,calib,emcSim,PreEcl,epc"      ,"StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim" ,"emcRaw","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
-  {"emcDY2","",""       ,"db,StEvent,EmcUtil,PreEcl,Epc","StEmcADCtoEMaker","StEmcADCtoEMaker","EMC raw chain",kFALSE},
+  {"emcDY2","",""       ,"db,StEvent,EmcUtil,PreEcl,Epc","StEmcADCtoEMaker","StEmcADCtoEMaker",
+                                                                                    "EMC raw chain",kFALSE},
 
 
   {"global"      ,"globalChain","","globT,Match,primary,v0,xi,kink,dst,SCL,dEdx"
@@ -325,7 +325,7 @@ Bfc_st BFC[] = {
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil"         ,"StdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event"       ,"","","StEvent"                                 ,"StEventMaker","StEventMaker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
-  {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE}, 
+  {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
                           
   {"Epc"         ,"epc","PostChain","PreEcl,Match,EmcUtil"            ,"StEpcMaker","StEpcMaker","",kFALSE},
 
@@ -577,6 +577,9 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
 	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2);
 	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
+	  if (maker == "StLaserEventMaker"){
+	    // Bill stuff - Empty place-holder
+	  }
 	  if (maker == "St_tpt_Maker" && GetOption("ExB")){
 	    // bit 0 is ExB ON or OFF
 	    // The next 3 bits are reserved for yearly changes.
