@@ -1,5 +1,8 @@
-//$Id: MemoryUsage.C,v 1.5 2000/01/31 16:14:17 kathy Exp $
+//$Id: MemoryUsage.C,v 1.6 2000/02/01 17:31:00 kathy Exp $
 //$Log: MemoryUsage.C,v $
+//Revision 1.6  2000/02/01 17:31:00  kathy
+//fixed documentation
+//
 //Revision 1.5  2000/01/31 16:14:17  kathy
 //update memory usage macro to read the input file twice and calculate the binning on the histogram by itself
 //
@@ -26,9 +29,7 @@
 //        InFile - input text file of memory used 
 //               - 1 entry per line
 //        OutFile - output postscript file name
-//        nevents - # entrys in InFile - default is 500
-//        lowy    - low value of y axis - default is 250000
-//        highy   - upper value of y axis - default is 350000
+//
 ////////////////////////////////////////////////////////////
 
 void MemoryUsage(    
