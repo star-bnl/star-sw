@@ -101,7 +101,8 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
       mTrackingMenu(0),
       fMenuBarLayout(0), fMenuBarItemLayout(0), fMenuBarHelpLayout(0),
       mchain(0), mIoMaker(0),
-      fTrackingFrame(0), fFinishTrackButton(0), fFinishEventButton(0),
+      fTrackingFrame(0), fDoTrackStepButton(0),
+      fFinishTrackButton(0), fFinishEventButton(0),
       fNextEventButton(0)
 {
     cout <<"MainFrame::MainFrame()"<<endl;
@@ -225,6 +226,11 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
     fTrackingFrame = new TGCompositeFrame(this, 60, 20, kHorizontalFrame |
 					  kSunkenFrame);
 
+    fDoTrackStepButton = new TGTextButton(fTrackingFrame,
+					  "&Next Track Step", M_Tracking_DoTrackStep);
+    fDoTrackStepButton->Associate(this);
+    fDoTrackStepButton->SetToolTipText("Perform the next step in the current track");
+    
     fFinishTrackButton = new TGTextButton(fTrackingFrame,
 					  "Finish &Track", M_Tracking_FinishTrack);
     fFinishTrackButton->Associate(this);
@@ -328,6 +334,9 @@ MainFrame::~MainFrame()
     delete fTrackingFrame;
     fTrackingFrame=0;
 
+    delete fDoTrackStepButton;
+    fDoTrackStepButton=0;
+    
     delete fFinishTrackButton;
     fFinishTrackButton=0;
 
@@ -360,8 +369,12 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	    
 	case kCM_BUTTON:
 	    //printf("Button was pressed, id = %ld\n", parm1);
+	    if (parm1 == M_Tracking_DoTrackStep) {
+		doNextTrackStep();
+	    }
+	    
 	    if (parm1 == M_Tracking_FinishTrack) {
-		doNextStiGuiAction();
+		finishTrack();
 	    }
 	    else if (parm1 == M_Tracking_FinishEvent) {
 		finishEvent();
@@ -473,7 +486,7 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 		break;
 
 	    case M_Tracking_FinishTrack:
-		doNextStiGuiAction();
+		finishTrack();
 		break;
 
 	    case M_Tracking_FinishEvent:
@@ -529,13 +542,18 @@ void MainFrame::testDraw()
     c1->Update();
 }
 
-void MainFrame::doNextStiGuiAction()
+void MainFrame::doNextTrackStep()
 {
-    //cout <<"MainFrame::doNextStGuiAction()"<<endl;
     setCurrentDetectorToDefault();
-    StiMaker::instance()->doNextAction();
+    StiMaker::instance()->doNextTrackStep();
     showCurrentDetector();
-    //cout <<"\t Leaving doNextStGuiAction()"<<endl;
+}
+
+void MainFrame::finishTrack()
+{
+    setCurrentDetectorToDefault();
+    StiMaker::instance()->finishTrack();
+    showCurrentDetector();
 }
 
 void MainFrame::finishEvent()

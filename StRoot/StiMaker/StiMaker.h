@@ -41,7 +41,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.29 2001/10/11 13:18:04 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.30 2001/10/16 22:19:32 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -61,7 +61,8 @@ public:
     void printStatistics() const;
     
     //Used for stepping to next action (via StiControlPad)
-    void doNextAction();
+    void doNextTrackStep();
+    void finishTrack();
     void finishEvent();
     
 protected:
