@@ -386,7 +386,7 @@ c----------------------------------------------------------------------
 *
 *     Print STAF version identification
 *
-      CHARACTER  CHPAW*8, VERSQQ*8, MONTH*12(12)
+      CHARACTER  CHPAW*8, VERSQQ*8, MONTH(12)*12
       DATA MONTH/'January','February','March','April','May','June',
      > 'July','August','September','October','November','December'/
  
