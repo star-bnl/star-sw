@@ -37,7 +37,14 @@ static const int   times[]=  {
 
   // create makers connecting to Star databases 
 
-  St_db_Maker *dbMk = new St_db_Maker("StarDb","MySQL:StarDb");
+  char *db2 = "StarDb";
+  if (gSystem->AccessPathName(db2) !=0) {
+    printf("File %s does not exist\n",db2);
+    db2 = "";
+  }
+  
+  
+  St_db_Maker *dbMk = new St_db_Maker("dbName","MySQL:StarDb","$STAR/StarDb",db2);
 
   dbMk->Init();
 
