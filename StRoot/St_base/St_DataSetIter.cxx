@@ -289,7 +289,8 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Int_t depth) {
 }
  
 //______________________________________________________________________________
-St_DataSet *St_DataSetIter::Mkdir(const Char_t *dirname){
+St_DataSet *St_DataSetIter::Mkdir(const Char_t *dirname)
+{
  St_DataSet *set = 0;
  set = Next(dirname,0,kTRUE);
  if (!fNext)  Reset();  // Create a new iterator
@@ -297,7 +298,8 @@ St_DataSet *St_DataSetIter::Mkdir(const Char_t *dirname){
 }
  
 //______________________________________________________________________________
-Int_t St_DataSetIter::Rmdir(St_DataSet *dataset,Option_t *option){
+Int_t St_DataSetIter::Rmdir(St_DataSet *dataset,Option_t *option)
+{
 //
 //  Remove the St_DataSet *dataset from the current dataset
 //
