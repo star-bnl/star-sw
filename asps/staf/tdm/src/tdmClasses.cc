@@ -45,7 +45,7 @@
 #define EMPTY_ROW(R) (rowCount() <= R && R < maxRowCount())
 
 //:----------------------------------------------- PROTOTYPES         --
-//extern CC_P int dsTypeSpecifier(char **ptr, size_t *pLen, size_t tid);
+//extern CC_P int dsTypeSpecifier(char **ptr, size_t tid);
 extern CC_P void dsuPrintData(FILE *stream , DS_TYPE_CODE_T type
 		, unsigned int count , void *data);
 extern "C" int finite(double);
@@ -1174,7 +1174,7 @@ STAFCV_T tdmFactory:: getTypeName (long tid, char *& name) {
    const char 	*post=NULL;
    const char 	*buff=NULL;	size_t lbuff=0;
 
-   if( !dsTypeSpecifier(&spec,&lspec,(size_t)tid)
+   if( !dsTypeSpecifier(&spec,(size_t)tid)
    ||  (0 == (pre = strstr(spec,"struct")))
    ||  (0 == (post = strstr(spec,"{")))
    ||  (0 >= (post - pre))
@@ -1198,7 +1198,7 @@ STAFCV_T tdmFactory:: getTypeSpecification (long tid, char *& spec) {
    const char *c;
    size_t l;
 
-   if( !dsTypeSpecifier(&c,&l,(size_t)tid) ){
+   if( !dsTypeSpecifier(&c,(size_t)tid) ){
 /*-   spec = NULL;				14jul97 BUGFIX -*/
       spec = (char*)MALLOC(9); strcpy(spec,"**NONE**");
       EML_ERROR(INVALID_TYPE_ID);
