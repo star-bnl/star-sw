@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVectorD.cc,v 1.2 1999/10/15 15:56:30 ullrich Exp $
+ * $Id: StLorentzVectorD.cc,v 1.3 1999/10/15 21:55:09 didenko Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StLorentzVectorD.cc,v $
- * Revision 1.2  1999/10/15 15:56:30  ullrich
- * Changed output format in operator<<, added operator>>
+ * Revision 1.3  1999/10/15 21:55:09  didenko
+ * fixed type of x,y,z,t T-> double
+ *
+ * Revision 1.3  1999/10/15 21:55:09  didenko
+ * fixed type of x,y,z,t T-> double
  *
  * Revision 1.2  1999/10/15 15:56:30  ullrich
  * Changed output format in operator<<, added operator>>
@@ -110,7 +113,7 @@ ostream& operator<< (ostream& os, const StLorentzVectorD& v)
 {
     return os << v.vect() << "\t\t" << v.t();
 }
-    T  x, y, z, t;
+
 istream&  operator>>(istream& is, StLorentzVectorD& v)
 {
     double  x, y, z, t;
