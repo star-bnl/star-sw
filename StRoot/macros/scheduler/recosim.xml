@@ -153,7 +153,7 @@
       exit $status
     endif
 
-    if (! -s ${JOBFILEBASENAME}..event.root) then;
+    if (! -s ${JOBFILEBASENAME}.event.root) then;
       echo "root4star ERROR. The output file \"${JOBFILEBASENAME}.event.root\" was not created. Abort \!\!\! "
       echo "<b>root4star ERROR. The output file \"${JOBFILEBASENAME}.event.root\" was not created. Abort \!\!\! </b>"  >>${localLogFile}
       exit $status
