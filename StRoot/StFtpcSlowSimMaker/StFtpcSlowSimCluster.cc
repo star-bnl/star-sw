@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimCluster.cc,v 1.4 2001/04/02 12:04:31 jcs Exp $
+// $Id: StFtpcSlowSimCluster.cc,v 1.5 2002/04/19 22:24:12 perev Exp $
 // $Log: StFtpcSlowSimCluster.cc,v $
+// Revision 1.5  2002/04/19 22:24:12  perev
+// fixes for ROOT/3.02.07
+//
 // Revision 1.4  2001/04/02 12:04:31  jcs
 // get FTPC calibrations,geometry from MySQL database and code parameters from StarDb/ftpc
 //
@@ -19,6 +22,7 @@
 //  Date:  Oct 25, 1996
 ///////////////////////////////////////////////////////////////////////////
 
+#include <iostream.h>
 #include "StFtpcSlowSimCluster.hh"
 #include "StFtpcSlowSimField.hh"
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"

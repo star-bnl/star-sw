@@ -17,9 +17,12 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //
-//  $Id: Stl3CounterMaker.cxx,v 1.5 2002/03/07 22:03:41 struck Exp $
+//  $Id: Stl3CounterMaker.cxx,v 1.6 2002/04/19 22:24:21 perev Exp $
 //
 //  $Log: Stl3CounterMaker.cxx,v $
+//  Revision 1.6  2002/04/19 22:24:21  perev
+//  fixes for ROOT/3.02.07
+//
 //  Revision 1.5  2002/03/07 22:03:41  struck
 //  major update: using new NotifyMe() to get input filename, allows to run on
 //  more than one input file in a chain, two output tables separated into two files
@@ -43,6 +46,8 @@
 
 
 #include <stdlib.h>
+#include <iostream.h>
+#include <fstream.h>
 #include "Stl3CounterMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"

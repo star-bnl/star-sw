@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.9 2000/09/15 21:19:50 fisyak Exp $
+// $Id: StChargeStepMaker.cxx,v 1.10 2002/04/19 22:24:01 perev Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.10  2002/04/19 22:24:01  perev
+// fixes for ROOT/3.02.07
+//
 // Revision 1.9  2000/09/15 21:19:50  fisyak
 // No FindObject in TDataSet
 //
@@ -34,6 +37,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
+#include <fstream.h>
 #include <stdlib.h>
 #include <math.h>
 #include "StChargeStepMaker.h"
@@ -53,8 +57,8 @@
 
 ClassImp(StChargeStepMaker)
   static const char *eRegions_names[] = {"innerWest",
-					 "outerWest","innerEast","outerEast"}; 
-  
+                                         "outerWest","innerEast","outerEast"};
+
 
 //_____________________________________________________________________________
 StChargeStepMaker::StChargeStepMaker(const char *name):
@@ -70,18 +74,18 @@ StChargeStepMaker::~StChargeStepMaker() {
 
 Int_t StChargeStepMaker::Init() {
 
-  
 
-  //		Histograms     
+
+  //            Histograms
   InitHistograms(); // book histograms
 
-  for (int isec = 0;isec<4;isec++){ 
+  for (int isec = 0;isec<4;isec++){
     for (int ievt = 0; ievt<100;ievt++){
      pastresults[ievt][isec]=0.0;
     }
     nresults[isec]=0;
     lastresult[isec]=-1;
-  }  // reset arrays for running average 
+  }  // reset arrays for running average
 
   date = 0;
   time = 0;
@@ -98,18 +102,18 @@ Int_t StChargeStepMaker::Make() {
   if (date==0) {date = GetDate();cout << "date = " << date << endl;}
   if (time==0) {time = GetTime();cout << "time = " << time << endl;}
 
-  // prepare tree  
-  typedef struct 
+  // prepare tree
+  typedef struct
   {
     Float_t x,y,z;
     Int_t time,pad,adc;
-  } 
+  }
   Pixel_t;
   Pixel_t mypixel;
 
   //  mytree = new TTree("Pixels","Pixels");
   //  mytree->Branch("Pixels",&mypixel,"x:y:z:pad:adc");
-  
+
 
   // pixel counter
   Int_t number_of_found = 0 ;
@@ -124,20 +128,20 @@ Int_t StChargeStepMaker::Make() {
     }
   else
     {
-      
+
       // iterator of raw_data_tpc to navigate through it
       St_DataSetIter rawdata(raw_data_tpc) ;
       for (int sec = 1;sec<=24;sec++){
       Char_t sectorname[10]; //= "Sector_1" ;
       sprintf(sectorname, "Sector_%d", sec);
       St_DataSet *sector = rawdata(sectorname) ;
-      //      cout << " Examining sector : " << sectorname << endl ;	
-      
+      //      cout << " Examining sector : " << sectorname << endl ;
+
       if (!sector) return kStOK;
-      
+
       St_DataSetIter sector_iterator(sector) ;
       //sector_iterator.Du() ;
-      // get the raw tables of this secotor 
+      // get the raw tables of this secotor
       St_raw_row *st_raw_row ;
       raw_row_st* row_st ;
       St_raw_pad *st_raw_pad ;
@@ -152,155 +156,155 @@ Int_t StChargeStepMaker::Make() {
       Int_t rowindex = 0;
 
       if (row<=13)
-	{
-	  // inner sector
-	  // raw_row_in
-	  st_raw_row = (St_raw_row*) sector_iterator("raw_row_in");
-	  row_st = (raw_row_st*) st_raw_row->GetTable();
-	  // raw_pad_in
-	  st_raw_pad = (St_raw_pad*) sector_iterator("raw_pad_in");
-	  pad_st = (raw_pad_st*) st_raw_pad->GetTable();
-	  // raw_seq_in
-	  st_raw_seq = (St_raw_seq*) sector_iterator("raw_seq_in");
-	  seq_st = (raw_seq_st*) st_raw_seq->GetTable();
-	  // raw_shortdata_in
-	  st_shortdata = (St_type_shortdata *) sector_iterator("pixel_data_in");
-	  adcarray = (type_shortdata_st*) st_shortdata->GetTable();
-	  
-	  // rowdindex
-	  rowindex = 13 - row ;
-	}
-      else 
-	{
-	  //outer sector
-	  // raw_row_in
-	  st_raw_row = (St_raw_row*) sector_iterator("raw_row_out");
-	  row_st = (raw_row_st*) st_raw_row->GetTable();
-	  // raw_pad_in
-	  st_raw_pad = (St_raw_pad*) sector_iterator("raw_pad_out");
-	  pad_st = (raw_pad_st*) st_raw_pad->GetTable();
-	  // raw_seq_in
-	  st_raw_seq = (St_raw_seq*) sector_iterator("raw_seq_out");
-	  seq_st = (raw_seq_st*) st_raw_seq->GetTable();
-	  // raw_shortdata_in
-	  st_shortdata = (St_type_shortdata *) sector_iterator("pixel_data_out");
-	  adcarray = (type_shortdata_st*) st_shortdata->GetTable();
-	  // row index
-	  rowindex = 45 - row ;
-	}	  
+        {
+          // inner sector
+          // raw_row_in
+          st_raw_row = (St_raw_row*) sector_iterator("raw_row_in");
+          row_st = (raw_row_st*) st_raw_row->GetTable();
+          // raw_pad_in
+          st_raw_pad = (St_raw_pad*) sector_iterator("raw_pad_in");
+          pad_st = (raw_pad_st*) st_raw_pad->GetTable();
+          // raw_seq_in
+          st_raw_seq = (St_raw_seq*) sector_iterator("raw_seq_in");
+          seq_st = (raw_seq_st*) st_raw_seq->GetTable();
+          // raw_shortdata_in
+          st_shortdata = (St_type_shortdata *) sector_iterator("pixel_data_in");
+          adcarray = (type_shortdata_st*) st_shortdata->GetTable();
+
+          // rowdindex
+          rowindex = 13 - row ;
+        }
+      else
+        {
+          //outer sector
+          // raw_row_in
+          st_raw_row = (St_raw_row*) sector_iterator("raw_row_out");
+          row_st = (raw_row_st*) st_raw_row->GetTable();
+          // raw_pad_in
+          st_raw_pad = (St_raw_pad*) sector_iterator("raw_pad_out");
+          pad_st = (raw_pad_st*) st_raw_pad->GetTable();
+          // raw_seq_in
+          st_raw_seq = (St_raw_seq*) sector_iterator("raw_seq_out");
+          seq_st = (raw_seq_st*) st_raw_seq->GetTable();
+          // raw_shortdata_in
+          st_shortdata = (St_type_shortdata *) sector_iterator("pixel_data_out");
+          adcarray = (type_shortdata_st*) st_shortdata->GetTable();
+          // row index
+          rowindex = 45 - row ;
+        }
 
       ////////
       // Get data for this row
       ///////
-      Int_t pixel_offset_row =(Int_t) (row_st[rowindex].ipixel) ;
-      Int_t seq_offset_row =(Int_t) (row_st[rowindex].iseq) ;
-      Int_t pad_offset_row =(Int_t) (row_st[rowindex].ipad) ;
-      Int_t row_id = (Int_t) (row_st[rowindex].RowId) ;
+      Int_t pixel_offset_row =(Int_t) (row_st[rowindex].ipixel);
+      Int_t seq_offset_row   =(Int_t) (row_st[rowindex].iseq  );
+      Int_t pad_offset_row   =(Int_t) (row_st[rowindex].ipad  );
+      Int_t row_id           =(Int_t) (row_st[rowindex].RowId );
 
       /////////
       // loop over pads
       /////////
       //cout << " Number of pads we loop over " <<  Int_t (row_st[rowindex].npad) << endl;
       for (Int_t padindex = 0 ; padindex < Int_t (row_st[rowindex].npad) ; padindex++)
-	{
-	  Int_t pixel_offset_pad = (Int_t) (pixel_offset_row + (pad_st[padindex+pad_offset_row].PadOffset));
-	  Int_t seq_offset_pad = (Int_t) (seq_offset_row + (pad_st[padindex+pad_offset_row].SeqOffset));
-	  Int_t num_seq_pad = (Int_t) (pad_st[padindex+pad_offset_row].nseq);
-	    
-	  Int_t pad_id = (Int_t) (pad_st[padindex+(row_st[rowindex].ipad)].PadId);
-	  Int_t seq_mod_break = (Int_t) (pad_st[padindex+(row_st[rowindex].ipad)].SeqModBreak);
-	  //if (num_seq_pad>1)
-	  //{
-	  //  cout << "alert padid " << pad_id ;
-	  // cout << "    row  " << row_id ;
-	  ////  cout << "    seq  " << num_seq_pad ;
-	  //  }
-	  ///////
-	  // loop over sequenzes
-	  ///////
-	  //cout << " Number of sequenzes we loop over " << num_seq_pad << endl;
-	  for ( Int_t sequenzindex = 0 ; sequenzindex < num_seq_pad ; sequenzindex++ )
-	    {
-	      Int_t timebucketoffset=0;
-	      if ( sequenzindex < seq_mod_break )
-		{
-		  timebucketoffset = (Int_t) (seq_st[sequenzindex + seq_offset_pad].m);
-		}
-	      else if ( sequenzindex >= seq_mod_break )
-		{
-		  timebucketoffset = (Int_t) (seq_st[sequenzindex + seq_offset_pad].m + 256) ;
-		} 
-		
+        {
+          Int_t pixel_offset_pad = (Int_t) (pixel_offset_row + (pad_st[padindex+pad_offset_row].PadOffset));
+          Int_t seq_offset_pad = (Int_t) (seq_offset_row + (pad_st[padindex+pad_offset_row].SeqOffset));
+          Int_t num_seq_pad = (Int_t) (pad_st[padindex+pad_offset_row].nseq);
 
-	      Int_t numberoftimebucketsinthissequenz =(Int_t) (seq_st[sequenzindex + seq_offset_pad].i);
-	      //////
-	      // loop over pixel in sequenz
-	      //////
-	      //cout << " Number of pixel we loop over " << numberoftimebucketsinthissequenz << endl;
-	      for ( Int_t pixelindex = 0 ; pixelindex <= numberoftimebucketsinthissequenz ; pixelindex++ )
-		{
-		  // Get adc value
-		  Short_t adc_value = (Short_t) adcarray[pixelindex+pixel_offset_pad].data;
-		    
-		  // Get according bucket
-		  Int_t bucket_id = (Int_t) timebucketoffset + pixelindex;
+          Int_t pad_id = (Int_t) (pad_st[padindex+(row_st[rowindex].ipad)].PadId);
+          Int_t seq_mod_break = (Int_t) (pad_st[padindex+(row_st[rowindex].ipad)].SeqModBreak);
+          //if (num_seq_pad>1)
+          //{
+          //  cout << "alert padid " << pad_id ;
+          // cout << "    row  " << row_id ;
+          ////  cout << "    seq  " << num_seq_pad ;
+          //  }
+          ///////
+          // loop over sequenzes
+          ///////
+          //cout << " Number of sequenzes we loop over " << num_seq_pad << endl;
+          for ( Int_t sequenzindex = 0 ; sequenzindex < num_seq_pad ; sequenzindex++ )
+            {
+              Int_t timebucketoffset=0;
+              if ( sequenzindex < seq_mod_break )
+                {
+                  timebucketoffset = (Int_t) (seq_st[sequenzindex + seq_offset_pad].m);
+                }
+              else if ( sequenzindex >= seq_mod_break )
+                {
+                  timebucketoffset = (Int_t) (seq_st[sequenzindex + seq_offset_pad].m + 256) ;
+                }
 
-		  if ( adc_value < 1024 && adc_value >= 0 && 
-		       pad_id >= 1 && pad_id <= 182
-		       && bucket_id >= 0 && bucket_id < 512 )
-		    {
-		      // Increase counter
-		      number_of_found++;
 
-		      // Fill Display
-		      //		      myhist->Fill(pad_id,bucket_id,adc_value) ;
+              Int_t numberoftimebucketsinthissequenz =(Int_t) (seq_st[sequenzindex + seq_offset_pad].i);
+              //////
+              // loop over pixel in sequenz
+              //////
+              //cout << " Number of pixel we loop over " << numberoftimebucketsinthissequenz << endl;
+              for ( Int_t pixelindex = 0 ; pixelindex <= numberoftimebucketsinthissequenz ; pixelindex++ )
+                {
+                  // Get adc value
+                  Short_t adc_value = (Short_t) adcarray[pixelindex+pixel_offset_pad].data;
 
-		      //		      PTRS.Setptrs((Double_t) pad_id, (Double_t) bucket_id,(Double_t) row_id, (Double_t) sec) ;
-		      //		      transformer.raw_to_global(PTRS,XYZ) ;
-		      //		      mypixel.x = (Float_t) XYZ.Getx() ;
-		      //		      mypixel.y = (Float_t) XYZ.Gety() ;
-		      //		      mypixel.z = (Float_t) XYZ.Getz() ;
-		      mypixel.pad = (Int_t) pad_id ; 
-		      mypixel.adc = (Int_t) adc_value ;
-		      mypixel.time = (Int_t) bucket_id  ;
+                  // Get according bucket
+                  Int_t bucket_id = (Int_t) timebucketoffset + pixelindex;
+
+                  if ( adc_value < 1024 && adc_value >= 0 &&
+                       pad_id >= 1 && pad_id <= 182
+                       && bucket_id >= 0 && bucket_id < 512 )
+                    {
+                      // Increase counter
+                      number_of_found++;
+
+                      // Fill Display
+                      //                      myhist->Fill(pad_id,bucket_id,adc_value) ;
+
+                      //                      PTRS.Setptrs((Double_t) pad_id, (Double_t) bucket_id,(Double_t) row_id, (Double_t) sec) ;
+                      //                      transformer.raw_to_global(PTRS,XYZ) ;
+                      //                      mypixel.x = (Float_t) XYZ.Getx() ;
+                      //                      mypixel.y = (Float_t) XYZ.Gety() ;
+                      //                      mypixel.z = (Float_t) XYZ.Getz() ;
+                      mypixel.pad = (Int_t) pad_id ;
+                      mypixel.adc = (Int_t) adc_value ;
+                      mypixel.time = (Int_t) bucket_id  ;
                       int section = 0;
                       if (row>13) section++;
                       if (sec>12) section = section+2;
-		      //                      step[section]->Fill(mypixel.time,mypixel.adc);
+                      //                      step[section]->Fill(mypixel.time,mypixel.adc);
                       step[section]->Fill(mypixel.time);
- 
 
-		      //		      mytree->Fill();
 
-		     
+                      //                      mytree->Fill();
 
-		      if (number_of_found%100==0)
-			{
-			  //			  cout << " Filling  pad : " << pad_id << "\t" ;
-//  			  cout << "time : " << bucket_id << "\t" ;
-//  			  cout << "adc : " << adc_value << "\t" ;
-//  			  cout << "x : " << mypixel.x  << "\t" ;
-//  			  cout << "y : " << mypixel.y  << "\t" ;
-//  			  cout << "z : " << mypixel.z << endl;
-			}
-		    }
-		  else 
-		    {
-		      cout << "something wrong with adc value :" << adc_value <<endl;
-		      cout << "in   pad : " << pad_id << "\t" ;
-		      cout << "       time : " << bucket_id << "\t" ;
-		      cout << "       adc : " << adc_value << endl;
-		    }
-		} // Loop over pixel in this sequenz 
-	    } // Loop over sequnezes                           
-	} // Loop over pads
+
+
+                      if (number_of_found%100==0)
+                        {
+                          //                      cout << " Filling  pad : " << pad_id << "\t" ;
+//                        cout << "time : " << bucket_id << "\t" ;
+//                        cout << "adc : " << adc_value << "\t" ;
+//                        cout << "x : " << mypixel.x  << "\t" ;
+//                        cout << "y : " << mypixel.y  << "\t" ;
+//                        cout << "z : " << mypixel.z << endl;
+                        }
+                    }
+                  else
+                    {
+                      cout << "something wrong with adc value :" << adc_value <<endl;
+                      cout << "in   pad : " << pad_id << "\t" ;
+                      cout << "       time : " << bucket_id << "\t" ;
+                      cout << "       adc : " << adc_value << endl;
+                    }
+                } // Loop over pixel in this sequenz
+            } // Loop over sequnezes
+        } // Loop over pads
       }   // Loop over rows
       }   // Loop over sectors
     }
 
 
-  
-//		Histograms     
+
+//              Histograms
     MakeHistograms(); // clustering histograms
   //Calculate and print weighted means:
   for (int i=0;i<4;i++){
@@ -313,7 +317,7 @@ Int_t StChargeStepMaker::Make() {
     cout << "StChargeStepMaker: weighted mean "  << eRegions_names[i] << " = " << answer << endl;
     cout << "StChargeStepMaker: average "  << eRegions_names[i] << " = " << current_average << endl;
     }
-  } 
+  }
 
   cout << "Got through StChargeStepMaker OK." << endl;
 
@@ -324,7 +328,7 @@ Int_t StChargeStepMaker::Make() {
 
 void StChargeStepMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.9 2000/09/15 21:19:50 fisyak Exp $\n");
+  printf("* $Id: StChargeStepMaker.cxx,v 1.10 2002/04/19 22:24:01 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -337,7 +341,7 @@ void StChargeStepMaker::Clear(const char *opt) {
   for (int i=0;i<4;i++){
     step[i]->Reset();
     derivative[i]->Reset();
-  } 
+  }
   StMaker::Clear();
 
 }
@@ -367,18 +371,18 @@ theGuess = (int)((theDb->Dimensions()->outerEffectiveDriftDistance()/(theDb->Dri
  cout << "central membrane around tb = " << theGuess << endl;
  for(int i = 0;i<4;i++){
   char histname[50];
-  sprintf(histname,"Step %s",eRegions_names[i]); 
+  sprintf(histname,"Step %s",eRegions_names[i]);
   step[i] = new TH1S(histname,histname,100,theGuess-50,theGuess+50);
   AddHist(step[i]);
-  sprintf(histname,"Diff %s",eRegions_names[i]); 
+  sprintf(histname,"Diff %s",eRegions_names[i]);
   derivative[i] = new TH1S(histname,histname,100,theGuess-50,theGuess+50);
   AddHist(derivative[i]);
-  sprintf(histname,"Result %s",eRegions_names[i]); 
+  sprintf(histname,"Result %s",eRegions_names[i]);
   result[i] = new TH1F(histname,histname,200,theGuess-20,theGuess+20);
   AddHist(result[i]);
  };
 
-  // 		Create Histograms
+  //            Create Histograms
 }
 
 //----------------------------------------------------------------------
@@ -388,7 +392,7 @@ void StChargeStepMaker::MakeHistograms() {
    for (int ientry = 0;ientry < step[ihist]->GetNbinsX()-1; ientry++){
     derivative[ihist]->SetBinContent(ientry,step[ihist]->GetBinContent(ientry) - step[ihist]->GetBinContent(ientry+1));
    }
- } 
+ }
 }
 
 //-----------------------------------------------------------------
@@ -447,7 +451,7 @@ St_tpcDriftVelocity* StChargeStepMaker::driftTable(){
   float reference_step_east = mytable->chargeStepOuterEast;;
   float Lwest = reference_velocity*((reference_step_west/reference_clock)+reference_t0);
   float Least = reference_velocity*((reference_step_east/reference_clock)+reference_t0);
-  cout << "Least, trig offset = " << Least << " " << reference_t0 << endl; 
+  cout << "Least, trig offset = " << Least << " " << reference_t0 << endl;
   float velocityEast = Least/((GetAverage(3)/theDb->Electronics()->samplingFrequency()) + theDb->triggerTimeOffset()*1e6);
   float velocityWest = Lwest/((GetAverage(1)/theDb->Electronics()->samplingFrequency()) + theDb->triggerTimeOffset()*1e6);
   St_tpcDriftVelocity* table = new St_tpcDriftVelocity("tpcDriftVelocity",1);
@@ -461,10 +465,10 @@ St_tpcDriftVelocity* StChargeStepMaker::driftTable(){
 }
 
 void StChargeStepMaker::WriteTableToFile(){
-  char filename[80]; 
+  char filename[80];
   sprintf(filename,"./StarDb/Calibrations/tpc/tpcDriftVelocity.%08d.%06d.C",date,time);
   TString dirname = gSystem->DirName(filename);
-  if (!gSystem->OpenDirectory(dirname.Data())) { 
+  if (!gSystem->OpenDirectory(dirname.Data())) {
     if (gSystem->mkdir(dirname.Data())) {
       cout << "Directoty " << dirname << " creation failed" << endl;
     }

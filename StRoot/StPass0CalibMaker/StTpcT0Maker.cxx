@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.2 2002/02/05 22:20:54 hardtke Exp $
+// $Id: StTpcT0Maker.cxx,v 1.3 2002/04/19 22:24:16 perev Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.3  2002/04/19 22:24:16  perev
+// fixes for ROOT/3.02.07
+//
 // Revision 1.2  2002/02/05 22:20:54  hardtke
 // Move Init code to InitRun
 //
@@ -51,7 +54,8 @@
 // StTpcT0Maker class                                                   //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
+#include <iostream.h>
+#include <fstream.h>
 #include "StTpcT0Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -294,7 +298,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.2 2002/02/05 22:20:54 hardtke Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.3 2002/04/19 22:24:16 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

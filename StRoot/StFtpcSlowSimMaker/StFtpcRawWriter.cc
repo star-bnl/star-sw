@@ -1,5 +1,8 @@
-// $Id: StFtpcRawWriter.cc,v 1.1 2000/11/23 10:16:43 hummler Exp $
+// $Id: StFtpcRawWriter.cc,v 1.2 2002/04/19 22:24:12 perev Exp $
 // $Log: StFtpcRawWriter.cc,v $
+// Revision 1.2  2002/04/19 22:24:12  perev
+// fixes for ROOT/3.02.07
+//
 // Revision 1.1  2000/11/23 10:16:43  hummler
 // New FTPC slow simulator in pure maker form
 //
@@ -9,6 +12,7 @@
 // used by StFtpcSlowSimulator to write simulated data to tables
 
 
+#include <iostream.h>
 #include "StFtpcRawWriter.hh"
 
 StFtpcRawWriter::StFtpcRawWriter(St_fcl_ftpcndx *ftpcndxIn,
