@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.h,v 1.3 2003/06/25 23:05:41 thenry Exp $
+ * $Id: StJetOutputMaker.h,v 1.4 2003/08/27 18:10:08 thenry Exp $
  * $Log: StJetOutputMaker.h,v $
+ * Revision 1.4  2003/08/27 18:10:08  thenry
+ * Added a few cut variables, and fixed the saving of the EMC subjet points
+ *
  * Revision 1.3  2003/06/25 23:05:41  thenry
  * Fixed bugs
  *
@@ -42,29 +45,86 @@ class eofException {
 
 class EventSubStruct {
  public:
-  EventSubStruct() : eventId(0), 
+  EventSubStruct() : eventId(0), runNumber(0), 
     xVertex(0), yVertex(0), zVertex(0), 
-    npTracks(0) {};
+    npTracks(0), spinUpY0B1DownY3B4(0), bunchCrossingId7bit(0), 
+    bunchCrossingId(0), numCoincidences(0), sumPtTracks(0),
+    sumEMC(0), sumDoubleESub(0), sumDoubleECalc(0), numPoints(0), 
+    isAborted(0) {};
   EventSubStruct(const EventSubStruct &copy) : eventId(copy.eventId),
+    runNumber(copy.runNumber), 
     xVertex(copy.xVertex), yVertex(copy.yVertex), zVertex(copy.zVertex),
-    npTracks(copy.npTracks) {};
-  void clear(void) {};
+    npTracks(copy.npTracks), spinUpY0B1DownY3B4(copy.spinUpY0B1DownY3B4),
+    bunchCrossingId7bit(copy.bunchCrossingId7bit), 
+    bunchCrossingId(copy.bunchCrossingId), 
+    numCoincidences(copy.numCoincidences), sumPtTracks(copy.sumPtTracks),
+    sumEMC(copy.sumEMC), sumDoubleESub(copy.sumDoubleESub),
+    sumDoubleECalc(copy.sumDoubleECalc), numPoints(copy.numPoints), 
+    isAborted(copy.isAborted){};
+  void clear(void) { clearSpinBits(); };
   ostream& out(ostream &os)
     {
       os << "EventSubStruct" << endl;
       os << "eventId: " << eventId << endl;
+      os << "runNumber: " << runNumber << endl;
       os << "xVertex: " << xVertex << endl;
       os << "yVertex: " << yVertex << endl;
       os << "zVertex: " << zVertex << endl;
       os << "npTracks: " << npTracks << endl;
+      if(yellowIsSpinUp()) os << "Yellow Spin Up" << endl; 
+      if(blueIsSpinUp()) os << "Blue Spin Up" << endl; 
+      if(yellowIsSpinDown()) os << "Yellow Spin Down" << endl; 
+      if(blueIsSpinDown()) os << "Blue Spin Down" << endl;
+      os << "bunchCrossingId7bit: " << bunchCrossingId7bit << endl;
+      os << "bunchCrossingId: " << bunchCrossingId << endl;
+      os << "numCoincidences: " << numCoincidences << endl;
+      os << "sumPtTracks: " << sumPtTracks << endl;
+      os << "sumEMC: " << sumEMC << endl;
+      os << "sumDoubleESub: " << sumDoubleESub << endl;
+      os << "sumDoubleECalc: " << sumDoubleECalc << endl;
+      os << "numPoints: " << numPoints << endl;
+      if(isAborted) os << "Jet Finding Aborted!" << endl;
       return os;
     }
 
-  short eventId;
+  unsigned short eventId;
+  unsigned short runNumber;
   double xVertex;
   double yVertex;
   double zVertex;
   short npTracks;
+  unsigned char spinUpY0B1DownY3B4;
+  unsigned short bunchCrossingId7bit;
+  unsigned short bunchCrossingId;
+  short numCoincidences;
+  double sumPtTracks;
+  double sumEMC;
+  double sumDoubleESub;
+  double sumDoubleECalc;
+  long numPoints;
+  char isAborted;
+
+  inline bool yellowIsSpinUp(void) { return spinUpY0B1DownY3B4 & 1; };
+  inline bool blueIsSpinUp(void) { return spinUpY0B1DownY3B4 & 2; };
+  inline bool yellowIsSpinDown(void) { return spinUpY0B1DownY3B4 & 4; };
+  inline bool blueIsSpinDown(void) { return spinUpY0B1DownY3B4 & 8; };
+  inline void clearSpinBits(void) { spinUpY0B1DownY3B4 = 0; };
+  inline void ySpinUp(bool truthValue) { 
+    if(truthValue) spinUpY0B1DownY3B4 |= 1; 
+    else spinUpY0B1DownY3B4 &= 254;
+  };
+  inline void bSpinUp(bool truthValue) {
+    if(truthValue) spinUpY0B1DownY3B4 |= 2; 
+    else spinUpY0B1DownY3B4 &= 253;
+  };
+  inline void ySpinDown(bool truthValue) {
+    if(truthValue) spinUpY0B1DownY3B4 |= 4; 
+    else spinUpY0B1DownY3B4 &= 251;
+  };
+  inline void bSpinDown(bool truthValue) {
+    if(truthValue) spinUpY0B1DownY3B4 |= 8; 
+    else spinUpY0B1DownY3B4 &= 247;
+  };
 };
 
 class EventStruct {
@@ -98,6 +158,7 @@ class TrackStruct {
       os << "TrackPhi: " << trackPhi << endl;
       os << "TrackEta: " << trackEta << endl;
       if(isTpcTrack) os << "Track is from TPC" << endl;
+      else os << "Track is from EMC" << endl;
       return os;
     }
   
@@ -201,7 +262,7 @@ public:
     TrackStruct track;
 
 #ifndef __ROOT__
-    short &eventId;
+    unsigned short &eventId;
     double &xVertex;
     double &yVertex;
     double &zVertex;
