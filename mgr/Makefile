@@ -1,4 +1,7 @@
 #  $Log: Makefile,v $
+#  Revision 1.11  1998/02/21 00:58:31  fisyak
+#  Add tls library
+#
 #  Revision 1.10  1998/02/18 22:58:03  fisyak
 #  Move staf
 #
@@ -25,7 +28,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/18 22:58:03 $ 
+#             Last modification $Date: 1998/02/21 00:58:31 $ 
 ifdef SILENT
 .SILENT:
 endif
@@ -241,12 +244,14 @@ endif
 ifndef LIBRARIES
 ifeq ($(LIB_STAR),$(LIB_DIR))
 		LIBRARIES :=  $(LIB_STAR)/$(PKG_LIB) \
-               -L$(STAR)/asps/../lib/$(SYS_HOST_STAR)  -lmsg   
+               -L$(STAR)/asps/../lib/$(SYS_HOST_STAR)
 else
 		LIBRARIES :=  $(LIB_DIR)/$(PKG_LIB)  \
                 $(shell test -f $(LIB_STAR)/$(PKG_LIB) && echo $(LIB_STAR)/$(PKG_LIB)) \
-               -L$(STAR)/asps/../lib/$(SYS_HOST_STAR) -lmsg   
+               -L$(STAR)/asps/../lib/$(SYS_HOST_STAR)
 endif
+LIBRARIES +=  $(shell test -f $(STAR)/asps/../lib/$(SYS_HOST_STAR)/libtls.a && echo -ltls)
+LIBRARIES +=  $(shell test -f $(STAR)/asps/../lib/$(SYS_HOST_STAR)/libmsg.a && echo -lmsg)
 endif
 #-------------------------------rules-------------------------------
 # phony - not a file
