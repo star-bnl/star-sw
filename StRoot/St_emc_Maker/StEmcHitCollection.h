@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.h,v 1.5 1999/09/08 00:25:32 fisyak Exp $
+// $Id: StEmcHitCollection.h,v 1.6 1999/09/17 21:28:40 fisyak Exp $
 // $Log: StEmcHitCollection.h,v $
+// Revision 1.6  1999/09/17 21:28:40  fisyak
+// remove St_db_Maker.h
+//
 // Revision 1.5  1999/09/08 00:25:32  fisyak
 // Add tables/ for table includes
 //
@@ -25,7 +28,6 @@
 #include "St_Table.h"
 #include "St_TableSorter.h"
 #include "StMaker.h"
-#include "St_db_Maker/St_db_Maker.h"
 #include "StEmcGeom.h"
 #include "StChain.h"
 #include "TArrayS.h"
