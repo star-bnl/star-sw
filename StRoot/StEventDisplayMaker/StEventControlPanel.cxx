@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.11 2003/02/26 23:50:22 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.12 2003/10/08 18:50:48 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -381,12 +381,12 @@ void StEventControlPanel::NextEvent()
 {
    SuspendTopWidget(); 
 
-   fgDispMk->Info("Looping over the next event");
+   fgDispMk->MakeInfo("Looping over the next event");
    {gSystem->DispatchOneEvent(1);}
    fBar->topLevelWidget ()->setEnabled (FALSE );
    fgChain->EventLoop(1,1);   
 //   StEventDisplayMaker::MakeLoop(2);
-   fgDispMk->Info("Done");
+   fgDispMk->MakeInfo("Done");
    ResumeTopWidget();
    {gSystem->DispatchOneEvent(1);}
 }
@@ -395,11 +395,11 @@ void StEventControlPanel::Redraw()
 {
    SuspendTopWidget(); 
 
-   fgDispMk->Info("Redrawing the current event");
+   fgDispMk->MakeInfo("Redrawing the current event");
    {gSystem->DispatchOneEvent(1);}
    fgDispMk->ClearCanvas();
    fgDispMk->Make();
-   fgDispMk->Info("Done");
+   fgDispMk->MakeInfo("Done");
 
    ResumeTopWidget();
    {gSystem->DispatchOneEvent(1);}
