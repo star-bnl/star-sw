@@ -1,11 +1,11 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.14 2000/03/17 14:55:12 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.15 2000/03/21 17:04:21 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
- * Revision 1.14  2000/03/17 14:55:12  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.15  2000/03/21 17:04:21  lasiuk
+ * remove forced delete of singleton classes
  *
  * Revision 1.15  2000/03/21 17:04:21  lasiuk
  * remove forced delete of singleton classes
@@ -697,12 +697,9 @@ Int_t StRrsMaker::Make()
 }
 
 
-    delete mGeometryDb;
-    delete mPhysicsDb;
 
 int StRrsMaker::Finish()
 {
-    delete mWriter;
 #ifdef RICH_WITH_VIEWER
     delete StRichViewer::getView();
 #endif
