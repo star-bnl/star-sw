@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.10 2001/04/27 10:25:21 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.11 2001/05/02 13:40:07 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.11  2001/05/02 13:40:07  oldi
+// Small change to be able to update the output file again.
+//
 // Revision 1.10  2001/04/27 10:25:21  oldi
 // Protection against crash due to lack of fast simulator hit information.
 // The evaluator gives (up to now) only valueable information when tracking was
@@ -540,10 +543,8 @@ void StFtpcTrackEvaluator::SetupFile(Char_t *filename, Char_t *write_permission)
 
   mFile = new TFile(mFilename, mWritePermission);
   
-  if (!mFile->IsOpen()) {
-    gMessMgr->Message("but that's o.k. - I'll create it immediately!", "W", "OST"); 
-    delete mFile;
-    mFile = new TFile(mFilename, "RECREATE");
+  if (!mFile->Get("num_fhits") && strcmp(mWritePermission, "UPDATE") == 0) {
+    gMessMgr->Message("File did not exist but that's o.k. - I'll create it immediately!", "W", "OST"); 
     CreateHistos();
     WriteHistos();
     DeleteHistos();
