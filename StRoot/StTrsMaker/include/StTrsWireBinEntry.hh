@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireBinEntry.hh,v 1.4 2000/02/24 16:39:52 long Exp $
+ * $Id: StTrsWireBinEntry.hh,v 1.5 2000/06/23 00:12:24 snelling Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireBinEntry.hh,v $
+ * Revision 1.5  2000/06/23 00:12:24  snelling
+ * Removed dependence on local files now pointed to StDbUtilities
+ *
  * Revision 1.4  2000/02/24 16:39:52  long
  * add sigmaL(),sigmaT()
  *
@@ -40,7 +43,7 @@
 #endif
 
 #include "StThreeVector.hh"
-#include "StGlobalCoordinate.hh"
+#include "StDbUtilities/StGlobalCoordinate.hh"
 
 class StTrsWireBinEntry {
 public:

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMagneticField.hh,v 1.1 1998/11/10 17:12:04 fisyak Exp $
+ * $Id: StMagneticField.hh,v 1.2 2000/06/23 00:12:23 snelling Exp $
  *
  * Author: Thomas Ullrich, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMagneticField.hh,v $
+ * Revision 1.2  2000/06/23 00:12:23  snelling
+ * Removed dependence on local files now pointed to StDbUtilities
+ *
  * Revision 1.1  1998/11/10 17:12:04  fisyak
  * Put Brian trs versin into StRoot
  *
@@ -24,7 +27,7 @@
 #define ST_MAGNETIC_FIELD
 
 #include "StThreeVector.hh"
-#include "StGlobalCoordinate.hh"
+#include "StDbUtilities/StGlobalCoordinate.hh"
 
 class StMagneticField {
 public:

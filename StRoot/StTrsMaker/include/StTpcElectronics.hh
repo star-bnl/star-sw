@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcElectronics.hh,v 1.4 1999/02/28 20:17:55 lasiuk Exp $
+ * $Id: StTpcElectronics.hh,v 1.5 2000/06/23 00:12:24 snelling Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTpcElectronics.hh,v $
+ * Revision 1.5  2000/06/23 00:12:24  snelling
+ * Removed dependence on local files now pointed to StDbUtilities
+ *
  * Revision 1.4  1999/02/28 20:17:55  lasiuk
  * add numberOfTimeBins
  *
@@ -33,7 +36,7 @@
 #include <iostream.h>
 
 #include "StGlobals.hh"
-#include "StTpcPadCoordinate.hh"
+#include "StDbUtilities/StTpcPadCoordinate.hh"
 
 class StTpcElectronics {
 public:

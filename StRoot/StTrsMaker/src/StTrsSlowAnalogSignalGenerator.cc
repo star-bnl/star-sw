@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.24 2000/06/07 02:03:12 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.25 2000/06/23 00:12:41 snelling Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
+ * Revision 1.25  2000/06/23 00:12:41  snelling
+ * Removed dependence on local files now pointed to StDbUtilities
+ *
  * Revision 1.24  2000/06/07 02:03:12  lasiuk
  * exit/abort ultimatum
  *
@@ -118,13 +121,8 @@
 
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
-#ifndef TPC_DATABASE_PARAMETERS
-#include "StTpcLocalSectorCoordinate.hh"
-#include "StTpcPadCoordinate.hh"
-#else
 #include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
 #include "StDbUtilities/StTpcPadCoordinate.hh"
-#endif
 
 #include "StTrsSlowAnalogSignalGenerator.hh"
 

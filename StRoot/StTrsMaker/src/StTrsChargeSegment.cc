@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.24 2000/02/24 16:19:07 long Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.25 2000/06/23 00:12:40 snelling Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.25  2000/06/23 00:12:40  snelling
+ * Removed dependence on local files now pointed to StDbUtilities
+ *
  * Revision 1.24  2000/02/24 16:19:07  long
  * take away straight line model due to changes made by GEANT on de<0 case
  * 
@@ -113,12 +116,7 @@ using std::random_shuffle;
 
 #include "StPhysicalHelix.hh"
 
-#define TPC_DATABASE_PARAMETERS
-#ifndef TPC_DATABASE_PARAMETERS
-#include "StTpcCoordinateTransform.hh"
-#else
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
-#endif
 #include "StTrsDeDx.hh"
 
 // Need a CERNLIB routine for tssSplit
@@ -160,11 +158,7 @@ StTrsChargeSegment::~StTrsChargeSegment() {/* nopt */ }
 
 void StTrsChargeSegment::rotate(StTpcGeometry* geodb, StTpcSlowControl* SCdb, StTpcElectronics* elecDb)
 { // rotate to sector 12 ---use a coordinate transform:
-#ifndef TPC_DATABASE_PARAMETERS
-    StTpcCoordinateTransform transformer(geodb, SCdb, elecDb);
-#else
     StTpcCoordinateTransform transformer(gStTpcDb);
-#endif
 
     //cout << "rotate() position= " << mPosition << endl;
 
