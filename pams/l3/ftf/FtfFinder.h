@@ -17,40 +17,35 @@ class FtfFinder {
 
 public:
    FtfFinder( ) ;
-   float  FTF ( ) ;
    friend FtfTrack ;
 	
-	void   dEdx                    ( ) ;
-
-	void   getTracks               ( ) ;
-	void   mergePrimaryTracks      ( ) ;
-	int    reset                   ( ) ;
-	int    setConformalCoordinates ( ) ;
-	int    setPointers             ( ) ;
-	float  time                    ( ) ;
-
-
-   void		printVols ( ) ;
-	void		printRows ( ) ;
-
+   void   dEdx                    ( ) ;
+   void   getTracks               ( ) ;
+   void   mergePrimaryTracks      ( ) ;
+   float  process ( ) ;
+   int    reset                   ( ) ;
+   int    setConformalCoordinates ( ) ;
+   int    setPointers             ( ) ;
+   float  time                    ( ) ;
 //
-	int           n_hits     ;  
-	FtfHit        *hit       ;  
-	int           n_tracks   ; 
-	FtfTrack      *track     ;  
-	FtfPara       para       ;
-	int           max_tracks ;
-   int           n_mc_tracks ;
-	FtfMcTrack    *mc_track   ;
-
-	VOLUME        *volume     ;
+   void		printVols ( ) ;
+   void		printRows ( ) ;
+//
+   int           nHits      ;  
+   FtfHit        *hit       ;  
+   int           nTracks    ; 
+   FtfTrack      *track     ;  
+   FtfPara       para       ;
+   int           maxTracks  ;
+   int           nMcTracks  ;
+   FtfMcTrack    *mcTrack    ;
+   VOLUME        *volume     ;
    ROW           *rowk       ;
-   AREA          *track_area ;
-
-	float init_time, total_time ;
+   AREA          *trackArea ;
+   float initTime, totalTime ;
 private: 
 
-	FtfTrack      *current_track ;
+   FtfTrack      *currentTrack ;
     
 } ;
 #endif

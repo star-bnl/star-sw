@@ -2,6 +2,8 @@
 //: FILE:       FtfPara.cpp
 //: HISTORY:
 //:             28oct1996 version 1.00
+//:              7dec1998 variable names changed to C++ style
+//:                       
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfPara
@@ -15,60 +17,60 @@ void FtfPara::setDefaults (void)
 {
 /*  Define cuts - this should be obsolete */
 
-   mod_row           = 1    ;
-   chi2_hit_cut      = 500.F  ;
-   chi2_hit_good     = 100.F ;
-   chi2_track_cut    = 250.F ;
-   dr_segm           = 1     ;
-   dr_track          = 3     ;
+   modRow           = 1    ;
+   hitChi2Cut      = 500.F  ;
+   goodHitChi2     = 100.F ;
+   trackChi2Cut    = 250.F ;
+   segmentRowSearchRange = 1 ;
+   trackRowSearchRange   = 3 ;
    dEdx              = 0     ;
-   dEdx_n_truncate   = 20    ;
-   dphi              = 0.10F * mod_row ;
-   deta              = 0.10F * mod_row ;
-   dphi_merge        = 0.02F  ;
-   deta_merge        = 0.02F  ;
-   eta_min           = -2.5F  ;
-   eta_min_track     = -2.2F  ;
-   eta_max           =  2.5F  ;
-   eta_max_track     =  2.2F  ;
-   event_reset       =  1     ;
-   get_errors        =  0     ;
-   ghost_flag        =  0     ;
-   go_backwards      =  0     ;
-   good_distance     =  1.F * mod_row ;
+   dEdxNTruncate     = 20    ;
+   dphi              = 0.10F * modRow ;
+   deta              = 0.10F * modRow ;
+   dphiMerge         = 0.02F  ;
+   detaMerge         = 0.02F  ;
+   etaMin            = -2.5F  ;
+   etaMinTrack       = -2.2F  ;
+   etaMax            =  2.5F  ;
+   etaMaxTrack       =  2.2F  ;
+   eventReset        =  1     ;
+   getErrors         =  0     ;
+   ghostFlag         =  0     ;
+   goBackwards       =  0     ;
+   goodDistance      =  1.F * modRow ;
    init              =  0 ;
-   merge_primaries   =  0    ;
-   phi_min           =  (float)(-0.000001/To_deg)  ;
-   phi_min_track     =  (float)(-0.000001/To_deg)  ;
-   phi_max           = (float)(360.2/To_deg)  ;
-   phi_max_track     = (float)(360.2/To_deg)  ;
-   max_dis_segm      = 100.F * mod_row ;
-   mn_hit_trk        = 5      ;
-   n_hit_segm        = 3      ;
-   n_eta             = 60     ;
-   n_eta_track       = 60     ;
-   n_phi             = 20     ;
-   n_phi_track       = 60     ;
-   n_pass_primaries  = 1      ;
-   n_pass_secondaries= 0      ;
+   mergePrimaries    =  0    ;
+   phiMin            =  (float)(-0.000001/toDeg)  ;
+   phiMinTrack       =  (float)(-0.000001/toDeg)  ;
+   phiMax            = (float)(360.2/toDeg)  ;
+   phiMaxTrack       = (float)(360.2/toDeg)  ;
+   maxDistanceSegment = 100.F * modRow ;
+   minHitsPerTrack   = 5      ;
+   nHitsForSegment   = 3      ;
+   nEta              = 60     ;
+   nEtaTrack         = 60     ;
+   nPhi              = 20     ;
+   nPhiTrack         = 60     ;
+   nPrimaryPasses    = 1      ;
+   nSecondaryPasses  = 1      ;
    rowInnerMost      = 1      ;
    rowOuterMost      = 1      ;
    rowStart          = 45     ;
-   segment_max_angle = 10.F/To_deg ;
-   sz_fit_flag       = 1      ;
-   xy_error_scale    = 1.0F   ;
-   sz_error_scale    = 1.0F   ;
-   bfield            = 0.5F   ;
+   segmentMaxAngle   = 10.F/toDeg ;
+   szFitFlag         = 1      ;
+   xyErrorScale      = 1.0F   ;
+   szErrorScale      = 1.0F   ;
+   bField            = 0.5F   ;
    phiShift          = 0.0    ;
    
-   pt_min_helix_fit  = 100.F  ;
-   r_vertex          = 0.F    ;
-   x_vertex          = 0.F    ;
-   y_vertex          = 0.F    ;
-   z_vertex          = 0.F    ;
-   dx_vertex         = 0.005F ;
-   dy_vertex         = 0.005F ;
-   phi_vertex        = 0.F    ;
+   ptMinHelixFit     = 100.F  ;
+   rVertex           = 0.F    ;
+   xVertex           = 0.F    ;
+   yVertex           = 0.F    ;
+   zVertex           = 0.F    ;
+   dxVertex          = 0.005F ;
+   dyVertex          = 0.005F ;
+   phiVertex         = 0.F    ;
 
    return  ;
 }

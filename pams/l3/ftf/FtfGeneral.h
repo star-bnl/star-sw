@@ -4,13 +4,13 @@
 //
 //    Some constrats 
 //
-const float To_deg=57.29577951F ;
-const float Pi    =3.141592654F ;
-const float Twopi =2.F*Pi ; 
+const float toDeg =57.29577951F ;
+const float pi    =3.141592654F ;
+const float twoPi =2.F*pi ; 
+const float piHalf = 0.5 * pi ;
 //
 //-->   Functions
 //
-
 #define min(a,b)    ( ( (a) < (b) ) ? (a) : (b) )
 #define max(a,b)    ( ( (a) > (b) ) ? (a) : (b) )
 #define seta(r,z)   (float)(3.0F * (z) / (fabs(z)+2.0F*(r)))

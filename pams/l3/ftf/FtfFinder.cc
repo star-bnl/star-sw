@@ -18,24 +18,23 @@ FtfFinder::FtfFinder ( )
 //
     hit        = 0 ;  
     track      = 0 ;
-    mc_track   = 0 ;
+    mcTrack    = 0 ;
     volume     = 0 ;
     rowk       = 0 ;
-    track_area = 0 ;
+    trackArea  = 0 ;
 }
 //*********************************************************************
 //      Steers the tracking 
 //*********************************************************************
-float FtfFinder::FTF (  ) {  
+float FtfFinder::process (  ) {  
 //-----------------------------------------------------------------
 //        Make sure there is something to work with
 //------------------------------------------------------------------ 
-    if ( n_hits <= 0 ) {
+    if ( nHits <= 0 ) {
          printf ( "fft: Hit structure is empty \n " ) ;
          return 1 ;
     }
-//	init_time = time ( );
-	init_time = time ( );
+    initTime = time ( );
 //
 //        General initialization 
 //
@@ -45,33 +44,33 @@ float FtfFinder::FTF (  ) {
 //
 //      Event reset and set pointers
 //
-   if ( para.event_reset  && setPointers ( ) ) return 1 ;   
+   if ( para.eventReset  && setPointers ( ) ) return 1 ;   
 //
 //      Build primary tracks now
 //
    short i ;
    para.primaries = 1 ;
-   for ( i = 0 ; i < para.n_pass_primaries ; i++ )
+   for ( i = 0 ; i < para.nPrimaryPasses ; i++ )
         getTracks ( );
 //
 //      Look for secondaries    
 //
    para.primaries = 0 ;
-   for ( i = 0 ; i < para.n_pass_secondaries ; i++ )
+   for ( i = 0 ; i < para.nSecondaryPasses ; i++ )
         getTracks ( );
 
 //   if ( para.dEdx ) dEdx ( ) ;
 
-   total_time = time ( ) ;
+   totalTime = time ( ) ;
    if ( para.infoLevel > 0 )
-      printf ( "ftf time: %7.3f \n ", total_time ) ;
-	return total_time ;
+      printf ( "ftf time: %7.3f \n ", totalTime ) ;
+   return totalTime ;
 } 
 //********************************************************************
 //     Calculates deposited Energy
 //********************************************************************
 void FtfFinder::dEdx ( ) {
-   for ( int i = 0 ; i<n_tracks ; i++ ){
+   for ( int i = 0 ; i<nTracks ; i++ ){
 	track[i].dEdx( ) ;
    }
 }
@@ -80,76 +79,76 @@ void FtfFinder::dEdx ( ) {
 //	Recontruct primary tracks 
 //**********************************************************************
 void FtfFinder::getTracks ( ) {
-   short   n_hit_segment ;
+   short   nhitsSegment ;
 //
 //     Set conformal coordinates if we are working with primaries
 //
    if ( para.primaries ) {
       setConformalCoordinates ( ) ;
-      para.min_n_hits_for_fit = 1 ;
-      n_hit_segment   = (short)para.n_hit_segm ;
+      para.minHitsForFit = 1 ;
+      nhitsSegment   = (short)para.nHitsForSegment;
    }
    else {
-      para.min_n_hits_for_fit = 2 ;
-      n_hit_segment   = (short)max(para.n_hit_segm,3) ;
+      para.minHitsForFit = 2 ;
+      nhitsSegment   = (short)max(para.nHitsForSegment,3) ;
    }
 //
 //               Loop over rows   
 //
-   for ( int ir = para.n_rp - 1 ; ir>=para.mn_hit_trk ; ir--) {
+   for ( int ir = para.nRowsPlusOne - 1 ; ir>=para.minHitsPerTrack ; ir--) {
 //
 //           Loop over hits in this particular row
 //
-      for ( FtfHit *first_hit = rowk[ir].first_hit ;
-		    first_hit != 0 ;
-	    	first_hit = first_hit->nxrhit ) {
+      for ( FtfHit *firstHit = rowk[ir].firstHit ;
+            firstHit != 0 ;
+            firstHit = firstHit->nextRowHit ) {
 //
 //     Check hit was not used before
 //
-         if ( first_hit->track != 0  ) continue ;
+         if ( firstHit->track != 0  ) continue ;
 //
 //     One more track 
 //
-		 n_tracks++ ;
+	 nTracks++ ;
 //
 //
-         if ( n_tracks > max_tracks ){
+         if ( nTracks > maxTracks ){
             printf("\n fft_track: Max nr tracks reached !") ;
-            n_tracks = max_tracks  ;
+            nTracks = maxTracks  ;
             return ;
          }
 //
 //     Initialize variables before going into track hit loop
 //
-         FtfTrack *this_track  = &track[n_tracks-1];
-	      this_track->para      = &para ;
-	      this_track->id        = n_tracks - 1 ;
-         this_track->first_hit = this_track->last_hit = this_track->ref_hit = first_hit ;
+         FtfTrack *thisTrack = &track[nTracks-1];
+	 thisTrack->para     = &para ;
+	 thisTrack->id       = nTracks - 1 ;
+         thisTrack->firstHit = thisTrack->lastHit = thisTrack->refHit = firstHit ;
 #ifdef TRDEBUG
-         this_track->Debug_New ( ) ;
+         thisTrack->Debug_New ( ) ;
 #endif
 //
 //              Set fit parameters to zero
 //
-        this_track->Reset ( ) ;
+        thisTrack->reset ( ) ;
 //
 //      Go into hit looking loop
 //
-		if ( this_track->Build_Track ( first_hit, volume ) ) {
+        if ( thisTrack->buildTrack ( firstHit, volume ) ) {
 //
 //    Merge Tracks if requested
 //
-          if ( para.primaries &&
-               para.merge_primaries == 1 &&
-               this_track->Merge_Primary( track_area )  ) n_tracks-- ;
-		}
-	    else{
+        if ( para.primaries &&
+             para.mergePrimaries == 1 &&
+             thisTrack->mergePrimary( trackArea )  ) nTracks-- ;
+	}
+       else{
 //
 //      If track was not built delete candidate
 //
-            this_track->Delete_Candidate ( ) ;
-		    n_tracks-- ;
-		 }
+            thisTrack->deleteCandidate ( ) ;
+	    nTracks-- ;
+       }
 //    
 //       End loop over hits inside row               
 //
@@ -165,13 +164,13 @@ void FtfFinder::mergePrimaryTracks ( ) {
 //
 //   Reset area keeping track pointers
 // 
-   memset ( track_area, 0, para.n_phit*para.n_etat*sizeof(AREA) ) ;  
+   memset ( trackArea, 0, para.nPhiTrackPlusOne*para.nEtaTrackPlusOne*sizeof(AREA) ) ;  
 //
 //    Loop over tracks
 //
-   FtfTrack* currentTrack ;
+// FtfTrack* currentTrack ;
 
-   for ( int i = 0 ; i < n_tracks ; i++ ) {
+   for ( int i = 0 ; i < nTracks ; i++ ) {
       currentTrack = &(track[i]);
       if ( currentTrack->flag < 0 ) continue ;
 //
@@ -183,7 +182,7 @@ void FtfFinder::mergePrimaryTracks ( ) {
 //    if track is not merged is added
 //    to the track volume (area)
 //
-      if ( currentTrack->Merge_Primary ( track_area ) ) {
+      if ( currentTrack->mergePrimary ( trackArea ) ) {
          currentTrack->flag = -1 ;
       }
    }
@@ -193,7 +192,7 @@ void FtfFinder::mergePrimaryTracks ( ) {
 //*********************************************************************
 int FtfFinder::reset (void)
 {
-   float phi_diff ;
+   float phiDiff ;
 //
 //   Initialization flag in principle assume failure
 //
@@ -201,18 +200,18 @@ int FtfFinder::reset (void)
 //----------------------------------------------------------------------------
 //     Allocate volumes 
 //---------------------------------------------------------------------------*/
-   para.n_rp      = ( para.rowOuterMost - para.rowInnerMost ) / para.mod_row + 2 ;
-   if ( para.n_rp < 1 ) {
+   para.nRowsPlusOne = ( para.rowOuterMost - para.rowInnerMost ) / para.modRow + 2 ;
+   if ( para.nRowsPlusOne < 1 ) {
        printf ( " \n =====> Error <===== " ) ;
        printf ( " \n Rows: Outer Most Inner Most %d % d ", para.rowOuterMost,  para.rowInnerMost ) ;
        return 1 ;
    }
-   para.n_phip    = para.n_phi + 1 ;
-   para.n_etap    = para.n_eta + 1 ;
-   para.n_phietap = para.n_phip * para.n_etap ;
-   if ( para.merge_primaries ) {
-      para.n_phit = para.n_phi_track + 1 ;
-      para.n_etat = para.n_eta_track + 1 ;
+   para.nPhiPlusOne    = para.nPhi + 1 ;
+   para.nEtaPlusOne    = para.nEta + 1 ;
+   para.nPhiEtaPlusOne = para.nPhiPlusOne * para.nEtaPlusOne ;
+   if ( para.mergePrimaries ) {
+      para.nPhiTrackPlusOne = para.nPhiTrack + 1 ;
+      para.nEtaTrackPlusOne = para.nEtaTrack + 1 ;
    }
 //
 //-->    Allocate volume memory
@@ -220,9 +219,11 @@ int FtfFinder::reset (void)
    if (volume != NULL) free ( (void *) volume ) ; 
 #ifdef TRDEBUG
    printf("Allocating %d bytes of memory for volume\n",
-               para->n_rp*para.n_phip*para.n_etap*sizeof(VOLUME));
+               para->nRp*para.nPhip*para.nEtap*sizeof(VOLUME));
 #endif
-   volume = (VOLUME *)malloc(para.n_rp*para.n_phip*para.n_etap*sizeof(VOLUME));
+   volume = (VOLUME *)malloc(para.nRowsPlusOne*
+                             para.nPhiPlusOne *
+                             para.nEtaPlusOne*sizeof(VOLUME));
    if(volume == (VOLUME *)NULL) {
      printf ( "Problem with malloc... exiting\n" ) ;
      return 1 ;
@@ -233,9 +234,9 @@ int FtfFinder::reset (void)
    if (rowk != NULL) free ( (void *) rowk ) ;
 #ifdef TRDEBUG
    printf("Allocating %d bytes of memory for rowk\n",
-                              para->n_rp*sizeof(ROW));
+                              para->nRp*sizeof(ROW));
 #endif
-   rowk = (ROW *)malloc(para.n_rp*sizeof(ROW));
+   rowk = (ROW *)malloc(para.nRowsPlusOne*sizeof(ROW));
    if ( rowk == ( ROW *)NULL) {
      printf ( "Problem with malloc... exiting\n" ) ;
      exit(0);
@@ -243,14 +244,15 @@ int FtfFinder::reset (void)
 /*
  *-->    Allocate track area memory
  */
-   if ( para.merge_primaries ) {
-      if (track_area != NULL) free ( (void *) track_area ) ;
+   if ( para.mergePrimaries ) {
+      if (trackArea != NULL) free ( (void *) trackArea ) ;
 #ifdef TRDEBUG
          printf("Allocating %d bytes of memory for track_area\n",
                        para.n_phip*para.n_etap*sizeof(AREA));
 #endif
-         track_area = (AREA *)malloc(para.n_phit*para.n_etat*sizeof(AREA));
-         if(track_area == (AREA *)NULL) {
+         trackArea = (AREA *)malloc(para.nPhiTrackPlusOne*
+                                    para.nEtaTrackPlusOne*sizeof(AREA));
+         if(trackArea == (AREA *)NULL) {
          printf ( "Problem with malloc... exiting\n" ) ;
          return 1 ;
       }
@@ -258,7 +260,7 @@ int FtfFinder::reset (void)
 //
 //   Check there is some memory allocated
 //
-         if ( track_area == 0 ){
+         if ( trackArea == 0 ){
             printf ( " You cannot repass with the merging option when \n " ) ; 
             printf ( " when you did not use it the first time         \n " ) ; 
             return 1 ;
@@ -268,47 +270,47 @@ int FtfFinder::reset (void)
 /*--------------------------------------------------------------------------
             Look whether the phi range is closed (< 5 degrees )
 -------------------------------------------------------------------------- */
-   phi_diff = para.phi_max - para.phi_min ;
-   if ( phi_diff > 2. * Pi + 0.1 ) {
+   phiDiff = para.phiMax - para.phiMin ;
+   if ( phiDiff > 2. * pi + 0.1 ) {
       printf ( " Wrong phi range %f7.2, %f7.2 ", 
-                 para.phi_min*To_deg, para.phi_max*To_deg ) ;
+                 para.phiMin*toDeg, para.phiMax*toDeg ) ;
       return 1 ;
    }
-   if ( fabs(phi_diff-Twopi ) < Pi / 36. ) para.phi_closed = 1 ;
+   if ( fabs(phiDiff-twoPi ) < pi / 36. ) para.phiClosed = 1 ;
    else 
-      para.phi_closed = 0 ;
+      para.phiClosed = 0 ;
 /*--------------------------------------------------------------------------
             Calculate volume dimensions
 -------------------------------------------------------------------------- */
-   para.phi_slice   = (para.phi_max - para.phi_min)/para.n_phi ;
-   para.eta_slice   = (para.eta_max - para.eta_min)/para.n_eta ;
+   para.phiSlice   = (para.phiMax - para.phiMin)/para.nPhi ;
+   para.etaSlice   = (para.etaMax - para.etaMin)/para.nEta ;
 /*--------------------------------------------------------------------------
             If needed calculate track area dimensions
 -------------------------------------------------------------------------- */
-   para.phi_slice_track   = (para.phi_max_track - para.phi_min_track)/para.n_phi_track ;
-   para.eta_slice_track   = (para.eta_max_track - para.eta_min_track)/para.n_eta_track ;
+   para.phiSliceTrack   = (para.phiMaxTrack - para.phiMinTrack)/para.nPhiTrack ;
+   para.etaSliceTrack   = (para.etaMaxTrack - para.etaMinTrack)/para.nEtaTrack ;
 //
 //    Set vertex parameters
 //
-   if ( para.x_vertex != 0 || para.y_vertex != 0 ) { 
-      para.r_vertex   = (float)sqrt (para.x_vertex*para.x_vertex +
-	                                  para.y_vertex*para.y_vertex) ;
-	  para.phi_vertex = (float)atan2(para.y_vertex,para.x_vertex);
+   if ( para.xVertex != 0 || para.yVertex != 0 ) { 
+      para.rVertex   = (float)sqrt (para.xVertex*para.xVertex +
+	                            para.yVertex*para.yVertex) ;
+      para.phiVertex = (float)atan2(para.yVertex,para.xVertex);
    }
    else {
-	  para.r_vertex   = 0.F ;
-	  para.phi_vertex = 0.F ;
+      para.rVertex   = 0.F ;
+      para.phiVertex = 0.F ;
    }
 
-   if ( para.dx_vertex != 0 || para.dy_vertex != 0 )
-      para.xy_weight_vertex = 1.F / ((float)sqrt(para.dx_vertex*para.dx_vertex+
-	                                              para.dy_vertex*para.dy_vertex) ) ;
-   else para.xy_weight_vertex = 1.0F ;
+   if ( para.dxVertex != 0 || para.dyVertex != 0 )
+      para.xyWeightVertex = 1.F / ((float)sqrt(para.dxVertex*para.dxVertex+
+	                                       para.dyVertex*para.dyVertex) ) ;
+   else para.xyWeightVertex = 1.0F ;
 //
 //   Set # hits & tracks to zero
 //
-   n_hits   = 0 ;
-   n_tracks = 0 ;
+   nHits   = 0 ;
+   nTracks = 0 ;
 //
 //    Set initialization flag to true
 //
@@ -324,24 +326,24 @@ int FtfFinder::setConformalCoordinates ( )
 /*-------------------------------------------------------------------------
         Loop over hits 
 -------------------------------------------------------------------------*/
-   FtfHit* this_hit ;
-   float x, y, r2, inv_r2 ;
-   for ( int ihit = 0 ; ihit<n_hits ; ihit++ )
+   FtfHit* thisHit ;
+   float x, y, r2, invR2 ;
+   for ( int ihit = 0 ; ihit<nHits ; ihit++ )
    {
 /*-------------------------------------------------------------------------
         Transform coordinates
 -------------------------------------------------------------------------*/
-      this_hit = &(hit[ihit]) ;
+     thisHit = &(hit[ihit]) ;
 
-	  x             = this_hit->x - para.x_vertex ;
-     y             = this_hit->y - para.y_vertex ;
-	  r2            = x * x + y * y ;
-     inv_r2        = 1.F / r2 ;
+     x            = thisHit->x - para.xVertex ;
+     y            = thisHit->y - para.yVertex ;
+     r2           = x * x + y * y ;
+     invR2        = 1.F / r2 ;
 
-     this_hit->xp    =     x * inv_r2 ;
-     this_hit->yp    =   - y * inv_r2 ;
-	  this_hit->wxy   =   r2 * r2 /  ( square(para.xy_error_scale)
-		                            * ( square(this_hit->dx) + square(this_hit->dy) ) ) ;
+     thisHit->xp    =     x * invR2 ;
+     thisHit->yp    =   - y * invR2 ;
+     thisHit->wxy   =   r2 * r2 /  ( square(para.xyErrorScale)
+	                            * ( square(thisHit->dx) + square(thisHit->dy) ) ) ;
    } 
 
    return 0 ;
@@ -351,74 +353,71 @@ int FtfFinder::setConformalCoordinates ( )
 //********************************************************************
 int FtfFinder::setPointers ( )
 {
-    int ihit, i_rr, i_phi, i_eta ;
-    register int tmp_index;
+    int ihit, localRow ;
+    register int volumeIndex;
     float r, r2, phi, eta ;
-    FtfHit *this_hit ;
+    FtfHit *thisHit ;
 //
 //   Set volumes to zero
 //
-   memset ( rowk,   0, para.n_rp*sizeof(ROW) ) ;
-   int n = para.n_rp*para.n_etap*para.n_phip ;
+   memset ( rowk,   0, para.nRowsPlusOne*sizeof(ROW) ) ;
+   int n = para.nRowsPlusOne*para.nEtaPlusOne*para.nPhiPlusOne ;
    memset ( volume, 0, n*sizeof(VOLUME) ) ;
-   if ( para.merge_primaries ) 
-      memset ( track_area, 0, para.n_phit*para.n_etat*sizeof(AREA) ) ;  
+   if ( para.mergePrimaries ) 
+      memset ( trackArea, 0, para.nPhiTrackPlusOne*para.nEtaTrackPlusOne*sizeof(AREA) ) ;  
 /*-------------------------------------------------------------------------
         Loop over hits 
 -------------------------------------------------------------------------*/
 
-   for ( ihit = 0 ; ihit<n_hits ; ihit++ )
+   for ( ihit = 0 ; ihit<nHits ; ihit++ )
    {
 /*-------------------------------------------------------------------------
         Check whether row is to be considered
 -------------------------------------------------------------------------*/
-      this_hit = &(hit[ihit]) ;
-      i_rr = this_hit->i_r - para.rowInnerMost ;
-      if ( fmod(i_rr,para.mod_row) != 0 ) continue ;
+      thisHit = &(hit[ihit]) ;
+      localRow = thisHit->row - para.rowInnerMost ;
+      if ( fmod(localRow,para.modRow) != 0 ) continue ;
 
-      if ( this_hit->i_r < para.rowInnerMost ) continue ;
-      if ( this_hit->i_r > para.rowOuterMost ) continue ;
+      if ( thisHit->row < para.rowInnerMost ) continue ;
+      if ( thisHit->row > para.rowOuterMost ) continue ;
 /*
  *->    Get "renormalized" index
  */
-      i_rr = i_rr / para.mod_row + 1 ;
+      localRow = localRow / para.modRow + 1 ;
 
 /*-------------------------------------------------------------------------
         Transform coordinates
 -------------------------------------------------------------------------*/
-      r2            = this_hit->x * this_hit->x + this_hit->y * this_hit->y ;
+      r2            = thisHit->x * thisHit->x + thisHit->y * thisHit->y ;
       r             = (float)sqrt ( r2 ) ;
-      phi           = (float)atan2(this_hit->y,this_hit->x) + para.phiShift ;
-      if ( phi < 0 ) phi = phi + 2.F * Pi ;
-      eta           = (float)seta(r,this_hit->z) ;
+      phi           = (float)atan2(thisHit->y,thisHit->x) + para.phiShift ;
+      if ( phi < 0 ) phi = phi + twoPi ;
+      eta           = (float)seta(r,thisHit->z) ;
 
-      if ( para.sz_fit_flag ) {
-        this_hit->s  = 0.F ;
-        this_hit->wz = (float)(1./ square ( para.sz_error_scale * this_hit->dz ));
+      if ( para.szFitFlag ) {
+        thisHit->s  = 0.F ;
+        thisHit->wz = (float)(1./ square ( para.szErrorScale * thisHit->dz ));
       }
 
-      this_hit->r   = r   ;
-      this_hit->phi = phi ;
-      this_hit->eta = eta ;
+      thisHit->r   = r   ;
+      thisHit->phi = phi ;
+      thisHit->eta = eta ;
 /*-------------------------------------------------------------------------
         Set pointers
 -------------------------------------------------------------------------*/
-      this_hit->nxvhit     = 
-      this_hit->nxrhit     = 0 ;
+      thisHit->nextVolumeHit  = 
+      thisHit->nextRowHit     = 0 ;
 /*-------------------------------------------------------------------------
         Get phi index for hit
 -------------------------------------------------------------------------*/
 
-      i_phi = (int)( (this_hit->phi-para.phi_min)/para.phi_slice + 1);
-      this_hit->i_phi = i_phi ; 
-      if ( i_phi < 1 || i_phi > para.n_phi ) {
-
+      thisHit->phiIndex = (int)( (thisHit->phi-para.phiMin)/para.phiSlice + 1);
+      if ( thisHit->phiIndex < 1 || thisHit->phiIndex > para.nPhi ) {
          if ( para.infoLevel > 0 ) {
-	      printf ( " \n === > Hit %d has Phi = %f  ", this_hit->id, 
-                                                     this_hit->phi ) ;
-              printf ( " \n Phi index %d out of range ", i_phi ) ;
+	      printf ( " \n === > Hit %d has Phi = %f  ", thisHit->id, 
+                                                          thisHit->phi ) ;
+              printf ( " \n Phi index %d out of range  ", thisHit->phiIndex ) ;
          }
-
 	 continue ;
       } 
 
@@ -426,16 +425,14 @@ int FtfFinder::setPointers ( )
         Get eta index for hit
 -------------------------------------------------------------------------*/
 
-    i_eta = (int)((this_hit->eta - para.eta_min)/para.eta_slice + 1);
-    this_hit->i_eta = i_eta ;
-    if ( i_eta < 1 || i_eta > para.n_eta ) {
-
+    thisHit->etaIndex = (int)((thisHit->eta - para.etaMin)/para.etaSlice + 1);
+    if ( thisHit->etaIndex < 1 || thisHit->etaIndex > para.nEta ) {
        if ( para.infoLevel > 0 ) {
-          printf ( " \n === > Hit %d has Eta = %f  ", this_hit->id, 
-                                                     this_hit->eta ) ;
-          printf ( " \n Eta min/max %f %f ", para.eta_min, para.eta_max ) ;
-          printf ( " \n Eta slice   %f    ", para.eta_slice ) ;
-          printf ( " \n Eta index %d out of range ", i_eta ) ;	  
+          printf ( " \n === > Hit %d has Eta = %f  ", thisHit->id, 
+                                                     thisHit->eta ) ;
+          printf ( " \n Eta min/max %f %f ", para.etaMin, para.etaMax ) ;
+          printf ( " \n Eta slice   %f    ", para.etaSlice ) ;
+          printf ( " \n Eta index %d out of range ", thisHit->etaIndex ) ;	  
        }
 
        continue ;
@@ -443,29 +440,30 @@ int FtfFinder::setPointers ( )
 //
 //    Reset track assigment
 //
-    this_hit->nxthit     = 0 ;
-    this_hit->track      = 0 ;
+    thisHit->nextTrackHit  = 0 ;
+    thisHit->track         = 0 ;
 /* ------------------------------------------------------------------------- 
    Increase nr. of hits in small volume  WARNING! C-arrays go from 0
    Set Id of first hit in this vol. and link to next hit in previous
    hit in the same volume
 -------------------------------------------------------------------------*/
-      tmp_index = i_rr  * para.n_phietap + i_phi * para.n_etap + i_eta ;
+      volumeIndex = localRow  * para.nPhiEtaPlusOne + 
+                    thisHit->phiIndex * para.nEtaPlusOne + thisHit->etaIndex ;
 
-      if (volume[tmp_index].first_hit == 0 ) 
-	      volume[tmp_index].first_hit = this_hit ;
+      if (volume[volumeIndex].firstHit == 0 ) 
+	      volume[volumeIndex].firstHit = thisHit ;
       else
-         (volume[tmp_index].last_hit)->nxvhit = this_hit ;
-      volume[tmp_index].last_hit = this_hit ;
+         (volume[volumeIndex].lastHit)->nextVolumeHit = thisHit ;
+      volume[volumeIndex].lastHit = thisHit ;
 
 /*-------------------------------------------------------------------------
      Set row pointers
 -------------------------------------------------------------------------*/
-      if ( rowk[i_rr].first_hit == NULL )
-         rowk [i_rr].first_hit = this_hit ;
+      if ( rowk[localRow].firstHit == NULL )
+         rowk [localRow].firstHit = thisHit ;
       else
-         (rowk[i_rr].last_hit)->nxrhit = this_hit ;
-      rowk[i_rr].last_hit = this_hit ;
+         (rowk[localRow].lastHit)->nextRowHit = thisHit ;
+      rowk[localRow].lastHit = thisHit ;
    }
    return 0 ;
 } 

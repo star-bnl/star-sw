@@ -1,4 +1,4 @@
-//:>------------------------------------------------------------------
+//:>-----------------------------------------------------------------/
 //: FILE:       FtfBaseTrack.cpp
 //: HISTORY:
 //:             28oct1996 version 1.00
@@ -25,24 +25,24 @@ void ftfMatrixDiagonal ( double *h, float &h11, float &h22, float &h33 ) ;
 //      Track Initialization
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 FtfBaseTrack::FtfBaseTrack ( ){
-	first_hit = 0 ;
-	last_hit  = 0 ;
+   firstHit = 0 ;
+   lastHit  = 0 ;
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //       Fit a circle
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-int FtfBaseTrack::Fit_Helix (  ) 
+int FtfBaseTrack::fitHelix (  ) 
 {
-   if ( Fit_Circle ( ) ){
-	  printf ( " Problem in Fit_Circle " ) ;
+   if ( fitCircle ( ) ){
+      printf ( " Problem in Fit_Circle " ) ;
       return 1 ;
    }
 //
 //     Fit line in s-z plane now
 //
-   if ( Fit_Line ( )) {
-	   printf ( " Problem fitting a line " ) ;
-	   return 1 ;
+   if ( fitLine ( )) {
+      printf ( " Problem fitting a line " ) ;
+      return 1 ;
    }
    return 0 ;
 }
@@ -52,13 +52,13 @@ int FtfBaseTrack::Fit_Helix (  )
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //    
 //  Fits circle parameters using algorithm
-//  described by Chernov and Oskov in Computer Physics
+//  described by ChErnov and Oskov in Computer Physics
 //  Communications.
 // 
 //  Written in FORTRAN by Jawluen Tang, Physics department , UT-Austin 
 //  Moved to C by Pablo Yepes
 //---------------------------------------------------------------
-int FtfBaseTrack::Fit_Circle (  ) 
+int FtfBaseTrack::fitCircle (  ) 
 {
   double wsum  = 0.0 ;
   double xav   = 0.0 ;
@@ -66,18 +66,18 @@ int FtfBaseTrack::Fit_Circle (  )
 //
 //     Loop over hits calculating average
 //
-  for ( start_loop() ; done() ; next_hit() ) { 
+  for ( startLoop() ; done() ; nextHit() ) { 
     
-	current_hit->wxy = 1.0F/ (float)(current_hit->dx*current_hit->dx +
-		                             current_hit->dy*current_hit->dy) ;
-	wsum      += current_hit->wxy ;
-	xav       += current_hit->wxy * current_hit->x ;
-	yav       += current_hit->wxy * current_hit->y ;
+	currentHit->wxy = 1.0F/ (float)(currentHit->dx*currentHit->dx +
+		                             currentHit->dy*currentHit->dy) ;
+	wsum      += currentHit->wxy ;
+	xav       += currentHit->wxy * currentHit->x ;
+	yav       += currentHit->wxy * currentHit->y ;
   }
   if ( para->primaries ) {
-	 wsum += para->xy_weight_vertex ;
-	 xav  += para->x_vertex ;
-	 yav  += para->y_vertex ;
+	 wsum += para->xyWeightVertex ;
+	 xav  += para->xVertex ;
+	 yav  += para->yVertex ;
   }
   xav = xav / wsum ;
   yav = yav / wsum ;
@@ -89,19 +89,19 @@ int FtfBaseTrack::Fit_Circle (  )
   double yyav  = 0.0 ;
   double xi, yi ;
 
-  for ( start_loop() ; done() ; next_hit() ) { 
-	xi        = current_hit->x - xav ;
-	yi        = current_hit->y - yav ;
-	xxav     += xi * xi * current_hit->wxy ;
-	xyav     += xi * yi * current_hit->wxy ;
-	yyav     += yi * yi * current_hit->wxy ;
+  for ( startLoop() ; done() ; nextHit() ) { 
+	xi        = currentHit->x - xav ;
+	yi        = currentHit->y - yav ;
+	xxav     += xi * xi * currentHit->wxy ;
+	xyav     += xi * yi * currentHit->wxy ;
+	yyav     += yi * yi * currentHit->wxy ;
   }
   if ( para->primaries ) {
-	xi        = para->x_vertex - xav ;
-	yi        = para->y_vertex - yav ;
-	xxav     += xi * xi * para->xy_weight_vertex ;
-	xyav     += xi * yi * para->xy_weight_vertex ;
-	yyav     += yi * yi * para->xy_weight_vertex ; 
+	xi        = para->xVertex - xav ;
+	yi        = para->yVertex - yav ;
+	xxav     += xi * xi * para->xyWeightVertex ;
+	xyav     += xi * yi * para->xyWeightVertex ;
+	yyav     += yi * yi * para->xyWeightVertex ; 
   }
   xxav = xxav / wsum ;
   xyav = xyav / wsum ;
@@ -166,9 +166,9 @@ int FtfBaseTrack::Fit_Circle (  )
   double rrrrav  = 0.0 ;
 
   double xixi, yiyi, riri, wiriri, xold, yold ;
-  for ( start_loop() ; done() ; next_hit() ) { 
-	xold = current_hit->x - xav ;
-	yold = current_hit->y - yav ;
+  for ( startLoop() ; done() ; nextHit() ) { 
+	xold = currentHit->x - xav ;
+	yold = currentHit->y - yav ;
 //
 //-->  ROTATE SO THAT <XY> = 0 & DIVIDE BY RSCALE SO THAT <R**2> = 1
 //
@@ -178,11 +178,11 @@ int FtfBaseTrack::Fit_Circle (  )
 	xixi   = xi * xi ;
 	yiyi   = yi * yi ;
 	riri   = xixi + yiyi ;
-	wiriri = current_hit->wxy * riri ;
+	wiriri = currentHit->wxy * riri ;
 
-	xyav   += current_hit->wxy * xi * yi ;
-	xxav   += current_hit->wxy * xixi ;
-	yyav   += current_hit->wxy * yiyi ;
+	xyav   += currentHit->wxy * xi * yi ;
+	xxav   += currentHit->wxy * xixi ;
+	yyav   += currentHit->wxy * yiyi ;
 
 	xrrav  += wiriri * xi ;
 	yrrav  += wiriri * yi ;
@@ -192,8 +192,8 @@ int FtfBaseTrack::Fit_Circle (  )
 //   Include vertex if required
 //
   if ( para->primaries ) {
-	xold = para->x_vertex - xav ;
-	yold = para->y_vertex - yav ;
+	xold = para->xVertex - xav ;
+	yold = para->yVertex - yav ;
 //
 //-->  ROTATE SO THAT <XY> = 0 & DIVIDE BY RSCALE SO THAT <R**2> = 1
 //
@@ -203,11 +203,11 @@ int FtfBaseTrack::Fit_Circle (  )
 	xixi   = xi * xi ;
 	yiyi   = yi * yi ;
 	riri   = xixi + yiyi ;
-	wiriri = para->xy_weight_vertex * riri ;
+	wiriri = para->xyWeightVertex * riri ;
 
-	xyav   += para->xy_weight_vertex * xi * yi ;
-	xxav   += para->xy_weight_vertex * xixi ;
-	yyav   += para->xy_weight_vertex * yiyi ;
+	xyav   += para->xyWeightVertex * xi * yi ;
+	xxav   += para->xyWeightVertex * xixi ;
+	yyav   += para->xyWeightVertex * yiyi ;
 
 	xrrav  += wiriri * xi ;
 	yrrav  += wiriri * yi ;
@@ -321,26 +321,26 @@ int FtfBaseTrack::Fit_Circle (  )
 //
   float x0, y0 ;
   if ( para->primaries ) {
-	   x0   = para->x_vertex ;
-	   y0   = para->y_vertex ;
-	   phi0 = para->phi_vertex ;
-	   r0   = para->r_vertex ;
+     x0   = para->xVertex ;
+     y0   = para->yVertex ;
+     phi0 = para->phiVertex ;
+     r0   = para->rVertex ;
   } 
   else {
-	 x0   =  last_hit->x  ;
-	 y0   =  last_hit->y  ;
-     phi0 =  last_hit->phi;
-     r0   =  last_hit->r  ;
+     x0   =  lastHit->x  ;
+     y0   =  lastHit->y  ;
+     phi0 =  lastHit->phi;
+     r0   =  lastHit->r  ;
   }
   //
   psi  = (float)atan2(bcent-y0,acent-x0) ;
-  psi  = psi + q * 0.5F * Pi ;
-  if ( psi < 0 ) psi = psi + Twopi ;
-  pt   = (float)(2.9979e-3 * para->bfield * radius ) ;
+  psi  = psi + q * 0.5F * pi ;
+  if ( psi < 0 ) psi = psi + twoPi ;
+  pt   = (float)(2.9979e-3 * para->bField * radius ) ;
 //
 //    Get errors from fast fit
 //
-   if ( para->get_errors ) Get_Errors_Circle_Fit ( acent, bcent, radius ) ;
+   if ( para->getErrors ) getErrorsCircleFit ( acent, bcent, radius ) ;
 //
   return 0 ;
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -350,74 +350,72 @@ int FtfBaseTrack::Fit_Circle (  )
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //    Fit Line in s-z plane
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-int FtfBaseTrack::Fit_Line ( )
+int FtfBaseTrack::fitLine ( )
 {
 //
 //     initialization 
 //
-	double sum = 0.F ;
-	double ss  = 0.F ;
-	double sz  = 0.F ;
-	double sss = 0.F ;
-	double ssz = 0.F ;
+   double sum = 0.F ;
+   double ss  = 0.F ;
+   double sz  = 0.F ;
+   double sss = 0.F ;
+   double ssz = 0.F ;
 //
 //     find sum , sums ,sumz, sumss 
 // 
-	float dx, dy ;
-	float radius = (float)(pt / ( 2.9979e-3 * para->bfield ) ) ;
-	if ( para->primaries ) {
-		dx   = first_hit->x - para->x_vertex ;
-		dy   = first_hit->y - para->y_vertex ;
-	}
-	else {
-		dx   = first_hit->x - last_hit->x ;
-		dy   = first_hit->y - last_hit->y ;
-	}
-    float dpsi = 0.5F * (float)sqrt ( dx*dx + dy*dy ) / radius ;
-	float total_s = 2.0F * radius * (float)asin ( dpsi ) ;
-
+   float dx, dy ;
+   float radius = (float)(pt / ( 2.9979e-3 * para->bField ) ) ;
+   if ( para->primaries ) {
+      dx   = firstHit->x - para->xVertex ;
+      dy   = firstHit->y - para->yVertex ;
+   }
+   else {
+      dx   = firstHit->x - lastHit->x ;
+      dy   = firstHit->y - lastHit->y ;
+   }
+   float dpsi = 0.5F * (float)sqrt ( dx*dx + dy*dy ) / radius ;
+   float total_s = 2.0F * radius * (float)asin ( dpsi ) ;
 //
-	FtfHit *previous_hit ;
+   FtfHit *previousHit ;
 	
-	for ( start_loop() ; done() ; next_hit() ) {
+   for ( startLoop() ; done() ; nextHit() ) {
         
-               if ( current_hit != first_hit ) {
-		   dx   = current_hit->x - previous_hit->x ;
-		   dy   = current_hit->y - previous_hit->y ;
-		   dpsi = 0.5F * (float)sqrt ( dx*dx + dy*dy ) / radius ;
-		   current_hit->s = previous_hit->s - 2.0F * radius * (float)asin ( dpsi ) ;
-		}
-		else
-			current_hit->s = total_s ;
+      if ( currentHit != firstHit ) {
+         dx   = currentHit->x - previousHit->x ;
+	 dy   = currentHit->y - previousHit->y ;
+	 dpsi = 0.5F * (float)sqrt ( dx*dx + dy*dy ) / radius ;
+	 currentHit->s = previousHit->s - 2.0F * radius * (float)asin ( dpsi ) ;
+      }
+      else
+         currentHit->s = total_s ;
         
-	   sum += current_hit->wz ;
-		ss  += current_hit->wz * current_hit->s ;
-		sz  += current_hit->wz * current_hit->z ;
-		sss += current_hit->wz * current_hit->s * current_hit->s ;
-		ssz += current_hit->wz * current_hit->s * current_hit->z ;
-		previous_hit = current_hit ;
- 
-	}
+      sum += currentHit->wz ;
+      ss  += currentHit->wz * currentHit->s ;
+      ssz += currentHit->wz * currentHit->z ;
+      sss += currentHit->wz * currentHit->s * currentHit->s ;
+      ssz += currentHit->wz * currentHit->s * currentHit->z ;
+      previousHit = currentHit ;
+   }
 
-    double det = sum * sss - ss * ss;
-    if ( fabs(det) < 1e-20){ 
-	   chi2[1] = 99999.F ;
-	   return 0 ;
-	}
+   double det = sum * sss - ss * ss;
+   if ( fabs(det) < 1e-20){ 
+      chi2[1] = 99999.F ;
+      return 0 ;
+   }
 //
 //     compute the best fitted parameters A,B
 //
-    tanl = (float)((sum * ssz - ss * sz ) / det );
-    z0   = (float)((sz * sss - ssz * ss ) / det );
+   tanl = (float)((sum * ssz - ss * sz ) / det );
+   z0   = (float)((sz * sss - ssz * ss ) / det );
 //
 //     calculate chi-square 
 //
-    chi2[1] = 0.F ;
-	double r1 ;
-	for ( start_loop() ; done() ; next_hit() ) {
-	   r1   = current_hit->z - tanl * current_hit->s - z0 ;
-	   chi2[1] += (float) ( (double)current_hit->wz * (r1 * r1) );
-    }
+   chi2[1] = 0.F ;
+   double r1 ;
+   for ( startLoop() ; done() ; nextHit() ) {
+      r1   = currentHit->z - tanl * currentHit->s - z0 ;
+      chi2[1] += (float) ( (double)currentHit->wz * (r1 * r1) );
+   }
 //
 //     calculate estimated variance
 //      varsq=chi/(float(n)-2.) 
@@ -449,72 +447,71 @@ int FtfBaseTrack::Fit_Line ( )
 // From a routine written in Fortran by  AUTHOR:
 //  Jawluen Tang, Physics department , UT-Austin 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-int FtfBaseTrack::Get_Errors_Circle_Fit ( float a, float b, float r ) {
+int FtfBaseTrack::getErrorsCircleFit ( float a, float b, float r ) {
     
-	double h[9] = { 0. };
-    float dx, dy ;
-	float h11, h22, h33 ;
-    static int i, j ;
-    static float ratio, c1, s1;
-    static float hyp;
+   double h[9] = { 0. };
+   float dx, dy ;
+   float h11, h22, h33 ;
+   static int i, j ;
+   static float ratio, c1, s1;
+   static float hyp;
 
    
-	for (j = 0; j < 9; j++ ) {
-	    h[j] = 0.;
-	}
+   for (j = 0; j < 9; j++ ) {
+      h[j] = 0.;
+   }
 //
 //    If circle fit was not used the
 //    errors in the real space need to
 //    be calculated
 //
-	if ( pt < para->pt_min_helix_fit == 1 ) {
-	   for ( start_loop() ; done() ; next_hit() ) { 
-	     current_hit->wxy = 1.0F/ (float)(current_hit->dx*current_hit->dx +
-		                                  current_hit->dy*current_hit->dy) ;
-	   }
-	}
-	
+   if ( pt < para->ptMinHelixFit == 1 ) {
+      for ( startLoop() ; done() ; nextHit() ) { 
+         currentHit->wxy = 1.0F/ (float)(currentHit->dx*currentHit->dx +
+                                         currentHit->dy*currentHit->dy) ;
+      }
+   }
 //
 //    Loop over points in fit
 //
-	for ( start_loop() ; done() ; next_hit() ) {
-	   dx = current_hit->x - a;
-	   dy = current_hit->y - b;
-	   hyp = (float)sqrt( dx * dx + dy * dy );
-	   s1 = dx / hyp;
-	   c1 = dy / hyp;
-	   ratio = r / hyp;
-	   h[0] += current_hit->wxy * (ratio * (s1 * s1 - 1) + 1);
-	   h[1] += current_hit->wxy * ratio * s1 * c1;
-	   h[2] += current_hit->wxy * s1;
-	   h[4] += current_hit->wxy * (ratio * (c1 * c1 - 1) + 1);
-	   h[5] += current_hit->wxy * c1;
-	   h[8] += current_hit->wxy ;
-    }
-	h[3]  = h[1];
-	h[6]  = h[2];
-	h[7]  = h[5];
+   for ( startLoop() ; done() ; nextHit() ) {
+      dx = currentHit->x - a;
+      dy = currentHit->y - b;
+      hyp = (float)sqrt( dx * dx + dy * dy );
+      s1 = dx / hyp;
+      c1 = dy / hyp;
+      ratio = r / hyp;
+      h[0] += currentHit->wxy * (ratio * (s1 * s1 - 1) + 1);
+      h[1] += currentHit->wxy * ratio * s1 * c1;
+      h[2] += currentHit->wxy * s1;
+      h[4] += currentHit->wxy * (ratio * (c1 * c1 - 1) + 1);
+      h[5] += currentHit->wxy * c1;
+      h[8] += currentHit->wxy ;
+   }
+   h[3]  = h[1];
+   h[6]  = h[2];
+   h[7]  = h[5];
 
-    ftfMatrixDiagonal  ( h, h11, h22, h33 ) ;
+   ftfMatrixDiagonal  ( h, h11, h22, h33 ) ;
 //
 //   Calculate pt error now
 //
-   dpt          = (float)(2.9979e-3 * para->bfield * h33 );
+   dpt          = (float)(2.9979e-3 * para->bField * h33 );
 //
 //     Get error in psi now
 //
-	if ( para->primaries ) {
-	  dx = a ;
-	  dy = b ;
-	}
-	else {
-      dx = last_hit->x + a - first_hit->x ;
-      dy = last_hit->y + b + first_hit->y ;
-	}
-	double w   = dy / dx ;
-    dpsi  = (float)(( 1. / ( 1. + w*w ) ) * ( h22 / dx - dy * h11 / ( dx*dx ) )) ;
+   if ( para->primaries ) {
+      dx = a ;
+      dy = b ;
+   }
+   else {
+      dx = lastHit->x + a - firstHit->x ;
+      dy = lastHit->y + b + firstHit->y ;
+   }
+   double w   = dy / dx ;
+   dpsi  = (float)(( 1. / ( 1. + w*w ) ) * ( h22 / dx - dy * h11 / ( dx*dx ) )) ;
 
-	return 0 ;
+   return 0 ;
 }
 
 //*************************************************************************
@@ -547,9 +544,9 @@ void FtfBaseTrack::Print ( int level )
    
    if ( fmod(level,10) > 0 ) {
       printf ( " \n *** Clusters in this track *** " ) ;
-      first_hit->Print ( 10 ) ;
-      for ( start_loop() ; done() ; next_hit()  ) { 
-        current_hit->Print ( 1 ) ;
+      firstHit->print ( 10 ) ;
+      for ( startLoop() ; done() ; nextHit()  ) { 
+        currentHit->print ( 1 ) ;
       }
    }
    printf ( "\n " ) ; 
