@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.6 2000/09/14 22:17:57 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.7 2000/10/31 16:20:57 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.7  2000/10/31 16:20:57  caines
+ * Added more functions to make the code more readable
+ *
  * Revision 1.6  2000/09/14 22:17:57  caines
  * Put back in flagging hot anodes and timebuckets
  *
@@ -481,6 +484,7 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
          for(int clu = 0; clu < mNumOfClusters; clu++)
            {
 	     
+	     mTotNumOfClusters += mNumOfClusters;
 
             tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
             mNumOfMembers = mHybridCluster->getNumberOfMembers(clu);
