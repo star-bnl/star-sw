@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMCReader.cxx,v 1.2 2004/03/02 21:34:47 chunhuih Exp $
+ * $Id: StEStructMCReader.cxx,v 1.3 2004/03/03 23:16:00 chunhuih Exp $
  *
  * Author: Chunhui Han
  *
@@ -13,7 +13,12 @@
  **********************************************************************
  *
  * $Log: StEStructMCReader.cxx,v $
+ * Revision 1.3  2004/03/03 23:16:00  chunhuih
+ * removed the code in the constructor that gets the total number of events
+ * to reduce initialization time.
+ *
  * Revision 1.2  2004/03/02 21:34:47  chunhuih
+ *
  * added impact parameter information to the StEStructEvent
  *
  * Revision 1.1  2004/02/26 20:06:25  chunhuih
@@ -34,13 +39,26 @@ ClassImp(StEStructMCReader)
 
 StEStructMCReader::StEStructMCReader(TTree *tree) : meventsToDo(0), meventCount(0), mloopIndex(0), mAmDone(false), mECuts(0), mTCuts(0), mIPMAX(1000000) {
   Init(tree);
+  if(fChain != 0)
+    mNentries = int(fChain->GetEntriesFast());
 }
 
 StEStructMCReader::StEStructMCReader(int nevents, TTree *tree, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mECuts(ecuts), mTCuts(tcuts), mIPMAX(1000000) {
   Init(tree);
-  int n = getTotalEventCount();
-  if( nevents > n || nevents == 0 )
-    meventsToDo = n;
+  if(fChain != 0)
+    mNentries = int(fChain->GetEntriesFast());
+}
+
+StEStructMCReader::StEStructMCReader(int nevents, char *fileListFile, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mECuts(ecuts), mTCuts(tcuts), mIPMAX(1000000) {
+  ifstream fin(fileListFile);
+  char s[256];
+  TChain *chain = new TChain("h999");
+  while(fin >> s ) {
+    chain->Add(s);
+  }
+  Init((TTree *)chain);
+  if(fChain != 0)
+    mNentries = int(fChain->GetEntriesFast());
 }
 
 Int_t StEStructMCReader::LoadTree(Int_t entry)
@@ -218,7 +236,8 @@ float* StEStructMCReader::globalDCA(float* p, float* v){
 }
 
 StEStructEvent* StEStructMCReader::next() {
-  if(fChain == NULL || meventCount == meventsToDo ) {
+  if( fChain == NULL || (meventsToDo != 0 && meventCount == meventsToDo) ||
+      mloopIndex == mNentries ) {
     mAmDone = true;
     return (StEStructEvent *)NULL;
   }
@@ -244,10 +263,9 @@ void StEStructMCReader::fillTracks(StEStructEvent* estructEvent) {
   mrefMult=0;
   StEStructTrack* eTrack= new StEStructTrack();
 
-  int nentries = int(fChain->GetEntriesFast());
   Int_t nbytes = 0, nb = 0;
   itrac = 0;
-  for(; mloopIndex < nentries && itrac != -1; mloopIndex++) {
+  for(; mloopIndex < mNentries && itrac != -1; mloopIndex++) {
     Int_t ientry = LoadTree(mloopIndex);
     if(ientry < 0) break;
     nb = fChain->GetEntry(mloopIndex); nbytes += nb;
