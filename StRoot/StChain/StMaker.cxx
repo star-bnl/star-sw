@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.131 2003/09/02 17:55:29 perev Exp $
+// $Id: StMaker.cxx,v 1.132 2003/09/28 21:12:45 jeromel Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -919,10 +919,10 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
  // Define the type of the OS
   TString STAR = stardir;
   TString delim = ":";
-  Bool_t NT=kFALSE;
+  //Bool_t NT=kFALSE; variable assigned but never used
 
   if (strcmp(gSystem->GetName(),"WinNT") == 0 ) {
-     NT=kTRUE;
+    //NT=kTRUE;
      delim = ";";
      STAR.ReplaceAll("$(afs)","//sol/afs");
   }
@@ -1159,6 +1159,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.132  2003/09/28 21:12:45  jeromel
+// Unused var NT removed/commented
+//
 // Revision 1.131  2003/09/02 17:55:29  perev
 // gcc 3.2 updates + WarnOff
 //
