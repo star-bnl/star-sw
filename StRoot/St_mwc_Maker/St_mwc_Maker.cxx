@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.24 2001/01/31 20:54:23 vlmrz Exp $
+// $Id: St_mwc_Maker.cxx,v 1.25 2001/05/30 18:11:09 perev Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.25  2001/05/30 18:11:09  perev
+// int to Finish added
+//
 // Revision 1.24  2001/01/31 20:54:23  vlmrz
 // Choice of slow or fast simu, new parameters, signal generated for 11 conseq. RHIC crossings
 //
@@ -125,7 +128,7 @@ St_mwc_Maker::St_mwc_Maker(const char *name):StMaker(name){
 St_mwc_Maker::~St_mwc_Maker(){
 }
 //______________________________________________________________________________
-St_mwc_Maker::Finish(){
+Int_t St_mwc_Maker::Finish(){
    return StMaker::Finish();
 }
 //_____________________________________________________________________________
