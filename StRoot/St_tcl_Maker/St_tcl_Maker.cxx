@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.18 1999/02/10 20:57:39 kathy Exp $
+// $Id: St_tcl_Maker.cxx,v 1.19 1999/02/16 01:53:57 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.19  1999/02/16 01:53:57  fisyak
+// Make sure that tfs does not run if there tss
+//
 // Revision 1.18  1999/02/10 20:57:39  kathy
 // added histograms to Maker
 //
@@ -218,8 +221,8 @@ Int_t St_tcl_Maker::Make(){
 	}
       }
     }
+    else {
     // Row data does not exit, check GEANT. if it does then use fast cluster simulation
-    if (!raw_data_tpc || !sector_tot){
       St_DataSetIter geant(gStChain->DataSet("geant"));
       St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
       St_g2t_track   *g2t_track   = (St_g2t_track   *) geant("g2t_track");
@@ -249,7 +252,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.18 1999/02/10 20:57:39 kathy Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.19 1999/02/16 01:53:57 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
