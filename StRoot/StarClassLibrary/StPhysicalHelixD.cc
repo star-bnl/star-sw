@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPhysicalHelixD.cc,v 1.2 1999/02/17 11:08:03 ullrich Exp $
+ * $Id: StPhysicalHelixD.cc,v 1.3 1999/02/24 11:43:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,8 +15,8 @@
  ***************************************************************************
  *
  * $Log: StPhysicalHelixD.cc,v $
- * Revision 1.2  1999/02/17 11:08:03  ullrich
- * Fix bug in momentum calculation.
+ * Revision 1.3  1999/02/24 11:43:12  ullrich
+ * Fixed bug in momentum().
  *
  * Revision 1.2  1999/02/17 11:08:03  ullrich
  * Fix bug in momentum calculation.
@@ -78,8 +78,7 @@ StThreeVectorD StPhysicalHelixD::momentum(double B) const
 	{
 	    using namespace units;
 #endif
-	    double pt =
-		fabs(c_light*nanosecond/meter*B/tesla)/(fabs(mCurvature)*meter)/GeV;
+	    double pt =	GeV*fabs(c_light*nanosecond/meter*B/tesla)/(fabs(mCurvature)*meter);
 	    
 	    return (StThreeVectorD(pt*cos(mPhase+mH*M_PI/2),   // pos part pos field
 				   pt*sin(mPhase+mH*M_PI/2),
