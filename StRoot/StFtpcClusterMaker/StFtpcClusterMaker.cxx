@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.47 2003/04/15 11:34:41 putschke Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.48 2003/05/07 15:08:56 putschke Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.48  2003/05/07 15:08:56  putschke
+// improvements for cathode offset corretions
+//
 // Revision 1.47  2003/04/15 11:34:41  putschke
 // Include corrections for inner cathode offset and move some parameter to database
 //
@@ -382,6 +385,9 @@ Int_t StFtpcClusterMaker::Make()
      cout<<"          magboltzDeflection(0,0)   = "<<dbReader->magboltzDeflection(0,0)<<endl;
      cout<<"          offsetCathodeWest         = "<<paramReader->offsetCathodeWest()<<endl;
      cout<<"          offsetCathodeEast         = "<<paramReader->offsetCathodeEast()<<endl;
+     cout<<"          angleOffsetWest           = "<<paramReader->angleOffsetWest()<<endl;
+     cout<<"          angleOffsetEast           = "<<paramReader->angleOffsetEast()<<endl;
+     cout<<"          minChargeWindow           = "<<paramReader->minChargeWindow()<<endl;
   }
 
   St_DataSet *daqDataset;

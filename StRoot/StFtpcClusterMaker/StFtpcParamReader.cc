@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.22 2003/04/15 11:36:11 putschke Exp $
+// $Id: StFtpcParamReader.cc,v 1.23 2003/05/07 15:10:26 putschke Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.23  2003/05/07 15:10:26  putschke
+// improvements for cathode offset corretions
+//
 // Revision 1.22  2003/04/15 11:36:11  putschke
 // Include corrections for inner cathode offset and move some parameter to database
 //
@@ -136,6 +139,10 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mDeltaPad = detTable->deltaPad;
     mOffsetCathodeWest = detTable->offsetCathodeWest;
     mOffsetCathodeEast = detTable->offsetCathodeEast;
+    mAngleOffsetWest = detTable->angleOffsetWest;
+    mAngleOffsetEast = detTable->angleOffsetEast;
+
+    mMinChargeWindow = detTable->minChargeWindow;
 
   } else {
     gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
@@ -289,6 +296,10 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mDeltaPad = detTable->deltaPad;
     mOffsetCathodeWest = detTable->offsetCathodeWest;
     mOffsetCathodeEast = detTable->offsetCathodeEast;
+    mAngleOffsetWest = detTable->angleOffsetWest;
+    mAngleOffsetEast = detTable->angleOffsetEast;
+
+    mMinChargeWindow = detTable->minChargeWindow;
 
   } else {
     gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");

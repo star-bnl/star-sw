@@ -55,10 +55,13 @@ memset(&row,0,tableSet->GetRowSize());
     row.maxPadlengthOut           =        10;  // max padlength of cluster medium
     row.deltaTime                 =         2;  // width unfolding window time
     row.deltaPad                  =         2;  // width unfolding window pad
+    row.minChargeWindow           =        30;  // minimum charge to make hit in search window (AuAu)
                                                 // inner cathode shift offset (cm)
     row.offsetCathodeWest         =     -0.035;  // west
     row.offsetCathodeEast         =      -0.06;  // east
-
+    row.angleOffsetWest           =        0.0;  // angle displ. west (radians)
+    row.angleOffsetEast           =     0.2628;  // angle displ. east (radians)
+  
     row.normalizedNowPressure     =    1013.25; // normalized air pressure (in hPa) ;
     row.adjustedAirPressureWest   =    1013.25; // temperature adjusted air pressure for FTPC West 
     row.adjustedAirPressureEast   =    1013.25; // temperature adjusted air pressure for FTPC East 
