@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.10 2000/01/27 00:04:31 posk Exp $
+// $Id: plot.C,v 1.11 2000/02/04 16:26:43 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker
@@ -9,6 +9,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.11  2000/02/04 16:26:43  posk
+// Added correct calculation of event plane resolution for large flow.
+//
 // Revision 1.10  2000/01/27 00:04:31  posk
 // Corrected error in pt plots.
 //
@@ -51,15 +54,15 @@ const Float_t etaMax = 2.;
 const Float_t ptMax  = 2.;
 Int_t runNo = 0;
 char  runNumber[6];
-
-// gSystem->Load("boldStyle");
-// boldStyle();
-
+ 
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
     
+  gROOT->SetStyle("Bold");                              // set style
+  gROOT->ForceStyle();
+
   // names of histograms made by StFlowAnalysisMaker
   // also projections of some of these histograms
   const char* baseName[] = { "Flow_Res_Sel",
@@ -83,6 +86,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   			     "Flow_YieldAll.Pt",
    			     "Flow_Bin_Eta",
    			     "Flow_Bin_Pt",
+                             "Flow_prof_CosPhi",
 			     "Flow_Phi_Sel",
 			     "Flow_Phi_Weight_Sel",
 			     "Flow_Phi_Flat_Sel",
@@ -105,10 +109,10 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_vEta_Sel",
 			     "Flow_vPt_Sel",
 			     "Flow_v.Eta_Sel",
-			     "Flow_v.Pt_Sel" };
+			     "Flow_v.Pt_Sel"};
   //const int nNames = sizeof(baseName) / sizeof(baseName[0]);
   const int nNames = sizeof(baseName) / 4;
-  const int nSingles = 20 + 1;
+  const int nSingles = 21 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -374,8 +378,6 @@ TCanvas* plotResolution(){
       histName->Append(*countColumns);
       cout << "row= " << j << " col= " << k << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
-      //TH1* hist= (TH1*)chain->Maker("FlowAnalysis")->GetHistList()->
-      //	FindObject(histName->Data());
       TH1* hist = (TH1*)histFile.Get(histName->Data());
       if (!hist) {
 	cout << "### Can't find histogram " << histName->Data() << endl;
@@ -383,6 +385,7 @@ TCanvas* plotResolution(){
       }
       graphPad->cd(padN);
       gStyle->SetOptStat(0);
+      hist->SetMaximum(1.1);
       hist->Draw();
       if (j == 0) lineZeroHar->Draw();
       hist->Print("all");
@@ -462,7 +465,7 @@ TCanvas* plotSingles(char* shortName){
     gPad->SetLogy();
     gStyle->SetOptStat(100110);
     if (projY) projY->Draw("H");
-  } else if (strstr(shortName,"Bin")!=0) {
+  } else if (strstr(shortName,"Bin")!=0) {     // Bin hists
     if (strstr(shortName,"Pt")!=0) {
       TLine* lineDiagonal  = new TLine(0., 0., ptMax, ptMax);
     } else {
@@ -473,6 +476,11 @@ TCanvas* plotSingles(char* shortName){
     hist->SetMarkerColor(2);
     hist->Draw();
     lineDiagonal->Draw();
+  } else if (strstr(shortName,"CosPhi")!=0) {  // CosPhiLab
+    TLine* lineZeroHar = new TLine(0.5, 0., 6.5, 0.);
+    gStyle->SetOptStat(0);
+    hist->Draw();
+    lineZeroHar->Draw();
   } else {
     gStyle->SetOptStat(100110);
     hist->Draw();

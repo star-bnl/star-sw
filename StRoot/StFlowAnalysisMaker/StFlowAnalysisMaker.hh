@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.hh,v 1.8 2000/01/24 23:02:13 posk Exp $
+// $Id: StFlowAnalysisMaker.hh,v 1.9 2000/02/04 16:26:42 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.hh,v $
+// Revision 1.9  2000/02/04 16:26:42  posk
+// Added correct calculation of event plane resolution for large flow.
+//
 // Revision 1.8  2000/01/24 23:02:13  posk
 // Merged updates
 //
@@ -116,6 +119,7 @@ private:
   TH2D*     mHistYieldAll2D;    //!
   TProfile* mHistBinEta;        //!
   TProfile* mHistBinPt;         //!
+  TProfile* mHistCosPhi;        //!
   
   // for each harmonic, each selection, and each sub-event
   struct histSubHars {

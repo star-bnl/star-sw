@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.18 2000/01/27 00:04:29 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.19 2000/02/04 16:26:41 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.19  2000/02/04 16:26:41  posk
+// Added correct calculation of event plane resolution for large flow.
+//
 // Revision 1.18  2000/01/27 00:04:29  posk
 // Corrected error in pt plots.
 //
@@ -92,6 +95,7 @@
 #include "TOrdCollection.h"
 #define PR(x) cout << "##### FlowAnalysis: " << (#x) << " = " << (x) << endl;
 extern "C" float besi0_(const float&);
+extern "C" float besi1_(const float&);
 
 ClassImp(StFlowAnalysisMaker)
 
@@ -123,13 +127,13 @@ Int_t StFlowAnalysisMaker::Make() {
   // Make histograms
 
   // Get a pointer to the flow tags
-  StFlowTagMaker* pFlowTagMaker = 0;
-  pFlowTag = 0;
+  StFlowTagMaker* pFlowTagMaker = NULL;
+  pFlowTag = NULL;
   pFlowTagMaker = (StFlowTagMaker*)GetMaker("FlowTag");
   if (pFlowTagMaker) pFlowTag = pFlowTagMaker->TagPointer();
 
   // Get a pointer to StFlowEvent
-  StFlowMaker* pFlowMaker = 0;
+  StFlowMaker* pFlowMaker = NULL;
   pFlowMaker = (StFlowMaker*)GetMaker("Flow");
   if (pFlowMaker) pFlowEvent = pFlowMaker->FlowEventPointer();
 
@@ -163,7 +167,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.18 2000/01/27 00:04:29 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.19 2000/02/04 16:26:41 posk Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -330,6 +334,12 @@ Int_t StFlowAnalysisMaker::Init() {
   mHistBinPt->SetXTitle("Pt (GeV)");
   mHistBinPt->SetYTitle("<Pt> (GeV)");
   
+  // cos(n*phiLab)
+  mHistCosPhi = new TProfile("Flow_prof_CosPhi", "Flow_prof_CosPhi",
+    nHars, 0.5, (float)(nHars) + 0.5, -100., 100., "");
+  mHistCosPhi->SetXTitle("Harmonic");
+  mHistCosPhi->SetYTitle("cos(n*PhiLab) (%)");
+    
   TString* histTitle;
   for (int i = 0; i < nSels + nSubs; i++) {
     char countSubs[2];
@@ -358,6 +368,7 @@ Int_t StFlowAnalysisMaker::Init() {
   for (int k = 0; k < nSels; k++) {
     char countSels[2];
     sprintf(countSels,"%d",k+1);
+
     // for sub-event pairs
 
     // cos(n*delta_Psi)
@@ -564,39 +575,6 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHist_vObsPt->SetYTitle("Flow (%)");
       delete histTitle;
 
-      // Flow
-      histTitle = new TString("Flow_v2D_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHist_v2D = new TH2F(histTitle->Data(),
-        histTitle->Data(), nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax);
-      histFull[k].histFullHar[j].mHist_v2D->Sumw2();
-      histFull[k].histFullHar[j].mHist_v2D->SetXTitle("Pseudorapidity");
-      histFull[k].histFullHar[j].mHist_v2D->SetYTitle("Pt (GeV)");
-      delete histTitle;
-
-      // Flow projections
-      histTitle = new TString("Flow_vEta_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHist_vEta = new TProfile(histTitle->Data(),
-        histTitle->Data(), 2*nEtaBins, etaMin, etaMax, -100., 100., "");
-      histFull[k].histFullHar[j].mHist_vEta->SetXTitle("Pseudorapidity");
-      histFull[k].histFullHar[j].mHist_vEta->SetYTitle("Flow (%)");
-      delete histTitle;
-
-      histTitle = new TString("Flow_vPt_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHist_vPt = new TProfile(histTitle->Data(),
-        histTitle->Data(), 2*nPtBins, ptMin, ptMax, -100., 100., "");
-      histFull[k].histFullHar[j].mHist_vPt->SetXTitle("Pt (GeV)");
-      histFull[k].histFullHar[j].mHist_vPt->SetYTitle("Flow (%)");
-      delete histTitle;
-
     }
   }
   return StMaker::Init();
@@ -782,6 +760,14 @@ void StFlowAnalysisMaker::fillParticleHistograms() {
     mHistBinEta->Fill(eta, eta);
     mHistBinPt->Fill(pt, pt);
 
+    // cos(n*phiLab)
+    for (int j = 0; j < nHars; j++) {
+      float order  = (float)(j+1);
+      float vIn = cos(order * phi)/perCent;
+      if (eta < 0 && (j+1) % 2 == 1) vIn *= -1;
+      mHistCosPhi->Fill(order, vIn);
+    }
+
     //For Eta symmetry
     if (eta > 0.) { etaSymPosN++; }
     else { etaSymNegN++; }
@@ -805,8 +791,6 @@ void StFlowAnalysisMaker::fillParticleHistograms() {
 	  histFull[k].histFullHar[j].mHistPhi->Fill(phi);
 	  histFull[k].histFullHar[j].mHistYield2D->Fill(eta, pt);
 	}
- 	//cout << "k= " << k << " j= " << j << " Psi= " <<
-	//  mQ[k][j].Phi() / order << "\t Psi_i= " << psi_i << endl;
 
        	// Caculate v for all particles
 	float v = cos(order * (phi - psi_i))/perCent;
@@ -815,8 +799,6 @@ void StFlowAnalysisMaker::fillParticleHistograms() {
 	histFull[k].histFullHar[j].mHistSum_v2D->Fill(eta, pt, v);
 	histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v);
 	histFull[k].histFullHar[j].mHist_vObsPt->Fill(pt, vFlip);
-	histFull[k].histFullHar[j].mHist_vEta->Fill(eta, v);
-	histFull[k].histFullHar[j].mHist_vPt->Fill(pt, vFlip);
 
 	// Correlation of Phi of all particles with Psi
 	float phi_i = phi;
@@ -852,6 +834,34 @@ static Double_t qDist(double* q, double* par) {
 
 //-----------------------------------------------------------------------
 
+static Double_t resEventPlane(double chi) {
+  // Calculates the event plane resolution as a function of chi
+
+  float con = 0.626657;                   // sqrt(pi/2)/2
+  float arg = chi * chi / 4.;
+
+  Double_t res = con * chi * exp(-arg) * (besi0_(arg) + besi1_(arg)); 
+
+  return res;
+}
+
+//-----------------------------------------------------------------------
+
+static Double_t chi(double res) {
+  // Calculates chi from the event plane resolution
+
+  double chi = 1.5;
+  double delta = 0.75;
+  for (int i = 0; i < 15; i++) {
+    chi = (resEventPlane(chi) < res) ? chi + delta : chi - delta;
+    delta = delta / 2.;
+  }
+
+  return chi;
+}
+
+//-----------------------------------------------------------------------
+
 Int_t StFlowAnalysisMaker::Finish() {
   // Calculates resolution and mean flow values
   // Fits q distribution and outputs phiWgt values
@@ -859,6 +869,7 @@ Int_t StFlowAnalysisMaker::Finish() {
   static const int& nHars    = Flow::nHars;
   static const int& nSels    = Flow::nSels;
   static const int& nPhiBins = Flow::nPhiBins;
+  TString* histTitle;
 
   // PhiWgt histogram collection
   TOrdCollection* phiWgtHistNames = new TOrdCollection(nSels*nHars);
@@ -871,18 +882,31 @@ Int_t StFlowAnalysisMaker::Finish() {
   double zero[nEtaBins+2][nPtBins+2] = {{0.}};
   histYield2DZero->SetError(&zero[0][0]);
 
-  // Calculate resolution = sqrt(2)*sqrt(mHistCos)
+  // Calculate resolution = from sqrt(mHistCos)
   float cosPair[Flow::nSels][Flow::nHars];
   float cosPairErr[Flow::nSels][Flow::nHars];
   for (int k = 0; k < nSels; k++) {
+    char countSels[2];
+    sprintf(countSels,"%d",k+1);
     for (int j = 0; j < nHars; j++) {
+      char countHars[2];
+      sprintf(countHars,"%d",j+1);
       cosPair[k][j]    = histFull[k].mHistCos->GetBinContent(j+1);
       cosPairErr[k][j] = histFull[k].mHistCos->GetBinError(j+1);
-      if (cosPair[k][j] > 0.) {
-	mRes[k][j] = sqrt(2*cosPair[k][j]);
-	mResErr[k][j] = cosPairErr[k][j] / mRes[k][j];
+      if (cosPair[k][j] > 0.86) {      // resolution saturates
+	mRes[k][j]    = 0.98;
+	mResErr[k][j] = 0.01;
+      } else if (cosPair[k][j] > 0.) {
+	float deltaResSub = 0.01;  // differential for the error propergation
+	double resSub = sqrt(cosPair[k][j]);
+	double resSubErr = cosPairErr[k][j] / (2. * resSub);
+	double chiSub = chi(resSub);
+	double chiSubDelta = chi(resSub + deltaResSub);
+	mRes[k][j] = resEventPlane(sqrt(2) * chiSub); // full event plane res.
+	double mResDelta = resEventPlane(sqrt(2) * chiSubDelta);
+	mResErr[k][j] = resSubErr * fabs(mRes[k][j] - mResDelta) / deltaResSub;
       } else {
-	mRes[k][j] = 0.;
+	mRes[k][j]    = 0.;     // subevent correlation must be positive
 	mResErr[k][j] = 0.;
       }
       histFull[k].mHistRes->SetBinContent(j+1, mRes[k][j]);
@@ -892,11 +916,43 @@ Int_t StFlowAnalysisMaker::Finish() {
       histFull[k].histFullHar[j].mHist_vObs2D->
  	Divide(histFull[k].histFullHar[j].mHistSum_v2D, histYield2DZero,1.,1.);
 
+      // Clone the _vObs histograms to make the _v histograms
+      histFull[k].histFullHar[j].mHist_v2D = 
+	(TH2F*)histFull[k].histFullHar[j].mHist_vObs2D->Clone();
+      histTitle = new TString("Flow_v2D_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHist_v2D->SetName(histTitle->Data());
+      histFull[k].histFullHar[j].mHist_v2D->SetTitle(histTitle->Data());
+      delete histTitle;
+      AddHist(histFull[k].histFullHar[j].mHist_v2D);
+
+      histFull[k].histFullHar[j].mHist_vEta =
+	(TProfile*)histFull[k].histFullHar[j].mHist_vObsEta->Clone();
+      histTitle = new TString("Flow_vEta_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHist_vEta->SetName(histTitle->Data());
+      histFull[k].histFullHar[j].mHist_vEta->SetTitle(histTitle->Data());
+      delete histTitle;
+      AddHist(histFull[k].histFullHar[j].mHist_vEta);
+
+      histFull[k].histFullHar[j].mHist_vPt =
+	(TProfile*)histFull[k].histFullHar[j].mHist_vObsPt->Clone();
+      TString* histTitle = new TString("Flow_vPt_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHist_vPt->SetName(histTitle->Data());
+      histFull[k].histFullHar[j].mHist_vPt->SetTitle(histTitle->Data());
+      delete histTitle;
+      AddHist(histFull[k].histFullHar[j].mHist_vPt);
+
       // Calulate v = vObs / Resolution
       // The systematic error of the resolution is not folded in.
       cout << "# Resolution= " << mRes[k][j] << " +/- " << mResErr[k][j] << endl;
-      histFull[k].histFullHar[j].mHist_v2D->
-   	Divide(histFull[k].histFullHar[j].mHistSum_v2D, histYield2DZero,1.,1.);
 
       if (mRes[k][j] != 0.) {
 	histFull[k].histFullHar[j].mHist_v2D-> Scale(1. / mRes[k][j]);
