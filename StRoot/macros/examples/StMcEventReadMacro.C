@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.2 1999/07/23 10:53:52 kathy Exp $
+// $Id: StMcEventReadMacro.C,v 1.3 1999/07/23 14:35:43 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.3  1999/07/23 14:35:43  calderon
+// Updated names of default files and of packages
+//
 // Revision 1.2  1999/07/23 10:53:52  kathy
 // put in header info in Manuel's macros
 //
@@ -29,11 +32,11 @@ TBrowser *brow=0;
 
 
 void StMcEventReadMacro(Int_t nevents=1,
-     const char *MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.geant.root")
-    // /disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfsr/psc0030_02_40evts.geant.root
-    // /star/u2b/lisa/workdir/gtrack.PetersBranch.root
-    // /disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.geant.root
-
+const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root")
+// /disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfsr/psc0030_02_40evts.geant.root
+// /star/u2b/lisa/workdir/gtrack.PetersBranch.root
+// /disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.geant.root
+// /disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root
 {
 // Load all the System libraries
     gSystem->Load("St_base");
@@ -44,7 +47,7 @@ void StMcEventReadMacro(Int_t nevents=1,
 
     
     gSystem->Load("StMcEvent");
-    gSystem->Load("StMcEventReaderMaker"); // This is where I load my own maker
+    gSystem->Load("StMcEventMaker"); // This is where I load my own maker
 
 
     gSystem->Load("StarClassLibrary");
@@ -64,17 +67,18 @@ void StMcEventReadMacro(Int_t nevents=1,
 
     StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
     IOMk->SetDebug();
-
-    
+    IOMk->SetIOMode("r");
+    IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+    IOMk->SetBranch("geantBranch",0,"r");
   
   // add makers to chain here:
   
-  StMcEventReaderMaker  *mcEventReader  = new StMcEventReaderMaker; // Make an instance...
+  StMcEventMaker  *mcEventReader  = new StMcEventMaker; // Make an instance...
 
   // now execute the chain member functions
   
   chain->Init(); // This should call the Init() method in ALL makers
- 
+  chain->PrintInfo();
 
   for (int iev=0;iev<nevents; iev++) {
     chain->Clear();
@@ -113,4 +117,6 @@ void StMcEventReadMacro(Int_t nevents=1,
     
   } // Event Loop
   chain->Finish(); // This should call the Finish() method in ALL makers
+                   // Comment this line out if you want to access the information
+                   // at the command line.
 }
