@@ -1,96 +1,137 @@
-* $Id: richgeo.g,v 1.9 2000/02/22 20:34:14 nevski Exp $
+* $Id: richgeo.g,v 1.10 2001/03/13 20:56:33 nevski Exp $
 *
 * $Log: richgeo.g,v $
+* Revision 1.10  2001/03/13 20:56:33  nevski
+* variable rich position taken from DB
+*
 * Revision 1.9  2000/02/22 20:34:14  nevski
 * LGAM added to HITs definition
 *
 * Revision 1.8  2000/01/28 21:53:37  nevsky
 * secondaries in Rich can be discarded
 *
+* Revision 2.0  2000/10/12 kunde
 *
 module  RICHGEO defines Ring Image Cerenkov geometry
 author  Gerd Kunde
 created June 1, 1998 supposely
 
-+CDE,AGECOM,GCUNIT,GCONST.
-
-      Content  RICH,SRIC,ALUM,HONE,OQUA,OQUF,QUAR,
-               META,RGAP,RCSI,BARR,SPAC,FREO,
-               ALMF,BORD,HOLE               
-
-      structure  rich {version, rpos, dx, dy, dz, phi}
-
-*
 *  medium vs material table at my understanding:
 *       air   honey  quarz  freon methan   csi    gri   opaco   Gap    Al
 *  med: 101    102    103    104    105    106    107    108    109    110
 *  mat: 101    106    120    130    140    106    111    121    140    150
 *       air     C    SiO2   C6F14   CH4     C     Cu    SiO2    CH4    Al
 *             Radl?                       Radl?
-*
-    Integer    N,i,IsOpt
-    Parameter (N=11)
-*
+
++CDE,AGECOM,GCUNIT,GCONST.
+
+    Content   RICH,SRIC,ALUM,HONE,OQUA,OQUF,QUAR,RGAP,RCSI,
+              BARR,SPAC,FREO,ALMF,BORD,HOLE ",META"
+
+    Structure Rich {int version, position, dx, dy, dz }
+    Structure Rpos {int position, phi, rpos, ypos, zpos, tx, ty, tz }
+    Structure Rmat {char Mate, rindex(13), absco(13), effic(13)  }
+
+    Integer   N,i,IsOpt
+    Parameter (N=13)	
     real ppckov(N)       / 5.63e-9, 5.77e-9, 5.9e-9, 6.05e-9, 6.2e-9,
                            6.36e-9, 6.52e-9, 6.7e-9, 6.88e-9, 7.08e-9,
-                           7.3e-9/
-
-* --- Refraction indexes
-
-    real rindex_freon(N)  /  1.269946, 1.271246, 1.272452, 1.273844,
-                             1.275236,1.276721, 1.278206, 1.279876,
-                             1.281546, 1.283402, 1.285444/
-    real rindex_quarz(N)  /  1.528309, 1.533333, 1.538243, 1.544223,
-                             1.550568, 1.557770, 1.565463, 1.574765,
-                             1.584831, 1.597027, 1.611858/
-    real rindex_methane(N)/N * 1.000444 /
-    real rindex_quarzo(N) /N * 1./
-    real rindex_gri(N)    /N * 1./
-
-* ---- Absorbtion lenghts (in cm)
-
-    real absco_freon(N)  / 179.0987, 179.0987, 179.0987, 179.0987,
-                           179.0987, 121.9547, 43.40067, 15.7394,
-                           9.417928, 5.195241,  1.415808/
-    real absco_quarz(N)  / 5*1000000., 29.85, 7.34, 4.134, 1.273,
-                           0.722, 0.365/
-    real absco_quarzo(N) /N * .00001  /
-    real absco_csi(N)    /N * .0001   /
-    real absco_methane(N)/N * 1000000./
-    real absco_gri(N)    /N * .0001   /
-
-* ---- Detection efficiencies (quantum efficiency for CsI)
-
-    real effic_csi(N) / 3.15e-4, 4.50e-4, 6.75e-3, 1.125e-2, 2.115e-2,
-                        3.60e-2, 8.46e-2,  .15533,   .20286,   .24745,
-                        .27881/
-    real effic_all(N) /N * 1./
-    real effic_gri(N) /N * 1./
-* 
+                           7.3e-9,  7.52e-9, 7.75e-9/
+* double precision is needed to keep angle<->cosinus conversion correct
+    Real*8    rot(3,3), tx, ty, tz
+    EXTERNAL  RICHSTEP,RcsiStep
 *
-*  gmom 100 8 -0.1 -0.1 3.0 3.0 0.0 0.0     
-*   
-*
-*   EXTERNAL RICHSTEP,RGAPSTEP,OQUASTEP,RCSISTEP,RGJKSTEP
-    EXTERNAL RICHSTEP,RcsiStep
-* 
-*
-   Begin   
+    Begin   
 
     fill RICH  ! Cerenkov detector parameters
-        version = 1    ! complexity version
-        rpos = 235     ! distance to center  
-        dx   = 49.45   ! rich half width
-        dy   = 11.325  ! rich half thickness
-        dz   = 73.15   ! rich half length
-        phi  = 300     ! rich athimutal position
+        version  = 1       ! complexity version
+        position = 1       ! actual position in STAR
+        dx       = 49.45   ! Half width (long dimension)
+        dy       = 11.325  ! Rich half thickness
+        dz       = 73.15   ! Half length (short dimension)
+
+    fill RPOS  ! Cerenkov detector position 
+        position = 1          ! nominal position in STAR
+        phi      = 300        ! pad plane center phi position
+        rpos     = 235.0      ! distance to center  
+        ypos     =  0         ! pad plane center offset
+        zpos     =  0         ! z position of the pad plane center
+        tx       =  0         ! rich orientation x-angle (deg)
+        ty       =  0         ! rich orientation y-angle (deg)
+        tz       =  30        ! rich orientation z-angle (deg)
+
+    fill RPOS  ! Cerenkov detector position 
+        position = 2          ! actual position in STAR
+        phi      = -59.95062  ! pad plane center phi position
+        rpos     = 240.22755  ! distance to the pad pane center
+        ypos     =   8.125    ! pad plane center offset
+        zpos     = -.3089772  ! z position of the pad plane center
+        tx       = -.02003531 ! rich orientation x-angle (deg)
+        ty       =  .03788445 ! rich orientation y-angle (deg)
+        tz       =   29.81715 ! rich orientation z-angle (deg)
+
+    fill RMAT  ! Material property for Cerenkov light
+        MATE   = 'GRI'                         ! default materials
+        Effic  = { 1,1,1,1,1,1,1,1,1,1,1,1,1 } ! Detection efficiencies
+        Rindex = { 1,1,1,1,1,1,1,1,1,1,1,1,1 } ! Refraction index
+        Absco  = { 1.e-4,1.e-4,1.e-4,1.e-4,1.e-4,1.e-4,1.e-4,1.e-4,1.e-4,1.e-4,
+                   1.e-4,1.e-4,1.e-4 }         ! Absorbtion lenghts (in cm)
+
+    fill RMAT  ! Material property for Cerenkov light
+        MATE   = 'QRZO'                        ! Opaque quarz
+        Effic  = { 1,1,1,1,1,1,1,1,1,1,1,1,1 } ! Detection efficiencies
+        Rindex = { 1,1,1,1,1,1,1,1,1,1,1,1,1 } ! Refraction index
+        Absco  = { 1.e-5,1.e-5,1.e-5,1.e-5,1.e-5,1.e-5,1.e-5,1.e-5,1.e-5,1.e-5,
+                   1.e-5,1.e-5,1.e-5 }         ! Absorbtion lenghts (in cm)
+
+    fill RMAT  ! Material property for Cerenkov light
+        MATE   = 'META'                        ! material - methane
+        Effic  = { 1,1,1,1,1,1,1,1,1,1,1,1,1 } ! Detection efficiencies
+        Rindex = { 1.000444, 1.000444, 1.000444, 1.000444, 1.000444, 1.000444,
+                   1.000444, 1.000444, 1.000444, 1.000444, 1.000444, 1.000444,
+                   1.000444 }                  ! Refraction index
+        Absco  = { 1.e6, 1.e6, 1.e6, 1.e6, 1.e6, 1.e6, 1.e6, 1.e6, 1.e6, 1.e6,
+                   1.e6, 1.e6, 1.e6}           ! Absorbtion lenghts (in cm)
+
+    fill RMAT  ! Material property for Cerenkov light
+        MATE   = 'QARZ'                        ! material - quartz
+        Effic  = { 1,1,1,1,1,1,1,1,1,1,1,1,1 } ! Detection efficiencies
+        Rindex = { 1.528309, 1.533333, 1.538243, 1.544223,1.550568, 1.557770, 
+                   1.565463, 1.574765, 1.584831, 1.597027, 1.611858, 1.62366, 
+                   1.63815}                    ! Refraction index
+        Absco  = { 1, 1, 1, 1, 1, 29.85, 7.34, 4.134, 1.273, .722, .365, 
+                   .10051, 0.001}              ! Absorbtion lenghts (in cm)
+
+    fill RMAT  ! Material property for Cerenkov light
+        MATE   = 'FREO'             ! material
+        Effic  = { 1,1,1,1,1,1,1,1,1,1,1,1,1 } ! Detection efficiencies
+        Rindex = { 1.269946, 1.271246, 1.272452, 1.273844, 1.275236, 1.276721,
+                   1.278206, 1.279876, 1.281546, 1.283402, 1.285444, 1.28731,
+                   1.28936 }                   ! Refraction index
+        Absco  = { 179.0987, 179.0987, 179.0987, 179.0987, 179.0987, 121.9547,
+                   43.40067, 15.7394, 9.417928, 5.195241,  1.415808, 0.36728,
+                   0.001}                      ! Absorbtion lenghts (in cm)
+
+    fill RMAT  ! Material property for Cerenkov light
+        MATE   = 'CSI'                         ! material - Cesium Iodide
+        Effic  = { 3.15e-4, 4.50e-4, 6.75e-3, 1.125e-2, 2.115e-2, 3.60e-2, 
+                   8.46e-2,  .15533,  .20286,   .24745,   .27881,  0.3060,
+                   0.3250 }                    ! quantum efficiencies
+        Rindex = { 1.000444, 1.000444, 1.000444, 1.000444, 1.000444, 1.000444,
+                   1.000444, 1.000444, 1.000444, 1.000444, 1.000444, 1.000444,
+                   1.000444 }                  ! Refraction index
+        Absco  = { 1.e-4,1.e-4,1.e-4,1.e-4,1.e-4,1.e-4,1.e-4,1.e-4,1.e-4,1.e-4,
+                   1.e-4,1.e-4,1.e-4 }         ! Absorbtion lenghts (in cm)
+    endfill
 
     USE RICH
+    USE RPOS position=rich_position
+
     isopt=0
     if (rich_version>1) isopt=1
-*
+
     call  AgSSTEP(RICHSTEP) 
-*
+
 *   special material definition here:
     component O    A=16.00     Z=8    W=2
     component Si   A=28.09     Z=14   W=1
@@ -114,24 +155,57 @@ created June 1, 1998 supposely
     Material  Air
     Medium    Standard
 
-    Create and Position RICH in CALB x = rich_rpos*cos(rich_phi*degrad),
-                                     y = rich_rpos*sin(rich_phi*degrad),
-                                     AlphaZ=rich_phi-90
+* define RICH position using reconstructed Euler angles
+* thanks to James Dunlop
+
+    tx = degrad*rpos_tx
+    ty = degrad*rpos_ty
+    tz = degrad*rpos_tz
+
+    rot(1,1) = -cos(tz)*cos(ty)
+    rot(2,1) = -sin(tz)*cos(ty)
+    rot(3,1) =  sin(ty)
+
+    rot(1,2) = -cos(tz)*sin(ty)*sin(tx) + sin(tz)*cos(tx)
+    rot(2,2) = -sin(tz)*sin(ty)*sin(tx) - cos(tz)*cos(tx)
+    rot(3,2) = -cos(ty)*sin(tx)
+  
+    rot(1,3) =  cos(tz)*sin(ty)*cos(tx) + sin(tz)*sin(tx)
+    rot(2,3) =  sin(tz)*sin(ty)*cos(tx) - cos(tz)*sin(tx)
+    rot(3,3) =  cos(ty)*cos(tx)
+
+    Create and Position RICH in CALB _
+      x = rpos_rpos*cos(rpos_phi*degrad)-rpos_ypos*rot(1,2),
+      y = rpos_rpos*sin(rpos_phi*degrad)-rpos_ypos*rot(2,2),
+      z = rpos_zpos-rpos_ypos*rot(3,2),
+      ThetaX=acos(rot(3,1))*raddeg  PhiX=atan2(rot(2,1),rot(1,1))*raddeg,
+      ThetaY=acos(rot(3,2))*raddeg  PhiY=atan2(rot(2,2),rot(1,2))*raddeg,
+      ThetaZ=acos(rot(3,3))*raddeg  PhiZ=atan2(rot(2,3),rot(1,3))*raddeg
+                                            
+*     AlphaZ=rpos_phi-90
+
+    prin1  %x,%y,%z, (rot(i,2),i=1,3);
+    (' Rich position =',3f10.4,',  orientation =',3f10.6)
 
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+block RICH is just an aluminum box
+
 *   outside dimensions                         mm       cm
 *   tickness        104+25+41+22.5+2+32 =  226.5 /2 = 11.325
 *   long dimension  146.3 /2 = 73.15  cm          
 *   short dimension 989 /2   = 494.5  mm
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-block RICH is just an aluminum box
+
     Material  Aluminium
     Attribute RICH seen=1   colo=5
     shape     BOX  dx=rich_dx  dy=rich_dy  dz=rich_dz      
-    CALL GSCKOV(%Imed,11,PPCKOV,ABSCO_gri,EFFIC_gri,RINDEX_gri)
+    USE       RMAT  Mate='GRI'
+    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
+
     create and position  SRIC
 endblock
 *-----------------------------------------------------------------
+block SRIC is sensitive part of the whole RICH ... full of Methane
+
 * inside dimensions
 * long dimension 146.3 - 2*70 = 132.3 / 2 = 66.15
 * short dimension  989 - 2*70 =  84.9 / 2 = 42.45
@@ -141,9 +215,9 @@ endblock
 *   +194.5+0.25  csi center                    8.150
 *   +192.5  4 millimeter volume gap center     7.925                       
 *    (190.5 - 98 )/2=46.25+ 98 = 144.25 methane center  3.1
-*   +95.5   center quartz                     -1.775
-*   +88     center freon                      -2.525
-*   +81     center neoceram                   -3.225
+*   +95.5   center quartz                     -1.775 +1.275
+*   +88     center freon                      -2.525 +1.275
+*   +81     center neoceram                   -3.225 +1.275
 *   +71     honeycomb ends   with alu cover   -4.225
 *   +38     center honeycomb                  -7.525
 *   +5      honeycomb starts with alu cover   -10.825
@@ -154,146 +228,174 @@ endblock
 *    four csi cathodes 640*393 with a frame of 21 
 *    xpos  393/2 + 21/2 + 9.5 = 21.65
 *    zpos  640/2 + 21/2 + 4.5 = 33.5
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-block SRIC is sensitive part of the whole RICH ... full of Air
-    material  Air
+
+    material  Methane
     Attribute SRIC seen=1   colo=1
     shape     BOX  dx=42.45 dy=11.325  dz=66.15
-    CALL GSCKOV(%imed,11,PPCKOV,ABSCO_methane,EFFIC_all,RINDEX_methane)
+    USE       RMAT  Mate='META'
+    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
 
     Create and Position ALUM              y=-10.825
     Create and Position HONE              y=-7.525
     Create and Position ALUM              y=-4.225
-    Create and Position OQUA  x=-21.65    y=-3.225
-    Create and Position OQUA  x=21.65     y=-3.225
-    Create and Position OQUF  x=-21.65    y=-2.525
-    Create and Position OQUF  x=21.65     y=-2.525
-    Create and Position QUAR  x=-21.6     y=-1.775
-    Create and Position QUAR  x=21.6      y=-1.775
-    Create and Position META              y= 3.100
-    Create and Position rGAP              y= 7.925
-    Create and Position ALMF              y= 9.725  
+    Create and Position OQUA  x=-21.65    y=-3.225+1.275
+    Create and Position OQUA  x=21.65     y=-3.225+1.275
+    Create and Position OQUF  x=-21.65    y=-2.525+1.275
+    Create and Position OQUF  x=21.65     y=-2.525+1.275
+    Create and Position QUAR  x=-21.6     y=-1.775+1.275
+    Create and Position QUAR  x=21.6      y=-1.775+1.275
+
+*    It turns out that we are working in a methane volume in the
+*    first place so no Methane here ..
+*    Create and Position META              y= 3.100
+
+    Create and Position rGAP              y= 7.550
+    Create and Position ALMF              y= 9.350  
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Block ALUM is an Aluminum sheet
+
 * flush in sric
 * thickness 0.5 mm ???
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-Block ALUM is an Aluminum sheet
+
     Material  Aluminium
     Attribute ALUM  seen=1  colo=5 
     shape     BOX   dx=42.45 dy=0.025 dz=66.15
-    CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_gri,EFFIC_gri,RINDEX_gri)
+    USE       RMAT  Mate='GRI'
+    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Block ALMF is an Aluminum sheet
+
 * flush in sric a four hole aluminum frame
 * thickness 32mm
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    Block ALMF is an Aluminum sheet
+
     Material  Aluminium
     Attribute ALMF  seen=1  colo=5 
     shape     BOX   dx=42.45 dy=1.6 dz=66.15
-    CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_gri,EFFIC_gri,RINDEX_gri)
+    USE       RMAT  Mate='GRI'
+    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
+
     Create and Position HOLE    x=-21.65  y= 0.0   z=-33.5
     Create and Position HOLE    x=21.65   y= 0.0   z=-33.5
     Create and Position HOLE    x=-21.65  y= 0.0   z=33.5
     Create and Position HOLE    x=21.65   y= 0.0   z=33.5
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+block HONE is a CARBONIO
+
 *  flush in sric
 *  thickness  104-33-5 = 66 / 2 = 3.3 but 0.188 is the equivalent to carbon
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-block HONE is a CARBONIO
+
     material  Carbonio
     Attribute HONE  seen=1   colo=6
     shape     BOX   dx=42.45  dy=0.188  dz=66.15
-    CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_methane,EFFIC_all,RINDEX_methane)
+*   use methane properties intead of Carbon ?
+    USE       RMAT  Mate='META'
+    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
 endblock
-*------------------------------------------
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+block OQUA e me scelto per labellare il quarzo opaco
+
 * 1330 /2 = 66.5 bigger than inside box 
 * 413  /2 = 20.65
 * thickness 4 / 2 = 0.2
 * position width 433
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    block OQUA e me scelto per labellare il quarzo opaco
+
     material  opaco  
     medium    Opaco_quartz    Isvol=Isopt  
     Attribute OQUA   seen=1   colo=2
     shape     BOX    dx=20.65 dy=0.2   dz=66.5
-    CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_QUARZO,EFFIC_all,RINDEX_QUARZO)
+    USE       RMAT   Mate='QRZO'
+    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
+
     if (isopt>0) then
-    HITS  OQUA x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
-               Slen:.1:(0,500)    Lptot:18:(-3,2),
-               Tof:16:(0,1.e-6)   LGAM:16:(-2,2),
-               Step:16:(0,10)     Eloss:16:(0,0.001) 
+    HITS  OQUA x:.01:   y:.01:   z:.01:,
+               cx:10:   cy:10:   cz:10:,
+               Slen:.1:(0,500)   Lptot:18:(-3,2),
+               Tof:16:(0,1.e-6)  LGAM:16:(-2,2),
+               Step:16:(0,10)    Eloss:16:(0,0.001) 
     endif  
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Block QUAR da me scelto per labellare il quarzo
+
 *   A big piece consisting out of 3 tiles connected with opaco glue
 *   actual tile size is
 *   443.2 * 3 = 1329.6 that's 0.4 less than the 133, 2 gaps of 0.2/2=0.1
 *     gaps are barr, positioned at 443.2/2+0.1 away from center 221.7
 *   413   /2 =  20.65
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    block QUAR da me scelto per labellare il quarzo
+
     material  quarz
     medium    quartz          Isvol=Isopt  
     Attribute QUAR  seen=1    colo=2
     shape     BOX   dx=20.65  dy=0.25  dz=66.5
-    CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_QUARZ,EFFIC_all,RINDEX_QUARZ)
+    USE       RMAT  mate='QARZ'
+    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
 
-    Create and Position BARR z=-21.7
-    Create and Position BARR z=21.7
+    Create and Position BARR     z =-21.7
+    Create and Position BARR     z = 21.7
     if (isopt>0) then
-    HITS  QUAR x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
-               Slen:.1:(0,500)    Lptot:18:(-3,2),
-               Tof:16:(0,1.e-6)   LGAM:16:(-2,2),
-               Step:16:(0,10)     Eloss:16:(0,0.001) 
+    HITS  QUAR x:.01:   y:.01:   z:.01:,
+               cx:10:   cy:10:   cz:10:,
+               Slen:.1:(0,500)   Lptot:18:(-3,2),
+               Tof:16:(0,1.e-6)  LGAM:16:(-2,2),
+               Step:16:(0,10)    Eloss:16:(0,0.001) 
     endif  
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-*     width in z  0.2/2=0.1
-* 413   /2 =  20.65
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block BARR e Barrette quarzo opaco
+
+* width in z  0.2/2=0.1
+* 413   /2 =  20.65
+
     material  opaco
     Attribute BARR  seen=1   colo=2
     shape     BOX   dx=20.65  dy=0.25  dz=0.1
-    CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_QUARZO,EFFIC_all,RINDEX_QUARZO)
+    USE       RMAT   Mate='QRZO'
+    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - -
+*block META is METANO
 * long dimension 146.3 - 2*70 = 132.3 / 2 = 66.15
 * short dimension  989 - 2*70 =  84.9 / 2 = 42.45
 * thickness is 92.5/2 =46.25
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-block META is METANO
-    material  Methane
-    Attribute META  seen=1   colo=4
-    shape     BOX   dx=42.45  dy=4.625   dz=66.15 
-    CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_METHANE,EFFIC_all,RINDEX_METHANE)
-endblock
+*
+*    material  Methane
+*    Attribute META  seen=1   colo=4
+*    shape     BOX   dx=42.45  dy=4.625   dz=66.15 
+*    USE       RMAT  Mate='META'
+*    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
+*endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - -
+block rGAP is METANOL gap
+
 * long dimension 146.3 - 2*70 = 132.3 / 2 = 66.15
 * short dimension  989 - 2*70 =  84.9 / 2 = 42.45
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-block rGAP is METANOL gap
+
     material  Methane       
     Medium    Methane_Gap    Isvol=1
     Attribute RGAP  seen=1   colo=4
     shape     BOX   dx=42.45  dy=0.2   dz=66.15
-    CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_METHANE,EFFIC_all,RINDEX_METHANE)
-    HITS rGAP  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
-               Slen:.1:(0,500)    Lptot:18:(-3,2),
-               Tof:16:(0,1.e-6)   LGAM:16:(-2,2),
-               Step:16:(0,10)     Eloss:16:(0,0.001) 
+*   use methane properties instead of methanol ?
+    USE       RMAT  Mate='META'
+    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
+
+    HITS rGAP  x:.01:   y:.01:   z:.01:,
+               cx:10:   cy:10:   cz:10:,
+               Slen:.1:(0,500)   Lptot:18:(-3,2),
+               Tof:16:(0,1.e-6)  LGAM:16:(-2,2),
+               Step:16:(0,10)    Eloss:16:(0,0.001) 
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-*
-*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 block HOLE is an oppening in the aluminum frame 
     material  Air
     Attribute HOLE seen=1   colo=4
     shape     BOX  dx=19.65 dy=1.6  dz=32.00
-    CALL GSCKOV(%imed,N,PPCKOV,ABSCO_methane,EFFIC_all,RINDEX_methane)
+*   use methane properties instead of air ?
+    USE       RMAT  Mate='META'
+    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
+
     Create and Position BORD    x=0  y= -1.35  z=0
     Create and Position rCSI    x=0  y= -1.575  z=0
 endblock
@@ -302,9 +404,12 @@ Block BORD is carbon
     Material  Carbonio 
     Attribute BORD seen=1   colo=6 
     shape     BOX   dx=19.65  dy=0.2   dz=32.0
-    CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_gri,EFFIC_gri,RINDEX_gri)
+    USE       RMAT  Mate='GRI'
+    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
 endblock
-* - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Block rCSI is Cesium Iodide
+
 * changed to four blocks
 * frame size of holder is 72 each side
 * frame along long dimension is 4.5
@@ -316,82 +421,95 @@ endblock
 *  989  - 72 - 72 - 21 = 824 / 2 = 412 - 2*9.5 = 393
 * short dimension (393-2*0.5) /2 = 19.60 this is 49 pads 
 *  392*2+30 = 814 /2 =  (40.7 + 0.1) * 2 = 816 is 102 pads 3 empty offest 40.8
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-Block rCSI is Cesium Iodide
+
 *   call  AgSSTEP(RGJKSTEP) 
     Material  Carbonio
     Medium    CSI   Isvol=1
     Attribute RCSI  seen=1   colo=6 
     shape     BOX   dx=19.60  dy=0.025   dz=32.0
-    CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_CSI,EFFIC_CSI,RINDEX_methane)
-    HITS rCSI  x:.005:   y:.01:   z:.005:   cx:10:   cy:10:   cz:10:,
+*   refraction index same as in methane ?
+    USE       RMAT  Mate='CSI'
+    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
+
+    HITS rCSI  x:.005:   y:.01:   z:.005:,
+               cx:10:    cy:10:   cz:10:,
                Slen:.1:(0,500)    Lptot:18:(-3,2),
                Tof:16:(0,1.e-6)   LGAM:16:(-2,2),
                Step:16:(0,10)     USER:32:(-0.01,0.01) 
 endblock
 *- - - - - - - - - - - - - - - - - - - - - - - - - - -
+block OQUF is FRAME QUARZO OPACO
+
 * 1330 /2 = 66.5 bigger than inside box 
 * 413  /2 = 20.65
 * thickness 10 / 2 = 0.5
 * positioning width 433
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-block OQUF e FRAME QUARZO OPACO
+
     material  opaco 
     Attribute OQUF  seen=1    colo=2
     shape     BOX   dx=20.65  dy=0.5   dz=66.5
+    USE       RMAT  Mate='QRZO'
+    CALL GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
+
     Create and Position FREO
-    CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_QUARZO,EFFIC_all,RINDEX_QUARZO)
 endblock 
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+block FREO is FREON
+
 * inside dimensions
 * 1310 /2 = 65.5
 * 413 of the frame - 2*0.5 = 403  /2 = 20.15
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-block FREO is FREON
+
     component C     A=12  Z=6  W=6
     component F     A=19  Z=9  W=14
     mixture   freon DENS=1.7   Isvol=Isopt
 
     attribute FREO  seen=1    colo=3
     shape     BOX   dx=20.15  dy=0.5   dz=65.5
-    CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_FREON,EFFIC_all,RINDEX_FREON)
+    USE       Rmat  mate='FREO'
+    CALL GSCKOV(%Imed,N,PPCKOV,Rmat_ABSCO,Rmat_EFFIC,Rmat_RINDEX)
 
     do i = 1,9
        Create and Position SPAC  x=+6.7 z=(5-i)*14.4 ort=zxy
        Create and Position SPAC  x=-6.7 z=(5-i)*14.4 ort=zxy
     enddo
+
     if (Isopt>0) then
-    HITS FREO  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
-               Slen:.1:(0,500)    Lptot:18:(-3,2),
-               Tof:16:(0,1.e-6)   LGAM:16:(-2,2),
-               Step:16:(0,10)     Eloss:16:(0,0.001) 
+    HITS FREO  x:.01:   y:.01:   z:.01:,
+               cx:10:   cy:10:   cz:10:,
+               Slen:.1:(0,500)   Lptot:18:(-3,2),
+               Tof:16:(0,1.e-6)  LGAM:16:(-2,2),
+               Step:16:(0,10)    Eloss:16:(0,0.001) 
     endif  
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Block SPAC e Spacers (quarz cylinders)
+
 * 9 spacers center is z=0
 * spaced 144
 * distance from the middle 134.0
 * 1 cm cylinders 
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-Block SPAC e Spacers (quarz cylinders)
+
     material  QUARZ
     attribute SPAC seen=1 colo=2
     shape TUBE rmin=0 Rmax=.5 dz=0.5
-    CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_QUARZ,EFFIC_all,RINDEX_QUARZ)
+    USE   RMAT mate='QARZ'
+    CALL  GSCKOV(%Imed,N,PPCKOV,rmat_ABSCO,rmat_EFFIC,rmat_RINDEX)
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+*Block awire 
 * inside dimensions
 * long dimension 146.3 - 2*70 = 132.3 / 2 = 66.15
 * anode wires 20 microns 4 millimeter pitch
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-*Block awire 
+*
 *    material  anode
 *    attribute SPAC seen=1 colo=2
 *    shape TUBE rmin=0 Rmax=0.0020 dy= 66.15
 *endblock
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 end
 
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
       subroutine RICHSTEP
 * discard cerenkov photon absorption hits everywhere except for CSI
@@ -841,4 +959,4 @@ c     print*,'<<FILI_ANODICI>>',y0a
       end
       
 c-----------------------------------------------------------------------------
-      
+     
