@@ -1,40 +1,28 @@
 #ifndef StiPixelDetectorBuilder_H
 #define StiPixelDetectorBuilder_H
-
 #include "Sti/StiDetectorBuilder.h"
-class StiDefaultHitErrorCalculator;
+#include "Sti/StiHitErrorCalculator.h"
 
 class StiPixelDetectorBuilder : public StiDetectorBuilder
 {
-
 public:
-    // constructors
     StiPixelDetectorBuilder(bool active);
     virtual ~StiPixelDetectorBuilder(); 	
-    virtual void loadDb();
-    virtual void buildMaterials();
-    virtual void buildShapes();
-    virtual void buildDetectors();
-
-    /// returns the azimuthal angle [-pi, pi) for tpc sector [1-24]
-    double phiForTpcSector(unsigned int iSector) const;
-    
+    virtual void buildDetectors(StMaker&source);
+    double phiForSector(unsigned int iSector) const;
  protected:
-
     StiMaterial * _gas;
     StiMaterial * _fcMaterial;
-		
-    StiDefaultHitErrorCalculator * _innerCalc;
+    StiDefaultHitErrorCalculator _calculator;
 };
 
-inline double StiPixelDetectorBuilder::phiForTpcSector(unsigned int sector) const
+inline double StiPixelDetectorBuilder::phiForSector(unsigned int sector) const
 {
-    if(sector<0 || sector>=12)
-	{
-	    cout << "phiForTpcSector(" << sector << "): invalid sector" << endl;
-	    throw runtime_error("StiPixelDetectorBuilder::phiForTpcSector - ERROR - Invalid Sector");
-	}
-    return phiForSector(sector, 12);
-} // phiForTpcSector
+	int nSectors = 12;
+  int offset = nSectors/4;
+  double deltaPhi = 2.*M_PI/nSectors;
+  double dPhi = (offset - static_cast<int>(sector+1))*deltaPhi;
+  return nice(dPhi);  
+} 
 
 #endif 
