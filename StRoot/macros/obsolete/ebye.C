@@ -1,5 +1,8 @@
-// $Id: ebye.C,v 1.3 1998/08/20 12:33:32 fisyak Exp $
+// $Id: ebye.C,v 1.4 1998/08/26 12:15:15 fisyak Exp $
 // $Log: ebye.C,v $
+// Revision 1.4  1998/08/26 12:15:15  fisyak
+// Remove asu & dsl libraries
+//
 // Revision 1.3  1998/08/20 12:33:32  fisyak
 // Splitted base libraries
 //
@@ -26,8 +29,6 @@
 //
 {
    gSystem->Load("St_base.so");
-   gSystem->Load("libasu.so");
-   gSystem->Load("libdsl.so");
    gSystem->Load("xdf2root.so");
    gSystem->Load("St_Tables.so");
    gSystem->Load("libmsg.so");

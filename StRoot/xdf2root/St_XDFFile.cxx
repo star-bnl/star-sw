@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.11 1998/08/18 14:05:07 fisyak Exp $ 
+// $Id: St_XDFFile.cxx,v 1.12 1998/08/26 12:15:23 fisyak Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.12  1998/08/26 12:15:23  fisyak
+// Remove asu & dsl libraries
+//
 // Revision 1.11  1998/08/18 14:05:07  fisyak
 // Add to bfc dst
 //
@@ -205,7 +208,7 @@ St_DataSet *St_XDFFile::NextEventGet()
  if (strchr(fType,'r')) {
    if (!::xdr_dataset(fStream,&fDataSet))
    {
-       printf("*** Error: NextEvent() xdf_next_record: end of file %s",fName); 
+       printf("*** Warning: NextEvent() xdf_next_record: end of file %s\n",fName); 
        return 0;
    };
    St_DataSet *set = MakeDataSet(fDataSet);
@@ -273,7 +276,7 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
       else 
       {
         table = new St_Table((char *)name,(char *)type, nrows, data, rsize);
-        Printf(" Error: MakeDataSet the share lib /DLL for the table <%s> was not loaded",type);
+        Printf(" Warning: MakeDataSet the share lib /DLL for the table <%s> was not loaded\n",type);
         SafeDelete(table);
       }
 

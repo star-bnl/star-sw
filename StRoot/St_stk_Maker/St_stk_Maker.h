@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.h,v 1.2 1998/08/18 14:05:03 fisyak Exp $
+// $Id: St_stk_Maker.h,v 1.3 1998/08/26 12:15:10 fisyak Exp $
 // $Log: St_stk_Maker.h,v $
+// Revision 1.3  1998/08/26 12:15:10  fisyak
+// Remove asu & dsl libraries
+//
 // Revision 1.2  1998/08/18 14:05:03  fisyak
 // Add to bfc dst
 //
@@ -34,7 +37,7 @@ class St_svg_geom;
 class St_stk_Maker : public StMaker {
  private:
                Bool_t drawinit;
-// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.2 1998/08/18 14:05:03 fisyak Exp $";
+// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.3 1998/08/26 12:15:10 fisyak Exp $";
                Int_t  m_mode;      // mode 1 = primaries;
 	                           // mode 2 = secondaries;
 	                           // mode 3 = primaries to secondaries 
@@ -111,7 +114,7 @@ class St_stk_Maker : public StMaker {
    virtual void Set_nitermax   (Int_t   m =      7){m_nitermax	 = m;} // *MENU*
    virtual void Set_niternull  (Int_t   m =   1000){m_niternull  = m;} // *MENU*
    virtual void Set_sec_factor (Float_t m =    6.0){m_sec_factor = m;} // *MENU*
-   virtual void Set_ifstk      (Bool_t  m =  kTRUE){m_ifstk 	 = m;} // *MENU*
+   virtual void Set_ifstk      (Bool_t  m = kFALSE){m_ifstk 	 = m;} // *MENU*
    ClassDef(St_stk_Maker, 1)   //STAR chain virtual base class for Makers
 };
 

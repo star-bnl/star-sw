@@ -1,9 +1,9 @@
-// $Id: tss.C,v 1.5 1998/08/26 12:15:16 fisyak Exp $
-// $Log: tss.C,v $
-// Revision 1.5  1998/08/26 12:15:16  fisyak
+// $Id: bfcx.C,v 1.1 1998/08/26 12:15:15 fisyak Exp $
+// $Log: bfcx.C,v $
+// Revision 1.1  1998/08/26 12:15:15  fisyak
 // Remove asu & dsl libraries
 //
-// Revision 1.4  1998/08/20 12:33:33  fisyak
+// Revision 1.9  1998/08/20 12:33:32  fisyak
 // Splitted base libraries
 //
 // Revision 1.8  1998/08/18 14:05:08  fisyak
@@ -49,16 +49,11 @@
 #include "St_Table.h"
 #endif
 //gSystem.Exec("rm *.log");
-//  Char_t *filename = "/star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/tss/auau_ce_b0-2_0001_0020.xdf";
-//  Char_t *filename = "/afs/rhic/star/data/samples/event_0000050.xdf";
-//  Char_t *filename = "/afs/rhic/star/data/samples/muons_100_ctb.dsl";
-//  
-  Char_t *filename = "/afs/rhic/star/data/samples/muons_100_ctb.dsl";
-  //  Char_t *filename = "/disk1/star/tss/auau_ce_b0-2_4281_4300.xdf";
+  Char_t *filename = "/star/sol/users/fisyak/auau_ce_b0-2_0001_0020.xdf";
   St_XDFFile *xdf_in   = new St_XDFFile(filename,"r");
-  St_XDFFile *xdf_out  = new St_XDFFile("muons_100_ctb.xdf","w");
-  TFile      *root_out=  new TFile("muons_100_ctb.root","RECREATE");
-  //  TFile      *root_tree= new TFile("muons_100_ctb.tree.root","RECREATE");
+  St_XDFFile *xdf_out  = new St_XDFFile("auau_central_hijing.xdf","w");
+  TFile      *root_out=  new TFile("auau_central_hijing.root","RECREATE");
+//TFile      *root_tree= new TFile("auau_central_hijing.tree.root","RECREATE");
 // Create the main chain object
   StChain chain("StChain");
 //  Create the makers to be called by the current chain
@@ -71,7 +66,7 @@
   St_tcl_Maker tcl_Maker("tcl_Maker","event/data/tpc/hits");
   St_stk_Maker stk_Maker("stk_Maker","event/data/svt/tracks");
   St_tpt_Maker tpt_Maker("tpt_Maker","event/data/tpc/tracks");
-//  St_dst_Maker dst_Maker("dst_Maker","event/data/dst");
+  St_dst_Maker dst_Maker("dst_Maker","event/data/global");
 // Set parameters
 //  tss_Maker.adcxyzon();
   chain.PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.6 1998/08/18 14:05:04 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.7 1998/08/26 12:15:10 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.7  1998/08/26 12:15:10  fisyak
+// Remove asu & dsl libraries
+//
 // Revision 1.6  1998/08/18 14:05:04  fisyak
 // Add to bfc dst
 //
@@ -34,6 +37,9 @@
 #include "tpc/St_tph_Module.h"
 #include "tpc/St_xyz_newtab_Module.h"
 #include "tpc/St_tte_hit_match_Module.h"
+#include "tpc/St_tfs_g2t_Module.h"
+#include "tpc/St_tfs_filt_Module.h"
+
 ClassImp(St_tcl_Maker)
 
 //_____________________________________________________________________________
@@ -105,6 +111,13 @@ void St_tcl_Maker::Init(){
        SafeDelete(tclpars);
      }
    }
+// tfs parameters
+   St_DataSet *tfspars = local("tpc/tfspars");
+   if (tfspars){
+     m_tfs_fspar = (St_tfs_fspar *) local("tpc/tfspars/tfs_fspar");
+     m_tfs_bmpar = (St_tfs_bmpar *) local("tpc/tfspars/tfs_bmpar");
+     m_tfs_fsctrl= (St_tfs_fsctrl*) local("tpc/tfspars/tfs_fsctrl");
+   }
 // Create Histograms    
    StMaker::Init();
 }
@@ -114,7 +127,7 @@ Int_t St_tcl_Maker::Make(){
    St_DataSetIter tpc_data(m_DataSet);
    if (!m_DataSet->GetList()) {// If DataSet list empty then create it
      St_tcl_tphit  *tphit = (St_tcl_tphit *) tpc_data("tphit");
-     if (!tphit) {tphit = new St_tcl_tphit("tphit",200000); tpc_data.Add(tphit);}
+     if (!tphit) {tphit = new St_tcl_tphit("tphit",400000); tpc_data.Add(tphit);}
      St_tcl_tphit_aux  *tphitau = (St_tcl_tphit_aux *) tpc_data("tphitau");
      if (!tphitau) {tphitau = new St_tcl_tphit_aux("tphitau",200000); tpc_data.Add(tphitau);}
      St_tcl_tpcluster  *tpcluster = (St_tcl_tpcluster *) tpc_data("tpcluster");
@@ -174,6 +187,29 @@ Int_t St_tcl_Maker::Make(){
        if (Res_tte !=  kSTAFCV_OK)  cout << "Problem with tte_hit_match.." << endl;
        cout << "finish run_tte_hit_match" << endl;
      }
+     else {// Row data does not exit, check GEANT. if it does then use fast cluster simulation
+       St_DataSetIter geant(gStChain->GetGeant());
+       St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("Event/g2t_tpc_hit");
+       St_g2t_track   *g2t_track   = (St_g2t_track *) geant("Event/g2t_track");
+       if (g2t_tpc_hit && g2t_track){
+         St_tcl_tpc_index  *index = (St_tcl_tpc_index *) tpc_data("index");
+         if (!index) {index = new St_tcl_tpc_index("index",700000); tpc_data.Add(index);}
+	 cout << "start tfs_run" << endl;
+
+         Int_t Res_tfs_g2t =   tfs_g2t(g2t_tpc_hit, g2t_track,
+                                m_tfs_fspar,m_tfs_bmpar,m_tfs_fsctrl,
+                                index, m_type, tphit);
+
+         if (Res_tfs_g2t !=  kSTAFCV_OK){cout << "Problem running tfs_g2t..." << endl;}
+         else {
+
+           Int_t Res_tfs_filt = tfs_filt(tphit);
+
+           if ( Res_tfs_filt !=  kSTAFCV_OK){cout << " Problem running tfs_filt..." << endl;} 
+	 }
+	 cout << "finish tfs_run" << endl;
+       }
+     }
    }
 //Histograms     
  return kSTAFCV_OK;
@@ -181,7 +217,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.6 1998/08/18 14:05:04 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.7 1998/08/26 12:15:10 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

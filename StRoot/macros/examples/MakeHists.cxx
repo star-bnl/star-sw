@@ -15,8 +15,6 @@ void MakeHists(Char_t *xdffilename="/star/sol/users/fisyak/auau_ce_b0-2_4801_500
   }
   else{
     if (gSystem.Load("St_base.so"))      printf(" Loading DLL \"St_base.so\" failed \n");
-    if (gSystem.Load("libasu.so"))      printf(" Loading DLL \"libasu.so\" failed \n");
-    if (gSystem.Load("libdsl.so"))      printf(" Loading DLL \"libdsl.so\" failed \n");
     if (gSystem.Load("xdf2root.so"))      printf(" Loading DLL \"xdf2root.so\" failed \n");
     if (gSystem.Load("St_Tables.so"))    printf(" Loading DLL \"St_Tables.so\" failed \n");
   }

@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.1 1998/07/21 00:36:46 fisyak Exp $
+// $Id: St_tcl_Maker.h,v 1.2 1998/08/26 12:15:10 fisyak Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.2  1998/08/26 12:15:10  fisyak
+// Remove asu & dsl libraries
+//
 // Revision 1.1  1998/07/21 00:36:46  fisyak
 // tcl and tpt
 //
@@ -17,11 +20,16 @@
 class St_tpg_pad_plane;
 class St_tpg_detector;
 class St_tpg_pad;
+
 class St_tss_tsspar;
 
 class St_tcl_sector_index;
 class St_tcl_tclpar;
 class St_tcl_tpc_index_type;
+
+class St_tfs_fspar;
+class St_tfs_bmpar;
+class St_tfs_fsctrl;
 
 class St_tcl_Maker : public StMaker {
  private:
@@ -37,6 +45,9 @@ class St_tcl_Maker : public StMaker {
 	                                        // how tcl works
                St_tcl_tpc_index_type *m_type;   //!  Table of many-to-many index 
 	                                        // correlations for tpc evaluations
+               St_tfs_fspar     *m_tfs_fspar;   //! TFS parameter table 
+               St_tfs_bmpar     *m_tfs_bmpar;   //! TFS beam parameter table
+               St_tfs_fsctrl    *m_tfs_fsctrl;  //! TFS control switches
  protected:
  public: 
                   St_tcl_Maker();

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/06/98  (E-mail:fine@bnl.gov)
-// $Id: CallMevSaveXDF.cxx,v 1.5 1998/08/20 12:33:31 fisyak Exp $
+// $Id: CallMevSaveXDF.cxx,v 1.6 1998/08/26 12:15:14 fisyak Exp $
 // $Log: CallMevSaveXDF.cxx,v $
+// Revision 1.6  1998/08/26 12:15:14  fisyak
+// Remove asu & dsl libraries
+//
 // Revision 1.5  1998/08/20 12:33:31  fisyak
 // Splitted base libraries
 //
@@ -25,8 +28,6 @@
   }
   else {
     if (gSystem.Load("St_base.so"))      printf(" Loading DLL \"St_base.so\" failed \n");
-    if (gSystem.Load("libasu.so"))      printf(" Loading DLL \"libasu.so\" failed \n");
-    if (gSystem.Load("libdsl.so"))      printf(" Loading DLL \"libdsl.so\" failed \n");
     if (gSystem.Load("xdf2root.so"))      printf(" Loading DLL \"xdf2root.so\" failed \n");
     if (gSystem.Load("St_Tables.so"))    printf(" Loading DLL \"St_Tables.so\" failed \n");
     // Load dictionary for begin_html <a href="http://www.rhic.bnl.gov/afs/rhic/star/doc/www/packages_l/dev/pams/doc/module.html#mevsim_mod">mevsim</a> end_html STAF module

@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.9 1998/08/20 12:33:32 fisyak Exp $
+// $Id: bfc.C,v 1.10 1998/08/26 12:15:15 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.10  1998/08/26 12:15:15  fisyak
+// Remove asu & dsl libraries
+//
 // Revision 1.9  1998/08/20 12:33:32  fisyak
 // Splitted base libraries
 //
@@ -26,8 +29,6 @@
 //
 {
    gSystem->Load("St_base.so");
-   gSystem->Load("libasu.so");
-   gSystem->Load("libdsl.so");
    gSystem->Load("xdf2root.so");
    gSystem->Load("St_Tables.so");
    gSystem->Load("libmsg.so");
@@ -38,6 +39,8 @@
    gSystem->Load("St_svt.so");
    gSystem->Load("global.sl");
    gSystem->Load("St_global.so");
+   gSystem->Load("ftpc.sl");
+   gSystem->Load("St_ftpc.so");
    gSystem->Load("StChain.so");
 
 #ifndef __CINT__
@@ -48,29 +51,25 @@
 #include "St_Table.h"
 #endif
 //gSystem.Exec("rm *.log");
-//  Char_t *filename = "/star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/tss/auau_ce_b0-2_0001_0020.xdf";
-//  Char_t *filename = "/afs/rhic/star/data/samples/event_0000050.xdf";
-//  Char_t *filename = "/afs/rhic/star/data/samples/muons_100_ctb.dsl";
-//  
-   //  Char_t *filename = "/afs/rhic/star/data/samples/muons_100_ctb.dsl";
-  Char_t *filename = "/disk1/star/tss/auau_ce_b0-2_4281_4300.xdf";
+  Char_t *filename = "/afs/rhic/star/data/samples/auau_central_hijing.xdf";
   St_XDFFile *xdf_in   = new St_XDFFile(filename,"r");
-  St_XDFFile *xdf_out  = new St_XDFFile("muons_100_ctb.xdf","w");
-  TFile      *root_out=  new TFile("muons_100_ctb.root","RECREATE");
-  //  TFile      *root_tree= new TFile("muons_100_ctb.tree.root","RECREATE");
+  St_XDFFile *xdf_out  = new St_XDFFile("auau_central_hijing.xdf","w");
+  TFile      *root_out=  new TFile("auau_central_hijing.root","RECREATE");
+//TFile      *root_tree= new TFile("auau_central_hijing.tree.root","RECREATE");
 // Create the main chain object
   StChain chain("StChain");
 //  Create the makers to be called by the current chain
   St_xdfin_Maker xdfin("xdfin_Maker","event/geant");
-  chain.SetInputXDFile(xdf_in);
   St_run_Maker run_Maker("run_Maker","run/params");
+  chain.SetInputXDFile(xdf_in);
 //  St_evg_Maker evg_Maker("evg_Maker","event");
   St_srs_Maker srs_Maker("srs_Maker","event/data/svt/hits");
-  St_tss_Maker tss_Maker("tss_Maker","event/raw_data/tpc");
+  //  St_fss_Maker fss_Maker("fss_Maker","event/raw_data/ftpc/pixels");
+  //  St_tss_Maker tss_Maker("tss_Maker","event/raw_data/tpc");
   St_tcl_Maker tcl_Maker("tcl_Maker","event/data/tpc/hits");
   St_stk_Maker stk_Maker("stk_Maker","event/data/svt/tracks");
-  St_tpt_Maker tpt_Maker("tpt_Maker","event/data/tpc/trackas");
-  St_dst_Maker dst_Maker("dst_Maker","event/data/dst");
+  St_tpt_Maker tpt_Maker("tpt_Maker","event/data/tpc/tracks");
+  //  St_dst_Maker dst_Maker("dst_Maker","event/data/global");
 // Set parameters
 //  tss_Maker.adcxyzon();
   chain.PrintInfo();
@@ -78,7 +77,7 @@
   chain.Init();
 //  chain.MakeTree("StChainTree","Title");
 // Prepare TCanvas to show some histograms created by makers
-  xdf_out->NextEventPut(chain.GetRun()); // xdf output
+  //  xdf_out->NextEventPut(chain.GetRun()); // xdf output
   root_out->cd();
   chain.GetRun()->Write();// root output
   gBenchmark->Start("bfc");
@@ -91,13 +90,13 @@
     root_out->cd();
     evnt->Write();// root output
     //    root_tree->cd();
-    printf ("Fill Tree\n");
-    chain.FillTree();
+    //    printf ("Fill Tree\n");
+    //    chain.FillTree();
   //  histCanvas->Modified();
   //  histCanvas->Update();
   //  chain.Clear();
   }
-  chain.Finish();
+  //  chain.Finish();
   gBenchmark->Stop("bfc");
   gBenchmark->Print("bfc");
   // delete xdf_in;

@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.h,v 1.4 1998/08/14 15:25:58 fisyak Exp $
+// $Id: St_TLA_Maker.h,v 1.5 1998/08/26 12:15:13 fisyak Exp $
 // $Log: St_TLA_Maker.h,v $
+// Revision 1.5  1998/08/26 12:15:13  fisyak
+// Remove asu & dsl libraries
+//
 // Revision 1.4  1998/08/14 15:25:58  fisyak
 // add options
 //
@@ -24,9 +27,9 @@
 class St_TLA_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.4 1998/08/14 15:25:58 fisyak Exp $";
-// Int_t         m_mode;        // mode 1 = primaries;
-// St_stk_stkpar m_stk_stkpar;  //! pointer to stk parameters
+// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.5 1998/08/26 12:15:13 fisyak Exp $";
+// Int_t          m_mode;        // mode 1 = primaries;
+// St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
  
  protected:
  public: 
