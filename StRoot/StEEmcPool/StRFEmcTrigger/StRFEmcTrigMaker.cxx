@@ -21,6 +21,7 @@
 #include "StEvent/StBbcTriggerDetector.h"
 #include "TClonesArray.h"
 
+
 ClassImp(StRFEmcTrigMaker)
 
 StRFEmcTrigMaker::StRFEmcTrigMaker(const char *name):StMaker(name){
@@ -410,7 +411,89 @@ Int_t StRFEmcTrigMaker::Make(){
     EJPmaxt=0;   //Holds max JP sum for whole EEMC
     EJPsumt=0;  //Holds sum of all JP in EEMC
     
+     // According to STAR NOTE#229A all detectors should be numbered first from the +z side (West End) looking toward the interactions region 
+     // If a detector needs additional numbering on the -z side then the numbers should be consecutive with the +z elements.
+     // Following this, standing on the west side looking at the interaction region, module 58 is at 12 o'clock and in JP0 with JP1 and so on
+     // proceeding in a clockwise manner. Standing on the east side looking at the interaction region module 118 is at 12 o'clock 
+    // and in JP6 with JP7 and so on proceeding in a clockwise manner.
+
     ///****************************////////////////////////////////////**************************//////////////////////////////////
+    ///****************************BARREL********************************************************//////////////////////////////////
+    ///****************************////////////////////////////////////**************************//////////////////////////////////
+    //JP0 goes from module=53/2 to module=3/1 (TP=0+26-29,30+56-59,60+86-89,90+116-119,120+146-149)
+    //JP1 goes from module=3/2 to module=13/1
+    //JP2 goes from module=13/2 to module=23/1
+    //JP3 goes from module=23/2 to module=33/1
+    //JP4 goes from module=33/2 to module=43/1
+    //JP5 goes from module=43/2 to module=53/1 (TP=21-25,51-55,81-85,111-115,141-145)
+    //JP6 goes from module=113/2 to module=63/1
+    //JP7 goes from module=63/2 to module=73/1
+    //JP8 goes from module=73/2 to module=83/1
+    //JP9 goes from module=83/2 to module=93/1
+    //JP10 goes from module=93/2 to module=103/1
+    //JP11 goes from module=103/2 to module=113/1
+
+    //TP(0-29) for eta bin (1-4) all modules 1-60
+    //TP(30-59) for eta bin(5-8) all modules  1-60
+    //TP(60-89) for eta bin(9-12) all modules 1-60 
+    //TP(90-119) for eta bin(13-16) all modules 1-60 
+    //TP(120-149) for eta bin(17-20) all modules 1-60
+    //TP(150-179) for eta bin (1-4) all modules 61-120
+    //TP(180-209) for eta bin(5-8) all modules 61-120 
+    //TP(210-239) for eta bin(9-12) all modules  61-120
+    //TP(240-269) for eta bin(13-16) all modules  61-120
+    //TP(270-299) for eta bin(17-20) all modules 61-120
+
+
+    //StDetectorId BemcId=StDetectorId(kBarrelEmcTowerId);
+    StDetectorId BemcId=StDetectorId(kBarrelEmcTowerId);
+    EmcDet = EmcCol->detector(BemcId); //BEMC tower detector number
+    assert(EmcDet);
+    for (uint mod=1;mod<=EmcDet->numberOfModules();mod++){
+      StEmcModule* module=EmcDet->module(mod); 
+      StSPtrVecEmcRawHit& hit=module->hits();
+      for(uint ih=0;ih<hit.size();ih++){
+	StEmcRawHit *x=hit[ih];
+	Bmod=x->module();
+	Bsub=x->sub();
+	Beta=x->eta();
+	BTowADC=x->adc();
+	//printf("ih=%d, mod=%d eta=%d sub=%d adc=%d\n",ih,x->module(),x->eta(),x->sub(),x->adc());	  
+	if (BTowADC>0) {
+	  //	  printf("mod=%d, sub=%d, Beta=%d adc=%d\n",Bmod,Bsub,Beta,BTowADC);
+	  int jpBindex=(Bmod+Bsub+5)/10;
+	  if (((Bmod+Bsub+5)>=60)&&((Bmod+Bsub+5)<=66)) {
+	    jpBindex=0;
+	  }
+	  if ((Bmod == 60)&&(Bsub==2)) jpBindex=0;
+	  
+	  int tpBindex=((Bmod+Bsub-3)/2) + 30*((Beta-1)/4);
+	  if ((Bmod==1)&&(Bsub==1)) {
+	    tpBindex=(29 + 30*((Beta-1)/4));
+	  }  
+	  if (Bmod>60){//need to add 150 to tp# for east side 
+	    tpBindex=150 + ((Bmod+Bsub-3)/2) + 30*((Beta-1)/4);
+	    if ((Bmod==61)&&(Bsub==1)) {
+	      tpBindex=150 + (59 + 30*((Beta+-1)/4));
+	    }  
+	  }
+	  Sum(&jpBsum[jpBindex],&BTowADC);
+	  Max(&jpBmax[jpBindex],&BTowADC);
+	  Sum(&tpBsum[tpBindex],&BTowADC);
+	  Max(&tpBmax[tpBindex],&BTowADC);
+	  jpB_hit_num[jpBindex]++;
+	//printf("jpBindex=%d, jpBsum=%d, jpBmax=%d\n",jpBindex,jpBsum[jpBindex],jpBmax[jpBindex]);
+	//printf("tpBindex=%d, tpBsum=%d, tpBmax=%d\n",tpBindex,tpBsum[tpBindex],tpBmax[tpBindex]);
+	}
+      }
+    }
+    
+    for (int q=0; q < 6; q++){
+      Sum(&BJPsumt,&jpBsum[q]);
+      Max(&BHTmaxt,&jpBmax[q]);
+      Max(&BJPmaxt,&jpBsum[q]);
+    }
+  
     ///****************************ENDCAP2004****************************************************//////////////////////////////////
     ///****************************////////////////////////////////////**************************//////////////////////////////////
     //Tower 01TA01 has sec=1,sub=1,eta=1
@@ -427,8 +510,8 @@ Int_t StRFEmcTrigMaker::Make(){
     //tp=30 is defined as Eid 3-6 + 15-18
     //tp=60 is defined as Eid 7-11 + 19-23	
 
-    StDetectorId emcId=StDetectorId(kEndcapEmcTowerId);
-    EmcDet = EmcCol->detector(emcId); //EEMC tower detector number
+    StDetectorId EemcId=StDetectorId(kEndcapEmcTowerId);
+    EmcDet = EmcCol->detector(EemcId); //EEMC tower detector number
     assert(EmcDet);
     for (uint mod=1;mod<=EmcDet->numberOfModules();mod++){
       StEmcModule* module=EmcDet->module(mod); 
@@ -474,6 +557,7 @@ Int_t StRFEmcTrigMaker::Make(){
       //printf("q=%d; JPmax=%d ,JPsum=%d\n",q,jpEmax[q],jpEsum[q]);
     }   
     printf("EJPsum=%d ,EHTmax=%d,EJPmax=%d\n",EJPsumt,EHTmaxt,EJPmaxt);
+    printf("BJPsum=%d ,BHTmax=%d,BJPmax=%d\n",BJPsumt,BHTmaxt,BJPmaxt);
   }
   if(!EmcCol) cout << "No StEvent info!" << endl;  
  }
