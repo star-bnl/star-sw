@@ -17,7 +17,7 @@
 // For now, these methods just test intersection with the central plane
 // of the detector using a straight line projection of the track node.
 StiIntersection StiMaterialInteraction::findIntersection(
-    StiKalmanTrackNode *pNode, StiDetector *pDetector,
+    const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
     double &dXlocal, double &dThickness, double &dDensity){
 
   switch(pDetector->getShape()->getShapeCode()){
@@ -37,13 +37,13 @@ StiIntersection StiMaterialInteraction::findIntersection(
 } // findIntersection
 
 StiIntersection StiMaterialInteraction::findPlanarIntersection(
-    StiKalmanTrackNode *pNode, StiDetector *pDetector,
+    const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
     double &dXlocal, double &dThickness, double &dDensity){
 
   StiPlacement *pPlacement = pDetector->getPlacement();
   StiPlanarShape *pShape = dynamic_cast<StiPlanarShape *>(
       pDetector->getShape());
-  StiDetector *pDetectorNode = pNode->getDetector();
+  const StiDetector *pNodeDetector = pNode->getDetector();
 
   //---------------------------------------------------
   // first, do the intersection of the node's momentum 
@@ -58,23 +58,21 @@ StiIntersection StiMaterialInteraction::findPlanarIntersection(
   // get normals to plane in global coords
   StThreeVectorD normal(1., 0., 0.);
   normal.rotateZ(pPlacement->getNormalRefAngle());
-  StThreeVectorD nodeNormal(1., 0., 0.);
-  nodeNormal.rotateZ(pDetectorNode->getPlacement()->getNormalRefAngle());
-
-  // get vector to detector center in global coords
-  double dDetectorX = pPlacement->getCenterRadius() *
-      cos(pPlacement->getCenterRefAngle());
-  double dDetectorY = pPlacement->getCenterRadius() *
-      sin(pPlacement->getCenterRefAngle());
-  StThreeVectorD center(dDetectorX, dDetectorY, pPlacement->getZcenter());
 
   // get vector to node in global coords
   StThreeVectorD node(pNode->fX, pNode->fP0, pNode->fP1);
   node.rotateZ(pNode->fAlpha);
 
-  // find intersection in global coords
-  StThreeVectorD nodeToIntersection = momentum*((center - node).dot(normal)/
-                                                momentum.dot(normal));
+  // find the coefficent for momentum vector which extends it to
+  // the intersection point, then the intersection.
+  double momentumCoefficient = 
+      (pPlacement->getNormalRadius() - node.dot(normal))/
+      momentum.dot(normal);
+  // physically, we only want a negative coefficient.  We are tracking
+  // outside-in, which means we should be tracking in the negative
+  // momentum direction.
+  //if(momentumCoefficient>0.){ return kFailed; }
+  StThreeVectorD nodeToIntersection = momentumCoefficient*momentum;
   StThreeVectorD intersection = node + nodeToIntersection;
 
   //--------------------------------
@@ -83,10 +81,10 @@ StiIntersection StiMaterialInteraction::findPlanarIntersection(
 
   // just use the cosine between the momentum and the detector normal to
   // calculate thickness traversed
-  double dPathLengthDetector = pShape->getThickness()*
-      fabs(momentum.dot(normal)/momentum.mag());
-  double dPathLengthNodeDetector = pDetectorNode->getShape()->getThickness()*
-      fabs(momentum.dot(nodeNormal)/momentum.mag());
+  double dPathLengthDetector = findThickness(pDetector, &intersection, 
+                                             &momentum);
+  double dPathLengthNodeDetector = findThickness(pNodeDetector, &node, 
+                                                 &momentum);
 
   // subtract off the half-thicknesses traversed of in both detectors
   // to get the gap thickness traversed
@@ -95,17 +93,16 @@ StiIntersection StiMaterialInteraction::findPlanarIntersection(
 
   double dPathLength = dPathLengthDetector + dPathLengthGap;
 
-  cout << "pathLengthDetector=" << dPathLengthDetector
-       << ", pathLengthNodeDetector=" << dPathLengthNodeDetector
-       << ", pathLengthGap-=" << dPathLengthGap
-       << ", pathLength=" << dPathLength << endl;
+  cout << "  pathLengthDetector=" << dPathLengthDetector << endl
+       << "  pathLengthNodeDetector=" << dPathLengthNodeDetector << endl
+       << "  pathLengthGap=" << dPathLengthGap << endl
+       << "  pathLength=" << dPathLength << endl;
 
   // get the weighted density average
   StiMaterial *pGas = pDetector->getGas();
   StiMaterial *pMaterial = pDetector->getMaterial();
   dDensity = (pGas->getDensity()*dPathLengthGap +
-              pMaterial->getDensity()*dPathLengthDetector)/
-      dPathLength;
+              pMaterial->getDensity()*dPathLengthDetector)/dPathLength;
 
   dThickness = (dPathLengthGap/dPathLength/pGas->getRadLength() +
                 dPathLengthDetector/dPathLength/pMaterial->getRadLength());
@@ -128,39 +125,198 @@ StiIntersection StiMaterialInteraction::findPlanarIntersection(
   double dOuterZ = dInnerZ + 2.*EDGE_HALF_WIDTH;
   
   // direct hit
-  if(fabs(dYoffset)<dInnerY && fabs(dZoffset)<dInnerZ){ return kCenter; }
+  if(fabs(dYoffset)<dInnerY && fabs(dZoffset)<dInnerZ){ return kHit; }
 
   // outside detector to positive or negative y
-  if(dYoffset>dOuterY && fabs(dYoffset)>fabs(dZoffset)){  return kNorthOut; }
-  if(dYoffset<-dOuterY && fabs(dYoffset)>fabs(dZoffset)){ return kSouthOut; }
+  if(dYoffset>dOuterY && fabs(dYoffset)>fabs(dZoffset)){
+    return kMissPhiPlus; 
+  }
+  if(dYoffset<-dOuterY && fabs(dYoffset)>fabs(dZoffset)){
+    return kMissPhiMinus;
+  }
 
   // outside detector to positive or negative z (west or east)
-  if(dZoffset>dOuterZ){  return kWestOut; }
-  if(dZoffset<-dOuterZ){ return kEastOut; }
+  if(dZoffset>dOuterZ){  return kMissZplus; }
+  if(dZoffset<-dOuterZ){ return kMissZminus; }
 
   // on positive or negative y edge
-  if(dYoffset>0 && dYoffset>fabs(dZoffset)){  return kNorthEdge; }
-  if(dYoffset<0 && dYoffset<-fabs(dZoffset)){ return kSouthEdge; }
+  if(dYoffset>0 && dYoffset>fabs(dZoffset)){  return kEdgePhiPlus; }
+  if(dYoffset<0 && dYoffset<-fabs(dZoffset)){ return kEdgePhiMinus; }
 
   // on positive or negative z edge
-  if(dZoffset>0){ return kWestEdge; }
-  if(dZoffset<0){ return kEastEdge; }
+  if(dZoffset>0){ return kEdgeZplus; }
+  if(dZoffset<0){ return kEdgeZminus; }
 
   return kFailed;
 
 } // findPlanarIntersection
 
 StiIntersection StiMaterialInteraction::findCylindricalIntersection(
-    StiKalmanTrackNode *pNode, StiDetector *pDetector,
+    const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
     double &dXlocal, double &dThickness, double &dDensity){
+
+  StiPlacement *pPlacement = pDetector->getPlacement();
+  StiCylindricalShape *pShape = dynamic_cast<StiCylindricalShape *>(
+      pDetector->getShape());
+  const StiDetector *pNodeDetector = pNode->getDetector();
+
+  //---------------------------------------------------
+  // first, do the intersection of the node's momentum 
+  // vector with the detector cylinder in global coords.
+
+  // get momentum of node in global coords
+  double adMomentum[3];
+  pNode->getMomentum(adMomentum);
+  StThreeVectorD momentum(adMomentum[0], adMomentum[1], adMomentum[2]);
+  momentum.rotateZ(pNode->fAlpha);
+  
+  // get vector to node in global coords
+  StThreeVectorD node(pNode->fX, pNode->fP0, pNode->fP1);
+  node.rotateZ(pNode->fAlpha);
+
+  // get "transverse" vectors used in calculating intersection
+  StThreeVectorD zHat(0., 0., 1.);
+  StThreeVectorD momentumPerp = momentum.cross(zHat);
+  StThreeVectorD nodePerp = node.cross(zHat);
+
+  // first, test for any intersection at all
+  double radius = pPlacement->getNormalRadius();
+  double determinant = radius*radius*momentumPerp.mag2() -
+      node.dot(momentumPerp)*node.dot(momentumPerp);
+  if(determinant<0.){ return kFailed; }
+
+  // find the coefficent for momentum vector which extends it to
+  // the intersection point, then the intersection.
+  double momentumCoefficient = 
+      (-nodePerp.dot(momentumPerp) + sqrt(determinant))/momentumPerp.mag2();
+  double momentumCoefficientAlternate = 
+      (-nodePerp.dot(momentumPerp) - sqrt(determinant))/momentumPerp.mag2();
+  // for now, take smaller root...this may not always be right
+  if(fabs(momentumCoefficient)>fabs(momentumCoefficientAlternate)){
+    momentumCoefficient = momentumCoefficientAlternate; 
+  }
+
+  // physically, we only want a negative coefficient.  We are tracking
+  // outside-in, which means we should be tracking in the negative
+  // momentum direction.
+  //if(momentumCoefficient>0.){ return kFailed; }
+  StThreeVectorD nodeToIntersection = momentumCoefficient*momentum;
+  StThreeVectorD intersection = node + nodeToIntersection;
+
+  //--------------------------------
+  // determine thickness and density
+  // of the region travsersed
+
+  // just use the cosine between the momentum and the detector normal to
+  // calculate thickness traversed
+  double dPathLengthDetector = findThickness(pDetector, &intersection, 
+                                             &momentum);
+  double dPathLengthNodeDetector = findThickness(pNodeDetector, &node, 
+                                                 &momentum);
+
+  // subtract off the half-thicknesses traversed of in both detectors
+  // to get the gap thickness traversed
+  double dPathLengthGap = nodeToIntersection.mag() - dPathLengthDetector/2. -
+      dPathLengthNodeDetector/2.;
+
+  double dPathLength = dPathLengthDetector + dPathLengthGap;
+
+  cout << "  pathLengthDetector=" << dPathLengthDetector << endl
+       << "  pathLengthNodeDetector=" << dPathLengthNodeDetector << endl
+       << "  pathLengthGap=" << dPathLengthGap << endl
+       << "  pathLength=" << dPathLength << endl;
+
+  // get the weighted density average
+  StiMaterial *pGas = pDetector->getGas();
+  StiMaterial *pMaterial = pDetector->getMaterial();
+  dDensity = (pGas->getDensity()*dPathLengthGap +
+              pMaterial->getDensity()*dPathLengthDetector)/dPathLength;
+
+  dThickness = (dPathLengthGap/dPathLength/pGas->getRadLength() +
+                dPathLengthDetector/dPathLength/pMaterial->getRadLength());
+
+  //--------------------------------
+  // rotate to local and determine 
+  // if & where it hit the detector
+
+  intersection.rotateZ(-pPlacement->getNormalRefAngle());
+  dXlocal = intersection.x();
+
+  // get offsets of intersection from center
+  double dPhiOffset = intersection.phi();
+  double dZoffset = intersection.z() - pPlacement->getZcenter();
+
+  // find limits of various regions
+  double dInnerPhi = pShape->getOpeningAngle()/2. - EDGE_HALF_WIDTH/radius;
+  double dOuterPhi = dInnerPhi + 2.*EDGE_HALF_WIDTH/radius;
+  double dInnerZ = pShape->getHalfDepth() - EDGE_HALF_WIDTH;
+  double dOuterZ = dInnerZ + 2.*EDGE_HALF_WIDTH;
+  
+  // direct hit
+  if(fabs(dPhiOffset)<dInnerPhi && fabs(dZoffset)<dInnerZ){ return kHit; }
+
+  // outside detector to positive or negative y
+  if(dPhiOffset>dOuterPhi && fabs(dPhiOffset)>fabs(dZoffset)){  
+    return kMissPhiPlus; 
+  }
+  if(dPhiOffset<-dOuterPhi && fabs(dPhiOffset)>fabs(dZoffset)){ 
+    return kMissPhiMinus; 
+  }
+
+  // outside detector to positive or negative z (west or east)
+  if(dZoffset>dOuterZ){  return kMissZplus; }
+  if(dZoffset<-dOuterZ){ return kMissZminus; }
+
+  // on positive or negative y edge
+  if(dPhiOffset>0 && dPhiOffset>fabs(dZoffset)){  return kEdgePhiPlus; }
+  if(dPhiOffset<0 && dPhiOffset<-fabs(dZoffset)){ return kEdgePhiMinus; }
+
+  // on positive or negative z edge
+  if(dZoffset>0){ return kEdgeZplus; }
+  if(dZoffset<0){ return kEdgeZminus; }
+
   return kFailed;
 } // findCylindricalIntersection
 
 StiIntersection StiMaterialInteraction::findConicalIntersection(
-    StiKalmanTrackNode *pNode, StiDetector *pDetector,
+    const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
     double &dXlocal, double &dThickness, double &dDensity){
   return kFailed;
 } // findConicalIntersection
+
+// returns thickness*(direction dot normal at point).
+// all coordinates are assumed to be global.  pDirection does not have to
+// be normalized.
+// normalized.
+// returns -1 on failure.
+double StiMaterialInteraction::findThickness(const StiDetector *pDetector,
+                                             const StThreeVectorD *pPoint,
+                                             const StThreeVectorD *pDirection){
+
+  double dAlpha = pDetector->getPlacement()->getNormalRefAngle();
+  double dThickness = pDetector->getShape()->getThickness();
+
+  StThreeVectorD normal(1., 0., 0.);
+  normal.rotateZ(dAlpha);
+  StThreeVectorD point = *pPoint;
+
+  switch(pDetector->getShape()->getShapeCode()){
+    case kCylindrical:
+        // get local azimuthal angle of point
+        point.rotateZ(-dAlpha);
+        // rotate normal by this angle
+        normal.rotateZ(point.phi());
+    case kPlanar:
+        dThickness *= normal.dot(*pDirection)/pDirection->mag();
+        break;
+    case kConical:
+    default:
+        dThickness = -1.;
+        break;
+  }
+
+  return dThickness;
+}
 
 
 

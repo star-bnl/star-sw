@@ -671,12 +671,6 @@ double StiKalmanTrackNode::getMassHypothesis()
 	return massHypothesis;
 }
 
-void StiKalmanTrackNode::setDetector(const StiDetector * det)
-{
-  detector = det;
-}
-
-
 ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 {
 	// print to the ostream "os" the parameters of this node 
