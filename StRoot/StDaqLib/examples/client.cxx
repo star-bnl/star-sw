@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client.cxx,v 1.6 2000/01/04 20:55:05 levine Exp $
+ * $Id: client.cxx,v 1.7 2000/01/14 17:54:26 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: sample top-level code sould be used as a tutorial
@@ -14,6 +14,9 @@
  *
  ***************************************************************************
  * $Log: client.cxx,v $
+ * Revision 1.7  2000/01/14 17:54:26  levine
+ * example use of TRG_Reader
+ *
  * Revision 1.6  2000/01/04 20:55:05  levine
  * Implemented memory-mapped file access in EventReader.cxx. Old method
  * (via seeks) is still possible by setting mmapp=0 in
@@ -149,6 +152,20 @@ int main(int argc, char *argv[])
       else
 	offset = -1;
 
+      TRG_Reader *tr = getTRGReader(er);
+      if(!tr) {
+	cout << "Error creating TRG_Reader: " << er->errstr() << endl;
+	close(fd);
+	exit(0);
+      } 
+      else printf("created TRG_Reader!!!\n");
+      fprintf(er->logfd,"\n\n================\n\nHerb's formatted TRGD dump:\n\n\n");
+      tr->pBankTRGD->PrintAllTheData(er->logfd);
+      fprintf(er->logfd,"\n\n================\n\nMike's formatted TRGD dump:\n\n\n");
+      tr->pBankTRGD->PrintDataCompact(er->logfd);
+
+#ifdef DOTPC      
+
       DetectorReader *dr = getDetectorReader(er, "TPCV2P0");
       if(!dr) {
 	cout << "Error creating TPC_Reader: " << er->errstr() << endl;
@@ -245,6 +262,8 @@ int main(int argc, char *argv[])
 	}
 #endif
       delete dr; // remove TPC reader
+#endif
+      delete tr; // remove TRG reader
       delete er;
     }
   close(fd);
