@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.79 2004/04/07 18:17:45 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.80 2004/04/08 00:13:09 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.80  2004/04/08 00:13:09  perev
+// Again move from .data to .const
+//
 // Revision 1.79  2004/04/07 18:17:45  perev
 // Cleanup, DB data now in .const as should be
 //
@@ -558,7 +561,7 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
   ds = ds->GetParent();
 
   TString path = ds->Path();
-  const char *cc = strchr(strstr(path,"/.data/")+7,'/');
+  const char *cc = strchr(strstr(path,"/.const/")+8,'/');
   if (cc) dbfile += cc;
   dbfile += "/"; dbfile += left->GetName();
   gSystem->ExpandPathName(dbfile);
@@ -721,7 +724,7 @@ Int_t  St_db_Maker::Save(const char *path,const TDatime *newtime)
   while((ds = nextDS())) {
     if (!ds->InheritsFrom(TTable::Class()))continue;    
     ts = ds->Path();
-    i = ts.Index(".data/"); assert(i>0); ts.Replace(0  ,i+6,"");
+    i = ts.Index(".const/"); assert(i>0); ts.Replace(0  ,i+7,"");
     if (ts.Index(".")>=0)		continue;
     l = ts.Length();
     for (i=0;i<l;i++) {
