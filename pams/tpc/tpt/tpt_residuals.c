@@ -39,7 +39,7 @@ long type_of_call tpt_residuals_(
 **:               res_h   - header Structure for res
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
-float xlocal[3]; /* scratch position */
+float xlocal[]={0,0,0}; /* scratch position */
 float bfield[3]; /* magnetic field */
 #define LEN 300000
 long  loc_hit[LEN]; /* array to index the hit table sorted by track */
@@ -51,7 +51,7 @@ long id_track;
 long newmaxlen; /* new rowcount for the resolution table */
 float x1,y1,z1;
 float xc,yc,psic,radius;
-float phi, phi0, tanl;
+float phi, phi0,phidif, tanl;
 float arclen;
 TCL_TPHIT_ST *jhit;
 
@@ -122,9 +122,11 @@ while (l<=hit_h[0].nok && hit[loc_hit[l]].track>0)
 	/* now calculate the track length, get the azimuthal angle (with respect to the center)
         for the current point */
         phi = atan2(jhit->y-yc,jhit->x-xc);
-        arclen=arclen+radius*(phi-phi0)*tanl;
+        phidif = fabs(phi-phi0);
+        phidif = (phidif<C_2PI-phidif) ? phidif : C_2PI-phidif;
+        arclen=arclen+radius*phidif;
         phi0 = phi;
-        res[i].resz=jhit->z-z1-arclen;
+        res[i].resz=jhit->z-z1-arclen*tanl;
         i++;
     	if (i >= res_h->maxlen) { /* Increase table */
              newmaxlen = res_h->maxlen*1.3;
