@@ -1,6 +1,8 @@
 #ifndef STSSDSTRIP_HH
 #define STSSDSTRIP_HH
 
+#define MAXIDMCHIT 5
+
 class StSsdStrip
 {
  public:

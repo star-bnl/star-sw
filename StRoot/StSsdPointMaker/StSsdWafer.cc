@@ -2279,14 +2279,14 @@ int StSsdWafer::setMatcheds(sdm_geom_par_st *geom_par, StSsdPoint *Point, StSsdC
   int pHitIndex   = 0;
   int nHitIndex   = 0;
   int sptHitIndex = 0;
-  for (pHitIndex = 0; pHitIndex < 5; pHitIndex++)
+  for (pHitIndex = 0; pHitIndex < MAXIDMCHIT; pHitIndex++)
     {
-      for (nHitIndex = 0; nHitIndex < 5; nHitIndex++)
+      for (nHitIndex = 0; nHitIndex < MAXIDMCHIT; nHitIndex++)
 	{
 	  if ((pMatched->getIdMcHit(pHitIndex))
 	      &&(nMatched->getIdMcHit(nHitIndex))
               &&(pMatched->getIdMcHit(pHitIndex) == nMatched->getIdMcHit(nHitIndex))
-	      &&(sptHitIndex < 5))
+	      &&(sptHitIndex < MAXIDMCHIT))
 	      Point->setNMchit(pMatched->getIdMcHit(pHitIndex),sptHitIndex++);
 	}
     }
