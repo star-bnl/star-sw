@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.13 2003/01/10 16:40:36 oldi Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.14 2003/03/03 16:24:36 aihong Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -102,6 +102,10 @@ Int_t StFlowCumulantMaker::Init() {
   xLabel = "Pseudorapidity";
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }  
   
+  profScale=1000.;// in new root version, error does not show correctly 
+  //if the number is too small. this is a trick to walkaround.
+
+
   if (mOldMethod) 
         r0 = 0.06;
   else  r0 = 1.5; // this number should be small, but it could bring numerical 
@@ -407,7 +411,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.13 2003/01/10 16:40:36 oldi Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.14 2003/03/03 16:24:36 aihong Exp $");
 
   return StMaker::Init();
 }
@@ -630,15 +634,15 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 	  
 	  for (int ord = 0; ord < Flow::nCumulDiffOrders; ord++) {
 	    histFull[k].histFullHar[j].mHistCumul2D[ord]->
-	      Fill(yOrEta, pt, cumuTemp[ord]); 
+	      Fill(yOrEta, pt,  ((ord>0) ? cumuTemp[ord]*profScale : cumuTemp[ord])); 
 	    histFull[k].histFullHar[j].mHistCumulEta[ord]->
-	      Fill(yOrEta, cumuTemp[ord]); 
+	      Fill(yOrEta, ((ord>0) ? cumuTemp[ord]*profScale : cumuTemp[ord])); 
 	    histFull[k].histFullHar[j].mHistCumulPt[ord]->
-	      Fill(pt, cumuTempFlip[ord]); 
+	      Fill(pt, ((ord>0) ? cumuTempFlip[ord]*profScale : cumuTempFlip[ord])); 
 	  }	  
 	  
 	  for (int ord = 0; ord < Flow::nCumulDiffOrders; ord++)
-	    histFull[k].mHistCumul[ord]->Fill(order, cumuTempFlip[ord] );
+	    histFull[k].mHistCumul[ord]->Fill(order, ((ord>0) ? cumuTempFlip[ord]*profScale : cumuTempFlip[ord]) );
 	}
       }
     }  
@@ -678,6 +682,7 @@ Int_t StFlowCumulantMaker::Finish() {
       histFull[k].mHist_v[ord]->SetXTitle("harmonic");
       histFull[k].mHist_v[ord]->SetYTitle("v (%)");
       delete histTitle;
+if (ord>0)  histFull[k].mHist_v[ord]->Scale(1./profScale);
       AddHist(histFull[k].mHist_v[ord]);
     }
     
@@ -797,6 +802,8 @@ Int_t StFlowCumulantMaker::Finish() {
 	histFull[k].histFullHar[j].mHist_v2D[ord]->SetZTitle("v (%)");
 	delete histTitle;
 	
+if (ord>0) histFull[k].histFullHar[j].mHist_v2D[ord]->Scale(1./profScale);
+
 	histTitle = new TString("Flow_Cumul_vEta_Order");
 	histTitle->Append(*theCumulOrder);
 	histTitle->Append("_Sel");
@@ -811,6 +818,8 @@ Int_t StFlowCumulantMaker::Finish() {
 	histFull[k].histFullHar[j].mHist_vEta[ord]->SetYTitle("v (%)");
 	delete histTitle;
 	
+if (ord>0) histFull[k].histFullHar[j].mHist_vEta[ord]->Scale(1./profScale);
+
 	histTitle = new TString("Flow_Cumul_vPt_Order");
 	histTitle->Append(*theCumulOrder);
 	histTitle->Append("_Sel");
@@ -824,6 +833,9 @@ Int_t StFlowCumulantMaker::Finish() {
 	histFull[k].histFullHar[j].mHist_vPt[ord]->SetXTitle("Pt (GeV)");
 	histFull[k].histFullHar[j].mHist_vPt[ord]->SetYTitle("v (%)");
 	delete histTitle;
+
+if (ord>0) histFull[k].histFullHar[j].mHist_vPt[ord]->Scale(1./profScale);
+
       }
       
       if (mOldMethod) {
@@ -993,6 +1005,7 @@ Int_t StFlowCumulantMaker::Finish() {
   (*cumulConstants)(11)=r0;
   (*cumulConstants)(12)=m_M;
   (*cumulConstants)(13)=(strlen(pFlowSelect->PidPart()) != 0) ? 1 : 0;//1,pidflow
+  (*cumulConstants)(14)=double(profScale);//1,pidflow
 
   cumulConstants->Write("CumulConstants",TObject::kOverwrite | TObject::kSingleKey);
 
@@ -1036,6 +1049,9 @@ void StFlowCumulantMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.14  2003/03/03 16:24:36  aihong
+// blow up 4-part cumulant by 1000 in order to let error bars calculated by ROOT
+//
 // Revision 1.13  2003/01/10 16:40:36  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.

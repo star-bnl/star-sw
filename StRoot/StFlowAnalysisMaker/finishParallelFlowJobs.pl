@@ -205,12 +205,13 @@ if ($libVersion !~ m/$starVer/) {
  print tempMacro  "    int nCumulInteg_qMax  = (*cumulConstants)(8);  \n";
  print tempMacro  "    int nCumulDiffOrders  = (*cumulConstants)(9);  \n";
  print tempMacro  "    int nCumulDiff_qMax   = (*cumulConstants)(10); \n";
- print tempMacro  "    //  double r0  = (*cumulConstants)(11);        \n";
- print tempMacro  "    //  int m_M    = (*cumulConstants)(12);        \n";
- print tempMacro  "    //  int isPidFlow    = (*cumulConstants)(13);        \n";
- print tempMacro  "     double r0 = 1.5;                              \n";
- print tempMacro  "     int    m_M = 1;                               \n";
- print tempMacro  "     int    isPidFlow = 0;                               \n";
+ print tempMacro  "    double r0             = (*cumulConstants)(11);        \n";
+ print tempMacro  "    int m_M               = (*cumulConstants)(12);        \n";
+ print tempMacro  "    int isPidFlow         = (*cumulConstants)(13);        \n";
+ print tempMacro  "    double profScale      = (*cumulConstants)(14);        \n";
+ print tempMacro  "   //  double r0 = 1.5;                              \n";
+ print tempMacro  "   //  int    m_M = 1;                               \n";
+ print tempMacro  "   //  int    isPidFlow = 0;                               \n";
  print tempMacro  "    TObjString* oldNewTag = (TObjString* )histFile->Get(\"CumulMethodTag\"); \n";
  print tempMacro  "    int isNewMethod = ((oldNewTag->GetString()).Contains(\"cumulNew\")) ? 1 : 0;  \n";
 
@@ -231,6 +232,7 @@ if ($libVersion !~ m/$starVer/) {
  print tempMacro  "     fprintf(f, \"const int m_M               = %d; \\n\", m_M);  \n";
  print tempMacro  "     fprintf(f, \"const int isPidFlow         = %d; \\n\", isPidFlow);  \n";
  print tempMacro  "     fprintf(f, \"const double r0             = %f; \\n\", r0);  \n";
+ print tempMacro  "     fprintf(f, \"const double profScale      = %f; \\n\", profScale);  \n";
  print tempMacro  "     fclose(f); \n";
  print tempMacro  "   } \n";
 

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.h,v 1.2 2003/01/10 16:40:47 oldi Exp $
+// $Id: StFlowCumulantMaker.h,v 1.3 2003/03/03 16:24:37 aihong Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -55,7 +55,7 @@ public:
   void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
 
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowCumulantMaker.h,v 1.2 2003/01/10 16:40:47 oldi Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowCumulantMaker.h,v 1.3 2003/03/03 16:24:37 aihong Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -74,6 +74,7 @@ private:
   StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
   StFlowSelection* pFlowSelect; //! selection object
 
+  Double_t  profScale;          //! profile scale
   Double_t  r0;                 //! r0 in the cumulant paper.
   Double_t  r0Sq;               //! square of r0.
   UInt_t    m_M;                //! m in the cumulant paper.
@@ -148,6 +149,9 @@ inline void StFlowCumulantMaker::SetOldMethod(Bool_t flag)
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.h,v $
+// Revision 1.3  2003/03/03 16:24:37  aihong
+// blow up 4-part cumulant by 1000 in order to let error bars calculated by ROOT
+//
 // Revision 1.2  2003/01/10 16:40:47  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.
