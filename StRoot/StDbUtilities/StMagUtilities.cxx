@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.40 2003/10/28 02:09:45 perev Exp $
+ * $Id: StMagUtilities.cxx,v 1.41 2004/01/06 20:04:41 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,8 +11,12 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.41  2004/01/06 20:04:41  jhthomas
+ * Add new routine to handle a shorted ring on the East end of the TPC.
+ * Also new routine to help redo the space charge calculations.
+ *
  * Revision 1.40  2003/10/28 02:09:45  perev
- * r<IFCRadius skipped
+ *  r<IFCRadius skipped
  *
  * Revision 1.39  2003/10/25 00:57:02  perev
  * Redundand debug print removed
@@ -169,8 +173,9 @@ enum   DistortSelect                                                  <br>
   kMembrane          = 0x80,     // Bit 8                             <br>
   kEndcap            = 0x100,    // Bit 9                             <br>
   kIFCShift          = 0x200,    // Bit 10                            <br>
-  kSpaceCharge       = 0x400     // Bit 11                            <br>
-  kSpaceChargeR2     = 0x800     // Bit 12                            <br>
+  kSpaceCharge       = 0x400,    // Bit 11                            <br>
+  kSpaceChargeR2     = 0x800,    // Bit 12                            <br>
+  kShortedRing       = 0x1000    // Bit 13                            <br>
 } ;                                                                   <br>
 
 Note that the option flag used in the chain is 2x larger 
@@ -208,7 +213,6 @@ static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
 static Float_t  gRescale = 1.0 ;        // Multiplicative factor (allows re-scaling wrt which map read)
 
-
 //________________________________________
 
 
@@ -216,8 +220,7 @@ ClassImp(StMagUtilities)
 
 /// StMagUtilities default constructor
 
-StMagUtilities::StMagUtilities ()
-  
+StMagUtilities::StMagUtilities ()  
 {
   cout << "StMagUtilities:: Unfortunately, instantiation with StMagUtilities(<empty>) is obsolete" << endl ;
   cout << "StMagUtilities:: You must specify DataBase pointers or specify the requested Field settings manually" << endl ;
@@ -227,145 +230,151 @@ StMagUtilities::StMagUtilities ()
 /// StMagUtilities constructor using the DataBase
 
 StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
-
 { 
-  gMap = kMapped ;                    // Do once & Select the B field map (mapped field or constant)
-  fSpaceCharge = StDetectorDbSpaceCharge::instance() ;  // Initialize the DB for SpaceCharge (EbyE)
-  fSpaceChargeR2 = fSpaceCharge ;     // Temporary until DB has a new entry !!!!!
-  fTpcVolts    = StDetectorDbTpcVoltages::instance() ;  // Initialize the DB for TpcVoltages
-  CommonStart( mode, dbin , dbin2 ) ; // Read the Magnetic and Electric Field Data Files, set constants
+  gMap = kMapped        ;    // Select the B field shape (kMapped == mapped field, kConstant == constant field )
+  SetDb ( dbin, dbin2 ) ;    // Put DB pointers into private/global space
+  GetMagFactor()        ;    // Get the magnetic field scale factor from the DB
+  GetTPCParams()        ;    // Get the TPC parameters from the DB
+  GetTPCVoltages()      ;    // Get the TPC Voltages from the DB
+  GetSpaceCharge()      ;    // Get the spacecharge variable from the DB
+  GetSpaceChargeR2()    ;    // Get the spacecharge variable R2 from the DB
+  CommonStart( mode )   ;    // Read the Magnetic and Electric Field Data Files, set constants
 }
 
 
 /// StMagUtilities constructor not using the DataBase
 
 StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t mode )       
-
 { 
-  gFactor = factor ;
-  gMap = map ;                        // Do once & select the requested map (mapped or constant)
-  fSpaceCharge = 0 ;                  // Do not get SpaceCharge out of the DB - use default in CommonStart
-  fSpaceChargeR2 = 0 ;                // Do not get SpaceChargeR2 out of the DB - use default in CommonStart
-  fTpcVolts = 0 ;                     // Do not get TpcVoltages out of the DB - use default in CommonStart
-  CommonStart( mode, 0 , 0 ) ;        // Read the Magnetic and Electric Field Data Files, set constants
+  gFactor = factor    ;      // Manually selected magnetic field scale factor
+  gMap    = map       ;      // Select the type of field (mapped field shape or constant field)
+  thedb2  = 0         ;      // Do not get MagFactor from the DB       - use manual selection above
+  thedb   = 0         ;      // Do not get TPC parameters from the DB  - use defaults in CommonStart
+  fTpcVolts      =  0 ;      // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
+  fSpaceCharge   =  0 ;      // Do not get SpaceCharge out of the DB   - use defaults in CommonStart
+  fSpaceChargeR2 =  0 ;      // Do not get SpaceChargeR2 out of the DB - use defaults in CommonStart
+  CommonStart( mode ) ;      // Read the Magnetic and Electric Field Data Files, set constants
 }
+
 
 //________________________________________
 
 
 void StMagUtilities::SetDb ( StTpcDb* dbin , TDataSet* dbin2 )
- 
 {
-  thedb = dbin ;
+  thedb  = dbin  ;
   thedb2 = dbin2 ;
+}
+
+void StMagUtilities::GetMagFactor ()  
+{ 
+  St_MagFactor *fMagFactor  =  (St_MagFactor *) thedb2->Find("MagFactor");  assert(fMagFactor) ;
+  gFactor        =  (*fMagFactor)[0].ScaleFactor ;         // Set the magnetic field scale factor
+}
+
+void StMagUtilities::GetTPCParams ()  
+{ 
+  StarDriftV     =  1e-6*thedb->DriftVelocity() ;        
+  TPC_Z0         =  thedb->PadPlaneGeometry()->outerSectorPadPlaneZ()-thedb->WirePlaneGeometry()
+                    ->outerSectorFrischGridPadPlaneSeparation() ;    
+  XTWIST         =  1e3*thedb->GlobalPosition()->TpcEFieldRotationY() ; 
+  YTWIST         =  -1e3*thedb->GlobalPosition()->TpcEFieldRotationX() ;            
+  IFCShift       =  thedb->FieldCage()->InnerFieldCageShift();
+  EASTCLOCKERROR =  1e3*thedb->FieldCage()->EastClockError();
+  WESTCLOCKERROR =  1e3*thedb->FieldCage()->WestClockError();
+}
+
+void StMagUtilities::GetTPCVoltages ()  
+{ 
+  fTpcVolts      =  StDetectorDbTpcVoltages::instance() ;  // Initialize the DB for TpcVoltages
+  CathodeV       =  fTpcVolts->getCathodeVoltage() * 1000 ; 
+  GG             =  fTpcVolts->getGGVoltage() ; 
+}
+
+void StMagUtilities::GetSpaceCharge ()  
+{ 
+  fSpaceCharge   =  StDetectorDbSpaceCharge::instance()  ; 
+  SpaceCharge    =  fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ; 
+}
+
+void StMagUtilities::GetSpaceChargeR2 ()  
+{ 
+  fSpaceChargeR2 =  StDetectorDbSpaceCharge::instance() ;  // Temporary until the DB has a new entry! 
+  SpaceChargeR2  =  0.525 * fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ; 
 }
 
 
 //________________________________________
 
-/// Initialization method.  This will also sort the options received by the tpt Maker
 
-void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
+/// Initialization method.  This will sort and apply the options received by the tpt Maker
+
+void StMagUtilities::CommonStart ( Int_t mode )
 
 {
 
-  Float_t  B[3], X[3] = { 0, 0, 0 } ;
-  Float_t  OmegaTau ;           // For an electron, OmegaTau carries the sign opposite of B 
+  //  These items are not taken from the DB but they should be ... some day.
+      IFCRadius   =    47.45 ;     // Radius of the Inner Field Cage
+      OFCRadius   =    200.0 ;     // Radius of the Outer Field Cage
+  //  End of list of items that might come from the DB
 
-  // These items are available in the DB
-  StarDriftV  =     5.45 ;      // Drift Velocity (cm/microSec) Magnitude
-  TPC_Z0      =    209.3 ;      // Z location of STAR TPC Ground wire Plane (cm)
-  XTWIST      =   -0.165 ;      // X Displacement of West end of TPC wrt magnet (mRad)
-  YTWIST      =    0.219 ;      // Y Displacement of West end of TPC wrt magnet (mRad)
-  SpaceCharge =      0.0 ;      // Space Charge parameter (uniform in the TPC, Coulombs/Epsilon-nought)
-  SpaceChargeR2 =    0.0 ;      // Space Charge parameter (space charge from event ~1/R**2, Coulombs/Epsilon-nought)
-  IFCShift    =   0.0080 ;      // Shift of the IFC towards the West Endcap (cm) (2/1/2002)
-  CathodeV    = -31000.0 ;      // Cathode Voltage (volts)
-  GG          =   -127.5 ;      // Gating Grid voltage (volts)
-  EASTCLOCKERROR =   0.0 ;      // Phi rotation of East end of TPC in milli-radians
-  WESTCLOCKERROR = -0.43 ;      // Phi rotation of West end of TPC in milli-radians
-  // These items are not taken from the DB but they should be ... some day.
-  IFCRadius   =    47.45 ;      // Radius of the Inner Field Cage
-  OFCRadius   =    200.0 ;      // Radius of the Outer Field Cage
-  // End of list of items that might come from the DB
+  if ( thedb2 == 0 ) cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected BFIELD setting." << endl ; 
+  else  cout << "StMagUtilities::ComonSta  Magnetic Field scale factor is " << gFactor << endl ;
 
-  SetDb( dbin, dbin2 ) ;
-
-  if ( dbin != 0 )  // Initialize parameters to database values, if requested and where available
-    { 
-      StarDriftV  =  1e-6*thedb->DriftVelocity() ;        
-      TPC_Z0      =  thedb->PadPlaneGeometry()->outerSectorPadPlaneZ()-thedb->WirePlaneGeometry()
-	             ->outerSectorFrischGridPadPlaneSeparation() ;    
-      XTWIST      =  1e3*thedb->GlobalPosition()->TpcEFieldRotationY() ; 
-      YTWIST      =  -1e3*thedb->GlobalPosition()->TpcEFieldRotationX() ;            
-      IFCShift    =  thedb->FieldCage()->InnerFieldCageShift();
-      EASTCLOCKERROR = 1e3*thedb->FieldCage()->EastClockError();
-      WESTCLOCKERROR = 1e3*thedb->FieldCage()->WestClockError();
-      cout << "StMagUtilities::CommonSta  Using TPC parameters from DataBase. " << endl ; 
-    }
-  else
+  if ( thedb == 0 )
     {
+      StarDriftV  =     5.45 ;      // Drift Velocity (cm/microSec) Magnitude
+      TPC_Z0      =    208.7 ;      // Z location of STAR TPC Frisch Grid (Gating Grid) (cm)
+      XTWIST      =   -0.165 ;      // X Displacement of West end of TPC wrt magnet (mRad)
+      YTWIST      =    0.219 ;      // Y Displacement of West end of TPC wrt magnet (mRad)
+      IFCShift    =   0.0080 ;      // Shift of the IFC towards the West Endcap (cm) (2/1/2002)
+      EASTCLOCKERROR =   0.0 ;      // Phi rotation of East end of TPC in milli-radians
+      WESTCLOCKERROR = -0.43 ;      // Phi rotation of West end of TPC in milli-radians
       cout << "StMagUtilities::CommonSta  WARNING -- Using hard-wired TPC parameters. " << endl ; 
     }
+  else  cout << "StMagUtilities::CommonSta  Using TPC parameters from DataBase. " << endl ; 
+  
+  if ( fTpcVolts == 0 ) 
+    {
+      CathodeV    = -31000.0 ;      // Cathode Voltage (volts)
+      GG          =   -127.5 ;      // Gating Grid voltage (volts)
+      cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected TpcVoltages setting. " << endl ; 
+    }
+  else  cout << "StMagUtilities::CommonSta  Using TPC voltages from the DB."   << endl ; 
 
-  if ( fTpcVolts != 0 )     // Get TpcVoltages
+  if ( fSpaceCharge != 0 )          
     {
-      CathodeV = fTpcVolts->getCathodeVoltage() * 1000 ; 
-      GG       = fTpcVolts->getGGVoltage() ; 
-    }
-  else
-    {
-      cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected TpcVolages setting. " << endl ; 
-    }
-
-  if ( fSpaceCharge != 0  )  // Get SpaceCharge so it can be printed, below.
-    {
-      SpaceCharge   = fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ; 
-    }
-  else
-    {
+      SpaceCharge =      0.0 ;      // Space Charge parameter (uniform in the TPC, Coulombs/Epsilon-nought)
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected SpaceCharge settings. " << endl ; 
     }
+  else  cout << "StMagUtilities::CommonSta  Using SpaceCharge values from the DB." << endl ; 
 
-  if ( fSpaceChargeR2 != 0 )  // Get SpaceCharge so it can be printed, below.
+  if ( fSpaceChargeR2 != 0 )
     {
-      SpaceChargeR2 = fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ; 
-      SpaceChargeR2 *= 0.525 ; // Temporary until the DB has a new entry to cover this case
-    }
-  else
-    {
+      SpaceChargeR2 =    0.0 ;      // Space Charge parameter (space charge from event ~1/R**2, Coulombs/Epsilon-nought)
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected SpaceChargeR2 settings. " << endl ; 
     }
+  else  cout << "StMagUtilities::CommonSta  Using SpaceChargeR2 values from the DB." << endl ; 
 
-  if ( dbin2 != 0 )  // Initialize the DB for the Magnetic Field and set the scale factor
-    {
-      St_MagFactor *fMagFactor = (St_MagFactor *) thedb2->Find("MagFactor"); assert(fMagFactor);
-      gFactor = (*fMagFactor)[0].ScaleFactor;  // Set the magnetic field scale factor
-    }
-  else
-    {
-      cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected BFIELD setting. " << endl ; 
-    }
-
-  // Default behavior: no bits set gives you this default
+  // Parse the mode switch which was received from the Tpt maker
   // To turn on and off individual distortions, set these higher bits
+  // Default behavior: no bits set gives you the following defaults
 
   mDistortionMode = mode;
-  
-  if ( !( mode & ( kBMap | kPadrow13 | kTwist | kClock | kMembrane | kEndcap | kIFCShift | kSpaceCharge | kSpaceChargeR2 ))) 
+  if ( !( mode & ( kBMap | kPadrow13 | kTwist | kClock | kMembrane | kEndcap | kIFCShift | kSpaceCharge | kSpaceChargeR2 | kShortedRing ))) 
     {
-      mDistortionMode |= kBMap ;
-      mDistortionMode |= kPadrow13 ;
-      mDistortionMode |= kTwist ;
-      mDistortionMode |= kClock ;
-      mDistortionMode |= kIFCShift ;
-      printf("StMagUtilities::CommonSta  Default mode selection\n");
+       mDistortionMode |= kBMap ;
+       mDistortionMode |= kPadrow13 ;
+       mDistortionMode |= kTwist ;
+       mDistortionMode |= kClock ;
+       mDistortionMode |= kIFCShift ;
+       printf("StMagUtilities::CommonSta  Default mode selection\n");
     } 
-  else 
-    {
-      printf("StMagUtilities::CommonSta  Using mode option 0x%X\n",mode);
-    }
+  else printf("StMagUtilities::CommonSta  Using mode option 0x%X\n",mode);
  
+  Float_t  B[3], X[3] = { 0, 0, 0 } ;
+  Float_t  OmegaTau ;                       // For an electron, OmegaTau carries the sign opposite of B 
+
   ReadField() ;                             // Read the Magnetic and Electric Field Data Files
   BField(X,B) ;                             // Work in kGauss, cm and assume Bz dominates
 
@@ -376,9 +385,9 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
   StarMagE   =  TMath::Abs(CathodeV/TPC_Z0) ;           // STAR Electric Field (V/cm) Magnitude
   OmegaTau   =  -11.0 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note the sign of B is important 
 
-  Const_0    =  1. / ( 1. + ::pow( OmegaTau, 2 ) ) ;
-  Const_1    =  OmegaTau / ( 1. + ::pow( OmegaTau, 2 ) ) ;
-  Const_2    =  ::pow( OmegaTau, 2 ) / ( 1. + ::pow( OmegaTau, 2 ) ) ;
+  Const_0    =  1. / ( 1. +  OmegaTau*OmegaTau ) ;
+  Const_1    =  OmegaTau / ( 1. + OmegaTau*OmegaTau ) ;
+  Const_2    =  OmegaTau*OmegaTau / ( 1. + OmegaTau*OmegaTau ) ;
 
   cout << "StMagUtilities::DriftVel     =  " << StarDriftV << " cm/microsec" <<  endl ; 
   cout << "StMagUtilities::TPC_Z0       =  " << TPC_Z0 << " cm" << endl ; 
@@ -572,6 +581,13 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
 
   if (mDistortionMode & kSpaceChargeR2) { 
       UndoSpaceChargeR2Distortion ( Xprime1, Xprime2 ) ;
+      for (unsigned int i=0; i<3; ++i) {
+	  Xprime1[i] = Xprime2[i];
+      }
+  }
+
+  if (mDistortionMode & kShortedRing) { 
+      UndoShortedRingDistortion ( Xprime1, Xprime2 ) ;
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
@@ -978,25 +994,23 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 	  for ( Int_t j = 0 ; j < neR ; ++j ) 
 	    {
 	      r = eRadius[j] ;
-	      Double_t IntegralOverZ = 0 ;
-	      shiftEr[i][j] = IntegralOverZ ; 	    
-              if (r<IFCRadius) continue; //VP defence against divergency. NOt sure is is correct
+	      shiftEr[i][j] = 0.0 ; 	    
+              if (r < IFCRadius) continue; //VP defence against divergency. Not sure if correct.  JT - Yes, OK.
+	      Double_t IntegralOverZ = 0.0 ;
 	      for ( Int_t n = 1 ; n < Nterms ; ++n ) 
 		{
 		  Double_t k  = (2*n-1) * TMath::Pi() / TPC_Z0 ;
 		  Double_t Cn = -4.0 * IFCShift / ( k * TPC_Z0 ) ;
-                  Double_t BK0kOFCRadius = TMath::BesselK0( k*OFCRadius );
-		  Double_t BI0kOFCRadius = TMath::BesselI0( k*OFCRadius );
-                  Double_t Numerator =
-		    BK0kOFCRadius * TMath::BesselI1( k*r ) +
-		    BI0kOFCRadius * TMath::BesselK1( k*r ) ;
+		  Double_t Numerator =
+		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI1( k*r ) +
+		    TMath::BesselK1( k*r )         * TMath::BesselI0( k*OFCRadius ) ;
 		  Double_t Denominator =
-		    BK0kOFCRadius * TMath::BesselI0( k*IFCRadius ) -
-		    BI0kOFCRadius * TMath::BesselK0( k*IFCRadius );
-                  double qwe = Numerator / Denominator;
+		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI0( k*IFCRadius ) -
+		    TMath::BesselK0( k*IFCRadius ) * TMath::BesselI0( k*OFCRadius ) ;
 		  Double_t zterm = 1 + TMath::Cos( k*z ) ;
-		  IntegralOverZ += (Cn * zterm *qwe) ;
-                  if (n>10 && fabs(IntegralOverZ)*1.e-10>fabs(qwe)) break;
+		  Double_t qwe = Numerator / Denominator ;
+		  IntegralOverZ += Cn * zterm * qwe ;
+	          if ( n>10 && fabs(IntegralOverZ)*1.e-10 > fabs(qwe) ) break;
 		}
 	      if  ( eZList[i] < 0 )  IntegralOverZ = -1 * IntegralOverZ ;  // Force AntiSymmetry of solutions in Z
 	      shiftEr[i][j] = IntegralOverZ ; 	    }
@@ -1038,7 +1052,6 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 
 { 
   
-
   Float_t  Er_integral, Ephi_integral ;
   Double_t r, phi, z ;
 
@@ -1053,15 +1066,15 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 	  for ( Int_t j = 0 ; j < neR ; ++j ) 
 	    {
 	      r = eRadius[j] ;
-	      Double_t IntegralOverZ = 0 ;
-	      spaceEr[i][j] = 0. ; 
-              if (r<IFCRadius) continue;
+	      spaceEr[i][j] = 0.0 ; 
+              if (r < IFCRadius) continue; //VP defence against divergency. Not sure if correct.  JT - Yes, OK.
+	      Double_t IntegralOverZ = 0.0 ;
 	      for ( Int_t n = 1 ; n < Nterms ; ++n ) 
 		{
 		  Double_t k  = n * TMath::Pi() / TPC_Z0 ;  // Integrated Charge Density
-		  Double_t Zterm = TMath::Power(-1,(n+1)) * ( 1.0 - TMath::Cos( k * ( TPC_Z0 - z ) ) ) ;
+		  Double_t zterm = TMath::Power(-1,(n+1)) * ( 1.0 - TMath::Cos( k * ( TPC_Z0 - z ) ) ) ;
 		  //Double_t k  = (2*n-1) * TMath::Pi() / TPC_Z0 ;  // Uniform Charge Density
-		  //Double_t Zterm = 1.0 + TMath::Cos( k *  z ) ;   // Uniform Charge Density
+		  //Double_t zterm = 1.0 + TMath::Cos( k *  z ) ;   // Uniform Charge Density
 		  Double_t Cn = -4.0 / ( k*k*k * TPC_Z0 * StarMagE ) ;
 		  Double_t Numerator =
 		    TMath::BesselI1( k*r )         * TMath::BesselK0( k*OFCRadius ) -
@@ -1071,10 +1084,9 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 		  Double_t Denominator =
 		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI0( k*IFCRadius ) -
 		    TMath::BesselK0( k*IFCRadius ) * TMath::BesselI0( k*OFCRadius ) ;
-                  Double_t qwe = Numerator / Denominator;
-                  
-		  IntegralOverZ += Cn * Zterm * qwe ;
-                  if (n>10 && fabs(IntegralOverZ)*1.e-10 > fabs(qwe)) break;
+		  Double_t qwe = Numerator / Denominator ;
+		  IntegralOverZ += Cn * zterm * qwe ;
+	          if ( n>10 && fabs(IntegralOverZ)*1.e-10 > fabs(qwe) ) break;
 		}
 	      spaceEr[i][j] = IntegralOverZ ; 
 	    }
@@ -1282,6 +1294,153 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
   
 //________________________________________
 
+
+/// Shorted Ring Distortion 
+
+void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprime[] )
+// Electrostatic equations solved by relaxtion.  Original work by Jim Thomas, 1/5/2004
+// This code contains *hardwired parameters* for the short on the EAST end of the TPC on 12/22/2003.
+
+{ 
+
+  const Float_t   Ring        =  169.5 ;               // Location of short (in units of rings)
+  const Float_t   Pitch       =  1.15  ;               // Ring to Ring pitch (cm)
+  const Float_t   RingRatio   =  Ring*Pitch/TPC_Z0 ;   // Percent of full length where short appears
+  
+  const Int_t     ROWS        =  150 ;        // Rmax - Rmin (cm) [high accuracy not required]
+  const Int_t     COLUMNS     =  182 ;        // Number of rings  [high accuracy not required]
+  const Int_t     ITERATIONS  =  1000 ;
+  const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
+  const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
+  const Double_t  Ratio       =  GRIDSIZER*GRIDSIZER / (GRIDSIZEZ*GRIDSIZEZ) ;
+  const Double_t  Four        =  2.0 + 2.0*Ratio ;
+
+  Float_t   Er_integral, Ephi_integral ;
+  Double_t  r, phi, z ;
+
+  static Int_t DoOnce = 0 ;
+
+  if ( DoOnce == 0 )
+    {
+
+      TMatrixD  ArrayV(ROWS,COLUMNS), ArrayE(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
+      Float_t   Rlist[ROWS], Zedlist[COLUMNS] ;
+
+      //Fill boundary of arrays with error potentials and "volume" of array with approximate solutions to aid convergence. 
+      for ( Int_t i = 0 ; i < ROWS ; i++ )  
+	{
+	  Double_t Radius = IFCRadius + i*GRIDSIZER ;
+	  Rlist[i] = Radius ;
+	  for ( Int_t j = 0 ; j < COLUMNS ; j++ )  
+	    {
+  	      Double_t zed = j*GRIDSIZEZ ;
+	      Zedlist[j] = zed ;
+              if ( (float)j/(float)(COLUMNS-1) < RingRatio )
+                ArrayV(i,j) = ((ROWS-1-i)/(ROWS-1))*StarMagE*j*Pitch/(COLUMNS-2) ;
+              else
+                ArrayV(i,j) = ((ROWS-1-i)/(ROWS-1))*StarMagE*(j-(COLUMNS-1))*Pitch/(COLUMNS-2) ;
+            }
+	}      
+      
+      //Solve Poisson's equation in cylindrical coordinates by relaxation technique
+      //Allow for different size grid spacing in R and Z directions
+
+      for ( Int_t k = 1 ; k <= ITERATIONS; k++ )
+	{
+	  for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )  
+	    {
+	      for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  
+		{
+		  Double_t Radius = IFCRadius + i*GRIDSIZER ;
+		  ArrayV(i,j) = ( ArrayV(i+1,j) + ArrayV(i-1,j) + Ratio*ArrayV(i,j+1) + Ratio*ArrayV(i,j-1) ) 
+		    + ArrayV(i+1,j)*GRIDSIZER/(2*Radius) - ArrayV(i-1,j)*GRIDSIZER/(2*Radius)  ;
+		  ArrayV(i,j) *=  1.0/Four ;
+		}
+	    }
+	}
+
+      //Differentiate V(r) and solve for E(r) using special equations for the first and last row
+      //Integrate E(r)/E(z) from point of origin to pad plane
+
+      for ( Int_t j = COLUMNS-1 ; j >= 0 ; j-- )  // Count backwards to facilitate integration over Z
+	{	  
+	  // Differentiate in R
+	  for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  ArrayE(i,j) = -1 * ( ArrayV(i+1,j) - ArrayV(i-1,j) ) / (2*GRIDSIZER) ;
+	  ArrayE(0,j)      =  -1 * ( -0.5*ArrayV(2,j) + 2.0*ArrayV(1,j) - 1.5*ArrayV(0,j) ) / GRIDSIZER ;  
+	  ArrayE(ROWS-1,j) =  -1 * ( 1.5*ArrayV(ROWS-1,j) - 2.0*ArrayV(ROWS-2,j) + 0.5*ArrayV(ROWS-3,j) ) / GRIDSIZER ; 
+	  // Integrate over Z
+	  for ( Int_t i = 0 ; i < ROWS ; i++ ) 
+	    {
+	      Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
+	      EroverEz(i,j) = 0.0 ;
+	      for ( Int_t k = j ; k < COLUMNS ; k++ ) 
+		{ 
+		  EroverEz(i,j)  +=  Index*(GRIDSIZEZ/3.0)*ArrayE(i,(COLUMNS-1)+j-k)/(-1*StarMagE) ;
+		  if ( Index != 4 )  Index = 4; else Index = 2 ;
+		}
+	      if ( Index == 4 ) EroverEz(i,j)  -=  (GRIDSIZEZ/3.0)*ArrayE(i,COLUMNS-1)/ (-1*StarMagE) ;
+	      if ( Index == 2 ) EroverEz(i,j)  +=  
+				  (GRIDSIZEZ/3.0)*(0.5*ArrayE(i,COLUMNS-2)-2.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
+	      if ( j == COLUMNS-2 ) EroverEz(i,j) =  
+				      (GRIDSIZEZ/3.0)*(1.5*ArrayE(i,COLUMNS-2)+1.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
+	      if ( j == COLUMNS-1 ) EroverEz(i,j) =  0.0 ;
+	    }
+	}
+
+      //Interpolate results onto standard grid for Electric Fields
+
+      Int_t ilow=0, jlow=0 ;
+      Float_t save_Er[2] ;	      
+      for ( Int_t i = 0 ; i < neZ ; ++i ) 
+	{
+	  // Apply correction to EAST end of TPC, only.  Return 0 if on the West end.
+	  z = TMath::Abs(eZList[i]) ;
+	  for ( Int_t j = 0 ; j < neR ; ++j ) 
+	    { // Linear interpolation
+	      r = eRadius[j] ;
+	      Search( ROWS,   Rlist, r, ilow ) ;  // Note switch - R in rows and Z in columns
+	      Search( COLUMNS, Zedlist, z, jlow ) ;
+	      if ( ilow < 0 ) ilow = 0 ;  // artifact of Root's binsearch, returns -1 if out of range
+	      if ( jlow < 0 ) jlow = 0 ;   
+	      if ( ilow + 1  >=  ROWS - 1 ) ilow =  ROWS - 2 ;	      
+	      if ( jlow + 1  >=  COLUMNS - 1 ) jlow =  COLUMNS - 2 ; 
+	      save_Er[0] = EroverEz(ilow,jlow) + (EroverEz(ilow,jlow+1)-EroverEz(ilow,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+	      save_Er[1] = EroverEz(ilow+1,jlow) + (EroverEz(ilow+1,jlow+1)-EroverEz(ilow+1,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+	      shortEr[i][j] = save_Er[0] + (save_Er[1]-save_Er[0])*(r-Rlist[ilow])/GRIDSIZER ;
+	      if ( eZList[i] > 0 ) shortEr[i][j] = 0.0 ;  // Force West end to zero !!!!
+	    }
+	}
+
+      DoOnce = 1 ;      
+
+    }
+
+  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+  phi    =  TMath::ATan2(x[1],x[0]) ;
+  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
+  z      =  x[2] ;
+  if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
+  if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
+
+  Interpolate2DEdistortion( r, z, shortEr, Er_integral ) ;
+  Ephi_integral = 0.0 ;  // E field is symmetric in phi
+
+  // Subtract to Undo the distortions
+  if ( r > 0.0 ) 
+    {
+      phi =  phi - ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+    }
+
+  Xprime[0] = r * TMath::Cos(phi) ;
+  Xprime[1] = r * TMath::Sin(phi) ;
+  Xprime[2] = x[2] ;
+
+}
+
+  
+//________________________________________
+
 /// Read the electric and magnetic field maps stored on disk
 
 void StMagUtilities::ReadField( )
@@ -1334,8 +1493,6 @@ void StMagUtilities::ReadField( )
       
   printf("StMagUtilities::ReadField  Reading Magnetic Field:  %s,  Scale factor = %f \n",comment.Data(),gFactor);
   printf("StMagUtilities::ReadField  Filename is %s, Adjusted Scale factor = %f \n",filename.Data(),gFactor*gRescale);
-
-  
   printf("StMagUtilities::ReadField  Version: ") ;
   
   if ( mDistortionMode & kBMap )          printf ("3D Mag Field Distortions") ;
@@ -1347,6 +1504,7 @@ void StMagUtilities::ReadField( )
   if ( mDistortionMode & kSpaceChargeR2 ) printf (" + SpaceChargeR2") ;
   if ( mDistortionMode & kMembrane )      printf (" + Central Membrane") ;
   if ( mDistortionMode & kEndcap )        printf (" + Endcap") ;
+  if ( mDistortionMode & kShortedRing )   printf (" + ShortedRing") ;
 
   printf("\n");
   
@@ -1783,11 +1941,13 @@ void StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
 
 //________________________________________
 
+
 /// Convert from the old (Uniform) space charge correction to the new (1/R**2) space charge correction. 
 
 void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_t x[3], const Float_t p[3], 
 					        const Prime PrimaryOrGlobal, Float_t x_new[3], Float_t p_new[3],
 		         const unsigned int RowMask1  , const unsigned int RowMask2 ,const Float_t VertexError)
+
 // Applicable to 200 GeV Au+Au data that is on the P02ge (and other) microDSTs.
 // Given the charge and momentum of a particle and a point on the circular path described by the particle , 
 // this function returns the new position of the point (cm) and the new momentum of the particle (GeV).  This 
@@ -1956,3 +2116,12 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
   p_new[2] *= Pt_new / ( Rotation * R0_new * count ) ;
 
 }
+
+
+
+
+
+
+
+
+
