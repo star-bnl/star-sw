@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.2 1999/09/20 20:28:12 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.3 1999/09/21 15:07:03 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.3  1999/09/21 15:07:03  kathy
+// change to have notes on input values at top of each macro, also clean up notes on usage and remove the usage of method St_QA_Maker::SetPntrToHistUtil which is not going to be used now that I made St_QA_Maker totally independent of the histogram printing
+//
 // Revision 1.2  1999/09/20 20:28:12  kathy
 // fix to give macro correct name
 //
@@ -15,9 +18,39 @@
 //
 // Kathy's notes (9/20/99):
 //   - adapted from bfcread.C macro and changed so it could read in
-//     .hist.root file produced from bfc.C in 99f
+//     .hist.root file produced from bfc.C 
 //   - reads .hist.root file and draws & prints histograms from
 //     given input Maker
+//
+// inputs: MainFile - *.hist.root file from bfc output
+//         MakerHist - name of Maker that you want histograms from
+//         psFile - output postscript filename
+//
+// standard Maker names in bfc ==>
+//  geant
+//  db
+//  calib
+//  emc_raw
+//  tpc_hits
+//  svt_hits
+//  ftpc_hits
+//  tpc_tracks
+//  svt_tracks
+//  ftpc_tracks
+//  ctf
+//  mwc
+//  trg
+//  global
+//  match
+//  primary
+//  v0
+//  xi
+//  kink
+//  dst
+//  StEventMaker
+//  analysis
+//  QA
+//
 //======================================================================
 
 class St_DataSet;
@@ -59,7 +92,7 @@ void bfcread_hist_to_ps(
 
 // now must set pointer to StMaker so HistUtil can find histograms
 //  with StHistUtil methods
-// -- input any maker pointer but much cast as type StMaker
+// -- input any maker pointer but must cast as type StMaker
    HU->SetPntrToMaker((StMaker *)treeMk);
 
 // ONLY use StTreeMaker in chain 
