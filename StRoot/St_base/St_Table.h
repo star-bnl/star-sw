@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.31 1999/08/11 14:44:39 fine Exp $
+// $Id: St_Table.h,v 1.32 1999/08/12 16:39:49 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.32  1999/08/12 16:39:49  fine
+// class between St_Table::GetSize and TArray::GEtSize has been resolved
+//
 // Revision 1.31  1999/08/11 14:44:39  fine
 // name clash with ROOT over enum resolved
 //
@@ -205,8 +208,8 @@ public:
    virtual   UInt_t       GetNumberOfColumns()                  const;
    virtual   UInt_t       GetOffset(Int_t columnIndex)          const;
    virtual   Int_t        GetOffset(const Char_t *columnName=0) const;
-   virtual   UInt_t       GetSize(Int_t columnIndex)            const;
-   virtual   Int_t        GetSize(const Char_t *columnName=0)   const;
+   virtual   UInt_t       GetColumnSize(Int_t columnIndex)      const;
+   virtual   Int_t        GetColumnSize(const Char_t *columnName=0) const;
    virtual   UInt_t       GetTypeSize(Int_t columnIndex)        const;
    virtual   Int_t        GetTypeSize(const Char_t *columnName=0) const ;
    virtual   UInt_t       GetDimensions(Int_t columnIndex)      const;
@@ -236,22 +239,6 @@ inline void *St_Table::operator[](Int_t i)
     return (void *)(s_Table+i*(*s_Size));
 }
 #endif
-
-#ifndef TABLE_DESCRIPTOR_LIST
-# if 0
-#  define TABLE_DESCRIPTOR_LIST                \
-    protected:                                 \
-     static TList *fgListOfColDescriptors;     \
-     virtual TList *GetRowDescriptors() { return fgListOfColDescriptors?fgListOfColDescriptors:(fgListOfColDescriptors=GetTableDescriptors());} \
-     virtual void  SetRowDescriptors(TList *list) { fgListOfColDescriptors = list;}  
-# else
-#  define TABLE_DESCRIPTOR_LIST                \
-    protected:                                 \
-     static St_tableDescriptor *fgColDescriptors;    \
-     virtual St_tableDescriptor *GetRowDescriptors() { return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());} \
-     virtual void  SetRowDescriptors(St_tableDescriptor *list) { fgColDescriptors = list;}  
-# endif
-#endif 
 
 #endif 
 

@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.63 1999/08/11 14:44:38 fine Exp $ 
+// $Id: St_Table.cxx,v 1.64 1999/08/12 16:39:48 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.64  1999/08/12 16:39:48  fine
+// class between St_Table::GetSize and TArray::GEtSize has been resolved
+//
 // Revision 1.63  1999/08/11 14:44:38  fine
 // name clash with ROOT over enum resolved
 //
@@ -1842,8 +1845,8 @@ UInt_t       St_Table::GetNumberOfColumns()              const {return GetRowDes
 UInt_t       St_Table::GetOffset(Int_t columnIndex)      const {return GetRowDescriptors()->GetOffset(columnIndex); }
 Int_t        St_Table::GetOffset(const Char_t *columnName) const {return GetRowDescriptors()->GetOffset(columnName); }
 
-UInt_t       St_Table::GetSize(Int_t columnIndex)        const {return GetRowDescriptors()->GetSize(columnIndex); }
-Int_t        St_Table::GetSize(const Char_t *columnName) const {return GetRowDescriptors()->GetSize(columnName); }
+UInt_t       St_Table::GetColumnSize(Int_t columnIndex)  const {return GetRowDescriptors()->GetSize(columnIndex); }
+Int_t        St_Table::GetColumnSize(const Char_t *columnName) const {return GetRowDescriptors()->GetSize(columnName); }
 
 UInt_t       St_Table::GetTypeSize(Int_t columnIndex)    const {return GetRowDescriptors()->GetTypeSize(columnIndex); }
 Int_t        St_Table::GetTypeSize(const Char_t *columnName) const {return GetRowDescriptors()->GetTypeSize(columnName); }
