@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.148 2000/11/25 18:53:17 fisyak Exp $
+// $Id: bfc.C,v 1.149 2001/01/24 21:15:16 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -76,8 +76,10 @@ void bfc(const Int_t First,
   chain->Set_IO_Files(infile,outfile);
   if (chain->Load() > kStOk) 
     {printf("Error:Problems with loading of shared library(ies)\n"); gSystem->Exit(1);}
+  if (Last < -1) return;
   if (chain->Instantiate() > kStOk) 
     {printf("Error:Problems with instantiation of Maker(s)\n"); gSystem->Exit(1);}
+  if (Last <  0) return;
   if (chain->GetOption("DISPLAY")) dsMk = (StEventDisplayMaker *) chain->GetMaker("EventDisplay");
 #if 0
   // Insert your maker before "tpc_hits"
@@ -160,7 +162,7 @@ void bfc(const Int_t First,
   if (Last >= 0) {
     Int_t iInit = chain->Init();
     if (iInit >=  kStEOF) {
-      printf ("QAInfo:Run is failed on Init stage with %i\n",iInit);
+      chain->Fatal(iInit,"on init");
       goto END;
     }
     StEvtHddr *hd = (StEvtHddr*)chain->GetDataSet("EvtHddr");
@@ -181,7 +183,7 @@ void bfc(const Int_t First,
   }
   xdf_out = chain->GetXdfOut();
   if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
-  treeMk = chain->GetMaker("tree");
+  treeMk = chain->GetMaker("OutTree");
  EventLoop: if (i <= Last && iMake != kStEOF && iMake != kStFatal) {
    evnt.Reset();
    evnt.Start("QAInfo:");
