@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine (fine@bnl.gov)
 // 
-// $Id: StHistCollectorMaker.cxx,v 2.3 2000/11/30 20:13:27 fine Exp $
+// $Id: StHistCollectorMaker.cxx,v 2.4 2000/12/01 02:16:42 fine Exp $
 //
 ////////////////////////////////////////////////////////////////////////////
 //                                                                        //
@@ -114,28 +114,34 @@ void  StHistCollectorMaker::UpdateHists(TObjectSet *oldSet,TObjectSet *newSet)
     TH1 *donor = 0;
     while ( (donor = (TH1 *)nextDonor()) ) {
       Bool_t found = kFALSE;
-      const Char_t *newname = donor->GetName();
-      TH1 *oldHist = 0;
-      while ( (oldHist = (TH1 *)nextOld()) && !found) {
-        // if the "new" set does contain the dataset
-        // with the same name as ours update it too
-        if (!strcmp(oldHist->GetName(),newname)) {
-           oldHist->Add(donor); // merge histograms
-        }
-      }; nextOld.Reset(); // old histograms has been looked up
+      if (donor->GetEntries() > 0 ) {
+        const Char_t *newname = donor->GetName();
+        TH1 *oldHist = 0;
+        while ( (oldHist = (TH1 *)nextOld()) && !found) {
+          // if the "new" set does contain the dataset
+          // with the same name as ours update it too
+          if (!strcmp(oldHist->GetName(),newname)) {
+             found = kTRUE;
+             oldHist->Add(donor); // merge histograms
+          }
+        }; nextOld.Reset(); // old histograms has been looked up
 
-      // If the new "set" contains some new dataset with brand-new name
-      // move it into the our dataset and remove it from its old location
-      if (!found && donor->GetEntries() > 0 ) { // move histogram to this 
-        oldList->Add(donor);
-        newList->Remove(donor);
-        donor->SetDirectory(0);
-      }      
+        // If the new "set" contains some new dataset with brand-new name
+        // move it into the our dataset and remove it from its old location
+        if (!found) { // move histogram to this 
+          oldList->Add(donor);
+          newList->Remove(donor);
+          donor->SetDirectory(0);
+        }      
+      }
     }
   }
 }
 
 // $Log: StHistCollectorMaker.cxx,v $
+// Revision 2.4  2000/12/01 02:16:42  fine
+// the performance issue resolved
+//
 // Revision 2.3  2000/11/30 20:13:27  fine
 // Get rid of the empty histograms (thanks Fisyak)
 //
