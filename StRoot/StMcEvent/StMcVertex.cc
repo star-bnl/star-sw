@@ -1,13 +1,17 @@
 /***************************************************************************
  *
- * StMcVertex.cc
+ * $Id: StMcVertex.cc,v 1.3 1999/07/29 00:13:14 calderon Exp $
+ * $Log: StMcVertex.cc,v $
+ * Revision 1.3  1999/07/29 00:13:14  calderon
+ * Read ge_volume correctly
+ *
  *
  **************************************************************************/
 #include "StThreeVectorF.hh"
 
 #include "StMcEvent/StMcVertex.hh"
 #include "StMcEvent/StMcTrack.hh"
-static const char rcsid[] = "$Id: StMcVertex.cc,v 1.2 1999/07/28 20:27:37 calderon Exp $";
+static const char rcsid[] = "$Id: StMcVertex.cc,v 1.3 1999/07/29 00:13:14 calderon Exp $";
 
 StMcVertex::StMcVertex()
 {
@@ -43,7 +47,7 @@ StMcVertex::StMcVertex(g2t_vertex_st* vtx)
   mPosition.setX(vtx->ge_x[0]);
   mPosition.setY(vtx->ge_x[1]);
   mPosition.setZ(vtx->ge_x[2]);
-  for (int i = 0; i<4; ++i) mGeantVolume[i] = vtx->ge_volume[i];
+  mGeantVolume=vtx->ge_volume;
   mTof = vtx->ge_tof;
   mGeantProcess = vtx->eg_proc;
   
