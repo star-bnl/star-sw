@@ -13,12 +13,12 @@
 # "use strict" clean is in the works.  Regression tests will keep the
 # code honest by checking for warnings and "use strict" failures.
 
-# $Id: cons,v 1.1.1.13 2000/08/20 19:36:51 fisyak Exp $
+# $Id: cons,v 1.1.1.14 2000/09/04 20:30:02 fisyak Exp $
 
-$ver_num = __VERSION__;
-$ver_rev = "__REVISION__";
+$ver_num = 2.1;
+$ver_rev = ".2";
 $version = sprintf "This is Cons %s%s " .
-	    '($Id: cons,v 1.1.1.13 2000/08/20 19:36:51 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.1.1.14 2000/09/04 20:30:02 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -155,14 +155,24 @@ Arguments can be any of the following, in any order:
 
   -x		Show this message and exit.
 
-   Please report any bugs/fixes/suggestions through the
-   cons-discuss@gnu.org mailing list. To subscribe, send mail to
-   cons-discuss-request@gnu.org with body 'subscribe'.
+
+   Please report any suggestions through the cons-discuss@gnu.org mailing
+   list.
+
+   To subscribe, send mail to cons-discuss-request@gnu.org with body
+   'subscribe'.
+
+   If you find a bug, please report it through the bug-cons@gnu.org
+   mailing list.
+
+   Information about CONS can be obtained from the official cons web site
+   http://www.dsmit.com/cons/ or its mirrors (listed there).
+
+   The cons maintainers can be contacted by email at cons-maintainers@gnu.org
 
    User documentation of cons is contained in cons and can be obtained
    by doing 'perldoc /path/to/cons'.
 
-   The Official cons site is: http://www.dsmit.com/cons/
 );
 
 # Simplify program name, if it is a path.
@@ -2956,6 +2966,15 @@ sub out {
 	unlink($lp);
 	return if ! eval { link($cp, $lp) };
 	rename($lp, $sp);
+	# Unix98 says, "If the old argument and the new argument both
+	# [refer] to the same existing file, the rename() function
+	# returns successfully and performs no other action."  So, if
+	# $lp and $sp are links (i.e., $cp and $sp are links), $lp is
+	# left, and we must unlink it ourselves.  If the rename failed
+	# for any reason, it is also good form to unlink the temporary
+	# $lp.  Otherwise $lp no longer exists and, barring some race,
+	# the unlink fails silently.
+	unlink($lp);
 	return;
     }
 
@@ -3105,19 +3124,11 @@ __END__;
 
 =head1 NAME
 
-Cons - Cons: A Software Construction System
+Cons - A Software Construction System
 
 =head1 DESCRIPTION
 
-The original document was automatically derived from the F<cons/cons.html>
-by B<html2pod>, thanks to Ulrich Pfeifer. Later revisions were created from
-the original.
-
-=head1 Cons: A Software Construction System
-
-by Bob Sidebotham, et al. F<cons-discuss@gnu.org>
-
-A guide and reference for version __VERSION____REVISION__
+A guide and reference for version 2.1.2
 
 Copyright (c) 1996-2000 Free Software Foundation, Inc.
 
@@ -5395,14 +5406,34 @@ can be attached to a source file by:
 
     QuickScan $env \myscan, "$_.smf";
 
-=head1 Support and Suggestions
+=head1 SUPPORT AND SUGGESTIONS
 
 Cons is maintained by the user community.  To subscribe, send mail to
 B<cons-discuss-request@gnu.org> with body B<subscribe>.
 
-Please report any bugs/fixes/suggestions through the
-cons-discuss@gnu.org mailing list.
+Please report any suggestions through the B<cons-discuss@gnu.org> mailing
+list.
 
-The Official cons site is: http://www.dsmit.com/cons/
+=head1 BUGS
+
+Sure to be some. Please report any bugs through the B<bug-cons@gnu.org>
+mailing list.
+
+=head1 INFORMATION ABOUT CONS
+
+Information about CONS can be obtained from the official cons web site
+B<http://www.dsmit.com/cons/> or its mirrors listed there.
+
+The cons maintainers can be contacted by email at
+B<cons-maintainers@gnu.org>
+
+=head1 AUTHORS
+
+Originally by Bob Sidebotham. Then significantly enriched by the members
+of the Cons community B<cons-discuss@gnu.org>.
+
+The Cons community would like to thank Ulrich Pfeifer for the original pod
+documentation derived from the F<cons.html> file. Cons documentation is now
+a part of the program itself.
 
 =cut
