@@ -44,7 +44,10 @@ class StEmcDecoder
     int       connector1[20],connector2[20],connector3[20];
     int       SmdeRDO[120][150],SmdpRDO[120][10][15];
     int       SmdeIndex[120][150],SmdpIndex[120][10][15];
+    
     int       PsdModules[4][15];
+    int       PsdOffset[40];
+    int       PsdStart[60];
     int       PsdRDO[4800];
     int       PsdIndex[4800];
     
@@ -58,7 +61,7 @@ class StEmcDecoder
     void      Init(unsigned int,unsigned int);///< Init method
         
   public:
-              StEmcDecoder(unsigned int date=20010101,unsigned int time=000000);///< StEmcDecoder constructor
+              StEmcDecoder(unsigned int date=20300101,unsigned int time=000000);///< StEmcDecoder constructor
     virtual   ~StEmcDecoder();///< StEmcDecoder destructor
 
     int       GetTowerIdFromDaqId(int,int&);///<Get Sofwtare Id from Daq Id for towers
@@ -81,6 +84,7 @@ class StEmcDecoder
     
     void      PrintTowerMap(ofstream *);///<Print Tower MAP
     void      PrintSmdMap(ofstream *);///<Print SMD MAP
+    void      PrintPsdMap(ofstream *);///<Print SMD MAP
     
 };
 #endif
