@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.14 2001/08/07 20:52:15 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.15 2001/09/16 22:09:28 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.15  2001/09/16 22:09:28  caines
+ * Add extra checks for when SVT isnt in every event
+ *
  * Revision 1.14  2001/08/07 20:52:15  caines
  * Implement better packing of svt hardware and charge values
  *
@@ -120,6 +123,7 @@ Int_t StSvtClusterAnalysisMaker::Init()
   mNoEvents=0;
   
   GetSvtCluster();
+  GetSvtRawEvent();
   GetSvtEvent();
   SetSvtAnalysis();
 
@@ -138,20 +142,25 @@ Int_t StSvtClusterAnalysisMaker::Init()
 
 //__________________________________________________________________________________________________
 
+Int_t StSvtClusterAnalysisMaker::GetSvtRawEvent()
+{
+  St_DataSet *dataSet;
+
+  dataSet = GetDataSet("StSvtRawData");
+  if( !dataSet) return kStWarn;
+  mSvtRawEventColl = (StSvtHybridCollection*)(dataSet->GetObject());
+  if( !mSvtRawEventColl) return kStWarn;
+ 
+  return kStOK;
+}
+//__________________________________________________________________________________________________
+
 Int_t StSvtClusterAnalysisMaker::GetSvtEvent()
 {
   St_DataSet *dataSet;
   
   dataSet = GetDataSet("StSvtData");
-  assert(dataSet); 
   mSvtAdjEvent = (StSvtData*)(dataSet->GetObject());
-  assert(mSvtAdjEvent);
-
-  dataSet = GetDataSet("StSvtRawData");
-  assert(dataSet);
-  mSvtRawEventColl = (StSvtHybridCollection*)(dataSet->GetObject());
-  //mSvtRawEventColl = (StSvtData*)(dataSet->GetObject());
-  assert(mSvtRawEventColl);
 
   return kStOK;
 }
@@ -263,6 +272,11 @@ Int_t StSvtClusterAnalysisMaker::Make()
 
   if (Debug()) gMessMgr->Debug() << "In StSvtClusterAnalysisMaker::Make() ..."
 				 <<  GetName() << endm;
+
+  if( GetSvtRawEvent()){
+    gMessMgr->Warning() << " StSvtClusterAnalysisMaker::Make :No SVT RAW data " << endm;
+    return kStWarn;
+  }
   SetClusterAnalysis();
 
   if( Debug()) MakeHistograms();

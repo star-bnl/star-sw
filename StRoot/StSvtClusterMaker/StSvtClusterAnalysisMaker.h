@@ -1,5 +1,8 @@
-// $Id: StSvtClusterAnalysisMaker.h,v 1.5 2001/08/07 20:52:15 caines Exp $
+// $Id: StSvtClusterAnalysisMaker.h,v 1.6 2001/09/16 22:09:31 caines Exp $
 // $Log: StSvtClusterAnalysisMaker.h,v $
+// Revision 1.6  2001/09/16 22:09:31  caines
+// Add extra checks for when SVT isnt in every event
+//
 // Revision 1.5  2001/08/07 20:52:15  caines
 // Implement better packing of svt hardware and charge values
 //
@@ -55,6 +58,7 @@ class StSvtClusterAnalysisMaker : public StMaker
   Int_t Reset();
 
   Int_t GetSvtEvent();
+  Int_t GetSvtRawEvent();
   Int_t GetSvtPixels();
   Int_t GetSvtCluster();
   Int_t SetSvtAnalysis();
@@ -68,8 +72,8 @@ class StSvtClusterAnalysisMaker : public StMaker
   Int_t SetClusterAnalysis();
   void  printClusterInfo();
   void MakeHistograms(); // Tracking histograms
-  virtual const char *GetCVS()
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.5 2001/08/07 20:52:15 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.6 2001/09/16 22:09:31 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     
  protected:

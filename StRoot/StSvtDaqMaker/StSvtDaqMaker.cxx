@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.8 2001/07/11 23:29:47 munhoz Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.9 2001/09/16 22:08:44 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.9  2001/09/16 22:08:44  caines
+ * Add extra checks for when SVT isnt in every event
+ *
  * Revision 1.8  2001/07/11 23:29:47  munhoz
  * adding capability for zero suppressed and pedestal reading
  *
@@ -190,10 +193,13 @@ Int_t StSvtDaqMaker::GetSvtData()
 
   if(  !daqReader->SVTPresent ()){
     gMessMgr->Error() << "SVT -No SVT Present but trying to read it" << endm;
+    if( fSvtData) Reset();
     return kStErr;
   }
   svtReader = daqReader->getSVTReader();
   assert(svtReader);
+
+  if( !fSvtSet) SetSvtData();
 
   if (!fSvtData) {
     fSvtData = new StSvtDaqData(fConfig);
@@ -220,6 +226,7 @@ Int_t StSvtDaqMaker::GetSvtPed()
 
   if(  !daqReader->SVTPresent ()){
     gMessMgr->Error() << "SVT -No SVT Present but trying to read it" << endm;
+    if( fSvtPed) Reset();
     return kStErr;
   }
   svtReader = daqReader->getSVTReader();
@@ -243,6 +250,7 @@ Int_t StSvtDaqMaker::GetSvtRMSPed()
 
   if(  !daqReader->SVTPresent ()){
     gMessMgr->Error() << "SVT -No SVT Present but trying to read it" << endm;
+    if( fSvtRMSPed) Reset();
     return kStErr;
   }
   svtReader = daqReader->getSVTReader();
@@ -313,7 +321,6 @@ Int_t StSvtDaqMaker::Reset()
   if (Debug()) gMessMgr->Debug()<< "StSvtDaqMaker::Reset" << endm;
 
   fSvtData = NULL;
-  fSvtSet = NULL;
   fHybridSet = NULL;
   fSvtPed = NULL;
   fSvtSet = NULL;
@@ -336,7 +343,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.8 2001/07/11 23:29:47 munhoz Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.9 2001/09/16 22:08:44 caines Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
