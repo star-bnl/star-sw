@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMiniDst.cc,v 1.4 1999/11/19 19:44:48 genevb Exp $
+ * $Id: StXiMiniDst.cc,v 1.5 2000/01/04 19:41:52 genevb Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 30-Mar-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StXiMiniDst.cc,v $
+ * Revision 1.5  2000/01/04 19:41:52  genevb
+ * Fixed linux compiler warnings
+ *
  * Revision 1.4  1999/11/19 19:44:48  genevb
  * Modified for StEvent 2.0
  *
@@ -40,7 +43,7 @@ StXiMiniDst::StXiMiniDst(StXiVertex* xiVertex,
 			 StEvMiniDst* event) : 
              StV0MiniDst(v0Vertex, event) {
 
-  mCharge = xiVertex->chargeOfBachelor();
+  mCharge = (int) (xiVertex->chargeOfBachelor());
   mDecayVertexXi[0] = xiVertex->position().x();
   mDecayVertexXi[1] = xiVertex->position().y();
   mDecayVertexXi[2] = xiVertex->position().z();

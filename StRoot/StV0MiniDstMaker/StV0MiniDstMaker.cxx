@@ -1,5 +1,8 @@
-// $Id: StV0MiniDstMaker.cxx,v 1.5 1999/11/19 19:44:47 genevb Exp $
+// $Id: StV0MiniDstMaker.cxx,v 1.6 2000/01/04 19:41:52 genevb Exp $
 // $Log: StV0MiniDstMaker.cxx,v $
+// Revision 1.6  2000/01/04 19:41:52  genevb
+// Fixed linux compiler warnings
+//
 // Revision 1.5  1999/11/19 19:44:47  genevb
 // Modified for StEvent 2.0
 //
@@ -144,7 +147,10 @@ Int_t StV0MiniDstMaker::Make(){
         mCollection->Add(v0);
         mEntries++;
       }
-    }
+    } break;
+  default:
+    gMessMgr->Error("StV0MiniDstMaker::Make(): Vertex type unrecognized.");
+    return kStErr;
   }
   
   gMessMgr->Info() << "StV0MiniDstMaker: found " << (mEntries-nLast)
@@ -274,6 +280,9 @@ TOrdCollection* StV0MiniDstMaker::Read(Int_t* nent) {
       xi->UpdateV0();
       xi->UpdateXi();
       break;
+    default:
+      gMessMgr->Error("StV0MiniDstMaker::Read(): Vertex type unrecognized.");
+      return 0;
     }
   }
 
