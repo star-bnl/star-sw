@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.23 2004/04/04 22:33:54 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.24 2004/04/05 23:22:49 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -215,19 +215,19 @@ Int_t StdEdxY2Maker::Init(){
       f->cd();
       if (! m_DoNotCorrectdEdx) {
 #ifdef XYZcheck
-	XYZ = new THx3D("XYZ","xyz for clusters",20,-200,200,20,-200,200,20,-200,200);
+	XYZ = new THx3D("XYZ","xyz for clusters",20,-200,200,20,-200,200,21,-210,210);
 	XYZbad = new TH3D("XYZbad","xyz for clusters with mismatched sectors",
-			  20,-200,200,20,-200,200,20,-200,200);
+			  20,-200,200,20,-200,200,21,-210,210);
 #endif // XYZcheck
 	Z3  = new TH3D("Z3",
 		       "log(dEdx/Pion) versus row and Drift Distance",
-		       NoRow,1., NoRow+1,100,0.,200., 200,-5.,5.);
+		       NoRow,1., NoRow+1,105,0.,210., 200,-5.,5.);
 	Z3A = new TH3D("Z3A",
 		       "log(dEdx/Pion) just after corection versus row and Drift Distance",
-		       NoRow,1., NoRow+1,100,0.,200., 200,-5.,5.);
+		       NoRow,1., NoRow+1,105,0.,210., 200,-5.,5.);
 	Z3C = new TH3D("Z3C",
 		       "log(dEdx/Pion) corrected versus row and Drift Distance",
-		       NoRow,1., NoRow+1,100,0.,200., 200,-5.,5.);
+		       NoRow,1., NoRow+1,105,0.,210., 200,-5.,5.);
 	Z3O = new TH3D("Z3O",
 		       "log(dEdx/Pion) versus row and (Drift)*ppmO2In",
 		       NoRow,1., NoRow+1,100,0.,1.e4, 200,-5.,5.);
