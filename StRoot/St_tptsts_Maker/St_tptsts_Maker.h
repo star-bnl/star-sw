@@ -1,5 +1,8 @@
-// $Id: St_tptsts_Maker.h,v 1.2 1999/07/15 13:58:30 perev Exp $
+// $Id: St_tptsts_Maker.h,v 1.3 1999/09/14 13:51:46 love Exp $
 // $Log: St_tptsts_Maker.h,v $
+// Revision 1.3  1999/09/14 13:51:46  love
+// Add README file
+//
 // Revision 1.2  1999/07/15 13:58:30  perev
 // cleanup
 //
@@ -26,7 +29,7 @@ class St_tpt_pars;
 class St_tpt_spars;
 class TNtuple;
 
-enum { maxNofTracks = 200}; 
+enum { maxNofTracks = 600}; 
 
 class St_tptsts_Maker : public StMaker {
 private:
@@ -48,7 +51,7 @@ public:
   virtual Int_t  Make();
   virtual void   Set_stks(Bool_t m=kTRUE){m_mkstks = m;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tptsts_Maker.h,v 1.2 1999/07/15 13:58:30 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tptsts_Maker.h,v 1.3 1999/09/14 13:51:46 love Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(St_tptsts_Maker, 1)   //StAF chain virtual base class for Makers
 };
