@@ -1,5 +1,8 @@
-// $Id: StMessTypeList.h,v 1.3 1999/06/29 17:37:30 genevb Exp $
+// $Id: StMessTypeList.h,v 1.4 1999/06/30 17:24:49 genevb Exp $
 // $Log: StMessTypeList.h,v $
+// Revision 1.4  1999/06/30 17:24:49  genevb
+// Better limit management, remove Bool_t
+//
 // Revision 1.3  1999/06/29 17:37:30  genevb
 // Lots of fixes...
 //
@@ -27,8 +30,10 @@
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 // Syntax currently required by Solaris compiler
 #define StVector(T) vector<T, allocator<T> >
+typedef vector<int, allocator<int> > intVector;
 #else
 #define StVector(T) vector<T>
+typedef vector<int> intVector;
 #endif
 
 class StMessTypePair {
@@ -60,7 +65,9 @@ class StMessTypeList {
    static StMessTypeList* Instance();
                     int AddType(const char* type, const char* text);
                     int FindTypeNum(const char* type);
-          StMessTypePair* FindType(const char* type);
+        StMessTypePair* FindType(const char* type);
+            const char* FindNumType(size_t typeNum);
+            const char* FindNumText(size_t typeNum);
             const char* Text(const char* type);
                     int ListTypes();
 };

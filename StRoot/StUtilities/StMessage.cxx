@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.7 1999/06/30 04:18:45 genevb Exp $
+// $Id: StMessage.cxx,v 1.8 1999/06/30 17:24:49 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.8  1999/06/30 17:24:49  genevb
+// Better limit management, remove Bool_t
+//
 // Revision 1.7  1999/06/30 04:18:45  genevb
 // Fixes: summary wrap-around, unsigned ints, last character of message, <> for time; no KNOWN remaining bugs
 //
@@ -53,7 +56,7 @@ ClassImp(StMessage)
 //_____________________________________________________________________________
 StMessage::StMessage(char *mess, char *ty, char* opt) :
 type(new char(toupper(*ty))),
-messTime(new TDatime()) {
+messTime() {
   static char space = ' ';
   size_t len = strlen(opt);
   option = new char[len];
@@ -70,7 +73,6 @@ messTime(new TDatime()) {
 }
 //_____________________________________________________________________________
 StMessage::~StMessage() {
-  messTime->~TDatime();
 }
 //_____________________________________________________________________________
 int StMessage::Print(int nChars) {
@@ -91,7 +93,7 @@ int StMessage::Print(int nChars) {
     messBuffer << insert1 << message;                    // ": ",message
     if (nChars<=0) {
       if (!strchr(option,'T')) {
-        char* temp2 = strchr(messTime->AsString(),' ');
+        char* temp2 = strchr(messTime.AsString(),' ');
         messBuffer << insert2 << (++temp2) << insert3 ;  // " (",time,")"
       }
       messBuffer << endofline;                           // "\n" end-line
@@ -125,7 +127,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.7 1999/06/30 04:18:45 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.8 1999/06/30 17:24:49 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

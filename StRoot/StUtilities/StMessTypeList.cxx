@@ -1,5 +1,8 @@
-// $Id: StMessTypeList.cxx,v 1.4 1999/06/29 17:37:30 genevb Exp $
+// $Id: StMessTypeList.cxx,v 1.5 1999/06/30 17:24:49 genevb Exp $
 // $Log: StMessTypeList.cxx,v $
+// Revision 1.5  1999/06/30 17:24:49  genevb
+// Better limit management, remove Bool_t
+//
 // Revision 1.4  1999/06/29 17:37:30  genevb
 // Lots of fixes...
 //
@@ -39,7 +42,7 @@ StMessTypeList::StMessTypeList() {
 }
 //________________________________________
 StMessTypeList::~StMessTypeList() {
-  for (int i=0; i<messList.size(); i++)
+  for (size_t i=0; i<messList.size(); i++)
     delete (messList[i]);
 }
 //_____________________________________________________________________________
@@ -72,6 +75,16 @@ int StMessTypeList::FindTypeNum(const char* type) {
 StMessTypePair* StMessTypeList::FindType(const char* type) {
   int j = FindTypeNum(type);
   return ( (j) ? messList[(j-1)] : 0 );
+}
+//_____________________________________________________________________________
+const char* StMessTypeList::FindNumType(size_t typeNum) {
+  if ((typeNum < 1) || (typeNum > messList.size())) return 0;
+  return messList[(typeNum - 1)]->Type();
+}
+//_____________________________________________________________________________
+const char* StMessTypeList::FindNumText(size_t typeNum) {
+  if ((typeNum < 1) || (typeNum > messList.size())) return 0;
+  return messList[(typeNum - 1)]->Text();
 }
 //_____________________________________________________________________________
 const char* StMessTypeList::Text(const char* type) {

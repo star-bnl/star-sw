@@ -1,5 +1,8 @@
-// $Id: StMessage.h,v 1.3 1999/06/29 17:37:31 genevb Exp $
+// $Id: StMessage.h,v 1.4 1999/06/30 17:24:50 genevb Exp $
 // $Log: StMessage.h,v $
+// Revision 1.4  1999/06/30 17:24:50  genevb
+// Better limit management, remove Bool_t
+//
 // Revision 1.3  1999/06/29 17:37:31  genevb
 // Lots of fixes...
 //
@@ -37,7 +40,7 @@ class StMessage {
 //   unsigned long runNumber;
 //   pair<long, long> eventId;
    char* option;
-   const TDatime* messTime;
+   TDatime messTime;
    char* message;
 
  public:
@@ -46,7 +49,7 @@ class StMessage {
    virtual ~StMessage();
    virtual           void PrintInfo();
    virtual          int Print(int nChars=0);
-   virtual const TDatime* GetTime() const {return messTime;}
+   virtual     TDatime& GetTime() {return messTime;}
    virtual const  char* GetType() const {return type;}
    virtual        char* GetMessage() {return message;}
    virtual        char* GetOptions() {return option;}

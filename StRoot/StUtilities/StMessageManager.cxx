@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.10 1999/06/30 04:18:45 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.11 1999/06/30 17:24:50 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.11  1999/06/30 17:24:50  genevb
+// Better limit management, remove Bool_t
+//
 // Revision 1.10  1999/06/30 04:18:45  genevb
 // Fixes: summary wrap-around, unsigned ints, last character of message, <> for time; no KNOWN remaining bugs
 //
@@ -596,18 +599,18 @@ void StMessageManager::Summary(int nTerms) {
 //
   int max = 67;
   int nMess = messList.size();
-  StVector(Bool_t) done;
+  intVector done;
   typedef StVector(char*) CharPtrVec;
   CharPtrVec mType;
   StVector(CharPtrVec) toks;
   int i;
   int j;
   int k;
-  Bool_t agree;
+  int agree;
   char* temp;
   cout << "  ***** StMessageManager message summary *****" << endl;
   for (i=0; i<nMess; i++) {
-    done.push_back(kFALSE);
+    done.push_back(0);
     temp = new char(*(messList[i]->GetType()));
     mType.push_back(temp);
     toks.push_back(*(new CharPtrVec));
@@ -626,21 +629,21 @@ void StMessageManager::Summary(int nTerms) {
     if (!(done[i])) {
       for (j=(i+1); j<nMess; j++) {
         if ((*(mType[i]))==(*(mType[j]))) {
-          agree = kTRUE;
+          agree = 1;
           for (k=0; k<nTerms; k++) {
             if ((toks[i])[k] != NULL) {
               if (((toks[j])[k] == NULL) ||
-                        strcmp((toks[i])[k],(toks[j])[k])) agree = kFALSE;
+                        strcmp((toks[i])[k],(toks[j])[k])) agree = 0;
             }
-            else if ((toks[j])[k] != NULL) agree = kFALSE;
+            else if ((toks[j])[k] != NULL) agree = 0;
           }
           if (agree) {
-            done[j] = kTRUE;
+            done[j] = 1;
             count++;
           }
         }
       }
-      done[i] = kTRUE;
+      done[i] = 1;
       for (j = messList[i]->Print(max); j<max; j++) cout << ".";
       cout << ".. " << count << endl;
     }
@@ -669,7 +672,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.10 1999/06/30 04:18:45 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.11 1999/06/30 17:24:50 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
