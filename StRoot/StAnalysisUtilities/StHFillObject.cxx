@@ -1,5 +1,8 @@
-// $Id: StHFillObject.cxx,v 1.1 1999/08/31 20:40:19 genevb Exp $
+// $Id: StHFillObject.cxx,v 1.2 1999/11/19 20:33:27 genevb Exp $
 // $Log: StHFillObject.cxx,v $
+// Revision 1.2  1999/11/19 20:33:27  genevb
+// Fixed a new/delete problem with Root & Char_t strings
+//
 // Revision 1.1  1999/08/31 20:40:19  genevb
 // Introduction of library and inclusion of StHFillObject
 //
@@ -258,8 +261,10 @@ Int_t StHFillFormula::DefinedVariable(TString& variable) {
   if (!(vars.used[vars.set][vars.dim]))
     vars.used[vars.set][vars.dim] = new TArrayI(vars.accSize);
 
-  Char_t* vary = new Char_t[variable.Length()];
-  strcpy(vary,variable.Data());
+  Ssiz_t vLen = variable.Length();
+  Char_t* vary = new Char_t[vLen+1];
+  strncpy(vary,variable.Data(),vLen);
+  vary[vLen] = 0;
   Int_t isPtr=0;
 
   Char_t* args = strchr(vary,'[');          // Check for an array
