@@ -1,5 +1,8 @@
-// $Id: bfcread_dstBranch.C,v 1.13 2000/06/01 18:57:03 kathy Exp $
+// $Id: bfcread_dstBranch.C,v 1.14 2000/06/02 19:33:35 kathy Exp $
 // $Log: bfcread_dstBranch.C,v $
+// Revision 1.14  2000/06/02 19:33:35  kathy
+// now unpack and print out contents of BfcStatus table every event
+//
 // Revision 1.13  2000/06/01 18:57:03  kathy
 // updating to separate out BfcStatus stats
 //
@@ -137,9 +140,32 @@ EventLoop: if (iev < nevents && !istat) {
     }
 
       if (ddb->InheritsFrom("TTable")) { 
+
+         tabl = (TTable *)ddb;
+         cout << " QAInfo:     it's a table with #rows = " 
+                        << tabl->GetNRows() << endl;
+         fout << " QAInfo:     it's a table with #rows = " 
+                        << tabl->GetNRows() << endl;
+
         if (dsName == "BfcStatus") {	
           countevtabb++;
           Countevtabb++;
+// Now print out contents of BfcStatus for QA purposes
+            TDataSetIter bfcstatiter(ddb);
+            St_dst_bfc_status *bfcstat = 
+              (St_dst_bfc_status *) bfcstatiter.Find("BfcStatus");
+            dst_bfc_status_st *bth = bfcstat->GetTable();
+//  loop over all rows in table BfcStatus:
+            Int_t ij = 0;
+            for (ij=0; ij< bfcstat->GetNRows(); ij++)
+            {
+	      cout << " QAInfo:       BfcStatus table -- row " << ij <<
+		", Maker: "     <<  bth[ij]->maker_name <<
+                " has istat = "  <<  bth[ij]->status << endl;
+	      fout << " QAInfo:       BfcStatus table -- row " << ij <<
+		", Maker: "     <<  bth[ij]->maker_name <<
+                " has istat = "  <<  bth[ij]->status << endl;
+             }       
         }
         else{
           countevtabd++;
@@ -147,11 +173,6 @@ EventLoop: if (iev < nevents && !istat) {
         }
  
 
-         tabl = (TTable *)ddb;
-         cout << " QAInfo:     it's a table with #rows = " 
-                        << tabl->GetNRows() << endl;
-         fout << " QAInfo:     it's a table with #rows = " 
-                        << tabl->GetNRows() << endl;
       }
 
 
