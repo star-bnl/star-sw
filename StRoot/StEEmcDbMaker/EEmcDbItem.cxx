@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.7 2004/03/12 02:24:10 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.8 2004/03/12 21:53:39 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
@@ -108,6 +108,7 @@ void EEmcDbItem::clear() {
   eta=-5;  
   thr=-6;
   strip=-299;
+  plane='X';	
   stat=fail=0;
   key=-999;
 }
@@ -179,6 +180,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.8  2004/03/12 21:53:39  balewski
+// bug with not cleared 'plane'
+//
 // Revision 1.7  2004/03/12 02:24:10  balewski
 // to synchronize
 //
