@@ -1,9 +1,9 @@
 .rn '' }`
-''' $RCSfile: cons.1,v $$Revision: 1.1.1.1 $$Date: 1999/10/29 23:13:10 $
+''' $RCSfile: cons.1,v $$Revision: 1.1.1.2 $$Date: 2000/03/12 18:58:48 $
 '''
 ''' $Log: cons.1,v $
-''' Revision 1.1.1.1  1999/10/29 23:13:10  fisyak
-''' import cons 1.7
+''' Revision 1.1.1.2  2000/03/12 18:58:48  fisyak
+''' cons release 1.8-dev
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH CONS 1 "1.7" "28/Oct/1999" "Cons - Software Construction System"
+.TH CONS 1 "1.8-dev" "16/Feb/2000" "Cons - Software Construction System"
 .UC
 .if n .hy 0
 .if n .na
@@ -199,7 +199,7 @@ the original.
 .SH "\fBCons: A Software Construction System\fR"
 by Bob Sidebotham \fIrns@fore.com\fR
 .PP
-A guide and reference for version 1.7
+A guide and reference for version 1.8-dev
 .PP
 Copyright (c) 1996-1999 FORE Systems, Inc. All rights reserved.
 .PP
@@ -1197,6 +1197,42 @@ with the \*(L'Link\*(R' command.  A repository tree may contain one or more
 subdirectories for version builds established via \f(CWLink\fR to a source
 subdirectory.  Cons will search for derived files in the appropriate build
 subdirectories under the repository tree.
+.SH "\fBDefault targets\fR"
+Until now, we've demonstrated invoking Cons with an explicit target
+to build:
+.PP
+.Vb 1
+\&  % cons hello
+.Ve
+Normally, Cons does not build anything unless a target is specified,
+but specifying \*(L'.\*(R' (the current directory) will build everything:
+.PP
+.Vb 1
+\&  % cons                # does not build anything
+.Ve
+.Vb 1
+\&  % cons .              # builds everything under the top-level directory
+.Ve
+Adding the \f(CWDefault\fR method to any Construct or Conscript file will add
+the specified targets to a list of default targets.  Cons will build
+these defaults if there are no targets specified on the command line.
+So adding the following line to the top-level Construct file will mimic
+Make's typical behavior of building everything by default:
+.PP
+.Vb 1
+\&  Default '.';
+.Ve
+The following would add the \f(CWhello\fR and \f(CWgoodbye\fR commands (in the
+same directory as the Construct or Conscript file) to the default list:
+.PP
+.Vb 4
+\&  Default qw(
+\&        hello
+\&        goodbye
+\&  );
+.Ve
+The \f(CWdefault\fR method may be used more than once to add targets to the
+default list.
 .SH "\fBSelective builds\fR"
 Cons provides two methods for reducing the size of given build. The first is
 by specifying targets on the command line, and the second is a method for
@@ -1411,27 +1447,52 @@ a reference to a new, default construction environment is created. This
 contains a number of construction variables and some methods. At the present
 writing, the default list of construction variables is defined as follows:
 .PP
-.Vb 20
+.Vb 23
 \&  CC            => 'cc',
 \&  CFLAGS        => '',
 \&  CCCOM         => '%CC %CFLAGS %_IFLAGS -c %< -o %>',
-\&  CPPPATH       => '',
-\&  LINK          => '%CC',
+\&  CXX           => '%CC',
+\&  CXXFLAGS      => '%CFLAGS',
+\&  CXXCOM        => '%CXX %CXXFLAGS %_IFLAGS -c %< -o %>',
+\&  LINK          => '%CXX',
 \&  LINKCOM       => '%LINK %LDFLAGS -o %> %< %_LDIRS %LIBS',
-\&  LIBPATH       => '',
-\&  LIBS          => '',
+\&  LINKMODULECOM => '%LD -r -o %> %<',
 \&  AR            => 'ar',
-\&  ARCOM         => "%AR %ARFLAGS %> %<\en%RANLIB %>",
 \&  ARFLAGS       => 'r',
+\&  ARCOM         => "%AR %ARFLAGS %> %<\en%RANLIB %>",
 \&  RANLIB        => 'ranlib',
 \&  AS            => 'as',
 \&  ASFLAGS       => '',
 \&  ASCOM         => '%AS %ASFLAGS %< -o %>',
 \&  LD            => 'ld',
 \&  LDFLAGS       => '',
+\&  PREFLIB       => 'lib',
 \&  SUFLIB        => '.a',
+\&  SUFLIBS       => '.so:.a',
 \&  SUFOBJ        => '.o',
-\&  ENV           => { PATH => '/bin:/usr/bin' },
+\&  ENV           => { 'PATH' => '/bin:/usr/bin' },
+.Ve
+On Win32 systems (Windows \s-1NT\s0), the following construction variables
+are overridden in the default:
+.PP
+.Vb 17
+\&  CC            => 'cl',
+\&  CFLAGS        => '/nologo',
+\&  CCCOM         => '%CC %CFLAGS %_IFLAGS /c %< /Fo%>',
+\&  LINK          => 'link',
+\&  LINKCOM       => '%LINK %LDFLAGS /out:%> %< %_LDIRS %LIBS',
+\&  LINKMODULECOM => '%LD /r /o %> %<',
+\&  AR            => 'lib',
+\&  ARFLAGS       => '/nologo ',
+\&  ARCOM         => "%AR %ARFLAGS /out:%> %<",
+\&  RANLIB        => '',
+\&  LD            => 'link',
+\&  LDFLAGS       => '/nologo ',
+\&  PREFLIB       => '',
+\&  SUFEXE        => '.exe',
+\&  SUFLIB        => '.lib',
+\&  SUFLIBS       => '.dll:.lib',
+\&  SUFOBJ        => '.obj',
 .Ve
 These variables are used by the various methods associated with the
 environment, in particular any method that ultimately invokes an external
@@ -1565,6 +1626,12 @@ Multiple File Install:
 \&  InstallAs $env [@tgts], [@srcs];
 .Ve
 Both the target and the sources lists should be of the same length.
+.Ip "\fBThe \fR\fBPrecious\fR\fB method\fR" 0
+The \f(CWPrecious\fR method asks cons not to delete the given file or list
+of files before building them again.  This is especially useful for
+allowing incremental updates to libraries or debug information files
+which are updated rather than rebuilt anew each time.  Cons will still
+delete the files when the \f(CW-r\fR flag is specified.
 .Ip "\fBThe \fR\fBCommand\fR\fB method\fR" 0
 The \f(CWCommand\fR method is a catchall method which can be used to arrange for
 any external command to be called to update the target. For this command, a
@@ -1618,11 +1685,34 @@ directory \f(CWtest\fR:
 \&  echo test/foo test/bar -i test/baz >> test/tgt
 .Ve
 .PP
-Any of the above pseudo variables may be followed immediately by \f(CW:d\fR or
-\f(CW:f\fR, to indicate the directory or file associated with the
-name. Continuing with the above example, \f(CW%<:f\fR would expand to \f(CWfoo bar
-baz\fR, and \f(CW%\fR:d> would expand to \f(CWtest\fR.
+Any of the above pseudo variables may be followed immediately by one of
+the following suffixes to select a portion of the expanded path name:
 .PP
+.Vb 5
+\&  C<:b>    the directory plus the file name stripped of any suffix
+\&  C<:d>    the directory
+\&  C<:f>    the file name
+\&  C<:s>    the file name suffix
+\&  C<:F>    the file name stripped of any suffix
+.Ve
+Continuing with the above example, \f(CW%<:f\fR would expand to \f(CWfoo bar baz\fR,
+and \f(CW%\fR:d> would expand to \f(CWtest\fR.
+.PP
+It is possible to programmatically rewrite part of the command by
+enclosing part of it between \f(CW%[\fR and \f(CW%]\fR.  This will call the
+construction variable named as the first word enclosed in the brackets
+as a Perl code reference; the results of this call will be used to
+replace the contents of the brackets in the command line.  For example:
+.PP
+.Vb 2
+\&  $env = new cons(X_COMMA => sub { join(",", @_) });
+\&  Command $env 'tgt', qw(foo bar baz), "echo %[X_COMMA %<%] > %>"
+.Ve
+This will execute:
+.PP
+.Vb 1
+\&  echo foo,bar,baz > tgt
+.Ve
 After substitution occurs, strings of white space are converted into single
 blanks, and leading and trailing white space is eliminated. It is therefore
 not possible to introduce variable length white space in strings passed into
@@ -1651,6 +1741,22 @@ strings this way, you must either explicitly set up a dependency (with the
 command which is expected to be available. If it isn't available, you will,
 of course, get an error.
 .PP
+Cons normally prints a command before executing it.  This behavior is
+suppressed if the first character of the command is \f(CW@\fR.  Note that
+you may need to separate the \f(CW@\fR from the command name or escape it to
+prevent \f(CW@cmd\fR from looking like an array to Perl quote operators that
+perform interpolation:
+.PP
+.Vb 8
+\&  # The first command line is incorrect,
+\&  # because "@cp" looks like an array
+\&  # to the Perl qq// function.
+\&  # Use the second form instead.
+\&  Command $env 'foo', 'foo.in', qq(
+\&        @cp %< tempfile
+\&        @ cp tempfile %>
+\&  );
+.Ve
 If there are shell meta characters anywhere in the expanded command line,
 such as \f(CW<\fR, \f(CW\fR>, quotes, or semi-colon, then the command will actually be
 executed by invoking a shell. This means that a command such as:
@@ -1858,11 +1964,25 @@ This functionality could be invoked as in the following example:
 \&  Library $env 'lib.o', 'foo.c', 'bar.c';
 .Ve
 .SH "\fBInvoking Cons\fR"
-The \f(CWcons\fR command is always invoked from the root of the build tree. A
+The \f(CWcons\fR command is usually invoked from the root of the build tree. A
 \f(CWConstruct\fR file must exist in that directory. If the \f(CW-f\fR argument is
 used, then an alternate \f(CWConstruct\fR file may be used (and, possibly, an
 alternate root, since \f(CWcons\fR will cd to \f(CWConstruct\fR file's containing
-directory). The command is invoked as follows:
+directory).
+.PP
+If \f(CWcons\fR is invoked from a child of the root of the build tree with
+the \f(CW-t\fR argument, it will walk up the directory hierarchy looking for a
+\f(CWConstruct\fR file.  (An alternate name may still be specified with \f(CW-f\fR.)
+The targets supplied on the command line will be modified to be relative
+to the discovered \f(CWConstruct\fR file.  For example, invoking \f(CWcons\fR in
+\*(L"root/libfoo/sub\*(R" with \f(CWcons -t target\fR is identical to invoking it in
+\*(L"root\*(R" with \f(CWcons libfoo/sub/target\fR.  (Assuming there is a \f(CWConstruct\fR
+file in \*(L"root\*(R".  If there are any \f(CWDefault\fR targets specified in
+the directory hierarchy's \f(CWConstruct\fR or \f(CWConscript\fR files, only
+the default targets at or below the directory from which \f(CWcons -t\fR
+was invoked will be built.
+.PP
+The command is invoked as follows:
 .PP
 .Vb 1
 \&  cons <arguments> -- <construct-args>
@@ -1918,6 +2038,10 @@ attempted.
 .Ip "\f(CW-R\fR <repos>" 10
 Search for files in \fIrepos\fR.  Multiple \fB\-R\fR \fIrepos\fR directories are
 searched in the order specified.
+.Ip "\f(CW-t\fR" 10
+Traverse up the directory hierarchy looking for a Construct file, if
+none exists in the current directory.  Targets will be modified to be
+relative to the Construct file.
 .Ip "\f(CW-v\fR" 10
 Show \f(CWcons\fR version and continue processing.
 .Ip "\f(CW-V\fR" 10
@@ -2136,6 +2260,8 @@ The Official cons site is: http://www.dsmit.com/cons/
 
 .IX Item "\fBRepository interaction with other Cons features\fR"
 
+.IX Header "\fBDefault targets\fR"
+
 .IX Header "\fBSelective builds\fR"
 
 .IX Item "\fBSelective targeting\fR"
@@ -2167,6 +2293,8 @@ The Official cons site is: http://www.dsmit.com/cons/
 .IX Item "\fBThe \fR\fBInstall\fR\fB method\fR"
 
 .IX Item "\fBThe \fR\fBInstallAs\fR\fB method\fR"
+
+.IX Item "\fBThe \fR\fBPrecious\fR\fB method\fR"
 
 .IX Item "\fBThe \fR\fBCommand\fR\fB method\fR"
 
@@ -2237,6 +2365,8 @@ The Official cons site is: http://www.dsmit.com/cons/
 .IX Item "\f(CW-r\fR"
 
 .IX Item "\f(CW-R\fR <repos>"
+
+.IX Item "\f(CW-t\fR"
 
 .IX Item "\f(CW-v\fR"
 

@@ -2,12 +2,12 @@
 
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.1.1.5 2000/01/20 18:52:25 fisyak Exp $
+# $Id: cons,v 1.1.1.6 2000/03/12 18:58:47 fisyak Exp $
 
-$ver_num = 1.7;
-$ver_rev = "";
+$ver_num = 1.8;
+$ver_rev = "-dev";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.1.1.5 2000/01/20 18:52:25 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.1.1.6 2000/03/12 18:58:47 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -30,7 +30,9 @@ $version = "This is Cons $ver_num$ver_rev " .
 
 require 5.002;
 use integer;
+use Cwd;
 use File::Copy;
+use File::Spec;
 
 #------------------------------------------------------------------
 # Determine if running on win32 platform - either Windows NT or 95
@@ -117,6 +119,11 @@ Arguments can be any of the following, in any order:
   -R <repos>	Search for files in <repos>.  Multiple -R <repos>
 		directories are searched in the order specified.
 
+  -t            Traverse up the directory hierarchy looking for a
+		Construct file, if none exists in the current directory.
+		(Targets will be modified to be relative to the
+		Construct file.)
+
   -v		Show cons version and continue processing.
   -V            Show cons version and exit.
   -x		Show this message and exit.
@@ -132,7 +139,8 @@ Arguments can be any of the following, in any order:
 );
 
 # Simplify program name, if it is a path.
-$0 =~ s#.*/##;
+($vol, $dir, $file) = File::Spec->splitpath($0);
+$0 = $file;
 
 # Default parameters.
 $param::topfile = 'Construct';	# Top-level construction file.
@@ -160,12 +168,12 @@ sub showcom {
      'CXX'          => '%CC',
      'CXXFLAGS'     => '%CFLAGS',
      'CXXCOM'       => '%CXX %CXXFLAGS %_IFLAGS -c %< -o %>',
-     'LINK'	    => '%CC',
+     'LINK'	    => '%CXX',
      'LINKCOM'	    => '%LINK %LDFLAGS -o %> %< %_LDIRS %LIBS',
      'LINKMODULECOM'=> '%LD -r -o %> %<',
      'AR'	    => 'ar',
-     'ARCOM'	    => "%AR %ARFLAGS %> %<\n%RANLIB %>",
      'ARFLAGS'	    => 'r', # rs?
+     'ARCOM'	    => "%AR %ARFLAGS %> %<\n%RANLIB %>",
      'RANLIB'	    => 'ranlib',
      'AS'	    => 'as',
      'ASFLAGS'	    => '',
@@ -190,9 +198,30 @@ sub showcom {
      'ENV'	    => { 'PATH' => '/bin:/usr/bin' },
 );
 
+# overrides for Win32
 if ($main::_WIN32) {
-  # reset PREFLIB;
-  $param::defaults->{'PREFLIB'} = '';
+    # Defined for VC++ 6.0 by Greg Spencer <greg_spencer@acm.org>.
+    # Your mileage may vary.
+    my @win = (
+	'CC'             => 'cl',
+	'CFLAGS'         => '/nologo',
+	'CCCOM'          => '%CC %CFLAGS %_IFLAGS /c %< /Fo%>',
+	'LINK'           => 'link',
+	'LINKCOM'        => '%LINK %LDFLAGS /out:%> %< %_LDIRS %LIBS',
+	'LINKMODULECOM'  => '%LD /r /o %> %<',
+	'AR'             => 'lib',
+	'ARFLAGS'        => '/nologo ',
+	'ARCOM'          => "%AR %ARFLAGS /out:%> %<",
+	'RANLIB'         => '',
+	'LD'             => 'link',
+	'LDFLAGS'        => '/nologo ',
+	'PREFLIB'        => '',
+	'SUFEXE'         => '.exe',
+	'SUFLIB'         => '.lib',
+	'SUFLIBS'        => '.dll:.lib',
+	'SUFOBJ'         => '.obj',
+    );
+    push(@param::defaults, @win);
 }
 
 # Handle command line arguments.
@@ -206,61 +235,63 @@ while (@ARGV) {
 }
 
 sub option {
-    if ($_ eq 'v') {
-	print($version);
-    } elsif ($_ eq 'V') {
-	print($version), exit(0);
-    } elsif ($_ eq 'o') {
-	$param::overfile = shift(@ARGV);
-	die("$0: -o option requires a filename argument.\n")
-	    if !$param::overfile;
-    } elsif ($_ eq 'f') {
-	$param::topfile = shift(@ARGV);
-	die("$0: -f option requires a filename argument.\n")
-	    if !$param::topfile;
-    } elsif ($_ eq 'wf') {
-       $param::depfile = shift(@ARGV);
-       die("$0: -wf option requires a filename argument.\n")
-	   if !$param::depfile;
-    } elsif ($_ eq 'k') {
-	$param::kflag = 1;
-    } elsif ($_ eq 'p') {
-	$param::pflag = 1;
-	$param::build = 0;
-    } elsif ($_ eq 'pa') {
-	$param::pflag = $param::aflag = 1;
-	$param::build = 0;
-	$indent = "... ";
-    } elsif ($_ eq 'pw') {
-	$param::pflag = $param::wflag = 1;
-	$param::build = 0;
-    } elsif ($_ eq 'q') {
-	$param::quiet = 1;
-    } elsif ($_ eq 'r') {
-	$param::rflag = 1;
-	$param::build = 0;
-    } elsif ($_ eq 'h') {
-	$param::localhelp =1;
-    } elsif ($_ eq 'x') {
-	print($usage);
-	exit 0;
-    } elsif ($_ eq 'd') {
-	$param::depends = 1;
-    } elsif ($_ eq 'cc') {
-	$param::cachecom = 1;
-    } elsif ($_ eq 'cd') {
-	$param::cachedisable = 1;
-    } elsif ($_ eq 'cr') {
-	$param::random = 1;
-    } elsif ($_ eq 'cs') {
-	$param::cachesync = 1;
-    } elsif ($_ eq 'R') {
-	my($repository) = shift(@ARGV);
-	die("$0: -R option requires a repository argument.\n") if !$repository;
-	script::Repository($repository);
-    } else {
-	die qq($0: unrecognized option "-$_". Use -x for a usage message.\n)
-	    if $_;
+    my %opt = (
+		    'cc' =>   sub { $param::cachecom = 1; },
+		    'cd' =>   sub { $param::cachedisable = 1; },
+		    'cr' =>   sub { $param::random = 1; },
+		    'cs' =>   sub { $param::cachesync = 1; },
+		    'd' =>    sub { $param::depends = 1; },
+		    'h' =>    sub { $param::localhelp = 1; },
+		    'k' =>    sub { $param::kflag = 1; },
+		    'p' =>    sub { $param::pflag = 1;
+				    $param::build = 0; },
+		    'pa' =>   sub { $param::pflag = 1;
+				    $param::aflag = 1;
+				    $indent = "... ";
+				    $param::build = 0; },
+		    'pw' =>   sub { $param::pflag = 1;
+				    $param::wflag = 1;
+				    $param::build = 0; },
+		    'q' =>    sub { $param::quiet = 1; },
+		    'r' =>    sub { $param::rflag = 1;
+				    $param::build = 0; },
+		    't' =>    sub { $param::traverse = 1; },
+		    'v' =>    sub { print($version); },
+		    'V' =>    sub { print($version), exit(0); },
+		    'x' =>    sub { print($usage), exit 0; },
+		);
+
+    my %opt_arg = (
+		    'f' =>    sub { $param::topfile = $_[0]; },
+		    'o' =>    sub { $param::overfile = $_[0]; },
+		    'R' =>    sub { script::Repository($_[0]); },
+		    'wf' =>   sub { $param::depfile = $_[0]; },
+		);
+
+    if (defined $opt{$_}) {
+	$opt{$_}->();
+	return;
+    }
+    $_  =~ m/(.)(.*)/;
+    if (defined $opt_arg{$1}) {
+	if (! $2) {
+	    $_ = shift @ARGV;
+	    die("$0: -$1 option requires an argument.\n") if ! $_;
+	}
+	$opt_arg{$1}->($2 || $_);
+	return;
+    }
+    $_  =~ m/(..)(.*)/;
+    if (defined $opt_arg{$1}) {
+	if (! $2) {
+	    $_ = shift @ARGV;
+	    die("$0: -$1 option requires an argument.\n") if ! $_;
+	}
+	$opt_arg{$1}->($2 || $_);
+	return;
+    }
+    if ($_) {
+	die qq($0: unrecognized option "-$_".  Use -x for a usage message.\n);
     }
 }
 
@@ -301,9 +332,29 @@ if ($param::depfile) {
 
 # If the supplied top-level Conscript file is not in the
 # current directory, then change to that directory.
-if ($param::topfile =~ s#(.*)/##) {
-    chdir($1) || die("$0: couldn't change to directory $1 ($!)\n");
+($vol, $dir, $file) = File::Spec->splitpath($param::topfile);
+if ($vol || $dir) {
+    my($cd) = File::Spec->catpath($vol, $dir, undef);
+    chdir($cd) || die("$0: couldn't change to directory $cd ($!)\n");
+    $param::topfile = $file;
 }
+
+# Walk up the directory hierarchy looking for a Conscript file (if -t set).
+my $target_top;
+if ($param::traverse) {
+    my $cwd = cwd();
+    $target_top = dir::lookupdir(undef, $cwd);
+    my $dir = $target_top;
+    while (! -f $dir->prefix . $param::topfile) {
+	$dir = $dir->up;
+	die("$0: unable to find $param::topfile.\n") if ! $dir;
+    }
+    chdir($dir->path);
+    @targets = map(dir::lookup($target_top, $_)->path, @targets);
+}
+
+# Set up $dir::top and $dir::cwd, now that we are in the right directory.
+dir::init();
 
 # Now handle override file.
 package override;
@@ -339,8 +390,8 @@ for $re (@param::include) {
 # Read the top-level construct file and its included scripts.
 doscripts($param::topfile);
 
-# Status priorities. This let's us aggregate status for directories and print
-# an appropriate message (at the top-level).
+# Status priorities. This lets us aggregate status for directories
+# and print an appropriate message (at the top-level).
 %priority =
     ('none' => 1, 'handled' => 2, 'built' => 3, 'unknown' => 4, 'errors' => 5);
 
@@ -349,6 +400,16 @@ doscripts($param::topfile);
 
 # Build the supplied target patterns.
 for $tgt (map($dir::top->lookup($_), @targets)) {
+    if ($target_top && ! $tgt->is_under($target_top)) {
+	# A -t option was used, and this target is not underneath
+	# the directory where we were invoked via -t.
+	# If the target is a directory and the -t directory
+	# is underneath it, then build the -t directory.
+	if (ref $tgt ne "dir" || ! $target_top->is_under($tgt)) {
+	    next;
+	}
+	$tgt = $target_top;
+    }
     my($status) = buildtarget($tgt);
     if ($status ne 'built') {
 	my($path) = $tgt->path;
@@ -380,6 +441,11 @@ sub buildtarget {
 	if (exists $tgt->{member}) {
 	    my($members) = $tgt->{member};
 	    for $entry (sort keys %$members) {
+		# XXX
+		# This manipulation is still operating-system specific,
+		# but there's no File::Spec method for hidden files,
+		# so leave it alone until we know what cross-OS
+		# conventions make sense.
 		next if $entry =~ /^\./; # ignore hidden files
 		my($tgt) = $members->{$entry};
 		next if ref($tgt) eq "file" && !exists($tgt->{builder});
@@ -492,16 +558,13 @@ sub Link {
 # is cumbersome, but assures that the paths will be reported
 # the same regardless of symbolic links.
 sub Repository {
-    my($my_dir) = $dir::cwd->path;
-    if ($my_dir eq '.') {
-	chomp($my_dir = `pwd`);
-    }
+    my($my_dir) = Cwd::cwd();
     foreach $dir (@_) {
-	my($d) = `cd $dir 2>/dev/null && pwd`;
-	next if ! $d;
-	chop $d;
-	push(@param::rpath, $dir::top->lookupdir($dir))
-	    if -d $d && $d ne $my_dir;
+	my($d) = `$^X -e "use Cwd; chdir('$dir') && print cwd"`;
+	next if ! $d || ! -d $d || $d eq $my_dir;
+	# We know we can get away with passing undef to lookupdir
+	# as the directory because $dir is an absolute path.
+	push(@param::rpath, dir::lookupdir(undef, $dir));
 	push @INC, $d;
     }
 }
@@ -574,10 +637,9 @@ sub Ignore {
     $param::ignore = join("|", map("($_)", @_)) if @_;
 }
 
-# Specification of default targets.  Should only be called once?
+# Specification of default targets.
 sub Default {
-    die("Default called more than once\n") if $param::default_targets;
-    @param::default_targets = @_ if @_;
+    push(@param::default_targets, map($dir::cwd->lookup($_)->path, @_));
 }
 
 # Local Help.  Should only be called once.
@@ -661,7 +723,9 @@ sub UseCache($@) {
 	return 1;
     }
     my($depth) = 15;
-    while ($depth-- && ! -d $dir) { $dir = "../$dir"; }
+    while ($depth-- && ! -d $dir) {
+	$dir = File::Spec->catdir(File::Spec->updir, $dir);
+    }
     if (-d $dir) {
 	$param::cache = $dir;
 	return 1;
@@ -742,6 +806,13 @@ sub _subst {
     $str;
 }
 
+sub Precious {
+    my($env) = shift;
+    for $file (map($dir::cwd->lookup($_), @_)) {
+	$file->{precious} = 1;
+    }
+}
+
 sub Install {
     my($env) = shift;
     my($tgtdir) = $dir::cwd->lookupdir($env->_subst(shift));
@@ -801,7 +872,7 @@ sub Install_Local {
 
 sub Objects {
     my($env) = shift;
-    map($_->{entry}, _Objects($env, map($dir::cwd->lookup($_), @_)))
+    map($_->relpath($dir::cwd), _Objects($env, map($dir::cwd->lookup($_), @_)))
 }
 
 # Called with multiple source file references (or object files).
@@ -809,7 +880,7 @@ sub Objects {
 sub _Objects {
     my($env) = shift;
     my($suffix) = $env->{SUFOBJ};
-    map(_Object($env, $_, $dir::cwd->lookup($_->base . $suffix)), @_);
+    map(_Object($env, $_, $_->{dir}->lookup($_->base . $suffix)), @_);
 }
 
 # Called with an object and source reference.  If no object reference
@@ -948,7 +1019,7 @@ sub action {
     my($self, $tgt) = @_;
     my($src) = $tgt->{sources}[0];
     main::showcom("Install ${\$src->rpath} as ${\$tgt->path}")
-      if ($param::install && !$param::quiet);
+	if ($param::install && !$param::quiet);
     return unless $param::build;
     futil::install($src->rpath, $tgt);
     return 1;
@@ -965,6 +1036,7 @@ sub find {
     $com{$env,$com,$includes} || do {
 	# Remove unwanted bits from signature -- those bracketed by %( ... %)
 	my($comsig) = $com;
+	$comsig =~ s/^\@\s*//mg;
 	while ($comsig =~ s/%\(([^%]|%[^\(])*?%\)//g) { }
 	my($self) = { env => $env, com => $com, includes => $includes,
 		     comsig => $comsig };
@@ -977,7 +1049,7 @@ sub cachin {
     my($self, $tgt, $sig) = @_;
     if (cache::in($tgt, $sig)) {
 	if ($param::cachecom) {
-	    map { main::showcom($_) } $self->getcoms($tgt);
+	    map { if (! s/^\@\s*//) { main::showcom($_) } } $self->getcoms($tgt);
 	} else {
 	    printf("Retrieved %s from cache\n", $tgt->path)
 		unless ($param::quiet);
@@ -991,6 +1063,35 @@ sub cachin {
 sub cachout {
     my($self, $tgt, $sig) = @_;
     cache::out($tgt, $sig);
+}
+
+# internal routine to process variable options.
+# f: return file part
+# F: return file part, but strip any suffix
+# d: return directory part
+# b: return full path, but strip any suffix (a.k.a. return basename)
+# s: return only the suffix (or an empty string, if no suffix is there)
+# no option: return full path to file
+sub _variant {
+    my($opt, $file) = @_;
+    if ($opt eq 'f') { return $file->{entry}; }
+    elsif ($opt eq 'd') { return $file->{dir}->path; }
+    elsif ($opt eq 'F') {
+	my $subst = $file->{entry};
+	$subst =~ s/\.[^\.]+$//;
+	return $subst;
+    }
+    elsif ($opt eq 'b') {
+	my $subst = $file->path;
+	$subst =~ s/\.[^\.]+$//;
+	return $subst;
+    }
+    elsif ($opt eq 's') {
+	my $subst = $file->{entry};
+	$subst =~ m/(\.[^\.]+)$/;
+	return $1;
+    }
+    else { return $file->path; }
 }
 
 # For the signature of a basic command, we don't bother
@@ -1019,38 +1120,39 @@ sub getcoms {
 	$com =~ s/%[()]//g;
 
 	# Deal with %n, n=1,9 and variants.
-	while ($com =~ /%([1-9])(:([fd]?))?/) {
+	while ($com =~ /%([1-9])(:([fdbsF]?))?/) {
 	    my($match) = $&;
 	    my($src) = $src1[$1];
-	    my($subst) =
-		!$src? '' :
-		    $3 eq 'f' ? $src1[$1]->{entry} :
-			$3 eq 'd'? $src1[$1]->rfile->{dir}->path :
-			    $src1[$1]->rpath;
+	    my($subst) = _variant($3, $src1[$1]->rfile);
 	    undef $src[$1];
 	    $com =~ s/$match/$subst/;
 	}
 
 	# Deal with %0 aka %> and variants.
-	while ($com =~ /%[0>](:([fd]?))?/) {
+	while ($com =~ /%[0>](:([fdbsF]?))?/) {
 	    my($match) = $&;
-	    my($subst) =
-		$2 eq 'f' ? $tgt->{entry} :
-		    $2 eq 'd'? $tgt->{dir}->path :
-			$tgt->path;
+	    my($subst) = _variant($2, $tgt);
 	    $com =~ s/$match/$subst/;
 	}
 
 	# Deal with %< (all sources except %n's already used)
-	while ($com =~ /%<(:([fd]?))?/) {
+	while ($com =~ /%<(:([fdbsF]?))?/) {
 	    my($match) = $&;
-	    my($subst) =
-		join(' ',
-		     $2 eq 'f' ? map($_ && $_->{entry} || (), @src) :
-		     $2 eq 'd' ? map($_ && $_->rfile->{dir}->path || (), @src)
-			       : map($_ && $_->rpath || (), @src));
+	    my @list = ();
+	    foreach (@src) {
+		push(@list, _variant($2, $_->rfile)) if $_;
+	    }
+	    my($subst) = join(' ', @list);
 	    $com =~ s/$match/$subst/;
 	}
+
+	# Deal with %[ %].
+	$com =~ s{%\[(.*?)%\]}{
+	    my($func, @args) = split(/\s/, $1);
+	    die("$0: \"$func\" is not defined.\n")
+		unless ($self->{env}->{$func});
+	    $self->{env}->{$func}->(@args);
+	}gex;
 
 	# White space cleanup. XXX NO WAY FOR USER TO HAVE QUOTED SPACES
 	$com = join(' ', split(' ', $com));
@@ -1067,7 +1169,7 @@ sub action {
 
     if ($param::build) {
 	futil::mkdir($tgt->{dir});
-	unlink($tgt->path); # is this done already?
+	unlink($tgt->path) if ! $tgt->precious;
     }
 
     # Set environment.
@@ -1076,7 +1178,9 @@ sub action {
 
     # Handle multi-line commands.
     for $com ($self->getcoms($tgt)) {
-	main::showcom($com);
+	if ($com !~ s/^\@\s*//) {
+	    main::showcom($com);
+	}
 	if ($param::build) {
 
 	  #---------------------
@@ -1128,7 +1232,7 @@ sub action {
 	    return undef;
 	  }
 	}
-      }
+    }
 
     # success.
     return 1;
@@ -1162,15 +1266,16 @@ sub find {
 	for $dir (map($wd->lookupdir($env->_subst($_)), @$pdirs)) {
 	    my($dpath) = $dir->path;
 	    $ldirs .= $flagprefix . $dpath;
-	    next if $dpath =~ m#^$dir::MATCH_SEPARATOR#o;
+	    next if File::Spec->file_name_is_absolute($dpath);
 	    if (@param::rpath) {
-		my($suffix);
-		if ($dpath ne '.' && $dpath !~ '^#') {
-		    $suffix = $dir::SEPARATOR . $dpath;
-		}
-		my($d);
-		foreach $d (@param::rpath) {
-		    $ldirs .= $flagprefix . $d->path . $suffix;
+		if ($dpath eq File::Spec->curdir) {
+		    foreach my $d (map($_->path, @param::rpath)) {
+			$ldirs .= $flagprefix . $d;
+		    }
+		} else {
+		    foreach my $d (map($_->path, @param::rpath)) {
+			$ldirs .= $flagprefix . File::Spec->catfile($d, $dpath);
+		    }
 		}
 	    }
 	}
@@ -1211,14 +1316,14 @@ sub includes {
     my(@names);
 
     if ($main::_WIN32) {
-      # Pass %LIBS symbol through %-substituition
-      # <schwarze@isa.de> 1998-06-18
-      @names = split(' ', $env->_subst($env->{LIBS}));
+	# Pass %LIBS symbol through %-substituition
+	# <schwarze@isa.de> 1998-06-18
+	@names = split(' ', $env->_subst($env->{LIBS}));
     } else {
-      @names = split(' ', $env->{LIBS});
+	@names = split(' ', $env->{LIBS});
     }
     for $name (@names) {
-      my($lpath,@allnames);
+	my($lpath,@allnames);
 	if ($name =~ /^-l(.*)/) {
 	    # -l style names are looked up on LIBPATH, using all
 	    # possible lib suffixes in the same search order the
@@ -1442,7 +1547,7 @@ sub action {
     my($tgts) = $self->{tgts};
     for $tgt (@$tgts) {
 	futil::mkdir($tgt->{dir});
-	unlink($tgt->path);
+	unlink($tgt->path) if ! $tgt->precious;
     }
 
     # Now do the action to build all the targets. For consistency
@@ -1584,7 +1689,7 @@ sub scan {
 	return () unless open(SCAN, $file->rpath);
 	while (<SCAN>) {
 	    next unless /^\s*#/;
-	    if (/^\s*#\s*include\s*([<"])(.*)[>"]/) {
+	    if (/^\s*#\s*include\s*([<"])(.*?)[>"]/) {
 		if ($1 eq "<") {
 		    push(@anglenames, $2);
 		} else {
@@ -1610,7 +1715,6 @@ sub scan {
 		push(@includes, $include) unless $include->ignore;
 		last;
 	    }
-	    $include->forget();
 	}
     }
 
@@ -1621,7 +1725,6 @@ sub scan {
 		push(@includes, $include) unless $include->ignore;
 		last;
 	    }
-	    $include->forget();
 	}
     }
 
@@ -1640,19 +1743,66 @@ sub iflags {
     my($flagprefix) = " ${main::FLAG_CHARACTER}I";
     for $dpath (map($_->path, @{$self->{path}})) {
 	$iflags .= $flagprefix . $dpath;
-	next if $dpath =~ m#^$dir::MATCH_SEPARATOR#o;
+	next if File::Spec->file_name_is_absolute($dpath);
 	if (@param::rpath) {
-	    my($suffix);
-	    if ($dpath ne '.' && $dpath !~ '^#') {
-		$suffix = $dir::SEPARATOR . $dpath;
-	    }
-	    my($dir);
-	    foreach $dir (@param::rpath) {
-		$iflags .= $flagprefix . $dir->path . $suffix;
+	    if ($dpath eq File::Spec->curdir) {
+		foreach my $d (map($_->path, @param::rpath)) {
+		    $iflags .= $flagprefix . $d;
+		}
+	    } else {
+		foreach my $d (map($_->path, @param::rpath)) {
+		    $iflags.= $flagprefix . File::Spec->catfile($d, $dpath);
+		}
 	    }
 	}
     }
     $iflags
+}
+
+package File::Spec;
+
+# Some of the File::Spec methods we use are recent additions.
+# Provide some rudimentary fall-back methods (probably with some
+# hidden UNIX assumptions in them) for people with older modules
+# installed.
+
+# We should NOT put a lot of effort into supporting these methods,
+# making them portable, etc.  Encourage people to upgrade their
+# File::Spec module or their version of Perl instead.
+
+sub _splitpath {
+    $_[1] =~ s#^([A-Za-z]:)/#/#;
+    my $vol = $1;
+    my(@path) = split(/$dir::MATCH_SEPARATOR/, $_[1], -1);
+    $file = pop @path;
+    push @path, $file if ! $file;
+    $dirs = join($dir::SEPARATOR, @path);
+    return ($vol, $dirs, $file);
+}
+
+sub _splitdir {
+    my @dirs = split(/$dir::MATCH_SEPARATOR/, $_[1], -1);
+    push(@dirs, '') if $dirs[$#dirs];
+    @dirs;
+}
+
+sub _catpath {
+    $_[0]->catfile(@_[2..$#_]);
+}
+
+# Catch these undefined File::Spec methods with AUTOLOAD
+# and redirect them to our fall-back methods.
+
+sub AUTOLOAD {
+    my %map = (
+	splitpath => \&_splitpath,
+	splitdir => \&_splitdir,
+	catpath => \&_catpath,
+    );
+    my($func) =$AUTOLOAD;
+    $func =~ s/File::Spec:://;
+    *$func = $map{$func};	# Arrange for a direct call next time.
+    $map{$func}->(@_);
 }
 
 # Directory and file handling. Files/dirs are represented by objects.
@@ -1660,25 +1810,9 @@ sub iflags {
 package dir;
 
 BEGIN {
-
-    $SEPARATOR = "/";
-    $MATCH_SEPARATOR = "/";
-    if ($main::_WIN32) {
-	$SEPARATOR = "\\";
-	$MATCH_SEPARATOR = "\\\\";
-    }
-
-    $root = {path => $SEPARATOR, prefix => $SEPARATOR,
-	     srcpath => $SEPARATOR, 'exists' => 1 };
-    $root->{srcdir} = $root;
-    bless $root;
-
-    $top = {path => '.', prefix => '', srcpath => '.', exists => 1 };
-    $top->{srcdir} = $top;
-    $top->{member}->{'.'} = $top;
-    bless $top;
-
-    $cwd = $top;
+    # A portable way of determing our directory separator.
+    $SEPARATOR = File::Spec->catdir('', '');
+    $MATCH_SEPARATOR = "\Q$SEPARATOR\E";
 }
 
 # Look up a file (but not a directory) in a directory.
@@ -1687,11 +1821,9 @@ BEGIN {
 sub lookup {
     my($dir, $entry) = @_;
 
-    #--------------------------------------------------------------------
-    # Convert entry to use SEPARATOR characters so it is correct on eith
-    # win32 or Unix platforms.
-    #--------------------------------------------------------------------
-
+    # Convert all slashes to the native directory separator.
+    # This allows Construct files to always be written with good
+    # ol' POSIX path names, regardless of what we're running on.
     $entry =~ s#/#$SEPARATOR#g;
 
     if ($entry !~ m#$MATCH_SEPARATOR#o) {
@@ -1701,26 +1833,71 @@ sub lookup {
 	    $dir = $dir::top;
 	}
     } else {
-	# Path has a / in it somewhere. Separate into
-	# stem and entry, and find the new directory
-	# to look the entry up in.
-	my($stem);
-	if ($entry =~ s#^$MATCH_SEPARATOR##) {
-	    # Absolute path
-	    if ($entry =~ m#$MATCH_SEPARATOR#o) {
-		($stem, $entry) = $entry =~ m#(.*)$MATCH_SEPARATOR(.*)#o;
-		$dir = $root->lookupdir($stem)
+	# Portable file name manipulation with File::Spec;
+	# lots of comments to explain what's happening and why.
+	#
+	# File::Spec doesn't understand the Cons convention of
+	# an initial '#' for top-relative files.  Strip it.
+	my($toprel) = $entry =~ s/^#//;
+	my($vol, $directories);
+	($vol, $directories, $entry) = File::Spec->splitpath($entry);
+	if ($vol || $directories) {
+	    # There was at least one separator somewhere in the path.
+	    my @dirs = File::Spec->splitdir($directories);
+
+	    # If there was a file entry on the end of the path, then
+	    # the last @dirs elemnt is '' and we don't need it.  If
+	    # there wasn't a file entry on the end (File::Spec knew
+	    # the last component was a directory), then the last @dirs
+	    # element becomes the entry we want to look up.
+	    my($e) = pop @dirs;
+	    $entry ||= $e;
+
+	    # splitdir returns '' as the first array element if it
+	    # finds a separator first in the path, so we can test
+	    # that to determine if the path name was absolute.
+	    # The less-efficient alternative is to pass the original
+	    # value of $entry to File::Spec->file_name_is_absolute.
+	    if (! $dirs[0]) {
+		# The path was absolute.  If no volume was supplied,
+		# use the volume of our current directory.
+		$vol ||= $cwd_vol;
+		if (! $root{$vol}) {
+		    # This is our first time looking up a path name
+		    # on this volume, so create a root node for it.
+		    # (On UNIX systems, $vol is always '', so '/'
+		    # always maps to the $root{''} node.)
+		    $root{$vol} = {path => $vol.$SEPARATOR,
+				prefix => $vol.$SEPARATOR,
+				srcpath => $vol.$SEPARATOR,
+				'exists' => 1 };
+		    $root{$vol}->{srcdir} = $root{$vol};
+		    bless $root{$vol};
+		}
+		if (@dirs <= 1) {
+		    # We're in the root directory.  If we're not
+		    # looking up a $entry within the root, then they
+		    # asked for '/' and we return the node.
+		    return $root{$vol} if ! $entry;
+		    $dir = $root{$vol};
+		} else {
+		    # We're looking up something below the root directory.
+		    # Strip the initial '/' from the path (the array
+		    # slice below) and look it up relative to this
+		    # volume's root.
+		    $dir = $root{$vol}->lookupdir(File::Spec->catdir(@dirs[1 .. $#dirs]));
+		}
 	    } else {
-		return $root if !$entry;
-		$dir = $root;
-	    }
-	} else {
-	    ($stem, $entry) = $entry =~ m#(.*)$MATCH_SEPARATOR(.*)#o;
-	    if ($entry =~ s/^#//) {
-		# Top-relative names begin with #.
-		$dir = $dir::top->lookupdir($stem)
-	    } else {
-		$dir = $dir->lookupdir($stem)
+		# The path was relative, not absolute.  But there
+		# was at least one directory separator there, so
+		# we have a directory to look up, either relative
+		# to the top (if there was an initial '#') or the
+		# current directory (if not).
+		if ($toprel) {
+		    $dir = $dir::top->lookupdir(File::Spec->catdir(@dirs));
+		} else {
+		    $dir = $dir->lookupdir(File::Spec->catdir(@dirs));
+		}
 	    }
 	}
     }
@@ -1739,23 +1916,42 @@ sub lookupdir {
     }
 }
 
-# "Forget" that we ever considered the dirname
-# of this pathname to be a directory, if in fact,
-# it does not name a directory that exists.
-sub forget {
-    my($self) = shift;
-    my($dir) = $self->{dir};
-    if (ref($dir->{dir})) {
-      if (!$dir->dir_exists) {
-          delete $dir::cache{$dir->{dir},$dir->{entry}};
-          bless $dir, file;
-      }
-    }
+# Return the parent directory without doing a lookupdir,
+# which would create a parent if it doesn't already exist.
+# A return value of undef (! $dir->up) indicates a root directory.
+sub up {
+    $_[0]->{member}->{'..'};
 }
 
-sub dir_exists {
-    return $_[0]->{isdir} if exists $_[0]->{isdir};
-    $_[0]->{isdir} = (-d $_[0]->path);
+# Return whether this is an entry somewhere underneath the
+# specified directory.
+sub is_under {
+    my $dir = $_[0];
+    while ($dir) {
+	return 1 if $_[1] == $dir;
+	$dir = $dir->up;
+    }
+    return undef;
+}
+
+# Return the relative path from the specified directory ($_[1])
+# to the object.  Return undef if this isn't underneath the
+# specified directory.
+sub relpath {
+    my $dir = $_[0];
+    my @dirs;
+    while ($dir) {
+	if ($_[1] == $dir) {
+	    if (@dirs < 2) {
+		return @dirs[0] || '';
+	    } else {
+		return File::Spec->catdir(@dirs);
+	    }
+	}
+	unshift(@dirs, $dir->{entry});
+	$dir = $dir->up;
+    }
+    return undef;
 }
 
 # Return the path of the directory (file paths implemented
@@ -1798,6 +1994,21 @@ sub accessible {
     die $err;
 }
 
+sub init {
+    my $path = Cwd::cwd();
+
+    # We know we can get away with passing undef to lookupdir
+    # as the directory because $dir is an absolute path.
+    $top = lookupdir(undef, $path);
+    $top->{path} = $top->{srcpath} = File::Spec->curdir;
+    $top->{prefix} = '';
+    $top->{srcdir} = $top;
+
+    $cwd = $top;
+
+    ($cwd_vol, undef, undef) = File::Spec->splitpath($path);
+}
+
 
 package file;
 
@@ -1831,7 +2042,7 @@ sub rfile {
     my($rfile) = $self;
     if (@param::rpath) {
 	my($path) = $self->path;
-	if ($path !~ m#^$dir::MATCH_SEPARATOR#o && ! -f $path) {
+	if (! File::Spec->file_name_is_absolute($path) && ! -f $path) {
 	    my($dir);
 	    foreach $dir (@param::rpath) {
 		my($t) = $dir->prefix . $path;
@@ -1844,6 +2055,11 @@ sub rfile {
 	}
     }
     $self->{rfile} = $rfile;
+}
+
+# returns the "precious" status of this file.
+sub precious {
+    return $_[0]->{precious};
 }
 
 # "Erase" reference to a Repository file,
@@ -1868,7 +2084,7 @@ sub rsrcpath {
     return $_[0]->{rsrcpath} if exists $_[0]->{rsrcpath};
     my($self) = @_;
     my($path) = $self->{rsrcpath} = $self->srcpath;
-    if (@param::rpath && $path !~ m+^$dir::MATCH_SEPARATOR+o && ! -f $path) {
+    if (@param::rpath && ! File::Spec->file_name_is_absolute($path) && ! -f $path) {
 	my($dir);
 	foreach $dir (@param::rpath) {
 	    my($t) = $dir->prefix . $path;
@@ -1890,13 +2106,7 @@ sub source_exists {
     return $_[0]->{source_exists} if defined $_[0]->{source_exists};
     my($self) = @_;
     my($path) = $self->path;
-    my($dir) = $self->{dir};
-    my($time);
-
-    if ($dir->dir_exists) {
-      $time = (stat($path))[9];
-    }
-
+    my($time) = (stat($path))[9];
     if ($self->is_linked) {
 	# Linked directory, local logic.
 	my($srcpath) = $self->srcpath;
@@ -2044,7 +2254,7 @@ sub _build {
 	# If requested, build in a random order, instead of the
 	# order that the dependencies were listed.
 	my(%rdeps);
-	map { $rdeps{$_,'*' x int(rand(0,10))} = $_ } @deps;
+	map { $rdeps{$_,'*' x int(rand 10)} = $_ } @deps;
 	$rdeps = [values(%rdeps)];
     }
 
@@ -2156,6 +2366,21 @@ sub bind {
     $self->{builder} = $builder;
     push(@{$self->{sources}}, @sources);
 }
+
+sub is_under {
+    $_[0]->{dir}->is_under($_[1]);
+}
+
+sub relpath {
+    my $dirpath = $_[0]->{dir}->relpath($_[1]);
+    if (! defined $dirpath) {
+	return undef;
+    } elsif (! $dirpath) {
+	return $_[0]->{entry};
+    } else {
+	File::Spec->catfile($dirpath, $_[0]->{entry});
+    }
+}
 
 # File utilities
 package futil;
@@ -2169,7 +2394,9 @@ sub install {
     return 1 if $tp eq $sp;
     return 1 if eval { link($sp, $tp) };
     unlink($tp);
-    futil::mkdir($tgt->{dir});
+    if (! futil::mkdir($tgt->{dir})) {
+	return undef;
+    }
     return 1 if eval { link($sp, $tp) };
     futil::copy($sp, $tp);
 }
@@ -2182,22 +2409,32 @@ sub copy {
 
     # Use Perl standard library module for file copying, which handles
     # binary copies. <schwarze@isa.de> 1998-06-18
-    File::Copy::copy($sp, $tp) || return undef;
-    utime $atime, $mtime, $tp
-	|| die qq($0: can\'t set modification time for file "$tp" ($!)\n); #'
-    chmod $mode, $tp
-	|| die qq($0: can\'t set mode on file "$tp" ($!)\n); #'
+    if (! File::Copy::copy($sp, $tp)) {
+	warn qq($0: can\'t install "$sp" to "$tp" ($!)\n); #'
+	return undef;
+    }
+    if (! utime $atime, $mtime, $tp) {
+	warn qq($0: can\'t set modification time for file "$tp" ($!)\n); #'
+	return undef;
+    }
+    if (! chmod $mode, $tp) {
+	warn qq($0: can\'t set mode $mode on file "$tp" ($!)\n); #'
+	return undef;
+    }
     return 1;
 }
 
 # Ensure that the specified directory exists.
 # Aborts on failure.
 sub mkdir {
-    return if $_[0]->{exists};
-    futil::mkdir($_[0]->{dir}); # Recursively make parent.
+    return 1 if $_[0]->{exists};
+    if (! futil::mkdir($_[0]->{dir})) { # Recursively make parent.
+	return undef;
+    }
     my($path) = $_[0]->path;
     if (!-d $path && !mkdir($path, 0777)) {
-	die("$0: can't create directory $path ($!).\n");
+	warn qq($0: can't create directory $path ($!).\n); #'
+	return undef;
     }
     $dir->{exists} = 1;
 }
@@ -2275,7 +2512,7 @@ sub in {
     # Add the path to the signature, to make it unique.
     $sig = sig->collect($sig, $file->path) unless $param::mixtargets;
     my($dir) = substr($sig, 0, 1);
-    my($cp) = "$param::cache/$dir/$sig";
+    my($cp) = File::Spec->catfile($param::cache, $dir, $sig);
     return -f $cp && futil::install($cp, $file);
 }
 
@@ -2289,8 +2526,12 @@ sub out {
     $sig = sig->collect($sig, $file->path) unless $param::mixtargets;
     my($dir) = substr($sig, 0, 1);
     my($sp) = $file->path;
-    my($cp) = "$param::cache/$dir/$sig";
-    if (-f $cp) {
+    my($cp) = File::Spec->catfile($param::cache, $dir, $sig);
+    my($cdir) = File::Spec->catfile($param::cache, $dir);
+    if (! -d $cdir) {
+	mkdir($cdir, 0777) ||
+	    die("$0: can't create cache directory $cdir ($!).\n");
+    } elsif (-f $cp) {
 	# Already cached: try to use that instead, to save space.
 	# This can happen if the -cs option is used on a previously
 	# uncached build, or if two builds occur simultaneously.
@@ -2368,7 +2609,7 @@ sub signature {
 		return $file->{sig} = $hsig;
 	    }
 	}
-	if ($path !~ m#^/#) {
+	if (! File::Spec->file_name_is_absolute($path)) {
 	    # A file in the local build directory. Assume we can write
 	    # a signature file for it, and compute the actual source
 	    # signature. We compute the file based on the build path,
@@ -2458,7 +2699,7 @@ the original.
 
 by Bob Sidebotham F<rns@fore.com>
 
-A guide and reference for version 1.7
+A guide and reference for version 1.8-dev
 
 Copyright (c) 1996-1999 FORE Systems, Inc. All rights reserved.
 
@@ -3564,6 +3805,39 @@ subdirectory.  Cons will search for derived files in the appropriate build
 subdirectories under the repository tree.
 
 
+=head1 B<Default targets>
+
+Until now, we've demonstrated invoking Cons with an explicit target
+to build:
+
+  % cons hello
+
+Normally, Cons does not build anything unless a target is specified,
+but specifying '.' (the current directory) will build everything:
+
+  % cons		# does not build anything
+
+  % cons .		# builds everything under the top-level directory
+
+Adding the C<Default> method to any Construct or Conscript file will add
+the specified targets to a list of default targets.  Cons will build
+these defaults if there are no targets specified on the command line.
+So adding the following line to the top-level Construct file will mimic
+Make's typical behavior of building everything by default:
+
+  Default '.';
+
+The following would add the C<hello> and C<goodbye> commands (in the
+same directory as the Construct or Conscript file) to the default list:
+
+  Default qw(
+	hello
+	goodbye
+  );
+
+The C<default> method may be used more than once to add targets to the
+default list.
+
 =head1 B<Selective builds>
 
 Cons provides two methods for reducing the size of given build. The first is
@@ -3820,27 +4094,51 @@ contains a number of construction variables and some methods. At the present
 writing, the default list of construction variables is defined as follows:
 
 
-
   CC		=> 'cc',
   CFLAGS	=> '',
   CCCOM		=> '%CC %CFLAGS %_IFLAGS -c %< -o %>',
-  CPPPATH	=> '',
-  LINK		=> '%CC',
+  CXX		=> '%CC',
+  CXXFLAGS	=> '%CFLAGS',
+  CXXCOM	=> '%CXX %CXXFLAGS %_IFLAGS -c %< -o %>',
+  LINK		=> '%CXX',
   LINKCOM	=> '%LINK %LDFLAGS -o %> %< %_LDIRS %LIBS',
-  LIBPATH	=> '',
-  LIBS		=> '',
+  LINKMODULECOM	=> '%LD -r -o %> %<',
   AR		=> 'ar',
-  ARCOM		=> "%AR %ARFLAGS %> %<\n%RANLIB %>",
   ARFLAGS	=> 'r',
+  ARCOM		=> "%AR %ARFLAGS %> %<\n%RANLIB %>",
   RANLIB	=> 'ranlib',
   AS		=> 'as',
   ASFLAGS	=> '',
   ASCOM		=> '%AS %ASFLAGS %< -o %>',
   LD		=> 'ld',
   LDFLAGS	=> '',
+  PREFLIB	=> 'lib',
   SUFLIB	=> '.a',
+  SUFLIBS	=> '.so:.a',
   SUFOBJ	=> '.o',
-  ENV		=> { PATH => '/bin:/usr/bin' },
+  ENV		=> { 'PATH' => '/bin:/usr/bin' },
+
+
+On Win32 systems (Windows NT), the following construction variables
+are overridden in the default:
+
+  CC		=> 'cl',
+  CFLAGS	=> '/nologo',
+  CCCOM		=> '%CC %CFLAGS %_IFLAGS /c %< /Fo%>',
+  LINK		=> 'link',
+  LINKCOM	=> '%LINK %LDFLAGS /out:%> %< %_LDIRS %LIBS',
+  LINKMODULECOM	=> '%LD /r /o %> %<',
+  AR		=> 'lib',
+  ARFLAGS	=> '/nologo ',
+  ARCOM		=> "%AR %ARFLAGS /out:%> %<",
+  RANLIB	=> '',
+  LD		=> 'link',
+  LDFLAGS	=> '/nologo ',
+  PREFLIB	=> '',
+  SUFEXE	=> '.exe',
+  SUFLIB	=> '.lib',
+  SUFLIBS	=> '.dll:.lib',
+  SUFOBJ	=> '.obj',
 
 These variables are used by the various methods associated with the
 environment, in particular any method that ultimately invokes an external
@@ -3995,6 +4293,14 @@ Multiple File Install:
 
 Both the target and the sources lists should be of the same length.
 
+=item B<The >B<Precious>B< method>
+
+The C<Precious> method asks cons not to delete the given file or list
+of files before building them again.  This is especially useful for
+allowing incremental updates to libraries or debug information files
+which are updated rather than rebuilt anew each time.  Cons will still
+delete the files when the C<-r> flag is specified.
+
 =item B<The >B<Command>B< method>
 
 The C<Command> method is a catchall method which can be used to arrange for
@@ -4066,10 +4372,30 @@ directory C<test>:
 
 =back
 
-Any of the above pseudo variables may be followed immediately by C<:d> or
-C<:f>, to indicate the directory or file associated with the
-name. Continuing with the above example, C<%<:f> would expand to C<foo bar
-baz>, and C<%>:d> would expand to C<test>.
+Any of the above pseudo variables may be followed immediately by one of
+the following suffixes to select a portion of the expanded path name:
+
+  C<:b>    the directory plus the file name stripped of any suffix
+  C<:d>    the directory
+  C<:f>    the file name
+  C<:s>    the file name suffix
+  C<:F>    the file name stripped of any suffix
+
+Continuing with the above example, C<%<:f> would expand to C<foo bar baz>,
+and C<%>:d> would expand to C<test>.
+
+It is possible to programmatically rewrite part of the command by
+enclosing part of it between C<%[> and C<%]>.  This will call the
+construction variable named as the first word enclosed in the brackets
+as a Perl code reference; the results of this call will be used to
+replace the contents of the brackets in the command line.  For example:
+
+  $env = new cons(X_COMMA => sub { join(",", @_) });
+  Command $env 'tgt', qw(foo bar baz), "echo %[X_COMMA %<%] > %>"
+
+This will execute:
+
+  echo foo,bar,baz > tgt
 
 After substitution occurs, strings of white space are converted into single
 blanks, and leading and trailing white space is eliminated. It is therefore
@@ -4098,6 +4424,21 @@ strings this way, you must either explicitly set up a dependency (with the
 C<Depends> method), or be sure that the command you are using is a system
 command which is expected to be available. If it isn't available, you will,
 of course, get an error.
+
+Cons normally prints a command before executing it.  This behavior is
+suppressed if the first character of the command is C<@>.  Note that
+you may need to separate the C<@> from the command name or escape it to
+prevent C<@cmd> from looking like an array to Perl quote operators that
+perform interpolation:
+
+  # The first command line is incorrect,
+  # because "@cp" looks like an array
+  # to the Perl qq// function.
+  # Use the second form instead.
+  Command $env 'foo', 'foo.in', qq(
+	@cp %< tempfile
+	@ cp tempfile %>
+  );
 
 If there are shell meta characters anywhere in the expanded command line,
 such as C<<>, C<>>, quotes, or semi-colon, then the command will actually be
@@ -4351,13 +4692,25 @@ This functionality could be invoked as in the following example:
 
 =head1 B<Invoking Cons>
 
-The C<cons> command is always invoked from the root of the build tree. A
+The C<cons> command is usually invoked from the root of the build tree. A
 C<Construct> file must exist in that directory. If the C<-f> argument is
 used, then an alternate C<Construct> file may be used (and, possibly, an
 alternate root, since C<cons> will cd to C<Construct> file's containing
-directory). The command is invoked as follows:
+directory).
 
+If C<cons> is invoked from a child of the root of the build tree with
+the C<-t> argument, it will walk up the directory hierarchy looking for a
+C<Construct> file.  (An alternate name may still be specified with C<-f>.)
+The targets supplied on the command line will be modified to be relative
+to the discovered C<Construct> file.  For example, invoking C<cons> in
+"root/libfoo/sub" with C<cons -t target> is identical to invoking it in
+"root" with C<cons libfoo/sub/target>.  (Assuming there is a C<Construct>
+file in "root".  If there are any C<Default> targets specified in
+the directory hierarchy's C<Construct> or C<Conscript> files, only
+the default targets at or below the directory from which C<cons -t>
+was invoked will be built.
 
+The command is invoked as follows:
 
   cons <arguments> -- <construct-args>
 
@@ -4454,6 +4807,12 @@ attempted.
 
 Search for files in I<repos>.  Multiple B<-R> I<repos> directories are
 searched in the order specified.
+
+=item C<-t>
+
+Traverse up the directory hierarchy looking for a Construct file, if
+none exists in the current directory.  Targets will be modified to be
+relative to the Construct file.
 
 =item C<-v>
 
