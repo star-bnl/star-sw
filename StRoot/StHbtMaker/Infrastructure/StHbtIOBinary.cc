@@ -90,7 +90,7 @@ int StHbtIOBinary::readTrackList(StHbtEvent& ev, unsigned short trVersion){
   iret =  read(NtracksInCollection);
   //#ifdef STHBTDEBUG
   cout << " reading " << NtracksInCollection << " tracks " << endl;
-  if (NtracksInCollection > 1e7) {
+  if (NtracksInCollection > 1e6) {
     for ( int i=0; i<10; i++) {
       cout << " StHbtIOBinaryReader::readTrackList(...) - unreasonable number of tracks, returning ioERR " << endl;
     }
