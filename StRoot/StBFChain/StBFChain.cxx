@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.150 2000/11/03 21:21:42 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.151 2000/11/07 01:47:44 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -37,6 +37,7 @@ Bfc_st BFC[] = {
   {"Y1h"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1h parameters",kFALSE},
   {"RY1h"        ,""  ,"","db,calib"                        ,"","","Real data with Year1h geometry",kFALSE},
   {"Y2a"         ,""  ,"","db,calib"                            ,"","","Turn on Year 2a parameters",kFALSE},
+  {"NoDb"        ,""  ,"",""                                        ,"","","Take out Db from Chain",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Trigger Type","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -629,6 +630,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
        GetOption("Xi")    || GetOption("Kink"))) SetOption("global");
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval"); 
   if (!GetOption("event")) SetOption("-analysis");
+  if (GetOption("NoDb")) {SetOption("-db"); SetOption("-calib");}
   // Print set values
   St_Bfc *Bfc = new St_Bfc("BFChain",NoChainOptions);
   AddRunco(Bfc);
