@@ -281,9 +281,10 @@ void StiMaker::finishEvent()
 		if (useExtendToVertex)
 			{
 				StiHit * vertex = toolkit->getHitFactory()->getObject();
-				// set vertex as (0,0,0) for now...
-				vertex->set(0.,0.,  0.,0.,0.,  0.01,0.01,0.01,0.01,0.01,0.01);
-				tracker->extendTracksToVertex(vertex);
+				StThreeVectorF& vp = mevent->primaryVertex()->position();
+				StThreeVectorF& ve = mevent->primaryVertex()->positionError();
+				vertex->set(0.,0.,vp.x(),vp.y(),vp.z(),ve.x(),0.,0.,ve.y(),0.,ve.z());
+				tracker->extendTracksToVertex(*vertex);
 			}
 		clock.start();
 		mevent = mStEventFiller->fillEvent(mevent, toolkit->getTrackContainer());
