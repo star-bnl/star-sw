@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.13 2000/03/27 02:19:26 fine Exp $
+// $Id: St_Module.cxx,v 1.14 2000/03/30 05:20:51 fine Exp $
 
 #include <assert.h>
 #include <string.h>
@@ -307,19 +307,6 @@ Int_t  St_Module::ExecuteModule(TTable *f1,TTable *f2,TTable *f3,TTable *f4,
                               TTable *f29,TTable *f30,TTable *f31,TTable *f32,
                               TTable *f33,TTable *f34,TTable *f35,TTable *f36,
                               TTable *f37,TTable *f38
-#if 0
-                                                ,TTable *f39,TTable *f40,
-                              TTable *f41,TTable *f42,TTable *f43,TTable *f44,
-                              TTable *f45,TTable *f46,TTable *f47,TTable *f48,
-                              TTable *f49,TTable *f50,TTable *f51,TTable *f52,
-                              TTable *f53,TTable *f54,TTable *f55,TTable *f56,
-                              TTable *f57,TTable *f58,TTable *f59,TTable *f60,
-                              TTable *f61,TTable *f62,TTable *f63,TTable *f64,
-                              TTable *f65,TTable *f66,TTable *f67,TTable *f68,
-                              TTable *f69,TTable *f70,TTable *f71,TTable *f72,
-                              TTable *f73,TTable *f74,TTable *f75,TTable *f76,
-                              TTable *f77,TTable *f78,TTable *f79,TTable *f80
-#endif
                               )
 {
   fIndex = 38;
@@ -327,22 +314,17 @@ Int_t  St_Module::ExecuteModule(TTable *f1,TTable *f2,TTable *f3,TTable *f4,
                   ,f13,f14,f15,f16,f17,f18,f19,f20,f21,f22,f23,f24,
                   f25,f26,f27,f28,f29,f30,f31,f32,f33,f34,f35,f36,
                   f37,f38
-#if 0
-                                                ,f39,f40,f41,f42,f43,f44,f45,f46,f47,f48,
-                  f49,f50,f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,
-                  f61,f62,f63,f64,f65,f66,f67,f68,f69,f70,f71,f72,
-                  f73,f74,f75,f76,f77,f78,f79,f80
-#endif
                   );
   return ExecuteModule();
 }
 void St_Module::Streamer(TBuffer &)
-{
-///===== assert(0);
-}
+{ assert(0);}
 
 //________________________________________________________________________
 // $Log: St_Module.cxx,v $
+// Revision 1.14  2000/03/30 05:20:51  fine
+// bug fixed
+//
 // Revision 1.13  2000/03/27 02:19:26  fine
 // warning removed
 //
