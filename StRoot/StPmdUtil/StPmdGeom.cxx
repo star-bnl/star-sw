@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.9 2004/09/19 00:08:21 perev Exp $
+ * $Id: StPmdGeom.cxx,v 1.10 2004/11/15 23:27:23 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.10  2004/11/15 23:27:23  subhasis
+ * if() removed in ctor to stop valgrind error
+ *
  * Revision 1.9  2004/09/19 00:08:21  perev
  * Small Walgrind leak fixed
  *
@@ -1260,8 +1263,9 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
       iRun[ik] = runfile[2+ik];
     }
   
-  Int_t rn = atoi(iRun);
-  cout<<"runno, rn1 "<<runno1<<" "<<rn<<endl;
+  Int_t rn =0;
+  rn=atoi(iRun);
+  //cout<<"runno, rn1 "<<runno1<<" "<<rn<<endl;
   
   // Once the day is know choose the mapping file
   //     if( rn >=1 && rn <21)

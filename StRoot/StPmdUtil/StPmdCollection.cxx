@@ -1,6 +1,6 @@
  /**********************************************
  *
- * $Id: StPmdCollection.cxx,v 1.3 2003/10/14 10:16:31 subhasis Exp $
+ * $Id: StPmdCollection.cxx,v 1.4 2004/11/15 23:27:16 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay, July 2002.
  ***********************************************
@@ -9,6 +9,9 @@
  *
  ***********************************************
  * $Log: StPmdCollection.cxx,v $
+ * Revision 1.4  2004/11/15 23:27:16  subhasis
+ * if() removed in ctor to stop valgrind error
+ *
  * Revision 1.3  2003/10/14 10:16:31  subhasis
  * zeroed before delete
  *
@@ -23,9 +26,8 @@ ClassImp(StPmdCollection)
 
 StPmdCollection::StPmdCollection(Char_t * name):TDataSet(name) {
   for(int i=0; i<2; i++){
-   if(mDetector[i]) mDetector[i]=0;
-   if(mDetector[i]) delete mDetector[i];
-       StPmdDetector * det = new StPmdDetector(i,12);
+      mDetector[i]=0;
+      StPmdDetector * det = new StPmdDetector(i,12);
       this->setDetector(det,i);
   }
 }
