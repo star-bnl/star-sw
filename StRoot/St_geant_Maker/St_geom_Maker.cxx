@@ -1,5 +1,8 @@
-// $Id: St_geom_Maker.cxx,v 1.2 1998/12/04 19:36:47 fisyak Exp $
+// $Id: St_geom_Maker.cxx,v 1.3 1998/12/12 00:18:00 fisyak Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.3  1998/12/12 00:18:00  fisyak
+// Remove gstar for the moment
+//
 // Revision 1.2  1998/12/04 19:36:47  fisyak
 // Add Pavel/Ruben gstar interface
 //
@@ -82,12 +85,14 @@ St_geom_Maker::~St_geom_Maker(){
 Int_t St_geom_Maker::Init(){
 // Create tables
    St_DataSetIter       local(gStChain->DataSet("params"));
+#if 0
    printf (" calling agmain \n"); 
    agmain_(); 
    geometry_();
    //   Draw();
    Do("dcut cave x 0.1 10 10 0.03 0.03");
    Work();
+#endif
 // Create Histograms    
    return StMaker::Init();
 }
@@ -98,10 +103,11 @@ Int_t St_geom_Maker::Make(){
 }
  return kStOK;
 }
+#if 0
 //_____________________________________________________________________________
 void St_geom_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geom_Maker.cxx,v 1.2 1998/12/04 19:36:47 fisyak Exp $\n");
+  printf("* $Id: St_geom_Maker.cxx,v 1.3 1998/12/12 00:18:00 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
@@ -241,5 +247,6 @@ void St_geom_Maker::Work()
      };
      fNode=node;
 }
+#endif
 
 
