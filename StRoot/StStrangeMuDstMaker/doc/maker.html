@@ -62,6 +62,7 @@
 <a href="#filtering">Filtering</a><br>
 <a href="#tools">Tools</a><br>
 <a href="#buffer">Buffer Sizes</a><br>
+<a href="#adding">Adding Content</a><br>
 </center>
 
 <p>
@@ -504,6 +505,97 @@ The event branch currently uses 64 KB per variable. The total memory used
 is then a function of which branches are activated, as well as how many
 variables are in each branch. The above functions must be called between
 the instantiation of the maker, and the call to <tt>Init()</tt>.
+
+
+<p>
+<HR width=60%>
+<p>
+
+<a name="adding"><h2>Adding Content</h2></a>
+You might wish to add more information to your
+own MuDsts. This is done quite
+simply using the <a href="#filtering">filtering</a> code.
+An example is provided here:
+<p>
+
+Let's say I want to add a branch which contains a
+little bit of information that describes an event. In
+my example, I've made a new class called "StA"
+with two values that describe the event. This is
+what its header file looks like:
+<pre>
+#ifndef StA_hh
+#define StA_hh
+#include "TObject.h"
+class StA : public TObject {
+  public:
+   StA() {}
+   virtual ~StA() {}
+   Int_t value1;
+   Float_t value2;
+   ClassDef(StA,1)
+};
+#endif
+</pre>
+
+Now I must modify the filterStrangeMuDst.C macro
+to include the new information. Here are 3 steps:
+<p>
+
+<ol>
+<li>Load the library for the new class:
+<pre>
+  gSystem->Load("myNewLibrary");
+</pre>
+<p>
+
+<li>Assign a new branch (I called mine "ABranch")
+for the new MuDst <b>after</b> the <tt>chain.Init()</tt>
+call, but before the event loop:
+<pre>
+   StA::Class()->IgnoreTObjectStreamer(); // Don't store extra stuff
+   TTree* tree = strangeNewDst.GetTree();
+   TClonesArray* AArray = new TClonesArray("StA",1);
+   tree->Branch("ABranch",&AArray,64000,99);
+   StA* Ainstance = new((*AArray)[0]) StA();
+</pre>
+
+<li>Fill the data in the new branch during the
+event loop. Here is a simple example where
+I count Lambda candidates and their mean pt:
+<pre>
+     Int_t totalLams = 0;
+     Float_t totalLamPt = 0.;
+     for( Int_t j = 0; j &lt; strangeOldDst.GetNV0(); j++ ) {
+       StV0MuDst *v0m = strangeOldDst.GetV0(j);
+       Float_t ml = v0m->massLambda();
+       if ((ml &gt; 1.11) && (ml &lt; 1.12)) {
+         totalLams++;
+         totalLamPt += v0m->ptV0();
+       }
+     }
+     Ainstance->value1 = totalLams;
+     Ainstance->value2 = totalLamPt/totalLams;
+</pre>
+</ol>
+
+That's all there is to it. Your output MuDst will
+contain the new branch with the new data. Simply
+opening the new file in Root will allow you to do
+things like making histograms with the new data
+using <tt>TTree::Draw()</tt>. Reading the actual
+class back will require adding code like this
+after the <tt>chain.Init()</tt> of readStrangeMuDst.C:
+<pre>
+   TTree* tree = strangeNewDst.GetTree();
+   TClonesArray* AArray = new TClonesArray("StA",0);
+   tree->SetBranchStatus("ABranch.*",1);
+   tree->SetBranchAddress("ABranch",&AArray);
+</pre>
+and using the following code during the event loop:
+<pre>
+     StA* Ainstance = (StA*) (AArray->At(0));
+</pre>
 
 
 
