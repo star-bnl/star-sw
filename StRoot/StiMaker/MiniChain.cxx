@@ -102,7 +102,13 @@ void MiniChain::setupDatabase()
 {  
   cout <<"MiniChain::setupDatabase() -I- Started" <<endl;
   St_db_Maker * dbaseMk  = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb");
-  if (_pars->doSimulation) dbaseMk-> SetDateTime(20010801,000000);  // << trouble here
+  if (_pars->doSimulation) 
+  dbaseMk->SetDateTime(20010102,000000);  // << trouble here
+  cout <<"MiniChain: I - Date Set: "
+       <<dbaseMk->GetDateTime().AsString()
+       <<endl;
+  dbaseMk->SetDebug();
+
   if (_pars->useTpc) new StTpcDbMaker("tpcDb");
   if (_pars->useSvt) new StSvtDbMaker("svtDb");
   new StDetectorDbMaker("detDb");
@@ -119,6 +125,7 @@ void MiniChain::eventLoop(int first, int last)
   _chain->PrintInfo();
 
   int status = _chain->Init();
+  _chain->SetDebug();
   cout <<"MiniChain::eventLoop() -I- chain->Init() completed with status:"<<status <<endl;
   int theRunNumber = 100000;
   status = _chain->InitRun(theRunNumber);
