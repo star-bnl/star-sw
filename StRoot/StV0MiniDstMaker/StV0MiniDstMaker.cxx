@@ -1,5 +1,8 @@
-// $Id: StV0MiniDstMaker.cxx,v 1.6 2000/01/04 19:41:52 genevb Exp $
+// $Id: StV0MiniDstMaker.cxx,v 1.7 2000/03/06 23:12:33 genevb Exp $
 // $Log: StV0MiniDstMaker.cxx,v $
+// Revision 1.7  2000/03/06 23:12:33  genevb
+// Change to file directory before creating TTree
+//
 // Revision 1.6  2000/01/04 19:41:52  genevb
 // Fixed linux compiler warnings
 //
@@ -65,6 +68,7 @@ Int_t StV0MiniDstMaker::Init(){
   if( mWriteFile ) {
     if( mUseTree ) {
       // Create a ROOT TTree, based on a TClonesArray
+      if (muDst) muDst->cd();
       tree = new TTree("muDst","Strangeness Micro-DST");
       Int_t split=1;
       Int_t bsize=64000;
