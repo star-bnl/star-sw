@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.21 2003/09/02 17:58:41 perev Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.22 2004/01/13 21:06:04 fisyak Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.22  2004/01/13 21:06:04  fisyak
+ * Add TpcHitNtuple usind IdTruth info
+ *
  * Revision 1.21  2003/09/02 17:58:41  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -84,7 +87,7 @@
  * StMcEvent and StAssociationMaker
  *
  *************************************************/
-
+#include <assert.h>
 #include <Stiostream.h>
 #include <stdlib.h>
 #include <string>
@@ -104,7 +107,7 @@
 
 #include "StMessMgr.h"
 
-#include "StChain.h"
+#include "StBFChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 
@@ -127,9 +130,14 @@ const Float_t StMcAnalysisMaker::mMinDeltaX = -0.52;
 const Float_t StMcAnalysisMaker::mMaxDeltaX =  0.52;
 const Float_t StMcAnalysisMaker::mMinDeltaZ = -0.52;
 const Float_t StMcAnalysisMaker::mMaxDeltaZ =  0.52;
-
+struct TpcHitMRPair_t {
+  Float_t sector, row, 
+    xM, yM, zM, pxM, pyM, pzM, dEM, dSM, nM,
+    xR, yR, zR, dER, IdM, IdR, qR, nR;
+};
+static Char_t *vTpcHitMRPair = "sector:row:xM:yM:zM:pxM:pyM:pzM:dEM:dSM:nM:xR:yR:zR:dER:IdM:IdR:qR:nR";
+static TpcHitMRPair_t TpcHitMRPair;
 ClassImp(StMcAnalysisMaker)
-
 
 //_________________________________________________
 StMcAnalysisMaker::StMcAnalysisMaker(const char *name, const char *title):StMaker(name,title)
@@ -142,6 +150,7 @@ StMcAnalysisMaker::StMcAnalysisMaker(const char *name, const char *title):StMake
     coordRec        = 0;  
     coordMcPartner  = 0;
     mTrackNtuple    = 0;
+    mTpcHitNtuple   = 0;
 }
 
 //_________________________________________________
@@ -171,8 +180,6 @@ void StMcAnalysisMaker::Clear(const char*)
 //_________________________________________________
 Int_t StMcAnalysisMaker::Finish()
 {
-    mNtupleFile->Write();
-    mNtupleFile->Close();
     return StMaker::Finish();
 }
 
@@ -184,6 +191,10 @@ Int_t StMcAnalysisMaker::Init()
     
     SetZones();  // This is my method to set the zones for the canvas.
 
+    StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
+    mNtupleFile = chain->GetTFile();
+    assert (mNtupleFile);
+    mNtupleFile->cd();
     // Book Histograms Here so they can be found and deleted by Victor's chain (I hope).
     mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",
 			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
@@ -203,11 +214,12 @@ Int_t StMcAnalysisMaker::Init()
 
     // Define the file for the Ntuple, otherwise it won't be available later.
     
-    mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");
-
+    
     char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commTpcHits:hitDiffX:hitDiffY:hitDiffZ";
     mTrackNtuple = new TNtuple("TrackNtuple","Track Pair Info",vars);
     mTrackNtuple->SetAutoSave(100000000);
+    mTpcHitNtuple = new TNtuple("TpcHitNtuple","the TPC hit pairs Info",vTpcHitMRPair);
+    mTpcHitNtuple->SetAutoSave(100000000);
     //cout << "Defined Momentum Res. Histogram & Ntuple" << endl;
 
 
@@ -216,296 +228,366 @@ Int_t StMcAnalysisMaker::Init()
 //_________________________________________________
 Int_t StMcAnalysisMaker::Make()
 {
-    // Get the pointers we need, we have to use the titles we gave them in the
-    // macro.  I just used the defaults.
-
-    // StEvent
-    StEvent* rEvent = 0;
-    rEvent = (StEvent*) GetInputDS("StEvent");
-
-    // StMcEvent
-    StMcEvent* mEvent = 0;
-    mEvent = ((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
-
-    // StAssociationMaker
-    StAssociationMaker* assoc = 0;
-    assoc = (StAssociationMaker*) GetMaker("StAssociationMaker");
-
-    // the Multimaps...
-    rcTpcHitMapType* theHitMap = 0;
-    theHitMap = assoc->rcTpcHitMap();
-    rcTrackMapType* theTrackMap = 0;
-    theTrackMap = assoc->rcTrackMap();
-    mcV0MapType* theMcV0Map = 0;
-    theMcV0Map = assoc->mcV0Map(); 
-
-    if (!theHitMap) {
-	gMessMgr->Warning() << "----------WARNING----------\n"
-			    << "No Hit Map found for this event!" << endm;
-	return kStWarn;
-    }
-    // Example: look at the position of the primary vertex
-    //          Map is not needed for this, but it's a good check,
-    //          tracking will not be good if primary vertex was not well placed.
-
-    // First check whether the Primary Vertex is there at all.
-    StThreeVectorD VertexPos(0,0,0);
-    if (rEvent->primaryVertex()) {
-	VertexPos = rEvent->primaryVertex()->position();
-	cout << "Position of Primary Vertex from StEvent:" << endl;
-	cout << VertexPos << endl;
-    }
-    else {
-	cout << "----------- WARNING ------------" << endl;
-	cout << "No primary vertex from StEvent!!" << endl;
-	cout << "Assume it is at (0,0,0)         " << endl;
-	
-    }
-    cout << "Position of Primary Vertex from StMcEvent:" << endl;
-    cout << mEvent->primaryVertex()->position() << endl;
+  // Get the pointers we need, we have to use the titles we gave them in the
+  // macro.  I just used the defaults.
+  
+  // StEvent
+  StEvent* rEvent =  (StEvent*) GetInputDS("StEvent");
+  
+  // StMcEvent
+  StMcEvent* mEvent = ((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
+  
+  // StAssociationMaker
+  StAssociationMaker* assoc = 0;
+  assoc = (StAssociationMaker*) GetMaker("StAssociationMaker");
+  
+  // the Multimaps...
+  rcTpcHitMapType* theHitMap   = assoc->rcTpcHitMap();
+  mcTpcHitMapType* theMcHitMap = assoc->mcTpcHitMap();
+  rcTrackMapType*  theTrackMap = assoc->rcTrackMap();
+  mcV0MapType* theMcV0Map      = assoc->mcV0Map(); 
+  
+  if (!theHitMap) {
+    gMessMgr->Warning() << "----------WARNING----------\n"
+			<< "No Hit Map found for this event!" << endm;
+    return kStWarn;
+  }
+  // Example: look at the position of the primary vertex
+  //          Map is not needed for this, but it's a good check,
+  //          tracking will not be good if primary vertex was not well placed.
+  
+  // First check whether the Primary Vertex is there at all.
+  StThreeVectorD VertexPos(0,0,0);
+  if (rEvent->primaryVertex()) {
+    VertexPos = rEvent->primaryVertex()->position();
+    cout << "Position of Primary Vertex from StEvent:" << endl;
+    cout << VertexPos << endl;
+  }
+  else {
+    cout << "----------- WARNING ------------" << endl;
+    cout << "No primary vertex from StEvent!!" << endl;
+    cout << "Assume it is at (0,0,0)         " << endl;
     
-    // Example: look at hits associated with 1st REC hit in Tpc Hit collection.
-
-    StTpcHit*     firstHit;
-    Bool_t        gotOneHit;
-    StTpcHitCollection* tpcColl = rEvent->tpcHitCollection();
-    unsigned int j,k, nhits;
-    nhits = tpcColl->numberOfHits();
-        if (tpcColl && nhits) {
-	    gotOneHit = kFALSE;
-	    for (k=0; !gotOneHit && k<tpcColl->numberOfSectors(); k++)
-		for (j=0; !gotOneHit && j<tpcColl->sector(k)->numberOfPadrows(); j++)
-		    if (tpcColl->sector(k)->padrow(j)->hits().size()) {
-			
-			firstHit = tpcColl->sector(k)->padrow(j)->hits()[0];
-			cout << "First Hit Found in Sector "
-			     << firstHit->sector() << " Padrow "
-			     << firstHit->padrow() << endl;
-			gotOneHit = kTRUE;
-		    }
-	    cout << "This hit has " <<  theHitMap->count(firstHit) << " MC Hits associated with it."<< endl;
-	    // To get the associated hits of the first hit we use equal_range(key), which returns
-	    // 2 iterators, the lower bound and upper bound, so that then we can loop over them.
+  }
+  cout << "Position of Primary Vertex from StMcEvent:" << endl;
+  cout << mEvent->primaryVertex()->position() << endl;
+  
+  // Example: look at hits associated with 1st REC hit in Tpc Hit collection.
+  
+  StTpcHit*     firstHit;
+  Bool_t        gotOneHit;
+  StTpcHitCollection* tpcColl = rEvent->tpcHitCollection();
+  unsigned int j,k, nhits;
+  nhits = tpcColl->numberOfHits();
+  if (tpcColl && nhits) {
+    gotOneHit = kFALSE;
+    memset (&TpcHitMRPair, 0, sizeof(TpcHitMRPair_t));
+    for (k=0; !gotOneHit && k<tpcColl->numberOfSectors(); k++)
+      for (j=0; !gotOneHit && j<tpcColl->sector(k)->numberOfPadrows(); j++)
+	if (tpcColl->sector(k)->padrow(j)->hits().size()) {
+	  
+	  firstHit = tpcColl->sector(k)->padrow(j)->hits()[0];
+	  cout << "First Hit Found in Sector "
+	       << firstHit->sector() << " Padrow "
+	       << firstHit->padrow() << endl;
+	  gotOneHit = kTRUE;
+	}
+    cout << "This hit has " <<  theHitMap->count(firstHit) << " MC Hits associated with it."<< endl;
+    // To get the associated hits of the first hit we use equal_range(key), which returns
+    // 2 iterators, the lower bound and upper bound, so that then we can loop over them.
+    
+    cout << "Position of First Rec. Hit and Associated (if any) MC Hit:" << endl;
+    pair<rcTpcHitMapIter,rcTpcHitMapIter> hitBounds = theHitMap->equal_range(firstHit);
+    
+    for (rcTpcHitMapIter it=hitBounds.first; it!=hitBounds.second; ++it) 
+      cout << "[" << (*it).first->position() << ", " << (*it).second->position() << "]" << endl;
+  }
+  else {
+    cout << "There are no reconstructed TPC Hits in this event" << endl;
+  }
+  // Example: Make a histogram using the Hit Map.
+  // Fill histogram from map
+  
+  float DeltaX;
+  float DeltaZ;
+  
+  StTpcHitCollection* recHits = rEvent->tpcHitCollection();
+  StMcTpcHitCollection* mcHits = mEvent->tpcHitCollection();
+  assert (recHits || mcHits);
+  cout << "Making Hit Resolution Histogram..." << endl;
+  // Loop over Rec Hits
+  
+  for (unsigned int iSector=0; iSector< recHits->numberOfSectors(); iSector++) {
+    for (unsigned int iPadrow=0; iPadrow<recHits->sector(iSector)->numberOfPadrows();
+	 iPadrow++) {
+      for (StTpcHitIterator iter = recHits->sector(iSector)->padrow(iPadrow)->hits().begin();
+	   iter != recHits->sector(iSector)->padrow(iPadrow)->hits().end();
+	   iter++) {
+	const StTpcHit   *rhit = dynamic_cast<const StTpcHit   *> (*iter);
+	assert(rhit);
+	if (rhit->TestBit(StMcHit::kMatched)) {
+	  pair<rcTpcHitMapIter,rcTpcHitMapIter>
+	    recBounds = theHitMap->equal_range(rhit);
+	  
+	  for (rcTpcHitMapIter it2=recBounds.first; it2!=recBounds.second; ++it2){
 	    
-	    cout << "Position of First Rec. Hit and Associated (if any) MC Hit:" << endl;
-	    pair<rcTpcHitMapIter,rcTpcHitMapIter> hitBounds = theHitMap->equal_range(firstHit);
+	    const StMcTpcHit *mhit = dynamic_cast<const StMcTpcHit *> ((*it2).second);
+	    assert ( mhit);
+	    DeltaX = rhit->position().x() - mhit->position().x();
+	    DeltaZ = rhit->position().z() - mhit->position().z();
 	    
-	    for (rcTpcHitMapIter it=hitBounds.first; it!=hitBounds.second; ++it) 
-		cout << "[" << (*it).first->position() << ", " << (*it).second->position() << "]" << endl;
+	    mHitResolution->Fill(DeltaX,DeltaZ);
 	    
+	    memset (&TpcHitMRPair, 0, sizeof(TpcHitMRPair));
+	    TpcHitMRPair.sector   = rhit->sector();
+	    TpcHitMRPair.row      = rhit->padrow();
+	    TpcHitMRPair.xR       = rhit->position().x();
+	    TpcHitMRPair.yR       = rhit->position().y();
+	    TpcHitMRPair.zR       = rhit->position().z();
+	    TpcHitMRPair.dER      = rhit->charge();
+	    TpcHitMRPair.IdR      = rhit->idTruth();
+	    TpcHitMRPair.qR       = rhit->quality();
+	    TpcHitMRPair.nR       = theHitMap->count(rhit);
+	    TpcHitMRPair.xM       = mhit->position().x();
+	    TpcHitMRPair.yM       = mhit->position().y();
+	    TpcHitMRPair.zM       = mhit->position().z();
+	    TpcHitMRPair.pxM      = mhit->localMomentum().x();
+	    TpcHitMRPair.pyM      = mhit->localMomentum().y();
+	    TpcHitMRPair.pzM      = mhit->localMomentum().z();
+	    TpcHitMRPair.dEM      = mhit->dE();
+	    TpcHitMRPair.dSM      = mhit->dS();
+	    StMcTrack *mTrack     = mhit->parentTrack();
+	    if (mTrack) TpcHitMRPair.IdM = mTrack->key();
+	    else        TpcHitMRPair.IdM = 0;
+	    TpcHitMRPair.nM     = theMcHitMap->count(mhit);
+	    mTpcHitNtuple->Fill(&TpcHitMRPair.sector);
+	  }
 	}
 	else {
-	    cout << "There are no reconstructed TPC Hits in this event" << endl;
+	  memset (&TpcHitMRPair, 0, sizeof(TpcHitMRPair));
+	  TpcHitMRPair.sector   = rhit->sector();
+	  TpcHitMRPair.row      = rhit->padrow();
+	  TpcHitMRPair.xR       = rhit->position().x();
+	  TpcHitMRPair.yR       = rhit->position().y();
+	  TpcHitMRPair.zR       = rhit->position().z();
+	  TpcHitMRPair.dER      = rhit->charge();
+	  TpcHitMRPair.IdR      = rhit->idTruth();
+	  TpcHitMRPair.qR       = rhit->quality();
+	  TpcHitMRPair.nR       = theHitMap->count(rhit);
+	  mTpcHitNtuple->Fill(&TpcHitMRPair.sector);
 	}
-    
-
-    // Example: Make a histogram using the Hit Map.
-    
-    
-    // Fill histogram from map
-
-    float DeltaX;
-    float DeltaZ;
-    
-    StTpcHit* keyHit;
-    StTpcHitCollection* recHits = rEvent->tpcHitCollection();
-     
-    cout << "Making Hit Resolution Histogram..." << endl;
-    // Loop over Rec Hits
-    
-    for (unsigned int iSector=0; iSector< recHits->numberOfSectors(); iSector++) {
-	for (unsigned int iPadrow=0; iPadrow<recHits->sector(iSector)->numberOfPadrows();
-	     iPadrow++) {
-	    for (StTpcHitIterator iter = recHits->sector(iSector)->padrow(iPadrow)->hits().begin();
-		 iter != recHits->sector(iSector)->padrow(iPadrow)->hits().end();
-		 iter++) {
-		keyHit = *iter;
-		pair<rcTpcHitMapIter,rcTpcHitMapIter>
-		    recBounds = theHitMap->equal_range(keyHit);
-	
-		for (rcTpcHitMapIter it2=recBounds.first; it2!=recBounds.second; ++it2){
-		    
-		    DeltaX = (*it2).second->position().x() - (*it2).first->position().x();
-		    DeltaZ = (*it2).second->position().z() - (*it2).first->position().z();
-
-		    mHitResolution->Fill(DeltaX,DeltaZ);
-		    
-		}//Mc Hits assoc. w/ rec.
-	    } // Rec hits loop
-	} // padrow
-    } // sector
-    keyHit = 0;
-    cout << "Finished Making Histogram." << endl;
-    
-    if (!theTrackMap) {
-	gMessMgr->Warning() << "----------WARNING----------\n"
-			    << "No Track Map found for this event!" << endm;
-	return kStWarn;
+      }
     }
-    // Example: look at the magnitude of the momentum of
-    //          the MC track associated with first track in track Collection
-
-    StSPtrVecTrackNode& rcTrackNodes = rEvent->trackNodes();
-    StTrackNode*        firstTrackNode = *(rcTrackNodes.begin());
-    StGlobalTrack*      firstTrack = dynamic_cast<StGlobalTrack*>(firstTrackNode->track(global));
+  }
+  for (unsigned int iSector=0;
+       iSector<mcHits->numberOfSectors(); iSector++) {
     
-    if (firstTrack) {
-	pair<rcTrackMapIter,rcTrackMapIter> trackBounds = theTrackMap->equal_range(firstTrack);
-
-	
-	cout << "MC Tracks associated with first Track in collection: " << theTrackMap->count(firstTrack) << endl;
-	cout << "Momentum of First Track and of Associated Tracks (if there are any):" << endl;
-	// Get the momentum of the track and compare it to MC Track.
-	// Use primary track if available
-	StPrimaryTrack* pTrk = dynamic_cast<StPrimaryTrack*>(firstTrack->node()->track(primary));
-	StThreeVectorD recMom(0,0,0);
-	if (pTrk)
-	    recMom = pTrk->geometry()->momentum();
-	else
-	    recMom = firstTrack->geometry()->momentum();
-	for (rcTrackMapIter trkIt=trackBounds.first; trkIt!=trackBounds.second; ++trkIt) { 
-	    cout << "[" << abs(recMom) << ", ";
-	    cout << abs((*trkIt).second->partnerMcTrack()->momentum()) << "]" << endl;
-	    cout << "These tracks have : \n";
-	    cout << (*trkIt).second->commonTpcHits() << " TPC  hits in common." << endl;
-	    cout << (*trkIt).second->commonSvtHits() << " SVT  hits in common." << endl;
-	    cout << (*trkIt).second->commonFtpcHits() <<" FTPC hits in common." << endl;
-	}
+    if (Debug()) {cout << iSector + 1 << " "; flush(cout);}
+    StMcTpcSectorHitCollection* tpcSectHitColl = mcHits->sector(iSector);
+    for (unsigned int iPadrow=0;
+	 iPadrow<tpcSectHitColl->numberOfPadrows();
+	 iPadrow++) {
+      StMcTpcPadrowHitCollection* tpcPadRowHitColl = tpcSectHitColl->padrow(iPadrow);
+      for (unsigned int iHit=0;
+	   iHit<tpcPadRowHitColl->hits().size();
+	   iHit++){
+	const StMcTpcHit *mhit = dynamic_cast<const StMcTpcHit *> (tpcPadRowHitColl->hits()[iHit]);
+	assert (mhit);
+	if (mhit->TestBit(StMcHit::kMatched)) continue;
+	memset (&TpcHitMRPair, 0, sizeof(TpcHitMRPair));
+	TpcHitMRPair.sector   = mhit->sector();
+	TpcHitMRPair.row      = mhit->padrow();
+	TpcHitMRPair.xM       = mhit->position().x();
+	TpcHitMRPair.yM       = mhit->position().y();
+	TpcHitMRPair.zM       = mhit->position().z();
+	TpcHitMRPair.pxM      = mhit->localMomentum().x();
+	TpcHitMRPair.pyM      = mhit->localMomentum().y();
+	TpcHitMRPair.pzM      = mhit->localMomentum().z();
+	TpcHitMRPair.dEM      = mhit->dE();
+	TpcHitMRPair.dSM      = mhit->dS();
+	StMcTrack *mTrack     = mhit->parentTrack();
+	if (mTrack) TpcHitMRPair.IdM = mTrack->key();
+	else        TpcHitMRPair.IdM = 0;
+	mTpcHitNtuple->Fill(&TpcHitMRPair.sector);
+      }
     }
-    else {
-	cout << "First Node doesn't have a global Track!" << endl;
+  }
+  cout << "Finished Making Histogram." << endl;
+  
+  if (!theTrackMap) {
+    gMessMgr->Warning() << "----------WARNING----------\n"
+			<< "No Track Map found for this event!" << endm;
+    return kStWarn;
+  }
+  // Example: look at the magnitude of the momentum of
+  //          the MC track associated with first track in track Collection
+  
+  StSPtrVecTrackNode& rcTrackNodes = rEvent->trackNodes();
+  StTrackNode*        firstTrackNode = 0;
+  StGlobalTrack*      firstTrack = 0;
+  if (! rcTrackNodes.size()) {
+    cout << "Track Nodes List is empty!" << endl;
+    return kStWarn;
+  }
+  firstTrackNode = *(rcTrackNodes.begin());
+  if (! firstTrackNode) {
+    cout << "No tracks in Track Nodes List!" << endl;
+    return kStWarn;
+  }
+  firstTrack = dynamic_cast<StGlobalTrack*>(firstTrackNode->track(global));
+  if (! firstTrack) {
+    cout << "GlobalTrack for first Track Nodehas not been found!" << endl;
+    return kStWarn;
+  }
+  pair<rcTrackMapIter,rcTrackMapIter> trackBounds = theTrackMap->equal_range(firstTrack);
+  cout << "MC Tracks associated with first Track in collection: " << theTrackMap->count(firstTrack) << endl;
+  cout << "Momentum of First Track and of Associated Tracks (if there are any):" << endl;
+  // Get the momentum of the track and compare it to MC Track.
+  // Use primary track if available
+  StPrimaryTrack* pTrk = dynamic_cast<StPrimaryTrack*>(firstTrack->node()->track(primary));
+  StThreeVectorD recMom(0,0,0);
+  if (pTrk)
+    recMom = pTrk->geometry()->momentum();
+  else
+    recMom = firstTrack->geometry()->momentum();
+  for (rcTrackMapIter trkIt=trackBounds.first; trkIt!=trackBounds.second; ++trkIt) { 
+    cout << "[" << abs(recMom) << ", ";
+    cout << abs((*trkIt).second->partnerMcTrack()->momentum()) << "]" << endl;
+    cout << "These tracks have : \n";
+    cout << (*trkIt).second->commonTpcHits() << " TPC  hits in common." << endl;
+    cout << (*trkIt).second->commonSvtHits() << " SVT  hits in common." << endl;
+    cout << (*trkIt).second->commonFtpcHits() <<" FTPC hits in common." << endl;
+  }
+  // Example: Make a histogram of the momentum resolution of the event
+  //          Make an Ntuple with rec & monte carlo mom, mean hit difference, and # of common hits
+  StGlobalTrack* recTrack;
+  StPrimaryTrack* primTrk;
+  StMcTrack*     mcTrack;
+  StThreeVectorD p(0,0,0);
+  StThreeVectorD pmc(0,0,0);
+  float diff =0;
+  
+  float* values = new float[12];
+  
+  for (rcTrackMapIter tIter=theTrackMap->begin();
+       tIter!=theTrackMap->end(); ++tIter){
+    
+    recTrack = (*tIter).first;
+    if ((*tIter).second->commonTpcHits()<10) continue;
+    mcTrack = (*tIter).second->partnerMcTrack();
+    
+    pmc = mcTrack->momentum();
+    for (int k=0; k<3; k++) values[k] = pmc[k];
+    values[3]=pmc.mag();
+    
+    primTrk = dynamic_cast<StPrimaryTrack*>(recTrack->node()->track(primary));
+    if (primTrk)
+      p = primTrk->geometry()->momentum();
+    else
+      p = recTrack->geometry()->momentum();
+    
+    for (int j=0; j<3; j++) values[j+4] = p[j];
+    values[7]=p.mag();
+    values[8]=(*tIter).second->commonTpcHits();
+    // Fill 1d Mom. resolution Histogram
+    
+    diff = (p.mag() - pmc.mag())/pmc.mag();
+    mMomResolution->Fill(diff,1.);
+    // Loop to get Mean hit position diff.
+    StThreeVectorF rHitPos(0,0,0);
+    StThreeVectorF mHitPos(0,0,0);
+    
+    StPtrVecHit recTpcHits = recTrack->detectorInfo()->hits(kTpcId);
+    
+    for (StHitIterator hi=recTpcHits.begin();
+	 hi!=recTpcHits.end(); hi++) {
+      StHit* hit = *hi;
+      StTpcHit* rHit = dynamic_cast<StTpcHit*>(hit);
+      if (!rHit) { cout << "This Hit is not a TPC Hit"<< endl; continue;}
+      pair<rcTpcHitMapIter,rcTpcHitMapIter> rBounds = theHitMap->equal_range(rHit);
+      for (rcTpcHitMapIter hIter=rBounds.first; hIter!=rBounds.second; hIter++) {
+	const StMcTpcHit* mHit = (*hIter).second;
+	if (mHit->parentTrack() != mcTrack) continue;
+	rHitPos += rHit->position();
+	mHitPos += mHit->position();
+      }// Associated Hits Loop.
+      
+    } // Hits of rec. Track Loop
+    
+    rHitPos /=(float) (*tIter).second->commonTpcHits();
+    mHitPos /=(float) (*tIter).second->commonTpcHits();
+    for (int jj=0; jj<3; jj++) values[9+jj] = rHitPos[jj] - mHitPos[jj];
+    mTrackNtuple->Fill(values);
+  } // Tracks in Map Loop
+  cout << "Finished Track Loop, Made Ntuple" << endl;
+  //delete vars;
+  delete [] values;
+  //mNtupleFile->Write(); // Write the Ntuple to the File in Finish(), not here
+  
+  // Example: Make 2 Histograms
+  // - x and y positions of the hits from the reconstructed track.
+  // - x and y positions of the hits from the  Monte Carlo  track.
+  
+  unsigned int maxCommonTpcHits = 0;
+  StMcTrack* partner = 0;
+  trackBounds = theTrackMap->equal_range(firstTrack);
+  for (rcTrackMapIter rcIt = trackBounds.first;
+       rcIt != trackBounds.second;
+       ++rcIt) {
+    if ((*rcIt).second->commonTpcHits() >  maxCommonTpcHits) {
+      partner = (*rcIt).second->partnerMcTrack();
+      maxCommonTpcHits = (*rcIt).second->commonTpcHits();
     }
+  }
+  StHitIterator rcHitIt;
+  StMcTpcHitIterator mcHitIt;
+  StPtrVecHit theHits = firstTrack->detectorInfo()->hits(kTpcId);
+  for (rcHitIt  = theHits.begin();
+       rcHitIt != theHits.end();
+       rcHitIt++) coordRec->Fill((*rcHitIt)->position().x(),(*rcHitIt)->position().y());
+  if (partner)
+    for (mcHitIt  = partner->tpcHits().begin();
+	 mcHitIt != partner->tpcHits().end();
+	 mcHitIt++) coordMcPartner->Fill((*mcHitIt)->position().x(),(*mcHitIt)->position().y());
+  
+  if (!theMcV0Map) {
+    gMessMgr->Warning() << "----------WARNING----------\n"
+			<< "No V0 Map found for this event!" << endm;
+    return kStWarn;
+  }
+  //Example: Print out position of V0 vertices that have been associated.
+  //         (LSB)
+  StSPtrVecMcVertex& mcVertices = mEvent->vertices();
+  StV0Vertex* rcV0Partner;
+  StMcVertexIterator mcVertexIt;
+  
+  //Loop over all MC vertices
+  bool foundV0Pair = false;
+  for (mcVertexIt = mcVertices.begin(); mcVertexIt != mcVertices.end();
+       mcVertexIt++){
+    // Get the upper and lower bounds.
+    pair<mcV0MapIter,mcV0MapIter> mcV0Bounds = theMcV0Map->equal_range(*mcVertexIt);
     
-    // Example: Make a histogram of the momentum resolution of the event
-    //          Make an Ntuple with rec & monte carlo mom, mean hit difference, and # of common hits
-    StGlobalTrack* recTrack;
-    StPrimaryTrack* primTrk;
-    StMcTrack*     mcTrack;
-    StThreeVectorD p(0,0,0);
-    StThreeVectorD pmc(0,0,0);
-    float diff =0;
-
-    float* values = new float[12];
+    // Print out MC vertex position if there is an associated V0.
     
-    for (rcTrackMapIter tIter=theTrackMap->begin();
-	 tIter!=theTrackMap->end(); ++tIter){
-
-	recTrack = (*tIter).first;
-	if ((*tIter).second->commonTpcHits()<10) continue;
-	mcTrack = (*tIter).second->partnerMcTrack();
-	
-	pmc = mcTrack->momentum();
-	for (int k=0; k<3; k++) values[k] = pmc[k];
-	values[3]=pmc.mag();
-	
-	primTrk = dynamic_cast<StPrimaryTrack*>(recTrack->node()->track(primary));
-	if (primTrk)
-	    p = primTrk->geometry()->momentum();
-	else
-	    p = recTrack->geometry()->momentum();
-		
-	for (int j=0; j<3; j++) values[j+4] = p[j];
-	values[7]=p.mag();
-	values[8]=(*tIter).second->commonTpcHits();
-	// Fill 1d Mom. resolution Histogram
-	
-	diff = (p.mag() - pmc.mag())/pmc.mag();
-	mMomResolution->Fill(diff,1.);
-	// Loop to get Mean hit position diff.
-	StThreeVectorF rHitPos(0,0,0);
-	StThreeVectorF mHitPos(0,0,0);
-
-	StPtrVecHit recTpcHits = recTrack->detectorInfo()->hits(kTpcId);
-	
-	for (StHitIterator hi=recTpcHits.begin();
-	     hi!=recTpcHits.end(); hi++) {
-	    StHit* hit = *hi;
-	    StTpcHit* rHit = dynamic_cast<StTpcHit*>(hit);
-	    if (!rHit) { cout << "This Hit is not a TPC Hit"<< endl; continue;}
-	    pair<rcTpcHitMapIter,rcTpcHitMapIter> rBounds = theHitMap->equal_range(rHit);
-	    for (rcTpcHitMapIter hIter=rBounds.first; hIter!=rBounds.second; hIter++) {
-		const StMcTpcHit* mHit = (*hIter).second;
-		if (mHit->parentTrack() != mcTrack) continue;
-		rHitPos += rHit->position();
-		mHitPos += mHit->position();
-	    }// Associated Hits Loop.
-	
-	} // Hits of rec. Track Loop
-       
-	rHitPos /=(float) (*tIter).second->commonTpcHits();
-	mHitPos /=(float) (*tIter).second->commonTpcHits();
-	for (int jj=0; jj<3; jj++) values[9+jj] = rHitPos[jj] - mHitPos[jj];
-	mTrackNtuple->Fill(values);
-    } // Tracks in Map Loop
-    cout << "Finished Track Loop, Made Ntuple" << endl;
-    //delete vars;
-    delete [] values;
-    //mNtupleFile->Write(); // Write the Ntuple to the File in Finish(), not here
-
-    // Example: Make 2 Histograms
-    // - x and y positions of the hits from the reconstructed track.
-    // - x and y positions of the hits from the  Monte Carlo  track.
-
-    unsigned int maxCommonTpcHits = 0;
-    StMcTrack* partner = 0;
-    pair<rcTrackMapIter,rcTrackMapIter> trackBounds = theTrackMap->equal_range(firstTrack);
-    for (rcTrackMapIter rcIt = trackBounds.first;
-	 rcIt != trackBounds.second;
-	 ++rcIt) {
-	if ((*rcIt).second->commonTpcHits() >  maxCommonTpcHits) {
-	    partner = (*rcIt).second->partnerMcTrack();
-	    maxCommonTpcHits = (*rcIt).second->commonTpcHits();
-	}
+    if (mcV0Bounds.first != mcV0Bounds.second) {
+      cout << "Printing Position of a V0 pair:\n";
+      cout << "Position of MC V0 vertex: " << (*mcVertexIt)->position() << endl;
+      foundV0Pair = true;
     }
-    StHitIterator rcHitIt;
-    StMcTpcHitIterator mcHitIt;
-    StPtrVecHit theHits = firstTrack->detectorInfo()->hits(kTpcId);
-    for (rcHitIt  = theHits.begin();
-	 rcHitIt != theHits.end();
-	 rcHitIt++) coordRec->Fill((*rcHitIt)->position().x(),(*rcHitIt)->position().y());
-    if (partner)
-	for (mcHitIt  = partner->tpcHits().begin();
-	     mcHitIt != partner->tpcHits().end();
-	     mcHitIt++) coordMcPartner->Fill((*mcHitIt)->position().x(),(*mcHitIt)->position().y());
-    
-    if (!theMcV0Map) {
-	gMessMgr->Warning() << "----------WARNING----------\n"
-			    << "No V0 Map found for this event!" << endm;
-	return kStWarn;
+    //Now loop over the bounds      
+    for(mcV0MapIter mcV0MapIt = mcV0Bounds.first;
+	mcV0MapIt != mcV0Bounds.second; ++mcV0MapIt){
+      rcV0Partner = (*mcV0MapIt).second;
+      cout << "Position of rc V0 vertex: " << rcV0Partner->position() << endl;
+      
     }
-    //Example: Print out position of V0 vertices that have been associated.
-    //         (LSB)
-    StSPtrVecMcVertex& mcVertices = mEvent->vertices();
-    StV0Vertex* rcV0Partner;
-    StMcVertexIterator mcVertexIt;
-
-    //Loop over all MC vertices
-    bool foundV0Pair = false;
-    for (mcVertexIt = mcVertices.begin(); mcVertexIt != mcVertices.end();
-	 mcVertexIt++){
-	// Get the upper and lower bounds.
-	pair<mcV0MapIter,mcV0MapIter> mcV0Bounds = theMcV0Map->equal_range(*mcVertexIt);
-
-	// Print out MC vertex position if there is an associated V0.
-	
-	if (mcV0Bounds.first != mcV0Bounds.second) {
-	    cout << "Printing Position of a V0 pair:\n";
-	    cout << "Position of MC V0 vertex: " << (*mcVertexIt)->position() << endl;
-	    foundV0Pair = true;
-	}
-	//Now loop over the bounds      
-	for(mcV0MapIter mcV0MapIt = mcV0Bounds.first;
-	    mcV0MapIt != mcV0Bounds.second; ++mcV0MapIt){
-	    rcV0Partner = (*mcV0MapIt).second;
-	    cout << "Position of rc V0 vertex: " << rcV0Partner->position() << endl;
-	   
-	}
-	if (foundV0Pair) break; // Only print the information of 1 reconstructed vertex, to avoid a lot of output.
-    }
-
-    
-    
-    //mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,900,500);
-
-    return kStOK;
+    if (foundV0Pair) break; // Only print the information of 1 reconstructed vertex, to avoid a lot of output.
+  }
+  
+  
+  
+  //mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,900,500);
+  
+  return kStOK;
 }
