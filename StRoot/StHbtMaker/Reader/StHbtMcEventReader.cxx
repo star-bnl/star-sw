@@ -343,7 +343,6 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
     cout << daughter1->particleDefinition()->charge() << " ";
     cout << daughter2->particleDefinition()->charge() << " ";
     cout << endl;
-    cout << " geantProcessId " << geantProcess << endl;
 #endif    
     
     // fill the V0MiniDst structure
