@@ -1,9 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.18 2000/01/18 20:53:37 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.19 2000/02/22 16:18:45 ullrich Exp $
  * $Log: StAssociationMaker.cxx,v $
- * Revision 1.18  2000/01/18 20:53:37  calderon
- * Changes to work with CC5
+ * Revision 1.19  2000/02/22 16:18:45  ullrich
+ * Applied temporary fix to cope with changed SVT hit
+ * storage scheme in StEvent.
  *
  * Revision 1.18  2000/01/18 20:53:37  calderon
  * Changes to work with CC5
@@ -635,27 +636,60 @@ Int_t StAssociationMaker::Make()
     mRcSvtHitMap = new rcSvtHitMapType;
     mMcSvtHitMap = new mcSvtHitMapType;
 
+    //**************************************************************************
+    //          READ THIS - READ THIS - READ THIS - READ THIS - READ THIS
+    //**************************************************************************
+    //
+    //   Begin modifications here, Feb 22, 2000 by Thomas
+    //
+    //   Cause of problem: In the SVT block below the StSvtLayerHitCollection
+    //   is used but didn't exist anymore.
+    //   Was changed to StSvtBarrelHitCollection after announcing it one day
+    //   in advanced.
+    //   Best solution: change StMcEvent (not sure here?) and StAssociationMaker.
+    //   This solution: I change the StEvent part only. The association should
+    //                  still work it might only take a bit more time.
+    //
+    //   SHOULD BE PERMANENTLY FIXED BY AN EXPERT !!!
+    // 
+    //**************************************************************************
+
+    unsigned int iLayer;
     float svtHitDistance;
     unsigned int nSvtHits = rcSvtHitColl->numberOfHits();
-    for (unsigned int iLayer=0;  nSvtHits &&
-	     iLayer<rcSvtHitColl->numberOfLayers(); iLayer++) {
+    for (unsigned int iBarrel=0;  nSvtHits &&
+	     iBarrel<rcSvtHitColl->numberOfBarrels(); iBarrel++) {
 	
-	cout << "In Layer : " << iLayer + 1 << endl;
+	cout << "In Barrel : " << iBarrel + 1 << endl;
 	
 	for (unsigned int iLadder=0;
-	     iLadder<rcSvtHitColl->layer(iLayer)->numberOfLadders();
+	     iLadder<rcSvtHitColl->barrel(iBarrel)->numberOfLadders();
 	     iLadder++) {
 	    //PR(iLadder);
 	    for (unsigned int iWafer=0;
-		 iWafer<rcSvtHitColl->layer(iLayer)->ladder(iLadder)->numberOfWafers();
+		 iWafer<rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->numberOfWafers();
 		 iWafer++) {
 	    //PR(iWafer);
+
+		//**************************************************************
+		//  Mods by Thomas: Up to here it was easy.
+		//  Now we have to get the layer number where the wafer
+		//  is in. This is straightforward since we do the association
+		//  on the wafer and all hits in the wafer know about the layer
+		//  they are in. Here we use the first one (as good as any other
+		//  one) if it exists. If not the next for-loop is not executed
+		//  anyhow.
+		//**************************************************************
+		if (rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().size()) {
+		    iLayer = rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits()[0]->layer();
+		    iLayer--;   // SVT guys start to count at 1. We start at 0 here.
+		}
+			
 		for (unsigned int iHit=0;
-		     iHit<rcSvtHitColl->layer(iLayer)->ladder(iLadder)->wafer(iWafer)->hits().size();
+		     iHit<rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().size();
 		     iHit++){
 		    //PR(iHit); 
-		    
-		    rcSvtHit = rcSvtHitColl->layer(iLayer)->ladder(iLadder)->wafer(iWafer)->hits()[iHit];
+		    rcSvtHit = rcSvtHitColl->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits()[iHit];
 				
 		    StMcSvtHit* closestSvtHit = 0;
 		    for (unsigned int jHit=0;
@@ -692,7 +726,15 @@ Int_t StAssociationMaker::Make()
 		} // End of Hits in Wafer loop for Rec. Hits
 	    } // End of Wafer Loop for Rec. Hits
 	} // End of Ladder Loop for Rec. Hits
-    } // End of Layer Loop for Rec. Hits
+    } // End of Barrel Loop for Rec. Hits
+
+    //**************************************************************************
+    //
+    //   End modifications here, Feb 22, 2000 by Thomas
+    //
+    //**************************************************************************
+    //   No mods by me after this line
+    //**************************************************************************
     
     cout << "Finished Making SVT Hit Associations *********" << endl;
 
