@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: Random.h,v 1.1 1999/01/30 03:59:00 fisyak Exp $
+ * $Id: Random.h,v 1.2 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author:  Gabriele Cosmo - Created: 5th Sep 1995
  *          modified SCL bl
@@ -28,6 +28,9 @@
  ***************************************************************************
  *
  * $Log: Random.h,v $
+ * Revision 1.2  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
  * Revision 1.1  1999/01/30 03:59:00  fisyak
  * Root Version of StarClassLibrary
  *
@@ -192,11 +195,15 @@ protected:     // -------- Data members ---------
   HepRandomEngine * theEngine;
   // The corresponding algorithm.
 
+  HepBoolean deleteEngine;
+  // True if the engine should be deleted on destruction.
+
   HepBoolean set;
+
+  HepDouble status[3], oldm;
   HepDouble nextGauss;
   // For Gaussian random numbers which are generated two at a time.
 
-  HepDouble status[3], oldm;
   const HepDouble meanMax;
   // For Poisson, to re-initialize if mean is the same as the previous.
 
@@ -204,10 +211,6 @@ private:       // -------- Data members ---------
 
   static HepRandom * theGenerator;
   // The common shared static generator
-
-  HepBoolean deleteEngine;
-  // True if the engine should be deleted on destruction.
-
 };
 
 inline void HepRandom::setSeed(long seed, HepInt lux) {

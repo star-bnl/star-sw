@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandGauss.cc,v 1.1 1999/01/30 03:59:00 fisyak Exp $
+ * $Id: RandGauss.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: RandGauss.cc,v $
+ * Revision 1.2  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
  * Revision 1.1  1999/01/30 03:59:00  fisyak
  * Root Version of StarClassLibrary
  *
@@ -79,9 +82,7 @@ RandGauss::shootArray( vector<HepDouble,allocator<HepDouble> >& vec,
                             HepDouble mean, HepDouble stdDev )
 #endif
 {
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+   for (unsigned int i=0; i<vec.size(); ++i)
      vec[i] = shoot(mean,stdDev);
 }
 
@@ -132,9 +133,7 @@ RandGauss::shootArray( HepRandomEngine* anEngine,
 		       HepDouble mean, HepDouble stdDev )
 #endif
 {
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+   for (unsigned int i=0; i<vec.size(); ++i)
      vec[i] = shoot(anEngine,mean,stdDev);
 }
 
@@ -183,8 +182,6 @@ RandGauss::fireArray( vector<HepDouble,allocator<HepDouble> >& vec,
 		      HepDouble mean, HepDouble stdDev )
 #endif
 {
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+   for (unsigned int i=0; i<vec.size(); ++i)
      vec[i] = fire(mean,stdDev);
 }

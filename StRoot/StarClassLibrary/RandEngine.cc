@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandEngine.cc,v 1.1 1999/01/30 03:58:59 fisyak Exp $
+ * $Id: RandEngine.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: RandEngine.cc,v $
+ * Revision 1.2  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
  * Revision 1.1  1999/01/30 03:58:59  fisyak
  * Root Version of StarClassLibrary
  *
@@ -139,8 +142,6 @@ void RandEngine::flatArray(vector<HepDouble>& vec)
 void RandEngine::flatArray(vector<HepDouble,allocator<HepDouble> >& vec)
 #endif
 {
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+   for (unsigned int i=0; i<vec.size(); ++i)
      vec[i]=flat();
 }

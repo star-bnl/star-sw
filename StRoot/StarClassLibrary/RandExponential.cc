@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandExponential.cc,v 1.1 1999/01/30 03:59:00 fisyak Exp $
+ * $Id: RandExponential.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author: Gabriele Cosmo - Created: 17th May 1996
  *         modified for SCL bl
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: RandExponential.cc,v $
+ * Revision 1.2  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
  * Revision 1.1  1999/01/30 03:59:00  fisyak
  * Root Version of StarClassLibrary
  *
@@ -53,18 +56,14 @@ RandExponential::shootArray( vector<HepDouble,allocator<HepDouble> >& vec,
                                   HepDouble mean )
 #endif
 {
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+   for (unsigned int i=0; i<vec.size(); ++i)
      vec[i] = shoot(mean);
 }
 
 void RandExponential::shootArray( HepRandomEngine* anEngine, const HepInt size,
                                   HepDouble* vect, HepDouble mean )
 {
-   register HepInt i;
-
-   for (i=0; i<size; ++i)
+   for (int i=0; i<size; ++i)
      vect[i] = shoot(anEngine, mean);
 }
 
@@ -78,9 +77,7 @@ RandExponential::shootArray( HepRandomEngine* anEngine,
 			     HepDouble mean )
 #endif
 {
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+   for (unsigned int i=0; i<vec.size(); ++i)
      vec[i] = shoot(anEngine, mean);
 }
 
@@ -102,8 +99,6 @@ RandExponential::fireArray( vector<HepDouble, allocator<HepDouble> >& vec,
                                  HepDouble mean )
 #endif
 {
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+   for (unsigned int i=0; i<vec.size(); ++i)
      vec[i] = fire(mean);
 }

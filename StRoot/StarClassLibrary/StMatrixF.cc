@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixF.cc,v 1.2 1999/03/07 15:02:20 wenaus Exp $
+ * $Id: StMatrixF.cc,v 1.3 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StMatrixF.cc,v $
- * Revision 1.2  1999/03/07 15:02:20  wenaus
- * fix scope problems
+ * Revision 1.3  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
+ * Revision 1.3  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
  *
  * Revision 1.2  1999/03/07 15:02:20  wenaus
  * fix scope problems
@@ -74,8 +77,8 @@ StMatrixF::StMatrixF(size_t p,size_t q, size_t init)
 
 StMatrixF::StMatrixF(const StMatrixF& m1)
     : mRow(m1.numRow()), mCol(m1.numCol()), mSize(m1.numSize())
-    for(int ii=0; ii<mRow; ii++)
- 	for(int jj=0; jj<mCol; jj++)
+{
+    mElement = new float[mSize];
 
     for(unsigned int ii=0; ii<mRow; ii++)
  	for(unsigned int jj=0; jj<mCol; jj++)
@@ -84,8 +87,8 @@ StMatrixF::StMatrixF(const StMatrixF& m1)
 
 StMatrixF::StMatrixF(const StMatrixD& m1)
     : mRow(m1.numRow()), mCol(m1.numCol()), mSize(m1.numSize())
-    for(int ii=0; ii<mRow; ii++)
- 	for(int jj=0; jj<mCol; jj++)
+{
+    mElement = new float[mSize];
 
     for(unsigned int ii=0; ii<mRow; ii++)
  	for(unsigned int jj=0; jj<mCol; jj++)
@@ -102,8 +105,8 @@ StMatrixF& StMatrixF::operator=(const StMatrixF& m1)
 	mSize    = m1.numRow()*m1.numCol();
 	mElement = new float[mSize];
 
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++) {
+	mRow = m1.numRow();
+	mCol = m1.numCol();
 	
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++) {
@@ -124,8 +127,8 @@ StMatrixF& StMatrixF::operator=(const StMatrixD& m1)
 	mSize    = m1.numRow()*m1.numCol();
 	mElement = new float[mSize];
 
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++) {
+	mRow = m1.numRow();
+	mCol = m1.numCol();
 	
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++) {
@@ -183,8 +186,8 @@ float& StMatrixF::operator()(size_t row, size_t col)
 /* -----------------------------------------------------------------------
    This section contains the assignment and inplace operators =,+=,-=,*=,/=.
    ----------------------------------------------------------------------- */
-    for(int ii=0; ii<mRow; ii++)
- 	for(int jj=0; jj<mCol; jj++)
+
+StMatrixF& StMatrixF::operator*=(double fact)
 {
     for(unsigned int ii=0; ii<mRow; ii++)
  	for(unsigned int jj=0; jj<mCol; jj++)
@@ -195,8 +198,8 @@ float& StMatrixF::operator()(size_t row, size_t col)
 
 StMatrixF & StMatrixF::operator/=(double fact)
 {
-    for(int ii=0; ii<mCol; ii++)
- 	for(int jj=0; jj<mRow; jj++)
+    if(fact == 0) {
+	cerr << "StMatrixF::operator/=(): Cannot divide by zero!" << endl;
     }
     for(unsigned int ii=0; ii<mCol; ii++)
  	for(unsigned int jj=0; jj<mRow; jj++)
@@ -206,28 +209,30 @@ StMatrixF & StMatrixF::operator/=(double fact)
 }
 
 // operator+=
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++)
+StMatrixF& StMatrixF::operator+=(const StMatrixF& m2)
+{
     if(mRow == m2.numRow() && mCol == m2.numCol()) {
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
 		*(mElement+(ii)*mCol+jj) += m2(ii+1,jj+1);
 
 	return (*this);
+    }
     else {
 	cerr << "StMatrixF::operator+=(): Matrices are not same size!" << endl;
 	return (*this);
     }	
 }
 
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++)
+StMatrixF& StMatrixF::operator+=(const StMatrixD& m2)
+{
     if(mRow == m2.numRow() && mCol == m2.numCol()) {
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
 		*(mElement+(ii)*mCol+jj) += m2(ii+1,jj+1);
 
 	return (*this);
+    }
     else {
 	cerr << "StMatrixD::operator+= Matrices are not same size!" << endl;
 	return (*this);
@@ -235,28 +240,30 @@ StMatrixF & StMatrixF::operator/=(double fact)
 }
 
 // operator -=
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++)
+StMatrixF& StMatrixF::operator-=(const StMatrixF& m2)
+{
     if(mRow == m2.numRow() && mCol == m2.numCol()) {
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
 		*(mElement+(ii)*mCol+jj) -= m2(ii+1,jj+1);
 
 	return (*this);
+    }
     else {
 	cerr << "StMatrixF::operator-=(): Matrices are not same size!" << endl;
 	return (*this);
     }
 }
 
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++)
+StMatrixF& StMatrixF::operator-=(const StMatrixD& m2)
+{
     if(mRow == m2.numRow() && mCol == m2.numCol()) {
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
 		*(mElement+(ii)*mCol+jj) -= m2(ii+1,jj+1);
 
 	return (*this);
+    }
     else {
 	cerr << "StMatrixD::operator-=(): Matrices are not same size!" << endl;
 	return (*this);
@@ -266,15 +273,16 @@ StMatrixF & StMatrixF::operator/=(double fact)
 // operator::dot
 StMatrixF StMatrixF::dot(const StMatrixF& m2)
 {
-	for(int i=0; i<mRow; i++)
-	    for(int j=0; j<m2.numCol(); j++) {
-		for(int kk=0; kk<mCol; kk++)
+    if(mCol == m2.numRow() ) {
+	StMatrixF mret(mRow, m2.numCol(), 0);
+	
 	for(unsigned int i=0; i<mRow; i++)
 	    for(unsigned int j=0; j<m2.numCol(); j++) {
 		for(unsigned int kk=0; kk<mCol; kk++)
 		    mret(i+1, j+1) += (*(mElement+(i)*mCol+kk))*m2(kk+1,j+1);
 	    }
 	return mret;
+    }
     else {
 	cerr << "StMatrixF::dot(): Incompatible matrix sizes" << endl;
 	return StMatrixF();
@@ -283,15 +291,16 @@ StMatrixF StMatrixF::dot(const StMatrixF& m2)
 
 StMatrixF StMatrixF::dot(const StMatrixD& m2)
 {
-	for(int i=0; i<mRow; i++)
-	    for(int j=0; j<m2.numCol(); j++) {
-		for(int kk=0; kk<mCol; kk++)
+    if(mCol == m2.numRow() ) {
+	StMatrixF mret(mRow, m2.numCol(), 0);
+	
 	for(unsigned int i=0; i<mRow; i++)
 	    for(unsigned int j=0; j<m2.numCol(); j++) {
 		for(unsigned int kk=0; kk<mCol; kk++)
 		    mret(i+1, j+1) += (*(mElement+(i)*mCol+kk))*m2(kk+1,j+1);
 	    }
 	return mret;
+    }
     else {
 	cerr << "StMatrixD::dot(): Incompatible matrix sizes" << endl;
 	return StMatrixF();
@@ -310,8 +319,8 @@ StMatrixF StMatrixF::operator- () const
     return mret*=-1;
 }
 
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++) {
+int StMatrixF::operator== (const StMatrixF& m1) const
+{
     if (mCol == m1.numCol() && mRow == m1.numRow()) {
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++) {
@@ -845,6 +854,7 @@ StThreeVectorF operator*(const StMatrixF& m1, const StThreeVectorF& v3)
 	return StThreeVectorF(m1[0][0]*v3.x()+m1[0][1]*v3.y()+m1[0][2]*v3.z(),
 			      m1[1][0]*v3.x()+m1[1][1]*v3.y()+m1[1][2]*v3.z(),
 			      m1[2][0]*v3.x()+m1[2][1]*v3.y()+m1[2][2]*v3.z());
+    }
     else {
 	cerr << "StMatrixF * StThreeVectorF: Matrix Must be 3x3" << endl;
 	return StThreeVectorF();
@@ -857,6 +867,7 @@ StThreeVectorD operator*(const StMatrixF& m1, const StThreeVectorD& v3)
 	return StThreeVectorD(m1[0][0]*v3.x()+m1[0][1]*v3.y()+m1[0][2]*v3.z(),
 			      m1[1][0]*v3.x()+m1[1][1]*v3.y()+m1[1][2]*v3.z(),
 			      m1[2][0]*v3.x()+m1[2][1]*v3.y()+m1[2][2]*v3.z());
+    }
     else {
 	cerr << "StMatrixF * StThreeVectorD: Matrix Must be 3x3" << endl;
 	return StThreeVectorD();
@@ -870,6 +881,7 @@ StThreeVectorF operator*(const StThreeVectorF& v3, const StMatrixF& m1)
 	return StThreeVectorF(m1[0][0]*v3.x()+m1[1][0]*v3.y()+m1[2][0]*v3.z(),
 			      m1[0][1]*v3.x()+m1[1][1]*v3.y()+m1[2][1]*v3.z(),
 			      m1[0][2]*v3.x()+m1[1][2]*v3.y()+m1[2][2]*v3.z());
+    }
     else {
 	cerr << "operator*(): StThreeVectorF * StMatrixF: Matrix Must be 3x3" << endl;
 	return StThreeVectorF();
@@ -882,6 +894,7 @@ StThreeVectorD operator*(const StThreeVectorD& v3, const StMatrixF& m1)
 	return StThreeVectorD(m1[0][0]*v3.x()+m1[1][0]*v3.y()+m1[2][0]*v3.z(),
 				       m1[0][1]*v3.x()+m1[1][1]*v3.y()+m1[2][1]*v3.z(),
 				       m1[0][2]*v3.x()+m1[1][2]*v3.y()+m1[2][2]*v3.z());
+    }
     else {
 	cerr << "operator*(): StThreeVectorD * StMatrixF: Matrix Must be 3x3" << endl;
 	return StThreeVectorD();
@@ -895,6 +908,7 @@ StLorentzVectorF operator*(const StMatrixF& m1, const StLorentzVectorF& v4)
 					 m1[1][0]*v4.x()+m1[1][1]*v4.y()+m1[1][2]*v4.z()+m1[1][3]*v4.t(),
 					 m1[2][0]*v4.x()+m1[2][1]*v4.y()+m1[2][2]*v4.z()+m1[2][3]*v4.t(),
 					 m1[3][0]*v4.x()+m1[3][1]*v4.y()+m1[3][2]*v4.z()+m1[3][3]*v4.t());
+    }
     else {
 	cerr << "operator*(): StMatrixF * StLorentzVectorF: Matrix Must be 4x4" << endl;
 	return StLorentzVectorF();
@@ -908,6 +922,7 @@ StLorentzVectorD operator*(const StMatrixF& m1, const StLorentzVectorD& v4)
 					 m1[1][0]*v4.x()+m1[1][1]*v4.y()+m1[1][2]*v4.z()+m1[1][3]*v4.t(),
 					 m1[2][0]*v4.x()+m1[2][1]*v4.y()+m1[2][2]*v4.z()+m1[2][3]*v4.t(),
 					 m1[3][0]*v4.x()+m1[3][1]*v4.y()+m1[3][2]*v4.z()+m1[3][3]*v4.t());
+    }
     else {
 	cerr << "operator*(): StMatrixF * StLorentzVectorD: Matrix Must be 4x4" << endl;
 	return StLorentzVectorD();
@@ -921,6 +936,7 @@ StLorentzVectorF operator*(const StLorentzVectorF& v4, const StMatrixF& m1)
 					 m1[0][1]*v4.x()+m1[1][1]*v4.y()+m1[2][1]*v4.z()+m1[1][3]*v4.t(),
 					 m1[0][2]*v4.x()+m1[1][2]*v4.y()+m1[2][2]*v4.z()+m1[2][3]*v4.t(),
 					 m1[0][3]*v4.x()+m1[1][3]*v4.y()+m1[2][3]*v4.z()+m1[2][3]*v4.t());
+    }
     else {
 	cerr << "StLorentzVectorF * StMatrixF: Matrix Must be 3x3" << endl;
 	return StLorentzVectorF();
@@ -934,6 +950,7 @@ StLorentzVectorD operator*(const StLorentzVectorD& v4, const StMatrixF& m1)
 					 m1[0][1]*v4.x()+m1[1][1]*v4.y()+m1[2][1]*v4.z()+m1[1][3]*v4.t(),
 					 m1[0][2]*v4.x()+m1[1][2]*v4.y()+m1[2][2]*v4.z()+m1[2][3]*v4.t(),
 					 m1[0][3]*v4.x()+m1[1][3]*v4.y()+m1[2][3]*v4.z()+m1[2][3]*v4.t());
+    }
     else {
 	cerr << "StLorentzVectorD * StMatrixF: Matrix Must be 3x3" << endl;
 	return StLorentzVectorD();
@@ -946,6 +963,7 @@ StMatrixF operator+(const StMatrixF& m1,const StMatrixF& m2)
 	StMatrixF mret(m1);
 	mret +=m2;
 	return mret;
+    }
     else {
 	cerr << "operator+(): Matrix Sizes must be the same." << endl;
 	return StMatrixF();
@@ -956,6 +974,7 @@ StMatrixF operator-(const StMatrixF& m1,const StMatrixF& m2)
 {
     if(m1.numRow() == m2.numRow() && m1.numCol() == m2.numCol()) {
 	return StMatrixF(m1) -= m2;
+    }
     else {
 	cerr << "operator-(): Matrix Sizes must be the same." << endl;
 	return StMatrixF();

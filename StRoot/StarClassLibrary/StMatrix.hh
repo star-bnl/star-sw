@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.5 1999/04/14 23:12:07 fisyak Exp $
+ * $Id: StMatrix.hh,v 1.6 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,8 +18,11 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
- * Revision 1.5  1999/04/14 23:12:07  fisyak
- * Add __CINT__ to handle references
+ * Revision 1.6  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
+ * Revision 1.6  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
  *
  * Revision 1.5  1999/04/14 23:12:07  fisyak
  * Add __CINT__ to handle references
@@ -405,8 +408,8 @@ template<class DataType>
 template<class X>
 StMatrix<DataType>::StMatrix(const StMatrix<X>& m1)
     : mRow(m1.numRow()), mCol(m1.numCol()), mSize(m1.numSize())
-    for(int ii=0; ii<mRow; ii++)
- 	for(int jj=0; jj<mCol; jj++)
+{
+    mElement = new DataType[mSize];
 
     for(unsigned int ii=0; ii<mRow; ii++)
  	for(unsigned int jj=0; jj<mCol; jj++)
@@ -416,8 +419,8 @@ StMatrix<DataType>::StMatrix(const StMatrix<X>& m1)
 template<class DataType>
 StMatrix<DataType>::StMatrix(const StMatrix<DataType>& m1)
     : mRow(m1.numRow()), mCol(m1.numCol()), mSize(m1.numSize())
-    for(int ii=0; ii<mRow; ii++)
- 	for(int jj=0; jj<mCol; jj++)
+{
+    mElement = new DataType[mSize];
 
     for(unsigned int ii=0; ii<mRow; ii++)
  	for(unsigned int jj=0; jj<mCol; jj++)
@@ -427,8 +430,8 @@ StMatrix<DataType>::StMatrix(const StMatrix<DataType>& m1)
 template<class DataType>
 StMatrix<DataType>::StMatrix(const StMatrix<float>& m1)
     : mRow(m1.numRow()), mCol(m1.numCol()), mSize(m1.numSize())
-    for(int ii=0; ii<mRow; ii++)
- 	for(int jj=0; jj<mCol; jj++)
+{
+    mElement = new DataType[mSize];
 
     for(unsigned int ii=0; ii<mRow; ii++)
  	for(unsigned int jj=0; jj<mCol; jj++)
@@ -438,8 +441,8 @@ StMatrix<DataType>::StMatrix(const StMatrix<float>& m1)
 template<class DataType>
 StMatrix<DataType>::StMatrix(const StMatrix<double>& m1)
     : mRow(m1.numRow()), mCol(m1.numCol()), mSize(m1.numSize())
-    for(int ii=0; ii<mRow; ii++)
- 	for(int jj=0; jj<mCol; jj++)
+{
+    mElement = new DataType[mSize];
 
     for(unsigned int ii=0; ii<mRow; ii++)
  	for(unsigned int jj=0; jj<mCol; jj++)
@@ -461,8 +464,8 @@ StMatrix<DataType>& StMatrix<DataType>::operator=(const StMatrix<X>& m1)
 	mSize    = m1.numRow()*m1.numCol();
 	mElement = new DataType[mSize];
 
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++) {
+	mRow = m1.numRow();
+	mCol = m1.numCol();
 	
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++) {
@@ -484,8 +487,8 @@ StMatrix<DataType>& StMatrix<DataType>::operator=(const StMatrix<DataType>& m1)
 	mSize    = m1.numRow()*m1.numCol();
 	mElement = new DataType[mSize];
 
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++) {
+	mRow = m1.numRow();
+	mCol = m1.numCol();
 	
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++) {
@@ -507,8 +510,8 @@ StMatrix<DataType>& StMatrix<DataType>::operator=(const StMatrix<float>& m1)
 	mSize    = m1.numRow()*m1.numCol();
 	mElement = new DataType[mSize];
 
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++) {
+	mRow = m1.numRow();
+	mCol = m1.numCol();
 	
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++) {
@@ -529,8 +532,8 @@ StMatrix<DataType>& StMatrix<DataType>::operator=(const StMatrix<double>& m1)
 	mSize    = m1.numRow()*m1.numCol();
 	mElement = new DataType[mSize];
 
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++) {
+	mRow = m1.numRow();
+	mCol = m1.numCol();
 	
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++) {
@@ -608,8 +611,8 @@ DataType& StMatrix<DataType>::operator()(size_t row, size_t col)
    This section contains the assignment and inplace operators =,+=,-=,*=,/=.
    ----------------------------------------------------------------------- */
 
-    for(int ii=0; ii<mRow; ii++)
- 	for(int jj=0; jj<mCol; jj++)
+template<class DataType>
+StMatrix<DataType>& StMatrix<DataType>::operator*=(double fact)
 {
     for(unsigned int ii=0; ii<mRow; ii++)
  	for(unsigned int jj=0; jj<mCol; jj++)
@@ -625,8 +628,8 @@ StMatrix<DataType> & StMatrix<DataType>::operator/=(double fact)
 #ifndef ST_NO_EXCEPTIONS
 	throw out_of_range("StMatrix<T>::operator/=(): Cannot divide by zero!");
 #else
-    for(int ii=0; ii<mCol; ii++)
- 	for(int jj=0; jj<mRow; jj++)
+	cerr << "StMatrix<T>::operator/=(): Cannot divide by zero!" << endl;
+#endif
     }
     for(unsigned int ii=0; ii<mCol; ii++)
  	for(unsigned int jj=0; jj<mRow; jj++)
@@ -638,8 +641,8 @@ StMatrix<DataType> & StMatrix<DataType>::operator/=(double fact)
 #ifndef ST_NO_MEMBER_TEMPLATES
 template<class DataType>
 template<class X>
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++)
+StMatrix<DataType>& StMatrix<DataType>::operator+=(const StMatrix<X>& m2)
+{
     if(mRow == m2.numRow() && mCol == m2.numCol()) {
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
@@ -658,8 +661,8 @@ template<class X>
 
 template<class DataType>
 template<class X>
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++)
+StMatrix<DataType>& StMatrix<DataType>::operator-=(const StMatrix<X>& m2)
+{
     if(mRow == m2.numRow() && mCol == m2.numCol()) {
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
@@ -680,9 +683,9 @@ template<class DataType>
 template<class X>
 StMatrix<DataType> StMatrix<DataType>::dot(const StMatrix<X>& m2)
 {
-	for(int i=0; i<mRow; i++)
-	    for(int j=0; j<m2.numCol(); j++) {
-		for(int kk=0; kk<mCol; kk++)
+    if(mCol == m2.numRow() ) {
+	StMatrix<DataType> mret(mRow, m2.numCol(), 0);
+	
 	for(unsigned int i=0; i<mRow; i++)
 	    for(unsigned int j=0; j<m2.numCol(); j++) {
 		for(unsigned int kk=0; kk<mCol; kk++)
@@ -701,8 +704,8 @@ StMatrix<DataType> StMatrix<DataType>::dot(const StMatrix<X>& m2)
 #else  // ST_NO_MEMBER_TEMPLATES
 // operator+=
 template<class DataType>
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++)
+StMatrix<DataType>& StMatrix<DataType>::operator+=(const StMatrix<float>& m2)
+{
     if(mRow == m2.numRow() && mCol == m2.numCol()) {
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
@@ -720,8 +723,8 @@ template<class DataType>
 }
 
 template<class DataType>
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++)
+StMatrix<DataType>& StMatrix<DataType>::operator+=(const StMatrix<double>& m2)
+{
     if(mRow == m2.numRow() && mCol == m2.numCol()) {
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
@@ -740,8 +743,8 @@ template<class DataType>
 
 // operator -=
 template<class DataType>
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++)
+StMatrix<DataType>& StMatrix<DataType>::operator-=(const StMatrix<float>& m2)
+{
     if(mRow == m2.numRow() && mCol == m2.numCol()) {
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
@@ -759,8 +762,8 @@ template<class DataType>
 }
 
 template<class DataType>
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++)
+StMatrix<DataType>& StMatrix<DataType>::operator-=(const StMatrix<double>& m2)
+{
     if(mRow == m2.numRow() && mCol == m2.numCol()) {
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
@@ -781,9 +784,9 @@ template<class DataType>
 template<class DataType>
 StMatrix<DataType> StMatrix<DataType>::dot(const StMatrix<float>& m2)
 {
-	for(int i=0; i<mRow; i++)
-	    for(int j=0; j<m2.numCol(); j++) {
-		for(int kk=0; kk<mCol; kk++)
+    if(mCol == m2.numRow() ) {
+	StMatrix<DataType> mret(mRow, m2.numCol(), 0);
+	
 	for(unsigned int i=0; i<mRow; i++)
 	    for(unsigned int j=0; j<m2.numCol(); j++) {
 		for(unsigned int kk=0; kk<mCol; kk++)
@@ -803,9 +806,9 @@ StMatrix<DataType> StMatrix<DataType>::dot(const StMatrix<float>& m2)
 template<class DataType>
 StMatrix<DataType> StMatrix<DataType>::dot(const StMatrix<double>& m2)
 {
-	for(int i=0; i<mRow; i++)
-	    for(int j=0; j<m2.numCol(); j++) {
-		for(int kk=0; kk<mCol; kk++)
+    if(mCol == m2.numRow() ) {
+	StMatrix<DataType> mret(mRow, m2.numCol(), 0);
+	
 	for(unsigned int i=0; i<mRow; i++)
 	    for(unsigned int j=0; j<m2.numCol(); j++) {
 		for(unsigned int kk=0; kk<mCol; kk++)
@@ -840,8 +843,8 @@ StMatrix<DataType> StMatrix<DataType>::operator- () const
 }
 
 template<class DataType>
-	for(int ii=0; ii<mRow; ii++)
-	    for(int jj=0; jj<mCol; jj++) {
+bool StMatrix<DataType>::operator== (const StMatrix<DataType>& m1) const
+{
     if (mCol == m1.numCol() && mRow == m1.numRow()) {
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++) {
@@ -1345,15 +1348,15 @@ unsigned int StMatrix<DataType>::dfinv(size_t *ir) {
 	    for ( ; miik<min_end; ) {
 		s33 += (*mikj) * (*(miik++));
 		mikj += n;
-	for (j=1; j<=ni; j++) {
+	    }
 	    *(mij++) = s33;
-	    DataType *miik = mii + j;
-	    DataType *mikij = mii + j * n + j;
-	    for (unsigned int k=j; k<=ni; k++) {
+	}
+	for (unsigned int jn=1; jn<=ni; jn++) {
+	    s34 = 0.0;
 	    DataType *miik = mii + jn;
 	    DataType *mikij = mii + jn * n + jn;
 	    for (unsigned int k=jn; k<=ni; k++) {
-	    *(mii+j) = s34;
+		s34 += *mikij * (*(miik++));
 		mikij += n;
 	    }
 	    *(mii+jn) = s34;

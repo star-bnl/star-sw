@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleDefinition.cc,v 1.1 1999/05/14 18:48:13 ullrich Exp $
+ * $Id: StParticleDefinition.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleDefinition.cc,v $
+ * Revision 1.2  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
  * Revision 1.1  1999/05/14 18:48:13  ullrich
  * Initial Revision
  *
@@ -41,25 +44,25 @@ StParticleDefinition::StParticleDefinition(
 					   bool                aIsStableFlag,
 					   double              aLifetime)
     : mParticleName(aName), 
-      mPDGMass(aMass),
-      mPDGWidth(aWidth),
-		   mPDGCharge(aCharge),
-		   mPDGiSpin(aISpin),
-		   mPDGSpin(aISpin*0.5),
-		   mPDGiParity(aIParity), 
-		   mPDGiConjugation(aIConjugation),
-		   mPDGiIsospin(aIIsospin),
-		   mPDGiIsospin3(aIIsospin3),
-		   mPDGiGParity(aGParity),
-		   mPDGIsospin(aIIsospin*0.5),
-		   mPDGIsospin3(aIIsospin3*0.5),
-		   mParticleType(aType), 
-		   mLeptonNumber(aLepton),
-		   mBaryonNumber(aBaryon),
-		   mPDGEncoding(aEncoding),
-		   mAntiPDGEncoding(-1*aEncoding),
-		   mPDGStable(aIsStableFlag), 
-		   mPDGLifeTime(aLifetime) 
+    mPDGMass(aMass),
+    mPDGWidth(aWidth),
+    mPDGCharge(aCharge),
+    mPDGiSpin(aISpin),
+    mPDGSpin(aISpin*0.5),
+    mPDGiParity(aIParity), 
+    mPDGiConjugation(aIConjugation),
+    mPDGiIsospin(aIIsospin),
+    mPDGiIsospin3(aIIsospin3),
+    mPDGIsospin(aIIsospin*0.5),
+    mPDGIsospin3(aIIsospin3*0.5),
+    mPDGiGParity(aGParity),
+    mLeptonNumber(aLepton),
+    mBaryonNumber(aBaryon),
+    mParticleType(aType), 
+    mPDGEncoding(aEncoding),
+    mAntiPDGEncoding(-1*aEncoding),
+    mPDGStable(aIsStableFlag), 
+    mPDGLifeTime(aLifetime) 
 {
     //
     // check name and register this particle into ParticleTable

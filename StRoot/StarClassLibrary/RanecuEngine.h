@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RanecuEngine.h,v 1.1 1999/01/30 03:59:01 fisyak Exp $
+ * $Id: RanecuEngine.h,v 1.2 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author: Gabriele Cosmo - Created: 2nd February 1996
  *         modified for SCL bl
@@ -24,6 +24,9 @@
  ***************************************************************************
  *
  * $Log: RanecuEngine.h,v $
+ * Revision 1.2  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
  * Revision 1.1  1999/01/30 03:59:01  fisyak
  * Root Version of StarClassLibrary
  *
@@ -86,11 +89,11 @@ private:
 
   // Members defining the current state of the generator.
 
-  const HepInt maxSeq;
   long table[215][2];
   HepInt seq;
   const HepInt ecuyer_a, ecuyer_b, ecuyer_c, ecuyer_d, ecuyer_e, ecuyer_f;
   const HepInt shift1, shift2;
+  const HepInt maxSeq;
   const HepDouble prec;
 
 };

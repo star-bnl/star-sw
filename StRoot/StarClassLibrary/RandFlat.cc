@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandFlat.cc,v 1.1 1999/01/30 03:59:00 fisyak Exp $
+ * $Id: RandFlat.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author:  Gabriele Cosmo - Created: 17th May 1995
  *          modified for SCL bl
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: RandFlat.cc,v $
+ * Revision 1.2  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
  * Revision 1.1  1999/01/30 03:59:00  fisyak
  * Root Version of StarClassLibrary
  *
@@ -56,9 +59,7 @@ RandFlat::shootArray( vector<HepDouble>& vec, HepDouble lx, HepDouble dx )
 RandFlat::shootArray( vector<HepDouble,allocator<HepDouble> >& vec, HepDouble lx, HepDouble dx )
 #endif
 {
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+   for (unsigned int i=0; i<vec.size(); ++i)
      vec[i] = shoot(lx,dx);
 }
 
@@ -66,9 +67,7 @@ void RandFlat::shootArray( HepRandomEngine* anEngine,
                            const HepInt size, HepDouble* vect,
                            HepDouble lx, HepDouble dx  )
 {
-   register HepInt i;
-
-   for (i=0; i<size; ++i)
+   for (int i=0; i<size; ++i)
      vect[i] = shoot(anEngine,lx,dx);
 }
 
@@ -83,9 +82,7 @@ void RandFlat::shootArray( HepRandomEngine* anEngine,
 		      HepDouble lx, HepDouble dx  )
 #endif
 {
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+   for (unsigned int i=0; i<vec.size(); ++i)
      vec[i] = shoot(anEngine,lx,dx);
 }
 
@@ -104,8 +101,6 @@ void RandFlat::fireArray( vector<HepDouble>& vec, HepDouble lx, HepDouble dx )
 void RandFlat::fireArray( vector<HepDouble,allocator<HepDouble> >& vec, HepDouble lx, HepDouble dx )
 #endif
 {
-   register HepInt i;
-
-   for (i=0; i<vec.size(); ++i)
+   for (unsigned int i=0; i<vec.size(); ++i)
      vec[i] = fire(lx,dx);
 }

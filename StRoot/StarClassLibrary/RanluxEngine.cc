@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RanluxEngine.cc,v 1.1 1999/01/30 03:59:01 fisyak Exp $
+ * $Id: RanluxEngine.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
  *
  * Author: Original code from CLHEP by G. Cosmo
  *         modified for SCL bl
@@ -22,6 +22,9 @@
  ***************************************************************************
  *
  * $Log: RanluxEngine.cc,v $
+ * Revision 1.2  1999/12/07 23:43:04  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
  * Revision 1.1  1999/01/30 03:59:01  fisyak
  * Root Version of StarClassLibrary
  *
@@ -353,9 +356,8 @@ RanluxEngine::flatArray(vector<HepDouble,allocator<HepDouble> >& vec)
   HepFloat next_random;
   register HepFloat uni;
   register HepInt i;
-  register HepInt index;
 
-  for (index=0; index<vec.size(); ++index) {
+  for (unsigned int index=0; index<vec.size(); ++index) {
     uni = float_seed_table[j_lag] - float_seed_table[i_lag] - carry;
     if(uni < 0. ){
        uni += 1.0;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: JamesRandom.cc,v 1.1 1999/01/30 03:58:59 fisyak Exp $
+ * $Id: JamesRandom.cc,v 1.2 1999/12/07 23:43:03 ullrich Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -22,6 +22,9 @@
  ***************************************************************************
  *
  * $Log: JamesRandom.cc,v $
+ * Revision 1.2  1999/12/07 23:43:03  ullrich
+ * Modified to get rid of warnings on Linux.
+ *
  * Revision 1.1  1999/01/30 03:58:59  fisyak
  * Root Version of StarClassLibrary
  *
@@ -222,10 +225,9 @@ HepJamesRandom::flatArray(vector<HepDouble>& vec)
 HepJamesRandom::flatArray(vector<HepDouble,allocator<HepDouble> >& vec)
 #endif
 {
-   register HepDouble uni;
-   register HepInt i;
+   HepDouble     uni;
 
-   for (i=0; i<vec.size(); ++i) {
+   for (unsigned int i=0; i<vec.size(); ++i) {
       do {
          uni = *pi97 - *pj97;
          if ( uni < 0.0 ) uni++;
