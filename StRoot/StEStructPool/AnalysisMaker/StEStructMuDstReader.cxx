@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.2 2004/06/25 03:10:29 porter Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.3 2004/09/24 01:41:42 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -82,6 +82,8 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
 
  unsigned int tword=muEvent->l0Trigger().triggerWord();
  int refMult=muEvent->refMult();
+// djp 9/23/2004  MuDst events with vertex at 0,0,0 are bad.
+    mrefMult = 0;
 
  float x=muEvent->eventSummary().primaryVertexPosition().x();
  float y=muEvent->eventSummary().primaryVertexPosition().y();
@@ -89,9 +91,14 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
 
  bool useEvent=true;
 
- if(!mECuts->goodTrigger(tword) ||
+// djp 9/23/2004  MuDst events with vertex at 0,0,0 are bad.
+ if ((fabs(x) < 1e-5) && (fabs(y) < 1e-5) && (fabs(z) < 1e-5)) {
+        useEvent = false;
+ } else if(!mECuts->goodTrigger(muEvent) ||
     !mECuts->goodPrimaryVertexZ(z) ||
-    !mECuts->goodCentrality(refMult))useEvent=false;
+    !mECuts->goodCentrality(refMult)) {
+     useEvent=false;
+ }
  
  retVal = new StEStructEvent();
 
@@ -133,13 +140,13 @@ bool StEStructMuDstReader::fillTracks(StEStructEvent* estructEvent) {
   // does a copy.
   //
 
+  mrefMult=0;
   StMuDst* muDst=mMaker->muDst();
   int numPrimaries=muDst->primaryTracks()->GetEntries();
   if(0==numPrimaries)return false;
 
   StEStructTrack* eTrack = new StEStructTrack();
 
-  mrefMult=0;
   for(int i=0; i<numPrimaries; i++){
 
     eTrack->SetInComplete();
@@ -254,6 +261,10 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.3  2004/09/24 01:41:42  prindle
+ * Allow for cuts to be defined by character strings. I use this to select trigger
+ * cuts appropriate for run periods
+ *
  * Revision 1.2  2004/06/25 03:10:29  porter
  * added a new common statistics output and added electron cut with momentum slices
  *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.2 2004/04/15 18:45:35 msd Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.3 2004/09/24 01:41:41 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -48,19 +48,24 @@ void StEStructEventCuts::initNames(){
 
 bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int nvals){
 
-  if(!strcmp(name,mtWordName.name)){ 
-    mtWord[0]=(unsigned int)atoi(vals[0]); 
-    mtWord[1]=(unsigned int)atoi(vals[1]);
-    if(mtWord[0]==mtWord[1]){ // historgam needs some help in this case.
-      float arange[2];
-      arange[0]=mtWord[0]-0.05*mtWord[0];
-      arange[1]=mtWord[0]+0.05*mtWord[0];
-      mtWordName.idx=createCutHists(name,arange);
-    } else {
-      mtWordName.idx=createCutHists(name,mtWord);
+    if (!strcmp(name,mtWordName.name)) {
+        if (1 == nvals) {
+            sscanf(vals[0],"%s\t",mRunPeriod);
+            mtWordName.idx = 0;
+        } else {
+            mtWord[0]=(unsigned int)atoi(vals[0]); 
+            mtWord[1]=(unsigned int)atoi(vals[1]);
+            if(mtWord[0]==mtWord[1]){ // histogram needs some help in this case.
+                float arange[2];
+                arange[0]=mtWord[0]-0.05*mtWord[0];
+                arange[1]=mtWord[0]+0.05*mtWord[0];
+                mtWordName.idx=createCutHists(name,arange);
+            } else {
+                mtWordName.idx=createCutHists(name,mtWord);
+            }
+            return true;
+        }
     }
-    return true;
-  }
  
   if(!strcmp(name,mpVertexZName.name)){
     mpVertexZ[0]=atof(vals[0]); 
@@ -107,6 +112,10 @@ void StEStructEventCuts::printCuts(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.3  2004/09/24 01:41:41  prindle
+ * Allow for cuts to be defined by character strings. I use this to select trigger
+ * cuts appropriate for run periods
+ *
  * Revision 1.2  2004/04/15 18:45:35  msd
  * Removed hard-wired range of numTrack cut histograms
  *
