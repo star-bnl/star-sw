@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.58 1999/07/17 23:29:22 fisyak Exp $
+// $Id: StMaker.cxx,v 1.59 1999/07/29 01:05:23 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.59  1999/07/29 01:05:23  fisyak
+// move bfc to StBFChain
+//
 // Revision 1.58  1999/07/17 23:29:22  fisyak
 // Add Peter Jacobs QAInfo tag in printout
 //
@@ -866,3 +869,23 @@ void StMaker::Streamer(TBuffer &b)
 { Error("Streamer"," attempt to write %s\n ",GetName());
   assert(0);
 }
+//______________________________________________________________________________
+StMaker *StMaker::New(const Char_t *classname, const Char_t *name, void *title)
+{
+  // This static method creates a new StMaker object if provided 
+  
+  StMaker *maker = 0;
+  if (classname) 
+  {
+    TClass *cl = gROOT->GetClass(classname);
+    if (cl) {
+      maker = (StMaker *)cl->New();
+      if (maker) {
+	if (name && strlen(name)) maker->SetName(name);
+	if (title) maker->SetTitle((Char_t *) title);
+      }
+    } 
+  }
+  return maker; 
+}
+

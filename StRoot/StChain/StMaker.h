@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.29 1999/07/13 02:19:34 perev Exp $
+// $Id: StMaker.h,v 1.30 1999/07/29 01:05:23 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.30  1999/07/29 01:05:23  fisyak
+// move bfc to StBFChain
+//
 // Revision 1.29  1999/07/13 02:19:34  perev
 // GetCVS,StEvtHddr,etc...
 //
@@ -142,7 +145,7 @@ public:
    virtual TList       *GetHistList() const {return (TList*)GetDirObj(".hist");};
    virtual StMaker     *cd(){StMaker *ret = fgStChain; fgStChain=this; return ret;};
    virtual StMaker     *Cd(){return cd();};
-
+   static  StMaker     *New(const Char_t *classname, const Char_t *name="", void *title=0);
 //		STAR methods
    virtual Int_t  	GetNumber() const ;
    virtual void   	SetNumber(Int_t number) ;
@@ -210,7 +213,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.29 1999/07/13 02:19:34 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.30 1999/07/29 01:05:23 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };
