@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.hh,v 1.1 1999/02/04 18:38:03 lasiuk Exp $
+ * $Id: StTrsUnpacker.hh,v 1.2 1999/02/10 04:26:32 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.hh,v $
+ * Revision 1.2  1999/02/10 04:26:32  lasiuk
+ * TObject for passing
+ *
  * Revision 1.1  1999/02/04 18:38:03  lasiuk
  * Initial Revision
  *
@@ -44,5 +47,6 @@ public:
 private:
     StTrsDigitalSector* mSector;
     StSequence*         mSequence;
+    unsigned char*      mPadList;
 };
 #endif
