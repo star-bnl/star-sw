@@ -7,6 +7,8 @@
 * 8/7/98 L.D. Carr -- lcarr@u.washington.edu
 *	1.  changed switches
 *       2.  moved sca_ensemble_ave and sca_prior to /dui/calib/ebye/sca
+* 8/10/98 K. Turner - changed exec create_tables_global#sca to 
+*                             exec create_tables_global#egr to make it standard
 * 
 ************************************************************************
 ************************************************************************
@@ -84,7 +86,7 @@
   
   exec create_tables_ebye#sca
   
-  exec create_tables_global#sca
+  exec create_tables_global#egr
   
   exec init_sca#init [prior_switch] [ensemble_switch] [analysis_switch]
   
