@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.436 2004/08/18 03:36:01 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.437 2004/08/23 23:12:09 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -362,9 +362,11 @@ Bfc_st BFC1[] = {
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
-  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+
+
   {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation>",kFALSE},
-  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+
+
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE},
@@ -806,7 +808,7 @@ Bfc_st BFC2[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
    //  {"ITTF"        ,""  ,"",""                    ,"","","Turn on second option block for ITTF chain",kFALSE},
   {"ITTF"        ,""  ,"","Sti,svtDb",                                   "","","Turn on ITTF chain",kFALSE},
-  {"SvtHitFilt"     ,"", "","",                                        "","","SVT Hit filter Maker",kFALSE},
+  {"SvtHitFilt"  ,"", "","",                                           "","","SVT Hit filter Maker",kFALSE},
   {"NoHits"      ,""  ,"",""                            ,"","","Don't write hits into Event.Branch",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
@@ -835,6 +837,7 @@ Bfc_st BFC2[] = {
   {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
+  {"clearmem"    ,""  ,"",""                            ,"","","Instruct StiMaker to clear factory",kFALSE},
   {"InTree"      ,""  ,"","in",""                                     ,"","bfcTree Input Tree name",kFALSE},
   {"OutTree"     ,""  ,"","Tree",""                                  ,"","bfcTree Output Tree name",kFALSE},
   {"DstOut"      ,""  ,"","Tree"                                       ,"","","Write dst to StTree",kFALSE},
@@ -969,9 +972,9 @@ Bfc_st BFC2[] = {
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
-  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+
   {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation>",kFALSE},
-  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE},
@@ -1516,6 +1519,8 @@ Int_t StBFChain::Instantiate()
 		 << *pars << endl;
 
 	    //if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
+	    if ( GetOption("clearmem") )  stiMk->SetMode(1);
+
 	  }
 	  if (maker=="StGenericVertexMaker") {
 	      StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) mk;
