@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.371 2004/01/02 20:21:22 starreco Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.372 2004/01/06 20:17:51 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -248,6 +248,7 @@ Bfc_st BFC1[] = {
   {"OIFC"        ,""  ,"","",""                                         ,"","Field Cage correction",kFALSE},
   {"OSpaceZ"     ,""  ,"","",""                                      ,"","Space Charge corrections",kFALSE},
   {"OSpaceZ2"    ,""  ,"","",""                                   ,"","Space Charge corrections R2",kFALSE},
+  {"OShortR"     ,""  ,"","",""                                       ,"","Shorted Ring correction",kFALSE},
   {"AlignSectors",""  ,"","",""          ,"","Activate Sector Alignment correction in St_tpt_Maker",kFALSE},
 
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
@@ -773,6 +774,7 @@ Bfc_st BFC2[] = {
   {"OIFC"        ,""  ,"","",""                                         ,"","Field Cage correction",kFALSE},
   {"OSpaceZ"     ,""  ,"","",""                                      ,"","Space Charge corrections",kFALSE},
   {"OSpaceZ2"    ,""  ,"","",""                                   ,"","Space Charge corrections R2",kFALSE},
+  {"OShortR"     ,""  ,"","",""                                       ,"","Shorted Ring correction",kFALSE},
   {"AlignSectors",""  ,"","",""          ,"","Activate Sector Alignment correction in St_tpt_Maker",kFALSE},
 
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
@@ -1439,6 +1441,7 @@ Int_t StBFChain::Instantiate()
 	    if( GetOption("OIFC") ){	      mask |=   (kIFCShift      << 1); }
 	    if( GetOption("OSpaceZ") ){	      mask |=   (kSpaceCharge   << 1); }
 	    if( GetOption("OSpaceZ2") ){      mask |=   (kSpaceChargeR2 << 1); }
+	    if( GetOption("OShortR") ){       mask |=   (kShortedRing   << 1); }
 
 	    (void) printf("StBFChain:: ExB The option passed will be %d 0x%X\n",mask,mask);
 	    mk->SetMode(mask);
