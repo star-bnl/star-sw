@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.14 2000/03/05 04:11:48 fine Exp $
+// $Id: St_tableDescriptor.cxx,v 1.15 2000/03/07 23:52:21 fine Exp $
 #include <stdlib.h> 
 #include "St_tableDescriptor.h"
 #include "St_Table.h"
@@ -191,7 +191,6 @@ void St_tableDescriptor::LearnTable(TClass *classPtr)
     AddAt(&elementDescriptor,columnIndex); columnIndex++;
   }
 }
-
 //______________________________________________________________________________
 Int_t St_tableDescriptor::UpdateOffsets(const St_tableDescriptor *newDescriptor)
 {
@@ -284,6 +283,9 @@ St_Table::EColumnType St_tableDescriptor::ColumnType(const Char_t *columnName) c
 
 //____________________________________________________________________________
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.15  2000/03/07 23:52:21  fine
+// some comments improved
+//
 // Revision 1.14  2000/03/05 04:11:48  fine
 // Automatic schema evolution for St_Table has been activated
 //

@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.100 2000/03/06 02:03:16 fine Exp $ 
+// $Id: St_Table.cxx,v 1.101 2000/03/07 23:52:21 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -9,6 +9,18 @@
 // St_Table                                                             //
 //                                                                      //
 // Wraps the array of the STAF C-structures (one STAF Table per element)//
+//                                                                      //
+// class St_Table provides the automatic schema evolution for           //
+// the derived "table" classes saved with ROOT format.                  //
+//                                                                      //
+// "Automatic Schema evolution" provides:                               //
+//   -  skipping data-member if it is not present for the current       //
+//      implementation of the "table" but was present at the time the   //
+//      table was written;                                              //
+//   -  assign a default value ZERO for the brand-new data-members,     //
+//      those were not in the structure when the object was written but //
+//      present now;                                                    //
+//   -  trace propely any change in the order of the data-members       //
 //                                                                      //
 // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/st2tab.gif"> </P> End_Html //
 //                                                                      //
@@ -104,6 +116,7 @@ ClassImp(St_Table)
  
 //______________________________________________________________________________
 St_tableDescriptor *St_Table::GetTableDescriptors() const {
+ // protected: create a new St_tableDescriptor descriptor for this table
     return new St_tableDescriptor(this);
 }
 
@@ -143,6 +156,7 @@ void St_Table::AsString(void *buf, const char *name, Int_t width) const
 //______________________________________________________________________________
 const void *St_Table::At(Int_t i) const
 {
+ // Returns a pointer to the i-th row of the table
    if (!BoundsOk("St_Table::At", i))
       i = 0;
    return (const void *)(s_Table+i*(*s_Size));
@@ -1054,6 +1068,8 @@ void St_Table::Append(St_Table *donorTable, Int_t nRows, Int_t firstRows)
 //______________________________________________________________________________
 void St_Table::CopyStruct(Char_t *dest, const Char_t *src)
 {
+ // Copy the C-structure src into the new location
+ // the length of the strucutre is defined by this class descriptor
     ::memcpy(dest,src,*s_Size*fN);
 }
 //______________________________________________________________________________
@@ -1067,6 +1083,12 @@ void St_Table::CopySet(St_Table &array)
 //______________________________________________________________________________
 void *St_Table::ReAllocate()
 {
+  // Reallocate this table leaving only (used rows)+1 allocated
+  // GetTableSize() = GetNRows() + 1
+  // returns a pointer to the first row of the reallocated table
+  // Note:
+  // The table is reallocated if it is an owner of the internal array
+
    ReAlloc(GetNRows()+1);
    return (void *)s_Table;
 }
@@ -1074,13 +1096,20 @@ void *St_Table::ReAllocate()
 //______________________________________________________________________________
 void *St_Table::ReAllocate(Int_t newsize)
 {
+  // Reallocate this table leaving only <newsize> allocated
+  // GetTableSize() = newsize;
+  // returns a pointer to the first row of the reallocated table
+  // Note:
+  // The table is reallocated if it is an owner of the internal array
+
   if (newsize > fN) ReAlloc(newsize);
   return (void *)s_Table;
 }
 
 //______________________________________________________________________________
 void St_Table::ReAlloc(Int_t newsize)
-{
+{  
+  // The table is reallocated if it is an owner of the internal array
   if (!TestBit(kIsNotOwn) && s_Size && newsize > 0) {
     void *arr =  realloc(s_Table,*s_Size*newsize);
     SetfN(newsize);
@@ -1104,6 +1133,9 @@ void St_Table::Browse(TBrowser *b){
 //______________________________________________________________________________
 void St_Table::Clear(Option_t *opt)
 {
+  // Deletes the internal array of this class
+  // if this object does own its internal table
+
   if (!s_Table) return;
   if (!opt || !opt[0]) {
     if (! TestBit(kIsNotOwn)) free(s_Table);
@@ -2747,6 +2779,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.101  2000/03/07 23:52:21  fine
+// some comments improved
+//
 // Revision 1.100  2000/03/06 02:03:16  fine
 // Schema evolution: skiping the lost field introduced
 //
