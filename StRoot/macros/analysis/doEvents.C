@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.53 2000/05/17 16:53:50 kathy Exp $
+// $Id: doEvents.C,v 1.54 2000/05/18 17:44:54 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -35,6 +35,16 @@
 // Author List: Torre Wenaus, BNL  2/99
 //              Victor Perevoztchikov
 //  
+//  inputs:
+//      nevents = # events to process
+//      path = a. directory you want files from
+//             b. "-" to get just the one file you want
+//      file = a. file names in directory (takes all files)
+//             b. the 1 particular full file name (with directory) you want
+//      qaflag = "off"  - doesn't do anything now
+//      wrStEOut = flag to turn on=1, off=0 writing of output test.event.root
+//                 file --- set to off by default 
+//      
 ///////////////////////////////////////////////////////////////////////////////
 
 Int_t    usePath = 0;
@@ -67,10 +77,10 @@ void doEvents(Int_t nevents=2,
               const Char_t *path="-",
               const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
               const Char_t *qaflag = "off", 
-              const Char_t *wrStEOut = "false");
+              const Int_t wrStEOut = 0);
 
 // ------------------ Here is the actual method -----------------------------------------
-void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, const Char_t *wrStEOut)
+void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, const Int_t wrStEOut)
 {
 
   cout <<  endl << endl <<" doEvents -  input # events = " << nevents << endl;
@@ -187,7 +197,7 @@ void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, cons
 //--------------------------------------------------------------------------
 
 void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
-              const Char_t *qaflag, const Char_t *wrStEOut)
+              const Char_t *qaflag, const Int_t wrStEOut)
 {
     if (nevents==-1) { Help(); return;}
     const char *fileListQQ[]={0,0};
@@ -204,8 +214,11 @@ void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.53  2000/05/17 16:53:50  kathy
-// change flag to write out .event.root file to false by default
+// Revision 1.54  2000/05/18 17:44:54  kathy
+// turn off by default the writing of output *.event.root file - had it ON by default by accident
+//
+// Revision 1.54  2000/05/18 17:44:54  kathy
+// turn off by default the writing of output *.event.root file - had it ON by default by accident
 //
 // Revision 1.53  2000/05/17 16:53:50  kathy
 // change flag to write out .event.root file to false by default
