@@ -1,5 +1,10 @@
-// $Id: StFtpcConfMapper.cc,v 1.20 2002/10/11 15:44:58 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.21 2002/11/06 13:44:47 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.21  2002/11/06 13:44:47  oldi
+// Vertex handling simplifed.
+// Flag for clusters not to be used for tracking introduced.
+// Code clean ups.
+//
 // Revision 1.20  2002/10/11 15:44:58  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -158,18 +163,18 @@ StFtpcConfMapper::StFtpcConfMapper()
 {
   // Default constructor.
 
-  mLaser = (Bool_t)false;
+  mLaser = (Bool_t)kFALSE;
 
   mHit     = 0;
   mVolume  = 0;
 
-  mVertexConstraint = (Bool_t)true;
+  mVertexConstraint = (Bool_t)kTRUE;
 }
 
 
-StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[6], Bool_t bench, 
+StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, StFtpcVertex *vertex, Bool_t bench, 
 				   Int_t phi_segments, Int_t eta_segments) 
-  : StFtpcTracker(fcl_fppoint, vertexPos, bench)
+  : StFtpcTracker(fcl_fppoint, vertex, bench)
 {
   // Constructor.
 
@@ -177,7 +182,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, Double_t vertexP
     mBench->Start("init");
   }
 
-  mLaser = (Bool_t)false;
+  mLaser = (Bool_t)kFALSE;
 
   mNumRowSegment = StFtpcTrackingParams::Instance()->RowSegments();
   mNumPhiSegment = StFtpcTrackingParams::Instance()->PhiSegments(); 
@@ -197,14 +202,17 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, Double_t vertexP
 
   Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
   mClustersUnused = n_clusters;
+  mBadClusters = 0;
 
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
   mHit = new TObjArray(n_clusters);    // create TObjArray
-  mHitsCreated = (Bool_t)true;
+  mHitsCreated = (Bool_t)kTRUE;
   {for (Int_t i = 0; i < n_clusters; i++) {
     mHit->AddAt(new StFtpcConfMapPoint(point_st++, mVertex), i);
-    ((StFtpcConfMapPoint *)mHit->At(i))->SetHitNumber(i);
+    StFtpcConfMapPoint *hit = (StFtpcConfMapPoint *)mHit->At(i);
+    hit->SetHitNumber(i);
+    if (hit->GetUnusableForTrackingFlag()) mBadClusters++;
   }}
 
   mVolume = new TObjArray(mBounds);  // create ObjArray for volume cells (of size bounds)
@@ -229,9 +237,9 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, Double_t vertexP
 }
 
 
-StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_hits, Double_t vertexPos[6], Bool_t bench, 
+StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_hits, StFtpcVertex *vertex, Bool_t bench, 
 				   Int_t phi_segments, Int_t eta_segments) 
-  : StFtpcTracker(fcl_fppoint, vertexPos, bench)
+  : StFtpcTracker(fcl_fppoint, vertex, bench)
 {
   // Constructor to fill in evaluated hits.
 
@@ -239,7 +247,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_
     mBench->Start("init");
   }
 
-  mLaser = (Bool_t)false;
+  mLaser = (Bool_t)kFALSE;
 
   mNumRowSegment = StFtpcTrackingParams::Instance()->RowSegments();
   mNumPhiSegment = StFtpcTrackingParams::Instance()->PhiSegments();
@@ -260,18 +268,21 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_
   Int_t n_clusters = fcl_fppoint->GetNRows();           // number of clusters
   Int_t n_goodclusters = good_hits->CountAppearance(1); // number of good clusters
   mClustersUnused = n_goodclusters;
-  
+  mBadClusters = 0;
+
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
   mHit = new TObjArray(n_goodclusters);    // create TObjArray
-  mHitsCreated = (Bool_t)true;
+  mHitsCreated = (Bool_t)kTRUE;
   Int_t good_hits_counted = 0;
 
   {for (Int_t i = 0; i < n_clusters; i++) {
     
     if (good_hits->At(i) == 1) {
       mHit->AddAt(new StFtpcConfMapPoint(point_st++, mVertex), good_hits_counted);
-      ((StFtpcConfMapPoint *)mHit->At(good_hits_counted))->SetHitNumber(i);
+      StFtpcConfMapPoint* hit = (StFtpcConfMapPoint *)mHit->At(good_hits_counted);
+      hit->SetHitNumber(i);
+      if (hit->GetUnusableForTrackingFlag()) mBadClusters++;
       good_hits_counted++;
     }
 
@@ -314,7 +325,7 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
     mBench->Start("init");
   }
 
-  mLaser = (Bool_t)false;
+  mLaser = (Bool_t)kFALSE;
 
   mNumRowSegment = StFtpcTrackingParams::Instance()->RowSegments();
   mNumPhiSegment = StFtpcTrackingParams::Instance()->PhiSegments();
@@ -333,6 +344,7 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
   mLengthFitNaN  = 0;
 
   mClustersUnused = mHit->GetEntriesFast();
+  mBadClusters = 0;
 
   mVolume = new TObjArray(mBounds);  // create ObjArray for volume cells (of size bounds)
 
@@ -344,6 +356,7 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
 
   {for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
     h = (StFtpcConfMapPoint *)mHit->At(i);
+    if (h->GetUnusableForTrackingFlag()) mBadClusters++;
     ((TObjArray *)mVolume->At(GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h))))->AddLast(h);
   }}
 
@@ -394,10 +407,10 @@ void StFtpcConfMapper::MainVertexTracking()
   //MainVertexSettings(3, 5, 1, 2, 1, 3);    //loose cuts
 
   Cuts("main_vertex");
-  //SetTrackletCuts(0.007, true);  //Markus
-  //SetTrackletCuts(0.03, true); //loose cuts
-  //SetTrackCuts(0.007, 0.03, 30, true);  //Markus
-  //SetTrackCuts(0.07, 0.3, 50, true);  //loose cuts
+  //SetTrackletCuts(0.007, kTRUE);  //Markus
+  //SetTrackletCuts(0.03, kTRUE); //loose cuts
+  //SetTrackCuts(0.007, 0.03, 30, kTRUE);  //Markus
+  //SetTrackCuts(0.07, 0.3, 50, kTRUE);  //loose cuts
 
   ClusterLoop();
  
@@ -719,26 +732,26 @@ Bool_t const StFtpcConfMapper::TestExpression(Int_t sub_row_segm, Int_t end_row,
   if (backward) {
     
     if (sub_row_segm >= end_row) {
-      return (Bool_t)true;
+      return (Bool_t)kTRUE;
     }
     
     else {
-      return (Bool_t) false;
+      return (Bool_t) kFALSE;
     }
   }
   
   else { // forward
     
     if (sub_row_segm <= end_row) {
-      return (Bool_t)true;
+      return (Bool_t)kTRUE;
     }
     
     else {
-      return (Bool_t) false;
+      return (Bool_t) kFALSE;
     }
   }
  
-  return (Bool_t) false;
+  return (Bool_t) kFALSE;
 }
 
 
@@ -781,16 +794,16 @@ Bool_t const StFtpcConfMapper::VerifyCuts(const StFtpcConfMapPoint *lasttrackhit
   if (newhit->GetCircleDist() < mMaxCircleDist[mVertexConstraint] &&
       newhit->GetLengthDist() < mMaxLengthDist[mVertexConstraint] &&
       TrackAngle(lasttrackhit, newhit, backward) < mMaxAngleTrack[mVertexConstraint]) {
-    return true;
+    return kTRUE;
   }
   
   else {
-    return false;
+    return kFALSE;
   }
 }
 
 
-Double_t const StFtpcConfMapper::TrackAngle(const StFtpcPoint *lasthitoftrack, const StFtpcPoint *hit, Bool_t backward = (Bool_t)true)
+Double_t const StFtpcConfMapper::TrackAngle(const StFtpcPoint *lasthitoftrack, const StFtpcPoint *hit, Bool_t backward = (Bool_t)kTRUE)
 {
   // Returns the 'angle' between the last two points on the track (of which the last point is
   // given as input) and the second given point.
@@ -1251,7 +1264,7 @@ void StFtpcConfMapper::MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2)
     trackhitnumber->AddLast(((StFtpcPoint *)trackpoint->At(i))->GetHitNumber());
   }}
   
-  track->SetProperties(true, new_track_number);
+  track->SetProperties(kTRUE, new_track_number);
   track->ComesFromMainVertex(mVertexConstraint);
   track->CalculateNMax();
 
@@ -1312,7 +1325,7 @@ void StFtpcConfMapper::ClusterLoop()
 	    for (hit_num = 0; hit_num < entries; hit_num++) {  
 	      hit = (StFtpcConfMapPoint *)segment->At(hit_num);
 	      
-	      if (hit->GetUsage() == true) { // start hit was used before 
+	      if (hit->IsUnusable()) { // start hit was used before or flagged as not to be used for tracking
 		continue;
 	      }
 	      
@@ -1361,7 +1374,7 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
   // create tracklets
   for (point = 1; point < mTrackletLength[mVertexConstraint]; point++) {
 
-    if ((closest_hit = GetNextNeighbor(hit, coeff, (Bool_t)true))) {
+    if ((closest_hit = GetNextNeighbor(hit, coeff, (Bool_t)kTRUE))) {
       // closest_hit for hit exists
       track->AddPoint(closest_hit);
       hit = closest_hit;
@@ -1416,7 +1429,7 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
 	//Double_t chi_len  = track->GetChi2Length();
 	
 	StraightLineFit(track, coeff);
-	closest_hit = GetNextNeighbor((StFtpcConfMapPoint *)trackpoint->Last(), coeff, (Bool_t)true);
+	closest_hit = GetNextNeighbor((StFtpcConfMapPoint *)trackpoint->Last(), coeff, (Bool_t)kTRUE);
 	
 	if (closest_hit) {
 	  
@@ -1475,7 +1488,7 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
 }
 
 
-StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coeff = 0, Bool_t backward = (Bool_t)true)
+StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coeff = 0, Bool_t backward = (Bool_t)kTRUE)
 { 
   // Returns the nearest cluster to a given start_hit. 
   
@@ -1564,8 +1577,8 @@ StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_
 	  for (sub_hit_num = 0; sub_hit_num < sub_entries; sub_hit_num++) {  
 	    hit = (StFtpcConfMapPoint *)sub_segment->At(sub_hit_num);
 	    
-	    if (!(hit = (StFtpcConfMapPoint *)sub_segment->At(sub_hit_num))->GetUsage()) {
-	      // hit was not used before
+	    if ((hit = (StFtpcConfMapPoint *)sub_segment->At(sub_hit_num))->IsUsable()) {
+	      // hit was not used before and is flagged ok for tracking
 	      
 	      // set conformal mapping coordinates if looking for non vertex tracks
 	      if (!mVertexConstraint) {
@@ -1826,11 +1839,11 @@ Bool_t StFtpcConfMapper::TrackExtension(StFtpcTrack *track)
 
     mClustersUnused -= (track->GetNumberOfPoints() - number_of_points);
 
-    return (Bool_t)true;
+    return (Bool_t)kTRUE;
   }
   
   else {
-    return (Bool_t)false;
+    return (Bool_t)kFALSE;
   } 
 }
 
@@ -1877,7 +1890,7 @@ void StFtpcConfMapper::TrackingInfo()
   gMessMgr->width(5);
   *gMessMgr << GetNumberOfClusters() - GetNumClustersUnused() << "/";
   gMessMgr->width(5);
-  *gMessMgr << GetNumClustersUnused() << ") clusters (used/unused)." << endm;
+  *gMessMgr << GetNumClustersUnused() << ") clusters (used/unused, of which " << GetNumBadClusters() << " were flagged 'bad')." << endm;
 
   gMessMgr->Message("", "I", "OST") << "       ";
   gMessMgr->width(5);
