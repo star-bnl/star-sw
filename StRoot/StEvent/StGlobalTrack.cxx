@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cxx,v 1.8 1999/07/16 12:34:49 fisyak Exp $
+ * $Id: StGlobalTrack.cxx,v 1.9 1999/07/28 16:38:27 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cxx,v $
- * Revision 1.8  1999/07/16 12:34:49  fisyak
- * Fix PidTraits
+ * Revision 1.9  1999/07/28 16:38:27  fisyak
+ * Fix no. of SVT and FTPC hits
+ *
+ * Revision 1.9  1999/07/28 16:38:27  fisyak
+ * Fix no. of SVT and FTPC hits
  *
  * Revision 1.8  1999/07/16 12:34:49  fisyak
  * Fix PidTraits
@@ -63,10 +66,10 @@
  * Revision 1.2  1999/01/15 22:53:44  wenaus
  * version with constructors for table-based loading
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.8 1999/07/16 12:34:49 fisyak Exp $";
+ * Revision 2.0  1999/10/12 18:42:10  ullrich
  * Completely Revised for New Version
 #include "StGlobalTrack.h"
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.8 1999/07/16 12:34:49 fisyak Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.9 1999/07/28 16:38:27 fisyak Exp $";
  
 #include "tables/dst_track.h"
 #include "StVertex.h"
@@ -104,7 +107,7 @@ StGlobalTrack::StGlobalTrack(dst_track_st* trk,
     mNumberOfSvtHits = 0;
     mNumberOfFtpcHits = 0; 
 }
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.8 1999/07/16 12:34:49 fisyak Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 1.9 1999/07/28 16:38:27 fisyak Exp $";
 StGlobalTrack::~StGlobalTrack() {
     //
     //   If a track gets deleted make sure
@@ -192,7 +195,7 @@ int StGlobalTrack::numberOfTpcHits() const
 
 int StGlobalTrack::numberOfSvtHits() const
 {
-	return mNumberOfTpcHits;	
+    if (mSvtHits)
 	return mSvtHits->size() ? mSvtHits->size() : mNumberOfSvtHits;
     else
 	return mNumberOfSvtHits;
@@ -200,7 +203,7 @@ int StGlobalTrack::numberOfSvtHits() const
 
 int StGlobalTrack::numberOfFtpcHits() const
 {
-	return mNumberOfTpcHits;	
+    if (mFtpcHits)
 	return mFtpcHits->size() ? mFtpcHits->size() : mNumberOfFtpcHits;
     else
 	return mNumberOfFtpcHits;	
