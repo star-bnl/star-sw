@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.17 2003/04/11 22:47:35 porter Exp $
+ * $Id: MysqlDb.h,v 1.18 2003/07/02 18:39:24 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.18  2003/07/02 18:39:24  porter
+ * added server version to connection notification and host:port to connection failure notification
+ *
  * Revision 1.17  2003/04/11 22:47:35  porter
  * Added a fast multi-row write model specifically needed by the daqEventTag
  * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
@@ -179,6 +182,7 @@ private:
   char* mdbuser;
   char* mdbpw;
   int mdbPort;  
+  char* mdbServerVersion;
 
   unsigned int mtimeout; // wait time between connection tries
 

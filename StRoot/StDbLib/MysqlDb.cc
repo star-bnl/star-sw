@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.24 2003/04/11 22:47:27 porter Exp $
+ * $Id: MysqlDb.cc,v 1.25 2003/07/02 18:39:23 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.25  2003/07/02 18:39:23  porter
+ * added server version to connection notification and host:port to connection failure notification
+ *
  * Revision 1.24  2003/04/11 22:47:27  porter
  * Added a fast multi-row write model specifically needed by the daqEventTag
  * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
@@ -175,7 +178,7 @@ static const char* binaryMessage = {"Cannot Print Query with Binary data"};
 
 ////////////////////////////////////////////////////////////////////////
 
-MysqlDb::MysqlDb(): mdbhost(0), mdbName(NULL), mdbuser(0), mdbpw(0), mdbPort(0),mlogTime(false) {
+MysqlDb::MysqlDb(): mdbhost(0), mdbName(NULL), mdbuser(0), mdbpw(0), mdbPort(0),mdbServerVersion(0),mlogTime(false) {
 
 mhasConnected=false;
 mtimeout=1;
@@ -197,6 +200,7 @@ if(mdbhost) delete [] mdbhost;
 if(mdbuser) delete [] mdbuser;
 if(mdbpw)   delete [] mdbpw;
 if(mdbName)  delete [] mdbName;
+ if(mdbServerVersion) delete [] mdbServerVersion;
 
 }
 
@@ -213,12 +217,19 @@ bool MysqlDb::reConnect(){
     if(!connected){
       timeOutConnect*=2;
       ostrstream wm;
-      wm<<" Connection Failed with MySQL returned error ";
-      wm<<mysql_error(&mData)<<"  will re-try with timeout set at \n==> ";
+      wm<<" Connection Failed with MySQL on "<<mdbhost<<":"<<mdbPort<<endl;
+      wm<<" Returned error =";
+      wm<<mysql_error(&mData)<<".  Will re-try with timeout set at \n==> ";
       wm<<timeOutConnect<<" seconds <=="<<ends;
       StDbManager::Instance()->printInfo(wm.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__); wm.freeze(0);
     }
   }      
+
+  if(connected){
+    if(mdbServerVersion) delete [] mdbServerVersion;
+    mdbServerVersion=new char[strlen(mData.server_version)+1];
+    strcpy(mdbServerVersion,mData.server_version);
+  }
 
   return connected;
 
@@ -263,7 +274,9 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
        t0=mqueryLog.wallTime()-t0;
        cs<< "Server Connecting:"; if(mdbName)cs<<" DB=" << mdbName ;
        cs<< "  Host=" << aHost <<":"<<aPort<<endl;
-       cs<< " --> Connection Time="<<t0<<" sec"<<ends;
+       cs<< " --> Connection Time="<<t0<<" sec   ";
+       if(mdbServerVersion)cs<<" MysqlVersion="<<mdbServerVersion;
+       cs<<ends;
        //       connString = cs.str();
         StDbManager::Instance()->printInfo(cs.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
 	//	delete [] connString;
