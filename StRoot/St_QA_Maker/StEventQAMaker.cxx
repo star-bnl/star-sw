@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.12 1999/12/16 04:27:34 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.13 1999/12/16 22:14:03 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.13  1999/12/16 22:14:03  lansdell
+// corrected how I get r0 and phi0 for global tracks
+//
 // Revision 1.12  1999/12/16 04:27:34  lansdell
 // histogram of psi values now in degrees instead of radians
 //
@@ -162,12 +165,6 @@ void StEventQAMaker::MakeHistGlob() {
 	             pow((globtrk->detectorInfo()->firstPoint().y()),2);
       radf = TMath::Sqrt(radf);
 
-      // I had to calculate r0 and phi0 b/c StEvent doesn't keep these
-      // variables as far as I can tell. -CL
-      Float_t r0 = sqrt(pow(globtrk->geometry()->origin().x(),2) + 
-			pow(globtrk->geometry()->origin().y(),2));
-      Float_t phi0 = acos(globtrk->geometry()->origin().x()/r0)/degree;
-
 // from Lanny on 2 Jul 1999 9:56:03
 //1. x0,y0,z0 are coordinates on the helix at the starting point, which
 //   should be close to the first TPC hit position assigned to the track.
@@ -194,8 +191,8 @@ void StEventQAMaker::MakeHistGlob() {
 	m_fit_pointT->Fill(globtrk->fitTraits().numberOfFitPoints());
 	m_glb_chargeT->Fill(globtrk->geometry()->charge());
 
-	m_glb_r0T->Fill(r0);
-	m_glb_phi0T->Fill(phi0);
+	m_glb_r0T->Fill(globtrk->geometry()->origin().perp());
+	m_glb_phi0T->Fill(globtrk->geometry()->origin().phi()/degree);
 	m_glb_z0T->Fill(globtrk->geometry()->origin().z());
 	m_glb_curvT->Fill(globtrk->geometry()->curvature());
 
@@ -258,8 +255,8 @@ void StEventQAMaker::MakeHistGlob() {
 	m_fit_pointTS->Fill(globtrk->fitTraits().numberOfFitPoints());
 	m_glb_chargeTS->Fill(globtrk->geometry()->charge());
 
-	m_glb_r0TS->Fill(r0);
-	m_glb_phi0TS->Fill(phi0);
+	m_glb_r0TS->Fill(globtrk->geometry()->origin().perp());
+	m_glb_phi0TS->Fill(globtrk->geometry()->origin().phi()/degree);
 	m_glb_z0TS->Fill(globtrk->geometry()->origin().z());
 	m_glb_curvTS->Fill(globtrk->geometry()->curvature());
 
