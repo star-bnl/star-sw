@@ -97,10 +97,13 @@ msgc_dbg.o : msgc.c
 
 
 msg_inc : msg.inc
+	rm -f msg_inc
 	ln -s msg.inc msg_inc
 
 msg_native_inc : msg_sgi.inc
+	rm -f msg_native_inc
 	ln -s msg_sgi.inc msg_native_inc
 
 msg_ret_inc : msg_ret.inc
+	rm -f msg_ret_inc
 	ln -s msg_ret.inc msg_ret_inc
