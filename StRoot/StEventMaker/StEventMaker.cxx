@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.1 1999/11/04 19:55:37 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.2 1999/11/05 18:35:54 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.1  1999/11/04 19:55:37  ullrich
- * Corrected typo.
+ * Revision 2.2  1999/11/05 18:35:54  ullrich
+ * Added methods and flags for debugging and monitoring.
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -21,6 +21,7 @@
  * Skip the attempt of creating an instance of StRun in case
  * no dst dataset is available.
  *
+ * Revision 2.25  2000/05/25 14:44:43  ullrich
  * Removed remaining pieces of the RICH pixel table.
  *
  * Revision 2.24  2000/05/24 15:48:15  ullrich
@@ -34,6 +35,8 @@
  *
  * Revision 2.22  2000/04/26 20:29:13  ullrich
  * Create instance of StEvent not StBrowsableEvent.
+ *
+ * Revision 2.21  2000/03/22 17:11:20  ullrich
  * Added further checks for case were tables exist but have
 #include "TClass.h"
 #include "StTrack.h"
@@ -52,9 +55,13 @@
  *
  * Revision 2.17  2000/02/08 21:14:16  genevb
  * Handle cases with no tracks.
-    doLoadTpcHits  = kTRUE;
-    doLoadFtpcHits = kTRUE;
-    doLoadSvtHits  = kTRUE;
+ *
+ * Revision 2.16  2000/01/25 20:11:11  ullrich
+ * Fixed bug in loading the Xi vertices.
+ *
+ * Revision 2.15  2000/01/14 18:51:06  ullrich
+ * Added printout of quasi-histos in the event summary
+ * to printEventInfo().
  * With Victors help now possible to read the dst_summary_param
 #if defined(__SUNPRO_CC)
     doPrintRunInfo    = kTRUE;  // TMP, set to fFALSE later
@@ -82,7 +89,7 @@
     doPrintRunInfo    = kTRUE;  // TMP 
     doPrintEventInfo  = kTRUE;  // TMP
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.1 1999/11/04 19:55:37 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.2 1999/11/05 18:35:54 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -90,14 +97,17 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.1 1999/11/04 19:55:37 ull
  *
  * Revision 2.2  1999/11/05 18:35:54  ullrich
  * Added methods and flags for debugging and monitoring.
+ *
+ * Revision 2.1  1999/11/04 19:55:37  ullrich
+ * Corrected typo.
+ *
  * Revision 2.0  1999/11/04 19:03:00  ullrich
  * Revised to build new StEvent version
  *
  **************************************************************************/
 #include <vector>
 #include <algorithm>
-    //
-    
+#include <utility>
 #include "StEventMaker/StEventMaker.h"
 #include "StEventMaker/StRootEventManager.hh"
 #include "PhysicalConstants.h"
@@ -116,6 +126,22 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.1 1999/11/04 19:55:37 ull
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.2 1999/11/05 18:35:54 ullrich Exp $";
+#endif
+
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.2 1999/11/05 18:35:54 ullrich Exp $";
+
+ClassImp(StEventMaker)
+    doPrintEventInfo  = kFALSE;
+{
+    if(title) SetTitle(title);
+    mEventManager = new StRootEventManager();
+    mEventManager->setMaker(this);
+    if (status == oocError) return kStWarn;
+    doLoadSvtHits     = kTRUE;
+    doLoadSsdHits     = kTRUE;
+    doLoadTptTracks   = kFALSE;
+    doPrintEventInfo  = kFALSE;
     doPrintMemoryInfo = kTRUE;
         status = makeRun();
         if (status == kStOK) AddRunCont(mCurrentRun);
@@ -221,7 +247,7 @@ StEventMaker::loadRunConstants()
     
     //  2nd suppose we are in doEvents
     dst_summary_param_st* dstSummaryParam = mEventManager->returnTable_dst_summary_param(nrows);
-    //        Load trigger & trigger detector data
+    if (theEventManager->openEvent("dstRunco") != oocError) {
     if (!dstEventSummary || !dstSummaryParam)
         theEventManager->closeEvent();
         if (mDstSummaryParam) return kStOK;
@@ -305,7 +331,7 @@ StEventMaker::makeEvent()
     //
             ptrack->setDetectorInfo(ptrack->detectorInfo());
     StSPtrVecV0Vertex          &v0Vertices   = mCurrentEvent->v0Vertices();
-    //        Find and setup primary vertices (if any).
+    StSPtrVecXiVertex          &xiVertices   = mCurrentEvent->xiVertices();
     StSPtrVecKinkVertex        &kinkVertices = mCurrentEvent->kinkVertices();
     StTrackDetectorInfo        *info;
     StTrackNode                *node;
@@ -323,7 +349,7 @@ StEventMaker::makeEvent()
     StVector(unsigned int)    vecPrimaryVertexId(maxId+1, 0U);
     nfailed = 0;
     
-    //        Setup V0 vertices
+        if (dstVertices[i].iflag == 1 && dstVertices[i].vtx_id == kEventVtxId) {
         id = dstPrimaryTracks[i].id_start_vertex ? dstPrimaryTracks[i].id_start_vertex/10 : 0;
         if (!id) {
                 if (vecPrimaryTracks[k] &&
@@ -477,6 +503,329 @@ StEventMaker::makeEvent()
                     vecGlobalTracks[id]->detectorInfo()->addHit(ftpcHit);
                 else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
                     vecPrimaryTracks[id]->detectorInfo()->addHit(ftpcHit);
+			if (vecPrimaryTracks[id]->detectorInfo() != info)
+		else
+		    else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
+
+	    if (nfailed) 
+	
+            nfailed = 0;
+            StSsdHit *ssdHit;
+            begin = index[kSsdId].first;
+            end   = index[kSsdId].first+index[kSsdId].second;
+	    info    = 0;
+	    nfailed = 0;
+                ssdHit = new StSsdHit(dstPoints[i]);
+		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
+			vecGlobalTracks[id]->detectorInfo()->addHit(ftpcHit);
+		    else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
+			vecPrimaryTracks[id]->detectorInfo()->addHit(ftpcHit);
+		    id = dstPoints[i].id_track;
+		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
+			info = vecGlobalTracks[id]->detectorInfo();
+			info->addHit(ftpcHit);
+		    }
+		    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
+			if (vecPrimaryTracks[id]->detectorInfo() != info)
+			    vecPrimaryTracks[id]->detectorInfo()->addHit(ftpcHit);
+		}
+		else {
+		    nfailed++;
+		    delete ftpcHit;
+		}
+        
+        //
+        //        FTPC hits
+        //
+        if (doLoadFtpcHits) {
+            info    = 0;
+            nfailed = 0;
+		else {
+		    nfailed++;
+		    delete ftpcHit;
+		}
+                    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
+                        if (vecPrimaryTracks[id]->detectorInfo() != info)
+	    if (nfailed) 
+		gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
+				    << " FTPC hits, wrong hardware address." << endm;
+                    nfailed++;
+                    delete ftpcHit;
+    
+            }
+            // east
+            begin = index[kFtpcEastId].first;
+            end   = index[kFtpcEastId].first+index[kFtpcEastId].second;
+            for (i=begin; i<end; i++) {
+                ftpcHit = new StFtpcHit(dstPoints[i]);
+	mCurrentEvent->setRichPixelCollection(new StRichPixelCollection(dstRichPixel, nrows));
+    //
+    //  Load RICH pixel
+    //
+    nrows = 0;
+    dst_rch_pixel_st* dstRichPixel = mEventManager->returnTable_dst_rch_pixel(nrows);
+    if (dstRichPixel && nrows)
+        mCurrentEvent->setRichPixelCollection(new StRichPixelCollection(dstRichPixel, nrows));
+                if (ftpcHitColl->addHit(ftpcHit)) {
+                    id = dstPoints[i].id_track;
+                    if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
+                        info = vecGlobalTracks[id]->detectorInfo();
+                        info->addHit(ftpcHit);
+                    }
+                    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
+    if (mCurrentRun) 
+	mCurrentRun->Dump();
+                }
+                else {
+                    nfailed++;
+	 << (mCurrentRun ? (void*) (mCurrentRun->summary()) : 0)        << endl;
+                }
+            }
+            mCurrentEvent->setFtpcHitCollection(ftpcHitColl);
+            if (nfailed)
+    StEvtHddr* header = dynamic_cast<StEvtHddr*>(GetInputDS("EvtHddr"));
+    if (header) {
+	mCurrentEvent->setTriggerMask(header->GetTriggerMask());
+    }
+    
+
+		 << "] : \t"   << evtsum->tracksInPtBin(k) << endl;
+	}
+	cout << "--> StEventSummary quasi-histogram -> energy vs. eta" << endl;
+	for (k=0; k<evtsum->numberOfBins(); k++) {
+	    cout << k << "\t[" << evtsum->lowerEdgeEtaBin(k)
+		 << " - "      << evtsum->upperEdgeEtaBin(k)
+		 << "] : \t"   << evtsum->energyInEtaBin(k) << endl;
+	}
+	cout << "--> StEventSummary quasi-histogram -> energy vs. phi" << endl;
+	for (k=0; k<evtsum->numberOfBins(); k++) {
+	    cout << k << "\t[" << evtsum->lowerEdgePhiBin(k)
+		 << " - "      << evtsum->upperEdgePhiBin(k)
+		 << "] : \t"   << evtsum->energyInPhiBin(k) << endl;
+	}
+            cout << k << "\t[" << evtsum->lowerEdgeEtaBin(k)
+                 << " - "      << evtsum->upperEdgeEtaBin(k)
+                 << "] : \t"  <<  evtsum->tracksInEtaBin(k) << endl;
+        }
+	 << (void*) (mCurrentEvent->softwareMonitor())                  << endl;
+        for (k=0; k<evtsum->numberOfBins(); k++) {
+            cout << k << "\t[" << evtsum->lowerEdgePhiBin(k)
+                 << " - "      << evtsum->upperEdgePhiBin(k)
+                 << "] : \t"   << evtsum->tracksInPhiBin(k) << endl;
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StTpcSoftwareMonitor at "
+	     << (void*) (mCurrentEvent->softwareMonitor()->tpc())           << endl;
+	cout << "---------------------------------------------------------" << endl;
+	if (mCurrentEvent->softwareMonitor()->tpc())
+	    mCurrentEvent->softwareMonitor()->tpc()->Dump();
+	
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StSvtSoftwareMonitor at "
+	     << (void*) (mCurrentEvent->softwareMonitor()->svt())           << endl;
+	cout << "---------------------------------------------------------" << endl;
+	if (mCurrentEvent->softwareMonitor()->svt())
+	    mCurrentEvent->softwareMonitor()->svt()->Dump();
+	
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StFtpcSoftwareMonitor at "
+	     << (void*) (mCurrentEvent->softwareMonitor()->ftpc())          << endl;
+	cout << "---------------------------------------------------------" << endl;
+	if (mCurrentEvent->softwareMonitor()->ftpc())
+	    mCurrentEvent->softwareMonitor()->ftpc()->Dump();
+	
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StEmcSoftwareMonitor at "
+	     << (void*) (mCurrentEvent->softwareMonitor()->emc())           << endl;
+	cout << "---------------------------------------------------------" << endl;
+	if (mCurrentEvent->softwareMonitor()->emc())
+	    mCurrentEvent->softwareMonitor()->emc()->Dump();
+	
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StRichSoftwareMonitor at "
+	     << (void*) (mCurrentEvent->softwareMonitor()->rich())          << endl;
+	cout << "---------------------------------------------------------" << endl;
+	if (mCurrentEvent->softwareMonitor()->rich())
+	    mCurrentEvent->softwareMonitor()->rich()->Dump();
+	
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StCtbSoftwareMonitor at "
+	     << (void*) (mCurrentEvent->softwareMonitor()->ctb())           << endl;
+	cout << "---------------------------------------------------------" << endl;
+	if (mCurrentEvent->softwareMonitor()->ctb())
+	    mCurrentEvent->softwareMonitor()->ctb()->Dump();
+	
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StL3SoftwareMonitor at "
+	     << (void*) (mCurrentEvent->softwareMonitor()->l3())            << endl;
+	cout << "---------------------------------------------------------" << endl;
+	if (mCurrentEvent->softwareMonitor()->l3())
+	    mCurrentEvent->softwareMonitor()->l3()->Dump();
+	
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StGlobalSoftwareMonitor at "
+	     << (void*) (mCurrentEvent->softwareMonitor()->global())        << endl;
+	cout << "---------------------------------------------------------" << endl;
+	if (mCurrentEvent->softwareMonitor()->global())
+	    mCurrentEvent->softwareMonitor()->global()->Dump();
+        
+        cout << "---------------------------------------------------------" << endl;
+        cout << "StRichSoftwareMonitor at "
+             << (void*) (mCurrentEvent->softwareMonitor()->rich())          << endl;
+	 << (void*) (mCurrentEvent->l0Trigger())                        << endl;
+        if (mCurrentEvent->softwareMonitor()->rich())
+            mCurrentEvent->softwareMonitor()->rich()->Dump();
+        
+        cout << "---------------------------------------------------------" << endl;
+        cout << "StCtbSoftwareMonitor at "
+	 << (void*) (mCurrentEvent->triggerDetectorCollection())        << endl;
+        cout << "---------------------------------------------------------" << endl;
+        if (mCurrentEvent->softwareMonitor()->ctb())
+	mCurrentEvent->triggerDetectorCollection()->Dump();
+        
+        cout << "---------------------------------------------------------" << endl;
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StCtbTriggerDetector"                                      << endl;
+	cout << "---------------------------------------------------------" << endl;
+	mCurrentEvent->triggerDetectorCollection()->ctb().Dump();
+
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StMwcTriggerDetector"                                      << endl;
+	cout << "---------------------------------------------------------" << endl;
+	mCurrentEvent->triggerDetectorCollection()->mwc().Dump();
+
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StVpdTriggerDetector"                                      << endl;
+	cout << "---------------------------------------------------------" << endl;
+	mCurrentEvent->triggerDetectorCollection()->vpd().Dump();
+
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StZdcTriggerDetector"                                      << endl;
+	cout << "---------------------------------------------------------" << endl;
+	mCurrentEvent->triggerDetectorCollection()->zdc().Dump();
+
+    cout << "---------------------------------------------------------" << endl;
+    cout << "StTriggerDetectorCollection at "
+         << (void*) (mCurrentEvent->triggerDetectorCollection())        << endl;
+    cout << "---------------------------------------------------------" << endl;
+    if (mCurrentEvent->triggerDetectorCollection())
+        mCurrentEvent->triggerDetectorCollection()->Dump();
+	 << mCurrentEvent->trackDetectorInfo().size() << endl;
+    if (mCurrentEvent->triggerDetectorCollection()) {
+        cout << "---------------------------------------------------------" << endl;
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StTrackDetectorInfo at "
+	     << (void*) mCurrentEvent->trackDetectorInfo()[0]               << endl;
+	cout << "---------------------------------------------------------" << endl;
+	mCurrentEvent->trackDetectorInfo()[0]->Dump();
+        cout << "StMwcTriggerDetector"                                      << endl;
+        cout << "---------------------------------------------------------" << endl;
+        mCurrentEvent->triggerDetectorCollection()->mwc().Dump();
+
+        cout << "---------------------------------------------------------" << endl;
+        cout << "StVpdTriggerDetector"                                      << endl;
+        cout << "---------------------------------------------------------" << endl;
+        mCurrentEvent->triggerDetectorCollection()->vpd().Dump();
+
+	 << mCurrentEvent->trackNodes().size() << endl;
+        cout << "StZdcTriggerDetector"                                      << endl;
+        cout << "---------------------------------------------------------" << endl;
+        mCurrentEvent->triggerDetectorCollection()->zdc().Dump();
+    }
+	     << mCurrentEvent->trackNodes()[0]->entries() << endl;
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StTrackNode at "
+	     << (void*) mCurrentEvent->trackNodes()[0]                      << endl;
+	cout << "---------------------------------------------------------" << endl;
+	mCurrentEvent->trackNodes()[0]->Dump();
+	for (i=0; i<mCurrentEvent->trackNodes()[0]->entries(); i++)
+	    printTrackInfo(mCurrentEvent->trackNodes()[0]->track(i));
+    if (mCurrentEvent->trackDetectorInfo().size()) {
+        cout << "---------------------------------------------------------" << endl;
+        cout << "StTrackDetectorInfo at "
+             << (void*) mCurrentEvent->trackDetectorInfo()[0]               << endl;
+        cout << "---------------------------------------------------------" << endl;
+        mCurrentEvent->trackDetectorInfo()[0]->Dump();
+    }
+    
+    cout << "---------------------------------------------------------" << endl;
+	 << mCurrentEvent->numberOfPrimaryVertices() << endl;
+    cout << "Dumping first element in collection only (if available). " << endl;
+    cout << "All tracks in the first node are printed separately  "     << endl;
+    cout << "after the node info.                                     " << endl;
+	     << mCurrentEvent->primaryVertex()->numberOfDaughters() << endl;
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StPrimaryVertex at "
+	     << (void*) mCurrentEvent->primaryVertex()                      << endl;
+	cout << "---------------------------------------------------------" << endl;
+	mCurrentEvent->primaryVertex()->Dump();
+	if (mCurrentEvent->primaryVertex()->numberOfDaughters())
+	    printTrackInfo(mCurrentEvent->primaryVertex()->daughter(0));	    
+        cout << "---------------------------------------------------------" << endl;
+        cout << "StTrackNode at "
+             << (void*) mCurrentEvent->trackNodes()[0]                      << endl;
+        cout << "---------------------------------------------------------" << endl;
+        mCurrentEvent->trackNodes()[0]->Dump();
+    cout << "Dumping collection sizes and one hit only."                << endl;
+            printTrackInfo(mCurrentEvent->trackNodes()[0]->track(i));
+	 << mCurrentEvent->v0Vertices().size() << endl;
+
+    cout << "---------------------------------------------------------" << endl;
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StV0Vertex at "
+	     << (void*) mCurrentEvent->v0Vertices()[0]                      << endl;
+	cout << "---------------------------------------------------------" << endl;
+	mCurrentEvent->v0Vertices()[0]->Dump();	
+    cout << "collection size = "
+         << mCurrentEvent->numberOfPrimaryVertices() << endl;
+    
+    if (mCurrentEvent->numberOfPrimaryVertices()) {
+        cout << "# primary tracks in first element = "
+             << mCurrentEvent->primaryVertex()->numberOfDaughters() << endl;
+        cout << "---------------------------------------------------------" << endl;
+    cout << "Dumping collection sizes and one hit only."                << endl;
+             << (void*) mCurrentEvent->primaryVertex()                      << endl;
+        cout << "---------------------------------------------------------" << endl;
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StXiVertex at "
+	     << (void*) mCurrentEvent->xiVertices()[0]                      << endl;
+	cout << "---------------------------------------------------------" << endl;
+	mCurrentEvent->xiVertices()[0]->Dump();	
+    cout << "---------------------------------------------------------" << endl;
+    cout << "StSPtrVecV0Vertex"                                         << endl;
+    cout << "Dumping first element in collection only (if available). " << endl;
+    cout << "---------------------------------------------------------" << endl;
+    cout << "collection size = "
+         << mCurrentEvent->v0Vertices().size() << endl;
+    
+	 << mCurrentEvent->kinkVertices().size() << endl;
+        cout << "---------------------------------------------------------" << endl;
+    cout << "Dumping collection sizes and one hit only."                << endl;
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StKinkVertex at "
+	     << (void*) mCurrentEvent->kinkVertices()[0]                    << endl;
+	cout << "---------------------------------------------------------" << endl;
+	mCurrentEvent->kinkVertices()[0]->Dump();	
+    cout << "---------------------------------------------------------" << endl;
+    cout << "StSPtrVecXiVertex"                                         << endl;
+    cout << "Dumping first element in collection only (if available). " << endl;
+    cout << "---------------------------------------------------------" << endl;
+    cout << "collection size = "
+         << mCurrentEvent->xiVertices().size() << endl;
+    
+    if (mCurrentEvent->xiVertices().size()) {
+        cout << "---------------------------------------------------------" << endl;
+        cout << "StXiVertex at "
+	nhits = tpcColl->numberOfHits();
+	cout << "# of hits in collection = " << nhits << endl;
+	gotOneHit = kFALSE;
+	for (k=0; !gotOneHit && k<tpcColl->numberOfSectors(); k++)
+	    for (j=0; !gotOneHit && j<tpcColl->sector(k)->numberOfPadrows(); j++)
+		if (tpcColl->sector(k)->padrow(j)->hits().size()) {
+		    tpcColl->sector(k)->padrow(j)->hits()[0]->Dump();
+		    gotOneHit = kTRUE;
+		}
+    cout << "collection size = "
+         << mCurrentEvent->kinkVertices().size() << endl;
         nhits = tpcColl->numberOfHits();
         cout << "# of hits in collection = " << nhits << endl;
         gotOneHit = kFALSE;
