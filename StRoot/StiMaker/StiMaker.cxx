@@ -40,7 +40,6 @@
 #include "Sti/StiEvaluableTrackSeedFinder.h"
 #include "StiGui/StiRDLocalTrackSeedFinder.h"
 #include "Sti/StiDetectorFinder.h"
-//#include "Sti/TrackNodeTest.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiTrackMerger.h"
@@ -168,8 +167,10 @@ Int_t StiMaker::InitRun(int run)
 	  else
 	    cout << "---- AssociationMaker NOT Defined" << endl;
 	  
-	  toolkit->setAssociationMaker(mAssociationMaker);
-	  toolkit->getEvaluator(mEvalFileName);
+		StiEventAssociator::instance(mAssociationMaker);
+		StiEvaluator::instance(mEvalFileName);
+	  //toolkit->setAssociationMaker(mAssociationMaker);
+	  //toolkit->getEvaluator(mEvalFileName);
 	  cout <<"--- Evaluator Ready" << endl;
 	}
       else
@@ -287,7 +288,7 @@ void StiMaker::finishEvent()
 				cout <<"Associate for event\t";
 				StiEventAssociator::instance()->associate(mMcEvent);
 				cout <<"done"<<endl;
-				StiEvaluator::instance()->evaluateForEvent(toolkit->getTrackContainer());
+				StiEvaluator::instance()->evaluate(toolkit->getTrackContainer());
 			}
 		
 		if (ioBroker->useGui()==true) 

@@ -46,8 +46,8 @@ public:
 	virtual StiTrackFitter       * getTrackFitter();
 	virtual StiTrackMerger       * getTrackMerger();
 	virtual StiDisplayManager    * getDisplayManager();
-	virtual StiEvaluator         * getEvaluator(const string& file);
-	virtual StiEvaluator         * getEvaluator();
+	//virtual StiEvaluator         * getEvaluator(const string& file);
+	//virtual StiEvaluator         * getEvaluator();
 	//virtual StiEventAssociator   * getEventAssociator();
 	virtual StiIOBroker * getIOBroker();
 	virtual StiHitFiller * getHitFiller();
@@ -91,7 +91,7 @@ protected:
 	StiTrackFitter        * trackFitter;
 	StiTrackMerger        * trackMerger;
 	StiDisplayManager     * displayManager;
-	StiEvaluator          * evaluator;
+	//StiEvaluator          * evaluator;
 	//StiEventAssociator    * eventAssociator;
 	StiIOBroker * ioBroker;
 	StiHitFiller * hitFiller;
