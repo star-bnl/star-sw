@@ -1,39 +1,51 @@
 * editted 7/9/98 Kathy Turner - don't create subdirectores for GSTAR
+* editted 7/10/98 K. Turner - change geant macro definitions to geant_Run 
+*                             and geant_Event
 * 
 **************************************************
+ 
 macro setup 
 
   macro/global/import *
     
  if $vexist(setup_done)=0 then
    exec setup#dir
-*  exec setup#tables
    vec/cre setup_done
  endif
  
 return
  
 **************************************************
+ 
 macro dir
   
   macro/global/import *
    
-
  MESSAGE ********************************
  MESSAGE *** Setting up directory tree **
  MESSAGE ********************************
  
+*************** create global macros *********************************
+ 
+ message ' new version'
  macro/global/create run       /dui/run
  macro/global/create event     /dui/event
- macro/global/create constants [run]
  macro/global/create calib     /dui/calib
+     
+ macro/global/create constants [run]
  macro/global/create params    [constants]/params
  macro/global/create geometry  [constants]/params
- macro/global/create evgen     [event]/evgen    
- macro/global/create geant     [event]/geant    
- macro/global/create raw_data  [event]/raw_data 
- macro/global/create data      [event]/data
- macro/global/create dst       [event]/dst
+ macro/global/create geantR    [run]/geant    
+ macro/global/create geant_Run [geantR]/Run
+   
+ macro/global/create evgen       [event]/evgen    
+ macro/global/create geantE      [event]/geant    
+ macro/global/create geant_Event [geantE]/Event
+ macro/global/create raw_data    [event]/raw_data 
+ macro/global/create data        [event]/data
+ macro/global/create dst         [event]/dst
+   
+***************** make directories *************************************
    
 * top level directories--------------------------
  mkdir  [run]
@@ -41,19 +53,22 @@ macro dir
  mkdir  [event]
  
 * constants tables ----------------------------------
+ mkdir  [geantR]
+ mkdir  [geant_Run]
  mkdir  [params]
   for sys in ctf emc ftpc global mwc svt tpc
     mkdir [params]/[sys]
     mkdir [calib]/[sys]
   endfor
  mkdir  [params]/global/magnetic_field
-  
-
+ 
+ 
 *  event generator tables ----------------------------
  mkdir  [evgen]
  
-*  geant tables ---------------------------------------
- mkdir  [geant]
+* geant event tables ---------------------------------
+ mkdir [geantE]
+ mkdir [geant_Event]
 
 *  raw data tables ------------------------------------
  mkdir  [raw_data] 
@@ -80,34 +95,9 @@ macro dir
 *  dst information ---------------------------------------
  mkdir  [dst]
  
- return
+ 
+return
  
 ******************************************************
  
-* macro tables
-   
-* macro/global/import *
 
-*____ geant/Run
-* for table in  cave_cave  pipe_pipg  svtt_svtg  svtt_swca  svtt_ssup _
-* svtt_serg  svtt_swam  svtt_selc  svtt_svtl  tpce_tpcg _
-* tpce_tprs  tpce_tecw  ftpc_ftpg  ftpc_ffcc  ftpc_frbd _
-* ftpc_fssd  vpdd_vpdg  btof_btog  btof_tray  btof_ctbb _
-* btof_toff  calb_calg  ecal_emcg  ecal_eetr  ecal_esec _
-* ecal_emxg  ecal_exse  magp_magg  magp_mbar  magp_mend _
-* mfld_mflg  g2tm_gttc  g2tm_dete  mick_miky 
-   
-* macro/global/create [table] [geant]/Run/[table]
-* endfor
- 
-*____ geant/Event
-* for table in event vertex track svt_hit tpc_hit ctb_hit emc_hit smd_hit
-*  macro/global/create g2t_[table] [geant]/Event/g2t_[table]
-* endfor
- 
-* ____ constants/ctf
-
-
-* return
-
-* *********************************************************************
