@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.14 2001/09/05 20:41:42 laue Exp $
+ * $Id: StHbtEvent.cc,v 1.15 2001/11/14 21:07:21 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.15  2001/11/14 21:07:21  lisa
+ * Fixed several small things (mostly discarded const) that caused fatal errors with gcc2.95.3
+ *
  * Revision 1.14  2001/09/05 20:41:42  laue
  * Updates of the hbtMuDstTree microDSTs
  *
@@ -125,8 +128,8 @@ StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) {
     cout << "StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) - mMagneticField=" << mMagneticField << endl;
 #endif
     mMagneticField = 2.5;
-    ev->SetMagneticField(mMagneticField);
-    cout << "StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) - mMagneticField set to " << mMagneticField << endl;
+    //    ev->SetMagneticField(mMagneticField);   commented-out by malisa 14nov01 - unneeded and caused compiler problems
+    cout << "StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) - B=0 in TTree! WARNING!! PROBABLY SCREWED-UP!!" << endl;
   }
 
   // create collections

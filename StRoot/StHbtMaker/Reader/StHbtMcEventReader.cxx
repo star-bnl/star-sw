@@ -226,8 +226,8 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
 	continue;
       }
       pdgCode = track->particleDefinition()->pdgEncoding();
-      motherPdgCode = track->parent(); // 0 if no start vertex 
-      if (motherPdgCode) { 
+      //this was just stupid... malisa 14nov01      motherPdgCode = track->parent(); // 0 if no start vertex 
+      if (track->parent()) { 
 	motherPdgCode = track->parent()->pdgId();
 	motherTrackId = track->parent()->key();
       }

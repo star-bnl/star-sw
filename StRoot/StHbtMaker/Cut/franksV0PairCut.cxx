@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: franksV0PairCut.cxx,v 1.1 2000/05/03 17:47:24 laue Exp $
+ * $Id: franksV0PairCut.cxx,v 1.2 2001/11/14 21:07:20 lisa Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: franksV0PairCut.cxx,v $
+ * Revision 1.2  2001/11/14 21:07:20  lisa
+ * Fixed several small things (mostly discarded const) that caused fatal errors with gcc2.95.3
+ *
  * Revision 1.1  2000/05/03 17:47:24  laue
  * new pair cut
  *
@@ -25,7 +28,7 @@ ClassImp(franksV0PairCut)
 #endif
 
 //__________________
-franksV0PairCut::franksV0PairCut() : mNPairsPassed(0), mNPairsFailed(0), mTrackIdCut(0) {
+franksV0PairCut::franksV0PairCut() : mTrackIdCut(0), mNPairsPassed(0), mNPairsFailed(0) {
 }
 //__________________
 //franksV0PairCut::~franksV0PairCut(){

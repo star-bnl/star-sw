@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StHbtKink.cc,v 1.3 2001/09/05 21:55:23 laue Exp $
+ * $Id: StHbtKink.cc,v 1.4 2001/11/14 21:07:21 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, 23May2001
  *
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StHbtKink.cc,v $
+ * Revision 1.4  2001/11/14 21:07:21  lisa
+ * Fixed several small things (mostly discarded const) that caused fatal errors with gcc2.95.3
+ *
  * Revision 1.3  2001/09/05 21:55:23  laue
  * typo fixed
  *
@@ -76,7 +79,7 @@ StHbtKink::StHbtKink( const StKinkVertex& SKV, StHbtThreeVector PrimaryVertex )
   mDecayAngleCM               = SKV.decayAngleCM();
 
   // now fill member StHbtTrack data...
-  StTrack* StTrk;
+  const StTrack* StTrk;
   StHbtTrack* HbtTrk;
   // Daughter
   StTrk = SKV.daughter(0);

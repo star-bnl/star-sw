@@ -78,7 +78,8 @@ protected:
   int mLL;
   short mNuclChargeSign;  
   bool mSwap;  // are particle in wright order ? 
-  int const mLLMax;
+  //  int const mLLMax;  this makes Cint and gcc compiler puke, so I make it non-const... malisa 14nov01
+  int mLLMax;
   int* mNumProcessPair;
   int mNumbNonId;
   char** mLLName;

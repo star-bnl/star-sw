@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.9 2001/09/13 15:03:49 laue Exp $
+ * $Id: StHbtTrack.cc,v 1.10 2001/11/14 21:07:21 lisa Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
+ * Revision 1.10  2001/11/14 21:07:21  lisa
+ * Fixed several small things (mostly discarded const) that caused fatal errors with gcc2.95.3
+ *
  * Revision 1.9  2001/09/13 15:03:49  laue
  * bug fix in copy constructor (didn't decode pid probability)
  *
@@ -209,7 +212,10 @@ StHbtTrack::StHbtTrack(const StEvent* EV, const StTrack* ST) {
   static StuProbabilityPidAlgorithm* aihongPid = hbtAihongPid->aihongPid();
   if( (mPidProbElectron+mPidProbPion+mPidProbKaon+mPidProbProton) <= 0.){
     if (previousEventNumber != EV->info()->id()) {
-      hbtAihongPid->updateEvent(uncorrectedNumberOfPositivePrimaries(*EV));
+      // must do the below because uncorrectedNumberOfPositivePrimaries() function does not have const argument
+      StEvent* TempEv = (StEvent*)EV;
+      hbtAihongPid->updateEvent(uncorrectedNumberOfPositivePrimaries(*TempEv));
+      //      hbtAihongPid->updateEvent(uncorrectedNumberOfPositivePrimaries(*EV));
       previousEventNumber = EV->info()->id();
     }
     hbtAihongPid->updateTrack( (int)mCharge, mP.mag(), mP.pseudoRapidity(), mNHitsDedx, mdEdx);
