@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.hh,v 2.2 2000/08/17 00:38:09 ullrich Exp $
+ * $Id: StRootEventManager.hh,v 2.3 2001/09/12 23:48:34 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.hh,v $
+ * Revision 2.3  2001/09/12 23:48:34  ullrich
+ * Removed code to load run_header and run_summary tables.
+ *
  * Revision 2.2  2000/08/17 00:38:09  ullrich
  * Added CpyTrk table.
  *
@@ -40,9 +43,7 @@ public:
     virtual void shutdown();
     
     virtual particle_st*  	   returnTable_particle(long&)          const;
-    virtual run_header_st*         returnTable_run_header(long&)        const;             
     virtual event_header_st*       returnTable_event_header(long&)      const;             
-    virtual dst_run_summary_st*    returnTable_dst_run_summary(long&)   const;             
     virtual dst_event_summary_st*  returnTable_dst_event_summary(long&) const;             
     virtual dst_L0_Trigger_st*     returnTable_dst_L0_Trigger(long&)    const;             
     virtual dst_TrgDet_st*         returnTable_dst_TrgDet(long&)        const;             
