@@ -86,7 +86,7 @@ ClassImp(StV0FinderMaker)
   else hits[maxtracks-1] = -2;
 
   ptV0sq = 3.5*3.5;
-  Bfield = -2;
+  Bfield = 1.e-10; //Random value for initialisation.
 }
 
 
@@ -688,7 +688,7 @@ Int_t StV0FinderMaker::Make() {
   } // i-Loop
 
   gMessMgr->Info()<<"StV0FinderMaker : now I have "<<v0Vertices.size()<<" V0s."<<endm;
-  gMessMgr->Info()<<"StV0FinderMaker : using magnetic field : "<<Bfield<<endm;
+  gMessMgr->Info()<<"StV0FinderMaker : using magnetic field : "<<Bfield*1.e13<<" T."<<endm;
 
   // Any cleanup involved for using KeepV0()
   
@@ -738,8 +738,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.7 2003/07/04 17:52:54 faivre Exp $
+// $Id: StV0FinderMaker.cxx,v 1.8 2003/07/15 17:40:36 faivre Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.8  2003/07/15 17:40:36  faivre
+// Fixed charge of Bfield (used for print, and XiFinder since now).
+//
 // Revision 1.7  2003/07/04 17:52:54  faivre
 // Use SVT cuts if any dg has a SVT hit.
 //
