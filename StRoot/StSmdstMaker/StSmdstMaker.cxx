@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.14 1999/11/16 23:01:19 genevb Exp $
+// $Id: StSmdstMaker.cxx,v 1.15 1999/11/29 21:41:16 fisyak Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.15  1999/11/29 21:41:16  fisyak
+// Remove StMagF header file from include area
+//
 // Revision 1.14  1999/11/16 23:01:19  genevb
 // Modified for StEvent 2.0
 //
@@ -76,7 +79,7 @@
 #include "math_constants.h"
 #include "PhysicalConstants.h"
 #include <math.h>
-#include "StMagF.h"
+#include "StMagF/StMagF.h"
 #include "StMessMgr.h"
 
 ClassImp(StSmdstMaker)
