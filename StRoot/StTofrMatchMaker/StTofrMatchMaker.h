@@ -1,3 +1,22 @@
+/*******************************************************************
+ *
+ * $Id: StTofrMatchMaker.h,v 1.2 2004/03/09 17:44:56 dongx Exp $
+ *
+ * Author: Xin Dong
+ *****************************************************************
+ *
+ * Description: Tofr Match Maker to do the matching between the 
+ *              fired celles and TPC tracks ( similar to  Frank's
+ *              TofpMatchMaker )
+ *
+ *****************************************************************
+ *
+ * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.2  2004/03/09 17:44:56  dongx
+ * first release
+ *
+ *
+ *******************************************************************/
 #ifndef STTOFRMATCHMAKER_HH     
 #define STTOFRMATCHMAKER_HH
 #include "StMaker.h"
@@ -180,7 +199,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.1 2004/03/09 17:21:40 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.2 2004/03/09 17:44:56 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
