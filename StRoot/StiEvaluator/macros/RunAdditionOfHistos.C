@@ -1,11 +1,19 @@
 //
-// $Id: RunAdditionOfHistos.C,v 1.1 2002/11/27 00:09:29 calderon Exp $
+// $Id: RunAdditionOfHistos.C,v 1.2 2003/06/19 21:25:19 calderon Exp $
 //
 // This is nothing more than a copy of the original hadd.C example in the
 // root tutorials, modified to take the input directory as argument
 // the input prefix is hardwired at the moment
 //
 // $Log: RunAdditionOfHistos.C,v $
+// Revision 1.2  2003/06/19 21:25:19  calderon
+// Better handling of file names, don't assume the input files, but use
+// options in the macros (keep setting the default values as before).
+// Adding Zbigniew's scripts and macros.
+// Modified FillHistos.C due to a bug in the handling of the file name,
+// which was fortuitously counterbalanced by a call to TString::Data()
+// which truncated the TString at just the right place.
+//
 // Revision 1.1  2002/11/27 00:09:29  calderon
 // New version of evaluator using the minimctrees
 // Macros for running the evaluation and perl script to coordinate
@@ -32,7 +40,7 @@ void RunAdditionOfHistos(TString topDir="StiEvalOutputRawHistos/") {
 
     // use the vertex bin as the suffix for both input and output files
     char* prefixin = new char[25];
-    sprintf(prefixin,"rawHistosEvalItTestrcf");      // minimc hijing july 2002
+    sprintf(prefixin,"rawHistos");      // minimc hijing july 2002
 
     //create a support list for the input files
     flist = new TList();
