@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.12 1999/05/05 14:07:12 love Exp $
+// $Id: StMinidaqMaker.cxx,v 1.13 1999/05/10 13:38:23 love Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.13  1999/05/10 13:38:23  love
+// Book all reformat_new tables as 1 row, expand only when needed
+//
 // Revision 1.12  1999/05/05 14:07:12  love
 // Used Debug on debug messages, changed initraw sign, fixes some print statements
 //
@@ -257,20 +260,20 @@ void StMinidaqMaker::TransferData(){
      if (!raw_row_out) {raw_row_out = new St_raw_row("raw_row_out",32); sect.Add(raw_row_out);}
      // pad description, representing mapped data from one pad 
      St_raw_pad  *raw_pad_in = (St_raw_pad *) sect("raw_pad_in");
-     if (!raw_pad_in) {raw_pad_in = new St_raw_pad("raw_pad_in",4000); sect.Add(raw_pad_in);}
+     if (!raw_pad_in) {raw_pad_in = new St_raw_pad("raw_pad_in",1); sect.Add(raw_pad_in);}
      St_raw_pad  *raw_pad_out = (St_raw_pad *) sect("raw_pad_out");
-     if (!raw_pad_out) {raw_pad_out = new St_raw_pad("raw_pad_out",4000); sect.Add(raw_pad_out);}
+     if (!raw_pad_out) {raw_pad_out = new St_raw_pad("raw_pad_out",1); sect.Add(raw_pad_out);}
      // This table defines the interpretation of subsequent tables.  One row per sector
      St_raw_seq  *raw_seq_in = (St_raw_seq *) sect("raw_seq_in");
-     if (!raw_seq_in) {raw_seq_in = new St_raw_seq("raw_seq_in",50000); sect.Add(raw_seq_in);}
+     if (!raw_seq_in) {raw_seq_in = new St_raw_seq("raw_seq_in",1); sect.Add(raw_seq_in);}
      St_raw_seq  *raw_seq_out = (St_raw_seq *) sect("raw_seq_out");
-     if (!raw_seq_out) {raw_seq_out = new St_raw_seq("raw_seq_out",100000); sect.Add(raw_seq_out);}
+     if (!raw_seq_out) {raw_seq_out = new St_raw_seq("raw_seq_out",1); sect.Add(raw_seq_out);}
      // Data Table (10-bit)
      St_type_shortdata  *pixel_data_in = (St_type_shortdata *) sect("pixel_data_in");
-     if (!pixel_data_in) {pixel_data_in = new St_type_shortdata("pixel_data_in",900000); 
+     if (!pixel_data_in) {pixel_data_in = new St_type_shortdata("pixel_data_in",1); 
      sect.Add(pixel_data_in);}
      St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
-     if (!pixel_data_out) {pixel_data_out = new St_type_shortdata("pixel_data_out",900000); 
+     if (!pixel_data_out) {pixel_data_out = new St_type_shortdata("pixel_data_out",1); 
      sect.Add(pixel_data_out);}
    } //end of loop of sector
    
@@ -376,6 +379,13 @@ void StMinidaqMaker::TransferData(){
                     St_raw_seq         *raw_seq_out    = (St_raw_seq *) sect("raw_seq_out");
                     St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
                     St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
+
+		    raw_pad_in->ReAllocate(4000);
+		    raw_pad_out->ReAllocate(4000);
+		    raw_seq_in->ReAllocate(50000);
+		    raw_seq_out->ReAllocate(100000);
+		    pixel_data_in->ReAllocate(900000);
+		    pixel_data_out->ReAllocate(900000);
                     Int_t res = reformat_new(m_tsspar,m_tfc_sector_index,
                         		     m_it,m_sd,m_st,
                         		     raw_sec_m,
@@ -392,7 +402,7 @@ void StMinidaqMaker::TransferData(){
 //_____________________________________________________________________________
 void StMinidaqMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.12 1999/05/05 14:07:12 love Exp $\n");
+  printf("* $Id: StMinidaqMaker.cxx,v 1.13 1999/05/10 13:38:23 love Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
