@@ -2,8 +2,11 @@
 //  
 // JB 3/30/01 - divorce with MC. Only StEvent is used. No evaluation
 //
-// $Id: StppLPfindMaker.cxx,v 1.4 2001/04/26 20:04:52 balewski Exp $
+// $Id: StppLPfindMaker.cxx,v 1.5 2001/04/27 20:50:45 balewski Exp $
 // $Log: StppLPfindMaker.cxx,v $
+// Revision 1.5  2001/04/27 20:50:45  balewski
+// *** empty log message ***
+//
 // Revision 1.4  2001/04/26 20:04:52  balewski
 // *** empty log message ***
 //
@@ -55,6 +58,7 @@
 
 #include "tables/St_dst_track_Table.h"
 #include "tables/St_tpt_track_Table.h" 
+#include "tables/St_tcl_tphit_Table.h" //tmp for CL vs. nPrim
 
 // for Helix model
 #include "StarCallf77.h"
@@ -229,7 +233,7 @@ Int_t StppLPfindMaker::Make()
   dst1->Add(my);
 
   // =========================================================
-  printf(" ppTag   U p d a t e     . . . NOT implemented\n");
+  //printf(" ppTag   U p d a t e     . . . NOT implemented\n");
   // =========================================================
 
   //-----------------------------
@@ -242,6 +246,14 @@ Int_t StppLPfindMaker::Make()
   hv[4]->Fill(row.pt);
   hv[5]->Fill(nTPTtr);
   
+  
+ //   G E T   D A T A
+ St_DataSet *ds=GetDataSet("tpc_hits"); assert(ds);
+ St_tcl_tphit  *tpcl=(St_tcl_tphit  *) ds->Find( "tphit");
+ if(tpcl==0) printf("NULL pointer to St_tcl_tphit table\n");
+ int nCL=tpcl->GetNRows();
+
+ ((TH2F *)hv[7])->Fill(row.nPrim,nCL/1000.);
 
 return kStOK;
 }
