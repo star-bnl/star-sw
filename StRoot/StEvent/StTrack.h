@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 1.3 1999/04/27 01:24:27 fisyak Exp $
+ * $Id: StTrack.h,v 1.4 1999/04/28 22:27:37 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
- * Revision 1.3  1999/04/27 01:24:27  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:37  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.4  1999/04/28 22:27:37  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.8  1999/04/08 14:58:38  ullrich
  * Moved PID traits from StTrack to StGlobalTrack.
@@ -39,7 +42,6 @@
  *
 #include "TObject.h"
  * Added non-const method pidTraits().
-#include "StTrackPidTraits.h"
 #define StTrack_hh 
 #include "tables/dst_track.h"
 #include "StPhysicalHelixD.hh"
@@ -53,7 +55,7 @@ class StTrack : public TObject {
 #include "StObject.h"
     StTrack(dst_track_st*);
     StTrack(dst_track_st* trk,
-            StThreeVectorF& origin,
+            Double_t curvature,
             Double_t dip,
             Double_t phase,
             StThreeVectorD& origin,
@@ -65,7 +67,6 @@ class StTrack : public TObject {
     Int_t operator!=(const StTrack&) const;
 
     virtual StPhysicalHelixD&  helix();
-    virtual StTrackPidTraits& pidTraits();
     virtual StVertex*         startVertex();
     virtual StVertex*         stopVertex();
     virtual StTrackFitTraits& fitTraits();
@@ -76,8 +77,7 @@ class StTrack : public TObject {
     StTrackGeometry*               geometry();
     const StTrackGeometry*         geometry() const;
     StPhysicalHelixD  mHelix;
-    StTrackPidTraits mPidTraits;
-    ClassDef(StTrack,1)  //StTrack structure
+    StVertex*        mStopVertex;
     StTrackFitTraits mFitTraits;
     float            mLength;
   ClassDef(StTrack,1)  //StTrack structure
@@ -87,8 +87,6 @@ inline StPhysicalHelixD& StTrack::helix() { return mHelix; }
 
 inline StVertex* StTrack::startVertex() { return mStartVertex; }
 
-
-inline StTrackPidTraits& StTrack::pidTraits() { return mPidTraits; }
 inline StVertex* StTrack::stopVertex() { return mStopVertex; }
 
 inline StTrackFitTraits& StTrack::fitTraits() { return mFitTraits; }

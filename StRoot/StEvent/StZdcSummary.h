@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcSummary.h,v 1.3 1999/04/27 01:24:33 fisyak Exp $
+ * $Id: StZdcSummary.h,v 1.4 1999/04/28 22:27:41 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StZdcSummary.h,v $
- * Revision 1.3  1999/04/27 01:24:33  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:41  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:41  fisyak
  * New version with pointer instead referencies
@@ -19,9 +19,7 @@
  * Revision 1.2  1999/01/15 22:54:30  wenaus
  * version with constructors for table-based loading
  *
-#ifdef __ROOT__
 #include "TObject.h"
-#endif
 #ifndef StZdcSummary_hh
 #define StZdcSummary_hh
 class StZdcSummary : public TObject {
@@ -42,9 +40,7 @@ public:
     void setAdcSum(Float_t);     
     
 protected:
-#ifdef __ROOT__
-	ClassDef(StZdcSummary,1)  //StZdcSummary structure
-#endif
+    Float_t mAdcSumEast;
     Float_t mAdcSumWest;
     Float_t mAdcSum;        
   ClassDef(StZdcSummary,1)  //StZdcSummary structure

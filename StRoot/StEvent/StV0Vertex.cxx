@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cxx,v 1.3 1999/04/27 01:24:29 fisyak Exp $
+ * $Id: StV0Vertex.cxx,v 1.4 1999/04/28 22:27:39 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,14 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cxx,v $
- * Revision 1.3  1999/04/27 01:24:29  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:39  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.4  1999/04/28 22:27:39  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.7  1999/04/13 23:27:21  genevb
+ * Slightly refined vertex code, updated V0, Xi vertex documentation
  *
  * Revision 1.6  1999/04/09 19:34:03  genevb
  * Added vertex daughter functionality
@@ -33,12 +39,10 @@
  * version with constructors for table-based loading
  *
  * Revision 2.1  1999/10/28 22:28:01  ullrich
-static const Char_t rcsid[] = "$Id: StV0Vertex.cxx,v 1.3 1999/04/27 01:24:29 fisyak Exp $";
+#include <iostream.h>
  *
-#ifdef __ROOT__
 #include <algorithm>
-static const Char_t rcsid[] = "$Id: StV0Vertex.cxx,v 1.3 1999/04/27 01:24:29 fisyak Exp $";
-#endif
+static const Char_t rcsid[] = "$Id: StV0Vertex.cxx,v 1.4 1999/04/28 22:27:39 fisyak Exp $";
 #include "tables/dst_v0_vertex.h"
 ClassImp(StV0Vertex)
 #include "tables/St_dst_vertex_Table.h"
@@ -68,6 +72,19 @@ StV0Vertex::StV0Vertex(dst_v0_vertex_st* v0vtx, dst_vertex_st* vtx) :
     mMomentumOfDaughters[positiveTrack].setZ(v0vtx->pos_pz);
     mDcaDaughters = v0vtx->dcapn;
     mDcaParentToPrimaryVertex = v0vtx->dcav0;
+    mMomentumOfDaughters[negative].setZ(v0vtx.neg_pz);
+    mMomentumOfDaughters[positive].setX(v0vtx.pos_px);
+    mMomentumOfDaughters[positive].setY(v0vtx.pos_py);
+    mMomentumOfDaughters[positive].setZ(v0vtx.pos_pz);
+StGlobalTrack* StV0Vertex::daughter(StTrackSign sign, Double_t B)
+        if (filter(mDaughters[i])) vec.push_back(mDaughters[i]);
+    Int_t i = 0;
+    Int_t agree = 1;
+    if (sign == negativeTrack) agree = -1;
+    while (i < numberOfDaughters()) {
+      StGlobalTrack* ithDaughter = StVertex::daughter(i++);
+      // Check for charge and field sign agreement
+      if ( (agree * ithDaughter->helix().charge(B)) > 0) return ithDaughter;
 {
     return 0;
     if (track) {

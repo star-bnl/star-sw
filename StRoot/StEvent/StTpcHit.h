@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 1.2 1999/04/27 01:24:25 fisyak Exp $
+ * $Id: StTpcHit.h,v 1.3 1999/04/28 22:27:37 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
- * Revision 1.2  1999/04/27 01:24:25  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.3  1999/04/28 22:27:37  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.3  1999/04/28 22:27:37  fisyak
  * New version with pointer instead referencies
@@ -31,10 +31,13 @@
  * Revision 1.2  1999/01/15 22:53:59  wenaus
  * version with constructors for table-based loading
  *
-
+ * Revision 2.4  1999/12/01 15:56:31  ullrich
+ * Renamed xxxInCluster() methods to xxxInHit()
  *
 class StVecPtrGlobalTrack;
-#include "tables/dst_point.h"
+class StGlobalTrackCollection;
+#include "StArray.h"
+ * Inlined sector() and padrow().
 #include "StGlobalTrack.h"
 #include "StGlobalTrack.h"
  *
@@ -46,13 +49,12 @@ using namespace std;
 	     const StThreeVectorF&,
 	     Float_t, UChar_t = 0);
     StTpcHit(dst_point_st*);
-#if 0    
-    StVecPtrGlobalTrack relatedTracks(const StTrackCollection&);
-#endif
-	ClassDef(StTpcHit,1)  //StTpcHit structure
+    
+    StVecPtrGlobalTrack relatedTracks(const StGlobalTrackCollection&);
+#ifndef __CINT__  
   StVecPtrGlobalTrack relatedTracks(const StGlobalTrackCollection&);
 #endif
-//______________________________________________________________
+  ClassDef(StTpcHit,1)  //StTpcHit structure
              ULong_t, Float_t, UChar_t = 0);
 StCollectionDef(TpcHit)
 

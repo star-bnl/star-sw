@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 1.3 1999/04/27 01:24:21 fisyak Exp $
+ * $Id: StHit.h,v 1.4 1999/04/28 22:27:33 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
- * Revision 1.3  1999/04/27 01:24:21  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:33  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.4  1999/04/28 22:27:33  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.5  1999/04/19 20:46:06  ullrich
  * Made virtual class
@@ -30,6 +33,7 @@
  *
  * Revision 2.2  2000/06/01 21:38:56  ullrich
 #include "TObject.h"
+ *
  * Revision 2.1  1999/10/28 22:25:50  ullrich
 #include "StObject.h"
 class StHit : public TObject {
@@ -40,29 +44,29 @@ class StHit : public TObject {
 	  Float_t, UChar_t = 0);
     // StHit(const StSvtHit&);                  use default
     // const StHit & operator=(const StHit&);   use default
-    ~StHit();
+    virtual ~StHit();
   // StHit(const StSvtHit&);                  use default
     Int_t operator==(const StHit&) const;
     Int_t operator!=(const StHit&) const;
     
-    const StThreeVectorF& position() const;
-    const StThreeVectorF& positionError() const;
-    Float_t                       charge() const;
-    UChar_t               trackReferenceCount() const;	
-
-    void setPosition(const StThreeVectorF&);
-    void setPositionError(const StThreeVectorF&);
-    void setCharge(Float_t);
-    void setTrackReferenceCount(UChar_t);
+    virtual const StThreeVectorF& position() const;
+    virtual const StThreeVectorF& positionError() const;
+    virtual Float_t                       charge() const;
+    virtual UChar_t               trackReferenceCount() const;	
+  virtual Float_t                       charge() const;
+    virtual void setPosition(const StThreeVectorF&);
+    virtual void setPositionError(const StThreeVectorF&);
+    virtual void setCharge(Float_t);
+    virtual void setTrackReferenceCount(UChar_t);
   virtual void setPositionError(const StThreeVectorF&);
   virtual void setCharge(Float_t);
     StThreeVectorF mPosition;
     StThreeVectorF mPositionError;
     Float_t                mCharge;
     UChar_t        mTrackRefCount;    
-    ClassDef(StHit,1)  //StHit structure
+  StThreeVectorF mPositionError;
   Float_t                mCharge;
-#ifndef __CINT__
+  UChar_t        mTrackRefCount;    
   ClassDef(StHit,1)  //StHit structure
 protected:
     
@@ -72,7 +76,7 @@ inline const StThreeVectorF& StHit::position() const { return mPosition; }
 
 inline const StThreeVectorF& StHit::positionError() const { return mPositionError; }
 
-#endif
+inline Float_t StHit::charge() const { return mCharge; }
 
 inline UChar_t StHit::trackReferenceCount() const { return mTrackRefCount; }	
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 1.3 1999/04/27 01:24:19 fisyak Exp $
+ * $Id: StEvent.h,v 1.4 1999/04/28 22:27:32 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,11 +14,20 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 1.3  1999/04/27 01:24:19  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:32  fisyak
+ * New version with pointer instead referencies
  *
- * Revision 1.2  1999/02/10 02:17:34  fisyak
- * Merging with new Torre stuff
+ * Revision 1.4  1999/04/28 22:27:32  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.7  1999/03/23 21:47:43  ullrich
+ * Member function made virtual
+ *
+ * Revision 1.6  1999/03/04 18:17:00  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
+ *
+ * Revision 1.5  1999/03/04 15:56:56  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.4  1999/02/23 21:20:06  ullrich
  * Modified EMC hit collections.
@@ -29,11 +38,62 @@
  * Revision 1.2  1999/01/15 22:53:40  wenaus
  * version with constructors for table-based loading
  *
+ * Revision 2.9  2000/05/15 18:35:37  ullrich
+ * All data member related to collections and containers are now
+ * kept by pointer. The interface (public methods) stays the same.
+class StCtbCounterCollection;
+class StEmcHitCollection;
+class StEmcPreShowerHitCollection;
+class StEmcTowerHitCollection;
+class StFtpcHitCollection;
+class StGlobalTrackCollection;
+class StMwcSectorCollection;
+class StSmdEtaHitCollection;
+class StSmdHitCollection;
+class StSmdPhiHitCollection;
+class StSvtHitCollection;
+class StTpcHitCollection;
+class StVertexCollection;
+class StVpdCounterCollection;
+class StZdcSegmentCollection;
+class StCtbCounterIterator;
+class StEmcHitIterator;
+class StEmcPreShowerHitIterator;
+class StEmcTowerHitIterator;
+class StFtpcHitIterator;
+class StGlobalTrackIterator;
+class StMwcSectorIterator;
+class StSmdEtaHitIterator;
+class StSmdHitIterator;
+class StSmdPhiHitIterator;
+class StSvtHitIterator;
+class StTpcHitIterator;
+class StVertexIterator;
+class StVpdCounterIterator;
+class StZdcSegmentIterator;
+class StVecPtrCtbCounter;
+class StVecPtrEmcHit;
+class StVecPtrEmcPreShowerHit;
+class StVecPtrEmcTowerHit;
+class StVecPtrFtpcHit;
+class StVecPtrGlobalTrack;
+class StVecPtrMwcSector;
+class StVecPtrSmdEtaHit;
+class StVecPtrSmdHit;
+class StVecPtrSmdPhiHit;
+class StVecPtrSvtHit;
+class StVecPtrTpcHit;
 class StVecPtrVertex;
 #include "TObject.h"
-#include "TString.h"
+class StVecPtrZdcSegment;
  * Those methods which returns references were modified to create
  * an empty collection in case the pointer is null.
+#include "TDatime.h"
+#ifndef __CINT__
+#include <iostream.h>
+#endif
+#ifndef __ROOT__
+#include <utility>
 #endif
  *
 #ifndef __ROOT__
@@ -43,13 +103,19 @@ class StVecPtrVertex;
 #include "StRun.h"
 #include "StGlobalTrack.h"
 #include "StFtpcHit.h"
-#include "StEmcHit.h"
-#include "StSmdHit.h"
+#include "StVertex.h"
+#include "StSvtHit.h"
+#include "StTpcHit.h"
+#include "StEmcTowerHit.h"
 #include "StEmcPreShowerHit.h"
 #include "StSmdPhiHit.h"
 #include "StSmdEtaHit.h"
 #include "tables/dst_event_header.h"
 #include "tables/dst_event_summary.h"
+#include "StEnumerations.h"
+#include "dst_event_header.h"
+#include "dst_event_summary.h"
+
 struct pairL
 using namespace std;
     long first;
@@ -61,7 +127,6 @@ using namespace std;
 class StEvent : public TObject {
 };
  *
-    StEvent(const StEvent&);
  * Revision 2.2  1999/11/04 13:30:42  ullrich
  * Added constructor without summary table
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -69,80 +134,95 @@ class StEvent : public TObject {
  **************************************************************************/
 #include "StTrackDetectorInfo.h"
     Int_t operator==(const StEvent &right) const;
-    const TString&                type() const;
-    pairL                        id() const;
-    Long_t                       time() const;
-    ULong_t                runNumber() const;              
-    ULong_t                triggerMask() const;
-    ULong_t                bunchCrossingNumber() const;
-    Double_t                       luminosity() const;
-    StRun*                       run();
-    StVertex*                    primaryVertex();
-    StDstEventSummary*              summary();
-    StTrackCollection*           trackCollection();
-    StTpcHitCollection*          tpcHitCollection();
-    StSvtHitCollection*          svtHitCollection();
-    StFtpcHitCollection*         ftpcHitCollection();
-    StEmcHitCollection*          emcHitCollection();
-    StSmdHitCollection*          smdHitCollection();
-    StVertexCollection*          vertexCollection();
-    StTriggerDetectorCollection* triggerDetectorCollection();
-    StL0Trigger*                 l0Trigger();                        
-    Float_t                      beamPolarization(StBeamDirection, StBeamPolarizationAxis);
+    virtual const TString&   type() const;
+    virtual pairL            id() const;
+    virtual Long_t           time()        const {return GetTime();};
+    ULong_t     	     GetUTime()    const {return mTime.Get();};
+    Int_t     	             GetDate()     const {return ((TDatime *)&mTime)->GetDate();};
+    Int_t     	             GetTime()     const {return ((TDatime *)&mTime)->GetTime();};
+    TDatime                  GetDateTime() const {return mTime;};
+   
+    virtual ULong_t                runNumber() const;              
+    virtual ULong_t                triggerMask() const;
+    virtual ULong_t                bunchCrossingNumber() const;
+    virtual Double_t                       luminosity() const;
+    virtual StRun*                       run();
+    virtual StVertex*                    primaryVertex();
+    virtual StDstEventSummary*           summary();
+    virtual StGlobalTrackCollection*           trackCollection();
+    virtual StTpcHitCollection*          tpcHitCollection();
+    virtual StSvtHitCollection*          svtHitCollection();
+    virtual StFtpcHitCollection*         ftpcHitCollection();
+    virtual StEmcTowerHitCollection*     emcTowerHitCollection();
+    virtual StEmcPreShowerHitCollection* emcPreShowerHitCollection();
+    virtual StSmdPhiHitCollection*       smdPhiHitCollection();
+    virtual StSmdEtaHitCollection*       smdEtaHitCollection();
+    virtual StVertexCollection*          vertexCollection();
+    virtual StTriggerDetectorCollection* triggerDetectorCollection();
+    virtual StL0Trigger*                 l0Trigger();                        
+    virtual Float_t                        beamPolarization(StBeamDirection, StBeamPolarizationAxis);
 
-    void setType(const TString&);
-    void setId(const pairL&);
-    void setTime(Long_t);
-    void setRunNumber(ULong_t);                
-    void setTriggerMask(ULong_t);              
-    void setBunchCrossingNumber(ULong_t);      
-    void setLuminosity(Double_t);               
-    void setRun(StRun*);                            
-    void setPrimaryVertex(StVertex*);                  
-    void setSummary(StDstEventSummary*);                        
-    void setTrackCollection(StTrackCollection*);                
-    void setTpcHitCollection(StTpcHitCollection*);               
-    void setSvtHitCollection(StSvtHitCollection*);               
-    void setFtpcHitCollection(StFtpcHitCollection*);              
-    void setEmcHitCollection(StEmcHitCollection*);              
-    void setSmdHitCollection(StSmdHitCollection*);              
-    void setVertexCollection(StVertexCollection*);               
-    void setTriggerDetectorCollection(StTriggerDetectorCollection*);      
-    void setL0Trigger(StL0Trigger*);                      
-    void setBeamPolarization(StBeamDirection, StBeamPolarizationAxis, Float_t);                   
+    virtual void setType(const Char_t*);
+    virtual void setId(const pairL&);
+    virtual void setTime(Int_t dt)                 {SetDateTime(dt,0);};
+    virtual void SetDateTime(int iDate,int iTime){mTime.Set(iDate,iTime);};
+    virtual void SetDateTime(TDatime dt)	 {mTime=dt;};
+    virtual void setRunNumber(ULong_t);                
+    virtual void setTriggerMask(ULong_t);              
+    virtual void setBunchCrossingNumber(ULong_t);      
+    virtual void setLuminosity(Double_t);               
+    virtual void setRun(StRun*);                            
+    virtual void setPrimaryVertex(StVertex*);                  
+    virtual void setSummary(StDstEventSummary*);                        
+    virtual void setTrackCollection(StGlobalTrackCollection*);                
+    virtual void setTpcHitCollection(StTpcHitCollection*);               
+    virtual void setSvtHitCollection(StSvtHitCollection*);               
+    virtual void setTrackCollection(StGlobalTrackCollection*);             
+    virtual void setTpcHitCollection(StTpcHitCollection*);                 
+    virtual void setSvtHitCollection(StSvtHitCollection*);                 
+    virtual void setFtpcHitCollection(StFtpcHitCollection*);              
+    virtual void setEmcTowerHitCollection(StEmcTowerHitCollection*);              
+    virtual void setEmcPreShowerHitCollection(StEmcPreShowerHitCollection*);              
+    virtual void setSmdPhiHitCollection(StSmdPhiHitCollection*);              
+    virtual void setSmdEtaHitCollection(StSmdEtaHitCollection*);              
+    virtual void setBeamPolarization(StBeamDirection, StBeamPolarizationAxis, Float_t);                   
     virtual void setTriggerDetectorCollection(StTriggerDetectorCollection*);      
     virtual void setL0Trigger(StL0Trigger*);                      
-    TString                        mType;
-    pairL             mId;                      
-    ULong_t                mRunNumber;
-    Long_t                       mTime;
-    ULong_t                mTriggerMask;
-    ULong_t                mBunchCrossingNumber;
-    Double_t                       mLuminosity;
+    virtual void setBeamPolarization(StBeamDirection, StBeamPolarizationAxis, Float_t); // *MENU*
+    pairL                        mId;                      
+    
+    
+    pairL                        mId;        //!
+    ULong_t                      mRunNumber;
+    TDatime                      mTime;
 
     StRun*                       mRun;
     Double_t                     mLuminosity;
-    StTrackCollection*           mTracks;
+    StGlobalTrackCollection*     mTracks;
     StVertexCollection*          mVertices;
     StDstEventSummary*           mSummary;
     //    StRun*                       mRun;
     StVertex*                    mPrimaryVertex;
-    StEmcHitCollection*          mEmcHits;
-    StSmdHitCollection*          mSmdHits;
+    StTpcHitCollection*          mTpcHits;
+    StSvtHitCollection*          mSvtHits;
+    StFtpcHitCollection*         mFtpcHits;
+    StEmcTowerHitCollection*     mEmcTowerHits;
     StEmcPreShowerHitCollection* mEmcPreShowerHits;
     StTriggerDetectorCollection* mTriggerDetectors;
     Float_t                        mBeamPolarizationEast[3];
     Float_t                        mBeamPolarizationWest[3];
+    StL0Trigger*                 mL0Trigger;                
     Float_t                      mBeamPolarizationEast[3];
     Float_t                      mBeamPolarizationWest[3];
-	ClassDef(StEvent,1)  //StEvent structure
+    StFtpcHitCollection*         mFtpcHits;
+    StSvtHitCollection*          mSvtHits;
     const StEvent& operator=(const StEvent&);
-
     StTriggerDetectorCollection* mTriggerDetectors;  
   ClassDef(StEvent,1)  //StEvent structure
+
 inline const TString& StEvent::type() const { return mType;}
+
 inline pairL StEvent::id() const { return mId;}
-inline Long_t StEvent::time() const { return mTime;}
 
 inline ULong_t StEvent::runNumber() const { return mRunNumber;}             
 
@@ -158,7 +238,7 @@ inline StVertex* StEvent::primaryVertex() { return mPrimaryVertex;}
 
 inline StDstEventSummary* StEvent::summary() { return mSummary;}
 
-inline StTrackCollection* StEvent::trackCollection() { return mTracks;}
+inline StGlobalTrackCollection* StEvent::trackCollection() { return mTracks;}
 
 inline StTpcHitCollection* StEvent::tpcHitCollection() { return mTpcHits;}
 
@@ -166,9 +246,13 @@ inline StSvtHitCollection* StEvent::svtHitCollection() { return mSvtHits;}
 
 inline StFtpcHitCollection* StEvent::ftpcHitCollection() { return mFtpcHits;}
 
-inline StEmcHitCollection* StEvent::emcHitCollection() { return mEmcHits;}
+inline StEmcTowerHitCollection* StEvent::emcTowerHitCollection() { return mEmcTowerHits;}
 
-inline StSmdHitCollection* StEvent::smdHitCollection() { return mSmdHits;}
+inline StEmcPreShowerHitCollection* StEvent::emcPreShowerHitCollection() { return mEmcPreShowerHits;}
+
+inline StSmdPhiHitCollection* StEvent::smdPhiHitCollection() { return mSmdPhiHits;}
+
+inline StSmdEtaHitCollection* StEvent::smdEtaHitCollection() { return mSmdEtaHits;}
 
 inline StVertexCollection* StEvent::vertexCollection() { return mVertices;}
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 1.3 1999/04/27 01:24:20 fisyak Exp $
+ * $Id: StHit.cxx,v 1.4 1999/04/28 22:27:33 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
- * Revision 1.3  1999/04/27 01:24:20  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:33  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:33  fisyak
  * New version with pointer instead referencies
@@ -27,14 +27,13 @@
  *
  * Revision 1.2  1999/01/15 22:53:45  wenaus
  * version with constructors for table-based loading
-#include <iostream.h>
- * Added member mFlag and access member flag() and setFlag().
-static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.3 1999/04/27 01:24:20 fisyak Exp $";
-#include "StGlobalTrack.h"
-#ifdef __ROOT__
  *
-static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.3 1999/04/27 01:24:20 fisyak Exp $";
-#endif
+ * Revision 2.3  2000/06/01 21:38:53  ullrich
+ * Added member mFlag and access member flag() and setFlag().
+static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.4 1999/04/28 22:27:33 fisyak Exp $";
+#include "StGlobalTrack.h"
+ *
+static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.4 1999/04/28 22:27:33 fisyak Exp $";
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.0  1999/10/12 18:42:17  ullrich

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDstEventSummary.cxx,v 1.3 1999/04/27 01:24:16 fisyak Exp $
+ * $Id: StDstEventSummary.cxx,v 1.4 1999/04/28 22:27:30 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StDstEventSummary.cxx,v $
- * Revision 1.3  1999/04/27 01:24:16  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:30  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:30  fisyak
  * New version with pointer instead referencies
@@ -21,10 +21,8 @@
  *
  **************************************************************************/
 #include "StDstEventSummary.h"
-#ifdef __ROOT__
 
-static const Char_t rcsid[] = "$Id: StDstEventSummary.cxx,v 1.3 1999/04/27 01:24:16 fisyak Exp $";
-#endif
+static const Char_t rcsid[] = "$Id: StDstEventSummary.cxx,v 1.4 1999/04/28 22:27:30 fisyak Exp $";
 
 ClassImp(StDstEventSummary)
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedx.h,v 1.3 1999/04/27 01:24:16 fisyak Exp $
+ * $Id: StDedx.h,v 1.4 1999/04/28 22:27:29 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StDedx.h,v $
- * Revision 1.3  1999/04/27 01:24:16  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:29  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:29  fisyak
  * New version with pointer instead referencies
@@ -27,9 +27,7 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
-#ifdef __ROOT__
 #include "TObject.h"
-#endif
 #include "tables/dst_dedx.h"
 
 class StDedx : public TObject {
@@ -55,9 +53,7 @@ public:
     
 protected:
     UShort_t mNumberOfPointsUsed;
-#ifdef __ROOT__
-	ClassDef(StDedx,1)  //StDedx structure
-#endif
+    Float_t          mMean;
     Float_t          mVariance;
     ULong_t  mStatus;              
   ClassDef(StDedx,1)  //StDedx structure

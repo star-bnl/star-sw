@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdCounter.h,v 1.3 1999/04/27 01:24:31 fisyak Exp $
+ * $Id: StVpdCounter.h,v 1.4 1999/04/28 22:27:40 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVpdCounter.h,v $
- * Revision 1.3  1999/04/27 01:24:31  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:40  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:40  fisyak
  * New version with pointer instead referencies
@@ -21,7 +21,6 @@
  *
  **************************************************************************/
 #define StVpdCounter_hh
-
 class StVpdCounter : public TObject {
 #include "StObject.h"
 #include "StArray.h"
@@ -42,10 +41,10 @@ public:
     void setTime(Float_t);
     
 protected:
-    ClassDef(StVpdCounter,1)  //StVpdCounter structure
+    Short_t mId;
     Float_t mAdc;
     Float_t mTime;
-typedef StVecPtrVpdCounter StVecVpdCounter;
+  ClassDef(StVpdCounter,1)  //StVpdCounter structure
 };
 StCollectionDef(VpdCounter)
 

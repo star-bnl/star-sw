@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 1.3 1999/04/27 01:24:30 fisyak Exp $
+ * $Id: StVertex.cxx,v 1.4 1999/04/28 22:27:39 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,18 +13,27 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
- * Revision 1.3  1999/04/27 01:24:30  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:39  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.4  1999/04/28 22:27:39  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.4  1999/04/19 18:07:35  genevb
+ * Fixed vertex constructor
  *
  * Revision 1.3  1999/04/19 15:54:10  genevb
  * Added momentum() to vertex classes
  *
  * Revision 1.2  1999/01/15 22:54:22  wenaus
  * version with constructors for table-based loading
-static const Char_t rcsid[] = "$Id: StVertex.cxx,v 1.3 1999/04/27 01:24:30 fisyak Exp $";
+ *
+ * Revision 2.5  2000/02/10 16:32:19  ullrich
+static const Char_t rcsid[] = "$Id: StVertex.cxx,v 1.4 1999/04/28 22:27:39 fisyak Exp $";
 #include "StGlobalTrack.h"
 
-static const Char_t rcsid[] = "$Id: StVertex.cxx,v 1.3 1999/04/27 01:24:30 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StVertex.cxx,v 1.4 1999/04/28 22:27:39 fisyak Exp $";
+ *
 StVertex::StVertex()
 {
     mType = undefined;                           
@@ -35,6 +44,8 @@ StVertex::StVertex()
  * Modified to cope with new compiler version on Sun (CC5.0).
 StVertex::StVertex(dst_vertex_st* vtx)
   StVertex::StVertex():mType(undefined),mDaughters(new StVecPtrGlobalTrack),mParent(0),mQualityBitmask(0),mChiSquared(0){}
+  mType = undefined;                           
+  mParent = 0;                
  * Revision 2.2  1999/11/22 15:04:43  ullrich
 StVertex::StVertex(dst_vertex_st* vtx):mType(undefined),mDaughters(new StVecPtrGlobalTrack),mParent(0)
  *
@@ -70,7 +81,18 @@ void StVertex::setPosition(const StThreeVectorF& val) { mPosition = val; }
 void StVertex::setPositionError(const StThreeVectorF& val) { mPositionError = val; }  
     m(2,2) = mCovariantMatrix[2];
 void StVertex::setQualityBitmask(ULong_t val) { mQualityBitmask = val; } 
-StCollectionImp(Vertex)
+    m(3,3) = mCovariantMatrix[5];
+void StVertex::setChiSquared(Float_t val) { mChiSquared = val; }     
+    
+StThreeVectorF StVertex::momentum(Double_t B)
+{
+    if (mParent) {
+      return mParent->helix().momentum(B);
+    } else {
+      StThreeVectorF mMomentum;
+      for (Int_t i=0; i<numberOfDaughters(); i++) {
+        mMomentum += daughter(i)->helix().momentum(B);
+      }
       return mMomentum;
     }
 }

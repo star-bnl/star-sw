@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 1.2 1999/04/27 01:24:24 fisyak Exp $
+ * $Id: StSvtHit.cxx,v 1.3 1999/04/28 22:27:35 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
- * Revision 1.2  1999/04/27 01:24:24  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.3  1999/04/28 22:27:35  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.3  1999/04/28 22:27:35  fisyak
  * New version with pointer instead referencies
@@ -21,11 +21,15 @@
  *
  * Revision 1.2  1999/01/15 22:53:54  wenaus
  * version with constructors for table-based loading
+ *
+ * Revision 2.5  1999/12/13 20:16:19  ullrich
+#include "tables/dst_point.h"
 #include "StGlobalTrack.h"
-static const Char_t rcsid[] = "$Id: StSvtHit.cxx,v 1.2 1999/04/27 01:24:24 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StSvtHit.cxx,v 1.3 1999/04/28 22:27:35 fisyak Exp $";
 #include "dst_point.h"
  * Inlined layer(), sector() and ladder().
-static const Char_t rcsid[] = "$Id: StSvtHit.cxx,v 1.2 1999/04/27 01:24:24 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StSvtHit.cxx,v 1.3 1999/04/28 22:27:35 fisyak Exp $";
+#include "tables/dst_point.h"
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
 StCollectionImp(SvtHit)
@@ -49,7 +53,7 @@ StSvtHit::StSvtHit(dst_point_st* pt)
 
     //
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 1.2 1999/04/27 01:24:24 fisyak Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 1.3 1999/04/28 22:27:35 fisyak Exp $";
 
 ClassImp(StSvtHit)
     
@@ -81,10 +85,10 @@ StSvtHit::StSvtHit(const StThreeVectorF& p,
     const Float_t maxRange   = 22;
     mPositionError.setX(Float_t(svtx)/(1L<<26)); 
     ULong_t svty11 = pt.position[0]/(1L<<20);
-#if 0
     ULong_t svtz   = pt.position[1]/(1L<<10);
     mPositionError.setZ(Float_t(svtz)/(1L<<26));
 
+#if 0
 StVecPtrGlobalTrack StSvtHit::relatedTracks(const StTrackCollection& c)
     //
     StVecPtrGlobalTrack  result;
@@ -94,10 +98,9 @@ StVecPtrGlobalTrack StSvtHit::relatedTracks(const StTrackCollection& c)
 	if (find(hits.begin(), hits.end(), this) != hits.end())
 	    result.push_back(track);
 	//	if (find(hits.begin(), hits.end(), this) != hits.end())
+#endif
 	if (hits.FindObject(this))
 	  result.push_back(track);
-#endif
-StCollectionImp(SvtHit)
     }
     return result;
 ULong_t

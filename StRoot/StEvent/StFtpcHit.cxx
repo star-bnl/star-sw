@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.cxx,v 1.5 1999/04/27 01:24:19 fisyak Exp $
+ * $Id: StFtpcHit.cxx,v 1.6 1999/04/28 22:27:32 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.cxx,v $
- * Revision 1.5  1999/04/27 01:24:19  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.6  1999/04/28 22:27:32  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.6  1999/04/28 22:27:32  fisyak
  * New version with pointer instead referencies
@@ -21,13 +21,14 @@
  *
  * Revision 1.2  1999/01/15 22:53:42  wenaus
  * version with constructors for table-based loading
+ *
+#include "tables/dst_point.h"
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
-static const Char_t rcsid[] = "$Id: StFtpcHit.cxx,v 1.5 1999/04/27 01:24:19 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StFtpcHit.cxx,v 1.6 1999/04/28 22:27:32 fisyak Exp $";
 #include "dst_point.h"
-#ifdef __ROOT__
  * Changed method names xxxInCluster to xxxInHit
-static const Char_t rcsid[] = "$Id: StFtpcHit.cxx,v 1.5 1999/04/27 01:24:19 fisyak Exp $";
-#endif
+static const Char_t rcsid[] = "$Id: StFtpcHit.cxx,v 1.6 1999/04/28 22:27:32 fisyak Exp $";
+ * Revision 2.3  1999/11/09 19:35:09  ullrich
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
 StCollectionImp(FtpcHit)
@@ -50,7 +51,7 @@ StFtpcHit::StFtpcHit(dst_point_st* pt)
 
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StFtpcHit.cxx,v 1.5 1999/04/27 01:24:19 fisyak Exp $";
+static const char rcsid[] = "$Id: StFtpcHit.cxx,v 1.6 1999/04/28 22:27:32 fisyak Exp $";
 
 StMemoryPool StFtpcHit::mPool(sizeof(StFtpcHit));
 
@@ -82,23 +83,21 @@ StFtpcHit::StFtpcHit(const StThreeVectorF& p,
     const Float_t maxRange   = 270;
     mPositionError.setX(Float_t(ftpcx)/(1L<<17)); 
     ULong_t ftpcy11 = pt.position[0]/(1L<<20);
-#if 0
-StVecPtrGlobalTrack StFtpcHit::relatedTracks(const StTrackCollection& c)
+    ULong_t ftpcz   = pt.position[1]/(1L<<10);
 StFtpcHit::clone() { return new StFtpcHit(*this); }
 
 StVecPtrGlobalTrack StFtpcHit::relatedTracks(const StTrackCollection* c)
 {
-    
-    for (iter = c.begin(); iter != c.end(); iter++) {
+#if 0    
+    StVecPtrGlobalTrack    result;
     StGlobalTrack          *track;
-	const StVecPtrFtpcHit & hits = track->ftpcHits();
+	const StVecPtrFtpcHit &hits = track->ftpcHits();
 	if (find(hits.begin(), hits.end(), this) != hits.end())
 	const StVecPtrFtpcHit &hits = track->ftpcHits();
 	//	if (find(hits->begin(), hits->end(), this) != hits->end())
+#endif
 	if (hits.FindObject(this))
 	    result.push_back(track);
-#endif
-StCollectionImp(FtpcHit)
     }
     return result;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cxx,v 1.1 1999/04/27 01:24:32 fisyak Exp $
+ * $Id: StXiVertex.cxx,v 1.2 1999/04/28 22:27:40 fisyak Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
@@ -11,8 +11,20 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cxx,v $
- * Revision 1.1  1999/04/27 01:24:32  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.2  1999/04/28 22:27:40  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.2  1999/04/28 22:27:40  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.8  1999/04/14 22:04:30  genevb
+ * Fixed a memory leak
+ *
+ * Revision 1.7  1999/04/13 23:27:21  genevb
+ * Slightly refined vertex code, updated V0, Xi vertex documentation
+ *
+ * Revision 1.6  1999/04/09 20:02:11  genevb
+ * Change constancy of new functions
  *
  * Revision 1.5  1999/04/09 19:34:05  genevb
  * Added vertex daughter functionality
@@ -31,12 +43,10 @@
  *
  *
  * Revision 2.1  1999/10/28 22:28:15  ullrich
-static const Char_t rcsid[] = "$Id: StXiVertex.cxx,v 1.1 1999/04/27 01:24:32 fisyak Exp $";
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
-#ifdef __ROOT__
 #include "StXiVertex.h"
-static const Char_t rcsid[] = "$Id: StXiVertex.cxx,v 1.1 1999/04/27 01:24:32 fisyak Exp $";
-#endif
+static const Char_t rcsid[] = "$Id: StXiVertex.cxx,v 1.2 1999/04/28 22:27:40 fisyak Exp $";
 #include "tables/dst_xi_vertex.h"
 #include "StTrackGeometry.h"
 #include "tables/St_dst_vertex_Table.h"
@@ -72,17 +82,14 @@ Float_t StXiVertex::dcaV0ToPrimaryVertex() const
       return mV0Vertex->dcaParentToPrimaryVertex();
     } else {
       return 0;
-StThreeVectorF& StXiVertex::momentumOfV0() const
+    }
 StXiVertex::dcaV0ToPrimaryVertex() const
-    StThreeVectorF* v0Mom;
 {
 StThreeVectorF StXiVertex::momentumOfV0() const
     else
-      v0Mom = new StThreeVectorF(nMom + pMom);
-    } else {
-      v0Mom = new StThreeVectorF();
+        return 0;
       const StThreeVectorF& nMom = mV0Vertex->momentumOfDaughter(negativeTrack);
-    return *v0Mom;
+      const StThreeVectorF& pMom = mV0Vertex->momentumOfDaughter(positiveTrack);
       return (nMom + pMom);
 StXiVertex::momentumOfV0() const
     return StThreeVectorF();
@@ -107,6 +114,12 @@ void StXiVertex::setType(StVertexType)
     cerr << "StXiVertex::setType(): change of type not allowed, class has fixed type." << endl;
 StXiVertex::bachelor() { return mDaughter; }
 
+void StXiVertex::setV0Vertex(StV0Vertex* v0vtx)
+
+void
+StXiVertex::setDcaParentToPrimaryVertex(Float_t val) { mDcaParentToPrimaryVertex = val; }
+
+Double_t StXiVertex::chargeOfBachelor(Double_t B)
 void
     StGlobalTrack* b = bachelor();
     return ( (b) ? b->helix().charge(B) : 0 ) ;

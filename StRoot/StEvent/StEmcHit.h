@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcHit.h,v 1.3 1999/04/27 01:24:17 fisyak Exp $
+ * $Id: StEmcHit.h,v 1.4 1999/04/28 22:27:31 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEmcHit.h,v $
- * Revision 1.3  1999/04/27 01:24:17  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:31  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:31  fisyak
  * New version with pointer instead referencies
@@ -27,6 +27,7 @@
  *
 
 #ifndef StEmcHit_hh
+#define StEmcHit_hh
 #include "StObject.h"
 class StEmcHit : public TObject {
 #include <iostream.h>
@@ -51,12 +52,10 @@ public:
 
 protected:
     Int_t   mId;
-    ClassDef(StEmcHit,1)  //StEmcHit structure
+    Float_t mPhi;
     Float_t mEta;
-
     Float_t mEnergy;
   ClassDef(StEmcHit,1)  //StEmcHit structure
-#ifndef __CINT__
 };
 StCollectionDef(EmcHit)
 
@@ -84,7 +83,7 @@ inline void StEmcHit::setEnergy(Float_t val) { mEnergy = val; };
 
 inline void StEmcHit::setId(Int_t i) { mId = i; };
 
-#endif
+inline void StEmcHit::setPhi(Float_t val) { mPhi = val; };
 
 inline void StEmcHit::setEta(Float_t val) { mEta = val; };
 

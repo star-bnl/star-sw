@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 1.3 1999/04/27 01:24:27 fisyak Exp $
+ * $Id: StTrackFitTraits.cxx,v 1.4 1999/04/28 22:27:37 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
- * Revision 1.3  1999/04/27 01:24:27  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.4  1999/04/28 22:27:37  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/04/28 22:27:37  fisyak
  * New version with pointer instead referencies
@@ -24,10 +24,8 @@
  *
  * Revision 2.4  2000/01/20 14:43:39  ullrich
  *
-#ifdef __ROOT__
  * Revision 2.2  1999/11/01 12:45:14  ullrich
-static const Char_t rcsid[] = "$Id: StTrackFitTraits.cxx,v 1.3 1999/04/27 01:24:27 fisyak Exp $";
-#endif
+static const Char_t rcsid[] = "$Id: StTrackFitTraits.cxx,v 1.4 1999/04/28 22:27:37 fisyak Exp $";
 #include "tables/dst_track.h"
 ClassImp(StTrackFitTraits)
  * Adapted new StArray version. First version to compile on Linux and Sun.

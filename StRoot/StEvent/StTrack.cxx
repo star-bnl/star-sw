@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 1.4 1999/04/27 01:24:27 fisyak Exp $
+ * $Id: StTrack.cxx,v 1.5 1999/04/28 22:27:37 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
- * Revision 1.4  1999/04/27 01:24:27  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.5  1999/04/28 22:27:37  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.5  1999/04/28 22:27:37  fisyak
  * New version with pointer instead referencies
@@ -34,20 +34,18 @@
  * Revision 1.2  1999/01/15 22:54:02  wenaus
  * version with constructors for table-based loading
  *
-static const Char_t rcsid[] = "$Id: StTrack.cxx,v 1.4 1999/04/27 01:24:27 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StTrack.cxx,v 1.5 1999/04/28 22:27:37 fisyak Exp $";
  * New decoding for dst_track::method. New enum added.
-#ifdef __ROOT__
  *
-static const Char_t rcsid[] = "$Id: StTrack.cxx,v 1.4 1999/04/27 01:24:27 fisyak Exp $";
-#endif
-StTrack::StTrack() : mHelix(0., 0., 0., StThreeVectorF(), 1)
+static const Char_t rcsid[] = "$Id: StTrack.cxx,v 1.5 1999/04/28 22:27:37 fisyak Exp $";
+ * Removed method unlink() and all calls to it.
 ClassImp(StTrack)
 ClassImp(StTrack)
 StTrack::StTrack() : mHelix(0, 0, 0, StThreeVectorD())
-static const char rcsid[] = "$Id: StTrack.cxx,v 1.4 1999/04/27 01:24:27 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 1.5 1999/04/28 22:27:37 fisyak Exp $";
     mStartVertex = 0;
     mStopVertex   = 0;
-  mHelix(0., 0., 0., StThreeVectorF(), 1), mFitTraits(trk)
+  mHelix(0, 0, 0, StThreeVectorD()), mFitTraits(trk)
 StTrack::StTrack(dst_track_st* trk) : 
     mStartVertex = 0;
     mStopVertex   = 0;
@@ -57,7 +55,7 @@ StTrack::StTrack(dst_track_st* trk) :
         mGeometry = 0;
     mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
 StTrack::StTrack(dst_track_st* trk,
-                 StThreeVectorF& origin,
+                 Double_t curvature,
                  Double_t dip,
   mHelix(curvature, dip, phase, origin, h), mFitTraits(trk)
 		 Int_t h) : 

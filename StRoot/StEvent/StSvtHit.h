@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 1.2 1999/04/27 01:24:25 fisyak Exp $
+ * $Id: StSvtHit.h,v 1.3 1999/04/28 22:27:36 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
- * Revision 1.2  1999/04/27 01:24:25  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.3  1999/04/28 22:27:36  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.3  1999/04/28 22:27:36  fisyak
  * New version with pointer instead referencies
@@ -31,11 +31,12 @@
  * Revision 1.2  1999/01/15 22:53:55  wenaus
  * version with constructors for table-based loading
  *
-
+ * Revision 2.4  1999/11/11 11:03:57  ullrich
+ * Inlined layer(), sector() and ladder().
  *
 class StVecPtrGlobalTrack;
 class StGlobalTrackCollection;
-#include "tables/dst_point.h"
+#include "StArray.h"
  * Memory now allocated using StMemoryPool via overloaded new/delete
 #include "StGlobalTrack.h"
  *
@@ -47,12 +48,12 @@ using namespace std;
 	     const StThreeVectorF&,
 	     Float_t, UChar_t = 0);
     StSvtHit(dst_point_st*);
-#if 0    
+    
     StVecPtrGlobalTrack relatedTracks(const StGlobalTrackCollection&);
-#endif
-    ClassDef(StSvtHit,1)  //StSvtHit structure
+#ifndef __CINT__    
   StVecPtrGlobalTrack relatedTracks(const StGlobalTrackCollection&);
 #endif
+  ClassDef(StSvtHit,1)  //StSvtHit structure
 public:
 StCollectionDef(SvtHit)
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.h,v 1.1 1999/04/27 01:24:32 fisyak Exp $
+ * $Id: StXiVertex.h,v 1.2 1999/04/28 22:27:41 fisyak Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
@@ -11,8 +11,23 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.h,v $
- * Revision 1.1  1999/04/27 01:24:32  fisyak
- * Fix intermidaiate version with pointer instead of referencies
+ * Revision 1.2  1999/04/28 22:27:41  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.2  1999/04/28 22:27:41  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.8  1999/04/19 15:54:10  genevb
+ * Added momentum() to vertex classes
+ *
+ * Revision 1.7  1999/04/14 22:04:30  genevb
+ * Fixed a memory leak
+ *
+ * Revision 1.6  1999/04/13 23:27:21  genevb
+ * Slightly refined vertex code, updated V0, Xi vertex documentation
+ *
+ * Revision 1.5  1999/04/09 20:02:12  genevb
+ * Change constancy of new functions
  *
  * Revision 1.4  1999/04/09 19:34:06  genevb
  * Added vertex daughter functionality
@@ -27,16 +42,16 @@
  * Add new StXiVertex
  *
  *
-#ifdef __ROOT__
 #include "TObject.h"
-#endif
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
+#include "StObject.h"
  * Revision 2.0  1999/10/12 18:43:37  ullrich
 #include "tables/dst_vertex.h"
 #include "tables/dst_xi_vertex.h"
+ * Completely Revised for New Version
 #include "dst_vertex.h"
-
+#include "dst_xi_vertex.h"
 #ifndef __ROOT__
 #include <float.h>
 #endif
@@ -50,8 +65,11 @@ class StXiVertex : public StVertex {
 
     Float_t dcaBachelorToPrimaryVertex() const;
     Float_t dcaV0ToPrimaryVertex() const;
-    StThreeVectorF& momentumOfV0() const;
+    Float_t dcaDaughters() const;
+    Float_t dcaParentToPrimaryVertex() const;
     StPtrVecTrack         daughters(StTrackFilter&);
+    StThreeVectorF momentumOfV0() const;
+    StThreeVectorF momentum() const;
     StV0Vertex* v0Vertex() const;
     StGlobalTrack* bachelor();
     Double_t chargeOfBachelor(Double_t B);
@@ -67,9 +85,7 @@ class StXiVertex : public StVertex {
     void setDcaDaughters(Float_t);
     void setV0Vertex(StV0Vertex*);
     StThreeVectorF mMomentumOfBachelor;
-#ifdef __ROOT__
-	ClassDef(StXiVertex,1)  //StXiVertex structure
-#endif
+    void removeDaughter(StTrack*);
 
     StV0Vertex*          mV0Vertex;          // Pointer to V0 daughter
   ClassDef(StXiVertex,1)  //StXiVertex structure
@@ -78,15 +94,19 @@ class StXiVertex : public StVertex {
 inline Float_t StXiVertex::dcaBachelorToPrimaryVertex () const
 {
     return mDcaBachelorToPrimaryVertex;
-StXiVertex::momentumOfBachelor() const
+}
+
+inline const StThreeVectorF&
 StXiVertex::momentumOfBachelor() const { return mMomentumOfBachelor; }
-    return mMomentumOfBachelor;
+
 inline StThreeVectorF StXiVertex::momentum() const
 {
     return (mMomentumOfBachelor + momentumOfV0());
 }
 
 inline Float_t StXiVertex::dcaDaughters() const { return mDcaDaughters; }
+
+inline Float_t StXiVertex::dcaParentToPrimaryVertex() const { return mDcaParentToPrimaryVertex; }
 
 inline StV0Vertex* StXiVertex::v0Vertex() const { return mV0Vertex; }
 
