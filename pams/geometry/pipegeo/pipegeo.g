@@ -2,16 +2,30 @@
 Module PIPEGEO is the geometry  of the STAR beam pipe.
   Created  30-03-99
   Author   W.B.Christie
-* modifications:
-* PN, 30-03-99:  outer part is Aluminum, not steel
-* 14-09-99, Holm Huemmler: include beampipe wrap and shield
+
+* $Id: pipegeo.g,v 1.6 2003/12/17 22:18:09 potekhin Exp $
+*
+* $Log: pipegeo.g,v $
+* Revision 1.6  2003/12/17 22:18:09  potekhin
+* a) Put in CVS tags so you can read this
+* b) Added a control structure for encapsulated
+* versioning off the steering file geometry.g
+* c) Added the aluminum pipe config as as
+* separate entry, as opposed to setting
+* parameters directly from geometry.g
+* d) Added a version with a slim central
+* pipe section, so futher the studies related
+* to the PIXL detector
+*
 ******************************************************************************
 +CDE,AGECOM,GCUNIT.
 *
       Content  PIPE,PIPC,PIPO,PIPS,PIPB,PIPT,PFLO,PFLT,PVAC,PVAO,PVAS,
                PVAB,PRIS,PRID,PRIB,PIPI,PVAI,PVAT,PWRP,PSLD
-*
-      Structure PIPG {version,  BeInnR,   BeOutR,   BeLeng,   char Material,
+
+      Structure PIPV {version,  int pipeConfig}
+      Structure PIPG {config,
+                      BeInnR,   BeOutR,   BeLeng,   char Material,
                       S1InnR,   S1OutR,   S1Leng,   S2InnR,   S2OutR,  S2Leng,
                       S3InnR,   S3OutR,   S3Leng,
                       S4InnR,   S4OutR,   S4Leng,
@@ -19,14 +33,19 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
                       RibNum,   RibSpa,   RibThk,   RibOutR,  RibCent,
                       WrpInnR,  WrpOutR,  WrpLeng, 
                       SldInnR,  SldOutR,  SldLeng}
-*
-*    local variable for section positioning
-      Real    Z1,Z2,Z3,Z4,R1,R2,vacuum/1.e-5/
-*
+
+      Real    Z1,Z2,Z3,Z4,R1,R2,vacuum/1.e-5/ ! local variables for section positioning
 * -----------------------------------------------------------------------------
 *
+   FILL PIPV    !  Beam pipe version
+      version    =  1    ! geometry version
+      pipeConfig =  2    ! pipe version (2 is the default, unfortunately)
+   endFill
+
+* note that in the following configs 1 and 2 have been historically swapped
+
    FILL PIPG    !  Beam Pipe data
-      version   =  2    ! geometry version     
+      config   =  2     ! both material and geo params
       BeInnR    = 3.9   ! Berillium section inner radius
       BeOutR    = 4.0   ! Berillium section outer radius
       BeLeng    = 76.2  ! Berillium section half length
@@ -59,23 +78,42 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
       SldLeng   = 300   ! length of SVT beam pipe shield
 
    FILL PIPG    !  Beam Pipe data
-      version   =  1    ! geometry version     
+      config   =  1     ! both material and geo params
       material  ='IRON' ! material is steel
+   endfill
+
+* some seriously obsolete config
+   FILL PIPG    !  Beam Pipe data
+      config   = 3      ! both material and geo params
+      BeLeng   = 0      ! Berillium section half length
+      S1Leng   = 230    ! first Aluminum section half length
+   endfill
+
+   FILL PIPG    !  Beam Pipe data
+      config   =  4     ! both material and geo params
+      BeInnR    = 1.2   ! Berillium section inner radius
+      BeOutR    = 1.276 ! Berillium section outer radius
    endfill
 *
 *
-      USE      PIPG  
+      USE      PIPV
+      USE      PIPG config=PIPV_pipeConfig;
+
       prin1  pipg_material; (' beam pipe material - ',a4)
+      write(*,*)  'Inner radius of the Beam Pipe: ', pipg_BeInnR
+
 * calculate positions of the 1st, 2nd, and 3rd breaks in the expected pipe.
       Z1 = pipg_BeLeng + 2*pipg_S1Leng + pipg_flange1t
       Z2 = Z1 - 2*pipg_flange1t + 2*pipg_s2leng
       Z3 = Z2 + pipg_flange1t +2*pipg_s3leng +2*pipg_conelen +2*pipg_s4leng
+
 * Calculate the center position of the bell transition cone
       Z4 = Z2 + pipg_flange1t + 2*pipg_s3leng + pipg_conelen 
+
 * calculate mother PCON radii
       R1 = pipg_SldOutR
       R2 = pipg_S4outR
-*
+
       Create   PIPE
       Position PIPE in CAVE 
       Position PIPE in CAVE  ThetaZ=180
