@@ -67,7 +67,7 @@
         else
           If (tpad<41) then
              isdet = mod(42-tpad,3)
-             tpad  = (tpad+2)/2
+             tpad  = (tpad+2)/3
           else If (tpad<73) then
              tpad=tpad-41+14
           else
