@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.409 2004/04/07 22:34:50 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.410 2004/04/09 22:15:54 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -190,7 +190,7 @@ Bfc_st BFC1[] = {
                                                                           "Laser Calibration Chain",kFALSE},
   {"L3Counter","" ,"","db,detDb,xin,l3count","","",                    "L3 Counter extraction pass",kFALSE},
   {"VtxSeedCal","","",
-   "ppOpt,ry2001,in,tpc_daq,tpc,global,-v0,-xi,-kink,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
+   "ppOpt,ry2001,in,tpc_daq,tpc,global,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
 
 
@@ -426,7 +426,7 @@ Bfc_st BFC1[] = {
                                                                                     "EMC raw chain",kFALSE},
 
 
-  {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdxY2"
+  {"global"      ,"globalChain","","globT,Match,vertex,primary,dst,SCL,dEdxY2"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -487,9 +487,9 @@ Bfc_st BFC1[] = {
 
   {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker",
                                                                           "Find Kinks from StEvent",kFALSE},
-  {"V02"         ,"v02","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
+  {"V02"         ,"v02","","db,MuDST,-V0","StV0FinderMaker","StSecondaryVertexMaker",
                                                                             "Find V0s from StEvent",kFALSE},
-  {"Xi2"         ,"xi2","","db,MuDST,-V02","StXiFinderMaker","StSecondaryVertexMaker",
+  {"Xi2"         ,"xi2","","db,MuDST,-V02,-Xi","StXiFinderMaker","StSecondaryVertexMaker",
                                                                          "Xis AND V0s from StEvent",kFALSE},
   {"V0svt"       ,"v0svt","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
                                                               "Special: use estGlobal from StEvent",kFALSE},
@@ -743,7 +743,7 @@ Bfc_st BFC2[] = {
                                                                           "Laser Calibration Chain",kFALSE},
   {"L3Counter","" ,"","db,detDb,xin,l3count","","",                    "L3 Counter extraction pass",kFALSE},
   {"VtxSeedCal","","",
-   "ppOpt,ry2001,in,tpc_daq,tpc,global,-v0,-xi,-kink,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
+   "ppOpt,ry2001,in,tpc_daq,tpc,global,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
 
 
@@ -980,7 +980,7 @@ Bfc_st BFC2[] = {
   {"emcDY2"   ,"",""                 ,"db,StEvent,EmcUtil,PreEcl,Epc","StEmcADCtoEMaker","StEmcADCtoEMaker",
                                                                                     "EMC raw chain",kFALSE},
   //  Reminder: You are within the ITTF chain definitions
-  {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdxY2"
+  {"global"      ,"globalChain","","globT,Match,vertex,primary,dst,SCL,dEdxY2"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -1048,9 +1048,9 @@ Bfc_st BFC2[] = {
   //  Reminder: You are within the ITTF chain definitions
   {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker",
                                                                           "Find Kinks from StEvent",kFALSE},
-  {"V02"         ,"v02","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
+  {"V02"         ,"v02","","db,MuDST,-V0","StV0FinderMaker","StSecondaryVertexMaker",
                                                                             "Find V0s from StEvent",kFALSE},
-  {"Xi2"         ,"xi2","","db,MuDST,-V02","StXiFinderMaker","StSecondaryVertexMaker",
+  {"Xi2"         ,"xi2","","db,MuDST,-V02,-Xi","StXiFinderMaker","StSecondaryVertexMaker",
                                                                          "Xis AND V0s from StEvent",kFALSE},
   {"V0svt"       ,"v0svt","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
                                                               "Special: use estGlobal from StEvent",kFALSE},
