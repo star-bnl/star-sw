@@ -18,7 +18,7 @@
      >        Iw,Ihit,Ltra,Ntbeam,Nttarg,Nhit,N10,
      >        Nvs(15)/15*0/,NBV(15),IP,ISTAT,IDPDG,MOTH(2),IDAU(2)
       real    VMOD,Tofg,vert(4),pvert(4),ubuf(100),Digi(15),
-              P(5),V(5),theta,y,R,AMASS,TIME
+              P(5),V(5),theta,y,R,AMASS,TIME,pt
 *
    
 * do not allow run without geometry
@@ -48,9 +48,12 @@
 * separate histogram for primary and secondary
          if (Nttarg<=0) then
             call hfill(12,float(Ipart),1.,1.)
-            theta=atan2(sqrt(pvert(1)**2+pvert(2)**2),pvert(3))
+            pt    = VMOD(pvert,2)
+            theta = atan2(pt,pvert(3))
             call hfill(15,theta,1.,1.)
-            y=-alog(tan(theta/2))
+
+            y     = sign(10.,pvert(3))
+            if (pt>0.001) y=-alog(tan(theta/2))
             call hfill(16,y,1.,1.)
          endif
          if (Nttarg>0)  call hfill(14,float(mod(Ntbeam,50)),1.,1.)
