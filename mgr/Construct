@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.123 2003/01/11 20:18:54 jeromel Exp $
+# $Id: Construct,v 1.124 2003/01/12 21:54:03 perev Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
@@ -51,8 +51,8 @@ if ($def->{CXX}  =~ m/-Zoi/ ){
     $OBJ = $BUILD . "/OBJ";
 }
 $INCLUDE = "#" . $include;
-$EXPORT  = "#.share";
-#$EXPORT  = $BUILD."/.share";
+#$EXPORT  = "#.share";
+$EXPORT  = $BUILD . "/.share";
 $LIBPATH = $LIB;
 print "Set LIB = $LIB BIN = $BIN OBJ = $OBJ SHARE = $BUILD\n";
 print "    INCLUDE = $INCLUDE LIBPATH = $LIBPATH\n";
