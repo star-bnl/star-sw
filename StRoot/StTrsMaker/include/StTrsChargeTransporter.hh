@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsChargeTransporter.hh,v 1.2 1999/03/15 13:45:08 lasiuk Exp $
+ * $Id: StTrsChargeTransporter.hh,v 1.3 2000/02/24 16:23:48 long Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsChargeTransporter.hh,v $
+ * Revision 1.3  2000/02/24 16:23:48  long
+ * transportToWire(StTrsMiniChargeSegment&) --->transportToWire(StTrsMiniChargeSegment&,double &,double &) to calculate diffussion as a function of field
+ *
  * Revision 1.2  1999/03/15 13:45:08  lasiuk
  * omegaTau is calculated assuming mobility is independent of electric field
  *
@@ -53,7 +56,7 @@ public:
     //StTrsChargeTransporter& operator=(const StTrsChargeTransporter&);
 
     // The Real Stuff is here...FAST or SLOW
-    virtual void   transportToWire(StTrsMiniChargeSegment&)       = 0;
+    virtual void   transportToWire(StTrsMiniChargeSegment&,double &,double &)       = 0;
     virtual double chargeAttachment(double)                 const = 0;
     virtual double wireGridTransmission()                         = 0;
 
