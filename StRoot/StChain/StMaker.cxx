@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.150 2004/08/02 19:44:14 perev Exp $
+// $Id: StMaker.cxx,v 1.151 2004/08/03 00:49:03 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -462,7 +462,7 @@ void StMaker::Clear(Option_t *option)
       StMkDeb::SetCurrent(curr);
    }
    TCollection::EmptyGarbageCollection();
-   doPs(maker->GetName(),"Clear");
+   doPs(GetName(),"Clear");
    // Maker=StChain or whatever is called "Eread" would
    // reach this with a NULL pointer when executed from a macro
    // such as doEvent(). Same reason for the patch below ...
@@ -1328,6 +1328,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.151  2004/08/03 00:49:03  perev
+// bug fix, wrong maker for dops name
+//
 // Revision 1.150  2004/08/02 19:44:14  perev
 // Bug fix, doPs Clear was not called
 //
