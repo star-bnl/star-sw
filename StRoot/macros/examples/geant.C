@@ -1,4 +1,4 @@
-// $Id: geant.C,v 1.13 2000/10/04 19:51:19 fisyak Exp $
+// $Id: geant.C,v 1.14 2001/05/30 18:24:59 perev Exp $
 //=======================================================================
 // owner: Pavel Nevski
 // what it does: 
@@ -6,8 +6,6 @@
 //
 //#define gtrack
 TBrowser *b = 0;
-class StChain;
-StChain  *chain=0;
 class St_geant_Maker;
 St_geant_Maker *geant=0;
 void geant(const Int_t Nevents=1,
