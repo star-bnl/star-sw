@@ -37,7 +37,7 @@ public:
 
     int getCurrentSize() const;
     
-    string& getName() const;
+    const string& getName() const;
     
 protected:
 
@@ -48,7 +48,11 @@ protected:
     void* returnObject();
     
     virtual void* makeNewObject() const = 0;
-    
+
+    //Sub class must clean up vector    
+    void clearAndDestroy();
+    virtual void destroyObject(void*) = 0;
+
 private:
     
     StiObjectFactory(); //Not implemented
@@ -63,9 +67,11 @@ private:
     int incrementalSize;
     int maxIncrementCount;
     int incrementCount;
-    
+
     t_vector container;
     t_vector::iterator mCurrent;    
+    
+    
 };
 
 
@@ -105,6 +111,11 @@ inline void StiObjectFactory::initialize()
 	createObjects(originalSize);
 	initialized=true;
     }
+}
+
+inline const string& StiObjectFactory::getName() const
+{
+    return name;
 }
 
 #endif

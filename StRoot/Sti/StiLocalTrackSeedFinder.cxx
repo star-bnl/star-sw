@@ -2,6 +2,10 @@
 //M.L. Miller (Yale Software)
 //10/01
 
+//scl
+#include "StThreeVectorF.hh"
+#include "StThreeVector.hh"
+
 //StiGui
 #include "StiGui/StiDisplayManager.h"
 #include "StiGui/StiRootDrawableHits.h"
@@ -128,7 +132,13 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
 {
     mMessenger <<"StiLocalTrackSeedFinder::makeTrack()"<<endl;
     StiKalmanTrack* track = 0;
-    mdrawablehits->push_back(hit);
+    const StThreeVectorF& pos = hit->globalPosition();
+
+    //mdrawablehits->push_back(StThreeVector<double>(pos.x(), pos.y(), pos.z() ));
+    mdrawablehits->push_back( pos.x() );
+    mdrawablehits->push_back( pos.y() );
+    mdrawablehits->push_back( pos.z() );
+
     mdrawablehits->fillHitsForDrawing();
 
     mDetStore->setToDetector(*mCurrentDet);

@@ -17,10 +17,19 @@ StiObjectFactory::StiObjectFactory(const string& newName,  int original, int inc
 
 StiObjectFactory::~StiObjectFactory() 
 {
+    // cout <<"StiObjectFactor destructor.  Deleting "<<getName()<<endl;
     for (t_vector::iterator it=container.begin(); it!=container.end(); ++it) {
 	delete (*it);
 	(*it) = 0;
     }
+}
+
+void StiObjectFactory::clearAndDestroy()
+{
+    for (t_vector::iterator it=container.begin(); it!=container.end(); ++it) {
+	destroyObject(*it);
+    }
+    container.clear();
 }
 
 void* StiObjectFactory::returnObject() 

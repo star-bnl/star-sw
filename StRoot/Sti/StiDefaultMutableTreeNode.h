@@ -87,8 +87,8 @@ class StiDefaultMutableTreeNode : public StiTreeNode
   int getLevel() ;
   StiTreeNode *  getRoot() ;
   bool isRoot();
-  StiDefaultMutableTreeNode *  getNextNode() ;
-  StiDefaultMutableTreeNode *  getPreviousNode(); 
+  StiDefaultMutableTreeNode *  getNextNode();
+  StiDefaultMutableTreeNode *  getPreviousNode();
   bool isNodeChild(StiTreeNode *  aNode) ;
   StiTreeNode *  getFirstChild() ;
   StiTreeNode *  getLastChild() ;
