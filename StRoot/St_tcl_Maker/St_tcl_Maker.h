@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.17 1999/11/20 20:53:51 snelling Exp $
+// $Id: St_tcl_Maker.h,v 1.18 1999/11/22 23:18:46 snelling Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.18  1999/11/22 23:18:46  snelling
+// added Li Qun's changes to tfs
+//
 // Revision 1.17  1999/11/20 20:53:51  snelling
 // Removed hitclus table and added entries to tphit table
 //
@@ -54,13 +57,14 @@
 // Revision 1.1  1998/07/21 00:36:46  fisyak
 // tcl and tpt
 //
-#ifndef STAR_St_tcl_Maker
-#define STAR_St_tcl_Maker
+#ifndef St_tcl_Maker_H
+#define St_tcl_Maker_H
 
 enum eTcl {
  TCC_PAD = 182, 
  TCC_BIN = 512
 };
+
 const float CENTIMETERS_PER_TIME_BIN 	= 0.4082;
 const float LINEARIZATION 		= 1.2;
 
@@ -202,7 +206,7 @@ class St_tcl_Maker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.17 1999/11/20 20:53:51 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.18 1999/11/22 23:18:46 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(St_tcl_Maker, 1)       //StAF chain virtual base class for Makers
 };

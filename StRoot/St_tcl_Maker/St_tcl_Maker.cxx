@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.49 1999/11/20 20:53:51 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.50 1999/11/22 23:18:45 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.50  1999/11/22 23:18:45  snelling
+// added Li Qun's changes to tfs
+//
 // Revision 1.49  1999/11/20 20:53:51  snelling
 // Removed hitclus table and added entries to tphit table
 //
@@ -177,6 +180,7 @@
 #include "tpc/St_tte_hit_match_Module.h"
 #include "tpc/St_tfs_g2t_Module.h"
 #include "tpc/St_tfs_filt_Module.h"
+#include "tpc/St_tfs_fill_tphit_pad_tmbk_Module.h"
 #include "TH1.h"
 
 ClassImp(St_tcl_Maker)
@@ -479,7 +483,14 @@ Int_t St_tcl_Maker::Make() {
 	  Int_t Res_tfs_filt = tfs_filt(tphit);
 	  if ( Res_tfs_filt !=  kSTAFCV_OK){ 
 	    cout << " Problem running tfs_filt..." << endl;
-	  } 
+	  }
+	  
+	  Int_t Res_tfs_fill_tphit_pad_tmbk=
+	    tfs_fill_tphit_pad_tmbk(m_tpg_pad_plane,tphit);
+	  if ( Res_tfs_fill_tphit_pad_tmbk !=  kSTAFCV_OK){ 
+	    cout << " Problem running tfs_fill_tphit_pad_tmbk..." << endl;
+	  }
+	  
 	}
 	if (Debug()) cout << "finish tfs_run" << endl;
       }
