@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.59 1999/07/29 01:05:23 fisyak Exp $
+// $Id: StMaker.cxx,v 1.60 1999/08/06 13:01:37 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.60  1999/08/06 13:01:37  fisyak
+// Add Active flag
+//
 // Revision 1.59  1999/07/29 01:05:23  fisyak
 // move bfc to StBFChain
 //
@@ -175,7 +178,7 @@ StMaker::StMaker()
 }
 
 //_____________________________________________________________________________
-StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker")
+StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker"),fActive(kTRUE)
 {
    SetMode();
    m_Inputs = 0;
@@ -593,14 +596,16 @@ Int_t StMaker::Make()
    TIter nextMaker(tl);
    StMaker *maker;
    while ((maker = (StMaker*)nextMaker())) {
-  // Call Maker
-     maker->StartMaker();
-     ret = maker->Make();
-     maker->EndMaker(ret);
+     if (maker->IsActive()) {
+       // Call Maker
+       maker->StartMaker();
+       ret = maker->Make();
+       maker->EndMaker(ret);
      
-     if (Debug()) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
-
-     if (ret>kStWarn) { if (Debug()) maker->ls(3); return ret;}
+       if (Debug()) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
+       
+       if (ret>kStWarn) { if (Debug()) maker->ls(3); return ret;}
+     }
    }
    return kStOK;
 }

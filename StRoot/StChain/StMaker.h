@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.30 1999/07/29 01:05:23 fisyak Exp $
+// $Id: StMaker.h,v 1.31 1999/08/06 13:01:38 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.31  1999/08/06 13:01:38  fisyak
+// Add Active flag
+//
 // Revision 1.30  1999/07/29 01:05:23  fisyak
 // move bfc to StBFChain
 //
@@ -113,6 +116,7 @@ protected:
    TStopwatch      m_Timer;             //Timer object
 
    StMaker        *gStChain;  		//???? Temporary ?????
+   Bool_t          fActive;             // true if active
 public:
 
 //		Constructor & Destructor
@@ -182,12 +186,14 @@ public:
    virtual TList       *GetMakeList() const ;
    virtual StMaker     *GetParentMaker () const;
    virtual StMaker     *GetMaker (const char *mkname);
+   virtual Bool_t       IsActive() {return fActive;}
    virtual StMaker     *Maker (const char *mkname){return GetMaker (mkname);};
 
 
 //    Setters for flags and switches
 
-   virtual void        	SetDebug(Int_t l=1){m_DebugLevel=l;}
+   virtual void        	SetDebug(Int_t l=1){m_DebugLevel=l;}     // *MENU*
+   virtual void         SetActive(Bool_t k=kTRUE){fActive = k;}  // *MENU*
    virtual void       	SetAlias(const char* log,const char* act,const char* dir=".aliases");
    virtual void       	AddAlias(const char* log,const char* act,const char* dir=".aliases");
    virtual void       	SetInput(const char* log,const char* act){SetAlias(log,act);};
@@ -195,7 +201,7 @@ public:
    virtual void       	SetOutput(const char* log,St_DataSet *ds);
    virtual void       	SetOutput(St_DataSet *ds){SetOutput(0,ds);};
    virtual void       	SetOutputAll(St_DataSet *ds);
-   virtual void   	SetMode(Int_t mode=0)   {m_Mode=mode;}
+   virtual void   	SetMode(Int_t mode=0)   {m_Mode=mode;}   // *MENU*
 
    virtual Double_t     RealTime(){ return m_Timer.RealTime();}
    virtual Double_t     CpuTime() { return m_Timer.CpuTime();}
@@ -213,7 +219,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.30 1999/07/29 01:05:23 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.31 1999/08/06 13:01:38 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };
