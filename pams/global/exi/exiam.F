@@ -301,6 +301,7 @@ c*** decide here if it is a good candidate (pgj: removed lambda mass check)
      >          (rv .gt. rv_xi(id_det))    ) THEN
 
 c*** calculate xi impact parameter - careful, needs main vertex at (0,0,0)
+c*** Not any more HLC 3/3/98
 
               CALL track_mom(trkb,0,pb,bfield(3))
 
