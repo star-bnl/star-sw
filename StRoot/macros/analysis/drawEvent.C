@@ -1,9 +1,12 @@
-// $Id: drawEvent.C,v 1.2 1999/07/13 00:57:57 fine Exp $
+//*-- Author :  Valeri Fine (fine@bnl.gov)
+// $Id: drawEvent.C,v 1.3 1999/07/14 01:47:15 fine Exp $
 // $Log: drawEvent.C,v $
+// Revision 1.3  1999/07/14 01:47:15  fine
+// New macros derived from doEvent to show StEventDisplayMaker
+//
 // Revision 1.2  1999/07/13 00:57:57  fine
 // replace the author\'s name
 //
-//*-- Author :  Valeri Fine (fine@bnl.gov)
 // Revision 1.1  1999/07/13 00:54:53  fine
 //  New macro based on doEvent but with 3D graphics
 //
@@ -16,13 +19,13 @@
 // doEvents.C
 //
 // Description: 
-// Chain to read events from files or database into StEvent and analyze
+// Chain to read events from files or database into StEvent and create its' 3D view
 //
 // Environment:
 //  Software developed for the STAR Detector at Brookhaven National Laboratory
 //
 // Author List: 
-//  Torre Wenaus, BNL  2/99
+//  Valeri Fine, BNL  7/99
 //
 // History:
 //
@@ -78,8 +81,6 @@ void doEventsQQ(const Int_t nevents=999,
               const Char_t **fileList)
 {
 
-
-
   // Dynamically link needed shared libs
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -119,6 +120,8 @@ void doEventsQQ(const Int_t nevents=999,
   Int_t iInit = chain->Init();
   if (iInit) chain->Fatal(iInit,"on init");
   chain->PrintInfo();
+  disp->SetTrackFilterFlag(1);
+  disp->SetHitFilterFlag(0);
 
   // Event loop
   int istat;
