@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrackSelection.cxx,v 1.9 2001/04/20 16:22:40 lmartin Exp $
+ * $Id: StEstTrackSelection.cxx,v 1.10 2001/04/25 17:34:46 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrackSelection.cxx,v $
+ * Revision 1.10  2001/04/25 17:34:46  perev
+ * HPcorrs
+ *
  * Revision 1.9  2001/04/20 16:22:40  lmartin
  * New version of ChooseBestNBranches.
  *
@@ -55,7 +58,7 @@ void StEstTracker::FlagTPCTracksSP(int overPass) {
   // If the radius (in the x-y plane) of the track origin is 
   // bigger than rmaxTPC  : flag=-2
 
-  long i;
+  int i;
 
   for (i=0;i<mNTrack;i++) {
     mTrack[i]->mTPCTrack->SetFlagSP(0);
@@ -137,7 +140,7 @@ void StEstTracker::ChooseBestBranch(StEstTrack *tr, int overPass) {
   // and swapped with the branch 0. The other branches
   // are then removed.
 
-  long i;
+  int i;
   double chimin=100000000, chi;
   int chinr = 0;
   StEstBranch *br_best;
@@ -161,7 +164,7 @@ void StEstTracker::ChooseBestBranch(StEstTrack *tr, int overPass) {
     
 void StEstTracker::RemoveOneHitTracks() {
 
-  long i,j;
+  int i,j;
 
   if(mDebugLevel>2) gMessMgr->Info()<<"*** Removal of one-hit-tracks ***"<<endm;
   for (i=0;i<mNTrack;i++) { // loop over the tracks
@@ -184,8 +187,8 @@ void StEstTracker::RemoveHitSharing() {
   // here that when this method is called only one branch per track survives
   // the previous selection (such as ChooseBestBranch).
   
-  long brmax,i,j,k,brmin;
-  long HowMany;
+  int brmax,i,j,k,brmin;
+  int HowMany;
   double minbr;
 
   if(mDebugLevel>2)
@@ -197,7 +200,7 @@ void StEstTracker::RemoveHitSharing() {
     brmin=0;
     minbr=1.e+99;
     StEstTrack **track = new StEstTrack*[mSvtHit[i]->GetNBranch()];
-    long* br_index = new long[mSvtHit[i]->GetNBranch()];
+    int* br_index = new int[mSvtHit[i]->GetNBranch()];
 
     for (j=0;j<mSvtHit[i]->GetNBranch();j++){
       track[j]=mSvtHit[i]->mBranch[j]->mTrack;
@@ -234,7 +237,7 @@ void StEstTracker::ChooseSegment(int overPass,int layer) {
   // and placed at the top of the branch list. The remaining branches
   // are then removed.
 
-  long   i,j,k;
+  int   i,j,k;
   int    pattern0, pattern1=0, nbr,k_swap,lastgood,isok_swap;
   int    MaxRemainingHits=0;
   StEstBranch *br_swap;
@@ -242,7 +245,7 @@ void StEstTracker::ChooseSegment(int overPass,int layer) {
   // pattern1 contains the mandatory layers (slay=2)
   for (i=layer; i<4; i++)
     if (mSegments[overPass]->slay[i]==2 &&
-	mParams[0]->onoff[i]==1) pattern1 |= int(pow(2,i));
+	mParams[0]->onoff[i]==1) pattern1 |= (1<<i);
   // MaxRemainingHits is the maximum number of hits
   // which can be associated in the layers which still
   // have to be scanned.
@@ -261,7 +264,7 @@ void StEstTracker::ChooseSegment(int overPass,int layer) {
     for (j=0;j<nbr;j++) {      
       pattern0=0;
       for(k=0; k<mTrack[i]->GetBranch(j)->GetNHits(); k++)
-	pattern0 |= int(pow(2,mTrack[i]->GetBranch(j)->GetHit(k)->GetWafer()->GetLayer()));
+	pattern0 |= (1<<(mTrack[i]->GetBranch(j)->GetHit(k)->GetWafer()->GetLayer()));
       // segment or minimum hit number condition not fulfilled
       if ((pattern1!=(pattern1 & pattern0)) || 
 	  (mTrack[i]->GetBranch(j)->GetNHits()<mSegments[overPass]->minhits-MaxRemainingHits)) 
@@ -296,7 +299,7 @@ void StEstTracker::ChooseSegment(int overPass,int layer) {
 void StEstTracker::FinishFlag() {
   // flag the found tracks and their hits
 
-  long il,maxl;
+  int il,maxl;
   int jl;
   StEstBranch *br;
   
@@ -316,7 +319,7 @@ void StEstTracker::ReInitializeHelix() {
   // ReInitialize the helix of the branch 0 
   // in case of no segment has been kept 
 
-  long il,HowMany;
+  int il,HowMany;
   StEstBranch *br;
   
   HowMany=0;

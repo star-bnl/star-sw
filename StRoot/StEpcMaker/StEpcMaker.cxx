@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.8 2001/04/24 23:06:08 subhasis Exp $
+// $Id: StEpcMaker.cxx,v 1.9 2001/04/25 17:26:13 perev Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.9  2001/04/25 17:26:13  perev
+// HPcorrs
+//
 // Revision 1.8  2001/04/24 23:06:08  subhasis
 // clusters attached to Points, QA hists are made for all category separately
 //
@@ -71,7 +74,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 // declaring cernlib routine (mathlib, H301) assndx to be used for matching.
 #include "StarCallf77.h"
 #define    assndx  F77_NAME(assndx,ASSNDX)
-extern "C" {void type_of_call assndx ( Int_t &, Float_t (*)[], Int_t &, Int_t &, Int_t &,Int_t *, Float_t &,Int_t (*)[],Int_t &); }
+extern "C" {void type_of_call assndx ( Int_t &, Float_t *, Int_t &, Int_t &, Int_t &,Int_t *, Float_t &,Int_t *,Int_t &); }
 
 
 ClassImp(StEpcMaker)

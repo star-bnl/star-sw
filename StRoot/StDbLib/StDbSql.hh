@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.hh,v 1.2 2001/03/30 18:48:26 porter Exp $
+ * $Id: StDbSql.hh,v 1.3 2001/04/25 17:19:53 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.hh,v $
+ * Revision 1.3  2001/04/25 17:19:53  perev
+ * HPcorrs
+ *
  * Revision 1.2  2001/03/30 18:48:26  porter
  * modified code to keep Insure from wigging-out on ostrstream functions.
  * moved some messaging into a StDbSql method.
@@ -48,6 +51,11 @@ typedef list<StDbTableDescriptor*,allocator<StDbTableDescriptor*> > DescList;
 #if !defined(ST_NO_NAMESPACES)
 using std::list;
 #endif
+
+#ifdef HPUX
+#define freeze(i) str()
+#endif
+
 typedef list<StDbTableDescriptor*> DescList;
 #endif
 

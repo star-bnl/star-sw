@@ -13,7 +13,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
+
+#ifndef ST_NO_NAMESPACES
 using std::sort;
+#endif
 
 // needed for solaris cc5
 #if !defined(ST_NO_NAMESPACES)

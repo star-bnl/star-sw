@@ -54,7 +54,7 @@ int gl3Residuals::process ( gl3Event* event ) {
       //calculate circle center and radius
       double x0=ctrack->r0*cos(ctrack->phi0);
       double y0=ctrack->r0*sin(ctrack->phi0);
-      double trackPhi0=ctrack->psi+ctrack->q*0.5*M_PI/fabs(ctrack->q);
+      double trackPhi0=ctrack->psi+ctrack->q*0.5*M_PI/abs(ctrack->q);
       double rcoc=ctrack->pt/(BFACT*ctrack->bField);
       double xcoc=x0 - (rcoc*cos(trackPhi0));
       double ycoc=y0 - (rcoc*sin(trackPhi0));
@@ -65,7 +65,7 @@ int gl3Residuals::process ( gl3Event* event ) {
 	  gl3Hit *chit=(gl3Hit*)(ctrack->currentHit);
 	  
 	  int sector = chit->getRowSector()/100;
-	  int row=(int)fmod(chit->getRowSector(),100);
+	  int row=chit->getRowSector()%100;
 	  
 	  double xc=chit->getX();
 	  double yc=chit->getY();

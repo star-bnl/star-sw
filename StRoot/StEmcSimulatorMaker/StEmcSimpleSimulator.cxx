@@ -1,3 +1,4 @@
+#include <math.h>
 #include "StEmcSimpleSimulator.h"
 #include "../StEmcUtil/emcInternalDef.h"
 
@@ -127,8 +128,11 @@ Float_t StEmcSimpleSimulator::getEnergy()
   return e;
 }
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcSimpleSimulator.cxx,v 1.1 2000/10/23 22:53:14 pavlinov Exp $
+//  $Id: StEmcSimpleSimulator.cxx,v 1.2 2001/04/25 17:24:33 perev Exp $
 //  $Log: StEmcSimpleSimulator.cxx,v $
+//  Revision 1.2  2001/04/25 17:24:33  perev
+//  HPcorrs
+//
 //  Revision 1.1  2000/10/23 22:53:14  pavlinov
 //  First working C++ version
 //

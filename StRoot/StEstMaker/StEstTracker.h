@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.h,v 1.8 2001/03/19 16:06:18 lmartin Exp $
+ * $Id: StEstTracker.h,v 1.9 2001/04/25 17:33:36 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.h,v $
+ * Revision 1.9  2001/04/25 17:33:36  perev
+ * HPcorrs
+ *
  * Revision 1.8  2001/03/19 16:06:18  lmartin
  * References to McTrack objects removed.
  *
@@ -70,15 +73,15 @@ struct StEstProjOut {
 };
 
 struct StEstGtrk {
-  long    nhit;                // ! number of his per track
-  long    ipnt[220];          // ! pointers to hits belonging to trk
-  long    pos[220];           //! position on a track
-  long    det[220];           //! detector hit belongs to
+  int    nhit;                // ! number of his per track
+  int    ipnt[220];          // ! pointers to hits beinting to trk
+  int    pos[220];           //! position on a track
+  int    det[220];           //! detector hit beints to
   float   p[9];                 //! track parameters
-  long    nfit;                 //! # of points used in fit
-  long    flag;                 //! flags from the fitting 
-  long    ntpc;                 //! Number of TPC hits
-  long    nmax;                 //! # of max points
+  int    nfit;                 //! # of points used in fit
+  int    flag;                 //! flags from the fitting 
+  int    ntpc;                 //! Number of TPC hits
+  int    nmax;                 //! # of max points
 };
 
 
@@ -112,30 +115,30 @@ class StEstTracker {
   StEstProjOut     mProjOut;//!
   StEstGtrk*       gtrk; //!
   
-  long*            Eval_id_mctrk2est_Track;//!
+  int*            Eval_id_mctrk2est_Track;//!
   StEstHit***      Eval_mchits;//!
 
-  long     mWafId2IndexWaf[9000];  //!
-  long*    mTptIndex; //!
+  int     mWafId2IndexWaf[9000];  //!
+  int*    mTptIndex; //!
   
   
-  long     mNTPCTrack;      //! number of TPC tracks
-  long     mNTrack;         //! total number of tracks
-  long     mNSvtHit;        //! number of SVT hits
-  long     mNWafers;        //! number of wafers
+  int     mNTPCTrack;      //! number of TPC tracks
+  int     mNTrack;         //! total number of tracks
+  int     mNSvtHit;        //! number of SVT hits
+  int     mNWafers;        //! number of wafers
   int      mPreprojNumber;  //!
   
-  long    mNIdealPrim; //! number of Ideal primary track in the event
-  long    mNIdealSeco; //! number of Ideal primary track in the event
-  long    mNGoodPrim; //! number of Good primary track in the event
-  long    mNGoodSeco; //! number of Good primary track in the event
-  long    mNBadPrim; //! number of Bad primary track in the event
-  long    mNBadSeco; //! number of Bad primary track in the event
+  int    mNIdealPrim; //! number of Ideal primary track in the event
+  int    mNIdealSeco; //! number of Ideal primary track in the event
+  int    mNGoodPrim; //! number of Good primary track in the event
+  int    mNGoodSeco; //! number of Good primary track in the event
+  int    mNBadPrim; //! number of Bad primary track in the event
+  int    mNBadSeco; //! number of Bad primary track in the event
 
   int  Preprojection(StEstBranch&, int);
   int  Tracking(int);
   int  RefitBranch(StEstBranch *br, int usevertex=0, int *fitstatus=NULL);
-  int  Projection(StEstBranch* branch, long slay);
+  int  Projection(StEstBranch* branch, int slay);
   void RemoveOneHitTracks();
   void ChooseBestBranch(StEstTrack *tr, int overPass);
   void ChooseBestNBranches(StEstTrack *tr, int slay);
@@ -161,13 +164,13 @@ class StEstTracker {
 	       St_egr_egrpar* m_egr_egrpar,
 	       table_head_st* m_egrpar_h);
   ~StEstTracker();
-  long GetNTrack();
-  long GetIdealPrim() {return mNIdealPrim;};
-  long GetIdealSeco() {return mNIdealSeco;};
-  long GetGoodPrim() {return mNGoodPrim;};
-  long GetGoodSeco() {return mNGoodSeco;};
-  long GetBadPrim() {return mNBadPrim;};
-  long GetBadSeco() {return mNBadSeco;};
+  int GetNTrack();
+  int GetIdealPrim() {return mNIdealPrim;};
+  int GetIdealSeco() {return mNIdealSeco;};
+  int GetGoodPrim() {return mNGoodPrim;};
+  int GetGoodSeco() {return mNGoodSeco;};
+  int GetBadPrim() {return mNBadPrim;};
+  int GetBadSeco() {return mNBadSeco;};
   float GetVertexZ(); 
 
   int DoTracking();
@@ -186,16 +189,16 @@ class StEstTracker {
   void EsttoGlobtrk(St_stk_track* Ststktrk,
 		    St_sgr_groups* Stsgrgrps,
 		    St_svm_evt_match* StEstMatch);
-  void CumulEval(long* mCumulNIdealPrim,
-		 long* mCumulNIdealSeco,
-		 long* mCumulNGoodPrim,
-		 long* mCumulNGoodSeco,
-		 long* mCumulNBadPrim,
-		 long* mCumulNBadSeco,
-		 long* mCumulNEvents);
+  void CumulEval(int* mCumulNIdealPrim,
+		 int* mCumulNIdealSeco,
+		 int* mCumulNGoodPrim,
+		 int* mCumulNGoodSeco,
+		 int* mCumulNBadPrim,
+		 int* mCumulNBadSeco,
+		 int* mCumulNEvents);
   void CleanUp();
   ClassDef(StEstTracker, 1)
 };
 
-inline long StEstTracker::GetNTrack() {return mNTrack;};
+inline int StEstTracker::GetNTrack() {return mNTrack;};
 #endif

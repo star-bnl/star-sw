@@ -178,7 +178,7 @@ int gl3Event::readEvent  ( int maxLength, char* buffer ){
 //   the event viewer wants them(at least for now) at
 //   inner most point so we extrapolate to inner most hit radius
 //
-   for ( int i = 0 ; i < nTracks ; i++ ) {
+   for ( i = 0 ; i < nTracks ; i++ ) {
       St_l3_Coordinate_Transformer* transformer = 
                       (St_l3_Coordinate_Transformer *)coordinateTransformer ;
       float radius = transformer->GetRadialDistanceAtRow(track[i].innerMostRow-1) ;

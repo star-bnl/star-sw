@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracking.cxx,v 1.5 2001/02/23 13:58:59 lmartin Exp $
+ * $Id: StEstTracking.cxx,v 1.6 2001/04/25 17:34:09 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracking.cxx,v $
+ * Revision 1.6  2001/04/25 17:34:09  perev
+ * HPcorrs
+ *
  * Revision 1.5  2001/02/23 13:58:59  lmartin
  * cout replaced by gMessMgr.
  *
@@ -59,8 +62,8 @@ int StEstTracker::Tracking(int slay) {
   int FirstHitIndex,HitPosition,ThereIsOneIdealHitInTheLayer;
   int fitstatus,OneIsGood,SeveralWereGood,IndexFirstWasGood;
 
-  long lm,lm2;
-  long i,j,jc,k,kk, maxl, nbr, nbranch;
+  int lm,lm2;
+  int i,j,jc,k,kk, maxl, nbr, nbranch;
   double distbra[MAXHITPROJ];
   int distind[MAXHITPROJ], indtmp;
   StEstHit* hitbra[MAXHITPROJ];

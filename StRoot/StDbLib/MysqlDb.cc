@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.16 2001/03/31 15:03:46 porter Exp $
+ * $Id: MysqlDb.cc,v 1.17 2001/04/25 17:13:19 perev Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.17  2001/04/25 17:13:19  perev
+ * HPcorrs
+ *
  * Revision 1.16  2001/03/31 15:03:46  porter
  * fix bug in StDbManagerImpl::getDbName accidently introduced yesterday
  * & added new diagnostic message in MysqlDb
@@ -103,6 +106,11 @@
 #include <strstream.h>
 
 //#include "errmsg.h"
+
+#ifdef HPUX
+#define freeze(i) str()
+#endif
+
 
 #define CR_MIN_ERROR            2000    /* For easier client code */
 #define CR_MAX_ERROR            2999

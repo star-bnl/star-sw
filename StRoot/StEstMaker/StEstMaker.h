@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.h,v 1.4 2001/03/02 16:00:46 lmartin Exp $
+ * $Id: StEstMaker.h,v 1.5 2001/04/25 17:29:57 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.h,v $
+ * Revision 1.5  2001/04/25 17:29:57  perev
+ * HPcorrs
+ *
  * Revision 1.4  2001/03/02 16:00:46  lmartin
  * Data members added to store the cumulated numbers of ideal,good and bad tracks.
  *
@@ -45,13 +48,13 @@ class StEstMaker : public StMaker {
   int      mNSuperPass;     //! number of superpasses
   int      mIdealTracking;  //! perfect tracking and evaluation performed as well
   int      mDebugLevel;     //! Debugging Level controling the output messages
-  long     mCumulNIdealPrim; //! Cumulated number of ideal primary tracks
-  long     mCumulNIdealSeco; //! Cumulated number of ideal secondary tracks
-  long     mCumulNGoodPrim; //! Cumulated number of good primary tracks
-  long     mCumulNGoodSeco; //! Cumulated number of good secondary tracks
-  long     mCumulNBadPrim; //! Cumulated number of bad primary tracks
-  long     mCumulNBadSeco; //! Cumulated number of bad secondary tracks
-  long     mCumulNEvents;  //! Cumulated number of events
+  int     mCumulNIdealPrim; //! Cumulated number of ideal primary tracks
+  int     mCumulNIdealSeco; //! Cumulated number of ideal secondary tracks
+  int     mCumulNGoodPrim; //! Cumulated number of good primary tracks
+  int     mCumulNGoodSeco; //! Cumulated number of good secondary tracks
+  int     mCumulNBadPrim; //! Cumulated number of bad primary tracks
+  int     mCumulNBadSeco; //! Cumulated number of bad secondary tracks
+  int     mCumulNEvents;  //! Cumulated number of events
   StEstParams**    mParams;//!
   StEstSegments**  mSegments;//!
   St_egr_egrpar*   m_egr_egrpar; //!
@@ -64,7 +67,7 @@ class StEstMaker : public StMaker {
   virtual Int_t Init();
   virtual Int_t Make();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StEstMaker.h,v 1.4 2001/03/02 16:00:46 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StEstMaker.h,v 1.5 2001/04/25 17:29:57 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   Int_t Finish();
 

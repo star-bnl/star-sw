@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.12 2001/03/30 18:48:26 porter Exp $
+ * $Id: MysqlDb.h,v 1.13 2001/04/25 17:17:33 perev Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.13  2001/04/25 17:17:33  perev
+ * HPcorrs
+ *
  * Revision 1.12  2001/03/30 18:48:26  porter
  * modified code to keep Insure from wigging-out on ostrstream functions.
  * moved some messaging into a StDbSql method.
@@ -92,6 +95,10 @@ typedef  int MYSQL_FIELD;
 #include <strstream.h>
 #include "StDbBuffer.h"
 #include "StDbLogger.hh"
+
+#ifdef HPUX
+#define freeze(i) str()
+#endif
 
 #define endsql ";"
  
