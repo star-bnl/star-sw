@@ -1,12 +1,12 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 1.3 2000/05/22 15:14:44 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 1.4 2000/05/23 16:57:01 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 1.3  2000/05/22 15:14:44  horsley
- * modified StRichRings, StRichTDrawableRings to comply with sun compiler
+ * Revision 1.4  2000/05/23 16:57:01  lasiuk
+ * Get RICH hits from the collection, dataset when necessary
  *
  *
  * modified StRichRings, StRichTDrawableRings to comply with sun compiler
@@ -57,11 +57,11 @@
 #include "StChain.h"
 #include "St_DataSet.h"
 #include "TNtuple.h"
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.3 2000/05/22 15:14:44 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.4 2000/05/23 16:57:01 lasiuk Exp $";
 
 Int_t 
 StRichPIDMaker::Make() { 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.3 2000/05/22 15:14:44 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.4 2000/05/23 16:57:01 lasiuk Exp $";
   evtN++;
   StMemoryInfo* memory = StMemoryInfo::instance();
  
@@ -70,10 +70,50 @@ static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.3 2000/05/22 15:14:44 h
   rEvent = (StEvent *) GetInputDS("StEvent");
   
   if (!rEvent)  {
+      cout << "Cannot Get (StEvent*)rEvent " << endl;
+      cout << "Failed to retrieve the richCollection from StEvent\n";
+      cout << "You may look in the dataset, BUT...\n";
+      cout << "\t NO TRACKS WILL BE AVAILABLE!" << endl;
+      St_ObjectSet *richObjectSet = (St_ObjectSet*)GetDataSet("StRichEvent");
+      if(!richObjectSet) {
+	  cout << "StRichPIDMaker::Make()";
+	  cout << "\tCannot get richObjectSet " << endl;
+	  return kStWarn;
+      }
+      PR(richObjectSet);
+      StRichCollection* dataSetEvent = (StRichCollection *)richObjectSet->GetObject();
+      if(dataSetEvent) {
+ 	  cout << "***The dataSetEvent exists" << endl;
+// 	  PR(dataSetEvent);
+// 	  PR(dataSetEvent->getRichPixels().size());
+// 	  PR(dataSetEvent->getRichClusters().size());
+// 	  PR(dataSetEvent->getRichHits().size());
+      }
+      else {
+	  cout << "if(dataSetEvent) dne" << endl;
+      }
+
+      cout << "We will exit here" << endl;
       return kStWarn;
   }
     
+  //  get objects associated with this event
 
+  cout << "Grab the rich collection..." << endl;
+  mRichCollection = 0;
+  mRichCollection = rEvent->richCollection();
+  if(!mRichCollection) {
+      cout << "Failed to retrieve the richCollection from StEvent" << endl;
+      cout << "Must exit here..." << endl;
+      return kStWarn;
+  }
+  
+  cout << "Got the rich collection" << endl;
+  PR(mRichCollection);
+  PR(mRichCollection->pixelsPresent());
+  PR(mRichCollection->clustersPresent());
+  PR(mRichCollection->hitsPresent());
+  
 #ifdef myRICH_WITH_PADMONITOR
   StRichGeometryDb* mGeometryDb = StRichGeometryDb::getDb();  
   StRichPadMonitor* padMonitor = StRichPadMonitor::getInstance(mGeometryDb);
@@ -94,52 +134,40 @@ static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.3 2000/05/22 15:14:44 h
   }
 
 
-  //  get objects associated with this event
-  St_ObjectSet *rchEvent = 0;
-  rchEvent = (St_ObjectSet*)GetDataSet("richHits");
-  if(!rchEvent) { 
-    return kStWarn;
-  }
-  
-
-  cout << "Grab the hits ..." << endl;
-  mRichHits = 0;
-  mRichHits = (StRichSimpleHitCollection*)(rchEvent->GetObject());
-  if(!mRichHits) {
-    return kStWarn;
-  }
-  
   // get tracks intersecting RICH, make monte carlo associations 
   // First check whether the Primary Vertex is there at all.
   StThreeVectorD VertexPos(0,0,0);
   if (rEvent->primaryVertex()) {
-    VertexPos = rEvent->primaryVertex()->position();
-    }
-
+      VertexPos = rEvent->primaryVertex()->position();
+  }
+  else {
+      cout << "rEvent->primaryVertex() cannot be found.  Must exit!!!" << endl;
+      return kStWarn;
+  }
   
      
-  StEvent& ev = *rEvent;
-  double magField  = ev.summary()->magneticField();
+  //StEvent& ev = *rEvent;
+  double magField  = rEvent->summary()->magneticField();
 
-  int occ = 0;
-  if (ev.richPixelCollection()) {
-    occ = ev.richPixelCollection()->size();
+  //int occ = 0;
+  if (rEvent->richCollection()) {
+      cout << "Got the RICH Collection" << endl;
   } 
 
   
   // grab tracks intersecting RICH
     
-  StSPtrVecTrackNode& theTrackNodes = ev.trackNodes();
+  StSPtrVecTrackNode& theTrackNodes = rEvent->trackNodes();
   for (size_t nodeIndex=0; nodeIndex<theTrackNodes.size(); nodeIndex++) {
     size_t numberOfTracksInNode =  theTrackNodes[nodeIndex]->entries(global);
     for (size_t trackIndex=0; trackIndex<numberOfTracksInNode; trackIndex++)  {
-      StRichTrack* tempTrack = new StRichTrack(theTrackNodes[nodeIndex]->track(global,trackIndex),magField); 
+      StRichTrack* tempTrack =
+	  new StRichTrack(theTrackNodes[nodeIndex]->track(global,trackIndex),magField); 
       trackFilter.setTrack(tempTrack);
       
       if (trackFilter.trackAcceptable())  { 
 	mListOfStRichTracks.push_back(tempTrack);
       }               
-	  
       else {
 	delete tempTrack;
       }
@@ -186,29 +214,35 @@ static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.3 2000/05/22 15:14:44 h
 		  int     hits = 0;
 		  double chiSqd = 0.0;
 		  double totalArea = ringCalc.calculateArea(cut);
-		 
+
+		  //
+		  // Access hits from StEvent::richCollection()
 		  // loop over hits
-		  for (size_t hitIndex=0; hitIndex<mRichHits->mTheHits.size(); hitIndex++) 
+		  //
+		  StSPtrVecRichHit mTheHits = mRichCollection->getRichHits();
+		  for (size_t hitIndex=0; hitIndex<mTheHits.size(); hitIndex++) 
 		    { // hits
 		      
 		      double ang   = 0.0;
 		      double dist  = 0.0;
 		      double meanD = 0.0;
-		      
+
+		      //
 		      // hit filter
-		      if (hitFilter(mRichHits->mTheHits[hitIndex]->local(),ringCalc,ang,dist,cut,meanD)) 
-			{ // hit filter
+		      //
+		      if (hitFilter(mTheHits[hitIndex]->local(),ringCalc,ang,dist,cut,meanD)) {
+			  // hit filter
 			  
 			  // hi-lite each hit found in ring
 #ifdef myRICH_WITH_PADMONITOR
-			  padMonitor->redrawHit(mRichHits->mTheHits[hitIndex],mListOfParticles[particleIndex]);
+			  padMonitor->redrawHit(mTheHits[hitIndex],mListOfParticles[particleIndex]);
 #endif
 			  
 			  hits++;
 			  chiSqd += meanD;
 			  //double b = mListOfStRichTracks[trackIndex]->getStTrack()->geometry()->helix().distance(VertexPos);
 			 
-			} // ---> hit filter
+		      } // ---> hit filter
 		    } //  -----> loop over hits
 		  
 		  part_area[particleIndex] = totalArea;
@@ -320,11 +354,14 @@ vector<StTrack* >& StRichPIDMaker::getListOfStTracks() {
       track->getPidTrait()->addPid(pid);
     }       
 
-Int_t StRichPIDMaker::hitFilter(StThreeVector<double>& hit, 
+Int_t StRichPIDMaker::hitFilter(StThreeVectorF& tmpHit, 
 				StRichRingCalculator& ringCalculator,
 				double& ang, double& dist, double cut, double& meanD) {
 
   // calculate distance from inner,mean, outer rings
+    // &^%$
+    //
+    StThreeVector<double> hit(tmpHit.x(), tmpHit.y(), tmpHit.z());
   ringCalculator.clear();  
   double meanAngle = 0;
   innerDistance = ringCalculator.getInnerDistance(hit,innerAngle);

@@ -1,13 +1,13 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 1.2 2000/05/19 19:06:10 horsley Exp $
+ * $Id: StRichPIDMaker.h,v 1.3 2000/05/23 16:57:05 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
- *  Revision 1.2  2000/05/19 19:06:10  horsley
- *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
+ *  Revision 1.3  2000/05/23 16:57:05  lasiuk
+ *  Get RICH hits from the collection, dataset when necessary
  *
  *  min/max algorithms
  *
@@ -39,6 +39,7 @@ using std::vector;
 //#include "StRichMcSwitch.h"
 #include "StRichTrackingControl.h"
 #include "StRichMcSwitch.h"
+class StRichCollection;
 class StRichSimpleHitCollection;
 
 // StDisplay
@@ -55,8 +56,8 @@ class StRichPadMonitor;
   vector<StTrack* >     mListOfStTracks; //!
   vector<StRichTrack* > mListOfStRichTracks; //!
 
-  // hit collection
-  StRichSimpleHitCollection* mRichHits; //!
+  // Rich collection
+  StRichCollection* mRichCollection; //!
 
   // track filter
   StRichTrackFilter trackFilter; //!
@@ -85,7 +86,8 @@ class StRichPadMonitor;
     TH3F*    pionCorrectedTheta_xb;    //! 
   StRichPIDMaker(const Char_t *name="RICHPID", bool writeNtuple=false);
 
-  Int_t hitFilter(StThreeVector<double>& hit, StRichRingCalculator& ringCalculator, double& ang, double& dist, double cut, double& meanD);
+  Int_t hitFilter(StThreeVectorF& hit, StRichRingCalculator& ringCalculator,
+		  double& ang, double& dist, double cut, double& meanD);
 
   vector<StRichTrack* >& getListOfStRichTracks();
   vector<StTrack* >&     getListOfStTracks();
