@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.3 1999/12/07 21:25:25 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.4 1999/12/07 21:39:27 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.4  1999/12/07 21:39:27  porter
+ * *** empty log message ***
+ *
  * Revision 1.3  1999/12/07 21:25:25  porter
  * some fixes for linux warnings
  *
@@ -256,9 +259,9 @@ bool  StDbBuffer::ReadScalar(tpe s,const char *aName) \
   return tRetVal;}
 
 // --> old 
-// if (Find_Col(aName)) \
-//  { char* tSwapVal=new char[mycsize[mCol[mCur].type]];\
-//  if(WriteMem(&s,mCol[mCur].val,mCol[mCur].type)) tRetVal=true;}\
+// if (Find_Col(aName)) 
+//  { char* tSwapVal=new char[mycsize[mCol[mCur].type]];
+//  if(WriteMem(&s,mCol[mCur].val,mCol[mCur].type)) tRetVal=true;}
 //  return tRetVal;}
 
 Rscal(char&); 
@@ -328,7 +331,7 @@ bool  StDbBuffer::ReadArray(tpe* &s, int &len,const char *aName)\
     s=new tpe[len];\
     for (i=0;i<len;i++)\
       { if (!(WriteMem(&s[i],(void*)(((char*)mCol[mCur].val)+i*mycsize[mCol[mCur].type]),mCol[mCur].type))) break;}\
-      if (i==mCol[mCur].length) tRetVal=true;};}\
+      if (i==(int)mCol[mCur].length) tRetVal=true;};}\
  else { cerr << " field " << aName << " doesnt exist in this Buffer" << endl; }\
  return tRetVal;\
 }
