@@ -1,4 +1,5 @@
 #include "Parameter.h"
+#include <stdexcept>
 
 const int Parameter::Boolean = 0;
 const int Parameter::Integer = 1;

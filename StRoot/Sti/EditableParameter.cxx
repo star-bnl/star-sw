@@ -1,4 +1,5 @@
 #include "EditableParameter.h"
+#include <stdexcept>
 
 EditableParameter::EditableParameter()
  : ConstrainedParameter(),
