@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.9 2000/06/29 05:04:24 lansdell Exp $
+// $Id: bfcread_hist_files_add.C,v 2.10 2000/06/29 05:47:17 lansdell Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.10  2000/06/29 05:47:17  lansdell
+// checked for null pointer
+//
 // Revision 2.9  2000/06/29 05:04:24  lansdell
 // now outputs .hist.root file with particular maker's histograms (need to update to do all histogram branches)
 //
@@ -171,32 +174,33 @@ void bfcread_hist_files_add(
 // to see an example of histograms being added together:   
   cout << "bfcread_hist_files_add.C, an example! = " <<  endl;
   Int_t imk = 0;
+  TH1** kathyArray=0;
   for (imk=0;imk<hCCount;imk++) {
-    TH1** kathyArray = HU->getNewHist();
+    kathyArray = HU->getNewHist();
     if (strcmp(kathyArray[imk]->GetName(),"TabQaEvsumTrkTot")==0) {       
       kathyArray[imk]->Draw();
       gPad->Update();
     } // if strcmp -- to draw
   } // for -- end of example
 
+  if (kathyArray) {
 
-// constructor 
-  StHistMaker *HM  = new StHistMaker;
-  HM->SetHArray(kathyArray);
-  // need HM->SetHArraySize 
+    // constructor 
+    StHistMaker *HM  = new StHistMaker;
+    HM->SetHArray(kathyArray);
 
-// output hist.root file:
+    // output hist.root file:
+    cout << " MakerHistDir : " << MakerHistDir << endl;
+    StTreeMaker* treeMk = new StTreeMaker(MakerHistDir,outHistFile,TopDirTree);
+    treeMk->SetIOMode("w");
+    treeMk->SetBranch("histBranch");
 
-  cout << " MakerHistDir : " << MakerHistDir << endl;
-  StTreeMaker* treeMk = new StTreeMaker(MakerHistDir,outHistFile,TopDirTree);
-  treeMk->SetIOMode("w");
-  treeMk->SetBranch("histBranch");
-
-  HM->Init();
-  treeMk->Init();
-  HM->Make();
-  treeMk->Make();
-  HM->Finish();
-  treeMk->Finish();
+    HM->Init();
+    treeMk->Init();
+    HM->Make();
+    treeMk->Make();
+    HM->Finish();
+    treeMk->Finish();
+  }
 
 } // end of the macro!
