@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.7 2003/08/22 20:52:20 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.8 2003/08/25 17:57:12 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -48,7 +48,7 @@ class  StEEmcDbIndexItem1;
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.7 2003/08/22 20:52:20 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.8 2003/08/25 17:57:12 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -76,9 +76,12 @@ class StEEmcDbMaker : public StMaker {
   float KsigOverPed; // defines threshold
   int nFound;
   TString dbName; //name of the DB used 
+  template <class St_T, class T_st> T_st * getTable(TDataSet *eedb, int secID, TString tabName);
+  
 
  protected:
  public:  
+
   void print(int k=0);
   void setSectors(int ,int); ///< limit the range of sectors for speed
   void setThreshold(float x);// defines threshold for ADCs
@@ -101,7 +104,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.7 2003/08/22 20:52:20 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.8 2003/08/25 17:57:12 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -110,3 +113,8 @@ class StEEmcDbMaker : public StMaker {
  };
 
 #endif
+
+// $Log: StEEmcDbMaker.h,v $
+// Revision 1.8  2003/08/25 17:57:12  balewski
+// use teplate to access DB-tables
+//
