@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.6 2001/04/05 04:00:38 ullrich Exp $
+ * $Id: StHit.h,v 2.7 2001/04/25 15:57:22 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.7  2001/04/25 15:57:22  jeromel
+ * Fixed cint problem with StContainers.h
+ *
  * Revision 2.6  2001/04/05 04:00:38  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -38,7 +41,9 @@
 
 #include "StMeasuredPoint.h"
 #include "StEnumerations.h"
+#ifndef __CINT__
 #include "StContainers.h"
+#endif
 
 class StTrackNode;
 class StTrack;
