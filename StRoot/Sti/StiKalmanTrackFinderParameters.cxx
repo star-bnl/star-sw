@@ -34,8 +34,8 @@ const StiKalmanTrackFinderParameters & StiKalmanTrackFinderParameters::operator=
   mcsCalculated   = p.mcsCalculated; 
   field           = p.field; 
   maxNullCount    = p.maxNullCount;
-  maxContiguousNullCount            = p.maxContiguousNullCount; 
-  minContiguousHitCountForNullReset = p.minContiguousHitCountForNullReset;
+  maxContiguousNullCount            = p.maxContigNullCount; //maxContiguousNullCount; 
+  minContiguousHitCountForNullReset = p.minCountForReset;   //minContiguousHitCountForNullReset;
   maxChi2Vertex   = p.maxChi2Vertex;
   massHypothesis  = p.massHypothesis;
   return *this; 
