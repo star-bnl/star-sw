@@ -21,14 +21,15 @@ rhic_dir  := $(subst $(RHIC_ASIS)/,,$(RHIC_DIR))
 SOURCES   := $(subst $(CERN_DIR)/,,$(wildcard $(CERN_DIR)/* $(CERN_DIR)/.*) )
 SOURCES   := $(subst  .. , ,$(SOURCES))
 SOURCES   := $(strip $(subst  . , ,$(SOURCES)))
-SRC       := $(strip $(foreach dir, $(SOURCES), $(shell test -f $(CERN_DIR)/$(dir) && echo $(dir))))
-DIRS      := $(sort $(strip $(foreach dir, $(SOURCES), $(shell \
-             test -h $(CERN_DIR)/$(dir) || test -d $(CERN_DIR)/$(dir) &&  echo $(dir);))))
+SRC       := $(strip $(foreach f,$(SOURCES),$(shell if [ -r $(CERN_DIR)/$(f) ]; then echo $(f); fi)))
+LINKS     := $(sort $(strip $(foreach d,$(SOURCES),$(shell if [ -h $(CERN_DIR)/$(d) ]; then  echo $(d); fi))))
+DIRES     := $(filter-out $(LINKS),$(SOURCES))
+DIRS      := $(foreach e,$(DIRES),$(shell if [ -d $(CERN_DIR)/$e ]; then echo $e; fi))
 src       := $(strip $(filter-out $(DIRS),$(SRC)))
 src       := $(filter-out %.gz %.tar %.Z,$(src))
 dirs      := $(filter-out alpha_% tar hp700_ux90 rs_aix% sgi_% sun4c_%,$(DIRS))
 ifneq (,$(strip $(dirs)))
-dirs      :=$(filter-out alpha_% rs_aix% sgi% 94a 95a 95b 96a 97a 99- NEW obsolete metahtml%,$(dirs))
+dirs      :=$(filter-out tar alpha_% rs_aix% sgi% 94a 95a 95b 96a 97a 99- NEW obsolete metahtml%,$(dirs))
 ifeq ($(RHIC_DIR),$(RHIC_ASIS))
 skip_list :=adm packages
 skip_list += a10_sr104 a68_sr104 alpha_% amiga_aux20 bin cern convex% cray% etc hp700_ux101 hp700_ux807 hp700_ux90 
@@ -54,10 +55,14 @@ tags_%:
 test:
 	@echo "CERN_DIR    = |"$(CERN_DIR)"|"
 	@echo "RHIC_DIR    = |"$(RHIC_DIR)"|"
+	@echo "rhic_dir    = |"$(rhic_dir)"|"
 	@echo "SOURCES     = |"$(SOURCES)"|"
+	@echo "SRC         = |"$(SRC)"|"
 	@echo "src         = |"$(src)"|"
 	@echo "RHIC_SOURCES= |"$(RHIC_SOURCES)"|"
 	@echo "skip_list   = |"$(skip_list)"|"
 	@echo "SKIP_LIST   = |"$(SKIP_LIST)"|"
-	@echo "dirs        = |"$(dirs)"|"
+	@echo "LINKS       = |"$(LINKS)"|"
+	@echo "DIRES       = |"$(DIRES)"|"
 	@echo "DIRS        = |"$(DIRS)"|"
+	@echo "dirs        = |"$(dirs)"|"
