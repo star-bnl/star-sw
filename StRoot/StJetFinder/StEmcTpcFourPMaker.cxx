@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.21 2004/03/25 18:53:41 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.22 2004/04/27 22:27:08 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -193,7 +193,13 @@ Int_t StEmcTpcFourPMaker::Make() {
   else
     {
       if(adc2E == NULL)
+      {
 	muEmc = uDst->emcCollection();
+        if(muEmc != NULL)
+          cout << "muEmc != NULL" << endl;
+        else
+          cout << "muEmc == NULL" << endl;
+      }
       else
 	emc = adc2E->getEmcCollection();
     }
@@ -268,87 +274,44 @@ Int_t StEmcTpcFourPMaker::Make() {
 	}
       else
 	{
-	  mDb = NULL;
-	  TString DbName = "Calibrations/emc/y3"+detname[0];
-	  mDb = GetInputDB(DbName.Data());
-	  if(!mDb) return kFALSE;
-	  TString TableName;
+          if(!simpleCal)
+          {
+	    mDb = NULL;
+	    TString DbName = "Calibrations/emc/y3"+detname[0];
+	    mDb = GetInputDB(DbName.Data());
+	    if(!mDb) return kFALSE;
+	    TString TableName;
 
-	  TableName = detname[0] + "Calib";
-	  St_emcCalib* cptr = (St_emcCalib*) mDb->Find(TableName.Data());
-	  if(cptr) emccalibtbl = cptr->GetTable();
-	  if(!emccalibtbl) return kFALSE;
+	    TableName = detname[0] + "Calib";
+	    St_emcCalib* cptr = (St_emcCalib*) mDb->Find(TableName.Data());
+	    if(cptr) emccalibtbl = cptr->GetTable();
+	    if(!emccalibtbl) return kFALSE;
 
-	  TableName = detname[0] + "Gain";
-	  St_emcGain* gptr = (St_emcGain*) mDb->Find(TableName.Data());
-	  if(gptr) emcgaintbl = gptr->GetTable();
+	    TableName = detname[0] + "Gain";
+	    St_emcGain* gptr = (St_emcGain*) mDb->Find(TableName.Data());
+	    if(gptr) emcgaintbl = gptr->GetTable();
 
-	  TableName = detname[0] + "Ped";
-	  St_emcPed* pptr = (St_emcPed*) mDb->Find(TableName.Data());
-	  if(pptr) emcpedtbl = pptr->GetTable();
-	  if(!emcpedtbl) return kFALSE;
+	    TableName = detname[0] + "Ped";
+	    St_emcPed* pptr = (St_emcPed*) mDb->Find(TableName.Data());
+	    if(pptr) emcpedtbl = pptr->GetTable();
+	    if(!emcpedtbl) return kFALSE;
+          }
 	}
 
       for(hitId = 1; hitId <= maxHits; hitId++)
 	{
+          cout << "Hit #: " << hitId << endl;
+          if(muEmc != NULL)
+            cout << "muEmc != NULL" << endl;
 	  float eta, phi, energy;
-	  if(towerProxy->isGood(runNumber, hitId-1) == false) { 
-	    //cout << "throwing away tower: " << hitId-1 << endl; 
-	    continue; }
-	  geom->getEtaPhi(hitId, eta, phi);
+          bool isGood;
+          getValuesFromHitId(hitId, runNumber, eta, phi, energy, isGood, 
+		towerProxy, geom, data, muEmc, simpleCal, mDb, emcgaintbl, 
+                emccalibtbl, emcpedtbl);
+          if(isGood == false)
+            continue;
 	  while(phi < 0) phi += twoPi;
 	  while(phi > twoPi) phi -= twoPi;
-	  if(adc2E)
-	    {
-	      if(data->TowerStatus[hitId-1] != 1) continue;
-	      if(simpleCal)
-                {
-                  double et = 0.0125*static_cast<double>(data->TowerADC[hitId-1]);
-                  energy = et/sqrt(1.0-tanh(eta)*tanh(eta));
-                }
-              else
-                {
-	          energy = towerProxy->energyFunction(
-						  runNumber, 
-						  hitId-1, 
-						  data->TowerADC[hitId-1], 
-						  data->TowerEnergy[hitId-1]);
-                }
-	    }
-	  else // Calibration!!!!  MuDst does not contain energy.
-	    {
-	      float ADC = 0; 
-	      float PED = 0;
-	      ADC = muEmc->getTowerADC(hitId, bemc);
-              if(simpleCal)
-                {
-                  double et = 0.0125*ADC;
-                  energy = et/sqrt(1.0-tanh(eta)*tanh(eta));
-                }
-              else
-                {
-	      	  PED = static_cast<float>(emcpedtbl[0].AdcPedestal[hitId-1])
-		    /100.0;
-	          //PED = static_cast<double>(static_cast<int>(PED));
-	          float ADCSUB = ADC-PED;
-	          energy = 0;
-	          float ADCPOWER = 1;
-	          for(int i = 0; i < 5; i++)
-		    {
-		      float c = 0;
-		      c = emccalibtbl[0].AdcToE[hitId-1][i];
-		      energy += c*ADCPOWER;
-		      ADCPOWER *= ADCSUB;
-		    }
-	          if(PED <= 0) energy = 0;
-	          float gain = 1;
-	          if(emcgaintbl != NULL)
-		    gain = emcgaintbl[0].Gain[hitId-1];
-	          if(gain < .1)  // gain shouldn't have a large or negative effect
-		    gain = 1;
-	          //energy *= gain;
-                }
-	    }
 
 	  sumEMC += energy;
 	  if(energy < 0.01) continue;
@@ -557,3 +520,74 @@ Int_t StEmcTpcFourPMaker::Finish()
   return kStOk;
 }
 
+bool getValuesFromHitId(int hitId, int runNumber, float &eta, float &phi, 
+  float &energy, bool &isGood, SafetyArray *towerProxy, StEmcGeom *geom, 
+  StBemcData *data, StMuEmcCollection *muEmc, bool simpleCal, 
+  TDataSet *mDb, emcGain_st* emcgaintbl,
+  emcCalib_st* emccalibtbl, emcPed_st* emcpedtbl)
+{
+	  if(towerProxy->isGood(runNumber, hitId-1) == false) { 
+            isGood = false;
+	    return false; }
+	  geom->getEtaPhi(hitId, eta, phi);
+	  if(data)
+	    {
+	      if(data->TowerStatus[hitId-1] != 1) { isGood = false; return false; }
+	      if(simpleCal)
+                {
+                  double et = 0.0125*static_cast<double>(data->TowerADC[hitId-1]);
+                  energy = et/sqrt(1.0-tanh(eta)*tanh(eta));
+                }
+              else
+                {
+	          energy = towerProxy->energyFunction(
+						  runNumber, 
+						  hitId-1, 
+						  data->TowerADC[hitId-1], 
+						  data->TowerEnergy[hitId-1]);
+                }
+	    }
+	  else // Calibration!!!!  MuDst does not contain energy.
+	    {
+              if(emccalibtbl == NULL)
+                return false;
+	      float ADC = 0; 
+	      float PED = 0;
+              if(muEmc != NULL)
+              {
+	        ADC = muEmc->getTowerADC(hitId, bemc);
+                //cout << "ADC value: " << ADC << endl;
+              }
+              else
+                return false;
+              if(simpleCal)
+                {
+                  double et = 0.0125*ADC;
+                  energy = et/sqrt(1.0-tanh(eta)*tanh(eta));
+                }
+              else
+                {
+	      	  PED = static_cast<float>(emcpedtbl[0].AdcPedestal[hitId-1])
+		    /100.0;
+	          //PED = static_cast<double>(static_cast<int>(PED));
+	          float ADCSUB = ADC-PED;
+	          energy = 0;
+	          float ADCPOWER = 1;
+	          for(int i = 0; i < 5; i++)
+		    {
+		      float c = 0;
+		      c = emccalibtbl[0].AdcToE[hitId-1][i];
+		      energy += c*ADCPOWER;
+		      ADCPOWER *= ADCSUB;
+		    }
+	          if(PED <= 0) energy = 0;
+	          float gain = 1;
+	          if(emcgaintbl != NULL)
+		    gain = emcgaintbl[0].Gain[hitId-1];
+	          if(gain < .1)  // gain shouldn't have a large or negative effect
+		    gain = 1;
+	          //energy *= gain;
+                }
+	    }
+  return true;
+}

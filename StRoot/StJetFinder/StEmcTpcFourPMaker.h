@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.18 2004/03/22 21:41:05 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.19 2004/04/27 22:27:09 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.19  2004/04/27 22:27:09  thenry
+ * Added getValuesFromHitId function which is a nice wrapper function for
+ * the routines which find eta phi and energy from hitId.
+ *
  * Revision 1.18  2004/03/22 21:41:05  thenry
  * Added UseSimpleADCCal() switch for proper analysis of Pythia Data
  *
@@ -647,6 +651,12 @@ class StEmcTpcFourPMaker : public StFourPMaker {
 };
 
 typedef multimap<double, StMuEmcPoint*, less<double> > DistanceToPointMap;
+
+bool getValuesFromHitId(int hitId, int runNumber, float &eta, float &phi,
+  float &energy, bool &isGood, SafetyArray *towerProxy, StEmcGeom *geom,
+  StBemcData *data, StMuEmcCollection *muEmc, bool simpleCal, 
+  TDataSet *mDb = NULL, emcGain_st* emcgaintbl = NULL, 
+  emcCalib_st* emccalibtbl = NULL, emcPed_st* emcpedtbl = NULL);
 
 #endif
 
