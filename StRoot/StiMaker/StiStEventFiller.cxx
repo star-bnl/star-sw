@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.35 2004/08/05 05:25:25 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.36 2004/08/06 02:29:20 andrewar Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.36  2004/08/06 02:29:20  andrewar
+ * Modifed call to getMaxPointCount
+ *
  * Revision 2.35  2004/08/05 05:25:25  calderon
  * Fix the assignment of the first point for primaries.  Now,
  * the logic for both globals and primaries is that the first
@@ -840,7 +843,14 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
       gTrack->setImpactParameter(impactParam );
   }
 
-  int maxPoints = track->getMaxPointCount();
+  int maxPoints = track->getMaxPointCount(1);//1 for TPC
+  cout <<"Tpc Hits: Max "<<maxPoints <<" coded: "
+       <<encodedStEventPoints(track)<<endl;
+  maxPoints = track->getMaxPointCount(2);//2 for Svt
+  cout <<"Svt Hits: Max "<<maxPoints<<" coded: "
+       <<encodedStEventPoints(track)<<endl;
+
+  
   gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(maxPoints));
   fillGeometry(gTrack, track, false); // inner geometry
   fillGeometry(gTrack, track, true);  // outer geometry
