@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.6 2001/04/05 04:00:46 ullrich Exp $
+ * $Id: StVertex.h,v 2.7 2001/05/30 17:45:55 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
+ * Revision 2.7  2001/05/30 17:45:55  perev
+ * StEvent branching
+ *
  * Revision 2.6  2001/04/05 04:00:46  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -81,8 +84,13 @@ protected:
     Float_t       mCovariantMatrix[6];
     Float_t       mChiSquared;
     Float_t       mProbChiSquared;
-    StTrack*      mParent;             //$LINK
+//  StTrack*      mParent;           	//$LINK
+#ifdef __CINT__
+    StObjLink     mParent;            
+#else
+    StLink<StTrack> mParent;            
+#endif //__CINT__
 
-    ClassDef(StVertex,1)
+    ClassDef(StVertex,2)
 };
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.h,v 2.3 2001/03/24 03:34:53 perev Exp $
+ * $Id: StPrimaryTrack.h,v 2.4 2001/05/30 17:45:54 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.h,v $
+ * Revision 2.4  2001/05/30 17:45:54  perev
+ * StEvent branching
+ *
  * Revision 2.3  2001/03/24 03:34:53  perev
  * clone() -> clone() const
  *
@@ -43,8 +46,13 @@ protected:
     StObject* clone() const;
     
 private:
-    StPrimaryVertex*  mVertex; //$LINK
+//  StPrimaryVertex*         	mVertex; 	//$LINK
+#ifdef __CINT__
+    StObjLink  		     	mVertex; 	
+#else
+    StLink<StPrimaryVertex>  	mVertex; 	
+#endif //__CINT__
     
-    ClassDef(StPrimaryTrack,1)
+    ClassDef(StPrimaryTrack,2)
 };
 #endif

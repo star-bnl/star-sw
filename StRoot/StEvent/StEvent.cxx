@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.24 2001/05/17 22:56:18 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.25 2001/05/30 17:45:53 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.25  2001/05/30 17:45:53  perev
+ * StEvent branching
+ *
  * Revision 2.24  2001/05/17 22:56:18  ullrich
  * Removed all usage of dst_summary_param.
  *
@@ -94,6 +97,7 @@
 #include <typeinfo>
 #include <algorithm>
 #include "TClass.h"
+#include "TDataSetIter.h"
 #include "StEvent.h"
 #include "StEventClusteringHints.h"
 #include "StEventInfo.h"
@@ -112,15 +116,18 @@
 #include "StL0Trigger.h"
 #include "StL3Trigger.h"
 #include "StPsd.h"
-#include "tables/St_event_header_Table.h"
-#include "tables/St_dst_event_summary_Table.h"
+#include "event_header.h"
+#include "dst_event_summary.h"
+#include "dst_summary_param.h"
 #include "StAutoBrowse.h"
+#include "StEventBranch.h"
+
 #ifndef ST_NO_NAMESPACES
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.24 2001/05/17 22:56:18 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.24 2001/05/17 22:56:18 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.25 2001/05/30 17:45:53 perev Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.25 2001/05/30 17:45:53 perev Exp $";
 
 ClassImp(StEvent)
 
@@ -210,7 +217,8 @@ _lookupAndSet(T* val, StSPtrVecObject &vec)
             vec[i] = val;
             return;
         }
-    if (val) vec.push_back(val);
+    if (!val) return;
+    vec.push_back(val);
 }
 #endif /*-HPUX*/
 void
@@ -222,22 +230,22 @@ StEvent::init(const event_header_st& evtHdr)
     mContent.push_back(new StEventInfo(evtHdr));
 }
 
-StEvent::StEvent() : St_DataSet("StEvent")
+StEvent::StEvent() : StXRefMain("StEvent")
 {
+    GenUUId();		//Generate Universally Unique IDentifier
     initToZero();
 }
   
 StEvent::StEvent(const event_header_st& evtHdr,
-                 const dst_event_summary_st& evtSum) :
-    St_DataSet("StEvent")
+                 const dst_event_summary_st& evtSum)
+                 :StXRefMain("StEvent")
 {
     initToZero();
     init(evtHdr);
     mContent.push_back(new StEventSummary(evtSum));
 }
 
-StEvent::StEvent(const event_header_st& evtHdr) :
-    St_DataSet("StEvent")
+StEvent::StEvent(const event_header_st& evtHdr):StXRefMain("StEvent")
 {
     initToZero();
     init(evtHdr);
@@ -675,6 +683,7 @@ StEvent::clusteringHints()
 {
     StEventClusteringHints *hints = 0;
     _lookupOrCreate(hints, mContent);
+    hints->SetParent(this);
     return hints;
 }
 
@@ -895,3 +904,84 @@ void StEvent::statistics()
     cout << "\t# of hits in RICH:           " << (richCollection() ? richCollection()->getRichHits().size() : 0) << endl;
     cout << "\t# of PSDs:                   " << numberOfPsds() << endl;
 }
+
+void StEvent::Split()
+{
+  StEventClusteringHints *clu = clusteringHints();  
+  assert(clu);
+  TDataSetIter next(this);
+  TDataSet *ds;
+  while ((ds=next())) 
+  { if (ds->IsA()!=StEventBranch::Class()) continue;
+    Remove(ds); delete ds;
+  }
+
+  vector<string> brs = clu->listOfBranches();       // list of all branches for given mode (miniDST or DST)         
+  int nbrs = brs.size();
+  for (int ibr =0; ibr < nbrs; ibr++) { //loop over branches
+    string sbr = brs[ibr];
+    if(sbr.size()==0)		continue;
+    const char *brName = sbr.c_str();
+    assert(strncmp(brName,"evt_",4)==0 || strcmp(brName,"event")==0);
+
+    UInt_t tally = ((clu->branchId(brName)) << 22) | 1 ;
+
+    StEventBranch *obr = new StEventBranch(brName,this,tally);
+    vector<string> cls = clu->listOfClasses(sbr.c_str());
+    int ncls = cls.size();
+    for (int icl =0; icl < ncls; icl++) { //loop over clases
+      string scl = cls[icl];
+      if(scl.size()==0) 	continue;
+      obr->AddKlass(scl.c_str());
+    } //end clases
+  } //end branches
+}
+//______________________________________________________________________________
+Bool_t StEvent::Notify(){Split();return 0;}  
+//______________________________________________________________________________
+void StEvent::Streamer(TBuffer &R__b)
+{
+   // Stream an object of class StEvent.
+
+   UInt_t R__s, R__c;
+   if (R__b.IsReading()) {
+
+      Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+      if (R__v == 1) {
+         TDataSet::Streamer(R__b); 
+         mContent.Streamer(R__b);
+         R__b.CheckByteCount(R__s, R__c, Class());
+         Split();
+         return;
+      } else { // version >=2
+         StXRefMain::Streamer(R__b);
+         R__b.CheckByteCount(R__s, R__c, Class());
+      }
+
+   }  else /*writing*/ {
+
+      R__c = R__b.WriteVersion(Class(), kTRUE);
+      StXRefMain::Streamer(R__b);
+      R__b.SetByteCount(R__c, kTRUE);   
+   } 
+}  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+

@@ -17,10 +17,14 @@
 #pragma link C++ class StIOEvent-;
 #pragma link C++ class StIO-;
 #pragma link C++ class StObject-!;
+#pragma link C++ class StXRef-;
+#pragma link C++ class StXRefMain-;
 #pragma link C++ class StObjArray-!;
 #pragma link C++ class StRefArray-!;
 #pragma link C++ class StStrArray-!;
+#pragma link C++ class StObjLink-!;
 #pragma link C++ class StMem-!;
+#pragma link C++ class TPageMap-!;
 
 
 

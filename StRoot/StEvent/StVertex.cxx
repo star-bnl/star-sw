@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 2.7 2001/04/05 04:00:59 ullrich Exp $
+ * $Id: StVertex.cxx,v 2.8 2001/05/30 17:45:55 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
+ * Revision 2.8  2001/05/30 17:45:55  perev
+ * StEvent branching
+ *
  * Revision 2.7  2001/04/05 04:00:59  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -36,6 +39,8 @@
  *
  **************************************************************************/
 #include <algorithm>
+#include "TClass.h"
+#include "TFile.h"
 #include "StVertex.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "StTrack.h"
@@ -46,7 +51,7 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 2.7 2001/04/05 04:00:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.8 2001/05/30 17:45:55 perev Exp $";
 
 StVertex::StVertex()
 {
@@ -136,3 +141,37 @@ StVertex::setProbChiSquared(float val) { mProbChiSquared = val; }
 
 void
 StVertex::setParent(StTrack* val) { mParent = val; }
+
+void StVertex::Streamer(TBuffer &R__b)
+{
+    // Stream an object of class .
+
+    if (R__b.IsReading()) {
+       UInt_t R__s, R__c;
+       Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+       if (R__v > 1) {
+          Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+          return;
+       }
+       //====process old versions before automatic schema evolution
+       StMeasuredPoint::Streamer(R__b);
+       R__b >> (Int_t&)mType;
+       R__b >> mFlag;
+       Int_t dumy;
+       if (gFile && gFile->GetVersion() < 30000) {R__b >> dumy;}
+       R__b.ReadFastArray(mCovariantMatrix,6);
+       R__b >> mChiSquared;
+       R__b >> mProbChiSquared;
+//     R__b >> mParent;
+       R__b >> (StTrack*&)mParent;
+
+       R__b.CheckByteCount(R__s, R__c, Class());
+       //====end of old versions
+      
+    } else {
+       Class()->WriteBuffer(R__b,this);
+    }
+} 
+
+
+

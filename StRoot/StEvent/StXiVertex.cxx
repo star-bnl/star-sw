@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cxx,v 2.4 2001/04/05 04:00:59 ullrich Exp $
+ * $Id: StXiVertex.cxx,v 2.5 2001/05/30 17:45:55 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cxx,v $
+ * Revision 2.5  2001/05/30 17:45:55  perev
+ * StEvent branching
+ *
  * Revision 2.4  2001/04/05 04:00:59  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -27,6 +30,7 @@
  *
  **************************************************************************/
 #include <iostream.h>
+#include "TClass.h"
 #include "StXiVertex.h"
 #include "StV0Vertex.h"
 #include "StTrack.h"
@@ -34,7 +38,7 @@
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_xi_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.4 2001/04/05 04:00:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.5 2001/05/30 17:45:55 perev Exp $";
 
 ClassImp(StXiVertex)
 
@@ -77,13 +81,13 @@ StXiVertex::numberOfDaughters() const { return mDaughter ? 1 : 0;}
 StTrack*
 StXiVertex::daughter(unsigned int i)
 {
-    return i == 0 ? mDaughter : 0;
+    return i == 0 ? (StTrack*)mDaughter : 0;
 }
 
 const StTrack*
 StXiVertex::daughter(unsigned int i) const
 {
-    return i == 0 ? mDaughter : 0;
+    return i == 0 ? (const StTrack*)mDaughter : 0;
 }
 
 StPtrVecTrack
@@ -182,4 +186,35 @@ StXiVertex::removeDaughter(StTrack* track)
 {
     if (track == mDaughter)  mDaughter = 0;
 }
+
+void StXiVertex::Streamer(TBuffer &R__b)
+{
+    // Stream an object of class .
+
+    if (R__b.IsReading()) {
+       UInt_t R__s, R__c;
+       Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+       if (R__v > 1) {
+          Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+          return;
+       }
+       //====process old versions before automatic schema evolution
+       StVertex::Streamer(R__b);
+       R__b >> (StTrack*&)mDaughter;
+       R__b >> mDcaBachelorToPrimaryVertex;
+       mMomentumOfBachelor.Streamer(R__b);
+       R__b >> mDcaDaughters;
+       R__b >> mDcaParentToPrimaryVertex;
+       R__b >> (StV0Vertex*&)mV0Vertex;
+
+       R__b.CheckByteCount(R__s, R__c, Class());
+       //====end of old versions
+      
+    } else {
+       Class()->WriteBuffer(R__b,this);
+    }
+} 
+
+
+
     

@@ -9,6 +9,7 @@
 #include "St_DataSetIter.h"
 #include "StTreeMaker.h"
 #include "tables/St_dst_bfc_status_Table.h"
+#include "StObject.h"
 
 
 ClassImp(StTreeMaker)
@@ -170,7 +171,11 @@ Int_t StTreeMaker::Make(){
 //_____________________________________________________________________________
 Int_t StTreeMaker::MakeRead(const StUKey &RunEvent){
 
+  TDataSet *xrefMain[2];
   int iret;
+  xrefMain[0] = StXRefManager::GetMain();
+
+
   if (!RunEvent.IsNull())	iret = fTree->ReadEvent(RunEvent);
   else                  	iret = fTree->NextEvent(        );
 
@@ -195,6 +200,10 @@ Int_t StTreeMaker::MakeRead(const StUKey &RunEvent){
     *hddr = *runevt;
 //
   }
+  xrefMain[1] = StXRefManager::GetMain();
+//		New XREF main object?
+  if (xrefMain[1] && xrefMain[1]!=xrefMain[0] && xrefMain[1]->GetParent()==0 )
+     AddData(xrefMain[1]);
   return iret;
 }    
 //_____________________________________________________________________________
@@ -286,7 +295,7 @@ void StTreeMaker::UpdateTree(Int_t flag)
 //		Fill branches
 
   StBranch *br;
-  const char* logs;int nlog,isSetBr,isHist; 
+  const char* logs;int nlog,isSetBr; 
   St_DataSet *upd,*updList,*dat,*ds;
   const char *cc;
 
@@ -412,14 +421,18 @@ Int_t StTreeMaker::Save()
 //_____________________________________________________________________________
 void StTreeMaker::Close(Option_t *)
 { 
-  if (fTree) {fTree->Close(); delete fTree; fTree=0;}
+  if (fTree) {
+    m_DataSet->Remove(fTree); 	fTree->Close(); 
+    delete fTree; 		fTree=0;}
   SetFile("");
 }
 //_____________________________________________________________________________
 void StTreeMaker::Clear(Option_t *opt)
 {
   if (opt){/*touch*/}
-  if (fTree) fTree->Clear();
+  if (fTree) {m_DataSet->Remove(fTree);fTree->Clear();}
+  m_DataSet->Delete();
+  if (fTree) m_DataSet->Add(fTree);
 }
 
 

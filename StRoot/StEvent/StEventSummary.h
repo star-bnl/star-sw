@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.h,v 2.4 2001/05/17 22:56:33 ullrich Exp $
+ * $Id: StEventSummary.h,v 2.5 2001/05/30 17:45:54 perev Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.h,v $
+ * Revision 2.5  2001/05/30 17:45:54  perev
+ * StEvent branching
+ *
  * Revision 2.4  2001/05/17 22:56:33  ullrich
  * Removed all usage of dst_summary_param.
  *
@@ -126,7 +129,7 @@ protected:
     TArrayF        mEnergyVsPhiHisto;
     Double_t       mMagneticFieldZ;
     
-    ClassDef(StEventSummary,1)
+    ClassDef(StEventSummary,2)
 };
 
 #endif

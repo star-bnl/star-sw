@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.20 2001/05/17 22:56:33 ullrich Exp $
+ * $Id: StEvent.h,v 2.21 2001/05/30 17:45:53 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.21  2001/05/30 17:45:53  perev
+ * StEvent branching
+ *
  * Revision 2.20  2001/05/17 22:56:33  ullrich
  * Removed all usage of dst_summary_param.
  *
@@ -107,13 +110,14 @@ class StXiVertex;
 class StKinkVertex;
 class StPsd;
 
-class StEvent : public St_DataSet {
+class StEvent : public StXRefMain {
 public:
     StEvent();
     StEvent(const event_header_st&,
             const dst_event_summary_st&);
     StEvent(const event_header_st&);
     virtual ~StEvent();
+    
 
     void                                Browse(TBrowser*);
     static const TString&               cvsTag();
@@ -208,16 +212,17 @@ public:
     void addPsd(StPsd*);
     void removePsd(StPsd*);
     
+virtual Bool_t Notify();   
 protected:
     mutable StSPtrVecObject  mContent;
     static  TString          mCvsTag;
-
+    void    Split();
 private:
     StEvent& operator=(const StEvent&);
     StEvent(const StEvent&);
     void initToZero();
     void init(const event_header_st&);
-    ClassDef(StEvent,1)
+    ClassDef(StEvent,2)
 };
 #endif
 

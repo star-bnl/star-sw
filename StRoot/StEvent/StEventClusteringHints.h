@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.h,v 2.5 2001/05/01 03:48:36 ullrich Exp $
+ * $Id: StEventClusteringHints.h,v 2.6 2001/05/30 17:45:54 perev Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.h,v $
+ * Revision 2.6  2001/05/30 17:45:54  perev
+ * StEvent branching
+ *
  * Revision 2.5  2001/05/01 03:48:36  ullrich
  * Added branch IDs.
  *
@@ -52,11 +55,11 @@ public:
     StEventClusteringHints();
     virtual ~StEventClusteringHints();
         
-    void setDstMode();                          // switch to DST mode
+    void setDstMode();                      	// switch to DST mode
     void setMiniDstMode();                      // switch to miniDST mode
     const char* branchName(const char*) const;  // get branch name for given class name
     int branchId(const char*) const;            // return unique ID for given branch
-
+    void SetParent(TObject *par){fParent=par;}
 #if !defined(__CINT__)    
     vector<string> listOfBranches() const;      // list of all branches for given mode (miniDST or DST)         
     vector<string> listOfClasses() const;       // list of all top level classes known     
@@ -70,10 +73,11 @@ private:
     StEventClusteringHints(const StEventClusteringHints&);
 
 private:
-    map<string,string> *mNameMap;           //!
-    map<string,string> mDstMap;             //!
-    map<string,string> mMiniDstMap;         //!
-    map<string, int>   mBranchIds;          //!
+    TObject *fParent;				//!
+    map<string,string> *mNameMap;       	//!
+    map<string,string> mDstMap;         	//!
+    map<string,string> mMiniDstMap;     	//!
+    map<string, int>   mBranchIds;      	//!
  
     ClassDef(StEventClusteringHints,1)
 };

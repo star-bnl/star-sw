@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.cxx,v 2.5 2001/04/05 04:00:53 ullrich Exp $
+ * $Id: StRichPidTraits.cxx,v 2.6 2001/05/30 17:45:54 perev Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.cxx,v $
+ * Revision 2.6  2001/05/30 17:45:54  perev
+ * StEvent branching
+ *
  * Revision 2.5  2001/04/05 04:00:53  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -27,9 +30,10 @@
  * Initial Revision.
  *
  ***************************************************************************/
+#include "TClass.h"
 #include "StRichPidTraits.h"
 
-static const char rcsid[] = "$Id: StRichPidTraits.cxx,v 2.5 2001/04/05 04:00:53 ullrich Exp $";
+static const char rcsid[] = "$Id: StRichPidTraits.cxx,v 2.6 2001/05/30 17:45:54 perev Exp $";
 
 ClassImp(StRichPidTraits)
 
@@ -79,3 +83,39 @@ operator<<(ostream& os, const StRichPidTraits& t)
             << "\n\tid                  " << t.id()
             << "\n\tprobability         " << t.probability());
 }
+
+void StRichPidTraits::Streamer(TBuffer &R__b)
+{
+    // Stream an object of class .
+
+    if (R__b.IsReading()) {
+       UInt_t R__s, R__c;
+       Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+       if (R__v > 1) {
+          Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+          return;
+       }
+       //====process old versions before automatic schema evolution
+       StTrackPidTraits::Streamer(R__b);
+       mThePids.Streamer(R__b);
+       R__b >> mProductionVersion;
+       R__b >> mId;
+       R__b >> mProbability;
+
+//     R__b >> mAssociatedMip;
+       R__b >> (StRichHit*&)mAssociatedMip;
+
+       mMipResidual.Streamer(R__b);
+       mRefitResidual.Streamer(R__b);
+       R__b >> mSigned3dDca;
+       R__b >> mSigned2dDca;
+
+
+       R__b.CheckByteCount(R__s, R__c, Class());
+       //====end of old versions
+      
+    } else {
+       Class()->WriteBuffer(R__b,this);
+    }
+} 
+

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.4 2001/05/01 03:48:28 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.5 2001/05/30 17:45:54 perev Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.5  2001/05/30 17:45:54  perev
+ * StEvent branching
+ *
  * Revision 2.4  2001/05/01 03:48:28  ullrich
  * Added branch IDs.
  *
@@ -26,7 +29,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.4 2001/05/01 03:48:28 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.5 2001/05/30 17:45:54 perev Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -34,30 +37,33 @@ StEventClusteringHints::~StEventClusteringHints() {/*noop*/}
 
 StEventClusteringHints::StEventClusteringHints()
 {
+    fParent = 0;
     setMiniDstMode();
-    setBranch("StEventInfo",                 "header",   2);
-    setBranch("StEventSummary",              "header",   2);
-    setBranch("StSoftwareMonitor",           "header",   2);
-    setBranch("StL0Trigger",                 "trigger",  3);
-    setBranch("StL3Trigger",                 "trigger",  3);
-    setBranch("StTriggerDetectorCollection", "trigger",  3);
-    setBranch("StSPtrVecTrackDetectorInfo",  "tracks",   4);
-    setBranch("StSPtrVecPrimaryVertex",      "tracks",   4);
-    setBranch("StSPtrVecTrackNode",          "tracks",   4);
-    setBranch("StSPtrVecKinkVertex",         "vertices", 5);
-    setBranch("StSPtrVecV0Vertex",           "vertices", 5);
-    setBranch("StSPtrVecXiVertex",           "vertices", 5);
-    setBranch("StEmcCollection",             "emc",      6);
-    setBranch("StRichCollection",            "aux",      7);
-    setBranch("StTofCollection",             "aux",      7);
-    setBranch("StSsdHitCollection",          "hits",     8);
-    setBranch("StSvtHitCollection",          "hits",     8);
-    setBranch("StTpcHitCollection",          "hits",     8);
-    setBranch("StFtpcHitCollection",         "hits",     8);
+    setBranch("StEventInfo",                 "evt_header",   2);
+    setBranch("StEventSummary",              "evt_header",   2);
+    setBranch("StEventClusteringHints",      "evt_header",   2);
+    setBranch("StSoftwareMonitor",           "evt_header",   2);
+    setBranch("StL0Trigger",                 "evt_trigger",  3);
+    setBranch("StL3Trigger",                 "evt_trigger",  3);
+    setBranch("StTriggerDetectorCollection", "evt_trigger",  3);
+    setBranch("StSPtrVecTrackDetectorInfo",  "evt_tracks",   4);
+    setBranch("StSPtrVecPrimaryVertex",      "evt_tracks",   4);
+    setBranch("StSPtrVecTrackNode",          "evt_tracks",   4);
+    setBranch("StSPtrVecKinkVertex",         "evt_vertices", 5);
+    setBranch("StSPtrVecV0Vertex",           "evt_vertices", 5);
+    setBranch("StSPtrVecXiVertex",           "evt_vertices", 5);
+    setBranch("StEmcCollection",             "evt_emc",      6);
+    setBranch("StRichCollection",            "evt_aux",      7);
+    setBranch("StTofCollection",             "evt_aux",      7);
+    setBranch("StSsdHitCollection",          "evt_hits",     8);
+    setBranch("StSvtHitCollection",          "evt_hits",     8);
+    setBranch("StTpcHitCollection",          "evt_hits",     8);
+    setBranch("StFtpcHitCollection",         "evt_hits",     8);
 
     setDstMode();
     setBranch("StEventInfo",                 "event", 1);
     setBranch("StEventSummary",              "event", 1);
+    setBranch("StEventClusteringHints",      "event", 1);
     setBranch("StSoftwareMonitor",           "event", 1);
     setBranch("StEmcCollection",             "event", 1);
     setBranch("StRichCollection",            "event", 1);
@@ -78,11 +84,20 @@ StEventClusteringHints::StEventClusteringHints()
 } 
 
 void
-StEventClusteringHints::setDstMode() {mNameMap = &mDstMap;}
+StEventClusteringHints::setDstMode()
+{ 
+  if (mNameMap == &mDstMap) return;
+  mNameMap = &mDstMap;
+  if (fParent) fParent->Notify();
+}
 
 void
-StEventClusteringHints::setMiniDstMode() {mNameMap = &mMiniDstMap;}
-
+StEventClusteringHints::setMiniDstMode()
+{
+  if (mNameMap == &mMiniDstMap) return;
+  mNameMap = &mMiniDstMap;
+  if (fParent) fParent->Notify();
+}
 const char*
 StEventClusteringHints::branchName(const char* classname) const
 {
@@ -95,13 +110,15 @@ StEventClusteringHints::setBranch(const char* classname, const char* branchname,
 {
     (*mNameMap)[string(classname)] = string(branchname);
     mBranchIds[string(branchname)] = id;
+    if (fParent) fParent->Notify();
+    
 }
 
 int
 StEventClusteringHints::branchId(const char* branchname) const
 {
     map<string,int>::const_iterator i = mBranchIds.find(string(branchname));
-    return i != mBranchIds.end() ? i->second : 0;  
+    return i != mBranchIds.end() ? i->second : -1;  
 }
 
 vector<string>
@@ -150,3 +167,74 @@ StEventClusteringHints::print(ostream& os)
 	    cout << '\t' << classes[k] << endl;
     }
 }
+
+static TBuffer&  operator<<(TBuffer& buf, const map<string,string> &s)
+{
+  TString ts1,ts2;
+  map<string,string>::const_iterator i;
+  buf << s.size();
+  for (i = s.begin(); i != s.end(); i++){
+    ts1 = i->first. c_str(); ts1.Streamer(buf);
+    ts2 = i->second.c_str(); ts2.Streamer(buf);}
+  return buf;
+}
+
+static TBuffer&  operator>>(TBuffer& buf,      map<string,string> & s)
+{
+  TString ts1,ts2; int i,size;
+  buf >> size;
+  for (i = 0;i<size;i++){
+    ts1.Streamer(buf); ts2.Streamer(buf);
+    s[string(ts1.Data())] = string(ts2.Data());}  
+  return buf;
+}
+   
+static TBuffer&  operator<<(TBuffer& buf, const map<string,int> &s)
+{
+  TString ts1;
+  map<string,int>::const_iterator i;
+  int size = s.size();buf << size;
+  for (i = s.begin(); i != s.end(); i++){
+    ts1 = i->first.c_str(); ts1.Streamer(buf);
+    buf << i->second;}
+  return buf;
+}
+
+static TBuffer&  operator>>(TBuffer& buf,      map<string,int> & s)
+{
+  TString ts1;
+  int i,size,ii;
+  buf >> size;
+  for (i = 0;i<size;i++){
+    ts1.Streamer(buf); buf>>ii;
+    s[string(ts1.Data())] = ii;}
+  return buf;
+}
+
+
+
+void StEventClusteringHints::Streamer(TBuffer &R__b)
+{
+// Stream an object of class StEventClusteringHints
+
+   UChar_t mode;
+   UInt_t R__s, R__c;
+   if (R__b.IsReading()) {
+      Version_t R__v = R__b.ReadVersion(&R__s, &R__c); if (R__v) { }
+      R__b >> mode; mNameMap=(mode)? &mMiniDstMap:&mDstMap;
+      R__b >>  mDstMap;     
+      R__b >>  mMiniDstMap;     
+      R__b >>  mBranchIds;
+      R__b.CheckByteCount(R__s, R__c, Class());  
+      
+   } else { /*writing*/   
+      R__c = R__b.WriteVersion(Class(), kTRUE);
+      mode = (mNameMap == &mMiniDstMap);
+      R__b <<  mode;     
+      R__b <<  mDstMap;     
+      R__b <<  mMiniDstMap;     
+      R__b <<  mBranchIds;
+      R__b.SetByteCount(R__c, kTRUE);
+   }
+}
+

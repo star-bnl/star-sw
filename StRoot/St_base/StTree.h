@@ -67,7 +67,7 @@ public:
 
 protected:
   virtual void OpenTFile();
-  void SetParAll(TDataSet *par,TList *savList);
+  void SetParAll(TDataSet *parNew,TDataSet *parOld, TList *savList);
   void SetParAll(TList *savList);
   Int_t fNEvents; 		//  Number of written events in file
   StUKey  fUKey;          	//! Current RunEvent number 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.h,v 2.6 2001/04/05 04:00:41 ullrich Exp $
+ * $Id: StRichPidTraits.h,v 2.7 2001/05/30 17:45:54 perev Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.h,v $
+ * Revision 2.7  2001/05/30 17:45:54  perev
+ * StEvent branching
+ *
  * Revision 2.6  2001/04/05 04:00:41  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -75,7 +78,7 @@ public:
     int   id() const;
     float probability() const;
 
-    StRichHit*             associatedMip() const;
+    const StRichHit*       associatedMip() const;
     const StThreeVectorF&  mipResidual() const;
     const StThreeVectorF&  refitResidual() const;
     float                  signedDca2d() const;
@@ -88,7 +91,12 @@ private:
     Int_t            mId;
     Float_t          mProbability;
 
-    StRichHit*       mAssociatedMip; //$LINK
+//  StRichHit*        	mAssociatedMip; //$LINK
+#ifdef __CINT__
+    StObjLink	      	mAssociatedMip; 
+#else
+    StLink<StRichHit> 	mAssociatedMip; 
+#endif //__CINT__
     StThreeVectorF   mMipResidual;
     StThreeVectorF   mRefitResidual;
 
@@ -97,7 +105,7 @@ private:
     
     StObject* clone() const;
 
-    ClassDef(StRichPidTraits,1)
+    ClassDef(StRichPidTraits,2)
 };
 
 // sets
@@ -122,7 +130,7 @@ inline int StRichPidTraits::productionVersion() const { return mProductionVersio
 inline int StRichPidTraits::id() const {return mId;}
 inline float StRichPidTraits::probability() const {return mProbability;}
 
-inline StRichHit* StRichPidTraits::associatedMip() const { return mAssociatedMip;}
+inline const StRichHit* StRichPidTraits::associatedMip() const { return mAssociatedMip;}
 inline const StThreeVectorF& StRichPidTraits::mipResidual() const {return mMipResidual;}
 inline const StThreeVectorF& StRichPidTraits::refitResidual() const { return mRefitResidual;}
 inline float StRichPidTraits::signedDca2d() const { return mSigned2dDca;}

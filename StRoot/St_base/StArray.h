@@ -4,10 +4,7 @@
  
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_DataSet                                                           //
 //                                                                      //
-// St_DataSet class is a base class to implement the directory-like     //
-// data structures and maintain it via St_DataSetIter class iterator    //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
  
@@ -44,6 +41,43 @@
 	class const_StRefArrayIter;
 #endif /*__CINT__*/
 
+class StObjLink : public TObject
+{
+public:
+   	StObjLink(const StObject *p=0)	{fLink=(StObject*)p;}
+   	StObjLink(const StObjLink &from){fLink=(StObject*)from.fLink;}
+       ~StObjLink()             	{fLink=0;}
+
+   	StObjLink &operator=(StObjLink &from){fLink=from.fLink;return *this;}
+   	StObjLink &operator=(StObject *obj)  {fLink=obj; return *this;}
+   	StObject  &operator*() 				{return *fLink;}
+   	StObject  *operator->() 			{return  fLink;}
+   	          operator StObject *&() 		{return  fLink;}
+                  operator const StObject *() const 	{return  fLink;}
+   	StObject*  get() 				{return  fLink;}
+virtual Bool_t     IsFolder() const {return 1;}
+virtual void Browse(TBrowser* b); 			
+//   void Streamer(TBuffer &buf);
+
+   StObject *fLink;
+   ClassDef(StObjLink,1)
+};
+
+template<class T>
+    class StLink : public StObjLink {
+public:
+    typedef T element_type;
+    StLink(T *p = 0):StObjLink(p){};
+   StLink<T> &operator=(T *obj)  {fLink=obj; return *this;}
+   StLink<T> &operator=(const StLink<T> &fr) {fLink=(StObject*)fr.fLink; return *this;}
+   T         &operator*() 		{return *((T*)fLink);}
+   T         *operator->() 		{return   (T*)fLink; }
+   const T   *operator->() const	{return   (const T*)fLink; }
+              operator const T *() const{return   (const T*)fLink; }
+   	      operator T *&() 		{return   (T*&)fLink; }
+};
+
+
 class StObjArray;
 class StStrArray;
 class StRefArray;
@@ -64,7 +98,7 @@ virtual void Browse(TBrowser *b);
         void reserve(size_t sz) {fV.reserve(sz)      ;}
         void resize(size_t sz,TObject *v=0) {fV.resize(sz,v);}
 virtual Bool_t IsFolder() const;
-        TObject *&at(int i){return fV[i];}
+        TObject *       &at(int i)       {return fV[i];}
         void     put_at(TObject *obj,int i){fV[i]=obj;}
 
         TObject * const &front() const { return fV.front();}
@@ -97,26 +131,17 @@ protected:
 //NONMONO void Book(TObject* obj,int idx);
 
 public:
- StStrArray(const Char_t *name="",Int_t sz=0);
- StStrArray(Int_t sz);
+ StStrArray(Int_t sz=0);
  StStrArray(const StStrArray &from);
  virtual ~StStrArray();
  virtual void operator =(const StStrArray &a); 
 
- const char *GetIDName() const ;
- void                SetIDName(const char* name);
- virtual void        SetName(const char *name);
- virtual const char *GetName() const;
-
  void push_back(const TObject *to){fV.push_back((TObject*)to);}
  VecTObjIter erase(VecTObjIter fst,VecTObjIter lst=0);
  void clear();
- virtual void makeZombie();
+ virtual void makeZombie(int flg);			
 private:
-TString fIDName;
-TString fName;
- 
-ClassDef(StStrArray,2)
+ClassDef(StStrArray,3)
 };
 
 
@@ -126,7 +151,7 @@ public:
   StRefArray(Int_t sz=0);
   StRefArray(const StRefArray &from);
    ~StRefArray(){};
-ClassDef(StRefArray,2)
+ClassDef(StRefArray,3)
 };
 
 //	Utilities
@@ -174,8 +199,7 @@ ClassDef(StPtrVec ## QWERTY ##,1) \
 class StSPtrVec ## QWERTY : public StStrArray \
 { \
 public: \
-StSPtrVec ## QWERTY(const Char_t *name=0,Int_t sz=0):StStrArray(name,sz){};\
-StSPtrVec ## QWERTY(Int_t sz):StStrArray("",sz){};\
+StSPtrVec ## QWERTY(Int_t sz=0):StStrArray(sz){};\
 StSPtrVec ## QWERTY(const StSPtrVec ## QWERTY &from):StStrArray(from){};\
 \
  St ## QWERTY * const &at(Int_t idx) const {return (St ## QWERTY  * const &)fV[idx];}\

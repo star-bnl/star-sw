@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.h,v 2.5 2001/04/05 04:00:38 ullrich Exp $
+ * $Id: StKinkVertex.h,v 2.6 2001/05/30 17:45:54 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.h,v $
+ * Revision 2.6  2001/05/30 17:45:54  perev
+ * StEvent branching
+ *
  * Revision 2.5  2001/04/05 04:00:38  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -80,7 +83,12 @@ public:
     void removeDaughter(StTrack*);
 
 protected:
-    StTrack*       mDaughter;         //$LINK
+//    StTrack*       mDaughter;         //$LINK
+#ifdef __CINT__
+    StObjLink        mDaughter;		
+#else
+    StLink<StTrack>  mDaughter;		
+#endif //__CINT__
     UShort_t       mParentGeantId;
     UShort_t       mDaughterGeantId;
     Float_t        mDcaParentDaughter;
@@ -95,6 +103,6 @@ protected:
     StThreeVectorF mDaughterMomentum;
 
     StObject* clone() const;
-    ClassDef(StKinkVertex,1)
+    ClassDef(StKinkVertex,2)
 };
 #endif
