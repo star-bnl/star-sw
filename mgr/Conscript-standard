@@ -110,16 +110,7 @@ if ($#src > -1) {
     Library      $env2 $LIBPKG, @src;  
     Install $env2 $LIB, $LIBPKG;
   }
-  if ($STAR_SYS =~ /^sun4x_5/) {
-    my $obj_templates = $obj_dir . "/Templates.DB";
-    my $templates = " ";
-    if (-d $obj_templates) {$templates .= $obj_templates . "/*.o";}
-    my $LINKMODULECOM = $env2->{LINKMODULECOM} . $templates;
-    $env3 = $env2->clone('LINKMODULECOM'      => $LINKMODULECOM);
-    LinkedModule $env3 $SO_PKG, @src;
-  }
-
-  else {LinkedModule $env2 $SO_PKG, @src;}
+  LinkedModule $env2 $SO_PKG, @src;
   Install $env2 $LIB, $SO_PKG;
 }  
 #________________________________________
