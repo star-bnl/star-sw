@@ -53,6 +53,52 @@ STAFCV_T dui_cd(char* path)
 
 /*
 *:>---------------------------------------------------------------------
+*:ROUTINE:      void kam_dui_df_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* DUI/DF
+*:<---------------------------------------------------------------------
+*/
+void kam_dui_df_()
+{
+        STAFCV_T status = dui_df();
+}
+STAFCV_T dui_df()
+{
+   if( !dui->df() ){
+      EML_FAILURE(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
+
+/*
+*:>---------------------------------------------------------------------
+*:ROUTINE:      void kam_dui_du_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* DUI/DU [ PATH ]
+*:<---------------------------------------------------------------------
+*/
+void kam_dui_du_()
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char*  path = ku_gets();     /* path */
+   long  minsize = ku_geti();   /* min size of reported tables */
+
+        STAFCV_T status = dui_du(path,minsize);
+}
+STAFCV_T dui_du(char* path,long minsize)
+{
+   if( !dui->du(path,minsize) ){
+      EML_FAILURE(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
+
+/*
+*:>---------------------------------------------------------------------
 *:ROUTINE:      void kam_dui_ln_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --

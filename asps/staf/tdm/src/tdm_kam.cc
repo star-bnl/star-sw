@@ -33,6 +33,7 @@
 /*-------------------------------------------- PROTOTYPES           --*/
 extern "C" void dsuPrintData(FILE *stream , DS_TYPE_CODE_T type
 		, unsigned int count , void *data);
+extern "C" char * temp_tablename();
 
 /*
 *:>---------------------------------------------------------------------
@@ -292,17 +293,29 @@ STAFCV_T tdm_type_load(char * fname)
    }
    printf("\n---\n%s\n---\n",spec); fflush(0);
 
-     if( !tdm->newTable("tdm_temporary",spec,1)
-     ||  !tdm->deleteTable("tdm_temporary")
-// DS_DATASET_T *T=NULL; HACK ???????????????????????????????
-// if( !dsNewTable(&T,"t__tmp" HACK ?????????????????????????
+//   if( !tdm->newTable("tdm_temporary",spec,1) HACK ???????????
+//   ||  !tdm->deleteTable("tdm_temporary")     HACK ???????????
+   DS_DATASET_T *ttmp=NULL;
+   char *ptmp;
+   char *ntmp;
+   ptmp=NULL;
+   if( !dsNewTable(&ttmp,ntmp=temp_tablename(),spec,1,ptmp)
    ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(CANT_CREATE_TEMP_TABLE);
    }
 
    FREE(spec); FREE(buffer);
    fclose(f);
    EML_SUCCESS(STAFCV_OK);
+}
+
+char * temp_tablename()
+{
+	static int i=0;
+	static char c[10],*n=c;
+	sprintf(n,"t_tmp%d",i);
+	i++;
+	return n;
 }
 
 /*
