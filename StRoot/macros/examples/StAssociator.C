@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.2 1999/07/23 10:53:48 kathy Exp $
+// $Id: StAssociator.C,v 1.3 1999/07/23 14:35:41 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.3  1999/07/23 14:35:41  calderon
+// Updated names of default files and of packages
+//
 // Revision 1.2  1999/07/23 10:53:48  kathy
 // put in header info in Manuel's macros
 //
@@ -20,12 +23,11 @@ class StChain;
 StChain *chain=0;
 
 void StAssociator(Int_t nevents=1,
-		  const char *MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.geant.root")
+const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root")
 
-    // File for rlnx02 : /disk0/star/test/SL99d/tfs_Solaris/Fri/year_1b/psc0050_01_40evts.geant.root
-    //     const Char_t *MainFile="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf")
-    // Usual file: /disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.geant.root
-
+// /disk0/star/test/SL99d/tfs_Solaris/Fri/year_1b/psc0050_01_40evts.geant.root
+// /disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfsr/psc0029_02_40evts.geant.root
+// /disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root
 {
 
     // Dynamically link needed shared libs
@@ -36,8 +38,8 @@ void StAssociator(Int_t nevents=1,
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
-    gSystem->Load("StEventReaderMaker"); // For use in new
-    //gSystem->Load("StEventMaker"); // For use in dev (along with at least 5 other changes)
+    gSystem->Load("StEventReaderMaker"); // For use in SL99e
+    //gSystem->Load("StEventMaker"); // For use in SL99f (along with at least 5 other changes)
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
     gSystem->Load("StAssociationMaker");
@@ -52,8 +54,8 @@ void StAssociator(Int_t nevents=1,
     ioMaker->SetDebug();
     ioMaker->SetIOMode("r");
     ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
-    ioMaker->SetBranch("geantBranch",0,"r"); //activate EventBranch
-    ioMaker->SetBranch("dstBranch",0,"r"); //activate EventBranch
+    ioMaker->SetBranch("geantBranch",0,"r"); //activate geant Branch
+    ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
 
     // Note, the title "events" is used in the Association Maker, so don't change it.
     //StEventMaker*       eventReader   = new StEventMaker("events","title");
@@ -101,6 +103,9 @@ void StAssociator(Int_t nevents=1,
     gPad->SetLogy(0);
     examples->coordMcPartner->Draw();
     
-    chain->Finish(); // This should call the Finish() method in ALL makers
+    chain->Finish(); // This should call the Finish() method in ALL makers,
+                     // comment it out if you want to keep the objects
+                     // available at the command line after running
+                     // the macro.
 }
 
