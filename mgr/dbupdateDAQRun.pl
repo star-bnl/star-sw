@@ -76,11 +76,14 @@ my $debugOn = 0;
 
 my $topHpssReco  =  "/home/starreco/reco";
 my $DISK1 = "/star/rcf/disk00001/star";
-my $DISK2 = "/star/rcf/data09/reco";
-my $DISK3 = "/star/rcf/data10/reco";
-my $DISK4 = "/star/rcf/data05/reco";
-my $DISK5 = "/star/rcf/data07/reco";
-my $DISK6 = "/star/rcf/data08/reco";
+
+my @DISKR = (
+#              "/star/rcf/data09/reco",
+#              "/star/rcf/data10/reco",
+#              "/star/rcf/data05/reco",
+              "/star/rcf/data08/reco",
+#              "/star/rcf/data07/reco",
+); 
 
 my %monthHash = (
 		 "Jan" => 1,
@@ -174,23 +177,22 @@ my $maccess;
  my $flname;
 my $nDiskFiles = 0;
 my @diskRecoDirs;
+my $ndir = 0;
 
 print "\nFinding reco files in disk\n";
 
-for( $ll = 0; $ll<scalar(@Sets); $ll++) { 
-  $diskRecoDirs[$ll] = $DISK2 . "/" . $prodSr . "/" .  $Sets[$ll] ;
-  print "diskRecoDir: $diskRecoDirs[$ll]\n";
+ for( $kk = 0; $kk<scalar(@DISKR); $kk++)  { 
+ for( $ll = 0; $ll<scalar(@Sets); $ll++) {
+   $diskRecoDirs[$ndir] = $DISKR[$kk] . "/" . $Sets[$ll];
+   print "diskRecotDir: $diskRecoDirs[$ndir]\n";
+   $ndir++;   
+ }
 }
-   $diskDstDirs[$ll] = $DISK3 . "/" . $prodSr . "/" . $Sets[2];
-    print "diskDstDir: $diskDstDirs[$ll]\n";  
-   $ll++;
-   $diskDstDirs[$ll] = $DISK4 . "/" . $prodSr . "/" . $Sets[2];
-    print "diskDstDir: $diskDstDirs[$ll]\n";  
- 
+
 my $dflag;
 
 foreach $diskDir (@diskRecoDirs) {
-#  print "diskRecoDir: ", $diskDir, "\n";
+  print "diskRecoDir: ", $diskDir, "\n";
   if (-d $diskDir) {
   opendir(DIR, $diskDir) or die "can't open $diskDir\n";
   while( defined($flname = readdir(DIR)) ) {
@@ -383,7 +385,7 @@ foreach my $jobnm (@jobSum_set){
 
       print "updating JobStatus table\n";
  
-#     &updateJSTable(); 
+     &updateJSTable(); 
 
       }else {
        }
@@ -590,7 +592,7 @@ elsif ( $gflag == 2) {
 
 ##### update RECO DAQ files in Files Catalog if rerun 
    print "Updating Files Catalog\n";
-   &updateDbTable();  
+#   &updateDbTable();  
        last;
       }else{
        next;
