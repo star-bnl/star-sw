@@ -49,10 +49,15 @@ class StiDefaultTrack : public StiTrack, public StiKalmanTrack
 
  
   void  addHit(StHit * hit);
+  void  addHitToNode(StHit * hit, StiMutableTreeNode * node);
+  void  addHitAsParent(StHit * hit, StiMutableTreeNode * node);
   void  removeHit(StHit * hit);
+  void  removeNode(StiMutableTreeNode * node);
   void  removeAllHits();
   void  reset();
-
+  void  pruneNodes(StiMutableTreeNode * node);
+  StiMutableTreeNode * findBestBranch(StiMutableTreeNode * node);
+ 
   static setSvtDedxCalculator(StiDedxCalculator * calculator);
   static setTpcDedxCalculator(StiDedxCalculator * calculator);
   static setTreeNodeFactory(StiTreeNodeFactory  * factory);
@@ -68,22 +73,6 @@ class StiDefaultTrack : public StiTrack, public StiKalmanTrack
   
   void   addHitNode(StiMutableTreeNode * addedNode, StiMutableTreeNode * target);
 
-  double fX;              // X-coordinate of this track (reference plane)
-  double fAlpha;          // rotation angle
-
-  double fdEdx;           // dE/dx 
-
-  double fP0;             // Y-coordinate of a track
-  double fP1;             // Z-coordinate of a track
-  double fP2;             // C*x0
-  double fP3;             // track curvature
-  double fP4;             // tangent of the track momentum dip angle
-
-  double fC00;                         // covariance
-  double fC10, fC11;                   // matrix
-  double fC20, fC21, fC22;             // of the
-  double fC30, fC31, fC32, fC33;       // track
-  double fC40, fC41, fC42, fC43, fC44; // parameters
  
   StiTreeNode * first;  // first point on this track
   StiTreeNode * last;   // current/last work node
