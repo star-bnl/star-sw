@@ -169,12 +169,12 @@ void StiSvtHitLoader::loadHits(StEvent* source,
 					hit->position().y(),
 					hit->position().z(),
 					hit->charge() );
-		      _hitContainer->push_back( stiHit );
-					//cout << " hit from :"<<*detector<<endl;
-					//cout << " stHit-x"<<hit->position().x()<<" x:"<<stiHit->x()<<endl;
-					//cout << " stHit-y"<<hit->position().y()<<" y:"<<stiHit->y()<<endl;
-					//cout << " stHit-z"<<hit->position().z()<<" z:"<<stiHit->z()<<endl;
-					//cout << " _______DIFF:" << stiHit->x()-detector->getPlacement()->getNormalRadius()<<endl;
+		      _hitContainer->add( stiHit );
+		      //cout << " hit from :"<<*detector<<endl;
+		      //cout << " stHit-x"<<hit->position().x()<<" x:"<<stiHit->x()<<endl;
+		      //cout << " stHit-y"<<hit->position().y()<<" y:"<<stiHit->y()<<endl;
+		      //cout << " stHit-z"<<hit->position().z()<<" z:"<<stiHit->z()<<endl;
+		      //cout << " _______DIFF:" << stiHit->x()-detector->getPlacement()->getNormalRadius()<<endl;
 		    }
 		}
 	    }

@@ -97,7 +97,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 				hit->position().z(),
 				hit->charge());
 	      //cout << "Adding HIT:"<<*stiHit<<endl;
-	      _hitContainer->push_back( stiHit );
+	      _hitContainer->add( stiHit );
 	    }
 	}
     }
@@ -189,11 +189,11 @@ void StiTpcHitLoader::loadMcHits(StMcEvent* source,
 				hit->position().y(),
 				hit->position().z(),
 				hit->dE());
-	      _mcHitContainer->push_back( stiHit );
+	      _mcHitContainer->add( stiHit );
 	      mcTrack->addHit(stiHit);
 	      if (useMcAsRec) 
 		{
-		  _hitContainer->push_back( stiHit );
+		  _hitContainer->add( stiHit );
 		}
 	      //cout << "StiKalmanTrackFinder::loadMcHits() -I- Hit Done."<<endl;
 	    }

@@ -64,7 +64,7 @@ void StiSsdHitLoader::loadHits(StEvent* source,
 		  stiHit->reset();
 		  operator()(hit, stiHit);
 		  //stiHit->setDetector (layer );
-		  _hitContainer->push_back( stiHit );
+		  _hitContainer->add( stiHit );
 		  if (fmod(++nhit, nprint)==0.) _messenger <<"Filling SsdHit:\t"<<nhit<<endl;
 		}
 	    }

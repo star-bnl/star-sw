@@ -173,12 +173,12 @@ void PrintMenuGroup::printEff()
       StiHitToHitMap mcHitToRecHitMap;
       //StiHitToHitMap recHitToMcHitMap;
       StiDefaultHitAssociationFilter hitAssocFilter;
-      mcHitToRecHitMap.build(mcHitContainer,recHitContainer,&hitAssocFilter);
+      mcHitToRecHitMap.build(*mcHitContainer,*recHitContainer,hitAssocFilter);
       cout << "   hit to hit map size:" <<  mcHitToRecHitMap.size() << endl;
       mcHitToRecHitMap.analyze();
       //recHitToMcHitMap.build(recHitContainer,mcHitContainer,&hitAssocFilter);
       StiHitToTrackMap recHitToTrackMap;
-      recHitToTrackMap.build(trackContainer);
+      recHitToTrackMap.build(*trackContainer);
       cout << " hit to track map size:" << recHitToTrackMap.size()<<endl;
 
       StiTrackToObjMap map;
