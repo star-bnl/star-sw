@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/01/99  
-//  
-// 
+// $Id: St_NodeViewIter.cxx,v 1.3 1999/03/29 19:25:26 fine Exp $
+// $Log: St_NodeViewIter.cxx,v $
+// Revision 1.3  1999/03/29 19:25:26  fine
+// Visibility flag have been activated. Some working correction
+//
 
 #include "St_NodeViewIter.h"
 #include "TClonesArray.h"
@@ -22,20 +25,19 @@ St_NodeViewIter::~St_NodeViewIter()
 //______________________________________________________________________________
 St_NodePosition *St_NodeViewIter::GetPosition(Int_t level)
 {
-  Int_t l = level;
-  if (!l) l = fDepth;
+  Int_t thisLevel = level;
+  if (!thisLevel) thisLevel = fDepth;
   St_NodePosition *pos = 0;
-  St_NodePosition  null;
-  if (m_Positions) pos=(St_NodePosition *)m_Positions->At(l);
+  if (m_Positions) pos=(St_NodePosition *)m_Positions->At(thisLevel);
   return pos;
 }
 
 //______________________________________________________________________________
 St_NodePosition St_NodeViewIter::operator[](Int_t level)
 {
-  Int_t l = level;
-  if (!l) l = fDepth;
-  St_NodePosition *pos = GetPosition(l);
+  Int_t thisLevel = level;
+  if (!thisLevel) thisLevel = fDepth;
+  St_NodePosition *pos = GetPosition(thisLevel);
   St_NodePosition  null;
   if (pos) return *pos;
   else     return null;
@@ -62,17 +64,20 @@ St_NodePosition *St_NodeViewIter::UpdateTempMatrix(St_NodePosition *curPosition)
     St_NodePosition *oldPosition = 0;
     TRotMatrix *oldMatrix = 0;
     oldPosition = (St_NodePosition *)m_Positions->At(fDepth-1);
-    oldMatrix = oldPosition->GetMatrix();
+    Double_t oldTranslation[] = { 0, 0, 0 };
+    if (oldPosition) 
+    {
+      oldMatrix         = oldPosition->GetMatrix();
  
-    Double_t oldTranslation[3];
-    oldTranslation[0] = oldPosition->GetX();
-    oldTranslation[1] = oldPosition->GetY();
-    oldTranslation[2] = oldPosition->GetZ();
+      oldTranslation[0] = oldPosition->GetX();
+      oldTranslation[1] = oldPosition->GetY();
+      oldTranslation[2] = oldPosition->GetZ();
+    }
 
     // Pick the "current" position by pieces
     TRotMatrix *curMatrix        = curPosition->GetMatrix();
  
-    // Create a new postion
+    // Create a new position
     Double_t newTranslation[3];
     Double_t newMatrix[9];
 
@@ -100,6 +105,17 @@ St_NodePosition *St_NodeViewIter::UpdateTempMatrix(St_NodePosition *curPosition)
   return newPosition;
 }
 
+//______________________________________________________________________________
+void St_NodeViewIter::ResetPosition(Int_t level, St_NodePosition *newPosition)
+{
+  Int_t thisLevel = level;
+  if (!thisLevel) thisLevel = fDepth;
+  St_NodePosition *thisPosition  =  GetPosition(level);
+  if (thisPosition) delete thisPosition;
+  thisPosition = 0;
+  if (newPosition) 
+     thisPosition =  new ((*m_Positions)[thisLevel]) St_NodePosition(*newPosition);
+}
 //______________________________________________________________________________
 void St_NodeViewIter::Reset(St_DataSet *l,Int_t depth)
 {
