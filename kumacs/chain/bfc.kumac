@@ -114,10 +114,10 @@
 MACRO bfc _
    TOP=$STAR _
    adcxyzon=0 _
-   tpc_sector_first=18 _
-   tpc_sector_last=18 _
-   domain='geometry tpc svt global ' _
-   chain='g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0  evout'_ 
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   domain='geometry tpc' _
+   chain='g2t tpg tss tcl tpt'_ 
    first=1 _
    no_events=1 _
    input_data_prefix=$AFS_RHIC/star/data/samples/ _
@@ -162,7 +162,7 @@ MACRO bfc _
  if $iquest(1)<>0 goto ABEND
 
  exec [TOP]/kumacs/chain/bfc_util#bfc_init chain=[chain]
-
+ 
 *****************************************
 *  MAIN EVENT LOOP 
 *****************************************
