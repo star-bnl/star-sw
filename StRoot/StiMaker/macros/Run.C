@@ -1,4 +1,3 @@
-
 void help();
 void loadLibrairies();
 
@@ -14,15 +13,14 @@ void loadLibrairies(bool doProfile)
 	//  char * list[]={"St_base","StChain","StUtilities","StBFChain", "St_Tables","libgen_Tables",
 	// "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker",
   char * list[]={"St_base","StChain","StUtilities", "St_Tables", "StarClassLibrary",
-								 "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker",
-								 "StIOMaker","StTreeMaker",
-								 "St_db_Maker","StDbLib","StDbBroker","StSvtDbMaker","StDbUtilities",
-								 "StTpcDb","StEvent","StEventMaker","StEmcUtil", 
-								 "StMcEvent","StMcEventMaker","StAssociationMaker","StDaqLib","StDAQMaker",
-								 "StDetectorDbMaker",
-								 "StSvtClassLibrary","StSvtDaqMaker","StSvtSimulationMaker","StSvtCalibMaker",
-								 "StSvtSeqAdjMaker","StSvtClusterMaker","Sti","StiGui",
-								 "StiEvaluator","libGui","StiMaker","StiTpc","StiSvt","StiEmc","StMiniMcEvent","StMiniMcMaker","last"};
+		 "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker",
+		 "StIOMaker","StTreeMaker", "St_db_Maker","StDbLib","StDbBroker",
+		 "StSvtDbMaker","StDbUtilities", "StTpcDb","StEvent","StEventMaker","StEmcUtil", 
+		 "StMcEvent","StMcEventMaker","StAssociationMaker","StDaqLib","StDAQMaker",
+		 "StDetectorDbMaker", "StSvtClassLibrary","StSvtDaqMaker",
+		 "StSvtSimulationMaker","StSvtCalibMaker", "StSvtSeqAdjMaker",
+		 "StSvtClusterMaker","Sti","StiGui", "StiEvaluator","libGui","StiMaker",
+		 "StiTpc","StiSvt","StiEmc","StMiniMcEvent","StMiniMcMaker","last"};
 
   int i=0;  
   cout <<"Run.C::loadLibrairies() - INFO - Started"<<endl;
@@ -43,17 +41,33 @@ void loadLibrairies(bool doProfile)
 
 void Run(int firstEvent=0,
 	 int nEvents=1,
+	 //const char * filePrefix = "st_physics_",
 	 const char * filePrefix = "rcf",
-	 const char * path= "/star/data15/reco/auau200/hijing/b0_20/standard/year2001/hadronic_on/trs_gb/",
-	 const char * file="rcf0183_09_300evts.geant.root",
-	 bool useGui=true,
+	 //const char * path= "/star/data13/reco/ppMinBias/FullField/P02gf/2002/019/",
+	 //const char * path ="/star/data22/ITTF/EvalData/Event/ppMinBias/",
+  	 //const char * file="st_physics_3019045_raw_0031.event.root",
+	 const char * path= "/star/data22/ITTF/EvalData/MCFiles/auau200",
+  	 const char * file="rcf0183_12_300evts.event.root",
+
+//  	 bool useGui=false,
+//  	 bool doSimulation=false,
+//  	 bool doAssociation=false,
+//  	 bool doMiniMcEvent=false,
+//  	 bool doDst=false,
+//  	 bool doStEventOutput=true,
+//  	 bool doStEventInput=true,
+//  	 bool doProfile=false
+
+	 //Example of switch setup for minimctree output
+	 bool useGui=false,
 	 bool doSimulation=true,
 	 bool doAssociation=true,
 	 bool doMiniMcEvent=true,
 	 bool doDst=false,
-	 bool doStEventOutput=false,
-	 bool doStEventInput=false,
-	 bool doProfile=false )
+	 bool doStEventOutput=true,
+	 bool doStEventInput=true,
+	 bool doProfile=false
+	 )
 {
   const char *fileList[]={0,0};
   if (strncmp(path,"GC",2)==0) 
