@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.44 2003/09/02 17:58:11 perev Exp $
+// $Id: StFlowEvent.cxx,v 1.45 2004/03/11 17:58:40 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -66,6 +66,7 @@ Bool_t  StFlowEvent::mPtWgt                = kTRUE;
 Bool_t  StFlowEvent::mEtaWgt               = kTRUE;
 Bool_t  StFlowEvent::mProbPid              = kFALSE;
 Bool_t  StFlowEvent::mEtaSubs              = kFALSE;
+Bool_t  StFlowEvent::mRanSubs              = kFALSE;
 Bool_t  StFlowEvent::mOnePhiWgt            = kFALSE;
 Bool_t  StFlowEvent::mFirstLastPhiWgt      = kFALSE;
 Bool_t  StFlowEvent::mFirstLastPoints      = kFALSE;
@@ -872,6 +873,11 @@ void StFlowEvent::PrintSelectionList() {
   } else {
     cout << "#    EtaSubs= FALSE" << endl;
   }
+  if (mRanSubs) {
+    cout << "#    RanSubs= TRUE" << endl;
+  } else {
+    cout << "#    RanSubs= FALSE" << endl;
+  }
   cout << "#######################################################" << endl;
   cout << "# Pid Deviant Cuts:" << endl; 
   cout << "#    PiPlus cuts=  " << mPiPlusCuts[0] << ", " 
@@ -923,6 +929,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.45  2004/03/11 17:58:40  posk
+// Added Random Subs analysis method.
+//
 // Revision 1.44  2003/09/02 17:58:11  perev
 // gcc 3.2 updates + WarnOff
 //

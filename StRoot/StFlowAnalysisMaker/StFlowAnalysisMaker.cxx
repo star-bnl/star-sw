@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.81 2003/12/12 02:34:40 oldi Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.82 2004/03/11 18:00:03 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1153,7 +1153,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.81 2003/12/12 02:34:40 oldi Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.82 2004/03/11 18:00:03 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1507,9 +1507,19 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	pFlowSelect->SetHarmonic(j);
 	double order  = (double)(j+1);
 	float psi_i, psi_2;
-	if (pFlowEvent->EtaSubs()) { // particles with the opposite subevent
+	if (pFlowEvent->EtaSubs()) { // particles with the other subevent
 	  int i = Flow::nSels*k;
 	  psi_i = (eta > 0.) ? mPsiSub[i+1][j] : mPsiSub[i][j];
+	} else if (pFlowEvent->RanSubs()) { // particles with the other subevent
+	  int i = Flow::nSels*k;
+	  if (pFlowTrack->Select(j,k,0)) {
+	    psi_i =  mPsiSub[i+1][j];
+	  } else if (pFlowTrack->Select(j,k,1)) {
+	    psi_i =  mPsiSub[i][j];
+	  } else { // neither
+	    int r = (eta > 0.) ? 1 : 0;
+	    psi_i =  mPsiSub[i+r][j]; // random
+	  }
 	} else if (order > 3. && !oddHar) {
 	  psi_i = mPsi[k][1];  // 2nd harmomic event plane
 	  if (psi_i > twopi/order) psi_i -= twopi/order; // ???
@@ -1651,7 +1661,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  if (oddHar && eta < 0.) phiWgt *= -1.; // restore value
 
 	  // Remove autocorrelations
-	  if (!pFlowEvent->EtaSubs()) {
+	  if (!pFlowEvent->EtaSubs() && !pFlowEvent->RanSubs()) {
 	    TVector2 Q_i;
 	    if (order > 3. && !oddHar) { // 2nd harmonic event plane
 	      Q_i.Set(phiWgt * cos(phi * 2.), phiWgt * sin(phi * 2.));
@@ -1955,7 +1965,7 @@ Int_t StFlowAnalysisMaker::Finish() {
 	    mRes[k][j] *= ::sqrt(2.);
 	    mResErr[k][j] *= ::sqrt(2.);
 	  }
-	} else if (pFlowEvent->EtaSubs()) { // sub res only
+	} else if (pFlowEvent->EtaSubs() || pFlowEvent->RanSubs()) { // sub res only
 	  resSub = ::sqrt(cosPair[k][j]);
 	  resSubErr = cosPairErr[k][j] / (2. * resSub);
 	  mRes[k][j]    = resSub;
@@ -2226,6 +2236,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.82  2004/03/11 18:00:03  posk
+// Added Random Subs analysis method.
+//
 // Revision 1.81  2003/12/12 02:34:40  oldi
 // Removal of some major bugs in the v1{EP1,EP2} method.
 //

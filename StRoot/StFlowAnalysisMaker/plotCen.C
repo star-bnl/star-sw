@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.18 2004/03/01 22:43:44 posk Exp $
+// $Id: plotCen.C,v 1.19 2004/03/11 18:00:06 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -20,7 +20,7 @@
 #include <math.h>
 #include "TMath.h" 
  
-const  Int_t nCens = 10;
+const  Int_t nCens = 10; // min bias + 9 centralities
 int    runNumber   = 0;
 char   runName[6];
 char   fileName[30];
@@ -265,8 +265,8 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   for (int i = 0; i < pads; i++) {
     int fileN = i;                           // file number
     int padN = fileN + 1;                    // pad number
-    sprintf(histTitle,"Centrality %d",padN);
-    cout << "centrality= " << padN << endl;
+    sprintf(histTitle,"Centrality %d",padN-1);
+    cout << "centrality= " << padN-1 << endl;
 
     // get the histogram
     bool twoD;
@@ -658,6 +658,9 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.19  2004/03/11 18:00:06  posk
+// Added Random Subs analysis method.
+//
 // Revision 1.18  2004/03/01 22:43:44  posk
 // Changed some "->" to ".".
 //

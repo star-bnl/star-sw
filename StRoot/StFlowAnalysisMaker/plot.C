@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.56 2004/03/01 22:43:43 posk Exp $
+// $Id: plot.C,v 1.57 2004/03/11 18:00:05 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -196,16 +196,16 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_PidMult",
     "Flow_Phi_FarEast_Sel",                      // first multi graph hist
     "Flow_Phi_Flat_FarEast_Sel",
-    "Flow_Phi_Weight_FarEast_Sel",
+    //"Flow_Phi_Weight_FarEast_Sel",
     "Flow_Phi_East_Sel",
     "Flow_Phi_Flat_East_Sel",
-    "Flow_Phi_Weight_East_Sel",
+    //"Flow_Phi_Weight_East_Sel",
     "Flow_Phi_West_Sel",
     "Flow_Phi_Flat_West_Sel",
-    "Flow_Phi_Weight_West_Sel",
+    //"Flow_Phi_Weight_West_Sel",
     "Flow_Phi_FarWest_Sel",
     "Flow_Phi_Flat_FarWest_Sel",
-    "Flow_Phi_Weight_FarWest_Sel",
+    //"Flow_Phi_Weight_FarWest_Sel",
     "Flow_Mul_Sel",
     "Flow_Yield2D_Sel",
     "Flow_Yield.Eta_Sel",
@@ -740,7 +740,7 @@ void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
     cout << "save? y/[n], quit? q" << endl;
     fgets(tmp, sizeof(tmp), stdin);
     if (strstr(tmp,"y")!=0) can->Print(".ps");
-    else if (strstr(tmp,"q")!=0) return;
+    else if (strstr(tmp,"q")!=0) return can;
   }
   cout << "  plotAll Done" << endl;
 }
@@ -871,6 +871,9 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.57  2004/03/11 18:00:05  posk
+// Added Random Subs analysis method.
+//
 // Revision 1.56  2004/03/01 22:43:43  posk
 // Changed some "->" to ".".
 //
