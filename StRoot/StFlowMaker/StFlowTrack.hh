@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.hh,v 1.6 1999/12/16 18:05:25 posk Exp $
+// $Id: StFlowTrack.hh,v 1.7 1999/12/21 01:11:02 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.hh,v $
+// Revision 1.7  1999/12/21 01:11:02  posk
+// Added more quantities to StFlowEvent.
+//
 // Revision 1.6  1999/12/16 18:05:25  posk
 // Fixed Linux compatability again.
 //
@@ -52,6 +55,8 @@ public:
   Short_t  Charge()    const;
   Float_t  ImpactPar() const;
   Double_t Chi2()      const;
+  Int_t    FitPts()    const;
+  Int_t    MaxPts()    const;
   Int_t    Select(Int_t harmonic, Int_t selection, Int_t subevent= -1) const;
 
   void     SetPid(Char_t);
@@ -61,6 +66,8 @@ public:
   void     SetCharge(Short_t);
   void     SetImpactPar(Float_t);
   void     SetChi2(Double_t);
+  void     SetFitPts(Int_t);
+  void     SetMaxPts(Int_t);
   void     SetSelect(Int_t harmonic, Int_t selection);
   void     SetSubevent(Int_t harmonic, Int_t selection, Int_t subevent);
 
@@ -77,6 +84,8 @@ private:
   Short_t  mCharge;
   Float_t  mImpactPar;
   Double_t mChi2;
+  Int_t    mFitPts;
+  Int_t    mMaxPts;
   Int_t    mSelection;
   Int_t    mSubevent[Flow::nHars][Flow::nSels];
 
@@ -89,6 +98,8 @@ inline Float_t  StFlowTrack::Pt()        const { return mPt; }
 inline Short_t  StFlowTrack::Charge()    const { return mCharge; }   
 inline Float_t  StFlowTrack::ImpactPar() const { return mImpactPar; }
 inline Double_t StFlowTrack::Chi2()      const { return mChi2; }                
+inline Int_t    StFlowTrack::FitPts()    const { return mFitPts; }                
+inline Int_t    StFlowTrack::MaxPts()    const { return mMaxPts; }                
 
 inline Int_t    StFlowTrack::Select(Int_t harmonic, Int_t selection,
  Int_t subevent) const {
@@ -106,6 +117,8 @@ inline void StFlowTrack::SetPt(Float_t pt)         { mPt = pt; }
 inline void StFlowTrack::SetCharge(Short_t charge) { mCharge = charge; }     
 inline void StFlowTrack::SetImpactPar(Float_t b)   { mImpactPar = b; }   
 inline void StFlowTrack::SetChi2(Double_t chi2)    { mChi2 = chi2; }              
+inline void StFlowTrack::SetFitPts(Int_t fitPts)   { mFitPts = fitPts; }      
+inline void StFlowTrack::SetMaxPts(Int_t maxPts)   { mMaxPts = maxPts; }      
 
 inline void StFlowTrack::SetSelect(Int_t harmonic, Int_t selection) {
   Int_t bitShift = harmonic + Flow::nHars * selection;

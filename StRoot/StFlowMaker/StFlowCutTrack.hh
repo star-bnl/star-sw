@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.hh,v 1.4 1999/12/15 22:01:24 posk Exp $
+// $Id: StFlowCutTrack.hh,v 1.5 1999/12/21 01:10:57 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //
@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.hh,v $
+// Revision 1.5  1999/12/21 01:10:57  posk
+// Added more quantities to StFlowEvent.
+//
 // Revision 1.4  1999/12/15 22:01:24  posk
 // Added StFlowConstants.hh
 //
@@ -37,7 +40,6 @@
 #include <stdlib.h>
 #include "Rtypes.h"
 class StPrimaryTrack;
-class StFlowTrack;
 
 class StFlowCutTrack {
 

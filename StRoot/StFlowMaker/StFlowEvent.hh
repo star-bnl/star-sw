@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.hh,v 1.5 1999/12/15 22:01:26 posk Exp $
+// $Id: StFlowEvent.hh,v 1.6 1999/12/21 01:10:59 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.hh,v $
+// Revision 1.6  1999/12/21 01:10:59  posk
+// Added more quantities to StFlowEvent.
+//
 // Revision 1.5  1999/12/15 22:01:26  posk
 // Added StFlowConstants.hh
 //
@@ -38,6 +41,7 @@
 #include <stdlib.h>
 #include "StFlowTrackCollection.hh"
 #include "StFlowConstants.hh"
+#include "StThreeVectorF.hh"
 #include "Rtypes.h"
 #include "SystemOfUnits.h"
 class TVector2;
@@ -49,13 +53,15 @@ public:
            StFlowEvent();
   virtual  ~StFlowEvent();
 
-  Double_t PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const;
-  UInt_t   EventNumber() const;
-  UInt_t   Mult(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
-  TVector2 Q(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
-  Float_t  q(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
-  Float_t  MeanPt(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
-  Float_t  Psi(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
+  Double_t       PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const;
+  UInt_t         EventNumber() const;
+  UInt_t         OrigMult() const;
+  StThreeVectorF VertexPos() const;
+  UInt_t         Mult(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
+  TVector2       Q(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
+  Float_t        q(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
+  Float_t        MeanPt(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
+  Float_t        Psi(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
   StFlowTrackCollection* TrackCollection() const;
 
   void     SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
@@ -64,7 +70,8 @@ public:
   void     PrintSelectionList();
   void     MakeSubEvents();
   void     SetEventNumber(const UInt_t&);
-  void     SetOrigTrackN(const UInt_t&);
+  void     SetOrigMult(const UInt_t&);
+  void     SetVertexPos(const StThreeVectorF&);
   void     SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt);
 
   // For I/O of this object -- functions defined in StHbtIO.cc
@@ -75,13 +82,15 @@ private:
 
   Int_t   checkInput(Int_t harN, Int_t selN, Int_t subN) const;
 
-  UInt_t  mEventNumber;                      // number of the event
-  UInt_t  mOrigTrackN;                       // number of tracks
-  static  Float_t mEtaCuts[2][Flow::nHars][Flow::nSels];  // range absolute values
-  static  Float_t mPtCuts[2][Flow::nHars][Flow::nSels];   // range
+  UInt_t          mEventNumber;                      // number of the event
+  UInt_t          mOrigMult;                         // number of tracks
+  StThreeVectorF  mVertexPos;                        // primary vertex position
+  static Float_t  mEtaCuts[2][Flow::nHars][Flow::nSels];  // range absolute values
+  static Float_t  mPtCuts[2][Flow::nHars][Flow::nSels];   // range
+  Flow::PhiWgt_t  mPhiWgt;
+
   StFlowEvent*           pFlowEvent;         //!
   StFlowTrackCollection* pTrackCollection;   //!
-  Flow::PhiWgt_t         mPhiWgt;
 
 };
 
@@ -89,6 +98,10 @@ inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {
   return pTrackCollection; }
 
 inline  UInt_t StFlowEvent::EventNumber() const { return mEventNumber; }
+
+inline  UInt_t StFlowEvent::OrigMult() const { return mOrigMult; }
+
+inline  StThreeVectorF StFlowEvent::VertexPos() const { return mVertexPos; }
 
 inline void StFlowEvent::SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
 { mEtaCuts[0][harN][selN] = lo; mEtaCuts[1][harN][selN] = hi; }
@@ -99,8 +112,11 @@ inline void StFlowEvent::SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN
 inline void StFlowEvent::SetEventNumber(const UInt_t& event) {
   mEventNumber = event; }
 
-inline void StFlowEvent::SetOrigTrackN(const UInt_t& tracks) {
-  mOrigTrackN = tracks; }
+inline void StFlowEvent::SetOrigMult(const UInt_t& tracks) {
+  mOrigMult = tracks; }
+
+inline void StFlowEvent::SetVertexPos(const StThreeVectorF& vertexPos) {
+  mVertexPos = vertexPos; }
 
 #endif
 
