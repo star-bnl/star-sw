@@ -1,7 +1,7 @@
 #include "StLocalHit.hh"
 #include "StMcParameterDB.h"
 #include <iostream.h>
-#include <cmath>
+#include <math.h>
 
 //ClassImp(StLocalHit.cc)
 
@@ -28,15 +28,15 @@ StLocalHit::~StLocalHit()
 
 //__________________________
 
-bool StLocalHit::operator==(const StLocalHit& x) const
+int StLocalHit::operator==(const StLocalHit& x) const
 {    
-    return abs(x.mLocalX  -  mLocalX) < StMcParameterDB::instance()->xCut() &&
-	   abs(x.mGlobalZ - mGlobalZ) < StMcParameterDB::instance()->zCut() ;
+    return fabs(x.mLocalX  -  mLocalX) < StMcParameterDB::instance()->xCut() &&
+	   fabs(x.mGlobalZ - mGlobalZ) < StMcParameterDB::instance()->zCut() ;
 	
 }
 //__________________________
 
-bool StLocalHit::operator!=(const StLocalHit& x) const
+int StLocalHit::operator!=(const StLocalHit& x) const
 {
     return !(*this == x);  // use operator==()
 }

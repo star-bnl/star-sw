@@ -1,7 +1,21 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.6 1999/07/30 16:19:14 calderon Exp $
+ * $Id: StAssociationMaker.h,v 1.7 1999/09/09 23:51:22 calderon Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.7  1999/09/09 23:51:22  calderon
+ * Made the following changes:
+ * StAssociationMaker
+ *
+ * -correct definition of multimap for Solaris/ObjectSpace
+ * -clear candidate vector at the end of reconstructed track loop
+ * -remove # of pings histogram
+ *
+ * StLocalHit
+ *
+ * -use math.h instead of cmath because of abs()
+ * -change abs() to fabs() everywhere
+ * -change bool's to int's so Solaris doesn't complain
+ *
  * Revision 1.6  1999/07/30 16:19:14  calderon
  * Use value_type typedef for inserting pairs in multimaps, Victor corrected iterators on HP in SL99h, Improved use of const for HP compilation
  *
@@ -32,6 +46,15 @@ struct trackPing {
     unsigned int nPings;
 };
 
+
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
+#endif
+
+
+#ifndef __CINT__
+#include <map>
+#include <utility>
 // Define the comparison to be used in the multimaps
 struct compHit{
     bool operator()(const StTpcHit*,const StTpcHit*) const;
@@ -42,23 +65,20 @@ struct compTrack {
     bool operator()(const StGlobalTrack*, const StGlobalTrack*) const;
 };
 
-#if !defined(ST_NO_NAMESPACES)
-using namespace std;
-#endif
-
-
-#ifndef __CINT__
-#include <map>
-#include <utility>
 // Need to define the maps & Iterators, typedef them so we don't write the whole thing out every time
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 typedef  multimap<const StTpcHit*, const StMcTpcHit*, compHit> tpcHitMapType;//!
 
 typedef  multimap<StGlobalTrack*, StTrackPairInfo*, compTrack> trackMapType;//!
 #else
-typedef  multimap<const StTpcHit*, const StMcTpcHit*, compHit, allocator< pair<const StTpcHit*, const StMcTpcHit*> > > tpcHitMapType;//!
+// This type of definition is really criptic, but this is what ObjectSpace wants...
+typedef  const StTpcHit*    hitMapKey;
+typedef  const StMcTpcHit*  hitMapValue;
+typedef  multimap<hitMapKey, hitMapValue, compHit, allocator< OS_PAIR(hitMapKey, hitMapValue) > > tpcHitMapType;//!
 
-typedef  multimap<StGlobalTrack*, StTrackPairInfo*, compTrack, allocator< pair<const StGlobalTrack*, StTrackPairInfo*> > > trackMapType;//!
+typedef  StGlobalTrack* trackMapKey;
+typedef  StTrackPairInfo* trackMapValue;
+typedef  multimap<trackMapKey, trackMapValue, compTrack, allocator< OS_PAIR(trackMapKey, trackMapValue) > > trackMapType;//!
 #endif
 typedef  tpcHitMapType::iterator tpcHitMapIter;//!
 typedef  tpcHitMapType::value_type tpcHitMapValType; //!
@@ -92,7 +112,7 @@ class StAssociationMaker : public StMaker {
     virtual Int_t Make();
     virtual Int_t Finish();
 
-    TH1F*     mNumberOfPings;    //! Number of Hits Associated.
+    //TH1F*     mNumberOfPings;    //! Number of Hits Associated.
     
 
     // Have to tell Root not to parse the Multimap stuff, or else it pukes.
@@ -115,7 +135,7 @@ private:
     Bool_t drawinit;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.6 1999/07/30 16:19:14 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.7 1999/09/09 23:51:22 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker, 1)
 
