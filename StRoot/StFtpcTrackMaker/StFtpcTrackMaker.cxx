@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.37 2002/09/07 21:30:52 jeromel Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.38 2002/10/03 10:34:01 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.38  2002/10/03 10:34:01  oldi
+// Usage of gufld removed.
+// Magnetic field is read by StMagUtilities, now.
+//
 // Revision 1.37  2002/09/07 21:30:52  jeromel
 // Syntax correct ")" or "(" at the begining of a line seems to make gcc crash
 // in optimize flags.
@@ -212,6 +216,15 @@ StFtpcTrackMaker::~StFtpcTrackMaker()
 }
 
 //_____________________________________________________________________________
+Int_t StFtpcTrackMaker::InitRun(Int_t run){
+
+  // get tracking parameters from database
+  StFtpcTrackingParams::Instance(kFALSE, GetDataBase("RunLog"));
+
+  return kStOK;
+}
+
+//_____________________________________________________________________________
 Int_t StFtpcTrackMaker::Init()
 {
   // Initialisation.
@@ -261,9 +274,8 @@ Int_t StFtpcTrackMaker::Make()
   // Setup and tracking.
   
   gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) started..." << endm;
-  
   // get tracking parameters from database
-  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance(Debug());
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance(Debug(), 0);
   
   St_DataSet *ftpc_data = GetDataSet("ftpc_hits");
   
@@ -416,7 +428,7 @@ Int_t StFtpcTrackMaker::Make()
     }
     
     // get magnetic field
-    Double_t mag_fld_factor = StFormulary::GetMagneticFieldFactor();
+    Double_t mag_fld_factor = params->MagFieldFactor();
     Double_t vertexPos[6] = {primary_vertex_x,     primary_vertex_y,     primary_vertex_z, 
 			     primary_vertex_x_err, primary_vertex_y_err, primary_vertex_z_err};
     StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertexPos, kTRUE);
@@ -429,7 +441,7 @@ Int_t StFtpcTrackMaker::Make()
     else {
       tracker->TwoCycleTracking();
     }
-    
+
     // for the line above you have these possibilities
     //tracker->MainVertexTracking();
     //tracker->FreeTracking();
@@ -462,7 +474,7 @@ Int_t StFtpcTrackMaker::Make()
     // momentum fit, dE/dx calculation, write tracks to tables
     St_fpt_fptrack *fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", tracker->GetNumberOfTracks());
     m_DataSet->Add(fpt_fptrack);
-    
+
     if (mag_fld_factor != 0.) {
       // momentum fit possible
       tracker->FitAnddEdxAndWrite(fpt_fptrack, m_fdepar->GetTable(), -primary_vertex_id);
@@ -516,7 +528,6 @@ Int_t StFtpcTrackMaker::Make()
     */
     
     MakeHistograms(tracker);
-    
     delete tracker;
     
     //MakeHistograms();
@@ -615,13 +626,26 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
   }
 }
 
+
+//_____________________________________________________________________________
+Int_t StFtpcTrackMaker::Finish()
+{
+  // final cleanup
+
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
+  delete params;
+
+  return kStOK;
+}
+
+
 //_____________________________________________________________________________
 void StFtpcTrackMaker::PrintInfo()
 {
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.37 2002/09/07 21:30:52 jeromel Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.38 2002/10/03 10:34:01 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

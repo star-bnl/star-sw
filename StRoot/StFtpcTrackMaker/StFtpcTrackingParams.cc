@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackingParams.cc,v 1.5 2002/08/02 11:19:32 oldi Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.6 2002/10/03 10:34:06 oldi Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.6  2002/10/03 10:34:06  oldi
+// Usage of gufld removed.
+// Magnetic field is read by StMagUtilities, now.
+//
 // Revision 1.5  2002/08/02 11:19:32  oldi
 // MaxDCA is set to 100 cm now. Therefore 'every' track is fitted with the
 // primary vertex in addition to the global fit, which is perfpormed anyway.
@@ -18,6 +22,8 @@
 #include "StFtpcTrackingParams.hh"
 #include "SystemOfUnits.h"
 
+#include "tables/St_MagFactor_Table.h"
+
 #include "TMath.h"
 #include "iostream.h"
 
@@ -35,15 +41,21 @@ class St_fde_fdepar;
 StFtpcTrackingParams* StFtpcTrackingParams::mInstance = 0;
 
 
-StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug) {
+StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, TDataSet *RunLog) {
   // makes new instance or returns old on if it exists already
 
+  Bool_t created = kFALSE;
   if (!mInstance) {
     mInstance = new StFtpcTrackingParams();
+    created = kTRUE;
+  }
 
-    if (debug) {
-      mInstance->PrintParams();
-    }
+  if (RunLog) {
+    mInstance->ResetMagField(RunLog);
+  }
+  
+  if (debug) {
+    mInstance->PrintParams();
   }
 
   return mInstance;
@@ -60,7 +72,11 @@ StFtpcTrackingParams::StFtpcTrackingParams() : mTpcToGlobalRotation(3, 3, 1), mG
 
  
 StFtpcTrackingParams::~StFtpcTrackingParams() {
-  // nothing to be done
+  // delete created pointers
+  
+  delete mMagField;
+  
+  mInstance = 0;
 }
 
 
@@ -302,6 +318,25 @@ Int_t StFtpcTrackingParams::InitFromFile() {
      cout << "FTPC rotation matrix:" << mFtpcRotation << endl;
      cout << "Inverse FTPC rotation matrix:" << mFtpcRotationInverse << endl;
    }
+   
+   mMagFieldFactor = -9999.; // just some dumb number, will be set by ResetMagField()
+   
+   return 1;
+}
+
+
+Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog) {
+  // Resets magnetic field if field configuration has changed.
+  
+  St_MagFactor *fMagFactor = (St_MagFactor *)RunLog->Find("MagFactor"); 
+  assert(fMagFactor);
+
+  Float_t newFactor = (*fMagFactor)[0].ScaleFactor;
+  if (newFactor != mMagFieldFactor) {
+    mMagFieldFactor = newFactor;
+    delete mMagField;
+    mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);
+  }
 
   return 1;
 }
@@ -395,9 +430,11 @@ void StFtpcTrackingParams::PrintParams() {
   cout << "Min. point ratio: " << mMinPointRatio << endl; 
   cout << "Max. point ratio: " << mMaxPointRatio << endl; 
 
+  cout << endl;
+  cout << "Magnetic field factor: " << mMagFieldFactor << endl;
+
   return;
 }
-
 
 // Pion mass
 inline Float_t StFtpcTrackingParams::m_pi() { return StFtpcTrackingParams::mM_pi; }
@@ -464,3 +501,7 @@ inline StMatrixD StFtpcTrackingParams::FtpcRotation()          { return mFtpcRot
 inline StMatrixD StFtpcTrackingParams::FtpcRotationInverse()   { return mFtpcRotationInverse;   }
 inline  Double_t StFtpcTrackingParams::InstallationPointZ()    { return mInstallationPointZ;    }
 inline  Double_t StFtpcTrackingParams::ObservedVertexOffsetY() { return mObservedVertexOffsetY; }
+
+// magnetic field table
+inline Float_t StFtpcTrackingParams::MagFieldFactor()   { return mMagFieldFactor; }
+inline StMagUtilities *StFtpcTrackingParams::MagField() { return mMagField;       }

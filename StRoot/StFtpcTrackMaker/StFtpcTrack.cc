@@ -1,5 +1,9 @@
-// $Id: StFtpcTrack.cc,v 1.18 2002/04/29 15:50:01 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.19 2002/10/03 10:33:59 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.19  2002/10/03 10:33:59  oldi
+// Usage of gufld removed.
+// Magnetic field is read by StMagUtilities, now.
+//
 // Revision 1.18  2002/04/29 15:50:01  oldi
 // All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
 // In a future version the actual values should be moved to an .idl file (the
@@ -107,11 +111,6 @@
 #include "StMessMgr.h"
 
 #include <math.h>
-
-#ifndef gufld
-#define gufld gufld_
-extern "C" {void gufld(float *, float *);}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                                                                //
@@ -738,7 +737,8 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
   // get z-component of B-field at 0,0,0 for first momentum guess
   Float_t pos[3] = {0, 0, 0};
   Float_t centralField[3];
-  gufld(pos, centralField);
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
+  params->MagField()->B3DField(pos, centralField);
   centralField[0] *= kilogauss;
   centralField[1] *= kilogauss;
   centralField[2] *= kilogauss;
@@ -790,7 +790,8 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
 				currentPosition.y(), 
 				currentPosition.z() + stepSize/2};
       Float_t localField[3];
-      gufld(positionArray, localField);
+      params->MagField()->B3DField(positionArray, localField);
+
       StThreeVector<Double_t> fieldVector
 	((Double_t) localField[0] * kilogauss/tesla*c_light*nanosecond/meter, 
 	 (Double_t) localField[1] * kilogauss/tesla*c_light*nanosecond/meter, 

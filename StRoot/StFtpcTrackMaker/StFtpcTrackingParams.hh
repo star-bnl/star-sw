@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackingParams.hh,v 1.3 2002/06/07 06:00:40 oldi Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.4 2002/10/03 10:34:08 oldi Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.4  2002/10/03 10:34:08  oldi
+// Usage of gufld removed.
+// Magnetic field is read by StMagUtilities, now.
+//
 // Revision 1.3  2002/06/07 06:00:40  oldi
 // New value for rotation angle of FTPC east after temperature offset was corrected.
 //
@@ -16,6 +20,7 @@
 #include "StThreeVector.hh"
 #include "StMatrixD.hh"
 
+#include "StDbUtilities/StMagUtilities.h"
 //#include "StTpcDb/StTpcDb.h"
 
 class StGlobalCoordinate;
@@ -96,19 +101,21 @@ class StFtpcTrackingParams
   Double_t mObservedVertexOffsetY;
   
   //StTpcDb*                gTpcDbPtr; // pointer to TPC database
-
+  StMagUtilities *mMagField;  // pointer to magnetic field table
+  Float_t mMagFieldFactor;
 
  protected:
   
   StFtpcTrackingParams();
-  virtual ~StFtpcTrackingParams();
 
   void PrintParams();
   Int_t InitdEdx();
+  Int_t ResetMagField(TDataSet *RunLog = 0);
 
  public:
 
-  static StFtpcTrackingParams* Instance(Bool_t debug = kFALSE);
+  static StFtpcTrackingParams* Instance(Bool_t debug = kFALSE, TDataSet *RunLog = 0);
+  virtual ~StFtpcTrackingParams();
 
   Int_t Init();
   Int_t InitFromFile();
@@ -178,6 +185,10 @@ class StFtpcTrackingParams
   StMatrixD FtpcRotationInverse();
   Double_t InstallationPointZ();
   Double_t ObservedVertexOffsetY();
+
+  // magnetic field table
+  StMagUtilities *MagField();
+  Float_t MagFieldFactor();
 
   ClassDef(StFtpcTrackingParams,0)  // Parameters for FTPC tracking
 };    
