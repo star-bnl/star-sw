@@ -212,7 +212,7 @@ void MiniChain::setupOutput(const char * filePrefix,
   TString dstName = templateFile.ReplaceAll(".event.root",".MuDst.root");
   //_sti.event.root now replaced with _sti.mudst.root
   
-  TString miniMcName = templateFile.ReplaceAll(".mudst.root",".minimc.root");
+  TString miniMcName = templateFile.ReplaceAll(".MuDst.root",".minimc.root");
   //_sti.mudst.root now replaced with _sti.minimc.root
   
   if (_pars->doStEventOutput) 
