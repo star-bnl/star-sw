@@ -154,6 +154,7 @@ TTreeHelperCast::operator const ULong_t        *&()
 
 //______________________________________________________________________________
 class TTreeHelperMem  : public TNamed { //special class for TTreeHelper
+public:
    Int_t  fType;
    Int_t  fUnits;
    Int_t  fSize;
@@ -213,6 +214,9 @@ void TTreeHelper::Init()
   fNErr  = 0;
   fEntry = 0;
   fUnits = 0;
+  fChain = 0;
+  if (fTree->IsA()==TChain::Class()) fChain=(TChain*)fTree;
+  fTreeNumb = 0;
   fTree->SetMakeClass(1);
   fTree->SetBranchStatus("*",0);
   if (fTree->IsA()==TChain::Class()) 
@@ -367,6 +371,14 @@ Int_t TTreeHelper::Next(Int_t entry)
     fEntry=0; return 0;}
 
   int ientry = (entry >= 0) ? entry:fEntry++;
+  if (fChain) {
+    ientry = fChain->LoadTree(ientry);
+    if (ientry<0) return 0;
+    if (fTreeNumb != fChain->GetTreeNumber()) {
+      fTreeNumb = fChain->GetTreeNumber();
+      Notify();
+  } }
+
   int n = fBraList.GetEntriesFast();
   Int_t ans = 0;
   for (int i=0;i<n;i++) {
@@ -381,12 +393,20 @@ Int_t TTreeHelper::Next(Int_t entry)
 //______________________________________________________________________________
 Bool_t TTreeHelper::Notify()
 {
+  const char *tyName;
+  Int_t units,brType;
+  void  *add;
+
   fBraList.Clear();
   int n = fMemList.GetEntriesFast();
   for (int i=0;i<n;i++) {
-    TObject *t = fMemList.UncheckedAt(i);
+    TTreeHelperMem *t = (TTreeHelperMem*)fMemList.UncheckedAt(i);
     TBranch *b = GetBranch(t->GetName());
     Assert(b);
+    b->ResetBit  (kDoNotProcess);
+    GetInfo(b,tyName,units,add,brType);
+    if (units > t->fUnits) t->Alloc(units);
+
     fBraList.Add(b);
   }
   return 0;
