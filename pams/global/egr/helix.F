@@ -29,7 +29,7 @@
 *--
         DOUBLE PRECISION DR1,DP1(5),DR2,DP2(5),SAVE,DP(5),D(5),RES
 CCC        DATA D/0.1,0.01,0.01,0.01,0.001/
-        DATA D/1.0,0.1,0.01,0.01,0.01/
+        DATA D/0.1,0.1,0.01,0.01,0.01/
 *--
         IF ((R1.LT.RMIN) .OR. (R2.LT.RMIN)) THEN
            IRET = 1
