@@ -1,5 +1,8 @@
-* $Id: tde_new.F,v 1.6 1998/10/10 00:53:18 sakrejda Exp $
+* $Id: tde_new.F,v 1.7 1998/12/09 00:53:19 sakrejda Exp $
 * $Log: tde_new.F,v $
+* Revision 1.7  1998/12/09 00:53:19  sakrejda
+* increased local array size to accomodate Venus events
+*
 * Revision 1.6  1998/10/10 00:53:18  sakrejda
 * take care of tracks with decreasing radius, do not discard them
 *
@@ -74,7 +77,7 @@ c
 c
       PARAMETER (ndemax=1000)
       PARAMETER (nlocmax=400000)
-      PARAMETER  (nloctrc=10000)
+      PARAMETER  (nloctrc=20000)
 c
       INTEGER loc_hit(nlocmax),loc_track(nloctrc)
 
@@ -93,16 +96,16 @@ C-----------------------------------------------------------------------
 C Abort if there are no TPC hits to work with
 
       if (hit_h.nok.eq.0) then
-*        call message('TDE_DEDX-W: No TPC hitss. 
-*    >                TDE aborted.',1,imsg2)
+        call message('TDE_DEDX-W: No TPC hitss.'// 
+     >               ' TDE aborted.',1,imsg2)
          tde_new=STAFCV_BAD
          return
       endif
 C Abort if there are too many TPC hits to work with
 
       if (hit_h.nok.gt.nlocmax) then
-*        call message('TDE_DEDX-W: Too many TPC hits. 
-*    >                 TDE aborted.',1,imsg2)
+        call message('TDE_DEDX-W: Too many TPC hits.'// 
+     >                 'TDE aborted.',1,imsg2)
          tde_new=STAFCV_BAD
          return
       endif
@@ -110,16 +113,16 @@ C Abort if there are too many TPC hits to work with
 C Abort if there are no TPC tracks to work with
 
       if (track_h.nok.eq.0) then
-*        call message('TDE_DEDX-W: No TPC tracks. 
-*    >                 TDE aborted.',1,imsg3)
+        call message('TDE_DEDX-W: No TPC tracks.'//
+     >                 'TDE aborted.',1,imsg3)
          tde_new=STAFCV_BAD
          return
       endif
 C Abort if there are too many TPC tracks to work with
 
       if (track_h.nok.gt.nloctrc) then
-*        call message('TDE_DEDX-W: too many TPC tracks. 
-*    >                 TDE aborted.',1,imsg3)
+        call message('TDE_DEDX-W: too many TPC tracks.'// 
+     >                 'TDE aborted.',1,imsg3)
          tde_new=STAFCV_BAD
          return
       endif
