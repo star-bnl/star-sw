@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.3 1999/11/15 23:09:10 perev Exp $
+// $Id: StObject.cxx,v 1.4 1999/11/17 14:22:10 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.4  1999/11/17 14:22:10  perev
+// bug in dtor fix
+//
 // Revision 1.3  1999/11/15 23:09:10  perev
 // Streamer for StrArray and auto remove
 //
@@ -27,8 +30,10 @@ StObject::~StObject()
   if (!colIdx) return;
   StStrArray *ar = StRegistry::GetColl(colIdx);
   if (!ar) return;
-  if (ar->At(objIdx-1) != (TObject*)this) return;
-  ar->RemoveAt(objIdx-1);
+  int n = ar->GetSize();
+  if (objIdx>=n)			return;
+  if (ar->At(objIdx) != (TObject*)this) return;
+  ar->RemoveAt(objIdx);
 }
 //_____________________________________________________________________________
 void StObject::Browse(TBrowser *tb)
