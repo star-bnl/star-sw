@@ -13,6 +13,7 @@
 #include "TStyle.h"
 #include "tables/St_emcStatus_Table.h" 
 #include "tables/St_emcPed_Table.h" 
+#include "StDaqLib/EMC/StEmcDecoder.h"
 
 #include <iostream>
 #include <fstream>
@@ -425,9 +426,9 @@ CSMStatusUtils::makeStatusPlots(TString plotDir) {
   TH2F* currentHist = NULL;
   TH2F* tmpHist = NULL;
   TString runnumberstring;
-  int runnumber, priorRunNumber, currentRunNumber=9999999, savedCurrentRunNumber;
-  int priorTimeStamp, currentTimeStamp=9999999;
-  int priorDateStamp, currentDateStamp=9999999;
+  int runnumber, priorRunNumber, currentRunNumber=99999999, savedCurrentRunNumber;
+  int priorTimeStamp, currentTimeStamp=99999999;
+  int priorDateStamp, currentDateStamp=99999999;
   Bool_t firstGoodRun = kTRUE;
   Float_t averageNumberHitsPerChan;
   Int_t goodTowers;
@@ -459,7 +460,9 @@ cout << " it opened" << endl;
       assert(runHist);
       assert(myTree);
 
-      if(firstGoodRun) { //initialize currentHist and priorHist
+//if first good run, initialize currentHist and priorHist
+//otherwise, add run histogram to currentHist
+      if(firstGoodRun) {
 outputlog << "it's the first good run" << endl;
 cout << "it's the first good run" << endl;
         currentHist = dynamic_cast<TH2F*>(runHist->Clone("ch1"));
@@ -468,7 +471,9 @@ cout << "it's the first good run" << endl;
         priorHist->SetDirectory(0);
         priorHist->Reset();
         firstGoodRun = kFALSE;
-      } else currentHist->Add(runHist);
+      } else {
+        currentHist->Add(runHist);
+      }
       
       setDateTimeInfo(runnumber,myTree);
       
@@ -500,7 +505,8 @@ cout << "it's the first good run" << endl;
 
 	    // analyze
 	    goodTowers = analyseStatusHistogram(currentHist,plotDir,averageNumberHitsPerChan,
-                  *statusVector,*pedestalmean,*pedestalwidth,*pedestalchi,hHotTower);
+          currentDateStamp,currentTimeStamp,
+          *statusVector,*pedestalmean,*pedestalwidth,*pedestalchi,hHotTower);
 
       if(averageNumberHitsPerChan > 100) {
 //set prior RI to current RI; clear current RI
@@ -543,6 +549,7 @@ cout << "end of fill and poor statistics!" << endl;
 	      hHotTower->GetXaxis()->SetTitle("Tower Id");
 	      hHotTower->GetYaxis()->SetTitle("Number of Hits Above Pedestal");
   	    goodTowers = analyseStatusHistogram(currentHist,plotDir,averageNumberHitsPerChan,
+                  currentDateStamp,currentTimeStamp,
                   *statusVector,*pedestalmean,*pedestalwidth,*pedestalchi,hHotTower);
       } else {
 outputlog << " poor statistics!" << endl;
@@ -692,6 +699,8 @@ Int_t
 CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
                                           TString directory,
                                           Float_t& averageNumberOfHitsPerChannel,
+                                          Int_t dateStamp,
+                                          Int_t timeStamp,
                                           std::vector<Short_t>& statusVector,
                                           std::vector<Float_t>& pedestalmean,
                                           std::vector<Float_t>& pedestalwidth,
@@ -715,14 +724,10 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
     *iter = 0;
 
 //loop through all the channels
-  for (Int_t i = 2; i <= hist->GetXaxis()->GetNbins(); i++) {
-    Int_t chanId = static_cast<Int_t>(hist->GetXaxis()->GetBinCenter(i));
-    if (chanId < 0.5 || chanId > mDetectorSize+0.5) {
-      //cout << "bin " << i << " has center " << hist->GetXaxis()->GetBinCenter(i) << " which is not valid" << endl;
-      exit(1);
-    }
+  for (Int_t chanId = 1; chanId < mDetectorSize+1; chanId++) {
 
-    TH1D* proj = hist->ProjectionY("projTemp",i,i);
+//the next line has the "+1"s because the first bin is underflow
+    TH1D* proj = hist->ProjectionY("projTemp",chanId+1,chanId+1);
  
     if (proj) {
 
@@ -772,7 +777,7 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
         if(nHitsAbovePedestal==0) {
           nHitsAbovePedestal=1; //(just for log plot sakes)
 
-          statusVector[chanId] |= 256;
+          statusVector[chanId] |= mZerobit;
         }
         hHotTower->AddAt(nHitsAbovePedestal,chanId);
       }
@@ -797,10 +802,10 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
       int numberofnonzerohits = 0;
       Short_t bitoff = 0;
       Short_t biton = (1+2+4+8);
-      for(Short_t i=1; i<maxBin; i++) {
-        if(proj->GetBinContent(i) > 0) {
-          bitoff |= (i-1);
-          biton &= (i-1);
+      for(Short_t bin=1; bin<maxBin; bin++) {
+        if(proj->GetBinContent(bin) > 0) {
+          bitoff |= (bin-1);
+          biton &= (bin-1);
           numberofnonzerohits++;
         }
       }
@@ -813,16 +818,46 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
 //total number of hits test
       Float_t entries = proj->Integral(1,proj->GetXaxis()->GetNbins());
       if (entries == 0) {
-        statusVector[chanId] |= 256;  //channel has no pedestal?
+        statusVector[chanId] |= mZerobit;  //channel has no pedestal?
       }
       
       delete proj;
     } else {
 //lack of histogram test
-      statusVector[chanId] |= 256;
+      statusVector[chanId] |= mZerobit;
     }
   }
   
+  unsigned int date = dateStamp;
+  unsigned int time = timeStamp;
+  StEmcDecoder barry(date,time);
+  Int_t towerId,nextTowerId;
+  Bool_t histogramsAreSame;
+  
+//identical channel test
+
+//daqId is from 0 to N-1
+//towerId is from 1 to N
+//histogram projection is from 2 to N+1 (stupid... but true)
+
+  for(int daqId=0; daqId<mDetectorSize-1; daqId++) {
+    histogramsAreSame = kTRUE;
+    barry.GetTowerIdFromDaqId(daqId,towerId);
+    barry.GetTowerIdFromDaqId(daqId+1,nextTowerId);
+    
+    TH1D* projnow = hist->ProjectionY("projTemp2",towerId+1,towerId+1);
+    TH1D* projnext = hist->ProjectionY("projTemp3",nextTowerId+1,nextTowerId+1);
+    
+    for (Int_t i=1; i<projnow->GetXaxis()->GetNbins() && histogramsAreSame; i++) {
+      if( projnow->GetBinContent(i) != projnext->GetBinContent(i))
+        histogramsAreSame = kFALSE;
+    }
+    if(histogramsAreSame) {
+      statusVector[towerId] |= 256;
+      statusVector[nextTowerId] |= 256;
+    }
+  }
+
 //hot tower/cold tower tests
   Float_t sumofhits=0, nbinhits=0;
   Int_t goodTowers = 0;
@@ -840,9 +875,13 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
       if(statusVector[i] == 0) {
         statusVector[i]=1;
         goodTowers++;
-      } else if(statusVector[i] & 256) {
+      } else if(statusVector[i] & mZerobit) {
         statusVector[i]=0;
       }
+    }
+  } else {
+    for(int i=1; i<mDetectorSize; i++) {
+      statusVector[i]=0;
     }
   }
   delete gaus;
