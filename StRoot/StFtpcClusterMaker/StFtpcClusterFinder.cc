@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.42 2003/01/14 12:58:00 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.43 2003/01/16 18:03:52 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.43  2003/01/16 18:03:52  oldi
+// Bug eliminated. Now it compiles on Solaris again.
+//
 // Revision 1.42  2003/01/14 12:58:00  jcs
 // use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
 // FTPC asic mapping
@@ -877,7 +880,7 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
   printf("starting hitfinder\n");
 #endif
 
-  TPeak Peaks[MAXPEAKS];
+  TPeak *Peaks = new TPeak[MAXPEAKS];
   float TClSearch [162][258]; 
 
   for (int i=0;i<162;i++)
@@ -992,6 +995,7 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
 #ifdef DEBUG
       printf("Point fitting failed! Cluster is lost.\n");
 #endif
+      delete[] Peaks;
       return FALSE;
     }
   
@@ -1005,7 +1009,7 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
 	}
     }
 #endif
-
+  delete[] Peaks;
   return TRUE;
 }
 
