@@ -290,11 +290,57 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     // get associated mctrack
     // **********************
     StMcTrack* mTrack = (*tIter).second->partnerMcTrack();
+
+    // check Pdg Id of the StMcTrack and its mc-mother and mc-daughters
+    if (CheckPdgIdLists()) {
+      int checkParticle = CheckPdgIdList(mAcceptedParticles);
+      int checkMother   = CheckPdgIdList(mAcceptedMothers);
+      int checkDaughter = CheckPdgIdList(mAcceptedDaughters);
+      // check particle
+      checkParticle = CheckPdgIdList(mAcceptedParticles, mTrack->particleDefinition()->pdgEncoding());
+      //      cout << " particleID " << mTrack->particleDefinition()->pdgEncoding() << endl;
+      // check mothers
+      if ( mTrack->startVertex() == 0 ) {
+	//	cout << " no start vertex " << endl;
+	checkMother+= CheckPdgIdList(mAcceptedMothers, 0);
+      }
+      else {
+	if ( mTrack->startVertex()->parent() != 0 ) {
+	  //	  cout << " parent found " << endl;
+	  //	  cout <<  " parent " << mTrack->startVertex()->parent() << endl;
+	  if (mTrack->startVertex()->parent()->particleDefinition() != 0 ) {
+	    checkMother+= CheckPdgIdList(mAcceptedMothers, mTrack->startVertex()->parent()->particleDefinition()->pdgEncoding());
+	    if (mTrack->startVertex()->parent()->particleDefinition()->pdgEncoding() == 333) {
+	      cout << " motherID " << mTrack->startVertex()->parent()->particleDefinition()->pdgEncoding() << endl;
+	    }
+	  }
+	}
+      }
+      /*
+      if ( mTrack->stopVertex() == 0 ) {
+//	cout << " no stop vertex " << endl;
+      }
+      else {
+	for (int iDaughter=0; iDaughter < mTrack->stopVertex()->daughters().size()-1; iDaughter++) {
+	  checkDaughter+= 
+	    CheckPdgIdList(mAcceptedDaughters,mTrack->stopVertex()->daughters()[iDaughter]->particleDefinition()->pdgEncoding());
+	}
+      }
+      */
+      // all together
+      if ( !(checkParticle && checkMother && checkDaughter) ) {
+	continue;
+      }
+    }
+    
+
     /*
       if ((*tIter).second->commonTpcHits()<10) 
       continue;
     */
     int geantId =  mTrack->geantId();
+
+
     //cout << " partnerMcTrack geant Id           : " << mTrack->geantId() << endl;
     //cout << " partnerMcTrack particleDefinition : " << *(mTrack->particleDefinition()) << endl;
     

@@ -3,12 +3,13 @@
 
 #include <ctime>
 #include "StMaker.h"
+#include "StHbtMaker/Infrastructure/StHbtCheckPdgIdList.h"
 #include "StHbtMaker/Base/StHbtEventReader.hh"
 #include "StV0MiniDstMaker/StV0MiniDstMaker.h"
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 
-class StHbtAssociationReader : public StHbtEventReader{
+class StHbtAssociationReader : public StHbtEventReader, public StHbtCheckPdgIdList {
   
  private:
   // pointers to other mkers

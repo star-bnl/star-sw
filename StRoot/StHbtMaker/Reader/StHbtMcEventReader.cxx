@@ -191,6 +191,26 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
   for (StMcTrackIterator iter=mcEvent->tracks().begin(); iter!=mcEvent->tracks().end(); iter++){
     StMcTrack*  track = *iter;
 
+    if ( track->geantId() == 151) {
+      cout << " phi found " << endl;
+      int nDaughters = track->stopVertex()->numberOfDaughters();
+      cout << " momentum " << track->momentum().mag() << endl;
+      cout << " number of daughters = " << nDaughters << endl;
+      if (nDaughters == 2) {
+	cout << track->stopVertex()->daughters()[0]->geantId() << endl;
+	cout << track->stopVertex()->daughters()[1]->geantId() << endl;
+	cout << abs(track->stopVertex()->daughters()[0]->fourMomentum() +
+		    track->stopVertex()->daughters()[1]->fourMomentum()) << endl;
+      }
+      cout << " no key for starnew reasons " << endl;
+    }
+
+    if ( track->startVertex()->parent() ==0 )
+      continue;
+    else
+      if ( track->startVertex()->parent()->geantId() != 151 ) 
+	continue;
+
     int nTpcHits = track->tpcHits().size();
 
     if (nTpcHits==0) {
@@ -226,7 +246,6 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
     // set NSigma's, derivation in dedx distribustion from being a poin, kaon, proton  [sigma]
     // **************************************************************************************
     int geantPid = track->particleDefinition()->pdgEncoding();
-
     //cout << geantPid << " " << track->particleDefinition()->mass() << " " << track->particleDefinition()->charge() << endl;
 
     switch (geantPid) {
