@@ -53,8 +53,7 @@ void EEfeeDataBlock :: print(int flag){
   
   if(flag<=0) return;
 
-  int nd=getValidDataLen();
-  if(flag>1) nd=getDataLen();
+  int nd=getDataLen();
   printf("Data[%3d]:",nd);
   for(int i=0;i<nd;i++) {
     if( i%8 == 0 ) printf("\n");
@@ -80,22 +79,13 @@ EEfeeDataBlock ::  set(const EEfeeDataBlock *b) {
 //--------------------------------------------------
 //--------------------------------------------------
 void EEfeeDataBlock ::setHead(UShort_t *h) {
-  assert(h);
-  memcpy(head,h,sizeof(head[0])*MaxHead);
+  if(h) 
+    memcpy(head,h,sizeof(head[0])*MaxHead);
+  else // empty header==>clear
+    memset(head,0,sizeof(head[0])*MaxHead);
+
 }
 
-//--------------------------------------------------
-//--------------------------------------------------
-//--------------------------------------------------
-
-int EEfeeDataBlock ::getValidDataLen() const {
-
-  return MaxData;   //tmp
-
-  if(getCrateID()>=MinTwCrateID && getCrateID()<= MaxTwCrateID ) return MaxTwCrateCh;
-  if(getCrateID()>=MinMapmtCrateID && getCrateID()<= MaxMapmtCrateID ) return MaxMapmtCrateCh;
-  return 0;
-}
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -112,8 +102,14 @@ int EEfeeDataBlock ::getNData(int thres) const {
 //--------------------------------------------------
 //--------------------------------------------------
 
-void EEfeeDataBlock ::setDataArray(UShort_t *d, int size) {
-  assert(d);
+void EEfeeDataBlock ::setDataArray(UShort_t *dIn, int size) {
+  UShort_t x=0,*d=&x;
+  if(dIn) {
+    d=dIn;
+  } else {
+    size =1;
+  }
+  
   if(size!=MaxData) { // tmp, was '>' 
     if(data) delete [] data;
     MaxData = size;
@@ -164,6 +160,9 @@ int  EEfeeDataBlock :: isValid(){
 
 /*
  * $Log: EEfeeDataBlock.cxx,v $
+ * Revision 1.10  2004/03/20 20:25:55  balewski
+ * *** empty log message ***
+ *
  * Revision 1.9  2004/01/27 07:09:37  balewski
  * slower but simpler
  *
