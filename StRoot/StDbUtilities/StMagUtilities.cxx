@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.43 2004/01/20 02:52:18 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.44 2004/01/22 16:20:43 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,10 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.44  2004/01/22 16:20:43  jhthomas
+ * Add Hardwired code for Shorted Ring with External Resistor.
+ * Change Omega Tau factors.  May need update, later.
+ *
  * Revision 1.43  2004/01/20 02:52:18  jhthomas
  * Add code for extra resistor outside TPC to help remedy short.  !!This code currently commented out!!
  *
@@ -391,9 +395,9 @@ void StMagUtilities::CommonStart ( Int_t mode )
   StarMagE   =  TMath::Abs((CathodeV-GG)/TPC_Z0) ;           // STAR Electric Field (V/cm) Magnitude
   OmegaTau   =  -10.0 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note the sign of B is important 
 
-  Float_t Fudge_0    =  1.34 ;  // Drift in plane of E and B
-  Float_t Fudge_1    =  1.11 ;  // Drift perpendicular to plane of E and B
-  Float_t Fudge_2    =  1.34 ;  // Drift in plane of E and B
+  Float_t Fudge_0    =  1.11 ;  // Drift velocity correction factor: perpendicular to Z and the ExB direction
+  Float_t Fudge_1    =  1.34 ;  // Drift velocity correction factor: in the ExB direction
+  Float_t Fudge_2    =  1.11 ;  // Drift velocity correction factor: perpendicular to Z and the ExB direction
 
   Const_0    =  1. / ( 1. +  Fudge_0*Fudge_0*OmegaTau*OmegaTau ) ;
   Const_1    =  Fudge_1*OmegaTau / ( 1. + Fudge_1*Fudge_1*OmegaTau*OmegaTau ) ;
@@ -1319,7 +1323,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
   const Float_t   GridRatio   =  (CathodeV-GG)/CathodeV ; // Ratio of TPC length to Resistor chain length.
   
   const Int_t     ROWS        =  150 ;        // Rmax - Rmin (cm) [high accuracy not required]
-  const Int_t     COLUMNS     =  182 ;        // Number of rings  [high accuracy not required]
+  const Int_t     COLUMNS     =  183 ;        // Number of rings (note that ring zero is the CM so add one to ring numbers)  
   const Int_t     ITERATIONS  =  3000 ;
   const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
   const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
@@ -1336,6 +1340,10 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 
       TMatrixD  ArrayV(ROWS,COLUMNS), ArrayE(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
       Float_t   Rlist[ROWS], Zedlist[COLUMNS] ;
+      Int_t     TpcShortConfiguration ;     // This will come out of the conditions DB, someday.
+
+      //TpcShortConfiguration = 0 ;           // Shorted ring.  No compensating resistor.
+      TpcShortConfiguration = 1 ;           // Shorted ring with external compensating resistor.
 
       //Fill boundary of arrays with error potentials and "volume" of array with approximate solutions to aid convergence. 
       for ( Int_t i = 0 ; i < ROWS ; i++ )  
@@ -1349,13 +1357,20 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
   	      Double_t zed = j*GRIDSIZEZ ;
 	      Zedlist[j] = zed ;
               if ( (float)j/(float)(COLUMNS-1) < RingRatio )
-                ArrayV(i,j) = SHRINK * StarMagE*Pitch*GridRatio * (double)j/(double)(COLUMNS-1) ;          // One shorted Ring
-	      //ArrayV(i,j) = 0.0 ;   // Add one external resistor
+		{
+		  if ( TpcShortConfiguration == 0 ) ArrayV(i,j) = SHRINK*StarMagE*Pitch*GridRatio*(double)j/(double)(COLUMNS-1) ;
+		  if ( TpcShortConfiguration == 1 ) ArrayV(i,j) = 0.0 ;  // with external resistor   
+		}
 	      else
-                ArrayV(i,j) = SHRINK * StarMagE*Pitch*GridRatio * ( (double)j/(double)(COLUMNS-1) - 1 ) ;  // One shorted Ring
-	      //ArrayV(i,j) = SHRINK * StarMagE*Pitch * -1 ; // Add one  external resistor
-	      if ( j == 0 || j == (COLUMNS-1) ) ArrayV(i,j) = 0.0 ;  // Force zero error potential on endcap and CM
-	      if ( i == (ROWS-1) )              ArrayV(i,j) = 0.0 ;  // Force zero error potential on OFC
+		{
+		  if ( TpcShortConfiguration == 0 ) ArrayV(i,j) = SHRINK*StarMagE*Pitch*GridRatio*((double)j/(double)(COLUMNS-1)-1) ;
+		  if ( TpcShortConfiguration == 1 ) ArrayV(i,j) = SHRINK*StarMagE*Pitch * -1 ; // with external resistor
+		  if ( TpcShortConfiguration == 1 && j >= 181 ) ArrayV(i,j) = 0.0 ; // Force rings 181 and 182 to zero error
+		}
+	      // Force zero error potential on endcap and CM
+	      if ( ( j == 0 || j == (COLUMNS-1) ) && ( i != 0 && i != (ROWS-1) ) ) ArrayV(i,j) = 0.0 ;  
+	      // Force zero error potential on OFC
+	      if ( i == (ROWS-1) ) ArrayV(i,j) = 0.0 ;
             }
 	}      
       
