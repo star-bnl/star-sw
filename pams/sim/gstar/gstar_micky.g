@@ -44,10 +44,12 @@ Created August,14 1997
     gamma2(dummy)=-alog(Rndm(1)*Rndm(2))
 *
     Iprin=ISLFLAG('MICK','PRIN')
+    Check Iprin>=0
     prin1; (' *** generating an event with micky-mouse generator ***')
-    
+    USE /DETM/MICK/MIKY
+
     Call AgSVERT(Zero,0,0,Ub,0,Ivert)
-    do Ip=1,nint(miky_NP) 
+    do Ip=1,nint(miky_NP)
        Ipart=miky_code(Ip)
        Call  GFPART (Ipart,Cname,ItrTyp,Amass,Charge,Tlife,Ub,Nu)
        check Ipart>0 & Itrtyp>0
@@ -55,7 +57,9 @@ Created August,14 1997
        mult=nint(abs(miky_MULT(Ip)))
        If (miky_MULT(Ip)>0)  Call POISSN (miky_MULT(Ip),Mult,Ier)
 *                                 generate
+       prin2 mult,%L(Cname); (2x,'*** generating ',i5,1x,a,'''s')
        do I=1,Mult
+       prin3; (' *** generating an event with micky-mouse generator ***')
           call RANNOR(a,b)
           pt      = Gamma2(0)/miky_SLOPE(Ip)
           y       = miky_DY(Ip)*a
