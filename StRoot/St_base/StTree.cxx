@@ -13,7 +13,11 @@ return (c) ? (c-RWU)&3 : 0;
 
 ClassImp(StIOEvent)
 StIOEvent::StIOEvent():TObject(){};
-
+//______________________________________________________________________________
+void StIOEvent::Browse(TBrowser *b)
+{
+  if (b && fObj) fObj->Browse(b);
+}
 //______________________________________________________________________________
 void StIOEvent::Streamer(TBuffer &R__b)
 {
@@ -69,7 +73,7 @@ TObject *StIO::Read(TFile *file, const Char_t *name, ULong_t  ukey)
   TFile *bakfile = gFile; TDirectory *bakdir = gDirectory; file->cd();
   event.Read((const char*)MakeKey(name,ukey));
   gFile=bakfile; gDirectory=bakdir;
-  
+  if (!event.fObj)  return 0; 
   assert(event.GetUniqueID()==ukey);
   return event.fObj;
 }
@@ -102,6 +106,7 @@ ULong_t StIO::GetNextKey(TFile *file, const Char_t *name, ULong_t ukey)
 
   if (strncmp(prevkey,kname,lname)) lnk = 0;
   if (!lnk) goto RETURN; 
+  while( !isdigit(kname[lname])){lname++;} 
   ukey = strtoul(kname+lname,0,0);
 
 RETURN:;
@@ -155,7 +160,23 @@ Int_t StBranch::SetFile(const Char_t *file)
   Error("SetFile","File is already opened");
   return 1;
 }
-
+//_______________________________________________________________________________
+Int_t StBranch::UpdateFile(const Char_t *file)
+{
+TString outFile = file; gSystem->ExpandPathName(outFile);
+TString outDir  = gSystem->DirName(outFile);
+TString outBas  = gSystem->BaseName(outFile);
+TString intDir  = gSystem->DirName(fFile);
+TString intBas  = gSystem->BaseName(fFile);
+Char_t * newFile = gSystem->ConcatFileName(outDir,intBas);
+if (intBas == outBas || outBas.IsNull()) 	goto RETN00;
+if (fIOMode&1 == 0) 				goto RETN99;
+if (gSystem->AccessPathName(newFile)) 		goto RETN99;
+RETN00: fFile = newFile;
+printf("<StBranch::UpdateFile> Branch=%s file %s\n",GetName(),newFile); 
+RETN99: delete newFile;
+return 0;
+}
 //_______________________________________________________________________________
 Int_t StBranch::SetTFile(TFile *tfile)
 { 
@@ -182,7 +203,7 @@ Int_t StBranch::Open()
   if (!fIOMode) return 0;
   if (fTFile)   return 0;
   if (fFile.IsNull()) { // Construct file name
-    fFile=GetName(); fFile+=".root";
+    fFile=GetName(); fFile.ReplaceAll("Branch",""); fFile+=".root";
     StTree *tree = (StTree*)GetParent();
     if (tree) { // include base name
       const char* base = tree->GetBaseName();
@@ -335,7 +356,14 @@ Int_t StTree::Open()
   }
   return iret;
 }
-
+//_______________________________________________________________________________
+Int_t StTree::UpdateFile(const Char_t *file)
+{
+  St_DataSetIter next(this);StBranch *br;
+  while ((br=(StBranch*)next())) br->UpdateFile(file); 
+  return 0;
+}
+ 
 //_______________________________________________________________________________
 Int_t StTree::WriteEvent(ULong_t  ukey)
 {  
@@ -374,7 +402,7 @@ Int_t StTree::NextEvent()
 //_______________________________________________________________________________
 void StTree::Close(const char* opt)
 {  
-  TString treeKey(GetName()); treeKey += ".tree";
+  TString treeKey(GetName());
   Clear();
   St_DataSetIter next(this); StBranch *br;
   while ((br=(StBranch*)next())) {
@@ -392,9 +420,10 @@ void StTree::Close(const char* opt)
 //_______________________________________________________________________________
 StTree *StTree::GetTree(TFile *file, const char *treeName)
 {
-  StTree *ret;
-  TString treeKey(treeName); treeKey += ".tree";
-  ret = (StTree*)StIO::Read(file,(const char*)treeKey,2000);
+  StTree *ret; ULong_t u = 2000;
+  TString treeKey(treeName);
+  ret = (StTree*)StIO::Read(file,(const char*)treeKey,u);
+  if(!ret) {ret = (StTree*)StIO::Read(file,"bfc.tree",u);}
   if (ret) ret->SetIOMode("r");
   return ret;
 }

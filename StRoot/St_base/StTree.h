@@ -46,6 +46,7 @@ public:
   virtual void SetOption(Option_t *opt);
   virtual Option_t     *GetOption() const {return fOption;};
   virtual Int_t 	SetFile(const Char_t *file);
+  virtual Int_t UpdateFile(const Char_t *file);
   virtual const Char_t *GetFile() const {return (const Char_t*)fFile;};
   virtual Int_t 	SetTFile(TFile *tfile);
   virtual TFile        *GetTFile(){return fTFile;};
@@ -96,6 +97,7 @@ public:
   virtual const char *GetBaseName() 
           {return (fBaseName.IsNull()) ? 0:(const char*)fBaseName;};
   static StTree *GetTree(TFile *file, const char *treeName);
+  virtual Int_t UpdateFile(const Char_t *file);
 
 protected:
   TString fBaseName;		//base name to construct branch file name
@@ -110,6 +112,8 @@ public:
   StIOEvent();
  ~StIOEvent(){};
 TObject *fObj;	// Pointer to full tree
+ virtual void  Browse(TBrowser *b);
+  virtual Bool_t IsFolder(){ return fObj ? kTRUE: kFALSE; }
 
 ClassDef(StIOEvent,1)
 };
