@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.cc,v 2.2 1999/12/03 00:51:53 calderon Exp $
+ * $Id: StMcVertex.cc,v 2.3 1999/12/14 07:04:50 calderon Exp $
  * $Log: StMcVertex.cc,v $
+ * Revision 2.3  1999/12/14 07:04:50  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.2  1999/12/03 00:51:53  calderon
  * Tested with new StMcEventMaker.  Added messages for
  * diagnostics.
@@ -27,7 +30,7 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StMcVertex.cc,v 2.2 1999/12/03 00:51:53 calderon Exp $";
+static const char rcsid[] = "$Id: StMcVertex.cc,v 2.3 1999/12/14 07:04:50 calderon Exp $";
 
 StMcVertex::StMcVertex()
 {
@@ -81,6 +84,8 @@ ostream&  operator<<(ostream& os, const StMcVertex& v)
 }
 
 
+void StMcVertex::setPosition(const StThreeVectorF& val) { mPosition = val; }
+
 void StMcVertex::setParent(StMcTrack* val) {  mParent = val; }         
 
 void StMcVertex::addDaughter(StMcTrack* val) { mDaughters.push_back(val); }  
@@ -92,6 +97,6 @@ void StMcVertex::setTof(float val) { mTof = val; }
 void StMcVertex::setGeantProcess(int val) { mGeantProcess = val; }     
 
 void StMcVertex::removeDaughter(StMcTrack* trk) {
-    StPtrVecMcTrackIterator iter = find(mDaughters.begin(), mDaughters.end(), trk);
+    StMcTrackIterator iter = find(mDaughters.begin(), mDaughters.end(), trk);
   if (iter != mDaughters.end()) mDaughters.erase(iter);
 }

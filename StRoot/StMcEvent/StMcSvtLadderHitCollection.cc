@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtLadderHitCollection.cc,v 2.1 1999/11/19 19:06:33 calderon Exp $
+ * $Id: StMcSvtLadderHitCollection.cc,v 2.2 1999/12/14 07:04:49 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSvtLadderHitCollection.cc,v $
+ * Revision 2.2  1999/12/14 07:04:49  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.1  1999/11/19 19:06:33  calderon
  * Recommit after redoing the files.
  *
@@ -20,7 +23,7 @@
  **************************************************************************/
 #include "StMcSvtLadderHitCollection.hh"
 
-static const char rcsid[] = "$Id: StMcSvtLadderHitCollection.cc,v 2.1 1999/11/19 19:06:33 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtLadderHitCollection.cc,v 2.2 1999/12/14 07:04:49 calderon Exp $";
 
 #ifdef PERSISTENT
 ClassImp(StMcSvtLadderHitCollection)
@@ -43,16 +46,16 @@ unsigned int
 StMcSvtLadderHitCollection::numberOfWafers() const
 {
     switch (mLayerNumber) {
-    case 0:
     case 1:
+    case 2:
         return 4;
         break;
-    case 2:
     case 3:
+    case 4:
         return 6;
         break;
-    case 4:
     case 5:
+    case 6:
         return 7;
         break;
     default:

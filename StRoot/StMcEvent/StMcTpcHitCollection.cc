@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHitCollection.cc,v 2.0 1999/11/17 02:01:00 calderon Exp $
+ * $Id: StMcTpcHitCollection.cc,v 2.1 1999/12/14 07:04:49 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcTpcHitCollection.cc,v $
+ * Revision 2.1  1999/12/14 07:04:49  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.0  1999/11/17 02:01:00  calderon
  * Completely revised for new StEvent
  *
@@ -19,7 +22,7 @@
 #include "StMcTpcPadrowHitCollection.hh"
 #include "StMcTpcHit.hh"
 
-static const char rcsid[] = "$Id: StMcTpcHitCollection.cc,v 2.0 1999/11/17 02:01:00 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTpcHitCollection.cc,v 2.1 1999/12/14 07:04:49 calderon Exp $";
 
 #ifdef PERSISTENT
 ClassImp(StMcTpcHitCollection)
@@ -34,8 +37,8 @@ StMcTpcHitCollection::addHit(StMcTpcHit* hit)
 {
     unsigned int s, r;
     if (hit &&
-        (s = hit->sector()) < mNumberOfSectors &&
-        (r = hit->padrow()) < mSectors[s].numberOfPadrows()) {
+        (s = hit->sector()-1) < mNumberOfSectors &&
+        (r = hit->padrow()-1) < mSectors[s].numberOfPadrows()) {
         mSectors[s].padrow(r)->hits().push_back(hit);
         return true;
     }

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.cc,v 2.1 1999/11/19 19:06:32 calderon Exp $
+ * $Id: StMcHit.cc,v 2.2 1999/12/14 07:04:49 calderon Exp $
  * $Log: StMcHit.cc,v $
+ * Revision 2.2  1999/12/14 07:04:49  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.1  1999/11/19 19:06:32  calderon
  * Recommit after redoing the files.
  *
@@ -19,19 +22,15 @@
 
 #include "tables/St_g2t_hits_Table.h"
 
-static const char rcsid[] = "$Id: StMcHit.cc,v 2.1 1999/11/19 19:06:32 calderon Exp $";
+static const char rcsid[] = "$Id: StMcHit.cc,v 2.2 1999/12/14 07:04:49 calderon Exp $";
 
 StMcHit::StMcHit()
-{
-    mdE = 0;
-    mdS = 0;
-    mParentTrack = 0;
-    
-}
+    : mPosition(0.,0.,0.), mdE(0),mdS(0),mParentTrack(0)
+{ /* noop */   }
 
 StMcHit::StMcHit(const StThreeVectorF& p,
 		 float de, float ds, StMcTrack* parent)
-    : StGlobalCoordinate(p), mdE(de), mdS(ds), mParentTrack(parent)
+    : mPosition(p), mdE(de), mdS(ds), mParentTrack(parent)
 { /* noop */ }
 
 StMcHit::StMcHit(g2t_hits_st* pt)
@@ -42,6 +41,7 @@ StMcHit::StMcHit(g2t_hits_st* pt)
   mPosition.setX(pt->x[0]); 
   mPosition.setY(pt->x[1]);
   mPosition.setZ(pt->x[2]);
+  mParentTrack = 0;
   // For parent track, the g2t_hits table only gives the id of 
   // the parent track :  pt->track_p  .  We need to decode this and assign
   // mParentTrack to the pointer to the parent track.
@@ -59,6 +59,8 @@ int StMcHit::operator!=(const StMcHit& h) const
 {
     return !(*this == h);  // use operator==()
 }
+
+void StMcHit::setPosition(const StThreeVectorF& val) { mPosition = val; }
 
 void StMcHit::setdE(float val) { mdE = val; }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHitCollection.cc,v 2.0 1999/11/17 02:00:59 calderon Exp $
+ * $Id: StMcSvtHitCollection.cc,v 2.1 1999/12/14 07:04:49 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSvtHitCollection.cc,v $
+ * Revision 2.1  1999/12/14 07:04:49  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.0  1999/11/17 02:00:59  calderon
  * Completely revised for new StEvent
  *
@@ -18,7 +21,7 @@
 #include "StMcSvtHitCollection.hh"
 #include "StMcSvtHit.hh"
 
-static const char rcsid[] = "$Id: StMcSvtHitCollection.cc,v 2.0 1999/11/17 02:00:59 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtHitCollection.cc,v 2.1 1999/12/14 07:04:49 calderon Exp $";
 
 #ifdef PERSISTENT
 ClassImp(StMcSvtHitCollection)
@@ -32,9 +35,9 @@ StMcSvtHitCollection::StMcSvtHitCollection()
     //  proper numberOfLadders() and numberOfWafers().
     //
     for (int i=0; i<mNumberOfLayers; i++) {
-        mLayers[i].setLayerNumber(i);
+        mLayers[i].setLayerNumber(i+1);
         for (unsigned int j=0; j<mLayers[i].numberOfLadders(); j++)
-            mLayers[i].ladder(j)->setLayerNumber(i);
+            mLayers[i].ladder(j)->setLayerNumber(i+1);
     }
 }
 
@@ -48,9 +51,9 @@ StMcSvtHitCollection::addHit(StMcSvtHit* hit)
 {
     unsigned int l, d, w;
     if (hit &&
-        (l = hit->layer()) < mNumberOfLayers &&
-        (d = hit->ladder()) < mLayers[l].numberOfLadders() &&
-        (w = hit->wafer()) < mLayers[l].ladder(d)->numberOfWafers()) {
+        (l = hit->layer()-1) < mNumberOfLayers &&
+        (d = hit->ladder()-1) < mLayers[l].numberOfLadders() &&
+        (w = hit->wafer()-1) < mLayers[l].ladder(d)->numberOfWafers()) {
         mLayers[l].ladder(d)->wafer(w)->hits().push_back(hit);
         return true;
     }

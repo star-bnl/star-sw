@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHitCollection.cc,v 2.0 1999/11/17 02:00:59 calderon Exp $
+ * $Id: StMcFtpcHitCollection.cc,v 2.1 1999/12/14 07:04:49 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcFtpcHitCollection.cc,v $
+ * Revision 2.1  1999/12/14 07:04:49  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.0  1999/11/17 02:00:59  calderon
  * Completely revised for new StEvent
  *
@@ -18,7 +21,7 @@
 #include "StMcFtpcHitCollection.hh"
 #include "StMcFtpcHit.hh"
 
-static const char rcsid[] = "$Id: StMcFtpcHitCollection.cc,v 2.0 1999/11/17 02:00:59 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFtpcHitCollection.cc,v 2.1 1999/12/14 07:04:49 calderon Exp $";
 
 #ifdef PERSISTENT
 ClassImp(StMcFtpcHitCollection)
@@ -32,7 +35,7 @@ bool
 StMcFtpcHitCollection::addHit(StMcFtpcHit* hit)
 {
     unsigned int p;
-    if (hit && (p = hit->plane()) < mNumberOfPlanes) {
+    if (hit && (p = hit->plane()-1) < mNumberOfPlanes) {
       mPlanes[p].hits().push_back(hit);
       return true;
     }

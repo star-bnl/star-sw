@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.hh,v 2.2 1999/12/03 00:51:52 calderon Exp $
+ * $Id: StMcSvtHit.hh,v 2.3 1999/12/14 07:04:49 calderon Exp $
  * $Log: StMcSvtHit.hh,v $
+ * Revision 2.3  1999/12/14 07:04:49  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.2  1999/12/03 00:51:52  calderon
  * Tested with new StMcEventMaker.  Added messages for
  * diagnostics.
@@ -46,10 +49,10 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
 
-    unsigned long layer() const;      // layer=[0,5]
-    unsigned long ladder() const;     // ladder=[0-7]
-    unsigned long wafer() const;      // wafer=[0-6]
-    unsigned long barrel() const;     // barrel=[0-2]
+    unsigned long layer() const;      // layer=[1,6]
+    unsigned long ladder() const;     // ladder=[1-8]
+    unsigned long wafer() const;      // wafer=[1-7]
+    unsigned long barrel() const;     // barrel=[1-3]
     unsigned long hybrid() const;
 
 protected:
@@ -63,21 +66,21 @@ inline unsigned long
 StMcSvtHit::layer() const
 {
     // Volume Id: 1000*layer + 100*wafer + ladder (Helen, Nov 99)
-    return (mVolumeId)/1000 - 1;
+    return (mVolumeId)/1000;
 }
 
 inline unsigned long
 StMcSvtHit::ladder() const
 {
     // Volume Id: 1000*layer + 100*wafer + ladder (Helen, Nov 99)
-    return (mVolumeId)%100 - 1;
+    return (mVolumeId)%100 ;
 }
 
 inline unsigned long
 StMcSvtHit::wafer() const
 {
     // Volume Id: 1000*layer + 100*wafer + ladder (Helen, Nov 99)
-    return ((mVolumeId)%1000)/100 - 1;
+    return ((mVolumeId)%1000)/100;
 }
 
 inline unsigned long

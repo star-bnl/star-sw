@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.2 1999/12/03 00:51:51 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.3 1999/12/14 07:04:49 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.3  1999/12/14 07:04:49  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.2  1999/12/03 00:51:51  calderon
  * Tested with new StMcEventMaker.  Added messages for
  * diagnostics.
@@ -34,8 +37,8 @@
 #include <string>
 #include <utility>
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.2 1999/12/03 00:51:51 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.2 1999/12/03 00:51:51 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.3 1999/12/14 07:04:49 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.3 1999/12/14 07:04:49 calderon Exp $";
 
 void StMcEvent::initToZero()
 {
@@ -95,11 +98,11 @@ StMcEvent::~StMcEvent()
     if (mFtpcHits) delete mFtpcHits;
     mFtpcHits=0;
 
-    for(StPtrVecMcTrackIterator it=mTracks.begin();
+    for(StMcTrackIterator it=mTracks.begin();
 	it != mTracks.end(); it++)
 	delete *it;    
         
-    for(StPtrVecMcVertexIterator iv=mVertices.begin();
+    for(StMcVertexIterator iv=mVertices.begin();
 	iv != mVertices.end(); iv++)
 	delete *iv;
 }
