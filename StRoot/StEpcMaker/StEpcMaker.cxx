@@ -1,7 +1,7 @@
 //
-// $Id: StEpcMaker.cxx,v 1.5 2000/08/29 20:33:04 subhasis Exp $
+// $Id: StEpcMaker.cxx,v 1.6 2000/08/29 20:40:06 subhasis Exp $
 // $Log: StEpcMaker.cxx,v $
-// Revision 1.5  2000/08/29 20:33:04  subhasis
+// Revision 1.6  2000/08/29 20:40:06  subhasis
 // Modified to accept input from StEvent and writing output to StEvent for Emc
 //
 // Revision 1.3  2000/05/16 21:48:32  subhasis
