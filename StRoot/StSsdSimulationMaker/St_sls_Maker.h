@@ -23,6 +23,7 @@ class St_sls_Maker : public StMaker {
    virtual       ~St_sls_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
+   virtual Int_t  Finish();
    virtual void   PrintInfo();
    ClassDef(St_sls_Maker, 1)   //StAF chain virtual base class for Makers
 };
