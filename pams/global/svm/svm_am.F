@@ -267,7 +267,7 @@ ccc
       integer  nunasg,nsvt,ntpc,pidsvt,pidtpc
       integer NO_TKS_MAX
 
-      parameter (NO_TKS_MAX=10000)
+      parameter (NO_TKS_MAX=30000)
       
       dimension jtmp(NO_TKS_MAX),j5(5),chitmp(NO_TKS_MAX),chi5(5)
       dimension idsvt(NO_TKS_MAX),psvt(6,NO_TKS_MAX)
