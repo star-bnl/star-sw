@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.12 2003/10/08 20:17:55 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.13 2003/12/04 05:56:47 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.13  2003/12/04 05:56:47  calderon
+ * Inclusion of Endcap EMC hit collection in StMcEvent and
+ * of the Endcap hit vector in StMcTrack.
+ * fix const of StMcVertex::parent() to avoid warnings in user code
+ *
  * Revision 2.12  2003/10/08 20:17:55  calderon
  * -using <iostream>, std::cout, std::ostream.
  * -changes in FTPC volume Id.
@@ -25,8 +30,13 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
  *
- * $Id: StMcTrack.hh,v 2.12 2003/10/08 20:17:55 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.13 2003/12/04 05:56:47 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.13  2003/12/04 05:56:47  calderon
+ * Inclusion of Endcap EMC hit collection in StMcEvent and
+ * of the Endcap hit vector in StMcTrack.
+ * fix const of StMcVertex::parent() to avoid warnings in user code
+ *
  * Revision 2.12  2003/10/08 20:17:55  calderon
  * -using <iostream>, std::cout, std::ostream.
  * -changes in FTPC volume Id.
@@ -155,6 +165,8 @@ public:
     const StPtrVecMcCalorimeterHit& bsmdpHits() const; //!
     StPtrVecMcTofHit&               tofHits(); //!
     const StPtrVecMcTofHit&         tofHits() const; //!
+    StPtrVecMcCalorimeterHit&       eemcHits(); //!
+    const StPtrVecMcCalorimeterHit& eemcHits() const; //!
     StPtrVecMcPixelHit&             pixelHits(); //!
     const StPtrVecMcPixelHit&       pixelHits() const; //!
     StParticleDefinition*           particleDefinition(); //!
@@ -180,6 +192,7 @@ public:
     void setBsmdeHits(StPtrVecMcCalorimeterHit&); //!
     void setBsmdpHits(StPtrVecMcCalorimeterHit&); //!
     void setTofHits(StPtrVecMcTofHit&); //!
+    void setEemcHits(StPtrVecMcCalorimeterHit&); //!
     void setPixelHits(StPtrVecMcPixelHit&); //!
 
     void setShower(char); //!
@@ -199,6 +212,7 @@ public:
     void addBsmdeHit(StMcCalorimeterHit*); //!
     void addBsmdpHit(StMcCalorimeterHit*); //!
     void addTofHit(StMcTofHit*); //!
+    void addEemcHit(StMcCalorimeterHit*); //!
     void addPixelHit(StMcPixelHit*); //!
     void removeTpcHit(StMcTpcHit*); //!
     void removeSvtHit(StMcSvtHit*); //!
@@ -211,6 +225,7 @@ public:
     void removeBsmdeHit(StMcCalorimeterHit*); //!
     void removeBsmdpHit(StMcCalorimeterHit*); //!
     void removeTofHit(StMcTofHit*); //!
+    void removeEemcHit(StMcCalorimeterHit*); //!
     void removePixelHit(StMcPixelHit*); //!
 
     //    void setTopologyMap(StTrackTopologyMap&); //!
@@ -230,6 +245,7 @@ protected:
     StPtrVecMcCalorimeterHit mBsmdeHits; //!
     StPtrVecMcCalorimeterHit mBsmdpHits; //!
     StPtrVecMcTofHit         mTofHits; //!
+    StPtrVecMcCalorimeterHit mEemcHits; //!
     StPtrVecMcPixelHit       mPixelHits; //!
     StParticleDefinition*    mParticleDefinition; //!
     StMcTrack*               mParent;
@@ -310,6 +326,10 @@ inline const StPtrVecMcCalorimeterHit& StMcTrack::bsmdpHits() const { return mBs
 inline StPtrVecMcTofHit& StMcTrack::tofHits() { return mTofHits; }
 
 inline const StPtrVecMcTofHit& StMcTrack::tofHits() const { return mTofHits; }
+
+inline StPtrVecMcCalorimeterHit& StMcTrack::eemcHits() { return mEemcHits; }
+
+inline const StPtrVecMcCalorimeterHit& StMcTrack::eemcHits() const { return mEemcHits; }
 
 inline StPtrVecMcPixelHit& StMcTrack::pixelHits() { return mPixelHits; }
 
