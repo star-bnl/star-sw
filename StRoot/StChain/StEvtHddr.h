@@ -72,6 +72,7 @@ protected:
     TDatime     mProdTime;		//Production time
     TString     mEventType;
 
+ClassDef(StEvtHddr,1)
 };
 
 inline StEvtHddr::StEvtHddr(St_DataSet *parent):St_DataSet("EvtHddr",parent)
