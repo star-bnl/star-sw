@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.hh,v 1.6 2002/04/25 20:34:50 caines Exp $
+ * $Id: StSvtAnalysis.hh,v 1.7 2002/05/09 16:55:40 munhoz Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.hh,v $
+ * Revision 1.7  2002/05/09 16:55:40  munhoz
+ * add reading bad anodes from DB
+ *
  * Revision 1.6  2002/04/25 20:34:50  caines
  * Pass bad anode information into cluster fitter
  *
@@ -32,7 +35,7 @@
 #include  "StSvtHybridCluster.hh"
 
 class StSvtHybridData;
-class StSvtBadAnode;
+class StSvtHybridBadAnodes;
 class StSequence;
 
 class StSvtAnalysis 
@@ -43,7 +46,7 @@ public:
   virtual ~StSvtAnalysis();
 
   void   SetPointers(StSvtHybridData* hybAdjData,StSvtHybridData* hybRawData,
-                     StSvtHybridCluster* hybClu, StSvtBadAnode* SvtBadAnode,int numOfHybrids,
+                     StSvtHybridCluster* hybClu, StSvtHybridBadAnodes* SvtBadAnode,int numOfHybrids,
 		     int PedOffset);
   void setArrays(int TotalNumberOfHybrids);
   void setMemory();
@@ -120,7 +123,7 @@ private:
   StSvtHybridData* mHybridData;            //!
   StSvtHybridData* mHybridRawData;         //!
   StSvtHybridCluster* mHybridCluster;      //!
-  StSvtBadAnode* mSvtBadAnode;             //!
+  StSvtHybridBadAnodes* mSvtBadAnode;             //!
   StSequence* mSvtSequence;                //!
   int* mCluFirstAnode;                     //!
   int* mCluLastAnode;                      //!

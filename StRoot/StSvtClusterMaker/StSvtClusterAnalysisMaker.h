@@ -1,5 +1,8 @@
-// $Id: StSvtClusterAnalysisMaker.h,v 1.8 2002/04/25 20:34:51 caines Exp $
+// $Id: StSvtClusterAnalysisMaker.h,v 1.9 2002/05/09 16:55:40 munhoz Exp $
 // $Log: StSvtClusterAnalysisMaker.h,v $
+// Revision 1.9  2002/05/09 16:55:40  munhoz
+// add reading bad anodes from DB
+//
 // Revision 1.8  2002/04/25 20:34:51  caines
 // Pass bad anode information into cluster fitter
 //
@@ -49,7 +52,7 @@ class StSvtHybridData;
 class StSvtData;
 class StSvtAnalysis;
 class StSvtAnalysedHybridClusters;
-class StSvtBadAnode;
+class StSvtHybridBadAnodes;
  
 class StSvtClusterAnalysisMaker : public StMaker
 {
@@ -81,7 +84,7 @@ class StSvtClusterAnalysisMaker : public StMaker
   void  printClusterInfo();
   void MakeHistograms(); // Tracking histograms
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.8 2002/04/25 20:34:51 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.9 2002/05/09 16:55:40 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     
  protected:
@@ -115,7 +118,7 @@ class StSvtClusterAnalysisMaker : public StMaker
   StSvtAnalysis* mSvtAnalysis;                //!
   StSvtAnalysedHybridClusters* mSvtAnalClusters;      //! 
   StSvtHit* mSvtHit;                          //!
-  StSvtBadAnode* mSvtBadAnode;                //!
+  StSvtHybridBadAnodes* mSvtBadAnode;                //!
 
   St_ObjectSet* mSvtAnalSet;                  //!
 
