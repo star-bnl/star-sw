@@ -21,11 +21,14 @@ my $debugOn=0;
 
 
 my $DISK1 = "/star/rcf/disk00001/star";
-my $DISK2 =  "/star/rcf/data09/reco";
-my $DISK3 = "/star/rcf/data10/reco";
-my $DISK4 = "/star/rcf/data05/reco";
-my $DISK5 = "/star/rcf/data07/reco";
-my $DISK6 = "/star/rcf/data08/reco";
+
+my @DISKR = (
+              "/star/rcf/data09/reco",
+              "/star/rcf/data10/reco",
+              "/star/rcf/data05/reco",
+              "/star/rcf/data08/reco",
+              "/star/rcf/data07/reco",
+); 
 
 my $prodSr = "P00hg";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
@@ -193,7 +196,7 @@ my $ndbOnFiles = 0;
  }
  
  print "\nFinding daq DST files in HPSS\n";
- my $ftpRDaq = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>100)
+ my $ftpRDaq = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>200)
    or die "HPSS access failed";
  $ftpRDaq->login("starreco","MockData") or die "HPSS access failed";
 
@@ -206,7 +209,7 @@ my $maccess;
 my $mdowner; 
 my $flname;
 my $nDiskFiles = 0;
-my $kk = 0; 
+my $ndir = 0;
 
 #####  find daq reco files on disk
 
@@ -214,19 +217,13 @@ my $kk = 0;
  $nDiskFiles = 0;
  print "\nFinding daq reco files in disk\n";
 
-
+ for( $kk = 0; $kk<scalar(@DISKR); $kk++)  { 
  for( $ll = 0; $ll<scalar(@SetD); $ll++) {
-   $diskDstDirs[$ll] = $DISK2 . "/" . $SetD[$ll];
-#   $kk++;
-   print "diskDstDir: $diskDstDirs[$ll]\n";
-    
+   $diskDstDirs[$ndir] = $DISKR[$kk] . "/" . $SetD[$ll];
+   print "diskDstDir: $diskDstDirs[$ndir]\n";
+   $ndir++;   
  }
-   $diskDstDirs[$ll] = $DISK3 . "/" . $SetD[2];
-    print "diskDstDir: $diskDstDirs[$ll]\n";  
-
-   $ll++;
-   $diskDstDirs[$ll] = $DISK4 . "/" . $SetD[2];
-    print "diskDstDir: $diskDstDirs[$ll]\n";  
+}
 
 
  foreach $diskDir (@diskDstDirs) {
