@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: BFC.C,v 1.2 1999/08/06 18:58:18 fisyak Exp $
+// $Id: BFC.C,v 1.3 1999/09/08 00:42:48 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -11,7 +11,7 @@
 #include "TRegexp.h"
 #include "TSystem.h"
 #include "StRoot/St_base/St_DataSet.h"
-#include "StRoot/StChain/StChain.h"
+#include "StChain.h"
 #include "StRoot/xdf2root/St_XDFFile.h"
 #include "StRoot/StMagF/StMagF.h"
 #include "StRoot/StIOMaker/StIOMaker.h"
