@@ -426,7 +426,14 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node)
 		    sNode = tNode;  // the new source node
 		    hitCount++;
 		    contiguousHitCount++;
+		    
+		    //Is this a bug?
 		    leadDet = tNode->getDetector();
+		    cout <<"Assigning to leadDet, line 430, StiKalmanTrackFinder";
+		    cout <<" THIS IS A BUG!!!!!!"<<endl;
+		    cout <<"leadDet:\t"<<endl;
+		    //cout <<*leadDet<<endl;
+		    
 		    if (contiguousHitCount>minContiguousHitCountForNullReset)
 			contiguousNullCount = 0;
 		}
