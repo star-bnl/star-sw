@@ -90,14 +90,12 @@ TH3D *Bichsel::GetHist3D(const Char_t *HistName) {
 //________________________________________________________________________________
 void Bichsel::GetFile() {
   if (! fFileName) {
-    Char_t *file;
     static Char_t *rootf = "BichselT.root";
     static Char_t *path  = ".:./StRoot/StBichsel:$STAR/StRoot/StBichsel";
-    file = gSystem->Which(path,rootf,kReadPermission);
+     Char_t *file = gSystem->Which(path,rootf,kReadPermission);
     if (! file) Fatal("Bichsel::GetFile","File %s has not been found in path %s",rootf,path);
     else        Warning("Bichsel::GetFile","File %s has been found as %s",rootf,file);
     fFileName = new TString(file);
-    delete [] file;
   }
   TDirectory *dir = gDirectory;
 #ifdef PRINT
