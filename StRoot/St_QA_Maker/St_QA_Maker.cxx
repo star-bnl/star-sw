@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.73 1999/12/17 22:11:33 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.74 1999/12/21 23:11:00 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.74  1999/12/21 23:11:00  kathy
+// unpack number of points correctly in primtrk table; change some limits
+//
 // Revision 1.73  1999/12/17 22:11:33  kathy
 // add psi vs phi hist, change limits
 //
@@ -462,7 +465,9 @@ void St_QA_Maker::MakeHistGlob(){
 	  // 	     " #totm   = " << trkmpnt << endl; 
 	//}
 
-	//if (t->n_point < t->n_fit_point){
+
+    	//if (t->n_point < t->n_fit_point){
+        //  cout << "   trk # " << i << endl;
         //  cout << "*** n_point = " << t->n_point << " n_fit = " << t->n_fit_point << 
         //                 " n_max = " << t->n_max_point << endl;
         //  cout << "  iflag = " << t->iflag << " det-id = " << t->det_id << endl;
@@ -484,7 +489,30 @@ void St_QA_Maker::MakeHistGlob(){
 	// 	     " #totm   = " << trkmpnt << endl; 
 	//	}
 
-    
+	//if (trkfpnt > 55){
+        //  cout << "   trk # " << i << endl;
+        //  cout << "*** n_point = " << t->n_point << " n_fit = " << t->n_fit_point << 
+        //                 " n_max = " << t->n_max_point << endl;
+        //  cout << "  iflag = " << t->iflag << " det-id = " << t->det_id << endl;
+        //  cout << "    #ssd    = " << ssdpnt <<
+	//            " #hold1  = " << hold1  <<         
+	//             " #ssd    = " << ssdpnt <<
+	//             " #svt    = " << svtpnt <<
+        //             " #tpc    = " << tpcpnt <<
+	// 	     " #tot    = " << trkpnt << endl; 
+        //  cout << "    #ssdf   = " << ssdfpnt <<
+	//             " #hold1f = " << holdf1  <<         
+	//             " #svtf   = " << svtfpnt <<
+        //             " #tpcf   = " << tpcfpnt <<
+	// 	     " #totf   = " << trkfpnt << endl; 
+        //  cout << "    #ssdm   = " << ssdmpnt <<
+	//             " #hold1m = " << holdm1  <<         
+	//             " #svtm   = " << svtmpnt <<
+        //             " #tpcm   = " << tpcmpnt <<
+	// 	     " #totm   = " << trkmpnt << endl; 
+	//			}
+
+
 	Float_t pT = -999.;
 	pT = 1./TMath::Abs(t->invpt);
         Float_t lmevpt = TMath::Log10(pT*1000.0);
@@ -752,6 +780,47 @@ void St_QA_Maker::MakeHistPrim(){
 
       if (t->iflag>0) {
         cnttrkg++;
+
+// n_point,n_fit_point,n_max_point is packed on dst tables:
+//   n_point = 1*tpc_pnt + 1000*svt_pnt + 10000*ssd_pnt
+//   - must unpack and add together to get total #pnt
+       Int_t ssdpnt = 0;
+       Int_t  hold1 = 0;
+       Int_t svtpnt = 0;
+       Int_t tpcpnt = 0;
+       Int_t trkpnt = 0;
+
+       Int_t ssdfpnt = 0;
+       Int_t  holdf1 = 0;
+       Int_t svtfpnt = 0;
+       Int_t tpcfpnt = 0;
+       Int_t trkfpnt = 0;
+
+       Int_t ssdmpnt = 0;
+       Int_t  holdm1 = 0;
+       Int_t svtmpnt = 0;
+       Int_t tpcmpnt = 0;
+       Int_t trkmpnt = 0;
+
+ 
+        ssdpnt = (t->n_point)/10000;
+         hold1 = ((t->n_point)%10000);
+        svtpnt = hold1/1000;
+        tpcpnt = (hold1%1000);
+        trkpnt = tpcpnt+svtpnt+ssdpnt;
+
+        ssdfpnt = (t->n_fit_point)/10000;
+         holdf1 = ((t->n_fit_point)%10000);
+        svtfpnt = holdf1/1000;
+        tpcfpnt = (holdf1%1000);
+        trkfpnt = tpcfpnt+svtfpnt+ssdfpnt;
+
+        ssdmpnt = (t->n_max_point)/10000;
+         holdm1 = ((t->n_max_point)%10000);
+        svtmpnt = holdm1/1000;
+        tpcmpnt = (holdm1%1000);
+        trkmpnt = tpcmpnt+svtmpnt+ssdmpnt;
+
 	Float_t pT = -999.;
 	pT = 1./TMath::Abs(t->invpt);
         Float_t lmevpt = TMath::Log10(pT*1000.0);
@@ -762,7 +831,7 @@ void St_QA_Maker::MakeHistPrim(){
         Float_t lmevmom = TMath::Log10(gmom*1000.0); 
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
-        Float_t nfitntot = (Float_t(t->n_fit_point))/(Float_t(t->n_point));
+        Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt));
         Float_t x0s  =  t->r0 * TMath::Cos(t->phi0*degree);
         Float_t y0s  =  t->r0 * TMath::Sin(t->phi0*degree);
         Float_t xdif =  (t->x_first[0])-x0s;
@@ -773,9 +842,9 @@ void St_QA_Maker::MakeHistPrim(){
                 radf = TMath::Sqrt(radf); 
 
  	m_pdet_id->Fill(t->det_id);
-	m_ppoint->Fill(t->n_point);
-	m_pmax_point->Fill(t->n_max_point);
-	m_pfit_point->Fill(t->n_fit_point);
+	m_ppoint->Fill(trkpnt);
+	m_pmax_point->Fill(trkmpnt);
+	m_pfit_point->Fill(trkfpnt);
         m_prim_charge->Fill(t->icharge);
         m_prim_xf->Fill(t->x_first[0]);
         m_prim_yf->Fill(t->x_first[1]);
@@ -801,8 +870,8 @@ void St_QA_Maker::MakeHistPrim(){
         m_ptanl_zf->Fill(t->x_first[2],t->tanl);
 	m_pmom_trklength->Fill(t->length,lmevmom);
         m_peta_trklength->Fill(eta,t->length);
-	m_pnpoint_length->Fill(t->length,Float_t(t->n_point));
-	m_pfpoint_length->Fill(t->length,Float_t(t->n_fit_point));
+	m_pnpoint_length->Fill(t->length,Float_t(trkpnt));
+	m_pfpoint_length->Fill(t->length,Float_t(trkfpnt));
 	m_pchisq0_mom->Fill(lmevmom,chisq0);
 	m_pchisq1_mom->Fill(lmevmom,chisq1);
 	m_pchisq0_eta->Fill(eta,chisq0);
