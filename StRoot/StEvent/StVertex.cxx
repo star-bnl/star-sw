@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 1.1 1999/01/30 03:58:10 fisyak Exp $
+ * $Id: StVertex.cxx,v 1.2 1999/02/09 19:56:29 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
- * Revision 1.1  1999/01/30 03:58:10  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 19:56:29  fisyak
+ * Import new Torre staff
  *
  * Revision 1.3  1999/04/19 15:54:10  genevb
  * Added momentum() to vertex classes
@@ -22,11 +22,11 @@
  * Revision 1.2  1999/01/15 22:54:22  wenaus
  * version with constructors for table-based loading
 
-static const Char_t rcsid[] = "$Id: StVertex.cxx,v 1.1 1999/01/30 03:58:10 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StVertex.cxx,v 1.2 1999/02/09 19:56:29 fisyak Exp $";
 #include "StGlobalTrack.h"
 #ifdef __ROOT__
 
-static const Char_t rcsid[] = "$Id: StVertex.cxx,v 1.1 1999/01/30 03:58:10 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StVertex.cxx,v 1.2 1999/02/09 19:56:29 fisyak Exp $";
 #endif
 StVertex::StVertex()
 {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedx.h,v 1.1 1999/01/30 03:58:04 fisyak Exp $
+ * $Id: StDedx.h,v 1.2 1999/02/09 19:59:03 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StDedx.h,v $
- * Revision 1.1  1999/01/30 03:58:04  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 19:59:03  fisyak
+ * Import new Torre staff
+ *
+ * Revision 1.4  1999/04/28 22:27:29  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.3  1999/01/30 23:03:10  wenaus
  * table load intfc change; include ref change
@@ -27,7 +30,7 @@
 #ifdef __ROOT__
 #include "TObject.h"
 #endif
-#include "dst_dedx.h"
+#include "tables/dst_dedx.h"
 
 class StDedx : public TObject {
 #include "dst_dedx.h"

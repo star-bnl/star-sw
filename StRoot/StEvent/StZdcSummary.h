@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcSummary.h,v 1.1 1999/01/30 03:58:11 fisyak Exp $
+ * $Id: StZdcSummary.h,v 1.2 1999/02/09 19:52:35 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StZdcSummary.h,v $
- * Revision 1.1  1999/01/30 03:58:11  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 19:52:35  fisyak
+ * Import new Torre staff
  *
  * Revision 1.4  1999/04/28 22:27:41  fisyak
  * New version with pointer instead referencies

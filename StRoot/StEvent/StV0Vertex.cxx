@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cxx,v 1.1 1999/01/30 03:58:09 fisyak Exp $
+ * $Id: StV0Vertex.cxx,v 1.2 1999/02/09 19:53:52 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cxx,v $
- * Revision 1.1  1999/01/30 03:58:09  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 19:53:52  fisyak
+ * Import new Torre staff
  *
  * Revision 1.4  1999/02/18 15:42:09  ullrich
  * Momemta of daughter tracks added.
@@ -28,11 +28,11 @@
  *
 #include "StEnumerations.h"
  * Revision 2.1  1999/10/28 22:28:01  ullrich
-static const Char_t rcsid[] = "$Id: StV0Vertex.cxx,v 1.1 1999/01/30 03:58:09 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StV0Vertex.cxx,v 1.2 1999/02/09 19:53:52 fisyak Exp $";
  *
 #ifdef __ROOT__
 #include <algorithm>
-static const Char_t rcsid[] = "$Id: StV0Vertex.cxx,v 1.1 1999/01/30 03:58:09 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StV0Vertex.cxx,v 1.2 1999/02/09 19:53:52 fisyak Exp $";
 #endif
 StV0Vertex::StV0Vertex()
 #include "tables/St_dst_vertex_Table.h"

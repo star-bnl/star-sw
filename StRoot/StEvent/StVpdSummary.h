@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdSummary.h,v 1.1 1999/01/30 03:58:10 fisyak Exp $
+ * $Id: StVpdSummary.h,v 1.2 1999/02/09 19:53:23 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVpdSummary.h,v $
- * Revision 1.1  1999/01/30 03:58:10  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 19:53:23  fisyak
+ * Import new Torre staff
  *
  * Revision 1.3  1999/03/17 22:22:19  ullrich
  * Some cosmetics
