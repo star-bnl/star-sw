@@ -15,10 +15,8 @@ void RunStiMaker(Int_t nevents=1,
 		 bool doFit=true, /* true->fit track only */
 		 //bool doFit=false, /* false->find track only */
 		 
-		 //const char* MainFile="/star/data13/reco/dev/2001/09/*2251008*.event.root")
-		 //const char *MainFile="/scr20/ittf/data/DEV_9_12_01/*.event.root")
-		 const char *MainFile="/direct/star+data02/scratch/haibin/geantTest/muon_10.dst.root")
-    //const char *MainFile="/scr20/ittf/data/DEV_9_12_01/*.event.root")
+                 //const char *MainFile="/scr20/ittf/data/DEV_9_12_01/*.event.root")
+                 const char *MainFile="/scr20/ittf/data/DEV_10_04_01/*.event.root")
     
 {    
     // Dynamically link needed shared libs
@@ -168,12 +166,15 @@ void RunStiMaker(Int_t nevents=1,
 
     //Now we can do diagnostics
     if (draw==false) {
-	cout <<"\n\n***** Processed "<<iev-1<<" events with "<<TestTree->GetEntries()<<" tracks ******\n"<<endl;
+	cout <<"\n\n***** Processed "<<iev-1<<" events with ";
+	cout <<TestTree->GetEntries()<<" tracks ******\n"<<endl;
 	
 	TestTree->Draw("mcTrackPt");
 	cout <<"\tMean MC pt:\t"<<htemp->GetMean()<<"\tRMS:\t"<<htemp->GetRMS()<<endl;
-
+	  
+	
     }
+    
     return;
 }
 
