@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.3 2001/03/06 23:36:09 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.4 2001/03/19 15:53:10 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.4  2001/03/19 15:53:10  jcs
+// use ftpcDimensions from database
+//
 // Revision 1.3  2001/03/06 23:36:09  jcs
 // use database instead of params
 //
@@ -45,6 +48,7 @@ StMaker(name),
 m_fss_gas(0),
 m_fss_param(0),
 m_det(0),
+m_dimensions(0),
 m_padrow_z(0),
 m_efield(0),
 m_vdrift(0),
@@ -74,6 +78,7 @@ Int_t StFtpcSlowSimMaker::Init(){
   }
   St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
 
+  m_dimensions = (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions");
   m_padrow_z   = (St_ftpcPadrowZ  *)dblocal_geometry("ftpcPadrowZ" );
 
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
@@ -131,6 +136,7 @@ Int_t StFtpcSlowSimMaker::Make(){
  
     //create FTPC database reader
     StFtpcDbReader *dbReader = new StFtpcDbReader(paramReader,
+                                                  m_dimensions,
                                                   m_padrow_z,
                                                   m_efield,
                                                   m_vdrift,

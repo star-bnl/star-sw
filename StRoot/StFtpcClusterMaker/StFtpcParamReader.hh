@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.13 2001/03/06 23:34:16 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.14 2001/03/19 15:52:48 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.14  2001/03/19 15:52:48  jcs
+// use ftpcDimensions from database
+//
 // Revision 1.13  2001/03/06 23:34:16  jcs
 // use database instead of params
 //
@@ -63,26 +66,12 @@ protected:
 
   //ClusterFinder parameters (also used by other classes)
   Int_t mNumberOfMagboltzBins;
-  Int_t mNumberOfPadrowsPerSide;
-  Int_t mFirstPadrowToSearch;
-  Int_t mLastPadrowToSearch;
-  Int_t mFirstSectorToSearch;
-  Int_t mLastSectorToSearch;
-  Int_t mNumberOfPadrows;
-  Int_t mNumberOfSectors;
-  Int_t mNumberOfPads;
-  Int_t mNumberOfTimebins;
   Int_t mGaussFittingFlags;
   Int_t mMinimumClusterMaxADC;
   Int_t mNumberOfDriftSteps;
   Int_t mDirectionOfMagnetField;
-  Float_t mSensitiveVolumeInnerRadius;
-  Float_t mSensitiveVolumeOuterRadius;
   Float_t mRadiusTimesField;
   Float_t mRadiansPerDegree;
-  Float_t mMicrosecondsPerTimebin;
-  Float_t mRadiansPerPad;
-  Float_t mRadiansPerBoundary;
   Float_t mStandardPressure;
   Float_t mNormalizedNowPressure;
   Float_t mTZero;
@@ -128,8 +117,6 @@ protected:
   Int_t mMergedClusterFlag;
   Int_t mNumberOfPadsDedxSmearing;
   Int_t mNumberOfBinsDedxSmearing;
-  Float_t mPhiOrigin;
-  Float_t mPhiPerSector;
   Float_t mRadiusTolerance;
   Float_t mSigmaSpacingFactor;
   Float_t mAdcConversionFactor;
@@ -155,7 +142,6 @@ protected:
   Float_t mGasAttenuation;
   Float_t mGasGain;
   Float_t mGasIonizationPotential;
-  Float_t mPadLength;
   Float_t mSigmaPadResponseFuntion;
   Float_t mReadoutShaperTime;
   
@@ -187,26 +173,12 @@ public:
 
   // inline get functions
   Int_t numberOfMagboltzBins() {return mNumberOfMagboltzBins;}
-  Int_t numberOfPadrowsPerSide() {return mNumberOfPadrowsPerSide;}
-  Int_t firstPadrowToSearch() {return mFirstPadrowToSearch;}
-  Int_t lastPadrowToSearch() {return mLastPadrowToSearch;}
-  Int_t firstSectorToSearch() {return mFirstSectorToSearch;}
-  Int_t lastSectorToSearch() {return mLastSectorToSearch;}
-  Int_t numberOfPadrows() {return mNumberOfPadrows;}
-  Int_t numberOfSectors() {return mNumberOfSectors;}
-  Int_t numberOfPads() {return mNumberOfPads;}
-  Int_t numberOfTimebins() {return mNumberOfTimebins;}
   Int_t gaussFittingFlags() {return mGaussFittingFlags;}
   Int_t minimumClusterMaxADC() {return mMinimumClusterMaxADC;}
   Int_t numberOfDriftSteps() {return mNumberOfDriftSteps;}
   Int_t directionOfMagnetField() {return mDirectionOfMagnetField;}
-  Float_t sensitiveVolumeInnerRadius() {return mSensitiveVolumeInnerRadius;}
-  Float_t sensitiveVolumeOuterRadius() {return mSensitiveVolumeOuterRadius;}
   Float_t radiusTimesField() {return mRadiusTimesField;}
   Float_t radiansPerDegree() {return mRadiansPerDegree;}
-  Float_t microsecondsPerTimebin() {return mMicrosecondsPerTimebin;}
-  Float_t radiansPerPad() {return mRadiansPerPad;}
-  Float_t radiansPerBoundary() {return mRadiansPerBoundary;}
   Float_t standardPressure() {return mStandardPressure;}
   Float_t normalizedNowPressure() {return mNormalizedNowPressure;}
   Float_t tZero() {return mTZero;}
@@ -241,8 +213,6 @@ public:
   Int_t mergedClusterFlag() {return mMergedClusterFlag;}
   Int_t numberOfPadsDedxSmearing() {return mNumberOfPadsDedxSmearing;}
   Int_t numberOfBinsDedxSmearing() {return mNumberOfBinsDedxSmearing;}
-  Float_t phiOrigin() {return mPhiOrigin;}
-  Float_t phiPerSector() {return mPhiPerSector;}
   Float_t radiusTolerance() {return mRadiusTolerance;}
   Float_t sigmaSpacingFactor() {return mSigmaSpacingFactor;}
   Float_t adcConversionFactor() {return mAdcConversionFactor;}
@@ -261,10 +231,8 @@ public:
   Float_t gasAttenuation() {return mGasAttenuation;}
   Float_t gasGain() {return mGasGain;}
   Float_t gasIonizationPotential() {return mGasIonizationPotential;}
-  Float_t padLength() {return mPadLength;}
   Float_t sigmaPadResponseFuntion() {return mSigmaPadResponseFuntion;}
   Float_t readoutShaperTime() {return mReadoutShaperTime;}
-  Float_t padPitch() {return mRadiansPerPad*mSensitiveVolumeOuterRadius;}
 
 };
 

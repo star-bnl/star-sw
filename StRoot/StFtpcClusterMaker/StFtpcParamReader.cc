@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.13 2001/03/06 23:34:12 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.14 2001/03/19 15:52:48 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.14  2001/03/19 15:52:48  jcs
+// use ftpcDimensions from database
+//
 // Revision 1.13  2001/03/06 23:34:12  jcs
 // use database instead of params
 //
@@ -49,30 +52,16 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_det *det,
 {
 
   mNumberOfMagboltzBins = 761;
-  mNumberOfPadrowsPerSide = 10;
 
   // det table exists only once, just copy
   fcl_det_st *detTable = det->GetTable();
   mDetTable = detTable; // copy to data member to write parameters back
-  mFirstPadrowToSearch = detTable->firstrow  ;
-  mLastPadrowToSearch = detTable->lastrow;
-  mFirstSectorToSearch = detTable->firstsec;
-  mLastSectorToSearch = detTable->lastsec;
-  mNumberOfPadrows = detTable->n_rows;
-  mNumberOfSectors = detTable->n_sectors;
-  mNumberOfPads = detTable->n_pads;
-  mNumberOfTimebins = detTable->n_bins;
   mGaussFittingFlags = detTable->usegauss;
   mMinimumClusterMaxADC = detTable->min_max_adc;
   mNumberOfDriftSteps = detTable->n_int_steps;
   mDirectionOfMagnetField = detTable->magfld;
-  mSensitiveVolumeInnerRadius = detTable->r_in;
-  mSensitiveVolumeOuterRadius = detTable->r_out;
   mRadiusTimesField = detTable->rad_times_field;
   mRadiansPerDegree = degree;
-  mMicrosecondsPerTimebin = detTable->timebin_size;
-  mRadiansPerPad = detTable->rad_per_pad;
-  mRadiansPerBoundary = detTable->rad_per_gap;
   mStandardPressure = detTable->p_standard;
   mNormalizedNowPressure = detTable->p_normalized;
   mTZero = detTable->t_zero;
@@ -104,10 +93,6 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_det *det,
   mPercentNe = detTable->percent_ne;
   mPercentHe = detTable->percent_he;
 
-  //  temporarily set Ftpc fast simulator geometry parameters until in data base
-  mPhiOrigin = 90.;
-  mPhiPerSector = 60.;
-  mPadLength = 2.0;
   //  temporarily set Ftpc fast simulator parameters until in data base
   mFtpcWestGeantVolumeId = 100;
   mFtpcEastGeantVolumeId = 200;
@@ -180,35 +165,20 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
   mGasGain = paramTable->gas_gas_gain;
   mGasAttenuation = paramTable->gas_attenuation;
   mGasIonizationPotential = paramTable->gas_avg_ion_pot;
-  mPadLength = paramTable->readout_pad_length;
   mSigmaPadResponseFuntion = paramTable->readout_sigma_prf;
   mReadoutShaperTime = paramTable->readout_shaper_time;
  
   mNumberOfMagboltzBins = 761;
-  mNumberOfPadrowsPerSide = 10;
 
   // det table exists only once, just copy
   fcl_det_st *detTable = det->GetTable();
   mDetTable = detTable; // copy to data member to write parameters back
-  mFirstPadrowToSearch = detTable->firstrow  ;
-  mLastPadrowToSearch = detTable->lastrow;
-  mFirstSectorToSearch = detTable->firstsec;
-  mLastSectorToSearch = detTable->lastsec;
-  mNumberOfPadrows = detTable->n_rows;
-  mNumberOfSectors = detTable->n_sectors;
-  mNumberOfPads = detTable->n_pads;
-  mNumberOfTimebins = detTable->n_bins;
   mGaussFittingFlags = detTable->usegauss;
   mMinimumClusterMaxADC = detTable->min_max_adc;
   mNumberOfDriftSteps = detTable->n_int_steps;
   mDirectionOfMagnetField = detTable->magfld;
-  mSensitiveVolumeInnerRadius = detTable->r_in;
-  mSensitiveVolumeOuterRadius = detTable->r_out;
   mRadiusTimesField = detTable->rad_times_field;
   mRadiansPerDegree = degree;
-  mMicrosecondsPerTimebin = detTable->timebin_size;
-  mRadiansPerPad = detTable->rad_per_pad;
-  mRadiansPerBoundary = detTable->rad_per_gap;
   mStandardPressure = detTable->p_standard;
   mNormalizedNowPressure = detTable->p_normalized;
   mTZero = detTable->t_zero;

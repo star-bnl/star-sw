@@ -1,6 +1,9 @@
-// $Id: StFtpcChargeStep.cc,v 1.5 2001/03/06 23:33:27 jcs Exp $
+// $Id: StFtpcChargeStep.cc,v 1.6 2001/03/19 15:52:47 jcs Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.6  2001/03/19 15:52:47  jcs
+// use ftpcDimensions from database
+//
 // Revision 1.5  2001/03/06 23:33:27  jcs
 // use database instead of params
 //
@@ -88,19 +91,19 @@ int StFtpcChargeStep::histogram(int setPressure)
      }
 
   int iRow;
-  for(iRow=mParam->firstPadrowToSearch()-1; 
-      iRow<mParam->lastPadrowToSearch(); iRow++)
+  for(iRow=mDb->firstPadrowToSearch()-1; 
+      iRow<mDb->lastPadrowToSearch(); iRow++)
     {
       int iSec;
-      for(iSec=mParam->firstSectorToSearch()-1; 
-	  iSec<mParam->lastSectorToSearch(); iSec++)
+      for(iSec=mDb->firstSectorToSearch()-1; 
+	  iSec<mDb->lastSectorToSearch(); iSec++)
 	{
 #ifdef DEBUG
 	  printf("Now on Sector %d, Row %d\n", iSec, iRow);
 #endif
 	  
 	  // calculate hardware (daq) sectors from software position
-	  int iHardSec = mParam->numberOfSectors()*(int)(iRow/2) + iSec + 1;
+	  int iHardSec = mDb->numberOfSectors()*(int)(iRow/2) + iSec + 1;
 	  int iHardRow = iRow%2 + 1;
 
 	  // get list of occupied pads in sector
@@ -201,14 +204,14 @@ int StFtpcChargeStep::histogram(int setPressure)
 
   float TimeCoordinate=chargestep2+0.5;// 0 is at beginning of 1st timebin
   // include tZero = time from collision to beginning of bin 0
-  TimeCoordinate += mParam->tZero()/mParam->microsecondsPerTimebin();
+  TimeCoordinate += mParam->tZero()/mDb->microsecondsPerTimebin();
   int PadtransPerTimebin = (int) mParam->numberOfDriftSteps() 
-    / mParam->numberOfTimebins();
+    / mDb->numberOfTimebins();
   
   /* linear interpolation in radius table */
-  for(i=0; pRadius[i]>mParam->sensitiveVolumeInnerRadius(); i++);
-  float aimTime=(i*(pRadius[i-1]-mParam->sensitiveVolumeInnerRadius())
-		 +(i-1)*(mParam->sensitiveVolumeInnerRadius()-pRadius[i]))
+  for(i=0; pRadius[i]>mDb->sensitiveVolumeInnerRadius(); i++);
+  float aimTime=(i*(pRadius[i-1]-mDb->sensitiveVolumeInnerRadius())
+		 +(i-1)*(mDb->sensitiveVolumeInnerRadius()-pRadius[i]))
     /(pRadius[i-1]-pRadius[i]);
   aimTime/=PadtransPerTimebin;
   float newPressure=
@@ -224,9 +227,9 @@ int StFtpcChargeStep::histogram(int setPressure)
       // reiterate time calculation to get better precision
       calcpadtrans(pRadius);
       /* linear interpolation in radius table */
-      for(i=0; pRadius[i]>mParam->sensitiveVolumeInnerRadius(); i++);
-      aimTime=(i*(pRadius[i-1]-mParam->sensitiveVolumeInnerRadius())
-	       +(i-1)*(mParam->sensitiveVolumeInnerRadius()-pRadius[i]))
+      for(i=0; pRadius[i]>mDb->sensitiveVolumeInnerRadius(); i++);
+      aimTime=(i*(pRadius[i-1]-mDb->sensitiveVolumeInnerRadius())
+	       +(i-1)*(mDb->sensitiveVolumeInnerRadius()-pRadius[i]))
 	/(pRadius[i-1]-pRadius[i]);
       aimTime/=PadtransPerTimebin;
       newPressure=
@@ -239,9 +242,9 @@ int StFtpcChargeStep::histogram(int setPressure)
       // reiterate again to get even better precision (error<10E^-4)
       calcpadtrans(pRadius);
       /* linear interpolation in radius table */
-      for(i=0; pRadius[i]>mParam->sensitiveVolumeInnerRadius(); i++);
-      aimTime=(i*(pRadius[i-1]-mParam->sensitiveVolumeInnerRadius())
-	       +(i-1)*(mParam->sensitiveVolumeInnerRadius()-pRadius[i]))
+      for(i=0; pRadius[i]>mDb->sensitiveVolumeInnerRadius(); i++);
+      aimTime=(i*(pRadius[i-1]-mDb->sensitiveVolumeInnerRadius())
+	       +(i-1)*(mDb->sensitiveVolumeInnerRadius()-pRadius[i]))
 	/(pRadius[i-1]-pRadius[i]);
       aimTime/=PadtransPerTimebin;
       newPressure=
@@ -265,7 +268,7 @@ int StFtpcChargeStep::calcpadtrans(double *pRadius)
   double t_last, t_next, r_last, r_next, e_now, v_now, psi_now;
   double step_size, deltap;
   
-  step_size=((float) mParam->numberOfTimebins()
+  step_size=((float) mDb->numberOfTimebins()
 	     / (float) mParam->numberOfDriftSteps());
   deltap=mParam->normalizedNowPressure()-mParam->standardPressure();
   
@@ -278,8 +281,8 @@ int StFtpcChargeStep::calcpadtrans(double *pRadius)
       /* determine starting values */
       t_last=0;
       v_buf=0;
-      r_last=mParam->sensitiveVolumeOuterRadius();
-      pRadius[padrow]=mParam->sensitiveVolumeOuterRadius();
+      r_last=mDb->sensitiveVolumeOuterRadius();
+      pRadius[padrow]=mDb->sensitiveVolumeOuterRadius();
       e_now = mParam->radiusTimesField() / (0.5*r_last);
       for(j=v_buf; j<mParam->numberOfMagboltzBins() 
 	    && mDb->magboltzEField(j) < e_now; j++);
@@ -310,7 +313,7 @@ int StFtpcChargeStep::calcpadtrans(double *pRadius)
 	{
 	  t_next = t_last + step_size;
 	  /* first guess for r_next: */
-	  r_next = r_last - v_now * step_size * mParam->microsecondsPerTimebin();
+	  r_next = r_last - v_now * step_size * mDb->microsecondsPerTimebin();
 	  e_now = mParam->radiusTimesField() / (0.5*(r_last+r_next));
 	  
 	  for(j=v_buf; mDb->magboltzEField(j) < e_now 
@@ -340,7 +343,7 @@ int StFtpcChargeStep::calcpadtrans(double *pRadius)
 	  /(mDb->magboltzEField(j)-mDb->magboltzEField(v_buf));
 	  
 	  /* correct r_next: */
-	  r_next = r_last - v_now * step_size *mParam->microsecondsPerTimebin();
+	  r_next = r_last - v_now * step_size *mDb->microsecondsPerTimebin();
 	  pRadius[padrow+(i+1)]=r_next;
 	  t_last=t_next;
 	  r_last=r_next;

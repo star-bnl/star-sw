@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.3 2001/03/06 23:36:16 jcs Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.4 2001/03/19 15:53:10 jcs Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.4  2001/03/19 15:53:10  jcs
+// use ftpcDimensions from database
+//
 // Revision 1.3  2001/03/06 23:36:16  jcs
 // use database instead of params
 //
@@ -43,14 +46,14 @@ StFtpcSlowSimReadout::StFtpcSlowSimReadout(StFtpcParamReader *paramReader,
   mParam=paramReader;
   mDb=dbReader;
   mRandomNumberGenerator = mParam->randomNumberGenerator();
-  number_plane = mParam->numberOfPadrowsPerSide();
-  pad_pitch = mParam->padPitch();
-  pad_length = mParam->padLength();
+  number_plane = mDb->numberOfPadrowsPerSide();
+  pad_pitch = mDb->padPitch();
+  pad_length = mDb->padLength();
   sigma_prf = mParam->sigmaPadResponseFuntion();   
   shaper_time = mParam->readoutShaperTime();
-  slice = mParam->microsecondsPerTimebin();
+  slice = mDb->microsecondsPerTimebin();
 
-  mOuterRadius = mParam->sensitiveVolumeOuterRadius();
+  mOuterRadius = mDb->sensitiveVolumeOuterRadius();
 
   mADCArray=adcIn;
 
@@ -62,10 +65,10 @@ StFtpcSlowSimReadout::StFtpcSlowSimReadout(StFtpcParamReader *paramReader,
   pcum   = new float[gnch];
   polya(gnch, glow, ghigh, gdelta);
   
-  int imax=mParam->numberOfPadrows()
-    *mParam->numberOfSectors()
-    *mParam->numberOfPads()
-    *mParam->numberOfTimebins();
+  int imax=mDb->numberOfPadrows()
+    *mDb->numberOfSectors()
+    *mDb->numberOfPads()
+    *mDb->numberOfTimebins();
   for(int i=0; i<imax; ++i) 
     mADCArray[i] = 0.0;    //jcs
   
@@ -75,8 +78,8 @@ StFtpcSlowSimReadout::StFtpcSlowSimReadout(StFtpcParamReader *paramReader,
   }
   
   // angle range in which each sector is calculated
-  phiMin = mParam->simulationPhiStart() * degree;
-  phiMax = mParam->simulationPhiEnd() * degree;    
+  phiMin = mDb->phiOrigin() * degree;
+  phiMax = mDb->phiEnd() * degree;    
   mGasGain = mParam->gasGain();
   mMaxAdc = mParam->maxAdc();
   mGaussIntSteps = mParam->gaussIntegrationSteps();
@@ -136,19 +139,19 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
   float n_sigmas_to_calc  = 5.0;        
   
   // get the readout position in radial direction
-  float time_slice = mParam->microsecondsPerTimebin()*1000;// into nsec
+  float time_slice = mDb->microsecondsPerTimebin()*1000;// into nsec
   float time       = cl->GetDriftTime()*1000.;       // into nsec
   int     itim       = WhichSlice(time);
   
   // get the readout position in azimuthal direction
-  float delta_phi  = mParam->radiansPerPad();
+  float delta_phi  = mDb->radiansPerPad();
   float phi        = cl->GetPhi();
   int isec, jsec, nsecs;                                //jcs
   int     ipad       = WhichPad(phi,isec);         //jcs
   
   // big if() loop
-  if ( itim > 2 && itim < (mParam->numberOfTimebins()-3) &&
-       ipad > 2 && ipad < (mParam->numberOfPads()-3) ) 
+  if ( itim > 2 && itim < (mDb->numberOfTimebins()-3) &&
+       ipad > 2 && ipad < (mDb->numberOfPads()-3) ) 
     {      
       // and calculate the pad distribution
       
@@ -161,8 +164,8 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
       float mid_phi = phi;
       float mid_time = time;
       float hypo = sqrt((pad_off/pad_pitch)*(pad_off/pad_pitch)
-			+(time_off/(double)mParam->microsecondsPerTimebin()*1000)*
-			(time_off/(double)mParam->microsecondsPerTimebin()*1000));
+			+(time_off/(double)mDb->microsecondsPerTimebin()*1000)*
+			(time_off/(double)mDb->microsecondsPerTimebin()*1000));
       int n_sub_hits = (int) (2*hypo);
       int current_sub_hit;
       
@@ -188,17 +191,17 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	  int pad_min = WhichPad(phi-width_phi+twopi,isec_min);       //jcs
 	  int pad_max = WhichPad(phi+width_phi,isec_max);       //jcs
 	  if ( isec_min > isec_max )                                 //jcs
-	    nsecs = mParam->numberOfSectors() - isec_min + isec_max + 1;                 //jcs
+	    nsecs = mDb->numberOfSectors() - isec_min + isec_max + 1;                 //jcs
 	  else 
 	    if (isec_min == isec_max && pad_min >= pad_max )           //jcs
-	      nsecs = mParam->numberOfSectors() + 1;                                       //jcs
+	      nsecs = mDb->numberOfSectors() + 1;                                       //jcs
 	    else                                                       //jcs
 	      nsecs = isec_max - isec_min + 1;                        //jcs
 	  int isec = isec_min;                                       //jcs
 	  for (jsec=1; jsec<nsecs+1; ++jsec) {                           //jcs
 	    if (isec != isec_max || (isec == isec_max && pad_min >= pad_max )) {  //jcs 
 	      pad_max_save = pad_max;              //jcs
-	      pad_max = mParam->numberOfPads()-1;                    //jcs
+	      pad_max = mDb->numberOfPads()-1;                    //jcs
 	    }                                          //jcs  
 	    npad    = (pad_max - pad_min + 1);                          //jcs
 	    float* pad = new float[npad];  // signal dist. in pads
@@ -248,7 +251,7 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	      cout << current_sub_hit << "th subhit from time " << tim_min << " to " << tim_min+ntim << " pad " << pad_min << " to " << pad_min+npad << endl;
 	    for (i=0; i<npad; ++i) 
 	      for (j=0; j<ntim; ++j) {
-		int k = irow*mParam->numberOfSectors()*mParam->numberOfPads()*mParam->numberOfTimebins()+isec*mParam->numberOfPads()*mParam->numberOfTimebins()+(i+pad_min)*mParam->numberOfTimebins() + (j+tim_min) ;   //jcs
+		int k = irow*mDb->numberOfSectors()*mDb->numberOfPads()*mDb->numberOfTimebins()+isec*mDb->numberOfPads()*mDb->numberOfTimebins()+(i+pad_min)*mDb->numberOfTimebins() + (j+tim_min) ;   //jcs
 		mADCArray[k] += (float)(mFinalElectrons * pad[i] * sca[j])/(2*n_sub_hits+1);
 	      }
 	    
@@ -258,7 +261,7 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	    pad_min = 0;                                                 //jcs
 	    pad_max = pad_max_save;                                      //jcs
 	    ++isec;                                                      //jcs
-	    if ( isec > mParam->numberOfSectors()-1 )
+	    if ( isec > mDb->numberOfSectors()-1 )
 	      isec = 0;                                                  //jcs                                
 	  }  // end of loop over sectors for multisector cluster       jcs
 	} // end of loop over subhits
@@ -270,11 +273,11 @@ void StFtpcSlowSimReadout::OutputADC() const
 {
   int num_pixels[11]={0}, num_pixels_occupied[11]={0};
   
-  for (int row=0; row<mParam->numberOfPadrows(); row++) { 
-    for (int sec=0; sec<mParam->numberOfSectors(); sec++) {
-      for (int pad=0; pad<mParam->numberOfPads(); pad++) {
-	for (int bin=0; bin<mParam->numberOfTimebins(); bin++) {
-	  int i=bin+mParam->numberOfTimebins()*pad+mParam->numberOfTimebins()*mParam->numberOfPads()*sec+mParam->numberOfTimebins()*mParam->numberOfPads()*mParam->numberOfSectors()*row;
+  for (int row=0; row<mDb->numberOfPadrows(); row++) { 
+    for (int sec=0; sec<mDb->numberOfSectors(); sec++) {
+      for (int pad=0; pad<mDb->numberOfPads(); pad++) {
+	for (int bin=0; bin<mDb->numberOfTimebins(); bin++) {
+	  int i=bin+mDb->numberOfTimebins()*pad+mDb->numberOfTimebins()*mDb->numberOfPads()*sec+mDb->numberOfTimebins()*mDb->numberOfPads()*mDb->numberOfSectors()*row;
 	  
 	  mADCArray[i] =(mADCArray[i] / mParam->adcConversion());
 
@@ -307,7 +310,7 @@ void StFtpcSlowSimReadout::OutputADC() const
 
 float StFtpcSlowSimReadout::PhiOfPad(const int pad, const int deg_or_rad)
 {
-    return (pad+0.5)*mParam->radiansPerPad() + mParam->radiansPerBoundary()/2;
+    return (pad+0.5)*mDb->radiansPerPad() + mDb->radiansPerBoundary()/2;
 }
 
 int StFtpcSlowSimReadout::WhichPad(const float phi, int &isec)   //jcs
@@ -315,40 +318,40 @@ int StFtpcSlowSimReadout::WhichPad(const float phi, int &isec)   //jcs
     // phi and phi_min in rad
     float dphi = fmod(phi-phiMin+twopi,twopi);   //jcs
     isec = (int)(dphi/(phiMax-phiMin));
-    dphi = dphi - isec*(phiMax-phiMin)- mParam->radiansPerBoundary()/2;
-    int ipad = (int) (dphi/mParam->radiansPerPad() +0.5) ;
+    dphi = dphi - isec*(phiMax-phiMin)- mDb->radiansPerBoundary()/2;
+    int ipad = (int) (dphi/mDb->radiansPerPad() +0.5) ;
     if (ipad < 0)  {
         ipad = 0;
     }
-    if (ipad > mParam->numberOfPads() - 1) {
-        ipad = mParam->numberOfPads() - 1;
+    if (ipad > mDb->numberOfPads() - 1) {
+        ipad = mDb->numberOfPads() - 1;
     }
     return ipad;
 }
 
 int StFtpcSlowSimReadout::WhichSlice(const float time)
 {
-    int itim = (int) (time*0.001/mParam->microsecondsPerTimebin()) ;    // time in nsec
+    int itim = (int) (time*0.001/mDb->microsecondsPerTimebin()) ;    // time in nsec
     if (itim < 0) {
         itim = 0;
     }
-    if (itim > mParam->numberOfTimebins() - 1) {
-        itim = mParam->numberOfTimebins() - 1;
+    if (itim > mDb->numberOfTimebins() - 1) {
+        itim = mDb->numberOfTimebins() - 1;
     }
     return itim;
 }
 
 float StFtpcSlowSimReadout::TimeOfSlice(const int slice)
 {
-    return (slice+0.5)*1000*mParam->microsecondsPerTimebin();         // time in nsec
+    return (slice+0.5)*1000*mDb->microsecondsPerTimebin();         // time in nsec
 }
 
 void StFtpcSlowSimReadout::Print() const 
 {
     cout << " Number of pad rows = " 
-         << mParam->numberOfPadrows() << endl;
+         << mDb->numberOfPadrows() << endl;
     cout << " Number of pad per row = " 
-         << mParam->numberOfPads() << endl;
+         << mDb->numberOfPads() << endl;
     cout << " Pad length = " 
          << pad_length 
          << " pitch = " 
@@ -356,7 +359,7 @@ void StFtpcSlowSimReadout::Print() const
     cout << " Shaping time = " 
          << shaper_time << " [ns]" << endl;
     cout << " Time slice = " 
-         << mParam->microsecondsPerTimebin()*1000 << " [ns]" << endl;
+         << mDb->microsecondsPerTimebin()*1000 << " [ns]" << endl;
     cout << " Pad response sigma = " 
          << sigma_prf << " [um]" << endl;
                           

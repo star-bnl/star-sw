@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.1 2001/03/06 23:34:00 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.2 2001/03/19 15:52:47 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.2  2001/03/19 15:52:47  jcs
+// use ftpcDimensions from database
+//
 // Revision 1.1  2001/03/06 23:34:00  jcs
 // use database instead of params
 //
@@ -10,7 +13,9 @@
 #include "StFtpcParamReader.hh"
 #include "StMessMgr.h"
 
+// for StFtpcClusterMaker
 StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
+                               St_ftpcDimensions    *dimensions,
                                St_ftpcPadrowZ       *zrow,
                                St_ftpcEField        *efield,
                                St_ftpcVDrift        *vdrift,
@@ -22,6 +27,30 @@ StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
                                St_ftpcTimeOffset    *timeoffset )
 {
   mParam = paramReader;
+
+  //  just copy dimensions table start to pointer
+  ftpcDimensions_st* dimensionsTable = (ftpcDimensions_st*)dimensions->GetTable();
+  if(dimensionsTable){
+    mNumberOfPadrows            = dimensionsTable->totalNumberOfPadrows;
+    mNumberOfPadrowsPerSide     = dimensionsTable->numberOfPadrowsPerSide;
+    mFirstPadrowToSearch        = dimensionsTable->firstPadrowToSearch;
+    mLastPadrowToSearch         = dimensionsTable->lastPadrowToSearch;   
+    mNumberOfSectors            = dimensionsTable->numberOfSectorsPerPadrow;
+    mFirstSectorToSearch        = dimensionsTable->firstSectorToSearch;
+    mLastSectorToSearch         = dimensionsTable->lastSectorToSearch;
+    mPhiOrigin                  = dimensionsTable->phiOrigin;
+    mPhiPerSector               = dimensionsTable->phiPerSector;
+    mNumberOfPads               = dimensionsTable->numberOfPadsPerSector;
+    mPadLength                  = dimensionsTable->padLength;
+    mRadiansPerPad              = dimensionsTable->radiansPerPad;
+    mRadiansPerBoundary         = dimensionsTable->radiansPerGap;
+    mNumberOfTimebins           = dimensionsTable->numberOfTimebinsPerSector;
+    mMicrosecondsPerTimebin     = dimensionsTable->sizeOfTimebin;
+    mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
+    mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcDimensions","E");
+  }
 
   //  just copy zrow table start to pointer
   ftpcPadrowZ_st* padrowzTable = (ftpcPadrowZ_st*)zrow->GetTable();
@@ -94,6 +123,7 @@ StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
 }
 
 StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
+                               St_ftpcDimensions    *dimensions,
                                St_ftpcPadrowZ       *zrow,
                                St_ftpcEField        *efield,
                                St_ftpcVDrift        *vdrift,
@@ -102,6 +132,31 @@ StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
                                St_ftpcdDeflectiondP *ddeflectiondp)
 {
   mParam = paramReader;
+
+  //  just copy dimensions table start to pointer
+  ftpcDimensions_st* dimensionsTable = (ftpcDimensions_st*)dimensions->GetTable();
+  if(dimensionsTable){
+    mNumberOfPadrows = dimensionsTable->totalNumberOfPadrows;
+    mNumberOfPadrowsPerSide = dimensionsTable->numberOfPadrowsPerSide;
+    mFirstPadrowToSearch    = dimensionsTable->firstPadrowToSearch;
+    mLastPadrowToSearch     = dimensionsTable->lastPadrowToSearch;
+    mNumberOfSectors        = dimensionsTable->numberOfSectorsPerPadrow;
+    mFirstSectorToSearch    = dimensionsTable->firstSectorToSearch;
+    mLastSectorToSearch     = dimensionsTable->lastSectorToSearch;
+    mPhiOrigin                  = dimensionsTable->phiOrigin;
+    mPhiPerSector               = dimensionsTable->phiPerSector;
+    mNumberOfPads           = dimensionsTable->numberOfPadsPerSector;
+    mPadLength              = dimensionsTable->padLength;
+    mPadPitch               = dimensionsTable->padPitch;
+    mRadiansPerPad          = dimensionsTable->radiansPerPad;
+    mRadiansPerBoundary     = dimensionsTable->radiansPerGap;
+    mNumberOfTimebins       = dimensionsTable->numberOfTimebinsPerSector;
+    mMicrosecondsPerTimebin = dimensionsTable->sizeOfTimebin;
+    mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
+    mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcDimensions","E");
+  }
 
   //  just copy zrow table start to pointer
   ftpcPadrowZ_st* padrowzTable = (ftpcPadrowZ_st*)zrow->GetTable();
@@ -165,7 +220,7 @@ StFtpcDbReader::~StFtpcDbReader()
 
 Float_t StFtpcDbReader::padrowZPosition(Int_t i) 
 {
-  if(i>=0 && i<mParam->numberOfPadrows())
+  if(i>=0 && i<numberOfPadrows())
     {
       return mPadrowZPosition[i];
     }
@@ -192,9 +247,9 @@ Float_t StFtpcDbReader::magboltzEField(Int_t i)
 
 Float_t StFtpcDbReader::magboltzVDrift(Int_t i, Int_t padrow)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<mParam->numberOfPadrowsPerSide())
+  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
-      return mMagboltzVDrift[padrow+mParam->numberOfPadrowsPerSide()*i];
+      return mMagboltzVDrift[padrow+numberOfPadrowsPerSide()*i];
     }
   else
     {
@@ -205,9 +260,9 @@ Float_t StFtpcDbReader::magboltzVDrift(Int_t i, Int_t padrow)
 
 Float_t StFtpcDbReader::magboltzDeflection(Int_t i, Int_t padrow)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<mParam->numberOfPadrowsPerSide())
+  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
-      return mMagboltzDeflection[padrow+mParam->numberOfPadrowsPerSide()*i];
+      return mMagboltzDeflection[padrow+numberOfPadrowsPerSide()*i];
     }
   else
     {
@@ -218,9 +273,9 @@ Float_t StFtpcDbReader::magboltzDeflection(Int_t i, Int_t padrow)
 
 Float_t StFtpcDbReader::magboltzdVDriftdP(Int_t i, Int_t padrow)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<mParam->numberOfPadrowsPerSide())
+  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
-      return mMagboltzdVDriftdP[padrow+mParam->numberOfPadrowsPerSide()*i];
+      return mMagboltzdVDriftdP[padrow+numberOfPadrowsPerSide()*i];
     }
   else
     {
@@ -231,9 +286,9 @@ Float_t StFtpcDbReader::magboltzdVDriftdP(Int_t i, Int_t padrow)
 
 Float_t StFtpcDbReader::magboltzdDeflectiondP(Int_t i, Int_t padrow)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<mParam->numberOfPadrowsPerSide())
+  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
-      return mMagboltzdDeflectiondP[padrow+mParam->numberOfPadrowsPerSide()*i];
+      return mMagboltzdDeflectiondP[padrow+numberOfPadrowsPerSide()*i];
     }
   else
     {
@@ -244,7 +299,7 @@ Float_t StFtpcDbReader::magboltzdDeflectiondP(Int_t i, Int_t padrow)
 
 Float_t StFtpcDbReader::amplitudeSlope(Int_t i, Int_t padrow)
 {
-  if(i>0 && i<=(mParam->numberOfSectors()*mParam->numberOfPads()) && padrow>=0 && padrow<mParam->numberOfPadrows())
+  if(i>0 && i<=(numberOfSectors()*numberOfPads()) && padrow>=0 && padrow<numberOfPadrows())
     {
        return ampslopeTable[padrow].slope[i-1];
     }
@@ -257,7 +312,7 @@ Float_t StFtpcDbReader::amplitudeSlope(Int_t i, Int_t padrow)
 
 Float_t StFtpcDbReader::amplitudeOffset(Int_t i, Int_t padrow)
 {
-  if(i>0 && i<=(mParam->numberOfSectors()*mParam->numberOfPads()) && padrow>=0 && padrow<mParam->numberOfPadrows())
+  if(i>0 && i<=(numberOfSectors()*numberOfPads()) && padrow>=0 && padrow<numberOfPadrows())
     {
        return ampoffsetTable[padrow].offset[i-1];
     }
@@ -270,7 +325,7 @@ Float_t StFtpcDbReader::amplitudeOffset(Int_t i, Int_t padrow)
 
 Float_t StFtpcDbReader::timeOffset(Int_t i, Int_t padrow)
 {
-  if(i>0 && i<=(mParam->numberOfSectors()*mParam->numberOfPads()) && padrow>=0 && padrow<mParam->numberOfPadrows())
+  if(i>0 && i<=(numberOfSectors()*numberOfPads()) && padrow>=0 && padrow<numberOfPadrows())
     {
        return timeoffsetTable[padrow].offset[i-1];
     }
@@ -298,9 +353,9 @@ Int_t StFtpcDbReader::setMagboltzEField(Int_t i, Float_t newvalue)
 
 Int_t StFtpcDbReader::setMagboltzVDrift(Int_t i, Int_t padrow, Float_t newvalue)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<mParam->numberOfPadrowsPerSide())
+  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
-      mMagboltzVDrift[padrow+mParam->numberOfPadrowsPerSide()*i]=newvalue;
+      mMagboltzVDrift[padrow+numberOfPadrowsPerSide()*i]=newvalue;
       return 1;
     }
   else
@@ -312,9 +367,9 @@ Int_t StFtpcDbReader::setMagboltzVDrift(Int_t i, Int_t padrow, Float_t newvalue)
 
 Int_t StFtpcDbReader::setMagboltzDeflection(Int_t i, Int_t padrow, Float_t newvalue)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<mParam->numberOfPadrowsPerSide())
+  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
-      mMagboltzDeflection[padrow+mParam->numberOfPadrowsPerSide()*i]=newvalue;
+      mMagboltzDeflection[padrow+numberOfPadrowsPerSide()*i]=newvalue;
       return 1;
     }
   else
@@ -326,9 +381,9 @@ Int_t StFtpcDbReader::setMagboltzDeflection(Int_t i, Int_t padrow, Float_t newva
 
 Int_t StFtpcDbReader::setMagboltzdVDriftdP(Int_t i, Int_t padrow, Float_t newvalue)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<mParam->numberOfPadrowsPerSide())
+  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
-      mMagboltzdVDriftdP[padrow+mParam->numberOfPadrowsPerSide()*i]=newvalue;
+      mMagboltzdVDriftdP[padrow+numberOfPadrowsPerSide()*i]=newvalue;
       return 1;
     }
   else
@@ -340,9 +395,9 @@ Int_t StFtpcDbReader::setMagboltzdVDriftdP(Int_t i, Int_t padrow, Float_t newval
 
 Int_t StFtpcDbReader::setMagboltzdDeflectiondP(Int_t i, Int_t padrow, Float_t newvalue)
 {
-  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<mParam->numberOfPadrowsPerSide())
+  if(i>=0 && i<mParam->numberOfMagboltzBins() && padrow>=0 && padrow<numberOfPadrowsPerSide())
     {
-      mMagboltzdDeflectiondP[padrow+mParam->numberOfPadrowsPerSide()*i]=newvalue;
+      mMagboltzdDeflectiondP[padrow+numberOfPadrowsPerSide()*i]=newvalue;
       return 1;
     }
   else

@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.8 2001/03/06 23:33:56 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.9 2001/03/19 15:52:47 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.9  2001/03/19 15:52:47  jcs
+// use ftpcDimensions from database
+//
 // Revision 1.8  2001/03/06 23:33:56  jcs
 // use database instead of params
 //
@@ -45,6 +48,7 @@ class TH2F;
 class St_fcl_det;
 class St_ffs_gaspar;
 class DetectorReader;
+class St_ftpcDimensions;
 class St_ftpcPadrowZ;
 class St_ftpcEField;
 class St_ftpcVDrift;
@@ -58,9 +62,10 @@ class St_ftpcTimeOffset;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.8 2001/03/06 23:33:56 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.9 2001/03/19 15:52:47 jcs Exp $";
    St_fcl_det      *m_det;       //!
    St_ffs_gaspar   *m_gaspar;   //!
+   St_ftpcDimensions    *m_dimensions;    //!
    St_ftpcPadrowZ       *m_padrow_z;      //!
    St_ftpcEField        *m_efield;        //!
    St_ftpcVDrift        *m_vdrift;        //!
@@ -88,7 +93,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.8 2001/03/06 23:33:56 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.9 2001/03/19 15:52:47 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };

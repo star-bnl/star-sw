@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.21 2001/01/27 20:10:42 jcs Exp $
+// $Id: StFtpcFastSimu.cc,v 1.22 2001/03/19 15:52:47 jcs Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.22  2001/03/19 15:52:47  jcs
+// use ftpcDimensions from database
+//
 // Revision 1.21  2001/01/27 20:10:42  jcs
 // change name of parameter
 //
@@ -67,6 +70,7 @@
 
 #include "StFtpcFastSimu.hh"
 #include "StFtpcParamReader.hh"
+#include "StFtpcDbReader.hh"
 #include "StFtpcGeantReader.hh"
 #include <iostream.h>
 #include <stdlib.h>
@@ -81,6 +85,7 @@ static RanluxEngine engine;
 
 StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
 			       StFtpcParamReader *paramReader,
+                               StFtpcDbReader    *dbReader, 
 			       TObjArray *pointarray,
 			       TObjArray *geantarray)
 {
@@ -88,6 +93,7 @@ StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
   
   // store Readers in data members
   mParam=paramReader;
+  mDb   =dbReader;
   mGeant=geantReader;
 
   // allocate memory for local storage
@@ -273,7 +279,7 @@ int StFtpcFastSimu::ffs_gen_padres()
 	sigPhi = err_azi[0]+err_azi[1]*Rh+err_azi[2]*sqr(Rh)+err_azi[3]*sqr(Rh)*Rh;
 
 	//   Sigma_tr response
-	sigma_tr = sqrt(sqr(sigPhi)+(sqr(mParam->padLength()*tan(alpha))));
+	sigma_tr = sqrt(sqr(sigPhi)+(sqr(mDb->padLength()*tan(alpha))));
 
 	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -284,7 +290,7 @@ int StFtpcFastSimu::ffs_gen_padres()
 	  err_rad[3]*sqr(Rh)*Rh;
 
 	//mk Sigma longitudinal at anode [micron] 
-	sigma_l = sqrt(sqr(sigTimeb)+sqr(mParam->padLength()*tan(lambda)));
+	sigma_l = sqrt(sqr(sigTimeb)+sqr(mDb->padLength()*tan(lambda)));
 
 	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -338,9 +344,9 @@ int StFtpcFastSimu::ffs_hit_rd()
 	    mGeantPoint[ih].SetPrimaryTag(-1*mGeantPoint[ih].GetPrimaryTag());
 	  }
 	int temp=mGeant->geantVolume(ih) - mParam->ftpcWestGeantVolumeId();
-	if (temp > mParam->numberOfPadrowsPerSide())
+	if (temp > mDb->numberOfPadrowsPerSide())
 	  {
-	    temp = mGeant->geantVolume(ih) - mParam->ftpcEastGeantVolumeId() + mParam->numberOfPadrowsPerSide();
+	    temp = mGeant->geantVolume(ih) - mParam->ftpcEastGeantVolumeId() + mDb->numberOfPadrowsPerSide();
 	  }
 	mPoint[ih].SetPadRow(temp);
 
@@ -441,9 +447,9 @@ int StFtpcFastSimu::ffs_ini()
   {
     //-----------------------------------------------------------------------
     // mk
-    ri = mParam->sensitiveVolumeInnerRadius()+mParam->radiusTolerance();
-    ra = mParam->sensitiveVolumeOuterRadius()-mParam->radiusTolerance();
-    padrows = mParam->numberOfPadrowsPerSide();
+    ri = mDb->sensitiveVolumeInnerRadius()+mParam->radiusTolerance();
+    ra = mDb->sensitiveVolumeOuterRadius()-mParam->radiusTolerance();
+    padrows = mDb->numberOfPadrowsPerSide();
 
     //mk Drift-Velocity:
     Vhm[0]  = mParam->vDriftEstimates(0);
@@ -501,14 +507,14 @@ int StFtpcFastSimu::ffs_ini()
     Va = Vhm[0] + Vhm[1]*ra + Vhm[2]*sqr(ra) + Vhm[3]*ra*sqr(ra);
 
     //     phi of sector number 1 origin
-    phimin = degree * mParam->phiOrigin();
+    phimin = degree * mDb->phiOrigin();
 
     //     size of one sector in phi
-    phisec = degree * mParam->phiPerSector();
+    phisec = degree * mDb->phiPerSector();
 
     //     a cluster is too close to lower sector boundary if it is
     //     not more than 2 pads away 
-    sector_phi_min = mParam->radiansPerBoundary()/2 + 2*mParam->radiansPerPad();
+    sector_phi_min = mDb->radiansPerBoundary()/2 + 2*mDb->radiansPerPad();
 
     //     a cluster is too close to upper sector boundary if it is
     //     not more than 2 pads away 

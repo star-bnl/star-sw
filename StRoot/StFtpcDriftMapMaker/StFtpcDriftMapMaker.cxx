@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.4 2001/03/09 13:54:27 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.5 2001/03/19 15:53:05 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.5  2001/03/19 15:53:05  jcs
+// use ftpcDimensions from database
+//
 // Revision 1.4  2001/03/09 13:54:27  jcs
 // write out cstructs with new values so that they can be added to database
 //
@@ -46,6 +49,7 @@ StMaker(name),
 m_fss_gas(0),
 m_fss_param(0),
 m_det(0),
+    m_dimensions(0),
     m_padrow_z(0),
     m_efield(0),
     m_vdrift(0),
@@ -74,6 +78,7 @@ Int_t StFtpcDriftMapMaker::Init(){
   }
   St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
 
+  m_dimensions = (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions");
   m_padrow_z   = (St_ftpcPadrowZ  *)dblocal_geometry("ftpcPadrowZ" );
 
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
@@ -102,6 +107,7 @@ Int_t StFtpcDriftMapMaker::Make(){
 
   // create FTPC data base reader
   StFtpcDbReader *dbReader = new StFtpcDbReader(paramReader,
+                                                m_dimensions,
                                                 m_padrow_z,
                                                 m_efield,
                                                 m_vdrift,
@@ -135,7 +141,7 @@ Int_t StFtpcDriftMapMaker::Make(){
       thisRadius = paramReader->radiusTimesField() / thisField; 
       
       posVector[1]=thisRadius; 
-      for(j=0; j < paramReader->numberOfPadrowsPerSide(); j++) 
+      for(j=0; j < dbReader->numberOfPadrowsPerSide(); j++) 
  	{ 
  	  posVector[2]=dbReader->padrowZPosition(j); 
  	  /* sets posVector to (0, radius, z) */ 
