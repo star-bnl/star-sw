@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 2.8 2001/11/21 20:57:18 lasiuk Exp $
+ * $Id: StRichPadMonitor.cxx,v 2.9 2002/02/01 18:01:42 lasiuk Exp $
  * Description:
  *  A Pad Monitor for the STAR-RICH.
  *  Runs only in ROOT
@@ -7,6 +7,9 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
+ * Revision 2.9  2002/02/01 18:01:42  lasiuk
+ * remove getentries() from loops where appropriate
+ *
  * Revision 2.8  2001/11/21 20:57:18  lasiuk
  * add quick rings, text drawing
  *
@@ -262,12 +265,6 @@ void StRichPadMonitor::clearPads()
 {
 //     //cout << "StRichPadMonitor::clearPads()" << endl;
 
-//     for(int ii=0; ii<mAllFilledPads.GetEntries(); ii++) {
-// 	(mAllFilledPads[ii])->Delete();	    
-//     }
-//     mAllFilledPads.Clear();
-//     mAllFilledPads.Expand(0);
-
     mAllFilledPads.Delete();
 }
 
@@ -276,11 +273,6 @@ void StRichPadMonitor::clearG2T()
     //cout << "StRichPadMonitor::clearGeant()" << endl;
     //PR(mG2TSegments.GetEntries());
 
-//     for(int ii=0; ii< mG2TSegments.GetEntries(); ii++) {
-// 	(mG2TSegments[ii])->Delete();	    
-//     }
-//     mG2TSegments.Clear();
-//     mG2TSegments.Expand(0);
     mG2TSegments.Delete();
 }
 
@@ -288,11 +280,6 @@ void StRichPadMonitor::clearHits() {
 //      cout << "StRichPadMonitor::clearHits()" << endl;
 //     PR(mHits.GetEntries());
 
-//     for(int ii=0; ii< mHits.GetEntries(); ii++) {
-// 	(mHits[ii])->Delete();	    
-//     }
-//     mHits.Clear();
-//     mHits.Expand(0);
     mHits.Delete();
 }
 
@@ -310,11 +297,6 @@ void StRichPadMonitor::clearTracks() {
 
 void StRichPadMonitor::clearRingInfo() {
      cout << "StRichPadMonitor::clearRingInfo()" << endl;
-//     for(int ii=0; ii< mRingInfo.GetEntries(); ii++) {
-// 	(mRingInfo[ii])->Delete();	    
-//     }
-//     mRingInfo.Clear();
-//     mRingInfo.Expand(0);
      
      mRingInfo.Delete();
 }
@@ -322,12 +304,6 @@ void StRichPadMonitor::clearRingInfo() {
 void StRichPadMonitor::clearMisc()
 {
 //     cout << "StRichPadMonitor::clearMisc()" << endl;
-
-//     for(int ii=0; ii<mMisc.GetEntries(); ii++) {
-// 	(mMisc[ii])->Delete();	    
-//     }
-//     mMisc.Clear();
-//     mMisc.Expand(0);
 
     mMisc.Delete();
 }
@@ -345,7 +321,7 @@ void StRichPadMonitor::clearText()
 void StRichPadMonitor::drawPads()
 {
     //cout << "StRichPadMonitor::drawPads()" << endl;
-    for(int ii=0; ii<mAllFilledPads.GetEntries(); ii++) {
+    for(int ii=0; ii<mAllFilledPads.GetLast()+1; ii++) {
 	(mAllFilledPads[ii])->Draw();
     }
 }
@@ -409,8 +385,7 @@ void StRichPadMonitor::drawGeantGroup(int trackp, int color)
 {
     //
     // Loop over all mG2TSegments
-    //cout << "#mG2tSegments= " << mG2TSegments.GetEntries() << endl;
-    for(int ii=0; ii<mG2TSegments.GetEntries(); ii++) {
+    for(int ii=0; ii<mG2TSegments.GetLast()+1; ii++) {
  	if(dynamic_cast<StRichDrawableTG2T*>(mG2TSegments.At(ii))->mTrackp == trackp) {
 	    int currentColor =
 		dynamic_cast<StRichDrawableTG2T*>(mG2TSegments.At(ii))->GetTextColor();
