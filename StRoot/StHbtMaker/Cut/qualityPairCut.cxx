@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: qualityPairCut.cxx,v 1.1 2000/04/05 18:56:18 rcwells Exp $
+ * $Id: qualityPairCut.cxx,v 1.2 2000/07/31 01:19:24 lisa Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: qualityPairCut.cxx,v $
+ * Revision 1.2  2000/07/31 01:19:24  lisa
+ * add PairCut which contains collection of PairCuts - also 3D bertsch-pratt CorrFctn
+ *
  * Revision 1.1  2000/04/05 18:56:18  rcwells
  * Adding class qualityPairCut
  *
@@ -61,8 +64,10 @@ bool qualityPairCut::Pass(const StHbtPair* pair){
 }
 //__________________
 StHbtString qualityPairCut::Report(){
-  string Stemp = "Quality Pair Cut - total dummy-- always returns true\n";
+  string Stemp = "Quality Pair Cut\n";
   char Ctemp[100];
+  sprintf(Ctemp,"Range of cut:\t%E ... \t%E\n",mQualCutLo,mQualCutHi);
+  Stemp += Ctemp;
   sprintf(Ctemp,"Number of pairs which passed:\t%ld  Number which failed:\t%ld\n",mNPairsPassed,mNPairsFailed);
   Stemp += Ctemp;
   StHbtString returnThis = Stemp;
