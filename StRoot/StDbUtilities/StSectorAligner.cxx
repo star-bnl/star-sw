@@ -40,7 +40,7 @@ static const float sectorY[] = {
 
 ClassImp(StSectorAligner)
 
-static const float deg_2_rad= 180./M_PI;
+static const float deg_2_rad= M_PI/180.;
 
 
 //__________ CONSTRUCTORS AND DESTRUCTORS_________
