@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.27 1999/11/05 23:18:40 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.28 1999/11/07 05:27:12 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.28  1999/11/07 05:27:12  fine
+// Take in account new data-member of tpt_track table: length
+//
 // Revision 1.27  1999/11/05 23:18:40  fine
 // convertor degree to rad was introduced
 //
@@ -371,10 +374,10 @@ Int_t StEventDisplayMaker::CreateCanvas()
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeGlobalTracks()
 {
-  const Int_t maxTrackCounter = 9999999;
   Int_t trackCounter  = 0;
   Int_t hitCounter    = 0;
 #ifdef STEVENT
+  const Int_t maxTrackCounter = 9999999;
   Width_t size;
   Style_t style;
   StTrackCollection *tracks = m_Event->trackCollection();
@@ -550,9 +553,8 @@ Int_t StEventDisplayMaker::MakeEvent()
   //----------------------------//
     total = MakeGlobalTracks(); //
   //----------------------------//
-
-  StVirtualEventFilter *filter = 0;
 #ifdef STEVENT
+  StVirtualEventFilter *filter = 0;
   filter = (StVirtualEventFilter *)m_FilterArray->At(kTpcHit);
   if (!filter || filter->IsOn() ) {
   StTpcHitCollection *hits   = m_Event->tpcHitCollection();
@@ -823,9 +825,11 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
            //-------------------------------------------------------------//
            // Artificial length has to be replaced with the "regular" one //
            //-------------------------------------------------------------//
-           Float_t artficialLength = 200; // cm
-           Int_t nSteps = Int_t(4*artficialLength*t.curvature + 1); 
-           Float_t step = artficialLength / nSteps;
+	   //           Float_t artficialLength = 200; // cm
+	   //           Int_t nSteps = Int_t(4*artficialLength*t.curvature + 1); 
+	   // Float_t step = artficialLength / nSteps;
+	   Int_t nSteps = Int_t(4*t.length*t.curvature + 1); 
+	   Float_t step = t.length / nSteps;
            StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix,step,nSteps);
            m_TrackCollector->Add(tracksPoints);    // Collect to remove  
            St_PolyLineShape *tracksShape   = new St_PolyLineShape(tracksPoints,"L");
