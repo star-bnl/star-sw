@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: swguide.pl,v 1.9 1999/09/21 12:25:00 wenaus Exp $
+# $Id: swguide.pl,v 1.10 1999/10/30 15:10:03 wenaus Exp $
 #
 # $Log: swguide.pl,v $
+# Revision 1.10  1999/10/30 15:10:03  wenaus
+# Improve README, doc handling
+#
 # Revision 1.9  1999/09/21 12:25:00  wenaus
 # Update to run on Solaris
 #
@@ -77,6 +80,7 @@ if ( $dynamic ne "yes" && $q->param('pkg') eq '' && $q->param('find') eq '') {
                  ".ddl" => "DDL",
                  ".sh" => "script",
                  ".pl" => "script",
+                 ".pm" => "script",
                  ".csh" => "script",
                  ".batch" => "script",
                  ".bat" => "script",
@@ -223,10 +227,10 @@ page is too old.
 END
 
 # Build list of pams
-@pamList = `cd $root; gfind pams -maxdepth 2 -mindepth 2 -type d`;
+@pamList = `cd $root; /opt/star/bin/gfind pams -maxdepth 2 -mindepth 2 -type d`;
 foreach $pm (@pamList) {
     $pm =~ m/pams\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)/;
-    if ( $1 ne "CVS" && $1 ne "idl" && $1 ne "inc" && $1 ne "kumac" ) {
+    if ( $1 ne "CVS" && $1 ne "inc" && $1 ne "kumac" ) {
         $pams{$2} = "$1/$2";
         $pams{$1} = "$1";
     }
@@ -245,6 +249,8 @@ $totfiles = 0;
             "StRoot",
             "StDb",
             "mgr",
+            "scripts",
+            "cgi",
             "pams/ctf",
             "pams/db",
             "pams/ebye",
@@ -261,11 +267,15 @@ $totfiles = 0;
             "pams/svt",
             "pams/tpc",
             "pams/trg",
-            "pams/vpd"
+            "pams/vpd",
+            "Dsv"
             );
 
 %oneLevel = (
-             "mgr" => 1
+             "mgr" => 1,
+             "scripts" => 1,
+             "cgi" => 1,
+             "Dsv" => 1
              );
 
 for ($idr=0; $idr<@allDirs; $idr++) {
@@ -373,25 +383,36 @@ sub showPackage {
     print "flag $showFlag $theRoot $theDir $thePkg<br>\n" if $debugOn;
     $pkgLine = "";
     $nsl = 0;
-    ### README file
-    if ( -e "$theRoot/$theDir/$thePkg/README" ) {
-        $readme = "<a href=\"http://duvall.star.bnl.gov/STARAFS/comp/pkg/$ver/$theDir/$thePkg/README\">README</a>";
+    if ( $thePkg eq 'inc' || $thePkg eq 'kumac' ) {
+      $readme = "      ";
+      $doc = "   ";
     } else {
+      ### README file
+      if ( -e "$theRoot/$theDir/$thePkg/README" ) {
+        $readme = "<a href=\"http://duvall.star.bnl.gov/STARAFS/comp/pkg/$ver/$theDir/$thePkg/README\">README</a>";
+      } else {
         $readme = "<font color=\"gray\">README</font>";
-    }
-    ### doc directory
-    $docDir = "$theRoot/$theDir/$thePkg/doc";
-    $doc = "<font color=\"gray\">doc</font>";
-    if ( -d $docDir ) {
+      }
+      ### doc directory. For pams, the doc area has package name doc
+      if ( $thePkg eq 'doc' ) {
+        $docDir = "$theRoot/$theDir/$thePkg";
+        $docLoc = "";
+      } else {
+        $docDir = "$theRoot/$theDir/$thePkg/doc";
+        $docLoc = "doc/";
+      }
+      $doc = "<font color=\"gray\">doc</font>";
+      if ( -d $docDir ) {
         opendir(DOC, $docDir);
         while (defined ($docf = readdir DOC)) {
-            if ( $docf ne "." && $docf ne ".." && $docf ne "CVS" ) {
-                # something seems to be there
-                $doc = "<a href=\"http://duvall.star.bnl.gov/STARAFS/comp/pkg/$ver/$theDir/$thePkg/doc\">doc</a>";
-                last;
-            }
+          if ( $docf ne "." && $docf ne ".." && $docf ne "CVS" ) {
+            # something seems to be there
+            $doc = "<a href=\"http://duvall.star.bnl.gov/STARAFS/comp/pkg/$ver/$theDir/$thePkg/$docLoc\">doc</a>";
+            last;
+          }
         }
         close DOC;
+      }
     }
     ### CVS link
     $cvs = "<a href=\"http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/$theDir/$thePkg\">CVS</a>";
@@ -507,7 +528,7 @@ sub showPackage {
         }
         $pkgLine = sprintf("$disp1%s%-27s%s %s %s %s %s%s%9s%s%4d Files%5d Lines %02d/%02d/%02d %3d Days %s$disp2\n",
                            $pkgUrl,$theDir."/".$thePkg,"</a>",$readme,$doc,$cvs,$src,
-                           "<a href=\"http://www.star.bnl.gov/cvs/user/$pkgOwner/index.html#bottom\">",$pkgOwner,"</a>",
+                           "<a href=\"http://www.star.bnl.gov/webdata/cvs/user/$pkgOwner/index.html#bottom\">",$pkgOwner,"</a>",
                            $filecount,$linecount,$mo+1,$dy,$yr,$sinceMod,$thePamUrl);
     } else {
         $pkgLine = sprintf("%s%-27s%s %s %s %s %s\n",
@@ -708,7 +729,7 @@ sub showFiles {
                                    $date,
                                    "<a href=\"http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/$theDir/$thePkg/$fname\">CVS</a>",
                                    "<a href=\"http://duvall.star.bnl.gov/lxr/source/$theDir/$thePkg/$fname?v=$rel\">src</a>",
-                                   "<a href=\"http://www.star.bnl.gov/cvs/user/$owner/index.html#bottom\">",$owner,"</a>",
+                                   "<a href=\"http://www.star.bnl.gov/webdata/cvs/user/$owner/index.html#bottom\">",$owner,"</a>",
                                    $theLines,$reptag);
                 print "$output" if $debugOn;
                 $linecount += $count;
