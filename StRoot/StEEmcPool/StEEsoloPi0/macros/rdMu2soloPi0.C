@@ -12,9 +12,9 @@ StChain *chain=0;
 
 
 int rdMu2soloPi0(
- TString fullName="mc5",
- int nEve=200000,
- Int_t nFiles  = 50,
+ TString fullName="mc7",
+ int nEve=2000000,
+ Int_t nFiles  = 5000,
  char* file="inpMC/130.lis", 
  char* inDir   = "./",
  char* outDir   = "outPi0/"
@@ -40,21 +40,19 @@ int rdMu2soloPi0(
   int nEntries=tree->GetEntries();
   printf("total eve in chain =%d\n",nEntries);
 
-  St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
-  dbMk->SetDateTime(20031120,0);
-  // dbMk->SetFlavor("sim","eemcPMTcal");
-  //  dbMk->SetFlavor("sim","eemcPIXcal");
+  St_db_Maker *stDb = new St_db_Maker("StarDb", "MySQL:StarDb");
+  stDb->SetDateTime(20031120,0);
+  // stDb->SetFlavor("sim","eemcPMTcal");
+  //  stDb->SetFlavor("sim","eemcPIXcal");
 
   myDb=new StEEmcDbMaker("eemcDb");
+  // myDb->setSectors(5,8);
 
   myMk3=new StEEsoloPi0Maker("soloPi0","MuDst");
   TObjArray  HList;
   myMk3->SetHList(&HList);
   myMk3->SetMCflag();
-  // myMk1->setSectors(1,8);
-  // myDb->setTimeStampDay(20040320);  // format: yyyymmdd
-  //myMk1->setPreferedFlavor("set-b","eemcPMTcal");
-
+  
   gMessMgr->SwitchOff("D");
   gMessMgr->SwitchOn("I");
  
