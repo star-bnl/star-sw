@@ -1,19 +1,13 @@
-**:>--------------------------------------------------------------------
-**    module    G2T is the g2tmain invoker only
-**    author    Pavel Nevski
-**    created   22 april 98
-**:<--------------------------------------------------------------------
-      subroutine   g2t 
-      entry        g2t_start
-      print *,' *********** g2t main called *********** '
-      call  g2tmain
-      end
-
-**:>--------------------------------------------------------------------
+**:>-----------------------------------------------------------------------
 module    G2Tmain  is g2t converter
 author    Pavel Nevski
 created   22 april 98
-**:<--------------------------------------------------------------------
+*
+* description: create and fill two new directories in the CWD:
+*              Run   - with tables mapped to DETM family banks
+*              Event - with track/vertex and hit tables
+*              One level is assumed, names can be modified by DETP command
+**:<-----------------------------------------------------------------------
 #include "geant321/gcnum.inc"
 #include "geant321/gcflag.inc"
 #include "g2t_event.inc"
@@ -31,6 +25,8 @@ created   22 april 98
       Character      o*1,cdir*20,edir*20
       Record         /G2T_EVENT_ST/  g2t_event
 *
+ entry  g2t 
+ entry  g2t_start
 *
  If (First) Then
    first = .false.
@@ -125,19 +121,18 @@ created   22 april 98
  endif
 *
       G2T_MAIN = 0
+      Use GTTC
 *     map detm family banks:
-      Call AGSTRUT(' ',' ')
+      o    = CHAR(0)
+      Cdir = gttc_rdir(1)//gttc_rdir(2)//gttc_rdir(3)
+      Call AGSTRUT(' ',Cdir)
 
       check NVERTX>0
-*     map hepe_gent particle table:
-      call agstrut('/evnt/gene/gent@HEPE','Event')
 *
-      Use GTTC
-*
-      o    = CHAR(0)
       Cdir = gttc_edir(1)//gttc_edir(2)//gttc_edir(3)
-      ld   = Lenocc(cdir)
-      edir = '/dui/'//Cdir(1:ld)//o
+*     map hepe_gent particle table:
+      call agstrut('/evnt/gene/gent@HEPE',Cdir)
+      ld   = Lenocc(cdir);  edir = Cdir(1:ld)//o
  
       i = TDM_map_table(edir,'g2t_event'//o,g2t_event_spec//o,1,g2t_event)
       if (ld>0) i = DUI_CDIR (edir)
@@ -149,6 +144,7 @@ created   22 april 98
       i = AMI_MODULE_CALL ('g2t_get_kine'//o,2,names)
       prin5 i; (' g2tmain: get_kine done with i=',i6)
 
+      Use GTTC
       do j=1,GTTC_Nsys
 
         use dete(j) 
@@ -171,7 +167,8 @@ created   22 april 98
         prin5 i; (' g2tmain ===> ami_call g2t_get_hits  = ',i6)
 
       enddo
-      if (ld>0) i = DUI_CDIR ('/dui'//o)
+      if (ld>0) i = DUI_CDIR('..'//o)
+*
       G2T_MAIN = i
       END
 
