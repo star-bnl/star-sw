@@ -1,5 +1,8 @@
-// $Id: StHbtExample.C,v 1.3 1999/07/13 02:31:39 lisa Exp $
+// $Id: StHbtExample.C,v 1.4 1999/07/27 21:09:18 lisa Exp $
 // $Log: StHbtExample.C,v $
+// Revision 1.4  1999/07/27 21:09:18  lisa
+// do event loop with goto because Cint pukes on for loop
+//
 // Revision 1.3  1999/07/13 02:31:39  lisa
 // Update StHbtExample macro for new StHbtMaker
 //
@@ -17,7 +20,7 @@
 //=======================================================================
 
 class StChain;
-StChain *chain=0;
+StChain *chain=0;    // NOTE - chain needs to be declared global so for StHbtEventReader
 
 // keep pointers to Correlation Functions global, so you can have access to them...
 class QinvCorrFctn;
@@ -28,19 +31,19 @@ class MinvCorrFctn;
 MinvCorrFctn* MinvCF;
 
 void StHbtExample(Int_t nevents=1,
-		  const char *MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.dst.root")
+		  const char *MainFile="/disk00000/star/test/dev/tfs_Solaris/Tue/year_2a/psc0208_01_40evts.dst.root")
 {
 
     // Dynamically link needed shared libs
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
+    gSystem->Load("StUtilities");  // new addition 22jul99
     gSystem->Load("StMagF");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
-    gSystem->Load("StEventReaderMaker");
-    //gSystem->Load("StEventMaker");
+    gSystem->Load("StEventMaker");
     gSystem->Load("StHbtMaker");
 
     cout << "Dynamic loading done" << endl;
@@ -60,9 +63,10 @@ void StHbtExample(Int_t nevents=1,
     ioMaker->SetBranch("dstBranch",0,"r"); //activate EventBranch
 
 
-    StEventReaderMaker* eventMaker = new StEventReaderMaker("events","title");
+    StEventMaker* eventMaker = new StEventMaker("events","title");
 
     cout << "Just instantiated StEventMaker... lets go StHbtMaker!" << endl;
+
 
     StHbtMaker* hbtMaker = new StHbtMaker("HBT","title");
     cout << "StHbtMaker instantiated"<<endl;
@@ -172,6 +176,7 @@ void StHbtExample(Int_t nevents=1,
 
 
 
+
     /* ------------------ end of setting up hbt stuff ------------------ */
 
 
@@ -180,14 +185,31 @@ void StHbtExample(Int_t nevents=1,
   chain->Init(); // This should call the Init() method in ALL makers
   chain->PrintInfo();
 
-  for (Int_t iev=0;iev<nevents; iev++) {
-    cout << "StHbtExample -- Working on eventNumber " << iev << endl;
-    chain->Clear();
-    int iret = chain->Make(iev); // This should call the Make() method in ALL makers
-    if (iret) break;
-    
-    
-    
-  } // Event Loop
+
+  // Event loop
+  int istat=0,iev=1;
+ EventLoop: if (iev <= nevents && !istat) {
+   cout << "StHbtExample -- Working on eventNumber " << iev << " of " << nevents << endl;
+   chain->Clear();
+   istat = chain->Make(iev);
+   if (istat) {cout << "Last event processed. Status = " << istat << endl;}
+   iev++; goto EventLoop;
+ }
+
+//  good old Cint can't even handle a for-loop
+//   for (Int_t iev=1;iev<=nevents; iev++) {
+//     chain->Clear();
+//     int iret = chain->Make(iev); // This should call the Make() method in ALL makers
+//     if (iret) {
+//       cout << "StHbtExample.C -- chain returned nonzero value " << iret 
+// 	   << " on event " << iev << endl;
+//       break;
+//     } 
+//   } // Event Loop
+
+
+
+  cout << "StHbtExample -- Done with event loop" << endl;
+
   chain->Finish(); // This should call the Finish() method in ALL makers
 }
