@@ -1,5 +1,9 @@
-// $Id: StFtpcConfMapper.cc,v 1.17 2002/04/05 16:50:04 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.18 2002/04/08 15:37:43 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.18  2002/04/08 15:37:43  oldi
+// Switch for magnetic field factor installed.
+// Minor corrections/improvements.
+//
 // Revision 1.17  2002/04/05 16:50:04  oldi
 // Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
 // Each Track inherits from StHelix, now.
@@ -468,14 +472,34 @@ void StFtpcConfMapper::LaserTracking()
   SetTrackletCuts(0.05, false);
   
   ClusterLoop();
-  ExtendTracks();
-  
+
   if (mBench) {
     mBench->Stop("laser");
     gMessMgr->Message("", "I", "OST") << "Laser tracking finished       (" << mBench->GetCpuTime("laser") << " s)." << endm;
     mTime += mBench->GetCpuTime("laser");
+    mBench->GetCpuTime("nofield");
+
+    mBench->Start("extend");
   }
   
+  ExtendTracks();
+  
+  if (mBench) {
+    mBench->Stop("extend");
+    gMessMgr->Message("", "I", "OST") << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
+    mTime += mBench->GetCpuTime("extend");
+
+    mBench->Start("splits");
+  }
+
+  HandleSplitTracks(0.11, 0.5, 0.5);
+
+  if (mBench) {
+    mBench->Stop("splits");
+    gMessMgr->Message("", "I", "OST") << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
+    mTime += mBench->GetCpuTime("splits");
+  }
+
   return;
 }
 
@@ -498,14 +522,33 @@ void StFtpcConfMapper::NoFieldTracking()
   SetTrackletCuts(0.03, true);
   
   ClusterLoop();
+
+  if (mBench) {
+    mBench->Stop("nofield");
+    gMessMgr->Message("", "I", "OST") << "No field tracking finished    (" << mBench->GetCpuTime("nofield") << " s)." << endm;
+    mBench->GetCpuTime("nofield");
+
+    mBench->Start("extend");
+  }
+  
   ExtendTracks();
   
   if (mBench) {
-    mBench->Stop("laser");
-    gMessMgr->Message("", "I", "OST") << "No field tracking finished    (" << mBench->GetCpuTime("laser") << " s)." << endm;
-    mBench->GetCpuTime("nofield");
+    mBench->Stop("extend");
+    gMessMgr->Message("", "I", "OST") << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
+    mTime += mBench->GetCpuTime("extend");
+
+    mBench->Start("splits");
   }
-  
+
+  HandleSplitTracks(0.11, 0.5, 0.5);
+
+  if (mBench) {
+    mBench->Stop("splits");
+    gMessMgr->Message("", "I", "OST") << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
+    mTime += mBench->GetCpuTime("splits");
+  }
+
   return;
 }
  
