@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.3 1999/11/05 00:02:04 posk Exp $
+// $Id: plot.C,v 1.4 1999/11/24 18:14:07 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker
@@ -8,6 +8,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.4  1999/11/24 18:14:07  posk
+// Now reads event quantities with StFlowEvent methods
+//
 // Revision 1.3  1999/11/05 00:02:04  posk
 // Changed the flow vector, Q, to a TVector2.
 //
@@ -31,28 +34,28 @@ TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
 
   // names of histograms made by StFlowAnalysisMaker
   // also projections of some of these histograms
-  const char *baseName[] = { "Flow_Res_Event",
-			     "Flow_Phi_Event",
-			     "Flow_Phi_Weight_Event",
-			     "Flow_Phi_Flat_Event",
+  const char *baseName[] = { "Flow_Res_Sel",
+			     "Flow_Phi_Sel",
+			     "Flow_Phi_Weight_Sel",
+			     "Flow_Phi_Flat_Sel",
 			     "Flow_Psi_Subs",
-			     "Flow_Psi_Event",
-			     "Flow_Mult_Event",
-			     "Flow_MeanPt_Event",
-			     "Flow_q_Event",
-			     "Flow_Psi_Sub_Corr_Event",
-			     "Flow_Psi_Sub_Corr_Diff_Event",
-			     "Flow_Phi_Corr_Event",
-			     "Flow_Sum_v2D_Event",
-			     "Flow_Yield2D_Event",
-			     "Flow_Yield.Eta_Event",
-			     "Flow_Yield.Pt_Event",
-			     "Flow_vObs2D_Event",
-			     "Flow_v2D_Event",
-			     "Flow_v.Eta_Event",
-			     "Flow_v.Pt_Event"};
-  // 			     "Flow_Bin_Eta_Event",
-  // 			     "Flow_Bin_Pt_Event"};
+			     "Flow_Psi_Sel",
+			     "Flow_Mult_Sel",
+			     "Flow_MeanPt_Sel",
+			     "Flow_q_Sel",
+			     "Flow_Psi_Sub_Corr_Sel",
+			     "Flow_Psi_Sub_Corr_Diff_Sel",
+			     "Flow_Phi_Corr_Sel",
+			     "Flow_Sum_v2D_Sel",
+			     "Flow_Yield2D_Sel",
+			     "Flow_Yield.Eta_Sel",
+			     "Flow_Yield.Pt_Sel",
+			     "Flow_vObs2D_Sel",
+			     "Flow_v2D_Sel",
+			     "Flow_v.Eta_Sel",
+			     "Flow_v.Pt_Sel"};
+  // 			     "Flow_Bin_Eta_Sel",
+  // 			     "Flow_Bin_Pt_Sel"};
   const Int_t nNames = sizeof(baseName) / sizeof(*baseName);
 
   // construct array of short names
@@ -60,7 +63,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
   for (int n = 0; n < nNames; n++) {
     shortName[n] = new char[30];
     strcpy(shortName[n], baseName[n]);
-    char* cp = strstr(shortName[n],"_Event");
+    char* cp = strstr(shortName[n],"_Sel");
     if (cp) *cp = '\0';
   }
 
@@ -137,7 +140,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
       char* cproj = strstr(temp,".");
       if (cproj) {     // a projection
 	*cproj = '\0'; // remove from "." on
-	strcat(temp,"2D_Event");
+	strcat(temp,"2D_Sel");
 	TString* histName = new TString(temp);
 	TString* histProjName = new TString(baseName[pageNumber]);
 	histProjName->Append(*countColumns);
@@ -235,7 +238,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
 	func_q->SetLineStyle(kDotted);
 	func_q->Draw("same");
       } else if (strstr(shortName[pageNumber],"Phi")!=0) { // Phi distibutions
-	hist->SetMinimum(0.8*(hist->GetMaximum()));
+       	hist->SetMinimum(0.8*(hist->GetMaximum()));
 	if (strstr(shortName[pageNumber],"Weight")!=0) {
 	  gStyle->SetOptStat(0);
 	  hist->Draw(); 
@@ -267,7 +270,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t eventN=0, Int_t harN=0){
 // macro for the profile plots
 TCanvas* plotProfile(Int_t pageN=1){
   pageN--;
-  char* profName[] = {"Flow_prof_Cos_Event","Flow_Res_Event"};
+  char* profName[] = {"Flow_prof_Cos_Sel","Flow_Res_Sel"};
   Int_t columns = nSubEvents/2;
   Int_t rows = 2;
   Int_t pads = rows*columns;
