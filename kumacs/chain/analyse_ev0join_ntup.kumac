@@ -25,14 +25,16 @@ ntuple/cut $32 dcan>1.0
 
 hi/file 1 [ntuple_file]
  
-for/file 40 ev0join_Mlambda.ps
-meta 40 -111
- 
 nt/proj 101 111.inv_mass_la 
 nt/proj 102 111.inv_mass_la $11.and.$12.and.$13
 nt/proj 103 111.inv_mass_la $11.and.$12.and.$13.and.$21.and.$22.and.$31.and.$32
  
-close 40
+ for/file 40 ev0join_Mlambda.ps
+ meta 40 -111
+ hi/pl 101
+ hi/pl 102
+ hi/pl 103
+ close 40
  
 trace off
 
