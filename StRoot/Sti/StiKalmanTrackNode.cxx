@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.24 2003/05/22 18:42:33 andrewar Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.25 2003/07/07 17:27:50 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.25  2003/07/07 17:27:50  pruneau
+ * Changed the source of detector dependent tracking parameters to be that
+ * of detector builders rather than the centralized _pars.
+ *
  * Revision 2.24  2003/05/22 18:42:33  andrewar
  * Changed max eloss correction from 1% to 10%.
  *
@@ -1074,14 +1078,15 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 
 double StiKalmanTrackNode::getWindowY()
 {	  
-  const StiHitErrorCalculator * calc = getDetector()->getHitErrorCalculator();
+  const StiHitErrorCalculator * calc  = getDetector()->getHitErrorCalculator();
+  const StiTrackingParameters * tPars = getDetector()->getTrackingParameters();
   if (!calc)
     {
       cout << "SKTN::getWindowY() -E- Detector:"<<getDetector()->getName()<<" has no calculator"<<endl;
       throw runtime_error("SKTN::getWindowY() -E- calc==0");
     }
   calc->calculateError(this);
-  double window = pars->searchWindowScale*sqrt(_c00+eyy);
+  double window = tPars->getSearchWindowScale()*sqrt(_c00+eyy);
   /*  double sqrtC00 = sqrt(_c00);
   double sqrtEyy = sqrt(eyy);
   double eta = 180*getDipAngle()/3.1415;
@@ -1090,10 +1095,10 @@ double StiKalmanTrackNode::getWindowY()
 			  << " sqrt(_c00):"<<sqrtC00
 			  <<" ey:"<<sqrtEyy
 			  << " window:"<<window;*/
-  if (window<pars->minSearchWindow)
-    window = pars->minSearchWindow;
-  else if (window>pars->maxSearchWindow)
-    window = pars->maxSearchWindow;
+  if (window<tPars->getMinSearchWindow())
+    window = tPars->getMinSearchWindow();
+  else if (window>tPars->getMaxSearchWindow())
+    window = tPars->getMaxSearchWindow();
   //if (fabs(eta)<10.)cout <<" win corr:"<<window<<endl;
   return window;
 }
@@ -1101,7 +1106,8 @@ double StiKalmanTrackNode::getWindowY()
 //_____________________________________________________________________________
 double StiKalmanTrackNode::getWindowZ() const
 {	 
-  double window = pars->searchWindowScale*sqrt(_c11+ezz);  
+  const StiTrackingParameters * tPars = getDetector()->getTrackingParameters();
+  double window = tPars->getSearchWindowScale()*sqrt(_c11+ezz);  
   /*
   double sqrtC11 = sqrt(_c11);
   double sqrtEzz = sqrt(ezz);
@@ -1111,11 +1117,10 @@ double StiKalmanTrackNode::getWindowZ() const
 			  << " sqrt(_c11):"<<sqrtC11
 			  <<" ez:"<<sqrtEzz
 			  <<" window:"<<window;*/
-  if (window<pars->minSearchWindow)
-    window = pars->minSearchWindow;
-  else if (window>pars->maxSearchWindow)
-    window = pars->maxSearchWindow;
-  //if (fabs(eta)<10.)cout <<" win corr:"<<window<<endl;
+  if (window<tPars->getMinSearchWindow())
+    window = tPars->getMinSearchWindow();
+  else if (window>tPars->getMaxSearchWindow())
+    window = tPars->getMaxSearchWindow();
   return window;
 }
 
