@@ -1,5 +1,12 @@
       SUBROUTINE ev0_circle_param(trk,xc,r)
 c:>------------------------------------------------------------------
+C:FILE:         ems_ev0_routines.F
+C:DESCRIPTION:  Service routines for EMC Analysis Module, package ems, STAF compliant.
+c:AUTHOR:       Spiros Margetis?
+C:BUGS:         None known.
+C:HISTORY:      05dec95-v1.0-wjl- Creation.
+c:>------------------------------------------------------------------
+c:>------------------------------------------------------------------
 C:ROUTINE:      ev0_circle_param
 C:DESCRIPTION:  returns x,y coordinates and radius of circle in bending plane
 C:ARGUMENTS:    see code

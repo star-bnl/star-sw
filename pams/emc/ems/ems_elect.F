@@ -1,3 +1,8 @@
+      INTEGER*4 FUNCTION EMS_ELECT(
+     1     ems_hits_bemc_h,     ems_hits_bemc ,
+     2       egr_globtrk_h,       egr_globtrk ,
+     3       ems_control_h,       ems_control ,
+     4      ems_electron_h,      ems_electron ) 
 c:>------------------------------------------------------------------
 C:FILE:         ems_elect.F
 C:DESCRIPTION:  EMC Analysis Module, package ems, STAF compliant.
@@ -7,11 +12,6 @@ C:HISTORY:      31jul96-v1.0-wjl- Creation.
 C:              30oct96 T. LeCompte added some bounds checking
 C:              15feb97 WJL, fixed 72 column overflows in lecompte's bounds checks
 c:>------------------------------------------------------------------
-      INTEGER*4 FUNCTION EMS_ELECT(
-     1     ems_hits_bemc_h,     ems_hits_bemc ,
-     2       egr_globtrk_h,       egr_globtrk ,
-     3       ems_control_h,       ems_control ,
-     4      ems_electron_h,      ems_electron ) 
 c:>------------------------------------------------------------------
 C:ROUTINE:      INTEGER*4 EMS_ELECT
 C:DESCRIPTION:  looks for electrons from W's and Z's
@@ -252,4 +252,3 @@ cWJL
       EMS_ELECT=STAFCV_OK
 999   RETURN
       END
-

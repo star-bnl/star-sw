@@ -1,6 +1,13 @@
       SUBROUTINE eut_extra_rad ( p,  rd,     zp,   ang
      +,                          td, cosphi, zint, iercod, dirvec )
 c:>------------------------------------------------------------------
+C:FILE:         ems_ev0_routines.F
+C:DESCRIPTION:  Service routines for EMC Analysis Module, package ems, STAF compliant.
+c:AUTHOR:       Spiros Margetis?
+C:BUGS:         None known.
+C:HISTORY:      05dec95-v1.0-wjl- Creation.
+c:>------------------------------------------------------------------
+c:>------------------------------------------------------------------
 C:ROUTINE:      eut_extra_rad
 C:DESCRIPTION:  use helix parameters to compute incercept w/ given cylinder...
 C:ARGUMENTS:    see code

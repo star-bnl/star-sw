@@ -1,3 +1,6 @@
+      INTEGER*4 FUNCTION EMS_FAKE_EGR(
+     1       tpt_track_h,         tpt_track ,
+     2       egr_globtrk_h,       egr_globtrk )
 c:>------------------------------------------------------------------
 C:FILE:         ems_fake_egr.F
 C:DESCRIPTION:  EMC Analysis Module, package ems, STAF compliant.
@@ -5,9 +8,6 @@ c:AUTHOR:       W.J. Llope, Rice University
 C:BUGS:         None known.
 C:HISTORY:      02aug96-v1.0-wjl- Creation.
 c:>------------------------------------------------------------------
-      INTEGER*4 FUNCTION EMS_FAKE_EGR(
-     1       tpt_track_h,         tpt_track ,
-     2       egr_globtrk_h,       egr_globtrk )
 c:>------------------------------------------------------------------
 C:ROUTINE:      INTEGER*4 EMS_FAKE_EGR
 C:DESCRIPTION:  Just copies TPC track info into egr_globtrk

@@ -1,5 +1,12 @@
       SUBROUTINE ev0_track_mom(trk,iflag,p)
 c:>------------------------------------------------------------------
+C:FILE:         ems_ev0_routines.F
+C:DESCRIPTION:  Service routines for EMC Analysis Module, package ems, STAF compliant.
+c:AUTHOR:       Spiros Margetis?
+C:BUGS:         None known.
+C:HISTORY:      05dec95-v1.0-wjl- Creation.
+c:>------------------------------------------------------------------
+c:>------------------------------------------------------------------
 C:ROUTINE:      ev0_track_mom
 C:DESCRIPTION:  returns track momentum components from track parameters
 C:ARGUMENTS:    see code

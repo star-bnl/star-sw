@@ -1,10 +1,3 @@
-c:>------------------------------------------------------------------
-C:FILE:         ems_interface.F
-C:DESCRIPTION:  EMC Analysis Module, package ems, STAF compliant.
-c:AUTHOR:       W.J. Llope, Rice University 
-C:BUGS:         None known.
-C:HISTORY:      31jul96-v1.0-wjl- Creation.
-c:>------------------------------------------------------------------
       INTEGER*4 FUNCTION EMS_INTERFACE(
      1         g2t_event_h,       g2t_event ,
      2         g2t_vertex_h,      g2t_vertex ,
@@ -14,6 +7,13 @@ c:>------------------------------------------------------------------
      6         ems_control_h,     ems_control ,
      6         ems_hits_bemc_h,   ems_hits_bemc ,
      7         ems_hits_bsmd_h,   ems_hits_bsmd )
+c:>------------------------------------------------------------------
+C:FILE:         ems_interface.F
+C:DESCRIPTION:  EMC Analysis Module, package ems, STAF compliant.
+c:AUTHOR:       W.J. Llope, Rice University 
+C:BUGS:         None known.
+C:HISTORY:      31jul96-v1.0-wjl- Creation.
+c:>------------------------------------------------------------------
 c:>------------------------------------------------------------------
 C:ROUTINE:      INTEGER*4 EMS_INTERFACE
 C:DESCRIPTION:  produces input tables for ems from g2t tables
@@ -310,5 +310,3 @@ c---- end of routine...
       ems_interface = STAFCV_OK
 999   RETURN
       END
-
-C=======================================================================
