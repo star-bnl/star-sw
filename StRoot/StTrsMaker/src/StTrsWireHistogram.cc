@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.29 2003/12/24 13:44:54 fisyak Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.30 2004/04/07 18:57:25 perev Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.30  2004/04/07 18:57:25  perev
+ * Improve memory usage
+ *
  * Revision 1.29  2003/12/24 13:44:54  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -171,10 +174,11 @@ StTrsWireHistogram::StTrsWireHistogram(StTpcGeometry* geoDb, StTpcSlowControl* s
       mDoGasGainFluctuations(true),
       mGasGainCalculationDone(false),
       mDoSingleElectronMultiplication(false),
-      mDoTimeDelay(false)
-    
+      mDoTimeDelay(false),
+      mSectorWires(0)    
       
 {
+    mSectorWires.reserve(10000);    
     srand48(19460510);
     random=new TRandom(); 
     mNumberOfEntriesInTable=4000;
@@ -453,7 +457,7 @@ void StTrsWireHistogram::clear()
 //VP    }
     
     int sz = mSectorWires.size();
-    mSectorWires.resize(0);
+    mSectorWires.clear();
     mSectorWires.resize(sz);
     mMin = -1;
     mMax = -1;
