@@ -184,9 +184,10 @@ Int_t StVertexSeedMaker::Make(){
        (notTrig) && (iTrg < dbTriggerId->getIDNumRows()) ; iTrg++) {
     if (summary & (1 << (dbTriggerId->getDaqTrgId(iTrg)))) {
       switch (dbTriggerId->getOfflineTrgId(iTrg)) {
-        case (2001) :
-        case (2003) :
-        case (2300) :
+        case (1000) :     // ppMinBias
+        case (2001) :     // dAuMinBias
+        case (2003) :     // dAuMinBias
+        case (2300) :     // dAuTOF
                       { notTrig = kFALSE; }
         default     : {}
       }
@@ -296,7 +297,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.15 2003/03/21 15:12:24 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.16 2003/04/22 19:20:52 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -581,8 +582,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.15 2003/03/21 15:12:24 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.16 2003/04/22 19:20:52 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.16  2003/04/22 19:20:52  genevb
+// Add ppMinBias triggers
+//
 // Revision 1.15  2003/03/21 15:12:24  genevb
 // Allow use of TOF triggers
 //
