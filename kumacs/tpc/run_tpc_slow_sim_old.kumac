@@ -5,8 +5,9 @@
 * 6/10/98 Kathy Turner
 *         - works for old version of tpc tables
 *  6/25/98 Lidia Didenko
-*  6/25/98 Kathy Turner
-***********************************************************************
+* 6/25/98 Kathy Turner
+*  7/2/98 - K. Turner - code now requires that you load geometry libraries
+**************************************************************************
 ************************************************************************
 macro run__
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
@@ -27,7 +28,6 @@ macro run__
 * --> to run
 *    - change the inputs above as desired
 *    - run staf
-*    -   make tpc   (you'll get pams needed: tpg,tfc,tss,tcl)
 *    -   exec run_tpc_slow_sim_old
 *
 *
@@ -77,6 +77,7 @@ $STAR/pams/trg/kumac
 *  LOAD LIBRARIES
  
  if $vexist(make_done)=0 then
+   make geometry
    make tpc 
    vec/cre make_done
  endif
