@@ -23,6 +23,7 @@
 
 #include "StGenericVertexFinder.h"  
 #include "StMinuitVertexFinder.h"  
+#include "StppLMVVertexFinder.h"  
 
 #include "StTreeMaker/StTreeMaker.h"
 
@@ -80,10 +81,11 @@ Int_t StGenericVertexMaker::Init()
   // setup params
   EtaCut=1.4; // Sensible default cut
 
+  gMessMgr->Info() << "StGenericVertexMaker::Init: m_Mode=" <<  m_Mode << endm;
   if ( m_Mode & 0x1){
     theFinder= new StMinuitVertexFinder();
   } else if ( m_Mode & 0x2){
-    theFinder= new StMinuitVertexFinder();
+    theFinder= new StppLMVVertexFinder();
   } else {
     // Later, this would NEVER make multiple possible vertex
     // finder unlike for option 0x1 .

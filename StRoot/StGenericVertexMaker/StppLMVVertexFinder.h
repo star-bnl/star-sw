@@ -11,7 +11,7 @@
  *          MaxTrkDcaZ=180.000000  
  *          f6=0.000000  f7=0.000000  f8=0.000000  f9=8888.000000
  *
- * $Id: StppLMVVertexFinder.h,v 1.2 2004/07/23 01:00:52 jeromel Exp $
+ * $Id: StppLMVVertexFinder.h,v 1.3 2004/07/23 02:24:39 jeromel Exp $
  *
  */
 
@@ -32,8 +32,6 @@ class StppLMVVertexFinder: public StGenericVertexFinder {
     virtual         ~StppLMVVertexFinder();
     bool            fit(StEvent*);         
     int             NCtbMatches();
-
-    // Added, not part of the base-class
     void            printInfo(ostream& = cout) const;
     void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
 
@@ -100,6 +98,9 @@ private:
 /***************************************************************************
  *
  * $Log: StppLMVVertexFinder.h,v $
+ * Revision 1.3  2004/07/23 02:24:39  jeromel
+ * Oops ... Worng swithc (had twice Minuit). Now corrected.
+ *
  * Revision 1.2  2004/07/23 01:00:52  jeromel
  * Removed methods/data members (moved in base class) + doxygenized
  *

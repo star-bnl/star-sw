@@ -22,7 +22,7 @@
  * is enforced.
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.3 2004/07/23 00:58:19 jeromel Exp $
+ * $Id: StGenericVertexFinder.h,v 1.4 2004/07/23 02:24:38 jeromel Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -39,6 +39,8 @@ class StGenericVertexFinder {
   virtual ~StGenericVertexFinder(){};                         // virtual destructor
   virtual bool           fit(StEvent*)=0;                     // fit the vertex
   virtual int            NCtbMatches()=0;                     // returns the number of CTB match
+  virtual void           UseVertexConstraint(double, double, double, double, double)=0;
+  virtual void           printInfo(ostream& = cout) const=0;
 
   // General (default)
   virtual StThreeVectorD result() const {return mFitError;};  // result of fit
@@ -85,6 +87,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.4  2004/07/23 02:24:38  jeromel
+// Oops ... Worng swithc (had twice Minuit). Now corrected.
+//
 // Revision 1.3  2004/07/23 00:58:19  jeromel
 // Base class method+data member (was duplicated in implementation)
 //
