@@ -36,7 +36,7 @@ St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
   {
      SetTitle(viewNode->GetTitle());
      EDataSetPass mode = kContinue;
-     St_NodeViewIter next(viewNode);
+     St_NodeViewIter next(viewNode,0);
      St_NodeView *nextView = 0;
      while (nextView = (St_NodeView *)next(mode)){     
        mode = kContinue;
@@ -87,8 +87,8 @@ St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,ED
 //_____________________________________________________________________________
 void St_NodeView::Browse(TBrowser *b){
   St_ObjectSet::Browse(b);
-  St_NodePosition *pos = GetPosition();
-  if (pos) pos->Browse(b);
+//  St_NodePosition *pos = GetPosition();
+//  if (pos) pos->Browse(b);
 //    b->Add(pos); 
 }
 
@@ -224,24 +224,24 @@ void St_NodeView::Paint(Option_t *option)
 //*-*  vis = -2 shape is drawn. Its sons are not drawn
 //*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-  static St_NodePosition nullPosition;
 
 // restrict the levels for "range" option
   Int_t level = gGeometry->GeomLevel();
 //  if (option && option[0]=='r' && level > 3 && strcmp(option,"range") == 0) return;
-  if (option && option[0]=='r' && level > 3 ) return;
+//  if (option && option[0]=='r' && level > 3 ) return;
 
   TPadView3D *view3D=gPad->GetView3D();
 
-  St_Node *thisNode  = GetNode();
-  St_NodePosition *position = &nullPosition;
-  if (thisNode)    position = GetPosition();
-
+  St_Node *thisNode  = 0;
+  St_NodePosition *position = GetPosition();
+  
   // UpdatePosition does change the current matrix and it MUST be called FIRST !!!
+  if (position) {
+     thisNode  = position->GetNode();
+     position->UpdatePosition(option);      
+  }
 
-  position->UpdatePosition(option);      
-
-  if (thisNode) thisNode->PaintShape(option);  
+  if (thisNode)  thisNode->PaintShape(option);  
 ////---   if ( thisNode->TestBit(kSonsInvisible) ) return;
  
 //*-*- Paint all sons
@@ -251,17 +251,14 @@ void St_NodeView::Paint(Option_t *option)
   if(!nsons) return;
  
   gGeometry->PushLevel();
-  St_Node *node;
-  TObject *obj;
+  St_NodeView *node;
   TIter  next(fNodes);
-  while ((obj = next())) {
-     if (view3D)
-         view3D->PushMatrix();
- 
-     node = (St_Node*)obj;
+  while ((node = (St_NodeView *)next())) {
+     if (view3D && position)  view3D->PushMatrix();
+
      node->Paint(option);
-     if (view3D)
-         view3D->PopMatrix();
+
+     if (view3D && position)  view3D->PopMatrix();
   }
   gGeometry->PopLevel();
 }

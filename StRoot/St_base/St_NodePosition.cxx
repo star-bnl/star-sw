@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.11 1999/03/30 22:30:14 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.12 1999/04/02 23:36:04 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.12  1999/04/02 23:36:04  fine
+// Collapsed geometry structures has been implemeted
+//
 // Revision 1.11  1999/03/30 22:30:14  fine
-// Visibility test has been added for Paint method
+//  Visibility test has been added for Paint method
 //
 // Revision 1.10  1999/03/27 22:44:59  fine
 // Working 3D St_node with X3d and OpenGL
@@ -40,6 +43,7 @@
 //*KEND.
  
 #include <iostream.h>
+#include <iomanip.h>
 
 #include "St_NodePosition.h" 
 #include "St_Node.h" 
@@ -352,13 +356,52 @@ void St_NodePosition::Paint(Option_t *option)
    gGeomLevel--;
 #endif 
 }
+//_______________________________________________________________________
+void St_NodePosition::Print(Option_t *option)
+{
+  St_Node *myNode = GetNode();
+  cout << " Node: " <<   GetNode()->GetName() << endl;
+  cout << " Position: x=" <<
+          GetX() << " : y=" << 
+          GetY() << " : z=" <<
+          GetZ() << endl;
+ 
+  if (fMatrix){
+      fMatrix->Print();
+      Double_t *matrix = fMatrix->GetMatrix();
+      Int_t i = 0;
+      cout << setw(4) <<" " ; 
+      for (i=0;i<3;i++) cout << setw(3) << i+1 << setw(3) << ":" ;
+      cout << endl;
+      for (i=0;i<3;i++) {      
+        cout << i+1 << ". ";
+        for (Int_t j=0;j<3;j++)
+           cout << setw(6) << *matrix++ << " : " ;
+        cout << endl;
+      }
+  }
+}
  
 //_______________________________________________________________________
 void St_NodePosition::SavePrimitive(ofstream &out, Option_t *option)
 {
+#if 0
+  out << "St_NodePosition *CreatePosition() { " << endl;
+  out << "  St_NodePosition *myPosition = 0;    " << endl;
+  Double_t x = GetX();
+  Double_t y = GetY();
+  Double_t z = GetZ();
+  TRotMatrix *matrix = 
+   myPosition =  new St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t z, const Text_t *matrixname)
+: fNode(node),fX(x),fY(y),fZ(z),fMatrix(0)
+{
+/
+  out << "  return myPosition; "                << endl;
+  out << "} "                                   << endl;
+#endif
 
 }
-  
+   
 //_______________________________________________________________________
 void St_NodePosition::UpdatePosition(Option_t *)
 {
