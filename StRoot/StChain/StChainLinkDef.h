@@ -4,5 +4,4 @@
 #pragma link off all functions;
 #pragma link C++ class StMaker-;
 #pragma link C++ class StChain-;
-#pragma link C++ class StBFChain-;
 #endif
