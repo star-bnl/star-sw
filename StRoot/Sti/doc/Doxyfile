@@ -305,7 +305,7 @@ WARN_LOGFILE           =
 # with spaces.
 
 #INPUT                  = "U:\code\ITF\StRoot"
-INPUT                 = "~andrewar/tempcvs/StRoot/"
+INPUT                 = "/star/u/andrewar/tempcvs/StRoot/"
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
