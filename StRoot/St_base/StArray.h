@@ -233,10 +233,10 @@ typedef const_St ## QWERTY ## Iterator  StSPtrVec ## QWERTY ## ConstIterator;\
 //______________________________________________________________
 #define StCollectionImp(QWERTY) \
 \
-ClassImp(StPtrVec ## QWERTY ##) \
+ClassImp(StPtrVec ## QWERTY ) \
 void 		StPtrVec  ## QWERTY::Streamer(TBuffer& b){StRefArray::Streamer(b);} \
 \
-ClassImp(StSPtrVec ## QWERTY) \
+ClassImp(StSPtrVec ## QWERTY ) \
 \
 void 		StSPtrVec ## QWERTY::Streamer(TBuffer& b){StStrArray::Streamer(b);} \
 
