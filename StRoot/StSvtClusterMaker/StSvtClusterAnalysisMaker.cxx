@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.22 2002/05/09 16:55:40 munhoz Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.23 2003/01/28 20:28:00 munhoz Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.23  2003/01/28 20:28:00  munhoz
+ * new filters for clusters
+ *
  * Revision 1.22  2002/05/09 16:55:40  munhoz
  * add reading bad anodes from DB
  *
@@ -80,6 +83,8 @@
 #include "TObjectSet.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TNtuple.h"
+#include "TFile.h"
 
 #include "StMessMgr.h"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
@@ -93,7 +98,8 @@
 #include "StSvtClusterAnalysisMaker.h"
 #include "StSvtSeqAdjMaker/StSvtSeqAdjMaker.h"
 
-
+TFile *hfile;
+//TNtuple* ntpl;
 //___________________________________________________________________________________________
 StSvtClusterAnalysisMaker::StSvtClusterAnalysisMaker(const char *name) : StMaker(name)
 {
@@ -148,6 +154,9 @@ Int_t StSvtClusterAnalysisMaker::Init()
 
    
   mTotalNumberOfHybrids = mSvtRawEventColl->getTotalNumberOfHybrids();
+
+  if (Debug()) hfile  = new TFile("myrootfile_clus.root","RECREATE","Demo ROOT file");
+
   CreateClusterHist(mTotalNumberOfHybrids);
 
   St_DataSet* dataSet;
@@ -156,6 +165,8 @@ Int_t StSvtClusterAnalysisMaker::Init()
     mSvtBadAnodeSet = (StSvtHybridCollection*)(dataSet->GetObject());
 
   mSvtAnalysis = new StSvtAnalysis(mTotalNumberOfHybrids);
+
+  mSvtAnalysis->LoadAnodeGains();
 
   return  StMaker::Init();
 
@@ -242,43 +253,43 @@ Int_t StSvtClusterAnalysisMaker::CreateClusterHist(Int_t tNuOfHyb)
   m_nClust = new TH2F("NClust","No. clusters per event",1000,0.,1000.,100,0.,3000.);
   m_SumADCvsTime = new TH2F("SumAdcVsTime" ,"Time bucket vs Sum ADC",128,0.,128.,1000,0,100);
   m_PeakADCvsTime = new TH2F("PeakAdcVsTime" ,"Time bucket vs PeakADC",128,0.,128.,50,0,50);
+  m_sumADC_all = new TH1F("SumADCall","Sum of ADC counts in cluster",500,0,500);
   m_time_anode_clu = new TH2F*[tNuOfHyb];
   m_time_anode_raw = new TH2F*[tNuOfHyb];
   m_sumADC = new TH1F*[tNuOfHyb];
-   
 
-  char title1[20];
-  char titleraw[20];
-  char titleadc[20];
-  char  title2[4];
-  char* title3;
-  char* titlerawc;
-  char* titleadcc;
+  //  if(Debug()) ntpl = new TNtuple("ntpl","All hits","hy:charge:time:anode:flag:peakadc:num_pix:num_ano:wid_time:wid_ano:myflag:event:barrel:ladder:wafer");   
   
-   for (int barrel = 1;barrel <= mSvtRawEventColl->getNumberOfBarrels();barrel++) {
-     for (int ladder = 1;ladder <= mSvtRawEventColl->getNumberOfLadders(barrel);ladder++) {
-       for (int wafer = 1;wafer <= mSvtRawEventColl->getNumberOfWafers(barrel);wafer++) {
-	 for (int hybrid = 1;hybrid <= mSvtRawEventColl->getNumberOfHybrids();hybrid++) {
-           
-	   int index = mSvtRawEventColl->getHybridIndex(barrel,ladder,wafer,hybrid);
-	   if(index < 0) continue;
-	   sprintf(title1,"TimAnodecluster");
-	   sprintf(titleraw,"TimAnodeRaw");
-	   sprintf(titleadc,"ADC");
-	   sprintf(title2,"%d", index);
-	   title3 = strcat(title1,title2);
-	   titlerawc = strcat(titleraw,title2);
-	   titleadcc = strcat(titleadc,title2);
-	   //	   cout << title3 <<" " << titlerawc << " " << titleadcc << " " << index << " " <<  tNuOfHyb << endl;
-	   if( Debug()){
-	     m_time_anode_clu[index] = new TH2F(title3 ,"Time bucket vs anode",240,0.5,240.5,129,-0.5,128.5);	   
-	     m_time_anode_raw[index] = new TH2F(titlerawc ,"Time bucket vs anode",240,0.5,240.5,129,-0.5,128.5);
-	     m_sumADC[index] = new TH1F(titleadcc,"Sum of ADC counts in cluster",100,0,1000);
-	   }
+  if(Debug()){
+    char title1[20];
+    char titleraw[20];
+    char titleadc[20];
+    char  title2[4];
+    char* title3;
+    char* titlerawc;
+    char* titleadcc;
+    for (int barrel = 1;barrel <= mSvtRawEventColl->getNumberOfBarrels();barrel++) {
+      for (int ladder = 1;ladder <= mSvtRawEventColl->getNumberOfLadders(barrel);ladder++) {
+	for (int wafer = 1;wafer <= mSvtRawEventColl->getNumberOfWafers(barrel);wafer++) {
+	  for (int hybrid = 1;hybrid <= mSvtRawEventColl->getNumberOfHybrids();hybrid++) {
+	    
+	    int index = mSvtRawEventColl->getHybridIndex(barrel,ladder,wafer,hybrid);
+	    if(index < 0) continue;
+	    sprintf(title1,"TimAnodecluster");
+	    sprintf(titleraw,"TimAnodeRaw");
+	    sprintf(titleadc,"ADC");
+	    sprintf(title2,"%d", index);
+	    title3 = strcat(title1,title2);
+	    titlerawc = strcat(titleraw,title2);
+	    titleadcc = strcat(titleadc,title2);
+	    m_time_anode_clu[index] = new TH2F(title3 ,"Time bucket vs anode",240,0.5,240.5,129,-0.5,128.5);	   
+	    m_time_anode_raw[index] = new TH2F(titlerawc ,"Time bucket vs anode",240,0.5,240.5,129,-0.5,128.5);
+	    m_sumADC[index] = new TH1F(titleadcc,"Sum of ADC counts in cluster",200,0,200);
+	  }
 	}
       }
-     }
-   }
+    }
+  }
 
 
   return kStOK;
@@ -307,8 +318,9 @@ Int_t StSvtClusterAnalysisMaker::Make()
   }
 
   //SetSvtAnalysis();
-  SetClusterAnalysis();
+  mNoEvents++;
 
+  SetClusterAnalysis();
   if( Debug()) MakeHistograms();
 
   return kStOK;
@@ -368,12 +380,10 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
           mSvtAnalysis->CluFirstTimeBin();
           mSvtAnalysis->CluLastTimeBin();
           mSvtAnalysis->MomentAnalysis();
-          mSvtAnalysis->SetBadAnTb(mNumOfClusters);   //note I dont look at decon here
-          if( Debug()) mSvtAnalysis->Report(index);
+	  //          mSvtAnalysis->SetBadAnTb(mNumOfClusters);   //note I dont look at decon here
 
 
-	  mSvtAnalClusters = (StSvtAnalysedHybridClusters*)
-	     mSvtAnalColl->at(index);
+	  mSvtAnalClusters = (StSvtAnalysedHybridClusters*) mSvtAnalColl->at(index);
 
 	  if( mSvtAnalClusters){
 	    delete mSvtAnalClusters;
@@ -385,17 +395,21 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 					 barrel,ladder,wafer,hybrid));
 	    mSvtAnalClusters->setSvtHit(mSvtAnalysis,T0Jitter);
 	    mSvtAnalColl->at(index) = mSvtAnalClusters;
-	   
+	    
+	    // Fill hitograms and ntuples.
 	    for( int clu=0; clu<mSvtAnalysis->GetnSvtClu(); clu++){
-	      if(Debug()) m_sumADC[index]->Fill(mSvtAnalysis->GetCluCharge(clu));
-	      if( mSvtAnalysis->GetCluFlag(clu) < 4){
+	      //if( mSvtAnalysis->GetCluFlag(clu) < 4){
+		if(Debug()) m_sumADC[index]->Fill(mSvtAnalysis->GetCluCharge(clu));
 		m_SumADCvsTime->Fill((float)mSvtAnalysis->GetMeanClusterTimeBin(clu),(float)mSvtAnalysis->GetCluCharge(clu));
 	       
 		m_PeakADCvsTime->Fill((float)mSvtAnalysis->GetMeanClusterTimeBin(clu),(float)mSvtAnalysis->GetCluPeakAdc(clu));
+
 		m_n_seq->Fill(mSvtAnalysis->GetCluNumPixels(clu));
-	      }
-	    
+		m_sumADC_all->Fill((float)mSvtAnalysis->GetCluCharge(clu));
+		//if(Debug()) ntpl->Fill(index,(float)mSvtAnalysis->GetCluCharge(clu),(float)mSvtAnalysis->GetMeanClusterTimeBin(clu),(float)mSvtAnalysis->GetMeanClusterAnode(clu),(float)mSvtAnalysis->GetCluFlag(clu),(float)mSvtAnalysis->GetCluPeakAdc(clu),(float)mSvtAnalysis->GetCluNumPixels(clu),(float)mSvtAnalysis->GetCluNumAnodes(clu),(float)mSvtAnalysis->GetSecondMomClusterTimeBin(clu),(float)mSvtAnalysis->GetSecondMomClusterAnode(clu),(float)mSvtAnalysis->return_oneortwoanode_flag(clu),(float)mNoEvents,(float)barrel,(float)ladder,(float)wafer);
+		//}
 	    }
+
 	  }
         }
       }
@@ -529,13 +543,14 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
   
   int mSequence;
   int listAn, actualAn,seq,stTimeBin,len;
+  int raw_stTimeBin,raw_len;
   unsigned char* adc;
+  unsigned char* raw_adc;
   int index = 0;
 
   StSequence* svtSequence;
   StSvtClusterMemberInfo** tempMemberInfo; 
   
-  mNoEvents++;
   int TotalClusters=0;
  
  for(int barrel = 1;barrel <= mSvtAdjEvent->getNumberOfBarrels();barrel++) {
@@ -552,6 +567,7 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
          m_time_anode_raw[index]->Reset();
 
          mHybridAdjData = (StSvtHybridData *)mSvtAdjEvent->at(index); 
+
 	 if( !mHybridAdjData) continue;
          mHybridCluster = (StSvtHybridCluster*)mSvtClusterColl->at(index); 
 
@@ -570,26 +586,28 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
             tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
             mNumOfMembers = mHybridCluster->getNumberOfMembers(clu);
 
+
+
             for(int mem = 0; mem < mNumOfMembers; mem++)
               {
                listAn = tempMemberInfo[clu][mem].listAnode;
                seq =  tempMemberInfo[clu][mem].seq;
                actualAn =  tempMemberInfo[clu][mem].actualAnode; //actual anode
                mHybridAdjData->getListSequences(listAn,mSequence,svtSequence);
-	       
+
 
                stTimeBin =svtSequence[seq].startTimeBin; 
                len = svtSequence[seq].length; 
                adc = svtSequence[seq].firstAdc;
+
 	       
 	       int count=0;
 	       for(int k = 0; k < len ; k++)
                  {
 	          count = (int) adc[k];
-	          m_time_anode_clu[index]->Fill(actualAn,stTimeBin + k,clu + 1);
+	          m_time_anode_clu[index]->Fill(actualAn,stTimeBin + k,count); 
 	          m_time_anode_raw[index]->Fill(actualAn,stTimeBin + k,count); 
 	         }
-	       
 	      }
 	   }
 	 delete [] tempMemberInfo;
@@ -636,6 +654,7 @@ Int_t StSvtClusterAnalysisMaker::Finish(){
 
  if (Debug()) gMessMgr->Debug() << "In StSvtClusterAnalysisMaker::Finish() ..."
 				<<   GetName() << endm;
+ if (Debug()) hfile->Write();
 
   return kStOK;
 }

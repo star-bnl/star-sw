@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.hh,v 1.7 2002/05/09 16:55:40 munhoz Exp $
+ * $Id: StSvtAnalysis.hh,v 1.8 2003/01/28 20:27:49 munhoz Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.hh,v $
+ * Revision 1.8  2003/01/28 20:27:49  munhoz
+ * new filters for clusters
+ *
  * Revision 1.7  2002/05/09 16:55:40  munhoz
  * add reading bad anodes from DB
  *
@@ -64,6 +67,8 @@ public:
   int    GetFirstTimeBin(int clu);
   int    GetLastTimeBin(int clu);
   int    GetCluFlag(int clu);
+  int    GetDeconvFlag(int clu);
+  int    return_oneortwoanode_flag(int clu);
   int    GetCluPeakAdc(int clu);
   int    GetCluNumAnodes(int clu);
   int    GetCluNumPixels(int clu);
@@ -80,6 +85,7 @@ public:
   void   Report(int index);
   void   ResetMeanValues();
   void   SetBadAnTb(int numClus);
+  void   LoadAnodeGains();
 
   int    Print_Pixels(int iRows, int iCols, int clu);
   int    Fill_Pixel_Array(int clu);
@@ -112,6 +118,7 @@ private:
   int m_hybIndex;                          //!
 
   int mHitId;
+  int mMyflag;                             // added by JT
   int mNeff;
   int mNumOfClusters, mNumOfMembers;
   int mNumPixels, mPeakADC, mSumAdc;
@@ -119,6 +126,7 @@ private:
   double mDriftMom1, mAnodeMom1;
   double mDriftMom2, mAnodeMom2, mMom0;
   double mX_err, mY_err;  
+  double mAnodeGain[433][241];             // added by JT
 
   StSvtHybridData* mHybridData;            //!
   StSvtHybridData* mHybridRawData;         //!
@@ -130,6 +138,7 @@ private:
   int* mCluFirstTimeBin;                   //!
   int* mCluLastTimeBin;                    //!
   int* mCluFlag;                           //!
+  int* m_oneortwo_flag;                    // added by JT
   int* mCluPeakAdc;                        //!
   int* mCluNumPixels;                      //!
   int* mCluNumAnodes;                      //!
