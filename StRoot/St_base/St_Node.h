@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.5 1999/01/25 23:36:41 fine Exp $
+// $Id: St_Node.h,v 1.6 1999/01/30 04:24:21 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.6  1999/01/30 04:24:21  fine
+// St_Table: Print memory leak fixed
+//
 // Revision 1.5  1999/01/25 23:36:41  fine
 // St_DataSet fixed, St_DataSetIter::operator[] introduced, St_Node with own Hash methdo
 //
@@ -73,6 +76,7 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
         virtual void        Draw(Option_t *option=""); // *MENU*
         virtual void        DrawOnly(Option_t *option="");
         virtual void        ExecuteEvent(Int_t event, Int_t px, Int_t py);
+        static  TRotMatrix *GetIdentity();
         virtual Text_t     *GetObjectInfo(Int_t px, Int_t py);
         const   Option_t   *GetOption() const { return fOption.Data();}
                 TShape     *GetShape()  const {return fShape;}

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.9 1999/01/29 18:41:53 fine Exp $
+// $Id: St_Node.cxx,v 1.10 1999/01/30 04:24:20 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.10  1999/01/30 04:24:20  fine
+// St_Table: Print memory leak fixed
+//
 // Revision 1.9  1999/01/29 18:41:53  fine
 // St_TableSorter clean up for HP machine
 //
@@ -290,14 +293,7 @@ St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,
 //*-*
  if (!node) return 0;
  TRotMatrix *rotation = matrix;
- if(!rotation) {
-    if (!gIdentity) {
-       gIdentity = gGeometry->GetRotMatrix("Identity");
-       if (!gIdentity) 
-          gIdentity  =  new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
-   }
-   rotation = gIdentity;
- }
+ if(!rotation) rotation = GetIdentity();
  St_NodePosition *position = new St_NodePosition(node,x,y,z,rotation);
  return Add(node,position);
 }
@@ -311,14 +307,9 @@ St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,
 //*-*    matrixname  is the name of the rotation matrix
 //*-*
  if (!node) return 0;
- TRotMatrix *rotation = gIdentity;
- if (strlen(matrixname)) rotation = gGeometry->GetRotMatrix(matrixname);
- else if (!gIdentity) {
-    gIdentity = gGeometry->GetRotMatrix("Identity");
-    if (!gIdentity) 
-          gIdentity  =  new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
-    rotation = gIdentity;
- }
+ TRotMatrix *rotation = 0;
+ if (matrixname && strlen(matrixname)) rotation = gGeometry->GetRotMatrix(matrixname);
+ if (!rotation)                        rotation = GetIdentity();
  St_NodePosition *position = new St_NodePosition(node,x,y,z,rotation);
  return Add(node,position);
 }
@@ -492,7 +483,17 @@ void St_Node::ExecuteEvent(Int_t, Int_t, Int_t)
    gPad->SetCursor(kHand);
 }
  
- 
+//______________________________________________________________________________
+TRotMatrix *St_Node::GetIdentity()
+{
+ // Return a pointer the "identity" matrix
+ if (!gIdentity) {
+      gIdentity = gGeometry->GetRotMatrix("Identity");
+      if (!gIdentity) 
+         gIdentity  =  new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
+ }
+ return gIdentity;
+}
 //______________________________________________________________________________
 Text_t *St_Node::GetObjectInfo(Int_t, Int_t)
 {

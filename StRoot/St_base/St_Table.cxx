@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.36 1999/01/29 19:20:55 fine Exp $ 
+// $Id: St_Table.cxx,v 1.37 1999/01/30 04:24:22 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.37  1999/01/30 04:24:22  fine
+// St_Table: Print memory leak fixed
+//
 // Revision 1.36  1999/01/29 19:20:55  fine
 // St_Table::SavePrimitive The protection against of undefined table has been introduced
 //
@@ -756,7 +759,9 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
       }
       rowCount -= thisLoopLenth;
       startRow  = nextRow;
-   }
+      if (arrayLayout) delete [] arrayLayout;
+      if (arraySize) delete arraySize;
+  }
   cout << "---------------------------------------------------------------------------------------" << endl;
   return 0;
  }
@@ -930,6 +935,8 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
            }
            out << ";" << endl;
          }
+         if (arrayLayout) delete [] arrayLayout;
+         if (arraySize) delete arraySize;
       }
       out << tableId << "->AddAt(&" << rowId << "," << rowNumber-rowCount <<");" 
           << endl; 
