@@ -36,7 +36,7 @@ ClassImp(StppAnaPars)
 //cstr
     
 //StppJetAnalyzer::StppJetAnalyzer(const StJetPars* pars)
-StppJetAnalyzer::StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* pars) : mPars(*ap)
+    StppJetAnalyzer::StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* pars, StFourPMaker* fp) : mFourPMaker(fp), mPars(*ap)
 {
     cout <<"StppJetAnalyzer::StppJetAnalyzer()"<<endl;
     
