@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.68 2002/02/07 22:02:52 hardtke Exp $
+// $Id: St_tcl_Maker.cxx,v 1.69 2003/04/29 16:23:28 perev Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.69  2003/04/29 16:23:28  perev
+// non TPCoriented cleanup
+//
 // Revision 1.68  2002/02/07 22:02:52  hardtke
 // Give Init a return type -- make redhat 7.2 happy
 //
@@ -234,7 +237,7 @@ Int_t St_tcl_Maker::Make() {
     // when its empty.
     if (isumpix < 1) {
       Warning ("Make"," TPC data is empty, isumpix=%d dump event.",isumpix);
-      return kStErr;
+      return kStWarn;
     }
       gMessMgr->Info() << "number of estimated hits used: " << max_hit 
 		       << endm;
@@ -469,7 +472,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.68 2002/02/07 22:02:52 hardtke Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.69 2003/04/29 16:23:28 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
