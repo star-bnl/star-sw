@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.50 1998/09/14 21:34:25 kathy Exp $
+* $Id: bfc.kumac,v 1.51 1998/09/15 21:08:55 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.51  1998/09/15 21:08:55  kathy
+* make bfc skip events for fzin & dstin also
+*
 * Revision 1.50  1998/09/14 21:34:25  kathy
 * put print stmt in bfc to tell # events; put new chain variable dstin in bfc_util; call_bfc_read_dst is shell to read in dst
 *
@@ -449,7 +452,7 @@ MACRO bfc _
      nw=$words([test])
      do i=1,[nw]
        mod=$word([test],[i],1)
-       if [mod].eq.evgin.or.[mod].eq.g2tin.or.[mod].eq.evin.or.[mod].eq.esin then 
+       if [mod].eq.evgin.or.[mod].eq.g2tin.or.[mod].eq.evin.or.[mod].eq.esin.or.[mod].eq.fzin.or.[mod].eq.dstin then 
            message ' SKIP EVENTS FOR ' [mod]
 	   do ievent = 1,[skip]
 	       message 'skip event # ',[ievent]
