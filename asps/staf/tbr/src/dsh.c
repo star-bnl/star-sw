@@ -10,7 +10,7 @@
 #define EXTERN
 #include "brow.h"
 #include "dscuts.h"
-void Say(char *mess);
+void Sss(char *mess);
 int gAlreadyErr;
 extern int gDone;
 char *gTheBlurb="\
@@ -31,13 +31,13 @@ myBool TableHasMoreThanZeroRows(int tlm) {
   size_t nRow;
   if(!dsTableRowCount(&nRow,gDs[tlm]->dsPtr)) Err(938);
   if(nRow>0) return TRUE;
-  Say("Please do not select\ntables that have zero rows."); return FALSE;
+  Sss("Please do not select\ntables that have zero rows."); return FALSE;
 }
 myBool TableHasMoreThanZeroCols(int tlm) {
   size_t nCol;
   if(!dsTableColumnCount(&nCol,gDs[tlm]->dsPtr)) Err(538);
   if(nCol>0) return TRUE;
-  Say("Please do not select\ntables that have zero columns."); return FALSE;
+  Sss("Please do not select\ntables that have zero columns."); return FALSE;
 }
 void ExpandExceptCase(int wds) {
   char *x,c;
@@ -284,7 +284,7 @@ float MinMax(int control,DS_DATASET_T *pp,size_t whichCol,int subscript) {
     if(dataType==STRING||dataType==HEX) rv=0.0;
     else {
       if(gTableValueError) {
-        Say("Error 91t: This table has\nunsupported data types."); return 0;
+        Sss("Error 91t: This table has\nunsupported data types."); return 0;
       }
       if(control==0) { if(rv>cv) rv=cv; }
       else           { if(rv<cv) rv=cv; }
@@ -303,7 +303,7 @@ float Ave(float *stdDev,DS_DATASET_T *pp,size_t whichCol,int subscript) {
     gDataType=dataType;
     if(dataType==STRING||dataType==HEX) { *stdDev=0; return 0.0; }
     if(gTableValueError) {
-      Say("Error 92t: This table has\nunsupported data types."); return 0;
+      Sss("Error 92t: This table has\nunsupported data types."); return 0;
     }
   } ave/=nRowInt;
   sum2=0;
@@ -311,7 +311,7 @@ float Ave(float *stdDev,DS_DATASET_T *pp,size_t whichCol,int subscript) {
     cv=Value(&dataType,pp,whichCol,rowInt,subscript);
     if(dataType==STRING||dataType==HEX) Err(999);
     if(gTableValueError) {
-      Say("Error 93t: This table has\nunsupported data types."); return 0;
+      Sss("Error 93t: This table has\nunsupported data types."); return 0;
     }
     sum2+=(ave-cv)*(ave-cv);
   } *stdDev=sqrt(sum2/nRowInt);
@@ -360,7 +360,7 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
     strcpy(stdString,"???"); strcpy(aveString,"???");
   }
   if(reportSpaceNeeded||gCalculateAverages) {
-    if(!reportSpaceNeeded) Progress(-5,10,"ferences\" menu to speed this up.",
+    if(!reportSpaceNeeded) tbrProgress(-5,10,"ferences\" menu to speed this up.",
     "Doing min/max/averages.  See the \"Pre-");
     for(ii=0;ii<rr;ii++) { /* 1st pass for progTot */
       whichCol=ii;
@@ -394,7 +394,7 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
     asi=arraySize;
     for(jj=1;jj<=asi;jj++) { /* loop over array members */
       if(gCalculateAverages) {
-        Progress(progNow++,progTot,NULL,NULL);
+        tbrProgress(progNow++,progTot,NULL,NULL);
         minFloat=MinMax(0,pp,whichCol,jj-1); if(gTableValueError) break;
         maxFloat=MinMax(1,pp,whichCol,jj-1); if(gTableValueError) break;
         aveFloat=Ave(&stdFloat,pp,whichCol,jj-1); if(gTableValueError) break;
@@ -436,7 +436,7 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
     if(gTableValueError) break;
     if(doBreak) break;
   }	/* loop over columns */
-  if(gCalculateAverages) Progress(-10,progTot,NULL,NULL);
+  if(gCalculateAverages) tbrProgress(-10,progTot,NULL,NULL);
   *tot=lineCnt;
 }
   /* 6gg: Unlike pRIMARYlIST & dATASETlIST, this is not an index to gDs[].
@@ -535,7 +535,7 @@ void DumpDatasetInfo(void) {
   }
 }
 void Blurb(void) {
- Say(gTheBlurb);
+ Sss(gTheBlurb);
 }
 void tbrNewDSTree(DS_DATASET_T **dsPtr,long nDsPtr) {
   PP"Function tbrNewDTree() in the table browser does not work yet.\n");

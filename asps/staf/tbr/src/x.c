@@ -83,7 +83,7 @@ Widget Column(Widget parent);
 Widget Row(Widget parent);
 void CreateMenuItems(char *tableName,Widget mbar,int whichWindow);
 XtCP TextCB(Widget w,caddr_t cld,caddr_t cad);
-void Say(char *mess);
+void Sss(char *mess);
 /***********************************************************  FUNCTIONS  **/
 void SaveValueOfCalcAve(void) {
   FILE *ff;
@@ -179,7 +179,7 @@ void TimeoutCursors(int on) {
     XChangeWindowAttributes(dpy, XtWindow(gAppShell), CWCursor, &attrs);
     XFlush(dpy);
 }
-void Progress(int x,int max,char *label,char *label2) {
+void tbrProgress(int x,int max,char *label,char *label2) {
   ARGS
   int val; XmString title;
   if(x==-5) {
@@ -373,7 +373,7 @@ void PrepareProgressPopup() {
   XtManageChild(junk);
   XmStringFree(title);
 }
-void Say(char *mess) {
+void Sss(char *mess) {
   XmString messWidget,okWidget,titleWidget;
   char *title="STAR table browser";
   register int n;
@@ -420,7 +420,7 @@ void QuitCB(Widget w,caddr_t cld,caddr_t cad) {
   gDone=7;
 }
 void Complain5(void) {
- Say("\
+ Sss("\
  You wrote too much to the bottom part of\n\
  the window.\n\
  Try restricting the amount you write with\n\
@@ -482,7 +482,7 @@ void GetRidOfNewlines(char *xx) {
 void SaveCutsInFile(char *tableName,char *xx) {
   FILE *ff,*temp; char *tok,copy[MAX_CUTS_STRING+5],line[MAX_CUTS_STRING+5];
   temp=fopen("bRoWsER.tmp","w");
-  if(temp==NULL) { Say("I don't have write permission here."); return; }
+  if(temp==NULL) { Sss("I don't have write permission here."); return; }
   ff=fopen("browser.cuts","r");
   if(ff!=NULL) {
     while(fgets(line,MAX_CUTS_STRING,ff)) {
@@ -587,11 +587,11 @@ void DoBox(void) {
   DrawLine(0.0,1.0,1.0,1.0); DrawLine(1.0,1.0,1.0,0.0);
 }
 void Complain1(void) {
-  Say("You can only highlight\none column for 1D histograms.");
+  Sss("You can only highlight\none column for 1D histograms.");
 }
 void Complain2(void) {
   /* Two reasons for this: gHist[] only 1d, and draw.c not coded for >1. */
-  Say("Only one graphics window at a time.\nPlease close the one you have.");
+  Sss("Only one graphics window at a time.\nPlease close the one you have.");
 }
 char *Date(void) {
   FILE *ff; int len,ii;
@@ -664,7 +664,7 @@ void DrawHist(int whWin) {
   ExposeCB(junk1,junk2,junk3);
 }
 void SayError0(int codePos) {
- Say("\
+ Sss("\
  You have to highlight at least one column\n\
  so I'll have something to output.\n\
  See \"Using this window\" under \"Help\".\n\
@@ -675,12 +675,12 @@ void WrBotCB(Widget ww,caddr_t cld,caddr_t cad) {
   FILE *ff; XmString scratch;
   int whWin; whWin=(int)cld;
   ff=fopen("browDump.txt","w"); if(ff==NULL) {
-    Say("I can't write on browDump.txt."); return;
+    Sss("I can't write on browDump.txt."); return;
   }
   scratch=XmTextGetString(gWin[whWin]->txtWidWriteH);
   fprintf(ff,"%s\n",scratch); XtFree(scratch);
   fprintf(ff,"%s\n",gWin[whWin]->textOutput);
-  fclose(ff); Say("Your file is named \"browDump.txt\".");
+  fclose(ff); Sss("Your file is named \"browDump.txt\".");
 }
 void BotLongerCB(Widget ww,caddr_t cld,caddr_t cad) {
   ARGS
@@ -710,7 +710,7 @@ void RunHistMinMax(size_t row) {
       gWin[gRunWhWin]->tlm[gRunWhichHilitedLine],irow,
       gWin[gRunWhWin]->subscript[gRunWhichHilitedLine]);
   if(gTableValueError) {
-    Say("Table has unsupported data type"); gBreakRowsLoop=TRUE;
+    Sss("Table has unsupported data type"); gBreakRowsLoop=TRUE;
   }
   if(gMin>val) gMin=val; if(gMax<val) gMax=val;
 }
@@ -721,7 +721,7 @@ void RunHistFill(size_t row) {
       gWin[gRunWhWin]->tlm[gRunWhichHilitedLine],irow,
       gWin[gRunWhWin]->subscript[gRunWhichHilitedLine]);
   if(gTableValueError) {
-    Say("Table has unsupported data type"); gBreakRowsLoop=TRUE;
+    Sss("Table has unsupported data type"); gBreakRowsLoop=TRUE;
   }
   hist=(HIST-1)*(val-gMin)/(gMax-gMin);
   if(hist>=HIST||hist<0) {
@@ -738,7 +738,7 @@ void RunAverage(size_t row) {
       gWin[gRunWhWin]->tlm[gRunWhichHilitedLine],irow,
       gWin[gRunWhWin]->subscript[gRunWhichHilitedLine]);
   if(gTableValueError) {
-    Say("Table has unsupported data type"); gBreakRowsLoop=TRUE;
+    Sss("Table has unsupported data type"); gBreakRowsLoop=TRUE;
   }
 }
 void ConvertToHex(char *out,float val) {
@@ -820,7 +820,7 @@ void RunValue(size_t row) {
     val=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
           gWin[gRunWhWin]->tlm[lnfhl],irow,gWin[gRunWhWin]->subscript[lnfhl]);
     if(gTableValueError) {
-      Say("Table has unsupported data type"); gBreakRowsLoop=TRUE; break;
+      Sss("Table has unsupported data type"); gBreakRowsLoop=TRUE; break;
     }
     sprintf(format,"%%%ds",WIDE);
     if(gVWType==VWSTRING) {
@@ -867,7 +867,7 @@ void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   void (*runFunc)();
   if((int)w==2&&(int)cld==5&&(int)cad==14) { whAct=whActS; whWin=whWinS; }
   else { whWin=((int)cld)%1000; whAct=((int)cld)/1000; }
-  if(NumRows(whWin)<1) { Say("This table has zero rows."); return; }
+  if(NumRows(whWin)<1) { Sss("This table has zero rows."); return; }
   gLastWhWin=whWin;
   gRunWhWin=whWin; if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(128);
   switch(whAct) {
@@ -897,10 +897,10 @@ void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
     }
   }
   if(gRunNRowsDone==0&&gDone2<10) {
-    Say("No rows were\nselected by \"ROW SELECTION\".");
+    Sss("No rows were\nselected by \"ROW SELECTION\".");
   } else {
     if(whAct==1) {
-      sprintf(act,"Your output file is %s.\n",TXTOUT); Say(act);
+      sprintf(act,"Your output file is %s.\n",TXTOUT); Sss(act);
     }
     if(whAct==2) {
       sprintf(act,"The color was >>  %s  <<.\nOutput file = %s.\n",
@@ -908,7 +908,7 @@ void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
       strcat(act,"You can add other tables besides\n");
       strcat(act,gWin[whWin]->tableName);
       strcat(act,".");
-      Say(act);
+      Sss(act);
     }
   }
   whActS=whAct; whWinS=whWin;
@@ -937,7 +937,7 @@ void OneLnAllRowsCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   char act[30],tt2[45],format[30];
   void (*runFunc)();
   whWin=((int)cld)%1000; whAct=((int)cld)/1000;
-  if(NumRows(whWin)<1) { Say("This table has zero rows."); return; }
+  if(NumRows(whWin)<1) { Sss("This table has zero rows."); return; }
   gRunWhWin=whWin; if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(120);
   /*Write("------------------------------------------------\n",whWin);*/
   switch(whAct) {
@@ -960,7 +960,7 @@ void OneLnAllRowsCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
     if(firstTime) { firstTime=FALSE; RunTheRows(FALSE,whWin,runFunc); }
     else RunTheRows(TRUE,whWin,runFunc);
     if(gVWType!=VWNUMBER) {
-      Say("You can't do that with octet or strings."); return;
+      Sss("You can't do that with octet or strings."); return;
     } else {
       if(gRunNRowsDone>0) {
         switch(whAct) {
@@ -1023,7 +1023,7 @@ void AuxOutputFromOneLn(int whWin,int whAct) { /* includes histogramming */
   if(reportCuts) { Write(gCuts,whWin); Write("\n",whWin); }
 } /* end of OneLnAllRowsCB() */
 void Complain6(void) {
- Say("\
+ Sss("\
  You did not type properly in the box labeled\n\
  \"Type range\".   Example: you want rows 12 to 24,\n\
  type \"12-24\" or \"12:24\" or \"12 24\"\n\
@@ -1040,7 +1040,7 @@ void RunTheRows(myBool skipInit,int whWin,void (*fnct)()) {
   if(!skipInit&&gWin[whWin]->useCuts) {
     if(!GetCuts(cuts,gWin[whWin]->tableName)) return;
     if(!DoCutsWrapper(MAXROW_DIV_BY_8,ba,cuts,gWin[whWin]->wh_gDs)) {
-      Say("We have error 51r.\nCheck your cuts string."); return;
+      Sss("We have error 51r.\nCheck your cuts string."); return;
     }
     strncpy(gCuts,cuts,COL);
     strcpy(gCuts+COL-8," etc...");
@@ -1068,11 +1068,11 @@ void DumpPsCB(Widget w,caddr_t cld,caddr_t cad) {
   FILE *ff; char fn[111];
   strcpy(fn,"plot.ps");
   ff=fopen(fn,"w");
-  if(ff==NULL) { Say("I can't write in this directory."); return; }
+  if(ff==NULL) { Sss("I can't write in this directory."); return; }
   fprintf(ff,"%s",gPs);
   fprintf(ff,"\nshowpage\n");
   fclose(ff);
-  Say("Your file is named plot.ps.");
+  Sss("Your file is named plot.ps.");
 }
 void DoCB(Widget w,caddr_t cld,caddr_t cad) {
   gCalculateAverages=TRUE;
@@ -1084,7 +1084,7 @@ void SkipCB(Widget w,caddr_t cld,caddr_t cad) {
 }
 void NotTruncCB(Widget w,caddr_t cld,caddr_t cad) {
  gTruncateStrings=0;
- Say("\
+ Sss("\
  This destroys alignment of the columns\n\
  in all browser windows.\n");
 }
@@ -1092,11 +1092,11 @@ void TruncCB(Widget w,caddr_t cld,caddr_t cad) {
   gTruncateStrings=7;
 }
 void SigFigCB(Widget w,caddr_t cld,caddr_t cad) { /* pops it up */
-  Say("This does not work yet.");
+  Sss("This does not work yet.");
   /* XtPopup(gSigFigScalePopup,XtGrabNone); */
 }
 void VisHelpCB(Widget w,caddr_t cld,caddr_t cad) {
- Say("\
+ Sss("\
  1. Select rows in upper right corner.\n
  2. Choose menu item 'Write visualizer file'.\n
  3. OPTIONAL: Repeat 1 to 2.*\n
@@ -1109,7 +1109,7 @@ void VisHelpCB(Widget w,caddr_t cld,caddr_t cad) {
  ");
 }
 void HelpSelTabCB(Widget w,caddr_t cld,caddr_t cad) {
- Say("\
+ Sss("\
  Indentation indicates hierarchy.\n\
  \n\
  STEP 1. Click on the two-letter abbrevi-\n\
@@ -1121,7 +1121,7 @@ void HelpSelTabCB(Widget w,caddr_t cld,caddr_t cad) {
  ");
 }
 void HelpUtwCB(Widget w,caddr_t cld,caddr_t cad) {
- Say("\
+ Sss("\
  This window represents one table.\n\
  \n\
  In the middle is a list of the table's columns.\n\
@@ -1153,10 +1153,10 @@ void HelpCutsCB(Widget w,caddr_t cld,caddr_t cad) {
   strcat(gPass,"square brackets (NOT PARENTHESES, AS IN TAS)\n");
   strcat(gPass,"for columns whose data types are arrays.\n");
   strcat(gPass,"\n");
-  Say(gPass);
+  Sss(gPass);
 }
 void HelpBugRptCB(Widget w,caddr_t cld,caddr_t cad) {
-  Say("Email ward@physics.utexas.edu");
+  Sss("Email ward@physics.utexas.edu");
 }
 #ifdef STANDALONE
 #define QUITSTRING "Quit"
@@ -1273,7 +1273,7 @@ int LineNumber(myBool *inTriangle,int whWin,Position pos) {
 void Complain(void) {
   char buf[200];
   sprintf(buf,"You can't select any more columns.\nMax = %d.",
-  MCOL); Say(buf);
+  MCOL); Sss(buf);
 }
 void Abbr(char *x) {
   char *pp,first[66],parens[22]; int ii,len,lenPar,lenForRest;
@@ -1362,7 +1362,7 @@ void ResetTheTriangles(int wds) {
   char junk[100]; int len,ii,nLines;
   if(wds>=0) {
     if(!ToggleCase(wds)) {
-      Say(
+      Sss(
       "You can't expand/contract that.\nIt's the lowest hierarchical level.");
       return;
     }
@@ -1406,7 +1406,7 @@ XtCP TextCB(Widget w,caddr_t cld,caddr_t cad) { /* user click in text window */
   if(lineNumber<0||lineNumber>=gWin[whWin]->nlcpwtto) {
     PP"lineNumber=%d, whWin=%d, gWin[whWin]->nlcpwtto=%d.\n",
     lineNumber,whWin,gWin[whWin]->nlcpwtto);
-    Say("You clicked too low."); return 0;
+    Sss("You clicked too low."); return 0;
   }
   tlm=gWin[whWin]->tlm[lineNumber];
   switch(gWin[whWin]->win_type) {
@@ -1416,9 +1416,9 @@ XtCP TextCB(Widget w,caddr_t cld,caddr_t cad) { /* user click in text window */
       SetHilite(HILITE_TURN_ON,whWin,lineNumber); /*BBB un-hilite when closed*/
       break;
     case WIN_TYPE_PRIMARY:
-      if(tlm<0) { Say(gMess0); return NULL; }
+      if(tlm<0) { Sss(gMess0); return NULL; }
       if(inTri) { ResetTheTriangles(tlm); return NULL; }
-      if(!ATable(tlm)) { Say(gBlurb7); return; }
+      if(!ATable(tlm)) { Sss(gBlurb7); return; }
       if(!TableHasMoreThanZeroCols(tlm)) return;
       /* 961003 if(!TableHasMoreThanZeroRows(tlm)) return; */
       if(whWin!=0) Err(993); /* for sake of, eg, 0 in CloseThisWindowCB */
@@ -1715,7 +1715,7 @@ void DoXStuff(void) {
         if(gWin[gLastWhWin]->whichRadio==3) {
           OneLnPerRowCB((Widget)2,(caddr_t)5,(caddr_t)14);
         } else {
-          Say("This only works when we are doing\n\"Next 10\".");
+          Sss("This only works when we are doing\n\"Next 10\".");
         }
       }
     }
