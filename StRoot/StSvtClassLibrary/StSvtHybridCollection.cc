@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.cc,v 1.8 2001/10/04 02:56:26 caines Exp $
+ * $Id: StSvtHybridCollection.cc,v 1.9 2001/11/06 18:29:34 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCollection.cc,v $
+ * Revision 1.9  2001/11/06 18:29:34  caines
+ * Add back in delete of mSvtConfig
+ *
  * Revision 1.8  2001/10/04 02:56:26  caines
  * Fix some of the hybrid swapping indexing
  *
@@ -74,7 +77,9 @@ StSvtHybridCollection::StSvtHybridCollection(StSvtConfig* config)
 
 StSvtHybridCollection::~StSvtHybridCollection()
 {
-  //delete mSvtConfig;
+  if( mSvtConfig){
+    delete mSvtConfig;
+  }
 }
 
 void StSvtHybridCollection::setConfiguration(const char* config)
