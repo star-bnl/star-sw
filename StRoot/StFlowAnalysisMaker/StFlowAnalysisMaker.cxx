@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.61 2002/01/31 01:09:10 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.62 2002/02/13 22:31:27 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1057,7 +1057,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.61 2002/01/31 01:09:10 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.62 2002/02/13 22:31:27 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1425,19 +1425,29 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    detId = kUnknownId;
 	  }
 
+	  // Calculate weights for filling histograms
+	  float wt = 1.;
+	  if (pFlowEvent->PtWgt()) {
+	    wt *= (pt < 2.) ? pt : 2.;  // pt weighting going constant above 2 GeV
+	  }
+	  float etaAbs = fabs(eta);
+ 	  if (pFlowEvent->EtaWgt() && oddHar && etaAbs > 1.) {
+	    wt *= etaAbs;
+	  }
+
 	  // Fill histograms with selections
 	  if (detId == kFtpcEastId) {
-	    histFull[k].histFullHar[j].mHistPhiFtpcEast->Fill(phi);
+	    histFull[k].histFullHar[j].mHistPhiFtpcEast->Fill(phi,wt);
 	  } else if (detId == kFtpcWestId) {
-	    histFull[k].histFullHar[j].mHistPhiFtpcWest->Fill(phi);
+	    histFull[k].histFullHar[j].mHistPhiFtpcWest->Fill(phi,wt);
 	  } else if (kTpcFarEast){
-	    histFull[k].histFullHar[j].mHistPhiFarEast->Fill(phi);
+	    histFull[k].histFullHar[j].mHistPhiFarEast->Fill(phi,wt);
 	  } else if (kTpcEast){
-	    histFull[k].histFullHar[j].mHistPhiEast->Fill(phi);
+	    histFull[k].histFullHar[j].mHistPhiEast->Fill(phi,wt);
 	  } else if (kTpcWest){
-	    histFull[k].histFullHar[j].mHistPhiWest->Fill(phi);
+	    histFull[k].histFullHar[j].mHistPhiWest->Fill(phi,wt);
 	  } else if (kTpcFarWest){
-	    histFull[k].histFullHar[j].mHistPhiFarWest->Fill(phi);
+	    histFull[k].histFullHar[j].mHistPhiFarWest->Fill(phi,wt);
 	  }
 	  histFull[k].histFullHar[j].mHistYield2D->Fill(eta, pt);
 	  histFull[k].histFullHar[j].mHistEtaPhi2D->Fill(eta, phi);
@@ -1445,10 +1455,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  // Get phiWgt
 	  double phiWgt = pFlowEvent->PhiWeight(k, j, pFlowTrack);
 
-	  double phiWgtRaw = phiWgt;
-	  if (pFlowEvent->PtWgt()) { // remove pt weighting
-	    phiWgtRaw /= (pt < 2.) ? pt : 2.;
-	  }
+	  double phiWgtRaw = phiWgt; // removes wt effects
 	  if (oddHar && eta < 0.) phiWgtRaw /= -1.;
 	  if (detId == kFtpcEastId) {
 	    histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->Fill(phi, phiWgtRaw);
@@ -1782,6 +1789,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.62  2002/02/13 22:31:27  posk
+// Pt Weight now also weights Phi Weight. Added Eta Weught, default=FALSE.
+//
 // Revision 1.61  2002/01/31 01:09:10  posk
 // *** empty log message ***
 //
