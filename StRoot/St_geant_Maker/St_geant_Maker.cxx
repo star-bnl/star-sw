@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.92 2004/03/16 18:37:49 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.93 2004/07/30 00:29:54 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.93  2004/07/30 00:29:54  potekhin
+// Fixed an old indexing typo
+//
 // Revision 1.92  2004/03/16 18:37:49  potekhin
 // Corrected a typo that caused an out-of-bounds
 // array error.
@@ -1602,7 +1605,7 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
       TGeoTranslation *translation = 0;
       if (TMath::Abs(xyz[0]) > 1.e-30 ||
 	  TMath::Abs(xyz[1]) > 1.e-30 || 
-	  TMath::Abs(xyz[0]) > 1.e-30)  {
+	  TMath::Abs(xyz[2]) > 1.e-30)  {
 	translation = (TGeoTranslation *) TranslationH.GetPointer(xyz,3);
 	if (! translation ) {
 	  translation = new TGeoTranslation(xyz[0],xyz[1],xyz[2]);
