@@ -29,7 +29,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.8 2001/07/06 18:18:37 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.9 2001/08/01 19:10:33 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -40,7 +40,6 @@ public:
     //Gets/sets
     void setMaterialBuildPath(char* val);
     void setDetectorBuildPath(char* val);
-    void setPolygonBuildPath(char* val);
 
     void printStatistics() const;
     
@@ -54,10 +53,6 @@ protected:
 
 private:
 
-    static StiMaker* sinstance; //!
-    static bool mdone;
-    static int mcounter;
-
     StiHitContainer* mhitstore; //!
     StiHitFactory* mhitfactory; //!
     StiEvaluableTrackFactory* mtrackfactory; //!
@@ -68,11 +63,16 @@ private:
     StiDrawableHits* mdrawablehits; //!
     StiEvaluableTrackSeedFinder* mtrackseedfinder; //!
     StiRDEvaluableTrackFactory* md_trackfactory; //!
+    detector_factory* mdetectorfactory; //!
+    data_node_factory* mdatanodefactory; //!
 
     char* mmaterialbuildpath; //!
     char* mdetectorbuildpath; //!
-    char* mpolygonbuildpath; //!
     
+    static StiMaker* sinstance; //!
+    static bool mdone;
+    static int mcounter;
+
 private:
     StEvent* mevent; //!
     ClassDef(StiMaker, 1)

@@ -96,6 +96,12 @@ StiMaker::~StiMaker()
     
     StiTrackContainer::kill();
     mtrackstore = 0;
+
+    delete mdetectorfactory;
+    mdetectorfactory = 0;
+
+    delete mdatanodefactory;
+    mdatanodefactory = 0;
     
 }
 
@@ -157,6 +163,18 @@ Int_t StiMaker::Init()
     mtrackseedfinder->setFactory(mtrackfactory);
     mtrackseedfinder->setStTrackType(global);
 
+    //The StiDetector factory
+    mdetectorfactory = new detector_factory("DrawableDetectorFactory");
+    mdetectorfactory->setIncrementalSize(1000);
+    mdetectorfactory->setMaxIncrementCount(10);
+    mdetectorfactory->reset();
+
+    //The DetectorNodeFactory
+    mdatanodefactory = new data_node_factory("DataNodeFactory");
+    mdatanodefactory->setIncrementalSize(1000);
+    mdatanodefactory->setMaxIncrementCount(10);
+    mdatanodefactory->reset();
+    
     //The Display
     mdisplay = StiDisplayManager::instance(); //Must come before anything that you want to be drawn
     mdisplay->cd();
@@ -169,11 +187,10 @@ Int_t StiMaker::Init()
     mdisplay->addDrawable(mdrawablehits);
 
     //The Detector Tree
-    //Must build Polygons and Materials before detectors
+    //Must build Materials before detectors
     mdetector = StiDetectorContainer::instance();
-    mdetector->buildPolygons(mpolygonbuildpath);
     mdetector->buildMaterials(mmaterialbuildpath);
-    mdetector->buildDetectors(mdetectorbuildpath);
+    mdetector->buildDetectors(mdetectorbuildpath, mdatanodefactory, mdetectorfactory);
     mdetector->reset();
     //mdetector->print();
       
@@ -256,12 +273,6 @@ void StiMaker::setDetectorBuildPath(char* val)
 {
     mdetectorbuildpath = val;
 }
-
-void StiMaker::setPolygonBuildPath(char* val)
-{
-    mpolygonbuildpath = val;
-}
-
 
 void StiMaker::reset()
 {
