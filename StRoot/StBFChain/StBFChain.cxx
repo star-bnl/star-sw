@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.297 2002/06/14 04:47:51 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.298 2002/06/29 00:31:25 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -396,7 +396,7 @@ Bfc_st BFC1[] = {
   {"EbyeScaTags" ,"","TagsChain","StEvent"            ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
   {"PCollTag"    ,"","TagsChain","StEvent"                  ,"StPCollTagMaker","StPCollTagMaker","",kFALSE},
   {"tags"        ,"","TagsChain",
-                 "TagsChain,globT,Event,FlowTag,StrangeTags,SpectraTag,EbyeScaTags,TpcTag,PCollTag"
+                 "TagsChain,globT,Event,StrangeTags,SpectraTag,EbyeScaTags,TpcTag,PCollTag"
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
 
 
@@ -794,7 +794,7 @@ Bfc_st BFC2[] = {
   {"EbyeScaTags" ,"","TagsChain","StEvent"            ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
   {"PCollTag"    ,"","TagsChain","StEvent"                  ,"StPCollTagMaker","StPCollTagMaker","",kFALSE},
   {"tags"        ,"","TagsChain",
-                 "TagsChain,globT,Event,FlowTag,StrangeTags,SpectraTag,EbyeScaTags,TpcTag,PCollTag"
+                 "TagsChain,globT,Event,StrangeTags,SpectraTag,EbyeScaTags,TpcTag,PCollTag"
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
 
   // THIS IS THE ITTF PART OF THE OPTION
