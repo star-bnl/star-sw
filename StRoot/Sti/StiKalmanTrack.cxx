@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.18 2003/03/14 20:50:29 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.19 2003/03/17 17:45:31 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.19  2003/03/17 17:45:31  pruneau
+ * *** empty log message ***
+ *
  * Revision 2.18  2003/03/14 20:50:29  pruneau
  * Added groupId member and accessor functions to StiDetector, StiDetectorGroup, StiDetectorBuilder,
  * and modified getNodes of the StiKalmanTrack class to use it. This eliminates explicit
@@ -759,10 +762,14 @@ vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(int detectorId) const
       const StiKalmanTrackNode& node = *it;
       StiHit* hit = node.getHit();
       if (hit && 
+	  hit->detector())
+      if (hit && 
 	  hit->detector() && 
 	  node.getDedx()>0. &&  
 	  detectorId==hit->detector()->getGroupId() ) 
-	nodeVec.push_back(const_cast<StiKalmanTrackNode*>(&node));
+	{
+	  nodeVec.push_back(const_cast<StiKalmanTrackNode*>(&node));
+	}
       ++it;
     }
   return nodeVec;
