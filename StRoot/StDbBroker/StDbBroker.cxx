@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.33 2001/10/30 21:59:32 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.34 2001/12/21 04:55:31 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.34  2001/12/21 04:55:31  porter
+ * changed some ostrstream usage for insure tests
+ *
  * Revision 1.33  2001/10/30 21:59:32  porter
  * same timestamp fix for runlevel query... but works..
  *
@@ -266,7 +269,8 @@ unsigned int numElements = mdescriptor->NumberOfColumns();
      os<<index[mdescriptor->Dimensions(i)-1]<<ends;
      char* lengthString = os.str(); 
      buff.WriteScalar(lengthString,"length");
-     delete [] lengthString;
+     os.freeze(0);
+     //     delete [] lengthString;
    }
 
    // position in struct
@@ -366,8 +370,10 @@ StDbBroker::SetDateTime(UInt_t date, UInt_t time)
 
    dateTime = ds.str();
    mgr->setRequestTime(dateTime);
-   delete [] timeCheck;
-   delete [] dateTime;
+   ds.freeze(0);
+   ts.freeze(0);
+   //   delete [] timeCheck;
+   //   delete [] dateTime;
 }
 
 //____________________________________________________________________________
