@@ -248,7 +248,7 @@ public:
   static StiMaterial * prevGas;
   static StiMaterial * mat;
   static StiMaterial * prevMat;
-  static double x0,y0, dx, dl;
+  static double x0,y0, dx, dy, dl0, dl;
   static double x1,y1,z1,cosCA1,sinCA1;
   static double x2,y2,z2,cosCA2,sinCA2;
   static double sumSin, sinCA1plusCA2, sumCos;
