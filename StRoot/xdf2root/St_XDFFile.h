@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.17 1998/12/19 02:54:05 fine Exp $
+// $Id: St_XDFFile.h,v 1.18 1999/01/21 02:46:38 fine Exp $
 // $Log: St_XDFFile.h,v $
+// Revision 1.18  1999/01/21 02:46:38  fine
+// New method dir and Browse to navigate XDF files
+//
 // Revision 1.17  1998/12/19 02:54:05  fine
 // ST_XDFFile::NextEventList() - fast scan of the XDF files method has been introduced
 //
@@ -49,7 +52,7 @@ class St_DataSet;
 class TClass;
 
 
-class St_XDFFile 
+class St_XDFFile : public TObject
  {
   private:
     FILE 		*fFile;  	// pointer to C file descriptor 
@@ -61,6 +64,7 @@ class St_XDFFile
     const Char_t        *fMethodName;   // The name of the current method (to debug code)
     TSocket             *fSocket;       // Socket to XDF I/O
     Int_t                fRecordCount;  // No. of records read/written
+    St_DataSet          *fBrowsable;    // The pointer to the record selected with ROOT Browser
 
   protected:
     static St_DataSet   *MakeDataSet(DS_DATASET_T *ds);    // DS_DATASET_T -> St_DataSet. Create St_DataSet object from DS_DATASET_T C-structure
@@ -71,9 +75,12 @@ class St_XDFFile
     St_XDFFile();                                          // Default ctor
     St_XDFFile(const Char_t *filename,const Char_t *mode="r");                  // Create object and open file
     virtual ~St_XDFFile();
+    virtual void        Browse(TBrowser *b);
     virtual Int_t       CloseXDF();                                             // close the XDF file (it is called from dtor)
+    static  Int_t       dir(const Char_t *filename, UInt_t firstRecord=1, UInt_t numberOfRecords=1);
             Int_t       GetErrorCode() const { return fErrorCode;}
     virtual const Char_t *GetName() const { return fName;}
+    virtual St_DataSet *GetSelected() { St_DataSet *s = fBrowsable; fBrowsable=0; return s;}
     virtual Int_t       OpenXDF(const Char_t *filename,const Char_t *mode="r"); // Open file and read create the "root" St_DataSet (it is called from ctor)
     virtual Int_t       OpenXDF(TInetAddress address, const char *service,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(TInetAddress address, Int_t port,const Char_t *mode="r");      // Create object and open file
