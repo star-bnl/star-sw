@@ -11,6 +11,7 @@
 #include "TCanvas.h"
 #include "TH1.h"
 #include "TGraphErrors.h"
+#include "StEmcUtil/StEmcGeom.h"
 
 ClassImp(StEmcEqualSpectra);
 //_____________________________________________________________________________
@@ -31,6 +32,8 @@ void StEmcEqualSpectra::DrawEqualConst()
   emcEqualization_st* rows=EqualTable->GetTable();
   TH1F* distr1=new TH1F("distr1","Relative gain distribution",200,0,4);
   TH1F* distr2=new TH1F("distr2","Relative shift distribution",200,-4,4);
+  distr1->SetFillColor(11);
+  distr2->SetFillColor(11);
   
   const int nbins=GetNBin();
   
@@ -65,12 +68,16 @@ void StEmcEqualSpectra::DrawEqualConst()
   graph2->SetTitle("Equalization Relative shift");
 
   canvas5->cd(1);
-  graph1->Draw("A*");
+  graph1->SetMarkerStyle(20);
+  graph1->SetMarkerColor(1); 
+  graph1->Draw("AP");
   canvas5->cd(2);
   distr1->Draw();
   
   canvas6->cd(1);
-  graph2->Draw("A*");
+  graph2->SetMarkerStyle(20);
+  graph2->SetMarkerColor(1); 
+  graph2->Draw("AP");
   canvas6->cd(2);
   distr2->Draw();
   
@@ -88,11 +95,10 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
    
   Bool_t EqDone=kFALSE;
     
-  Float_t pwd1=20;
-  Float_t pwd2=20;
+  Float_t pwd1=30;
 
   Float_t a=0,b=0,erra=0,errb=0,cov=0,chi=0;
-  const int npoints=6;
+  const int npoints=10;
   
   // mean and RMS modes  
   // 0 -  mean and RMS with liear average
@@ -104,6 +110,14 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
     Int_t max=nadcMax;
     max=140;
     Float_t m1,r1,m2,r2;
+    Float_t eta1,phi1,eta2,phi2,theta1,theta2;
+    
+    GetGeo()->getEtaPhi((Int_t)position1,eta1,phi1);
+    GetGeo()->getEtaPhi((Int_t)position2,eta2,phi2);
+    
+    theta1=2.*atan(exp(-eta1));
+    theta2=2.*atan(exp(-eta2));
+    
     if(mode==0 || mode==1)
     {
       GetMeanAndRms(position1,(Int_t)pwd1,max,&m1,&r1);
@@ -114,6 +128,12 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
       GetLogMeanAndRms(position1,(Int_t)pwd1,max,&m1,&r1);
       GetLogMeanAndRms(position2,(Int_t)pwd1,max,&m2,&r2);
     }
+    
+    /*m1*=sin(theta1);
+    r1*=sin(theta1);
+    m2*=sin(theta2);
+    r2*=sin(theta2);*/
+    
     if(mode==0 || mode==2)
     {
       a=r1/r2;
@@ -138,9 +158,7 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
     x1[nadcMax-1]=GetAdcValue(position1,nadcMax-1);
     x2[nadcMax-1]=GetAdcValue(position2,nadcMax-1);
     Float_t max=pwd1;
-    
-    if(pwd2>max) max=pwd2;
-    
+       
     for(Int_t i=nadcMax-2;i>=(Int_t)(max);i--)
     {
       x1[i]=x1[i+1]+GetAdcValue(position1,i);
@@ -151,19 +169,20 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
     
     Float_t limit;
     
-    if(x1[(int)max]<x2[(int)max]) limit=0.95*x1[(int)max];
-    else limit=0.95*x2[(int)max];
+    if(x1[(int)max]<x2[(int)max]) limit=0.9*x1[(int)max];
+    else limit=0.9*x2[(int)max];
     cout <<"id = "<<position2<<"  ref = "<<position1<<"  limit = "<<limit<<endl;
     
     if(limit>=10)
     {    
-      Float_t dl=log10(limit)/(Float_t)npoints;
+      Float_t dl=log10(0.9*limit)/(Float_t)npoints;
+      Float_t dl0=log10(0.1*limit);
     
       Float_t cc1[npoints],ec1[npoints],cc2[npoints],ec2[npoints];
       Float_t ss=0,sx=0,sx2=0,sy=0,sxy=0;
       for(Int_t i=0;i<npoints;i++)
       {
-        Float_t x=pow(10,((Float_t)i+1)*dl);
+        Float_t x=pow(10,dl0)+pow(10,((Float_t)i)*dl);
         Float_t xmin=x-sqrt(x);
         Float_t xmax=x+sqrt(x);
         Float_t a1=5000,a2=5000;
@@ -197,7 +216,6 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
         sy+=cc1[i]/(ec1[i]*ec1[i]);
         sxy+=(cc1[i]*cc2[i])/(ec1[i]*ec1[i]);
       }
-      cout <<"--------------------\n";
       Float_t delta=ss*sx2-sx*sx;
       a=(ss*sxy-sx*sy)/delta; // preliminar fit ...
       b=0;erra=0;errb=0;cov=0;chi=0;
@@ -226,6 +244,7 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
       }
       EqDone=kTRUE;
       cout <<"a = "<<a<<"+-"<<erra<<"  b = "<<b<<"+-"<<errb<<"  cov = "<<cov<<"  chi = "<<sqrt(chi/(npoints-2))<<endl;
+      cout <<"--------------------\n";
     }
   }
   

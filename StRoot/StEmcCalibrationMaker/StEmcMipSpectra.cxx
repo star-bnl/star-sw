@@ -13,6 +13,7 @@
 #include "TGraphErrors.h"
 #include "TMinuit.h"
 #include "StEmcFit.h"
+#include "StEmcUtil/StEmcGeom.h"
 
 ClassImp(StEmcMipSpectra);
  
@@ -23,7 +24,7 @@ Double_t Gaussian(Double_t x,Double_t A,Double_t xavg,Double_t sigma)
 {
   Double_t ex,arg;
   arg=(x-xavg)/sigma;
-  ex=exp(-arg*arg);
+  ex=exp(-0.5*arg*arg);
   return A*ex;
 }
 //_____________________________________________________________________________
@@ -43,7 +44,9 @@ void StEmcMipSpectra::DrawEtaBin(Int_t etabin)
 
   TCanvas* canvas7=new TCanvas("canvas7","EMC Eta Bin Spectrum",500,350);
   
-  TH1F* hist=new TH1F("hist","Eta Bin Equalization Spectrum",nadcMax,0,(Float_t)nadcMax-1);
+  char title[90];
+  sprintf(title,"Eta Bin %02d MIP peak spectrum",etabin);
+  TH1F* hist=new TH1F("hist",title,nadcMax,0,(Float_t)nadcMax-1);
 
   TArrayF temp=GetEtaBinSpectra(etabin);
   for(Int_t j=0;j<nadcMax;j++) hist->Fill(j,temp[j]);
@@ -56,7 +59,6 @@ void StEmcMipSpectra::DrawEtaBin(Int_t etabin)
   {
     Int_t fitmin=mip[etabin-1].MipFitAdcMin;
     Int_t fitmax=mip[etabin-1].MipFitAdcMax;
-    Int_t df=fitmax-fitmin;
     
     TH1F* fit=new TH1F("fit","",nadcMax,0,(Float_t)nadcMax-1);
     TH1F* fitpeak=new TH1F("fitpeak","",nadcMax,0,(Float_t)nadcMax-1);
@@ -67,14 +69,18 @@ void StEmcMipSpectra::DrawEtaBin(Int_t etabin)
       Double_t gauss1=Gaussian((Double_t)adc,(Double_t)mip[etabin-1].MipFitParam[0],
                                              (Double_t)mip[etabin-1].MipFitParam[1],
                                              (Double_t)mip[etabin-1].MipFitParam[2]);
+
       Double_t gauss2=Gaussian((Double_t)adc,(Double_t)mip[etabin-1].MipFitParam[3],
                                              (Double_t)mip[etabin-1].MipFitParam[4],
                                              (Double_t)mip[etabin-1].MipFitParam[5]);
+
       fit->Fill((Float_t)adc,gauss1+gauss2);
       fitpeak->Fill((Float_t)adc,gauss1);
       fitback->Fill((Float_t)adc,gauss2);
     }
+    hist->SetFillColor(11);
     fit->SetLineColor(4);
+    fit->SetLineWidth(2.0);
     fitpeak->SetLineColor(2); 
     fitback->SetLineColor(3);
     fit->Draw("sameC");
@@ -116,12 +122,24 @@ Bool_t StEmcMipSpectra::CalibrateByMip(Int_t bin,TArrayF SpectraTemp,
 {
   emcMipCalib_st* mip=MipTable->GetTable();
 
+
+/*
+  This is the method that performs the MIP peak fit. The fit is 
+  dependent on initial guesses so, every case is one case and there is
+  no way to find best guesses automaticaly. An initial guess finder is
+  implemented but every fit we must check the numbers by hand.
+*/
+
+
+  Int_t parms=6;
+  
   StEmcFit *fit=new StEmcFit();
-  fit->SetNParms(6);
+  fit->SetNParms(parms);
   Int_t type=1;             // two gaussians
   fit->SetFuncType(type);
-  Float_t a[7];
-  Int_t   ia[7]={0,1,1,1,1,1,1};
+  Float_t a[parms+1];
+  Int_t   ia[]={0,1,1,1,1,1,1};
+  
   
   Int_t adcmip=20;
   Int_t firstadc=0;
@@ -129,14 +147,20 @@ Bool_t StEmcMipSpectra::CalibrateByMip(Int_t bin,TArrayF SpectraTemp,
       if(SpectraTemp[i]>SpectraTemp[adcmip]) adcmip=i;
       
   firstadc=10; 
-  a[3]=15;        // mip width
+  a[3]=10;        // mip width
   
-  Int_t lastadc=(Int_t)(5.0*a[3]+(Float_t)adcmip);
+  if(bin==2) adcmip+=1;
+  //if(bin==1) ;
+  if(bin==4) {firstadc=18;}
+  
+  Int_t lastadc=(Int_t)(8.0*a[3]+(Float_t)adcmip);
   
   a[4]=0;
   for(Int_t i=0;i<3;i++) a[4]+=SpectraTemp[firstadc+i]/3;   // background amplitude
   
-  //if(bin==5) {firstadc=20; adcmip=50; lastadc=100; a[4]=75;}
+  if(bin==2) {firstadc=7; lastadc=140;}
+    
+  //if(bin==5) lastadc=150; 
   
   a[5]=(Float_t)firstadc+1.;                      // background center
   
@@ -155,7 +179,7 @@ Bool_t StEmcMipSpectra::CalibrateByMip(Int_t bin,TArrayF SpectraTemp,
     if (sig==0) sig=1;
     fit->AddPoint((Float_t)i,SpectraTemp[i],sig);
   }
-  for(Int_t i=1;i<=6;i++) 
+  for(Int_t i=1;i<=fit->GetNParam();i++) 
   {
     cout <<"Parm i = "<<i<<"  Initial a[i] = "<<a[i]<<endl;
     fit->SetParm(i,a[i],ia[i]);
@@ -212,10 +236,8 @@ TArrayF StEmcMipSpectra::GetEtaBinSpectra(Int_t etabin)
   Int_t mi,mf,ei,ef,si,sf;
   CalcEtaBin(etabin,etaBinWidth,&mi,&mf,&ei,&ef);
   
-  
   if(ei!=ef && ef==nEta) ef--;  // remove last channels in eta
-  
-  
+    
   si=1; sf=GetNSub();
 
   for(Int_t m=mi;m<=mf;m++)

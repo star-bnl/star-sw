@@ -17,15 +17,15 @@
 #include "tables/St_emcCalibration_Table.h"
 #include "tables/St_emcEqualization_Table.h"
 #include "tables/St_emcMipCalib_Table.h"
-
+class StEmcGeom;
 class StEmcSpectra : public St_DataSet 
 {
   private:
-           Int_t    detNum;
+           Int_t      detNum;
                                       
-           TMatrix  Spectra;
-           TArrayF  Sum;
-           TArrayI  IsOnOff;
+           TMatrix    Spectra;
+           TArrayF    Sum;
+           TArrayI    IsOnOff;
                                           
   protected:   
   public: 
@@ -75,6 +75,8 @@ class StEmcSpectra : public St_DataSet
            TArrayF GetEtaBinSpectra(Int_t);
            Float_t GetSumEtaBin(Int_t); 
            Int_t   GetEtaBinId(Int_t,Int_t);
+           
+           StEmcGeom* GetGeo();
            
            void    SaveAll(char*);
            void    LoadAll(char*);

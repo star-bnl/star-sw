@@ -14,9 +14,7 @@
 #include "StEmcUtil/StEmcGeom.h"
 
 ClassImp(StEmcSpectra);
-
 StEmcGeom* geo;
-
 //_____________________________________________________________________________
 const char* StEmcSpectra::GetDetName()   
 { 
@@ -267,13 +265,16 @@ void StEmcSpectra::Draw(Int_t position)
     return;
   }
   TCanvas* canvas1=new TCanvas("canvas1","EMC Spectra",500,350);
-  TH1F* hist=new TH1F("hist","EMC Spectrum",nAdcMax,0,(Float_t)nAdcMax-1);
+  char title[80];
+  sprintf(title,"EMC Spectrum channel %05d",position);
+  TH1F* hist=new TH1F("hist",title,nAdcMax,0,(Float_t)nAdcMax-1);
   for(Int_t j=0;j<nAdcMax;j++) 
   {
     Float_t k=GetAdcValue(position,j);
     hist->Fill(j,k);
   }
   canvas1->cd();
+  hist->SetFillColor(11);
   hist->Draw();
   return;
 }
@@ -318,12 +319,15 @@ void StEmcSpectra::DrawEtaBin(Int_t etabin)
 
   TCanvas* canvas7=new TCanvas("canvas7","EMC Eta Bin Spectrum",500,350);
   
-  TH1F* hist=new TH1F("hist","Eta Bin Equalization Spectrum",nAdcMax,0,(Float_t)nAdcMax-1);
+  char title[90];
+  sprintf(title,"Eta Bin %02d spectrum",etabin);
+  TH1F* hist=new TH1F("hist",title,nAdcMax,0,(Float_t)nAdcMax-1);
 
   TArrayF temp=GetEtaBinSpectra(etabin);
   for(Int_t j=0;j<nAdcMax;j++) hist->Fill(j,temp[j]);
   
   canvas7->cd();
+  hist->SetFillColor(11);
   hist->Draw();
 }
 //_____________________________________________________________________________
@@ -532,7 +536,11 @@ void StEmcSpectra::LoadAll(char *filename)
     }  
   file.close();
 }
-
+//_____________________________________________________________________________
+StEmcGeom* StEmcSpectra::GetGeo()
+{
+  return geo;
+}
 
 
 

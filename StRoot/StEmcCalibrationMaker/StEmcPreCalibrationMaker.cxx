@@ -1,9 +1,9 @@
 //*-- Author : Alexandre Suaide 
 // 
-// $Id: StEmcPreCalibrationMaker.cxx,v 1.4 2001/11/02 15:30:30 jeromel Exp $
+// $Id: StEmcPreCalibrationMaker.cxx,v 1.5 2001/11/07 17:54:10 suaide Exp $
 // $Log: StEmcPreCalibrationMaker.cxx,v $
-// Revision 1.4  2001/11/02 15:30:30  jeromel
-// Added return 1;  to make Insure happy about Int_t function not returning a value.
+// Revision 1.5  2001/11/07 17:54:10  suaide
+// some modifications for real data
 //
 // Revision 1.3  2001/10/26 21:00:33  suaide
 // Many modifications to optimize for real data
@@ -63,7 +63,6 @@ Int_t StEmcPreCalibrationMaker::Init()
 Int_t StEmcPreCalibrationMaker::Finish()
 {
   cout <<"Finishing EmcPreCalibration maker ++++++++++++++++++++++++\n";
-  return 1;
 }
 //_____________________________________________________________________________
 Int_t StEmcPreCalibrationMaker::Make()

@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide and Marcia Moura
 // 
-// $Id: StEmcFit.cxx,v 1.2 2001/10/26 21:00:33 suaide Exp $
+// $Id: StEmcFit.cxx,v 1.3 2001/11/07 17:54:09 suaide Exp $
 // $Log: StEmcFit.cxx,v $
+// Revision 1.3  2001/11/07 17:54:09  suaide
+// some modifications for real data
+//
 // Revision 1.2  2001/10/26 21:00:33  suaide
 // Many modifications to optimize for real data
 //
@@ -205,13 +208,23 @@ void StEmcFit::Fit()
   alamda=-1;
   Int_t co=0;
   Float_t old=1e30,deltao=0;
-  loop:
+  mrqmin();
+  
+  do
+  {
+    Float_t oldlamda=alamda;
     mrqmin();
     deltao=fabs(chisq-old)/old;
     old=chisq;
     //cout <<"chi = "<<chisq<<"  alamda = "<<alamda<<endl;
     co++;
-    if(co<1000 && alamda>1e-20 && alamda <1e37 && deltao > 0.00001 ) goto loop;
+    
+    if(alamda<1e-20 || alamda >1e37) goto end;
+    if(deltao==0 && oldlamda<alamda) goto end;
+    if(deltao==0 && alamda>1e6) goto end;
+  } while(co<2000);
+  
+  end:
   cout <<"FIT: Niteractions = "<<co<<"  alamda = "<<alamda<<endl;
   alamda=0;  
   mrqmin();
@@ -222,13 +235,23 @@ void StEmcFit::Fit(Int_t max)
   alamda=-1;
   Int_t co=0;
   Float_t old=1e30,deltao=0;
-  loop:
+  mrqmin();
+  
+  do
+  {
+    Float_t oldlamda=alamda;
     mrqmin();
     deltao=fabs(chisq-old)/old;
     old=chisq;
     //cout <<"chi = "<<chisq<<"  alamda = "<<alamda<<endl;
     co++;
-    if(co<max && alamda>1e-20 && alamda <1e37 && deltao > 0.00001 ) goto loop;
+    
+    if(alamda<1e-20 || alamda >1e37) goto end;
+    if(deltao==0 && oldlamda>alamda) goto end;
+    if(deltao==0 && alamda>1e6) goto end;
+  } while(co<max);
+  
+  end:
   cout <<"FIT: Niteractions = "<<co<<"  alamda = "<<alamda<<endl;
   alamda=0;  
   mrqmin();
@@ -255,8 +278,8 @@ k = 1; :::; na/3. The dimensions of the arrays are a[1..na], dyda[1..na].*/
   {
     //if(atry[i+2]<=0) {atry[i+2]=fabs(atry[i+2]);}
     arg=(x-atry[i+1])/atry[i+2];
-    ex=exp(-arg*arg);
-    fac=atry[i]*ex*2.0*arg*(atry[i+2]/fabs(atry[i+2]));
+    ex=exp(-0.5*arg*arg);
+    fac=atry[i]*ex*arg*(atry[i+2]/fabs(atry[i+2]));
     *y += atry[i]*ex;
     dyda[i]=ex;
     dyda[i+1]=fac/atry[i+2];
@@ -277,8 +300,8 @@ void StEmcFit::gaussPlusExp(Float_t x, Float_t *y)
   *y=0.0;
 // gaussian
     arg=(x-atry[2])/atry[3];
-    ex=exp(-arg*arg);
-    fac=atry[1]*ex*2.0*arg;
+    ex=exp(-0.5*arg*arg);
+    fac=atry[1]*ex*arg;
     *y += atry[1]*ex;
     dyda[1]=ex;
     dyda[2]=fac/atry[3];
