@@ -1,26 +1,28 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% StEvent - User Guide and Reference Manual -- LaTeX Source 
+% StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 1.6 1999/03/16 00:49:23 ullrich Exp $
+% $Id: StEvent.tex,v 1.7 1999/03/19 17:22:44 ullrich Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Notes to the authors:
-% 
+%
 % - A template for a class reference is at the end of this file.
 % - Wrap all names functions with \name{}
 % - All code, examples, prototypes in \verb+ ... +\\
 %   or /begin{verbatim} ... \end{verbatim}
 % - Use \StEvent if you refer to the package itself (not the class)
 %
+% This file is best edit with xemacs and the 'Function' package loaded.
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.6  1999/03/16 00:49:23  ullrich
-% Check in current status
+% Revision 1.7  1999/03/19 17:22:44  ullrich
+% Save current version.
 %
 % Revision 1.16  1999/03/31 19:03:50  ullrich
 % Corrected typos in UML appendix
@@ -81,7 +83,7 @@
 % Revision 2.44  2000/08/17 00:36:31  ullrich
 % Added description of StTptTrack.
 %
-\newcommand{\StEvent}{\textsl{$\cal{S}$t$\cal{E}$vent}}
+% Revision 2.43  2000/08/17 01:18:02  ullrich
 % Fixed wrong description of StZtbTriggerDetector::adc().
 %
 % Revision 2.42  2000/07/13 12:47:07  ullrich
@@ -123,8 +125,8 @@
 % Added description of changes to StTrackDetectorInfo.
 %
 % Revision 2.27  2000/04/10 19:59:34  genevb
-  {\LARGE $ $Revision: 1.6 $ $}  \\[5mm] % replaced by cvs with current revision  
-  {\LARGE $ $Date: 1999/03/16 00:49:23 $ $}  % replaced by cvs with current revision  
+% StRoot/StEvent/doc/tex/
+%
 % Revision 2.26  2000/03/30 16:55:38  ullrich
 % Modified reference section for StTrack::key().
 %
@@ -138,8 +140,8 @@
 % Added description of new method of StVertex.
 %
 % Revision 2.22  2000/03/02 12:40:40  ullrich
-  {\LARGE $ $Revision: 1.6 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/16 00:49:23 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.7 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/19 17:22:44 $ $}  % replaced by cvs with current revision
 % Revision 2.21  2000/02/28 19:37:26  ullrich
 % Added the hypperref package to add bookmarks and hyperlinks
 % tp pdf documents.
@@ -147,51 +149,124 @@
 % Revision 2.20  2000/02/24 13:25:12  ullrich
 % Added RICH and EMC to the reference section. Created
 % (empty) section for EMC and RICH in User Guide.
-  {\LARGE $ $Revision: 1.6 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/16 00:49:23 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.7 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/19 17:22:44 $ $}  % replaced by cvs with current revision
 %
-\section{Introduction} 
+% Revision 2.18  2000/02/11 16:23:45  ullrich
+% Add info on order in which primary vertices are stored
+  {\LARGE User Guide and Reference Manual}\\[2cm]
+  {\LARGE $ $Revision: 1.7 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/19 17:22:44 $ $}  % replaced by cvs with current revision
+% Added Helens description of iflag (see StTrack::flag()).
+%
+% Revision 2.16  2000/01/27 18:38:30  ullrich
+% Fixed typo in units for curvature.
+%
+% Revision 2.15  2000/01/12 10:45:31  ullrich
+% Fixed error (underscore in text).
+%
+% Revision 2.14  2000/01/11 16:31:56  ullrich
+% Regular update.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[twoside]{article}
+
+\parindent 0pt
+\parskip 6pt
+model to access, manipulate and analyze STAR DSTs. It consist of a set
+of C++ classes which are connected in a tree like structure. The top
+class is \name{StEvent} which also is the single entry point to
+the whole tree. All what is needed to access every instance in the
+tree and navigate freely through the structure is a pointer to
+\clearpage
+\name{StEventReaderMaker} which is explained below in detail.
+
+\section{Introduction}
+    \label{fig:umlForEvents}
+sec.~\ref{sec:StEventReaderMaker}.
+\StEvent\footnote{The name ``StEvent'' is somewhat misleading since it
+    of a class.  We therefore write \StEvent\ when we refer to the
+    package and \name{StEvent} for the class.} is an object oriented
+framework to access, manipulate and analyze STAR DSTs. It consist of a
+set of C++ classes which are connected in a tree like structure. The
+top class is \name{StEvent} which represents also the single entry
+point to the whole tree. All what is needed to access every instance
+in the tree and navigate freely through the structure is a pointer to
+\name{StEvent}. This pointer can be obtained from the
+\name{StEventReaderMaker} which is explained in detail in
+sec.~\ref{sec:howto}.
+
+Although \StEvent\ benefits from the flexibility of the OO design it
+is strongly constraint by the existing DST model where the data is
+basic class diagrams using the Unified Modelling Language (UML).
+is mapped to the OO model and keys are replaced by associations
+between classes through pointer and references.
+
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics[width=0.95\textwidth]{umlForEvents.eps}
+    \caption{UML diagram showing the top class \name{StEvent} and its
+        directly related classes.}
+    \label{fig:umlForEvents}
+\end{center}
+\end{figure}
+Overall the design of \StEvent\ is fairly simple which reflects the
+    \caption{Dependencies for the TPC, FTPC and SVT hit classes.}
+fact that the package is strongly focused on simple data access and
+navigation.  In order to give an overview without going to much in
+detail Fig.~\ref{fig:umlForEvents}-\ref{fig:umlForVertices} show some
+basic class diagrams using the Unified Modelling Language UML (see
+Appendix~\ref{sec:introUML} for a brief introduction to UML).
+
+Fig.~\ref{fig:umlForEvents} shows an UML class diagram \index{UML}
+which illustrates the first layer of classes directly connected to
+\name{StEvent}. Most notably are the collections for hits, tracks and
+vertices. Each event has a run associated with it which is described
+by the \name{StRun} class. \\
+A more simple structure of concrete classes is depicted in
+Fig.~\ref{fig:umlForHits}. Shown is the relations between the various
+Global Tracks are the essential backbone of the data model. They
+    \caption{Data model for \name{StGlobalTrack} and related classes.}
+three vector class \name{StThreeVector} indicates a 'has a'
+relationship, since the actual position in xyz is stored in a data
+member of type \name{StThreeVector}.
+\usepackage{amsmath}
+\begin{figure}[htb]
+% Typographic Conventions
+    \includegraphics[height=0.4\textheight]{umlForHits.eps}
+    \caption{Dependencies for the TPC, FTPC and SVT hit classes.}
+    \label{fig:umlForHits}
+\newcommand{\StEvent}{\textsf{StEvent}}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-... missing
+Fig.~\ref{fig:umlForTracks} shows a more complex diagram which
 Global tracks are the essential backbone of the data model. They
     \caption{Data model for the vertices and related classes in \StEvent .}
 contain references to their hits in the various detectors and keep
 track of their start and stop vertices.  (see
 fig.~\ref{fig:umlForVertices}).
-This document is intended to serve the advanced users as well
-as beginners. It is therefore divided in two parts, a user
-guide and a reference manual. In the first part we rather concentrate
-on basic questions and provide guidance to get started.
-The reference section provides information on all available classes,
-their member functions and related operators. Each class reference contains
-one or more examples which demonstrates some features of the class
-and how to use it.
 
-New users should \textbf{not} start with the Reference section. It is meant
-as a lookup when specific information is needed. Beginners should
-study the User Guide and should make themself familiar only with those
-classes which they will encounter most:
-\name{StEvent} (sec.~\ref{sec:StEvent}),
-\name{StGlobalTrack} (sec.~\ref{sec:StGlobatTrack}),
-\name{StVertex} (sec.~\ref{sec:StVertex}),
-and \name{StTpcHit} (sec.~\ref{sec:StVertex}).
-Reading and understanding the various examples certainly is the
-best way to get started. Note, however,
-that the examples shown throughout this guide are often not complete
-and are not guaranteed to compile. Their only purpose is to illustrate
-a specific feature and not to provide a fully functional programming unit.
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics[height=0.4\textheight]{umlForTracks.eps}
+    \caption{Data model for \name{StGlobalTrack} and related classes.}
+    \label{fig:umlForTracks}
+\end{center}
+\end{figure}
 
-...
+The dependencies of the various kinds of vertices is shown in
+Fig.~\ref{fig:umlForVertices} on page \pageref{fig:umlForVertices}.
+The base class \name{StVertex} is used for most of the common types of
+vertices while more specialized classes, e.g.~\name{StXiVertex},
+derived from it have a more complex design reflecting their higher
+degree of specialization.
 
-
-The name ``StEvent'' is somewhat misleading since it is \textit{(i)}
-the name of the package and \textit{(ii)} the name of a class.
-We therefore write \StEvent\ when we refer to the package
-and \name{StEvent} for the class.
-
-In this document the terms \textit{method} and \textit{member function}
-are used synonymously.
-
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics[height=0.4\textheight]{umlForVertices.eps}
+    \caption{Data model for the vertices and related classes in \StEvent .}
+    \label{fig:umlForVertices}
+\end{center}
 \end{figure}
 
 %
@@ -215,7 +290,7 @@ should study the User Guide and should make themself familiar only
 with those classes they will encounter more frequently: \name{StEvent}
 (sec.~\ref{sec:StEvent}), \name{StGlobalTrack}
 (sec.~\ref{sec:StGlobalTrack}), \name{StVertex}
-\section{Getting \StEvent Sources}  \index{Getting StEvent sources}
+(sec.~\ref{sec:StVertex}), and \name{StTpcHit}
 (sec.~\ref{sec:StVertex}).  Reading and understanding the various
 examples certainly is the best way to get started. Note, however, that
 the examples shown throughout this guide are often not complete and
@@ -223,7 +298,7 @@ are not guaranteed to compile. Their only purpose is to illustrate a
 specific feature and not to provide a fully functional programming
 unit.
 
-  {\LARGE $ $Date: 1999/03/16 00:49:23 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/19 17:22:44 $ $}  % replaced by cvs with current revision
      \advance\leftmargin by \labelsep%
 \section{Further documentation}
 \label{sec:furtherdoc}
@@ -235,41 +310,49 @@ To obtain the SCL documentation perform the following steps:
   \item Make sure \name{\$CVSROOT} is set properly:\\
     (i.e.~\name{CVSROOT = /afs/rhic/star/packages/repository})
   \item Check-out the SCL into your current working directory:\\
-\StEvent\ follows the STAR coding guidelines as described on the STAR web page: \\ 
+    \name{cvs checkout StRoot/StarClassLibrary}
+  \item Go to the directory containing the documentation:\\
+    \name{cd StRoot/StarClassLibrary/doc/tex}
   \item Create the PostScript document \name{StarClassLibrary.ps}:\\
-All developers are encouraged to follow this small set of rules 
-in order to create a homogeneous and coherent interface style.
-Here we summarize the most relevant one concerning the programmable interface:
+    \name{make}
+\end{enumerate}
+\index{SCL} \index{StarClassLibrary}
 \section{Coding Standards}  \index{Coding Standards}
-\item all classes, enumerations and functions start with the prefix \textbf{St}
+
+  {\Large\bf STAR Offline Library Long Writeup}
 \section{Getting \StEvent\ Sources}  \index{Getting StEvent sources}
-\item header files have the extension \textbf{.hh},
-    source files have the extension\textbf{ .cc}
+  \hfill\mbox{}\\[3cm]
+The \StEvent\ package is part of the official STAR software distribution
 and is therefore present in the actual STAR software releases. To access
-\item classes, methods, and variables have self-explanatory English names
-    and first letter capitalization to delineate words
+the complete source code proceed as follows:
+
 \StEvent\ is under {\bf CVS} control at BNL.  It can
 be accessed via \name{afs}: \index{afs} \index{CVS} \index{CVSROOT}
 \begin{enumerate}
   \item Obtain an \name{afs} token: \name{klog -cell rhic}.
-\item methods (member functions) which return a certain object have the same name as the referring object, i.e.,
-    without a preceding \name{get} prefix (as in \name{StEvent::primaryVertex()})
-\item methods which assign a value to a data member (or members) 
-    carry the prefix \name{set} (as in  \name{StEvent::setPrimaryVertex()}).
-\item integer variables which serve as counter or indices and never can take negative
-    values are consistently of declared as \name{unsigned}. 
+  \item Make sure \name{\$CVSROOT} is set properly:\\
+    (i.e.~\name{CVSROOT = /afs/rhic/star/packages/repository})
+  \item Check-out package into your current working directory:\\
+    \name{cvs checkout StRoot/StEvent}
+\end{enumerate}
+    \name{get} prefix \\ (as in \name{StEvent::primaryVertex()})
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    the prefix \name{set} (as in \name{StEvent::setPrimaryVertex()}).
 \section{Coding Standards}
 \index{Coding Standards}
-    \item const member functions are guaranteed to not alter data member
-    \item const arguments are guaranteed to not be modified by the function
-    \item const return values cannot be modified    
+
+\StEvent\ follows the STAR coding guidelines as described on the
+STAR web page: \\
+http://rsgi01.rhic.bnl.gov/STAR/html/comp\_l/train/standards.html.\\
+All developers are encouraged to follow this small set of rules in
 order to create a homogeneous and coherent interface style.  Here we
-    \name{const}'ness implies a slightly higher compile time overhead but a faster execution
-    time.
-\item Objects which are returned by pointer are not guaranteed to exist in which case
-    a null pointer is returned. It is users responsibility to check for the return value
-    and make sure the pointer is valid (non-zero) before she dereference it.
-    Objects which are granted to exist are returned by reference or by value.
+summarize the most relevant one concerning the programmable interface:
+\begin{itemize}
+\item all classes, enumerations and functions start with the prefix
+    \textbf{St}
+\item all member function start with a lowercase letter
+\item header files have the extension \textbf{.hh}, source files have
+    the extension\textbf{ .cc}
 \item the use of underscores in names is discouraged
 \item classes, methods, and variables have self-explanatory English
     names and first letter capitalization to delineate words
@@ -290,15 +373,14 @@ In addition \StEvent\ defines a few rules which ease its usage
     \item const member functions are guaranteed to not alter data
         member
     \item const arguments are guaranteed to not be modified by the
-All quantities in \StEvent\ are stored using the official STAR
-units: cm, GeV and Tesla.
-In order to maintain a coherent system of units 
-it is recommended to use the definitions in \name{SystemOfUnits.h}
-from the StarClassLibrary. They allow to 'assign' a unit to a given variable
-by multiplying it with a constant named accordingly (centimeter, millimeter,
-kilometer, tesla, MeV, ...).
-The value of the constants is thus that the result after the multiplication
-follows always the STAR system of units.
+    \item const return values cannot be modified
+\section{Accessing \StEvent : StEventReaderMaker}
+\label{sec:StEventReaderMaker}
+    exist in which case a null pointer is returned. It is users
+StEvent:
+... missing
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{An extended example: doEvents.C}
 \index{doEvents.C}
 %    Introduction
@@ -329,7 +411,7 @@ variable by multiplying it with a constant named accordingly
 (centimeter, millimeter, kilometer, tesla, MeV, ...).  The value of
 the constants is thus that the result after the multiplication follows
 always the STAR system of units.
-}%footnotesize    
+
                              tpcOther,
 {\footnotesize
                              ftpcConformal,
@@ -355,16 +437,15 @@ file in the \name{StarClassLibrary} (see Sec.~\ref{sec:furtherDoc}).
 \index{StarClassLibrary} In order to define the units of the various
 physical constants another set of constants defined in
 \texttt{SystemOfUnits.h} is used (also from \name{StarClassLibrary}).
-\StEvent\ is  continuously improved. In certain cases it might happen that the
-documentation isn't up-to-date. In these cases the header file should
-be visited.
+The latter is described in section \ref{sec:units}.
 
-Although \StEvent\ is updated frequently it might happen that it
-lacks means of accessing some specific DST information
-since the content of the DST changes considerably in time. We expect
-a more stable situation as soon as experimental data comes in and
-the DST format gets better defined.
-\index{DST files} 
+\subsection{Conventions}
+\index{conventions}
+}%footnotesize
+\label{sec:conventions}
+{\footnotesize
+
+\subsubsection{Numbering Scheme}
 \label{sec:conventionsNumbering}
 
 All numbering follows \emph{strictly} the C/C++ convention, i.e. the
@@ -392,12 +473,12 @@ file should be visited.
 
 Although \StEvent\ is updated frequently it might happen that it lacks
 means of accessing some specific DST information since the content of
-        
+the DST changes considerably in time. We expect a more stable
 situation as soon as experimental data comes in and the DST format
 gets better defined.  \index{DST files}
-  \verb+#include "StEnumerations.hh"+ \\  
-  
-  
+
+\subsection{Enumeration Types} \index{enumerations}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %    Reference Manual
 %
@@ -410,9 +491,9 @@ gets better defined.  \index{DST files}
 \section{Global Constants, Enumerations and Definitions}
 
 In addition to the constants defined in the two header files
-    
+\index{StarClassLibrary} \name{SystemOfUnits.h} and
 \name{PhysicalConstants.h} which are part of the StarClassLibrary
-    
+\StEvent\ defines a set of enumeration types in
 \name{StEnumerations.hh}. The types defined therein are used
 throughout \StEvent .
 
@@ -425,7 +506,7 @@ throughout \StEvent .
 \end{figure}
 
 \item[Synopsis]
-    
+  \verb+#include "StEnumerations.hh"+ \\
 
 typedef short          Short_t;     //Signed Short integer 2 bytes
 \item[Description]
@@ -497,7 +578,7 @@ All container are guaranteed to provide at least the following member functions:
 \StEvent\ have a referring iterator defined (see table \ref{tab:stcoll})
 which is declared in the same header file as the
 corresponding collection.
-    
+
 In order to keep your code independent of the underlying container
 types users are encouraged to use \textit{iterators} instead of
 indices. The higher degree of flexibility allows to change containers
@@ -524,7 +605,7 @@ It should be replaced by:
     the \name{StEvent} class itself, i.e., \name{StEvent} provides member functions
     which return pointer or references to them.  There names are
     composed of the name of the objects they hold and the word
-    \end{tabular}            
+    \name{Collection}.  All containers of this type are listed in
     table \ref{tab:stcoll}.  The hold the essential objects as hits,
     tracks and vertices.
 
@@ -546,7 +627,7 @@ It should be replaced by:
         \textbf{Collection Class} & \textbf{Elements} & \textbf{Iterator} & \textbf{Header File} \\ \hline
 \name{StEmcPreShowerHitCollection} & \name{StEmcPreShowerHit} & \name{StEmcPreShowerHitIterator} & \name{StEmcPreShowerHitCollection.hh}  \\ \hline
 \name{StEmcTowerHitCollection}     & \name{StEmcTowerHit}     & \name{StEmcTowerHitIterator}     & \name{StEmcTowerHitCollection.hh}  \\ \hline
-    \end{tabular}            
+\name{StSmdEtaHitCollection}       & \name{StSmdEtaHit}       & \name{StSmdEtaHitIterator}       & \name{StSmdEtaHitCollection.hh}  \\ \hline
 \name{StSmdPhiHitCollection}       & \name{StSmdPhiHit}       & \name{StSmdPhiHitIterator}       & \name{StSmdPhiHitCollection.hh}  \\ \hline
 \name{StFtpcHitCollection}         & \name{StFtpcHit$*$}      & \name{StFtpcHitIterator}         & \name{StFtpcHitCollection.hh}  \\ \hline
 \name{StSvtHitCollection}          & \name{StSvtHit$*$}       & \name{StSvtHitIterator}          & \name{StSvtHitCollection.hh}  \\ \hline
@@ -562,7 +643,7 @@ It should be replaced by:
 
 \begin{table}[htb]
     \begin{center}
-         hit = iter;                             // no dereference necessary
+     StEmcPreShowerHitCollection* hits = event->emcPreShowerHitCollection();
         \hline
         \textbf{Collection Class} & \textbf{Elements} & \textbf{Iterator} & \textbf{Header File} \\ \hline
 \name{StVecCtbCounter}     & \name{StCtbCounter}   & \name{StVecCtbCounterIterator}     & \name{StVecCtbCounter.hh}  \\ \hline
@@ -601,7 +682,7 @@ But for a \textit{by-pointer} collection:
      StVertex *vertex;
      for (iter = vertices->begin(); iter != vertices->end(); iter++)
 but want to leave the original as it is.
-since they are for internal use only (even if public). 
+\end{verbatim}
 
 Hint: Use pointers or references to collection elements wherever
 possible.  Making local copies is often time- and memory-intensive.
@@ -618,18 +699,18 @@ but want to leave the original untouched.
 take tables as arguments. They are for nternal use only (even if public).
 
 Destructors, assignment operators and copy constructors are not listed.
-    content of a single Central Trigger Barrel (CTB) counter.  
-    
+\name{Inline} declarations are omitted throughout the documentation.
+\index{StMeasuredPoint}
 STAR CVS repository are described in alphabetic order.
 \texttt{StMeasuredPoint} can be used wherever positions and errors
 \index{StCtbCounter|textbf} \index{CTB}
-  
+are the coordinates and their weight which depends on the errors.
 \end{verbatim}
 Note that some constructors are omitted, especially the ones which
-    stored in the \name{dst\_TriggerDetectors.idl} table. Each counter
+take tables as arguments. They are for nternal use only (even if
 public).
 
-    
+Destructors, assignment operators and copy constructors are not
 listed.  \name{Inline} declarations are omitted throughout the
 documentation.
 
@@ -638,11 +719,11 @@ documentation.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %    Reference: StCtbCounter
-   
+    is identified by an ID. The class holds the number of mips and the counter
     corrected time.\index{dst\_TriggerDetectors.idl}
     The list of \name{StCtbCounter} objects (collection class \name{StVecCtbCounter}) can be obtained
     through the \name{StTriggerDetectorCollection::ctbCounters()} method.
-    
+    \index{StVecCtbCounter}
     The list of \name{StCtbCounter} objects (collection class \name{StVecCtbCounter}) can be obtained
     through the \name{StTriggerDetectorCollection}.
     \index{StVecCtbCounter}
@@ -650,22 +731,22 @@ documentation.
     content of a single Central Trigger Barrel (CTB) counter.
 
 \item[Synopsis]
-    
+    \verb+#include "StCtbCounter.hh"+\\
     \verb+class StCtbCounter;+\\
     
-    
+\item[Description]
     \name{StCtbCounter} represents the CTB counter information as
     stored in the \\ \name{dst\_TriggerDetectors.idl} table. Each
-    
+    counter is identified by an ID. The class holds the number of mips
     and the counter corrected time.\index{dst\_TriggerDetectors.idl}
     The list of \name{StCtbCounter} objects (collection class
-    
+    \name{StVecCtbCounter}) can be obtained through the
     \name{StTriggerDetectorCollection::ctbCounters()} method.
     \index{StVecCtbCounter} \index{StTriggerDetectorCollection}
-    
+
 \item[Persistence]
     None
-    
+
 \item[Related Classes]
     None
 
@@ -676,7 +757,8 @@ documentation.
     \verb+StCtbCounter(short id, float m, float t);+ \\
     Constructs a CTB counter with id \name{id}, number of mips \name{m}
     and counter corrected time \name{t}.
-    StTriggerDetectorCollection* tds = event->triggerDetectorCollection();
+
+\item[Public Member\\ Functions]
     \verb+short id() const;+ \\
     Returns the id of the counter.
 
@@ -684,7 +766,7 @@ documentation.
     Returns the counter signal in number of mips.
 
     \verb+float time() const;+ \\
-}%footnotesize    
+    Returns the counter corrected time.
 
     \verb+void setId(short);+ \\
     Sets the counter id.
@@ -698,12 +780,12 @@ documentation.
 \item[Examples]
 {\footnotesize
 \begin{verbatim}
-    energy loss (dE/dx) of a particle (track) in a specific detector.   
-    
-\item[Synopsis] 
+//
+//  Function to calculate and return the sum of the
+//  number of mips from all CTB counter.
 //
 \index{dE/dx} \index{StDedx|textbf}
-    
+    double sum = 0;
     StTriggerDetectorCollection* tds =
                 event->triggerDetectorCollection();
     StVecCtbCounter &counters = tds->ctbCounters();
@@ -711,7 +793,7 @@ documentation.
         sum += counters[i].mips();
     assert(i == 240);               // must be 240 counters
     return sum;
-    
+}
 \end{verbatim}
 }%footnotesize
 \end{Entry}
@@ -721,36 +803,36 @@ documentation.
 %    Reference: StDedx
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   
+\subsection{StDedx}
 \index{dE/dx}
 \index{StDedx|textbf}
 \label{sec:StDedx}
-    
+\begin{Entry}
 \item[Summary]
     \name{StDedx} is a class which provides information on the
     energy loss (dE/dx) of a particle (track) in a specific detector.
-    
+
 \item[Synopsis]
     \verb+#include "StDedx.hh"+\\
-    
+    \verb+class StDedx;+\\
 
 \item[Description]
-    
+    \name{StDedx} represents the dE/dx information as stored
     in the \name{dst\_dedx.idl} table. It contains dE/dx mean and
     variance, number of used hits and a status word. The status word
     holds information on the quality and status of the extracted dE/dx.
     The class is used for charged tracks in the TPC, FTPC and SVT.
     \index{dst\_dedx.idl}
-    
+
 \item[Persistence]
     None
-    
+
 \item[Related Classes]
     Every global track (StGlobalTrack) holds the information
-    
+    about the energy loss of itself within the various detectors.
     Currently \name{StGlobalTrack} provides dE/dx information
     for the TPC, FTPC and the SVT.
-    
+    \index{StGlobalTrack}
 
 \item[Public\\ Constructors]
     \verb+StDedx();+ \\
@@ -763,7 +845,7 @@ documentation.
     \verb+float mean() const;+ \\
     Mean (most probable) dE/dx value.
 
- 
+    \verb+float variance() const;+ \\
     Returns the variance.
 
     \verb+unsigned long  status() const;+ \\
@@ -778,7 +860,7 @@ documentation.
      cout << "<dE/dx> = " << dedx->mean() << endl;
      cout << "var(dE/dx) = " << dedx->variance() << endl;
      cout << "# of points used = " << dedx->numberOfPointsUsed() << endl;
-}%footnotesize    
+    \verb+void setStatus(unsigned long);+ \\
     Sets the status word.
 
 \item[Examples]
@@ -792,12 +874,12 @@ void printDedx(StGlobalTrack &track)
 {
     StDedx *ftpc = track.ftpcDedx();
     StDedx *tpc  = track.tpcDedx();
-    information on the current event as stored on the DST. 
-    
-\item[Synopsis] 
+    StDedx *svt  = track.svtDedx();
+
+    if (ftpc) printOneDedx(ftpc, "FTPC");
     if (tpc) printOneDedx(tpc, "TPC");
 \index{event summary} \index{StDstEventSummary|textbf}
-    
+
 void printOneDedx(StDedx *dedx, const char* name)
 {
      cout << "\nDeDx info on " << name << ':' << endl;
@@ -806,7 +888,7 @@ void printOneDedx(StDedx *dedx, const char* name)
      cout << "points used = " << dedx->numberOfPointsUsed() << endl;
      cout << "status word = " << dedx->status() << endl;
 }
-    
+    See sec.~\ref{sec:StTrackPidTraits}
 \begin{Entry}
 \end{Entry}
 
@@ -814,15 +896,15 @@ void printOneDedx(StDedx *dedx, const char* name)
 %
 %    Reference: StDstEventSummary
 %
-   
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StDstEventSummary}
 \index{event summary}
 \index{StDstEventSummary|textbf}
-    
+\label{sec:StDstEventSummary}
 \begin{Entry}
 \item[Summary]
     \name{StDstEventSummary} is a class which summarizes basic
-    
+    information on the current event as stored on the DST.
 
 \item[Synopsis]
     \verb+#include "StDstEventSummary.hh"+\\
@@ -838,11 +920,11 @@ void printOneDedx(StDedx *dedx, const char* name)
     \index{dst\_event\_summary.idl}
 
 \item[Persistence]
-    
-\item[Synopsis] 
+    None
+
 \item[Related Classes]
     The pointer to the event summary information can be obtained directly
-    
+\index{StEmcHit|textbf} \index{EMC hit} \index{SMD hit}
 \item[Public\\ Constructors]
     \verb+StDstEventSummary();+ \\
     Default constructor.
@@ -854,12 +936,12 @@ void printOneDedx(StDedx *dedx, const char* name)
     \verb+StVecTH2F& histograms2D();+ \\
     Returns vector of 2-dimensional (Root) histograms of type THF2.
 \end{Entry}
-    
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %    Reference: StEmcHit
 %
-    The following classes are derived from \name{StEmcHit}: 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StEmcHit}
 \index{StEmcHit|textbf}
 \index{EMC hit}
@@ -876,36 +958,36 @@ void printOneDedx(StDedx *dedx, const char* name)
 \item[Description]
     \name{StEmcHit} provides the basic functionality for all
     derived classes which represent EMC hits (incl. SMD and EEMC). It
-    
+    provides information on position and energy deposition in the
     corresponding detector element (tower, preshower, shower maximum).
     The hit position is given in eta, phi coordinates measured at the
     center of the detector element.\\
-    
+    Note that it does not represent an
     EMC cluster. Here the terminology is somewhat different to the
     TPC. Tracks are related to TPC hits and EMC clusters.  EMC hits
-    
+    are currently stored only because of lack of cluster information.
 
 \item[Persistence]
-    
+    None
 
 \item[Related Classes]
-    
+    The following classes are derived from \name{StEmcHit}:
     StEmcPreShowerHit, StEmcTowerHit, StSmdEtaHit, StSmdPhiHit.
     Current collection classes
-    
+    contain the derived hits only.
     \index{StGlobalTrack}
     \index{StEmcPreShowerHit}
-    
+    \index{StEmcTowerHit}
     \index{StSmdEtaHit}
     \index{StSmdPhiHit}
-    
+
 \item[Public\\ Constructors]
     \verb+StEmcHit();+ \\
-    
+    Constructs an instance of \name{StEmcHit} with all values initialized to 0 (zero).
 
     \verb+StEmcHit(int i, float E, float phi, float eta);+ \\
     Create an instance of \name{StEmcHit} with identifier \name{i},
-   
+    energy deposition \name{E} and position \name{phi}, \name{eta}.
 
 \item[Public Member\\ Functions]
     \verb+float energy() const;+ \\
@@ -918,7 +1000,7 @@ void printOneDedx(StDedx *dedx, const char* name)
     $\phi$ coordinate at the center of the detector element.
 
     \verb+float eta() const;+ \\
-}%footnotesize    
+    $\eta$ coordinate at the center of the detector element.
 
     \verb+void setEnergy(float);+ \\
     Set energy.
@@ -939,16 +1021,16 @@ void printOneDedx(StDedx *dedx, const char* name)
 \item[Examples]
 {\footnotesize
 \begin{verbatim}
-    
-\item[Synopsis] 
+//
+//  Create and print an EMC hit
 //
 void test()
-    
+{
    StEmcHit hit(10, 10*GeV, 120*degree, 0.1);
    cout << "EMC hit = " << hit << endl;
 }
 \end{verbatim}
-    
+}%footnotesize
 {\bf Programs Output:}
 {\footnotesize
 \begin{verbatim}
@@ -963,7 +1045,7 @@ EMC hit = (0.1, 2.094; 10)
 %    Reference: StEmcPreShowerHit
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+\subsection{StEmcPreShowerHit}
 \index{EMC pre-shower hit}  \index{StEmcPreShowerHit|textbf}
 \label{sec:StEmcPreShowerHit}
 \begin{Entry}
@@ -985,7 +1067,7 @@ EMC hit = (0.1, 2.094; 10)
     \name{StEmcPreShowerHit} is derived directly from \name{StEmcHit}.
     The hits are kept in an instance of \name{StEmcPreShowerHitCollection}
     where they are stored by value (see \ref{sec:collections}).
-}%footnotesize    
+    \index{StEmcHit}
     \index{StEmcPreShowerHitCollection}
 
 \item[Public\\ Constructors]
@@ -1000,16 +1082,16 @@ EMC hit = (0.1, 2.094; 10)
 //  Calculate the total-energy ratio of pre shower detectors
 //  between the two hemispheres (eta < 0 and eta > 0).
 //
-    
-\item[Synopsis] 
+double ratioEmcPreShowerHits(StEvent *event)
+{
    StEmcPreShowerHitCollection* hits =
                        event->emcPreShowerHitCollection();
-    
+   StEmcPreShowerHitIterator iter;
    double sumLeft = 0;
    double sumRight = 0;
    for (iter = hits->begin(); iter != hits->end(); iter++)
        if (iter->eta() < 0)
-    
+           sumLeft += iter->energy();
        else
            sumRight += iter->energy();
    return sumRight > 0 ? sumLeft/sumRight : 0;
@@ -1024,8 +1106,8 @@ EMC hit = (0.1, 2.094; 10)
 %    Reference: StEmcTowerHit
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-\item[Examples] \index{accumulate (example)} 
+\subsection{StEmcTowerHit}
+\index{EMC tower hit} \index{StEmcTowerHit|textbf}
 \label{sec:StEmcTowerHit}
 \begin{Entry}
 \item[Summary]
@@ -1059,11 +1141,11 @@ EMC hit = (0.1, 2.094; 10)
 {\footnotesize
 \begin{verbatim}
 struct addEnergy {
-    
-\item[Synopsis] 
+    double operator()(double s, StEmcTowerHit &h) {return s += h.e();}
+};
 
 //  Calculate the total tower energy using the generic STL
-    
+//  function 'accumulate'
 //  (Note the binary operator addEnergy() defined above)
 //
 double sumEmcTowerHits(StEvent *event)
@@ -1074,9 +1156,9 @@ double sumEmcTowerHits(StEvent *event)
 \end{verbatim}
 }%footnotesize
 \end{Entry}
-    event mixing) you have to create local copies of the objects.  
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+%
 %    Reference: StEvent
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1085,40 +1167,40 @@ double sumEmcTowerHits(StEvent *event)
 \index{event header}
 \label{sec:StEvent}
 \begin{Entry}
-    
+\item[Summary]
     \name{StEvent} is the top class in the \StEvent\ data model.
-    \verb+const string& type() const;+\\ 
+    It provides methods to access all quantities and objects
     stored in the DST.
 
-    
+    \verb+const string& type() const;+\\
     \verb+#include "StEvent.hh"+\\
     \verb+class StEvent;+\\
 
     \verb+pair<long, long> id() const;+\\
     Objects of type \name{StEvent} are the entry point to the DST data.
-    
+    From here one can navigate to (and access) every quantity stored
     in the DST. Since many other \StEvent\ header files are included
     in \name{StEvent.hh} itself it is often sufficient to include only
-    
+    \verb+StEvent();+ \\
     \verb+time_t time() const;+\\
     Deleting \name{StEvent} deletes the whole data tree, i.e.~all depending objects
     are deleted properly. If you want to keep objects beyond the event (e.g.~ for
-    
+    \verb+unsigned long runNumber() const;+\\
     Event type (e.g. Au+Au, p+p, laser)
 
 \item[Persistence]
-    
+    \verb+unsigned long triggerMask() const;+\\
 
 \item[Related Classes]
     integers.
-    
+    \verb+unsigned long bunchCrossingNumber() const;+\\
 \item[Public\\ Constructors]
     \index{event time} Unique time stamp for this event.
     Default constructor. Creates an "empty" event.
-    
+    \verb+double luminosity() const;+\\
     \verb+virtual const string& type() const;+\\
     Experiment run number.
-    
+    Event type (e.g. Au+Au, p+p, laser)
     \verb+StRun* run();+\\
     \verb+virtual pair<long, long> id() const;+\\
     Trigger mask.
@@ -1126,64 +1208,64 @@ double sumEmcTowerHits(StEvent *event)
     compilers do not yet support the \name{long long} integer type
     integers.\index{event Id} 
     Beam-beam bunch crossing number.
-    
+
     \verb+virtual time_t time() const;+\\
 
     Luminosity reading when event was taken.
-    
+    \verb+StDstEventSummary* summary();+\\
     Experiment run number.
     \index{run number}
 
     \verb+StTrackCollection* trackCollection();+\\
     \index{primary vertex}
     Trigger mask.
-    
+    \index{trigger mask}
 
     \verb+virtual unsigned long bunchCrossingNumber() const;+\\
     Beam-beam bunch crossing number.
     \verb+StTpcHitCollection* tpcHitCollection();+\\  \index{hit collections}
     \verb+virtual double luminosity() const;+\\
-    
+    Luminosity reading when event was taken.
     \index{luminosity}
 
     \verb+virtual StRun* run();+\\
     \index{track collection}
     \verb+StSvtHitCollection* svtHitCollection();+\\
 
-    
+    \verb+virtual StVertex* primaryVertex();+\\
     Returns a pointer to primary vertex. The same object is stored
     high importance for most analyze steps this method was added
     \verb+virtual StTpcHitCollection* tpcHitCollection();+\\  \index{hit collections}
     this functions returns a null pointer.
     \verb+StFtpcHitCollection* ftpcHitCollection();+\\
 
-    
+    \verb+virtual StDstEventSummary* summary();+\\
 
     if the summary is not available.
 
     \verb+virtual StTrackCollection* trackCollection();+\\
     \verb+StEmcTowerHitCollection* emcTowerHitCollection();+\\
     if the collection is not available.
-    
+    Note that \name{StTrackCollection} is a polymorphic container.
     \index{track collection}
 
     \verb+virtual StTpcHitCollection* tpcHitCollection();+\\ 
     \verb+StEmcPreShowerHitCollection* emcPreShowerHitCollection();+\\
     if the collection is not available.
-    
+    Note that \name{StTpcHitCollection} is a polymorphic container.
     \index{hit collections}
 
     \verb+virtual StSvtHitCollection* svtHitCollection();+\\
     \verb+StSmdPhiHitCollection* smdPhiHitCollection();+\\
     hits in the SVT (\name{StSvtHit}) or a null pointer if the
-    
+    collection is not available.  Note that \name{StSvtHitCollection}
     is a polymorphic container.
 
 
     \verb+virtual StFtpcHitCollection* ftpcHitCollection();+\\
     \verb+StSmdEtaHitCollection* smdEtaHitCollection();+\\
     all hit in the FTPC (\name{StFtpcHit}) or a null pointer if the
-    
+    collection is not available.  Note that \name{StFtpcHitCollection}
     is a polymorphic container.
 
 
@@ -1199,19 +1281,19 @@ double sumEmcTowerHits(StEvent *event)
     \verb+emcPreShowerHitCollection();+\\
     Returns a pointer to the collection of hits from the EMC
     pre-shower detectors or a null pointer if the collection is not
-    
+
     available.  Note that \name{StEmcPreShowerHitCollection holds} the
     \index{vertex collection} \index{vertices}
     hits by value.
     \verb+StTriggerDetectorCollection* triggerDetectorCollection();+\\
     Returns a pointer to the collection of hits from the $\phi$ shower
     max detector (SMD) or a null pointer if the collection is not
-   
+    available.  Note that \name{StSmdPhiHitCollection} holds the hits
     member \name{type()} which allows to determine the type of vertex
     object. One than can use the type cast operator (either the
     traditional \name{()} or the ANSI \name{dynamic\_cast}) to cast
     \verb+StL0Trigger* l0Trigger();+\\
-    
+    examples below.\index{type cast} \index{StVertexCollection}
     \index{StV0Vertex} \index{StVertex} \index{StXiVertex}
 
     \verb+virtual StVertexCollection* vertexCollection();+\\
@@ -1221,43 +1303,43 @@ double sumEmcTowerHits(StEvent *event)
     is not a container but a more complex class which keeps track of the
     various trigger detectors and their content.
     \index{StTriggerDetectorCollection}
-    a profound understanding of the relations between the different objects.    
-    
+    member function \name{type()} which allows to determine what type
+    of vertex we are dealing with. One than can use the type cast
     \index{L0 trigger}
     operator (either the traditional \name{()} or the ANSI
     \name{dynamic\_cast}) to cast the object to its actual type. This
-    \verb+void setRunNumber(unsigned long);+\\                
-    \verb+void setTriggerMask(unsigned long);+\\              
-    \verb+void setBunchCrossingNumber(unsigned long);+\\      
-    \verb+void setLuminosity(double);+\\               
-    \verb+void setRun(StRun*);+\\                            
-    \verb+void setPrimaryVertex(StVertex*);+\\                  
-    \verb+void setSummary(StDstEventSummary*);+\\                        
-    \verb+void setTrackCollection(StTrackCollection*);+\\                
-    \verb+void setTpcHitCollection(StTpcHitCollection*);+\\               
-    \verb+void setSvtHitCollection(StSvtHitCollection*);+\\               
-    \verb+void setFtpcHitCollection(StFtpcHitCollection*);+\\              
-    \verb+void setEmcTowerHitCollection(StEmcTowerHitCollection*);+\\              
-    \verb+void setEmcPreShowerHitCollection(StEmcPreShowerHitCollection*);+\\              
-    \verb+void setSmdPhiHitCollection(StSmdPhiHitCollection*);+\\              
-    \verb+void setSmdEtaHitCollection(StSmdEtaHitCollection*);+\\              
-    \verb+void setVertexCollection(StVertexCollection*);+\\               
-    \verb+void setTriggerDetectorCollection(StTriggerDetectorCollection*);+\\      
-    \verb+void setL0Trigger(StL0Trigger*);+\\                      
+    \verb+void setType(const char*);+\\
+    \verb+void setId(const pair<long, long>&);+\\
+    \verb+void setTime(time_t);+\\
+    \verb+void setRunNumber(unsigned long);+\\
+    \verb+void setTriggerMask(unsigned long);+\\
+    \verb+void setBunchCrossingNumber(unsigned long);+\\
+    \verb+void setLuminosity(double);+\\
+    \verb+void setRun(StRun*);+\\
+    \verb+void setPrimaryVertex(StVertex*);+\\
+    \verb+void setSummary(StDstEventSummary*);+\\
+    \verb+void setTrackCollection(StTrackCollection*);+\\
+    \verb+void setTpcHitCollection(StTpcHitCollection*);+\\
+    \verb+void setSvtHitCollection(StSvtHitCollection*);+\\
+    \verb+void setFtpcHitCollection(StFtpcHitCollection*);+\\
+    \verb+void setEmcTowerHitCollection(StEmcTowerHitCollection*);+\\
+    \verb+void setEmcPreShowerHitCollection(StEmcPreShowerHitCollection*);+\\
+    \verb+void setSmdPhiHitCollection(StSmdPhiHitCollection*);+\\
+    \verb+void setSmdEtaHitCollection(StSmdEtaHitCollection*);+\\
     \verb+void setVertexCollection(StVertexCollection*);+\\
-    \verb+                         StBeamPolarizationAxis, float);+\\                   
+    \verb+void setTriggerDetectorCollection(StTriggerDetectorCollection*);+\\
     \verb+void setL0Trigger(StL0Trigger*);+\\
     \verb+void setBeamPolarization(StBeamDirection, +\\
     \verb+virtual void setType(const char*);+\\
     \verb+virtual void setId(const pair<long, long>&);+\\
     \verb+virtual void setTime(time_t);+\\
     \verb+virtual void setRunNumber(unsigned long);+\\
-    
+    \verb+virtual void setTriggerMask(unsigned long);+\\
     \verb+virtual void setBunchCrossingNumber(unsigned long);+\\
     \verb+virtual void setLuminosity(double);+\\
-    if otherwise. 
+    \verb+virtual void setRun(StRun*);+\\
     \verb+virtual void setPrimaryVertex(StVertex*);+\\
-    
+    \verb+virtual void setSummary(StDstEventSummary*);+\\
     \verb+virtual void setTrackCollection(StTrackCollection*);+\\
     \verb+virtual void setTpcHitCollection(StTpcHitCollection*);+\\
     \verb+virtual void setSvtHitCollection(StSvtHitCollection*);+\\
@@ -1266,7 +1348,7 @@ double sumEmcTowerHits(StEvent *event)
     \verb+setEmcTowerHitCollection(StEmcTowerHitCollection*);+\\
     \verb+virtual void+\\
     \verb+setEmcPreShowerHitCollection(StEmcPreShowerHitCollection*);+\\
-//   
+    \verb+virtual void+\\
     \verb+setSmdPhiHitCollection(StSmdPhiHitCollection*);+\\
     \verb+virtual void+\\
     \verb+setSmdEtaHitCollection(StSmdEtaHitCollection*);+\\
@@ -1274,7 +1356,7 @@ double sumEmcTowerHits(StEvent *event)
     \verb+virtual void+\\
     \verb+setTriggerDetectorCollection(StTriggerDetectorCollection*);+\\
     \verb+virtual void setL0Trigger(StL0Trigger*);+\\
-     cout << "event time = " << ctime(&t);     
+    \verb+virtual void setBeamPolarization(StBeamDirection, +\\
     \verb+                         StBeamPolarizationAxis, float);+\\
 
 \item[Public Member\\ Operators]
@@ -1290,7 +1372,7 @@ double sumEmcTowerHits(StEvent *event)
 //
           <<  event->primaryVertex()->position()/millimeter << " mm" << endl;
 //   the function adds a new line by default.
-//   V0 vertices with r>10 cm.  
+//
 void printEvent(StEvent *event)
 {
      time_t t = event->time();
@@ -1307,7 +1389,7 @@ void printEvent(StEvent *event)
           << event->vertexCollection()->size() << endl;
      cout << "# of tpc hits = "
           << event->tpcHitCollection()->size() << endl;
-           if (v0->position().perp() > rMin) counter++; 
+     cout << "xyz of primary Vertex = "
           <<  event->primaryVertex()->position()/millimeter
           << " mm" << endl;
 }
@@ -1325,13 +1407,13 @@ void printEvent(StEvent *event)
 //   together with all other vertices which share the common
 //   base class StVertex.
 //
-//  (Note the binary function addMips() defined above) 
+unsigned int numberOfV0Vertices(StEvent *event)
 {
    StVertexCollection* vertices = event->vertexCollection();
    StVertexIterator i;
    StVertex   *vertex;
    StV0Vertex *v0;
-   return accumulate(counters.begin(), counters.end(), 0., addMips());   
+   double rMin = 10*centimeter;
    unsigned int counter = 0;
    for (i = vertices->begin(); i != vertices->end(); i++) {
        vertex = *i;
@@ -1349,12 +1431,12 @@ void printEvent(StEvent *event)
 \begin{verbatim}
 struct addMips {
     double operator()(double s, StCtbCounter &c) {return s += c.mips();}
-    
-\item[Synopsis] 
+};
+
 //
 //  Returns the total event multiplicity
-    
-\item[Description]    
+//  as measured in the CTB.
+//  Here we use the generic STL function 'accumulate'.
 //  (Note the binary function addMips() defined above)
 //
 double totalCtbMultiplicity(StEvent *event)
@@ -1365,8 +1447,8 @@ double totalCtbMultiplicity(StEvent *event)
 }
 \end{verbatim}
 }%footnotesize
-    \name{StFtpcHit}.    
-    
+
+\end{Entry}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -1375,7 +1457,7 @@ double totalCtbMultiplicity(StEvent *event)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StFtpcHit}
 \index{FTPC hit} \index{StFtpcHit|textbf}
-    which were used to reconstruct the global track. 
+\label{sec:StFtpcHit}
 \begin{Entry}
 \item[Summary]
     \name{StFtpcHit} represents a FTPC hit.
@@ -1386,7 +1468,7 @@ double totalCtbMultiplicity(StEvent *event)
 
 \item[Description]
     \name{StFtpcHit} inherits most functionality from \name{StHit}.  For a complete
-    
+    description of the inherited member functions see \name{StHit}
     (sec.~\ref{sec:StHit}).
 
     In the \StEvent\ data model each track keeps references to the
@@ -1401,7 +1483,7 @@ double totalCtbMultiplicity(StEvent *event)
     None
 
 \item[Related Classes]
-    
+    \name{StFtpcHit} is derived directly from \name{StHit}.
     The hits are kept in an instance of \name{StFtpcHit}Collection
     where they are stored by pointer (see \ref{sec:collections}).
     Each instance of \name{StGlobalTrack} holds a list of FTPC hits
@@ -1425,7 +1507,7 @@ double totalCtbMultiplicity(StEvent *event)
     collection passed as argument.  The number of elements
     equals the reference count
     (\name{StFtpcHit::trackReferenceCount()}) if the track collection is
-}  
+    the actual track collection obtained from
     \name{StEvent::trackCollection().}  Note that this functions has to iterate
     over the given track collection in order to setup the return
     argument. The time to collect the referring tracks goes linear
@@ -1446,13 +1528,13 @@ meanPtOfRelatedTracks(StEvent *event, StFtpcHit *hit)
    StTrackCollection* tracks = event->trackCollection();
    double B = 0.5*tesla;
 
-    
-\item[Synopsis] 
+   StVecPtrGlobalTrack tlist =
+             hit->relatedTracks(*event->trackCollection());
 
    StVecPtrGlobalTrackIterator i;
-    
+   double sumPt = 0;
    for (i = tlist.begin(); i != tlist.end(); i++) {
-    
+       sumPt += (*i)->helix().momentum(tesla).perp();
    }
    return tlist.size() > 0 ? sumPt/tlist.size() : 0;
 }
@@ -1462,7 +1544,7 @@ meanPtOfRelatedTracks(StEvent *event, StFtpcHit *hit)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-    
+%    Reference: StGlobalTrack
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StGlobalTrack}
@@ -1487,7 +1569,7 @@ meanPtOfRelatedTracks(StEvent *event, StFtpcHit *hit)
     see \name{StTrack} for more details.\\
     (\name{relatedTracks()}) method which is provided by all \name{StHit}
     based classes: \name{StTpcHit}, \name{StSvtHit} and \name{StFtpcHit}.  It returns a
-   
+    list of pointers to tracks associated with an individual hit.
     This list however has to be constructed by scanning through a
     \name{StTrackCollection} which can be obtained through the
     \name{StEvent::trackCollection()} method.  \name{StGlobalTrack} is
@@ -1503,12 +1585,12 @@ meanPtOfRelatedTracks(StEvent *event, StFtpcHit *hit)
     \index{relation between hits and tracks}
     \name{StTpcHit}, \name{StSvtHit} and \name{StFtpcHit}.  It returns
     a list of pointers to tracks associated with an individual hit.
-  
+    This list, however, has to be constructed by scanning through a
     track collection.  Holding such a list as local data member would
     increase the memory usage of the hit classes beyond what can be
     afforded. The downside of such a scheme is a somewhat increased
     \verb+const StVecPtrTpcHit& tpcHits() const;+\\
-    
+    for the track lookup. See sec.~\ref{sec:StTpcHit} for more.\\
     The information on the relation between hits and tracks in
     \StEvent\ is solely kept in \name{StGlobalTrack}.  Each global
     track knows about the hits it is associated with.
@@ -1523,12 +1605,12 @@ meanPtOfRelatedTracks(StEvent *event, StFtpcHit *hit)
 
 \item[Related Classes]
     \verb+StDedx* tpcDedx();+\\
-    
+    All global tracks are kept in an instance of \name{StTrackCollection}
     where they are stored by pointer (see sec.~\ref{sec:collections}).
     \index{StTrack}
     \index{StTrackCollection}
     \verb+StDedx* svtDedx();+\\
-    
+\item[Public\\ Constructors]
     \verb+StGlobalTrack();+\\
     Constructs an instance of \name{StGlobalTrack} with all values initialized to 0 (zero).
     \verb+virtual int  numberOfFtpcHits() const;+\\
@@ -1536,13 +1618,13 @@ meanPtOfRelatedTracks(StEvent *event, StFtpcHit *hit)
     
     \verb+virtual const StVecPtrTpcHit& tpcHits() const;+\\
     Vector of TPC hits assigned to the track during
-    
-    \verb+void setFtpcDedx(StDedx*);+\\    
+    reconstruction. The returned collection holds the
+    \verb+void setTpcDedx(StDedx*);+\\
 
     \verb+virtual const StVecPtrSvtHit& svtHits() const;+\\
     \verb+void setFtpcDedx(StDedx*);+\\
     reconstruction. The returned collection holds the
-    
+    hits by pointer. Note, that the collection can be empty.
     \verb+void setSvtDedx(StDedx*);+\\
     Returns pointer to an instance of the \name{StDedx} class which holds
     Vector of FTPC hits assigned to the track during
@@ -1550,23 +1632,23 @@ meanPtOfRelatedTracks(StEvent *event, StFtpcHit *hit)
     hits by pointer. Note, that the collection can be empty.
     \verb+virtual StDedx* svtDedx();+\\
     Returns pointer to an instance of the \name{StDedx} class which holds
-    
+    \verb+void addTpcHit(StTpcHit*);+\\
     information on the energy loss of the track/particle in the TPC.
     If no dE/dx information is available a null pointer is returned.
     \verb+virtual StDedx* ftpcDedx();+\\
-    
+    \verb+void addFtpcHit(StFtpcHit*);+\\
     Returns a constant pointer to an instance of the \name{StDedx} class which holds
     information on the energy loss of the track/particle in the SVT.
     If no dE/dx information is available a null pointer is returned.
-    
+    \verb+void addSvtHit(StSvtHit*);+\\
     \verb+virtual StTrackPidTraits& pidTraits();+\\
     Returns a reference to \name{StTrackPidTraits} which allows
     to obtain information on the particle identification (PID)
-    
+    \verb+void removeTpcHit(StTpcHit*);+\\
 
     \verb+virtual void setTpcDedx(StDedx*);+\\
     Assigns the dE/dx information for the TPC.
-    
+    \verb+void removeFtpcHit(StFtpcHit*);+\\
     \verb+virtual void setFtpcDedx(StDedx*);+\\
     Assigns the dE/dx information for the FTPC.
 
@@ -1577,7 +1659,7 @@ meanPtOfRelatedTracks(StEvent *event, StFtpcHit *hit)
     i.e., they increase or decrease the reference counter
     of the referring hit (see the referring hit classes).}
 
-//  is close (distance < 1.5 cm) to the primary vertex. 
+    \verb+virtual void addTpcHit(StTpcHit*);+\\
     Adds a TPC hit to the internal hit collection.
     Increments the reference counter of the hit.
 
@@ -1601,7 +1683,7 @@ meanPtOfRelatedTracks(StEvent *event, StFtpcHit *hit)
     Removes a SVT hit from the internal hit collection.
     Decrements the reference counter of the hit.
 
-}%footnotesize    
+\item[Examples]
 {\bf Example 1:}
 {\footnotesize
 \begin{verbatim}
@@ -1665,7 +1747,7 @@ void printDeDx(StGlobalTrack &track)
 void printMomAtRichCrossing(StGlobalTrack &track)
 {
     StPhysicalHelix& helix = track.helix();
-}%footnotesize   
+
     // the center of the RICH
     StThreeVector<double> center(0, 2.05*meter, 0);
 
@@ -1678,7 +1760,7 @@ void printMomAtRichCrossing(StGlobalTrack &track)
     //
     // Check: s is set to DBL_MAX if
     // StHelix::pathLength() fails. We also have
-//  
+    // to make sure that the intersection is
     // within the boundaries. StHelix::pathLength()
     // assumes a infinite extended plane.
     //
@@ -1724,11 +1806,11 @@ double meanPtOfGoodTracks(StEvent *event)
 
         // apply cuts
         if (theTrack->tpcHits().size() < 40) continue;
-    
-\item[Synopsis] 
+        StThreeVector<> pvtx = event->primaryVertex()->position();
+        double dca = theTrack->helix().distance(pvtx);
         if (dca > 5*millimeter) continue;
         if (theTrack->fitTraits().chiSquaredInXY() > 1.2 ||
-    
+            theTrack->fitTraits().chiSquaredInPlaneZ() > 1.2)
             continue;
 
         // add up pt
@@ -1738,72 +1820,74 @@ double meanPtOfGoodTracks(StEvent *event)
     }
     return n ? sumPt/n : 0;
 }
-    
+\end{verbatim}
 }%footnotesize
 
 \end{Entry}
 
-    The following classes are derived from \name{StHit}: 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %    Reference: StHit
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\subsection{StHit}
 \index{StHit|textbf} \index{hit}
 \label{sec:StHit}
-    Constructs an instance of \name{StHit} with all values initialized to 0 (zero).
-    
+\begin{Entry}
+\item[Summary]
+    \name{StHit} is the base class of all TPC, FTPC and SVT hit classes.
 
 \item[Synopsis]
     \verb+#include "StHit.hh"+\\
     \verb+class StHit;+\\
 
-        
+\item[Description]
     \name{StHit} is not a virtual class.
     which represent TPC, FTPC and SVT hits. It provides information on
     position, position error, charge, and on the number of tracks which
-    
+    are reconstructed using this hit.  All information is taken from
     the \name{dst\_point.idl} table except the reference count which
     is added properly by StEventReaderMaker.
-    
+    \name{StHit} is a virtual class.
     \index{dst\_point.idl}
 
-    
-    \verb+unsigned char trackReferenceCount() const;+\\    
+\item[Persistence]
+    None
 
-    
+\item[Related Classes]
     The following classes are derived from \name{StHit}:
     \name{StTpcHit}, \name{StFtpcHit}, \name{StSvtHit}.
-    
+    \index{StTpcHit}
     \index{StFtpcHit}
     \index{StSvtHit}
     
 \item[Public\\ Constructors]
     \verb+StHit();+\\
-    
+    Constructs an instance of \name{StHit} with all values initialized
     to 0 (zero).
 
     \verb+StHit(const StThreeVector<float>& pos,+\\
     \verb+const StThreeVector<float>& position() const;+\\
     \verb+      float q, unsigned char cnt = 0);+\\
-    Returns true (1) if two instances of \name{StHit} are equal or false (0)
-    if otherwise.
-    The only data member used for the comparison are position and charge.
+    Create an instance of \name{StHit} with position \name{pos},
+    \verb+const StThreeVector<float>& positionError() const;+\\
+
 \item[Public Member\\ Functions]
+    \verb+float charge() const;+\\
     Hit position in global coordinates.
-    Returns true (1) if two instances of \name{StHit} are not equal or false (0)
-    if otherwise. 
-    This operator is implemented by simply inverting \name{operator==}.
-        
+
+    \verb+unsigned char trackReferenceCount() const;+\\
+    Hit position error.
+
     \verb+void setPosition(const StThreeVector<float>&);+\\
     Total hit charge.
 
-    
-\item[Examples] 
+    \verb+void setPositionError(const StThreeVector<float>&);+\\
+    Number of tracks referencing this hit (see \name{StGlobalTrack}).
 
     \verb+void setCharge(float);+\\
     Set the hit position.
-//  Create and print a random hits 
+
     \verb+void setTrackReferenceCount(unsigned char);+\\
     Set the error on the hit position.
 
@@ -1818,12 +1902,12 @@ double meanPtOfGoodTracks(StEvent *event)
     Returns true (1) if two instances of \name{StHit} are equal or
     false (0) if otherwise.  The only data member used for the
     comparison are position and charge.
-   StHit hit(pos, err, -1); 
+    
 
     \verb+int operator!=(const StHit&) const;+\\
     Returns true (1) if two instances of \name{StHit} are not equal or
     false (0) if otherwise.  This operator is implemented by simply
-}%footnotesize    
+    inverting \name{operator==}.
 
 \item[Global Operators]
     \verb+ostream&  operator<<(ostream& os, const StHit&);+\\
@@ -1848,11 +1932,11 @@ void printArbitraryHit()
    StThreeVector<float> err(rgauss.shoot(0.,sigma),
                             rgauss.shoot(0.,sigma),
                             rgauss.shoot(0.,sigma));
-    
+   StHit hit(pos, err, -1);
 
    cout << hit << endl;
 }
-  
+\end{verbatim}
 }%footnotesize
 {\bf Programs Output:}
 {\footnotesize
@@ -1861,14 +1945,14 @@ Position: (-20.3111, -80.7543, 76.8227)
 Error: (0.00077, -0.0008, -0.00005242)
 Charge: -1
 RefCount: 0
-    
+\end{verbatim}
 }%footnotesize
 
 \end{Entry}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-    
+%    Reference: StL0Trigger
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StL0Trigger}
@@ -1876,31 +1960,31 @@ RefCount: 0
 \index{L0 trigger}
 \label{sec:StL0Trigger}
 \begin{Entry}
-    
+\item[Summary]
     \name{StL0Trigger} describes the STAR level 0 trigger.
 
-    
+\item[Synopsis]
     \verb+#include "StL0Trigger.hh"+\\
     \verb+class StL0Trigger;+\\
 
 \item[Description]
-    MWC/CTB spacial topology.
+    \name{StL0Trigger} is constructed using the data
     stored in the \name{dst\_L0\_Trigger.idl} table.
     \index{dst\_L0\_Trigger.idl} The class provides various
     information on the STAR level 0 trigger in addition to the
     methods inherited from its base class \name{StTrigger}.
-    \verb+void setMwcCtbMultiplicity(long);+\\   
+    \index{StEvent} A pointer to the actual instance can be obtained
     by invoking the \name{StEvent::l0Trigger()} method.
-    
-    \verb+void setMwcCtbDipole(long);+\\           
+
+\item[Persistence]
     None
-    
-    \verb+void setMwcCtbTopology(long);+\\           
+
+\item[Related Classes]
    \name{StL0Trigger} is derived from \name{StTrigger}.
-    
+   \index{StTrigger}
 
 \item[Public\\ Constructors]
-    
+    \verb+StL0Trigger();+\\
     Default constructor. All data member are initialized to 0 (zero).
 
 \item[Public Member\\ Functions]
@@ -1929,7 +2013,7 @@ RefCount: 0
     Sets the spacial topology analysis word.
 
     \verb+void setMwcCtbMoment(long);+\\
-}%footnotesize    
+    Sets the moment analysis word.
 
 \item[Examples]
 {\footnotesize
@@ -1945,47 +2029,49 @@ void compareL0MwcCtb(StEvent *event)
 
     // from the detectors
     double sum = 0;
-    
+    StTriggerDetectorCollection* tds =
                           event->triggerDetectorCollection();
     StVecCtbCounter &counters = tds->ctbCounters();
     for (int i=0; i<counters.size(); i++)
-  
+        sum += counters[i].mips();
     StVecMwcSector &sectors = tds->mwcSectors();
     for (int k=0; k<sectors.size(); k++)
         sum += sectors[k].mips();
 
     // print-out
     cout << "Multiplicity from L0: " << l0Result << endl;
-    
+    cout << "Sum of MWC/CTB:       " << sum << endl;
 }
 \end{verbatim}
 }%footnotesize
 
-    The list of \name{StMwcSector} objects (collection class StVecMwcSector) can be obtained
-    through the StTriggerDetectorCollection.
+\end{Entry}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-   
+%    Reference: StMwcSector
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    Constructs an empty MWC sector, i.e., all values are initialized to 0 (zero).
+\subsection{StMwcSector}
+\index{StMwcSector|textbf}
 \index{MWC}
 \label{sec:StMwcSector}
-    Constructs a MWC sector with id \name{id} and number of mips \name{m}.
+\begin{Entry}
+\item[Summary]
     \name{StMwcSector} represents a single MWC sector.
 
 \item[Synopsis]
     \verb+#include "StMwcSector.hh"+\\
-    
+    \verb+class StMwcSector;+\\
 
 \item[Description]
-    
+    \name{StMwcSector} holds information on a single MWC sector as
     stored in the \\
     \name{dst\_TriggerDetectors.idl} table. Each sector
-    
+    is identified by an ID. The class holds the number of mips detected
     in the sector. \index{dst\_TriggerDetectors.idl}
 
-   
+\item[Persistence]
     None
 
 \item[Related Classes]
@@ -2002,7 +2088,7 @@ void compareL0MwcCtb(StEvent *event)
     Constructs a MWC sector with id \name{id} and number of mips
     \name{m}.
 
-}%footnotesize    
+\item[Public Member\\ Functions]
     \verb+short id() const;+ \\
     Unique sector ID.
 
@@ -2010,7 +2096,7 @@ void compareL0MwcCtb(StEvent *event)
     Number of mips.
 
     \verb+void setId(short);+ \\
-\subsection{StRun} 
+    Sets the ID.
 
     \verb+void setMips(float);+ \\
     Sets the number of mips.
@@ -2019,21 +2105,21 @@ void compareL0MwcCtb(StEvent *event)
 {\footnotesize
 \begin{verbatim}
 //
-    
-\item[Synopsis] 
+//  Sum mips in all MWC sectors
+//
 double sumMwcMips(StEvent *event)
 {
     StTriggerDetectorCollection* tds =
                       event->triggerDetectorCollection();
-    \name{StRun} holds information specific to a DST production run. Note that one
-    DST production run may include or overlap with one or more experimental runs.
-    The current instance of \name{StRun} can be obtained via \name{StEvent::run()}.
-    It provides all information stored in the \name{dst\_run\_header.idl} table.
-    \name{StRun} is a virtual class.
+    StVecMwcSector &sectors = tds->mwcSectors();
+    double sum = 0;
+    for (int i=0; i<sectors.size(); i++)
+        sum += sectors[i].mips();
+    return sum;
+}
 \end{verbatim}
 }%footnotesize
-\item[Persistence]
-    None
+\end{Entry}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -2041,41 +2127,46 @@ double sumMwcMips(StEvent *event)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StRun}
-    
+\index{StRun|textbf}
 \label{sec:StRun}
 \index{run information}
 \index{center-of-mass energy}
 
+    \verb+long id() const;+\\
 \item[Summary]
     \name{StRun} holds information about one DST production run.
 
+    \verb+const string& type() const;+\\
     \verb+#include "StRun.hh"+\\
-    \index{trigger mask}
-    Trigger mask.
+    \verb+class StRun;+\\
     
+    \verb+long triggerMask() const;+\\
     \name{StRun} holds information specific to a DST
-    \index{center-of-mass energy}
-    CM total energy per NN pair (GeV).
+    production run. Note that one DST production run may include or
     overlap with one or more experimental runs.  The current instance
+    \verb+double centerOfMassEnergy() const;+\\
     provides all information stored in the \name{dst\_run\_header.idl}
-    \index{beam mass number}
-    A of east (\name{dir=east}) or west (\name{dir=west}) moving beam.
-    StBeamDirection is defined in \name{StEnumerations.hh}
-    (see sec.~\ref{sec:StEnumerations}).
+    table.  \name{StRun} is a virtual class.
+    \index{dst\_run\_header.idl}
+    \verb+short beamMassNumber(StBeamDirection dir) const;+\\
 \item[Persistence] None
+
 \item[Related Classes]
-    \index{beam charge}
-    Z of east (\name{dir=east}) or west (\name{dir=west}) moving beam.
-    StBeamDirection is defined in \name{StEnumerations.hh}.
+    None
+    \index{trigger mask} Trigger mask.
+    \verb+short beamCharge(StBeamDirection) const;+\\
     \verb+StRun();+ \\
+    Default constructor. All data member are initialized to 0 (zero).
     \index{center-of-mass energy} CM total energy per NN pair (GeV).
 \item[Public Member\\ Functions]
     \verb+virtual long id() const;+\\
     \verb+StRunSummary* summary();+\\
-    The following member functions are used to set data member of \name{StEvent}.
-    They are shown only for completeness and shouldn't be used without
-    a profound understanding of the relations between the different objects.    
+    \index{beam mass number} A of east (\name{dir=east}) or west
+
+    \verb+virtual const string& type() const;+\\
     
+    
+
     \index{beam charge} Z of east (\name{dir=east}) or west
     Trigger mask.\index{trigger mask} 
     \name{StEnumerations.hh}.
@@ -2083,16 +2174,16 @@ double sumMwcMips(StEvent *event)
     \verb+void setType(const char*);+\\
     \verb+void setTriggerMask(long);+\\
     \verb+void setCenterOfMassEnergy(double);+\\
- 
+    \verb+void setBeamMassNumber(StBeamDirection, short);+\\
     \verb+void setBeamCharge(StBeamDirection, short);+\\
     \verb+void setSummary(StRunSummary*);+\\
     (\name{dir=west}) moving beam.  StBeamDirection is defined in
     \name{StEnumerations.hh} (see sec.~\ref{sec:StEnumerations}).
     \index{beam mass number} 
-    
+
     \verb+virtual short beamCharge(StBeamDirection) const;+\\
     Z of east (\name{dir=east}) or west
-    if otherwise. 
+    (\name{dir=west}) moving beam.  StBeamDirection is defined in
     \name{StEnumerations.hh}.\index{beam charge} 
     
 
@@ -2100,7 +2191,7 @@ double sumMwcMips(StEvent *event)
     Returns pointer to run summary object or a null pointer if no
     summary is available.
     
-//   
+    \emph{The following member functions are used to set data member of
     \name{StEvent}.  They are shown only for completeness and
     shouldn't be used without a profound understanding of the
     relations between the different objects.}
@@ -2122,7 +2213,7 @@ double sumMwcMips(StEvent *event)
 
     \verb+int operator!=(const StRun&) const;+\\
     Returns true (1) if two instances of \name{StRun} are not equal or false (0)
-A=197 Z=79                            A=197 Z=79     
+    if otherwise.
     This operator is implemented by simply inverting \name{operator==}.
 
 \item[Examples]
@@ -2141,11 +2232,11 @@ void beamInfo(StEvent *event)
          << " Z=" << setw(2) << run->beamCharge(east)
          << blanks
          << "A=" << setw(3) << run->beamMassNumber(west)
-    
-\item[Synopsis] 
+         << " Z=" << setw(2) << run->beamCharge(west) << endl;
+    cout << dashes << ">  sqrt(s) = " << setw(3)
          << run->centerOfMassEnergy()/GeV << "GeV <"
          << dashes << endl;
-    
+    cout << "east" << blanks+moreBlanks << "west" << endl;
 }
 \end{verbatim}
 }%footnotesize
@@ -2156,37 +2247,37 @@ A=197 Z=79                            A=197 Z=79
 ------------->  sqrt(s) = 200 GeV <-------------
 east                                        west
 \end{verbatim}
-    
+}%footnotesize
 
 \end{Entry}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-    
+%    Reference: StRunSummary
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
+\subsection{StRunSummary}
 \index{run summary} \index{StRunSummary|textbf}
 \label{sec:StRunSummary}
 \begin{Entry}
-    
+\item[Summary]
     \name{StRunSummary} summarizes a DST production run.
 
 \item[Synopsis]
-    
+    \verb+#include "StRunSummary.hh"+\\
     \verb+class StRunSummary;+\\
 
-    
+\item[Description]
     \name{StRunSummary} provides summary information in the DST
     production run. Note that one DST production run may include or
-    
+    overlap with one or more experimental runs.  A pointer to the
     actual instance of \name{StRunSummary} can be obtained via
     \name{StRun::summary()}.  \name{StRunSummary} uses data stored in
-    
+    the \name{dst\_run\_summary.idl} table. The content, however,
     strongly deviates from the former design draft since much of the
     table content is now stored in histograms.
     \index{dst\_run\_summary.idl}
-    
+
 \item[Persistence]
     None
 
@@ -2196,25 +2287,25 @@ east                                        west
 \item[Public\\ Constructors]
     \verb+StRunSummary();+ \\
 
-    
+\item[Public Member\\ Functions]
     \verb+const string& version() const;+ \\
     DST production software version.
-    
+
     \verb+ long numberOfEvents() const;+ \\
     Total number of events in the run.
-    
+    \index{number of events in run}
 
     \verb+ long numberOfProcessedEvents() const;+ \\
-    
+    Total number of successfully processed events.
 
     \verb+time_t startTime() const;+ \\
-    
+    Start time of production.
 
     \verb+time_t stopTime() const;+ \\
-    
+    Stop time of production.
 
     \verb+double cpuSeconds() const;+ \\
-    
+    Total CPU seconds for production run.
     \index{CPU time}
 
     \verb+StVecTH1F& histograms1D();+ \\
@@ -2236,8 +2327,8 @@ east                                        west
     \verb+void setNumberOfProcessedEvents(unsigned long);+ \\
     Sets total number of successfully processed events.
 
-}%footnotesize    
-    
+    \verb+void setStartTime(time_t);+ \\
+    Sets start time of production.
 
     \verb+void setStopTime(time_t);+ \\
     Sets stop time of production.
@@ -2250,17 +2341,18 @@ east                                        west
 \begin{verbatim}
 //
 //  Evaluate and print DST run efficiencies.
-    \name{StSmdEtaHit} represents a hit in the $\eta$ shower-maximum-detector (SMD).
-    
-\item[Synopsis] 
+//
+void printRunEfficiency(StEvent *event, ostream& os=cout)
+{
+   StRunSummary *summary = event->run->summary();
 
    if (!summary) return;   // no summary available
-    
+
    double effN = (double)summary->numberOfProcessedEvents()/
                  summary->numberOfEvents();
    double effT = (double)summary->cpuSeconds()/
                  (summary->stopTime() - summary->start(Time));
-    
+
    os << "Percentage of processed events: " << effN << endl;
    os << "Percentage of CPU/total time: "   << effT << endl;
 }
@@ -2275,7 +2367,7 @@ east                                        west
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StSmdEtaHit}
-    
+\index{SMD hit} \index{StSmdEtaHit|textbf}
 \label{sec:StSmdEtaHit}
 \begin{Entry}
 \item[Summary]
@@ -2292,7 +2384,7 @@ east                                        west
     see \name{StEmcHit} (sec.~\ref{sec:StEmcHit}).
 
 \item[Persistence]
-}%footnotesize    
+    None
 
 \item[Related Classes]
     \name{StSmdEtaHit} is derived directly from \name{StEmcHit}.
@@ -2306,17 +2398,18 @@ east                                        west
     Create an instance of \name{StSmdEtaHit} with identifier \name{i},
     energy deposition \name{E} and position \name{phi}, \name{eta}.
 
-    \name{StSmdPhiHit} represents a hit in the $\phi$ shower-maximum-detector (SMD).
-    
-\item[Synopsis] 
+\item[Examples]
+{\footnotesize
+\begin{verbatim}
+//
 //  Count the hits above given threshold minEnergy
 //
-    
+unsigned int countSmdEtaHits(StEvent *event, double minEnergy)
 {
    StSmdEtaHitCollection* hits = event->emcTowerHitCollection();
    double counter = 0;
    StSmdEtaHitIterator iter;
-    
+   for (iter = hits->begin(); iter != hits->end(); iter++)
        if (iter->energy() > minEnergy) counter++;
    return counter;
 }
@@ -2331,7 +2424,7 @@ east                                        west
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StSmdPhiHit}
-    
+\index{StSmdPhiHit|textbf} \index{SMD hit}
 \label{sec:StSmdPhiHit}
 \begin{Entry}
 \item[Summary]
@@ -2351,7 +2444,7 @@ east                                        west
     None
 
 \item[Related Classes]
-}%footnotesize    
+    \name{StSmdPhiHit} is derived directly from \name{StEmcHit}.
     The hits are kept in an instance of \name{StSmdPhiHitCollection}
     where they are stored by value (see \ref{sec:collections}).
     \index{StEmcHit}
@@ -2366,15 +2459,15 @@ east                                        west
 {\footnotesize
 \begin{verbatim}
 bool operator<(const StSmdPhiHit &x, const StSmdPhiHit &y)
-    
-\item[Synopsis] 
+{
+     return x.energy() < y.energy();
 }
 
-    
+//
 //  Sort all hits in the SmdPhiHitCollection according to their energy.
-    \name{StSvtHit} inherits most functionality from \name{StHit}.  For a complete
-    description of the inherited member functions see \name{StHit}
-    (sec.~\ref{sec:StHit}).
+//  To do that we use the generic sort algorithm from the STL.
+//  (Note the definition of the 'operator<' above).
+//
 void sortSmdPhiHits(StEvent *event)
 {
    StSmdPhiHitCollection* hits = event->emcTowerHitCollection();
@@ -2382,8 +2475,8 @@ void sortSmdPhiHits(StEvent *event)
 }
 \end{verbatim}
 }%footnotesize
-    StSvtHit.    
-    
+
+\end{Entry}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -2392,7 +2485,7 @@ void sortSmdPhiHits(StEvent *event)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StSvtHit}
 \index{SVT hit} \index{StSvtHit|textbf}
-    which were used to reconstruct the global track. 
+\label{sec:StSvtHit}
 \begin{Entry}
 \item[Summary]
     \name{StSvtHit} represents a SVT hit.
@@ -2403,22 +2496,22 @@ void sortSmdPhiHits(StEvent *event)
 
 \item[Description]    
     \name{StSvtHit} inherits most functionality from \name{StHit}.
-    
+    For a complete description of the inherited member functions see
     \name{StHit} (sec.~\ref{sec:StHit}).
 
     In the \StEvent\ data model each track keeps references to the
     associated hits but not vice versa. In order to allow
     the reverse navigation \name{StSvtHit} adds a method
-    collection passed as argument.  The number of elements
-    equals the reference count
-    (\name{StSvtHit::trackReferenceCount()}) if the track collection is
-    the actual track collection obtained from
-    \name{StEvent::trackCollection().}  Note that this functions has to iterate
-    over the given track collection in order to setup the return
-    argument. The time to collect the referring tracks goes linear
-    with the size of the given collection \name{coll}.
-    For information on the returned collection class see sec.~\ref{sec:collections}.
-    
+    \name{relatedTracks()} which allows to obtain a list of tracks
+    which were reconstructed using this hit, i.e., a list of pointers
+    to global tracks (\name{StSvtHit}$*$) which reference objects of type
+    StSvtHit.
+
+\item[Persistence]
+    None
+
+\item[Related Classes]
+    \name{StSvtHit} is derived directly from \name{StHit}.
     The hits are kept in an instance of \name{StSvtHitCollection}
     where they are stored by pointer (see \ref{sec:collections}).
     Each instance of \name{StGlobalTrack} holds a list of SVT hits
@@ -2430,18 +2523,18 @@ void sortSmdPhiHits(StEvent *event)
 \item[Public\\ Constructors]
     \verb+StSvtHit(const StThreeVector<float>& pos,+\\
     \verb+         const StThreeVector<float>& err,+\\
-    StSvtHitCollection *hits = 
+    \verb+         float q, unsigned char cnt = 0);+\\
     Create an instance of \name{StSvtHit} with position \name{pos},
     position error \name{err}, charge \name{q}, and reference count \name{cnt}.
 
-    for(iter = hits->begin(); 
+\item[Public Member\\ Functions]
     \verb+StVecPtrGlobalTrack+\\
     \verb+relatedTracks(const StTrackCollection& coll);+\\
     Returns a collection of tracks stored in \name{coll} which
-            theList.push_back(hit);        
+    reference this hit.  The individual elements are a subset of the
     collection passed as argument.  The number of elements equals the
     reference count (\name{StSvtHit::trackReferenceCount()}) if the
-}  
+    track collection is the actual track collection obtained from
     \name{StEvent::trackCollection().}  Note that this functions has
     to iterate over the given track collection in order to setup the
     return argument. The time to collect the referring tracks goes
@@ -2457,15 +2550,15 @@ void sortSmdPhiHits(StEvent *event)
 //  each used by more than N tracks.
 //
 vector<StSvtHit*>
-    
-\item[Synopsis] 
+getBusyHits(StEvent *event, int N)
+{
     vector<StSvtHit*> theList;
     StSvtHitCollection *hits =
-    
-\item[Description]    
-    \name{StTpcHit} inherits most functionality from \name{StHit}.  For a complete
-    description of the inherited member functions see \name{StHit}
-    (sec.~\ref{sec:StHit}).
+                   event->svtHitCollection();
+    StSvtHitIterator iter;
+    StSvtHit *hit;
+    for(iter = hits->begin();
+        iter != hits->end(); iter++) {
         hit = iter;
         if (hit->trackReferenceCount() > N)
             theList.push_back(hit);
@@ -2473,8 +2566,8 @@ vector<StSvtHit*>
     return theList;
 }
     See sec.~\ref{sec:StTrackPidTraits}   
-    \name{StTpcHit}.    
-    
+
+\end{Entry}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -2483,7 +2576,7 @@ vector<StSvtHit*>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StTpcHit}
 \index{TPC hit} \index{StTpcHit|textbf}
-    which were used to reconstruct the global track. 
+\label{sec:StTpcHit}
 \begin{Entry}
 \item[Summary]
     \name{StTpcHit} represents a TPC hit.
@@ -2494,7 +2587,7 @@ vector<StSvtHit*>
 
 \item[Description]
     \name{StTpcHit} inherits most functionality from \name{StHit}.
-    
+    For a complete description of the inherited member functions see
     \name{StHit} (sec.~\ref{sec:StHit}).
 
     In the \StEvent\ data model each track keeps references to the
@@ -2509,7 +2602,7 @@ vector<StSvtHit*>
     None
 
 \item[Related Classes]
-    
+    \name{StTpcHit} is derived directly from \name{StHit}.
     The hits are kept in an instance of \name{StTpcHitCollection}
     where they are stored by pointer (see \ref{sec:collections}).
     Each instance of \name{StGlobalTrack} holds a list of TPC hits
@@ -2580,7 +2673,7 @@ double largestGap(StGlobalTrack &track)
     // Sort the hits according to r (use STL sort)
     // (here we actually sort the pointers to the hits)
     //
-}  
+    sort(hits.begin(), hits.end(), compRadiusOfHits());
 
     //
     // Get the path length s on the track for the first hit
@@ -2603,89 +2696,91 @@ double largestGap(StGlobalTrack &track)
     double maxGap = 0;   // the max gap so far
 
     for (int i=1; i<hits.size(); i++) {
-    
-\item[Synopsis] 
+        s = track.helix().pathLength(hits[i]->position());
+        gap = fabs(s - sLast);
         if (gap > maxGap) maxGap = gap;
         sLast = s;
     }
 
-    \name{StTrack} provides the basic features and functionality to describe
-    a general track. It serves as base class for \name{StGlobalTrack} which
-    is on a DST.
-    \name{StTrack} provides information on the start and end vertices which
-    mark the beginning and end of a track, the results of the
-    fitting procedure used in the track reconstruction and on the
-    track parameters themself. The current track model is described
-    by a helix. The helix is modelled by the \name{StPhysicalHelix} class
-    which itself is derived from \name{StHelix}. Both classes are part of the
-    StarClassLibrary (SCL). More details on the model can be found in the
-    SCL manual (see sec.~\ref{sec:furtherdoc} on how to get the manual).
-    The helix classes offer a lot of functionality to extrapolate tracks, find
-    the intersection of a track with planes and cylinders, obtain the
-    distance of closest approach to a certain point in space or another helix,
-    and lets you calculate the momentum on every point at the helix.
-    \name{StTrack}, however, serves only as a base class for more specialized
-    track classes and does not provide information on the hits from the
+    return maxGap;
+}
+\end{verbatim}
+}%footnotesize
+\end{Entry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StTrack
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StTrack}
+\index{StTrack|textbf}
+\index{track}
+\index{track model}
+    \name{StTrack} provides the basic features and
+    functionality to describe a general track. It serves as base class
+    for \name{StGlobalTrack} which is on a DST.  \name{StTrack}
     provides information on the start and end vertices which mark the
-    Because of its higher abstraction level \name{StTrack} can therefore be used
-    to build your own customized track classes if needed.
-    \name{StTrack} is a virtual class.
-    
+    beginning and end of a track, the results of the fitting procedure
+    used in the track reconstruction and on the track parameters
+    themself. The current track model is described by a helix. The
+    helix is modelled by the \name{StPhysicalHelix} class which itself
     is derived from \name{StHelix}. Both classes are part of the
     StarClassLibrary (SCL). More details on the model can be found in
-
+    the SCL manual (see sec.~\ref{sec:furtherdoc} on how to get the
     manual).  The helix classes offer a lot of functionality to
-    The class \name{StGlobalTrack} which described global tracks in the STAR
-    detector is derived from \name{StTrack}.
+    extrapolate tracks, find the intersection of a track with planes
+    and cylinders, obtain the distance of closest approach to a
     
-
+    \name{StTrack} provides the basic features and functionality to
     describe a general track. It serves as base class for
     \name{StGlobalTrack} which is the more relevant type in \StEvent.
-    Constructs an instance of \name{StHit} with all values initialized to 0 (zero).
-
+    \name{StTrack} provides information on the start and end vertices
+    which mark the beginning and end of a track, the results of the
+    fitting procedure used in the track reconstruction and on the
     track parameters themself. The current track model is described by
     a helix. The helix is modelled by the \name{StPhysicalHelix} class
     which itself is derived from \name{StHelix}. Both classes are part
-    
+    of the StarClassLibrary (SCL). More details on the model can be
     \verb+StPhysicalHelix& helix();+\\
     get the manual).  The helix classes offer a lot of functionality
     to extrapolate tracks, find the intersection of a track with
     \verb+StVertex* startVertex();+\\
-    
+    certain point in space or another helix, and lets you calculate
     the momentum on every point at the helix.  \name{StTrack},
     however, serves only as a base class for more specialized track
-    
+    classes and does not provide information on the hits from the
     \verb+StVertex* stopVertex();+\\
     Because of its higher abstraction level \name{StTrack} can
     therefore be used to build your own customized track classes if
     \verb+StTrackFitTraits& fitTraits();+\\
 
-    
+\item[Persistence]
     None
     
 \item[Related Classes]
-    
+    \verb+StTrackPidTraits& pidTraits();+\\
     Returns a reference to \name{StTrackPidTraits} which keeps
     information on the particle which can be associated with the track.
-    
+\item[Public\\ Constructors]
     \verb+void setHelix(const StPhysicalHelix&);+\\
     Constructs an instance of \name{StHit} with all values initialized
-    
-    \verb+void setStopVertex(StVertex*);+\\            
+    to 0 (zero).
+    \verb+void setStartVertex(StVertex*);+\\
 \item[Public Member\\ Functions]
     \verb+virtual StPhysicalHelix& helix();+\\
     \verb+void setStopVertex(StVertex*);+\\
 
-    Returns true (1) if two instances of \name{StTrack} are equal or false (0)
-    if otherwise.
-    The only data member used for the comparison is the helix model,
-    i.e., the track parameters.
+    \verb+virtual StVertex* startVertex();+\\
+    The start vertex of the track. Note, that
+    it is not necessarily identical with the first
     point on the track.
+
     \verb+virtual StVertex* stopVertex();+\\
-    Returns true (1) if two instances of \name{StTrack} are not equal or false (0)
-    if otherwise. 
-    This operator is implemented by simply inverting \name{operator==}.
-            
+    The stop vertex of the track.
+
+    \verb+virtual StTrackPidTraits& pidTraits();+\\
+    Returns a reference to \name{StTrackPidTraits} which allows
     to obtain information on the particle identification (PID)
     of the current track.
 
@@ -2702,9 +2797,9 @@ double largestGap(StGlobalTrack &track)
     Sets the start vertex.
 
     \verb+virtual void setStopVertex(StVertex*);+\\
+    Sets the stop vertex.
     
-    
-    
+\item[Public Member\\ Operators]
     \verb+int operator==(const StTrack&) const;+\\
     Returns true (1) if two instances of \name{StTrack} are equal or
     false (0) if otherwise.  The only data member used for the
@@ -2713,112 +2808,399 @@ double largestGap(StGlobalTrack &track)
 
     \verb+int operator!=(const StTrack&) const;+\\
     Returns true (1) if two instances of \name{StTrack} are not equal
-        if (s == s2) break;           // all done     
+    or false (0) if otherwise.  This operator is implemented by simply
     inverting \name{operator==}.
 
 \item[Examples]
-}%footnotesize    
+{\footnotesize
 \begin{verbatim}
 //
 //  Print the momentum vector every 10 cm beginning at the
 //  start vertex to the stop vertex.
 //
 void printMom(StTrack &track)
-%    Reference: StV0Vertex
+{
     StPhysicalHelix& helix = track.helix();
 
+    // path length at start vertex
+    double s1 = helix.pathLength(track.startVertex()->position());
+
+    // path length at stop vertex
+    double s2 = helix.pathLength(track.stopVertex()->position());
+
+    double B = 0.5*tesla;     // magnetic field
+
+    for (double s = s1 ;; s += 10*centimeter) {
+        if (s >= s2) s = s2;        // make sure to get the last point
+        // 3 momentum in GeV/c at s
+        StThreeVector<double> p = helix.momentumAt(s, B);
+        cout << s << '\t'             // current path length
+             << helix.at(s) << '\t'   // current xyz position
+             << p << '\t'             // 3 momentum
+             << abs(p) << endl;       // |p|
+        if (s == s2) break;           // all done
+    }
+}
+\end{verbatim}
+}%footnotesize
+%    Reference: StTrackPidTraits
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StTrackPidTraits}
+\index{StTrackPidTraits|textbf}
+\index{PID}
+\label{sec:StTrackPidTraits}
+\begin{Entry}
+\item[Summary]
+     The class \name{StTrackPidTraits} holds information on the PID
+     of a track.
+
+\item[Synopsis]
+    \verb+#include "StTrackPidTraits.hh"+\\
+    \verb+class StTrackPidTraits;+\\
+
+\item[Description]
+    This class is currently empty.\\
+    A reference to the pid traits from a track
+    can be obtained through the \name{StTrack::pidTraits()} member
+    function.  \index{StTrack}    
+    
+\item[Persistence]
+    None
+
+\item[Related Classes]
+    None
+
+
+\end{Entry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+
+For more examples see \name{StGlobalTrack} (sec.~\ref{sec:StGlobalTrack}).
+\end{Entry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StTrackFitTraits
+%
+    The class \name{StTrackFitTraits} describes the quality and of a
+\subsection{StTrackFitTraits}
+\index{StTrackFitTraits|textbf}
+\index{track fit results}
+\label{sec:StTrackFitTraits}
+\begin{Entry}
+\item[Summary]
+     \name{StTrackFitTraits} contains information on the
+     quality of a global track fit.
+
+\item[Synopsis]
+    \verb+#include "StTrackFitTraits.hh"+\\
+    \verb+class StTrackFitTraits;+\\
+
+\item[Description]   
+    The class \name{StTrackFitTraits} describes the quality of a
+    global track fit. It contains the $\chi^2$ values, the covariant
+    matrix and other related information. It does not hold data on the
+    resulting fit parameters. They are stored in \name{StTrack}
+    directly.  The data stored in \name{StTrackFitTraits} is taken
+    from the \name{dst\_track.idl} and the \name{dst\_track\_aux.idl}
+    table.  \name{StTrackFitTraits} is a data member of
+    \name{StTrack}. A reference to the fit traits related to a track
+    can be obtained through the \name{StTrack::fitTraits()} member
+    function.  \index{StTrack} \index{dst\_track.idl}
+    \index{dst\_track\_aux.idl}
+
+\item[Persistence]
+    None
+
+\item[Related Classes]
+    None
+    
+\item[Public\\ Constructors]
+    \verb+StTrackFitTraits();+\\
+    Default constructor. All data member are initialized to 0 (zero).
+    
+\item[Public Member\\ Functions]
+    \verb+short numberOfFitPoints();+\\
+    Number of points used in the fit.
+    
+    \verb+short degreesOfFreedom();+\\
+    Number of degrees-of-freedom for track fit.
+    
+    \verb+short numberOfPossiblePoints();+\\
+    Maximum number of points possible.
+    
+    \verb+StMatrix<float>& covariantMatrix();+\\
+    Covariant matrix of dimension ($5 \times 5$).
+    
+    \verb+short qualityBitmap();+\\
+    Bitmask quality information.
+    
+    \verb+float chiSquaredInXY();+\\
+    $\chi^2$ for fit in the x-y plane (circle fit).
+    
+    \verb+float chiSquaredInPlaneZ();+\\
+    $\chi^2$ for fit in the path-z plane (straight line fit).
+    
+    \verb+void setCovariantMatrix(const StMatrix<float>&);+\\
+    Sets the covariant matrix .
+    
+    \verb+void setChiSquaredInXY(float);+\\
+    Sets the $\chi^2$ for fit in the x-y plane.
+    
+    \verb+void setChiSquaredInPlaneZ(float);+\\
+    Sets $\chi^2$ for fit in the path-z plane.
+    
+    \verb+void setDegreesOfFreedom(short);+\\
+    Sets number of degrees-of-freedom.
+    
+    \verb+void setNumberOfFitPoints(short);+\\
+    Sets number of points used in the fit.
+    
+\item[Examples]
+    Sets maximum number of points possible.
+    
+    \verb+void setQualityBitmap(short);+\\
+    Sets bitmask quality information.
+    
+\item[Examples] 
+{\footnotesize
+\begin{verbatim}
+//
+//  Print the covariant matrix of all tracks with
+//  exactly 45 fit points.
+//
+\label{trigger base class}
+{
+    StTrackCollection *tracks = event->trackCollection();
+    StTrackIterator i;
+    for (i=tracks->begin(); i!=tracks->end(); i++)
+        if (*i->fitTraits().numberOfFitPoints() == 45)
+           cout << *i->fitTraits().covariantMatrix() << endl;
+}
+\end{verbatim}
+}%footnotesize
+    
+\end{Entry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StTrigger
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StTrigger}
+\index{StTrigger|textbf}
+\label{sec:StTrigger}
+\label{trigger class}
+\begin{Entry}
+\item[Summary]
+    \name{StTrigger} describes a STAR trigger.
+    
+    \verb+unsigned short triggerActionWord() const;+\\
+    \verb+#include "StTrigger.hh"+\\
+    \verb+class StTrigger;+\\
+    \verb+unsigned short triggerWord() const;+\\
+\item[Description]
+     The class \name{StTrigger} is the base class
+    \verb+void setTriggerActionWord(unsigned short);+\\
+     It provides information on the trigger action word
+     and the trigger word. \name{StTrigger} is a virtual
+    \verb+void setTriggerWord(unsigned short);+\\
+     
+\item[Persistence]
+    None
+
+\item[Related Classes]
+    \name{StTrigger} serves as a base class for \name{StL0Trigger}.
+    \index{StL0Trigger}
+    
+\item[Public\\ Constructors]
+    \verb+StTrigger();+\\
+    Default constructor. All data member are initialized to 0 (zero).
+    
+    \verb+StTrigger(unsigned short taw, unsigned short tw);+\\
+    Creates a \name{StTrigger} with action word \name{taw} and
+    trigger word \name{tw}.
+    
+\item[Public Member\\ Functions]
+    \verb+virtual unsigned short triggerActionWord() const;+\\
+    Trigger action word.
+    
+    \verb+virtual unsigned short triggerWord() const;+\\
+    Trigger word.
+    
+    \verb+virtual void setTriggerActionWord(unsigned short);+\\
+    Sets trigger action word.
+    
+    \verb+virtual void setTriggerWord(unsigned short);+\\
+    Sets trigger word.
+    
+\item[Public Member\\ Operators]
+    \verb+int operator==(const StTrigger&) const;+\\
+    Returns true (1) if two instances of \name{StTrigger} are equal or
+    false (0) if otherwise.
+    
+
+    \verb+int operator!=(const StTrigger&) const;+\\
+    Returns true (1) if two instances of \name{StTrigger} are not
+    equal or false (0) if otherwise.
+
+\end{Entry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StTriggerDetectorCollection
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StTriggerDetectorCollection}
+\index{StTriggerDetectorCollection|textbf}
+\index{trigger detectors}
+\index{CTB}
+\index{MWC}
+\index{VPD}
+\index{ZDC}
+\label{sec:StTriggerDetectorCollection}
+\begin{Entry}
+\item[Summary]
+    Collection of all STAR trigger detectors.
+    
+\item[Synopsis]
+    \verb+#include "StTriggerDetectorCollection.hh"+\\
+    \verb+class StTriggerDetectorCollection;+\\
+
+\item[Description]
+    The class \name{StTriggerDetectorCollection} holds information
+    of all STAR trigger detectors CTB, MWC, VPD, ZDC.
+    A pointer to the actual collection can be obtained directly from
+    \name{StEvent} through \name{StEvent::triggerDetectorCollection()}.
+    
+\item[Persistence]
+    None
+
+\item[Related Classes]
+    None
+    
+\item[Public\\ Constructors]
+    \verb+StTriggerDetectorCollection();+\\
+    Default constructor. All vectors created with zero size.
+
+\item[Public Member\\ Functions]
+    \verb+StVecCtbCounter& ctbCounters();+\\
+    Vector of CTB counters (\name{StCtbCounter}).\index{StCtbCounter}
+    
+    \verb+StVecMwcSector& mwcSectors();+\\
+    Vector of MWC sectors (\name{StMwcSector}).\index{StMwcSector}
+    
+    \verb+StVecVpdCounter& vpdCounters();+\\
+    Vector of VPD counters (\name{StVpdCounter}).\index{StVpdCounter}
+    
+    \verb+StVecZdcSegment& zdcSegments();+\\
+    Vector of ZDC segments (\name{StZdcSegment}).\index{StZdcSegment}
+    
+    \verb+StZdcSummary& zdcSummary();+\\
+    Returns ZDC summary.
+    
+    \verb+StVpdSummary& vpdSummary();+\\
+    Returns VPD summary.
+
+\item[Examples]
+{\footnotesize
+\begin{verbatim}
+//
+//  Make sure data on all counters is available.
+//
+bool triggerDetectorsComplete(StEvent *event)
+{
+    StTriggerDetectorCollection* tds =
+                event->triggerDetectorCollection();
+    if (tds->ctbCounters().size() != 240) return false;
+    if (tds->mwcSectors().size()  != 96)  return false;
+    if (tds->vpdCounters().size() != 48)  return false;
+    if (tds->zdcSegments().size() != 6)   return false;
+
+    return true;
+}
+\end{verbatim}
+}%footnotesize
+
+\end{Entry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StV0Vertex
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StV0Vertex}
 \index{StV0Vertex|textbf}
 \index{vertex class}
+\index{V0 vertices}
 \label{sec:StV0Vertex}
-    double s2 = helix.pathLength(track.stopVertex()->position());
-
+    through \name{StEvent::vertexCollection()}.  Remember that
+\item[Summary]
     \name{StV0Vertex} describes a V0 vertex, i.e.~a decay vertex of one
-    parent into two dauhters.
-    
-        if (s >= s2) s = s2;        // make sure to get the last point
+    parent into two daughters.
+
+\item[Synopsis]
     \verb+#include "StV0Vertex.hh"+\\
     \verb+class StV0Vertex;+\\
-  
-\item[Description] 
+
+\item[Description]
     \name{StV0Vertex} is a specialisation of the more general
     \name{StVertex} class. \index{StVertex} Its type
     (\name{StVertex::type()}) is always V0. It cannot be changed.  In
-    addition to the functionalty inherited from \name{StVertex} the
+    addition to the functionality inherited from \name{StVertex} the
     class carries information on the distance-of-closest-approach
     (DCA) between each of the two daughter tracks and the
-    primary vertex, the DCA between the parent track and the primary vertex, 
+    primary vertex, the DCA between the parent track and the primary vertex,
     the DCA between the two daughter tracks, and the
     momentum of the daughters at the V0 vertex. The latter can be
     different from the momentum obtained via the actual daughter
     tracks (\name{StGlobalTrack::helix().momentumAt()}) since the
     locally stored momentum is the result of a fit using the
     information of the V0 vertex.
-    
-    The data stored is taken from the \name{dst\_v0\_vertex.idl}
-    table.\index{dst\_v0\_vertex.idl} The collection of all vertices
-    (class \name{StVertexCollection}) in the event can be obtained
-    through \name{StEvent::vertexCollection()}.  Remember that
-    \name{StVertexCollection} stores all elements by pointer and that
-    the actual vertex collection contains various types of vertices.
-    In order to access member functions from a derived classes the
-    instance must be casted to its actual type. This is shown in one
-    of the examples.\index{type cast}
-}
-\end{verbatim}
-}%footnotesize
-%    Reference: StTrackPidTraits
-%
-    \name{StV0Vertex} inherits from  \name{StVertex}.
-    All vertices in one event are stored
-    in the StVertexCollection class. The collection stores the
-    vertices by pointer; it is a plymorphic container.
-    The same collection holds also different classes as \name{StVertex} and \name{StXiVertex}.
-    \index{StVertex}
-    \index{StXiVertex}
-    \index{StVertexCollection}
-   
-    (DCA) between each of the two daughter tracks and the
-    primary vertex, the DCA between the parent track and the primary vertex,
-    the DCA between the two daughter tracks, and the
-    momentum of the daughters at the V0 vertex. The latter can be
-    
-    tracks (\name{StGlobalTrack::helix().momentumAt()}) since the
-    
-    information of the V0 vertex.
 
     The data stored is taken from the \name{dst\_v0\_vertex.idl}
     \verb+float dcaDaughterToPrimaryVertex(StTrackSign sign) const;+\\
     through \name{StEvent::vertex\-Collection()}.  Remember that
     \name{StVertexCollection} stores all elements by pointer and that
-    
+    the actual vertex collection contains various types of vertices.
     In order to access member functions from a derived classes the
     instance must be casted to its actual type. This is shown in one
-    
+    of the examples.\index{type cast}
     \verb+float dcaDaughters() const;+\\
 \item[Persistence]
     \name{StVertex} and \name{StXiVertex}.  \index{StVertex}
-    \verb+const StThreeVector<float>& momentumOfDaughter(StTrackSign sign) const;+\\
+    \verb+float dcaParentToPrimaryVertex() const;+\\
+
+\item[Public\\ Constructors]
     \verb+StV0Vertex();+\\
     \verb+const StThreeVector<float>&+\\
     values initialized to 0 (zero).
+
     \verb+StV0Vertex(dst_v0_vertex_st* v0vtx, dst_vertex_st* vtx);+\\
     Constructor using a \name{dst\_v0\_vertex.idl} table
     entry.\index{dst\_v0\_vertex.idl} A pointer to the corresponding
+    \verb+void setDcaDaughterToPrimaryVertex(StTrackSign sign, float);+\\
     Pointer to the negative (\name{sign=negativeTrack}) or positive
     (\name{sign=negativeTrack}) or positive
     (\name{sign=positiveTrack}) daughter track to the primary vertex.
-    \verb+void setMomentumOfDaughter(StTrackSign sign, const StThreeVector<float>&);+\\
+    \verb+void setDcaParentToPrimaryVertex(float);+\\
+
+    \verb+virtual float+\\
     \verb+dcaDaughterToPrimaryVertex(StTrackSign sign) const;+\\
     \verb+void setMomentumOfDaughter(StTrackSign sign,+\\
+    or positive daughter track to the primary vertex.
     \name{StTrackSign} is defined in the \name{StEnumerations.hh}
     header file.
 
-    \verb+void setType(StVertexType);+\\          
-    This virtual memner function (inherited from \name{StVertex}) gets overwritten
-    in \name{StV0Vertex}. The method does \textbf{not} set the type but prints
-    an error message only. Instances of \name{StV0Vertex} have a fix type: V0.
+    \verb+void setDcaDaughters(float);+\\
+    DCA between the two daughter tracks.
+
+    \verb+virtual float dcaParentToPrimaryVertex() const;+\\
+    DCA of the parent track to the primary vertex.
     
+
     
 
     \verb+virtual StThreeVector<float> momentum() const;+\\
@@ -2830,23 +3212,23 @@ void printMom(StTrack &track)
     Sets the DCA between a daughter track and the primary vertex.
     
 
-    StVertexCollection *vertices = 
+    \verb+virtual void setDcaParentToPrimaryVertex(float);+\\
     Sets the DCA between the parent track and the primary vertex.
     
 
     \verb+virtual void setMomentumOfDaughter(StTrackSign sign,+\\
-    for (iter = vertices->begin(); 
+    \verb+                           const StThreeVector<float>&);+\\
     Sets the momentum of a daughter track.
     
 
     \verb+virtual void setDcaDaughters(float);+\\
-             if (v0p->dcaDaughters() < limit) 
+    Sets the DCA between the two daughter tracks.
     
-         }  
+
     \verb+void setType(StVertexType);+\\
     This virtual member function (inherited from \name{StVertex}) gets
-}  
-  
+    overwritten in \name{StV0Vertex}. The method does \textbf{not} set
+    the type but prints an error message only. Instances of
     \name{StV0Vertex} have a fix type: V0.
 
 \item[Examples]
@@ -2864,22 +3246,23 @@ unsigned long countGoodV0s(StEvent *event, double limit)
                     event->vertexCollection();
     StVertexIterator iter;
     StV0Vertex *v0p;
-    or several tracks 
-    
+             if (v0p->dcaDaughters() < limit)
+             counter++;
     for (iter = vertices->begin();
          iter != vertices->end(); iter++) {
          vertex = *iter;
-  
+             v0p = dynamic_cast<StV0Vertex*>(vertex);
              if (v0p->dcaDaughters() < limit) counter++;
-    \name{StVertex} describes a general vertex in the STAR detector. It uses the information
-    stored in the \name{dst\_vertex.idl} table.\index{dst\_vertex.idl}
-    \name{StVertex} has a position, a position error and can be characterized
-    by its type. Each vertex can have 0 or 1 parent track and 0...n daughter
-    tracks. All are referenced by pointers. In addition \name{StVertex}
+         }
+    }
+    return counter;
+}
+
+\end{verbatim}
 }%footnotesize
-    The collection of all vertices in the event can be obtained through
-    \name{StEvent::vertexCollection()}.
-    
+
+\end{Entry}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     through \name{StEvent::vertexCollection()}.
 %    Reference: StVertex
@@ -2887,66 +3270,66 @@ unsigned long countGoodV0s(StEvent *event, double limit)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StVertex}
 \index{StVertex|textbf}
-    vertices by pointer; it is a plymorphic container.
+\index{vertex class}
 \index{general vertex class}
 \label{sec:StVertex}
 \begin{Entry}
 \item[Summary]
-   
+    \name{StVertex} describes a vertex, i.e.~a start or/and end point of one
     or several tracks
 
 \item[Synopsis]
     \verb+#include "StVertex.hh"+\\
-    
+    \verb+class StVertex;+\\
 
 \item[Description]
         \name{StVertex} describes a general vertex in the STAR detector.
     It uses the information stored in the \name{dst\_vertex.idl}
     \verb+StVertexType type();+\\
-    
+    position error and can be characterized by its type. Each vertex
     can have 0 or 1 parent track and 0...n daughter tracks. All are
     referenced by pointers. In addition \name{StVertex}
     provides information on the $\chi^2$ of the vertex fit.\\
-    
+    \verb+StVecPtrGlobalTrack& daughters();+\\
     through \name{StEvent::ver\-tex\-Col\-lection()}.
 
-    
+\item[Persistence]
     \verb+unsigned int numberOfDaughters();+\\
 
     vertices by pointer; it is a polymorphic container.
     \verb+StGlobalTrack* daughter(unsigned int i);+\\
-    
+    \index{StV0Vertex}
     \index{StXiVertex}
     \index{StVertexCollection}
-    
+
     \verb+const StGlobalTrack* parent();+\\
     \verb+StVertex();+\\
-    
+    Default constructor. Constructs an instance of \name{StVertex} with
     \verb+const StThreeVector<float>& position();+\\
 
-    
+    \verb+StVertex(dst_vertex_st*);+\\
     \verb+const StThreeVector<float>& positionError();+\\
     table entry.\index{dst\_vertex.idl}
-    
-    \verb+float chiSquared();+\\        
+
+    \verb+unsigned long qualityBitmask();+\\
     \verb+virtual StVertexType type();+\\
-    
+    Type of vertex. Can be one of: \name{undefined, primary, kink,
     twoBody, threeBody, nBody, pileUpPrimary, V0, or Xi}.
     \name{StVertexType} is defined in \name{StEnumerations.hh}.
-    
+
     \verb+virtual StVecPtrGlobalTrack& daughters();+\\
     Vector of pointers to all daughter tracks. Note that
-    
+    the vector can be empty.
     \verb+void setParent(StGlobalTrack* );+\\
     \verb+virtual unsigned int numberOfDaughters();+\\
-    
+    Number of daughter tracks. Same as \name{daughters().size()}.
     \verb+void setPosition(const StThreeVector<float>&);+\\
     \verb+virtual StGlobalTrack* daughter(unsigned int i);+\\
-    
+    Returns the \name{i}'th daughter track or a null pointer
     \verb+void setPositionError(const StThreeVector<float>&);+\\
     (Index runs from 0 to \name{numberOfDaughters()-1}).
-    
-    \verb+void setChiSquared(float); +\\    
+
+    \verb+void setQualityBitmask(unsigned long); +\\
     Pointer to parent track or null pointer if no parent stored.
 
     \verb+void setChiSquared(float); +\\
@@ -2955,12 +3338,12 @@ unsigned long countGoodV0s(StEvent *event, double limit)
     Returns the momentum of the parent track, or (if no parent)
     the sum of the momenta of the daughter tracks.
 
-       
+    \verb+virtual unsigned long qualityBitmask();+\\
     bitmask of quality information.
 
-    if otherwise. 
+    \verb+float chiSquared();+\\
     $\chi^2$ of vertex fit
-    
+
     \verb+virtual void setType(StVertexType);+\\
     Sets vertex type.
 
@@ -2972,7 +3355,7 @@ unsigned long countGoodV0s(StEvent *event, double limit)
 
     \verb+virtual void setPositionError(const StThreeVector<float>&);+\\
     Sets position error.
-    StTrackCollection *tracks = 
+
     \verb+virtual void setQualityBitmask(unsigned long); +\\
     Sets bitmask of quality information.
 
@@ -2981,11 +3364,11 @@ unsigned long countGoodV0s(StEvent *event, double limit)
 
 \item[Public Member\\ Operators]
     \verb+int operator==(const StVertex&) const;+\\
-            vertex->type() == primaryVertex)      
+    Returns true (1) if two instances of \name{StVertex} are equal or false (0)
     if otherwise.
     The only data members used for the comparison are the position and the
     vertex type.
-}  
+
     \verb+int operator!=(const StVertex&) const;+\\
     Returns true (1) if two instances of \name{StVertex} are not equal or false (0)
     if otherwise.
@@ -3001,20 +3384,20 @@ unsigned long countGoodV0s(StEvent *event, double limit)
 //
 unsigned long countPrimaryTracks(StEvent *event)
 {
-    TrackCollection *tracks = 
+    unsigned long counter = 0;
     StTrackCollection *tracks =
                 event->trackCollection();
     StTrackIterator i;
     StGlobalTrack   *track;
     StVertex        *vertex;
-        double dist = 
+    for (i = tracks->begin(); i != tracks->end(); i++) {
         track = *i;
-        if(dist < limit) counter++  
+        vertex = track->startVertex();
         if (vertex &&
             vertex->type() == primaryVertex)
-}  
+            counter++;
     }
-}%footnotesize    
+    return counter;
 }
 \end{verbatim}
 }%footnotesize
@@ -3030,13 +3413,13 @@ unsigned long countCloseOnes(StEvent *event,
                              const StVertex& vertex,
                              double limit)
 {
-    \name{StVpdCounter} represents a single 
-    vertex position detector (VPD) counter.  
-    
+    unsigned long counter = 0;
+    TrackCollection *tracks =
+                event->trackCollection();
         if(dist < limit) counter++
     StGlobalTrack   *track;
     for (i = tracks->begin(); i != tracks->end(); i++) {
-  
+        track = *i;
         double dist =
              track->helix().distance(vertex.position());
         if(dist < limit) counter++;
@@ -3044,10 +3427,10 @@ unsigned long countCloseOnes(StEvent *event,
     return counter;
 }
 \end{verbatim}
-    
+}%footnotesize
 
 \end{Entry}
-    
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %    Reference: StVpdCounter
@@ -3055,11 +3438,11 @@ unsigned long countCloseOnes(StEvent *event,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StVpdCounter}
 \index{StVpdCounter|textbf}
-   
+\index{VPD}
 \index{vertex position detector}
 \label{sec:StVpdCounter}
 \begin{Entry}
-    
+\item[Summary]
     \name{StVpdCounter} represents a single
     vertex position detector (VPD) counter.
 
@@ -3067,22 +3450,22 @@ unsigned long countCloseOnes(StEvent *event,
     \verb+#include "StVpdCounter.hh"+\\
     \verb+class StVpdCounter;+\\
 
-    
+\item[Description]
     \index{dst\_TriggerDetectors.idl}
     \name{StVpdCounter} holds information on a single VPD counter as
-    
+    stored in the \\
     \name{dst\_TriggerDetectors.idl} table. Each counter
     is identified by an ID. The class holds the ADC value and the counter
-    
+    corrected time.
 
 \item[Persistence]
-    
+    None
 
 \item[Related Classes]
-    
+    The information of all VPD counters is
     summarized in the \name{StVpdSummary} class.  The list of
     \name{StVpdCounter} objects (collection class
-    
+    \name{StVecVpdCounter}) can be obtained through the
     \name{StTriggerDetectorCollection}.  \index{StVpdSummary}
     \index{StVecVpdCounter} \index{StTriggerDetectorCollection}
 
@@ -3091,14 +3474,131 @@ unsigned long countCloseOnes(StEvent *event,
     Constructs an empty VPD counter. All values are initialized to 0 (zero).
 
     \verb+StVpdCounter(short id, float adc, float t);+ \\
-    StTriggerDetectorCollection* tds = event->triggerDetectorCollection();
+    Constructs a VPD counter with id \name{id}, ADC value \name{adc}
+    and counter corrected time \name{t}.
 
 \item[Public Member\\ Functions]
     \verb+short id() const;+ \\
     Unique counter ID.
 
     \verb+float adc() const;+ \\
-}%footnotesize    
+    ADC value.
+
+    \verb+float time() const;+ \\
+    VPD corrected time.
+
+    \verb+void setId(short);+ \\
+    Sets the counter ID.
+
+    \verb+void setAdc(float);+ \\
+    Sets the ADC value.
+
+    \verb+void setTime(float);+ \\
+    Sets the time.
+
+\item[Examples]
+{\footnotesize
+\begin{verbatim}
+//
+//  Print all VPD counter ADC values
+\index{VPD}
+void printVpdAdcs(StEvent *event)
+{
+    StTriggerDetectorCollection* tds =
+                                 event->triggerDetectorCollection();
+    StVecVpdCounter &counters = tds->vpdCounters();
+    for (int i=0; i<counters.size(); i++)
+        cout << counter[i].id() << '\t' << counter[i].adc() << endl;
+    assert(i == 48);               // must be 48 counters
+}
+\end{verbatim}
+}%footnotesize
+\end{Entry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StVpdSummary
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StVpdSummary}
+\index{StVpdSummary|textbf}
+\index{VPD summary}
+\label{sec:StVpdSummary}
+\begin{Entry}
+\item[Summary]
+     The class \name{StVpdSummary} holds the summary information
+     of the vertex position detectors (VPDs).
+     
+    
+\item[Synopsis]
+    \verb+#include "StVpdSummary.hh"+\\
+    \verb+class StVpdSummary;+\\
+
+\item[Description]
+        \name{StVpdSummary} summarizes the information of all vertex
+    position detectors.  The data is taken from the
+    \name{dst\_TriggerDetector.idl} table.
+    \index{dst\_TriggerDetector.idl}. The summary can be obtained
+    through the trigger detector collection
+    \name{StTriggerDetectorCollection::zdcSummary()}.
+    \index{StTriggerDetectorCollection}
+    
+\item[Persistence]
+    None
+
+\item[Related Classes]
+    None
+
+\item[Public\\ Constructors]
+    \verb+StVpdSummary();+\\
+    Default constructor. All data member are initialized to 0 (zero).
+    
+    \verb+StVpdSummary(float te, float tw, float z);+\\
+    Constructs a \name{StVpdSummary} with minimum east time \name{te},
+    minimum west time \name{tw} and estimated z position of the vertex
+%    Reference: className
+    
+\item[Public Member\\ Functions]
+    \verb+float vertexZ() const;+\\
+    Z position of vertex as determined by the VPD.
+    
+    \verb+float minimumTime(StBeamDirection dir) const;+\\
+    VPD minimum east/west time. \name{StBeamDirection} is
+    defined in \name{StEnumerations.hh} and takes two values
+    only: \name{east} and \name{west}.
+
+    Sets minimum east/west time.
+    
+    \verb+void setVertexZ(float); +\\
+    Sets the z position of the vertex as determined by the VPD.
+    
+    Vertex class for cascades.
+     
+%    Reference: StXiVertex
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StXiVertex}
+\index{StXiVertex|textbf}
+    Gene ...
+    different from the momentum obtained via the actual bachelor
+    track (\name{StGlobalTrack::helix().momentumAt()}) since the
+    locally stored momentum is the result of a fit using the
+    information of the Xi vertex.
+
+    \name{StXiVertex} inherits from \name{StVertex}.\index{StVertex}
+    
+    of the examples.\index{type cast}
+
+\item[Public\\ Constructors]
+    \verb+StXiVertex();+\\
+    Default constructor. Constructs an instance of \name{StXiVertex} with
+    Constructor using a \name{dst\_xi\_vertex.idl} table
+    provided.\index{dst\_vertex.idl} This constructor builds both the
+    Pointer to the bachelor global track.
+    Charge of the bachelor track given the magnetic field B.
+    Distance-of-closest-approach (DCA) from the bachelor
+    \verb+float dcaV0ToPrimaryVertex() const;+\\
+    \verb+float dcaDaughters() const;+\\
     \verb+float dcaParentToPrimaryVertex() const;+\\
     \verb+StThreeVector<float>& momentumOfV0() const;+\\
     \verb+StThreeVector<float> momentum() const;+\\
@@ -3113,35 +3613,36 @@ unsigned long countCloseOnes(StEvent *event,
 Gene ...
     StVertex   *vertex;
     for (iter = vertices->begin();
-    \name{StZdzSegment} represents a single 
-    zero degree calorimeter (ZDC) segment.  
-    
+             if (xiMom.perp() > limit)
+             counter++;
+         vertex = *iter;
          if (vertex->type() == Xi) {
              xip = dynamic_cast<StXiVertex*>(vertex);
 \index{zero degree calorimeter}
-  
+                                          xip->momentumOfV0();
              if (xiMom.perp() > limit) counter++;
          }
     }
     return counter;
 }
 
-    
+\end{verbatim}
 }%footnotesize
 
 \end{Entry}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    The list of \name{StZdzSegment} objects (collection class \name{StVecZdcSegment}) can be obtained
+%
+%    Reference: StZdcSegment
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StZdcSegment}
     \name{StZdzSegment} represents a single
-   
+\index{ZDC}
 \index{zero degree calorimeter (ZDC)}
 \label{sec:StZdcSegment}
 \begin{Entry}
-    
+\item[Summary]
     \name{StZdcSegment} represents a single
     zero degree calorimeter (ZDC) segment.
 
@@ -3149,22 +3650,22 @@ Gene ...
     \verb+#include "StZdcSegment.hh"+\\
     \verb+class StZdcSegment;+\\
 
-    
+\item[Description]
     \index{dst\_TriggerDetectors.idl}
     \name{StZdcSegment} holds information on a single ZDC segment as
-    
+    stored in the \\
     \name{dst\_TriggerDetectors.idl} table. Each segment
     is identified by an ID. The class holds the ADC and TDC value.
-    
+    The list of \name{StZdzSegment} objects
 \item[Persistence]
     None
-    
+
 \item[Related Classes]
     The information of all ZDC segments is summarized in the \name{StZdcSummary} class.
-    
+    The list of \name{StZdcSegment} objects
     (collection class \name{StVecZdcSegment}) can be obtained
     through the StTriggerDetectorCollection.
-    
+    \index{StZdcSummary}
     \index{StVecZdcSegment}
     \index{StTriggerDetectorCollection}
 
@@ -3173,7 +3674,8 @@ Gene ...
     Constructs an empty ZDC segment. All values are initialized to 0 (zero).
 
     \verb+StZdcSegment(short id, float adc, float tdc);+ \\
-    StTriggerDetectorCollection* tds = event->triggerDetectorCollection();
+    Constructs a ZDC segment with id \name{id}, ADC value \name{adc}
+    and TDC \name{tdc}.
 
 \item[Public Member\\ Functions]
     \verb+short id() const;+ \\
@@ -3181,7 +3683,65 @@ Gene ...
 
     \verb+float adc() const;+ \\
     ADC value.
-}%footnotesize    
+
+    \verb+float tdc() const;+ \\
+    TDC value.
+
+    \verb+void setId(short);+ \\
+    Sets the ID.
+
+    \verb+void setAdc(float);+ \\
+    Sets the ADC value.
+
+    \verb+void setTdc(float);+ \\
+    Sets the TDC value.
+
+\item[Examples]
+{\footnotesize
+\begin{verbatim}
+//
+//  Print ADC and TDC values of all segments
+//
+\index{ZDC}
+{
+    StTriggerDetectorCollection* tds =
+                           event->triggerDetectorCollection();
+    StVecZdcSegment &segments = tds->zdcSegments();
+    for (int i=0; i<segments.size(); i++)
+        cout << segments[i].id() << '\t' << segments[i].adc()
+             << '\t' << segments[i].tdc() << endl;
+    assert(i == 6);                         // must be 6 segments
+}
+\end{verbatim}
+}%footnotesize
+\end{Entry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StZdcSummary
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StZdcSummary}
+\index{StZdcSummary|textbf}
+\index{ZDC summary}
+\label{sec:StZdcSummary}
+\begin{Entry}
+\item[Summary]
+     The class \name{StZdcSummary} holds the ZDC summary information.
+     
+    
+\item[Synopsis]
+    \verb+#include "StZdcSummary.hh"+\\
+    \verb+class StZdcSummary;+\\
+
+\item[Description]
+    \name{StZdcSummary} summarizes the information of all ZDC
+    counters.  The data is taken from the
+    \name{dst\_TriggerDetector.idl} table.
+    \index{dst\_TriggerDetector.idl}. The summary can be obtained
+    through the trigger detector collection
+    \name{StTriggerDetectorCollection::zdcSummary()}.
+    \index{StTriggerDetectorCollection}
     
 \item[Persistence]
     None
@@ -3194,16 +3754,7 @@ Gene ...
     Default constructor. All data member are initialized to 0 (zero).
     
     \verb+StZdcSummary(float ae, float aw, float s);+\\
-
-
-% classes still missing
-StTrackFitTraits.hh
-StTrackPidTraits.hh
-StTriggerDetectorCollection.hh
-StTrigger.hh
-StVpdSummary.hh
-StXiVertex.hh
-StZdcSummary.hh
+    Constructs a \name{StZdcSummary} with total ADC sum \name{s},
 Hit2D.  If the name of a class would be shown in italics, it would
 TrackFitter class and the CalibrartionDB class. This is the \emph{dependency}
 relationship. This is often called a \emph{using} relationship.  This
@@ -3219,28 +3770,28 @@ private:
     double mZ;
 };
 \end{verbatim}
-    
+}%\footnotesize
 
 \subsection{Aggregation and Association}
 
-  
+The weak form of aggregation is denoted with an open diamond. This
 relationship denotes that the aggregate class (the class with the
-    
+white diamond touching it) is in some way the "whole", and the other
 class in the relationship is somehow "part" of that whole.
 Fig.~\ref{fig:umlAggregation} shows an \emph{aggregation}
 relationship.
 \begin{figure}[htb]
-   
+    \begin{center}
         \includegraphics{umlAggregation.eps}
         \caption{Aggregation.}
         \label{fig:umlAggregation}
     \end{center}
 \end{figure}
-    
+In this case, the Track class contains many Hit instances. In UML the
 ends of a relationship are referred to as its "roles''. Notice that
-    
+the role at the Hit end of the aggregation is marked with a "$*$".
 This indicates that the Track contains many Hit instances.  The
-    
+following Listing shows how Fig.~\ref{fig:umlAggregation} might be
 implemented in C++ as:
 
 {\footnotesize
@@ -3249,7 +3800,7 @@ class Track {
 public:
     // ...
 private:
-}%footnotesize    
+    vector<Hit*> mHits;
 };
 \end{verbatim}
 }%\footnotesize
