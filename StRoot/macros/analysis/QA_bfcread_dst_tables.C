@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.13 1999/11/10 14:57:57 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.14 1999/11/10 17:06:58 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.14  1999/11/10 17:06:58  kathy
+// remove check on globtrk_aux and primtrk_aux tables for 99i and above since these tables are obsolete now - in QA_bfcread_dst_tables.C
+//
 // Revision 1.13  1999/11/10 14:57:57  kathy
 // changed QA_bfcread_dst_tables.C to take into account new tables in 99i and above
 //
@@ -98,12 +101,10 @@ void QA_bfcread_dst_tables(
   Int_t cnt_event_header=0;
   Int_t cnt_event_summary=0;
   Int_t cnt_globtrk=0;
-  Int_t cnt_globtrk_aux=0;
   Int_t cnt_vertex=0;
   Int_t cnt_point=0;
   Int_t cnt_globtrk2=0;
   Int_t cnt_primtrk=0;
-  Int_t cnt_primtrk_aux=0;
   Int_t cnt_dst_v0_vertex=0;
   Int_t cnt_dst_xi_vertex=0;
   Int_t cnt_dst_dedx=0;
@@ -146,12 +147,10 @@ void QA_bfcread_dst_tables(
    cnt_event_header=0;
    cnt_event_summary=0;
    cnt_globtrk=0;
-   cnt_globtrk_aux=0;
    cnt_vertex=0;
    cnt_point=0;
    cnt_globtrk2=0;
    cnt_primtrk=0;
-   cnt_primtrk_aux=0;
    cnt_dst_v0_vertex=0;
    cnt_dst_xi_vertex=0;
    cnt_dst_dedx=0;
@@ -206,8 +205,6 @@ void QA_bfcread_dst_tables(
                 cnt_event_summary++;
               if (strcmp(obj->GetName(),"globtrk")==0) 
                 cnt_globtrk++;
-              if (strcmp(obj->GetName(),"globtrk_aux")==0) 
-                cnt_globtrk_aux++;
               if (strcmp(obj->GetName(),"vertex")==0) 
                 cnt_vertex++;
               if (strcmp(obj->GetName(),"point")==0) 
@@ -216,8 +213,6 @@ void QA_bfcread_dst_tables(
                 cnt_globtrk2++;
               if (strcmp(obj->GetName(),"primtrk")==0) 
                 cnt_primtrk++;
-              if (strcmp(obj->GetName(),"primtrk_aux")==0) 
-                cnt_primtrk_aux++;
               if (strcmp(obj->GetName(),"dst_v0_vertex")==0) 
                 cnt_dst_v0_vertex++;
               if (strcmp(obj->GetName(),"ev0_eval")==0) 
@@ -270,11 +265,6 @@ void QA_bfcread_dst_tables(
           fout << endl << "QA-> Missing Table: " << "globtrk" << endl;
           tabmiss++;
         } 
-        if (cnt_globtrk_aux == 0){
-          cout << endl << "QA-> Missing Table: " << "globtrk_aux" << endl;
-          fout << endl << "QA-> Missing Table: " << "globtrk_aux" << endl;
-          tabmiss++;
-        } 
         if (cnt_vertex == 0){
           cout << endl << "QA-> Missing Table: " << "vertex" << endl;
           fout << endl << "QA-> Missing Table: " << "vertex" << endl;
@@ -293,11 +283,6 @@ void QA_bfcread_dst_tables(
         if (cnt_primtrk == 0){
           cout << endl << "QA-> Missing Table: " << "primtrk" << endl;
           fout << endl << "QA-> Missing Table: " << "primtrk" << endl;
-          tabmiss++;
-        } 
-        if (cnt_primtrk_aux == 0){
-          cout << endl << "QA-> Missing Table: " << "primtrk_aux" << endl;
-          fout << endl << "QA-> Missing Table: " << "primtrk_aux" << endl;
           tabmiss++;
         } 
         if (cnt_dst_v0_vertex == 0){
