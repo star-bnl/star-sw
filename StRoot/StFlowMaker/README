@@ -1,0 +1,6 @@
+StFlowMaker
+
+Creates a FlowEvent from StEvent using event
+and track cuts.
+Contains the member fuction used in the flow 
+analysis (StFlowTagMaker and StFlowAnalysisMaker).
