@@ -7,11 +7,12 @@ DVIPDF          = dvipdf
 LATEX           = latex
 MKINDEX         = makeindex -s StEventIndex.sty
 PSNUP		= psnup -2 -pletter
-PSSRC		= StEventTitle.eps StarIcon.eps umlForHits.eps \
-		  umlForEvents.eps umlForTracks.eps umlForVertices.eps \
-		  umlAggregation.eps umlClassIcon.eps umlClass.eps \
-	          umlAssociation.eps umlComposition.eps umlInheritance.eps \
-	          umlDependency.eps
+PSSRC		= StarIcon.eps StEventTitle.eps \
+		  cartoon1.eps cartoon2.eps cartoon4.eps \
+		  run.eps event.eps monitors.eps trigger.eps \
+		  nodes.eps tracks.eps umlClassIcon.eps umlClass.eps \
+		  umlComposition.eps umlInheritance.eps \
+		  umlAggregation.eps umlAssociation.eps umlDependency.eps
 
 all:			$(TEXSRC).ps
 
