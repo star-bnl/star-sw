@@ -5,8 +5,11 @@
 //                                                                      //
 // StPrimaryMaker virtual base class for Maker                          //
 //                                                                      //
-// $Id: StPrimaryMaker.h,v 1.10 2001/09/05 21:28:29 genevb Exp $
+// $Id: StPrimaryMaker.h,v 1.11 2001/09/07 23:18:16 genevb Exp $
 // $Log: StPrimaryMaker.h,v $
+// Revision 1.11  2001/09/07 23:18:16  genevb
+// Additional vertex fixing from file capabilities
+//
 // Revision 1.10  2001/09/05 21:28:29  genevb
 // Added vertex file-reading ability
 //
@@ -35,6 +38,7 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #include "TArrayF.h"
+#include "TArrayI.h"
 #endif
 
 class St_evr_privert;
@@ -64,6 +68,9 @@ class StPrimaryMaker : public StMaker {
   TArrayF m_fixedArrayX;
   TArrayF m_fixedArrayY;
   TArrayF m_fixedArrayZ;
+  TArrayI m_fixedArrayR;
+  TArrayI m_fixedArrayE;
+  Bool_t embedVerts;
   float zCutppLMV;
   long ppLMV(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
   long ppLMV3(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
@@ -71,6 +78,7 @@ class StPrimaryMaker : public StMaker {
   TH1F *hppLMV2[16];
   TH1F *hPiFi[16];
  protected:
+  virtual Int_t FixVertexFileRead(char* fname, Bool_t idMatch);
   
   
  public: 
@@ -80,16 +88,26 @@ class StPrimaryMaker : public StMaker {
   virtual Int_t  Make();
   virtual void  FixVertex(Float_t x=0, Float_t y=0, Float_t z=0);
   virtual Int_t FixVertex(Int_t eventNumber);
-  virtual Int_t FixVertexFile(char* fname);
+  virtual Int_t FixVertex(Int_t runID, Int_t eventID);
+  virtual Int_t FixVertexFileEmbed(char* fname);
+  virtual Int_t FixVertexFile3Vector(char* fname);
+  virtual Int_t FixVertexFileMatch(char* fname);
   virtual void  UnFixVertex();
   Int_t GetFixedSize() { return m_fixedArrayX.GetSize(); }
+  Int_t GetMatchedSize() { return m_fixedArrayE.GetSize(); }
   void ppLMVuse(float z)
     { zCutppLMV=z; printf("ppLMVuse(z=%f cm) called\n", zCutppLMV=z);}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.10 2001/09/05 21:28:29 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.11 2001/09/07 23:18:16 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPrimaryMaker, 0)   //StAF chain virtual base class for Makers
     };
     
+inline Int_t StPrimaryMaker::FixVertexFileEmbed(char* fname)
+  { embedVerts=kTRUE; return FixVertexFileRead(fname, kTRUE); }
+inline Int_t StPrimaryMaker::FixVertexFile3Vector(char* fname)
+  { return FixVertexFileRead(fname, kFALSE); }
+inline Int_t StPrimaryMaker::FixVertexFileMatch(char* fname)
+  { embedVerts=kFALSE; return FixVertexFileRead(fname, kTRUE ); }
 #endif
     

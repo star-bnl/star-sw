@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.61 2001/09/05 21:28:29 genevb Exp $
+// $Id: StPrimaryMaker.cxx,v 1.62 2001/09/07 23:18:16 genevb Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.62  2001/09/07 23:18:16  genevb
+// Additional vertex fixing from file capabilities
+//
 // Revision 1.61  2001/09/05 21:28:29  genevb
 // Added vertex file-reading ability
 //
@@ -213,6 +216,7 @@
 #define gufld   gufld_
 extern "C" {void gufld(Float_t *, Float_t *);}
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
+int curEvNum=-1;
 
 //class St_tcl_tpcluster;
 //class St_ctu_cor;
@@ -227,10 +231,13 @@ ClassImp(StPrimaryMaker)
   m_fixedVertex(0),
   m_fixedArrayX(0),
   m_fixedArrayY(0),
-  m_fixedArrayZ(0)
+  m_fixedArrayZ(0),
+  m_fixedArrayR(0),
+  m_fixedArrayE(0)
 {
   m_flag      = 2;
   zCutppLMV=0; // turn off ppLMV  as default
+  embedVerts = kFALSE;
 }
 //_____________________________________________________________________________
 StPrimaryMaker::~StPrimaryMaker(){
@@ -276,27 +283,74 @@ Int_t StPrimaryMaker::FixVertex(Int_t eventNumber){
   return kStOK;
 }
 //_____________________________________________________________________________
-Int_t StPrimaryMaker::FixVertexFile(char* fname){
+Int_t StPrimaryMaker::FixVertex(Int_t runID, Int_t eventID){
+  Bool_t found=kFALSE;
+  Int_t i=curEvNum+1;                                 // Search forward
+  while (!(found || (i >= GetMatchedSize()))) {
+    if ((m_fixedArrayE.At(i) == eventID) &&
+        (embedVerts || (m_fixedArrayR.At(i) == runID)))
+      found = kTRUE;
+    else i++;
+  }
+  if (! found) i=curEvNum-1;                          // Search backward
+  while (!(found || (i < 0))) {
+    if ((m_fixedArrayE.At(i) == eventID) &&
+        (embedVerts || (m_fixedArrayR.At(i) == runID)))
+      found = kTRUE;
+    else i--;
+  }
+  if (! found) {
+    gMessMgr->Error() << "StPrimaryMaker: no matching run and event IDs\n"
+      << "      found from vertex file!!! EXITING WITH ERROR!!!" << endm;
+    return kStErr;
+  }
+  curEvNum = i;
+  FixVertex(m_fixedArrayX.At(curEvNum),
+            m_fixedArrayY.At(curEvNum),
+            m_fixedArrayZ.At(curEvNum));
+  return kStOK;
+}
+//_____________________________________________________________________________
+Int_t StPrimaryMaker::FixVertexFileRead(char* fname, Bool_t idMatch){
+  // If idMatch, then read eventID, runID (or mult for embedding), X, Y, Z.
+  // Otherwise read X, Y, Z.
+
   FILE* fp = fopen(fname,"r");
   if (fp) {
     int asize=1024;
     int count=0;
+    int fR,fE;
     float fX,fY,fZ;
-    while (fscanf(fp,"%f %f %f",&fX,&fY,&fZ) != EOF) {
+    while (( (idMatch) ?
+             (fscanf(fp,"%d %d %f %f %f",&fE,&fR,&fX,&fY,&fZ)) :
+             (fscanf(fp,"%f %f %f",&fX,&fY,&fZ)) )
+           != EOF) {
       if ((count + 1) > GetFixedSize()) {
         m_fixedArrayX.Set(asize);
         m_fixedArrayY.Set(asize);
         m_fixedArrayZ.Set(asize);
+        if (idMatch) {
+          m_fixedArrayR.Set(asize);
+          m_fixedArrayE.Set(asize);
+        }
         asize *= 2;
       }
       m_fixedArrayX.AddAt(fX,count);
       m_fixedArrayY.AddAt(fY,count);
       m_fixedArrayZ.AddAt(fZ,count);
+      if (idMatch) {
+        m_fixedArrayR.AddAt(fR,count);
+        m_fixedArrayE.AddAt(fE,count);
+      }
       count++;
     }
     m_fixedArrayX.Set(count);
     m_fixedArrayY.Set(count);
     m_fixedArrayZ.Set(count);
+    if (idMatch) {
+      m_fixedArrayR.Set(count);
+      m_fixedArrayE.Set(count);
+    }
     fclose(fp);
     gMessMgr->Info() << "StPrimaryVertex: read in " << count <<
       " event vertices from vertex file: " << fname << endm;
@@ -502,7 +556,9 @@ Int_t StPrimaryMaker::Make(){
   }
 
   // Using file of fixed vertices
-  if (GetFixedSize()) {
+  if (GetMatchedSize()) {                  // Match event/run IDs
+    if (FixVertex(GetRunNumber(),GetEventNumber())) return kStErr;
+  } else if (GetFixedSize()) {
     if (FixVertex(GetNumber()-1)) return kStErr;
   }
 
