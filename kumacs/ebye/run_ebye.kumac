@@ -9,6 +9,7 @@
 *       2.  moved sca_ensemble_ave and sca_prior to /dui/calib/ebye/sca
 * 8/10/98 K. Turner - changed exec create_tables_global#sca to 
 *                             exec create_tables_global#egr to make it standard
+* 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
 * 
 ************************************************************************
 ************************************************************************
@@ -125,7 +126,7 @@
 
 * close ntuple
   message ' close ntuple'
-  exec write_table_to_ntuple#close_disk [funit]
+  exec write_table_to_ntuple#close_disk [funit] [nid]
 
 * close input file
   message ' close input file'

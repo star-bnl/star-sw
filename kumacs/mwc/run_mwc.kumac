@@ -2,7 +2,8 @@
 * run_mwc.kumac
 * 
 * 7/31/98 P. Yepes  - editted to make it standard
-************************************************************************
+* 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk 
+* ***********************************************************************
 ************************************************************************
 
  macro run__
@@ -109,7 +110,7 @@
  
 * close ntuple
   message ' close ntuple'
-  exec write_table_to_ntuple#close_disk [funit]
+  exec write_table_to_ntuple#close_disk [funit] [nid]
 
 * close input file
   message ' close input file'
