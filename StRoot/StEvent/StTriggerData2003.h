@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.h,v 2.3 2003/07/16 19:58:31 perev Exp $
+ * $Id: StTriggerData2003.h,v 2.4 2004/02/11 01:39:52 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.h,v $
+ * Revision 2.4  2004/02/11 01:39:52  ullrich
+ * Use enumeration StBeamDirector for east/west. Add member for ZDC vertex.
+ *
  * Revision 2.3  2003/07/16 19:58:31  perev
  * Cleanup of StTriggerData2003 at all
  *
@@ -32,7 +35,7 @@ class StTriggerData2003 : public StTriggerData {
 public:
     StTriggerData2003();
     StTriggerData2003(const TrgDataType2003*);
-virtual ~StTriggerData2003();
+    ~StTriggerData2003();
   
     void dump() const;  //dump data into text
   
@@ -67,18 +70,18 @@ virtual ~StTriggerData2003();
     
     // MWC
     unsigned short mwc(int pmt, int prepost=0) const;
-            
+
     // BBC
-    unsigned short bbcADC(int eastwest, int pmt, int prepost=0) const;
-    unsigned short bbcTDC(int eastwest, int pmt, int prepost=0) const;
-    unsigned short bbcADCSum(int eastwest, int prepost=0) const;
-    unsigned short bbcADCSumLargeTile(int eastwest, int prepost=0) const;
-    unsigned short bbcEarliestTDC(int eastwest, int prepost=0) const;
+    unsigned short bbcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    unsigned short bbcTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    unsigned short bbcADCSum(StBeamDirection eastwest, int prepost=0) const;
+    unsigned short bbcADCSumLargeTile(StBeamDirection eastwest, int prepost=0) const;
+    unsigned short bbcEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     unsigned short bbcTimeDifference() const;
 
     // FPD
-    unsigned short fpd(int eastwest, int module, int pmt, int prepost=0) const; 
-    unsigned short fpdSum(int eastwest, int module) const;
+    unsigned short fpd(StBeamDirection eastwest, int module, int pmt, int prepost=0) const; 
+    unsigned short fpdSum(StBeamDirection eastwest, int module) const;
     
     // experts only
     char* getTriggerStructure();
@@ -91,8 +94,3 @@ protected:
 };
 
 #endif
-
-
-
-
-
