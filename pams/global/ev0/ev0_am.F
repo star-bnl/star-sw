@@ -19,10 +19,10 @@ C     vertex_h:     dst vertex table header
 C     vertex:       dst vertex table, co-ords and pointers to aux tables
 C     ev0out_h:     auxiallary vertex structure header
 C     ev0out:       auxilliary vertex structure 
-C      trak_h:        local ev0 track table header
-C      track         local ev0 track table
-C      bmag_h:      Magnetic field table header
-C      bmag:        Value of magnetic field
+C     trak_h:       local ev0 track table header
+C     track         local ev0 track table
+C     bmag_h:       Magnetic field table header
+C     bmag:         Value of magnetic field
 C
 C   Output arguments : 
 C     values in ev0out table
@@ -42,18 +42,17 @@ C   Error conditions    : None-Yet
 C<----------------------------------------------------------------------
       IMPLICIT NONE
 #include "ev0_am.inc"
+#include "phys_constants.inc"
+#include "math_constants.inc"
 
       INTEGER nok
       INTEGER i
 
-      REAL    pi,degrad,raddeg
+
       REAL    xc(2)
 
 C---executable statements
 C
-      pi=acos(-1.)
-      degrad = pi/180.
-      raddeg = 180./pi      
 C----------------------------------------------------------------------
 C----------------------------------------------------------------------
 C
@@ -77,16 +76,16 @@ c Transform tracking parameters to local parameters
         nok=0
         if((globtrk_h.nok).eq.0) return
         DO i=1,globtrk_h.nok
-           if (globtrk(i).sflag .gt. 0 ) then
+           if (globtrk(i).iflag .gt. 0 ) then
               nok=nok+1
-              IF(nok.ge. trak_h.maxlen)   GOTO 35
+              IF(nok .ge. trak_h.maxlen)   GOTO 35
               trak(nok).id  = globtrk(i).id
-              trak(nok).r0   = globtrk(i).r0
-              trak(nok).phi  = globtrk(i).phi0*degrad
+              trak(nok).r0   = sqrt(globtrk(i).x0**2+globtrk(i).y0**2)
+              trak(nok).phi  = atan2(globtrk(i).y0,globtrk(i).x0)
               trak(nok).z0   = globtrk(i).z0
-              trak(nok).psi   = globtrk(i).psi*degrad !degrees to radians
+              trak(nok).psi   = globtrk(i).psi*C_RAD_PER_DEG !degrees to radians
               trak(nok).tanl= globtrk(i).tanl
-              trak(nok).rc = 100/(0.299792458*bmag(1).B*globtrk(i).invpt)
+              trak(nok).rc = 1./(C_D_CURVATURE*bmag(1).B*10*globtrk(i).invpt)
               trak(nok).q  = float(globtrk(i).icharge)
               call ev0_circle_param(trak(nok).r0,xc,
      +             trak(nok).rc,bmag(1).B)
