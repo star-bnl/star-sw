@@ -26,7 +26,7 @@
 	  WRITE( M132, 101 ) Junque, Stuff, Nonsense
 	  CALL Message( M132, 2, IDI1 ) !2 line message.
 	END IF
-101	FORMAT('<Subroutine Name>-T1  Junque:  'I11'  Stuff:'E15.8 /
+101	FORMAT('<Subroutine Name>-I1  Junque:  'I11'  Stuff:'E15.8 /
      1	       '                      Nonsense:'I11 )
 
 *	Here's how to make a table -- MSG_Enabled & Message do msg accounting, Message_Out does't:
