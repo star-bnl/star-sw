@@ -1,4 +1,7 @@
 #  $Log: MakePam.mk,v $
+#  Revision 1.14  1998/04/20 23:41:09  fisyak
+#  Remove -traditional from gcc
+#
 #  Revision 1.13  1998/04/20 22:39:10  fisyak
 #  Correct dependencies
 #
@@ -67,7 +70,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/04/20 22:39:10 $ 
+#           Last modification $Date: 1998/04/20 23:41:09 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
 ifdef SILENT
@@ -229,7 +232,8 @@ ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF)))
         SL_PKG  := $(LIB_DIR)/$(PKG_SL)
 endif                           
 endif                          
-MKDEPFLAGS:= -traditional -MG -MM -w
+#MKDEPFLAGS:= -traditional -MG -MM -w
+MKDEPFLAGS:= -MG -MM -w
 ifndef NODEPEND                
 FILES_D  :=                          $(addsuffix .d,   $(basename $(FILES_O)))
 FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
