@@ -64,7 +64,7 @@ void StIOMaker::Build(StFileI *fileSet,const char *ioFile,const char *treeName)
     if (ioFile && ioFile[0]) {  //Make small StFile
       fFileSet = new StFile();
       fFileSet->AddFile(ioFile);
-      AddConst(new TObjectSet("FileSet",fFileSet,1)); 	//To be deleted at the end
+      AddConst(new TObjectSet("..FileSet",fFileSet,1)); 	//To be deleted at the end
     }  
   } else {			//Write/Update
     fCase = 1;
@@ -100,7 +100,10 @@ Int_t StIOMaker::Init()
   if (fIOMode[0]!='r') return;
 
 //		Add file to StFile
-  if(!fFileSet) fFileSet = new StFile();
+  if(!fFileSet) {
+    fFileSet = new StFile();
+    AddConst(new TObjectSet("..FileSet",fFileSet,1)); 	//To be deleted at the end
+  }
   fFileSet->AddFile(file);
 }
 //_____________________________________________________________________________
