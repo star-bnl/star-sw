@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.28 2000/11/09 19:23:09 lbarnby Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.29 2000/11/23 02:08:49 lbarnby Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.29  2000/11/23 02:08:49  lbarnby
+ * More protection against Nan
+ *
  * Revision 1.28  2000/11/09 19:23:09  lbarnby
  * Cernlib entry point changed (dstlan->dislan) Fix for optimization bug, prevent use of nan. Proper robust solution still required.
  *
@@ -640,13 +643,18 @@ double StTrsChargeSegment::xReflectedLandau(double x0, double sig) const
     double xhi = 1.;
 
     float arg1, arg2;
-    
+    float dlan1, dlan2;
+
+    int counter=0;
     double x,p;
     do {
 	x = .5*(xlo+xhi);
 	arg1 = (x-x0)/sig;
 	arg2 = (1.-x-x0)/sig;
-	p = .5*(1. + (dislan_(&arg1) - dislan_(&arg2))/denom);
+	dlan1 = dislan_(&arg1);
+	dlan2 = dislan_(&arg2);
+	if (isnan(dlan1)) dlan1=0;
+	p = .5*(1. + (dlan1 - dlan2)/denom);
 	if( (fabs(testValue-p)<granularity) ) {
 	    return x;
 	}
@@ -655,6 +663,10 @@ double StTrsChargeSegment::xReflectedLandau(double x0, double sig) const
 	}
 	else {
 	    xhi = x;
+	}
+	if(counter++ == 100){
+	  cout << "Probable race condition in loop in StTrsChargeSegement::xReflectedLandau" << endl;
+	  PR(arg1); PR(arg2); PR(arg3); PR(arg4);
 	}
     } while(true);
 }
