@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.74  2003/07/01 21:32:46  ward
+// Do not skip event if TPC data is legitimately missing because of mixed triggers.
+//
 // Revision 1.73  2003/05/13 03:31:35  jeromel
 // Minor message modif (by by Perry Mason)
 //
@@ -238,7 +241,7 @@ ClassImp(St_tpcdaq_Maker)
 #define HISTOGRAMS
 
 #include "StDAQMaker/StDAQReader.h"
-StDAQReader *victorPrelim;
+StDAQReader *victorPrelim=0;
 StTPCReader *victor;
 int gSector;
 // #define DEVELOPMENT
@@ -255,6 +258,8 @@ St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 //________________________________________________________________________________
 Int_t St_tpcdaq_Maker::Init() {
   
+  victorPrelim=0;
+
   m_seq_startTimeBin  = new TH1F("tpcdaq_startBin" , 
 				 "seq vs start bin" , 512 , 1.0 , 512.0 );
   m_seq_sequnceLength = new TH1F("tpcdaq_seqLen" , 
@@ -292,8 +297,7 @@ Int_t St_tpcdaq_Maker::InitRun(Int_t RunNumber) {
   if(m_Mode == 0 || m_Mode == 2) { // Update this for embedding.
     herb=GetDataSet("StDAQReader");
     assert(herb);
-    victorPrelim=(StDAQReader*)(herb->GetObject());
-    assert(victorPrelim);
+    victorPrelim=(StDAQReader*)(herb->GetObject()); assert(victorPrelim);
   } else if(m_Mode == 1) {// Trs
   } else {
     PP("-----------------------------------------------------------------\n");
@@ -708,7 +712,12 @@ int St_tpcdaq_Maker::Output() {
       pixSave=pixR; iseqSave=seqR; nPixelThisPadRow=0; nSeqThisPadRow=0;
       offsetIntoPadTable=padR; pixTblWhere=0; numPadsWithSignal=0;
       seqOffset=0; npad=getPadList(ipadrow+1,&padlist);
+
+      assert(victorPrelim);
+      if(!(victorPrelim->TPCPresent())) { assert(pixCnt==0); return 4321; /* TPC data missing in this event */ }
+
       if(npad<0) return 1; // Corrupted event, see comment 66f.
+
       pixOffset=0;
       // printf("BBB isect=%d ,ipadrow=%d ,npad=%d \n",isect,ipadrow,npad);
       if(npad>0) pad=padlist[0];
@@ -865,7 +874,7 @@ void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int sectorCntsFrom1,char swap,
   St_DataSetIter rootIterator(m_DataSet);
   St_daq100cl *daq100cl = (St_daq100cl*) rootIterator("daq100cl");
   if(!daq100cl) {
-    daq100cl=new St_daq100cl("daq100cl",1000); // bbb Chk num w/Valerie.
+    daq100cl=new St_daq100cl("daq100cl",1000);
     rootIterator.Add(daq100cl); totalRowCount=0;
   }
 
@@ -897,7 +906,7 @@ void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int sectorCntsFrom1,char swap,
       singlerow.timebucket=Swap2(swap,*time);
       singlerow.charge=Swap2(swap,*charge);
       singlerow.flag=Swap2(swap,*flag);
-      daq100cl->AddAt(&singlerow,totalRowCount++); // bbb Ask Valerie whether there's a better way.
+      daq100cl->AddAt(&singlerow,totalRowCount++);
     }
   }
 }
@@ -977,7 +986,7 @@ void St_tpcdaq_Maker::DAQ100clOutput(const unsigned int *pTPCP) {
 }
 //________________________________________________________________________________
 Int_t St_tpcdaq_Maker::Make() {
-  int errorCode; const char *pTPCP;
+  int output,errorCode; const char *pTPCP;
   printf("St_tpcdaq_Maker::Make() method called\n"); 
 #ifdef DEVELOPMENT
   char junk[10];
@@ -1001,8 +1010,11 @@ Int_t St_tpcdaq_Maker::Make() {
     return kStErr;
   }
   assert(!m_DataSet->GetList());
-  if(daq_flag & 0x01) { //Sometimes this causes us to skip the corruption check, but it's not im-
-    if(Output()) { //portant because the data that would've gotten checked probably won't be used.
+  if(daq_flag & 0x01) { // Sometimes this causes us to skip the corruption check, but it's not im-
+                        // portant because the data that would've gotten checked probably won't be used.
+    output=Output();
+    if(output==4321) printf("St_tpcdaq_Maker::Make() TPC data is missing this event, but do not skip event\n");
+    else if( (output!=0) && (output!=4321) ) {
       PP("St_tpcdaq_Maker has detected .daq file corruption.  Skip this event.\n");
       return kStErr; // See comment 66f.
     }
