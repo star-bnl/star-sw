@@ -1,5 +1,5 @@
 /*********************************************************
- * $Id: StRichViewer.h,v 1.2 2000/01/25 22:02:22 lasiuk Exp $
+ * $Id: StRichViewer.h,v 1.3 2000/04/05 16:06:09 lasiuk Exp $
  *
  * Description:
  *  Struct holds different histograms filled by different
@@ -9,8 +9,8 @@
  *
  ************************************************************
  * $Log: StRichViewer.h,v $
- * Revision 1.2  2000/01/25 22:02:22  lasiuk
- * Second Revision
+ * Revision 1.3  2000/04/05 16:06:09  lasiuk
+ * add histos
  *
  * Revision 1.2  2000/01/25 22:02:22  lasiuk
  * Second Revision
@@ -33,10 +33,6 @@
 #include "TH1.h"
 #include "TH2.h"
 
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData {
-#endif
-    
 class StRichViewer {
 private:
     StRichViewer();
@@ -53,7 +49,13 @@ public:
     TH1F    * mWires;            // wires with charge - obsolete
     TH1F    * mWhichWire;        // wires with charge
     TH1F    * mFeedback;         // feedback photons
+    TH1F    * mPoissonMean;
     TH1F    * mPolia;            // Polia distribution
+    TH1F    * mDist;
+    TH1F    * mPhi;
+
+    TH1F    *mCost;
+
     TH1F    * mNoise;            // Electric noise on pads
     TH1F    * mTotalCharge;      // Charge simulated vs. charge collected
     
@@ -65,14 +67,10 @@ public:
     static int           histograms;  // flag turning them off
     static StRichViewer *p2View;      // handle to only instance
     
-    TCanvas * mCanvas1;
+    //TCanvas * mCanvas1;
     TFile   * mHFile;
     
 };
-
-#ifndef ST_NO_NAMESPACES
-//}
-#endif
 
 #endif // ST_RICH_VIEWER_H
 
