@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.32 2000/10/23 19:44:13 lbarnby Exp $
+// $Id: StMatchMaker.cxx,v 1.33 2000/11/01 00:53:01 lbarnby Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.33  2000/11/01 00:53:01  lbarnby
+// Move field dependent set up from Init into InitRun
+//
 // Revision 1.32  2000/10/23 19:44:13  lbarnby
 // Fix units for B
 //
@@ -445,17 +448,7 @@ Int_t StMatchMaker::Init(){
     m_egr_egrpar->AddAt(&row,1);
   }
 
-  // Set up copying of TPC tracks (no refit) if field off (B very small)
-  gMessMgr->Info() << "B field is " << B/kilogauss << " kilogauss" << endm;
-  if (B/kilogauss < 0.005){
-    gMessMgr->Info() <<
-      "No field run: no refit, copy tracks into globtrk table" << endm;
-    egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
-    egr_egrpar->usetpc = 1;
-    egr_egrpar->usesvt = 1;
-    egr_egrpar->useglobal  = 0;
-  }
-  
+
   AddRunCont(m_egr_egrpar);
  
 
@@ -467,6 +460,24 @@ Int_t StMatchMaker::Init(){
   m_srspar         = (St_srs_srspar  *) svtpars("srspars/srs_srspar");
   
   return StMaker::Init();
+}
+//_____________________________________________________________________________
+Int_t StMatchMaker::InitRun(int runnumber){
+  // Set up copying of TPC tracks (no refit) if field off (B very small)
+  Float_t x[3] = {0,0,0};
+  Float_t b[3];
+  gufld(x,b);
+  Double_t B = b[2]*kilogauss;
+  gMessMgr->Info() << "StMatchMaker::InitRun:B field is " << B/kilogauss << " kilogauss" << endm;
+  if (B/kilogauss < 0.005){
+    gMessMgr->Info() <<
+      "StMatchMaker::InitRun: No field run: no refit, copy tracks into globtrk table" << endm;
+    egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
+    egr_egrpar->usetpc = 1;
+    egr_egrpar->usesvt = 1;
+    egr_egrpar->useglobal  = 0;
+  }
+  return StMaker::InitRun(runnumber);
 }
 //_____________________________________________________________________________
 Int_t StMatchMaker::Make(){
