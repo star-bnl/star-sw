@@ -46,7 +46,7 @@ cd [dst]
 
 tdm/table/rowcount event_header   1
 
-tdm/table/cell/putvalue 'event_header[0].n_event'      0  0
+tdm/table/cell/putvalue 'event_header[0].n_event'      0
 tdm/table/cell/putvalue 'event_header[0].n_run'        0
 tdm/table/cell/putvalue 'event_header[0].event_type'  'Collision'
 tdm/table/cell/putvalue 'event_header[0].time'         0
@@ -78,6 +78,7 @@ tdm/table/cell/putvalue 'particle_dst_param[0].phi_max'       360.0
  return
 
 * ***************************************************************
+
 
 
 
