@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.20 2001/08/29 20:45:15 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.21 2001/08/31 21:29:50 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.21  2001/08/31 21:29:50  genevb
+// Check if trigger info exists
+//
 // Revision 2.20  2001/08/29 20:45:15  genevb
 // Trigger word histos
 //
@@ -148,27 +151,34 @@ Int_t StEventQAMaker::Make() {
       }
       BookHist();
     }
-    UInt_t tword = event->l0Trigger()->triggerWord();
-    Bool_t doEvent = kFALSE;
-    if (tword) {
-      if ((tword >= 0x1000) && (tword < 0x1100)) {
-        mTrigWord->Fill(1.); // "MinBias"
-	doEvent = kTRUE;
-      } else if ((tword >= 0x1100) && (tword < 0x1200)) {
-        mTrigWord->Fill(2.); // "Central"
-	doEvent = kTRUE;
-      } else if (tword == 0xF200) {
-        mTrigWord->Fill(7.); // "Laser"
+    UInt_t tword = 0;
+    Bool_t doEvent = kTRUE;
+    StTrigger* l0Trig = event->l0Trigger();
+    if (l0Trig) {
+      doEvent = kFALSE;
+      tword = l0Trig->triggerWord();
+      if (tword) {
+        if ((tword >= 0x1000) && (tword < 0x1100)) {
+          mTrigWord->Fill(1.); // "MinBias"
+	  doEvent = kTRUE;
+        } else if ((tword >= 0x1100) && (tword < 0x1200)) {
+          mTrigWord->Fill(2.); // "Central"
+	  doEvent = kTRUE;
+        } else if (tword == 0xF200) {
+          mTrigWord->Fill(7.); // "Laser"
+        } else {
+          mTrigWord->Fill(8.); // "Other"
+        }
+        mTrigWord->Fill(TMath::Log2((Double_t) tword));
+        for (int bitn=0; bitn<32; bitn++) {
+          if (tword>>(bitn) & 1U)
+            mTrigBits->Fill((Float_t) bitn);
+        }
       } else {
-        mTrigWord->Fill(8.); // "Other"
+        gMessMgr->Warning("StEventQAMaker::Make(): trigger word=0 !!!!!");
       }
-      mTrigWord->Fill(TMath::Log2((Double_t) tword));
-      for (int bitn=0; bitn<32; bitn++) {
-        if (tword>>(bitn) & 1U)
-          mTrigBits->Fill((Float_t) bitn);
-      }
-    } else {
-      gMessMgr->Warning("StEventQAMaker::Make(): trigger word=0 !!!!!");
+    } else { // No trigger info!
+      gMessMgr->Warning("StEventQAMaker::Make(): No trigger info...processing anyhow");
     }
     if (!doEvent) {
       gMessMgr->Message() << "StEventQAMaker::Make(): "
