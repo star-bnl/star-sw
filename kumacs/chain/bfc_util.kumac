@@ -45,7 +45,7 @@ return
 **********************************************************************
  
 macro bfc_init _
-         chain=' evg2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout' 
+         chain=' g2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout' 
   
   macro/global/import *
     
@@ -63,7 +63,7 @@ macro bfc_init _
     (evgin) newfile hij_in [input_file] r; 
             user/input u [evgen]/particle.staf
      (fzin)
-  (evg2tin) exec input_g2t_file#init [input_file]
+     (g2tin) exec input_g2t_file#init [input_file]
             if (STAF_STATUS(1).ne. STAFCV_OK) then
               message 'problem opening input file '
               goto EOF 
@@ -119,7 +119,7 @@ macro bfc_init _
 	    exec init_egr
       (ev0) exec create_tables_global#ev0 
             exec init_ev0#init_ev0
-(ev0_eval2) exec create_tables_global#ev0_eval2
+    (ev0_e) exec create_tables_global#ev0_eval2
 	    exec init_ev0#ev0_eval2 
       (emc)
             exec init_ems;  
@@ -149,7 +149,7 @@ EOF:
 **********************************************************************
 
  macro bfc_process _
-      chain=' evg2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
+      chain=' g2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
    
   macro/global/import *
   test = [chain]
@@ -163,7 +163,7 @@ EOF:
     (evgin) cd [event]; getev hij_in
             user/input u [evgen]/particle.staf
 *           exec $STAR/pams/gen/kumac/particle
-  (evg2tin) exec input_g2t_file#read
+    (g2tin) exec input_g2t_file#read
             if (staf_status(1).ne.STAFCV_OK) goto EOF
      (evin) exec read_table_from_file#read inev
      (fzin) nextl 1 
@@ -216,7 +216,7 @@ EOF:
       (svm)    exec run_svm#run_svm 	     |  TPC to SVT Matching 
       (egr)    exec run_egr#egr              |  Event Global Refit
       (ev0)    exec run_ev0#ev0_am           |  V0 Finder 
-(ev0_eval2)    exec run_ev0#ev0_eval2  
+    (ev0_e)    exec run_ev0#ev0_eval2  
       (erj)    exec run_jet_egrid
                exec run_jet_erj
     (evout)    if [output_file]="" then
@@ -248,7 +248,7 @@ return
 **********************************************************************
 
 macro bfc_finish _
-   chain=' evg2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'
+   chain=' g2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'
   
   macro/global/import *
   test = [chain]
@@ -256,7 +256,7 @@ macro bfc_finish _
   do i = 1, [nw]
     mod = $word([test],[i],1)
     CASE [mod] in 
-   (evg2tin)  exec input_g2t_file#close
+     (g2tin)  exec input_g2t_file#close
       (rgst)  ge/rz/cd //PAWC;
 	        hi/list;  | show histograms
      (evout) exec write_table_to_file#close evout;
