@@ -6,7 +6,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: St_TableSorter.h,v 1.22 1999/12/05 06:34:17 fine Exp $
+//  $Id: St_TableSorter.h,v 1.23 2000/01/12 01:24:53 fine Exp $
 //
 //  St_TableSorter  - Is an "observer" class to sort the St_Table objects
 //                    The class provides an interface to the standard "C/C++"
@@ -30,6 +30,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 
 class St_Table;
+class table_head_st;
 class St_TableSorter : public TNamed {
  private:
    union {  Char_t   m_Char; 
@@ -118,10 +119,12 @@ class St_TableSorter : public TNamed {
 
     void  SetSearchMethod();
     void  SetSimpleArray(Int_t arraySize, Int_t firstRow,Int_t numberRows);
+    void  BuildSorter(TString &colName, Int_t firstRow, Int_t numberRows);
 
  public:
     St_TableSorter();
     St_TableSorter(const St_Table &table, TString &colName, Int_t firstRow=0,Int_t numbeRows=0);
+    St_TableSorter(const table_head_st *header, TString &colName, Int_t firstRow=0,Int_t numbeRows=0);
 
     St_TableSorter(const Float_t  *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
     St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
@@ -171,6 +174,9 @@ class St_TableSorter : public TNamed {
 };
 //______________________________________________________________________
 // $Log: St_TableSorter.h,v $
+// Revision 1.23  2000/01/12 01:24:53  fine
+// several methods to use St_Table class from the <converted> C program to C++
+//
 // Revision 1.22  1999/12/05 06:34:17  fine
 // Several const methods for St_TableSorter introduced
 //
