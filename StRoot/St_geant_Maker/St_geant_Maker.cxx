@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.12 1999/02/12 14:18:27 nevski Exp $
+// $Id: St_geant_Maker.cxx,v 1.13 1999/02/12 17:57:01 nevski Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.13  1999/02/12 17:57:01  nevski
+// particle table
+//
 // Revision 1.12  1999/02/12 14:18:27  nevski
 // merging 2 mods
 //
@@ -102,6 +105,7 @@
 #include "g2r/St_g2t_esm_Module.h"
 #include "g2r/St_g2t_zdc_Module.h"
 #include "g2r/St_g2t_vpd_Module.h"
+#include "g2r/St_g2t_particle_Module.h"
 
 common_gcbank *cbank;
 common_quest  *cquest; 
@@ -150,6 +154,20 @@ typedef struct {
 #define csjcal csjcal_
 
 extern "C" void     type_of_call  gfnhit_(char*,char*,int*,int,int);
+extern "C" void     type_of_call  agnzgete_(int* ILK,int* IDE,
+             int* NPART,int* IRUN,int* IEVT,char* CGNAM,
+             float* VERT,int* IWTFL,float* WEIGH);
+/*
+* Input : ILK   - Link number  : 1 = primary, 2 = secondary (obsolete)    *
+*         IDE   - ID of event in gate ( ZEBRA IDN)                        *
+* Output: NPART - Number of particles in event record                     *
+*         IRUN  - run number as recorded by generator                     *
+*         IEVT  - event number as recorded by generator                   *
+*         CGNAM - generator name                                          *
+*         VERT(4)- x,y,z,t of event (metres,seconds or mm,mm/c)           *
+*         IWTFL - weight flag                                             *
+*         WEIGH - event weight                                            *
+*/
 ClassImp(St_geant_Maker)
 
 //_____________________________________________________________________________
@@ -177,13 +195,24 @@ Int_t St_geant_Maker::Init(){
 Int_t St_geant_Maker::Make()
 { if (!m_DataSet->GetList()) 
  {
-  Int_t nhits,nhit1,nhit2;
+  Int_t    nhits,nhit1,nhit2,link=1,ide=1,npart,irun,ievt,iwtfl;
+  Float_t  vert[4],weigh;
+  Char_t   cgnam[20];
+
   gtrig();
+  agnzgete_(&link,&ide,&npart,&irun,&ievt,cgnam,vert,&iwtfl,&weigh);
+
+  if (npart>0)
+  {  St_particle  *particle   = new St_particle("particle",npart);
+     Int_t Res_part = g2t_particle(particle);
+     m_DataSet->Add(particle);
+  }
   St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",cnum->nvertx);
   m_DataSet->Add(g2t_vertex);
   St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
   m_DataSet->Add(g2t_track);
   Int_t Res_kine = g2t_get_kine(g2t_vertex,g2t_track);
+
 
   //---------------------- inner part -------------------------//
   gfnhit_ ("SVTH","SVTD", &nhits, 4,4);
@@ -287,7 +316,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.12 1999/02/12 14:18:27 nevski Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.13 1999/02/12 17:57:01 nevski Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
