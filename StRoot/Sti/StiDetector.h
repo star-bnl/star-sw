@@ -10,13 +10,13 @@
 #include <string>
 
 class StiMaterial;
+class StiShape;
+class StiPlacement;
 
 class StiDetector {
     
 public:
 
-    enum StiShapeCode {kPlanar = 1, kCylindrical}; // shapeCode constants
-    
     // con/destructor
     StiDetector();
     virtual ~StiDetector();
@@ -30,23 +30,9 @@ public:
     StiMaterial* getGas() const { return gas; }
     StiMaterial* getMaterial() const { return material; }
 
-    int getShapeCode() const { return shapeCode; }
-    double getCenterRadius() const { return centerRadius; }
-    double getCenterRefAngle() const { return centerRefAngle; }
-    double getOrientationAngle() const { return orientationAngle; }
-    double getHalfWidth() const { return halfWidth; }
-    double getNormalRadius() const { return normalRadius; }
-    double getNormalRefAngle() const { return normalRefAngle; }
-    double getYmin() const { return yMin; }
-    double getYmax() const { return yMax; }
+    StiShape* getShape() const { return shape; }
+    StiPlacement* getPlacement() const { return placement; }
 
-    double getActivePosition() const {return activePosition; }
-    double getHalfDepth() const { return halfDepth; }
-    double getZCenter() const {return zCenter;}
-    double getThickness() const { return thickness; }
-
-    int getSector() const {return sector;}
-    int getPadrow() const {return padrow;}
     const char* getName() const {return name;}
     
     // mutators
@@ -58,46 +44,18 @@ public:
     void setGas(StiMaterial *val){ gas = val; }
     void setMaterial(StiMaterial *val){ material = val; }
 
-    void setShapeCode(StiShapeCode val) {shapeCode = val;}
+    void setShape(StiShape *val){ shape = val; }
+    void setPlacement(StiPlacement *val){ placement = val; }
 
-    // when changing the center representation, update the normal one
-    void setCenterRep(double cRadius, double cRefAngle, double oAngle, double hWidth);    
-    void setCenterRadius(double val){ centerRadius = val; updateNormalRep(); }
-    void setCenterRefAngle(double val){centerRefAngle = val; updateNormalRep(); }    
-    void setOrientationAngle(double val){ orientationAngle= val; updateNormalRep(); }    
-    void setHalfWidth(double val){ halfWidth= val; updateNormalRep(); }
-    
-    // when changing the normal representation, update the center one
-    void setNormalRep(double nRadius, double nRefAngle,double minY, double maxY);    
-    void setNormalRadius(double val){ normalRadius = val; updateCenterRep(); }    
-    void setNormalRefAngle(double val){ normalRefAngle = val; updateCenterRep(); }    
-    void setYmax(double val){ yMax = val; updateCenterRep(); }    
-    void setYmin(double val){ yMin = val; updateCenterRep(); }
-    
-
-    void setThickness(double val) {thickness = val;}
-    void setActivePosition(double val) {activePosition = val;}
-    void setZCenter(double val) {zCenter = val;}
-    void setHalfDepth(double val) {halfDepth = val;}
-
-    void setSector(int val) {sector = val;}
-    void setPadrow(int val) {padrow = val;}
     void setName(const char *val){	strncpy(name, val, 99);}
 
     //action
     virtual void build(const char* infile);  //for now, build from SCL parsable ascii file
     virtual void write(const char* szFileName);
+
+    virtual void copy(StiDetector &detector);
     
 protected:
-
-    //--------------------------------------------------------------------
-    // methods for keeping our 2 plane representations in sync
-
-    // Sets the "normal" representation based on the current values of  the "center" representation
-    void updateNormalRep();
-
-    // Sets the "center" representation based on the current values of the "normal" representation
-    void StiDetector::updateCenterRep();
     
     // logical switches
     bool on;                  // toggle this layer on/off.  (off => NOT added to detector container)
@@ -111,36 +69,9 @@ protected:
     StiMaterial *material;      // material composing the discrete scatterer
     
     // physical location / orientation
-    StiShapeCode shapeCode;     // 1 if planar, 2 if circular
+    StiShape     *shape;
+    StiPlacement *placement;
 
-    // 1) for planar objects we store 2 representations
-    //   a) Most useful for detector navigation, vector to object's center + angle _from_ radius _to_ normal & half-width
-    double centerRadius;
-    double centerRefAngle;
-    double orientationAngle;
-    double halfWidth;
-    //   b) Most useful for Kalman, normal vector to object's plane + max & min y_local relative to the normal.
-    double normalRadius;
-    double normalRefAngle;
-    double yMax;
-    double yMin;
-
-    // 2) for cylindrical objects, we use the variables above:
-    //    centerRadius = normalRadius = radius of circle
-    //    centerRefAngle = normalRefAngle = ref angle to center of arc
-    //    orientationAngle = 0
-    //    halfWidth = yMax = -yMin = half pathlength of arc
-
-    // 3) these are common to both geometries:
-    double activePosition;     // detector plane location in local x (cm)
-    double zCenter;            // center of detector in z (global) in cm
-    double halfDepth;          // 1/2 extent in z in cm
-    double thickness;          // perpendicular thickness of material
-
-    //------------------------------------------------------------------------
-    // naming
-    int sector;  //Generalized sector (azimuthal ordering)
-    int padrow;  //Generalized padrow (radial ordering)
     char name[100];  //Name of the class, a char to avoid template problems
 
 };

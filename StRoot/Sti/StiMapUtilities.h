@@ -22,7 +22,7 @@ struct MapKeyLessThan{
     double postolerance;
 };
 
-//Structure for detector map key
+//Structures for detector map key
 struct DetectorMapKey {
   bool operator==(const DetectorMapKey&) const;
   bool operator<(const DetectorMapKey&) const;
@@ -33,11 +33,19 @@ struct DetectorMapKey {
 
 // Structure for material map key
 struct MaterialMapKey {
-    MaterialMapKey::MaterialMapKey(const char *str):name(str){}
-    MaterialMapKey::MaterialMapKey():name(0){}
+    MaterialMapKey::MaterialMapKey(const char *str){ strncpy(name, str, 127); }
+    MaterialMapKey::MaterialMapKey(){}
     bool operator==(const MaterialMapKey&) const;
     bool operator<(const MaterialMapKey&) const;
-    const char *name;
+    char name[128];
+};
+
+struct ShapeMapKey {
+    ShapeMapKey::ShapeMapKey(const char *str){ strncpy(name, str, 127); }
+    ShapeMapKey::ShapeMapKey(){}
+    bool operator==(const ShapeMapKey&) const;
+    bool operator<(const ShapeMapKey&) const;
+    char name[128];
 };
 
 //Functors for ordering hits

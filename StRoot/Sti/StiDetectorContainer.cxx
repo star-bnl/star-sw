@@ -51,27 +51,7 @@ StiDetectorContainer::StiDetectorContainer() : mroot(0), mregion(0)
 StiDetectorContainer::~StiDetectorContainer()
 {
     cout <<"StiDetectorContainer::~StiDetectorContainer()"<<endl;
-    clearAndDestroy();
-}
-
-void StiDetectorContainer::clearAndDestroy()
-{
-    for (materialmap::iterator it=mmaterialmap.begin(); it!=mmaterialmap.end(); ++it) {
-	delete (*it).second;
-	(*it).second = 0;
-    }
-    return;
-}
-
-const materialmap& StiDetectorContainer::materialMap() const
-{
-    return mmaterialmap;
-}
-
-StiMaterial* StiDetectorContainer::material(const MaterialMapKey& key) const
-{
-    materialmap::const_iterator where = mmaterialmap.find(key);
-    return (where!= mmaterialmap.end()) ? (*where).second : 0;
+//    clearAndDestroy();
 }
 
 void StiDetectorContainer::setToDetector(double radius)
@@ -180,37 +160,4 @@ void StiDetectorContainer::buildDetectors(const char* buildDirectory, data_node_
 void StiDetectorContainer::print() const
 {
 }
-
-
-// Load all material definition files from a given directory
-void StiDetectorContainer::buildMaterials(const char* buildDirectory){
-  char* buildfile = new char[200];
-
-  DIR *pDir = opendir(buildDirectory);
-  struct dirent *pDirEnt;
-  struct stat fileStat;
-
-  while( (pDirEnt = readdir(pDir)) != 0){
-    sprintf(buildfile, "%s/%s", buildDirectory, pDirEnt->d_name);
-
-    // get file attributes
-    stat(buildfile, &fileStat);
-
-    // if regular file, process as material
-    if(S_ISREG(fileStat.st_mode)){
-      StiMaterial *pMaterial = new StiMaterial();
-      pMaterial->build(buildfile);
-
-      // add to materials map by name
-      MaterialMapKey key(pMaterial->getName());
-      mmaterialmap.insert( materialMapValType(key, pMaterial) );
-
-      cout << "materialMap[" << key.name << "]='" 
-           << *(mmaterialmap[key]) << "'" << endl;
-    } // if is regular file
-  }
-
-  closedir(pDir);
-}// buildMaterials
-
 

@@ -120,6 +120,14 @@ bool MaterialMapKey::operator<(const MaterialMapKey& key2) const{
   return( strcmp(name, key2.name) < 0 );
 }
 
+bool ShapeMapKey::operator==(const ShapeMapKey& key2) const{
+  return( strcmp(name, key2.name) == 0 );
+}
+
+bool ShapeMapKey::operator<(const ShapeMapKey& key2) const{
+  return( strcmp(name, key2.name) < 0 );
+}
+
 //----------------------- Streamers -------------------------------------------------
 ostream& operator<<(ostream& os, const HitMapKey& a)
 {
@@ -132,5 +140,9 @@ ostream& operator<<(ostream& os, const DetectorMapKey& a)
 }
 
 ostream& operator<<(ostream& os, const MaterialMapKey& a){
+  return os << a.name;
+}
+
+ostream& operator<<(ostream& os, const ShapeMapKey& a){
   return os << a.name;
 }

@@ -22,9 +22,6 @@ using std::map;
 class StiDetector;
 class StiMaterial;
 
-typedef map<MaterialMapKey, StiMaterial*> materialmap;
-typedef materialmap::value_type materialMapValType;
-
 class StiDetectorContainer
 {
 public:
@@ -35,21 +32,16 @@ public:
     static StiDetectorContainer* instance();
     static void kill();
 
-    //Gets/sets
-    StiMaterial* material(const MaterialMapKey& key) const;
-    const materialmap& materialMap() const;
-
     //Temporary, MLM 7/30/01
     data_node* root() const {return mroot;}
     
     //Build functions
-    virtual void buildMaterials(const char* buildDirectory);
     virtual void buildDetectors(const char* buildDirectory, data_node_factory* nodefactory,
 				detector_factory* detfactory);
 
     //Action
     void reset(); //full internal reset of interator structure
-    void clearAndDestroy();
+//    void clearAndDestroy();
     
     //Navigation
 
@@ -91,8 +83,6 @@ private:
     //Singleton Management
     StiDetectorContainer();
     static StiDetectorContainer* sinstance;
-
-    materialmap mmaterialmap;
     
 };
 

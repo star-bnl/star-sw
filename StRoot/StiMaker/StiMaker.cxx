@@ -189,7 +189,6 @@ Int_t StiMaker::Init()
     //The Detector Tree
     //Must build Materials before detectors
     mdetector = StiDetectorContainer::instance();
-    mdetector->buildMaterials(mmaterialbuildpath);
     mdetector->buildDetectors(mdetectorbuildpath, mdatanodefactory, mdetectorfactory);
     mdetector->reset();
     //mdetector->print();

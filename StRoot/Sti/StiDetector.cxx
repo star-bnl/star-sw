@@ -9,11 +9,13 @@
 #include "StGetConfigValue.hh"
 //Sti
 #include "StiMaterial.h"
+#include "StiShape.h"
+#include "StiPlacement.h"
 #include "StiDetectorContainer.h"
 #include "StiDetector.h"
 #include "StiMapUtilities.h"
 
-StiDetector::StiDetector() : gas(0), material(0)
+StiDetector::StiDetector() : gas(0), material(0), shape(0), placement(0)
 {
 }
 
@@ -21,70 +23,24 @@ StiDetector::~StiDetector()
 {
 }
 
-void StiDetector::setCenterRep(double cRadius, double cRefAngle, double oAngle, double hWidth)
-{
-    centerRadius = cRadius;
-    centerRefAngle = cRefAngle;
-    orientationAngle = oAngle;
-    halfWidth = hWidth;
-    updateNormalRep();
-}
+void StiDetector::copy(StiDetector &detector){
 
+  on = detector.isOn();
+  active = detector.isActive();
+  continuousMedium = detector.isContinuousMedium();
+  discreteScatterer = detector.isDiscreteScatterer();
 
-void StiDetector::setNormalRep(double nRadius, double nRefAngle,double minY, double maxY)
-{
-    normalRadius = nRadius;
-    normalRefAngle = nRefAngle;
-    yMin = minY;
-    yMax = maxY;
-    updateCenterRep();
-}
+  gas = detector.getGas();
+  material = detector.getMaterial();
+  shape = detector.getShape();
+  placement = detector.getPlacement();
 
-void StiDetector::updateNormalRep()
-{
-    if(shapeCode == kPlanar){
-        normalRadius = centerRadius*sin(orientationAngle);
-        normalRefAngle = centerRefAngle - orientationAngle;
-        yMin = centerRadius*cos(orientationAngle);
-        yMax = yMin + 2.*halfWidth;
-    }
-    else if(shapeCode == kCylindrical){
-        normalRadius = centerRadius;
-        normalRefAngle = centerRefAngle;
-        yMin = -halfWidth;
-        yMax = halfWidth;
-    }
-}
-
-void StiDetector::updateCenterRep()
-{
-    if(shapeCode == kPlanar){
-        halfWidth = (yMax - yMin)/2.;
-        orientationAngle = atan( (yMin + yMax)/2./normalRadius );
-        centerRefAngle = normalRefAngle - orientationAngle;
-        centerRadius = normalRadius/cos(orientationAngle);
-    }
-    else if(shapeCode == kCylindrical){
-        halfWidth = yMax;
-        orientationAngle = 0;
-        centerRefAngle = normalRefAngle;
-        centerRadius = normalRadius;
-    }
-
-/*
-    cout << "yMax = " << yMax << endl
-         << "yMin = " << yMin << endl
-         << "normalRefAngle = " << normalRefAngle << endl
-         << "normalRadius = " << normalRadius << endl
-         << "halfWidth = " << halfWidth << endl
-         << "orientationAngle = " << orientationAngle << endl
-         << "centerRefAngle = " << centerRefAngle << endl
-         << "centerRadius = " << centerRadius << endl;
-*/
+  setName(detector.getName());
 }
 
 void StiDetector::build(const char* buildfile)
 {
+/*
     StiDetectorContainer* store = StiDetectorContainer::instance();
     
     StGetConfigValue(buildfile, "on", on);
@@ -134,12 +90,12 @@ void StiDetector::build(const char* buildfile)
     StGetConfigValue(buildfile,"sector",sector);
     StGetConfigValue(buildfile,"padrow",padrow);
     StGetConfigValue(buildfile,"name",name);
-
+*/
     return;
 }  // build()
  
 void StiDetector::write(const char *szFileName){
-  
+  /*
   ofstream os(szFileName);
 
   os << "on:\t\t\t" << static_cast<int>(on) << endl;
@@ -166,30 +122,34 @@ void StiDetector::write(const char *szFileName){
   os << "sector:\t\t\t" << sector << endl;
   os << "padrow:\t\t\t" << padrow << endl;
   os << "name:\t\t\t" << name << endl;
-
+  */
 } // write()
 
 ostream& operator<<(ostream& os, const StiDetector& d)
 {
-    os <<d.isOn()<<" "<<d.isActive()<<" "<<d.isContinuousMedium()<<" "<<d.isDiscreteScatterer()<<" ";
-    if (!d.getGas()) {
-		cout <<"No Gas ";
-    }
-    else {
-		os <<*(d.getGas())<<" ";
-    }
-    if (!d.getMaterial()) {
-		cout <<"No Material ";
-    }
-    else {
-		os <<*(d.getMaterial())<<" ";
-    }
-    os <<d.getShapeCode()<<" "<<d.getCenterRadius()<<" "<<d.getCenterRefAngle()<<" ";
-    os <<d.getOrientationAngle()<<" "<<d.getHalfWidth()<<" ";
-    os <<d.getNormalRadius()<<" "<<d.getNormalRefAngle()<<" ";
-    os <<d.getYmin()<<" "<<d.getYmax()<<" ";
-    os <<d.getActivePosition()<<" "<<d.getZCenter()<<" ";
-    os <<d.getHalfDepth()<<" "<<d.getThickness()<<" ";
-    os <<d.getSector()<<" "<<d.getPadrow()<<" "<<d.getName();;
-    return os;
+  /*
+  os <<d.isOn()<<" "<<d.isActive()<<" "<<d.isContinuousMedium()<<" "<<d.isDiscreteScatterer()<<" ";
+
+  if (!d.getGas()){ 
+    cout <<"No Gas ";
+  }else{ 
+    os <<*(d.getGas())<<" ";
+  }
+
+  if (!d.getMaterial()){ 
+    cout <<"No Material ";
+  }else{ 
+    os <<*(d.getMaterial())<<" ";
+  }
+/*
+  os <<d.getShapeCode()<<" "<<d.getCenterRadius()<<" "<<d.getCenterRefAngle()<<" ";
+  os <<d.getOrientationAngle()<<" "<<d.getHalfWidth()<<" ";
+  os <<d.getNormalRadius()<<" "<<d.getNormalRefAngle()<<" ";
+  os <<d.getYmin()<<" "<<d.getYmax()<<" ";
+  os <<d.getActivePosition()<<" "<<d.getZCenter()<<" ";
+  os <<d.getHalfDepth()<<" "<<d.getThickness()<<" ";
+  os <<d.getSector()<<" "<<d.getPadrow()<<" "<<d.getName();;
+*/
+  return os;
+
 }
