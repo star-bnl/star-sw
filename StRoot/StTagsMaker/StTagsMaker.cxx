@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.7 2000/06/17 15:41:56 vanyashi Exp $
+// $Id: StTagsMaker.cxx,v 1.8 2000/07/28 21:05:36 fisyak Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.8  2000/07/28 21:05:36  fisyak
+// Remove dependence on StChain InitRun
+//
 // Revision 1.7  2000/06/17 15:41:56  vanyashi
 // Comments from idl files are added to tags
 //
@@ -50,6 +53,7 @@ Int_t StTagsMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StTagsMaker::Make(){
+  if (!fTree) InitRun(1);
   if (fTree && fTagsList && tabClass) {
     St_DataSetIter next(fTagsList);
     St_DataSet *set = 0;
