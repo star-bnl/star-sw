@@ -1,4 +1,4 @@
-// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.24 1998/09/25 00:45:09 perev Exp $";
+// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.25 1998/09/25 02:12:55 fisyak Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -262,7 +262,7 @@ STAFCV_T amiBroker:: callInvoker (const char * name
 //- Check Input Tables;
 
    int ierr; 
-   for (i=0 ;i<(int)tnames._length;i++ ){
+   for (int i=0 ;i<(int)tnames._length;i++ ){
      ierr = tables._buffer[i]->NaN(); 
      if (ierr)  printf("MODULE %s ***ERROR*** Bad input Table %s\n",
                name,tables._buffer[i]->Name());}
@@ -271,7 +271,7 @@ STAFCV_T amiBroker:: callInvoker (const char * name
    STAFCV_T status = invoker->call(tables);/*fix memory leak -akio*/
 
 //- Check Output Tables;
-   for (i=0 ;i<(int)tnames._length;i++ ){
+   for (int i=0 ;i<(int)tnames._length;i++ ){
      ierr = tables._buffer[i]->NaN(); 
      if (ierr)  printf("MODULE %s ***ERROR*** Bad Output Table %s\n",
                name,tables._buffer[i]->Name());}
