@@ -29,43 +29,44 @@ long  type_of_call fill_dst_event_summary_ (
 {
   
   /*
-  /*
-  /*:>--------------------------------------------------------------------
-  /*: ROUTINE:     fill_dst_event_summary_
-  /*: DESCRIPTION: Fill event summary information based on DST global track, 
-  /*:              auxiliary track, Tof and vertex tables.
-  /*:              
-  /*:
-  /*: AUTHOR:      Dhammika Weerasundara -- University of Washington
-  /*:              dhammika@gibbs.npl.washington.edu
-  /*:
-  /*: ARGUMENTS:
-  /*:          IN:
-  /*:             dstRunHeader         - DST run header table
-  /*:             dst_run_header_h     - Header Structure for dstRunHeader  
-  /*:             dstEventHeader       - DST event header table
-  /*:             dst_event_header_h   - Header Structure for dstEventHeader
-  /*:             dstTof               - DST TOF table
-  /*:             dst_tof_h            - Header Structure for dstTof       
-  /*:             dstTrack             - DST tracks table       
-  /*:             dst_track_h          - Header Structure for dstTrack
-  /*:             dstTrackAux          - DST track auxiliary table
-  /*:             dst_track_aux_h      - Header Structure for dstTrackAux   
-  /*:             dstVertex            - DST vertex table
-  /*:             dst_vertex_h         - Header Structure for dstVertex 
-  /*:       INOUT:
-  /*:         OUT:
-  /*:             dstEventSummary      - DST event summary table 
-  /*:             dst_event_summary_h  - Header Structure for dstEventSummary
-  /*:             
-  /*:
-  /*: RETURNS:    STAF Condition Value
-  /*:
-  /*: HISTORY:    
-  /*:      Aug 08, 1998       Dhammika W.        Original
-  /*:
-  /*:>--------------------------------------------------------------------
-  
+   *
+   *:>-------------------------------------------------------------------- 
+   *: ROUTINE:     fill_dst_event_summary_
+   *: DESCRIPTION: Fill event summary information based on DST global track, 
+   *:              auxiliary track, Tof and vertex tables.
+   *:              
+   *:
+   *: AUTHOR:      Dhammika Weerasundara -- University of Washington
+   *:              dhammika@gibbs.npl.washington.edu
+   *:
+   *: ARGUMENTS:
+   *:          IN:
+   *:             dstRunHeader         - DST run header table
+   *:             dst_run_header_h     - Header Structure for dstRunHeader  
+   *:             dstEventHeader       - DST event header table
+   *:             dst_event_header_h   - Header Structure for dstEventHeader
+   *:             dstTof               - DST TOF table
+   *:             dst_tof_h            - Header Structure for dstTof       
+   *:             dstTrack             - DST tracks table       
+   *:             dst_track_h          - Header Structure for dstTrack
+   *:             dstTrackAux          - DST track auxiliary table
+   *:             dst_track_aux_h      - Header Structure for dstTrackAux   
+   *:             dstVertex            - DST vertex table
+   *:             dst_vertex_h         - Header Structure for dstVertex 
+   *:       INOUT:
+   *:         OUT:
+   *:             dstEventSummary      - DST event summary table 
+   *:             dst_event_summary_h  - Header Structure for dstEventSummary
+   *:             
+   *:
+   *: RETURNS:    STAF Condition Value
+   *:
+   *: HISTORY:    
+   *:      Aug 08, 1998       Dhammika W.        Original
+   *:
+   *:>-------------------------------------------------------------------- 
+   */
+
   /*  ==================  Local Variables  ======================== */
   int     irange;
   int     glb_trk_good, glb_trk_prim, glb_trk_plus, glb_trk_minus;
