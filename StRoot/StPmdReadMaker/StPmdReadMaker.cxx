@@ -1,15 +1,18 @@
 /***************************************************************************
+ *$Id: StPmdReadMaker.cxx,v 1.3 2003/12/03 11:50:29 subhasis Exp $
  *
  * StPmdReadMaker
  *
  * Author:  Supriya Das and Subhasis Chattopadhyay
- **************************
-
- *************************************************
+ ***************************************************************************
  *
  * Description: Reading PMD data and filling hits for StEvent
- ****************************
- ***********************************************
+ **************************************************************************
+ *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.3  2003/12/03 11:50:29  subhasis
+ *Comment header changed by Supriya
+ *
+ ***************************************************************************
  */
 
 //#include <Stiostream.h>
@@ -355,9 +358,11 @@ Bool_t StPmdReadMaker::ReadCalibrationsConst()
   if(a) pmdcalibst = a->GetTable();
   if(!pmdcalibst) return kFALSE;
   m_PmdCalibConst=pmdcalibst;		
+
+  /*
   //loop over all boards and all channels //
   Int_t MAX_BRD= 1296;
-  /*
+ 
     for(Int_t id=1;id<=MAX_BRD;id++)
     {
       for(Int_t ich=0;ich<PMD_BOARD_CH_MAX;ich++){

@@ -1,18 +1,18 @@
 /********************************************************
  *
- * $Id: StPmdDBUtil.cxx,v 1.1 2003/11/27 12:32:40 subhasis Exp $
+ * $Id: StPmdDBUtil.cxx,v 1.2 2003/12/03 11:56:08 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
  *********************************************************
  *
- * Description: This the class of PMD Utillty which contains
+ * Description: This the class of PMD Utility which contains
  * FEE boardwise information.
  *
  *********************************************************
  * $Log: StPmdDBUtil.cxx,v $
- * Revision 1.1  2003/11/27 12:32:40  subhasis
- * First version
+ * Revision 1.2  2003/12/03 11:56:08  subhasis
+ * Comment header changed by Supriya
  *
  *
  **********************************************************/
