@@ -31,7 +31,8 @@ float prop_one_track( float gtrack[8] , float target[2] , float ptrack[3] )
   
   
   long  iflag;
-  float xpr[2], curvf, gseed;
+  float xpr[2], gseed;
+  /* float curvf; */
   float psi, pt, tanl, x0[3], xp[2], xout[2],  xv[3], xx0[3];
   float trk[7], r1, xc[2];
   float pStraight[3];
@@ -57,7 +58,7 @@ float prop_one_track( float gtrack[8] , float target[2] , float ptrack[3] )
       trk[4] = gtrack[4];
       trk[5] = gtrack[5]; /* charge */
       trk[6] = pt;
-      curvf  = (float) C_D_CURVATURE;
+      /* curvf  = (float) C_D_CURVATURE; */
       /* r1     = pt/(curvf*bfld*10.); */
       /*      r1     = fabs(r1); */
       if(gtrack[7] != 0.)
