@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.212 2001/07/14 16:47:41 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.213 2001/07/18 20:22:44 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -89,10 +89,14 @@ Bfc_st BFC[] = {
   //                                                         ,"Production chain for summer 2001 data (incomplete)",kFALSE},
   {"SvtD"        ,""  ,"","SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit,SvtVtx", "", "",
                                                                               "SVT makers for Data",kFALSE}, 
-  {"P2001"       ,""  ,"","y2001,in,tpc_daq,tpc,svt_daq,SvtD,rich,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
-                                                           ,"Production chain for summer 2001 data (temptative)",kFALSE},
-  {"P2001a"       ,"" ,"","ry2001,in,tpc_daq,tpc,svt_daq,SvtD,rich,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
-                                                           ,"Production chain for summer 2001 data (a)",kFALSE},
+
+  {"P2001"       ,""  ,"","y2001,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
+                                                           ,"Production chain for summer 2001 data (current)",kFALSE},
+
+  {"P2001a"      ,""  ,"","y2001,in,tpc_daq,tpc,svt_daq,SvtD,emcY2,rich,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
+                                                           ,"Production chain for summer 2001 data (full)",kFALSE},
+
+
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
