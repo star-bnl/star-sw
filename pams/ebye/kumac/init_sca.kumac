@@ -1,4 +1,4 @@
-* sca_init.kumac
+* init_sca.kumac
 * written by L.D. Carr -- lcarr@u.washington.edu
 * ----------------------------------------------------------------
 * this is the initialization kumac for the sca event by event package
@@ -24,7 +24,7 @@ return
 * ******************************************************
 
 * ***************************************************************
-macro setSwitchToPrior
+macro prior
   
   cd [params]/ebye
   tdm/table/cell/putvalue 'sca_switch[0].useDeltaD'      0
@@ -39,7 +39,7 @@ return
 * ******************************************************
 
 * ***************************************************************
-macro setSwitchToEnsembleAve
+macro ensemble
   
   cd [params]/ebye
   tdm/table/cell/putvalue 'sca_switch[0].useDeltaD'      0
@@ -54,7 +54,7 @@ return
 * ******************************************************
 
 * ***************************************************************
-macro setSwitchToUseDeltaD
+macro deltad
   
   cd [params]/ebye
   tdm/table/cell/putvalue 'sca_switch[0].useDeltaD'      0
