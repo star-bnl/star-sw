@@ -1,0 +1,13 @@
+/*    defaultTrgLvl.idl
+*
+*  Table: defaultTrgLvl
+*
+*       description:
+*/ 
+
+
+struct defaultTrgLvl { 
+
+   unsigned long  level;   /*   */
+
+ };  
