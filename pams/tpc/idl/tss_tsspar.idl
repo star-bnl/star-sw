@@ -28,7 +28,6 @@
        float     diff_trans; /* trans diff const of gas (cm/sqrt(cm)) */
        float     gain_in;    /* gas gain:inner sector (dimensionless) */
        float     gain_out;   /* gas gain:outer sector (dimensionless) */
-       float     geant_volm; /* GEANT cell volume for tss (cm) */
        float     prf_in;     /* pad resp.func:inner sector (cm) */
        float     prf_out;    /* pad resp.func:outer sector (cm) */
        float     sca_rms;    /* SCA noise (random, not filtered) */
@@ -37,7 +36,6 @@
        float     tau;        /* shaper resp. time const. (usec) */
        float     threshold;  /* adc threshold (adc counts but a real num */
        float     time_offset;/* Wayne Betts time offsets */
-       float     v_drift;    /* drift velocity (cm/usec) */
        float     v_test;     /* voltage of test pulse (V) */
        float     white_rms;  /* rms of white noise (shaper filtered) */
        float     wire_coupling_in;/* wire-to-pad coupling inner sector */
@@ -46,5 +44,5 @@
        float     y_laser;    /* local y of laser point[cm] across row */
        float     z_laser;    /* z drift length of pointlaser source(cm) */
    };
-/*  Last mod. for tsspar: $Date: 1997/12/31 14:34:11 $ */
+/*  Last mod. for tsspar: $Date: 1998/12/17 19:30:59 $ */
 
