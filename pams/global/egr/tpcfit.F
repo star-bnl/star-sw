@@ -48,7 +48,7 @@ C* covar - covariance matrix
 
       REAL xfirst,yfirst,zfirst,xlast,ylast,zlast,rfirst,xpar,ypar
       REAL x,y,z,xer,yer,zer,phi,psi,lambda,psii,psif,psir,parmass
-      REAL tanl,cosl,q
+      REAL tanl,cosl
       REAL r,x0,y0,dpsi,twopi
       REAL TRKGEN(6),TRKREF(6),TPC(6,MXPNT),TPCCH2(MXPNT),TRKTPC(23)
       INTEGER ihitseq(mxpnt)
@@ -58,6 +58,7 @@ C* covar - covariance matrix
       LOGICAL good_hit(*)
 
       real a,b
+      real csign
 
       XYZ(1) = 0.0
       XYZ(2) = 0.0
@@ -116,7 +117,7 @@ C parameters at beginning of track
       y = yfirst
       z = zfirst
       rfirst = sqrt(x**2+y**2) 
-      q = sign(1.0,param(5)) ! charge
+      csign = bfield(3)*param(5) ! b_z * charge
 
       phi = param(1)
       xpar = param(6)*cos(param(1)) ! x of parameters
@@ -124,8 +125,8 @@ C parameters at beginning of track
 
       tanl = param(4)
 
-      psi = param(3)+sign(1.0,param(5))*C_PI_2 !mangled psi
-      r = 1.0/(C_D_CURVATURE*bfield(3)*abs(param(5)))
+      psi = param(3)+sign(1.0,csign)*C_PI_2 !mangled psi
+      r = 1.0/abs(C_D_CURVATURE*csign)
 
       x0 = xpar - r*cos(psi)
       y0 = ypar - r*sin(psi)
@@ -148,7 +149,7 @@ C convert to 0-2pi
         dpsi = psif-psii
 C -- put dpsi in 0-2pi range
         dpsi = amod(dpsi,real(C_2PI))
-        psir = psi+dpsi - sign(1.0,param(5))*C_PI_2
+        psir = psi+dpsi - sign(1.0,csign)*C_PI_2
 C convert to 0-2pi
         psir = amod(psir,twopi)
         if(psir.lt.0)psir=psir+C_2PI
@@ -157,7 +158,7 @@ C convert to 0-2pi
         trkgen(5) = psir
 
 C -- check for rotation direction
-        if(q*bfield(3).lt.0)then
+        if(csign.lt.0)then
           if(dpsi.lt.0)then
             dpsi = (C_2PI+dpsi)
           endif
@@ -166,7 +167,7 @@ C -- check for rotation direction
             dpsi = -(C_2PI-dpsi)
           endif
         endif
-        trkgen(3) = param(2)-dpsi*r*sign(1.0,param(5))*tanl ! z
+        trkgen(3) = param(2)-dpsi*sign(r,csign)*tanl ! z
       endif ! if(abs(rfirst-param(6)).gt.0.1)
 
 C parameters at end of track
@@ -184,7 +185,7 @@ C convert to 0-2pi
       dpsi = psif-psii
 C -- put dpsi in 0-2pi range
       dpsi = amod(dpsi,real(C_2PI))
-      psir = psi+dpsi - sign(1.0,param(5))*C_PI_2
+      psir = psi+dpsi - sign(1.0,csign)*C_PI_2
 C convert to 0-2pi
       psir = amod(psir,twopi)
       if(psir.lt.0)psir=psir+C_2PI
@@ -194,7 +195,7 @@ C convert to 0-2pi
       trkref(6) = trkgen(6) ! q/pt
 
 C -- check for rotation direction
-      if(q*bfield(3).lt.0)then
+      if(csign.lt.0)then
         if(dpsi.lt.0)then
           dpsi = (C_2PI+dpsi)
         endif
@@ -204,7 +205,7 @@ C -- check for rotation direction
         endif
       endif
 
-      trkref(3) = trkgen(3)-dpsi*r*sign(1.0,param(5))*tanl ! z
+      trkref(3) = trkgen(3)-dpsi*sign(r,csign)*tanl ! z
 
       CALL TPCTRK(NEVT,NTRK,TRKGEN,TRKREF,NTPCUSED,TPC,TPCCH2,TRKTPC,IRET)
 C DEBUG
@@ -496,6 +497,7 @@ CCC         CH2SMO=1.E20
 *--
       REAL TRKGEN(6),TRKREF(6),TPC(6,*),TPCCH2(*),TRKTPC(23)
 *--
+      REAL PIx2xR
       REAL PR(5),P(5),C(15),V(2),CV(3),CINI(15)
 CCC      DATA CINI/1.E2 ,0.   ,0.   ,0.   ,0.   ,
 CCC     &                1.E1 ,0.   ,0.   ,0.   ,
@@ -623,8 +625,9 @@ CCC     &                                  1.E0 /
       TRKTPC( 1) = R
       CALL UCOPY(P(1),TRKTPC(2),5)
       CALL UCOPY(C(1),TRKTPC(7),15)
-      IF (TRKTPC(2).LT.0)       TRKTPC(2) = TRKTPC(2) + 2.*PI*R
-      IF (TRKTPC(2).GT.2.*PI*R) TRKTPC(2) = TRKTPC(2) - 2.*PI*R
+      PIx2xR = 2.*PI*R
+      IF (TRKTPC(2).LT.0)      TRKTPC(2) = TRKTPC(2) + PIx2xR
+      IF (TRKTPC(2).GT.PIx2xR) TRKTPC(2) = TRKTPC(2) - PIx2xR
 CCC      IF (TRKTPC(5).LT.0)       TRKTPC(5) = TRKTPC(5) + 2.*PI
 CCC      IF (TRKTPC(5).GT.2.*PI)   TRKTPC(5) = TRKTPC(5) - 2.*PI
       TRKTPC(22) = CH2TOT
@@ -691,6 +694,7 @@ CCC      IF (TRKTPC(5).GT.2.*PI)   TRKTPC(5) = TRKTPC(5) - 2.*PI
 *--
       REAL PR(5),P(5),C(15),V(2),CV(3),RES(2),PUL(2),CMS(15)
 *--
+      REAL PIxR
       REAL DER(5,5),HT(5,2)
       DATA HT/1.,0.,0.,0.,0.,
      &        0.,1.,0.,0.,0./
@@ -726,8 +730,9 @@ CCC      CALL TPCSCA(R,RL,PR(1),P(1),X,CMS(1))
         RETURN
       ENDIF
 *--
-      IF ((PR(1)-V(1)).GT.( PI * R)) V(1) = V(1) + 2. * PI * R
-      IF ((PR(1)-V(1)).LT.(-PI * R)) V(1) = V(1) - 2. * PI * R
+      PIxR = PI * R
+      IF ((PR(1)-V(1)).GT.PIxR) V(1) = V(1) + 2. * PIxR
+      IF ((PR(1)-V(1)).LT.-PIxR) V(1) = V(1) - 2. * PIxR
 *--
       CALL KTMEAS(2,V(1),CV(1),HT(1,1),IERR)
       IF (IERR.GT.0) THEN
@@ -797,7 +802,7 @@ CCC      IF(X.LE.0.0)RETURN
       COSL = SQRT(1./(1.+P(3)**2))
 
       BETM2 = 1. + (PMASS * P(5)/COSL)**2
-      rad = 1.0/(CONSB*abs(p(5)))
+CCC      rad = 1.0/abs(CONSB*p(5))
       dpsi = p(4)-pl(4)
 
 C -- check for rotation direction

@@ -23,6 +23,9 @@ C---------------------------------------------------------------------
 
       REAL r,xc(2),x(2),trk1(7),xout(2),beta
       REAL psi,psir,dpsi
+      REAL csign
+
+      csign = beta*trk1(6)
 
 C-----calculate the new track parameters
 
@@ -32,7 +35,7 @@ C -- put psi in 0-2pi range
       psi = amod(psi,real(C_2PI))
       if(psi.lt.0.)psi=psi+C_2PI
 
-      psir = psi - trk1(6)*C_PI_2
+      psir = psi - sign(1.0,csign)*C_PI_2
 C -- put psir in 0-2pi range
       psir = amod(psir,real(C_2PI))
       if(psir.lt.0.)psir=psir+C_2PI
@@ -44,7 +47,7 @@ C -- put dpsi in 0-2pi range
       xout(2)=trk1(4)+dpsi
 
 C -- check for rotation direction
-      if(trk1(6).gt.0)then
+      if(csign.gt.0)then
         if(dpsi.lt.0)then
           dpsi = (C_2PI+dpsi)
         endif
@@ -55,7 +58,7 @@ C -- check for rotation direction
       endif
    
 C --  z = zi + dz = zi - dpsi*signedradius*tanl
-      xout(1)=trk1(3)-dpsi*trk1(6)*sign(r,beta)*trk1(5)
+      xout(1)=trk1(3)-dpsi*sign(r,csign)*trk1(5)
 
       RETURN
       END
@@ -118,6 +121,7 @@ C			iflag	!iflag=5 if no solution, =3 if only one
 C   Functional Description :	It finds all possible intersections in
 C				the bending plane of two circles.
 C   Created  DEC-1991 S.Margetis   
+C   Modified SEP-1999 G.Van Buren
 C   Error conditions	: None
 C   Status		: Tested
 C----------------------------------------------------------------------
@@ -125,6 +129,7 @@ C----------------------------------------------------------------------
       REAL	xc1(2),xc2(2),r1,r2,r1sq,r2sq
       REAL	x(2),y(2),om1,om2,ph1,ph2
       REAL	a,b,c,d,dia,dtouch,cut
+      REAL      a2pb2,bc,ad,om12,om22,temp
 C---clear variables cleared before entering routine--------------------
 c      CALL VZERO(x,2)
 c      CALL VZERO(y,2)
@@ -133,20 +138,25 @@ C---find the two intersections----------------------------------------
       r2sq = r2*r2
       a=xc1(1)-xc2(1)
       b=xc1(2)-xc2(2)
-      c=(r1sq-r2sq+a*a+b*b)/2.
-      d=(a*a+b*b)*r1sq-c*c
+      a2pb2 = a*a+b*b
+      c=(r1sq-r2sq+a2pb2)/2.
+      d=a2pb2*r1sq-c*c
 C---check if there is any solution, one or two -----------------------
       IF(d.lt.0.0) GOTO 137
       IF(d.lt.0.001) iflag=3 
       d = sqrt(d)
-      om1=( -b*c+abs(a)*d ) / (a*a+b*b)
-      om2=( -b*c-abs(a)*d ) / (a*a+b*b)
+      bc = b*c
+      ad = abs(a)*d
+      om1=( -bc+ad ) / a2pb2
+      om2=( -bc-ad ) / a2pb2
 C----find the right pair---------------------------------------------
-      IF( (r1sq-om1*om1).ge.0.) THEN
-	ph1=sqrt(r1sq-om1*om1)
+      om12 = r1sq-om1*om1
+      IF( om12.ge.0.) THEN
+	ph1=sqrt(om12)
 	ph2=-ph1
-	IF( abs((ph1+a)**2+(om1+b)**2-r2sq).le.
-     +      abs((ph2+a)**2+(om1+b)**2-r2sq) ) THEN
+        temp = (om1+b)**2-r2sq
+	IF( abs((ph1+a)**2+temp).le.
+     +      abs((ph2+a)**2+temp) ) THEN
 		y(1)=om1+xc1(2)
 		x(1)=ph1+xc1(1)
 	ELSE
@@ -155,11 +165,13 @@ C----find the right pair---------------------------------------------
 	ENDIF	
       ENDIF
 C------second pair------------------------------------------------
-      IF( (r1sq-om2*om2).ge.0.) THEN
-	ph1=sqrt(r1sq-om2*om2)
+      om22 = r1sq-om2*om2
+      IF( om22.ge.0.) THEN
+	ph1=sqrt(om22)
 	ph2=-ph1
-	IF( abs((ph1+a)**2+(om2+b)**2-r2sq).le.
-     +      abs((ph2+a)**2+(om2+b)**2-r2sq) ) THEN
+        temp = (om2+b)**2-r2sq
+	IF( abs((ph1+a)**2+temp).le.
+     +      abs((ph2+a)**2+temp) ) THEN
 		y(2)=om2+xc1(2)
 		x(2)=ph1+xc1(1)
 	ELSE
@@ -172,7 +184,7 @@ C----------------------------------------------------------------------
       RETURN
 
   137 continue
-      dia=sqrt(a*a+b*b)
+      dia=sqrt(a2pb2)
       dtouch=dia-r1-r2
       IF(dtouch .le. sqrt(cut))  THEN
         iflag=3
@@ -206,27 +218,33 @@ C                               The input vectors must be calculated
 C                               at a point close to the vertex.
 C   Created  JUN-1992  S.Margetis
 C   Modified: 4/2/99 R.L.Ray
+C   Modified: 9/25/00 G.Van Buren
 C   Error conditions            : Error for p(1)=0 fixed (4/2/99 RLR)
 C   Status                      : Tested
 C----------------------------------------------------------------------
       REAL      xv(3),x(3),p(3),x0(3),nom,cut,det
+      REAL      temp,p2p2,p3p3,p2p3
       DATA  cut /1.0E-06/
 *----------------------------------------------------------------------
 
-        nom=(p(2)*p(2)+p(3)*p(3))*x(1)-(x(2)*p(2)+x(3)*p(3))*p(1) 
+        p2p2 = p(2)*p(2)
+        p3p3 = p(3)*p(3)
+        nom=(p2p2+p3p3)*x(1)-(x(2)*p(2)+x(3)*p(3))*p(1) 
         nom=nom+(xv(1)*p(1)+xv(2)*p(2)+xv(3)*p(3))*p(1)
-        x0(1)=nom/( p(1)*p(1)+p(2)*p(2)+p(3)*p(3) )
+        x0(1)=nom/( p(1)*p(1)+p2p2+p3p3 )
 
 C       IF(p(1).ne.0.) THEN
         IF(abs(p(1)) .gt. cut) THEN              ! RLR (4/99)
-         x0(2)=x(2)+(p(2)/p(1))*(x0(1)-x(1))
-         x0(3)=x(3)+(p(3)/p(1))*(x0(1)-x(1))
+         temp = (x0(1)-x(1))/p(1)
+         x0(2)=x(2)+p(2)*temp
+         x0(3)=x(3)+p(3)*temp
         ELSE
-         det = p(2)*p(2) + p(3)*p(3)             ! RLR (4/99)
-         x0(2)=(x(2)*p(3)*p(3)+xv(2)*p(2)*p(2)+  ! RLR (4/99)
-     1         (xv(3)-x(3))*p(2)*p(3))/det       ! RLR (4/99)
-         x0(3)=(x(3)*p(2)*p(2)+xv(3)*p(3)*p(3)+  ! RLR (4/99)
-     1         (xv(2)-x(2))*p(2)*p(3))/det       ! RLR (4/99)
+         p2p3 = p(2)*p(3)
+         det = p2p2 + p3p3                       ! RLR (4/99)
+         x0(2)=(x(2)*p3p3+xv(2)*p2p2+            ! RLR (4/99)
+     1         (xv(3)-x(3))*p2p3)/det            ! RLR (4/99)
+         x0(3)=(x(3)*p2p2+xv(3)*p3p3+            ! RLR (4/99)
+     1         (xv(2)-x(2))*p2p3)/det            ! RLR (4/99)
 
 C        x0(3)=p(2)*(x(3)*p(2)-x(2)*p(3))/(p(2)*p(2)+p(3)*p(3))
 C               IF(p(2).eq.0.) THEN
