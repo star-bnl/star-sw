@@ -64,7 +64,8 @@ bool StHitRadiusLessThan::operator() (const StHit* hit1, const StHit* hit2) cons
 
 bool StiHitIsUsed::operator() (const StiHit* hit) const
 {
-    return !hit->isUsed();
+    //return !hit->isUsed();
+    return (hit->timesUsed()==0);
 }
 
 //Order StHits (NOT Sti!) by radius
@@ -141,7 +142,8 @@ void SetHitUsed::operator()(StiTrackNode& node)
 {
     StiHit* hit = node.getHit();
     if(hit!=0) {
-	hit->setUsed(true);
+	//hit->setUsed(true);
+	hit->setTimesUsed(hit->timesUsed()+1);
     }
 }
 

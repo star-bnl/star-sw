@@ -137,7 +137,8 @@ StiKalmanTrack* StiLocalTrackSeedFinder::next()
 
     while (hasMore() && track==0) {
 	//For now, do one hit at a time, regardless of validity
-	if ( (*mCurrentHit)->isUsed() == false ) {
+	//if ( (*mCurrentHit)->isUsed() == false ) {
+	if ( (*mCurrentHit)->timesUsed()==0 ) {
 	    track =makeTrack(*mCurrentHit);
 	}
 	increment();
@@ -179,7 +180,8 @@ bool StiLocalTrackSeedFinder::extendHit(StiHit* hit)
     while (mHitStore->hasMore()) {
 	++nhits;
 	StiHit* theHit = mHitStore->getHit();//Get hit and increment
-	if (theHit->isUsed()==false) {
+	//if (theHit->isUsed()==false) {
+	if (theHit->timesUsed()==0) {
 	    double theDeltaZ = fabs( theHit->z()-hit->z() );
 	    if ( theDeltaZ < dz ) {
 		closestHit = theHit;
@@ -373,7 +375,8 @@ bool StiLocalTrackSeedFinder::extrapolate()
     while (mHitStore->hasMore()) {
 	++nhits;
 	StiHit* theHit = mHitStore->getHit(); //Get hit and increment
-	if (theHit->isUsed()==false) {
+	//if (theHit->isUsed()==false) {
+	if (theHit->timesUsed()==0) {
 	    double theDeltaZ = fabs( theHit->z() - z3 );
 	    if ( theDeltaZ < dz ) {
 		closestHit = theHit;

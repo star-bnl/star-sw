@@ -63,5 +63,5 @@ ostream& operator<<(ostream& os, const StiHit& hit)
 	      <<hit.sxx()<<" "<<hit.syy()<<" "<<hit.szz()<<"\t" //Diagonal Error
 	      <<hit.sxy()<<" "<<hit.sxz()<<" "<<hit.syz()<<"\t" //Off-diagonal error
 	      <<hit.detector() //pointer to detector
-	      <<"Is Used: "<<hit.isUsed();
+	      <<"times Used: "<<hit.timesUsed();
 }

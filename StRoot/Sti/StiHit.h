@@ -108,9 +108,12 @@ public:
     /// StMcHit associated with this StiHit.
     //const StMcHit* stMcHit() const;
 
+    ///Return the number of times this hit was assigned to a track
+    unsigned int timesUsed() const;
+    
     ///Return a boolean that marks whether or not this hit is assigne to a
     ///track.
-    bool   isUsed() const;
+    //bool   isUsed() const;
 
     ///Return a const reference to a StThreeVectorF that denotes the position
     ///of the hit in global STAR coordinates.
@@ -151,8 +154,12 @@ public:
     void setDetector(StiDetector*);
     ///Set the pointer to the corresponding StHit object.
     void setStHit(StHit*);
+    
     ///Set a boolean that marks whether or not this hit is assigned to a track.
-    void setUsed(bool);
+    //void setUsed(bool);
+
+    ///Set the number of times used
+    void setTimesUsed(unsigned int);
 
     //Operators
 
@@ -172,7 +179,7 @@ private:
     double msxy;
     double msxz;
     double msyz;
-    bool   mused;
+    unsigned int mTimesUsed;
     StiDetector* mdetector;
     StHit* msthit;
 };
@@ -212,7 +219,8 @@ inline void StiHit::setSyz(double val)
 inline void StiHit::reset()
 {
     mrefangle = mposition = mx = my = mz = msxx = msyy = mszz = msxy = msxz = msyz = 0.;
-    mused = false;
+    //mused = false;
+    mTimesUsed=0;
     mdetector = 0;
     msthit = 0;
 }
@@ -255,7 +263,9 @@ inline const StiDetector* StiHit::detector() const {return mdetector;}
 
 inline StiDetector* StiHit::detector() {return mdetector;}
 
-inline bool   StiHit::isUsed() const { return mused;}
+//inline bool   StiHit::isUsed() const { return mused;}
+
+inline unsigned int StiHit::timesUsed() const { return mTimesUsed;}
 
 inline void StiHit::set(double refAngle, double position, double x, double y, double z, 
 			double sxx, double sxy, double sxz, double syy, double syz, double szz) 
@@ -271,7 +281,7 @@ inline void StiHit::set(double refAngle, double position, double x, double y, do
     msxy = sxy;
     msxz = sxz;
     msyz = syz;  
-    mused = false;
+    //mused = false;
 }
 
 inline void StiHit::setX(double val) {mx=val;}
@@ -288,6 +298,11 @@ inline void StiHit::setDetector(StiDetector* det) {mdetector=det;}
 
 inline void StiHit::setStHit(StHit* val) {msthit=val;}
 
-inline void StiHit::setUsed(bool val) { mused = val;}
+inline void StiHit::setTimesUsed(unsigned int val)
+{
+    mTimesUsed=val;
+}
+
+//inline void StiHit::setUsed(bool val) { mused = val;}
 
 #endif
