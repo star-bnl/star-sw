@@ -1,5 +1,8 @@
-// $Id: StMessMgr.h,v 1.7 1999/09/14 15:42:02 genevb Exp $
+// $Id: StMessMgr.h,v 1.8 1999/09/16 15:50:24 genevb Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.8  1999/09/16 15:50:24  genevb
+// Fixed a bug in over-writing memory when calling from FORTRAN, use char=0 instead of strcpy
+//
 // Revision 1.7  1999/09/14 15:42:02  genevb
 // Some bug fixes, workaround for nulls in strings
 //
@@ -66,9 +69,8 @@ void type_of_call Msg_Disable_(char* mess="",
                                   size_t len=0);
 void type_of_call StMessage_(char* mess="", char* type="", char* opt=0,
                                   size_t len1=0, size_t len2=0, size_t len3=0);
-void type_of_call StInfo_(char* mess="", size_t len1=0);
-//void type_of_call StInfo_(char* mess="", char* opt="O",
-//                                  size_t len1=0, size_t len2=1);
+void type_of_call StInfo_(char* mess="", char* opt="O",
+                                  size_t len1=0, size_t len2=1);
 void type_of_call StWarning_(char* mess="", char* opt="E",
                                   size_t len1=0, size_t len2=1);
 void type_of_call StError_(char* mess="", char* opt="E",
