@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichWindowHistogram.cxx,v 1.3 2002/02/01 17:45:56 lasiuk Exp $
+ * $Id: StRichWindowHistogram.cxx,v 1.4 2003/01/16 17:42:19 dunlop Exp $
  *
  * Author:  bl Nov 2, 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichWindowHistogram.cxx,v $
+ * Revision 1.4  2003/01/16 17:42:19  dunlop
+ * Namespace fix for Solaris
+ *
  * Revision 1.3  2002/02/01 17:45:56  lasiuk
  * Mods for gcc(7.2)
  * outer helix usage
@@ -35,6 +38,8 @@
 using namespace units;
 using std::accumulate;
 using std::max_element;
+using std::sort;
+
 #endif
 
 ostream& operator<<(ostream& os, const StRichWindowBin& win) {
