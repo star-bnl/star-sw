@@ -1,6 +1,15 @@
-* $Id: svttgeo3.g,v 1.4 2004/09/11 01:17:34 potekhin Exp $
+* $Id: svttgeo3.g,v 1.5 2005/02/02 00:17:50 potekhin Exp $
 *
 * $Log: svttgeo3.g,v $
+* Revision 1.5  2005/02/02 00:17:50  potekhin
+* We now have a new estimate of the copper cable mass, for
+* the cables feeding the SVT and residing on the support cones.
+*
+* Included in the code now are the re-normalized thickness of
+* the copper cones (our approximation of the cable assembly)
+* and the switches and logic to allow the updated configuration
+* to be created, as requested by the user in geometry.g
+*
 * Revision 1.4  2004/09/11 01:17:34  potekhin
 * Added a parameter to specify the innermost layer index,
 * thus providing the possibility to selectively remove inner layers.
@@ -112,7 +121,8 @@ Module  SVTTGEO3  is the SVT geometry for STAR: corrected and without SSD
                        SCBM,SCBL,SFED,SPLS,SOUM,SOUR
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
-		       ZsizeMax,  Angoff, SupportVer,   ifMany, Nmin}
+		       ZsizeMax,  Angoff, SupportVer,   ConeVer,
+                       ifMany, Nmin}
 *     
       structure SWCA { Version,   Length,
                        WaferWid,  WaferLen,  WaferThk,  RohaThk,
@@ -196,6 +206,7 @@ Module  SVTTGEO3  is the SVT geometry for STAR: corrected and without SSD
       ZsizeMax  = 270        ! SVT+FTPC length
       Angoff    = 0          ! angular offset x1 for slayer 2 x2 for slayer 3
       SupportVer= 1          ! versioning of the shield
+      ConeVer=    1          ! versioning of the support cone
       ifMany    = 0          ! whether we use the geant MANY option
       Nmin      = 1          ! the index of the innermost layer
 *
@@ -215,6 +226,46 @@ Module  SVTTGEO3  is the SVT geometry for STAR: corrected and without SSD
    Fill SSUP ! Support structures
       Version   = 1          ! geometry version
       CabThk    = 0.05       ! thickness of layer of cables on support cone
+      HosRmn    = 0.75       ! inner radius of water hoses on support cone
+      HosRmx    = 0.95       ! outer radius of water hoses on support cone
+      Nhoses    = 10         ! number of water hoses
+      WrpMyThk  = 0.10       ! thickness of mylar wrap around cone (guess)
+      WrpAlThk  = 0.01       ! thickness of Al on mylar wrap (guess)
+      GrphThk   = 0.16	     ! support cone thickness
+      Cone1zmn  = 52.23      ! Cone z min (parts 1,2,3,4 in increasing z)
+      RodLen    = 110.8      ! Length of support rods
+      RodDist   = 17.5       ! Distance of support rod od from beam axis 
+      RodID     = 2.5        ! ID of Carbon support rods (approx)
+      RodOD     = 3.05       ! OD of Carbon support rods (approx)
+      Con1IdMn  = 15.67      ! Minimum id of cone 1 
+      Con3IdMn  = 21.67      ! Minimum id of cone 3 (TBD)
+      Con4IdMn  = 37.4       ! Minimum id of cone 4 (TBD)
+      Con4IdMx  = 37.4       ! Maximum id of cone 4 (TBD)
+      Cone3zmx  = 150.0      ! Maximum z of cone 3 (TBD)
+      Cone4zmx  = 229.36     ! Maximum z of cone 4 (TBD)
+      BraThk    = .2         ! thickness of Al brackets 
+      ERJThk    = .1         ! (z) thickness of end ring joining brackets
+      ERJWid    = 2.07       ! (azimuthal) width of end ring joining brackets
+      ERJLen    = 5.19       ! (radial) length of end ring joining brackets
+      ERJzdis   = 2.0        ! dist from ladder ends to ERJ (guess)
+      ERJ1x     = 0.31       ! ERJ screw 1 x position (radial)
+      ERJ2x     = 1.15       ! ERJ screw 2 x position
+      ERJ2y     = 0.72       ! ERJ screw 2 y position
+      ERJrad    = 10.80      ! distance of ERJ center from beam axis
+      ERJdia    = 0.17       ! ERJ screw diameter
+*------------------------------------------------------------
+* This is a copy of the above (base) version with one difference which is
+* the thickness of the copper layer which models the cables attached to
+* the cones. Based on the new measured data from Dave Lynn, we normalize the
+* effective thickness of this approximation, such that it matches the actual
+* cable weight.It's a factor of 4.35 compared to the previous number. That
+* previous number's origin is now impossible to determine.
+* NOTE: historically in the code this number, CabThk, is divided by 2.
+* I will keep it the same way to more easily compare the old with the new.
+
+   Fill SSUP ! Support structures
+      Version   = 2          ! geometry version
+      CabThk    = 0.21       ! thickness of layer of cables on support cone
       HosRmn    = 0.75       ! inner radius of water hoses on support cone
       HosRmx    = 0.95       ! outer radius of water hoses on support cone
       Nhoses    = 10         ! number of water hoses
@@ -470,7 +521,7 @@ Module  SVTTGEO3  is the SVT geometry for STAR: corrected and without SSD
       USE SVTG
       USE SWCA
       USE SELC
-      USE SSUP
+      USE SSUP version=SVTG_ConeVer
       USE SSUB
       USE SERG
       USE SWAM
@@ -483,6 +534,8 @@ Module  SVTTGEO3  is the SVT geometry for STAR: corrected and without SSD
       if(SVTG_SupportVer==2) then ! shrink the inner radius so that pixel fits in
          SVTG_RsizeMin = 1.4
       endif
+
+      write(*,*) '********* SVT Support Cone Cable layer thickness: ', SSUP_CabThk
 
 * introduce common materials here
 *
