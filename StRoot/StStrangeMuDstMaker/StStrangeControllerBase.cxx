@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 3.6 2001/09/14 21:39:02 genevb Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.7 2001/11/05 23:41:06 genevb Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.7  2001/11/05 23:41:06  genevb
+// Add more dEdx, B field info, careful of changes to TTree unrolling
+//
 // Revision 3.6  2001/09/14 21:39:02  genevb
 // Adjustments to not depend on order in which maker Clear() is called
 //
@@ -123,7 +126,8 @@ void StStrangeControllerBase::InitReadDst() {
 //_____________________________________________________________________________
 void StStrangeControllerBase::InitCreateDst() {
   tree = masterMaker->GetTree();
-  file = masterMaker->GetFile(dstType);
+//  file = masterMaker->GetFile(dstType);
+  file = masterMaker->GetFile(0);
   AssignBranch(GetName(),&dataArray);
   if (doMc && !(dstMaker)) {
     AssignBranch(GetMcName(),&mcArray);
@@ -178,7 +182,7 @@ TBranch* StStrangeControllerBase::AssignBranch(const char* name,
   }
   // End of bug workaround.
 
-  static Int_t split=2;
+  static Int_t split=10;
   TBranch* branch = tree->Branch(name,address,bsize,split);
   if (masterMaker->GetMode() == StrangeWrite) branch->SetFile(file);
   return branch;
@@ -230,8 +234,10 @@ Int_t StStrangeControllerBase::MakeCreateSubDst() {
 //_____________________________________________________________________________
 void StStrangeControllerBase::Clear(Option_t* opt) {
   if (dstMaker) {                                // Making a subDST
-    selections->Reset();
-    keepers->Reset();
+    if (selections) {
+      selections->Reset();
+      keepers->Reset();
+    }
     if (tree->GetBranch(GetName())->GetAddress() != (char*) &dataArray) {
       tree->SetBranchAddress(GetName(),&dataArray);
     }

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.cc,v 3.3 2001/08/23 13:20:54 genevb Exp $
+ * $Id: StStrangeEvMuDst.cc,v 3.4 2001/11/05 23:41:06 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.cc,v $
+ * Revision 3.4  2001/11/05 23:41:06  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
  * Revision 3.3  2001/08/23 13:20:54  genevb
  * Many bug workarounds...
  *
@@ -58,6 +61,9 @@ void StStrangeEvMuDst::Fill(StEvent& event) {
 
   mRun = event.runId();
   mEvent = event.id();
+  StEventSummary* evSum = event.summary();
+  if (evSum) mMagneticField = evSum->magneticField();
+  else mMagneticField = 0.;
   
   mGlobalTracks = 0;
   StSPtrVecTrackNode& theNodes = event.trackNodes();
@@ -89,6 +95,7 @@ void StStrangeEvMuDst::Fill(StMcEvent& event) {
 
   mRun = event.runNumber();
   mEvent = event.eventNumber();
+  mMagneticField = 0.;
   
   mGlobalTracks = event.tracks().size();
   mPrimaryNegTracks = 0;

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkI.hh,v 3.1 2001/05/04 20:15:13 genevb Exp $
+ * $Id: StKinkI.hh,v 3.2 2001/11/05 23:41:06 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 27-Apr-2001
  *
@@ -13,6 +13,9 @@
  ***********************************************************************
  *
  * $Log: StKinkI.hh,v $
+ * Revision 3.2  2001/11/05 23:41:06  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
  * Revision 3.1  2001/05/04 20:15:13  genevb
  * Common interfaces and reorganization of components, add MC event info
  *
@@ -89,10 +92,18 @@ public:
   virtual Float_t  dedxParent()      const {return 0;}
   // dE/dX of daughter
   virtual Float_t  dedxDaughter()    const {return 0;}
+  // Error on mean of dE/dX of parent
+  virtual Float_t  errDedxParent()      const {return 0;}
+  // Error on mean of dE/dX of daughter
+  virtual Float_t  errDedxDaughter()    const {return 0;}
   // Number of dE/dX points for parent
   virtual UShort_t numDedxParent()   const {return 0;}
   // Number of dE/dX points for daughter
   virtual UShort_t numDedxDaughter() const {return 0;}
+  // Length of dE/dX track of parent
+  virtual Float_t  lenDedxParent()      const {return 0;}
+  // Length of dE/dX track of daughter
+  virtual Float_t  lenDedxDaughter()    const {return 0;}
 };
 
 

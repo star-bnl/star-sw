@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMuDst.hh,v 3.3 2001/05/04 20:15:15 genevb Exp $
+ * $Id: StXiMuDst.hh,v 3.4 2001/11/05 23:41:07 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 30-Mar-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiMuDst.hh,v $
+ * Revision 3.4  2001/11/05 23:41:07  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
  * Revision 3.3  2001/05/04 20:15:15  genevb
  * Common interfaces and reorganization of components, add MC event info
  *
@@ -76,7 +79,9 @@ public:
   Long_t  detectorIdXi();              // Detector ID for Xi vertex
   virtual Long_t detectorIdPars();     // Detector ID for pars used in Xi finder
   Float_t dedxBachelor() const;        // dE/dX of bachelor
+  Float_t errDedxBachelor() const;     // Error on mean of dE/dX of bachelor
   UShort_t numDedxBachelor() const;    // Number of dE/dX points for bachelor
+  Float_t lenDedxBachelor() const;     // Length of dE/dX track for bachelor
 
 protected:
   Int_t   mCharge;                     // Written out
@@ -103,9 +108,10 @@ protected:
   void    FillXi(StXiVertex*);
 
   Float_t mDedxBachelor;
+  Float_t mErrDedxBachelor;
   UShort_t mNumDedxBachelor;
 
-  ClassDef(StXiMuDst,4)
+  ClassDef(StXiMuDst,5)
 };
 
 inline StXiMuDst::StXiMuDst(StXiVertex* x1,StV0Vertex* v1,StStrangeEvMuDst* e1):
@@ -137,6 +143,10 @@ inline Float_t StXiMuDst::clXi()   const { return mClXi; }
 inline Float_t StXiMuDst::chi2Bachelor() const { return mChi2Bachelor; }
 inline Float_t StXiMuDst::clBachelor()   const { return mClBachelor; }
 inline Float_t StXiMuDst::dedxBachelor() const { return mDedxBachelor; }
-inline UShort_t StXiMuDst::numDedxBachelor() const { return mNumDedxBachelor; }
+inline Float_t StXiMuDst::errDedxBachelor() const { return mErrDedxBachelor; }
+inline UShort_t StXiMuDst::numDedxBachelor() const
+             { return (mNumDedxBachelor%100); }
+inline Float_t StXiMuDst::lenDedxBachelor() const
+             { return (mNumDedxBachelor/100); }
 
 #endif

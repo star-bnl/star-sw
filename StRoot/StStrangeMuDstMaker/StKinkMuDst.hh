@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.hh,v 3.3 2001/05/04 20:15:14 genevb Exp $
+ * $Id: StKinkMuDst.hh,v 3.4 2001/11/05 23:41:06 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.hh,v $
+ * Revision 3.4  2001/11/05 23:41:06  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
  * Revision 3.3  2001/05/04 20:15:14  genevb
  * Common interfaces and reorganization of components, add MC event info
  *
@@ -73,8 +76,12 @@ public:
   Float_t  clDaughter()   const;       // Confidence level of daughter
   Float_t  dedxParent()   const;       // dE/dX of parent
   Float_t  dedxDaughter() const;       // dE/dX of daughter
+  Float_t  errDedxParent()   const;    // Error on mean of dE/dX of parent
+  Float_t  errDedxDaughter() const;    // Error on mean of dE/dX of daughter
   UShort_t numDedxParent()   const;    // Number of dE/dX points for parent
   UShort_t numDedxDaughter() const;    // Number of dE/dX points for daughter
+  Float_t  lenDedxParent()   const;    // Length of dE/dX track of parent
+  Float_t  lenDedxDaughter() const;    // Length of dE/dX track of daughter
 
   Float_t  mDcaParentDaughter;
   Float_t  mDcaDaughterPrimaryVertex;
@@ -101,6 +108,8 @@ public:
   Float_t  mClDaughter;
   Float_t  mDedxParent;
   Float_t  mDedxDaughter;
+  Float_t  mErrDedxParent;
+  Float_t  mErrDedxDaughter;
   UShort_t mNumDedxParent;
   UShort_t mNumDedxDaughter;
 
@@ -112,7 +121,7 @@ private:
   void     findTransverseMassPion();
   void     findRapidityKaon();
   void     findRapidityPion();
-  ClassDef(StKinkMuDst,4)
+  ClassDef(StKinkMuDst,5)
 };
 
 inline Float_t StKinkMuDst::dcaParentDaughter() const
@@ -152,6 +161,14 @@ inline Float_t StKinkMuDst::chi2Daughter() const { return mChi2Daughter; }
 inline Float_t StKinkMuDst::clDaughter()   const { return mClDaughter; }
 inline Float_t StKinkMuDst::dedxParent()   const { return mDedxParent; }
 inline Float_t StKinkMuDst::dedxDaughter() const { return mDedxDaughter; }
-inline UShort_t StKinkMuDst::numDedxParent()   const { return mNumDedxParent; }
-inline UShort_t StKinkMuDst::numDedxDaughter() const { return mNumDedxDaughter; }
+inline Float_t StKinkMuDst::errDedxParent()   const { return mErrDedxParent; }
+inline Float_t StKinkMuDst::errDedxDaughter() const { return mErrDedxDaughter; }
+inline UShort_t StKinkMuDst::numDedxParent()   const
+               { return (mNumDedxParent%100); }
+inline UShort_t StKinkMuDst::numDedxDaughter() const
+               { return (mNumDedxDaughter%100); }
+inline Float_t StKinkMuDst::lenDedxParent()   const
+               { return (mNumDedxParent/100); }
+inline Float_t StKinkMuDst::lenDedxDaughter() const
+               { return (mNumDedxDaughter/100); }
 #endif
