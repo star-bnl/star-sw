@@ -1,6 +1,0 @@
-   struct ctu_cor { 
-       long      i_eta;       /* Z index */
-       long      i_phi;       /* Phi index */
-       float     n;           /* Nr. particles through counter  */
-       float     time;        /* Time from t0 */
-   } ;

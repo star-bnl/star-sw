@@ -1,9 +1,0 @@
-macro ctu_run 
-*
-*   
-*    Call cts
-*
-ami/mod/call ctu /dui/constants/ctf/geometry/ctb _ 
-                 /dui/constants/ctf/calib/ctb_slat _
-                 /dui/data/ctf/ctb_raw _
-                 /dui/data/ctf/ctb_cor

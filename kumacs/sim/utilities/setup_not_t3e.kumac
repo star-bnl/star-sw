@@ -1,8 +1,0 @@
-*
-* Non-T3E specific setup
-*
-* pmj 14/4/98
-
-mess dolce fa niente (this is not a CRAY T3E)
-
-macro/global/create PLATFORM NOT_T3E
