@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.25 2004/03/10 05:53:08 jeromel Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.26 2004/03/24 18:44:58 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -35,6 +35,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.26  2004/03/24 18:44:58  ward
+ * Suppress debug messages.
+ *
  * Revision 1.25  2004/03/10 05:53:08  jeromel
  * Left a debug line in (to remove later)
  *
@@ -163,17 +166,17 @@ int TPCV2P0_ZS_SR::initialize()
     {
       adcd_p[rcb][mz] = detector->getBankTPCADCD(sector,rcb,mz);
       if ((void *)adcd_p[rcb][mz] != NULL) {
-	if (detector->ercpy->verbose) printf("found ADCD RB%d MZ%d\n",rcb+1,mz+1);
+	// if (detector->ercpy->verbose) printf("found ADCD RB%d MZ%d\n",rcb+1,mz+1);
 	fflush(stdout);
       }
       adcx_p[rcb][mz] = detector->getBankTPCADCX(sector,rcb,mz);
       if ((void *)adcx_p[rcb][mz] != NULL) {
-	if (detector->ercpy->verbose) printf("found ADCX RB%d MZ%d\n",rcb+1,mz+1);
+	// if (detector->ercpy->verbose) printf("found ADCX RB%d MZ%d\n",rcb+1,mz+1);
 	fflush(stdout);
       }
       seqd_p[rcb][mz] = detector->getBankTPCSEQD(sector,rcb,mz);
       if ((void *)seqd_p[rcb][mz] != NULL) {
-	if (detector->ercpy->verbose) printf("found SEQD RB%d MZ%d\n",rcb+1,mz+1);
+	// if (detector->ercpy->verbose) printf("found SEQD RB%d MZ%d\n",rcb+1,mz+1);
 	fflush(stdout);
       }
     }
