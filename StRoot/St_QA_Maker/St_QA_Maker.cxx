@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.24 1999/05/05 19:35:52 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.25 1999/05/06 12:48:44 fisyak Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.25  1999/05/06 12:48:44  fisyak
+// Add search geant in search path for particle tables
+//
 // Revision 1.24  1999/05/05 19:35:52  kathy
 // add new method ListHists and clean up
 //
@@ -854,6 +857,7 @@ void St_QA_Maker::MakeHistGen(St_DataSet *dst){
   St_DataSetIter dstI(dst);
   
   St_particle   *part     = (St_particle  *) dstI["particle"];
+  if (!part) part = (St_particle  *) DataSet("geant/particle");
   if (part){
     particle_st *p = part->GetTable();
     Int_t nchgpart=0;
@@ -1117,7 +1121,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.24 1999/05/05 19:35:52 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.25 1999/05/06 12:48:44 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
