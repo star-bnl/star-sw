@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableI.h,v 1.3 1999/09/30 02:06:10 porter Exp $
+ * $Id: StDbTableI.h,v 1.4 1999/12/03 19:02:02 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTableI.h,v $
+ * Revision 1.4  1999/12/03 19:02:02  porter
+ * modified descriptor to accept tableDescriptor once this St_base object
+ * has been updated to have longer name lengths.
+ *
  * Revision 1.3  1999/09/30 02:06:10  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -83,8 +87,8 @@ public:
   virtual int GetNRows() const=0;
   virtual void setRowNumber(int row) =0;
 
-  virtual void StreamAccessor(typeAcceptor* accept) =0;
-  virtual void dbStreamer(typeAcceptor* accept) =0;
+  virtual void StreamAccessor(typeAcceptor* accept, bool isReading) =0;
+  virtual void dbStreamer(typeAcceptor* accept, bool isReading) =0;
 
   virtual void StreamAccessor(StDbBufferI* buff, bool isReading) =0;
   virtual void dbStreamer(StDbBufferI* buff, bool isReading) =0;

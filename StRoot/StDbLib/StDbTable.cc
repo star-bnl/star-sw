@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.8 1999/11/29 21:40:08 fisyak Exp $
+ * $Id: StDbTable.cc,v 1.9 1999/12/03 19:01:59 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,12 +11,21 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.9  1999/12/03 19:01:59  porter
+ * modified descriptor to accept tableDescriptor once this St_base object
+ * has been updated to have longer name lengths.
+ *
  * Revision 1.8  1999/11/29 21:40:08  fisyak
  * Add cast to HP
  *
  * Revision 1.7  1999/11/19 21:58:06  porter
  * added method to return "malloc'd" version of table instead of new
  * so that delete of St_Table class i done correctly
+ *
+ * $Log: StDbTable.cc,v $
+ * Revision 1.9  1999/12/03 19:01:59  porter
+ * modified descriptor to accept tableDescriptor once this St_base object
+ * has been updated to have longer name lengths.
  *
  * Revision 1.6  1999/10/19 14:30:39  porter
  * modifications relevant to use with StDbBroker and future merging with
@@ -110,6 +119,8 @@ StDbTable::setDescriptor(StTableDescriptorI* descriptor){
 char* 
 StDbTable::GetTable() { if(!mdata)createMemory(); return mdata;};
 
+/////////////////////////////////////////////////////////////////////
+
 void* 
 StDbTable::GetTableCpy() { 
 
@@ -129,10 +140,9 @@ void
 StDbTable::SetTable(char* c, int nrows) { 
 
 if(mdata){
- delete [] mdata; 
- mdata = 0;
+  delete [] mdata; 
+  mdata = 0;
 }
-
 createMemory(nrows);
 int len = nrows*getTableSize();
 memcpy(mdata,c,len);
@@ -199,6 +209,7 @@ bool retVal = true;
   if(mdescriptor && mdescriptor->getNumElements()>0){
      int len = mrows*mdescriptor->getTotalSizeInBytes();
      mdata=new char[len];
+     memset(mdata,0,len);
   } else {
     if(!mtableName){mtableName=new char[8]; strcpy(mtableName,"Unknown");}
     //    cerr << "Table [ "<<mtableName<<" ] has no description to fill memory" << endl;
@@ -238,7 +249,7 @@ StDbTable::setElementID(int* elements, int nrows) {
 
  mrows = nrows;
  if(mrows==1){
-   maccessor.elementID = new int;
+   maccessor.elementID = new int[1];
    *(maccessor.elementID) = 0;
  } else {
    maccessor.elementID = new int[nrows];
@@ -252,29 +263,34 @@ StDbTable::setElementID(int* elements, int nrows) {
 
 
 void
-StDbTable::StreamAccessor(typeAcceptor* accept){
+StDbTable::StreamAccessor(typeAcceptor* accept, bool isReading){
 
-  //  cout << "stream sID " << endl;
-   accept->pass("schemaID",maccessor.schemaID,1);
-   //  cout << "stream bt " << endl;
    int len = 1;
-   if(maccessor.beginTime.mdateTime)len=strlen(maccessor.beginTime.mdateTime);
-   accept->pass("beginTime",maccessor.beginTime.mdateTime,1);
-   //  cout << "stream et " << endl;
-   //   accept->pass("endTime",maccessor.endTime,1);
-   //  cout << "stream v " << endl;
-   if(maccessor.version)len=strlen(maccessor.version);
-   accept->pass("version",maccessor.version,len);
-   //  cout << "stream eID " << endl;
-   if(!maccessor.elementID){
-     maccessor.elementID = new int[mrows];
-     for(int i=0;i<mrows;i++)maccessor.elementID[i]=i;
+
+   accept->pass("schemaID",maccessor.schemaID,len);
+
+   if(isReading){
+
+   if(maccessor.beginTime.mdateTime) delete [] maccessor.beginTime.mdateTime;
+   if(maccessor.version)delete [] maccessor.version;
+   if(maccessor.elementID)delete [] maccessor.elementID;
+
+   } else {
+
+     if(!maccessor.elementID){
+       maccessor.elementID = new int[mrows];
+       for(int i=0;i<mrows;i++)maccessor.elementID[i]=i;
+     }
+
    }
+
+   accept->pass("beginTime",maccessor.beginTime.mdateTime,len);
+   accept->pass("version",maccessor.version,len);
+   int * eids;
    accept->pass("elementID",maccessor.elementID, mrows);
-
+   if(isReading)cout << mtableName << " & " << mrows << endl;
+ 
 }
-
-
 
 //////////////////////////////////////////////////////////////////////
 
@@ -305,11 +321,8 @@ StDbTable::StreamAccessor(StDbBufferI* buff, bool isReading){
       unsigned int bTime;// , eTime;
       buff->ReadScalar(bTime,"beginTime"); 
       if(bTime>maccessor.beginTime.munixTime)maccessor.beginTime.munixTime=bTime;
-      //      buff->ReadScalar(eTime,"endTime");
-      //      if(eTime<maccessor.endTime.munixTime) maccessor.endTime.munixTime = eTime;
     }
-    //   buff->ReadScalar(maccessor.beginTime,"beginTime");
-    //   buff->ReadScalar(maccessor.endTime,"endTime");
+
   } else {
 
    buff->WriteScalar(maccessor.schemaID,"schemaID");
@@ -419,7 +432,7 @@ char* ptr;
 ///////////////////////////////////////////////////////////////////////
 
 void
-StDbTable::dbStreamer(typeAcceptor* accept){
+StDbTable::dbStreamer(typeAcceptor* accept, bool isReading){
 
 int max = mdescriptor->getNumElements();
 char* name;
@@ -429,12 +442,21 @@ char* ptr;
 
  if(createMemory() && mrowNumber < mrows){
 
- for(int i=0; i<max; i++){
-    getElementSpecs(i,ptr,name,length,type);
-    // cout << "Acceptor offset is " << ptr-mdata << endl;
-    PassElement(ptr,name,length,type,accept);
-    delete [] name;
- }
+   if(isReading){
+     for(int i=0; i<max; i++){
+      getElementSpecs(i,ptr,name,length,type);
+      // cout << "Acceptor offset is " << ptr-mdata << endl;
+      PassInElement(ptr,name,length,type,accept);
+      delete [] name;
+     }
+   } else {
+     for(int i=0; i<max; i++){
+      getElementSpecs(i,ptr,name,length,type);
+      // cout << "Acceptor offset is " << ptr-mdata << endl;
+      PassOutElement(ptr,name,length,type,accept);
+      delete [] name;
+     }
+   }
 
  mrowNumber++;
 
@@ -464,9 +486,16 @@ float* mfloat; double* mdouble;
     }
   case Stuchar:
     {
-    buff->ReadArray(muchar,len,name);
-    memcpy(ptr,muchar,len);
+       buff->ReadArray(muchar,len,name);
+       // buff->ReadArray(mint,len,name);
+       //unsigned char* tmp = new unsigned char[len];
+       //for(int k=0;k<len;k++){
+       //tmp[k]= (unsigned char)*mint;
+       // mint++;
+       // }
+    memcpy(ptr,muchar,len*sizeof(unsigned char));
     delete [] muchar;
+    // delete [] tmp;
     break;
     }
   case Stshort:
@@ -546,7 +575,14 @@ StDbTable::WriteElement(char* ptr, char* name, int len, StTypeE type, StDbBuffer
   case Stuchar:
     {
     unsigned char* muchar = (unsigned char*)ptr;
-    buff->WriteArray(muchar,len,name);
+    int* tmp = new int[len] ;
+    for(int k=0;k<len;k++){
+      tmp[k]= (int)*muchar;
+      muchar++;
+    }
+    //   buff->WriteArray(muchar,len,name);
+    buff->WriteArray(tmp,len,name);
+    delete [] tmp;
     break;
     }
   case Stshort:
@@ -602,12 +638,122 @@ StDbTable::WriteElement(char* ptr, char* name, int len, StTypeE type, StDbBuffer
   }
 
 }
+
 ///////////////////////////////////////////////////////////////////////
 
 void
-StDbTable::PassElement(char* ptr, char* name, int len, StTypeE type, typeAcceptor* accept){
+StDbTable::PassInElement(char* ptr, char* name, int len, StTypeE type, typeAcceptor* accept){
 
- 
+
+  switch (type) {
+  case Stchar:
+    {
+    char* data;
+    accept->pass(name,data,len);
+    memcpy(ptr,data,len);
+    delete [] data;
+    break;
+    }
+  case Stuchar:
+    {
+     unsigned char* data; 
+     accept->pass(name,data,len);
+     memcpy(ptr,data,len);
+     delete [] data;
+     break;
+    }
+  case Stshort:
+    {
+
+     short* data; 
+     accept->pass(name,data,len);
+     memcpy(ptr,data,len*sizeof(short));
+     delete [] data;
+     break;
+
+    }
+  case Stushort:
+    {
+
+     unsigned short* data; 
+     accept->pass(name,data,len);
+     memcpy(ptr,data,len*sizeof(short));
+     delete [] data;
+     break;
+
+    }
+  case Stint:
+    {
+
+     int* data; 
+     accept->pass(name,data,len);
+     memcpy(ptr,data,len*sizeof(int));
+     delete [] data;
+     break;
+
+    }
+  case Stuint:
+    {
+
+     unsigned int* data; 
+     accept->pass(name,data,len);
+     memcpy(ptr,data,len*sizeof(int));
+     delete [] data;
+     break;
+
+    }
+  case Stlong:
+    {
+
+     long* data; 
+     accept->pass(name,data,len);
+     memcpy(ptr,data,len*sizeof(long));
+     delete [] data;
+     break;
+
+   }
+  case Stulong:
+    {
+
+     unsigned long* data; 
+     accept->pass(name,data,len);
+     memcpy(ptr,data,len*sizeof(long));
+     delete [] data;
+     break;
+
+    }
+  case Stfloat:
+    {
+
+     float* data; 
+     //     cout << "1st = " << len << endl; 
+     accept->pass(name,data,len);
+     //     cout << "2st = " << len << " & " << *data << endl;
+     memcpy(ptr,data,len*sizeof(float));
+     delete [] data;
+     break;
+
+    }
+  case Stdouble:
+    {
+
+     double* data; 
+     accept->pass(name,data,len);
+     memcpy(ptr,data,len*sizeof(double));
+     delete [] data;
+     break;
+
+    }
+
+  }
+
+}
+
+///////////////////////////////////////////////////////////////////////
+
+void
+StDbTable::PassOutElement(char* ptr, char* name, int len, StTypeE type, typeAcceptor* accept){
+
   switch (type) {
   case Stchar:
     {
@@ -703,6 +849,9 @@ StDbTable::PassElement(char* ptr, char* name, int len, StTypeE type, typeAccepto
   }
 
 }
+
+/////////////////////////////////////////////////////////////////
+
 
 void
 StDbTable::checkDescriptor(){
