@@ -125,6 +125,7 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   ioMaker->SetDebug();
   ioMaker->SetBranch("*",0,"0");           //deactivate all branches
   ioMaker->SetBranch("eventBranch",0,"r"); //activate evt.root Branch
+  ioMaker->SetBranch("emcBranch",0,"r");   //activate evt.root Branch
   ioMaker->SetBranch("runcoBranch",0,"r"); //activate runcoBranch
 
 
