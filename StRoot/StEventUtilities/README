@@ -80,6 +80,25 @@ is to eliminate beam-gas background where most of the particles would go one
 way or the other.
 
 
+** StuProbabilityPidAlgorithm: Class for Particle Identification
+-----------------------------------------------------------------
+Files:       StuProbabilityPidAlgorithm.h, StuProbabilityPidAlgorithm.cxx
+Author:      Aihong Tang, Kent State University 
+             Richard Witt (FORTRAN version), Kent State University
+Date:        March 2000
+Description:
+
+StuProbabilityPidAlgorithm is a functor inherited from StPidAlgorithm.
+It can give three most likehood particletypes for a given track in StEvent.
+
+It depends on a set of parmeters, which can be read in from database or 
+from the current working directory.
+
+For detail usage, go to tutorial section of:
+StRoot/StPidAmpMaker/doc/index.html
+
+
+
 <next entry comes here>
 
 
