@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.427 2004/07/29 03:36:45 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.428 2004/07/29 18:23:58 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -183,10 +183,10 @@ Bfc_st BFC1[] = {
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
   {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2004 (tpc)",kFALSE},
-  {"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,ftpc,trgd,OSpaceZ2","",""
+  {"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr4,ftpc,trgd,ZDCvtx,OSpaceZ2","",""
                 ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
-  {"pp2004"     ,""    ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,,ppOpt,-PreVtx,ftpc,trgd,OSpaceZ2","",""
-                         ,"Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+  {"pp2004"     ,""   ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr4,ppOpt,-PreVtx,ftpc,trgd,ZDCvtx,OSpaceZ2",
+                     "","""Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
 
 
   // Other chains/Calibration
@@ -251,6 +251,8 @@ Bfc_st BFC1[] = {
                                           "... AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC ...",kFALSE},
   {"Corr3"       ,""  ,"","AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC","","",
                                         "... AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC ...",kFALSE},
+  {"Corr4"       ,""  ,"","AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC,OShortR","","",
+                               "... AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC , OShortR...",kFALSE},
   {"ExB"         ,""  ,"","",""                                       ,"","Activate ExB correction",kFALSE},
   {"EB1"         ,""  ,"","",""                                     ,"","Force ExB configuration 1",kFALSE},
   {"EB2"         ,""  ,"","",""                                     ,"","Force ExB configuration 2",kFALSE},
@@ -756,10 +758,10 @@ Bfc_st BFC2[] = {
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
   //{"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
   //                                                                   ,"Base chain for 2004 (tpc)",kFALSE},
-  //{"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,ftpc,trgd,OSpaceZ2","",""
-  //            ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
-  //{"pp2004"     ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,ppOpt,-PreVtx,ftpc,trgd,OSpaceZ2","",""
-  //                     ,"Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+  //{"P2004"       ,""        ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr4,ftpc,trgd,ZDCvtx,OSpaceZ2","","",
+  //             "Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+  //{"pp2004"     ,"" ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr4,ppOpt,-PreVtx,ftpc,trgd,ZDCvtx,OSpaceZ2",
+  //                "","","Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
   // 
   // *** ITTF chains *** Year4 drops standard chains and support ITTF chains only
   //     Main change tpc -> tpcI and Cdst -> Idst
@@ -772,10 +774,10 @@ Bfc_st BFC2[] = {
   //  there is no PreVtx in tpcI so no need to do -PreVtx for pp chain
   //  SVT is added as base default, svtIT in chains 
   {"P2004"       ,"" ,"",
-                          "B2004,fcf,VFMinuit,l3onl,tofDat,emcDY2,eemcD,fpd,ftpc,trgd,svtIT,Corr3,OSpaceZ2",
+                   "B2004,fcf,VFMinuit,l3onl,tofDat,emcDY2,eemcD,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
               "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
   {"pp2004"      ,"" ,"",
-        "B2004,fcf,ppOpt,VFppLMV,CtbMatchVtx,l3onl,tofDat,emcDY2,eemcD,fpd,ftpc,trgd,svtIT,Corr3,OSpaceZ2",
+  "B2004,fcf,ppOpt,VFppLMV,CtbMatchVtx,l3onl,tofDat,emcDY2,eemcD,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
              "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},   
    
 
@@ -844,6 +846,8 @@ Bfc_st BFC2[] = {
                                           "... AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC ...",kFALSE},
   {"Corr3"       ,""  ,"","AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC","","",
                                           "... AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC ...",kFALSE},
+  {"Corr4"       ,""  ,"","AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC,OShortR","","",
+                               "... AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC , OShortR...",kFALSE},
   {"ExB"         ,""  ,"","",""                                       ,"","Activate ExB correction",kFALSE},
   {"EB1"         ,""  ,"","",""                                     ,"","Force ExB configuration 1",kFALSE},
   {"EB2"         ,""  ,"","",""                                     ,"","Force ExB configuration 2",kFALSE},
