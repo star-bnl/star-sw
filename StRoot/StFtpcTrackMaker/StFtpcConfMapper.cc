@@ -1,5 +1,11 @@
-// $Id: StFtpcConfMapper.cc,v 1.13 2001/04/25 17:53:06 perev Exp $
+// $Id: StFtpcConfMapper.cc,v 1.14 2001/07/12 08:29:02 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.14  2001/07/12 08:29:02  oldi
+// New constructor introduced to be able to use only cluster which were
+// found to be good in a previous run.
+// New function NoFieldTracking() introduced.
+// Tracking parameters for LaserTracking() changed.
+//
 // Revision 1.13  2001/04/25 17:53:06  perev
 // HPcorrs
 //
@@ -191,6 +197,79 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, Double_t vertexP
 }
 
 
+StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_hits, Double_t vertexPos[3], Bool_t bench, 
+				   Int_t phi_segments, Int_t eta_segments) 
+  : StFtpcTracker(fcl_fppoint, vertexPos, bench)
+{
+  // Constructor to fill in evaluated hits.
+
+  if (bench) {
+    mBench->Start("init");
+  }
+
+  mLaser = (Bool_t)false;
+
+  mNumRowSegment = 20;   // The number of rows has to be fixed to 20 (because this is the number of rows in both Ftpc's)!
+  mNumPhiSegment = phi_segments; 
+  mNumEtaSegment = eta_segments; 
+  mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
+  mMaxFtpcRow = mNumRowSegment/2;
+
+  CalcEtaMinMax();
+
+  mMergedTracks = 0;
+  mMergedTracklets = 0;
+  mMergedSplits = 0;
+  mExtendedTracks = 0;
+  mDiffHits = 0;
+  mDiffHitsStill = 0;
+  mLengthFitNaN  = 0;
+
+  Int_t n_clusters = fcl_fppoint->GetNRows();           // number of clusters
+  Int_t n_goodclusters = good_hits->CountAppearance(1); // number of good clusters
+  mClustersUnused = n_goodclusters;
+  
+  fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
+
+  mHit = new TObjArray(n_goodclusters);    // create TObjArray
+  mHitsCreated = (Bool_t)true;
+  Int_t good_hits_counted = 0;
+
+  {for (Int_t i = 0; i < n_clusters; i++) {
+    
+    if (good_hits->At(i) == 1) {
+      mHit->AddAt(new StFtpcConfMapPoint(point_st++, mVertex), good_hits_counted);
+      ((StFtpcConfMapPoint *)mHit->At(good_hits_counted))->SetHitNumber(i);
+      good_hits_counted++;
+    }
+
+    else {
+      point_st++;
+    }
+  }}
+
+  mVolume = new TObjArray(mBounds);  // create ObjArray for volume cells (of size bounds)
+
+  {for (Int_t i = 0; i < mBounds; i++) {
+    mVolume->AddAt(new TObjArray(0), i);     // Fill ObjArray with empty ObjArrays
+  }}
+
+  StFtpcConfMapPoint *h;
+
+  {for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
+    h = (StFtpcConfMapPoint *)mHit->At(i);   
+    h->Setup(mVertex);
+    ((TObjArray *)mVolume->At(GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h))))->AddLast(h);
+  }}
+
+  if (mBench) {
+    mBench->Stop("init");
+    gMessMgr->Message("", "I", "OST") << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
+    mTime += mBench->GetCpuTime("init");
+  }
+}
+
+
 StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t bench, 
 				   Int_t phi_segments, Int_t eta_segments) 
   : StFtpcTracker(hits, vertex, bench)
@@ -351,7 +430,7 @@ void StFtpcConfMapper::FreeTracking()
 
 void StFtpcConfMapper::LaserTracking()
 {
-  // Tracking of straight (laser) tracks.
+  // Tracking of straight tracks in arbitrary directions.
   // Cuts and settings are optimized to find straight tracks.
 
   if (mBench) {
@@ -361,11 +440,11 @@ void StFtpcConfMapper::LaserTracking()
   // settings
   SetLaser((Bool_t)true);
   SetMaxDca(1.);
-  NonVertexSettings(10, 5, 2, 2, 2, 15);
+  NonVertexSettings(10, 5, 3, 2, 2, 15);
   SetVertexConstraint(false);
   
   // cuts
-  SetTrackletCuts(0.0001, false);
+  SetTrackletCuts(0.05, false);
   
   ClusterLoop();
   ExtendTracks();
@@ -379,7 +458,37 @@ void StFtpcConfMapper::LaserTracking()
   return;
 }
 
-
+void StFtpcConfMapper::NoFieldTracking()
+{
+  // Tracking of straight tracks originating from main vertex.
+  // Cuts and settings are optimized to find straight tracks.
+  
+  if (mBench) {
+    mBench->Start("nofield");
+  }
+  
+  // settings
+  SetLaser((Bool_t)true);
+  SetMaxDca(1.);
+  MainVertexSettings(10, 5, 2, 2, 1, 3);
+  SetVertexConstraint(true);
+  
+  // cuts
+  SetTrackletCuts(0.03, true);
+  
+  ClusterLoop();
+  ExtendTracks();
+  
+  if (mBench) {
+    mBench->Stop("laser");
+    gMessMgr->Message("", "I", "OST") << "No field tracking finished    (" << mBench->GetCpuTime("laser") << " s)." << endm;
+    mBench->GetCpuTime("nofield");
+  }
+  
+  return;
+}
+ 
+ 
 void StFtpcConfMapper::Settings(Int_t trackletlength1, Int_t trackletlength2, Int_t tracklength1, Int_t tracklength2, Int_t rowscopetracklet1, Int_t rowscopetracklet2, Int_t rowscopetrack1, Int_t rowscopetrack2, Int_t phiscope1, Int_t phiscope2, Int_t etascope1, Int_t etascope2)
 {
   // Sets all settings of the tracker.
@@ -396,10 +505,10 @@ void StFtpcConfMapper::Settings(Int_t trackletlength1, Int_t trackletlength2, In
   //     These remove tracks and release points again already during the tracking
   //     if the tracker hasn't found enough hits on the track.
   //     
-  //   - number of row segments to look on both sides for main vertex tracklets
-  //   - number of row segments to look on both sides for non vertex tracklets
-  //   - number of row segments to look on both sides for main vertex tracks
-  //   - number of row segments to look on both sides for non vertex tracks
+  //   - number of row segments to look in inward direction for main vertex tracklets
+  //   - number of row segments to look in inward direction for non vertex tracklets
+  //   - number of row segments to look in inward direction for main vertex tracks
+  //   - number of row segments to look in inward direction for non vertex tracks
   //     These should be set to 1 for tracklets and to a value not less than 1 for track. 
   //     Otherwise (if the value is set to 0) the tracker looks for the next point
   //     only in the same row. It should be set to a value higher than 1 if you
