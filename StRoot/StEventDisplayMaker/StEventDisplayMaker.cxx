@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.99 2004/07/21 00:56:06 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.100 2004/07/27 00:34:43 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -747,6 +747,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
 
     case kTRK:;
     case kTRK|kHIT:;
+      if (kase&kHIT) kase -= kHIT;
       if (all) { 
         shaps = mEventHelper->SelTracks(kase&3);
       } else {
@@ -1132,6 +1133,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.100  2004/07/27 00:34:43  perev
+// StrangeBugFix
+//
 // Revision 1.99  2004/07/21 00:56:06  fine
 // Chnage the abstract custom filter interface to allow use the custom visual attributes
 //
