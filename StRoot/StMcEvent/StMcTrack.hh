@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.4 2000/03/06 18:05:23 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.5 2000/04/04 22:25:24 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.5  2000/04/04 22:25:24  calderon
+ * add inline function to return primary key from g2t table
+ *
  * Revision 2.4  2000/03/06 18:05:23  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -169,6 +172,7 @@ inline int StMcTrack::isShower() const { return mIsShower; }
 
 inline long StMcTrack::geantId() const { return mGeantId; }
 
+inline long StMcTrack::key() const { return mKey; }
 #endif
 
 
