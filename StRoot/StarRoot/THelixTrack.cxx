@@ -156,7 +156,7 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
        s = temp.Step(pnts+lv); 
        if (fabs(s*fCosL) > fabs(s*fCosL-fullen)) s = s-fullen/fCosL;
        temp.Move(s); s0 += s; stp[ip] = s0;
-       zm += z; sm += s; ss += s*s; zs += z*s; 
+       zm += z; sm += s0; ss += s0*s0; zs += z*s0; 
      }
      zm /= np; sm /= np; ss /= np; zs /= np; 
      ss -= sm*sm; zs -= zm*sm; 
