@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRrsMaker.h,v 1.6 2000/02/08 23:46:46 lasiuk Exp $
+ * $Id: StRrsMaker.h,v 1.7 2000/02/12 21:54:25 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
@@ -15,8 +15,11 @@
  *  memory.
  ***********************************************************
  *  $Log: StRrsMaker.h,v $
- *  Revision 1.6  2000/02/08 23:46:46  lasiuk
- *  comment to prevent streamer for ionize and inducesignal. Remove filter
+ *  Revision 1.7  2000/02/12 21:54:25  lasiuk
+ *  Introduce provisions to read in local coordinates
+ *
+ *  Revision 1.7  2000/02/12 21:54:25  lasiuk
+ *  Introduce provisions to read in local coordinates
  *
  *  Revision 1.6  2000/02/08 23:46:46  lasiuk
  *  comment to prevent streamer for ionize and inducesignal. Remove filter
@@ -96,7 +99,9 @@ public:
     Int_t Init();
     Int_t Init(int histograms);
     Int_t Make();
-
+    Int_t Finish();
+    void setUseLocalCoordinate(int);
+    void useLocalCoordinate(int);
     void addPedestal(int);
     void addElectricNoise(int);
     
@@ -147,11 +152,13 @@ private:
     /*StRrsOstream*                mOutputStream; */
     
     //   Flags settable at macro level!
+    int       mWriteToFile;
+
     int       mAddPedestal;
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.6 2000/02/08 23:46:46 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.7 2000/02/12 21:54:25 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
     
     virtual const char *GetCVS() const
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.6 2000/02/08 23:46:46 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.7 2000/02/12 21:54:25 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StRrsMaker, 1)            // StAF chain
 };
