@@ -23,7 +23,7 @@ StIOEvent::StIOEvent():TObject(){fObj=(TObject*)(-1);};
 //______________________________________________________________________________
 void StIOEvent::Browse(TBrowser *b)
 {
-  if (b && fObj) fObj->Browse(b);
+  if (b && fObj && (Long_t)fObj != (-1)) fObj->Browse(b);
 }
 //______________________________________________________________________________
 void StIOEvent::Streamer(TBuffer &R__b)
@@ -591,8 +591,9 @@ ClassImp(StFile)
 //_____________________________________________________________________________
 Int_t StFile::AddFile(const Char_t **fileList)
 { 
+  const Char_t *file;
   if (!fileList) return 0;
-  for(int i=0;const Char_t *file = fileList[i];i++) AddFile(file);
+  for(int i=0; file = fileList[i];i++) AddFile(file);
   return 0;
 }
 //_____________________________________________________________________________
