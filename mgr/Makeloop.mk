@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.71  1999/04/22 23:44:28  fisyak
+#  put St_io_Maker back in
+#
 #  Revision 1.70  1999/04/18 23:36:05  fisyak
 #  Add -lpgc for new pgf77
 #
@@ -289,7 +292,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/04/18 23:36:05 $ 
+#           Last modification $Date: 1999/04/22 23:44:28 $ 
 #  default setings
 # Current Working Directory
 #
@@ -344,7 +347,7 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
-  SUBDIRS := $(filter-out St_emc_Maker St_io_Maker, $(SUBDIRS))
+  SUBDIRS := $(filter-out St_emc_Maker, $(SUBDIRS))
 #                         St_evg_Maker St_ebye_Maker St_fpt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out vpd par crs egz fri g2x mev, $(SUBDIRS))
 ifndef OBJY_HOME
