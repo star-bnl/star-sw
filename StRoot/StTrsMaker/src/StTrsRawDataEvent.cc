@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsRawDataEvent.cc,v 1.1 1999/02/04 18:36:43 lasiuk Exp $
+ * $Id: StTrsRawDataEvent.cc,v 1.2 1999/02/14 20:43:24 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsRawDataEvent.cc,v $
- * Revision 1.1  1999/02/04 18:36:43  lasiuk
- * Initial Revision
+ * Revision 1.2  1999/02/14 20:43:24  lasiuk
+ * indexing (ii) and debug info
  *
  * Revision 1.1  1999/02/04 18:36:43  lasiuk
  * Initial Revision
@@ -28,6 +28,8 @@ StTrsRawDataEvent::StTrsRawDataEvent()
     // USE resize() for LINUX compatibility
     mSectors.resize(24);
     PR(mSectors.size());
+    for(int ii=0; ii<mSectors.size(); ii++)
+	mSectors[ii] = NULL;
 }
 
 StTrsRawDataEvent::~StTrsRawDataEvent()
