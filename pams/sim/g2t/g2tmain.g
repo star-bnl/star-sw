@@ -8,6 +8,7 @@ created   22 april 98
 *              Event - with track/vertex and hit tables
 *              One level is assumed, names can be modified by DETP command
 **:<-----------------------------------------------------------------------
+#include "geant321/gcbank.inc"
 #include "geant321/gcnum.inc"
 #include "geant321/gcflag.inc"
 #include "g2t_event.inc"
@@ -28,6 +29,7 @@ created   22 april 98
  entry  g2t 
  entry  g2t_start
  begin  
+ if JVOLUM<=0 { print *,' G2T: no geometry loaded YET'; return; }
 *
  If (First) Then
    first = .false.
