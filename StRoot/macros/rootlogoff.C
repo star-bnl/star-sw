@@ -1,5 +1,8 @@
-// $Id: rootlogoff.C,v 1.6 2003/10/02 17:58:24 perev Exp $
+// $Id: rootlogoff.C,v 1.7 2004/01/14 20:13:13 perev Exp $
 // $Log: rootlogoff.C,v $
+// Revision 1.7  2004/01/14 20:13:13  perev
+// flag -nodelete added
+//
 // Revision 1.6  2003/10/02 17:58:24  perev
 // little improvement in rootlogoff
 //
@@ -24,13 +27,25 @@ class StMaker;
 namespace rootlogoff {
 TClass *tclassMk=0;
 ::StMaker *mk=0;
+::TList *list;
+int iarg;
 }
 
 rootlogoff::tclassMk = gROOT->GetClass("StMaker",0);
 if (rootlogoff::tclassMk && rootlogoff::tclassMk->GetClassInfo()) 
 {
   rootlogoff::mk = StMaker::GetChain();
-  if (rootlogoff::mk) {rootlogoff::mk->Finish(); delete rootlogoff::mk;}
+  if (rootlogoff::mk) {
+    rootlogoff::mk->Finish();
+    for (rootlogoff::iarg=1;rootlogoff::iarg<gApplication->Argc();rootlogoff::iarg++)
+    {
+       if (strcmp("-nodelete",gApplication->Argv(rootlogoff::iarg))) continue; 
+       rootlogoff::iarg=-1;
+       break;
+    }
+    if (rootlogoff::iarg!=-1) delete rootlogoff::mk;
+    else printf ("*** Chain not deleted***\n");
+  }
 }
 printf("\nThis is the end of ROOT -- Goodbye\n\n");
 }
