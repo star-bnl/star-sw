@@ -596,7 +596,7 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           nSolved++;
   	}
 //  ********************************************************************
-      else if(!strcmp(currentKind,"1p1n2n3n"))// case (1-3)A
+      else if(!strcmp(currentKind,"1p1n2n3n"))// case (1-3)A checked
  	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 13);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
@@ -618,23 +618,23 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
 	  nSolved++;
  	}
 //  *********************************************************************
-        else if(!strcmp(currentKind,"1p1n2p1n3p1n"))// case (1-3)AS
+        else if(!strcmp(currentKind,"1p1n2p1n3p1n"))// case (1-3)AS checked
   	{
  	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
- 	  newPointA->setEnergyLoss(Adc[0], Adc[1]-Adc[2]-Adc[3]);
+ 	  newPointA->setEnergyLoss(Adc[0], Adc[1]-Adc[2]-Adc[4]);
           newPointA->setFlag(100);
  	  mPoint->addNewPoint(newPointA);
 
  	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
- 	  newPointB->setEnergyLoss(Adc[2], Adc[1]-Adc[0]-Adc[3]);
+ 	  newPointB->setEnergyLoss(Adc[2], Adc[1]-Adc[0]-Adc[4]);
           newPointB->setFlag(100);
  	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
-          setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(1));
- 	  newPointC->setEnergyLoss(Adc[3], Adc[1]-Adc[0]-Adc[2]);
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(4), currentPackage->getMatched(1));
+ 	  newPointC->setEnergyLoss(Adc[3], Adc[1]-Adc[0]-Adc[4]);
           newPointC->setFlag(100);
  	  mPoint->addNewPoint(newPointC);
           nSolved++;
@@ -1100,7 +1100,7 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           nSolved++;
   	}
 // 13 ********************************************************************
-        else if(!strcmp(currentKind,"1p1n2p1n2n3n"))//        case (2-3)C
+        else if(!strcmp(currentKind,"1p1n2p1n2n3n"))//        case (2-3)C checked
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
@@ -1123,7 +1123,7 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           nSolved++;
   	}
 // 14 ********************************************************************
-        else if(!strcmp(currentKind,"1p1n2n2p2n3p2n"))//       case (3-2)CP
+        else if(!strcmp(currentKind,"1p1n2n2p2n3p2n"))//       case (3-2)CP checked
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
@@ -1138,7 +1138,7 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
 	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(dimensions, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(5), currentPackage->getMatched(2)); // Fixed thanks to Lilian !
  	  newPointD->setEnergyLoss(Adc[5], Adc[2]-Adc[3]);
           newPointD->setFlag(100);
  	  mPoint->addNewPoint(newPointD);
@@ -1146,7 +1146,7 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           nSolved++;
   	}
 // 15 ********************************************************************
-        else if(!strcmp(currentKind,"1p1n2n3n2p3n"))//        case (2-3)CS
+        else if(!strcmp(currentKind,"1p1n2n3n2p3n"))//        case (2-3)CS checked
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
@@ -1169,7 +1169,7 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           nSolved++;
   	}
 // 16 ********************************************************************
-        else if(!strcmp(currentKind,"1p1n2p1n3p1n2n"))//      case (3-2)CPS
+        else if(!strcmp(currentKind,"1p1n2p1n3p1n2n"))//      case (3-2)CPS checked
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
