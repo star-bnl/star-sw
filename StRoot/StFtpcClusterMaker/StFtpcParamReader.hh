@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.16 2001/04/24 07:11:45 oldi Exp $
+// $Id: StFtpcParamReader.hh,v 1.17 2001/07/11 21:19:33 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.17  2001/07/11 21:19:33  jcs
+// remove obsolete entries in tables
+//
 // Revision 1.16  2001/04/24 07:11:45  oldi
 // Float_t mSlowSimPressure introduced to replace mNormalizedNowPressure in
 // StFtpcSlowSimMaker.
@@ -77,7 +80,6 @@ protected:
   Int_t mGaussFittingFlags;
   Int_t mMinimumClusterMaxADC;
   Int_t mNumberOfDriftSteps;
-  Int_t mDirectionOfMagnetField;
   Float_t mStandardPressure;
   Float_t mNormalizedNowPressure;
   Float_t mLorentzAngleFactor;
@@ -99,8 +101,6 @@ protected:
   Float_t m3PadWeightedError;
   Float_t m3PadGaussError;
   Float_t mZDirectionError;
-  Float_t mDvdpCalcOffset;
-  Float_t mBaseTemperature;
   //FastSimulator parameters
   Int_t mOrderOfFastEstimates;
   Float_t *mVDriftEstimates;
@@ -171,7 +171,6 @@ public:
   Int_t gaussFittingFlags() {return mGaussFittingFlags;}
   Int_t minimumClusterMaxADC() {return mMinimumClusterMaxADC;}
   Int_t numberOfDriftSteps() {return mNumberOfDriftSteps;}
-  Int_t directionOfMagnetField() {return mDirectionOfMagnetField;}
   Float_t standardPressure() {return mStandardPressure;}
   Float_t normalizedNowPressure() {return mNormalizedNowPressure;}
   Float_t lorentzAngleFactor() {return mLorentzAngleFactor;}
@@ -190,8 +189,6 @@ public:
   Float_t threePadWeightedError() {return m3PadWeightedError;}
   Float_t threePadGaussError() {return m3PadGaussError;}
   Float_t zDirectionError() {return mZDirectionError;}
-  Float_t dvdpCalcOffset() {return mDvdpCalcOffset;}
-  Float_t baseTemperature() {return mBaseTemperature;}
   Int_t ftpcWestGeantVolumeId() {return mFtpcWestGeantVolumeId;}
   Int_t ftpcEastGeantVolumeId() {return mFtpcEastGeantVolumeId;}
   Int_t unfoldedClusterFlag() {return mUnfoldedClusterFlag;}

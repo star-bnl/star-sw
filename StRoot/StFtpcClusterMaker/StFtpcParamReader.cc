@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.16 2001/04/24 07:11:39 oldi Exp $
+// $Id: StFtpcParamReader.cc,v 1.17 2001/07/11 21:19:31 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.17  2001/07/11 21:19:31  jcs
+// remove obsolete entries in tables
+//
 // Revision 1.16  2001/04/24 07:11:39  oldi
 // Float_t mSlowSimPressure introduced to replace mNormalizedNowPressure in
 // StFtpcSlowSimMaker.
@@ -74,7 +77,6 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mPadDiffusionErrors = (Float_t *) detTable->padDiffusionErrors;
     mTimeDiffusionErrors = (Float_t *) detTable->timeDiffusionErrors;
     mLorentzAngleFactor = detTable->lorentzAngleFactor;
-    mDvdpCalcOffset = detTable->dvdpCalcOffset;
     mPadBadFitError = detTable->padBadFitError;
     mTimeBadFitError = detTable->timeBadFitError;
     mPadUnfoldError = detTable->padUnfoldError;
@@ -90,8 +92,6 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     m3PadWeightedError = detTable->threePadWeightedError;
     m3PadGaussError = detTable->threePadGaussError;
     mZDirectionError = detTable->zDirectionError;
-    mDirectionOfMagnetField = detTable->directionOfMagnetField;
-    mBaseTemperature = detTable->baseTemperature;
     mNormalizedNowPressure = detTable->normalizedNowPressure;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
@@ -196,7 +196,6 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mPadDiffusionErrors = (Float_t *) detTable->padDiffusionErrors;
     mTimeDiffusionErrors = (Float_t *) detTable->timeDiffusionErrors;
     mLorentzAngleFactor = detTable->lorentzAngleFactor;
-    mDvdpCalcOffset = detTable->dvdpCalcOffset;
     mPadBadFitError = detTable->padBadFitError;
     mTimeBadFitError = detTable->timeBadFitError;
     mPadUnfoldError = detTable->padUnfoldError;
@@ -212,8 +211,6 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     m3PadWeightedError = detTable->threePadWeightedError;
     m3PadGaussError = detTable->threePadGaussError;
     mZDirectionError = detTable->zDirectionError;
-    mDirectionOfMagnetField = detTable->directionOfMagnetField;
-    mBaseTemperature = detTable->baseTemperature;
     mNormalizedNowPressure = detTable->normalizedNowPressure;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
