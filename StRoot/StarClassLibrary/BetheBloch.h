@@ -1,11 +1,14 @@
 //
-// $Id: BetheBloch.h,v 1.6 2003/05/22 21:01:01 perev Exp $
+// $Id: BetheBloch.h,v 1.7 2004/03/18 18:57:43 fisyak Exp $
 //
 // Description:
 // Function to return the expected dE/dx as a function of
 // beta*gamma for the TPC
 // 
 // $Log: BetheBloch.h,v $
+// Revision 1.7  2004/03/18 18:57:43  fisyak
+// Make only warning about BetheBloch::BetheBloch
+//
 // Revision 1.6  2003/05/22 21:01:01  perev
 // Remove redundant dependency
 //
@@ -38,6 +41,7 @@ class BetheBloch {
 public:
     BetheBloch();
     virtual ~BetheBloch();
+    static   int noWarn;
     double   operator() (double);
     static   Double_t Sirrf(Double_t poverm, Double_t Length=60., Int_t k=0);
     static   Double_t Girrf(Double_t poverm, Double_t Tmin=1.e-3, Int_t k=0);
