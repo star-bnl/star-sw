@@ -35,18 +35,19 @@ void StiMaterialInteraction::nameForIntersection(
 // of the detector using a straight line projection of the track node.
 StiIntersection StiMaterialInteraction::findIntersection(
     const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
-    double &dXlocal, double &dThickness, double &dDensity){
+    double &dXlocal, double &dThickness, double &dDensity, double &dDistance){
   
   switch(pDetector->getShape()->getShapeCode()){
   case kPlanar:  
     return findPlanarIntersection(pNode, pDetector, 
-				  dXlocal, dThickness, dDensity);
+				  dXlocal, dThickness, dDensity, dDistance);
     case kCylindrical:
       return findCylindricalIntersection(pNode, pDetector, 
-					 dXlocal, dThickness, dDensity);
+					 dXlocal, dThickness, dDensity,
+                                         dDistance);
   case kConical:
     return findConicalIntersection(pNode, pDetector, 
-				   dXlocal, dThickness, dDensity);
+				   dXlocal, dThickness, dDensity, dDistance);
   default:
     return kFailed;
   }
@@ -56,7 +57,7 @@ StiIntersection StiMaterialInteraction::findIntersection(
 
 StiIntersection StiMaterialInteraction::findPlanarIntersection(
     const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
-    double &dXlocal, double &dThickness, double &dDensity){
+    double &dXlocal, double &dThickness, double &dDensity, double &dDistance){
 
   StiPlacement *pPlacement = pDetector->getPlacement();
   StiPlanarShape *pShape = dynamic_cast<StiPlanarShape *>(
@@ -119,6 +120,7 @@ double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
       dPathLengthNodeDetector/2.;
 
   double dPathLength = dPathLengthDetector + dPathLengthGap;
+  dDistance = dPathLength;
 
   // get the weighted density average
   StiMaterial *pGas = pDetector->getGas();
@@ -181,7 +183,7 @@ double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
 
 StiIntersection StiMaterialInteraction::findCylindricalIntersection(
     const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
-    double &dXlocal, double &dThickness, double &dDensity){
+    double &dXlocal, double &dThickness, double &dDensity, double &dDistance){
 
   StiPlacement *pPlacement = pDetector->getPlacement();
   StiCylindricalShape *pShape = dynamic_cast<StiCylindricalShape *>(
@@ -248,6 +250,7 @@ StiIntersection StiMaterialInteraction::findCylindricalIntersection(
       dPathLengthNodeDetector/2.;
 
   double dPathLength = dPathLengthDetector + dPathLengthGap;
+  dDistance = dPathLength;
 
   // get the weighted density average
   StiMaterial *pGas = pDetector->getGas();
@@ -303,7 +306,7 @@ StiIntersection StiMaterialInteraction::findCylindricalIntersection(
 
 StiIntersection StiMaterialInteraction::findConicalIntersection(
     const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
-    double &dXlocal, double &dThickness, double &dDensity){
+    double &dXlocal, double &dThickness, double &dDensity, double &dDistance){
   return kFailed;
 } // findConicalIntersection
 

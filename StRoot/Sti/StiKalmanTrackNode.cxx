@@ -413,8 +413,9 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 			cout << " doing rotation <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
 			rotate(-dAlpha);
 		}
-  double x, x0, rho;
-  position = StiMaterialInteraction::findIntersection(pNode,tDet,x,x0,rho);
+  double x, x0, rho, pathLength;
+  position = StiMaterialInteraction::findIntersection(pNode,tDet,x,x0,rho,
+                                                      pathLength);
   if (StiDebug::isReq(StiDebug::Node))
 		cout << "StiKalmanTrackNode::propagate(...)\tx/x0/rho:" << x << "\t" << x0 << "\t" << rho << endl;
   propagate(x,x0,rho);
