@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.33 2004/04/26 00:13:28 perev Exp $
+ * $Id: StMuDstMaker.h,v 1.34 2004/05/04 00:09:17 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -95,10 +95,10 @@ class StMuDstMaker : public StIOInterFace {
     
   virtual int Init();
   virtual void Clear(Option_t *option="");
-  virtual int Make();
-  virtual int Finish();
+  virtual int  Make();
+  virtual int  Finish();
           void printArrays();   
-
+          void SetStatus(const char *arrType,int status);
 	    /// Set the track filter used for all tracks (except the L3 tracks) when creating muDsts from StEvent and writing to disk.
   void setTrackFilter(StMuCut* c);
   StMuFilter* trackFilter();
@@ -142,7 +142,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.33 2004/04/26 00:13:28 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.34 2004/05/04 00:09:17 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -274,6 +274,7 @@ virtual   void closeRead();
   TClonesArray* mEmcArrays    [__NEMCARRAYS__    ];
   TClonesArray* mPmdArrays    [__NPMDARRAYS__    ];
   TClonesArray* mTofArrays    [__NTOFARRAYS__    ];
+  char          mStatusArrays [__NALLARRAYS__    ];
 
   ClassDef(StMuDstMaker, 0)
 }; 
@@ -309,6 +310,27 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.34  2004/05/04 00:09:17  perev
+ * //  Selecting SetBranchStatus for particular MuDst branches
+ * //  Special names:
+ * //  MuEventAll - all branches related to StMuEvent
+ * //  StrangeAll - all branches related to StrangeMuDst
+ * //  EmcAll     - all branches related to Emc
+ * //  PmdAll     - all branches related to Pmd
+ * //  TofAll     - all branches related to Tof
+ * //  By default all branches of MuDst are read. If user wants to read only some of
+ * //  them, then:
+ * //  SetStatus("*",0)           // all branches off
+ * //  SetStatus("MuEventAll",1)  // all standard MuEvent branches ON
+ * //  SetStatus("StrangeAll",1)  // all standard Strange branches ON
+ * //  SetStatus("EmcAll"    ,1)  // all standard Emc     branches ON
+ * //  SetStatus("PmdAll"    ,1)  // all standard Pmd     branches ON
+ * //  SetStatus("TofAll"    ,1)  // all standard Tof     branches ON
+ * //
+ * //  SetStatus("XiAssoc"    ,1) // Strange branch "XiAssoc" is ON
+ * //  Names of branches look StMuArrays::arrayTypes[]
+ * //  It allows to speed up reading MuDst significantly
+ *
  * Revision 1.33  2004/04/26 00:13:28  perev
  * Cleanup+simplification
  *
