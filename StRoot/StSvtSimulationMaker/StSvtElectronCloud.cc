@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtElectronCloud.cc,v 1.4 2003/11/13 16:24:59 caines Exp $
+ * $Id: StSvtElectronCloud.cc,v 1.5 2003/11/15 20:24:29 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtElectronCloud.cc,v $
+ * Revision 1.5  2003/11/15 20:24:29  caines
+ * fixes to remove warnings at compilation
+ *
  * Revision 1.4  2003/11/13 16:24:59  caines
  * Further improvements to get simulator looking like reality
  *
@@ -279,6 +282,9 @@ void StSvtElectronCloud::calculateWidthAtAnode(double mTc)
       }
 
       mPhi = mInitPhi;
+      sigmaXSq=0;
+      sigmaYSq=0;
+      sigmaXYSq=0;
 
       if(mTheta == 0){
 	mPhi = 0;
@@ -383,7 +389,7 @@ int StSvtElectronCloud::runge_kutta4(int stepBefore, int numBinDiv, double stepl
   double  n1 = 0.0, n2 = 0.0, n3 = 0.0, n4 = 0.0; 
   double  o1 = 0.0, o2 = 0.0, o3 = 0.0, o4 = 0.0; 
   double tim = 0.0, a = 1000.0;  // a is conversion factor to micro meters
-  double phi = 0.0,sigma1Sq = 0.0,sigma2Sq = 0.0,sigmaXSq = 0.0,sigmaYSq = 0.0,sigmaXYSq = 0.0;
+  double phi = 0.0,sigma1Sq = 0.0,sigma2Sq = 0.0;
 
   int stepNow = stepBefore + 1;
 
@@ -584,7 +590,7 @@ int StSvtElectronCloud::adamsBushFort(int n, int  numBinDiv, double steplen)
 {
  int stepNow = 0;
  double  a = 1000, phi = 0.;
- double tim = 0, sigma1Sq = 0, sigma2Sq = 0, sigmaXSq, sigmaYSq, sigmaXYSq;
+ double tim = 0, sigma1Sq = 0, sigma2Sq = 0;
  double dSigmaXSqBydt1 = 0, dSigmaYSqBydt1 = 0,dSigmaXYSqBydt1 = 0;
  double sigmaXSqPre = 0,sigmaXSqCor = 0,sigmaYSqPre = 0,sigmaYSqCor = 0, sigmaXYSqPre = 0,sigmaXYSqCor = 0; 
 
@@ -769,7 +775,6 @@ double StSvtElectronCloud::sigmaYSqFunc(double tim, double sigma1Sq, double sigm
 
 double StSvtElectronCloud::sigmaXYSqFunc(double tim, double sigma1Sq, double sigma2Sq, double phi){
 
-  double sigXY;
 
   double diffFunc = func1(tim,sigma1Sq,sigma2Sq) - func2(tim,sigma1Sq,sigma2Sq);
   double func = 0;
@@ -878,6 +883,7 @@ double StSvtElectronCloud::getSigma1()
  sigma1Sq = 0.5*((mSigmaXSqNow + mSigmaYSqNow) + sqrt(pow((mSigmaXSqNow - mSigmaYSqNow),2) + 4.*pow(mSigmaXYSqNow,2)));
  sigma2Sq = 0.5*((mSigmaXSqNow + mSigmaYSqNow) - sqrt(pow((mSigmaXSqNow - mSigmaYSqNow),2) + 4.*pow(mSigmaXYSqNow,2)));
 
+ phi=0;
  if((1. - sqrt(fabs(sigma2Sq)/fabs(sigma1Sq))) > 0.001){
 
      if((mSigmaXSqNow - mSigmaYSqNow)){
@@ -917,7 +923,7 @@ double StSvtElectronCloud::getSigma1()
 double StSvtElectronCloud::getSigma2()
 {
   double sigma1Sq, sigma2Sq, sn, cs, phi;
-
+  phi=0;
   sigma1Sq = 0.5*((mSigmaXSqNow + mSigmaYSqNow) + sqrt(pow((mSigmaXSqNow - mSigmaYSqNow),2) + 4.*pow(mSigmaXYSqNow,2)));
   sigma2Sq = 0.5*((mSigmaXSqNow + mSigmaYSqNow) - sqrt(pow((mSigmaXSqNow - mSigmaYSqNow),2) + 4.*pow(mSigmaXYSqNow,2)));
 

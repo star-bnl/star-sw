@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulation.cc,v 1.8 2003/11/13 16:24:59 caines Exp $
+ * $Id: StSvtSimulation.cc,v 1.9 2003/11/15 20:24:29 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulation.cc,v $
+ * Revision 1.9  2003/11/15 20:24:29  caines
+ * fixes to remove warnings at compilation
+ *
  * Revision 1.8  2003/11/13 16:24:59  caines
  * Further improvements to get simulator looking like reality
  *
@@ -151,7 +154,7 @@ void StSvtSimulation::setPasaSigAttributes(int pasaSigAttributes, int numOfAnode
 void StSvtSimulation::doCloud_FixHitPos(double anode,double time, double Energy)
 {
 
-   double wStep = 0.001;    // mm
+  // double wStep = 0.001;    // mm
 
   //mTimeBinSize = 0.04;  //micro sec ---> 0.27 mm at 6.75 mm/us
   //2.7mm -----> a width of 10 time bins
