@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.4 2000/01/07 18:20:34 ullrich Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.5 2000/03/29 00:16:30 ullrich Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
- * Revision 2.4  2000/01/07 18:20:34  ullrich
- * Buf fixed. Wrong indices for mMap in bit().
+ * Revision 2.5  2000/03/29 00:16:30  ullrich
+ * Fixed off-by-one error.
  *
  * Revision 2.5  2000/03/29 00:16:30  ullrich
  * Fixed off-by-one error.
@@ -28,10 +28,10 @@
  * Revision 2.1  1999/10/13 19:45:46  ullrich
  * Initial Revision
  *
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.4 2000/01/07 18:20:34 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.5 2000/03/29 00:16:30 ullrich Exp $";
 #include "StTrackTopologyMap.h"
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.4 2000/01/07 18:20:34 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.5 2000/03/29 00:16:30 ullrich Exp $";
 
 ClassImp(StTrackTopologyMap)
     mMap[0] = mMap[1] = 0;
@@ -90,13 +90,13 @@ StTrackTopologyMap::hasHitInSvtLayer(UInt_t layer) const
 
 Bool_t
 StTrackTopologyMap::hasHitInRow(StDetectorId id, UInt_t row) const
-        return !ftpcFormat() && bit(row+8);
+{
     switch (id) {
     case kTpcId:
-        return ftpcFormat() && bit(row+11);
+        return !ftpcFormat() && bit(row+7);
         break;
     case kFtpcWestId:
-        return ftpcFormat() && bit(row+1);
+        return ftpcFormat() && bit(row+10);
         break;
     case kFtpcEastId:
         return ftpcFormat() && bit(row);
@@ -124,11 +124,11 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
         break;
     case kSsdId:
         if (bit(7)) n++;
-        for (i=0; i<10; i++)
+        break;
     case kFtpcWestId:
     case kFtpcEastId:
         for (i=1; i<11; i++)
-        for (i=0; i<45; i++)
+            if (hasHitInRow(id, i)) n++;
         break;
     case kTpcId:
         for (i=1; i<46; i++)
