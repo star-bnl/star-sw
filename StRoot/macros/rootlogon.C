@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.26 2000/06/23 23:49:02 fisyak Exp $
+// $Id: rootlogon.C,v 1.27 2000/08/27 17:46:41 fisyak Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -129,4 +129,5 @@
      }
    }
 #endif
+   if (gSystem->Getenv("OPENGL")) gROOT->Macro("GL.C");
 }
