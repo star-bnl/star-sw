@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.1 2002/03/08 17:04:17 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.2 2002/03/08 20:04:31 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -52,28 +52,6 @@ ClassImp(StMuDstMaker)
 #if !(ST_NO_NAMESPACES)
   using namespace units;
 #endif
-
-
-// char* StMuDstMaker::strangeArrayNames[__NSTRANGEARRAYS__] = {"Event","McEvent",
-// 							       "V0","McV0","V0Assoc",
-// 							       "Xi","McXi","XiAssoc",
-// 							       "Kink","McKink","KinkAssoc"};
-// char* StMuDstMaker::strangeArrayTypes[__NSTRANGEARRAYS__] = {"StStrangeEvMuDst","StStrangeEvMuDst",
-// 							       "StV0MuDst","StV0Mc","StStrangeAssoc",
-// 							       "StXiMuDst","StXiMc","StStrangeAssoc",
-// 							       "StKinkMuDst","StKinkMc","StStrangeAssoc"};
-// int StMuDstMaker::strangeArraySizes[__NSTRANGEARRAYS__]       = {1,1,10000,100,100,10000,100,100,10000,100,100};
-// int StMuDstMaker::strangeArrayCounters[__NSTRANGEARRAYS__]    = {0,0,0,0,0,0,0,0,0,0,0};
-
-
-// char* StMuDstMaker::arrayNames[__NARRAYS__] = {"MuEvent",
-// 						 "PrimaryTracks","GlobalTracks","OtherTracks","L3Tracks",
-//                                                  "RichSpectra","DetectorStates","L3AlgoAccept","L3AlgoReject"};
-// char* StMuDstMaker::arrayTypes[__NARRAYS__] = {"StMuEvent",
-// 						 "StMuTrack","StMuTrack","StMuTrack","StMuTrack",
-// 						 "StRichSpectra","StDetectorState","StL3AlgorithmInfo","StL3AlgorithmInfo"};
-// int StMuDstMaker::arraySizes[__NARRAYS__]       = {1,10000,10000,10000,10000,100,100,100,100};
-// int StMuDstMaker::arrayCounters[__NARRAYS__]    = {0,0,0,0,0,0,0,0,0};
 
 
 //-----------------------------------------------------------------------
@@ -256,7 +234,6 @@ void StMuDstMaker::write(){
 
   DEBUGMESSAGE2("now fill tree");
   mTTree->Fill();
-  mStrangeTTree->Fill();
   DEBUGMESSAGE2("tree filled");
 
   return;
@@ -295,10 +272,13 @@ void StMuDstMaker::openRead() {
 
   // strange stuff
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-    mStrangeChain->SetBranchAddress(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i]);
+    mChain->SetBranchAddress(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i]);
   } 
+  
+  (void*)mChain->GetBranch("");  /// this dummy call returns 0, but magically after calling it, I get a the tree in the next call
+  mTTree = mChain->GetTree();
 
-  mStMuDst->set(this);
+  mStMuDst->set(this);  
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -307,7 +287,6 @@ void StMuDstMaker::read(){
   DEBUGMESSAGE1("");
   if ( !(mEventCounter<mChain->GetEntries()) ) throw StMuExceptionEOF("end of input",PF);
   mChain->GetEntry(mEventCounter);
-  mStrangeChain->GetEntry(mEventCounter);
   mEventCounter++;
   
   return;
@@ -348,12 +327,10 @@ void StMuDstMaker::openWrite(string fileName) {
   }
 
   // strange stuff
-  mStrangeTTree = new TTree("StrangeMuDst","Strangeness Micro-DST",mSplit);
-  mStrangeTTree->SetAutoSave(1000000);  // autosave when 1 Mbyte written
     DEBUGMESSAGE("strange arrays");
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     DEBUGVALUE2(i);
-    branch = mStrangeTTree->Branch(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i], bufsize, mSplit);
+    branch = mTTree->Branch(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i], bufsize, mSplit);
   }
  
   mCurrentFileName = fileName;
@@ -363,10 +340,8 @@ void StMuDstMaker::openWrite(string fileName) {
 //-----------------------------------------------------------------------
 void StMuDstMaker::closeWrite(){
   if (mTTree) mTTree->AutoSave(); 
-  if (mStrangeTTree) mStrangeTTree->AutoSave();
   if (mCurrentFile) mCurrentFile->Close();
   mTTree = 0;
-  mStrangeTTree = 0;
   mCurrentFile = 0;
 }
 //-----------------------------------------------------------------------
@@ -701,14 +676,14 @@ string StMuDstMaker::basename(string s){
   string::size_type pos =  name.find(".event.root");
   if (pos != string::npos) name.erase(pos,pos+11);
   return name;
-}
+}  
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::makeChain(const char* dir, const char* filter, int maxFiles) {
   DEBUGMESSAGE1("");
   mChain = new TChain("MuDst");
-  mStrangeChain = new TChain("StrangeMuDst");
+  //  TChain* mChain2 = new TChain("StrangeMuDst");
   // read directory
   void *pDir = gSystem->OpenDirectory(dir);
   // now find the files that end in the specified extention
@@ -722,11 +697,12 @@ void StMuDstMaker::makeChain(const char* dir, const char* filter, int maxFiles) 
       // add it to the chain
       cout << fileCount << " " << fullFile << endl;
       mChain->Add(fullFile);
-      mStrangeChain->Add(fullFile);
+      //  mChain2->Add(mChain2);
       delete fullFile;
       if(++fileCount >= maxFiles) break;
     }   
   }
+  mChain->AddFriend("StrangeMuDst");
   DEBUGVALUE2(fileCount);
 }
 
@@ -737,6 +713,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.2  2002/03/08 20:04:31  laue
+ * change from two trees to 1 tree per file
+ *
  * Revision 1.1  2002/03/08 17:04:17  laue
  * initial revision
  *
