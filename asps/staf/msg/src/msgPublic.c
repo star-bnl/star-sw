@@ -42,7 +42,7 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10-Oct-1996, \tcom
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
-#if !defined(_AIX) && !defined(Linux)
+#if !defined(_AIX) && !defined(Linux) && !defined(hpux)
 #include <sys/systeminfo.h>
 #endif
 
@@ -959,7 +959,7 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	  }
  	} else {                  /* Cold-start initialization -- get everything:              */
 	  MsgInitialized = TRUE;
-#if !defined(_AIX) && !defined(Linux)
+#if !defined(_AIX) && !defined(Linux) && !defined(hpux)
 	  if ( sysinfo( SI_HOSTNAME, s1000, 1000) < 0 ) s1000[0] = NULL;
 #else
 	  if ( gethostname( s1000, 1000) < 0 ) s1000[0] = NULL;

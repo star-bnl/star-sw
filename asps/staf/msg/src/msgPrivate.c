@@ -45,7 +45,7 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 9-Oct-1996, \tcomp
 #include <sys/ipc.h>  /*  Interprocess Communications  -- needed for Shared Memory.  */
 #include <sys/shm.h>  /*  Shared Memory.  */
 
-#if !defined(_AIX) && !defined(Linux)
+#if !defined(_AIX) && !defined(Linux) && !defined(hpux)
 #include <sys/systeminfo.h>
 #endif
 
@@ -67,6 +67,7 @@ extern int MsgInitialized; /* This starts out FALSE, and is set to TRUE when ini
 int CPUtime0 = 0;
 int ELAtime0 = 0;
 
+ 
 funcPoint MsgAlarmRoutine = NULL;
 
 char   m1000[1000];  /*  Some "scratch" message space.  */
@@ -1155,7 +1156,7 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	control->shmid     = shmid;
 
 /*	Need to re-establish this:  */
-#if !defined(_AIX) && !defined(Linux)
+#if !defined(_AIX) && !defined(Linux) && !defined(hpux)
 	if ( sysinfo( SI_HOSTNAME, s1000, 1000) < 0 ) s1000[0] = NULL;
 #else
 	if ( gethostname( s1000, 1000) < 0 ) s1000[0] = NULL;
