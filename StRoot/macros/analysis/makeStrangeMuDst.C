@@ -1,5 +1,8 @@
-// $Id: makeStrangeMuDst.C,v 2.0 2000/06/02 22:28:58 genevb Exp $
+// $Id: makeStrangeMuDst.C,v 2.1 2000/06/09 22:15:10 genevb Exp $
 // $Log: makeStrangeMuDst.C,v $
+// Revision 2.1  2000/06/09 22:15:10  genevb
+// Include code for fixing track topology maps, if necessary
+//
 // Revision 2.0  2000/06/02 22:28:58  genevb
 // Updated for version 2 of Strangeness mico DST package
 //
@@ -24,6 +27,8 @@
 // what it does:  Uses StStrangeMuDstMaker to create a micro DST
 //                with both v0's and xi's. Uncomment lines after
 //                "using Monte Carlo" to include MC info in DST.
+//                Uncomment lines after "for MDC3 files" to fix
+//                track topology maps from MDC.
 //======================================================
 
 
@@ -48,6 +53,8 @@ void load() {
 //  gSystem->Load("StMcEventMaker");
 //  gSystem->Load("StAssociationMaker");
 //  gSystem->Load("StMcAnalysisMaker");
+// The following is needed for MDC3 files with incorrect track topology maps
+//  gSystem->Load("StHbtMaker");
 }
 
 void run() {
@@ -69,6 +76,8 @@ void run() {
 // The following are needed for using Monte Carlo info
 //  StMcEventMaker*     mcEventReader = new StMcEventMaker; 
 //  StAssociationMaker* associator    = new StAssociationMaker;
+// The following is needed for MDC3 files with incorrect track topology maps
+//  StRandyTopMapMaker topoMapFixer();
   StStrangeMuDstMaker strangeDst("strangeMuDst");
 
   // Indicate input branches
