@@ -62,7 +62,7 @@
 
 ClassImp(St_TableSorter)
 //_____________________________________________________________________________
-St_TableSorter::St_TableSorter() : m_ParentTable(0)
+  St_TableSorter::St_TableSorter(const St_Table &table) : m_ParentTable(table)
 {
   // default ctor for RootCint dictionary
   m_SortIndex  = 0;

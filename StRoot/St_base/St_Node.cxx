@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.8 1999/01/25 14:22:46 fine Exp $
+// $Id: St_Node.cxx,v 1.9 1999/01/29 18:41:53 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.9  1999/01/29 18:41:53  fine
+// St_TableSorter clean up for HP machine
+//
 // Revision 1.8  1999/01/25 14:22:46  fine
 // St_Node Identity matrix improvement
 //
@@ -55,7 +58,7 @@
 #include "TRotMatrix.h"
 #include "St_NodePosition.h"
 
-const Int_t kMAXLEVELS = 20;
+//const Int_t kMAXLEVELS = 20;
 const Int_t kSonsInvisible = BIT(17);
 
 #if 0

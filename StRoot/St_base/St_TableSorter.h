@@ -110,7 +110,7 @@ class St_TableSorter : public TNamed {
     void  SetSearchMethod();
 
  public:
-    St_TableSorter();
+    St_TableSorter(const St_Table &table=*((const St_Table *)0));
     St_TableSorter(const St_Table &table, TString &colName, Int_t firstRow=0,Int_t numbeRows=0);
     virtual ~St_TableSorter();
     
