@@ -32,7 +32,8 @@ C
 	DATA space/32/
 	DATA tab/9/
 	DATA null/0/
-	LOGICAL*1 first /.true./
+	LOGICAL*1 first 
+        data first/.true./
 !	[specification_statement]...
 	 
 	IF (first) THEN
