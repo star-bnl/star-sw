@@ -1,7 +1,15 @@
 /*****************************************
  *
- * $Id: StMcParameterDB.h,v 1.2 1999/09/23 21:25:22 calderon Exp $
+ * $Id: StMcParameterDB.h,v 1.3 1999/10/01 14:08:59 calderon Exp $
  * $Log: StMcParameterDB.h,v $
+ * Revision 1.3  1999/10/01 14:08:59  calderon
+ * Added Local Hit resolution Histogram. It is made by default
+ * without any requirement of association, to serve
+ * as a diagnostic.
+ * Before building track multimap, check the size of the
+ * tpc hit map.  If it is too small, print out a warning
+ * and exit.
+ *
  * Revision 1.2  1999/09/23 21:25:22  calderon
  * Added Log & Id
  * Modified includes according to Yuri
@@ -24,12 +32,12 @@ class StMcParameterDB {
 public:
     static StMcParameterDB* instance(); // *MENU*
     
-    double xCut() const; // *MENU*
-    double zCut() const; // *MENU*
+    float xCut() const; // *MENU*
+    float zCut() const; // *MENU*
     unsigned int reqCommonHits() const; // *MENU*
     
-    void setXCut(double); // *MENU*
-    void setZCut(double); // *MENU*
+    void setXCut(float); // *MENU*
+    void setZCut(float); // *MENU*
     void setReqCommonHits(unsigned int); // *MENU*
 
 private:
@@ -40,19 +48,20 @@ private:
     // also assignment operator
     StMcParameterDB& operator= (const StMcParameterDB&);
     
-    double mXCut;
-    double mZCut;
+    float mXCut;
+    float mZCut;
     unsigned int mReqCommonHits;
 
     ClassDef(StMcParameterDB, 1)
     
 };
+ostream& operator<<(ostream &, const StMcParameterDB&);
 
-// inline double StMcParameterDB::xCut() const { return mXCut; }
+inline float StMcParameterDB::xCut() const { return mXCut; }
 
-// inline double StMcParameterDB::zCut() const { return mZCut; }
+inline float StMcParameterDB::zCut() const { return mZCut; }
 
-// inline unsigned int StMcParameterDB::reqCommonHits() const { return mReqCommonHits; }
+inline unsigned int StMcParameterDB::reqCommonHits() const { return mReqCommonHits; }
 
 #endif
 

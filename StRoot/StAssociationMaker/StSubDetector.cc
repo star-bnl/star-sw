@@ -1,7 +1,15 @@
 /***************************************************************************
  *
- * $Id: StSubDetector.cc,v 1.6 1999/09/24 01:22:50 fisyak Exp $
+ * $Id: StSubDetector.cc,v 1.7 1999/10/01 14:08:59 calderon Exp $
  * $Log: StSubDetector.cc,v $
+ * Revision 1.7  1999/10/01 14:08:59  calderon
+ * Added Local Hit resolution Histogram. It is made by default
+ * without any requirement of association, to serve
+ * as a diagnostic.
+ * Before building track multimap, check the size of the
+ * tpc hit map.  If it is too small, print out a warning
+ * and exit.
+ *
  * Revision 1.6  1999/09/24 01:22:50  fisyak
  * Reduced Include Path
  *
@@ -36,8 +44,10 @@ int TpcLocalTransform(StThreeVectorF& xgl, int& iSector, int& iPadrow, float& xl
     
     // try using StThreeVector member functions
     float phi = xgl.phi();
+   
   if (phi<0.0) phi+=6.21318530718;
-  iSector =(int) ((phi+0.2617993878)/0.5235987756);  
+  
+  iSector =(int) ((phi+0.2617993878)/0.5235987756);
   if (iSector==12) iSector=0;
   float phi_rot;
   float ff;
@@ -45,7 +55,9 @@ int TpcLocalTransform(StThreeVectorF& xgl, int& iSector, int& iPadrow, float& xl
       // Do nothing to the z local.
       iSector=15-iSector;
       if (iSector>12) iSector-=12;
+  
       phi_rot = ((float)iSector) * 0.5235987756;
+  
     ff = -1.0;
   }
   else {
@@ -53,6 +65,7 @@ int TpcLocalTransform(StThreeVectorF& xgl, int& iSector, int& iPadrow, float& xl
     if (iSector<=12) iSector+=12;
     // Do nothing to the z local.
     phi_rot = ((float)(24-iSector)) * 0.5235987756;
+  
     ff = 1.0;
   }
 
@@ -86,12 +99,12 @@ int TpcLocalTransform(StThreeVectorF& xgl, int& iSector, int& iPadrow, float& xl
 	  if (ylocal<radmax) { break; }
       }
   }
-  
+//   cout << "The Sector is " << iSector << endl;
+//   cout << "The Padrow is " << iPadrow << endl;
+//   cout << "The Vector is " << xgl << endl;
+//   cout << "The xlocal is " << xlocal << endl;
+//   cout << "The ylocal is " << ylocal << endl;
   if (iPadrow>=45) {
-      cout << "The Vector is " << xgl << endl;
-      cout << "The Sector is " << iSector << endl;
-      cout << "The xlocal is " << xlocal << endl;
-      cout << "The ylocal is " << ylocal << endl;
       
       cout << "Transformation failed :( " << endl;
     return -1;
@@ -144,7 +157,6 @@ void StSubDetector::addHit(const StMcTpcHit* hit){
   if (TpcLocalTransform(xglbvec,iSector,iPadrow,xLocal)!=0){
     cout << "Transformation failed!!!"<<endl;
   }
-  
   float zGlobal = xglbvec.z();
   mDevices[iSector]->row(iPadrow)->addHit(hit, xLocal, zGlobal);
 }
