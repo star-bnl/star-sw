@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.22 1998/11/01 16:42:28 fisyak Exp $
+// $Id: bfc.C,v 1.23 1998/11/06 01:42:18 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.23  1998/11/06 01:42:18  fisyak
+// Add ana.C
+//
 // Revision 1.22  1998/11/01 16:42:28  fisyak
 // dst analysis
 //
@@ -67,7 +70,7 @@ void bfc(
 "/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc091_03_34evts_dst.xdf",
          const Char_t *FileOut=
 "/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc091_03_34evts_dst.root",
-         const Int_t  Nevents=2)
+         const Int_t  Nevents=1000)
 {
   gSystem->Load("St_base.so");
   gSystem->Load("StChain.so");
@@ -75,6 +78,7 @@ void bfc(
   gSystem->Load("St_Tables.so");
   gSystem->Load("libmsg.so");
   gSystem->Load("libtls.so");
+  gSystem->Load("St_params_Maker.so");
   gSystem->Load("St_xdfin_Maker.so");
   gSystem->Load("St_calib_Maker.so");
   gSystem->Load("St_evg_Maker.so");
@@ -83,23 +87,22 @@ void bfc(
   gSystem->Load("St_TLA_Maker.so");
   gSystem->Load("tpc.sl");
   gSystem->Load("St_tpc.so");
-  gSystem->Load("St_params_Maker.so");
   gSystem->Load("St_tss_Maker.so");
   gSystem->Load("St_tcl_Maker.so");
   gSystem->Load("St_tpt_Maker.so");
-  gSystem->Load("svt.sl");
-  gSystem->Load("St_svt.so");
-  gSystem->Load("St_srs_Maker.so");
-  gSystem->Load("St_stk_Maker.so");
-  gSystem->Load("ftpc.sl");
-  gSystem->Load("St_ftpc.so");
-  gSystem->Load("St_fss_Maker.so");
-  gSystem->Load("St_fcl_Maker.so");
-  //  gSystem->Load("St_fpt_Maker.so");
   gSystem->Load("global.sl");
   gSystem->Load("St_global.so");
   gSystem->Load("St_dst_Maker.so");
   gSystem->Load("St_run_summary_Maker.so");
+  gSystem->Load("svt.sl");
+  gSystem->Load("St_svt.so");
+  gSystem->Load("St_srs_Maker.so");
+  gSystem->Load("St_stk_Maker.so");
+  //  gSystem->Load("ftpc.sl");
+  //  gSystem->Load("St_ftpc.so");
+  //  gSystem->Load("St_fss_Maker.so");
+  //  gSystem->Load("St_fcl_Maker.so");
+  //  gSystem->Load("St_fpt_Maker.so");
 #if 0
          const Char_t *fileinp = 
 "/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc091_03_34evts.xdf";
@@ -107,7 +110,7 @@ void bfc(
 "/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc091_03_34evts.xdf";
          const Char_t *FileOut=
 "/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc091_03_34evts.root";
-         const Int_t  Nevents=1;
+         const Int_t  Nevents=1000;
 #endif
   St_XDFFile   *xdf_in   = 0;
   if (fileinp)  xdf_in   = new St_XDFFile(fileinp,"r");
@@ -137,12 +140,12 @@ void bfc(
   St_srs_Maker         svt_hits("svt_hits","event/data/svt/hits");
   St_tcl_Maker         tpc_hits("tpc_hits","event/data/tpc/hits");
   St_TLA_Maker         ctf_hits("ctf_hits","event/data/ctf/hits");
-  St_fcl_Maker         fcl_hits("ftpc_hits","event/data/ftpc/hits");
+//  St_fcl_Maker         fcl_hits("ftpc_hits","event/data/ftpc/hits");
   St_stk_Maker       stk_tracks("svt_tracks","event/data/svt/tracks");
   St_tpt_Maker       tpc_tracks("tpc_tracks","event/data/tpc/tracks");
-  St_TLA_Maker      ftpc_tracks("ftpc_tracks","event/data/ftpc/tracks");
+//  St_TLA_Maker      ftpc_tracks("ftpc_tracks","event/data/ftpc/tracks");
   St_TLA_Maker           global("global","event/data/global");
-  St_dst_Maker              dst("dst","event/data/global/dst");
+  St_dst_Maker        dst_Maker("dst","event/data/global/dst");
   St_run_summary_Maker  summary("run_summary","run/dst");
   chain.PrintInfo();
 // Init the mai chain and all its makers
@@ -202,7 +205,7 @@ void bfc(
     }
     gBenchmark->Print("bfc");
   }
-  else TBrowser b;
 #if 0
+  else TBrowser b;
 #endif
 }
