@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.3 2000/06/23 15:52:34 kathy Exp $
+// $Id: bfcread_hist_files_add.C,v 2.4 2000/06/23 20:18:09 kathy Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.4  2000/06/23 20:18:09  kathy
+// move example draw out of file loop to prepare for writing hist out to .hist.root file
+//
 // Revision 2.3  2000/06/23 15:52:34  kathy
 // cleanup - only need to use IOMk, not IOMk1,2 etc
 //
@@ -75,18 +78,18 @@ void bfcread_hist_files_add(
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("StIOMaker");
+    //    gSystem->Load("St_QA_Maker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StUtilities");
     gSystem->Load("StAnalysisUtilities");
     gSystem->Load("libglobal_Tables");
 
-
 // constructor for other maker (not used in chain)
    StHistUtil   *HU  = new StHistUtil;
 
-
 // loop over files:
  Int_t ifl=1;
+ Int_t hCCount=0;
 
  EventLoop: if (ifl<=fnum) {  
 
@@ -114,7 +117,6 @@ void bfcread_hist_files_add(
   dirList = HU->FindHists(MakerHistDir);
 
 // now make a copy of all histograms into my new histograms!
-  Int_t hCCount=0;
   hCCount = HU->CopyHists(dirList);
 
   cout << "bfcread_hist_files_add.C, # histograms copied = " << 
@@ -151,6 +153,14 @@ void bfcread_hist_files_add(
   cout << "bfcread_hist_files_add.C, # histograms added = " << 
     hACount << endl << endl;
 
+ }  //else (ifl not #1)
+
+   ifl++;                                
+   goto EventLoop;   
+
+ } // loop over files
+
+
 // to see an example of histograms being added together:   
   cout << "bfcread_hist_files_add.C, an example! = " <<  endl;
    Int_t imk = 0;
@@ -162,12 +172,6 @@ void bfcread_hist_files_add(
        } // if strcmp -- to draw
    } // for -- end of example
 
- }  //else (ifl not #1)
-
-   ifl++;                                
-   goto EventLoop;   
-
- } // loop over files
 
 } // end of the macro!
  
