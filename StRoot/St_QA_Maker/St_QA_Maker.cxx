@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.64 1999/12/06 22:25:05 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.65 1999/12/07 23:14:18 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.65  1999/12/07 23:14:18  kathy
+// fix primary vtx histograms for dst tables; split apart the ftpc and tpc in the dedx histograms
+//
 // Revision 1.64  1999/12/06 22:25:05  kathy
 // split apart the tpc and ftpc (east & west) histograms for the globtrk table; had to add characters to end of each histogram pointer to differentiate the different ones; updated the default list of hist to be plotted with logy scale
 //
@@ -503,9 +506,21 @@ void St_QA_Maker::MakeHistDE() {
 
     dst_dedx_st *d = dst_dedx->GetTable();
     for (Int_t i = 0; i < dst_dedx->GetNRows(); i++,d++) {
-      m_ndedx->Fill(d->ndedx);
-      m_dedx0->Fill(d->dedx[0]*1e6);
-      m_dedx1->Fill(d->dedx[1]*1e6);
+        if (d->det_id==1) {      
+         m_ndedxT->Fill(d->ndedx);
+         m_dedx0T->Fill(d->dedx[0]*1e6);
+         m_dedx1T->Fill(d->dedx[1]*1e6);
+        }
+        if (d->det_id==4) {      
+         m_ndedxFW->Fill(d->ndedx);
+         m_dedx0FW->Fill(d->dedx[0]);
+         m_dedx1FW->Fill(d->dedx[1]);
+        }
+        if (d->det_id==5) {      
+         m_ndedxFE->Fill(d->ndedx);
+         m_dedx0FE->Fill(d->dedx[0]);
+         m_dedx1FE->Fill(d->dedx[1]);
+        }
     }
   }
 }
@@ -754,7 +769,7 @@ void St_QA_Maker::MakeHistVertex(){
     dst_vertex_st  *t   = vertex->GetTable();
     for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
       //         if (t->iflag>0) {  
-      if (i==0){                           // plot of primary vertex only
+      if (t->iflag==1 && t->vtx_id==1){                           // plot of primary vertex only
 	m_pv_detid->Fill(t->det_id); 
 	m_pv_vtxid->Fill(t->vtx_id);
 	if (!isnan(double(t->x))) m_pv_x->Fill(t->x);     

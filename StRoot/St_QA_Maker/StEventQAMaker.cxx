@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.6 1999/12/07 18:56:00 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.7 1999/12/07 23:14:17 kathy Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.7  1999/12/07 23:14:17  kathy
+// fix primary vtx histograms for dst tables; split apart the ftpc and tpc in the dedx histograms
+//
 // Revision 1.6  1999/12/07 18:56:00  lansdell
 // added a few more histograms and updated the default list of logy plots
 //
@@ -311,9 +314,9 @@ void StEventQAMaker::MakeHistDE() {
       //StDedxPidTraits *dedxPidTr = dynamic_cast<StDedxPidTraits*>(trkPidTr[0]);
       StDedxPidTraits *dedxPidTr = (StDedxPidTraits*)(trkPidTr[0]);
       if (dedxPidTr) {
-	m_ndedx->Fill(dedxPidTr->numberOfPoints());
-	m_dedx0->Fill(dedxPidTr->mean());
-	m_dedx1->Fill(dedxPidTr->sigma());
+	m_ndedxT->Fill(dedxPidTr->numberOfPoints());
+	m_dedx0T->Fill(dedxPidTr->mean());
+	m_dedx1T->Fill(dedxPidTr->sigma());
       }
     }
   }

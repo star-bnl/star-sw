@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.5 1999/12/06 22:25:05 kathy Exp $ 
+//! $Id: StQABookHist.h,v 1.6 1999/12/07 23:14:18 kathy Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.6  1999/12/07 23:14:18  kathy
+//! fix primary vtx histograms for dst tables; split apart the ftpc and tpc in the dedx histograms
+//!
 //! Revision 1.5  1999/12/06 22:25:05  kathy
 //! split apart the tpc and ftpc (east & west) histograms for the globtrk table; had to add characters to end of each histogram pointer to differentiate the different ones; updated the default list of hist to be plotted with logy scale
 //!
@@ -32,7 +35,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.5 1999/12/06 22:25:05 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.6 1999/12/07 23:14:18 kathy Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -207,9 +210,19 @@ class StQABookHist : public StMaker {
 // for method MakeDE - from table dst_dedx
   
   TH1F     *m_ndedxr;        //! number of tracks with dedx info
-  TH1F     *m_ndedx;         //! number of point to find dE/dx
-  TH1F     *m_dedx0;         //! dE/dx [0]
-  TH1F     *m_dedx1;         //! dE/dx [1] 
+
+  TH1F     *m_ndedxT;         //! number of point to find dE/dx, tpc
+  TH1F     *m_dedx0T;         //! dE/dx [0], tpc
+  TH1F     *m_dedx1T;         //! dE/dx [1], tpc
+
+  TH1F     *m_ndedxFE;         //! number of point to find dE/dx, ftpcE
+  TH1F     *m_dedx0FE;         //! dE/dx [0], ftpcE
+  TH1F     *m_dedx1FE;         //! dE/dx [1], ftpcE
+
+  TH1F     *m_ndedxFW;         //! number of point to find dE/dx, ftpcW
+  TH1F     *m_dedx0FW;         //! dE/dx [0], ftpcW
+  TH1F     *m_dedx1FW;         //! dE/dx [1], ftpcW
+
   
 
 // for method MakeHistPrim - from table primtrk
@@ -377,7 +390,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.5 1999/12/06 22:25:05 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.6 1999/12/07 23:14:18 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };
