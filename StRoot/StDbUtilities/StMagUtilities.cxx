@@ -1,20 +1,24 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.2 2000/11/03 02:41:58 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.3 2000/12/15 16:10:45 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
  ***********************************************************************
  *
- * Description: Utilities for the Magnetid Field
+ * Description: Utilities for the Magnetic Field
  *
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.3  2000/12/15 16:10:45  jhthomas
+ * Add PadRow13, Clock, and Twist corrections to UndoDistortion
+ *
  * Revision 1.2  2000/11/03 02:41:58  jhthomas
  * Added CVS comment structure to .h and .cxx files
  *
  ***********************************************************************/
+
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StMagUtilities Class                                                 //
@@ -127,6 +131,7 @@ void StMagUtilities::ReadField( )
       
   printf("Reading Magnetic Field:  %s,  Scale factor = %f \n",comment.Data(),fFactor);
   printf("Filename is %s, Adjusted Scale factor = %f \n",filename.Data(),fFactor*fRescale);
+  printf("Version: Mag Field Distortions + PadRow13 + Twist + Clock \n" ) ;
   MapLocation = BaseLocation + filename ;
   gSystem->ExpandPathName(MapLocation) ;
   magfile = fopen(MapLocation.Data(),"r") ;
@@ -174,8 +179,8 @@ void StMagUtilities::InterpolateBfield( const Float_t r, const Float_t z, Float_
   Float_t save_Br[ORDER+1] ;
   Float_t save_Bz[ORDER+1] ;
 
-  jlow = TMath::BinarySearch( nZ,   ZList,   z   ) ;
-  klow = TMath::BinarySearch( nR,   Radius,  r   ) ;
+  jlow = Search( nZ,   ZList,   z   ) ;
+  klow = Search( nR,   Radius,  r   ) ;
   if ( jlow < 0 ) jlow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
   if ( klow < 0 ) klow = 0 ;
   if ( jlow + ORDER  >=    nZ - 1 ) jlow =   nZ - 1 - ORDER ;
@@ -282,28 +287,72 @@ void StMagUtilities::BrBzField( const Float_t r, const Float_t z, Float_t &Br_va
 }
 
 //________________________________________
+//
+// Main Entry Point for requests for E field in Cartesian coordinates
+//
+//________________________________________
+
+void StMagUtilities::EField( const Float_t x[3], Float_t E[3] )
+
+{                          
+
+  Int_t sign ;
+
+  if ( x[2] >= 0.0 ) sign =  1 ;                       // (TPC West)
+  else               sign = -1 ;                       // (TPC East)  
+
+  E[0] = 0 ;
+  E[1] = 0 ;
+  E[2] = -1.*sign*StarMagE ;                           // EField points at the central membrane, Volts/cm
+
+}
+
+//________________________________________
 
 void StMagUtilities::UndoDistortion( const Float_t x[3], Float_t Xprime[3] )
+
+{
+
+  Float_t Xprime1[3], Xprime2[3] ;
+  UndoBDistortion     ( x, Xprime1 ) ;
+  UndoPad13Distortion ( Xprime1, Xprime2 ) ;
+  UndoTwistDistortion ( Xprime2, Xprime1 ) ;
+  UndoClockDistortion ( Xprime1, Xprime  ) ;
+
+}
+
+//________________________________________
+
+void StMagUtilities::UndoBDistortion( const Float_t x[3], Float_t Xprime[3] )
 
 {
 
   double   Const_1, Const_2 ;
   double   OmegaTau ;                                  // OmegaTau carries the sign opposite of B
   Float_t  B[3], ah ;                                  // ah carries the sign opposite of E (for forward integration)
-  Int_t    sign, index = 1 ;
+  Int_t    sign, index = 1 , NSTEPS ;              
   
   if ( x[2] >= 0.0 ) sign =  1 ;                       // (TPC West)
   else               sign = -1 ;                       // (TPC East)  
 
   Xprime[0]  =  x[0] ;                                 // Integrate backwards from TPC plane to 
-  Xprime[1]  =  x[1] ;                                 // the point the electron cluster was born 
-  Xprime[2]  =  sign * TPC_Z0 ;                        // on the ifferent readout planes
+  Xprime[1]  =  x[1] ;                                 // the point the electron cluster was born. 
+  Xprime[2]  =  sign * TPC_Z0 ;                        // Prepare for different readout planes
 
-  BField( Xprime, B ) ;                                // Work in kGauss and cm
-  OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm, Bz dominates
+  BField( Xprime, B ) ;                                // Work in kGauss, cm and assume Bz dominates
+
+  // Theoretically, OmegaTau is defined as shown here.  Instead, we will use scaled values from Aleph
+  // OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm
+
+  OmegaTau   =  -0.4 * B[2] ;                          // B in kGauss, note that the sign of B is important here and below
   Const_1    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
   Const_2    =  pow( OmegaTau, 2 ) / ( 1. + pow( OmegaTau, 2 ) ) ;
-  ah = ( x[2] - sign * TPC_Z0 ) / ( NSTEPS - 1 ) ;     // Going Backwards! 
+
+  for ( NSTEPS = 5 ; NSTEPS < 1000 ; NSTEPS += 2 )     // Choose ah to be about 1 cm, NSTEPS must be odd
+    {
+      ah = ( x[2] - sign * TPC_Z0 ) / ( NSTEPS - 1 ) ; // Going Backwards! 
+      if ( TMath::Abs(ah) < 1.0 ) break ;
+    }
 
   for ( Int_t i = 1; i <= NSTEPS; ++i )                // Simpson's Integration Loop
     {
@@ -326,7 +375,7 @@ void StMagUtilities::DoDistortion( const Float_t x[3], Float_t Xprime[3] )
   double   Const_1, Const_2 ;
   double   OmegaTau ;                                  // OmegaTau carries the sign opposite of B
   Float_t  B[3], ah ;                                  // ah carries the sign opposite of E (for forward integration)
-  Int_t    sign, index = 1 ;
+  Int_t    sign, index = 1 , NSTEPS ;              
   
   if ( x[2] >= 0.0 ) sign =  1 ;                       // (TPC West)
   else               sign = -1 ;                       // (TPC East)  
@@ -335,13 +384,22 @@ void StMagUtilities::DoDistortion( const Float_t x[3], Float_t Xprime[3] )
   Xprime[1]  =  x[1] ;                                 // the electron cluster was born 
   Xprime[2]  =  x[2] ;                                 // to the padplane to estimate the distortion
 
-  BField( Xprime, B ) ;                                // Work in kGauss and cm
-  OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm, Bz dominates
+  BField( Xprime, B ) ;                                // Work in kGauss, cm and assume Bz dominates
+
+  // Theoretically, OmegaTau is defined as shown here.  Instead, we will use scaled values from Aleph
+  // OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm
+
+  OmegaTau   =  -0.4 * B[2] ;                          // B in kGauss, note that the sign of B is important here and below
   Const_1    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
   Const_2    =  pow( OmegaTau, 2 ) / ( 1. + pow( OmegaTau, 2 ) ) ;
-  ah = ( sign*TPC_Z0 - x[2] ) / ( NSTEPS - 1 ) ;       // Integrate forward to create the distortion
 
-  for ( Int_t i = 1; i <= NSTEPS; ++i )                // Simpson's Integration Loop
+  for ( NSTEPS = 5 ; NSTEPS < 1000 ; NSTEPS += 2 )     // Choose ah to be about 1 cm, NSTEPS must be odd
+    {
+      ah = ( sign*TPC_Z0 - x[2] ) / ( NSTEPS - 1 ) ;   // Integrate forward to create the distortion
+      if ( TMath::Abs(ah) < 1.0 ) break ;
+    }
+
+  for ( Int_t i = 1 ; i <= NSTEPS ; ++i )              // Simpson's Integration Loop
     {
       if ( i == NSTEPS ) index = 1 ;
       Xprime[2] +=  index*(ah/3) ;
@@ -353,6 +411,220 @@ void StMagUtilities::DoDistortion( const Float_t x[3], Float_t Xprime[3] )
 
   Xprime[2] = x[2] ;                                   // Report Z location as initial start position
                                                        // Just like DAQ does for the STAR TPC
+}
+
+//________________________________________
+
+Int_t StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x )
+
+{
+
+  // Search an ordered table by starting at the most recently used point
+
+  static Int_t low = 0 ;
+  Long_t middle, high ;
+  Int_t  ascend = 0, increment = 1 ;
+
+  if ( Xarray[N-1] >= Xarray[0] ) ascend = 1 ;  // Ascending ordered table if true
+  
+  if ( low < 0 || low > N-1 ) { low = -1 ; high = N ; }
+
+  else                                            // Ordered Search phase
+    {
+      if ( (Int_t)( x >= Xarray[low] ) == ascend ) 
+	{
+	  if ( low == N-1 ) return(low) ;          
+	  high = low + 1 ;
+	  while ( (Int_t)( x >= Xarray[high] ) == ascend )  
+	    {
+	      low = high ;
+	      increment *= 2 ;
+	      high = low + increment ;
+	      if ( high > N-1 )  {  high = N ; break ;  }
+	    }
+	}
+      else
+	{
+	  if ( low == 0 )  {  low = -1 ;  return(low) ;  }
+	  high = low - 1 ;
+	  while ( (Int_t)( x < Xarray[low] ) == ascend )
+	    {
+	      high = low ;
+	      increment *= 2 ;
+	      if ( increment >= high )  {  low = -1 ;  break ;  }
+	      else  low = high - increment ;
+	    }
+	}
+    }
+
+  while ( (high-low) != 1 )                      // Binary Search Phase
+    {
+      middle = ( high + low ) / 2 ;
+      if ( (Int_t)( x >= Xarray[middle] ) == ascend )
+	low = middle ;
+      else
+	high = middle ;
+    }
+
+  if ( x == Xarray[N-1] ) low = N-2 ;
+  if ( x == Xarray[0]   ) low = 0 ;
+
+  return(low) ;
+       
+}
+
+
+//________________________________________
+
+
+void StMagUtilities::UndoEDistortion( const Float_t x[3], Float_t Xprime[3] )
+
+{
+
+  double   Const_3, Const_4 ;
+  double   OmegaTau ;                                  // OmegaTau carries the sign opposite of B
+  Float_t  E[3], B[3], ah ;                            // ah carries the sign opposite of E (for forward integration)
+  Int_t    sign, index = 1 , NSTEPS ;              
+  
+  if ( x[2] >= 0.0 ) sign =  1 ;                       // (TPC West)
+  else               sign = -1 ;                       // (TPC East)  
+
+  Xprime[0]  =  x[0] ;                                 // Integrate backwards from TPC plane to 
+  Xprime[1]  =  x[1] ;                                 // the point the electron cluster was born. 
+  Xprime[2]  =  sign * TPC_Z0 ;                        // Prepare for different readout planes
+
+  BField( Xprime, B ) ;                                // Work in kGauss, cm and assume Bz dominates
+
+  // Theoretically, OmegaTau is defined as shown here.  Instead, we will use scaled values from Aleph
+  // OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm
+
+  OmegaTau   =  -0.4 * B[2] ;                          // B in kGauss, note that the sign of B is important here
+  Const_3    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
+  Const_4    =  1.0 / ( 1. + pow( OmegaTau, 2 ) ) ;    
+
+  for ( NSTEPS = 5 ; NSTEPS < 1000 ; NSTEPS += 2 )     // Choose ah to be about 1 cm, NSTEPS must be odd
+    {
+      ah = ( x[2] - sign * TPC_Z0 ) / ( NSTEPS - 1 ) ; // Going Backwards! 
+      if ( TMath::Abs(ah) < 1.0 ) break ;
+    }
+
+  for ( Int_t i = 1; i <= NSTEPS; ++i )                // Simpson's Integration Loop
+    {
+      if ( i == NSTEPS ) index = 1 ;
+      Xprime[2] +=  index*(ah/3) ;
+      EField( Xprime, E ) ;                            // Work in V/cm, and assume Ez dominates
+      Xprime[0] +=  index*(ah/3)*( Const_4*E[0] + Const_3*E[1] ) / E[2] ;
+      Xprime[1] +=  index*(ah/3)*( Const_4*E[1] - Const_3*E[0] ) / E[2] ;
+      if ( index != 4 ) index = 4; else index = 2 ;
+    }    
+
+}
+
+
+//________________________________________
+
+
+void StMagUtilities::UndoPad13Distortion( const Float_t x[3], Float_t Xprime[3] )
+
+{
+
+  const Int_t   TERMS    = 400 ;                 // Number of terms in the sum
+  const Float_t SCALE    = 0.192 ;               // Set the scale for the correction
+  const Float_t BOX      = 200.0 - GAPRADIUS ;   // Size of the box in which to work
+  const Float_t PI       = TMath::Pi() ;
+
+  static Float_t  C[TERMS] ;                     // Coefficients for series
+  static Int_t    Flag = 0 ;                     // Calculate only once
+  static Float_t  Const_3, Const_4, OmegaTau ;
+  Float_t r, Zdrift, Br_value, Bz_value ;
+  Double_t phi, phi0, y, sum = 0.0 ;
+
+  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+  phi    =  TMath::ATan2(x[1],x[0]) ;            // Phi ranges from pi to -pi
+  phi0   =  ( (Int_t)((TMath::Abs(phi)+PI/12.)/(PI/6.) + 6.0 ) - 6.0 ) * PI/6. ;
+  if ( phi < 0 ) phi0 *= -1. ;
+  y      =  r * TMath::Cos( phi0 - phi ) ;
+  Zdrift =  TPC_Z0 - TMath::Abs(x[2]) ;
+
+  if ( Flag == 0 ) 
+    {
+      C[0] = GAP13 * GG * SCALE / ( 2 * BOX ) ;   
+      for ( Int_t i = 1 ; i < TERMS ; i++ )
+	  C[i] = 2 * GG * SCALE * TMath::Sin( GAP13*i*PI/( 2*BOX ) ) / ( i * PI ) ;
+      BrBzField( 100.0, 1.0, Br_value, Bz_value ) ; // Work in kGauss, cm and assume Bz dominates
+      OmegaTau   =  -0.4 * Bz_value ;         // B in kGauss, note that the sign of B is important here
+      Const_3    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
+      Const_4    =  1.0 / ( 1. + pow( OmegaTau, 2 ) ) ;    
+      Flag = 1 ;
+    }
+  
+  for ( Int_t k = 1 ; k < TERMS ; k++ )
+    {
+      sum += ( C[k] / StarMagE ) * ( 1. - TMath::Exp(-1*k*PI*Zdrift/BOX) )
+	* TMath::Sin(k*PI*(y-GAPRADIUS)/BOX) ;
+    }
+  
+  // Subtract to Undo the distortions
+  phi =  phi - ( Const_3*(-1*sum)*TMath::Cos(phi0-phi) + Const_4*sum*TMath::Sin(phi0-phi) ) / r ;      
+  r   =  r   - ( Const_4*sum*TMath::Cos(phi0-phi) - Const_3*(-1*sum)*TMath::Sin(phi0-phi) ) ;  
+
+  Xprime[0] = r * TMath::Cos(phi) ;
+  Xprime[1] = r * TMath::Sin(phi) ;
+  Xprime[2] = x[2] ;
+  
+}
+
+//________________________________________
+
+
+void StMagUtilities::UndoTwistDistortion( const Float_t x[3], Float_t Xprime[3] )
+
+{
+
+  static Int_t    Flag = 0 ;                  // Do once
+  static Float_t  Const_3, Const_4, OmegaTau ;
+  Float_t         Zdrift, B[3] ;
+  Int_t           sign ;
+
+  if ( Flag == 0 ) 
+    {
+      BField( x, B ) ;                        // Work in kGauss, cm and assume Bz dominates
+      OmegaTau   =  -0.4 * B[2] ;             // B in kGauss, note that the sign of B is important here
+      Const_3    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
+      Const_4    =  1.0 / ( 1. + pow( OmegaTau, 2 ) ) ;    
+      Flag = 1 ;
+    }
+  
+  if ( x[2] >= 0.0 ) sign =  1 ;                       // (TPC West)
+  else               sign = -1 ;                       // (TPC East)  
+
+  Zdrift = sign * ( TPC_Z0 - TMath::Abs(x[2]) ) ;
+  Xprime[0] = x[0] + ( -1* Const_3 * YTWIST/TPCLENGTH + Const_4 * XTWIST/TPCLENGTH ) * Zdrift ;
+  Xprime[1] = x[1] + (     Const_3 * XTWIST/TPCLENGTH + Const_4 * YTWIST/TPCLENGTH ) * Zdrift ;
+  Xprime[2] = x[2] ;                          // Add (above) to undo the distortion 
+
+}
+
+
+//________________________________________
+
+
+void StMagUtilities::UndoClockDistortion( const Float_t x[3], Float_t Xprime[3] )
+
+{
+
+  Double_t r, phi ;
+
+  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+  phi    =  TMath::ATan2(x[1],x[0]) ;
+
+  if ( x[2] < 0 )  phi += EASTCLOCKERROR/1000. ;    // Phi rotation error in milli-radians
+  if ( x[2] >= 0 ) phi += WESTCLOCKERROR/1000. ;    // Phi rotation error in milli-radians
+
+  Xprime[0] = r * TMath::Cos(phi) ;
+  Xprime[1] = r * TMath::Sin(phi) ;
+  Xprime[2] = x[2] ;
+
 }
 
 
