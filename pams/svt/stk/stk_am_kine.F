@@ -45,7 +45,7 @@ C                                            cylinder)
       real     konst, bfield
       real     x1, y1, z1
       real     ptot, pt, p(3), costh, sinth, cosl, sinl, ph, th
-      real     infinity/1.e12/
+      real     infinity/1.e9/
 
 c     error/message
       

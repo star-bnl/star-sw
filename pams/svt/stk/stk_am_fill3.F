@@ -127,7 +127,8 @@ c     wkw: make cthij parameters
          waferntot     = 0
          waferi(0)     = 0
          wafern(0)     = 0
-         do ilayer = 1, config(1).n_layer
+c         do ilayer = 1, config(1).n_layer
+         do ilayer = 1, 6
             wafern(ilayer) = 
      &           config(1).n_ladder(ilayer)*
      &           config(1).n_wafer(ilayer)
@@ -229,6 +230,7 @@ c               write(884,*) 'iwafer, ilayer, n:',iwafer1,ilayer1,
 c     &              waferkeyn(ilayer1,iwafer1) 
 c            end do
 c         end do
+         
 
       end if  ! first call
       
@@ -291,16 +293,22 @@ c     sort the space points by wafer and count them
          iladder      =  kwafer-ilayer*1000-iwafer1*100
          iwafer2  = waferi(ilayer) + 
      &        (iladder-1)*config(1).n_wafer(ilayer) + iwafer1
-         if (kwafer.ne.geom(iwafer2).id) then
-            write(6,*) ' fatal mis-match'
-            write(6,*) 'idw,ly,w,ld,w2,id:', 
-     &           kwafer,ilayer,iwafer1,iladder,
-     &           iwafer2, geom(iwafer2).id
-            return
-         end if
 
-         sptkeyn(iwafer2) = sptkeyn(iwafer2) + 1
-         sptkey(sptkeyn(iwafer2),iwafer2) = ispt
+
+         if (kwafer.ne.geom(iwafer2).id) then
+            if (kwafer.gt.7000.and.kwafer.lt.9000.and.config(1).n_layer.eq.7) then
+* it is ok : the SSD is in but we do not want to use the hits
+            else
+               write(6,*) ' fatal mis-match'
+               write(6,*) 'idw,ly,w,ld,w2,id:', 
+     &              kwafer,ilayer,iwafer1,iladder,
+     &              iwafer2, geom(iwafer2).id
+               return
+            endif
+         else
+            sptkeyn(iwafer2) = sptkeyn(iwafer2) + 1
+            sptkey(sptkeyn(iwafer2),iwafer2) = ispt
+         endif
 
       end do ! spt = 1, spt_h.nok
 
@@ -1124,6 +1132,16 @@ c            write(889,*) ' considering track for storage:',itrack+1
                      groups(n_groups).id1 = itrack
                      groups(n_groups).id2 = ispts(k)
                      n_groups = n_groups + 1
+                     if( n_groups .gt. groups_h.maxlen) then
+                        write(6,*)'Too many groups', n_groups
+                        k = 7
+                        done(1)   = .true.
+                        done(2)   = .true.
+                        done(3)   = .true.
+                        done(4)   = .true.
+                        done(5)   = .true.
+                        done(6)   = .true.
+                     endif
                   end if
                end do
             end if
