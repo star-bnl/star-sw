@@ -106,6 +106,7 @@ void StiMaker::kill()
 
 StiMaker::~StiMaker() 
 {
+    cout <<"StiMaker::~StiMaker()"<<endl;
     StiHitContainer::kill();
     mhitstore = 0;
     
@@ -293,6 +294,7 @@ Int_t StiMaker::Init()
 	mdisplay->setSkeletonView();
 	mdisplay->draw();
 	mdisplay->update();
+	//mdisplay->print();
     }
 
     //The Evaluator
