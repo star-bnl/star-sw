@@ -73,6 +73,16 @@ class StBemcData: public TDataSet
 					Char_t  SmdeStatus[18000];            ///< SMD-eta status 
 					Char_t  SmdpStatus[18000];            ///< SMD-phi status
 					
+					// psd data -----------------------------------------------------
+					Bool_t  PSDPresent;                   ///< Check to see if there is PSD information in the event
+					Bool_t  ValidPSDEvent;                ///< check to see if the event is valid
+  				Short_t PSDErrorFlag;                 ///< Error from TDC
+  				Short_t PSDByteCount;                 ///< Total byte count for PSD
+  				Short_t NPsdHits;                     ///< Total number of channels
+  				Short_t PsdADC[4800];                 ///< Matrix of ADC's in Physical Positions for PSD
+  				Float_t PsdEnergy[4800];              ///< SMD-eta energy 
+					Char_t  PsdStatus[4800];              ///< SMD-eta status 
+					
 	ClassDef(StBemcData,1) 
 };
 #endif
