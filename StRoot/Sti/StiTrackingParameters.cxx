@@ -1,7 +1,10 @@
 /*!
- * $Id: StiTrackingParameters.cxx,v 2.2 2003/07/30 17:04:20 andrewar Exp $  
+ * $Id: StiTrackingParameters.cxx,v 2.3 2003/10/28 15:55:15 andrewar Exp $  
  *
  * $Log: StiTrackingParameters.cxx,v $
+ * Revision 2.3  2003/10/28 15:55:15  andrewar
+ * Added method to set parameters from a txt input file.
+ *
  * Revision 2.2  2003/07/30 17:04:20  andrewar
  * Added log and version id bars.
  *
@@ -64,4 +67,29 @@ void StiTrackingParameters::initialize()
   add(new EditableParameter("Scaling",   "Search Window Scaling",&_searchWindowScaling,_searchWindowScaling,0.,10.,0.1,0));
   add(new EditableParameter("Max Chi2",  "Max Chi2",&_maxChi2ForSelection,_maxChi2ForSelection,0.,20.,0.1,0));
 
+}
+
+void StiTrackingParameters::setPar(ifstream& inFile)
+{
+  inFile >> _used;
+  inFile >> _active;
+  inFile >> _maxChi2ForSelection;
+  inFile >> _minSearchWindow;
+  inFile >> _maxSearchWindow;
+  inFile >> _searchWindowScaling;
+
+
+  return;
+}
+
+
+
+ostream& operator<<(ostream& os, const StiTrackingParameters& par)
+{
+  return os  <<"Tracking Parameters set:" << endl
+       <<"\tActive:\t"                 << par.active() <<endl
+       <<"\tMaxChi2ForSelection:\t "   << par.getMaxChi2ForSelection() <<endl
+       <<"\tMinSearchWindow:\t "       << par.getMinSearchWindow()     <<endl
+       <<"\tMaxSearchWindow:\t "       << par.getMaxSearchWindow()     <<endl
+       <<"\tSearchWindowScaling:\t "   << par.getSearchWindowScale() <<endl;
 }
