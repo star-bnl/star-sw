@@ -39,6 +39,7 @@ public:
 
     virtual void setMarkerStyle(unsigned int) = 0;
     virtual void setMarkerSize(double) = 0;
+    virtual void add(double x, double y, double z)=0;
 
 protected:
     

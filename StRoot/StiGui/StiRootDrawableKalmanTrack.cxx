@@ -66,7 +66,7 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
     double step = 1.; //cm
     
     StiKalmanTrackNode * lastNode = getInnerMostNode();
-    double xLocal = lastNode->fX;
+    double xLocal = lastNode->_x;
     StiKTNForwardIterator it(lastNode);
     StiKTNForwardIterator end = it.end();
     while(it!=end ) 
@@ -88,7 +88,7 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
 	  }
 	// Fill interpolation to muck up a continuous track
 	StThreeVector<double> pos;
-	while (xLocal<next.fX) 
+	while (xLocal<next._x) 
 	  {
 	    try 
 	      {

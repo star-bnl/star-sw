@@ -20,27 +20,27 @@ StiRootDrawable::StiRootDrawable() : mrotation(0), mshape(0), mnode(0), mselfnod
 
 StiRootDrawable::~StiRootDrawable()
 {
-    //ROOT thinks it owns these objects, so it does the cleanup for us
-    //delete mrotation;
-    //mrotation=0;
-    //delete mshape;
-    //mshape=0;
-    //delete mnode;
-    //mnode=0;
+  //ROOT thinks it owns these objects, so it does the cleanup for us
+  //delete mrotation;
+  //mrotation=0;
+  //delete mshape;
+  //mshape=0;
+  //delete mnode;
+  //mnode=0;
 }
 
 void StiRootDrawable::setVisibility(bool val)
 {
-    (val) ? mnode->SetVisibility(TVolume::kBothVisible) : mnode->SetVisibility(TVolume::kNoneVisible);
-    return;
+  (val) ? mnode->SetVisibility(TVolume::kBothVisible) : mnode->SetVisibility(TVolume::kNoneVisible);
 }
 
 void StiRootDrawable::setColor(int val)
 {
-    mshape->SetLineColor(val);
-    mnode->SetLineColor(val);
-    mselfnode->SetLineColor(val);
-    return;
+  //cout<<"StiRootDrawable::setColor(int val) - INFO - Started"<<endl;
+  mshape->SetLineColor(val);
+  mnode->SetLineColor(val);
+  mselfnode->SetLineColor(val);
+  cout<<"StiRootDrawable::setColor(int val) - INFO - Started"<<endl;
 }
 
 void gStiEulerMatrixForRoot(double phi, double* xx) //rotation about z-axis by angle phi
@@ -55,5 +55,4 @@ void gStiEulerMatrixForRoot(double phi, double* xx) //rotation about z-axis by a
     xx[6]=0.;
     xx[7]=0.;
     xx[8]=1.;
-    return;
 }

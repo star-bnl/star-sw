@@ -24,18 +24,21 @@ class StiHitContainer;
 class StiRDLocalTrackSeedFinder : public StiLocalTrackSeedFinder
 {
 public:
-    StiRDLocalTrackSeedFinder(StiDetectorContainer*, StiHitContainer*);
-    virtual ~StiRDLocalTrackSeedFinder();
-
-    //Update state from StiIOBroker
-    virtual void getNewState();
-
-    //Over-write reset method
-    virtual void reset();
-   
+  StiRDLocalTrackSeedFinder(const string& name,
+			    Factory<StiKalmanTrack>* trackFactory,
+			    StiHitContainer* hitContainer,
+			    StiDetectorContainer    * detectorContainer);
+  virtual ~StiRDLocalTrackSeedFinder();
+  
+  //Update state from StiIOBroker
+  virtual void getNewState();
+  
+  //Over-write reset method
+  virtual void reset();
+  
 protected:
-    virtual StiKalmanTrack* makeTrack(StiHit*);
-    StiRootDrawableHits* mdrawablehits;
+  virtual StiKalmanTrack* makeTrack(StiHit*);
+  StiRootDrawableHits* mdrawablehits;
 
 private:
     

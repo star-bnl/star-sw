@@ -19,9 +19,7 @@
 #define StiGuiIOBroker_HH
 
 #include "TObject.h"
-
-//Sti
-#include "Sti/SubjectObserver.h"
+#include "Sti/Base/SubjectObserver.h"
 
 class StiGuiIOBroker : public Subject
 {

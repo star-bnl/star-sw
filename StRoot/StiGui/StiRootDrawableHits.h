@@ -24,6 +24,7 @@ public:
 
     virtual void setMarkerStyle(unsigned int);
     virtual void setMarkerSize(double);
+    virtual void add(double x, double y, double z);
 
 protected:
     StiTPolyMarker3D* mpoly;

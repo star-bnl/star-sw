@@ -26,7 +26,7 @@ public:
     
     virtual void setMarkerStyle(unsigned int val);
     virtual void setMarkerSize(double);
-    
+    virtual void add(double x, double y, double z){};
     virtual void setLineStyle(unsigned int val);
     virtual void setLineWidth(double);
     
