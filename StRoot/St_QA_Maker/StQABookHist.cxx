@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.6 2001/04/26 20:45:19 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.7 2001/04/28 22:05:13 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.7  2001/04/28 22:05:13  genevb
+// Added EMC histograms
+//
 // Revision 2.6  2001/04/26 20:45:19  lansdell
 // changed some histogram ranges (TPC+SVT radius at start, impact param for primary tracks)
 //
@@ -29,8 +32,11 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
+#include <math.h>
 #include "QAH.h"
 #include "StQABookHist.h"
+#include "StEmcUtil/StEmcMath.h"
+#include "StEmcUtil/emcDetectorName.h"
 
 
 ClassImp(StQABookHist)
@@ -495,6 +501,7 @@ void StQABookHist::BookHist(){
   BookHistVertex();
   BookHistPoint();
   BookHistRich();
+  BookHistEMC();
   BookHistEval();
   
 }
@@ -1209,6 +1216,137 @@ void StQABookHist::BookHistPoint(){
 void StQABookHist::BookHistRich(){
 
   m_rich_tot   = QAH::H1F("QaRichTot",  "g2t_rch_hit: multiplicity ",50,0.,1000.);
+
+}
+//_____________________________________________________________________________
+void StQABookHist::BookHistEMC(){
+
+// Book the hists for SimulatorMaker
+  m_emc_nhit=QAH::H2F("EmcNHitsVsDet","emc: Number of hit(log) .vs. Detector #",100,0.0,4.5,4,0.5,4.5);
+  m_emc_etot=QAH::H2F("EmcEtotVsDet","emc: Total energy(log) .vs. Detector #",100,-4.0,4.5,8,0.5,4.5);
+
+  const Char_t* tit={"Barrel"};
+  const Int_t   nx[4] = {40,40,300,20};
+  const Int_t   ny[4]  = {120, 120, 60, 900};
+  Float_t rpi = M_PI + 0.00001;
+  TString name, title;
+  TArrayD *xb = StEmcMath::binForSmde();
+
+  for(Int_t i=0; i<4; i++){
+    name  = detname[i] + "Hits";
+    title = tit  + detname[i] + " hits dist.";
+    if(i==2) m_emc_hits[i]=QAH::H2F(name,title, xb->GetSize()-1,xb->GetArray(),ny[i],-rpi,rpi);
+    else m_emc_hits[i] = QAH::H2F(name,title, nx[i],-1.,+1., ny[i],-rpi, rpi);
+
+    name   = detname[i] + "Energy2D";
+    title  = tit + detname[i] + " energy dist. in eta&phi";
+    if(i==2) m_emc_energy2D[i] = QAH::H2F(name,title, xb->GetSize()-1,xb->GetArray(), ny[i],-rpi,rpi);
+    else m_emc_energy2D[i] = QAH::H2F(name,title, nx[i],-1.,+1., ny[i],-rpi, rpi);
+
+    name  = detname[i] + "Adc";
+    title = tit + detname[i] + " ADC dist.";
+    m_emc_adc[i]  = QAH::H1F(name,title, 5001, -0.5, 5000.5);
+    if(i==2) 
+
+    name   = detname[i] + "Energy";
+    title  = tit + detname[i] + " energy dist.";
+    m_emc_energy[i] = QAH::H1F(name,title, 600, 0.0, 60.0);
+  }
+  delete xb;
+
+// Book the hists for cluster finder
+  Int_t greta[4]={40,40,300,20};   // eta bins
+  Int_t grphi[4]={120,120,60,900}; // phi bins  => 16-apr by PAI
+  Float_t myPI = M_PI + 0.0001;
+  
+  m_emc_ncl=QAH::H2F("EmcNcluster","emc: Number of cluster(log) .vs. Detector #",40,0.0,4.0, 4,0.5,4.5);
+  m_emc_etotCl=QAH::H2F("EmcEcluster" ,"emc: Total PreCluster Energy(log) .vs. Detector #", 60,-2.0,4.0, 4,0.5,4.5);
+
+  Float_t rmsMax=0.026;
+  Int_t   rmsN=52;
+  m_emc_sig_e= QAH::H2F("EmcRMSeta" ,"emc: Sigma(eta) .vs. Detector #",rmsN,0.0,rmsMax,4,0.5,4.5);
+  m_emc_sig_p= QAH::H2F("EmcRMSphi" ,"emc: Sigma(phi) .vs. Detector #",rmsN,0.0,rmsMax,4,0.5,4.5);
+  for (Int_t i=0; i<4; i++)
+  {
+    TString name_h = detname[i] + "_cluster";
+    TString name_e = detname[i] + "_cluster_energy";
+    TString tit_h  = detname[i] + " cluster";
+    TString tit_e  = detname[i] + " energy of cluster";
+    if(i==2) {
+      m_emc_cl[i]     = QAH::H2F(name_h,tit_h,greta[i],-1.0,1.0,grphi[i],-M_PI*1.015, M_PI*0.985);
+      m_emc_energyCl[i] = QAH::H2F(name_e,tit_e,greta[i],-1.0,1.0,grphi[i],-M_PI*1.015, M_PI*0.985);
+    } else {
+      m_emc_cl[i]     = QAH::H2F(name_h,tit_h,greta[i],-1.0,1.0,grphi[i],-myPI, myPI);
+      m_emc_energyCl[i] = QAH::H2F(name_e,tit_e,greta[i],-1.0,1.0,grphi[i],-myPI, myPI);
+    }
+    
+
+    name  = detname[i] + "ClNum";
+    title   = "Number hits in cluster for " + detname[i];
+    m_emc_HitsInCl[i]   = QAH::H1F(name, title, 21, -0.5, 20.5);
+
+    name  = detname[i] + "ClEnergy";
+    title   = "Energy of cluster for " + detname[i];
+    m_emc_EnergyCl[i]    = QAH::H1F(name, title, 2000, 0.0, 20.0);
+
+    TString name_eta  = detname[i] + "Eta";
+    TString tit_eta   = "Eta of clusters for " + detname[i];
+    TString name_phi  = detname[i] + "Phi";
+    TString tit_phi   = "Phi of clusters for " + detname[i];
+    if(i==2) {
+      TArrayD *xb  = StEmcMath::binForSmde();
+      if(xb) {
+        m_emc_EtaInCl[i] = QAH::H1F(name_eta, tit_eta, xb->GetSize()-1, xb->GetArray());
+        delete xb;
+      }
+      m_emc_PhiInCl[i]   = QAH::H1F(name_phi, tit_phi, grphi[i], -M_PI*1.015, M_PI*0.985);
+    } else { 
+      m_emc_EtaInCl[i]   = QAH::H1F(name_eta, tit_eta, greta[i], -1., 1.);
+      m_emc_PhiInCl[i]   = QAH::H1F(name_phi, tit_phi, grphi[i], -myPI, myPI);
+    }
+  }
+  // Book the hists for Emc Ponits
+  const TString catname[] = {"EmcCat1", "EmcCat2", "EmcCat3", "EmcCat4"};
+
+  for (Int_t i=0; i<4; i++) {
+    name = catname[i] + "_Point_Energy";
+    title = catname[i] + " Point Energy";
+    m_emc_point_energy[i]= QAH::H1F(name,title,100,0.,10.);
+
+    name = catname[i] + "_Point_Eta";
+    title = catname[i] + " Point Eta";
+    m_emc_point_eta[i]= QAH::H1F(name,title,100,-1.,1.);
+
+    name = catname[i] + "_Point_Phi";
+    title = catname[i] + " Point Phi";
+    m_emc_point_phi[i]= QAH::H1F(name,title,100,-3.14,3.14);
+   
+    name = catname[i] + "_Sigma_Eta";
+    title = catname[i] + " Sigma Eta";
+    m_emc_point_sigeta[i]= QAH::H1F(name,title,100,0.,.2);
+  
+    name = catname[i] + "_Sigma_Phi";
+    title = catname[i] + " Sigma Phi";
+    m_emc_point_sigphi[i]= QAH::H1F(name,title,100,0.,.2);
+
+    name = catname[i] + "_Delta_Eta";
+    title = catname[i] + " Delta Eta";
+    m_emc_point_deleta[i]= QAH::H1F(name,title,100,-.5,.5);
+
+    name = catname[i] + "_Delta_Phi";
+    title = catname[i] + " Delta Phi";
+    m_emc_point_delphi[i]= QAH::H1F(name,title,100,-.5,.5);
+
+    name = catname[i] + "_Points_Multiplicity";
+    title = catname[i] + " Points Multiplicity";
+    m_emc_points[i]= QAH::H1F(name,title,200,0.,2000.);
+
+    name = catname[i] + "_Track_Momenta";
+    title = catname[i] + " Track Momenta ";
+    m_emc_point_trmom[i]= QAH::H1F(name,title,100,0.,10.);
+  }
+
+  m_emc_point_flag= QAH::H1F(" Point Flag "," Point Flag ",5,0.5,5.5);
 
 }
 //_____________________________________________________________________________

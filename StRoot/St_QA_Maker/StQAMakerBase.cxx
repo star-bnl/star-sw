@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.4 2001/04/26 16:34:40 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.5 2001/04/28 22:05:13 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.5  2001/04/28 22:05:13  genevb
+// Added EMC histograms
+//
 // Revision 2.4  2001/04/26 16:34:40  genevb
 // Fixed some histogram ranges
 //
@@ -126,6 +129,8 @@ Int_t StQAMakerBase::Make(){
   MakeHistPoint();
   // histograms from table g2t_rch_hit
   MakeHistRich();
+  // histograms from EMC in StEvent
+  MakeHistEMC();
   // histograms from geant and reco tables 
   MakeHistEval();
 
