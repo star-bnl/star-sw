@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.cxx,v 2.11 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StFtpcHit.cxx,v 2.12 2004/09/15 17:20:54 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.cxx,v $
+ * Revision 2.12  2004/09/15 17:20:54  ullrich
+ * Updated from Janet (unpacking of bits).
+ *
  * Revision 2.11  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -53,7 +56,7 @@
 #include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.11 2004/07/15 16:36:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.12 2004/09/15 17:20:54 ullrich Exp $";
 
 StMemoryPool StFtpcHit::mPool(sizeof(StFtpcHit));
 
@@ -127,7 +130,7 @@ StFtpcHit::StFtpcHit(const dst_point_st& pt)
 
 StFtpcHit::StFtpcHit(const StFtpcPoint& pt)
 {
-  update(pt);
+    update(pt);
 }
 
 void StFtpcHit::update(const StFtpcPoint& pt)
@@ -170,24 +173,24 @@ StFtpcHit::~StFtpcHit() {/* noop */}
 unsigned int
 StFtpcHit::sector() const
 {
-    return bits(11, 10);   // bits 11-20
+    return bits(9, 3);   // bits 9-11
 }
 
 unsigned int
 StFtpcHit::plane() const
 {
-    return bits(4, 7);    // bits 4-10
+    return bits(4, 5);    // bits 4-8
 }
 
 unsigned int
 StFtpcHit::padsInHit() const
 {
-    return bits(21, 4);   // bits 21-24
+    return bits(12, 8);   // bits 12-19
 }
 
 unsigned int
 StFtpcHit::timebinsInHit() const
 {
-    return bits(25, 7);   // bits 25-31
+    return bits(20, 9);   // bits 20-28
 }
 
