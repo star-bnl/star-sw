@@ -13,9 +13,9 @@ macro setup
   macro/global/import *
     
  if $vexist(setup_done)=0 then
-   exec setup#set_dir
    exec setup#set_aliases
    exec setup#set_globals
+   exec setup#set_dir
    vec/cre setup_done
  endif
  
@@ -46,20 +46,6 @@ macro set_globals
    
  macro/global/create ievent           1          'Event counter'
       
-  
-   
-return
-
-**************************************************
-macro set_dir
-  
-  macro/global/import *
-   
- MESSAGE ********************************
- MESSAGE *** Setting up directory tree **
- MESSAGE ********************************
-
-*************** create global macros for directories ********************
  macro/global/create run       /dui/run
  macro/global/create event     /dui/event
  macro/global/create calib     /dui/calib
@@ -76,7 +62,20 @@ macro set_dir
  macro/global/create geant_Event [geantE]/Event
  macro/global/create raw_data    [event]/raw_data 
  macro/global/create data        [event]/data
- macro/global/create dst         [event]/data/global/dst 
+ macro/global/create dst         [event]/data/global/dst   
+   
+return
+
+**************************************************
+macro set_dir
+  
+  macro/global/import *
+   
+ MESSAGE ********************************
+ MESSAGE *** Setting up directory tree **
+ MESSAGE ********************************
+
+
 
 ***************** make directories *************************************
    
