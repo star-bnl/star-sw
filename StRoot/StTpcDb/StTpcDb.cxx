@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.34 2004/01/14 22:54:30 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.35 2004/02/23 00:35:00 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.35  2004/02/23 00:35:00  fisyak
+ * Add access to tpcPadResponse
+ *
  * Revision 1.34  2004/01/14 22:54:30  fisyak
  * Add hooks for Pedestal and tpcGain
  *
@@ -499,6 +502,15 @@ St_tpcGainC     *StTpcDb::tpcGain() {
     mGain = new St_tpcGainC(table);
   }
   return mGain;
+}
+//________________________________________________________________________________
+St_tpcPadResponseC     *StTpcDb::PadResponse() {
+  if (! mPadResponse){
+    St_tpcPadResponse *table = (St_tpcPadResponse *) FindTable("tpcPadResponse",kCalibration);
+    if (! table) return 0;
+    mPadResponse = new St_tpcPadResponseC(table);
+  }
+  return mPadResponse;
 }
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.24 2004/01/14 22:54:30 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.25 2004/02/23 00:35:00 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.25  2004/02/23 00:35:00  fisyak
+ * Add access to tpcPadResponse
+ *
  * Revision 1.24  2004/01/14 22:54:30  fisyak
  * Add hooks for Pedestal and tpcGain
  *
@@ -105,6 +108,7 @@
 #include "St_DataSet.h"
 #include "St_tpcPedestalC.h"
 #include "St_tpcGainC.h"
+#include "St_tpcPadResponseC.h"
 class StMaker;
 class St_tpcDriftVelocity;
 class St_trgTimeOffset;
@@ -133,6 +137,7 @@ class StTpcDb {
  // StTpcCoordinateTransform* transform; //!
  St_tpcPedestalC*      mPedestal;      //!
  St_tpcGainC*          mGain;          //!
+ St_tpcPadResponseC*   mPadResponse;   //!
  protected:
    StTpcDb() {}
    void GetDataBase(StMaker* maker);
@@ -155,6 +160,7 @@ class StTpcDb {
    St_Table *getTpcTable(int i);
    St_tpcPedestalC *Pedestal();
    St_tpcGainC     *tpcGain();
+   St_tpcPadResponseC *PadResponse();
    TTable          *FindTable(const Char_t *name, Int_t dbIndex=kCalibration);
    //small pieces of data:
    float DriftVelocity();
