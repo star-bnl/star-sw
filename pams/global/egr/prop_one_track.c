@@ -3,7 +3,7 @@
 #include "math_constants.h"
 #include "phys_constants.h"
 
-float prop_one_track( float gtrack[7] , float target[2] , float ptrack[3] )
+float prop_one_track( float gtrack[8] , float target[2] , float ptrack[3] )
 {
 /*:>--------------------------------------------------------------------
 **: ROUTINE:    prop_one_track
@@ -34,10 +34,10 @@ float prop_one_track( float gtrack[7] , float target[2] , float ptrack[3] )
   float xlocal[3],bfield[3];
   
 
-  /* get magnetic field   */
-  xlocal[0] =  xlocal[1] = xlocal[2] = 0.;
-  gufld_(xlocal,bfield);
-  bfld = bfield[2]/10.;         /* Tesla */
+  /* get magnetic field   
+     xlocal[0] =  xlocal[1] = xlocal[2] = 0.;
+     gufld_(xlocal,bfield);
+     bfld = bfield[2]/10.;   */      /* Tesla */
   
   iflag=0;
   if(fabs(gtrack[6]) >= 0.001 )
@@ -60,8 +60,13 @@ float prop_one_track( float gtrack[7] , float target[2] , float ptrack[3] )
       trk[5] = gtrack[5]; /* charge */
       trk[6] = pt;
       curvf  = (float) C_D_CURVATURE;
-      r1     = pt/(curvf*bfld*10.);
+      /* r1     = pt/(curvf*bfld*10.); */
       /*      r1     = fabs(r1); */
+      if(gtrack[7] != 0.)
+        r1=1./gtrack[7];
+      else
+        r1=99999.;
+
       if(r1 <= 0.)
         r1=-r1;
       
