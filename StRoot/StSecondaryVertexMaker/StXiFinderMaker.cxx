@@ -273,7 +273,7 @@ Bool_t StXiFinderMaker::UseV0() {
   
   //Bloc 5bis
   double dca,bxi;
-  //double ptot_b2,epi,ek,ptot_v02,ela,ptot_2,ptot,exi,eom,bdotx,vdotx,ppar,npar,pper,bBach,bV0;
+  double ptot_v02,bdotx,vdotx,ppar,pper;
   StThreeVectorF pXi;
   
   //Function helixDCA
@@ -619,6 +619,20 @@ Bool_t StXiFinderMaker::UseV0() {
               pXi.setZ(pV0.z()+xOrig.z());
               //Cut: remove if Xi points away from primary vertex
               if (((xpp.x()-xPvx.x())*pXi.x()+(xpp.y()-xPvx.y())*pXi.y()+(xpp.z()-xPvx.z())*pXi.z()) < 0.0) continue;
+              //Calculate pt-Armenteros
+              ptot_v02=ptV0*ptV0+pV0.z()*pV0.z();
+              bdotx=xOrig.x()*pXi.x()+xOrig.y()*pXi.y()+xOrig.z()*pXi.z();
+              vdotx=pV0.x()*pXi.x()+pV0.y()*pXi.y()+pV0.z()*pXi.z();
+              if (bachGeom->charge() > 0)
+                 {ppar=bdotx/pXi.mag();
+                  pper=::sqrt(ptot[k]*ptot[k]-ppar*ppar);
+                  }
+                  else
+                 {ppar=vdotx/pXi.mag();
+                  pper=::sqrt(ptot_v02-ppar*ppar);
+                  }
+              //Cut: pt-Armanteros
+              if (pper > 0.33) continue;
               //Function helixDCA(charge,xpp,pXi,bxi);
               //helixDCA is defined in exi_c_utils.cc (pams/global/exi/).
               pt_tmp = ::sqrt(pXi.x()*pXi.x()+pXi.y()*pXi.y());
@@ -639,38 +653,12 @@ Bool_t StXiFinderMaker::UseV0() {
                   globHelix=0;
                   continue;
                   }
-              //Calculate parent and daughter kinematics
-              /*ptot_b2=xOrig.x()*xOrig.x()+xOrig.y()*xOrig.y()+xOrig.z()*xOrig.z();
-              epi=::sqrt(ptot_b2+M_PION_MINUS*M_PION_MINUS);
-              ek=::sqrt(ptot_b2+M_KAON_MINUS*M_KAON_MINUS);
-              ptot_v02=pV0.x()*pV0.x()+pV0.y()*pV0.y()+pV0.z()*pV0.z();
-              ela=::sqrt(ptot_v02+M_LAMBDA*M_LAMBDA);
-              ptot_2=pXi.x()*pXi.x()+pXi.y()*pXi.y()+pXi.z()*pXi.z();
-              ptot=::sqrt(ptot_2);
-              exi=::sqrt(ptot_2+M_XI_MINUS*M_XI_MINUS);
-              eom=::sqrt(ptot_2+M_OMEGA_MINUS*M_OMEGA_MINUS);
-              //Calculate Armenteros variables
-              bdotx=xOrig.x()*pXi.x()+xOrig.y()*pXi.y()+xOrig.z()*pXi.z();
-              vdotx=pV0.x()*pXi.x()+pV0.y()*pXi.y()+pV0.z()*pXi.z();
-              if (bachGeom->charge() > 0)
-                 {ppar=bdotx/ptot;
-                  npar=vdotx/ptot;
-                  pper=::sqrt(ptot_b2-ppar*ppar);
-                  }
-                  else
-                 {ppar=vdotx/ptot;
-                  npar=bdotx/ptot;
-                  pper=::sqrt(ptot_v02-ppar*ppar);
-                  }*/
-              //Calculate daughter impact parameters
               StThreeVectorD p1 = globHelix->at(globHelix->pathLength(xPvx));
               StThreeVectorD p2(p1.x()-globHelix->xcenter(),p1.y()-globHelix->ycenter(),0);
               StThreeVectorD p3(xPvx.x()-globHelix->xcenter(),xPvx.y()-globHelix->ycenter(),0);
               if (p3.mag2() > p2.mag2()) bxi=-bxi;
               delete globHelix;
               globHelix=0;
-              /*bBach=trk[k]->impactParameter();
-              bV0=fabs(v0Vertex->dcaParentToPrimaryVertex());*/
               xiVertex = new StXiVertex();
               xiVertex->setPosition(xpp);
               xiVertex->addDaughter(trk[k]);
@@ -709,8 +697,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.18 2004/02/04 14:53:36 faivre Exp $
+// $Id: StXiFinderMaker.cxx,v 1.19 2004/02/05 16:52:28 faivre Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.19  2004/02/05 16:52:28  faivre
+// Add cut pt-Armanteros > 0.33 ; small cleanup.
+//
 // Revision 1.18  2004/02/04 14:53:36  faivre
 // Remove bug introduced in previous version (confusion dca/bxi when copy-pasting from helixDCA).
 //
