@@ -113,24 +113,24 @@ inline Abstract* VectorizedFactory<Concrete,Abstract>::getInstance()
 	{
 	  // expand _container size
 	  instantiate(_incrementalSize);
-	  cout << "VectorizedFactory<Concrete,Abstract>::getInstance() - INFO - " << endl
-	       << "                Name :"<< _name<<endl
-	       << "       Original Size :"<< _originalSize<<endl
-	       << "     IncrementalSize :"<< _incrementalSize<<endl
-	       << " Max Increment Count :"<< _maxIncrementCount<<endl
-	       << "     Increment Count :"<< _incrementCount<<endl
-	       << "         Current size:"<< _container.size()<<endl;
+// 	  cout << "VectorizedFactory<Concrete,Abstract>::getInstance() - INFO - " << endl
+// 	       << "                Name :"<< _name<<endl
+// 	       << "       Original Size :"<< _originalSize<<endl
+// 	       << "     IncrementalSize :"<< _incrementalSize<<endl
+// 	       << " Max Increment Count :"<< _maxIncrementCount<<endl
+// 	       << "     Increment Count :"<< _incrementCount<<endl
+// 	       << "         Current size:"<< _container.size()<<endl;
 	  return *_current++;
 	}
       else 
 	{
-	  cout << "VectorizedFactory<Concrete,Abstract>::getInstance() - ERROR - " << endl
-	       << "                Name :"<< _name<<endl
-	       << "       Original Size :"<< _originalSize<<endl
-	       << "     IncrementalSize :"<< _incrementalSize<<endl
-	       << " Max Increment Count :"<< _maxIncrementCount<<endl
-	       << "     Increment Count :"<< _incrementCount<<endl
-	       << "         Current size:"<< _container.size()<<endl;
+// 	  cout << "VectorizedFactory<Concrete,Abstract>::getInstance() - ERROR - " << endl
+// 	       << "                Name :"<< _name<<endl
+// 	       << "       Original Size :"<< _originalSize<<endl
+// 	       << "     IncrementalSize :"<< _incrementalSize<<endl
+// 	       << " Max Increment Count :"<< _maxIncrementCount<<endl
+// 	       << "     Increment Count :"<< _incrementCount<<endl
+// 	       << "         Current size:"<< _container.size()<<endl;
 	
 	  throw runtime_error("VectorizedFactory::getInstance() - FATAL - Too many expension requests");
 	}
