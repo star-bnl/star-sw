@@ -1,64 +1,9 @@
-// $Id: StArray.cxx,v 1.23 2000/04/23 01:00:45 perev Exp $
-// $Log: StArray.cxx,v $
-// Revision 1.23  2000/04/23 01:00:45  perev
-// StEvent monolitic I/O
-//
-// Revision 1.21  2000/04/18 02:57:25  perev
-// StEvent browse
-//
-// Revision 1.20  2000/01/28 20:37:03  perev
-// Home made SetLast removed
-//
-// Revision 1.19  1999/11/19 20:40:12  perev
-// StObjArray::Streamer==TCollection::Streamer(b)
-//
-// Revision 1.18  1999/11/17 14:22:09  perev
-// bug in dtor fix
-//
-// Revision 1.17  1999/11/15 23:09:10  perev
-// Streamer for StrArray and auto remove
-//
-// Revision 1.16  1999/11/06 18:01:47  perev
-// StArray cleanup
-//
-// Revision 1.15  1999/10/30 02:10:54  perev
-// CleanUp of StArray for new StEvent
-//
-// Revision 1.14  1999/10/22 22:24:00  perev
-// Minor fixes
-//
-// Revision 1.13  1999/10/21 00:13:58  perev
-// Version of StArray for new StEvent
-//
-// Revision 1.12  1999/07/30 01:12:05  perev
-// StArray const(antisation)
-//
-// Revision 1.11  1999/07/17 19:00:12  perev
-// fix destructor of StStrArray
-//
-// Revision 1.10  1999/06/23 20:31:04  perev
-// StArray I/O + browser
-//
-// Revision 1.7  1999/05/11 01:10:50  fine
-// StArray::Browse() method jas been introduced
-//
-// Revision 1.6  1999/05/10 19:19:35  fisyak
-// Add Valery's update for Browser
-//
-// Revision 1.5  1999/05/04 22:45:22  perev
-// Default ctr for StArray
-//
-// Revision 1.4  1999/04/30 13:15:55  fisyak
-// Ad StObject, modification StArray for StRootEvent
-//
-// Revision 1.2  1999/01/21 21:14:43  fisyak
-// assert
-//
 #include <assert.h>
 #include <stdlib.h>
 #include "StArray.h"
 #include "TDatime.h"
 #include "TBrowser.h"
+#include "TRandom.h"
 
 TObjArray *StRegistry::fgReg  = 0;
 Int_t      StRegistry::fgFree = 0;
@@ -67,8 +12,24 @@ ClassImp(StTObjArray)
 //______________________________________________________________________________
 void StTObjArray::Streamer(TBuffer &b)
 {
-  fName.Streamer(b);
-  fArr->Streamer(b);
+  char nonEmpty;
+  if (b.IsReading()){
+    Clear(); fName = ""; fArr->SetName("");
+    b >> nonEmpty;
+    if (nonEmpty==0) return; 
+    fName.Streamer(b);
+    if (nonEmpty==1) return; 
+    fArr->Streamer(b);
+  } else { 
+    nonEmpty = 0;
+    if (!fName.IsNull()) 	nonEmpty = 1;    
+    if (fArr->GetEntries()) 	nonEmpty = 2;
+    b << nonEmpty;
+    if (nonEmpty==0) 		return;
+    fName.Streamer(b);
+    if (nonEmpty==1) 		return;
+    fArr->Streamer(b);
+}
 }
 //______________________________________________________________________________
 void StTObjArray::SetTitle(const char *title)
@@ -263,15 +224,9 @@ TObject** StObjArray::GetCell(Int_t idx) const{return &((*fArr)[idx]);}
 void StObjArray::Streamer(TBuffer &b)
 {StTObjArray::Streamer(b);}
 //______________________________________________________________________________
-// void StObjArray::ShowMembers(TMemberInspector &, char *){}
-//______________________________________________________________________________
 const TIterator *StObjArray::Begin() const
 { 
-//  TIterator *(StObjArray::*mkit)(Bool_t dir) const = (TIterator *(StObjArray::*)(Bool_t) const)&MakeIterator;
-  static  TIterator *iter=0;
-  if (iter) delete iter;
-  iter =  MakeIterator();
-  return iter;
+  return MakeIterator();
 }
 //______________________________________________________________________________
 void StObjArray::Browse(TBrowser *b)
@@ -302,9 +257,7 @@ Bool_t StObjArray::IsFolder(){ return GetEntries();}
 //______________________________________________________________________________
 const TIterator *StObjArray::End() const
 { 
-  static  TIterator *iter=0;
-  if (iter) delete iter;
-  iter =  MakeIterator();
+  TIterator *iter =  MakeIterator();
   ((StObjArrayIter*)iter)->SetCursor(GetLast()+1);
   return iter;
 }
@@ -343,7 +296,35 @@ void StObjArray::Erase(StObjArrayIter *iter)
   if (!obj) return;
   Clean(iter); delete obj;
 }
+//______________________________________________________________________________
+void StObjArray::random_shuffle(int start,int end)
+{
+  static TRandom *ran = 0;
+  if(!ran) ran = new TRandom();
+  int lst = GetLast();
+  if (start > lst)	return;
+  if (end   > lst) 	end = lst;
+  if (start <= end)	return;
 
+  for (int i=start; i<end; i++) {
+    int j = i + (int)(ran->Rndm()*(end-i+1)); 
+    if (i==j) 	continue;
+    TObject *ti = At(i);
+    TObject *tj = At(j);
+    AddAt(ti,j);
+    AddAt(tj,i);
+  }    
+}
+//______________________________________________________________________________
+void random_shuffle(StObjArrayIter &start,StObjArrayIter &end)
+{
+  StObjArray *coll =  (StObjArray *)start.GetCollection();
+  StObjArray *koll =  (StObjArray *)end  .GetCollection();
+  assert(coll==koll);
+  int istart = start.GetCursor();
+  int iend   = end.  GetCursor();
+  coll->random_shuffle(istart,iend);
+}
 //______________________________________________________________________________
 ClassImp(StObjArrayIter)
 //______________________________________________________________________________
@@ -587,7 +568,6 @@ void StStrArray::Streamer(TBuffer &R__b)
    if (R__b.IsReading()) {
       Version_t R__v = R__b.ReadVersion(); if (R__v) { }
       StObjArray::Streamer(R__b);
-//    Warning("Streamer"," Read %s\n",GetIDName());
    } else {
       R__b.WriteVersion(StStrArray::IsA());
       SetIDName(0);
@@ -595,3 +575,62 @@ void StStrArray::Streamer(TBuffer &R__b)
    }
 
 }
+// $Id: StArray.cxx,v 1.24 2000/04/23 20:37:18 perev Exp $
+// $Log: StArray.cxx,v $
+// Revision 1.24  2000/04/23 20:37:18  perev
+// random shuffle and one byte for empty collection I/O
+//
+// Revision 1.23  2000/04/23 01:00:45  perev
+// StEvent monolitic I/O
+//
+// Revision 1.21  2000/04/18 02:57:25  perev
+// StEvent browse
+//
+// Revision 1.20  2000/01/28 20:37:03  perev
+// Home made SetLast removed
+//
+// Revision 1.19  1999/11/19 20:40:12  perev
+// StObjArray::Streamer==TCollection::Streamer(b)
+//
+// Revision 1.18  1999/11/17 14:22:09  perev
+// bug in dtor fix
+//
+// Revision 1.17  1999/11/15 23:09:10  perev
+// Streamer for StrArray and auto remove
+//
+// Revision 1.16  1999/11/06 18:01:47  perev
+// StArray cleanup
+//
+// Revision 1.15  1999/10/30 02:10:54  perev
+// CleanUp of StArray for new StEvent
+//
+// Revision 1.14  1999/10/22 22:24:00  perev
+// Minor fixes
+//
+// Revision 1.13  1999/10/21 00:13:58  perev
+// Version of StArray for new StEvent
+//
+// Revision 1.12  1999/07/30 01:12:05  perev
+// StArray const(antisation)
+//
+// Revision 1.11  1999/07/17 19:00:12  perev
+// fix destructor of StStrArray
+//
+// Revision 1.10  1999/06/23 20:31:04  perev
+// StArray I/O + browser
+//
+// Revision 1.7  1999/05/11 01:10:50  fine
+// StArray::Browse() method jas been introduced
+//
+// Revision 1.6  1999/05/10 19:19:35  fisyak
+// Add Valery's update for Browser
+//
+// Revision 1.5  1999/05/04 22:45:22  perev
+// Default ctr for StArray
+//
+// Revision 1.4  1999/04/30 13:15:55  fisyak
+// Ad StObject, modification StArray for StRootEvent
+//
+// Revision 1.2  1999/01/21 21:14:43  fisyak
+// assert
+//
