@@ -1,5 +1,11 @@
-// $Id: summarizeEvent.cc,v 1.2 1999/02/11 15:39:16 wenaus Exp $
+// $Id: summarizeEvent.cc,v 1.3 1999/06/25 19:20:41 fisyak Exp $
 // $Log: summarizeEvent.cc,v $
+// Revision 1.3  1999/06/25 19:20:41  fisyak
+// Merge StRootEvent and StEvent
+//
+// Revision 1.3  1999/06/24 21:56:48  wenaus
+// Version minimally changed from standard StAnalysisMaker
+//
 // Revision 1.2  1999/02/11 15:39:16  wenaus
 // cleanup
 //
@@ -20,9 +26,9 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-#include "StEvent/StEvent.hh"
+#include "StEvent.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.2 1999/02/11 15:39:16 wenaus Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.3 1999/06/25 19:20:41 fisyak Exp $";
  *
 void summarizeEvent(StEvent& event)
 {
