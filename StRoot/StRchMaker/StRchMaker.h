@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 1.8 2000/04/05 21:24:28 lasiuk Exp $
+ * $Id: StRchMaker.h,v 1.9 2000/05/01 20:22:50 dunlop Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,8 +9,11 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRchMaker.h,v $
- * Revision 1.8  2000/04/05 21:24:28  lasiuk
- * with cf
+ * Revision 1.9  2000/05/01 20:22:50  dunlop
+ * Added in SetMode
+ *
+ * Revision 1.10  2000/05/18 21:57:19  lasiuk
+ * dev patch
  *
  * Revision 1.9  2000/05/01 20:22:50  dunlop
  * Added in SetMode
@@ -103,10 +106,15 @@ protected:
     TH1F* mpad;//!
     TH1F* mqpad;//!
     TH1F* mcratio;//!
-	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.8 2000/04/05 21:24:28 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.9 2000/05/01 20:22:50 dunlop Exp $ built "__DATE__" "__TIME__ ;
     TH1F* mhc;//!
     TH1F* mhmc;//!
-	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.8 2000/04/05 21:24:28 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.9 2000/05/01 20:22:50 dunlop Exp $ built "__DATE__" "__TIME__ ;
+#endif
+    virtual const char *GetCVS() const	{
+    
+	return cvs;
+    }
 public:
     virtual void SetMode(Int_t mode=0) {
 	m_Mode = mode;
