@@ -5,8 +5,8 @@ c
 #endif 
 c
        STRUCTURE  /table_head_st/
-           CHARACTER*20 name    ! table name
-           CHARACTER*20 type    ! table type
+           CHARACTER*31 name    ! table name
+           CHARACTER*31 type    ! table type
            INTEGER*4 maxlen     ! # rows allocated
            INTEGER*4 nok        ! # rows filled
            INTEGER*4 rbytes	! number of bytes per row
