@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.34  1998/10/20 01:41:59  fisyak
+#  debug only for db
+#
 #  Revision 1.33  1998/10/14 21:40:48  fisyak
 #  Add versioning of shared libraries for ROOT wrappers
 #
@@ -80,7 +83,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/10/14 21:40:48 $ 
+#             Last modification $Date: 1998/10/20 01:41:59 $ 
 #. default setings
 
 RM := rm -f
@@ -94,6 +97,13 @@ MKDIR := mkdir -p
 
 COUT := -o 
 LOUT := -o 
+DEBUG := -g 
+ifdef NODEBUG
+  DEBUG := -O2
+endif
+ifdef nodebug
+  DEBUG := -O2
+endif
 
   O     :=o
   A     :=a
@@ -138,13 +148,6 @@ YACCLIB  := -ly
 LEX      := lex
 LEXLIB   := -ll
 
-DEBUG := -g 
-ifdef NODEBUG
-  DEBUG := -O2
-endif
-ifdef nodebug
-  DEBUG := -O2
-endif
 
 ifneq (,$(findstring $(STAF_ARCH),intel_wnt))
 #  case WIN32
