@@ -44,9 +44,10 @@ void St_srs_Maker::Init(){
      svt = local("svt");
      St_DataSetIter svt_Iter(svt);
 // Shape configuration
-     svg_shape_st shape = { 1, // id
-                            3, // n_shape
-                            3., 3.0, 0.0150}; // shape[10]
+     svg_shape_st shape = { 1, // long id; /* Type of SDD shape */
+                            3, // long n_shape; /* number of shape parameters */
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // float active[10]; /* active area of sdd */
+                            3., 3.0, 0.0150, 0, 0, 0, 0, 0, 0, 0}; // float shape[10]; /* custom shape parameters of SDD wafer */
      m_shape  = new St_svg_shape("shape",1);
      m_shape->AddAt((ULong_t *)&shape,0);   svt_Iter.Add(m_shape);
 //
@@ -55,14 +56,14 @@ void St_srs_Maker::Init(){
 //message "initalizing config table..."
 
      svg_config_st config = {
-       3,                                   //	long cap_nshape; /* number of shape parameters */
-       1,                                   //	long cap_shape_id; /* GEANT shape id for end caps */
-       1,                                   //	long cap_trackmed; /* tracking medium for end caps */
+       3,                                   // long cap_nshape; /* number of shape parameters */
+       1,                                   // long cap_shape_id; /* GEANT shape id for end caps */
+       1,                                   // long cap_trackmed; /* tracking medium for end caps */
        10,                                  // long frame_trackmed; /* tracking medium for frame */
        1, 1, 1, 1, 1, 1, 0, 0, 0, 0,        // long layer_drift[10]; /* drift direction indicator 3=Z=beam axis */
        4, 4, 6, 6, 8, 8, 0, 0, 0, 0,        // long n_ladder[10]; /* Number of ladders in layer(x)  x-->1-5 */
-       6,                                   //	long n_layer; /* SVT layer number */
-       4, 4, 6, 6, 7, 7, 0, 0, 0, 0,        //	long n_wafer[10]; /* Number of wafers on ladder for layer(x) */
+       6,                                   // long n_layer; /* SVT layer number */
+       4, 4, 6, 6, 7, 7, 0, 0, 0, 0,        // long n_wafer[10]; /* Number of wafers on ladder for layer(x) */
        0.015, 0.015, 0.015, 0.015, 0.015, 0.015, 0, 0, 0, 0, //	float be_support_thick[10]; /* berylium support */
        0.3, 0.3, 0.3, 0.3, 0.3, 0.3,0, 0, 0, 0, //	float be_support_width[10]; /* berylium support */
        29.5,                                //  float cap_position; /* distance of svt end cap from origin */
@@ -135,7 +136,7 @@ void St_srs_Maker::Init(){
 //                    the table direct(1).sd (drift direction)                  
 //                                           .st (transverse direction)         
   srs_srspar_st srs_srspar = {
-        1, 1, 1, 1, 1, 1, 0, 0, 0, //long id_active[10]; /* id for active area on each layer */
+        1, 1, 1, 1, 1, 1, 0, 0, 0, 0, //long id_active[10]; /* id for active area on each layer */
 	111111,                    // long init_ran; /* if not 0 init seed with this each event */
 	0,                         //long merge; /* merge=1 when merging enabled */
 	3,                         // long method; /* how to copy hits to spt table */

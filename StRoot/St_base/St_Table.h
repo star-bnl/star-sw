@@ -83,7 +83,7 @@ public:
    virtual     Long_t     HasData() const { return 1; }
    virtual     Bool_t     IsFolder();
    virtual     void       ls(Option_t *option="");
-   virtual     void       ls(Int_t deep=0);
+   virtual     void       ls(Int_t deep);
    virtual     Char_t    *Print(Char_t *buf="",Int_t n=0) const ;
    virtual     table_head_st *GetHeader() const;
    void        MakeHeader(const Char_t *prefix,const Char_t *tablename,const Char_t *suffix, FILE *fl=0); // Create header file for STAF table class

@@ -30,8 +30,8 @@
   St_xdfin_Maker xdfin("Xdfin","event/geant");
   chain.SetInputXDFile(&xdffile_in);
 //  St_evg_Maker evg("evg","event");
-  St_srs_Maker srs_Maker("srs_Maker","event/data");
-  St_tss_Maker tss_Maker("tss_Maker","event/raw_data");
+  St_srs_Maker srs_Maker("srs_Maker","event/data/svt");
+  St_tss_Maker tss_Maker("tss_Maker","event/raw_data/tpc");
 // Set parameters
   tss_Maker.adcxyzon();
   chain.PrintInfo();
@@ -43,7 +43,7 @@ for (Int_t i=0;i<1;i++){
   chain.Make(i);
   //  histCanvas->Modified();
   //  histCanvas->Update();
-  chain.Clear();
+  //  chain.Clear();
 }
   gBenchmark->Stop("tss");
   gBenchmark->Print("tss");
