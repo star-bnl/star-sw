@@ -89,7 +89,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.13 1998/08/23 19:56:18 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.14 1998/08/28 21:22:28 fisyak Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -422,6 +422,7 @@ void DotIncFileTbl(void) {
   FINC"C\n");
 }
 void Tbl(void) {
+/*
   if(gOptiont) {
     Ose(); PP"You have used option -t with a table-type idl file.\n");
     PP"This does not make sense.  The option -t means 'templates\n");
@@ -430,6 +431,7 @@ void Tbl(void) {
     PP"FATAL ERROR   FATAL ERROR   FATAL ERROR   FATAL ERROR   \n");
     exit(2);
   }
+  */
   OpenAllTblOutput();
   if(gOptionM || gOptionT) return;
   DotHFileTbl(); 
