@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.11 1998/04/20 21:57:25 sakrejda Exp $
+* $Id: tte.F,v 1.12 1998/04/22 15:54:55 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.12  1998/04/22 15:54:55  sakrejda
+* estimate of purity for reconstructed tracks fixed
+*
 * Revision 1.11  1998/04/20 21:57:25  sakrejda
 * count of reconstructed points per mc track corrected
 *
@@ -47,6 +50,7 @@ C<----------------------------------------------------------------------------
 
 #include "tte.inc"
 #include "math_constants.inc"
+#include "phys_constants.inc"
 
 C DESCRIPTION:
 C tte evaluates performance of the tpt package by comparing it's output
@@ -84,7 +88,7 @@ C      it was affecting sence of rotation in the momentum extrapolation
 C      and reconstructed charge entered into the evaluation tables
 C_____________________________________________________________________________
 
-      integer   tls_Index_Sort_i              !integer sort (tls pkg)
+      INTEGER   tls_Index_Sort_i              !integer sort (tls pkg)
       integer   tls_qsort_herb_i              !integer indexed sort
 
       integer   list_size                     !size of the list arrays used 
@@ -122,6 +126,8 @@ c     the second counts how many mc hits went into this reconstructed hit.
       parameter (maxtrack=500)
       integer   rec_track_on_mc_track_nok
       integer   rec_track_on_mc_track(2,maxtrack)    
+      integer   mc_track_on_rec_track_nok
+      integer   mc_track_on_rec_track(2,maxtrack)    
 c     compact list of reconstructed tracks
 
 *                                             !track address in g2t_track
@@ -560,8 +566,8 @@ c     sort on the index table on reconstructed hit id (key2)
      >       tindex(istart+1).key2,tindex)
 c
 c
-c     set up a list so the monte carlo hit can be found in the
-c     translation table, clean up and zero the list_index_mc first
+c     set up a list so the reconstructed hit can be found in the
+c     translation table, clean up and zero the list_index_rec first
       call vzero(list_index_rec,list_size)
       do i=istart,istart+ng2t-1
         if(tindex(i).key2.gt.0.and.tindex(i).key2.lt.list_size) then
@@ -595,7 +601,6 @@ c        double-check, whether this is a good track, loop only through good trac
          if(track_num.gt.0.and.list_tracks(track_num).eq.0) then
            track_num=0
            bad_track=bad_track+1
-
          endif
          if(track_num.gt.0) then 
            track_num_local=track_num
@@ -635,8 +640,8 @@ c            and get it's momentum information.
 *            first get the track radius
 *            hrot is the sence of rotation
              hrot=-track(list_tracks(track_num)).q
-             radius=1.0/(track(list_tracks(track_num)).invp*0.5
-     >       *0.00299792458)
+             radius=1.0/(track(list_tracks(track_num)).invp*5.0
+     >       *C_D_CURVATURE)
              psic=C_RAD_PER_DEG*track(list_tracks(track_num)).psi-
      >       hrot*0.25*C_2PI
              if(psic.gt.C_2PI) psic=psic-C_2PI
@@ -673,12 +678,12 @@ c            and get it's momentum information.
              eval(eval_h.nok).pullmx(1)=0.0
              eval(eval_h.nok).pullmx(2)=0.0
              j=i
-             rec_track_on_mc_track_nok=0
+             mc_track_on_rec_track_nok=0
 
          do while(track_num_local.eq.track_num)
 c          find a mc track associated with this hit
 c          to do it take a real hit id
-           ip=hit(loc_hit(i)).id
+           ip=hit(loc_hit(j)).id
 c          look up its position in the index table and take
 c          the mc hit id from this location
            id_mc=tindex(list_index_rec(ip)).key1
@@ -688,20 +693,20 @@ c          find a parent track for this point
            mc_track=g2t_hit(ip_mc).track_p
 c          let's see how many different tracks got mixed up in this one...
            iloc=0
-           do ii=1,rec_track_on_mc_track_nok
-              if(rec_track_on_mc_track(1,ii).eq.mc_track) iloc=ii
+           do ii=1,mc_track_on_rec_track_nok
+              if(mc_track_on_rec_track(1,ii).eq.mc_track) iloc=ii
            end do
            if(iloc.eq.0) then
-             if(rec_track_on_mc_track_nok.lt.maxtrack)then
-                rec_track_on_mc_track_nok=rec_track_on_mc_track_nok+1
-                rec_track_on_mc_track(1,rec_track_on_mc_track_nok)=
+             if(mc_track_on_rec_track_nok.lt.maxtrack)then
+                mc_track_on_rec_track_nok=mc_track_on_rec_track_nok+1
+                mc_track_on_rec_track(1,mc_track_on_rec_track_nok)=
      >          mc_track
-                rec_track_on_mc_track(2,rec_track_on_mc_track_nok)=0
-                iloc=rec_track_on_mc_track_nok
+                mc_track_on_rec_track(2,mc_track_on_rec_track_nok)=0
+                iloc=mc_track_on_rec_track_nok
              endif
            endif
-           rec_track_on_mc_track(2,iloc)=
-     >     rec_track_on_mc_track(2,iloc)+1
+           mc_track_on_rec_track(2,iloc)=
+     >     mc_track_on_rec_track(2,iloc)+1
            j=j+1
            track_num_local=hit(loc_hit(j)).track/1000
          end do
@@ -709,13 +714,13 @@ c          let's see how many different tracks got mixed up in this one...
 c        let's find the biggest contribution
          ibig=0
          iloc=1
-         do ii=1,rec_track_on_mc_track_nok
-            if(rec_track_on_mc_track(2,ii).gt.ibig) then
-              ibig=rec_track_on_mc_track(2,ii)
+         do ii=1,mc_track_on_rec_track_nok
+            if(mc_track_on_rec_track(2,ii).gt.ibig) then
+              ibig=mc_track_on_rec_track(2,ii)
               iloc=ii
             endif
          end do
-         eval(eval_h.nok).mtrk=rec_track_on_mc_track(1,iloc)
+         eval(eval_h.nok).mtrk=mc_track_on_rec_track(1,iloc)
          eval(eval_h.nok).ngood=ibig
          ii=list_g2t_tracks(mc_track)
          eval(eval_h.nok).pxvg=g2t_track(ii).p(1)
