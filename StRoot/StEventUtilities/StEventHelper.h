@@ -145,21 +145,33 @@ private:
 //______________________________________________________________________________
 class StFilterABC : public TNamed {  	//base class for StEvent filters
 public:
-   		StFilterABC(const char *name);
-               ~StFilterABC(){};
+   StFilterABC(const char *name);
+   ~StFilterABC(){};
 
-virtual float        *GetPars() const	= 0;
-virtual const float  *GetDefs() const	= 0;
-virtual const char  **GetNams() const	= 0;
-              void    SetDefs();
-virtual Int_t         Accept(StPoints3DABC *pnt) =0;
-         void   Update();
+   virtual float        *GetPars() const	= 0;
+   virtual const float  *GetDefs() const	= 0;
+   virtual const char  **GetNams() const	= 0;
+           bool         *GetActive() { return &fActive;}
+           void          SetDefs();
+           bool          Active() const {return fActive;}
+           void          SetActive(bool active){fActive = active;}
+           Int_t         Accept(StPoints3DABC *pnt);
+           void          Update();
+protected:
+   bool   fActive;// the flag whether the filter is "on"
 
+protected:
+   virtual Int_t         AcceptCB(StPoints3DABC *pnt) =0;
 private:
-static int fgDial;
-ClassDef(StFilterABC,0)
+   static int fgDial;
+   ClassDef(StFilterABC,0)
 };
-
+//______________________________________________________________________________
+inline Int_t StFilterABC::Accept(StPoints3DABC *pnt) 
+{
+   //  Apply the user-provided filter if the filter is activated
+   return fActive ? AcceptCB(pnt): 1;
+}
 //______________________________________________________________________________
 
 class StFilterDef : public StFilterABC { // An example of default filter
@@ -169,7 +181,7 @@ public:
 virtual float        *GetPars() const {return (float*)(&fFirst+1);}
 virtual const float  *GetDefs() const;
 virtual const char  **GetNams() const;
-virtual Int_t   Accept(StPoints3DABC *pnt) ;
+virtual Int_t   AcceptCB(StPoints3DABC *pnt) ;
 
 
 
@@ -201,10 +213,10 @@ public:
 virtual float        *GetPars() const {return (float*)(&fpCutHigh+1);}
 virtual const float  *GetDefs() const;
 virtual const char  **GetNams() const;
-virtual Int_t   Accept(StPoints3DABC *pnt) ;
+virtual Int_t         AcceptCB(StPoints3DABC *pnt) ;
 
 protected:
-  Int_t Accept(const StTrack *track); // proxy for /StMuDSTMaker/COMMON/StMStMuL3Filter
+  Int_t AcceptCB(const StTrack *track); // proxy for /StMuDSTMaker/COMMON/StMStMuL3Filter
 
 protected:
   BetheBloch* mBB;
