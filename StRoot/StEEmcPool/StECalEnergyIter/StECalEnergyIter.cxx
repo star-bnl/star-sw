@@ -10,8 +10,8 @@
 
 
 StECalEnergyIter::StECalEnergyIter(StMuEmcCollection *emCol, int det,
-				   StEEmcDbMaker *eedb) 
-  : mEmCol(emCol), mEEdb(eedb), mdetector(det), mIhits(0) {
+				   StEEmcDbMaker *eedb, bool flag) 
+  : mEmCol(emCol), mEEdb(eedb), mdetector(det), mIhits(0), mSuppBad(flag) {
 
   char cuv = 'U';
   switch (mdetector)
@@ -26,7 +26,7 @@ StECalEnergyIter::StECalEnergyIter(StMuEmcCollection *emCol, int det,
       cuv = 'V'; // and fall through
     case esmdu:
       mNhits = mEmCol->getNEndcapSmdHits(cuv);
-      break;
+      break; 
     default:
       mNhits = 0;
     }
@@ -36,32 +36,39 @@ StECalEnergyIter::StECalEnergyIter(StMuEmcCollection *emCol, int det,
 bool StECalEnergyIter::next(float &e, int &adc, int &adclessped, 
 			    int &sec, int &eta, int &phi, char &cdet)
 {
-  if ( mNhits <= mIhits )  return false;
   const EEmcDbItem *dbitem;
   cdet = 'U';
-  switch (mdetector)
-    {
-    case eemc:
-      mEmCol->getEndcapTowerADC(mIhits++, adc, sec, phi, eta);
-      cdet = 'T';
-      dbitem = mEEdb->getTile(sec, phi-1+'A', eta, cdet);
-      break;
-    case eprs:
-      int prsId;
-      adc = mEmCol->getEndcapPrsHit(mIhits++, sec, phi, eta, prsId)->getAdc();
-      cdet = prsId-1+'P';
-      dbitem = mEEdb->getTile(sec, phi-1+'A', eta, cdet);
-      break;
-    case esmdv:
-      cdet = 'V'; // and fall through
-    case esmdu:
-      adc = mEmCol->getEndcapSmdHit(cdet, mIhits++, sec, eta)->getAdc();
-      dbitem = mEEdb->getByStrip(sec, cdet, eta);
-      break;
-    default:
-      return false;
-    }
-  if  ( !dbitem || dbitem->fail ) 
+  bool dbfail;
+
+  do {
+    if ( mNhits <= mIhits )  return false;    
+    switch (mdetector)
+      {
+      case eemc:
+	mEmCol->getEndcapTowerADC(mIhits++, adc, sec, phi, eta);
+	cdet = 'T';
+	dbitem = mEEdb->getTile(sec, phi-1+'A', eta, cdet);
+	break;
+      case eprs:
+	int prsId;
+	adc = mEmCol->getEndcapPrsHit(mIhits++, sec, phi, eta,
+				      prsId)->getAdc();
+	cdet = prsId-1+'P';
+	dbitem = mEEdb->getTile(sec, phi-1+'A', eta, cdet);
+	break;
+      case esmdv:
+	cdet = 'V'; // and fall through
+      case esmdu:
+	adc = mEmCol->getEndcapSmdHit(cdet, mIhits++, sec, eta)->getAdc();
+	dbitem = mEEdb->getByStrip(sec, cdet, eta);
+	break;
+      default:
+	return false;
+      }
+    dbfail = ( !dbitem || dbitem->fail || dbitem->gain < 0.5 );
+  } while ( mSuppBad && dbfail );
+
+  if  ( dbfail ) 
     {
       e = - 100.0;
       adclessped = adc;
@@ -69,7 +76,7 @@ bool StECalEnergyIter::next(float &e, int &adc, int &adclessped,
   else 
     {
       float acorr = adc - dbitem->ped;
-      e = acorr * dbitem->gain;
+      e = acorr/dbitem->gain;
       adclessped = (int) floor(acorr + 0.5);
     }
 
