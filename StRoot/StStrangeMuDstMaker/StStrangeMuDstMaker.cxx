@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.2 2000/07/17 20:28:40 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.3 2000/08/10 01:14:17 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.3  2000/08/10 01:14:17  genevb
+// Upped basket size of event branch; Set old file format
+//
 // Revision 3.2  2000/07/17 20:28:40  genevb
 // File size limitation workaround, some under the hood improvements
 //
@@ -160,7 +163,7 @@ void StStrangeMuDstMaker::InitCreateDst() {
 
   if (!dstMaker) {
     Int_t split=2;
-    Int_t bsize=64000;
+    Int_t bsize=1024000;
     TBranch* branch = tree->Branch("Event",&evClonesArray,bsize,split);
     branch->SetFile(file[evT]);
     cuts->Assure();
@@ -415,6 +418,7 @@ Int_t StStrangeMuDstMaker::OpenFile() {
                       << file[evT] << endm;
     return kStErr;
   }
+  if (rw == StrangeWrite) muDst->SetFormat(1);   // Necessary to read MuDst in plain root
   gMessMgr->Info() << "StStrangeMuDstMaker: Opened event file:\n  "
                    << file[evT] << endm;     
   return kStOk;
