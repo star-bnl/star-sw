@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.11 2000/01/24 14:39:27 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.12 2000/01/24 20:35:37 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.12  2000/01/24 20:35:37  ward
+ * Access trigger data.
+ *
  * Revision 1.11  2000/01/24 14:39:27  perev
  * FTPC (HolmMade) is added
  *
@@ -124,6 +127,7 @@ int StDAQReader::readEvent()
 
   if (fTPCReader) fTPCReader->Update();
   if (fFTPCReader) fFTPCReader->Update();
+  if (fTRGReader) fTRGReader->Update();
 
   return 0;
 }
@@ -201,6 +205,15 @@ StFTPCReader *StDAQReader::getFTPCReader()
     fFTPCReader = new StFTPCReader(this);
   }
   return fFTPCReader;
+}
+//_____________________________________________________________________________
+StTRGReader *StDAQReader::getTRGReader()
+{
+  if (!fTRGReader) {
+    fTRGReader = new StTRGReader(this);
+    assert(fTRGReader);
+  }
+  return fTRGReader;
 }
 //_____________________________________________________________________________
 void StDAQReader::printEventInfo()
