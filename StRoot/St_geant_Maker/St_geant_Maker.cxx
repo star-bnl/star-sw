@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.33 1999/04/09 23:52:48 nevski Exp $Id: 1999/03/11 00:15:22 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.34 1999/04/12 23:17:11 fine Exp $Id: 1999/03/11 00:15:22 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.34  1999/04/12 23:17:11  fine
+// Unique postion ID has been introduced
+//
 // Revision 1.33  1999/04/09 23:52:48  nevski
 // checking 3 volume parameters now
 //
@@ -448,7 +451,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.33 1999/04/09 23:52:48 nevski Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.34 1999/04/12 23:17:11 fine Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -847,9 +850,9 @@ void St_geant_Maker::Work()
 
      if (node)
      {  TRotMatrix *matrix=GetMatrix(theta1,phi1,theta2,phi2,theta3,phi3);
-       node->Add(newNode,xx[0],xx[1],xx[2],matrix); // Copy to add
+       node->Add(newNode,xx[0],xx[1],xx[2],matrix,UInt_t(mcopy)); // Copy to add       
        if (strcmp(name,"BANG")==0) 
-          printf(" BANG: %f %f %f %f %f %f \n",
+          printf(" BANG: %d. %f %f %f %f %f %f \n",mcopy,
                    theta1,phi1,theta2,phi2,theta3,phi3);
      }
     node = newNode;
