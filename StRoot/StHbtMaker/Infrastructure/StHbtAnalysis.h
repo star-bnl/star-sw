@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.h,v 1.10 2000/04/03 16:21:50 laue Exp $
+ * $Id: StHbtAnalysis.h,v 1.11 2000/05/11 21:18:56 willson Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.h,v $
+ * Revision 1.11  2000/05/11 21:18:56  willson
+ * Removed StHbtThreeParticleCorrFctn's...put methods in StHbtCorrFctn
+ * Some methods in derived analysis classes moved to base analysis class
+ *
  * Revision 1.10  2000/04/03 16:21:50  laue
  * some include files changed
  * Multi track cut added
@@ -83,14 +87,7 @@
 //#endif
 
 #include "StHbtMaker/Base/StHbtBaseAnalysis.h"        // base analysis class
-#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 //#include <string>
-#include "StHbtMaker/Base/StHbtEventCut.h"             // base class 
-#include "StHbtMaker/Base/StHbtParticleCut.h"          // base class
-#include "StHbtMaker/Base/StHbtPairCut.h"              // base class
-#include "StHbtMaker/Base/StHbtCorrFctn.hh"             // base class
-#include "StHbtMaker/Infrastructure/StHbtCorrFctnCollection.hh"
-
 
 class StHbtAnalysis : public StHbtBaseAnalysis {
 
@@ -101,13 +98,8 @@ public:
   virtual ~StHbtAnalysis();
 
   // Gets and Sets
-  StHbtPairCut*       PairCut();
-  void SetPairCut(StHbtPairCut*);
 
-  StHbtCorrFctnCollection* CorrFctnCollection();
-  StHbtCorrFctn* CorrFctn(int n);    // Access to CFs within the collection
-
-  void AddCorrFctn(StHbtCorrFctn*);
+  StHbtCorrFctn* CorrFctn(int n);     // Access to CFs within the collection
 
   bool AnalyzeIdenticalParticles();
   virtual StHbtString Report();       //! returns reports of all cuts applied and correlation functions being done
@@ -118,11 +110,9 @@ public:
 
   virtual void Finish();
 
-  friend StHbtLikeSignAnalysis;
+  friend class StHbtLikeSignAnalysis;
 
 private:
-  StHbtPairCut*       mPairCut;
-  StHbtCorrFctnCollection* mCorrFctnCollection;
 
 #ifdef __ROOT__
   ClassDef(StHbtAnalysis, 0)
@@ -130,13 +120,7 @@ private:
 
 };
 
-// Get's
-inline StHbtPairCut*       StHbtAnalysis::PairCut() {return mPairCut;}
-inline StHbtCorrFctnCollection* StHbtAnalysis::CorrFctnCollection() {return mCorrFctnCollection;}
-
 // Set's
-inline void StHbtAnalysis::AddCorrFctn(StHbtCorrFctn* cf) {mCorrFctnCollection->push_back(cf); cf->myAnalysis=this;}
-inline void StHbtAnalysis::SetPairCut(StHbtPairCut* x) { mPairCut = x; x->myAnalysis=this;}
 inline bool StHbtAnalysis::AnalyzeIdenticalParticles(){return (mFirstParticleCut==mSecondParticleCut);}
 
 #endif
