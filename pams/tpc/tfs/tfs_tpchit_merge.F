@@ -1,5 +1,8 @@
-* $Id: tfs_tpchit_merge.F,v 1.6 1998/09/18 21:56:51 perev Exp $
+* $Id: tfs_tpchit_merge.F,v 1.7 1998/09/20 23:48:23 perev Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.7  1998/09/20 23:48:23  perev
+* malloc for temporary array
+*
 * Revision 1.6  1998/09/18 21:56:51  perev
 * WRONG calling sequence for tls_sort
 *
@@ -106,7 +109,7 @@ C     IROW  - 2 number of hits
 
 
 C Local variables
-      INTEGER I,J,K,L,ISTART,IEND,IPAD,NUM_MARKED,NOK
+      INTEGER I,J,K,L,ISTART,IEND,IPAD,NUM_MARKED,NOK,ij
 
       REAL DZMIN, DRMIN
       REAL DZ, DR, ZLAP, RLAP, ZWID, RWID, ZSIZ, RSIZ
@@ -118,9 +121,16 @@ C Local variables
       integer  iret,irowl,i_rows(10),ii_rows
       integer  tls_Quick_Sort_r, tls_Quick_Sort_i,tls_Search_i
 
-      integer  max_hit_merge,n_hit_merge,imerge_hit_id
-      parameter (max_hit_merge=50000)
-      integer  imerge_id(max_hit_merge,2)
+      integer  malloc,max_hit_merge,n_hit_merge,imerge_hit_id
+      PARAMETER  (max_hit_merge=50000000)
+       structure /merge_t/
+        integer key
+        integer row
+      end structure
+      record/merge_t/  imerge_id(max_hit_merge)
+      pointer (p_merge,imerge_id)
+
+
       integer IsectorDummy
       integer idI1, idI2, idI3
       character*132 m132  ! And some message-generating space.
@@ -129,9 +139,9 @@ C Local variables
 C=========================== Begin Executable Code =======================
 
 C     Initialize imerge_id.  04/16/1997   DSW.
-      call vzero(imerge_id,2*max_hit_merge)
       n_hit_merge = 0
-
+      p_merge = malloc(2*4*tpc_index_h.nok)
+      
 C     Quick_sort tpc_index table for key2 so it's easy to find  right
 C     geant hit corresponding to given tpc hit. This is needed to update
 C     the tpc_index table after tpc hit merging.
@@ -416,8 +426,8 @@ C     04/16/1997  DSW
                irowl = i_rows(1)
                n_hit_merge = n_hit_merge + 1 
                if(n_hit_merge.le.max_hit_merge)then
-                  imerge_id(n_hit_merge,1) =  irowl
-                  imerge_id(n_hit_merge,2) =  tphit(l).id
+                  imerge_id(n_hit_merge).row =  irowl
+                  imerge_id(n_hit_merge).key =  tphit(l).id
                else
                   write(m132,*) 'TFS-MERGE-I1 total number of merged '
      >                          //'hits exceeds  ' ,max_hit_merge 
@@ -425,7 +435,7 @@ C     04/16/1997  DSW
                endif
                
  100        continue
-            
+           
          enddo                  ! loop over rows
       enddo                     ! loop over sectors
 *     jump here if the index gets past the loop limit 
@@ -435,10 +445,10 @@ C     04/16/1997  DSW
 C     Update  tphit.id in the index table for merged hits.
 C     04/16/1997  DSW
 
-      do i = 1, n_hit_merge
-         irowl                 = imerge_id(i,1)
-         tpc_index(irowl).key2 = imerge_id(i,2) 
+      do ij = 1, n_hit_merge
+         irowl                 = imerge_id(ij).row
+         tpc_index(irowl).key2 = imerge_id(ij).key 
       enddo
-
+      call free(p_merge)
       return
       end
