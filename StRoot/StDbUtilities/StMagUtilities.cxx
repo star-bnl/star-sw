@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.12 2001/06/13 16:36:43 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.13 2001/06/14 22:12:11 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,8 +11,12 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.13  2001/06/14 22:12:11  jhthomas
+ * Speedup UndoBDistorion by adding table lookups
+ *
  * Revision 1.12  2001/06/13 16:36:43  jhthomas
- * *** empty log message ***
+ * Improve the speed and timing of the PadRow13 correction.
+ * Add 3D magnetic field functions so now both 2D and 3D are availble.
  *
  * Revision 1.3  2000/12/15 16:10:45  jhthomas
  * Add PadRow13, Clock, and Twist corrections to UndoDistortion
@@ -40,30 +44,25 @@
 // Work in kGauss, cm - but note that the Bfield maps on disk are in gauss, cm.
 //
 // To do:  
-// Pull parameters out of DB rather than from #define.  kChain should use DB.  Also need Standalone.
-// Note that phi less than 0 or greater 2 pi will be extrapolated - fix this by adding
-// rows to the phi table in the reading routine for CM correction.  Increase phi table size to 14.
-// Add table for row13 solutions (only need y by z), do once;  also table for UndoDistortion.
-// Scale membrane correction to Efield value by allowing Omega Tau to change with Efield and DriftV
-// Include Hui's Z offsets for the inner and outer sectors as part of DB - a value already exists
+// Pull parameters out of DB rather than from #define.  kChain version and Standalone version.
 // Add a routine to distort the track if we are given a Geant Vector full of points == a track
-// Move Read routine to a separate class so it can be called "new".  How to share data?
 // Add simulated B field map in the regions where the field is not mapped.
 //
 
-
-#define  nZ               57            // Standard STAR Map grid # of Z points in table
+#define  nZ               57            // Standard STAR B field Map. Number of Z points in table
 #define  nR               28            // Number of R points in table
 #define  nPhi             37            // Number of Phi points in table
-#define  neZ              69            // Standard STAR Map grid # of Z points in table
+#define  neZ              69            // Standard STAR E field Map. Number of Z points in table
 #define  neR              33            // Number of R points in table
 #define  nePhi            13            // Number of Phi points in table ( add one for 360 == 0 )
+
 #define  StarDriftV     5.45            // STAR Drift Velocity (cm/microSec) Magnitude
 #define  StarMagE      148.0            // STAR Electric Field (V/cm) Magnitude
-#define  TPC_Z0        208.7            // Z location of STAR TPC Gating Grid (cm)
 #define  GG           -127.5            // Gating Grid voltage (volts)
-#define  XTWIST       -0.079            // X Displacement of West end of TPC (cm) wrt magnet & TPC_Z0
-#define  YTWIST        0.032            // Y Displacement of West end of TPC (cm) wrt magnet & TPC_Z0
+
+#define  TPC_Z0        208.7            // Z location of STAR TPC Gating Grid (cm)
+#define  XTWIST       -0.379            // X Displacement of West end of TPC wrt magnet (mRad)
+#define  YTWIST        0.153            // Y Displacement of West end of TPC wrt magnet (mRad)
 #define  EASTCLOCKERROR  0.0            // Phi rotation of East end of TPC in milli-radians
 #define  WESTCLOCKERROR -0.43           // Phi rotation of West end of TPC in milli-radians
 
@@ -73,7 +72,7 @@ extern   "C" { void gufld(Float_t *, Float_t *) ; }
 
 static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays are full
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
-static Float_t  gRescale = 1.0 ;        // Multiplicative factor (allows re-scaling wrt which map was read)
+static Float_t  gRescale = 1.0 ;        // Multiplicative factor (allows re-scaling wrt which map read)
 static Float_t  Const_0, Const_1, Const_2 ;  // OmegaTau parameters
 static Float_t  Bz[nZ][nR], Br[nZ][nR] ;         
 static Float_t  Radius[nR], ZList[nZ] ;         
@@ -84,6 +83,7 @@ static Float_t  EEphi[neZ][nePhi][neR], EEr[neZ][nePhi][neR] ;
 static Float_t  eRadius[neR], ePhiList[nePhi], eZList[neZ]  ;         
 
 //________________________________________
+
 
 ClassImp(StMagUtilities)
 
@@ -102,7 +102,6 @@ StMagUtilities::StMagUtilities( )
     }
 
 }
-
 
 StMagUtilities::StMagUtilities( const EBField map = kMapped, const Float_t factor = 1.0 )
 
@@ -141,7 +140,7 @@ void StMagUtilities::Init ( )
   Const_0    =  1. / ( 1. + pow( OmegaTau, 2 ) ) ;
   Const_1    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
   Const_2    =  pow( OmegaTau, 2 ) / ( 1. + pow( OmegaTau, 2 ) ) ;
-  cout << "OmegaTau = " << OmegaTau << endl ;
+  cout << "OmegaTau = " << OmegaTau << "   Please wait for the tables to fill ... ~60 seconds" << endl ;
 
 }
 
@@ -246,13 +245,13 @@ void StMagUtilities::UndoDistortion( const Float_t x[3], Float_t Xprime[3] )
 
   Float_t Xprime1[3], Xprime2[3] ;
   
-  UndoBDistortion        ( x, Xprime1 ) ;
+  FastUndoBDistortion    ( x, Xprime1 ) ;
   UndoPad13Distortion    ( Xprime1, Xprime2 ) ;
   UndoTwistDistortion    ( Xprime2, Xprime1 ) ;
   UndoClockDistortion    ( Xprime1, Xprime2 ) ;
-  UndoMembraneDistortion ( Xprime2, Xprime ) ;
-  //UndoMembraneDistortion ( Xprime2, Xprime1 ) ;  // replace previous line with these two
-  //UndoEndcapDistortion   ( Xprime1, Xprime ) ;   // in order to invoke Endcap corrections
+  UndoMembraneDistortion ( Xprime2, Xprime ) ; 
+  //UndoMembraneDistortion ( Xprime2, Xprime1 ) ;  // Replace the previous line with these two 
+  //UndoEndcapDistortion   ( Xprime1, Xprime ) ;   // to enable the Endcap distortion corrections
   
 }
 
@@ -310,6 +309,109 @@ void StMagUtilities::UndoBDistortion( const Float_t x[3], Float_t Xprime[3] )
 
 }
 
+
+#define NPOINTS 22                                  // Number of points on the Z interpolation grid
+
+void StMagUtilities::FastUndoBDistortion( const Float_t x[3], Float_t Xprime[3] )
+
+{
+ 
+  static  Int_t   DoOnce = 0 ;
+  static  Float_t xarray[2*NPOINTS-1], yarray[2*NPOINTS-1], zarray[NPOINTS] ;
+  static  Float_t dXplus[2*NPOINTS-1][2*NPOINTS-1][NPOINTS], dYplus[2*NPOINTS-1][2*NPOINTS-1][NPOINTS] ;
+  static  Float_t dXminus[2*NPOINTS-1][2*NPOINTS-1][NPOINTS], dYminus[2*NPOINTS-1][2*NPOINTS-1][NPOINTS] ;
+
+  const   Int_t ORDER = 2 ;                         // Linear interpolation = 1, Quadratic = 2         
+  Int_t   i, j, k ;
+  Int_t   ilow, jlow, klow ;
+  Float_t xx[3] ;
+  Float_t save_dX[ORDER+1], saved_dX[ORDER+1] ;
+  Float_t save_dY[ORDER+1], saved_dY[ORDER+1] ;
+
+  if ( DoOnce == 0 )
+
+    {
+      for ( i = 0 ; i < 2*NPOINTS-1 ; i++ )
+	{
+	  xarray[i] = -1*TPC_Z0 + i*TPC_Z0/(NPOINTS-1) ;
+	  xx[0] = xarray[i] ;
+	  for ( j = 0 ; j < 2*NPOINTS-1 ; j++ )
+	    {
+	      yarray[j] = -1*TPC_Z0 + j*TPC_Z0/(NPOINTS-1) ;
+	      xx[1] = yarray[j] ;
+	      for ( k = 0 ; k < NPOINTS ; k++ )
+		{
+		  zarray[k] = k * TPC_Z0/(NPOINTS-1) ;
+		  xx[2] = zarray[k] ;
+		  if ( k == 0 ) xx[2] = 0.1 ;       // Stay off central membrane by a tiny bit
+		  UndoBDistortion(xx,Xprime) ;
+		  dXplus[i][j][k] = Xprime[0] ;
+		  dYplus[i][j][k] = Xprime[1] ;
+		  xx[2] = -1*zarray[k] ;            // Note sign flip for Z < 0
+		  if ( k == 0 ) xx[2] = -0.1 ;      // Stay off central membrane by a tiny bit
+		  UndoBDistortion(xx,Xprime) ;
+		  dXminus[i][j][k] = Xprime[0] ;
+		  dYminus[i][j][k] = Xprime[1] ;
+		}
+	    }
+	}
+      DoOnce = 1 ;
+    }
+
+  if ( x[2] >= 0 ) 
+    {
+      Search( 2*NPOINTS-1, xarray, x[0], ilow ) ;
+      Search( 2*NPOINTS-1, yarray, x[1], jlow ) ;
+      Search( NPOINTS,     zarray, x[2], klow ) ;
+      if ( ilow < 0 ) ilow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
+      if ( jlow < 0 ) jlow = 0 ;
+      if ( klow < 0 ) klow = 0 ;
+      if ( ilow + ORDER  >=  2*NPOINTS - 2 ) ilow =  2*NPOINTS - 2 - ORDER ;
+      if ( jlow + ORDER  >=  2*NPOINTS - 2 ) jlow =  2*NPOINTS - 2 - ORDER ;
+      if ( klow + ORDER  >=  NPOINTS - 1 )   klow =  NPOINTS - 1 - ORDER ;
+      
+      for ( i = ilow ; i < ilow + ORDER + 1 ; i++ )
+	{
+	  for ( j = jlow ; j < jlow + ORDER + 1 ; j++ )
+	    {
+	      save_dX[j-jlow] = Interpolate( &zarray[klow], &dXplus[i][j][klow], ORDER, x[2] )   ;
+	      save_dY[j-jlow] = Interpolate( &zarray[klow], &dYplus[i][j][klow], ORDER, x[2] )   ;
+	    }
+	  saved_dX[i-ilow] = Interpolate( &yarray[jlow], save_dX, ORDER, x[1] )   ; 
+	  saved_dY[i-ilow] = Interpolate( &yarray[jlow], save_dY, ORDER, x[1] )   ; 
+	}
+      Xprime[0] = Interpolate( &xarray[ilow], saved_dX, ORDER, x[0] )   ;
+      Xprime[1] = Interpolate( &xarray[ilow], saved_dY, ORDER, x[0] )   ;
+      Xprime[2] = x[2] ;
+    }
+  else
+    {
+      Search( 2*NPOINTS-1, xarray, x[0], ilow ) ;
+      Search( 2*NPOINTS-1, yarray, x[1], jlow ) ;
+      Search( NPOINTS,     zarray, -1*x[2], klow ) ;      // Note sign flip for Z < 0
+      if ( ilow < 0 ) ilow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
+      if ( jlow < 0 ) jlow = 0 ;
+      if ( klow < 0 ) klow = 0 ;
+      if ( ilow + ORDER  >=  2*NPOINTS - 2 ) ilow =  2*NPOINTS - 2 - ORDER ;
+      if ( jlow + ORDER  >=  2*NPOINTS - 2 ) jlow =  2*NPOINTS - 2 - ORDER ;
+      if ( klow + ORDER  >=  NPOINTS - 1 )   klow =  NPOINTS - 1 - ORDER ;
+      
+      for ( i = ilow ; i < ilow + ORDER + 1 ; i++ )
+	{
+	  for ( j = jlow ; j < jlow + ORDER + 1 ; j++ )
+	    {
+	      save_dX[j-jlow] = Interpolate( &zarray[klow], &dXminus[i][j][klow], ORDER, -1*x[2] )   ;
+	      save_dY[j-jlow] = Interpolate( &zarray[klow], &dYminus[i][j][klow], ORDER, -1*x[2] )   ;
+	    }
+	  saved_dX[i-ilow] = Interpolate( &yarray[jlow], save_dX, ORDER, x[1] )   ; 
+	  saved_dY[i-ilow] = Interpolate( &yarray[jlow], save_dY, ORDER, x[1] )   ; 
+	}
+      Xprime[0] = Interpolate( &xarray[ilow], saved_dX, ORDER, x[0] )   ;
+      Xprime[1] = Interpolate( &xarray[ilow], saved_dY, ORDER, x[0] )   ;
+      Xprime[2] = x[2] ;
+    }
+  
+}
 
 //________________________________________
 
@@ -414,14 +516,15 @@ void StMagUtilities::UndoTwistDistortion( const Float_t x[3], Float_t Xprime[3] 
   Float_t         Zdrift ;
   Int_t           sign ;
 
-  // Work in TPC coordinates but note that XTWIST and YTWIST reported in Magnet coord system so negate them (below)  
+  // Work in TPC coordinates but note that XTWIST and YTWIST reported in Magnet coord system 
+  // so negate them (below)  
   
   if ( x[2] >= 0.0 ) sign =  1 ;                       // (TPC West)
   else               sign = -1 ;                       // (TPC East)  
 
   Zdrift = sign * ( TPC_Z0 - TMath::Abs(x[2]) ) ;
-  Xprime[0] = x[0] - ( -1* Const_1 * -1*YTWIST/TPC_Z0 + Const_2 * -1*XTWIST/TPC_Z0 ) * Zdrift ;
-  Xprime[1] = x[1] - (     Const_1 * -1*XTWIST/TPC_Z0 + Const_2 * -1*YTWIST/TPC_Z0 ) * Zdrift ;
+  Xprime[0] = x[0] - ( -1* Const_1 * -1*YTWIST/1000 + Const_2 * -1*XTWIST/1000 ) * Zdrift ;
+  Xprime[1] = x[1] - (     Const_1 * -1*XTWIST/1000 + Const_2 * -1*YTWIST/1000 ) * Zdrift ;
   Xprime[2] = x[2] ;                                   // Subtract to undo the distortion 
 
 }
@@ -460,9 +563,11 @@ void StMagUtilities::UndoMembraneDistortion( const Float_t x[3], Float_t Xprime[
 
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi    =  TMath::ATan2(x[1],x[0]) ;
-  z      =  x[2] ;
-
   if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
+  z      =  x[2] ;
+  if ( z > 0 && z <  0.1 ) z =  0.5 ;               // Protect against discontinuity at CM
+  if ( z < 0 && z > -0.1 ) z = -0.5 ;               // Protect against discontinuity at CM
+ 
   InterpolateEdistortion( r, phi, z, Er_integral, Ephi_integral ) ;
 
   // Subtract to Undo the distortions
@@ -558,7 +663,7 @@ void StMagUtilities::ReadField( )
       
   printf("Reading Magnetic Field:  %s,  Scale factor = %f \n",comment.Data(),gFactor);
   printf("Filename is %s, Adjusted Scale factor = %f \n",filename.Data(),gFactor*gRescale);
-  printf("Version: 3D Mag Field Distortions + PadRow13 + Twist + Clock + Membrane  \n" ) ;
+  printf("Version: 3D Mag Field Distortions + Twist + PadRow13 + Clock + Membrane + Endcap\n" ) ;
   MapLocation = BaseLocation + filename ;
   gSystem->ExpandPathName(MapLocation) ;
   magfile = fopen(MapLocation.Data(),"r") ;
@@ -650,7 +755,6 @@ void StMagUtilities::ReadField( )
   fclose(b3Dfile) ;
 
   filename = "membrane_efield.dat" ;
-  //MapLocation = filename ;
   MapLocation = BaseLocation + filename ;
   gSystem->ExpandPathName(MapLocation) ;
   efile = fopen(MapLocation.Data(),"r") ;
@@ -764,7 +868,7 @@ void StMagUtilities::InterpolateBfield( const Float_t r, const Float_t z, Float_
 
   fscale = 0.001*gFactor*gRescale ;               // Scale STAR maps to work in kGauss, cm
 
-  const   Int_t ORDER = 1  ;                      // Linear interpolation          
+  const   Int_t ORDER = 1  ;                      // Linear interpolation = 1, Quadratic = 2        
   static  Int_t jlow, klow ;                            
   Float_t save_Br[ORDER+1] ;
   Float_t save_Bz[ORDER+1] ;
@@ -795,7 +899,7 @@ void StMagUtilities::Interpolate3Dfield( const Float_t r, const Float_t z, const
 
   fscale = 0.001*gFactor*gRescale ;               // Scale STAR maps to work in kGauss, cm
 
-  const   Int_t ORDER = 1 ;                      // Linear interpolation          
+  const   Int_t ORDER = 1 ;                      // Linear interpolation = 1, Quadratic = 2   
   static  Int_t ilow, jlow, klow ;
   Float_t save_Br[ORDER+1],   saved_Br[ORDER+1] ;
   Float_t save_Bz[ORDER+1],   saved_Bz[ORDER+1] ;
@@ -840,7 +944,7 @@ void StMagUtilities::InterpolateEdistortion( const Float_t r, const Float_t phi,
 
 {
 
-  const   Int_t ORDER = 1 ;                      // Linear interpolation          
+  const   Int_t ORDER = 1 ;                      // Linear interpolation = 1, Quadratic = 2         
   static  Int_t ilow, jlow, klow ;
   Float_t save_Er[ORDER+1],   saved_Er[ORDER+1] ;
   Float_t save_Ephi[ORDER+1], saved_Ephi[ORDER+1] ;
@@ -879,7 +983,7 @@ void StMagUtilities::InterpolateEEdistortion( const Float_t r, const Float_t phi
 
 {
 
-  const   Int_t ORDER = 1 ;                      // Linear interpolation          
+  const   Int_t ORDER = 1 ;                      // Linear interpolation = 1, Quadratic = 2       
   static  Int_t ilow, jlow, klow ;
   Float_t save_Er[ORDER+1],   saved_Er[ORDER+1] ;
   Float_t save_Ephi[ORDER+1], saved_Ephi[ORDER+1] ;
@@ -924,7 +1028,8 @@ Float_t StMagUtilities::Interpolate( const Float_t Xarray[], const Float_t Yarra
   Float_t y ;
 
 
-  if ( ORDER == 2 ) 
+  if ( ORDER == 2 )                // Quadratic Interpolation = 2 
+
     {
       y  = (x-Xarray[1]) * (x-Xarray[2]) * Yarray[0] / ( (Xarray[0]-Xarray[1]) * (Xarray[0]-Xarray[2]) ) ; 
       y += (x-Xarray[2]) * (x-Xarray[0]) * Yarray[1] / ( (Xarray[1]-Xarray[2]) * (Xarray[1]-Xarray[0]) ) ; 
@@ -932,12 +1037,13 @@ Float_t StMagUtilities::Interpolate( const Float_t Xarray[], const Float_t Yarra
       
     }
 
-  else
+  else                             // Linear Interpolation = 1
+
     {
       y  = Yarray[0] + ( Yarray[1]-Yarray[0] ) * ( x-Xarray[0] ) / ( Xarray[1] - Xarray[0] ) ;
     }
 
-  return(y) ;
+  return (y) ;
 
 }
 
