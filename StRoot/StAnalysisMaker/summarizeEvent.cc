@@ -1,5 +1,8 @@
-// $Id: summarizeEvent.cc,v 1.6 1999/08/06 21:25:33 fisyak Exp $
+// $Id: summarizeEvent.cc,v 1.7 1999/08/07 19:40:58 fisyak Exp $
 // $Log: summarizeEvent.cc,v $
+// Revision 1.7  1999/08/07 19:40:58  fisyak
+// use StMessage
+//
 // Revision 1.6  1999/08/06 21:25:33  fisyak
 // Switch to StMessager
 //
@@ -37,37 +40,28 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "StEvent.h"
  *
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.6 1999/08/06 21:25:33 fisyak Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.7 1999/08/07 19:40:58 fisyak Exp $";
  *
 void summarizeEvent(StEvent& event)
 {
   gMessMgr->Info() << "QAInfo: StAnalysisMaker,  Reading Event "  << 
-    " Type " << event.type() << " Run " << event.runNumber() << endl;
+    " Type " << event.type() << " Run " << event.runNumber() << endm;
     gMessMgr->QAInfo() << "StAnalysisMaker,  Reading Event: " << nevents
-  gMessMgr->Info() << " N vertex " << event.vertexCollection()->size() << endl;
-  gMessMgr->Info() << " N track " << event.trackCollection()->size() << endl;
-  gMessMgr->Info() << " N TPC hit " << event.tpcHitCollection()->size() << endl;
-  gMessMgr->Info() << " N FTPC hit " << event.ftpcHitCollection()->size() << endl;
-  gMessMgr->Info() << " N SVT hit " << event.svtHitCollection()->size() << endl;
-
-  gMessMgr->Info() << "QAInfo: # tracks:         " << 
-              event.trackCollection()->size() << endl;
+  gMessMgr->Info() << "QAInfo:  # tracks:         " << 
+              event.trackCollection()->size() << endm;
   gMessMgr->Info() << "QAInfo:  # vertices:       " << 
-              event.vertexCollection()->size() << endl;
+              event.vertexCollection()->size() << endm;
   gMessMgr->Info() << "QAInfo:  # TPC hits:       " << 
-             event.tpcHitCollection()->size() << endl;
+             event.tpcHitCollection()->size() << endm;
   gMessMgr->Info() << "QAInfo:  # SVT hits:       " << 
-             event.svtHitCollection()->size() << endl;
+             event.svtHitCollection()->size() << endm;
   gMessMgr->Info() << "QAInfo:  # FTPC hits:      " << 
-             event.ftpcHitCollection()->size() << endl;
+             event.ftpcHitCollection()->size() << endm;
+  if (event.primaryVertex()) {
   gMessMgr->Info() << "QAInfo:  primary vertex:   " << 
-             event.primaryVertex()->position() << endl;
-
+             event.primaryVertex()->position() << endm;
+  }
 		       << (event.svtHitCollection() ? event.svtHitCollection()->numberOfHits() : 0) << endm;
-
-
-
-
     
     gMessMgr->QAInfo() << "# FTPC hits:      "
 		       << (event.ftpcHitCollection() ? event.ftpcHitCollection()->numberOfHits() : 0) << endm;
