@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.20 2000/02/23 21:55:40 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.21 2000/03/14 17:58:41 yepes Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.21  2000/03/14 17:58:41  yepes
+// change tracker setup for online case
+//
 // Revision 1.20  2000/02/23 21:55:40  yepes
 // fix problem with null data set
 //
@@ -176,7 +179,7 @@ Int_t St_l3t_Maker::MakeOnLine(){
 //
 //    Set parameters
 //
-   tracker.setup (  ) ;
+   tracker.setup ( 30000, 3000 ) ;
 // tracker.para.infoLevel = 10 ;
    for ( int ie = 0 ; ie < gl3.nEvents ; ie++ ) gl3.event[ie].bField = 0.5 ;
    tracker.reset();
