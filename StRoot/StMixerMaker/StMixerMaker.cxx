@@ -1,40 +1,3 @@
-/***************************************************************************
- *
- * $Id: StMixerMaker.cxx,v 1.7 2000/07/10 13:32:42 pfachini Exp $
- *
- * Author: Patricia Fachini
- *
- ***************************************************************************
- *
- * Description: Maker for doing the embedding (mixing)
- *              
- ***************************************************************************
- *
- * $Log: StMixerMaker.cxx,v $
- * Revision 1.7  2000/07/10 13:32:42  pfachini
- * *** empty log message ***
- *
- * Revision 1.6  2000/03/15 22:23:53  pfachini
- * Now using only TPC_DB parameters
- *
- * Revision 1.5  2000/03/15 22:16:32  pfachini
- * *** empty log message ***
- *
- * Revision 1.4  2000/03/15 20:50:41  pfachini
- * The command line to write out the mixed events into a file is now commented
- *
- * Revision 1.3  2000/03/15 17:23:14  pfachini
- * Using now the Trs classes instead of having a 'local' copy
- *
- * Revision 1.2  2000/02/22 20:25:23  pfachini
- * *** empty log message ***
- *
- * Revision 1.1  2000/02/16 21:02:09  pfachini
- * First version StMixer
- *
- *
- **************************************************************************/
-
 //////////////////////////////////////////////////////////////////////////
 //
 // You must select a data base initializer method
@@ -567,7 +530,7 @@ Int_t StMixerMaker::Make() {
     // Digitize the Signals
     //
     // First make a sector where the data can go...
-    StTrsDigitalSector* aDigitalSector = new StTrsDigitalSector(mGeometryDb);
+    aDigitalSector = new StTrsDigitalSector(mGeometryDb);
     
     // Point to the object you want to fill
     //
@@ -595,12 +558,18 @@ Int_t StMixerMaker::Make() {
   return kStOK;
 } // Make() 
 
-// Make sure the memory is deallocated!
-Int_t StMixerMaker::Clear()
+void StMixerMaker::Clear(Option_t *opt)
 {
-  //mAllTheDataMixer->clear(); //This deletes all the StTrsDigitalSectors in the StTrsRawDataEvent
-  return kStOk;
+  StMaker::Clear();
+  delete mAllTheDataMixer;
+  delete tdr1;
+  delete tdr2;
+  delete aDigitalSector;
+  delete mSector;
+  delete mSector1;
+  delete mSector2;
 }
+
 Int_t StMixerMaker::Finish()
 {
   //Clean up all the pointers that were initialized in StTrsMaker::Init()
