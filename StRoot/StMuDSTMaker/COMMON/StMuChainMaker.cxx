@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.18 2003/04/21 18:18:52 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.19 2003/04/24 22:22:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -131,7 +131,7 @@ TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFile
   if (dirFile.find(".lis")!=string::npos) 	        fromList(dirFile);
   else if (dirFile.find(".files")!=string::npos)        fromList(dirFile);
   else if (dirFile.find(".MuDst.root")!=string::npos)   fromFile(dirFile);
-  else if (dirFile.rfind("/") == dirFile.length()-1 )   fromDir(dirFile);
+  else if (dirFile.rfind("/") == dirFile.length()-2 )   fromDir(dirFile);
   else                                                  FORCEDDEBUGMESSAGE(" don't know how to read input ");
 
   add( mFileList );
@@ -360,6 +360,10 @@ void StMuChainMaker::fromFile(string file) {
  /***************************************************************************
   *
   * $Log: StMuChainMaker.cxx,v $
+  * Revision 1.19  2003/04/24 22:22:11  laue
+  * Bug fixed when reading directories. Forgot the string terminator when
+  * searching for the last character.
+  *
   * Revision 1.18  2003/04/21 18:18:52  laue
   * Modifications for the new scheduler implementation:
   * - the filenames and the number of events per files are now supplied
