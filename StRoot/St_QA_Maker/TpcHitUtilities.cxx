@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: TpcHitUtilities.cxx,v 1.4 2002/02/01 23:15:27 genevb Exp $
+// $Id: TpcHitUtilities.cxx,v 1.5 2003/09/19 21:23:37 genevb Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: TpcHitUtilities.cxx,v $
+// Revision 1.5  2003/09/19 21:23:37  genevb
+// Extraneous semicolon
+//
 // Revision 1.4  2002/02/01 23:15:27  genevb
 // Include float.h
 //
@@ -54,7 +57,7 @@ TpcHitUtilities::TpcHitUtilities(StTrack* tck, double magneticField)
     m_BField = magneticField;
 }
 
-TpcHitUtilities::~TpcHitUtilities() {};
+TpcHitUtilities::~TpcHitUtilities() {}
 
 //Access--------------------------------------
 void TpcHitUtilities::clear()
