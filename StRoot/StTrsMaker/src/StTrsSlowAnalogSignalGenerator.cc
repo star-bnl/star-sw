@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.7 1999/02/10 20:55:16 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.8 1999/02/12 01:27:18 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
- * Revision 1.7  1999/02/10 20:55:16  lasiuk
- * Feb 10,1999
+ * Revision 1.8  1999/02/12 01:27:18  lasiuk
+ * Limit Debug output
  *
+ * Revision 1.13  1999/02/26 18:26:09  lasiuk
+ * to offset must be used uniformly.  Correction to
+ * "timeOfSignal" should be merged with coordinate transform
  *
  * Revision 1.12  1999/02/19 10:35:04  lasiuk
  * Function prototype for StTpcCoordinateTransform
@@ -49,6 +52,8 @@
  *
  * Revision 1.2  1998/11/13 21:32:16  lasiuk
  * adjust charge generated
+ *
+ * Revision 1.1  1998/11/10 17:12:27  fisyak
  * Put Brian trs versin into StRoot
  *
  * Revision 1.5  1998/11/08 17:30:26  lasiuk
@@ -123,7 +128,7 @@ double StTrsSlowAnalogSignalGenerator::endoChargeIntegral(double xo, double yo, 
     using namespace units;
 #endif
     double L = (yo < mGeomDb->lastInnerSectorAnodeWire()) ?
-    cout << "got to StTrsSlowAnalogSignalGenerator::imageChargeIntegral" << endl;
+	mGeomDb->innerSectorAnodeWirePadPlaneSeparation() :
 	mGeomDb->outerSectorAnodeWirePadPlaneSeparation();
     //PR(L);
     double t3 = 1/L;
@@ -207,21 +212,21 @@ double StTrsSlowAnalogSignalGenerator::imageChargeIntegral(double xo, double yo,
 	double t62 = 5*sqrt(t27+t2+t48+(d*d)/100-2.*t49-2.*t28+t13);
 	double t66 = atan((50./d)*t29*t46*t31/t62);
 	double t74 = 0.1591549431*q*(-t19*xu*t23+t19*xo*t23+t37*xl*t9-t37*xo*t9)*t44
-    cout << "StTrsSlowAnalogSignalGenerator::signalOnPad()" << endl;
+	    -0.1591549431*q*(-t55*xu*t23+t55*xo*t23+t66*xl*t9-t66*xo*t9)*t44;
 	
 	return t74;
 double StTrsSlowAnalogSignalGenerator::signalOnPad(double xo, double yo, double xl, double xu, double yl, double yu)
-	    cout << "********************Endo" << endl;
+{
 {
 //     cout << "StTrsSlowAnalogSignalGenerator::signalOnPad()" << endl;
      switch(mChargeDistribution)
- 	    cout << "********************GATTI" << endl;
+	{
 	case endo:
 // 	    cout << "********************Endo" << endl;
 	    return endoChargeIntegral(xo,yo,xl,xu,yl,yu);
 	    break;
  	case gatti:
-	    cout << "********************DIPOLE" << endl;
+//  	    cout << "********************GATTI" << endl;
 // 	    return gattiChargeIntegral(xo,yo,xl,xu,yl,yu);
 	    cout << "Gatti Distribution Not Implemented Yet!" << endl;
 	    exit(0);
@@ -233,7 +238,7 @@ double StTrsSlowAnalogSignalGenerator::signalOnPad(double xo, double yo, double 
 	default:
 	    cerr << "Default Function Selected. ERROR!" << endl;
 	    exit(0);
-    cout << "StTrsSlowAnalogSignalGenerator::inducedChargeOnPad()" << endl;
+	    break;
 	}
 }
 // // 	    return gattiChargeIntegral(xo,yo,xl,xu,yl,yu);
@@ -249,14 +254,14 @@ double StTrsSlowAnalogSignalGenerator::signalOnPad(double xo, double yo, double 
 {
 //     cout << "StTrsSlowAnalogSignalGenerator::inducedChargeOnPad()" << endl;
 	
-	    PR(currentWire.size());
+    // This should probably be made a data member at some point!
     StTpcCoordinateTransform transformer(mGeomDb, mSCDb, mElectronicsDb);
 // 	PR(currentWire.size());
 // 	    PR(currentWire.size());
     PR(wireHistogram->max());
     if(wireHistogram->min()<0) {
 	cerr << "Wire Plane is empty" << endl;
- 	    PR(ycoord);  // ycoord of Wire
+	return;
     }
     for(int jj=wireHistogram->min(); jj<=wireHistogram->max(); jj++) {
 //   	cout << "Wire Index: " << jj << endl;
@@ -266,17 +271,18 @@ double StTrsSlowAnalogSignalGenerator::signalOnPad(double xo, double yo, double 
 	aTpcWire currentWire = wireHistogram->getWire(jj);
 	aTpcWire::iterator iter;
 
-	    PR(iter->position());
-	    PR(xyCoord);
+	for(iter  = currentWire.begin();
+	    // What is the location of the avalanche
 	    // center of Pad that is being processed?
 // 	    PR(*iter);
 // 	    PR(xyCoord);
 	    //xyCoord.pos().setY(ycoord);
 	    float ycoord = wireHistogram->wireCoordinate(jj);
-	    PR(tpcRaw);
-
+//  	    PR(*iter);
+//    	    PR(ycoord);  // ycoord of Wire
 	    //PR(iter->position().z()/mSCDb->driftVelocity());
 // 	    PR(tpcRaw);
+	    //sleep(5);
 	    StTpcPadCoordinate    tpcRaw;
 	    StTpcLocalCoordinate  xyCoord(iter->position());
 	    cout << "AnsigGen r/p " << centralPad << '/' << centralRow << endl;
@@ -311,7 +317,7 @@ double StTrsSlowAnalogSignalGenerator::signalOnPad(double xo, double yo, double 
 	    if(xyCoord.pos().y() < mGeomDb->outerSectorEdge()) {
 		mRowLimits.second = min(mRowLimits.second, mGeomDb->numberOfInnerRows());
 	    }
-		    cout << " row: " << irow << " pad: " << ipad << endl;
+	    else {
 		mRowLimits.first  = max(mRowLimits.first, (mGeomDb->numberOfInnerRows()+1));
 		//PR(mPadLimits.first);
 		//PR(mPadLimits.second);
@@ -346,10 +352,10 @@ double StTrsSlowAnalogSignalGenerator::signalOnPad(double xo, double yo, double 
 		    //cout << "  yl " << yl << " yu " << yu << endl;
 // 		    PR(padWidth);
 // 		    PR(padLength);
-		    PR(chargeOfSignal);
-		    PR(iter->numberOfElectrons());
+		    tpcRaw.setPad(ipad);
+		    tpcRaw.setRow(irow);
 		    transformer(tpcRaw,xyCoord);
-		    PR(chargeOfSignal);
+// 		    PR(chargeOfSignal);
 // 		    PR(iter->numberOfElectrons());
 		    // Integral limits for nearest pad
 // 		    PR(chargeOfSignal);
@@ -359,12 +365,12 @@ double StTrsSlowAnalogSignalGenerator::signalOnPad(double xo, double yo, double 
 		    
 		    //PR(chargeOfSignal);
 		    //PR(timeOfSignal);
-		    PR(padSignal);
+//  		    PR(iter->numberOfElectrons());
 
 //  		    PR(chargeOfSignal);
-		    PR(ipad);
-		    PR(irow);
-		    PR(mSector->timeBinsOfRowAndPad(irow,ipad).size());
+// 		    PR(padSignal);
+//   		    PR(chargeOfSignal);
+			iter->position().z()/mSCDb->driftVelocity();
 //   		    PR(padSignal);
 // 		    PR(iter->position());
 		    // Make an analog signal
@@ -633,7 +639,7 @@ double StTrsSlowAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal
 	default:
 	    cerr << "Default Function Selected. ERROR!" << endl;
 	    exit(0);
-    cout << "StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()" << endl;
+	    break;
 	}
 }
 // 	    return asymmetricGaussianApproximateResponse(t, sig);
@@ -656,7 +662,7 @@ double StTrsSlowAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal
 void StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()
 {
 //     cout << "StTrsSlowAnalogSignalGenerator::sampleAnalogSignal()" << endl;
-	    cout << "row/pad " << irow << '/' << ipad << ' ' << continuousAnalogTimeSequence.size() << endl;
+    
     // operates on mSector 
 
 	    //cout << "row/pad " << irow << '/' << ipad << ' ' << continuousAnalogTimeSequence.size() << endl;

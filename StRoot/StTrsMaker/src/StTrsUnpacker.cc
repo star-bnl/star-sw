@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.cc,v 1.3 1999/02/10 20:55:18 lasiuk Exp $
+ * $Id: StTrsUnpacker.cc,v 1.4 1999/02/12 01:27:18 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.cc,v $
- * Revision 1.3  1999/02/10 20:55:18  lasiuk
- * Feb 10,1999
+ * Revision 1.4  1999/02/12 01:27:18  lasiuk
+ * Limit Debug output
+ *
+ * Revision 1.6  1999/02/16 18:15:41  fisyak
+ * Check in the latest updates to fix them
  *
  * Revision 1.5  1999/02/14 20:45:15  lasiuk
  * use assert and index (ii) was 'off by 1'
@@ -88,7 +91,7 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
     for(; ii<numberOfEntriesD; ii++) {
 	if ( (*TrsPadData.first)[ii] == static_cast<unsigned char>(0) ) {
 	    numberOfZeros += (*TrsPadData.second)[ii];
-	PR(static_cast<int>(*aSequence.firstAdc));
+	    continue;
 	}
 	PR(aSequence.startTimeBin);
 	//PR(static_cast<int>(*aSequence.firstAdc));
