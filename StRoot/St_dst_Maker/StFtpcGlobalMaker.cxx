@@ -1,5 +1,9 @@
-// $Id: StFtpcGlobalMaker.cxx,v 1.9 2002/10/31 13:43:24 oldi Exp $
+// $Id: StFtpcGlobalMaker.cxx,v 1.10 2002/11/06 13:48:25 oldi Exp $
 // $Log: StFtpcGlobalMaker.cxx,v $
+// Revision 1.10  2002/11/06 13:48:25  oldi
+// Vertex handling simplifed.
+// Global/primary fit handling simplified.
+//
 // Revision 1.9  2002/10/31 13:43:24  oldi
 // dE/dx parameters read from database, now.
 // Code cleanup (indention).
@@ -173,11 +177,11 @@ Int_t StFtpcGlobalMaker::Make(){
 #ifdef REFIT_FTPC_TRACKS
   // Redo unconstrained fit with primary vertex instead of preVertex
   StFtpcVertex *refit_vertex = new StFtpcVertex(primvtx);
-  gMessMgr->Info() << "Using primary vertex: "<< refit_vertex->GetX() << "+-" << refit_vertex->GetXerr() << ", " << refit_vertex->GetY() << "+-" << refit_vertex->GetYerr()  << ", " << refit_vertex->GetZ()  << "+-" << refit_vertex->GetZerr() << endm;
+  gMessMgr->Info() << "Using primary vertex: "<< *refit_vertex << endm;
   Bool_t bench = (Bool_t)false;
   StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, fcl_fppoint, fpt_fptrack, bench, 
 					      StFtpcTrackingParams::Instance()->MaxDca(0));
-  refitter->FitAnddEdxAndWrite(fpt_fptrack,-primvtx->id);
+  refitter->GlobalFitAnddEdxAndWrite(fpt_fptrack);
   delete refitter;
   delete refit_vertex;
 #endif

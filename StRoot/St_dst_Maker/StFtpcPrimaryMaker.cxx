@@ -1,5 +1,9 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.12 2002/10/11 15:47:35 oldi Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.13 2002/11/06 13:48:29 oldi Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.13  2002/11/06 13:48:29  oldi
+// Vertex handling simplifed.
+// Global/primary fit handling simplified.
+//
 // Revision 1.12  2002/10/11 15:47:35  oldi
 // Code cleanup (several lines of code changed due to *params -> Instance()).
 //
@@ -151,7 +155,7 @@ Int_t StFtpcPrimaryMaker::Make(){
   Bool_t bench = (Bool_t)false;
   StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, bench, 
 					      StFtpcTrackingParams::Instance()->MaxDca(0));
-  refitter->FitAndWrite(tracks, primvtx->id);
+  refitter->PrimaryFitAndWrite(tracks);
   delete refitter;
   delete refit_vertex;
 
