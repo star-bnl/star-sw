@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   02/12/99
-// $Id: TurnDisplay.C,v 1.5 1999/12/27 20:54:39 fine Exp $
+// $Id: TurnDisplay.C,v 1.6 1999/12/27 21:47:06 fine Exp $
   StEventDisplayMaker *dsMaker = 0;
   StVirtualEventFilter *trackFilter;
 //___________________________________________________________________
@@ -12,7 +12,10 @@ void TurnDisplay(const Char_t *filterName=0) {
   //  - defines the tables one wants to be drawn
 
     if (!chain->GetOption("DISPLAY")) {
+       gSystem->Load("St_geom_Maker");
        gSystem->Load("StEventDisplayMaker");
+       StMaker *mini = new St_geom_Maker();
+       mini->Init();
        dsMaker = new StEventDisplayMaker();
        dsMaker->Init();
     }
@@ -59,7 +62,7 @@ void TurnDisplay(const Char_t *filterName=0) {
        //      contain 3 columns associated with x,y,z and 
        //      foreing key to link all points together
 
-       //dsMaker->AddName("g2t_tpc_hit(track_p,x[0]:x[1]:x[2])");   //Add the tables to the Event Display list
+       // dsMaker->AddName("g2t_tpc_hit(track_p,x[0]:x[1]:x[2])");   //Add the tables to the Event Display list
        // dsMaker->AddName("g2t_svt_hit(track_p,x[0]:x[1]:x[2])");   //Add the tables to the Event Display list
        dsMaker->AddName("tphit(id_globtrk,x:y:z)");               //Add the tables to the Event Display list
        dsMaker->AddName("scs_spt(id_globtrk,x[0]:x[1]:x[2])");    //Add the tables to the Event Display list
@@ -90,6 +93,9 @@ void TurnDisplay(const Char_t *filterName=0) {
   }
 //__________________________________________________________________________
 // $Log: TurnDisplay.C,v $
+// Revision 1.6  1999/12/27 21:47:06  fine
+// St_geom_Maker has been added
+//
 // Revision 1.5  1999/12/27 20:54:39  fine
 // it shows how to active the ttrack points
 //
