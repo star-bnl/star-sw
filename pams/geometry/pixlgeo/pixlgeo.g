@@ -1,5 +1,13 @@
-* $Id: pixlgeo.g,v 1.4 2003/10/16 20:47:55 potekhin Exp $
+* $Id: pixlgeo.g,v 1.5 2003/10/16 21:06:01 potekhin Exp $
 * $Log: pixlgeo.g,v $
+* Revision 1.5  2003/10/16 21:06:01  potekhin
+* Notice that this check-in and previous
+* both contain only two sectors for brevity.
+*
+* I changed the notation slightly in the
+* angle offset area, and adjusted the sector
+* opening angle.
+*
 * Revision 1.4  2003/10/16 20:47:55  potekhin
 * Substantial move forward:
 * 1) Introduced the mother volume for each ladder
@@ -79,7 +87,7 @@ Module PIXLGEO is the geometry of the STAR pixel detector
       Ladder     =  4          ! ladder index
       r          =  1.595      ! 4th ladder nominal radius
       a          =  79.51      ! 4th ladder nominal position angle
-      aOffset    =  19.85      ! Angular offset  (degrees)
+      aOffset    =  70.15-90.0 ! Angular offset
    EndFill
 
 ******************************************************
@@ -137,7 +145,7 @@ endblock
 Block PSEC is a group of ladders
       Material  Silicon
       Attribute PSEC   Seen=1  colo=5
-      Shape TUBS  Rmin=PIXG_Rin Rmax=PIXG_Rout Dz=PIXG_TotalLength/2.0 Phi1=-15.0 Phi2=115.0
+      Shape TUBS  Rmin=PIXG_Rin Rmax=PIXG_Rout Dz=PIXG_TotalLength/2.0 Phi1=-12.0 Phi2=110.0
 endblock
 *
 * -----------------------------------------------------------------------------
