@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.8 2000/07/28 21:05:36 fisyak Exp $
+// $Id: StTagsMaker.cxx,v 1.9 2003/05/14 03:30:17 jeromel Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.9  2003/05/14 03:30:17  jeromel
+// Zombied branch corrected . BugTracking #121
+//
 // Revision 1.8  2000/07/28 21:05:36  fisyak
 // Remove dependence on StChain InitRun
 //
@@ -150,12 +153,12 @@ EDataSetPass StTagsMaker::GetTags (St_DataSet* ds)
 	Comment.ReplaceAll(":",' ');
 	Comment.ReplaceAll("/",' ');
 	//have to add '[' for non-arrays
-	if (nDim==0) {
-	  leaflist += '[';
-	  leaflist += Comment;
-	  leaflist += "] ";
-	}
-	else {
+	if (nDim != 0) {
+	  //leaflist += '[';
+	  //leaflist += Comment;
+	  //leaflist += "] ";
+	  //}
+	  //else {
 	  leaflist += " '";
 	  leaflist += Comment;
 	  leaflist += "' ";
