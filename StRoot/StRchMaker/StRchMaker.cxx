@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.24 2000/06/16 20:34:11 dunlop Exp $
+ * $Id: StRchMaker.cxx,v 1.25 2000/06/16 20:52:14 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.24  2000/06/16 20:34:11  dunlop
- * Fixed segfault again.  Was stomped last checkin
+ * Revision 1.25  2000/06/16 20:52:14  dunlop
+ * Fixed another segfault when dataset not present
+ *
+ * Revision 1.25  2000/06/16 20:52:14  dunlop
+ * Fixed another segfault when dataset not present
  *
  * Revision 1.24  2000/06/16 20:34:11  dunlop
  * Fixed segfault again.  Was stomped last checkin
@@ -305,6 +308,13 @@ Int_t StRchMaker::Make() {
 	    }
 	    mTheRichReader = new StRrsReader(theRichSimData, -9);
 	}
+	else {
+	    cout << "DAQ" << endl;
+	    mTheRichData   = GetDataSet("StDAQReader");
+	    if(!mTheRichData) {
+		cout << "\tSkip this event\n" << endl;
+		clearPadMonitor();
+		
 		return kStWarn;
 	    }
 
@@ -734,10 +744,10 @@ void StRchMaker::fillStEvent()
     
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.24 2000/06/16 20:34:11 dunlop Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.25 2000/06/16 20:52:14 dunlop Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.24 2000/06/16 20:34:11 dunlop Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 1.25 2000/06/16 20:52:14 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
