@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofSlat.h,v 2.4 2003/05/21 18:23:18 ullrich Exp $
+ * $Id: StTofSlat.h,v 2.5 2003/07/09 20:13:24 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofSlat.h,v $
+ * Revision 2.5  2003/07/09 20:13:24  ullrich
+ * Inherits now from StHit. Methods added.
+ *
  * Revision 2.4  2003/05/21 18:23:18  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -31,13 +34,15 @@
 #ifndef StTofSlat_hh
 #define StTofSlat_hh
 
-#include "StObject.h"
+//#include "StObject.h"
+#include "StHit.h"
 class StTrack;
 
-class StTofSlat : public StObject {
+class StTofSlat : public StHit {
 public:
     StTofSlat();
-    StTofSlat(unsigned short, unsigned short, unsigned short, StTrack*);
+    StTofSlat(unsigned short, unsigned short, unsigned short, StTrack*,
+    	      float, unsigned short, unsigned short);
     ~StTofSlat();
     
     int operator==(const StTofSlat&) const;
@@ -46,20 +51,29 @@ public:
     unsigned short  slatIndex() const;
     unsigned short  adc() const;
     unsigned short  tdc() const;
-    
-    StTrack*       associatedTrack();
-    const StTrack* associatedTrack() const;
-    
-    void      setSlatIndex(unsigned short);
-    void      setAdc(unsigned short);
-    void      setTdc(unsigned short);
-    void      setAssociatedTrack(StTrack*);
-    
+    StTrack*        associatedTrack();
+    const StTrack*  associatedTrack() const;
+    float           zHit() const;
+    unsigned short  hitProf() const;
+    unsigned short  matchFlag() const;
+
+    void setSlatIndex(unsigned short);
+    void setAdc(unsigned short);
+    void setTdc(unsigned short);
+    void setAssociatedTrack(StTrack*);
+    void setZhit(float);
+    void setHitProf(UShort_t);
+    void setMatchFlag(UShort_t);
+
 protected:
+    StObject* clone() const;
     UShort_t  mSlatIndex;
     UShort_t  mAdc;
     UShort_t  mTdc;
     StTrack  *mAssociatedTrack; //$LINK
+    float     mZhit;
+    UShort_t  mHitProf;
+    UShort_t  mMatchFlag;
     
     ClassDef(StTofSlat,2)
 };
@@ -82,6 +96,18 @@ StTofSlat::setTdc(unsigned short rawTdc)
     mTdc = rawTdc;
 }
 
+inline void StTofSlat::setZhit(float zhit){
+  mZhit = zhit;
+}
+
+inline void StTofSlat::setHitProf(unsigned short hitprof){
+  mHitProf = hitprof;
+}
+
+inline void StTofSlat::setMatchFlag(unsigned short matchflag){
+  mMatchFlag = matchflag;
+}
+
 inline unsigned short
 StTofSlat::slatIndex() const
 {
@@ -99,5 +125,18 @@ StTofSlat::tdc()  const
 {
     return mTdc;
 }
+
+inline float StTofSlat::zHit() const {
+  return mZhit;
+}
+
+inline unsigned short StTofSlat::hitProf() const {
+  return mHitProf;
+}
+
+inline unsigned short StTofSlat::matchFlag() const {
+  return mMatchFlag;
+}
+
 
 #endif
