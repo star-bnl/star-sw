@@ -14,6 +14,7 @@ class StEmcDecoder;
 class StBemcData: public TDataSet
 {
  protected:
+  enum {MAXSMDRDO=8, TDCCHANNELS=30, EMCTRIGGERPATCH=300, TOWERCHANNELS=4800, SMDCHANNELS=18000};
   StEmcDecoder *mDecoder;
  
  public: 
@@ -48,42 +49,48 @@ class StBemcData: public TDataSet
   Short_t TDCErrorFlag;                 ///< Error from TDC
   Short_t NTDCChannels;                 ///< Total number of valid TDC channels
 
-  Short_t TDCError[30];                 ///< vector with TDC error for each TDC channel
-  Short_t TDCToken[30];                 ///< vector with crate token for each TDC channel
-  Short_t TDCTrigger[30];               ///< vector with trigger number for each TDC channel
-  Short_t TDCCrateId[30];               ///< vector with crate Id for each TDC channel
-  Short_t TDCCount[30];                 ///< vector with byte count for each TDC channel
+  Short_t TDCError[TDCCHANNELS];        ///< vector with TDC error for each TDC channel
+  Short_t TDCToken[TDCCHANNELS];        ///< vector with crate token for each TDC channel
+  Short_t TDCTrigger[TDCCHANNELS];      ///< vector with trigger number for each TDC channel
+  Short_t TDCCrateId[TDCCHANNELS];      ///< vector with crate Id for each TDC channel
+  Short_t TDCCount[TDCCHANNELS];        ///< vector with byte count for each TDC channel
+
+  Float_t TDCGhost[TDCCHANNELS];        ///< vector with the threshold for each TDC channel to remove ghost pedestals
+  Short_t TDCGhostMode[TDCCHANNELS];    ///< Mode for ghost pedestal removal
+  Bool_t  TowerRemoveGhost;             ///< If kTRUE, removes the entire event in case of a ghost pedestal
+  Short_t NumberGhost;                  ///< Number of ghost TDC channel
+  Short_t NumberBadHeader;              ///< Number of bad headers
   
-  Short_t TowerADC[4800];               ///< Matrix of ADC's as obtained from daq
-  Float_t TowerEnergy[4800];            ///< tower energy
-  Char_t  TowerStatus[4800];            ///< tower status
+  Short_t TowerADC[TOWERCHANNELS];      ///< Matrix of ADC's as obtained from daq
+  Float_t TowerEnergy[TOWERCHANNELS];   ///< tower energy
+  Char_t  TowerStatus[TOWERCHANNELS];   ///< tower status
 					
-  Char_t  HighTower[300];               ///< high tower trigger data
-  Char_t  Patch[300];                   ///< Patch trigger data
+  Char_t  HighTower[EMCTRIGGERPATCH];   ///< high tower trigger data
+  Char_t  Patch[EMCTRIGGERPATCH];       ///< Patch trigger data
 	
-					// smd data -----------------------------------------------------
+	// smd data -----------------------------------------------------
   Bool_t  SMDPresent;                   ///< Check to see if there is SMD information in the event
   Bool_t  ValidSMDEvent;                ///< check to see if the event is valid
   Short_t SMDErrorFlag;                 ///< Error from TDC
   Short_t SMDByteCount;                 ///< Total byte count for SMD
   Short_t NSmdHits;                     ///< Total number of channels
-  Char_t  TimeBin[8];                   ///< Time bin for each SMD fiber
-  Short_t SmdeADC[18000];               ///< Matrix of ADC's in Physical Positions for SMD_Eta
-  Short_t SmdpADC[18000];               ///< Matrix of ADC's in Physical Positions for SMD_Phi
-  Float_t SmdeEnergy[18000];            ///< SMD-eta energy 
-  Float_t SmdpEnergy[18000];            ///< SMD-phi energy
-  Char_t  SmdeStatus[18000];            ///< SMD-eta status 
-  Char_t  SmdpStatus[18000];            ///< SMD-phi status
+  Char_t  TimeBin[MAXSMDRDO];           ///< Time bin for each SMD fiber
+  Short_t SmdeADC[SMDCHANNELS];         ///< Matrix of ADC's in Physical Positions for SMD_Eta
+  Short_t SmdpADC[SMDCHANNELS];         ///< Matrix of ADC's in Physical Positions for SMD_Phi
+  Float_t SmdeEnergy[SMDCHANNELS];      ///< SMD-eta energy 
+  Float_t SmdpEnergy[SMDCHANNELS];      ///< SMD-phi energy
+  Char_t  SmdeStatus[SMDCHANNELS];      ///< SMD-eta status 
+  Char_t  SmdpStatus[SMDCHANNELS];      ///< SMD-phi status
   
-					// psd data -----------------------------------------------------
+	// psd data -----------------------------------------------------
   Bool_t  PSDPresent;                   ///< Check to see if there is PSD information in the event
   Bool_t  ValidPSDEvent;                ///< check to see if the event is valid
   Short_t PSDErrorFlag;                 ///< Error from TDC
   Short_t PSDByteCount;                 ///< Total byte count for PSD
   Short_t NPsdHits;                     ///< Total number of channels
-  Short_t PsdADC[4800];                 ///< Matrix of ADC's in Physical Positions for PSD
-  Float_t PsdEnergy[4800];              ///< SMD-eta energy 
-  Char_t  PsdStatus[4800];              ///< SMD-eta status 
+  Short_t PsdADC[TOWERCHANNELS];        ///< Matrix of ADC's in Physical Positions for PSD
+  Float_t PsdEnergy[TOWERCHANNELS];     ///< SMD-eta energy 
+  Char_t  PsdStatus[TOWERCHANNELS];     ///< SMD-eta status 
   
   ClassDef(StBemcData,1) 
 };
