@@ -137,8 +137,8 @@ for (i=0;i< indextbl_h[0].nok;i++)
          DataRow=  indextbl[i].data_row;
          Row=      indextbl[i].rgm;
          Npads=structtbl[StructRow].info;
-	 k=1;
-         while(k++<=Npads){
+	 k=0;
+         while(k++<Npads){
 	 Pad=structtbl[StructRow+k].info;
          if(Row<14){gains_in[RowOffset[Row-1]+Pad-1].data=
 		      (gain_bad[DataRow+k-1].gain<=0.0)?1.0:gain_bad[DataRow+k-1].gain;}
