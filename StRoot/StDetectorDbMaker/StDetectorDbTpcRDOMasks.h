@@ -5,6 +5,8 @@
 #include "StMaker.h"
 #include "tables/St_tpcRDOMasks_Table.h"
 
+struct tpcRDOMasks_st;
+
 class StDetectorDbTpcRDOMasks{
 public:
     static StDetectorDbTpcRDOMasks* instance();

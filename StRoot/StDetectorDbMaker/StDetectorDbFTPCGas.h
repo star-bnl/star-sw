@@ -3,9 +3,10 @@
 
 #include <iostream.h>
 #include "StMaker.h"
-#include "tables/St_ftpcGasOut_Table.h"
-#include "tables/St_ftpcGasSystem_Table.h"
-#include "tables/St_tpcGas_Table.h"
+
+struct ftpcGasSystem_st;
+struct ftpcGasOut_st;
+struct tpcGas_st;
 
 class StDetectorDbFTPCGas{
 public:

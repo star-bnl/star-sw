@@ -3,14 +3,13 @@
 
 #include <iostream.h>
 #include "StMaker.h"
-#include "tables/St_trigDetSums_Table.h"
-#include "tables/St_richvoltages_Table.h"
-#include "tables/St_y1Mult_Table.h"
+
+struct trigDetSums_st;
+struct richvoltages_st;
+struct y1Mult_st;
 
 class StDetectorDbRichScalers{
 public:
-    
-    
     static StDetectorDbRichScalers* instance();
     
     double getCTBWest();
