@@ -1,10 +1,18 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.32 2004/01/30 21:40:21 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.33 2004/03/17 21:01:53 andrewar Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.33  2004/03/17 21:01:53  andrewar
+ * Trapping for negative track error (^2) values _c00 and _c11. This should
+ * be a temporary fix until the root of the problem is found. Problem seems
+ * localized to trackNodes without hits.
+ * Also trapping for asin(x), x>1 in ::length; point to point cord length
+ * on the helix is greater than twice radius of curvature. This should also be
+ * resovled.
+ *
  * Revision 2.32  2004/01/30 21:40:21  pruneau
  * some clean up of the infinite checks
  *
@@ -599,6 +607,10 @@ void StiKalmanTrackNode::propagateError()
   _c21 += b21; 
   _c31 += b31; 
   _c41 += b41; 
+
+  if(_c00<=0.) _c00=0.;
+  if(_c11<=0.) _c11=0.;
+
 }
 
 /*! Calculate the effect of MCS on the track error matrix.
@@ -781,7 +793,10 @@ double StiKalmanTrackNode::pathLToNode(const StiKalmanTrackNode * const oNode)
 inline double StiKalmanTrackNode::length(const StThreeVector<double>& delta, double curv)
 {
   double tR = fabs(2./curv);
-  return  tR*asin(delta.magnitude()/tR);
+  double m = delta.magnitude();
+  if(m<tR) return  tR*asin(delta.magnitude()/tR);
+  //  cout <<"Trapping m"<<endl;
+  return tR*M_PI/2.;
 }
 
 StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
@@ -1064,7 +1079,10 @@ double StiKalmanTrackNode::getWindowY()
   const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
   if (!calc)throw runtime_error("SKTN::getWindowY() -E- calc==0");
   calc->calculateError(this);
-  double window = searchWindowScale*::sqrt(_c00+eyy);
+
+ 
+
+    double window = searchWindowScale*::sqrt(_c00+eyy);
   if (window<minSearchWindow)
     window = minSearchWindow;
   else if (window>maxSearchWindow)
@@ -1082,8 +1100,10 @@ double StiKalmanTrackNode::getWindowZ()
   double maxSearchWindow   = parameters->getMaxSearchWindow();
 
   const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
-  if (!calc)throw runtime_error("SKTN::getWindowY() -E- calc==0");
+  if (!calc)throw runtime_error("SKTN::getWindowZ() -E- calc==0");
   calc->calculateError(this);
+
+  
   double window = searchWindowScale*::sqrt(_c11+ezz); 
   if (window<minSearchWindow)
     window = minSearchWindow;
