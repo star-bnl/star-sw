@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.73  2004/09/07 14:09:07  jcs
+// use the IAttr(".histos") to control histogrammingZ
+//
 // Revision 1.72  2004/09/03 20:35:03  perev
 // Big LeakOff + mem optimisation
 //
@@ -382,28 +385,33 @@ Int_t StFtpcClusterMaker::Init(){
   m_fastsimpars  = (St_ftpcFastSimPars *)local("ftpcFastSimPars");
 
   // 		Create Histograms
-  m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
   m_chargestep_West = new TH1F("fcl_chargestepW","FTPC West chargestep",260, -0.5, 259.5);
   m_chargestep_East = new TH1F("fcl_chargestepE","FTPC East chargestep",260, -0.5, 259.5);
-  m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,7,0.,8.);
-  m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
-  m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
-  //m_pads       = new TH1F("fcl_pads"	,"FTPC pads"			,80,1.,161.);
-  //m_timebins   = new TH1F("fcl_timebins","FTPC timebins"		,100,1.,257.);
-  m_row_sector = new TH2F("fcl_row_sector","FTPC(fcl) row vs. sector"	,20,1.,21.,6,1.,7.);
-  //m_npad_nbin  = new TH2F("fcl_pad_bin"	,"FTPC(fcl) pad vs. timebin"	,80,1.,161.,100,1.,257.);
   m_cluster_radial_West = new TH1F("fcl_radialW","FTPCW cluster radial position",700,0.,35.);
   m_cluster_radial_East = new TH1F("fcl_radialE","FTPCE cluster radial position",700,0.,35.);
 
-  m_hitsvspad = new TH2F("fcl_hitsvspad","#hits vs. padlength",10,0.5,10.5,11,0.5,11.5);
-  m_hitsvstime = new TH2F("fcl_hitsvstime","#hits vs. timelength",12,0.5,12.5,11,0.5,11.5);
+  m_csteps     = NULL;
+  m_hitsvspad  = NULL;
+  m_hitsvstime = NULL;
 
   m_padvstime_West = new TH2F("fcl_padvstimeW","FTPCW padlength vs. timelength",12,0.5,12.5,10,0.5,10.5);
   m_padvstime_East = new TH2F("fcl_padvstimeE","FTPCE padlength vs. timelength",12,0.5,12.5,10,0.5,10.5);
-  m_maxadc_West = new TH1F("fcl_maxadcW","FTPCW MaxAdc",50,0.5,50.5);
-  m_maxadc_East = new TH1F("fcl_maxadcE","FTPCE MaxAdc",50,0.5,50.5);
-  m_charge_West = new TH1F("fcl_chargeW","FTPCW charge",50,0.5,500.5);
-  m_charge_East = new TH1F("fcl_chargeE","FTPCE charge",50,0.5,500.5);
+  if (IAttr(".histos")) {
+     m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,7,0.,8.);
+     m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
+     m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
+     m_row_sector = new TH2F("fcl_row_sector","FTPC(fcl) row vs. sector"	,20,1.,21.,6,1.,7.);
+     //m_pads       = new TH1F("fcl_pads"	,"FTPC pads"			,80,1.,161.);
+     //m_timebins   = new TH1F("fcl_timebins","FTPC timebins"		,100,1.,257.);
+     //m_npad_nbin  = new TH2F("fcl_pad_bin"	,"FTPC(fcl) pad vs. timebin"	,80,1.,161.,100,1.,257.);
+     m_maxadc_West = new TH1F("fcl_maxadcW","FTPCW MaxAdc",50,0.5,50.5);
+     m_maxadc_East = new TH1F("fcl_maxadcE","FTPCE MaxAdc",50,0.5,50.5);
+     m_charge_West = new TH1F("fcl_chargeW","FTPCW charge",50,0.5,500.5);
+     m_charge_East = new TH1F("fcl_chargeE","FTPCE charge",50,0.5,500.5);
+     m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
+     m_hitsvspad = new TH2F("fcl_hitsvspad","#hits vs. padlength",10,0.5,10.5,11,0.5,11.5);
+     m_hitsvstime = new TH2F("fcl_hitsvstime","#hits vs. timelength",12,0.5,12.5,11,0.5,11.5);
+  }   
 
   return StMaker::Init();
 }
@@ -724,8 +732,10 @@ Int_t StFtpcClusterMaker::Make()
     }
   
   // mHitArray and its contents will be deleted by StMaker::Clear() since it is sitting in a TDataSet
-// Deactivate histograms for MDC3
-  MakeHistograms(); // FTPC cluster finder histograms
+    
+  // Fill FTPC cluster maker histograms
+  MakeHistograms(); 
+
   return iMake;
 }
 
@@ -734,52 +744,55 @@ Int_t StFtpcClusterMaker::Make()
 //_____________________________________________________________________________
 void StFtpcClusterMaker::MakeHistograms() 
 {
+  if (!mHitArray) return;
 
   //cout<<"*** NOW MAKING HISTOGRAMS FOR fcl ***"<<endl;
 
-
-  if (!mHitArray) return;
   for (Int_t i=0; i<mHitArray->GetEntriesFast();i++) {
     StFtpcPoint *hit = (StFtpcPoint*)mHitArray->At(i);
-    Int_t flag = hit->GetFlags();
-    if (flag > 0) {
-      Int_t bin = 6;
-      for (Int_t twofac=32; twofac>0; twofac=twofac/2,bin--) {
-	Int_t nbit = flag/twofac;
-        if (nbit != 1) 	continue;
-        m_flags->Fill((float)bin);
-	flag = flag - nbit*twofac;        
-      }//end loop twofac
-    }//endif flag
-
-   Float_t nrow = hit->GetPadRow();
-   m_row->Fill(nrow);
-   Float_t nsec = hit->GetSector();
-   m_sector->Fill(nsec);
-   m_row_sector->Fill(nrow,nsec);
-
-//  Float_t npad = r->n_pads;
-//  m_pads->Fill(npad);
-//  Float_t nbin = r->n_bins;
-//  m_timebins->Fill(nbin);
-//  m_npad_nbin->Fill(npad,nbin);
   
-   // Fill cluster radius histograms
-   Float_t rpos = ::sqrt(hit->GetX()*hit->GetX() + hit->GetY()*hit->GetY());
-   if (hit->GetPadRow() <=10 ) 
-     {
+    Float_t rpos = ::sqrt(hit->GetX()*hit->GetX() + hit->GetY()*hit->GetY());
+    if (hit->GetPadRow() <=10 ) {
        m_cluster_radial_West->Fill(rpos);
-       m_maxadc_West->Fill(hit->GetMaxADC());
-       m_charge_West->Fill(hit->GetCharge());	 
        m_padvstime_West->Fill(hit->GetNumberBins(),hit->GetNumberPads());
-     }
-   else if (hit->GetPadRow() >=11 ) 
-     {
+       if (IAttr(".histos")) {
+          m_maxadc_West->Fill(hit->GetMaxADC());
+          m_charge_West->Fill(hit->GetCharge());	 
+       }	  
+    } //end if hit->GetPadRow() <=10
+    else if (hit->GetPadRow() >=11 ) {
        m_cluster_radial_East->Fill(rpos);
-       m_maxadc_East->Fill(hit->GetMaxADC());
-       m_charge_East->Fill(hit->GetCharge());
        m_padvstime_East->Fill(hit->GetNumberBins(),hit->GetNumberPads());
-     }
+       if (IAttr(".histos")) {
+          m_maxadc_East->Fill(hit->GetMaxADC());
+          m_charge_East->Fill(hit->GetCharge());
+       }	  
+    } //end if hit->GetPadRow() >=11
+
+    if (IAttr(".histos")) {
+       Int_t flag = hit->GetFlags();
+       if (flag > 0) {
+          Int_t bin = 6;
+          for (Int_t twofac=32; twofac>0; twofac=twofac/2,bin--) {
+	     Int_t nbit = flag/twofac;
+             if (nbit != 1) 	continue;
+             m_flags->Fill((float)bin);
+	     flag = flag - nbit*twofac;        
+          } //end loop twofac
+       } //endif flag
+
+       Float_t nrow = hit->GetPadRow();
+       m_row->Fill(nrow);
+       Float_t nsec = hit->GetSector();
+       m_sector->Fill(nsec);
+       m_row_sector->Fill(nrow,nsec);
+
+   //  Float_t npad = r->n_pads;
+   //  m_pads->Fill(npad);
+   //  Float_t nbin = r->n_bins;
+   //  m_timebins->Fill(nbin);
+   //  m_npad_nbin->Fill(npad,nbin);
+    }  //end if IAttr
    
-  }//end rows loop 
+  } //end for mHitArray->GetEntriesFast()
 }
