@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.13 1999/12/16 22:14:03 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.14 2000/01/05 23:20:50 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.14  2000/01/05 23:20:50  lansdell
+// changed sigma() to errorOnMean() for dedx histos
+//
 // Revision 1.13  1999/12/16 22:14:03  lansdell
 // corrected how I get r0 and phi0 for global tracks
 //
@@ -406,17 +409,17 @@ void StEventQAMaker::MakeHistDE() {
 	if (trkPidTr[0]->detector()==1) {
 	  m_ndedxT->Fill(dedxPidTr->numberOfPoints());
 	  m_dedx0T->Fill(dedxPidTr->mean());
-	  m_dedx1T->Fill(dedxPidTr->sigma());
+	  m_dedx1T->Fill(dedxPidTr->errorOnMean());
 	}
 	if (trkPidTr[0]->detector()==4) {
 	  m_ndedxFW->Fill(dedxPidTr->numberOfPoints());
 	  m_dedx0FW->Fill(dedxPidTr->mean());
-	  m_dedx1FW->Fill(dedxPidTr->sigma());
+	  m_dedx1FW->Fill(dedxPidTr->errorOnMean());
 	}
 	if (trkPidTr[0]->detector()==5) {
 	  m_ndedxFE->Fill(dedxPidTr->numberOfPoints());
 	  m_dedx0FE->Fill(dedxPidTr->mean());
-	  m_dedx1FE->Fill(dedxPidTr->sigma());
+	  m_dedx1FE->Fill(dedxPidTr->errorOnMean());
 	}
       }
     }
