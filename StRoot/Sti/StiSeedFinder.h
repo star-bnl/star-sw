@@ -7,7 +7,10 @@
 #ifndef StiSeedFinder_HH
 #define StiSeedFinder_HH
 
-#include <utility>
+#include <string>
+using std::string;
+
+#include "StiObjectFactoryInterface.h"
 
 class StiKalmanTrack;
 class StTrack;
@@ -24,9 +27,33 @@ public:
     virtual void build() = 0;
     virtual void reset() =0;
 
+    ///Set the path of the file from which to build the seed-finder.
+    void setBuildPath(const string&);
+
+    //SetFactory
+    void setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val);
+    
 protected:
+    StiObjectFactoryInterface<StiKalmanTrack>* mFactory;
+    bool mBuilt;
+    string mBuildPath;
+    
 private:
 };
+
+//inlines
+
+inline void StiSeedFinder::setBuildPath(const string& val)
+{
+    mBuildPath=val;
+}
+
+inline void StiSeedFinder::setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val)
+{
+    mFactory=val;
+}
+
+
 
 #endif
 

@@ -15,16 +15,19 @@
 //Sti
 #include "StiKalmanTrack.h"
 #include "StiMapUtilities.h"
+#include "StiHit.h"
 #include "StiHitContainer.h"
-#include "CombinationIterator.h"
 #include "StiTrackSeedFinder.h"
+#include "StiDetector.h"
 #include "StiDetectorContainer.h"
-
 
 ostream& operator<<(ostream& os, const StiHit& hit);
 
-StiTrackSeedFinder::StiTrackSeedFinder(StiHitContainer* h, Sti2HitComboFilter* filter)
-    : mhitstore(h), mtrackfactory(0), mdrawablehits(new StiRootDrawableHits()), mhitcombofilter(filter)
+StiTrackSeedFinder::StiTrackSeedFinder(StiDetectorContainer* det,
+				       StiHitContainer* h, Sti2HitComboFilter* filter)
+    : StiSeedFinder(),
+      mDetStore(det), mhitstore(h), mdrawablehits(new StiRootDrawableHits()),
+      mhitcombofilter(filter)
 {
     //cout <<"StiTrackSeedFinder::StiTrackSeedFinder()"<<endl;
     if (!mhitcombofilter) {
@@ -47,141 +50,13 @@ StiTrackSeedFinder::~StiTrackSeedFinder()
     //Note, do not call delete on drawable hits, they're owned by root
 }
 
-StiTrackSeedFinder::StiTrackSeedFinder(const StiTrackSeedFinder& rhs)
-    : StiSeedFinder(rhs), mhitstore(0), mtrackfactory(0), mdrawablehits(0), mhitcombofilter(0)
-{
-    copyToThis(rhs);
-}
-
-StiTrackSeedFinder& StiTrackSeedFinder::operator=(const StiTrackSeedFinder& rhs)
-{
-    if (this==&rhs) return *this; //don't assign to this!
-    StiSeedFinder::operator=(rhs);
-    copyToThis(rhs);
-    return *this;
-}
-
-void StiTrackSeedFinder::copyToThis(const StiTrackSeedFinder& rhs)
-{
-    //shallow copies
-    mhitstore = rhs.mhitstore;
-    mtrackfactory = rhs.mtrackfactory;
-    mnlayers = rhs.mnlayers;
-    mdrawablehits = rhs.mdrawablehits; //root owns this object
-    miterator = rhs.miterator;
-    mhitcombofilter = rhs.mhitcombofilter;
-
-    //StiDisplayManager::instance()->addDrawable(mdrawablehits);
-}
-
-void StiTrackSeedFinder::build()
-{
-    cout <<"StiTrackSeedFinder::build()"<<endl;
-}
-
-int StiTrackSeedFinder::numberOfLayers() const 
-{
-    return mnlayers;
-}
-
 void StiTrackSeedFinder::reset()
 {
-    mnlayers = 0;
-    miterator.clear();
     mdrawablehits->clear();
     return;
 }
 
-void StiTrackSeedFinder::addLayer(double refangle, double position)
-{
-    const hitvector& vec = mhitstore->hits(refangle, position);
-    miterator.push_back( vec.begin(), vec.end() );
-    ++mnlayers;
-    miterator.init();
-    return;
-}
-
-void StiTrackSeedFinder::print() const
-{
-    miterator.print();
-    return;
-}
-
-bool StiTrackSeedFinder::hasMore()
-{
-    return ( miterator.valid()==true && miterator!=miterator.end());
-}
-
-//Loop on combinations until we get a valid one
-StiKalmanTrack* StiTrackSeedFinder::next()
-{
-    if (mhitcombofilter == 0) {
-	cout <<"StiTrackSeedFinder::next()\tError!:\t mhitcombofilter==0. ABORT"<<endl;
-	return 0;
-    }
-    else if (mtrackfactory == 0) {
-	cout <<"StiTrackSeedFinder::next()\tError!:\t mtrackfactory==0. ABORT"<<endl;
-	return 0;
-    }
-    
-    bool go = true;
-    StiKalmanTrack* track = 0;
-    while (go && hasMore()) {
-	cout <<"\nCombination  -----------"<<endl;
-	track = makeTrack( *miterator );
-	if (track) {
-	    go=false; //We found a good track, return it.  Else, we keep searching combinations
-	    cout <<"Found a good track, return it"<<endl;
-	}
-	else {
-	    cout <<"track==0"<<endl;
-	}
-	++miterator;
-    }
-    return track;
-}
-
-//check points in a given combination, return track if accepted
-StiKalmanTrack* StiTrackSeedFinder::makeTrack(const tvector& vec) const
-{
-    cout <<"StiTrackSeedFinder::makeTrack()"<<endl;
-    //Construct Track fromt these points
-    StiKalmanTrack* track = 0;
-    /*
-      if (vec.size()<3) {
-      cout <<"StiTrackSeedFinder::makeTrack()\tError:\tvec.size()<3  Abort"<<endl;
-      return track;
-      }
-    */
-    mdrawablehits->clear();
-
-    //This is an ugly loop ,but it is chosen for efficiency to avoid multiple loops over the points
-    //and terminate the loop immediately if a hit combination doesn't pass the filter
-    bool go=true;
-    mdrawablehits->push_back( vec[0] ); //Temp, MLM
-    for (unsigned int i=1; i<vec.size() && go; ++i) { //start at begin+1
-	go = mhitcombofilter->operator()( vec[i-1], vec[i] );
-	mdrawablehits->push_back( vec[i] ); //Temp, MLM
-    }
-    if (go) { //They're all good
-	mdrawablehits->fillHitsForDrawing();
-	track = mtrackfactory->getObject();
-	track->reset();
-	//Setup DetectorContainer to inner-most point
-	//This assumes outside in tracking, can be made to switch on direction
-	StiDetector* layer = vec.front()->detector();
-	if (!layer) {
-	    cout <<"StiTrackSeedFinder::makeTrack(). ERROR:\thit has no detector!"<<endl;
-	    return track;
-	}
-	StiDetectorContainer::instance()->setToDetector( layer );
-    }
-    else {
-	cout <<"Combination Failed"<<endl;
-    }
-    //cout <<"\tLeaving"<<endl;
-    return track;
-}
+//STL Functors
 
 void StiRectangular2HitComboFilter::build(const string& buildPath)
 {
@@ -192,7 +67,8 @@ void StiRectangular2HitComboFilter::build(const string& buildPath)
     StGetConfigValue(buildPath.c_str(), "deltaD", deltaD);
     StGetConfigValue(buildPath.c_str(), "deltaZ", deltaZ);
     if (deltaD==-1 || deltaZ==-1) {
-	cout <<"StiRectangular2HitComboFilter::build(). ERROR:\tdeltaD or deltaZ not set.. Abort"<<endl;
+	cout <<"StiRectangular2HitComboFilter::build(). ERROR:\t";
+	cout <<"deltaD or deltaZ not set.. Abort"<<endl;
 	return;
     }
 }
@@ -206,7 +82,8 @@ void StiCollinear2HitComboFilter::build(const string& buildPath)
     StGetConfigValue(buildPath.c_str(), "deltaPhi", deltaPhi);
     StGetConfigValue(buildPath.c_str(), "deltaTheta", deltaTheta);
     if (deltaPhi==-1 || deltaTheta==-1) {
-	cout <<"StiCollinear2HitComboFilter::build(). ERROR:\tdeltaPhi or deltaTheta not set.. Abort"<<endl;
+	cout <<"StiCollinear2HitComboFilter::build(). ERROR:\t";
+	cout <<"deltaPhi or deltaTheta not set.. Abort"<<endl;
 	return;
     }
 }
