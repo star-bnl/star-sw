@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichArea.cxx,v 2.4 2000/11/22 23:24:49 horsley Exp $
+ * $Id: StRichArea.cxx,v 2.5 2001/04/17 18:21:48 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichArea.cxx,v $
+ *  Revision 2.5  2001/04/17 18:21:48  horsley
+ *  made correction to monte carlo area calculation, not used in production
+ *
  *  Revision 2.4  2000/11/22 23:24:49  horsley
  *  StRichArea.cxx monte carlo integration fix to the return value
  *
@@ -1798,24 +1801,29 @@ int StRichArea::monteCarloHitFinder(double angleCut,double& angle) {
       iterationNumber++;
       mOuterRing->getPoint(modifiedPsi,outerRingPoint);
       
-      if( (outerRingPoint.x() == FLT_MAX) || ( (fabs(outerRingPoint.x() > mRadY)) || (fabs(outerRingPoint.y()) > mRadY) ) ) {
-	modifiedPsi+=littleStep;
-      }
+      if ( (outerRingPoint.x() == FLT_MAX) || 
+	   ( 
+	    (fabs(outerRingPoint.x()) > mRadY) || (fabs(outerRingPoint.y()) > mRadY) 
+	    )
+	   ) 
+	{
+	  modifiedPsi+=littleStep;
+	}
       else {
 	// we found a point
 	break;
       }
     };
-
+    
     psi = modifiedPsi;
     
     
     mInnerRing->getPoint(psi,innerRingPoint);
     mOuterRing->getPoint(psi,outerRingPoint);
 
-    if( (fabs(outerRingPoint.x()  > mRadX)) ||
-	(fabs(outerRingPoint.y()) > mRadY)  ||
-	(fabs(innerRingPoint.x()  > mRadX)) ||
+    if( (fabs(outerRingPoint.x()) > mRadX) ||
+	(fabs(outerRingPoint.y()) > mRadY) ||
+	(fabs(innerRingPoint.x()) > mRadX) ||
 	(fabs(innerRingPoint.y()) > mRadY)  ) {
      return 0;
     }
