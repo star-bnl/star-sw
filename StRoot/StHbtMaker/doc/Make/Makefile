@@ -11,45 +11,51 @@ VPATH         := $(STROOT) $(HBTPATH) $(HBTPATH)/Base $(HBTPATH)/Cut \
 		 $(HBTPATH)/Fit $(HBTPATH)/Reader $(STARCLASSPATH)
 
 HBTOBJ        := \
-StHbtEvent.o \
-StHbtIO.o \
 StHbtIOBinary.o \
-StHbtPair.o \
 StHbtV0.o \
-StHbtParticle.o \
+StHbtTrack.o \
+StHbtPair.o \
+StHbtEvent.o \
 StHbtPicoEvent.o \
 gamovCorrect.o \
-StHbtMaker.o \
-ExitSepCorrFctn.o \
-MinvCorrFctn.o \
-OpeningAngleCorrFctn.o \
-ParityCorrFctn.o \
-QinvCorrFctn.o \
-QinvCorrFctnC.o \
-QvecCorrFctn.o \
-ParityEventCut.o \
-dummyV0Cut.o \
-eventCutMonitor_Mult.o \
-franksTrackCut.o \
-helensV0Cut.o \
-mikesEventCut.o \
-mikesPairCut.o \
-mikesTrackCut.o \
-trackCutMonitor_DCA.o \
-trackCutMonitor_P.o \
-trackCutMonitor_P_vs_Dedx.o \
-trackCutMonitor_Pt.o \
-trackCutMonitor_Y_vs_Pt.o \
-StHbtAnalysis.o \
-StHbtCoulomb.o \
-StHbtCutMonitorHandler.o \
-StHbtManager.o \
-StHbtAsciiReader.o \
-StHbtBinaryReader.o \
+StHbtParticle.o \
+StHbtIO.o \
+franks1Histo.o \
+franks2Histo.o \
 franks1HistoD.o \
 franks2HistoD.o \
-franks2Histo.o \
-#franks1Histo.o \
+StHbtMaker.o \
+OpeningAngleCorrFctn.o \
+MinvCorrFctnArmenteros.o \
+QinvCorrFctn.o \
+QvecCorrFctn.o \
+MinvCorrFctnM_vs_Pt.o \
+MinvCorrFctnY_vs_Pt.o \
+QinvCorrFctnC.o \
+ExitSepCorrFctn.o \
+ParityCorrFctn.o \
+MinvCorrFctn.o \
+helensV0Cut.o \
+mikesTrackCut.o \
+trackCutMonitor_DCA.o \
+trackCutMonitor_P_vs_Dedx.o \
+trackCutMonitor_Y_vs_Pt.o \
+eventCutMonitor_Mult.o \
+mikesPairCut.o \
+franksTrackCut.o \
+trackCutMonitor_P.o \
+mikesEventCut.o \
+ParityEventCut.o \
+trackCutMonitor_Pt.o \
+dummyV0Cut.o \
+StHbtManager.o \
+StHbtAnalysis.o \
+StHbtCutMonitorHandler.o \
+StHbtCoulomb.o \
+StHbtAsciiReader.o \
+StHbtBinaryReader.o \
+StHbtGstarTxtReader.o 
+
 
 
 STARCLASSOBJ        := \
@@ -185,8 +191,8 @@ endif
 #   Rules and dependencies
 #
 
-.PRECIOUS: %.o %.cxx
-.SUFFIXES: .h .o .cc .cxx
+.PRECIOUS: %.o %.cxx %.cc
+.SUFFIXES: .hh .h .o .cc .cxx
 
 #%:	%.cc
 #	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< -o $@ $(LDFLAGS)
@@ -198,11 +204,12 @@ endif
 #	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $<
 
 %.o:	%.cxx
+	@echo "*** cxx ***"
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $<
 
-#%.o.cc:
-#	@echo "*** cc ***"
-#	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $<
+%.o:    %.cc
+	@echo "*** cc ***"
+	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $<
 
 
    
