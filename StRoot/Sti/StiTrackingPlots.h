@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.h,v 2.14 2004/12/11 22:21:02 pruneau Exp $
+ * $Id: StiTrackingPlots.h,v 2.15 2004/12/23 15:07:19 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.h,v $
+ * Revision 2.15  2004/12/23 15:07:19  pruneau
+ * added point of closest approach to vertex (pca) histos
+ *
  * Revision 2.14  2004/12/11 22:21:02  pruneau
  * new histos
  *
@@ -109,6 +112,9 @@ class StiTrackingPlots : public HistogramGroup
   TH2D * _dzVsZ[NPLOTS][51][12];
   TH2D * _svtNhitVsNode[NPLOTS];
   TH2D * _svtNfitVsNode[NPLOTS];
+
+  TH2D * _pcaxy[NPLOTS];
+  TH2D * _pcazt[NPLOTS];
 
   //track kinematics & helix parameters
   //make all plots 3D - value,Phi,Eta - then cut 
