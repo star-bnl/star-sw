@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.6 1999/09/30 02:06:07 porter Exp $
+ * $Id: StDbManager.hh,v 1.7 1999/10/19 14:30:39 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.7  1999/10/19 14:30:39  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
  * Revision 1.6  1999/09/30 02:06:07  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -120,6 +124,7 @@ public:
   virtual void setStoreTime(const char* time);
   virtual unsigned int getUnixStoreTime();
   virtual char* getDateStoreTime();
+  virtual bool getDataBaseInfo(const char* dbname, char*& type, char*& domain);
  
   //  virtual bool IsValid(StDbTableI* table, int time);
   //  virtual void fetchDbTable(StDbTableI* table, int time);

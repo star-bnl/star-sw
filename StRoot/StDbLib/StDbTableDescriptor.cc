@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.4 1999/09/30 02:06:10 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.5 1999/10/19 14:30:40 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.5  1999/10/19 14:30:40  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
  * Revision 1.4  1999/09/30 02:06:10  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -33,7 +37,7 @@ offsetToNextEmptyByte = 0;
 offsetToLast4Bytes = -4;
 mnumElements = 0;
 lastType=Stdouble;
-
+padsize = 0;
 mcols = new tableDescriptor[mMax+1];
 
 }
@@ -157,10 +161,8 @@ char* id= strstr(length,",");
 void
 StDbTableDescriptor::fillSizeAndOffset(char* length, int elementNum){
 
-  // offsetToLast4Bytes
-  // offsetToNextEmptyByte
 
-int i = elementNum;
+  int i = elementNum;
   fillLengths(length,i);
   int space = 4-(offsetToNextEmptyByte-offsetToLast4Bytes);
 
@@ -183,7 +185,6 @@ int i = elementNum;
 
      mcols[i].offset=offsetToNextEmptyByte;
      offsetToNextEmptyByte = mcols[i].offset+mcols[i].size;
-     //     j = 4* ((int) floor ( (mcols[i].size-space-1)/4 ));
      j = 4* ((int) floor ((float) (mcols[i].size-1)/4 ));
      offsetToLast4Bytes = offsetToLast4Bytes+j+4;
 
@@ -196,21 +197,38 @@ int i = elementNum;
 
   } else {
 
-    if(type==Stdouble && lastType!=Stdouble){
-      offsetToLast4Bytes+=4;
-      offsetToNextEmptyByte+=4;
+
+    if(type==Stdouble && lastType != Stdouble && padsize < 8){
+      //      offsetToLast4Bytes+=4;
+      //      offsetToNextEmptyByte+=4;
+      offsetToLast4Bytes+=padsize;
+      offsetToNextEmptyByte+=padsize;
     }
+
      mcols[i].offset=offsetToLast4Bytes+4;
      offsetToNextEmptyByte = mcols[i].offset + mcols[i].size;
      j = 4* ((int) floor ((float) (mcols[i].size-1)/4 ));
      offsetToLast4Bytes = mcols[i].offset + j;// + 4;
+     
   }
 
   if(offsetToLast4Bytes<0)offsetToLast4Bytes=0;
+
 #ifdef LINUX
   lastType=Stdouble;
 #else
+  if(type==Stdouble)padsize = 0;
   lastType=type;
+
+  unsigned int onesize = getSize(mcols[i].type);
+  for(j=0;j<k;j++){
+    if(mcols[i].dimensionlen[j]==1 && j>0)continue;
+    for(int jj=0; jj< mcols[i].dimensionlen[j]; jj++){
+      padsize=padsize+(int)onesize;
+      if(padsize>=8)padsize=padsize-8;
+    }
+  }
+
 #endif
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbFactoryI.cc,v 1.3 1999/09/30 02:06:05 porter Exp $
+ * $Id: StDbFactoryI.cc,v 1.4 1999/10/19 14:30:38 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbFactoryI.cc,v $
+ * Revision 1.4  1999/10/19 14:30:38  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
  * Revision 1.3  1999/09/30 02:06:05  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -42,14 +46,14 @@ if(!isloaded)initIDList();
 
 for(IDList::iterator itr = mIDList.begin();
     itr != mIDList.end(); ++itr){
-  if(!(*itr)){cout << "Look out Null Pointer in list" << endl; continue;}
+  if(!(*itr)){cout << "Look out Null Pointer in list" << endl; break;}
   if((*itr)->checkName(tableName)){
      retVal = (*itr)->getID();
      break;
   }
 }
 
-if(!retVal)cerr << "StDbFactoryI:: No SchemaID for "<<tableName<<" : default to most recent in DB"<< endl;
+//if(!retVal)cerr << "StDbFactoryI:: No SchemaID for "<<tableName<<" : default to most recent in DB"<< endl;
 return retVal;
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.hh,v 1.6 1999/09/30 02:06:03 porter Exp $
+ * $Id: StDbConfigNode.hh,v 1.7 1999/10/19 14:30:38 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.hh,v $
+ * Revision 1.7  1999/10/19 14:30:38  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
  * Revision 1.6  1999/09/30 02:06:03  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -111,8 +115,8 @@ public:
   virtual bool hasData();
   virtual void printTree();
 
-  virtual StDbTable* addDbTable(const char* tableName, char* version, bool isBaseLine = false);
-  virtual StDbTable* addTable(const char* tableName, char* version, bool isBaseLine = false);
+  virtual StDbTable* addDbTable(const char* tableName, char* version="default", bool isBaseLine = false);
+  virtual StDbTable* addTable(const char* tableName, char* version="default", bool isBaseLine = false);
   // virtual StDbTable* findTable(const char* tableName, const char* version, int elementID);
   virtual void removeTable(StDbTable* table);
   virtual TableIter* getTableIter();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.h,v 1.3 1999/09/30 02:06:01 porter Exp $
+ * $Id: StDbBuffer.h,v 1.4 1999/10/19 14:30:37 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.h,v $
+ * Revision 1.4  1999/10/19 14:30:37  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
  * Revision 1.3  1999/09/30 02:06:01  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -173,6 +177,8 @@ protected:
   void StrConv(char* aVal,char* &s);
 
   void MemSwapCpy(char* where,char* from,int len,int swaplen,BuffMode mode);
+
+  //ClassDef(StDbBuffer,0)
 
 
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.h,v 1.3 1999/09/30 02:06:10 porter Exp $
+ * $Id: StDbTableDescriptor.h,v 1.4 1999/10/19 14:30:40 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.h,v $
+ * Revision 1.4  1999/10/19 14:30:40  porter
+ * modifications relevant to use with StDbBroker and future merging with
+ * "params" database structure + some docs + suppressing diagnostics messages
+ *
  * Revision 1.3  1999/09/30 02:06:10  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -43,6 +47,7 @@ protected:
  int offsetToNextEmptyByte;
  int offsetToLast4Bytes;
  StTypeE lastType;
+ int padsize;
 
  tableDescriptor* mcols;
  int mMax;
