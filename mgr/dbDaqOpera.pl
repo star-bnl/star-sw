@@ -155,6 +155,7 @@ print "\nFind dst files on disk\n";
 foreach $diskDir (@diskRecoDirs) {
   opendir(DIR, $diskDir) or die "can't open $diskDir\n";
   while( defined($filename = readdir(DIR)) ) {
+
     next if $filename =~ /^\.\.?$/;
     next if $filename =~ /.dst.xdf$/;
     next if $filename =~ /.event.root$/;
@@ -178,7 +179,7 @@ foreach $diskDir (@diskRecoDirs) {
     my $dname = $filename; 
      $dname =~ s/.dst.root//g;
      @words = split ("/", $diskDir);
-     $ddir = $words[2] . "/" . $words[3] . "/" . $words[4] . "/" . $words[5]; 
+     $ddir = $words[3] . "/" . $words[4] . "/" . $words[5] . "/" . $words[6]; 
 
      $fObjAdr = \(DstAttr->new());
      ($$fObjAdr)->dstDir($ddir);
@@ -293,7 +294,7 @@ my $dqfiles;
         $mdaqfield = ($$dqfiles)->daqfield;
         $mdaqtrig = ($$dqfiles)->daqtrig;
         $mdaqbeam = ($$dqfiles)->daqbeam;
-
+#       print $mdaqName, "\n";
        if(!defined($mdaqfield)) {
          $mdaqfield = 0;
  } 
@@ -312,8 +313,10 @@ my $dqfiles;
        
       $mdstDiskDir = ($$mdiskFile)->dstDir; 
       next if ( $mdstDiskDir ne $mdir);
+#    print $mdstDiskDir, "\n";
       $mdstDiskFile = ($$mdiskFile) -> dstName; 
        next if !($mdstDiskFile =~ /$basename/);
+#    print $mdstDiskFile, "\n";  
        $dst_disk_date = ($$mdiskFile)->dstDDate;
        $dst_disk_size = ($$mdiskFile)->dstDSize;
    }
@@ -326,11 +329,12 @@ my $dqfiles;
       next if ($mdstHpssDir ne $mdir);
       $mdstHpssFile = ($$mhpssfile) -> dstName; 
        next if !($mdstHpssFile =~ /$basename/);
+#    print $mdstHpssFile, "\n";
        $dst_hpss_date = ($$mhpssfile)->dstDDate;
        $dst_hpss_size = ($$mhpssfile)->dstDSize;
    }
 
-   print "filling operation table\n";
+#   print "filling operation table\n";
     &fillTable();
  }
 
@@ -400,7 +404,7 @@ sub walkHpss {
 #      print "Dir ".$dirs->[$ii]."\n";
     my @dird = $ftp->dir($dirs->[$ii]);
     for ($jj=0; $jj<@dird; $jj++) {
-      my @fields = split(/\s+/, $dir[$jj]);
+      my @fields = split(/\s+/, $dird[$jj]);
       my $size   = $fields[4];
       my $month  = $fields[5];
       my $day    = $fields[6];
@@ -413,9 +417,9 @@ sub walkHpss {
 
       my @dirF = split(/\//, $dirs->[$ii]); 
 
-      my $dset = sprintf("%s\/%s\/%s\/%s",$dirF[3],$dirF[4],$dirF[5],
-                                                 $dirF[6]);
-      print "Dset ".$dset. "\n";
+      my $dset = sprintf("%s\/%s\/%s\/%s",$dirF[4],$dirF[5],$dirF[6],
+                                                 $dirF[7]);
+#      print "Dset ".$dset. "\n";
       my $monthD = $monthHash{$month};
 
       if ( $year =~ m/:/ ) {
@@ -442,9 +446,9 @@ sub walkHpss {
       ($$fObjAdr)->dstName($dsname);
       ($$fObjAdr)->dstDir($dset);
       ($$fObjAdr)->dstDSize($size);
-      ($$fObjAdr)->dstDdate($timeS);
-      $files->[$nHpssFiles] = $fObjAdr;
-      $nHpssFiles++;
+      ($$fObjAdr)->dstDDate($timeS);
+      $files->[$nhpssFiles] = $fObjAdr;
+      $nhpssFiles++;
 #      print "File ".$dsname."\n" ;
     }
   }
