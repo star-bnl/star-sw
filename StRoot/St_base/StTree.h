@@ -143,6 +143,7 @@ public:
   virtual Int_t GetNextBundle();
 protected:
   void SetInfo(St_DataSet *ds);
+  void RefreshIter();
   const Char_t *GetAttr(St_DataSet *ds,const char *att);
   St_DataSet *GetFileDS(int idx);
   St_DataSet *fDS;
