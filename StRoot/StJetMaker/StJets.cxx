@@ -1,7 +1,12 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.4 2004/09/20 23:15:51 mmiller Exp $
+// $Id: StJets.cxx,v 1.5 2004/09/22 15:46:21 mmiller Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.5  2004/09/22 15:46:21  mmiller
+// Added a double check to verify that jet 4p is equal to the vector sum of
+// the particles 4-p.  Removed troublesome access methods to StJets.  See
+// StJetReader::exampleEventAna() for access to jet-particles.
+//
 // Revision 1.4  2004/09/20 23:15:51  mmiller
 // Fixed bug in retreiving emc towers for jet, introduced
 // TrackToJetIndex inherits from TLorentzVector now.  See StJetReader::exampleAna
@@ -168,59 +173,16 @@ void StJets::addProtoJet(StProtoJet& pj)
     new((*mJets)[jetIndex]) StJet( pj.e(), pj.px(), pj.py(), pj.pz(), nCell, charge );
 }
 
-void StJets::print()
-{
-    /*
-      for(Int_t i = 0; i < numJets(); i++)
-      printf("Jet#%d: Et=%6.3f  Eta=%6.3f  Phi=%6.3f  P=%6.3f  Pt=%6.3f  E=%6.3f  nCell= %4d\n",
-      i,et(i),eta(i),phi(i),p(i),pt(i),e(i),nCell(i));
-    */
-}
-
-
-const TLorentzVector* StJets::trackToJetIndex(int jetIndex, int trackIndex)
+vector<TrackToJetIndex*> StJets::particles(int jetIndex)
 {
     int size = mTrackToJetIndices->GetLast()+1;
-    TrackToJetIndex* t2j=0;
-
-    //cout <<"\n search for jetIndex:\t"<<jetIndex<<"\ttrackIndex:\t"<<trackIndex<<endl;
+    vector<TrackToJetIndex*> vec;
+    
     for (int i=0; i<size; ++i) {
 	TrackToJetIndex* id = static_cast<TrackToJetIndex*>( (*mTrackToJetIndices)[i] );
-	//cout <<"\tjet:\t"<<id->jetIndex()<<"\ttrack:\t"<<id->trackIndex()<<endl;
-	if (id->jetIndex()==jetIndex && id->trackIndex()==trackIndex) {
-	    t2j = id;
-	    break;
+	if (id->jetIndex()==jetIndex) {
+	    vec.push_back(id);
 	}
-    }
-    return t2j;
-}
-
-const TLorentzVector* StJets::trackToJetIndex(StMuDst* event, int jetIndex, const StMuTrack* track)
-{
-    int trackIndex = -1;
-    TClonesArray& tracks = *(event->primaryTracks());
-    int ntracks = tracks.GetLast()+1;
-    for (int i=0; i<ntracks; ++i) {
-	const StMuTrack* temp = static_cast<const StMuTrack*>( tracks[i] );
-	if (temp == track) {
-	    trackIndex = i;
-	    break;
-	}
-    }
-    return trackToJetIndex(jetIndex, trackIndex);
-}
-
-vector<int> StJets::jetBemcTowerIndices(int jetIndex)
-{
-    vector<int> vec;
-    int size = mTrackToJetIndices->GetLast()+1;
-        
-    for (int i=0; i<size; ++i) {
-	TrackToJetIndex* id = static_cast<TrackToJetIndex*>( (*mTrackToJetIndices)[i] );
-	StDetectorId detId = id->detectorId();
-	
-	if (detId!=kBarrelEmcTowerId || id->jetIndex()!=jetIndex) continue;
-	vec.push_back(id->trackIndex());
     }
     return vec;
 }
@@ -249,8 +211,6 @@ StJets::TrackVec StJets::jetParticles(StMuDst* event, int jetIndex)
 	if (id->jetIndex() == jetIndex ) {
 	    StMuTrack* track = static_cast<StMuTrack*>( tracks[trackIndex] );
 	    vec.push_back( track );
-	    //cout <<"mom_track:\t"<<track->momentum()<<endl;
-	    //cout <<"mom_check:\t"<<id->Px()<<"\t"<<id->Py()<<"\t"<<id->Pz()<<endl;
 	}
     }
     
@@ -262,16 +222,6 @@ bool StJets::inBounds(int i)
 {
     return (i>0 && i<nJets());
 }
-
-/*
-  StJet* StJets::jet(int i)
-  {
-  //this is readable, but fast, optimized compiler will take care of it
-  TClonesArray& tj = *mJets;
-  TObject* temp = tj[i];
-  return ( inBounds(i)==true ) ? static_cast<StJet*>( temp ) : 0;
-  }
-*/
 
 double StJets::e(int i) 
 {

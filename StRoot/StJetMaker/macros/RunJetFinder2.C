@@ -5,11 +5,12 @@ class  StChain;
 StChain *chain;
 int total=0;
 
-void RunJetFinder2(int nevents=99,
+void RunJetFinder2(int nevents=100,
 		   const char* dir = "",
-		   const char* file = "/star/data35/reco/productionPP/ReversedFullField/P04ij/2004/117/st_physics_5117052_raw_2010002.MuDst.root",
+		   const char* file = "/star/data16/reco/ppLong-1/FullField/P03ih/2003/150/st_physics_4150010_raw_0030061.MuDst.root",
+		   //const char* file = "/star/data35/reco/productionPP/ReversedFullField/P04ij/2004/117/st_physics_5117052_raw_2010002.MuDst.root",
 		   const char *filter = "",
-		   const char *outfile="4150010_raw_0010005")
+		   const char *outfile="./4150010_raw_0030061")
 {
     if (gClassTable->GetID("TTable") < 0) {
 	gSystem->Load("libStar");
@@ -81,7 +82,9 @@ void RunJetFinder2(int nevents=99,
     anapars->setJetEtaMax(100.0);
     anapars->setJetEtaMin(0);
     anapars->setJetNmin(0);
+    
 
+    /*
     //Setup the cone finder (See StJetFinder/StConeJetFinder.h -> class StConePars)
     StConePars* cpars = new StConePars();
     cpars->setGridSpacing(56, -1.6, 1.6, 120, -pi, pi);
@@ -95,6 +98,7 @@ void RunJetFinder2(int nevents=99,
     cpars->setDoSplitMerge(true);
     cpars->setDebug(false);
     emcJetMaker->addAnalyzer(anapars, cpars, "MkConeJetsPt02R07");
+    */
 
     //Setup the cone finder (See StJetFinder/StCdfChargedConeJetFinder.h -> class StCdfChargedConePars)
     StCdfChargedConePars* ccdfpars = new StCdfChargedConePars();
@@ -105,12 +109,14 @@ void RunJetFinder2(int nevents=99,
     ccdfpars->setDebug(false);
     emcJetMaker->addAnalyzer(anapars, ccdfpars, "MkCdfChargedJetsPt02R07");
 
+    /*
     //Setup the kt=finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
     StKtCluPars* ktpars = new StKtCluPars();
     ktpars->setR(1.0);
     ktpars->setDebug(false);
     emcJetMaker->addAnalyzer(anapars, ktpars, "MkKtJet");
-  
+    */
+    
     chain->Init();
     chain->PrintInfo();
 
@@ -143,7 +149,7 @@ void RunJetFinder2(int nevents=99,
 	const char* bname = branch->GetName();
 	TString bnameString(bname);
 	cout <<"\t--- Found branch:\t"<<bnameString<<endl;
-	for (int jb=0; jb<branchesToKill->GetLast()+1; ++jb) {
+	for (int jb=0; jb<branchesToKill.GetLast()+1; ++jb) {
 	    TObjString* tos = static_cast<TObjString*>( branchesToKill[jb] );
 	    TString btk = tos->GetString();
 	    //cout <<"\t\tcompare to:\t"<<btk<<endl;
