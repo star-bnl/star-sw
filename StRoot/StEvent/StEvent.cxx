@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.3 2000/01/05 16:02:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.2  1999/11/04 13:30:40  ullrich
- * Added constructor without summary table
+ * Revision 2.3  2000/01/05 16:02:25  ullrich
+ * SSD hits added to StEvent.
  *
  * Revision 2.11  2000/05/15 18:35:38  ullrich
  * All data member related to collections and containers are now
@@ -28,6 +28,7 @@
  * Revision 2.8  2000/04/18 17:31:28  perev
  *
  * Revision 2.7  2000/03/29 16:54:11  ullrich
+ * Added L3 trigger.
  *
  * Changes due to the addition of the EMC to StEvent
  *
@@ -35,8 +36,8 @@
  * Primary vertices automatically sorted in addPrimaryVertex().
  * add rich pixel info/containers
  *
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.3 2000/01/05 16:02:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.3 2000/01/05 16:02:25 ullrich Exp $";
  *
  * Revision 2.0  1999/10/12 18:41:53  ullrich
 
@@ -44,18 +45,19 @@ static const char rcsid[] = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich 
 #include <typeinfo>
 #include <algorithm>
 #include "StEvent.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.3 2000/01/05 16:02:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.3 2000/01/05 16:02:25 ullrich Exp $";
 #include "StTpcHitCollection.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.3 2000/01/05 16:02:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.3 2000/01/05 16:02:25 ullrich Exp $";
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StRichCollection.h"
 #include "StTrackDetectorInfo.h"
+#include "StTriggerDetectorCollection.h"
 #include "StL0Trigger.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.3 2000/01/05 16:02:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.3 2000/01/05 16:02:25 ullrich Exp $";
 #include "tables/St_dst_event_summary_Table.h"
 #include "tables/St_dst_summary_param_Table.h"
 #ifndef ST_NO_NAMESPACES
@@ -76,7 +78,7 @@ using std::swap;
     mV0Vertices = 0;
     mXiVertices = 0;
     mKinkVertices = 0;
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.2 1999/11/04 13:30:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.3 2000/01/05 16:02:25 ullrich Exp $";
 void
 StEvent::initToZero()
 
@@ -97,6 +99,7 @@ StEvent::init(const event_header_st& evtHdr)
 {
     mContent.push_back(new StEventInfo(evtHdr));
 }
+
 {
     initToZero();
     mSummary = new StEventSummary(evtSum, sumPar);
@@ -152,6 +155,12 @@ StEvent::summary() const { return mSummary; }
     return static_cast<StEventSummary*>(mContent[mSummary]);
 StEvent::softwareMonitor() { return mSoftwareMonitor; }
 
+const TString&
+StEvent::softwareMonitor() const { return mSoftwareMonitor; }
+    _lookup(monitor, mContent);
+    return monitor;
+StEvent::tpcHitCollection() { return mTpcHits; }
+    _lookup(monitor, mContent);
     return hits;
 StEvent::svtHitCollection() const { return mSvtHits; }
     _lookup(hits, mContent);
@@ -259,6 +268,13 @@ StEvent::setBunchCrossingNumber(ULong_t val) { mBunchCrossingNumber = val; }
     if (mContent[mSummary]) delete mContent[mSummary];
     if (mSoftwareMonitor) delete mSoftwareMonitor;
     mSoftwareMonitor = val;
+{
+    _lookupAndSet(val, mContent);
+}
+
+    if (mContent[mSoftwareMonitor]) delete mContent[mSoftwareMonitor];
+    if (mTpcHits) delete mTpcHits;
+    mTpcHits = val;
     _lookupAndSet(val, mContent);
 }
 

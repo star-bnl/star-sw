@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBrowsableEvent.cxx,v 2.3 1999/11/04 13:29:49 ullrich Exp $
+ * $Id: StBrowsableEvent.cxx,v 2.4 2000/01/05 16:02:18 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StBrowsableEvent.cxx,v $
- * Revision 2.3  1999/11/04 13:29:49  ullrich
- * Added constructor without summary table
+ * Revision 2.4  2000/01/05 16:02:18  ullrich
+ * SSD hits added to StEvent.
  *
  * Revision 2.5  2000/02/23 17:35:52  ullrich
  * Changes due to the addition of the EMC to StEvent
@@ -29,6 +29,7 @@
  * Initial Revision
  *
  **************************************************************************/
+#include "StBrowsableEvent.h"
 #include "StEventSummary.h"
 #include "StSoftwareMonitor.h"
 #include "StTpcHitCollection.h"
@@ -44,7 +45,7 @@
 #include "StEmcCollection.h"
 #include "StRichPixelCollection.h"
 
-static const char rcsid[] = "$Id: StBrowsableEvent.cxx,v 2.3 1999/11/04 13:29:49 ullrich Exp $";
+static const char rcsid[] = "$Id: StBrowsableEvent.cxx,v 2.4 2000/01/05 16:02:18 ullrich Exp $";
 
 ClassImp(StBrowsableEvent)
 
@@ -63,6 +64,7 @@ StBrowsableEvent::~StBrowsableEvent() { /* noop */ }
 void
 StBrowsableEvent::browse(TBrowser *b)
 {
+    if (b) {
         if (mSummary)          b->Add(mSummary);
         if (mSoftwareMonitor)  b->Add(mSoftwareMonitor);
         if (mTpcHits)          b->Add(mTpcHits);

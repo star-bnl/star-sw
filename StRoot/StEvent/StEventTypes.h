@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.1 1999/10/13 19:43:04 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.2 2000/01/05 16:02:30 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
- * Revision 2.1  1999/10/13 19:43:04  ullrich
- * Initial Revision
+ * Revision 2.2  2000/01/05 16:02:30  ullrich
+ * SSD hits added to StEvent.
  *
  * Revision 2.8  2000/05/22 21:43:06  ullrich
  * Add RICH related containers.
@@ -51,6 +51,9 @@
 #include "StEventInfo.h"
 #include "StFtpcHit.h"
 #include "StFtpcHitCollection.h"
+#include "StFtpcPlaneHitCollection.h"
+#include "StFtpcSoftwareMonitor.h"
+#include "StFunctional.h"
 #include "StGlobalSoftwareMonitor.h"
 #include "StGlobalTrack.h"
 #include "StHelixModel.h"
