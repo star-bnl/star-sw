@@ -1,5 +1,8 @@
-// $Id: St_geom_Maker.cxx,v 1.4 1998/12/12 00:21:15 fisyak Exp $
+// $Id: St_geom_Maker.cxx,v 1.5 1998/12/16 20:56:24 fisyak Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.5  1998/12/16 20:56:24  fisyak
+// Add gstar to ROOT
+//
 // Revision 1.4  1998/12/12 00:21:15  fisyak
 // Remove gstar for the moment
 //
@@ -59,17 +62,17 @@
 #include "TGTRA.h"
 #include "TCTUB.h"
 
-extern "C"    void    geant_();
-extern "C"    void    agmain_();
+extern "C" void geant_     ();
+extern "C" void agmain_    (Int_t*,Int_t*);
 extern "C" void agxuser_   ();
 extern "C" void agxinit_   ();
-extern "C" void geometry_   ();
-extern "C" int  agvolume_  (TNode**,float**,float**,float**,int*);
-extern "C" void kuexel_    (const char*,int);
-extern "C" void set_kupatl_(const char*,int*,int);
-extern "C" void dzddiv_    (int*,int*,char*,char*,int*,int*,int*,int*,int,int);
-extern "C" void gfrotm_    (int*,float*,float*,float*,float*,float*,float*);
-extern "C" void gfxzrm_    (int*,float*,float*,float*, float*,float*, float*,float*, float*,float*, float*);
+extern "C" void geometry_  ();
+extern "C" Int_t  agvolume_  (TNode**,Float_t**,Float_t**,Float_t**,Int_t*);
+extern "C" void kuexel_    (const Char_t*,Int_t);
+extern "C" void set_kupatl_(const Char_t*,Int_t*,Int_t);
+extern "C" void dzddiv_    (Int_t*,Int_t*,Char_t*,Char_t*,Int_t*,Int_t*,Int_t*,Int_t*,Int_t,Int_t);
+extern "C" void gfrotm_    (Int_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*);
+extern "C" void gfxzrm_    (Int_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*,Float_t*);
 
 Float_t theta1, phi1, theta2, phi2, theta3, phi3, type;
 Int_t   nlev;
@@ -77,9 +80,9 @@ Int_t   nlev;
 ClassImp(St_geom_Maker)
 
 //_____________________________________________________________________________
-St_geom_Maker::St_geom_Maker(const char *name, const char *title):
+St_geom_Maker::St_geom_Maker(const Char_t *name, const Char_t *title):
 StMaker(name,title){
-   drawinit=kFALSE;
+  drawinit=kFALSE;
 }
 //_____________________________________________________________________________
 St_geom_Maker::~St_geom_Maker(){
@@ -88,10 +91,14 @@ St_geom_Maker::~St_geom_Maker(){
 Int_t St_geom_Maker::Init(){
 // Create tables
    St_DataSetIter       local(gStChain->DataSet("params"));
-#if 0
-   printf (" calling agmain \n"); 
-   agmain_(); 
+   printf (" calling agmain \n");
+   Int_t nwg = 100000;
+   Int_t nwp = 0;
+   agmain_(&nwg,&nwp); 
+   Do("detp geometry field_only");
+
    geometry_();
+#if 0
    //   Draw();
    Do("dcut cave x 0.1 10 10 0.03 0.03");
    Work();
@@ -109,24 +116,24 @@ Int_t St_geom_Maker::Make(){
 //_____________________________________________________________________________
 void St_geom_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geom_Maker.cxx,v 1.4 1998/12/12 00:21:15 fisyak Exp $\n");
+  printf("* $Id: St_geom_Maker.cxx,v 1.5 1998/12/16 20:56:24 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
 
-#if 0
+#if 1
 //Geometry *pGeometry = new Geometry();
 
 
 void St_geom_Maker::Draw()
 { 
      int    idiv=2,Ldummy,one=1,zero=0,iw=1;
-     char   *path=" ",*opt="IN";
+     Char_t   *path=" ",*opt="IN";
      dzddiv_ (&idiv,&Ldummy,path,opt,&one,&zero,&one,&iw,1,2);
 }
 
-void St_geom_Maker::Do(const char *job)
+void St_geom_Maker::Do(const Char_t *job)
 {  
      int l=strlen(job);
      kuexel_(job,l);
@@ -172,7 +179,7 @@ void St_geom_Maker::Work()
            Int_t    irot   = 0;
            Float_t* xyz    = 0;
            Float_t* att    = volu+6+np; 
-           char     name[] = {0,0,0,0,0};
+           Char_t     name[] = {0,0,0,0,0};
            float    xx[3]  = {0.,0.,0.};
            Int_t       j   = 0;
            Int_t   check   = 0;
@@ -180,7 +187,7 @@ void St_geom_Maker::Work()
            if (mother) nin = mother[2];
            if (node) node->cd();
 
-           strncpy(name,(const char*)(volu-5),4);
+           strncpy(name,(const Char_t*)(volu-5),4);
            t=(TShape*)gGeometry->GetListOfShapes()->FindObject(name);
            if (!t)
            {   switch (shape)
