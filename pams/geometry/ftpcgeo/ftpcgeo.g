@@ -11,16 +11,19 @@ Module   FTPCGEO  is the geometry of the Forward TPC in STAR
 *  Modified 10-July-98
 *  Author   Holm Hummler, Janet Seyboth
 *           Position FSEN in correct order
+*  Modified 15-July-98
+*  Author   Janet Seyboth
+*           removed unused definitions
+*           declare FROM  konly='MANY'
+*           declare FGAS  konly='ONLY'
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
 	Content FTPC, FIAL, FMPT, FOAL, FDUM, FGAS, FSEN, FSEC,
 		FIFR, FKWI, FFSL, FFCE, FROS, FROM, FROR, FROB, 
-		FROE, FROL, FROP, FROT, FREL, FRCC, FRCE, FROK,
+		FROE, FROL, FROP, FROT, FREL, FRCC, FRCE,
 		FSER, FSRA, FSRB, FSPG, FSPI, FSSM, FSRI, FSBA,
-		FPAD, FFRA, FFRB, FFRC, FFRD, FFRE, FFRF, FFRG, 
-		FFRH, FFRI, FFRJ, FFRK, FFRL, FFRM, FFRN, FFRO, 
-		FFRP, FFRQ 
+		FPAD, FFRA
 *
 	structure FTPG { Version, RinnerMs, RouterMs,
                          RGasOut, RRoM, RElCard,  RCooPlm, RCooPle, 
@@ -48,14 +51,14 @@ Module   FTPCGEO  is the geometry of the Forward TPC in STAR
                         PolyOR, TrapX1, TrapX2, TrapDY, TrapDZ,
                         PGonPDZ, SBSDy}
 *
-	Integer  k,n,jj,ww,nn,gg,hh,Iring
+	Integer  k,n,jj,ww,gg,hh,Iring
         Integer krueck
         Integer  iflaga(5),iflagb(5)
         Data     iflaga /0,1,1,2,2/
         Data     iflagb /0,0,1,1,2/
-	Real     position, temp1, temp2, temp3,temp4
-        Real     z1,z2,z3,z4,z5,z6
-	Real     frob_x1,deg,pxy,rsignx,rsigny
+	Real     position, temp1, temp2, temp3
+        Real     z1,z2
+	Real     frob_x1
 	Integer  Agexist
 
 *
@@ -296,18 +299,18 @@ Endblock
 * ----------------------------------------------------------------------------
 Block FDUM is a dummy volume to provide the correct hitplane-numbering
       Material  Argon_gas
-      attribute FINR   seen=0  colo=7
+      attribute FDUM   seen=0  colo=7
       temp1=ftpg_RinnerMs+ftpg_DrInAlL1+ _
               ftpg_DrInIsoL+ftpg_DrInAlL2
       Shape     TUBE   Rmin=temp1,
                        Rmax=ftpg_RGasOut,
                        Dz=ftpg_totLen/2-ftpg_DzKapton
-      Create and position FGAS
+      Create and position FGAS  konly='ONLY'
 Endblock
 * ----------------------------------------------------------------------------
 Block FGAS is the FTPC gas volume
       Material  Argon_gas
-      attribute FINR   seen=1  colo=7
+      attribute FGAS   seen=1  colo=7
       temp1=ftpg_RinnerMs+ftpg_DrInAlL1+ _
               ftpg_DrInIsoL+ftpg_DrInAlL2
       Shape     TUBE   Rmin=temp1,
@@ -409,7 +412,9 @@ Block FSEC is a sensitive gas sector
 *     SHAPE     TUBE
       Shape     division Iaxis=2  Ndiv=6 C0=30 
 *
-      HITS      FSEN   xx:16:SHX(-50,50)   yy:16:(-50,50)     zz:32:(-370,370),
+*  may be: ... cx:0.01: cy:0.01: cz:0.01: ptot:16:(-100,100) instead of px,py,pz
+*
+      HITS      FSEC   xx:16:SHX(-50,50)   yy:16:(-50,50)     zz:32:(-370,370),
                        px:16:(-100,100)    py:16:(-100,100)   pz:16:(-100,100),
                        Slen:16:(0,1.e4)    Tof:16:(0,1.e-6)   Step:16:(0,100),
                        SHTN:16:            Elos:32:(0,1)
@@ -510,9 +515,10 @@ Block FROS is one Ring of Readout Modules in the support Structure
 
            Do ww=frbd_Phi2,frbd_Phi12,frbd_Phi3 
 *
-              Position FROM  AlphaZ=ww _
+              Position FROM  AlphaZ=ww+180 _
                              x=-29.42*sin(degrad*ww)_
-                             y=ftpg_RRoM*cos(degrad*ww)
+                             y=ftpg_RRoM*cos(degrad*ww)_
+                             konly='MANY'
 * PN:         position is done relative to the volume CENTER
               Position FREL  AlphaZ=ww _
                              x=-(ftpg_RElCard+frbd_ElectrDY)*sin(degrad*ww) _
@@ -546,21 +552,22 @@ Block FROM is one Module of the Readout Chamber
 
 * PN: default is position in current block, 'IN FROM' not needed
 
-  	Create and position FROR  AlphaX=frbd_Phi7 y=frbd_RaHol
+if (1>2) then
+  	Create and position FROR  AlphaX=frbd_Phi7 y=frbd_RaHol  konly='MANY'
+endif
+        Create and position FROE  x=frbd_XEHol y=frbd_YEHol      konly='MANY'
+        Create and position FROE  x=-(frbd_XEHol) y=frbd_YEHol   konly='MANY'
 
-        Create and position FROE  x=frbd_XEHol y=frbd_YEHol
-        Create and position FROE  x=-(frbd_XEHol) y=frbd_YEHol
-
-        Create and position FROL  z=frbd_XLHol  y=frbd_YLHol
-        Create and position FROL  z=-(frbd_XLHol)  y=frbd_YLHol
+        Create and position FROL  z=frbd_XLHol  y=frbd_YLHol     konly='MANY'
+        Create and position FROL  z=-(frbd_XLHol)  y=frbd_YLHol  konly='MANY'
         
         frob_x1 = -(frbd_BOffset)
 
         Do jj=1,5
+         Create and position FROB  AlphaY=frbd_Phi1 x=frob_x1_ 
+                     z=frbd_ZOffB      konly='MANY'
          Create and position FROB  AlphaY=frbd_Phi1 x=frob_x1_
-                     z=frbd_ZOffB 
-         Create and position FROB  AlphaY=frbd_Phi1 x=frob_x1_
-                     z=-(frbd_ZOffB) 
+                     z=-(frbd_ZOffB)   konly='MANY'
          frob_x1 = frob_x1 + 5.96 
         EndDo
          
@@ -568,7 +575,7 @@ Endblock
 * ----------------------------------------------------------------------------
 Block FROR is the Radius in the Readout Chamber
 	Material Air
-	Attribute FROR seen=0 colo=1
+	Attribute FROR seen=1 colo=4
 	shape TUBS Rmin=frbd_CakeHIR,
                    Rmax=frbd_CakeHOR,
                    Dz= frbd_CakeHWZ,
@@ -578,7 +585,7 @@ Endblock
 * ----------------------------------------------------------------------------
 Block FROB are the Box Holes in the Readout Chamber
 	Material Air
-	Attribute FROB seen=0 colo=1
+	Attribute FROB seen=1 colo=1
 	shape BOX Dx=frbd_BoxHX,
                   Dy=frbd_BoxHY,
                   Dz=frbd_BoxHZ
@@ -586,7 +593,7 @@ Endblock
 * ----------------------------------------------------------------------------
 Block FROE are the End Box Holes in the Readout Chamber
 	Material Air
-	Attribute FROE seen=0 colo=1
+	Attribute FROE seen=1 colo=3
 	shape BOX Dx=frbd_EBoxHX,
                   Dy=frbd_EBoxHY,
                   Dz=frbd_EBoxHZ
@@ -594,7 +601,7 @@ Endblock
 * ----------------------------------------------------------------------------
 Block FROL are the Length side Box Holes in the Readout Chamber
 	Material Air
-	Attribute FROL seen=0 colo=1
+	Attribute FROL seen=1 colo=2
 	Shape BOX Dx=frbd_LBoxHX,
                   Dy=frbd_LBoxHY,
                   Dz=frbd_LBoxHZ
