@@ -1,7 +1,10 @@
 #  $Log: Makefile,v $
+#  Revision 1.2  1998/01/01 03:28:11  fisyak
+#  New make.kumac
+#
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1997/12/31 14:35:23 $ 
+#             Last modification $Date: 1998/01/01 03:28:11 $ 
 #.SILENT:
 ALL_DEPS  = $^
 FIRST_DEP = $<
@@ -46,8 +49,10 @@ ROOT    := $(shell cd $(INP_DIR)/../../../; $(PWD))
 DOM_DIR := $(shell cd $(INP_DIR)/../; $(PWD))
 DOMAIN  := $(notdir $(DOM_DIR))
 DOM_DIRS:= $(addprefix $(ROOT)/pams/,$(shell cd $(INP_DIR)/../../; ls))
-IDL_DIRS:= $(shell ls -d $(ROOT)/pams/*/idl)
-INC_DIRS:= $(shell ls -d $(ROOT)/pams/*/inc)
+#IDL_DIRS:= $(shell ls -d $(ROOT)/pams/*/idl $(STAR_ROOT)/pams/*/idl)
+#INC_DIRS:= $(shell ls -d $(ROOT)/pams/*/inc $(STAR_ROOT)/pams/*/inc)
+IDL_DIRS:= $(wildcard $(ROOT)/pams/*/idl $(STAR_ROOT)/pams/*/idl)
+INC_DIRS:= $(wildcard $(ROOT)/pams/*/inc $(STAR_ROOT)/pams/*/inc)
 LIB_DIR := $(OUT_DIR)/$(STAR_SYS)
 OBJ_DIR := $(LIB_DIR)/$(NAME).obj
 DIR_GEN := $(OUT_DIR)/share
@@ -106,7 +111,7 @@ endif
 ifndef LIBRARIES
   LIBRARIES :=  -L$(CERN_ROOT)/lib -L$(STAR_ROOT)/staf/$(STAR_SYS) \
                 -lmathlib -lkernlib -ltls -lmsg \
-                $(LD_LIBS) -L$(STAR_LIB) -l$(DOMAIN)
+                $(LD_LIBS) -L$(LIB_DIR) -L$(STAR_LIB) -l$(DOMAIN)
 endif
 #-------------------------------rules-------------------------------
 # phony - not a file
