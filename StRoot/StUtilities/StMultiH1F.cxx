@@ -1,5 +1,8 @@
-// $Id: StMultiH1F.cxx,v 1.2 2000/08/25 15:46:42 genevb Exp $
+// $Id: StMultiH1F.cxx,v 1.3 2000/08/25 22:03:39 genevb Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.3  2000/08/25 22:03:39  genevb
+// Fixed entries problem
+//
 // Revision 1.2  2000/08/25 15:46:42  genevb
 // Added stats box, legend names
 //
@@ -51,8 +54,8 @@ void StMultiH1F::Draw(Option_t *option) {
   // dummy histogram pointer
   TH1F** temp = new TH1F*[ybins];
 
+  TString n0;
   for (ybin=0; ybin<ybins; ybin++) {
-    TString n0;
     if ((ybin >= 10) || (names[ybin].IsNull())) n0 = GetName();
     else n0 = names[ybin];
     Int_t slice = ybin+1;
@@ -77,7 +80,8 @@ void StMultiH1F::Draw(Option_t *option) {
 
   // Draw statistics for full set if stats are turned on
   if (!TestBit(kNoStats)) {
-    temp[0] = (TH1F*) ProjectionX(GetName(),0,(ybins-1));
+    temp[0] = (TH1F*) ProjectionX(GetName());
+    temp[0]->SetEntries(GetEntries());
     temp[0]->SetStats(kTRUE);
     temp[0]->Draw("boxsames");
     legend->SetX1(0.59);
