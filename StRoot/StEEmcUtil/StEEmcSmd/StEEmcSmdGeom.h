@@ -1,16 +1,26 @@
 
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.h,v 1.1 2003/03/28 15:50:00 balewski Exp $
+ * $Id: StEEmcSmdGeom.h,v 1.2 2003/04/04 15:33:31 wzhang Exp $
  *
  * Author: Wei-Ming Zhang
  *****************************************************************
  *
  * Description: Interface to EEMC-SMD database
+ * 
+ * The following demensions are defined for SMD in EEmcGeomDefs.h
+ * EEmcNumSectors     = 12 (The order follows numbering scheme of TPC sectors)
+ * kEEmcNumSmdPlanes  =  3 (1: the innermost and 3: the outermost) 
+ * kEEmcNumStrips     =288 (1: the shortes inner and 288: the shortest outer) 
+ * kEEmcNumEdgeStrips =283 (1: the shortes inner and 283: the shortest outer)
+ * kEEmcNumSmdLayers  =  2 (1: U and 2: V) 
  *
  *****************************************************************
  *
  * $Log: StEEmcSmdGeom.h,v $
+ * Revision 1.2  2003/04/04 15:33:31  wzhang
+ * included EEmcGeomDefs.h & improved codes
+ *
  * Revision 1.1  2003/03/28 15:50:00  balewski
  * first
  *
@@ -20,6 +30,7 @@
 #define STEEMCSMDGEOM_H
 #include "StThreeVectorD.hh"
 #include "StThreeVectorF.hh"
+#include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 
 #include <vector>
 #ifndef ST_NO_NAMESPACES
@@ -28,12 +39,9 @@ using std::vector;
 
 class StMaker;
 
-#define nStrips         288             
-#define nMods           12             
-
 struct StructEEmcSmdParam {
-  float zPlane[3];
-  float rOffset[3];
+  float zPlane[kEEmcNumSmdPlanes];
+  float rOffset[kEEmcNumSmdPlanes];
 };
 
 struct StructEEmcStripId{
@@ -73,9 +81,9 @@ struct StructEEmcSmdModule {
 class StEEmcSmdGeom{
  private:
   StructEEmcSmdParam     mEEmcSmdParam;      //! general geometry variables
-  StructEEmcSmdModule    mEEmcUModule[12];   //! 12 U modules. 
-  StructEEmcSmdModule    mEEmcVModule[12];   //! 12 V modules. 
-  bool                   mIsSectorIn[12];    //! sector status. 
+  StructEEmcSmdModule    mEEmcUModule[kEEmcNumSectors];   //! 12 U modules. 
+  StructEEmcSmdModule    mEEmcVModule[kEEmcNumSectors];   //! 12 V modules. 
+  bool                   mIsSectorIn[kEEmcNumSectors];    //! sector status. 
 
   void initGeomFromFile(const Char_t* = "/star/u/wzhang/myafs/anlsmd/strip_geometry.txt");
   static StEEmcSmdGeom* sInstance;

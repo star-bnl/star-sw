@@ -1,7 +1,7 @@
 
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.cxx,v 1.1 2003/03/28 15:49:59 balewski Exp $
+ * $Id: StEEmcSmdGeom.cxx,v 1.2 2003/04/04 15:33:32 wzhang Exp $
  *
  * Author: Wei-Ming Zhang 
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StEEmcSmdGeom.cxx,v $
+ * Revision 1.2  2003/04/04 15:33:32  wzhang
+ * included EEmcGeomDefs.h & improved codes
+ *
  * Revision 1.1  2003/03/28 15:49:59  balewski
  * first
  * 
@@ -29,15 +32,9 @@
 #include "PhysicalConstants.h"
 #include "StMaker.h"
 
-const float zPlane[3] = {278.327,279.542,280.757};
-const float rOffset[3]={1.850,0.925,0.0};
-const int   mapUV[3][12] = {{2,1,0,2,1,0,2,1,0,2,1,0},
-	                    {0,2,1,0,2,1,0,2,1,0,2,1},
-			    {1,0,2,1,0,2,1,0,2,1,0,2}};
-
 /// defaulty constructor
 StEEmcSmdGeom::StEEmcSmdGeom(){ 
-	for(int iMod = 1; iMod <= nMods; iMod++) mIsSectorIn[iMod-1] = true;
+  for(int iMod = 1; iMod <= kEEmcNumSectors; iMod++) mIsSectorIn[iMod-1] = true;
 };
 /// default empty destructor
 StEEmcSmdGeom::~StEEmcSmdGeom(){ 
@@ -74,8 +71,8 @@ StEEmcSmdGeom* StEEmcSmdGeom::instance(intVec sIdVec) {
 void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
 
 // Fill EEMC-SMD parameters first 
-   for(int iPlane=0; iPlane<3; iPlane++) 
-	         mEEmcSmdParam.rOffset[iPlane] = rOffset[iPlane];
+   for(int iPlane=0; iPlane<kEEmcNumSmdPlanes; iPlane++) 
+	         mEEmcSmdParam.rOffset[iPlane] = kEEmcSmdROffset[iPlane];
 
    cout << "StEEmcSmdGeom: loading dBase from " << InputFile << endl;
 
@@ -89,14 +86,14 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
   const int mx=1000;
   int num;
   char  buf[mx];
-  float x0[nStrips];
-  float y1[nStrips];
-  float y2[nStrips]; 
-  float length[nStrips];
-  float x0Edge[nStrips];
-  float y1Edge[nStrips];
-  float y2Edge[nStrips];
-  float lengthEdge[nStrips];
+  float x0[kEEmcNumStrips];
+  float y1[kEEmcNumStrips];
+  float y2[kEEmcNumStrips]; 
+  float length[kEEmcNumStrips];
+  float x0Edge[kEEmcNumEdgeStrips];
+  float y1Edge[kEEmcNumEdgeStrips];
+  float y2Edge[kEEmcNumEdgeStrips];
+  float lengthEdge[kEEmcNumEdgeStrips];
   
 // read header information
   next1: // skip header
@@ -104,7 +101,7 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
   //  printf("buf= %s \n",buf);
   if(buf[0]=='#') goto next1;
 
-  for (int i = 0; i < nStrips; i++) {
+  for (int i = 0; i < kEEmcNumStrips; i++) {
     fscanf(fd,"%d%f%f%f%f",     &num, &x0[i], &y1[i], &y2[i], &length[i]);
     //    if(i < 3||i>280) cout << num  << " " << x0[i << " " 
     //            << y1[i] << " "  << y2[i] << " " << length[i] << endl;
@@ -115,7 +112,7 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
   //  printf("buf= %s\n",buf);
   if(buf[0]=='#') goto nextlEdge;
 
-  for (int i = 0; i < nStrips-5; i++) {
+  for (int i = 0; i < kEEmcNumEdgeStrips; i++) {
     fscanf(fd,"%d%f%f%f%f",     &num, &x0Edge[i], &y1Edge[i], &y2Edge[i], &lengthEdge[i]);
     //     if(i < 3||i>280) cout << num << " " << x0Edge[i] << " " 
     //       << y1Edge[i] << " " <<  y2Edge[i] << " " << lengthEdge[i] << endl;
@@ -128,99 +125,100 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
 // Rotation angle for U/V layer is -/+( [45 - (moduleId - 1)*30] deg.
 // After rotation, x and y should be swapped for V layer   
 
-  int   delPhi = 30;
-  float vPhiRad[nMods], uPhiRad[nMods];
+  float   delPhi = 2*pi/degree/kEEmcNumSectors;
+  float vPhiRotation[kEEmcNumSectors], uPhiRotation[kEEmcNumSectors];
   
-  for(int iPhi=1; iPhi<=nMods; iPhi++){
-    int iMod = iPhi%nMods;
-    int phiDeg=iMod*delPhi;
-    if(iMod == 0) iMod = 12;    // To match the order of EEMC sectors
+  for(int iPhi=1; iPhi<=kEEmcNumSectors; iPhi++){
+    int iMod = iPhi%kEEmcNumSectors;
+    if(iMod == 0) iMod = kEEmcNumSectors; // iMod goes from 1 to 12
 
-    vPhiRad[iMod-1]=( 45.0 - phiDeg)*degree;  // 12 rotation angles for V
-    uPhiRad[iMod-1]=(-45.0 + phiDeg)*degree;  // 12 rotation angles for U
+// 12 rotation angles for coordinates transform from local to global for U & V 
+    uPhiRotation[iMod-1]=(-45.0 + iMod*delPhi)*degree; 
+    vPhiRotation[iMod-1]=( 45.0 - iMod*delPhi)*degree; 
   }
   
-  for (int iPlane = 1; iPlane <= 3; iPlane++) {
-    float gX1, gY1, gX2, gY2;
+  for (int iPlane = 1; iPlane <= kEEmcNumSmdPlanes; iPlane++) {
+    float globalX1, globalY1, globalX2, globalY2;
     float x0Corr, y1Corr, y2Corr, lengthCorr; 
-    float gPhi1, gPhi2, gPhiMin, gPhiMax;
-    float gR, gRMin, gRMax;
-
-    mEEmcSmdParam.zPlane[iPlane-1] = zPlane[iPlane-1];
+    float phi1, phi2, phiMin, phiMax;
+    float r, rMin, rMax;
+    mEEmcSmdParam.zPlane[iPlane-1] = kEEmcZSMD + 
+	             (iPlane - kEEmcNumSmdPlanes + 1) * kEEmcSmdZPlaneShift ;
 
 // V layer
     
-    for(int iPhi=iPlane; iPhi<=nMods; iPhi=iPhi+3) {
-      int iMod = iPhi%nMods;
-      if(iMod == 0) iMod = 12;
+    for(int iPhi=iPlane; iPhi<=kEEmcNumSectors; iPhi=iPhi+kEEmcNumSmdPlanes) {
+      int iMod = iPhi%kEEmcNumSectors;
+      if(iMod == 0) iMod = kEEmcNumSectors;
       if(IsSectorIn(iMod)) {
           
         EEmcStripPtrVec vStripPtrVec;
 
-        gRMin = 300.0;
-        gRMax = 0.0;
-        gPhiMin = pi; 
-        gPhiMax = -pi;
+        rMin = 1000.0;
+        rMax = 0.0;
+        phiMin = pi; 
+        phiMax = -pi;
      
-        for (int iEta = 0; iEta < nStrips; iEta++) {   
-          if(iPlane==1 && (iMod==4 || iMod==10)&& iEta > 282) break;      
+        for (int iEta = 0; iEta < kEEmcNumStrips; iEta++) {   
+          if(kEEmcSmdMapEdge[iPlane-1][iMod-1] && iEta > kEEmcNumEdgeStrips-1) 
+		                                                    break;      
           StructEEmcStripId  stripId;
  	  if(iMod != 0) stripId.moduleId = iMod;
-	  else stripId.moduleId = 12;
+	  else stripId.moduleId = kEEmcNumSectors;
 	  stripId.layerId = 2;
 	  stripId.etaId = iEta + 1;
 	  stripId.planeId = iPlane;
 	  StructEEmcStrip*    stripPtr = new StructEEmcStrip;
 	  stripPtr->stripId = stripId; 
 
-	  x0Corr = x0[iEta] - rOffset[iPlane - 1]*sqrt(0.5);
-	  y2Corr = y2[iEta] - rOffset[iPlane - 1]*sqrt(0.5);
-	  if(iPlane == 1 && (iMod == 4 || iMod == 10)) { 
-	    y1Corr = y1Edge[iEta] - rOffset[iPlane - 1]*sqrt(0.5);
+	  x0Corr = x0[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
+	  y2Corr = y2[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
+          if(kEEmcSmdMapEdge[iPlane-1][iMod-1]) {      
+	    y1Corr = y1Edge[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
 	    lengthCorr = lengthEdge[iEta];
           }
 	  else { 
-	    y1Corr = y1[iEta] - rOffset[iPlane - 1]*sqrt(0.5);
+	    y1Corr = y1[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
 	    lengthCorr = length[iEta];
           }
 
-          gX1 = y1Corr*cos(vPhiRad[iMod-1]) - 
-	                              x0Corr*sin(vPhiRad[iMod-1]);
-          gY1 = x0Corr*cos(vPhiRad[iMod-1]) + 
-			              y1Corr*sin(vPhiRad[iMod-1]);
-          gX2 = y2Corr*cos(vPhiRad[iMod-1]) - 
-	                              x0Corr*sin(vPhiRad[iMod-1]);
-          gY2 = x0Corr*cos(vPhiRad[iMod-1]) + 
-		                      y2Corr*sin(vPhiRad[iMod-1]);
+          globalX1 = y1Corr*cos(vPhiRotation[iMod-1]) - 
+	                              x0Corr*sin(vPhiRotation[iMod-1]);
+          globalY1 = x0Corr*cos(vPhiRotation[iMod-1]) + 
+			              y1Corr*sin(vPhiRotation[iMod-1]);
+          globalX2 = y2Corr*cos(vPhiRotation[iMod-1]) - 
+	                              x0Corr*sin(vPhiRotation[iMod-1]);
+          globalY2 = x0Corr*cos(vPhiRotation[iMod-1]) + 
+		                      y2Corr*sin(vPhiRotation[iMod-1]);
 
-	  gR = sqrt(gX1*gX1 + gY1*gY1);
-	  if(gR < gRMin) gRMin = gR;
-	  gR = sqrt(gX2*gX2 + gY2*gY2);
-	  if(gR > gRMax) gRMax = gR;
+	  r = sqrt(globalX1*globalX1 + globalY1*globalY1);
+	  if(r < rMin) rMin = r;
+	  r = sqrt(globalX2*globalX2 + globalY2*globalY2);
+	  if(r > rMax) rMax = r;
 
 //Fill vStripPtrVec 
-	  stripPtr->end1.setX(gX1) ;
-	  stripPtr->end1.setY(gY1) ;
-	  stripPtr->end1.setZ(zPlane[iPlane-1]);
-	  stripPtr->end2.setX(gX2) ;
-	  stripPtr->end2.setY(gY2) ;
-	  stripPtr->end2.setZ(zPlane[iPlane-1]);
+	  stripPtr->end1.setX(globalX1) ;
+	  stripPtr->end1.setY(globalY1) ;
+	  stripPtr->end1.setZ(mEEmcSmdParam.zPlane[iPlane-1]);
+	  stripPtr->end2.setX(globalX2) ;
+	  stripPtr->end2.setY(globalY2) ;
+	  stripPtr->end2.setZ(mEEmcSmdParam.zPlane[iPlane-1]);
           stripPtr->length = lengthCorr;
 
-	  gPhi1 = stripPtr->end1.phi();
-	  gPhi2 = stripPtr->end2.phi();
+	  phi1 = stripPtr->end1.phi();
+	  phi2 = stripPtr->end2.phi();
  
-	  if(iMod != 9) {
-            if(gPhi1 < gPhiMin) gPhiMin = gPhi1; 
-            if(gPhi1 > gPhiMax) gPhiMax = gPhi1; 
-            if(gPhi2 < gPhiMin) gPhiMin = gPhi2; 
-            if(gPhi2 > gPhiMax) gPhiMax = gPhi2; 
+	  if(iMod !=  kEEmcSmdModuleIdPhiCrossPi) {
+            if(phi1 < phiMin) phiMin = phi1; 
+            if(phi1 > phiMax) phiMax = phi1; 
+            if(phi2 < phiMin) phiMin = phi2; 
+            if(phi2 > phiMax) phiMax = phi2; 
           }
           else {
-            if(gPhi1 > 0)  if(gPhi1 < gPhiMin) gPhiMin = gPhi1; 
-	    if(gPhi1 < 0 )  if(gPhi1 > gPhiMax) gPhiMax = gPhi1; 
-            if(gPhi2 > 0)  if(gPhi2 < gPhiMin) gPhiMin = gPhi2; 
-            if(gPhi2 < 0)  if(gPhi2 > gPhiMax) gPhiMax = gPhi2; 
+            if(phi1 > 0)  if(phi1 < phiMin) phiMin = phi1; 
+	    if(phi1 < 0 ) if(phi1 > phiMax) phiMax = phi1; 
+            if(phi2 > 0)  if(phi2 < phiMin) phiMin = phi2; 
+            if(phi2 < 0)  if(phi2 > phiMax) phiMax = phi2; 
           }
           vStripPtrVec.push_back(stripPtr);
         } // loop over iEta
@@ -228,87 +226,88 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
 // Fill V Modules
         mEEmcVModule[iMod-1].moduleId = iMod;
         mEEmcVModule[iMod-1].planeId = iPlane;
-        mEEmcVModule[iMod-1].phiMin = gPhiMin;
-        mEEmcVModule[iMod-1].phiMax = gPhiMax;
-        mEEmcVModule[iMod-1].rMin = gRMin;
-        mEEmcVModule[iMod-1].rMax = gRMax;
+        mEEmcVModule[iMod-1].phiMin = phiMin;
+        mEEmcVModule[iMod-1].phiMax = phiMax;
+        mEEmcVModule[iMod-1].rMin = rMin;
+        mEEmcVModule[iMod-1].rMax = rMax;
         mEEmcVModule[iMod-1].stripPtrVec = vStripPtrVec;
 
       } // if selected sectors
     } // end of V iPhi
 
 // U layer
-    for(int iPhi=iPlane+1; iPhi<=13;iPhi=iPhi+3) {
-      int iMod = iPhi%nMods;
-      if(iMod == 0) iMod = 12;
+    for(int iPhi=iPlane+1;iPhi<=kEEmcNumSectors+1;iPhi=iPhi+kEEmcNumSmdPlanes) {
+      int iMod = iPhi%kEEmcNumSectors;
+      if(iMod == 0) iMod = kEEmcNumSectors;
       if(IsSectorIn(iMod)) {
         EEmcStripPtrVec uStripPtrVec;
 
-        gRMin = 300.0;
-        gRMax = 0.0; 
-        gPhiMin = pi; 
-        gPhiMax = -pi;
+        rMin = 1000.0;
+        rMax = 0.0; 
+        phiMin = pi; 
+        phiMax = -pi;
 
-        for (int iEta = 0; iEta < nStrips; iEta++) {   
-	  if(iPlane==2 && (iMod==3 || iMod==9) && iEta > 282) break; 
+        for (int iEta = 0; iEta < kEEmcNumStrips; iEta++) {   
+          if(kEEmcSmdMapEdge[iPlane-1][iMod-1] && iEta > kEEmcNumEdgeStrips-1) 
+		                                                      break; 
           StructEEmcStripId  stripId;
 	  if(iMod != 0) stripId.moduleId = iMod;
-	  else stripId.moduleId = 12;
+	  else stripId.moduleId = kEEmcNumSectors;
 	  stripId.layerId = 1; 
 	  stripId.etaId = iEta + 1;
 	  stripId.planeId = iPlane;
 	  StructEEmcStrip*    stripPtr = new StructEEmcStrip;
 	  stripPtr->stripId = stripId; 
 
-	  x0Corr = x0[iEta] - rOffset[iPlane - 1]*sqrt(0.5);
-	  y2Corr = y2[iEta] - rOffset[iPlane - 1]*sqrt(0.5);
-
-	  if(iPlane == 2 && (iMod == 3 || iMod == 9)) {
-	    y1Corr = y1Edge[iEta] - rOffset[iPlane - 1]*sqrt(0.5);
+	  x0Corr = x0[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
+	  y2Corr = y2[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
+	    
+          if(kEEmcSmdMapEdge[iPlane-1][iMod-1]) {      
+	    y1Corr = y1Edge[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
 	    lengthCorr = lengthEdge[iEta];
 	  }
 	  else { 
-	    y1Corr = y1[iEta] - rOffset[iPlane - 1]*sqrt(0.5);
+	    y1Corr = y1[iEta] - kEEmcSmdROffset[iPlane - 1]*sqrt(0.5);
 	    lengthCorr = length[iEta];
           }
 	   
-          gX1 = x0Corr*cos(uPhiRad[iMod-1])+ 
-		                     y1Corr*sin(uPhiRad[iMod-1]);
-          gY1 = y1Corr*cos(uPhiRad[iMod-1]) - 
-		                     x0Corr*sin(uPhiRad[iMod-1]);
-          gX2 = x0Corr*cos(uPhiRad[iMod-1]) + 
-		                     y2Corr*sin(uPhiRad[iMod-1]);
-          gY2 = y2Corr*cos(uPhiRad[iMod-1]) - 
-		                     x0Corr*sin(uPhiRad[iMod-1]);
+          globalX1 = x0Corr*cos(uPhiRotation[iMod-1])+ 
+		                     y1Corr*sin(uPhiRotation[iMod-1]);
+          globalY1 = y1Corr*cos(uPhiRotation[iMod-1]) - 
+		                     x0Corr*sin(uPhiRotation[iMod-1]);
+          globalX2 = x0Corr*cos(uPhiRotation[iMod-1]) + 
+		                     y2Corr*sin(uPhiRotation[iMod-1]);
+          globalY2 = y2Corr*cos(uPhiRotation[iMod-1]) - 
+		                     x0Corr*sin(uPhiRotation[iMod-1]);
 
-	  gR = sqrt(gX1*gX1 + gY1*gY1);
-	  if(gR < gRMin) gRMin = gR;
-	  gR = sqrt(gX2*gX2 + gY2*gY2);
-	  if(gR > gRMax) gRMax = gR;
+	  r = sqrt(globalX1*globalX1 + globalY1*globalY1);
+	  if(r < rMin) rMin = r;
+	  r = sqrt(globalX2*globalX2 + globalY2*globalY2);
+	  if(r > rMax) rMax = r;
 
 //Fill uStripPtrVec 
-	  stripPtr->end1.setX(gX1) ;
-	  stripPtr->end1.setY(gY1) ;
-	  stripPtr->end1.setZ(zPlane[iPlane-1]);
-	  stripPtr->end2.setX(gX2) ;
-	  stripPtr->end2.setY(gY2) ;
-	  stripPtr->end2.setZ(zPlane[iPlane-1]);
+	  stripPtr->end1.setX(globalX1) ;
+	  stripPtr->end1.setY(globalY1) ;
+	  stripPtr->end1.setZ(mEEmcSmdParam.zPlane[iPlane-1]);
+	  stripPtr->end2.setX(globalX2) ;
+	  stripPtr->end2.setY(globalY2) ;
+	  stripPtr->end2.setZ(mEEmcSmdParam.zPlane[iPlane-1]);
           stripPtr->length = lengthCorr;
 
-	  gPhi1 = stripPtr->end1.phi();
-	  gPhi2 = stripPtr->end2.phi();
+	  phi1 = stripPtr->end1.phi();
+	  phi2 = stripPtr->end2.phi();
 
-	  if(iMod != 9) {
-            if(gPhi1 < gPhiMin) gPhiMin = gPhi1; 
-            if(gPhi1 > gPhiMax) gPhiMax = gPhi1; 
-            if(gPhi2 < gPhiMin) gPhiMin = gPhi2; 
-            if(gPhi2 > gPhiMax) gPhiMax = gPhi2; 
+	  if(iMod !=  kEEmcSmdModuleIdPhiCrossPi) {
+            if(phi1 < phiMin) phiMin = phi1; 
+            if(phi1 > phiMax) phiMax = phi1; 
+            if(phi2 < phiMin) phiMin = phi2; 
+            if(phi2 > phiMax) phiMax = phi2; 
           }
           else {
-            if(gPhi1 > 0)  if(gPhi1 < gPhiMin) gPhiMin = gPhi1; 
-	    if(gPhi1 < 0 )  if(gPhi1 > gPhiMax) gPhiMax = gPhi1; 
-            if(gPhi2 > 0)  if(gPhi2 < gPhiMin) gPhiMin = gPhi2; 
-            if(gPhi2 < 0)  if(gPhi2 > gPhiMax) gPhiMax = gPhi2; 
+            if(phi1 > 0)  if(phi1 < phiMin) phiMin = phi1; 
+	    if(phi1 < 0 ) if(phi1 > phiMax) phiMax = phi1; 
+            if(phi2 > 0)  if(phi2 < phiMin) phiMin = phi2; 
+            if(phi2 < 0)  if(phi2 > phiMax) phiMax = phi2; 
           }
 
           uStripPtrVec.push_back(stripPtr);
@@ -317,10 +316,10 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
 //Fill U Modules	 
         mEEmcUModule[iMod-1].moduleId = iMod;
         mEEmcUModule[iMod-1].planeId = iPlane;
-        mEEmcUModule[iMod-1].phiMin = gPhiMin;
-        mEEmcUModule[iMod-1].phiMax = gPhiMax;
-        mEEmcUModule[iMod-1].rMin = gRMin;
-        mEEmcUModule[iMod-1].rMax = gRMax;
+        mEEmcUModule[iMod-1].phiMin = phiMin;
+        mEEmcUModule[iMod-1].phiMax = phiMax;
+        mEEmcUModule[iMod-1].rMin = rMin;
+        mEEmcUModule[iMod-1].rMax = rMax;
         mEEmcUModule[iMod-1].stripPtrVec = uStripPtrVec;
 
       } // if selected sectors
@@ -331,9 +330,9 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
 
   // set status of selectoed sectors
   void StEEmcSmdGeom::setSectors(const intVec sIdVec) {
-       for(int iMod = 1; iMod<= nMods; iMod++) mIsSectorIn[iMod - 1] = false;
+       for(int iMod = 1; iMod<= kEEmcNumSectors; iMod++) mIsSectorIn[iMod - 1] = false;
        for(unsigned int i = 0; i < sIdVec.size(); i++) { 
-          for(int iMod = 1; iMod<= nMods; iMod++) {
+          for(int iMod = 1; iMod<= kEEmcNumSectors; iMod++) {
             if (sIdVec[i] == iMod) mIsSectorIn[iMod - 1] = true;
           }
        }				       
@@ -344,7 +343,7 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
     StThreeVectorD  zero = 0.0;
     StructEEmcStrip strip; 
     strip.stripId.moduleId = 0;
-    strip.stripId.layerId = 3;
+    strip.stripId.layerId = 0;
     strip.stripId.etaId = 0;
     strip.stripId.planeId = 0;
     strip.end1 = zero;
@@ -359,21 +358,21 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
      float phi = point.phi();
      float r = sqrt(point.x()*point.x() + point.y()*point.y());
 
-     for (int iMod = 1; iMod <= nMods; iMod++) {
-       if(mapUV[planeId-1][iMod-1] > 0 && IsSectorIn(iMod)) {       
-         if(mapUV[planeId-1][iMod-1] == 1) {
+     for (int iMod = 1; iMod <= kEEmcNumSectors; iMod++) {
+       if(kEEmcSmdMapUV[planeId-1][iMod-1] > 0 && IsSectorIn(iMod)) {       
+         if(kEEmcSmdMapUV[planeId-1][iMod-1] == 1) {
            phiMin = mEEmcUModule[iMod-1].phiMin;  
            phiMax = mEEmcUModule[iMod-1].phiMax;  
            rMin = mEEmcUModule[iMod-1].rMin;  
            rMax = mEEmcUModule[iMod-1].rMax;
          }
-         else if(mapUV[planeId-1][iMod-1] == 2) { 
+         else if(kEEmcSmdMapUV[planeId-1][iMod-1] == 2) { 
            phiMin = mEEmcVModule[iMod-1].phiMin;  
            phiMax = mEEmcVModule[iMod-1].phiMax;  
            rMin = mEEmcVModule[iMod-1].rMin;  
            rMax = mEEmcVModule[iMod-1].rMax; 
          } 
-         if(iMod != 9) {
+         if(iMod !=  kEEmcSmdModuleIdPhiCrossPi) {
            if (phi >= phiMin && phi < phiMax && r > rMin && r < rMax) {
               moduleId = iMod;
               break;
@@ -399,7 +398,7 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
     float x1,y1,x2,y2,mu,d;
     int moduleId = EEmcModuleId(planeId, point);
     if(moduleId > 0 && IsSectorIn(moduleId)) {
-       int layerId = mapUV[planeId-1][moduleId-1];
+       int layerId = kEEmcSmdMapUV[planeId-1][moduleId-1];
        if(layerId == 1) {
          stripPtrVec = EEmcUModule(moduleId).stripPtrVec;  
        }
@@ -456,16 +455,14 @@ void StEEmcSmdGeom::printGeom(ostream& os) const {
 
 /// print module-specific geometry parameters
 void StEEmcSmdGeom::printModule(const StructEEmcSmdModule module, ostream& os) const {
-  char layer[2];
-  layer[0] = 'U';
-  layer[1] = 'V';
   float delPhi;
-  int layerId = mapUV[module.planeId-1][module.moduleId-1];
+  int layerId = kEEmcSmdMapUV[module.planeId-1][module.moduleId-1];
   delPhi = (module.phiMax - module.phiMin)/degree;
-  if(module.moduleId == 9) delPhi = 360.0 + delPhi;
+  if(module.moduleId == kEEmcSmdModuleIdPhiCrossPi) 
+	                     delPhi = 2*pi/degree + delPhi;
   
   os << "------StEEmcSmdGeom::printModule()------" << endl;
-  os << layer[layerId - 1] << " Module:  Id, plane, nStrips      = " 
+  os << kEEmcSmdLayerChar[layerId -1] << " Module:  Id, plane, nStrips      = " 
      << " " << module.moduleId 
      << " " << module.planeId 
      << " " << module.stripPtrVec.size() << endl;
@@ -482,14 +479,15 @@ void StEEmcSmdGeom::printModule(const StructEEmcSmdModule module, ostream& os) c
 
 /// print strip-specific geometry parameters
 void StEEmcSmdGeom::printStrip(const StructEEmcStrip strip, ostream& os) const {
-  char layer[3];
-  layer[0] = 'U';
-  layer[1] = 'V';
-  layer[2] = 'X';
+  char layerChar; 	
+  if(strip.stripId.moduleId == 0) layerChar = 'X';
+  else
+    layerChar = kEEmcSmdLayerChar[strip.stripId.layerId - 1];
+
   os << "------StEEmcSmdGeom::printStrip()------" << endl;
 
     os << "Strip:  module, eta, plane    = "
-       << " " << layer[strip.stripId.layerId-1] 
+       << " " << layerChar 
               << strip.stripId.moduleId
        << " " << strip.stripId.etaId
        << " " << strip.stripId.planeId << endl;
@@ -508,13 +506,15 @@ void StEEmcSmdGeom::printStrip(const StructEEmcStrip strip, ostream& os) const {
 
 /// print stripId
 void StEEmcSmdGeom::printStripId(const StructEEmcStripId stripId, ostream& os) const {
-  char layer[2];
-  layer[0] = 'U';
-  layer[1] = 'V';
+  char layerChar; 	
+  if(stripId.moduleId == 0) layerChar = 'X';
+  else
+    layerChar = kEEmcSmdLayerChar[stripId.layerId - 1];
+
   os << "------StEEmcSmdGeom::printStripId()------" << endl;
     os << "Strip:  module, eta, plane    = "
        << " " << stripId.moduleId
-              << layer[stripId.layerId-1]
+              << layerChar 
        << " " << stripId.etaId
        << " " << stripId.planeId << endl;
     os << "------------------------------------" << endl;
