@@ -1,7 +1,10 @@
-// $Id: St_dst_Maker.cxx,v 1.80 2004/05/11 17:18:39 jcs Exp $
+// $Id: St_dst_Maker.cxx,v 1.81 2004/05/24 13:49:04 jcs Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.81  2004/05/24 13:49:04  jcs
+// delete creation of St_dst_mon_soft_ftpc table - StEvent/StFtpcSoftwareMonitor filled directly
+//
 // Revision 1.80  2004/05/11 17:18:39  jcs
-// create an empty ftpc monitor soft table which will be filled in StFtpcTrackMaker.cxx
+//  create an empty ftpc monitor soft table which will be filled in StFtpcTrackMaker.cxx
 //
 // Revision 1.79  2004/05/11 15:44:05  jcs
 // remove filling of dst_mon_soft_ftpc table, information now stored directly into StEvent
@@ -239,7 +242,6 @@
 #include "global/St_fill_dst_event_summary_Module.h"
 #include "tables/St_dst_summary_param_Table.h"
 #include "tables/St_dst_run_summary_Table.h"
-#include "tables/St_dst_mon_soft_ftpc_Table.h"
 #include "tables/St_dst_mon_soft_ctb_Table.h"
 #include "tables/St_dst_mon_soft_emc_Table.h"
 #include "tables/St_dst_mon_soft_l3_Table.h"
@@ -250,7 +252,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.80 2004/05/11 17:18:39 jcs Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.81 2004/05/24 13:49:04 jcs Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -417,10 +419,6 @@ Int_t  St_dst_Maker::Filler(){
      if(!globtrk) {globtrk = new St_dst_track("globtrk",1);AddGarb(globtrk);}
   }
 
-  // create an empty ftpc monitor soft table which will be filled in StFtpcTrackMaker.cxx
-  St_dst_mon_soft_ftpc *mon_soft_ftpc = new St_dst_mon_soft_ftpc("mon_soft_ftpc",1);
-  dstI.Add(mon_soft_ftpc);
-  mon_soft_ftpc->SetNRows(1);
 
   St_dst_vertex    *vertex      = (St_dst_vertex *)    dstI("vertex");    
   //Make empty vertex table if none exists
