@@ -2,6 +2,7 @@
 //: FILE:       gl3Tracks.h
 //: HISTORY:
 //:              6dec1999 version 1.00
+//:              2feb2000 add sector to add methods
 //:<------------------------------------------------------------------
 #include <stdio.h>
 #include <math.h>
@@ -13,9 +14,9 @@
 
 class gl3Track {
 public:
-   short     id;          /* track id */
+   long      id;          /* track id */
    short     nHits;       /* Number of points assigned to that track */
-   long      primaryFlag; /* =1 if primary */
+   short     primaryFlag; /* =1 if primary */
    float     chisq[2];    /* xy and dz chi2 */
    float     dedx;        /* dE/dx information */
    float     pt  ;        /* pt time charge */
@@ -39,7 +40,7 @@ public:
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
 //############################################################################
-   void set ( type1_track* trk, float bField, float xVert, float yVert,
+   void set ( short sector, type1_track* trk, float bField, float xVert, float yVert,
                                               float rVert, float phiVert ) {
    //
    //   Line parameters in xy
@@ -81,7 +82,7 @@ public:
       if ( d_angle < -M_PI ) d_angle =   d_angle + 2.*M_PI  ;
       short  q = ( ( d_angle < 0 ) ? 1 : -1 ) ;
 //
-      id    = id ;
+      id    = trk->id  + sector * 10000 ;
       nHits = trk->nHits ; 
       pt    = (double)(2.9979e-3 * bField * rc ) * double(q) ;
       r0    = rVert ;
@@ -101,8 +102,8 @@ public:
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
 //############################################################################
-   void set ( type2_track* trk, float rVert, float phiVert ) {
-      id          = trk->id ;
+   void set ( short sector,  type2_track* trk, float rVert, float phiVert ) {
+      id          = trk->id + sector * 10000 ;
       nHits       = trk->nrec ;
       chisq[0]    = float(trk->xy_chisq)/10. ;
       chisq[1]    = float(trk->sz_chisq)/10. ;
@@ -119,8 +120,8 @@ public:
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
 //############################################################################
-   void set ( type3_track* trk ) {
-      id          = trk->id ;
+   void set ( short sector, type3_track* trk ) {
+      id          = trk->id + sector * 10000 ;
       nHits       = trk->nrec ;
       chisq[0]    = float(trk->xy_chisq)/10. ;
       chisq[1]    = float(trk->sz_chisq)/10. ;

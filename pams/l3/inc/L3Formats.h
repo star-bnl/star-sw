@@ -2,6 +2,7 @@
  * changes:
  *       11/24/99 cle: renamed some variables  
  *       12/06/99 ppy: add xLastHit, yLastHit to type1_track
+ *       01/31/00 ppy: add innerMostRow and outerMostRow to type1_track
  */
 
 #ifndef _L3_FORMATS_H
@@ -25,6 +26,8 @@
 struct type1_track { 
     short id ;
     short nHits ;
+    short innerMostRow ; /* Inner most row track expands */
+    short outerMostRow ; /* Outer most row track expands */
     float dedx ; 
     float s11Xy ;/* Fit parameters*/ 
     float s12Xy ;/* conformal line in xy plane */ 

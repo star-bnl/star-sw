@@ -2,6 +2,7 @@
 //: FILE:       gl3Event.h
 //: HISTORY:
 //:              3dec1999 version 1.00
+//:              3feb2000 add sector to addTracks of type 3
 //:<------------------------------------------------------------------
 #include <stdio.h>
 #include <math.h>
@@ -54,7 +55,7 @@ public:
 
    void addTracks ( short sector, int nTracks, type1_track* track1 ) ;
    void addTracks ( short sector, int nTracks, type2_track* track2 ) ;
-   void addTracks ( int nTracks, type3_track* track3 ) ;
+   void addTracks ( short sector, int nTracks, type3_track* track3 ) ;
 
    int  readEvent  ( int maxLength, char* buffer ) ;
    int  readSector ( int maxLength, char* buffer ) ;
