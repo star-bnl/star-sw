@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.10 2001/01/08 17:07:09 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.11 2001/01/15 16:08:41 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.11  2001/01/15 16:08:41  jcs
+// get phiOrigin and phiPerSector fro ftpcDimensions
+//
 // Revision 1.10  2001/01/08 17:07:09  jcs
 // move remaining constants from code to database
 //
@@ -142,6 +145,8 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_ampoff *ampoff,
   mPadrowZPosition = (Float_t *) &(zrow->GetTable()->z);
 
   //  temporarily set Ftpc fast simulator geometry parameters until in data base
+  mPhiOrigin = 90.;
+  mPhiPerSector = 60.;
   mPadLength = 2.0;
   //  temporarily set Ftpc fast simulator parameters until in data base
   mFtpcWestGeantVolumeId = 100;
@@ -151,8 +156,6 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_ampoff *ampoff,
   mMergedClusterFlag = 1000;
   mNumberOfPadsDedxSmearing = 4;
   mNumberOfBinsDedxSmearing = 3;
-  mSimulationPhiOrigin = 90.;
-  mSimulationPhiSector = 60.;
   mRadiusTolerance = 0.25;
   mSigmaSpacingFactorForCluster = 2.5;
   mAdcConversionFactor = 8000000.0;

@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.10 2001/01/08 17:07:17 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.11 2001/01/15 16:08:52 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.11  2001/01/15 16:08:52  jcs
+// get phiOrigin and phiPerSector fro ftpcDimensions
+//
 // Revision 1.10  2001/01/08 17:07:17  jcs
 // move remaining constants from code to database
 //
@@ -135,8 +138,8 @@ protected:
   Int_t mMergedClusterFlag;
   Int_t mNumberOfPadsDedxSmearing;
   Int_t mNumberOfBinsDedxSmearing;
-  Float_t mSimulationPhiOrigin;
-  Float_t mSimulationPhiSector;
+  Float_t mPhiOrigin;
+  Float_t mPhiPerSector;
   Float_t mRadiusTolerance;
   Float_t mSigmaSpacingFactorForCluster;
   Float_t mAdcConversionFactor;
@@ -270,8 +273,8 @@ public:
   Int_t mergedClusterFlag() {return mMergedClusterFlag;}
   Int_t numberOfPadsDedxSmearing() {return mNumberOfPadsDedxSmearing;}
   Int_t numberOfBinsDedxSmearing() {return mNumberOfBinsDedxSmearing;}
-  Float_t simulationPhiOrigin() {return mSimulationPhiOrigin;}
-  Float_t simulationPhiSector() {return mSimulationPhiSector;}
+  Float_t phiOrigin() {return mPhiOrigin;}
+  Float_t phiPerSector() {return mPhiPerSector;}
   Float_t radiusTolerance() {return mRadiusTolerance;}
   Float_t sigmaSpacingFactorForCluster() {return mSigmaSpacingFactorForCluster;}
   Float_t adcConversionFactor() {return mAdcConversionFactor;}
