@@ -47,21 +47,50 @@
    
  return
  
-**********************************************
- 
+* ********************************************
+  
  macro process_event
    
 * must go to directory geant!
-     cd /dui/geant
+* cd /dui/geant
 * read in another event from input_file
      trig 1
 * write out in staf table format
-     cd /dui/geant
-     for/call g2t
+* cd /dui/geant
+   for/call g2t
      
  return
 * ****************************************
-
+ 
+ macro mv_tables_Run
+   
+   dui/mv Run/cave_cave geant/Run
+   dui/mv Run/tpce_tpcg geant/Run
+   dui/mv Run/tpce_tprs geant/Run
+   dui/mv Run/tpce_tecw geant/Run
+   dui/mv Run/g2tm_gttc geant/Run
+   dui/mv Run/g2tm_dete geant/Run
+* dui/mv Run/mick_miky geant/Run
+   
+   rmdir Run
+   
+      
+ return
+ 
+* ***************************************
+ 
+ macro mv_tables_Event
+   
+   dui/mv Event/g2t_event    geant/Event
+   dui/mv Event/g2t_vertex   geant/Event
+   dui/mv Event/g2t_track    geant/Event
+   dui/mv Event/g2t_tpc_hit  geant/Event
+   
+* rmdir Event
+   
+ return
+ 
+* ****************************************
 
 
 
