@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.23 2003/10/16 19:48:37 akio Exp $
+// $Id: StppEvent.cxx,v 1.24 2004/01/23 00:54:44 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.24  2004/01/23 00:54:44  akio
+// update for ntp2003
+//
 // Revision 1.23  2003/10/16 19:48:37  akio
 // updates for 2003
 //
@@ -186,11 +189,14 @@ void StppEvent::clear(){
     xVertex = -9999.0;
     yVertex = -9999.0;
     zVertex = -9999.0;
-    LCP = 0;
-    sumPt = 0.0;
+    LCP     =  0;
+    LCPpt   =  0.0;
+    LCPeta  = -9.0;
+    LCPphi  = -9.0;
+    sumPt   = 0.0;
     vectorSumPt = 0.0;
-    weightedEta = 0.0;
-    weightedPhi = 0.0;
+    weightedEta =-9.0;
+    weightedPhi =-9.0;
 
     bbcAdcSumEast = 0;
     bbcAdcSumWest = 0;
@@ -336,6 +342,9 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	    if(pt > maxpt){
 		maxpt = pt;
 		LCP = i;
+		LCPpt=pt;
+		LCPeta=t->eta();
+		LCPphi=t->phi();
 	    }
 	    sumPt += pt;
 	    sumPx += pt * cos(t->phi());
@@ -653,12 +662,11 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	if(bbc->tdc(i+16)>0 && bbc->tdc(i+16)<west) west=bbc->tdc(i+16);
       }
       if(east<1500 && west<1500) { bbcdif= (float)west-(float)east; }
-      StMuTrack *t = (StMuTrack *)(* tracks)[LCP];
       rin[0]=zVertex;
       rin[1]=bbcdif;
-      rin[2]=t->pt();
-      rin[3]=t->eta();
-      rin[4]=t->phi();
+      rin[2]=LCPpt;
+      rin[3]=LCPeta;
+      rin[4]=LCPphi;
       rin[5]=(float)zdcTdcEast;
       rin[6]=(float)zdcTdcWest;
       rin[7]=(float)zdcEast;
@@ -724,7 +732,26 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	  ntp2003_.NEastFTPCTrk= uncorrectedNumberOfFtpcEastPrimaries(*event);
 	  ntp2003_.xVertex     = xVertex;
 	  ntp2003_.yVertex     = yVertex;
-	  ntp2003_.zVertex     = zVertex;
+	  ntp2003_.zVertex     = zVertex;	  
+	  ntp2003_.ntrk        = 0;
+	  int n=0;
+	  if(nPrimTrack>0) {
+	    for(int i=0; i<=tracks->GetLast(); i++) {
+	      StMuTrack *t = (StMuTrack *)(* tracks)[i];
+	      if(t->id() > 0){
+		ntp2003_.trknhit[n]=t->nHits();
+		ntp2003_.trkpt[n]  =t->pt() * t->charge();
+		ntp2003_.trketa[n] =t->eta();
+		ntp2003_.trkphi[n] =t->phi();
+		ntp2003_.trkdcax[n] =t->dcaGlobal().x();
+		ntp2003_.trkdcay[n] =t->dcaGlobal().y();
+		ntp2003_.trkdcaz[n] =t->dcaGlobal().z();
+		n++;
+		//		printf("DCA n,dcax/y/z,eta = %d %f %f %f %f\n",n,t->dcaGlobal().x(),t->dcaGlobal().y(),t->dcaGlobal().z(),t->eta());
+		ntp2003_.ntrk=n;
+	      }	    
+	    }
+	  }
 	  for(int i=0; i<8;   i++) {ntp2003_.VTXDSM[i]=trgd->TrgSum.DSMdata.VTX[i];
 	                            ntp2003_.FPDDSM[i]=trgd->TrgSum.DSMdata.FPD[i];
 				    ntp2003_.FPDENSL1[i]=trgd->rawTriggerDet[0].FPDEastNSLayer1[i];

@@ -1,3 +1,5 @@
+const int MAXTRK=5000;
+
 typedef struct{
   int event;
   int BChi;
@@ -31,6 +33,14 @@ typedef struct{
   float xVertex;
   float yVertex;
   float zVertex;
+  int ntrk;
+  int trknhit[MAXTRK];
+  float trkpt[MAXTRK];
+  float trketa[MAXTRK];
+  float trkphi[MAXTRK];
+  float trkdcax[MAXTRK];
+  float trkdcay[MAXTRK];
+  float trkdcaz[MAXTRK];
 } ntpcb;
 
 extern ntpcb ntp2003_;
