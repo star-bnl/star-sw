@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.2 2002/11/02 01:46:59 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.3 2002/11/05 01:56:58 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -88,6 +88,7 @@ const static Int_t NoRow    = 45;
 const static Double_t pMomin = 0.4; // range for dE/dx calibration
 const static Double_t pMomax = 0.5;
 const static Double_t GeV2keV = TMath::Log(1.e-6);
+const static Double_t TrackLengthCut = 20.;
 TMinuit *gMinuit = new TMinuit(2);
 // Histograms
 TProfile2D *Z = 0, *ZC = 0, *ETA = 0, *SecRow = 0, *SecRowC = 0, *ZRow = 0;// *sXY = 0, *SXY = 0;
@@ -933,7 +934,8 @@ Int_t StdEdxY2Maker::Make(){
 	  gMessMgr->Error() << "StdEdxY2Maker:: NdEdx = " << NdEdx 
 			    << ">  NoFitPoints ="<< NoFitPoints << endm; 
       }
-      if (NdEdx <= 0) continue;
+      //      if (NdEdx <= 0) continue;
+      if (TrackLength < TrackLengthCut) continue;
       SortdEdx(NdEdx,CdEdx,dEdxS);
 #if 0
       PrintdEdx(2);
