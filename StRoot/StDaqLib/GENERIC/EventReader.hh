@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.9 2000/01/31 19:38:51 levine Exp $
+ * $Id: EventReader.hh,v 1.10 2000/02/15 23:24:27 fisyak Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -20,6 +20,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.10  2000/02/15 23:24:27  fisyak
+ * Force to compile StPadMonitorMaker
+ *
  * Revision 1.9  2000/01/31 19:38:51  levine
  * chamge to #if !defined ST_NO_NAMESPACES
  *
@@ -135,7 +138,7 @@ struct Pad
 struct PadRow
 {
   u_short npads;
-  Pad *pad;
+  struct Pad *pad;
 };
 
 
