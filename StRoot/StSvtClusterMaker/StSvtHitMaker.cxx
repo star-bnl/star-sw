@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.1 2000/08/21 13:03:40 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.2 2000/08/24 04:26:56 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,10 +10,16 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.2  2000/08/24 04:26:56  caines
+ * Printout for debugging
+ *
  * Revision 1.1  2000/08/21 13:03:40  caines
  * First version of cluster->STAR hit maker
  *
  **************************************************************************/
+
+#include <fstream.h>
+#include <iomanip.h>
 
 #include "StSvtHitMaker.h"
 
@@ -28,7 +34,11 @@
 #include "StDbUtilities/StSvtCoordinateTransform.hh"
 #include "StDbUtilities/StCoordinates.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
+#include "StSvtClassLibrary/StSvtData.hh"
 #include "StSvtAnalysedHybridClusters.hh"
+
+
+fstream cluInfo;
 
 ClassImp(StSvtHitMaker)
 //___________________________________________________________________________
@@ -49,9 +59,16 @@ Int_t StSvtHitMaker::Init()
   if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::Init() ..."  << endm;
 
 
+ // Get pointer to StSvtData
+
+  St_DataSet *dataSet2 = GetDataSet("StSvtData");
+  assert(dataSet2);
+  mSvtData = (StSvtData*)(dataSet2->GetObject());
+  assert(mSvtData);
+
   // Get pointer to StSvtAnalysis
 
-  St_DataSet *dataSet2 = GetDataSet("StSvtAnalResults");
+  dataSet2 = GetDataSet("StSvtAnalResults");
   assert(dataSet2);
   mSvtCluColl = (StSvtHybridCollection*)(dataSet2->GetObject());
   assert(mSvtCluColl);
@@ -129,9 +146,10 @@ Int_t StSvtHitMaker::Init()
   if( iWrite == 1){
     m_hfile = new TFile("clusters.root","RECREATE","Clusters");
     
-    m_ClusTuple = new TNtuple("m_ClusTuple","Clusters","flag:xl:yl:x:y:z:charge:mom2x:mom2y:numAnodes:numPixels:peak:hybrid:evt");
+    m_ClusTuple = new TNtuple("Clusters","Clusters","flag:xl:yl:x:y:z:charge:mom2x:mom2y:numAnodes:numPixels:peak:hybrid:evt");
+
+     cluInfo.open("ClusterInfo.dat",ios::app);
     
-    iMyEvt=0;
   }
 
   return  StMaker::Init();
@@ -334,10 +352,23 @@ Int_t StSvtHitMaker::FillHistograms(){
 		      mSvtBigHit->svtHitData()[i].numOfPixelsInClu,
 		      mSvtBigHit->svtHitData()[i].peakAdc,
 		      index,
-		      iMyEvt);
+		      mSvtData->getEventNumber());
     
+    cluInfo<<mSvtData->getEventNumber()
+	   <<setw(13)<<  index
+	   <<setw(13)<<  mSvtBigHit->svtHit()[i].flag()
+	   <<setw(13)<<  mSvtBigHit->WaferPosition()[i].x()
+	   <<setw(13)<<  mSvtBigHit->WaferPosition()[i].y()
+	   <<setw(13)<<  mSvtBigHit->svtHit()[i].position().x()
+	   <<setw(13)<<  mSvtBigHit->svtHit()[i].position().y()
+	   <<setw(13)<<  mSvtBigHit->svtHit()[i].position().z()
+	   <<setw(13)<<  mSvtBigHit->svtHit()[i].charge()
+	   <<setw(13)<<  mSvtBigHit->svtHitData()[i].mom2[0]
+	   <<setw(13)<<  mSvtBigHit->svtHitData()[i].mom2[1]
+	   <<setw(13)<<  mSvtBigHit->svtHitData()[i].numOfAnodesInClu
+	   <<setw(13)<<  mSvtBigHit->svtHitData()[i].numOfPixelsInClu
+	   <<setw(13)<<  mSvtBigHit->svtHitData()[i].peakAdc<<endl;
   }
-  iMyEvt++;
 }
 
 //_____________________________________________________________________________
@@ -348,6 +379,7 @@ Int_t StSvtHitMaker::Finish(){
  if( iWrite == 1){
    m_hfile->Write();
    m_hfile->Close();
+   cluInfo.close();
  }
  return kStOK;
 }
