@@ -1,7 +1,10 @@
 // Using StV0MiniDstMaker to make v0 mini-DST
 // Peter G. Jones, University of Birmingham, p.g.jones@bham.ac.uk
-// $Id: makeV0MiniDst.C,v 1.2 1999/07/30 15:07:31 genevb Exp $
+// $Id: makeV0MiniDst.C,v 1.3 1999/08/13 13:36:44 jones Exp $
 // $Log: makeV0MiniDst.C,v $
+// Revision 1.3  1999/08/13 13:36:44  jones
+// Modified to reflect new revision of StV0MiniDstMaker
+//
 // Revision 1.2  1999/07/30 15:07:31  genevb
 // Take advantage of StHFillObject inheritance
 //
@@ -16,6 +19,7 @@ void load() {
   gSystem->Load("StChain");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
+  gSystem->Load("StMagF");
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker");
   gSystem->Load("StV0MiniDstMaker");
@@ -38,9 +42,9 @@ void run() {
   // Create Makers
   StIOMaker IOMaker("IO","r",files,"bfcTree");
   StEventMaker eventMaker("events","title");
-  StV0MiniDstMaker v0dst("v0dst","V0MiniDst.root"); // Sets mini-DST filename
+  StV0MiniDstMaker v0dst("v0dst","V0MicroDst.root"); // Sets output filename
 
-  //  IOMaker.SetDebug();
+  v0dst.SetV0VertexType(); // Selects V0 vertices for micro-DST
 
   // Do init
   Int_t ierr = chain.Init();

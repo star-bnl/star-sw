@@ -1,7 +1,10 @@
 // Using StV0MiniDstMaker to read a v0 mini-DST
 // Peter G. Jones, University of Birmingham, p.g.jones@bham.ac.uk
-// $Id: readV0MiniDst.C,v 1.4 1999/08/10 21:26:35 genevb Exp $
+// $Id: readV0MiniDst.C,v 1.5 1999/08/13 13:36:44 jones Exp $
 // $Log: readV0MiniDst.C,v $
+// Revision 1.5  1999/08/13 13:36:44  jones
+// Modified to reflect new revision of StV0MiniDstMaker
+//
 // Revision 1.4  1999/08/10 21:26:35  genevb
 // Spaces are no longer separaters for collection->Draw()
 //
@@ -32,16 +35,10 @@ void load() {
   clock = new TStopwatch;
   clock.Start(kTRUE);
 
-  // Open V0 mini-DST
-  TFile input("V0MiniDst.root");
-  collection = (TOrdCollection *) input.Get("V0MiniDst;1");
-  if( collection )
-    printf("collection size %d\n",collection->GetSize());
-  else
-    printf("pointer to collection is zero\n");
-
-  // Loop over collection and precalculate some useful quantities
-  collection->ls("Update");
+  // Open V0 micro-DST
+  StV0MiniDstMaker* v0dst = new StV0MiniDstMaker("v0dst","V0MicroDst.root");
+  v0dst->SetV0VertexType();
+  collection = v0dst->Read(&n_v0);
 
   // Stop the clock
   clock.Stop();
@@ -69,15 +66,21 @@ void run() {
   hX = new TH1F("mX","X coordinate",100,-50,50);
   hY = new TH1F("mY","Y coordinate",100,-50,50);
   hZ = new TH1F("mZ","Z coordinate",100,-100,100);
-  hMassLambda = new TH1F("mMassLambda","Lambda Mass",100,1.08,1.12);
+  hMassLambda = new TH1F("mMassLambda","Lambda Mass",100,1.08,1.2);
 
   clock.Start(kTRUE);
 
   // Loop over collection and fill histograms
-  TString a1 = "mX:position[0]; mY:position[1]; mZ:position[2];";
-  a1+="mMassLambda:massLambda";
+
+  // Example 1: Using Gene Van Buren's StHFillObject class
+  TString a1 = "mX:decayVertexV0[0]; mY:decayVertexV0[1]; mZ:decayVertexV0[2];";
   collection->Draw(a1.Data());
   
+  // Example 2: Or DIY
+  for( Int_t i=0; i<n_v0; i++ ) {
+    StV0MiniDst *v0m = (StV0MiniDst *) collection->At(i);
+    hMassLambda->Fill(v0m->massLambda());
+  }
 
   // Stop the stopwatch
   clock.Stop();
