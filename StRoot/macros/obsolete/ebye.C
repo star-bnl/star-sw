@@ -1,5 +1,8 @@
-// $Id: ebye.C,v 1.1 1998/08/05 14:33:40 fisyak Exp $
+// $Id: ebye.C,v 1.2 1998/08/07 19:27:05 dhammika Exp $
 // $Log: ebye.C,v $
+// Revision 1.2  1998/08/07 19:27:05  dhammika
+// event by event chain in root
+//
 // Revision 1.1  1998/08/05 14:33:40  fisyak
 // Add ebye
 //
@@ -19,20 +22,20 @@
 // Add tcl and tpt
 //
 {
-   gSystem->Load("$STAR/lib/libasu.so");
-   gSystem->Load("$STAR/lib/libdsl.so");
-   gSystem->Load("$STAR/lib/St_base.so");
-   gSystem->Load("$STAR/lib/St_Tables.so");
-   gSystem->Load("$STAR/lib/libmsg.so");
-   gSystem->Load("$STAR/lib/libtls.so");
-   //   gSystem->Load("$STAR/lib/geometry.sl");
-   gSystem->Load("$STAR/lib/ebye.sl");
-   gSystem->Load("$STAR/lib/St_ebye.so");
-   gSystem->Load("$STAR/lib/tpc.sl");
-   gSystem->Load("$STAR/lib/St_tpc.so");
-   gSystem->Load("$STAR/lib/svt.sl");
-   gSystem->Load("$STAR/lib/St_svt.so");
-   gSystem->Load("$STAR/lib/StChain.so"); 
+   gSystem->Load("libasu.so");
+   gSystem->Load("libdsl.so");
+   gSystem->Load("St_base.so");
+   gSystem->Load("St_Tables.so");
+   gSystem->Load("libmsg.so");
+   gSystem->Load("libtls.so");
+   //   gSystem->Load("geometry.sl");
+   gSystem->Load("ebye.sl");
+   gSystem->Load("St_ebye.so");
+   gSystem->Load("tpc.sl");
+   gSystem->Load("St_tpc.so");
+   gSystem->Load("svt.sl");
+   gSystem->Load("St_svt.so");
+   gSystem->Load("StChain.so"); 
 
 #ifndef __CINT__
 #include "Rtypes.h"
@@ -58,13 +61,13 @@
 // Prepare TCanvas to show some histograms created by makers
   gBenchmark->Start("ebye");
 
-for (Int_t i=0;i<1;i++){
+for (Int_t i=0;i<90;i++){
   chain.Make(i);
   //  histCanvas->Modified();
   //  histCanvas->Update();
-  chain.Clear();
+   chain.Clear();
 }
-  gBenchmark->Stop("bfc");
-  gBenchmark->Print("bfc");
+  gBenchmark->Stop("ebye");
+  gBenchmark->Print("ebye");
   TBrowser b;
 }

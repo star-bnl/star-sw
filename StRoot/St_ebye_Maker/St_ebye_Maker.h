@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.h,v 1.1 1998/08/05 14:33:37 fisyak Exp $
+// $Id: St_ebye_Maker.h,v 1.2 1998/08/07 19:26:10 dhammika Exp $
 // $Log: St_ebye_Maker.h,v $
+// Revision 1.2  1998/08/07 19:26:10  dhammika
+// event by event chain in root
+//
 // Revision 1.1  1998/08/05 14:33:37  fisyak
 // Add ebye
 //
@@ -20,7 +23,8 @@
 class St_sca_switch;
 class St_sca_filter_const;
 class St_sca_const;
-class St_dst_track ;
+class St_foo_dst_event_summary ;
+class St_foo_dst_track ;
 class St_XDFFile;
 class St_particle;
 class St_sca_in;
@@ -32,7 +36,8 @@ class St_ebye_Maker : public StMaker {
                St_sca_switch   *m_sca_switch;        //!
                St_sca_const    *m_sca_const;         //!
                St_sca_filter_const *m_sca_filter_const;  //!
-               St_dst_track    *m_dsttrack;          //!
+               St_foo_dst_event_summary   *m_dst_event_summary;          //!
+               St_foo_dst_track    *m_dsttrack;          //!
                St_particle     *m_particle;          //!
                St_sca_in       *m_sca_in;            //!
                St_sca_out *m_sca_out;            //!
