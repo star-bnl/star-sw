@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.9 2004/01/22 18:36:11 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.10 2004/01/26 19:42:25 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.10  2004/01/26 19:42:25  jml
+ * blah
+ *
  * Revision 1.9  2004/01/22 18:36:11  jml
  * more updates to the logging
  *
@@ -124,9 +127,7 @@ ClassImp(StRTSClientFCFMaker);
 static FILE *ff ;
 #endif
 
-static class fcfAfterburner fcf_after ;
-static class fcfAfterburner croat_after ;
-
+static class fcfAfterburner fcf_after;
 
 // The raw cluster data...
 // Three contributions...
@@ -288,7 +289,6 @@ Int_t StRTSClientFCFMaker::Init()
 #endif
 
   fcf_after.setVerbose(false);
-  croat_after.setVerbose(false);
   return StMaker::Init();
 }
 
@@ -409,6 +409,21 @@ Int_t StRTSClientFCFMaker::Make()
     {
       fcfHit h;
 
+      // First compare...
+      if((n_croat_cl > 0) &&
+	 (n_daq_file_cl > 0)) 
+      {
+ 	int e = fcf_after.compare(daq_file_resptr[s][pr],
+ 				  croat_resptr[s][pr]);
+
+	mismatch_sector += e;
+	mismatch_tot += e;
+
+// 	if(e != 0) {
+// 	  printf("FCFMaker: mismatch between daq_file & calculated clusters (s=%d, pr=%d)\n",s,pr);
+// 	}
+      }
+
       // Do daq file cluster after burner
       if(n_daq_file_cl > 0) {
 	if(n_burned_daq_file_cl == -1) 
@@ -431,9 +446,9 @@ Int_t StRTSClientFCFMaker::Make()
 	if(n_burned_croat_cl == -1) 
 	  n_burned_croat_cl = 0;
 
-	croat_after.burn(croat_resptr[s][pr]);
+	fcf_after.burn(croat_resptr[s][pr]);
 		
-	while(croat_after.next(&h)) {
+	while(fcf_after.next(&h)) {
 	  n_burned_croat_cl++;
 	  n_burned_croat_cl_sector++;
 
@@ -441,21 +456,6 @@ Int_t StRTSClientFCFMaker::Make()
 	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,s+1);
 	  }
 	}
-      }
-
-      if((n_croat_cl > 0) &&
-	 (n_daq_file_cl > 0)) 
-      {
- 	int e = fcf_after.compare(daq_file_resptr[s][pr],
- 				  croat_resptr[s][pr]);
-
-
-	mismatch_sector += e;
-	mismatch_tot += e;
-
-// 	if(e != 0) {
-// 	  printf("FCFMaker: mismatch between daq_file & calculated clusters (s=%d, pr=%d)\n",s,pr);
-// 	}
       }
     }
     
