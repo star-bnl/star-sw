@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.3 1999/11/30 18:52:51 snelling Exp $
+// $Id: StFlowEvent.cc,v 1.4 1999/12/04 00:10:32 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cc,v $
+// Revision 1.4  1999/12/04 00:10:32  posk
+// Works with the new StEvent
+//
 // Revision 1.3  1999/11/30 18:52:51  snelling
 // First modification for the new StEvent
 //
@@ -185,17 +188,18 @@ Float_t StFlowEvent::q(Int_t harN, Int_t selN, Int_t subN) {
 }
 
 //-------------------------------------------------------------
+
 void StFlowEvent::MakeSubEvents() {
 
   StFlowTrackIterator itr;
-  int* counter = new int[nHars * nSels];
-  int* counter2 = new int[nHars * nSels];
+  int* fullEventMult = new int[nHars * nSels];
+  int* count = new int[nHars * nSels];
   //initialize all elements in array with 0 
-  memset(counter, 0 , (nHars * nSels) * sizeof(int));
-  memset(counter2, 0 , (nHars * nSels) * sizeof(int));
+  memset(fullEventMult, 0 , (nHars * nSels) * sizeof(int));
+  memset(count, 0 , (nHars * nSels) * sizeof(int));
   Int_t iSelect, iHar, iSub = 0;
 
-  random_shuffle(TrackCollection()->begin(), TrackCollection()->end());
+  //random_shuffle(TrackCollection()->begin(), TrackCollection()->end());
 
 
   // loop to count the total number of tracks for each selection
@@ -204,7 +208,7 @@ void StFlowEvent::MakeSubEvents() {
     for (iSelect = 0; iSelect < nSels; iSelect++) {
       for (iHar = 0; iHar < nHars; iHar++) {
 	if (pFlowTrack->Select(iHar, iSelect)) {
-	    counter[iHar + nHars * iSelect]++;
+	    fullEventMult[iHar + nHars * iSelect]++;
 	}
       }
     }
@@ -216,9 +220,9 @@ void StFlowEvent::MakeSubEvents() {
     for (iSelect = 0; iSelect < nSels; iSelect++) {
       for (iHar = 0; iHar < nHars; iHar++) {
 	if (pFlowTrack->Select(iHar, iSelect)) {
-	  counter2[iHar + nHars * iSelect]++;
-	  iSub = (Int_t)(counter2[iHar + nHars * iSelect] / 
-			 floor(counter[iHar + nHars * iSelect] / nSubs)) + 1;
+	  count[iHar + nHars * iSelect]++;
+	  iSub = ceil(count[iHar + nHars * iSelect] / 
+			 floor(fullEventMult[iHar + nHars * iSelect] / nSubs));
 	  if (iSub > nSubs) {
 	    iSub = 0;
 	  }
@@ -229,4 +233,3 @@ void StFlowEvent::MakeSubEvents() {
   }
   
 }
-//-------------------------------------------------------------

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.3 1999/11/30 18:52:47 snelling Exp $
+// $Id: StFlowCutEvent.cxx,v 1.4 1999/12/04 00:10:30 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.4  1999/12/04 00:10:30  posk
+// Works with the new StEvent
+//
 // Revision 1.3  1999/11/30 18:52:47  snelling
 // First modification for the new StEvent
 //
@@ -52,7 +55,7 @@ StFlowCutEvent::~StFlowCutEvent() {
 Int_t    StFlowCutEvent::mMultCuts[2]    = {10, 10000};
 Float_t  StFlowCutEvent::mVertexXCuts[2] = {-1., 1.};
 Float_t  StFlowCutEvent::mVertexYCuts[2] = {-1., 1.};
-Float_t  StFlowCutEvent::mVertexZCuts[2] = {-100., 100.};
+Float_t  StFlowCutEvent::mVertexZCuts[2] = {-30., 30.};
 UInt_t   StFlowCutEvent::mEventN         = 0;     
 UInt_t   StFlowCutEvent::mGoodEventN     = 0;
 UInt_t   StFlowCutEvent::mMultCut        = 0;

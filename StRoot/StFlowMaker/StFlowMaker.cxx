@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StFlowMaker.cxx,v 1.4 1999/11/30 18:52:52 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.5 1999/12/04 00:10:34 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 // Description:  Maker to fill StFlowEvent from StEvent and
@@ -8,6 +8,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.5  1999/12/04 00:10:34  posk
+// Works with the new StEvent
+//
 // Revision 1.4  1999/11/30 18:52:52  snelling
 // First modification for the new StEvent
 //
@@ -68,7 +71,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.4 1999/11/30 18:52:52 snelling Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.5 1999/12/04 00:10:34 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -186,6 +189,17 @@ StFlowEvent* StFlowMaker::fillFlowEvent() {// Make StFlowEvent from StEvent
   }
   PR(goodTracks);
   
+  pFlowEvent->MakeSubEvents();
+
+//   for (int j = 0; j < nHars; j++) {
+//     for (int k = 0; k < nSels; k++) {
+//       for (int n = 0; n < nSubs; n++) {
+// 	cout << "j,k,n= " << j << k << n << " : " << 
+// 	  pFlowEvent->Mult(j, k, n+1) << endl;
+//       }
+//     }
+//   }
+
   // Check Eta Symmetry
   if (!StFlowCutEvent::CheckEtaSymmetry()) {    // if kFALSE delete this event
     delete pFlowEvent;
