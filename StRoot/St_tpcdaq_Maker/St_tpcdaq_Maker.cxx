@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.59  2000/11/28 23:52:20  fisyak
+// Add 1.135 factor to gain to make peack value = 1
+//
 // Revision 1.58  2000/11/25 23:15:03  fisyak
 // Add cut for 0.125 < Gain < 8
 //
@@ -666,7 +669,7 @@ int St_tpcdaq_Maker::Output() {
               printf("ipadrow=%d, pad-1=%d, fgain=%g\n",ipadrow,pad-1,fGain[ipadrow][pad-1]);
               assert(0);
             }
-            conversion=(short unsigned int)(0.5+fGain[ipadrow][pad-1]*conversion);
+            conversion=(short unsigned int)(0.5+1.135*fGain[ipadrow][pad-1]*conversion);
 #endif
 #ifdef HISTOGRAMS
             m_pix_AdcValue->Fill((Float_t)(conversion));
