@@ -1,5 +1,9 @@
-// $Id: StFtpcTracker.hh,v 1.9 2001/01/30 13:31:54 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.10 2001/04/02 14:20:23 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.10  2001/04/02 14:20:23  oldi
+// Some minor changes due to Insure++ was reporting problems.
+// These changes do not affect the physical output of StFtpcTrackMaker!
+//
 // Revision 1.9  2001/01/30 13:31:54  oldi
 // New variable mTime introduced to count total time consumption.
 //
@@ -108,7 +112,7 @@ public:
   virtual  ~StFtpcTracker();  // destructor
 
   void    CalcEnergyLoss(FDE_FDEPAR_ST *fdepar);                            // calculates dE/dx
-  void    Sorter(Double_t arr[], Int_t *index, Int_t len);                  // sorts by dE/dx
+  void    Sorter(Double_t *arr, Int_t *index, Int_t len);                  // sorts by dE/dx
   Int_t   FitAnddEdxAndWrite(St_fpt_fptrack *trackTable, 
 			     FDE_FDEPAR_ST *fdepar, 
 			     Int_t id_start_vertex);                        // does momentum fit, the dEdx calculation and writes tracks to STAF table
