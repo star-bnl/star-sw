@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.85 2003/01/08 03:16:32 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.86 2003/01/17 01:36:16 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -101,7 +101,10 @@
 #include "StEventDisplayInfo.h"
 
 #ifdef R__QT
-    StPadControlPanel   *fPadControlPanelnew=0; //!
+#  include <qfont.h>
+#  include <qapplication.h>
+#  include <qpixmap.h>
+#  include <qbuttongroup.h>
     StEventControlPanel *fEventControlPanel=0;  //!
 #endif 
 
@@ -116,8 +119,10 @@ StEventDisplayInfo *StEventDisplayMaker::fgInfo      = 0;
 //_____________________________________________________________________________
 StEventDisplayInfo::StEventDisplayInfo(StEventDisplayInfo **kaddr, const char* title, UInt_t w, UInt_t h)
 #ifdef R__QT
-  :QTextView(title)
+  :QTextEdit(title)
   {  
+    setCaption("Event Info");
+    setWFlags( getWFlags() | Qt::WDestructiveClose);
     resize(w,h);
 #else
   {
@@ -127,7 +132,7 @@ StEventDisplayInfo::StEventDisplayInfo(StEventDisplayInfo **kaddr, const char* t
 //_____________________________________________________________________________
 void StEventDisplayInfo::AddText(const char *info){ 
 #ifdef R__QT
-  setText(info);
+  append(info);
 #endif
 }
 //_____________________________________________________________________________
@@ -140,6 +145,7 @@ void StEventDisplayInfo::SetText(const char *info){
 inline void StEventDisplayInfo::Popup(){ 
 #ifdef R__QT
   show();
+  raise();
 #endif
 }
 
@@ -194,14 +200,21 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   for (i=0;i<lvolumeNames;i++) AddVolume(volumeNames[i]);
 
 #ifdef R__QT
-  fPadControlPanelnew = new StPadControlPanel();
+  // redefine the default application font
+  QFont  myFont = QApplication::font();
+  int myFontSize = myFont. pointSize ();
+  myFont.setPointSize(8);
+  QApplication::setFont(myFont);
+#include "starIcon.xpm"
+  QPixmap qStarIcon(starIcon);
   fEventControlPanel  = new StEventControlPanel();
+  fEventControlPanel->Bar()->setIcon(qStarIcon);
   gSystem->DispatchOneEvent(1);
 #else
   gROOT->LoadMacro("EventControlPanel.C");
   gSystem->DispatchOneEvent(1);
   gROOT->LoadMacro("PadControlPanel.C"  );
-  fprintf(stderr," PLease install Qt package to run Event Display. \n \t Thank you!\n");
+  fprintf(stderr," /n/n/nPlease install Qt package to run Event Display. \n \t Thank you!\n/n/n/n");
 #endif
 
 
@@ -277,9 +290,15 @@ Int_t StEventDisplayMaker::BuildGeometry()
 //    if (strcmp(tpssNode->GetName(),"TPGV") && strcmp(tpssNode->GetName(),"TPSS")) continue;
   return 0;
 }
+//______________________________________________________________________________
+void StEventDisplayMaker::ClearGeometry()
+{
+   // Delete the geometry structure
+   delete m_ShortView; m_ShortView = 0; m_EventsView = 0;
+}
 
 //______________________________________________________________________________
-void StEventDisplayMaker::AddName(const char *name)
+void StEventDisplayMaker::AddName(const char *name,Bool_t refresh)
 {
   //  "name" - StEvent
   //  "g2t_tpc_hit(track_id,x[0]:x[1]:x[2])"
@@ -290,9 +309,11 @@ void StEventDisplayMaker::AddName(const char *name)
         m_ListDataSetNames->Add(new TObjString(name));
   if (strncmp(name,"StEvent",7)==0) {
 #ifdef R__QT
-    fEventControlPanel->Refresh();
+     if (refresh)
+        fEventControlPanel->Refresh();
+#else
+     gSystem->DispatchOneEvent(1);
 #endif 
-    gSystem->DispatchOneEvent(1);
   }
 }
 //______________________________________________________________________________
@@ -301,6 +322,9 @@ void StEventDisplayMaker::AddFilter(StFilterABC* filt)
     if (!mFilterList) mFilterList = new TList;
     if (mFilterList->FindObject(filt->GetName())) return;
     mFilterList->Add(filt);
+#ifdef R__QT
+    if (fEventControlPanel) fEventControlPanel->AddFilter((TObject*)filt); 
+#endif
 }
 //______________________________________________________________________________
 void StEventDisplayMaker::RemoveName(const char *name)
@@ -410,51 +434,15 @@ void StEventDisplayMaker::Clear(Option_t *)
 //_____________________________________________________________________________
 TVirtualPad *StEventDisplayMaker::CreateCanvas()
 {
-  if (!GetEventPad()) {
-    // Attention !!! The name of TCanvas MUST unique across all ROOT
-    // objects otherwise those will be destroyed by TCanvas ctor !!!
-    m_PadBrowserCanvas = new TCanvas("STARMonitor","Event Display",10,600,400,400);
-    m_PadBrowserCanvas->SetFillColor(kBlack);
-    // Add three TPad's for GetRunNumber/GetEventNumber()/GetDateTime/
+   if (!GetEventPad()) {
+      // Attention !!! The name of TCanvas MUST unique across all ROOT
+      // objects otherwise those will be destroyed by TCanvas ctor !!!
+      m_PadBrowserCanvas = new TCanvas("STARMonitor","Event Display",10,600,400,400);
+      m_PadBrowserCanvas->SetFillColor(kBlack);
+      // Add three TPad's for GetRunNumber/GetEventNumber()/GetDateTime/
+   }
 
-#if 0
-     TPad *newpad = new TPad("RunNumber","RunNumber",0.02,0.9,0.2,0.96);
-     newpad->Draw();
-     newpad->cd();
-     mRunNumberLabel = new TPaveLabel(0.01,0.01,0.99,0.99,"RunNumber");
-     mRunNumberLabel->Draw();
-     m_PadBrowserCanvas->cd();
-
-     newpad = new TPad("EventNumber","EventNumber",0.02,0.9,0.2,0.96);
-     newpad->Draw();
-     newpad->cd();
-     mEventNumberLabel = new TPaveLabel(0.01,0.01,0.99,0.99,"EventNumber");
-     mEventNumberLabel->Draw();
-     m_PadBrowserCanvas->cd();
-
-     newpad = new TPad("DateTime","DateTime",0.02,0.9,0.2,0.96);
-     newpad->Draw();
-     newpad->cd();
-     mDateTimeLabel = new TPaveLabel(0.01,0.01,0.99,0.99,"DateTime");
-     mDateTimeLabel->Draw();
-     m_PadBrowserCanvas->cd();
-#endif
-  }
-  
    char buffer[100];
-#if 0
-   sprintf(buffer,"%d",GetRunNumber());
-   mRunNumberLabel->SetLabel(buffer);
-   printf(" GetRunNumber %s ;",buffer);
-
-   sprintf(buffer,"%d",GetEventNumber());
-   printf(" GetEventNumber %s ;",buffer);
-   mEventNumberLabel->SetLabel(buffer);
- 
-   sprintf(buffer,"%d/%d",GetDate(),GetTime());
-   printf(" DateTIme %s \n;",buffer);
-   mDateTimeLabel->SetLabel(buffer);
-#endif
    Int_t date  = GetDate();
    Int_t year  = date/10000;
    Int_t day   = (date - year*10000);
@@ -468,17 +456,16 @@ TVirtualPad *StEventDisplayMaker::CreateCanvas()
    sec         =  sec  - min*100;
 
    sprintf(buffer,"Event Display: Run=%d; Event=%d; Date=%d.%02d.%02d/%02d:%02d:%02d",
-     GetRunNumber(),GetEventNumber(),year,month,day,hours,min,sec);
+      GetRunNumber(),GetEventNumber(),year,month,day,hours,min,sec);
 
    m_PadBrowserCanvas->SetTitle(buffer);
 
-  if (m_ShortView) m_ShortView->Draw();
-  m_PadBrowserCanvas->Modified();
-  m_PadBrowserCanvas->Update();
-  return m_PadBrowserCanvas;
+   if (!m_ShortView) BuildGeometry();
+   if (m_ShortView) m_ShortView->Draw();
+   m_PadBrowserCanvas->Modified();
+   m_PadBrowserCanvas->Update();
+   return m_PadBrowserCanvas;
 }
-
-
 
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::Make()
@@ -616,7 +603,7 @@ AGAIN: fgEventLoop = -1;
      m_PadBrowserCanvas->Modified();
      m_PadBrowserCanvas->Update();
    }
-
+#if 0
    printf("StEventDisplayMaker::EventLoop Started\n");
    int resLoop = MakeLoop(0);
    printf("StEventDisplayMaker::EventLoop FINISHED\n");
@@ -625,7 +612,9 @@ AGAIN: fgEventLoop = -1;
      case 2: break;
      case 3: fgEventLoop = 0; return kStEOF;
    } 
+#endif 
    fgEventLoop = 0;
+   gSystem->DispatchOneEvent(1);
    return kStOK;
 }
 
@@ -1065,7 +1054,7 @@ Int_t StEventDisplayMaker::MakeLoop(Int_t flag)
    if (fgEventLoop == -1 && flag == 0) {
      fgEventLoop=-2;
      Info("Waiting...");
-     while (fgEventLoop==-2) {gSystem->DispatchOneEvent(1);}
+     while (fgEventLoop==-2)                              {gSystem->DispatchOneEvent(1);}
      Info("Waiting finished");
      int ans = fgEventLoop; fgEventLoop=-1;
      Info(infos[ans]);
@@ -1080,9 +1069,12 @@ Int_t StEventDisplayMaker::MakeLoop(Int_t flag)
        case 1: Info("Redrawing...");
                edMk->ReDraw(); 
                Info("Redrawing finished");
-               return 0;
-       case 2: Info("NextEvent"); 
-               fgStChain->Clear(); fgStChain->Make(); return 0;
+               break;
+       case 2: Info("Next event, please!"); 
+               fgStChain->Clear(); 
+               fgStChain->Make(); 
+               Info("Next event done");
+               break;
      }
      return 0;
    }
@@ -1115,8 +1107,8 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
-// Revision 1.85  2003/01/08 03:16:32  fine
-// first working version of Qt-based Event Display. It is still very ugly
+// Revision 1.86  2003/01/17 01:36:16  fine
+// working version of Qt-based StEventDisplayMaker class
 //
 // Revision 1.84  2002/12/19 01:21:45  fine
 // CPP condition to use Qt staff has been introduced

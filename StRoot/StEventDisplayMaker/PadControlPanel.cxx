@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.cxx,v 1.3 2002/12/24 21:21:36 fine Exp $
+// $Id: PadControlPanel.cxx,v 1.4 2003/01/17 01:36:04 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -73,14 +73,14 @@ QButtonGroup *mainBar=0;
 
 
 //_______________________________________________________________________________________
-StPadControlPanel::StPadControlPanel() { Build();}
+StPadControlPanel::StPadControlPanel(QWidget *parent) { Build(parent);}
 //_______________________________________________________________________________________
 void StPadControlPanel::AddButt(const Char_t *buttonName, const Char_t *command)
 {   
    new QPushButton(buttonName,fBar,command);
 }
 //_______________________________________________________________________________________
-void  StPadControlPanel::Build()
+void  StPadControlPanel::Build(QWidget *parent)
 {
    const char *fills[] = {
     "Black background",	"StPadControlPanel::SetBackround(kBlack);"
@@ -96,18 +96,15 @@ void  StPadControlPanel::Build()
    ,"Add Axes",		"StPadControlPanel::AddAxes     ();"
    ,"Rulers",		"StPadControlPanel::ToggleRulers();"
    ,"Zoom",		"StPadControlPanel::ToggleZoom  ();"
-   ,"ReDraw canvas",	"StEventDisplayMaker::MakeLoop(1);"
-   ,"Next event",	"StEventDisplayMaker::MakeLoop(2);"
-   ,"End of Chain",	"StEventDisplayMaker::MakeLoop(3);"
+  // ,"End of Chain",	"StEventDisplayMaker::MakeLoop(3);"
    ,0};
 
 
-   fBar = new QVButtonGroup("Pad Control Panel",0,"Pad");
+   fBar = new QVButtonGroup("Pad Control Panel",parent,"Pad");
    fBar->setCaption("Pad Control Panel");
    mainBar=fBar;
    for (int i=0;fills[i];i+=2) {AddButt(fills[i],fills[i+1]);}
    connect(fBar,SIGNAL(clicked(int)),this,SLOT(Clicked(int)));
-   printf("  ---- >>> %d \n",fBar->count());
    fBar->show();
 }
 //_______________________________________________________________________________________
@@ -134,9 +131,9 @@ void StPadControlPanel::Clicked(int id) {
         case 10: StPadControlPanel::AddAxes     (); break;
         case 11: StPadControlPanel::ToggleRulers(); break;
         case 12: StPadControlPanel::ToggleZoom  (); break;
-        case 13: StEventDisplayMaker::MakeLoop(1); break;
-        case 14: StEventDisplayMaker::MakeLoop(2); break;
-        case 15: StEventDisplayMaker::MakeLoop(3); break;
+      //  case 13: StEventDisplayMaker::MakeLoop(3); break;
+      //  case 13: StEventDisplayMaker::MakeLoop(1); break;
+      //  case 14: StEventDisplayMaker::MakeLoop(2); break;
         default:  break;
      }
 //     gROOT->ProcessLine(b->name());   // CDictionary doesn't contain any StPadControlPanel ???
@@ -172,7 +169,8 @@ void StPadControlPanel::RotateView(Float_t phi, Float_t theta, TVirtualPad *pad)
       Int_t iret;
       Float_t p = phi;
       Float_t t = theta;
-      view->SetView(p, t, 0, iret);
+      view->SetView(p, t, 90, iret);
+//      view->SetView(p, t, 0, iret);
       thisPad->SetPhi(-90-p);
       thisPad->SetTheta(90-t);
       thisPad->Modified();

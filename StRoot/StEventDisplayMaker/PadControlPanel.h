@@ -4,7 +4,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.h,v 1.4 2003/01/08 03:16:31 fine Exp $
+// $Id: PadControlPanel.h,v 1.5 2003/01/17 01:36:16 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -50,8 +50,8 @@ public slots:
 
 public:
 
-  StPadControlPanel();
-  void  Build();
+  StPadControlPanel(QWidget *parent=0);
+  void  Build(QWidget *parent=0);
   virtual ~StPadControlPanel();
   QButtonGroup *Bar() const;
 
@@ -72,10 +72,6 @@ public:
   void MakeFourView(TVirtualPad *pad=0);
   void AddAxes(TVirtualPad *pad=0);
   
-  
-#if 0
- ClassDef(StPadControlPanel,0);
-#endif
 };
 
 // StPadControlPanel __StPadControlPanel__;

@@ -1,7 +1,7 @@
 /* XPM */
-static const char *starIcon[]={
+static const char *starIconTrans[]={
 "34 34 3 1",
-". c #ffffff",
+". c none",
 "a c #000000",
 "# c #ff0000",
 "..................................",
