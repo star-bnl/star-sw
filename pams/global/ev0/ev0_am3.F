@@ -112,10 +112,14 @@ C     Only write tracks that have more than a certain number of hits in a detect
      +             trak(i).det_id .eq.  kSsdSvtId .or.
      )             trak(i).det_id .eq. kSsdId )then
               detect_id_i = 2
+              points(1) = globtrkpi(i).n_point - (1000 * int(globtrkpi(i).n_point/1000))
               points(2) = ((((globtrkpi(i).n_point - (10000 * int(globtrkpi(i).n_point/10000)) - points(1))/1000)) 
      +        + (int(globtrkpi(i).n_point/10000)))
            else
               detect_id_i = 3
+              points(1) = globtrkpi(i).n_point - (1000 * int(globtrkpi(i).n_point/1000))
+              points(2) = ((((globtrkpi(i).n_point - (10000 * int(globtrkpi(i).n_point/10000)) - points(1))/1000)) 
+     +        + (int(globtrkpi(i).n_point/10000)))
               points(3) = (points(1) + points(2))
            endif
 
