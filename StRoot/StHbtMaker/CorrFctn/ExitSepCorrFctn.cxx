@@ -11,14 +11,13 @@
  **************************************************************************/
 
 #include "StHbtMaker/CorrFctn/ExitSepCorrFctn.h"
-#include "StThreeVectorD.hh"
 #include <cstdio>
 
 #ifdef __ROOT__
 ClassImp(ExitSepCorrFctn)
 #endif
 
-StThreeVectorD FindExitPoint(const StPhysicalHelixD& pHelix);
+StHbtThreeVector FindExitPoint(const StPhysicalHelixD& pHelix);
 
 //____________________________
 ExitSepCorrFctn::ExitSepCorrFctn(char* title, const int& nbinsQ, const float& QLo, const float& QHi,
@@ -76,9 +75,9 @@ void ExitSepCorrFctn::AddRealPair(const StHbtPair* pair){
   // Let's find the exit seperation for the particles
   // IF THEY WOULD BOTH ORIGINATE AT (0,0,0)
 
-  StThreeVectorD exitPt1 = FindExitPoint(pair->track1()->Helix());
-  StThreeVectorD exitPt2 = FindExitPoint(pair->track2()->Helix());
-  StThreeVectorD diff = exitPt1 - exitPt2;
+  StHbtThreeVector exitPt1 = FindExitPoint(pair->track1()->Helix());
+  StHbtThreeVector exitPt2 = FindExitPoint(pair->track2()->Helix());
+  StHbtThreeVector diff = exitPt1 - exitPt2;
 
   double exitSep = diff.mag();
   double Qinv = fabs(pair->qInv());   // note - qInv() will be negative for identical pairs...
@@ -88,9 +87,9 @@ void ExitSepCorrFctn::AddRealPair(const StHbtPair* pair){
 //____________________________
 void ExitSepCorrFctn::AddMixedPair(const StHbtPair* pair){
 
-  StThreeVectorD exitPt1 = FindExitPoint(pair->track1()->Helix());
-  StThreeVectorD exitPt2 = FindExitPoint(pair->track2()->Helix());
-  StThreeVectorD diff = exitPt1 - exitPt2;
+  StHbtThreeVector exitPt1 = FindExitPoint(pair->track1()->Helix());
+  StHbtThreeVector exitPt2 = FindExitPoint(pair->track2()->Helix());
+  StHbtThreeVector diff = exitPt1 - exitPt2;
 
   double exitSep = diff.mag();
   double Qinv = fabs(pair->qInv());   // note - qInv() will be negative for identical pairs...
@@ -101,8 +100,8 @@ void ExitSepCorrFctn::AddMixedPair(const StHbtPair* pair){
 
 
 //_______________ seperate function for calculating the exit point...
-StThreeVectorD FindExitPoint(const StPhysicalHelixD& pHelix){
-  static StThreeVectorD ZeroVec(0.,0.,0.);
+StHbtThreeVector FindExitPoint(const StPhysicalHelixD& pHelix){
+  static StHbtThreeVector ZeroVec(0.,0.,0.);
   double dip, curv, phase;
   int h;
   curv = pHelix.curvature();
@@ -118,9 +117,9 @@ StThreeVectorD FindExitPoint(const StPhysicalHelixD& pHelix){
   candidates = hel.pathLength(2.0);
   sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
 
-  static StThreeVectorD WestEnd(0.,0.,2.);
-  static StThreeVectorD EastEnd(0.,0.,-2.);
-  static StThreeVectorD EndCapNormal(0.,0.,1.0);
+  static StHbtThreeVector WestEnd(0.,0.,2.);
+  static StHbtThreeVector EastEnd(0.,0.,-2.);
+  static StHbtThreeVector EndCapNormal(0.,0.,1.0);
 
   endLength = hel.pathLength(WestEnd,EndCapNormal);
   if (endLength < 0.0) endLength = hel.pathLength(EastEnd,EndCapNormal);
