@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.18 2000/03/17 17:23:05 laue Exp $
+ * $Id: StHbtManager.cxx,v 1.19 2000/05/08 15:45:50 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.19  2000/05/08 15:45:50  laue
+ * Memory leak fixed. Current hbt event was not deleted
+ *
  * Revision 1.18  2000/03/17 17:23:05  laue
  * Roberts new three particle correlations implemented.
  *
@@ -269,7 +272,7 @@ int StHbtManager::ProcessEvent(){
     (*AnalysisIter)->ProcessEvent(currentHbtEvent);
   } 
 
-  delete currentHbtEvent;
+  if (currentHbtEvent) delete currentHbtEvent;
   cout << "StHbtManager::ProcessEvent() - return to caller ... " << endl;
   return 0;    // 0 = "good return"
 }       // ProcessEvent
