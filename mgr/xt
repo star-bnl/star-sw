@@ -41,7 +41,7 @@ if (($comp =~ /^rsgi/) || ($comp =~ /^ribm/) || ($comp =~ /^rnfs/) ||
          ($comp =~ /^rmds00/) || ($comp =~ /^rmds03/)) {
   $com = $ssh . " "  . $comp . ".rhic.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif (($comp =~ /^rcas/) || ($comp =~ /^rcrs/) || ($comp =~ /^rlnx/) || ($comp =~ /^play/) ) {
-  $com = $ssh . " "  . $comp . ".rcf.bnl.local xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
+  $com = $ssh . " "  . $comp . ".rcf.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif (($comp =~ /^linux/) ) {
   $com = $ssh . " "  . $comp . ".usatlas.bnl.gov xterm" . $color . " -name " . "root" . " -n " . $comp . "&";
 } elsif (($comp =~ /^atlas/) ) {
