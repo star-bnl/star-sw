@@ -24,7 +24,7 @@
        float     prf;        /* value of the pad response (cm) */
        float     zrf;        /* value of the drift response (cm) */
        float     dedx;       /* de/dx for this hit */
-       short     row;        /* 100*isector TPC row number */
+       short     row;        /* 100*isector + TPC row number */
        short     nseq;       /* number of sequences contributing to hit */
        short     npads;      /* number of pad fired in this hit */
        short     minpad;     /* lowest pad id in this hit */
@@ -35,6 +35,6 @@
        short     id_simtrk;  /* id of simulated track */
        short     id_quality; /* percentage of charge associated with above id */
    };
-/*  Last mod. for tphit: $Date: 2004/01/14 13:22:02 $ */
+/*  Last mod. for tphit: $Date: 2004/03/31 20:14:20 $ */
 
 
