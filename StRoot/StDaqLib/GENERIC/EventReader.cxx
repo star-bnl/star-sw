@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.43 2003/09/02 17:55:31 perev Exp $
+ * $Id: EventReader.cxx,v 1.44 2003/10/02 19:39:22 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.44  2003/10/02 19:39:22  ward
+ * Swap header only of DATAP, so Insure++ does not complain about uninitialized data.
+ *
  * Revision 1.43  2003/09/02 17:55:31  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -530,7 +533,8 @@ void EventReader::InitEventReader(int fdes, long offset)
   // read the datap bank then seek back to start of it
   Bank_DATAP datap;
   ret = read(fd,&datap,sizeof(Bank_Header));
-  if (datap.swap() < 0) ERROR(ERR_SWAP);
+  if (datap.header.swap() < 0) ERROR(ERR_SWAP); // There is no data in the body.  Swapping it causes
+                                                // Insure++ to complain.  So we swap only the header.
   int len = 4*datap.header.BankLength;
   //  if (len>sizeof(datap)) ERROR(ERR_BANK);
   // why is sizeof(datap) 548 when it should be 138*4 ??
