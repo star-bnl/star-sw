@@ -3,6 +3,9 @@
  **************************************************************************
  *
  * $Log: StSsdPointMaker.cxx,v $
+ * Revision 1.4  2004/11/04 15:10:19  croy
+ * use the IAttr(".histos") to control histogramming and modification of the SsdHitCollection creation
+ *
  * Revision 1.3  2004/08/13 07:07:23  croy
  * Updates to read SSD databases
  *
@@ -182,35 +185,37 @@ Int_t StSsdPointMaker::Init(){
     }
   
   // 		Create SCF histograms
-  noisDisP = new TH1F("Noise_p","Noise Distribution",25,0,25);
-  snRatioP = new TH1F("SN_p","Signal/Noise (p)",200,0,200);
-  stpClusP = new TH1F("NumberOfStrips_p","Strips per Cluster",8,0,8);
-  totChrgP = new TH1F("ChargeElectron_p","Total Cluster Charge",100,0,300000);
-  
-  noisDisN = new TH1F("Noise_n","Noise Distribution",25,0,25);
-  snRatioN = new TH1F("SN_n","Signal/Noise",200,0,200);
-  stpClusN = new TH1F("NumberOfStrips_n","Strips per Cluster",8,0,8);
-  totChrgN = new TH1F("ChargeElectron_n","Total Cluster Charge",100,0,300000);
 
-// 		Create SCM histograms
-  matchisto = new TH2S("matchingHisto","Matching Adc (1p-1n)",50,0,1000,50,0,1000);
-  matchisto->SetXTitle("PSide ADC count");
-  matchisto->SetYTitle("NSide ADC count");
-  matchisto->SetZTitle("(1p-1n) hits");
+  if (IAttr(".histos")) {
+    noisDisP = new TH1F("Noise_p","Noise Distribution",25,0,25);
+    snRatioP = new TH1F("SN_p","Signal/Noise (p)",200,0,200);
+    stpClusP = new TH1F("NumberOfStrips_p","Strips per Cluster",8,0,8);
+    totChrgP = new TH1F("ChargeElectron_p","Total Cluster Charge",100,0,300000);
+    
+    noisDisN = new TH1F("Noise_n","Noise Distribution",25,0,25);
+    snRatioN = new TH1F("SN_n","Signal/Noise",200,0,200);
+    stpClusN = new TH1F("NumberOfStrips_n","Strips per Cluster",8,0,8);
+    totChrgN = new TH1F("ChargeElectron_n","Total Cluster Charge",100,0,300000);
+    
+    // 		Create SCM histograms
+    matchisto = new TH2S("matchingHisto","Matching Adc (1p-1n)",50,0,1000,50,0,1000);
+    matchisto->SetXTitle("PSide ADC count");
+    matchisto->SetYTitle("NSide ADC count");
+    matchisto->SetZTitle("(1p-1n) hits");
 
-  matchisto->SetTitleOffset(2,"X");
-  matchisto->SetTitleOffset(2,"Y");
-//   matchisto->SetTitleOffset(-1,"Z");
+    matchisto->SetTitleOffset(2,"X");
+    matchisto->SetTitleOffset(2,"Y");
+    //   matchisto->SetTitleOffset(-1,"Z");
 
-  matchisto->SetLabelSize(0.03,"X");
-  matchisto->SetLabelSize(0.03,"Y");
-  matchisto->SetLabelSize(0.03,"Z");
+    matchisto->SetLabelSize(0.03,"X");
+    matchisto->SetLabelSize(0.03,"Y");
+    matchisto->SetLabelSize(0.03,"Z");
 
-  matchisto->SetNdivisions(5,"X");
-  matchisto->SetNdivisions(5,"Y");
-  matchisto->SetNdivisions(10,"Z");
-  orthoproj = new TH1S("ProjectionOrtho","Perfect Matching Deviation",80,-80,80);
-
+    matchisto->SetNdivisions(5,"X");
+    matchisto->SetNdivisions(5,"Y");
+    matchisto->SetNdivisions(10,"Z");
+    orthoproj = new TH1S("ProjectionOrtho","Perfect Matching Deviation",80,-80,80);
+  }
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -229,8 +234,18 @@ Int_t StSsdPointMaker::Make()
   St_scm_spt *scm_spt = new St_scm_spt("scm_spt",5000);
   m_DataSet->Add(scm_spt);
   mCurrentEvent = (StEvent*) GetInputDS("StEvent");
-  if(mCurrentEvent) mSsdHitColl = mCurrentEvent->ssdHitCollection();
-  else              mSsdHitColl = 0;
+  if(mCurrentEvent) 
+    {
+      mSsdHitColl = mCurrentEvent->ssdHitCollection();
+      if (!mSsdHitColl) {
+	gMessMgr->Warning("StSsdPointMaker::Make : The SSD hit collection does not exist  - creating a new one");
+	mSsdHitColl = new StSsdHitCollection;
+	mCurrentEvent->setSsdHitCollection(mSsdHitColl);
+      }
+    }
+  else              
+    mSsdHitColl = 0;
+
   
   StDbTable* configTable = maccess -> addDbTable("ssdConfiguration");
   mDbMgr->fetchDbTable(configTable);
@@ -316,20 +331,22 @@ void StSsdPointMaker::makeScfCtrlHistograms()
     for (Int_t iScf = 0; iScf < scf_cluster->GetNRows(); iScf++, dClus++)
       {
 	clustSide = ((dClus->id_cluster/10000)-(dClus->id_cluster/100000)*10);
-	if(!clustSide)
-	  {
-	    noisDisP->Fill(dClus->noise_count/dClus->n_strip);
-	    snRatioP->Fill((dClus->adc_count*dClus->n_strip)/dClus->noise_count);
-	    stpClusP->Fill(dClus->n_strip);
-	    totChrgP->Fill(convAdcToE*dClus->adc_count);
-	  }
-	else
-	  {
-	    noisDisN->Fill(dClus->noise_count/dClus->n_strip);
-	    snRatioN->Fill((dClus->adc_count*dClus->n_strip)/dClus->noise_count);
-	    stpClusN->Fill(dClus->n_strip);
-	    totChrgN->Fill(convAdcToE*dClus->adc_count);
-	  }
+	if (IAttr(".histos")) {
+	  if(!clustSide)
+	    {
+	      noisDisP->Fill(dClus->noise_count/dClus->n_strip);
+	      snRatioP->Fill((dClus->adc_count*dClus->n_strip)/dClus->noise_count);
+	      stpClusP->Fill(dClus->n_strip);
+	      totChrgP->Fill(convAdcToE*dClus->adc_count);
+	    }
+	  else
+	    {
+	      noisDisN->Fill(dClus->noise_count/dClus->n_strip);
+	      snRatioN->Fill((dClus->adc_count*dClus->n_strip)/dClus->noise_count);
+	      stpClusN->Fill(dClus->n_strip);
+	      totChrgN->Fill(convAdcToE*dClus->adc_count);
+	    }
+	}
       }
   }
 }
@@ -337,20 +354,22 @@ void StSsdPointMaker::makeScfCtrlHistograms()
 void StSsdPointMaker::writeScfCtrlHistograms()
 {  
 
-  ScfCtrlFile = new TFile("event/scfCtrl_histos.root","RECREATE");
-  
-  noisDisP->Write();
-  snRatioP->Write();
-  stpClusP->Write();
-  totChrgP->Write();
-  
-  noisDisN->Write();
-  snRatioN->Write();
-  stpClusN->Write();
-  totChrgN->Write();
+  if (IAttr(".histos")) {
+
+    ScfCtrlFile = new TFile("event/scfCtrl_histos.root","RECREATE");
     
-  ScfCtrlFile->Close();
-  
+    noisDisP->Write();
+    snRatioP->Write();
+    stpClusP->Write();
+    totChrgP->Write();
+    
+    noisDisN->Write();
+    snRatioN->Write();
+    stpClusN->Write();
+    totChrgN->Write();
+    
+    ScfCtrlFile->Close();
+  }
 }
 //_____________________________________________________________________________
 void StSsdPointMaker::makeScmCtrlHistograms()
@@ -370,23 +389,29 @@ void StSsdPointMaker::makeScmCtrlHistograms()
 	    Float_t a = 0, b = 0;
 	    a = convMeVToAdc*(dSpt->de[0]+dSpt->de[1]);
 	    b = convMeVToAdc*(dSpt->de[0]-dSpt->de[1]);
-	    matchisto->Fill(a,b);
-	    orthoproj->Fill((b-a)/TMath::Sqrt(2.));
+	    if (IAttr(".histos")) {	      
+	      matchisto->Fill(a,b);
+	      orthoproj->Fill((b-a)/TMath::Sqrt(2.));
+	    }
 	  }
       }
-//     matchisto->Draw();
+    //     matchisto->Draw();
   }
 }
 //_____________________________________________________________________________
 void StSsdPointMaker::writeScmCtrlHistograms()
 {
-  ScmCtrlFile = new TFile("event/scmCtrl_histos.root","RECREATE");
-
-  matchisto->Write();
-  orthoproj->Write();
-
-  ScmCtrlFile->Close();
+  if (IAttr(".histos")) {
+    
+    ScmCtrlFile = new TFile("event/scmCtrl_histos.root","RECREATE");
+    
+    matchisto->Write();
+    orthoproj->Write();
+    
+    ScmCtrlFile->Close();
+  }
 }
+
 
 void StSsdPointMaker::debugUnPeu(StSsdBarrel *mySsd)
 {
@@ -405,8 +430,10 @@ void StSsdPointMaker::PrintInfo()
 Int_t StSsdPointMaker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In StSsdPointMaker::Finish() ... "
                                << GetName() << endm; 
-  writeScfCtrlHistograms();
-  writeScmCtrlHistograms();
+  if (IAttr(".histos")) {
+    writeScfCtrlHistograms();
+    writeScmCtrlHistograms();
+  }    
   return kStOK;
 }
 
