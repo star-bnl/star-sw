@@ -1,40 +1,43 @@
-void Example_tags()
+void Example_tags(const char* topDir = "/star/rcf/GC/daq/tags/")
 {
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // Example_tags.C                                                       //
 //                                                                      //
 // shows how to use the STAR tags files                                 //
-// Input: directory                                                     //
-// used to select all tags files in the same directory                  //
+// Input: top level directory (must end with "/")                       //
 //                                                                      //
 // what it does:                                                        //
-// 1. creates ROOT TChain from all selected tagDB files                 //
+// 1. creates TChain from all tags files down from the topDir           //
 // 2. loops over all events in the chain                                //
 //                                                                      //
 // owner: Alexandre V. Vaniachine <AVVaniachine@lbl.gov>                //
 //////////////////////////////////////////////////////////////////////////
 
-
+  gSystem->Load("libStar");
+  gSystem->Load("St_base");
   // start benchmarks
   gBenchmark = new TBenchmark();
   gBenchmark->Start("total");
    
   // set loop optimization level
   gROOT->ProcessLine(".O4");
-  // gather all files from the same Run into one chain
+  // gather all files from the same top directory into one chain
+  St_FileSet dirs(topDir);
+  St_DataSetIter next(&dirs,0);
+  St_DataSet *set = 0; 
   TChain chain("Tag");
-
-  chain.Add("st_physics_1164056_raw_0003.tags.root");
-//   chain.Add("/star/rcf/test/dst/run9/st_physics_1164056_raw_0001.tags.root");
-//   chain.Add("/star/rcf/test/dst/run9/st_physics_1164056_raw_0002.tags.root");
-//   chain.Add("/star/rcf/test/dst/run9/st_physics_1164056_raw_0003.tags.root");
-//   chain.Add("/star/rcf/test/dst/run9/st_physics_1164056_raw_0004.tags.root");
-
+  while ( (set = next()) ) {           
+    if (strcmp(set->GetTitle(),"file") || !(strstr(set->GetName(),".tags.root"))) continue;
+    TString p = set->Path();
+    Char_t *tagsfile = gSystem->ConcatFileName(topDir,p.Data());
+    chain.Add(tagsfile);
+  } 
   cout<<"chained "<<chain->GetEntries()<<" events "<<endl;
 
   TObjArray *files = chain.GetListOfFiles();
-  cout<<"chained "<<files->GetEntriesFast()<<" files from the tagDB"<<endl;
+  UInt_t nFiles = files->GetEntriesFast();
+  cout << "chained " << nFiles << " files from " << topDir << endl;
 
   TObjArray *branches = chain.GetListOfBranches();
   TObjArray *leaves = chain.GetListOfLeaves();
@@ -76,80 +79,79 @@ void Example_tags()
   for (l=0;l<nleaves;l++) {
     leaf = (TLeaf*)leaves->UncheckedAt(l);
     branch = leaf->GetBranch();
-
     branch->GetEntry();
-
+    //tag comment is in the title
+    TString Title = leaf->GetTitle();
     Int_t dim = leaf->GetNdata();
+    if (dim==1) {
+      Title.ReplaceAll('['," '"); 
+      Title.ReplaceAll(']',"'"); 
+    }
+    cout << "\n Table: ";
+    cout.width(10);
+    cout << ((TNamed*)tagTable->UncheckedAt(tableIndex[l]))->GetName()<< 
+      " -- has tag: " << Title<<endl;
     for (Int_t i=0;i<dim;i++) {
-      cout << 
-	" Table#,name: " << tableIndex[l] <<
-	", " << ((TNamed*)tagTable->UncheckedAt(tableIndex[l]))->GetName()<< 
-	" -- has  tag: " << leaf->GetName();
+      cout <<"                               "<< leaf->GetName();
       if (dim>1) cout << '['<<i<<']';
       cout << " = " << leaf->GetValue(i) << endl; 
-      
     }
   }
 
-  //example of a histogram:
+  //example of a plot:
   c1 = new TCanvas("c1","Beam-Gas Rejection",600,1000);
   gStyle->SetMarkerStyle(8);
   chain->Draw("n_trk_tpc[0]:n_trk_tpc[1]");
-  //   return;
 
-  gBenchmark->Start("loop");
-
-  leaf = chain.GetLeaf("n_trk_tpc");
+  ntrk = chain.GetLeaf("n_trk_tpc");
   TLeaf *event = chain.GetLeaf("mEventNumber");
   TLeaf *ivent = chain.GetLeaf("mIventNumber");
   TBranch *ebranch = event->GetBranch();
 
-  //count collisions
+  //example of a selection: write event numbers for collisions on the plot
   Int_t ncoll=0;
   char aevent[10];
-  //loop over all events
-  for (Int_t k=0;k<chain->GetEntries();k++) {
-    chain.GetEntry(k);
-    //print values only for the first event in each file of the chain
-    if (k == *(chain.GetTreeOffset()+chain.GetTreeNumber())) {
-      file = (files->UncheckedAt(chain.GetTreeNumber()))->GetTitle();
-      cout<<"chain event "<< k 
-	  <<", start of file "<< chain.GetTreeNumber()+1 <<": "<< file.Data() <<endl;
+  TText t(0,0,"a");
+  t.SetTextFont(52);
+  t.SetTextSize(0.02);
+  Float_t cut = 0.35;
+  //loop over all events: READ ONLY REQUIRED BRANCHES!
+  gBenchmark->Start("loop");
+  for (Int_t i=0;i<nFiles;i++) {
+    file = (files->UncheckedAt(i))->GetTitle();
+    cout <<"Start of file "<< i+1 <<": "<< file.Data() <<endl;
+    chain.LoadTree(*(chain.GetTreeOffset()+i));
+    TTree *T = chain.GetTree();
+    //must renew leaf pointer for each tree
+    ntrk = T->GetLeaf("n_trk_tpc");
+    event = T->GetLeaf("mEventNumber");
+    ivent = T->GetLeaf("mIventNumber");
+    for (Int_t j = 0; j<T->GetEntries();j++){
+      ntrk->GetBranch()->GetEntry(j);
+      event->GetBranch()->GetEntry(j);
+      ivent->GetBranch()->GetEntry(i);
       
-      leaf = chain.GetLeaf("n_trk_tpc");
-      event = chain.GetLeaf("mEventNumber");
-      ivent = chain.GetLeaf("mIventNumber");
-    }
-    Int_t Nm=leaf->GetValue(0);
-    Int_t Np=leaf->GetValue(1);
-    Int_t ntrk = Np+Nm;
-    Float_t asim=(Np-Nm)/float(Np+Nm);
-    
-    TText t(0,0,"a");
-    t.SetTextFont(52);
-    t.SetTextSize(0.02);
-    Float_t cut = 0.35;
-    
-    if (-cut<asim && asim< cut && ntrk>400) {
-      cout
- 	<<" bfc event number for this file = "<<ivent->GetValue()
-	<<" DAQ event number = "<<event->GetValue()
-	<<endl;
-      ncoll++;
-      sprintf(aevent,"%d",event->GetValue());
-      t.DrawText(Np+10,Nm+10,aevent);
+      Int_t Nm=ntrk->GetValue(0);
+      Int_t Np=ntrk->GetValue(1);
+      Int_t Ntrk = Np+Nm;
+      Float_t asim=(Np-Nm)/float(Np+Nm);
+      if (-cut < asim&&asim < cut && Ntrk>400) {
+	cout
+	  <<" bfc event number for this file = "<<ivent->GetValue()
+	  <<" DAQ event number = "<<event->GetValue()
+	  <<endl;
+	ncoll++;
+	sprintf(aevent,"%d",event->GetValue());
+	t.DrawText(Np+10,Nm+10,aevent);
+      }
     }
   }
-
-  gPad->Update();
+  gBenchmark->Stop("loop");
   t.SetTextSize(0.05);
   t.DrawText(50,2550,"ntrk>400 and |(Np-Nm)/(Np+Nm)| < 0.35 ");
   t.DrawText(500,-300,"Ntrk with tanl<0 ");
-  
   cout <<" number of events with ntrk>400 and |asim|<"<<cut<<" = "<<ncoll<<endl;
-
   // stop timer and print benchmarks
-  gBenchmark->Stop("loop");
   gBenchmark->Print("loop");  
   gBenchmark->Stop("total");
   gBenchmark->Print("total");  
