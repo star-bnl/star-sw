@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofData.h,v 2.2 2002/02/22 22:56:51 jeromel Exp $
+ * $Id: StTofData.h,v 2.3 2003/05/21 18:22:46 ullrich Exp $
  *
  * Author: W.J. Llope, Sep 2001
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofData.h,v $
+ * Revision 2.3  2003/05/21 18:22:46  ullrich
+ * Major Revision of ToF classes (F. Geurts)
+ *
  * Revision 2.2  2002/02/22 22:56:51  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -55,7 +58,7 @@ protected:
     Short_t   mTc;
     UShort_t  mSc;    
 
-    ClassDef(StTofData,1)
+    ClassDef(StTofData,2)
 };
 
 inline void

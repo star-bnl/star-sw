@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofCollection.cxx,v 2.3 2001/10/01 19:40:58 ullrich Exp $
+ * $Id: StTofCollection.cxx,v 2.4 2003/05/21 18:22:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.cxx,v $
+ * Revision 2.4  2003/05/21 18:22:46  ullrich
+ * Major Revision of ToF classes (F. Geurts)
+ *
  * Revision 2.3  2001/10/01 19:40:58  ullrich
  * Added methods and members for StTofData.
  *
@@ -26,7 +29,7 @@
  **************************************************************************/
 #include "StTofCollection.h"
 
-static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.3 2001/10/01 19:40:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.4 2003/05/21 18:22:46 ullrich Exp $";
 
 ClassImp(StTofCollection)
     
@@ -34,16 +37,28 @@ StTofCollection::StTofCollection() { /* noop */ }
 
 StTofCollection::~StTofCollection() { /* noop */ }
 
-const StSPtrVecTofSlat&
-StTofCollection::tofSlats() const
+const StSPtrVecTofCell&
+StTofCollection::tofCell() const
 {
-    return mTofSlats;
+    return mTofCell;
+}
+
+StSPtrVecTofCell&
+StTofCollection::tofCell()
+{
+    return mTofCell;
+}
+
+const StSPtrVecTofSlat&
+StTofCollection::tofSlat() const
+{
+    return mTofSlat;
 }
 
 StSPtrVecTofSlat&
-StTofCollection::tofSlats()
+StTofCollection::tofSlat()
 {
-    return mTofSlats;
+    return mTofSlat;
 }
 
 const StSPtrVecTofHit&
@@ -71,10 +86,22 @@ StTofCollection::tofData()
 }
 
 
+// void
+// StTofCollection::addUnit(const StTofUnit* aUnit)  
+// {
+//     if (aUnit) mTofUnits.push_back(aUnit);
+// }
+
+void
+StTofCollection::addCell(const StTofCell* aCell)  
+{
+    if (aCell) mTofCell.push_back(aCell);
+}
+
 void
 StTofCollection::addSlat(const StTofSlat* aSlat)  
 {
-    if (aSlat) mTofSlats.push_back(aSlat);
+    if (aSlat) mTofSlat.push_back(aSlat);
 }
 
 void
@@ -91,9 +118,15 @@ StTofCollection::addData(const StTofData* aData)
 
 
 bool
+StTofCollection::cellsPresent() const
+{
+    return mTofCell.size();
+}
+
+bool
 StTofCollection::slatsPresent() const
 {
-    return mTofSlats.size();
+    return mTofSlat.size();
 }
 
 bool

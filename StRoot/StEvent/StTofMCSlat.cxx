@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMCSlat.cxx,v 2.3 2001/04/27 21:43:18 ullrich Exp $
+ * $Id: StTofMCSlat.cxx,v 2.4 2003/05/21 18:23:18 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofMCSlat.cxx,v $
+ * Revision 2.4  2003/05/21 18:23:18  ullrich
+ * Major Revision of ToF classes (F. Geurts)
+ *
  * Revision 2.3  2001/04/27 21:43:18  ullrich
  * Moved MC info class into separate file.
  *
@@ -23,13 +26,14 @@
 #include "iostream.h"
 #include "StTofMCSlat.h"
 
-static const char rcsid[] = "$Id: StTofMCSlat.cxx,v 2.3 2001/04/27 21:43:18 ullrich Exp $";
+static const char rcsid[] = "$Id: StTofMCSlat.cxx,v 2.4 2003/05/21 18:23:18 ullrich Exp $";
 
 ClassImp(StTofMCSlat)
 
-StTofMCSlat::StTofMCSlat() { /* nopt */ }
+StTofMCSlat::StTofMCSlat() { /* noop */ }
 
-StTofMCSlat::StTofMCSlat(const StTofMCInfo& MCInfo) :  mTofMCInfo(MCInfo) { /* nopt */ }
+StTofMCSlat::StTofMCSlat(const StTofMCInfo& MCInfo) :
+    mTofMCInfo(MCInfo) { /* noop */ }
 
 StTofMCSlat::~StTofMCSlat() { /* noop */ }
     
@@ -37,7 +41,6 @@ int
 StTofMCSlat::operator==(const StTofMCSlat& MCSlat) const
 {
     return (MCSlat.mSlatIndex == mSlatIndex && MCSlat.mTofMCInfo == mTofMCInfo);
-
 }
 
 int
@@ -50,7 +53,7 @@ ostream&
 operator<<(ostream& os, const StTofMCSlat& slat)
 {
     return (os << "StTofMCSlat::> " << "  Id=  " << slat.slatIndex()   
-                                    << ", adc= " << slat.adc()  
-                                    << ", tdc= " << slat.tdc() << endl  
-                                    << "  MCInfo:  " << slat.mcInfo());
+	    << ", adc= " << slat.adc()  
+	    << ", tdc= " << slat.tdc() << endl  
+	    << "MCInfo: " << slat.mcInfo());
 }
