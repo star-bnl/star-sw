@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.18 2000/02/23 21:31:33 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.19 2000/03/07 21:52:15 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.19  2000/03/07 21:52:15  ward
+// Converted from assert() to kStFatal.
+//
 // Revision 1.18  2000/02/23 21:31:33  ward
 // Replaced the mErr mechanism with assert()s.
 //
@@ -95,6 +98,7 @@ typedef struct {
 class St_tpcdaq_Maker : public StMaker {
  private:
    Char_t            *gConfig; //!
+   char               mErr; //!
    StTpcRawDataEvent *mEvent; //!
    void MakeHistograms();
    void SetGainCorrectionStuff(int);
@@ -166,7 +170,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.18 2000/02/23 21:31:33 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.19 2000/03/07 21:52:15 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };

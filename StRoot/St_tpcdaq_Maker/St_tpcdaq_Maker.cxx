@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.48  2000/03/07 21:52:14  ward
+// Converted from assert() to kStFatal.
+//
 // Revision 1.47  2000/02/23 21:31:32  ward
 // Replaced the mErr mechanism with assert()s.
 //
@@ -328,7 +331,7 @@ void St_tpcdaq_Maker::SeqWrite(St_raw_seq *raw_seq_gen,int rownumber,
     int startTimeBin,int numberOfBinsInSequence) {
   int nAlloc,nUsed;
   raw_seq_st singlerow;
-  assert(startTimeBin<0x100);
+  if(startTimeBin>=0x100) mErr=1;
   singlerow.m=startTimeBin;
   singlerow.i=numberOfBinsInSequence-1;
   nAlloc=raw_seq_gen->GetTableSize(); nUsed=raw_seq_gen->GetNRows();
@@ -600,7 +603,7 @@ int St_tpcdaq_Maker::Output() {
 #endif
         nPixelThisPad=0;
         seqStatus=getSequences(fGain[ipadrow][pad-1],ipadrow+1,pad,&nseq,&listOfSequences);
-        if(seqStatus<0) { PrintErr(seqStatus,'a'); assert(0); }
+        if(seqStatus<0) { PrintErr(seqStatus,'a'); mErr=2; return 1; }
         if(nseq) {
           numPadsWithSignal++; 
           if(ipadrow>=13) dataOuter[isect-1]=7; else dataInner[isect-1]=7;
@@ -614,7 +617,7 @@ int St_tpcdaq_Maker::Output() {
           startTimeBin=listOfSequences[iseq].startTimeBin;
           if(startTimeBin<0) startTimeBin=0;
           if(startTimeBin>511) startTimeBin=511;
-          assert(prevStartTimeBin<=startTimeBin);
+          if(prevStartTimeBin>startTimeBin) { mErr=3; return 2; }
           prevStartTimeBin=startTimeBin; seqLen=listOfSequences[iseq].length;
 #ifdef NOISE_ELIM
           skip=0;
@@ -695,8 +698,10 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
  return 0;
 }
 Int_t St_tpcdaq_Maker::Make() {
+  char junk[12];
   int ii,errorCode;
-  printf("I am Confucius. (Feb 23 2000).  St_tpcdaq_Maker::Make().\n"); 
+  printf("I am Ronald McDonald. (Mar 7 2000).  St_tpcdaq_Maker::Make().\n"); 
+  mErr=0;
   errorCode=GetEventAndDecoder();
   if(gDAQ) { victor=victorPrelim->getTPCReader(); assert(victor); }
   printf("GetEventAndDecoder() = %d\n",errorCode);
@@ -706,6 +711,15 @@ Int_t St_tpcdaq_Maker::Make() {
   }
   assert(!m_DataSet->GetList());
   Output();
-  printf("Got through St_tpcdaq_Maker OK.\n");
+  if(mErr) {
+    PP"------------------------------------------------------\n");
+    PP"Hello.  This \007is Herb (ward@physics.utexas.edu).  We have a very\n");
+    PP"severe error.  Please record this error code: %d\n",mErr);
+    PP"and send it to me along with (1) the .daq file, (2) the event number,\n");
+    PP"(3) the bfc() arguments, and (4) $STAR.  Press return to continue.  "); gets(junk);
+    return kStFatal;
+  } else {
+    printf("Got through St_tpcdaq_Maker OK.\n");
+  }
   return kStOK;
 }
