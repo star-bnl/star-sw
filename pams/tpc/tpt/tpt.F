@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.10 1998/05/26 04:15:12 sakrejda Exp $
+* $Id: tpt.F,v 1.11 1998/06/01 03:15:22 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.11  1998/06/01 03:15:22  sakrejda
+* inconsistency in calls to message fixed, TPT-I3 replaced by TPTI3-E1
+*
 * Revision 1.10  1998/05/26 04:15:12  sakrejda
 * message type set to E to limit printing
 *
@@ -110,7 +113,7 @@ C     initialize timing counters
           call Msg_Enable( 'TPTROOT1-E1' )
       endif
 
-      write(m132,*) 'TPT-I3 starting in the main tracking subroutine ...'
+      write(m132,*) 'TPTI3-E1 starting in the main tracking subroutine ...'
       call Message( m132, 1, idI3)
 
 C     set return value to normal success
@@ -264,7 +267,7 @@ C     write out timing information
       write(m132(5),*) '       TIME_MERGE : ',time_merge
       call message(m132, 5, idI3)
 c
-      write(m132,*) 'TPT-I3 first pass', track_h.nok
+      write(m132,*) 'TPTI3-E1 first pass', track_h.nok
       call message(m132, 1, idI3)
 
 c
