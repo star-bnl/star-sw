@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNetOut.h,v 1.3 2000/05/05 19:20:46 aihong Exp $
+ * $Id: StPidAmpNetOut.h,v 1.4 2000/05/05 21:24:58 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNetOut.h,v $
+ * Revision 1.4  2000/05/05 21:24:58  aihong
+ * change operator << to let it pass sun compiler
+ *
  * Revision 1.3  2000/05/05 19:20:46  aihong
  * let StPidAmpNetOut::Get*ParArray() returns pointer instead of obj.
  *
@@ -86,7 +89,7 @@ class StPidAmpNetOut : public TNamed {
 
    };
 
-ostream& operator<<(ostream& s, const StPidAmpNetOut& netOut);
+ostream& operator<<(ostream& s, StPidAmpNetOut& netOut);
 
 #endif
 

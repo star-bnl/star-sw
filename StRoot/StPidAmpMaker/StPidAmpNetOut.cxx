@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNetOut.cxx,v 1.3 2000/05/05 19:20:47 aihong Exp $
+ * $Id: StPidAmpNetOut.cxx,v 1.4 2000/05/05 21:24:57 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNetOut.cxx,v $
+ * Revision 1.4  2000/05/05 21:24:57  aihong
+ * change operator << to let it pass sun compiler
+ *
  * Revision 1.3  2000/05/05 19:20:47  aihong
  * let StPidAmpNetOut::Get*ParArray() returns pointer instead of obj.
  *
@@ -148,14 +151,14 @@ Int_t     StPidAmpNetOut::GetNResoPars() const{return mResoParArray.GetSize();}
 Int_t     StPidAmpNetOut::GetGeantID() const{return mGeantID;}
 Double_t  StPidAmpNetOut::GetCalibConst() const{return mCalibConst;}
 
-ostream& operator<<(ostream& s, const StPidAmpNetOut& netOut){
+ostream& operator<<(ostream& s,  StPidAmpNetOut& netOut){
   int i;
   s<<netOut.GetName()<<" Geant ID: "<<netOut.GetGeantID()<<endl;
   s<<"Calibration constant: "<<netOut.GetCalibConst()<<endl;
 
   s<<"band Parameters: { ";
 
- const TArrayD* theBandParArray=netOut.GetBandParArray();
+  TArrayD* theBandParArray=netOut.GetBandParArray();
 
   for (i=0; i<theBandParArray->GetSize();i++){
 
@@ -169,7 +172,7 @@ ostream& operator<<(ostream& s, const StPidAmpNetOut& netOut){
  
    s<<"amplitude Parameters: { ";
 
- const TArrayD* theAmpParArray=netOut.GetAmpParArray();
+  TArrayD* theAmpParArray=netOut.GetAmpParArray();
 
 
   for (i=0; i<theAmpParArray->GetSize();i++){
@@ -184,7 +187,7 @@ ostream& operator<<(ostream& s, const StPidAmpNetOut& netOut){
   
   s<<"resolution Parameters: { ";
 
- const TArrayD* theResoParArray=netOut.GetResoParArray();
+  TArrayD* theResoParArray=netOut.GetResoParArray();
 
   for (i=0; i<theResoParArray->GetSize();i++){
 
