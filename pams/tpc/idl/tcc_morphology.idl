@@ -27,11 +27,11 @@
 	float	meanTimePosition;
 	float 	padSigma1;
 	float	timeSigma1;
-	float	padTimeSigma1;
+	float	padTimeSigma1Sq;
 	/* 2 = orthogonal direction to pad-time for quadrupole */	
 	float 	padSigma2;
 	float	timeSigma2;
-	float	padTimeSigma2;
+	float	padTimeSigma2Sq;
 	float	ecc1;        /* eccentricity */
 	float	ecc2;
 	float	linEcc1;     /* linearizedEccentricity */

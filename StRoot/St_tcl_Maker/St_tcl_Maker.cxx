@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.29 1999/03/13 23:34:03 perev Exp $
+// $Id: St_tcl_Maker.cxx,v 1.30 1999/03/15 22:31:04 sakrejda Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.30  1999/03/15 22:31:04  sakrejda
+// names of variables for the cluster morph. table changed
+//
 // Revision 1.29  1999/03/13 23:34:03  perev
 // New makers
 //
@@ -233,10 +236,10 @@ Int_t St_tcl_Maker::FillOneRowOfMorphTable(
   singlerow.meanTimePosition	= meanTimePos;
   singlerow.padSigma1		= padSigma1Eq5;
   singlerow.timeSigma1		= timeSigma1Eq6;
-  singlerow.padTimeSigma1	= padTimeSigma1Eq7;
+  singlerow.padTimeSigma1Sq	= padTimeSigma1Eq7;
   singlerow.padSigma2		= padSigma2Eq12;
   singlerow.timeSigma2		= timeSigma2Eq13;
-  singlerow.padTimeSigma2	= padTimeSigma2Eq14;
+  singlerow.padTimeSigma2Sq	= padTimeSigma2Eq14;
   singlerow.ecc1		= ecc1Eq15;
   singlerow.ecc2		= ecc2Eq16;
   singlerow.linEcc1		= linEcc1Eq8;
@@ -572,7 +575,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.29 1999/03/13 23:34:03 perev Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.30 1999/03/15 22:31:04 sakrejda Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
