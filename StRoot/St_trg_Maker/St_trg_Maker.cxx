@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.24 2001/01/18 16:55:05 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.25 2001/07/12 17:40:34 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.25  2001/07/12 17:40:34  ward
+// New version of trgStructures.h, and modifications to other code in support thereof.
+//
 // Revision 1.24  2001/01/18 16:55:05  ward
 // Corrections in Vladimir2Herbert from Vladimir Morozov.
 //
@@ -444,6 +447,10 @@ void St_trg_Maker::ZdcSim(St_dst_TrgDet *dst1) {
 //_____________________________________________________________________________
 void St_trg_Maker::dumpDataToScreenAndExit() {
   int i;
+  char *TrgSumHeader=(char*)&(GraceSlick->TrgSum.TrgSumHeader);
+  char *L0SumHeader=(char*)&(GraceSlick->TrgSum.L0SumHeader);
+  char *L1SumHeader=(char*)&(GraceSlick->TrgSum.L1SumHeader);
+  char *L2SumHeader=(char*)&(GraceSlick->TrgSum.L2SumHeader);
                    printf("%15s      = %d\n","TCUdataBytes",GraceSlick->EvtDesc.TCUdataBytes);
                    printf("%15s      = %d\n","TCUEvtDesc",GraceSlick->EvtDesc.TCUEvtDesc);
                    printf("%15s      = %d\n","TrgDataFmtVer",GraceSlick->EvtDesc.TrgDataFmtVer);
@@ -452,16 +459,16 @@ void St_trg_Maker::dumpDataToScreenAndExit() {
                    printf("%15s      = %d\n","npre",GraceSlick->EvtDesc.npre);
                    printf("%15s      = %d\n","npost",GraceSlick->EvtDesc.npost);
                    printf("%15s      = %d\n","TrgSumBytes",GraceSlick->TrgSum.TrgSumBytes);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","TrgSumHeader",i,GraceSlick->TrgSum.TrgSumHeader[i]);
+for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","TrgSumHeader",i,TrgSumHeader[i]);
 for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L1Sum",i,GraceSlick->TrgSum.L1Sum[i]);
 for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L2Sum",i,GraceSlick->TrgSum.L2Sum[i]);
                    printf("%15s    = %d\n","L0SumBytes",GraceSlick->TrgSum.L0SumBytes);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L0SumHeader",i,GraceSlick->TrgSum.L0SumHeader[i]);
+for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L0SumHeader",i,L0SumHeader[i]);
                    printf("%15s      = %d\n","L1SumBytes",GraceSlick->TrgSum.L1SumBytes);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L1SumHeader",i,GraceSlick->TrgSum.L1SumHeader[i]);
+for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L1SumHeader",i,L1SumHeader[i]);
 for(i=0;i< 32;i++) printf("%15s[%3d] = %d\n","L1Result",i,GraceSlick->TrgSum.L1Result[i]);
                    printf("%15s      = %d\n","L2SumBytes",GraceSlick->TrgSum.L2SumBytes);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L2SumHeader",i,GraceSlick->TrgSum.L2SumHeader[i]);
+for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L2SumHeader",i,L2SumHeader[i]);
 for(i=0;i< 32;i++) printf("%15s[%3d] = %d\n","L2Result",i,GraceSlick->TrgSum.L2Result[i]);
                    printf("%15s      = %d\n","RawDetBytes",GraceSlick->RAW[0].RawDetBytes);
 for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","RawDetHeader",i,GraceSlick->RAW[0].RawDetHeader[i]);
