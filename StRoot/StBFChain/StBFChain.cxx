@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.227 2001/09/06 18:27:41 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.228 2001/09/13 20:48:53 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -204,7 +204,7 @@ Bfc_st BFC[] = {
   {"DbV0713"     ,""  ,"","db,calib,ry1h"                  ,"","","20000713/0 Db Version for p00he",kFALSE},
   {"DbV0727"     ,""  ,"","db,calib,ry1h"                  ,"","","20000727/0 Db Version for p00he",kFALSE},
   {"DbV0819"     ,""  ,"","db,calib,ry1h"                  ,"","","20000819/0 Db Version for p00hg",kFALSE}, 
-  {"DbV1123"     ,""  ,"","db,calib,ry1h" ,"","","20001123/0 Db w/o TpcDriftVel. from StTpcT0Maker",kFALSE}, 
+  {"DbV1123"     ,""  ,"","db,calib,ry1h"  ,"","","20001123/0 Db wo TpcDriftVel. from StTpcT0Maker",kFALSE}, 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
