@@ -1,0 +1,7 @@
+/* scp_raw.idl                                 */
+/* SVT raw data - unzero suppressed ADC values */
+
+struct scp_raw{
+  long      adc;
+};
+

@@ -1,0 +1,21 @@
+/* ssf_seq.idl
+ * 
+ * Table: ssf_seq
+ * Keys to ADC values output by the Zero Suppression Faker
+ * 
+ * By convention, the anode index runs 0-127 on the positive 
+ * drift direction side (+phi direction) and 128-255 on the
+ * negative side.
+ *
+ * One seq record is associated with each line cluster found
+ * by the zero suppression routine.
+ *
+ */
+struct ssf_seq {
+  short  t_beg;    /* time of beginning of sequence                                      */
+  short  t_end;    /* time of end of  sequence                                           */
+  short  anode_id; /* Anode Index                                                        */
+  long   key_next; /* a key used for link listing during cluster finder search (scs)     */
+  long   key_adc;  /* key to the ADC table pointing to the 1st ADC value in the sequence */
+};
+
