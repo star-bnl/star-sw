@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbMessService.hh,v 1.1 2001/01/22 18:37:56 porter Exp $
+ * $Id: StDbMessService.hh,v 1.2 2003/12/16 01:30:32 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbMessService.hh,v $
+ * Revision 1.2  2003/12/16 01:30:32  porter
+ * additional fixes for change from ostrstream to ostringstream that were not exposed until
+ * running in online
+ *
  * Revision 1.1  2001/01/22 18:37:56  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -34,7 +38,7 @@
 
 
 // simple debug, warn, connection, & error  
-enum StDbMessLevel { dbMDebug=0, dbMWarn, dbMConnect, dbMErr }; 
+enum StDbMessLevel { dbMDebug=0, dbMWarn, dbMConnect, dbMErr, dbMFatal }; 
 
 class StDbMessService {
 

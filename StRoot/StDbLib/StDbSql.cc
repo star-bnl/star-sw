@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.24 2003/09/26 20:40:37 deph Exp $
+ * $Id: StDbSql.cc,v 1.25 2003/12/16 01:30:32 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.25  2003/12/16 01:30:32  porter
+ * additional fixes for change from ostrstream to ostringstream that were not exposed until
+ * running in online
+ *
  * Revision 1.24  2003/09/26 20:40:37  deph
  * *** empty log message ***
  *
@@ -762,12 +766,16 @@ StDbSql::WriteDbNoIndex(StDbTable* table, unsigned int storeTime){
   char* sTime=getDateTime(storeTime);
 
   int numRows=table->GetNRows();
-  const char* colList=(cList.str()).c_str();
+  char* colList = new char[strlen((cList.str()).c_str())+1];
+  strcpy(colList,(cList.str()).c_str());
+
   int i;
   bool hasBinary=false;
   if(Db.InputStart(dataTable,&buff,colList,numRows,hasBinary)){
  
     if(hasBinary){ // got to go through the buffer
+
+      cout<<" In Binary write???"<<endl;
 
       for(i=0;i<numRows;i++){
         buff.WriteScalar(sTime,"beginTime");
@@ -796,6 +804,7 @@ StDbSql::WriteDbNoIndex(StDbTable* table, unsigned int storeTime){
   clear();
 
   table->setRowNumber();
+  delete [] colList;
   delete [] sTime;
 
   delete [] dataTable;
