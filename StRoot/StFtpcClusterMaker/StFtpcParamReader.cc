@@ -1,6 +1,10 @@
-// $Id: StFtpcParamReader.cc,v 1.3 2000/10/31 09:52:13 hummler Exp $
+// $Id: StFtpcParamReader.cc,v 1.4 2000/11/03 13:23:13 hummler Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.4  2000/11/03 13:23:13  hummler
+// add set functions to change the drift map values
+// (to be used in the new drift map maker)
+//
 // Revision 1.3  2000/10/31 09:52:13  hummler
 // add parameters for slow simulator
 //
@@ -51,6 +55,8 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_ampoff *ampoff,
     new Float_t[mNumberOfPadrowsPerSide*mNumberOfPadtransBins];
   Int_t i, j;
   fcl_padtrans_st *padtransTable = padtrans->GetTable();
+  // store padtrans table for writing back in destructor
+  mPadtransTable=padtransTable;
   for(i=0; i<mNumberOfPadtransBins; i++)
     {
       mPadtransEField[i] = padtransTable[i].e;
@@ -192,6 +198,8 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
   mPadtransdDeflectiondP = 
     new Float_t[mNumberOfPadrowsPerSide*mNumberOfPadtransBins];
   fcl_padtrans_st *padtransTable = padtrans->GetTable();
+  // store padtrans table for writing back in destructor
+  mPadtransTable=padtransTable;
   for(i=0; i<mNumberOfPadtransBins; i++)
     {
       mPadtransEField[i] = padtransTable[i].e;
@@ -257,8 +265,30 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
 }
 
 
+
 StFtpcParamReader::~StFtpcParamReader()
 {
+  // write padtrans array back to table
+  Int_t i,j;
+  if(mPadtransTable!=NULL)
+    {
+      for(i=0; i<mNumberOfPadtransBins; i++)
+	{
+	  mPadtransTable[i].e = mPadtransEField[i];
+	  for(j=0; j<mNumberOfPadrowsPerSide; j++)
+	    {
+	      mPadtransTable[i].v[j] =
+		mPadtransVDrift[j+mNumberOfPadrowsPerSide*i]; 
+	      mPadtransTable[i].psi[j] =
+		mPadtransDeflection[j+mNumberOfPadrowsPerSide*i]; 
+	      mPadtransTable[i].dv_dp[j] =
+		mPadtransdVDriftdP[j+mNumberOfPadrowsPerSide*i]; 
+	      mPadtransTable[i].dpsi_dp[j] =
+		mPadtransdDeflectiondP[j+mNumberOfPadrowsPerSide*i]; 
+	    }
+	}
+    }
+
   delete[] mPadtransEField;
   delete[] mPadtransVDrift;
   delete[] mPadtransDeflection;
@@ -375,6 +405,76 @@ Float_t StFtpcParamReader::padtransdDeflectiondP(Int_t i, Int_t padrow)
     {
       gMessMgr->Message("StFtpcParamReader: padtransdDeflectiondP index out of range, using 0", "W", "OST");
       return mPadtransdDeflectiondP[0];
+    }
+}
+
+Int_t StFtpcParamReader::setPadtransEField(Int_t i, Float_t newvalue) 
+{
+  if(i>=0 && i<mNumberOfPadtransBins)
+    {
+      mPadtransEField[i]=newvalue;
+      return 1;
+    }
+  else
+    {
+      gMessMgr->Message("StFtpcParamReader: padtransEField index out of range, not changed", "W", "OST");
+      return 0;
+    }
+}
+
+Int_t StFtpcParamReader::setPadtransVDrift(Int_t i, Int_t padrow, Float_t newvalue) 
+{
+  if(i>=0 && i<mNumberOfPadtransBins && padrow>=0 && padrow<mNumberOfPadrowsPerSide)
+    {
+      mPadtransVDrift[padrow+mNumberOfPadrowsPerSide*i]=newvalue;
+      return 1;
+    }
+  else
+    {
+      gMessMgr->Message("StFtpcParamReader: padtransVDrift index out of range, not changed", "W", "OST");
+      return 0;
+    }
+}
+
+Int_t StFtpcParamReader::setPadtransDeflection(Int_t i, Int_t padrow, Float_t newvalue) 
+{
+  if(i>=0 && i<mNumberOfPadtransBins && padrow>=0 && padrow<mNumberOfPadrowsPerSide)
+    {
+      mPadtransDeflection[padrow+mNumberOfPadrowsPerSide*i]=newvalue;
+      return 1;
+    }
+  else
+    {
+      gMessMgr->Message("StFtpcParamReader: padtransDeflection index out of range, not changed", "W", "OST");
+      return 0;
+    }
+}
+
+Int_t StFtpcParamReader::setPadtransdVDriftdP(Int_t i, Int_t padrow, Float_t newvalue) 
+{
+  if(i>=0 && i<mNumberOfPadtransBins && padrow>=0 && padrow<mNumberOfPadrowsPerSide)
+    {
+      mPadtransdVDriftdP[padrow+mNumberOfPadrowsPerSide*i]=newvalue;
+      return 1;
+    }
+  else
+    {
+      gMessMgr->Message("StFtpcParamReader: padtransdVDriftdP index out of range, not changed", "W", "OST");
+      return 0;
+    }
+}
+
+Int_t StFtpcParamReader::setPadtransdDeflectiondP(Int_t i, Int_t padrow, Float_t newvalue) 
+{
+  if(i>=0 && i<mNumberOfPadtransBins && padrow>=0 && padrow<mNumberOfPadrowsPerSide)
+    {
+      mPadtransdDeflectiondP[padrow+mNumberOfPadrowsPerSide*i]=newvalue;
+      return 1;
+    }
+  else
+    {
+      gMessMgr->Message("StFtpcParamReader: padtransdDeflectiondP index out of range, not changed", "W", "OST");
+      return 0;
     }
 }
 
