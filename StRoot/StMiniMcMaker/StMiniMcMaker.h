@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.h,v 1.7 2003/09/10 19:47:23 perev Exp $
+ * $Id: StMiniMcMaker.h,v 1.8 2004/01/26 13:59:26 calderon Exp $
  * \file  StMiniMcMaker.h
  * \brief Filling of StMiniMcEvent classes from StMcEvent, StEvent, StAssociationMaker
  * 
@@ -12,6 +12,9 @@
  * manuel calderon de la barca's code.
  *
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.8  2004/01/26 13:59:26  calderon
+ * Added the code to fill the global track matches of StMiniMcEvent.
+ *
  * Revision 1.7  2003/09/10 19:47:23  perev
  * ansi corrs
  *
@@ -47,6 +50,9 @@
  * Revision 1.4  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.8  2004/01/26 13:59:26  calderon
+ * Added the code to fill the global track matches of StMiniMcEvent.
+ *
  * Revision 1.7  2003/09/10 19:47:23  perev
  * ansi corrs
  *
@@ -78,7 +84,7 @@
  * but in order not to break Jenn's scripts if she was already using this macro,
  * this parameter was added at the end and defaults to "rcf", which is appropriate
  * for hijing files reconstructed in rcf.
- * and $Id: StMiniMcMaker.h,v 1.7 2003/09/10 19:47:23 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.h,v 1.8 2004/01/26 13:59:26 calderon Exp $ plus header comments for the macros
  *
  */
 
@@ -182,6 +188,7 @@ class StMiniMcMaker : public StMaker{
   Bool_t           acceptPt(StMcTrack*);
   Bool_t           acceptDebug(StMcTrack*);
   
+  StTrackPairInfo* findBestMatchedGlobal(StMcTrack*);
   PAIRVEC          findMatchedRc(StMcTrack*);
   PAIRHIT          findFirstLastHit(const StTrack*);
   PAIRHIT          findFirstLastFitHit(const StTrack*);
@@ -258,6 +265,7 @@ class StMiniMcMaker : public StMaker{
   Int_t            mNGhost; //!
   Int_t            mNContam; //!
   Int_t            mNMatched; //!
+  Int_t            mNMatGlob; //!
 
   ClassDef(StMiniMcMaker,0)
 };
