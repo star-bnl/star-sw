@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.78 1999/07/09 02:18:43 fisyak Exp $
+// $Id: bfc.C,v 1.79 1999/07/09 14:04:18 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -130,7 +130,7 @@ void SetChainOff(){// set all OFF
 void SetDefaultChain(){// default for standard chain
   if (! ChainFlags[kDefault]) {
     printf ("Set default options\n");
-    for (EChainOptions k = kTPC; k<kLAST; k++) if (k != kTSS && k != kTFS) SetOption(k);
+    for (EChainOptions k = kTPC; k<kAllEvent; k++) if (k != kTSS && k != kTRS) SetOption(k);
     SetOption(kDefault);
   } 
 }
@@ -192,7 +192,6 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
 	SetOption(kTDAQ);
 	SetOption(kTPC);
 	SetOption(kER99);
-	SetOption(kDefault);
 	break;
       case  kY1b:
 	SetOption(kEMC);
@@ -213,7 +212,6 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
 	SetOption(kSQA);
 	SetOption(kEVENT);
 	SetOption(kANALYS);
-	SetOption(kAllEvent);
 	break;
       case  kY2a:
 	SetOption(kDefault);
@@ -273,7 +271,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
       }
     }
   }
-  
+  // Check flags consistency   
   if (!ChainFlags[kXINDF] && !ChainFlags[kGSTAR] &&!ChainFlags[kTDAQ]) {
     SetOption(kFZIN);
     SetOption(kGEANT);
@@ -284,6 +282,8 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   if (ChainFlags[kAllEvent]) {
     SetOption(kEval); 
   }
+  SetOptionOff(kL3);
+  // Print set values
   for (k = kFIRST; k<kLAST;k++) {
     if (ChainFlags[k]) {
       printf ("================== %2d \t%s      \tis ON \t:%s \n",k,ChainOptions[k],ChainComments[k]);
@@ -298,8 +298,8 @@ void Load(const Char_t *Chain="gstar tfs"){
   gSystem->Load("StChain");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
-  //  gSystem->Load("StUtilities");
-  gSystem->Load("libmsg");
+  gSystem->Load("StUtilities");
+  //  gSystem->Load("libmsg");
   gSystem->Load("libtls");
   gSystem->Load("St_db_Maker");
   if (ChainFlags[kXINDF]) gSystem->Load("St_xdfin_Maker");
