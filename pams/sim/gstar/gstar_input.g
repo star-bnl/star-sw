@@ -1,6 +1,9 @@
-* $Id: gstar_input.g,v 1.36 2000/06/12 15:35:47 nevski Exp $
+* $Id: gstar_input.g,v 1.37 2000/08/10 23:55:40 nevski Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.37  2000/08/10 23:55:40  nevski
+* rqmd-type cwn accepted
+*
 * Revision 1.36  2000/06/12 15:35:47  nevski
 * debuging prints removed
 *
@@ -161,6 +164,10 @@
      elseif C=='C' { J=1;                    call gstar_ReadCNT(Igate)     }
      elseif C=='M' { J=CsADDR ('MICKINE'); IF (J!=0) Call CsJCAL(J,1,Igate)}
      elseif C=='S' { J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)-1;     }
+     elseif C=='V' { J=AMI_CALL ('venus'//o,        1,%L(Table)//o)-1; 
+                     J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)-1;     }
+     elseif C=='H' { J=AMI_CALL ('hijjet'//o,       1,%L(Table)//o)-1; 
+                     J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)-1;     }
      If Igate<=0   { Ier=1; return }
      If (NtoSkip<=0 | Idebug>0) print *,' AgUsREAD mode ',C,' Event ',Ievent,
         ': # particles in GEANT=',Ntrack,'  # vertices=',Nvertx   
@@ -284,6 +291,9 @@ c ---- Column-Wise-Ntuples ----
 *
          Nin+=1; num(3)=Nin;  
          Call RbSTORE ('/EVNT/GENE/GENT*',num,Cform,15,istat)
+*
+*        get rid of eta prime:
+         if (abs(ipdg)==331) ipdg=sign(221,ipdg)
 * 
          Call apdg2gea (Ipdg, ge_pid); If ge_pid<=0    
          {  Prin1 Ipdg; (' gstar_read HEPTUP unknown particle',i6)
