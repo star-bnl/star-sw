@@ -1,9 +1,6 @@
 #!/usr/local/bin/perl
 Import qw ( env INCLUDE LIB BIN EXPORT BUILD OBJ);
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
-$my_env = $env->clone(
-		    'DEBUG'      => ' '
-		    );
 my $DirPath = DirPath '.';# print "DirPath = $DirPath\n"; 
 my $Dir = "pams";                           print "Build Tables for $Dir\n";
 my @idlL = find_idl($Dir);#  print "@idlL\n"; 
@@ -21,7 +18,7 @@ my @sources = ();
 my $DIR = cwd();# print "DIR = $DIR\n";
 my $obj = $OBJ . "/pams/tables"; 
 my $share  = "#.share/tables";# print "share = $share\n";
-my $include = $INCLUDE . "/tables";
+my $include = $INCLUDE . "/tables"; #print "include = $include\n";
 my $SHARE  = $DIR . "/.share/tables";
 Link $DirPath =>  $SHARE; print "Link $DirPath =>  $SHARE\n";
 my $PKG = "St_Tables";
@@ -35,9 +32,15 @@ foreach my $idl (@idl) {#  print "$idl\n";
   my $idlt = $include . "/" . basename($idl);
   push @idlT, $IDL; 
 }# print "idlT = @idlT\n";
+Install $env $INCLUDE, @idlT; #print "Install $env $INCLUDE, @idlT\n";
 #___________________________________
 my $ROOTCINT_CPP = $INCLUDE . ":" . $INCLUDE . "/tables:" . $env->{ENV}->{STAF} . "/inc:" . 
   $env->{ENV}->{ROOTSRC};
+$env2 = $env->clone(
+		    'DEBUG'      => ' ',
+		    'CPPPATH'    =>$ROOTCINT_CPP
+		    );
+
 my $cscanner= find scan::cpp($env->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
 my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
 
@@ -45,8 +48,8 @@ foreach my $idll (@idlT) {
   my $stem     = basename ($idll, ".idl");# print "stem = $stem; idll: $idll\n";
   my $dir      = dirname ($idll); #print "dir = $dir\n"; 
   my $idl      = basename ($idll);
-  my $idlh     = $include . "/"    . $stem . ".h";             #print "idlh: $idlh\n";
-  my $idli     = $include . "/"    . $stem . ".inc";           #print "idli: $idli\n";
+  my $idlh     = $INCLUDE . "/"    . $stem . ".h";             #print "idlh: $idlh\n";
+  my $idli     = $INCLUDE . "/"    . $stem . ".inc";           #print "idli: $idli\n";
   my $idlH     = $include . "/St_" . $stem . "_Table.h";       #print "idlH: $idlH\n";
   my $idlC     = $share   . "/St_" . $stem . "_Table.cxx";     #print "idlC: $idlC\n";
   my $LinkDef  = $share   . "/"    . $stem . "LinkDef.h";      #print "LinkDef = $LinkDef\n";
@@ -54,27 +57,32 @@ foreach my $idll (@idlT) {
   my $idlCintC = $share   . "/St_" . $stem . "_TableCint.cxx"; #print "idlCintC = $idlCintC\n";
   my @Deps = ($idll);# print "Deps: $Deps[0]\n";
   if ($STAR_SYS !~ /^intel_wnt$/) {
-    Command $my_env [$idlh, $idli], @Deps, qq (stic.pl %>:d $stem  -H -q %1 );
-    Command $my_env [$idlH],        @Deps, qq (ConstructTable.pl %>);
-    Command $my_env [$idlC],        @Deps, qq (ConstructTable.pl %>);
-    Command $my_env [$LinkDef],     @Deps, qq (ConstructTable.pl %>);
+    Command $env2 [$idlh],        @Deps, qq (stic.pl %> -H -q %1 );
+    Command $env2 [$idli],        @Deps, qq (stic.pl %> -H -q %1 );
+    push @Deps, $idlh;
+    Command $env2 [$idlH],        @Deps, qq (ConstructTable.pl %>);
+    push @Deps, $idlH;
+    Command $env2 [$idlC],        @Deps, qq (ConstructTable.pl %>);
+    Command $env2 [$LinkDef],     @Deps, qq (ConstructTable.pl %>);
   }
   @Deps = ();
   push @Deps, $idlH;
   push @Deps, $LinkDef;
   push @Deps, $idlh;
   push @Deps, $idli;
+  push @Deps, $INCLUDE . "/Stypes.h";
   push @Deps, $INCLUDE . "/St_Table.h";
+  push @Deps, $INCLUDE . "/St_DataSet.h";
   push @Deps, $INCLUDE . "/tableDescriptor.h";
   if ($STAR_SYS !~ /^intel_wnt$/) {
-    Command $my_env [$idlCintC, $idlCintH], @Deps,  
+    Command $env2 [$idlCintC, $idlCintH], @Deps,  
     qq (rootcint.pl %>:d -f %>:f -c  "$ROOTCINT_CPPPATH -D__ROOT__" %1:f %2:f);
   }
   push @Deps, $idlCintC;
   push @Deps, $idlCintH;
   push @Deps, $idlC;
   my @src  = ($idlC,$idlCintH,$idlCintC);
-  Install $my_env $obj, @src;
+  Install $env2 $obj, @src; #print "Install $env2 $obj, @src\n";
   my $s;
   ($s = $idlC)     =~  s/$share/$obj/g; push @sources, $s;
   ($s = $idlCintC) =~  s/$share/$obj/g; push @sources, $s;
@@ -85,8 +93,8 @@ if ($#sources > -1) {
     Install $env2 $LIB, $LIBPKG;
   }
   
-  LinkedModule $my_env $SO_PKG, @sources;
-  Install $my_env $LIB, $SO_PKG;
+  LinkedModule $env2 $SO_PKG, @sources;
+  Install $env2 $LIB, $SO_PKG;
 }
 #________________________________________
 sub script::find_idl {
