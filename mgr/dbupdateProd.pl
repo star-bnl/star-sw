@@ -31,7 +31,6 @@ my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetG = (
              "auau200/nexus/default/b0_3/year_1h/hadronic_on",
-             "auau200/venus412/default/b0_3/year_1h/hadronic_on",
              "auau200/mevsim/vanilla/central/year_1h/hadronic_on",
              "auau200/mevsim/vanilla/flow/year_1h/hadronic_on", 
              "auau200/mevsim/vanilla/resonance/year_1h/hadronic_on", 
@@ -60,6 +59,7 @@ my @SetG = (
              "pau200/hijing/b0_7/jet15/year_1h/hadronic_on", 
              "pau200/hijing/b0_7/gam15/year_2a/hadronic_on",
              "pau200/hijing/b0_7/jet15/year_2a/hadronic_on",
+             "pp200/pythia/default/minibias/year_2a/hadronic_on",
              "auau200/mevsim/vcascade/central/year_1h/hadronic_on",       
              "auau200/mevsim/vcascade/flow/year_1h/hadronic_on", 
              "auau200/mevsim/vcascade/fluct/year_1h/hadronic_on",
@@ -71,7 +71,7 @@ my @SetG = (
              "auau200/hijing_quark/b0_3_jetq_on/jet05/year_1h/hadronic_on",
              "auau200/hijing_antinuc/b0_3_jetq_off/jet05/year_1h/hadronic_on",
              "auau200/hijing_antinuc/b0_3_jetq_on/jet05/year_1h/hadronic_on",
-             "pp200/pythia/default/minibias/year_2a/hadronic_on",
+             "auau200/venus412/default/b0_3/year_1h/hadronic_on",
 );
 
 my $SetD = "dst/prod5/1999/12";
@@ -198,11 +198,11 @@ my $inext =scalar(@SetG);
 #  $diskRecoDirs[$ll] = $DISK1 . "/" . $SetG[$ll] . "/tfs_6";
 #  print "diskRecoDir: $diskRecoDirs[$ll]\n" if $debugOn;
 #}
-for( $ll = 0; $ll< 34; $ll++) { 
+for( $ll = 0; $ll< 35; $ll++) { 
   $diskRecoDirs[$ll] = $DISK2 . "/" . $SetG[$ll] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$ll]\n";
 }
-for( $ii = 34; $ii< 40; $ii++) { 
+for( $ii = 35; $ii< 42; $ii++) { 
 $diskRecoDirs[$ii] = $DISK1 . "/" . $SetG[$ii] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$ii]\n";
 }
