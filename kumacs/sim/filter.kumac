@@ -1,5 +1,4 @@
 macro filter
- trace on
  option  stat
  option  date
  option  nbox
