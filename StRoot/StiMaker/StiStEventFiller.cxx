@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.46 2004/12/01 15:35:46 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.47 2004/12/02 04:18:06 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.47  2004/12/02 04:18:06  pruneau
+ * chi2[1] now set to incremental chi2 at inner most hit or vertex
+ *
  * Revision 2.46  2004/12/01 15:35:46  pruneau
  * removed throw and replaced with continue
  *
@@ -791,7 +794,8 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   float chi2[2];
   //get chi2/dof
   chi2[0] = track->getChi2();  
-  chi2[1] = -9999; // change: here goes an actual probability, need to calculate?
+  //chi2[1] = -9999; // change: here goes an actual probability, need to calculate?
+  chi2[1] = node->getChi2();//incremental chi2 for adding the inner most hit (or vertex).
     
 
   // @#$%^&
