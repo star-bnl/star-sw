@@ -12,7 +12,7 @@
 #include "StEmcSimulatorMaker/StEmcSimulatorMaker.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
-#include "StEmcGeom.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 #include "tables/St_emcStatus_Table.h"
 #include "tables/St_smdStatus_Table.h"
 #include <StMessMgr.h>  
