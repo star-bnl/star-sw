@@ -117,8 +117,9 @@ FILES_MOD  := $(wildcard $(SRC_DIR)/St_*_Module.cxx)
 FILES_DAT  := $(wildcard $(SRC_DIR)/St_DataSet.cxx)
 FILES_XDF  := $(wildcard $(SRC_DIR)/St_XDFFile.cxx)
 FILES_ALL  := $(filter-out %Cint.cxx,$(wildcard $(SRC_DIR)/St*.cxx))
-FILES_ST   := $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) $(FILES_DAT)
-FILES_ALL  := $(filter-out $(FILES_ST),$(FILES_ALL))
+FILES_ST   := $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD)
+#                                                                 $(FILES_DAT)
+FILES_ALL  := $(sort $(filter-out $(FILES_ST),$(FILES_ALL)))
 FILES_ORD  := $(FILES_ALL)
 ifdef FILES_SYM
   NAMES_SYM      := $(subst St_,,$(basename $(notdir $(FILES_SYM))))
@@ -180,7 +181,7 @@ STAR_FILES_O := $(wildcard $(STAR_OBJ_DIR)/*.o)
 FILTER  := $(addprefix %/,$(notdir $(FILES_O)))
 STAR_FILES_O := $(filer-out $(FILTER),$(STAR_FILES_O))
 FILES_D := $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_O)))))
-
+FILES_DCINT := $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_CINT_SYM) $(FILES_CINT_SYT) $(FILES_CINT_TAB) $(FILES_CINT_MOD) $(FILES_CINT_ORD)))))
 
 
 ifeq (,$(FILES_O))
@@ -222,7 +223,7 @@ $(FILES_CINT_SYT) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 
 $(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h 
 	$(COMMON_LINKDEF)
-	@echo "#pragma link C++ class St_DataSet;"       >> $(LINKDEF);
+#	@echo "#pragma link C++ class St_DataSet;"       >> $(LINKDEF);
 	@echo "#pragma link C++ enum EModuleTypes;"      >> $(LINKDEF);
 	@echo "#endif"					 >> $(LINKDEF);
 	@cat $(LINKDEF);
@@ -230,7 +231,7 @@ $(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 	rootcint -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCINT)  $(notdir $(1ST_DEPS)) \
         St_DataSet.h $(notdir $(LINKDEF));
 
-$(FILES_CINT_ORD) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h   
+$(FILES_CINT_ORD) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h    
 	$(ORD_LINKDEF)
 	@cat $(LINKDEF)
 	cd $(GEN_DIR); cp $(1ST_DEPS) .; \
@@ -277,10 +278,10 @@ $(OBJ_DIR)/%.o : %.c
 $(OBJ_DIR)/%.o : %.cxx 
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES)  $(1ST_DEPS) -o $(ALL_TAGS)
 
-$(DEP_DIR)/%Cint.d: %.h 
+$(FILES_DCINT): $(DEP_DIR)/%Cint.d: %.h 
 	$(RM) $(ALL_TAGS)
 	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(INCLUDES) -x c $(1ST_DEPS) | sed -e \
-'s/$(notdir $(STEM))\.h\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)/$(STEM)Cint.o)) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+'s/$(notdir $(STEM))\.h\.o/$(subst .,\.,$(subst /,\/,$(GEN_DIR)/$(STEM)Cint.cxx)) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 
 $(DEP_DIR)/%.d: %.c 
@@ -294,8 +295,6 @@ $(DEP_DIR)/%.d: %.cxx
 	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)/$(STEM).o)) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
-
-
 
 endif
 DeleteDirs :
@@ -358,4 +357,4 @@ test:
 	@echo FILES_SYM_H := $(FILES_SYM_H) 
 	@echo FILES_TAB_H := $(FILES_TAB_H) 
 	@echo FILES_MOD_H := $(FILES_MOD_H)
-
+	@echo FILES_DCINT := $(FILES_DCINT)
