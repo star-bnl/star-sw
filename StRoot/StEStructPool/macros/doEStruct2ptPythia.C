@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: doEStruct2ptPythia.C,v 1.1 2003/11/21 06:26:40 porter Exp $
+ * $Id: doEStruct2ptPythia.C,v 1.2 2004/03/02 21:51:11 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -52,8 +52,11 @@ void doEStruct2ptPythia(const char* fileListFile, const char* outputDir, const c
   
   // simple (global) centrality definition ...not persistant to event file.. 
   // and not used in this particular example
+  // For MC events the centrality is set based on impact parameter.
+  // For data one can use multiplicity, but this is not set in
+  // the reader code.
   StEStructCentrality* cent=StEStructCentrality::Instance();
-  const int temp[4]={0,4,7,50};
+  const double temp[4]={0,4,7,50};
   cent->setCentralities(temp,4);
 
   // create the low-level reader (here for MuDst)
@@ -150,6 +153,9 @@ void doEStruct2ptPythia(const char* fileListFile, const char* outputDir, const c
 /**********************************************************************
  *
  * $Log: doEStruct2ptPythia.C,v $
+ * Revision 1.2  2004/03/02 21:51:11  prindle
+ * I forgot to cvs add my EventGenerator readers.
+ *
  * Revision 1.1  2003/11/21 06:26:40  porter
  * macros for running pythia
  *
