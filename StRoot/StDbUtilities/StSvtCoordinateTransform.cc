@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.32 2004/10/13 17:40:48 munhoz Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.33 2004/11/24 02:42:01 jeromel Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -685,10 +685,10 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
   int hybrid = a.hybrid();
 
   float vd = -1;
-  float td = -1;
-  int anode;
+  //float td = -1;
+  //int anode;
   int index;
-  double Ratio = 1;
+  //double Ratio = 1;
 
   /*
   if (mDriftVelocity && mDriftCurve) 
