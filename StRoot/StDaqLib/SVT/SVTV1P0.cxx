@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0.cxx,v 1.2 2001/04/18 19:47:25 ward Exp $
+ * $Id: SVTV1P0.cxx,v 1.3 2001/05/04 18:05:23 jschamba Exp $
  *      
  * Author: Jeff Landgraf, M.J. LeVine, Marcelo Munhoz, J. Schambach
  *      
@@ -11,6 +11,10 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0.cxx,v $
+ * Revision 1.3  2001/05/04 18:05:23  jschamba
+ * Corrected several instances of wrong counting representation for hypersector
+ * and mezzanine (internal counting from 0, physical from 1)
+ *
  * Revision 1.2  2001/04/18 19:47:25  ward
  * StDaqLib/SVT stuff from Jo Schambach.
  *
@@ -388,7 +392,9 @@ classname(Bank_SVTSECP) *SVTV1P0_Reader::getBankSVTSECP(int hypersector)
 {
   if((hypersector < 1 ) || (hypersector > 4))
   {
-    ercpy->fprintError(ERR_BAD_ARG,__FILE__,__LINE__,"SVTSECP");
+    char str0[40];
+    sprintf(str0,"getBankSVTSECP(hs %d)",hypersector);
+    ercpy->fprintError(ERR_BAD_ARG,__FILE__,__LINE__,str0);
     return NULL;
   }
   hypersector--; //convert to internal represenation
@@ -397,7 +403,7 @@ classname(Bank_SVTSECP) *SVTV1P0_Reader::getBankSVTSECP(int hypersector)
      (!pBankSVTP->HyperSector[hypersector].length))
   {
     char str0[40];
-    sprintf(str0,"getBankSVTSECP(hs %d)",hypersector);
+    sprintf(str0,"getBankSVTSECP(hs %d)",hypersector+1);
     ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0);
     return NULL;
   }
@@ -408,18 +414,18 @@ classname(Bank_SVTSECP) *SVTV1P0_Reader::getBankSVTSECP(int hypersector)
 
   if(strncmp(ptr->header.BankType,"SVTSECP",7)) {
     char str0[40];
-    sprintf(str0,"getBankSVTSECP(hs %d)",hypersector);
+    sprintf(str0,"getBankSVTSECP(hs %d)",hypersector+1);
     ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__, str0); return NULL; 
   }
 
   if(!ptr->test_CRC()) { 
     char str0[40];
-    sprintf(str0,"getBankSVTSECP(hs %d)",hypersector);
+    sprintf(str0,"getBankSVTSECP(hs %d)",hypersector+1);
     ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
   }
   if(ptr->swap() < 0) { 
     char str0[40];
-    sprintf(str0,"getBankSVTSECP(hs %d)",hypersector);
+    sprintf(str0,"getBankSVTSECP(hs %d)",hypersector+1);
     ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
   }
   ptr->header.CRC = 0;
@@ -498,7 +504,7 @@ classname(Bank_SVTMZP) *SVTV1P0_Reader::getBankSVTMZP(int mz, classname(Bank_SVT
   if ((!rbp->Mz[mz].offset) || (!rbp->Mz[mz].length))
   { 
     char str0[40];
-    sprintf(str0,"getBankSVTMZP(rb %d  mz %d )",rb,mz);
+    sprintf(str0,"getBankSVTMZP(rb %d  mz %d )",rb,mz+1);
     ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0); 
     return NULL; 
   }
@@ -509,17 +515,17 @@ classname(Bank_SVTMZP) *SVTV1P0_Reader::getBankSVTMZP(int mz, classname(Bank_SVT
 
   if(strncmp(ptr->header.BankType,"SVTMZP",6)) {
     char str0[40];
-    sprintf(str0,"getBankSVTMZP(rb %d  mz %d )",rb,mz);
+    sprintf(str0,"getBankSVTMZP(rb %d  mz %d )",rb,mz+1);
     ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__,str0); return NULL; 
   }
   if(!ptr->test_CRC()) {
     char str0[40];
-    sprintf(str0,"getBankSVTMZP(rb %d  mz %d )",rb,mz);
+    sprintf(str0,"getBankSVTMZP(rb %d  mz %d )",rb,mz+1);
     ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
   }
   if(ptr->swap() < 0) { 
     char str0[40];
-    sprintf(str0,"getBankSVTMZP(rb %d  mz %d )",rb,mz);
+    sprintf(str0,"getBankSVTMZP(rb %d  mz %d )",rb,mz+1);
     ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
   }
   ptr->header.CRC = 0;
@@ -558,12 +564,12 @@ classname(Bank_SVTMZP) *SVTV1P0_Reader::getBankSVTMZP(int hypersector, int rb, i
     return NULL;
   }
 
-  classname(Bank_SVTSECP) *secp = getBankSVTSECP(2*(hypersector/2)+1);
-  // use odd slots 1 and 3
-  if(!secp) return NULL;
-
   // convert to internal representation:
   hypersector--;
+
+  // use odd slots 1 and 3
+  classname(Bank_SVTSECP) *secp = getBankSVTSECP(2*(hypersector/2)+1);
+  if(!secp) return NULL;
 
   classname(Bank_SVTRBP) *rbp;
   if (hypersector%2)             // internal hypersector odd -> hypersector even -> rb = 7 to 12 
