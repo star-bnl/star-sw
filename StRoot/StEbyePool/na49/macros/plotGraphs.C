@@ -1,14 +1,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotGraphs.C,v 1.8 2002/03/26 17:48:37 posk Exp $
+// $Id: plotGraphs.C,v 1.9 2002/05/14 20:59:29 posk Exp $
 //
 // Author:       Alexander Wetzler and Art Poskanzer, April 2001
 // Description:
 // Plot histograms for all 6 centralities averaged to 3
 // and also minimum bias and also v as a function of centrality.
 // Reads from file produced by vProj.C.
+// Writes data to data.txt after quitting ROOT.
+// Writes all graphs to graphs.root
 //
 ///////////////////////////////////////////////////////////////////////////////
+
+FILE* f = fopen("data.txt","w");
 
 void plotGraphs(Char_t* part = "pion") {
   Bool_t pion = kFALSE;
@@ -18,7 +22,7 @@ void plotGraphs(Char_t* part = "pion") {
   Bool_t crossSection = kTRUE;
   //Bool_t crossSection = kFALSE;  // yield weighting
   Bool_t pCons = kTRUE;            // with momentum conservation
-  //Bool_t pCons = kFALSE;            // without momentum conservation
+  //Bool_t pCons = kFALSE;
   int   eBeam = 158; //select full beam energy
   //int   eBeam = 40;  //select 40Gev beam energy
 
@@ -59,10 +63,15 @@ void plotGraphs(Char_t* part = "pion") {
   Float_t max;
   Float_t min;
   Float_t flip;
-  //Float_t markerSize = 1.5;
-  Float_t markerSize = 2.5;
+  Float_t markerSize = 1.7;
+  Float_t textSize = 0.05;
+  Float_t commentSize = 0.04;
   Char_t* beam;
+  Char_t* centrality[3] = {"central", "mid-central", "peripheral"};
+  Float_t noPercent = 100.;
   Float_t yCM;
+
+  TOrdCollection *graphList = new TOrdCollection(26);
 
   if (eBeam == 158) {
     beam = "160";
@@ -144,7 +153,8 @@ void plotGraphs(Char_t* part = "pion") {
     TF1* r2 = new TF1("r2", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)",
 		      yReflMin, yReflMax);
     TF1* r3 = new TF1("r3",
-		      "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yReflMin, yReflMax);
+		      "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", 
+		      yReflMin, yReflMax);
     
     TF1* f3All = new TF1("f3All",
     "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yMin, yAllMax);
@@ -183,13 +193,17 @@ void plotGraphs(Char_t* part = "pion") {
 			 , yAllReflMin, yReflMax);
   }    
   // centrality polynomials
-  TF1* c1 = new TF1("c1", "pol2", 1., 6.);
-  TF1* c2 = new TF1("c2", "pol3", 1., 6.);
-  TF1* c3 = new TF1("c3", "pol4", 1., 6.);
+//   TF1* c1 = new TF1("c1", "pol2", 1., 6.);
+//   TF1* c2 = new TF1("c2", "pol3", 1., 6.);
+//   TF1* c3 = new TF1("c3", "pol4", 1., 6.);
+  TF1* c1 = new TF1("c1", "pol2", 0.18, 0.86);
+  TF1* c2 = new TF1("c2", "pol3", 0.18, 0.86);
+  TF1* c3 = new TF1("c3", "pol4", 0.18, 0.86);
 
   char selText[2];
   char harText[2];
   char cenText[2];
+  char polText[2];
 
   // Read input files and get Y, Pt, and V histograms
   TH1F *Y[nCen][nHar];
@@ -206,15 +220,29 @@ void plotGraphs(Char_t* part = "pion") {
 	histName->Append("_Cen");
 	histName->Append(*cenText);
 	Y[i][j] = (TH1F*)file->Get(histName->Data());
-	if (!pion && i!=0) {
-	  Y[i][j]->Rebin(2);
-	  Y[i][j]->Scale(0.5);
-	} else if (!pion && j==1) {
-	  Y[i][j]->Rebin(2);  
-	  Y[i][j]->Scale(0.5);
+	Y[i][j]->Scale(1./noPercent);
+	if (eBeam == 158) {
+	  if (!pion && i!=0) {
+	    Y[i][j]->Rebin(4);
+	    Y[i][j]->Scale(0.25);
+	  } else if (!pion && j==1) {
+	    Y[i][j]->Rebin(2);  
+	    Y[i][j]->Scale(0.5);
+	  } else {
+	    Y[i][j]->Rebin(2);
+	    Y[i][j]->Scale(0.5);
+	  }
 	} else {
-	  Y[i][j]->Rebin(2);
-	  Y[i][j]->Scale(0.5);
+	  if (!pion && i!=0) {
+	    Y[i][j]->Rebin(2);
+	    Y[i][j]->Scale(0.5);
+	  } else if (!pion && j==1) {
+	    Y[i][j]->Rebin(2);  
+	    Y[i][j]->Scale(0.5);
+	  } else {
+	    Y[i][j]->Rebin(2);
+	    Y[i][j]->Scale(0.5);
+	  }
 	}
 	delete histName;
 	TString *histName = new TString("Flow_vPt_Sel2_Har");
@@ -222,6 +250,7 @@ void plotGraphs(Char_t* part = "pion") {
 	histName->Append("_Cen");
 	histName->Append(*cenText);
 	Pt[i][j] = (TH1F*)file->Get(histName->Data());
+	Pt[i][j]->Scale(1./noPercent);
 	if (!pion) {
 	  Pt[i][j]->Rebin(8);
 	  Pt[i][j]->Scale(0.125);
@@ -235,6 +264,7 @@ void plotGraphs(Char_t* part = "pion") {
     TString *histName = new TString("Flow_v_Sel2_Har");
     histName->Append(*harText);
     V[j] = (TH1F*)file->Get(histName->Data());
+    V[j]->Scale(1./noPercent);
     delete histName;
   }
   nYbins   = Y[7][0]->GetNbinsX();
@@ -252,14 +282,37 @@ void plotGraphs(Char_t* part = "pion") {
 	for (Int_t k = 0; k < 2; k++) {
 	  flowY[i][j][k] = new TGraphErrors();
 	  flowPt[i][j][k] = new TGraphErrors();
+	  sprintf(harText, "%d", j + 1);
+	  sprintf(cenText, "%d", i);
+	  sprintf(polText, "%d", k);
+	  TString *histName = new TString("Flow_vY_Har");
+	  histName->Append(*harText);
+	  histName->Append("_Cen");
+	  histName->Append(*cenText);
+	  histName->Append("_Pol");
+	  histName->Append(*polText);
+	  flowY[i][j][k]->SetName(histName->Data());
+	  delete histName;
+	  if(!k) {
+	    TString *histName = new TString("Flow_vPt_Har");
+	    histName->Append(*harText);
+	    histName->Append("_Cen");
+	    histName->Append(*cenText);
+	    flowPt[i][j][k]->SetName(histName->Data());
+	    delete histName;
+	  }
 	}
       }
     }
     flowV[j] = new TGraphErrors();
+    TString *histName = new TString("Flow_v_Har");
+    histName->Append(*harText);
+    flowV[j]->SetName(histName->Data());
   }
   
   for (Int_t i = 0; i < nCen; i++) {
     if (i==0 || i==7 || i==8 || i==9){
+      fprintf(f, "\n Centrality: %d \n", i);
       for (Int_t j = 0; j < nHar; j++) {
 	// Fill graphs with Y projection
 	if (!pion && i==0) nYbins = nYbinsMB;
@@ -281,6 +334,10 @@ void plotGraphs(Char_t* part = "pion") {
 	    flowY[i][j][1]->SetPoint(m,1000,0);
 	  }
 	}
+	fprintf(f, "v%d versus rapidity\n", j+1);
+	PrintGraph(flowY[i][j][0]);
+	graphList->AddLast(flowY[i][j][0]);
+	graphList->AddLast(flowY[i][j][1]);
 	// Fill graphs with Pt projection  - - -  for protons
 	if (!pion) {
 	  for (Int_t m = 0; m < nPtbins; m++) {
@@ -344,19 +401,39 @@ void plotGraphs(Char_t* part = "pion") {
 	    }
 	  }
 	}    
+	fprintf(f, "v%d versus pt\n", j+1);
+	PrintGraph(flowPt[i][j][0]);
+	graphList->AddLast(flowPt[i][j][0]);
       }
     }
   }
   
   // Fill graphs with v doubly projected
+  Float_t E0Beam = 36.8; // ?
+  if (eBeam == 158) {
+    Float_t E0[6] = {6.97, 11.61, 17.99, 23.76, 27.74, 31.45};
+  } else {
+    Float_t E0[6] = {6.97, 11.61, 17.99, 23.76, 27.74, 31.45}; // not correct
+  }
   for (Int_t j = 0; j < nHar; j++) {
     flip = (j) ? 1. : -1.;
     for (Int_t m = 0; m < 6; m++) {
       Int_t n = m + 1;
-      flowV[j]->SetPoint(m, m+1, flip * V[j]->GetBinContent(n));
+      //flowV[j]->SetPoint(m, m+1, flip * V[j]->GetBinContent(n));
+      flowV[j]->SetPoint(m, E0[m]/E0Beam, flip * V[j]->GetBinContent(n));
       flowV[j]->SetPointError(m, 0., V[j]->GetBinError(n));
     }
+    graphList->AddLast(flowV[j]);
   }
+
+  // Save graphs to file
+  Char_t rootFileName[255];
+  sprintf(rootFileName, "%s%d.root", part, eBeam);
+  TFile *graphFile = new TFile(rootFileName,"RECREATE");
+  //delete rootFileName;
+  graphFile->cd();
+  graphList->Write();
+  graphFile->Close();
   
   // Create Canvas
   TCanvas *canvas = new TCanvas("Flow", "Flow", 100, 100, 840, 600);
@@ -409,8 +486,8 @@ void plotGraphs(Char_t* part = "pion") {
     }
   }
 
-  hist->SetMaximum(max);
-  hist->SetMinimum(min);
+  hist->SetMaximum(max/noPercent);
+  hist->SetMinimum(min/noPercent);
   hist->Draw();
   flowY[0][0][0]->Fit("f3", "R");
   flowY[0][0][0]->Draw("P");
@@ -436,24 +513,28 @@ void plotGraphs(Char_t* part = "pion") {
   flowY[0][1][0]->Draw("P");
   flowY[0][1][1]->Draw("P");
 
-  TLine* lineYcm = new TLine(yCM, min, yCM, max);
+  TLine* lineYcm = new TLine(yCM, min/noPercent, yCM, max/noPercent);
   lineYcm->Draw();
   
   TLatex l; 
   l.SetNDC();
   l.SetTextColor(kBlue); 
   l.SetTextAlign(12); 
-  l.SetTextSize(0.06); 
-  l.SetIndiceSize(0.5);  
+  l.SetTextSize(textSize); 
   
   l.SetTextAngle(90); 
-  l.DrawLatex(0.07,0.6,"Flow (%)" ); 
+  //ordTitle = new TString(" flow (%)");
+  ordTitle = new TString(" flow");
+  ordTitle->Prepend(part);
+  //l.DrawLatex(0.07,0.6,ordTitle->Data());
+  l.DrawLatex(0.05,0.6,ordTitle->Data());
+  delete ordTitle;
   l.SetTextAngle(0); 
   l.DrawLatex(0.7,0.05,"rapidity" );
 
-  l.SetTextSize(0.04); 
+  l.SetTextSize(commentSize); 
   l.DrawLatex(0.2,0.2,"p_{t} < 2 GeV/c");
-  l.SetTextSize(0.06); 
+  l.SetTextSize(textSize); 
 
   l.SetTextColor(kRed); 
   if (eBeam == 158) {
@@ -514,38 +595,42 @@ void plotGraphs(Char_t* part = "pion") {
       min = -5.;
     }
   }
-  hist->SetMaximum(max);
-  hist->SetMinimum(min);
+  hist->SetMaximum(max/noPercent);
+  hist->SetMinimum(min/noPercent);
   hist->Draw();
 
   if (pion) {
     //flowPt[0][0][0]->Draw("PC");
-    flowPt[0][0][0]->Fit("o2", "R");
-    flowPt[0][0][0]->Fit("n2", "R+");
+//     flowPt[0][0][0]->Fit("o2", "R");
+//     flowPt[0][0][0]->Fit("n2", "R+");
     flowPt[0][0][0]->Draw("P");
   } else {
-    flowPt[0][0][0]->Fit("p3", "R");
+//     flowPt[0][0][0]->Fit("p3", "R");
     flowPt[0][0][0]->Draw("P");
   }
-  flowPt[0][1][0]->Fit("p3", "R");
+//   flowPt[0][1][0]->Fit("p3", "R");
   flowPt[0][1][0]->Draw("P");
 
   l.SetTextColor(kBlue); 
   l.SetTextAngle(90); 
-  l.DrawLatex(.07,0.6,"Flow (%)" ); 
+  //ordTitle = new TString(" flow (%)");
+  ordTitle = new TString(" flow");
+  ordTitle->Prepend(part);
+  l.DrawLatex(0.05,0.6,ordTitle->Data());
+  delete ordTitle;
   l.SetTextAngle(0); 
   l.DrawLatex(0.7,0.05,"p_{t} (GeV/c)" ); 
 
-  l.SetTextSize(0.04); 
+  l.SetTextSize(commentSize); 
   if(eBeam == 158)
     l.DrawLatex(0.2,0.8,"3 < y < 5");
   else
     l.DrawLatex(0.2,0.8,"2.24 < y < 4");
-  l.SetTextSize(0.06); 
+  l.SetTextSize(textSize); 
 
   l.SetTextColor(kRed); 
   if (pion) {
-    l.DrawLatex(0.7,0.45,"v_{1}"); 
+    l.DrawLatex(0.7,0.35,"v_{1}"); 
     l.SetTextColor(kGreen); 
     l.DrawLatex(0.7,0.8,"v_{2}");
   } else {
@@ -576,7 +661,6 @@ void plotGraphs(Char_t* part = "pion") {
   }
 
   // Harmonic 1 vs. y all Centralities dummy
-  
   sprintf(title, "v1 ");
   flowY[0][0][0]->SetTitle(strcat(title, part));
   delete hist;
@@ -589,8 +673,8 @@ void plotGraphs(Char_t* part = "pion") {
     max = 8.;
     min = -8.;
   }
-  hist->SetMaximum(max);
-  hist->SetMinimum(min);
+  hist->SetMaximum(max/noPercent);
+  hist->SetMinimum(min/noPercent);
   hist->Draw();
   flowY[0][0][0]->Draw("P");
 
@@ -602,8 +686,7 @@ void plotGraphs(Char_t* part = "pion") {
   legend->SetFillColor(10);
   Char_t EntryName[255];
   for (Int_t i = 7; i <= 9; i++){
-    sprintf(EntryName, "%d + %d", (i-6)*2-1, (i-6)*2);
-    legend->AddEntry(flowY[i][0][0], EntryName, "P");
+    legend->AddEntry(flowY[i][0][0], centrality[i-7], "P");
   }
   legend->SetHeader("Centralities");
   legend->Draw();
@@ -639,8 +722,8 @@ void plotGraphs(Char_t* part = "pion") {
     }
   }  
   
-  hist->SetMaximum(max);
-  hist->SetMinimum(min);
+  hist->SetMaximum(max/noPercent);
+  hist->SetMinimum(min/noPercent);
   hist->Draw();
   flowY[7][0][0]->Draw("P");
   for (Int_t i = 7; i <= 9; i++) {
@@ -660,30 +743,32 @@ void plotGraphs(Char_t* part = "pion") {
   legend->Clear();
   legend->SetX1NDC(0.2);
   legend->SetY1NDC(0.17);    
-  legend->SetX2NDC(0.38);
+  legend->SetX2NDC(0.45);
   legend->SetY2NDC(0.37);
   legend->SetFillColor(10);
-  Char_t EntryName[255];
+  legend->SetBorderSize(6);
   for (Int_t i = 7; i <= 9; i++){
-    sprintf(EntryName, "%d + %d", (i-6)*2-1, (i-6)*2);
-    legend->AddEntry(flowY[i][0][0], EntryName, "P");
+    legend->AddEntry(flowY[i][0][0], centrality[i-7], "P");
   }
-  legend->SetHeader("Centralities");
   legend->Draw();
 
   delete lineYcm;
-  TLine* lineYcm = new TLine(yCM, min, yCM, max);
+  TLine* lineYcm = new TLine(yCM, min/noPercent, yCM, max/noPercent);
   lineYcm->Draw();
 
   l.SetTextColor(kBlue); 
   l.SetTextAngle(90); 
-  l.DrawLatex(.07,0.6,"Flow (%)" ); 
+  //ordTitle = new TString(" v_{1} (%)");
+  ordTitle = new TString(" v_{1}");
+  ordTitle->Prepend(part);
+  l.DrawLatex(0.05,0.6,ordTitle->Data());
+  delete ordTitle;
   l.SetTextAngle(0);
   l.DrawLatex(0.7,0.05,"rapidity" ); 
 
-  l.SetTextSize(0.04); 
+  l.SetTextSize(commentSize); 
   l.DrawLatex(0.3,0.8,"p_{t} < 2 GeV/c");
-  l.SetTextSize(0.06); 
+  l.SetTextSize(textSize); 
 
   sprintf(outfile, "%s%s%s_v1_all_y.%s", outdir, beam, part, pstype);
   canvas->Print(outfile, pstype);
@@ -716,8 +801,8 @@ void plotGraphs(Char_t* part = "pion") {
       min = -10.;
     }
   }    
-  hist->SetMaximum(max);
-  hist->SetMinimum(min);
+  hist->SetMaximum(max/noPercent);
+  hist->SetMinimum(min/noPercent);
   hist->Draw();
   flowY[7][1][0]->Draw("P");
   if (pion) {
@@ -743,29 +828,30 @@ void plotGraphs(Char_t* part = "pion") {
   legend->Clear();
   legend->SetX1NDC(0.2);
   legend->SetY1NDC(0.17);    
-  legend->SetX2NDC(0.38);
+  legend->SetX2NDC(0.45);
   legend->SetY2NDC(0.37);
   legend->SetFillColor(10);
-  Char_t EntryName[255];
   for (Int_t i = 7; i <= 9; i++){
-    sprintf(EntryName, "%d + %d", (i-6)*2-1, (i-6)*2);
-    legend->AddEntry(flowY[i][1][0], EntryName, "P");
+    legend->AddEntry(flowY[i][1][0], centrality[i-7], "P");
   }
-  legend->SetHeader("Centralities");
   legend->Draw();
   
   delete lineYcm;
-  TLine* lineYcm = new TLine(yCM, min, yCM, max);
+  TLine* lineYcm = new TLine(yCM, min/noPercent, yCM, max/noPercent);
   lineYcm->Draw();
 
   l.SetTextAngle(90); 
-  l.DrawLatex(.07,0.6,"Flow (%)" ); 
+  //ordTitle = new TString(" v_{2} (%)");
+  ordTitle = new TString(" v_{2}");
+  ordTitle->Prepend(part);
+  l.DrawLatex(0.05,0.6,ordTitle->Data());
+  delete ordTitle;
   l.SetTextAngle(0); 
   l.DrawLatex(0.7,0.05,"rapidity" ); 
 
-  l.SetTextSize(0.04); 
+  l.SetTextSize(commentSize); 
   l.DrawLatex(0.7,0.2,"p_{t} < 2 GeV/c");
-  l.SetTextSize(0.06); 
+  l.SetTextSize(textSize); 
 
   sprintf(outfile, "%s%s%s_v2_all_y.%s", outdir, beam, part, pstype);
   canvas->Print(outfile, pstype);
@@ -795,18 +881,18 @@ void plotGraphs(Char_t* part = "pion") {
       min = -5.;
     }
   }    
-  hist->SetMaximum(max);
-  hist->SetMinimum(min);
+  hist->SetMaximum(max/noPercent);
+  hist->SetMinimum(min/noPercent);
   hist->Draw();
   flowPt[7][0][0]->Draw("P");
   for (Int_t i = 7; i <= 9; i++) {
     if (pion) {
       //flowPt[i][0][0]->Draw("PC");
-      flowPt[i][0][0]->Fit("o3", "R");
-      flowPt[i][0][0]->Fit("n2", "R+");
+//       flowPt[i][0][0]->Fit("o3", "R");
+//       flowPt[i][0][0]->Fit("n2", "R+");
       flowPt[i][0][0]->Draw("P");
     } else {
-      flowPt[i][0][0]->Fit("p3", "R");
+//       flowPt[i][0][0]->Fit("p3", "R");
       flowPt[i][0][0]->Draw("P");
     }
   }
@@ -814,28 +900,29 @@ void plotGraphs(Char_t* part = "pion") {
   legend->Clear();
   legend->SetX1NDC(0.2);
   legend->SetY1NDC(0.65);    
-  legend->SetX2NDC(0.38);
+  legend->SetX2NDC(0.45);
   legend->SetY2NDC(0.85);
   legend->SetFillColor(10);
-  Char_t EntryName[255];
   for (Int_t i = 7; i <= 9; i++){
-    sprintf(EntryName, "%d + %d", (i-6)*2-1, (i-6)*2);
-    legend->AddEntry(flowPt[i][0][0], EntryName, "P");
+    legend->AddEntry(flowPt[i][0][0], centrality[i-7], "P");
   }
-  legend->SetHeader("Centralities");
   legend->Draw();
   
   l.SetTextAngle(90); 
-  l.DrawLatex(.07,0.6,"Flow (%)" ); 
+  //ordTitle = new TString(" v_{1} (%)");
+  ordTitle = new TString(" v_{1}");
+  ordTitle->Prepend(part);
+  l.DrawLatex(0.05,0.6,ordTitle->Data());
+  delete ordTitle;
   l.SetTextAngle(0); 
   l.DrawLatex(0.7,0.05,"p_{t} (GeV/c)" ); 
   
-  l.SetTextSize(0.04); 
+  l.SetTextSize(commentSize); 
   if(eBeam == 158)
     l.DrawLatex(0.7,0.2,"3 < y < 5");
   else
     l.DrawLatex(0.7,0.2,"2.24 < y < 4");
-  l.SetTextSize(0.06); 
+  l.SetTextSize(textSize); 
 
   sprintf(outfile, "%s%s%s_v1_all_pt.%s", outdir, beam, part, pstype);
   canvas->Print(outfile, pstype);
@@ -864,40 +951,41 @@ void plotGraphs(Char_t* part = "pion") {
       min = -10.;
     }
   }
-  hist->SetMaximum(max);
-  hist->SetMinimum(min);
+  hist->SetMaximum(max/noPercent);
+  hist->SetMinimum(min/noPercent);
   hist->Draw();
   flowPt[7][1][0]->Draw("P");
   for (Int_t i = 7; i <= 9; i++) {
-    flowPt[i][1][0]->Fit("p2", "R");
+//     flowPt[i][1][0]->Fit("p2", "R");
     flowPt[i][1][0]->Draw("P");
   }
   
   legend->Clear();
   legend->SetX1NDC(0.2);
   legend->SetY1NDC(0.6);    
-  legend->SetX2NDC(0.38);
+  legend->SetX2NDC(0.45);
   legend->SetY2NDC(0.8);
   legend->SetFillColor(10);
-  Char_t EntryName[255];
   for (Int_t i = 7; i <= 9; i++){
-    sprintf(EntryName, "%d + %d", (i-6)*2-1, (i-6)*2);
-    legend->AddEntry(flowPt[i][1][0], EntryName, "P");
+    legend->AddEntry(flowPt[i][1][0], centrality[i-7], "P");
   }
-  legend->SetHeader("Centralities");
   legend->Draw();
   
   l.SetTextAngle(90); 
-  l.DrawLatex(.07,0.6,"Flow (%)" ); 
+  //ordTitle = new TString(" v_{2} (%)");
+  ordTitle = new TString(" v_{2}");
+  ordTitle->Prepend(part);
+  l.DrawLatex(0.05,0.6,ordTitle->Data());
+  delete ordTitle;
   l.SetTextAngle(0); 
   l.DrawLatex(0.7,0.05,"p_{t} (GeV/c)" ); 
 
-  l.SetTextSize(0.04); 
+  l.SetTextSize(commentSize); 
   if(eBeam == 158)
     l.DrawLatex(0.22,0.85,"3 < y < 5");
   else
     l.DrawLatex(0.22,0.85,"2.24 < y < 4");
-  l.SetTextSize(0.06); 
+  l.SetTextSize(textSize); 
 
   sprintf(outfile, "%s%s%s_v2_all_pt.%s", outdir, beam, part, pstype);
   canvas->Print(outfile, pstype);
@@ -917,7 +1005,8 @@ void plotGraphs(Char_t* part = "pion") {
   flowV[0]->SetTitle(strcat(title, part));
   delete hist;
   canvas->Clear();
-  hist = new TH1F(title, title, 6, 0.5, 6.5);
+  //hist = new TH1F(title, title, 6, 0.5, 6.5);
+  hist = new TH1F(title, title, 6, 0., 1.);
   if(eBeam == 158) {
     if (pion) {
       max =  5.;
@@ -935,8 +1024,8 @@ void plotGraphs(Char_t* part = "pion") {
       min = -6.;
     }
   }
-  hist->SetMaximum(max);
-  hist->SetMinimum(min);
+  hist->SetMaximum(max/noPercent);
+  hist->SetMinimum(min/noPercent);
   hist->Draw();
   //flowV[0]->Draw("PC");
   //flowV[1]->Draw("PC");
@@ -947,17 +1036,21 @@ void plotGraphs(Char_t* part = "pion") {
   
   l.SetTextColor(kBlue);
   l.SetTextAngle(90); 
-  l.DrawLatex(.07,0.6,"Flow (%)" ); 
+  //ordTitle = new TString(" flow (%)");
+  ordTitle = new TString(" flow");
+  ordTitle->Prepend(part);
+  l.DrawLatex(0.05,0.6,ordTitle->Data());
+  delete ordTitle;
   l.SetTextAngle(0); 
-  l.DrawLatex(0.7,0.05,"Centrality" ); 
+  l.DrawLatex(0.7,0.05,"E^{0}/E^{0}_{beam}" ); 
 
-  l.SetTextSize(0.04); 
+  l.SetTextSize(commentSize); 
   if(eBeam == 158)
     l.DrawLatex(0.22,0.85,"3 < y < 5");
   else
     l.DrawLatex(0.22,0.85,"2.24 < y < 4");
   l.DrawLatex(0.22,0.8,"0 < p_{t} < 2 GeV/c");
-  l.SetTextSize(0.06); 
+  l.SetTextSize(textSize); 
 
   l.SetTextColor(kRed); 
   if (pion) {
@@ -987,9 +1080,53 @@ bool Pause() {
   return kTRUE;
 }
 
+void PrintGraph(TGraphErrors* graph) {
+  Int_t nBins = graph->GetN();
+  Double_t *x,*y,*ey;
+
+  x = graph->GetX();
+  y = graph->GetY();
+  ey = graph->GetEY();
+
+  fprintf(f, "abcissa\n");
+
+  fprintf(f, "{");
+  if (x[0] > 0)
+    fprintf(f, "%f",x[0]);
+  for (Int_t i = 1; i < nBins; i++){
+    if (x[i] > 0)
+      fprintf(f, ", %f",x[i]);    
+  }
+  fprintf(f, "}\n");
+  
+  fprintf(f, "flow\n");
+  fprintf(f, "{");
+  if (x[0] > 0)
+    fprintf(f, "%f",y[0]);
+  for (Int_t i = 1; i < nBins; i++){
+    if (x[i] > 0)
+      fprintf(f, ", %f",y[i]);
+  }
+  fprintf(f, "}\n");
+  
+  fprintf(f, "error\n");
+  fprintf(f, "{");
+  if (x[0] > 0)
+    fprintf(f, "%f",ey[0]);
+  for (Int_t i = 1; i < nBins; i++){
+    if (x[i] > 0)
+      fprintf(f, ", %f",ey[i]);
+  }
+  fprintf(f, "}\n\n");
+
+}
+
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotGraphs.C,v $
+// Revision 1.9  2002/05/14 20:59:29  posk
+// For paper version 09.
+//
 // Revision 1.8  2002/03/26 17:48:37  posk
 // Corrected sqrt(2) mistake.
 //
