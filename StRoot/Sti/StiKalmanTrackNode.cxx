@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.52 2004/12/13 22:52:23 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.53 2004/12/14 17:10:17 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.53  2004/12/14 17:10:17  perev
+ * Propagate for 0 not called
+ *
  * Revision 2.52  2004/12/13 22:52:23  perev
  * Off testError
  *
@@ -770,10 +773,7 @@ int StiKalmanTrackNode::nudge()
 /// \note This method must be called ONLY after a call to the propagate method.
 void StiKalmanTrackNode::propagateError()
 {  
-  testError(&_c00);
   bool debug = false;//counter<300;
-  if (_c00<0 || _c11<0 || _c22<0) Break(201);
-  if (_c00>1.e6 || _c11> 1.e6|| _c22>1.e6) Break(201);
   if (debug) 
     {
       counter++;
@@ -786,6 +786,7 @@ void StiKalmanTrackNode::propagateError()
     }
 
   //f = F - 1
+  if (fabs(dx)<1.e-6) return;
   double xx=x1+x2;
   double tanCA1=sinCA1/cosCA1;
   double tanCA2=sinCA2/cosCA2;
@@ -1204,8 +1205,6 @@ int StiKalmanTrackNode::updateNode()
   testError(&_c00);
   double r00,r01,r11;
   const StiDetector * detector = _hit->detector();
-  if (_c00<0 || _c11<0 || _c22<0) Break(201);
-  if (_c00>1.e6 || _c11> 1.e6|| _c22>1.e6) Break(201);
   if (useCalculatedHitError && detector)
     {
       r00=_c00+eyy;
@@ -1272,10 +1271,6 @@ int StiKalmanTrackNode::updateNode()
   TRVector dP(K,TRArray::kAxB,dR);
   dP1.Verify(dP);//,1e-7,2);
 #endif
-  if (_x>2.)
-    {
-      if ( (dp4*dp4/16.>_c44) || (dp3*dp3/16. > _c33) || (dp2*dp2/16.>_c22) ) return 1;
-    }
 
   double eta  = _p2 + dp2;
   double cur  = _p3 + dp3;
@@ -1376,11 +1371,10 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
 {
   //cout << "rotate by alpha:"<< 180.*alpha/3.1415927<<endl;
   //cout << "         _alpha:"<< 180.*_alpha/3.1415927<<endl;
-  testError(&_c00);
+  if (fabs(alpha)<1.e-6) return 0;
   numeDeriv(alpha,2);
   _alpha += alpha;
   _alpha = nice(_alpha);
-//VP  if (fabs(_alpha) > M_PI*0.33) return -15;
     //cout << "    new  _alpha:"<< 180.*_alpha/3.1415927<<endl;
 
   double x1=_x; 
@@ -1620,7 +1614,7 @@ static const double MyChi2 = 1.18179;
   printf("BOT OHO: %g %p\n",chi2,(void*)getHit());
 }
 #endif 
-#if 1
+#if 0
 //______________________________________________________________________________
 int StiKalmanTrackNode::testError(double *emx)
 {
@@ -1670,7 +1664,7 @@ RETN:
   return ians;
 }
 #endif//0
-#if 0
+#if 1
 //______________________________________________________________________________
 int StiKalmanTrackNode::testError(double *emx)
 {
@@ -1679,7 +1673,7 @@ int StiKalmanTrackNode::testError(double *emx)
 
 
   static int nCalls=0; nCalls++;
-  static const double dia[5] = { 10000., 10000.,100.,3.,10000.};
+  static const double dia[5] = { 4., 4.,4.,4.,100.};
   static const int    idx[5][5] = 
   {{0,1,3,6,10},{1,2,4,7,11},{3,4,5,8,12},{6,7,8,9,13},{10,11,12,13,14}};
 return 0;
@@ -1687,14 +1681,14 @@ return 0;
   for (j1=0; j1<5;j1++){
     jj = idx[j1][j1];
     if (emx[jj]<=10*dia[j1] && (emx[jj]>0)) continue;
-//    assert(finite(emx[jj]));
+    assert(finite(emx[jj]));
     ians++; emx[jj]=dia[j1];
     for (j2=0; j2<5;j2++){if (j1!=j2) emx[idx[j1][j2]]=0;}
   }
   for (j1=0; j1< 5;j1++){
   for (j2=0; j2<j1;j2++){
     jj = idx[j1][j2];
-//    assert(finite(emx[jj]));
+    assert(finite(emx[jj]));
     if (emx[jj]*emx[jj]<0.9*emx[idx[j1][j1]]*emx[idx[j2][j2]]) continue;
     ians++;emx[jj]=0;
   }}
