@@ -1,5 +1,8 @@
-// $Id: DrawDstHistNew.C,v 1.3 1999/07/13 00:29:52 kathy Exp $
-// $Log: DrawDstHistNew.C,v $
+// $Id: DrawDstHist.C,v 1.27 1999/07/13 00:31:30 kathy Exp $
+// $Log: DrawDstHist.C,v $
+// Revision 1.27  1999/07/13 00:31:30  kathy
+// moved DrawDstHistNew.C to DrawDstHist.C
+//
 // Revision 1.3  1999/07/13 00:29:52  kathy
 // updated macros to take out StRootEvent
 //
