@@ -27,7 +27,9 @@ tdmFactory *tdm;
 //:<--------------------------------------------------------------------
 int tdm_init()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TDM:Initializing. ");
+#endif
 
 /*- Define the TDM KUIP commands. -*/
    tdm_def_();
@@ -43,7 +45,9 @@ int tdm_init()
 //:<--------------------------------------------------------------------
 int tdm_start()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TDM:Starting. ");
+#endif
 
 /*- Create the TDM Factory. -*/
    tdm = new tdmFactory("tdm");
@@ -59,6 +63,7 @@ int tdm_start()
 //:<--------------------------------------------------------------------
 int tdm_stop()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TDM:Stopping. ");
 
 /*- Delete the TDM Factory.
@@ -71,7 +76,7 @@ unecessary -- soc will do it. -*/
 #else   /*OLD_DSL*/
    dsDatasetAllocStats();		/* show allocation stats */
 #endif  /*OLD_DSL*/
-
+#endif /*QUIET_ASP*/
    return TRUE;
 }
 

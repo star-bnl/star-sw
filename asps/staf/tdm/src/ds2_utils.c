@@ -15,7 +15,7 @@
 /*-------------------------------------------- INCLUDES             -*/
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 #include "emlLib.h"
 #include "dstype.h"
 #include "table_header.h"
