@@ -434,7 +434,11 @@ inline double  StiKalmanTrack::getPseudoRapidity() const
 {
   // Return pseudo rapidity of the particle at the inner most node held by this track
   // which may (or not) be the primary vertex. 
-  return -log(tan(M_PI/4.-(getInnerMostHitNode()->getTanL()/2.)));
+  double tanTheta = tan(M_PI/4.- getInnerMostHitNode()->getDipAngle()/2. );
+  if (tanTheta>0.)
+    return -log(tanTheta);
+  else
+    throw runtime_error("StiKalmanTrack::getPseudoRapidity() -E- Attempting log(non positive number)");
 }
 
 /*! 
@@ -587,6 +591,7 @@ inline StiKalmanTrackNode * StiKalmanTrack::add(StiKalmanTrackNode * node)
   if (node->getHit())
     {
       TRACKMESSENGER <<"StiKalmanTrack::add() - I - node HAS a hit"<<endl;
+      node->nudge();
       node->updateNode();
     }
   else

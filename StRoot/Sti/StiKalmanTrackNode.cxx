@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.11 2003/03/04 21:31:05 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.12 2003/03/12 17:57:31 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.12  2003/03/12 17:57:31  pruneau
+ * Elss calc updated.
+ *
  * Revision 2.11  2003/03/04 21:31:05  pruneau
  * Added getX0() and getGasX0() conveninence methods.
  *
@@ -34,6 +37,8 @@ using namespace std;
 #include "StiElossCalculator.h"
 #include "StiKalmanTrackFinderParameters.h"
 #include "StiHitErrorCalculator.h"
+#include "Sti/StiElossCalculator.h"
+#include "StiMaker/StiMaker.h"
 
 // Local Track Model
 //
@@ -43,8 +48,11 @@ using namespace std;
 // x[3] = C  (local) curvature of the track
 // x[4] = tan(l) 
 
+StiMaker* StiKalmanTrackNode::maker = 0;
 StiKalmanTrackFinderParameters * StiKalmanTrackNode::pars = 0;
 bool StiKalmanTrackNode::recurse = false;
+
+const StiElossCalculator * StiKalmanTrackNode::_elossCalculator = new StiElossCalculator();
 
 int    StiKalmanTrackNode::shapeCode = 0;
 double StiKalmanTrackNode::x1=0;
@@ -99,7 +107,7 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
   _c20   = n->_c20; _c21 = n->_c21; _c22 = n->_c22;
   _c30   = n->_c30; _c31 = n->_c31; _c32 = n->_c32; _c33 = n->_c33;
   _c40   = n->_c40; _c41 = n->_c41; _c42 = n->_c42; _c43 = n->_c43; _c44 = n->_c44;
-	hitCount = n->hitCount;
+  hitCount = n->hitCount;
   nullCount = n->nullCount;
   contiguousHitCount = n->contiguousHitCount;
   contiguousNullCount = n->contiguousNullCount;
@@ -375,15 +383,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   propagateError();
   // Multiple scattering
   if (pars->mcsCalculated)
-    {
-      double sign;
-      if (dx>0)
-	sign = -1.;
-      else
-	sign =  1.;
-      
-      //    propagateMCS(relRadThickness,zOverA,ionization,pars->massHypothesis,sign);
-    }
+    propagateMCS(pNode,tDet);
   return position;
 }
 
@@ -473,6 +473,26 @@ int  StiKalmanTrackNode::propagate(double xk, int option)
   return 0;
 }
 
+void StiKalmanTrackNode::nudge()
+{
+  double deltaX = _hit->x()-_x;
+   sinCA2=_p3*(_x+deltaX) - _p2; 
+  MESSENGER << " StiKalmanTrackNode::nudge() -W- sin(CA2):"<<sinCA2<<endl;
+  if (fabs(sinCA2)>1.) return;
+  cosCA2   = sqrt(1.-sinCA2*sinCA2);
+  sumSin   = sinCA1+sinCA2;
+  sinCA1plusCA2    = sinCA1*cosCA2 + sinCA2*cosCA1;
+  if (fabs(sinCA1plusCA2)==0) return;
+  sumCos   = cosCA1+cosCA2;
+  _p0      += deltaX*sumSin/sumCos;
+  _p1      += deltaX*_p4*sumSin/sinCA1plusCA2;
+  _x       = _x+deltaX;
+  _sinCA   = sinCA2;
+  _cosCA   = cosCA2;
+}
+
+
+
 /// Propagate the track error matrix
 /// \note This method must be called ONLY after a call to the propagate method.
 void StiKalmanTrackNode::propagateError()
@@ -533,35 +553,82 @@ void StiKalmanTrackNode::propagateError()
   is delegated to the function "mcs2". The calculation of energy loss is done
   by the function eloss.
  */
-void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode,
-				      float elossSign)
+void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const StiDetector * tDet)
 {  
+ 
   double relRadThickness;
   // Half path length in previous node
-  double r1=previousNode->pathlength()/2.;
+  double r1,r2,r3,pL1,pL2,pL3,d1,d2,d3,dxEloss;
+  pL1=fabs(previousNode->pathlength())/2.;
   // Half path length in this node
-  double r3=pathlength()/2.;
+  pL3=fabs(pathlength())/2.;
   // Gap path length
-  double r2= pathLToNode(previousNode);
-  if (r2> (r1+r3)) 
+  pL2= fabs(pathLToNode(previousNode));
+  //cout << "propMCS: r1:"<<r1<<" r2:"<<r2<<" r3:"<<r3;
+  double x0p =-1;
+  double x0Gas=-1;
+  double x0=-1;
+  d1    = previousNode->getDensity();
+  x0p   = previousNode->getX0();
+  d3    = tDet->getMaterial()->getDensity();
+  x0    = tDet->getMaterial()->getX0();
+  if (pL2> (pL1+pL3)) 
     {
-      r2=r2-r1-r3;
+      pL2=pL2-pL1-pL3;
+      //cout<< "pL2':"<<pL2;
       if (dx>0)
-	relRadThickness = r1/previousNode->getX0()+ r2/getGasX0()+ r3/getX0();
-      else 
-	relRadThickness = r1/previousNode->getX0()+ r2/previousNode->getGasX0()+ r3/getX0();
+	{
+	  x0Gas = tDet->getGas()->getX0();
+	  d2    = tDet->getGas()->getDensity();
+	}
+      else
+	{
+	  x0Gas = previousNode->getGasX0(); 
+	  d2    = previousNode->getGasDensity();
+	}
+      relRadThickness = 0.;
+      dxEloss = 0;
+      if (x0p>0.) 
+	{
+	  relRadThickness += pL1/x0p;
+	  dxEloss += d1*pL1;
+	}
+      if (x0Gas>0.)
+	{
+	  relRadThickness += pL2/x0Gas;
+	  dxEloss += d2*pL2;
+	}
+      if (x0>0.)
+	{
+	  relRadThickness += pL3/x0;
+	  dxEloss += d3*pL3;
+	}
     }
   else 
     {
-      relRadThickness = r1/previousNode->getX0()+r3/getX0();
+      relRadThickness = 0.; 
+      dxEloss = 0;
+      if (x0p>0.) 
+	{
+	  relRadThickness += pL1/x0p;
+	  dxEloss += d1*pL1;
+	}
+      if (x0>0.)
+	{
+	  relRadThickness += pL3/x0;
+	  dxEloss += d3*pL3;
+	}
     }
+  //cout <<" dx:"<<dx<<" x0p:"<<x0p<<" x0:"<<x0<<" x0Gas:"<<x0Gas<<" relRadThick:"<<relRadThickness<<endl;
   double pt = getPt();
   double p2=(1.+_p4*_p4)*pt*pt;
   double m=pars->massHypothesis;
   double m2=m*m;
   double e2=p2+m2;
   double beta2=p2/e2;
+  //cout << " m2:"<<m2<<" p2:"<<p2<<" beta2:"<<beta2;
   double theta2=mcs2(relRadThickness,beta2,p2);
+  //cout << " theta2:"<<theta2;
   double ey  = _p3*_x-_p2;
   double ez  = _p4;
   double xz  = _p3*ez;
@@ -574,7 +641,18 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode,
   _c42 += ez*zz1*xy*theta2;
   _c44 += zz1*zz1*theta2;
   double dE=0;
-  //double dE=elossSign*eloss->calculate(1.,massHypo, beta2);
+  double sign;
+  if (dx>0)
+    sign = 1.;
+  else
+    sign = -1.;
+  double eloss = _elossCalculator->calculate(1.,0.5,m, beta2,5.);
+  dE = sign*dxEloss*eloss;
+  /* cout << "MCS: _x:"<<_x<<" dx:"<<dx<<" dxEloss:"<<dxEloss
+       <<" pt:"<<pt<<" p:"<<sqrt(p2)<<" E="<<sqrt(e2)<<" beta="
+       << sqrt(beta2)<<endl
+       << "     eloss:"<<eloss<<" dE:"<<dE<<" dE/E="<<dE/sqrt(e2)
+       << " correction:"<<(1.- sqrt(e2)*dE/p2)<<endl; */
   if (fabs(dE)>0)
     {
       double cc=_p3;
@@ -640,8 +718,9 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   MESSENGER <<"evaluateChi2()-INFO-Started"<<endl;
   //If required, recalculate the errors of the detector hits.
   //Do not attempt this calculation for the main vertex.
-  if (!hit)
-    throw runtime_error("SKTN::evaluateChi2(const StiHit &) - hit==0");
+  if (!hit)throw runtime_error("SKTN::evaluateChi2(const StiHit &) - hit==0");
+
+  
   const StiDetector * detector = hit->detector();
   if (useCalculatedHitError && detector)
     {
@@ -666,8 +745,15 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   double dy=hit->y()-_p0;
   double dz=hit->z()-_p1;
   double cc= (dy*r00*dy + 2*r01*dy*dz + dz*r11*dz)/det;
-  //if (!hit->detector())
-  //  cout << " dy:"<<dy << " dz:"<<dz<< " sqrt(dy^2+dz^2):" << sqrt(dy*dy+dz*dz) << " CHI2:"<< cc <<endl;
+  if (!hit->detector())
+    {//main vertex
+      maker->dyHist->Fill(dy);
+      maker->dzHist->Fill(dz);
+      /*cout << " evaluateChi2(VERTEX): _x:"<<_x 
+	   << " dy:"<<dy << " dz:"<<dz
+	   << " sqrt(dy^2+dz^2):" << sqrt(dy*dy+dz*dz) 
+	   << " CHI2:"<< cc <<endl;    */
+    }
   MESSENGER <<"evaluateChi2() -I- Done"<<cc<<endl;
   return cc;
 }
@@ -728,7 +814,7 @@ void StiKalmanTrackNode::updateNode()
   _sinCA  =  _p3*_x-_p2;
   if (_sinCA>1.) 
     {
-      cout << " SKTN    _sinCA>1";
+      //cout << " SKTN    _sinCA>1";
       throw runtime_error("SKTN::updateNode() - WARNING - _sinCA>1");
     }
   _cosCA = sqrt(1.-_sinCA*_sinCA); 

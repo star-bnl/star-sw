@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.11 2003/03/04 15:16:22 andrewar Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.12 2003/03/12 17:57:29 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.12  2003/03/12 17:57:29  pruneau
+ * Elss calc updated.
+ *
  * Revision 2.11  2003/03/04 15:16:22  andrewar
  * Added getTrackRadLength function to return radiation thickness along track (%).
  *
@@ -576,7 +579,7 @@ double StiKalmanTrack::getTrackRadLength() const
 	{x2 = x2 - x1 - x3;} //x2 is now the gap distance
       else {x2=0.;}
 
-      cout <<"getTrackRadLength: X's: "<<x1<<" "<<x2<<" "<<x3<<endl;
+      //cout <<"getTrackRadLength: X's: "<<x1<<" "<<x2<<" "<<x3<<endl;
 
       mat2=nextNode->getDetector()->isContinuousMedium();
 
@@ -619,7 +622,7 @@ double StiKalmanTrack::getTrackRadLength() const
 	  totalR +=x1/(x0_1)+x2/(x0_2)+x3/(x0_3);
 	}//end if over material types
 
-      cout <<"Rad lengths:"<<x0_1<<" "<<x0_2<<" "<<x0_3<<endl;
+      //cout <<"Rad lengths:"<<x0_1<<" "<<x0_2<<" "<<x0_3<<endl;
 
       //cache nextNode for next iteration...
       thisNode = nextNode;
@@ -629,7 +632,7 @@ double StiKalmanTrack::getTrackRadLength() const
 
     }
 
-  cout <<"Rad Length: "<<totalR;
+  //cout <<"Rad Length: "<<totalR;
   return totalR;
 
 }
@@ -898,12 +901,23 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() - ERROR - tNode==null");
   tNode->reset();
   StiHit *myHit;
-  //cout << "x,y,z:"<< localVertex.x() << " " <<  localVertex.y() << localVertex.z() << endl;
+  //cout << "SKT::extendToVertex() -I- x,y,z:"<< localVertex.x() 
+  //     << " " <<  localVertex.y() << " " << localVertex.z() << endl;
   //cout << "SKT::extendToVertex() -I- sNode->_x:"<<sNode->_x<<endl;
   //cout << "SKT::extendToVertex() -I-0 tNode->_x:"<< tNode->_x<<endl;
   if (tNode->propagate(sNode, &localVertex))
     { 
+      //cout << " on vertex plane:";
       chi2 = tNode->evaluateChi2(&localVertex); 
+      double dx,dy,dz,d;
+      dx=tNode->_x- localVertex.x();
+      dy=tNode->_p0- localVertex.y();
+      dz=tNode->_p1- localVertex.z();
+      d= sqrt(dx*dx+dy*dy+dz*dz);
+      /*cout << " dx:"<< dx
+	   << " dy:"<< dy
+	   << " dz:"<< dz
+	   << " d: "<< d<<endl;*/
       if (chi2<pars->maxChi2Vertex)
 	{
 	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();
@@ -911,16 +925,20 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 	  tNode->setHit(myHit);
 	  tNode->setChi2(chi2);
 	  tNode->setDetector(0);
+	 
 	  add(tNode);
 	  trackExtended = true;
 	}
     }
+  //else
+  //  cout <<" TRACK NOT REACHING THE VERTEX PLANE!"<<endl;
   return trackExtended;
 }
 
 bool StiKalmanTrack::find(int direction)
 {
-  bool trackExtended=false;
+  bool trackExtended=false;  
+  bool trackExtendedOut=false;
   setFlag(0);
   // invoke tracker to find or extend this track
   TRACKMESSENGER<<"StiKalmanTrack::find(int) -I- Outside-in"<<endl;
@@ -932,23 +950,26 @@ bool StiKalmanTrack::find(int direction)
     }		
   // decide if an outward pass is needed.
   const StiKalmanTrackNode * outerMostNode = getOuterMostHitNode();
-  if (false) //outerMostNode->getX()<190. )
+  if (outerMostNode->getX()<190. )
     {
       // swap the track inside-out in preparation for the outward search/extension
       TRACKMESSENGER<<"StiKalmanTrack::find(int) -I- Swap track"<<endl;
       swap();      
       try
 	{
-	  if (trackFinder->find(this,kInsideOut) )
-	    {
-	      if (debugCount<20) TRACKMESSENGER << "fit(OutIn)";
-	      fit(kOutsideIn);             
-	      trackExtended = true;
-	    }
+	  trackExtendedOut= trackFinder->find(this,kInsideOut);
 	}
       catch (...)
 	{
-	  cout << "StiKalmanTrack::find(int direction) -W- Exception while in out fit"<<endl;
+	  cout << "StiKalmanTrack::find(int direction) -W- Exception while in insideOut find"<<endl;
+	}
+      try
+	{
+	  if (trackExtendedOut) fit(kOutsideIn);
+	}
+      catch (...)
+	{
+	  cout << "StiKalmanTrack::find(int direction) -W- Exception while in OutsideIn fit"<<endl;
 	}
       swap();
       setTrackingDirection(kOutsideIn);

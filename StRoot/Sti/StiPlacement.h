@@ -39,6 +39,9 @@
 class StiPlacement{
 
 public:
+
+  enum StiRegion {kBackward, kMid, kForward, kUndefined};
+
     // constructors
     StiPlacement();
 

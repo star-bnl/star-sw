@@ -24,18 +24,12 @@
 class StiElossCalculator
 {
  public:
-
-  StiElossCalculator(double zOverA, double ionization);
+  StiElossCalculator();
   virtual ~StiElossCalculator();
-  double StiElossCalculator::calculate(double z2, double m, double beta2) const;
-  
- protected:
-  
+  double StiElossCalculator::calculate(double z2, double zOverA, double m, double beta2, double ionization2 ) const;
+ protected:  
   static const double _k;
   static const double _mec;
-  double _zOverA;
-  double _ionization2;
-  
 };
 
 #endif
