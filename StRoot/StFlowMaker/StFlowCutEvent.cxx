@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.5 1999/12/15 22:01:22 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.6 2000/01/13 22:19:16 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.6  2000/01/13 22:19:16  posk
+// Updates and corrections.
+//
 // Revision 1.5  1999/12/15 22:01:22  posk
 // Added StFlowConstants.hh
 //
@@ -49,14 +52,14 @@
 Int_t    StFlowCutEvent::mMultCuts[2]    = {10, 10000};
 Float_t  StFlowCutEvent::mVertexXCuts[2] = {-1., 1.};
 Float_t  StFlowCutEvent::mVertexYCuts[2] = {-1., 1.};
-Float_t  StFlowCutEvent::mVertexZCuts[2] = {-30., 30.};
+Float_t  StFlowCutEvent::mVertexZCuts[2] = {-50., 50.};
 UInt_t   StFlowCutEvent::mEventN         = 0;     
 UInt_t   StFlowCutEvent::mGoodEventN     = 0;
 UInt_t   StFlowCutEvent::mMultCut        = 0;
 UInt_t   StFlowCutEvent::mVertexXCut     = 0;
 UInt_t   StFlowCutEvent::mVertexYCut     = 0;
 UInt_t   StFlowCutEvent::mVertexZCut     = 0;
-Float_t  StFlowCutEvent::mEtaSymCuts[2]  = {-0.1, 0.1};
+Float_t  StFlowCutEvent::mEtaSymCuts[2]  = {-0.15, 0.15};
 UInt_t   StFlowCutEvent::mEtaSymCutN     = 0;     
 
 //-----------------------------------------------------------------------

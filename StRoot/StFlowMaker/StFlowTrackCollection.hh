@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrackCollection.hh,v 1.2 1999/11/30 18:52:56 snelling Exp $
+// $Id: StFlowTrackCollection.hh,v 1.3 2000/01/13 22:19:21 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrackCollection.hh,v $
+// Revision 1.3  2000/01/13 22:19:21  posk
+// Updates and corrections.
+//
 // Revision 1.2  1999/11/30 18:52:56  snelling
 // First modification for the new StEvent
 //
@@ -30,7 +33,8 @@
 #include <vector>
 
 #if !defined(ST_NO_NAMESPACES)
-using namespace std;
+//using namespace std;
+using std::vector;
 #endif
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
