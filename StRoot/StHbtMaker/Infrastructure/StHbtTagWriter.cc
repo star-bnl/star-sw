@@ -47,7 +47,7 @@ void StHbtTagWriter::Clear() {
 
 void StHbtTagWriter::SetTag(const char* c, unsigned char i, float v) { 
   if ( i<5) {
-    if ( strcmp(c,"")==0 ) /* no-op */;
+    if ( strcmp(c,"")==0 && c!=0) /* no-op */;
     else if ( strcmp(c,"chargedParticlesMeans")==0 ) mHbtTag.chargedParticles_Means[i] = v; 
     else if ( strcmp(c,"chargedParticlesSigmas")==0 ) mHbtTag.chargedParticles_Sigmas[i] = v; 
     else if ( strcmp(c,"positiveParticlesMeans")==0 ) mHbtTag.positiveParticles_Means[i] = v; 
@@ -72,7 +72,8 @@ void StHbtTagWriter::SetTag(const char* c, unsigned char i, float v) {
 
 float StHbtTagWriter::Tag(const char* c, unsigned char i) { 
   if ( i<5) {
-    if ( strcmp(c,"chargedParticlesMeans")==0 ) return mHbtTag.chargedParticles_Means[i]; 
+    if ( strcmp(c,"")==0 && c!=0) /* no-op */;
+    else if ( strcmp(c,"chargedParticlesMeans")==0 ) return mHbtTag.chargedParticles_Means[i]; 
     else if ( strcmp(c,"chargedParticlesSigmas")==0 ) return mHbtTag.chargedParticles_Sigmas[i]; 
     else if ( strcmp(c,"positiveParticlesMeans")==0 ) return mHbtTag.positiveParticles_Means[i]; 
     else if ( strcmp(c,"positiveParticlesSigmas")==0 ) return mHbtTag.positiveParticles_Sigmas[i]; 
