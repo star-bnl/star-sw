@@ -1,11 +1,11 @@
 // Hey Emacs this is -*-c++-*-
-#ifndef STAR_EETowDisplay
-#define STAR_EETowDisplay
-// $Id: EEmcTTDisplay.h,v 1.2 2004/01/26 21:08:31 zolnie Exp $
+#ifndef STAR_EEmcTTDisplay
+#define STAR_EEmcTTDisplay
+// $Id: EEmcTTDisplay.h,v 1.3 2004/01/26 21:51:53 zolnie Exp $
 
 /*!
  *                                                                     
- * \class  EETowDisplay
+ * \class  EEmcTTDisplay
  * \author Piotr A. Zolnierczuk
  * \date   2003/12/08
  *
@@ -22,10 +22,10 @@ class TList;
 class StMuTrack;
 class EEmcTower;
 
-class EETowDisplay : public EEmcGeomSimple {
+class EEmcTTDisplay : public EEmcGeomSimple {
 public: 
-  EETowDisplay(const char *name="eemc");
-  ~EETowDisplay();
+  EEmcTTDisplay(const char *name="eemc");
+  ~EEmcTTDisplay();
   
   TGeoVolume* operator() () { return mEEmc; };
   TGeoVolume* getVolume()   { return mEEmc; };
@@ -49,7 +49,7 @@ protected:
   TList *mTowerHits;
   TList *mTrackHits;
 public:
-  ClassDef(EETowDisplay, 1)   // 
+  ClassDef(EEmcTTDisplay, 1)   // 
 };
 
 
@@ -57,6 +57,9 @@ public:
 
 
 // $Log: EEmcTTDisplay.h,v $
+// Revision 1.3  2004/01/26 21:51:53  zolnie
+// shorter names
+//
 // Revision 1.2  2004/01/26 21:08:31  zolnie
 // working track/tower display (before big farewell cleanup)
 //
