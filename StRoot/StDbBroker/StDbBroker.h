@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.8 2000/01/14 14:49:10 porter Exp $
+ * $Id: StDbBroker.h,v 1.9 2000/01/27 20:30:40 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.9  2000/01/27 20:30:40  porter
+ * cleaned up dtor & error logic
+ *
  * Revision 1.8  2000/01/14 14:49:10  porter
  * set verbose level for checking, added $Id & $Logs, & made node container
  * more robust for interactions with StDbLib
@@ -83,7 +86,7 @@ class StDbBroker  {
   public:
 
     StDbBroker();
-    virtual ~StDbBroker(){}
+  virtual ~StDbBroker();
     
     //    int Init(const char *dbname);// return 0 if OK
 
