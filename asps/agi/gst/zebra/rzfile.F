@@ -1,7 +1,10 @@
 *
-* $Id: rzfile.F,v 1.4 1998/06/05 20:55:41 perev Exp $
+* $Id: rzfile.F,v 1.5 2000/01/06 02:42:36 nevski Exp $
 *
 * $Log: rzfile.F,v $
+* Revision 1.5  2000/01/06 02:42:36  nevski
+* elastic zebra updated
+*
 * Revision 1.4  1998/06/05 20:55:41  perev
 * AGI commit
 *
@@ -160,7 +163,7 @@ C     RZfile always with Exchange mode for LINUX
 #endif
             ENDIF
          ENDIF
- 
+
          IF(IQUEST(1).NE.0)GO TO 30
          LB=ITEST(KLB)
          IF(LB.GT.48)CALL RZIODO(LUNP,LB+6,2,ITEST,1)
@@ -172,7 +175,6 @@ C     RZfile always with Exchange mode for LINUX
 #if defined(CERNLIB_QMALT)||defined(CERNLIB_QMAPO)||defined(CERNLIB_QMDOS)
          IF(IOPTC.EQ.0.AND.IOPTH.EQ.0) THEN
             INQUIRE(UNIT=LUNP,RECL=LRECL)
-* DEC Fortran takes "longword" units
 #endif
 #if (defined(CERNLIB_QF_DEC))&&(defined(CERNLIB_QMDOS))
             IF(LRECP.NE.LRECL)THEN
@@ -303,7 +305,7 @@ C     RZfile always with Exchange mode for LINUX
      +      (' RZFILE. file cannot be processed by this version of RZ')
       ENDIF
 #endif
- 
+
       LFREE = 0
       LUSED = 0
       LRIN  = 0

@@ -1,7 +1,10 @@
 *
-* $Id: ztell.F,v 1.4 1998/06/05 20:55:45 perev Exp $
+* $Id: ztell.F,v 1.5 2000/01/06 02:42:37 nevski Exp $
 *
 * $Log: ztell.F,v $
+* Revision 1.5  2000/01/06 02:42:37  nevski
+* elastic zebra updated
+*
 * Revision 1.4  1998/06/05 20:55:45  perev
 * AGI commit
 *
@@ -14,7 +17,7 @@
 *CMZ :  1.30/00 19/03/97  22.28.33  by  Pavel Nevski
 *-- Author :
       SUBROUTINE ZTELL (IDP,JFLP)
-#include "gst/atcdes/quest.inc"
+#include "zebra/quest.inc"
 C-    Signal trouble situation,
 C-    called from the garbage collector if not enough space
 C-    may be user called with IDP > 100
@@ -24,8 +27,5 @@ C-    may be user called with IDP > 100
       If (IDP.eq.19 .and. JFLP.eq.0) write(*,102)
  102  format(22x,'probably there is no more space on output file')
       END
- 
- 
- 
- 
- 
+
+

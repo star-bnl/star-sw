@@ -1,7 +1,10 @@
 *
-* $Id: mzstor.F,v 1.5 1999/10/18 16:46:03 nevski Exp $
+* $Id: mzstor.F,v 1.6 2000/01/06 02:42:36 nevski Exp $
 *
 * $Log: mzstor.F,v $
+* Revision 1.6  2000/01/06 02:42:36  nevski
+* elastic zebra updated
+*
 * Revision 1.5  1999/10/18 16:46:03  nevski
 * pgf->g77
 *
@@ -17,9 +20,9 @@
 *-- Author :
       SUBROUTINE MZSTOR (IXSTOR,CHNAME,CHOPT
      +,                  IFENCE,LV,LLR,LLD,LIMIT,LAST)
- 
+
 C-    Initialize new Zebra store region, user called
- 
+
 #include "zebra/zbcd.inc"
 #include "zebra/zmach.inc"
 #include "zebra/zstate.inc"
@@ -36,7 +39,7 @@ C--------------    End CDE                             --------------
 #endif
 #if (defined(CERNLIB_QTRHOLL))&&(!defined(CERNLIB_A6M))
       DIMENSION    NAMESR(2)
-      DATA  NAMESR / 4HMZST, 4HOR .  /
+      DATA  NAMESR / 4HMZST, 4HOR . /
 #endif
 #if (defined(CERNLIB_QTRHOLL))&&(defined(CERNLIB_A6M))
       DATA  NAMESR / 6HMZSTOR /
@@ -47,23 +50,23 @@ C--------------    End CDE                             --------------
 #endif
 #if defined(CERNLIB_QHOLL)
       DATA  MMSYSL / 4HSYSL,0,0,101,2/
-      DATA  NAMELA / 4Hsyst, 4Hem .  /
-      DATA  NAMESY / 4Hsyst, 4Hem .  /
+      DATA  NAMELA / 4Hsyst, 4Hem . /
+      DATA  NAMESY / 4Hsyst, 4Hem . /
       DATA  NAMWSP / 4Hqwsp /
       DATA  NAMEDV / 4HQDIV /
 #endif
 #if !defined(CERNLIB_QHOLL)
       DATA  MMSYSL / 0,0,0,101,2/
 #endif
- 
+
 #include "zebra/q_jbit.inc"
 #include "zebra/q_sbit.inc"
 #include "zebra/q_shift.inc"
 #include "zebra/q_locf.inc"
- 
- 
+
+
 C--                Clear Zebra tables on first entry
- 
+
       IF (NQSTOR.NE.-1)            GO TO 13
       CALL VZERO (NQOFFT,32)
       LQATAB = LOCF (IQTABV(1)) - 1
@@ -73,7 +76,7 @@ C--                Clear Zebra tables on first entry
       LQWKFZ = LOCF(IQWKFZ(1)) - LQASTO
       NQTSYS = LOCF(IQDN2(20)) - LQATAB
       NQWKTB = NQWKTT
- 
+
 C-      KQFT=342 relies on LQFSTA(1) to be LQSTA(1+342) in /MZCC/
       KQFT = 342
 #if defined(CERNLIB_QPRINT)
@@ -98,46 +101,46 @@ C-      KQFT=342 relies on LQFSTA(1) to be LQSTA(1+342) in /MZCC/
       CALL UCTOH ('qwsp'    ,NAMWSP, 4,4)
       CALL UCTOH ('QDIV'    ,NAMEDV, 4,4)
 #endif
- 
+
 #include "zebra/qtrace.inc"
- 
+
       CALL UOPTC (CHOPT,'Q:',IQUEST)
       LOGQ   = IQUEST(1)
       IFLSPL = IQUEST(2)
- 
+
       JQSTOR = NQSTOR + 1
       CALL VZERO (KQT,27)
- 
+
 C--                Calculate store off-set
- 
+
       LQSTOR = LOCF(LV(1)) - 1
       KQS    = LQSTOR - LQASTO
- 
+
       NFEND  = (LQSTOR+1) - LOCF(IFENCE(1))
       NQFEND = NFEND
- 
+
 C--                Printing name of store
- 
+
       NQSNAM(1) = IQBLAN
       NQSNAM(2) = IQBLAN
       N = MIN (8, LEN(CHNAME))
       IF (N.NE.0)  CALL UCTOH (CHNAME,NQSNAM,4,N)
- 
+
 C--                Set log level
- 
+
       NQLOGL = NQLOGD
       IF (LOGQ.NE.0)  NQLOGL=-2
- 
+
 C--                Permanent links et al.
- 
+
       NQSTRU = LOCF(LLR(1)) - (LQSTOR+1)
       NQREF  = LOCF(LLD(1)) - (LQSTOR+1)
       NQLINK = NQREF
       LQ2END = LOCF(LIMIT(1)) - LQSTOR
       NDATAT = LOCF(LAST(1))  - LQSTOR
- 
+
 C--                Calculate table off-set
- 
+
       NDATA = NDATAT
       LOCT  = LQATAB
       IF (JQSTOR.NE.0)  THEN
@@ -148,7 +151,7 @@ C--                Calculate table off-set
           NDATA = NDATA - 4
           CALL VFILL (LQ(KQS+NDATA),10,IQNIL)
         ENDIF
- 
+
 #if defined(CERNLIB_QPRINT)
       IF (NQLOGL.GE.-1)
      +WRITE (IQLOG,9021) JQSTOR,NQSNAM(1),NQSNAM(2)
@@ -172,16 +175,16 @@ C--                Calculate table off-set
      F,I8,' words.'
      F/10X,'This store has a fence of',I5,' words.')
 #endif
- 
+
 C--                Set minimum sizes
- 
+
       NSYS   =  400
       NQMINR =   40
       NWF    = 2000
       IF (JQSTOR.EQ.0)  NQMINR=164
- 
+
 C--                Check parameters valid
- 
+
       IF (NQSTRU.LT.0)               GO TO 91
       IF (NQREF .LT.NQSTRU)          GO TO 91
       IF (NDATAT.LT.NQLINK+NWF)      GO TO 91
@@ -192,14 +195,14 @@ C--                Check parameters valid
           IF (JQSTOR.EQ.0)           GO TO 96
           GO TO 39
         ENDIF
- 
+
 #if (!defined(CERNLIB_QSINGLST))&&(defined(CERNLIB_QDEBUG))
 C--                Check overlapping stores
- 
+
       IF (JQSTOR.EQ.0)             GO TO 41
       KSA = KQS - NQFEND
       KSE = KQS + NDATAT
- 
+
       DO 36  JSTO=1,JQSTOR
       JT  = NQOFFT(JSTO)
       JS  = NQOFFS(JSTO)
@@ -207,33 +210,33 @@ C--                Check overlapping stores
       JSE = JS  + LQSTA(JT+21)
       JTA = JT  + LQBTIS
       JTE = JTA + NQTSYS
- 
+
       IF (KSE.GT.JTA .AND. KSA.LT.JTE     .or.
      >    KSE.GT.JSA .AND. KSA.LT.JSE)    THEN
          IF (NQLOGL.GE.0) WRITE (IQLOG,9139)
      >                    CHNAME,NQPNAM(JT+1), NQPNAM(JT+2)
  9139    FORMAT (' store ',a,' overlaps with store ',2a4)
       ENDIF
- 
+
    36 CONTINUE
 #endif
    39 IF (JQSTOR.GE.16)            GO TO 93
- 
+
 C----              Initialize divisions 1 + 2 + system
- 
+
    41 NQOFFT(JQSTOR+1) = KQT
       NQOFFS(JQSTOR+1) = KQS
       NQALLO(JQSTOR+1) = IFLSPL
       CALL VZERO (IQTABV(KQT+1),NQTSYS)
       CALL VBLANK (IQDN1(KQT+1), 40)
       NQSTOR = NQSTOR + 1
- 
+
       LQ(KQS+NDATA-1) = IQNIL
       LQ(KQS+NDATA)   = IQNIL
- 
+
       NDATA = NDATA - 2
       LQSTA(KQT+21) = NDATA
- 
+
       JQDVLL = 2
       JQDVSY = 20
       LQSTA(KQT+20)  = NDATA
@@ -244,7 +247,7 @@ C----              Initialize divisions 1 + 2 + system
       IQRNO(KQT+20)  = 9437183
       IQDN1(KQT+20)  = NAMESY(1)
       IQDN2(KQT+20)  = NAMESY(2)
- 
+
       LQSTA(KQT+2)  = NDATA - NSYS
       LQEND(KQT+2)  = LQSTA(KQT+2)
       NQDMAX(KQT+2) = NDATA
@@ -255,7 +258,7 @@ C----              Initialize divisions 1 + 2 + system
       IQRNO(KQT+2)  = 9437183
       IQDN1(KQT+2)  = NAMEDV
       IQDN2(KQT+2)  = IQNUM(3)
- 
+
       LQSTA(KQT+1)  = NQLINK + 1
       LQEND(KQT+1)  = LQSTA(KQT+1)
       NQDMAX(KQT+1) = NDATA
@@ -265,57 +268,57 @@ C----              Initialize divisions 1 + 2 + system
       IQRNO(KQT+1)  = 9437183
       IQDN1(KQT+1)  = NAMEDV
       IQDN2(KQT+1)  = IQNUM(2)
- 
+
       CALL UCOPY (IQCUR,IQTABV(KQT+1),16)
       CALL VFILL (IFENCE,NFEND,IQNIL)
       IF (NQLINK.NE.0)  CALL VZERO (LV,NQLINK)
- 
+
 C--                Return IXSTOR
- 
+
       IF (JQSTOR.EQ.0)  THEN
           IF (IXSTOR(1).EQ.0)      GO TO 71
         ENDIF
       IDN = ISHFTL (JQSTOR,26)
       IXSTOR(1) = IDN
- 
+
 C----              Create system link table bank
- 
+
    71 JQDIVI = JQDVSY
       CALL MZLIFT (-7,LSYS,0,2,MMSYSL,0)
       LQSYSS(KQT+1) = LSYS
- 
+
       NALL   = LOCF(IQTDUM(1)) - LOCF(LQSYSS(1))
       NSTR   = LOCF(LQSYSR(1)) - LOCF(LQSYSS(1))
- 
+
       LOCAR  = LOCF (LQSYSS(KQT+1)) - LQSTOR
       LOCARE = LOCAR + NALL
- 
+
 C--                Working space
- 
+
       IQ(KQS+LSYS+1) = 11
       IQ(KQS+LSYS+2) = 1
       IQ(KQS+LSYS+3) = 1 + NQLINK
       IQ(KQS+LSYS+4) = NQSTRU
       IQ(KQS+LSYS+5) = NAMWSP
       IQ(KQS+LSYS+6) = IQBLAN
- 
+
 C--                System link area
- 
+
       IQ(KQS+LSYS+7) = LOCAR
       IQ(KQS+LSYS+8) = LOCARE
       IQ(KQS+LSYS+9) = NSTR
       IQ(KQS+LSYS+10)= NAMELA(1)
       IQ(KQS+LSYS+11)= NAMELA(2)
- 
+
 C--                Range of possible values for an origin-link
- 
+
       IQTABV(KQT+13) = MIN (1, LOCAR)
       IQTABV(KQT+14) = MAX (LQSTA(KQT+21), LOCARE)
- 
+
 #include "zebra/qtrace99.inc"
       RETURN
 C------            Error conditions
- 
+
    96 NQCASE = NQCASE + 3
    93 NQCASE = NQCASE + 1
    92 NQCASE = NQCASE + 1
@@ -331,10 +334,7 @@ C------            Error conditions
       IQUEST(18) = NQMINR
       IQUEST(19) = NWF
 #include "zebra/qtofatal.inc"
-*  prevent "never used" warning
-#if defined(CERNLIB_HPUX)
-      N=NOT(IAND(IBITS(1,1,1),1))
-#endif
+C     prevent "never used" warning
+99999 N=JBIT(1,2)+JBYT(1,2,3)+MSBIT(1,2,3)
       END
-*      ==================================================
 #include "zebra/qcardl.inc"

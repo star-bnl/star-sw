@@ -1,7 +1,10 @@
 *
-* $Id: mzwork.F,v 1.5 1999/10/18 16:46:04 nevski Exp $
+* $Id: mzwork.F,v 1.6 2000/01/06 02:42:36 nevski Exp $
 *
 * $Log: mzwork.F,v $
+* Revision 1.6  2000/01/06 02:42:36  nevski
+* elastic zebra updated
+*
 * Revision 1.5  1999/10/18 16:46:04  nevski
 * pgf->g77
 *
@@ -16,9 +19,9 @@
 *CMZ :          06/12/97  11.43.18  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZWORK (IXSTOR,DFIRST,DLAST,IFLAGP)
- 
+
 C-    Allocate working space, user called
- 
+
 C-    IFLAG = -1  reset wsp empty
 C-             0  new wsp
 C-             1  vary both limits, keep common links
@@ -44,35 +47,35 @@ C--------------    End CDE                             --------------
       CHARACTER    NAMESR*8
       PARAMETER   (NAMESR = 'MZWORK  ')
 #endif
- 
+
 #include "zebra/q_jbit.inc"
 #include "zebra/q_locf.inc"
 #include "zebra/qtrace.inc"
 #include "zebra/qstore.inc"
- 
+
       IFLAG = IFLAGP(1)
       JSTO  = JBYT (IXSTOR,27,4)
       IF (JSTO.GT.NQSTOR) GO TO 91
- 
+
 C----              Reset empty working space
- 
+
       NEWL  = NQREF
       NEWD  = NQREF
       IF (IFLAG.LT.0)              GO TO 71
       NEWL  = LOCF (DFIRST(1)) - (LQSTOR+1)
       NEWD  = LOCF (DLAST(1))  -  LQSTOR
- 
+
       IF (IFLAG.GE.5)              then
          LQRSTA(JSTO+1)=NEWL
          LQREND(JSTO+1)=NEWD
          GO TO 999
       endif
- 
+
       IF (IFLAG.GE.3)  NEWD = LQSTA(1) - 1
       IF (IFLAG.EQ.2)  NEWL = NQLINK
- 
+
 C----              Check valid parameters
- 
+
       IF (NEWL.LT.NQREF)           GO TO 92
       IF (NEWD.LT.NEWL)            GO TO 93
       IF (IFLAG.GE.3)              GO TO 31
@@ -81,9 +84,9 @@ C----              Check valid parameters
       ELSE
          IF (NEWD.GE.LQRSTA(JSTO+1)) GO TO 94
       ENDIF
- 
+
 C--                Check garbage collection
- 
+
       NQRESV = LQSTA(KQT+2) - NQMINR - NEWD
       IF (NQRESV.GT.0)             GO TO 31
       print *,' negative NQRESV force garbage collection = ',NQRESV
@@ -93,18 +96,18 @@ C--                Check garbage collection
       CALL MZGAR1
       NQRESV = LQSTA(KQT+2) - NQMINR - NEWD
       IF (NQRESV.LE.0)             GO TO 94
- 
+
 C--                Clear new links
- 
+
    31 LA = NQREF
       IF (IFLAG.EQ.1)  LA = NQLINK
       IF (IFLAG.EQ.2)  LA = NQLINK
       IF (IFLAG.EQ.4)  LA = NQLINK
       N  = NEWL - LA
       IF (N.GT.0)  CALL VZERO (LQ(KQS+LA+1),N)
- 
+
 C----              Set new limits
- 
+
    71 NQLINK  = NEWL
       IQTABV(KQT+5) = NQLINK
       IF (IFLAG.LT.3)  THEN
@@ -114,15 +117,15 @@ C----              Set new limits
              LQEND(KQT+1) = LQSTA(KQT+1)
           endif
         ENDIF
- 
+
       IF (NQLOGL.GE.2) WRITE (IQLOG,9071) JQSTOR,IFLAG,NQLINK,NEWD
  9071 FORMAT (' MZWORK-  Store',I3,' Flag=',I2,' Last Link/Data',2I7)
- 
+
 #include "zebra/qtrace99.inc"
       RETURN
- 
+
 C------            Error conditions
- 
+
    94 NQCASE = 1
    93 NQCASE = NQCASE + 1
    92 NQCASE = NQCASE + 1
@@ -133,6 +136,7 @@ C------            Error conditions
       IQUEST(13) = NEWD
       IQUEST(14) = IFLAG
 #include "zebra/qtofatal.inc"
+C     prevent "never used" warning
+99999 N=JBIT(1,2)+JBYT(1,2,3)
       END
-*      ==================================================
 #include "zebra/qcardl.inc"
