@@ -1,8 +1,11 @@
 
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.8 2000/01/28 18:51:26 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.9 2000/01/28 20:41:35 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.9  2000/01/28 20:41:35  flierl
+// bug fixed :  St_hit_bank[supersectorindex-1];
+//
 // Revision 1.8  2000/01/28 18:51:26  flierl
 // delete Stpixel .... created memory leak
 //
@@ -215,7 +218,7 @@ Int_t St_l3Clufi_Maker::Make(){
 				// now we got the second sector of one supersector
 				// it gets the same out array but the start point will be different !
 				    supersectorindex = sectorindex/2;
-				    St_hit_bank_this = St_hit_bank[supersectorindex]; 
+				    St_hit_bank_this = St_hit_bank[supersectorindex-1]; 
 				}
 			    //cout << "  Supersecotr : " << supersectorindex << endl;
 			
