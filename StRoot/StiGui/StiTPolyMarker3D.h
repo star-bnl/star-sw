@@ -7,7 +7,6 @@
 
 #ifndef StiTPolyMarker3D_HH
 #define StiTPolyMarker3D_HH
-
 #include "TPolyMarker3D.h"
 
 class StiTPolyMarker3D : public TPolyMarker3D
@@ -17,13 +16,8 @@ public:
     StiTPolyMarker3D(Int_t n, Marker_t marker = 1, Option_t* option="");
     StiTPolyMarker3D(Int_t n, Float_t* p, Marker_t marker = 1, Option_t* option="");
     StiTPolyMarker3D(Int_t n, Double_t* p, Marker_t marker=1, Option_t* option="");
-
     virtual ~StiTPolyMarker3D();
-
     virtual Int_t DistancetoPrimitive(Int_t px, Int_t py);
-
-protected:
-private:
 };
 
 #endif

@@ -28,23 +28,14 @@ public:
 
     StiDrawableHits();
     virtual ~StiDrawableHits();
-
-    //Most drawing libraries require an array of points to be drawn
     virtual void fillHitsForDrawing() = 0;
-    
     virtual void draw() = 0;
     virtual void update() = 0;
     virtual void setColor(int val) = 0;
+    virtual void setType(int val) = 0;
+    virtual void setSize(double val) = 0;
     virtual void setVisibility(bool val) = 0;
-
-    virtual void setMarkerStyle(unsigned int) = 0;
-    virtual void setMarkerSize(double) = 0;
     virtual void add(double x, double y, double z)=0;
-
-protected:
-    
-private:
-
 };
 
 #endif

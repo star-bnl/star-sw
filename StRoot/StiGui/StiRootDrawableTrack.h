@@ -1,35 +1,32 @@
-#ifndef StiRootDrawableTrack_HH
-#define StiRootDrawableTrack_HH 1
-#include "StiGui/StiRootDrawableLine.h"
-#include "StiGui/StiRootDrawableHits.h"
+#ifndef StiRootDrawableTrack_H_INCLUDED
+#define StiRootDrawableTrack_H_INCLUDED
+#include <vector>
+#include <deque>
+#include "StiGui/StiDrawable.h"
 #include "StiGui/StiTPolyLine3D.h"
-#include "StiGui/StiRootDisplayManager.h"
-#include "Sti/StiDrawableTrack.h"
 
-/*! \class StiRootDrawableMcTrack
-  Abstract base class used to define the interface to drawable tracks
+/*! \class StiRootDrawableTrack
+  Concrete class used to draw tracks
   \author Claude A Pruneau
 */
-class StiRootDrawableTrack : public StiDrawableTrack
+class StiRootDrawableTrack : public StiDrawable, public vector<double>
 {
 public:
     StiRootDrawableTrack();
     virtual ~StiRootDrawableTrack();
-    //virtual void fillHitsForDrawing()=0;
-    virtual void update();
+    virtual void draw();
     virtual void reset();
+    virtual void setColor(int val);
+    virtual void setStyle(int val);
+    virtual void setSize(double val);
+    virtual void setVisible(bool val);
+    virtual void add(double x, double y, double z);
 protected:
-    StiRootDrawableLine* _line;
-    StiRootDrawableHits* _hits;
+    bool _visible;
+    double _rMin;
+    double _rMax;
+    deque<double> *_data;
+    StiTPolyLine3D *_line;
 };
 
-inline void StiRootDrawableTrack::update()
-{
-  //cout <<"StiRootDrawableTrack::update() - INFO - Starting."<<endl;
-  // clear the hits and lines of this track
-  this->StiRootDrawableTrack::reset();
-  // fill the hits
-  fillHitsForDrawing();
-  //cout <<"StiRootDrawableTrack::update() - INFO - Done."<<endl;
-}
 #endif
