@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.2 2003/01/17 01:36:16 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.3 2003/01/17 01:49:41 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@
 #include "StEventControlPanel.h"
 #include "StEventDisplayInfo.h"
 #include "StSimplePanel.h"
-#include "PadControlPanel.h"
+#include "StPadControlPanel.h"
 #include "StFilterDialog.h"
 #include "StEventHelper.h"
 #include "TROOT.h"
