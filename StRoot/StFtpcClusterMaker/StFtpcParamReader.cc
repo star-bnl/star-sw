@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.11 2001/01/15 16:08:41 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.12 2001/01/27 20:07:46 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.12  2001/01/27 20:07:46  jcs
+// change name of parameter
+//
 // Revision 1.11  2001/01/15 16:08:41  jcs
 // get phiOrigin and phiPerSector fro ftpcDimensions
 //
@@ -157,7 +160,7 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_ampoff *ampoff,
   mNumberOfPadsDedxSmearing = 4;
   mNumberOfBinsDedxSmearing = 3;
   mRadiusTolerance = 0.25;
-  mSigmaSpacingFactorForCluster = 2.5;
+  mSigmaSpacingFactor = 2.5;
   mAdcConversionFactor = 8000000.0;
   mClusterChargeConversionFactor = 6;
   //  just copy gaspar array pointers  
