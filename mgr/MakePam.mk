@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.80 1999/02/08 02:29:20 fisyak Exp $
+# $Id: MakePam.mk,v 1.81 1999/02/09 19:14:51 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.81  1999/02/09 19:14:51  fisyak
+# Add objy
+#
 # Revision 1.80  1999/02/08 02:29:20  fisyak
 # New Makefile scheme
 #
@@ -205,7 +208,8 @@ SUBDIR2 := $(filter-out $(SUBDIR1), $(subst $(STAR)/pams/,, $(wildcard $(STAR)/p
 INC_DIRS:= $(addprefix $(OUT_DIR)/pams/, $(SUBDIR1)) $(addprefix $(STAR)/pams/, $(SUBDIR2)) 
 
 #INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
-VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
+VPATH   := $(wildcard $(SRC_DIRS)) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
+#VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
 #-------------------------------includes----------------------------
 STICFLAGS =  $(addprefix -I,  $(STAF_SYS_INCS) $(SRC_DIR) $(IDL_DIRS))
 CXXFLAGS   += -DASU_MALLOC_OFF
@@ -232,6 +236,12 @@ FILES_CXX:= $(wildcard $(addsuffix /*.cxx, $(SRC_DIR)))
 FILES_C  := $(wildcard $(addsuffix /*.c , $(SRC_DIRS)))
 FILES_F  := $(wildcard $(addsuffix /*.F , $(SRC_DIRS)))
 FILES_CDF:= $(wildcard $(addsuffix /*.cdf , $(SRC_DIRS)))
+
+FILES_CXX := $(filter-out      %Cint.cxx, $(FILES_CXX))
+FILES_F   := $(filter-out %/.share/%/*.F, $(FILES_F))
+FILES_F   := $(filter-out %/.share/%/*.f, $(FILES_F))
+FILES_C   := $(filter-out %/.share/%/*.c, $(FILES_C))
+FILES_G   := $(filter-out %/.share/%/*.g, $(FILES_G))
 
 NAMES_IDM:= $(basename $(notdir $(FILES_IDM)))
 NAMES_G  := $(basename $(notdir $(FILES_G)))
@@ -268,8 +278,6 @@ ifndef NODEPEND
 FILES_D  := $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_O)))))
 FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
 endif                          
-FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O),   $(notdir $(basename $(FILES_ICC)))))
-NAMES_O   = $(notdir $(FILES_O))
 # *.cc moved to sl $(NAMES_CC)
 ifndef NT
 ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF))) 
@@ -283,14 +291,6 @@ ifneq (,$(QWE))
   QWE  := $(shell expr $(QWE) + 1)
   SL_NEW := $(SL_PKG).$(QWE)
 endif
-endif
-endif #/NT/                          
-ifneq (,$(strip $(FILES_O)))
-LIB_PKG := $(LIB_DIR)/lib$(DOMAIN).$(A)
-ifndef NT
-qwe     := $(shell test ! -f $(LIB_PKG) ||  $(AR) $(ARFLAGS) $(LIB_PKG))
-OBJS    := $(LIB_PKG)($(NAMES_O))
-endif #/* NT */
 endif
 ifneq (,$(FILES_IDM))   
 IDLSD    := $(wildcard $(STAR)/pams/$(DOMAIN)/*/*.idl $(STAR)/pams/$(DOMAIN)/*/*/*.idl $(STAR)/pams/$(DOMAIN)/*/*/*/*.idl)
@@ -312,16 +312,29 @@ FILES_O    += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CDF)))
 endif                          
 ifneq (,$(NAMES_G))            
 FILES_OG    := $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_G)))
+FILES_O     += $(FILES_OG)
 FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_OG)))))
 endif
 ifneq (,$(NAMES_CC))            
-FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CC))))
+FILES_SL    += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CC)))
 FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_CC)))))
 endif                          
 ifneq (,$(NAMES_CXX))            
-FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CXX))))
+FILES_SL    += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CXX)))
 FILES_D     += $(addprefix $(DEP_DIR)/,$(addsuffix .d, $(basename $(notdir $(FILES_CXX)))))
 endif                          
+endif #/NT/                          
+ifneq (,$(strip $(FILES_O)))
+LIB_PKG := $(LIB_DIR)/lib$(DOMAIN).$(A)
+ifndef NT
+qwe     := $(shell test ! -f $(LIB_PKG) ||  $(AR) $(ARFLAGS) $(LIB_PKG))
+ifneq (,$(NAMES_O))
+OBJS    := $(LIB_PKG)($(NAMES_O))
+endif
+endif #/* NT */
+endif
+FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O),   $(notdir $(basename $(FILES_ICC)))))
+NAMES_O   = $(notdir $(FILES_O))
 ifndef LIBRARIES
   LIBRARIES := $(LIB_PKG)	               
 ifneq ($(STAR_PATH),$(OUT_DIR))   
@@ -457,10 +470,20 @@ ifndef NT
 $(FILES_OG): $(OBJ_DIR)/%.o:%.g $(GEN_DIR)/geant3.def
 	cp $(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  -o  $(ALL_TAGS)
+	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o;
 $(FILES_OBJ) $(FILES_ORJ) $(FILES_OTJ): $(OBJ_DIR)/%.o: %.cxx
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
+	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o; 
+$(LIB_PKG)(%.o): %.g
+	cp $(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
+	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  -o  $(ALL_TAGS)
+	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o;
+$(LIB_PKG)(%.o): %.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
+	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o;
 $(FILES_SL) : $(OBJ_DIR)/%.o: %.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
+	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o;
 $(LIB_PKG)(%.o): %.F
 	$(FC)  $(CPPFLAGS) $(FFLAGS) $(FEXTEND)   -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o; $(RM) $(OBJ_DIR)/$(STEM).o
@@ -469,12 +492,12 @@ $(LIB_PKG)(%.o): %.c
 	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o; $(RM) $(OBJ_DIR)/$(STEM).o
 $(LIB_PKG)(%.o): %.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
-	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o; $(RM) $(OBJ_DIR)/$(STEM).o
-$(LIB_PKG)(%.o): %.cdf
+	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o;
 else #/* NT */
 $(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
 	$(CP)$(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
 	$(FOR72) $(subst /,\\,$(subst \,/,$(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  $(FOUT)$(ALL_TAGS)))
+	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o;
 $(FILES_OBJ) $(FILES_ORJ) $(FILES_OTJ): $(OBJ_DIR)/%.$(O): %.cxx
 	$(CXX) $(CXXFLAGS) $(CXXOPT) $(subst \,/, $(CPPFLAGS) -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN)
 $(FILES_SL) : $(OBJ_DIR)/%.$(O): %.cc
@@ -492,16 +515,15 @@ $(OBJ_DIR)/%.$(O): %.cc
 $(OBJ_DIR)/%.$(O): %.cdf
 	$(RM) $(subst /,\\,$(subst \,/,$(OBJ_DIR)/$(STEM).$(O)))
 endif #/* NT */
+$(LIB_PKG)(%.o): %.cdf
 	$(KUIPC) $(KUIPC_FLAGS) $(1ST_DEPS) $(GEN_DIR)/$(STEM).c
 ifndef NT
 	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(GEN_DIR)/$(STEM).c $(COUT) $(OBJ_DIR)/$(STEM).$(O); \
         $(RM)  $(GEN_DIR)/$(STEM).c
+	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).$(O); $(RM) $(OBJ_DIR)/$(STEM).$(O)
 else #/* NT */
 	$(CC)  $(subst \,/,$(CPPFLAGS) $(CFLAGS) $(COPT) -c $(CINP)$(GEN_DIR)/$(STEM).c $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN)) &&  \
         $(RM)  $(subst /,\\,$(subst \,/,$(GEN_DIR)/$(STEM).c))
-endif #/* NT */
-ifndef NT
-	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).$(O); $(RM) $(OBJ_DIR)/$(STEM).$(O)
 endif #/* NT */
 #_______________________dependencies_________________________________
 ifneq (,$(FILES_IDM))

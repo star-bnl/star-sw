@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.9 1999/02/08 02:29:20 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.10 1999/02/09 19:14:50 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.10  1999/02/09 19:14:50  fisyak
+# Add objy
+#
 # Revision 1.9  1999/02/08 02:29:20  fisyak
 # New Makefile scheme
 #
@@ -199,6 +202,9 @@ endif
 ifndef PAMS
   PAMS    := $(findstring /.share,$(INP_DIR))
 endif
+ifndef PAMS
+  PAMS    := $(findstring /StEvent,$(INP_DIR))
+endif
 ROOT_DIR:= $(word 1,$(subst $(PAMS), ,$(INP_DIR)))
 LEVEL   := $(words  $(subst /, ,$(subst $(ROOT_DIR),, $(INP_DIR))))
 branch  := $(subst /,,$(PAMS))
@@ -210,6 +216,11 @@ ifndef OUT_DIR
 endif
 ifeq (,$(strip $(filter /%,$(OUT_DIR))))
   override OUT_DIR := $(CWD)/$(OUT_DIR)
+endif
+ifeq ($(LEVEL), $(ONE))  #default is domain
+   ifeq (/StEvent,$(PAMS))
+    PKG :=StEvent
+   endif
 endif
 ifeq ($(LEVEL), $(TWO))  #default is domain
     DOM_DIR := $(CWD)

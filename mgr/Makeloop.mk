@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.50  1999/02/09 19:14:51  fisyak
+#  Add objy
+#
 #  Revision 1.49  1999/02/08 02:29:20  fisyak
 #  New Makefile scheme
 #
@@ -226,7 +229,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/02/08 02:29:20 $ 
+#           Last modification $Date: 1999/02/09 19:14:51 $ 
 #  default setings
 # Current Working Directory
 #
@@ -275,10 +278,17 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
   SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
   SUBDIRS := $(filter-out l3, $(SUBDIRS)) $(filter l3, $(SUBDIRS))
-  SUBDIRS := $(filter-out objy, $(SUBDIRS))
+  ifndef OBJY_HOME
+    SUBDIRS := $(filter-out objy, $(SUBDIRS))
+  endif
+  SUBDIRS := $(filter-out StEventReaderMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
+  SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
   ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
     SUBDIRS := $(filter-out trg, $(SUBDIRS))
     SUBDIRS := $(filter-out l3, $(SUBDIRS))
+    SUBDIRS := $(filter-out CLHEP, $(SUBDIRS)) 
   endif
   ifdef PKG
     SUBDIRS:=
@@ -299,6 +309,8 @@ St_TablesDoc:
 	$(MAKE)  -f $(MakePam) $(MAKFLAGS)
 	$(MAKE)  -f $(MakeDll) $(MAKFLAGS) -C  $(GEN_DIR)
 %_StRoot:
+	$(MAKE)  -f $(MakeDll) $(MAKFLAGS)
+StEvent_StEvent:
 	$(MAKE)  -f $(MakeDll) $(MAKFLAGS)
 St_Tables: $(BASE)
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables \
