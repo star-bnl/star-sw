@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.2 2000/03/09 20:45:04 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.3 2000/04/06 15:57:47 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
- * Revision 1.2  2000/03/09 20:45:04  aihong
- * add head for Log
+ * Revision 1.3  2000/04/06 15:57:47  aihong
+ * fix operator() for working fine when constructed above the track loop
+ *
+ * Revision 1.5  2000/05/05 19:25:39  aihong
+ * modified ctor
  *
  * Revision 1.2  2000/03/09 20:45:04  aihong
 
@@ -37,15 +40,17 @@ double lowRigReso(double xa, double xb, double ya, double yb,double theX);
 
 StuProbabilityPidAlgorithm::StuProbabilityPidAlgorithm(){
 
-      mDedxMethod=kTruncatedMeanId;
-StuProbabilityPidAlgorithm::StuProbabilityPidAlgorithm(StEvent& ev){
-      PID[0]=-1;//should be sth.standard say unIdentified.
-      PID[1]=-1;     
-      PID[2]=-1;
 
-     mProb[0]=0;
-     mProb[1]=0;
-     mProb[2]=0;
+StuProbabilityPidAlgorithm::StuProbabilityPidAlgorithm(StEvent& ev){
+     PID[0]   = -1;//should be sth.standard say unIdentified.
+     PID[1]   = -1;     
+     PID[2]   = -1;
+     mProb[0] = 0;
+     mProb[1] = 0;
+     mProb[2] = 0;
+     mExtrap  = false;
+
+     mDedxMethod=kTruncatedMeanId;
      mProb[0]=0;
      StuProbabilityPidAlgorithm::funcBandPt=&BetheBlock;
      mProb[2]=0;
@@ -53,7 +58,7 @@ StuProbabilityPidAlgorithm::StuProbabilityPidAlgorithm(StEvent& ev){
      StuProbabilityPidAlgorithm::funcBandPt=&BetheBloch;
      StuProbabilityPidAlgorithm::funcAmpPt =&MaxllBoltz;   
      StuProbabilityPidAlgorithm::funcResoPt=&Linear;
-     mExtrap=false;
+
      table = StParticleTable::instance();
 
 //-------------------------------
@@ -129,13 +134,26 @@ bool StuProbabilityPidAlgorithm::isExtrap(){
            return mExtrap;
 }
 
-          double rig=0.0;
-          double dedx=0.0;
-          double total=0;
-          double pt;
-          int    nhits;
-          int    charge;
-          int    i,j,jj;
+  //following parameters might (or not) be refreshed at the end of this method.
+     PID[0]   = -1;//should be sth.standard say unIdentified.
+     PID[1]   = -1;     
+     PID[2]   = -1;
+     mProb[0] = 0;
+     mProb[1] = 0;
+     mProb[2] = 0;
+     mExtrap  = false;
+
+
+     //local variables.
+          double rig    = 0.0;
+          double dedx   = 0.0;
+          double total  = 0;
+          double pt     = 0;
+          int    nhits  = 0;
+          int    charge = 0;
+          int    i      = 0;
+	  int    j      = 0;
+	  int    jj     = 0;
     const StPhysicalHelixD& helix=theTrack.geometry()->helix();
            dca=helix.distance(primaryVtx->position());
 
