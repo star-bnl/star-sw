@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.26 1998/08/01 20:34:01 kathy Exp $
+* $Id: bfc.kumac,v 1.27 1998/08/03 20:41:57 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.27  1998/08/03 20:41:57  kathy
+* now use detp geometry instead of bfc_util#bfc_gstar_setup to load settings for gstar
+*
 * Revision 1.26  1998/08/01 20:34:01  kathy
 * separated tid from tpt - now it's a separate variable in chain as it should be
 *
@@ -75,14 +78,17 @@
 * editted 7/28/98 K. Turner - now can read in txt file and run gstar (gtxin)
 * editted 7/31/98 K. Turner - now can skip events at beginning (g2tin)
 * editted 8/1/98  K. Turner - separated out tid from tpt as requested
+* editted 8/3/98  K. Turner - use detp geometry command for gstar setup
 * ******************************************************************************
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
 * TOP        - top level directory to search for kumacs 
 *            - change if you copy stuff to your area! 
 * tpc_sector_first - first sector # of tpc to simulation using tss
 * tpc_sector_last -  last sector # of tpc to simulation using tss
-* geomtype   - for running gstar (all, tpc_field,tpc_nofield) 
-* phystype   - for running gstar (on,off)
+* geomtype   - for gstar: tpc_only, field_only, complete, 
+*                         4th_off (for svt 4th layer off)
+* phystype   - for gstar:  hadr_on, hadr_off, decay_only
+*     *** can put 'help' as a value for geomtype or phystype too ***
 * domain     - list of domains to load [domain='tpc svt global]
 * chain      - list of modules to run **** HAVE TO BE IN ORDER ****
 *            - see more details below
@@ -200,8 +206,8 @@ MACRO bfc _
    TOP=$STAR _
    tpc_sector_first=1 _
    tpc_sector_last=1 _
-   geomtype=all _
-   phystype=on _
+   geomtype='complete 4th_off' _
+   phystype=hadr_on _
    domain=' geometry tpc svt global ' _
    chain='  g2tin svg tpg srs tfs sgr tpt tte_e tid svm egr ev0 evout' _
    first=1 _
@@ -225,7 +231,9 @@ MACRO bfc _
  message ' *** Input file              --> ' [input_file]        
  message ' *** Num Events to process   --> ' [no_events]
  message ' *** domains to load         --> ' [domain]
- message ' *** modules to process      --> ' [chain]   
+ message ' *** modules to process      --> ' [chain]  
+ message ' *** physics type            --> ' [phystype]
+ message ' *** geometry type           --> ' [geomtype]   
  message ' *** Output file name        --> ' [output_file]
  message ' *** tpc_sector_first        --> ' [tpc_sector_first]
  message ' *** tpc_sector_last         --> ' [tpc_sector_last]
@@ -251,7 +259,8 @@ MACRO bfc _
    
  exec setup#setup
       
- exec bfc_util#bfc_start domain=[domain] chain=[chain] 
+ exec bfc_util#bfc_start _
+    domain=[domain] chain=[chain] phystype=[phystype] geomtype=[geomtype]
    
  macro/global/import *
    
