@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.11 2000/01/27 20:30:40 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.12 2000/01/31 17:11:18 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,16 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.12  2000/01/31 17:11:18  porter
+ * fix break caused by the interaction design between
+ * 'StRoot/St_base/tableDescriptor.h' & 'StDbBroker::Descriptor'
+ * Now  StDbBroker::Descriptor==tableDescriptor_st
+ * And  StDbBroker::GetTableDescriptor() returns abstract StTableDescriptorI*
+ * Interface to StDbLib is (and was) handle correctly.
+ * StDbBroker is now tied to StRoot/St_base via tableDescriptor.h
+ * No problems would have occured if St_base interactions were based
+ * on StTableDesciptorI in the first place.
+ *
  * Revision 1.11  2000/01/27 20:30:40  porter
  * cleaned up dtor & error logic
  *
@@ -60,6 +70,9 @@
 #include "StDbLib/StDbTable.h"
 #include "dbNodes.h"
 #include "StDbLib/StDbTableIter.hh"
+#include "StDbLib/StDbBuffer.h"  // for inputting the descriptor
+#include "StDbLib/StDbTableDescriptor.h" 
+
 //
 //ClassImp(StDbBroker)
 //______________________________________________________________________________
@@ -123,13 +136,13 @@ void StDbBroker::Fill(void * pArray, const char **Comments)
   UInt_t i;
   for (i=0;i<m_nElements;i++) {
     
-    if(m_descriptor[i].dimensions>1)
+    if(m_descriptor[i].m_Dimensions>1)
       {
 	cerr<<"dim>1, can't handle yet"<<endl;
 	return;
       }
     
-    m_descriptor[i].name[31]='\0';
+    m_descriptor[i].m_ColumnName[31]='\0';
   }
   
   UInt_t date, time;
@@ -143,6 +156,96 @@ void StDbBroker::Fill(void * pArray, const char **Comments)
   
   delete [] Comments;
 }  
+
+//_____________________________________________________________________________
+StTableDescriptorI*
+StDbBroker::GetTableDescriptor(){
+
+StDbBuffer buff;
+StDbTableDescriptor* descriptor = new StDbTableDescriptor();
+
+ for(int i=0;i<m_nElements;i++){
+
+   buff.WriteScalar(m_descriptor[i].m_ColumnName,"name");
+
+   // array designation & lengths 
+   char lengthString[100];
+   ostrstream os(lengthString,100);
+   for(int k=0; k<m_descriptor[i].m_Dimensions-1;k++) os<<m_descriptor[i].m_IndexArray[k]<<",";
+   os<<m_descriptor[i].m_IndexArray[m_descriptor[i].m_Dimensions-1]<<ends;
+   buff.WriteScalar(lengthString,"length");
+
+   // position in struct
+   buff.WriteScalar(i,"position");
+
+   // Type identification
+  switch ((EColumnType)m_descriptor[i].m_Type) {
+  case kFloat:
+    {
+      buff.WriteScalar("Stfloat","type");
+      break;
+    }
+  case kInt:
+    {
+      buff.WriteScalar("Stint","type");
+      break;
+    }
+  case kLong:
+    {
+      buff.WriteScalar("Stlong","type");
+      break;
+    }
+  case kShort:
+    {
+      buff.WriteScalar("Stshort","type");
+      break;
+    }
+  case kDouble:
+    {
+      buff.WriteScalar("Stdouble","type");
+      break;
+    }
+  case kUInt:
+    {
+      buff.WriteScalar("Stuint","type");
+      break;
+    }
+  case kULong:
+    {
+      buff.WriteScalar("Stulong","type");
+      break;
+    }
+  case kUShort:
+    {
+      buff.WriteScalar("Stushort","type");
+      break;
+    }
+  case kUChar:
+    {
+      buff.WriteScalar("Stuchar","type");
+      break;
+    }
+  case kChar:
+    {
+      buff.WriteScalar("Stchar","type");
+      break;
+    }
+  default:
+    {
+      break;
+    }
+  }
+
+  descriptor->fillElement(&buff,0); // 0 means use this ....  don't check 
+                                    // about internal schemaID's
+  buff.Raz();
+
+ }
+
+return descriptor;
+
+}
+
 
 //_____________________________________________________________________________
 void
@@ -179,7 +282,7 @@ void * StDbBroker::Use(int tabID, int parID)
   // This is an "Offline" requirement of only 31 char per element name 
   UInt_t i;
   for (i=0;i<m_nElements;i++) {
-      m_descriptor[i].name[31]='\0';
+      m_descriptor[i].m_ColumnName[31]='\0';
   }
 
   void* pData = 0;
@@ -236,7 +339,7 @@ void * StDbBroker::Use()
   
   UInt_t i;
   for (i=0;i<m_nElements;i++) {
-      m_descriptor[i].name[31]='\0';
+      m_descriptor[i].m_ColumnName[31]='\0';
   }
 
   // Check if request is a "hierarchy" : if so send request to "params" DB

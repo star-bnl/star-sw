@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbUse.cxx,v 1.6 2000/01/10 20:31:16 porter Exp $
+ * $Id: DbUse.cxx,v 1.7 2000/01/31 17:11:18 porter Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -11,6 +11,16 @@
  ***************************************************************************
  *
  * $Log: DbUse.cxx,v $
+ * Revision 1.7  2000/01/31 17:11:18  porter
+ * fix break caused by the interaction design between
+ * 'StRoot/St_base/tableDescriptor.h' & 'StDbBroker::Descriptor'
+ * Now  StDbBroker::Descriptor==tableDescriptor_st
+ * And  StDbBroker::GetTableDescriptor() returns abstract StTableDescriptorI*
+ * Interface to StDbLib is (and was) handle correctly.
+ * StDbBroker is now tied to StRoot/St_base via tableDescriptor.h
+ * No problems would have occured if St_base interactions were based
+ * on StTableDesciptorI in the first place.
+ *
  * Revision 1.6  2000/01/10 20:31:16  porter
  * modified StDbBroker to be an interface to the DB-interface, StDbLib.
  *  - old functionality is retained for the short-term & modifications
@@ -362,21 +372,21 @@ count = 0;
 
 for (j=0;j<nVar;j++)
   {
-    if (strcmp(d[j].name,names[j]))
+    if (strcmp(d[j].m_ColumnName,names[j]))
       break;
     
     //cout<<"offset: \""<<d[j].offset<<"\" \""<<row[1]<<"\""<<endl;
-    if ( d[j].offset!=offset[j] )
+    if ( d[j].m_Offset!=(unsigned int)offset[j] )
       break;
     
     //same offset: check nDims
     //cout<<"nDims: \""<<d[j].dimensions<<"\" \""<<row[2]<<"\""<<endl;
-    if ( d[j].dimensions!=nDims[j] )
+    if ( d[j].m_Dimensions!=(unsigned int)nDims[j] )
       break;
     
     //same nDims: check firstDim
     //cout<<"nDims: \""<<d[j].firstDimension<<"\" \""<<row[3]<<"\""<<endl;
-    if ( d[j].firstDimension!=firstDim[j] )
+    if ( d[j].m_IndexArray[0]!=(unsigned int)firstDim[j] )
       break;
     
     //cout<<"variable "<< j+1 <<" is the same"<<endl;
@@ -391,20 +401,20 @@ if (count!=nVar)
 
     for (j=0;j<nVar;j++)
       {
-	cerr<<"names: \""<<d[j].name<<"\" \""<<names[j]<<"\""<<endl;
-	if (strcmp(d[j].name,names[j]))
+	cerr<<"names: \""<<d[j].m_ColumnName<<"\" \""<<names[j]<<"\""<<endl;
+	if (strcmp(d[j].m_ColumnName,names[j]))
 	  break;
 	
-	cerr<<"offset: "<<d[j].offset<<" "<<offset[j]<<endl;
-	if ( d[j].offset!=offset[j] )
+	cerr<<"offset: "<<d[j].m_Offset<<" "<<offset[j]<<endl;
+	if ( d[j].m_Offset!=(unsigned int)offset[j] )
 	  break;
 	
-	cerr<<"nDims: "<<d[j].dimensions<<" "<<nDims[j]<<endl;
-	if ( d[j].dimensions!=nDims[j] )
+	cerr<<"nDims: "<<d[j].m_Dimensions<<" "<<nDims[j]<<endl;
+	if ( d[j].m_Dimensions!=(unsigned int)nDims[j] )
 	  break;
 
-	cerr<<"firstDim: "<<d[j].firstDimension<<" "<<firstDim[j]<<endl;
-	if ( d[j].firstDimension!=firstDim[j] )
+	cerr<<"firstDim: "<<d[j].m_IndexArray[0]<<" "<<firstDim[j]<<endl;
+	if ( d[j].m_IndexArray[0]!=(unsigned int)firstDim[j] )
 	  break;
       }
     
@@ -506,13 +516,13 @@ else // query succeeded, get result
 		    for (j=0;j<nVar;j++)
 		      {
 			
-			switch(d[j].dimensions)
+			switch(d[j].m_Dimensions)
 			  {
 			  case 0:
 			    nTimes=1;
 			    break;
 			  case 1:
-			    nTimes=d[j].firstDimension;
+			    nTimes=d[j].m_IndexArray[0];
 			    break;
 			  case 2:
 			    cerr<<"two-dims not handled yet"<<endl;
@@ -526,13 +536,13 @@ else // query succeeded, get result
 			  }
 			
 			//from db offset to user offset
-			firstByte=i*sizeOfStruct+d[j].offset;
+			firstByte=i*sizeOfStruct+d[j].m_Offset;
 			firstDbByte=i*sizeOfDbStruct+offset[j];
 			
 			for (k=0;k<nTimes;k++) {
 
 			  //MYSQL_ROW row is just char**
-			  switch(d[j].type)
+			  switch((StDbBroker::EColumnType)d[j].m_Type)
 			    {
 			    case kUChar:
 			    case kChar:
