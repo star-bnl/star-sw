@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.29 2000/08/30 05:37:02 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.30 2000/11/02 16:33:28 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.29  2000/08/30 05:37:02  ullrich
- * Obtain trigger mask from StEvtHddr dataset.
+ * Revision 2.30  2000/11/02 16:33:28  ullrich
+ * Fixed tiny memory leak.
  *
  * Revision 2.29  2000/08/30 05:37:02  ullrich
  * Obtain trigger mask from StEvtHddr dataset.
@@ -140,7 +140,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.29 2000/08/30 05:37:02 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.30 2000/11/02 16:33:28 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -164,7 +164,10 @@ StEventMaker::StEventMaker(const char *name, const char *title) : StMaker(name)
     mCreateEmptyInstance = kFALSE;
 }
 
-StEventMaker::~StEventMaker() { /* noop */ }
+StEventMaker::~StEventMaker()
+{
+    delete mEventManager;
+}
 
 void
 StEventMaker::Clear(const char*)
@@ -319,17 +322,24 @@ StEventMaker::loadRunConstants()
     if (theEventManager->openEvent("dst/.runco") != oocError) {
         mDstSummaryParam = theEventManager->returnTable_dst_summary_param(nrows);
         theEventManager->closeEvent();
-        if (mDstSummaryParam) return kStOK;
+        if (mDstSummaryParam) {
+	    delete theEventManager;
+	    return kStOK;
+	}
     }
     
     //  2nd suppose we are in doEvents
     if (theEventManager->openEvent("dstRunco") != oocError) {
         mDstSummaryParam = theEventManager->returnTable_dst_summary_param(nrows);
         theEventManager->closeEvent();
-        if (mDstSummaryParam) return kStOK;
+        if (mDstSummaryParam)  {
+	    delete theEventManager;
+	    return kStOK;
+	}
     }
 
     gMessMgr->Warning() << "StEventMaker::loadRunConstants(): cannot find dst_summary_param" << endm;
+    delete theEventManager;
     return kStWarn;
 }
 
