@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StRichGeometryDb.h,v 1.3 2000/02/08 16:26:02 lasiuk Exp $
+ * $Id: StRichGeometryDb.h,v 1.4 2000/02/12 21:55:45 lasiuk Exp $
  *
  * Description:
  *  Both have common_fill,star_fill and my_fill private
@@ -15,11 +15,14 @@
  *
  *****************************************************************
  * $Log: StRichGeometryDb.h,v $
- * Revision 1.3  2000/02/08 16:26:02  lasiuk
- * rmove vector and StGlobals from Interface.
- * allocate space for survey parameters
- * calculate sector origins and pad corner positions
+ * Revision 1.4  2000/02/12 21:55:45  lasiuk
+ * Wire position adjustment
  *
+ *
+ * Revision 1.4  2000/02/12 21:55:45  lasiuk
+ * Wire position adjustment
+ *
+ * Revision 1.3  2000/02/08 16:26:02  lasiuk
  * rmove vector and StGlobals from Interface.
  * allocate space for survey parameters
  * calculate sector origins and pad corner positions
@@ -73,7 +76,7 @@ public:
     double quad_gap_x;          // gap between quadrants in x
 	
 	
-    double wire_x0;             // first wire offset
+    double wire_x0[2];             // first wire offset
     double quad_gap_y;          // gap between quadrants in x
     StThreeVector<double> mQuartzDimension;
     StThreeVector<double> mPadPlaneDimension;
@@ -106,9 +109,9 @@ public:
     double quadrantX0(int)        const;
     double quadrantGapInZ()       const;
     double quadrantY0(int)        const;
-	
+    double quadrantYOrigin(int)   const;
+    double firstWirePositionInX(int) const;
     const StThreeVector<double>& padPlaneDimension() const;
-    double firstWirePositionInX() const;
     double proximityGap()                            const; 
     
     double firstWirePositionInY(int) const;
@@ -153,7 +156,7 @@ inline double StRichGeometryDb::quadrantGapInZ() const {return quad_gap_z;}
 inline double StRichGeometryDb::quadrantGapInX() const { return quad_gap_x;}
 inline const StThreeVector<double>& StRichGeometryDb::quartzDimension() const { return mQuartzDimension;}
 inline const StThreeVector<double>& StRichGeometryDb::padPlaneDimension() const { return mPadPlaneDimension;}
-inline double StRichGeometryDb::firstWirePositionInX() const { return wire_x0;}
+inline double StRichGeometryDb::firstWirePositionInX(int q) const { return (q>0) ? wire_x0[0] : wire_x0[1]; }
 inline const StThreeVector<double>& StRichGeometryDb::normalVectorToPadPlane() const { return mNormalVectorToPadPlane;}
 
 	
