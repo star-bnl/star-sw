@@ -7,6 +7,7 @@
 //:             06may1999 ppy getTracks returns 1 for error
 //:             10aug1999 ppy nHitsForSegment set to at least 3 for
 //:                           secondary search.
+//:             23aug1999 ppy ClassImp added with ROOT flag
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfFinder, steers track finding
@@ -14,6 +15,12 @@
 //: AUTHOR:      ppy - Pablo Yepes, yepes@physics.rice.edu
 //:>------------------------------------------------------------------
 #include "FtfFinder.h"
+
+
+#ifdef SL3ROOT
+ClassImp(FtfFinder)
+#endif
+
 
 //*********************************************************************
 //      Initializes the package
@@ -70,8 +77,10 @@ double FtfFinder::process (  ) {
 
    cpuTime  = CpuTime ( ) ;
    realTime = RealTime ( ) ;
+#ifdef DEBUG
    if ( para.infoLevel > 0 )
-      printf ( "ftf time: cpu %7.3f real %f7.2 \n ", cpuTime, realTime ) ;
+      printf ( "FtfFinder::process: cpu %7.3f real %f7.2 \n", cpuTime, realTime ) ;
+#endif
    return cpuTime ;
 } 
 //********************************************************************
@@ -121,7 +130,7 @@ int FtfFinder::getTracks ( ) {
 //
 //
          if ( nTracks > maxTracks ){
-            printf("FtfFinder::getTracks: Max nr %d tracks reached !\n", maxTracks ) ;
+            printf("\n FtfFinder::getTracks: Max nr tracks reached !") ;
             nTracks = maxTracks  ;
             return 1 ;
          }
@@ -390,7 +399,7 @@ int FtfFinder::setPointers ( )
 -------------------------------------------------------------------------*/
       thisHit = &(hit[ihit]) ;
       localRow = thisHit->row - para.rowInnerMost ;
-      if ( fmod((double)localRow,(double)para.modRow) != 0 ) continue ;
+      if ( fmod(localRow,para.modRow) != 0 ) continue ;
 
       if ( thisHit->row < para.rowInnerMost ) continue ;
       if ( thisHit->row > para.rowOuterMost ) continue ;

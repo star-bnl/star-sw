@@ -40,7 +40,7 @@ extern "C" long type_of_call sl3Tpc_(
 //   Decode hit buffer
 //
    int nBytes = hitH->nok ;
-   int nHits =  tracker.read ( nBytes, (int *)hit ) ;
+   int nHits =  tracker.readSector ( (struct TPCSECLP *)hit ) ;
 //
 //   Track sector
 //

@@ -3,6 +3,9 @@
 //: HISTORY:
 //:             28oct1996 version 1.00
 //:             11aug1999 ppy primary flag fill in filling routines
+//:             22aug1999 fixing Debug routines (TRDEBUG flag on)  
+//:             23aug1999 change loop order in seekNextHit
+//:             29aug1999 move fill tracks from follow to build
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfTrack
@@ -12,12 +15,15 @@
 #include <memory.h>
 #include <stdio.h>
 #include <math.h>
-//#include "TrackerFrame.h"
 #include "FtfHit.h"
 #include "FtfTrack.h"
 #include "FtfVolume.h"
 
-extern FtfFinder     tracker ;
+//extern FtfFinder     tracker ;
+
+#ifdef SL3ROOT
+ClassImp(FtfTrack)
+#endif
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //    Add hits to track
@@ -139,18 +145,18 @@ void FtfTrack::add ( FtfTrack *piece )
       counter = 0 ;
       lastHit->nextTrackHit = piece->firstHit ;
       lastHit         = piece->lastHit ;
-      for ( FtfHit *currentHit  = piece->firstHit ; 
+      for ( FtfHit *currentHit   = (FtfHit *)piece->firstHit ; 
                      currentHit != 0 && counter < piece->nHits ;
-                     currentHit  = currentHit->nextTrackHit  ) {
+                     currentHit  = (FtfHit *)currentHit->nextTrackHit  ) {
         currentHit->track = this   ;
 	counter++ ;
        }
     }
     else {
       counter = 0 ;
-      for ( FtfHit *currentHit  = piece->firstHit ; 
+      for ( FtfHit *currentHit   = (FtfHit *)piece->firstHit ; 
                      currentHit != 0 && counter < piece->nHits ;
-                     currentHit  = currentHit->nextTrackHit  ) {
+                     currentHit  = (FtfHit *)currentHit->nextTrackHit  ) {
         currentHit->track = this   ;
 	counter++;
       }
@@ -196,6 +202,13 @@ int FtfTrack::buildTrack ( FtfHit *firstHit, VOLUME *volume ) {
 //    Now to extent track the other direction if requested
 //
    if ( para->goBackwards ) follow ( volume, GO_UP, para->rowOuterMost ) ;
+//
+//  Fill tracks
+//
+    if ( para->fillTracks ) fill ( ) ;
+#ifdef TRDEBUG
+   debugFill ( ) ;
+#endif
 
    return 1 ;
 }
@@ -220,9 +233,9 @@ void FtfTrack::dEdx (  ){
 //
 //
 //
-   for  ( nextHit = firstHit ; 
+   for  ( nextHit = (FtfHit *)firstHit ; 
           nextHit != 0 ;
-          nextHit = nextHit->nextTrackHit) { 
+          nextHit = (FtfHit *)nextHit->nextTrackHit) { 
     
       dedx += nextHit->q ;
 	 
@@ -249,20 +262,21 @@ void FtfTrack::dEdx (  ){
 //***********************************************************************
 void FtfTrack::deleteCandidate(void)
 {
+  FtfHit *currentHit = (FtfHit *)firstHit ;
   FtfHit *nextHit ;
 #ifdef TRDEBUG
   debugDeleteCandidate ( ) ;
 #endif
-  while ( firstHit != 0 )
+  while ( currentHit != 0 )
   {
-    nextHit            = firstHit->nextTrackHit;
-    firstHit->nextTrackHit     =  0 ;
-    firstHit->xyChi2   =
-    firstHit->szChi2   =  
-    firstHit->s        =  0.F ;
+    nextHit            = (FtfHit *)currentHit->nextTrackHit;
+    currentHit->nextTrackHit     =  0 ;
+    currentHit->xyChi2   =
+    currentHit->szChi2   =  
+    currentHit->s        =  0.F ;
 
-    firstHit->setStatus ( 0, para ) ;
-    firstHit = nextHit;
+    currentHit->setStatus ( 0, para ) ;
+    currentHit = nextHit;
   }
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -318,6 +332,7 @@ void FtfTrack::fillPrimary (  double &xc, double &yc, double &rc  ) {
 //       Get the rotation
 //
    double d_angle = angle_last - angle_vertex ;
+// double d_angle = angle_vertex - angle_last ;
 
    if ( d_angle >  pi ) d_angle =   d_angle - twoPi  ;
    if ( d_angle < -pi ) d_angle =   d_angle + twoPi  ;
@@ -326,8 +341,8 @@ void FtfTrack::fillPrimary (  double &xc, double &yc, double &rc  ) {
    r0   = para->rVertex ;
    phi0 = para->phiVertex ;
    psi  = (double)(angle_vertex - q * 0.5F * pi) ;
-   if ( psi < 0        )  psi = (double)(psi + twoPi );
-   if ( psi > 2. * pi  )  psi = (double)(psi - twoPi );
+   if ( psi < 0     )  psi = (double)(psi + twoPi );
+   if ( psi > twoPi )  psi = (double)(psi - twoPi );
 //
 //      Get z parameters if needed       
 //
@@ -379,8 +394,8 @@ void FtfTrack::fillSecondary ( double &xc, double &yc, double &rc )
    if ( dangle < -pi ) dangle =   dangle + twoPi  ;
 
    q    = ( ( dangle > 0 ) ? 1 : -1 ) ;
-   r0   = lastHit->r   ;
-   phi0 = lastHit->phi ;
+   r0   = ((FtfHit *)lastHit)->r   ;
+   phi0 = ((FtfHit *)lastHit)->phi ;
    psi  = (double)(angle2 - q * piHalf );
    if ( psi < 0     ) psi = (double)(psi + twoPi );
 //
@@ -416,12 +431,12 @@ int FtfTrack::follow ( VOLUME *volume, int way, int ir_stop ) {
    FtfHit *nextHit ;
    
    if ( way < 0 )
-      nextHit = lastHit ;
+      nextHit = (FtfHit *)lastHit ;
    else
-      nextHit = firstHit ; 
+      nextHit = (FtfHit *)firstHit ; 
 #ifdef TRDEBUG
-        if ( para->track_debug && para->debug_level >= 2 )
-        printf ( " \n ===> Going into Track extension <=== " );
+        if ( para->trackDebug && para->debugLevel >= 2 )
+        printf ( "FtfTrack::follow: ===> Going into Track extension <===\n" );
 #endif
 //
 //     Define variables to keep total chi2
@@ -442,18 +457,19 @@ int FtfTrack::follow ( VOLUME *volume, int way, int ir_stop ) {
       nextHit = seekNextHit ( volume, nextHit, way*para->trackRowSearchRange, USE_FOLLOW ) ;
 
 #ifdef TRDEBUG
-      if ( para.track_debug && para->debug_level >= 1 ){
+      if ( para->trackDebug && para->debugLevel >= 1 ){
          if ( nextHit != 0 ){
-            printf ( " Follow : Search succesful, hit selected %d ", nextHit->id );
-		    nextHit->Show ( para->color_track ) ;
+            printf ( "FtfTrack::follow: Search succesful, hit selected %d\n", 
+                      nextHit->id );
+//		    nextHit->Show ( para->color_track ) ;
          }
          else{
-            printf ( " Follow : Search unsuccesful " );
-            if ( chi2[0]+chi2[1] > para->chi2_hit_cut )
+            printf ( "FtfTrack::follow: Search unsuccesful\n" );
+            if ( chi2[0]+chi2[1] > para->hitChi2Cut )
                printf ( " hit chi2 %f larger than cut %f ", chi2[0]+chi2[1], 
-                                                            para->chi2_hit_cut ) ;
+                                                            para->hitChi2Cut ) ;
          }
-         Debug_Ask () ;
+         debugAsk () ;
       }
 #endif
 //
@@ -495,13 +511,6 @@ int FtfTrack::follow ( VOLUME *volume, int way, int ir_stop ) {
    double normalized_chi2 = (chi2[0]+chi2[1])/nHits ;
    if ( normalized_chi2 > para->trackChi2Cut ) return 0 ;
 //
-//  Otherwise go for it
-//
-   if ( para->fillTracks ) fill ( ) ;
-#ifdef TRDEBUG
-   debugFill ( ) ;
-#endif
-//
    return 1 ;
 }
 /*******************************************************************************
@@ -517,14 +526,14 @@ int FtfTrack::followHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
 //           Check delta eta 
 //
 //   if ( baseHit->dz < 1000. && candidateHit->dz < 1000 ){
-      deta = fabs((double) ((baseHit->eta)-(candidateHit->eta))) ;
+      deta = fabs((baseHit->eta)-(candidateHit->eta)) ;
       if ( deta > para->deta ) return 0 ; 
 //   }
 //   else deta = 0.F ;
 //
 //           Check delta phi
 //
-  dphi = fabs((double)((baseHit->phi)-(candidateHit->phi))) ;
+  dphi = fabs((baseHit->phi)-(candidateHit->phi)) ;
   if ( dphi > para->dphi && dphi < twoPi-para->dphi ) return 0 ;
 //
 //      If looking for secondaries calculate conformal coordinates
@@ -612,13 +621,11 @@ int FtfTrack::mergePrimary ( AREA *trackArea ){
 //
    i_phi = (int)(( psi - para->phiMinTrack ) / para->phiSliceTrack + 1 );
    if ( i_phi < 0 ) {
-       if ( para->infoLevel > 4 ) 
-          printf ( " Track phi index too low  %d \n", i_phi ) ;
+       printf ( " Track phi index too low  %d \n", i_phi ) ;
        i_phi = 1 ;
    }
    if ( i_phi >= para->nPhiTrackPlusOne ) {
-       if ( para->infoLevel > 4 ) 
-          printf ( " Track phi index too high %d \n", i_phi ) ;
+       printf ( " Track phi index too high %d \n", i_phi ) ;
        i_phi = para->nPhiTrack ;
    }
 //
@@ -626,13 +633,11 @@ int FtfTrack::mergePrimary ( AREA *trackArea ){
 //
    i_eta = (int)(( eta - para->etaMinTrack ) / para->etaSliceTrack + 1 );
    if ( i_eta <= 0 ) {
-       if ( para->infoLevel > 4 ) 
-          printf ( " Track eta index too low  %d \n", i_eta ) ;
+       printf ( " Track eta index too low  %d \n", i_eta ) ;
        i_eta = 1 ;
    }
    if ( i_eta >= para->nEtaTrackPlusOne ) {
-       if ( para->infoLevel > 4 ) 
-          printf ( " Track eta index too high %d \n", i_eta ) ;
+       printf ( " Track eta index too high %d \n", i_eta ) ;
        i_eta = para->nEtaTrack ;
    }
 //
@@ -668,7 +673,7 @@ int FtfTrack::mergePrimary ( AREA *trackArea ){
 
             i_track->add ( this ) ;
 #ifdef TRDEBUG
-			if ( para->debug_level > 1 )
+			if ( para->debugLevel > 1 )
                   printf ( " \n Track %d merge into %d ", this->id, i_track->id ) ;
 #endif
             track_merged = 1 ;
@@ -761,32 +766,36 @@ FtfHit *FtfTrack::seekNextHit ( VOLUME  *volume,
 //
 //      Loop over modules
 //
-   for ( k=0; k< N_LOOP; k++){ 
+   for ( ir = 0 ; ir < n_r_steps ; ir++ ){
+      irp = initialRow + way * ir ;
+      for ( k=0; k< N_LOOP; k++){ 
          ipp = baseHit->phiIndex + loop_phi[k];
 //
 //--   Gymnastics if phi is closed
 //
-      if ( ipp < 1 ) {
-         if ( para->phiClosed )
-            ipp = para->nPhi + ipp ;
-         else
-            continue ;
-      }
-      else if ( ipp > para->nPhi ) {
-         if ( para->phiClosed )
-            ipp = ipp - para->nPhi ;
-         else
-            continue ;
-      }
-//--
-//--     Now get eta index
+         if ( ipp < 1 ) {
+            if ( para->phiClosed )
+               ipp = para->nPhi + ipp ;
+            else
+               continue ;
+         }
+         else if ( ipp > para->nPhi ) {
+            if ( para->phiClosed )
+               ipp = ipp - para->nPhi ;
+            else
+               continue ;
+         }
 //
-      itp = baseHit->etaIndex + loop_eta[k];
-      if ( itp <     1      ) continue ;
-      if ( itp > para->nEta ) continue ;
-
-      for ( ir = 0 ; ir < n_r_steps ; ir++ ){
-         irp = initialRow + way * ir ;
+//     Now get eta index
+//
+         itp = baseHit->etaIndex + loop_eta[k];
+         if ( itp <     1      ) continue ;
+         if ( itp > para->nEta ) continue ;
+//
+#ifdef TRDEBUG
+         if ( para->trackDebug && para->debugLevel >= 4 ) 
+            printf ( "FtfTrack::seekNextHit: search in row %d \n",irp ) ;
+#endif
 //
 //       Now loop over hits in each volume 
 //
@@ -795,7 +804,7 @@ FtfHit *FtfTrack::seekNextHit ( VOLUME  *volume,
              candidateHit != 0 ;
              candidateHit = candidateHit->nextVolumeHit ){
 #ifdef TRDEBUG
-             Debug_in_Volume ( baseHit, candidateHit ) ;
+             debugInVolume ( baseHit, candidateHit ) ;
 #endif
 //----------------------------------------------------------------------------
 //         Check whether the hit was used before
@@ -848,12 +857,12 @@ int FtfTrack::segment( VOLUME *volume, int way ){
 //   Check which way to go
 //
 	if ( way < 0 ) 
-	   nextHit	= lastHit ;
+	   nextHit = (FtfHit *)lastHit ;
 	else
-	   nextHit = firstHit ;
+	   nextHit = (FtfHit *)firstHit ;
 #ifdef TRDEBUG
-   if ( para->track_debug && para->debug_level >= 4 )
-        printf ( " \n **** Trying to form segment **** " );
+   if ( para->trackDebug && para->debugLevel >= 4 )
+        printf ( "FtfTrack:segment: **** Trying to form segment ****\n" );
 #endif
 //
 //    Loop as long a a hit is found and the segment
@@ -861,16 +870,18 @@ int FtfTrack::segment( VOLUME *volume, int way ){
 //
    while ( nextHit != 0 && nHits < para->nHitsForSegment ) {
       chi2[0] = para->maxDistanceSegment ; ;
-      nextHit = seekNextHit ( volume, nextHit, way*para->segmentRowSearchRange, USE_SEGMENT ) ;
+      nextHit = seekNextHit ( volume, nextHit, way*para->segmentRowSearchRange, 
+                              USE_SEGMENT ) ;
 #ifdef TRDEBUG
-      if ( para->track_debug && para->debug_level > 0 ) {
+      if ( para->trackDebug && para->debugLevel > 0 ) {
          if ( nextHit != 0 ) {
-            printf ( " \n SEGMENT: Search succesful, hit %d selected ",nextHit->id );
-	    nextHit->Show ( para->color_track ) ;
+            printf ( "FtfTrack::segment: Search succesful, hit %d selected\n",
+                      nextHit->id );
+//       nextHit->Show ( para->color_track ) ;
          }
          else
-            printf ( " \n SEGMENT: Search unsuccesful " );
-         Debug_Ask () ;
+            printf ( "FtfTrack::segment: Search unsuccesful\n" );
+         debugAsk () ;
       }
 #endif
 //
@@ -927,19 +938,19 @@ int FtfTrack::segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
 //   select hit with the
 //   the smallest value of d3 (defined below)
 //
-   dphi  = (double)fabs((double)((baseHit->phi) - (candidateHit->phi))) ; 
+   dphi  = (double)fabs((baseHit->phi) - (candidateHit->phi)) ; 
    if ( dphi > pi ) dphi = (double)fabs( twoPi - dphi ) ;
    if ( dphi > para->dphi && dphi < twoPi -para->dphi ) return 0 ;
 //
 //    Make sure we want to look at the difference in eta
 //
    if ( baseHit->dz < 1000. && candidateHit->dz < 1000. ){
-        deta  = (double)fabs((double)((baseHit->eta) - (candidateHit->eta))) ; 
+        deta  = (double)fabs((baseHit->eta) - (candidateHit->eta)) ; 
         if ( deta > para->deta ) return 0 ;
    }
    else deta = 0.F ;
 
-   dr    = (double)fabs((double)(baseHit->row - candidateHit->row));
+   dr    = (double)fabs(baseHit->row - candidateHit->row);
    d3    = (double)(toDeg * dr * ( dphi  + deta ) ) ;
 //
 //     If initial segment is longer than 2 store angle info in 
@@ -953,17 +964,17 @@ int FtfTrack::segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
       lastXyAngle = angle ;
    }
 #ifdef TRDEBUG
-   if ( para->track_debug && para->debug_level >= 3 ) {
-      printf ( " \n dr,dphi,deta  %7.2f %7.2f %7.2f ",dr,dphi,deta ) ;
-      printf ( " \n 3d  distance  %7.2f ", d3 );
-      printf ( " \n Min distance  %7.2f ", chi2[0] );
+   if ( para->trackDebug && para->debugLevel >= 3 ) {
+      printf ( "FtfTrack::segmentHitSelection:\n");
+      printf ( "dr,dphi,deta,distance, Min distance  %7.2f %7.2f %7.2f %7.2f %7.2f\n",
+                dr,dphi,deta,d3,chi2[0] ) ;
       if ( d3 < chi2[0] )
-         printf ( " \n Best point, keep it !!! " );  
+         printf ( "Best point, keep it !!!\n" );  
       else{
-         printf ( "\n Worse than previous, reject !! " );
-         candidateHit->Show ( para->color_transparent );
+         printf ( "Worse than previous, reject !!\n" );
+//       candidateHit->Show ( para->color_transparent );
       }
-      Debug_Ask() ;
+      debugAsk() ;
    }
 #endif
    if ( d3 < chi2[0] ) {
@@ -976,7 +987,7 @@ int FtfTrack::segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
          dy     = candidateHit->y - baseHit->y ;
          angle  = (double)atan2 ( dy, dx ) ;
          if ( angle < 0  ) angle = angle + twoPi ;
-	    dangle = (double)fabs ((double)( lastXyAngle - angle ));
+	    dangle = (double)fabs ( lastXyAngle - angle );
 	    lastXyAngle = angle ;
          if ( dangle > para->segmentMaxAngle ) return 0 ;
       }
@@ -998,21 +1009,20 @@ int FtfTrack::segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
 //******************************************************************************/
 void FtfTrack::debugAsk (void) 
 {
-      char cc;
+    char cc;
 	  
-      printf ( "\n stop(s), continue (any other key) " );
-      cc = getchar();
-      if ( cc == 's' ) para->track_debug = 0 ;
-	  if ( cc == '1' ) para->debug_level = 1 ;
-	  if ( cc == '2' ) para->debug_level = 2 ;
-	  if ( cc == '3' ) para->debug_level = 3 ;
-	  if ( cc == '4' ) para->debug_level = 4 ;
-	  if ( cc == '5' ) para->debug_level = 5 ;
-	  if ( cc == '6' ) para->debug_level = 6 ;
-	  if ( cc == '7' ) para->debug_level = 7 ;
+    printf ( "stop(s), continue (any other key)\n" );
+    cc = getchar();
+    if ( cc == 's' ) para->trackDebug = 0 ;
+    if ( cc == '1' ) para->debugLevel = 1 ;
+    if ( cc == '2' ) para->debugLevel = 2 ;
+    if ( cc == '3' ) para->debugLevel = 3 ;
+    if ( cc == '4' ) para->debugLevel = 4 ;
+    if ( cc == '5' ) para->debugLevel = 5 ;
+    if ( cc == '6' ) para->debugLevel = 6 ;
+    if ( cc == '7' ) para->debugLevel = 7 ;
 
-	  printf ( " \n Debug Level %d ", para->track_debug ) ;
-		  
+    printf ( "FtfTrack::debugAsk: Debug Level %d\n", para->debugLevel ) ;
 	 
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1020,23 +1030,24 @@ void FtfTrack::debugAsk (void)
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void FtfTrack::debugDeleteCandidate(void)
 {
-  if ( para->track_debug == 0 || para->debug_level < 1 ) return ;
+  if ( para->trackDebug == 0 || para->debugLevel < 1 ) return ;
   
-  for ( start_loop() ; done() ; nextHit() ) {
-	  currentHit->Show ( para->color_back ) ;
-  }
-  printf ( "\n ==> Track %d has %d hits <==   "
+//  for ( startLoop() ; done() ; nextHit() ) {
+//  currentHit->Show ( para->color_back ) ;
+//  }
+  printf ( "FtfTrack::debugDeleteCandidate: Track %d has %d hits <==\n"
                            ,id, nHits );
-  printf ( "\n -- Minimum is %d,  delete it -- ",para->mn_hit_trk  );
-//  Print ( 31 ) ;
-  Debug_Ask () ;
+  printf ( "FtfTrack::debugDeleteCandidate: Minimum is %d, delete it \n",
+            para->minHitsPerTrack  );
+//  print ( 31 ) ;
+  debugAsk () ;
 }
 /*****************************************************************************  
      Fill track information tables
 ******************************************************************************/
 void FtfTrack::debugFill (  )
 {
-   if ( para->track_debug && para->debug_level >= 1 ) {
+   if ( para->trackDebug && para->debugLevel >= 1 ) {
       printf ( "\n ===> Track %d added  <=== ",id+1 );
       Print ( 31 ) ;
    }
@@ -1046,32 +1057,32 @@ void FtfTrack::debugFill (  )
 ******************************************************************************/
 void FtfTrack::debugFollowCandidate ( FtfHit* candidateHit )
 {
-  if ( !para->track_debug || para->debug_level >= 4 ) return ;
+  if ( !para->trackDebug || para->debugLevel >= 4 ) return ;
 //
 //    Show the whole track and fit
 //
-  for ( start_loop() ; done() ; nextHit() ) {
-	  currentHit->Show ( para->color_track ) ;
-  }
-  candidateHit->Show ( para->color_candidate );
+//for ( startLoop() ; done() ; nextHit() ) {
+//  currentHit->Show ( para->color_track ) ;
+//}
+//  candidateHit->Show ( para->color_candidate );
 //
 //        Print relevant information
 //
-  printf ( " \n ===> Extension in Follow <===" ) ;
- // Print ( 31 ) ;
+  printf ( "FtfTrack::debugFollowCandidate ===> Extension in Follow <===\n" ) ;
+ // print ( 31 ) ;
 
-  printf ( " \n Try hit %d  ", candidateHit->id ) ;
-  candidateHit->Print ( 1 ) ;
+  printf ( "FtfTrack::debugFollowCandidate: Try hit %d\n", candidateHit->id ) ;
+  candidateHit->print ( 11 ) ;
 //
 //     If the hit already used say it and forget about it
 //
   if ( candidateHit->track != 0 )
   {
-      printf ( " \n hit %d used in track %d ",
+      printf ( "FtfTrack::debugFollowCandidate: hit %d used in track %d\n",
                     candidateHit->id, id );
-      Debug_Ask () ;
-      candidateHit->Show ( para->color_candidate ) ;
-      candidateHit->Print ( 3 ) ;
+      debugAsk () ;
+//    candidateHit->Show ( para->color_candidate ) ;
+      candidateHit->print ( 3 ) ;
   }
 }
 /*******************************************************************************
@@ -1083,8 +1094,8 @@ void FtfTrack::debugFollowSuccess ( double dxy,      double dsz, double lxyChi2,
 //
 //     Check whether track needs to be debugged
 //
-   if ( !para->track_debug     ) return ;
-   if (  para->debug_level < 2 ) return ;
+   if ( !para->trackDebug     ) return ;
+   if (  para->debugLevel < 2 ) return ;
 //
 //      Show first level of info
 //
@@ -1092,16 +1103,18 @@ void FtfTrack::debugFollowSuccess ( double dxy,      double dsz, double lxyChi2,
    
    printf ( " \n ------------------------------------- " ) ;
    if ( lchi2 < chi2_min ){
-          printf ( " \n %f Best Chi2, keep point !!! ", lchi2 );
-          if ( lchi2 < para->chi2_hit_good ){
-              printf ( "\n This Chi2 is better than the good cut %f ",
-                              lchi2, para->chi2_hit_good );
-              printf ( "Stop search !!! " );
-		  }
+       printf ( "FtfTrack::debugFollowSuccess: %f Best Chi2, keep point !!!\n", 
+                    lchi2 );
+       if ( lchi2 < para->goodHitChi2 ){
+           printf ( "This Chi2 is better than the good cut %f\n",
+                           lchi2, para->goodHitChi2 );
+           printf ( "Stop search !!! " );
+       }
    }
    else{
-      printf ( "\n Hit %d worse than previous, forget it !! ", candidateHit->id );
-      candidateHit->Show ( para->color_track ) ;
+      printf ( "FtfTrack::debugFollowSuccess: Hit %d worse than previous, forget it !! ",
+                candidateHit->id );
+//    candidateHit->Show ( para->color_track ) ;
    }
    
    
@@ -1109,17 +1122,18 @@ void FtfTrack::debugFollowSuccess ( double dxy,      double dsz, double lxyChi2,
 //
 //   Show second level of info
 //
-   if ( para->debug_level > 2 ) {
-	  printf ( "\n dis_xy dis_sz   %7.2e %7.2e ", dxy, dsz );
-	  printf ( "\n Error xy   sz   %7.2e %7.2e ",  
+   if ( para->debugLevel > 2 ) {
+      printf ( "FtfTrack::debugFollowSuccess:\n");
+      printf ( "dis_xy dis_sz   %7.2e %7.2e\n ", dxy, dsz );
+      printf ( "Error xy   sz   %7.2e %7.2e\n ",  
                        candidateHit->wxy, candidateHit->wz );
-      printf ( "\n xy:a1,a2;sz:a1,a2  %7.2f %7.2f %7.2f %7.2f ",
-                                       a1Xy, a2Xy, a1_sz, a2_sz );
-      printf ( "\n ch2:xy sz tot min  %7.2f %7.2f %7.2f %7.2f ", 
+      printf ( "xy:a1,a2;sz:a1,a2  %7.2f %7.2f %7.2f %7.2f\n",
+                                       a1Xy, a2Xy, a1Sz, a2Sz );
+      printf ( "ch2:xy sz tot min  %7.2f %7.2f %7.2f %7.2f\n", 
                                         lxyChi2,lszChi2, lchi2, chi2_min );
    }
-   Debug_Ask() ;
-   candidateHit->Show ( para->color_transparent ) ;
+   debugAsk() ;
+// candidateHit->Show ( para->color_transparent ) ;
 }
 /*********************************************************************************
      Routine to look for segments.
@@ -1128,44 +1142,46 @@ void FtfTrack::debugFollowSuccess ( double dxy,      double dsz, double lxyChi2,
 void FtfTrack::debugInVolume ( FtfHit *baseHit, FtfHit *candidateHit )
 {
 
-   if ( para->track_debug && para->debug_level >= 2 ) {
+   if ( para->trackDebug && para->debugLevel >= 2 ) {
 /*----------------------------------------------------------------------------
       Show the whole segment
 ----------------------------------------------------------------------------*/
-      for ( start_loop() ; done() ; nextHit() ) {
-         currentHit->Show ( para->color_track ) ;
-      }
+//    for ( startLoop() ; done() ; nextHit() ) {
+//       currentHit->Show ( para->color_track ) ;
+//    }
       
-      candidateHit->Show ( para->color_candidate ) ;
+//    candidateHit->Show ( para->color_candidate ) ;
 /*----------------------------------------------------------------------------
         Print relevant information
 ----------------------------------------------------------------------------*/
-      if ( nHits > para->n_hit_segm+1 ) Print ( 31 ) ;
+      if ( nHits > para->nHitsForSegment+1 ) Print ( 31 ) ;
 
-      printf ( " \n Try hit %d  ", candidateHit->id ) ; 
-      candidateHit->Print ( 1 ) ;
+      printf ( "FtfTrack:debugInVolume: Try hit %d\n", candidateHit->id ) ; 
+      candidateHit->print ( 11 ) ;
 /*----------------------------------------------------------------------------
         If the hit already used say it and forget about it
 ----------------------------------------------------------------------------*/
       if ( candidateHit->track != 0 ) {
-         printf ( " \n hit %d used in track %d ", 
+         printf ( "FtfTrack:debugInVolume: hit %d used in track %d\n", 
                               candidateHit->id, id+1 );
-         candidateHit->Show ( 0 );
+//       candidateHit->Show ( 0 );
       }
       else {
-         double dphi  = (double)fabs((double(baseHit->phi - candidateHit->phi)) ;
+         double dphi  = (double)fabs(baseHit->phi - candidateHit->phi) ;
          double deta ;
          if ( baseHit->dz < 1000 && candidateHit->dz < 1000 )
-            deta  = (double)fabs((double(baseHit->eta - candidateHit->eta)) ;
+            deta  = (double)fabs(baseHit->eta - candidateHit->eta) ;
          else
             deta  = 0.F ;
 
          if ( dphi > para->dphi )
-            printf ( "Hits too far apart in phi: %f \n ", dphi ) ;
+            printf ( "FtfTrack:debugInVolume: Hits too far apart in phi: %f \n", 
+                      dphi ) ;
          if ( deta > para->deta )
-            printf ( "Hits too far apart in eta: %f \n ", deta ) ;
+            printf ( "FtfTrack:debugInVolume: Hits too far apart in eta: %f \n", 
+                      deta ) ;
       }
-      Debug_Ask () ;
+      debugAsk () ;
    }
 }
 /*****************************************************************************
@@ -1174,15 +1190,16 @@ void FtfTrack::debugInVolume ( FtfHit *baseHit, FtfHit *candidateHit )
 void FtfTrack::debugNew (  )
 {
 
-  if ( firstHit->id == para->debug_hit ) para->track_debug = 1 ;
-  if ( para->track_debug && para->debug_level >= 1 )
+  if ( firstHit->id == para->hitDebug ) para->trackDebug = 1 ;
+  if ( para->trackDebug && para->debugLevel >= 1 )
   {
-	 printf ( "\n ================================================ " );
-     printf ( "\n Starting track %d from point %d ", id, firstHit->id );
-	 printf ( "\n ================================================ " );
+     printf ( "================================================ \n" );
+     printf ( "FtfTrack::debugNew:Starting track %d from point %d\n", 
+              id, firstHit->id );
+     printf ( "================================================ \n" );
 
-     firstHit->Show ( para->color_track ) ;
-     Debug_Ask () ;
+//   firstHit->Show ( para->color_track ) ;
+     debugAsk () ;
    }
 }
 #endif

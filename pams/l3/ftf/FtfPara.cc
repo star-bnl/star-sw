@@ -5,6 +5,7 @@
 //:              7dec1998 ppy variable names changed to C++ style
 //:              3jun1999 ppy add fillTracks flag
 //:             11aug1999 ppy add vertexContrainedFit variable
+//:             23aug1999 ppy add Root option
 //:                       
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
@@ -14,12 +15,17 @@
 //:>------------------------------------------------------------------
 #include "FtfFinder.h"
 
+#ifdef SL3ROOT
+ClassImp(FtfPara)
+#endif
+
 
 void FtfPara::setDefaults (void)
 {
 /*  Define cuts - this should be obsolete */
 
-   modRow           = 1    ;
+   modRow          = 1    ;
+   infoLevel       = 0 ;
    hitChi2Cut      = 500.F  ;
    goodHitChi2     = 100.F ;
    trackChi2Cut    = 250.F ;
