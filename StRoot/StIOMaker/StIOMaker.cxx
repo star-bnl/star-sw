@@ -24,29 +24,34 @@ StIOMaker::StIOMaker(const char *name,  const char *iomode,
                      const char *ioFile,const char *treeName)
 :StIOInterFace(name,iomode)
 {
-  fFileSet = 0;
-  if (ioFile && ioFile[0]) { //Make small StFile
-    fFileSet = new StFile();
-    fFileSet->AddFile(ioFile);
-  }
-  Build(fFileSet,treeName);
+    Build(fFileSet,ioFile,treeName);
 }
 //_____________________________________________________________________________
 StIOMaker::StIOMaker(const char *name,   const char *iomode, 
                      StFileI  *fileSet,const char *treeName )
 :StIOInterFace(name,iomode)
 {
-  Build( fileSet,treeName);
+  Build( fileSet,0,treeName);
 }
 //_____________________________________________________________________________
-void StIOMaker::Build(StFileI *fileSet,const char *treeName) 
+void StIOMaker::Build(StFileI *fileSet,const char *ioFile,const char *treeName) 
 {
-  SetTreeName(treeName); fCase=0;
-  SetMaxEvent();
   fCurrMk = 0;			//!Pointer to current maker
+  fSkip=0; fFileSet=0; fCase = 0;
+  SetMaxEvent();
   memset(fFmtMk,0,sizeof(fFmtMk));
-  fFileSet= fileSet;
-  
+  SetTreeName(treeName); fCase=0;
+
+  if (fIOMode[0]=='r') {	//ReadOnly
+    fFileSet= fileSet;
+    if (ioFile && ioFile[0]) {  //Make small StFile
+      fFileSet = new StFile();
+      fFileSet->AddFile(ioFile);
+    }  
+  } else {			//Write/Update
+    fCase = 1;
+    fNextFile = ioFile;
+  }         
 }
 //_____________________________________________________________________________
 StIOMaker::~StIOMaker()
@@ -63,32 +68,44 @@ void StIOMaker::Rewind()
 //_____________________________________________________________________________
 Int_t StIOMaker::Init()
 {
-  return Open();
+//VP  return Open();
+  return 0;
 }
 //_____________________________________________________________________________
  void  StIOMaker::SetFile(const char *file)
 {
   if (!file || !file[0]) return;
   StIOInterFace::SetFile(file);
+  fNextFile = file;
+  if (fIOMode[0]!='r') return;
+
 //		Add file to StFile
   if(!fFileSet) fFileSet = new StFile();
   fFileSet->AddFile(file);
 }
 //_____________________________________________________________________________
-Int_t StIOMaker::Skip(int nskip)
+Int_t StIOMaker::Skip()
 {
   
-  if (!fCurrMk) Open();
+  if (!fSkip) 	return 0;
+  if (!fCurrMk) OpenRead();
   if (!fCurrMk) return 0;
   
-  int rest = fCurrMk->Skip(nskip);
-  if (!rest) return 0;
+  fSkip = fCurrMk->Skip(fSkip);
+  if (!fSkip) return 0;
   Close();
-  return Skip(rest);
+  return Skip();
 }
 
 //_____________________________________________________________________________
 Int_t StIOMaker::Open()
+{
+  if (fIOMode[0]==0) return 0;
+  if (fIOMode[0]=='r') { Skip(); return OpenRead();}
+  return OpenWrite();
+}
+//_____________________________________________________________________________
+Int_t StIOMaker::OpenRead()
 {
   
   if (fCurrMk) return 0;
@@ -98,7 +115,7 @@ Int_t StIOMaker::Open()
   if (fFileSet->GetNextBundle())	return kStEOF;
 
   fNextFile = fFileSet->GetFileName(0);
-  if (!fNextFile) return kStEOF;
+  if (fNextFile.IsNull()) return kStEOF;
   if(GetDebug()) printf("<StIOMaker::Open() file %s\n",(const char*)fNextFile);
   TString fmt = fFileSet->GetFormat(0);
   TString bra = fFileSet->GetCompName(0);
@@ -111,10 +128,27 @@ Int_t StIOMaker::Open()
   fCurrMk = fFmtMk[fCase-1];
 
   if (!fCurrMk) return kStErr;
-  fCurrMk->SetBranch(bra,fNextFile,0);
-  StIOInterFace::SetFile(fNextFile);
-  fCurrMk->SetFile(fNextFile);
+  fCurrMk->SetBranch(bra,fNextFile.Data(),0);
+  StIOInterFace::SetFile(fNextFile.Data());
+  fCurrMk->SetFile(fNextFile.Data());
+  NotifyEm("OpenFile",fNextFile.Data());
+  return fCurrMk->Open();
+}
+//_____________________________________________________________________________
+Int_t StIOMaker::OpenWrite()
+{
   
+  if (fCurrMk) return 0;
+  fNumEvent = 0;
+  if (fNextFile.IsNull()) return kStEOF;
+  if(GetDebug()) printf("<StIOMaker::Open() file %s\n",(const char*)fNextFile);
+  fCase = 1; 
+
+  if (!fFmtMk[fCase-1]) fFmtMk[fCase-1] = Load();
+  fCurrMk = fFmtMk[fCase-1];
+  if (!fCurrMk) return kStErr;
+  fCurrMk->Close();
+  fCurrMk->SetFile(fNextFile.Data());
   return fCurrMk->Open();
 }
 //_____________________________________________________________________________
@@ -155,7 +189,9 @@ Int_t StIOMaker::MakeRead(const StUKey &uk){
 //_____________________________________________________________________________
 Int_t StIOMaker::MakeWrite()
 {
-   return 1999;
+  if (!fCurrMk) Open();
+  if (!fCurrMk) return kStEOF;
+  return fCurrMk->MakeWrite();
 }
 //_____________________________________________________________________________
 Int_t StIOMaker::Finish()
@@ -172,7 +208,9 @@ Int_t StIOMaker::Finish()
 //_____________________________________________________________________________
 void StIOMaker::Close(Option_t *)
 { 
-  if (fCurrMk) fCurrMk->Close();
+  if (!fCurrMk) return;
+  fCurrMk->Close();
+  NotifyEm("CloseFile",fFile.Data());
   fCurrMk = 0;
 }
 //_____________________________________________________________________________
@@ -182,6 +220,11 @@ void StIOMaker::Clear(Option_t *opt)
   fCurrMk->Clear();
 }
 //_____________________________________________________________________________
+void  StIOMaker::NotifyMe(const char *about,const void *info)
+{
+   if (strcmp("CloseFile",about)==0) { Close(); 		return;}
+   if (strcmp("OpenFile" ,about)==0) { fNextFile =((char*)info);return;}
+}
 
 //_____________________________________________________________________________
 StIOInterFace *StIOMaker::Load()
