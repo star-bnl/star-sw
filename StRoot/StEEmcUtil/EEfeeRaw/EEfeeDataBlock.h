@@ -2,7 +2,7 @@
 #ifndef EEfeeDataBlock_h
 #define EEfeeDataBlock_h
 /*********************************************************************
- * $Id: EEfeeDataBlock.h,v 1.11 2004/04/20 21:43:53 balewski Exp $
+ * $Id: EEfeeDataBlock.h,v 1.12 2004/06/21 19:50:21 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Data Block
@@ -22,7 +22,8 @@ private:
   int      MaxData;
   UShort_t *head;//[MaxHead];
   UShort_t *data;//[MaxData]
-  
+  UChar_t  sanity;// encodes all corruptions, filled in fly
+
 public:  
   EEfeeDataBlock();
   EEfeeDataBlock(const EEfeeDataBlock *b);
@@ -48,13 +49,14 @@ public:
   UShort_t  getToken()    const { return  head[TOKEN] & 0x0FFF; }
   UChar_t   getTrigComm() const { return  (head[CRATE] / 0x0100) &0x000F ; }
   UChar_t   getCrateID()  const { return  head[CRATE] & 0x00FF ; }
+  UChar_t   getSanity()  const { return sanity;}
   int       getNData(int thres) const;
-  void      maskCrate() {head[CRATE]=0xFFFF;}
+  void      maskCrate() { sanity|=0x80;}// mark 7th (not used) bit 
   void      setCrateID(UShort_t id ) { head[CRATE]= (head[CRATE]&0xFF00) + ( id& 0x00FF);}
-  int       isValid(); 
-  int     isHeadValid(int token, int crId, int len, int trigComm, int errFlag);
+  int       isValid() const  {return !sanity;}
+  UChar_t   isHeadValid(int token, int crId, int len, int trigComm, int errFlag);
 
-  ClassDef(EEfeeDataBlock,2) // Endcap Emc event
+  ClassDef(EEfeeDataBlock,3) // Endcap Emc event
 };
 #endif
 
@@ -87,6 +89,9 @@ http://www.iucf.indiana.edu/U/gvisser/STAR_EEMC/STAR_EEMC_DAQ_Data_Formats.pdf
 
 /*
  * $Log: EEfeeDataBlock.h,v $
+ * Revision 1.12  2004/06/21 19:50:21  balewski
+ * mre detailed monitoring of data corruption
+ *
  * Revision 1.11  2004/04/20 21:43:53  balewski
  * small change in data block header get now tagged
  *

@@ -105,6 +105,7 @@ int EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken, HeadVer 
   else 
     { list=listC; dim=sizeof(listC)/sizeof(int); }
 
+  // printf("\n Header check:\n");
   int ic;
   int nOK=0;
   for(ic=0;ic<block->GetEntries();ic++) {
@@ -136,30 +137,31 @@ int EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken, HeadVer 
 
     // this is messy, contact Jan before you change between  ezTree header & .daq header
       
-    int ok=0;
-
+    
+    UChar_t  sick=0;
     switch (headVersion) {
     case headVer1:  // real .daq content
-      ok=b->isHeadValid(headToken,list[ic],lenCount,trigCommand,errFlag);
+      sick  =b->isHeadValid(headToken,list[ic],lenCount,trigCommand,errFlag);
       break;
     case  headVer2: // old ezTree header from siew
-      ok=b->isHeadValid(headToken,list[ic],errFlag,lenCount,trigCommand);
+      sick=b->isHeadValid(headToken,list[ic],errFlag,lenCount,trigCommand);
       break;
     case  headVer3:     // miniDaq2004 ezTree header 
       if(ic<6) errFlag=9; else errFlag=4;
-      ok=b->isHeadValid(headToken,list[ic],trigCommand,errFlag,lenCount);
+      sick=b->isHeadValid(headToken,list[ic],trigCommand,errFlag,lenCount);
       break;
     default:
       assert(1==2); // make up your mind men!
     }
- 
+
+    //  printf(" ic=%d crID=%d sick=0x%02x\n",ic,b->getCrateID(),sick);
+
     // printf("XXX b=%d crID=%d=%d  tok=%d=%d ok=%d\n",ic, b->getCrateID() ,list[ic],b->getToken(), headToken,ok);
     
-    if(ok) nOK++;
+    if(!sick) nOK++;
    
-    if(!ok)  b->maskCrate();
   }
-  // printf("nOK=%d\n",nOK);
+  //  printf("nOK=%d\n",nOK);
   return nOK;
 }
 
@@ -184,6 +186,9 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.16  2004/06/21 19:50:21  balewski
+ * mre detailed monitoring of data corruption
+ *
  * Revision 1.15  2004/06/01 16:05:18  balewski
  * forgoten update of data block headers check
  *
