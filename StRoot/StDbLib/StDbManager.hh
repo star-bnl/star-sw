@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.8 1999/12/03 22:24:01 porter Exp $
+ * $Id: StDbManager.hh,v 1.9 1999/12/28 21:31:42 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.9  1999/12/28 21:31:42  porter
+ * added 'using std::vector' and 'using std::list' for Solaris CC5 compilation.
+ * Also fixed some warnings arising from the CC5 compiles
+ *
  * Revision 1.8  1999/12/03 22:24:01  porter
  * expanded functionality used by online, fixed bug in
  * mysqlAccessor::getElementID(char*), & update StDbDataSet to
@@ -43,11 +47,14 @@ class StDbConfigNode;
 
 #ifndef __CINT__
 #include <list>
+
+
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef list<dbType*,allocator<dbType*> > dbTypes;
 typedef list<dbDomain*,allocator<dbDomain*> > dbDomains;
 typedef list<StDbServer*,allocator<StDbServer*> > ServerList;
 #else
+using std::list;
 typedef list<dbType*> dbTypes;
 typedef list<dbDomain*> dbDomains;
 typedef list<StDbServer*> ServerList;

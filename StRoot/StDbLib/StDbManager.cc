@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.cc,v 1.10 1999/12/03 22:24:01 porter Exp $
+ * $Id: StDbManager.cc,v 1.11 1999/12/28 21:31:42 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.11  1999/12/28 21:31:42  porter
+ * added 'using std::vector' and 'using std::list' for Solaris CC5 compilation.
+ * Also fixed some warnings arising from the CC5 compiles
+ *
  * Revision 1.10  1999/12/03 22:24:01  porter
  * expanded functionality used by online, fixed bug in
  * mysqlAccessor::getElementID(char*), & update StDbDataSet to
@@ -253,10 +257,10 @@ char* dirname=getenv(envName);
   xmlFile = new char[1024];
   ostrstream os(xmlFile,1024);
 
-  char* serverFile="/dbServers.xml";
+  char serverFile[32]="/dbServers.xml";
 
   if(subDirName){
-     os<<dirname<<subDirName<<serverFile<<ends;
+     os<<dirname<<subDirName<<(char*)serverFile<<ends;
    } else {
      os<<dirname<<serverFile<<ends;
    }
@@ -286,22 +290,29 @@ StDbManager::findServersXml(ifstream& is){
 
   stardatabase = findServerString(is); 
   if(!stardatabase) continue;
-
+  char bserver[32]="<server>"; char eserver[32]="</server>";
+  char bhost[32]="<host>"; char ehost[32]="</host>";
+  char bsock[32]="<socket>"; char esock[32]="</socket>";
+  char bport[32]="<port>"; char eport[32]="</port>";
+  char bdb[32]="<databases>"; char edb[32]="</databases>";
   int portNum = 0;
-  //cout << stardatabase << endl;
 
-  char* servName = mparser.getString(stardatabase,"<server>","</server>");
-  //cout << "server Name = " << servName << endl;
-  char* hostName = mparser.getString(stardatabase,"<host>","</host>");
-  char* uSocket = mparser.getString(stardatabase,"<socket>","</socket>");
-  char* portNumber = mparser.getString(stardatabase,"<port>","</port>");
+  //  char* servName = mparser.getString(stardatabase,"<server>","</server>");
+  //  char* hostName = mparser.getString(stardatabase,"<host>","</host>");
+  //  char* uSocket = mparser.getString(stardatabase,"<socket>","</socket>");
+  //  char* portNumber = mparser.getString(stardatabase,"<port>","</port>");
+  char* servName = mparser.getString(stardatabase,(char*)bserver,(char*)eserver);
+  char* hostName = mparser.getString(stardatabase,(char*)bhost,(char*)ehost);
+  char* uSocket = mparser.getString(stardatabase,(char*)bsock,(char*)esock);
+  char* portNumber = mparser.getString(stardatabase,(char*)bport,(char*)eport);
 
   if(portNumber){
     portNum   = atoi(portNumber);
     delete [] portNumber;
   }
 
-  char* dbNames = mparser.getString(stardatabase,"<databases>","</databases>");
+  //  char* dbNames = mparser.getString(stardatabase,"<databases>","</databases>");
+  char* dbNames = mparser.getString(stardatabase,(char*)bdb,(char*)edb);
 
    StDbServer* server = new StDbServer();
    server->setServerName(servName); delete [] servName;
@@ -757,24 +768,29 @@ bool
 StDbManager::getDataBaseInfo(const char* dbName, char*& type, char*& domain){
 
 bool retVal = false;
+char* tmpName=new char[strlen(dbName)+1];
+strcpy(tmpName,dbName);
 
-char* id = strstr(dbName,"/");
+
+char* id = strstr(tmpName,"/");
 if(!id) {
-type = new char[strlen(dbName)+1];
-strcpy(type,dbName);
+type = new char[strlen(tmpName)+1];
+strcpy(type,tmpName);
 domain = new char[strlen("Star")+1];
 strcpy(domain,"Star");
+delete [] tmpName;
 return true;
 }
 
 *id='\0';
-type = new char[strlen(dbName)+1];
-strcpy(type,dbName);
+type = new char[strlen(tmpName)+1];
+strcpy(type,tmpName);
 id++;
 domain = new char[strlen(id)+1];
 strcpy(domain,id);
 retVal = true;
 
+delete [] tmpName;
 return retVal;
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.9 1999/12/03 22:24:00 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.10 1999/12/28 21:31:41 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.10  1999/12/28 21:31:41  porter
+ * added 'using std::vector' and 'using std::list' for Solaris CC5 compilation.
+ * Also fixed some warnings arising from the CC5 compiles
+ *
  * Revision 1.9  1999/12/03 22:24:00  porter
  * expanded functionality used by online, fixed bug in
  * mysqlAccessor::getElementID(char*), & update StDbDataSet to
@@ -154,7 +158,7 @@ StDbConfigNode::printTree(){
 ////////////////////////////////////////////////////////////////////////
 
 StDbTable*
-StDbConfigNode::addDbTable(const char* tableName, char* version, bool isBaseLine){
+StDbConfigNode::addDbTable(const char* tableName, const char* version, bool isBaseLine){
   // just like addTable but also loads the descriptor from the database
 
   StDbTable* table = addTable(tableName,version,isBaseLine);
@@ -167,7 +171,7 @@ StDbConfigNode::addDbTable(const char* tableName, char* version, bool isBaseLine
 ////////////////////////////////////////////////////////////////////////
 
 StDbTable*
-StDbConfigNode::addTable(const char* tableName, char* version, bool isBaseLine){
+StDbConfigNode::addTable(const char* tableName, const char* version, bool isBaseLine){
 
   if(!mfactory)mfactory = StDbFactories::Instance()->getFactory(mdbType);
 
@@ -176,7 +180,7 @@ StDbConfigNode::addTable(const char* tableName, char* version, bool isBaseLine){
   table = mfactory->getDbTable(tableName,0);
 
   if(table){
-    table->setVersion(version);
+    table->setVersion((char*)version);
     //    table->setElementID(elementID);
     table->setDbType(mdbType);
     table->setDbDomain(mdbDomain);
