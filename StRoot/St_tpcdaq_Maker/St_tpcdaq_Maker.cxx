@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.40  1999/11/19 19:59:53  ward
+// Converted for new TRS ZeroSuppressed Reader.
+//
 // Revision 1.39  1999/09/27 19:22:58  ward
 // Ignore CVS comments in the noise file.
 //
@@ -120,13 +123,6 @@
 #include "TH1.h"
 #include "StTpcRawDataEvent.hh"
 #include "StDaqLib/TPC/trans_table.hh"
-// #include "StTrsMaker/include/StTrsRawDataEvent.hh"
-// #include "StTrsMaker/include/StDacRawDataEvent.hh"
-#ifdef TRS_SIMPLE
-#include <StTrsSimpleMaker/StTrsSimpleMaker.h>
-#else
-#include "StTrsMaker/include/StTrsUnpacker.hh"
-#endif
 #include "StSequence.hh"
 
 #include "tables/St_raw_sec_m_Table.h"
@@ -301,38 +297,15 @@ void St_tpcdaq_Maker::RowWrite(St_raw_row *raw_row_gen,int rownumber,
   singlerow.RowId=ipadrow+1;
   raw_row_gen->AddAt(&singlerow,rownumber);
 }
-void St_tpcdaq_Maker::OrderTheSequences(int nseq,StSequence *los) {
-#ifndef TRS_SIMPLE
-  return;
-#endif
-  int ii,didASwap=7;
-  StSequence saveValue;
-  while(didASwap) {
-    didASwap=0;
-    for(ii=1;ii<nseq;ii++) {
-      if(los[ii-1].startTimeBin>los[ii].startTimeBin) {
-        saveValue.startTimeBin  = los[ii  ].startTimeBin;
-        saveValue.length        = los[ii  ].length;
-        saveValue.firstAdc      = los[ii  ].firstAdc;
-        los[ii  ].startTimeBin  = los[ii-1].startTimeBin;
-        los[ii  ].length        = los[ii-1].length;
-        los[ii  ].firstAdc      = los[ii-1].firstAdc;
-        los[ii-1].startTimeBin  = saveValue.startTimeBin;
-        los[ii-1].length        = saveValue.length;
-        los[ii-1].firstAdc      = saveValue.firstAdc;
-        didASwap=7;
-      }
-    }
-  }
-}
 int St_tpcdaq_Maker::getSector(Int_t isect) {
-  int rv;
+  int rv=0;
   if(gDAQ) {         // Use DAQ.
-    gSector=isect; rv=0;
+    gSector=isect;
   } else {           // Use TRS.
-    rv=mUnpacker->getSector(isect,mEvent);
+    mZsr=mTdr->getZeroSuppressedReader(isect);
+    if(!mZsr) rv=5; /* Either there are no hits for this sector, or there is an error. */
   }
-  return rv; // 0 means "no error".
+  return rv; // 0 means there are hits and there is no error.
 }
 int St_tpcdaq_Maker::getPadList(int whichPadRow,unsigned char **padlist) {
   int rv; unsigned char *padlistPrelim;
@@ -341,7 +314,8 @@ int St_tpcdaq_Maker::getPadList(int whichPadRow,unsigned char **padlist) {
     *padlist=padlistPrelim;
     return rv;
   } else {           // Use TRS.
-    rv=mUnpacker->getPadList(whichPadRow,padlist);
+    assert(mZsr);
+    rv=mZsr->getPadList(whichPadRow,padlist);
   }
   return rv;
 }
@@ -353,7 +327,8 @@ int St_tpcdaq_Maker::getSequences(int row,int pad,int *nseq,StSequence **lst) {
     *lst=(StSequence*)lstPrelim;
     return rv;
   } else {           // Use TRS.
-    rv=mUnpacker->getSequences(row,pad,nseq,lst);
+    assert(sizeof(Sequence)==sizeof(StSequence));
+    rv=mZsr->getSequences(row,pad,nseq,(Sequence**)lst);
   }
   return rv; // < 0 means serious error.
 }
@@ -524,7 +499,6 @@ int St_tpcdaq_Maker::Output() {
 #endif
         nPixelThisPad=0;
         seqStatus=getSequences(ipadrow+1,pad,&nseq,&listOfSequences);
-        OrderTheSequences(nseq,listOfSequences); // BBB writing on Brian's mem
         if(seqStatus<0) { PrintErr(seqStatus,'a'); mErr=__LINE__; return 7; }
         if(nseq) {
           numPadsWithSignal++; 
@@ -565,8 +539,8 @@ int St_tpcdaq_Maker::Output() {
           for(ibin=0;ibin<seqLen;ibin++) {
             pixCnt++; conversion=log8to10_table[*(pointerToAdc++)]; 
 #ifdef GAIN_CORRECTION
-            assert(pad>0&&pad<=182); /* bbb delete this after running a few complete events */
-            if(fGain[ipadrow][pad-1]>22.0) { /* bbb delete this? */
+            assert(pad>0&&pad<=182);
+            if(fGain[ipadrow][pad-1]>22.0) {
               printf("Fatal error in %s, line %d.\n",__FILE__,__LINE__);
               printf("ipadrow=%d, pad-1=%d, fgain=%g\n",ipadrow,pad-1,fGain[ipadrow][pad-1]);
               exit(2);
@@ -614,16 +588,9 @@ timeOff     pad         SeqWrite SeqWrite m              0x100
 // BBB Brian don't forget LinArray[] ("DAQ to Offline").
 Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
   if(gDAQ) return 0;
-#ifdef TRS_SIMPLE
- mEvent=NULL;
- St_ObjectSet *decoder=(St_ObjectSet*)GetDataSet("Decoder"); if(!decoder) return 22;
- mUnpacker=(StTrsSimpleMaker*)(decoder->GetObject()); if(!mUnpacker) return 24;
-#else
  St_ObjectSet *trsEvent=(St_ObjectSet*)GetDataSet("Event"); if(!trsEvent) return 1;
- St_ObjectSet *decoder=(St_ObjectSet*) GetDataSet("Decoder"); if(!decoder) return 2;
- mUnpacker=(StTrsUnpacker*)(decoder->GetObject());  if(!mUnpacker) return 4;
  mEvent=(StTpcRawDataEvent*)(trsEvent->GetObject());   if(!mEvent) return 3;
-#endif
+ mTdr = new StTrsDetectorReader(mEvent); assert(mTdr);
  return 0;
 }
 Int_t St_tpcdaq_Maker::Make() {
