@@ -1,5 +1,9 @@
-* $Id: phmdgeo.g,v 1.9 2003/10/14 13:38:27 potekhin Exp $
+* $Id: phmdgeo.g,v 1.10 2004/03/31 14:45:33 potekhin Exp $
 * $Log: phmdgeo.g,v $
+* Revision 1.10  2004/03/31 14:45:33  potekhin
+* A recent change in coordinates by Subhasis,
+* based upon a survey.
+*
 * Revision 1.9  2003/10/14 13:38:27  potekhin
 * Added the Id and Log tags for better documentation.
 * The oprevious check-in featured:
@@ -10,6 +14,11 @@
 *****************************************************************
  Module  PHMDGEO  is the geometry of photon multiplicity detector
 *****************************************************************
+* Modified: 26th March 2004, Two changes made: Dipak
+* 1. Z-distance changed from 535cm to 542cm according to this year
+*  PMD servey data.
+* 2. Gap between two halves of PMD changed from 0.3 cm to 1cm
+*
 * modified: 18th July 2003: Tapan, Dipak
 * Two modifications:
 * 1. CUTGAM and CUTELE values are introduced in the
@@ -64,7 +73,7 @@
       version = 1               ! geometry version
       m_max   = 135.0           ! Mother volume max radius
       m_min   = 22.0            ! Mother volume min radius
-      zdist   = {-535.0,-550.0} ! PMD placed at 5.5 metre from the interaction point
+      zdist   = {-539.,-550.} ! PMD placed at 5.39 metre from the interaction point
       DPMDx   = 270    !  (X-halfwidth of the PMD box,was 190 earlier)
       DPMDy   = 270    ! Y-halfwidth of the  PMD box.
       DPMDz   = 10.    ! total z half-width of the box.
@@ -120,11 +129,11 @@ Block PHMD the PMD box volume and fill with air
       phi2=phideg2*degrad
       phi3=phideg3*degrad
 
-      create and position   PHMS x=xlen3*cos(phi1)-ylen3*sin(phi1)+1.5*pmdg_th_air,
+      create and position   PHMS x=xlen3*cos(phi1)-ylen3*sin(phi1)+5*pmdg_th_air,
                                  y=xlen3*sin(phi1)+ylen3*cos(phi1),
                                  z=0 Alphaz=phideg1 Ncopy=1 
 
-      create and position   PHMS x=xlen3*cos(phi2)-ylen3*sin(phi2)-1.5*pmdg_th_air,
+      create and position   PHMS x=xlen3*cos(phi2)-ylen3*sin(phi2)-5*pmdg_th_air,
                                  y=xlen3*sin(phi2)+ylen3*cos(phi2),
                                  z=0 Alphaz=phideg2 Ncopy=2
 
