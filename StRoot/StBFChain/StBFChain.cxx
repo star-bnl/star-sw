@@ -1,11 +1,12 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.407 2004/04/06 01:10:57 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.408 2004/04/07 18:52:02 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
 #include "TObjString.h"
 #include "TRegexp.h"
 #include "TSystem.h"
+#include "TMemStat.h"
 #include "StBFChain.h"
 #include "StEvtHddr.h"
 #include "StChain.h"
@@ -1234,7 +1235,9 @@ Int_t StBFChain::Load()
 	  }
 	  //	  if (!strstr(lib,libe.Data())) {
 	  iok = gSystem->Load(libe->GetString().Data());
-
+          {  TString ts("load "); ts += libe->GetString();
+	     TMemStat::PrintMem(ts.Data());
+	  }
 	  if (iok < 0)  {
 	    printf("QAInfo: problem with loading\t%s\nQAInfo: %s is switched off \t!!!!\n"
 		   ,libe->GetString().Data(),fBFC[i].Key);
