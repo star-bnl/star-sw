@@ -304,35 +304,39 @@
 <font  size ="+1" color="black">
  <h4>
  <pre>
-  geant
-  db
-  tpc_raw
-  tpc_hits    *
-  tpc_tracks  *
-  svt_hits    *
-  svt_tracks  *
-  ftpc_raw
-  ftpc_hits   *
-  ftpc_tracks *
-  emc_raw
-  emc_hits
-  l0
-  ctf         *
-  mwc         *
-  trg 
-  l3Tracks    *
-  rch
-  match
-  primary
-  v0
-  xi
-  kink
-  dst
-  StEventMaker
-  analysis
-  QA          *
-  CosmicsQA
-  EventDisplay
+   name in bfc      Maker
+  inputStream   --> StIOMaker
+  tree          --> StTreeMaker
+  geant             St_geant_Maker
+  db                St_db_Maker
+  tpc_raw           St_tpcdaq_Maker
+  ?                 StTrsMaker
+  tpc_hits    *     St_tcl_Maker
+  tpc_tracks  *     St_tpt_Maker
+  tpc_tracks        StLaserEventMaker
+  svt_hits    *     St_srs_Maker
+  svt_tracks  *     St_stk_Maker
+  ftpc_raw          St_fss_Maker
+  ftpc_hits   *     StFtpcClusterMaker
+  ftpc_tracks *     St_fpt_Maker
+  emc_raw           St_ems_Maker
+  emc_hits          St_emc_Maker
+  ctf         *     St_ctf_Maker
+  mwc         *     St_mwc_Maker
+  trg               St_trg_Maker
+  l3Tracks    *     St_l3t_Maker
+  rch               StRchMaker 
+  match             StMatchMaker
+  primary           StPrimaryMaker
+  v0                StV0Maker
+  xi                StXiMaker
+  kink              StKinkMaker
+  dst               St_dst_Maker
+  StEventMaker      StEventMaker
+  analysis          StAnalysisMaker
+  QA          *     St_QA_Maker
+  CosmicsQA         StQACosmicMaker
+  EventDisplay      StEventDisplayMaker
   
  </pre>
  </h4>
