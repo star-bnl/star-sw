@@ -48,7 +48,7 @@ int rdMuDst2print(
 
     printf("\n\n ====================%d  processing eventID %d nPrim=%d ==============\n", eventCounter++,info.id(),nPrim);
  
-    StMuEmcCollection* emc = muMk->muDst()->emcCollection();
+    StMuEmcCollection* emc = muMk->muDst()->muEmcCollection();
     if (!emc) {
       printf(" No EMC data for this event\n");
       return kStOK;
@@ -73,7 +73,7 @@ printEEtower( StMuEmcCollection* emc ) {
   nh=0;
   for (i=0; i< emc->getNEndcapTowerADC(); i++) {
     emc->getEndcapTowerADC(i,adc,sec,sub,eta);
-    //  if (adc<=0) continue; // print only non-zero values
+      if (adc<=0) continue; // print only non-zero values
     nh++;
     printf("i=%d  Tower %2.2dT%c%2.2d   adc=%4d\n",i,sec,sub+'A'-1,eta,adc );
     //    printf("  Tower isec=%d ieta=%d isub=%d    adc=%4d\n",sec,eta, sub,adc );
