@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.85 2003/10/31 23:12:13 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.86 2003/11/12 22:44:26 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.86  2003/11/12 22:44:26  potekhin
+// Kill a stray debug print statement
+//
 // Revision 1.85  2003/10/31 23:12:13  potekhin
 // Added a piece of code to handle the pixel detector hits.
 // Reformatted a few lines and changed some comments.
@@ -583,7 +586,6 @@ Int_t St_geant_Maker::Make()
 
     geant3->Gfnhit("PIXH","PLAC", nhits);
 
-    cout<<"**************************************** Pixel hits: "<<nhits<<endl;
     if (nhits>0) { 
       St_g2t_pix_hit *g2t_pix_hit = new St_g2t_pix_hit("g2t_pix_hit",nhits);
       m_DataSet->Add(g2t_pix_hit);
