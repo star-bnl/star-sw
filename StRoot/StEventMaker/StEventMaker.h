@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.h,v 2.4 2000/08/17 00:38:52 ullrich Exp $
+ * $Id: StEventMaker.h,v 2.5 2001/02/22 04:59:16 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.h,v $
+ * Revision 2.5  2001/02/22 04:59:16  ullrich
+ * Added protected method getStEventInstance().
+ *
  * Revision 2.4  2000/08/17 00:38:52  ullrich
  * Allow loading of tpt tracks.
  *
@@ -54,7 +57,7 @@ public:
        
     virtual const char *GetCVS() const
     {
-	static const char cvs[]="$Id: StEventMaker.h,v 2.4 2000/08/17 00:38:52 ullrich Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="$Id: StEventMaker.h,v 2.5 2001/02/22 04:59:16 ullrich Exp $ built "__DATE__" "__TIME__ ;
 	return cvs;
     }
 
@@ -71,10 +74,11 @@ public:
     Bool_t  doPrintCpuInfo;        //!
     
 protected:
-    Int_t  makeRun();
-    Int_t  makeEvent();
-    Bool_t isNewRun();
-    Int_t  loadRunConstants();
+    Int_t     makeRun();
+    Int_t     makeEvent();
+    Bool_t    isNewRun();
+    Int_t     loadRunConstants();
+    StEvent*  getStEventInstance();
     
     void   printRunInfo();
     void   printEventInfo();
