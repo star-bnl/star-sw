@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.13 2002/09/13 13:46:41 fsimon Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.14 2003/07/04 14:06:43 fsimon Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.14  2003/07/04 14:06:43  fsimon
+// Now rotating hits from global GEANT coordinates into local FTPC coordinates.
+// This uses the instance of StFtpcTrackingParams defined in StFtpcSlowSimMaker.
+//
 // Revision 1.13  2002/09/13 13:46:41  fsimon
 // Include functionality for smearing and kicking out hits,
 // uncomment if needed
@@ -57,6 +61,10 @@
 #include "StFtpcClusterMaker/StFtpcGeantReader.hh"
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
+
+// include for Detector Rotations
+#include "StFtpcTrackMaker/StFtpcTrackingParams.hh" 
+
 
 #include "TF1.h"
 
@@ -162,6 +170,44 @@ int StFtpcSlowSimulator::simulate()
 	// Throw out a given percentage of hits
 	//if (kickout->GetRandom() < 0.2) continue;
 
+       // Convert geant volume number into FTPC row number
+	int irow= mGeant->geantVolume(i);
+	if ( irow > 200){
+	  irow = irow - 201 + 10;
+	}
+	else  {
+	  irow = irow - 101;
+	}
+
+
+	
+	// Rotate the hit into FTPC - internal coordinate system (GEANT hits are always in global coords)
+	// This function is "stolen" from StFtpcPoint::TransformGlobal2Ftpc()
+
+	StThreeVectorD org(xx, yy, zz);
+	StThreeVectorD transform = StFtpcTrackingParams::Instance()->GlobalToTpcRotation() * (org - StFtpcTrackingParams::Instance()->TpcPositionInGlobal());
+	
+	// internal FTPC rotation
+	Int_t whichFtpc = (transform.z() < 0) ? 0 : 1; // east or west
+	
+	// first tranformation to new origin (FTPC installation point)
+	transform.setY(transform.y() - StFtpcTrackingParams::Instance()->InstallationPointY(whichFtpc));
+	transform.setZ(transform.z() - StFtpcTrackingParams::Instance()->InstallationPointZ(whichFtpc));
+    
+	// actual rotation
+	transform = StFtpcTrackingParams::Instance()->FtpcRotationInverse(whichFtpc) * transform;
+    
+	// set z-position back to original value
+	transform.setY(transform.y() + StFtpcTrackingParams::Instance()->InstallationPointY(whichFtpc));
+	transform.setZ(transform.z() + StFtpcTrackingParams::Instance()->InstallationPointZ(whichFtpc));
+    
+	xx = transform.x();
+	yy = transform.y();
+	// zz = transform.z(); //not used since z - coordinate is given by the rows, z-rotation is not taken into account in simulations,
+	// but the influence should be quite small
+
+
+
 	//   Test that current point is within chamber          
          rad = sqrt ( xx*xx + yy*yy );
         if(rad < r_min || rad > r_max) {
@@ -177,15 +223,7 @@ int StFtpcSlowSimulator::simulate()
 	if(DEBUG)
 	  cout << "Now processing hit " << i << " with xx;yy;zz;px;py;pz :"<< xx << "; " <<yy <<"; "<< zz <<"; "<< px <<"; "<< py <<"; "<< pz << endl;
 
-        // Convert geant volume number into FTPC row number
-	int irow= mGeant->geantVolume(i);
-	if ( irow > 200){
-	  irow = irow - 201 + 10;
-	}
-	else  {
-	  irow = irow - 101;
-	}
-
+ 
 	// angle between r and p vectors in xy plane:
         float fpp=0; if (pp>0) fpp=atan2(py,px);
 	float alpha = fpp - atan2(yy,xx);
