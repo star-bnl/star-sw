@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEventsVar.C,v 1.5 2002/03/23 21:45:56 posk Exp $
+// $Id: doFlowEventsVar.C,v 1.6 2002/03/26 17:48:33 posk Exp $
 //
 // Description: 
 // Chain to read events from microDST files into StFlowEvent and analyze.
@@ -38,26 +38,6 @@
 //              Art Poskanzer
 //              Alexander Wetzler
 //  
-///////////////////////////////////////////////////////////////////////////////
-//
-// $Log: doFlowEventsVar.C,v $
-// Revision 1.5  2002/03/23 21:45:56  posk
-// More 40 GeV compatability.
-//
-// Revision 1.4  2001/11/06 18:02:45  posk
-// 40 GeV compatability.
-//
-// Revision 1.3  2001/08/17 22:14:48  posk
-// Updated to also do 40 GeV.
-//
-// Revision 1.2  2001/05/14 23:15:22  posk
-// Lower pt uppers for centralities 1 and 2.
-//
-// Revision 1.1  2001/03/06 17:32:55  posk
-// All macros now work.
-//
-// Revision 1.27  2000/11/15 14:41:51  posk
-//
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
@@ -342,3 +322,28 @@ void doFlowEvents(const Int_t nevents)
   Char_t* fileExt="*muDST.root";
   doFlowEvents(nevents, filePath, fileExt);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Log: doFlowEventsVar.C,v $
+// Revision 1.6  2002/03/26 17:48:33  posk
+// Corrected sqrt(2) mistake.
+//
+// Revision 1.5  2002/03/23 21:45:56  posk
+// More 40 GeV compatability.
+//
+// Revision 1.4  2001/11/06 18:02:45  posk
+// 40 GeV compatability.
+//
+// Revision 1.3  2001/08/17 22:14:48  posk
+// Updated to also do 40 GeV.
+//
+// Revision 1.2  2001/05/14 23:15:22  posk
+// Lower pt uppers for centralities 1 and 2.
+//
+// Revision 1.1  2001/03/06 17:32:55  posk
+// All macros now work.
+//
+// Revision 1.27  2000/11/15 14:41:51  posk
+//
+///////////////////////////////////////////////////////////////////////////////

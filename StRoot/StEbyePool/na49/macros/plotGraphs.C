@@ -1,7 +1,14 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Id: plotGraphs.C,v 1.8 2002/03/26 17:48:37 posk Exp $
+//
+// Author:       Alexander Wetzler and Art Poskanzer, April 2001
+// Description:
 // Plot histograms for all 6 centralities averaged to 3
 // and also minimum bias and also v as a function of centrality.
 // Reads from file produced by vProj.C.
-// Alexander Wetzler and Art Poskanzer, April 2001
+//
+///////////////////////////////////////////////////////////////////////////////
 
 void plotGraphs(Char_t* part = "pion") {
   Bool_t pion = kFALSE;
@@ -18,18 +25,18 @@ void plotGraphs(Char_t* part = "pion") {
   if (pCons) {
     if (crossSection) {
       Char_t* fileExt = "Pcons.root";
-      Char_t* outdir  = "PconsPlots/";
+      Char_t* outdir = "PconsPlots/";
     } else {
       Char_t* fileExt = "PconsYield.root";
-      Char_t* outdir  = "PconsYieldPlots/";
+      Char_t* outdir = "PconsYieldPlots/";
     }
   } else {
     if (crossSection) {
       Char_t* fileExt = ".root";
-      Char_t* outdir  = "Plots/";
+      Char_t* outdir = "Plots/";
     } else {
       Char_t* fileExt = "Yield.root";
-      Char_t* outdir  = "YieldPlots/";
+      Char_t* outdir = "YieldPlots/";
     }
   }
 
@@ -79,16 +86,30 @@ void plotGraphs(Char_t* part = "pion") {
   Float_t yMin;
   Float_t yReflMax;
   Float_t yReflMin;
-  if (pion) {
-    yMax    = 4.9;
-    yMin    = 2.85;
-    yReflMax = 3.0;
-    yReflMin = 1.1;
+  if (eBeam == 158) {
+    if (pion) {
+      yMax    = 4.9;
+      yMin    = 2.85;
+      yReflMax = 3.0;
+      yReflMin = 1.1;
+    } else {
+      yMax    = 4.75;
+      yMin    = 2.85;
+      yReflMax = 3.0;
+      yReflMin = 1.1;
+    }
   } else {
-    yMax    = 4.75;
-    yMin    = 2.85;
-    yReflMax = 3.0;
-    yReflMin = 1.1;
+    if (pion) {
+      yMax    = 4.4;
+      yMin    = 2.24; //1.5;
+      yReflMax = 2.24; //1.5;
+      yReflMin = 0.1;
+    } else {
+      yMax    = 4.2;
+      yMin    = 2.24;
+      yReflMax = 2.24;
+      yReflMin = 0.3;
+    }
   }
   Float_t yAllMax = 4.4;
   Float_t yAllReflMin = 1.4;
@@ -109,30 +130,58 @@ void plotGraphs(Char_t* part = "pion") {
   TF1* n2 = new TF1("n2", "[0]*x + [1]*x*x", 0., 0.08);
 
   // y for first (f), second (s), and reflected (r)
-  TF1* f1 = new TF1("f1", "[0] + [1]*(x-2.92)", yMin, yMax);
-  TF1* f2 = new TF1("f2", "[0] + [1]*(x-2.92) + [2]*pow(x-2.92,3)", yMin, yMax);
-  TF1* f3 = new TF1("f3",
-    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yMin, yMax);
-
-  TF1* s1 = new TF1("s1", "[0] + [1]*pow(x-2.92,2)", yMin, yMax);
-  TF1* s2 = new TF1("s2", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)", 
-    yMin, yMax);
-
-  TF1* r1 = new TF1("r1", "[0] + [1]*pow(x-2.92,2)", yReflMin, yReflMax);
-  TF1* r2 = new TF1("r2", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)",
-    yReflMin, yReflMax);
-  TF1* r3 = new TF1("r3",
-    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yReflMin, yReflMax);
-
-  TF1* f3All = new TF1("f3All",
+  if(eBeam == 158) {
+    TF1* f1 = new TF1("f1", "[0] + [1]*(x-2.92)", yMin, yMax);
+    TF1* f2 = new TF1("f2", "[0] + [1]*(x-2.92) + [2]*pow(x-2.92,3)", yMin, yMax);
+    TF1* f3 = new TF1("f3",
+		      "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yMin, yMax);
+    
+    TF1* s1 = new TF1("s1", "[0] + [1]*pow(x-2.92,2)", yMin, yMax);
+    TF1* s2 = new TF1("s2", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)", 
+		      yMin, yMax);
+    
+    TF1* r1 = new TF1("r1", "[0] + [1]*pow(x-2.92,2)", yReflMin, yReflMax);
+    TF1* r2 = new TF1("r2", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)",
+		      yReflMin, yReflMax);
+    TF1* r3 = new TF1("r3",
+		      "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yReflMin, yReflMax);
+    
+    TF1* f3All = new TF1("f3All",
     "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yMin, yAllMax);
-  TF1* s2All = new TF1("s2All", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)", 
-    yMin, yAllMax);
-  TF1* r2All = new TF1("r2All", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)",
-    yAllReflMin, yReflMax);
-  TF1* r3All = new TF1("r3All",
-    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yAllReflMin, yReflMax);
-
+    TF1* s2All = new TF1("s2All", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)", 
+			 yMin, yAllMax);
+    TF1* r2All = new TF1("r2All", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)",
+			 yAllReflMin, yReflMax);
+    TF1* r3All = new TF1("r3All",
+			 "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yAllReflMin, yReflMax);
+  } else {
+    TF1* f1 = new TF1("f1", "[0] + [1]*(x-2.24)", yMin, yMax);
+    TF1* f2 = new TF1("f2", "[0] + [1]*(x-2.24) + [2]*pow(x-2.24,3)", yMin, yMax);
+    TF1* f3 = new TF1("f3",
+		      "[0]*(x-2.24) + [1]*pow(x-2.24,3) + [2]*pow(x-2.24,5)", yMin, yMax);
+    
+    TF1* s1 = new TF1("s1", "[0] + [1]*pow(x-2.24,2)", yMin, yMax);
+    TF1* s2 = new TF1("s2", "[0] + [1]*pow(x-2.24,2) + [2]*pow(x-2.24,4)", 
+		      yMin, yMax);
+    
+    TF1* r1 = new TF1("r1", "[0] + [1]*pow(x-2.24,2)", yReflMin, yReflMax);
+    TF1* r2 = new TF1("r2", "[0] + [1]*pow(x-2.24,2) + [2]*pow(x-2.24,4)",
+		      yReflMin, yReflMax);
+    TF1* r3 = new TF1("r3",
+		      "[0]*(x-2.24) + [1]*pow(x-2.24,3) + [2]*pow(x-2.24,5)",
+		      yReflMin, yReflMax);
+    
+    TF1* f3All = new TF1("f3All",
+			 "[0]*(x-2.24) + [1]*pow(x-2.24,3) + [2]*pow(x-2.24,5)"
+			 ,yMin, yAllMax);
+    TF1* s2All = new TF1("s2All", "[0] + [1]*pow(x-2.24,2) + [2]*pow(x-2.24,4)"
+			 , yMin, yAllMax);
+    TF1* r2All = new TF1("r2All", "[0] + [1]*pow(x-2.24,2) + [2]*pow(x-2.24,4)"
+			 ,yAllReflMin, yReflMax);
+    TF1* r3All = new TF1("r3All",
+			 "[0]*(x-2.24) + [1]*pow(x-2.24,3) + [2]*pow(x-2.24,5)"
+			 , yAllReflMin, yReflMax);
+  }    
   // centrality polynomials
   TF1* c1 = new TF1("c1", "pol2", 1., 6.);
   TF1* c2 = new TF1("c2", "pol3", 1., 6.);
@@ -158,11 +207,11 @@ void plotGraphs(Char_t* part = "pion") {
 	histName->Append(*cenText);
 	Y[i][j] = (TH1F*)file->Get(histName->Data());
 	if (!pion && i!=0) {
-	  Y[i][j]->Rebin(4);  
-	  Y[i][j]->Scale(0.25);
+	  Y[i][j]->Rebin(2);
+	  Y[i][j]->Scale(0.5);
 	} else if (!pion && j==1) {
-	  Y[i][j]->Rebin(4);  
-	  Y[i][j]->Scale(0.25);
+	  Y[i][j]->Rebin(2);  
+	  Y[i][j]->Scale(0.5);
 	} else {
 	  Y[i][j]->Rebin(2);
 	  Y[i][j]->Scale(0.5);
@@ -176,9 +225,9 @@ void plotGraphs(Char_t* part = "pion") {
 	if (!pion) {
 	  Pt[i][j]->Rebin(8);
 	  Pt[i][j]->Scale(0.125);
-	} else {
-	  //Pt[i][j]->Rebin(2);
-	  //Pt[i][j]->Scale(0.5);
+	} else if (eBeam != 158) {
+	  Pt[i][j]->Rebin(2);
+	  Pt[i][j]->Scale(0.5);
 	}
 	delete histName;
       }
@@ -218,20 +267,25 @@ void plotGraphs(Char_t* part = "pion") {
 	for (Int_t m = 0; m < nYbins; m++) {
 	  Int_t n = m + 1;
 	  if (Y[i][j]->GetBinCenter(n) > yMin && 
-	      Y[i][j]->GetBinError(n) < 2) {
+	      Y[i][j]->GetBinCenter(n) < yMax && 
+	      Y[i][j]->GetBinContent(n) != 0 &&
+	      Y[i][j]->GetBinError(n) < 20) {
 	    flowY[i][j][0]->SetPoint(m, Y[i][j]->GetBinCenter(n),
 				     flip * Y[i][j]->GetBinContent(n));
 	    flowY[i][j][0]->SetPointError(m, 0., Y[i][j]->GetBinError(n));
 	    flowY[i][j][1]->SetPoint(m, 2 * yCM -Y[i][j]->GetBinCenter(n),
 				     Y[i][j]->GetBinContent(n));
 	    flowY[i][j][1]->SetPointError(m, 0., Y[i][j]->GetBinError(n));
+	  } else {
+	    flowY[i][j][0]->SetPoint(m,-1000,0);
+	    flowY[i][j][1]->SetPoint(m,1000,0);
 	  }
 	}
 	// Fill graphs with Pt projection  - - -  for protons
 	if (!pion) {
 	  for (Int_t m = 0; m < nPtbins; m++) {
 	    Int_t n = m + 1;
-	    if (Pt[i][j]->GetBinError(n) < 4){
+	    if (Pt[i][j]->GetBinError(n) < 40){
 	      flowPt[i][j][0]->SetPoint(m, Pt[i][j]->GetBinCenter(n),
 					flip * Pt[i][j]->GetBinContent(n));
 	      flowPt[i][j][0]->SetPointError(m, 0., Pt[i][j]->GetBinError(n));
@@ -255,7 +309,7 @@ void plotGraphs(Char_t* part = "pion") {
 	  Pt[i][j]->Scale(0.5);
 	  for (Int_t m = 8; m < 16; m++) {
 	    Int_t n = m/2 + 1;
-	    if (!(m%2) && Pt[i][j]->GetBinError(n) < 3){
+	    if (!(m%2) && Pt[i][j]->GetBinError(n) < 12){
 	      flowPt[i][j][0]->SetPoint(m, Pt[i][j]->GetBinCenter(n),
 					flip * Pt[i][j]->GetBinContent(n));
 	      flowPt[i][j][0]->SetPointError(m, 0., Pt[i][j]->GetBinError(n));
@@ -267,7 +321,7 @@ void plotGraphs(Char_t* part = "pion") {
 	  Pt[i][j]->Scale(0.5);
 	  for (Int_t m = 16; m < 24; m++) {
 	    Int_t n = m/4 + 1;
-	    if (!(m%4) && Pt[i][j]->GetBinError(n) < 3){
+	    if (!(m%4) && Pt[i][j]->GetBinError(n) < 24){
 	      flowPt[i][j][0]->SetPoint(m, Pt[i][j]->GetBinCenter(n),
 					flip * Pt[i][j]->GetBinContent(n));
 	      flowPt[i][j][0]->SetPointError(m, 0.,
@@ -280,7 +334,7 @@ void plotGraphs(Char_t* part = "pion") {
 	  Pt[i][j]->Scale(0.5);
 	  for (Int_t m = 24; m < 40; m++) {
 	    Int_t n = m/8 + 1;
-	    if (!(m%8) && Pt[i][j]->GetBinError(n) < 3){
+	    if (!(m%8) && Pt[i][j]->GetBinError(n) < 48){
 	      flowPt[i][j][0]->SetPoint(m, Pt[i][j]->GetBinCenter(n),
 					flip * Pt[i][j]->GetBinContent(n));
 	      flowPt[i][j][0]->SetPointError(m, 0., 
@@ -332,14 +386,29 @@ void plotGraphs(Char_t* part = "pion") {
   flowY[0][1][1]->SetMarkerSize(markerSize);
 
   canvas->Clear();
-  TH1F *hist = new TH1F(title, title, 10, 1, 5);
-  if (pion) {
-    max = 4.;
-    min = -4.;
+  if(eBeam == 158)
+    TH1F *hist = new TH1F(title, title, 10, 1, 5);
+  else
+    TH1F *hist = new TH1F(title, title, 10, 0, 4.5);
+
+  if(eBeam == 158) {
+    if (pion) {
+      max = 4.;
+      min = -4.;
+    } else {
+      max = 4.;
+      min = -4.;
+    }
   } else {
-    max = 4.;
-    min = -4.;
+    if (pion) {
+      max = 6.;
+      min = -6.;
+    } else {
+      max = 20.;
+      min = -20.;
+    }
   }
+
   hist->SetMaximum(max);
   hist->SetMinimum(min);
   hist->Draw();
@@ -347,12 +416,22 @@ void plotGraphs(Char_t* part = "pion") {
   flowY[0][0][0]->Draw("P");
   flowY[0][0][1]->Fit("r3", "R");
   flowY[0][0][1]->Draw("P");
-  if (pion) {
-    flowY[0][1][0]->Fit("s2", "R");
-    flowY[0][1][1]->Fit("r2", "R");
+  if(eBeam == 158) {
+    if (pion) {
+      flowY[0][1][0]->Fit("s2", "R");
+      flowY[0][1][1]->Fit("r2", "R");
+    } else {
+      flowY[0][1][0]->Fit("s1", "R");
+      flowY[0][1][1]->Fit("r1", "R");
+    }
   } else {
-    flowY[0][1][0]->Fit("s1", "R");
-    flowY[0][1][1]->Fit("r1", "R");
+    if (pion) {
+      flowY[0][1][0]->Fit("s2", "R");
+      flowY[0][1][1]->Fit("r2", "R");
+    } else {
+      flowY[0][1][0]->Fit("s1", "R");
+      flowY[0][1][1]->Fit("r1", "R");
+    }
   }
   flowY[0][1][0]->Draw("P");
   flowY[0][1][1]->Draw("P");
@@ -377,14 +456,26 @@ void plotGraphs(Char_t* part = "pion") {
   l.SetTextSize(0.06); 
 
   l.SetTextColor(kRed); 
-  if (pion) {
-    l.DrawLatex(0.7,0.25,"v_{1}"); 
-    l.SetTextColor(kGreen); 
-    l.DrawLatex(0.7,0.82,"v_{2}"); 
+  if (eBeam == 158) {
+    if (pion) {
+      l.DrawLatex(0.7,0.25,"v_{1}"); 
+      l.SetTextColor(kGreen); 
+      l.DrawLatex(0.7,0.82,"v_{2}"); 
+    } else {
+      l.DrawLatex(0.8,0.8,"v_{1}"); 
+      l.SetTextColor(kGreen); 
+      l.DrawLatex(0.6,0.7,"v_{2}"); 
+    }
   } else {
-    l.DrawLatex(0.8,0.8,"v_{1}"); 
-    l.SetTextColor(kGreen); 
-    l.DrawLatex(0.6,0.7,"v_{2}"); 
+    if (pion) {
+      l.DrawLatex(0.7,0.32,"v_{1}"); 
+      l.SetTextColor(kGreen); 
+      l.DrawLatex(0.7,0.82,"v_{2}"); 
+    } else {
+      l.DrawLatex(0.65,0.65,"v_{1}"); 
+      l.SetTextColor(kGreen); 
+      l.DrawLatex(0.75,0.4,"v_{2}"); 
+    }
   }
 
   sprintf(outfile, "%s%s%s_mb_y.%s", outdir, beam, part, pstype);
@@ -406,12 +497,22 @@ void plotGraphs(Char_t* part = "pion") {
   delete hist;
   canvas->Clear();
   hist = new TH1F(title, title, 10, 0, 2);
-  if (pion) {
-    max = 10.;
-    min = -3.;
+  if(eBeam == 158) {
+    if (pion) {
+      max = 10.;
+      min = -3.;
+    } else {
+      max = 15.;
+      min = -5.;
+    }
   } else {
-    max = 15.;
-    min = -5.;
+    if (pion) {
+      max = 20.;
+      min = -5.;
+    } else {
+      max = 15.;
+      min = -5.;
+    }
   }
   hist->SetMaximum(max);
   hist->SetMinimum(min);
@@ -436,7 +537,10 @@ void plotGraphs(Char_t* part = "pion") {
   l.DrawLatex(0.7,0.05,"p_{t} (GeV/c)" ); 
 
   l.SetTextSize(0.04); 
-  l.DrawLatex(0.2,0.8,"3 < y < 5");
+  if(eBeam == 158)
+    l.DrawLatex(0.2,0.8,"3 < y < 5");
+  else
+    l.DrawLatex(0.2,0.8,"2.24 < y < 4");
   l.SetTextSize(0.06); 
 
   l.SetTextColor(kRed); 
@@ -472,6 +576,7 @@ void plotGraphs(Char_t* part = "pion") {
   }
 
   // Harmonic 1 vs. y all Centralities dummy
+  
   sprintf(title, "v1 ");
   flowY[0][0][0]->SetTitle(strcat(title, part));
   delete hist;
@@ -496,8 +601,8 @@ void plotGraphs(Char_t* part = "pion") {
   legend->SetY2NDC(0.37);
   legend->SetFillColor(10);
   Char_t EntryName[255];
-  for (Int_t i = 0; i < 3; i++){
-    sprintf(EntryName, "%d + %d", 2*i+1, 2*i+2);
+  for (Int_t i = 7; i <= 9; i++){
+    sprintf(EntryName, "%d + %d", (i-6)*2-1, (i-6)*2);
     legend->AddEntry(flowY[i][0][0], EntryName, "P");
   }
   legend->SetHeader("Centralities");
@@ -505,20 +610,35 @@ void plotGraphs(Char_t* part = "pion") {
 
   sprintf(outfile, "%s%s%s_v1_all_y.%s", outdir, beam, part, pstype);
   canvas->Print(outfile, pstype);
-
+   
   // Harmonic 1 vs. y three Centralities redrawn ---------------------------
   sprintf(title, "v1 ");
   flowY[7][0][0]->SetTitle(strcat(title, part));
   delete hist;
   canvas->Clear();
-  TH1F *hist = new TH1F(title, title, 10, 1, 5);
-  if (pion) {
-    max = 7.;
-    min = -7.;
+  if (eBeam == 158)
+    TH1F *hist = new TH1F(title, title, 10, 1, 5);
+  else
+    TH1F *hist = new TH1F(title, title, 10, 0, 4.5);
+
+  if (eBeam == 158) {
+    if (pion) {
+      max = 7.;
+      min = -7.;
+    } else {
+      max = 10.;
+      min = -10.;
+    }
   } else {
-    max = 10.;
-    min = -10.;
-  }
+    if (pion) {
+      max = 15.;
+      min = -15.;
+    } else {
+      max = 15.;
+      min = -15.;
+    }
+  }  
+  
   hist->SetMaximum(max);
   hist->SetMinimum(min);
   hist->Draw();
@@ -574,14 +694,28 @@ void plotGraphs(Char_t* part = "pion") {
   flowY[7][1][0]->SetTitle(strcat(title, part));
   delete hist;
   canvas->Clear();
-  TH1F *hist = new TH1F(title, title, 10, 1, 5);
-  if (pion) {
-    max = 5.;
-    min = -1.;
+  if (eBeam == 158)
+    TH1F *hist = new TH1F(title, title, 10, 1, 5);
+  else
+    TH1F *hist = new TH1F(title, title, 10, 0., 4.5);
+  
+  if(eBeam == 158) {  
+    if (pion) {
+      max = 5.;
+      min = -1.;
+    } else {
+      max = 10.;
+      min = -10.;
+    }
   } else {
-    max = 10.;
-    min = -10.;
-  }
+    if (pion) {
+      max = 6.;
+      min = -6.;
+    } else {
+      max = 10.;
+      min = -10.;
+    }
+  }    
   hist->SetMaximum(max);
   hist->SetMinimum(min);
   hist->Draw();
@@ -643,13 +777,24 @@ void plotGraphs(Char_t* part = "pion") {
   delete hist;
   canvas->Clear();
   hist = new TH1F(title, title, 10, 0, 2);
-  if (pion) {
-    max = 10.;
-    min = -4.;
+
+  if(eBeam == 158) {
+    if (pion) {
+      max = 10.;
+      min = -4.;
+    } else {
+      max = 15.;
+      min = -5.;
+    }
   } else {
-    max = 15.;
-    min = -5.;
-  }
+    if (pion) {
+      max = 10.;
+      min = -10.;
+    } else {
+      max = 20.;
+      min = -5.;
+    }
+  }    
   hist->SetMaximum(max);
   hist->SetMinimum(min);
   hist->Draw();
@@ -686,7 +831,10 @@ void plotGraphs(Char_t* part = "pion") {
   l.DrawLatex(0.7,0.05,"p_{t} (GeV/c)" ); 
   
   l.SetTextSize(0.04); 
-  l.DrawLatex(0.7,0.2,"3 < y < 5");
+  if(eBeam == 158)
+    l.DrawLatex(0.7,0.2,"3 < y < 5");
+  else
+    l.DrawLatex(0.7,0.2,"2.24 < y < 4");
   l.SetTextSize(0.06); 
 
   sprintf(outfile, "%s%s%s_v1_all_pt.%s", outdir, beam, part, pstype);
@@ -699,12 +847,22 @@ void plotGraphs(Char_t* part = "pion") {
   delete hist;
   canvas->Clear();
   hist = new TH1F(title, title, 10, 0, 2);
-  if (pion) {
-    max = 20.;
-    min = -2.;
+  if (eBeam == 158) {
+    if (pion) {
+      max = 20.;
+      min = -2.;
+    } else {
+      max = 20.;
+      min = -10.;
+    }
   } else {
-    max = 20.;
-    min = -10.;
+    if (pion) {
+      max = 25.;
+      min = -5.;
+    } else {
+      max = 20.;
+      min = -10.;
+    }
   }
   hist->SetMaximum(max);
   hist->SetMinimum(min);
@@ -735,7 +893,10 @@ void plotGraphs(Char_t* part = "pion") {
   l.DrawLatex(0.7,0.05,"p_{t} (GeV/c)" ); 
 
   l.SetTextSize(0.04); 
-  l.DrawLatex(0.22,0.85,"3 < y < 5");
+  if(eBeam == 158)
+    l.DrawLatex(0.22,0.85,"3 < y < 5");
+  else
+    l.DrawLatex(0.22,0.85,"2.24 < y < 4");
   l.SetTextSize(0.06); 
 
   sprintf(outfile, "%s%s%s_v2_all_pt.%s", outdir, beam, part, pstype);
@@ -757,12 +918,22 @@ void plotGraphs(Char_t* part = "pion") {
   delete hist;
   canvas->Clear();
   hist = new TH1F(title, title, 6, 0.5, 6.5);
-  if (pion) {
-    max =  5.;
-    min = -4.;
+  if(eBeam == 158) {
+    if (pion) {
+      max =  5.;
+      min = -4.;
+    } else {
+      max =  7.;
+      min = -5.;
+    }
   } else {
-    max =  7.;
-    min = -5.;
+    if (pion) {
+      max =  6.;
+      min = -6.;
+    } else {
+      max =  6.;
+      min = -6.;
+    }
   }
   hist->SetMaximum(max);
   hist->SetMinimum(min);
@@ -771,7 +942,7 @@ void plotGraphs(Char_t* part = "pion") {
   //flowV[1]->Draw("PC");
   flowV[0]->Fit("c3", "R");
   flowV[0]->Draw("P");
-  flowV[1]->Fit("c3", "R");
+  flowV[1]->Fit("c2", "R");
   flowV[1]->Draw("P");
   
   l.SetTextColor(kBlue);
@@ -781,7 +952,10 @@ void plotGraphs(Char_t* part = "pion") {
   l.DrawLatex(0.7,0.05,"Centrality" ); 
 
   l.SetTextSize(0.04); 
-  l.DrawLatex(0.22,0.85,"3 < y < 5");
+  if(eBeam == 158)
+    l.DrawLatex(0.22,0.85,"3 < y < 5");
+  else
+    l.DrawLatex(0.22,0.85,"2.24 < y < 4");
   l.DrawLatex(0.22,0.8,"0 < p_{t} < 2 GeV/c");
   l.SetTextSize(0.06); 
 
@@ -812,3 +986,12 @@ bool Pause() {
 
   return kTRUE;
 }
+
+///////////////////////////////////////////////////////////////////////////
+//
+// $Log: plotGraphs.C,v $
+// Revision 1.8  2002/03/26 17:48:37  posk
+// Corrected sqrt(2) mistake.
+//
+//
+///////////////////////////////////////////////////////////////////////////
