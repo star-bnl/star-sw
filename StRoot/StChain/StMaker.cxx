@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.147 2004/04/15 16:05:28 fine Exp $
+// $Id: StMaker.cxx,v 1.148 2004/04/26 00:07:12 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -659,7 +659,8 @@ Int_t StMaker::Make()
      assert((ret%10)>=0 && (ret%10)<=kStFatal);     
      maker->EndMaker(ret);
      
-     if (Debug() || ret) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
+     if (Debug() || ret) printf("*** %s::Make() == %s(%d) ***\n"
+                        ,maker->ClassName(),RetCodeAsString(ret),ret);
 
      maker->ResetBit(kMakeBeg);
      StMkDeb::SetCurrent(curr);
@@ -1180,6 +1181,22 @@ StEvtHddr *StMaker::GetEvtHddr() const
 }
 
 //_____________________________________________________________________________
+const char *StMaker::RetCodeAsString(int kode)
+{
+static const char* retCodes[] = {
+  "StOK"  ,"StWarn"  ,"StEOF"  ,"StERR"  ,"StFATAL" ,0,0,0,0,0,	
+  "StOK!" ,"StWarn!" ,"StEOF!" ,"StSKIP" ,"StSTOP"  ,0,0,0,0,0,
+  "StOK!!","StWarn!!","StEOF!!","StSKIP!","StSTOP!" ,0,0,0,0,0};
+
+  assert(kode>=0);
+  if (kode>=30) kode = kode%10+20;
+  const char *res = retCodes[kode];
+  if (!res) res = "StUNKNOWN";	
+  return res;	
+	
+}
+
+//_____________________________________________________________________________
 StMakerIter::StMakerIter(StMaker *mk,int secondary)
 {
   fState = 0;
@@ -1240,6 +1257,9 @@ AGAIN: switch (fState) {
 }
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.148  2004/04/26 00:07:12  perev
+// RetCodeAsString(kode) added. String form of STAR return codes
+//
 // Revision 1.147  2004/04/15 16:05:28  fine
 // Add extra data-mmeber and method for the coming STAR logger
 //
