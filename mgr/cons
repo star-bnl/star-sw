@@ -14,24 +14,23 @@ use Cwd;
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
 
 # NOTE:  Cons intentionally does not use the "perl -w" option or
-# "use strict."  Because Cons "configuration files" are actually
+# "use strict."  Beecause Cons "configuration files" are actually
 # Perl scripts, enabling those restrictions here would force them
-# on every user's config files, wanted or not.  Would users write
-# "better" Construct and Conscript files if we forced "use strict"
-# on them?  Probably.  But we want people to use Cons to get work
-# done, not force everyone to become a Perl guru to use it, so we
-# don't insist.
+# on every user, wanted or not.  Would users write "better"
+# Construct and Conscript files if we forced "use strict" on them?
+# Probably.  But we want people to use Cons to get work done, not
+# force everyone to become a Perl guru to use it, so we don't insist.
 #
-# That said, Cons' code is "perl -w" clean.  A patch for making it
-# "use strict" clean is in the works.  Regression tests will keep the
-# code honest by checking for warnings and "use strict" failures.
+# That said, Cons' code is both "perl -w" and "use strict" clean.
+# Regression tests keep the code honest by checking for warnings
+# and "use strict" failures.
 
-# $Id: cons,v 1.57 2000/09/04 20:34:51 fisyak Exp $
+# $Id: cons,v 1.55 2000/08/04 12:38:07 fisyak Exp $
 
-$ver_num = 2.1;
-$ver_rev = ".2";
+$ver_num = __VERSION__;
+$ver_rev = "__REVISION__";
 $version = sprintf "This is Cons %s%s " .
-	    '($Id: cons,v 1.57 2000/09/04 20:34:51 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.55 2000/08/04 12:38:07 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -59,42 +58,23 @@ use Cwd;
 use File::Copy;
 my $errors = 0;
 
-use vars qw( $_WIN32 $_a $_exe $_o $_so );
-
 #------------------------------------------------------------------
 # Determine if running on win32 platform - either Windows NT or 95
 #------------------------------------------------------------------
 
 BEGIN {
-    use Config;
-
+    $PATH_SEPARATOR = ':';
     # if the version is 5.003, we can check $^O
     if ($] <  5.003) {
 	eval("require Win32");
-	$_WIN32 = (!$@);
+	$iswin32 = (!$@);
     } else {
-	$_WIN32 = ($^O eq "MSWin32") ? 1 : 0;
+	$iswin32 = ($^O eq "MSWin32") ? 1 : 0;
     }
-
-    # Fetch the PATH separator from Config;
-    # provide our old defaults in case it's not set.
-    $PATH_SEPARATOR = $Config{path_sep};
-    $PATH_SEPARATOR = $_WIN32 ? ';' : ':' if ! defined $PATH_SEPARATOR;
-
-    # Fetch file suffixes from Config,
-    # accomodating differences in the Config variables
-    # used by different Perl versions.
-    $_exe = $Config{_exe};
-    $_exe = $Config{exe_ext} if ! defined $_exe;
-    $_exe = $_WIN32 ? '.exe' : '' if ! defined $_exe;
-    $_o = $Config{_o};
-    $_o = $Config{obj_ext}  if ! defined $_o;
-    $_o = $_WIN32 ? '.obj' : '.o' if ! defined $_o;
-    $_a = $Config{_a};
-    $_a = $Config{lib_ext} if ! defined $_a;
-    $_a = $_WIN32 ? '.lib' : '.a' if ! defined $_a;
-    $_so = ".$Config{so}";
-    $_so = $_WIN32 ? '.dll' : '.so' if ! defined $_so;
+    if ($iswin32) {
+	$_WIN32 = 1;
+	$PATH_SEPARATOR = ';';
+    }
 }
 
 # Flush stdout each time.
@@ -177,25 +157,14 @@ Arguments can be any of the following, in any order:
   -x		Show this message and exit.
   -h		Show this message and exit.
 
-
-
-   Please report any suggestions through the cons-discuss@gnu.org mailing
-   list.
-
-   To subscribe, send mail to cons-discuss-request@gnu.org with body
-   'subscribe'.
-
-   If you find a bug, please report it through the bug-cons@gnu.org
-   mailing list.
-
-   Information about CONS can be obtained from the official cons web site
-   http://www.dsmit.com/cons/ or its mirrors (listed there).
-
-   The cons maintainers can be contacted by email at cons-maintainers@gnu.org
+   Please report any bugs/fixes/suggestions through the
+   cons-discuss@gnu.org mailing list. To subscribe, send mail to
+   cons-discuss-request@gnu.org with body 'subscribe'.
 
    User documentation of cons is contained in cons and can be obtained
    by doing 'perldoc /path/to/cons'.
 
+   The Official cons site is: http://www.dsmit.com/cons/
 );
 
 # stash the path to cons.
@@ -247,9 +216,6 @@ sub showcom {
 }
 
 # Default environment.
-# This contains only the completely platform-independent information
-# we can figure out.  Platform-specific information (UNIX, Win32)
-# gets added below.
 @param::defaults = (
      'CC'	    => 'cc',
      'CFLAGS'	    => '',
@@ -275,10 +241,8 @@ sub showcom {
      'LD'	    => 'ld',
      'LDFLAGS'	    => '',
      'PREFLIB'      => 'lib',
-     'SUFEXE'	    => $_exe,				# '' on UNIX systems
-     'SUFLIB'	    => $_a,				# '.a' on UNIX systems
-     'SUFLIBS'      => "$_so:$_a",			# '.so:.a' on UNIX
-     'SUFOBJ'	    => $_o,				# '.o' on UNIX systems
+     'SUFLIB'	    => '.a',
+     'SUFLIBS'      => '.so:.a',
      'SUFMAP'       => {
 	 '.c'  => 'build::command::cc',
 	 '.s'  => 'build::command::cc',
@@ -292,6 +256,7 @@ sub showcom {
 	 '.rc' => 'build::command::rc',
 	 '.RC' => 'build::command::rc',
      },
+     'SUFOBJ'	    => '.o',
      'OBJMAP'       => {
 	 '.o'  => '.o',
 	 '.c'  => '.o',
@@ -312,8 +277,8 @@ sub showcom {
      'ENV'	    => { 'PATH' => $PATH },
 );
 
-if ($_WIN32) {
-    # Defaults for Win32.
+# overrides for Win32
+if ($main::_WIN32) {
     # Defined for VC++ 6.0 by Greg Spencer <greg_spencer@acm.org>.
     # Your mileage may vary.
     my @win = (
@@ -362,34 +327,6 @@ if ($_WIN32) {
 	},
     );
     push(@param::defaults, @win);
-} else {
-    # Defaults for a typical (?) UNIX platform.
-    # Your mileage may vary.
-    my @unix = (
-	'CC'             => 'cc',
-	'CFLAGS'         => '',
-	'CCCOM'          => '%CC %CFLAGS %_IFLAGS -c %< -o %>',
-	'CXX'            => '%CC',
-	'CXXFLAGS'       => '%CFLAGS',
-	'CXXCOM'         => '%CXX %CXXFLAGS %_IFLAGS -c %< -o %>',
-	'INCDIRPREFIX'   => '-I',
-	'LINK'           => '%CXX',
-	'LINKCOM'        => '%LINK %LDFLAGS -o %> %< %_LDIRS %LIBS',
-	'LINKMODULECOM'  => '%LD -r -o %> %<',
-	'LIBDIRPREFIX'   => '-L',
-	'AR'             => 'ar',
-	'ARFLAGS'        => 'r', # rs?
-	'ARCOM'          => "%AR %ARFLAGS %> %<\n%RANLIB %>",
-	'RANLIB'         => 'ranlib',
-	'AS'             => 'as',
-	'ASFLAGS'        => '',
-	'ASCOM'          => '%AS %ASFLAGS %< -o %>',
-	'LD'             => 'ld',
-	'LDFLAGS'        => '',
-	'PREFLIB'        => 'lib',
-	'ENV'            => { 'PATH' => '/bin:/usr/bin' },
-    );
-    push(@param::defaults, @unix);
 }
 
 # Handle command line arguments.
@@ -656,8 +593,13 @@ sub buildtarget {
 	    my($members) = $tgt->{member};
 	    my $entry;
 	    for $entry (sort keys %$members) {
-#yf 		next if $entry eq $dir::CURDIR || $entry eq $dir::UPDIR;
-		next if $entry eq $dir::CURDIR || $entry eq $dir::UPDIR or $entry eq '.consign'; # ignore hidden files
+		# XXX
+		# This manipulation is still operating-system specific,
+		# but there's no File::Spec method for hidden files,
+		# so leave it alone until we know what cross-OS
+		# conventions make sense.
+#yf		next if $entry =~ /^\./; # ignore hidden files
+	        next if $entry eq '.' or  $entry eq '..' or $entry eq '.consign'; # ignore hidden files
 		my($tgt) = $members->{$entry};
 		next if ref($tgt) ne "dir" && !exists($tgt->{builder});
 		my($stat) = buildtarget($members->{$entry});
@@ -1359,7 +1301,7 @@ sub _subst {
 sub Install {
     my($env) = shift;
     my($tgtdir) = $dir::cwd->lookupdir($env->_subst(shift));
-    for $file (map($dir::cwd->lookupfile($env->_subst($_)), @_)) {
+    for $file (map($dir::cwd->lookupfile($_), @_)) {
 	my($tgt) = $tgtdir->lookupfile($file->{entry});
 	$tgt->bind(find build::install, $file);
     }
@@ -1392,7 +1334,7 @@ sub InstallAs {
     } else {
 	foreach (0..$#sources) {
 	    my $tfile = $dir::cwd->lookupfile($env->_subst($targets[$_]));
-	    my $sfile = $dir::cwd->lookupfile($env->_subst($sources[$_]));
+	    my $sfile = $dir::cwd->lookupfile($sources[$_]);
 	    $tfile->bind(find build::install, $sfile);
 	}
     }
@@ -1405,8 +1347,8 @@ sub InstallAs {
 #	Local "$dir/$file";
 sub Install_Local {
     my($env) = shift;
-    my($tgtdir) = $dir::cwd->lookupdir($env->_subst(shift));
-    for $file (map($dir::cwd->lookupfile($env->_subst($_)), @_)) {
+    my($tgtdir) = $dir::cwd->lookupdir(shift);
+    for $file (map($dir::cwd->lookupfile($_), @_)) {
 	my($tgt) = $tgtdir->lookupfile($file->{entry});
 	$tgt->bind(find build::install, $file);
 	$tgt->local(1);
@@ -1415,8 +1357,7 @@ sub Install_Local {
 
 sub Objects {
     my($env) = shift;
-    map($_->relpath($dir::cwd),
-	_Objects($env, map($dir::cwd->lookupfile($env->_subst($_)), @_)))
+    map($_->relpath($dir::cwd), _Objects($env, map($dir::cwd->lookupfile($_), @_)))
 }
 
 # Called with multiple source file references (or object files).
@@ -1514,8 +1455,8 @@ sub Command {
 
 sub Depends {
     my($env) = shift;
-    my($tgt) = $dir::cwd->lookup($env->_subst(shift));
-    push(@{$tgt->{dep}}, map($dir::cwd->lookup($env->_subst($_)), @_));
+    my($tgt) = $dir::cwd->lookup(shift);
+    push(@{$tgt->{dep}}, map($dir::cwd->lookup($_), @_));
 }
 
 # Setup a quick scanner for the specified input file, for the
@@ -1525,7 +1466,7 @@ sub Depends {
 # dependencies.
 sub QuickScan {
     my($env, $code, $file, $path) = @_;
-    $dir::cwd->lookup($env->_subst($file))->{'srcscan',$env} =
+    $dir::cwd->lookup($file)->{'srcscan',$env} =
 	find scan::quickscan($code, $env, $env->_subst($path));
 }
 
@@ -1749,17 +1690,9 @@ sub action {
 	  #---------------------
 	  # Can't fork on Win32
 	  #---------------------
+
 	  if ($main::_WIN32) {
 	    system($com);
-	    if ($?) {
-	      my ($b0, $b1) = ($? & 0xFF, $? >> 8);
-	      my $err = $b1 || $?;
-	      my $path = $tgt->path;
-	      my $warn = qq($0: *** [$path] Error $err);
-	      $warn .= " (executable not found in path?)" if $b1 == 0xFF;
-	      warn "$warn\n";
-	      return undef;
-	    }
 	  } else {
 	    my($pid) = fork();
 	    die("$0: unable to fork child process ($!)\n") if !defined $pid;
@@ -1773,7 +1706,7 @@ sub action {
 	    }
 	    for (;;) {
 	      do {} until wait() == $pid;
-	      my ($b0, $b1) = ($? & 0xFF, $? >> 8);
+	      my($b0, $b1 ) = ($? & 0xFF, $? >> 8);
 	      # Don't actually see 0177 on stopped process; is this necessary?
 	      next if $b0 == 0177; # process stopped; we can wait.
 	      if ($b0) {
@@ -1793,6 +1726,15 @@ sub action {
 	      }
 	      last;
 	    }
+	  }
+	}
+
+	if ($main::_WIN32) {
+	  my($err) = $?;
+	  if ($err) {
+	    my($path) = $tgt->path;
+	    warn qq($0: *** [$path] Error $err\n); # trying to be like make.
+	    return undef;
 	  }
 	}
     }
@@ -2557,18 +2499,14 @@ sub splitdir {
 }
 
 sub splitpath {
-    my ($self, $path) = @_;
     my $vol = '';
-    my $sep = $_SEP;
     if ($main::_WIN32) {
-	if ($path =~ s#^([A-Za-z]:|(?:\\\\|//)[^\\/]+[\\/][^\\/]+)([\\/])#$2#) {
-	    $vol = $1;
-	    $sep = $2;
-	}
+	$_[1] =~ s#^([A-Za-z]:)[/\\]#\\#;
+	$vol = $1;
     }
-    my(@path) = split(/$_MATCH_SEP/, $path, -1);
+    my(@path) = split(/$_MATCH_SEP/, $_[1], -1);
     $file = pop @path;
-    $dirs = join($sep, @path, '');
+    $dirs = join($_SEP, @path, '');
     return ($vol, $dirs, $file);
 }
 
@@ -2665,7 +2603,7 @@ sub _parse_path {
 	# An absolute path name.  If no volume was supplied,
 	# use the volume of our current directory.
 	$vol = $cwd_vol if $vol eq '';
-	$vol = uc($vol) if File::Spec->case_tolerant;
+	$vol = lc($vol) if File::Spec->case_tolerant;
 	if (! defined $root{$vol}) {
 	    # This is our first time looking up a path name
 	    # on this volume, so create a root node for it.
@@ -2957,7 +2895,7 @@ sub init {
 
     ($cwd_vol, undef, undef) = File::Spec->splitpath($path);
     $cwd_vol = '' if ! defined $cwd_vol;
-    $cwd_vol = uc($cwd_vol) if File::Spec->case_tolerant;
+    $cwd_vol = lc($cwd_vol) if File::Spec->case_tolerant;
 }
 package file;
 
@@ -3383,7 +3321,7 @@ sub install {
 # Returns undef on failure. Preserves mtime and mode.
 sub copy {
     my ($sp, $tp) = @_;
-    my ($mode, $length, $atime, $mtime) = (stat($sp))[2,7,8,9];
+    my($mode, $length, $atime, $mtime) = (stat($sp))[2,7,8,9];
 
     # Use Perl standard library module for file copying, which handles
     # binary copies. <schwarze@isa.de> 1998-06-18
@@ -3391,25 +3329,15 @@ sub copy {
 	warn qq($0: can\'t install "$sp" to "$tp" ($!)\n); #'
 	return undef;
     }
-    # The file has been created, so try both the chmod and utime,
-    # first making sure the copy is writable (because permissions
-    # affect the ability to modify file times on some operating
-    # systems), and then changing permissions back if necessary.
-    my $ret = 1;
-    my $wmode = $mode | 0700;
-    if (! chmod $wmode, $tp) {
-	warn qq($0: can\'t set mode $wmode on file "$tp" ($!)\n); #'
-	$ret = undef;
-    }
     if (! utime $atime, $mtime, $tp) {
 	warn qq($0: can\'t set modification time for file "$tp" ($!)\n); #'
-	$ret = undef;
+	return undef;
     }
-    if ($mode !=  $wmode && ! chmod $mode, $tp) {
+    if (! chmod $mode, $tp) {
 	warn qq($0: can\'t set mode $mode on file "$tp" ($!)\n); #'
-	$ret = undef;
+	return undef;
     }
-    return $ret;
+    return 1;
 }
 
 # Ensure that the specified directory exists.
@@ -3527,15 +3455,6 @@ sub out {
 	unlink($lp);
 	return if ! eval { link($cp, $lp) };
 	rename($lp, $sp);
-	# Unix98 says, "If the old argument and the new argument both
-	# [refer] to the same existing file, the rename() function
-	# returns successfully and performs no other action."  So, if
-	# $lp and $sp are links (i.e., $cp and $sp are links), $lp is
-	# left, and we must unlink it ourselves.  If the rename failed
-	# for any reason, it is also good form to unlink the temporary
-	# $lp.  Otherwise $lp no longer exists and, barring some race,
-	# the unlink fails silently.
-	unlink($lp);
 	return;
     }
 
@@ -3680,11 +3599,15 @@ __END__;
 
 =head1 NAME
 
-Cons - A Software Construction System
+Cons - Cons: A Software Construction System
 
 =head1 DESCRIPTION
 
-A guide and reference for version 2.1.2
+The original document was automatically derived from the F<cons/cons.html>
+by B<html2pod>, thanks to Ulrich Pfeifer. Later revisions were created from
+the original.
+
+=head1 Cons: A Software Construction System
 
 by Bob Sidebotham, et al. F<cons-discuss@gnu.org>
 
@@ -4007,7 +3930,7 @@ file:
 
 	Conscript_chdir 1;
 
-When enabled, Cons will change to the subsidiary F<Conscript> file's
+When enabled, Cons whill change to the subsidiary F<Conscript> file's
 containing directory while reading in that file, and then change back
 to the top-level directory once the file has been processed.
 
@@ -5117,21 +5040,6 @@ your own execution path, in your top-level F<Construct> file (or perhaps by
 importing an appropriate construction package with the Perl C<use>
 command). The default variables are intended to get you off the ground.
 
-=head2 Interpolating construction variables
-
-Construction environment variables may be interpolated in the source and
-target file names by prefixing the construction variable name with C<%>.
-
-  $env = new cons(
-	DESTDIR	=>	'programs',
-	SRCDIR	=>	'src',
-  );
-  Program $env '%DESTDIR/hello', '%SRCDIR/hello.c';
-
-Expansion of construction variables is recursive--that is, the file
-name(s) will be re-expanded until no more substitutions can be made. If
-a construction variable is not defined in the environment, then the null
-string will be substituted.
 
 =head1 Default construction methods
 
@@ -5978,34 +5886,14 @@ can be attached to a source file by:
 
     QuickScan $env \myscan, "$_.smf";
 
-=head1 SUPPORT AND SUGGESTIONS
+=head1 Support and Suggestions
 
 Cons is maintained by the user community.  To subscribe, send mail to
 B<cons-discuss-request@gnu.org> with body B<subscribe>.
 
-Please report any suggestions through the B<cons-discuss@gnu.org> mailing
-list.
+Please report any bugs/fixes/suggestions through the
+cons-discuss@gnu.org mailing list.
 
-=head1 BUGS
-
-Sure to be some. Please report any bugs through the B<bug-cons@gnu.org>
-mailing list.
-
-=head1 INFORMATION ABOUT CONS
-
-Information about CONS can be obtained from the official cons web site
-B<http://www.dsmit.com/cons/> or its mirrors listed there.
-
-The cons maintainers can be contacted by email at
-B<cons-maintainers@gnu.org>
-
-=head1 AUTHORS
-
-Originally by Bob Sidebotham. Then significantly enriched by the members
-of the Cons community B<cons-discuss@gnu.org>.
-
-The Cons community would like to thank Ulrich Pfeifer for the original pod
-documentation derived from the F<cons.html> file. Cons documentation is now
-a part of the program itself.
+The Official cons site is: http://www.dsmit.com/cons/
 
 =cut
