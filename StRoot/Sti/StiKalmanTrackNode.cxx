@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.23 2003/05/09 22:07:57 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.24 2003/05/22 18:42:33 andrewar Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.24  2003/05/22 18:42:33  andrewar
+ * Changed max eloss correction from 1% to 10%.
+ *
  * Revision 2.23  2003/05/09 22:07:57  pruneau
  * Added protection to avoid 90deg tracks and ill defined eloss
  *
@@ -754,8 +757,8 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 	  return;
 	}
       //limit our correction to at most 1% per layer.
-      if (correction>1.01) correction = 1.01;
-      if (correction<0.99) correction = 0.99;
+      if (correction>1.1) correction = 1.1;
+      if (correction<0.9) correction = 0.9;
       _p3 = _p3 *correction;
       if (!finite(_p3)) 
 	{
