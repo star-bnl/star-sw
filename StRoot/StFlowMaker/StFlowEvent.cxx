@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.29 2002/01/31 01:04:43 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.30 2002/02/13 22:29:21 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -89,6 +89,7 @@ Float_t StFlowEvent::mElectronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mPositronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mDcaGlobalCuts[2]     = { 0., 0.};
 Bool_t  StFlowEvent::mPtWgt                = kFALSE;
+Bool_t  StFlowEvent::mEtaWgt               = kFALSE;
 Bool_t  StFlowEvent::mProbPid              = kFALSE;
 Bool_t  StFlowEvent::mEtaSubs              = kFALSE;
 Bool_t  StFlowEvent::mOnePhiWgt            = kFALSE;
@@ -121,6 +122,7 @@ Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN,	StFlowTrack*
   StTrackTopologyMap topologyMap = pFlowTrack->TopologyMap();
   float phi = pFlowTrack->Phi();
   if (phi < 0.) phi += twopi;
+  float eta = pFlowTrack->Eta();
 
   Double_t phiWgt;
   int n;
@@ -131,7 +133,6 @@ Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN,	StFlowTrack*
     if (mOnePhiWgt) {
       phiWgt = mPhiWgt[selN][harN][n];
     } else {
-      float eta = pFlowTrack->Eta();
       float vertexZ = mVertexPos.z();
       if (eta > 0. && vertexZ > 0.) {
 	phiWgt = mPhiWgtFarWest[selN][harN][n];
@@ -155,11 +156,17 @@ Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN,	StFlowTrack*
     phiWgt = mPhiWgtFtpcWest[selN][harN][n];
   }
 
-  if (mPtWgt) {  // pt weighting going constant above 2 GeV
+  if (mPtWgt) {
     float pt = pFlowTrack->Pt();
-    phiWgt *= (pt < 2.) ? pt : 2.;
+    phiWgt *= (pt < 2.) ? pt : 2.;  // pt weighting going constant above 2 GeV
   }
-  if (oddHar && pFlowTrack->Eta() < 0.) phiWgt *= -1.;
+
+  float etaAbs = fabs(eta);
+  if (mEtaWgt && oddHar && etaAbs > 1.) {
+    phiWgt *= etaAbs;
+  }
+  
+  if (oddHar && eta < 0.) phiWgt *= -1.;
 
   return phiWgt;
 }
@@ -167,8 +174,9 @@ Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN,	StFlowTrack*
 //-------------------------------------------------------------
 
 UInt_t StFlowEvent::Mult(StFlowSelection* pFlowSelect) {
-  UInt_t mult = 0;
   // Multiplicity of tracks selected for the event plane
+
+  UInt_t mult = 0;
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
@@ -250,14 +258,14 @@ Float_t StFlowEvent::Psi(StFlowSelection* pFlowSelect) {
 //-----------------------------------------------------------------------
 
 Double_t StFlowEvent::G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy) { 
-  // Generating function for the new cumulant method.
+  // Generating function for the new cumulant method. Eq. 3 in the Practical Guide.
 
   int selN     = pFlowSelect->Sel();
   int harN     = pFlowSelect->Har();
   double order = (double)(harN + 1);
 
-  double mMult4Q = (double)Mult(pFlowSelect);
-  Double_t theG  = 1.;
+  double mult = (double)Mult(pFlowSelect);
+  Double_t theG = 1.;
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
@@ -267,8 +275,8 @@ Double_t StFlowEvent::G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t 
 
       double phiWgt = PhiWeight(selN, harN, pFlowTrack);      
       float phi = pFlowTrack->Phi();
-      theG *= (1. + (phiWgt/mMult4Q) * (2.*Zx*cos(phi * order) + 
-				      2.*Zy*sin(phi * order) ) );            
+      theG *= (1. + (phiWgt/mult) * (2.* Zx * cos(phi * order) + 
+				     2.* Zy * sin(phi * order) ) );            
     }
   }
 
@@ -350,7 +358,6 @@ Double_t StFlowEvent::SumWeightSquare(StFlowSelection* pFlowSelect) {
 //-------------------------------------------------------------
 
 Double_t StFlowEvent::WgtMult_q4(StFlowSelection* pFlowSelect) { 
-
   // Used only for the old cumulant method, for getting q4 when weight is on.
   // Replace multiplicity in Eq.(74b) by this quantity when weight is on.
   // This is derived based on (A4) in the old cumulant paper.
@@ -438,7 +445,7 @@ Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) {
 //-----------------------------------------------------------------------
 
 void StFlowEvent::SetSelections() {
-  // for particles correlated with the event plane
+  // for particles used for the event plane
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
@@ -773,11 +780,16 @@ void StFlowEvent::PrintSelectionList() {
   // Call in Finish
 
   cout << "#######################################################" << endl;
-  cout << "# Weighting and Striping:" << endl; 
+  cout << "# Weighting and Striping:" << endl;
   if (mPtWgt) {
-    cout << "#    PtWgt= TRUE" << endl;
+    cout << "#    PtWgt= TRUE, also for output of PhiWgt file" << endl;
   } else {
     cout << "#    PtWgt= FALSE" << endl;
+  }
+  if (mEtaWgt) {
+    cout << "#    EtaWgt= TRUE, also for output of PhiWgt file for odd harmonics" << endl;
+  } else {
+    cout << "#    EtaWgt= FALSE" << endl;
   }
   if (mEtaSubs) {
     cout << "#    EtaSubs= TRUE" << endl;
@@ -832,6 +844,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.30  2002/02/13 22:29:21  posk
+// Pt Weight now also weights Phi Weights. Added Eta Weight, default=FALSE.
+//
 // Revision 1.29  2002/01/31 01:04:43  posk
 // *** empty log message ***
 //

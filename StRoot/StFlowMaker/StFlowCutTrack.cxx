@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.29 2002/01/31 21:43:14 aihong Exp $
+// $Id: StFlowCutTrack.cxx,v 1.30 2002/02/13 22:29:12 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -13,7 +13,7 @@
 #include <iomanip.h>
 #include <stdlib.h>
 #include "StEvent.h"
-//#include "StTrackTopologyMap.h"
+#include "StTrackTopologyMap.h"
 #include "StFlowPicoEvent.h"
 #include "StEventTypes.h"
 #include "StFlowCutTrack.h"
@@ -37,7 +37,7 @@ Float_t StFlowCutTrack::mDcaFtpcCuts[2]    = {0., 1.};
 Float_t StFlowCutTrack::mPtTpcCuts[2]      = {0.1, 8.};
 Float_t StFlowCutTrack::mPtFtpcCuts[2]     = {0.1, 8.};
 Float_t StFlowCutTrack::mEtaTpcCuts[2]     = {-1.3, 1.3};
-Float_t StFlowCutTrack::mChgTpcCuts[2]     = {-5000., 5000.};
+Int_t   StFlowCutTrack::mChgTpcCuts[2]     = {0, 0};
 Float_t StFlowCutTrack::mEtaFtpcCuts[4]    = {-4.0, -2.7, 2.7, 4.0};
 
 UInt_t  StFlowCutTrack::mTrackN            = 0;     
@@ -149,7 +149,7 @@ Int_t StFlowCutTrack::CheckTrack(StTrack* pTrack) {
     
     // charge
     if (mChgTpcCuts[1] > mChgTpcCuts[0] && 
-	(charge < mChgTpcCuts[0] || charge >= mChgTpcCuts[1])) {
+	(charge < mChgTpcCuts[0] || charge > mChgTpcCuts[1])) {
       mChgTpcCutN++;
       return kFALSE;
     }
@@ -300,7 +300,7 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
 
    // charge
     if (mChgTpcCuts[1] > mChgTpcCuts[0] && 
-	(charge < mChgTpcCuts[0] || charge >= mChgTpcCuts[1])) {
+	(charge < mChgTpcCuts[0] || charge > mChgTpcCuts[1])) {
       mChgTpcCutN++;
       return kFALSE;
     }
@@ -445,6 +445,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.30  2002/02/13 22:29:12  posk
+// Pt Weight now also weights Phi Weights. Added Eta Weight, default=FALSE.
+//
 // Revision 1.29  2002/01/31 21:43:14  aihong
 // add SetChgTpc()
 //

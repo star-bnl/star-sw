@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.36 2002/02/01 23:06:26 snelling Exp $
+// $Id: StFlowEvent.h,v 1.37 2002/02/13 22:29:28 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -60,6 +60,7 @@ public:
   Float_t        ZDCe() const;
   Float_t        ZDCw() const;
   Bool_t         PtWgt() const;
+  Bool_t         EtaWgt() const;
   Bool_t         ProbPid() const;
   Char_t*        Pid();
   Bool_t         EtaSubs() const;
@@ -115,6 +116,7 @@ public:
   static void SetProbPid();
   static void SetEtaSubs();
   static void SetPtWgt(Bool_t);
+  static void SetEtaWgt(Bool_t);
   static void SetOnePhiWgt();
 
 private:
@@ -149,6 +151,7 @@ private:
   Flow::PhiWgtFtpc_t  mPhiWgtFtpcWest;                           //!flattening weights Ftpc west
   static Float_t      mPiPlusCuts[2];                            // PID cuts
   static Bool_t       mPtWgt;                                    // flag for pt weighting
+  static Bool_t       mEtaWgt;                                     // flag for y weighting for odd harmonics
   static Char_t       mPid[10];                                  // h+, h-, pi-, pi+, pi, k+, k-, k, pr+, pr-, pr, e+, e-, e
   static Bool_t       mProbPid;                                  // flag for probability pid
   static Bool_t       mEtaSubs;                                  // flag for eta subevents
@@ -209,6 +212,8 @@ inline Float_t  StFlowEvent::ZDCe() const { return mZDCe; }
 inline Float_t  StFlowEvent::ZDCw() const { return mZDCw; }
 
 inline Bool_t   StFlowEvent::PtWgt() const { return mPtWgt; }
+
+inline Bool_t   StFlowEvent::EtaWgt() const { return mEtaWgt; }
 
 inline Char_t*  StFlowEvent::Pid() { return mPid; }
 
@@ -331,11 +336,16 @@ inline void StFlowEvent::SetOnePhiWgt() { mOnePhiWgt = kTRUE; }
 
 inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
 
+inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
+
 #endif
 
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.37  2002/02/13 22:29:28  posk
+// Pt Weight now also weights Phi Weights. Added Eta Weight, default=FALSE.
+//
 // Revision 1.36  2002/02/01 23:06:26  snelling
 // Added entries for header information in flowPico (not everthing is available yet)
 //
