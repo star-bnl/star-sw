@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.12 2002/12/09 18:54:23 ward Exp $
+ * $Id: DetectorReader.cxx,v 1.13 2003/03/24 18:12:15 ward Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.13  2003/03/24 18:12:15  ward
+ * Full support for EEMC from Herbert Ward.
+ *
  * Revision 1.12  2002/12/09 18:54:23  ward
  * EMC stuff from Subhassis.
  *
@@ -69,6 +72,7 @@
 #include "SVT/SVTV1P0_Reader.hh"
 #include "SSD/SSD_Reader.hh"
 #include "EMC/EMC_Reader.hh"
+#include "EEMC/EEMC_Reader.hh"
 #include "PMD/PMD_Reader.hh"
 #include "RICH/RICH_Reader.hh"
 #include "FTPC/FTPV1P0_Reader.hh"
@@ -153,6 +157,20 @@ RICH_Reader *getRICHReader(EventReader *er)
   return NULL;
 }
 
+EEMC_Reader *getEEMCReader(EventReader *er)
+{
+  Bank_EEMCP *pEEMCP;
+  pEEMCP = (Bank_EEMCP *)er->findBank("EECP");
+  if (pEEMCP)  {
+    if (!pEEMCP->test_CRC())  printf("CRC error in EEMCP: %s %d\n",
+					__FILE__,__LINE__) ;
+    if (pEEMCP->swap() < 0)   printf("swap error in EEMCP: %s %d\n",
+					__FILE__,__LINE__) ;
+    pEEMCP->header.CRC = 0;
+    return new EEMC_Reader(er,pEEMCP);
+  }
+  return FALSE;
+}
 EMC_Reader *getEMCReader(EventReader *er)
 {
   Bank_EMCP *pEMCP;

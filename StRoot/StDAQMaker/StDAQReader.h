@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.21 2003/02/16 16:02:49 perev Exp $
+ * $Id: StDAQReader.h,v 1.22 2003/03/24 18:12:10 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.22  2003/03/24 18:12:10  ward
+ * Full support for EEMC from Herbert Ward.
+ *
  * Revision 1.21  2003/02/16 16:02:49  perev
  * new method added
  *
@@ -82,6 +85,7 @@ typedef  EventInfo DAQEventInfo;
 class EventReader ;  
 class StTPCReader ;  
 class StEMCReader ;  
+class StEEMCReader ;  
 class StPMDReader ;  
 class StFTPCReader;  
 class StTRGReader ;
@@ -152,6 +156,7 @@ public:
   virtual const char *getFTPCVersion() const {return fFTPCVersion;} 
   StTPCReader  *getTPCReader (); 
   StEMCReader  *getEMCReader (); 
+  StEEMCReader  *getEEMCReader (); 
   StPMDReader  *getPMDReader (); 
   StRICHReader *getRICHReader(); 
   StFTPCReader *getFTPCReader(); 
@@ -171,6 +176,7 @@ protected:
   EventReader  *fEventReader;  
   StTPCReader  *fTPCReader;  
   StEMCReader  *fEMCReader;  
+  StEEMCReader  *fEEMCReader;  
   StPMDReader  *fPMDReader;  
   StFTPCReader *fFTPCReader;  
   StRICHReader *fRICHReader;
@@ -190,6 +196,7 @@ protected:
 #include "StTPCReader.h"
 #include "StFTPCReader.h"
 #include "StEMCReader.h"
+#include "StEEMCReader.h"
 #include "StPMDReader.h"
 #endif /*__CINT__*/
 #endif /*end*/

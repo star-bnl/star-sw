@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.31 2003/02/16 16:02:49 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.32 2003/03/24 18:12:10 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.32  2003/03/24 18:12:10  ward
+ * Full support for EEMC from Herbert Ward.
+ *
  * Revision 1.31  2003/02/16 16:02:49  perev
  * new method added
  *
@@ -117,6 +120,7 @@
 #include "StDAQReader.h"
 #include "StTPCReader.h"
 #include "StEMCReader.h"
+#include "StEEMCReader.h"
 #include "StPMDReader.h"
 #include "StFTPCReader.h"
 #include "StTRGReader.h"
@@ -133,6 +137,7 @@ StDAQReader::StDAQReader(const char *file)
   fEventReader	= 0;
   fTPCReader 	= 0;
   fEMCReader 	= 0;
+  fEEMCReader 	= 0;
   fPMDReader 	= 0;
   fRICHReader 	= 0;
   fL3Reader 	= 0;
@@ -178,6 +183,7 @@ int StDAQReader::close()
 
   if(fTPCReader) 	fTPCReader ->close();  
   if(fEMCReader) 	fEMCReader ->close();  
+  if(fEEMCReader) 	fEEMCReader ->close();  
   if(fPMDReader) 	fPMDReader ->close();  
   if(fSVTReader) 	fSVTReader ->close();  
 //if (fRICHReader) 	fRICHReader->close();  
@@ -216,6 +222,7 @@ int StDAQReader::readEvent()
   if (fTRGReader) 	fTRGReader ->Update();
   if (fSVTReader) 	fSVTReader ->Update();
   if (fEMCReader) 	fEMCReader ->Update();
+  if (fEEMCReader) 	fEEMCReader ->Update();
   if (fPMDReader) 	fPMDReader ->Update();
 
 //	Trigger Summary, code provided by Herb
@@ -302,10 +309,17 @@ StTPCReader *StDAQReader::getTPCReader()
   return fTPCReader;
 }
 //_____________________________________________________________________________
+StEEMCReader *StDAQReader::getEEMCReader()
+{
+  if (!fEEMCReader) {
+    fEEMCReader = new StEEMCReader(this);
+  }
+  return fEEMCReader;
+} 
+//_____________________________________________________________________________
 StEMCReader *StDAQReader::getEMCReader()
 {
   if (!fEMCReader) {
-    printf("bbb StDAQReader is about to instantiate StEMCReader.\n");
     fEMCReader = new StEMCReader(this);
   }
   return fEMCReader;
