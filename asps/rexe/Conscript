@@ -28,24 +28,49 @@ my $CPPFLAGS = $env->{CPPFLAGS};
 my $FLIBS = $env->{FLIBS};
 my $PGI = $env->{ENV}->{PGI};
 my $PGILIBS = "";
+my $Libraries =  $env->{Libraries};
 my $LD = $env->{LD};
 my $LDFLAGS = "";#$env->{LDFLAGS};
 if ($LD eq 'gcc' or $LD eq 'g++' or $LD eq 'icc'){
   $LDFLAGS = "-Wl,-export-dynamic -Wl,-noinhibit-exec,-Bdynamic";
 }
 if ($PGI) {
-  $PGILIBS .= " -L$PGI/linux86/lib";
-  $PGILIBS .= " -Wl,--whole-archive -Wl,-Bstatic";
-  if ( -e "$PGI/linux86/lib/libpgftnrtl.a"){
-    $PGILIBS .= " -lpgftnrtl";
+  if ($STAR_SYS =~ /^i386/) {
+    if ( -e "$PGI/linux86/lib/lpgftnrtl.a"){
+      $PGILIBS = " $PGI/linux86/lib/lpgftnrtl.a ";
+    } else {
+      $PGILIBS = " -L$PGI/linux86/lib -lpgftnrtl ";
+    }
+    if ( -e "$PGI/linux86/lib/libpgc.a"){
+      $PGILIBS .= " $PGI/linux86/lib/libpgc.a ";
+    } else {
+      $PGILIBS .= " -L$PGI/linux86/lib -lpgc";
+    }
+    
+    if( -e "$OPTSTAR/lib/libpgf77S.so"){
+      $PGILIBS .= " -L" . $OPTSTAR . "/lib -lpgf77S";
+      if( -e "$OPTSTAR/lib/libpgf77A.a"){
+	$PGILIBS .= " -lpgf77A";
+      }
+    }
   }
-  if ( -e "$PGI/linux86/lib/libpgc.a"){
-    $PGILIBS .= " -lpgc";
+  else {
+    $PGILIBS .= " -L$PGI/linux86/lib";
+    $PGILIBS .= " -Wl,--whole-archive -Wl,-Bstatic";
+    if ( -e "$PGI/linux86/lib/libpgftnrtl.a"){
+      $PGILIBS .= " -lpgftnrtl";
+    }
+    if ( -e "$PGI/linux86/lib/libpgc.a"){
+      $PGILIBS .= " -lpgc";
+    }
+    if ( -e "$PGI/linux86/lib/libpgnod_prof.a"){
+      $PGILIBS .= " -lpgnod_prof";
+    }
+    $PGILIBS .= " -Wl,--no-whole-archive -Wl,-Bdynamic";
+    $Libraries  .= " ". $PGILIBS;
   }
-  if ( -e "$PGI/linux86/lib/libpgnod_prof.a"){
-    $PGILIBS .= " -lpgnod_prof";
-  }
-  $PGILIBS .= " -Wl,--no-whole-archive -Wl,-Bdynamic";
+  
+#  print "PGILIBS = $PGILIBS ====================================\n";
 }
 $FCPATH  = "#asps/agi" . $main::PATH_SEPARATOR . "#asps/agi/gst" . $main::PATH_SEPARATOR . $env->{FCPATH};
 $FPPFLAGS = "-D__ROOT__ -DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB_DZDOC -DCERNLIB_SHL ".
@@ -58,7 +83,6 @@ my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{L
 my $LIBS  = $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};
 $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
 if ($env->{ENV}->{STAR}) {$LIBS .= " -lTable";}
-my $Libraries =  $env->{Libraries};
 my $FC        = $env->{FC};
 my $FEXTEND   = $env->{FEXTEND};
 if ($PGI && $STAR_SYS =~ /^rh/ or  $STAR_SYS =~ /i386/) {
@@ -66,23 +90,13 @@ if ($PGI && $STAR_SYS =~ /^rh/ or  $STAR_SYS =~ /i386/) {
   $FFLAGS   = $env->{G77FLAGS}; 
   $FEXTEND  = $env->{G77EXTEND};
   $FPPFLAGS .= " -DCERNLIB_LINUX";
-  $Libraries  .= " ". $PGILIBS;
 }
 
-my $LIBSTDC = "";
-my $libstdc = "";
-if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /i386/) {
-  my $libpath = `gcc -print-search-dirs`;
-  my @lines  = split /^/m, $libpath;
-  my @words  = split / /, $lines[0];
-  my $lpath  = @words[1];
-  chomp ($lpath);
-  $Libraries  .= " " . $LIBSTDC;
-}
-$Libraries  .=  " " . $env->{CERNLIBS};
+$Libraries  .= " " . $env->{CERNLIBS};
 $Libraries  .= " " . $env->{Packages}->{MYSQL}->{LIBS};
-$Libraries .=  " " . $env->{FLIBS} . " " . $env->{CLIBS} . " " . $env->{SYSLIBS} . $libstdc ;
+$Libraries  .= " " . $env->{FLIBS} . " " . $env->{CLIBS} . " " . $env->{SYSLIBS} . " -lstdc++";
 chomp($Libraries); print "Libraries = $Libraries\n" if $param::debug;
+if ($STAR_SYS =~ /^i386/) {$Libraries  .= " ". $PGILIBS;}
 if ($STAR_SYS =~ /^sun4x_5.$/) {
     if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
     $LIBS .= " -lCstd";
