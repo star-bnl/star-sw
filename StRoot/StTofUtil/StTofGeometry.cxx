@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.cxx,v 1.2 2002/01/22 01:55:05 geurts Exp $
+ * $Id: StTofGeometry.cxx,v 1.3 2002/01/23 17:30:45 geurts Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.cxx,v $
+ * Revision 1.3  2002/01/23 17:30:45  geurts
+ * removed const
+ *
  * Revision 1.2  2002/01/22 01:55:05  geurts
  * STAR dBase access routine, bugfixes and doxygenized
  *
@@ -70,7 +73,7 @@ void StTofGeometry::init(StMaker* maker){
 
 
 /// initialize TOF Slat parameters from XDF file
-void StTofGeometry::initGeomFromXdf(const Char_t* const InputXdfFile){
+void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
   cout << "StTofGeometry: loading dBase from " << InputXdfFile << endl;
   St_XDFFile xdf(InputXdfFile);
   St_DataSet *ctfg = xdf.NextEventGet();
