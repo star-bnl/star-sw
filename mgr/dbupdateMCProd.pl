@@ -32,9 +32,11 @@ my $topHpssReco  =  "/home/starreco/reco";
 my @SetG = (
              "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on",
              "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on", 
-             "pp200/pythia/default/minibias/year_2a/hadronic_on",
-             "auau128/hijing/b0_3/halffield/year_1e/hadronic_on",
-             "auau128/hijing/b0_12/halffield/year_1e/hadronic_on",
+             "auau130/mevsim/vanilla_flow/central/year_1h/hadronic_on",
+             "auau200/single/default/central/year_1e/hadronic_on",
+#             "pp200/pythia/default/minibias/year_2a/hadronic_on",
+#             "auau128/hijing/b0_3/halffield/year_1e/hadronic_on",
+#             "auau128/hijing/b0_12/halffield/year_1e/hadronic_on",
 );
 
 my @recoDir = ("tfs_7", "trs_7");
@@ -140,7 +142,7 @@ for( $ll = 0; $ll<scalar(@SetG) ; $ll++) {
 print "\nFinding reco files in disk\n";
  
 foreach $diskDir (@diskRecoDirs) {
-#  if (-d $diskDir) {
+  if (-d $diskDir) {
   opendir(DIR, $diskDir) or die "can't open $diskDir\n";
   while( defined($flname = readdir(DIR)) ) {
      next if $flname =~ /^\.\.?$/;
@@ -184,7 +186,7 @@ foreach $diskDir (@diskRecoDirs) {
    $nDiskFiles++;
   }
 closedir DIR;
-#}
+}
 }
 print "Total reco files: $nDiskFiles\n";
 
