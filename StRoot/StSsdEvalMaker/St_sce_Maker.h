@@ -57,8 +57,8 @@ class St_sce_Maker : public StMaker {
    virtual Int_t  Finish();
    virtual void   PrintInfo();
 
-   virtual const char *GetCVS()
-     {static const char cvs[]="Tag $Name:  $ $Id: St_sce_Maker.h,v 1.7 2003/10/08 15:44:19 suire Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   virtual const char *GetCVS() const
+     {static const char cvs[]="Tag $Name:  $ $Id: St_sce_Maker.h,v 1.8 2004/01/26 23:04:45 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_sce_Maker, 1)   //StAF chain virtual base class for Makers
 };
@@ -66,6 +66,9 @@ class St_sce_Maker : public StMaker {
  /**************************************************************************
  *
  * $Log: St_sce_Maker.h,v $
+ * Revision 1.8  2004/01/26 23:04:45  perev
+ * WarnOff
+ *
  * Revision 1.7  2003/10/08 15:44:19  suire
  * Removed a bug that happen during last commit
  *

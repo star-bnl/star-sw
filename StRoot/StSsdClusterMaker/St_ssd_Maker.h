@@ -88,8 +88,8 @@ class St_ssd_Maker : public StMaker {
    virtual Int_t  Finish();
    virtual void   PrintInfo();
 
-   virtual const char *GetCVS()
-     {static const char cvs[]="Tag $Name:  $ $Id: St_ssd_Maker.h,v 1.1 2003/10/08 03:18:09 suire Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   virtual const char *GetCVS() const
+     {static const char cvs[]="Tag $Name:  $ $Id: St_ssd_Maker.h,v 1.2 2004/01/26 23:04:18 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_ssd_Maker, 1)   //StAF chain virtual base class for Makers
 };
@@ -98,6 +98,9 @@ class St_ssd_Maker : public StMaker {
  /**************************************************************************
  * 
  *  $Log: St_ssd_Maker.h,v $
+ *  Revision 1.2  2004/01/26 23:04:18  perev
+ *  WarnOff
+ *
  *  Revision 1.1  2003/10/08 03:18:09  suire
  *  *** empty log message ***
  *

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.14 2003/11/25 01:54:33 meissner Exp $
+// $Id: StPeCPair.cxx,v 1.15 2004/01/26 23:01:03 perev Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.15  2004/01/26 23:01:03  perev
+// WarnOff
+//
 // Revision 1.14  2003/11/25 01:54:33  meissner
 // correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
 //
@@ -58,7 +61,7 @@ StPeCPair::StPeCPair() {
 StPeCPair::~StPeCPair() {
 }
 
-void StPeCPair::Clear() {
+void StPeCPair::Clear(const char *) {
   pCharge=0;
   pPt=0.;
   pPz =0.;
