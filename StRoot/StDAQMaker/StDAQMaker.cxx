@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StDAQMaker class for Makers                                      //
+// StDAQMaker class for Makers                                          //
+// Author Victor Perev							//
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>

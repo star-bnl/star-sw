@@ -1,4 +1,19 @@
-#include "StDAQMaker/StDAQReader.h"
+/***************************************************************************
+ *
+ * $Id: StDAQReader.cxx,v 1.3 1999/08/01 00:09:07 perev Exp $
+ *
+ * Author: Victor Perev
+ ***************************************************************************
+ *
+ * Description: Offline Wrapper for DAQ reader classes
+ *
+ ***************************************************************************
+ *
+ * $Log: StDAQReader.cxx,v $
+ * Revision 1.3  1999/08/01 00:09:07  perev
+ * leak removed author added
+ *
+ **************************************************************************/#include "StDAQMaker/StDAQReader.h"
 #include "StDaqLib/GENERIC/EventReader.hh"
 
 //	non standard open,close,read
@@ -179,7 +194,6 @@ void StTPCReader::setSector(int sector)
 
   fSector = sector;
 
-  fZeroSuppressedReader = fTPCImpReader->getZeroSuppressedReader(fSector);
   fZeroSuppressedReader = fTPCImpReader->getZeroSuppressedReader(fSector);
   fADCRawReader 	= fTPCImpReader->getADCRawReader(fSector);
   fPedestalReader 	= fTPCImpReader->getPedestalReader(fSector);
