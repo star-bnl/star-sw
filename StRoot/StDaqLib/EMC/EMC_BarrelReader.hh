@@ -20,6 +20,11 @@ public:
   int FillBarrelTower(Bank_TOWERADCR*);
   void PrintTowerArray();
 
+
+int GetCrate(int daq_tower,int& crate_seq);
+int Getjose_tower(int start,int& crate_seq);   
+int get_index_jose(int daq_tower,int& index_jose);
+
   int getTowerBin(const int,int &,int &,int &);
   int checkTowerId(const int);
   Bank_BTOWERADCR& getBTOWERADCR();
