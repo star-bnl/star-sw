@@ -1,0 +1,355 @@
+<HTML>
+<PRE>
+<H2>file: tdm/src/ahsLib.cc</H2>
+
+
+/*:Copyright 1996, Lawrence Berkeley National Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         ahsLib.c
+*:DESCRIPTION:  Parsing and unparsing functions for AHSs
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      10may96-v000b-cet- 
+*:HISTORY:      03may96-v000a-cet- creation
+*:&lt;---------------------------------------------------------------------
+*/
+
+/*-------------------------------------------- MACROS               --*/
+<B>#define <A NAME="_PRINTF">_PRINTF</A> printf("%s.%d-",__FILE__,__LINE__);fflush(0);printf</B>
+
+/*-------------------------------------------- INCLUDES             --*/
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;
+
+#include "asuAlloc.h"
+#include "ahsLib.h"
+
+/*-------------------------------------------- TYPEDEFS             --*/
+/*-------------------------------------------- GLOBALS              --*/
+/*-------------------------------------------- PROTOTYPES           --*/
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:
+*:DESCRIPTION:
+*:ARGUMENTS:
+*:RETURN VALUE:
+*:&lt;---------------------------------------------------------------------
+*/
+
+/*--------------------------------------------------------------------*/
+<B>int <A NAME="isValidAhsSpec">isValidAhsSpec(</A>char *s){ if(s)return TRUE;else return FALSE; }</B>
+/*--------------------------------------------------------------------*/
+<B>int <A NAME="isValidShapeSpec">isValidShapeSpec(</A>char *s){ if(s)return TRUE;else return FALSE; }</B>
+/*--------------------------------------------------------------------*/
+<B>int <A NAME="ahs_parseSpec">ahs_parseSpec(</A>char* spec, AHS_STRUCT_T* a)</B>
+{
+
+   <A HREF="#ahs_zeroAHS">ahs_zeroAHS(</A>*a);
+
+   char *locationSpec, *pathSpec, *qualifierSpec, *entrySpec;
+/*-(" Split specification into sub specs. \n");-*/
+   <A HREF="#ahs_specSplit">ahs_specSplit(</A>spec,locationSpec,pathSpec,qualifierSpec,entrySpec);
+
+/*# DEBUG
+printf("                     locationSpec = %s\n",locationSpec);
+printf("                         pathSpec = %s\n",pathSpec);
+printf("                    qualifierSpec = %s\n",qualifierSpec);
+printf("                        entrySpec = %s\n",entrySpec);
+fflush(0);
+DEBUG #*/
+
+/*-(" Load the AHS location and qualifier. \n");-*/
+   a-&gt;location = locationSpec; locationSpec = NULL;
+   a-&gt;qualifier = qualifierSpec; qualifierSpec = NULL;
+/*$ DEBUG $*/
+   a-&gt;entryName = entrySpec;
+/*$ DEBUG $*/
+
+/*-(" Split path into nodes. \n");-*/
+   if(pathSpec)
+      a-&gt;pathDepth = <A HREF="#ahs_spec2nodes">ahs_spec2nodes(</A>pathSpec,a-&gt;nodes);
+
+/*-(" Parse the entry. \n");-*/
+   if(entrySpec)
+      <A HREF="#ahs_spec2nameShape">ahs_spec2nameShape(</A>entrySpec ,a-&gt;entryName,a-&gt;entryShape);
+
+   return TRUE;
+}
+
+/*--------------------------------------------------------------------*/
+<B>int <A NAME="ahs_zeroAHS">ahs_zeroAHS(</A>AHS_STRUCT_T& a)</B>
+{
+/*-(" Zero-out the AHS. \n");-*/
+   a.location = NULL;
+   a.pathDepth = 0;
+   a.nodes = NULL;
+   a.qualifier = NULL;
+   a.entryName = NULL;
+   a.entryShape.rank = 0;
+   a.entryShape.indexes = NULL;
+
+   return TRUE;
+}
+
+/*--------------------------------------------------------------------*/
+<B>int <A NAME="ahs_printAHS">ahs_printAHS(</A>AHS_STRUCT_T a)</B>
+{
+   int i,j;
+
+   printf(
+   "====================================\n"
+   "   LOCATION = (%s)\n"
+   " PATH DEPTH = (%d)\n"
+   		,a.location
+   		,a.pathDepth); fflush(0);
+   for(i=0;i&lt;a.pathDepth;i++){
+   printf(
+   "    NODE[%d] = (%s) \tRANK = %d SHAPE = ["
+		,i
+		,a.nodes[i].name
+		,a.nodes[i].shape.rank); fflush(0);
+   for(j=0;j&lt;a.nodes[i].shape.rank;j++){
+   if(j&gt;0)printf(", "); fflush(0);
+   printf("%d",a.nodes[i].shape.indexes[j]); fflush(0);
+   }
+   printf("]\n"); fflush(0);
+   }
+   printf(
+   "  QUALIFIER = (%s)\n"
+   "      ENTRY = (%s) \tRANK = %d SHAPE = ["
+	,a.qualifier
+	,a.entryName
+	,a.entryShape.rank); fflush(0);
+   for(j=0;j&lt;a.entryShape.rank;j++){
+   if(j&gt;0)printf(", "); fflush(0);
+   printf("%d",a.entryShape.indexes[j]); fflush(0);
+   }
+   printf("]\n"); fflush(0);
+   return TRUE;
+}
+
+/*--------------------------------------------------------------------*/
+<B>int <A NAME="ahs_specSplit">ahs_specSplit(</A>const char *s</B>
+                , char*& loc, char*& path, char*& qual, char*& entr)
+{
+   char *spec;
+   char *c, *cc;
+   char **buffs; int nbuffs;
+   int nspec = 0;
+
+   spec = (char*)ASUALLOC(strlen(s) +1);
+   strcpy(spec,s);
+
+/*-(" Is there a location in the specification? \n");-*/
+   if( (cc=strchr(spec,':')) ){      /* first ':' */
+      nspec++;
+      nbuffs = strsplit(spec,":",&buffs);
+      if(nbuffs != 2){ <A HREF="#_PRINTF">_PRINTF</A>("syntax error\n"); return FALSE; }
+      loc = buffs[0]; buffs[0] = NULL;
+      ASUFREE(spec);
+      spec = buffs[1]; buffs[1] = NULL;
+      ASUFREE(buffs);
+   }
+   else {
+      loc = NULL;
+   }
+
+/*-(" Is there an entry in the specification? \n");-*/
+   if( (cc=strrchr(spec,'.')) ){     /* last '.' */
+      if( (0 == strncmp(cc,"./",2))
+      ||  (0 == strncmp(cc,"../",3))
+      ||  (0 == strncmp(cc-1,"/.",2))
+      ||  (0 == strncmp(cc-2,"/..",3))
+      ){
+	 entr = NULL;
+      }
+      else {
+	 nspec++;
+	 entr = (char*)ASUALLOC(strlen(spec) - (cc+1-spec) +1);
+	 strncpy(entr,cc+1,strlen(spec) - (cc+1-spec));
+	 c = (char*)ASUALLOC((cc-spec) +1);
+	 strncpy(c,spec,(cc-spec));
+	 ASUFREE(spec);
+	 spec = c; c = NULL;
+      }
+   }
+   else {
+      entr = NULL;
+   }
+
+/*-(" Is there a qualifier in the specification? \n");-*/
+   if( (c=strchr(spec,'(')) && (cc=strrchr(spec,')')) ){
+      nspec++;
+      nbuffs = strsplit(spec,"()",&buffs);
+      if(nbuffs != 2){ <A HREF="#_PRINTF">_PRINTF</A>("syntax error\n"); return FALSE; }
+      ASUFREE(spec);
+      spec = buffs[0]; buffs[0] = NULL;
+      qual = buffs[1]; buffs[1] = NULL;
+      ASUFREE(buffs);
+   }
+   else {
+      qual = NULL;
+   }
+
+/*-(" Is there a path in the specification? \n");-*/
+   if( TRUE ){
+      path = spec; spec = NULL;
+      nspec++;
+   }
+   else {
+      path = NULL;
+   }
+
+   if(spec)ASUFREE(spec);
+   return nspec;
+}
+
+/*--------------------------------------------------------------------*/
+<B>int <A NAME="ahs_spec2shape">ahs_spec2shape(</A>const char *spec, SHAPE_T& shape)</B>
+{
+   int isGood = TRUE;
+   char **buffs; int nbuffs;
+   int i;
+
+   if( !<A HREF="#isValidShapeSpec">isValidShapeSpec(</A>(char*)spec) ){
+      shape.rank = 0;
+      shape.indexes = NULL;
+      return FALSE;
+   }
+
+/*-(" Parse the shape specificatoin. \n");-*/
+   nbuffs = strsplit(spec,"[,]",&buffs);
+   if(nbuffs &lt; 1){
+      shape.rank = 0;
+      shape.indexes = NULL;
+      return FALSE;
+   }
+
+   shape.rank = nbuffs;
+   shape.indexes = (int*)ASUALLOC(nbuffs*sizeof(int*));
+
+   for( i=0;i&lt;nbuffs;i++ ){
+      if( isInteger(buffs[i]) ){
+	 shape.indexes[i] = atoi(buffs[i]);
+      }
+      else {
+	 shape.indexes[i] = -11301957;
+	 isGood = FALSE;
+      }
+   }
+   return isGood;
+}
+
+/*--------------------------------------------------------------------*/
+<B>int <A NAME="ahs_spec2nodes">ahs_spec2nodes(</A>const char *spec, AHSNODE_T*& nodes)</B>
+{
+   int depth;
+   char **buffs; int nbuffs;
+   char *cc;
+   int i;
+
+/*-(" Split path into nodes. \n");-*/
+   if( (cc=strchr(spec,'/')) ){
+      nbuffs = strsplit(spec,"/",&buffs); /* delimiter = "/" */
+      depth = nbuffs;
+   }
+   else {
+      depth = 1;
+      buffs = (char**)ASUALLOC(1*sizeof(char**));
+      buffs[0] = (char*)ASUALLOC(strlen(spec) +1);
+      strcpy(buffs[0],spec);
+   }
+
+/*-(" Create nodes array. \n");-*/
+   if( NULL == nodes ){
+      nodes = (AHSNODE_T*)ASUALLOC(depth*sizeof(AHSNODE_T*));
+   }
+
+/*-(" Load the AHS nodes. \n");-*/
+   for(i=0;i&lt;depth;i++){
+      <A HREF="#ahs_spec2nameShape">ahs_spec2nameShape(</A>buffs[i],nodes[i].name,nodes[i].shape);
+      ASUFREE(buffs[i]);
+   }
+   ASUFREE(buffs);
+
+   return depth;
+}
+
+/*--------------------------------------------------------------------*/
+<B>int <A NAME="ahs_spec2nameShape">ahs_spec2nameShape(</A>const char *spec, char*& name, SHAPE_T& shape)</B>
+{
+   char **buffs; int nbuffs;
+
+   nbuffs = strsplit(spec,"[]",&buffs);
+   name = buffs[0]; buffs[0] = NULL;
+   if( nbuffs == 2 ){
+      <A HREF="#ahs_spec2shape">ahs_spec2shape(</A>buffs[1],shape);
+      ASUFREE(buffs[1]);
+   }
+   else {
+      shape.rank = 0;
+      shape.indexes = NULL;
+   }
+   ASUFREE(buffs);
+   return TRUE;
+}
+/*--------------------------------------------------------------------*/
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

@@ -1,0 +1,267 @@
+<HTML>
+<PRE>
+<H2>file: tdm/inc/tdmClasses.hh</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley National Laboratory
+**:&gt;--------------------------------------------------------------------
+**:FILE:        tdmClasses.hh
+**:DESCRIPTION: Table & Dataset Memory Classes
+**:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
+**:BUGS:        -- STILL IN DEVELOPMENT --
+**:HISTORY:	14may96-v004b-cet- Make cellAddress public.
+**:HISTORY:     12mar96-v004a-cet- Use socFactory as base.
+**:HISTORY:     29nov95-v003a-cet- Rework for working MOAST
+**:HISTORY:     13sep95-v002b-cet- rework ctors & dtors
+**:HISTORY:     06jul95-v000a-cet- creation
+**:&lt;--------------------------------------------------------------------
+*/
+
+#ifdef __cplusplus
+#ifndef <A HREF="#TDMCLASSES_HH">TDMCLASSES_HH</A>
+<B>#define <A NAME="TDMCLASSES_HH">TDMCLASSES_HH</A></B>
+
+//:----------------------------------------------- INCLUDES           --
+<B>#define <A NAME="DS_ADVANCED">DS_ADVANCED</A></B>
+#include "dstype.h"
+#include "asu_macros.h"
+#include "asu_types.h"
+#include "socClasses.hh"
+#include "tdm_macros.h"
+#include "<A HREF="tdm_types.h.html">tdm_types.h</A>"
+
+//:=============================================== CLASS              ==
+class tdmObject: public virtual socObject {
+
+public:
+//:----------------------------------------------- CTORS & DTOR       --
+   <U>tdmObject(</U>);        //OVERLOAD CALL: tdmObject: <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>
+   <U>tdmObject(</U>const DS_DATASET_T* pDS);        //OVERLOAD CALL: tdmObject: <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>
+   virtual ~<U>tdmObject(</U>);        //OVERLOAD CALL: tdmObject: <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>
+//:----------------------------------------------- ATTRIBUTES         --
+   virtual char * <U>dslName</U> ();        //OVERLOAD CALL: dslName: <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>
+   virtual unsigned char <A HREF="tdmClasses.cc.html#isDataset">isDataset</A> ();
+   virtual unsigned char <A HREF="tdmClasses.cc.html#isTable">isTable</A> ();
+//:----------------------------------------------- PUB FUNCTIONS      --
+
+protected:
+//:----------------------------------------------- PROT VARIABLES     --
+   DS_DATASET_T *pDSthis;
+
+//:----------------------------------------------- PROT FUNCTIONS     --
+};
+
+//:=============================================== CLASS              ==
+class tdmTable: public virtual tdmObject {
+
+public:
+//:----------------------------------------------- CTORS & DTOR       --
+//   <U>tdmTable(</U>const char *name);        //OVERLOAD CALL: tdmTable: <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>
+   <U>tdmTable(</U>const char *name        //OVERLOAD CALL: tdmTable: <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>
+		, const DS_DATASET_T* pDS);
+   <U>tdmTable(</U>const DS_DATASET_T* pDS);        //OVERLOAD CALL: tdmTable: <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>
+   <U>tdmTable(</U>const char *name, const char * spec, long rows);        //OVERLOAD CALL: tdmTable: <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>
+   virtual ~<U>tdmTable(</U>);        //OVERLOAD CALL: tdmTable: <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>
+
+//:----------------------------------------------- ATTRIBUTES         --
+   virtual long <A HREF="tdmClasses.cc.html#columnCount">columnCount</A> ();
+   virtual char * <U>dslName</U> ();        //OVERLOAD CALL: dslName: <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>
+   virtual void <U>maxRowCount</U> (long <U>maxRowCount</U>);        //OVERLOAD CALL: maxRowCount: <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>; maxRowCount: <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>
+   virtual long <U>maxRowCount</U> ();        //OVERLOAD CALL: maxRowCount: <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>
+   virtual void <U>rowCount</U> (long <U>rowCount</U>);        //OVERLOAD CALL: rowCount: <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>; rowCount: <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>
+   virtual long <U>rowCount</U> ();        //OVERLOAD CALL: rowCount: <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>
+   virtual long <A HREF="tdmClasses.cc.html#rowSize">rowSize</A> ();
+   virtual char * <A HREF="tdmClasses.cc.html#typeName">typeName</A> ();
+   virtual char * <A HREF="tdmClasses.cc.html#typeSpecifier">typeSpecifier</A> ();
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+
+   virtual unsigned char <A HREF="tdmClasses.cc.html#isType">isType</A> (const char * aType);
+
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#findColumn">findColumn</A> (<A HREF="tdm_types.h.html#TDM_COLUMN_T">TDM_COLUMN_T</A>& column,
+		const char * name );
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#getColumn">getColumn</A> (<A HREF="tdm_types.h.html#TDM_COLUMN_T">TDM_COLUMN_T</A>& column, long ncol);
+
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#printRows">printRows</A> (long ifirst, long nrows);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#show">show</A> ();
+
+//- Column attributes
+   virtual long <A HREF="tdmClasses.cc.html#columnNumber">columnNumber</A> (const char * name);
+   virtual char * <A HREF="tdmClasses.cc.html#columnName">columnName</A> (long ncol);
+   virtual DS_TYPE_CODE_T <A HREF="tdmClasses.cc.html#columnTypeCode">columnTypeCode</A> (long ncol);
+   virtual char * <A HREF="tdmClasses.cc.html#columnTypeName">columnTypeName</A> (long ncol);
+   virtual long <A HREF="tdmClasses.cc.html#columnSize">columnSize</A> (long ncol);
+   virtual long <A HREF="tdmClasses.cc.html#columnRank">columnRank</A> (long ncol);
+   virtual long <A HREF="tdmClasses.cc.html#columnShape">columnShape</A> (long ncol, long ndim);
+   virtual long <A HREF="tdmClasses.cc.html#columnElcount">columnElcount</A> (long ncol);
+
+//- Data access
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#getCell">getCell</A> (<A HREF="tdm_types.h.html#TDM_CELLDATA_T">TDM_CELLDATA_T</A>& data
+		, long nrow, long ncol);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#putCell">putCell</A> (const <A HREF="tdm_types.h.html#TDM_CELLDATA_T">TDM_CELLDATA_T</A>& data
+		, long nrow, long ncol);
+
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#getData">getData</A> (TDM_DATABLOCK_T& data);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#putData">putData</A> (const TDM_DATABLOCK_T& data);
+
+//- CO-LOCATED METHODS
+   virtual void * <A HREF="tdmClasses.cc.html#cellAddress">cellAddress(</A>long nrow, long ncol);
+
+//- TEMPORARY LEGACY METHODS
+   virtual STAFCV_T <U>cvtDslPointer(</U><A HREF="tdm_types.h.html#DSL_PTR_T">DSL_PTR_T</A>& pDS);        //OVERLOAD CALL: cvtDslPointer: <A HREF="tdmClasses.cc.html#cvtDslPointer">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#cvtDslPointer">tdmClasses.cc(?)</A>
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#cvtTasStructs">cvtTasStructs(</A><A HREF="table_header.h.html#TABLE_HEAD_ST">TABLE_HEAD_ST</A> *& head, char *& data);
+
+protected:
+//:----------------------------------------------- PROT VARIABLES     --
+//:**NONE**
+//:----------------------------------------------- PROT FUNCTIONS     --
+
+};
+
+//:=============================================== CLASS              ==
+class tdmDataset: public virtual tdmObject {
+
+public:
+//:----------------------------------------------- CTORS & DTOR       --
+// <U>tdmDataset(</U>const char* name);        //OVERLOAD CALL: tdmDataset: <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>
+   <U>tdmDataset(</U>const char* name        //OVERLOAD CALL: tdmDataset: <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>
+		, const DS_DATASET_T* pDS);
+   <U>tdmDataset(</U>const DS_DATASET_T* pDS);        //OVERLOAD CALL: tdmDataset: <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>
+   <U>tdmDataset(</U>const char* name, long setDim);        //OVERLOAD CALL: tdmDataset: <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>
+   virtual ~<U>tdmDataset(</U>);        //OVERLOAD CALL: tdmDataset: <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>
+
+//:----------------------------------------------- ATTRIBUTES         --
+   virtual char * <U>dslName</U> ();        //OVERLOAD CALL: dslName: <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>
+   virtual long <A HREF="tdmClasses.cc.html#entryCount">entryCount</A> ();
+   virtual long <A HREF="tdmClasses.cc.html#maxEntryCount">maxEntryCount</A> ();
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#addDataset">addDataset</A> (const char * name, long setDim);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#addTable">addTable</A> (const char * name, const char * spec
+		, long rows);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#getEntryType">getEntryType</A> (char *& type, long num);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#getDatasetEntry">getDatasetEntry</A> (tdmDataset*& dataset, long num);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#getTableEntry">getTableEntry</A> (tdmTable*& table, long num);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#findDatasetEntry">findDatasetEntry</A> (tdmDataset*& dataset
+		, const char * name);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#findTableEntry">findTableEntry</A> (tdmTable*& table
+		, const char * name);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#getDescriptor">getDescriptor</A> (char *& descriptor);
+
+//- TEMPORARY LEGACY METHODS
+   virtual STAFCV_T <U>cvtDslPointer(</U><A HREF="tdm_types.h.html#DSL_PTR_T">DSL_PTR_T</A>& pDS);        //OVERLOAD CALL: cvtDslPointer: <A HREF="tdmClasses.cc.html#cvtDslPointer">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#cvtDslPointer">tdmClasses.cc(?)</A>
+
+protected:
+//:----------------------------------------------- PRIV VARIABLES     --
+
+//:----------------------------------------------- PRIV FUNCTIONS     --
+//:**NONE**
+
+};
+
+//:=============================================== CLASS              ==
+class tdmFactory: public virtual socFactory {
+
+public:
+//:----------------------------------------------- CTORS & DTOR       --
+   <U>tdmFactory(</U>);        //OVERLOAD CALL: tdmFactory: <A HREF="tdmClasses.cc.html#tdmFactory">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmFactory">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmFactory">tdmClasses.cc(?)</A>
+   <U>tdmFactory(</U>const char * name);        //OVERLOAD CALL: tdmFactory: <A HREF="tdmClasses.cc.html#tdmFactory">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmFactory">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmFactory">tdmClasses.cc(?)</A>
+   virtual ~<U>tdmFactory(</U>);        //OVERLOAD CALL: tdmFactory: <A HREF="tdmClasses.cc.html#tdmFactory">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmFactory">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmFactory">tdmClasses.cc(?)</A>
+
+//:----------------------------------------------- ATTRIBUTES         --
+//:**NONE**
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#deleteDataset">deleteDataset</A> (const char * name);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#deleteTable">deleteTable</A> (const char * name);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#findDataset">findDataset</A> (const char * name
+                , tdmDataset*& dataset);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#findTable">findTable</A> (const char * name, tdmTable*& table);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#getDataset">getDataset</A> (IDREF_T id, tdmDataset*& dataset);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#getTable">getTable</A> (IDREF_T id, tdmTable*& table);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#list">list</A> ();
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#newDataset">newDataset</A> (const char * name, long setDim);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#newTable">newTable</A> (const char * name, const char * spec
+                , long rows);
+
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#createDataset">createDataset</A> (const char * name, DS_DATASET_T *pDS
+		, tdmDataset *& dataset);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#createTable">createTable</A> (const char * name, DS_DATASET_T *pDS
+		, tdmTable *& table);
+
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#getTypeName">getTypeName</A> (long tid, char *& name);
+   virtual STAFCV_T <A HREF="tdmClasses.cc.html#getTypeSpecification">getTypeSpecification</A> (long tid, char *& spec);
+
+protected:
+//:----------------------------------------------- PROT VARIABLES     --
+//:**NONE**
+//:----------------------------------------------- PROT FUNCTIONS     --
+//:**NONE**
+
+};
+
+//----------------------------------------------------------------------
+<B><A NAME="CORBA_TIE">CORBA_TIE(</A>tdmObject)</B>
+<A HREF="#CORBA_TIE">CORBA_TIE(</A>tdmTable)
+<A HREF="#CORBA_TIE">CORBA_TIE(</A>tdmDataset)
+<A HREF="#CORBA_TIE">CORBA_TIE(</A>tdmFactory)
+
+#endif /*<A HREF="#TDMCLASSES_HH">TDMCLASSES_HH</A>*/
+#endif /*__cplusplus*/
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

@@ -1,0 +1,988 @@
+<HTML>
+<PRE>
+<H2>file: tdm/src/tdmClasses.cc</H2>
+
+
+//:Copyright 1995, Lawrence Berkeley National Laboratory
+//:&gt;--------------------------------------------------------------------
+//:FILE:        tdmClasses.C
+//:DESCRIPTION: Table & Dataset Memory Orbix-object C++ code
+//:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:        -- STILL IN DEVELOPMENT --
+//:HISTORY:     18apr96-v003c-cet- create tdmObject class
+//:HISTORY:     30nov95-v003b-cet- move dui to seperate ASP
+//:HISTORY:     29nov95-v003a-cet- get working with MOAST
+//:HISTORY:     13sep95-v002b-cet- rework ctors & dtors
+//:HISTORY:	13sep95-v002a-cet- manager now a factory, add dui...
+//:BUGS:        07jul95-v001a-cet- memory is not returned in dtors.
+//:HISTORY:     06jul95-v000a-cet- creation
+//:&lt;--------------------------------------------------------------------
+
+//:----------------------------------------------- INCLUDES           --
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include "asuAlloc.h"
+#include "emlLib.h"
+#include "socLib.h"
+#include "<A HREF="tdmClasses.hh.html">tdmClasses.hh</A>"
+
+//:----------------------------------------------- MACROS             --
+#include "tdm_macros.h"
+#ifndef MIN
+<B>#define <A NAME="MIN">MIN(</A>A,B) ( ( A &lt; B ) ? A : B )</B>
+#endif /*MIN*/
+<B>#define <A NAME="VALID_CELL">VALID_CELL(</A>R,C) ( (0 &lt;= R && R &lt; <U>maxRowCount</U>()) \</B>     //OVERLOAD CALL: maxRowCount: <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>
+		&& (0 &lt;= C && C &lt; <A HREF="#columnCount">columnCount</A>()) )
+<B>#define <A NAME="FULL_ROW">FULL_ROW(</A>R) (0 &lt;= R && R &lt; <U>rowCount</U>())</B>     //OVERLOAD CALL: rowCount: <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>
+<B>#define <A NAME="EMPTY_ROW">EMPTY_ROW(</A>R) (<U>rowCount</U>() &lt;= R && R &lt; <U>maxRowCount</U>())</B>     //OVERLOAD CALL: rowCount: <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>; maxRowCount: <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>
+
+//:----------------------------------------------- PROTOTYPES         --
+extern CC_P int dsTypeSpecifier(char **ptr, size_t *pLen, size_t tid);
+extern CC_P void <A HREF="dsuPrint.c.html#dsuPrintData">dsuPrintData(</A>FILE *stream , DS_TYPE_CODE_T type
+		, unsigned int count , void *data);
+
+//:=============================================== CLASS              ==
+// tdmObject
+
+//:----------------------------------------------- CTORS & DTOR       --
+<B>   tdmObject:: <A NAME="tdmObject">tdmObject(</A>)</B>
+		: socObject("NULL","tdmObject") {
+      pDSthis = NULL;
+   }
+
+<B>   tdmObject:: <A NAME="tdmObject">tdmObject(</A>const DS_DATASET_T* pDS)</B>
+		: socObject(pDS-&gt;name, "tdmObject") {
+      pDSthis = (DS_DATASET_T *)pDS;
+   }
+
+<B>   tdmObject:: ~<A NAME="tdmObject">tdmObject(</A>){ };</B>
+//:----------------------------------------------- ATTRIBUTES         --
+<B>char * tdmObject::  <A NAME="dslName">dslName</A> () {</B>
+   char *c=NULL;
+   char *cc=NULL;
+   if( <A HREF="#isDataset">isDataset</A>() ){
+      if( !dsDatasetName(&c,pDSthis) ){
+	 dsPerror("dsl error");
+	 return NULL;
+      }
+   }
+   else if( <A HREF="#isTable">isTable</A>() ){
+      if( !dsTableName(&c,pDSthis) ){
+	 dsPerror("dsl error");
+	 return NULL;
+      }
+   }
+   else {
+     return NULL;
+   }
+   cc = (char*)ASUALLOC(strlen(c)+1);
+   strcpy(cc,c);
+   return cc;
+}
+
+//----------------------------------
+<B>unsigned char tdmObject:: <A NAME="isDataset">isDataset</A> () {</B>
+
+   bool_t r;
+
+   if( !dsIsDataset(&r, pDSthis) ){
+      dsPerror("dsl error");
+      return FALSE;
+   }
+   if( r ){ return TRUE; }
+   else { return FALSE; }
+}
+
+//----------------------------------
+<B>unsigned char tdmObject:: <A NAME="isTable">isTable</A> () {</B>
+
+   bool_t r;
+
+   if( !dsIsTable(&r, pDSthis) ){
+      dsPerror("dsl error");
+      return FALSE;
+   }
+   if( r ){ return TRUE; }
+   else { return FALSE; }
+}
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+//:----------------------------------------------- PROT FUNCTIONS     --
+
+//:=============================================== CLASS              ==
+// tdmTable
+
+//:----------------------------------------------- CTORS & DTOR       --
+<B>tdmTable:: <A NAME="tdmTable">tdmTable(</A>const char * name, const DS_DATASET_T *pDS)</B>
+		: <U>tdmObject(</U>pDS)        //OVERLOAD CALL: tdmObject: <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>
+		, socObject(name, "tdmTable") {
+   myPtr = (SOC_PTR_T)this;
+   bool_t result;
+
+   if( !dsIsTable(&result, (DS_DATASET_T *)pDS)
+   ||  !result
+   ){
+      dsPerror("dsl error");
+      pDSthis = NULL;
+   }
+   pDSthis = (DS_DATASET_T *)pDS;
+}
+
+//----------------------------------
+<B>tdmTable:: <A NAME="tdmTable">tdmTable(</A>const DS_DATASET_T *pDS)</B>
+		: <U>tdmObject(</U>pDS)        //OVERLOAD CALL: tdmObject: <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>
+		, socObject(pDS-&gt;name, "tdmTable") {
+   myPtr = (SOC_PTR_T)this;
+   bool_t result;
+
+   if( !dsIsTable(&result, (DS_DATASET_T *)pDS)
+   ||  !result
+   ){
+      dsPerror("dsl error");
+      pDSthis = NULL;
+   }
+   pDSthis = (DS_DATASET_T *)pDS;
+}
+
+//----------------------------------
+<B>tdmTable:: <A NAME="tdmTable">tdmTable(</A>const char *name, const char * spec, long rows)</B>
+		: <U>tdmObject(</U>)        //OVERLOAD CALL: tdmObject: <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>
+		, socObject(name, "tdmTable") {
+   myPtr = (SOC_PTR_T)this;
+   pDSthis = NULL;
+   char *pData = NULL;
+   if( !dsNewTable(&pDSthis, (char*)name, (char*)spec, rows, pData)
+   ||  !dsAllocTables(pDSthis)
+   ){
+      dsPerror("dsl error");
+      pDSthis = NULL;
+   }
+}
+
+//----------------------------------
+<B>tdmTable:: ~<A NAME="tdmTable">tdmTable(</A>) { }</B>
+
+//:----------------------------------------------- ATTRIBUTES         --
+<B>long tdmTable::  <A NAME="columnCount">columnCount</A> () {</B>
+   size_t ccount;
+
+   if(!dsTableColumnCount(&ccount,pDSthis)) {
+      dsPerror("dsl error");
+      return -1;
+   }
+   return (long)ccount;
+}
+
+//----------------------------------
+/* OVER-RIDE tdmObject::<U>dslName</U> */        //OVERLOAD CALL: dslName: <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>
+<B>char * tdmTable::  <A NAME="dslName">dslName</A> () {</B>
+   char* c=NULL;
+   char* cc=NULL;
+   if( !dsTableName(&c, pDSthis) ){
+      dsPerror("dsl error");
+      return NULL;
+   }
+   cc = (char*)ASUALLOC(strlen(c) +1);
+   strcpy(cc,c);
+   return cc;
+}
+
+//----------------------------------
+<B>void tdmTable:: <U>maxRowCount</U> (long <A NAME="maxRowCount">maxRowCount</A>) {</B>     //OVERLOAD CALL: maxRowCount: <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>
+   if( !dsReallocTable(pDSthis, (size_t)<U>maxRowCount</U>) ){        //OVERLOAD CALL: maxRowCount: <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>
+      dsPerror("dsl error");
+   }
+}
+
+//----------------------------------
+<B>long tdmTable::  <A NAME="maxRowCount">maxRowCount</A> () {</B>
+   size_t count;
+   if( !dsTableMaxRowCount(&count, pDSthis) ){
+      dsPerror("dsl error");
+      return -1;
+   }
+   return (long)count;
+}
+
+//----------------------------------
+<B>void tdmTable:: <U>rowCount</U> (long <A NAME="rowCount">rowCount</A>) {</B>     //OVERLOAD CALL: rowCount: <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>
+   if( !dsSetTableRowCount(pDSthis, (size_t)<U>rowCount</U>) ){        //OVERLOAD CALL: rowCount: <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>
+      dsPerror("dsl error");
+   }
+}
+
+//----------------------------------
+<B>long tdmTable::  <A NAME="rowCount">rowCount</A> () {</B>
+   size_t count;
+   if( !dsTableRowCount(&count, pDSthis) ){
+      dsPerror("dsl error");
+      return -1;
+   }
+   return (long)count;
+}
+
+//----------------------------------
+<B>long tdmTable::  <A NAME="rowSize">rowSize</A> () {</B>
+   size_t rsize;
+
+   if(!dsTableRowSize(&rsize,pDSthis)) {
+      dsPerror("dsl error");
+      return -1;
+   }
+   return (long)rsize;
+}
+
+//----------------------------------
+<B>char * tdmTable::  <A NAME="typeName">typeName</A> () {</B>
+   char* tname=NULL;
+
+   if(!dsTableTypeName(&tname,pDSthis)) {
+      dsPerror("dsl error");
+      return NULL;
+   }
+   return tname;
+}
+
+//----------------------------------
+<B>char * tdmTable::  <A NAME="typeSpecifier">typeSpecifier</A> () {</B>
+   char* tspec=NULL;
+
+   if(!dsTableTypeSpecifier(&tspec,pDSthis)) {
+      dsPerror("dsl error");
+      return NULL;
+   }
+   char *c=(char*)ASUALLOC(strlen(tspec) +1);
+   strcpy(c,tspec);
+   return c;
+}
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+//-02feb96- return result as return value, not argument
+<B>unsigned char tdmTable:: <A NAME="isType">isType</A> (const char * aType) {</B>
+   bool_t rslt;
+   if( !dsTableIsType(&rslt, pDSthis, (char*)aType) ){
+      dsPerror("dsl error");
+      return FALSE;
+   }
+   return rslt;
+}
+
+//----------------------------------
+<B>STAFCV_T tdmTable:: <A NAME="printRows">printRows</A> (long ifirst, long nrows) {</B>
+
+   size_t i,j;
+   DS_TYPE_T *type;
+   char *pCellData;
+
+   if( !dsTypePtr(&type,pDSthis-&gt;tid)) {
+      EML_ERROR(BAD_TABLE_TYPE);
+   }
+   long ii=<U>rowCount</U>();        //OVERLOAD CALL: rowCount: <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>
+   if(ifirst &lt; 0 || ii &lt;= ifirst){
+      EML_ERROR(INVALID_TABLE_ROW);
+   }
+   fprintf(stdout," ROW #");
+   for( i=0;i&lt;<A HREF="#columnCount">columnCount</A>();i++ ){
+      fprintf(stdout,"\t%s",<A HREF="#columnName">columnName</A>(i));
+   }
+   fprintf(stdout,"\n");
+   pCellData = (char*)pDSthis-&gt;p.data;
+   pCellData += ifirst*<A HREF="#rowSize">rowSize</A>();
+   for( i=ifirst;i&lt;<A HREF="#MIN">MIN(</A>ii,ifirst+nrows);i++){
+      fprintf(stdout,"%6d:",i);
+/*REPLACE *** dsPrintData with dsuPrintData ***
+      dsPrintData(stdout, type
+		, 1 
+		, (char *)pDSthis-&gt;p.data +i*type-&gt;size);
+*/
+/*REPLACE *** dsuPrintData with dsPrintData ***
+      for(j=0;j&lt;<A HREF="#columnCount">columnCount</A>();j++){
+	 <A HREF="dsuPrint.c.html#dsuPrintData">dsuPrintData(</A>stdout, <A HREF="#columnTypeCode">columnTypeCode</A>(j), <A HREF="#columnElcount">columnElcount</A>(j)
+			, pCellData);
+	 pCellData += <A HREF="#columnSize">columnSize</A>(j);
+      }
+*/
+      dsPrintData(stdout, type, 1, pCellData);
+      pCellData += <A HREF="#rowSize">rowSize</A>();
+      fprintf(stdout,"\n");
+   }
+   
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmTable:: <A NAME="show">show</A> () {</B>
+   char* tspec=NULL;
+
+   if(!dsTableTypeSpecifier(&tspec,pDSthis)) {
+      EML_ERROR(DSL_ERROR);
+   }
+   printf("%s \n",tspec);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmTable:: <A NAME="findColumn">findColumn</A> (<A HREF="tdm_types.h.html#TDM_COLUMN_T">TDM_COLUMN_T</A>& column</B>
+		, const char * name) {
+   long ncol = <A HREF="#columnNumber">columnNumber</A>(name);
+   return <A HREF="#getColumn">getColumn</A>(column,ncol);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmTable:: <A NAME="getColumn">getColumn</A> (<A HREF="tdm_types.h.html#TDM_COLUMN_T">TDM_COLUMN_T</A>& column, long ncol) {</B>
+   if(ncol &lt; 0 || <A HREF="#columnCount">columnCount</A>() &lt;= ncol ){
+      EML_ERROR(INVALID_TABLE_COLUMN);
+   }
+   column.nCol = ncol;
+   column.name = <A HREF="#columnName">columnName</A>(ncol);
+   column.type = <A HREF="#columnTypeName">columnTypeName</A>(ncol);
+   column.code = <A HREF="#columnTypeCode">columnTypeCode</A>(ncol);
+   column.size = <A HREF="#columnSize">columnSize</A>(ncol);
+   column.rank = <A HREF="#columnRank">columnRank</A>(ncol);
+   for(int i=0;i&lt;column.rank;i++) column.shape[i] = <A HREF="#columnShape">columnShape</A>(ncol,i);
+   column.elcount = <A HREF="#columnElcount">columnElcount</A>(ncol);
+
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>long tdmTable:: <A NAME="columnNumber">columnNumber</A> (const char * name) {</B>
+   size_t cnum;
+   if( !dsFindColumn(&cnum, pDSthis, (char*)name) ){
+      dsPerror("dsl error");
+      return -1;
+   }
+   return (long)cnum;
+}
+
+//----------------------------------
+<B>char * tdmTable:: <A NAME="columnName">columnName</A> (long ncol) {</B>
+   char *c;
+   if( !dsColumnName(&c,pDSthis,ncol) ){
+      return NULL;
+   }
+   char *cc = (char*)ASUALLOC(strlen(c) +1);
+   strcpy(cc,c);
+   return cc;
+}
+
+//----------------------------------
+<B>DS_TYPE_CODE_T tdmTable:: <A NAME="columnTypeCode">columnTypeCode</A> (long ncol) {</B>
+   DS_TYPE_CODE_T code;
+   if( !dsColumnTypeCode(&code,pDSthis,ncol) ){
+//    return TDM_TYPE_UNKNOWN;
+      					/* this should never happen*/
+      dsPerror("dsl error - bad type code");
+   }
+   return code;
+}
+
+//----------------------------------
+<B>char * tdmTable:: <A NAME="columnTypeName">columnTypeName</A> (long ncol) {</B>
+   char *c;
+   if( !dsColumnTypeName(&c,pDSthis,ncol) ){
+      return NULL;
+   }
+   char *cc = (char*)ASUALLOC(strlen(c) +1);
+   strcpy(cc,c);
+   return cc;
+}
+
+//----------------------------------
+<B>long tdmTable:: <A NAME="columnSize">columnSize</A> (long ncol) {</B>
+   size_t c;
+   if( !dsColumnSize(&c,pDSthis,ncol) ){
+      return -1;
+   }
+   return c;
+}
+
+//----------------------------------
+<B>long tdmTable:: <A NAME="columnRank">columnRank</A> (long ncol) {</B>
+   size_t c;
+   if( !dsColumnDimCount(&c,pDSthis,ncol) ){
+      return -1;
+   }
+   return c;
+}
+
+//----------------------------------
+<B>long tdmTable:: <A NAME="columnShape">columnShape</A> (long ncol, long ndim) {</B>
+   size_t *c;
+   if( !dsColumnDimensions(c,pDSthis,ncol)
+   ||  !( ndim &lt; <A HREF="#columnRank">columnRank</A>(ncol) )
+   ){
+      return -1;
+   }
+   return c[ndim];
+}
+
+//----------------------------------
+<B>long tdmTable:: <A NAME="columnElcount">columnElcount</A> (long ncol) {</B>
+   size_t c;
+   if( !dsColumnElcount(&c,pDSthis,ncol) ){
+      return -1;
+   }
+   return c;
+}
+
+//----------------------------------
+//- DATA ACCESS
+//----------------------------------
+<B>STAFCV_T tdmTable:: <A NAME="getCell">getCell</A> (<A HREF="tdm_types.h.html#TDM_CELLDATA_T">TDM_CELLDATA_T</A>& data</B>
+		, long nrow, long ncol) {
+   if( !<A HREF="#VALID_CELL">VALID_CELL(</A>nrow,ncol) ) EML_ERROR(INVALID_TABLE_CELL);
+   data.data.v = <A HREF="#cellAddress">cellAddress(</A>nrow,ncol);
+   data._d = <A HREF="#columnTypeCode">columnTypeCode</A>(ncol);
+   data._maximum = data._length = data._size = <A HREF="#columnSize">columnSize</A>(ncol);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmTable:: <A NAME="putCell">putCell</A> (const <A HREF="tdm_types.h.html#TDM_CELLDATA_T">TDM_CELLDATA_T</A>& data</B>
+		, long nrow, long ncol) {
+   if( !<A HREF="#VALID_CELL">VALID_CELL(</A>nrow,ncol) ) EML_ERROR(INVALID_TABLE_CELL);
+   void *pData = <A HREF="#cellAddress">cellAddress(</A>nrow,ncol);
+   memcpy(pData,data.data.v,<A HREF="#columnSize">columnSize</A>(ncol));
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmTable:: <A NAME="getData">getData</A> (TDM_DATABLOCK_T& data) {</B>
+   size_t nrows,mxrow,rsize;
+   char* pData;
+
+   if( !dsTableDataAddress(&pData,pDSthis)
+   ||  !dsTableRowCount(&nrows,pDSthis)
+   ||  !dsTableMaxRowCount(&mxrow,pDSthis)
+   ||  !dsTableRowSize(&rsize,pDSthis)
+   ){
+      data._maximum = 0;
+      data._length = 0;
+      data._buffer = NULL;
+      EML_ERROR(BAD_TABLE);
+   }
+   data._maximum = mxrow*rsize;
+   data._length = nrows*rsize;
+   data._buffer = (unsigned char*)ASUALLOC(data._maximum);
+   memcpy(data._buffer,pData,data._length);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmTable:: <A NAME="putData">putData</A> (const TDM_DATABLOCK_T& data) {</B>
+   size_t nrows,mxrow,rsize;
+   char* pData;
+
+   if( !dsTableDataAddress(&pData,pDSthis)
+   ||  !dsTableRowCount(&nrows,pDSthis)
+   ||  !dsTableMaxRowCount(&mxrow,pDSthis)
+   ||  !dsTableRowSize(&rsize,pDSthis)
+   ||  data._length&lt;=0 || mxrow*rsize &lt; data._length
+   ){
+      EML_ERROR(BAD_TABLE);
+   }
+   memcpy(pData,data._buffer,data._length);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+
+}
+
+//----------------------------------------------------------------------
+//- CO-LOCATED METHODS - DO NOT USE THESE IN DISTRIBUTED SYSTEM
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+//- TEMPORARY LEGACY METHODS
+//----------------------------------------------------------------------
+<B>STAFCV_T tdmTable:: <A NAME="cvtDslPointer">cvtDslPointer(</A><A HREF="tdm_types.h.html#DSL_PTR_T">DSL_PTR_T</A>& pDS) {</B>
+
+   pDS = (<A HREF="tdm_types.h.html#DSL_PTR_T">DSL_PTR_T</A>)pDSthis;
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmTable:: <A NAME="cvtTasStructs">cvtTasStructs(</A><A HREF="table_header.h.html#TABLE_HEAD_ST">TABLE_HEAD_ST</A> *& head</B>
+		, char *& data) {
+
+   return <A HREF="tdm_utils.cc.html#tdm_cvtDst2st">tdm_cvtDst2st(</A>pDSthis,head,data);
+}
+
+<B>void * tdmTable:: <A NAME="cellAddress">cellAddress(</A>long nrow, long ncol) {</B>
+
+   char *pData;
+   size_t rMax, rCount, cCount, rSize;
+   size_t cSize;
+
+   if( !dsTableMaxRowCount(&rMax,pDSthis)
+   ||  !dsTableRowCount(&rCount,pDSthis)
+   ||  !dsTableColumnCount(&cCount,pDSthis)
+   ||  !dsTableRowSize(&rSize,pDSthis)
+   ||  !(0 &lt;= nrow && nrow &lt;= rMax)
+   ||  !(0 &lt;= ncol && ncol &lt;= cCount)
+   ){
+      return NULL;
+   }
+
+   if( nrow &lt; rCount ){
+      if( !dsCellAddress(&pData, pDSthis, nrow, ncol) ){
+	 return NULL;
+      }
+   }
+   else {
+      if( !dsTableDataAddress(&pData,pDSthis) ){
+	 return NULL;
+      }
+      for(int i=0;i&lt;ncol;i++){
+	 if( !dsColumnSize(&cSize,pDSthis,i) ){
+	    return NULL;
+	 }
+	 pData += cSize;
+      }
+   }
+   return (void*)pData;
+}
+//:----------------------------------------------- PROT FUNCTIONS     --
+
+//:=============================================== CLASS              ==
+// tdmDataset
+
+//:----------------------------------------------- CTORS & DTOR       --
+<B>tdmDataset:: <A NAME="tdmDataset">tdmDataset(</A>const char * name, const DS_DATASET_T *pDS)</B>
+		: <U>tdmObject(</U>pDS)        //OVERLOAD CALL: tdmObject: <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>
+		, socObject(name, "tdmDataset") {
+   myPtr = (SOC_PTR_T)this;
+   bool_t result;
+
+   if( !dsIsDataset(&result, (DS_DATASET_T *)pDS)
+   ||  !result
+   ){
+      dsPerror("unable to create dataset pointer");
+      pDSthis = NULL;
+   }
+   pDSthis = (DS_DATASET_T *)pDS;
+}
+
+//----------------------------------
+<B>tdmDataset:: <A NAME="tdmDataset">tdmDataset(</A>const DS_DATASET_T *pDS)</B>
+		: <U>tdmObject(</U>pDS)        //OVERLOAD CALL: tdmObject: <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmObject">tdmClasses.cc(?)</A>
+		, socObject(pDS-&gt;name, "tdmDataset") {
+   myPtr = (SOC_PTR_T)this;
+   bool_t result;
+
+   if( !dsIsDataset(&result, (DS_DATASET_T *)pDS)
+   ||  !result
+   ){
+      dsPerror("unable to create dataset pointer");
+      pDSthis = NULL;
+   }
+   pDSthis = (DS_DATASET_T *)pDS;
+}
+
+//----------------------------------
+<B>tdmDataset:: <A NAME="tdmDataset">tdmDataset(</A>const char* name, long setDim)</B>
+		: socObject(name, "tdmDataset") {
+   myPtr = (SOC_PTR_T)this;
+   pDSthis = NULL;
+   if( !dsNewDataset(&pDSthis, (char*)name, setDim) ){
+      dsPerror("unable to create dataset pointer");
+      pDSthis = NULL;
+   }
+}
+
+//----------------------------------
+<B>tdmDataset:: ~<A NAME="tdmDataset">tdmDataset(</A>) {</B>
+}
+
+//:----------------------------------------------- ATTRIBUTES         --
+/* OVER-RIDE tdmObject::<U>dslName</U> */        //OVERLOAD CALL: dslName: <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#dslName">tdmClasses.cc(?)</A>
+<B>char * tdmDataset::  <A NAME="dslName">dslName</A> () {</B>
+   char* c;
+   char* cc=NULL;
+   if( !dsDatasetName(&c, pDSthis) ){
+      dsPerror("dsl error");
+      return NULL;
+   }
+   cc = (char*)ASUALLOC(strlen(c) +1);
+   strcpy(cc,c);
+   return cc;
+}
+
+//----------------------------------
+<B>long tdmDataset::  <A NAME="entryCount">entryCount</A> () {</B>
+   size_t count;
+   if( !dsDatasetEntryCount(&count, pDSthis) ){
+      dsPerror("dsl error");
+      return -1;
+   }
+   return count;
+}
+
+//----------------------------------
+<B>long tdmDataset::  <A NAME="maxEntryCount">maxEntryCount</A> () {</B>
+   size_t count;
+   if( !dsDatasetMaxEntryCount(&count, pDSthis) ){
+      dsPerror("dsl error");
+      return -1;
+   }
+   return count;
+}
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+<B>STAFCV_T tdmDataset:: <A NAME="addDataset">addDataset</A> (const char * name, long setDim) {</B>
+//BUG- add dsAddDataset functionality
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmDataset:: <A NAME="addTable">addTable</A> (const char * name, const char * spec</B>
+		, long rows) {
+//BUG- add dsAddTable functionality
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmDataset:: <A NAME="getEntryType">getEntryType</A> (char *& type, long num) {</B>
+//BUG- should return "table" or "dataset"
+   type = NULL;
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmDataset:: <A NAME="getDatasetEntry">getDatasetEntry</A> (tdmDataset*& dataset</B>
+		, long num) {
+//BUG- add dsDatasetEntry functionality for dataset
+   dataset = NULL;
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmDataset:: <A NAME="cvtDslPointer">cvtDslPointer(</A><A HREF="tdm_types.h.html#DSL_PTR_T">DSL_PTR_T</A>& pDS) {</B>
+   pDS = (<A HREF="tdm_types.h.html#DSL_PTR_T">DSL_PTR_T</A>)pDSthis;
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmDataset:: <A NAME="getTableEntry">getTableEntry</A> (tdmTable*& table, long num) {</B>
+//BUG- add dsDatasetEntry functionality for table
+   table = NULL;
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmDataset:: <A NAME="findDatasetEntry">findDatasetEntry</A> (tdmDataset*& dataset</B>
+		, const char * name) {
+//BUG- add dsFindEntry functionality for dataset
+   dataset = NULL;
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmDataset:: <A NAME="findTableEntry">findTableEntry</A> (tdmTable*& table</B>
+		, const char * name) {
+//BUG- add dsFindEntry functionality for table
+   table = NULL;
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmDataset:: <A NAME="getDescriptor">getDescriptor</A> (char *& descriptor) {</B>
+//BUG- return full dataset description
+   descriptor = NULL;
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//:----------------------------------------------- PRIV FUNCTIONS     --
+//:**NONE**
+
+//:=============================================== CLASS              ==
+//: tdmFactory
+
+//:----------------------------------------------- CTORS & DTOR       --
+<B>tdmFactory:: <A NAME="tdmFactory">tdmFactory(</A>)</B>
+		: socFactory()
+		, socObject() {
+   EML_MESSAGE("tdmFactory -- NULL Creator");
+}
+
+<B>tdmFactory:: <A NAME="tdmFactory">tdmFactory(</A>const char * name)</B>
+		: socFactory()
+		, socObject(name, "tdmFactory") {
+   myPtr = (SOC_PTR_T)this;
+   lock(TRUE);
+}
+
+//----------------------------------
+<B>tdmFactory:: ~<A NAME="tdmFactory">tdmFactory(</A>) {</B>
+}
+
+//:----------------------------------------------- ATTRIBUTES         --
+//:**NONE**
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+<B>STAFCV_T tdmFactory:: <A NAME="deleteDataset">deleteDataset</A> (const char * name) {</B>
+   if( !soc-&gt;deleteObject(name,"tdmDataset") ){
+      EML_ERROR(CANT_DELETE_OBJECT);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmFactory:: <A NAME="deleteTable">deleteTable</A> (const char * name) {</B>
+   if( !soc-&gt;deleteObject(name,"tdmTable") ){
+      EML_ERROR(CANT_DELETE_OBJECT);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmFactory:: <A NAME="findDataset">findDataset</A> (const char * name</B>
+		, tdmDataset*& dataset ) {
+   socObject* obj;
+   if( !soc-&gt;findObject(name,"tdmDataset",obj) ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   dataset = (tdmDataset*)(obj-&gt;ptr());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmFactory:: <A NAME="findTable">findTable</A> (const char * name</B>
+		, tdmTable*& table) {
+   socObject* obj;
+   if( !soc-&gt;findObject(name,"tdmTable",obj) ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   table = (tdmTable*)(obj-&gt;ptr());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmFactory:: <A NAME="getDataset">getDataset</A> (IDREF_T id, tdmDataset*& dataset) {</B>
+   socObject* obj;
+   if( !soc-&gt;getObject(id,obj) ){
+      dataset = NULL;
+      EML_ERROR(INVALID_IDREF);
+   }
+   if( 0 != strcmp(obj-&gt;type(),"tdmDataset") ){
+      dataset = NULL;
+      EML_ERROR(WRONG_OBJECT_TYPE);
+   }
+   dataset = (tdmDataset*)(obj-&gt;ptr());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+
+}
+
+//----------------------------------
+<B>STAFCV_T tdmFactory:: <A NAME="getTable">getTable</A> (IDREF_T id, tdmTable*& table) {</B>
+   socObject* obj;
+   if( !soc-&gt;getObject(id,obj) ){
+      table = NULL;
+      EML_ERROR(INVALID_IDREF);
+   }
+   if( 0 != strcmp(obj-&gt;type(),"tdmTable") ){
+      table = NULL;
+      EML_ERROR(WRONG_OBJECT_TYPE);
+   }
+   table = (tdmTable*)(obj-&gt;ptr());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmFactory:: <A NAME="list">list</A> () {</B>
+   socObject* obj;
+
+   printf("\n"
+"**********************************************************************"
+   "\n"
+"**************** TDM - Table & Dataset Memory listing ****************"
+   "\n"
+"**********************************************************************"
+   "\n"
+"* IDREF * NAME            * TYPE            *                         "
+    "\n"
+"**********************************************************************"
+    "\n");
+   for( int i=0;i&lt;myCount;i++ ){
+      if( soc-&gt;getObject(entry(i),obj) ){
+         if( 0 == strcmp("tdmTable",obj-&gt;type()) ){
+            printf("* %5d * %-15s * %-15s * %d of %d rows filled \n"
+                        ,obj-&gt;idRef(),obj-&gt;name(),obj-&gt;type()
+                        ,TDMTABLE(obj)-&gt;<U>rowCount</U>()        //OVERLOAD CALL: rowCount: <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#rowCount">tdmClasses.cc(?)</A>
+                        ,TDMTABLE(obj)-&gt;<U>maxRowCount</U>());        //OVERLOAD CALL: maxRowCount: <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#maxRowCount">tdmClasses.cc(?)</A>
+         } else if( 0 == strcmp("tdmDataset",obj-&gt;type()) ){
+            printf("* %5d * %-15s * %-15s * %d of %d entries used \n"
+                        ,obj-&gt;idRef(),obj-&gt;name(),obj-&gt;type()
+                        ,TDMDATASET(obj)-&gt;<A HREF="#entryCount">entryCount</A>()
+                        ,TDMDATASET(obj)-&gt;<A HREF="#maxEntryCount">maxEntryCount</A>());
+         }
+      } else {
+         printf("* %5d * %-15s * %-15s * \n"
+                        ,entry(i),"**DELETED**","**DELETED**");
+      }
+   }
+   printf(
+"**********************************************************************"
+   "\n\n");
+
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmFactory:: <A NAME="newDataset">newDataset</A> (const char * name, long setDim) {</B>
+   IDREF_T id;
+   if( soc-&gt;idObject(name,"tdmDataset",id) ){
+      EML_ERROR(DUPLICATE_OBJECT_NAME);
+   }
+   static tdmDataset* p;
+   p = new <U>tdmDataset(</U>name,setDim);        //OVERLOAD CALL: tdmDataset: <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>
+   if( !soc-&gt;idObject(name,"tdmDataset",id) ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   addEntry(id);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+
+}
+
+//----------------------------------
+<B>STAFCV_T tdmFactory:: <A NAME="newTable">newTable</A> (const char * name, const char * spec</B>
+		, long rows) {
+   IDREF_T id;
+   if( soc-&gt;idObject(name,"tdmTable",id) ){
+      EML_ERROR(DUPLICATE_OBJECT_NAME);
+   }
+   static tdmTable* p;
+   p = new <U>tdmTable(</U>name,spec,rows);        //OVERLOAD CALL: tdmTable: <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>
+   if( !soc-&gt;idObject(name,"tdmTable",id) ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   addEntry(id);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmFactory:: <A NAME="createDataset">createDataset</A> (const char * name</B>
+		, DS_DATASET_T *pDS, tdmDataset *& dataset ) {
+   IDREF_T id;
+   if( soc-&gt;idObject(name,"tdmDataset",id) ){
+      EML_ERROR(DUPLICATE_OBJECT_NAME);
+   }
+   static tdmDataset* p;
+   p = new <U>tdmDataset(</U>name,pDS);        //OVERLOAD CALL: tdmDataset: <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmDataset">tdmClasses.cc(?)</A>
+   if( !soc-&gt;idObject(name,"tdmDataset",id) ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   addEntry(id);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmFactory:: <A NAME="createTable">createTable</A> (const char * name</B>
+		, DS_DATASET_T *pDS , tdmTable *& table ) {
+   IDREF_T id;
+   if( soc-&gt;idObject(name,"tdmTable",id) ){
+      EML_ERROR(DUPLICATE_OBJECT_NAME);
+   }
+   static tdmTable* p;
+   p = new <U>tdmTable(</U>name,pDS);        //OVERLOAD CALL: tdmTable: <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>, <A HREF="tdmClasses.cc.html#tdmTable">tdmClasses.cc(?)</A>
+   if( !soc-&gt;idObject(name,"tdmTable",id) ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   addEntry(id);
+   table = p;
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmFactory:: <A NAME="getTypeName">getTypeName</A> (long tid, char *& name) {</B>
+   char *c, *cc;
+   size_t l;
+   int ll;
+
+   if( !dsTypeSpecifier(&c,&l,(size_t)tid)
+   ||  !(0 == strstr("struct ",c))
+   ||  !(NULL != (cc = strchr(c,'{')))
+   ||  !(l &gt;= (ll = (int)cc - (int)c))
+   ){
+      name = NULL;
+      EML_ERROR(INVALID_TYPE_ID);
+   }
+   ll -= 7;
+   name = (char*)ASUALLOC(ll+1);
+   strncpy(name,c+7,ll);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T tdmFactory:: <A NAME="getTypeSpecification">getTypeSpecification</A> (long tid, char *& spec) {</B>
+   char *c;
+   size_t l;
+
+   if( !dsTypeSpecifier(&c,&l,(size_t)tid) ){
+      spec = NULL;
+      EML_ERROR(INVALID_TYPE_ID);
+   }
+   spec = (char*)ASUALLOC(l+1);
+   strcpy(spec,c);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//:----------------------------------------------- PRIV FUNCTIONS     --
+// **NONE**
+
+// ---------------------------------------------------------------------
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>
