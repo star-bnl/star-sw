@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.47 2002/04/18 23:29:34 jeromel Exp $
+ * $Id: StEventMaker.cxx,v 2.48 2002/05/01 01:08:31 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.48  2002/05/01 01:08:31  ullrich
+ * Add SVT dE/dx only to EST tracks.
+ *
  * Revision 2.47  2002/04/18 23:29:34  jeromel
  * Implementation of the SVT 2 tables scheme ...
  *
@@ -38,8 +41,7 @@
  * Revision 2.39  2001/11/07 21:20:46  ullrich
  * Added L1 trigger.
  *
- * Revision 2.38  2001/09/28 22:22:05  ullrichore `<'
-.i386_redhat61/obj/StRoot/StEventMaker/StEventMaker.cxx:1193: warning: decla
+ * Revision 2.38  2001/09/28 22:22:05  ullrich
  * Load helix geometry at last point of each track.
  *
  * Revision 2.37  2001/09/19 04:49:05  ullrich
@@ -201,7 +203,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.47 2002/04/18 23:29:34 jeromel Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.48 2002/05/01 01:08:31 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -759,15 +761,15 @@ StEventMaker::makeEvent()
     for (i=0; i<nrows; i++) {
         k = 0;
         id = dstDedx[i].id_track;
-        if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
+        if (id < vecGlobalTracks.size() && vecGlobalTracks[id] && dstDedx[i].det_id != kSvtId) {
             vecGlobalTracks[id]->addPidTraits(new StDedxPidTraits(dstDedx[i]));
             k++;
         }
-        if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id]) {
+        if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id] && dstDedx[i].det_id != kSvtId) {
             vecPrimaryTracks[id]->addPidTraits(new StDedxPidTraits(dstDedx[i]));
             k++;
         }
-        if (id < vecTptTracks.size() && vecTptTracks[id]) {
+        if (id < vecTptTracks.size() && vecTptTracks[id] && dstDedx[i].det_id != kSvtId) {
             vecTptTracks[id]->addPidTraits(new StDedxPidTraits(dstDedx[i]));
             k++;
         }
@@ -839,6 +841,7 @@ StEventMaker::makeEvent()
         if (vecPrimaryTracksCopy[k]) {
 	    nfailed++;
 	    delete vecPrimaryTracksCopy[k];
+	    vecPrimaryTracksCopy[k] = 0;
 	    vecPrimaryTracks[k] = 0;
 	}
     if (nfailed)
@@ -849,6 +852,7 @@ StEventMaker::makeEvent()
 	if (vecEstPrimaryTracksCopy[k]) {
 	    nfailed++;
 	    delete vecEstPrimaryTracksCopy[k];
+	    vecEstPrimaryTracksCopy[k] = 0;
 	    vecEstPrimaryTracks[k] = 0;
 	}
     if (nfailed)
@@ -965,44 +969,12 @@ StEventMaker::makeEvent()
 	for (k=0; k<vecPrimaryTracks.size(); k++)
 	    if (vecPrimaryTracks[k]) infomap[k].push_back(vecPrimaryTracks[k]->detectorInfo());
 
-
-// 	cerr << "Infomap before sorting and cleaning" << endl;
-// 	StPrompt();
-//         for (k=0; k<infomap.size(); k++) {
-// 	  cerr << k << '\t';
-// 	  for (i=0; i<infomap[k].size(); i++)
-// 	    cerr << infomap[k][i] << ' ';
-// 	  cerr << endl;
-// 	}
-//         StPrompt();
-
 	vector<StTrackDetectorInfo*>::iterator iter;
 	for (k=0; k<infomap.size(); k++) {
 	    sort(infomap[k].begin(),infomap[k].end());
 	    iter = unique(infomap[k].begin(),infomap[k].end());
 	    infomap[k].erase(iter, infomap[k].end());
-	}
-
-// 	cerr << "Infomap after sorting and cleaning" << endl;
-// 	StPrompt();
-//         for (k=0; k<infomap.size(); k++) {
-// 	  cerr << k << '\t';
-// 	  for (i=0; i<infomap[k].size(); i++)
-// 	    cerr << infomap[k][i] << ' ';
-// 	  cerr << endl;
-// 	}
-//         StPrompt();
-
-// 	cerr << "Verify type of every element" << endl;
-// 	StPrompt();
-//         for (k=0; k<infomap.size(); k++) {
-// 	  cerr << k << '\t';
-// 	  for (i=0; i<infomap[k].size(); i++)
-// 	    cerr << typeid(*(infomap[k][i])).name() << ' ';
-// 	  cerr << endl;
-// 	}
-//         StPrompt();
-	
+	}	
 
         //
         //        TPC hits
