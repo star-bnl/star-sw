@@ -36,6 +36,9 @@ void load() {
   gSystem->Load("St_Tables");
   gSystem->Load("StChain");
   gSystem->Load("StIOMaker");
+  gSystem->Load("StUtilities");
+  gSystem->Load("StarClassLibrary");
+  gSystem->Load("StMagF");
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker");
   gSystem->Load("StV0MiniDstMaker");
@@ -58,9 +61,9 @@ void run() {
   // Create Makers
   StIOMaker IOMaker("IO","r",files,"bfcTree");
   StEventMaker eventMaker("events","title");
-  StV0MiniDstMaker v0dst("v0dst","V0MiniDst.root"); // Sets mini-DST filename
+  StV0MiniDstMaker v0dst("v0dst","V0MicroDst.root"); // Sets output filename
 
-  //  IOMaker.SetDebug();
+  v0dst.SetV0VertexType(); // Select only V0 vertices for micro-DST
 
   // Do init
   Int_t ierr = chain.Init();

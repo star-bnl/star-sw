@@ -1,5 +1,8 @@
-// $Id: StV0MiniDstMaker.h,v 1.1 1999/07/13 12:42:25 jones Exp $
+// $Id: StV0MiniDstMaker.h,v 1.2 1999/08/13 12:38:17 jones Exp $
 // $Log: StV0MiniDstMaker.h,v $
+// Revision 1.2  1999/08/13 12:38:17  jones
+// Major revision to merge StV0MiniDstMaker and StXiMiniDstMaker
+//
 // Revision 1.1  1999/07/13 12:42:25  jones
 // *** empty log message ***
 //
@@ -10,27 +13,34 @@
 // StV0MiniDstMaker virtual base class for Maker                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#ifndef StMaker_H
 #include "StMaker.h"
-#endif
+#include "StEnumerations.h"
 
-class TFile;
 class TOrdCollection;
 
 class StV0MiniDstMaker : public StMaker {
  private:
  protected:
-  TFile *output;                       //!
-  const char *rootfile;                //!
-  TOrdCollection *v0MiniDstCollection; //!
+  StVertexType mVertexType;    //!
+  const Char_t *mFileName;     //!
+  TOrdCollection *mCollection; //!
+  Int_t mEntries;              //!
  public: 
-  StV0MiniDstMaker(const char *name="v0dst", const char *output="V0MiniDst.root");
+  StV0MiniDstMaker(const char *name="mDst", 
+		   const char *dst="mDst.root");
   virtual ~StV0MiniDstMaker();
+          void  SetXiVertexType();
+          void  SetV0VertexType();
+  TOrdCollection* Read(Int_t*);
   virtual Int_t Init();
   virtual Int_t Make();
   virtual Int_t Finish();
-  virtual void  PrintInfo();
   ClassDef(StV0MiniDstMaker,1)   //virtual base class for Makers
 };
+
+inline void StV0MiniDstMaker::SetXiVertexType()
+            { mVertexType = Xi; }
+inline void StV0MiniDstMaker::SetV0VertexType()
+            { mVertexType = V0; }
 
 #endif
