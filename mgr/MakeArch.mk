@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.67  1999/03/18 01:55:32  fisyak
+#  remove path for pgf77
+#
 #  Revision 1.66  1999/03/12 01:33:40  fisyak
 #  Take out -lI77 -lF77 for RedHat 5.1/5.2
 #
@@ -176,7 +179,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/03/12 01:33:40 $ 
+#             Last modification $Date: 1999/03/18 01:55:32 $ 
 #. default setings
 
 MAKE  := gmake
@@ -388,7 +391,7 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_re
   MOTIF :=
   OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES
   STRID    := lnx
-  FC       := /usr/pgi/linux86/bin/pgf77
+  FC       := pgf77
   LD       := $(CXX)
   SO	   := $(CXX)
   CXXFLAGS := $(DEBUG) -fPIC -Wall -fno-rtti -fno-exceptions -fno-for-scope
