@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.276 2002/02/22 00:34:05 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.277 2002/02/22 20:51:40 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -272,7 +272,7 @@ Bfc_st BFC[] = {
   {"Trs"         ,"","tpcChain","scl,tpcDB,tpc_daq,Simu"              ,"StTrsMaker","StTrsMaker","",kFALSE},
 
   {"Mixer"       ,"tpc_raw","","","StMixerMaker"  ,"StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
-  {"tpc_daq"     ,"tpc_raw","tpcChain","tpc_T"              ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
+  {"tpc_daq"     ,"tpc_raw","tpcChain","detDb,tpc_T"        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
@@ -484,11 +484,17 @@ Int_t StBFChain::Load()
 }
 
 //_____________________________________________________________________________
+/// Maker-instantiation handler.
 /*!
-  Maker-instantiation handler.
-  This routine contains it all, from calibration precedence to
-  parameter setting depending on option etc ... The SetMode()
-  and  mechanism is also treated here.
+  This routine contains it all (make instantiation that is), from calibration 
+  precedence to parameter setting depending on option etc ... Other thing done
+  here which deserves attention
+  - The maker's SetMode() mechanism is treated here.
+  - Calibration options like NoMySQLDb or NoCintDb and path are set
+  - SetFlavor() sim+ofl or sim is made
+
+  If a maker is added along with some flag options, this is the place to
+  implement the switches.
 */
 Int_t StBFChain::Instantiate()
 {
@@ -729,6 +735,8 @@ Int_t StBFChain::Instantiate()
   return status;
 }
 
+
+//_____________________________________________________________________
 /// Really the destructor (close files, delete pointers etc ...)
 Int_t StBFChain::Finish()
 {
@@ -776,7 +784,9 @@ Int_t StBFChain::ParseString (const TString &tChain, TObjArray &Opt) {
   }
   return nParsed;
 }
+
 //_____________________________________________________________________
+/// Check option if defined (Char_t argument interface)
 Int_t StBFChain::kOpt (const Char_t *tag) const {
   TString *Tag = new TString(tag);
   Int_t kO = kOpt(Tag);
@@ -784,7 +794,6 @@ Int_t StBFChain::kOpt (const Char_t *tag) const {
   return kO;
 }
 
-//_____________________________________________________________________
 /// Check option if defined.
 /*!
   This method checks if the options are valid by comparing them
@@ -840,11 +849,14 @@ void StBFChain::SetOption(const Int_t k) {
     }
   }
 }
+
 //_____________________________________________________________________
+/// Returns chain-option state (on/off)
 Bool_t StBFChain::GetOption(const Int_t k) const
 {
   return (k>0 && k <NoChainOptions) ? fBFC[k].Flag : kFALSE;
 }
+
 //_____________________________________________________________________________
 /// Scan all flags, check if they are correct
 void StBFChain::SetFlags(const Char_t *Chain)
@@ -885,7 +897,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	// messages NOW !!!
 	if( ! strncmp( string.Data() ,"dbv",3) && strlen(string.Data()) == 11){
 	  (void) sscanf(string.Data(),"dbv%d",&FDate);
-	  cout << " ... but still ill be considered as a floating timestamp " << FDate << endl;
+	  cout << " ... but still ill be considered as a dynamic timestamp " << FDate << endl;
 	}
       }
     } else {
@@ -1026,7 +1038,10 @@ void StBFChain::SetInputFile (const Char_t *infile){
   }
   if (fInFile) gMessMgr->QAInfo() << "Input file name = " << fInFile->Data() << endm;
 }
+
+
 //_____________________________________________________________________
+/// Takes care of output file name (extension)
 void StBFChain::SetOutputFile (const Char_t *outfile){
   if (outfile)               fFileOut = new TString(outfile);
   else {
@@ -1079,7 +1094,16 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
   }
   //    gSystem->Exit(1);
 }
+
+
+
 //_____________________________________________________________________
+/// Handles all geant options
+/*!
+  This method sets the Geant options that is the Geometry loading
+  part. Depends on St_geant_Maker instantiated in the Instantiate()
+  method.
+ */
 void StBFChain::SetGeantOptions(){
   if (geantMk) {
     SetInput("geant",".make/geant/.data");
@@ -1138,14 +1162,19 @@ void StBFChain::SetGeantOptions(){
     }
   }
 }
-//_____________________________________________________________________
-/// This method treats the DbV options used for database timestamp.
+
+/// Treats the DbV options used for database timestamp.
 /*!
-  Re-scan all options and search for dbv options. The order matters
-  since a later option would overwrite an earlier one. The mechanism
-  introduced for a floating (i.e. not pre-defined) timestamp is that
+  Re-scan all options and search for dbv options. This method also sorts
+  out the string-based database timestamp for reconstruction. Those have
+  to be in phase with the geant geometry (see SetGeantOptions()) if 
+  simulation is being reconstructed.
+
+  The order matters since a later option would overwrite an earlier one. 
+  The mechanism introduced for a dynamic (i.e. not pre-defined) timestamp is that
   it will be used ONLY if there are no other timestamp options. 
-  Be aware of this precedence ...
+  <b>Be aware of this precedence ...</b>
+  
  */
 void StBFChain::SetDbOptions(){
   Int_t i;
@@ -1159,7 +1188,7 @@ void StBFChain::SetDbOptions(){
   }
 
   if( ! Idate && FDate){
-    (void) printf("QAInfo: Switching to user chosen floating time-stamp %d %d\n",FDate,FTime);
+    (void) printf("QAInfo: Switching to user chosen dynamic time-stamp %d %d\n",FDate,FTime);
     (void) printf("QAInfo: Chain may crash if time-stamp is not validated by db interface\n");
     Idate = FDate;
     Itime = FTime;
@@ -1199,6 +1228,7 @@ void StBFChain::SetDbOptions(){
   }
 }
 //_____________________________________________________________________
+/// Creates output-tree branches
 void StBFChain::SetTreeOptions()
 {
   StTreeMaker *treeMk = (StTreeMaker *) GetMaker("outputStream");
