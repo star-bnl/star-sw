@@ -33,9 +33,9 @@
 #define ERROR_FORMAT "stic: error on line %d:\n%s\n%s\n"
 #define ERR_FORMAT2 "stic: error on line %d: unused character: %s\n"
 #define OUTFILE 43
-#define NOUTFILE 80
+#define NOUTFILE 256
 #define ARGS 90 /* max args per prototype */
-#define INC 40
+#define INC 128
 #define INIT  0
 #define CALL 15
 #define ERR Err(__LINE__)
@@ -89,7 +89,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.12 1998/08/20 00:46:30 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.13 1998/08/23 19:56:18 fisyak Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
