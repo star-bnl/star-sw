@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.cc,v 3.5 2002/04/30 16:02:47 genevb Exp $
+ * $Id: StStrangeEvMuDst.cc,v 3.6 2002/05/17 14:05:28 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.cc,v $
+ * Revision 3.6  2002/05/17 14:05:28  genevb
+ * Added L3 unbiased trigger info
+ *
  * Revision 3.5  2002/04/30 16:02:47  genevb
  * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
  *
@@ -70,6 +73,13 @@ void StStrangeEvMuDst::Fill(StEvent& event) {
   StTrigger* L0trig = event.l0Trigger();
   if (L0trig) mL0TriggerWord = L0trig->triggerWord();
   else mL0TriggerWord = 0;
+
+  // Assign mEvent a negative vaule for L3-biased events
+  StL3Trigger* L3trig = event.l3Trigger();
+  if (L3trig) {
+    StL3EventSummary* L3summary = L3trig->l3EventSummary();
+    if ((L3summary) && !(L3summary->unbiasedTrigger())) mEvent = -mEvent;
+  }
   
   mGlobalTracks = 0;
   StSPtrVecTrackNode& theNodes = event.trackNodes();
@@ -101,6 +111,7 @@ void StStrangeEvMuDst::Fill(StMcEvent& event) {
 
   mRun = event.runNumber();
   mEvent = event.eventNumber();
+  mL0TriggerWord = 0;
   mMagneticField = 0.;
   
   mGlobalTracks = event.tracks().size();
