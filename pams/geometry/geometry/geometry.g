@@ -23,9 +23,9 @@
    {IRAYL,ISTRA} = 0;
    TOFMAX = 1.e-4
 *
-*  main configuration - everthing on, ecxept for tof
-   {cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,mfld,mwc} = on;
-   {mwc,four,pse} = on; tof=off;
+*  main configuration - everthing on, except for tof
+   {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld} = on;
+   {mwc,four,pse}=on;  tof=off;
    NtrSubEv=1000
    field=5
    Nsi=7
@@ -70,7 +70,7 @@
       elseif Commands=='SPLIT_ON'  {<p> NtrSubEv=10000;                }
       elseif Commands=='DEBUG_ON'  {<p> Idebug=max(Idebug,1); Itest=1; }
       elseif CommandL=='DEBUG_OFF' {<p> {Idebug,Itest}=0;      i+=1;   }
-      else { 
+      else { <p>
              If (Commands(1:4)!='HELP') _
              print *,'UNKNOWN GSTAR KEYWORD, YOU BETTER STOP'; 
              print *,'you may select : '
@@ -83,7 +83,8 @@
              print *,'---------------------------------------------'
              print *,'Default: complete STAR with standard physics '
              print *,'---------------------------------------------'
-             if (IDEB==0 & IDEBUG==0) return;  i-=1; 
+             if IDEB==0 & IDEBUG==0 { print *,'Nothing done !'; return; }
+             i-=1; 
            }  
    }
 *
@@ -107,9 +108,10 @@
    if (field!=5) call AgDETP add ('MFLG(1).Bfield=',field,1)
 
 * - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
+*  CRAY does not accept construction: IF (mwc==off) ... I do it differntly:
    call AgDETP new ('tpce')
-   if (mwc==off) call AgDETP add ('tpcg(1).MWCread=',0,1)
-   if (pse==off) call AgDETP add ('tprs(1).super='  ,1,1) 
+   unless (mwc) call AgDETP add ('tpcg(1).MWCread=',0,1)
+   unless (pse) call AgDETP add ('tprs(1).super='  ,1,1) 
 *
    if (cave) Call cavegeo
    if (pipe) Call pipegeo
