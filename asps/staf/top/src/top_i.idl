@@ -19,20 +19,19 @@
 interface topProject_i : socObject_i {
 
 //:----------------------------------------------- ATTRIBUTES         --
-attribute string selectionSpecification;
+readonly attribute string selectionSpecification;
 
 //:----------------------------------------------- FUNCTIONS          --
 STAFCV_T project(in tdmTable_i table1, inout tdmTable_i table2);
-STAFCV_T reset();
 
 };	/* topProject_i */
 
 //:#####################################################################
 //:=============================================== INTERFACE          ==
-interface topJoin_i : socProject_i {
+interface topJoin_i : topProject_i {
 
 //:----------------------------------------------- ATTRIBUTES         --
-attribute string whereClause;
+readonly attribute string whereClause;
 
 //:----------------------------------------------- FUNCTIONS          --
 STAFCV_T join(in tdmTable_i table1, in tdmTable_i table2
@@ -45,18 +44,17 @@ STAFCV_T join(in tdmTable_i table1, in tdmTable_i table2
 interface topMask_i : socObject_i {
 
 //:----------------------------------------------- ATTRIBUTES         --
-attribute string cutFunction;
+readonly attribute string cutFunction;
 attribute boolean static;
 readonly attribute long pass;
 readonly attribute long fail;
 
 //:----------------------------------------------- FUNCTIONS          --
-STAFCV_T filter(in tdmTable table1, inout tdmTable table2);
-STAFCV_T cut(inout tdmTable table1);
-STAFCV_T mask(inout tdmTable table1);
-STAFCV_T unmask(inout tdmTable table1);
-STAFCV_T fill(in tdmTable table1);
-STAFCV_T reset(in tdmTable table1);
+STAFCV_T filter(in tdmTable_i table1, inout tdmTable_i table2);
+STAFCV_T cut(inout tdmTable_i table1);
+STAFCV_T mask(inout tdmTable_i table1);
+STAFCV_T unmask(inout tdmTable_i table1);
+STAFCV_T fill(in tdmTable_i table1);
 
 };	/* topMask_i */
 
@@ -65,10 +63,10 @@ STAFCV_T reset(in tdmTable table1);
 interface topSort_i : socObject_i {
 
 //:----------------------------------------------- ATTRIBUTES         --
-attribute string keyFunction;
+readonly attribute string keyFunction;
 
 //:----------------------------------------------- FUNCTIONS          --
-STAFCV_T sort(in tdmTable table1, inout tdmTable table2);
+STAFCV_T sort(in tdmTable_i table1, inout tdmTable_i table2);
 
 };	/* topMask_i */
 
