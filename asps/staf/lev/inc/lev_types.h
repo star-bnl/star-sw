@@ -40,6 +40,7 @@ extern CC_P void lev_def_();
 extern CC_P void kam_lev_count_();
 extern CC_P void kam_lev_list_();
 extern CC_P void kam_lev_update_();
+extern CC_P void kam_lev_register_version_();
 #endif /*NOKUIP*/
 
 #endif /* LEV_TYPES_H */

@@ -20,8 +20,7 @@
 #include "lev_macros.h"
 #include "lev_types.h"
 #include "lev_globals.h"
-extern "C" void lev_registerversion_(const char *,const char *);
-extern "C" void lev_registerversion(const char *,const char *);
+extern "C" void levVersRegistration(const char *,const char *);
 
 /*-------------------------------------------- TYPEDEFS             --*/
 /*-------------------------------------------- GLOBALS              --*/
@@ -43,9 +42,15 @@ void kam_lev_update_()
   printf("I have updated the versions table (config/levVersions).\n");
   set_staf_status(0);
 }
-void lev_registerversion_(const char *name,const char *version) {
+void levVersRegistration(const char *name,const char *version) {
+  /* PAM writers call this function. */
   lev->registerVersion(name,"pam",version);
 }
-void lev_registerversion(const char *name,const char *version) {
-  lev_registerversion_(name,version);
+void kam_lev_register_version(char *name,char *vers) {
+  lev->registerVersion(name,"kumac",vers);
+}
+void kam_lev_register_version_() {
+  char *name =  ku_gets(); /* name of object (eg, cat_fude.kumac) */
+  char *vers =  ku_gets(); /* version string from CVS */
+  kam_lev_register_version(name,vers);
 }
