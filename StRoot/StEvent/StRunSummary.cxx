@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunSummary.cxx,v 2.2 1999/12/21 15:09:06 ullrich Exp $
+ * $Id: StRunSummary.cxx,v 2.3 2000/01/31 12:01:05 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StRunSummary.cxx,v $
- * Revision 2.2  1999/12/21 15:09:06  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
+ * Revision 2.3  2000/01/31 12:01:05  ullrich
+ * Unique const_cast syntax for all platforms.
  *
  * Revision 2.2  1999/12/21 15:09:06  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -29,7 +29,7 @@
 #include "StRunSummary.h"
 #include "tables/St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: StRunSummary.cxx,v 2.2 1999/12/21 15:09:06 ullrich Exp $";
+static const char rcsid[] = "$Id: StRunSummary.cxx,v 2.3 2000/01/31 12:01:05 ullrich Exp $";
 
 ClassImp(StRunSummary)
 
@@ -158,11 +158,7 @@ StRunSummary::meanMultiplicity(StDetectorId id) const
     //  has some problems with const_cast'ing non-pointers.
     //
     if (i < mMultiplicityArraySize)
-#if defined(__SUNPRO_CC)
-        return (*(const_cast<TArrayF*>(&mMeanMultiplicity)))[i];
-#else
-        return const_cast<TArrayF>(mMeanMultiplicity)[i];
-#endif
+        return const_cast<TArrayF&>(mMeanMultiplicity)[i];
     else
         return 0;
 }
@@ -177,11 +173,7 @@ StRunSummary::rmsMultiplicity(StDetectorId id) const
     //  const version of operator[] and (ii) the SUN compiler
     //  has some problems with const_cast'ing non-pointers.
     //
-#if defined(__SUNPRO_CC)
-        return (*(const_cast<TArrayF*>(&mRmsMultiplicity)))[i];
-#else
-        return const_cast<TArrayF>(mRmsMultiplicity)[i];
-#endif
+        return const_cast<TArrayF&>(mRmsMultiplicity)[i];
     else
         return 0;
 }
